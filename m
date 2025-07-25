@@ -1,125 +1,91 @@
-Received: from out-186.mta1.migadu.com (out-186.mta1.migadu.com [95.215.58.186])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD1D12EF66B;
-	Fri, 25 Jul 2025 17:04:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.186
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 783BE236430;
+	Fri, 25 Jul 2025 23:35:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753463047; cv=none; b=svOUo6wbeD8ys8HiUJqTtrbzOWvsGUKl1EwkB5iX+Ny5x7HVY64LJBbeLsMlAz1Uu2pmSa88SRxMlJMeC9hIrJKT0JT2syyTVksOayzM/SSvwQiL93+Ius/d0LEn1aMWoIf8q5SEQa+VMPkGIZ/shJhcG+4KM/l/ewQ4B9WfReI=
+	t=1753486555; cv=none; b=SAoWvIz1+sfUqdowJc1fMJD3gC3o3D68aqqf3ue/2Hcm+nrt/zPW67NxYnJOSbuEVLH/DzQrWV4W7AjRwBxEVdTJnZC/tHAhN7G/wGgJiNqU22o9E7VsV+C79yTvDUhS85jelLn8tAHEFhxn7ZD7EVWt/ur7A5VrXyWR1Xro5Zk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753463047; c=relaxed/simple;
-	bh=XRPXn4b8DSkRHKtIXSlfRWZ/7dKLmVHQ9WRzD4Ora/A=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
-	 References:In-Reply-To; b=htjcsD+EQCIQw6khDop33F1876TUFNkXuh3Tzxx5MFA/Pwod2VSy0PMiv5932TAfxQwkXxfwrGy83vq26jX27daxk7JZX60yn42zQuArtVxsufNBaOjSgNCWaftaxsd6lTo4rjPLKGGglyWlz1kVrPfoDpt5pIbcmxYH2qi/n98=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=cknow.org; spf=pass smtp.mailfrom=cknow.org; dkim=pass (2048-bit key) header.d=cknow.org header.i=@cknow.org header.b=lMYRbbWd; arc=none smtp.client-ip=95.215.58.186
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=cknow.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cknow.org
+	s=arc-20240116; t=1753486555; c=relaxed/simple;
+	bh=Z2ML6z3GECKPol1IXrz6zBSrJw03TCZ07Q4UlyVizNU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=pxn8mYRszLP4qcjttPX4fhORi67wDGjsm7fnkmDOvOQD4AMjtn2G/0fDg8dIXc67dsQNAzgCoA3Z2JWm8w27pPMQF2jJV9zdcazBt9NgSga9MEP622kQm9ZpNdhKkDKg4vyexjVXdsZGbe5EpfdXQONnuwx7voInu6tGueuz/Uk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=s7FsWj76; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=cknow.org header.i=@cknow.org header.b="lMYRbbWd"
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="s7FsWj76"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1414C4CEE7;
+	Fri, 25 Jul 2025 23:35:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1753486554;
+	bh=Z2ML6z3GECKPol1IXrz6zBSrJw03TCZ07Q4UlyVizNU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=s7FsWj76SMCHaskzmoX/r6i35XPPGoRN1Kl8VCcllEJ8ZDz+29HKpg5wcaKToXT4P
+	 r3UQ6rUnBHLBPuJCxe27pGUpmz7ufMWGbN+XCXmOljnJJ7S40D09/0nwcM7+AnA3zL
+	 zKzB34v5F/HvtPK6gNi+X8r63GsMGa8LwTrsm+/ekWDGTlnfMd47mF6sNLPYoMB7Iu
+	 tFpITXxs1OlCgHcHmGLtR2+0gvGz1KPfX2KpBm4cqnBp0RVpl11a7VHGWBzrYMn1PD
+	 rt2h+RuwB2NVAKflq36KVuJmipJlDNlnu7nWfcZqj5KdazGqCr8qMpnnkffJ/sh5LT
+	 Y5s/LHZUNEYUg==
+Date: Fri, 25 Jul 2025 18:35:54 -0500
+From: Rob Herring <robh@kernel.org>
+To: Alexander Stein <alexander.stein@ew.tq-group.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>, Frank Li <Frank.Li@nxp.com>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 1/1] dt-bindings: mmc: fsl,esdhc: Add explicit reference
+ to mmc-controller-common
+Message-ID: <20250725233554.GA2028042-robh@kernel.org>
+References: <20250725060152.262094-1-alexander.stein@ew.tq-group.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cknow.org; s=key1;
-	t=1753463031;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Q6NaXMg9fbROH9LvIGCHCsqgrXQO+KbOb0QRffIyTME=;
-	b=lMYRbbWdVu9phJd7Q2DFv8Z9C2qAH919I0996wblEzzaVBasc+xxHGRU3M3Zp05/pBarYR
-	tB2bdt8xpLkn39yB2WOvU6IJWD0DC5EMcw+JgDP4EsDb8Jdld4Ez0FLfLVTYGjZaplAUO2
-	YWHNsenPJXB2mqKwteYxOdHxKQHmH4J+/BArnDso+N7Os0hUvCMmo6+8qC/FRW0/h7I6bU
-	1P81Lf5C/IEpTYiv5xnCC2RruYkXNWI8Dtqf4J7TzOqI4wNKEh/edzIuFgECkD6YXY0mjG
-	KqBQ6Le2cM+47oAUOI/htPjC8cwqHguDZwGRdYlP2Qp9xbe8kGGBfqEcFFYJ9w==
-Content-Type: multipart/signed;
- boundary=8c1edd4abc64afa689b98190459caaa658628e964ab805c9823f0dd1a1b2;
- micalg=pgp-sha512; protocol="application/pgp-signature"
-Date: Fri, 25 Jul 2025 19:03:29 +0200
-Message-Id: <DBLARE9EUGTB.1AIKSIZBIXHIJ@cknow.org>
-Cc: "Chen Wang" <unicorn_wang@outlook.com>, "Drew Fustini" <drew@pdp7.com>,
- <linux-rockchip@lists.infradead.org>
-Subject: Re: [PATCH v6 1/8] mmc: sdhci-of-dwcmshc: add common bulk optional
- clocks support
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: "Diederik de Haas" <didi.debian@cknow.org>
-To: "Adrian Hunter" <adrian.hunter@intel.com>, "Robin Murphy"
- <robin.murphy@arm.com>, "Chen Wang" <unicornxw@gmail.com>,
- <aou@eecs.berkeley.edu>, <conor+dt@kernel.org>, <guoren@kernel.org>,
- <inochiama@outlook.com>, <jszhang@kernel.org>,
- <krzysztof.kozlowski+dt@linaro.org>, <palmer@dabbelt.com>,
- <paul.walmsley@sifive.com>, <robh@kernel.org>, <ulf.hansson@linaro.org>,
- <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
- <linux-mmc@vger.kernel.org>, <linux-riscv@lists.infradead.org>,
- <chao.wei@sophgo.com>, <haijiao.liu@sophgo.com>,
- <xiaoguang.xing@sophgo.com>, <tingzhu.wang@sophgo.com>
-References: <cover.1722847198.git.unicorn_wang@outlook.com>
- <e57e8c51da81f176b49608269a884f840903e78e.1722847198.git.unicorn_wang@outlook.com> <f81b88df-9959-4968-a60a-b7efd3d5ea24@arm.com> <99899915-2730-41c7-b71a-f8d97bb6e59c@intel.com> <DBKCYCNRNTMZ.1XJU81M6EE2D0@cknow.org> <30cb2e71-5e0b-4fa0-b0e0-3263d9aa8712@intel.com>
-In-Reply-To: <30cb2e71-5e0b-4fa0-b0e0-3263d9aa8712@intel.com>
-X-Migadu-Flow: FLOW_OUT
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250725060152.262094-1-alexander.stein@ew.tq-group.com>
 
---8c1edd4abc64afa689b98190459caaa658628e964ab805c9823f0dd1a1b2
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
+On Fri, Jul 25, 2025 at 08:01:51AM +0200, Alexander Stein wrote:
+> Even though it is referenced by mmc/mmc-controller.yaml it still raises
+> the warning:
+>   esdhc@1560000 (fsl,ls1021a-esdhc): Unevaluated properties are not allowed ('bus-width' was unexpected)
+> 
+> Adding an explicit reference fixes this.
+> 
+> Signed-off-by: Alexander Stein <alexander.stein@ew.tq-group.com>
+> ---
+> I don't know if this is a tooling problem or whatever. I would have
+> expected that mmc-controller-common.yaml is added via
+> mmc-controller.yaml. But apparently this is missing resulting in the
+> given warning. Hence adding the reference
 
-On Thu Jul 24, 2025 at 4:57 PM CEST, Adrian Hunter wrote:
-> On 24/07/2025 17:33, Diederik de Haas wrote:
->> On Wed Jul 23, 2025 at 7:33 AM CEST, Adrian Hunter wrote:
->>> On 22/07/2025 21:33, Robin Murphy wrote:
->>>> A bit late for a "review", but Diederik and I have just been
->>>> IRC-debugging a crash on RK3568 which by inspection seems to be caused
->>>> by this patch:
->>>>
->>>> On 2024-08-05 10:17 am, Chen Wang wrote:
->>>>> From: Chen Wang <unicorn_wang@outlook.com>
->>>>>
->>>>> In addition to the required core clock and optional
->>>>> bus clock, the soc will expand its own clocks, so
->>>>> the bulk clock mechanism is abstracted.
->>>>>
->>>>> Note, I call the bulk clocks as "other clocks" due
->>>>> to the bus clock has been called as "optional".
->>>>>
->>>>> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
->>>>> Tested-by: Drew Fustini <drew@pdp7.com> # TH1520
->>>>> Tested-by: Inochi Amaoto <inochiama@outlook.com> # Duo and Huashan Pi
->>>>> ---
->>>
->>> Presumably the problem has gone away with:
->>>
->>> 	commit 91a001a1a0749e5d24606d46ac5dfd4433c00956
->>> 	Author: Binbin Zhou <zhoubinbin@loongson.cn>
->>> 	Date:   Sat Jun 7 15:39:01 2025 +0800
->>>
->>> 	    mmc: sdhci-of-dwcmshc: Drop the use of sdhci_pltfm_free()
->>>
->>> which is in next.
->>>
->>> In which case a separate fix is needed for stable.
->>=20
->> Adding that patch to my 6.16-rc7 kernel indeed stopped the OOPSies.
->> Thanks!
->
-> You need the other patches that it depends on, otherwise you are
-> just leaking the memory.  Refer:
->
-> 	https://lore.kernel.org/all/cover.1749127796.git.zhoubinbin@loongson.cn/
+The issue is the nodename. Since validation of it fails, the whole 
+referenced schema is not 'evaluated' and bus-width is unevaluated. Best 
+I can tell, that's correct behavior for json-schema.
 
-Also with the other patches, the OOPSies stopped :-)
+I guess this is an adequate work-around.
 
-Cheers,
-  Diederik
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
 
---8c1edd4abc64afa689b98190459caaa658628e964ab805c9823f0dd1a1b2
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQT1sUPBYsyGmi4usy/XblvOeH7bbgUCaIO47QAKCRDXblvOeH7b
-bh72AQCh2k0eqJiG8Ya5dmzENE7WFUBjyOZZW10vyWI/TozQJAEAlJekvqK7tuae
-XFsYO2aDmaIN1Y0pZTJ7d2kzkrzxwQk=
-=ZwZn
------END PGP SIGNATURE-----
-
---8c1edd4abc64afa689b98190459caaa658628e964ab805c9823f0dd1a1b2--
+> 
+>  Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+> index 62087cf920df8..f45e592901e24 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+> @@ -90,6 +90,7 @@ required:
+>  
+>  allOf:
+>    - $ref: sdhci-common.yaml#
+> +  - $ref: mmc-controller-common.yaml#
+>  
+>  unevaluatedProperties: false
+>  
+> -- 
+> 2.43.0
+> 
