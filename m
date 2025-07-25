@@ -1,146 +1,135 @@
-Received: from mail-vk1-f175.google.com (mail-vk1-f175.google.com [209.85.221.175])
+Received: from mail-ed1-f66.google.com (mail-ed1-f66.google.com [209.85.208.66])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41EB9217F33;
-	Fri, 25 Jul 2025 11:02:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5424F2356CF
+	for <linux-mmc@vger.kernel.org>; Fri, 25 Jul 2025 14:14:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.66
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753441332; cv=none; b=elMnxAhP3O2JQcKud+1YHEs52mFw4gYBgojeQD1AjtN6Lo2my84zEKl9KPKPvDIt+wpfyNsKXzdDBzkwajRRYUAQ8xCoOJoTRXJoUsNHjky/nxbf05fxWNndygNfvtOEe1nwokF9De9ty/LMZ4vs4b2CiCSgxeVESDV3MyXoB1w=
+	t=1753452890; cv=none; b=cv1CcoFjHUMUTP5oJV2qEwYtIlYnS3A84TzyhET+uqRFZkp691ycJ4ShwUsgNrsSnXVgM8kqTBvcFMqlrtQ8rrdV0Q9lq34AGrljZgJS/YKGa+e3ZvlpbvtGg2FeWcGrq6yzOJVT+ZqseSu6WIU9+4yMAyLzQ6kY52Ypwr6UraE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753441332; c=relaxed/simple;
-	bh=Ngio8xfyWIIDwlnM0W+JAkMk7HyR29dVYpj61dVV4ZM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=b1uU4NOu1oX/CK4hLs51r+fbDTOaezgVwLtVooiLlQq6Jfrz12wbiEVcGFWIK5V9X0me3INwuSOafvtxGmekeEwfHMrog8lGqy/+TLUXIDoMhlx1BPXXcmQFY3KzkWFV5WYOqUWk7oFZWzjJv7s0DOWyhZAjA6x8lHO7wHTuvi0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=XJiIzFXc; arc=none smtp.client-ip=209.85.221.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1753452890; c=relaxed/simple;
+	bh=rNyAWlp56eBFvy36oX5YiZlPyIt11W/cxbD2Iyf2S4s=;
+	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
+	 References:In-Reply-To; b=q4BFbTHvqNegKSs3E4fQGmk74l9PlVNE7X4iqThQjwtpjuwkKtVc2nbzZXcSmFebn8S+uBsM2zGR28kSLF1P8+gRzbBj7b5WdXW3SB2WxNUpIynBoeoCrOovduJYz3Nvx5B6A3/myQzCLvtj82hrBqANCgJ1IeNhWkboktPEP9A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com; spf=pass smtp.mailfrom=fairphone.com; dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b=3GNcyl+V; arc=none smtp.client-ip=209.85.208.66
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fairphone.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XJiIzFXc"
-Received: by mail-vk1-f175.google.com with SMTP id 71dfb90a1353d-53140c33563so1293791e0c.3;
-        Fri, 25 Jul 2025 04:02:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b="3GNcyl+V"
+Received: by mail-ed1-f66.google.com with SMTP id 4fb4d7f45d1cf-60c5b8ee2d9so4456318a12.2
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Jul 2025 07:14:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753441329; x=1754046129; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=fairphone.com; s=fair; t=1753452886; x=1754057686; darn=vger.kernel.org;
+        h=in-reply-to:references:to:from:subject:cc:message-id:date
+         :content-transfer-encoding:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8ihcslW5gx76Wnmrg/L2FGmXABDcUFjb21/r/z7IBkg=;
-        b=XJiIzFXcbSUlOdVKOLSBFloURuhSMPMluX2ag01rhZ9qeNuDETt5IcmYxmzhR6xcyS
-         btX6vpdQCORjK2Foe1VU5ZFfrfWcFOfgROtsC/dQxOd5yacyi9e0HXB+tJEDfUNLXoca
-         LvHlTz7EFPfTysDvnFdd13tIAmxm/W/uf26vZEZ43U0Nzn/glSQrg6hzWiRx6x0d3F4O
-         +eWJ4JgvPwu5j2iqwFtvf/gEeUkPLNdW5+fsPxVaJAeDwh1x57Q04BW2ofI3JVOxozyk
-         sSMf1oemodbVrCu8zRKAWUQ18lCOnH/1d7EPUQo/8hemHHE3Cpwlx4N8XuhzOihmBaWa
-         6czQ==
+        bh=iSkJyTrv6R3uiwv3q2J4zn3hDj1JQ7Rtyl+OeDRudNc=;
+        b=3GNcyl+VN56MLlLZZiFVdso3FYTMvxLqn0YicT4yjc3jDsdFduc6k8L2aJz+z7EMyB
+         MwmZZxlrU27kgawqJRkZm2zoQP2golw0YdBQEdxJg3OpVk1uIXLgbBiO2YEe9ssCeyfq
+         NEE3TiphHbKz1lK+XfH2G1qBUvZKPPaJv/znEj++VkWiLz9kiBcbgwmdKXKc/juZaz6n
+         UkHw63EKc8v0nhrOsyDsAZvXu1g8aeI0CtC6L22yQcvO5DjQdju5F0hof5CO4JJFhDKR
+         1va/awzeHy9uwa5YGsdaj0I5nvvekY+MC7BvqIZtc30xXJ7j4vpvZDgX2T5xHDb0Qfib
+         /0tA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753441329; x=1754046129;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=8ihcslW5gx76Wnmrg/L2FGmXABDcUFjb21/r/z7IBkg=;
-        b=FFYbQ7oq2snfySRrnYaPv000anwZrzXwvKcGNNUb1X2Wkq1MWJZVC21oIkNMiC0kGP
-         +P6GWZDF6toJUEhDl2XHzgOXh2ySKjb5LgKRQIZpi78heIlEvwtUb41cw+hOW5YnlJMV
-         2HUgxTZTZg0LzyTjA7JRbQbRoLZJbjmJkUl9bzkqETXaF2b+AGoWBNbMDqfDoFmThuCC
-         wOAAnGciU2oAKGAQMUtnGpdpgHk/QsrVc/BnHWuLMVzvGG6NExzctR7wYzUs67+fL7DP
-         2OK9M82e9tFFO0bGTDjqQ14HpnXymjxZBOJSFSleP0YnFfuamQNQsuDCsRh0tZNZWqW5
-         QFqg==
-X-Forwarded-Encrypted: i=1; AJvYcCVKD2ThX1x2TxOfKbb00QsmkEwjJh3hx1zIiVLDJNMvto+ykPgdd8IVYYS+TDBoUjhbLYMX12m1hCA1Ms4=@vger.kernel.org, AJvYcCXqipGXuvIufMINMw/MY7iRQQt0hq8WCDOUwLg7ao5/qYF8Xm6dWiMfEvZUdjKvd9FMwYtMutRlxNd5@vger.kernel.org
-X-Gm-Message-State: AOJu0YzRHauJ7GYxKBDK3jmn/YyWRjIRG9VTluEr2HEO8GLE9/lzqhVO
-	2SyehR5hO74uEL/Y5bOlkrPRwHWs/hsFX1P9SlHuiICo0n0Pn0m3b0Am0buxl7qTnL4Yum7zHVY
-	Qs5pXvpLvfeWDDtObB1NsVFnhfDDci2w=
-X-Gm-Gg: ASbGncss49ywqEHdk2VCi4MTcrOtdvrwS2IZam+SX1Hwx4Mx6YjDXp5VtneTrFmGZbb
-	wv2yO1Xh+TnjG2QSznEybz6yrG5nMWXba0WeSe41ZZWudJndyJgmwpbLU7J1LAg5A3UezSKrg0j
-	sYLc4TtMi02E/GyBeiDSh/mKi011e8JIcDLPvsa7XrFXrzUaHCsymTJZCzLhlHPiu8+rPT4kvpz
-	nm0OvlefVPo24CvVsb31zPRbfPNfPf9IBZJBsU=
-X-Google-Smtp-Source: AGHT+IGQMHgfEY7BuclRsjz6OH/7UgX+5R631hDtSjohy25v3ShupItv1BCYnry5FYvFEIhnzI2+C6EvDM+5V5QrM6A=
-X-Received: by 2002:a05:6122:46a8:b0:531:236f:1283 with SMTP id
- 71dfb90a1353d-538db602ff1mr319083e0c.10.1753441328963; Fri, 25 Jul 2025
- 04:02:08 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1753452886; x=1754057686;
+        h=in-reply-to:references:to:from:subject:cc:message-id:date
+         :content-transfer-encoding:mime-version:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=iSkJyTrv6R3uiwv3q2J4zn3hDj1JQ7Rtyl+OeDRudNc=;
+        b=iyxPelw2GOi5zAkLUb77u+lbpHpREMqetFWStIN4DwA0t6uDN2DYVK1nKVksYIXcSi
+         7hZ50Fk8bP1kNHteuHaiU9MTz1j25oG3Gx+fli2mm7F4CSMq4eIaLnq1u0gyo4gzxI9e
+         uGR0NqFKPrwQM7Di/zm9cab7TjqQGIFKgskcArcjzkOZuFHxXsCeH3b2E3uN7UuQkft+
+         W9p/1nSAwwwtblo/hogW3jifOcXpxstGKd64dSF6xBKs3xLi8SsZyzopLljrQbErECAm
+         +NZF4LTUX9G2PzAR8tcI8pxHXCiGQ5GY1j/bjzeXsVUmxbTPRLU+UaqvqvC7Qvvcntac
+         9LHA==
+X-Forwarded-Encrypted: i=1; AJvYcCUxHv5DA+xyWWljFebaqwIoxXfh1218ykaT0C/aw5aLGesxs8UmRc2Vvfpe9u5vXTQGE4X0at+FU3I=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxe4fNWiBW8QlwjGjd5H++VnKHJh06LvKongCysNYy9xXXJpj9L
+	EW9v2q0y+FuwqFUWxUXaMQwwfU4x3Zc3+2vDWsFV4EB0SgX8UQiGCNZtRhBQEGe4mvc=
+X-Gm-Gg: ASbGncscjLOHYuXyXsNEhybAB91U5LQGVQDlXJKXcz5Iliyefc9VQTjonhun0bKLHIH
+	SBtcl9xYrWr/YBmA+WMljrYbae9i3jledU89EK6dEP19pepTYCVvv25R5reRxk9rAjSrtc+aE0F
+	UjuWAb2ZR3WHQ5dRuk9W5J7HyArvvnISPhDZXsOQxlvOdtC906teoFXxK5KaLdFOpLjaraVP/4E
+	d82ETQAWiXTWBQq1MarkSm344f8q6Clrj1hBjjA04LSRZi7YjLarbe9AsBy8EmdGZcNH4VM/fDH
+	tsYltRdAR6/qvlMpGM20E/KxnOcZCVwDcmkyX8o47/CG2Cg7ddTDIsqHaT3Tpb8ROlp8jlNIxHU
+	Rw7yCTomKzC3+Lk1k7i8dKwXTxY20Xjaqbtyylpx7pqhfT4wS69VoDQK6s7V0iBzcXvo=
+X-Google-Smtp-Source: AGHT+IGz463msOz8qJcurxvgKtRb5VKMVkS2t8llkd59+2lECxEEVtdl6gBW3cfbqM7OYO38KYCWFg==
+X-Received: by 2002:a05:6402:3595:b0:604:e440:1d0b with SMTP id 4fb4d7f45d1cf-614f1a88810mr1744941a12.4.1753452885513;
+        Fri, 25 Jul 2025 07:14:45 -0700 (PDT)
+Received: from localhost (144-178-202-138.static.ef-service.nl. [144.178.202.138])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-614d907a40csm1635236a12.15.2025.07.25.07.14.44
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 25 Jul 2025 07:14:45 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20250716104334.44020-1-victorshihgli@gmail.com> <d5a0fcf9-4ae0-4d0a-842e-d9475997cdb5@intel.com>
-In-Reply-To: <d5a0fcf9-4ae0-4d0a-842e-d9475997cdb5@intel.com>
-From: Victor Shih <victorshihgli@gmail.com>
-Date: Fri, 25 Jul 2025 19:01:56 +0800
-X-Gm-Features: Ac12FXxlVobuRC8ZRTJ3xs8LnvzOZsLYryZXrXwLx982Oskd-13JLoxCmj_N6RQ
-Message-ID: <CAK00qKCUPOcSrjSuDyHiVsTUw6we029Uq4UjH2Q+JGuZ0KDOww@mail.gmail.com>
-Subject: Re: [PATCH V1] mmc: sdhci-pci-gli: GL9763e: Mask the replay timer
- timeout of AER
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
-	ben.chuang@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Date: Fri, 25 Jul 2025 16:14:44 +0200
+Message-Id: <DBL766O111UP.1IBG5Q30DCEQS@fairphone.com>
+Cc: <~postmarketos/upstreaming@lists.sr.ht>, <phone-devel@vger.kernel.org>,
+ <linux-arm-kernel@lists.infradead.org>, <iommu@lists.linux.dev>,
+ <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+ <linux-pm@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+ <linux-crypto@vger.kernel.org>, <dmaengine@vger.kernel.org>,
+ <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH 06/14] dt-bindings: mailbox: qcom-ipcc: document the
+ SM7635 Inter-Processor Communication Controller
+From: "Luca Weiss" <luca.weiss@fairphone.com>
+To: "Luca Weiss" <luca.weiss@fairphone.com>, "Will Deacon"
+ <will@kernel.org>, "Robin Murphy" <robin.murphy@arm.com>, "Joerg Roedel"
+ <joro@8bytes.org>, "Rob Herring" <robh@kernel.org>, "Krzysztof Kozlowski"
+ <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>, "Rafael J.
+ Wysocki" <rafael@kernel.org>, "Viresh Kumar" <viresh.kumar@linaro.org>,
+ "Manivannan Sadhasivam" <mani@kernel.org>, "Herbert Xu"
+ <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>,
+ "Vinod Koul" <vkoul@kernel.org>, "Bjorn Andersson" <andersson@kernel.org>,
+ "Konrad Dybcio" <konradybcio@kernel.org>, "Robert Marko"
+ <robimarko@gmail.com>, "Das Srinagesh" <quic_gurus@quicinc.com>, "Thomas
+ Gleixner" <tglx@linutronix.de>, "Jassi Brar" <jassisinghbrar@gmail.com>,
+ "Amit Kucheria" <amitk@kernel.org>, "Thara Gopinath"
+ <thara.gopinath@gmail.com>, "Daniel Lezcano" <daniel.lezcano@linaro.org>,
+ "Zhang Rui" <rui.zhang@intel.com>, "Lukasz Luba" <lukasz.luba@arm.com>,
+ "Ulf Hansson" <ulf.hansson@linaro.org>
+X-Mailer: aerc 0.20.1-0-g2ecb8770224a-dirty
+References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
+ <20250625-sm7635-fp6-initial-v1-6-d9cd322eac1b@fairphone.com>
+In-Reply-To: <20250625-sm7635-fp6-initial-v1-6-d9cd322eac1b@fairphone.com>
 
-On Thu, Jul 24, 2025 at 7:59=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
->
-> On 16/07/2025 13:43, Victor Shih wrote:
-> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >
-> > Due to a flaw in the hardware design, the GL9763e replay timer frequent=
-ly
-> > times out when ASPM is enabled. As a result, the warning messages will
-> > often appear in the system log when the system accesses the GL9763e
-> > PCI config. Therefore, the replay timer timeout must be masked.
-> >
-> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > ---
-> >  drivers/mmc/host/sdhci-pci-gli.c | 9 +++++++++
-> >  1 file changed, 9 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
-pci-gli.c
-> > index 4c2ae71770f7..eb3954729a3c 100644
-> > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > @@ -1754,6 +1754,7 @@ static int gl9763e_add_host(struct sdhci_pci_slot=
- *slot)
-> >  static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
-> >  {
-> >       struct pci_dev *pdev =3D slot->chip->pdev;
-> > +     int aer;
-> >       u32 value;
-> >
-> >       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> > @@ -1780,6 +1781,14 @@ static void gli_set_gl9763e(struct sdhci_pci_slo=
-t *slot)
-> >       value |=3D FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDL=
-Y_5);
-> >       pci_write_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, value);
-> >
-> > +     /* mask the replay timer timeout of AER */
-> > +     aer =3D pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
-> > +     if (aer) {
-> > +             pci_read_config_dword(pdev, aer + PCI_ERR_COR_MASK, &valu=
-e);
-> > +             value |=3D PCI_ERR_COR_REP_TIMER;
-> > +             pci_write_config_dword(pdev, aer + PCI_ERR_COR_MASK, valu=
-e);
-> > +     }
->
-> The same code is in gl9750_hw_setting() and gl9755_hw_setting()
-> so it could be a separate little function.
->
-> Also should gli_set_gl9763e() be renamed gl9763e_hw_setting() for
-> consistency?
->
-> Also should this have a fixes tag?
->
+Hi Jassi,
 
-Hi, Adrian
-
-Ok, I will update in the next version.
-I think I should only need the stable tag.
-
-Thanks, Victor Shih
-
-> > +
-> >       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> >       value &=3D ~GLI_9763E_VHS_REV;
-> >       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+On Wed Jun 25, 2025 at 11:23 AM CEST, Luca Weiss wrote:
+> Document the Inter-Processor Communication Controller on the SM7635 Platf=
+orm.
 >
+> Signed-off-by: Luca Weiss <luca.weiss@fairphone.com>
+
+I see you picked up this patch[0], but "qcom,sm7635-ipcc" should be
+dropped. Only "qcom,milos-ipcc" from v2 should land.
+
+[0] https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/com=
+mit/?id=3D872798f61d8bfea857e54aa17baa7b0d3ee24b65
+
+Regards
+Luca
+
+> ---
+>  Documentation/devicetree/bindings/mailbox/qcom-ipcc.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mailbox/qcom-ipcc.yaml b/D=
+ocumentation/devicetree/bindings/mailbox/qcom-ipcc.yaml
+> index f69c0ec5d19d3dd726a42d86f8a77433267fdf28..6e86ec36a82254ebd73c3067d=
+e495795c36c6bee 100644
+> --- a/Documentation/devicetree/bindings/mailbox/qcom-ipcc.yaml
+> +++ b/Documentation/devicetree/bindings/mailbox/qcom-ipcc.yaml
+> @@ -34,6 +34,7 @@ properties:
+>            - qcom,sdx75-ipcc
+>            - qcom,sm6350-ipcc
+>            - qcom,sm6375-ipcc
+> +          - qcom,sm7635-ipcc
+>            - qcom,sm8250-ipcc
+>            - qcom,sm8350-ipcc
+>            - qcom,sm8450-ipcc
+
