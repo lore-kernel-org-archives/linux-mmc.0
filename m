@@ -1,107 +1,117 @@
-Received: from mx1.tq-group.com (mx1.tq-group.com [93.104.207.81])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5486928134C;
-	Fri, 25 Jul 2025 06:02:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=93.104.207.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFEB828937A;
+	Fri, 25 Jul 2025 06:47:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753423324; cv=none; b=k/5XpqJraUjXFd6SK5I/if9Dl63M6BG2BCuQzURuh7zCkoAnvKl8FDpadzCrTM7zVXn2J8beNzvVySm2RYG5yAcjN2C/q02PIIXeRT1RG4cLaW4DIqkGjcmEUedcAgJLnNwZmBKWbU9zGvx2NU0GgANJooCmcxU/RkrWZbkfLD8=
+	t=1753426032; cv=none; b=svCoYb+Cgw0yUudJFMPr/wfEvmQaorddHLd9H/xNRQdwWfuvgkU/Kk5LMtdenduZP2EpBQgGmQgGQkfWOOFFbiCGOmp1KzrAEFeu33puYVlTV4rK+0m04lHjQoTXljEMPc5aBKdR0AlZ6Wh0vrq8rBIV1BJ7dtt+UWiB9PmlzDY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753423324; c=relaxed/simple;
-	bh=YRw7rFcDu4vNvOdSRQLyK0d6LASTLKXnrjMnLq+m7Ks=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=UX8pO7gNn15uT8xdtKRTIxpSXbNct0p8JxVn4nKwZmsgvlsreLTITL6U+8GG/NtE9KS37Y9BKyEucG7rr++vHrDwR2cQdRmJYVAisM+Fq5jQTzcIaS11lEotmln+gY2CYmaaC4F2bBt1zJXBcDge+FfWu1avOEMZq58vo8xAPK4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ew.tq-group.com; spf=pass smtp.mailfrom=ew.tq-group.com; dkim=pass (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b=A8qTrCfz; dkim=fail (0-bit key) header.d=ew.tq-group.com header.i=@ew.tq-group.com header.b=VbWMIsUg reason="key not found in DNS"; arc=none smtp.client-ip=93.104.207.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ew.tq-group.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ew.tq-group.com
+	s=arc-20240116; t=1753426032; c=relaxed/simple;
+	bh=VwXWIYN+uV8R/BhkN+JfhJ19YQ2JJoM6KZNVHrHfh14=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=det/dbXY38mnNf/7YsKm9bt3wABIDVgHBfC2tOZT5DLk7jDzikEC/b7lXeWAUMn8hiNJmvGx0Ua1bj4rrAkdAxX/D2etlLKYnCtS4D9U2y5n4cKu9vtdgvhwXYpr0lodkDgS8UI2b+k1hFp63mU0GkAHVuWeZem2BhJYJD6++yc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aEqz8C27; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="A8qTrCfz";
-	dkim=fail reason="key not found in DNS" (0-bit key) header.d=ew.tq-group.com header.i=@ew.tq-group.com header.b="VbWMIsUg"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1753423323; x=1784959323;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=gIjF0WLoJjIsLlPCbmDEL7SMVw5aD5pTVu3bKIXQuW4=;
-  b=A8qTrCfze0P/e6iCm7mfDXoF0gb4NQc9Zp5grB8MUsi88ltRbQ1zDqJ5
-   YNM9JBvqpBkIYHSR6KdU5wgA31YMoxKBV9GV+1YoUHqcKTF4GbOFRs0JO
-   hVU8ixqr1xnjgth+kHamP1YJYYAbhM8ukFW5RXnuxJZynnSRixPOZNEX7
-   ZTce0Do6Vx6XHMHrDWCt3EUdjMkCCy9eWam2ncpbutRlzO7wxAYe3ycK1
-   WHIZxcsBXAPJDoEBiIAD5ibxX3+FkmNhtCeMDbu3fWdVu6j1Vo6jxfXM+
-   Ir1bdtHrI4JWB7MqXKBKO3rnmVJlpFI1UwK7WOtUAs6AAwo2uO3LNi6Wa
-   g==;
-X-CSE-ConnectionGUID: tlaNM64zQbS/EQVWluh68A==
-X-CSE-MsgGUID: 7EQxuGH/R3O0c8k3t8Rv2Q==
-X-IronPort-AV: E=Sophos;i="6.16,338,1744063200"; 
-   d="scan'208";a="45412710"
-Received: from vmailcow01.tq-net.de ([10.150.86.48])
-  by mx1.tq-group.com with ESMTP; 25 Jul 2025 08:01:59 +0200
-X-CheckPoint: {68831DD7-1A-4FC15ADB-CD71293B}
-X-MAIL-CPID: 34F13FDAA2F1E88CBE740EB9BBCB8E95_0
-X-Control-Analysis: str=0001.0A00210F.68831D5C.0053,ss=1,re=0.000,recu=0.000,reip=0.000,cl=1,cld=1,fgs=0
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 911FE160F69;
-	Fri, 25 Jul 2025 08:01:54 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ew.tq-group.com;
-	s=dkim; t=1753423314;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=gIjF0WLoJjIsLlPCbmDEL7SMVw5aD5pTVu3bKIXQuW4=;
-	b=VbWMIsUgUy7EWPX+DTUHgI808r/pem+uKeOoLAcdqD7GktqxL7BnBTJ+3hetENyiSsjkBc
-	NrCnN+imsh6MkoOBFDlpcJhoCI7+VuyXwTmE97l4tRVp22aXwIsHZ/3IfTKsSEcmQkCv1l
-	udi5eTjtvxU8oc+dR6QocEykd25/f2stwkoc9jbGIruOHLIb50rnhyFyqx+Pk0K2PfnlL4
-	OaZx2h0DaCePSCCCVh8AYkElS5BfELSED8KT9XMhKGmFw8gBBoq7Bt0QzaAVJMu4+Q+uCv
-	2id01y/sqwnoAjdpIitF0AlOrsOFOUaOOkogO3YhE7iK5974SDXxvyCgwFDydg==
-From: Alexander Stein <alexander.stein@ew.tq-group.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Frank Li <Frank.Li@nxp.com>
-Cc: Alexander Stein <alexander.stein@ew.tq-group.com>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH 1/1] dt-bindings: mmc: fsl,esdhc: Add explicit reference to mmc-controller-common
-Date: Fri, 25 Jul 2025 08:01:51 +0200
-Message-ID: <20250725060152.262094-1-alexander.stein@ew.tq-group.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aEqz8C27"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE325C4CEE7;
+	Fri, 25 Jul 2025 06:47:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1753426032;
+	bh=VwXWIYN+uV8R/BhkN+JfhJ19YQ2JJoM6KZNVHrHfh14=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=aEqz8C27HVxuVGjtxct5liAUVwTFfKBHvQgVdT0lnwJGSlaMv4yyHtaQ6EzhY8T4D
+	 S7bitdnERQqC1kZ93RI/euQ8Xum9h95j+jzx9zCyw8nQIIZSUQE2h0OHXO6Eo7CcSE
+	 si3ifmWV9jh8/Z7x/N5TEIWt3chIzcSuwm9vtiDoH8rpU3TJu4hNjqiEPYwpOnC5+k
+	 vPBdWJE9gzpVD04/+ImftpYE28OLKI2armpAjMNwbJPH+BUVri8l/GVvv2Ks2f8huS
+	 KTxOR5aM26M0kibQ8I82DW4yTpurZucVCZnbgibkYBHh5MFBrACaWGsjuOWGLwBrY6
+	 NTPfRcUxFp8OA==
+Message-ID: <1a6f4194-de77-4dca-b2e8-2b51a106d770@kernel.org>
+Date: Fri, 25 Jul 2025 08:47:06 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Last-TLS-Session-Version: TLSv1.3
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V3 1/3] dt-binding: Add register-settings binding
+To: Rajesh Gumasta <rgumasta@nvidia.com>, krzk+dt@kernel.org,
+ robh@kernel.org, conor+dt@kernel.org, andi.shyti@kernel.org,
+ ulf.hansson@linaro.org, thierry.reding@gmail.com, jonathanh@nvidia.com,
+ kyarlagadda@nvidia.com
+Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org,
+ linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, andersson@kernel.org,
+ sjg@chromium.org, nm@ti.com
+References: <20250725052225.23510-1-rgumasta@nvidia.com>
+ <20250725052225.23510-2-rgumasta@nvidia.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <20250725052225.23510-2-rgumasta@nvidia.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Even though it is referenced by mmc/mmc-controller.yaml it still raises
-the warning:
-  esdhc@1560000 (fsl,ls1021a-esdhc): Unevaluated properties are not allowed ('bus-width' was unexpected)
+On 25/07/2025 07:22, Rajesh Gumasta wrote:
+> +description: |
+> +  Register Settings provides a generic way to specify register configurations
+> +  for any hardware controllers. Settings are specified under a "reg-settings"
+> +  sub-node under the controller device tree node. It allows defining both
+> +  default and operating mode specific register settings in the device tree.
+> +
+> +properties:
+> +  reg-settings:
+> +    type: object
+> +    description: |
+> +      Container node for register settings configurations. Each child node
+> +      represents a specific configuration mode or operating condition.
+> +
+> +    additionalProperties:
+> +      type: object
 
-Adding an explicit reference fixes this.
+I don't understand what does this binding bring. It is empty.
 
-Signed-off-by: Alexander Stein <alexander.stein@ew.tq-group.com>
----
-I don't know if this is a tooling problem or whatever. I would have
-expected that mmc-controller-common.yaml is added via
-mmc-controller.yaml. But apparently this is missing resulting in the
-given warning. Hence adding the reference
-
- Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-index 62087cf920df8..f45e592901e24 100644
---- a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-@@ -90,6 +90,7 @@ required:
- 
- allOf:
-   - $ref: sdhci-common.yaml#
-+  - $ref: mmc-controller-common.yaml#
- 
- unevaluatedProperties: false
- 
--- 
-2.43.0
-
+Best regards,
+Krzysztof
