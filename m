@@ -1,116 +1,198 @@
-Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2068.outbound.protection.outlook.com [40.107.244.68])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21240264618;
-	Tue, 29 Jul 2025 06:58:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753772306; cv=none; b=kHrpAM1pr6RuVG4PHg4Cj3u/AHeqpFNG8yKlFKeirZV2LUI0L2biOjeBzkpkhmwiNo1/z7xW4niozI02gHh3+kEFGLiZ3WU/iWuqYTdBy6VWMv8SyCMJn7jljmqGf8Rk/nn/JOkkBi2SM8tm+pDORqgQDCfZzlWIOw5OHs8hBsA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753772306; c=relaxed/simple;
-	bh=mlmMgEfh2bkKR9XTtXRjKPGqNjMsU/YKMZ/tXSM73n4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=iGSdoIt1E/ihkWOBX/GTYdDY4e2by3opmTnVpvGBI+hmjYMpZqZXz7E8/uafq7pfE4e5hy4esUqr0x/63Id+SvRQCH/wroV/XLB7bNYqM8fjK+RsYAJi3m6SsjyvENNRnYsCVl0KuVTkk5ndbuId34sq1UJF1lCLVtbk6mBjtAQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NPNvzcDV; arc=none smtp.client-ip=209.85.210.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D188B7260D;
+	Tue, 29 Jul 2025 09:15:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.244.68
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1753780530; cv=fail; b=CKMCaGdjUpURPS+SqkCdEEEC5kiZ82WixZwbCSdS496cwApdcNE8mbrQvVgsZYXa0fs92a3VWiSxFTDFlR9oXjboGYbU+WH2tg/34HJLLkJcA4wMJCtsapF8U8EDpklR1UnxMKw3iQ6Q9M6Ss0NkaB8dGICxWLbsiAnkAohm+Bs=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1753780530; c=relaxed/simple;
+	bh=XAAwSA0DnpTkAMFDmBus3434bYEpj4cU1r/CxZ1Uams=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=FOQRzx2A+YWRb77uaZB9Z0wU2Ae6yaGYOf/oIxDNE9oWsNNlUBq4R3dwMxq5gvygDWKHIY75krHCddrT8eDNcuCWEnbCt7rxwpisrnxGG3Pf5qGfRynFwgIigdSIT7QdRI+xeB3hBAmH/Hsp95EYLK4fylZo437nj2DCyb8/UiQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=W+FOfmRV; arc=fail smtp.client-ip=40.107.244.68
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NPNvzcDV"
-Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-747e41d5469so5690558b3a.3;
-        Mon, 28 Jul 2025 23:58:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753772304; x=1754377104; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LB5hbfGJeZWgdm24Ji9lctZ84pTJVwDogFiXOJHzb4k=;
-        b=NPNvzcDVPUUDdq17oPKHeBXHjlqr7MWENGLNl4ZFy2/vJTLhW1gxA/dStHOZsymcxX
-         m7CgeGv9zZUR85liIdJUnFQEWBRsjsLr7JluEHLuew0IzivpNx1J0nKwDiRrg3/00isn
-         KL1kjgXT5nemTVQWnKj+SLfSoqYU3AwVIyprDeXtUYqvmAJq1IHiONyJG41jt10QJtaD
-         4B8XfG2/8gzkX9aUnB9YTToDpTinUMubgoo+p8kJkpI8GfoY/UWIWMYxYKoBqIY7d12s
-         z0IcgAC7a4b2MjpsXD5Dx1UQ7M3aab/WPfUQHePyoktL8WNX0+JZmQNctFMEamE8ba6z
-         niBw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753772304; x=1754377104;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=LB5hbfGJeZWgdm24Ji9lctZ84pTJVwDogFiXOJHzb4k=;
-        b=IeI+gzfZamqQlGfEzpDebJ4ptTvEdU3iUJJJhcErR9Q4IXPLNwj3aNfPigL8qRATfa
-         DRzXHYb96E8zfklNTOyfzz750qWwz8x9uTOQCnMA352rT81LhUVzTNzaBDdmd3A/bx4l
-         CgFI2HyST/qhLivgywir8UyPRdU1NEa3UpQ5O0Q08HTTWpKUqLZHRXzN+bErPS9yxmI8
-         v22qIdUYrtIb1D5yqTqqvFfCgGKONKyIFr5fuh03GIQLCfnWTzD95lCPjtUCqphBbO7p
-         s6WcBQlogm7ywkSHxtEq98IVrUkrmuhQ1r2oqMSF+3Z0SEF5UlrTpLrnEbJpaiXOukmn
-         YLEA==
-X-Forwarded-Encrypted: i=1; AJvYcCViYKxltYJfMROeLw9r6V8thtPRvfvy4KFTqVTr8tBgFEvMxd2UGNzleLsqNmj+ztN+SftI02UphmZhhBI=@vger.kernel.org, AJvYcCXrOAyq1zvY9frJzeH/6Aa5ZETCmzh/lHOZmlL/d2/2uOucXah6HJYorLcsMyqG9n2am/Bzeatw@vger.kernel.org
-X-Gm-Message-State: AOJu0YyOA9WQgsvGaFlPCK2x59aN/KVWIxOSmg7Zg9vqqQAqLwv8MBIH
-	Z1kn/xWIVVH/UWDo6+ahFvcXBvUHsK1gLdEPJlczy0ohBqvSmcYvTr5E
-X-Gm-Gg: ASbGncso58v7uA+LUbTnrGfQpNHktCwBosRTQA9dkS12XvQswdZ8E57iTcPBeS/BjLo
-	crOjJya8Fj4UHAIA97miS9UDToCos5/dD6vyf335yRBtdqmcYvChyAwUS2DWaN1N8SNLrRxC5HW
-	y6rV29p0r7aFViERB1QFdnui0alPfzTMgFncQfSJg/Sk33CXoGC1ISyaivrla5in96DxfoLCZG1
-	YiqmsiyXxfYQxkh9Il9HxLx5uMLDPi46LoTNBBLJIK70quIV/Cux/tD1f5+psY+FAs/IV6pJ7cs
-	vDJJTGfxWh7K4/2mOyuJwLM560oznb7BdFNXQNT1q6VN4kOeWRDikC9/MP2obIpEMZWolr3xaqd
-	6e9G0dy6lqNzLZqIt92UGimgaBchQXQ==
-X-Google-Smtp-Source: AGHT+IEp2B5xYEjinFzGyWbcr+vEjXOY8+csoNqhewQ/2XSCpFas8HrQzNZAG4+o+llAcRo/gNKzjQ==
-X-Received: by 2002:a05:6a21:70c8:b0:21e:f2b5:30de with SMTP id adf61e73a8af0-23d700afbc9mr22847024637.12.1753772304372;
-        Mon, 28 Jul 2025 23:58:24 -0700 (PDT)
-Received: from victorshih.. ([2402:7500:469:65dd:c998:3a8e:c481:6cd7])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b420df76dd8sm758066a12.19.2025.07.28.23.58.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Jul 2025 23:58:24 -0700 (PDT)
-From: Victor Shih <victorshihgli@gmail.com>
-To: ulf.hansson@linaro.org,
-	adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	benchuanggli@gmail.com,
-	ben.chuang@genesyslogic.com.tw,
-	HL.Liu@genesyslogic.com.tw,
-	Victor Shih <victorshihgli@gmail.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	stable@vger.kernel.org
-Subject: [PATCH V3 3/3] mmc: sdhci-pci-gli: GL9763e: Mask the replay timer timeout of AER
-Date: Tue, 29 Jul 2025 14:58:06 +0800
-Message-ID: <20250729065806.423902-4-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250729065806.423902-1-victorshihgli@gmail.com>
-References: <20250729065806.423902-1-victorshihgli@gmail.com>
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="W+FOfmRV"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=qo20529YPxdP6MAeMJhcVgOe7h70YVXWik2UAkb2YJk4gB+uzHew92Kw/C5fTZUDCzFH+zeAoOS/lwNw4USa1Vk9M7kMvKbJiq7kEuG5Sx2fwshBMrkTxWJ/TumGq0yygz278nZ7REX4FCJ/fAqmJ6Wrz9b6u4KumUnl+hHbJsqkXjm0ZXk+DgJHVAOWu4CoWeCWa0nmAGdf4Iy0Ov6NSfEr5fjxmYRdRxrqMXnOSJesRCidJhdLhM6DzSDDIGz37ZFkbI78iqTv4ujC0SEzablFIpEks3Ak2f6yWzdeZP6xO9EJ8Y5fkYK+7al1JU9LRIMDzHzIF4bUQPtZWWcTWg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=mM6R6kU1pZzLg1FYvYE0iFfQEZI5UefNZe37qVteHdg=;
+ b=odicFvSGZOEGQ/IChiO0/pzjJ6qsfoQp0mqHHjrRzW8R0qHM/MiXb8LuwYExpelv9qdhEBObyB+fUQ/xu3iVVl3dSe2hqCOYq2aOkAaFw5Sju4lEQTMmfKIGGbHPeVipWgjRJ3nbmV3TNpejOT/jpDpA1QJeWLgfsnh50kw3gG10X8tMSBviQkyKbqKsrV8xEDGJKCJIhvVztsCQQJcyAteJoEXwn6FpKih7FYXLFVYL4EuT7tMgOxGB25mgcIJthf+lY+egAJgUOBHTpPY5SWRcWCO/B3FOq9pynayjlmu/EU1t+2TODqI/fHYogAHYGCywHsk5c0wwYH5sT/KNog==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=mM6R6kU1pZzLg1FYvYE0iFfQEZI5UefNZe37qVteHdg=;
+ b=W+FOfmRVQ4srXPvfcf9bT+B7kl2Xig6jrlYLN7seXSVszNTcv+eBftIoMrDQLatKXFGMm2tjikZ0btzKauywTAMlceWwRZve+9mhvBIlZcFCTO/xth6AR9Csub44lBGm/IPZ+ezPj801TeKaba3M3UXz09qQWt4taG6ROcqZSKWCt/R989cugHVXgMLiv9xoXmifyY5JFEx2B8JqapmMqLU1fI2ydbKZEo1kjK4KXIUg3+PKEIC8bMaLP6KsPDUH2IBHSDQbytkhon7PfdZSMUttALViKOBnIKPV9DJqOv1qRfwKOEo97V2c+Bcksfn4gJa6Yjy/Zqlf25HNmU5GdQ==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nvidia.com;
+Received: from SJ2PR12MB8784.namprd12.prod.outlook.com (2603:10b6:a03:4d0::11)
+ by DS0PR12MB7509.namprd12.prod.outlook.com (2603:10b6:8:137::8) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8964.26; Tue, 29 Jul
+ 2025 09:15:25 +0000
+Received: from SJ2PR12MB8784.namprd12.prod.outlook.com
+ ([fe80::1660:3173:eef6:6cd9]) by SJ2PR12MB8784.namprd12.prod.outlook.com
+ ([fe80::1660:3173:eef6:6cd9%5]) with mapi id 15.20.8964.025; Tue, 29 Jul 2025
+ 09:15:24 +0000
+Message-ID: <dc4ed9fd-2da1-4d9b-b8f1-446ea0697385@nvidia.com>
+Date: Tue, 29 Jul 2025 10:15:18 +0100
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V3 1/3] dt-binding: Add register-settings binding
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+ Rajesh Gumasta <rgumasta@nvidia.com>, krzk+dt@kernel.org, robh@kernel.org,
+ conor+dt@kernel.org, andi.shyti@kernel.org, ulf.hansson@linaro.org,
+ thierry.reding@gmail.com, kyarlagadda@nvidia.com
+Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org,
+ linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, andersson@kernel.org,
+ sjg@chromium.org, nm@ti.com
+References: <20250725052225.23510-1-rgumasta@nvidia.com>
+ <20250725052225.23510-2-rgumasta@nvidia.com>
+ <1a6f4194-de77-4dca-b2e8-2b51a106d770@kernel.org>
+From: Jon Hunter <jonathanh@nvidia.com>
+Content-Language: en-US
+In-Reply-To: <1a6f4194-de77-4dca-b2e8-2b51a106d770@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: LO4P123CA0662.GBRP123.PROD.OUTLOOK.COM
+ (2603:10a6:600:316::18) To SJ2PR12MB8784.namprd12.prod.outlook.com
+ (2603:10b6:a03:4d0::11)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SJ2PR12MB8784:EE_|DS0PR12MB7509:EE_
+X-MS-Office365-Filtering-Correlation-Id: 4eb1e7b1-0491-4850-ea5e-08ddce807389
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|7416014|366016;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?bnZ4WUlvbWRQZC9SZUV6TW1XRFV0Z0M5Wk14aUVKcWpyLy9ZWDhadXFZQlhN?=
+ =?utf-8?B?SEFheTBLaW54ZFAxdDhZMUFsRlNNck01c0p6Sm5HQksrTjlhdmo2RmpxTGhP?=
+ =?utf-8?B?L3g4YXM4VldxMUpnR2xKblRINVFpdXNUaFVGcE1EQU05RW4rRHJXelF1RDBn?=
+ =?utf-8?B?YzIzNW9wQnlHOWlzZWtnMUJqNGxESTlGU0pJSEdMR0V0TisyNHhSU1hYU3VV?=
+ =?utf-8?B?b2pCdXRuZkd1M0luYVdFNkdxbnRROE5tUUhVbEdjblgzeTRXKzYycHgvWHMv?=
+ =?utf-8?B?U2tqTXRoeElTQ0FLUmFIdXp1eG1SQ3dWL3IrZzB4UXhCZ2xjWGN0VDRqeXpI?=
+ =?utf-8?B?THNQZ2ZVc0p0MGJxNEhXb2ExRmxpRXRwTkcvMGNrNXZtWjhpYkJmOGdzWjFU?=
+ =?utf-8?B?M0ltRFRZM3FvUDVxczB2N3RPZWFqTktQUFZYRkt1L3M3cDE4T1R2eTdUMDNS?=
+ =?utf-8?B?R1VsTjRRWGNOWGNmYTVBWXUvMFh1bHFid3NsR1VXRSsrVjVNTGw3SER6UUtE?=
+ =?utf-8?B?Mnk4L2N3SCttbHBFc2pJU2dTTXJUVkVWNCtydW5ZLzZUclpEUlRKSnlRcFgr?=
+ =?utf-8?B?UFBqaitaY3g3c1F1Nit1ckJDNjk3RUZJY05WaXJQTlRyVjg1eFA2OG1zd1Zj?=
+ =?utf-8?B?V0dNNmduaXd1Mno3c2I0Tko4aGE3OEU4YlUrQzI4RXdxTWRHUjcvQlBTZUZS?=
+ =?utf-8?B?OE5WWGVTQnhhL0o1NkdoM25UcG1CV2RGYWZNNW5FNWNyK3R1NkdXV3M2YkJy?=
+ =?utf-8?B?WHMwU1hVT1FYN1Q0QzZGakNoNXMvYWlNb2Q0MHd0amx0c3IrNDhSUTFybzJx?=
+ =?utf-8?B?ZGdwT1ZWT2MrTWNoOCtGYzJ0VVM4WFhwNDM4bmpjdEJHVVJtTXZ4TjllUXBL?=
+ =?utf-8?B?dHVuYTUxMGFTY0Y5VXB4VXZxZERZeXA4UlhFaHRjRGRybnVyS0hwOWFBTTRr?=
+ =?utf-8?B?Vm5pQUJLbTUwMlhvdUo2Z29YekNoMUl4MU9NOWpHcmpNUklOQjVsdlBXaWZR?=
+ =?utf-8?B?Y1dwN1F1R0ZEOUtaeStkdkJ1UDErMklBYzFCQWF6Tk5QbWtLUzhnZDRyTURm?=
+ =?utf-8?B?QU5LSlNMZUJpSFFENjY1L2M3alVLc21Pa1BmdnlYeERvaGNVQzMxK0dOeTdB?=
+ =?utf-8?B?dUdFNkxXUWVNdk9hVERKZ0hWZlUxZVREelowdlRkY1Fpd1NqMFBJTzVBemhU?=
+ =?utf-8?B?VThvUnhRSjVCZHpGOEtUTThvWTMvRUhUOE41QkZQcG5XK2s4eVJUdHdxcVBV?=
+ =?utf-8?B?eFJ3R1VUcmNGcWIvRGlUd3daUEZOUngxN2RmT1MwRU82dUNnamdDcnRLcGtX?=
+ =?utf-8?B?NHpXZDE4ckVHTlhpTUNyQjZSMHM2R3p6eXBubTJOVU5LQUlWZ29OVFB5Q3ZF?=
+ =?utf-8?B?dXBZV0FRbFFVditqRlgyVmZJU2lrM2MxV1hVNmNTNWd4bFZQcU9iK2RBdWVr?=
+ =?utf-8?B?YUwvb2hMSXR3SU5MbUVlQU4rV3N5dmxUWHpNL2pqN0ZoYTJVeTQySEIxbHkw?=
+ =?utf-8?B?Skl4UnFWNVIwWFZ6UzhkalNBcDNDZ1V1MDF5MHRYU3F3bUZsenVocFo5QlV3?=
+ =?utf-8?B?SVBkejI1eUpmRGkvallKZGFGb1ZJR0xlZkdoQ1N5RGRaaWlraU8rdUwxaWJp?=
+ =?utf-8?B?d21VdkRLZWh1Zm9yMFExaXFXRW9weXBicGdzbktxYlI0OWlGODE4NTU2d2N5?=
+ =?utf-8?B?S201d3RiWkVRdWRRRWx6c0dnOFRCVFZnb3ppbWZIYjZJMitsUE1qL09iS0di?=
+ =?utf-8?B?Zm1lUS9KV2VIMTBGWkJnckNFM1k0eWs2ZDJLRGtxcFFGUUV4Wm1iRk1CcjRL?=
+ =?utf-8?B?Y1FLNVhXVDJ6bzhONFRReG1JajFUWHRaN3lwcmZuQ1VUS2NMVHRVY1FJZU5j?=
+ =?utf-8?B?dkNqZUphTFIyYlgybFA2TWM2WDVQZDZzdXI5SGNBVFJIeTkvOVNYbXdLdC9U?=
+ =?utf-8?Q?eMo17W+q6jk=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ2PR12MB8784.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(7416014)(366016);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?cTkwVEozK1dkSWYybzlDa2FCR2lOTG5Bay92NHQvaHFIQTRiRGROTUMyUkJ5?=
+ =?utf-8?B?ZGZhUDgrdGdtWTM4TFpBY2NzbjlBbkR4bkVtSnc3TWNJSGwzaDhKcklnMlg2?=
+ =?utf-8?B?dU9nUkhoOVVOWjVqVzJLdUc5aTNOaisvZjkwcWZLOWN1RUJxelRjYVErUTRi?=
+ =?utf-8?B?eFdzMnRDcVVPMmQ5SHBuTTJURW1YaHAxUGhlNnVucG1iQVdQVEVhblY3SE13?=
+ =?utf-8?B?VjlTUzBRaXpVZjAwbytxME9qSmdScThPb3liL2VCbjBvbFhMTyt5SXJ1Qm9G?=
+ =?utf-8?B?dlNqaUNFdi9LaXNmOVFUWnh3NVhnYVQ5NFlFOTZybGlma0ZZaklMcy80UVdm?=
+ =?utf-8?B?RXFSenVXeHpiWk9zemRNbWlvQVhFek5qU3FiQmo0US93MU5pNlA0NWFYMFRV?=
+ =?utf-8?B?cFNwMmFsN1dkUUhoTzc1Q1JadHJIbkpKS3lnQlNJVUNwZTJ4OWkxc05wam9R?=
+ =?utf-8?B?V3BYcVZmdjArKzF0ZVRZTTJmVzdVeWVTTWxpa0JsMzAzb0FyTDRabXl1S3pM?=
+ =?utf-8?B?MERVL1VDZFJGNitkSm1HeGpJa01jencxa2lkUVU3OGEvZUxHV1lmVWJtRWd0?=
+ =?utf-8?B?d2VvcC82cVBud2FkcTlTOUp2QlRyaHQ4QVZaRGhRaVRmRkRKRmtYRTd6SHd4?=
+ =?utf-8?B?dWhFK0tvWm1ETHBsSDZnUGwvZFRldTVhcmdXY2hGa3dzMmNnbVU3UG5qWGUv?=
+ =?utf-8?B?UHlsYkh1S1ovMHhKcUtBT2Vjd1ppU2NkVVBza1JjT3had25tdTlnajVuVkEr?=
+ =?utf-8?B?eS9NZ0VRL3pqbXRNRFlLSFc0YlZEam9sUTNQaWxpRnRvSkY5bGpzbDU2RGpq?=
+ =?utf-8?B?SXVxWVZBMEd1eWlOU0JRanQ4ZjdzbXB4azFYUXg5VEp1ZTUydU5FSXZ5ZHRC?=
+ =?utf-8?B?VUZIQnFvQ1hGYldFS3U1Q3owbWV0UUlKSzB6WlljcTBJT0J4WTVjWk05eWtV?=
+ =?utf-8?B?MnNoaE1xK04yaU1hb3pCWnhZZmdBcnh4eXpERk5RaHJJMDlGZnVTbElrZStN?=
+ =?utf-8?B?OHZFaVUxYVlMUU42RUMybWo1NXdsSDNyZWM1TUs5NmU5SmdMOCsyMTZmcVVI?=
+ =?utf-8?B?N3hIcmNIbjVyd0l3V21TWG5Ncks2T1l0T3pHUlp2ZkZ2cGxVRm9TMUkzVWNR?=
+ =?utf-8?B?S0diZzFPNE1uc1M4U1F4d1YrcDA1Y2lMUlRUSXh1RnBidDVremN6Y3QrNGJM?=
+ =?utf-8?B?eklHblFkYVVOd1VEZHRwWTQ1YUoxOENILzZJeDZLWFY2VFZxNjQzMmpZN21H?=
+ =?utf-8?B?UDRVZ3ArK0J3NEI0VHh3NXVyYVlua3pBdWlWdUhPTWVOQnlaTnVYQ0VsR0k2?=
+ =?utf-8?B?SDBTL1h5R0hzZHlEeW11OUxOZ3RkbFFNREJQdHR6OUM4UG5nWnVrcm0rOE1H?=
+ =?utf-8?B?L3VyTTVLT3ptbU1oV011NGNiZHRaQ2w3M3psaGVEbFpLTEFOVE54cnV6cGR0?=
+ =?utf-8?B?YXlEcWlNK0V5cTA5Wk9kRlhTcG1TRWQvR0tNM0l3M1JSZUsrL0FuQy93dWtE?=
+ =?utf-8?B?UTJTQUdLR2Y1dDJLaUdoTkJkL00zTUNrRCtGYVZZT2NjRmpMeUhTQkEzMU5B?=
+ =?utf-8?B?YkIyN3IySS9iNVZHWTJFUWdld2hWZisrTk1YTTFDSGRLOTNpRVV3MHdIcG44?=
+ =?utf-8?B?QUpiZ0UxNzF3ZUU3Zm9hMlp3S0NSOHFQZnc0dlI4cWFuaCtXYjM1bmVwdGJI?=
+ =?utf-8?B?SzBtWVNtYksrRVV3bkREY2VRUU9sZmhtNUMrRU8rU2Y1RkJBMS9kaUhJRUJU?=
+ =?utf-8?B?UFU3clpQVS9rQ2JCanhVbnY4UVkwK1poZXpybkFvaVZYS0R0U0tLV1NMRHRw?=
+ =?utf-8?B?SFR5UnplWGt6c2Z2TVhQZ2FVdUZCaWp3V3NYN0xqQ29ZQW9VSWNKMHhkUU9Q?=
+ =?utf-8?B?RXpkZnJQZHd1cmdjRzZ2WjhpRDc4aVhGYXQ3bUNUekJpWlJJU0dCcEpqelI2?=
+ =?utf-8?B?dVRrSFZVY1ZlZlEvL0FYUXhnbXZpaVB5Ry9pRnNsVjNOS1VqWWlWVFQrSEg3?=
+ =?utf-8?B?UGxabVROb0JoaUtMVVBadzJMNFJNSlRpRHd0bGpBM0lQRkVRZEtpRkIzQVBN?=
+ =?utf-8?B?WHd2ODUvWktNSE43cGRMblUzWDJtUW1OZCt1WjZGVDkvdEZ3bzhNRUk2Mzlm?=
+ =?utf-8?Q?dzHFJTD3rmx5kaWUuc30Si+5d?=
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4eb1e7b1-0491-4850-ea5e-08ddce807389
+X-MS-Exchange-CrossTenant-AuthSource: SJ2PR12MB8784.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Jul 2025 09:15:24.7063
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: x0tbA7a6ChGPpHaUpU5MCjES+7lKt+D0HzE7YsJqlPmlNgoWlBTTMYROrT1PDVlQ7TgQPOVSFdogz68KjjMKfg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR12MB7509
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Due to a flaw in the hardware design, the GL9763e replay timer frequently
-times out when ASPM is enabled. As a result, the warning messages will
-often appear in the system log when the system accesses the GL9763e
-PCI config. Therefore, the replay timer timeout must be masked.
+On 25/07/2025 07:47, Krzysztof Kozlowski wrote:
+> On 25/07/2025 07:22, Rajesh Gumasta wrote:
+>> +description: |
+>> +  Register Settings provides a generic way to specify register configurations
+>> +  for any hardware controllers. Settings are specified under a "reg-settings"
+>> +  sub-node under the controller device tree node. It allows defining both
+>> +  default and operating mode specific register settings in the device tree.
+>> +
+>> +properties:
+>> +  reg-settings:
+>> +    type: object
+>> +    description: |
+>> +      Container node for register settings configurations. Each child node
+>> +      represents a specific configuration mode or operating condition.
+>> +
+>> +    additionalProperties:
+>> +      type: object
+> 
+> I don't understand what does this binding bring. It is empty.
 
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-Fixes: 1ae1d2d6e555 ("mmc: sdhci-pci-gli: Add Genesys Logic GL9763E support")
-Cc: stable@vger.kernel.org
----
- drivers/mmc/host/sdhci-pci-gli.c | 3 +++
- 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 436f0460222f..3a1de477e9af 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -1782,6 +1782,9 @@ static void gl9763e_hw_setting(struct sdhci_pci_slot *slot)
- 	value |= FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDLY_5);
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, value);
- 
-+	/* mask the replay timer timeout of AER */
-+	sdhci_gli_mask_replay_timer_timeout(pdev);
-+
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
- 	value &= ~GLI_9763E_VHS_REV;
- 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+Yes this is very much similar to the pinctrl.yaml that defines a 
+top-level object that can then be used by different devices and those 
+devices can then define the properties they need. So the examples for 
+I2C and MMC really demonstrate how this would be used in the subsequent 
+patches. Obviously we are open to any ideas on how if there are better 
+or preferred ways to do this.
+
+Jon
+
 -- 
-2.43.0
+nvpublic
 
