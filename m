@@ -1,64 +1,62 @@
-Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 939A1299AA4;
-	Wed, 30 Jul 2025 16:46:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B587F2D838B;
+	Wed, 30 Jul 2025 16:46:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753893985; cv=none; b=W3RfR2u3GRvTuKONuHYcUXqC1WZhPn3LrsLRwMiaLj3zoWeklNzDmOGdzgXiDIAhu4PgEwAL6bNG7sdhm0iGDkb+n7jdht0BRfunsVS7CqyJ/79F79MxCTVa+sXlkg16N4CnxOZvEKCuh+1bhG4f6Iy0TEXTi6RsRPKlDwMqthU=
+	t=1753893985; cv=none; b=SrxLASrJPPEPR6HMuqeRUYWVis/PgXmLDREAUJDFoGn+Dws+YnPA3WH4KZLSiuPTODUZ7etl+afwtBN8Ep3jOQLxnmqohBhwgbxF+cIf+7qnroCVGS9Hxyjeg2bWQwBfA42CS8fOYHBwbqOS0ygD4OibQLJ/jw6DduYMe69hHWA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1753893985; c=relaxed/simple;
-	bh=LZARjLvzBZFjM3RmA19eFmnzbOWlVNKlKSM0tiqy62A=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=p4obWdFHngjrVghZwIIa2qkyw2MutG3KZfGq4BNnUmxdJhybRDmJMdCyqJ2BlDxgFrenT4yc6+y8FYuBSltF1vAYbfzXIHx9WJh846jEkC+as8uNZTJGE3tcDUGCcBicUNHLM/TfnYye6xCRV3ecfSLUaSbynKOjMYY3uhrb3JQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KUYKl430; arc=none smtp.client-ip=209.85.221.41
+	bh=OnY92MEoPqZZpm7KokGL7H7lPXOE0wu4xlzLwfU2dl8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Ip7vXaX0gdJvB94IQ2Gyb+c4mZWAcrqnGU0VD2cSXa+TCnI7KOy8JbcpoNLaXwSsgB7qGp+wIcCUDxej+0N5U6YYpXrx+TCEz8eq+R5SV4tPXB9kYgka6a7vvV6d2yEFbfSyv60VpI3r8Kd2ngaBT/FEEjHkCk091nJZEGPMUtQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=i2D9vebr; arc=none smtp.client-ip=209.85.221.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KUYKl430"
-Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-3b783ea502eso959653f8f.1;
-        Wed, 30 Jul 2025 09:46:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="i2D9vebr"
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-3b780bdda21so6636f8f.3;
+        Wed, 30 Jul 2025 09:46:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753893982; x=1754498782; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=bQs/dqIajSMMhMoY0aI6/yRw3xd1em+8T6SR7Mv78dc=;
-        b=KUYKl430a5NrM8fKBJEJ0bRb4GxZwjm/SYFlCCUFQ8S/yKwpVNA6Vi0ZMAQ3/IKRfF
-         0QSKGum5MYqpHFsdu7uu0l5UOaYA7AhA5V4QwI2b8mXVrS7xOvXTY+CRqjwjQtHLyEX5
-         Eoj01v/4yAT+poEES/q3VrMSDvcBEr1zZyur1gItiyJm0jPxaesV9R9zI6ljB2QEXaOL
-         gy8mV/PZRYwbtOIiU/NY2qEWScydvTC9s+OIrSO4i5OqVzD+vt0NmW+yXiID6BFc1KQi
-         FOr/I99AZi2z86Eh+V0aCW1GnDWKdRMt9pa1sMiJnHcFdgl8+gzNu2xXCas30ZiCjnmp
-         Wgsw==
+        d=gmail.com; s=20230601; t=1753893981; x=1754498781; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=MWezttRTSHsSXwTxZUD3kGHn4YUTpECkUfWv7cRVO4g=;
+        b=i2D9vebrDACkrf96p+sYZZybZIjAVsEATladOceIMYvS4Hoo5g8cM5EwBqCvo6jlac
+         v0Eq+t31lKELqQbUdg2reqFopf7HY411OcKOW7dijc/WUp4BTxHeci57QBPJEAxB/B6O
+         Krz0ZaWnjIsf9/H/56qTDFFb8QhakleLo/wzMVihH9LKDOKTOcj2r+Eipi5BTV8UAd3j
+         JM7ChZemvvM5FKidmVKoamNelnQc0uAcnQ8zbxtNnwj0ZBHHyaTZBRMfgdpkAjJnr2fI
+         9KYqLmzUsKi8QHwmCr2A0ENHIpvnHgJjXkQaXwpQpHYh+u6KS+aeqNwPn9yX0/dXq7BL
+         nflA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753893982; x=1754498782;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=bQs/dqIajSMMhMoY0aI6/yRw3xd1em+8T6SR7Mv78dc=;
-        b=hm1sspgTl6f+ofv00/STOIHbu84kL9fXCF6JWNXup/6YexWWxyF8agcrAa228ztj9y
-         k+2nlASQ45E22J/KVNUGERw21Gfm2LR66pRBNFTfiwIZv7TK7cYA3Dgqk+9qprPCyasD
-         8Jnf/ddJ8ylSsYBXbxsl8vKAFI/TtURPJgAoEV8v39KKO804iEDSkvApvZEC4mg7zDL2
-         Tn46U7idA/GyEVwSKvo1Kyi6E4/j2vluKbMJrPBcv2GK4T94H746iLx9MRynShLsQVdi
-         qvBZXTsMayZEXyBByWJaq0uCWsi5mGS+XfsieqAEvRIdULHK75BvKiYTR1Ed5K5CPBW+
-         VRIA==
-X-Forwarded-Encrypted: i=1; AJvYcCUG6ZG2/NKGDLCFAeKULR9caWRQqQrZTu11hhQGS1nNyF7DXFVTSa1c5PLZpga3LYOu/ODKxUYPxbW06vY=@vger.kernel.org, AJvYcCVYaCiRAQbff+6/vyD2n+X6vPLGpGflv7LXArecjP8yQrS0UzpHWIdwlvDEWXlEprhCEqsXkLEHpCGgM8N1E38vNGY=@vger.kernel.org, AJvYcCVgThrYt7VPCl6GZNA8XoW3bMj7OmgOV7GgXIYPRKdsAmILk0S9W/lTp5xU6PvuW2erE1iqQyvw2+bF@vger.kernel.org
-X-Gm-Message-State: AOJu0YxRA5RTN6HdVnX6vmxFkD/RPF5jGBBfWvm0SMSAljI2rLZPUpUO
-	OpEI09jx66Si+vMs1gY1SLd2HQdoVTypKS5/03/2qFX3JBiupAhzQqgI
-X-Gm-Gg: ASbGncvHJJKq9slMoP1lym/M0i+HwFZYop31ts+qO54f1raDQqdRRHbTGJ95Pd7tSLY
-	MyQeLXBe8TUglRGEwH0Pvv8XswETpbUSXi7EvxsJ9hZ2fZd/SUASbTQjJYZ2/a1Ak23Sz2OOVIr
-	yYkdyoLbGrN3safGVedrC/VEjUl4Xs80iAQ61x5Mobgeh4kLU2l5cq7lhWcj+rfdy2WUoef77hN
-	0kgK+5d34hfgjWN5uLLNKGIKcLBZweQUi5V8tHP3FNSi62XOmTfwaHpf+AcbGtJXbY7zmmWnH38
-	CS+ivZPUBa0Gwe5TV5AFzGLztvHTyaiS2V/Rlb/QL6ziFbLhJyxzTT+Pcf9GgbgwWyIcEpyOeXV
-	ENbQgkw9oNCzqeJK6Q/LcIfqYFja2gmur6bAUqQ+o13upGYnjJkU+wE6bT6SfJGkziHf6Ryry7A
+        d=1e100.net; s=20230601; t=1753893981; x=1754498781;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=MWezttRTSHsSXwTxZUD3kGHn4YUTpECkUfWv7cRVO4g=;
+        b=gjYRYiu/FZkRebRz//V2GwhIND+SekFLESdLX2FUh9zXdrjvA4IAkWMWdK+4zWW6qQ
+         +WCg4EJCpfLjCD1Y6KLCh2hhWypeATnBmXnjiwZNPoII1lWTGBZdHGch+DBfuIam4ds0
+         Ot9PYvvoQ2xiNETEhnoIOnwlcbSiMuYgODoaMx6gadK71+sEJkdCCPojHiNvgLclpOLQ
+         oqK3VoeAg6tCkOosy7I7p7lBiAg4d8l1AlGjOcbL1T6OV9/ubJYZB+uLCuLPRtxKvUgG
+         Jm40bCgPJpMa40YOMKRXRVpdy02ZvgAQyS3DQo9CtyLjohS9kfFh6sAM51b5N68sPXtU
+         Kmrw==
+X-Forwarded-Encrypted: i=1; AJvYcCUQHQsJUJb4fwp0tcRCxpFV5wjokBhEaSey30YB3dz/BcwiaasB7yxSBR3o04BIxrvsTq310CEdvXb9fAOy6nys0rk=@vger.kernel.org, AJvYcCX7bMCidlnKQvhHnQFujI7AzhhI0JJIybBsjQykL4M2lFl+KETNfOWaTU7PNuFWT2IqcKF5lOCALwOaf1M=@vger.kernel.org, AJvYcCXyYrvWzW4Y1vXAhrUDMlLEglWnZlJWKdTIzRe8gpUkTGKY47GMxRukicBfJia5dIaIkROQ8MTRNa/n@vger.kernel.org
+X-Gm-Message-State: AOJu0YxaN/gnmrdDOYiwiDnEXBm6EoegTJp18APED1wETULrJqAdA92V
+	4f7JouYYs5dQR0AmQGKq+NH/pkc/0eEx7xfSwUMyUZyaVybyGF8933od
+X-Gm-Gg: ASbGncsF2PAW+EuijZ66rTvjNXZjx24gcT/j1dy3AtH0VN2zu2nl9dwmbI6OPISs9hF
+	YGFKVoeehmqTkOdArat/B8AqoGg8AFWyQiP/42ykFHe8UYP8rMMyS0FsQjLczr4R+z1RGk7bxmW
+	kiyLxPemduqDUIoxl+g8c0xiZUtKwa2tjv7DHgaMA9AUgvyRFjaXzmY6iyErHKUYWnYOBG3PUHx
+	pFZOjqm+ooqwzh04TlRG3JNVC1HqJLPkbpUogHWpR3zu7DCIVQy5LP0HNjwb2j8x0t5maOH9HGO
+	ZgcsdtrHPrLkniINuwE+ECpBiFlN92ehAAc82g7M4n1Sl9vi9hGaCKYQgHXy7vKXztrR6sS25dk
+	X10jh2s3GPmO7GtBtc5a4vhDEj5DWjbHwp7OE6km+2NVP6fI9zhHlEowJEIrKFQq+p+6i4QAi0A
 	==
-X-Google-Smtp-Source: AGHT+IFdlAk+bDf8WtMWs7xZ1WESW0oEyPIAnozDGgppjs1A9m5aiQ5vD1hHltTMRTg1cWSNdFle5A==
-X-Received: by 2002:a05:6000:2306:b0:3b7:9ae0:4abb with SMTP id ffacd0b85a97d-3b79ae04dd1mr550108f8f.22.1753893981815;
-        Wed, 30 Jul 2025 09:46:21 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFVsIGb0eedx2AeA28sRXmsZd8CBEfzgL8urUOjvZce60/4JQnL/vLNtGQpEo4blBrcNfyIsQ==
+X-Received: by 2002:a05:6000:1881:b0:3b5:e084:283b with SMTP id ffacd0b85a97d-3b794fd5a50mr2755927f8f.17.1753893980834;
+        Wed, 30 Jul 2025 09:46:20 -0700 (PDT)
 Received: from biju.lan (host31-53-6-191.range31-53.btcentralplus.com. [31.53.6.191])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3b78ba267e3sm8564042f8f.59.2025.07.30.09.46.21
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3b78ba267e3sm8564042f8f.59.2025.07.30.09.46.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Jul 2025 09:46:21 -0700 (PDT)
+        Wed, 30 Jul 2025 09:46:20 -0700 (PDT)
 From: Biju <biju.das.au@gmail.com>
 X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
@@ -70,12 +68,10 @@ Cc: Biju Das <biju.das.jz@bp.renesas.com>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
 	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH v3 2/2] mmc: renesas_sdhi: Enable 64-bit polling mode
-Date: Wed, 30 Jul 2025 17:46:15 +0100
-Message-ID: <20250730164618.233117-3-biju.das.jz@bp.renesas.com>
+Subject: [PATCH v3 0/2] Enable 64-bit polling mode for R-Car Gen3 and RZ/G2+ family
+Date: Wed, 30 Jul 2025 17:46:13 +0100
+Message-ID: <20250730164618.233117-1-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250730164618.233117-1-biju.das.jz@bp.renesas.com>
-References: <20250730164618.233117-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -86,34 +82,30 @@ Content-Transfer-Encoding: 8bit
 
 From: Biju Das <biju.das.jz@bp.renesas.com>
 
-Enable 64-bit polling mode for R-Car gen3 and RZ/G2L SoCs.
+As per the RZ/{G2L,G3E} HW manual SD_BUF0 can be accessed by 16/32/64
+bits. Most of the data transfer in SD/SDIO/eMMC mode is more than 8 bytes.
+During testing it is found that, if the DMA buffer is not aligned to 128
+bit it fallback to PIO mode. In such cases, 64-bit access is much more
+efficient than the current 16-bit.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
----
 v2->v3:
- * No change
+ * Added header file linux/io.h
+ * Replaced io{read,write}64_rep->{read,write}sq to fix the build error
+   reported by the bot.
 RFT->v2:
  * Collected tags
----
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ * Fixed the build error reported by the bot.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 4b389e92399e..9e3ed0bcddd6 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -107,7 +107,8 @@ static const struct renesas_sdhi_of_data of_data_rza2 = {
- 
- static const struct renesas_sdhi_of_data of_data_rcar_gen3 = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
--			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
-+			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
-+			  TMIO_MMC_64BIT_DATA_PORT,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
- 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
+Biju Das (2):
+  mmc: tmio: Add 64-bit read/write support for SD_BUF0 in polling mode
+  mmc: renesas_sdhi: Enable 64-bit polling mode
+
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  3 +-
+ drivers/mmc/host/tmio_mmc.h                   | 15 +++++++++
+ drivers/mmc/host/tmio_mmc_core.c              | 33 +++++++++++++++++++
+ include/linux/platform_data/tmio.h            |  3 ++
+ 4 files changed, 53 insertions(+), 1 deletion(-)
+
 -- 
 2.43.0
 
