@@ -1,94 +1,117 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DDE8261593
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Jul 2025 09:17:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1134126CE1D
+	for <linux-mmc@vger.kernel.org>; Wed, 30 Jul 2025 10:11:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753867037; cv=none; b=chdwbd5ToayZLjndnMMgTinm8qYuF4JuXozNaYc2sF7vCIgQwYuWDqUYtV/WRBulw17gOevxO8oVEb79y9Y0i5RkzKYzTIXJ7Brza4RhZsRLv3iyine0TZt6DWZEKE4hMDAcTlCjCK2o5M6zIGCGqcEZjgYza15tt1aZriUp7ic=
+	t=1753870294; cv=none; b=Ow+Itlvs30zQmNE7ZYDXXWfnok7L5nju1tFWiK++2EjoOZfwaK9FkF4JV05P7DPvBb36KnmbGg0CyxqRS5epab03XEL/PRpNfzLQcuTO0gQ8UREBwk+bDa1k3D/KUley3yyDJw4QjKctPy93zkHD61QZg+4WQXXi+beQNGQ4GOQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753867037; c=relaxed/simple;
-	bh=Dpcd7l4PVdBUAu3dLde4TLawjV16LdfHLmoToUBiLfw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lUHpauVfGrx320jNMZ6ZZGz0iykDSo/oh1cOM2I7OBDypcM2uGa0qCYga1mbpUQJsD78Dchz93/p1WIYT4WPmIwaErVL18lz4ySgbw7GfUq3EfxGomz5uu2b/l9TQMWIGJuRKupyneXL+gM0QUYRFxRCPMQaYV74qwmrqQEPW3M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=Nkx9WmDw; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1753870294; c=relaxed/simple;
+	bh=rHJp2LMtPMka2osjSmJcL8x7CrDwT39C9ONAOwFG+KQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=KmDmI06BLu3hHD9u7TfeDMOoAa88LjUaRu95RQ6zPdXrrvs2T7R8OMjgx25tpebwLDYPheAunb8n3Qy2SOjV7i7Z7YET/cmsytJDx2H1weSVxHDabu2lrz3PieNUaT5Kaij7HQ6jCfUAFIN48MjwJOXQLtXrgqACvftV8NAcTCw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LwsfZ89b; arc=none smtp.client-ip=209.85.128.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="Nkx9WmDw"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=z9s8
-	RUZxXi4y+NdXdO9wZSa3qlMNEu3jZh6gP4YDP0k=; b=Nkx9WmDwDDT8RiY/j4X/
-	gWHBfnqhxiHT79d6s8ImeSbvS5yTL8ft7G2Bpi7n2nkxDhfaI/LD/bsmp8d2Y2CG
-	nzYXb2I496R2NEnmmfOddZOkUzPWSQnH2DgsMZJ4EwdAqz3CuWVi/IURIpEU/6kg
-	/sv54CbFugA0B6Ccm/7XdiL2dGqfQhvUR2qcFKOEdNJ4UvbtkOhLLAyHrFWcBV1L
-	3el553WbzhOztVcPwRP8Ot+DRZ5Pj55H+qKchD2/XhdYgT1x48KMh9SGr62+uSWG
-	pjeltvdDAQvyWylRE9AQs5SOm0jYzawu0+dxNL0YdlpSgbzGtQgph+MZ/Bl92SzO
-	JA==
-Received: (qmail 4115907 invoked from network); 30 Jul 2025 11:17:08 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Jul 2025 11:17:08 +0200
-X-UD-Smtp-Session: l3s3148p1@vNAs/SE7cocgAwDPXyC3AG0QzsW8mHdp
-Date: Wed, 30 Jul 2025 11:17:07 +0200
-From: Wolfram Sang <wsa-dev@sang-engineering.com>
-To: kernel test robot <lkp@intel.com>
-Cc: Biju <biju.das.au@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>,
-	llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	Biju Das <biju.das.jz@bp.renesas.com>, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v2 1/2] mmc: tmio: Add 64-bit read/write support for
- SD_BUF0 in polling mode
-Message-ID: <aInjE-sduVbBRmJx@shikoro>
-References: <20250727160731.106312-2-biju.das.jz@bp.renesas.com>
- <202507301421.AmWhOZBk-lkp@intel.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LwsfZ89b"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-71a206ec3a0so9503877b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Jul 2025 03:11:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1753870292; x=1754475092; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rHJp2LMtPMka2osjSmJcL8x7CrDwT39C9ONAOwFG+KQ=;
+        b=LwsfZ89bSCAjZ9to22dfD7zGiqmMWc8Rn9EYJDqcOjTuKIWQpS6yzMwoHlCV9Tw3pI
+         4CzxakkdaKk7pcwCauHxBwCk69jYUf4zs39FvRy89yBYCDQHVGGW/+tnfXZY3qUF+6Cr
+         GaSH251fSqM6vmY5Q39/m7F8zXykGfUs8XtTVmp4TYnJLqOiMBFUSWqtbA0rTANGq67S
+         YcSwHwZljp7mbO5N61demGIN+kGGLKhfLiZvtM8qKjsEkMG2XheKSnpTDMzZnRH9/sUX
+         TdbsuwDIZ+IQ1SBLEpVgU9KQC2NtxFrJOjRcEUPek2p1doj7BLvEijz5U/m7VLEb7kWt
+         SzLA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1753870292; x=1754475092;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=rHJp2LMtPMka2osjSmJcL8x7CrDwT39C9ONAOwFG+KQ=;
+        b=Ra6gq4Ti45+krB69e9tmuYvzFB8Ir0vLysXDwijZ+b6i4+zWDDpOksiehOHQ0TUeQT
+         rv9Vq00frt+bz0KneT0XHQzZXiNxgmEXfSLG6k3ZyKzr3hvqomzcHxAcTALKf5Q0MY1w
+         GMHVZtZdhiZhTcjZbmV4JYIcjYkUPFuI2y6CTSGo/cUDZTnpiyWABiGIiXvVOKSslv9x
+         GdAGmXwdhoHsm1qWLaOcqMZodd9Yh0y0fy9Z79S4b8W634LALebeXq6KmGsoZs+x7WLt
+         1dEZ0yu5JF7Sn5yNdhPHrKroq2uD+xjrA9/Y9xYz919Vi6nQYXi3lUVwghs0koR2DHpg
+         qk9w==
+X-Gm-Message-State: AOJu0YxGasE3NvKxZuVp/g+kBKCtUvCfKKBlqaa32253Ow1rM1fCqbHh
+	vo4HGxLNTfVYnd1zTUrxUgJwc8x31q+JnxrzfVl3ffGPOMdVV5g7u2yJ71dRqBomJKqySsncLHs
+	yg/UgZa5WMGGE9JiyvgUeTB0/7+eHHf6+YC6odoDP2Q==
+X-Gm-Gg: ASbGncufJ0xAR04xZLFIkBQ+U2Iue0MskoVzEJIetPwquxOyYgvdVCdOyTyY3H2aLrj
+	RhE49dQcdm0HTZke6Yj8xT91agKOiz5nQ6VdgzsYvv/R3vqD6p2AA0MSjje2X/2nkDtJwXU9eMe
+	2eA96W5VHl1zwk6mVRgW2sFW7ZHQqqCabQnLX1DQV743wsvinnWGj4RSsh61eTCvRy7YzROk8hn
+	UHtGLOg
+X-Google-Smtp-Source: AGHT+IHrJ4VF2CntYtYVBWk6V0wpyZff7GRTQCnWLcAs9un0vKxcj8KuH2qMJtrKtI4vdY3JSSOWUn3JvWrn3PVjLHU=
+X-Received: by 2002:a05:690c:a088:10b0:70e:404f:6714 with SMTP id
+ 00721157ae682-71a34a6c15cmr56967137b3.19.1753870291849; Wed, 30 Jul 2025
+ 03:11:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="kmR0COAf0tpqolK7"
-Content-Disposition: inline
-In-Reply-To: <202507301421.AmWhOZBk-lkp@intel.com>
+References: <20250723-b220362c0-fd0fdb0c86b1@bugzilla.kernel.org>
+In-Reply-To: <20250723-b220362c0-fd0fdb0c86b1@bugzilla.kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 30 Jul 2025 12:10:56 +0200
+X-Gm-Features: Ac12FXxrw6Z5zkJXAAHinqxtY3J6HIPoUgCRh9-jTUWs4Ox4XvlPZthb3NbB2WE
+Message-ID: <CAPDyKFp-4zmeitLD7hp6SvkokEZE9e8-JvPBOowRHQ0CADY3Nw@mail.gmail.com>
+Subject: Re: rtsx_pci driver is blocking s2idle
+To: Laurent Bigonville via Bugspray Bot <bugbot@kernel.org>, =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
+Cc: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
++ Ricky
 
---kmR0COAf0tpqolK7
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Wed, 23 Jul 2025 at 15:09, Laurent Bigonville via Bugspray Bot
+<bugbot@kernel.org> wrote:
+>
+> Laurent Bigonville added an attachment on Kernel.org Bugzilla:
+>
+> Created attachment 308404
+> s0ix-selftest-tool -s output
+>
+> Hello,
+>
+> I've a Dell latitude 5530 that has no S3 suspend, it only has s2idle
+>
+> I initially opened bug #218500 regarding the lack of support for S3. Whil=
+e trying to debug this, I start using s0ix-selftest-tool and I realized tha=
+t the driver for Realtek Semiconductor Co., Ltd. RTS525A PCI Express Card R=
+eader was blocking the suspend (rtsx_pci(_sdmmc) is then not loaded)
+>
+> If I disable the SD card reader in the Bios, the script is more happy (it=
+ also complains about the Raid/intel RST thing, but I guess that's an other=
+ issue)
+>
+> Is there a bug in rtsx_pci(_sdmmc)?
+>
+> File: 20250722-16-27-s0ix-output.log (text/plain)
+> Size: 1.85 KiB
+> Link: https://bugzilla.kernel.org/attachment.cgi?id=3D308404
+> ---
+> s0ix-selftest-tool -s output
+>
+> You can reply to this message to join the discussion.
+> --
+> Deet-doot-dot, I am a bot.
+> Kernel.org Bugzilla (bugspray 0.1-dev)
+>
 
+Thanks for reporting!
 
->    In file included from drivers/mmc/host/uniphier-sd.c:21:
-> >> drivers/mmc/host/tmio_mmc.h:249:2: error: call to undeclared function 'ioread64_rep'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
->      249 |         ioread64_rep(host->ctl + (addr << host->bus_shift), buf, count);
->          |         ^
-> >> drivers/mmc/host/tmio_mmc.h:255:2: error: call to undeclared function 'iowrite64_rep'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
->      255 |         iowrite64_rep(host->ctl + (addr << host->bus_shift), buf, count);
->          |         ^
+I have looped in Ricky to see if he may have some thoughts around this prob=
+lem.
 
-Sigh, then the guard seems to be ARM64 after all :(
-
-
---kmR0COAf0tpqolK7
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmiJ4xAACgkQFA3kzBSg
-KbaeJA//X+uqDvUdKGGo3FOKu+/F1eXweWNZxFEmeubtke3lHodepW1cA105X33H
-oHHK/iVapFK9wT4K3aGqHQGAYhoRtv/pWurW7AZCbZuHiIEvSGr6C5f2yohTYhix
-+2+sy6DD1W05jLljxT95UIe2cGe4gq/dBxjuMPY7hBdZWz+JkHGFYpLeAwMwdOVA
-SmSrrneaFJG6oA27RNSUO1sB7eGuTIqtLQhTDWEz105GBYsW41qW6QMHDMedejBo
-qhTQ0wAgzMzxsGKCraM//3iFdcAbn2mVvMpjMqI9YnlpF/+FxCr9ljzZAlKi1P7x
-GQF0IIdofihdw9MXtFH8bStWlNb9nlGqE6ujMSFLViUWqQrBnOZPXHFS19QF9Rsl
-FfmMOT0oOTTFd4510V2/TK+q5csNM1rFEx6dTyZi3qu4xiCocZ3kdZ4jRO/qJSlQ
-PhYy9s9wOrPvJLUX7avcnBZ7vZodmo/IR7TuN8t38mBQzUGF3oPJhX7wKEC+yA09
-iWwj86WvdsaV8tif3CuDU1KlkFYDTtUX4PEG3hLFRuxQeesi9b9AKOtuuHd/8R+h
-EPPyK/LyJ/ZMKEvMNAkNWadZjGjne/IvoivkoneCQUTVhZFhIeNGQYZT2MJUDXE4
-OYIiKUik0iEhiN7ofwWgRiAJvZqlAswXNxVQKDQFNjRPBZ3Oq/c=
-=Wjuh
------END PGP SIGNATURE-----
-
---kmR0COAf0tpqolK7--
+Kind regards
+Uffe
