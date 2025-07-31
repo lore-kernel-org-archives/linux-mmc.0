@@ -1,101 +1,200 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8CC881E;
-	Thu, 31 Jul 2025 09:41:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 787771A3155;
+	Thu, 31 Jul 2025 11:09:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753954915; cv=none; b=keKrEF5Gfppa46nkT/9JUIruj8sad3qDA2ijEIUtXBz7FXscpv8vuGz7LFTkAXyf9ThJJISJ5NYK7R0yoJ/LFFnTbR+VumB4whmdvD6oW8d+R69u+Eag5BOvEiA9kQu6PYImiGe4BJClIPVSYkEAqBUkoMbkCuG9sC3nWDRFNbk=
+	t=1753960195; cv=none; b=RSEgxS6YYQLaG0+vy4OOMfTFPfTZyEpCcNk6GKF3G/N9y+rPNW9XL3wPh3AavGVY4j2DOp5IEWWAwDbXoDwQpJB2mQv22VdbGcKizSCxk/rNftQ0NPK2Zzlt1mxUZ0kugmZisqMK2+dl9N97ncjYjjiT3P1FqNGUFX+r2ppWANQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753954915; c=relaxed/simple;
-	bh=i2/nMy7FKYTyjoOb6CSTRUZssDpBCdS9RZdlFSAXfls=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=SaoUQqPIelGT0gr986mOdR1pM9kMYzrSRmJOMnX9aPq6R2e5egztnvTJpKTEoY5fo9R4J8anx2zjOW9nnpNvwCe2P0Ah61vS20oYO3t1HU6TeqX5MrFczYSnUaiNxFE44csUUe3ZSwvd/9m/Tv9ViJSY8uGuP1WAp3GWGDDIAdc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VCYwW3NY; arc=none smtp.client-ip=209.85.128.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1753960195; c=relaxed/simple;
+	bh=ItVwJXgKGvVXJhCDRk3nmuNL0ZSzurtnjqAX6Z9zRgQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=rL/Pu2qQbH4efNGA7cCMYkDDnhoZgi1AZaXCHn/SQe8vloN2ZceQ5q76dQkDxI6xk0McSIrQGwjiiXYRo+qestGCQWIF9th8j7ybjEZuFi2amldKh5hsiKvb0FNJmzWy6D3MS/IhhC/dBETUcQv4B3LzAiIFF6ShSvHeF8iGgI8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=QQMkkWIv; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VCYwW3NY"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-455b00339c8so1773665e9.3;
-        Thu, 31 Jul 2025 02:41:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753954912; x=1754559712; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=ylc4ZxnLD2CbRkm680HNmR2pGWeedE4Tq4BAYLGyBVc=;
-        b=VCYwW3NYAZ0/cVfSaJh8PsHFc51hr5mYu5Eylzm0aem2n0obygz8fH+OF7lUR4XjTu
-         30SkYFa5p+xouMnrVg+beAOtvvTKwO2R0rEJjBOAqOJWlNDn83PcuboYz4KYX2t8ARB8
-         90ztcVSU8BbMUqBn027yU16fwsUNidwmMmc1xo3XdgRtu8ZkYk24kzTx4/y9JABjmecQ
-         k8mINmGnbl5AE4HUSjG/PEPjgOE3blpmNv04UgcGyJcHgc98vZwCQxPu59p8cuIBXbmo
-         GYydzZuaCHZ1/rrYrPt6u0kqngOTW2u+P4KP7SxsQHexc9Z1INDkug2LAbKOxu4BLgdW
-         SH2g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753954912; x=1754559712;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ylc4ZxnLD2CbRkm680HNmR2pGWeedE4Tq4BAYLGyBVc=;
-        b=MkjujIR2uis19Sl8+RWoLyZ4gEEIm0ARKcTQIH59y50ef2Yf8OzaRzxwPiMOmAdahv
-         DhzzcfiUO5/JMBDNovcSPQhFdvwaWe/t9qsRhl691FlCcbLMxkH+8rlH18aqUvNfdO3H
-         APhknwrkmzACtIOzYj6zxaMqtXbMELy54StX6iFpQ071DC7fXwD6oJyD3bU8HTM/xZTy
-         jylkQCyckOm7DIj8MeVUYijuX6j2RXNj3oYyvkObRxd9RtfFdRc4z/mDkU+TX1wsFBRX
-         +0pIL265/Zsfp90YoEzroWKNwStVbZ5c5zMgt+SgCv8PZxU+pPc13EGmsi4D13fouyS+
-         fCdw==
-X-Forwarded-Encrypted: i=1; AJvYcCUETHwXudgQnU/Lbt2t8EaDrTNaa9Mq4aEAT1WYIOpiVo1hWvQw1lccKFl7EEoEe2c6s6MRUe4j4d14@vger.kernel.org, AJvYcCV6YCAC1nI5YJoTv9VXQxwW6i1/BK9/5paKPDNCJ02uvhaFtXigJosoVhdipXkwv9xt6xLmCrtJg5PIdnY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyyIVuKpGZiDI846C6/ghCBjdBxYhbJaTE6OfqQldfK+8EsUbR9
-	PMIe/3hws5QEsjzbzUcuBDLLiSi7HOd9oPtDw67ZIUbMaUth+AmML36V
-X-Gm-Gg: ASbGncuZaCMdte218h1dFkovkuLnK8rhLB1xgpJC+3fHKl5Fu0Ksd7c/OF8f7Eh1Jqg
-	+X1IAVcBZVDZqFl69IdK+hxsUM+IQbXJSRs3wExhjXzWgHz3CjqZ2xeZsFYe45Tw2MnMt4m5MHx
-	33FfXpolHlMi0RM3vvIo/GlWWOGtrLcgULMckCks+DS40WloTL47GYtinJZdDx4CuGHbNqhcBcZ
-	WHZVoatTzu4Z24FCcQj08eNZKIL2V0buD5y7JU07AZZ4ebF/lDxCGv9Gagw9jYtsLQ4lWXa+tiO
-	G5XFnLUtmniiAX7rTNWAL1afwIDfHtKjwQlo4SJWe8RlBPmM5RA+RbARw20FumgvXaJYLTNbOF7
-	OA/sNP7828sUdrRE+Icy9
-X-Google-Smtp-Source: AGHT+IGje8yg8iNAPGrk4uFHpWmJ4AyuhPlf+5JK0IMwP0mZvBIu+DXEedc841mCBEGmi3Fx/5xZWg==
-X-Received: by 2002:a05:600c:5185:b0:456:1846:6566 with SMTP id 5b1f17b1804b1-45892bee39cmr54428715e9.29.1753954911810;
-        Thu, 31 Jul 2025 02:41:51 -0700 (PDT)
-Received: from localhost ([87.254.0.133])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-458953787a8sm58153325e9.14.2025.07.31.02.41.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 31 Jul 2025 02:41:51 -0700 (PDT)
-From: Colin Ian King <colin.i.king@gmail.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: kernel-janitors@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH][next] mmc: davinci: Remove space before newline
-Date: Thu, 31 Jul 2025 10:41:16 +0100
-Message-ID: <20250731094116.2163061-1-colin.i.king@gmail.com>
-X-Mailer: git-send-email 2.50.0
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="QQMkkWIv"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56V9fPIR024226;
+	Thu, 31 Jul 2025 11:09:49 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	qpacQAEuunvl9EP8TR9EjQRvykSiPqrIg87dN+nnP44=; b=QQMkkWIvg7nAxV/I
+	QNOuHcSFwk8DqlN2nQwlRm1dU6ESzEvngRpxytD/1xPUeuZ4cHG9/+AllZrK1Gsj
+	W5DHP+votsdEUOOMIbRQEYDra5FP0OA8aWkpaP8uVWgZ+NDu7pSti/n17qTycO14
+	3WBNYRRiz4VJPrG5naY82EyrFrr1l0d+ao9wOYnlZSVfRGvQRFsXdVF2MtxgRgAM
+	yjjuN/cqT1owwT6T35qPvQgZ36Ua+y4dX/jXO9Zp2Qt8eZzxXIZR6BmkvS2QEUsc
+	pDM4azS8ln2pwSuIFu9dYeIbTRRQ1Qihy314PozVLByANoOZhAYEW5+ystHziv7v
+	aWZAQw==
+Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 484r6qyhn1-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 31 Jul 2025 11:09:49 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 56VB9miG029221
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 31 Jul 2025 11:09:48 GMT
+Received: from [10.217.216.168] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Thu, 31 Jul
+ 2025 04:09:39 -0700
+Message-ID: <2fcb2378-8a1c-4d54-abca-709ada84b513@quicinc.com>
+Date: Thu, 31 Jul 2025 16:39:37 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for
+ qualcomm controllers
+To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
+CC: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_bhaskarv@quicinc.com>, <kernel@quicinc.com>
+References: <konkbi4hvd7qc4rhokwrymzqntroy7gijk3ndwv5rluswdrykp@xsafrtrjzmuq>
+ <10c90fee-ce7f-4034-9028-4252f19cb67f@quicinc.com>
+ <CAA8EJpoLLDXFQk-ViuaioKrECzMV0aUrcOj4v+Ufs4oHY53mrw@mail.gmail.com>
+ <064d3eed-c2ea-4b41-85b2-d2a5a922f8c7@quicinc.com>
+ <ehgjdszjr34xppmkrkicb4pnq326nor26tqu2ekop6ew2j3y3h@pm45aiipzuc5>
+ <48c73675-a73f-46f1-81a9-f701a2cf00a5@quicinc.com>
+ <c1ebdaf1-92bb-4f73-bca9-35246d7c10e1@oss.qualcomm.com>
+ <ca83b841-aea0-4233-93fe-02a7b5985af4@quicinc.com>
+ <1a0a5178-fcf0-49b6-8e4c-1393c0f4f229@oss.qualcomm.com>
+ <22848e2e-bd7d-486c-b481-c624d230d327@quicinc.com>
+ <tpervpypkne6lasl3fn3v52xutl3zfuytalo3cveoe4us63rrb@p2w4cvt2jf7a>
+Content-Language: en-US
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <tpervpypkne6lasl3fn3v52xutl3zfuytalo3cveoe4us63rrb@p2w4cvt2jf7a>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzMxMDA3NiBTYWx0ZWRfX7/D23SaG8FNJ
+ Ucde6TymgwWjO3WF6biqfY9gaBEJXkPBLZQLMLzHD0cId3W3TiLXy/CNMRksHqXa4LwKafGnAkD
+ mLHpVf8OC1pPSQoHgbEDD/Jf6uQIB+bMboeT2x2SStTiKf5vd5neKDKrFrqOqxDLictOl3+/F0F
+ bcGtRxuWOFIub4pNVeRanMVUnQLKx9JEmKRMKcKUGo4QZrNeO61LczxWao+6bKu6+hl9i565ENA
+ vXbaYB/X2NOHY33fjeQwshr2/l2YNC51j/GL76pU4xKbFN+hfpQEOLKBzbCTmcOk2Blm1XSnbym
+ UWGehA+CVBYjUrXS6u3r4CBFsf3QodeproCAqAqcpzwsP5953kgD8mY8Cz/vVyzc4Njk8TAWyS6
+ XBQeA3OD47//d/PwUsrNxTIPjbnxNzcFEIUHijWo3KMFJehBdF4ZG1vO2NbAnbeuR0f3VaN1
+X-Proofpoint-ORIG-GUID: avRKz0rpNOZkenctd36ICMSZgSE2j9vV
+X-Authority-Analysis: v=2.4 cv=ea89f6EH c=1 sm=1 tr=0 ts=688b4efd cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=COk6AnOGAAAA:8
+ a=O83kX4fD3CcbUwYZHKcA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-GUID: avRKz0rpNOZkenctd36ICMSZgSE2j9vV
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-07-31_01,2025-07-31_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ mlxscore=0 priorityscore=1501 impostorscore=0 lowpriorityscore=0 phishscore=0
+ malwarescore=0 suspectscore=0 bulkscore=0 adultscore=0 clxscore=1015
+ spamscore=0 mlxlogscore=999 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507310076
 
-There is a extraneous space before a newline in a dev_err message.
-Remove the space.
 
-Signed-off-by: Colin Ian King <colin.i.king@gmail.com>
----
- drivers/mmc/host/davinci_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index c691f1b60395..2a3c8058b0fb 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -588,7 +588,7 @@ static void mmc_davinci_request(struct mmc_host *mmc, struct mmc_request *req)
- 		cpu_relax();
- 	}
- 	if (mmcst1 & MMCST1_BUSY) {
--		dev_err(mmc_dev(host->mmc), "still BUSY? bad ... \n");
-+		dev_err(mmc_dev(host->mmc), "still BUSY? bad ...\n");
- 		req->cmd->error = -ETIMEDOUT;
- 		mmc_request_done(mmc, req);
- 		return;
--- 
-2.50.0
+On 7/24/2025 5:31 PM, Dmitry Baryshkov wrote:
+> On Thu, Jul 24, 2025 at 04:45:38PM +0530, Sarthak Garg wrote:
+>>
+>>
+>> On 5/21/2025 9:11 PM, Dmitry Baryshkov wrote:
+>>> On 21/05/2025 18:36, Sarthak Garg wrote:
+>>>>
+>>>>
+>>>> On 5/21/2025 8:19 PM, Dmitry Baryshkov wrote:
+>>>>> On 21/05/2025 17:35, Sarthak Garg wrote:
+>>>>>>
+>>>>>>
+>>>>>> On 5/21/2025 6:25 PM, Dmitry Baryshkov wrote:
+>>>>>>> On Wed, May 21, 2025 at 12:46:49PM +0530, Sarthak Garg wrote:
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> On 11/15/2024 6:53 PM, Dmitry Baryshkov wrote:
+>>>>>>>>> On Fri, 15 Nov 2024 at 12:23, Sarthak Garg
+>>>>>>>>> <quic_sartgarg@quicinc.com> wrote:
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> On 11/4/2024 4:19 PM, Dmitry Baryshkov wrote:
+>>>>>>>>>>> On Mon, Nov 04, 2024 at 11:37:22AM +0530, Sarthak Garg wrote:
+>>>>>>>>>>>> Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers.
+>>>>>>>>>>>> This enables runtime PM for eMMC/SD card.
+>>>>>>>>>>>
+>>>>>>>>>>> Could you please mention, which
+>>>>>>>>>>> platforms were tested with this patch?
+>>>>>>>>>>> Note, upstream kernel supports a lot of
+>>>>>>>>>>> platforms, including MSM8974, I
+>>>>>>>>>>> think the oldest one, which uses SDHCI.
+>>>>>>>>>>>
+>>>>>>>>>>
+>>>>>>>>>> This was tested with qdu1000 platform.
+>>>>>>>>>
+>>>>>>>>> Are you sure that it won't break other platforms?
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> Thanks for your valuable comment.
+>>>>>>>> I am not sure about the older platforms so to avoid issues on older
+>>>>>>>> platforms we can enable this for all SDCC version 5.0 targets ?
+>>>>>>>
+>>>>>>> No, there are still a lot of platforms. Either explain why this is
+>>>>>>> required for all v5 platforms (and won't break those) or
+>>>>>>> find some other
+>>>>>>> way, e.g. limit the change to QDU1000, explaining why it is _not_
+>>>>>>> applicable to other platforms.
+>>>>>>>
+>>>>>>
+>>>>>> Thanks for your comment.
+>>>>>
+>>>>> No need to.
+>>>>>   >> I agree with your concern but for me also its not possible
+>>>>> to test on
+>>>>>> all the platforms.
+>>>>>
+>>>>> Sure.
+>>>>>>> Lets say if I want to enable this caps for QDU1000 for which it has
+>>>>>> been tested and on any other upcoming target after testing,
+>>>>>> then how can I proceed to enable?
+>>>>>
+>>>>> Let's start from the beginning: why do you want to enable it on QDU1000?
+>>>>>
+>>>>
+>>>> QDU1000 is one latest available target where we have enabled this
+>>>> and tested. This has been enabled to save power.
+>>>
+>>> Isn't it a powered device? How much power is the save? Is it worth it?
+>>>
+>>
+>> Sorry I just did basic sanity on QDU1000 device to confirm its not breaking
+>> any eMMC functionality and we have also tested SD card on SM8550 as well.
+>> For power no's we have stared internal discussions and based on target
+>> available for power profiling with eMMC device we will come back.
+> 
+> So, again, _why_ do we want to enable it? If you haven't measured the
+> actual power savings, then it's obviously not a primary reason.
+> 
+> As for the v5 targets only, they start from SDM845. Have you tested it?
+> Does it bring any actual benefits?
+> 
 
+Sure will capture the power savings on our target with runtime PM and 
+will come back.
+In our downstream code its enabled for all our targets and tested for 
+quite some time.
+
+
+~Regards
+Sarthak
