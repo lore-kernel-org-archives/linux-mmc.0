@@ -1,74 +1,63 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com [209.85.222.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2732513C82E
-	for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 14:19:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26CFE1F4607
+	for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 16:43:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753971563; cv=none; b=WE9sMO4+OmNnm6WV1VRiIgzpvLHd91H2eaTEygHw5HGMIT+oUJgJGzFUZTtGillEctma4fjcRSsOIVix3DGjTHQco/7st80nVoDFPadxlo+B2PAV5DivYWbZXTSAUTlj6PMUCCNxRiXKBB9J+Tb4bSlHrKYVncaPSXgy3usy56E=
+	t=1753980204; cv=none; b=e1fJn1Qz9oQuDSeoPcFVDm9xEPz/ac0bVOzLZI/UHFmem8MRzjRjxtTZbYE7XRvsoC3LhJ7tSBdK/nwtbv7HYHgrPIHRpcJOaQOdXkTPwc3y2Q4OeRuKnY/7NWNzOQoSX5fAfRVVebtzKLkkUuuJ1MozKridx8p6gmVhCVw/ES8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753971563; c=relaxed/simple;
-	bh=Qw4pFHrzOdxadPlOIEaNsBko7KznwCW6BqAbKVS6rLg=;
+	s=arc-20240116; t=1753980204; c=relaxed/simple;
+	bh=RrP+Q+3mcEk4e6dH5D7T5bcgzHzmM7Taaur/o/ch7NA=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fku9A1C3iAz6rkIUsCA4CtbWJcv9YTeDuyRG82VrHy9O1013pnxEVNPMUNc4Y8Cf0FmDfQCBcTTPoE240guKQJPJe9/7aFNoLEvayH4jZcEJ+NaJx0VFYcoPu7pugM+9XVzBrwuIFSMTP1Nym554m6k3uypCH2tmPP1uOCS73GI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=KrwX3gXf; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	 In-Reply-To:Content-Type; b=qmvOv2uimLOJPpgwcBpBFR/gRycmRhGJOE5DJrvFsYy3Jae3fC+Q4pSZ0g57t1brIT3WBhSxgHfl2HQoWdyN3KBVjvZskBGAaB9FlC3N6De1Cq6UmMUSk6XzmwEb5kOVItL8/jKkygFJcO01zOMvO9eEXDTQ7qCxSjv3xEc3Fw4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=IqloykAa; arc=none smtp.client-ip=209.85.222.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="KrwX3gXf"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56VDf7Wc024696
-	for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 14:19:21 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	/SNOf+4G4zyCZV6YFfxz7XUorkDY17ov7WJ2xEOK/BA=; b=KrwX3gXfqJhv1dUm
-	l9T/1v1Hdec0nMGMmfNqC3FcNmuZzw+JCUoHXDCzwwjsP7qFa4SFwRLXz87uyP7e
-	bDQnRn0YYetO1e3l1uwe5gD4pNePvuA8q5njCclZSn45opp4YpJIvShYH6vXoQgt
-	xyDXhrkLLz6YnogY+/lcKAhWMD9UA/0LOFg9PhevZVGlZ1SPaWko2Yqs9st49RiR
-	wzWn6tjZM4kS5oURlz30KB1w6t0SFhRE7lLPWdnH2N5opIYfHia/tRo8SD6k5+iQ
-	QOq6LM5NKDE5gIhAN4eJ5sW511MNVwaLcGpNN3gXyFLFCepYLAElL6jNEWV/gg9Z
-	3KRgNQ==
-Received: from mail-oo1-f69.google.com (mail-oo1-f69.google.com [209.85.161.69])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48887g0dvd-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 14:19:21 +0000 (GMT)
-Received: by mail-oo1-f69.google.com with SMTP id 006d021491bc7-6196f9c8592so429704eaf.2
-        for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 07:19:20 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="IqloykAa"
+Received: by mail-qk1-f169.google.com with SMTP id af79cd13be357-7e32cf22fdfso110939485a.0
+        for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 09:43:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1753980202; x=1754585002; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=lbNcmxdMTZH4+4fKNLqLIFsAiyBnuQVAnpbsOwkpl5U=;
+        b=IqloykAa0JmYGsql1LqXJRP3bvfulMC+8YdSY2pGn9+5dVXr83vHL+mIzjbscKYa/N
+         Dmmx4pc2WJWj6hiY25E4hJ2kl6YuvAa8tQ+WsAi8aodwmQGl0UDV//84rTIAdnird+Nl
+         SvWd8QjEB+c4zZXpf4BaS8BgT7bXyX0TN23vI=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753971559; x=1754576359;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=/SNOf+4G4zyCZV6YFfxz7XUorkDY17ov7WJ2xEOK/BA=;
-        b=JfXEYFGP2x9MqwUnYOHqqevbsS6TeF9Vkb0FOhZwkgh2uRfXoQYk0hiX4IrtMhYZqH
-         PfbVWWMFK0aQk6acPZBMVorvvq+ed5X0iSDkW5OxGuUnyzpFJWBKBbUz6KKWN9lsGTR5
-         Yu63wpk0BUbKeaicd4zOKKalxLlZisiCIgTQKbquo5NjbK+UBQFFh54ECeEcUfQvi7vj
-         DCIG52HXogAcWcD9uwbKWIisHSNskoCjU4deqm+/r5cQj3g9ccRkibni8TWJ5gjm5tY5
-         KDQWKRe8IADTYSpPu3VDCRGx538SwGoggcq/3f6M8y77bOZWnsRdJ43bOZZeplmTlJQZ
-         3prg==
-X-Forwarded-Encrypted: i=1; AJvYcCVbgDfCt4DxdrjrLO+Sql5QCi+7RSNv3vrRGqm4PLVDbBrDtMttEUgIb3zoXrRHkyPrzrTErWFlbYc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywmg/rfPhC6w7jaCblWYZppANKv05L4O1Mm3pkcAbdOGgaHX4IF
-	jYzMMQMF99lxaDkAZP00Vy3ehNYNNcL/okOgdt3jEBdL8JWOCcqfDrcKIeLBfqwgTi+hJlPTkMb
-	mhQI6CrJWuYGHI0gMVtcf+jfZ+Kf7EaAJONPzg+ZEUhslVrRixRNvX+Du+2PChy5b/krZHihr9A
-	==
-X-Gm-Gg: ASbGncstyGkn59KAWbgvaPo1ovEL4jbvj+GHnRGmL5+T6gzesdT+RmPkjYVUXfZr7wC
-	Pxknvk3aBQT0Utez5goWutfHGggbejTCvY5HgW4qmFcdDjo76QlXvabXi4WSswbKvi7QqrLLMfq
-	rrfiL4S4Vp9sSUtO3WADbBjOHrGFLKsmQN3ROieCUqbmMGAy0AOc1V89IsnqIhIGdXHZ5iGjyFs
-	8BX0qcQQUxM+vuYqOgdSLH5Ode46g7/QWhPXjPyymLPqX3h2EsZqprylJu/nJtfUxTMVFY/Y1wM
-	Qvmw065Eskzqr/xGF2ckMYOCr6ugakG3ybEjZ9XSAWtc2luK4qYcSeLpo2PGrmZFfKaR43SnD19
-	DW36Np7njvzbYRA==
-X-Received: by 2002:a05:6808:3998:b0:40b:4230:387f with SMTP id 5614622812f47-4319bfee52bmr4796544b6e.32.1753971559332;
-        Thu, 31 Jul 2025 07:19:19 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHhExdeYZh9bGg37wkHjZqMBXQhg07o4VOQ+HBvIRZQY6XYxO2AVM5PEjkgZ/Xq6HBYLOpDRg==
-X-Received: by 2002:a05:6808:3998:b0:40b:4230:387f with SMTP id 5614622812f47-4319bfee52bmr4796485b6e.32.1753971558771;
-        Thu, 31 Jul 2025 07:19:18 -0700 (PDT)
-Received: from [10.148.43.238] (87-95-32-33.bb.dnainternet.fi. [87.95.32.33])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-332382a6ac3sm2618651fa.22.2025.07.31.07.19.17
+        d=1e100.net; s=20230601; t=1753980202; x=1754585002;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lbNcmxdMTZH4+4fKNLqLIFsAiyBnuQVAnpbsOwkpl5U=;
+        b=A+4298sw6WalT3g6WC9ko8sEi8AqEXSCr05uToHIAZQxQHqS4etcGUVImg81sspZAb
+         3Nt8R2l2fzMErQhYYfWaOXJX2wd/ylbDZk3gbAaT6/9peTUB3pEUp8PnUfHaKqr3/tm+
+         WOLDTGW6KL10Tr8cPK1X61Z1YIoLd51WUNmNjr8XI84/48sU+YKmI4bV7O3UBwX4tbhk
+         5WJ47JePEY1sLMU04tSNBZtF8F8wwfcPj7OmZiSeEN6NPomERouQ8HtrLEqSNnQEo7oF
+         N+YmH4uyEYzIWAVmBMw4ERblYqK7ciiANVdWzRilnyyYo8+QYv5kymL5dzgg80U6jY64
+         zrZg==
+X-Forwarded-Encrypted: i=1; AJvYcCWarp5lODDThJhTxpP4r8wUXr+D6qa3jdQzcN7DgRYfhwF8KLEJtLQgNPDThgOfjP1BJXZI0365juA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwCRKY+tB0djG7OwnrUk2kC1bAorC8bynWzP8pzqi/7Yz9BhAPi
+	9LHIUNA4vSswSJyCqxNVyMzfrcKCbfhrYrcN2qh27cvxhDIWMhpYqbMdC35mKbUzrg==
+X-Gm-Gg: ASbGncs6Xawgq4yEVzyEm+8g05D/QLRl1WagHns2kY+tNT8A/VFlBr3cg9xnnPjAQJA
+	OPnrH+1bAYQSdVf5MNB09YJJVYhy6XpPHobNAQoKL6SqylOW6+6h9J2ZYXP5YBiOK2Yp2aPtTZz
+	M4+k153QkOUIg9r36ydWcDXLBfTJDkVw3KWhREbAOJwhAWl1OSn2lNlhGViBc8le3tSG+etgmol
+	6GEKQgbbGNcwJGRaqJrxuiWWR7kN8oJt1SNHuGhPvnZP3tE8z/iXVzXmA9Y/Td50EpENsOxeWP/
+	GBB/rR1U/BM3TLA+YqQdyUNnRqQ+5F9r25gE20FFQmt/lS84OOucAXMvAI+0LDbNTeH9B0wxwtV
+	OOzG6dnFIQcLxPP6zs1LParsjiCDSCCpSbU560etqaGUPAd1E2vI/BzczxnwFAA==
+X-Google-Smtp-Source: AGHT+IEMxmTL/RtEarc2NI77icOmXLVKI0iWLz9cXU1YYoJIxr439vc8qqp/uBQFKFpa+CTDFCVyAA==
+X-Received: by 2002:a05:620a:430a:b0:7cd:3b02:b6e4 with SMTP id af79cd13be357-7e66ef7f617mr1153543485a.1.1753980201850;
+        Thu, 31 Jul 2025 09:43:21 -0700 (PDT)
+Received: from [10.67.48.245] ([192.19.223.252])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-7e67f5bfdb9sm107416485a.29.2025.07.31.09.43.19
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 31 Jul 2025 07:19:17 -0700 (PDT)
-Message-ID: <1f910d65-de34-424d-adf9-7669c22afeaa@oss.qualcomm.com>
-Date: Thu, 31 Jul 2025 17:19:16 +0300
+        Thu, 31 Jul 2025 09:43:21 -0700 (PDT)
+Message-ID: <f85367bb-566e-43d6-b405-b896c49c9aa7@broadcom.com>
+Date: Thu, 31 Jul 2025 09:43:18 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -76,214 +65,88 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-msm: Rectify DLL programming sequence
- for SDCC
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-Cc: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-        Sachin Gupta <quic_sachgupt@quicinc.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
- <ulf.hansson@linaro.org>, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        quic_cang@quicinc.com, quic_nguyenb@quicinc.com,
-        quic_bhaskarv@quicinc.com, quic_mapa@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sartgarg@quicinc.com
-References: <20241218091057.15625-1-quic_sachgupt@quicinc.com>
- <20241218091057.15625-3-quic_sachgupt@quicinc.com>
- <a2mnkliubpdryxdwsd33kccvnlb4fnyzik5ywxw4xhnimwdwsm@oxe34zogzfot>
- <bb60a145-1e8f-4004-b266-9f26a11440b9@quicinc.com>
- <otfof56qvqxyjaq6onor2f3egrt57h2xazncias72qnn4xjgz5@2aj2pyj5xmyl>
- <a885b32c-c59f-4fb6-b2cb-7955d2d3ae69@quicinc.com>
- <mpuyg4ndd7xvfpwd6oubn7zmzkuienyrig5pmkrd4badlpebvf@h6weyimpcfv2>
- <769268c2-9a7f-4b6e-aabd-a6cf5a744d5b@quicinc.com>
- <d5ykzwuk3wrwycol3wpeontfp5t7h7vfrfcxnmxei3qs74xsp7@ihtzne5wbytf>
- <81323b02-a7be-847a-b973-ca0cdb906558@quicinc.com>
- <p7o2ykmpghx5jqagpkhd2rfqgizcdagn366rltyn4gmbmnmpje@vcygaqcaowkn>
- <82d11cf6-bfed-9b73-c697-c692d1c7e02d@quicinc.com>
+Subject: Re: [PATCH 0/4] mmc: sdhci-brcmstb: rpmb sharing by claiming host for
+ TZOS
+To: Adrian Hunter <adrian.hunter@intel.com>,
+ Kamal Dasu <kamal.dasu@broadcom.com>, andersson@kernel.org,
+ baolin.wang@linux.alibaba.com, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org, ulf.hansson@linaro.org
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-remoteproc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+References: <20250711154221.928164-1-kamal.dasu@broadcom.com>
+ <d542b1fa-6e2a-4af1-a14b-eee32a7f3de6@intel.com>
 Content-Language: en-US
-From: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
-In-Reply-To: <82d11cf6-bfed-9b73-c697-c692d1c7e02d@quicinc.com>
+From: Florian Fainelli <florian.fainelli@broadcom.com>
+Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
+ xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
+ M0Txqn1tOWoIc4QUl6Ggqf5KP6FoRkCrgMMTnUAINsINYXK+3OLe7HjP10h2jDRX4Ajs4Ghs
+ JrZOBru6rH0YrgAhr6O5gG7NE1jhly+EsOa2MpwOiXO4DE/YKZGuVe6Bh87WqmILs9KvnNrQ
+ PcycQnYKTVpqE95d4M824M5cuRB6D1GrYovCsjA9uxo22kPdOoQRAu5gBBn3AdtALFyQj9DQ
+ KQuc39/i/Kt6XLZ/RsBc6qLs+p+JnEuPJngTSfWvzGjpx0nkwCMi4yBb+xk7Hki4kEslABEB
+ AAHNMEZsb3JpYW4gRmFpbmVsbGkgPGZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tPsLB
+ IQQQAQgAywUCZWl41AUJI+Jo+hcKAAG/SMv+fS3xUQWa0NryPuoRGjsA3SAUAAAAAAAWAAFr
+ ZXktdXNhZ2UtbWFza0BwZ3AuY29tjDAUgAAAAAAgAAdwcmVmZXJyZWQtZW1haWwtZW5jb2Rp
+ bmdAcGdwLmNvbXBncG1pbWUICwkIBwMCAQoFF4AAAAAZGGxkYXA6Ly9rZXlzLmJyb2FkY29t
+ Lm5ldAUbAwAAAAMWAgEFHgEAAAAEFQgJChYhBNXZKpfnkVze1+R8aIExtcQpvGagAAoJEIEx
+ tcQpvGagWPEH/2l0DNr9QkTwJUxOoP9wgHfmVhqc0ZlDsBFv91I3BbhGKI5UATbipKNqG13Z
+ TsBrJHcrnCqnTRS+8n9/myOF0ng2A4YT0EJnayzHugXm+hrkO5O9UEPJ8a+0553VqyoFhHqA
+ zjxj8fUu1px5cbb4R9G4UAySqyeLLeqnYLCKb4+GklGSBGsLMYvLmIDNYlkhMdnnzsSUAS61
+ WJYW6jjnzMwuKJ0ZHv7xZvSHyhIsFRiYiEs44kiYjbUUMcXor/uLEuTIazGrE3MahuGdjpT2
+ IOjoMiTsbMc0yfhHp6G/2E769oDXMVxCCbMVpA+LUtVIQEA+8Zr6mX0Yk4nDS7OiBlvOwE0E
+ U8AbwQEIAKxr71oqe+0+MYCc7WafWEcpQHFUwvYLcdBoOnmJPxDwDRpvU5LhqSPvk/yJdh9k
+ 4xUDQu3rm1qIW2I9Puk5n/Jz/lZsqGw8T13DKyu8eMcvaA/irm9lX9El27DPHy/0qsxmxVmU
+ pu9y9S+BmaMb2CM9IuyxMWEl9ruWFS2jAWh/R8CrdnL6+zLk60R7XGzmSJqF09vYNlJ6Bdbs
+ MWDXkYWWP5Ub1ZJGNJQ4qT7g8IN0qXxzLQsmz6tbgLMEHYBGx80bBF8AkdThd6SLhreCN7Uh
+ IR/5NXGqotAZao2xlDpJLuOMQtoH9WVNuuxQQZHVd8if+yp6yRJ5DAmIUt5CCPcAEQEAAcLB
+ gQQYAQIBKwUCU8AbwgUbDAAAAMBdIAQZAQgABgUCU8AbwQAKCRCTYAaomC8PVQ0VCACWk3n+
+ obFABEp5Rg6Qvspi9kWXcwCcfZV41OIYWhXMoc57ssjCand5noZi8bKg0bxw4qsg+9cNgZ3P
+ N/DFWcNKcAT3Z2/4fTnJqdJS//YcEhlr8uGs+ZWFcqAPbteFCM4dGDRruo69IrHfyyQGx16s
+ CcFlrN8vD066RKevFepb/ml7eYEdN5SRALyEdQMKeCSf3mectdoECEqdF/MWpfWIYQ1hEfdm
+ C2Kztm+h3Nkt9ZQLqc3wsPJZmbD9T0c9Rphfypgw/SfTf2/CHoYVkKqwUIzI59itl5Lze+R5
+ wDByhWHx2Ud2R7SudmT9XK1e0x7W7a5z11Q6vrzuED5nQvkhAAoJEIExtcQpvGagugcIAJd5
+ EYe6KM6Y6RvI6TvHp+QgbU5dxvjqSiSvam0Ms3QrLidCtantcGT2Wz/2PlbZqkoJxMQc40rb
+ fXa4xQSvJYj0GWpadrDJUvUu3LEsunDCxdWrmbmwGRKqZraV2oG7YEddmDqOe0Xm/NxeSobc
+ MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
+ 7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
+ 95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
+In-Reply-To: <d542b1fa-6e2a-4af1-a14b-eee32a7f3de6@intel.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=Vdn3PEp9 c=1 sm=1 tr=0 ts=688b7b69 cx=c_pps
- a=lVi5GcDxkcJcfCmEjVJoaw==:117 a=H8T8cKqSsIHj2cBiWKmgXw==:17
- a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=y10v7vMIaVi46rMawBgA:9
- a=QEXdDO2ut3YA:10 a=rBiNkAWo9uy_4UTK5NWh:22
-X-Proofpoint-ORIG-GUID: TVO7ThIED-_iy0BOHIUk21RuqqrzeKQU
-X-Proofpoint-GUID: TVO7ThIED-_iy0BOHIUk21RuqqrzeKQU
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzMxMDA5NyBTYWx0ZWRfXz6U7Dy3eKHPN
- OZeOt4BlYN4C8sSF8BglsHD8/pQ7p1ogLR7jliT7BNV+cXH5y6fKgtULr9JtoxsKkowtgZlvQxf
- Luh/FtkPtrQZf65C4CoP0Q3w8tz4AXwHEyPr3mrJrYy85S/BOpNs/L7Jxgq/o/YIKDdNVf9gV/Z
- 3D2J978hBDVTvXsTigKTIlnJzYsGozbGs/wbPelAmTDpNgZLpKfW8HfeuuCrDv3lKNqdWSrjzEl
- NOhStDEMA1MSz2s9H2nY05CaH9iScezcC7QmhejMbzWqcSzplW3elax6sgMyaVAggVE51SXlTQQ
- wtff3U+PXhiVG9O4hws/k55PsCcy0hGTcr2MI2QBPRAXOi86SQqM/2tO5flMtm2soA1Gg1xi5+N
- Wx1pXLsh2mmj3FX5EY1U8bbzVIVO0vBRT/bYk7Ix1lxgOSrvHsZL1Fffizwqc4IDrO1N0Iiw
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-07-31_02,2025-07-31_02,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 mlxscore=0 lowpriorityscore=0 impostorscore=0 clxscore=1015
- priorityscore=1501 malwarescore=0 mlxlogscore=999 spamscore=0 phishscore=0
- bulkscore=0 adultscore=0 classifier=spam authscore=0 authtc=n/a authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
- definitions=main-2507310097
 
-On 31/07/2025 14:46, Ram Prakash Gupta wrote:
-> 
-> On 7/30/2025 11:26 PM, Dmitry Baryshkov wrote:
->> On Wed, Jul 23, 2025 at 03:43:37PM +0530, Ram Prakash Gupta wrote:
->>> On 1/22/2025 3:20 PM, Dmitry Baryshkov wrote:
->>>> On Wed, Jan 22, 2025 at 02:57:59PM +0530, Sachin Gupta wrote:
->>>>> On 1/7/2025 8:38 PM, Dmitry Baryshkov wrote:
->>>>>> On Tue, Jan 07, 2025 at 11:13:32AM +0530, Sachin Gupta wrote:
->>>>>>> On 12/27/2024 12:23 AM, Dmitry Baryshkov wrote:
->>>>>>>> On Thu, Dec 26, 2024 at 11:22:40AM +0530, Sachin Gupta wrote:
->>>>>>>>> On 12/19/2024 11:24 AM, Dmitry Baryshkov wrote:
->>>>>>>>>> On Wed, Dec 18, 2024 at 02:40:57PM +0530, Sachin Gupta wrote:
->>>>>>>>>>> +
->>>>>>>>>>> +static unsigned int sdhci_msm_get_clk_rate(struct sdhci_host *host, u32 req_clk)
->>>>>>>>>>> +{
->>>>>>>>>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>>>>>>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->>>>>>>>>>> +	struct clk *core_clk = msm_host->bulk_clks[0].clk;
->>>>>>>>>>> +	unsigned int sup_clk;
->>>>>>>>>>> +
->>>>>>>>>>> +	if (req_clk < sdhci_msm_get_min_clock(host))
->>>>>>>>>>> +		return sdhci_msm_get_min_clock(host);
->>>>>>>>>>> +
->>>>>>>>>>> +	sup_clk = clk_round_rate(core_clk, clk_get_rate(core_clk));
->>>>>>>>>>> +
->>>>>>>>>>> +	if (host->clock != msm_host->clk_rate)
->>>>>>>>>>> +		sup_clk = sup_clk / 2;
->>>>>>>>>>> +
->>>>>>>>>>> +	return sup_clk;
->>>>>>>>>> Why?
->>>>>>>>> Sorry, I did not understand your question. Can you please explain in detail.
->>>>>>>> Please explain the maths. You get the rate from the clock, then you
->>>>>>>> round it, but it is the rate that has just been returned, so there
->>>>>>>> should be no need to round it. And after that there a division by two
->>>>>>>> for some reason. So I've asked for an explanation for that code.
->>>>>>>>
->>>>>>> clk_round_rate is used in case of over clocking issue we can round it to the
->>>>>>> usable frequency.
->>>>>> If it is a frequency _returned_ by the clock driver, why do you need to
->>>>>> round it? It sounds like that freq should be usable anyway.
->>>>>>
->>>>> I agree, rounding will be taken care by clock driver. Will remove in my next
->>>>> patch.
->>>>>
->>>>>>> Divide by 2 is used as for HS400 the tuning happens in
->>>>>>> HS200 mode only so to update the frequency to 192 Mhz.
->>>>>> Again, is it really 192 MHz? Or 19.2 MHz?
->>>>>> Also if it is for HS400, then shouldn't /2 be limited to that mode?
->>>>>>
->>>>> Yes, It is 192 MHz.
->>>> Good, thanks for the confirmation.
->>>>
->>>>> As part of eMMC Init, driver will try to init with the best mode supported
->>>>> by controller and device. In this case it is HS400 mode, But as part of
->>>>> HS400 mode, we perform Tuning in HS200 mode only where we need to configure
->>>>> half of the clock.
->>>> This isn't an answer to the question. Let me rephrase it for you: if the
->>>> /2 is only used for HS400, why should it be attempted in all other
->>>> modes? Please limit the /2 just to HS400.
->>> Hi Dmitry,
->>>
->>> like updated earlier by Sachin, HS400 tuning happens in HS200 mode, so if
->>> we try to use "ios->timing == MMC_TIMING_MMC_HS400" that wont help, as at
->>> this stage timing can be MMC_TIMING_MMC_HS200/MMC_TIMING_MMC_HS400 for
->>> hs200 tuning and hs400 selection. In this case we must divide clk by 2
->>> to get 192MHz and we find this as host->clock wont be equal to
->>> msm_host->clk_rate.
->> What are host->clock and msm_host->clk_rate at this point?
->> What is the host->flags value? See sdhci_msm_hc_select_mode().
-> 
-> There are 2 paths which are traced to this function when card initializes
-> in HS400 mode, please consider below call stack in 2 paths
-> 
-> sdhci_msm_configure_dll
-> sdhci_msm_dll_config
-> sdhci_msm_execute_tuning
-> mmc_execute_tuning
-> mmc_init_card
-> _mmc_resume
-> mmc_runtime_resume
-> 
-> with values of host->clock as 200000000 & msm_host-clk_rate as 400000000
-
-Please check the rates explicitly in the code rather than just checking 
-that they are not equal.
-
-> and host->flags as 0x90c6.
-> 
-> and
-> 
-> sdhci_msm_configure_dll
-> sdhci_msm_dll_config
-> sdhci_msm_set_uhs_signaling
-> sdhci_set_ios
-> mmc_set_clock
-> mmc_set_bus_speed
-> mmc_select_hs400
-> mmc_init_card
-> _mmc_resume
-> mmc_runtime_resume
-> 
-> with values of host->clock as 200000000 & msm_host-clk_rate as 400000000
-> and host->flags as 0x90c6 which are same as 1st.
-> 
-> Now if card is initialized in HS200 mode only below is the call stack
-> 
-> sdhci_msm_configure_dll
-> sdhci_msm_dll_config
-> sdhci_msm_execute_tuning
-> mmc_execute_tuning
-> mmc_init_card
-> _mmc_resume
-> mmc_runtime_resume
-> 
-> with values of host->clock as 200000000 & msm_host-clk_rate as 200000000
-> and host->flags as 0x90c6.
-> 
-> now if you see the host->flags value, its same across the modes, and if
-> I am getting it right from the pointed out function
-> sdhci_msm_hc_select_mode(), your suggestion seems to be using the check
-> host->flags & SDHCI_HS400_TUNING which is bit[13], but in above dumped
-> host->flags SDHCI_HS400_TUNING bit is not set where we are using the /2.
-> 
-> and the reason is, this bit is getting cleared in sdhci_msm_execute_tuning()
-> before sdhci_msm_dll_config() call.
-> 
-> so this /2, is eventually called only for HS400 mode.
-> 
-> Thanks,
-> Ram
-> 
+On 7/28/25 02:11, Adrian Hunter wrote:
+> On 11/07/2025 18:42, Kamal Dasu wrote:
+>> This patch adds support to claim host for TZOS RPMB access and synchronized
+>> access to the controller hardware using hwspinlock framework.
+>> To achieve this Linux OS and the secure TZOS make use of:
+>> - shared hardware semaphore register
+>> - a set of SDIO shared work registers and
+>> - IPI interrupt registers
 >>
->>> Now if we go for only HS200 mode supported card, there
->>> the supported clock value would be 192Mhz itself and we need to pass
->>> clk freq as 192MHz itself, hence division by 2 wont be needed, that is
->>> achieved there as host->clock would be equal to msm_host->clk_rate. Hence
->>> no other check is needed here.
->> Please think about the cause, not about the symptom. Clocks being
->> unequal is a result of some other checks being performed by the driver.
->> Please use those checks too.
+>> The currently running OS that needs access to the controller puts itself in its
+>> slot of work register and if its next in line it can try to grab the hardware
+>> semaphore and complete its mmc requests. The shared work registers indicate next
+>> in queue to access the controller, and current agent in the queue. Next agent
+>> queue state is changed under the hwspinlock is owned by the current OS accessing
+>> the controller hardware before release the semaphore, send and receive IPI
+>> interrupts between linux and secure world are used to indicate completion of
+>> transaction to the waiting OS. TZOS has its own RPMB driver which accesses
+>> partition when it wants to read/write RPMB frames. Current implementation
+>> assumes Linux and TZOS as the two work agents.
 >>
->>> sorry for it took time to update as I was gathering all this data.
->> 6 months? Well, that's a nice time to "gather all this data".
+>> This patchset is an alternative method to initial RFC patch:
+>> [PATCH RFC 0/3] mmc: sdhci-brcmstb: Add rpmb sharing support	
+>> https://lkml.org/lkml/2025/2/6/1711
 > 
-> Took it up from sachin last month but still its a long gap.
-> Thanks for helping revive.
+> Does it address Ulf's comments? i.e.
 > 
->>
->>> since Sachin have already pushed patchset #3, and if this explanation
->>> helps, let me know if we can continue on patchset #3.
->>>
->>> Thanks,
->>> Ram
->>>
+> 	https://lore.kernel.org/all/CAPDyKFrCjo8gGnxmXWP6V39N+b1o62VQH9zwMUNb2_+D3-qrdw@mail.gmail.com/
 
+If you are referring to the fact that Linux is the exclusive owner of 
+the eMMC controller, then no, that is still not what is being done here, 
+but we did respond as to why this is done that way, and there was no 
+subsequent question or comments on my respond to Ulf:
 
+https://lore.kernel.org/all/6328fe8d-c4ea-4945-b6ba-d994403121b5@broadcom.com/
 -- 
-With best wishes
-Dmitry
+Florian
