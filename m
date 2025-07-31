@@ -1,61 +1,63 @@
-Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
+Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 142491C32;
-	Thu, 31 Jul 2025 06:58:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36EB628D8DF;
+	Thu, 31 Jul 2025 06:58:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753945083; cv=none; b=HntXCxb7qMt+r1J9cw+F9pkcMT8L4N3A89MqjnqGbsGlZaPlcqO2ne2lWzlgT9neToKIAokBUqMifXLKpXpSUcdUwwKf1lK8rOlH9Ly7VDj98vHoBnNnyoHl35fZTzLbZHJCNJJmL3yIriclNClxx6blo8Np93ljciFIKntRebs=
+	t=1753945086; cv=none; b=hUVtyJbXP2xOhtCf5kmpfa65df/yvnmi0TZ0xu67NJNJgFMmjoBGe8TNF4Fjkh6QiXcffciyRT4uHju3Ag+G4Lz5OiIi37Emo9EAZEu5Aut07gpCqnGVTxcixQoD6ZYcxH4TWDXzeRN+oXisgoRT87LoGHVveFL5NmMe/znwrOs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753945083; c=relaxed/simple;
-	bh=iGPD/TNw35rf8JU9VX4CkNhrD6g8GVDuImcE3tqW9qw=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=eBFBSFzFlYw+HCynLPMNX/MNpLgc69Lq7OYPD6Q6fn1RvTqdRV5UvFrRirsZv00wBo89h704/EnwmcXlMduiexuUuS86FFDTdNGOW1Zr3NjqYNiyrcHsVYhDFXXuAptciXfXp5coJ7EvpOYClDXcmO7jWcRizXmM5X8EXr9nJDM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DVi3Sipq; arc=none smtp.client-ip=209.85.216.47
+	s=arc-20240116; t=1753945086; c=relaxed/simple;
+	bh=QljHv+p4rKSsMKburIbuxWqh0Pux/EFMS7aPCKeQWhk=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=E9U9bmNlRZo4czdjdLa+qJMj1K87mXBjOmEA7Eoad5M+bPQh6iIGPSx/112lojlvVqTCpJ+9y1RR0nmcqdaBZzXLcEaXKeb6KtM+09XitreTRPTKCiNqCCNfrSUPc2R4/UeMT4b0P47pSpjr2nPuMILZeAaHhKQ+tfR1NhfOL7M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bQjIhU4q; arc=none smtp.client-ip=209.85.216.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DVi3Sipq"
-Received: by mail-pj1-f47.google.com with SMTP id 98e67ed59e1d1-313154270bbso104012a91.2;
-        Wed, 30 Jul 2025 23:58:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bQjIhU4q"
+Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-31f255eb191so584975a91.0;
+        Wed, 30 Jul 2025 23:58:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753945080; x=1754549880; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=6dlh8XwGy1SjyENdbge1bkKF4yxVkK/f97ED5kL60Ho=;
-        b=DVi3Sipqbx9paDd5BHXbn0B7+8WDXgSV9M9A/7gTfTPBxQCqb63hSuJJrwXkygnXN8
-         35WWHiaN2s1ClpjDXDqaUa0Z7Rg1kOQIKaI2qdJxR3vaTyIlB8kk6smlXjn9hdO2eNVT
-         zklE1OiTZGb+bcYHPMnL/+NdKfxz61KA6FiAvTQ8OY8dfKDdaw81zOui7Gj1DfdgqcXi
-         C6ibY6BtZ7XurAVBR+wg1NN5YKTVCySj4uRbO6D22VXDJHFnhFn3jQuiipEbt79dNZfc
-         Mfz5adamvaZnvJdiQ3hpVVILCPwGstyRhiP/i3l2sGwxUcIQpaqk5rRW0o67P1wH5P9d
-         PX3Q==
+        d=gmail.com; s=20230601; t=1753945083; x=1754549883; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Pz10JIap2Hh1+jtjD77iTt7u/6v/cpy5eHzi6IMW11k=;
+        b=bQjIhU4qOkHvFkiHoGiYQVnvQl9APKZ65bgM0/k5O35I1WbRfW3pesavawlh0sy/Jb
+         /T5xuz8XQ3m/bU9xIp2PXZXkLmhNo32y1So4bqVXEZq7rbu30bVzmYaTmZHzdcgrIVn5
+         F8j4X/Lu1xURGh5t2EHYIpsO1I0hDNl5HtLXm3zV7rUh7eXQeIA4LuGD1HoIA4yBZZU9
+         9jLYV60VqP7+ddV9zAyGgu/gnKnKfyLo40fENYOcH44mDZ3vLd0+Ga6oQH6LitV4x+/d
+         GayoMMIUJqz9tDxRG0lNaDcXLJyBKyBjPiV7Gnaz7JDs6K3iBK6m0AR5UOu+f/KbOk4o
+         HXWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753945080; x=1754549880;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=6dlh8XwGy1SjyENdbge1bkKF4yxVkK/f97ED5kL60Ho=;
-        b=omm94n3MV/C2ZywXxvfPd96lAEfD8XU9oi3kaG3BIwOKMIt6eC2xb/IbPNEPb/6cXL
-         oFyof4xJv8AFz+Qsv0EQh0StG40H7e0JfEMcwE/jbtkllb+2Qr5ET5EUf4OZ6oSRHfqG
-         n3+ehBiyV6xLLMVUkNFvXxNDl4oM/kbL/YBIhcvJ1uEFUoRCId3L93DHYjo42sId6yXy
-         qerx/+WPLXs5Q+NLCzqGEBgmA35dEjnApcukHGq+fMHdODJPuQpM+4o8Pm66ff55gFaN
-         zsYDMkPezP0McQbN0nQo+9ZXH8WFAXvNIc4BnlHQDZ/DHhJvrqcybQohl40ZwAFZvfmL
-         LPpw==
-X-Forwarded-Encrypted: i=1; AJvYcCUlSRyJqmRAEfchqoyesHyvJGRRsibDoULjO6n9lt+iQtV3eM648v/npmtSYse95pUQUW8jmBxuYp3+4tI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzFdIKLCFOYolR72v+0CHp6cFlRZ3MsXHyAiISI2M6XuPmPXqSF
-	jNGqN80Rg9Ht8tJcyTlT9KLNDF1bdr6/Qf3qM4fJqUGvCugl3SpnkQAV
-X-Gm-Gg: ASbGncvyHoFJkuyFQLdCAMTILTvEoKQtyyhJf4Vmn3VTibvWkzWCF2GhKrg6X0UQnqO
-	9LqC9zmU079I2Awi5vsBxgna7wrbXKU60LJ+iBcYtgjoVQ5ROGZYIlHeNHLRJNM0/UqkdPTX2h1
-	x6ua8N/k5hGnydl6XD6Pf8Gp/MNVEGKw7qPXy3+Ps3N+UoY7xpiowXLLV1zlQhtqBmCo6j/56S4
-	HC0RmwC5JQLWrOpfe0ptG1+X+52fP5bab6fIi56WCOfficcJGKCNifVGNH+NP+HmOH26fu1bLVR
-	UH3yjIjKDQ9mR0fGZG4C/e31Jb+hpIhUMNMMUO5wZ1zm4GOH67EcRVbLPe09CvZbf3XgRpPNHn7
-	3DXN2aUzbN6+8/RB9OHAC3XEXWjHH5w==
-X-Google-Smtp-Source: AGHT+IH0omocCQWIH5Y6qHj+N3maXQG6SCixN09ykBfExW/iWIwVQrrncwzLhCMgj99E1nAEz3JwUA==
-X-Received: by 2002:a17:90b:3c83:b0:31f:69fd:a72b with SMTP id 98e67ed59e1d1-31f69fda784mr5904201a91.29.1753945080184;
-        Wed, 30 Jul 2025 23:58:00 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1753945083; x=1754549883;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Pz10JIap2Hh1+jtjD77iTt7u/6v/cpy5eHzi6IMW11k=;
+        b=q5sM6hqCtnCZSYrUbc/Oi2W7QdnKxGQDWmJ2v/L4mKHK5ARLDwsB6BoHieNAqAqtjA
+         W65wen+7pYttrBUKJERwh9Dst5fO9E/kBUKPPStd4tFaO/BM+R8ymVaFg/Ze1h0lfNHr
+         J6ZjGUZRHEpjdqKz2T//WUKJ09p1u6dCrDoLYFmNpWTNPkjz/DGmT99ZfFz1yS8B/a4S
+         RZXGZLJaebpDdMQuvt29YM0AOlqPqMhp16nCEG99Sc/GeLrVTzP5NnoUOHJjAH9FtHlA
+         bxX/ejJWNcn3uF6T/03m1CK0EAFV+F0tPNPz1Guj3xwZsa9qJdQriQpVptgbiofcamkT
+         SleA==
+X-Forwarded-Encrypted: i=1; AJvYcCUs9lP1D/yEDsg6GKP4XrglF0x8M0v6eF9RHg5Uttyhr67+1I/F9fH5iGnJIt01DSaCfiwwENQqnoipxSI=@vger.kernel.org, AJvYcCVeZtgJA0MBaIpVxjBKqEdpfJd7NTxPjktLAyi5+WeHz333hgPqILlx0DGeLUdBfJIUeH2aj89q@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy7FGN2iSKAyJxUCS6hzTD9d1CBDT0KPp0PAQRpiZW4BQOZXBRh
+	kssjtwTugfhIg+IDgHbjKA3x06FXpvXUXOj+WrKT3i7Q16DSlnWnqWju
+X-Gm-Gg: ASbGncti1Wj65zwrb2y9R37nIpCQkCnzD7rY/+3lIuETRI5Goe3Xa6Fc7rfZUUujUCM
+	atieyifC4uJ84KdYkv1s6RnHwy6DtvdgQfTCx1oYvh/odwVSmZMsDUv/BeOxMyBsa7JZ9CM3MQ5
+	Ls5TFJNRrybZ2inH2Hd+TXOOmGjCbEU0VYzgDn0J3GnsmYZMhv9ZPyv77IQVDjgQSA45by0ttrD
+	CzUFSB4ZHCLuHGqBr3gaScbZRgvRKSzRXKIeD/uyMNclvzQX8oEUxzyQkMml8F/lDtYm2aCF4ct
+	RDjeVfRyjtWRDvDe/hXoaQhvUeAjJn4yrYCQJTN+/1f9rpcf4xhw8CUM1oHVrWUB6HtXQSPXRF0
+	UciTUCCDQsymItt1lI36Qd/u3fwjSSg==
+X-Google-Smtp-Source: AGHT+IECS5bLXS51UwBXGlYtgyyHPWiVfuybg8QR4ZujUph6FVUs8a1qpPCaEkTP/4oHPqvmkS20Uw==
+X-Received: by 2002:a17:90b:17cb:b0:30e:5c7f:5d26 with SMTP id 98e67ed59e1d1-31f5de6b82dmr8316172a91.24.1753945083447;
+        Wed, 30 Jul 2025 23:58:03 -0700 (PDT)
 Received: from victorshih.. ([2402:7500:469:65dd:3aa4:3d44:3e04:a6c3])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3207eca6fdfsm1056736a91.20.2025.07.30.23.57.57
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3207eca6fdfsm1056736a91.20.2025.07.30.23.58.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Jul 2025 23:57:59 -0700 (PDT)
+        Wed, 30 Jul 2025 23:58:03 -0700 (PDT)
 From: Victor Shih <victorshihgli@gmail.com>
 To: ulf.hansson@linaro.org,
 	adrian.hunter@intel.com
@@ -64,11 +66,15 @@ Cc: linux-mmc@vger.kernel.org,
 	benchuanggli@gmail.com,
 	ben.chuang@genesyslogic.com.tw,
 	HL.Liu@genesyslogic.com.tw,
-	Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V4 0/3] Mask the replay timer timeout of AER for GL9763e
-Date: Thu, 31 Jul 2025 14:57:49 +0800
-Message-ID: <20250731065752.450231-1-victorshihgli@gmail.com>
+	Victor Shih <victorshihgli@gmail.com>,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	stable@vger.kernel.org
+Subject: [PATCH V4 1/3] mmc: sdhci-pci-gli: Add a new function to simplify the code
+Date: Thu, 31 Jul 2025 14:57:50 +0800
+Message-ID: <20250731065752.450231-2-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20250731065752.450231-1-victorshihgli@gmail.com>
+References: <20250731065752.450231-1-victorshihgli@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -79,63 +85,87 @@ Content-Transfer-Encoding: 8bit
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-These patches add a sdhci_gli_mask_replay_timer_timeout() function
-to simplify some of the code and mask the replay timer timeout of AER
-for the GL9763e chipset.
+In preparation to fix replay timer timeout, add
+sdhci_gli_mask_replay_timer_timeout() function
+to simplify some of the code, allowing it to be re-used.
 
-Changes in v4 (July. 31, 2025)
-* Rebase on latest mmc/next.
-* Patch#2: Add new message to the commit message to explain
-	   why it has a stable tag.
+Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+Fixes: 1ae1d2d6e555 ("mmc: sdhci-pci-gli: Add Genesys Logic GL9763E support")
+Cc: stable@vger.kernel.org
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 30 ++++++++++++++++--------------
+ 1 file changed, 16 insertions(+), 14 deletions(-)
 
------------------ original cover letter from v3 -----------------
-These patches add a sdhci_gli_mask_replay_timer_timeout() function
-to simplify some of the code and mask the replay timer timeout of AER
-for the GL9763e chipset.
-
-Changes in v3 (July. 29, 2025)
-* Rebase on latest mmc/next.
-* Split patch#2 in V2 into patch#2 and patch#3.
-* Patch#1: Correct the wrong parameters in the
-           sdhci_gli_mask_replay_timer_timeout() function.
-           Add new message to the commit message to explain
-           why it has a stable tag.
-           Add fixes tag to the commit message.
-* Patch#2: Add fixes tag to the commit message.
-* Patch#3: Add fixes tag to the commit message.
-
------------------ original cover letter from v2 -----------------
-These patches add a sdhci_gli_mask_replay_timer_timeout() function
-to simplify some of the code and mask the replay timer timeout of AER
-for the GL9763e chipset.
-
-Changes in v2 (July. 25, 2025)
-* Rebase on latest mmc/next.
-* Patch#1: Add a sdhci_gli_mask_replay_timer_timeout() function
-           to simplify some of the code.
-* Patch#2: Mask replay timer timeout of AER for the GL9763e.
-* Patch#2: Rename the gli_set_gl9763e() to gl9763e_hw_setting()
-           for consistency.
-
------------------ original cover letter from v1 -----------------
-Due to a flaw in the hardware design, the GL9763e replay timer frequently
-times out when ASPM is enabled. As a result, the warning messages will
-often appear in the system log when the system accesses the GL9763e
-PCI config. Therefore, the replay timer timeout must be masked.
-
-Changes in v1 (July. 16, 2025)
-* Rebase on latest mmc/next.
-* Mask replay timer timeout of AER for the GL9763e.
-
-Victor Shih (3):
-  mmc: sdhci-pci-gli: Add a new function to simplify the code
-  mmc: sdhci-pci-gli: GL9763e: Rename the gli_set_gl9763e() for
-    consistency
-  mmc: sdhci-pci-gli: GL9763e: Mask the replay timer timeout of AER
-
- drivers/mmc/host/sdhci-pci-gli.c | 37 ++++++++++++++++++--------------
- 1 file changed, 21 insertions(+), 16 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 4c2ae71770f7..f678c91f8d3e 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -287,6 +287,20 @@
+ #define GLI_MAX_TUNING_LOOP 40
+ 
+ /* Genesys Logic chipset */
++static void sdhci_gli_mask_replay_timer_timeout(struct pci_dev *pdev)
++{
++	int aer;
++	u32 value;
++
++	/* mask the replay timer timeout of AER */
++	aer = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
++	if (aer) {
++		pci_read_config_dword(pdev, aer + PCI_ERR_COR_MASK, &value);
++		value |= PCI_ERR_COR_REP_TIMER;
++		pci_write_config_dword(pdev, aer + PCI_ERR_COR_MASK, value);
++	}
++}
++
+ static inline void gl9750_wt_on(struct sdhci_host *host)
+ {
+ 	u32 wt_value;
+@@ -607,7 +621,6 @@ static void gl9750_hw_setting(struct sdhci_host *host)
+ {
+ 	struct sdhci_pci_slot *slot = sdhci_priv(host);
+ 	struct pci_dev *pdev;
+-	int aer;
+ 	u32 value;
+ 
+ 	pdev = slot->chip->pdev;
+@@ -626,12 +639,7 @@ static void gl9750_hw_setting(struct sdhci_host *host)
+ 	pci_set_power_state(pdev, PCI_D0);
+ 
+ 	/* mask the replay timer timeout of AER */
+-	aer = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
+-	if (aer) {
+-		pci_read_config_dword(pdev, aer + PCI_ERR_COR_MASK, &value);
+-		value |= PCI_ERR_COR_REP_TIMER;
+-		pci_write_config_dword(pdev, aer + PCI_ERR_COR_MASK, value);
+-	}
++	sdhci_gli_mask_replay_timer_timeout(pdev);
+ 
+ 	gl9750_wt_off(host);
+ }
+@@ -806,7 +814,6 @@ static void sdhci_gl9755_set_clock(struct sdhci_host *host, unsigned int clock)
+ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+ {
+ 	struct pci_dev *pdev = slot->chip->pdev;
+-	int aer;
+ 	u32 value;
+ 
+ 	gl9755_wt_on(pdev);
+@@ -841,12 +848,7 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+ 	pci_set_power_state(pdev, PCI_D0);
+ 
+ 	/* mask the replay timer timeout of AER */
+-	aer = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
+-	if (aer) {
+-		pci_read_config_dword(pdev, aer + PCI_ERR_COR_MASK, &value);
+-		value |= PCI_ERR_COR_REP_TIMER;
+-		pci_write_config_dword(pdev, aer + PCI_ERR_COR_MASK, value);
+-	}
++	sdhci_gli_mask_replay_timer_timeout(pdev);
+ 
+ 	gl9755_wt_off(pdev);
+ }
 -- 
 2.43.0
 
