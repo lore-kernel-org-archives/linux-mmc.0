@@ -1,117 +1,101 @@
-Received: from mail-pg1-f169.google.com (mail-pg1-f169.google.com [209.85.215.169])
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C66A28D8DB;
-	Thu, 31 Jul 2025 06:58:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8CC881E;
+	Thu, 31 Jul 2025 09:41:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753945092; cv=none; b=SCmHDlrN5YUmIbU0pQqVB3lWMUHIRo/AJtxJpe7sEpN4uA0KdjDB3EHqPTXR75kodOz5bKynBJiHmKaLlsF18eb6gWQA7By82lnTBy+a02dIOc0mYnmhYrL6PlaEAF9YEJ67kc3qCzPXsX/RFMMk6qwpWGLjO6W1Qs89x8qaQzs=
+	t=1753954915; cv=none; b=keKrEF5Gfppa46nkT/9JUIruj8sad3qDA2ijEIUtXBz7FXscpv8vuGz7LFTkAXyf9ThJJISJ5NYK7R0yoJ/LFFnTbR+VumB4whmdvD6oW8d+R69u+Eag5BOvEiA9kQu6PYImiGe4BJClIPVSYkEAqBUkoMbkCuG9sC3nWDRFNbk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753945092; c=relaxed/simple;
-	bh=/YObmg5o0fnmt+G7NwILAkIrttqDYVkOdM2arVfN/L8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=PR6gdLkxk5a7f5wajaDCmUAJFVp/sf2Mm5MBkI3N+apq76G5NONjCE5jnG1QIjQJqip4sSSXor22T5Kc45mJu5g6odKWxdm5cxqtrAW2eE7GRkYogps52zf/DuKSs/lQsLkXTWEo3QIjukuG5v7MSajwqkC6VytvaDe7OzK4blY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TKmBv6K1; arc=none smtp.client-ip=209.85.215.169
+	s=arc-20240116; t=1753954915; c=relaxed/simple;
+	bh=i2/nMy7FKYTyjoOb6CSTRUZssDpBCdS9RZdlFSAXfls=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=SaoUQqPIelGT0gr986mOdR1pM9kMYzrSRmJOMnX9aPq6R2e5egztnvTJpKTEoY5fo9R4J8anx2zjOW9nnpNvwCe2P0Ah61vS20oYO3t1HU6TeqX5MrFczYSnUaiNxFE44csUUe3ZSwvd/9m/Tv9ViJSY8uGuP1WAp3GWGDDIAdc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VCYwW3NY; arc=none smtp.client-ip=209.85.128.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TKmBv6K1"
-Received: by mail-pg1-f169.google.com with SMTP id 41be03b00d2f7-b3bcb168fd5so517660a12.3;
-        Wed, 30 Jul 2025 23:58:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VCYwW3NY"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-455b00339c8so1773665e9.3;
+        Thu, 31 Jul 2025 02:41:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753945090; x=1754549890; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ty71zZwrxKdG9735rE5ivsHSFJ0hlXvH1Bl1HDkBCEc=;
-        b=TKmBv6K1kjRrHBZg22QSuHSyVw3EwseishL1N4jyCALykGW85t2WRA7p/8/7brhXf5
-         +9Fin8GVtt24auOABTjrPZBwUqFuoJP0/A14MD463drNOX48YvGBqp92to1uccGB7Gu9
-         ydckk0vNpUV7IPdICt3Ts3LE7sWiRmIsPl0LQiBMWj3OtpjOgi5jSsOUe8NMkAfQq01p
-         mPxT3qiAoDihWaDR5uolxtDrPGjSAm1O3g7qFcA+CZjuutvT+jnZXPjuMProeS4UBZST
-         vb8uxNs2011ZH2T/rIx2gmX9ea6si6ICKWRdSFRVh5u/fPXn9mF9oMjR25FVGKoKK+3+
-         dzwg==
+        d=gmail.com; s=20230601; t=1753954912; x=1754559712; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=ylc4ZxnLD2CbRkm680HNmR2pGWeedE4Tq4BAYLGyBVc=;
+        b=VCYwW3NYAZ0/cVfSaJh8PsHFc51hr5mYu5Eylzm0aem2n0obygz8fH+OF7lUR4XjTu
+         30SkYFa5p+xouMnrVg+beAOtvvTKwO2R0rEJjBOAqOJWlNDn83PcuboYz4KYX2t8ARB8
+         90ztcVSU8BbMUqBn027yU16fwsUNidwmMmc1xo3XdgRtu8ZkYk24kzTx4/y9JABjmecQ
+         k8mINmGnbl5AE4HUSjG/PEPjgOE3blpmNv04UgcGyJcHgc98vZwCQxPu59p8cuIBXbmo
+         GYydzZuaCHZ1/rrYrPt6u0kqngOTW2u+P4KP7SxsQHexc9Z1INDkug2LAbKOxu4BLgdW
+         SH2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753945090; x=1754549890;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ty71zZwrxKdG9735rE5ivsHSFJ0hlXvH1Bl1HDkBCEc=;
-        b=rQoj5mbVDxm44ODk3KOuHEBDo87UYm+CypDwwzLb7QVntUGC/OWcMIMED99gNlOo7/
-         Xbb8dBrdZM6SNePyFHXT30ylLjaIm8QQDWybwd8ycGptfLXB0UZs2XOSbD7I7jnTFXmw
-         F7jVl+jHygbfLBJFa0CUt1NY2DYd7xKjA5m7M7zPdKekhu2vY9gI/tkiTOzfozADH6Dq
-         dcw7Bm4cdobDTMmuidhLSCkHwME/oZzgTEAER4qRxdtXymXWRi+nRqNcB8oybrRQBOML
-         eohSrp/njDwXjHeC14jC0tPsn6YmsuknfY4QinZEhLLb1m781aGTnrAd31JmnWeIJQMN
-         tggg==
-X-Forwarded-Encrypted: i=1; AJvYcCUvXYs0muVVSg8rzlfqh4R80XsXAFly2/ZAJU6k5zwlIWIgZDomSp+xEtSqSRJx/TD4aqOmRGOd@vger.kernel.org, AJvYcCWmnkzDl4cczHDjoViKLzvECjouype7oP9BLKd0eX0Qa8g9Nyi/OMphfiLvscC7WxKe1czdaqGhidZTOzQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YydN8GwktoJYdux/biM/1ARCb3M/IJ/Avdw3yS1ZeGBcc7sbMGx
-	XZBBVPUXyhzTraguxFGbpPOsB2qSI71QYyft3Dm3N5wXvFAhIx8YnWha
-X-Gm-Gg: ASbGncuNJp7V5pF3Ykvgzq2HAS368bYXe3j4u5MHDY1WBsFA1qX4NkdkEnf3jV+s0dN
-	5k4M9Q1puE7Ho/l601NJBzoy7ofxpajFNkgW1K1P/i+WqC6rY82tfhkA69SAz5UJbKbI1ou1ZE8
-	jdd7brtqk6DpMUlG5+iUJnIO6VTLLuzFWZ6SJ7xiGTlcNKo9LFox4rWFxz78w3WC2u5bLgRWGsZ
-	2yx4ETn0oaD9dP6uUJGMrEyGjss3zoR6YKeaWkmr1ifSAajZnrWcu97oyY76TJcOvtSCyB7HMSU
-	Vf8RJh3Hl9D+2F0zjo/qvltYEEtxbT69aBUefghpGXzglnvzJaBrrWK2ZAyU0RvrrlnESlbDWHo
-	OJSJTQV0ZJD+x1w9JnpIAumjJH5EYnA==
-X-Google-Smtp-Source: AGHT+IHLSH9Mg+m9acz2wJMrpJS7sSDiYOdOnmS+3Y0U5hJg/1mghFnOvuAa1vtywnWpXkfik/JzKg==
-X-Received: by 2002:a17:90b:4e88:b0:31e:ff94:3fba with SMTP id 98e67ed59e1d1-31f5de73be3mr9345349a91.24.1753945090158;
-        Wed, 30 Jul 2025 23:58:10 -0700 (PDT)
-Received: from victorshih.. ([2402:7500:469:65dd:3aa4:3d44:3e04:a6c3])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3207eca6fdfsm1056736a91.20.2025.07.30.23.58.06
+        d=1e100.net; s=20230601; t=1753954912; x=1754559712;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ylc4ZxnLD2CbRkm680HNmR2pGWeedE4Tq4BAYLGyBVc=;
+        b=MkjujIR2uis19Sl8+RWoLyZ4gEEIm0ARKcTQIH59y50ef2Yf8OzaRzxwPiMOmAdahv
+         DhzzcfiUO5/JMBDNovcSPQhFdvwaWe/t9qsRhl691FlCcbLMxkH+8rlH18aqUvNfdO3H
+         APhknwrkmzACtIOzYj6zxaMqtXbMELy54StX6iFpQ071DC7fXwD6oJyD3bU8HTM/xZTy
+         jylkQCyckOm7DIj8MeVUYijuX6j2RXNj3oYyvkObRxd9RtfFdRc4z/mDkU+TX1wsFBRX
+         +0pIL265/Zsfp90YoEzroWKNwStVbZ5c5zMgt+SgCv8PZxU+pPc13EGmsi4D13fouyS+
+         fCdw==
+X-Forwarded-Encrypted: i=1; AJvYcCUETHwXudgQnU/Lbt2t8EaDrTNaa9Mq4aEAT1WYIOpiVo1hWvQw1lccKFl7EEoEe2c6s6MRUe4j4d14@vger.kernel.org, AJvYcCV6YCAC1nI5YJoTv9VXQxwW6i1/BK9/5paKPDNCJ02uvhaFtXigJosoVhdipXkwv9xt6xLmCrtJg5PIdnY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyyIVuKpGZiDI846C6/ghCBjdBxYhbJaTE6OfqQldfK+8EsUbR9
+	PMIe/3hws5QEsjzbzUcuBDLLiSi7HOd9oPtDw67ZIUbMaUth+AmML36V
+X-Gm-Gg: ASbGncuZaCMdte218h1dFkovkuLnK8rhLB1xgpJC+3fHKl5Fu0Ksd7c/OF8f7Eh1Jqg
+	+X1IAVcBZVDZqFl69IdK+hxsUM+IQbXJSRs3wExhjXzWgHz3CjqZ2xeZsFYe45Tw2MnMt4m5MHx
+	33FfXpolHlMi0RM3vvIo/GlWWOGtrLcgULMckCks+DS40WloTL47GYtinJZdDx4CuGHbNqhcBcZ
+	WHZVoatTzu4Z24FCcQj08eNZKIL2V0buD5y7JU07AZZ4ebF/lDxCGv9Gagw9jYtsLQ4lWXa+tiO
+	G5XFnLUtmniiAX7rTNWAL1afwIDfHtKjwQlo4SJWe8RlBPmM5RA+RbARw20FumgvXaJYLTNbOF7
+	OA/sNP7828sUdrRE+Icy9
+X-Google-Smtp-Source: AGHT+IGje8yg8iNAPGrk4uFHpWmJ4AyuhPlf+5JK0IMwP0mZvBIu+DXEedc841mCBEGmi3Fx/5xZWg==
+X-Received: by 2002:a05:600c:5185:b0:456:1846:6566 with SMTP id 5b1f17b1804b1-45892bee39cmr54428715e9.29.1753954911810;
+        Thu, 31 Jul 2025 02:41:51 -0700 (PDT)
+Received: from localhost ([87.254.0.133])
+        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-458953787a8sm58153325e9.14.2025.07.31.02.41.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Jul 2025 23:58:09 -0700 (PDT)
-From: Victor Shih <victorshihgli@gmail.com>
-To: ulf.hansson@linaro.org,
-	adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	benchuanggli@gmail.com,
-	ben.chuang@genesyslogic.com.tw,
-	HL.Liu@genesyslogic.com.tw,
-	Victor Shih <victorshihgli@gmail.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	stable@vger.kernel.org
-Subject: [PATCH V4 3/3] mmc: sdhci-pci-gli: GL9763e: Mask the replay timer timeout of AER
-Date: Thu, 31 Jul 2025 14:57:52 +0800
-Message-ID: <20250731065752.450231-4-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250731065752.450231-1-victorshihgli@gmail.com>
-References: <20250731065752.450231-1-victorshihgli@gmail.com>
+        Thu, 31 Jul 2025 02:41:51 -0700 (PDT)
+From: Colin Ian King <colin.i.king@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH][next] mmc: davinci: Remove space before newline
+Date: Thu, 31 Jul 2025 10:41:16 +0100
+Message-ID: <20250731094116.2163061-1-colin.i.king@gmail.com>
+X-Mailer: git-send-email 2.50.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+There is a extraneous space before a newline in a dev_err message.
+Remove the space.
 
-Due to a flaw in the hardware design, the GL9763e replay timer frequently
-times out when ASPM is enabled. As a result, the warning messages will
-often appear in the system log when the system accesses the GL9763e
-PCI config. Therefore, the replay timer timeout must be masked.
-
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-Fixes: 1ae1d2d6e555 ("mmc: sdhci-pci-gli: Add Genesys Logic GL9763E support")
-Cc: stable@vger.kernel.org
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Colin Ian King <colin.i.king@gmail.com>
 ---
- drivers/mmc/host/sdhci-pci-gli.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/davinci_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 436f0460222f..3a1de477e9af 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -1782,6 +1782,9 @@ static void gl9763e_hw_setting(struct sdhci_pci_slot *slot)
- 	value |= FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDLY_5);
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, value);
- 
-+	/* mask the replay timer timeout of AER */
-+	sdhci_gli_mask_replay_timer_timeout(pdev);
-+
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
- 	value &= ~GLI_9763E_VHS_REV;
- 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index c691f1b60395..2a3c8058b0fb 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -588,7 +588,7 @@ static void mmc_davinci_request(struct mmc_host *mmc, struct mmc_request *req)
+ 		cpu_relax();
+ 	}
+ 	if (mmcst1 & MMCST1_BUSY) {
+-		dev_err(mmc_dev(host->mmc), "still BUSY? bad ... \n");
++		dev_err(mmc_dev(host->mmc), "still BUSY? bad ...\n");
+ 		req->cmd->error = -ETIMEDOUT;
+ 		mmc_request_done(mmc, req);
+ 		return;
 -- 
-2.43.0
+2.50.0
 
