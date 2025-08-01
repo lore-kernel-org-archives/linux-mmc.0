@@ -1,152 +1,142 @@
-Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com [209.85.222.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26CFE1F4607
-	for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 16:43:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74F54E56A;
+	Fri,  1 Aug 2025 08:45:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753980204; cv=none; b=e1fJn1Qz9oQuDSeoPcFVDm9xEPz/ac0bVOzLZI/UHFmem8MRzjRjxtTZbYE7XRvsoC3LhJ7tSBdK/nwtbv7HYHgrPIHRpcJOaQOdXkTPwc3y2Q4OeRuKnY/7NWNzOQoSX5fAfRVVebtzKLkkUuuJ1MozKridx8p6gmVhCVw/ES8=
+	t=1754037938; cv=none; b=ZZ3eWGq7m+IykTqzTwrESddsa0Ozi/WVR98Txx2B9cmZFik55iayiEO8yb0Zm9EgGSuzdmnrMCGzrL15B0i4EIjReon3d9rKW19jhNf34lGa+iblMKIQfDhEUcSeli7PDkZ/wHPtxpojplRmvh7nV5AVSKdjfdplSvlCOn0oJxY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753980204; c=relaxed/simple;
-	bh=RrP+Q+3mcEk4e6dH5D7T5bcgzHzmM7Taaur/o/ch7NA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=qmvOv2uimLOJPpgwcBpBFR/gRycmRhGJOE5DJrvFsYy3Jae3fC+Q4pSZ0g57t1brIT3WBhSxgHfl2HQoWdyN3KBVjvZskBGAaB9FlC3N6De1Cq6UmMUSk6XzmwEb5kOVItL8/jKkygFJcO01zOMvO9eEXDTQ7qCxSjv3xEc3Fw4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=IqloykAa; arc=none smtp.client-ip=209.85.222.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	s=arc-20240116; t=1754037938; c=relaxed/simple;
+	bh=53CXIjjipJvoRE5YjIFYA1vbsN3OX+CmaSPcp23/iww=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=QItwHc0p3A+1BP9SZLouLxHw8aiY++xsI1LIPm6wIidCd/81pAFhyc3LLl0UGoDs8ty+ekaK4ogYd5b5LNRiDsJvRoTMCVG3QvmvZvxWPU99YVoC1o9/lX9aWSq1N8HZw1wlPu2Rfc7igMSTq20G8/2JBC6wMbVoNipHy0kNwJg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=mWucHn4c; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="IqloykAa"
-Received: by mail-qk1-f169.google.com with SMTP id af79cd13be357-7e32cf22fdfso110939485a.0
-        for <linux-mmc@vger.kernel.org>; Thu, 31 Jul 2025 09:43:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1753980202; x=1754585002; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=lbNcmxdMTZH4+4fKNLqLIFsAiyBnuQVAnpbsOwkpl5U=;
-        b=IqloykAa0JmYGsql1LqXJRP3bvfulMC+8YdSY2pGn9+5dVXr83vHL+mIzjbscKYa/N
-         Dmmx4pc2WJWj6hiY25E4hJ2kl6YuvAa8tQ+WsAi8aodwmQGl0UDV//84rTIAdnird+Nl
-         SvWd8QjEB+c4zZXpf4BaS8BgT7bXyX0TN23vI=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753980202; x=1754585002;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=lbNcmxdMTZH4+4fKNLqLIFsAiyBnuQVAnpbsOwkpl5U=;
-        b=A+4298sw6WalT3g6WC9ko8sEi8AqEXSCr05uToHIAZQxQHqS4etcGUVImg81sspZAb
-         3Nt8R2l2fzMErQhYYfWaOXJX2wd/ylbDZk3gbAaT6/9peTUB3pEUp8PnUfHaKqr3/tm+
-         WOLDTGW6KL10Tr8cPK1X61Z1YIoLd51WUNmNjr8XI84/48sU+YKmI4bV7O3UBwX4tbhk
-         5WJ47JePEY1sLMU04tSNBZtF8F8wwfcPj7OmZiSeEN6NPomERouQ8HtrLEqSNnQEo7oF
-         N+YmH4uyEYzIWAVmBMw4ERblYqK7ciiANVdWzRilnyyYo8+QYv5kymL5dzgg80U6jY64
-         zrZg==
-X-Forwarded-Encrypted: i=1; AJvYcCWarp5lODDThJhTxpP4r8wUXr+D6qa3jdQzcN7DgRYfhwF8KLEJtLQgNPDThgOfjP1BJXZI0365juA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwCRKY+tB0djG7OwnrUk2kC1bAorC8bynWzP8pzqi/7Yz9BhAPi
-	9LHIUNA4vSswSJyCqxNVyMzfrcKCbfhrYrcN2qh27cvxhDIWMhpYqbMdC35mKbUzrg==
-X-Gm-Gg: ASbGncs6Xawgq4yEVzyEm+8g05D/QLRl1WagHns2kY+tNT8A/VFlBr3cg9xnnPjAQJA
-	OPnrH+1bAYQSdVf5MNB09YJJVYhy6XpPHobNAQoKL6SqylOW6+6h9J2ZYXP5YBiOK2Yp2aPtTZz
-	M4+k153QkOUIg9r36ydWcDXLBfTJDkVw3KWhREbAOJwhAWl1OSn2lNlhGViBc8le3tSG+etgmol
-	6GEKQgbbGNcwJGRaqJrxuiWWR7kN8oJt1SNHuGhPvnZP3tE8z/iXVzXmA9Y/Td50EpENsOxeWP/
-	GBB/rR1U/BM3TLA+YqQdyUNnRqQ+5F9r25gE20FFQmt/lS84OOucAXMvAI+0LDbNTeH9B0wxwtV
-	OOzG6dnFIQcLxPP6zs1LParsjiCDSCCpSbU560etqaGUPAd1E2vI/BzczxnwFAA==
-X-Google-Smtp-Source: AGHT+IEMxmTL/RtEarc2NI77icOmXLVKI0iWLz9cXU1YYoJIxr439vc8qqp/uBQFKFpa+CTDFCVyAA==
-X-Received: by 2002:a05:620a:430a:b0:7cd:3b02:b6e4 with SMTP id af79cd13be357-7e66ef7f617mr1153543485a.1.1753980201850;
-        Thu, 31 Jul 2025 09:43:21 -0700 (PDT)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-7e67f5bfdb9sm107416485a.29.2025.07.31.09.43.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 31 Jul 2025 09:43:21 -0700 (PDT)
-Message-ID: <f85367bb-566e-43d6-b405-b896c49c9aa7@broadcom.com>
-Date: Thu, 31 Jul 2025 09:43:18 -0700
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="mWucHn4c"
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56VNmVvg020327;
+	Fri, 1 Aug 2025 08:45:31 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=q40+7nJL3GRFgrcv6retxxUNLSbQ+VR2TMo
+	mWWntMqA=; b=mWucHn4ckKERrdy7oXMN1pXWHKv6Xz0jmfan2kG+DZZ18BG3LkA
+	2WrkVGjDTuqO8VwHj4x4pBzqgRlyDqXrmrdHn+K13mpCQsj3CH9C9S+p7qov85RZ
+	358kgH8+09682SfIiEgYp46XlFc5Diwdv2x7yQAQJ2deDISTo/6AZKld6tP/jBrZ
+	DtGBaB2uQQCx8fLY8D81rb92roPo88ZWRfaIhv7XHgCjNKYBxBAt0arhHw2k/449
+	bGIOCVjYNacU29PonJfK6oDtLqBH+7v2iSRjsa9EKSuKYppeES5TWTeKxV+yTEiW
+	nP7kO9C67XL1T3ZGlJP5Ma/MnFca3XUi7eQ==
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 484p1atys6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 01 Aug 2025 08:45:30 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 5718jRHb016877;
+	Fri, 1 Aug 2025 08:45:27 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 4859bemgs6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 01 Aug 2025 08:45:27 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 5718jQX5016869;
+	Fri, 1 Aug 2025 08:45:27 GMT
+Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.147.242.251])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 5718jQpK016868
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 01 Aug 2025 08:45:26 +0000
+Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2339771)
+	id 6FC455C4; Fri,  1 Aug 2025 14:15:25 +0530 (+0530)
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_cang@quicinc.com, quic_nguyenb@quicinc.com,
+        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+        quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com,
+        Sarthak Garg <quic_sartgarg@quicinc.com>
+Subject: [PATCH V4 0/4] Add level shifter support for qualcomm SOC's
+Date: Fri,  1 Aug 2025 14:15:14 +0530
+Message-Id: <20250801084518.2259767-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/4] mmc: sdhci-brcmstb: rpmb sharing by claiming host for
- TZOS
-To: Adrian Hunter <adrian.hunter@intel.com>,
- Kamal Dasu <kamal.dasu@broadcom.com>, andersson@kernel.org,
- baolin.wang@linux.alibaba.com, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, ulf.hansson@linaro.org
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-remoteproc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <20250711154221.928164-1-kamal.dasu@broadcom.com>
- <d542b1fa-6e2a-4af1-a14b-eee32a7f3de6@intel.com>
-Content-Language: en-US
-From: Florian Fainelli <florian.fainelli@broadcom.com>
-Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
- xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
- M0Txqn1tOWoIc4QUl6Ggqf5KP6FoRkCrgMMTnUAINsINYXK+3OLe7HjP10h2jDRX4Ajs4Ghs
- JrZOBru6rH0YrgAhr6O5gG7NE1jhly+EsOa2MpwOiXO4DE/YKZGuVe6Bh87WqmILs9KvnNrQ
- PcycQnYKTVpqE95d4M824M5cuRB6D1GrYovCsjA9uxo22kPdOoQRAu5gBBn3AdtALFyQj9DQ
- KQuc39/i/Kt6XLZ/RsBc6qLs+p+JnEuPJngTSfWvzGjpx0nkwCMi4yBb+xk7Hki4kEslABEB
- AAHNMEZsb3JpYW4gRmFpbmVsbGkgPGZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tPsLB
- IQQQAQgAywUCZWl41AUJI+Jo+hcKAAG/SMv+fS3xUQWa0NryPuoRGjsA3SAUAAAAAAAWAAFr
- ZXktdXNhZ2UtbWFza0BwZ3AuY29tjDAUgAAAAAAgAAdwcmVmZXJyZWQtZW1haWwtZW5jb2Rp
- bmdAcGdwLmNvbXBncG1pbWUICwkIBwMCAQoFF4AAAAAZGGxkYXA6Ly9rZXlzLmJyb2FkY29t
- Lm5ldAUbAwAAAAMWAgEFHgEAAAAEFQgJChYhBNXZKpfnkVze1+R8aIExtcQpvGagAAoJEIEx
- tcQpvGagWPEH/2l0DNr9QkTwJUxOoP9wgHfmVhqc0ZlDsBFv91I3BbhGKI5UATbipKNqG13Z
- TsBrJHcrnCqnTRS+8n9/myOF0ng2A4YT0EJnayzHugXm+hrkO5O9UEPJ8a+0553VqyoFhHqA
- zjxj8fUu1px5cbb4R9G4UAySqyeLLeqnYLCKb4+GklGSBGsLMYvLmIDNYlkhMdnnzsSUAS61
- WJYW6jjnzMwuKJ0ZHv7xZvSHyhIsFRiYiEs44kiYjbUUMcXor/uLEuTIazGrE3MahuGdjpT2
- IOjoMiTsbMc0yfhHp6G/2E769oDXMVxCCbMVpA+LUtVIQEA+8Zr6mX0Yk4nDS7OiBlvOwE0E
- U8AbwQEIAKxr71oqe+0+MYCc7WafWEcpQHFUwvYLcdBoOnmJPxDwDRpvU5LhqSPvk/yJdh9k
- 4xUDQu3rm1qIW2I9Puk5n/Jz/lZsqGw8T13DKyu8eMcvaA/irm9lX9El27DPHy/0qsxmxVmU
- pu9y9S+BmaMb2CM9IuyxMWEl9ruWFS2jAWh/R8CrdnL6+zLk60R7XGzmSJqF09vYNlJ6Bdbs
- MWDXkYWWP5Ub1ZJGNJQ4qT7g8IN0qXxzLQsmz6tbgLMEHYBGx80bBF8AkdThd6SLhreCN7Uh
- IR/5NXGqotAZao2xlDpJLuOMQtoH9WVNuuxQQZHVd8if+yp6yRJ5DAmIUt5CCPcAEQEAAcLB
- gQQYAQIBKwUCU8AbwgUbDAAAAMBdIAQZAQgABgUCU8AbwQAKCRCTYAaomC8PVQ0VCACWk3n+
- obFABEp5Rg6Qvspi9kWXcwCcfZV41OIYWhXMoc57ssjCand5noZi8bKg0bxw4qsg+9cNgZ3P
- N/DFWcNKcAT3Z2/4fTnJqdJS//YcEhlr8uGs+ZWFcqAPbteFCM4dGDRruo69IrHfyyQGx16s
- CcFlrN8vD066RKevFepb/ml7eYEdN5SRALyEdQMKeCSf3mectdoECEqdF/MWpfWIYQ1hEfdm
- C2Kztm+h3Nkt9ZQLqc3wsPJZmbD9T0c9Rphfypgw/SfTf2/CHoYVkKqwUIzI59itl5Lze+R5
- wDByhWHx2Ud2R7SudmT9XK1e0x7W7a5z11Q6vrzuED5nQvkhAAoJEIExtcQpvGagugcIAJd5
- EYe6KM6Y6RvI6TvHp+QgbU5dxvjqSiSvam0Ms3QrLidCtantcGT2Wz/2PlbZqkoJxMQc40rb
- fXa4xQSvJYj0GWpadrDJUvUu3LEsunDCxdWrmbmwGRKqZraV2oG7YEddmDqOe0Xm/NxeSobc
- MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
- 7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
- 95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
-In-Reply-To: <d542b1fa-6e2a-4af1-a14b-eee32a7f3de6@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: TpKgz92ofiSmeUPeXWRFYE5n9mNrbThb
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODAxMDA2MCBTYWx0ZWRfX5TbJU3kbnR6L
+ ZVu0TPtgME6mLiRc2Wgzl8cv6ZvEB1tMr0V/9dotIXrSFqb18miluxF4t7Y7CdyokQfNX5GgBZF
+ tsKrw8fuxbSvurbNsK3SIcvbFZ5mQqMjQ0UWO9R5Wt7hXZv5w3MsPdbFfv+kGu+JT/XHA+9rh6S
+ QffGXa1ltFkAxwUHwJTh6U3bOdFFqCi8Zfg4pOpYh0C/jXQVKVS228dgPhq2HblaTr1pm2ezns4
+ 7QTLeTckU1gU04L+nT31neFc4hRYiAUwXp56gX+Ql6ZfIPhGoXgNYq8kTo5//2fjSKza4q4znL0
+ 2YWBdQtJuHlG7h5l6oCqTnRjZ8cguXLhGlKppz54QS55N2Hpmh1qiOHLk4qcll7nkcdMoHMQ7bW
+ 6hOMd7VN+L6FOK3LvJp233sgc44VsW4whEd6T+l0aMGPPjt98hhClqnLcSZFMz2XufQ0w77F
+X-Proofpoint-GUID: TpKgz92ofiSmeUPeXWRFYE5n9mNrbThb
+X-Authority-Analysis: v=2.4 cv=KtNN2XWN c=1 sm=1 tr=0 ts=688c7eaa cx=c_pps
+ a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
+ a=2OwXVqhp2XgA:10 a=7dyTyeQR3BJvcbYslWQA:9
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-01_02,2025-07-31_03,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 priorityscore=1501 lowpriorityscore=0 suspectscore=0
+ adultscore=0 mlxlogscore=999 bulkscore=0 spamscore=0 impostorscore=0
+ mlxscore=0 malwarescore=0 phishscore=0 classifier=spam authscore=0 authtc=n/a
+ authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2508010060
 
-On 7/28/25 02:11, Adrian Hunter wrote:
-> On 11/07/2025 18:42, Kamal Dasu wrote:
->> This patch adds support to claim host for TZOS RPMB access and synchronized
->> access to the controller hardware using hwspinlock framework.
->> To achieve this Linux OS and the secure TZOS make use of:
->> - shared hardware semaphore register
->> - a set of SDIO shared work registers and
->> - IPI interrupt registers
->>
->> The currently running OS that needs access to the controller puts itself in its
->> slot of work register and if its next in line it can try to grab the hardware
->> semaphore and complete its mmc requests. The shared work registers indicate next
->> in queue to access the controller, and current agent in the queue. Next agent
->> queue state is changed under the hwspinlock is owned by the current OS accessing
->> the controller hardware before release the semaphore, send and receive IPI
->> interrupts between linux and secure world are used to indicate completion of
->> transaction to the waiting OS. TZOS has its own RPMB driver which accesses
->> partition when it wants to read/write RPMB frames. Current implementation
->> assumes Linux and TZOS as the two work agents.
->>
->> This patchset is an alternative method to initial RFC patch:
->> [PATCH RFC 0/3] mmc: sdhci-brcmstb: Add rpmb sharing support	
->> https://lkml.org/lkml/2025/2/6/1711
-> 
-> Does it address Ulf's comments? i.e.
-> 
-> 	https://lore.kernel.org/all/CAPDyKFrCjo8gGnxmXWP6V39N+b1o62VQH9zwMUNb2_+D3-qrdw@mail.gmail.com/
+Add level shifter support for qualcomm SOC's.
 
-If you are referring to the fact that Linux is the exclusive owner of 
-the eMMC controller, then no, that is still not what is being done here, 
-but we did respond as to why this is done that way, and there was no 
-subsequent question or comments on my respond to Ulf:
+- Changed from v3
+    - As suggested by Krzysztof Kozlowski moved the property from the
+    SoC-level DTS to the board-level DTS.
+    - Revised the commit messages to clearly explain its board-specific.
 
-https://lore.kernel.org/all/6328fe8d-c4ea-4945-b6ba-d994403121b5@broadcom.com/
+- Changed from v2
+    - As suggested by Konrad Dybcio and Ulf Hansson redesigned logic
+      to introduce a new DT property max-sd-hs-frequency and override
+      the hs_max_dtr accordingly in sd.c file.
+
+- Changed from v1
+    - As suggested by Krzysztof Kozlowski redesigned logic to use
+    compatible property for adding this level shifter support.
+    - Addressed Adrian Hunter comments on V1 with resepect to
+      checkpatch.
+    - Cleared the bits first and then set bits in
+      sdhci_msm_execute_tuning as suggested by Adrian Hunter.
+    - Upated the if condition logic in msm_set_clock_rate_for_bus_mode
+      as suggested by Adrian Hunter.
+
+Sarthak Garg (4):
+  mmc: sdhci-msm: Enable tuning for SDR50 mode for SD card
+  dt-bindings: mmc: controller: Add max-sd-hs-frequency property
+  mmc: core: Introduce a new flag max-sd-hs-frequency
+  arm64: dts: qcom: sm8550: Remove SDR104/SDR50 broken capabilities
+
+ .../bindings/mmc/mmc-controller-common.yaml       | 10 ++++++++++
+ arch/arm64/boot/dts/qcom/sm8550-hdk.dts           |  1 +
+ arch/arm64/boot/dts/qcom/sm8550-mtp.dts           |  1 +
+ .../dts/qcom/sm8550-sony-xperia-yodo-pdx234.dts   |  1 +
+ arch/arm64/boot/dts/qcom/sm8550.dtsi              |  3 ---
+ drivers/mmc/core/host.c                           |  2 ++
+ drivers/mmc/core/sd.c                             |  2 +-
+ drivers/mmc/host/sdhci-msm.c                      | 15 +++++++++++++++
+ include/linux/mmc/host.h                          |  1 +
+ 9 files changed, 32 insertions(+), 4 deletions(-)
+
 -- 
-Florian
+2.34.1
+
