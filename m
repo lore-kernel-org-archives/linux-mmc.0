@@ -1,48 +1,32 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D37AF22DFB6;
-	Fri,  1 Aug 2025 10:41:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 15895236457;
+	Fri,  1 Aug 2025 13:03:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754044904; cv=none; b=FaEmBw9xwsvTCCdFEFg7CkSEcLeh1aRoB8jm/T0PhBb3Cy7O+Yy12+RAFjB9I04+qBq/b8KKskCn/rnR2BWyatlOcoQ/GibIy9pZuLNXBd4p9hQkL/hPz+klT7hXHO9k3fhhRStx/ZGqLcyooXWqe4/5n8OX35NsKE96T6zNMoQ=
+	t=1754053431; cv=none; b=K32cRbno+DcilwQfvKhj4iOhdP5AGDf/VXzS/wFpvc4n9DMqSZpxD/ElcmJA2lsDtc1aXI6J8/8iTPjdQAAnhK3QSlUslytws9W/e3qJrZMt8WOCTZ5zraUID6g5W9ymDWm0+PHGXda00FmiBJOrmuH+TrseVDWaTNhYrUzZZYw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754044904; c=relaxed/simple;
-	bh=5pvFkk4M0D3F7KembLaqQ1XWTFU85kOzY64csmV08IM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=SA8DvHVovgoXlex4rCiAesr6lkyDb+rIfCYxG27SVsnKLzjLI8V6OVh0JiwjJC/tZwyUEYOYEGHEAqMxu/rfSmIL3T6B+zn8c5Iw041D/hQKn/JoeB2HaxqQ85vi99Eimaj8GnlI1niyjpbNTIdDuFIMvaSpAo20EsEIlNJ7Qe4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=ApYHJCrr; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1754053431; c=relaxed/simple;
+	bh=nLmqkVS9iQjauEy4rNIt9xm6IznauJc6LTLgt+KT0/g=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=p866id5XfedQ0ntmnCdJwPEHZ7ghaRHC77A5Tlk3aucQD9VIsQ7wQzUufrVZXOV0uJjMCp8W3er07Trjm7G9yPbz0/buu97lk+rQRd/SmU2TCWUU9yOaKwHlxLUcHEygJgcLxzLvkL4IcQJzgxmLeJfG0MmlcPSopXAksIlwIVc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=HXbUItXc; arc=none smtp.client-ip=13.77.154.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="ApYHJCrr"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5718l7gh018752;
-	Fri, 1 Aug 2025 10:41:38 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	/+RdDrgUH+Vdx9T0/jAKO/bQwDPOwb8XbAtxLj4mtto=; b=ApYHJCrrS0ZUjaHo
-	Sgs0v7KsHnNlmr4V7Q6QWW4F6EWmq7mcEqqKd6CrC8q5lTakTNPabbQpIG0yG0Yx
-	OLZ+KMggBSQ5KouzX8OCJodQzD/nKsLS+DvIM2n/L4dOnyjLdB8pGBQfnQoYgd/P
-	30DajWuEFkYtw04DycyMiW9poesRytboKze1UcNMkEaYfdW4kREI4zMVVZtazbci
-	iP7vJ4SWmpP4TTKzRPT4fGfuTVHCN5UEsWoEEM/Z020MDOieEpDlyStsVDWNrSAR
-	Xj0abnVpqPKfI4PVHx4bgaQFF/9oDJy29IGnhVz2bO6Zv+cAqSHi/WP+aixi6DSl
-	tz2aVQ==
-Received: from nasanppmta04.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 487jwgg2jm-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 01 Aug 2025 10:41:38 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 571AfbBL019403
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 1 Aug 2025 10:41:37 GMT
-Received: from [10.217.216.168] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Fri, 1 Aug
- 2025 03:41:32 -0700
-Message-ID: <b43cb2fd-c583-4383-9b2a-c186ac1c4e09@quicinc.com>
-Date: Fri, 1 Aug 2025 16:11:29 +0530
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="HXbUItXc"
+Received: from [100.79.129.131] (unknown [4.194.122.136])
+	by linux.microsoft.com (Postfix) with ESMTPSA id 3AF0E2018F0C;
+	Fri,  1 Aug 2025 06:03:46 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 3AF0E2018F0C
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+	s=default; t=1754053429;
+	bh=k47eOFDtblZTXzV626qQ8FC8NdB08Nl0iHc9y8piA/g=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=HXbUItXcptdZ0a55CSqNyeflST4IwBaAaATj+QdjdEiskHAWN6qxBeiU+Q0Vo3Rsn
+	 CMWWlnB4ubqKeRLqNfrJWa9icwyvZzfyX4gvJwyhdW8l9c7lV1nrsGFuwHkPgG3+u/
+	 OpHZSRpEAtopRXQg1v2wXggorwfrvJzEq5pzxhh0=
+Message-ID: <300b5c01-33bc-4ce6-942c-e32b6e55e5c7@linux.microsoft.com>
+Date: Fri, 1 Aug 2025 18:33:44 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,106 +34,49 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V4 2/4] dt-bindings: mmc: controller: Add
- max-sd-hs-frequency property
-To: Krzysztof Kozlowski <krzk@kernel.org>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski
-	<krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson
-	<andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
-        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
-        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>
-References: <20250801084518.2259767-1-quic_sartgarg@quicinc.com>
- <20250801084518.2259767-3-quic_sartgarg@quicinc.com>
- <98bd97cd-0d34-4bb6-869f-68feec1de68e@kernel.org>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Ensure CD logic stabilization
+ before power-up
+To: "Potthuri, Sai Krishna" <sai.krishna.potthuri@amd.com>,
+ Adrian Hunter <adrian.hunter@intel.com>, "Simek, Michal"
+ <michal.simek@amd.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-arm-kernel@lists.infradead.org"
+ <linux-arm-kernel@lists.infradead.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+ "git (AMD-Xilinx)" <git@amd.com>,
+ "saikrishna12468@gmail.com" <saikrishna12468@gmail.com>
+References: <20250721095357.3783222-1-sai.krishna.potthuri@amd.com>
+ <cf04326b-4de4-4637-aa3b-fa1c358b9ae4@intel.com>
+ <BY5PR12MB425804611D4B29ADDCC82906DB59A@BY5PR12MB4258.namprd12.prod.outlook.com>
 Content-Language: en-US
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-In-Reply-To: <98bd97cd-0d34-4bb6-869f-68feec1de68e@kernel.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+From: Prasanna Kumar T S M <ptsm@linux.microsoft.com>
+In-Reply-To: <BY5PR12MB425804611D4B29ADDCC82906DB59A@BY5PR12MB4258.namprd12.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Authority-Analysis: v=2.4 cv=WvgrMcfv c=1 sm=1 tr=0 ts=688c99e2 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=COk6AnOGAAAA:8
- a=UzVGX4NoDC1Cv9CGhM8A:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-ORIG-GUID: 11oSBsGxa4mah6YDsE2f3rjzvtrjavF8
-X-Proofpoint-GUID: 11oSBsGxa4mah6YDsE2f3rjzvtrjavF8
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODAxMDA3NyBTYWx0ZWRfX+rqFE58m5D0W
- kPpBDzQwVp2HgxZCBbcml9YUvgmggFvAbsGTxZrAJD2MaMC3kb4LW2zCx7okKVvdsI9NYDpee8r
- goRRcxC4m6Nr4d4GajqGScOswWukkmk8am/WahKe4cYIrX4A6VTNJnsC6PfohmNxxKVgLjnWQO5
- hmgNXd1LrObyM0V8tlFI7O/rES93EjqwEqGcnAtYNMlmYNQcTHXyRpoXvZ20lrGohoC7EhVwTco
- GdwD7qL3T18qO1jppTnzhQaYy1Us3Bxq/6Kon+Hn2fbeF4xAJI7D2doaQ55WPAMDiN2Nt2xamuf
- 1yaFbCgAyI75TZAQ1P4vFztcPA4GfIfyfgXCIO6Z2KfiEq367JmO8527w1O4km8dry/se4QOYON
- TmoOULaC3KPTyQ6uJ3CaGZwTsUrv3fUwasY1/b90HQ7V+X5AH51Ddhi78TMrDmb/z1u4p4/W
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-08-01_03,2025-07-31_03,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 bulkscore=0 clxscore=1015 suspectscore=0 lowpriorityscore=0
- spamscore=0 mlxscore=0 impostorscore=0 adultscore=0 malwarescore=0
- priorityscore=1501 mlxlogscore=908 classifier=spam authscore=0 authtc=n/a
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2508010077
 
+Hi Sai Krishna,
 
+On 25-07-2025 11:19, Potthuri, Sai Krishna wrote:
+>> Will this work with all Arasan variants?
+> Yes, this is expected to work across all Arasan variants that comply with the standard
+> SDHCI register definitions. The SDHCI_CD_STABLE bit is defined in both the
+> standard SDHCI specification and Arasan's user guide.
 
-On 8/1/2025 2:30 PM, Krzysztof Kozlowski wrote:
-> On 01/08/2025 10:45, Sarthak Garg wrote:
->> Some platforms may require limiting the maximum frequency used in SD
->> High-Speed (HS) mode due to board-level hardware constraints. For
->> example, certain boards may include level shifters or other components
->> that cannot reliably operate at the default 50 MHz HS frequency.
->>
->> Introduce a new optional device tree property max-sd-hs-frequency to
->> limit the maximum frequency (in Hz) used for SD cards operating in
->> High-Speed (HS) mode.
->>
->> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
->> ---
->>   .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++++++++
->>   1 file changed, 10 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->> index 9a7235439759..6c2529b976d1 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->> @@ -93,6 +93,16 @@ properties:
->>       minimum: 400000
->>       maximum: 384000000
->>   
->> +  max-sd-hs-frequency:
-> 
-> Use standard unit suffixes. s/frequency/hz/
-> 
-> 
-> 
+As SDHCI_CD_STABLE bit is defined in SDHCI specification, why are you 
+making a driver specific fix? Is this problem specific to Arasan eMMC? 
+If not, does it make sense to make this a framework level change instead 
+of a driver specific change?
 
-Sure will update this name to max-sd-hs-hz in V5.
+Given that you are planning to add a quirk, doing this in common code 
+would be better.
 
->> +    $ref: /schemas/types.yaml#/definitions/uint32
->> +    description: |
->> +      Maximum frequency (in Hz) to be used for SD cards operating in
->> +      High-Speed (HS) mode. This is useful for board-specific limitations,
->> +      such as level shifters or others where the card cannot reliably
->> +      operate at the default 50 MHz HS frequency.
-> 
-> Don't repeat constraints in free form text.
-> 
-> default:
-> 
-> 
+> On Xilinx/AMD Versal and ZynqMP platforms, the CD stable bit is typically set within
+> a few milliseconds. However, to be on the safer side and ensure compatibility across
+> all Arasan variants, a timeout of 1 second is added.
+> Please let me know if you prefer to increase the timeout or if this logic should be
+> enabled by a platform specific quirk.
 
-Sure will remove min/max constraints and add default: 50000000 in V5.
+Thanks,
+
+Prasanna Kumar
+
