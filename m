@@ -1,128 +1,143 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21F532AEE4;
-	Fri,  1 Aug 2025 09:02:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80BDD1F429C;
+	Fri,  1 Aug 2025 09:45:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754038963; cv=none; b=h4csnZGDx18YYsHFF/Zc3OUyXYf531JwJJCQfrQE50tFN7HEWaClTeYC/2Dei/qYhpZBdTvNrRZLCeTPDQbbA+t2iognwm+4ghfWty7KrHZD3rddN6+0sIiFG/w2GFSpKNlxP+7hxCUyismBxDx5XeH+fnuyExKWtBS9JVZ5bME=
+	t=1754041527; cv=none; b=JCZSqpbGPBDiZM0QP2tQX6QhmuiK7Tp27UYhIPSQk7l2QoYaMSej9LKlu6rX+Elu/qr3M6m4ZG0ykUe6QH6Q/YKfF2NkbtFYWxj80RUhL6HmuoA1/wcQJoVQexpLGGHs2vDxfgEhVwF23Mc+lfWt2s+YB8MEQJDjr6e+VGzUJBY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754038963; c=relaxed/simple;
-	bh=fRMOyufIEXVEaKCQpCMnOWAqoIDEvmejadmzskAzqNg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=E/VMGKnDjKT1bneosUvImCuM7l4oQ0CrGGizFTNVVRlkybzIk9LGbb8Ss3CTomGtvXm/nqgTwHAxth6SqSgaUl4O8GUWdDa9t7N2gy47YkG+xnJSeOmnbi9YpxgIQRbdXiXtzaqYURgRuXhqPC1ZRxQ3S0i+rXXsCHVX4dgmuXM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rZQahik9; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rZQahik9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 351E5C4CEE7;
-	Fri,  1 Aug 2025 09:02:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1754038962;
-	bh=fRMOyufIEXVEaKCQpCMnOWAqoIDEvmejadmzskAzqNg=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=rZQahik9u3lWQMfMFPRbBmhsvEoguc2RiCfsfxb0CDITpu0E1SLHVzYnGdG9savQV
-	 3FxWC61X1HbclX97asI2Bo6oMxewuvw7WBXD/6Cc0UHWZKxW9zyDx4VEoggSfKYPWn
-	 PP9AztKIfR0eYaXQDjyOwPMYgQJgcQYIHn3LJLNRPHKXSvxsN2vp3E64jVZ7fQamBX
-	 HRTyCY2iFYoiSCRzb0N53mtEIqcO2j4SaiXX2aIjxSfnYEymbxypeG+R6CCMlEBx5N
-	 90fb8Ivmtv1Xh+hcqFfc/f8PYtzNkoa6xseZq5HF0vlvLgrL2mDRgMz2eLsi3zdpPs
-	 1EP6t5QX5EUJA==
-Message-ID: <69f2807c-9a28-4b31-97cc-2756f0ab9fd4@kernel.org>
-Date: Fri, 1 Aug 2025 11:02:36 +0200
+	s=arc-20240116; t=1754041527; c=relaxed/simple;
+	bh=KcfImWe2ntjQGDLAHqEzuW4roK41FAxxJvrp+z88SKo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LpDJmdahNhXD2kmcjxef+UIS/VdXxdJHLGDjuv9U9pHo7yr8Hg9Z0M7F1P9NKHhlhSZkAiWqx410BjjmOsekUdPQ3qjmsxQgPlq9DdnuHzEA0IAQiD++EY/4JLQ9nsAXXBwFbeTxa2V0Qnh5BqGFie3W4QSMmYOUfk1KffzdrUQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: 35293e966ebc11f0b29709d653e92f7d-20250801
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.45,REQID:ca5dd5f4-92d7-4c45-b2d7-7cf99f183c14,IP:0,U
+	RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+	:release,TS:-5
+X-CID-META: VersionHash:6493067,CLOUDID:8ece0e5e0af63e6f711ca3f2e1c044df,BulkI
+	D:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0|50,EDM:-3,IP:nil,UR
+	L:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,S
+	PR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 0,NGT
+X-CID-BAS: 0,NGT,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-UUID: 35293e966ebc11f0b29709d653e92f7d-20250801
+Received: from node4.com.cn [(10.44.16.170)] by mailgw.kylinos.cn
+	(envelope-from <lijiayi@kylinos.cn>)
+	(Generic MTA)
+	with ESMTP id 613529967; Fri, 01 Aug 2025 17:45:07 +0800
+Received: from node4.com.cn (localhost [127.0.0.1])
+	by node4.com.cn (NSMail) with SMTP id 20842160038C1;
+	Fri,  1 Aug 2025 17:45:07 +0800 (CST)
+X-ns-mid: postfix-688C8CA2-9711391225
+Received: from kylin-pc.. (unknown [172.25.130.133])
+	by node4.com.cn (NSMail) with ESMTPA id CA7A2160038C0;
+	Fri,  1 Aug 2025 09:45:04 +0000 (UTC)
+From: Jiayi Li <lijiayi@kylinos.cn>
+To: maximlevitsky@gmail.com
+Cc: gregkh@linuxfoundation.org,
+	kai.heng.feng@canonical.com,
+	oakad@yahoo.com,
+	ulf.hansson@linaro.org,
+	luoqiu@kylinsec.com.cn,
+	viro@zeniv.linux.org.uk,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	jiayi_dec@163.com,
+	Jiayi Li <lijiayi@kylinos.cn>
+Subject: [PATCH] memstick: Fix deadlock by moving removing flag earlier
+Date: Fri,  1 Aug 2025 17:44:59 +0800
+Message-ID: <20250801094459.318184-1-lijiayi@kylinos.cn>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V4 4/4] arm64: dts: qcom: sm8550: Remove SDR104/SDR50
- broken capabilities
-To: Sarthak Garg <quic_sartgarg@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>,
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
- quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
- quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
-References: <20250801084518.2259767-1-quic_sartgarg@quicinc.com>
- <20250801084518.2259767-5-quic_sartgarg@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250801084518.2259767-5-quic_sartgarg@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 
-On 01/08/2025 10:45, Sarthak Garg wrote:
-> The kernel now handles level shifter limitations affecting SD card
-> modes, making it unnecessary to explicitly disable SDR104 and SDR50
-> capabilities in the device tree.
-> 
-> However, due to board-specific hardware constraints particularly related
-> to level shifter in this case the maximum frequency for SD High-Speed
-> (HS) mode must be limited to 37.5 MHz to ensure reliable operation of SD
-> card in HS mode. This is achieved using the max-sd-hs-frequency property
-> in the board DTS.
-> 
-> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> ---
->  arch/arm64/boot/dts/qcom/sm8550-hdk.dts                     | 1 +
->  arch/arm64/boot/dts/qcom/sm8550-mtp.dts                     | 1 +
->  arch/arm64/boot/dts/qcom/sm8550-sony-xperia-yodo-pdx234.dts | 1 +
->  arch/arm64/boot/dts/qcom/sm8550.dtsi                        | 3 ---
->  4 files changed, 3 insertions(+), 3 deletions(-)
-> 
+The existing memstick core patch: commit 62c59a8786e6 ("memstick: Skip
+allocating card when removing host") sets host->removing in
+memstick_remove_host(),but still exists a critical time window where
+memstick_check can run after host->eject is set but before removing is se=
+t.
 
-This will break MMC for all of the users and nothing in commit msg or
-cover letter explains that or mentions merging strategy.
+In the rtsx_usb_ms driver, the problematic sequence is:
 
-Exactly this case is covered by your internal guideline, no? Please read it.
+rtsx_usb_ms_drv_remove:          memstick_check:
+  host->eject =3D true
+  cancel_work_sync(handle_req)     if(!host->removing)
+  ...                              memstick_alloc_card()
+                                     memstick_set_rw_addr()
+                                       memstick_new_req()
+                                         rtsx_usb_ms_request()
+                                           if(!host->eject)
+                                           skip schedule_work
+                                       wait_for_completion()
+  memstick_remove_host:                [blocks indefinitely]
+    host->removing =3D true
+    flush_workqueue()
+    [block]
 
-Best regards,
-Krzysztof
+1. rtsx_usb_ms_drv_remove sets host->eject =3D true
+2. cancel_work_sync(&host->handle_req) runs
+3. memstick_check work may be executed here <-- danger window
+4. memstick_remove_host sets removing =3D 1
+
+During this window (step 3), memstick_check calls memstick_alloc_card,
+which may indefinitely waiting for mrq_complete completion that will
+never occur because rtsx_usb_ms_request sees eject=3Dtrue and skips
+scheduling work, memstick_set_rw_addr waits forever for completion.
+
+This causes a deadlock when memstick_remove_host tries to flush_workqueue=
+,
+waiting for memstick_check to complete, while memstick_check is blocked
+waiting for mrq_complete completion.
+
+Fix this by setting removing=3Dtrue at the start of rtsx_usb_ms_drv_remov=
+e,
+before any work cancellation. This ensures memstick_check will see the
+removing flag immediately and exit early, avoiding the deadlock.
+
+Fixes: 62c59a8786e6 ("memstick: Skip allocating card when removing host")
+Signed-off-by: Jiayi Li <lijiayi@kylinos.cn>
+---
+ drivers/memstick/core/memstick.c    | 1 -
+ drivers/memstick/host/rtsx_usb_ms.c | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/mem=
+stick.c
+index 043b9ec756ff..95e65f4958f2 100644
+--- a/drivers/memstick/core/memstick.c
++++ b/drivers/memstick/core/memstick.c
+@@ -555,7 +555,6 @@ EXPORT_SYMBOL(memstick_add_host);
+  */
+ void memstick_remove_host(struct memstick_host *host)
+ {
+-	host->removing =3D 1;
+ 	flush_workqueue(workqueue);
+ 	mutex_lock(&host->lock);
+ 	if (host->card)
+diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/=
+rtsx_usb_ms.c
+index 3878136227e4..5b5e9354fb2e 100644
+--- a/drivers/memstick/host/rtsx_usb_ms.c
++++ b/drivers/memstick/host/rtsx_usb_ms.c
+@@ -812,6 +812,7 @@ static void rtsx_usb_ms_drv_remove(struct platform_de=
+vice *pdev)
+ 	int err;
+=20
+ 	host->eject =3D true;
++	msh->removing =3D true;
+ 	cancel_work_sync(&host->handle_req);
+ 	cancel_delayed_work_sync(&host->poll_card);
+=20
+--=20
+2.47.1
+
