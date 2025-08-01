@@ -1,82 +1,152 @@
-Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 15895236457;
-	Fri,  1 Aug 2025 13:03:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
+Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DCCB269AFB;
+	Fri,  1 Aug 2025 14:14:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754053431; cv=none; b=K32cRbno+DcilwQfvKhj4iOhdP5AGDf/VXzS/wFpvc4n9DMqSZpxD/ElcmJA2lsDtc1aXI6J8/8iTPjdQAAnhK3QSlUslytws9W/e3qJrZMt8WOCTZ5zraUID6g5W9ymDWm0+PHGXda00FmiBJOrmuH+TrseVDWaTNhYrUzZZYw=
+	t=1754057688; cv=none; b=jPDLjN2DajTcywkzFvn1wb5ZrE940V8qV8T8pT4JhuzGndZQXljPkdsGiMLhJmz1Ky89UY9Euy/CvFkBBnq9bUecJHLhdj5o7Jipp5IxWQCYpiatSCU9IEcBpUruj7BzGar98HEageFnPynekLpfc8wXEb80eond6nueWc4HuuQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754053431; c=relaxed/simple;
-	bh=nLmqkVS9iQjauEy4rNIt9xm6IznauJc6LTLgt+KT0/g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=p866id5XfedQ0ntmnCdJwPEHZ7ghaRHC77A5Tlk3aucQD9VIsQ7wQzUufrVZXOV0uJjMCp8W3er07Trjm7G9yPbz0/buu97lk+rQRd/SmU2TCWUU9yOaKwHlxLUcHEygJgcLxzLvkL4IcQJzgxmLeJfG0MmlcPSopXAksIlwIVc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=HXbUItXc; arc=none smtp.client-ip=13.77.154.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
+	s=arc-20240116; t=1754057688; c=relaxed/simple;
+	bh=X8bDc3mEF7A+jWR5/Mtli4JbbUPbP/jIzLwqkvh83zk=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=D+UwoXC9j7axk86GxTW1y2DHaAcFAPGCjcD5m+tj1Ye4wVZaxZhKB6/TUIlWcwSQ/IAXYOLV0zBKfHMf1GiZj8gzgeVdJrOhNCnJdcwVNr2ZDjM1tOtXuU0b0i0SHZ7Dan0JHXyjlw/SzAZNOEFtPWb8jr/5jVjtxTuJ61IcEtQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=i6N0iP0B; arc=none smtp.client-ip=37.205.8.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="HXbUItXc"
-Received: from [100.79.129.131] (unknown [4.194.122.136])
-	by linux.microsoft.com (Postfix) with ESMTPSA id 3AF0E2018F0C;
-	Fri,  1 Aug 2025 06:03:46 -0700 (PDT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 3AF0E2018F0C
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-	s=default; t=1754053429;
-	bh=k47eOFDtblZTXzV626qQ8FC8NdB08Nl0iHc9y8piA/g=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=HXbUItXcptdZ0a55CSqNyeflST4IwBaAaATj+QdjdEiskHAWN6qxBeiU+Q0Vo3Rsn
-	 CMWWlnB4ubqKeRLqNfrJWa9icwyvZzfyX4gvJwyhdW8l9c7lV1nrsGFuwHkPgG3+u/
-	 OpHZSRpEAtopRXQg1v2wXggorwfrvJzEq5pzxhh0=
-Message-ID: <300b5c01-33bc-4ce6-942c-e32b6e55e5c7@linux.microsoft.com>
-Date: Fri, 1 Aug 2025 18:33:44 +0530
+	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="i6N0iP0B"
+DKIM-Signature: a=rsa-sha256; bh=xg6p9F3CDjFSzSKSOC4/hpt/VNg4sb7Ukef6jTBb/9A=;
+ c=relaxed/relaxed; d=dujemihanovic.xyz;
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
+ i=@dujemihanovic.xyz; s=default; t=1754057669; v=1; x=1754489669;
+ b=i6N0iP0BaDHQLYoTpRhu7egSc/yKlvNRbElMuGsRpE7zntaKAQ1+33b1r6asHzmD1aWpomZ3
+ 2o3BPdTPTFI5mQFgjwNyLiYWEZTB74htkkRxFxeBc0qfmc5PE+E9Pi9LCeKiXD/WdoIF9ZybHLf
+ PIKoCUfTZGLQMWeUfLN9ZkiXm6p+OATclFc6EkOmXySJqCg0W0G4gxNVF03tz4muok/Pjgi9DMe
+ hwlgEXWv8M2ELBwLiOGQI+0TLFavPSoiu2pgrsiq40t4xJKYvS8+E4vXrTb+4Tm6974bWL59zbq
+ K8p9xtd4EbKdm3tsCZsPi9UJNwQuMG+Kpd5j0BdyxRLqw==
+Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
+ ESMTPS id 2cca7fc8; Fri, 01 Aug 2025 16:14:29 +0200
+From: =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
+Date: Fri, 01 Aug 2025 16:14:15 +0200
+Subject: [PATCH RFC v2 1/2] dt-bindings: mmc: sdhci-pxa: add state_uhs
+ pinctrl
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Ensure CD logic stabilization
- before power-up
-To: "Potthuri, Sai Krishna" <sai.krishna.potthuri@amd.com>,
- Adrian Hunter <adrian.hunter@intel.com>, "Simek, Michal"
- <michal.simek@amd.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- "linux-arm-kernel@lists.infradead.org"
- <linux-arm-kernel@lists.infradead.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "git (AMD-Xilinx)" <git@amd.com>,
- "saikrishna12468@gmail.com" <saikrishna12468@gmail.com>
-References: <20250721095357.3783222-1-sai.krishna.potthuri@amd.com>
- <cf04326b-4de4-4637-aa3b-fa1c358b9ae4@intel.com>
- <BY5PR12MB425804611D4B29ADDCC82906DB59A@BY5PR12MB4258.namprd12.prod.outlook.com>
-Content-Language: en-US
-From: Prasanna Kumar T S M <ptsm@linux.microsoft.com>
-In-Reply-To: <BY5PR12MB425804611D4B29ADDCC82906DB59A@BY5PR12MB4258.namprd12.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Message-Id: <20250801-pxav3-uhs-v2-1-afc1c428c776@dujemihanovic.xyz>
+References: <20250801-pxav3-uhs-v2-0-afc1c428c776@dujemihanovic.xyz>
+In-Reply-To: <20250801-pxav3-uhs-v2-0-afc1c428c776@dujemihanovic.xyz>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Karel Balej <balejk@matfyz.cz>, David Wronek <david@mainlining.org>, 
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, phone-devel@vger.kernel.org, 
+ ~postmarketos/upstreaming@lists.sr.ht, 
+ =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2667;
+ i=duje@dujemihanovic.xyz; s=20240706; h=from:subject:message-id;
+ bh=X8bDc3mEF7A+jWR5/Mtli4JbbUPbP/jIzLwqkvh83zk=;
+ b=owGbwMvMwCW21nBykGv/WmbG02pJDBk9p4/4vskRf7H2/pumTTsil4g9/yYTUyNWzSo7g+F8g
+ H3H1vasjlIWBjEuBlkxRZbc/47XeD+LbN2evcwAZg4rE8gQBi5OAZiI+EZGhiXyOXE+F3QWNR8I
+ CrrfOSHxZrzxQYv82IlcPc4PS8v49jMy3K2uuP/90A3m4otf5ESEFy+QPm6tyJ23SehoDg/LL5a
+ 7LAA=
+X-Developer-Key: i=duje@dujemihanovic.xyz; a=openpgp;
+ fpr=6DFF41D60DF314B5B76BA630AD319352458FAD03
 
-Hi Sai Krishna,
+On the pxav3 controller, increasing the drive strength of the data pins
+might be required to maintain stability on fast bus clocks (above 100
+MHz). Add a state_uhs pinctrl to allow this.
 
-On 25-07-2025 11:19, Potthuri, Sai Krishna wrote:
->> Will this work with all Arasan variants?
-> Yes, this is expected to work across all Arasan variants that comply with the standard
-> SDHCI register definitions. The SDHCI_CD_STABLE bit is defined in both the
-> standard SDHCI specification and Arasan's user guide.
+The existing state_cmd_gpio pinctrl is changed to apply only on pxav1 as
+it's unneeded on the other controllers.
 
-As SDHCI_CD_STABLE bit is defined in SDHCI specification, why are you 
-making a driver specific fix? Is this problem specific to Arasan eMMC? 
-If not, does it make sense to make this a framework level change instead 
-of a driver specific change?
+Signed-off-by: Duje Mihanović <duje@dujemihanovic.xyz>
+---
+Changes in v2:
+- Newlines between properties in if:
+---
+ .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 47 +++++++++++++++++-----
+ 1 file changed, 37 insertions(+), 10 deletions(-)
 
-Given that you are planning to add a quirk, doing this in common code 
-would be better.
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+index 4869ddef36fd89265a1bfe96bb9663b553ac5084..fba1cc50fdf07cc25d42f45512c385a9b8207b9b 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+@@ -30,6 +30,41 @@ allOf:
+           maxItems: 1
+         reg-names:
+           maxItems: 1
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: mrvl,pxav1-mmc
++    then:
++      properties:
++        pinctrl-names:
++          description:
++            Optional for supporting PXA168 SDIO IRQ errata to switch CMD pin between
++            SDIO CMD and GPIO mode.
++          items:
++            - const: default
++            - const: state_cmd_gpio
++
++        pinctrl-1:
++          description:
++            Should switch CMD pin to GPIO mode as a high output.
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: mrvl,pxav3-mmc
++    then:
++      properties:
++        pinctrl-names:
++          description:
++            Optional for increasing stability of the controller at fast bus clocks.
++          items:
++            - const: default
++            - const: state_uhs
++
++        pinctrl-1:
++          description:
++            Should switch the drive strength of the data pins to high.
+ 
+ properties:
+   compatible:
+@@ -62,21 +97,13 @@ properties:
+       - const: io
+       - const: core
+ 
+-  pinctrl-names:
+-    description:
+-      Optional for supporting PXA168 SDIO IRQ errata to switch CMD pin between
+-      SDIO CMD and GPIO mode.
+-    items:
+-      - const: default
+-      - const: state_cmd_gpio
++  pinctrl-names: true
+ 
+   pinctrl-0:
+     description:
+       Should contain default pinctrl.
+ 
+-  pinctrl-1:
+-    description:
+-      Should switch CMD pin to GPIO mode as a high output.
++  pinctrl-1: true
+ 
+   mrvl,clk-delay-cycles:
+     description: Specify a number of cycles to delay for tuning.
 
-> On Xilinx/AMD Versal and ZynqMP platforms, the CD stable bit is typically set within
-> a few milliseconds. However, to be on the safer side and ensure compatibility across
-> all Arasan variants, a timeout of 1 second is added.
-> Please let me know if you prefer to increase the timeout or if this logic should be
-> enabled by a platform specific quirk.
-
-Thanks,
-
-Prasanna Kumar
+-- 
+2.50.1
 
