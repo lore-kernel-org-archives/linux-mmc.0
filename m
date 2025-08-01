@@ -1,150 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E48E43169;
-	Fri,  1 Aug 2025 10:02:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A9511C7013
+	for <linux-mmc@vger.kernel.org>; Fri,  1 Aug 2025 10:24:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754042565; cv=none; b=rQ++v6Q5tuDkg7iCPL1XvniiNmhPoFZXvGCA0Ex4C9IGhcQ4bEFcepEID4eDryfWli3Vl/OlLK/LkOGXgiwmOvZPcyj6i5uGyBAIla2yWu532KahGA3XDlh1Lf507WINu3sirahr56InwyWfJyVyzi1iIdVQ0yUInfSfXuJMAcE=
+	t=1754043852; cv=none; b=qbb0UB88SOARFHBgvOsUoXDNf3I38QSDBDp6r5K5VrN7+7q7MVVgpnuc6f0KKVPKmR7Z7nfcb8RDOaekpPDLfjciOOgr2Oalp1SmTfLScLlD7bovCtMj0CXZbwIdKuI3aHesHhoBvZVtT7PavYOcHcTsD42Jnil+21hi+jfgEk0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754042565; c=relaxed/simple;
-	bh=PQTdbHWk76OpgeQjhGtCUlTLwNSWy0TCHQwpI0BRDXU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MlT0qAfLgCaDVShZDz8cbrGsxnIYZxcvqP0aeZbT273JfrcTFyfBq3rqoyrO6olCGA/DvTN471x5i6cRCnt7xPhia0pHCy9F1/l1wAaN94ZtneKKz0LyDzwdhE2UrSSLPxqI1zCeRjiHXlCscnboiDqfCYgn/yvC/sX6GcjRuik=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=JQEQUW7p; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1754043852; c=relaxed/simple;
+	bh=vKCSw0E2ePFsj0DRcEy+IILC2vV4loJjGETUqoJyinQ=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=rWUiPwrE8bWb9a6/vyJVa+2EYmHFiGLyPBXeFHx0p0qYYFEr5YXMbBdtiLfDi0eJ+bv0HCzyn484VW/uXbcLoZ96m1I3WcGFwRFdtk9M6i8zkh8cna7c5m+o4R9BRz0W9ee9fIapjObHZh2oO72Ow4uoXwu6UfvN52T5MzYP6xc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b=bA3z4UI5; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="JQEQUW7p"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67CC9C4CEF4;
-	Fri,  1 Aug 2025 10:02:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1754042564;
-	bh=PQTdbHWk76OpgeQjhGtCUlTLwNSWy0TCHQwpI0BRDXU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=JQEQUW7pL2l9snCH+ToOQ7UjW/i020662mBYW+l2Q62jMcNfVJDUM8OWt5Rv+5zDN
-	 cQsCZyFS/YJBeaqDN10xm0JyEOY2EudDuaRdkV1eKtvY/YcF2h9hw3B0SxyPU73oVc
-	 6StnirPifFnWHwR8+GPAEZXq2AtWX8qugz1obnE0=
-Date: Fri, 1 Aug 2025 11:02:41 +0100
-From: Greg KH <gregkh@linuxfoundation.org>
-To: Jiayi Li <lijiayi@kylinos.cn>
-Cc: maximlevitsky@gmail.com, kai.heng.feng@canonical.com, oakad@yahoo.com,
-	ulf.hansson@linaro.org, luoqiu@kylinsec.com.cn,
-	viro@zeniv.linux.org.uk, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, jiayi_dec@163.com
-Subject: Re: [PATCH] memstick: Fix deadlock by moving removing flag earlier
-Message-ID: <2025080132-pacifist-spiritism-0cbe@gregkh>
-References: <20250801094459.318184-1-lijiayi@kylinos.cn>
+	dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b="bA3z4UI5"
+X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 571ANr3oA2766057, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=realtek.com; s=dkim;
+	t=1754043833; bh=vKCSw0E2ePFsj0DRcEy+IILC2vV4loJjGETUqoJyinQ=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:MIME-Version;
+	b=bA3z4UI5jlAWIHDHRiT/qvkhND/vnFRJlUUXM4hCwO6aa6Jy0QHELdC6lLUqg2Edt
+	 wuCMh+51nuv10mtM3D78p5htCTjS0rHhchXkfWm0B8ibxuf9Vk4IlUbwULq/9l+wz5
+	 NTRM2UtmyQToNNXxCP9DAgm1v0sCqXAtr4png+UbqBAh73Y5Bd8IgxFEmwkqxuWi3V
+	 S2CEVJ1rB/C69ztHA6wp6Ae5XVqKB6X6d6Auq7Yo6SI97tCdxUkVOI/75UukcDWM34
+	 ySMqTj0hts0tycnHRoaatpQspgd3XKCcOhiSEqOAUZGa/qZp4Y/xdxDrY8x9mhm3u4
+	 VW8T82A0JEPAw==
+Received: from mail.realtek.com (rtkexhmbs02.realtek.com.tw[172.21.6.41])
+	by rtits2.realtek.com.tw (8.15.2/3.13/5.93) with ESMTPS id 571ANr3oA2766057
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 1 Aug 2025 18:23:53 +0800
+Received: from RTEXMBS03.realtek.com.tw (172.21.6.96) by
+ RTKEXHMBS02.realtek.com.tw (172.21.6.41) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.11; Fri, 1 Aug 2025 18:23:54 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXMBS03.realtek.com.tw (172.21.6.96) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Fri, 1 Aug 2025 18:23:53 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547]) by
+ RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547%5]) with mapi id
+ 15.01.2507.035; Fri, 1 Aug 2025 18:23:53 +0800
+From: Ricky WU <ricky_wu@realtek.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+        Laurent Bigonville via Bugspray Bot
+	<bugbot@kernel.org>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: rtsx_pci driver is blocking s2idle
+Thread-Topic: rtsx_pci driver is blocking s2idle
+Thread-Index: AQHcATpU+K0+nCzNvE+e3eB6tfVwZ7RNl5dg
+Date: Fri, 1 Aug 2025 10:23:53 +0000
+Message-ID: <220fe444bef94ace80c8518bafa0746b@realtek.com>
+References: <20250723-b220362c0-fd0fdb0c86b1@bugzilla.kernel.org>
+ <CAPDyKFp-4zmeitLD7hp6SvkokEZE9e8-JvPBOowRHQ0CADY3Nw@mail.gmail.com>
+In-Reply-To: <CAPDyKFp-4zmeitLD7hp6SvkokEZE9e8-JvPBOowRHQ0CADY3Nw@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+x-kse-serverinfo: RTEXMBS03.realtek.com.tw, 9
+x-kse-antispam-interceptor-info: fallback
+x-kse-antivirus-interceptor-info: fallback
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250801094459.318184-1-lijiayi@kylinos.cn>
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-On Fri, Aug 01, 2025 at 05:44:59PM +0800, Jiayi Li wrote:
-> The existing memstick core patch: commit 62c59a8786e6 ("memstick: Skip
-> allocating card when removing host") sets host->removing in
-> memstick_remove_host(),but still exists a critical time window where
-> memstick_check can run after host->eject is set but before removing is set.
-> 
-> In the rtsx_usb_ms driver, the problematic sequence is:
-> 
-> rtsx_usb_ms_drv_remove:          memstick_check:
->   host->eject = true
->   cancel_work_sync(handle_req)     if(!host->removing)
->   ...                              memstick_alloc_card()
->                                      memstick_set_rw_addr()
->                                        memstick_new_req()
->                                          rtsx_usb_ms_request()
->                                            if(!host->eject)
->                                            skip schedule_work
->                                        wait_for_completion()
->   memstick_remove_host:                [blocks indefinitely]
->     host->removing = true
->     flush_workqueue()
->     [block]
-> 
-> 1. rtsx_usb_ms_drv_remove sets host->eject = true
-> 2. cancel_work_sync(&host->handle_req) runs
-> 3. memstick_check work may be executed here <-- danger window
-> 4. memstick_remove_host sets removing = 1
-> 
-> During this window (step 3), memstick_check calls memstick_alloc_card,
-> which may indefinitely waiting for mrq_complete completion that will
-> never occur because rtsx_usb_ms_request sees eject=true and skips
-> scheduling work, memstick_set_rw_addr waits forever for completion.
-> 
-> This causes a deadlock when memstick_remove_host tries to flush_workqueue,
-> waiting for memstick_check to complete, while memstick_check is blocked
-> waiting for mrq_complete completion.
-> 
-> Fix this by setting removing=true at the start of rtsx_usb_ms_drv_remove,
-> before any work cancellation. This ensures memstick_check will see the
-> removing flag immediately and exit early, avoiding the deadlock.
-> 
-> Fixes: 62c59a8786e6 ("memstick: Skip allocating card when removing host")
-> Signed-off-by: Jiayi Li <lijiayi@kylinos.cn>
-> ---
->  drivers/memstick/core/memstick.c    | 1 -
->  drivers/memstick/host/rtsx_usb_ms.c | 1 +
->  2 files changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-> index 043b9ec756ff..95e65f4958f2 100644
-> --- a/drivers/memstick/core/memstick.c
-> +++ b/drivers/memstick/core/memstick.c
-> @@ -555,7 +555,6 @@ EXPORT_SYMBOL(memstick_add_host);
->   */
->  void memstick_remove_host(struct memstick_host *host)
->  {
-> -	host->removing = 1;
->  	flush_workqueue(workqueue);
->  	mutex_lock(&host->lock);
->  	if (host->card)
-> diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
-> index 3878136227e4..5b5e9354fb2e 100644
-> --- a/drivers/memstick/host/rtsx_usb_ms.c
-> +++ b/drivers/memstick/host/rtsx_usb_ms.c
-> @@ -812,6 +812,7 @@ static void rtsx_usb_ms_drv_remove(struct platform_device *pdev)
->  	int err;
->  
->  	host->eject = true;
-> +	msh->removing = true;
->  	cancel_work_sync(&host->handle_req);
->  	cancel_delayed_work_sync(&host->poll_card);
->  
-> -- 
-> 2.47.1
-> 
-
-Hi,
-
-This is the friendly patch-bot of Greg Kroah-Hartman.  You have sent him
-a patch that has triggered this response.  He used to manually respond
-to these common problems, but in order to save his sanity (he kept
-writing the same thing over and over, yet to different people), I was
-created.  Hopefully you will not take offence and will fix the problem
-in your patch and resubmit it so that it can be accepted into the Linux
-kernel tree.
-
-You are receiving this message because of the following common error(s)
-as indicated below:
-
-- You have marked a patch with a "Fixes:" tag for a commit that is in an
-  older released kernel, yet you do not have a cc: stable line in the
-  signed-off-by area at all, which means that the patch will not be
-  applied to any older kernel releases.  To properly fix this, please
-  follow the documented rules in the
-  Documentation/process/stable-kernel-rules.rst file for how to resolve
-  this.
-
-If you wish to discuss this problem further, or you have questions about
-how to resolve this issue, please feel free to respond to this email and
-Greg will reply once he has dug out from the pending patches received
-from other developers.
-
-thanks,
-
-greg k-h's patch email bot
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24gPHVs
+Zi5oYW5zc29uQGxpbmFyby5vcmc+DQo+IFNlbnQ6IFdlZG5lc2RheSwgSnVseSAzMCwgMjAyNSA2
+OjExIFBNDQo+IFRvOiBMYXVyZW50IEJpZ29udmlsbGUgdmlhIEJ1Z3NwcmF5IEJvdCA8YnVnYm90
+QGtlcm5lbC5vcmc+OyBSaWNreSBXVQ0KPiA8cmlja3lfd3VAcmVhbHRlay5jb20+DQo+IENjOiBs
+aW51eC1tbWNAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBydHN4X3BjaSBkcml2ZXIg
+aXMgYmxvY2tpbmcgczJpZGxlDQo+IA0KPiANCj4gRXh0ZXJuYWwgbWFpbCA6IFRoaXMgZW1haWwg
+b3JpZ2luYXRlZCBmcm9tIG91dHNpZGUgdGhlIG9yZ2FuaXphdGlvbi4gRG8gbm90DQo+IHJlcGx5
+LCBjbGljayBsaW5rcywgb3Igb3BlbiBhdHRhY2htZW50cyB1bmxlc3MgeW91IHJlY29nbml6ZSB0
+aGUgc2VuZGVyIGFuZA0KPiBrbm93IHRoZSBjb250ZW50IGlzIHNhZmUuDQo+IA0KPiANCj4gDQo+
+ICsgUmlja3kNCj4gDQo+IE9uIFdlZCwgMjMgSnVsIDIwMjUgYXQgMTU6MDksIExhdXJlbnQgQmln
+b252aWxsZSB2aWEgQnVnc3ByYXkgQm90DQo+IDxidWdib3RAa2VybmVsLm9yZz4gd3JvdGU6DQo+
+ID4NCj4gPiBMYXVyZW50IEJpZ29udmlsbGUgYWRkZWQgYW4gYXR0YWNobWVudCBvbiBLZXJuZWwu
+b3JnIEJ1Z3ppbGxhOg0KPiA+DQo+ID4gQ3JlYXRlZCBhdHRhY2htZW50IDMwODQwNA0KPiA+IHMw
+aXgtc2VsZnRlc3QtdG9vbCAtcyBvdXRwdXQNCj4gPg0KPiA+IEhlbGxvLA0KPiA+DQo+ID4gSSd2
+ZSBhIERlbGwgbGF0aXR1ZGUgNTUzMCB0aGF0IGhhcyBubyBTMyBzdXNwZW5kLCBpdCBvbmx5IGhh
+cyBzMmlkbGUNCj4gPg0KPiA+IEkgaW5pdGlhbGx5IG9wZW5lZCBidWcgIzIxODUwMCByZWdhcmRp
+bmcgdGhlIGxhY2sgb2Ygc3VwcG9ydCBmb3IgUzMuDQo+ID4gV2hpbGUgdHJ5aW5nIHRvIGRlYnVn
+IHRoaXMsIEkgc3RhcnQgdXNpbmcgczBpeC1zZWxmdGVzdC10b29sIGFuZCBJDQo+ID4gcmVhbGl6
+ZWQgdGhhdCB0aGUgZHJpdmVyIGZvciBSZWFsdGVrIFNlbWljb25kdWN0b3IgQ28uLCBMdGQuIFJU
+UzUyNUENCj4gPiBQQ0kgRXhwcmVzcyBDYXJkIFJlYWRlciB3YXMgYmxvY2tpbmcgdGhlIHN1c3Bl
+bmQgKHJ0c3hfcGNpKF9zZG1tYykgaXMNCj4gPiB0aGVuIG5vdCBsb2FkZWQpDQo+ID4NCj4gPiBJ
+ZiBJIGRpc2FibGUgdGhlIFNEIGNhcmQgcmVhZGVyIGluIHRoZSBCaW9zLCB0aGUgc2NyaXB0IGlz
+IG1vcmUgaGFwcHkNCj4gPiAoaXQgYWxzbyBjb21wbGFpbnMgYWJvdXQgdGhlIFJhaWQvaW50ZWwg
+UlNUIHRoaW5nLCBidXQgSSBndWVzcyB0aGF0J3MNCj4gPiBhbiBvdGhlciBpc3N1ZSkNCj4gPg0K
+PiA+IElzIHRoZXJlIGEgYnVnIGluIHJ0c3hfcGNpKF9zZG1tYyk/DQo+ID4NCg0KSGkgTGF1cmVu
+dCwNCg0KQ2FuIHlvdSBoZWxwIHRvIGdldCBQQ0kgY29uZmlndXJhdGlvbiBzcGFjZT8NClR5cGlu
+ZyBjbWQgKEI6RDpGIGlzIG91ciBwY2kgcmVhZGVyIHBjaSBhZGRyZXNzKToNCnN1ZG8gbHNwY2kg
+LXMgQjpEOkYgLXh4eHggDQoNCldlIG5lZWQgdG8gY2hlY2sgdGhlIHBjaSBzZXR0aW5nIGZyb20g
+QklPUyBvbiB5b3VyIE5CDQoNClRoYW5rIHlvdQ0KDQo+ID4gRmlsZTogMjAyNTA3MjItMTYtMjct
+czBpeC1vdXRwdXQubG9nICh0ZXh0L3BsYWluKQ0KPiA+IFNpemU6IDEuODUgS2lCDQo+ID4gTGlu
+azogaHR0cHM6Ly9idWd6aWxsYS5rZXJuZWwub3JnL2F0dGFjaG1lbnQuY2dpP2lkPTMwODQwNA0K
+PiA+IC0tLQ0KPiA+IHMwaXgtc2VsZnRlc3QtdG9vbCAtcyBvdXRwdXQNCj4gPg0KPiA+IFlvdSBj
+YW4gcmVwbHkgdG8gdGhpcyBtZXNzYWdlIHRvIGpvaW4gdGhlIGRpc2N1c3Npb24uDQo+ID4gLS0N
+Cj4gPiBEZWV0LWRvb3QtZG90LCBJIGFtIGEgYm90Lg0KPiA+IEtlcm5lbC5vcmcgQnVnemlsbGEg
+KGJ1Z3NwcmF5IDAuMS1kZXYpDQo+ID4NCj4gDQo+IFRoYW5rcyBmb3IgcmVwb3J0aW5nIQ0KPiAN
+Cj4gSSBoYXZlIGxvb3BlZCBpbiBSaWNreSB0byBzZWUgaWYgaGUgbWF5IGhhdmUgc29tZSB0aG91
+Z2h0cyBhcm91bmQgdGhpcw0KPiBwcm9ibGVtLg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUN
+Cg==
