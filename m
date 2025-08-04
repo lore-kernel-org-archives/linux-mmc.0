@@ -1,176 +1,150 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24D4A1DE4E5;
-	Mon,  4 Aug 2025 00:41:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD157173;
+	Mon,  4 Aug 2025 01:36:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754268093; cv=none; b=To6hyijp0sE0Eu7hrEnyXws5riYrHZ/Qk980r0EM4w+RuvhccJWcHP6YKh6do3C7tcqGQnQ62fBR71XN6o++kUZd8xEcA4sCtPhhwjbXCSj6Y7MPNPk3Zbf8fKwKAsYg3zegt7lxwifbvPDc1yCSO1NQF2TX54uqrnYzCdMveaQ=
+	t=1754271382; cv=none; b=WLXNro0DjTp7c3Sb1rgP+Qqp0hOxA8ys2dWB/2etap77jWwJpp4sdwuq1DSCWev3rjY5ee2nbWYzjIagwoZ0oyjkYL16EkKEIChm3f62fXMjlferSJov6hkzQjloqNkVBerSIkEQiwI9dUsaTzAub3DL34Klab6rAJDxmhd6ZvA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754268093; c=relaxed/simple;
-	bh=vC7vSeY36xv5PztBy+MW+tCjXSZNLdfKjupopw86AlE=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=uHKWAb7d+KdXd+svA4w/dZ8e+wgw15E3q0eOc2H8vI+wtkR+18Nc71SKA2g4QoTe3+1Iv1U1h26a4lcdWlNovfvF2QkuWhJmCJpMfmTH2JMDO/ebNWIj50RzOs+aS/duzljI0ipB4diiYPJMJndMLfZiw94A7FJtmRsNbVaem3M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TKZ31nuy; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TKZ31nuy"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5A59C4CEF0;
-	Mon,  4 Aug 2025 00:41:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1754268093;
-	bh=vC7vSeY36xv5PztBy+MW+tCjXSZNLdfKjupopw86AlE=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=TKZ31nuyRAGUwz/JP7hooRDl53GCGrEmWVKlxePeUZYUXZJkm+mKXOBSMyP3gLnc5
-	 a7cuRXHcKW4JeHKQhfgtJbvGnMvM8Gjn89ymNZHw1zRy3K+/0fTmL6Gbg0EeGq70/t
-	 WUDSs4LniCiDAlNbjw+fhIIP4J5JPYy8sARPh4aTRsureBSBplWSgJQbghxCkjCkSL
-	 unRDQwSmNzmvVJHlmpM9peT1dOimxk1jBJ6XaxtplHhr2HhsQPPhvRqpiiHNgss8Gz
-	 3UsqW3Zdd/EZXCKxUmpEfKgYpRJ24vn4oFfgzgi1dqqUbWJHeH0zbhZpkLf1m5YNmD
-	 8jAAdNqknCzNw==
-From: Sasha Levin <sashal@kernel.org>
-To: patches@lists.linux.dev,
+	s=arc-20240116; t=1754271382; c=relaxed/simple;
+	bh=/Keh7XwihFhkH7/p1VNnfhrg98Ok167PyVFtl/lP6qk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Snqu5mQBbbPCxaBOY8IjLETj111uG7g8iaROybEYvIbUPM1D499f0zsmy7pMuEpF8IU2XYeBuOZKuvdC9Jr+xpQ6U1Z1M5yGvEvnP+wGBT7IMvcZa33C+bFJIKw1GSGk10avdLakvOmJYgm7HWh1lRE8DnBV6yl1heBSzwrxGCc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: 67ddb0b070d311f0b29709d653e92f7d-20250804
+X-CID-CACHE: Type:Local,Time:202508040930+08,HitQuantity:1
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.45,REQID:19f2735c-2a6f-4e51-8ffe-2ea9f6d9a637,IP:0,U
+	RL:0,TC:0,Content:-25,EDM:25,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTI
+	ON:release,TS:0
+X-CID-META: VersionHash:6493067,CLOUDID:a23135678690de963462a8cb6c5c13f3,BulkI
+	D:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0|50,EDM:5,IP:nil,URL
+	:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,SP
+	R:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 0,NGT
+X-CID-BAS: 0,NGT,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-UUID: 67ddb0b070d311f0b29709d653e92f7d-20250804
+Received: from node4.com.cn [(10.44.16.170)] by mailgw.kylinos.cn
+	(envelope-from <lijiayi@kylinos.cn>)
+	(Generic MTA)
+	with ESMTP id 258496427; Mon, 04 Aug 2025 09:36:13 +0800
+Received: from node4.com.cn (localhost [127.0.0.1])
+	by node4.com.cn (NSMail) with SMTP id E304416001A03;
+	Mon,  4 Aug 2025 09:36:12 +0800 (CST)
+X-ns-mid: postfix-68900E8C-734670263
+Received: from kylin-pc.. (unknown [172.25.130.133])
+	by node4.com.cn (NSMail) with ESMTPA id 172B616001A01;
+	Mon,  4 Aug 2025 01:36:10 +0000 (UTC)
+From: Jiayi Li <lijiayi@kylinos.cn>
+To: maximlevitsky@gmail.com
+Cc: gregkh@linuxfoundation.org,
+	kai.heng.feng@canonical.com,
+	oakad@yahoo.com,
+	ulf.hansson@linaro.org,
+	luoqiu@kylinsec.com.cn,
+	viro@zeniv.linux.org.uk,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	jiayi_dec@163.com,
+	Jiayi Li <lijiayi@kylinos.cn>,
 	stable@vger.kernel.org
-Cc: Sarthak Garg <quic_sartgarg@quicinc.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Sasha Levin <sashal@kernel.org>,
-	linux-arm-msm@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.10 21/39] mmc: sdhci-msm: Ensure SD card power isn't ON when card removed
-Date: Sun,  3 Aug 2025 20:40:23 -0400
-Message-Id: <20250804004041.3628812-21-sashal@kernel.org>
-X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250804004041.3628812-1-sashal@kernel.org>
-References: <20250804004041.3628812-1-sashal@kernel.org>
+Subject: [PATCH v2] memstick: Fix deadlock by moving removing flag earlier
+Date: Mon,  4 Aug 2025 09:36:04 +0800
+Message-ID: <20250804013604.1311218-1-lijiayi@kylinos.cn>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-X-stable-base: Linux 5.10.240
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
+The existing memstick core patch: commit 62c59a8786e6 ("memstick: Skip
+allocating card when removing host") sets host->removing in
+memstick_remove_host(),but still exists a critical time window where
+memstick_check can run after host->eject is set but before removing is se=
+t.
 
-[ Upstream commit db58532188ebf51d52b1d7693d9e94c76b926e9f ]
+In the rtsx_usb_ms driver, the problematic sequence is:
 
-Many mobile phones feature multi-card tray designs, where the same
-tray is used for both SD and SIM cards. If the SD card is placed
-at the outermost location in the tray, the SIM card may come in
-contact with SD card power-supply while removing the tray, possibly
-resulting in SIM damage.
+rtsx_usb_ms_drv_remove:          memstick_check:
+  host->eject =3D true
+  cancel_work_sync(handle_req)     if(!host->removing)
+  ...                              memstick_alloc_card()
+                                     memstick_set_rw_addr()
+                                       memstick_new_req()
+                                         rtsx_usb_ms_request()
+                                           if(!host->eject)
+                                           skip schedule_work
+                                       wait_for_completion()
+  memstick_remove_host:                [blocks indefinitely]
+    host->removing =3D true
+    flush_workqueue()
+    [block]
 
-To prevent that, make sure the SD card is really inserted by reading
-the Card Detect pin state. If it's not, turn off the power in
-sdhci_msm_check_power_status() and also set the BUS_FAIL power state
-on the controller as part of pwr_irq handling for BUS_ON request.
+1. rtsx_usb_ms_drv_remove sets host->eject =3D true
+2. cancel_work_sync(&host->handle_req) runs
+3. memstick_check work may be executed here <-- danger window
+4. memstick_remove_host sets removing =3D 1
 
-Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Link: https://lore.kernel.org/r/20250701100659.3310386-1-quic_sartgarg@quicinc.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+During this window (step 3), memstick_check calls memstick_alloc_card,
+which may indefinitely waiting for mrq_complete completion that will
+never occur because rtsx_usb_ms_request sees eject=3Dtrue and skips
+scheduling work, memstick_set_rw_addr waits forever for completion.
+
+This causes a deadlock when memstick_remove_host tries to flush_workqueue=
+,
+waiting for memstick_check to complete, while memstick_check is blocked
+waiting for mrq_complete completion.
+
+Fix this by setting removing=3Dtrue at the start of rtsx_usb_ms_drv_remov=
+e,
+before any work cancellation. This ensures memstick_check will see the
+removing flag immediately and exit early, avoiding the deadlock.
+
+Fixes: 62c59a8786e6 ("memstick: Skip allocating card when removing host")
+Signed-off-by: Jiayi Li <lijiayi@kylinos.cn>
+Cc: stable@vger.kernel.org
+
 ---
+v1 -> v2:
+Added Cc: stable@vger.kernel.org
+---
+ drivers/memstick/core/memstick.c    | 1 -
+ drivers/memstick/host/rtsx_usb_ms.c | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
 
-LLM Generated explanations, may be completely bogus:
-
-**Backport Status: YES**
-
-This commit should be backported to stable kernel trees for the
-following reasons:
-
-1. **Hardware Damage Prevention**: This is a critical safety fix that
-   prevents potential hardware damage to SIM cards. The commit message
-   clearly describes a real-world scenario where SD card power can
-   damage SIM cards in multi-card tray designs when the tray is removed.
-   This is a serious hardware safety issue that affects end users'
-   devices.
-
-2. **Bug Fix Nature**: The commit fixes a specific bug where SD card
-   power remains ON even when the card is physically removed. The code
-   changes show two key additions:
-   - In `sdhci_msm_check_power_status()`: Added check at lines 1625-1629
-     that turns off power (writes 0 to SDHCI_POWER_CONTROL) when card is
-     not detected (`!mmc->ops->get_cd(mmc)`)
-   - In `sdhci_msm_handle_pwr_irq()`: Added check at lines 1689-1694
-     that sets BUS_FAIL state when attempting to power on the bus while
-     card is not present
-
-3. **Small and Contained Fix**: The changes are minimal and well-
-   contained:
-   - Only 13 lines of actual code changes
-   - Changes are localized to the sdhci-msm driver
-   - No architectural changes or new features
-   - Simple logic additions that check card presence before power
-     operations
-
-4. **Low Risk of Regression**: The fix adds defensive checks that only
-   activate when:
-   - A card is physically not present (detected via get_cd)
-   - Power operations are being performed
-   - This doesn't affect normal operation when cards are properly
-     inserted
-
-5. **Platform-Specific Critical Fix**: This affects Qualcomm MSM-based
-   devices which are widely used in mobile phones. The multi-card tray
-   design mentioned is common in many smartphones, making this a
-   widespread potential issue.
-
-6. **Clear Problem and Solution**: The commit has a clear problem
-   statement (SIM damage from SD power) and a straightforward solution
-   (turn off power when card is removed). This makes it easy to verify
-   the fix is correct.
-
-The commit follows stable tree rules perfectly - it's a important bugfix
-that prevents hardware damage, has minimal code changes, doesn't
-introduce new features, and has very low regression risk. This is
-exactly the type of safety-critical fix that stable kernels should
-include.
-
- drivers/mmc/host/sdhci-msm.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index c9298a986ef0..183617d56b44 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1544,6 +1544,7 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/mem=
+stick.c
+index 043b9ec756ff..95e65f4958f2 100644
+--- a/drivers/memstick/core/memstick.c
++++ b/drivers/memstick/core/memstick.c
+@@ -555,7 +555,6 @@ EXPORT_SYMBOL(memstick_add_host);
+  */
+ void memstick_remove_host(struct memstick_host *host)
  {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	struct mmc_host *mmc = host->mmc;
- 	bool done = false;
- 	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
- 	const struct sdhci_msm_offset *msm_offset =
-@@ -1601,6 +1602,12 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
- 				 "%s: pwr_irq for req: (%d) timed out\n",
- 				 mmc_hostname(host->mmc), req_type);
- 	}
-+
-+	if ((req_type & REQ_BUS_ON) && mmc->card && !mmc->ops->get_cd(mmc)) {
-+		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-+		host->pwr = 0;
-+	}
-+
- 	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
- 			__func__, req_type);
- }
-@@ -1659,6 +1666,13 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
- 		udelay(10);
- 	}
- 
-+	if ((irq_status & CORE_PWRCTL_BUS_ON) && mmc->card &&
-+	    !mmc->ops->get_cd(mmc)) {
-+		msm_host_writel(msm_host, CORE_PWRCTL_BUS_FAIL, host,
-+				msm_offset->core_pwrctl_ctl);
-+		return;
-+	}
-+
- 	/* Handle BUS ON/OFF*/
- 	if (irq_status & CORE_PWRCTL_BUS_ON) {
- 		pwr_state = REQ_BUS_ON;
--- 
-2.39.5
+-	host->removing =3D 1;
+ 	flush_workqueue(workqueue);
+ 	mutex_lock(&host->lock);
+ 	if (host->card)
+diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/=
+rtsx_usb_ms.c
+index 3878136227e4..5b5e9354fb2e 100644
+--- a/drivers/memstick/host/rtsx_usb_ms.c
++++ b/drivers/memstick/host/rtsx_usb_ms.c
+@@ -812,6 +812,7 @@ static void rtsx_usb_ms_drv_remove(struct platform_de=
+vice *pdev)
+ 	int err;
+=20
+ 	host->eject =3D true;
++	msh->removing =3D true;
+ 	cancel_work_sync(&host->handle_req);
+ 	cancel_delayed_work_sync(&host->poll_card);
+=20
+--=20
+2.47.1
 
