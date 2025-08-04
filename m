@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 687631E520F;
-	Mon,  4 Aug 2025 00:37:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F3EC1FDD;
+	Mon,  4 Aug 2025 00:39:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754267868; cv=none; b=Ll61Kqj4+qOw8LpTV5vT24gcv0Jbax8cHe8HWjrK7WRnyYOYlqJLHXZt7z92A+85N9eVKEuerQxhkTViOzq+S7+70S1et1waszSUzu3rb443t76JIbpjz/LlCpA0Cwn0rXsy3ElNi9H9Dt1fZV8/lN/8ApYKJrzNl+QodSSepi8=
+	t=1754267986; cv=none; b=V6uNcbT0ztpgfgxozKvny1Atl7gffUXz7na46TwZ+D7lWCPyPpkvNuCmw559Fm8TlaHMiOSu3p96UUtYKGNU+H8bgCZcSg/RGHawOP7GvWLw75kNyMF7KekNDXCnVyxvpWJA5w6rA36Xxix4Al3DuxfKh9Bc04lzjRDMPKkbJfo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754267868; c=relaxed/simple;
-	bh=AwVUfQa5ih7ERhnmS/vJEQJ486eKdu9yIUKLNNK5gOo=;
+	s=arc-20240116; t=1754267986; c=relaxed/simple;
+	bh=XswF4KiZnHIP/qKJwVXchPkjCYY5DrFgTGwHm+gid6M=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=IbWpJkRWUQV/x7L40Yh0HjQZb83i5sgyP+HAbsfzuUz2yMWXvbyaY130cYW2tKgEYGnmNegSp3KvOQO8RCu+LVycpxEOXw+uXvEdBsnS58wyNtiqQqdqk154ZjQQEDyEp80TGOa89Ai7V+R0OU+VRlAmgdyS7VfrZLdXI3qCfwg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=h31FU6B3; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=PA9rkEbWvxX1u7Qi3fTm34u1jWXrn6KeIulCCydyoAN23ift2tVEa4EuuNDpd9sC9EjfKfDCkpmaaOLKDBXdm0+9QVHCz16zXEgzRJKvHSfhRuhD/+0exbUsRpkdJECyMqpPQn0vPsQzNDtmphwFHe6sa7QAvDIA0XEop5FK6k0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DGT8NtKU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="h31FU6B3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DF8FEC4CEEB;
-	Mon,  4 Aug 2025 00:37:46 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DGT8NtKU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B017EC4CEF8;
+	Mon,  4 Aug 2025 00:39:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1754267868;
-	bh=AwVUfQa5ih7ERhnmS/vJEQJ486eKdu9yIUKLNNK5gOo=;
+	s=k20201202; t=1754267986;
+	bh=XswF4KiZnHIP/qKJwVXchPkjCYY5DrFgTGwHm+gid6M=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=h31FU6B3+Rl6XkKh1QLB1xp+ENoT/hHa11rfYi3AKU2/VXhluqiMy8YhIW6bf0Mlz
-	 33IgTTSOWSrDtJ2L940UxaIAU5kVMkrlX/E/Q6WVnGKUBCH7YEodXAYj2rqSDL3DRw
-	 sMHHfer9KdqCkqk9qKwreBfhe8rVN5TKK6ahEVjwSrntVc883AW1ygEX45i69rvoVx
-	 oFnLiBWfH0ECfs7zZdgnkqo+KAbDSKiZz4rlaCjl68uwwDtYDDOZfOtwXpGsPtx0cv
-	 kPDxqneTD2/ECBLBD7wSiU52Nvclc444Btmmn8kfk441wJIpZPFbVbNZLuDmprwfUW
-	 bIvQdS/EwwRsw==
+	b=DGT8NtKUOyCXFFPkJyiqUxGcJpKi12oVr2s5Hu9oOBCKPN1rpo4d9n3rwuNRSW7NU
+	 Khminiq8m3KzEzQWGlVFocs6DSS5LV/JUvKmSIRtJGs04Pj0IIb+YybGrll+7KbLkj
+	 7y9NIWXGsDTGTqdbhPw0QV6epTw8EDdC2wCLKVwdGv8XESEP17vKQxuLdReNt6h1rG
+	 VgNWHbHIs2cxzUWlzN5+/Lbd8HVkG0rHLMhm7ewOjmpg6aGua/GqvFalKaOkA5yyJj
+	 wC2wCoi8SdFOV53lFLQVzZy46U5T/CuGYkJIZ2NeXlItrPTdamVThxoPpQw63giMTB
+	 /w2EYCc35QdJg==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
@@ -35,12 +35,12 @@ Cc: Sarthak Garg <quic_sartgarg@quicinc.com>,
 	Sasha Levin <sashal@kernel.org>,
 	linux-arm-msm@vger.kernel.org,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.1 29/51] mmc: sdhci-msm: Ensure SD card power isn't ON when card removed
-Date: Sun,  3 Aug 2025 20:36:21 -0400
-Message-Id: <20250804003643.3625204-29-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.15 25/44] mmc: sdhci-msm: Ensure SD card power isn't ON when card removed
+Date: Sun,  3 Aug 2025 20:38:30 -0400
+Message-Id: <20250804003849.3627024-25-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250804003643.3625204-1-sashal@kernel.org>
-References: <20250804003643.3625204-1-sashal@kernel.org>
+In-Reply-To: <20250804003849.3627024-1-sashal@kernel.org>
+References: <20250804003849.3627024-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,7 +49,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.1.147
+X-stable-base: Linux 5.15.189
 Content-Transfer-Encoding: 8bit
 
 From: Sarthak Garg <quic_sartgarg@quicinc.com>
@@ -133,7 +133,7 @@ include.
  1 file changed, 14 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index c8488b8e2073..f507fa491c58 100644
+index 4b727754d8e3..8fb2ba20e221 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
 @@ -1560,6 +1560,7 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
