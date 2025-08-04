@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EFC418FC86;
-	Mon,  4 Aug 2025 00:32:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 995CF18A6B0;
+	Mon,  4 Aug 2025 00:35:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754267572; cv=none; b=jQ7uzCu1h7IxAAuEMHT+cT3d/eBE1ezLH3CcpcaWgZf8KFjH3/sLErooWg5TH5t8FM7JzUMaLYnDH4YR5DmQI8eldBUPHBHyWlJBNbwyV4hKu8JFnFYq4S2rGq57SLHbXzq7h6vZfSh/moVQ8hz4PvVwSphLnMFlWUD8ODI6yUg=
+	t=1754267732; cv=none; b=uOuvF8mW/prFskSHS3RC5lcUr24lEMJ29HwCm3RyYe0uXi+mhgL19aD7iFuGnYJ1dd6DKFvXhzwA7YzjzPt8MF4+5fvufJUDoN+PWDIagx2ul+CBpenCq3Jf9hRBlVpHemVIdYSJA+7swx43HEesA8I4wCLOr3O7uaMeuQz3FQQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754267572; c=relaxed/simple;
+	s=arc-20240116; t=1754267732; c=relaxed/simple;
 	bh=IGT7qNVTARoFc4ErWWeNZEbqvnUwEU7bMP6KBeGBfgc=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=PnC2rmUVI3kfzIITNmnrPbEznbFn+hNBPKOf52Zh0jkKYQgWuaW4YFQuUqpcTaP8AXjpB1921oIuX5OeeP9msBxTJOagpSl1Gz1iYKnXX8BPjzECksHIIhuGSDJ1PPJSg1Dlv77v9hivzwGUR760JII3JZgDiBT3Mnyr6z6fFTc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=udx0WwCv; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=YwpMkBbz4PXocjCzkLm2YJnKlhU0U//y2BTdLBMZyTVgG1jiJ3RrAvowKnQy5Ljk49is3f0YXk31MPGttZQoXdAhK0gJyiZyfOKFWDbBK/EnUfCIjKn+A5nA8RYRvXXY0JTqHlW9S2fmpB30jL8HkOpkxdHlpTTXph9ihzpMN0Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qxMsINuE; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="udx0WwCv"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA08AC4CEEB;
-	Mon,  4 Aug 2025 00:32:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qxMsINuE"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D40D5C4CEEB;
+	Mon,  4 Aug 2025 00:35:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1754267572;
+	s=k20201202; t=1754267732;
 	bh=IGT7qNVTARoFc4ErWWeNZEbqvnUwEU7bMP6KBeGBfgc=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=udx0WwCvvJgmJN+IR1/f9YnCkhZHh2nfOtG3eH3mk73//dTLblPO+KIw3olypg2+c
-	 A6PpJdq8ayy9izB58MYty9fr2qiEgE4oV4hArRy4cYTgExR5Me/WDcqVmoqJHIS8Gt
-	 h/kkS7QaFr1r854j6RxZPn6QQ23UFdSDqvbz8u/upqB2Ic/XpPTEDuL/px6m2OBz1F
-	 JAbgL67MVDhejGiYDloNuUKeQJ1htm2YmulHRQOmk1BXFPwVQ487JKkIYYYY3qN8Sx
-	 htIS22YM9I1BC0gdsziQXuIdv22cVXL5f3yysBJvVXeT2w2CfflxgRDmwK76/5pcd0
-	 JES3WK0fwV0Ug==
+	b=qxMsINuE7h3meCMsCPldYHKoD5r0m8VcALDOvvsJL5vuyg2O5COlQK+MLEZM0+f7v
+	 SoF15bBjQYchbub3PP/EmJa0JAhshfM4yJnIpP4moBPQi+C/wGYafJvUbp8m2hQ5IG
+	 bv6aNPUMGdqPsW7FuDMgQ7fF+UHCxX+Yk38YTlZhOizaPE/e21cJ2uGSgFrn/EZ9xk
+	 /icQ3RKORv1uv0ut3TXhXGKTvbU1QFZe1WU3fHfnAiXbmY+d2yxKCrYZ8iMO1qzAdc
+	 WvMh/o6EEPdIoRva9FP80K4WHLSViuqiG3tQKqguNT3AdwrVe1SFnixa5tVBEJKsZv
+	 ewghlDzmC8mug==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
@@ -33,14 +33,14 @@ Cc: Sarthak Garg <quic_sartgarg@quicinc.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	Sasha Levin <sashal@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.12 39/69] mmc: sdhci-msm: Ensure SD card power isn't ON when card removed
-Date: Sun,  3 Aug 2025 20:30:49 -0400
-Message-Id: <20250804003119.3620476-39-sashal@kernel.org>
+	linux-arm-msm@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 6.6 33/59] mmc: sdhci-msm: Ensure SD card power isn't ON when card removed
+Date: Sun,  3 Aug 2025 20:33:47 -0400
+Message-Id: <20250804003413.3622950-33-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250804003119.3620476-1-sashal@kernel.org>
-References: <20250804003119.3620476-1-sashal@kernel.org>
+In-Reply-To: <20250804003413.3622950-1-sashal@kernel.org>
+References: <20250804003413.3622950-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,7 +49,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.12.41
+X-stable-base: Linux 6.6.101
 Content-Transfer-Encoding: 8bit
 
 From: Sarthak Garg <quic_sartgarg@quicinc.com>
