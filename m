@@ -1,74 +1,115 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fllvem-ot04.ext.ti.com (fllvem-ot04.ext.ti.com [198.47.19.246])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B2E02777F9;
-	Tue,  5 Aug 2025 15:24:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18BF2524F;
+	Tue,  5 Aug 2025 23:49:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.246
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754407490; cv=none; b=IFrBSmGnbKZakKIHXEIO/ViytwZvx+1jkCRuRevaNaiYZ6N7GEtyIO3YazMlxYnyIIURGIrO7YSYOACjQjVbMLemrjLsXT+3kpAZ6SCqKCD0n8jmpwj+1fhzsE3PBXqJns++MvwUR/qW9ykT6w3ZLW0fowpB9RkkvJ77RagvL8M=
+	t=1754437801; cv=none; b=kSDavQ9MZF8ZHuimz910FUvFUOsfLsLU8E//azF9WENkXLFMnXPCicZRnZ4ixaMZXtX9knSCHxXvBPOxW/aDzjJhVUecAzfeszSSUPIqenW1tF3b5vVppeDCRxcnLxSmuOPp+HSRkAZ75yssZMG0MwM4v0DN6sklB+d/JoeXTj4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754407490; c=relaxed/simple;
-	bh=97kct6PPabBUrzu7qy+1m0OjpYO0JiszZ63BiWMDoY0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Qufa2CdPNizQJv4Nc7eWVusnFjFHusv2w349hYsiAa/zALk1enLjvB+kxN1b90Zhj99ws3Ns1Y8ktsi4mi8/pITR46tnHal0fD/spkaXJ12wWKQbrgmQX/45uylPB3grX3V0Qe7OEJ91/El1QAs5+bbZOC6tScMnN6SafC8nXzg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U2gQZZkB; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1754437801; c=relaxed/simple;
+	bh=p2p4vKS5wYDCxNQLe3U+0FgrcL9pSAk87OCo+vsR5pM=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=j3qH1c4kaMdeuTnvHdZnjdvkkOlQbCTby5UvkgURD3jKHJIb+FYlpmXOxpR0sjO5VdQMtEu6rAtL3xPih9Zl3lFmIzwKJuKuMVc3zX/BC97C2GWA/TbmqzZgJlku2Vj/0yCvXJzHivWaaSgx2arUYLT+W8XcfLrqyRyMVwM0pK0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=bIsXxALN; arc=none smtp.client-ip=198.47.19.246
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U2gQZZkB"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 983ACC4CEF0;
-	Tue,  5 Aug 2025 15:24:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1754407490;
-	bh=97kct6PPabBUrzu7qy+1m0OjpYO0JiszZ63BiWMDoY0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=U2gQZZkBnklYg5klw9G8DgA4Iy/DzU85xwb99UpA/sTfAenk4gwUnfsTMZJTCmnk1
-	 Cce5UdMPsItPZFpY0k8wcsRQ+cKc2sfgJ2kCMNLC3qw9ENMd8q3WQvMENz57gshMcI
-	 9tPtWZwsu4WjlWEo/3foJhUZKWbAzyjgMEZSNTToJOOpu8MxMIFYGuF60g5oMbkIbS
-	 GkWzgyyeaiQqfqmGY7dPufob8tp+hIxTy5hEdBCTEhKwerdY+gujgBJpUBsV8dHSzf
-	 +vautmgSaFZ6bsTi/IpHKkcvJvzqBy3C/f1gjtF0WuaaAUqE20H/jOQ77e95oGSU/H
-	 APLbkGIS0dd+A==
-Date: Tue, 5 Aug 2025 10:24:47 -0500
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Duje =?utf-8?Q?Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-Cc: ~postmarketos/upstreaming@lists.sr.ht,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, Karel Balej <balejk@matfyz.cz>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	phone-devel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	David Wronek <david@mainlining.org>, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH RFC v2 1/2] dt-bindings: mmc: sdhci-pxa: add state_uhs
- pinctrl
-Message-ID: <175440748721.1807566.14795455362522050804.robh@kernel.org>
-References: <20250801-pxav3-uhs-v2-0-afc1c428c776@dujemihanovic.xyz>
- <20250801-pxav3-uhs-v2-1-afc1c428c776@dujemihanovic.xyz>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="bIsXxALN"
+Received: from fllvem-sh03.itg.ti.com ([10.64.41.86])
+	by fllvem-ot04.ext.ti.com (8.15.2/8.15.2) with ESMTP id 575NnpVa387998;
+	Tue, 5 Aug 2025 18:49:51 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1754437791;
+	bh=OWll8aXw8aHwO/nZCoAePnctU5zQKd6s1MSx1yOQJ/c=;
+	h=From:To:CC:Subject:Date:In-Reply-To:References;
+	b=bIsXxALNZCxgM9MZpL8IVa3U7/riBpqlbzXjh+MAmq05d3w1mVfrqxgkhISs2Jbpr
+	 3EuRvOOaRRhgFNMuSPQOFKdhxxXi8keEzUivJFii73yYtpQ0s/twmw1VkR4biyZto3
+	 FIrFjpiHRWI+RcVs5FjDmHqJ8NtC/AuUjBwcsqyM=
+Received: from DLEE113.ent.ti.com (dlee113.ent.ti.com [157.170.170.24])
+	by fllvem-sh03.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 575NnpOp3149163
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
+	Tue, 5 Aug 2025 18:49:51 -0500
+Received: from DLEE101.ent.ti.com (157.170.170.31) by DLEE113.ent.ti.com
+ (157.170.170.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Tue, 5
+ Aug 2025 18:49:50 -0500
+Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DLEE101.ent.ti.com
+ (157.170.170.31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
+ Frontend Transport; Tue, 5 Aug 2025 18:49:50 -0500
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 575Nno6n2624898;
+	Tue, 5 Aug 2025 18:49:50 -0500
+From: Judith Mendez <jm@ti.com>
+To: Judith Mendez <jm@ti.com>, Nishanth Menon <nm@ti.com>,
+        Tero Kristo
+	<kristo@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski
+	<krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC: Vignesh Raghavendra <vigneshr@ti.com>,
+        Santosh Shilimkar
+	<ssantosh@kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+Subject: [PATCH 1/4] dt-bindings: hwinfo: Add second register range for GP_SW
+Date: Tue, 5 Aug 2025 18:49:47 -0500
+Message-ID: <20250805234950.3781367-2-jm@ti.com>
+X-Mailer: git-send-email 2.49.0
+In-Reply-To: <20250805234950.3781367-1-jm@ti.com>
+References: <20250805234950.3781367-1-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20250801-pxav3-uhs-v2-1-afc1c428c776@dujemihanovic.xyz>
+Content-Type: text/plain
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
+This adds a second register range in ti,k3-socinfo. This register
+range can also be used to detect silicon revisions.
 
-On Fri, 01 Aug 2025 16:14:15 +0200, Duje Mihanović wrote:
-> On the pxav3 controller, increasing the drive strength of the data pins
-> might be required to maintain stability on fast bus clocks (above 100
-> MHz). Add a state_uhs pinctrl to allow this.
-> 
-> The existing state_cmd_gpio pinctrl is changed to apply only on pxav1 as
-> it's unneeded on the other controllers.
-> 
-> Signed-off-by: Duje Mihanović <duje@dujemihanovic.xyz>
-> ---
-> Changes in v2:
-> - Newlines between properties in if:
-> ---
->  .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 47 +++++++++++++++++-----
->  1 file changed, 37 insertions(+), 10 deletions(-)
-> 
+AM62px SR1.0, SR1.1, and SR1.2 can only be distinguished with GP_SW
+registers, so increase maximum items to 2 for reg property and update
+the example.
 
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+Signed-off-by: Judith Mendez <jm@ti.com>
+---
+ .../devicetree/bindings/hwinfo/ti,k3-socinfo.yaml        | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml b/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+index dada28b47ea0..3b656fc0cb5a 100644
+--- a/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
++++ b/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+@@ -24,7 +24,8 @@ properties:
+       - const: ti,am654-chipid
+ 
+   reg:
+-    maxItems: 1
++    maxItems: 2
++    minItems: 1
+ 
+ required:
+   - compatible
+@@ -34,7 +35,9 @@ additionalProperties: false
+ 
+ examples:
+   - |
+-    chipid@43000014 {
++    chipid@14 {
+         compatible = "ti,am654-chipid";
+-        reg = <0x43000014 0x4>;
++        reg = <0x43000014 0x4>,
++              <0x43000230 0x10>;
++        bootph-all;
+     };
+-- 
+2.49.0
 
