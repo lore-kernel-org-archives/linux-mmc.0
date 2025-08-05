@@ -1,241 +1,142 @@
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DCEE19D093;
-	Tue,  5 Aug 2025 03:23:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B082F257AEC;
+	Tue,  5 Aug 2025 09:19:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754364202; cv=none; b=QZOn8Df7uL6a+ukC0RKkHG3lnpVKa9kqbqm6ccjBRFwpNEDBFxlZPsczje07Puz0e5IegyOrzYfzXluf93YQy38byNY9ygIpaNHiHTGNrRSgzQ+/li6N9oncvLIgw//0NRJZf20VYY+nAPj76uhsvmhMxVtg2UG0RBsoUlc3EG8=
+	t=1754385587; cv=none; b=IQOWHZT9dLtfb6+jZ+oDPLW6JasjJ6zZlDmOpDH+qkExEOB6v64xfSBBndQTUzBy6KOKY4bHsxcmtDXkwRR9VSuK8uwFqUrOf9UEqn1+ehBrMsMSBihQcPSTXhHmX9Bjv8G3c8by0RqGKMC3g+tkHsvVZxFOKLTGSQUpVTri5hw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754364202; c=relaxed/simple;
-	bh=vT9AQs1JvRF7Eh3W0MiofWlA7/STiws+EgyOFyrS1GQ=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=WMLCa2OJCUmWdViG4c2RiS84jRYQe3qpBJpMVlo8lD0mxrFaTUsP3AW0mPkn1iNn1s/o6GiMpW+a3JseVk7lIN+fT57bMcauTZrL0axwPRlpjV7waXxy7i1dLDw1deuE+li7CJJQeNJrJWaGDn3PKWH48iMuYXqBHg6Mjw87EjY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b=IIW4VlXB; arc=none smtp.client-ip=211.75.126.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+	s=arc-20240116; t=1754385587; c=relaxed/simple;
+	bh=7mC3wl9r2WjfTNJhBB1YZNFGNWPZwe8RJuAByGvexao=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=OK/X2iIAcLUw3ynwqz15B2OWK4eJsOgi/OkVHaADpkKxz8DKPV5RQR3T+AHe6stONXKw9sCT3mTtIt+LAA3iTVDzNjpEqzmhZ2O70XZytjrpUo1AicVE79AfcN3Z1ysCp9BMv+SG7x384ejwad5LvVAq0sqpTXXuZ4Ax59n4TCA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=R94D9elE; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b="IIW4VlXB"
-X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 5753Mh5qA1454643, This message is accepted by code: ctloc85258
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=realtek.com; s=dkim;
-	t=1754364164; bh=yAOu5JL5wnfykAuhT113dv3FxNzRgEe8JxQ2jg7LQEQ=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:
-	 Content-Transfer-Encoding:Content-Type;
-	b=IIW4VlXBPT6PgOWQjtdVieP2UzQHyAOXxuCoi6GvXrEYy1M8gCaCIyaZzZb5LY97H
-	 V1TfoL7VtqGY4JfHDu9q3LjrRhyPoRiA6SQsGc5v/HuQMN6EOuWUaVhSqRoXEtlxam
-	 vo9dempnh6GWato70alitRllpN6+vR+nDPLATKyTJZZ2MkTicDE5t1kk539NkbpEV8
-	 jHgef1gLLyJbnE5H5e4YqZncBwXn4eU9WN+vMfkqB9cRVes+iUKYKqFFpopZZtPbjb
-	 HzAvnqbuIIXnHdJPJFKC+xpEvze0EjWfDPh2wr8RoV+RsrHbtDDQFWJj1eRiwVuPcT
-	 rkUNjjOthKrgw==
-Received: from mail.realtek.com (rtkexhmbs04.realtek.com.tw[10.21.1.54])
-	by rtits2.realtek.com.tw (8.15.2/3.13/5.93) with ESMTPS id 5753Mh5qA1454643
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 5 Aug 2025 11:22:43 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTKEXHMBS04.realtek.com.tw (10.21.1.54) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.11; Tue, 5 Aug 2025 11:22:44 +0800
-Received: from RTEXH36506.realtek.com.tw (172.21.6.27) by
- RTEXMBS01.realtek.com.tw (172.21.6.94) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Tue, 5 Aug 2025 11:22:43 +0800
-Received: from localhost (172.22.144.1) by RTEXH36506.realtek.com.tw
- (172.21.6.27) with Microsoft SMTP Server id 15.1.2507.39 via Frontend
- Transport; Tue, 5 Aug 2025 11:22:43 +0800
-From: Ricky Wu <ricky_wu@realtek.com>
-To: <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <arnd@arndb.de>, <gregkh@linuxfoundation.org>, <chenhuacai@kernel.org>,
-        <ricky_wu@realtek.com>, <ulf.hansson@linaro.org>,
-        <maximlevitsky@gmail.com>
-Subject: [PATCH] misc: rtsx: usb card reader: add OCP support
-Date: Tue, 5 Aug 2025 11:22:20 +0800
-Message-ID: <20250805032220.2355160-1-ricky_wu@realtek.com>
-X-Mailer: git-send-email 2.25.1
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="R94D9elE"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5751pD7c007598;
+	Tue, 5 Aug 2025 09:19:40 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	NfI0YkisqyQiDBbFFGLao7qusuEIEbYmrnUakGa8wH4=; b=R94D9elErWGrCGCG
+	TBMGq4hZolBiawCsOUFXmNasbOucsWh2cAC0b/oHS4lnjP0ob9hrEtV377qxlfv3
+	4RsMJaprMU0ON+11DL5lC8QeuNBtkFGPhl4vedwPHwahSARtKd4WtrpMgwKxnnb8
+	+D2HRmOgZRLDXK0GzqY7+h32FtjX0KHbsjLS+ddVi+99JyFK76/low15MamqwejX
+	L5MAkY1d1SM5X3afMajQEeCxTNdOZIfPoAf6N8CfgWYCJD2rDeDCVKtZICPAQJ8L
+	WS7qzDNjk691TOPTOOcCmy8bjx0RFAq6saExOW4Tpi+Oa+tnXJO1fS6RAGy+waUk
+	itEPAA==
+Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 489b2a7sc6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 05 Aug 2025 09:19:39 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA03.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5759JceB012879
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 5 Aug 2025 09:19:38 GMT
+Received: from [10.217.216.168] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Tue, 5 Aug
+ 2025 02:19:32 -0700
+Message-ID: <c7e36755-9255-4209-9d53-20077bd1d3ba@quicinc.com>
+Date: Tue, 5 Aug 2025 14:49:29 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V4 4/4] arm64: dts: qcom: sm8550: Remove SDR104/SDR50
+ broken capabilities
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski
+	<krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson
+	<andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>
+References: <20250801084518.2259767-1-quic_sartgarg@quicinc.com>
+ <20250801084518.2259767-5-quic_sartgarg@quicinc.com>
+ <69f2807c-9a28-4b31-97cc-2756f0ab9fd4@kernel.org>
+Content-Language: en-US
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <69f2807c-9a28-4b31-97cc-2756f0ab9fd4@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-KSE-ServerInfo: RTEXMBS01.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=OKwn3TaB c=1 sm=1 tr=0 ts=6891ccab cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=COk6AnOGAAAA:8
+ a=1q2MIjjhIDf-Krenf6QA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-ORIG-GUID: Rnz1D7qDn-xKlhuAdL1WPvdsOEv87e3p
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODA1MDA2NiBTYWx0ZWRfX4k91tHBAnPOJ
+ b6sNBFEp+yKxOUnHHgZqXnYFQJ7qyD/LM2+rlv6/c9XuZ3FfaN5YzhCjwD9tM872MmKVHvTAJuz
+ YC2xvV9CAtx73aKAbz1hq0OhYpRltBWzU/l3WbDM67P6PZode8xEcgux9Z8tueQTrXD3FPzgLV1
+ nkqzuf00CKy4y2Nh+j2CFaKzUPce/6AsU4bMoWwg9qxDULKeQvA2LyMmrjxeeWAsDUi56xnybfv
+ V/qkghpJfvWkXHHs2QFeD+jx1HdfOuHU+AvtQ5Q5DsChoeq3vSUu1GsMjbs3rbeLnWEYVTpK14x
+ 1HBfoNZ42C/h8L68CrFcKadmXEKjl6mzOZ28Kf9zwWLSuI/CBgisMBxa7L2UuSmX+b4TMJ4V8st
+ IGESpQj/OELcuiKCb97hCi6sKFZsJ4Na9b9j9/SmK1dZSI4E1ixPqe9PTsjrZbDzplzLjTFC
+X-Proofpoint-GUID: Rnz1D7qDn-xKlhuAdL1WPvdsOEv87e3p
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-05_02,2025-08-04_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 spamscore=0 suspectscore=0 mlxlogscore=971 clxscore=1015
+ phishscore=0 impostorscore=0 priorityscore=1501 adultscore=0 mlxscore=0
+ malwarescore=0 lowpriorityscore=0 classifier=spam authscore=0 authtc=n/a
+ authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2508050066
 
-This patch adds support for Over Current Protection (OCP) to the Realtek
-USB card reader driver.
 
-The OCP mechanism protects the hardware by detecting and handling current
-overload conditions.
-This implementation includes:
 
-- Register configurations to enable OCP monitoring.
-- Handling of OCP interrupt events and associated error reporting.
-- Card power management changes in response to OCP triggers.
+On 8/1/2025 2:32 PM, Krzysztof Kozlowski wrote:
+> On 01/08/2025 10:45, Sarthak Garg wrote:
+>> The kernel now handles level shifter limitations affecting SD card
+>> modes, making it unnecessary to explicitly disable SDR104 and SDR50
+>> capabilities in the device tree.
+>>
+>> However, due to board-specific hardware constraints particularly related
+>> to level shifter in this case the maximum frequency for SD High-Speed
+>> (HS) mode must be limited to 37.5 MHz to ensure reliable operation of SD
+>> card in HS mode. This is achieved using the max-sd-hs-frequency property
+>> in the board DTS.
+>>
+>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>> ---
+>>   arch/arm64/boot/dts/qcom/sm8550-hdk.dts                     | 1 +
+>>   arch/arm64/boot/dts/qcom/sm8550-mtp.dts                     | 1 +
+>>   arch/arm64/boot/dts/qcom/sm8550-sony-xperia-yodo-pdx234.dts | 1 +
+>>   arch/arm64/boot/dts/qcom/sm8550.dtsi                        | 3 ---
+>>   4 files changed, 3 insertions(+), 3 deletions(-)
+>>
+> 
+> This will break MMC for all of the users and nothing in commit msg or
+> cover letter explains that or mentions merging strategy.
+> 
+> Exactly this case is covered by your internal guideline, no? Please read it.
+> 
+> Best regards,
+> Krzysztof
 
-This enhancement improves the robustness of the driver when operating in
-environments where electrical anomalies may occur, particularly with SD
-and MS card interfaces.
-
-Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
----
- drivers/memstick/host/rtsx_usb_ms.c |  5 ++++-
- drivers/misc/cardreader/rtsx_usb.c  |  7 +++++++
- drivers/mmc/host/rtsx_usb_sdmmc.c   | 32 +++++++++++++++++++++++++----
- include/linux/rtsx_usb.h            | 11 ++++++++++
- 4 files changed, 50 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
-index 3878136227e4..9389e9643c24 100644
---- a/drivers/memstick/host/rtsx_usb_ms.c
-+++ b/drivers/memstick/host/rtsx_usb_ms.c
-@@ -216,7 +216,10 @@ static int ms_power_off(struct rtsx_usb_ms *host)
- 
- 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_CLK_EN, MS_CLK_EN, 0);
- 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_OE, MS_OUTPUT_EN, 0);
--
-+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL,
-+			POWER_MASK, POWER_OFF);
-+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL,
-+			POWER_MASK | LDO3318_PWR_MASK, POWER_OFF | LDO_SUSPEND);
- 	err = rtsx_usb_send_cmd(ucr, MODE_C, 100);
- 	if (err < 0)
- 		return err;
-diff --git a/drivers/misc/cardreader/rtsx_usb.c b/drivers/misc/cardreader/rtsx_usb.c
-index d007a4455ce5..1830e9ed2521 100644
---- a/drivers/misc/cardreader/rtsx_usb.c
-+++ b/drivers/misc/cardreader/rtsx_usb.c
-@@ -552,6 +552,10 @@ static int rtsx_usb_reset_chip(struct rtsx_ucr *ucr)
- 	ret = rtsx_usb_send_cmd(ucr, MODE_C, 100);
- 	if (ret)
- 		return ret;
-+	/* config OCP */
-+	rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_DETECT_EN, MS_OCP_DETECT_EN);
-+	rtsx_usb_write_register(ucr, OCPPARA1, 0xF0, 0x50);
-+	rtsx_usb_write_register(ucr, OCPPARA2, 0x7, 0x3);
- 
- 	/* config non-crystal mode */
- 	rtsx_usb_read_register(ucr, CFG_MODE, &val);
-@@ -722,6 +726,9 @@ static int rtsx_usb_suspend(struct usb_interface *intf, pm_message_t message)
- 			if (val & (SD_CD | MS_CD)) {
- 				device_for_each_child(&intf->dev, NULL, rtsx_usb_resume_child);
- 				return -EAGAIN;
-+			} else {
-+				/* if the card does not exists, clear OCP status */
-+				rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
- 			}
- 		} else {
- 			/* There is an ongoing operation*/
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index c5f6b9df066b..0632d294b12f 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -48,7 +48,7 @@ struct rtsx_usb_sdmmc {
- 	bool			ddr_mode;
- 
- 	unsigned char		power_mode;
--
-+	u16			ocp_stat;
- #ifdef RTSX_USB_USE_LEDS_CLASS
- 	struct led_classdev	led;
- 	char			led_name[32];
-@@ -785,6 +785,9 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
- 
- 	mutex_unlock(&ucr->dev_mutex);
- 
-+	/* get OCP status */
-+	host->ocp_stat = (val >> 4) & 0x03;
-+
- 	/* Treat failed detection as non-exist */
- 	if (err)
- 		goto no_card;
-@@ -795,6 +798,11 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
- 	}
- 
- no_card:
-+	/* clear OCP status */
-+	if (host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)) {
-+		rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
-+		host->ocp_stat = 0;
-+	}
- 	host->card_exist = false;
- 	return 0;
- }
-@@ -818,7 +826,11 @@ static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		cmd->error = -ENOMEDIUM;
- 		goto finish_detect_card;
- 	}
--
-+	/* check OCP stat */
-+	if (host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)) {
-+		cmd->error = -ENOMEDIUM;
-+		goto finish_detect_card;
-+	}
- 	mutex_lock(&ucr->dev_mutex);
- 
- 	mutex_lock(&host->host_mutex);
-@@ -977,9 +989,19 @@ static int sd_power_on(struct rtsx_usb_sdmmc *host)
- 
- 	usleep_range(800, 1000);
- 
-+	rtsx_usb_init_cmd(ucr);
-+	/* WA OCP issue: after OCP, there were problems with reopen card power */
-+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL, POWER_MASK, POWER_ON);
-+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, FPDCTL, SSC_POWER_MASK, SSC_POWER_DOWN);
-+	err = rtsx_usb_send_cmd(ucr, MODE_C, 100);
-+	if (err)
-+		return err;
-+	msleep(20);
-+	rtsx_usb_write_register(ucr, FPDCTL, SSC_POWER_MASK, SSC_POWER_ON);
-+	usleep_range(180, 200);
- 	rtsx_usb_init_cmd(ucr);
- 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_PWR_CTL,
--			POWER_MASK|LDO3318_PWR_MASK, POWER_ON|LDO_ON);
-+			LDO3318_PWR_MASK, LDO_ON);
- 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_OE,
- 			SD_OUTPUT_EN, SD_OUTPUT_EN);
- 
-@@ -1029,7 +1051,8 @@ static void sd_set_power_mode(struct rtsx_usb_sdmmc *host,
- 
- 	case MMC_POWER_UP:
- 		pm_runtime_get_noresume(sdmmc_dev(host));
--		err = sd_power_on(host);
-+		if (!(host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)))
-+			err = sd_power_on(host);
- 		if (err)
- 			dev_dbg(sdmmc_dev(host), "power-on (err = %d)\n", err);
- 		/* issue the clock signals to card at least 74 clocks */
-@@ -1332,6 +1355,7 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
- 	mmc->max_req_size = 524288;
- 
- 	host->power_mode = MMC_POWER_OFF;
-+	host->ocp_stat = 0;
- }
- 
- static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
-diff --git a/include/linux/rtsx_usb.h b/include/linux/rtsx_usb.h
-index f267a06c6b1e..276b509c03e3 100644
---- a/include/linux/rtsx_usb.h
-+++ b/include/linux/rtsx_usb.h
-@@ -99,6 +99,17 @@ extern int rtsx_usb_card_exclusive_check(struct rtsx_ucr *ucr, int card);
- #define CD_MASK		(SD_CD | MS_CD | XD_CD)
- #define SD_WP		0x08
- 
-+/* OCPCTL */
-+#define MS_OCP_DETECT_EN		0x08
-+#define	MS_OCP_INT_EN			0x04
-+#define	MS_OCP_INT_CLR			0x02
-+#define	MS_OCP_CLEAR			0x01
-+
-+/* OCPSTAT */
-+#define MS_OCP_DETECT			0x80
-+#define MS_OCP_NOW			0x02
-+#define MS_OCP_EVER			0x01
-+
- /* reader command field offset & parameters */
- #define READ_REG_CMD		0
- #define WRITE_REG_CMD		1
--- 
-2.25.1
-
+Just to make sure I’m addressing the right concern — are you primarily 
+worried about the introduction of the max-sd-hs-frequency property in 
+the board DTS files, or about the removal of the sdhci-caps-mask
+from the common sm8550.dtsi?
