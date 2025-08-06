@@ -1,108 +1,161 @@
-Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB1101C3027;
-	Wed,  6 Aug 2025 09:44:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3617A207A22;
+	Wed,  6 Aug 2025 10:25:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754473471; cv=none; b=EgW9EF9IoVjiOqpUGr9xOw8BF4hFcHXgIz5dcPPFfo73RBj9ql3cpQeoZsCuCr1YjdaD0OaKQpJE9a+J9J8IsGaKrm78XwYic3z+gW0r4sZo8XRk/iwjvP8rkmSRJS0QYRNgUhpPffGSoMhJNKjjwYvLZP4jQF9KRlH9sHnA0xk=
+	t=1754475922; cv=none; b=PTRhUhYn8lXopmmLAv4bO07Sz9S5104grj9S1mrOos+EjNV6lrHPNx6gjKk8krzzC4NdzK1o3aD8sm5nlKimIaU+jpbar1i7DipN8Hu82m8E37ZQBAZQKseTUJyvU1FObeyzQU0s2HUUmvYg37sBAKVbcokeuMfmia0NOlqN0iA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754473471; c=relaxed/simple;
-	bh=FtOtGKaRTRC/oyJoG1gUBX7YVLK7Bsb9LiRigwuWFxU=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=vDjEKCVd9f7rK0NoVromzVZu3BrhC+nqTUeemgTFInyyimwajAePF6b8YCXkm0P/sH9AaZOyKjVZkji/Hcz7OL6oljfaf59ffY5wk7U2VcwG9fT2EhmmLabqa9tSpEUyaxdJ6814BmoIzCvg1pUigoD79s5bsXTuKW0rAKjQe34=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=EdB5gs+k; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
+	s=arc-20240116; t=1754475922; c=relaxed/simple;
+	bh=lQuKRNOdyBLCKnmOXaLObB146vsfWcL0sWyfJEa5yo8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DyuQp8BCZzo5FYb9Zl30cqSr39+HCiryg1Nf+gzpps5KO/cJ9UmnsBEJ2nkLEARhbLMEHc3NpGtYo7NVfxOOUf4kcasnbIUeZjM/BnSoVl/UUthN0g4ApS9+osYsJsKY1OSBNtTgKICMYV8SDXajwjw8L675YQRj7Y1L8bqmeLs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=AEYm2b/x; arc=none smtp.client-ip=198.175.65.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="EdB5gs+k"
-DKIM-Signature: a=rsa-sha256; bh=QHl8Wzj/uqBwnumJOCDGSmLhk5tflD1ODmw6Mh2NOQA=;
- c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:Message-Id:Message-Id:References:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1754473444; v=1; x=1754905444;
- b=EdB5gs+knki6UTebyYR2nzHvmqostr4TTdljTpn8aTK97Wre0iNqiF+FpOogXJ3zgGAq34wo
- +uSxHp+XiM3+fr2BhFJCti2L0/aRG+lMs8hNzrqtpl8GphN5y8Pjf2EQBdLlsf3MHg/pHFZGX2a
- +tVtABKQEinprZywmBq4uDgKDc59982K273ooI+VsxkdDEUX9wLjaozT6ZA4r392vyvTMDGGzlS
- eUTlPg+ETrYnneZXqtJMvOcWwMVeCYzY6hEcBDuugBypml2IoA+4y12tIZH0+r+uRV76b4RSVw+
- 7itUoDpXk/+E9vDHxmzqLEQvzSQFeLA1OTotWKnAOK2Kg==
-Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id 400c2629; Wed, 06 Aug 2025 11:44:04 +0200
-From: =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-Subject: [PATCH v3 0/2] mmc: sdhci-pxav3: pinctrl setting for fast bus
- clocks
-Date: Wed, 06 Aug 2025 11:43:52 +0200
-Message-Id: <20250806-pxav3-uhs-v3-0-2f03fee380b0@dujemihanovic.xyz>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="AEYm2b/x"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1754475921; x=1786011921;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=lQuKRNOdyBLCKnmOXaLObB146vsfWcL0sWyfJEa5yo8=;
+  b=AEYm2b/xTxyQu/CUGCjKkZnakRNsgBDSZ2sHCszulmZJExwXAj4fiSH5
+   gPf4Cqp54CoRGSiqpH9mIGJIczDmkJhWBG40IQhVD06HpdQvBi6/7sUFL
+   UY/qfneE66c14CpU+TjjkxoDQBERWnw5gOi7y/JzAtATan7Yzm+M5wfRk
+   sNtIqMo0nntviY/9sC2G1vRKS1k4oeCAqY3ldsXTdg0pYmHvugv4l1L0Y
+   +4mT9QhHudD4fsM6oNN9E37HyJy6B6d9NDHmEm5iz8oLsjxwrgY9xWldp
+   fTucpi02PczgiZEEhplpSUtHNmij6QwFqixp0l7w19VPW1vBO7/ntBv34
+   w==;
+X-CSE-ConnectionGUID: RQSEnFjUQ5C7YW+iw+U/LQ==
+X-CSE-MsgGUID: b/cJDfU/TOSTb4TTO5Pndw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11513"; a="79337040"
+X-IronPort-AV: E=Sophos;i="6.17,268,1747724400"; 
+   d="scan'208";a="79337040"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Aug 2025 03:25:21 -0700
+X-CSE-ConnectionGUID: Z6/6PeVJTYOIZNPtcxitnA==
+X-CSE-MsgGUID: HS2lCiJCTYaqt9oompwpvQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.17,268,1747724400"; 
+   d="scan'208";a="195579330"
+Received: from lkp-server02.sh.intel.com (HELO 4ea60e6ab079) ([10.239.97.151])
+  by fmviesa001.fm.intel.com with ESMTP; 06 Aug 2025 03:25:18 -0700
+Received: from kbuild by 4ea60e6ab079 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1ujbKW-0001Xe-0I;
+	Wed, 06 Aug 2025 10:25:11 +0000
+Date: Wed, 6 Aug 2025 18:24:15 +0800
+From: kernel test robot <lkp@intel.com>
+To: Ricky Wu <ricky_wu@realtek.com>, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, arnd@arndb.de,
+	gregkh@linuxfoundation.org, chenhuacai@kernel.org,
+	ulf.hansson@linaro.org, maximlevitsky@gmail.com
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev
+Subject: Re: [PATCH] misc: rtsx: usb card reader: add OCP support
+Message-ID: <202508061704.hwI8epAJ-lkp@intel.com>
+References: <20250805032220.2355160-1-ricky_wu@realtek.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-X-B4-Tracking: v=1; b=H4sIANgjk2gC/23NQQ6CMBCF4auQrq3pFAroynsYF9hOZUykpJUGJ
- NzdwkYXLP+XyTczC+gJAztnM/MYKZDrUuSHjOm26R7IyaRmUkglKqh5PzYx50MbuDmp8m7RQG4
- FS/e9R0vjZl1vqVsKb+enjY6wrntKBC64xEKBVKUFW17M8MQXpecukj6O04etWpQ/oRbwL8gkN
- FaDLmStq2pXWJblCwwW+djsAAAA
-X-Change-ID: 20250718-pxav3-uhs-d956bfed13f0
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Karel Balej <balejk@matfyz.cz>, David Wronek <david@mainlining.org>, 
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, phone-devel@vger.kernel.org, 
- ~postmarketos/upstreaming@lists.sr.ht, 
- =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1530;
- i=duje@dujemihanovic.xyz; s=20240706; h=from:subject:message-id;
- bh=FtOtGKaRTRC/oyJoG1gUBX7YVLK7Bsb9LiRigwuWFxU=;
- b=owGbwMvMwCW21nBykGv/WmbG02pJDBmTlR+zTjs1yzBaaOb75MJ/sm8P/D7q81v+/SfGGSEB1
- TcLw9fGdJSyMIhxMciKKbLk/ne8xvtZZOv27GUGMHNYmUCGMHBxCsBEPlsxMuxX19se5cTAtTr7
- YKnZvYqny1/3Jl1gr7LpO+fca2rgcpzhr2igxuSuDek79ln/F98SdTRv0i9N42vbinZ9tbs69VS
- aGQ8A
-X-Developer-Key: i=duje@dujemihanovic.xyz; a=openpgp;
- fpr=6DFF41D60DF314B5B76BA630AD319352458FAD03
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250805032220.2355160-1-ricky_wu@realtek.com>
 
-Hello,
+Hi Ricky,
 
-This small series adds a pinctrl setting for fast MMC bus clocks to the
-pxav3 driver. On bus clocks above 100 MHz, driving the data pins at a
-higher current helps maintain signal quality.
+kernel test robot noticed the following build warnings:
 
-This series is related to Marvell PXA1908 SoC support; the latest
-version of that patchset (v16 as of now) can be found at
-https://lore.kernel.org/20250708-pxa1908-lkml-v16-0-b4392c484180@dujemihanovic.xyz
+[auto build test WARNING on char-misc/char-misc-testing]
+[also build test WARNING on char-misc/char-misc-next char-misc/char-misc-linus linus/master next-20250806]
+[cannot apply to soc/for-next ulf-hansson-mmc-mirror/next v6.16]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-Signed-off-by: Duje Mihanović <duje@dujemihanovic.xyz>
----
-Changes in v3:
-- Address maintainer comments:
-  - Refactor driver patch
-- Remove RFC tag
-- Update trailers
-- Link to v2: https://lore.kernel.org/r/20250801-pxav3-uhs-v2-0-afc1c428c776@dujemihanovic.xyz
+url:    https://github.com/intel-lab-lkp/linux/commits/Ricky-Wu/misc-rtsx-usb-card-reader-add-OCP-support/20250806-101802
+base:   char-misc/char-misc-testing
+patch link:    https://lore.kernel.org/r/20250805032220.2355160-1-ricky_wu%40realtek.com
+patch subject: [PATCH] misc: rtsx: usb card reader: add OCP support
+config: i386-buildonly-randconfig-001-20250806 (https://download.01.org/0day-ci/archive/20250806/202508061704.hwI8epAJ-lkp@intel.com/config)
+compiler: clang version 20.1.8 (https://github.com/llvm/llvm-project 87f0227cb60147a26a1eeb4fb06e3b505e9c7261)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250806/202508061704.hwI8epAJ-lkp@intel.com/reproduce)
 
-Changes in v2:
-- Address maintainer comments:
-  - Newline between properties in if:
-  - Don't try to lookup pinstates if pinctrl is NULL
-  - Only change pinstates if both are valid
-  - Replace dev_warn() with dev_dbg()
-- Link to v1: https://lore.kernel.org/r/20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202508061704.hwI8epAJ-lkp@intel.com/
 
----
-Duje Mihanović (2):
-      dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
-      mmc: sdhci-pxav3: add state_uhs pinctrl setting
+All warnings (new ones prefixed by >>):
 
- .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 47 +++++++++++++++++-----
- drivers/mmc/host/sdhci-pxav3.c                     | 40 +++++++++++++++++-
- 2 files changed, 76 insertions(+), 11 deletions(-)
----
-base-commit: 038d61fd642278bab63ee8ef722c50d10ab01e8f
-change-id: 20250718-pxav3-uhs-d956bfed13f0
+>> drivers/mmc/host/rtsx_usb_sdmmc.c:1054:7: warning: variable 'err' is used uninitialized whenever 'if' condition is false [-Wsometimes-uninitialized]
+    1054 |                 if (!(host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)))
+         |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   drivers/mmc/host/rtsx_usb_sdmmc.c:1056:7: note: uninitialized use occurs here
+    1056 |                 if (err)
+         |                     ^~~
+   drivers/mmc/host/rtsx_usb_sdmmc.c:1054:3: note: remove the 'if' if its condition is always true
+    1054 |                 if (!(host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)))
+         |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    1055 |                         err = sd_power_on(host);
+   drivers/mmc/host/rtsx_usb_sdmmc.c:1038:9: note: initialize the variable 'err' to silence this warning
+    1038 |         int err;
+         |                ^
+         |                 = 0
+   1 warning generated.
 
-Best regards,
+
+vim +1054 drivers/mmc/host/rtsx_usb_sdmmc.c
+
+  1034	
+  1035	static void sd_set_power_mode(struct rtsx_usb_sdmmc *host,
+  1036			unsigned char power_mode)
+  1037	{
+  1038		int err;
+  1039		struct rtsx_ucr *ucr = host->ucr;
+  1040	
+  1041		if (power_mode == host->power_mode)
+  1042			return;
+  1043	
+  1044		switch (power_mode) {
+  1045		case MMC_POWER_OFF:
+  1046			err = sd_power_off(host);
+  1047			if (err)
+  1048				dev_dbg(sdmmc_dev(host), "power-off (err = %d)\n", err);
+  1049			pm_runtime_put_noidle(sdmmc_dev(host));
+  1050			break;
+  1051	
+  1052		case MMC_POWER_UP:
+  1053			pm_runtime_get_noresume(sdmmc_dev(host));
+> 1054			if (!(host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)))
+  1055				err = sd_power_on(host);
+  1056			if (err)
+  1057				dev_dbg(sdmmc_dev(host), "power-on (err = %d)\n", err);
+  1058			/* issue the clock signals to card at least 74 clocks */
+  1059			rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
+  1060			break;
+  1061	
+  1062		case MMC_POWER_ON:
+  1063			/* stop to send the clock signals */
+  1064			rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0x00);
+  1065			break;
+  1066	
+  1067		case MMC_POWER_UNDEFINED:
+  1068			break;
+  1069	
+  1070		default:
+  1071			break;
+  1072		}
+  1073	
+  1074		host->power_mode = power_mode;
+  1075	}
+  1076	
+
 -- 
-Duje Mihanović <duje@dujemihanovic.xyz>
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
