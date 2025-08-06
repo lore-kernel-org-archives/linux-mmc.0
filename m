@@ -1,227 +1,153 @@
-Received: from fllvem-ot03.ext.ti.com (fllvem-ot03.ext.ti.com [198.47.19.245])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE27A2BDC28;
-	Tue,  5 Aug 2025 23:50:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7598147C9B;
+	Wed,  6 Aug 2025 06:40:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754437814; cv=none; b=av8ox0pLxcXcAsG301faUWo6BPH9VNshujeGppshgT5l+svtz+TQbayngeV8mLwBI0M+v6opH6sNi8///5BQKnyRxgFXIkdBl6V1sToOg/4o4QcFb0MOPy7UzGd/evfx8WI/Lw/TQpZzDwOme8VCqx32XuiYylF3C04UVrrxCAE=
+	t=1754462459; cv=none; b=u4DYhpBRmD8QrBPlMQ5WIapIT7QoLLZ4z5pkPe36oH+GGpCNfac/EJWaNEBbUxel4N0Iv68itwrLEkWc3wENb2ERv5bnXd5BGh/pOAaikAlLjxguzdbFIqA7eHHHAsHQlLGSAtUA1fYWVgqTzli3nMQzggsl4vQ83DkH4vqM6S8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754437814; c=relaxed/simple;
-	bh=y98rTCimIcBocg28bf5ZEqKcHSDMG73+7zkKaAH92OA=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=pkvL892Z152/75TSMerWCMht0zICKh+hWFYE8cYIkK1HZP3hoiPIMZ8NcB2pBd2ikMqfXuThcuBFfZSPUcRlzttg18qPRP3usOam6yIFvoIwr/u76cf5HtZbXtVvKkRnFCf6DxA9BM4SiYUyA6+cEC7xvRA7/FMMiCgBDR6Ph5c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=AXk1ifyi; arc=none smtp.client-ip=198.47.19.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1754462459; c=relaxed/simple;
+	bh=bv6SL8zTbN9CYXKmH50FRGh3j+YHsT0RhPhBJxUuKow=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Ey3c30o35hCHhSptpE8bD9wfkQtlT7mogkpddqQLtJ8zjcn2RaNOLFdzoGyWjhpGcY7zA+k2zP9pUyYtlI1AKYshUYrZtY00U8D//dqN9BdWeoCbPumY9QSICMQ1wtPkPx27DXfBnW9mqfh7gH0zG+EG9h0E7PVKYeFIUE8Yh4Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a8uVsGY2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="AXk1ifyi"
-Received: from fllvem-sh04.itg.ti.com ([10.64.41.54])
-	by fllvem-ot03.ext.ti.com (8.15.2/8.15.2) with ESMTP id 575NnpSv4145370;
-	Tue, 5 Aug 2025 18:49:51 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1754437791;
-	bh=UvHxejtAmgIijopXkaZv3LCB715mK7PNsMCmeGs/1aQ=;
-	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=AXk1ifyiWw/PWZOtRCvyC/xEbzQ8A3XnNuPXKZiktd9q/W33Ru/MUzXJmPwl6oxK5
-	 ryhZhdtJvR+hYk7VDldLvlXTPr3CbnxHi77e3riLcDx3fT4GWuxgD6LQ3BLxbfKIPM
-	 +FHUzBbecX5SBZiHRfyiqzDjVWEjRp3EBd7vuCSE=
-Received: from DLEE115.ent.ti.com (dlee115.ent.ti.com [157.170.170.26])
-	by fllvem-sh04.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 575Nnpgp3796005
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
-	Tue, 5 Aug 2025 18:49:51 -0500
-Received: from DLEE110.ent.ti.com (157.170.170.21) by DLEE115.ent.ti.com
- (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Tue, 5
- Aug 2025 18:49:50 -0500
-Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DLEE110.ent.ti.com
- (157.170.170.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
- Frontend Transport; Tue, 5 Aug 2025 18:49:50 -0500
-Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 575Nno6o2624898;
-	Tue, 5 Aug 2025 18:49:50 -0500
-From: Judith Mendez <jm@ti.com>
-To: Judith Mendez <jm@ti.com>, Nishanth Menon <nm@ti.com>,
-        Tero Kristo
-	<kristo@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski
-	<krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC: Vignesh Raghavendra <vigneshr@ti.com>,
-        Santosh Shilimkar
-	<ssantosh@kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-Subject: [PATCH 2/4] soc: ti: k3-socinfo: Add support for AM62P variants
-Date: Tue, 5 Aug 2025 18:49:48 -0500
-Message-ID: <20250805234950.3781367-3-jm@ti.com>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250805234950.3781367-1-jm@ti.com>
-References: <20250805234950.3781367-1-jm@ti.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a8uVsGY2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F1D0AC4CEFB;
+	Wed,  6 Aug 2025 06:40:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1754462459;
+	bh=bv6SL8zTbN9CYXKmH50FRGh3j+YHsT0RhPhBJxUuKow=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=a8uVsGY2B6rZU13J8Se1fgqQe6Kafv+wi/T4CNVC7cpOjXWBLrule8LfKAdTuvq7g
+	 kmxnrG85VUJsFluqq3JaxW5C3Std0CI9l7+vQ6AJqO5qJlrkhsg558JWIyZlVNT1XG
+	 oitmnSM+ZQ2punzwx4ccykveBFTtZbCHUCGNdE7AEHo7OMD4B/ETAiKeAPi+d4IaaF
+	 tgcY70R+4+NSFFmcDMQAu3eVZNAQBV15+I5JO24ZHcOtd5IZ6yOmBM3TwsLa4Lt2ma
+	 d/GWWyK8zAtwxv4tj2+YCXLvTazj+6zpZbt8VFn3R0uq1Mf89nUBqpqzLteREjTEEg
+	 4KkZZ8DEBq+5w==
+Message-ID: <0f1cbec6-6032-48f6-8887-e526484c0d20@kernel.org>
+Date: Wed, 6 Aug 2025 08:40:54 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/4] dt-bindings: hwinfo: Add second register range for
+ GP_SW
+To: Judith Mendez <jm@ti.com>, Nishanth Menon <nm@ti.com>,
+ Tero Kristo <kristo@kernel.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Vignesh Raghavendra <vigneshr@ti.com>,
+ Santosh Shilimkar <ssantosh@kernel.org>,
+ linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+References: <20250805234950.3781367-1-jm@ti.com>
+ <20250805234950.3781367-2-jm@ti.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <20250805234950.3781367-2-jm@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-This adds a support for detecting AM62P SR1.0, SR1.1, SR1.2.
+On 06/08/2025 01:49, Judith Mendez wrote:
+> This adds a second register range in ti,k3-socinfo. This register
 
-On AM62P, silicon revision is discovered with GP_SW1 instead of JTAGID
-register, so introduce GP_SW register range to determine SoC revision.
+Please do not use "This commit/patch/change", but imperative mood. See
+longer explanation here:
+https://elixir.bootlin.com/linux/v5.17.1/source/Documentation/process/submitting-patches.rst#L95
 
-Signed-off-by: Judith Mendez <jm@ti.com>
----
- drivers/soc/ti/k3-socinfo.c | 82 +++++++++++++++++++++++++++++++++----
- 1 file changed, 74 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/soc/ti/k3-socinfo.c b/drivers/soc/ti/k3-socinfo.c
-index d716be113c84..9daeced656d6 100644
---- a/drivers/soc/ti/k3-socinfo.c
-+++ b/drivers/soc/ti/k3-socinfo.c
-@@ -15,6 +15,7 @@
- #include <linux/sys_soc.h>
- 
- #define CTRLMMR_WKUP_JTAGID_REG		0
-+#define CTRLMMR_WKUP_GP_SW1_REG		4
- /*
-  * Bits:
-  *  31-28 VARIANT	Device variant
-@@ -62,10 +63,63 @@ static const struct k3_soc_id {
- 	{ JTAG_ID_PARTNO_AM62LX, "AM62LX" },
- };
- 
-+static const struct regmap_config k3_chipinfo_regmap_cfg = {
-+	.reg_bits = 32,
-+	.val_bits = 32,
-+	.reg_stride = 4,
-+};
-+
- static const char * const j721e_rev_string_map[] = {
- 	"1.0", "1.1", "2.0",
- };
- 
-+static const char * const am62p_gpsw_rev_string_map[] = {
-+	"1.0", "1.1", "1.2",
-+};
-+
-+static int
-+k3_chipinfo_get_variant_alternate(struct platform_device *pdev, unsigned int partno, u32 *variant)
-+{
-+	struct device *dev = &pdev->dev;
-+	struct regmap *regmap;
-+	void __iomem *base;
-+	u32 offset;
-+	int ret;
-+
-+	base = devm_platform_ioremap_resource(pdev, 1);
-+	if (IS_ERR(base))
-+		return PTR_ERR(base);
-+
-+	regmap = regmap_init_mmio(dev, base, &k3_chipinfo_regmap_cfg);
-+	if (IS_ERR(regmap))
-+		return PTR_ERR(regmap);
-+
-+	switch (partno) {
-+	case JTAG_ID_PARTNO_AM62PX:
-+		offset = CTRLMMR_WKUP_GP_SW1_REG;
-+		break;
-+	default:
-+		offset = CTRLMMR_WKUP_GP_SW1_REG;
-+	}
-+
-+	ret = regmap_read(regmap, offset, variant);
-+
-+	if (ret < 0)
-+		return ret;
-+
-+	return 0;
-+}
-+
-+static bool k3_chipinfo_variant_in_gp_sw(unsigned int partno)
-+{
-+	switch (partno) {
-+	case JTAG_ID_PARTNO_AM62PX:
-+		return true;
-+	default:
-+		return false;
-+	}
-+}
-+
- static int
- k3_chipinfo_partno_to_names(unsigned int partno,
- 			    struct soc_device_attribute *soc_dev_attr)
-@@ -83,8 +137,10 @@ k3_chipinfo_partno_to_names(unsigned int partno,
- 
- static int
- k3_chipinfo_variant_to_sr(unsigned int partno, unsigned int variant,
--			  struct soc_device_attribute *soc_dev_attr)
-+			  struct soc_device_attribute *soc_dev_attr, u32 gp_sw1)
- {
-+	u32 gpsw_variant = gp_sw1 % 16;
-+
- 	switch (partno) {
- 	case JTAG_ID_PARTNO_J721E:
- 		if (variant >= ARRAY_SIZE(j721e_rev_string_map))
-@@ -92,6 +148,13 @@ k3_chipinfo_variant_to_sr(unsigned int partno, unsigned int variant,
- 		soc_dev_attr->revision = kasprintf(GFP_KERNEL, "SR%s",
- 						   j721e_rev_string_map[variant]);
- 		break;
-+	case JTAG_ID_PARTNO_AM62PX:
-+		/* Always parse AM62P variant from GP_SW1 */
-+		if (gpsw_variant >= ARRAY_SIZE(am62p_gpsw_rev_string_map))
-+			goto err_unknown_variant;
-+		soc_dev_attr->revision = kasprintf(GFP_KERNEL, "SR%s",
-+						   am62p_gpsw_rev_string_map[gpsw_variant]);
-+		break;
- 	default:
- 		variant++;
- 		soc_dev_attr->revision = kasprintf(GFP_KERNEL, "SR%x.0",
-@@ -107,12 +170,6 @@ k3_chipinfo_variant_to_sr(unsigned int partno, unsigned int variant,
- 	return -ENODEV;
- }
- 
--static const struct regmap_config k3_chipinfo_regmap_cfg = {
--	.reg_bits = 32,
--	.val_bits = 32,
--	.reg_stride = 4,
--};
--
- static int k3_chipinfo_probe(struct platform_device *pdev)
- {
- 	struct device_node *node = pdev->dev.of_node;
-@@ -121,6 +178,7 @@ static int k3_chipinfo_probe(struct platform_device *pdev)
- 	struct soc_device *soc_dev;
- 	struct regmap *regmap;
- 	void __iomem *base;
-+	u32 gp_sw1_val = 0;
- 	u32 partno_id;
- 	u32 variant;
- 	u32 jtag_id;
-@@ -163,7 +221,15 @@ static int k3_chipinfo_probe(struct platform_device *pdev)
- 		goto err;
- 	}
- 
--	ret = k3_chipinfo_variant_to_sr(partno_id, variant, soc_dev_attr);
-+	if (k3_chipinfo_variant_in_gp_sw(partno_id)) {
-+		ret = k3_chipinfo_get_variant_alternate(pdev, partno_id, &gp_sw1_val);
-+		if (ret < 0) {
-+			dev_err(dev, "Failed to read GP_SW1: %d\n", ret);
-+			goto err;
-+		}
-+	}
-+
-+	ret = k3_chipinfo_variant_to_sr(partno_id, variant, soc_dev_attr, gp_sw1_val);
- 	if (ret) {
- 		dev_err(dev, "Unknown SoC SR[0x%08X]: %d\n", jtag_id, ret);
- 		goto err;
--- 
-2.49.0
+> range can also be used to detect silicon revisions.
+> 
+> AM62px SR1.0, SR1.1, and SR1.2 can only be distinguished with GP_SW
+> registers, so increase maximum items to 2 for reg property and update
+> the example.
+> 
+> Signed-off-by: Judith Mendez <jm@ti.com>
+> ---
+>  .../devicetree/bindings/hwinfo/ti,k3-socinfo.yaml        | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml b/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+> index dada28b47ea0..3b656fc0cb5a 100644
+> --- a/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+> +++ b/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+> @@ -24,7 +24,8 @@ properties:
+>        - const: ti,am654-chipid
+>  
+>    reg:
+> -    maxItems: 1
+> +    maxItems: 2
+> +    minItems: 1
 
+They always come with reversed order... but anyway, you instead must
+list the items with minItems.
+
+another problem is that this is not supposed to be per register. I
+already complained more than once about some of TI bindings: stop
+creating device nodes or address spaces per register.
+
+That's one address space.
+
+>  
+>  required:
+>    - compatible
+> @@ -34,7 +35,9 @@ additionalProperties: false
+>  
+>  examples:
+>    - |
+> -    chipid@43000014 {
+> +    chipid@14 {
+
+And this was never even checked :/ You have clear warnings here.
+
+Best regards,
+Krzysztof
