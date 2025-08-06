@@ -1,161 +1,146 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
+Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3617A207A22;
-	Wed,  6 Aug 2025 10:25:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94B4428FABC;
+	Wed,  6 Aug 2025 15:24:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754475922; cv=none; b=PTRhUhYn8lXopmmLAv4bO07Sz9S5104grj9S1mrOos+EjNV6lrHPNx6gjKk8krzzC4NdzK1o3aD8sm5nlKimIaU+jpbar1i7DipN8Hu82m8E37ZQBAZQKseTUJyvU1FObeyzQU0s2HUUmvYg37sBAKVbcokeuMfmia0NOlqN0iA=
+	t=1754493879; cv=none; b=a4j05PnMVYVtwRRg3hXn/Zk9B/C0tKufkoXfSZdK+NXd+89LixdjWHk5ZlKsz+8x7asNXcV/Yv4Z2KxhfuYCwDByVsQSYIt6XJ0H349Ir840latyPlv2vzcrBeuasGel0NRr2QJRXPmyYBqayLd8OYaycWMt43KN7rhKi7+GD9E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754475922; c=relaxed/simple;
-	bh=lQuKRNOdyBLCKnmOXaLObB146vsfWcL0sWyfJEa5yo8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DyuQp8BCZzo5FYb9Zl30cqSr39+HCiryg1Nf+gzpps5KO/cJ9UmnsBEJ2nkLEARhbLMEHc3NpGtYo7NVfxOOUf4kcasnbIUeZjM/BnSoVl/UUthN0g4ApS9+osYsJsKY1OSBNtTgKICMYV8SDXajwjw8L675YQRj7Y1L8bqmeLs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=AEYm2b/x; arc=none smtp.client-ip=198.175.65.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1754493879; c=relaxed/simple;
+	bh=IPrjJM0iNDTDA9YSrop9GNcDQsARPADzizUa+drioNA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=rWcNmB9he6exm8Mfyt3TudOzixQ00FM+1C57vhWK670NKfwRrQDZLCtWeW/IDuvVGAfa2PTe6/nGpZmWpsMxxsFkt6uLBlT6L0CjRVmWsldRICUeafEuqDgQIlquPQyH6l9awXxbuVinGK1zU0h3N/A8X55QU/jzDHti7Mhkgjg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=hzsO1BXe; arc=none smtp.client-ip=198.47.23.235
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="AEYm2b/x"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1754475921; x=1786011921;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=lQuKRNOdyBLCKnmOXaLObB146vsfWcL0sWyfJEa5yo8=;
-  b=AEYm2b/xTxyQu/CUGCjKkZnakRNsgBDSZ2sHCszulmZJExwXAj4fiSH5
-   gPf4Cqp54CoRGSiqpH9mIGJIczDmkJhWBG40IQhVD06HpdQvBi6/7sUFL
-   UY/qfneE66c14CpU+TjjkxoDQBERWnw5gOi7y/JzAtATan7Yzm+M5wfRk
-   sNtIqMo0nntviY/9sC2G1vRKS1k4oeCAqY3ldsXTdg0pYmHvugv4l1L0Y
-   +4mT9QhHudD4fsM6oNN9E37HyJy6B6d9NDHmEm5iz8oLsjxwrgY9xWldp
-   fTucpi02PczgiZEEhplpSUtHNmij6QwFqixp0l7w19VPW1vBO7/ntBv34
-   w==;
-X-CSE-ConnectionGUID: RQSEnFjUQ5C7YW+iw+U/LQ==
-X-CSE-MsgGUID: b/cJDfU/TOSTb4TTO5Pndw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11513"; a="79337040"
-X-IronPort-AV: E=Sophos;i="6.17,268,1747724400"; 
-   d="scan'208";a="79337040"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Aug 2025 03:25:21 -0700
-X-CSE-ConnectionGUID: Z6/6PeVJTYOIZNPtcxitnA==
-X-CSE-MsgGUID: HS2lCiJCTYaqt9oompwpvQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.17,268,1747724400"; 
-   d="scan'208";a="195579330"
-Received: from lkp-server02.sh.intel.com (HELO 4ea60e6ab079) ([10.239.97.151])
-  by fmviesa001.fm.intel.com with ESMTP; 06 Aug 2025 03:25:18 -0700
-Received: from kbuild by 4ea60e6ab079 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1ujbKW-0001Xe-0I;
-	Wed, 06 Aug 2025 10:25:11 +0000
-Date: Wed, 6 Aug 2025 18:24:15 +0800
-From: kernel test robot <lkp@intel.com>
-To: Ricky Wu <ricky_wu@realtek.com>, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, arnd@arndb.de,
-	gregkh@linuxfoundation.org, chenhuacai@kernel.org,
-	ulf.hansson@linaro.org, maximlevitsky@gmail.com
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev
-Subject: Re: [PATCH] misc: rtsx: usb card reader: add OCP support
-Message-ID: <202508061704.hwI8epAJ-lkp@intel.com>
-References: <20250805032220.2355160-1-ricky_wu@realtek.com>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="hzsO1BXe"
+Received: from fllvem-sh04.itg.ti.com ([10.64.41.54])
+	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTP id 576FORiO603713;
+	Wed, 6 Aug 2025 10:24:27 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1754493867;
+	bh=7RsgK39bZGGSX6h47xkhxWwFZ1ITqr8yrpYQjfJ5U7g=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=hzsO1BXe0Wzvoo9dSBV6u7zuoy/ZcmqIENibhejADzSxWaFki3CNbIurssoKE8dD4
+	 Ia5BMXZdr87A0hKdGXlE82F8wmtPzv+nShj5MkTPS76O2m22G0hikaTcLgN1w82z81
+	 YLuGVEo/iKGes8G1thXOAJTRimOpXrbKPf+J7cI0=
+Received: from DFLE103.ent.ti.com (dfle103.ent.ti.com [10.64.6.24])
+	by fllvem-sh04.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 576FOQe7122291
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
+	Wed, 6 Aug 2025 10:24:26 -0500
+Received: from DFLE105.ent.ti.com (10.64.6.26) by DFLE103.ent.ti.com
+ (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Wed, 6
+ Aug 2025 10:24:26 -0500
+Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DFLE105.ent.ti.com
+ (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
+ Frontend Transport; Wed, 6 Aug 2025 10:24:26 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 576FOQI53740880;
+	Wed, 6 Aug 2025 10:24:26 -0500
+Message-ID: <e9394117-996c-4134-b9f2-50accf633601@ti.com>
+Date: Wed, 6 Aug 2025 10:24:26 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250805032220.2355160-1-ricky_wu@realtek.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/4] dt-bindings: hwinfo: Add second register range for
+ GP_SW
+To: Krzysztof Kozlowski <krzk@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Tero
+ Kristo <kristo@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof
+ Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian
+ Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC: Vignesh Raghavendra <vigneshr@ti.com>,
+        Santosh Shilimkar
+	<ssantosh@kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+References: <20250805234950.3781367-1-jm@ti.com>
+ <20250805234950.3781367-2-jm@ti.com>
+ <0f1cbec6-6032-48f6-8887-e526484c0d20@kernel.org>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <0f1cbec6-6032-48f6-8887-e526484c0d20@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-Hi Ricky,
+Hi Krystoff,
 
-kernel test robot noticed the following build warnings:
+On 8/6/25 1:40 AM, Krzysztof Kozlowski wrote:
+> On 06/08/2025 01:49, Judith Mendez wrote:
+>> This adds a second register range in ti,k3-socinfo. This register
+> 
+> Please do not use "This commit/patch/change", but imperative mood. See
+> longer explanation here:
+> https://elixir.bootlin.com/linux/v5.17.1/source/Documentation/process/submitting-patches.rst#L95
 
-[auto build test WARNING on char-misc/char-misc-testing]
-[also build test WARNING on char-misc/char-misc-next char-misc/char-misc-linus linus/master next-20250806]
-[cannot apply to soc/for-next ulf-hansson-mmc-mirror/next v6.16]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+I can reword this.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Ricky-Wu/misc-rtsx-usb-card-reader-add-OCP-support/20250806-101802
-base:   char-misc/char-misc-testing
-patch link:    https://lore.kernel.org/r/20250805032220.2355160-1-ricky_wu%40realtek.com
-patch subject: [PATCH] misc: rtsx: usb card reader: add OCP support
-config: i386-buildonly-randconfig-001-20250806 (https://download.01.org/0day-ci/archive/20250806/202508061704.hwI8epAJ-lkp@intel.com/config)
-compiler: clang version 20.1.8 (https://github.com/llvm/llvm-project 87f0227cb60147a26a1eeb4fb06e3b505e9c7261)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250806/202508061704.hwI8epAJ-lkp@intel.com/reproduce)
+> 
+> 
+>> range can also be used to detect silicon revisions.
+>>
+>> AM62px SR1.0, SR1.1, and SR1.2 can only be distinguished with GP_SW
+>> registers, so increase maximum items to 2 for reg property and update
+>> the example.
+>>
+>> Signed-off-by: Judith Mendez <jm@ti.com>
+>> ---
+>>   .../devicetree/bindings/hwinfo/ti,k3-socinfo.yaml        | 9 ++++++---
+>>   1 file changed, 6 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml b/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+>> index dada28b47ea0..3b656fc0cb5a 100644
+>> --- a/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+>> +++ b/Documentation/devicetree/bindings/hwinfo/ti,k3-socinfo.yaml
+>> @@ -24,7 +24,8 @@ properties:
+>>         - const: ti,am654-chipid
+>>   
+>>     reg:
+>> -    maxItems: 1
+>> +    maxItems: 2
+>> +    minItems: 1
+> 
+> They always come with reversed order... but anyway, you instead must
+> list the items with minItems.
+> 
+> another problem is that this is not supposed to be per register. I
+> already complained more than once about some of TI bindings: stop
+> creating device nodes or address spaces per register.
+> 
+> That's one address space.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202508061704.hwI8epAJ-lkp@intel.com/
+That does not really make sense. Registers jtag vs gp_sw have a
+different back-end, one from silicon and another from efuse. Not even
+sure if the memory map will always be the same across processors.
 
-All warnings (new ones prefixed by >>):
+> 
+>>   
+>>   required:
+>>     - compatible
+>> @@ -34,7 +35,9 @@ additionalProperties: false
+>>   
+>>   examples:
+>>     - |
+>> -    chipid@43000014 {
+>> +    chipid@14 {
+> 
+> And this was never even checked :/ You have clear warnings here.
 
->> drivers/mmc/host/rtsx_usb_sdmmc.c:1054:7: warning: variable 'err' is used uninitialized whenever 'if' condition is false [-Wsometimes-uninitialized]
-    1054 |                 if (!(host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)))
-         |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/mmc/host/rtsx_usb_sdmmc.c:1056:7: note: uninitialized use occurs here
-    1056 |                 if (err)
-         |                     ^~~
-   drivers/mmc/host/rtsx_usb_sdmmc.c:1054:3: note: remove the 'if' if its condition is always true
-    1054 |                 if (!(host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)))
-         |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    1055 |                         err = sd_power_on(host);
-   drivers/mmc/host/rtsx_usb_sdmmc.c:1038:9: note: initialize the variable 'err' to silence this warning
-    1038 |         int err;
-         |                ^
-         |                 = 0
-   1 warning generated.
+I will double check this.
 
 
-vim +1054 drivers/mmc/host/rtsx_usb_sdmmc.c
+~ Judith
 
-  1034	
-  1035	static void sd_set_power_mode(struct rtsx_usb_sdmmc *host,
-  1036			unsigned char power_mode)
-  1037	{
-  1038		int err;
-  1039		struct rtsx_ucr *ucr = host->ucr;
-  1040	
-  1041		if (power_mode == host->power_mode)
-  1042			return;
-  1043	
-  1044		switch (power_mode) {
-  1045		case MMC_POWER_OFF:
-  1046			err = sd_power_off(host);
-  1047			if (err)
-  1048				dev_dbg(sdmmc_dev(host), "power-off (err = %d)\n", err);
-  1049			pm_runtime_put_noidle(sdmmc_dev(host));
-  1050			break;
-  1051	
-  1052		case MMC_POWER_UP:
-  1053			pm_runtime_get_noresume(sdmmc_dev(host));
-> 1054			if (!(host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)))
-  1055				err = sd_power_on(host);
-  1056			if (err)
-  1057				dev_dbg(sdmmc_dev(host), "power-on (err = %d)\n", err);
-  1058			/* issue the clock signals to card at least 74 clocks */
-  1059			rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
-  1060			break;
-  1061	
-  1062		case MMC_POWER_ON:
-  1063			/* stop to send the clock signals */
-  1064			rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0x00);
-  1065			break;
-  1066	
-  1067		case MMC_POWER_UNDEFINED:
-  1068			break;
-  1069	
-  1070		default:
-  1071			break;
-  1072		}
-  1073	
-  1074		host->power_mode = power_mode;
-  1075	}
-  1076	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
