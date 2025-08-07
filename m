@@ -1,48 +1,48 @@
-Received: from fllvem-ot03.ext.ti.com (fllvem-ot03.ext.ti.com [198.47.19.245])
+Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4159E1C8633;
-	Thu,  7 Aug 2025 22:14:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 293E5190498;
+	Thu,  7 Aug 2025 22:29:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754604886; cv=none; b=MFVlg4FixJj2nPaS/N00cecClSm+t+9Ln9epfnu+o86IELYPq5xbHF2uHIr/juXJtcuqlRind9WPc3PuOUf+UKi3hlifYo+yapiQvH38RPfvaf4dnIs1DB8s76h2SIl//ppLwOJsg7M+9bAYBsZHL4odRCMiwqbGVpVkdWGeu+g=
+	t=1754605775; cv=none; b=VZlko6jXevzq68uxYswVN6Rn5iOz1lxVSzaG72V3WYUxA/T6eCFEgG8+uQvwog7pvlE/Bn3E/Doamvj5CuFKzdRYd2cBjjBIxsVhkgukFUDLXMNIfEAxdFqQFYQseqy/aN0yHJLjL/dZRkw7C18GKpXSFpe9oYqc2R6nDf3kajM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754604886; c=relaxed/simple;
-	bh=IZIOlHsbbEP+s6770gk+A8V13aNT9F9SkfyXLOdTqPg=;
+	s=arc-20240116; t=1754605775; c=relaxed/simple;
+	bh=GnhXBlhan00EnWMeW6CfAY8zoMr8CZr1dFclyjoHcpc=;
 	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=LWodamltiZZzdPXfIVD9VCs1x6CpfTlxqXCCd5U3pdwO1cj/29iqvExKtQNakIVjFAW/SOFBJ+Y1RgW4+ThksNDRMXyWzbNs4Sa9PcubC6VDdsyOErcmRUXQ1Ug8yb8Wl/IF9/yshm4Q07YOvFJumYFhw4RuNDPcm0yM4Gfx4Hs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=CiZ4Zq6k; arc=none smtp.client-ip=198.47.19.245
+	 In-Reply-To:Content-Type; b=HR3vaKXqk8RI0JVmCrlUh3+3m0+ChKuRgI48usBrX37v2hP9A1bPMwgUYz6YXUahuGroRtY9pRzrGLrHAzN0dc4Xqqmr2kAooPaobGSDssqpvpRWTv7rhslcGORmtwjzs7jOY4l5ojR0vU45llsYRkfu5ZDwQnj6zlZHV8Rlots=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=ERzNQZ3m; arc=none smtp.client-ip=198.47.23.235
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="CiZ4Zq6k"
-Received: from fllvem-sh04.itg.ti.com ([10.64.41.54])
-	by fllvem-ot03.ext.ti.com (8.15.2/8.15.2) with ESMTP id 577MEVZE405890;
-	Thu, 7 Aug 2025 17:14:31 -0500
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="ERzNQZ3m"
+Received: from fllvem-sh03.itg.ti.com ([10.64.41.86])
+	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTP id 577MTP5M902301;
+	Thu, 7 Aug 2025 17:29:25 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1754604871;
-	bh=anUu0iGZccTAr7XKInCn6vxxWIjEHT78iPCZEky3scE=;
+	s=ti-com-17Q1; t=1754605765;
+	bh=vGg0k6siYa6ZSIVgo5SD6iu9EKp7AtLaUnHfY9l895Q=;
 	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=CiZ4Zq6kiEhHmG7UmhDjYE5gzTT8qkzVCiAa1gzKZi8NpwWxQY+eJwdkmzMzimYgL
-	 agpB0mzogoK2brivLEV+yE5zm3PqvDZFux9WN3292jXkezgMVcSAjpHreXVyljw4kA
-	 tFktZmmZDryX4fW1KRgoD6BmFV2mO8RP6wW5Dr54=
-Received: from DFLE109.ent.ti.com (dfle109.ent.ti.com [10.64.6.30])
-	by fllvem-sh04.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 577MEVlx1118947
+	b=ERzNQZ3mdvKb80aeNo3DpUYphXfZLnY45zeAjNzQIjUxTUwrc75Oa4QAj/fd0ShHF
+	 gcgx/100x5BIM33bsFEIeSv/wOct/nxx/09J4SHjf1sToUE1Nn3uUr106e3L9H70Sc
+	 WBDpPZb8bAjICh0NDARBBS9unBN+iMFAkA9Musag=
+Received: from DFLE114.ent.ti.com (dfle114.ent.ti.com [10.64.6.35])
+	by fllvem-sh03.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 577MTPak465544
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
-	Thu, 7 Aug 2025 17:14:31 -0500
-Received: from DFLE103.ent.ti.com (10.64.6.24) by DFLE109.ent.ti.com
- (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
+	Thu, 7 Aug 2025 17:29:25 -0500
+Received: from DFLE101.ent.ti.com (10.64.6.22) by DFLE114.ent.ti.com
+ (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Thu, 7
- Aug 2025 17:14:31 -0500
-Received: from lelvem-mr05.itg.ti.com (10.180.75.9) by DFLE103.ent.ti.com
- (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
+ Aug 2025 17:29:24 -0500
+Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DFLE101.ent.ti.com
+ (10.64.6.22) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
- Frontend Transport; Thu, 7 Aug 2025 17:14:31 -0500
+ Frontend Transport; Thu, 7 Aug 2025 17:29:24 -0500
 Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvem-mr05.itg.ti.com (8.18.1/8.18.1) with ESMTP id 577MEVAV2047321;
-	Thu, 7 Aug 2025 17:14:31 -0500
-Message-ID: <f5b48a22-b036-4df0-b68d-0606b1bc454d@ti.com>
-Date: Thu, 7 Aug 2025 17:14:30 -0500
+	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 577MTOBE1764481;
+	Thu, 7 Aug 2025 17:29:24 -0500
+Message-ID: <da9c4afb-84ce-49ee-86b3-b7f50457a067@ti.com>
+Date: Thu, 7 Aug 2025 17:29:24 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,8 +50,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/4] mmc: sdhci_am654: Disable HS400 for AM62P SR1.0 and
- SR1.1
+Subject: Re: [PATCH 2/4] soc: ti: k3-socinfo: Add support for AM62P variants
 To: Andrew Davis <afd@ti.com>, Nishanth Menon <nm@ti.com>,
         Tero Kristo
 	<kristo@kernel.org>, Rob Herring <robh@kernel.org>,
@@ -67,76 +66,81 @@ CC: Vignesh Raghavendra <vigneshr@ti.com>,
         <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
 References: <20250805234950.3781367-1-jm@ti.com>
- <20250805234950.3781367-4-jm@ti.com>
- <1f424bbd-3830-41f9-af4b-9d17af42edaa@ti.com>
+ <20250805234950.3781367-3-jm@ti.com>
+ <37f73812-be0c-43b2-a5bc-a41e09db85ea@ti.com>
 Content-Language: en-US
 From: Judith Mendez <jm@ti.com>
-In-Reply-To: <1f424bbd-3830-41f9-af4b-9d17af42edaa@ti.com>
+In-Reply-To: <37f73812-be0c-43b2-a5bc-a41e09db85ea@ti.com>
 Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
 X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
 Hi Andrew,
 
-On 8/7/25 12:28 PM, Andrew Davis wrote:
+On 8/7/25 12:24 PM, Andrew Davis wrote:
 > On 8/5/25 6:49 PM, Judith Mendez wrote:
->> This adds SDHCI_AM654_QUIRK_DISABLE_HS400 quirk which shall be used
->> to disable HS400 support. AM62P SR1.0 and SR1.1 do not support HS400
->> due to errata i2458 [0] so disable HS400 for these SoC revisions.
+>> This adds a support for detecting AM62P SR1.0, SR1.1, SR1.2.
 >>
->> [0] https://www.ti.com/lit/er/sprz574a/sprz574a.pdf
+>> On AM62P, silicon revision is discovered with GP_SW1 instead of JTAGID
+>> register, so introduce GP_SW register range to determine SoC revision.
+>>
 >> Signed-off-by: Judith Mendez <jm@ti.com>
 >> ---
->>   drivers/mmc/host/sdhci_am654.c | 16 ++++++++++++++++
->>   1 file changed, 16 insertions(+)
+>>   drivers/soc/ti/k3-socinfo.c | 82 +++++++++++++++++++++++++++++++++----
+>>   1 file changed, 74 insertions(+), 8 deletions(-)
 >>
->> diff --git a/drivers/mmc/host/sdhci_am654.c 
->> b/drivers/mmc/host/sdhci_am654.c
->> index e4fc345be7e5..b7d2adff3277 100644
->> --- a/drivers/mmc/host/sdhci_am654.c
->> +++ b/drivers/mmc/host/sdhci_am654.c
->> @@ -156,6 +156,7 @@ struct sdhci_am654_data {
->>   #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->>   #define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
->> +#define SDHCI_AM654_QUIRK_DISABLE_HS400 BIT(2)
+>> diff --git a/drivers/soc/ti/k3-socinfo.c b/drivers/soc/ti/k3-socinfo.c
+>> index d716be113c84..9daeced656d6 100644
+>> --- a/drivers/soc/ti/k3-socinfo.c
+>> +++ b/drivers/soc/ti/k3-socinfo.c
+>> @@ -15,6 +15,7 @@
+>>   #include <linux/sys_soc.h>
+>>   #define CTRLMMR_WKUP_JTAGID_REG        0
+>> +#define CTRLMMR_WKUP_GP_SW1_REG        4
+>>   /*
+>>    * Bits:
+>>    *  31-28 VARIANT    Device variant
+>> @@ -62,10 +63,63 @@ static const struct k3_soc_id {
+>>       { JTAG_ID_PARTNO_AM62LX, "AM62LX" },
 >>   };
->>   struct window {
->> @@ -820,6 +821,9 @@ static int sdhci_am654_init(struct sdhci_host *host)
->>       if (ret)
->>           goto err_cleanup_host;
->> +    if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_DISABLE_HS400)
->> +        host->mmc->caps2 &= ~(MMC_CAP2_HS400 | MMC_CAP2_HS400_ES);
->> +
->>       ret = __sdhci_add_host(host);
->>       if (ret)
->>           goto err_cleanup_host;
->> @@ -883,6 +887,12 @@ static int sdhci_am654_get_of_property(struct 
->> platform_device *pdev,
->>       return 0;
->>   }
->> +static const struct soc_device_attribute sdhci_am654_descope_hs400[] = {
->> +    { .family = "AM62PX", .revision = "SR1.0" },
->> +    { .family = "AM62PX", .revision = "SR1.1" },
->> +    { /* sentinel */ }
+>> +static const struct regmap_config k3_chipinfo_regmap_cfg = {
+>> +    .reg_bits = 32,
+>> +    .val_bits = 32,
+>> +    .reg_stride = 4,
 >> +};
 >> +
->>   static const struct of_device_id sdhci_am654_of_match[] = {
->>       {
->>           .compatible = "ti,am654-sdhci-5.1",
->> @@ -970,6 +980,12 @@ static int sdhci_am654_probe(struct 
->> platform_device *pdev)
->>       if (ret)
->>           return dev_err_probe(dev, ret, "parsing dt failed\n");
->> +    soc = soc_device_match(sdhci_am654_descope_hs400);
->> +    if (soc) {
->> +        dev_err(dev, "Disable descoped HS400 mode for this silicon 
->> revision\n");
+>>   static const char * const j721e_rev_string_map[] = {
+>>       "1.0", "1.1", "2.0",
+>>   };
+>> +static const char * const am62p_gpsw_rev_string_map[] = {
+>> +    "1.0", "1.1", "1.2",
+>> +};
+>> +
+>> +static int
+>> +k3_chipinfo_get_variant_alternate(struct platform_device *pdev, 
+>> unsigned int partno, u32 *variant)
+>> +{
+>> +    struct device *dev = &pdev->dev;
+>> +    struct regmap *regmap;
+>> +    void __iomem *base;
+>> +    u32 offset;
+>> +    int ret;
+>> +
+>> +    base = devm_platform_ioremap_resource(pdev, 1);
+>> +    if (IS_ERR(base))
+>> +        return PTR_ERR(base);
+>> +
+>> +    regmap = regmap_init_mmio(dev, base, &k3_chipinfo_regmap_cfg);
 > 
-> Not really an error, use dev_info() or dev_warn(). Also this message
-> should go up in the init function when the caps are actually removed,
-> and only printed if the caps were set in the first place.
+> devm_regmap_init_mmio()
+> 
+> Otherwise this regmap never gets freed up in the error paths.
 
-Will fix for v2, thanks
+Thanks for reviewing, but....
 
-~ Judith
+I have completely changed this patch in v2, feel free to review v2
+though (:
+
+
+..
 
