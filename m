@@ -1,126 +1,117 @@
-Received: from fhigh-a5-smtp.messagingengine.com (fhigh-a5-smtp.messagingengine.com [103.168.172.156])
+Received: from fllvem-ot04.ext.ti.com (fllvem-ot04.ext.ti.com [198.47.19.246])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59CA72AE74;
-	Fri,  8 Aug 2025 09:35:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.156
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0703347C7;
+	Fri,  8 Aug 2025 13:38:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.246
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1754645757; cv=none; b=DZwwYsNtsMjZAfYTTIk0vpbWZ1aXTb50J2oVi9FPu5LufNWbuOn3Du7+zCpsrjsCG7iZbp+xrf9uJLYbfbuTxrFcex31RWjDEJMfaqSMa6N08zTGBXeypLm9gwxOqNxVqBKv8JgJ2Cv2lWO/jPAcr+K0+GmOsNqM4eSbiViFPJI=
+	t=1754660299; cv=none; b=b5ogZWdrn0CFuMYgrAz/DLpNYxpBnwllE+Y2FNbP6dn02adl+1PKpFSbBeNebr03ywYULKPr7cHyX9CAGthV9UjuFKoYlihae1QmzRZrAFtnjDtnnrSJKpZJmevSYu1IPEgmraCuIq71jnAJtm+jRxZSfQDjRyg4BjCUtxvnRZk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1754645757; c=relaxed/simple;
-	bh=TLVTniuZttcH1XUQEqI/TrUIjj9gfTm9RsC9ZiqzNIc=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=m8qa/qFV6KxDO0IqGYT2Vdl4ZQ/RqlVtt9EXRvkKH5LxMugZunStBIukwiUUUBcez03DsY5y2nW3xzjOwTgWFWuYsZnztLtvo+RVfd9c79BtE2BzOsAQ1aZQqavhiuPNymcAriIQL4IkGnOan/fHii9DBtTKgjgcmhSJkBDaVWc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=TOuzzp57; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=HTxUchm7; arc=none smtp.client-ip=103.168.172.156
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	s=arc-20240116; t=1754660299; c=relaxed/simple;
+	bh=c5lrnUgwIG/rNRAu0GC1hkwAXsNvrmjR7WDCjDn8UKM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=ZpN+07sqQnjLQz7pYdwQ7HB/Ev+4yRWXIZQMbcmLRNiiqYEEk4DmxSgeY3vI/EIBA/4ydvRE2ZNUPTTcJNUi4BVVn0tyF6kDHX43NzU39JXmJjk5uxBVlanUVZe9kxtjuGiYG7/yESefohCX1evxC5f5cjVGqFaQL2e7HZpVHU8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=D3utI2E5; arc=none smtp.client-ip=198.47.19.246
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="TOuzzp57";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="HTxUchm7"
-Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 440CF14000B9;
-	Fri,  8 Aug 2025 05:35:52 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-05.internal (MEProxy); Fri, 08 Aug 2025 05:35:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm2; t=1754645752;
-	 x=1754732152; bh=+IkjgG41wJ1Z8VswgckhF77h56auMeNQN7JbI+lzz8U=; b=
-	TOuzzp57RHZZYLsPtSdfWyLv5cDm+26SfYGkZMGlmn/s0QOhNXueT8Os55HwymB/
-	8BFVSfj4U+BuFKG8XRVcCAWdpqkrxCH+VVVOR+FjPosYGUdbbpGiU1H/LDK/AxG5
-	7UY9msE6fkCXp/Y4kNZEARHr1P7rRs5Q6jmsQSitjhfg1jneZ9MroqFCFcQKGLOo
-	joMQjxnx+2kdJO5tf4SAi6lhjt1nCabWN7PEdaX8EkUIaG1zc3GsppIy3t62wupp
-	Kr7ZmCjn6LSTBO0t/CpJfNB1yihTyMnCLllFzvhaHtjMnmp83msC+CqPcRitOIcc
-	6B2mOW/Uh8i12uLzT93LKw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1754645752; x=
-	1754732152; bh=+IkjgG41wJ1Z8VswgckhF77h56auMeNQN7JbI+lzz8U=; b=H
-	TxUchm7Dlc1uhe0lQj+L9hBiroGWUhJLpMOXvOVf2nGWai4gjDNrtSLHUwCOHr5C
-	CRHTJxO+TCnWrz49oldUN9mRAg4vM2WnYwxLoRls5a5IqDe2Wl1CB7gneoVuoKb7
-	pgCtTyPz43G9rL/Fc4lP7nNswcizAO4+6xnvCcAqtxeGVkP8XAdMWrTVuG9yf4s4
-	UK+0/vLFzKinqeGrABa/P8h7QAr4amWgOM6Qlswq9N9qWR50dE4ZSUArenruihsx
-	3zMSfhqPBuKHD5X4vCMfsiqkpr2vVdvvWzqPCUha7ENnHnxrjnegH+hl+vbB0gvp
-	SVe4aygYWFN3qcvRcz6NQ==
-X-ME-Sender: <xms:98SVaFlFZOa1-h9v78DmKLpruZwL2M1zH-NzkTJo2DcbINe5WEineQ>
-    <xme:98SVaA2ZAZOxmqHTRU2bq23wl_STSdJH6KPCUUKVScFIDRAdbVdMtavbOzC6mbbYG
-    FV9IHzykPy5lg7Fbxs>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdduvdefgeejucetufdoteggodetrf
-    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
-    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
-    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrnhgu
-    uceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrthhtvg
-    hrnhephfdthfdvtdefhedukeetgefggffhjeeggeetfefggfevudegudevledvkefhvdei
-    necuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprghrnh
-    gusegrrhhnuggsrdguvgdpnhgspghrtghpthhtohepiedpmhhouggvpehsmhhtphhouhht
-    pdhrtghpthhtohepghhorhguohhnrdhgvgessghsthdrrghipdhrtghpthhtoheprggurh
-    hirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopehulhhfrdhhrghn
-    shhsohhnsehlihhnrghrohdrohhrghdprhgtphhtthhopeihrghnghiihhdtledtieesth
-    hhuhhnuggvrhhsohhfthdrtghomhdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhes
-    vhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhmmhgtsehvgh
-    gvrhdrkhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:98SVaFuEeDIe2kZQMto9tLEajLj9N4del19h-D3JcZ4jD3ObvPg1OQ>
-    <xmx:98SVaF2TJsDGbSssP0Hk9T1l0A2hXlzu12GOlkrjPaZEqWEZl2SkjQ>
-    <xmx:98SVaOVQXPfe5cKuifA5sbbkKvtDQgxrKkcr4_R-4a4kAi0Rnk6i3A>
-    <xmx:98SVaIILXFePJ6scoTA6yxgx9q2yDi5iwt_dRXJJWsmLe9HjpR5lTA>
-    <xmx:-MSVaPgKPDuSDb6RSQXWjG9vifYjiFVjWe9xRxg28aF3LfnqC8JHwN-L>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 72DDA700068; Fri,  8 Aug 2025 05:35:51 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="D3utI2E5"
+Received: from lelvem-sh01.itg.ti.com ([10.180.77.71])
+	by fllvem-ot04.ext.ti.com (8.15.2/8.15.2) with ESMTP id 578Dc9A8991745;
+	Fri, 8 Aug 2025 08:38:09 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1754660289;
+	bh=fY6ITv0IOCwAWvbopI78ay0Ho+0F53h/qZ6BsbQ7c3Q=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=D3utI2E5WFPqamVWrVO4a81tSwdLi0z6mOuyh7BD0sJ/1z2h91QIRwCJetoQbOosH
+	 0wNxxvKkaMDf1KPSgEy9X/7q+tIxDvs/w7brC8w/24O0bu6gQY4ANOJWLgEqJ1r28Q
+	 rVJIMxchuHyliXWThmBJRm4QQK97skudF8D4IpeA=
+Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
+	by lelvem-sh01.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 578Dc91U520915
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
+	Fri, 8 Aug 2025 08:38:09 -0500
+Received: from DLEE115.ent.ti.com (157.170.170.26) by DLEE112.ent.ti.com
+ (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Fri, 8
+ Aug 2025 08:38:09 -0500
+Received: from lelvem-mr05.itg.ti.com (10.180.75.9) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
+ Frontend Transport; Fri, 8 Aug 2025 08:38:08 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvem-mr05.itg.ti.com (8.18.1/8.18.1) with ESMTP id 578Dc8OD3118894;
+	Fri, 8 Aug 2025 08:38:09 -0500
+Message-ID: <16fac32a-a42a-4ec8-b0a2-3efe785af728@ti.com>
+Date: Fri, 8 Aug 2025 08:38:08 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: Tf7f6c885039edc57
-Date: Fri, 08 Aug 2025 11:35:07 +0200
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "yangzh0906@thundersoft.com" <yangzh0906@thundersoft.com>
-Cc: "Adrian Hunter" <adrian.hunter@intel.com>, "gordon.ge" <gordon.ge@bst.ai>,
- linux-kernel@vger.kernel.org,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- "Ulf Hansson" <ulf.hansson@linaro.org>
-Message-Id: <8413fb10-3526-42f8-aae9-382931aed7b2@app.fastmail.com>
-In-Reply-To: <20250808083916.959079-1-yangzh0906@thundersoft.com>
-References: <05e13ba9-c1fe-450a-a159-9693edce0a23@app.fastmail.com>
- <20250808083916.959079-1-yangzh0906@thundersoft.com>
-Subject: Re: [PATCH v2 5/8] mmc: sdhci: add Black Sesame Technologies BST C1200
- controller driver
-Content-Type: text/plain
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 2/2] mmc: sdhci_am654: Disable HS400 for AM62P SR1.0
+ and SR1.1
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, Nishanth Menon <nm@ti.com>,
+        Santosh Shilimkar
+	<ssantosh@kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, Andrew Davis <afd@ti.com>
+References: <20250807225138.1228333-1-jm@ti.com>
+ <20250807225138.1228333-3-jm@ti.com>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <20250807225138.1228333-3-jm@ti.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On Fri, Aug 8, 2025, at 10:39, Albert Yang wrote:
-> On Fri, Jul 11, 2025, at 08:55, Arnd Bergmann wrote:
->
-> After investigating the approaches you suggested, I need to clarify the
-> hardware constraints we face:
->
-> The BST C1200 SoC has fundamental hardware limitations:
-> - System RAM starts at 0x8.00000000 (above 32-bit addressable range)
-> - The eMMC controller's DMA engine is limited to 32-bit addressing
-> - The SMMU does not function for address translation in this path due to
->   hardware design flaws
-> - These limitations were finalized during silicon design and cannot be
->   modified in software
->
-> Regarding your suggestion about programming the bus controller mapping,
-> we have thoroughly reviewed the BST C1200 datasheet and confirmed:
-> - No accessible registers exist to reprogram the address mapping
-> - The 32-bit DMA limitation is a hard constraint of the controller IP
->
-> Given these silicon-level constraints, the current bounce buffer approach
-> represents the only viable solution to provide eMMC functionality on this
-> platform.
+Hi all,
 
-Thanks for checking and confirming. I think what you had in v2 is
-probably close to what we want then. Please update the comments in
-the code that explain the workaround and send it as v3 so we can
-have another look.
+On 8/7/25 5:51 PM, Judith Mendez wrote:
+> This adds SDHCI_AM654_QUIRK_DISABLE_HS400 quirk which shall be used
+> to disable HS400 support. AM62P SR1.0 and SR1.1 do not support HS400
+> due to errata i2458 [0] so disable HS400 for these SoC revisions.
+> 
+> [0] https://www.ti.com/lit/er/sprz574a/sprz574a.pdf
+> Signed-off-by: Judith Mendez <jm@ti.com>
+> ---
+>   drivers/mmc/host/sdhci_am654.c | 18 ++++++++++++++++++
+>   1 file changed, 18 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index e4fc345be7e5..dc4975514847 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -156,6 +156,7 @@ struct sdhci_am654_data {
+>   
+>   #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+>   #define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
+> +#define SDHCI_AM654_QUIRK_DISABLE_HS400 BIT(2)
+>   };
+>   
+>   struct window {
+> @@ -765,6 +766,7 @@ static int sdhci_am654_init(struct sdhci_host *host)
+>   {
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> +	struct device *dev = mmc_dev(host->mmc);
+>   	u32 ctl_cfg_2 = 0;
+>   	u32 mask;
+>   	u32 val;
+> @@ -820,6 +822,12 @@ static int sdhci_am654_init(struct sdhci_host *host)
+>   	if (ret)
+>   		goto err_cleanup_host;
+>   
+> +	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_DISABLE_HS400 &&
+> +	    host->mmc->caps2 & (MMC_CAP2_HS400 | MMC_CAP2_HS400_ES)) {
+> +		dev_err(dev, "Disable descoped HS400 mode for this silicon revision\n");
 
-     Arnd
+Forgot to switch to dev_info, so will respin the series one more time.
+
+Sorry for the noise.
+
+~ Judith
+
