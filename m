@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4FD8261574;
-	Tue, 12 Aug 2025 13:33:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA96E17A2E6;
+	Tue, 12 Aug 2025 13:35:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755005615; cv=none; b=JW6uQjlFkx0d2hJWHdinjetS7x9r7g6DV3bcL4HH5dVrfMfNUyXstmJFO18HdrorRCUCFlAv+o7TwomhXE7gvyyHtqXJf/68v99KMLLtnJVx3WtvsmBD6c9TkRJ+DNgSS6XsDgLQ8FO3gT9ZDlNMs7aO1fmozPizGE04QhtfFPI=
+	t=1755005702; cv=none; b=h/sBqbMgZo9NwBViHogDK702g4ncwnRXglK+wPnE8iFs/FkfsOka/SwE3DQJ1fQze+Em5ZgOaleN23YgUIPjW3TpsCyVRzLbqScKPBjlkN0jikuhsiW++kwlUcufmnzDxIrjd1G+qpVBk/36fSts7NyePhasLgxJXbNTTP/RdJY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755005615; c=relaxed/simple;
-	bh=dS4y36QAOmFxGB3IF5rTASgVCuJo6srS84clRq8Bg1g=;
+	s=arc-20240116; t=1755005702; c=relaxed/simple;
+	bh=EbSOUxZj4Dk5TROM6zew5g6CUwMUu1vUz6Zv2WHGHJA=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=aYUQEuO7WiG+lVsh/P+mwI3yFzaGp5A4kW/+ZuTxARvkS26TyE3Dc9R4E0tdLvo/NYMk5fN3/7GdYdl+5uk96A1Yb4SeDJ6gbqjQP9gDULBO5NyBd7R6hY1fWlvw2X9qUgBvWSQeMqgQzHiYvCfkYRD66TYfOCxrSrzsJ3XlrU4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GSNgCxpW; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=UGKN41DVjv9/hn9Fac2GlsOi9e3dAVqb0dD98dhP2jw4okSlO/BodrUK9TBmzja/OSXR2i0ydJQHGo2gD8xD5Bd0gj1AFfxwf6s9zJY2NsYxyt84DpEA9MgZf+FIWTtB+Jf9HeNu8BwziWsnVJt7cB7MNQph7WB/OjsYPaKxZ04=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OrOpgvI3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GSNgCxpW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 43663C4CEF0;
-	Tue, 12 Aug 2025 13:33:31 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OrOpgvI3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D032C4CEF0;
+	Tue, 12 Aug 2025 13:34:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755005615;
-	bh=dS4y36QAOmFxGB3IF5rTASgVCuJo6srS84clRq8Bg1g=;
+	s=k20201202; t=1755005701;
+	bh=EbSOUxZj4Dk5TROM6zew5g6CUwMUu1vUz6Zv2WHGHJA=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=GSNgCxpWNzfLytjJp0Y1T36No9Z0k5sKzohw1PUPPYsUuofA9cjlW0leejkQnvCs3
-	 BdEiaQZD7XTiCrNmCEE5SLwEHsFs4z0MKscQlPaf4heIYtknhFbCBxcWC7NjDOT3GI
-	 ZfD6sDdbGh/sCnsbt+xmkcVaPiR/xYKMCfz0biIBFGs0TlNgO9yTBtTT4tKIk/lBJe
-	 pGdzdV+I4jUcdZScGDQbFOBz7VaQ3qwtTKo+Kyde+ztrFPdtfcWYA1d0sj9Tt4nk/c
-	 4ezbmx32Z7zi1ERFImujsqEYQne0LpVocgrJNmc0MxYJAqal0tbMrDXzt4WKqI+OZ5
-	 K6NOgWC4ACf1Q==
-Message-ID: <45ec2fee-9b76-4f36-8476-000fbce775c6@kernel.org>
-Date: Tue, 12 Aug 2025 15:33:29 +0200
+	b=OrOpgvI3yZlVLT2n9n52cdCbXRIVq/NYDRmzuoUKn0xzH1ARomtKhBhi8yRbTKzFY
+	 YnG+X1GJuMVRIKIloJoDI6oG+OG12VA+Av82DNXxGRi7P6Q2+hZK8gTUX/nFPiPKtA
+	 J1ro95LCEXtkOgcowlNZ8sjLCHFhf07ICeI80SS1+RYDyJgFw1UWMIvHSy0NzJX1eu
+	 5ARh+jsEmt5ZztqFnAXtwsRCL3GP2NesLCtRSr/uZEY7pKrO/Erm4yAuCbNZNqdcnq
+	 FgE1VfCYT867B3vraZCaIiv9PdgQG0MJUybSIu3qKTtBT8ca7cb0BvLqJXFe5bT2+T
+	 pcw/qkwHVZOMQ==
+Message-ID: <d5e0f41e-34c1-44af-ac0d-8362a72a2ff1@kernel.org>
+Date: Tue, 12 Aug 2025 15:34:55 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,8 +35,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 8/8] MAINTAINERS: add and consolidate Black Sesame
- Technologies (BST) ARM SoC support
+Subject: Re: [PATCH v3 1/8] dt-bindings: vendor-prefixes: Add Black Sesame
+ Technologies Co., Ltd.
 To: Albert Yang <yangzh0906@thundersoft.com>, robh@kernel.org,
  krzk+dt@kernel.org, conor+dt@kernel.org, ulf.hansson@linaro.org,
  catalin.marinas@arm.com, will@kernel.org, arnd@arndb.de,
@@ -46,7 +46,7 @@ Cc: bst-upstream@bstai.top, linux-arm-kernel@lists.infradead.org,
  devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, soc@lists.linux.dev,
  linux-kernel@vger.kernel.org
 References: <20250812123110.2090460-1-yangzh0906@thundersoft.com>
- <20250812123110.2090460-9-yangzh0906@thundersoft.com>
+ <20250812123110.2090460-2-yangzh0906@thundersoft.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -92,54 +92,51 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250812123110.2090460-9-yangzh0906@thundersoft.com>
+In-Reply-To: <20250812123110.2090460-2-yangzh0906@thundersoft.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 12/08/2025 14:31, Albert Yang wrote:
-> Add and consolidate the MAINTAINERS entry for Black Sesame Technologies
-
-I do not see consolidation in the patch, so this part and subject are
-incorrect. You only add.
-
-Please wrap commit message according to Linux coding style / submission
-process (neither too early nor over the limit):
-https://elixir.bootlin.com/linux/v6.4-rc1/source/Documentation/process/submitting-patches.rst#L597
-
-
-> ARM SoC support. This entry covers device tree bindings, drivers, and board
-> files for BST SoCs, including MMC, and platform support.
+> Black Sesame Technologies Co., Ltd.s a leading automotive-grade
+> computing SoC and SoC-based
+> intelligent vehicle solution provider. Link: https://bst.ai/.
 > 
+> Acked-by: Rob Herring (Arm) <robh@kernel.org>
 > Signed-off-by: Ge Gordon <gordon.ge@bst.ai>
 
-What does this SoB represent? Who wrote the code?
+Odd order of tags. When was the patch written, by who and when was the
+Ack given?
 
-You added that SoB everywhere so I have worries it was automatic or
-manager's decision. That isn't what SoB is about.
-
-And looking at actual M: entry, this should be rather publicly Acked.
-That's what Ack is. Not SoB.
 
 > Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
+
 > ---
-> Change for v3:
+> Changes for v3:
 > - No changes
 > 
-> Change for v2:
+> Changes for v2:
 > - No changes
 > ---
->  MAINTAINERS | 10 ++++++++++
->  1 file changed, 10 insertions(+)
+>  Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index efb51ee92683..e3236384c28a 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -2441,6 +2441,16 @@ S:	Maintained
->  F:	Documentation/devicetree/bindings/arm/blaize.yaml
->  F:	arch/arm64/boot/dts/blaize/
->  
-> +ARM/BST SOC SUPPORT
-> +M:	Ge Gordon <gordon.ge@bst.ai>
+> diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+> index 5d2a7a8d3ac6..3c2031417232 100644
+> --- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
+> +++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+> @@ -222,6 +222,8 @@ patternProperties:
+>      description: Shenzhen BigTree Tech Co., LTD
+>    "^bitmain,.*":
+>      description: Bitmain Technologies
+> +  "^bst,.*":
+> +    description: Black Sesame Technologies Co., Ltd.
+
+Messed ordering.
+
+>    "^blaize,.*":
+>      description: Blaize, Inc.
+>    "^blutek,.*":
+
+
 Best regards,
 Krzysztof
