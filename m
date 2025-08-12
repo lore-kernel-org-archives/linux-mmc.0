@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA96E17A2E6;
-	Tue, 12 Aug 2025 13:35:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC2B51632DD;
+	Tue, 12 Aug 2025 13:36:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755005702; cv=none; b=h/sBqbMgZo9NwBViHogDK702g4ncwnRXglK+wPnE8iFs/FkfsOka/SwE3DQJ1fQze+Em5ZgOaleN23YgUIPjW3TpsCyVRzLbqScKPBjlkN0jikuhsiW++kwlUcufmnzDxIrjd1G+qpVBk/36fSts7NyePhasLgxJXbNTTP/RdJY=
+	t=1755005761; cv=none; b=HPzXjto33SUrNbosMAjQgMiTiYHSOoVwXbWdS5tb9XeNMiOYpTnTGtj2T1XpfqczAZYKpnY5P1Kxpx3Xz/79EQ00vBZf6xwjEY99PRiOuamKKtAPPpmlbABKPxQICccZBhv5+4qLAC0QjayNuD6nRh76yQt2/c4KoPYgFfwAv+g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755005702; c=relaxed/simple;
-	bh=EbSOUxZj4Dk5TROM6zew5g6CUwMUu1vUz6Zv2WHGHJA=;
+	s=arc-20240116; t=1755005761; c=relaxed/simple;
+	bh=06KyMX/ZPEEj+Ni0Hx96uCasR7hXuo5TzHLcgvQ59VY=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=UGKN41DVjv9/hn9Fac2GlsOi9e3dAVqb0dD98dhP2jw4okSlO/BodrUK9TBmzja/OSXR2i0ydJQHGo2gD8xD5Bd0gj1AFfxwf6s9zJY2NsYxyt84DpEA9MgZf+FIWTtB+Jf9HeNu8BwziWsnVJt7cB7MNQph7WB/OjsYPaKxZ04=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OrOpgvI3; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=bTHr6ZEZuV/7ysJLTddrF7v2v52c23dB1ffAE9ODRrRRBLfj+Jz5E/vHekGeUPYJnX+nvKIA8q4GmQijuUBn8peVXwM98U0CsvFS/TTgoPQv12LLE9Knx4B0YEu9xe+Hi3CZJl/pFjTr7Q7uCv6piBBHTs53Oc4gpDQsn/femkQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lFyK2pr0; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OrOpgvI3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D032C4CEF0;
-	Tue, 12 Aug 2025 13:34:57 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lFyK2pr0"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 40AE3C4CEF7;
+	Tue, 12 Aug 2025 13:35:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755005701;
-	bh=EbSOUxZj4Dk5TROM6zew5g6CUwMUu1vUz6Zv2WHGHJA=;
+	s=k20201202; t=1755005761;
+	bh=06KyMX/ZPEEj+Ni0Hx96uCasR7hXuo5TzHLcgvQ59VY=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=OrOpgvI3yZlVLT2n9n52cdCbXRIVq/NYDRmzuoUKn0xzH1ARomtKhBhi8yRbTKzFY
-	 YnG+X1GJuMVRIKIloJoDI6oG+OG12VA+Av82DNXxGRi7P6Q2+hZK8gTUX/nFPiPKtA
-	 J1ro95LCEXtkOgcowlNZ8sjLCHFhf07ICeI80SS1+RYDyJgFw1UWMIvHSy0NzJX1eu
-	 5ARh+jsEmt5ZztqFnAXtwsRCL3GP2NesLCtRSr/uZEY7pKrO/Erm4yAuCbNZNqdcnq
-	 FgE1VfCYT867B3vraZCaIiv9PdgQG0MJUybSIu3qKTtBT8ca7cb0BvLqJXFe5bT2+T
-	 pcw/qkwHVZOMQ==
-Message-ID: <d5e0f41e-34c1-44af-ac0d-8362a72a2ff1@kernel.org>
-Date: Tue, 12 Aug 2025 15:34:55 +0200
+	b=lFyK2pr0Rw1IAAWc1l29EAsZl6y5wRkq5FS9sZCI7zaCMDeHzfoydKLg60Rd/5ze2
+	 FXFh3jeH1lxJYw8dsIV8oQnSozUq0860bFWset+IrpwfsomaVeVeHime+nfkFtgzH7
+	 zpOj1BlGoC5efLwYiLFHbafa4e4xoBABHwPofSXeNaXxk7kXYXEmOhRirNMdfSzFEx
+	 b1T7At7W29ynyKlX0t+JjgJz8+vuO4Dpjkap0kUCuXa5VmIVCTX+p38rCiSLj6+Gnr
+	 Vwx5/yLHNOmHrbeRTCdJai+SgmuvNNitZ140tTUjmt6PZvxN259HYVWm6HhpN+N5eG
+	 iSSyBAA3y8b/A==
+Message-ID: <1512efa1-40c7-46e0-8636-dc0dc0e379c4@kernel.org>
+Date: Tue, 12 Aug 2025 15:35:55 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,8 +35,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/8] dt-bindings: vendor-prefixes: Add Black Sesame
- Technologies Co., Ltd.
+Subject: Re: [PATCH v3 2/8] dt-bindings: arm: add Black Sesame Technologies
+ (bst) SoC
 To: Albert Yang <yangzh0906@thundersoft.com>, robh@kernel.org,
  krzk+dt@kernel.org, conor+dt@kernel.org, ulf.hansson@linaro.org,
  catalin.marinas@arm.com, will@kernel.org, arnd@arndb.de,
@@ -46,7 +46,7 @@ Cc: bst-upstream@bstai.top, linux-arm-kernel@lists.infradead.org,
  devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, soc@lists.linux.dev,
  linux-kernel@vger.kernel.org
 References: <20250812123110.2090460-1-yangzh0906@thundersoft.com>
- <20250812123110.2090460-2-yangzh0906@thundersoft.com>
+ <20250812123110.2090460-3-yangzh0906@thundersoft.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -92,51 +92,21 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250812123110.2090460-2-yangzh0906@thundersoft.com>
+In-Reply-To: <20250812123110.2090460-3-yangzh0906@thundersoft.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 12/08/2025 14:31, Albert Yang wrote:
-> Black Sesame Technologies Co., Ltd.s a leading automotive-grade
-> computing SoC and SoC-based
-> intelligent vehicle solution provider. Link: https://bst.ai/.
+> Add device tree bindings for Black Sesame Technologies Arm SoC,
+> it consists several SoC models like C1200, etc.
 > 
-> Acked-by: Rob Herring (Arm) <robh@kernel.org>
 > Signed-off-by: Ge Gordon <gordon.ge@bst.ai>
-
-Odd order of tags. When was the patch written, by who and when was the
-Ack given?
-
-
 > Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
 
-> ---
-> Changes for v3:
-> - No changes
-> 
-> Changes for v2:
-> - No changes
-> ---
->  Documentation/devicetree/bindings/vendor-prefixes.yaml | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-> index 5d2a7a8d3ac6..3c2031417232 100644
-> --- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
-> +++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-> @@ -222,6 +222,8 @@ patternProperties:
->      description: Shenzhen BigTree Tech Co., LTD
->    "^bitmain,.*":
->      description: Bitmain Technologies
-> +  "^bst,.*":
-> +    description: Black Sesame Technologies Co., Ltd.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Messed ordering.
-
->    "^blaize,.*":
->      description: Blaize, Inc.
->    "^blutek,.*":
-
+... and place it correctly please. This goes below or under your SoB.
+Not some other place.
 
 Best regards,
 Krzysztof
