@@ -1,218 +1,176 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D12772F3C2E
-	for <linux-mmc@vger.kernel.org>; Wed, 13 Aug 2025 10:33:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 421502D060C;
+	Wed, 13 Aug 2025 11:08:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755081198; cv=none; b=kUAVNAvxO2K8z4qrA6OKIIaa7PDRAcwRZ3Scw6sH1i97z8qHcsQ8D9pNIFukX/PclNZ2asblJNj0DUN5JVJpmv5tzPANwZDhQYuvrbftVIOYKw2ylVWDDh6giduKPaDl/xuCxIPU+MMHH2EdIBpt3a9XPJQ0tyGy4m0etldqB4k=
+	t=1755083308; cv=none; b=ZblI5Pvx9dUj5JR3F0hv4tPuVqH9O/BQMP/zVVj3KBhaYBy7ZJV3nYPw+63DAQXZNWaW3Z5YuQ+B9gv74I1rIJvUI2zDjlxayuXZpho1d3ImJ0aH/dy7fIgPjUiQmrWa51SoqjQ+wuviIaR9WAFVLTU90o+ZyDHnHI6+8lKRMPs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755081198; c=relaxed/simple;
-	bh=IycRZzbtPjcoBJRiQajt7RaNrbxPeE1qygAH2mM/dr0=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=dK8v/eE/ftA740/wb3kHLB+s+2ZnP9RJ+pzK9gatgnwItg/nr3DPqk1rQL+orAYF38qYqYJFXqscjQ1wWVfrVovut/N1XQFrHeTULQZ5thE/3YSwdhphVFPUK+DE/TQrVSe4Iacljly5ElxlAOGfMxDWaU9VD7vK79NRlIkeHbA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <ore@pengutronix.de>)
-	id 1um8nA-0005sv-BR; Wed, 13 Aug 2025 12:33:12 +0200
-Received: from dude04.red.stw.pengutronix.de ([2a0a:edc0:0:1101:1d::ac])
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.96)
-	(envelope-from <ore@pengutronix.de>)
-	id 1um8n9-0004gi-0X;
-	Wed, 13 Aug 2025 12:33:11 +0200
-Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.96)
-	(envelope-from <ore@pengutronix.de>)
-	id 1um8n9-00FzM9-0I;
-	Wed, 13 Aug 2025 12:33:11 +0200
-From: Oleksij Rempel <o.rempel@pengutronix.de>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Oleksij Rempel <o.rempel@pengutronix.de>,
-	kernel@pengutronix.de,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Mark Brown <broonie@kernel.org>,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	=?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>,
-	Christian Loehle <christian.loehle@arm.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <Avri.Altman@sandisk.com>
-Subject: [PATCH v7 2/2] mmc: core: add undervoltage handler for MMC/eMMC devices
-Date: Wed, 13 Aug 2025 12:33:08 +0200
-Message-Id: <20250813103309.3810728-3-o.rempel@pengutronix.de>
-X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250813103309.3810728-1-o.rempel@pengutronix.de>
-References: <20250813103309.3810728-1-o.rempel@pengutronix.de>
+	s=arc-20240116; t=1755083308; c=relaxed/simple;
+	bh=agLW0VIDcUGVqtF+PXqlqKoUZfF/53CioVgWfMwAxpo=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=Y6nNU1ktOTUoDaeGGklHl2Tt2N2Yrm41qwNdjPti0NZrdRM3S/bIgcy1vM5x7Bsv4oWsd6A1zRmywrgrSWw0wO2qorb8pUCdqZbaaBmIsegF3UzyKnlUkSs40J9M+t6rLhrQj5ASQ11Z5vy8/kbIyelgqvx1irxd7CZOkBwA97U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=U5uCGNiO; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="U5uCGNiO"
+Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57D6mJlR008724;
+	Wed, 13 Aug 2025 11:08:21 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	eSJS8iaPgTC+NMg4WjXp7ShROEazviRD3VPvqnJIBbA=; b=U5uCGNiO4KmIu6qv
+	+OLEsZrxQmGVFgmbBz0pWnhCnTXq2stiedu4MgSg5L9KsM/AsTXIt69WzJg8v+E5
+	E368aovOlIAw6pJppkNqUd42ubxJ/qR3G7LVGcdQnRkhSc4hEkAzJD5tFBU7W4Fv
+	KwCFTuWhPSel0qBrCgh5JMuTqLvRA2VjECARWt4bdVa6ryOrkGokSQqxXVHrhNOI
+	4x3Pbhv9Ed5KwXu91hR/wRDjT43sUYJjWuIjChUWj4oP1fHe7tDoV1MOt2RKgdZA
+	Ol7m9IBGV/UQwyC3lUxxcxp41UtrRYuXwwr4Xf0MOn5+4fXpdJuxmlbIm6DEz5A+
+	CTUBhg==
+Received: from nasanppmta01.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48fem4fg51-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 13 Aug 2025 11:08:20 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 57DB8JOF015501
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 13 Aug 2025 11:08:19 GMT
+Received: from [10.206.107.4] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Wed, 13 Aug
+ 2025 04:08:14 -0700
+Message-ID: <ab5d3811-9fbf-4749-9463-4457fbf50023@quicinc.com>
+Date: Wed, 13 Aug 2025 16:38:11 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V4 4/4] arm64: dts: qcom: sm8550: Remove SDR104/SDR50
+ broken capabilities
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski
+	<krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson
+	<andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>
+References: <20250801084518.2259767-1-quic_sartgarg@quicinc.com>
+ <20250801084518.2259767-5-quic_sartgarg@quicinc.com>
+ <69f2807c-9a28-4b31-97cc-2756f0ab9fd4@kernel.org>
+ <c7e36755-9255-4209-9d53-20077bd1d3ba@quicinc.com>
+ <8b023e56-435b-43df-8b15-c562a494e06f@kernel.org>
+Content-Language: en-US
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <8b023e56-435b-43df-8b15-c562a494e06f@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ore@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: CX22bScD_SV7lCuBYIpCB4sFzipBqTpI
+X-Proofpoint-ORIG-GUID: CX22bScD_SV7lCuBYIpCB4sFzipBqTpI
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODExMDA2OCBTYWx0ZWRfX98xLFV266QbX
+ m27GIrJhSGb85YleytGJ0sQtrACMSDLz2lJ9QoDSGFvL1IjUV8jzFpWDdwJ6Pf35WJ5HWUvIU7N
+ yEppGUGTbYsYOFqHBCLPlynigAx0A3xSUKyh9BmYGe3ubhPVn3/mA2VFSTLtsUJYjG/WYMgteTP
+ mjmuowFZxJB7ndNXUuWDGF8mi+RSurRoahyot3Pj257xkyj0Ivh8Ofq3QEkCoZX9wozlDmlwj/s
+ 1zxKaTlg3P3EAg8efJvTzcx4WbHTp4whNwyfIxkvKHE8G/N+u1My3TrR5HENQsiBec/vLPB/WT9
+ yrK+K6Gu8YgkEjl8vcj8z66TM71mWqDUw+iZhR35AzeDyDsA7as6whxe7UHWhi8xdrtYzzdWVtq
+ xyZ6Yizv
+X-Authority-Analysis: v=2.4 cv=YMafyQGx c=1 sm=1 tr=0 ts=689c7224 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=COk6AnOGAAAA:8
+ a=7vkX0yn46oB1UrFKko0A:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-13_01,2025-08-11_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 clxscore=1015 priorityscore=1501 spamscore=0 suspectscore=0
+ adultscore=0 impostorscore=0 malwarescore=0 phishscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508110068
 
-Add infrastructure to handle regulator undervoltage events for MMC/eMMC
-cards. When an undervoltage is detected, the new handler performs a
-controlled emergency suspend using a short power-off notification,
-skipping the cache flush to maximize the chance of a safe shutdown.
-After the operation, the card is marked as removed to prevent further
-I/O and possible data corruption.
 
-This is implemented by introducing MMC_POWEROFF_UNDERVOLTAGE to the
-mmc_poweroff_type enum and refactoring the suspend logic into an
-internal __mmc_suspend() helper that allows the caller to skip the cache
-flush if required. The undervoltage handler is registered as a bus
-operation and invoked from the core undervoltage path.
 
-If power-off notification is not supported by the card, the handler
-falls back to sleep or deselecting the card.
+On 8/5/2025 2:55 PM, Krzysztof Kozlowski wrote:
+> On 05/08/2025 11:19, Sarthak Garg wrote:
+>>
+>>
+>> On 8/1/2025 2:32 PM, Krzysztof Kozlowski wrote:
+>>> On 01/08/2025 10:45, Sarthak Garg wrote:
+>>>> The kernel now handles level shifter limitations affecting SD card
+>>>> modes, making it unnecessary to explicitly disable SDR104 and SDR50
+>>>> capabilities in the device tree.
+>>>>
+>>>> However, due to board-specific hardware constraints particularly related
+>>>> to level shifter in this case the maximum frequency for SD High-Speed
+>>>> (HS) mode must be limited to 37.5 MHz to ensure reliable operation of SD
+>>>> card in HS mode. This is achieved using the max-sd-hs-frequency property
+>>>> in the board DTS.
+>>>>
+>>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>>> ---
+>>>>    arch/arm64/boot/dts/qcom/sm8550-hdk.dts                     | 1 +
+>>>>    arch/arm64/boot/dts/qcom/sm8550-mtp.dts                     | 1 +
+>>>>    arch/arm64/boot/dts/qcom/sm8550-sony-xperia-yodo-pdx234.dts | 1 +
+>>>>    arch/arm64/boot/dts/qcom/sm8550.dtsi                        | 3 ---
+>>>>    4 files changed, 3 insertions(+), 3 deletions(-)
+>>>>
+>>>
+>>> This will break MMC for all of the users and nothing in commit msg or
+>>> cover letter explains that or mentions merging strategy.
+>>>
+>>> Exactly this case is covered by your internal guideline, no? Please read it.
+>>>
+>>> Best regards,
+>>> Krzysztof
+>>
+>> Just to make sure I’m addressing the right concern — are you primarily
+>> worried about the introduction of the max-sd-hs-frequency property in
+>> the board DTS files, or about the removal of the sdhci-caps-mask
+>> from the common sm8550.dtsi?
+> 
+> 
+> Apply this patch and test MMC. Does it work? No. Was it working? Yes.
+> 
+> 
+> Best regards,
+> Krzysztof
 
-Additionally, update the shutdown path to avoid redundant shutdown
-steps if the card is already removed
 
-Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
----
-changes v7:
-- Squash undervoltage suspend preparation and handler into one patch.
-- Use mmc_card_removed() in shutdown path instead of host->undervoltage.
-- Remove redundant card presence check in undervoltage handler.
-changes v6:
-- Refactor suspend logic: move cache flush skipping during undervoltage
-  to a separate, preceding commit.
-- update commit message
-changes v5:
-- Rebased on top of patch introducing enum mmc_poweroff_type
-- Updated call to __mmc_suspend() to use MMC_POWEROFF_UNDERVOLTAGE
-- Dropped __mmc_resume() helper, as it is no longer needed
-- Updated commit message to reflect API change and code removal
-changes v4:
-- Drop HPI step.
-changes v3:
-- reword commit message.
-- add comments in the code
-- do not try to resume sleeping device
----
- drivers/mmc/core/mmc.c | 70 ++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 67 insertions(+), 3 deletions(-)
+You're absolutely right to raise the concern about potential breakage.
+After conducting additional testing across multiple boards, I’ve 
+confirmed that the removal of SDR104/SDR50 broken capabilities does 
+indeed affect V1 SM8550 devices.
+However, on V2 devices, all modes—including SDR104, SDR50, and HS—are 
+fully functional and have been verified to work reliably.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 7dc0a9339c5e..03b9a5acafd1 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -36,6 +36,7 @@
- enum mmc_poweroff_type {
- 	MMC_POWEROFF_SUSPEND,
- 	MMC_POWEROFF_SHUTDOWN,
-+	MMC_POWEROFF_UNDERVOLTAGE,
- 	MMC_POWEROFF_UNBIND,
- };
- 
-@@ -2132,9 +2133,15 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- 	if (mmc_card_suspended(host->card))
- 		goto out;
- 
--	err = _mmc_flush_cache(host);
--	if (err)
--		goto out;
-+	/*
-+	 * For the undervoltage case, we care more about device integrity.
-+	 * Avoid cache flush and notify the device to power off quickly.
-+	 */
-+	if (pm_type != MMC_POWEROFF_UNDERVOLTAGE) {
-+		err = _mmc_flush_cache(host);
-+		if (err)
-+			goto out;
-+	}
- 
- 	if (mmc_card_can_poweroff_notify(host->card) &&
- 	    mmc_host_can_poweroff_notify(host, pm_type))
-@@ -2212,6 +2219,13 @@ static int mmc_shutdown(struct mmc_host *host)
- {
- 	int err = 0;
- 
-+	/*
-+	 * In case of undervoltage, the card will be powered off (removed) by
-+	 * _mmc_handle_undervoltage()
-+	 */
-+	if (!host->card || mmc_card_removed(host->card))
-+		return 0;
-+
- 	/*
- 	 * If the card remains suspended at this point and it was done by using
- 	 * the sleep-cmd (CMD5), we may need to re-initialize it first, to allow
-@@ -2302,6 +2316,55 @@ static int _mmc_hw_reset(struct mmc_host *host)
- 	return mmc_init_card(host, card->ocr, card);
- }
- 
-+/**
-+ * _mmc_handle_undervoltage - Handle an undervoltage event for MMC/eMMC devices
-+ * @host: MMC host structure
-+ *
-+ * This function is triggered when an undervoltage condition is detected.
-+ * It attempts to transition the device into a low-power or safe state to
-+ * prevent data corruption.
-+ *
-+ * Steps performed:
-+ * - Perform an emergency suspend using EXT_CSD_POWER_OFF_SHORT if possible.
-+ *    - If power-off notify is not supported, fallback mechanisms like sleep or
-+ *      deselecting the card are attempted.
-+ *    - Cache flushing is skipped to reduce execution time.
-+ * - Mark the card as removed to prevent further interactions after
-+ *    undervoltage.
-+ *
-+ * Note: This function does not handle host claiming or releasing. The caller
-+ *	 must ensure that the host is properly claimed before calling this
-+ *	 function and released afterward.
-+ *
-+ * Returns: 0 on success, or a negative error code if any step fails.
-+ */
-+static int _mmc_handle_undervoltage(struct mmc_host *host)
-+{
-+	struct mmc_card *card = host->card;
-+	int err;
-+
-+	/*
-+	 * Perform an emergency suspend to power off the eMMC quickly.
-+	 * This ensures the device enters a safe state before power is lost.
-+	 * We first attempt EXT_CSD_POWER_OFF_SHORT, but if power-off notify
-+	 * is not supported, we fall back to sleep mode or deselecting the card.
-+	 * Cache flushing is skipped to minimize delay.
-+	 */
-+	err = _mmc_suspend(host, MMC_POWEROFF_UNDERVOLTAGE);
-+	if (err)
-+		pr_err("%s: undervoltage suspend failed: %pe\n",
-+		       mmc_hostname(host), ERR_PTR(err));
-+
-+	/*
-+	 * Mark the card as removed to prevent further operations.
-+	 * This ensures the system does not attempt to access the device
-+	 * after an undervoltage event, avoiding potential corruption.
-+	 */
-+	mmc_card_set_removed(card);
-+
-+	return err;
-+}
-+
- static const struct mmc_bus_ops mmc_ops = {
- 	.remove = mmc_remove,
- 	.detect = mmc_detect,
-@@ -2314,6 +2377,7 @@ static const struct mmc_bus_ops mmc_ops = {
- 	.hw_reset = _mmc_hw_reset,
- 	.cache_enabled = _mmc_cache_enabled,
- 	.flush_cache = _mmc_flush_cache,
-+	.handle_undervoltage = _mmc_handle_undervoltage,
- };
- 
- /*
--- 
-2.39.5
+Based on your feedback, I will revise the patch to retain the broken 
+SDR104/SDR50 capabilities in the common sm8550.dtsi, ensuring no impact 
+on current sm8550 devices already in use.
 
+We will revisit the removal of broken capabilities dt property for 
+upcoming targets after thorough validation and testing to ensure no 
+regressions from the beginning.
+
+Please let me know if this approach aligns with your expectations. I’ll 
+prepare and send out a revised patch accordingly.
+
+Best regards,
+Sarthak
