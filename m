@@ -1,168 +1,83 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+Received: from relay16.mail.gandi.net (relay16.mail.gandi.net [217.70.178.236])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BCC02FE05E
-	for <linux-mmc@vger.kernel.org>; Thu, 14 Aug 2025 13:07:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFBD6321439;
+	Thu, 14 Aug 2025 14:07:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.178.236
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755176833; cv=none; b=nKEjerrD+qsZldpvpRsZ/DyIwBGxQgaphHobdKPQK9N9HJ3u1r+NQAF7WUX4jqYaFKNwOocfB9md2Hn5JQP7huEY28Ta+27g/XFH9cqAmCFPdnp+TTJ+9KxVxJcrtabPJiqL0QCBQ6Hqihc5KiGSFGwOIeV+kA/99IHPtR/bntw=
+	t=1755180452; cv=none; b=naV4Bkd90PZXUO6TAfEYbXuCUjOvwF3dXBXWPhFUglk6rMuc6IdIPIdsxRL4cUk4UoyAmFbyjFsqMHeL8Q81fzQA47+wJSw27Td5oj0Dv3h2FDPJqIYx0dvDz41biAuuq24PImgTUd5c+ZQgRmUVvKrxSTdW9G2cGskbkK6toKE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755176833; c=relaxed/simple;
-	bh=e8pve1khCbrtl4a+E4u7i9uV7WIXh0A4/9sgMcU8z/Q=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=uCLnHtq+JvO1SES34qYs58Dga7VkGlAltCq19bX8BgFd9Vkuwwo+EVxT1cPD5loEwoWg3t4xCQ6GTKKCqkhlENxkkOVtdu7ageOYz9sbfxmZgTtMv8Iga/ajfbwBySqh1ZKOcckYm0BeJvOYoE8sSkaDuSPnFORS+Vj9v734kh4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <ore@pengutronix.de>)
-	id 1umXff-0006JC-0T; Thu, 14 Aug 2025 15:07:07 +0200
-Received: from dude04.red.stw.pengutronix.de ([2a0a:edc0:0:1101:1d::ac])
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.96)
-	(envelope-from <ore@pengutronix.de>)
-	id 1umXfe-000GHP-05;
-	Thu, 14 Aug 2025 15:07:06 +0200
-Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.96)
-	(envelope-from <ore@pengutronix.de>)
-	id 1umXfd-001Mpc-33;
-	Thu, 14 Aug 2025 15:07:05 +0200
-From: Oleksij Rempel <o.rempel@pengutronix.de>
+	s=arc-20240116; t=1755180452; c=relaxed/simple;
+	bh=TjveqBrhNy6GTxpiLaKBmk6h8jvO3csWqsY9XiP+i/8=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=pgGV3GQL1fieU3W04yG6ME+dwwRHJ3rQNeLwURb+VYACIqHCjHPYnTPavXn61V4xD2DCmaiitr/hqWrCsOAIOy/ARB/t4VtA4Whxgrz+/AybD6O9guH1aogn9mABAsIcZ4gN3q+wrYRnxmPAdDqlg5Aq9DIR3L1gAzYMcNElhsM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=WsRMYz6M; arc=none smtp.client-ip=217.70.178.236
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="WsRMYz6M"
+Received: by mail.gandi.net (Postfix) with ESMTPSA id 3AF54449AE;
+	Thu, 14 Aug 2025 14:07:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+	t=1755180448;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=TjveqBrhNy6GTxpiLaKBmk6h8jvO3csWqsY9XiP+i/8=;
+	b=WsRMYz6MxE7ZGg61wnvxsrhq2FRhJ+W/wIajKUk38kUNgHp5dKrtnANwDRgr4EIRUiVGAT
+	cDoI2WlzWmodjmyxbP1esQg8c1RdqtzbxSr+kIOfNoCyDkq0J+XtCIVIoj6Kllb8+Ndqr0
+	qLA9D+fkuyDAtDUb6IS0HAGcPOdUT9/uxyn70k6EzPf3dd18HLnREgukf9k3w81ImGHar1
+	KRnN3WlS+8XManmzk/iJZ0gjXAsV77N/ph1/Vpgdi5CsI5KqlFPAWcPchyvPMbvdIlZZh9
+	41ij3IyqRjel/5RRZ2nb8XqBRPt9JE8k4uVCuCyQ9Bv52uU3AKZvvpc1srjVmQ==
+From: =?UTF-8?B?QmVub8OudA==?= Monin <benoit.monin@bootlin.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Oleksij Rempel <o.rempel@pengutronix.de>,
-	kernel@pengutronix.de,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Mark Brown <broonie@kernel.org>,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	=?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>,
-	Christian Loehle <christian.loehle@arm.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <Avri.Altman@sandisk.com>
-Subject: [PATCH v8 0/2] mmc: handle undervoltage events and prevent eMMC corruption
-Date: Thu, 14 Aug 2025 15:07:03 +0200
-Message-Id: <20250814130705.326073-1-o.rempel@pengutronix.de>
-X-Mailer: git-send-email 2.39.5
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org,
+ Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>,
+ Tawfik Bayouk <tawfik.bayouk@mobileye.com>,
+ Gregory CLEMENT <gregory.clement@bootlin.com>,
+ Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+Subject: Re: [PATCH v3 0/6] mmc: introduce multi-block read gap tuning
+Date: Thu, 14 Aug 2025 16:07:27 +0200
+Message-ID: <4977174.OV4Wx5bFTl@benoit.monin>
+In-Reply-To:
+ <CAPDyKFqa6ut25uaDN6pP50wGi2+DZ8MJ6_OZ6ujtgjfHz4hxzg@mail.gmail.com>
+References:
+ <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
+ <CAPDyKFqa6ut25uaDN6pP50wGi2+DZ8MJ6_OZ6ujtgjfHz4hxzg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ore@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+X-GND-State: clean
+X-GND-Score: -100
+X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgddugeduvdejucetufdoteggodetrfdotffvucfrrhhofhhilhgvmecuifetpfffkfdpucggtfgfnhhsuhgsshgtrhhisggvnecuuegrihhlohhuthemuceftddunecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjughrpefhvfevufffkfgjfhgggfgtsehtqhertddttdejnecuhfhrohhmpeeuvghnohpfthcuofhonhhinhcuoegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomheqnecuggftrfgrthhtvghrnhepvddtteduleekueetffegudeltedtfeeigeefffethedvveduteejfedvffevudeunecuffhomhgrihhnpegsohhothhlihhnrdgtohhmnecukfhppedvrgdtudemtggsudegmeehheeimeejrgdttdemudehfeejmehffeehmeelfeeiugemvgelvdehnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepvdgrtddumegtsgdugeemheehieemjegrtddtmeduheefjeemfhefheemleefiegumegvledvhedphhgvlhhopehfrhgrmhgvfihorhhkrdhlohgtrghlnhgvthdpmhgrihhlfhhrohhmpegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomhdpnhgspghrtghpthhtohepkedprhgtphhtthhopehulhhfrdhhrghnshhsohhnsehlihhnrghrohdrohhrghdprhgtphhtthhopegrughrihgrnhdrhhhunhhtvghrsehinhhtvghlrdgtohhmpdhrtghpthhtoheplhhinhhugidqmhhmt
+ gesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehvlhgrughimhhirhdrkhhonhgurhgrthhivghvsehmohgsihhlvgihvgdrtghomhdprhgtphhtthhopehtrgiffhhikhdrsggrhihouhhksehmohgsihhlvgihvgdrtghomhdprhgtphhtthhopehgrhgvghhorhihrdgtlhgvmhgvnhhtsegsohhothhlihhnrdgtohhmpdhrtghpthhtohepthhhohhmrghsrdhpvghtrgiiiihonhhisegsohhothhlihhnrdgtohhm
 
-changes v8:
-- fix compile warning
-changes v7:
-- Remove all usage of the redundant undervoltage_notify_registered flag
-- Register undervoltage notifier in mmc_add_card() after setting card as
-  present, for all supported cards.
-- Unregister undervoltage notifier in mmc_remove_card() based on card presence
-- Remove all unnecessary EXPORT_SYMBOL_GPL for functions only used within MMC
-  core.
-- Move all host claiming and releasing responsibility for undervoltage events
-  into the bus_ops callback;
-- add comment for host->undervoltage
-- Squash undervoltage suspend preparation and handler into one patch.
-- Use mmc_card_removed() in shutdown path instead of host->undervoltage.
-- Remove redundant card presence check in undervoltage handler.
-changes v6:
-- Rewrite commit message to be more technical per reviewer feedback.
-- Address race conditions by using __mmc_stop_host() instead of only
-  claiming the host in the undervoltage handler.
-- Move notifier registration from mmc_regulator_get_supply() to the end of
-  a successful card initialization in mmc_attach_mmc(), ensuring it only
-  runs for capable cards.
-- Centralize notifier unregistration in mmc_remove_card() to correctly
-  handle all card removal and error paths.
-- Add 'undervoltage_notify_registered' flag to struct mmc_host to
-  reliably track the notifier state.
-- Consolidate multiple notifier callbacks into a single, generic handler.
-- Remove premature notifier support for vqmmc and vqmmc2 regulators.
-- Move INIT_WORK() for the undervoltage workqueue to mmc_alloc_host().
-changes v5:
-- Rebased on top of mmc/next after introduction of enum mmc_poweroff_type
-- Replaced boolean undervoltage parameter with MMC_POWEROFF_UNDERVOLTAGE
-- Dropped unused __mmc_resume() helper
-- Updated commit messages accordingly
-changes v4:
-- drop HPI and SDHCI related patches
+Hello Ulf,
 
-This patch set introduces a framework for handling undervoltage events
-in the MMC subsystem. The goal is to improve system reliability by
-ensuring graceful handling of power fluctuations that could otherwise
-lead to metadata corruption, potentially rendering the eMMC chip
-unusable or causing significant data loss.
+On Friday, 18 July 2025 at 15:04:18 CEST, Ulf Hansson wrote:
+> A quick review made me feel a lot better about this, thanks!
+>=20
+> Although I will need a few more days for review and possibly it's
+> getting too late for v6.17 for me, but let's see, I will do my best.
+>=20
+Any update on the review?
 
-## Problem Statement
+I have a new version with the small changes suggested by Adrian. I can send
+it but I'd rather wait if you also have some comments to avoid doing two
+separate versions of the patchset.
 
-Power fluctuations and sudden losses can leave eMMC devices in an
-undefined state, leading to severe consequences. The worst case can
-result in metadata corruption, making the entire storage inaccessible.
-While some eMMC devices promise to handle such situations internally,
-experience shows that some chip variants are still affected. This has
-led vendors to take a more protective approach, implementing external
-undervoltage handling as a precautionary measure to avoid costly field
-failures and returns.
+Best regards,
+=2D-=20
+Beno=C3=AEt Monin, Bootlin
+Embedded Linux and Kernel engineering
+https://bootlin.com
 
-The existence of the "Power Off Notification" feature in the eMMC
-standard itself serves as indirect evidence that this is a real-world
-issue.  While some projects have already faced the consequences of
-ignoring this problem (often at significant cost), specific cases cannot
-be disclosed due to NDAs.
 
-## Challenges and Implementation Approach
-
-1. **Raising awareness of the problem**: While vendors have used
-   proprietary solutions for years, a unified approach is needed upstream.
-   This patch set is a first step in making that happen.
-
-2. **Finding an acceptable implementation path**: There are multiple
-   ways to handle undervoltage - either in the kernel or in user space,
-   through a global shutdown mechanism, or using the regulator framework.
-   This patch set takes the kernel-based approach but does not prevent
-   future extensions, such as allowing user-space handoff once available.
-
-3. **Preparing for vendor adoption and testing**: By providing a
-   structured solution upstream, this patch set lowers the barrier for
-   vendors to standardize their undervoltage handling instead of relying on
-   fragmented, out-of-tree implementations.
-
-## Current Limitations
-
-This patch set is an initial step and does not yet cover all possible
-design restrictions or edge cases. Future improvements may include
-better coordination with user space and enhancements based on broader
-testing.
-
-## Testing Details
-
-The implementation was tested on an iMX8MP-based system. The board had
-approximately 100ms of available power hold-up time. The Power Off
-Notification was sent ~4ms after the board was detached from the power
-supply, allowing sufficient time for the eMMC to handle the event
-properly.  Tests were conducted under both idle conditions and active
-read/write operations.
-
-Oleksij Rempel (2):
-  mmc: core: Add infrastructure for undervoltage handling
-  mmc: core: add undervoltage handler for MMC/eMMC devices
-
- drivers/mmc/core/bus.c       | 12 ++++++
- drivers/mmc/core/core.c      | 23 +++++++++++
- drivers/mmc/core/core.h      |  2 +
- drivers/mmc/core/host.c      |  2 +
- drivers/mmc/core/mmc.c       | 71 +++++++++++++++++++++++++++++++--
- drivers/mmc/core/regulator.c | 77 ++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h     | 14 +++++++
- 7 files changed, 198 insertions(+), 3 deletions(-)
-
---
-2.39.5
 
