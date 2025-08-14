@@ -1,156 +1,83 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f177.google.com (mail-pg1-f177.google.com [209.85.215.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3933E15B0EC;
-	Thu, 14 Aug 2025 14:18:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DBF701EEA55;
+	Thu, 14 Aug 2025 19:10:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755181118; cv=none; b=GuJ60s1sw2PuD2Hm2Oy1NK/2lwYRnyLIr5JPHAOBdKVKFni/s03wMw3l9KeQwvFhpPJI8HY4EWdzK/OdvrVbeeLFBntPnnQLCgmEJuWe/KlJjyXNYVHIzWmwPLzilxwUNv2owq0fW8X9hnggJJFxIZNNI8EH/ROjsEKtmVWSsxE=
+	t=1755198633; cv=none; b=gc352XivqjK5e4imS27ZOML37Pk3IYqqWLG2KGbgNhWSsmZQYT0N0s122W2tkfKdD0OFa906Om3H8CytzPu3E0QihppxuJHi3mFFgq4GJzhRHjG35i9tpMy/JMu72cqtgkZGbjmiWMn6AX62LEC3PCpGUOWjsB7qShLW/lTR6RE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755181118; c=relaxed/simple;
-	bh=aIOvB7Z2yTByNAFttZWfPG8POEc6396jSKH09BJ+/Lw=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=kxK8yANVQDT4+6zKzNWO9ULNnCSB10yROVDfE0eGUDsaC5McpGAXdBYmzSybesQb8g6KEcUCTcl1Dkzo4Eu1qjLYZeyMjSHDkTKOXVG3Ov5WwU1RurfL52iwkC3ha1qPXUHPx92JX66qPE/l0whPWXvD1oOof3GzK7wq5D4+X6Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EqgU/EDu; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1755198633; c=relaxed/simple;
+	bh=7Ic7fVgdgQ8MblQFjMCCiNuHrsFYD4KaCcqXjlfhrB8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=o+/gTEjXO2uBdwBUOASes5I/GWcPl2CcLXkYRVeGUDBnze1DkRCtqVLnmxD5o89mM32yZ+qYeJstx0qFczcmeQO666OA1YQPVAbhLFM+LtaIAH67FtdHUBpNE+e1hXsLI5atg3L6d8fufwVHGhUR2zlPjrJjtBscJuKBrON4+nk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=kpcbpTEP; arc=none smtp.client-ip=209.85.215.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EqgU/EDu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 140DFC4CEEF;
-	Thu, 14 Aug 2025 14:18:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755181116;
-	bh=aIOvB7Z2yTByNAFttZWfPG8POEc6396jSKH09BJ+/Lw=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-	b=EqgU/EDu3oDCYRt1Si13BRghMkcwK5LqN9GkAcGcfcrhFTazE34zUUq8Od+e5oGUJ
-	 GNx5ulPcFgtO5ZyiSpwIBr8FUNyAthpqEJ1HFf9GnjWHY+qIpiLzwl5jpRBrlolPn2
-	 z6xjKGXo4jawDOcpqGnCDN73BGfqRqAyieck88qD94UdpBJX7zr50+UVyAUEIFPEy1
-	 8iZ5/OdecI+vpH1tXXE5PIrAiCENDSW7wdju78QYNBO7tccEMhyLT5/PeO3ORXivtj
-	 sVMKdqgvEftfF5s9YxpUhwR00ND4s4PmT0wxP/dvrTnBxT6CdvlYHRM7ommRoJA5zP
-	 uiUsOyuYlg5Jw==
-From: Mark Brown <broonie@kernel.org>
-To: linux-kernel@vger.kernel.org, 
- Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, 
- Alexandre Belloni <alexandre.belloni@bootlin.com>, 
- Alexandre Torgue <alexandre.torgue@foss.st.com>, 
- Alim Akhtar <alim.akhtar@samsung.com>, 
- Andrea della Porta <andrea.porta@suse.com>, 
- =?utf-8?q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, 
- Andrzej Hajda <andrzej.hajda@intel.com>, Andy Shevchenko <andy@kernel.org>, 
- Andy Yan <andy.yan@rock-chips.com>, Avi Fishman <avifishman70@gmail.com>, 
- Bartosz Golaszewski <brgl@bgdev.pl>, 
- Benjamin Fair <benjaminfair@google.com>, 
- Bjorn Andersson <andersson@kernel.org>, Chen-Yu Tsai <wens@csie.org>, 
- Daniel Lezcano <daniel.lezcano@linaro.org>, 
- David Airlie <airlied@gmail.com>, David Lechner <dlechner@baylibre.com>, 
- Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
- Drew Fustini <fustini@kernel.org>, dri-devel@lists.freedesktop.org, 
- Fabio Estevam <festevam@gmail.com>, 
- Fabrice Gasnier <fabrice.gasnier@foss.st.com>, Fu Wei <wefu@redhat.com>, 
- Guo Ren <guoren@kernel.org>, Hans Verkuil <hverkuil@kernel.org>, 
- =?utf-8?q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, imx@lists.linux.dev, 
- Iwona Winiarska <iwona.winiarska@intel.com>, 
- Jaroslav Kysela <perex@perex.cz>, Jassi Brar <jassisinghbrar@gmail.com>, 
- Jernej Skrabec <jernej.skrabec@gmail.com>, 
- Jerome Brunet <jbrunet@baylibre.com>, Jonas Karlman <jonas@kwiboo.se>, 
- Jonathan Cameron <jic23@kernel.org>, Kevin Hilman <khilman@baylibre.com>, 
- Kishon Vijay Abraham I <kishon@kernel.org>, 
- Konrad Dybcio <konradybcio@kernel.org>, 
- Krzysztof Kozlowski <krzk@kernel.org>, 
- Laurent Pinchart <Laurent.pinchart@ideasonboard.com>, 
- Lee Jones <lee@kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, 
- Linus Walleij <linus.walleij@linaro.org>, linux-actions@lists.infradead.org, 
- linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, 
- linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org, 
- linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org, 
- linux-input@vger.kernel.org, linux-media@vger.kernel.org, 
- linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org, 
- linux-pm@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, 
- linux-pwm@vger.kernel.org, linux-riscv@lists.infradead.org, 
- linux-rockchip@lists.infradead.org, linux-rtc@vger.kernel.org, 
- linux-samsung-soc@vger.kernel.org, linux-sound@vger.kernel.org, 
- linux-spi@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, 
- linux-sunxi@lists.linux.dev, Liu Ying <victor.liu@nxp.com>, 
- Lukasz Luba <lukasz.luba@arm.com>, 
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
- Manivannan Sadhasivam <mani@kernel.org>, 
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
- Mauro Carvalho Chehab <mchehab@kernel.org>, 
- Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
- Maxime Ripard <mripard@kernel.org>, 
- Michael Turquette <mturquette@baylibre.com>, 
- Miquel Raynal <miquel.raynal@bootlin.com>, Nancy Yuen <yuenn@google.com>, 
- Neil Armstrong <neil.armstrong@linaro.org>, 
- Nicolin Chen <nicoleotsuka@gmail.com>, 
- =?utf-8?q?Nuno_S=C3=A1?= <nuno.sa@analog.com>, openbmc@lists.ozlabs.org, 
- Patrick Venture <venture@google.com>, 
- Paul Walmsley <paul.walmsley@sifive.com>, 
- Pengutronix Kernel Team <kernel@pengutronix.de>, 
- Philipp Zabel <p.zabel@pengutronix.de>, 
- Piotr Wojtaszczyk <piotr.wojtaszczyk@timesys.com>, 
- "Rafael J. Wysocki" <rafael@kernel.org>, Robert Foss <rfoss@kernel.org>, 
- Samuel Holland <samuel.holland@sifive.com>, 
- Samuel Holland <samuel@sholland.org>, Sandy Huang <hjc@rock-chips.com>, 
- Sascha Hauer <s.hauer@pengutronix.de>, Shawn Guo <shawnguo@kernel.org>, 
- Shengjiu Wang <shengjiu.wang@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
- Stephen Boyd <sboyd@kernel.org>, Takashi Iwai <tiwai@suse.com>, 
- Tali Perry <tali.perry1@gmail.com>, Thomas Zimmermann <tzimmermann@suse.de>, 
- Tomer Maimon <tmaimon77@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
- =?utf-8?q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>, 
- Vasily Khoruzhick <anarsoul@gmail.com>, Vinod Koul <vkoul@kernel.org>, 
- Vladimir Zapolskiy <vz@mleia.com>, Xiubo Li <Xiubo.Lee@gmail.com>, 
- Yangtao Li <tiny.windzz@gmail.com>, Zhang Rui <rui.zhang@intel.com>
-In-Reply-To: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
-References: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
-Subject: Re: (subset) [PATCH 00/21] treewide: remove unneeded 'fast_io'
- parameter in regmap_config
-Message-Id: <175518109481.47921.1666131365484481268.b4-ty@kernel.org>
-Date: Thu, 14 Aug 2025 15:18:14 +0100
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="kpcbpTEP"
+Received: by mail-pg1-f177.google.com with SMTP id 41be03b00d2f7-b4716fb798dso813777a12.0;
+        Thu, 14 Aug 2025 12:10:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20230601; t=1755198631; x=1755803431; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=7Ic7fVgdgQ8MblQFjMCCiNuHrsFYD4KaCcqXjlfhrB8=;
+        b=kpcbpTEPjOfz1Y7B9JkjbpGvXBnF3XnA9rfDw+xrCrhXW70b/+56a7OtAYeDfSfyoW
+         1XuUVI7MHLIisr8SSgVOnTCElbTrc8ZAsiiFpo72VaX/6QRJ4I8Ry2DYWzre/k5nvRhG
+         pdcALgJhTgVE6VMKijy9gr92MSd9V5eXGrZYhvtsiPqf5TsD4fiyJIGM7/BACdv4MXF7
+         udtbycaUPVnWmvojxuYHaTZVtpCVyLGDljsJTKYjVutLlNMfQeEs0jEf5zIFTCWZOQqI
+         Z0VW4iP1ZpLUG81jFtkQtg4vaMIevm33eGE87ZTMzCz83zH81RjRdp3gpXaaRYdlfKHC
+         bENQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1755198631; x=1755803431;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=7Ic7fVgdgQ8MblQFjMCCiNuHrsFYD4KaCcqXjlfhrB8=;
+        b=pjN+jvVuiW10zyU9wk5MhM2ppChaHxy3TB1SL5xj+VGvZJ9VKcjEZ+hgAGb7hjZi5M
+         jTFxtOKCNd5wMw+9plL6zwgXofUj09R7bdrpGUzXo0FOkza2yqZLu+YSnDry0HVtlE03
+         n2qtsa9Lad+wmu461lTclClh6JyTlfHmd33ZUAtiSrbifRwrR75tmcQ47bB1eOnFyiNb
+         U6n5ynnB7Lb3ndRqAsaJTaIQlDb6+ZP60GCnYX5KoBNYoPgN9iGEfATcu8/s0RVA0j85
+         xYfQ0TpP8BdfbPP4S92ARsTf4+5IRsOR6ar5G3mRWEAZrxkD7klIFL6vMTPWZiMe2TS8
+         bqUQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUW0mrGq2fyHCmxelWiGF9oBS9uRI5rrLsqmL3jsSsn654ytBVLn366sYJ4jDlDY46Wm6mTQf7cK/co@vger.kernel.org, AJvYcCXH7rJcUtdnuxLMo0EaCBMwNRCTc4EAf91tljQ2a8ewPYCJGSWU6cIuy80Yt95gF4Can3N5E6zL+kJ2mFo=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzw2MVsbXeK580zT3lpKe6fGhCc0iGHkfqLOlZehSp+mr2XpxVQ
+	9kYfYBoZe6QYlUplfPt7fosa/NfE1SU6kmd7UpGD3aUBWsqL5G6T7A5X0J7fj3s0Q84cvEiUiWp
+	+nXzabrSlVrW8Ai+JnRbIoZQF1vbEcD4=
+X-Gm-Gg: ASbGncteKYfAfES7g+/mBYQS0s5J9W6SqAY2XpgSRx2vpLg2avBxPK3qSCTDttEdS93
+	3zDhDfuWOAvh+G12xW3E+AcDDkP4WbIysM42fwF2gkvgoTSvqAYeINJuWdf/8fzi7OkDwT1lKoM
+	HYpKpIeDXy3UTIemwG9yLpaYnG7iZA8ToUsP08SXEEfAb7Oe+eTkk4jmo2s6WThOjbKzaflvaaq
+	FfdQwSLHXLQIGWBOkVrtIyTbpMaBb71yU8tWLI4
+X-Google-Smtp-Source: AGHT+IGCkVCFwHi3iu3RTkUkT3KWCaKedVBq8LMJeylvVrEEx6RjEVwapMlmkmou0xfA/EzyS/n8fJ+FeogGpmfch5s=
+X-Received: by 2002:a17:902:cccf:b0:242:b315:dda7 with SMTP id
+ d9443c01a7336-244589fefd4mr53592755ad.3.1755198631063; Thu, 14 Aug 2025
+ 12:10:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.15-dev-cff91
+References: <20250812092908.101867-1-zhao.xichao@vivo.com>
+In-Reply-To: <20250812092908.101867-1-zhao.xichao@vivo.com>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date: Thu, 14 Aug 2025 21:10:20 +0200
+X-Gm-Features: Ac12FXz3DsOF41iVXZ21DRUi5sZbQZVEuhx31cU5DqXvUGLAmoyIN49sur7oF4Q
+Message-ID: <CAFBinCCrC02K8v3FbDzGTQYbPhC9RrJC3cnbuHLjJz8+AuV7jw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-mx-sdhc: use PTR_ERR_OR_ZERO() to simplify code
+To: Xichao Zhao <zhao.xichao@vivo.com>
+Cc: ulf.hansson@linaro.org, neil.armstrong@linaro.org, khilman@baylibre.com, 
+	jbrunet@baylibre.com, linux-mmc@vger.kernel.org, 
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, 13 Aug 2025 18:14:46 +0200, Wolfram Sang wrote:
-> While working on a driver using regmap with MMIO, I wondered if I need
-> to set 'fast_io' in the config. Turned out I don't need to, so I added
-> documentation for it with commit ffc72771ff6e ("regmap: Annotate that
-> MMIO implies fast IO").
-> 
-> This series fixes the existing users in the tree which needlessly set
-> the flag. They have been found using this coccinelle script:
-> 
-> [...]
-
-Applied to
-
-   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git for-next
-
-Thanks!
-
-[21/21] ASoC: remove unneeded 'fast_io' parameter in regmap_config
-        commit: d578faf7096affc036fd16333f1bfbe4991a22f7
-
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.
-
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
-
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
-
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
-
-Thanks,
-Mark
-
+On Tue, Aug 12, 2025 at 11:29=E2=80=AFAM Xichao Zhao <zhao.xichao@vivo.com>=
+ wrote:
+>
+> Use the standard error pointer macro to shorten the code and simplify.
+>
+> Signed-off-by: Xichao Zhao <zhao.xichao@vivo.com>
+Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
