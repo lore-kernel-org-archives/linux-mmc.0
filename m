@@ -1,150 +1,156 @@
-Received: from mail-vk1-f172.google.com (mail-vk1-f172.google.com [209.85.221.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3833D321423;
-	Thu, 14 Aug 2025 14:11:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3933E15B0EC;
+	Thu, 14 Aug 2025 14:18:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755180704; cv=none; b=jieb0eFm8R8s6/nxTv8qpPLNmiSubEjRYzdiCmNuRckW+xkzXE9SSpwkDb1b3WEqU9XASvGHmrrqOOt7iuDyI2FNza/FGoMTJu4kT9AKro23HrAreyL8a/mttET7NkHwN8mL7kZK+3/A5eoP+VgA6Y7nosF9oU9V/40HN245/1M=
+	t=1755181118; cv=none; b=GuJ60s1sw2PuD2Hm2Oy1NK/2lwYRnyLIr5JPHAOBdKVKFni/s03wMw3l9KeQwvFhpPJI8HY4EWdzK/OdvrVbeeLFBntPnnQLCgmEJuWe/KlJjyXNYVHIzWmwPLzilxwUNv2owq0fW8X9hnggJJFxIZNNI8EH/ROjsEKtmVWSsxE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755180704; c=relaxed/simple;
-	bh=vBZs5p9a6kfXe/2QUcnM8YpnGgjkxpBvaOlK39hjGxU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GvVYzQZkPbJRbqdf7xLWomgTUtAhTQs1Y/W2zvqPvWaDFO4YERcXHuTWyjSinZWV/WeJxMNCjqQCtNu0LKLUIeP5OUvhdx+sZhL9D7U/JEOKbFpDuxaO9BhZU0MlWIFGvh+xUSwz55rv7DeVNnc2ns0c3AlE5XFwt39fp11QZa8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ErOiAwfi; arc=none smtp.client-ip=209.85.221.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1755181118; c=relaxed/simple;
+	bh=aIOvB7Z2yTByNAFttZWfPG8POEc6396jSKH09BJ+/Lw=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=kxK8yANVQDT4+6zKzNWO9ULNnCSB10yROVDfE0eGUDsaC5McpGAXdBYmzSybesQb8g6KEcUCTcl1Dkzo4Eu1qjLYZeyMjSHDkTKOXVG3Ov5WwU1RurfL52iwkC3ha1qPXUHPx92JX66qPE/l0whPWXvD1oOof3GzK7wq5D4+X6Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EqgU/EDu; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ErOiAwfi"
-Received: by mail-vk1-f172.google.com with SMTP id 71dfb90a1353d-53b1717c562so731379e0c.0;
-        Thu, 14 Aug 2025 07:11:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1755180702; x=1755785502; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=zDj5ATn40XEd/bbOphW/tzB9rio0vvd0q3Gg5MgYsjk=;
-        b=ErOiAwfiYrKbs4GGQZBkNKcKKPO+wAFaO79BJL2UgBjmTIMeMt1cRrCBPmrqaI4wVo
-         fJ5e9243hGla9EbGykxrkhx/lsnNWjl5g61o0XholHYfNk3fnc/Ri7NOOvCZScVneOW0
-         DV9sCDbzSrOFoayHq1J0yC/Znz6hl98kOVtfxgS0Lk3sghrWx2epZxCUO4pHKsxJXGKp
-         jhnFIeqh4gLqwLS77t7Moj9HwZz/PMZ/+tdyCMVanDMvBbJyB4LqH98WmGp9oYdK+fvU
-         WpLcdVMwI7XSsjGplxCCrpzdhSicQ/KO2KZyqwt2qGesYCRPkgOvJ4ZDiwkJMVV6M+As
-         X8vg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755180702; x=1755785502;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=zDj5ATn40XEd/bbOphW/tzB9rio0vvd0q3Gg5MgYsjk=;
-        b=iwKLM4qo+nWWaMe8n5rPdl4aWcQ1tGb3xCAbvYQpo+w3KZk09AmP7DHSCsGfX28Hdy
-         +lSss0Hh1U9e3MbAEpJ97/JXfWvAznaka5XgZSAaplogaVubA+TUIoS0svVgemGHcJic
-         8sem5k4UGWIIyu6UqtUp9OeVr0L4HmTPziks//fWxo0tWBLM6tdE4yQ8GuqSBRvwiQY2
-         y/OMGAzvzIwW4w9nINE5lEwDhpz05onyHnzcDpPZAxJqNZhQKEDOl/+9atCrLBrekw91
-         PT24KhZsyxdiZjh5YHx2yfvZyXtKXFLQrNk5IYLtsBla0XUfpbIpOGDl7GrLHaU0TtbY
-         5wlg==
-X-Forwarded-Encrypted: i=1; AJvYcCVE8y3pl/6Ml87ZVhI0THAyEH+QqV42fppPy57fDliOuXDdEaCLWFoJDCzdzHVTEMhgP/JlYfHbwPASv4k=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxLKwGAKLvZFOvq3OS6zWpWcHqRiLklUV9J+/6m+MYvPH7GFimY
-	gBg3Jp31iQ757TXNBXGpbJA/yiI91b/WCF06uQNZ4S7IfqjaSCyJYklOnc7sPjvhfdbGFtRJ8Wb
-	H8Mnx/wTne8HEEbEKcG04p6jAgjrHWbs=
-X-Gm-Gg: ASbGncsIOtpSOx9c6queE5kHAWH8l3igpJ8YuSPPhJ0iZOWg8LgsLecv8WXsAzBfaAy
-	yawfQE/Ty+NN8vQJ7tFgQ2f3l7S23vP7D88416+efmhAKdj0ivV1krguRGYKv+JKge61GAyRTRn
-	hDJKCJ3nMQFRbSSe0CzJcJTPz3JLmHfDDA4lzYAccW6kMm7bye3By+k6LuSmmx0BoixpzbEyVyO
-	bSPTEtOLoBLRdUEXOWrWTgJ6KClFou6JYDE6HanIV3frCNnYPI=
-X-Google-Smtp-Source: AGHT+IGWT84dUFhKnxmUTSxuImwlw7Qhs7B3QGRQqKNHZ32sHUFfrvR1LAaidKbn2MZq1Ju5AYhsCIPsDoY6DVzR92A=
-X-Received: by 2002:a05:6122:8c0d:b0:531:2906:7525 with SMTP id
- 71dfb90a1353d-53b189b6976mr1316662e0c.6.1755180701809; Thu, 14 Aug 2025
- 07:11:41 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EqgU/EDu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 140DFC4CEEF;
+	Thu, 14 Aug 2025 14:18:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1755181116;
+	bh=aIOvB7Z2yTByNAFttZWfPG8POEc6396jSKH09BJ+/Lw=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=EqgU/EDu3oDCYRt1Si13BRghMkcwK5LqN9GkAcGcfcrhFTazE34zUUq8Od+e5oGUJ
+	 GNx5ulPcFgtO5ZyiSpwIBr8FUNyAthpqEJ1HFf9GnjWHY+qIpiLzwl5jpRBrlolPn2
+	 z6xjKGXo4jawDOcpqGnCDN73BGfqRqAyieck88qD94UdpBJX7zr50+UVyAUEIFPEy1
+	 8iZ5/OdecI+vpH1tXXE5PIrAiCENDSW7wdju78QYNBO7tccEMhyLT5/PeO3ORXivtj
+	 sVMKdqgvEftfF5s9YxpUhwR00ND4s4PmT0wxP/dvrTnBxT6CdvlYHRM7ommRoJA5zP
+	 uiUsOyuYlg5Jw==
+From: Mark Brown <broonie@kernel.org>
+To: linux-kernel@vger.kernel.org, 
+ Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, 
+ Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+ Alexandre Torgue <alexandre.torgue@foss.st.com>, 
+ Alim Akhtar <alim.akhtar@samsung.com>, 
+ Andrea della Porta <andrea.porta@suse.com>, 
+ =?utf-8?q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, 
+ Andrzej Hajda <andrzej.hajda@intel.com>, Andy Shevchenko <andy@kernel.org>, 
+ Andy Yan <andy.yan@rock-chips.com>, Avi Fishman <avifishman70@gmail.com>, 
+ Bartosz Golaszewski <brgl@bgdev.pl>, 
+ Benjamin Fair <benjaminfair@google.com>, 
+ Bjorn Andersson <andersson@kernel.org>, Chen-Yu Tsai <wens@csie.org>, 
+ Daniel Lezcano <daniel.lezcano@linaro.org>, 
+ David Airlie <airlied@gmail.com>, David Lechner <dlechner@baylibre.com>, 
+ Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
+ Drew Fustini <fustini@kernel.org>, dri-devel@lists.freedesktop.org, 
+ Fabio Estevam <festevam@gmail.com>, 
+ Fabrice Gasnier <fabrice.gasnier@foss.st.com>, Fu Wei <wefu@redhat.com>, 
+ Guo Ren <guoren@kernel.org>, Hans Verkuil <hverkuil@kernel.org>, 
+ =?utf-8?q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, imx@lists.linux.dev, 
+ Iwona Winiarska <iwona.winiarska@intel.com>, 
+ Jaroslav Kysela <perex@perex.cz>, Jassi Brar <jassisinghbrar@gmail.com>, 
+ Jernej Skrabec <jernej.skrabec@gmail.com>, 
+ Jerome Brunet <jbrunet@baylibre.com>, Jonas Karlman <jonas@kwiboo.se>, 
+ Jonathan Cameron <jic23@kernel.org>, Kevin Hilman <khilman@baylibre.com>, 
+ Kishon Vijay Abraham I <kishon@kernel.org>, 
+ Konrad Dybcio <konradybcio@kernel.org>, 
+ Krzysztof Kozlowski <krzk@kernel.org>, 
+ Laurent Pinchart <Laurent.pinchart@ideasonboard.com>, 
+ Lee Jones <lee@kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, 
+ Linus Walleij <linus.walleij@linaro.org>, linux-actions@lists.infradead.org, 
+ linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, 
+ linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org, 
+ linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org, 
+ linux-input@vger.kernel.org, linux-media@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org, 
+ linux-pm@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, 
+ linux-pwm@vger.kernel.org, linux-riscv@lists.infradead.org, 
+ linux-rockchip@lists.infradead.org, linux-rtc@vger.kernel.org, 
+ linux-samsung-soc@vger.kernel.org, linux-sound@vger.kernel.org, 
+ linux-spi@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, 
+ linux-sunxi@lists.linux.dev, Liu Ying <victor.liu@nxp.com>, 
+ Lukasz Luba <lukasz.luba@arm.com>, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Manivannan Sadhasivam <mani@kernel.org>, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
+ Mauro Carvalho Chehab <mchehab@kernel.org>, 
+ Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
+ Maxime Ripard <mripard@kernel.org>, 
+ Michael Turquette <mturquette@baylibre.com>, 
+ Miquel Raynal <miquel.raynal@bootlin.com>, Nancy Yuen <yuenn@google.com>, 
+ Neil Armstrong <neil.armstrong@linaro.org>, 
+ Nicolin Chen <nicoleotsuka@gmail.com>, 
+ =?utf-8?q?Nuno_S=C3=A1?= <nuno.sa@analog.com>, openbmc@lists.ozlabs.org, 
+ Patrick Venture <venture@google.com>, 
+ Paul Walmsley <paul.walmsley@sifive.com>, 
+ Pengutronix Kernel Team <kernel@pengutronix.de>, 
+ Philipp Zabel <p.zabel@pengutronix.de>, 
+ Piotr Wojtaszczyk <piotr.wojtaszczyk@timesys.com>, 
+ "Rafael J. Wysocki" <rafael@kernel.org>, Robert Foss <rfoss@kernel.org>, 
+ Samuel Holland <samuel.holland@sifive.com>, 
+ Samuel Holland <samuel@sholland.org>, Sandy Huang <hjc@rock-chips.com>, 
+ Sascha Hauer <s.hauer@pengutronix.de>, Shawn Guo <shawnguo@kernel.org>, 
+ Shengjiu Wang <shengjiu.wang@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+ Stephen Boyd <sboyd@kernel.org>, Takashi Iwai <tiwai@suse.com>, 
+ Tali Perry <tali.perry1@gmail.com>, Thomas Zimmermann <tzimmermann@suse.de>, 
+ Tomer Maimon <tmaimon77@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+ =?utf-8?q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>, 
+ Vasily Khoruzhick <anarsoul@gmail.com>, Vinod Koul <vkoul@kernel.org>, 
+ Vladimir Zapolskiy <vz@mleia.com>, Xiubo Li <Xiubo.Lee@gmail.com>, 
+ Yangtao Li <tiny.windzz@gmail.com>, Zhang Rui <rui.zhang@intel.com>
+In-Reply-To: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
+References: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
+Subject: Re: (subset) [PATCH 00/21] treewide: remove unneeded 'fast_io'
+ parameter in regmap_config
+Message-Id: <175518109481.47921.1666131365484481268.b4-ty@kernel.org>
+Date: Thu, 14 Aug 2025 15:18:14 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250731065752.450231-1-victorshihgli@gmail.com>
-In-Reply-To: <20250731065752.450231-1-victorshihgli@gmail.com>
-From: Victor Shih <victorshihgli@gmail.com>
-Date: Thu, 14 Aug 2025 22:11:29 +0800
-X-Gm-Features: Ac12FXwz-1M3A1J090DuDyIfg2Q7VO0BQHLIiCI6caS3FzjN8XCAtCqqJ_oklyQ
-Message-ID: <CAK00qKBzeXJMkYsz7zZTkLDgQ=EAoHvOzPrzmAbJeyUsMZZq0g@mail.gmail.com>
-Subject: Re: [PATCH V4 0/3] Mask the replay timer timeout of AER for GL9763e
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	benchuanggli@gmail.com, ben.chuang@genesyslogic.com.tw, 
-	HL.Liu@genesyslogic.com.tw, Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.15-dev-cff91
 
-Hi, Ulf
+On Wed, 13 Aug 2025 18:14:46 +0200, Wolfram Sang wrote:
+> While working on a driver using regmap with MMIO, I wondered if I need
+> to set 'fast_io' in the config. Turned out I don't need to, so I added
+> documentation for it with commit ffc72771ff6e ("regmap: Annotate that
+> MMIO implies fast IO").
+> 
+> This series fixes the existing users in the tree which needlessly set
+> the flag. They have been found using this coccinelle script:
+> 
+> [...]
 
-I'm embarrassed to bother you, but could you help to  please review
-this series of patches?
-If there are any parts that need to be modified, please let me know.
+Applied to
 
-Thanks, Victor Shih
+   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git for-next
 
+Thanks!
 
-On Thu, Jul 31, 2025 at 2:57=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
-m> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> These patches add a sdhci_gli_mask_replay_timer_timeout() function
-> to simplify some of the code and mask the replay timer timeout of AER
-> for the GL9763e chipset.
->
-> Changes in v4 (July. 31, 2025)
-> * Rebase on latest mmc/next.
-> * Patch#2: Add new message to the commit message to explain
->            why it has a stable tag.
->
-> ----------------- original cover letter from v3 -----------------
-> These patches add a sdhci_gli_mask_replay_timer_timeout() function
-> to simplify some of the code and mask the replay timer timeout of AER
-> for the GL9763e chipset.
->
-> Changes in v3 (July. 29, 2025)
-> * Rebase on latest mmc/next.
-> * Split patch#2 in V2 into patch#2 and patch#3.
-> * Patch#1: Correct the wrong parameters in the
->            sdhci_gli_mask_replay_timer_timeout() function.
->            Add new message to the commit message to explain
->            why it has a stable tag.
->            Add fixes tag to the commit message.
-> * Patch#2: Add fixes tag to the commit message.
-> * Patch#3: Add fixes tag to the commit message.
->
-> ----------------- original cover letter from v2 -----------------
-> These patches add a sdhci_gli_mask_replay_timer_timeout() function
-> to simplify some of the code and mask the replay timer timeout of AER
-> for the GL9763e chipset.
->
-> Changes in v2 (July. 25, 2025)
-> * Rebase on latest mmc/next.
-> * Patch#1: Add a sdhci_gli_mask_replay_timer_timeout() function
->            to simplify some of the code.
-> * Patch#2: Mask replay timer timeout of AER for the GL9763e.
-> * Patch#2: Rename the gli_set_gl9763e() to gl9763e_hw_setting()
->            for consistency.
->
-> ----------------- original cover letter from v1 -----------------
-> Due to a flaw in the hardware design, the GL9763e replay timer frequently
-> times out when ASPM is enabled. As a result, the warning messages will
-> often appear in the system log when the system accesses the GL9763e
-> PCI config. Therefore, the replay timer timeout must be masked.
->
-> Changes in v1 (July. 16, 2025)
-> * Rebase on latest mmc/next.
-> * Mask replay timer timeout of AER for the GL9763e.
->
-> Victor Shih (3):
->   mmc: sdhci-pci-gli: Add a new function to simplify the code
->   mmc: sdhci-pci-gli: GL9763e: Rename the gli_set_gl9763e() for
->     consistency
->   mmc: sdhci-pci-gli: GL9763e: Mask the replay timer timeout of AER
->
->  drivers/mmc/host/sdhci-pci-gli.c | 37 ++++++++++++++++++--------------
->  1 file changed, 21 insertions(+), 16 deletions(-)
->
-> --
-> 2.43.0
->
+[21/21] ASoC: remove unneeded 'fast_io' parameter in regmap_config
+        commit: d578faf7096affc036fd16333f1bfbe4991a22f7
+
+All being well this means that it will be integrated into the linux-next
+tree (usually sometime in the next 24 hours) and sent to Linus during
+the next merge window (or sooner if it is a bug fix), however if
+problems are discovered then the patch may be dropped or reverted.
+
+You may get further e-mails resulting from automated or manual testing
+and review of the tree, please engage with people reporting problems and
+send followup patches addressing any issues that are reported if needed.
+
+If any updates are required or you are submitting further changes they
+should be sent as incremental updates against current git, existing
+patches will not be replaced.
+
+Please add any relevant lists and maintainers to the CCs when replying
+to this mail.
+
+Thanks,
+Mark
+
