@@ -1,156 +1,218 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1D472F39B2;
-	Thu, 14 Aug 2025 11:14:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BD542FE06B
+	for <linux-mmc@vger.kernel.org>; Thu, 14 Aug 2025 13:07:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755170054; cv=none; b=Ut15ndK9suyWTvlPi7DRjKmO94cmLLVDWMaRypWKxuWA8pHu+VadjJ6yv6l6yEZp82zCdcyPcg7J2QmL6NLM/Mn/GPL9gb4POPCN2yXj2gwqSWNVcr1EyFTdvAOID7POMYFRvLQ3eEjz5vah/gFkgjO6Bm6y49ViemAkEAi2Xws=
+	t=1755176831; cv=none; b=gjdSpt4XeLp0od+vXkvmKfIKNAZuY6cV3sNe1EOqn/KwMQ8Z+KUliZlQ++fcWspFBKH+wAngnPe2n2dMMMf360E1+jbmtaKRe5Wirq4pA55S6jMNiWxpNWMvZLjrRbbRnESLNI6ZRM9YtgXI7bDdS3TjsKtwI34y8C1zmF80nwM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755170054; c=relaxed/simple;
-	bh=tEQmYgzbbnDyqDEJWRtGvNd+F5EzBR/vQBdSyaJQhYo=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=f8zoWRljDaUtkBEG9jh9Akue/JgQHMQF2UYUfm6gU4hT/joe+akAkfpcd0ZHLLYz2KzJli0+FGfjLaIpZN4Vt1/8xS3graQCyQD/V4f92xGOE0q/i4rZPBfKTyrijFZMf6hOgat7utoV3U51SBti+RH3jtwtejtHqLftwZnUyC8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nNpjrfeQ; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nNpjrfeQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CBF02C4CEED;
-	Thu, 14 Aug 2025 11:13:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755170053;
-	bh=tEQmYgzbbnDyqDEJWRtGvNd+F5EzBR/vQBdSyaJQhYo=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-	b=nNpjrfeQtIacQG0WEX7mhSYTd7hQlnB7xgoGgJ3v0sCDCZTw/gWywOLfqOYZY4LEw
-	 5E1vCRzlD1L7yPW24oE8hMcbLDvBgKF7UglcpNWQtk+d21igAN/jkLiw4vfw95mmaO
-	 Wy7Aqpr6pD43wwMPVYuuHLtW+Bl/6xetkfjwBZUQFNWFgaJ0eeIdJk6JAFWM+nmE53
-	 +kHohC9FP8zxW9RrnA7dkwqqcgSuN4MKh4R6jlzu+aBiOCgoS1PQtvycwFenFDAKSf
-	 8NGwtU+raJOCaLGmFHJD4RvJXWWS3gsAOxCpMzRtcOJrdMPkcN8DQ2NiQbSAuAjRLj
-	 ccmAEOd0wNzVg==
-From: Mark Brown <broonie@kernel.org>
-To: linux-kernel@vger.kernel.org, 
- Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, 
- Alexandre Belloni <alexandre.belloni@bootlin.com>, 
- Alexandre Torgue <alexandre.torgue@foss.st.com>, 
- Alim Akhtar <alim.akhtar@samsung.com>, 
- Andrea della Porta <andrea.porta@suse.com>, 
- =?utf-8?q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, 
- Andrzej Hajda <andrzej.hajda@intel.com>, Andy Shevchenko <andy@kernel.org>, 
- Andy Yan <andy.yan@rock-chips.com>, Avi Fishman <avifishman70@gmail.com>, 
- Bartosz Golaszewski <brgl@bgdev.pl>, 
- Benjamin Fair <benjaminfair@google.com>, 
- Bjorn Andersson <andersson@kernel.org>, Chen-Yu Tsai <wens@csie.org>, 
- Daniel Lezcano <daniel.lezcano@linaro.org>, 
- David Airlie <airlied@gmail.com>, David Lechner <dlechner@baylibre.com>, 
- Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
- Drew Fustini <fustini@kernel.org>, dri-devel@lists.freedesktop.org, 
- Fabio Estevam <festevam@gmail.com>, 
- Fabrice Gasnier <fabrice.gasnier@foss.st.com>, Fu Wei <wefu@redhat.com>, 
- Guo Ren <guoren@kernel.org>, Hans Verkuil <hverkuil@kernel.org>, 
- =?utf-8?q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, imx@lists.linux.dev, 
- Iwona Winiarska <iwona.winiarska@intel.com>, 
- Jaroslav Kysela <perex@perex.cz>, Jassi Brar <jassisinghbrar@gmail.com>, 
- Jernej Skrabec <jernej.skrabec@gmail.com>, 
- Jerome Brunet <jbrunet@baylibre.com>, Jonas Karlman <jonas@kwiboo.se>, 
- Jonathan Cameron <jic23@kernel.org>, Kevin Hilman <khilman@baylibre.com>, 
- Kishon Vijay Abraham I <kishon@kernel.org>, 
- Konrad Dybcio <konradybcio@kernel.org>, 
- Krzysztof Kozlowski <krzk@kernel.org>, 
- Laurent Pinchart <Laurent.pinchart@ideasonboard.com>, 
- Lee Jones <lee@kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, 
- Linus Walleij <linus.walleij@linaro.org>, linux-actions@lists.infradead.org, 
- linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, 
- linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org, 
- linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org, 
- linux-input@vger.kernel.org, linux-media@vger.kernel.org, 
- linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org, 
- linux-pm@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, 
- linux-pwm@vger.kernel.org, linux-riscv@lists.infradead.org, 
- linux-rockchip@lists.infradead.org, linux-rtc@vger.kernel.org, 
- linux-samsung-soc@vger.kernel.org, linux-sound@vger.kernel.org, 
- linux-spi@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, 
- linux-sunxi@lists.linux.dev, Liu Ying <victor.liu@nxp.com>, 
- Lukasz Luba <lukasz.luba@arm.com>, 
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
- Manivannan Sadhasivam <mani@kernel.org>, 
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
- Mauro Carvalho Chehab <mchehab@kernel.org>, 
- Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
- Maxime Ripard <mripard@kernel.org>, 
- Michael Turquette <mturquette@baylibre.com>, 
- Miquel Raynal <miquel.raynal@bootlin.com>, Nancy Yuen <yuenn@google.com>, 
- Neil Armstrong <neil.armstrong@linaro.org>, 
- Nicolin Chen <nicoleotsuka@gmail.com>, 
- =?utf-8?q?Nuno_S=C3=A1?= <nuno.sa@analog.com>, openbmc@lists.ozlabs.org, 
- Patrick Venture <venture@google.com>, 
- Paul Walmsley <paul.walmsley@sifive.com>, 
- Pengutronix Kernel Team <kernel@pengutronix.de>, 
- Philipp Zabel <p.zabel@pengutronix.de>, 
- Piotr Wojtaszczyk <piotr.wojtaszczyk@timesys.com>, 
- "Rafael J. Wysocki" <rafael@kernel.org>, Robert Foss <rfoss@kernel.org>, 
- Samuel Holland <samuel.holland@sifive.com>, 
- Samuel Holland <samuel@sholland.org>, Sandy Huang <hjc@rock-chips.com>, 
- Sascha Hauer <s.hauer@pengutronix.de>, Shawn Guo <shawnguo@kernel.org>, 
- Shengjiu Wang <shengjiu.wang@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
- Stephen Boyd <sboyd@kernel.org>, Takashi Iwai <tiwai@suse.com>, 
- Tali Perry <tali.perry1@gmail.com>, Thomas Zimmermann <tzimmermann@suse.de>, 
- Tomer Maimon <tmaimon77@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
- =?utf-8?q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>, 
- Vasily Khoruzhick <anarsoul@gmail.com>, Vinod Koul <vkoul@kernel.org>, 
- Vladimir Zapolskiy <vz@mleia.com>, Xiubo Li <Xiubo.Lee@gmail.com>, 
- Yangtao Li <tiny.windzz@gmail.com>, Zhang Rui <rui.zhang@intel.com>
-In-Reply-To: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
-References: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
-Subject: Re: (subset) [PATCH 00/21] treewide: remove unneeded 'fast_io'
- parameter in regmap_config
-Message-Id: <175517003454.17441.365944262533574232.b4-ty@kernel.org>
-Date: Thu, 14 Aug 2025 12:13:54 +0100
+	s=arc-20240116; t=1755176831; c=relaxed/simple;
+	bh=IycRZzbtPjcoBJRiQajt7RaNrbxPeE1qygAH2mM/dr0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=OAfQyP2BW7ujOl+dbu+xrraJVnG8xtE84c+yJYUgFphtdccpiDxGOlFEpQr9JNnT6ZgyA/ExubsfwHANFuLXDREL2FA3Y0F/9WDZWoeoZI4VC81tEYY09JcbKuhKKn63opyMeKLuwgBEalp+BJRr1rrAoK2vOASeG7sLDoUSc6Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <ore@pengutronix.de>)
+	id 1umXff-0006JE-0T; Thu, 14 Aug 2025 15:07:07 +0200
+Received: from dude04.red.stw.pengutronix.de ([2a0a:edc0:0:1101:1d::ac])
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <ore@pengutronix.de>)
+	id 1umXfe-000GHR-0G;
+	Thu, 14 Aug 2025 15:07:06 +0200
+Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.96)
+	(envelope-from <ore@pengutronix.de>)
+	id 1umXfe-001Mpw-01;
+	Thu, 14 Aug 2025 15:07:06 +0200
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Oleksij Rempel <o.rempel@pengutronix.de>,
+	kernel@pengutronix.de,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Mark Brown <broonie@kernel.org>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	=?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>,
+	Christian Loehle <christian.loehle@arm.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Avri Altman <Avri.Altman@sandisk.com>
+Subject: [PATCH v8 2/2] mmc: core: add undervoltage handler for MMC/eMMC devices
+Date: Thu, 14 Aug 2025 15:07:05 +0200
+Message-Id: <20250814130705.326073-3-o.rempel@pengutronix.de>
+X-Mailer: git-send-email 2.39.5
+In-Reply-To: <20250814130705.326073-1-o.rempel@pengutronix.de>
+References: <20250814130705.326073-1-o.rempel@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.15-dev-cff91
+Content-Transfer-Encoding: 8bit
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ore@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-On Wed, 13 Aug 2025 18:14:46 +0200, Wolfram Sang wrote:
-> While working on a driver using regmap with MMIO, I wondered if I need
-> to set 'fast_io' in the config. Turned out I don't need to, so I added
-> documentation for it with commit ffc72771ff6e ("regmap: Annotate that
-> MMIO implies fast IO").
-> 
-> This series fixes the existing users in the tree which needlessly set
-> the flag. They have been found using this coccinelle script:
-> 
-> [...]
+Add infrastructure to handle regulator undervoltage events for MMC/eMMC
+cards. When an undervoltage is detected, the new handler performs a
+controlled emergency suspend using a short power-off notification,
+skipping the cache flush to maximize the chance of a safe shutdown.
+After the operation, the card is marked as removed to prevent further
+I/O and possible data corruption.
 
-Applied to
+This is implemented by introducing MMC_POWEROFF_UNDERVOLTAGE to the
+mmc_poweroff_type enum and refactoring the suspend logic into an
+internal __mmc_suspend() helper that allows the caller to skip the cache
+flush if required. The undervoltage handler is registered as a bus
+operation and invoked from the core undervoltage path.
 
-   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git for-next
+If power-off notification is not supported by the card, the handler
+falls back to sleep or deselecting the card.
 
-Thanks!
+Additionally, update the shutdown path to avoid redundant shutdown
+steps if the card is already removed
 
-[19/21] spi: remove unneeded 'fast_io' parameter in regmap_config
-        commit: 48124569bbc6bfda1df3e9ee17b19d559f4b1aa3
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+changes v7:
+- Squash undervoltage suspend preparation and handler into one patch.
+- Use mmc_card_removed() in shutdown path instead of host->undervoltage.
+- Remove redundant card presence check in undervoltage handler.
+changes v6:
+- Refactor suspend logic: move cache flush skipping during undervoltage
+  to a separate, preceding commit.
+- update commit message
+changes v5:
+- Rebased on top of patch introducing enum mmc_poweroff_type
+- Updated call to __mmc_suspend() to use MMC_POWEROFF_UNDERVOLTAGE
+- Dropped __mmc_resume() helper, as it is no longer needed
+- Updated commit message to reflect API change and code removal
+changes v4:
+- Drop HPI step.
+changes v3:
+- reword commit message.
+- add comments in the code
+- do not try to resume sleeping device
+---
+ drivers/mmc/core/mmc.c | 70 ++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 67 insertions(+), 3 deletions(-)
 
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.
-
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
-
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
-
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
-
-Thanks,
-Mark
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 7dc0a9339c5e..03b9a5acafd1 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -36,6 +36,7 @@
+ enum mmc_poweroff_type {
+ 	MMC_POWEROFF_SUSPEND,
+ 	MMC_POWEROFF_SHUTDOWN,
++	MMC_POWEROFF_UNDERVOLTAGE,
+ 	MMC_POWEROFF_UNBIND,
+ };
+ 
+@@ -2132,9 +2133,15 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
+ 	if (mmc_card_suspended(host->card))
+ 		goto out;
+ 
+-	err = _mmc_flush_cache(host);
+-	if (err)
+-		goto out;
++	/*
++	 * For the undervoltage case, we care more about device integrity.
++	 * Avoid cache flush and notify the device to power off quickly.
++	 */
++	if (pm_type != MMC_POWEROFF_UNDERVOLTAGE) {
++		err = _mmc_flush_cache(host);
++		if (err)
++			goto out;
++	}
+ 
+ 	if (mmc_card_can_poweroff_notify(host->card) &&
+ 	    mmc_host_can_poweroff_notify(host, pm_type))
+@@ -2212,6 +2219,13 @@ static int mmc_shutdown(struct mmc_host *host)
+ {
+ 	int err = 0;
+ 
++	/*
++	 * In case of undervoltage, the card will be powered off (removed) by
++	 * _mmc_handle_undervoltage()
++	 */
++	if (!host->card || mmc_card_removed(host->card))
++		return 0;
++
+ 	/*
+ 	 * If the card remains suspended at this point and it was done by using
+ 	 * the sleep-cmd (CMD5), we may need to re-initialize it first, to allow
+@@ -2302,6 +2316,55 @@ static int _mmc_hw_reset(struct mmc_host *host)
+ 	return mmc_init_card(host, card->ocr, card);
+ }
+ 
++/**
++ * _mmc_handle_undervoltage - Handle an undervoltage event for MMC/eMMC devices
++ * @host: MMC host structure
++ *
++ * This function is triggered when an undervoltage condition is detected.
++ * It attempts to transition the device into a low-power or safe state to
++ * prevent data corruption.
++ *
++ * Steps performed:
++ * - Perform an emergency suspend using EXT_CSD_POWER_OFF_SHORT if possible.
++ *    - If power-off notify is not supported, fallback mechanisms like sleep or
++ *      deselecting the card are attempted.
++ *    - Cache flushing is skipped to reduce execution time.
++ * - Mark the card as removed to prevent further interactions after
++ *    undervoltage.
++ *
++ * Note: This function does not handle host claiming or releasing. The caller
++ *	 must ensure that the host is properly claimed before calling this
++ *	 function and released afterward.
++ *
++ * Returns: 0 on success, or a negative error code if any step fails.
++ */
++static int _mmc_handle_undervoltage(struct mmc_host *host)
++{
++	struct mmc_card *card = host->card;
++	int err;
++
++	/*
++	 * Perform an emergency suspend to power off the eMMC quickly.
++	 * This ensures the device enters a safe state before power is lost.
++	 * We first attempt EXT_CSD_POWER_OFF_SHORT, but if power-off notify
++	 * is not supported, we fall back to sleep mode or deselecting the card.
++	 * Cache flushing is skipped to minimize delay.
++	 */
++	err = _mmc_suspend(host, MMC_POWEROFF_UNDERVOLTAGE);
++	if (err)
++		pr_err("%s: undervoltage suspend failed: %pe\n",
++		       mmc_hostname(host), ERR_PTR(err));
++
++	/*
++	 * Mark the card as removed to prevent further operations.
++	 * This ensures the system does not attempt to access the device
++	 * after an undervoltage event, avoiding potential corruption.
++	 */
++	mmc_card_set_removed(card);
++
++	return err;
++}
++
+ static const struct mmc_bus_ops mmc_ops = {
+ 	.remove = mmc_remove,
+ 	.detect = mmc_detect,
+@@ -2314,6 +2377,7 @@ static const struct mmc_bus_ops mmc_ops = {
+ 	.hw_reset = _mmc_hw_reset,
+ 	.cache_enabled = _mmc_cache_enabled,
+ 	.flush_cache = _mmc_flush_cache,
++	.handle_undervoltage = _mmc_handle_undervoltage,
+ };
+ 
+ /*
+-- 
+2.39.5
 
