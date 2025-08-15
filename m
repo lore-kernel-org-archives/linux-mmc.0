@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A792D292906;
-	Fri, 15 Aug 2025 01:52:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEF86292B4B;
+	Fri, 15 Aug 2025 01:52:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222770; cv=none; b=rlE234gWrys2HLo8idJsUz4ldfHvLgfAH+VkJKCphkSvM1fheozIxKnVAFdO31a5fiCNUPdhcU4CcjSPzC+RbiLEuYx+lo9IHe8Pn3B7x2A9bQI7OZEsXrOpLKLbhzBhrpKpwijrRZh/S7yeDUzvOfcVHdlMD92Iw8KCrc+/oco=
+	t=1755222778; cv=none; b=uAC1lBxagIelztoKzgZiqJS35Q99rdTc9vXcpsSNC9vhOu5lgJMX4i1cexMt85diwgHdFXttbOtpyX7H92iCCajDa+CergjlLmTZAZMXV0Dm6DBh/KHoDjrqF4Qfdkkd4cRTFwSBZA0ijS0xsp8mgC2X79Ko3R9jUFRVHsxncAo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222770; c=relaxed/simple;
-	bh=IzZgrP+Thm8aY8QaBcmn+pxhfIUSwm9lvX5B3/yxCjw=;
+	s=arc-20240116; t=1755222778; c=relaxed/simple;
+	bh=INlG0kmvqymyn+H5Y2Jxgc3TKHlGOcIl3DMuV65cwzY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=OKQpY1u0D+GKwZrWoPON97PgVmJRKq8XV6KgsCLv++v35p9lYLukTUpUzO0ESh+xXdU/v4PcV10cWZfJSDwMGKhd6O6blWfsNiBCKM4xw8xDqVUkaommVe0Z/qgHt8PAU0POOKMW7lf4l9M+bGyNJybFBS7oG3/Wk2G+LmBFA5s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kAY78ScT; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=f2+Aqsuh0jhtUJreI6+0tJw1/xnCTcARVo3o4fpC761yFgSsQeXcbmZvtvhs6+aEH59EmsnLsk5SY84u1Igtf7gHdiLyOR1MV9rBDt9COD4Bhn/CvJK4qykuRpiVUju0oj132ryfG3UpVzgdLhJ8fuqXJzR/YEnRGjgUMXADT/4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=A14Vblpk; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kAY78ScT"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 56219C4CEED;
-	Fri, 15 Aug 2025 01:52:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="A14Vblpk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1C69C4CEF1;
+	Fri, 15 Aug 2025 01:52:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222770;
-	bh=IzZgrP+Thm8aY8QaBcmn+pxhfIUSwm9lvX5B3/yxCjw=;
+	s=k20201202; t=1755222777;
+	bh=INlG0kmvqymyn+H5Y2Jxgc3TKHlGOcIl3DMuV65cwzY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=kAY78ScTm7Jba7wSMqJrIh+m8CrW6Xn3mPma7xXWtD8mzaKvMaZFxZ1Dl/BdUD414
-	 bAmErURaLsJQtX2aHHlgVOwrSth8aQMDnNtcISUJ4t0kdP54Jb8Iu3xbPHpgWZCCvt
-	 B9R+mTvxNgwNbcYuQ9NlZiOpm29jEqq4Z5XFDcqjhT/ur7sdd2Et99/y1IG4gVWIDD
-	 cdt5kk1WWERYQF4/Buj0q4SNUQOgcYrtx2AkFNdm9mYxMHRt0noIzbecahW1XQcB88
-	 NjDOc2eYroTQ2CJluGJC/rgJqHInz+t3BzWa/AbJTacJobQ+qtxxJhcqCbA4Vgj+6y
-	 yZg/+SeNRwfKg==
+	b=A14Vblpk8k9Atpkx9WpA3Dde2demSaHB2yZO/0mQsaCMmun0f8LeslrhEiMq0/3F8
+	 PqoajhBfFhrvJsBMBLF1P7ULHedL4y2MFD2f+DPCTxSoa5hc07kO6khaXdp1CrVEFO
+	 b60JqOU32zhF5vFkpBtwXJtj53rzUpZnvG5Hm7cCMI+jllN6iUxeltHtwKaIOeL627
+	 012abVMeD0JY5e62IUTg7CbGvw0NPaPPPZVY/3xgnZmwO2SwdxITZ0EgqcGy+cjujo
+	 DtlzZWuPZnlClsRsftc3dIomXOlfG29IYgZ+WXU4H0trSxqPVY4cdY9Fa01gTN93L7
+	 cNUTWhma3TXsw==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 11/38] mmc: mmci: use modern PM macros
-Date: Fri, 15 Aug 2025 09:33:46 +0800
-Message-ID: <20250815013413.28641-12-jszhang@kernel.org>
+Subject: [PATCH 12/38] mmc: mxs-mmc: use modern PM macros
+Date: Fri, 15 Aug 2025 09:33:47 +0800
+Message-ID: <20250815013413.28641-13-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -93,45 +93,41 @@ regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/mmci.c | 9 +++------
- 1 file changed, 3 insertions(+), 6 deletions(-)
+ drivers/mmc/host/mxs-mmc.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 8367283647a9..e500051bd572 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -2516,7 +2516,6 @@ static void mmci_remove(struct amba_device *dev)
- 	}
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index a6e44e406106..7c7c52d9e8e7 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -680,7 +680,6 @@ static void mxs_mmc_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(ssp->clk);
  }
  
--#ifdef CONFIG_PM
- static void mmci_save(struct mmci_host *host)
+-#ifdef CONFIG_PM_SLEEP
+ static int mxs_mmc_suspend(struct device *dev)
  {
- 	unsigned long flags;
-@@ -2581,12 +2580,10 @@ static int mmci_runtime_resume(struct device *dev)
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
+@@ -699,9 +698,8 @@ static int mxs_mmc_resume(struct device *dev)
  
- 	return 0;
+ 	return clk_prepare_enable(ssp->clk);
  }
 -#endif
  
- static const struct dev_pm_ops mmci_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
--				pm_runtime_force_resume)
--	SET_RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
-+	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
-+	RUNTIME_PM_OPS(mmci_runtime_suspend, mmci_runtime_resume, NULL)
- };
+-static SIMPLE_DEV_PM_OPS(mxs_mmc_pm_ops, mxs_mmc_suspend, mxs_mmc_resume);
++static DEFINE_SIMPLE_DEV_PM_OPS(mxs_mmc_pm_ops, mxs_mmc_suspend, mxs_mmc_resume);
  
- static const struct amba_id mmci_ids[] = {
-@@ -2675,7 +2672,7 @@ MODULE_DEVICE_TABLE(amba, mmci_ids);
- static struct amba_driver mmci_driver = {
- 	.drv		= {
+ static struct platform_driver mxs_mmc_driver = {
+ 	.probe		= mxs_mmc_probe,
+@@ -709,7 +707,7 @@ static struct platform_driver mxs_mmc_driver = {
+ 	.driver		= {
  		.name	= DRIVER_NAME,
--		.pm	= &mmci_dev_pm_ops,
-+		.pm	= pm_ptr(&mmci_dev_pm_ops),
  		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+-		.pm	= &mxs_mmc_pm_ops,
++		.pm	= pm_sleep_ptr(&mxs_mmc_pm_ops),
+ 		.of_match_table = mxs_mmc_dt_ids,
  	},
- 	.probe		= mmci_probe,
+ };
 -- 
 2.50.0
 
