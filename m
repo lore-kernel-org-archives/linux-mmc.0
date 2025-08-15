@@ -1,105 +1,172 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5808347C3
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Aug 2025 12:26:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32DDD1DD9AC;
+	Fri, 15 Aug 2025 14:42:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755260777; cv=none; b=DVza1uybfBdT6f78fenQx80IURouMOtGbK0GstyxTMzG+5NLTzHyoVUOAMAIun6E8ORFW/WrHYSVM5Cq+nK4A+BEGPz6q95HhZsOevzIzQibWS2F98k7TRjeagC75yY8nUMOQOhqR3lEpWLrlQoAWiDDA5SDIt3z1o/koOtWsrk=
+	t=1755268932; cv=none; b=SNhpiggnkyeE9A40sTIS95MDv1GE+NrbqcxwEUJI6oJej7AM2cdvzeCFScha1rZK+f/f/Z3Vto/lRpVbPEEb0uvlbXjXrtna2B3INUDpqC6zffP78GwWZK+tg8NEm3lZorToO1CTgrz2utfyFe82d9NHJiBDnmdFLOYya1vf9As=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755260777; c=relaxed/simple;
-	bh=DQX/325BTJnKHkvFsWcPtvM5Q7ywGneVXSiEXQCqUS8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=qzwgmCoaVbysb9SYtTGw6XXdjAp6/Gqc+PuGxLzqMvxHZ2MpIHpvmUxbzF3dJrCcq+ZnbxEgkkepUMoankJfS2zdAtMGeZwQ7DO/Tx9duNQHGBvnmDtAj9vJ9TmOglfuoCNf9V73s/PUJGpBywafOdZaGjETK2nmBbZUn4/YYfA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iht3SdZa; arc=none smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1755268932; c=relaxed/simple;
+	bh=3eUf4UXirGpUX0gw3VvalDgnQQxUYuzOa7d+Bn86Fb0=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=uoFmnoQUiiydNZvBSIwjw1eFMinxeq2dGKl6YT05B4duAUcyXIcx+CZ7jQuJ5taxR7mj7ziRg1uLszZAQ4/r/WbMrgUwP7rVOSMDZcEBij0JMWC0f41d7cXPPdoszmT7Q+eNY2Dl1gb2xUtotHKAg+E5n1JbABVeQWDAIsFn52o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QGhHpuiS; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iht3SdZa"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-71e6eb6494eso2995747b3.3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Aug 2025 05:26:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755260775; x=1755865575; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=DQX/325BTJnKHkvFsWcPtvM5Q7ywGneVXSiEXQCqUS8=;
-        b=iht3SdZas2mQXu3/dhjbElUy4wg0D7jCLT4ogv3RCeCd7qTGPHIaqJ8MzfLMsKYWdD
-         w58TDST0AK6JUacwn+bTqrEGcOn7y9WQOxoKfDx/Miuh8SxdmOR2+7ho3URk1r5XhbBA
-         GeiTKvGTHUM1RoBtpYqj2MPZlCs7h4T5RvjiCHrTyUbdafAKoQAmmO0k1ITxtYouGvcI
-         rHBm9n1MK2bo0sQRR5ig+7lZxT0lEq3IEdd4XDar3t88LLeE8gFG6vW9D0V5ffDd5TT7
-         Yvzel+n1HDoOrIp83HGvwaenw/YjsO22L4+qq2CQVGV2PJbCvcGyxjt8USuXXakO2vw0
-         dOmg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755260775; x=1755865575;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=DQX/325BTJnKHkvFsWcPtvM5Q7ywGneVXSiEXQCqUS8=;
-        b=Ajr/ioZnTtTiWc/Qsy45zn+3SaOJ90AuI00rhcphfiopLmrdZSeE6qdLH2NrdILYFe
-         ms3Tu+EkG20Kd6/HPa65DVx09x//ucM0xgQ+1654K2GThmNpOQNkIiKE2pET1Yfx1qaF
-         gB6wi6KpwZXZ8UZe4DVVa46DmwJ8AcGzCk+Djs+zmqTv5m6/XqqpaPl5WTTGKmPXZbjH
-         W7I1jAzs4TwDOToBOd8QhiAWTTWv9WwNWq8b869bNvWOxleADDiYCu+liVKo8U+4dVkU
-         bKuhXJhU9PZCON/ipZkaPnqbAYIZ9E/UMCES2PnuRQJMq0QYyfqwu3GuNj0epJwA0cn4
-         4HEQ==
-X-Forwarded-Encrypted: i=1; AJvYcCULD9aLL/kEGqTI0u9dQIJMjkkNljqq0cD1OkZOeFWOV9PVVf1tSOzoiCm77k+zLHtTSyMXL5TAWqg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwIXPtYcsdGwZ4q6pYjPhdBr4Il2ORARW39dFK7rGT79oIWLZqm
-	kRQ+qsRAbO6VmRcfp7LPgeLnq++I1UANTHhhA8tZfYGc7rTN2355xg64p77nkUB4F9Cd/Jpmm7O
-	gvACY7SbbU8zOWIC2eu9F9Dj5Qn3idLp/6LJDW3Kgjw==
-X-Gm-Gg: ASbGncu16gGVNNDz+tnjPFzoJt8a3LwoDR9IEaHBQuVg4Y1EmrrSf7OjHXImv8XfptZ
-	DFGAgpz5m3sIKb+mdKp4pW9TbX/X48abR7N/7qnus+nPnq/NoKhdXcEnuMI7sXM3/iBaRAwCSFU
-	T+Ey8NKuLZBKtMAiZRH9LzJS7f0nQbmsUN6m8owmz6tTGOkKFLPsoFj06qPjq3YRW7pophftJj6
-	fsCWPiH
-X-Google-Smtp-Source: AGHT+IGVoF64dU58ys34hvl+sIzQbOqcLwGqOY2pYfPr1ee69oOhAIvxgZmb6HK1gQ9HxhwTtrIryKzZXt5l7++Kafc=
-X-Received: by 2002:a05:690c:4b8b:b0:71a:1c70:c20a with SMTP id
- 00721157ae682-71e6de43d96mr25006987b3.35.1755260774882; Fri, 15 Aug 2025
- 05:26:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QGhHpuiS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F3B35C4CEEB;
+	Fri, 15 Aug 2025 14:42:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1755268931;
+	bh=3eUf4UXirGpUX0gw3VvalDgnQQxUYuzOa7d+Bn86Fb0=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=QGhHpuiSTtGAbt/6dlTCnnoTA4ZplxFC8Tro0GJAdbAh12tMNEUSLu07z11OvQBvk
+	 oHTf5TJS/YKStrrrPHeWRzwJ0jGE6j5AZ1tbRvaZy3dDmEE9KCuVb15MPpzSH6J/gw
+	 2nlRciQR5ILTUmZcjfPb8Wftcr9/dguuRdUZKw9cWJDeaG76YAPPH1GvTVv9P/kSEx
+	 wLYcS3eJZ7unChNgWOYh7wQNPjdRjal2zeZDCWKyPnLkisSlJQ+WGVCBgVhn2LIrAt
+	 +qG7XHhqCY/zS15DuM72YtrsT2tpKSGGxqzGtUU2p/oH3AF5g3+H8o04kc5YGhgMBJ
+	 knwp+/59e078g==
+From: Bjorn Andersson <andersson@kernel.org>
+To: linux-kernel@vger.kernel.org,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Mark Brown <broonie@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Alexandre Torgue <alexandre.torgue@foss.st.com>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Andrea della Porta <andrea.porta@suse.com>,
+	=?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
+	Andrzej Hajda <andrzej.hajda@intel.com>,
+	Andy Shevchenko <andy@kernel.org>,
+	Andy Yan <andy.yan@rock-chips.com>,
+	Avi Fishman <avifishman70@gmail.com>,
+	Bartosz Golaszewski <brgl@bgdev.pl>,
+	Benjamin Fair <benjaminfair@google.com>,
+	Chen-Yu Tsai <wens@csie.org>,
+	Daniel Lezcano <daniel.lezcano@linaro.org>,
+	David Airlie <airlied@gmail.com>,
+	David Lechner <dlechner@baylibre.com>,
+	Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+	Drew Fustini <fustini@kernel.org>,
+	dri-devel@lists.freedesktop.org,
+	Fabio Estevam <festevam@gmail.com>,
+	Fabrice Gasnier <fabrice.gasnier@foss.st.com>,
+	Fu Wei <wefu@redhat.com>,
+	Guo Ren <guoren@kernel.org>,
+	Hans Verkuil <hverkuil@kernel.org>,
+	=?UTF-8?q?Heiko=20St=C3=BCbner?= <heiko@sntech.de>,
+	imx@lists.linux.dev,
+	Iwona Winiarska <iwona.winiarska@intel.com>,
+	Jaroslav Kysela <perex@perex.cz>,
+	Jassi Brar <jassisinghbrar@gmail.com>,
+	Jernej Skrabec <jernej.skrabec@gmail.com>,
+	Jerome Brunet <jbrunet@baylibre.com>,
+	Jonas Karlman <jonas@kwiboo.se>,
+	Jonathan Cameron <jic23@kernel.org>,
+	Kevin Hilman <khilman@baylibre.com>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Laurent Pinchart <Laurent.pinchart@ideasonboard.com>,
+	Lee Jones <lee@kernel.org>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	linux-actions@lists.infradead.org,
+	linux-amlogic@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-arm-msm@vger.kernel.org,
+	linux-clk@vger.kernel.org,
+	linux-gpio@vger.kernel.org,
+	linux-iio@vger.kernel.org,
+	linux-input@vger.kernel.org,
+	linux-media@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-phy@lists.infradead.org,
+	linux-pm@vger.kernel.org,
+	linuxppc-dev@lists.ozlabs.org,
+	linux-pwm@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	linux-rockchip@lists.infradead.org,
+	linux-rtc@vger.kernel.org,
+	linux-samsung-soc@vger.kernel.org,
+	linux-sound@vger.kernel.org,
+	linux-spi@vger.kernel.org,
+	linux-stm32@st-md-mailman.stormreply.com,
+	linux-sunxi@lists.linux.dev,
+	Liu Ying <victor.liu@nxp.com>,
+	Lukasz Luba <lukasz.luba@arm.com>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Nancy Yuen <yuenn@google.com>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Nicolin Chen <nicoleotsuka@gmail.com>,
+	=?UTF-8?q?Nuno=20S=C3=A1?= <nuno.sa@analog.com>,
+	openbmc@lists.ozlabs.org,
+	Patrick Venture <venture@google.com>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	Piotr Wojtaszczyk <piotr.wojtaszczyk@timesys.com>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Robert Foss <rfoss@kernel.org>,
+	Samuel Holland <samuel.holland@sifive.com>,
+	Samuel Holland <samuel@sholland.org>,
+	Sandy Huang <hjc@rock-chips.com>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Shawn Guo <shawnguo@kernel.org>,
+	Shengjiu Wang <shengjiu.wang@gmail.com>,
+	Simona Vetter <simona@ffwll.ch>,
+	Stephen Boyd <sboyd@kernel.org>,
+	Takashi Iwai <tiwai@suse.com>,
+	Tali Perry <tali.perry1@gmail.com>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Tomer Maimon <tmaimon77@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <ukleinek@kernel.org>,
+	Vasily Khoruzhick <anarsoul@gmail.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Vladimir Zapolskiy <vz@mleia.com>,
+	Xiubo Li <Xiubo.Lee@gmail.com>,
+	Yangtao Li <tiny.windzz@gmail.com>,
+	Zhang Rui <rui.zhang@intel.com>
+Subject: Re: (subset) [PATCH 00/21] treewide: remove unneeded 'fast_io' parameter in regmap_config
+Date: Fri, 15 Aug 2025 09:42:02 -0500
+Message-ID: <175526892008.370600.8859545110801188375.b4-ty@kernel.org>
+X-Mailer: git-send-email 2.49.0
+In-Reply-To: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
+References: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
- <CAPDyKFqa6ut25uaDN6pP50wGi2+DZ8MJ6_OZ6ujtgjfHz4hxzg@mail.gmail.com> <4977174.OV4Wx5bFTl@benoit.monin>
-In-Reply-To: <4977174.OV4Wx5bFTl@benoit.monin>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 15 Aug 2025 14:25:38 +0200
-X-Gm-Features: Ac12FXx4tr2FImgs2XwKqj-A11Qn4v2kO0YkD0oNl-AEmBzNU2XnHeUCkbheHm4
-Message-ID: <CAPDyKFrfV_VpX0dRJGMHLNgfYPW5njGCHZghtb3Oos-6CjV5DQ@mail.gmail.com>
-Subject: Re: [PATCH v3 0/6] mmc: introduce multi-block read gap tuning
-To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, 
-	Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>, 
-	Tawfik Bayouk <tawfik.bayouk@mobileye.com>, Gregory CLEMENT <gregory.clement@bootlin.com>, 
-	Thomas Petazzoni <thomas.petazzoni@bootlin.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-On Thu, 14 Aug 2025 at 16:07, Beno=C3=AEt Monin <benoit.monin@bootlin.com> =
-wrote:
->
-> Hello Ulf,
->
-> On Friday, 18 July 2025 at 15:04:18 CEST, Ulf Hansson wrote:
-> > A quick review made me feel a lot better about this, thanks!
-> >
-> > Although I will need a few more days for review and possibly it's
-> > getting too late for v6.17 for me, but let's see, I will do my best.
-> >
-> Any update on the review?
 
-Sorry for the delay. Just a minor comment on patch5, but the rest
-looks good to me!
+On Wed, 13 Aug 2025 18:14:46 +0200, Wolfram Sang wrote:
+> While working on a driver using regmap with MMIO, I wondered if I need
+> to set 'fast_io' in the config. Turned out I don't need to, so I added
+> documentation for it with commit ffc72771ff6e ("regmap: Annotate that
+> MMIO implies fast IO").
+> 
+> This series fixes the existing users in the tree which needlessly set
+> the flag. They have been found using this coccinelle script:
+> 
+> [...]
 
->
-> I have a new version with the small changes suggested by Adrian. I can se=
-nd
-> it but I'd rather wait if you also have some comments to avoid doing two
-> separate versions of the patchset.
+Applied, thanks!
 
-Thanks for pinging me! I will try to be quicker next time.
+[18/21] soc: remove unneeded 'fast_io' parameter in regmap_config
+        commit: 5d8a9c8401648d338d072a488d455ed4611c5d4b
 
-Kind regards
-Uffe
+Best regards,
+-- 
+Bjorn Andersson <andersson@kernel.org>
