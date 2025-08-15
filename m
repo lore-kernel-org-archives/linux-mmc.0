@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D71429CB3E;
-	Fri, 15 Aug 2025 01:54:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D055129ACE6;
+	Fri, 15 Aug 2025 01:54:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222878; cv=none; b=gE0MRpU+vA+E+NRJoZuVR6Uif++U5H6G0OMzbkDujXs0lTiwEDfd/Q5jHMjmtzVEtHiHQCCzmLDFmBIFY3vUzq1bQ9uyAYM6QvYp9p/4st85w8h1YeZHPOWMqPJwAN99NpZz092vZSysGCX6f/hRHmEepDllVOuikiLB0fTC4Sc=
+	t=1755222885; cv=none; b=sYva0zelM6RK+rPVZoM7o6zjy0brBZ1HLr0wVOpcltgqFxV0u6HEjbWBNWu2owqXXwFgQh6iyjq7Vj820GcLdXWZqEndFBqOn6oV+l30UZSrGlxHGfHk7ZbVjhEIh6Rb0oggeye8usz7yGaLCWSchQ3felQuXAlBE/uCO0qNteI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222878; c=relaxed/simple;
-	bh=L9nwWEBfXJuPHyqSS33q6AaeSPO5IJkCOi0sAgxs/00=;
+	s=arc-20240116; t=1755222885; c=relaxed/simple;
+	bh=TtXJDmxezN+QVZxIQGLYSDHPqxnbwoOEA70hU7804NA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HsIu0BrNHpu51bDMO2jPDp3hQGbRqLXWHry7s6UG3yPwRWI28LpmrjVCz9PucUyVKyX7GwvuHQ9BURi2eX3wE3xtSPhvZXjUtZDoSdJp8PUy3D7pLACvA6uBhX1PfbazCZHmTdZjsaoga/3dGw31oD4Xo9w6YwZBtA4b/Cy6U6Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dCo1hZl3; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=knrMVo/jGNRIWHOiltXRLm5fsHSzyo7TlR7/GLhGWkgJZdEKN578bb4YNJSJE5kPOp8DAWK57dj8KkEF2MYRRx848VqE49N/90nClZFdLpLX+UcDIGDv8/JXtRWr2j/KWwhG55zuZoPYXXzrF0UrMdTRWhYjf7iSlIAV7AfXmCw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SMWNEvJv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dCo1hZl3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4997EC4CEF5;
-	Fri, 15 Aug 2025 01:54:31 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SMWNEvJv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8F7FC4CEF1;
+	Fri, 15 Aug 2025 01:54:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222878;
-	bh=L9nwWEBfXJuPHyqSS33q6AaeSPO5IJkCOi0sAgxs/00=;
+	s=k20201202; t=1755222885;
+	bh=TtXJDmxezN+QVZxIQGLYSDHPqxnbwoOEA70hU7804NA=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=dCo1hZl3h8+a0xrnd/3RE2wwmFWVthCvDvOPQaLG/501313/kl52bfN9HcfGEIRr4
-	 RtC6gFwxLYZQkN7nFcz7vMxv4Ywpt2TdKeVwbPK6N0EiJdB4D6EDSakO0BXURmVgds
-	 5uxItax4qqRtSefCXjrGJ7dMhnDA06jhWhmJVjE+QXYLFhPnBHiR/rpz0/KAehIDBo
-	 x41/RtmXCVdwb0mjXzgaSJH6rloO5wffkFh3APYW5+SoZ3eL0GUHQrGe4d0WSeitgf
-	 UrAeuH7EC0pa0onmM5ZF4sKtpxK9Yzlztp/LTCSImp8gNqL2FOlKvCtNDNfaIHQ7Cy
-	 NllY/r+FqVLPw==
+	b=SMWNEvJvzM0oLtdZFwynmU8NMdDuBZ/xydk9OkNcJBREHSbb5xYExOdmRjF6YzCuQ
+	 ORMllVx1oDrfemI/MQC1zNCNlpyU/k/tr1eZtUSHM9z9BxuQchCOjJM3R+VYUYt/0s
+	 BJCU0YP+RU8OaPgqt7bw/2L71UXedMEwLwTPskv71/ZgHh8wjRHN/W0Vp0E+9Kohy/
+	 VVPS9jbXdngclLmKw8bv+4uPE42oVSRoArxupZ+AVWJms/sMUIpiHGt2L6fDFz0fPN
+	 x9sx5Y9D4pe36aMNvFgd6HDqO2OJBP0ROzgV3qvAnaH5MqWXfapfc1NenY6OfEx/B+
+	 OUf/s9U/2oDLA==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 25/38] mmc: sdhci-spear: use modern PM macros
-Date: Fri, 15 Aug 2025 09:34:00 +0800
-Message-ID: <20250815013413.28641-26-jszhang@kernel.org>
+Subject: [PATCH 26/38] mmc: sdhci-sprd: use modern PM macros
+Date: Fri, 15 Aug 2025 09:34:01 +0800
+Message-ID: <20250815013413.28641-27-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -93,41 +93,46 @@ regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/sdhci-spear.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-sprd.c | 10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index fa0f8aeb7ee0..72d21dc0cb69 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -130,7 +130,6 @@ static void sdhci_remove(struct platform_device *pdev)
- 	clk_disable_unprepare(sdhci->clk);
- }
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index fe2fe52b23b2..3584a2b314a9 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -903,7 +903,6 @@ static const struct of_device_id sdhci_sprd_of_match[] = {
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_sprd_of_match);
  
--#ifdef CONFIG_PM_SLEEP
- static int sdhci_suspend(struct device *dev)
+-#ifdef CONFIG_PM
+ static int sdhci_sprd_runtime_suspend(struct device *dev)
  {
  	struct sdhci_host *host = dev_get_drvdata(dev);
-@@ -161,9 +160,8 @@ static int sdhci_resume(struct device *dev)
+@@ -950,13 +949,10 @@ static int sdhci_sprd_runtime_resume(struct device *dev)
  
- 	return sdhci_resume_host(host);
+ 	return ret;
  }
 -#endif
  
--static SIMPLE_DEV_PM_OPS(sdhci_pm_ops, sdhci_suspend, sdhci_resume);
-+static DEFINE_SIMPLE_DEV_PM_OPS(sdhci_pm_ops, sdhci_suspend, sdhci_resume);
+ static const struct dev_pm_ops sdhci_sprd_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+-				pm_runtime_force_resume)
+-	SET_RUNTIME_PM_OPS(sdhci_sprd_runtime_suspend,
+-			   sdhci_sprd_runtime_resume, NULL)
++	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
++	RUNTIME_PM_OPS(sdhci_sprd_runtime_suspend, sdhci_sprd_runtime_resume, NULL)
+ };
  
- static const struct of_device_id sdhci_spear_id_table[] = {
- 	{ .compatible = "st,spear300-sdhci" },
-@@ -175,7 +173,7 @@ static struct platform_driver sdhci_driver = {
- 	.driver = {
- 		.name	= "sdhci",
+ static struct platform_driver sdhci_sprd_driver = {
+@@ -966,7 +962,7 @@ static struct platform_driver sdhci_sprd_driver = {
+ 		.name = "sdhci_sprd_r11",
  		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
--		.pm	= &sdhci_pm_ops,
-+		.pm	= pm_sleep_ptr(&sdhci_pm_ops),
- 		.of_match_table = sdhci_spear_id_table,
+ 		.of_match_table = sdhci_sprd_of_match,
+-		.pm = &sdhci_sprd_pm_ops,
++		.pm = pm_ptr(&sdhci_sprd_pm_ops),
  	},
- 	.probe		= sdhci_probe,
+ };
+ module_platform_driver(sdhci_sprd_driver);
 -- 
 2.50.0
 
