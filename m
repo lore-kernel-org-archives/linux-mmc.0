@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECF1B28CF7C;
-	Fri, 15 Aug 2025 01:54:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF590295537;
+	Fri, 15 Aug 2025 01:54:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222863; cv=none; b=Dzfpm58FnO3TXDvd5KyrZu3OyI9Q+CDUbPRY4YqqDt+Bh5hh3TX3vqrog/7AbXgjTyG4miT1Zw6/AA0Bf9Akr6QpguUQnnFwOp9LgiyjLFS+ohqRl16c6UwMbdgygPfC8WUq8cd3/t12i8sZlo4wpLtp+oLuxdW8b5s9YoZrqeI=
+	t=1755222871; cv=none; b=mhRIyGmVR8Y3obZPCPpo9P3qEJxVngOmTxVsVJoXLvllODtAq4coiIPh7ILz9MHz4/a8hU6muLQXpafpuwrChQezxOmB/HZaKMnNSxqMcKqh9VWj97N1PCCQZAyv8tHvEdNA5Z5hE8H2mkzX7xyqJXZuEZQE7h1SYr2yYZS6X+g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222863; c=relaxed/simple;
-	bh=zsWEaRqQM6tmd2c+fncO7p4Tpm64+i/AVDndX8KLebc=;
+	s=arc-20240116; t=1755222871; c=relaxed/simple;
+	bh=Xtt0Gh+8rnJkc7bnfTKTYzJ6uGY9+nZj9Zh0PXtUiSU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=G/eiJtLQj22EUkpp5ZQZ4+1YsZVSjr43ueOde4nTtXCNyXna+4UpdDatejUdnTD/BxV6IkDo/mK2q+N/efpkUhrZUlk09EcXxncv4JYljL906Km+HNt0hiJJL5+lKB+WIYxTmT9cYcauUpUN5S1VB9KZY8NcoGndmQ5mELEXX1g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SFynERfK; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=l9Wa5Gs7KloVPKtZzcdPgVynPVO4hmGKnsY9DXLpias2zOBlZI2d5wRd8bWj1+xrU8QUeQRSTlGjoqDMtH4tOD1egLy4EnfXXvVu9MluQgS2auDbAI+/NTa586/U6nHj+z7weNaqn52ZEfDGHQwQAha4P0b+Cda7kztvruRclmQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nzoMw8Os; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SFynERfK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 417C9C4CEED;
-	Fri, 15 Aug 2025 01:54:15 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nzoMw8Os"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 47747C4CEF1;
+	Fri, 15 Aug 2025 01:54:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222862;
-	bh=zsWEaRqQM6tmd2c+fncO7p4Tpm64+i/AVDndX8KLebc=;
+	s=k20201202; t=1755222870;
+	bh=Xtt0Gh+8rnJkc7bnfTKTYzJ6uGY9+nZj9Zh0PXtUiSU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=SFynERfKhCtrM9XVoOAquRH4uvw1WEV7WBtGWb6KDxpifTA2gmx6lTFKoZNyHLsJp
-	 Vkk4v63+jU/gW556gLVD8FBsNDPTiRF3LYUgEkd8MpkFUdtCEO3duKoIw6aaFmye2O
-	 CqqAOQgKWqSHrD87KqyaVbM8Ql4/uzm72MFl4sSUZtLb/bTznep2KugeVWhxRzkCUY
-	 QeELq6yqkxoE62tQdDQvDHxuMG4AoDRxuc+n0uqTsYOaQ+U5mmBg4fo4rDhSuFCJzK
-	 uTOANE+RswWK5SrRtBwPfDbhN/ZuiClZhqCy1qzSP78eqFBY9OLRGPBPtFqo+/BpBL
-	 7J05wvzmwAzdg==
+	b=nzoMw8Ostluj9UsuWcFcet5p6QRTPN+V16+FKix81XRZpr74c+MJlJEousO98mu8w
+	 7cuehjiVN7kfSl/3AcnSiqnTEthVmeMYOHwD73Tp76sAEQxqefSmfnL28kIuxRVcXu
+	 Spj73JcIfaFJi2b0Lv/3krO7BeOQ/BQOgHAgcioetmkrkT16ZW9md05mOzmoABQji8
+	 0KJS0GttkOoyIcXum9x2I2u/iwzJH2wLq9Q8glVLXzkwyAdQB7AIumhYRy/aYdwDSK
+	 QOWXWgYuI1lCeJDzfzJ/6DBUnnkSbl4umjZkSIYYF0gVK0/uiQYN5IT8gx3c+whqVJ
+	 fdhgv5rVgJWSg==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 23/38] mmc: sdhci-cadence: use modern PM macros
-Date: Fri, 15 Aug 2025 09:33:58 +0800
-Message-ID: <20250815013413.28641-24-jszhang@kernel.org>
+Subject: [PATCH 24/38] mmc: sdhci-s3c: use modern PM macros
+Date: Fri, 15 Aug 2025 09:33:59 +0800
+Message-ID: <20250815013413.28641-25-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -93,43 +93,55 @@ regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/sdhci-cadence.c | 8 ++------
- 1 file changed, 2 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-s3c.c | 11 +++--------
+ 1 file changed, 3 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 2d823e158c59..60a297628b06 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -551,7 +551,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	return sdhci_add_host(host);
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 40857fc2e21b..6bf66aaa86a6 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -681,7 +681,6 @@ static void sdhci_s3c_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(sc->clk_io);
  }
  
 -#ifdef CONFIG_PM_SLEEP
- static int sdhci_cdns_resume(struct device *dev)
+ static int sdhci_s3c_suspend(struct device *dev)
  {
  	struct sdhci_host *host = dev_get_drvdata(dev);
-@@ -578,11 +577,8 @@ static int sdhci_cdns_resume(struct device *dev)
+@@ -698,9 +697,7 @@ static int sdhci_s3c_resume(struct device *dev)
  
- 	return ret;
+ 	return sdhci_resume_host(host);
  }
 -#endif
  
--static const struct dev_pm_ops sdhci_cdns_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_cdns_resume)
--};
-+static DEFINE_SIMPLE_DEV_PM_OPS(sdhci_cdns_pm_ops, sdhci_pltfm_suspend, sdhci_cdns_resume);
+-#ifdef CONFIG_PM
+ static int sdhci_s3c_runtime_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+@@ -730,12 +727,10 @@ static int sdhci_s3c_runtime_resume(struct device *dev)
+ 	sdhci_runtime_resume_host(host, 0);
+ 	return 0;
+ }
+-#endif
  
- static const struct of_device_id sdhci_cdns_match[] = {
- 	{
-@@ -606,7 +602,7 @@ static struct platform_driver sdhci_cdns_driver = {
- 	.driver = {
- 		.name = "sdhci-cdns",
+ static const struct dev_pm_ops sdhci_s3c_pmops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
+-	SET_RUNTIME_PM_OPS(sdhci_s3c_runtime_suspend, sdhci_s3c_runtime_resume,
+-			   NULL)
++	SYSTEM_SLEEP_PM_OPS(sdhci_s3c_suspend, sdhci_s3c_resume)
++	RUNTIME_PM_OPS(sdhci_s3c_runtime_suspend, sdhci_s3c_runtime_resume, NULL)
+ };
+ 
+ static const struct platform_device_id sdhci_s3c_driver_ids[] = {
+@@ -770,7 +765,7 @@ static struct platform_driver sdhci_s3c_driver = {
+ 		.name	= "s3c-sdhci",
  		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
--		.pm = &sdhci_cdns_pm_ops,
-+		.pm = pm_sleep_ptr(&sdhci_cdns_pm_ops),
- 		.of_match_table = sdhci_cdns_match,
+ 		.of_match_table = of_match_ptr(sdhci_s3c_dt_match),
+-		.pm	= &sdhci_s3c_pmops,
++		.pm	= pm_ptr(&sdhci_s3c_pmops),
  	},
- 	.probe = sdhci_cdns_probe,
+ };
+ 
 -- 
 2.50.0
 
