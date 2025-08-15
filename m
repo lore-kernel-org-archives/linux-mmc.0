@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 127D029344F;
-	Fri, 15 Aug 2025 01:52:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11B22292906;
+	Fri, 15 Aug 2025 01:52:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222756; cv=none; b=VdL3U0iz9wCqd/kgSPAoru7E+sB2b1uNjIMygqPOMTHMbI9TPwrfhH67YW4cwmAMOe8Anrm/s/Hrd0aLvuLG4ZkYciD5KDAyCCd+rkCUBzrXsXkF00oGkE8ksr0B30ESbep0pd3Mp0YcfBiXEOHLrstqpUTX0wnwSTFAC+78PQQ=
+	t=1755222763; cv=none; b=gOAt+3V8K+RexmifOZdj8KHqpbEdJf7ZKw9/JiLs9NYBgZtNEzsIUm8QUvwXqivuT/K8+jA7Ft5aK7PZbDg3DYItZQyczDPOwi46F+bSM7ZEgJMMTnxZ4e4jkTzz6Htaw8EAUjz3o2IUXBD8sQLg5dD1cc3p7AVLmg9jxCPKWDE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222756; c=relaxed/simple;
-	bh=msCcAvgmi8cjejj/bvx4fWv7p7OoguqU+iU6TDTArRk=;
+	s=arc-20240116; t=1755222763; c=relaxed/simple;
+	bh=9RmwzGROqS9ck1Ji2XOxbWPQpMewErkgs9sCdvkpL+M=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CZOMZGmqqKiVIWhFsmHof2T42tivoZLRliargCVL4W1bdJE3vFVC6kYooKTllyknzUl6blqWgzOkQHpJLWW1p0jbkmpNZhl7usUfTIsuyhcqn34zw+0llEI3nJY4UUNKezSmO9OvNHBP+t4f7jzZkGZOnaMFzNQViyWLuYdJYAA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eYxY7vtX; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=CPfMDdwSoZD6AzXkTDoxyesiW29uDq4FLOM+kmn+X2smn+Q5JJ2SxADGqDyLQMBa2Djd0Y84TXZOHwZ/ynl9QsgNJ+VrN4S7pMpRngJ1z5v06+WYMPk+lj1TLdXDRcADV1f4ZsdDu1XpdtRAwc3ugHRdOe50YBiJkENdEvGy60k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OQFe3H9b; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eYxY7vtX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B00A4C4CEF6;
-	Fri, 15 Aug 2025 01:52:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OQFe3H9b"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0A075C4CEF5;
+	Fri, 15 Aug 2025 01:52:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222755;
-	bh=msCcAvgmi8cjejj/bvx4fWv7p7OoguqU+iU6TDTArRk=;
+	s=k20201202; t=1755222762;
+	bh=9RmwzGROqS9ck1Ji2XOxbWPQpMewErkgs9sCdvkpL+M=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=eYxY7vtXqaX7YJcy1zJf9xAbJ4YA8B/F9s+Jp/+ua09WP7sEEyT4gPGoQityJgjO1
-	 5xl4NBpSYzvNWJqxWajYQuhj7Loh+pJ/t9w3vB2AeD0XTjU4z0EOg76TAkHGxeZOpX
-	 8Lhge4A3seUB0oBTgGkg+voVTZmSKUiTeLOk+9KuQIyd4BzMqeeo3LELi68pUpqDFe
-	 bArbj5zBXda5yCGXaCVLCyXIRzeCeDJlgF56dc8m3ES63b6gO4gbP8LTxvPCABgiyt
-	 zr7o3scbcxG2BwonXW9w2Mq1oD31nTtgnG7hXKGEXOgpuBsb3npikS2ZWwWNkQ7LyV
-	 URp6OO0DhF6Lg==
+	b=OQFe3H9bTycS7/s20LwV6tDDKPMfREMWN6QhYX4vqLHzaWUumZETvOoTzvKKDaUqO
+	 M1R6ftX7vzOA8mGFV8s9WSLSMrPBVS6ItqipZN/zs8I4WYMfbz94cC7Y5ms8VeQDke
+	 tCf0QPCmtubxEblu3zO8YZw5PpSLnj70xON+76530uw7c5iNWX57Eym3yF0B4Q2qJc
+	 UvUpXzZKCBZohU/2l9rCm2iK3kHk5WBJMsrLbz1YZZUtNnpwNfMmZgVxwqHrjem29G
+	 o5WVgxx+xTA107BvqPfCpCK++XwhtUjzqpkE779qHEbwKWESQ9PbXa3Y0CPH1WrRWn
+	 Bpvn6MFF/FJXQ==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 09/38] mmc: cb710-mmc: use modern PM macros
-Date: Fri, 15 Aug 2025 09:33:44 +0800
-Message-ID: <20250815013413.28641-10-jszhang@kernel.org>
+Subject: [PATCH 10/38] mmc: davinci_mmc: use modern PM macros
+Date: Fri, 15 Aug 2025 09:33:45 +0800
+Message-ID: <20250815013413.28641-11-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -91,67 +91,48 @@ This has the advantage of always compiling these functions in,
 independently of any Kconfig option. Thanks to that, bugs and other
 regressions are subsequently easier to catch.
 
-At the same time, replace the platform_driver's .suspend and .resume
-usage with modern device_driver's .pm usage.
-
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/cb710-mmc.c | 19 +++++++++----------
- 1 file changed, 9 insertions(+), 10 deletions(-)
+ drivers/mmc/host/davinci_mmc.c | 14 +++-----------
+ 1 file changed, 3 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
-index 448d2f9159ea..31daec787495 100644
---- a/drivers/mmc/host/cb710-mmc.c
-+++ b/drivers/mmc/host/cb710-mmc.c
-@@ -664,25 +664,25 @@ static const struct mmc_host_ops cb710_mmc_host = {
- 	.get_cd = cb710_mmc_get_cd,
- };
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index c691f1b60395..75fd00fc51ed 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -1347,7 +1347,6 @@ static void davinci_mmcsd_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(host->clk);
+ }
  
 -#ifdef CONFIG_PM
+ static int davinci_mmcsd_suspend(struct device *dev)
+ {
+ 	struct mmc_davinci_host *host = dev_get_drvdata(dev);
+@@ -1373,21 +1372,14 @@ static int davinci_mmcsd_resume(struct device *dev)
+ 	return 0;
+ }
+ 
+-static const struct dev_pm_ops davinci_mmcsd_pm = {
+-	.suspend        = davinci_mmcsd_suspend,
+-	.resume         = davinci_mmcsd_resume,
+-};
 -
--static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
-+static int cb710_mmc_suspend(struct device *dev)
- {
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
- 
- 	cb710_mmc_enable_irq(slot, 0, ~0);
- 	return 0;
- }
- 
--static int cb710_mmc_resume(struct platform_device *pdev)
-+static int cb710_mmc_resume(struct device *dev)
- {
-+	struct platform_device *pdev = to_platform_device(dev);
- 	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
- 
- 	cb710_mmc_enable_irq(slot, 0, ~0);
- 	return 0;
- }
- 
--#endif /* CONFIG_PM */
-+static DEFINE_SIMPLE_DEV_PM_OPS(cb710_mmc_pmops, cb710_mmc_suspend, cb710_mmc_resume);
- 
- static int cb710_mmc_init(struct platform_device *pdev)
- {
-@@ -767,13 +767,12 @@ static void cb710_mmc_exit(struct platform_device *pdev)
- }
- 
- static struct platform_driver cb710_mmc_driver = {
--	.driver.name = "cb710-mmc",
-+	.driver = {
-+		.name = "cb710-mmc",
-+		.pm = pm_sleep_ptr(&cb710_mmc_pmops),
-+	},
- 	.probe = cb710_mmc_init,
- 	.remove = cb710_mmc_exit,
--#ifdef CONFIG_PM
--	.suspend = cb710_mmc_suspend,
--	.resume = cb710_mmc_resume,
+-#define davinci_mmcsd_pm_ops (&davinci_mmcsd_pm)
+-#else
+-#define davinci_mmcsd_pm_ops NULL
 -#endif
- };
++static DEFINE_SIMPLE_DEV_PM_OPS(davinci_mmcsd_pm_ops,
++				davinci_mmcsd_suspend, davinci_mmcsd_resume);
  
- module_platform_driver(cb710_mmc_driver);
+ static struct platform_driver davinci_mmcsd_driver = {
+ 	.driver		= {
+ 		.name	= "davinci_mmc",
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+-		.pm	= davinci_mmcsd_pm_ops,
++		.pm	= pm_sleep_ptr(&davinci_mmcsd_pm_ops),
+ 		.of_match_table = davinci_mmc_dt_ids,
+ 	},
+ 	.probe		= davinci_mmcsd_probe,
 -- 
 2.50.0
 
