@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A873C292B52;
-	Fri, 15 Aug 2025 01:55:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02554292B52;
+	Fri, 15 Aug 2025 01:55:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222929; cv=none; b=uU3uZNVTuHb1VvmnmYeZmQTMsUY4X/Ys5Ymj8tyR7acFeoJ0Q4I/tC664D1Y+uGsUfntIhquRRbARjG33AKVQkZmHTZS4nhhipgNhaXqwFcxDlDWxJkGShgobKE7GZdqraqlDnBOKUP+pgh26fAMmi2KdY4bzJ3XBVsJZaqjSNQ=
+	t=1755222937; cv=none; b=LoFOPgkvq/VzO53OyT4VaSxIu/3L8xUrx+FFuoEmuzsswtRiddZodQWNVgocMiQak+xjarsQGOVhjHzoJ1A7XYQpcBjTZ76pKS/F0aMfWZCqPKlzz9LV2jjL+3K7wJvrYeqKa6mVaTfMKmKJhVuQr8ebKxV9+j/wW+baJYyhykI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222929; c=relaxed/simple;
-	bh=Yz6S1aReViAb+oa9fo4YKprCoSFsQvvu8L/EMETvz4o=;
+	s=arc-20240116; t=1755222937; c=relaxed/simple;
+	bh=NHJg45Q6RPT/LzftpxYLT2sirlMKoU2PUDsz68Jd5mI=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=N6YJAcAG5u1W1aI3/w8Mwho/qpQEdGEjJsVZxO97LCk0DRUcZb1hEcCvf54VI1P8T1bMWVAH29WENNl7zkv4fktDPbIH1+vki3X3b0L1cl3YRz46t/eZm/UefI+OLFERQUS4YF6AJi97qnibJCMpVBh0FjP/+QT8l0Ot9QITVi8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=oo7KKsOn; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=IvMpx7z84Hd2Lhx5c5SdFCUaYQmiRD/zYtpEL8Xb/RZ41RNqam1Vo92PydhavV98/WFcsi/jX0KlB1RwXOM5WPWzmZzWUwEt3PHL7puhTZYH5qAyQeWEbOsdRPxxMypY7y6KUB+jOZlpe/IcE+n3N4D+QOkrWIpjHjgVSPvesuA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=t6Jwa9oA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="oo7KKsOn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A3631C4CEF7;
-	Fri, 15 Aug 2025 01:55:22 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="t6Jwa9oA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EFCA1C4CEF5;
+	Fri, 15 Aug 2025 01:55:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222929;
-	bh=Yz6S1aReViAb+oa9fo4YKprCoSFsQvvu8L/EMETvz4o=;
+	s=k20201202; t=1755222936;
+	bh=NHJg45Q6RPT/LzftpxYLT2sirlMKoU2PUDsz68Jd5mI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=oo7KKsOnqOrOeW8JFEspGz8d0cYNYYwDRC1lGRMvlkfLtQtoclXl4dSYJ0imBPThN
-	 3U2yVWv1N+vNGsvwsVDpnd4Onf7L133aDlsW5y46acLC1uLdr4wM7mCvITB9jv1gf9
-	 QT+jyZkNvC5Bldm9CItsRuOgxAkDPRR2cjO1Vmi+t6MFPZOoTAp9QYSjyKLqvArfkV
-	 pllZ4qd34NmBzPuhjZ6PKFU8zegltGajQ1N1+laWgSM4pik5U+Xa31rPiqm89pQqLk
-	 ZUTPXatTESyJkFbWra6RttFDtMAWgNHece4mcieh1paG/dtd1pC6De5sbUQgM6mPJq
-	 aUieWj0A6LygA==
+	b=t6Jwa9oAl2loRWlaQq4BM/0mXiLm6tdOKqdwld6dQqu0gODg4+zNXfHa+rTroLGB7
+	 8UrOJxC1WKC2P70lYm4b4saRYK1t5Nob/yNNjViViOfUIPaAbOMjMK8ZXlpWT8ao8G
+	 /SDobr+9mn9xuTpFWNiyeV05e9SyD21HJWhIc7joNVb1zo/cZ/bj1za7eMz6l7/RiP
+	 EH2O5B7nUruj16+ckY0M/MvdYcmm++nPF0K3BoKp+aQQcE6GuxDGrnUjRq//QJUCeF
+	 LDFJnp8D8cgxOfXvGS/kIgxdAJT2H/jub54gCzuLo5tdZtenkYlfHpXvfE8X+Zaf+3
+	 Kk+32QhYKXAxw==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 32/38] mmc: mtk-sd: use modern PM macros
-Date: Fri, 15 Aug 2025 09:34:07 +0800
-Message-ID: <20250815013413.28641-33-jszhang@kernel.org>
+Subject: [PATCH 33/38] mmc: sdhci-msm: use modern PM macros
+Date: Fri, 15 Aug 2025 09:34:08 +0800
+Message-ID: <20250815013413.28641-34-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -89,69 +89,88 @@ CONFIG_PM_SLEEP are disabled, without having to use __maybe_unused.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/mtk-sd.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 21 +++++++++------------
+ 1 file changed, 9 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index d7020e06dd55..79074291e9d2 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -3278,7 +3278,7 @@ static void msdc_restore_reg(struct msdc_host *host)
- 		__msdc_enable_sdio_irq(host, 1);
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 9d8e20dc8ca1..d2906bf6e598 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1943,7 +1943,7 @@ static void sdhci_msm_ice_enable(struct sdhci_msm_host *msm_host)
+ 		qcom_ice_enable(msm_host->ice);
  }
  
--static int __maybe_unused msdc_runtime_suspend(struct device *dev)
-+static int msdc_runtime_suspend(struct device *dev)
+-static __maybe_unused int sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
++static int sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
  {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct msdc_host *host = mmc_priv(mmc);
-@@ -3300,7 +3300,7 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
+ 	if (msm_host->mmc->caps2 & MMC_CAP2_CRYPTO)
+ 		return qcom_ice_resume(msm_host->ice);
+@@ -1951,7 +1951,7 @@ static __maybe_unused int sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
  	return 0;
  }
  
--static int __maybe_unused msdc_runtime_resume(struct device *dev)
-+static int msdc_runtime_resume(struct device *dev)
+-static __maybe_unused int sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
++static int sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
  {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct msdc_host *host = mmc_priv(mmc);
-@@ -3323,7 +3323,7 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
+ 	if (msm_host->mmc->caps2 & MMC_CAP2_CRYPTO)
+ 		return qcom_ice_suspend(msm_host->ice);
+@@ -2011,13 +2011,13 @@ static inline void sdhci_msm_ice_enable(struct sdhci_msm_host *msm_host)
+ {
+ }
+ 
+-static inline __maybe_unused int
++static inline int
+ sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
+ {
  	return 0;
  }
  
--static int __maybe_unused msdc_suspend(struct device *dev)
-+static int msdc_suspend(struct device *dev)
+-static inline __maybe_unused int
++static inline int
+ sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
  {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct msdc_host *host = mmc_priv(mmc);
-@@ -3348,7 +3348,7 @@ static int __maybe_unused msdc_suspend(struct device *dev)
- 	return pm_runtime_force_suspend(dev);
+ 	return 0;
+@@ -2801,7 +2801,7 @@ static void sdhci_msm_remove(struct platform_device *pdev)
+ 		clk_disable_unprepare(msm_host->bus_clk);
  }
  
--static int __maybe_unused msdc_resume(struct device *dev)
-+static int msdc_resume(struct device *dev)
+-static __maybe_unused int sdhci_msm_runtime_suspend(struct device *dev)
++static int sdhci_msm_runtime_suspend(struct device *dev)
  {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct msdc_host *host = mmc_priv(mmc);
-@@ -3360,8 +3360,8 @@ static int __maybe_unused msdc_resume(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -2820,7 +2820,7 @@ static __maybe_unused int sdhci_msm_runtime_suspend(struct device *dev)
+ 	return sdhci_msm_ice_suspend(msm_host);
  }
  
- static const struct dev_pm_ops msdc_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
--	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
-+	SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
-+	RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
+-static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
++static int sdhci_msm_runtime_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -2856,11 +2856,8 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+ }
+ 
+ static const struct dev_pm_ops sdhci_msm_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+-				pm_runtime_force_resume)
+-	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend,
+-			   sdhci_msm_runtime_resume,
+-			   NULL)
++	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
++	RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume, NULL)
  };
  
- static struct platform_driver mt_msdc_driver = {
-@@ -3371,7 +3371,7 @@ static struct platform_driver mt_msdc_driver = {
- 		.name = "mtk-msdc",
- 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
- 		.of_match_table = msdc_of_ids,
--		.pm = &msdc_dev_pm_ops,
-+		.pm = pm_ptr(&msdc_dev_pm_ops),
+ static struct platform_driver sdhci_msm_driver = {
+@@ -2869,7 +2866,7 @@ static struct platform_driver sdhci_msm_driver = {
+ 	.driver = {
+ 		   .name = "sdhci_msm",
+ 		   .of_match_table = sdhci_msm_dt_match,
+-		   .pm = &sdhci_msm_pm_ops,
++		   .pm = pm_ptr(&sdhci_msm_pm_ops),
+ 		   .probe_type = PROBE_PREFER_ASYNCHRONOUS,
  	},
  };
- 
 -- 
 2.50.0
 
