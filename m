@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEF86292B4B;
-	Fri, 15 Aug 2025 01:52:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1088F292B4B;
+	Fri, 15 Aug 2025 01:53:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222778; cv=none; b=uAC1lBxagIelztoKzgZiqJS35Q99rdTc9vXcpsSNC9vhOu5lgJMX4i1cexMt85diwgHdFXttbOtpyX7H92iCCajDa+CergjlLmTZAZMXV0Dm6DBh/KHoDjrqF4Qfdkkd4cRTFwSBZA0ijS0xsp8mgC2X79Ko3R9jUFRVHsxncAo=
+	t=1755222785; cv=none; b=DVnuZcyZ2OLw5ifclt4JeQ7dKzMfuJWtjVC/ttlPGZvvg5mOLBWyZut+yIDue0kkBKe68BWbB1GmLNgV1lwNtyce7q+zRgiD4aKDKwmVMdX8Dg7Iq59s8cFDpQQZaMeaX302y8znBSMos7OoBPHIjiF99q0Gz/NvbskJceu8jkA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222778; c=relaxed/simple;
-	bh=INlG0kmvqymyn+H5Y2Jxgc3TKHlGOcIl3DMuV65cwzY=;
+	s=arc-20240116; t=1755222785; c=relaxed/simple;
+	bh=HiZ4XD/u4pJ1wA4ohoDlBJ2++rgCeSH25iXqkb/Id5A=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=f2+Aqsuh0jhtUJreI6+0tJw1/xnCTcARVo3o4fpC761yFgSsQeXcbmZvtvhs6+aEH59EmsnLsk5SY84u1Igtf7gHdiLyOR1MV9rBDt9COD4Bhn/CvJK4qykuRpiVUju0oj132ryfG3UpVzgdLhJ8fuqXJzR/YEnRGjgUMXADT/4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=A14Vblpk; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=QlFtg8Lx0czivGZiCT4mpF3DigQoZ7sOPl1dbpHjG0JtrADYrvGemAfARfrBZvdRzLF9eA53firawtX0mPfNCehoC1fQTwZX4XawPd3eQTmvPEQ4MTVuQqZ74NwjwXM0JOjsk8Oa5sgxsGDZto5NbUC9YuvIp/6t3Kb/fycD6wg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mA/JLl3j; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="A14Vblpk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1C69C4CEF1;
-	Fri, 15 Aug 2025 01:52:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mA/JLl3j"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EE42BC4CEED;
+	Fri, 15 Aug 2025 01:52:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222777;
-	bh=INlG0kmvqymyn+H5Y2Jxgc3TKHlGOcIl3DMuV65cwzY=;
+	s=k20201202; t=1755222784;
+	bh=HiZ4XD/u4pJ1wA4ohoDlBJ2++rgCeSH25iXqkb/Id5A=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=A14Vblpk8k9Atpkx9WpA3Dde2demSaHB2yZO/0mQsaCMmun0f8LeslrhEiMq0/3F8
-	 PqoajhBfFhrvJsBMBLF1P7ULHedL4y2MFD2f+DPCTxSoa5hc07kO6khaXdp1CrVEFO
-	 b60JqOU32zhF5vFkpBtwXJtj53rzUpZnvG5Hm7cCMI+jllN6iUxeltHtwKaIOeL627
-	 012abVMeD0JY5e62IUTg7CbGvw0NPaPPPZVY/3xgnZmwO2SwdxITZ0EgqcGy+cjujo
-	 DtlzZWuPZnlClsRsftc3dIomXOlfG29IYgZ+WXU4H0trSxqPVY4cdY9Fa01gTN93L7
-	 cNUTWhma3TXsw==
+	b=mA/JLl3jVe71FvL6nc4NXj8fauG7h72JzOotjKYUik6oH6R05zibT0D1auS9aM0k7
+	 aMxLQg5z2OKC1iVwDuFL/yjN9sbVkxgRsRB6EnQp0j/tkTftdpPXwPG5sKMdTwgbbA
+	 Dbh7q8yuTH4XNvkdQymNRJkcfowgbpe+jp1N2qQs8LILnk17shBwUWk5N2y3Mwbfa6
+	 002yKhUdZsnoJ1e4Zu7uxJ1UCPIQja+pMtBbfqJ+Yj4AEWPE4ec0NZq95IEhTVLlqO
+	 IBdJGF8F8iLXKcqszht9xp+yme6KWTxerAMlH+vTeMDZkuX/nmc+8YIx3KBGzTioS9
+	 TnAZxMAot3ggA==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 12/38] mmc: mxs-mmc: use modern PM macros
-Date: Fri, 15 Aug 2025 09:33:47 +0800
-Message-ID: <20250815013413.28641-13-jszhang@kernel.org>
+Subject: [PATCH 13/38] mmc: omap_hsmmc: use modern PM macros
+Date: Fri, 15 Aug 2025 09:33:48 +0800
+Message-ID: <20250815013413.28641-14-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -93,39 +93,69 @@ regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/mxs-mmc.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index a6e44e406106..7c7c52d9e8e7 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -680,7 +680,6 @@ static void mxs_mmc_remove(struct platform_device *pdev)
- 	clk_disable_unprepare(ssp->clk);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index adc0d0b6ae37..09e4354d1f1d 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -620,8 +620,6 @@ static void omap_hsmmc_set_bus_mode(struct omap_hsmmc_host *host)
+ 		OMAP_HSMMC_WRITE(host->base, CON, con & ~OD);
+ }
+ 
+-#ifdef CONFIG_PM
+-
+ /*
+  * Restore the MMC host context, if it was lost as result of a
+  * power state change.
+@@ -689,6 +687,7 @@ static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM
+ /*
+  * Save the MMC host context (store the number of power state changes so far).
+  */
+@@ -1990,7 +1989,6 @@ static void omap_hsmmc_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(host->dbclk);
  }
  
 -#ifdef CONFIG_PM_SLEEP
- static int mxs_mmc_suspend(struct device *dev)
+ static int omap_hsmmc_suspend(struct device *dev)
  {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
-@@ -699,9 +698,8 @@ static int mxs_mmc_resume(struct device *dev)
- 
- 	return clk_prepare_enable(ssp->clk);
+ 	struct omap_hsmmc_host *host = dev_get_drvdata(dev);
+@@ -2032,9 +2030,7 @@ static int omap_hsmmc_resume(struct device *dev)
+ 	pm_runtime_put_autosuspend(host->dev);
+ 	return 0;
  }
 -#endif
  
--static SIMPLE_DEV_PM_OPS(mxs_mmc_pm_ops, mxs_mmc_suspend, mxs_mmc_resume);
-+static DEFINE_SIMPLE_DEV_PM_OPS(mxs_mmc_pm_ops, mxs_mmc_suspend, mxs_mmc_resume);
+-#ifdef CONFIG_PM
+ static int omap_hsmmc_runtime_suspend(struct device *dev)
+ {
+ 	struct omap_hsmmc_host *host;
+@@ -2102,11 +2098,10 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+ 	spin_unlock_irqrestore(&host->irq_lock, flags);
+ 	return 0;
+ }
+-#endif
  
- static struct platform_driver mxs_mmc_driver = {
- 	.probe		= mxs_mmc_probe,
-@@ -709,7 +707,7 @@ static struct platform_driver mxs_mmc_driver = {
+ static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
+-	SET_RUNTIME_PM_OPS(omap_hsmmc_runtime_suspend, omap_hsmmc_runtime_resume, NULL)
++	SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
++	RUNTIME_PM_OPS(omap_hsmmc_runtime_suspend, omap_hsmmc_runtime_resume, NULL)
+ };
+ 
+ static struct platform_driver omap_hsmmc_driver = {
+@@ -2115,7 +2110,7 @@ static struct platform_driver omap_hsmmc_driver = {
  	.driver		= {
- 		.name	= DRIVER_NAME,
+ 		.name = DRIVER_NAME,
  		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
--		.pm	= &mxs_mmc_pm_ops,
-+		.pm	= pm_sleep_ptr(&mxs_mmc_pm_ops),
- 		.of_match_table = mxs_mmc_dt_ids,
+-		.pm = &omap_hsmmc_dev_pm_ops,
++		.pm = pm_ptr(&omap_hsmmc_dev_pm_ops),
+ 		.of_match_table = of_match_ptr(omap_mmc_of_match),
  	},
  };
 -- 
