@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94BB2298CB6;
-	Fri, 15 Aug 2025 01:55:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA41029B8CE;
+	Fri, 15 Aug 2025 01:55:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222944; cv=none; b=FKcpIsO1v6penvgeGeSFo7/vkTb9jVWxOzkCvUzMDssQTiUm4PNI8/z3tpKx2HY23PzT3/jIny1y01aGaMMHVVnf0rnGJp+trO4ugXCO9+ZDxz9r7Ofy8uRTDlHShz7YF0ZMo6CddEg97VVtvWfjhSs33/x2qGrXeqVqhj7XRwY=
+	t=1755222951; cv=none; b=N7/qF1MzQy298ephewI10hJsGGNpF/LoegX1vQEu6tYKyp8op2Xpo8Xyu2EnBee60Q8aTi5ExcsodWPCJJbKM9sGDROvapw3z8EX3gaOqnmsSM87q9bL6IPWKbmrk0Sqo3BhRbEB/Hl1UmgoQm5THb4DYtnLYI3fH3jr6wwrUkg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222944; c=relaxed/simple;
-	bh=Z/FsofMY227WloXvAvWVR10i7/zLGg3QA6StyCVCXTQ=;
+	s=arc-20240116; t=1755222951; c=relaxed/simple;
+	bh=fCpU2z9tS/VV7L6nfg3/4EK4ZZ3KWPbuidPRnhC6sbQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=TIpImdMsBnb8/d8kUg0Qz2vLLxqXmPB58nWr/BSjuX8jLO5zkvm+UmQUtCCZTjFqmOjAU4UZ7IH0Be9DtwegDoRpvAPuo4dUErdld3473uq6htT5zbYR1n1YwsiLtD1lGpQk4aW8qWfJXnLlarQeO+sJ73njQ8iGATYGmZ3Z04E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OW/j3RE4; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=CSHF9zZ0VyD3AF2uPIVgtsUPl6G0yM/DEBleS103ZRxMh0iYvZWpSqKnDJDuXKWYAS9CxYS7cxE2Lsj1YVJ/TyjzKG8ta3nKlnMLnIkIzM1FRGAg72cTekmxvBeP4iyYxWX9NzfNkYNuKtddSPhaHI+6PkqcR6h5DXVEv5BVXuA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ofl++gEF; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OW/j3RE4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 44606C4CEED;
-	Fri, 15 Aug 2025 01:55:37 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ofl++gEF"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F74AC4CEF1;
+	Fri, 15 Aug 2025 01:55:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222944;
-	bh=Z/FsofMY227WloXvAvWVR10i7/zLGg3QA6StyCVCXTQ=;
+	s=k20201202; t=1755222951;
+	bh=fCpU2z9tS/VV7L6nfg3/4EK4ZZ3KWPbuidPRnhC6sbQ=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=OW/j3RE4gSC9rK+tSuZ57U4rHnlmxISJot7EpnrpDrgOouzGgNFk0UOcaErlsTQ6d
-	 uX0IVq4zSSDaG47TOF6/qi/j+8Z+uduZj8w3nD3F+8R/08UkGYAyFiCYGFkpEA6y9w
-	 /awaCZrSKl6HBt4QNue6ZHhnMo43QJY4yEdHkntbeLCTwRSCJa9SJ6j3UhnkBhGBH4
-	 7AS2D8V5V+LzAFWtn9E4vT1E6F+yKnL76IujTBTzcESQftqBo7OMsYVscPcE8Kl8SZ
-	 TitK2vHcs58qXiuo0sQC67BuAU3YvFWNLF1xp479XGhhrXBK2zK1JscwcoRRT6yis3
-	 Zw0xfYV55Uc0g==
+	b=Ofl++gEF8hDD1BiUk0L5kOrL3tmhCQRcx7V73vE/h/nvVo/61aJ5OTvX1YpHhWvbC
+	 o/keqG0LYNNdk4ryh7WJ8rPWlIUSJIZm99vL+wo7NhM+MYHhYQi2OgHsBxCpg6ite7
+	 KU23jZIXTt0IuKaRXeOMK20TNAJgMpNvrCcXwwmo4XhfC/ErDCZaVoQqITO+ks6/rH
+	 wF5z9CUJMsmJRbBl6hConr4BTq67ZDKm8iyfyS4GcS53Ijoe7p5+QTiN30lZyX8CWG
+	 hrhZKfODN/o8inMGwinl/8hAwAk5wil9OLfUn5IaEwwVuBSvFE/nUwWNLkErF3NrBf
+	 C+J2Ob8jeRo9g==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 34/38] mmc: via-sdmmc: use modern PM macros
-Date: Fri, 15 Aug 2025 09:34:09 +0800
-Message-ID: <20250815013413.28641-35-jszhang@kernel.org>
+Subject: [PATCH 35/38] mmc: dw_mmc: exynos: use modern PM macros
+Date: Fri, 15 Aug 2025 09:34:10 +0800
+Message-ID: <20250815013413.28641-36-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -85,61 +85,85 @@ Content-Transfer-Encoding: 8bit
 
 Use the modern PM macros for the suspend and resume functions to be
 automatically dropped by the compiler when CONFIG_PM or
-CONFIG_PM_SLEEP are disabled, without having to use __maybe_unused.
+CONFIG_PM_SLEEP are disabled, without having to use #ifdef guards.
+
+This has the advantage of always compiling these functions in,
+independently of any Kconfig option. Thanks to that, bugs and other
+regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/via-sdmmc.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c | 13 +++----------
+ drivers/mmc/host/dw_mmc.h        |  3 +++
+ 2 files changed, 6 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index 3bd49f64899d..c628b3bbfd7a 100644
---- a/drivers/mmc/host/via-sdmmc.c
-+++ b/drivers/mmc/host/via-sdmmc.c
-@@ -1218,7 +1218,7 @@ static void via_sd_remove(struct pci_dev *pcidev)
- 		pci_name(pcidev), (int)pcidev->vendor, (int)pcidev->device);
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index e3548408ca39..384609671a9a 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -189,7 +189,6 @@ static void dw_mci_exynos_set_clksel_timing(struct dw_mci *host, u32 timing)
+ 		set_bit(DW_MMC_CARD_NO_USE_HOLD, &host->slot->flags);
  }
  
--static void __maybe_unused via_init_sdc_pm(struct via_crdr_mmc_host *host)
-+static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
+-#ifdef CONFIG_PM
+ static int dw_mci_exynos_runtime_resume(struct device *dev)
  {
- 	struct sdhcreg *pm_sdhcreg;
- 	void __iomem *addrbase;
-@@ -1252,7 +1252,7 @@ static void __maybe_unused via_init_sdc_pm(struct via_crdr_mmc_host *host)
- 	via_print_sdchc(host);
- }
+ 	struct dw_mci *host = dev_get_drvdata(dev);
+@@ -203,9 +202,7 @@ static int dw_mci_exynos_runtime_resume(struct device *dev)
  
--static int __maybe_unused via_sd_suspend(struct device *dev)
-+static int via_sd_suspend(struct device *dev)
- {
- 	struct via_crdr_mmc_host *host;
- 	unsigned long flags;
-@@ -1269,7 +1269,7 @@ static int __maybe_unused via_sd_suspend(struct device *dev)
+ 	return ret;
+ }
+-#endif /* CONFIG_PM */
+ 
+-#ifdef CONFIG_PM_SLEEP
+ /**
+  * dw_mci_exynos_suspend_noirq - Exynos-specific suspend code
+  * @dev: Device to suspend (this device)
+@@ -265,7 +262,6 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
+ 
  	return 0;
  }
+-#endif /* CONFIG_PM_SLEEP */
  
--static int __maybe_unused via_sd_resume(struct device *dev)
-+static int via_sd_resume(struct device *dev)
+ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
  {
- 	struct via_crdr_mmc_host *sdhost;
- 	u8 gatt;
-@@ -1295,14 +1295,14 @@ static int __maybe_unused via_sd_resume(struct device *dev)
- 	return 0;
+@@ -712,11 +708,8 @@ static void dw_mci_exynos_remove(struct platform_device *pdev)
  }
  
--static SIMPLE_DEV_PM_OPS(via_sd_pm_ops, via_sd_suspend, via_sd_resume);
-+static DEFINE_SIMPLE_DEV_PM_OPS(via_sd_pm_ops, via_sd_suspend, via_sd_resume);
- 
- static struct pci_driver via_sd_driver = {
- 	.name = DRV_NAME,
- 	.id_table = via_ids,
- 	.probe = via_sd_probe,
- 	.remove = via_sd_remove,
--	.driver.pm = &via_sd_pm_ops,
-+	.driver.pm = pm_sleep_ptr(&via_sd_pm_ops),
+ static const struct dev_pm_ops dw_mci_exynos_pmops = {
+-	SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend_noirq,
+-				      dw_mci_exynos_resume_noirq)
+-	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
+-			   dw_mci_exynos_runtime_resume,
+-			   NULL)
++	NOIRQ_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend_noirq, dw_mci_exynos_resume_noirq)
++	RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_exynos_runtime_resume, NULL)
  };
  
- module_pci_driver(via_sd_driver);
+ static struct platform_driver dw_mci_exynos_pltfm_driver = {
+@@ -726,7 +719,7 @@ static struct platform_driver dw_mci_exynos_pltfm_driver = {
+ 		.name		= "dwmmc_exynos",
+ 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
+ 		.of_match_table	= dw_mci_exynos_match,
+-		.pm		= &dw_mci_exynos_pmops,
++		.pm		= pm_ptr(&dw_mci_exynos_pmops),
+ 	},
+ };
+ 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 5463392dc811..588027932412 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -541,6 +541,9 @@ extern void dw_mci_remove(struct dw_mci *host);
+ #ifdef CONFIG_PM
+ extern int dw_mci_runtime_suspend(struct device *device);
+ extern int dw_mci_runtime_resume(struct device *device);
++#else
++static inline int dw_mci_runtime_suspend(struct device *device) { return -EOPNOTSUPP; }
++static inline int dw_mci_runtime_resume(struct device *device) { return -EOPNOTSUPP; }
+ #endif
+ 
+ /**
 -- 
 2.50.0
 
