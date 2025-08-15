@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27646126BF1;
-	Fri, 15 Aug 2025 01:52:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6430B126BF1;
+	Fri, 15 Aug 2025 01:52:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222735; cv=none; b=j44DxRTpFfqL4LAeO84N4y/V8rv9+qx5B+9MfR+aN+xMnV6UHR8ifqPtggCjgoGgxXmqaL654w5O6hOmfFODa1XIlbZz0ZGpBGt+2T3ENyh/9cfFT3ur+QJ/9gjzz0YLPlMtNkOGSbzRI5V8Rt8VCi0kkgvG33ToBGPuc+zs7LU=
+	t=1755222741; cv=none; b=PVxFGlyFWZbELpimx89HbQ753TSODGYePtzezgDg2ijHGaXGfnQf1VkhgMVeG+NpOomOoDMZilQ0edC22HEX/dROE18F6QipwtB/Wsi+XqItrAcXYR1XDG2EMcRvXzAY6Cpu28830m4e5vK3fwVLdMa5xp4CQJf/23aHdGQB5t4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222735; c=relaxed/simple;
-	bh=uZES36OWOSTbBmVBY5IvFFyIvgQpeCcxTZIxV8x7MY4=;
+	s=arc-20240116; t=1755222741; c=relaxed/simple;
+	bh=iX7IOVbBU0iKfkEMkyGcPNaVsUqvqC0gaZQA5pKhNR8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=jVpQLB+yw8gJw4C7+rOoci+hH8L43MIH3aPSGX3oshKxAm51aRf1oj9eheMlUIEoL/OE7AcYu4qssdNHwicj3OpV1PRShSsTcYrIjAQzoXxDu+ICulAUhNBpnFscUtCrt61hZncq7UVcS5UY8atE6wKNQbGmIgv86YaOz6Wq3mE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P8/KEHKH; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=uQg3FL/G9ysAcaMSHtgV3zsHfqI7hyhyPAZvKWN49QpAOJd+f+BwS/gyMFlIc7IvvFGvQ/JGCD4WyDR2iXC0lvwf/iftfabx7fI8fTpSZYaasRS9jRiTVAdk+zPr1sIiSMKjzVllJknjki9VD5fe68wmuEwCubFSrimzYuRUTZw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AhAHFOi/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P8/KEHKH"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4AF9C4CEED;
-	Fri, 15 Aug 2025 01:52:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AhAHFOi/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C205C4CEF5;
+	Fri, 15 Aug 2025 01:52:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222733;
-	bh=uZES36OWOSTbBmVBY5IvFFyIvgQpeCcxTZIxV8x7MY4=;
+	s=k20201202; t=1755222741;
+	bh=iX7IOVbBU0iKfkEMkyGcPNaVsUqvqC0gaZQA5pKhNR8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=P8/KEHKHOHp7taVdgWlB+Nc7+OFP3UQCssF41Qa86sL3PDQmehvB04bBJW83nVcGF
-	 EpscYyRroa2rmRckpsd8x7WBe73edFctEkd+sZ8twG42jXuJye31ItAoJhCUhON9f8
-	 2rSphfbSopT78Xr0qMZPRleg12CxeBfRqRVAlQLmPSOI/NJC15878v9lzAx1Homh7w
-	 qcfCRBYcQ7H7SpUKuJd5YgFhhFLLo+BmeX1o2B4QxfcmhHasoapc8Zhbsz8pYx8Wcz
-	 GSrVJg4MC1xmeuWwLgmF1nK/WId4O4LJWBdxFjF+3Fi3d2pLvYngpKH6YdE499yVlq
-	 Sb6xBDKrxB3LQ==
+	b=AhAHFOi/JlN87VrzcWaGUozNfWkDJ/evavNiYQNbE1+UqRLAQC4ERMcyZNHsaPrhF
+	 yA8NnN7BKDDIhAjJ5BJATZQViwfu0wWgUO6Y0p1tWVCaIybdYTJgxz4RT5ns5YHIZg
+	 3Ncy76LbVq+yVkmKj3bRlM5ih5HxE8GfWYUHDMj6lL7F3Lawno/YiqQ6vQGbs5qefH
+	 xUD+fKizHRSz2sSsX+tsv23T/ByY1g/eBbRRprkWevHZxKnhazMrdiUrPIGgC0llzv
+	 n8iJZfEyvrxIdbPBsAcAKCFNfZ3O8e5JAkZbzqm6XNRdslQpACgET0eyg4Mw/DqtSW
+	 xAFYTdEN5rH+w==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 06/38] mmc: alcor: use modern PM macros
-Date: Fri, 15 Aug 2025 09:33:41 +0800
-Message-ID: <20250815013413.28641-7-jszhang@kernel.org>
+Subject: [PATCH 07/38] mmc: atmel: use modern PM macros
+Date: Fri, 15 Aug 2025 09:33:42 +0800
+Message-ID: <20250815013413.28641-8-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -93,43 +93,45 @@ regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/alcor.c | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ drivers/mmc/host/atmel-mci.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/alcor.c b/drivers/mmc/host/alcor.c
-index 288c3a91a0af..721db54739c1 100644
---- a/drivers/mmc/host/alcor.c
-+++ b/drivers/mmc/host/alcor.c
-@@ -1129,7 +1129,6 @@ static void alcor_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	mmc_remove_host(mmc);
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 777342fb7657..d1fbc6811563 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -2622,7 +2622,6 @@ static void atmci_remove(struct platform_device *pdev)
+ 	pm_runtime_put_noidle(dev);
  }
  
--#ifdef CONFIG_PM_SLEEP
- static int alcor_pci_sdmmc_suspend(struct device *dev)
+-#ifdef CONFIG_PM
+ static int atmci_runtime_suspend(struct device *dev)
  {
- 	struct alcor_sdmmc_host *host = dev_get_drvdata(dev);
-@@ -1150,10 +1149,9 @@ static int alcor_pci_sdmmc_resume(struct device *dev)
+ 	struct atmel_mci *host = dev_get_drvdata(dev);
+@@ -2642,12 +2641,10 @@ static int atmci_runtime_resume(struct device *dev)
  
- 	return 0;
+ 	return clk_prepare_enable(host->mck);
  }
--#endif /* CONFIG_PM_SLEEP */
+-#endif
  
--static SIMPLE_DEV_PM_OPS(alcor_mmc_pm_ops, alcor_pci_sdmmc_suspend,
--			 alcor_pci_sdmmc_resume);
-+static DEFINE_SIMPLE_DEV_PM_OPS(alcor_mmc_pm_ops, alcor_pci_sdmmc_suspend,
-+				alcor_pci_sdmmc_resume);
+ static const struct dev_pm_ops atmci_dev_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+-				pm_runtime_force_resume)
+-	SET_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
++	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
++	RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
+ };
  
- static const struct platform_device_id alcor_pci_sdmmc_ids[] = {
- 	{
-@@ -1171,7 +1169,7 @@ static struct platform_driver alcor_pci_sdmmc_driver = {
- 	.driver		= {
- 		.name	= DRV_NAME_ALCOR_PCI_SDMMC,
- 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
--		.pm	= &alcor_mmc_pm_ops
-+		.pm	= pm_sleep_ptr(&alcor_mmc_pm_ops),
+ static struct platform_driver atmci_driver = {
+@@ -2657,7 +2654,7 @@ static struct platform_driver atmci_driver = {
+ 		.name		= "atmel_mci",
+ 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
+ 		.of_match_table	= atmci_dt_ids,
+-		.pm		= &atmci_dev_pm_ops,
++		.pm		= pm_ptr(&atmci_dev_pm_ops),
  	},
  };
- module_platform_driver(alcor_pci_sdmmc_driver);
+ module_platform_driver(atmci_driver);
 -- 
 2.50.0
 
