@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6430B126BF1;
-	Fri, 15 Aug 2025 01:52:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4883295516;
+	Fri, 15 Aug 2025 01:52:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222741; cv=none; b=PVxFGlyFWZbELpimx89HbQ753TSODGYePtzezgDg2ijHGaXGfnQf1VkhgMVeG+NpOomOoDMZilQ0edC22HEX/dROE18F6QipwtB/Wsi+XqItrAcXYR1XDG2EMcRvXzAY6Cpu28830m4e5vK3fwVLdMa5xp4CQJf/23aHdGQB5t4=
+	t=1755222748; cv=none; b=iFEpzTqja0Xm84HiO4/2BLEA3YKDwGsalZsoyp697CuPUHTqMoVVYF0ThoqFJWYn07qeCCVoVI9Tcr6ekf1/AFLq3LJgXolBrz19zrMaTkKqOoFh5XlH1Y3voIDFLQs4YQTzOnxjy0x5AVft1akf1eXLLp4Aki8bvtnxkNaES9Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222741; c=relaxed/simple;
-	bh=iX7IOVbBU0iKfkEMkyGcPNaVsUqvqC0gaZQA5pKhNR8=;
+	s=arc-20240116; t=1755222748; c=relaxed/simple;
+	bh=4sxfAvqj4cNcTFAG8eOyEmLc1goXUm05coglsT+wLRE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=uQg3FL/G9ysAcaMSHtgV3zsHfqI7hyhyPAZvKWN49QpAOJd+f+BwS/gyMFlIc7IvvFGvQ/JGCD4WyDR2iXC0lvwf/iftfabx7fI8fTpSZYaasRS9jRiTVAdk+zPr1sIiSMKjzVllJknjki9VD5fe68wmuEwCubFSrimzYuRUTZw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AhAHFOi/; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=bQTIvy3lnQrLSGcGnwPRX8hAR0lO4R5ognM7M6pA8G37iqA5EMh9zEUH1xlxA0NZpJklLQbd2f1uqynqbVg1N9mYQF2BRbA+SqXV2s5mEkZNjTzXhR/5ActttqEHCz7iaeR0qa2Q8uvQf0dCisosKRxxI4NZhxqFZYREoU2DBSg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mHIOCE+q; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AhAHFOi/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C205C4CEF5;
-	Fri, 15 Aug 2025 01:52:13 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mHIOCE+q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 663EEC4CEF1;
+	Fri, 15 Aug 2025 01:52:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222741;
-	bh=iX7IOVbBU0iKfkEMkyGcPNaVsUqvqC0gaZQA5pKhNR8=;
+	s=k20201202; t=1755222748;
+	bh=4sxfAvqj4cNcTFAG8eOyEmLc1goXUm05coglsT+wLRE=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=AhAHFOi/JlN87VrzcWaGUozNfWkDJ/evavNiYQNbE1+UqRLAQC4ERMcyZNHsaPrhF
-	 yA8NnN7BKDDIhAjJ5BJATZQViwfu0wWgUO6Y0p1tWVCaIybdYTJgxz4RT5ns5YHIZg
-	 3Ncy76LbVq+yVkmKj3bRlM5ih5HxE8GfWYUHDMj6lL7F3Lawno/YiqQ6vQGbs5qefH
-	 xUD+fKizHRSz2sSsX+tsv23T/ByY1g/eBbRRprkWevHZxKnhazMrdiUrPIGgC0llzv
-	 n8iJZfEyvrxIdbPBsAcAKCFNfZ3O8e5JAkZbzqm6XNRdslQpACgET0eyg4Mw/DqtSW
-	 xAFYTdEN5rH+w==
+	b=mHIOCE+qM9QODXAdFTgwu9zEZ1YLlNbM6c7GXih3Rfm+YABbaNO6OgHhkY7vjKSMb
+	 2MTMEFE+Q/+nrg5Xb0pdIReB2f7E029ylWaelUEjE78ErOwT59th9Cu5spLXPH1/CP
+	 hWrnQ0f0WSc82Xwmuisgz0gXiRH8wdrdTn/ZbeoL3gjqA5eDl8GQpt79UVzurkMPyx
+	 ogXT2PB4wGOh8IXuTkZcHE6tTCheIYS8YmxZylWh3EGCBABghcjXmJVwIMTo2MTLSX
+	 TpA0t8Q+NdUB3YmmiF81LpBzMOE7u+hkJYqQEqFWBrab7BaHjBlbmy+XHt+Du1waTR
+	 2BSOlkEEs0PBA==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 07/38] mmc: atmel: use modern PM macros
-Date: Fri, 15 Aug 2025 09:33:42 +0800
-Message-ID: <20250815013413.28641-8-jszhang@kernel.org>
+Subject: [PATCH 08/38] mmc: au1xmmc: use modern PM macros
+Date: Fri, 15 Aug 2025 09:33:43 +0800
+Message-ID: <20250815013413.28641-9-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -91,47 +91,64 @@ This has the advantage of always compiling these functions in,
 independently of any Kconfig option. Thanks to that, bugs and other
 regressions are subsequently easier to catch.
 
+At the same time, replace the platform_driver's .suspend and .resume
+usage with modern device_driver's .pm usage.
+
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/atmel-mci.c | 9 +++------
- 1 file changed, 3 insertions(+), 6 deletions(-)
+ drivers/mmc/host/au1xmmc.c | 18 +++++++-----------
+ 1 file changed, 7 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 777342fb7657..d1fbc6811563 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2622,7 +2622,6 @@ static void atmci_remove(struct platform_device *pdev)
- 	pm_runtime_put_noidle(dev);
+diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
+index 85470773650d..cc6e05f9b96f 100644
+--- a/drivers/mmc/host/au1xmmc.c
++++ b/drivers/mmc/host/au1xmmc.c
+@@ -1150,10 +1150,9 @@ static void au1xmmc_remove(struct platform_device *pdev)
+ 	}
  }
  
 -#ifdef CONFIG_PM
- static int atmci_runtime_suspend(struct device *dev)
+-static int au1xmmc_suspend(struct platform_device *pdev, pm_message_t state)
++static int au1xmmc_suspend(struct device *dev)
  {
- 	struct atmel_mci *host = dev_get_drvdata(dev);
-@@ -2642,12 +2641,10 @@ static int atmci_runtime_resume(struct device *dev)
+-	struct au1xmmc_host *host = platform_get_drvdata(pdev);
++	struct au1xmmc_host *host = dev_get_drvdata(dev);
  
- 	return clk_prepare_enable(host->mck);
+ 	__raw_writel(0, HOST_CONFIG2(host));
+ 	__raw_writel(0, HOST_CONFIG(host));
+@@ -1164,27 +1163,24 @@ static int au1xmmc_suspend(struct platform_device *pdev, pm_message_t state)
+ 	return 0;
  }
+ 
+-static int au1xmmc_resume(struct platform_device *pdev)
++static int au1xmmc_resume(struct device *dev)
+ {
+-	struct au1xmmc_host *host = platform_get_drvdata(pdev);
++	struct au1xmmc_host *host = dev_get_drvdata(dev);
+ 
+ 	au1xmmc_reset_controller(host);
+ 
+ 	return 0;
+ }
+-#else
+-#define au1xmmc_suspend NULL
+-#define au1xmmc_resume NULL
 -#endif
++
++static DEFINE_SIMPLE_DEV_PM_OPS(au1xmmc_pmops, au1xmmc_suspend, au1xmmc_resume);
  
- static const struct dev_pm_ops atmci_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
--				pm_runtime_force_resume)
--	SET_RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
-+	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
-+	RUNTIME_PM_OPS(atmci_runtime_suspend, atmci_runtime_resume, NULL)
- };
- 
- static struct platform_driver atmci_driver = {
-@@ -2657,7 +2654,7 @@ static struct platform_driver atmci_driver = {
- 		.name		= "atmel_mci",
- 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
- 		.of_match_table	= atmci_dt_ids,
--		.pm		= &atmci_dev_pm_ops,
-+		.pm		= pm_ptr(&atmci_dev_pm_ops),
+ static struct platform_driver au1xmmc_driver = {
+ 	.probe         = au1xmmc_probe,
+ 	.remove        = au1xmmc_remove,
+-	.suspend       = au1xmmc_suspend,
+-	.resume        = au1xmmc_resume,
+ 	.driver        = {
+ 		.name  = DRIVER_NAME,
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
++		.pm = pm_sleep_ptr(&au1xmmc_pmops),
  	},
  };
- module_platform_driver(atmci_driver);
+ 
 -- 
 2.50.0
 
