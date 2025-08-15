@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BEEE292B52;
-	Fri, 15 Aug 2025 01:55:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 618D6292B52;
+	Fri, 15 Aug 2025 01:55:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222916; cv=none; b=QnA7YyTugzM1RHr0Rc2XrOJu+iW+245PJ4W9ZJx/6jIlGnHThGOP6H3KoxfQDTw8SI2uw5cgEr9lEgRG1MbjPjprTw3zZyfuYjZOrZVgHaKZiZCx3OkulSPPJTlM1ViS8QABx/Di9UjXLYKjnbAu57M02vkXG9IrlGTf0Nox6qQ=
+	t=1755222922; cv=none; b=h89KxMdBpScaybKpRzsD/2jTioeOFl/ZXKrasYlD/apiDn9s/YDEV7EDIsqNTKCyOzbxP5I9+s1ANTklNmAaK9aO7gd+ky7dEVgssmw7XfOH5QFTUIdaUqGPbifez8GjQdvPCWleZlJo7RbpKBlbdfYEFQD6EAIeIvQPF9jKIV0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222916; c=relaxed/simple;
-	bh=OmkHH+BV0FO3aQkqJcAtiZOudBZE3tLbZpIaJkccmEQ=;
+	s=arc-20240116; t=1755222922; c=relaxed/simple;
+	bh=H86uzBznaNKFfJ4yr0rczcFQsJTMFWry5uBkc9sc1Qg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=WxXQEJaAOD4lxxhYobcrEvkaz5CmcGdVa13vgpePv7FtWsk7jekkf3PiX4Mo2VX32N6IkAgELoFJ74dxh8no6UNdSEJyAREHzivkat7y7LgDbAFN8/6kc+dwwShYL2wPwszm6OwaEzi1lqTqAE+8/2TTjA7n2fzZPzNLlO0QN6M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d1ZeR1dQ; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=ICnqdFNSvfy2YqvjYUmFWYWOn2ac1xBjAL7gy5QJcuFIXszl8Q7JwBwP0UMaEVi5aBJ6QpOaSd7vgsjvFyUg+XPK2bKM0FlWcaNafl90SBV5Y1FqwXT+p6ClZgm4TPAs/HCo6FsX067fVT+/NG4LBZi2pAPHkllae3m6/qKAfwQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=K7NH0pUM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d1ZeR1dQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C520C4CEF1;
-	Fri, 15 Aug 2025 01:55:07 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="K7NH0pUM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 59A5CC4CEED;
+	Fri, 15 Aug 2025 01:55:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222914;
-	bh=OmkHH+BV0FO3aQkqJcAtiZOudBZE3tLbZpIaJkccmEQ=;
+	s=k20201202; t=1755222922;
+	bh=H86uzBznaNKFfJ4yr0rczcFQsJTMFWry5uBkc9sc1Qg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=d1ZeR1dQ4X/pYWoMSzzAZK7SAhdjKYhNYU8WyOESyVUQ5r6YZPv5CbzHsGkVnLUi2
-	 6eHkGD6ioUlPUGuKUDcC4yId/C3asaEkmanEV7wt1XHgp8ocyFHBsPdTHj1Pj+OXRG
-	 u9VvHxjEnhHmk7d3BFBYJZomK6w4u2tz/TS9wOyYj7cnC8Xg+GroQyGgCmFvOsywCs
-	 WQqskVLkkuSd6ezrpFO4QTjlfbEsIBekeYcsfIx38NsPoJLZj+66bQvIpIpxWKP+J8
-	 NmsbwB/4U55+BQLj37wbsApVmKmhc2AFzkd86dpCiLRQr59dx8vWLBHkgV+e0LTBvy
-	 NjWyfSfvSLsEA==
+	b=K7NH0pUM/gCBNvW/szYr5IrExsM/KITpOJ8YBopovC78fKnWm0nJuUUBUa7tXvYue
+	 e9TImbYQ9W+aG6+sGiSkQUxqewOzAQu5kk94MTxT2mbE5mzlfkh+Yl6PfKFDTUW0o0
+	 UbTPWfSqoiidFPO+4zeiiu4aEgXeqf8FXjYiDd3+qDMbwZh5Fy3vF61piK9fKspUcX
+	 9002jawClFU7lZDvoH1oIsF2oPhpQYQQ/BCL6ZBV5wwC/8O/EWVgLrxrkZM+kmktBU
+	 BpW2eUjTUtZtQhEAtfj9aiCfMuShZEBlInq/96vbpps4r4iTVGzrU2JcWabaG3rd4F
+	 3eCN+TZR2aGGQ==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 30/38] mmc: toshsd: use modern PM macros
-Date: Fri, 15 Aug 2025 09:34:05 +0800
-Message-ID: <20250815013413.28641-31-jszhang@kernel.org>
+Subject: [PATCH 31/38] mmc: wmt-sdmmc: use modern PM macros
+Date: Fri, 15 Aug 2025 09:34:06 +0800
+Message-ID: <20250815013413.28641-32-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -93,48 +93,50 @@ regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/toshsd.c | 8 ++------
- 1 file changed, 2 insertions(+), 6 deletions(-)
+ drivers/mmc/host/wmt-sdmmc.c | 16 ++--------------
+ 1 file changed, 2 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
-index e5f7f8abafc0..aa5d2511a62b 100644
---- a/drivers/mmc/host/toshsd.c
-+++ b/drivers/mmc/host/toshsd.c
-@@ -567,7 +567,6 @@ static void toshsd_powerdown(struct toshsd_host *host)
- 	pci_write_config_byte(host->pdev, SD_PCICFG_CLKSTOP, 0);
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 0d2929cfe397..1b1d691e19fc 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -911,7 +911,6 @@ static void wmt_mci_remove(struct platform_device *pdev)
+ 	dev_info(&pdev->dev, "WMT MCI device removed\n");
  }
  
--#ifdef CONFIG_PM_SLEEP
- static int toshsd_pm_suspend(struct device *dev)
+-#ifdef CONFIG_PM
+ static int wmt_mci_suspend(struct device *dev)
  {
- 	struct pci_dev *pdev = to_pci_dev(dev);
-@@ -599,7 +598,6 @@ static int toshsd_pm_resume(struct device *dev)
- 
+ 	u32 reg_tmp;
+@@ -963,18 +962,7 @@ static int wmt_mci_resume(struct device *dev)
  	return 0;
  }
--#endif /* CONFIG_PM_SLEEP */
  
- static int toshsd_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
- {
-@@ -688,16 +686,14 @@ static void toshsd_remove(struct pci_dev *pdev)
- 	pci_disable_device(pdev);
- }
- 
--static const struct dev_pm_ops toshsd_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(toshsd_pm_suspend, toshsd_pm_resume)
+-static const struct dev_pm_ops wmt_mci_pm = {
+-	.suspend        = wmt_mci_suspend,
+-	.resume         = wmt_mci_resume,
 -};
-+static DEFINE_SIMPLE_DEV_PM_OPS(toshsd_pm_ops, toshsd_pm_suspend, toshsd_pm_resume);
+-
+-#define wmt_mci_pm_ops (&wmt_mci_pm)
+-
+-#else	/* !CONFIG_PM */
+-
+-#define wmt_mci_pm_ops NULL
+-
+-#endif
++static DEFINE_SIMPLE_DEV_PM_OPS(wmt_mci_pm_ops, wmt_mci_suspend, wmt_mci_resume);
  
- static struct pci_driver toshsd_driver = {
- 	.name = DRIVER_NAME,
- 	.id_table = pci_ids,
- 	.probe = toshsd_probe,
- 	.remove = toshsd_remove,
--	.driver.pm = &toshsd_pm_ops,
-+	.driver.pm = pm_sleep_ptr(&toshsd_pm_ops),
+ static struct platform_driver wmt_mci_driver = {
+ 	.probe = wmt_mci_probe,
+@@ -982,7 +970,7 @@ static struct platform_driver wmt_mci_driver = {
+ 	.driver = {
+ 		.name = DRIVER_NAME,
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+-		.pm = wmt_mci_pm_ops,
++		.pm = pm_sleep_ptr(&wmt_mci_pm_ops),
+ 		.of_match_table = wmt_mci_dt_ids,
+ 	},
  };
- 
- module_pci_driver(toshsd_driver);
 -- 
 2.50.0
 
