@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA41029B8CE;
-	Fri, 15 Aug 2025 01:55:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48829293B48;
+	Fri, 15 Aug 2025 01:55:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755222951; cv=none; b=N7/qF1MzQy298ephewI10hJsGGNpF/LoegX1vQEu6tYKyp8op2Xpo8Xyu2EnBee60Q8aTi5ExcsodWPCJJbKM9sGDROvapw3z8EX3gaOqnmsSM87q9bL6IPWKbmrk0Sqo3BhRbEB/Hl1UmgoQm5THb4DYtnLYI3fH3jr6wwrUkg=
+	t=1755222959; cv=none; b=dMFwzY+dvd6KGwkvHqdqg5A6pth/Ij6+e3TaFE5f0m/R/LddJEyAAfB6F3IMNfr7LfW22YD7d7cpMo/u+LxuMqvBaNcZRFW13ax5NV0j3IXhzNKtlkhoxti7eHdoykbSJ5WY/fPZqnDud3DjXqohGeSgAB9OtFfXguRNdaFlv1Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755222951; c=relaxed/simple;
-	bh=fCpU2z9tS/VV7L6nfg3/4EK4ZZ3KWPbuidPRnhC6sbQ=;
+	s=arc-20240116; t=1755222959; c=relaxed/simple;
+	bh=SIss+Xq9xiCpCrynk679o+RdenprEBRwz+hH338Ojlg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CSHF9zZ0VyD3AF2uPIVgtsUPl6G0yM/DEBleS103ZRxMh0iYvZWpSqKnDJDuXKWYAS9CxYS7cxE2Lsj1YVJ/TyjzKG8ta3nKlnMLnIkIzM1FRGAg72cTekmxvBeP4iyYxWX9NzfNkYNuKtddSPhaHI+6PkqcR6h5DXVEv5BVXuA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ofl++gEF; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=Ys8J0p7kkGBgFrr5MiSfqgDaTkMojanDNOf9enIh8obvDxgBzedpHKx5TbEuaJPCZ5vNUu+64WkTbMn1iQCygPDOigEDnaqFJpwY7+XlqsOqwU/cWrWJ/8vvh/Hj8TPiJ1kYzLF0D5N+Oy8KJ7MbKwf3wdABDwO/MenySfr4IOI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Nu3uUEPv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ofl++gEF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F74AC4CEF1;
-	Fri, 15 Aug 2025 01:55:44 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Nu3uUEPv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC483C4CEED;
+	Fri, 15 Aug 2025 01:55:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755222951;
-	bh=fCpU2z9tS/VV7L6nfg3/4EK4ZZ3KWPbuidPRnhC6sbQ=;
+	s=k20201202; t=1755222958;
+	bh=SIss+Xq9xiCpCrynk679o+RdenprEBRwz+hH338Ojlg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=Ofl++gEF8hDD1BiUk0L5kOrL3tmhCQRcx7V73vE/h/nvVo/61aJ5OTvX1YpHhWvbC
-	 o/keqG0LYNNdk4ryh7WJ8rPWlIUSJIZm99vL+wo7NhM+MYHhYQi2OgHsBxCpg6ite7
-	 KU23jZIXTt0IuKaRXeOMK20TNAJgMpNvrCcXwwmo4XhfC/ErDCZaVoQqITO+ks6/rH
-	 wF5z9CUJMsmJRbBl6hConr4BTq67ZDKm8iyfyS4GcS53Ijoe7p5+QTiN30lZyX8CWG
-	 hrhZKfODN/o8inMGwinl/8hAwAk5wil9OLfUn5IaEwwVuBSvFE/nUwWNLkErF3NrBf
-	 C+J2Ob8jeRo9g==
+	b=Nu3uUEPvDKZYNvpRCDPhmrJNU0YmBfMf+A53OGCsvdkcf6CS4W7ghMcUUPi9wJV23
+	 /spz7TwWfq0frPoyrDrFLiIoLsVDfRgTaZcZAx2WFOL6JYmDMorB3EuM3VaZxetlLa
+	 wF5wxJqjzLDoy5A2c8sWYQuCV1LChIinQi5t56mgR1qH0zimPAaaylca/Y0vLupkoA
+	 icIovZOPsLDAfle5m8W8X5g3jo0X7OwCPHw6rB+EiiJSEraPITz/sziV1QoVwI/z0g
+	 3SgGsE2m0JIhwSBbyd8MVwwch58Na46k7Jmqjr5KnrzFL4IV6Q74R048WlUkS4G8sb
+	 gopLqcWnV0VVQ==
 From: Jisheng Zhang <jszhang@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Aubin Constans <aubin.constans@microchip.com>,
@@ -69,9 +69,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Alexey Charkov <alchark@gmail.com>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 35/38] mmc: dw_mmc: exynos: use modern PM macros
-Date: Fri, 15 Aug 2025 09:34:10 +0800
-Message-ID: <20250815013413.28641-36-jszhang@kernel.org>
+Subject: [PATCH 36/38] mmc: dw_mmc-k3: use modern PM macros
+Date: Fri, 15 Aug 2025 09:34:11 +0800
+Message-ID: <20250815013413.28641-37-jszhang@kernel.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250815013413.28641-1-jszhang@kernel.org>
 References: <20250815013413.28641-1-jszhang@kernel.org>
@@ -93,77 +93,36 @@ regressions are subsequently easier to catch.
 
 Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
 ---
- drivers/mmc/host/dw_mmc-exynos.c | 13 +++----------
- drivers/mmc/host/dw_mmc.h        |  3 +++
- 2 files changed, 6 insertions(+), 10 deletions(-)
+ drivers/mmc/host/dw_mmc-k3.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index e3548408ca39..384609671a9a 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -189,7 +189,6 @@ static void dw_mci_exynos_set_clksel_timing(struct dw_mci *host, u32 timing)
- 		set_bit(DW_MMC_CARD_NO_USE_HOLD, &host->slot->flags);
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index 0311a37dd4ab..ad6aa1aea549 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -461,11 +461,8 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
  }
  
--#ifdef CONFIG_PM
- static int dw_mci_exynos_runtime_resume(struct device *dev)
- {
- 	struct dw_mci *host = dev_get_drvdata(dev);
-@@ -203,9 +202,7 @@ static int dw_mci_exynos_runtime_resume(struct device *dev)
- 
- 	return ret;
- }
--#endif /* CONFIG_PM */
- 
--#ifdef CONFIG_PM_SLEEP
- /**
-  * dw_mci_exynos_suspend_noirq - Exynos-specific suspend code
-  * @dev: Device to suspend (this device)
-@@ -265,7 +262,6 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
- 
- 	return 0;
- }
--#endif /* CONFIG_PM_SLEEP */
- 
- static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
- {
-@@ -712,11 +708,8 @@ static void dw_mci_exynos_remove(struct platform_device *pdev)
- }
- 
- static const struct dev_pm_ops dw_mci_exynos_pmops = {
--	SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend_noirq,
--				      dw_mci_exynos_resume_noirq)
+ static const struct dev_pm_ops dw_mci_k3_dev_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+-				pm_runtime_force_resume)
 -	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
--			   dw_mci_exynos_runtime_resume,
+-			   dw_mci_runtime_resume,
 -			   NULL)
-+	NOIRQ_SYSTEM_SLEEP_PM_OPS(dw_mci_exynos_suspend_noirq, dw_mci_exynos_resume_noirq)
-+	RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_exynos_runtime_resume, NULL)
++	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
++	RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
  };
  
- static struct platform_driver dw_mci_exynos_pltfm_driver = {
-@@ -726,7 +719,7 @@ static struct platform_driver dw_mci_exynos_pltfm_driver = {
- 		.name		= "dwmmc_exynos",
+ static struct platform_driver dw_mci_k3_pltfm_driver = {
+@@ -475,7 +472,7 @@ static struct platform_driver dw_mci_k3_pltfm_driver = {
+ 		.name		= "dwmmc_k3",
  		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
- 		.of_match_table	= dw_mci_exynos_match,
--		.pm		= &dw_mci_exynos_pmops,
-+		.pm		= pm_ptr(&dw_mci_exynos_pmops),
+ 		.of_match_table	= dw_mci_k3_match,
+-		.pm		= &dw_mci_k3_dev_pm_ops,
++		.pm		= pm_ptr(&dw_mci_k3_dev_pm_ops),
  	},
  };
  
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 5463392dc811..588027932412 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -541,6 +541,9 @@ extern void dw_mci_remove(struct dw_mci *host);
- #ifdef CONFIG_PM
- extern int dw_mci_runtime_suspend(struct device *device);
- extern int dw_mci_runtime_resume(struct device *device);
-+#else
-+static inline int dw_mci_runtime_suspend(struct device *device) { return -EOPNOTSUPP; }
-+static inline int dw_mci_runtime_resume(struct device *device) { return -EOPNOTSUPP; }
- #endif
- 
- /**
 -- 
 2.50.0
 
