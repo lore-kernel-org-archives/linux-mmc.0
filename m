@@ -1,92 +1,81 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 237D7258EC6
-	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79A2630F534
+	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755514509; cv=none; b=G8sVw0V4iPkaN3+cu8P4ngqZXVuzJ0NSqYK7p4uXOhNowOhRDcwTpb52oleYGX+7affz/SFA2JcOgX2bGqghThOA1Su0ErB4lIX6P1C6jtQDx5LZYBYyUHHuC7jorSuT+JUb/lkuK+Vk9liAY7ORHMp0sZzsLrAHbRueqY2cx6g=
+	t=1755514515; cv=none; b=HMcGqXowzEZ26bAkU1Z8xjTca3VJuQaUNFlwEfBnHiowyovrNoHCkp4sBNX4ysKg4s7vD8S8r/wTOQctup2+6XUnPhas4wJYCZ1WuXu2Fasa27+Wrm2AvYMb86LXD+9S0CflW62WqhIXozdzNwCfNTK3+9SimxGPKVzTnoQn6Sk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755514509; c=relaxed/simple;
-	bh=vKDK/kYGYGr3RNTrZOVtB8efO78WdGaAxvqLdCCFNkI=;
+	s=arc-20240116; t=1755514515; c=relaxed/simple;
+	bh=HpNccza3p8v2vE6GFzePxRiQVMDCc6soH+W3WfHy8pI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bPCWp+69UHPhz6rPZm4MAZ3KlhLtFXr6OAuaS3iQoxHbqZ9osGVf3w5C7bEjGhtF8q9aPNdyjpkTM/Z2bsXVh6A9Tl5WoNQjF7ESxGFgfGLInf49ZAp8HItxr9KfdJVQciYeQWelnF11RaOk6rRNUaB6mCAS8wyFKb2knxjg2hk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fvGv6hWK; arc=none smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=pPXcfYJC0VOXle21UGW31nbDAzlrjakFs6n/oYI6lgPE4l/L2nL5woF2F5YjJi5A+u5Yymg3YgO0/ptLfJjeunYrqOQvQxYlsti5BChCIpHH9ucFZAEI4Lqs7n7C6QGFmRRTBOeplrvbIPKxT4vyrQfoKKj4/A18Mq1Hm/8W9gk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WZ5hEvgq; arc=none smtp.client-ip=209.85.219.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fvGv6hWK"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-71d603cebd9so42878387b3.1
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:07 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WZ5hEvgq"
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e934a3fa4f1so984693276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755514507; x=1756119307; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=AZJY1gsF1lWmEDHABfwXMbA6h49KOw8eSN77E9oJk8Y=;
-        b=fvGv6hWKZ0XiMmKz7NBH6ioHgg9wc9PcAHW8YLpD17Pnszqxj75036BT2lNJ22WSvD
-         qzAyE02ye5lnH3MpWuw2WPTnv4+9xL/wtd4vYb8JTXPWgoNwoiwDOsdrcqmuauP7VLCT
-         ZjfI6aVhxm+zRrwgRcyzlDM69Ugqg8ubkWLVtMXKpcqIeByor9anKxayJASZUnZBmFat
-         wtgD7XKtphwXeL9k7szM51MWyV8cIN06QW37G96dXrW6TO0qaqsAV4ohe3v5ospDK9Eb
-         jShBkaciStQ5IYFf/R8LxiXpDNkxJ0+ccWCZCEfxa1zi4bcqifpFyAYlKok/v8ncBqXz
-         DLGA==
+        d=linaro.org; s=google; t=1755514511; x=1756119311; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=zy1IorWNS34FecdFEvi5FhAZbBdTEKAgjIL+i6/fu6Q=;
+        b=WZ5hEvgqwdU+7GGP2AldpIwPArLri3vLOzYfIfHn4nHgCRK625R7V9d0QVr2qGAYLP
+         EXlfDQBOgQdRO992/3Oyua7dZKVoU3rV6Z1zQDjC9xjaId/kWNRJB0hjUB15QJr7dP5u
+         5YliamSRNtU2KeKTYjL7rRDv/CC9Tvs1sqwDN43b/VwfDb1CHyy8M4Wf2qA8Gzp2BblG
+         fCQy6lLr7iJaiW6rQofm+zF8ef2smP8SkS8L7cbGoEJUQEc2i1Ztn6m9IvJ1zANrqhs/
+         VL4xkacR2dyH6rXBWWIeLa4GC+2N39+B0XryaxRRcYLRBnqRzVSJ+YOGZynnO9dolD7Y
+         0PHw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755514507; x=1756119307;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=AZJY1gsF1lWmEDHABfwXMbA6h49KOw8eSN77E9oJk8Y=;
-        b=klevs//zfUnfUgtNZ5khH5Ls3HXj7pV+LMVbcXAKRkqWPDhe+HFYbVaJ/jYV4TfRgc
-         ZDBfuk6IqkQleJxxPPJrd7739OBQNBCHR2wAHoAFDFKXSIyYD7za2S3NePhfeguQ+09Q
-         U0Iwb5y49w0a9Exe/ql8Zq1L0m9kXFk1ofxt9p6DTssIvuAh2Iv4OZG3Vdpun1oTR/mQ
-         myE2DQ73/LEa2QejkQaTNHB7SNKgGdG4QAHU51Eaf3CveMrBgw+JwODDvlUqP+E/8VZh
-         URz19A0fJ4fGI9tIQtHewuv+5za67ZO+by0IFaCyas//6+/U0SVTzDOcEcnRmXzULiUz
-         Kxyg==
-X-Forwarded-Encrypted: i=1; AJvYcCV7+CpuP9ZuvNhyQBo205VyPFrWOkwVMB6KS060Tbb9Llp40MftsElYfrvI2uKCSgPoaSy9vT9zj2Y=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxcKtuoBNduedX33y84ht2aNPrk5vbhX11z1ql8ofyoq8Gvqd4E
-	Lhe+NnpoLjDC0yHnJOm5IlH+vDhaOUyQt3p5PeFAvrd0SrXniXlvQ0X/7WxCE5PfgqWJx6lOsXX
-	vw4J5MvmjnwPLUbnNY48JTG8TM9yhXaoELuNhYIUBHXmwVjwnONio
-X-Gm-Gg: ASbGnct2mezgqzI+N6O/Cpr9seVEQEVcd96dWHhS9FuAod9uah8Izl6rJ574LcaldE4
-	1eJZYMN+vXUMAQlnuKj02IoN2P0CjzkLHCDkAin8VS6kF8ys/ZT0J+eCX0k0awNWMcp+pNvFqQ4
-	7ziiMdojB6mA3LSBszFPUl7wg88zFoMhKEJQjzI7uSvh/XyMLNPmAVLrBaF5IH58r9emxjs9YUn
-	eBSqvzNuGagSJ58GB4=
-X-Google-Smtp-Source: AGHT+IE+mHNvMRJ77rqIA60/oTCoGLQVxT3XrHizX3j02VMu9a/GMJErQeXbYxChNDQVnwbnKryLXNBZT9D6RggJe7Y=
-X-Received: by 2002:a05:690c:4c0b:b0:71a:154:f2aa with SMTP id
- 00721157ae682-71e6ddb1126mr120053737b3.11.1755514506632; Mon, 18 Aug 2025
- 03:55:06 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1755514511; x=1756119311;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=zy1IorWNS34FecdFEvi5FhAZbBdTEKAgjIL+i6/fu6Q=;
+        b=sAsfzVhX2sXQYRAOUM3+8KlnCf32s2sR4ifFgiJQOexuBO3wHvdiUYjQmxl/cKaEFG
+         lVMOxxvNPynM/gpol4kYN8ww1CSTGSWpDMuyc4f/xOuFq1u77c0hDDMmW2oNVzFu/4eh
+         Lt0MkaNw4nBBaEnBM01U0av0QfyaQifZ/hExJFvQJflv+RzIPMsQI0v8APVroV8C/zvw
+         hcOekb8D+94ahzE+ZOPxNAmm0lFwkK7nanhAm4eXIp7Qly2+1WxxF6lHule9Xevz8Nxj
+         KMtgu5yOMVDIQQIHfSQ7zzei9OfcFSRmSxnPl85RzOGYi2V8VIoQ3HCaSYST8APM7+rK
+         Ttug==
+X-Forwarded-Encrypted: i=1; AJvYcCUGW9EipXBvtfypbsDvEtdJzArGr5XusH130vqb51gxhos0WYd5uslsF2FuV5khwf73tWHZaW84hsg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzU/LGwrGo8ccD1bTwbclPdZ5IfVMyH9gqMSF1D9klA7k6ZdkDb
+	2rdAuTqNwMHqjFWUS2iDGDyEudKNP49wQ8KkvY9KiR2z01jXcfjFxV5pLIvGj6H9hsddcekV/cH
+	U7rL4Lm1ucV+H16U9Sx/NP2akZNJ4P/Uv7XnvJjBT6PZ2LsKK14AC
+X-Gm-Gg: ASbGncseaqfHP6sq5DsIQk+kX+iQldU9gDVa+71EKvIxpYHOe35ckCrY/82Z8Kg0RF1
+	7EGwjdiyOcF0KzTgRpMie6LoQmU9tjAYrV7tpv2RWnCjaRDbkvrrgtUg1oScvF5aKceFHP4iXE5
+	62HDQoWI2H6d2wL9Dn4r+0daHbbgS7oFAJXtVXLI9rssKxAOcatEwQDb5CnA6sI+u8nMg9155GB
+	8TKpQkK
+X-Google-Smtp-Source: AGHT+IEboBf6c0njtMAWRhLMOeerkvYUC/RpB+BHwi3FJenNwXNu8sDBXzeAxKFWYduZF9LOAJuj4ffV/2Ux+0YYIgU=
+X-Received: by 2002:a05:690c:23c4:b0:71c:4152:82f9 with SMTP id
+ 00721157ae682-71e6d9f11a3mr132543537b3.8.1755514511272; Mon, 18 Aug 2025
+ 03:55:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <7b124fe1-4f7b-4218-b564-e16ad2c3882f@intel.com> <20250724185354.815888-1-erick.shepherd@ni.com>
-In-Reply-To: <20250724185354.815888-1-erick.shepherd@ni.com>
+References: <20250724112817.142784-1-colin.i.king@gmail.com>
+In-Reply-To: <20250724112817.142784-1-colin.i.king@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 18 Aug 2025 12:54:30 +0200
-X-Gm-Features: Ac12FXxG-p66A79sRwFlMCXjIzKTCitp1sNv6f6375C2O9l8KBFwRdXaD8n6E2U
-Message-ID: <CAPDyKFq=5sc2kCv2EH7KH8RCpOq3JCgVD3dete-k+c-ZmjUL=g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: Disable SD card clock before changing parameters
-To: Erick Shepherd <erick.shepherd@ni.com>
-Cc: adrian.hunter@intel.com, brad.mouring@ni.com, kyle.roeschley@ni.com, 
-	linux-mmc@vger.kernel.org
+Date: Mon, 18 Aug 2025 12:54:35 +0200
+X-Gm-Features: Ac12FXzzABoPhZpmLWeQec_PNYAHBcPqx-MkWfT1zRFWCwObMMPA2QDob8U7l2w
+Message-ID: <CAPDyKFqQJsBjaVotzRmL=pHWLmJnOiXUaQN5yo0oheiKyw8T+w@mail.gmail.com>
+Subject: Re: [PATCH][next] mmc: Kconfig: Fix spelling mistake "referrered" -> "referred"
+To: Colin Ian King <colin.i.king@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+	kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, 24 Jul 2025 at 20:54, Erick Shepherd <erick.shepherd@ni.com> wrote:
+On Thu, 24 Jul 2025 at 13:28, Colin Ian King <colin.i.king@gmail.com> wrote:
 >
-> Per the SD Host Controller Simplified Specification v4.20 =C2=A73.2.3, ch=
-ange
-> the SD card clock parameters only after first disabling the external card
-> clock. Doing this fixes a spurious clock pulse on Baytrail and Apollo Lak=
-e
-> SD controllers which otherwise breaks voltage switching with a specific
-> Swissbit SD card. This change is limited to Intel host controllers to
-> avoid an issue reported on ARM64 devices.
+> There are two spelling mistakes in the config. Fix them.
 >
-> Signed-off-by: Kyle Roeschley <kyle.roeschley@ni.com>
-> Signed-off-by: Brad Mouring <brad.mouring@ni.com>
-> Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
+> Signed-off-by: Colin Ian King <colin.i.king@gmail.com>
 
 Applied for next, thanks!
 
@@ -95,48 +84,31 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 15 +++++++++++++--
->  1 file changed, 13 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/Kconfig | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-p=
-ci-core.c
-> index b0b1d403f352..7ef821d16d39 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -689,8 +689,19 @@ static int intel_start_signal_voltage_switch(struct =
-mmc_host *mmc,
->         return 0;
->  }
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 7232de1c0688..4afa0130779d 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -359,7 +359,7 @@ config MMC_SDHCI_S3C
+>         depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
+>         help
+>           This selects the Secure Digital Host Controller Interface (SDHCI)
+> -         often referrered to as the HSMMC block in some of the Samsung
+> +         often referred to as the HSMMC block in some of the Samsung
+>           S3C6410, S5Pv210 and Exynos (Exynso4210, Exynos4412) SoCs.
 >
-> +static void sdhci_intel_set_clock(struct sdhci_host *host, unsigned int =
-clock)
-> +{
-> +       u16 clk =3D sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +
-> +       /* Stop card clock separately to avoid glitches on clock line */
-> +       if (clk & SDHCI_CLOCK_CARD_EN)
-> +               sdhci_writew(host, clk & ~SDHCI_CLOCK_CARD_EN, SDHCI_CLOC=
-K_CONTROL);
-> +
-> +       sdhci_set_clock(host, clock);
-> +}
-> +
->  static const struct sdhci_ops sdhci_intel_byt_ops =3D {
-> -       .set_clock              =3D sdhci_set_clock,
-> +       .set_clock              =3D sdhci_intel_set_clock,
->         .set_power              =3D sdhci_intel_set_power,
->         .enable_dma             =3D sdhci_pci_enable_dma,
->         .set_bus_width          =3D sdhci_set_bus_width,
-> @@ -700,7 +711,7 @@ static const struct sdhci_ops sdhci_intel_byt_ops =3D=
- {
->  };
+>           If you have a controller with this interface (thereforeyou build for
+> @@ -401,7 +401,7 @@ config MMC_SDHCI_SPEAR
+>         depends on OF
+>         help
+>           This selects the Secure Digital Host Controller Interface (SDHCI)
+> -         often referrered to as the HSMMC block in some of the ST SPEAR range
+> +         often referred to as the HSMMC block in some of the ST SPEAR range
+>           of SoC
 >
->  static const struct sdhci_ops sdhci_intel_glk_ops =3D {
-> -       .set_clock              =3D sdhci_set_clock,
-> +       .set_clock              =3D sdhci_intel_set_clock,
->         .set_power              =3D sdhci_intel_set_power,
->         .enable_dma             =3D sdhci_pci_enable_dma,
->         .set_bus_width          =3D sdhci_set_bus_width,
+>           If you have a controller with this interface, say Y or M here.
 > --
-> 2.43.0
+> 2.50.0
 >
