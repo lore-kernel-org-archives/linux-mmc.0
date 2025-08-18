@@ -1,79 +1,80 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79A2630F534
-	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57F7C3101C4
+	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755514515; cv=none; b=HMcGqXowzEZ26bAkU1Z8xjTca3VJuQaUNFlwEfBnHiowyovrNoHCkp4sBNX4ysKg4s7vD8S8r/wTOQctup2+6XUnPhas4wJYCZ1WuXu2Fasa27+Wrm2AvYMb86LXD+9S0CflW62WqhIXozdzNwCfNTK3+9SimxGPKVzTnoQn6Sk=
+	t=1755514516; cv=none; b=ePgHixoXR/3H21uxs/g409/bVZzynOOFSCgrjhsspHX1ScTOv2qp1rOu3BBSlbbYn7m7hg4fOCk9PZAkZujcos6M3svYPxOVmjpCfWOzurwbj+IW4eLEY5g0PSvLimqw/1QqIEAfSCZ75ic/qRLgZkibOykVsx4rHG5EwmfhodI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755514515; c=relaxed/simple;
-	bh=HpNccza3p8v2vE6GFzePxRiQVMDCc6soH+W3WfHy8pI=;
+	s=arc-20240116; t=1755514516; c=relaxed/simple;
+	bh=FJ519jWH9KWAI2H67Tholf7HmFlB87+jCNjkI7Ma76k=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=pPXcfYJC0VOXle21UGW31nbDAzlrjakFs6n/oYI6lgPE4l/L2nL5woF2F5YjJi5A+u5Yymg3YgO0/ptLfJjeunYrqOQvQxYlsti5BChCIpHH9ucFZAEI4Lqs7n7C6QGFmRRTBOeplrvbIPKxT4vyrQfoKKj4/A18Mq1Hm/8W9gk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WZ5hEvgq; arc=none smtp.client-ip=209.85.219.178
+	 To:Cc:Content-Type; b=MD1oYJVBcA9v3IKO4LAZGV7DQwpyclv1Z4Uanib3I3gTneFJuBjwczZlQLk4l2ucnTB8ZWN/q+MHek1SsarDozw1LJcpiPMGUWX/M+Ez9dO1PaZIVFAJdNDP8xadukb2G2kUX/taVmk8jgc2NIVn7dxbbEKCC+OlJf4n5cdR0Ws=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=k48YcGtx; arc=none smtp.client-ip=209.85.128.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WZ5hEvgq"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e934a3fa4f1so984693276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="k48YcGtx"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-71d603acc23so32236907b3.1
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755514511; x=1756119311; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1755514514; x=1756119314; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=zy1IorWNS34FecdFEvi5FhAZbBdTEKAgjIL+i6/fu6Q=;
-        b=WZ5hEvgqwdU+7GGP2AldpIwPArLri3vLOzYfIfHn4nHgCRK625R7V9d0QVr2qGAYLP
-         EXlfDQBOgQdRO992/3Oyua7dZKVoU3rV6Z1zQDjC9xjaId/kWNRJB0hjUB15QJr7dP5u
-         5YliamSRNtU2KeKTYjL7rRDv/CC9Tvs1sqwDN43b/VwfDb1CHyy8M4Wf2qA8Gzp2BblG
-         fCQy6lLr7iJaiW6rQofm+zF8ef2smP8SkS8L7cbGoEJUQEc2i1Ztn6m9IvJ1zANrqhs/
-         VL4xkacR2dyH6rXBWWIeLa4GC+2N39+B0XryaxRRcYLRBnqRzVSJ+YOGZynnO9dolD7Y
-         0PHw==
+        bh=cRZb2JpwGfgK0Dvyni/lGLUSOMBzhH0cIWS+Rzvv3Hw=;
+        b=k48YcGtxlfSYR9PBWChf+LVHYtP4S/gAJLeQD4OajBYmJVId/6KgQ2x6S/zCULd3kn
+         evIja1kpFM1Jc90MXRQbREk4IArIA7ueaiQLJasEFdBbHgWUCoZXgbmCA8R8XBLJAknD
+         AXBI1ZxP5dCN99mlPqMc0TwBxzJ2X/l6mjGBJf0jZ0gE7gMHfe0mTlcKQ8C034cudVWf
+         56osERU3gA0G2nhJczJGGQIR5SgXpyT78JC+2u39W1gxUHCOBSz7NEd0q8byFZcY100o
+         IbgngaIyJAQ1O8BkFXivZrqjAatAyKSAp7SzGss0o1FdUuCEoTwshQilyi+giCJDbRgr
+         te0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755514511; x=1756119311;
+        d=1e100.net; s=20230601; t=1755514514; x=1756119314;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=zy1IorWNS34FecdFEvi5FhAZbBdTEKAgjIL+i6/fu6Q=;
-        b=sAsfzVhX2sXQYRAOUM3+8KlnCf32s2sR4ifFgiJQOexuBO3wHvdiUYjQmxl/cKaEFG
-         lVMOxxvNPynM/gpol4kYN8ww1CSTGSWpDMuyc4f/xOuFq1u77c0hDDMmW2oNVzFu/4eh
-         Lt0MkaNw4nBBaEnBM01U0av0QfyaQifZ/hExJFvQJflv+RzIPMsQI0v8APVroV8C/zvw
-         hcOekb8D+94ahzE+ZOPxNAmm0lFwkK7nanhAm4eXIp7Qly2+1WxxF6lHule9Xevz8Nxj
-         KMtgu5yOMVDIQQIHfSQ7zzei9OfcFSRmSxnPl85RzOGYi2V8VIoQ3HCaSYST8APM7+rK
-         Ttug==
-X-Forwarded-Encrypted: i=1; AJvYcCUGW9EipXBvtfypbsDvEtdJzArGr5XusH130vqb51gxhos0WYd5uslsF2FuV5khwf73tWHZaW84hsg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzU/LGwrGo8ccD1bTwbclPdZ5IfVMyH9gqMSF1D9klA7k6ZdkDb
-	2rdAuTqNwMHqjFWUS2iDGDyEudKNP49wQ8KkvY9KiR2z01jXcfjFxV5pLIvGj6H9hsddcekV/cH
-	U7rL4Lm1ucV+H16U9Sx/NP2akZNJ4P/Uv7XnvJjBT6PZ2LsKK14AC
-X-Gm-Gg: ASbGncseaqfHP6sq5DsIQk+kX+iQldU9gDVa+71EKvIxpYHOe35ckCrY/82Z8Kg0RF1
-	7EGwjdiyOcF0KzTgRpMie6LoQmU9tjAYrV7tpv2RWnCjaRDbkvrrgtUg1oScvF5aKceFHP4iXE5
-	62HDQoWI2H6d2wL9Dn4r+0daHbbgS7oFAJXtVXLI9rssKxAOcatEwQDb5CnA6sI+u8nMg9155GB
-	8TKpQkK
-X-Google-Smtp-Source: AGHT+IEboBf6c0njtMAWRhLMOeerkvYUC/RpB+BHwi3FJenNwXNu8sDBXzeAxKFWYduZF9LOAJuj4ffV/2Ux+0YYIgU=
-X-Received: by 2002:a05:690c:23c4:b0:71c:4152:82f9 with SMTP id
- 00721157ae682-71e6d9f11a3mr132543537b3.8.1755514511272; Mon, 18 Aug 2025
- 03:55:11 -0700 (PDT)
+        bh=cRZb2JpwGfgK0Dvyni/lGLUSOMBzhH0cIWS+Rzvv3Hw=;
+        b=hiJt/L0LCM55nLDjU5U3sayp8QhtVaDxDwah57o5Mez7BX+uhBymF7R4giqes0FicG
+         6lCiep3kBwjT2ysB+uysdVUuS2ii4llQyaitT2VS7Dy5TgP1YV+azX/dNRJX/dyguxi9
+         0IpXXbTAgB8t3bl0wNTjKkb6/lGmOFV9FBawO0JL01RnRZJNO/WsIKYkRQw7oN2Wo2H2
+         KZvY0hPN9J4S9eIe7VWPQFH5AAFLaTFSeCKN8vTw5C6kyLWeP22CQX6TH7vky+rzFzph
+         lSnftyAh4Bx8ptB5MSBL3qvcinwBXeCzQSuFk54aj9DNMTCjr+QlpFjZR6l+Iidn+YAV
+         QzAQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVBZx1IawXhomkSpg0VgxRfpnpz51F6CpVkdA+1WC4ByizeDG2ymmsmTYDeCfy3c+1IUvahVEdpp/I=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwI6xfogCs61ycaT1Fmv1XRjW42c7eYqL8AeoD0Qnxzocb6ge8z
+	DIvSu8YkLcM5ur2UW7yqeGoeu0eF/2VPvC+GB9XRueI8Kqo4xqzjkoN+4g0Mb2AX7TGQhypM+zS
+	2jhLOODawBbxeYU9W1f8MpgDa87UaKnidTq8or0777A==
+X-Gm-Gg: ASbGncvSJnrYYuVhwd9ulSBIxVb8dLCWkIhzW2OhqS7CLCsG+qvxgtgu1Rmkda/MUyO
+	rV5jQk/QuPeS40W12qcqvXFjMFsVXHF3tkO9EVwoiZ5OGnwJlfsmbc55yASw0692ZUpCwv7pEeU
+	38xXoNJ8n5mM/J4qDIZyNrtWB9UY+4PTUSxka1X3cWwTOsNSn1hp1FWcAiQWJXl+ZZDh29QxZ/x
+	XeALNpf
+X-Google-Smtp-Source: AGHT+IESjdzn9W2JnsSauD18554Pkmz/p+/H6LoVzd2oHmARAOOT0+bzfJ7oITTTCicEmYqOeZmBCi19VjziTAWluD4=
+X-Received: by 2002:a05:690c:4b8b:b0:71c:1e93:272d with SMTP id
+ 00721157ae682-71e77506f84mr94612597b3.31.1755514514246; Mon, 18 Aug 2025
+ 03:55:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250724112817.142784-1-colin.i.king@gmail.com>
-In-Reply-To: <20250724112817.142784-1-colin.i.king@gmail.com>
+References: <20250731094116.2163061-1-colin.i.king@gmail.com>
+In-Reply-To: <20250731094116.2163061-1-colin.i.king@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 18 Aug 2025 12:54:35 +0200
-X-Gm-Features: Ac12FXzzABoPhZpmLWeQec_PNYAHBcPqx-MkWfT1zRFWCwObMMPA2QDob8U7l2w
-Message-ID: <CAPDyKFqQJsBjaVotzRmL=pHWLmJnOiXUaQN5yo0oheiKyw8T+w@mail.gmail.com>
-Subject: Re: [PATCH][next] mmc: Kconfig: Fix spelling mistake "referrered" -> "referred"
+Date: Mon, 18 Aug 2025 12:54:38 +0200
+X-Gm-Features: Ac12FXwmA01YCEQ2jCJwvBR_wmGb3MGLVpLbRcdACzXEkQ4qTCrGPjPh1dPBI50
+Message-ID: <CAPDyKFrPhVezQprofCFyP5nbytyBCWsmxAu-ZbO_Bbx+d5aXrA@mail.gmail.com>
+Subject: Re: [PATCH][next] mmc: davinci: Remove space before newline
 To: Colin Ian King <colin.i.king@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+Cc: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>, linux-mmc@vger.kernel.org, 
 	kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 24 Jul 2025 at 13:28, Colin Ian King <colin.i.king@gmail.com> wrote:
+On Thu, 31 Jul 2025 at 11:41, Colin Ian King <colin.i.king@gmail.com> wrote:
 >
-> There are two spelling mistakes in the config. Fix them.
+> There is a extraneous space before a newline in a dev_err message.
+> Remove the space.
 >
 > Signed-off-by: Colin Ian King <colin.i.king@gmail.com>
 
@@ -84,31 +85,22 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/Kconfig | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/davinci_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 7232de1c0688..4afa0130779d 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -359,7 +359,7 @@ config MMC_SDHCI_S3C
->         depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
->         help
->           This selects the Secure Digital Host Controller Interface (SDHCI)
-> -         often referrered to as the HSMMC block in some of the Samsung
-> +         often referred to as the HSMMC block in some of the Samsung
->           S3C6410, S5Pv210 and Exynos (Exynso4210, Exynos4412) SoCs.
->
->           If you have a controller with this interface (thereforeyou build for
-> @@ -401,7 +401,7 @@ config MMC_SDHCI_SPEAR
->         depends on OF
->         help
->           This selects the Secure Digital Host Controller Interface (SDHCI)
-> -         often referrered to as the HSMMC block in some of the ST SPEAR range
-> +         often referred to as the HSMMC block in some of the ST SPEAR range
->           of SoC
->
->           If you have a controller with this interface, say Y or M here.
+> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+> index c691f1b60395..2a3c8058b0fb 100644
+> --- a/drivers/mmc/host/davinci_mmc.c
+> +++ b/drivers/mmc/host/davinci_mmc.c
+> @@ -588,7 +588,7 @@ static void mmc_davinci_request(struct mmc_host *mmc, struct mmc_request *req)
+>                 cpu_relax();
+>         }
+>         if (mmcst1 & MMCST1_BUSY) {
+> -               dev_err(mmc_dev(host->mmc), "still BUSY? bad ... \n");
+> +               dev_err(mmc_dev(host->mmc), "still BUSY? bad ...\n");
+>                 req->cmd->error = -ETIMEDOUT;
+>                 mmc_request_done(mmc, req);
+>                 return;
 > --
 > 2.50.0
 >
