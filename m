@@ -1,137 +1,163 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CC6E319855
-	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA44F31579F
+	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755514548; cv=none; b=Ut45ZeJkigImhrmT6NI9+hWV+oaVLgDwHkYrA+H7lq1CaHIP7848xWdkgYkWs9t4iPsVjvGB1kLBGkKqN9xPKXdrq3ICwebFRDd6uYPmQYAo8z2jrBfZ0FJCYtVKCiqcZ89hz8J0wAdudUpAOcgySQIeM0E2QtBwAL9GikXmP2k=
+	t=1755514553; cv=none; b=uA8TY+gjhGMhD+j72gSKPRwxUXmW9WB5e7InxL+PVAcpncVC55El99GFxg4bFuoweeHBOBKhBYOY/XNYfSKdX8o4osEMAjHUiysYQWKvqM7nTO4rcWn2rHWHcX6jMeiBY4kTkrAZNwOpDuosg3rfJiA5BujgVkF0jBhOgZjgn1U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755514548; c=relaxed/simple;
-	bh=iHvNIYoVtM0gtmhzVNDj0P+hg4qdzTTYa8AKTvPgEcY=;
+	s=arc-20240116; t=1755514553; c=relaxed/simple;
+	bh=6uPzar8fnz6L8ml82QStz50hbQ5nxpvVN3h1tUdJAos=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Y4u0y8nO/VaQ+K6k04wS2OzD8QT1zztxaWeEI0/npoTiAuEn8Tb756wgJBrK7xnz7sI8RY/Xy83rj0LnvaT2h2ogqysZz+mm/K3+gkOhEd+JzUiMOM4Y/gVqMBlihe6UCLsKpZO4TI+Fnlu88OkAucUg62hoJpbGjY2fHhGbt78=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kD86IGkO; arc=none smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=Nk4lr6VIfQ/eSYHHbQFW/V36ABYzoTc07a2EJDMkgwkjhiNDDcH/MHJhLmpraDSaUflMOQqj/LjhjZiMhrYAxkqA/NBHSJ5DX8+wKLQe+415EHHu2eB7mT0hT9nGHOD3Tpdj681Plli0PJFy4EgFJuDIK8KeI+Sa1y6cdDhtIiI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oM8ryQTW; arc=none smtp.client-ip=209.85.219.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kD86IGkO"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-71d71bcab69so26399237b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oM8ryQTW"
+Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-e934c8f9757so926273276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755514546; x=1756119346; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1755514551; x=1756119351; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=JC9hJ08acql9I6gPRIBiwIU0+h4AM1URG+SiBRg5N5k=;
-        b=kD86IGkOKItmRd329e72CKnck5nAbNNmZzBh9bnP9JskvN8mK988Jzq1r9hlPxUNcm
-         eN8ER1Zy0j87jBEc8DE/gKmbHPOXLfEtqUBaqMn6bzrqrz706iwqX/Nkpb+AGWwInPKl
-         Z9v63vCuFIqj/GJl9OZssy+mXhN8NZlKNPw8WLIMqgzbTn5BzfPSgALOqkApl6pNdJQ5
-         uuwXe9eXJF8pOX0Ust/y7/sl0NUBkJ/ODtEAQz64xZy3p4rcbrHD0tYHo7DO7SGKfONF
-         YqrSwaAT+mhRSBh2jwONGhd2NKdVmAcpgj9qx7rAuSu8vwT2scAEd56kff8O1m9S/ItT
-         0yrg==
+        bh=dSUcJw1TXruqA7NYhOWlsQiZC/PcevLoh3jJ9TCLJxk=;
+        b=oM8ryQTWNOMISk6HXymQy6AyJP4wzGxSJf2DGG172ok6NREbSEoF5v0uW6e7t1NhJL
+         x/MRkwuVpqTfSdhRec8erU6JaxZ0NOCPSmuHyPa58WLt+Q41Q1D4wCX+hcqG/CWFEGLW
+         8MbNwYfja9A4pO9j4zMhcIaQ6FdjeLwa8HMePpExcfgSogwNPM9DWGua36rdg8jiZu05
+         XxxA450TrqNuFamAID/qk7rXwRSOrOQYcs6F2fd+T0gCwlKdQD4jXMf8qyeyd0QljI2Z
+         LMCdt/p2n7A3WeTI0LHe5rtCawZ4NrMvVmH+XsR4Zkhuslne+bOlMVpfBjka9mcJmqBr
+         NxJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755514546; x=1756119346;
+        d=1e100.net; s=20230601; t=1755514551; x=1756119351;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=JC9hJ08acql9I6gPRIBiwIU0+h4AM1URG+SiBRg5N5k=;
-        b=b6Ld7G9w5pEQgod/9RHtb8br53LGQ/7HAyBeCOK1pkjmchs5OI7nvWjfS1YEUwt9Te
-         oTdPC1nnooEw+JB9KFz7hkdLNmWCjYwlA9LGD4SLdSM3E/zlx1TNH4l2mCmw6b1CLLUh
-         e1vGePRQ/QSHOb9FMdCsyFElNdC2/zQa1kpAg4T/ya/rPe8oW/gUn5UoaaEuNmD0wEdy
-         7txU3SD04RX44eF9e5tIOg66kZYJ23WkyuV0YNP8KCRm6rRaMMzFXwaP/TUGYdsmIDN/
-         cJSDs4jrYUc3am6ied41AeQyHqG/lTvchwOvtaPj6hrIUfFcs3z2Y8O6Wn04fvEPJMI3
-         207g==
-X-Forwarded-Encrypted: i=1; AJvYcCV2jIS37oX939wLY7+91hYB1vxo4HIao3dXI6/QnsnaCG1JdnVAYF/n9mt3j396fiXmUEUXOvs81Js=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzVph5hS9e/1frgSb4fp649r14cgxNRhm+NQbYkwradFpo8QfUQ
-	skqnGxW3S/olP3Onbc/fBaW+D5JUs69i/7y1jkTOdkzjZpnEQ/QEkCqjh6L+6uGAzJAyqWBhQGc
-	1nJClCKj33TDmDrkTdx4e4OrSgbPQVkocPFLevuEDyg==
-X-Gm-Gg: ASbGncs6PLPq6BXdJd06er4Xy0wIwAFtcQ4w0CkYYKkVCDu7fG9m+a0779OmNXtymRL
-	SzLH/u9cosrY2CYRMzc4Ng1PgSM5wRAd8OnzfoDtfGnMU0MW6mLe44sGMHYYQBh4u15ioo42mYS
-	d657diXAmx926WFipmj+IKFI+f5Nq56bvDDuJs9Z1cCTQUkcpBKGvdb8ua0ej+RWBF2BRmMOgVI
-	pM7wyhv
-X-Google-Smtp-Source: AGHT+IEJTkVP+1K5o7GJEioZhNvRiV/+3+KOjFOMU5W0tfTvsqjZdrEBlWJvBYcKuor7yLdO8Lk+wVhX68UKDrA8wAs=
-X-Received: by 2002:a05:690c:3609:b0:71c:1673:7bb7 with SMTP id
- 00721157ae682-71e774aaa16mr105428807b3.13.1755514546131; Mon, 18 Aug 2025
- 03:55:46 -0700 (PDT)
+        bh=dSUcJw1TXruqA7NYhOWlsQiZC/PcevLoh3jJ9TCLJxk=;
+        b=tKq9njKRABRfsN8/TI3JexkUxiNpW+ZG5rDNl+AJP4VZsBnC10UogjF8oQ1wRXANvC
+         betEX5KOy6WoJUKfvYMtytmdb9b/yZS7siRRr613DjmvyBIPFm4+1t4xNUE6AV8mcp4S
+         Zzz29e2M3GK06S7Z0jXAeZL2DR3JSRZ92ev8Ag33VuQl1rvl7vNxyKO/hIhmi4+Yq8K6
+         vsRj+lys1PUSHlQj+IaWE3z8iw676ZfozdkpYpy1BycenuzX+KYrFPiwXI0BfDm/O3ZK
+         fHZmFI0ZtvhKimZZUR1yMz9nFsfQgTXB+IszKuD51FXwpXQb7Vn2s3pHSrC8SLjFuZ/M
+         o2YQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWRQ6g4e6R26/JwboPD9Pj0jaG1k51G4NoeiZhAaE2nTZmJEiv6lLgktkm3vsLXBsiHjqmgZgFMoMM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxuUOMStF+al5Gr4TGbC35q6Zj3mCZUUTyDmUq59Y832NWBUgpB
+	7Auyk11aiRs1k0+kBfi9aYMq7Nyr0dXd996OfF4wXcf5AQXa30RvEzQYFUTwcpezzd6jvNdvcbd
+	U6O/YsHxvMvC3FoLAnOJi1oJHyHK/DIDnBvFvT7kezQ==
+X-Gm-Gg: ASbGnctzwfX+JV6nj8+hYLr8BXNtYpRBOwA6lEe+ttvyp+mC4ka3X+Tznt+ogK43sS1
+	BHb7PA9XvF/1WtKxP9v/2tcb9MUAIA/4MNb1mpdxd4ALHGwOiAuj1mc+n5L9fymbXflQNSduJzI
+	hi44cKlm44J34T3iV/2nLQfEMOeJDPXlDEb23/wFSv1k5rrOR0/o7GFgzekHB8eCDjguPyiQ/BP
+	mMYdGEa
+X-Google-Smtp-Source: AGHT+IGh7RVez0cYblanpn7QsvQTnxPk0VxeHoWXwhEM0PY4fYruJQmra/PgvlN67LU1aBTvJBYNVkGUDhr8hRBfu3Y=
+X-Received: by 2002:a05:6902:18ca:b0:e93:4df7:6889 with SMTP id
+ 3f1490d57ef6-e934df76df2mr4130536276.5.1755514550706; Mon, 18 Aug 2025
+ 03:55:50 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250629203859.170850-1-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20250629203859.170850-1-biju.das.jz@bp.renesas.com>
+References: <20250804013604.1311218-1-lijiayi@kylinos.cn>
+In-Reply-To: <20250804013604.1311218-1-lijiayi@kylinos.cn>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 18 Aug 2025 12:55:10 +0200
-X-Gm-Features: Ac12FXwQkLY8qn_v81dOCAFgoFZ2JHmLbmrbQI4CNQWFczXEWLCAbRxpDcxVexw
-Message-ID: <CAPDyKFozdeAku=c7HM10ARL6-uJv43LaEa80+gSHa-uBNGmnVA@mail.gmail.com>
-Subject: Re: [PATCH RFT] mmc: host: renesas_sdhi: Fix the actual clock
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>, Biju Das <biju.das.au@gmail.com>
+Date: Mon, 18 Aug 2025 12:55:14 +0200
+X-Gm-Features: Ac12FXyqwG0c8SLIENypbwfR6jFFJ-FTW3VAEPm1_XbocLArGkOzSh1HDj0UOQA
+Message-ID: <CAPDyKFp4a_y-Om3CxEn2zO_s9yBeMmyMpgVL04j_xLEt7HtNqA@mail.gmail.com>
+Subject: Re: [PATCH v2] memstick: Fix deadlock by moving removing flag earlier
+To: Jiayi Li <lijiayi@kylinos.cn>
+Cc: maximlevitsky@gmail.com, gregkh@linuxfoundation.org, 
+	kai.heng.feng@canonical.com, oakad@yahoo.com, luoqiu@kylinsec.com.cn, 
+	viro@zeniv.linux.org.uk, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, jiayi_dec@163.com, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sun, 29 Jun 2025 at 22:39, Biju Das <biju.das.jz@bp.renesas.com> wrote:
+On Mon, 4 Aug 2025 at 03:36, Jiayi Li <lijiayi@kylinos.cn> wrote:
 >
-> Wrong actual clock reported, if the SD clock division ratio is other
-> than 1:1(bits DIV[7:0] in SD_CLK_CTRL are set to 11111111).
+> The existing memstick core patch: commit 62c59a8786e6 ("memstick: Skip
+> allocating card when removing host") sets host->removing in
+> memstick_remove_host(),but still exists a critical time window where
+> memstick_check can run after host->eject is set but before removing is set.
 >
-> On high speed mode, cat /sys/kernel/debug/mmc1/ios
-> Without the patch:
-> clock:          50000000 Hz
-> actual clock:   200000000 Hz
+> In the rtsx_usb_ms driver, the problematic sequence is:
 >
-> After the fix:
-> clock:          50000000 Hz
-> actual clock:   50000000 Hz
+> rtsx_usb_ms_drv_remove:          memstick_check:
+>   host->eject = true
+>   cancel_work_sync(handle_req)     if(!host->removing)
+>   ...                              memstick_alloc_card()
+>                                      memstick_set_rw_addr()
+>                                        memstick_new_req()
+>                                          rtsx_usb_ms_request()
+>                                            if(!host->eject)
+>                                            skip schedule_work
+>                                        wait_for_completion()
+>   memstick_remove_host:                [blocks indefinitely]
+>     host->removing = true
+>     flush_workqueue()
+>     [block]
 >
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> 1. rtsx_usb_ms_drv_remove sets host->eject = true
+> 2. cancel_work_sync(&host->handle_req) runs
+> 3. memstick_check work may be executed here <-- danger window
+> 4. memstick_remove_host sets removing = 1
+>
+> During this window (step 3), memstick_check calls memstick_alloc_card,
+> which may indefinitely waiting for mrq_complete completion that will
+> never occur because rtsx_usb_ms_request sees eject=true and skips
+> scheduling work, memstick_set_rw_addr waits forever for completion.
+>
+> This causes a deadlock when memstick_remove_host tries to flush_workqueue,
+> waiting for memstick_check to complete, while memstick_check is blocked
+> waiting for mrq_complete completion.
+>
+> Fix this by setting removing=true at the start of rtsx_usb_ms_drv_remove,
+> before any work cancellation. This ensures memstick_check will see the
+> removing flag immediately and exit early, avoiding the deadlock.
+>
+> Fixes: 62c59a8786e6 ("memstick: Skip allocating card when removing host")
+> Signed-off-by: Jiayi Li <lijiayi@kylinos.cn>
+> Cc: stable@vger.kernel.org
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
+>
 > ---
-> Note:
-> For HS400, the division ratio is 0. I don't have a board with HS400 mode
-> to verify the fix.
->
-> I believe for HS400 Mode,
-> SDnH = 800MHz
-> Divider 2 = 400MHz
-> Division ratio 0 = 400 / 2 = 200MHz
->
-> and for HS200/SDR-104
-> SDnH = 800 MHz
-> Divider 4 = 200 MHz
-> Division ratio 1:1 = 200MHz
->
-> Please correct me, if it is wrong.
+> v1 -> v2:
+> Added Cc: stable@vger.kernel.org
 > ---
->  drivers/mmc/host/renesas_sdhi_core.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
+>  drivers/memstick/core/memstick.c    | 1 -
+>  drivers/memstick/host/rtsx_usb_ms.c | 1 +
+>  2 files changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index fb8ca03f661d..a41291a28e9b 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -222,7 +222,11 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
->                         clk &= ~0xff;
->         }
+> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
+> index 043b9ec756ff..95e65f4958f2 100644
+> --- a/drivers/memstick/core/memstick.c
+> +++ b/drivers/memstick/core/memstick.c
+> @@ -555,7 +555,6 @@ EXPORT_SYMBOL(memstick_add_host);
+>   */
+>  void memstick_remove_host(struct memstick_host *host)
+>  {
+> -       host->removing = 1;
+>         flush_workqueue(workqueue);
+>         mutex_lock(&host->lock);
+>         if (host->card)
+> diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
+> index 3878136227e4..5b5e9354fb2e 100644
+> --- a/drivers/memstick/host/rtsx_usb_ms.c
+> +++ b/drivers/memstick/host/rtsx_usb_ms.c
+> @@ -812,6 +812,7 @@ static void rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+>         int err;
 >
-> -       sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & CLK_CTL_DIV_MASK);
-> +       clock = clk & CLK_CTL_DIV_MASK;
-> +       if (clock != 0xff)
-> +               host->mmc->actual_clock /= (1 << (ffs(clock) + 1));
-> +
-> +       sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clock);
->         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
->                 usleep_range(10000, 11000);
+>         host->eject = true;
+> +       msh->removing = true;
+>         cancel_work_sync(&host->handle_req);
+>         cancel_delayed_work_sync(&host->poll_card);
 >
 > --
-> 2.43.0
+> 2.47.1
 >
