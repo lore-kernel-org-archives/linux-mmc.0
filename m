@@ -1,116 +1,100 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD70A30E0D2
-	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D047B318131
+	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:55:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755514522; cv=none; b=UI8FL8NfI9l9VGQZc0Gxib1fxkcLt1DJT1DrzxXB6tGXAQF1NN2cM22YPwpljvdnUdOFC9kgN3lumfzZo6Kn1d0BbOv0LstzPy3dt7OjeIzy51YjXwhJW1GYP6m3QDE5qFIAnnaSojaNe58XbtQ7xmALbQbL7TbIlAQdiNRkxaA=
+	t=1755514525; cv=none; b=Ry88P5IOfbJwJN/33ciHmxHTUQKs0GaADN535Zr0v21B5wNhfvkUgQMhTRxphvyytP2eLMbeEZJRDrHQ96P6LR8rJUdDSHgb/5FyLXr1GlfMreZHJIGxGs7ioGNdpQ+6qGCELVcYqwcMLvmBL8NOHVg0oEAQq2/FLrK/d38ND+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755514522; c=relaxed/simple;
-	bh=/gdGHTrneWQqmOYRuvh9CIob29j8iPfzhl61xeqmBF4=;
+	s=arc-20240116; t=1755514525; c=relaxed/simple;
+	bh=1B8WjQD8aKur+ksU7TSq0KwogfrxP4QpmvyI6HIFcPo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fWgZCIdtAZXulbFAZ7JyIdDh0ssjMxEi9TOqUATYo6/+vJ20EOtljfCFOxPNqWTAybC2i0M6YYx9Gk0HEXkFQbisfXkafhhU9soN7LjE9Zc/EGYDRt6kJ1qQGpVSZX6cvv/HnBnVIHf0s5AM0zYovV0QE5HDMw9s59/VVTOu2jY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=OF7IOqeb; arc=none smtp.client-ip=209.85.128.176
+	 To:Cc:Content-Type; b=EnEApPHB8T9wDP6r7imDvECGMTOte8RhtlciQCzV6AOsydPYYyTcB8yVJfvTUg+sXbHHwBVSo3WYJxQdG5IIX9qMqOyxymSIOJ8fHDKTzU1XK4VI0g5phBBI8TWgy9yt6+LZXUSVel4xo9Omi6O7dlL7vOdDbV+T07OUNjtih8Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JHBEvL/1; arc=none smtp.client-ip=209.85.128.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="OF7IOqeb"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-71d603f13abso34523927b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JHBEvL/1"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-71d60504bf8so33610767b3.2
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:55:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755514519; x=1756119319; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1755514523; x=1756119323; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=CIznuZ7T7PsTVuExPL1E/1VfmJgJv6V7rfdbbABcMss=;
-        b=OF7IOqebzp4B/GdXZ7M1on4q3vS95oCZIPQyeP9vzsfKvOXXTQb6i/ZFf92kSP6pna
-         DPAgDVa38F0n2TTyn1RfGhN/NlrSfKaBOludYR2Po4dGuXqlFjk21G/9hUsDogW0oSS3
-         stFgmfEWo2omNgMv4oRuWZikMsBo0UVPlqsUvNsakSdbqiwtNJCwgEnR8j8vTiGhYVNy
-         BRSWMCp/P2HArk3rKfH24DeuPvfW2nD/rKUai0jtBsW/aaVEt0SwnDIDLKIJtpKTO/mG
-         cqbC50rIB4uTBGl0AmL/d0ESaFGZUhpn2p/HtdBvH6t0X2umtTadoOxnjKlYjtL1OiZ2
-         h8cA==
+        bh=ENmtRIEDhmxvQ94icOvqd3Bf6ucroHzMRQeAeEkJDjc=;
+        b=JHBEvL/1S/HcebvdO9h2iVbobK3c7au2nja8q0crcsVVU5ZV/LjEtLoCpH4QxISnXz
+         Ty4dUx6dieK8iemoCVZ6Aj8yfJVvsW2nfcECPtspLb6nPkEr3ZqNu3W8B8DtjwV3zkhX
+         5vo7U+58q/jHw200wvvKzW0S2PjwuzyGaUQuxNVKNuZJKFwcGbTRNf2XbG1S8UWr46ft
+         AKANHDkdvTZpO27NL1JkxGoyc56LSzNJf/4cisj/LhOKKosgl7Lo42315v0pg/HA82Z2
+         KGNvYuMhK8EvyMUiu8Mf9yZe/SXSoGKcg5tpO7T1sbvV+8jBpch9FxQp2CGhOnT5qRbt
+         7qdA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755514519; x=1756119319;
+        d=1e100.net; s=20230601; t=1755514523; x=1756119323;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=CIznuZ7T7PsTVuExPL1E/1VfmJgJv6V7rfdbbABcMss=;
-        b=fwJRErVyJWIL7Xq+3JW2oBv9QQ6+pIEtwT0NNW/3cDpw/20dRI/k4H9okSujRCFs1h
-         aOSk2DtDyK02dnoLAIAvtqrjp/d/J8RAqlnAtLUymoSFkKMbCBqxfqgSIg953Qld1S22
-         pi+LcNDhne1BkPy+Rp249FvVXBJTYHl5ac03xaZ3KcwxUhr4Hjfi8xLfvw4RBT0JR1/V
-         5B6OngQXOgrH5oMhl1gqvCPtnb1ljp1ZpdkCUJhO7nhxLijC4Tp4K0CIHEZhgIaJq33Z
-         d3xBjgfijKIoiXZw8XH8SKLSrP1t4xZ54To4cxa5mOYrJLbqNHAK3PO8xiX4/FTqm0XA
-         Dbvg==
-X-Forwarded-Encrypted: i=1; AJvYcCVw5z/Qiadzrp6VLOZEHJStqPk7VNDJogl27C+EVABiTZW7u3wrHoUkOTDqe6ZwzaQrHXx/zB1rlAM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywuq2JdHXV6HG8fQxTqv5ReAAemnsU2aemIsFERpEBW1rDfR+AC
-	zEPIi9HZ4fGiHZyM8Kpvf1aykuEtoV6kQRyL9BJUV5icjd5p3vspJUTiA1vcSfPnIZP2YiA399f
-	0fIUyQ2IzYjht2wyqKh7ayAzdKDjt+8DK7YPpLzqkrw==
-X-Gm-Gg: ASbGncsx+icIOmuL1ZQwKcN0/LeLmelwG22tF8IbtMvPga94oCkOrm9Fr0HQI/TM/3V
-	9gDEX5Kq7X7Js1xdiKkIjLpOR91F0zBSNBi4tgoib6kHLLoDu1jgfWGKwp+/lSg2RJGyg9D5BVW
-	At/Fml8BfZn6dPCa0/F7Jd+D9QSTfD178pSjlN1L7tR96RJzpIv9YEOaZD+HbUHWjpo9rd44+SE
-	68QRRF2
-X-Google-Smtp-Source: AGHT+IH66Dj8WNKlffsTjeVMHpVPRufHU47TKI73ywlHa/Ok4uJvh4KyxWFO4feX4WNsCgPnN/DCJXQlKj8LP+ouHSM=
-X-Received: by 2002:a05:690c:680b:b0:71b:6950:c6cc with SMTP id
- 00721157ae682-71e6de26037mr157669637b3.35.1755514518726; Mon, 18 Aug 2025
- 03:55:18 -0700 (PDT)
+        bh=ENmtRIEDhmxvQ94icOvqd3Bf6ucroHzMRQeAeEkJDjc=;
+        b=Nv7IXWsXY2+t8Ze82xdqxrPvNg/Jyy0EWcPuTRWoN+ACSh2TJ1ij3foWOfc29vy5sh
+         7+qjrnvRg+HxcI9uCxosNsao+3XsD4pSnrMR+2JfyEsoGpre+CdJyo9mq9QpvxGWDZwo
+         WSnwbVmV51umDPtGbFjqv9SvSUzVzMQlS+VXbQsxl6voayutALHisSadd8P1G1XMBj47
+         017roLRKFOFTsI755sj2eRanvAh8cydcn4c5Vj5RQEFXiasdkoakC9WcYdUCTEr5ef5p
+         R1gxBosySO7KS1Ay85d+Y6/emzVaU52OMFT9IxUmn+cKfMqHgqCWKOtSP8bV1Qnvbg+i
+         x/PA==
+X-Forwarded-Encrypted: i=1; AJvYcCXK3UcQ0VI502pw7suT+K+3pzdY9YRZvjEzCO4K+KQd/0jEInSn5ZlgFYBfFeP8vSadCSeHDu5tWxo=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw0kXA1RPSds1IEF/HUKpzMZetW24fog15cCdfgVysjRbz78kKS
+	RFctRU8PKRB85acWTzRJqIh3K3L3CYLSmyu2vZh7SlK4etvMY1LivSoWtQ9uDjXFldn8JOTh9/o
+	Yk5zr2dPa8B7FLnArZKFT8AYRGvOfzxcM6GPz5v7AeA==
+X-Gm-Gg: ASbGncvYMHswETPRwe/YUGzziVAiRLFo19qTVGv9ZgBFJDc7HydJVx7d/LVqBieNK2L
+	LdlIaDDkoGnA6rN36J8rzbB/4dCjwT3PuAeFNEjfUkRwvWvr/uUYQF2qwGkFCoXk54j2eZEQefI
+	yqlsSZ0Hz1ONpsAczkpVHgno4VJQYHFOVFJwZkG0gqJYayytjW5ZnMBT/JxdwXDR88/HK7Nw8TN
+	eKbACX+W5j+MabrO3Q=
+X-Google-Smtp-Source: AGHT+IGFrvcRLmBqC4ykAY5f9r7pHXOXtSKkgdQx0dMA+FB1OXOj4uJgVPQiYyCZtPfzGrL32zU3NCUmh42e+GVA1xk=
+X-Received: by 2002:a05:690c:eca:b0:71a:45f7:b78e with SMTP id
+ 00721157ae682-71e6db0daf0mr134659817b3.26.1755514522745; Mon, 18 Aug 2025
+ 03:55:22 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250725060152.262094-1-alexander.stein@ew.tq-group.com>
-In-Reply-To: <20250725060152.262094-1-alexander.stein@ew.tq-group.com>
+References: <20250728082230.1037917-1-rex.chen_1@nxp.com>
+In-Reply-To: <20250728082230.1037917-1-rex.chen_1@nxp.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 18 Aug 2025 12:54:42 +0200
-X-Gm-Features: Ac12FXygjZDpxgBwolikr0do3iLHNX20_TzBAu8skyfNiyVUVQRmQ-7AdMiWBKk
-Message-ID: <CAPDyKFoWF4G-T72Hhb4_VDvHzTWebpFwq7o5LDH421_VUQnkPA@mail.gmail.com>
-Subject: Re: [PATCH 1/1] dt-bindings: mmc: fsl,esdhc: Add explicit reference
- to mmc-controller-common
-To: Alexander Stein <alexander.stein@ew.tq-group.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Frank Li <Frank.Li@nxp.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Mon, 18 Aug 2025 12:54:45 +0200
+X-Gm-Features: Ac12FXwJq4t3cFVfAr8ETGstDf_wr5B-SQb7QqMcxinPkFAXCan72ZZuywZKj8s
+Message-ID: <CAPDyKFrSYohNh3tFRZoaPjAm=4GOe_Q1P2RS=8GD7i=BhD=UZw@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2]
+To: Rex Chen <rex.chen_1@nxp.com>
+Cc: conor.dooley@microchip.com, bartosz.golaszewski@linaro.org, 
+	viro@zeniv.linux.org.uk, linux-mmc@vger.kernel.org, avri.altman@wdc.com, 
+	shawn.lin@rock-chips.com, adrian.hunter@intel.com, 
+	wsa+renesas@sang-engineering.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 25 Jul 2025 at 08:02, Alexander Stein
-<alexander.stein@ew.tq-group.com> wrote:
+On Mon, 28 Jul 2025 at 10:22, Rex Chen <rex.chen_1@nxp.com> wrote:
 >
-> Even though it is referenced by mmc/mmc-controller.yaml it still raises
-> the warning:
->   esdhc@1560000 (fsl,ls1021a-esdhc): Unevaluated properties are not allowed ('bus-width' was unexpected)
+> [patch 1/2]
+> No change for patch 1
+> [patch 2/2]
+> Add more details in commit message
 >
-> Adding an explicit reference fixes this.
+> Rex Chen (2):
+>   mmc: core: SPI mode remove cmd7
+>   mmc: mmc_spi: multiple block read remove read crc ack
 >
-> Signed-off-by: Alexander Stein <alexander.stein@ew.tq-group.com>
+>  drivers/mmc/core/sdio.c    | 6 +++++-
+>  drivers/mmc/host/mmc_spi.c | 2 +-
+>  2 files changed, 6 insertions(+), 2 deletions(-)
+>
+> --
+> 2.25.1
+>
 
-Applied for next, thanks!
+The series applied for next, thanks!
+
+Do you think we should tag these for stable kernels too?
 
 Kind regards
 Uffe
-
-
-> ---
-> I don't know if this is a tooling problem or whatever. I would have
-> expected that mmc-controller-common.yaml is added via
-> mmc-controller.yaml. But apparently this is missing resulting in the
-> given warning. Hence adding the reference
->
->  Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-> index 62087cf920df8..f45e592901e24 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-> @@ -90,6 +90,7 @@ required:
->
->  allOf:
->    - $ref: sdhci-common.yaml#
-> +  - $ref: mmc-controller-common.yaml#
->
->  unevaluatedProperties: false
->
-> --
-> 2.43.0
->
