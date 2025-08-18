@@ -1,82 +1,83 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 553AA261B73
-	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:56:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7218261B99
+	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:56:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755514565; cv=none; b=kYuizuVSMNiufiU6xOuwgMBouwgmoen60/g+NHUM+y65x39VesTIiew1Z3vMurUamc4AIWri8QxWn3sPLaCRubPswVYqE93L1JoSdJTUP86NDYpbUC0drtcFTk8JD4F5SV76rokU7X2zkJLfHIuW3vxsgiIrPbtYGAivtV5P86w=
+	t=1755514569; cv=none; b=lAdzbn9y18FNvRym8hQYQjoeJDT3gyp8rHTndmOtmLxDnX8/NcPSCxPp1DogGIgHHlKiSBEfdsqqgNdkKvNZHmoGERlVJIaowokGul7oCYbK7stLzNY0wS92yEc5bA/mVcLXuCOJVeyhowYJSRzXeSlHnaxTac89uwjdOjPLBlA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755514565; c=relaxed/simple;
-	bh=cQh8V4MSHSCq71cP6DQMTdJxWDVSbyeNn5X8j2CTEFg=;
+	s=arc-20240116; t=1755514569; c=relaxed/simple;
+	bh=jxnu/FEhDIb+0x6qULMoBWUNLjUiRBXs0W3MtieNfUg=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=isLLMNRCfHERJhVZ7Ogir22SKgITDM2u9UFFYv9E2F3aeaY8womVvExwxTZ0gyy39z2oXVX/VhL+S0UKARlzxkTQuRkYJmO7XI+PkCO7ilj2bkWhUBUlws5ulVXPGbWg+t8OiDxxW5A46tSKecvpZdHkl3Fgvg4z1M9/UQtoN0w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=v/UTAnAs; arc=none smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=D4PyFtqcf5GlgYssN/iR+K8ZUyxbmgccTRDulxGtB+gw3uygnLNUC1Xe6GTy/ACclVmgOb/J7tKAbEAJ/BJgVdURiBcnOEiMNdtsRbWzwqIDQsK9ASkfoUvIJ04JDntN3KJOH4E6/p0yDCxWvJ26GL6zun3G78ySigJkoiOIGnQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YZiegpXC; arc=none smtp.client-ip=209.85.219.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="v/UTAnAs"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-71d601859f5so32019857b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:56:03 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YZiegpXC"
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e94cfaa274fso658247276.0
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:56:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755514562; x=1756119362; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1755514566; x=1756119366; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Gf/h379UViupe5+NY6kzAfazLWPK0066Pyufbr9DpO4=;
-        b=v/UTAnAsfZ+Xw+dqX1khMjCRZWNf8vHq2E7fq22bPB7stDeNTYEPNAIPYzRbDRko9E
-         E+V+ikM9tFz9gnqR3tpd32FbvAKD4MmW+GKaOfR+VFbrU0VcHmwFlKCAIPDzoRnWeDUM
-         Mi7TutgMukyq8gI7Fx/QmyX4r5SDBp5DDPnYNZLX1DHrx2o7R3AnM7LwQSs7l8RNtvwA
-         oTJETfl3B9xncplFgg6mkufeCFJgmjqPTJ2MJflsvZOGxQfmb892SvGSDl9NOFBPYTgr
-         RSRSC+uA9X4zjig+8leK5sFHp5hAqieq0k4V0Lyo6kla/BM2IKAHoow8bIqhywZ84SwP
-         3jnQ==
+        bh=1b8N64MqBxtdg6Md3INHXM2YASwrOfNIX/lKR/8J+KM=;
+        b=YZiegpXCulLsU4XmcakeiwDIx9ChQntdLnJBhl/mS6H7G+RsM7marWno4jHEj+ZK1d
+         9+GHUX9jj3xpcAPFTCstwwuKj3Gw5YsZJ4vvg5cX2P9h3pUKk8aIL5HLTJ8kl2Qf8ovS
+         zVjsyS6QJmeMgMpl9k6rsoNtKy+N7CQ1EiJNA1Vwq+5duY3f+MNBRGyc8eFPfecXLC/W
+         7HhLeOlmijNJZcuQ2tD8vNlSOzXkZ3MtumnpOFSZcZA3L3W4pSsv4QlR8El7cwh9ddph
+         8k9oKhPaNQF93ptmeTsGQ189SBH1/Ap6Kk42AIUILtEaIYpfwk6h/XBJWi2FiuVgSBaE
+         w09Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755514562; x=1756119362;
+        d=1e100.net; s=20230601; t=1755514566; x=1756119366;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Gf/h379UViupe5+NY6kzAfazLWPK0066Pyufbr9DpO4=;
-        b=KNvStmgxvlg4xuKlckeYaXpcNNYPLnivW58pGrSc7YvAuiFBC6csYsbyE6jNd6FvgD
-         6bzrLYeW4XQRJsfnmwVNhH3voliDoAwGOXAcWz+T7rgx+IalNpNGYJUmHj33IGGA7fQQ
-         JL6oMNQPkdinKMFwJIbWLbLgTOQ5MgiBKdNsD6SlYsWQQEz/34dAxfyrpzqmnc9SI1Rk
-         uqlufdPN1x7IwT5CW7iVdrdBsoWyiD2iA9Y0tlBPxTCLsoZ27cPcNgILX+OM7ZbQcROr
-         YuE8foPTuF4b8YfXEw0uYviPRUtetr+oQuwPZ3t67VehXEpOeUdfsrN2txb5UtloxgvP
-         3cqw==
-X-Forwarded-Encrypted: i=1; AJvYcCV7PTqd6UDJOWIJ1/QUfcGXCm4CqCaXwcs361qQKaGZh9ZcjC7raOEYR6RId93SHK1GHx4ZvpNyx6c=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxyKI52pbpqYGZ/wAywZrhHZghH5mxE0hBezeYvfoBtKUPPGkuA
-	3EAQqyIZc2w6il8Pw6h5xyQUm5qnIPan4qfce2zWhI1GP5YVOK2wPWLTxYwbqIjJtYv6y+JQxRk
-	qDh8afk9/0SysIqu/MccIjVXyEJ9JSIrbgTNjp/oFVQ==
-X-Gm-Gg: ASbGnctnfxyhwF8ItLvCcFvIOpxFowl+Kgmah3d8z65O64ze5aTb54+0nFSKZUGN1ha
-	3iZECtyE1R7+fQTN5i7fCtBsZnOLn0ai4ylkP0MDNrKy7kMrkgFEhBWer58QgkZCtRSdiSiYfjL
-	srqQ0cHSwxpIhqot/aVmt6PkUbMh7scKy23AGy7/7oqn8O4H0eN1tmzD5MUQYAFEkuM5tbi+Szw
-	fTX3iO5
-X-Google-Smtp-Source: AGHT+IGpvbrDi4hUl48Zba/3/rBPfc8NraKhAc4AfrhtmjNoilheS+QB0WSMwYa9e4qE4gIontoviX/Mi8xWRVPKC+8=
-X-Received: by 2002:a05:690c:6605:b0:71a:3849:f88e with SMTP id
- 00721157ae682-71e6ddb2fb5mr146226437b3.17.1755514562208; Mon, 18 Aug 2025
- 03:56:02 -0700 (PDT)
+        bh=1b8N64MqBxtdg6Md3INHXM2YASwrOfNIX/lKR/8J+KM=;
+        b=BH8IobqpEHhzTgIDd9aZ7kkT43/ffNHebdhCoJMb1pZiHKAMHAIHuNZOQc4gXS3Q5h
+         +Q8KtZY6HGsd5p7s3olae/FEavstaZWmom2vgabO5MgI3elHEwCcsKt167oMmAHdRd84
+         YJFGVXq8upl78djoUWXnRD1Ah54+wpc+xDKGWCvj1vmuRNrEbwFyS3y2o7Z0ACP+CNwy
+         Q0f8yoRZAytGrzTo4/jbe/roZ6dEGrBTYRiy/0lgqNtG0Nc2uhk7Te82TBh1I85xcBba
+         NghPVrwlBPWajhc4nDjfXWdmMahMqbNYDv0lNwC5FxfAAkbWI0ztCn/lG6Agd9eo8pwT
+         3arg==
+X-Forwarded-Encrypted: i=1; AJvYcCVpqt6jl6zyo+Dr6CKEUt0epX8XsDlIaFSb8RYUWTTcsL/D0WTRgwcenhpsnafXWEmhJOOjiHSe2SY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywrsp9N301vlnYxyA7s10qxYPWfLgNI5CE1bDFQrfwGO5+hsz7U
+	taq7RR4kDLUJiDejOL2SQTZQtY+xIhG30Q58nbwyi9RuawnuKcDILzSjG0N3nUrJ1PJNNZ7haFo
+	UBa700GqFQJou32sSUa/PzgL9iRou4GgC/hMcRRL8YKmMQO5HgrVp
+X-Gm-Gg: ASbGncunl1+7ZH+8XLtTUPhbKZZSxLjNa4/h8g7lfFwH574h76ai91hU5aNka/pi1mS
+	AGa5Xm0C0EmR3mrHMcdorqVDG331sXr0PDNoRL7ul3aGslhclBcY+B/Qh2+Kp+9aJV1RITJiEMC
+	MUYQILwU8Jh0ui59p6HwHbEO/NpxDNQaPUnvgF8r+p2xhz1unwhcsQ6UD7sE4ua2iUaeLzDMPUT
+	7R9uOcK
+X-Google-Smtp-Source: AGHT+IH15gkPWwCvc5PywNU5D/QK0nGxHhRHiumu/lEM3Txj8hZO2Y340R+Kfm/qCGDXBKcQw9v3YihoNtgwIe7LbYU=
+X-Received: by 2002:a05:690c:74c8:b0:71b:f500:70c0 with SMTP id
+ 00721157ae682-71e6d9f2fe0mr141459777b3.6.1755514565675; Mon, 18 Aug 2025
+ 03:56:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250812092908.101867-1-zhao.xichao@vivo.com>
-In-Reply-To: <20250812092908.101867-1-zhao.xichao@vivo.com>
+References: <20250813161517.4746-1-wsa+renesas@sang-engineering.com> <20250813161517.4746-11-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20250813161517.4746-11-wsa+renesas@sang-engineering.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 18 Aug 2025 12:55:26 +0200
-X-Gm-Features: Ac12FXwa1IzQiF3BDBFOd_R2WYobNi0PZbh6LfTaEAaRBfzgD2wCR6ijr3XXs00
-Message-ID: <CAPDyKFqeA895DBDKJUcerXAYLGG_Em-vBu9eRMoVEwc0LyX=ug@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-mx-sdhc: use PTR_ERR_OR_ZERO() to simplify code
-To: Xichao Zhao <zhao.xichao@vivo.com>
-Cc: neil.armstrong@linaro.org, khilman@baylibre.com, jbrunet@baylibre.com, 
-	martin.blumenstingl@googlemail.com, linux-mmc@vger.kernel.org, 
-	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Date: Mon, 18 Aug 2025 12:55:30 +0200
+X-Gm-Features: Ac12FXzrKO2nm0jcbAZqxzbeAAtZHnjZ63sxktJhx4Uo6D36k115qSOwu0HiS6c
+Message-ID: <CAPDyKFqiF2b-LOr8aGgy--u76=z14dCwUveTN_zQOKLpjyhY3A@mail.gmail.com>
+Subject: Re: [PATCH 10/21] mmc: remove unneeded 'fast_io' parameter in regmap_config
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-kernel@vger.kernel.org, Mark Brown <broonie@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 12 Aug 2025 at 11:29, Xichao Zhao <zhao.xichao@vivo.com> wrote:
+On Wed, 13 Aug 2025 at 18:16, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> Use the standard error pointer macro to shorten the code and simplify.
+> When using MMIO with regmap, fast_io is implied. No need to set it
+> again.
 >
-> Signed-off-by: Xichao Zhao <zhao.xichao@vivo.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Applied for next, thanks!
 
@@ -85,25 +86,24 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/meson-mx-sdhc-clkc.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
+> No dependencies, can be applied directly to the subsystem tree. Buildbot is
+> happy, too.
 >
-> diff --git a/drivers/mmc/host/meson-mx-sdhc-clkc.c b/drivers/mmc/host/meson-mx-sdhc-clkc.c
-> index cbd17a596cd2..6d619bd0a8dc 100644
-> --- a/drivers/mmc/host/meson-mx-sdhc-clkc.c
-> +++ b/drivers/mmc/host/meson-mx-sdhc-clkc.c
-> @@ -84,10 +84,8 @@ static int meson_mx_sdhc_gate_clk_hw_register(struct device *dev,
->                 return ret;
+>  drivers/mmc/host/sdhci_am654.c | 1 -
+>  1 file changed, 1 deletion(-)
 >
->         clk_bulk_data[bulk_index].clk = devm_clk_hw_get_clk(dev, hw, name_suffix);
-> -       if (IS_ERR(clk_bulk_data[bulk_index].clk))
-> -               return PTR_ERR(clk_bulk_data[bulk_index].clk);
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index e4fc345be7e5..8a099508b939 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -95,7 +95,6 @@ static const struct regmap_config sdhci_am654_regmap_config = {
+>         .reg_bits = 32,
+>         .val_bits = 32,
+>         .reg_stride = 4,
+> -       .fast_io = true,
+>  };
 >
-> -       return 0;
-> +       return PTR_ERR_OR_ZERO(clk_bulk_data[bulk_index].clk);
->  }
->
->  int meson_mx_sdhc_register_clkc(struct device *dev, void __iomem *base,
+>  struct timing_data {
 > --
-> 2.34.1
+> 2.47.2
 >
