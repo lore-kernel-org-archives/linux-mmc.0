@@ -1,140 +1,135 @@
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+Received: from fhigh-a1-smtp.messagingengine.com (fhigh-a1-smtp.messagingengine.com [103.168.172.152])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81D9C319847;
-	Mon, 18 Aug 2025 11:49:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=60.244.123.138
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B76B5189;
+	Mon, 18 Aug 2025 12:08:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.152
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755517748; cv=none; b=t0RTOjjYfEMSuzynThY6RaQ055rKJ+nzZ3+CvujNBr9GxZ2LM8vTAbr36AZbvj/7yggVfKdX2JYkeD6JFlyYsLkFQz1m8BLXYXMFDnJvxBd2hrWyDObnOh4V8gD2TS+5zCOPtU4s8Tiu0DTLM9yiDxj0/fi1zm5j35hkmh8srF0=
+	t=1755518925; cv=none; b=SXePj0vC8MB4aMgvKDUUca1GzhgRVTcGvybx4dOa5+Yo/fHETBaHIc1SvmxJHuczkzY0wY08YoXQRmGQWx4RypwhivU6qh5uQzpqjN6tjaEbcdO36Asgx7vJWe5YnwawDreLcYzQdcZnyBx3fvWCokGVgX05Ytx92VhQR1wgCuY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755517748; c=relaxed/simple;
-	bh=SAKxyLiHdmjapI/0v82ehEcOeJtGZPTqAaeUY42UAmE=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=k/Pqsxz3eN6hwy5KnhEGT7/KE0P/AMhYKiJgGmUr+J6ktt56IM7aXr/t6+sc5hnCfbtqrETmEEp6t5Hlt72aYKGM78Ib0Mj7xuLTF4O8tRmIjJ6ic0H+VYLDfqw3XRLD6MjO5p/a8pU1sYPD/2jSIuLB6UDpTg6XIibjJfrjV4U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=Ts5uEDSh; arc=none smtp.client-ip=60.244.123.138
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
+	s=arc-20240116; t=1755518925; c=relaxed/simple;
+	bh=bh6OIfO4EELLg333GBIihIzx8g8wZEEARzEm1lA1wgA=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=GcnTPGJC44wviaev5x/0RPefkTUD9U5cizGOKm6OnJesHPuEjS7lHAEkOkYt7M9b1pCyUYTX3r2qnSOjfhD/pb7UKRuSDGcj5jKZTyExeUCyKKr8u+9IURZsg1hdvngwpsnr2zS2oUCXpLdHrGlmQ4pudW8V/5D/WBWjbDNPoXo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=PZFmpJE1; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=QlsHi7Pm; arc=none smtp.client-ip=103.168.172.152
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="Ts5uEDSh"
-X-UUID: 543ec4de7c2911f08729452bf625a8b4-20250818
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=lyPRgtJIrl+DCxGXCftDbyg/RUx12+pyN49Ht/Rz3Ao=;
-	b=Ts5uEDShSHdxHPRZ2FhRS2c1TFPtaL1BpYBKo8Wrn4bpNQ+ZhzSC+t+sApbc+VkFz2j6co1AHYNqgHhx6Eziz6KSrfGC5YZ+0gpL6mAs/9jpDACIzXhqBSorRLQelj0j3sKB+bPshGr+Zqnkhf5SORTqJA0kwtobjubl24JOy3Y=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.3.3,REQID:93b5a144-6427-463a-969f-6aff181eb48e,IP:0,UR
-	L:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
-	release,TS:-5
-X-CID-META: VersionHash:f1326cf,CLOUDID:6e869844-18c5-4075-a135-4c0afe29f9d6,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:-5,Content:0|15|50,EDM:-3,IP:
-	nil,URL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,L
-	ES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 2,SSN|SDN
-X-CID-BAS: 2,SSN|SDN,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
-X-UUID: 543ec4de7c2911f08729452bf625a8b4-20250818
-Received: from mtkmbs09n2.mediatek.inc [(172.21.101.94)] by mailgw01.mediatek.com
-	(envelope-from <mengqi.zhang@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 217536809; Mon, 18 Aug 2025 19:48:59 +0800
-Received: from mtkmbs13n2.mediatek.inc (172.21.101.108) by
- mtkmbs13n1.mediatek.inc (172.21.101.193) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.39; Mon, 18 Aug 2025 19:48:58 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs13n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1258.39 via Frontend Transport; Mon, 18 Aug 2025 19:48:57 +0800
-From: Mengqi Zhang <mengqi.zhang@mediatek.com>
-To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, Krzysztof Kozlowski
-	<krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Matthias Brugger
-	<matthias.bgg@gmail.com>, AngeloGioacchino Del Regno
-	<angelogioacchino.delregno@collabora.com>, Wenbin Mei
-	<wenbin.mei@mediatek.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-mediatek@lists.infradead.org>, Mengqi Zhang
-	<mengqi.zhang@mediatek.com>
-Subject: [PATCH] dt-bindings: mmc: Add compatible for MT8189 SoC
-Date: Mon, 18 Aug 2025 19:47:27 +0800
-Message-ID: <20250818114855.8637-1-mengqi.zhang@mediatek.com>
-X-Mailer: git-send-email 2.46.0
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="PZFmpJE1";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="QlsHi7Pm"
+Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
+	by mailfhigh.phl.internal (Postfix) with ESMTP id 0BFA61400177;
+	Mon, 18 Aug 2025 08:08:43 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-05.internal (MEProxy); Mon, 18 Aug 2025 08:08:43 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm3; t=1755518923;
+	 x=1755605323; bh=xQdgyGA5COaCrzWAChLbDJ+k+lzLu0z9z0SAOXUT6IU=; b=
+	PZFmpJE1SIC0ikjX2oHaqNM6DnBCadXASQTuhYXCsK+w7Y5zL8DAAQR6ob3dDUqe
+	jwLZnpxKI6/IibAOqlxOoGneXquxM0rCvsL+CaaJhGSeb465FVt7EC4Jz6N8bTjh
+	atf3fbws0BCfEqZJ4nQGhOZSmDGKZ98PThJ7u65IraJQIsA0RsnuJXhGxQBXsee5
+	AShi0wFgrQYfo2OkZpMXJ+Tnz1693FY8rIkQxWh41pEaPzcy8/5aTAXRUqIrz8nI
+	gnps6evmvxVP8d12IchRmVa2m5XGkGn5Ilm171BSI1QaTlfC7BaiWnOmmQIz89DG
+	uvzNw7vsaevQAabV7cgyLg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1755518923; x=
+	1755605323; bh=xQdgyGA5COaCrzWAChLbDJ+k+lzLu0z9z0SAOXUT6IU=; b=Q
+	lsHi7Pm1rZLZHQJtksrghMt0VUT9jNPcm3xovM5rJ/CCW7qxyh9loEB/g8EO6Ajp
+	8TRXN6BIWUjvtzN0isKS+bO4l0fdXqQWA2csTPSuwbRIIwKPYiYUNvHg2IEcQbEo
+	XdwwRqUZ66MCPb5WIvvSPUP1/GOaoqHWVwtg2JfkioPnqNSKxeu2/uOh368n9+GQ
+	YGycwqlzmA8c+c74gCW7DPHY1Stb6FHkmi5D5IVbxDiEtTxPbY9KuN0NEQgHx4oS
+	GgdlZr9hcpksMzjDaB/BJWvGV1e/c83HkAR915BdEEYnobWKsTRSToeyPB+eyPzK
+	url7v9zbKtder0cz6B0lg==
+X-ME-Sender: <xms:yRejaCqIZ3AGCURGRIlytMnCHfErMm7O_syE0cyNe-2YuKo50f-OCA>
+    <xme:yRejaArSGBva9y0cZZZ4lTFsL4VtQI3dW-1yB_FTQHtmWAA7rOJJBSjlSK7rCmUob
+    MtBeHreYZw0lPd1dpE>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdduhedvheejucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceu
+    rghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujf
+    gurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddtnecuhfhrohhmpedftehrnhgu
+    uceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrthhtvg
+    hrnhephfdthfdvtdefhedukeetgefggffhjeeggeetfefggfevudegudevledvkefhvdei
+    necuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprghrnh
+    gusegrrhhnuggsrdguvgdpnhgspghrtghpthhtohepudekpdhmohguvgepshhmthhpohhu
+    thdprhgtphhtthhopegtrghtrghlihhnrdhmrghrihhnrghssegrrhhmrdgtohhmpdhrtg
+    hpthhtoheprhhosghinhdrmhhurhhphhihsegrrhhmrdgtohhmpdhrtghpthhtohepughi
+    nhhgrdifrghnghessghsthdrrghipdhrtghpthhtohepghhorhguohhnrdhgvgessghsth
+    drrghipdhrtghpthhtohepsghsthdquhhpshhtrhgvrghmsegsshhtrghirdhtohhppdhr
+    tghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtth
+    hopegtohhnohhrodgutheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepkhhriihkodgu
+    theskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepkhhriihksehkvghrnhgvlhdrohhrgh
+X-ME-Proxy: <xmx:yRejaF6BKJ9KbL9B2ut29tSL58MeD3qPX_I_sQ3FXIg2oS7mws-kbw>
+    <xmx:yRejaJeSxwQ2DaDjOy7Yp2mOZ20MbZ9bT8d1Lu-05voCl9vG9NIl_A>
+    <xmx:yRejaOJxxIDgpIHsMGO_c8hSSz_LiLB1-QwXCuyLAcPu5gbq73CdNg>
+    <xmx:yRejaHnbPPwLJ82TxrvKEU3-LqT0cm8Cpn8rPVdHvfWRuTILLcW2sw>
+    <xmx:yxejaDqi-zXF_mMXhoi3J-UJkoYExW_yqvxdzr2z3myvYYWDiKMWXgo9>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 1E17D700068; Mon, 18 Aug 2025 08:08:41 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-ThreadId: AXmPW4ZJGxVF
+Date: Mon, 18 Aug 2025 14:08:20 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "Ulf Hansson" <ulf.hansson@linaro.org>,
+ "yangzh0906@thundersoft.com" <yangzh0906@thundersoft.com>
+Cc: "Krzysztof Kozlowski" <krzk@kernel.org>, "Rob Herring" <robh@kernel.org>,
+ krzk+dt@kernel.org, "Conor Dooley" <conor+dt@kernel.org>,
+ "Catalin Marinas" <catalin.marinas@arm.com>, "Will Deacon" <will@kernel.org>,
+ "Adrian Hunter" <adrian.hunter@intel.com>,
+ "Robin Murphy" <robin.murphy@arm.com>, ding.wang@bst.ai,
+ "gordon.ge" <gordon.ge@bst.ai>, bst-upstream <bst-upstream@bstai.top>,
+ linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ soc@lists.linux.dev, linux-kernel@vger.kernel.org
+Message-Id: <689f58fe-6339-4a3e-9aad-175bff7681f8@app.fastmail.com>
+In-Reply-To: 
+ <CAPDyKFon7Q2UHOJbbVtPTHvqxYeOJr8HK5BOk6TAJaph8FcwvQ@mail.gmail.com>
+References: <20250812123110.2090460-1-yangzh0906@thundersoft.com>
+ <20250812123110.2090460-6-yangzh0906@thundersoft.com>
+ <CAPDyKFon7Q2UHOJbbVtPTHvqxYeOJr8HK5BOk6TAJaph8FcwvQ@mail.gmail.com>
+Subject: Re: [PATCH v3 5/8] mmc: sdhci: add Black Sesame Technologies BST C1200
+ controller driver
 Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Add a compatible string for the MT8189 SoC's mtk-sd mmc controllers.
+On Mon, Aug 18, 2025, at 12:48, Ulf Hansson wrote:
+> On Tue, 12 Aug 2025 at 14:31, Albert Yang <yangzh0906@thundersoft.com> wrote:
 
-Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
----
- .../devicetree/bindings/mmc/mtk-sd.yaml       | 29 +++++++++++++++++++
- 1 file changed, 29 insertions(+)
+>> +       /*
+>> +        * Silicon constraints for BST C1200:
+>> +        * - System RAM base is 0x800000000 (above 32-bit addressable range)
+>> +        * - The eMMC controller DMA engine is limited to 32-bit addressing
+>> +        * - SMMU cannot be used on this path due to hardware design flaws
+>> +        * - These are fixed in silicon and cannot be changed in software
+>> +        *
+>> +        * Bus/controller mapping:
+>> +        * - No registers are available to reprogram the address mapping
+>> +        * - The 32-bit DMA limit is a hard constraint of the controller IP
+>> +        *
+>> +        * Given these constraints, an SRAM-based bounce buffer in the 32-bit
+>> +        * address space is required to enable eMMC DMA on this platform.
+>> +        */
+>> +       err = bst_sdhci_reallocate_bounce_buffer(host);
+>> +       if (err) {
+>> +               dev_err(&pdev->dev, "Failed to allocate bounce buffer: %d\n", err);
+>> +               goto err_remove_host;
+>> +       }
+>
+> FYI, I will be awaiting a confirmation from Arnd to be with the above
+> hack, before I queue this up.
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index 6dd26ad31491..1285dddeaec9 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -25,6 +25,7 @@ properties:
-           - mediatek,mt8135-mmc
-           - mediatek,mt8173-mmc
-           - mediatek,mt8183-mmc
-+          - mediatek,mt8189-mmc
-           - mediatek,mt8196-mmc
-           - mediatek,mt8516-mmc
-       - items:
-@@ -192,6 +193,7 @@ allOf:
-             - mediatek,mt8183-mmc
-             - mediatek,mt8186-mmc
-             - mediatek,mt8188-mmc
-+            - mediatek,mt8189-mmc
-             - mediatek,mt8195-mmc
-             - mediatek,mt8196-mmc
-             - mediatek,mt8516-mmc
-@@ -240,6 +242,7 @@ allOf:
-               - mediatek,mt7986-mmc
-               - mediatek,mt7988-mmc
-               - mediatek,mt8183-mmc
-+              - mediatek,mt8189-mmc
-               - mediatek,mt8196-mmc
-     then:
-       properties:
-@@ -319,6 +322,32 @@ allOf:
-             - const: source_cg
-             - const: crypto
- 
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: mediatek,mt8189-mmc
-+    then:
-+      properties:
-+        clocks:
-+         items:
-+            - description: source clock
-+            - description: HCLK which used for host
-+            - description: independent source clock gate
-+            - description: bus clock used for internal register access
-+            - description: peripheral bus clock gate
-+            - description: AXI bus clock gate
-+            - description: crypto clock used for data encrypt/decrypt (optional)
-+        clock-names:
-+          items:
-+            - const: source
-+            - const: hclk
-+            - const: source_cg
-+            - const: bus_clk
-+            - const: pclk_cg
-+            - const: axi_cg
-+            - const: crypto
-+
-   - if:
-       properties:
-         compatible:
--- 
-2.46.0
+The explanations here are clear enough to me,
 
+Acked-by: Arnd Bergmann <arnd@arndb.de>
