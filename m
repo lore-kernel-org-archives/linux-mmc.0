@@ -1,109 +1,120 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+Received: from mail-vk1-f176.google.com (mail-vk1-f176.google.com [209.85.221.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7218261B99
-	for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 10:56:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29D702877FB;
+	Mon, 18 Aug 2025 11:00:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755514569; cv=none; b=lAdzbn9y18FNvRym8hQYQjoeJDT3gyp8rHTndmOtmLxDnX8/NcPSCxPp1DogGIgHHlKiSBEfdsqqgNdkKvNZHmoGERlVJIaowokGul7oCYbK7stLzNY0wS92yEc5bA/mVcLXuCOJVeyhowYJSRzXeSlHnaxTac89uwjdOjPLBlA=
+	t=1755514847; cv=none; b=OKv2QlQn36VmTx9VpTcFuFPXn5E95rrW58K9XI0BOP1htamzjGhNTI5GRJ1JuwPIiwIVryVIBG+R/9sMG7R6w5iaakQJqKA4hMZy19ofMLTeeeSrbQuzFLvAk2GBvFEFLMISY5fkzrCLhc1orcG7QDe1TRFSxIikN6X1KcplVjk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755514569; c=relaxed/simple;
-	bh=jxnu/FEhDIb+0x6qULMoBWUNLjUiRBXs0W3MtieNfUg=;
+	s=arc-20240116; t=1755514847; c=relaxed/simple;
+	bh=RbrfUulgvtPSV8etcDyWwRW3ch/eMAY72nRtjUWiU8Y=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=D4PyFtqcf5GlgYssN/iR+K8ZUyxbmgccTRDulxGtB+gw3uygnLNUC1Xe6GTy/ACclVmgOb/J7tKAbEAJ/BJgVdURiBcnOEiMNdtsRbWzwqIDQsK9ASkfoUvIJ04JDntN3KJOH4E6/p0yDCxWvJ26GL6zun3G78ySigJkoiOIGnQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YZiegpXC; arc=none smtp.client-ip=209.85.219.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YZiegpXC"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e94cfaa274fso658247276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Aug 2025 03:56:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755514566; x=1756119366; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1b8N64MqBxtdg6Md3INHXM2YASwrOfNIX/lKR/8J+KM=;
-        b=YZiegpXCulLsU4XmcakeiwDIx9ChQntdLnJBhl/mS6H7G+RsM7marWno4jHEj+ZK1d
-         9+GHUX9jj3xpcAPFTCstwwuKj3Gw5YsZJ4vvg5cX2P9h3pUKk8aIL5HLTJ8kl2Qf8ovS
-         zVjsyS6QJmeMgMpl9k6rsoNtKy+N7CQ1EiJNA1Vwq+5duY3f+MNBRGyc8eFPfecXLC/W
-         7HhLeOlmijNJZcuQ2tD8vNlSOzXkZ3MtumnpOFSZcZA3L3W4pSsv4QlR8El7cwh9ddph
-         8k9oKhPaNQF93ptmeTsGQ189SBH1/Ap6Kk42AIUILtEaIYpfwk6h/XBJWi2FiuVgSBaE
-         w09Q==
+	 To:Cc:Content-Type; b=HU/yYGvqvuHhPmN94v8sK+WeDulrxlqdJkXccGsJBRGrw4xf/jP7trDsSiqETWg+eR6C38yRlddJLnTC6zsxI+VYtERW/H/vfOfhANAfiFz4DIgaVWigq9mBDxyw2hE/T1xxSGBfBWi/V55VgO1eQx/uDwjbhrCP4QPZmme0hFo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vk1-f176.google.com with SMTP id 71dfb90a1353d-53b17531009so1252108e0c.3;
+        Mon, 18 Aug 2025 04:00:44 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755514566; x=1756119366;
+        d=1e100.net; s=20230601; t=1755514844; x=1756119644;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=1b8N64MqBxtdg6Md3INHXM2YASwrOfNIX/lKR/8J+KM=;
-        b=BH8IobqpEHhzTgIDd9aZ7kkT43/ffNHebdhCoJMb1pZiHKAMHAIHuNZOQc4gXS3Q5h
-         +Q8KtZY6HGsd5p7s3olae/FEavstaZWmom2vgabO5MgI3elHEwCcsKt167oMmAHdRd84
-         YJFGVXq8upl78djoUWXnRD1Ah54+wpc+xDKGWCvj1vmuRNrEbwFyS3y2o7Z0ACP+CNwy
-         Q0f8yoRZAytGrzTo4/jbe/roZ6dEGrBTYRiy/0lgqNtG0Nc2uhk7Te82TBh1I85xcBba
-         NghPVrwlBPWajhc4nDjfXWdmMahMqbNYDv0lNwC5FxfAAkbWI0ztCn/lG6Agd9eo8pwT
-         3arg==
-X-Forwarded-Encrypted: i=1; AJvYcCVpqt6jl6zyo+Dr6CKEUt0epX8XsDlIaFSb8RYUWTTcsL/D0WTRgwcenhpsnafXWEmhJOOjiHSe2SY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywrsp9N301vlnYxyA7s10qxYPWfLgNI5CE1bDFQrfwGO5+hsz7U
-	taq7RR4kDLUJiDejOL2SQTZQtY+xIhG30Q58nbwyi9RuawnuKcDILzSjG0N3nUrJ1PJNNZ7haFo
-	UBa700GqFQJou32sSUa/PzgL9iRou4GgC/hMcRRL8YKmMQO5HgrVp
-X-Gm-Gg: ASbGncunl1+7ZH+8XLtTUPhbKZZSxLjNa4/h8g7lfFwH574h76ai91hU5aNka/pi1mS
-	AGa5Xm0C0EmR3mrHMcdorqVDG331sXr0PDNoRL7ul3aGslhclBcY+B/Qh2+Kp+9aJV1RITJiEMC
-	MUYQILwU8Jh0ui59p6HwHbEO/NpxDNQaPUnvgF8r+p2xhz1unwhcsQ6UD7sE4ua2iUaeLzDMPUT
-	7R9uOcK
-X-Google-Smtp-Source: AGHT+IH15gkPWwCvc5PywNU5D/QK0nGxHhRHiumu/lEM3Txj8hZO2Y340R+Kfm/qCGDXBKcQw9v3YihoNtgwIe7LbYU=
-X-Received: by 2002:a05:690c:74c8:b0:71b:f500:70c0 with SMTP id
- 00721157ae682-71e6d9f2fe0mr141459777b3.6.1755514565675; Mon, 18 Aug 2025
- 03:56:05 -0700 (PDT)
+        bh=plE3Vb+AIpRujCyDm2rxlOVen/ii4JSJJa6Lxd+bP8w=;
+        b=F/j0mK5o0DguS3dkCZW54OXszOYlRFaIc0+j8OcsdykrhvYvh7Nzi58NLv7B2jJgQQ
+         bSIZYCOM65GmhCRRCOfwBYliu8wctiL+eOdlBtB6GoFUyXnMIP/jBC1kNFHGz+cJjuRd
+         nA5Vr+Hg7OosqwJMaoKRd3sr4A5TUqS+Ot1Z82GX6GVpN09Na7XJL1QOdDub356WHn9e
+         h+WGEHRdPmq+uP1CF+T5b1QUskmbLaZghHuSA/1MvlQL4qh/iw518b7PK+0jfi/aO22y
+         UuwQJUnMSraVyHePC3qgAz+BLRxZoC9qtk13S0jgyzVbjHKwcdoNWP8zPYenbbqwQ7F8
+         NN+A==
+X-Forwarded-Encrypted: i=1; AJvYcCUlmNi6+kN3uefglQBkumng/sFsAUIshl5Y6qR6Mc+3rT7k8JxoKUxGCLjlt/ERDZNx/itWIZvX0XU=@vger.kernel.org, AJvYcCVwWt6vpy7caDcin9t7SrcstWvSK3QrMyXfNsdSGAdEa5wkxMSNsCBUAYIhChnlWN7yG2f/fcPKSX2yboV9paeAiTU=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyc796Dr5UD4796scVdN2QgU8WJb3IiaLAxDl3OL8MAlYhFquXs
+	r7ii60otQDHgY9fKA6ekp5rDDIwZUa3nVobXjwubeYi50k0NH9ZSolAU60yrZIey
+X-Gm-Gg: ASbGncvAXPGAPvBfP/8Vz59wxl/G2Q2whK1l+V36EXn4//XJApl8/cu7F7+CAxTKUUk
+	ksHJpCmPbEyMgPyyrU6UuKIVuL+uJyf9FHnSR8RIKjNYXlSa+tU7BzBN4rPIxfPSn0W0eJNZziV
+	PtbXygcfeRL0/8UEV4kKM0A7y4a5IFUP3Le5uOotH4MkOOzgfZNwhLQljP39CfhILpjoY7wSUKz
+	5mSL7E5vO58oZEdoMfaHLGcO9bANKL6gGnaSthRUIEXDGB5A4yT+IUuHnQM4VxRYIqtrGxt96Qi
+	6+y+4eFQ0h4mbRltaTlc4vG7UpTx9OCkVuM6tJ9/g7mdojES1GBIrKl2QV5/oYLN6K8rH9JQGhI
+	YtsYWKu+4qjruVVsoXAy8dUPAdlXlSiHlNVlej/QuzlgYH+3qVw4prZZ9YSZIr7M0Ce3gOLE=
+X-Google-Smtp-Source: AGHT+IFVD2R7GaWGaIrKyEsz7oDzk1+06DvwmkAX2blx1hHlXW9Rymk4XRrMeLPTilDVBL29O081tg==
+X-Received: by 2002:a05:6122:4f97:b0:531:4041:c4c5 with SMTP id 71dfb90a1353d-53b2b866f32mr3238104e0c.7.1755514841760;
+        Mon, 18 Aug 2025 04:00:41 -0700 (PDT)
+Received: from mail-vs1-f41.google.com (mail-vs1-f41.google.com. [209.85.217.41])
+        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-53b2bd99c6bsm1885833e0c.8.2025.08.18.04.00.40
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 18 Aug 2025 04:00:41 -0700 (PDT)
+Received: by mail-vs1-f41.google.com with SMTP id ada2fe7eead31-50f8bd52e06so1227797137.3;
+        Mon, 18 Aug 2025 04:00:40 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUCXT/0MbWa1vUhgAdWXB2Q/gGU49rHGqEkq5G9AX5PM+MX4+f1Ck40AHrlU5v5/B/QLgZCdoqNhG8=@vger.kernel.org, AJvYcCUsFawBvX2XOli2ztRg32R7uSB5JS1f23FK5nDsol97595HozpXJim/f/11uHkEGb+1MWa/axfwdBhSef0vaHDuszA=@vger.kernel.org
+X-Received: by 2002:a05:6102:b15:b0:4fd:3b67:4572 with SMTP id
+ ada2fe7eead31-5126cb46251mr3684513137.15.1755514840548; Mon, 18 Aug 2025
+ 04:00:40 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250813161517.4746-1-wsa+renesas@sang-engineering.com> <20250813161517.4746-11-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20250813161517.4746-11-wsa+renesas@sang-engineering.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 18 Aug 2025 12:55:30 +0200
-X-Gm-Features: Ac12FXzrKO2nm0jcbAZqxzbeAAtZHnjZ63sxktJhx4Uo6D36k115qSOwu0HiS6c
-Message-ID: <CAPDyKFqiF2b-LOr8aGgy--u76=z14dCwUveTN_zQOKLpjyhY3A@mail.gmail.com>
-Subject: Re: [PATCH 10/21] mmc: remove unneeded 'fast_io' parameter in regmap_config
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-kernel@vger.kernel.org, Mark Brown <broonie@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+References: <20250629203859.170850-1-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20250629203859.170850-1-biju.das.jz@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Mon, 18 Aug 2025 13:00:29 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdWwuK8zKm+j4KEZaGcABSaNmmy7CKUFa+8r0t43obYTEg@mail.gmail.com>
+X-Gm-Features: Ac12FXxVvj9GCtdNBq17QDSntgoupM8yR_J4TU7haNJjKCbcMj1krY_iNwHXfTI
+Message-ID: <CAMuHMdWwuK8zKm+j4KEZaGcABSaNmmy7CKUFa+8r0t43obYTEg@mail.gmail.com>
+Subject: Re: [PATCH RFT] mmc: host: renesas_sdhi: Fix the actual clock
+To: Biju Das <biju.das.jz@bp.renesas.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, 
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>, Biju Das <biju.das.au@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 13 Aug 2025 at 18:16, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> When using MMIO with regmap, fast_io is implied. No need to set it
-> again.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Hi Biju,
 
-Applied for next, thanks!
+On Sun, 29 Jun 2025 at 22:39, Biju Das <biju.das.jz@bp.renesas.com> wrote:
+> Wrong actual clock reported, if the SD clock division ratio is other
+> than 1:1(bits DIV[7:0] in SD_CLK_CTRL are set to 11111111).
+>
+> On high speed mode, cat /sys/kernel/debug/mmc1/ios
+> Without the patch:
+> clock:          50000000 Hz
+> actual clock:   200000000 Hz
+>
+> After the fix:
+> clock:          50000000 Hz
+> actual clock:   50000000 Hz
+>
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-Kind regards
-Uffe
+Thanks for your patch!
 
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -222,7 +222,11 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
+>                         clk &= ~0xff;
+>         }
+>
+> -       sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & CLK_CTL_DIV_MASK);
+> +       clock = clk & CLK_CTL_DIV_MASK;
+> +       if (clock != 0xff)
 
-> ---
-> No dependencies, can be applied directly to the subsystem tree. Buildbot is
-> happy, too.
->
->  drivers/mmc/host/sdhci_am654.c | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index e4fc345be7e5..8a099508b939 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -95,7 +95,6 @@ static const struct regmap_config sdhci_am654_regmap_config = {
->         .reg_bits = 32,
->         .val_bits = 32,
->         .reg_stride = 4,
-> -       .fast_io = true,
->  };
->
->  struct timing_data {
-> --
-> 2.47.2
->
+Perhaps CLK_CTL_DIV_MASK?
+
+> +               host->mmc->actual_clock /= (1 << (ffs(clock) + 1));
+> +
+> +       sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clock);
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
+>                 usleep_range(10000, 11000);
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
