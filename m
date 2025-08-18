@@ -1,163 +1,243 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BC0831A059;
-	Mon, 18 Aug 2025 12:17:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 038613218A0;
+	Mon, 18 Aug 2025 12:32:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755519453; cv=none; b=R6Lsgg6sL5PWxU0wgbgq9JiYw073hg2t74tsO2cjPJO7cpuRJ1FzRwFwKt9/dqXMAt/5aTMqfp4Z74IeYa6kqftLd2dYpX5GiYEgzdla954ScYCxLmEXvhZoolnVrkdcg723urEsrZgwuN4CZ570ZJB7ou0AAtUNcbalXsF2W+Q=
+	t=1755520362; cv=none; b=HLYYCWigbpUiIZMt4aclnYFCrnndrk9yuSlpEzDhFB0Ls+tptwuHgRvRJpj5NpTMNlmYDRQgX5Pywxjk3Bem7uJ+HqEQdt/lCNL04moU3EQQQYoy4EF3mXePnx+jRKen3ZSiKKm8a9KXwwEDgpZ7PAQT+g3NaKH4a4bYdukI3qg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755519453; c=relaxed/simple;
-	bh=pN2ktZgnpU5sK96YS6Tu1DHHMe1tgA4d0/aTsg8hRIQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RWnKc93zeiyKf2m+v4qt83w8QGaW0Y6SsLros6BbD+mkfF5CoeIgCXrp9PR8cUCmNaj5p2EOpYRgH6FuRB3OwRrH9V+BnXyqNCmahp2JUxsgUL7H9/xHFAO0LoV7F9zb4UvrfsVQD9veCO2g2r/PJgyAKoruPzfmXg1daBCt4Pw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UY9MJR43; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1755520362; c=relaxed/simple;
+	bh=7eSRICr9B26HKAoDMxNcGLfCteb0eI2rm+hgRBUQyog=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=A4+L74HFFcIS6R0W/tS4Wkl9K8haYkm2mPPQl6undlb1feWUpt4472PjwKxSRih7Oz0Ov7vlbebw3ygplqDqhlba1RUqDb+EEQ2d455qZkKw/bz9VUF3zmvcUJenMz5mQr5XBmAIxvgj9vdbgB6aB+yaCx0rsfDxkKVZWUnIIPc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sNKP/cEL; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UY9MJR43"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD5FBC113D0;
-	Mon, 18 Aug 2025 12:17:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sNKP/cEL"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC8CFC4CEEB;
+	Mon, 18 Aug 2025 12:32:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755519453;
-	bh=pN2ktZgnpU5sK96YS6Tu1DHHMe1tgA4d0/aTsg8hRIQ=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=UY9MJR43L0uR+Ikd9ylXHu1aOmrBA/7g3/+yN2tAuxDOj3YyjJx0UZKXzFmsx3ke1
-	 UDQe2i9fdHOCDsbeGjoNKn2sG071EmlrEC6xIX32MB/iQZI6amgVRHR3NuSbI6EjwV
-	 VRm9qdF7us/uUn+esSPNRA8ubckZ8gd7fuOh7dAVmSB7gYg+jBlXwSrUo2bgXxuyaB
-	 R0OCt5oEXS8VMDsKFUn3mQhFdf0ANPxX6saS0vAU4Gb7MqtS4cC7+R5GaIlCvnZJYm
-	 3lxoWXkBBwTTFKSh+FK9Drb/T6bxGdaGnXyyusPD/qPGIuvUAh/VLqvzJWUVrdTHn0
-	 jbBrDJEUMw+gw==
-Message-ID: <401876fa-0786-44b4-aadc-da85ee829880@kernel.org>
-Date: Mon, 18 Aug 2025 14:17:27 +0200
+	s=k20201202; t=1755520361;
+	bh=7eSRICr9B26HKAoDMxNcGLfCteb0eI2rm+hgRBUQyog=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=sNKP/cELaKAbUtQPchxOJzytvkwlPDmBv0FHejwEq0xutUvJa9PgG1kOQRW+hkeEk
+	 N8RI6C43cKmceMYq1elsIzRZ8h+Y16HamueVb08NXa9pqYZSrAus+iRuE9t0t0Fb8j
+	 8gtwgTC/u0f1U7KgZcHL0freAyXOHB8RU2wwsGfUhxoKqdiO0jDaFjvMZYunIbmUqn
+	 TZtXI7geAxzyaLgYPgqg/EsK3CSdTXtyQTCDUUJNAvjOa81MAAYJV6PlEUY/lviivG
+	 AU6dYoyNwBiZh1huZ8hqX4eosMYgJAWbr/WQbkuIS9FqmB0bcftkkWO1LRmySEFpOb
+	 3kWslGyysVDGw==
+Date: Mon, 18 Aug 2025 20:15:22 +0800
+From: Jisheng Zhang <jszhang@kernel.org>
+To: Bough Chen <haibo.chen@nxp.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Aubin Constans <aubin.constans@microchip.com>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Manuel Lauss <manuel.lauss@gmail.com>,
+	=?utf-8?B?TWljaGHvv73vv70gTWlyb3Pvv73vv71hdw==?= <mirq-linux@rere.qmqm.pl>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Heiko Stuebner <heiko@sntech.de>,
+	Russell King <linux@armlinux.org.uk>,
+	Chaotian Jing <chaotian.jing@mediatek.com>,
+	Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+	Shawn Guo <shawnguo@kernel.org>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	Fabio Estevam <festevam@gmail.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Michal Simek <michal.simek@amd.com>,
+	Eugen Hristev <eugen.hristev@linaro.org>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Ben Dooks <ben-linux@fluff.org>, Viresh Kumar <vireshk@kernel.org>,
+	Orson Zhai <orsonzhai@gmail.com>,
+	Baolin Wang <baolin.wang@linux.alibaba.com>,
+	Chunyan Zhang <zhang.lyra@gmail.com>,
+	Patrice Chotard <patrice.chotard@foss.st.com>,
+	Thierry Reding <thierry.reding@gmail.com>,
+	Jonathan Hunter <jonathanh@nvidia.com>,
+	Chen-Yu Tsai <wens@csie.org>,
+	Jernej Skrabec <jernej.skrabec@gmail.com>,
+	Samuel Holland <samuel@sholland.org>,
+	Alexey Charkov <alchark@gmail.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH 18/38] mmc: sdhci-esdhc-imx: use modern PM macros
+Message-ID: <aKMZWjM536EOHDn9@xhacker>
+References: <20250815013413.28641-1-jszhang@kernel.org>
+ <20250815013413.28641-19-jszhang@kernel.org>
+ <DU0PR04MB94962993C99F922CCF93FB6F9034A@DU0PR04MB9496.eurprd04.prod.outlook.com>
+ <aKAfRFPJQM_EtAKF@xhacker>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: Add compatible for MT8189 SoC
-To: Mengqi Zhang <mengqi.zhang@mediatek.com>,
- Chaotian Jing <chaotian.jing@mediatek.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
- AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
- Wenbin Mei <wenbin.mei@mediatek.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mediatek@lists.infradead.org
-References: <20250818114855.8637-1-mengqi.zhang@mediatek.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250818114855.8637-1-mengqi.zhang@mediatek.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <aKAfRFPJQM_EtAKF@xhacker>
 
-On 18/08/2025 13:47, Mengqi Zhang wrote:
-> Add a compatible string for the MT8189 SoC's mtk-sd mmc controllers.
-
-Where is any user of that?
-
+On Sat, Aug 16, 2025 at 02:03:48PM +0800, Jisheng Zhang wrote:
+> On Fri, Aug 15, 2025 at 03:23:56AM +0000, Bough Chen wrote:
+> > > -----Original Message-----
+> > > From: Jisheng Zhang <jszhang@kernel.org>
+> > > Sent: 2025Ҵ8??15?? 9:34
+> > > To: Ulf Hansson <ulf.hansson@linaro.org>; Aubin Constans
+> > > <aubin.constans@microchip.com>; Nicolas Ferre
+> > > <nicolas.ferre@microchip.com>; Alexandre Belloni
+> > > <alexandre.belloni@bootlin.com>; Claudiu Beznea
+> > > <claudiu.beznea@tuxon.dev>; Manuel Lauss <manuel.lauss@gmail.com>;
+> > > Micha?? Miros??aw <mirq-linux@rere.qmqm.pl>; Jaehoon Chung
+> > > <jh80.chung@samsung.com>; Krzysztof Kozlowski <krzk@kernel.org>; Alim
+> > > Akhtar <alim.akhtar@samsung.com>; Heiko Stuebner <heiko@sntech.de>;
+> > > Russell King <linux@armlinux.org.uk>; Chaotian Jing
+> > > <chaotian.jing@mediatek.com>; Matthias Brugger <matthias.bgg@gmail.com>;
+> > > AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>;
+> > > Shawn Guo <shawnguo@kernel.org>; Sascha Hauer <s.hauer@pengutronix.de>;
+> > > Pengutronix Kernel Team <kernel@pengutronix.de>; Fabio Estevam
+> > > <festevam@gmail.com>; Adrian Hunter <adrian.hunter@intel.com>; Kamal
+> > > Dasu <kamal.dasu@broadcom.com>; Al Cooper <alcooperx@gmail.com>;
+> > > Broadcom internal kernel review list
+> > > <bcm-kernel-feedback-list@broadcom.com>; Florian Fainelli
+> > > <florian.fainelli@broadcom.com>; Bough Chen <haibo.chen@nxp.com>; Michal
+> > > Simek <michal.simek@amd.com>; Eugen Hristev <eugen.hristev@linaro.org>;
+> > > Vignesh Raghavendra <vigneshr@ti.com>; Ben Dooks <ben-linux@fluff.org>;
+> > > Viresh Kumar <vireshk@kernel.org>; Orson Zhai <orsonzhai@gmail.com>;
+> > > Baolin Wang <baolin.wang@linux.alibaba.com>; Chunyan Zhang
+> > > <zhang.lyra@gmail.com>; Patrice Chotard <patrice.chotard@foss.st.com>;
+> > > Thierry Reding <thierry.reding@gmail.com>; Jonathan Hunter
+> > > <jonathanh@nvidia.com>; Chen-Yu Tsai <wens@csie.org>; Jernej Skrabec
+> > > <jernej.skrabec@gmail.com>; Samuel Holland <samuel@sholland.org>; Alexey
+> > > Charkov <alchark@gmail.com>
+> > > Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+> > > Subject: [PATCH 18/38] mmc: sdhci-esdhc-imx: use modern PM macros
+> > > 
+> > > Use the modern PM macros for the suspend and resume functions to be
+> > > automatically dropped by the compiler when CONFIG_PM or
+> > > CONFIG_PM_SLEEP are disabled, without having to use #ifdef guards.
+> > > 
+> > > This has the advantage of always compiling these functions in, independently of
+> > > any Kconfig option. Thanks to that, bugs and other regressions are subsequently
+> > > easier to catch.
+> > 
+> > Hi Jisheng,
 > 
-> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
-> ---
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 29 +++++++++++++++++++
->  1 file changed, 29 insertions(+)
+> Hi,
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> index 6dd26ad31491..1285dddeaec9 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -25,6 +25,7 @@ properties:
->            - mediatek,mt8135-mmc
->            - mediatek,mt8173-mmc
->            - mediatek,mt8183-mmc
-> +          - mediatek,mt8189-mmc
->            - mediatek,mt8196-mmc
->            - mediatek,mt8516-mmc
->        - items:
-> @@ -192,6 +193,7 @@ allOf:
->              - mediatek,mt8183-mmc
->              - mediatek,mt8186-mmc
->              - mediatek,mt8188-mmc
-> +            - mediatek,mt8189-mmc
+> > 
+> > When I remove all the configs under Power management options I got the following build warning:
+> > 
+> > drivers/mmc/host/sdhci-esdhc-imx.c:2079:12: warning: ??sdhci_esdhc_resume?? defined but not used [-Wunused-function]
+> >  2079 | static int sdhci_esdhc_resume(struct device *dev)
+> >       |            ^~~~~~~~~~~~~~~~~~
+> >   CC      drivers/mmc/host/cqhci-core.o
+> > drivers/mmc/host/sdhci-esdhc-imx.c:2017:12: warning: ??sdhci_esdhc_suspend?? defined but not used [-Wunused-function]
+> >  2017 | static int sdhci_esdhc_suspend(struct device *dev)
+> >       |            ^~~~~~~~~~~~~~~~~~~
+> 
+> Hmm interesting, what's test toolchain? I tested this patch with gcc14
+> with below three combinations before sending out, no warnings at all:
+> PM + PM_SLEEP
+> PM only
+> !PM + ! PM_SLEEP
+> 
+> The sdhci_esdhc_suspend|resume are referenced by SYSTEM_SLEEP_PM_OPS.
+> The pm_sleep_ptr() macro does the tricky, when both PM and PM_SLEEP are
+> disabled, they are optimized out.
 
-huh? This sets the clocks
+Hi Haibo,
 
->              - mediatek,mt8195-mmc
->              - mediatek,mt8196-mmc
->              - mediatek,mt8516-mmc
-> @@ -240,6 +242,7 @@ allOf:
->                - mediatek,mt7986-mmc
->                - mediatek,mt7988-mmc
->                - mediatek,mt8183-mmc
-> +              - mediatek,mt8189-mmc
->                - mediatek,mt8196-mmc
->      then:
->        properties:
-> @@ -319,6 +322,32 @@ allOf:
->              - const: source_cg
->              - const: crypto
->  
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: mediatek,mt8189-mmc
-> +    then:
-> +      properties:
-> +        clocks:
-> +         items:
+Could you plz share your toolchain information? And FYI, today I tested
+clang with the above three combinations, also no warnings. So I'm really
+interested how to reproduce your warnings.
 
-As this as well..
+And the kernel CI build robot hasn't sent out warning email so far.
 
-And obviously never tested.
-
-Please don't send untested (and buggy) code :(. Why do you think
-reviewers should spend time on it instead of tools?
-
-Best regards,
-Krzysztof
+Thanks
+> 
+> So can you plz kindly show your toolchain? I will check
+> 
+> Thanks
+> > 
+> > Regards
+> > Haibo Chen
+> > > 
+> > > Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+> > > ---
+> > >  drivers/mmc/host/sdhci-esdhc-imx.c | 13 +++----------
+> > >  1 file changed, 3 insertions(+), 10 deletions(-)
+> > > 
+> > > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > index a040c0896a7b..a7a5df673b0f 100644
+> > > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > @@ -1650,7 +1650,6 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host
+> > > *host)
+> > >  	}
+> > >  }
+> > > 
+> > > -#ifdef CONFIG_PM_SLEEP
+> > >  static void sdhc_esdhc_tuning_save(struct sdhci_host *host)  {
+> > >  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host); @@ -1707,7
+> > > +1706,6 @@ static void sdhc_esdhc_tuning_restore(struct sdhci_host *host)
+> > >  		       host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+> > >  	}
+> > >  }
+> > > -#endif
+> > > 
+> > >  static void esdhc_cqe_enable(struct mmc_host *mmc)  { @@ -2016,7
+> > > +2014,6 @@ static void sdhci_esdhc_imx_remove(struct platform_device
+> > > *pdev)
+> > >  		cpu_latency_qos_remove_request(&imx_data->pm_qos_req);
+> > >  }
+> > > 
+> > > -#ifdef CONFIG_PM_SLEEP
+> > >  static int sdhci_esdhc_suspend(struct device *dev)  {
+> > >  	struct sdhci_host *host = dev_get_drvdata(dev); @@ -2112,9 +2109,7 @@
+> > > static int sdhci_esdhc_resume(struct device *dev)
+> > > 
+> > >  	return ret;
+> > >  }
+> > > -#endif
+> > > 
+> > > -#ifdef CONFIG_PM
+> > >  static int sdhci_esdhc_runtime_suspend(struct device *dev)  {
+> > >  	struct sdhci_host *host = dev_get_drvdata(dev); @@ -2188,12 +2183,10
+> > > @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+> > >  		cpu_latency_qos_remove_request(&imx_data->pm_qos_req);
+> > >  	return err;
+> > >  }
+> > > -#endif
+> > > 
+> > >  static const struct dev_pm_ops sdhci_esdhc_pmops = {
+> > > -	SET_SYSTEM_SLEEP_PM_OPS(sdhci_esdhc_suspend, sdhci_esdhc_resume)
+> > > -	SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
+> > > -				sdhci_esdhc_runtime_resume, NULL)
+> > > +	SYSTEM_SLEEP_PM_OPS(sdhci_esdhc_suspend, sdhci_esdhc_resume)
+> > > +	RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
+> > > +sdhci_esdhc_runtime_resume, NULL)
+> > >  };
+> > > 
+> > >  static struct platform_driver sdhci_esdhc_imx_driver = { @@ -2201,7 +2194,7
+> > > @@ static struct platform_driver sdhci_esdhc_imx_driver = {
+> > >  		.name	= "sdhci-esdhc-imx",
+> > >  		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+> > >  		.of_match_table = imx_esdhc_dt_ids,
+> > > -		.pm	= &sdhci_esdhc_pmops,
+> > > +		.pm	= pm_ptr(&sdhci_esdhc_pmops),
+> > >  	},
+> > >  	.probe		= sdhci_esdhc_imx_probe,
+> > >  	.remove		= sdhci_esdhc_imx_remove,
+> > > --
+> > > 2.50.0
+> > 
