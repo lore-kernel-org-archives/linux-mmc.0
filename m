@@ -1,251 +1,223 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83A492EB841;
-	Tue, 19 Aug 2025 13:21:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.19
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755609709; cv=fail; b=ZsgsABlPwQHXP/ECTTyHWWKmEtWJZKfeMIcLgHtvW7GSEX1xugQpManoEXBEpQZBvHolEn1uVRqE8ciqFs85vhmcCCwWh/qPjO7dYPjhDw69ow6WN3PAJNpUiS4Q0mA9k2RnIJfl+/lZOz+mY8RbKBJFZ18L8SqhxfQNTotxUdk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755609709; c=relaxed/simple;
-	bh=0kdIy4WfOXUlSth3/cnr93SRxFXJeE3mxWf69JTW1c0=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=JIhTlM+0y2Kh1vKucqnGHOWf0AYtz3+KqIz7gg+zMb0gAlRq/zQG0m4E1hA104M3gSGVoqYxhh/DxsSKHA37bxHAPnyawAS5oDKPG4B1cDE1cHNgf9ITHwxMRm7Yfq3glxKWSItQoCwYCl2XgV6mqKRb7kKzDyV1fIAP32Y+tYU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=W1VX5XCH; arc=fail smtp.client-ip=192.198.163.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24CB6322C87
+	for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2025 13:30:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1755610212; cv=none; b=tUppRh5ZdSgwJt1Nvdwr4tXZ/twlte5oqPljLeLkfgdzexWLuOHaUMlisrravvkj9ezoNcaW5hqc+DOg4q2OYr6zML1PqQqaXwhE/D/z5QLM7yliP3U2/10vdf95bFAU88nFgN+eOWo8W1dz2DcmRky9HM3/RC6Tbm9DtCn8GXU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1755610212; c=relaxed/simple;
+	bh=2x+nr/skuUY4GRQ7BJZyYRfCE9ow4uQQSWbYeTrmKMM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=cYRRste5lOkWU8l9sp0w4OEWaYDI7P2LImcxZEn9LujqNusCcFwwaJHVLi+54j1onSFO3we73MiZm9Fbk21k6TUd8yCJKq314dCjmYxbcMBwjz7AcibeMNUTTFgbApw5fFcYB4D4GdVbDAPF7UB/RXrEXasYnXOqCpFur2OUMn8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=KESBohmF; arc=none smtp.client-ip=209.85.221.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="W1VX5XCH"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1755609707; x=1787145707;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=0kdIy4WfOXUlSth3/cnr93SRxFXJeE3mxWf69JTW1c0=;
-  b=W1VX5XCHnKRjPov3hsIke+3I3+Kv8xDLzT6I58urhI2G6iWMatWN5bGL
-   6eQVTcH7R6xeFqQvmQo8iAhg3h9lgfaWEjn9w+I98ljmdNBVjv8M+RKKu
-   pgRFUUDvNWKSONWtABwZFGU2h/5SJl/D4t2cDifxrBQVy3C0Qz4I+fIEF
-   mjqEXyUQ3ewChMCFlJaSM/geIKQUlAN7a1GpJq2Df+l19P7szCV6S3Wdm
-   zlqRNWsn5togsRmEiIBCZgI4BZjbeM2A2f77lJzaHm8m/6Si5ik30aw5H
-   20JviUwVTm4s5hOJo0wAUErQxPHSj7pYTkl4bIQ/TYr2a1SQp4d4IHzOw
-   w==;
-X-CSE-ConnectionGUID: /BtNJxxSQnySwip7aBKZzQ==
-X-CSE-MsgGUID: UE//1NbkQIyvEEs2ehUxMg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11527"; a="56881238"
-X-IronPort-AV: E=Sophos;i="6.17,300,1747724400"; 
-   d="scan'208";a="56881238"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Aug 2025 06:21:47 -0700
-X-CSE-ConnectionGUID: PLKyHfg/TMu2nWdDQSmoiw==
-X-CSE-MsgGUID: PZS/ouRhSt2GMalxooMKhQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.17,300,1747724400"; 
-   d="scan'208";a="198709949"
-Received: from fmsmsx902.amr.corp.intel.com ([10.18.126.91])
-  by fmviesa001.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Aug 2025 06:21:46 -0700
-Received: from FMSMSX903.amr.corp.intel.com (10.18.126.92) by
- fmsmsx902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.17; Tue, 19 Aug 2025 06:21:43 -0700
-Received: from fmsedg903.ED.cps.intel.com (10.1.192.145) by
- FMSMSX903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.17 via Frontend Transport; Tue, 19 Aug 2025 06:21:43 -0700
-Received: from NAM12-MW2-obe.outbound.protection.outlook.com (40.107.244.59)
- by edgegateway.intel.com (192.55.55.83) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.17; Tue, 19 Aug 2025 06:21:43 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Fsk5cGyxYzYI8QGV8ODVrTsrSb6dBkXZxEgOcuaH6y7pXRgG8IV/hWS+UIOzVg6zE6/yKcznm1nHhDJrYTOlX/HYp7+AJAwnNPs6gVBy/WvMzPhoH4yk38RF2W8W/SUshjNdeQiLFfafEexNVjUmmUAM2QBP9HhVF61bkKrbh4mxQnRdY18FxkwujWA3zfGlCAHz/rPJ4gybMARO9FxdDs0JO1ZQui9X+M+FTN2VQJ9VLc+tnf2C4kNqQqWhOhn6QEKwlBioL5s+G6GtuJSv/PUbYb3Fpwlw1W8RpSOcS5L7wpEIHaHRfY1N1ujQaIZVKWB80K/H5sWLxsBejuBwQw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=oAo14Fso5H+/Um2vwiGnYeTntFJPkDIrBhoUfGjBc0c=;
- b=S5G5THr7MgTUWqaH/yYZz6EhFdtX70HThHpCkbeQwJQ3ihohk5OblkBkiXrdAddTUzqeWA2SNc67zBmU6HeTBgocIzWPYd2FGmDtycGk/3dsRBZ6NYPGRg7Dk1gQnRuLRvUysJyklX9lqcW2STSn/sMhL89OgN30yud1R+lrfeU99Eu6AixSJXadzAnM8H7vw/gZhCczLl5ail2vFStvH9SfJ3oPoZCzjKuFBAQYHOfnlVCbI4GnVNleyoVLUXRQBgchwuPDpX/7yeKikQrH5g/L8jA6hF2SOnCVCOkPn47Ag/m4ecVC9zhUyWTIlIj3UQIG2moeQ/JYd67DJSsD6g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by PH0PR11MB5781.namprd11.prod.outlook.com (2603:10b6:510:14a::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9031.24; Tue, 19 Aug
- 2025 13:21:40 +0000
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::eeac:69b0:1990:4905]) by IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::eeac:69b0:1990:4905%5]) with mapi id 15.20.9031.023; Tue, 19 Aug 2025
- 13:21:40 +0000
-Message-ID: <f117bc05-893f-4c89-8cb7-3f40a8bfb92d@intel.com>
-Date: Tue, 19 Aug 2025 16:21:36 +0300
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] mmc: sdhci_am654: Disable HS400 for AM62P SR1.0 and
- SR1.1
-To: Andrew Davis <afd@ti.com>, Judith Mendez <jm@ti.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-References: <20250818203310.3066985-1-jm@ti.com>
- <f07d0353-4103-4776-a303-f6a3aad5bf15@ti.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
- 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
- 4, Domiciled in Helsinki
-In-Reply-To: <f07d0353-4103-4776-a303-f6a3aad5bf15@ti.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: DU2PR04CA0027.eurprd04.prod.outlook.com
- (2603:10a6:10:3b::32) To IA1PR11MB7198.namprd11.prod.outlook.com
- (2603:10b6:208:419::15)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KESBohmF"
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-3bb2fb3a48aso2039940f8f.1
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2025 06:30:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1755610208; x=1756215008; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:from:references:cc:to:subject:reply-to:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=knBJfeY7SrNVNfBdfMYQvBglp12XKu8xx5P5bXguUyg=;
+        b=KESBohmFCMGE4wQKy14+BkPAp+cerkvq4Y3UUCqz7nZnJyv+ttF7kK6kWGy5cNVVv9
+         mOteHVfPpqPkMosTjw+X/0Ddxg+nIFA+mVCoC8YhUhtvhwXzF8Q/JmPBRnHFgkjsLjQ2
+         xvQeOxbQapfh0G+nLnTQXiG9iCRFplL0aLJgQLfGovvbBXO4vVoB6F+dvsfR6Rh4Sn8L
+         l7fC1q3WtunSRawWiKzfq0me2QfOHn5Bqlg2c5K8Tub/62bD79nb6VtNFwBWKDEdo1oA
+         NQ0d2T6jPDRtNYXspn1kFlZTMLAx8Wb5q+risrUktihQUgfTgOv2g32IvL6HEAi5sQ/U
+         xCWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1755610208; x=1756215008;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:from:references:cc:to:subject:reply-to:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=knBJfeY7SrNVNfBdfMYQvBglp12XKu8xx5P5bXguUyg=;
+        b=MT/7mV3AK6pGTeWqIzOcizo5I+Dy6Yh3cQk2grhzTtiFKVq2mbWhF1zo+z0zsHnQDj
+         +tY275+dfQ6j5dhKxI1VFKPLK4u61oetKZksLX+Jfmu7eXNWNupA1NHkRW8yvojZDXf+
+         St/0zwdu0kLxF4hMEHA7Mqooa7PfkUG65pHWQNRv6PAi1Gjny/wuB18JtofQSQ8lcm2u
+         45RQ8cTUnSa48VOo/JjRl1GKv5Iio2dNjHpsCimZgJybVDFJW5fCJOeSTD30VxORtoAm
+         NoolP+LQOClxRCliElUiUQU90nphSVLurQZzFs4I0mBpHUQ2Xo+Pchhh56qm2pkxmAsn
+         owWA==
+X-Gm-Message-State: AOJu0YyHeAUeRuREhocdC7IC3dB8R+af9kMW1wXkMclj+qETH3sh/Fdz
+	FpQ/zE1FJ1+uy0GoYPsZtTONYcODieSXbzBLVISqE9WWtvHIzVilr7yDSH4/0HYbFw4=
+X-Gm-Gg: ASbGncsM5dEqdUc0+dhYYmjWImusw5Gu0WRr/mYbl4bRp6cpicSrMtUDO8iSKkltTQX
+	IDZpmTYjm8ZexbgbyKWnoDZMAJmb3+FlCxSeG/RoNY0oLEk2O6Cx2HxD9i6l3gHxOJ8kCfz9MOb
+	rthm03yMEp/M7qJ9aIsjLbQEx0mxOrj8o6u7lcI8xUknA3yUI1sfMaAeDCns7gmjEKAnQnj9b1a
+	Yi99qw8GuDGAIFQIhmbQEQLoBoXvEbUhBXkkO2ZojN9a+0J8H0P8wIX7HK6WDBXrnoSl6Ajp94W
+	vnMqK/TjIsgvFuOgvFaXrRG7OQbN2YrG0HNC8gy8/OYMZcBJELHNYMqFpmpLh1OrMwDU8V/4gVD
+	Hq/PxyNmXXCwpwhSddo0LfCUsBPBrUZ5adnTsIO6QpG7Gv4NHm2sxi0YiUd3l74Lv86j3T35V
+X-Google-Smtp-Source: AGHT+IEW6PEt5c5zZhNLZ/Pcs71M1NCr3MeIFAqMJP3ldCHCFgbCV/V52lZmgSnXSl7zss275nsd2Q==
+X-Received: by 2002:a05:6000:22c5:b0:3b7:974d:5359 with SMTP id ffacd0b85a97d-3c0ecc31562mr2253335f8f.32.1755610208206;
+        Tue, 19 Aug 2025 06:30:08 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:3d9:2080:e7a:79e6:53ed:ce35? ([2a01:e0a:3d9:2080:e7a:79e6:53ed:ce35])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-45b42a908d3sm44412925e9.22.2025.08.19.06.30.07
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 19 Aug 2025 06:30:07 -0700 (PDT)
+Message-ID: <0257f893-fed8-4ee9-ad4e-cdcdad8b5c85@linaro.org>
+Date: Tue, 19 Aug 2025 15:30:06 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|PH0PR11MB5781:EE_
-X-MS-Office365-Filtering-Correlation-Id: a9c87731-93fe-491c-7c11-08dddf235546
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014|7053199007;
-X-Microsoft-Antispam-Message-Info: =?utf-8?B?YlJqU2VydVlsbDY4Q3oxQVZ3MU9RU01vYSs2Q1JuWWpTZEZreWVuNUMraExM?=
- =?utf-8?B?T1R3L2V3QndIYnJFODdTYm9CYzIraDdmYkZmNFlIYk1SV1JzaEV4MGFFV0tx?=
- =?utf-8?B?TkpaSk5xaTFGUUJTTEJxemJTODhHWXFkTkF2L3dpbXBhbDNZemZJeXFmdzg5?=
- =?utf-8?B?ZW8xQlVCS1dLMzhKN2l1NnBBbDRwTyttZTk1SSthVWdlZ2RZUjJDdTdwV1ht?=
- =?utf-8?B?YitLZEZ3OXd0ciswZE15cmhocHZXTTVXYkxhUHBod2czNWRyRGpwNHE1MFYr?=
- =?utf-8?B?bmRGaVZLbGtkS0UvUmxIQ3N0SUlzV3NENGNJOUtBR2E3VTN6QVNKNFo4OERu?=
- =?utf-8?B?LzFVdks3YTREbnU0SytqQ2oxZmFYSTZWQnlKNGdjbUJpNVY2V0k2Uldoazhk?=
- =?utf-8?B?UGlYN1BSN3RIcVFKVHBEaVd1a0dkMTlaWm9GaDRybTlHUVkwZ2EybnJTSnQ5?=
- =?utf-8?B?VHkzTVlGRTlmNFpTYWh3dEdIMVJFanVVWWF1enhzWTRsemU3eGl1RVVOMTlv?=
- =?utf-8?B?Mk9BRU5xbnZzNHVSZzBFNm9KSkVOdGlqK2V5Lzd3cUx1d1BnUUtrRUdZbFNx?=
- =?utf-8?B?SUxYckErRnppa3hRZXNteHhJdmtNNFZnUTdKaWt6U1ZONFhIc0dWeUdYVXNI?=
- =?utf-8?B?em5FbXRVZ2daamVCeTcrd3Y5RjFLR3dVc2l0MjFtTktWdTRsdlUzOG5aNThl?=
- =?utf-8?B?SVhZekNIcHVhVFV0TmE2eUJyVVlkQTdZRDFNRmFZVUVSM0tLOE5UQ25KanVh?=
- =?utf-8?B?bHVGRnlZNmhhLzJoR1J3T0dSWnFVNUZaTDM1WkkwM2VnUm9jdEs5VFJ5azNh?=
- =?utf-8?B?QklRbXZLRWJ3d2loNE1HYVgvZ2lZc2t4eVhQeTlicmdlRTdFS09LWElMKzcw?=
- =?utf-8?B?NWZPQitBQzViczlUN1QyT3RGMElIV3BTdUVQNTlKOHIzaDhHODJQaDZwNkRw?=
- =?utf-8?B?MFY4QlNHSktMR29LTllvL1lxUlRybHlsZy9iQStVb1lWNmpWaVRUVG1CUzM3?=
- =?utf-8?B?bGJjelhKUEhabHkwM1k1a0VFQzlvMWxPVm5YOEtKeWw5VmhIbmgvenNWZEN5?=
- =?utf-8?B?OW9aWGNRTm1OVkZ1TWJEOW1zcWFKWHl6WHBOd3BlSTlZdDZZZnRvUG0wYzYr?=
- =?utf-8?B?ZWtxTVZiMEROOExBWWFoVm9KZ2hLN3NLVEhjMWNvL0tDSUd3eDEzdGNFNTVn?=
- =?utf-8?B?R1dKWHhkWTROVlpzV2k5eDE2cURDRVg2SDNSRDRIVlFROERwUU42cWdUSjQr?=
- =?utf-8?B?ek5QQ0htL3VOOHp5UFdjdk5pQ2VjVzBneFlKVW5QSHBrRWZQRWVBOFA4dlln?=
- =?utf-8?B?Qzk4RXhIRXY5R3VlbmJLWXZmbXBIRUs1T3Q0MGUrWmhPMGNucGY0MldEUzF6?=
- =?utf-8?B?Tkpnem4ramZNZ0FaYXhOYWh6QkRQdU1TUnJRNStiNURDalJzelF5RDJoRDBU?=
- =?utf-8?B?WkJ1MmZtVFBIUzQ4YVh3UHlQb3pHbGJEek5UY2lRVkpSNHhBZ2xESitLQnhS?=
- =?utf-8?B?b0lyL09tcHNMUFV1MFJXVW1JMFdDY0t3d1lGTVhNbUlKQ3FwanA5cE53VjhL?=
- =?utf-8?B?NE5aOU5VWW4vZ0ZwQkk1YmpCYVpRRXhQSG9zUm9tY0Q4azZCbUFlbjBGTG1L?=
- =?utf-8?B?RDNWUjJEZGdtZVpmQkZFbnFHOFdQbDhaRGNadmtDdmx1NjVhWGUycUhlUTh4?=
- =?utf-8?B?RUE5V3NybmZyL2RONjM1aGVscSt4bTdkc3hiby9FaHVTd0FJZTU2U09rMjh0?=
- =?utf-8?B?S2ZvQ3RSVVJVUVBiVkQ2TlJoNmFQU0ZZcEMycldvdXZuTkhWWjgrYWtpam5Y?=
- =?utf-8?Q?7Sr5tvKckfrwGX26WOyO/B6Nxd24T7Qs5WrHw=3D?=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(7053199007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?QlJzdk5kUFhzU3pYQXU3dmZlY3VhVWRxTERKMTV0bE5MTy9pZnVlTVBTMVUz?=
- =?utf-8?B?cHNFL2ZHaC9FeFEzZlNIazFWTG43TEdSa3RTVlE5THk5K0VmL2NWZVptS04z?=
- =?utf-8?B?RW51cEM0cjgrWDFESEdyb0xjd3pQTWp3Yk9NMFdRK2FVTmowUjdZZzdzMDFJ?=
- =?utf-8?B?aE53WE5qK0ZqZUJIbjV3eWVBMzNyc3ErRjNjc253L2xWOFpBK1ZyT2sxbFJj?=
- =?utf-8?B?Nlp4NnlmUXpSQUdFajRFYlJRdElhcEF2YUowc3FLT0pUSmMxbXF0Z0I3SDNS?=
- =?utf-8?B?RnRQUXU5cVcwU0dKMkpjeVBUYzV1Q3IrcHZZWTkzbjk2UkJTYkdia2t2RUVs?=
- =?utf-8?B?bXRjcVJzU2UxYXZtWlMvSEI0ZkZ3c1VxOWZqc0Q4R2FCMWVlTkROSy9xVE40?=
- =?utf-8?B?NEFKTnFRQzN6Uk43NWhtK1FUbXVla2g1RGl5TVYrSzZTY1hWUURxZVdIU3Iv?=
- =?utf-8?B?Kzcyem5RTVhpMlpKaEhXQ2ZyQ1dmdkFCTEsyZ05UOTM5MTBTSnV2TkZRWWFK?=
- =?utf-8?B?OExOdnU2YzlZWW1wVUc4ZW9ma0phc09Kc1BLb2VIakhwSk1kRDkxbld1Yzhs?=
- =?utf-8?B?dzBuUk5aeTdIaWtuQzNuNUpvUFlReE5pVDZsOFpuUXpXUlI5UG13UElJWXBq?=
- =?utf-8?B?OE91RnloaUZwM0JSY0hZcnlVU3JPUTdjTUc1QTNUbktScEVFSld1dUFNcFZI?=
- =?utf-8?B?V2NjTVcwb3I2THB1K1ludjAwNmNmTlZ1Y1hMb24yeWhLN2E3ZzJQUWdjZ0JE?=
- =?utf-8?B?MWhnWGVaS3pHMGlaMHhCNlBqWUtSZEUyZ2dvQ09ZZnRheUZLOFY0SmNuY2dn?=
- =?utf-8?B?eHZhVk1RZmhKampienJiZ3htMVFJQlc2SkNaeVdzVzh6NkhySzlXK05kSzFv?=
- =?utf-8?B?bWRSU3R6SmN6cFVHUVNmWnd4RnFSSDFraWlobndUYzAyUk5YOGY0eHVnUzZm?=
- =?utf-8?B?SzhJSUFDM1h3UURBcHM4V25RWXpWOC9QUXBEU09EcktaLzZKSUNtNVVwQmo3?=
- =?utf-8?B?S3ZTa29EdUk1aVpqS1hQSmRPcTJxUDdncllQcXVRcXpSUm0yRGJPZXNCQ1g4?=
- =?utf-8?B?SW5Bc3pabEVCWEVFeFhaeHJtbStIMThwaUY2dDZpeGNGZHRjTDAzenZJR2Fs?=
- =?utf-8?B?d0ZyMndIU0tRcDdXblNSbUxIdXE0YWdiaU8xQjlXbG1la25PZWVXRUFYR042?=
- =?utf-8?B?VTlSbnoyMmdQaVhxc3lzdTFCUVFoc3kreVVHVi84MEhFbmxVclc4Mk1yME4x?=
- =?utf-8?B?ZzIvYUx4YVc1bnp0QWI0LzV4dzErYXgzYzl4TjRCL3dQQnl5V3dHZ0J3b0lS?=
- =?utf-8?B?OVJkL2NiR2M2L21HWWhiYmI3elpOK0tRRTFleFUxYTVLTU5VMFMyQVhRYXBZ?=
- =?utf-8?B?SFNLK3ZmREp2WE5Kc0I2YWJWZkpjMUFHVDdqbkpnUzlQYUduV3J6MkRTN0NT?=
- =?utf-8?B?dW42Vk9rNTdSdTN2Wk0xTjdwbG94anlHOUtSSjUvVHo1UjBSQm03ZnZEMEV5?=
- =?utf-8?B?VGc0Nzh4SmZvTHNRQmU1aHRDVDltYkI4aHEybFdXZDlrcmh6UFdQV2VhWE00?=
- =?utf-8?B?Q2ZKcFFYamhIMG1SVkdQOVJtYVhOS01FUmQvRUg4US9MUUhDY0ZrNmtBbElV?=
- =?utf-8?B?bDdxZnBvMVZEdEdLYzVUT1IzWlpTaUJKZTlVeFZmYmp0UTk1S09kakpmM2di?=
- =?utf-8?B?RTFJZFZxOTE5YlZBSWpKVXhUNzVlZzhEd2FEdGhueWtoT1RzSzBVdDBDUTdK?=
- =?utf-8?B?ckFTS0o2U2lITGU0NSt1bUpyc09LT0lZSUhrNXFpRWZZWUt6dE1ER1F4VXRJ?=
- =?utf-8?B?a1BMM2ZoeWExU3hTVmxnUXBMRkVIK3pwRVpNOGRZc1EvRnhHbTZHNTJPbER0?=
- =?utf-8?B?WWozUHU3ZzFmdVdyeHhHR3VkRGhYaDhyajNPbVp0QkJFL0t1MGlzT0Y1YWZi?=
- =?utf-8?B?N3VidFdxV0tDS3I5UVQyVEpJRHBxK2w3SmxocnhPbHNqM0p4a08rc1FKYUx6?=
- =?utf-8?B?VCs1SDQwMGJObjh6cXEwZEoycHRRRmZjd0RCWHlXZGY2d0VyUnZGcEl4OUYr?=
- =?utf-8?B?aTY3WElkejcyWUZjbVAwbkZLVTJzb1p5MnB4TjltSWo2NTErbXlVLzBLYXFl?=
- =?utf-8?B?RnlYck9vVFhSd21xeGk2N0oxUEJFOVo4R1B2SGFXNkJ1Q1hkZTM4eWtVbXV6?=
- =?utf-8?B?amc9PQ==?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: a9c87731-93fe-491c-7c11-08dddf235546
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Aug 2025 13:21:40.6438
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: YDLSncOWdcwYbfxGPHVAk2zy50CYu+ZPfTv4JZkhEBPMTi389MNqM7TN2Yzn2BM2XH5kahiTEqX5fCcLYBIg/w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR11MB5781
-X-OriginatorOrg: intel.com
+User-Agent: Mozilla Thunderbird
+Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
+Subject: Re: [PATCH V4 4/4] arm64: dts: qcom: sm8550: Remove SDR104/SDR50
+ broken capabilities
+To: Sarthak Garg <quic_sartgarg@quicinc.com>,
+ Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
+ Krzysztof Kozlowski <krzk@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>,
+ Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+ quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+ quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+References: <20250801084518.2259767-1-quic_sartgarg@quicinc.com>
+ <20250801084518.2259767-5-quic_sartgarg@quicinc.com>
+ <69f2807c-9a28-4b31-97cc-2756f0ab9fd4@kernel.org>
+ <c7e36755-9255-4209-9d53-20077bd1d3ba@quicinc.com>
+ <8b023e56-435b-43df-8b15-c562a494e06f@kernel.org>
+ <ab5d3811-9fbf-4749-9463-4457fbf50023@quicinc.com>
+ <4091c488-996c-4318-82ad-c054a9ef5a22@oss.qualcomm.com>
+ <a93fb5bf-1fd5-4e00-8338-b8608a9ba8fa@kernel.org>
+ <f2f13082-20d6-4f22-8dfb-f11b01cd6706@oss.qualcomm.com>
+ <dda9a2ef-5b86-4883-8347-b5ccf25e8d5d@quicinc.com>
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <dda9a2ef-5b86-4883-8347-b5ccf25e8d5d@quicinc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On 18/08/2025 23:38, Andrew Davis wrote:
-> On 8/18/25 3:33 PM, Judith Mendez wrote:
->> This adds SDHCI_AM654_QUIRK_DISABLE_HS400 quirk which shall be used
->> to disable HS400 support. AM62P SR1.0 and SR1.1 do not support HS400
->> due to errata i2458 [0] so disable HS400 for these SoC revisions.
+On 14/08/2025 09:15, Sarthak Garg wrote:
+> 
+> 
+> On 8/13/2025 5:37 PM, Konrad Dybcio wrote:
+>> On 8/13/25 1:56 PM, Krzysztof Kozlowski wrote:
+>>> On 13/08/2025 13:21, Konrad Dybcio wrote:
+>>>> On 8/13/25 1:08 PM, Sarthak Garg wrote:
+>>>>>
+>>>>>
+>>>>> On 8/5/2025 2:55 PM, Krzysztof Kozlowski wrote:
+>>>>>> On 05/08/2025 11:19, Sarthak Garg wrote:
+>>>>>>>
+>>>>>>>
+>>>>>>> On 8/1/2025 2:32 PM, Krzysztof Kozlowski wrote:
+>>>>>>>> On 01/08/2025 10:45, Sarthak Garg wrote:
+>>>>>>>>> The kernel now handles level shifter limitations affecting SD card
+>>>>>>>>> modes, making it unnecessary to explicitly disable SDR104 and SDR50
+>>>>>>>>> capabilities in the device tree.
+>>>>>>>>>
+>>>>>>>>> However, due to board-specific hardware constraints particularly related
+>>>>>>>>> to level shifter in this case the maximum frequency for SD High-Speed
+>>>>>>>>> (HS) mode must be limited to 37.5 MHz to ensure reliable operation of SD
+>>>>>>>>> card in HS mode. This is achieved using the max-sd-hs-frequency property
+>>>>>>>>> in the board DTS.
+>>>>>>>>>
+>>>>>>>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>>>>>>>> ---
+>>>>>>>>>     arch/arm64/boot/dts/qcom/sm8550-hdk.dts                     | 1 +
+>>>>>>>>>     arch/arm64/boot/dts/qcom/sm8550-mtp.dts                     | 1 +
+>>>>>>>>>     arch/arm64/boot/dts/qcom/sm8550-sony-xperia-yodo-pdx234.dts | 1 +
+>>>>>>>>>     arch/arm64/boot/dts/qcom/sm8550.dtsi                        | 3 ---
+>>>>>>>>>     4 files changed, 3 insertions(+), 3 deletions(-)
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> This will break MMC for all of the users and nothing in commit msg or
+>>>>>>>> cover letter explains that or mentions merging strategy.
+>>>>>>>>
+>>>>>>>> Exactly this case is covered by your internal guideline, no? Please read it.
+>>>>>>>>
+>>>>>>>> Best regards,
+>>>>>>>> Krzysztof
+>>>>>>>
+>>>>>>> Just to make sure I’m addressing the right concern — are you primarily
+>>>>>>> worried about the introduction of the max-sd-hs-frequency property in
+>>>>>>> the board DTS files, or about the removal of the sdhci-caps-mask
+>>>>>>> from the common sm8550.dtsi?
+>>>>>>
+>>>>>>
+>>>>>> Apply this patch and test MMC. Does it work? No. Was it working? Yes.
+>>>>>>
+>>>>>>
+>>>>>> Best regards,
+>>>>>> Krzysztof
+>>>>>
+>>>>>
+>>>>> You're absolutely right to raise the concern about potential breakage.
+>>>>> After conducting additional testing across multiple boards, I’ve confirmed that the removal of SDR104/SDR50 broken capabilities does indeed affect V1 SM8550 devices.
+>>>>
+>>>> v1 is a prototype revision, please forget it exists, we most definitely
+>>>> do not support it upstream
+>>>
+>>>
+>>> You should double check. SM8450 (not v1!) needed it, so either it was
+>>> copied to SM8550 (v2!) by mistake or was also needed.
 >>
->> [0] https://www.ti.com/lit/er/sprz574a/sprz574a.pdf
->> Signed-off-by: Judith Mendez <jm@ti.com>
->> ---
->> This patch was separated from [0] since it will be merged to
->> different trees anyways.
+>> I believe that the speed capabilities are indeed restricted on 8550-final
+>> and that's why this patchset exists in the first place
 >>
->> Link to v2:
->> [0] https://lore.kernel.org/linux-mmc/20250807225138.1228333-1-jm@ti.com
->> ---
->>   drivers/mmc/host/sdhci_am654.c | 18 ++++++++++++++++++
->>   1 file changed, 18 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->> index 8a099508b939..cc8c4145bf2b 100644
->> --- a/drivers/mmc/host/sdhci_am654.c
->> +++ b/drivers/mmc/host/sdhci_am654.c
->> @@ -155,6 +155,7 @@ struct sdhci_am654_data {
->>     #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->>   #define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
->> +#define SDHCI_AM654_QUIRK_DISABLE_HS400 BIT(2)
->>   };
->>     struct window {
->> @@ -764,6 +765,7 @@ static int sdhci_am654_init(struct sdhci_host *host)
->>   {
->>       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>       struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->> +    struct device *dev = mmc_dev(host->mmc);
->>       u32 ctl_cfg_2 = 0;
->>       u32 mask;
->>       u32 val;
->> @@ -819,6 +821,12 @@ static int sdhci_am654_init(struct sdhci_host *host)
->>       if (ret)
->>           goto err_cleanup_host;
->>   +    if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_DISABLE_HS400 &&
->> +        host->mmc->caps2 & (MMC_CAP2_HS400 | MMC_CAP2_HS400_ES)) {
->> +        dev_info(dev, "Disable descoped HS400 mode for this silicon revision\n");
+>> Konrad
 > 
-> Messages to the user do not need to be imperative, maybe:
+> Hi Krzysztof, Konrad,
 > 
-> "Disabling HS400 mode not supported on this silicon revision\n"
+> Konrad is right — this patch series addresses limitations seen on
+> SM8550-final silicon.
 > 
-> Not a blocker,
-> 
-> Reviewed-by: Andrew Davis <afd@ti.com>
+> SDR50 mode: The tuning support introduced in this series helps ensure
+> reliable operation.
+> SDR104 mode: limitations are resolved in SM8550 v2.
 
-I agree about the message.  Another possibility:
-"HS400 mode is not supported on this silicon revision, disabling it"
+I guess the state is the same for SM8650, it also requires the max-sd-hs-frequency.
 
-Otherwise:
+I guess all boards with a level-shifter on board would need such limitation,
+including most of the HDK boards (SM8450 included)
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Neil
+
+> 
+> But still to avoid regressions, *I’ll like to retain sdhci-caps-mask in
+> sm8550.dtsi for now and revisit its removal for future targets after
+> thorough validation and testing from the beginning.*
+> 
+> Konrad suggested placing max-sd-hs-frequency in the SoC dtsi.
+> Krzysztof, could you please share your thoughts on this approach?
+> 
+> Best regards,
+> Sarthak Garg
 
