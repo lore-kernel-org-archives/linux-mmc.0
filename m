@@ -1,235 +1,113 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C17A233A01C;
-	Tue, 19 Aug 2025 12:16:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6487E305075
+	for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2025 12:36:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755605804; cv=none; b=dSqGm37ovHrfG8Ka7yexe073ws2H9mMrmOdbAR+stxIBDaDqlvlmb/rQDCyvYJe2jSFjongn6vIVdBDNMSihh1bxTPhqCdlvdDyziCt3/jS9SsgqGWJjRDCMqmAIL6dVobb0oJTPTghng5fhCJAyfe96mRT7m0bw7ZDA3vIwS7M=
+	t=1755606972; cv=none; b=krUAyo1ONWEmtCQXgetxQbQNBrNRzQ+qsWH3ot6lWVUO12YbnIv6trEhumkRUV4gRqCqCKRYu6k5Z4Hw/gDp4Bb7t612lR0k44VZ5VyS5VoCd9Lqb4FMP+chGn9MRAUF8d4oBwwDAtT0G1OGsUkGq/SVGkBkkkGARyMWmuLgUEc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755605804; c=relaxed/simple;
-	bh=i+gz6s1/P4QZJsZ/FOYZ/eYvIn2i6T9S8U1Kd/yz18c=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=piJ7h9lTf7+Gv12YJ/xwVx7dvgla9hpOlGwxGJ9YSYi7eqqdPIgMSk2bc8uof/2HO1D1lseVjHiD6K68QY1JE0AyjLhHmqYZrk9M1horShEu5QnRip3Xr06r5M6GHQwyii1Um3IsvWCbMlWtMfNDqePRQuGBkF7uCn1jq1IeZ7E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q7MbBzNR; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1755606972; c=relaxed/simple;
+	bh=uLmoeTEPLRsdPKevsA7Wu19y02YUzzv2ebc4f/4P8rI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=RZZSoDymUWl7X9NMvdhN63YbLdTO+G5wmFL/Q4frwu9CJ38qONzpVdgfO9QRq8qp/Q/Gj0+WuTxD0Zrx20ZfvlRQ34jsZKVEYKMNn7/ym7JwKoMCByMAmsMfZAtutGFWfqsF4KozYyX9RFmDBk5joF2O8YxtWxoPhTAXctIT15o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=syVdo2Vl; arc=none smtp.client-ip=209.85.128.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q7MbBzNR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73893C116B1;
-	Tue, 19 Aug 2025 12:16:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1755605804;
-	bh=i+gz6s1/P4QZJsZ/FOYZ/eYvIn2i6T9S8U1Kd/yz18c=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Q7MbBzNRv0R9J9Im++yVgscta4px84UvtZzjzQKjFP7HvP6ppcq/9a6gZIeyziKk8
-	 Nrd8p39mM/3BmKFiyr20zcIQpyVV1fATUq5lPCFsdPkjVz1HO6/PYsFW6YZnJFKW42
-	 clp1zQKRNp16afZyqDBEk7ec3v29sGJyidkvYDAcSbChASRYQs2L0aEbJBVI6seIBH
-	 gKSbcpSvQvIyV/MYpGLOCRjLwlTh7sLTMJKUrnY9Lk8+dEKb3FjhXp8CDNpFJGXBln
-	 rThMYsZosXNPz9bKOz6CERm9PGl3qyD0jU/KV7m2yS8iqja4Yr6CXImVj+vcL3nHFc
-	 b3rSuCnjS2J4g==
-Date: Tue, 19 Aug 2025 19:59:23 +0800
-From: Jisheng Zhang <jszhang@kernel.org>
-To: Bough Chen <haibo.chen@nxp.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	Aubin Constans <aubin.constans@microchip.com>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Manuel Lauss <manuel.lauss@gmail.com>,
-	=?utf-8?B?TWljaGHvv73vv70gTWlyb3Pvv73vv71hdw==?= <mirq-linux@rere.qmqm.pl>,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Alim Akhtar <alim.akhtar@samsung.com>,
-	Heiko Stuebner <heiko@sntech.de>,
-	Russell King <linux@armlinux.org.uk>,
-	Chaotian Jing <chaotian.jing@mediatek.com>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Michal Simek <michal.simek@amd.com>,
-	Eugen Hristev <eugen.hristev@linaro.org>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Ben Dooks <ben-linux@fluff.org>, Viresh Kumar <vireshk@kernel.org>,
-	Orson Zhai <orsonzhai@gmail.com>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Chunyan Zhang <zhang.lyra@gmail.com>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Thierry Reding <thierry.reding@gmail.com>,
-	Jonathan Hunter <jonathanh@nvidia.com>,
-	Chen-Yu Tsai <wens@csie.org>,
-	Jernej Skrabec <jernej.skrabec@gmail.com>,
-	Samuel Holland <samuel@sholland.org>,
-	Alexey Charkov <alchark@gmail.com>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH 18/38] mmc: sdhci-esdhc-imx: use modern PM macros
-Message-ID: <aKRnG7P_krdC9zKY@xhacker>
-References: <20250815013413.28641-1-jszhang@kernel.org>
- <20250815013413.28641-19-jszhang@kernel.org>
- <DU0PR04MB94962993C99F922CCF93FB6F9034A@DU0PR04MB9496.eurprd04.prod.outlook.com>
- <aKAfRFPJQM_EtAKF@xhacker>
- <aKMZWjM536EOHDn9@xhacker>
- <DU0PR04MB9496FAB31EE76054B79E05F99030A@DU0PR04MB9496.eurprd04.prod.outlook.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="syVdo2Vl"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-71d603a269cso42340387b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Aug 2025 05:36:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1755606968; x=1756211768; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=S500HgKRMvfBRecyDLJ9zoSuVb5mEhYt0fyH2bKRAms=;
+        b=syVdo2VlS7eNwUje2EYRfPFfliH+zm2KwZPpc1IjbSlIkatZxUJn1rFdEdu+BsX8g3
+         ZLveuLXWFzJfUfPJ6XE1uNL+e4c3lEuhLJYGl4z1bM4ARI75JpAuM8+fR1btlphbBZxR
+         OPqDX8e5x09pzHzPdP5oXPZzxnPhxG2uZGVnufd+Ltmb6C06Z2U17NXxcDH8SfxtBs4X
+         x74+bIrwQoKoiVQ3nPzGVIh41nheUmx9b3YMpzaNhrpZgJ1vtNrlBqomHwN/9ynWGVxl
+         JXRdIAUUc51SKc562p3HRyb36odAHshr3zF0pO2VE+oUf7P+LgL+ZP9s3Ks2H4xZBW/9
+         6SbQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1755606968; x=1756211768;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=S500HgKRMvfBRecyDLJ9zoSuVb5mEhYt0fyH2bKRAms=;
+        b=HcwP+cBquVA0qyP1HHLPfDzJyw9dRfZ/QGgLPA96qiM3RnZF23gXHZrELPP2OMztOI
+         sgR8bRF8/34D8j08fnMwmeazhwo+3K8+QEZgGUgEcCFgr2X1CPnzuUIcnl0nr+D+Mp6+
+         q3fkolFRzdP0887SojAho1jU0C+W/clzQlrO/qd0zcrI9LTknk4ByYfIXpqgiIsUB5vh
+         56bRWH1amdty9rkpHyq5OFHzMGO9t1KK8M3gej0h0w0iWjpWckQXlF7VOXTFf7f7xpra
+         fNHQOYY116rL+uT5SyP5hVVOFr0eYon9YCO+Tld/kr0gteKi5xU+CqFiBEda5SgnDiUW
+         GZLw==
+X-Forwarded-Encrypted: i=1; AJvYcCVE2CGw/EjshezKRvORJMsjlvPH1zWFM+f2dVFpT0hLB5db5yL0k8y0QSec5grFXwPWEU1d3LUHU4k=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwnRXW+cQ1cCMAwt2YJoif8n21Ab3cQazFNCdnZXZCj6eTUI9JL
+	eEYS2tJtfktZLWfevnFOu5ozrLFDzZrhBl6wwN/5NpZUPtInnJirRzmUVjVRpxNU8w41lisvy21
+	FNAV0K2T8Xu9qY68YB+/d0gh7EysMIwjQCl+68S2UWw==
+X-Gm-Gg: ASbGncsE30pgeF+laASGR7zXLtcar28Mu4aS0Dor1mVc1PJyrM7fGIY9T6y6PvP688q
+	+ibYLST/I7HHwEgDFY4nkin78kfiVWWFWs7ffcYHQJnBA/YNdp0RhxERG9wV9zgE5mT86vX18Fc
+	9xRlMBUYgFaLRILtwF/QUu6QZNTv4Ii7OXjJA1hwzcSFHo7mXz/Jxp2+7/i2ON3sMVpjGFzeDas
+	cIHvhM=
+X-Google-Smtp-Source: AGHT+IEZC9xBY6/DAM78NuJbtaoZs1NU7ump47Zvi54A4GCPGfkKW4Xc5CuVqSxtuuIbne9iaz4fTB/gFateGh85WrI=
+X-Received: by 2002:a05:690c:9a8d:b0:71a:1f51:291b with SMTP id
+ 00721157ae682-71f9d4cbc58mr23090687b3.12.1755606968233; Tue, 19 Aug 2025
+ 05:36:08 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <DU0PR04MB9496FAB31EE76054B79E05F99030A@DU0PR04MB9496.eurprd04.prod.outlook.com>
+References: <20250728082230.1037917-1-rex.chen_1@nxp.com> <CAPDyKFrSYohNh3tFRZoaPjAm=4GOe_Q1P2RS=8GD7i=BhD=UZw@mail.gmail.com>
+ <PAXPR04MB833574367C8BC478C5196201FC30A@PAXPR04MB8335.eurprd04.prod.outlook.com>
+In-Reply-To: <PAXPR04MB833574367C8BC478C5196201FC30A@PAXPR04MB8335.eurprd04.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 19 Aug 2025 14:35:31 +0200
+X-Gm-Features: Ac12FXz6BOf_e8mCrlczoSdRxV6lU_MsmWBmJf4rJBB150nDm05KXA21awFATb8
+Message-ID: <CAPDyKFqQs8nH9EQdGhUCG29EYmipy4d2XJ7Li8VsEXcZOiSxyw@mail.gmail.com>
+Subject: Re: [EXT] Re: [PATCH v3 0/2]
+To: Rex Chen <rex.chen_1@nxp.com>
+Cc: "conor.dooley@microchip.com" <conor.dooley@microchip.com>, 
+	"bartosz.golaszewski@linaro.org" <bartosz.golaszewski@linaro.org>, 
+	"viro@zeniv.linux.org.uk" <viro@zeniv.linux.org.uk>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "avri.altman@wdc.com" <avri.altman@wdc.com>, 
+	"shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, 
+	"adrian.hunter@intel.com" <adrian.hunter@intel.com>, 
+	"wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Tue, Aug 19, 2025 at 03:48:57AM +0000, Bough Chen wrote:
-> > -----Original Message-----
-> > From: Jisheng Zhang <jszhang@kernel.org>
-> > Sent: 2025年8月18日 20:15
-> > To: Bough Chen <haibo.chen@nxp.com>
-> > Cc: Ulf Hansson <ulf.hansson@linaro.org>; Aubin Constans
-> > <aubin.constans@microchip.com>; Nicolas Ferre
-> > <nicolas.ferre@microchip.com>; Alexandre Belloni
-> > <alexandre.belloni@bootlin.com>; Claudiu Beznea
-> > <claudiu.beznea@tuxon.dev>; Manuel Lauss <manuel.lauss@gmail.com>;
-> > Micha�� Miros��aw <mirq-linux@rere.qmqm.pl>; Jaehoon Chung
-> > <jh80.chung@samsung.com>; Krzysztof Kozlowski <krzk@kernel.org>; Alim
-> > Akhtar <alim.akhtar@samsung.com>; Heiko Stuebner <heiko@sntech.de>;
-> > Russell King <linux@armlinux.org.uk>; Chaotian Jing
-> > <chaotian.jing@mediatek.com>; Matthias Brugger <matthias.bgg@gmail.com>;
-> > AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>;
-> > Shawn Guo <shawnguo@kernel.org>; Sascha Hauer <s.hauer@pengutronix.de>;
-> > Pengutronix Kernel Team <kernel@pengutronix.de>; Fabio Estevam
-> > <festevam@gmail.com>; Adrian Hunter <adrian.hunter@intel.com>; Kamal
-> > Dasu <kamal.dasu@broadcom.com>; Al Cooper <alcooperx@gmail.com>;
-> > Broadcom internal kernel review list
-> > <bcm-kernel-feedback-list@broadcom.com>; Florian Fainelli
-> > <florian.fainelli@broadcom.com>; Michal Simek <michal.simek@amd.com>;
-> > Eugen Hristev <eugen.hristev@linaro.org>; Vignesh Raghavendra
-> > <vigneshr@ti.com>; Ben Dooks <ben-linux@fluff.org>; Viresh Kumar
-> > <vireshk@kernel.org>; Orson Zhai <orsonzhai@gmail.com>; Baolin Wang
-> > <baolin.wang@linux.alibaba.com>; Chunyan Zhang <zhang.lyra@gmail.com>;
-> > Patrice Chotard <patrice.chotard@foss.st.com>; Thierry Reding
-> > <thierry.reding@gmail.com>; Jonathan Hunter <jonathanh@nvidia.com>;
-> > Chen-Yu Tsai <wens@csie.org>; Jernej Skrabec <jernej.skrabec@gmail.com>;
-> > Samuel Holland <samuel@sholland.org>; Alexey Charkov <alchark@gmail.com>;
-> > linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-> > Subject: Re: [PATCH 18/38] mmc: sdhci-esdhc-imx: use modern PM macros
-> > 
-> > On Sat, Aug 16, 2025 at 02:03:48PM +0800, Jisheng Zhang wrote:
-> > > On Fri, Aug 15, 2025 at 03:23:56AM +0000, Bough Chen wrote:
-> > > > > -----Original Message-----
-> > > > > From: Jisheng Zhang <jszhang@kernel.org>
-> > > > > Sent: 2025Ҵ8??15?? 9:34
-> > > > > To: Ulf Hansson <ulf.hansson@linaro.org>; Aubin Constans
-> > > > > <aubin.constans@microchip.com>; Nicolas Ferre
-> > > > > <nicolas.ferre@microchip.com>; Alexandre Belloni
-> > > > > <alexandre.belloni@bootlin.com>; Claudiu Beznea
-> > > > > <claudiu.beznea@tuxon.dev>; Manuel Lauss <manuel.lauss@gmail.com>;
-> > > > > Micha?? Miros??aw <mirq-linux@rere.qmqm.pl>; Jaehoon Chung
-> > > > > <jh80.chung@samsung.com>; Krzysztof Kozlowski <krzk@kernel.org>;
-> > > > > Alim Akhtar <alim.akhtar@samsung.com>; Heiko Stuebner
-> > > > > <heiko@sntech.de>; Russell King <linux@armlinux.org.uk>; Chaotian
-> > > > > Jing <chaotian.jing@mediatek.com>; Matthias Brugger
-> > > > > <matthias.bgg@gmail.com>; AngeloGioacchino Del Regno
-> > > > > <angelogioacchino.delregno@collabora.com>;
-> > > > > Shawn Guo <shawnguo@kernel.org>; Sascha Hauer
-> > > > > <s.hauer@pengutronix.de>; Pengutronix Kernel Team
-> > > > > <kernel@pengutronix.de>; Fabio Estevam <festevam@gmail.com>;
-> > > > > Adrian Hunter <adrian.hunter@intel.com>; Kamal Dasu
-> > > > > <kamal.dasu@broadcom.com>; Al Cooper <alcooperx@gmail.com>;
-> > > > > Broadcom internal kernel review list
-> > > > > <bcm-kernel-feedback-list@broadcom.com>; Florian Fainelli
-> > > > > <florian.fainelli@broadcom.com>; Bough Chen <haibo.chen@nxp.com>;
-> > > > > Michal Simek <michal.simek@amd.com>; Eugen Hristev
-> > > > > <eugen.hristev@linaro.org>; Vignesh Raghavendra <vigneshr@ti.com>;
-> > > > > Ben Dooks <ben-linux@fluff.org>; Viresh Kumar
-> > > > > <vireshk@kernel.org>; Orson Zhai <orsonzhai@gmail.com>; Baolin
-> > > > > Wang <baolin.wang@linux.alibaba.com>; Chunyan Zhang
-> > > > > <zhang.lyra@gmail.com>; Patrice Chotard
-> > > > > <patrice.chotard@foss.st.com>; Thierry Reding
-> > > > > <thierry.reding@gmail.com>; Jonathan Hunter
-> > > > > <jonathanh@nvidia.com>; Chen-Yu Tsai <wens@csie.org>; Jernej
-> > > > > Skrabec <jernej.skrabec@gmail.com>; Samuel Holland
-> > > > > <samuel@sholland.org>; Alexey Charkov <alchark@gmail.com>
-> > > > > Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-> > > > > Subject: [PATCH 18/38] mmc: sdhci-esdhc-imx: use modern PM macros
-> > > > >
-> > > > > Use the modern PM macros for the suspend and resume functions to
-> > > > > be automatically dropped by the compiler when CONFIG_PM or
-> > > > > CONFIG_PM_SLEEP are disabled, without having to use #ifdef guards.
-> > > > >
-> > > > > This has the advantage of always compiling these functions in,
-> > > > > independently of any Kconfig option. Thanks to that, bugs and
-> > > > > other regressions are subsequently easier to catch.
-> > > >
-> > > > Hi Jisheng,
-> > >
-> > > Hi,
-> > >
-> > > >
-> > > > When I remove all the configs under Power management options I got the
-> > following build warning:
-> > > >
-> > > > drivers/mmc/host/sdhci-esdhc-imx.c:2079:12: warning:
-> > > > ??sdhci_esdhc_resume?? defined but not used [-Wunused-function]
-> > > >  2079 | static int sdhci_esdhc_resume(struct device *dev)
-> > > >       |            ^~~~~~~~~~~~~~~~~~
-> > > >   CC      drivers/mmc/host/cqhci-core.o
-> > > > drivers/mmc/host/sdhci-esdhc-imx.c:2017:12: warning:
-> > > > ??sdhci_esdhc_suspend?? defined but not used [-Wunused-function]
-> > > >  2017 | static int sdhci_esdhc_suspend(struct device *dev)
-> > > >       |            ^~~~~~~~~~~~~~~~~~~
-> > >
-> > > Hmm interesting, what's test toolchain? I tested this patch with gcc14
-> > > with below three combinations before sending out, no warnings at all:
-> > > PM + PM_SLEEP
-> > > PM only
-> > > !PM + ! PM_SLEEP
-> > >
-> > > The sdhci_esdhc_suspend|resume are referenced by
-> > SYSTEM_SLEEP_PM_OPS.
-> > > The pm_sleep_ptr() macro does the tricky, when both PM and PM_SLEEP
-> > > are disabled, they are optimized out.
-> > 
-> > Hi Haibo,
-> > 
-> > Could you plz share your toolchain information? And FYI, today I tested clang
-> > with the above three combinations, also no warnings. So I'm really interested
-> > how to reproduce your warnings.
-> > 
-> > And the kernel CI build robot hasn't sent out warning email so far.
-> 
-> I'm not sure whether my test step is correct.
-> I find for ARM, it force to enable the CONFIG_PM. to test your patch, I force remove all the PM related configs in .config. then meet this warning. And also many other driver build warning.
+On Tue, 19 Aug 2025 at 08:04, Rex Chen <rex.chen_1@nxp.com> wrote:
+>
+> On Mon, 28 Jul 2025 at 10:22, Rex Chen <rex.chen_1@nxp.com> wrote:
+> >
+> > [patch 1/2]
+> > No change for patch 1
+> > [patch 2/2]
+> > Add more details in commit message
+> >
+> > Rex Chen (2):
+> >   mmc: core: SPI mode remove cmd7
+> >   mmc: mmc_spi: multiple block read remove read crc ack
+> >
+> >  drivers/mmc/core/sdio.c    | 6 +++++-
+> >  drivers/mmc/host/mmc_spi.c | 2 +-
+> >  2 files changed, 6 insertions(+), 2 deletions(-)
+> >
+> > --
+> > 2.25.1
+> >
+>
+> The series applied for next, thanks!
+>
+> Do you think we should tag these for stable kernels too?
+> ------------------------
+> RE from Rex:
+> Thanks, Pls apply the patch to stable kernels.
+> ------------------------
+>
 
-Now, I tried arm multi_v7_defconfig, then unselect those platforms which
-enable CONFIG_PM, then enable COMPILE_TEST, then unselect CONFIG_PM and
-CONFIG_PM_SLEEP, and build with  arm-linux-gnueabihf-gcc-14, stil no
-any warning.
-So can you plz share your defconfig? you can save it by 'make savedefconfig'
-And I asked twice about your toolchain information, can you plz provide
-it?
+Okay, I have tagged the patches for stable too.
 
-> Seems this test method is not correct, can anyone confirm here?
-> 
-> I did another test today, I enable the COMPILE_TEST, and use x86, chose the usdhc in menuconfig, disable CONFIG_PM, and build kernel by the following command, do not meet any warning:
-> make ARCH=x86 CC=gcc -j64
-> Seems this means !PM + !PM_SLEEP verify ok.
-
-I tested not only x86, but also arm64 and riscv...
-
-> 
-> What's your method to test these PM related combination?
-
-Similar as yours -- enable COMPILE_TEST.
-Sure for the drivers I used: sdhci-of-dwcmshc, sdhci-pxav3 and
-sdhci-xenon, I tested them.
-
-B.R
+Kind regards
+Uffe
