@@ -1,98 +1,93 @@
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+Received: from mail-vk1-f179.google.com (mail-vk1-f179.google.com [209.85.221.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEBF02E5423
-	for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 11:53:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B7EB1ACED7;
+	Wed, 20 Aug 2025 11:53:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755690797; cv=none; b=dO36ngiJF8X60MAFHKeMgEwgXBulfklL5hH9RI1gyvCWexJcu2fp0FBXjObedM+5OgFicGw+BLZOdL2fal0XM17j92fJ6QA+3Y6hOxzdbE2sOBDLesO5YREaAJqz7HqVrpBaXzd4/Z2uVb9pkYO9FAzOMrDYlYifjWSfVLT7JUM=
+	t=1755690841; cv=none; b=AlLCcSAD/1QZCH/i1YsqF5DZWikjxM56GoXsi9CMapZtvFIwhxRw9MLIdHvTCpSU1+KnpLM1O+/04QA5T44+AMf0DtlJb0U5Hnr0yUA9PWj58rKC/9gEJ2HhQXMvp21KfdLGD/kse8xBSGeOC1Z2jKfvel5hMyhlGIn4S5DIGJE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755690797; c=relaxed/simple;
-	bh=MmM1CnA+Lor+nEFLiAe+sbXE4PA+dY1hJjQ4Ly416Rg=;
+	s=arc-20240116; t=1755690841; c=relaxed/simple;
+	bh=QB2MQQNMFoetjcWtVJa01/TbjbCGv33M0NSGAkUVdDY=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ekdlEgsEEJxCgSyJNHAOzhDfIMLFRejHqWhSa3iaz14/93EuPzsDrwy1Fldjd8i8G9pctwi/v3LVnpWXQmJhFkVyBXRH2Z3tQaCq1MnghFuu8eaMgvNnwfmKrHI1eVXyK3K+1s2hKU40scwBqic/1zu5FHvDNPEJRwge9fgMKcE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JpeH41Xj; arc=none smtp.client-ip=209.85.128.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JpeH41Xj"
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-71e6f84b77eso39350127b3.2
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 04:53:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755690795; x=1756295595; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=wfY8E6fJCADzHf1Bzi5Pgxw3WUb0pai7Lp/eq5DYsIM=;
-        b=JpeH41Xj+XQiPsAXhvjdzDjk5JBMlqPNAbrCvJo2jv+tY9UpVXLLPljdMR8YbR/pbv
-         2JV/uRWIMuaV57gs81MMwQAfC142oqDoAocP3jiSF4SG6UyrIr/XQPmFktAJGklCm2i8
-         GcCTbQVQu5GhSafWiHTE8e394RVKuo4O2rhpob9gb2BrWuE73VB07AYEnbyLp5/JDEtc
-         LXZ6XoxMD5KBcHoQpo26fOzIrTMQhDjg43VmDIvOHXPjIf7PjMjhkhT8J8Rv/tLP9P1y
-         Uez+3zMXUfPPAocjZyljQPw7KxclRI2BifIoTwG2Ru/BzruM9OsuC9BwAvQC1oghvhYA
-         3WNQ==
+	 To:Cc:Content-Type; b=jdz1BJqUuMhFK1ndMiJcvHaH84UItnDgoWIBJdOXsVykrBmJpeYU9un8Hr5+3wVKCutSN79ifozjTEjisOw3uwh7ephzPrSB4KvFwVQEjGe0QaO4D8pFooNHCamdtA4gEg4BLDELQUeh+/JCRpkZ80gAkq2NWxXync8oPwGVQaM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vk1-f179.google.com with SMTP id 71dfb90a1353d-53b175498beso2038322e0c.3;
+        Wed, 20 Aug 2025 04:53:58 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755690795; x=1756295595;
+        d=1e100.net; s=20230601; t=1755690838; x=1756295638;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=wfY8E6fJCADzHf1Bzi5Pgxw3WUb0pai7Lp/eq5DYsIM=;
-        b=uQK0X7ahRNOzQsvsd4Z3hAVgUyZ0Xm3ExLnM3vYvi2uJ42HmH5lorzjZxtrnRhytU/
-         02N0GSkBKQWF33D0cuDKzdKPK+uZ7tchSsGaoO8fNi7IobX3EXzR05c2lbGaKKFSAKWo
-         4GeQrZC7QI1KfmZbhq/nFe/O6NKiPq2r7IplokeUU+Q3XpqJYsd+1/6I++FQCZxvvRYa
-         FIvfA7nsPAkcJf1wRW7XEm1P/UC/XHunhkoTZLbBRXcwp8LNPAE1k/vKbMNeKqmQQVAN
-         rSNFoHCa5z2o+hxjO0b6wy0QfkX15GVa1+wTllRvuRS2YzsiSYyy/4KwRCyEyZrPq52u
-         UyaQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXx0Xn/ffaDGzWidBAMhiwGpuACTE96x1tMiUdTMPKGdiLTwtguayW2uBG5hHR6L1T/m0i8xs4j3TA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwJxAoMC89m0UdARgUUp6JkSgiY8/fHdo74xRZni+r82pM4e+Qw
-	8UYLLpz8lEjCu5B2Qcdz9SBfSu2fZ663W8TY3dloPalkTOlfP3wLwKU1owLcRqPfpvwaE41S92L
-	AboeSoQeWhwHC6aFjm4IenXOvnI2dYzm8mKiw44kAmQ==
-X-Gm-Gg: ASbGnct6YwxorRSiXqxYPn1gtwh38diHNAkMtp/fxj3ZVa6Oe+bUdaoxudZpDIf9MUa
-	mGMZpkjJXJKPGq6DgpSj08yoB6Exgb3zmuQWDQAabLXI3mQhlh0KOFiewxgMyzGMFNoDzwWYL5I
-	9FhynWvRYusYIVW2v/QkfwFWroijL1z/8zEMrNgrRpdmdjMhGZGYy+OPax3g4Xp6wStIWJfXBWh
-	3rqrs5L
-X-Google-Smtp-Source: AGHT+IFjcS9cmVgaI4c6h6za/ZHS+/se2bsGoBeQs6x8QymSZGHT1jVZ61lTLCqqdXlZW30H6USeUxtBeOWYh/jv0yQ=
-X-Received: by 2002:a05:690c:3684:b0:71e:8086:c9da with SMTP id
- 00721157ae682-71fb3230d13mr28006737b3.31.1755690794740; Wed, 20 Aug 2025
- 04:53:14 -0700 (PDT)
+        bh=m3cC7wTIi41/+V4NnXvdgtBZ4b3AkkW1EoT+UJ7kYNI=;
+        b=jb5c2RRAUAiMdPfW1mQCsh7t9Hhu3zAPnYd5lIZ+aZfKUTnpEAhqMVy/6Idf2qvo+U
+         htONKwsPzUAyTRN0Y+Sn/XCck8c5Zwf3HUia0ShVu7nhsmDMjdCCU+wXM7fZnRDHCaIp
+         iOYqBfGL8hVPZSRFFS7MJ5pBVwIyNVzkZshWfVM8Dq9K7SQMSQyfiRXbLivmrXrIrxCV
+         JWIhPzY3rpfw3MNeBqbqmgpYW5jQBv4Siu4IXCGP0AerUJbT4k9TQGdnSV64bkO2X3DL
+         FF/50JelLcPFHEbEmKGQP+n+PgWCWrdj9x1iyVv7fNqWlgOzDAHPpccWB/4+HO+8Cf8S
+         jdPg==
+X-Forwarded-Encrypted: i=1; AJvYcCV0capFRkvrRYQaMzUfMSmaoCUWtW4TXSVYl3EghOaT440sSHmbPGvup2bB7CCDWxikEmj+Zn89vHHc@vger.kernel.org, AJvYcCVNb6p7rTgIjBTAvHMbh9cfsB8kWTwPq3IMoaNMQSPt9qBuit5UYnaILgd7oOahfX6hj6xxwuJoFtYCd3/HLQopu4E=@vger.kernel.org, AJvYcCWx4FKcAPGxVvAliakvlvp5LjTTE8mNuXOBWTDlTcm1zhzyRrklLtCvTZ0YGMoR64x1npgCqh+3Pj0z3ws=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxR2hYS4jT9VokknkP64QxxR6mhAJsqQguhkLz7zalU3muydomX
+	hkVl3ra1ogV5H9yFtrOMOXnF0buEiWLYVh306/qn19Ky2G6lPJiF4WnTN/2ywvk6
+X-Gm-Gg: ASbGncs8PD7AgLn8YHjOtGbIeWq2J1j9iPIvXrSl/gLP5Cej3MJy2ZkEOJN81yykcxF
+	K1kPe98dfWbYuFmI7s/COPphNHVAPj/0OB6XsgohHZ4TxX6f3hsMmWzuysLIUPXJs8xEq/ZS9KO
+	Atq8BBcDBsE2CiZaAlDYsB6NDFOntRMdkuCLZ7qtNlTLyqyn4cEVZtuMpvvueUuPeptR7Huak2U
+	ShZPmBtb0e4sos2O2gC04Gip1yrkKzcFGbVF2BnGIQZZa+d7hJlcHQVjZ1HqSXlC3pop5ovT9p6
+	pSsLRDROl/EXZu7bcVCrF0pC14bgk8yU15yceILKeA/JmwOLIt/5LolykJ9j+y6iP0w2VjkLC4P
+	C6Kt30RgTSHpKnZhtSG36LDausHJ15FW1fRuAXz5yGQhFoVM5fqDZM3eFGG4y
+X-Google-Smtp-Source: AGHT+IHMJyUY1FE8eduW+KGDPzAoJndiJKgiMe2Q9+9Q34rmkDoRgfPsZ5ToKmlm1zIOjhnzBBZBWA==
+X-Received: by 2002:a05:6122:319f:b0:539:3b3c:617a with SMTP id 71dfb90a1353d-53c6d60edacmr747604e0c.8.1755690837665;
+        Wed, 20 Aug 2025 04:53:57 -0700 (PDT)
+Received: from mail-vs1-f54.google.com (mail-vs1-f54.google.com. [209.85.217.54])
+        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-53b2beff365sm3141144e0c.23.2025.08.20.04.53.57
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 20 Aug 2025 04:53:57 -0700 (PDT)
+Received: by mail-vs1-f54.google.com with SMTP id ada2fe7eead31-50f88cd722bso1909834137.1;
+        Wed, 20 Aug 2025 04:53:57 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCV2XVIVI6ERWjLAIyFhAD9TqTQ0/rg93LwfViwYDxMm4nKjAtT4RVw0vzjvkuEd8HgddilPzpxH2xQpIPM=@vger.kernel.org, AJvYcCWvCaUBAJXjD0UV06ig8Mw0ozFrYai/wlDqSFWKtIKYvRfgGSySLGVj+fQ2moCouM1BazgT5uBnq8MCqmG4k/dBkic=@vger.kernel.org, AJvYcCXXM/CyBpNRWP5hjcLbNDr+YCrMHGS55XmWZ3zSnEDleBCmy83nSGYwbDMOf1G6JS2vLc00oNHY2LZ+@vger.kernel.org
+X-Received: by 2002:a05:6102:290e:b0:518:9c6a:2c03 with SMTP id
+ ada2fe7eead31-51a52a18e04mr605179137.30.1755690836961; Wed, 20 Aug 2025
+ 04:53:56 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250814130705.326073-1-o.rempel@pengutronix.de> <20250814130705.326073-3-o.rempel@pengutronix.de>
-In-Reply-To: <20250814130705.326073-3-o.rempel@pengutronix.de>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 20 Aug 2025 13:52:38 +0200
-X-Gm-Features: Ac12FXwzhsz92ch8tIMD-PG1qULef7_8F4arRRIauJobKzyL6ZBdAvs9a6BFjYY
-Message-ID: <CAPDyKFo3SnqvxdD4C-ESFERPJNfRXWKxzX1Hh573DsxvVdPdnQ@mail.gmail.com>
-Subject: Re: [PATCH v8 2/2] mmc: core: add undervoltage handler for MMC/eMMC devices
-To: Oleksij Rempel <o.rempel@pengutronix.de>
-Cc: kernel@pengutronix.de, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Mark Brown <broonie@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>, =?UTF-8?Q?S=C3=B8ren_Andersen?= <san@skov.dk>, 
-	Christian Loehle <christian.loehle@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Avri Altman <Avri.Altman@sandisk.com>
+References: <20250820104808.94562-1-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20250820104808.94562-1-biju.das.jz@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Wed, 20 Aug 2025 13:53:46 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdWeB2z6eax8gm2oO_X35Qm0+cg8NjoFutWMdfHKW-1DBQ@mail.gmail.com>
+X-Gm-Features: Ac12FXy_1UNUF7-0Y5wL5N-u8MrFdhGcL9qUsuwrmyT27ZsRX-Q_yUiNcVYzW1o
+Message-ID: <CAMuHMdWeB2z6eax8gm2oO_X35Qm0+cg8NjoFutWMdfHKW-1DBQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: renesas_sdhi: Replace magic number '0xff' in renesas_sdhi_set_clock()
+To: Biju <biju.das.au@gmail.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Biju Das <biju.das.jz@bp.renesas.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 
-[...]
-
-> @@ -2212,6 +2219,13 @@ static int mmc_shutdown(struct mmc_host *host)
->  {
->         int err = 0;
+On Wed, 20 Aug 2025 at 12:48, Biju <biju.das.au@gmail.com> wrote:
+> From: Biju Das <biju.das.jz@bp.renesas.com>
 >
-> +       /*
-> +        * In case of undervoltage, the card will be powered off (removed) by
-> +        * _mmc_handle_undervoltage()
-> +        */
-> +       if (!host->card || mmc_card_removed(host->card))
+> Replace the magic number '0xff' with CLK_CTL_DIV_MASK macro for finding
+> actual clock in renesas_sdhi_set_clock().
+>
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-There is no need to check for host->card here, as the shutdown ops
-can't be called unless it exists.
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-> +               return 0;
-> +
+Gr{oetje,eeting}s,
 
-[...]
+                        Geert
 
-Kind regards
-Uffe
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
