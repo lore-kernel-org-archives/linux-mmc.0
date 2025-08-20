@@ -1,164 +1,148 @@
-Received: from rere.qmqm.pl (rere.qmqm.pl [91.227.64.183])
+Received: from lelvem-ot01.ext.ti.com (lelvem-ot01.ext.ti.com [198.47.23.234])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60D0B1F91C8;
-	Wed, 20 Aug 2025 19:30:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.227.64.183
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C84A836CE00;
+	Wed, 20 Aug 2025 19:30:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.234
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755718243; cv=none; b=YYnDAdKPQ5x2sTBpUoN1FpWHoo7RGVEntSIJapWxYHfkKIFpsuW1FyacSUgvZuRb7PHsro5MAwNKKm0Eb5kIbbH9rd4r72iTgAgI2cXz4VbWJTljKtjp9OE13tZWlc3yHadV17hhJq7DCFRk6zs4J8REaKwqRzcs36Xtftphc9I=
+	t=1755718253; cv=none; b=n1BDswKc1RLxX1eg7hjgz4yS/FXF1MNeEMkD85AFSnuvzHHFKNTesW/mhgt7dG88ecYYx7SSGb3RbUX8oCZ5D1kYQGQllqKvEoLzsqXjKpIIZdLb4odwH7CdK7hf0N+Z6WmYOoTVvlvfsl5saEbXKrLcD+8L6gbWy2Ng4O8RKpw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755718243; c=relaxed/simple;
-	bh=pQU/6XxX3lQh65+djipRIT43r4IzL9AGpiB4R9ey11k=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=L1N2ERdMN2wD/EXmzfPjs5ABBT7Cfqy8Nsehd8YG72NHeItanD3AKpYVqD8YvtZ2uzal/hTE6x2XKFqTK92BHjXErprMIyqn+RcgpGchI344vogi0K1Jkv4dU34cMZ4H54eGNKYrfT7r6+xF+pnw2DdSb33TzNMOOBaT3btsxOI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=rere.qmqm.pl; spf=pass smtp.mailfrom=rere.qmqm.pl; dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b=P+INdoQE; arc=none smtp.client-ip=91.227.64.183
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=rere.qmqm.pl
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rere.qmqm.pl
+	s=arc-20240116; t=1755718253; c=relaxed/simple;
+	bh=2MgdwlJeSwaisuGzVs4brwSIi7VbS7aJ1NanT33mDBc=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=iNRziegV2DjlunNO2kXPLO0W4672LsnuqOsDMK5h/KaistUKXpsoCV7faxCWxVjrDby5QowBvrm78prUDpb9EPqGz7HiZDly9F1x3q0/bn0XSl9vFmieIzCPFht57JosqkB1JCh28cWRf7RioXSdNO6uIB3R20wjc5SjX7H+xFs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=ysf8YzAw; arc=none smtp.client-ip=198.47.23.234
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="P+INdoQE"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-	t=1755717711; bh=pQU/6XxX3lQh65+djipRIT43r4IzL9AGpiB4R9ey11k=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=P+INdoQEfOpWX6hDuSz2wTSn/wFroLwFcYgXJxFayWsKndEtXE1ad7bmgTVq/gbOp
-	 m49CCAPFRMtCPX2cmqi7DDQBJv5kGnkRBnV1BVE8n7m+rfaEKAWbf27rK2GoZD6/yo
-	 p2Hd/zFDeTgwAnoaszU0i2AqyFqjLox9CkSkFw8Y/auxXw2B/6o/jEfi0TjdBdoWD0
-	 GEW+Ruo+eOWG9UeXQrfRVBD7qaG2bIsjnqrVBMBpXjTpq4e2lxXH6wYdtDk8zT44SI
-	 3lSS8apZLrJ1GIoS5SrILmobYSls1QAAHUEfuuI/6yvbrqb5S9RUEzxz92BluDKWb/
-	 eRAwUMfs5yQAQ==
-Received: from remote.user (localhost [127.0.0.1])
-	by rere.qmqm.pl (Postfix) with ESMTPSA id 4c6bt33Rsgz1H;
-	Wed, 20 Aug 2025 21:21:47 +0200 (CEST)
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 1.0.7 at mail
-Date: Wed, 20 Aug 2025 21:21:46 +0200
-From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-To: Jisheng Zhang <jszhang@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	Aubin Constans <aubin.constans@microchip.com>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Manuel Lauss <manuel.lauss@gmail.com>,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Alim Akhtar <alim.akhtar@samsung.com>,
-	Heiko Stuebner <heiko@sntech.de>,
-	Russell King <linux@armlinux.org.uk>,
-	Chaotian Jing <chaotian.jing@mediatek.com>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Haibo Chen <haibo.chen@nxp.com>,
-	Michal Simek <michal.simek@amd.com>,
-	Eugen Hristev <eugen.hristev@linaro.org>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Ben Dooks <ben-linux@fluff.org>, Viresh Kumar <vireshk@kernel.org>,
-	Orson Zhai <orsonzhai@gmail.com>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Chunyan Zhang <zhang.lyra@gmail.com>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Thierry Reding <thierry.reding@gmail.com>,
-	Jonathan Hunter <jonathanh@nvidia.com>,
-	Chen-Yu Tsai <wens@csie.org>,
-	Jernej Skrabec <jernej.skrabec@gmail.com>,
-	Samuel Holland <samuel@sholland.org>,
-	Alexey Charkov <alchark@gmail.com>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 09/38] mmc: cb710-mmc: use modern PM macros
-Message-ID: <aKYgSkOc1U5Dio8w@qmqm.qmqm.pl>
-References: <20250815013413.28641-1-jszhang@kernel.org>
- <20250815013413.28641-10-jszhang@kernel.org>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="ysf8YzAw"
+Received: from fllvem-sh03.itg.ti.com ([10.64.41.86])
+	by lelvem-ot01.ext.ti.com (8.15.2/8.15.2) with ESMTP id 57KJUlpv3266977;
+	Wed, 20 Aug 2025 14:30:47 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1755718247;
+	bh=IeWsADdri0ocUxlQVF4mtwR+WyA8x/GO9o64bt18pvw=;
+	h=From:To:CC:Subject:Date;
+	b=ysf8YzAwt65yJWCe14kuzy5/ck8sxwfp8i0wNfuA1biIWbV1E2w4l47/tbF7eWCj1
+	 5du06waYRSK8+KdovXFQxZmec8FOiBY9C9i87KjB3K4Es5oCE3ck6wa4dStYqMpT9l
+	 NRe8EUnZQSHi0Fjaxul+tz20cS7Ci0ivHWNa69C4=
+Received: from DLEE115.ent.ti.com (dlee115.ent.ti.com [157.170.170.26])
+	by fllvem-sh03.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 57KJUlAL1577857
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
+	Wed, 20 Aug 2025 14:30:47 -0500
+Received: from DLEE102.ent.ti.com (157.170.170.32) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Wed, 20
+ Aug 2025 14:30:47 -0500
+Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DLEE102.ent.ti.com
+ (157.170.170.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
+ Frontend Transport; Wed, 20 Aug 2025 14:30:47 -0500
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 57KJUlBt712398;
+	Wed, 20 Aug 2025 14:30:47 -0500
+From: Judith Mendez <jm@ti.com>
+To: Judith Mendez <jm@ti.com>, Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf
+ Hansson <ulf.hansson@linaro.org>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Andrew Davis
+	<afd@ti.com>
+Subject: [PATCH v5] mmc: sdhci_am654: Disable HS400 for AM62P SR1.0 and SR1.1
+Date: Wed, 20 Aug 2025 14:30:47 -0500
+Message-ID: <20250820193047.4064142-1-jm@ti.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20250815013413.28641-10-jszhang@kernel.org>
+Content-Type: text/plain
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On Fri, Aug 15, 2025 at 09:33:44AM +0800, Jisheng Zhang wrote:
-> Use the modern PM macros for the suspend and resume functions to be
-> automatically dropped by the compiler when CONFIG_PM or
-> CONFIG_PM_SLEEP are disabled, without having to use #ifdef guards.
-> 
-> This has the advantage of always compiling these functions in,
-> independently of any Kconfig option. Thanks to that, bugs and other
-> regressions are subsequently easier to catch.
-> 
-> At the same time, replace the platform_driver's .suspend and .resume
-> usage with modern device_driver's .pm usage.
-> 
-> Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
-> ---
->  drivers/mmc/host/cb710-mmc.c | 19 +++++++++----------
->  1 file changed, 9 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
-> index 448d2f9159ea..31daec787495 100644
-> --- a/drivers/mmc/host/cb710-mmc.c
-> +++ b/drivers/mmc/host/cb710-mmc.c
-> @@ -664,25 +664,25 @@ static const struct mmc_host_ops cb710_mmc_host = {
->  	.get_cd = cb710_mmc_get_cd,
->  };
->  
-> -#ifdef CONFIG_PM
-> -
-> -static int cb710_mmc_suspend(struct platform_device *pdev, pm_message_t state)
-> +static int cb710_mmc_suspend(struct device *dev)
->  {
-> +	struct platform_device *pdev = to_platform_device(dev);
->  	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
->  
->  	cb710_mmc_enable_irq(slot, 0, ~0);
->  	return 0;
->  }
->  
-> -static int cb710_mmc_resume(struct platform_device *pdev)
-> +static int cb710_mmc_resume(struct device *dev)
->  {
-> +	struct platform_device *pdev = to_platform_device(dev);
->  	struct cb710_slot *slot = cb710_pdev_to_slot(pdev);
->  
->  	cb710_mmc_enable_irq(slot, 0, ~0);
->  	return 0;
->  }
->  
-> -#endif /* CONFIG_PM */
-> +static DEFINE_SIMPLE_DEV_PM_OPS(cb710_mmc_pmops, cb710_mmc_suspend, cb710_mmc_resume);
->  
->  static int cb710_mmc_init(struct platform_device *pdev)
->  {
-> @@ -767,13 +767,12 @@ static void cb710_mmc_exit(struct platform_device *pdev)
->  }
->  
->  static struct platform_driver cb710_mmc_driver = {
-> -	.driver.name = "cb710-mmc",
-> +	.driver = {
-> +		.name = "cb710-mmc",
-> +		.pm = pm_sleep_ptr(&cb710_mmc_pmops),
-> +	},
->  	.probe = cb710_mmc_init,
->  	.remove = cb710_mmc_exit,
-> -#ifdef CONFIG_PM
-> -	.suspend = cb710_mmc_suspend,
-> -	.resume = cb710_mmc_resume,
-> -#endif
->  };
->  
->  module_platform_driver(cb710_mmc_driver);
-> -- 
-> 2.50.0
-> 
+This adds SDHCI_AM654_QUIRK_DISABLE_HS400 quirk which shall be used
+to disable HS400 support. AM62P SR1.0 and SR1.1 do not support HS400
+due to errata i2458 [0] so disable HS400 for these SoC revisions.
 
-Acked-by: Micha³ Miros³aw <mirq-linux@rere.qmqm.pl>
+[0] https://www.ti.com/lit/er/sprz574a/sprz574a.pdf
+Fixes: 37f28165518f ("arm64: dts: ti: k3-am62p: Add ITAP/OTAP values for MMC")
+Cc: stable@vger.kernel.org
+Signed-off-by: Judith Mendez <jm@ti.com>
+Reviewed-by: Andrew Davis <afd@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+This patch was separated from [1] since it will be merged to
+different trees anyways.
+
+Links:
+v4: https://lore.kernel.org/linux-mmc/20250819152854.3117844-1-jm@ti.com/
+v3: https://lore.kernel.org/linux-mmc/20250818203310.3066985-1-jm@ti.com/
+v2: [1] https://lore.kernel.org/linux-mmc/20250807225138.1228333-1-jm@ti.com
+
+Changes since v4:
+- Add fixes tag and cc stable as per Ulf's review comment in v4
+---
+ drivers/mmc/host/sdhci_am654.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 8a099508b939..ffc45930c240 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -155,6 +155,7 @@ struct sdhci_am654_data {
+ 
+ #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+ #define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
++#define SDHCI_AM654_QUIRK_DISABLE_HS400 BIT(2)
+ };
+ 
+ struct window {
+@@ -764,6 +765,7 @@ static int sdhci_am654_init(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
++	struct device *dev = mmc_dev(host->mmc);
+ 	u32 ctl_cfg_2 = 0;
+ 	u32 mask;
+ 	u32 val;
+@@ -819,6 +821,12 @@ static int sdhci_am654_init(struct sdhci_host *host)
+ 	if (ret)
+ 		goto err_cleanup_host;
+ 
++	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_DISABLE_HS400 &&
++	    host->mmc->caps2 & (MMC_CAP2_HS400 | MMC_CAP2_HS400_ES)) {
++		dev_info(dev, "HS400 mode not supported on this silicon revision, disabling it\n");
++		host->mmc->caps2 &= ~(MMC_CAP2_HS400 | MMC_CAP2_HS400_ES);
++	}
++
+ 	ret = __sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_cleanup_host;
+@@ -882,6 +890,12 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+ 	return 0;
+ }
+ 
++static const struct soc_device_attribute sdhci_am654_descope_hs400[] = {
++	{ .family = "AM62PX", .revision = "SR1.0" },
++	{ .family = "AM62PX", .revision = "SR1.1" },
++	{ /* sentinel */ }
++};
++
+ static const struct of_device_id sdhci_am654_of_match[] = {
+ 	{
+ 		.compatible = "ti,am654-sdhci-5.1",
+@@ -969,6 +983,10 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		return dev_err_probe(dev, ret, "parsing dt failed\n");
+ 
++	soc = soc_device_match(sdhci_am654_descope_hs400);
++	if (soc)
++		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_DISABLE_HS400;
++
+ 	host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
+ 	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+ 
+-- 
+2.49.0
+
