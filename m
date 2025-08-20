@@ -1,166 +1,145 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77B8B31CA72
-	for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 16:12:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3053032275C;
+	Wed, 20 Aug 2025 16:20:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755706323; cv=none; b=BZNigbbLWWRKB4alL/gThzb1XvuNviZB4s9mrpunhIQBycqb+6yylAJAzUbXKdhXb50GvawtR6r09tH469Tdx99OZyDHf9GvTpIDqKymRJr5w/GTM+RsqJ/iw5llqOvB0avdyzB82z89x4kA34yQd0K0S4FbSBTyEhaxOoH3Qas=
+	t=1755706852; cv=none; b=PkzqrKIOOoP7/ZcdgILfgM878lfgv/klkqcCdFbDXtDYoAvXMYblANMZm0ZzTgiNG7ZgrwnwZyQSBAS+fgxy6mKHSKw5SDFeepkXSfP9uweNBun1Y8nPYXNgFVl568/UIw7wsWGe6vvET6WDSDxpoqDJa08mOZCGgpeg+P9nYbg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755706323; c=relaxed/simple;
-	bh=N2MrP5BJEUs8REnU+Gj6bAFrxsuXD4Cgl44PMracfaI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WyMqcEyYCCkGRPHOk5x9QLUxgchwUDNFfFK3RNpEbRnOcy06ovHVw+jbBbeudbw53F6tx/cvJT/lOBwvqaWAcgGmlUhXEWiRw182haIW4wllHmiawzY6WcCVmlYNx4UJfT/l+7xUXSO4FBMgo5iSxDWq0wCZP+YF+zOPreBs2Ns=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=pBwO9aQv; arc=none smtp.client-ip=209.85.128.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1755706852; c=relaxed/simple;
+	bh=KuHQlhLloiL8qIhruC+SjKavcvsQQojmdPAzwfSpvyw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OCwtv4wwb1JWARixOaqnSCFQ0/SMLZDuhkusfT1IfnJSOg/DJpotY83FbXZe8WWufuaB8+4PBXkWQwkcHHoVMOOu2M1fwz7Qlnoz4HS2V2eDOX5N7P252dY0NfY4t9Dn6Kyc4yCcM/m8RxVuW1ERXrC5TSTmEMvF0/I4fNn43iA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fyIu/H5l; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pBwO9aQv"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-71d60110772so63387b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 09:12:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755706320; x=1756311120; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZKEj4OoFu5qxWiZKLT6PI6uf5xnbuxEXW6QnaXB6ZtI=;
-        b=pBwO9aQvjDGnv7uIW7CNAsOd9ED/5VLvWSf4P5zS+AcQBIQ+QAdN5giHMZyFsZTLyo
-         vZ/iXem/mCNhx02SHiZtLXYNSaHasyNyTvRc0ysJVjr3dOiY9CH6sEbSirP18ZRF+Mj1
-         ZqlXl5nAEHB1RWimv0bYjPef12VjiQrAxmkW2KD5zVrySPi5+H9cn0JZnXGMsANf7RJf
-         hZBB1Fbbg8qIGSLBgBSNU3a6CzG9MnXvpk7DqfLe0gJd0HefxggvQHzfrn8nuVjYsny7
-         2vbbXwRRQOTmtxlcqaRyQpfD8BGUynE65bX1bUBYaCTAJAGml9vJpF7jHw55d1EI9QH4
-         P4nQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755706320; x=1756311120;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ZKEj4OoFu5qxWiZKLT6PI6uf5xnbuxEXW6QnaXB6ZtI=;
-        b=fF+1asYoBIAxetdEvadFwDWhgJXs4JLXDeIxySuBT3J0WTt7GLarTzTFVAwZ8hEan0
-         41DLMthOGrQqNI5BFYH361NNw4hFxAeBtzjURMq8Ffx1doXDcgvQ5GN+0XX6oa5NwX4s
-         3U+dDTure9OsEZ4mW0Ok9anpby1bLdop/UTcVTZoYNpMIEMp/L6JCzqbdz4Nk5L7hJLB
-         QsT4M34eOaf7rkr6y2K0bsTXu+tu9ySOjNP66azHU43VqEhe+jQRAKoV46x8D6R1cShY
-         Ia3aYIxyY6geA3TSEShEARg7w5jgzPF6zWxBHKMP5QXXKqvb7C07hpYBkvG4XMNGxuZG
-         MVhQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXwplqKX91L5pNxWCtoIPQ8VW75d6/x5ZBsRN1V6vDefstA5ImnZbgsZM87G9Sj0yGPEO6K3MtKyrk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyepfg3qXVxqQzihxI8P6RaBxLVd0CRdaPXI44noswiXA4Kql7/
-	t8qFknBdvrR2oiX/6oRHXcu+7nkX6mzmUvR2GiiDumWuu5sBmwiI/lYtPtdJRoD4bVg8E4cKO/N
-	uHHYmvfwGAECpcqRyupHM/TiwEyyqLHe0H4hyCRTIEg==
-X-Gm-Gg: ASbGncuQ/rAgGUmY94WeCTDVxrOfBEx7N01RCamvXd1Geg6P9tVTM/h1UnalBGIhqdy
-	0EkL98h9I8uakHF7l2jhV6A18tzbzfNmSV7Ne0FHnA8qSIkzWZJflDvy5mIY2CvPj+CrWnbSMfx
-	XY+JLUw+UzENLka2FTMMBFla6o0Vn48OJCH6V3vLy/Iv20XEki9WOseDoHLVoX+P2i1o4KlcF0r
-	zLwcebX
-X-Google-Smtp-Source: AGHT+IFyGmPKSjD9LQZuyLeQ/TtIq9vh3tMfOnN/t8pZNM1B/noC7/Ya+OcZNQb3fDOmJP/tGcVjYZngksMRq3/mB94=
-X-Received: by 2002:a05:690c:6109:b0:71f:b944:1012 with SMTP id
- 00721157ae682-71fb9444b96mr27757007b3.45.1755706320050; Wed, 20 Aug 2025
- 09:12:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fyIu/H5l"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 970EBC4CEE7;
+	Wed, 20 Aug 2025 16:20:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1755706852;
+	bh=KuHQlhLloiL8qIhruC+SjKavcvsQQojmdPAzwfSpvyw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fyIu/H5lPoivJ0GpsC1AJXOXeBc5ZNxmaljT7ateChUzqYChxTxsKShz8KfHRwQRf
+	 Pr1O+nyJWvhgbpQjH2eF1goyuLJef40u9aVHzS2I0PX9EyBYDQwJchu8Is1mXnDWTG
+	 Ze1D04DVSpcHYQwTCZQv47IfbSNErIL+i6Kw6Kio0bKA7+7mt1gi+OcVlv/7xMW7jl
+	 mRTGXyyeNtXidaXNOxCMPUep48ujVX1r6WsrFY6JKuGFGH3KdW3q+limHUd60x43IC
+	 ATn3GVRAIgLqmFnsgrh9FqLHw+se7fNGTYPFz/UsInmjDBqhthAopD5rhDG1LdFJlg
+	 ngrjppmPesKNw==
+Date: Wed, 20 Aug 2025 09:20:48 -0700
+From: Nathan Chancellor <nathan@kernel.org>
+To: Dan Carpenter <dan.carpenter@linaro.org>
+Cc: =?iso-8859-1?Q?Beno=EEt?= Monin <benoit.monin@bootlin.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	llvm@lists.linux.dev, patches@lists.linux.dev
+Subject: Re: [PATCH] mmc: sdhci-cadence: Fix -Wuninitialized in
+ sdhci_cdns_tune_blkgap()
+Message-ID: <20250820162048.GC3805667@ax162>
+References: <20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-v1-1-94aa2d0c438a@kernel.org>
+ <2560300.XAFRqVoOGU@benoit.monin>
+ <aKWmvWTtQ_QZYgEm@stanley.mountain>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250819152854.3117844-1-jm@ti.com>
-In-Reply-To: <20250819152854.3117844-1-jm@ti.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 20 Aug 2025 18:11:24 +0200
-X-Gm-Features: Ac12FXzAJOFWwYq5VhPJAug_YKD03X7VQt06zhfNoBt5coG_TQ70POedXOcSHJQ
-Message-ID: <CAPDyKFrZ7jLfAQ1N4_nXZndFvtvKeLqhK-9MjuHUoJA073Pdcg@mail.gmail.com>
-Subject: Re: [PATCH v4] mmc: sdhci_am654: Disable HS400 for AM62P SR1.0 and SR1.1
-To: Judith Mendez <jm@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Andrew Davis <afd@ti.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <aKWmvWTtQ_QZYgEm@stanley.mountain>
 
-On Tue, 19 Aug 2025 at 17:28, Judith Mendez <jm@ti.com> wrote:
->
-> This adds SDHCI_AM654_QUIRK_DISABLE_HS400 quirk which shall be used
-> to disable HS400 support. AM62P SR1.0 and SR1.1 do not support HS400
-> due to errata i2458 [0] so disable HS400 for these SoC revisions.
->
-> [0] https://www.ti.com/lit/er/sprz574a/sprz574a.pdf
-> Signed-off-by: Judith Mendez <jm@ti.com>
-> Reviewed-by: Andrew Davis <afd@ti.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On Wed, Aug 20, 2025 at 01:43:09PM +0300, Dan Carpenter wrote:
+> On Wed, Aug 20, 2025 at 10:07:35AM +0200, Benoît Monin wrote:
+> > > --- a/drivers/mmc/host/sdhci-cadence.c
+> > > +++ b/drivers/mmc/host/sdhci-cadence.c
+> > > @@ -288,13 +288,12 @@ static int sdhci_cdns_tune_blkgap(struct mmc_host *mmc)
+> > >  	void __iomem *hrs38_reg = priv->hrs_addr + SDHCI_CDNS_HRS38;
+> > >  	int ret;
+> > >  	u32 gap;
+> > > -	u32 hrs37_mode;
+> > >  
+> > >  	/* Currently only needed in HS200 mode */
+> > >  	if (host->timing != MMC_TIMING_MMC_HS200)
+> > >  		return 0;
+> > >  
+> > > -	writel(hrs37_mode, hrs37_reg);
+> > > +	writel(SDHCI_CDNS_HRS37_MODE_MMC_HS200, hrs37_reg);
+> > >  
+> > >  	for (gap = 0; gap <= SDHCI_CDNS_HRS38_BLKGAP_MAX; gap++) {
+> > >  		writel(gap, hrs38_reg);
+> > > 
+> > Thanks for the catch!
+> > 
+> > I don't get how gcc does not raise a warning here, only clang does. I
+> > did build with gcc-11 and gcc-15 and they don't complain about this
+> > uninitialized variable.
+> > 
+> 
+> We disabled uninitialized variable checking on GCC.  It was too crazy
+> and especially if we want to use -Werror.
+> 
+> Smatch also detects this bug.
 
-Can we add a fixes tag? And should this be tagged for stable too?
+Technically, -Wuninitialized is on for GCC as well but as soon as there
+is control flow between the declaration of the variable and its usage,
+it gets changed into -Wmaybe-uninitialized :/
 
-Kind regards
-Uffe
+In file included from arch/arm64/include/asm/io.h:288,
+                 from include/linux/io.h:12,
+                 from include/linux/iopoll.h:14,
+                 from drivers/mmc/host/sdhci-cadence.c:9:
+In function 'writel',
+    inlined from 'sdhci_cdns_tune_blkgap' at drivers/mmc/host/sdhci-cadence.c:297:2,
+    inlined from 'sdhci_cdns_execute_tuning' at drivers/mmc/host/sdhci-cadence.c:352:9:
+include/asm-generic/io.h:276:9: error: 'hrs37_mode' may be used uninitialized [-Werror=maybe-uninitialized]
+  276 |         log_write_mmio(value, 32, addr, _THIS_IP_, _RET_IP_);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+drivers/mmc/host/sdhci-cadence.c: In function 'sdhci_cdns_execute_tuning':
+drivers/mmc/host/sdhci-cadence.c:291:13: note: 'hrs37_mode' was declared here
+  291 |         u32 hrs37_mode;
+      |             ^~~~~~~~~~
 
-> ---
-> This patch was separated from [1] since it will be merged to
-> different trees anyways.
->
-> Links:
-> v3: https://lore.kernel.org/linux-mmc/20250818203310.3066985-1-jm@ti.com/
-> v2: [1] https://lore.kernel.org/linux-mmc/20250807225138.1228333-1-jm@ti.com
->
-> Changes since v3:
-> - Add Andrew's and Adrian's tags
-> - Fix message to user as per Andrew's and Adrian's suggestion
->   in v3 to a less imperative tone
-> - Fix commit message reference indexes
-> ---
->  drivers/mmc/host/sdhci_am654.c | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index 8a099508b939..ffc45930c240 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -155,6 +155,7 @@ struct sdhci_am654_data {
->
->  #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->  #define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
-> +#define SDHCI_AM654_QUIRK_DISABLE_HS400 BIT(2)
->  };
->
->  struct window {
-> @@ -764,6 +765,7 @@ static int sdhci_am654_init(struct sdhci_host *host)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> +       struct device *dev = mmc_dev(host->mmc);
->         u32 ctl_cfg_2 = 0;
->         u32 mask;
->         u32 val;
-> @@ -819,6 +821,12 @@ static int sdhci_am654_init(struct sdhci_host *host)
->         if (ret)
->                 goto err_cleanup_host;
->
-> +       if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_DISABLE_HS400 &&
-> +           host->mmc->caps2 & (MMC_CAP2_HS400 | MMC_CAP2_HS400_ES)) {
-> +               dev_info(dev, "HS400 mode not supported on this silicon revision, disabling it\n");
-> +               host->mmc->caps2 &= ~(MMC_CAP2_HS400 | MMC_CAP2_HS400_ES);
-> +       }
-> +
->         ret = __sdhci_add_host(host);
->         if (ret)
->                 goto err_cleanup_host;
-> @@ -882,6 +890,12 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->         return 0;
->  }
->
-> +static const struct soc_device_attribute sdhci_am654_descope_hs400[] = {
-> +       { .family = "AM62PX", .revision = "SR1.0" },
-> +       { .family = "AM62PX", .revision = "SR1.1" },
-> +       { /* sentinel */ }
-> +};
-> +
->  static const struct of_device_id sdhci_am654_of_match[] = {
->         {
->                 .compatible = "ti,am654-sdhci-5.1",
-> @@ -969,6 +983,10 @@ static int sdhci_am654_probe(struct platform_device *pdev)
->         if (ret)
->                 return dev_err_probe(dev, ret, "parsing dt failed\n");
->
-> +       soc = soc_device_match(sdhci_am654_descope_hs400);
-> +       if (soc)
-> +               sdhci_am654->quirks |= SDHCI_AM654_QUIRK_DISABLE_HS400;
-> +
->         host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
->         host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
->
-> --
-> 2.49.0
->
+vs
+
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index a2a4a5b0ab96..b968c0fb925d 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -290,12 +290,12 @@ static int sdhci_cdns_tune_blkgap(struct mmc_host *mmc)
+        u32 gap;
+        u32 hrs37_mode;
+
++       writel(hrs37_mode, hrs37_reg);
++
+        /* Currently only needed in HS200 mode */
+        if (host->timing != MMC_TIMING_MMC_HS200)
+                return 0;
+
+-       writel(hrs37_mode, hrs37_reg);
+-
+        for (gap = 0; gap <= SDHCI_CDNS_HRS38_BLKGAP_MAX; gap++) {
+                writel(gap, hrs38_reg);
+                ret = mmc_read_tuning(mmc, 512, 32);
+
+In file included from arch/arm64/include/asm/io.h:288,
+                 from include/linux/io.h:12,
+                 from include/linux/iopoll.h:14,
+                 from drivers/mmc/host/sdhci-cadence.c:9:
+drivers/mmc/host/sdhci-cadence.c: In function 'sdhci_cdns_tune_blkgap':
+include/asm-generic/io.h:273:16: error: 'hrs37_mode' is used uninitialized [-Werror=uninitialized]
+  273 | #define writel writel
+drivers/mmc/host/sdhci-cadence.c:293:9: note: in expansion of macro 'writel'
+  293 |         writel(hrs37_mode, hrs37_reg);
+      |         ^~~~~~
+drivers/mmc/host/sdhci-cadence.c:291:13: note: 'hrs37_mode' was declared here
+  291 |         u32 hrs37_mode;
+      |             ^~~~~~~~~~
+
+It would be nice if GCC could adopt clang's semantics of "uninitialized
+when used _here_" for -Wuninitalized versus the current scheme of
+converting it to a "may be used uninitialized" warning.
+
+Cheers,
+Nathan
