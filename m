@@ -1,130 +1,140 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC3BA36CDF5
-	for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 16:44:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D41FF221F2F;
+	Wed, 20 Aug 2025 17:02:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755708250; cv=none; b=MLmjPVzWCsZLJFcofYdMajmMynUlSvK9kqBJOzpdfgRuWhhqCcydC+KLu2Gz+HzOs5cugzIqxjLgGXRpAt2jbxj6NXCMD6ZajlOBjLGcRPfuy4mJrC7xSY89aeZg4bEUO6sfSN4RTL2HEOmghjrSresJ24jLtZvLfdQilrr/L5U=
+	t=1755709380; cv=none; b=I76Kx4ye36sfgAxHK6r4H42NVC0LQIRlQbOnTawxGVEsh713QYk8nj2vkEGoz16tOtOvVIRjyjViunSklbRJryLfRjTXExhTAgvpGLUyuGSh7yUlmdLtKxhdgjtE0PE1mifwp/cO/wXiTuroQzQ04ohSdL5B1kQqFAz9SR5vGN0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755708250; c=relaxed/simple;
-	bh=rlf4MbI1vwsNRKdLc8cJukyH+as7zfttKIVUPC62vTA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LFCniXuGhrkpcQXB8rxPskQWVYfPn9hiG9rpwpEzuJbDG1gWiFAuehExyRt0yfgEPWEUzU4wITMqx7d83oN4ITuC3FuZZXZLug4zXO7ZUWopUAyAKF5d3DiYXMX8V64yz5089i5FlGIKFJaUsOAAuoO+c6KZKoEiuZzKc+6Ks/o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ahPYc7oS; arc=none smtp.client-ip=209.85.128.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1755709380; c=relaxed/simple;
+	bh=Zv4ujPO3KQCQ/S/zZ+87yMEeTHGtDtwjmsw35eFBLPg=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=GJeKu3gn/6repjJ2Tilsx8ObkFzt3ZlNB8lv0AdCbKsv3nJDGWP6bkp8t5bVVAacMd/DPFGlnZEQgz9CoeLBGJ3w+qUhW+e4gwleM8BlFaSX4VU+tc4tQS1wiR7PRw4YAqwHkYNsp3abWm86rAQt+Q3szir5y4AiBa5c8JjHUW0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Dr1d03/z; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ahPYc7oS"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-71d6051afbfso105227b3.2
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 09:44:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755708248; x=1756313048; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Q5lasJ3h7RVrddAHM1lvs/E5g0tBvN03o3fKd+WqO+A=;
-        b=ahPYc7oSqTj/teiJxWiX0xImH7K5WYq5RtH2ZXIa03q8qE3IlSbbIv7vZXKa8eVh7V
-         OmGRkY8lwjy+t2HB0lwK4s/KcPTaAak7QP+tGwsU6H/L8eAW6A+OsN94h9a08FGnaGmY
-         Hz7fSuCXOmW0DvcvbVy/417pyAnvRIvrnqIKLiy3C4RKLGmdTE9yPjjJDyRtofUiOcXd
-         aIizQttbbYLauQzQ53wC3QPVYoFHKjJg5TwFohFGPhsur1+JsJfqtihMXOp4udrjrLZI
-         Anqdcp82zNUTTkXcsrAJgXwYslimjW8ftepsPCqjRiN5ElIx88Gp5OumiOv7y5VAKfjq
-         WvCQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755708248; x=1756313048;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Q5lasJ3h7RVrddAHM1lvs/E5g0tBvN03o3fKd+WqO+A=;
-        b=gKOcbfb7MZNpZZsBVBEPzxfjehgV82bpIETpBdC0sHpmDlvXLmUDl9lRHru0dr9cHi
-         8eQJ2VcLOvRT2hWNzP3q1esFB3HnxD6MTHFYEvDVeLhsE2fZBb0JGhOuh3KKVks9gv0B
-         8n/O/YKS3pBdmX04p7OdO8wV2aJrkloqe+RdkM5f2CPPr37eMpsYT/saB62jHPx+7hsk
-         lqe/RTDyTu+BMIyh4wjv+07+t8rh8LUCz7IrN41ncANnnMYMbbLXL+94Dls9ps6/EYso
-         V4sU4oUhXu757k2INuMeYufORK3YxUuTValsHro3gaXDbeIxU+uV0jVIR+FDe7sF/2n5
-         VAMw==
-X-Forwarded-Encrypted: i=1; AJvYcCUZDPkXDWNlEyqzdGz06buY/Chm6rgLu7E0/wX4SlZXyXdlkBh78Kdeh5NAYBymdAcZGFCzmEablZU=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx/QpAhVKAvT564fODhb1pfp62OqEJBgrry4o7c++2RyNF5k61g
-	xQ09wL052Hf8Q1OK5zgL6wHdbaYhee5dh0t1AQt+ekN7S/f5vxkhD59unNTDTfZzEkE3fMG2Mwi
-	hSaOmp1HbxS2RLJiL+gwCXxwgwBgKCb5OmLFu0R+sodx43BHxsT0x/78=
-X-Gm-Gg: ASbGncszLi+5NWFVZgYE/lpDRIDCHyZerZC69luq+aPxk/8QKieHSxl6Rr42Qbo1IBT
-	7qTJro2uWsJzG/4ybu2/vIXnaAO9ySaxymDJKXKy8Vz6giUPbnVc8y/h1TJeNjXaqqvqXIyYb4p
-	7FUly0/m9mvXbc+03YFXZM54T6+0E/2oZSXBcs+JA9vFl84pO4tK6uLN2STRkmt4jiv+NmKgQ2A
-	Yx6idei
-X-Google-Smtp-Source: AGHT+IH6m3Ww+OjQuVs+Bfy8fafay2w24/TuXvOFcHZfUby02NoUSl9x/4nPk4fk2gOIDJz6QPD6Mw+/dyMYSAB7qgc=
-X-Received: by 2002:a05:690c:94:b0:71e:727d:7dc5 with SMTP id
- 00721157ae682-71fb322b559mr43302807b3.36.1755708247693; Wed, 20 Aug 2025
- 09:44:07 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Dr1d03/z"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0A73AC113CF;
+	Wed, 20 Aug 2025 17:02:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1755709379;
+	bh=Zv4ujPO3KQCQ/S/zZ+87yMEeTHGtDtwjmsw35eFBLPg=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=Dr1d03/ztQZzehnuA3pVpw7eG2apfzSIzXWZn4V8PSF/oxOnzaMyj6VZxDgQ3XY0C
+	 nca+A2IJDoLbxKo30R/YmbItPPf92i6LVVRW7LTdmYn+yLP3bLCTrV977h9BaHEtKx
+	 NXa2PCl2PJ+9sKMlIBp1C0l2xmBSHRNp1Ot+Slf6644+zsAzHmD5BYUvfwKZ1SqBPg
+	 b3bNilTK6GPtQRkA2c0x0ltTwqwessPnwFUwQuinpUV1sWYrBj8/SGJJQ8Wlda48Mw
+	 vcZIdxxAkqbQkwlZ9DlQZ/Zs8lvh3SMTfcqlJlRdXT5KDCZbCRFgNoX/rafdY4my5h
+	 Ujim+Xbb9lOhA==
+From: Vinod Koul <vkoul@kernel.org>
+To: linux-kernel@vger.kernel.org, 
+ Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Mark Brown <broonie@kernel.org>, 
+ Adrian Hunter <adrian.hunter@intel.com>, 
+ Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+ Alexandre Torgue <alexandre.torgue@foss.st.com>, 
+ Alim Akhtar <alim.akhtar@samsung.com>, 
+ Andrea della Porta <andrea.porta@suse.com>, 
+ =?utf-8?q?Andreas_F=C3=A4rber?= <afaerber@suse.de>, 
+ Andrzej Hajda <andrzej.hajda@intel.com>, Andy Shevchenko <andy@kernel.org>, 
+ Andy Yan <andy.yan@rock-chips.com>, Avi Fishman <avifishman70@gmail.com>, 
+ Bartosz Golaszewski <brgl@bgdev.pl>, 
+ Benjamin Fair <benjaminfair@google.com>, 
+ Bjorn Andersson <andersson@kernel.org>, Chen-Yu Tsai <wens@csie.org>, 
+ Daniel Lezcano <daniel.lezcano@linaro.org>, 
+ David Airlie <airlied@gmail.com>, David Lechner <dlechner@baylibre.com>, 
+ Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
+ Drew Fustini <fustini@kernel.org>, dri-devel@lists.freedesktop.org, 
+ Fabio Estevam <festevam@gmail.com>, 
+ Fabrice Gasnier <fabrice.gasnier@foss.st.com>, Fu Wei <wefu@redhat.com>, 
+ Guo Ren <guoren@kernel.org>, Hans Verkuil <hverkuil@kernel.org>, 
+ =?utf-8?q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, imx@lists.linux.dev, 
+ Iwona Winiarska <iwona.winiarska@intel.com>, 
+ Jaroslav Kysela <perex@perex.cz>, Jassi Brar <jassisinghbrar@gmail.com>, 
+ Jernej Skrabec <jernej.skrabec@gmail.com>, 
+ Jerome Brunet <jbrunet@baylibre.com>, Jonas Karlman <jonas@kwiboo.se>, 
+ Jonathan Cameron <jic23@kernel.org>, Kevin Hilman <khilman@baylibre.com>, 
+ Kishon Vijay Abraham I <kishon@kernel.org>, 
+ Konrad Dybcio <konradybcio@kernel.org>, 
+ Krzysztof Kozlowski <krzk@kernel.org>, 
+ Laurent Pinchart <Laurent.pinchart@ideasonboard.com>, 
+ Lee Jones <lee@kernel.org>, Liam Girdwood <lgirdwood@gmail.com>, 
+ Linus Walleij <linus.walleij@linaro.org>, linux-actions@lists.infradead.org, 
+ linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, 
+ linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org, 
+ linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org, 
+ linux-input@vger.kernel.org, linux-media@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org, 
+ linux-pm@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, 
+ linux-pwm@vger.kernel.org, linux-riscv@lists.infradead.org, 
+ linux-rockchip@lists.infradead.org, linux-rtc@vger.kernel.org, 
+ linux-samsung-soc@vger.kernel.org, linux-sound@vger.kernel.org, 
+ linux-spi@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, 
+ linux-sunxi@lists.linux.dev, Liu Ying <victor.liu@nxp.com>, 
+ Lukasz Luba <lukasz.luba@arm.com>, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Manivannan Sadhasivam <mani@kernel.org>, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
+ Mauro Carvalho Chehab <mchehab@kernel.org>, 
+ Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
+ Maxime Ripard <mripard@kernel.org>, 
+ Michael Turquette <mturquette@baylibre.com>, 
+ Miquel Raynal <miquel.raynal@bootlin.com>, Nancy Yuen <yuenn@google.com>, 
+ Neil Armstrong <neil.armstrong@linaro.org>, 
+ Nicolin Chen <nicoleotsuka@gmail.com>, 
+ =?utf-8?q?Nuno_S=C3=A1?= <nuno.sa@analog.com>, openbmc@lists.ozlabs.org, 
+ Patrick Venture <venture@google.com>, 
+ Paul Walmsley <paul.walmsley@sifive.com>, 
+ Pengutronix Kernel Team <kernel@pengutronix.de>, 
+ Philipp Zabel <p.zabel@pengutronix.de>, 
+ Piotr Wojtaszczyk <piotr.wojtaszczyk@timesys.com>, 
+ "Rafael J. Wysocki" <rafael@kernel.org>, Robert Foss <rfoss@kernel.org>, 
+ Samuel Holland <samuel.holland@sifive.com>, 
+ Samuel Holland <samuel@sholland.org>, Sandy Huang <hjc@rock-chips.com>, 
+ Sascha Hauer <s.hauer@pengutronix.de>, Shawn Guo <shawnguo@kernel.org>, 
+ Shengjiu Wang <shengjiu.wang@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+ Stephen Boyd <sboyd@kernel.org>, Takashi Iwai <tiwai@suse.com>, 
+ Tali Perry <tali.perry1@gmail.com>, Thomas Zimmermann <tzimmermann@suse.de>, 
+ Tomer Maimon <tmaimon77@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+ =?utf-8?q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>, 
+ Vasily Khoruzhick <anarsoul@gmail.com>, Vladimir Zapolskiy <vz@mleia.com>, 
+ Xiubo Li <Xiubo.Lee@gmail.com>, Yangtao Li <tiny.windzz@gmail.com>, 
+ Zhang Rui <rui.zhang@intel.com>
+In-Reply-To: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
+References: <20250813161517.4746-1-wsa+renesas@sang-engineering.com>
+Subject: Re: (subset) [PATCH 00/21] treewide: remove unneeded 'fast_io'
+ parameter in regmap_config
+Message-Id: <175570934550.66459.15951444863822303407.b4-ty@kernel.org>
+Date: Wed, 20 Aug 2025 22:32:25 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-v1-1-94aa2d0c438a@kernel.org>
-In-Reply-To: <20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-v1-1-94aa2d0c438a@kernel.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 20 Aug 2025 18:43:31 +0200
-X-Gm-Features: Ac12FXy7rDHN8USe2ZYWKKe_XNpSU7YSWOYPW1bMeT7tRaJLRvVitFbGjplVTcY
-Message-ID: <CAPDyKFoHOWrrwud-gxQdN6TJjCwheWqv2XPj+B2jHTO4CBU4Ew@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-cadence: Fix -Wuninitialized in sdhci_cdns_tune_blkgap()
-To: Nathan Chancellor <nathan@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>, 
-	linux-mmc@vger.kernel.org, llvm@lists.linux.dev, patches@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.13.0
 
-On Tue, 19 Aug 2025 at 19:29, Nathan Chancellor <nathan@kernel.org> wrote:
->
-> Clang warns (or errors with CONFIG_WERROR=y):
->
->   drivers/mmc/host/sdhci-cadence.c:297:9: error: variable 'hrs37_mode' is uninitialized when used here [-Werror,-Wuninitialized]
->     297 |         writel(hrs37_mode, hrs37_reg);
->         |                ^~~~~~~~~~
->   drivers/mmc/host/sdhci-cadence.c:291:16: note: initialize the variable 'hrs37_mode' to silence this warning
->     291 |         u32 hrs37_mode;
->         |                       ^
->         |                        = 0
->
-> A previous revision assigned SDHCI_CDNS_HRS37_MODE_MMC_HS200 to
-> hrs37_mode in a switch statement but the final revision moved to a
-> simple if statement. Pass that as the value to writel() and
-> remove hrs37_mode, clearing up the warning.
->
-> Fixes: 60613a8b9b81 ("mmc: sdhci-cadence: implement multi-block read gap tuning")
-> Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 
-Applied for next, thanks!
+On Wed, 13 Aug 2025 18:14:46 +0200, Wolfram Sang wrote:
+> While working on a driver using regmap with MMIO, I wondered if I need
+> to set 'fast_io' in the config. Turned out I don't need to, so I added
+> documentation for it with commit ffc72771ff6e ("regmap: Annotate that
+> MMIO implies fast IO").
+> 
+> This series fixes the existing users in the tree which needlessly set
+> the flag. They have been found using this coccinelle script:
+> 
+> [...]
 
-Kind regards
-Uffe
+Applied, thanks!
 
-> ---
->  drivers/mmc/host/sdhci-cadence.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index a2a4a5b0ab96..eaa88897a256 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -288,13 +288,12 @@ static int sdhci_cdns_tune_blkgap(struct mmc_host *mmc)
->         void __iomem *hrs38_reg = priv->hrs_addr + SDHCI_CDNS_HRS38;
->         int ret;
->         u32 gap;
-> -       u32 hrs37_mode;
->
->         /* Currently only needed in HS200 mode */
->         if (host->timing != MMC_TIMING_MMC_HS200)
->                 return 0;
->
-> -       writel(hrs37_mode, hrs37_reg);
-> +       writel(SDHCI_CDNS_HRS37_MODE_MMC_HS200, hrs37_reg);
->
->         for (gap = 0; gap <= SDHCI_CDNS_HRS38_BLKGAP_MAX; gap++) {
->                 writel(gap, hrs38_reg);
->
-> ---
-> base-commit: 7138017038c42feb682445407974ed736e1ff308
-> change-id: 20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-cc1246cb39d8
->
-> Best regards,
-> --
-> Nathan Chancellor <nathan@kernel.org>
->
+[12/21] phy: remove unneeded 'fast_io' parameter in regmap_config
+        commit: e1e1e77f7df7cbee959ba024e5475907fe561c98
+
+Best regards,
+-- 
+~Vinod
+
+
