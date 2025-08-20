@@ -1,134 +1,214 @@
-Received: from smtpout-04.galae.net (smtpout-04.galae.net [185.171.202.116])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 125CE239E80
-	for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 08:07:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.171.202.116
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A91A2D8362
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 08:42:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755677271; cv=none; b=lnWJXo08FMLNlz6Tal1Noc7JRz+lANyfZNnG0jmidQzVQFp9KgYLDUj2ogglMwSCchdV+Rf8zSFQ4Cqayco1Gx9ZAxSzZRWAoZScjUh5rFtDOIWV7piWFQx+zMKhSRWHf10TzPNAUQ5SUJhN8cDjCfiebX/nrSQI02ZsvTNlWgY=
+	t=1755679335; cv=none; b=HvGGCeExzEAc8KQHnkxcC4/43T6W1HFk5g76WESOYPl9HahwDX7Ii8FB63r0dvSl4CoxCXmJkL2stu847z5KfBM4WhL4NycrVshBrXLbdEjc8o6lPelqNUsKepGGNC0+vszelyrja0FbeHxKKZ2pZf3gTon/+I/3pUnJSuxxuhk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755677271; c=relaxed/simple;
-	bh=1LchkEdSUPOGHvF8BqxbIW+DxgHBEG7fHZ0C9P7w9bk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=C/3zrdAr5fniSMNwJVRuxOUYfneUbyYVgb3kyfDMkJxd8L7tiBZvjje0vvZhFbpDd72Xi9s3fuZMJ4t3z+bCfOJEXhzonGuluIfjw6xYt+HFU79XW7NyGm7A0xpC/KPhPyMvHyMDkA8lkE+D/rhHu4AKD7sb+3STQCs00WbcTu8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=dOcyVhuo; arc=none smtp.client-ip=185.171.202.116
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+	s=arc-20240116; t=1755679335; c=relaxed/simple;
+	bh=zMxp/Y9NCrKDYrER4UyjAnXSn/8lzKPXQ7dHBNQTR30=;
+	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
+	 References:In-Reply-To; b=crIRzFwsoiYRG227xHmjGsBkuvxhvEtjD/lzIq4dNFjbHslpV2czBXiR8V+vejuTcXgmRNWlhvSoahiDk3fQ0bT/MAQtM4o0bOFPhnIBSrbBOFX5TXJTXBELRXk9INFq9Cbh3m7O/+oFTezgws3Q1YqM+9bh5uO78pp/9NA2/n4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com; spf=pass smtp.mailfrom=fairphone.com; dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b=Hisoo03y; arc=none smtp.client-ip=209.85.218.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fairphone.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="dOcyVhuo"
-Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-04.galae.net (Postfix) with ESMTPS id 413C3C6B3B9;
-	Wed, 20 Aug 2025 08:07:33 +0000 (UTC)
-Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id C032D606AF;
-	Wed, 20 Aug 2025 08:07:46 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 41BCB1C22D86F;
-	Wed, 20 Aug 2025 10:07:35 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1755677265; h=from:subject:date:message-id:to:cc:mime-version:content-type:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=BqOeKH44mmo+fNgntbIgoiF5KwaoWXtJymnj9DvA82U=;
-	b=dOcyVhuo4R38XYIpSGRStvC6gWxn/IXf/BnB8QnIGcJbHDO0V+a8hg90NTf93oxn7Z3qLv
-	uiJKLhMw67PzGmtKQiVl046uQdqgbdxtpUBm7DGOCf4/QIZZjst1gtN+5INLfos3ORjaTt
-	bU7aQVQabj5eoNEs38/PWsKzetcU+gZZcz4wWJV959VNZQh5HUVdEDYmwaYCUtkAPpF6Cy
-	rsYduX0WN+Lxydxuk3FNXaU/NF2tcXIH0BAed0aLhUXdjWMH7uNlDZereJ2IYp/qPOSHrM
-	1bD/kZLKySsfTZk3pJsZZUK43MHlf5GNV4U0PET/W2Gwio2OGPN4oqyIQRDN3w==
-From: =?UTF-8?B?QmVub8OudA==?= Monin <benoit.monin@bootlin.com>
-To: Nathan Chancellor <nathan@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
- llvm@lists.linux.dev, patches@lists.linux.dev
-Subject:
- Re: [PATCH] mmc: sdhci-cadence: Fix -Wuninitialized in
- sdhci_cdns_tune_blkgap()
-Date: Wed, 20 Aug 2025 10:07:35 +0200
-Message-ID: <2560300.XAFRqVoOGU@benoit.monin>
-In-Reply-To:
- <20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-v1-1-94aa2d0c438a@kernel.org>
-References:
- <20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-v1-1-94aa2d0c438a@kernel.org>
+	dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b="Hisoo03y"
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-afcb7a3b3a9so877276166b.2
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Aug 2025 01:42:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fairphone.com; s=fair; t=1755679331; x=1756284131; darn=vger.kernel.org;
+        h=in-reply-to:references:to:from:subject:cc:message-id:date
+         :content-transfer-encoding:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=dETmxzysQAIIrfvzFS6NhiwZKV/rguUqMxZ2Lb2+BiA=;
+        b=Hisoo03y9XPP464yOPXxVjUqj3dwzI25SNF2mh3om6L87mrSL1I5xseXAIYxPdKBah
+         5RqXOfK2i5/qLPMiB3BIezAA8BW/FUitmmeBZP78Dg3zLQjnW2GR0pUgZxyLiLSK4ho5
+         KLWWPPZgeSLCeMf6xUAFwNxBx1V8PnUuBTBN4lYlDw9mkWmOiBlLczleThtGSBjWw34N
+         fkg2BAGdIr7YwKWut46Nc3C/lF1izmKhSjonPW7/CMlGok0JJs4zmNezrp82BIkgayOe
+         Fhva+a1ixV6qGtSHTwapA54vX9olPxwaqCYBLVTXwaHGYP09zOkRBg6etgFL1C5+SiuC
+         +WgQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1755679331; x=1756284131;
+        h=in-reply-to:references:to:from:subject:cc:message-id:date
+         :content-transfer-encoding:mime-version:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=dETmxzysQAIIrfvzFS6NhiwZKV/rguUqMxZ2Lb2+BiA=;
+        b=hNiXQmd0GHZqaqcv8e+xJRrkV3d/OP1gNwrX8A1hQlLJZAFF3gFXWE3bAUEd3nVWJR
+         OsmNckxpT+//q7R3lIjq7dVV+aRkRtmR8gWw/eYn0W4jCqKFABZHGbL4AOy78CDoK8f6
+         Sc6liFBIZYCEo0ivqDER6RwGIoj6Z9JoDI9CmwB6MD/pa/AwMFX76ZLKpTCXmOH9TUKy
+         RgKRJcyH6oM27P9BnCXLMHvQ8wnmFlJ0CcwRMhuXEeq85BbAvuvlEIa22gIyk43DJidC
+         NUBhicjvJx6fcunTRY8vKD8PH74r2WqdG7f7q8KR0f8ozsBoinTojCS3g6lxFtH4SzNu
+         /4gA==
+X-Forwarded-Encrypted: i=1; AJvYcCXTh8tIB+W2rUn2y5F3D76P5ZjWmox+C5OxJJV0cXoUqXtOdxAH5uepaeJJY++NyI/ynDAhPvnSiq0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxtXoI6WW29w4f1L6F4jLBuBr5fY6LPSQE+Ulmq+Geua/ZjEJIH
+	olQbS256XJjAff9BpMA/NvOeTs8zmL6URF5YEW4N3RwfwlhU5CW8MQ+agGS+GsJ8kzI=
+X-Gm-Gg: ASbGncshhf+6tE4AEJNytMklZNIW/nxlo2Ztw4xogaxodOVXc4C4j2UYrKwnRXhXeAi
+	QVabtSRxO5YOl3snd+9ymcHm3/fz4JlMbKdkfcw0tsAKdiCt0WMKyagMTa4QvKbDd/ckxGXainx
+	l3PvOLOlUb70MfH6WlG2CjRR7L++/EoWCnWP9TqVQwdbhb0zoe7/RP5/H8Kslt9mLMWiD8RGVTR
+	h5gnAV8GbtG5imacnMHVsgZd+BA2YcEMAKEmgYpLY1YvwEOz4BRaB4QNc3axwrTvoEQ1whTL6AB
+	ZN+M5vvQrXhjOvY0SzRIW2+hIQhBh+dmFIazs9MP1k3BggAD4M5AHeZR5AqFprKTE+MKK0AEcuI
+	kleArMqjiTszNWY6iD6Mbi+XbjnfhsV+LPIWWxqJrzHQE1veoVpdWL/3EYoWaInb8VIg=
+X-Google-Smtp-Source: AGHT+IEac2OEaqE2OoGnweWa6iOptxoUoAiXM3h5Vw1WEpE7VDgBBgHTZqHGUTgnoBZuEdKM1TFNmg==
+X-Received: by 2002:a17:907:9715:b0:ae3:6f35:36fe with SMTP id a640c23a62f3a-afdf01e915cmr146724366b.47.1755679330638;
+        Wed, 20 Aug 2025 01:42:10 -0700 (PDT)
+Received: from localhost (144-178-202-139.static.ef-service.nl. [144.178.202.139])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-afded478bf3sm138377366b.53.2025.08.20.01.42.09
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 20 Aug 2025 01:42:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
+Mime-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="utf-8"
-X-Last-TLS-Session-Version: TLSv1.3
+Content-Type: text/plain; charset=UTF-8
+Date: Wed, 20 Aug 2025 10:42:09 +0200
+Message-Id: <DC74DPI8WS81.17VCYVY34C2F9@fairphone.com>
+Cc: <~postmarketos/upstreaming@lists.sr.ht>, <phone-devel@vger.kernel.org>,
+ <linux-arm-kernel@lists.infradead.org>, <iommu@lists.linux.dev>,
+ <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+ <linux-pm@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+ <linux-crypto@vger.kernel.org>, <dmaengine@vger.kernel.org>,
+ <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH v2 14/15] arm64: dts: qcom: Add initial Milos dtsi
+From: "Luca Weiss" <luca.weiss@fairphone.com>
+To: "Konrad Dybcio" <konrad.dybcio@oss.qualcomm.com>, "Will Deacon"
+ <will@kernel.org>, "Robin Murphy" <robin.murphy@arm.com>, "Joerg Roedel"
+ <joro@8bytes.org>, "Rob Herring" <robh@kernel.org>, "Krzysztof Kozlowski"
+ <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>, "Rafael J.
+ Wysocki" <rafael@kernel.org>, "Viresh Kumar" <viresh.kumar@linaro.org>,
+ "Manivannan Sadhasivam" <mani@kernel.org>, "Herbert Xu"
+ <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>,
+ "Vinod Koul" <vkoul@kernel.org>, "Bjorn Andersson" <andersson@kernel.org>,
+ "Konrad Dybcio" <konradybcio@kernel.org>, "Robert Marko"
+ <robimarko@gmail.com>, "Das Srinagesh" <quic_gurus@quicinc.com>, "Thomas
+ Gleixner" <tglx@linutronix.de>, "Jassi Brar" <jassisinghbrar@gmail.com>,
+ "Amit Kucheria" <amitk@kernel.org>, "Thara Gopinath"
+ <thara.gopinath@gmail.com>, "Daniel Lezcano" <daniel.lezcano@linaro.org>,
+ "Zhang Rui" <rui.zhang@intel.com>, "Lukasz Luba" <lukasz.luba@arm.com>,
+ "Ulf Hansson" <ulf.hansson@linaro.org>
+X-Mailer: aerc 0.20.1-0-g2ecb8770224a-dirty
+References: <20250713-sm7635-fp6-initial-v2-0-e8f9a789505b@fairphone.com>
+ <20250713-sm7635-fp6-initial-v2-14-e8f9a789505b@fairphone.com>
+ <3e0299ad-766a-4876-912e-438fe2cc856d@oss.qualcomm.com>
+ <DBE6TK1KDOTP.IIT72I1LUN5M@fairphone.com>
+ <DBE8G88CIQ53.2N51CABIBJOOO@fairphone.com>
+ <DBOC7QBND54K.1SI5V9C2Z76BY@fairphone.com>
+ <55420d89-fcd4-4cb5-a918-d8bbe2a03d19@oss.qualcomm.com>
+In-Reply-To: <55420d89-fcd4-4cb5-a918-d8bbe2a03d19@oss.qualcomm.com>
 
-Hi Nathan,
+Hi Konrad,
 
-On Tuesday, 19 August 2025 at 19:28:49 CEST, Nathan Chancellor wrote:
-> Clang warns (or errors with CONFIG_WERROR=3Dy):
->=20
->   drivers/mmc/host/sdhci-cadence.c:297:9: error: variable 'hrs37_mode' is=
- uninitialized when used here [-Werror,-Wuninitialized]
->     297 |         writel(hrs37_mode, hrs37_reg);
->         |                ^~~~~~~~~~
->   drivers/mmc/host/sdhci-cadence.c:291:16: note: initialize the variable =
-'hrs37_mode' to silence this warning
->     291 |         u32 hrs37_mode;
->         |                       ^
->         |                        =3D 0
->=20
-> A previous revision assigned SDHCI_CDNS_HRS37_MODE_MMC_HS200 to
-> hrs37_mode in a switch statement but the final revision moved to a
-> simple if statement. Pass that as the value to writel() and
-> remove hrs37_mode, clearing up the warning.
->=20
-> Fixes: 60613a8b9b81 ("mmc: sdhci-cadence: implement multi-block read gap =
-tuning")
-> Signed-off-by: Nathan Chancellor <nathan@kernel.org>
-> ---
->  drivers/mmc/host/sdhci-cadence.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-ca=
-dence.c
-> index a2a4a5b0ab96..eaa88897a256 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -288,13 +288,12 @@ static int sdhci_cdns_tune_blkgap(struct mmc_host *=
-mmc)
->  	void __iomem *hrs38_reg =3D priv->hrs_addr + SDHCI_CDNS_HRS38;
->  	int ret;
->  	u32 gap;
-> -	u32 hrs37_mode;
-> =20
->  	/* Currently only needed in HS200 mode */
->  	if (host->timing !=3D MMC_TIMING_MMC_HS200)
->  		return 0;
-> =20
-> -	writel(hrs37_mode, hrs37_reg);
-> +	writel(SDHCI_CDNS_HRS37_MODE_MMC_HS200, hrs37_reg);
-> =20
->  	for (gap =3D 0; gap <=3D SDHCI_CDNS_HRS38_BLKGAP_MAX; gap++) {
->  		writel(gap, hrs38_reg);
->=20
-Thanks for the catch!
+On Sat Aug 2, 2025 at 2:04 PM CEST, Konrad Dybcio wrote:
+> On 7/29/25 8:49 AM, Luca Weiss wrote:
+>> Hi Konrad,
+>>=20
+>> On Thu Jul 17, 2025 at 11:46 AM CEST, Luca Weiss wrote:
+>>> Hi Konrad,
+>>>
+>>> On Thu Jul 17, 2025 at 10:29 AM CEST, Luca Weiss wrote:
+>>>> On Mon Jul 14, 2025 at 1:06 PM CEST, Konrad Dybcio wrote:
+>>>>> On 7/13/25 10:05 AM, Luca Weiss wrote:
+>>>>>> Add a devicetree description for the Milos SoC, which is for example
+>>>>>> Snapdragon 7s Gen 3 (SM7635).
+>>>>>>
+>>>>>> Signed-off-by: Luca Weiss <luca.weiss@fairphone.com>
+>>>>>> ---
+>>>>>
+>>>>> [...]
+>>>>>> +
+>>>>>> +		spmi_bus: spmi@c400000 {
+>>>>>> +			compatible =3D "qcom,spmi-pmic-arb";
+>>>>>
+>>>>> There's two bus instances on this platform, check out the x1e binding
+>>>>
+>>>> Will do
+>>>
+>>> One problem: If we make the labels spmi_bus0 and spmi_bus1 then we can'=
+t
+>>> reuse the existing PMIC dtsi files since they all reference &spmi_bus.
+>>>
+>>> On FP6 everything's connected to PMIC_SPMI0_*, and PMIC_SPMI1_* is not
+>>> connected to anything so just adding the label spmi_bus on spmi_bus0
+>>> would be fine.
+>>>
+>>> Can I add this to the device dts? Not going to be pretty though...
+>>>
+>>> diff --git a/arch/arm64/boot/dts/qcom/milos-fairphone-fp6.dts b/arch/ar=
+m64/boot/dts/qcom/milos-fairphone-fp6.dts
+>>> index d12eaa585b31..69605c9ed344 100644
+>>> --- a/arch/arm64/boot/dts/qcom/milos-fairphone-fp6.dts
+>>> +++ b/arch/arm64/boot/dts/qcom/milos-fairphone-fp6.dts
+>>> @@ -11,6 +11,9 @@
+>>>  #include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
+>>>  #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
+>>>  #include "milos.dtsi"
+>>> +
+>>> +spmi_bus: &spmi_bus0 {};
+>>> +
+>>>  #include "pm7550.dtsi"
+>>>  #include "pm8550vs.dtsi"
+>>>  #include "pmiv0104.dtsi" /* PMIV0108 */
+>>>
+>>> Or I can add a second label for the spmi_bus0 as 'spmi_bus'. Not sure
+>>> other designs than SM7635 recommend using spmi_bus1 for some stuff.
+>>>
+>>> But I guess longer term we'd need to figure out a solution to this, how
+>>> to place a PMIC on a given SPMI bus, if reference designs start to
+>>> recommend putting different PMIC on the separate busses.
+>>=20
+>> Any feedback on this regarding the spmi_bus label?
+>
+> I had an offline chat with Bjorn and we only came up with janky
+> solutions :)
+>
+> What you propose works well if the PMICs are all on bus0, which is
+> not the case for the newest platforms. If some instances are on bus0
+> and others are on bus1, things get ugly really quick and we're going
+> to drown in #ifdefs.
+>
+>
+> An alternative that I've seen downstream is to define PMIC nodes in
+> the root of a dtsi file (not in the root of DT, i.e. NOT under / { })
+> and do the following:
+>
+> &spmi_busN {
+> 	#include "pmABCDX.dtsi"
+> };
+>
+> Which is "okay", but has the visible downside of having to define the
+> temp alarm thermal zone in each board's DT separately (and doing
+> mid-file includes which is.. fine I guess, but also something we avoided
+> upstream for the longest time)
+>
+>
+> Both are less than ideal when it comes to altering the SID under
+> "interrupts", fixing that would help immensely. We were hoping to
+> leverage something like Johan's work on drivers/mfd/qcom-pm8008.c,
+> but that seems like a longer term project.
+>
+> Please voice your opinions
 
-I don't get how gcc does not raise a warning here, only clang does. I
-did build with gcc-11 and gcc-15 and they don't complain about this
-uninitialized variable.
+Since nobody else jumped in, how can we continue?
 
-Tested-by: Beno=C3=AEt Monin <benoit.monin@bootlin.com>
+One janky solution in my mind is somewhat similar to the PMxxxx_SID
+defines, doing something like "#define PM7550_SPMI spmi_bus0" and then
+using "&PM7550_SPMI {}" in the dtsi. I didn't try it so not sure that
+actually works but something like this should I imagine.
 
-> ---
-> base-commit: 7138017038c42feb682445407974ed736e1ff308
-> change-id: 20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-cc1246cb39d8
->=20
-> Best regards,
-> -- =20
-> Nathan Chancellor <nathan@kernel.org>
->=20
->=20
+But fortunately my Milos device doesn't have the problem that it
+actually uses both SPMI busses for different PMICs, so similar to other
+SoCs that already have two SPMI busses, I could somewhat ignore the
+problem and let someone else figure out how to actually place PMICs on
+spmi_bus0 and spmi_bus1 if they have such a hardware.
 
-Best regards,
-=2D-=20
-Beno=C3=AEt Monin, Bootlin
-Embedded Linux and Kernel engineering
-https://bootlin.com
+Regards
+Luca
 
-
+>
+> Konrad
 
