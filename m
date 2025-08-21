@@ -1,196 +1,366 @@
-Received: from mail-ed1-f65.google.com (mail-ed1-f65.google.com [209.85.208.65])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B87920B218
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 15:13:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.65
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B914B2E92D6
+	for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 20:07:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755789191; cv=none; b=aD3Uph6RTMFwVTh+MIlyUOsu/uIYruTVuDOMJYOb1G+4H8rIRaWLagEYoAlXmizKsCp+ceKHiFFBEjR4TfVFD+KMSheWktFgftqi+4KLd/b6H1gT4JKA30nyCdlKzrvbmrFEKzrtT5YcvKBTR8NxNwByafw1WvqR1m62dLbyRIw=
+	t=1755806833; cv=none; b=QFtz9iVt+N/F3wz0LT0THmeO7QtJoVqomu7GNbMv92ZtCAvi4GD5FVTR6th7sIEiJGtPE4rPz/vi6xFEZCyr/qRZow0CGKpp9E0BVmIWycv9jfYXiKv4J88E1xq1MR76HTDcpjsv6X35sv/rZGjJkQCJwL8KoQ/0X/c//32sxeM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755789191; c=relaxed/simple;
-	bh=9nQwhppjTEwgUcisyV4d7XyXTyKaChRyMGDsYQad9o8=;
-	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TSErJb2XS0b9Xbaz9lcx2IJeOWGx2ZcREpFSi+0okKJtJG8iU8Ua1it2xq4BiAQNIxryBCnSuuS9Ep5yiAFgkTw7AeO6mkwX8ufj/EUTTVAF4f3X6l+m+bgFYfYYyGa6SEpxBHZmsktsEs3ProC6yoXT5Q5K6TEzp0SEOgXzeB4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=G4Ns05Zt; arc=none smtp.client-ip=209.85.208.65
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1755806833; c=relaxed/simple;
+	bh=1aX6aTG8s6ax1CtK3pZ1UQ/TXpBX5+Ze6lBjUUjUQPw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bAO2o2sK8V3zpLLQ4MLuJmi1opLyr+wVH/SAqdxpeKZYVI8vkmTjXdhRW5C7Yvpt4oiLrLHPvhVJcUz8wJ/LHgbrzDPl6qQ7Fvw2OUkVcd8GSmec0akaBC+3M9zAvFVcj3EVSoEpwxB5hT8deo7Cvri+cCDgxplVwwoa3y+T5ic=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=V/j5m5aa; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="G4Ns05Zt"
-Received: by mail-ed1-f65.google.com with SMTP id 4fb4d7f45d1cf-6188b70abdfso1376314a12.2
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 08:13:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1755789188; x=1756393988; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=+xtxRuaoXngMWzDes/bLKJ29G8INr9oKLKpCWom6nFQ=;
-        b=G4Ns05ZtejOdEM1fPpWd1dKNjGt+h7dkwglwxgHpPFOmWbvAsf3OWICaSmQiL3ZFtq
-         sT2gVGjcN4BZbJF7YNgiWsCDIk0ziesqptb8RcUaIxob66oELeYFerX8SU2Dr2KeXMvu
-         5dcp3DTefexDtsPaWuypX1MZgV91Ug6vQT8Nt4s/Wi16DtiAsryb3fPicbeo/YkeVjLT
-         kYc1cyHHwKzEQYNw9Ls+xdjF9IVjxB9zvOKey3oI1b2WstiCMSl5gNYswiwLv3eFmy4+
-         w/NE4w3in73iilQVvtScRGusvocaFJROUmDo+JUksKEWrAC3fdFSOKtZayT52COYMDlK
-         DC7A==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="V/j5m5aa"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1755806830;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=LLdMjSHtv+zm1bY5U2c0p8D/d+U3cemLYeHBKaj7voE=;
+	b=V/j5m5aaGnkbuWEUpHL+pKDhqiCyKflPBA+oxbyRAWuWEbCjY8zAPXMQiAB2he823LdfK6
+	XiGPsCCPmnU5XlbXhRmonUJlrV8r1K8nTbfqT+gcgNS7IpzIghbyyuylWmFMA2GXdI2Upu
+	ElHPR+cdFXMPflowz2DQzTxdRcEXC0E=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-495-3syYCY7DNpeK5r5M2LWeMQ-1; Thu, 21 Aug 2025 16:07:07 -0400
+X-MC-Unique: 3syYCY7DNpeK5r5M2LWeMQ-1
+X-Mimecast-MFC-AGG-ID: 3syYCY7DNpeK5r5M2LWeMQ_1755806827
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-45a256a20fcso8249605e9.2
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 13:07:07 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755789188; x=1756393988;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:date:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+xtxRuaoXngMWzDes/bLKJ29G8INr9oKLKpCWom6nFQ=;
-        b=Znn+/GP+1OSo3jWTYatur17r2gDPcKsm7zxtbwJf2TrADnSOEvC1kwLp21LrSssokL
-         dJDNKahKzTTyNWAywN5cQpVjdIQlR3CvfYE883SXP9aIm4KJupyqfcnNVXYqZvv8dY7A
-         VXrvpkaNctqZ/X2/hehHcPUysHoeDTLDwLhA2vQ6TtKQfJ0KPumaN5uaIZjYDD5qjAdw
-         021nTGZpua8VumwfAwXjJbOK9lKcJCx43/Fyk8heLcPa0H9VvpJw2D5Ee2JFwzS7hpNW
-         KqXvLElwT7xmqMRUUHozr70tgZSAIh/8kwbUAF1LiYxyJBiaJzOosoZz7gbjPJQ0ZWwi
-         /l2w==
-X-Forwarded-Encrypted: i=1; AJvYcCVoRVsOpyMLR4GIg5UmqZj9xI+I9tx7RIZEuWl08fm9HERshCeDhub18TwwruJM1XuD9ieKfNxmS+Q=@vger.kernel.org
-X-Gm-Message-State: AOJu0YymyLOcsE27hkiFOqE11qrpX/bsr4BrWIDbh1CHHFfGxTvhHW0F
-	bGKGh8U3AwN4Jn/OB625L/KSlb7Pz+VgYE4mGy98b/YO34RFXfOkFzQ9k1qwSQEYFHU=
-X-Gm-Gg: ASbGncszILgpHlBGKZrLKyX8pnp8MZZC42+U2Pjc/2ahzuL8sdSCd9jkMIWGYfZVbuk
-	xQs6Qr/FDas+08B3ttt0L0se19vzuVivmVRZ34caUhbS8x1SnXwNaXpGyTNdmCz8b6gZrFQlQVz
-	le4dwaMhIDjxNKBUwiMYWiic1bcXEiTslp6kPWJdnsJf3I3R8MkyMeYQ6yleJ/WKuw55ic6KZAp
-	Oq+gneaFGHzaGRTiIZ77dcfWTq7Nwv/5nQco8j9PAf4JPdZu01CPLG8RWbzGAzSOF2CbudLzRyA
-	9ssvQUsxDwFIhBzCIv0oLGY4Uw5UaGolofTFAZWbCfPiOzg4o5OPIEOaGcnHuhsaBnGhsQQfQwP
-	EXjaiL10bs/cJSd1FeuMk7AoCYfiZkRruiFGBoR17DOSBfiRC1sgJTt2QOHKE
-X-Google-Smtp-Source: AGHT+IET+pViMkmHfWuU+dAIph0lKCRKrp1cWSJUrymAHEUx2uNDRZI8YqflErDfwiyzgFbu3IhI8g==
-X-Received: by 2002:a05:6402:84f:b0:61a:2cac:890c with SMTP id 4fb4d7f45d1cf-61bf86ef69amr2362795a12.13.1755789187656;
-        Thu, 21 Aug 2025 08:13:07 -0700 (PDT)
-Received: from localhost (host-79-36-0-44.retail.telecomitalia.it. [79.36.0.44])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-61a8ca8660esm3796686a12.10.2025.08.21.08.13.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Aug 2025 08:13:07 -0700 (PDT)
-From: Andrea della Porta <andrea.porta@suse.com>
-X-Google-Original-From: Andrea della Porta <aporta@suse.de>
-Date: Thu, 21 Aug 2025 17:14:59 +0200
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Andrea della Porta <andrea.porta@suse.com>, linus.walleij@linaro.org,
-	robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
-	florian.fainelli@broadcom.com, wahrenst@gmx.net,
-	linux-gpio@vger.kernel.org, devicetree@vger.kernel.org,
+        d=1e100.net; s=20230601; t=1755806826; x=1756411626;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=LLdMjSHtv+zm1bY5U2c0p8D/d+U3cemLYeHBKaj7voE=;
+        b=MLqH5TEgxk69QMnOJeLYUQiB1S99HlAze2b1bSMg+KQJ7hY+e7SeistIgY/kZ/ZoZM
+         cRoSSwfLv2nKjBamrO+mOIlkbeDatpgxJrfdXJHLDE4SocBo3cZ8dBw4yQ4fghN/sBNH
+         nXFQjS9izLF+SJSN8fb843LUNVMyVm3wT38rgS3rPgUXY1uFvYSDYSedgyvKqZBUK3in
+         tVJaT4lXRwSipt5Cbkwq1ygY5M87es903o8vW97pTu1Ymi/jkeQQc03Whsy8VHwBfqk4
+         aOoAn0KBqUPCr/1L8oUwcToQ4+VGgNeoqe90c3mhHKsfBAtmXQWPLnpyzFdHrwtnCknz
+         R3aw==
+X-Forwarded-Encrypted: i=1; AJvYcCUZO32ql874/AUu/kD6sc0lyuSvIuUQEY/vFSn/rmayzeVEj/eVG7W+9NDw3gwdQJUzBM3T2/kKHdo=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw5sCWMgX04Zd/5Pal3TgZwHZ1alTBvCR1KFwEVfl4CiAUiI6KR
+	A0iCh+XKSTzYFLBfOV66nNxce9ecMTK++Ole+z/VQjkkPDesc5VgEg+iv1ky7gVCs2owY34PSrX
+	B4IK9AwrwdOVu466F6yaQ/2W7/MTCTLVJyd+16y/EI6f1SQYKLIPMHAdZmNtwHg==
+X-Gm-Gg: ASbGncswz+d0IV4106KlKWA97AYXuqjkPiTrFUsDcx7cJRgmGASfi1q1KN7ocKIryR8
+	HZomfKNyEEE/V5nn0kT3q/DktBXkyXtsK0m6r5ULQC1cKV/BM6aqUhxO9EUDtpLU0k5yYlBpQS8
+	rsBYNm5fE4mI4iGpSuJZNTr7494rVQIMX7ow/dPUa4vEzLcL4XD1wk2iFdmOUYbqKxZc3wFV0kR
+	CIsHFKL4L0fdoKyPWJ0sXzEiLFQVxc5DfJiHlH5p7uptS1Gnvr5IL0+tkS56SigIq/9B/FxUD5k
+	kKO4X4TpzPE4h20x/qutwaog5cZXkjmsRdR/oPeNXUVO6i9D4IbF8U0Jf0aABX08BVcLuXvaWil
+	eeyA5RY2zPRxJ3ngjEVpngg==
+X-Received: by 2002:a05:600c:4506:b0:456:1bae:5470 with SMTP id 5b1f17b1804b1-45b5179b6camr3191375e9.8.1755806826496;
+        Thu, 21 Aug 2025 13:07:06 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG7XEacdneicK9OezeDu7E6BzvwjamEpx7+RbUEh0t7qSo20kryXdXhBwYQdhu2/m95zw+e6A==
+X-Received: by 2002:a05:600c:4506:b0:456:1bae:5470 with SMTP id 5b1f17b1804b1-45b5179b6camr3190665e9.8.1755806825859;
+        Thu, 21 Aug 2025 13:07:05 -0700 (PDT)
+Received: from localhost (p200300d82f26ba0008036ec5991806fd.dip0.t-ipconnect.de. [2003:d8:2f26:ba00:803:6ec5:9918:6fd])
+        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-3c077788df7sm12764142f8f.48.2025.08.21.13.07.02
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 21 Aug 2025 13:07:05 -0700 (PDT)
+From: David Hildenbrand <david@redhat.com>
+To: linux-kernel@vger.kernel.org
+Cc: David Hildenbrand <david@redhat.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	Jason Gunthorpe <jgg@nvidia.com>,
+	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+	"Liam R. Howlett" <Liam.Howlett@oracle.com>,
+	Vlastimil Babka <vbabka@suse.cz>,
+	Mike Rapoport <rppt@kernel.org>,
+	Suren Baghdasaryan <surenb@google.com>,
+	Michal Hocko <mhocko@suse.com>,
+	Jens Axboe <axboe@kernel.dk>,
+	Marek Szyprowski <m.szyprowski@samsung.com>,
+	Robin Murphy <robin.murphy@arm.com>,
+	John Hubbard <jhubbard@nvidia.com>,
+	Peter Xu <peterx@redhat.com>,
+	Alexander Potapenko <glider@google.com>,
+	Marco Elver <elver@google.com>,
+	Dmitry Vyukov <dvyukov@google.com>,
+	Brendan Jackman <jackmanb@google.com>,
+	Johannes Weiner <hannes@cmpxchg.org>,
+	Zi Yan <ziy@nvidia.com>,
+	Dennis Zhou <dennis@kernel.org>,
+	Tejun Heo <tj@kernel.org>,
+	Christoph Lameter <cl@gentwo.org>,
+	Muchun Song <muchun.song@linux.dev>,
+	Oscar Salvador <osalvador@suse.de>,
+	x86@kernel.org,
 	linux-arm-kernel@lists.infradead.org,
+	linux-mips@vger.kernel.org,
+	linux-s390@vger.kernel.org,
+	linux-crypto@vger.kernel.org,
+	linux-ide@vger.kernel.org,
+	intel-gfx@lists.freedesktop.org,
+	dri-devel@lists.freedesktop.org,
+	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@axis.com,
+	linux-scsi@vger.kernel.org,
+	kvm@vger.kernel.org,
+	virtualization@lists.linux.dev,
+	linux-mm@kvack.org,
+	io-uring@vger.kernel.org,
+	iommu@lists.linux.dev,
+	kasan-dev@googlegroups.com,
+	wireguard@lists.zx2c4.com,
+	netdev@vger.kernel.org,
+	linux-kselftest@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	Albert Ou <aou@eecs.berkeley.edu>,
+	Alexander Gordeev <agordeev@linux.ibm.com>,
+	Alexandre Ghiti <alex@ghiti.fr>,
+	Alex Dubov <oakad@yahoo.com>,
+	Alex Williamson <alex.williamson@redhat.com>,
+	Andreas Larsson <andreas@gaisler.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Brett Creeley <brett.creeley@amd.com>,
 	Catalin Marinas <catalin.marinas@arm.com>,
-	Will Deacon <will@kernel.org>, iivanov@suse.de, svarbanov@suse.de,
-	mbrugger@suse.com, Jonathan Bell <jonathan@raspberrypi.com>,
-	Phil Elwell <phil@raspberrypi.com>,
+	Christian Borntraeger <borntraeger@linux.ibm.com>,
+	Christophe Leroy <christophe.leroy@csgroup.eu>,
+	Damien Le Moal <dlemoal@kernel.org>,
+	Dave Hansen <dave.hansen@linux.intel.com>,
+	David Airlie <airlied@gmail.com>,
+	"David S. Miller" <davem@davemloft.net>,
+	Doug Gilbert <dgilbert@interlog.com>,
+	Heiko Carstens <hca@linux.ibm.com>,
+	Herbert Xu <herbert@gondor.apana.org.au>,
+	Huacai Chen <chenhuacai@kernel.org>,
+	Ingo Molnar <mingo@redhat.com>,
+	"James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+	Jani Nikula <jani.nikula@linux.intel.com>,
+	"Jason A. Donenfeld" <Jason@zx2c4.com>,
+	Jason Gunthorpe <jgg@ziepe.ca>,
+	Jesper Nilsson <jesper.nilsson@axis.com>,
+	Joonas Lahtinen <joonas.lahtinen@linux.intel.com>,
+	Kevin Tian <kevin.tian@intel.com>,
+	Lars Persson <lars.persson@axis.com>,
+	Madhavan Srinivasan <maddy@linux.ibm.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	Maxim Levitsky <maximlevitsky@gmail.com>,
+	Michael Ellerman <mpe@ellerman.id.au>,
+	Nicholas Piggin <npiggin@gmail.com>,
+	Niklas Cassel <cassel@kernel.org>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Rodrigo Vivi <rodrigo.vivi@intel.com>,
+	Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>,
+	Shuah Khan <shuah@kernel.org>,
+	Simona Vetter <simona@ffwll.ch>,
+	Sven Schnelle <svens@linux.ibm.com>,
+	Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Tvrtko Ursulin <tursulin@ursulin.net>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org,
-	Jiri Slaby <jirislaby@kernel.org>, linux-serial@vger.kernel.org
-Subject: Re: [PATCH 2/6] dt-bindings: serial: Add clock-frequency property as
- an alternative to clocks
-Message-ID: <aKc38_NsDy4G1uRy@apocalypse>
-References: <cover.1754924348.git.andrea.porta@suse.com>
- <419658ce1a1009c6f8b7af22a02b278cd695dab0.1754924348.git.andrea.porta@suse.com>
- <d02626bc-a00e-486a-854e-b4555c11ee85@kernel.org>
+	Vasily Gorbik <gor@linux.ibm.com>,
+	WANG Xuerui <kernel@xen0n.name>,
+	Will Deacon <will@kernel.org>,
+	Yishai Hadas <yishaih@nvidia.com>
+Subject: [PATCH RFC 00/35] mm: remove nth_page()
+Date: Thu, 21 Aug 2025 22:06:26 +0200
+Message-ID: <20250821200701.1329277-1-david@redhat.com>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <d02626bc-a00e-486a-854e-b4555c11ee85@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-Hi Krzysztof,
+This is based on mm-unstable and was cross-compiled heavily.
 
-On 14:02 Tue 12 Aug     , Krzysztof Kozlowski wrote:
-> On 11/08/2025 17:19, Andrea della Porta wrote:
-> > The UARTA controller on BCM2712 connected to Bluetooth chip does not
-> 
-> Bluetooth chip does not ask...
-> 
-> > mandiatorily ask for a clock connected to the high speed baud generator.
-> > This is, in fact, an optional clock in the driver.
-> 
-> ... or driver does not ask?
-> 
-> Please describe here hardware.
-> 
-> 
-> > 
-> > As an alternative, the call to uart_read_port_properties() ensures that
-> > just a simple 'clock-frequency' property can be specified for the clock
-> > value.
-> 
-> Don't describe drivers. Describe hardware.
+I should probably have already dropped the RFC label but I want to hear
+first if I ignored some corner case (SG entries?) and I need to do
+at least a bit more testing.
 
-I will try to test whether the driver can just work specifying clock instead of
-clock-frequency in teh DTS, so there will be no need to amend the bindings.
+I will only CC non-MM folks on the cover letter and the respective patch
+to not flood too many inboxes (the lists receive all patches).
 
-Many thanks,
-Andrea
+---
 
-> 
-> > 
-> > Amend the bindings to allow to either specify clocks or clock-frequency.
-> > 
-> > Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
-> > ---
-> >  .../bindings/serial/brcm,bcm7271-uart.yaml    | 19 +++++++++++++++++--
-> 
-> Please use subject prefixes matching the subsystem. You can get them for
-> example with `git log --oneline -- DIRECTORY_OR_FILE` on the directory
-> your patch is touching. For bindings, the preferred subjects are
-> explained here:
-> https://www.kernel.org/doc/html/latest/devicetree/bindings/submitting-patches.html#i-for-patch-submitters
-> 
-> 
-> >  1 file changed, 17 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/serial/brcm,bcm7271-uart.yaml b/Documentation/devicetree/bindings/serial/brcm,bcm7271-uart.yaml
-> > index 89c462653e2d..96697b1428bd 100644
-> > --- a/Documentation/devicetree/bindings/serial/brcm,bcm7271-uart.yaml
-> > +++ b/Documentation/devicetree/bindings/serial/brcm,bcm7271-uart.yaml
-> > @@ -40,7 +40,15 @@ properties:
-> >            - const: dma_tx
-> >            - const: dma_intr2
-> >  
-> > +  clock-frequency:
-> > +    description:
-> > +      The input clock frequency for the UART, Either this or clocks must be
-> > +      specified.
-> 
-> Anyway, don't open-code schema in free form text.
-> 
-> That's legacy property. You need clear explanation why.
-> 
-> > +
-> >    clocks:
-> > +    description:
-> > +      High speed baud rate clock. Either this or clock-frequency must be
-> > +      specified.
-> 
-> Drop last sentence, Anyway, don't open-code schema in free form text.
-> First sentence seems redundant anyway.
-> 
-> 
-> >      minItems: 1
-> 
-> I'll fix this.
-> 
-> >  
-> >    clock-names:
-> > @@ -61,11 +69,18 @@ required:
-> >    - compatible
-> >    - reg
-> >    - reg-names
-> > -  - clocks
-> > -  - clock-names
-> >    - interrupts
-> >    - interrupt-names
-> >  
-> > +oneOf:
-> > +  - allOf:
-> > +      - required:
-> > +          - clocks
-> > +      - required:
-> > +          - clock-names
-> > +  - required:
-> > +      - clock-frequency
-> > +
-> >  unevaluatedProperties: false
-> >  
-> >  examples:
-> 
-> 
-> Best regards,
-> Krzysztof
+As discussed recently with Linus, nth_page() is just nasty and we would
+like to remove it.
+
+To recap, the reason we currently need nth_page() within a folio is because
+on some kernel configs (SPARSEMEM without SPARSEMEM_VMEMMAP), the
+memmap is allocated per memory section.
+
+While buddy allocations cannot cross memory section boundaries, hugetlb
+and dax folios can.
+
+So crossing a memory section means that "page++" could do the wrong thing.
+Instead, nth_page() on these problematic configs always goes from
+page->pfn, to the go from (++pfn)->page, which is rather nasty.
+
+Likely, many people have no idea when nth_page() is required and when
+it might be dropped.
+
+We refer to such problematic PFN ranges and "non-contiguous pages".
+If we only deal with "contiguous pages", there is not need for nth_page().
+
+Besides that "obvious" folio case, we might end up using nth_page()
+within CMA allocations (again, could span memory sections), and in
+one corner case (kfence) when processing memblock allocations (again,
+could span memory sections).
+
+So let's handle all that, add sanity checks, and remove nth_page().
+
+Patch #1 -> #5   : stop making SPARSEMEM_VMEMMAP user-selectable + cleanups
+Patch #6 -> #12  : disallow folios to have non-contiguous pages
+Patch #13 -> #20 : remove nth_page() usage within folios
+Patch #21        : disallow CMA allocations of non-contiguous pages
+Patch #22 -> #31 : sanity+check + remove nth_page() usage within SG entry
+Patch #32        : sanity-check + remove nth_page() usage in
+                   unpin_user_page_range_dirty_lock()
+Patch #33        : remove nth_page() in kfence
+Patch #34        : adjust stale comment regarding nth_page
+Patch #35        : mm: remove nth_page()
+
+A lot of this is inspired from the discussion at [1] between Linus, Jason
+and me, so cudos to them.
+
+[1] https://lore.kernel.org/all/CAHk-=wiCYfNp4AJLBORU-c7ZyRBUp66W2-Et6cdQ4REx-GyQ_A@mail.gmail.com/T/#u
+
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Jason Gunthorpe <jgg@nvidia.com>
+Cc: Lorenzo Stoakes <lorenzo.stoakes@oracle.com>
+Cc: "Liam R. Howlett" <Liam.Howlett@oracle.com>
+Cc: Vlastimil Babka <vbabka@suse.cz>
+Cc: Mike Rapoport <rppt@kernel.org>
+Cc: Suren Baghdasaryan <surenb@google.com>
+Cc: Michal Hocko <mhocko@suse.com>
+Cc: Jens Axboe <axboe@kernel.dk>
+Cc: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: Robin Murphy <robin.murphy@arm.com>
+Cc: John Hubbard <jhubbard@nvidia.com>
+Cc: Peter Xu <peterx@redhat.com>
+Cc: Alexander Potapenko <glider@google.com>
+Cc: Marco Elver <elver@google.com>
+Cc: Dmitry Vyukov <dvyukov@google.com>
+Cc: Brendan Jackman <jackmanb@google.com>
+Cc: Johannes Weiner <hannes@cmpxchg.org>
+Cc: Zi Yan <ziy@nvidia.com>
+Cc: Dennis Zhou <dennis@kernel.org>
+Cc: Tejun Heo <tj@kernel.org>
+Cc: Christoph Lameter <cl@gentwo.org>
+Cc: Muchun Song <muchun.song@linux.dev>
+Cc: Oscar Salvador <osalvador@suse.de>
+Cc: x86@kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-mips@vger.kernel.org
+Cc: linux-s390@vger.kernel.org
+Cc: linux-crypto@vger.kernel.org
+Cc: linux-ide@vger.kernel.org
+Cc: intel-gfx@lists.freedesktop.org
+Cc: dri-devel@lists.freedesktop.org
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@axis.com
+Cc: linux-scsi@vger.kernel.org
+Cc: kvm@vger.kernel.org
+Cc: virtualization@lists.linux.dev
+Cc: linux-mm@kvack.org
+Cc: io-uring@vger.kernel.org
+Cc: iommu@lists.linux.dev
+Cc: kasan-dev@googlegroups.com
+Cc: wireguard@lists.zx2c4.com
+Cc: netdev@vger.kernel.org
+Cc: linux-kselftest@vger.kernel.org
+Cc: linux-riscv@lists.infradead.org
+
+David Hildenbrand (35):
+  mm: stop making SPARSEMEM_VMEMMAP user-selectable
+  arm64: Kconfig: drop superfluous "select SPARSEMEM_VMEMMAP"
+  s390/Kconfig: drop superfluous "select SPARSEMEM_VMEMMAP"
+  x86/Kconfig: drop superfluous "select SPARSEMEM_VMEMMAP"
+  wireguard: selftests: remove CONFIG_SPARSEMEM_VMEMMAP=y from qemu
+    kernel config
+  mm/page_alloc: reject unreasonable folio/compound page sizes in
+    alloc_contig_range_noprof()
+  mm/memremap: reject unreasonable folio/compound page sizes in
+    memremap_pages()
+  mm/hugetlb: check for unreasonable folio sizes when registering hstate
+  mm/mm_init: make memmap_init_compound() look more like
+    prep_compound_page()
+  mm/hugetlb: cleanup hugetlb_folio_init_tail_vmemmap()
+  mm: sanity-check maximum folio size in folio_set_order()
+  mm: limit folio/compound page sizes in problematic kernel configs
+  mm: simplify folio_page() and folio_page_idx()
+  mm/mm/percpu-km: drop nth_page() usage within single allocation
+  fs: hugetlbfs: remove nth_page() usage within folio in
+    adjust_range_hwpoison()
+  mm/pagewalk: drop nth_page() usage within folio in folio_walk_start()
+  mm/gup: drop nth_page() usage within folio when recording subpages
+  io_uring/zcrx: remove "struct io_copy_cache" and one nth_page() usage
+  io_uring/zcrx: remove nth_page() usage within folio
+  mips: mm: convert __flush_dcache_pages() to
+    __flush_dcache_folio_pages()
+  mm/cma: refuse handing out non-contiguous page ranges
+  dma-remap: drop nth_page() in dma_common_contiguous_remap()
+  scatterlist: disallow non-contigous page ranges in a single SG entry
+  ata: libata-eh: drop nth_page() usage within SG entry
+  drm/i915/gem: drop nth_page() usage within SG entry
+  mspro_block: drop nth_page() usage within SG entry
+  memstick: drop nth_page() usage within SG entry
+  mmc: drop nth_page() usage within SG entry
+  scsi: core: drop nth_page() usage within SG entry
+  vfio/pci: drop nth_page() usage within SG entry
+  crypto: remove nth_page() usage within SG entry
+  mm/gup: drop nth_page() usage in unpin_user_page_range_dirty_lock()
+  kfence: drop nth_page() usage
+  block: update comment of "struct bio_vec" regarding nth_page()
+  mm: remove nth_page()
+
+ arch/arm64/Kconfig                            |  1 -
+ arch/mips/include/asm/cacheflush.h            | 11 +++--
+ arch/mips/mm/cache.c                          |  8 ++--
+ arch/s390/Kconfig                             |  1 -
+ arch/x86/Kconfig                              |  1 -
+ crypto/ahash.c                                |  4 +-
+ crypto/scompress.c                            |  8 ++--
+ drivers/ata/libata-sff.c                      |  6 +--
+ drivers/gpu/drm/i915/gem/i915_gem_pages.c     |  2 +-
+ drivers/memstick/core/mspro_block.c           |  3 +-
+ drivers/memstick/host/jmb38x_ms.c             |  3 +-
+ drivers/memstick/host/tifm_ms.c               |  3 +-
+ drivers/mmc/host/tifm_sd.c                    |  4 +-
+ drivers/mmc/host/usdhi6rol0.c                 |  4 +-
+ drivers/scsi/scsi_lib.c                       |  3 +-
+ drivers/scsi/sg.c                             |  3 +-
+ drivers/vfio/pci/pds/lm.c                     |  3 +-
+ drivers/vfio/pci/virtio/migrate.c             |  3 +-
+ fs/hugetlbfs/inode.c                          | 25 ++++------
+ include/crypto/scatterwalk.h                  |  4 +-
+ include/linux/bvec.h                          |  7 +--
+ include/linux/mm.h                            | 48 +++++++++++++++----
+ include/linux/page-flags.h                    |  5 +-
+ include/linux/scatterlist.h                   |  4 +-
+ io_uring/zcrx.c                               | 34 ++++---------
+ kernel/dma/remap.c                            |  2 +-
+ mm/Kconfig                                    |  3 +-
+ mm/cma.c                                      | 36 +++++++++-----
+ mm/gup.c                                      | 13 +++--
+ mm/hugetlb.c                                  | 23 ++++-----
+ mm/internal.h                                 |  1 +
+ mm/kfence/core.c                              | 17 ++++---
+ mm/memremap.c                                 |  3 ++
+ mm/mm_init.c                                  | 13 ++---
+ mm/page_alloc.c                               |  5 +-
+ mm/pagewalk.c                                 |  2 +-
+ mm/percpu-km.c                                |  2 +-
+ mm/util.c                                     | 33 +++++++++++++
+ tools/testing/scatterlist/linux/mm.h          |  1 -
+ .../selftests/wireguard/qemu/kernel.config    |  1 -
+ 40 files changed, 203 insertions(+), 150 deletions(-)
+
+
+base-commit: c0e3b3f33ba7b767368de4afabaf7c1ddfdc3872
+-- 
+2.50.1
+
