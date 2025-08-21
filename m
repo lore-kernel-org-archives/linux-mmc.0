@@ -1,71 +1,71 @@
-Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B65D19D8A7
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 12:32:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B1F319E97B
+	for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 12:32:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755779554; cv=none; b=nOhxrUCfjHF98D+ea8YB151QpX8TEhMo/a1gE6M+/MfYgCdzjAy+T1xCLsFGuZue/6Is2jUqgYzjH2X5LYmxB+Edv8Vx86WsSvVcHpL8TiQi1F7XfKoQNHa4KAc7pxIjFq3oEtiZIjP9dy9JN7Eftg15UnCgPjugI2R3LcG/GLU=
+	t=1755779577; cv=none; b=kl4451ttBR+s54deaMWmJ+dtsU4hNaS0UnYPMYC/bgJwWwWH3wxhba3cCgRorbCg5m5moWOjfQVw+7vXoAtO2e83ogSa8ekgd0G14a6hVw4NjPoV1VC7jSUa2cKVv7SJxCFnVHTvjr0sY8hheKyGFhI6kFPSqFxh8meUD7FfH3M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755779554; c=relaxed/simple;
-	bh=i4ivNoJA/XYa4j8URBoVuQOwoj5jbAtHTh2CVRUNL98=;
+	s=arc-20240116; t=1755779577; c=relaxed/simple;
+	bh=ocQ3d5j9vIq4dGBBuOr8WswQdXME9A/E4gyt+hUQqp0=;
 	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=Txb7O+kTmTIYNdOiRjEJfFOC2XkHyWEo2eJaVw5C5MqdExDuWmML7pVtqqCvABk/MUiAsy4st3/GOZJ35LhUzR7Nh1Vqgu0zGu+drk1sGTv14xb3lDws3ueULriIboFnX+8fGkgcUh5adFapk+R4TM3fzennX3+NuAOuBawSIK0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=qSFNqRVz; arc=none smtp.client-ip=209.85.128.46
+	 Content-Disposition; b=Fl2LPm+k3ET6HbZvYqsEFP32KX7SdVMHL625aA0qrwd53rp3MM5XF882EwjSC8d/LrAHfHmO2ofVP7wa7lBo6SrVL3t/YerHl8RPpPUm5y7I6OZsJgBvzDtFwSNm0/4y1ExxZVroCEW/FR16TKZl6FfMlrR8vwlFPMct72eotQI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LlJCwPyH; arc=none smtp.client-ip=209.85.221.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qSFNqRVz"
-Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-45a1b0bd237so7402455e9.2
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 05:32:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LlJCwPyH"
+Received: by mail-wr1-f46.google.com with SMTP id ffacd0b85a97d-3b916fda762so899500f8f.0
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 05:32:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1755779550; x=1756384350; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1755779574; x=1756384374; darn=vger.kernel.org;
         h=content-disposition:mime-version:message-id:subject:cc:to:from:date
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=3YxbukuAzSacGXrM6lqlSlHSwuWfZD3gHN6r3X8UJRE=;
-        b=qSFNqRVzxpYKMyE1QC6KxqSoQWvVw0pW04O36qfvu+Fv9AMM6y2I7o+EtEeroIKx5f
-         xn06yIk8ngZsSvaBbsEOFW4Ni4gVFrB7W0ev7J9CMdVKuWhNM1idSkFw2Ulpqjlyvvg6
-         lh9pAYC/CrukmwOamp4fbJUfPILgHsXPK9xYuVaQtXlN+09nzZcazkaPdt0e63RxHNiv
-         n3XmaGswzWoV/Dzp5zLdrjFmOmHvZVRKQdI1wC/RUL2LGpPHNTAb+gYDl8vGBeEFend3
-         lDu0UIiWhVOvURAxEtwdN/QgO2UOP7uuW0Ddz0M3kzHuYoFvjNfLn8KPb9+qpLk5lR2p
-         jmng==
+        bh=MdIRAKr2cN8G91t8BLxjz7Gzji0/85KCNwhJJjiYkCg=;
+        b=LlJCwPyH7wQd7hGdjBPPo9QpbeOqt6GOUinJqkXNvJrdyvYw+tzGITSaJy+a2cURXP
+         OuXCCFUh9SXzjyjv3ky9IY/HFZlVj2tPyWQ4uuFZgCry/Al31k8WTAY/lAUPJO9W1Kvo
+         tX/pgcycrK0qmi9bgAbjSwsWTMHZLF1VKuOA7NYh3GvzmPGe3yYhlLG7rKWdOdrkapLW
+         aJaokVdsat/5G25fiZyfZHBPPBF5FL18tb7UGokIzj8hTbYQCD8cVlOR9cwkI4HBqV5U
+         pqBn81D7s2PeU0W2GNBw9HC+YbQ+vZJza9IT5bq53I7FHeLSJa7+UghKqAC2lmZs2kqv
+         EhSw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1755779550; x=1756384350;
+        d=1e100.net; s=20230601; t=1755779574; x=1756384374;
         h=content-disposition:mime-version:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=3YxbukuAzSacGXrM6lqlSlHSwuWfZD3gHN6r3X8UJRE=;
-        b=LHWxmw5abg5urAwINEo8jgcc2yQo10Sj0+vh5DrmNAPNy/cvAcNSVFHLEp2gzOR1jN
-         bZWI0fnd40vMZNSElBRfn9zSS+dsORIjPF0AGImQX8halwylCkYYCNcHd84aRVXB8vUx
-         Qxbab3qhENZNY0yqmGiiJr7bQFsFe6b3nCtVbIk2idArLJSE1Kq1cMUku4PzvemEApHx
-         aDGKrso25evypXneAMtvOsiZQCEdf0EoFHFFBuqd66x2GYnW0eZyvqYc/Pe/VZgEwR0I
-         zlIGCmdEV/634bY90lHV8lGOgl1+YferVBBafVYLV/RR8rdMozmZyCiTj7g0GIDBRDhi
-         WJlQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVp1H5iQv48l7QpBMJtF3YIVDV1FFgdLhpJVajnW84292n2mmrhMUt7MssRQfRhfZTSfL2zbgCBmpA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxuwh1uEDYzykD+fH/+n6fa0zjD+VFgLzx/zaglMdEQqyS/ggQq
-	ssYNZnxF92+nOnI//1WGt37UYaBipw20BBRvtzsXobeFq4PBTbhl9Etz3/SXVvAMnH8=
-X-Gm-Gg: ASbGncs1QtqWufnTJDS09sI92qbXt+/loEpm7DoVBLzpAPuw/n0qkLHH8Nn7UemDeD1
-	O+TxZQ8H14MOka9k61/EYD8Dn6qOQ3VFNNo5MNdKEQ+dxYFUSDl/gmcLQmQG8lvsLqhPGeXfoop
-	8qqJ/1onzbUDpSdh7qH+Mi+nULc2YF2u1cNxnT9kc8dnU1l/yfrkkKoBguZFE4Xi+TqKLhHU3UZ
-	ZLE5KVYRvqXzcRxmB4lCtFvK3KB50riwHWiQstSgpf9mBRkdYo4Ae8Mo8VcAW8RfKrFH6uYyBOy
-	gsfHPpPI+5b7+c6UUvzq71I8UEicIf4SE6CeTMnAbQJIPj5LA0Ghr6tLw3KvSH8Xiy8Jq4Md3r5
-	PBUlAqbqTn9tzsrXL1WguKbKAfKtUvsv0WxLdWQ==
-X-Google-Smtp-Source: AGHT+IF4re4JMKqmwW7eC8Vyez+RBY3Ot24DyU7VwP7W6aNkCpKu4qpBngC8551+g/vQCfP2k/8E9w==
-X-Received: by 2002:a05:600c:458d:b0:459:e200:67e0 with SMTP id 5b1f17b1804b1-45b4d7dcc58mr19978705e9.10.1755779549700;
-        Thu, 21 Aug 2025 05:32:29 -0700 (PDT)
+        bh=MdIRAKr2cN8G91t8BLxjz7Gzji0/85KCNwhJJjiYkCg=;
+        b=nj2rAE0oPH02Au+pb5gcU9/3jQWupFYBjS35lwmFzEbggfOfjE+Xr9DDVl3At3sSBz
+         S7HtP+Qr2+BsgbLLMPVFwOyvYAAgRX49whsTi4L4QWt+svFNEGAcIq7A9221z3zkGIon
+         v1ixcAdPiEpDTquqWyqm6Vut1EqH+U8aLfkax3HVPuLqlw85vDqAK4sN4kEM6naCCQPd
+         ebAXHIQ2On/x7TBvsx5zLwIjrB20e8lYY/UO9f+nQs5qNc8RBFiN7dluXShklDCJc0b7
+         f6dDkJUz/pwpNunnxnbryIorNJ4UCjvt4uIi+hvMUJmwztyTiaxf4QnVQytvN+Qhpfrq
+         lCMw==
+X-Forwarded-Encrypted: i=1; AJvYcCWiXE8vnAwEDzmSzDkFfaMG2CKywaC0UX6x1xMWUdWHkNkl9vyhXAzThpIAfwKrVcs52JGiLxdYvQI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwOBrp3votnlfWlqr5d2cBZ1Bl5SLLeL8gi2o/9gnhy6bhvGGuN
+	5HKorsSwpGjENh4Ek+LvME5vQI1DsZ6XLVFTqQyPex8aNsQTV4nBI0tUNHpIp11pEzo=
+X-Gm-Gg: ASbGnctkwKZf/t6Zpqh1wyKMHAdF7Re34ljTB1v562wtB13107kJEkVg/RXsGHIdVgL
+	3xlGX1hHuKuJFGRvMMiNKuCbSKnJXi++Ihc7cnCGhhzFu0kE9PSHDICZDXJl1Lz3zq/KrZgNR/K
+	k/u2otNChIYQHd5aPxZqtGOVcD3Jk8RChSDFkLnxAXXyXvz/rrRPknIYOmVPUjAf7xEUWmF3wGs
+	gg37WpXsqoauCgzxH6DAmYYsHgsgGitQAHguuDh3hN5VCIdo9AjYqZhmK6O9FnUoOc4ks+usB1f
+	dE7vt1gwjFRxlsDIGCyHZ6rlTSexxwL+LRohC2Cn5zp8Q/5l1G7bJjCu2uheQEFOkZ4eJugyPr4
+	DaWy//SEaSDUlPU1V6E0asXsdvx1NTNl3jIq3hw==
+X-Google-Smtp-Source: AGHT+IGLOFZokM+L1YFBETmJ+c1HGUrKFAr5zBcd3i6pzbkvpmwIxEYCoRLXatleLwvbvzJVH4ODSg==
+X-Received: by 2002:adf:9b97:0:b0:3b7:94ad:ef50 with SMTP id ffacd0b85a97d-3c4b4256c02mr1669280f8f.2.1755779573600;
+        Thu, 21 Aug 2025 05:32:53 -0700 (PDT)
 Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-45b4dc255f9sm29273285e9.21.2025.08.21.05.32.28
+        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-3c077788df7sm11530384f8f.48.2025.08.21.05.32.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Aug 2025 05:32:29 -0700 (PDT)
-Date: Thu, 21 Aug 2025 15:32:25 +0300
+        Thu, 21 Aug 2025 05:32:53 -0700 (PDT)
+Date: Thu, 21 Aug 2025 15:32:49 +0300
 From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-	Rex Chen <rex.chen_1@nxp.com>, Huacai Chen <chenhuacai@kernel.org>,
+To: Ricky Wu <ricky_wu@realtek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	Binbin Zhou <zhoubinbin@loongson.cn>, linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
-Subject: [PATCH] mmc: mmc_spi: remove unnecessary check in
- mmc_spi_setup_data_message()
-Message-ID: <aKcR2ea747xkw_it@stanley.mountain>
+Subject: [PATCH next] mmc: rtsx_usb_sdmmc: Fix uninitialized variable issue
+Message-ID: <aKcR8QD81TjVqIhl@stanley.mountain>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -76,28 +76,36 @@ Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 X-Mailer: git-send-email haha only kidding
 
-An earlier commit changed the outer if statement from
-"if (multiple || write) {" to "if (write) {" so now we know that "write"
-is true and no longer need to check.  Delete the unnecessary check.
+If rtsx_usb_get_card_status() fails then "val" isn't initialized.
+Move the use of "val" until after the error checking.
 
+Fixes: d2e6fb2c31a0 ("misc: rtsx: usb card reader: add OCP support")
 Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
 ---
- drivers/mmc/host/mmc_spi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 95a32ff29ee1..42936e248c55 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -566,7 +566,7 @@ mmc_spi_setup_data_message(struct mmc_spi_host *host, bool multiple, bool write)
- 	if (write) {
- 		t = &host->early_status;
- 		memset(t, 0, sizeof(*t));
--		t->len = write ? sizeof(scratch->status) : 1;
-+		t->len = sizeof(scratch->status);
- 		t->tx_buf = host->ones;
- 		t->rx_buf = scratch->status;
- 		t->cs_change = 1;
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index e1ed39c657c3..70bd21084b97 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -785,13 +785,13 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+ 
+ 	mutex_unlock(&ucr->dev_mutex);
+ 
+-	/* get OCP status */
+-	host->ocp_stat = (val >> 4) & 0x03;
+-
+ 	/* Treat failed detection as non-exist */
+ 	if (err)
+ 		goto no_card;
+ 
++	/* get OCP status */
++	host->ocp_stat = (val >> 4) & 0x03;
++
+ 	if (val & SD_CD) {
+ 		host->card_exist = true;
+ 		return 1;
 -- 
 2.47.2
 
