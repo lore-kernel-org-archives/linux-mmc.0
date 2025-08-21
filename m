@@ -1,35 +1,36 @@
 Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 024D02367AE;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15E8830DD1C;
 	Thu, 21 Aug 2025 11:20:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755775253; cv=none; b=cNzNne90XK9KXAEZJFYKAlQqTFRFTUTdTAkbZXQ47yV0eSymUXpLELxpWIOGTosqdHlvxzL3MmAfg+Z4bYhdp6ySsDkgS6UVxL8MOZYXPbAi71fJirwwSngC/LBd7uc2e3cImxyhvNqd4UuEZ2LQi7YSiZ7EkCaYdshxFhNmneU=
+	t=1755775253; cv=none; b=U3D2oFDjIXssHdCMwDZqnXBQ8/WLWCPR/3gOBksM+X5CiVKc0YSczn0jiK6NGD3rx4nR1mbH/ctTYSpgj2DjFVXt9RgwH5BjOijF+bl/xTGd5tAxhC2O2PlwnqowYWUpf+OZsUqt1fY1zY32Rw+CS4JaPVT1oBDCB39PQyySStU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1755775253; c=relaxed/simple;
-	bh=v7iuef6GPf6tu0R2yla7tAMIgPcdtUQT6XnIxy5KK94=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=uMrAXlDCUsq6A3g2dmD3S0mYdQ8Bu/25HCbUgwJjA4H9hOOnmqFiVCNdx2CnihXKl9fW6sra4QXH0J/Rz1ieZezjtPgmFouBRShFcUiUH8SWG7fE5q4NqhZjMSmIPEfoSRnk6LBVy1hFr3TQbeXwBCgZblVguT5Flexak1YigNc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=PgLKE6p2; arc=none smtp.client-ip=37.205.8.231
+	bh=cIC7s5NmpQyvXwv7gG+89a1BknGeLYatlzWDzXINP2k=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=bdo3Iax4pnyn3KubkA2HNic9SIZmqgbcqOL5MbD2GB9fh9WHpVlYmiZpjBgSvauSvyousDqD45myLw9TICZ1NZnJdkDEPpQGSBHghmLfJMzxNjYqmX41hliIoz/Xcqj6zK5gP9KJNutnwhakFHVXh5Vq+tz1mNy2nhvNdWCawX4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=j5PPxBiT; arc=none smtp.client-ip=37.205.8.231
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="PgLKE6p2"
-DKIM-Signature: a=rsa-sha256; bh=9rNIDpDoTdLh2E6jhEYhac+912Izr531qbk98L0qxyM=;
+	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="j5PPxBiT"
+DKIM-Signature: a=rsa-sha256; bh=b5NI1TT88MTAqiLI8nYID5mlHscCtsllJzEYglqt6qE=;
  c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1755775245; v=1; x=1756207245;
- b=PgLKE6p23+eJpEo1O7wM6plSrqI7O8LsjQBO1/jJ+dsXnqzewhuFtrbzIO8qDtmmZaPnMMmC
- pQvJdwwlddW6EMaw7a6XgxFzdpzJ60kp6ehC11YRsQ3IcNqh8RkFCbW5QQVWIHgwEQo18ZI7tbM
- JdWZc0PVm1N2f6BGiyvpjoIR2t2rrhLth1kPdblx4iQnvpWCzKaMYCudyqwt2Gx/Pb7AkQCKjbs
- 0G10187Z4qdbvKl0t7cnHlccwqkOh1hSSSKcj7tvae5EKNvcARO28LnKiSZzVmOHH51pemCtyqW
- SqvI/AclLHFZrIsdu9TFLjMQIHvd/XQcM6GOy7xpd5mMw==
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:Message-Id:Message-Id:References:Autocrypt:Openpgp;
+ i=@dujemihanovic.xyz; s=default; t=1755775244; v=1; x=1756207244;
+ b=j5PPxBiTvDOwFSaeA6BirgHVzTLFljn+kg/Yp0fmSaLTbb7hWNS0gSQ/zoFItiTdnUh0on6B
+ r6TskX44OIyqecm+C4KPRrkvYhHnfQx6Jpj89dCXknB4RqC6qNlGDADHLZ0FEcZirV13uKit+uW
+ cxA/RGCM+CS/o2HUgw1NITrcuiVBux9jOwCUqlGa1G3ewBJWq9D7nmczcxw4+e4JslYjbXvSPzK
+ 7uOXC4KSP28ONaWWh7cKWey61eYwQHxbHFMRS4JloIB10y5hC1qdIP857X/cec+/huGJwrSziTC
+ kMgSX3Uy7piMEjQBOWE0p4epRS5ETH2L0aVgRo8n52xjA==
 Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id 22348194; Thu, 21 Aug 2025 13:20:45 +0200
+ ESMTPS id 95b49b87; Thu, 21 Aug 2025 13:20:44 +0200
 From: =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-Date: Thu, 21 Aug 2025 13:20:35 +0200
-Subject: [PATCH v4 1/2] dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
+Subject: [PATCH v4 0/2] mmc: sdhci-pxav3: pinctrl setting for fast bus
+ clocks
+Date: Thu, 21 Aug 2025 13:20:34 +0200
+Message-Id: <20250821-pxav3-uhs-v4-0-bb588314f3c3@dujemihanovic.xyz>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,9 +39,11 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Message-Id: <20250821-pxav3-uhs-v4-1-bb588314f3c3@dujemihanovic.xyz>
-References: <20250821-pxav3-uhs-v4-0-bb588314f3c3@dujemihanovic.xyz>
-In-Reply-To: <20250821-pxav3-uhs-v4-0-bb588314f3c3@dujemihanovic.xyz>
+X-B4-Tracking: v=1; b=H4sIAAIBp2gC/3XOwQ6CMAyA4VcxOzuzbmygJ9/DeICtk5kIZJMFJ
+ Ly7g4sc8Pg3zddOJKB3GMjlMBGP0QXXNimy44HoumweSJ1JTTjjkuVQ0G4oo6B9Hag5S1VZNCA
+ sI2m/82jdsFq3e+rahXfrx5WOsEz3lAiUUY6ZBC6VBauupn/iy6XjbXT6NIwfsmiR/4SCwVbgS
+ SitBp3xQuf5X0FsBbUVxPKDZcIiioJVbE+Y5/kLLnA3Ty4BAAA=
+X-Change-ID: 20250718-pxav3-uhs-d956bfed13f0
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
  Krzysztof Kozlowski <krzk+dt@kernel.org>, 
  Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
@@ -50,85 +53,61 @@ Cc: Karel Balej <balejk@matfyz.cz>, David Wronek <david@mainlining.org>,
  ~postmarketos/upstreaming@lists.sr.ht, 
  =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2265;
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1603;
  i=duje@dujemihanovic.xyz; s=20240706; h=from:subject:message-id;
- bh=v7iuef6GPf6tu0R2yla7tAMIgPcdtUQT6XnIxy5KK94=;
- b=owGbwMvMwCW21nBykGv/WmbG02pJDBnLGbktWDVLP11Oiq+/feFsibuhi2DVZoeaGWtcr6d2v
- v0/c+XWjlIWBjEuBlkxRZbc/47XeD+LbN2evcwAZg4rE8gQBi5OAZiI7V+G/z7qTSXGNoyaM2/M
- +mbKeK5pa+/vyZbPFF3m8i9TdjlTOY+R4TfLm5n/fe+2PZczf/j927e/RZ/zrwjH1ySJGx07bTT
- rICsA
+ bh=cIC7s5NmpQyvXwv7gG+89a1BknGeLYatlzWDzXINP2k=;
+ b=owGbwMvMwCW21nBykGv/WmbG02pJDBnLGbl5y9n6WA8cuWx1O+DC1KXfWFpO3Y5UE+bg3KU8y
+ 1ZuQnlyRykLgxgXg6yYIkvuf8drvJ9Ftm7PXmYAM4eVCWQIAxenAEzE9R4jw9R6U/s87228rjZb
+ PbcY26sujd90bDuTTqfR1VtPzvoeMmdkWL3/eeqWiLyFM2Ya1GubvjgcKnYz9P70kkOX33IkdAf
+ XsgMA
 X-Developer-Key: i=duje@dujemihanovic.xyz; a=openpgp;
  fpr=6DFF41D60DF314B5B76BA630AD319352458FAD03
 
-On the pxav3 controller, increasing the drive strength of the data pins
-might be required to maintain stability on fast bus clocks (above 100
-MHz). Add a state_uhs pinctrl to allow this.
+Hello,
 
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+This small series adds a pinctrl setting for fast MMC bus clocks to the
+pxav3 driver. On bus clocks above 100 MHz, driving the data pins at a
+higher current helps maintain signal quality.
+
+This series is related to Marvell PXA1908 SoC support merged into v6.17.
+
 Signed-off-by: Duje Mihanović <duje@dujemihanovic.xyz>
 ---
 Changes in v4:
-- Rebase on v6.17-rc2 (That version has essentially had a part of this
-  patch merged, causing the potentially weird diff. The end result is
-  the same as in the previous versions of the series though.)
+- Address maintainer comments:
+  - Fix if-else braces
+- Rebase on v6.17-rc2
+- Update trailers
+- Link to v3: https://lore.kernel.org/r/20250806-pxav3-uhs-v3-0-2f03fee380b0@dujemihanovic.xyz
+
+Changes in v3:
+- Address maintainer comments:
+  - Refactor driver patch
+- Remove RFC tag
+- Update trailers
+- Link to v2: https://lore.kernel.org/r/20250801-pxav3-uhs-v2-0-afc1c428c776@dujemihanovic.xyz
 
 Changes in v2:
-- Newlines between properties in if:
+- Address maintainer comments:
+  - Newline between properties in if:
+  - Don't try to lookup pinstates if pinctrl is NULL
+  - Only change pinstates if both are valid
+  - Replace dev_warn() with dev_dbg()
+- Link to v1: https://lore.kernel.org/r/20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz
+
 ---
- .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 29 +++++++++++++++++++---
- 1 file changed, 26 insertions(+), 3 deletions(-)
+Duje Mihanović (2):
+      dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
+      mmc: sdhci-pxav3: add state_uhs pinctrl setting
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-index e7c06032048a3a73eb3eb67a887e75db273ffa92..fba1cc50fdf07cc25d42f45512c385a9b8207b9b 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-@@ -44,12 +44,27 @@ allOf:
-           items:
-             - const: default
-             - const: state_cmd_gpio
--        pinctrl-0:
--          description:
--            Should contain default pinctrl.
-+
-         pinctrl-1:
-           description:
-             Should switch CMD pin to GPIO mode as a high output.
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: mrvl,pxav3-mmc
-+    then:
-+      properties:
-+        pinctrl-names:
-+          description:
-+            Optional for increasing stability of the controller at fast bus clocks.
-+          items:
-+            - const: default
-+            - const: state_uhs
-+
-+        pinctrl-1:
-+          description:
-+            Should switch the drive strength of the data pins to high.
- 
- properties:
-   compatible:
-@@ -82,6 +97,14 @@ properties:
-       - const: io
-       - const: core
- 
-+  pinctrl-names: true
-+
-+  pinctrl-0:
-+    description:
-+      Should contain default pinctrl.
-+
-+  pinctrl-1: true
-+
-   mrvl,clk-delay-cycles:
-     description: Specify a number of cycles to delay for tuning.
-     $ref: /schemas/types.yaml#/definitions/uint32
+ .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 29 +++++++++++++--
+ drivers/mmc/host/sdhci-pxav3.c                     | 41 +++++++++++++++++++++-
+ 2 files changed, 66 insertions(+), 4 deletions(-)
+---
+base-commit: c17b750b3ad9f45f2b6f7e6f7f4679844244f0b9
+change-id: 20250718-pxav3-uhs-d956bfed13f0
 
+Best regards,
 -- 
-2.50.1
+Duje Mihanović <duje@dujemihanovic.xyz>
 
