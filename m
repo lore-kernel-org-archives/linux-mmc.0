@@ -1,93 +1,134 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F117D27FD78
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Aug 2025 09:49:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 024D02367AE;
+	Thu, 21 Aug 2025 11:20:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755769783; cv=none; b=F3ad7PD/8k5XwBPm9K3BE+LVRV9ynBzfFObiV9xijwh3B7/+wFAtm8ouDyAYqWMK+sFp9rMVCxHQGpL/lRdYLz358cujx8FsXFOWSpc3CNTaH+z/B632nN313G3Mo36w1u6K6oAhZXvguBlZCz05N0EJypA7scbcPN9dXo1NjyI=
+	t=1755775253; cv=none; b=cNzNne90XK9KXAEZJFYKAlQqTFRFTUTdTAkbZXQ47yV0eSymUXpLELxpWIOGTosqdHlvxzL3MmAfg+Z4bYhdp6ySsDkgS6UVxL8MOZYXPbAi71fJirwwSngC/LBd7uc2e3cImxyhvNqd4UuEZ2LQi7YSiZ7EkCaYdshxFhNmneU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755769783; c=relaxed/simple;
-	bh=KGnr7mlsNJ9SOoLjBMKZob7b5N+Dnsa+6ff9WZFvsvw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=T+3Qf9eGaQkbjVFWLK4RAzTT65HuROQYGKx6zvRFC2fzNEKJFAnebnWK/iIpgBPhH4iMFjje+oNLuslgQCTeUpVCogFppe2gJMW1Xdhx39Ftfz7/xDwCQzWjhRHOM18fqXBdopYphLMY0sU4vaeL3piR+eP1lQ9JyljnM36PbfE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=J2bWGm7x; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1755775253; c=relaxed/simple;
+	bh=v7iuef6GPf6tu0R2yla7tAMIgPcdtUQT6XnIxy5KK94=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=uMrAXlDCUsq6A3g2dmD3S0mYdQ8Bu/25HCbUgwJjA4H9hOOnmqFiVCNdx2CnihXKl9fW6sra4QXH0J/Rz1ieZezjtPgmFouBRShFcUiUH8SWG7fE5q4NqhZjMSmIPEfoSRnk6LBVy1hFr3TQbeXwBCgZblVguT5Flexak1YigNc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=PgLKE6p2; arc=none smtp.client-ip=37.205.8.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="J2bWGm7x"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=KGnr
-	7mlsNJ9SOoLjBMKZob7b5N+Dnsa+6ff9WZFvsvw=; b=J2bWGm7xe/lVqqk2bJKM
-	aZQikBKT7zuo+QvCFnXTTSzE5Kl5pfFiv0e5KMDm38B/TGWW19vpBGUcgTkjd48K
-	LuVQm6XrxNLNKKbyffFnEEaw87qlVIpwbvaQtObZrfkClPFlb5DBJujxMqKmbkcS
-	aEjZN0Uej4KiAig7HTG8adMGqjrl5lMpSwpi2mSlXkbX3QZuB5hi+zV8pe69UPkT
-	Vtcdx45HX7pUUqUmQCeQXpZGaRLZRB3WzKAyg7dXuHKq5N+aSEMB6cJWak7cESMl
-	HVJgKb3cZNDWL5BYLst5nI2XAYEGbJ8Wcg6Uoqu0yNSpIwIlSTVzVrHXLkdYM+mn
-	wg==
-Received: (qmail 3463395 invoked from network); 21 Aug 2025 11:49:38 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Aug 2025 11:49:38 +0200
-X-UD-Smtp-Session: l3s3148p1@aojxAd080rbUtcd1
-Date: Thu, 21 Aug 2025 11:49:35 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Biju <biju.das.au@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	Biju Das <biju.das.jz@bp.renesas.com>, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH] mmc: host: renesas_sdhi: Replace magic number '0xff' in
- renesas_sdhi_set_clock()
-Message-ID: <aKbrr0I7KuTeYdNY@shikoro>
-References: <20250820104808.94562-1-biju.das.jz@bp.renesas.com>
+	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="PgLKE6p2"
+DKIM-Signature: a=rsa-sha256; bh=9rNIDpDoTdLh2E6jhEYhac+912Izr531qbk98L0qxyM=;
+ c=relaxed/relaxed; d=dujemihanovic.xyz;
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
+ i=@dujemihanovic.xyz; s=default; t=1755775245; v=1; x=1756207245;
+ b=PgLKE6p23+eJpEo1O7wM6plSrqI7O8LsjQBO1/jJ+dsXnqzewhuFtrbzIO8qDtmmZaPnMMmC
+ pQvJdwwlddW6EMaw7a6XgxFzdpzJ60kp6ehC11YRsQ3IcNqh8RkFCbW5QQVWIHgwEQo18ZI7tbM
+ JdWZc0PVm1N2f6BGiyvpjoIR2t2rrhLth1kPdblx4iQnvpWCzKaMYCudyqwt2Gx/Pb7AkQCKjbs
+ 0G10187Z4qdbvKl0t7cnHlccwqkOh1hSSSKcj7tvae5EKNvcARO28LnKiSZzVmOHH51pemCtyqW
+ SqvI/AclLHFZrIsdu9TFLjMQIHvd/XQcM6GOy7xpd5mMw==
+Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
+ ESMTPS id 22348194; Thu, 21 Aug 2025 13:20:45 +0200
+From: =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
+Date: Thu, 21 Aug 2025 13:20:35 +0200
+Subject: [PATCH v4 1/2] dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="Okd/WNIiif9UVfeC"
-Content-Disposition: inline
-In-Reply-To: <20250820104808.94562-1-biju.das.jz@bp.renesas.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Message-Id: <20250821-pxav3-uhs-v4-1-bb588314f3c3@dujemihanovic.xyz>
+References: <20250821-pxav3-uhs-v4-0-bb588314f3c3@dujemihanovic.xyz>
+In-Reply-To: <20250821-pxav3-uhs-v4-0-bb588314f3c3@dujemihanovic.xyz>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Karel Balej <balejk@matfyz.cz>, David Wronek <david@mainlining.org>, 
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, phone-devel@vger.kernel.org, 
+ ~postmarketos/upstreaming@lists.sr.ht, 
+ =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2265;
+ i=duje@dujemihanovic.xyz; s=20240706; h=from:subject:message-id;
+ bh=v7iuef6GPf6tu0R2yla7tAMIgPcdtUQT6XnIxy5KK94=;
+ b=owGbwMvMwCW21nBykGv/WmbG02pJDBnLGbktWDVLP11Oiq+/feFsibuhi2DVZoeaGWtcr6d2v
+ v0/c+XWjlIWBjEuBlkxRZbc/47XeD+LbN2evcwAZg4rE8gQBi5OAZiI7V+G/z7qTSXGNoyaM2/M
+ +mbKeK5pa+/vyZbPFF3m8i9TdjlTOY+R4TfLm5n/fe+2PZczf/j927e/RZ/zrwjH1ySJGx07bTT
+ rICsA
+X-Developer-Key: i=duje@dujemihanovic.xyz; a=openpgp;
+ fpr=6DFF41D60DF314B5B76BA630AD319352458FAD03
 
+On the pxav3 controller, increasing the drive strength of the data pins
+might be required to maintain stability on fast bus clocks (above 100
+MHz). Add a state_uhs pinctrl to allow this.
 
---Okd/WNIiif9UVfeC
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+Signed-off-by: Duje Mihanović <duje@dujemihanovic.xyz>
+---
+Changes in v4:
+- Rebase on v6.17-rc2 (That version has essentially had a part of this
+  patch merged, causing the potentially weird diff. The end result is
+  the same as in the previous versions of the series though.)
 
-On Wed, Aug 20, 2025 at 11:48:01AM +0100, Biju wrote:
-> From: Biju Das <biju.das.jz@bp.renesas.com>
->=20
-> Replace the magic number '0xff' with CLK_CTL_DIV_MASK macro for finding
-> actual clock in renesas_sdhi_set_clock().
->=20
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+Changes in v2:
+- Newlines between properties in if:
+---
+ .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 29 +++++++++++++++++++---
+ 1 file changed, 26 insertions(+), 3 deletions(-)
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+index e7c06032048a3a73eb3eb67a887e75db273ffa92..fba1cc50fdf07cc25d42f45512c385a9b8207b9b 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+@@ -44,12 +44,27 @@ allOf:
+           items:
+             - const: default
+             - const: state_cmd_gpio
+-        pinctrl-0:
+-          description:
+-            Should contain default pinctrl.
++
+         pinctrl-1:
+           description:
+             Should switch CMD pin to GPIO mode as a high output.
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: mrvl,pxav3-mmc
++    then:
++      properties:
++        pinctrl-names:
++          description:
++            Optional for increasing stability of the controller at fast bus clocks.
++          items:
++            - const: default
++            - const: state_uhs
++
++        pinctrl-1:
++          description:
++            Should switch the drive strength of the data pins to high.
+ 
+ properties:
+   compatible:
+@@ -82,6 +97,14 @@ properties:
+       - const: io
+       - const: core
+ 
++  pinctrl-names: true
++
++  pinctrl-0:
++    description:
++      Should contain default pinctrl.
++
++  pinctrl-1: true
++
+   mrvl,clk-delay-cycles:
+     description: Specify a number of cycles to delay for tuning.
+     $ref: /schemas/types.yaml#/definitions/uint32
 
+-- 
+2.50.1
 
---Okd/WNIiif9UVfeC
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmim668ACgkQFA3kzBSg
-Kbbu6A/9HUajXMEY4wIt4hhluNYp7gc887lMKQ4NzKrOqXU+X9xgPsXvOzEPZdmy
-3Hwdi+Kkae35ycVwRTL/pR5AAE9oTRmBw8TMgM4Ogyg5uNZjRhmEUPkzgF8Av7MZ
-hvtHTz49//7CHQ6UB+hnNpKHOJsqQ3m5oiWwkkSkl3cv774HzItfldwf88hjW6Fi
-4m/YQ7QjuRJ+n3wBuGWZ1ZhV2RihHGeHPtYQwC/T22GsqUiq9GcAKd2wFCfnuA6N
-kr+suzGtbKPymRfYm4+O6lmCSDH6Vdxip7JSB4+NFjAkIvAcGt8e4rMjs43ri/d0
-93I8chudB6hVD9rV3TPfGvbrYhcS/JQFQNTuwWrSrFs3jt3SyLeENSe1VyQwH0Dp
-YLVKTcOVXx6fpIMB2O/eml4+egDKge8OirOnDdVXehsi1WfkXDF1CETFrG2TybYv
-XHvxHGy4SpOScOe4Msmg/KsY1T+7mx7DdgqTi3BltjDxa6hd+0AcxDqsnJIeDtPB
-i96xsnm9Y76I1F6WgnKKkVCQB211xtYT5AtL0mxFqGMYoA1+SnQmdmHdQ7Yy5XUA
-iUKShltmESTVEIum622avla6OnfN6ZW6IcNjZ8X4nOKON1M6hLpz0zeKbvrlbqDf
-N9Wu+9uqIRW3vtRRICRrw1Sq6e7lSMDueM0dbNkJ+xVYTHTMc9k=
-=llvT
------END PGP SIGNATURE-----
-
---Okd/WNIiif9UVfeC--
