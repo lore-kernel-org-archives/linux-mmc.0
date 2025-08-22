@@ -1,142 +1,114 @@
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DCCD2EAB8E;
-	Fri, 22 Aug 2025 08:15:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D44D219A81
+	for <linux-mmc@vger.kernel.org>; Fri, 22 Aug 2025 09:58:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1755850524; cv=none; b=ozLI64b9GVkgPSCwtPCuert4I6ajVEbnwo5JDaG/kwfv67Vvr2lFsAsePrm3dyJk5ndnPtnehOczlDXuFYFGu7UY9EAhd3qR+KCng0lYVHtvjV1vP9nqcPkYMPTqEKhE8xuaeZrLjp4bTnRR8UwvJPEWWv2smbcRlaF6DLdihPk=
+	t=1755856741; cv=none; b=IvvumtG80o0VhXwX/dK+N+p9n2K91eVb+BkevNNsyr3m7HlTv/g3V0npDkeEPJ4YuFJzWJhzTdKjullanqTQeXX1R2AR6+kazsSiONLeETOwaL/3gSI1ixgZIx4/XgNN74BFwtqmlm14dsITLFVNdxZTs0ogTMIp1wSsPnjMoBs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1755850524; c=relaxed/simple;
-	bh=kTBgh0y3vRHtAXTeRcbbIloycHJMI8lellSKLz/etxs=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
-	 Content-Type:References; b=KyXfAKy0F6ybvStAwcrXAl3biBkLUUQ6DEZFSRmOfzmRYRgIG37lB7OaWyfJgYV8T9iF4iIytitS2ZQo+FvY+BvEeLQGgc3/hWgMYDQuNEmWbaqbO9kH927iWHN4aCUrICUaWEobQwpuar4If72hJzV66dkJG9o3P8TNiyk9L8k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=e4dvoXQd; arc=none smtp.client-ip=210.118.77.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1755856741; c=relaxed/simple;
+	bh=FD00boVi7jm3nXXfQYGSl6CRaBgwvUPArFELpTcQcf8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=iDdhLpNjEb8+/QlNw7BX7HCsEcgiv7YEkd6IA90z0aX/bSbMQICQ0wHQ6ZfEfFRrpVDRxLjIkar9NReZHQ5nvxtg6MPmsAu+eY++661CA+8dcKH4/2Y0D9isgcGX8fv79HLJDKOUZa3RCr7Ho0haI0oZEWNHouxTAdqkHuNJzxg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=hBeGujdF; arc=none smtp.client-ip=209.85.128.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="e4dvoXQd"
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20250822081519euoutp01946853c37392c604dd0c3ef7d9f9864d~eCL6pnShX0804708047euoutp01V;
-	Fri, 22 Aug 2025 08:15:19 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20250822081519euoutp01946853c37392c604dd0c3ef7d9f9864d~eCL6pnShX0804708047euoutp01V
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1755850519;
-	bh=gSgM5v5QN4mf4R9UjO3p9g49c5fElcblzx9rfuNpgCM=;
-	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
-	b=e4dvoXQdSu6m2XApKflo9WPmqpXymYx8peucZKWnnidxwTqyyGT6vyRmLSZhDupfy
-	 UQS833Dv4xDvMpcINMnXzIPqm8717h4UDC2WHsJO8GSlXAIbIu/HM+EmSf5f03lk+1
-	 DvviTyYYSXyxJn74yEGOVwAsfz9e64KnZWqZgVcw=
-Received: from eusmtip1.samsung.com (unknown [203.254.199.221]) by
-	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-	20250822081519eucas1p173966299ee7e4ed7e44e5668490c5bb1~eCL6VCjyQ0206902069eucas1p1F;
-	Fri, 22 Aug 2025 08:15:19 +0000 (GMT)
-Received: from [106.210.134.192] (unknown [106.210.134.192]) by
-	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
-	20250822081515eusmtip1e7bc345219f25d2646a53b4e40310c91~eCL2XTm3N1429714297eusmtip1U;
-	Fri, 22 Aug 2025 08:15:14 +0000 (GMT)
-Message-ID: <8c4b0068-92be-427b-8bfc-9926eea6aa09@samsung.com>
-Date: Fri, 22 Aug 2025 10:15:14 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hBeGujdF"
+Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-71d60504788so16354697b3.2
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Aug 2025 02:58:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1755856737; x=1756461537; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=ta0x0Etwp/qHFHu8i5E2Zmb/9HCL2i+tnxSvK4L8KnM=;
+        b=hBeGujdFyM7IhDkTHno7B9V8qIEHej26Fm/9D8TothcqI4OW7Cf1zreIDoin+DQpmH
+         TuiOxHYbH1Aj2KUPztTogCUlg9bebpx5gLOw1mp9dECOSZKtYVdenVEXMcH4Fiw9e5Cp
+         w8sxOhKpC8MtX/wTUd+Ux/sbdVBpDeIY9aRk+BUlzHMipr9VKhEp5CyCIYbom0qrwECS
+         96/bekYV+lhrHl2shY49fxdjJUUFGVx2FnfoBmsg/+SpPUx5QwQYV1FLaOUB0XiVQOX1
+         C4pAuzerW36KSPBxHvxH3PlOLShNbMFcLSkD0wS6TzBk9FucQD98pMg5em+DWceiv+WD
+         Id+w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1755856737; x=1756461537;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ta0x0Etwp/qHFHu8i5E2Zmb/9HCL2i+tnxSvK4L8KnM=;
+        b=g/Gkws3LeV4c4MDSdCitUTI0iap1qicnlPzOGG50re6ap0aioPoj9k8FEaHVbiYiUx
+         iRW7EEnrrJDFlod2baaf8HpGD7ZrKuQz1L/dP4b7Oi5B7WKh0hKbdEtH3SmrXUus/k7m
+         1V3oXcG6UY29zIXEDbAs9DAPk+6eZVWNn4e/bv79FQfljBj+vJdDfv1zSR8O1ozI6EgU
+         Sc6CN0h1YxPAgoOKL3IDQ+fVEQDKceEyU2PeDxLKJovuVnMqLsqCy4fEixfEwO179FcA
+         C493WcPWZHyNqWrPTWgYg7rWqZtWorQrKOswpyX/CAwaNowCxOoHrkZtklwCzfURsaYc
+         p2hA==
+X-Forwarded-Encrypted: i=1; AJvYcCUwruYlYKyrU5PvJeIRNuay9O5O1fT9Qc9cwJzzGqhQzbbbDXd6EgsTsgRmaS6NlX5yxrj0At8yUoY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyKwQeZ5Q/kWZ/AguPS/+OJvw3fCSCFAi4CAe+kHbmkNb69wEP3
+	uyb5cmD/Jya/f6wZv31QMDRFLEonC2BHeGH8w6+4WcL0UmY5UH+E4K9Q7e4BLRUiT0gXJVCB7sJ
+	NIKqOyvflHiudy/mEw2xVzRmqAcuME8tsFFr+4gMf4KyEZ8nUpcGV
+X-Gm-Gg: ASbGncua2FWA/LuaPG6idNltevtUhs/AD5rsASpo5QgiuX2bp0phflIPMX25ac0sNpd
+	aWnuxT7t9a/O0mSLcyWQXTirlbdCQTPwq+KMuNznxj0i2M5MKCmKixPCsC6DRqD/eV7Cq85Ya4k
+	WV5ZbrCk7/NFw3Hnfwu8y9xNMxyZXTMkd+GvD52a3HIDV9yM0k51yUPqEddBhDYB4bdYQHpobK6
+	haXdC7f
+X-Google-Smtp-Source: AGHT+IFd0X7jkwq2XGOJ7EKMxon9dbw2ksIcL5ljDLbAAX3e91uv+L7uUO91qQDTLkLCO0orfNEA4dlYcWAaDmDw/cI=
+X-Received: by 2002:a05:690c:6702:b0:71b:68ab:8bdd with SMTP id
+ 00721157ae682-71fdc437461mr24057427b3.39.1755856737275; Fri, 22 Aug 2025
+ 02:58:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Betterbird (Windows)
-Subject: Re: [PATCH RFC 23/35] scatterlist: disallow non-contigous page
- ranges in a single SG entry
-To: David Hildenbrand <david@redhat.com>, linux-kernel@vger.kernel.org
-Cc: Alexander Potapenko <glider@google.com>, Andrew Morton
-	<akpm@linux-foundation.org>, Brendan Jackman <jackmanb@google.com>,
-	Christoph Lameter <cl@gentwo.org>, Dennis Zhou <dennis@kernel.org>, Dmitry
-	Vyukov <dvyukov@google.com>, dri-devel@lists.freedesktop.org,
-	intel-gfx@lists.freedesktop.org, iommu@lists.linux.dev,
-	io-uring@vger.kernel.org, Jason Gunthorpe <jgg@nvidia.com>, Jens Axboe
-	<axboe@kernel.dk>, Johannes Weiner <hannes@cmpxchg.org>, John Hubbard
-	<jhubbard@nvidia.com>, kasan-dev@googlegroups.com, kvm@vger.kernel.org,
-	"Liam R. Howlett" <Liam.Howlett@oracle.com>, Linus Torvalds
-	<torvalds@linux-foundation.org>, linux-arm-kernel@axis.com,
-	linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
-	linux-ide@vger.kernel.org, linux-kselftest@vger.kernel.org,
-	linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org,
-	linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
-	Marco Elver <elver@google.com>, Michal Hocko <mhocko@suse.com>, Mike
-	Rapoport <rppt@kernel.org>, Muchun Song <muchun.song@linux.dev>,
-	netdev@vger.kernel.org, Oscar Salvador <osalvador@suse.de>, Peter Xu
-	<peterx@redhat.com>, Robin Murphy <robin.murphy@arm.com>, Suren Baghdasaryan
-	<surenb@google.com>, Tejun Heo <tj@kernel.org>,
-	virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
-	wireguard@lists.zx2c4.com, x86@kernel.org, Zi Yan <ziy@nvidia.com>
-Content-Language: en-US
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-In-Reply-To: <20250821200701.1329277-24-david@redhat.com>
-Content-Transfer-Encoding: 7bit
-X-CMS-MailID: 20250822081519eucas1p173966299ee7e4ed7e44e5668490c5bb1
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-RootMTR: 20250821200818eucas1p2c3df1e12eeba86a68679743d2f5929a8
-X-EPHeader: CA
-X-CMS-RootMailID: 20250821200818eucas1p2c3df1e12eeba86a68679743d2f5929a8
-References: <20250821200701.1329277-1-david@redhat.com>
-	<CGME20250821200818eucas1p2c3df1e12eeba86a68679743d2f5929a8@eucas1p2.samsung.com>
-	<20250821200701.1329277-24-david@redhat.com>
+References: <20250821200701.1329277-1-david@redhat.com> <20250821200701.1329277-27-david@redhat.com>
+In-Reply-To: <20250821200701.1329277-27-david@redhat.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 22 Aug 2025 11:58:21 +0200
+X-Gm-Features: Ac12FXyNlpfyW29hh3KLyFNs0xgg6UyHwa_qnpYtINLnggZTT9u4v5G4XN84Gbc
+Message-ID: <CAPDyKFrAth_76byLZG+5+CA1ZELJVH6XaFzfo2i7nYfnMYKa=A@mail.gmail.com>
+Subject: Re: [PATCH RFC 26/35] mspro_block: drop nth_page() usage within SG entry
+To: David Hildenbrand <david@redhat.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-mm@kvack.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 21.08.2025 22:06, David Hildenbrand wrote:
-> The expectation is that there is currently no user that would pass in
-> non-contigous page ranges: no allocator, not even VMA, will hand these
-> out.
+- trimmed cc-list
+
+On Thu, 21 Aug 2025 at 22:08, David Hildenbrand <david@redhat.com> wrote:
 >
-> The only problematic part would be if someone would provide a range
-> obtained directly from memblock, or manually merge problematic ranges.
-> If we find such cases, we should fix them to create separate
-> SG entries.
+> It's no longer required to use nth_page() when iterating pages within a
+> single SG entry, so let's drop the nth_page() usage.
 >
-> Let's check in sg_set_page() that this is really the case. No need to
-> check in sg_set_folio(), as pages in a folio are guaranteed to be
-> contiguous.
->
-> We can now drop the nth_page() usage in sg_page_iter_page().
->
+> Cc: Maxim Levitsky <maximlevitsky@gmail.com>
+> Cc: Alex Dubov <oakad@yahoo.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
 > Signed-off-by: David Hildenbrand <david@redhat.com>
-Acked-by: Marek Szyprowski <m.szyprowski@samsung.com>
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Kind regards
+Uffe
+
+
+
+
 > ---
->   include/linux/scatterlist.h | 4 +++-
->   1 file changed, 3 insertions(+), 1 deletion(-)
+>  drivers/memstick/core/mspro_block.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> diff --git a/include/linux/scatterlist.h b/include/linux/scatterlist.h
-> index 6f8a4965f9b98..8196949dfc82c 100644
-> --- a/include/linux/scatterlist.h
-> +++ b/include/linux/scatterlist.h
-> @@ -6,6 +6,7 @@
->   #include <linux/types.h>
->   #include <linux/bug.h>
->   #include <linux/mm.h>
-> +#include <linux/mm_inline.h>
->   #include <asm/io.h>
->   
->   struct scatterlist {
-> @@ -158,6 +159,7 @@ static inline void sg_assign_page(struct scatterlist *sg, struct page *page)
->   static inline void sg_set_page(struct scatterlist *sg, struct page *page,
->   			       unsigned int len, unsigned int offset)
->   {
-> +	VM_WARN_ON_ONCE(!page_range_contiguous(page, ALIGN(len + offset, PAGE_SIZE) / PAGE_SIZE));
->   	sg_assign_page(sg, page);
->   	sg->offset = offset;
->   	sg->length = len;
-> @@ -600,7 +602,7 @@ void __sg_page_iter_start(struct sg_page_iter *piter,
->    */
->   static inline struct page *sg_page_iter_page(struct sg_page_iter *piter)
->   {
-> -	return nth_page(sg_page(piter->sg), piter->sg_pgoffset);
-> +	return sg_page(piter->sg) + piter->sg_pgoffset;
->   }
->   
->   /**
-
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
-
+> diff --git a/drivers/memstick/core/mspro_block.c b/drivers/memstick/core/mspro_block.c
+> index c9853d887d282..985cfca3f6944 100644
+> --- a/drivers/memstick/core/mspro_block.c
+> +++ b/drivers/memstick/core/mspro_block.c
+> @@ -560,8 +560,7 @@ static int h_mspro_block_transfer_data(struct memstick_dev *card,
+>                 t_offset += msb->current_page * msb->page_size;
+>
+>                 sg_set_page(&t_sg,
+> -                           nth_page(sg_page(&(msb->req_sg[msb->current_seg])),
+> -                                    t_offset >> PAGE_SHIFT),
+> +                           sg_page(&(msb->req_sg[msb->current_seg])) + t_offset / PAGE_SIZE,
+>                             msb->page_size, offset_in_page(t_offset));
+>
+>                 memstick_init_req_sg(*mrq, msb->data_dir == READ
+> --
+> 2.50.1
+>
