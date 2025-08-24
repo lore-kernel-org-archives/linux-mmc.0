@@ -1,112 +1,147 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from smtp1.ms.mff.cuni.cz (smtp-in1.ms.mff.cuni.cz [195.113.20.234])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 270EF26C3A7;
-	Sun, 24 Aug 2025 11:13:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC3764317D;
+	Sun, 24 Aug 2025 11:14:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.113.20.234
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756034024; cv=none; b=UBKU38o/nHza/1Z/cQ2ENNe3XGluUHc/kp7Jyw1X4fe5BAdI1Dr2+9Ixhvt2uzJVlwWvPaW6b3wpVYqie7WLQG7WTvYo9l4t0Bal8veLF1NWag/oQXcq6+ZPYi62YCJKKZo+BQuuyVX6ciDGXWHRFhz7vRuZvJji7gi2PkwSsQ4=
+	t=1756034057; cv=none; b=W67bOjZyK6KM25WO8dpTIQ0PBUyUqnbkCzpNyqAdxt3g/9bzoMj9xcXJ/M93la82tk2rGlcUEvUoM5T+ohycDFBtlUHIqzJTK1OBkvszxM+gecSklnxKjE/NG5WbodzCJUAspyWs1KkVrBITumDESZmb2vmEt03z0v50D1/zqhU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756034024; c=relaxed/simple;
-	bh=mv/bsRsVdM7pQCuwt1SnavPyP9K9Bv9tTNozHds6S8Q=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Szm/2Hc3AicuwCR3psd7IOfh+vU5kBAEOH1U1PT/HDR19wJkIGjpn6JdT4hH5azezUttXQlfAwIc3lmElrYDShR3Km7QhBIJZIhChVnMhmu1PZKYcNv60tDUXOeNV8QI0YtRjQsw0JpvKv7tddvHHREfiwdXc5k2DXo4fySGT4Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=q1FooV2S; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1756034057; c=relaxed/simple;
+	bh=FerGia3PhqrqFYSjiLJULWoh3Jr9z/+AiMZOROAQOmY=;
+	h=Mime-Version:Content-Type:Date:Message-Id:To:From:Cc:Subject:
+	 References:In-Reply-To; b=KP6oQd+1ZF/mAa1LfCFC/wM0bA7Wr43NYqpFBdIbwGwqgUQBHnrjWNH+Yr3tx+2rYr8ZKjZXmVIofW7/0hGoyGSehHdO7F6ph0c5iQxMmRJHSqwerNPBLozllFnmPmsVotwHjnrVvZnf/85tV3uYbnG+J9NyJZRePOGGJ/yB0u4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=matfyz.cz; dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b=BIX6Ywur; arc=none smtp.client-ip=195.113.20.234
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=matfyz.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="q1FooV2S"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 35C94C4CEEB;
-	Sun, 24 Aug 2025 11:13:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1756034021;
-	bh=mv/bsRsVdM7pQCuwt1SnavPyP9K9Bv9tTNozHds6S8Q=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=q1FooV2SVNS+J+o5HD1EFtwyz4Squld/IWRpQQomvuqnpBezptQ35W+wxahx5C4vC
-	 dTrdpWV3JnhwEYm9AVvK8BXKNPLIL92P+YxNMqF2la7deN50Wvy+Nixy4NngeHjXUu
-	 w9jKLBLmszlZ1jnj6RctxWi3Od5i7SGzDawrVSn2d3W6MGLi9glEFOfYYAwfCXX7uh
-	 0uAhO2Ow+8FxhN5rm4FyEhKghmUB19m8j8PhWcMDjEQuUstj9QRJyuOrqYS4e0Re/6
-	 wCZmr2iPOhOeZFPP6hGpM4r31hGTg4R+xFf1XJEJ5zX9MGkLSbpYmR9ewTZX1ceSiA
-	 4cTCSPMkK064w==
-Message-ID: <6e9cf11f-c160-4833-b3f4-cb22ecf6a26c@kernel.org>
-Date: Sun, 24 Aug 2025 13:13:36 +0200
+	dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b="BIX6Ywur"
+X-SubmittedBy: id balejk@matfyz.cz subject /postalCode=110+2000/O=Univerzita+20Karlova/street=Ovocn+5CxC3+5CxBD+20trh+20560/5/ST=Praha,+20Hlavn+5CxC3+5CxAD+20m+5CxC4+5Cx9Bsto/C=CZ/CN=Karel+20Balej/emailAddress=balejk@matfyz.cz
+	serial F5FD910E8FE2121B897F7E55B84E351D
+	issued by /C=NL/O=GEANT+20Vereniging/CN=GEANT+20Personal+20CA+204
+	auth type TLS.CUNI
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mff.cuni.cz;
+	s=submission; t=1756034023; x=1757334023;
+	bh=ADa+fVNGO4WZmlPkY9EPlfFvm3fduD+G2BAy5zB2N7o=; h=From;
+	b=BIX6Ywury7THcZTUYmmkJAPhdSkdCI4UXdME4S4FwGX213bfIVVUGxYziYzSB4Otd
+	 aO7LNYITNTTfZc+bz5Gwt2lOk+o4BkyNAAHPccl0otCve2rbHcP4sCS0lFu+TXV+85
+	 YSYIPBEU/wmSzQAXhb9Fu7kdkMdkhw4alxrSmbgn1JrEZIbgBIdaEg16EWXKt9/DUC
+	 SyF0oFa9HIR8p2phDhHrQnxf/mfczW3shD7zzKiiFdmPjV56J+XCYNF9ZODDAK+sV4
+	 siF/aep1v4S1dUr2OgxYgbswwnmpG9uRE2lQIpI7RktRhjAEVqzwF++EhoQDY+EjTl
+	 HZp07okK8RPMQ==
+Received: from localhost (internet5.mraknet.com [185.200.108.250])
+	(authenticated)
+	by smtp1.ms.mff.cuni.cz (8.16.1/8.16.1) with ESMTPS id 57OBDf7f084268
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
+	Sun, 24 Aug 2025 13:13:43 +0200 (CEST)
+	(envelope-from balejk@matfyz.cz)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH mmc/next 1/3] arm64: dts: samsung,coreprimevelte: add PMIC
-To: Karel Balej <balejk@matfyz.cz>, linux-mmc@vger.kernel.org,
- ulf.hansson@linaro.org, =?UTF-8?Q?Duje_Mihanovi=C4=87?=
- <duje@dujemihanovic.xyz>, Andrew Lunn <andrew@lunn.ch>,
- Gregory Clement <gregory.clement@bootlin.com>,
- Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, linux-arm-kernel@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org
-References: <20250824110039.28258-1-balejk@matfyz.cz>
- <20250824110039.28258-2-balejk@matfyz.cz>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
- cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
- JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
- gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
- J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
- NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
- BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
- vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
- Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
- TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
- S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
- FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJoF1BKBQkWlnSaAAoJEBuTQ307
- QWKbHukP/3t4tRp/bvDnxJfmNdNVn0gv9ep3L39IntPalBFwRKytqeQkzAju0whYWg+R/rwp
- +r2I1Fzwt7+PTjsnMFlh1AZxGDmP5MFkzVsMnfX1lGiXhYSOMP97XL6R1QSXxaWOpGNCDaUl
- ajorB0lJDcC0q3xAdwzRConxYVhlgmTrRiD8oLlSCD5baEAt5Zw17UTNDnDGmZQKR0fqLpWy
- 786Lm5OScb7DjEgcA2PRm17st4UQ1kF0rQHokVaotxRM74PPDB8bCsunlghJl1DRK9s1aSuN
- hL1Pv9VD8b4dFNvCo7b4hfAANPU67W40AaaGZ3UAfmw+1MYyo4QuAZGKzaP2ukbdCD/DYnqi
- tJy88XqWtyb4UQWKNoQqGKzlYXdKsldYqrLHGoMvj1UN9XcRtXHST/IaLn72o7j7/h/Ac5EL
- 8lSUVIG4TYn59NyxxAXa07Wi6zjVL1U11fTnFmE29ALYQEXKBI3KUO1A3p4sQWzU7uRmbuxn
- naUmm8RbpMcOfa9JjlXCLmQ5IP7Rr5tYZUCkZz08LIfF8UMXwH7OOEX87Y++EkAB+pzKZNNd
- hwoXulTAgjSy+OiaLtuCys9VdXLZ3Zy314azaCU3BoWgaMV0eAW/+gprWMXQM1lrlzvwlD/k
- whyy9wGf0AEPpLssLVt9VVxNjo6BIkt6d1pMg6mHsUEVzsFNBFVDXDQBEADNkrQYSREUL4D3
- Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
- MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
- OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
- GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
- 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
- YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
- 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
- BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
- JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
- 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
- YpsFAmgXUF8FCRaWWyoACgkQG5NDfTtBYptO0w//dlXJs5/42hAXKsk+PDg3wyEFb4NpyA1v
- qmx7SfAzk9Hf6lWwU1O6AbqNMbh6PjEwadKUk1m04S7EjdQLsj/MBSgoQtCT3MDmWUUtHZd5
- RYIPnPq3WVB47GtuO6/u375tsxhtf7vt95QSYJwCB+ZUgo4T+FV4hquZ4AsRkbgavtIzQisg
- Dgv76tnEv3YHV8Jn9mi/Bu0FURF+5kpdMfgo1sq6RXNQ//TVf8yFgRtTUdXxW/qHjlYURrm2
- H4kutobVEIxiyu6m05q3e9eZB/TaMMNVORx+1kM3j7f0rwtEYUFzY1ygQfpcMDPl7pRYoJjB
- dSsm0ZuzDaCwaxg2t8hqQJBzJCezTOIkjHUsWAK+tEbU4Z4SnNpCyM3fBqsgYdJxjyC/tWVT
- AQ18NRLtPw7tK1rdcwCl0GFQHwSwk5pDpz1NH40e6lU+NcXSeiqkDDRkHlftKPV/dV+lQXiu
- jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
- zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
- XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250824110039.28258-2-balejk@matfyz.cz>
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Date: Sun, 24 Aug 2025 13:13:41 +0200
+Message-Id: <DCAM3WTJ4EXA.32GZBS4G7GWFJ@matfyz.cz>
+To: <linux-mmc@vger.kernel.org>, <ulf.hansson@linaro.org>,
+        =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>,
+        "Andrew Lunn"
+ <andrew@lunn.ch>,
+        "Gregory Clement" <gregory.clement@bootlin.com>,
+        "Sebastian Hesselbarth" <sebastian.hesselbarth@gmail.com>,
+        "Rob Herring"
+ <robh@kernel.org>,
+        "Krzysztof Kozlowski" <krzk+dt@kernel.org>,
+        "Conor
+ Dooley" <conor+dt@kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+From: "Karel Balej" <balejk@matfyz.cz>
+Cc: <~postmarketos/upstreaming@lists.sr.ht>, <phone-devel@vger.kernel.org>
+Subject: Re: [PATCH mmc/next 3/3] arm64: dts: samsung,coreprimevelte: add
+ SDIO
+References: <20250824110039.28258-1-balejk@matfyz.cz>
+ <20250824110039.28258-4-balejk@matfyz.cz>
+In-Reply-To: <20250824110039.28258-4-balejk@matfyz.cz>
 
-On 24/08/2025 12:53, Karel Balej wrote:
-> Bind power management chip to the samsung,coreprimevelte smartphone.
-> This enables support for onkey and RTC as well as for regulators two of
-> which are explicitly bound here to the SD card.
+Karel Balej, 2025-08-24T12:53:45+02:00:
+> +	sdh2_pins_0: sdh2-pins-0 {
+> +		pinctrl-single,pins =3D <
+> +			0x24 1
+> +			0x28 1
+> +			0x2c 1
+> +			0x30 1
+> +			0x34 1
+> +			0x38 1
+> +			0x3c 1
+> +			0x40 1
+> +		>;
+> +		pinctrl-single,drive-strength =3D <0x1000 0x1800>;
+> +		pinctrl-single,bias-pullup =3D <0 0xc000 0 0xc000>;
+> +		pinctrl-single,bias-pulldown =3D <0 0xa000 0 0xa000>;
+> +		pinctrl-single,input-schmitt =3D <0 0x30>;
+> +		pinctrl-single,input-schmitt-enable =3D <0x40 0 0x40 0x40>;
+> +		pinctrl-single,low-power-mode =3D <0 0x388>;
+> +	};
+> +
+> +	sdh2_pins_1: sdh2-pins-1 {
+> +		pinctrl-single,pins =3D <0x64 1>;
+> +		pinctrl-single,drive-strength =3D <0x1000 0x1800>;
+> +		pinctrl-single,bias-pullup =3D <0 0xc000 0 0xc000>;
+> +		pinctrl-single,bias-pulldown =3D <0 0xa000 0 0xa000>;
+> +		pinctrl-single,input-schmitt =3D <0 0x30>;
+> +		pinctrl-single,input-schmitt-enable =3D <0x40 0 0x40 0x40>;
+> +		pinctrl-single,low-power-mode =3D <0x208 0x388>;
+> +	};
+> +
+> +	sdh2_pins_2: sdh2-pins-2 {
+> +		pinctrl-single,pins =3D <0x5c 1>;
+> +		pinctrl-single,bias-pullup =3D <0xc000 0xc000 0 0xc000>;
+> +		pinctrl-single,bias-pulldown =3D <0x8000 0xa000 0x8000 0xa000>;
+> +		pinctrl-single,low-power-mode =3D <0x288 0x388>;
+> +	};
+> +
+> +	sdh2_fast_pins_0: sdh2-fast-pins-0 {
+> +		pinctrl-single,pins =3D <
+> +			0x24 1
+> +			0x28 1
+> +			0x2c 1
+> +			0x30 1
+> +			0x34 1
+> +			0x38 1
+> +			0x3c 1
+> +			0x40 1
+> +		>;
+> +		pinctrl-single,drive-strength =3D <0x1800 0x1800>;
+> +		pinctrl-single,bias-pullup =3D <0 0xc000 0 0xc000>;
+> +		pinctrl-single,bias-pulldown =3D <0 0xa000 0 0xa000>;
+> +		pinctrl-single,input-schmitt =3D <0 0x30>;
+> +		pinctrl-single,input-schmitt-enable =3D <0x40 0 0x40 0x40>;
+> +		pinctrl-single,low-power-mode =3D <0 0x388>;
+> +	};
+> +
+> +	sdh2_fast_pins_1: sdh2-fast-pins-1 {
+> +		pinctrl-single,pins =3D <0x64 1>;
+> +		pinctrl-single,drive-strength =3D <0x1800 0x1800>;
+> +		pinctrl-single,bias-pullup =3D <0 0xc000 0 0xc000>;
+> +		pinctrl-single,bias-pulldown =3D <0 0xa000 0 0xa000>;
+> +		pinctrl-single,input-schmitt =3D <0 0x30>;
+> +		pinctrl-single,input-schmitt-enable =3D <0x40 0 0x40 0x40>;
+> +		pinctrl-single,low-power-mode =3D <0x208 0x388>;
+> +	};
+> +
+> +	sdh2_fast_pins_2: sdh2-fast-pins-2 {
+> +		pinctrl-single,pins =3D <0x5c 1>;
+> +		pinctrl-single,drive-strength =3D <0x1800 0x1800>;
+> +		pinctrl-single,bias-pullup =3D <0xc000 0xc000 0 0xc000>;
+> +		pinctrl-single,bias-pulldown =3D <0x8000 0xa000 0x8000 0xa000>;
+> +		pinctrl-single,low-power-mode =3D <0x288 0x388>;
+> +	};
 
+Sorry, these got mixed in by accident and should be in a separate future
+patch enabling the eMMC support. I will drop them from here when I send
+the next version.
 
-Your patches have confusing mmc/next prefix. This is a SoC patchset, not
-mmc.
-
-> 
-> Signed-off-by: Karel Balej <balejk@matfyz.cz>
-
-Best regards,
-Krzysztof
+K. B.
