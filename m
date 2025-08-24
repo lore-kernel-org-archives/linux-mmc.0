@@ -1,140 +1,75 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C3D2393DE3;
-	Sun, 24 Aug 2025 13:24:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 816CF28F4;
+	Sun, 24 Aug 2025 16:30:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756041880; cv=none; b=VP4If5ozBuciAvANxGkykqsy5cYI2s6CmQASw/YAAqldG3NPH1K2d8y3nT03z1xK/Wn/MdvkrTaq9qUZlXEUCoD/40poqJi68er6jh1Yub3tFG09ifLIjjzfKO3xKSDjiNqtrp20Ba01qgIiuANRSB3rkS3y4AFOqGTT5lYPJG8=
+	t=1756053126; cv=none; b=Kj6jRt1Z2+NruuUz3YCVginQvp5gjrH3BPOqBv5D/UeY7blRxwHRwDpCh1tFRUuavpB83Cv+e1M6Po+jdru162ynbQHl+X8ySnzpNePkS3bt6djnKVtvRFzj68LAON43Prq9CluUBgWEHbk2XT2rpiZvoBHUIxQvQXPJQd6O2ww=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756041880; c=relaxed/simple;
-	bh=ULWSWvx5qOQocuXhhEVwmUdZJ/jQrpo8zzXV1kr+XYk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ull+/HlBVmEZZhKNv/0sF3Fn0DS7SlawRmd45WFjUcqhk6vXZn+ZJRH0gdfvL+szbq3qH/vrNmxBQiRIDrUmnj5odiEMPyrVd8IVLdTS1jYwx3VQgA/2P1BdSidVqMXbvEYDwQ5VAJulrtq5kSIboWrVEqZwW0XH9JdD3c5I0ZA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SquWihWK; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1756053126; c=relaxed/simple;
+	bh=G2OHILXUuHJu2eH22mnptPrLtTmml/fktiLPE1KzmDo=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=jJwvkUNijSn0cwkyO93svrkDQUMjVqOXFIzBFvHKO1XDkguNZKgevIKP6BtGPHnaE4zPcvcxWYtaqCnBAc+0jzUB2Du7L4TpK1+6BtEZkCf18Fh/I+JOWR+IANCsERKsxQTHI7Y2C/TjkQhmiXolYGbxjtzs8UDSXLh4wKof7G0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=ORwhDOb+; arc=none smtp.client-ip=37.205.8.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SquWihWK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B4638C4CEEB;
-	Sun, 24 Aug 2025 13:24:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1756041880;
-	bh=ULWSWvx5qOQocuXhhEVwmUdZJ/jQrpo8zzXV1kr+XYk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=SquWihWK3f+VpRPVHREvb/KU1Ip2U18TP7N1MuJITOAx4rQrPZH3cvqtkOP5SvK7q
-	 i6NO1TPVUbZk8RWkAk3LTCsFqBTBZ14HIKev8nasvhFuIsLkIUiO3cKzio2Q51II/F
-	 wyed5FtAlddWEWPif7U0YGP0VU7Jz0WnTx8oiBRZXCVwF7SJXztCvl7h61L8oudm/m
-	 ZzJcPQiQ6a3vkdslZGaL+map5bzuxrOH69hNlp4a8gDkADVHKqlXnjP6H9fUKUPAle
-	 G5RP+5YSDJFPCZAOfsIK30ngRx5fl+uNMhMZuFtvohYRU68gjsyw/nUrRlnisE/5CR
-	 1GDLoGVBUCvXA==
-Date: Sun, 24 Aug 2025 16:24:23 +0300
-From: Mike Rapoport <rppt@kernel.org>
-To: David Hildenbrand <david@redhat.com>
-Cc: linux-kernel@vger.kernel.org, Alexander Potapenko <glider@google.com>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Brendan Jackman <jackmanb@google.com>,
-	Christoph Lameter <cl@gentwo.org>, Dennis Zhou <dennis@kernel.org>,
-	Dmitry Vyukov <dvyukov@google.com>, dri-devel@lists.freedesktop.org,
-	intel-gfx@lists.freedesktop.org, iommu@lists.linux.dev,
-	io-uring@vger.kernel.org, Jason Gunthorpe <jgg@nvidia.com>,
-	Jens Axboe <axboe@kernel.dk>, Johannes Weiner <hannes@cmpxchg.org>,
-	John Hubbard <jhubbard@nvidia.com>, kasan-dev@googlegroups.com,
-	kvm@vger.kernel.org, "Liam R. Howlett" <Liam.Howlett@oracle.com>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	linux-arm-kernel@axis.com, linux-arm-kernel@lists.infradead.org,
-	linux-crypto@vger.kernel.org, linux-ide@vger.kernel.org,
-	linux-kselftest@vger.kernel.org, linux-mips@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-mm@kvack.org,
-	linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org,
-	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
-	Marco Elver <elver@google.com>,
-	Marek Szyprowski <m.szyprowski@samsung.com>,
-	Michal Hocko <mhocko@suse.com>, Muchun Song <muchun.song@linux.dev>,
-	netdev@vger.kernel.org, Oscar Salvador <osalvador@suse.de>,
-	Peter Xu <peterx@redhat.com>, Robin Murphy <robin.murphy@arm.com>,
-	Suren Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>,
-	virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
-	wireguard@lists.zx2c4.com, x86@kernel.org, Zi Yan <ziy@nvidia.com>
-Subject: Re: [PATCH RFC 12/35] mm: limit folio/compound page sizes in
- problematic kernel configs
-Message-ID: <aKsSh0OEjf4GLmIG@kernel.org>
-References: <20250821200701.1329277-1-david@redhat.com>
- <20250821200701.1329277-13-david@redhat.com>
+	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="ORwhDOb+"
+DKIM-Signature: a=rsa-sha256; bh=KBMwXOKWo3H5shr3lU27LMOukqdPgtvWMNq4qyPQjsk=;
+ c=relaxed/relaxed; d=dujemihanovic.xyz;
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
+ i=@dujemihanovic.xyz; s=default; t=1756053033; v=1; x=1756485033;
+ b=ORwhDOb+RWlGUXOku+owQSOhL6+X82KxUA7Z8ZFg5fhCgmduoWGxsKTcBmv3lOTUn3v7b4cz
+ nbH3hcwLCQietNt4EG2Aj3ekxB1uaV+mBb4/A8ZlvM54c4cXvpwBYRz9+XbrdxwtSxu7sFDhyWI
+ eABzqalZo5qYsnrIAwDxIJzcXrK9a/v0GBCYHk2wkDqWU1kA4Dgrsqz64gM4BGV4lnWO+eZE3Dk
+ 9o9PpBa2l7u74pRLS4ENbH/z1gwWdmt35IKaNKtCks6/t52GoNykON5cINHmTFH18r+4fqVqvDK
+ qojvQVU7GVehloturu99MMSlwA+3/5UWl5Yuxrrt1VwUA==
+Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
+ ESMTPS id 3921b3f8; Sun, 24 Aug 2025 18:30:33 +0200
+From: Duje =?UTF-8?B?TWloYW5vdmnEhw==?= <duje@dujemihanovic.xyz>
+To: Karel Balej <balejk@matfyz.cz>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+ Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@bootlin.com>,
+ Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, linux-arm-kernel@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org
+Subject: Re: [PATCH mmc/next 1/3] arm64: dts: samsung,coreprimevelte: add PMIC
+Date: Sun, 24 Aug 2025 18:30:32 +0200
+Message-ID: <4701387.LvFx2qVVIh@radijator>
+In-Reply-To: <20250824110039.28258-2-balejk@matfyz.cz>
+References:
+ <20250824110039.28258-1-balejk@matfyz.cz>
+ <20250824110039.28258-2-balejk@matfyz.cz>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250821200701.1329277-13-david@redhat.com>
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
 
-On Thu, Aug 21, 2025 at 10:06:38PM +0200, David Hildenbrand wrote:
-> Let's limit the maximum folio size in problematic kernel config where
-> the memmap is allocated per memory section (SPARSEMEM without
-> SPARSEMEM_VMEMMAP) to a single memory section.
-> 
-> Currently, only a single architectures supports ARCH_HAS_GIGANTIC_PAGE
-> but not SPARSEMEM_VMEMMAP: sh.
-> 
-> Fortunately, the biggest hugetlb size sh supports is 64 MiB
-> (HUGETLB_PAGE_SIZE_64MB) and the section size is at least 64 MiB
-> (SECTION_SIZE_BITS == 26), so their use case is not degraded.
-> 
-> As folios and memory sections are naturally aligned to their order-2 size
-> in memory, consequently a single folio can no longer span multiple memory
-> sections on these problematic kernel configs.
-> 
-> nth_page() is no longer required when operating within a single compound
-> page / folio.
-> 
-> Signed-off-by: David Hildenbrand <david@redhat.com>
+On Sunday, 24 August 2025 12:53:43 Central European Summer Time Karel Balej 
+wrote:
+>  &twsi2 {
+>  	status = "okay";
+> +
+> +	pmic@30 {
+> +		compatible = "marvell,88pm886-a1";
+> +		reg = <0x30>;
+> +		interrupts = <0 4 IRQ_TYPE_LEVEL_HIGH>;
 
-Acked-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
+Use GIC_SPI instead of 0 here.
 
-> ---
->  include/linux/mm.h | 22 ++++++++++++++++++----
->  1 file changed, 18 insertions(+), 4 deletions(-)
-> 
-> diff --git a/include/linux/mm.h b/include/linux/mm.h
-> index 77737cbf2216a..48a985e17ef4e 100644
-> --- a/include/linux/mm.h
-> +++ b/include/linux/mm.h
-> @@ -2053,11 +2053,25 @@ static inline long folio_nr_pages(const struct folio *folio)
->  	return folio_large_nr_pages(folio);
->  }
->  
-> -/* Only hugetlbfs can allocate folios larger than MAX_ORDER */
-> -#ifdef CONFIG_ARCH_HAS_GIGANTIC_PAGE
-> -#define MAX_FOLIO_ORDER		PUD_ORDER
-> -#else
-> +#if !defined(CONFIG_ARCH_HAS_GIGANTIC_PAGE)
-> +/*
-> + * We don't expect any folios that exceed buddy sizes (and consequently
-> + * memory sections).
-> + */
->  #define MAX_FOLIO_ORDER		MAX_PAGE_ORDER
-> +#elif defined(CONFIG_SPARSEMEM) && !defined(CONFIG_SPARSEMEM_VMEMMAP)
-> +/*
-> + * Only pages within a single memory section are guaranteed to be
-> + * contiguous. By limiting folios to a single memory section, all folio
-> + * pages are guaranteed to be contiguous.
-> + */
-> +#define MAX_FOLIO_ORDER		PFN_SECTION_SHIFT
-> +#else
-> +/*
-> + * There is no real limit on the folio size. We limit them to the maximum we
-> + * currently expect.
-> + */
-> +#define MAX_FOLIO_ORDER		PUD_ORDER
->  #endif
->  
->  #define MAX_FOLIO_NR_PAGES	(1UL << MAX_FOLIO_ORDER)
-> -- 
-> 2.50.1
-> 
+> +		interrupt-parent = <&gic>;
 
--- 
-Sincerely yours,
-Mike.
+Drop, root node already uses the GIC as the interrupt parent.
+
+Regards,
+--
+Duje
+
+
