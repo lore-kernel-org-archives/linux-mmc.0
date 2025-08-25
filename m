@@ -1,269 +1,151 @@
-Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
+Received: from mx1.tq-group.com (mx1.tq-group.com [93.104.207.81])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 196A52BE636;
-	Mon, 25 Aug 2025 08:34:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756110879; cv=pass; b=jc1MRLfgM4tljQZSndqORHiGHSYucnYHx5NXCwuMKp1QkMT6J+ofaX1ork/JK9D5cNnlbtArO+WJpAoz84wqhjLVPCeLPCnR64I3HF7YjjIC/MmGmQpehskQJmHpXsTSPwXHRvjeXCadxaXDXU5c1u7RnLt7Qm8gtOAnl4LPH2Y=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756110879; c=relaxed/simple;
-	bh=AplDMNpQrVa+6ujyW6aFMAfrzaBWAXNLrWFlvNJPSE0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=lQOCAlmOVlF+MLNm2cFWFBXDectt0+WOxgkQFxDVO8OjFprhg7YNA28Ar17zmU2ZDftlHHfSwMJ2vLbKTzcoBnV8QLxwnLBhQJHnuuj6UdV8kCEVzELPyNi9c5o5LlkSp7lLcTjrrZjqn5phU6bWc3OkCes8/yxhjJEttQU5c7w=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=hXsl/tA1; arc=pass smtp.client-ip=136.143.188.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A75D23BCE7;
+	Mon, 25 Aug 2025 12:15:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=93.104.207.81
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1756124159; cv=none; b=rBADqJ3ImZTA/K35OvBL82t3QxpKgxhSojW96vP7VVe+WttybQ1BSCtfiED/aGspL4cM6jJWvMmt/LkQoSkkzYXNX5pUW4lVyQ4jyxila6cwu9XV5gupbppTtkHJvjbzu7PtKVfxie2/52n6jLFeIuzAg4ZXR9wok3CGhnz31HM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1756124159; c=relaxed/simple;
+	bh=Ti5muMAyeztdYaT7gdOAkMCnChvbp3E+ufomta9VzkE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LA4QaBUka6pIT9qj4nRUAmpoNgz+tEVdhS2f5w6miVASESDSGclyBHSm/AVDquk6YfLjVEuq5TBSDh0iKkt1jZCyvMSwcvuDVyV+wYoe6yVzQMOzMKsg9AzfIijF2mSouq/vZbPOMVkSfzZoIyUmmaR6VM+E5ztnKjKuJn5HUlQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ew.tq-group.com; spf=pass smtp.mailfrom=ew.tq-group.com; dkim=pass (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b=lHJtI1SH; dkim=fail (0-bit key) header.d=ew.tq-group.com header.i=@ew.tq-group.com header.b=gdPY8dNU reason="key not found in DNS"; arc=none smtp.client-ip=93.104.207.81
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ew.tq-group.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ew.tq-group.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="hXsl/tA1"
-ARC-Seal: i=1; a=rsa-sha256; t=1756110820; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=LFAtsntCOuSlbC+Yj5ZRCjRMHvHoYaewb+xttNTjyBEp1wUg4UVp7R9azPmNo+krE244LrfthV97cO1frpohR4C5Od72zy01di5drl9CB3vfzZOvOjbTGo3Q5kLzG2GMAq1JUVl/mbxuvbXzyusKN1x/fEbPc1PrChn6tUSYf+4=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1756110820; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=ro4CYktrHjQl1zV/xi0GQHqJQjcL5YX/tkQEHL0EB80=; 
-	b=Vb8Pt7K/T7ggbw/08L/o7pBGNkglyJ1EJhn1b8HlmdV+/CSe7wibT9+jGWu8CJ3Hq3Maq7LxMWjMUC2j09HwXngFK9tznb6N1mctDSHKnCaFFznjdyog4rklKmIaNtMU72AQgAPA6pTPUU9+LMVl+hkpwu1DRsJLcYHGIKFMsV0=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
-	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1756110820;
-	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
-	h=From:From:Date:Date:Subject:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-Id:Message-Id:References:In-Reply-To:To:To:Cc:Cc:Reply-To;
-	bh=ro4CYktrHjQl1zV/xi0GQHqJQjcL5YX/tkQEHL0EB80=;
-	b=hXsl/tA1XRD+QYp28O5qCK9TTJ1fNcNTZEdyncy9TtuJ03KWzrre2jCqBrKw7Kvp
-	D5tHb/iboM5G5FghUjkAoXWd9OFAHgL7asfERYA9DVwE96op7O1bwW+T+6FM+zr/Ljn
-	xhJqO6+WyaCfhICwj2n6N0LWq+rHhUtrPfp27igk=
-Received: by mx.zohomail.com with SMTPS id 1756110819128320.62627416678515;
-	Mon, 25 Aug 2025 01:33:39 -0700 (PDT)
-From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-Date: Mon, 25 Aug 2025 10:28:40 +0200
-Subject: [PATCH v3 20/20] phy: rockchip-pcie: switch to FIELD_PREP_WM16
- macro
+	dkim=pass (2048-bit key) header.d=tq-group.com header.i=@tq-group.com header.b="lHJtI1SH";
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=ew.tq-group.com header.i=@ew.tq-group.com header.b="gdPY8dNU"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1756124157; x=1787660157;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=WSRmMY5jU29CsQJMPn3HB4luU6QMUAIAzwE1ehOyQFA=;
+  b=lHJtI1SHL7h/n3urqB1Xk+iC2ELEwirD2Dsb/uLh+rnenoAXaGONgSgy
+   Syj2iLsADHf8bYwnNMxsq/XJMbjDW1icPP6QFJ+RYS68On9dS4k/RoiK9
+   NJeTQyjiD5YgsrH2AoiPYIfnTb+wR2qzhipk5j2/HHXnOFmHEqbNexUtq
+   RzHPs6hEBQt8rWHWeiHgYf0OBX4kosY9r5gXgApekzZN4rDbwpVTH+PDW
+   rAIWV2OIk0fnITow0RHTHquTTFKUaDMVe7/ZcIDQ326yo8tir0mkXGL2o
+   O3zYu9secNTf/aHJhUpVVauHFdEL9dbZ+U93A7sZ4l04uX1WPuvWFPdQa
+   w==;
+X-CSE-ConnectionGUID: gYy7aZT2SlqM1DErnKG2hA==
+X-CSE-MsgGUID: ixrzK5p5SMWBO5YN5piB4Q==
+X-IronPort-AV: E=Sophos;i="6.17,312,1747692000"; 
+   d="scan'208";a="45893231"
+Received: from vmailcow01.tq-net.de ([10.150.86.48])
+  by mx1.tq-group.com with ESMTP; 25 Aug 2025 14:15:54 +0200
+X-CheckPoint: {68AC53FA-4-20CAA7DA-EC9DC758}
+X-MAIL-CPID: C7257E9FBF8196D0A70DD1DDAFECAAF3_0
+X-Control-Analysis: str=0001.0A002124.68AC5412.00AB,ss=1,re=0.000,recu=0.000,reip=0.000,cl=1,cld=1,fgs=0
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 8E53816738B;
+	Mon, 25 Aug 2025 14:15:47 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ew.tq-group.com;
+	s=dkim; t=1756124149; h=from:subject:date:message-id:to:cc:mime-version:
+	 content-transfer-encoding; bh=WSRmMY5jU29CsQJMPn3HB4luU6QMUAIAzwE1ehOyQFA=;
+	b=gdPY8dNUI0ok/UvDq5d5vLVuD8qCqnm0GwUHXQmXOpi6jLoje1P80JQzJje8OHdtJL1qhW
+	Q2HAnT+XbpUE4MaM2I2xyUFYKK2L6A9gIplTm9dcJWjSxcVhCfBvXFQFqFzKu9mZgPHGtV
+	JkGMHZqLsXo0DWY3+lRNH5YY+Tgbss8VQ/Y65Bso8bwJSUEnKdv110i/sGqxpUG4ESbvpa
+	Sm1EWg0om+pqRfTCW8BZNBxSl6r9XEeQ765Ri1nmvnXrVy+R7Bnoy2xcAzXp9Ji5Sy4qfi
+	1NqZpFzwRyw9JGhx6QpXvaFh7b7Ilc/xBtZGc4sDuhdWITNOltZj7iJ8o1cULg==
+From: Alexander Stein <alexander.stein@ew.tq-group.com>
+To: Vignesh Raghavendra <vigneshr@ti.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Mark Brown <broonie@kernel.org>,
+	Tony Lindgren <tony@atomide.com>
+Cc: Matthias Schiffer <matthias.schiffer@tq-group.com>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Alexander Stein <alexander.stein@ew.tq-group.com>
+Subject: [PATCH 1/1] mmc: sdhci-omap: use regulator_get_optional() and reuse pbias in sdhci_omap_regulator_get_caps()
+Date: Mon, 25 Aug 2025 14:15:33 +0200
+Message-ID: <20250825121534.2167270-1-alexander.stein@ew.tq-group.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250825-byeword-update-v3-20-947b841cdb29@collabora.com>
-References: <20250825-byeword-update-v3-0-947b841cdb29@collabora.com>
-In-Reply-To: <20250825-byeword-update-v3-0-947b841cdb29@collabora.com>
-To: Yury Norov <yury.norov@gmail.com>, 
- Rasmus Villemoes <linux@rasmusvillemoes.dk>, 
- Jaehoon Chung <jh80.chung@samsung.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, 
- Shreeya Patel <shreeya.patel@collabora.com>, 
- Mauro Carvalho Chehab <mchehab@kernel.org>, 
- Sandy Huang <hjc@rock-chips.com>, Andy Yan <andy.yan@rock-chips.com>, 
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
- Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
- Nicolas Frattaroli <frattaroli.nicolas@gmail.com>, 
- Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
- Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, 
- Andrew Lunn <andrew+netdev@lunn.ch>, 
- "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
- Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
- Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
- Alexandre Torgue <alexandre.torgue@foss.st.com>, 
- Shawn Lin <shawn.lin@rock-chips.com>, 
- Lorenzo Pieralisi <lpieralisi@kernel.org>, 
- =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
- Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
- Bjorn Helgaas <bhelgaas@google.com>, Chanwoo Choi <cw00.choi@samsung.com>, 
- MyungJoo Ham <myungjoo.ham@samsung.com>, 
- Kyungmin Park <kyungmin.park@samsung.com>, Qin Jian <qinjian@cqplus1.com>, 
- Michael Turquette <mturquette@baylibre.com>, 
- Stephen Boyd <sboyd@kernel.org>, Nathan Chancellor <nathan@kernel.org>, 
- Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, 
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>
-Cc: kernel@collabora.com, linux-kernel@vger.kernel.org, 
- linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- linux-rockchip@lists.infradead.org, linux-media@vger.kernel.org, 
- dri-devel@lists.freedesktop.org, linux-phy@lists.infradead.org, 
- linux-sound@vger.kernel.org, netdev@vger.kernel.org, 
- linux-stm32@st-md-mailman.stormreply.com, linux-pci@vger.kernel.org, 
- linux-pm@vger.kernel.org, linux-clk@vger.kernel.org, llvm@lists.linux.dev, 
- Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-X-Mailer: b4 0.14.2
+Content-Transfer-Encoding: 8bit
+X-Last-TLS-Session-Version: TLSv1.3
 
-The era of hand-rolled HIWORD_UPDATE macros is over, at least for those
-drivers that use constant masks.
+From: Matthias Schiffer <matthias.schiffer@tq-group.com>
 
-The Rockchip PCIe PHY driver, used on the RK3399, has its own definition
-of HIWORD_UPDATE.
+We actually want to get an error return instead of a dummy regulator
+when a supply is not set. Change regulator_get() to
+regulator_get_optional() for the vqmmc supply and reuse omap_host->pbias,
+which is already initialized at this point.
 
-Remove it, and replace instances of it with hw_bitfield.h's
-FIELD_PREP_WM16. To achieve this, some mask defines are reshuffled, as
-FIELD_PREP_WM16 uses the mask as both the mask of bits to write and to
-derive the shift amount from in order to shift the value.
+This change also avoids warning messages:
 
-In order to ensure that the mask is always a constant, the inst->index
-shift is performed after the FIELD_PREP_WM16, as this is a runtime
-value.
+    sdhci-omap 48060000.mmc: supply pbias not found, using dummy regulator
+    sdhci-omap 48060000.mmc: supply vqmmc not found, using dummy regulator
 
-From this, we gain compile-time error checking, and in my humble opinion
-nicer code, as well as a single definition of this macro across the
-entire codebase to aid in code comprehension.
-
-Tested on a RK3399 ROCKPro64, where PCIe still works as expected when
-accessing an NVMe drive.
-
-Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+Fixes: de5ccd2af71f ("mmc: sdhci-omap: Handle voltages to add support omap4")
+Signed-off-by: Matthias Schiffer <matthias.schiffer@tq-group.com>
+Signed-off-by: Alexander Stein <alexander.stein@ew.tq-group.com>
 ---
- drivers/phy/rockchip/phy-rockchip-pcie.c | 70 +++++++++-----------------------
- 1 file changed, 20 insertions(+), 50 deletions(-)
+ drivers/mmc/host/sdhci-omap.c | 25 +++++++++++++------------
+ 1 file changed, 13 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/phy/rockchip/phy-rockchip-pcie.c b/drivers/phy/rockchip/phy-rockchip-pcie.c
-index 4e2dfd01adf2ff09da5129579171e6ac44ca89e5..126306c014546d3f4d8c630c1eed6d339c49800b 100644
---- a/drivers/phy/rockchip/phy-rockchip-pcie.c
-+++ b/drivers/phy/rockchip/phy-rockchip-pcie.c
-@@ -8,6 +8,7 @@
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 08d5a82b7d01b..4623781adba7b 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -939,16 +939,10 @@ static const struct sdhci_ops sdhci_omap_ops = {
+ 	.set_timeout = sdhci_omap_set_timeout,
+ };
  
- #include <linux/clk.h>
- #include <linux/delay.h>
-+#include <linux/hw_bitfield.h>
- #include <linux/io.h>
- #include <linux/mfd/syscon.h>
- #include <linux/module.h>
-@@ -18,22 +19,13 @@
- #include <linux/regmap.h>
- #include <linux/reset.h>
- 
--/*
-- * The higher 16-bit of this register is used for write protection
-- * only if BIT(x + 16) set to 1 the BIT(x) can be written.
-- */
--#define HIWORD_UPDATE(val, mask, shift) \
--		((val) << (shift) | (mask) << ((shift) + 16))
- 
- #define PHY_MAX_LANE_NUM      4
--#define PHY_CFG_DATA_SHIFT    7
--#define PHY_CFG_ADDR_SHIFT    1
--#define PHY_CFG_DATA_MASK     0xf
--#define PHY_CFG_ADDR_MASK     0x3f
-+#define PHY_CFG_DATA_MASK     GENMASK(10, 7)
-+#define PHY_CFG_ADDR_MASK     GENMASK(6, 1)
- #define PHY_CFG_WR_ENABLE     1
- #define PHY_CFG_WR_DISABLE    0
--#define PHY_CFG_WR_SHIFT      0
--#define PHY_CFG_WR_MASK       1
-+#define PHY_CFG_WR_MASK       BIT(0)
- #define PHY_CFG_PLL_LOCK      0x10
- #define PHY_CFG_CLK_TEST      0x10
- #define PHY_CFG_CLK_SCC       0x12
-@@ -48,11 +40,7 @@
- #define PHY_LANE_RX_DET_SHIFT 11
- #define PHY_LANE_RX_DET_TH    0x1
- #define PHY_LANE_IDLE_OFF     0x1
--#define PHY_LANE_IDLE_MASK    0x1
--#define PHY_LANE_IDLE_A_SHIFT 3
--#define PHY_LANE_IDLE_B_SHIFT 4
--#define PHY_LANE_IDLE_C_SHIFT 5
--#define PHY_LANE_IDLE_D_SHIFT 6
-+#define PHY_LANE_IDLE_MASK    BIT(3)
- 
- struct rockchip_pcie_data {
- 	unsigned int pcie_conf;
-@@ -99,22 +87,14 @@ static inline void phy_wr_cfg(struct rockchip_pcie_phy *rk_phy,
- 			      u32 addr, u32 data)
+-static unsigned int sdhci_omap_regulator_get_caps(struct device *dev,
+-						  const char *name)
++static unsigned int sdhci_omap_regulator_get_caps(struct regulator *reg)
  {
- 	regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_conf,
--		     HIWORD_UPDATE(data,
--				   PHY_CFG_DATA_MASK,
--				   PHY_CFG_DATA_SHIFT) |
--		     HIWORD_UPDATE(addr,
--				   PHY_CFG_ADDR_MASK,
--				   PHY_CFG_ADDR_SHIFT));
-+		     FIELD_PREP_WM16(PHY_CFG_DATA_MASK, data) |
-+		     FIELD_PREP_WM16(PHY_CFG_ADDR_MASK, addr));
- 	udelay(1);
- 	regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_conf,
--		     HIWORD_UPDATE(PHY_CFG_WR_ENABLE,
--				   PHY_CFG_WR_MASK,
--				   PHY_CFG_WR_SHIFT));
-+		     FIELD_PREP_WM16(PHY_CFG_WR_MASK, PHY_CFG_WR_ENABLE));
- 	udelay(1);
- 	regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_conf,
--		     HIWORD_UPDATE(PHY_CFG_WR_DISABLE,
--				   PHY_CFG_WR_MASK,
--				   PHY_CFG_WR_SHIFT));
-+		     FIELD_PREP_WM16(PHY_CFG_WR_MASK, PHY_CFG_WR_DISABLE));
+-	struct regulator *reg;
+ 	unsigned int caps = 0;
+ 
+-	reg = regulator_get(dev, name);
+-	if (IS_ERR(reg))
+-		return ~0U;
+-
+ 	if (regulator_is_supported_voltage(reg, 1700000, 1950000) > 0)
+ 		caps |= SDHCI_CAN_VDD_180;
+ 	if (regulator_is_supported_voltage(reg, 2700000, 3150000) > 0)
+@@ -956,8 +950,6 @@ static unsigned int sdhci_omap_regulator_get_caps(struct device *dev,
+ 	if (regulator_is_supported_voltage(reg, 3150000, 3600000) > 0)
+ 		caps |= SDHCI_CAN_VDD_330;
+ 
+-	regulator_put(reg);
+-
+ 	return caps;
  }
  
- static int rockchip_pcie_phy_power_off(struct phy *phy)
-@@ -125,11 +105,9 @@ static int rockchip_pcie_phy_power_off(struct phy *phy)
+@@ -967,11 +959,20 @@ static int sdhci_omap_set_capabilities(struct sdhci_host *host)
+ 	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+ 	struct device *dev = omap_host->dev;
+ 	const u32 mask = SDHCI_CAN_VDD_180 | SDHCI_CAN_VDD_300 | SDHCI_CAN_VDD_330;
+-	unsigned int pbias, vqmmc, caps = 0;
++	unsigned int pbias = ~0U, vqmmc = ~0U, caps = 0;
++	struct	regulator *reg_vqmmc;
+ 	u32 reg;
  
- 	guard(mutex)(&rk_phy->pcie_mutex);
+-	pbias = sdhci_omap_regulator_get_caps(dev, "pbias");
+-	vqmmc = sdhci_omap_regulator_get_caps(dev, "vqmmc");
++	if (!IS_ERR(omap_host->pbias))
++		pbias = sdhci_omap_regulator_get_caps(omap_host->pbias);
++
++	/* mmc->supply.vqmmc is not initialized yet */
++	reg_vqmmc = regulator_get_optional(dev, "vqmmc");
++	if (!IS_ERR(reg_vqmmc)) {
++		vqmmc = sdhci_omap_regulator_get_caps(reg_vqmmc);
++		regulator_put(reg_vqmmc);
++	}
++
+ 	caps = pbias & vqmmc;
  
--	regmap_write(rk_phy->reg_base,
--		     rk_phy->phy_data->pcie_laneoff,
--		     HIWORD_UPDATE(PHY_LANE_IDLE_OFF,
--				   PHY_LANE_IDLE_MASK,
--				   PHY_LANE_IDLE_A_SHIFT + inst->index));
-+	regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_laneoff,
-+		     FIELD_PREP_WM16(PHY_LANE_IDLE_MASK,
-+				     PHY_LANE_IDLE_OFF) << inst->index);
- 
- 	if (--rk_phy->pwr_cnt) {
- 		return 0;
-@@ -139,11 +117,9 @@ static int rockchip_pcie_phy_power_off(struct phy *phy)
- 	if (err) {
- 		dev_err(&phy->dev, "assert phy_rst err %d\n", err);
- 		rk_phy->pwr_cnt++;
--		regmap_write(rk_phy->reg_base,
--			     rk_phy->phy_data->pcie_laneoff,
--			     HIWORD_UPDATE(!PHY_LANE_IDLE_OFF,
--					   PHY_LANE_IDLE_MASK,
--					   PHY_LANE_IDLE_A_SHIFT + inst->index));
-+		regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_laneoff,
-+			     FIELD_PREP_WM16(PHY_LANE_IDLE_MASK,
-+					     !PHY_LANE_IDLE_OFF) << inst->index);
- 		return err;
- 	}
- 
-@@ -159,11 +135,9 @@ static int rockchip_pcie_phy_power_on(struct phy *phy)
- 
- 	guard(mutex)(&rk_phy->pcie_mutex);
- 
--	regmap_write(rk_phy->reg_base,
--		     rk_phy->phy_data->pcie_laneoff,
--		     HIWORD_UPDATE(!PHY_LANE_IDLE_OFF,
--				   PHY_LANE_IDLE_MASK,
--				   PHY_LANE_IDLE_A_SHIFT + inst->index));
-+	regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_laneoff,
-+		     FIELD_PREP_WM16(PHY_LANE_IDLE_MASK,
-+				     !PHY_LANE_IDLE_OFF) << inst->index);
- 
- 	if (rk_phy->pwr_cnt++) {
- 		return 0;
-@@ -177,9 +151,7 @@ static int rockchip_pcie_phy_power_on(struct phy *phy)
- 	}
- 
- 	regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_conf,
--		     HIWORD_UPDATE(PHY_CFG_PLL_LOCK,
--				   PHY_CFG_ADDR_MASK,
--				   PHY_CFG_ADDR_SHIFT));
-+		     FIELD_PREP_WM16(PHY_CFG_ADDR_MASK, PHY_CFG_PLL_LOCK));
- 
- 	/*
- 	 * No documented timeout value for phy operation below,
-@@ -210,9 +182,7 @@ static int rockchip_pcie_phy_power_on(struct phy *phy)
- 	}
- 
- 	regmap_write(rk_phy->reg_base, rk_phy->phy_data->pcie_conf,
--		     HIWORD_UPDATE(PHY_CFG_PLL_LOCK,
--				   PHY_CFG_ADDR_MASK,
--				   PHY_CFG_ADDR_SHIFT));
-+		     FIELD_PREP_WM16(PHY_CFG_ADDR_MASK, PHY_CFG_PLL_LOCK));
- 
- 	err = regmap_read_poll_timeout(rk_phy->reg_base,
- 				       rk_phy->phy_data->pcie_status,
-
+ 	if (pbias != ~0U && vqmmc == ~0U)
 -- 
-2.51.0
+2.43.0
 
