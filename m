@@ -1,49 +1,58 @@
-Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 198CE1D63CD;
-	Sun, 24 Aug 2025 16:42:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756053730; cv=none; b=lwzWKmDaSLoGWcWkuDaUFVF5W2ZQirzQ3V4HO3xc6W1O/11icZHbrWG8FA4Uwu3dvV3ONztyevOumkU1dK9dpnmX+XGMXgAtI31Z4vQN2A95T9OM6amhlIbxqhsLotElbqAyfq9bFMPoj8q2ypn1cLn5mHwn4ap3trHcKzg3zIA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756053730; c=relaxed/simple;
-	bh=g0dsBv+tZKoLLuVmXNG3YPHgvwDEQRIwt+zROqJGaUk=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D355C221578;
+	Mon, 25 Aug 2025 07:48:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1756108119; cv=pass; b=F2pwl1kzAZsJcM97E9ZC5+jvbGcOAAp15GIuDOOzDqpPEPeGJyQlbPiE9UJJ5UXCacMjlILdFCENjxFsK5ZCqpp6bVjQy7a90KhsbqwiwCVhNw9HTqoNPr6SzaFe4WFGEBbe8qHiV9uG1AQ0YHBrbenGjspeDBGTu0UJFUmJOTY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1756108119; c=relaxed/simple;
+	bh=R5WQhVv7rK8cy7Q4wz4ZKiJYZYoscvA7NtPO3IDhYFw=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=p58KScBDRiuGJTEk5YNcCdLFhVQG3woUeV/tak+s0eqh4jvR4GmUJneya+nzRg6c8U/dDtxIEFh4YpLclmXx7ghkcdFVCan/m5X1AYBSy6rShZCt3N0BMZxVJnmg1JzkwYcvG/dk0x668rlhn+T1asuKqRMjpU387E7CI66hu1I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=FqGZ5J1b; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
+	 MIME-Version:Content-Type; b=ouYBTlir4PXZ+pAsmXmhRwSXSEgx/vtOxBsC8cLtaLakd5iHcsOSHz8OJq8a5FvkS7d/IihkDu75RpQTHsbLl4xO8i00BbK27cSpYB7GkHz3XGKDOv+93v7tZytr+I1IUd4ZciVae/fhWEUGobp5OYUhfMhDoebXrxptzgMyXK0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=F+CZpcEH; arc=pass smtp.client-ip=136.143.188.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="FqGZ5J1b"
-DKIM-Signature: a=rsa-sha256; bh=ysizyDV1UE87HUIt7ZRiS1yeJatz3bjdvsDuraJC0sE=;
- c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1756053719; v=1; x=1756485719;
- b=FqGZ5J1b5tJ9wpjENynkSsp3flST81ymQP3gVZTq7KLZr1N3j5diukQb3EJ1AWNZ+Bd/fhOJ
- JONJKTOw6apCmTTTT0XAbCFzE1PwfFwDAsqmsaxaCxRGQShmlbc8YOt1ru4Sdn1i+xJk90FTmJB
- QvtC4s8Fn0HDHwjOkaINvRLUv8PT6Bap4jBdnxbTV24jFGJ8+mS9C3+rkolJ7Kjy7B7gEoDeHG6
- 2xRQH5rcEB8GHMbQW295UhSpYMgOJtk178OlZvBbx9JfvTr2bKysn8soVW9IbUqDg/dQQc4iVAq
- UphxzeWON+RRwWb/UJNRtmBCwauQBJpjLHk3jVHUGe0oA==
-Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id 6acb09e9; Sun, 24 Aug 2025 18:41:59 +0200
-From: Duje =?UTF-8?B?TWloYW5vdmnEhw==?= <duje@dujemihanovic.xyz>
-To: Karel Balej <balejk@matfyz.cz>
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
- Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@bootlin.com>,
- Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, linux-arm-kernel@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
- Karel Balej <balejk@matfyz.cz>
-Subject: Re: [PATCH mmc/next 3/3] arm64: dts: samsung,coreprimevelte: add SDIO
-Date: Sun, 24 Aug 2025 18:41:58 +0200
-Message-ID: <13858228.uLZWGnKmhe@radijator>
-In-Reply-To: <20250824110039.28258-4-balejk@matfyz.cz>
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="F+CZpcEH"
+ARC-Seal: i=1; a=rsa-sha256; t=1756108093; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=Mif53jBa6MJhiFA3/aeaKEpanFEPOgAIH7H2ZuUdsrAtRPu/MgbOT3DP6FBY2rj6ePbMjSECj12yIiQqzo9EC3onYNcemMOPA7kexfcK9xKDYPuR6j4sRJVelnLZBLEQG0X38Apa47eBKSzmFFuNz9vrZ2uFGldXO/K346zQY/c=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1756108093; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=80dzrh8aYZfGg2XUHBNmSgUetz0wp59La7rrflIHLYk=; 
+	b=hTrQDB+vFRUoh2TzCLNct7ZH6mA+ZiLxyi08MHJ278n9kJefJSS8W0fZv6yV5vnJvzDAcQZhLzydoq1k/A5PczB6y4tbslyaC/qdgSZhpG/4L25+svqU468G3JXb+BZHKPSOMfmr/+kta3MYdiQArODPHxGvpuzc+7VGFRmUwYk=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=collabora.com;
+	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
+	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1756108093;
+	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
+	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
+	bh=80dzrh8aYZfGg2XUHBNmSgUetz0wp59La7rrflIHLYk=;
+	b=F+CZpcEHNCcVVD5E2eusUhfW3VOUS/ZWUIpDXxI5z5QeKjtOV9RCcGxyZ/bOxE14
+	x+XVoB1b6xaPLKM4peUQofBqgx8GIHy0CMMo5WJvpvX22tuJAS78545/+5x34SM4fh0
+	HU9zR45BRWmSNqHl8sXRyIGwQroD2o9wsHxVH/9U=
+Received: by mx.zohomail.com with SMTPS id 1756108090913704.2939268893988;
+	Mon, 25 Aug 2025 00:48:10 -0700 (PDT)
+From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+To: Stephen Boyd <sboyd@kernel.org>
+Cc: kernel@collabora.com, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, linux-media@vger.kernel.org,
+ dri-devel@lists.freedesktop.org, linux-phy@lists.infradead.org,
+ linux-sound@vger.kernel.org, netdev@vger.kernel.org,
+ linux-stm32@st-md-mailman.stormreply.com, linux-pci@vger.kernel.org,
+ linux-pm@vger.kernel.org, linux-clk@vger.kernel.org, llvm@lists.linux.dev
+Subject: Re: [PATCH v2 19/20] clk: sp7021: switch to FIELD_PREP_WM16 macro
+Date: Mon, 25 Aug 2025 09:48:05 +0200
+Message-ID: <2795210.mvXUDI8C0e@workhorse>
+In-Reply-To: <175340605069.3513.18204498860033427106@lazor>
 References:
- <20250824110039.28258-1-balejk@matfyz.cz>
- <20250824110039.28258-4-balejk@matfyz.cz>
+ <20250623-byeword-update-v2-0-cf1fc08a2e1f@collabora.com>
+ <20250623-byeword-update-v2-19-cf1fc08a2e1f@collabora.com>
+ <175340605069.3513.18204498860033427106@lazor>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -53,25 +62,27 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 7Bit
 Content-Type: text/plain; charset="utf-8"
 
-On Sunday, 24 August 2025 12:53:45 Central European Summer Time Karel Balej 
-wrote:
-> @@ -368,3 +505,12 @@ &sdh0 {
->  	vmmc-supply = <&ldo14>;
->  	vqmmc-supply = <&ldo6>;
->  };
-> +
-> +&sdh1 {
-> +	pinctrl-names = "default", "state_uhs";
-> +	pinctrl-0 = <&sdh1_pins_0 &sdh1_pins_1 &sdh1_pins_2>;
-> +	pinctrl-1 = <&sdh1_fast_pins_0 &sdh1_fast_pins_1 &sdh1_pins_2>;
-> +	bus-width = <4>;
-> +	broken-cd;
-> +	non-removable;
+On Friday, 25 July 2025 03:14:10 Central European Summer Time Stephen Boyd wrote:
+> Quoting Nicolas Frattaroli (2025-06-23 09:05:47)
+> > The sp7021 clock driver has its own shifted high word mask macro,
+> > similar to the ones many Rockchip drivers have.
+> > 
+> > Remove it, and replace instances of it with hw_bitfield.h's
+> > FIELD_PREP_WM16 macro, which does the same thing except in a common
+> > macro that also does compile-time error checking.
+> > 
+> > This was compile-tested with 32-bit ARM with Clang, no runtime tests
+> > were performed as I lack the hardware. However, I verified that fix
+> > commit 5c667d5a5a3e ("clk: sp7021: Adjust width of _m in HWM_FIELD_PREP()")
+> > is not regressed. No warning is produced.
+> 
+> Does it generate the same code before and after?
+> 
 
-non-removable overrides broken-cd, drop the latter.
+Yes, the generated machine code is exactly the same, at least with
+clang, and I'll assume it'll be the same for gcc.
 
-Regards,
---
-Duje
+Kind regards,
+Nicolas Frattaroli
 
 
