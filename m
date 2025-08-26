@@ -1,111 +1,185 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 78069268C40;
-	Tue, 26 Aug 2025 13:11:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31CE23164DA
+	for <linux-mmc@vger.kernel.org>; Tue, 26 Aug 2025 18:21:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756213907; cv=none; b=CWw58cRYt3KhGuBAmyGe0ej5N0Uobsfe9VJ+JbLq3U2uLHuG1Q3NcYFItyxKKEZvKjBEPCIpMMaTPK6S7X5MmRr1dV4cEEt9emRUHdJHAOPeCULy4mJCGAe2OLQA6OfTsNjMkbyKg9fNaXYsdXSh3VsLrL0Zo3aNmkFi8Brb0RY=
+	t=1756232488; cv=none; b=sZcfEpBSPxTRwd2DYMEZDG8wIGCbV4LBkpheTGm5BCHi2HzOfw559MO2kVhDHqlOzTwe/Oi8Fgb1Ee9pFauNOaMKHEV1ltC28ZxUvcO/Vvhk6wpiBdqreyJ9R+VfmNMpXG1twQWHQ2AICF3En9uLblT0qgCx5VHYoCfUcVDKOy8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756213907; c=relaxed/simple;
-	bh=r4P1fcbNrMFnG8T5p3u4dMJamruaFASdwNbmXce96jM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=q6grDa1aR3QZkWBsvSGDnCL7tfbQP8dhNLUDMb19LemWKdTEjBOq72cfFmZR1Mqs8Md/zjPHgK1/8DF15lB16+tyS2LPhRkmihg+XFZYtQMXi0jCGNyPerA9Yr8aPY48Shi9z7nQHj5LNSZj0KmrKe10799+LmQmDWo4+TgI2rU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 7C1B82BF2;
-	Tue, 26 Aug 2025 06:11:36 -0700 (PDT)
-Received: from raptor (usa-sjc-mx-foss1.foss.arm.com [172.31.20.19])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 0B7A13F63F;
-	Tue, 26 Aug 2025 06:11:36 -0700 (PDT)
-Date: Tue, 26 Aug 2025 14:11:34 +0100
-From: Alexandru Elisei <alexandru.elisei@arm.com>
-To: David Hildenbrand <david@redhat.com>
-Cc: linux-kernel@vger.kernel.org, Alexander Potapenko <glider@google.com>,
-	Andrew Morton <akpm@linux-foundation.org>,
-	Brendan Jackman <jackmanb@google.com>,
-	Christoph Lameter <cl@gentwo.org>, Dennis Zhou <dennis@kernel.org>,
-	Dmitry Vyukov <dvyukov@google.com>, dri-devel@lists.freedesktop.org,
-	intel-gfx@lists.freedesktop.org, iommu@lists.linux.dev,
-	io-uring@vger.kernel.org, Jason Gunthorpe <jgg@nvidia.com>,
-	Jens Axboe <axboe@kernel.dk>, Johannes Weiner <hannes@cmpxchg.org>,
-	John Hubbard <jhubbard@nvidia.com>, kasan-dev@googlegroups.com,
-	kvm@vger.kernel.org, "Liam R. Howlett" <Liam.Howlett@oracle.com>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	linux-arm-kernel@axis.com, linux-arm-kernel@lists.infradead.org,
-	linux-crypto@vger.kernel.org, linux-ide@vger.kernel.org,
-	linux-kselftest@vger.kernel.org, linux-mips@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-mm@kvack.org,
-	linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org,
-	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
-	Marco Elver <elver@google.com>,
-	Marek Szyprowski <m.szyprowski@samsung.com>,
-	Michal Hocko <mhocko@suse.com>, Mike Rapoport <rppt@kernel.org>,
-	Muchun Song <muchun.song@linux.dev>, netdev@vger.kernel.org,
-	Oscar Salvador <osalvador@suse.de>, Peter Xu <peterx@redhat.com>,
-	Robin Murphy <robin.murphy@arm.com>,
-	Suren Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>,
-	virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
-	wireguard@lists.zx2c4.com, x86@kernel.org, Zi Yan <ziy@nvidia.com>
-Subject: Re: [PATCH RFC 21/35] mm/cma: refuse handing out non-contiguous page
- ranges
-Message-ID: <aK2yhtQ0M_0hqQHh@raptor>
-References: <20250821200701.1329277-1-david@redhat.com>
- <20250821200701.1329277-22-david@redhat.com>
- <aK2QZnzS1ErHK5tP@raptor>
- <ad521f4f-47aa-4728-916f-3704bf01f770@redhat.com>
- <aK2wlGYvCaFQXzBm@raptor>
- <ecc599ee-4175-4356-ab66-1d76a75f44f7@redhat.com>
+	s=arc-20240116; t=1756232488; c=relaxed/simple;
+	bh=qzHczj72h4oQbVLmtthjacKx7xf5SfWEL8+jy/CLgNs=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=bVGEbzLksIydq3eFw8fUr914GzjA9ah6ZvnwjpPy1sHQuLXRAv4WiFC+JPd3IvnJ9VWKJW/PLUbfHvihqcM99Gj76ir1rHXNe0Ggd4jSJF5DHeUKB/f3C1M7yzKHvU2vRzAk6kL+5KGOadM4awZPJY6XL6/x0VpN7S1p0dZGFn0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=izeZmhB5; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="izeZmhB5"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 57QBcMr6005250
+	for <linux-mmc@vger.kernel.org>; Tue, 26 Aug 2025 18:21:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=hPe0HyPY1257DHhbwG0Jod
+	JXNJ2pFH3pGUWzM9Lk8eg=; b=izeZmhB5S/2lNjXv9zVR031HQw8TcVAcQoY5nb
+	M2TCeDynyI8UGRkrt3pOK5LnFpxXHXymsGXyBjNATsL30XQGd2ysv0pExRbMYdfu
+	4ShASPMQxdOaHEGrjgEBdZAfzt9DoPPtpPAMwx4NaTYu4zoeQgE/HSvqFSTDcp45
+	o8YG9myaS1Q/Nr4sr12KmpXNIzb02ZmHUADwdkNZIM6Gk5kCKHxXML6pZVuy1Obk
+	wPD1PiSLSDvLgEO4FGZYJkhu+WIkmZwd8qPGPxe4fdF8C96kOXTnTIoBaFGzqHlZ
+	CBdny7iZn6ERBAsfHpB7OnWzKAUMbGQ2DoxIKWStNHEcvu4w==
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com [209.85.210.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48rtpevbcb-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Tue, 26 Aug 2025 18:21:25 +0000 (GMT)
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-770562b1ed3so4913271b3a.2
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Aug 2025 11:21:25 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1756232484; x=1756837284;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=hPe0HyPY1257DHhbwG0JodJXNJ2pFH3pGUWzM9Lk8eg=;
+        b=xLrBl2qLN93x7ceFubwqkyBPMd/RfWMw9i2spNjFwEEuD6ucn9ET/Jey9TgiuDHyiz
+         q9CeiMCnahEcxtSvLkPuLR+LpQv5bv6cMNDJ0xHPyYVj7TAT/7K63QDPOQcWtfh7x4GK
+         QdTf1QBcNm3nQkHFOtyVyiNVTZjkMUjImTY1EmXIjVH79qu/wmf62JpX0+664trQ7/ib
+         qGGIg7ohCk/N6Ep9b3irGgZPcmNeZXEXvDV1T5w0OUiuaEJhfL9fjG3Q1yhsNuHmOl8/
+         EfAfZ/TKctdDkV6Gr0qc2vyevrC98oA0Zd+lkggK5f37TDbrxuzwI+MJmWU9sl8i7ODQ
+         2mDQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXBC7iC1Iov3cR78LjPZYxdcS6TAzSZcUTEjIfembjzdh6Lu7prfAooCgHVP3F8APrZPwMsE8jy56A=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy2Yu/k0qSp9dLnJOviHmVzOUw1bS8jdS9cF3AMRPQpjN8NHhLo
+	/fnc+Wjz4R5+8po3ZypUKxxSvSBITEONA27oZQuRBfPvqN3Fa9RXDrMvJyckFHHnzKkbvuBPnkE
+	SxY94JWYm6fHVJRA1eY91sY2h4443bqgxFj/eDbmx13GwU3YHCmbaAMCiHdlYdYQ=
+X-Gm-Gg: ASbGncuSdWjpniedi5QX1ilycHkkp2/nsh1l9+rLouBo52tMvEQ/JvtWpAqHhiqkajy
+	Ky1s8lp+XSsKdv72OUhKfUSo7Vp9vedsN22M/brc/+eFFkly4TelXqUNGzHfvWJPlgNxxM4yJ0+
+	S9ETBTzrLcoRGrvp0cUjK38Jkuf4X49l/dzMAAMLL01opiAoQuxhOLmLRJ1cb1gcI2BY3I6yx44
+	rIlc7FA9Bxzwaru9oJ2NUchL54GD7Dy/xjPQcExLGQVgMKcBzM7+m2CAMbPLKaY8nTkkzjL5ool
+	P1smj1w8R1lkBBIfbcm+SOf8QGMXx/fyuP4bTG+O3cEWIK0/V8vFmLi6WFGR/xvk5Ut3
+X-Received: by 2002:a05:6a21:339a:b0:240:7ed:402d with SMTP id adf61e73a8af0-24340e1c3b3mr23574482637.31.1756232483786;
+        Tue, 26 Aug 2025 11:21:23 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHCUTgs+xlc+QQ+t40ZnsGhICVfnXPMX4kzaNskevdgCEI9w2BTmLMj8s+bCulNJADhimXIyA==
+X-Received: by 2002:a05:6a21:339a:b0:240:7ed:402d with SMTP id adf61e73a8af0-24340e1c3b3mr23574443637.31.1756232483259;
+        Tue, 26 Aug 2025 11:21:23 -0700 (PDT)
+Received: from hu-wasimn-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-77048989fe6sm9881803b3a.51.2025.08.26.11.21.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Aug 2025 11:21:22 -0700 (PDT)
+From: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+Subject: [PATCH 0/5] arm64: dts: qcom: lemans-evk: Extend board support for
+ additional peripherals
+Date: Tue, 26 Aug 2025 23:50:59 +0530
+Message-Id: <20250826-lemans-evk-bu-v1-0-08016e0d3ce5@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ecc599ee-4175-4356-ab66-1d76a75f44f7@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAAv7rWgC/x3MwQpAQBRG4VfRXbt1R6PkVWTB+HHD0Eyk5N1Nl
+ t/inIcigiJSnT0UcGnU3SeYPCM3d34C65BMhRSlVMbyiq3zkXEt3J8MJ6Z0sFIJKDVHwKj3/2v
+ a9/0AhZSuDV8AAAA=
+X-Change-ID: 20250814-lemans-evk-bu-ec015ce4080e
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Richard Cochran <richardcochran@gmail.com>
+Cc: kernel@oss.qualcomm.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, netdev@vger.kernel.org,
+        Monish Chunara <quic_mchunara@quicinc.com>,
+        Wasim Nazir <wasim.nazir@oss.qualcomm.com>,
+        Viken Dadhaniya <viken.dadhaniya@oss.qualcomm.com>,
+        Sushrut Shree Trivedi <quic_sushruts@quicinc.com>,
+        Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>,
+        Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>,
+        Mohd Ayaan Anwar <quic_mohdayaa@quicinc.com>,
+        Dikshita Agarwal <quic_dikshita@quicinc.com>,
+        Vishal Kumar Pal <quic_vispal@quicinc.com>,
+        Mohammad Rafi Shaik <mohammad.rafi.shaik@oss.qualcomm.com>,
+        Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+X-Mailer: b4 0.15-dev-e44bb
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1756232476; l=2170;
+ i=wasim.nazir@oss.qualcomm.com; s=20250807; h=from:subject:message-id;
+ bh=qzHczj72h4oQbVLmtthjacKx7xf5SfWEL8+jy/CLgNs=;
+ b=4ggj8MHSr1SwbKvJXc1FvZJaW3gg4AdmaisjjsdsQJeAJ5meP6HPjvSkkegHG04U0Ef9SHmRk
+ Zpnr/9l7/v1B4IPhxeVXCNxvwgMo0ERudBzuwcJ0s6NCzdT/FN0Vzq8
+X-Developer-Key: i=wasim.nazir@oss.qualcomm.com; a=ed25519;
+ pk=4ymqwKogZUOQnbcvSUHyO19kcEVTLEk3Qc4u795hiZM=
+X-Proofpoint-GUID: DZLIt1sPjBHo4weecthrL1LFLmVVKDMC
+X-Proofpoint-ORIG-GUID: DZLIt1sPjBHo4weecthrL1LFLmVVKDMC
+X-Authority-Analysis: v=2.4 cv=Hd8UTjE8 c=1 sm=1 tr=0 ts=68adfb25 cx=c_pps
+ a=m5Vt/hrsBiPMCU0y4gIsQw==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=IkcTkHD0fZMA:10 a=2OwXVqhp2XgA:10 a=VwQbUJbxAAAA:8 a=EUspDBNiAAAA:8
+ a=TdWL2oi4fdni6beYElwA:9 a=QEXdDO2ut3YA:10 a=IoOABgeZipijB_acs4fv:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODI1MDE0MiBTYWx0ZWRfX+bZEcSqYWszF
+ v0Dmj3C4lIteL70ZOxzU5MCBEnm1xrNeCjmL8ESetjl7D5/pykOBlkOG/BSCAJDDynYER4qqE0G
+ dl424smm8rT/XQ3MFa3dTqlZkr6dNiwr1JbLJZFsmahrVUYhyxU61SkGBCnMy/3j+tknRbL2EvA
+ 1W30Lf9nQUNR4U/AgpeWdPEtt03bn/drhxe1AhmQGT8Na++HbVC9Jf4+Nk7GF/TWC7ipDJ/FPLC
+ StCI165yp2Yar5UfUaIzDMJd+tnfLnPagtebZ7k01nObod4/BAtI5FPvI+S+VrPv90W0YRFYwPj
+ z+7wosSM09t+LPYRQP8c4QG8gLfsB5F3cSCC9861UYRYjWDOK+iPwxH3O1U3hkkkSATM1Q50TKC
+ CoWXTP0m
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-08-26_02,2025-08-26_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0
+ adultscore=0 clxscore=1011 impostorscore=0 spamscore=0 classifier=typeunknown
+ authscore=0 authtc= authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2507300000 definitions=main-2508250142
 
-Hi David,
+This series extend support for additional peripherals on the Qualcomm
+Lemans EVK board to enhance overall hardware functionality.
 
-On Tue, Aug 26, 2025 at 03:08:08PM +0200, David Hildenbrand wrote:
-> On 26.08.25 15:03, Alexandru Elisei wrote:
-> > Hi David,
-> > 
-> > On Tue, Aug 26, 2025 at 01:04:33PM +0200, David Hildenbrand wrote:
-> > ..
-> > > > Just so I can better understand the problem being fixed, I guess you can have
-> > > > two consecutive pfns with non-consecutive associated struct page if you have two
-> > > > adjacent memory sections spanning the same physical memory region, is that
-> > > > correct?
-> > > 
-> > > Exactly. Essentially on SPARSEMEM without SPARSEMEM_VMEMMAP it is not
-> > > guaranteed that
-> > > 
-> > > 	pfn_to_page(pfn + 1) == pfn_to_page(pfn) + 1
-> > > 
-> > > when we cross memory section boundaries.
-> > > 
-> > > It can be the case for early boot memory if we allocated consecutive areas
-> > > from memblock when allocating the memmap (struct pages) per memory section,
-> > > but it's not guaranteed.
-> > 
-> > Thank you for the explanation, but I'm a bit confused by the last paragraph. I
-> > think what you're saying is that we can also have the reverse problem, where
-> > consecutive struct page * represent non-consecutive pfns, because memmap
-> > allocations happened to return consecutive virtual addresses, is that right?
-> 
-> Exactly, that's something we have to deal with elsewhere [1]. For this code,
-> it's not a problem because we always allocate a contiguous PFN range.
-> 
-> > 
-> > If that's correct, I don't think that's the case for CMA, which deals out
-> > contiguous physical memory. Or were you just trying to explain the other side of
-> > the problem, and I'm just overthinking it?
-> 
-> The latter :)
+It includes:
+  - New peripherals like:
+    - GPI (Generic Peripheral Interface) DMA controllers and QUPv3 controllers
+      for peripheral communication.
+    - PCIe HW with required regulators and PHYs.
+    - I2C based devices like GPIO I/O expander and EEPROM.
+    - USB0 controller in device mode.
+    - Remoteproc subsystems for supported DSPs.
+    - Qca8081 2.5G Ethernet PHY.
+    - Iris video decoder.
+    - SD card support on SDHC v5.
+  - Audio change [1] to support capture and playback on I2S.
 
-Ok, sorry for the noise then, and thank you for educating me.
+Dependency:
+  - Revert commit b5323835f050 ("OPP: Reorganize _opp_table_find_key()") to
+    avoid regression introduced in linux-next (20250825).
+  - This series depends on the removal of partial changes from patch [2],
+    which are now part of the above commit and are causing boot failures as
+    described in [3].
+  - The ethernet PHY QCA8081 depends on CONFIG_QCA808X_PHY, without
+    which ethernet will not work.
 
-Alex
+[1] https://lore.kernel.org/linux-arm-msm/20250822131902.1848802-1-mohammad.rafi.shaik@oss.qualcomm.com/
+[2] https://lore.kernel.org/all/20250820-opp_pcie-v4-2-273b8944eed0@oss.qualcomm.com/
+[3] https://lore.kernel.org/all/aKyS0RGZX4bxbjDj@hu-wasimn-hyd.qualcomm.com/
+
+---
+Mohammad Rafi Shaik (2):
+      arm64: dts: qcom: lemans: Add gpr node
+      arm64: dts: qcom: lemans-evk: Add sound card
+
+Monish Chunara (2):
+      dt-bindings: mmc: sdhci-msm: Document the Lemans compatible
+      arm64: dts: qcom: lemans: Add SDHC controller and SDC pin configuration
+
+Wasim Nazir (1):
+      arm64: dts: qcom: lemans-evk: Extend peripheral and subsystem support
+
+ .../devicetree/bindings/mmc/sdhci-msm.yaml         |   1 +
+ arch/arm64/boot/dts/qcom/lemans-evk.dts            | 439 +++++++++++++++++++++
+ arch/arm64/boot/dts/qcom/lemans.dtsi               | 124 ++++++
+ 3 files changed, 564 insertions(+)
+---
+base-commit: d0630b758e593506126e8eda6c3d56097d1847c5
+change-id: 20250814-lemans-evk-bu-ec015ce4080e
+
+Best regards,
+--  
+Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+
