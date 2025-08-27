@@ -1,47 +1,47 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E382631A579
-	for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 22:06:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99A133101A9
+	for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 22:06:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756332387; cv=none; b=pGxQqlkH3b6o7+qTFpI1OPqER7r7n4UXAtobtFGcrpnmgYtW43ghbk+ELNUyjGZoOF0ojLsW8B3fNNbkCZqvokqqgkHIf9aq/dnOvEHoTZwbHDaWs+zGe+Gii/DXCfWf3rrdqqOrzq8/XUIPhDA0ZaguI+TDBBPOa0h0VOKuA4s=
+	t=1756332403; cv=none; b=jsoC2voJAdkXzSK+bS3WASDvw6nHY3TUmiDYBlShdeZLBqJ1P4Iv+Aw0YbKfFufBvqYyjuWWXdG11fevJ+e5AW9+2PeDB+7GuP1hClYn+u/7CBjvr2dS3yEtnfcqqBx0NTH7aNyEU/IJn/1LVGbNwdstVBRZQOYokh3lhkn+4aA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756332387; c=relaxed/simple;
-	bh=g5Pqhen6+TGsZaJhVjcxjHrty8uEIOPaJGSbz6Iayeg=;
+	s=arc-20240116; t=1756332403; c=relaxed/simple;
+	bh=ANpe/aj72IDL28EcyXtxKgIaAJfJoWb+vaA9p9Cpqn4=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=PHQJJkqC71ndYnx+7RE4vK7gclMYLDKCuHX+d83VHP4spERVbZSlmlzlN86V/CgMuGGpTV7logwncPEeSmqu9tghfbp/8/2wkfvHUfwhch1LwsS257RyymAVWCUj+zz9V/1TlUpXn+2j61ntWWuh7M9PE/IRq+xlbO3hQygRfjg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PoXHJwEz; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version; b=MRo8vbA8pyi5/Gs6jCZuPul1YWCLF0xQKOP73tQmHRx9t9vavNygVNxUs6ZMORZXHR/pJcrTnXo0j4t7oedILP0uG5BixNs+y1GD65CgJaF/atzwPy5h1/uSXi9K1crvg5FsGBrZWjF08aIl+wU3IWFxl8o6xTfkfxGXASDbMgE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EVtd/s+S; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PoXHJwEz"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EVtd/s+S"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1756332385;
+	s=mimecast20190719; t=1756332400;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=TaqjYk7qiFpFT4dP16wKMuC8fiQfbkUwRRgQVKGzHC8=;
-	b=PoXHJwEzk7w2QrZiRN5qwswFGzO4Fur9KbS2Pq0kw3vH+sjIV8DfkOy5vjMjGF3DFFk/9W
-	FyvaBZ7ulBVM5XZsqIJ30EIBKMC296H30G5XkHH0wvHUb/ZgeCZY1AU/dMk8X2bD1PaLfS
-	XxcbE1lvXXaONrNyGeeCHMcoMU3rGME=
-Received: from mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-35-165-154-97.us-west-2.compute.amazonaws.com [35.165.154.97]) by
+	bh=rjZeFWjCbDhCMUqSkeYcKpAMeyN7QE5gKijkCrCFfpU=;
+	b=EVtd/s+S5I2374gRD8pj/8syusivpe9qL64acVTjCd7UlfnusjatWI97oeKbWsKSL6u6YN
+	clhUpoaK/UJ0HH+B5oI3HC0geAPUtRuPvY1cStlP3A5ojVJrhbNEQ4nLXxFHQf6r/gE+eF
+	v5Qs8RcrqZeB2KcE0vZg1CaXwDDj5q8=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-154-990HNXa9P7CWji11STEtIQ-1; Wed,
- 27 Aug 2025 18:06:21 -0400
-X-MC-Unique: 990HNXa9P7CWji11STEtIQ-1
-X-Mimecast-MFC-AGG-ID: 990HNXa9P7CWji11STEtIQ_1756332373
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-553-lA8LiC6sONKppwkqSITe_w-1; Wed,
+ 27 Aug 2025 18:06:37 -0400
+X-MC-Unique: lA8LiC6sONKppwkqSITe_w-1
+X-Mimecast-MFC-AGG-ID: lA8LiC6sONKppwkqSITe_w_1756332389
 Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-06.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 36F19180028E;
-	Wed, 27 Aug 2025 22:06:13 +0000 (UTC)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id F080119541A4;
+	Wed, 27 Aug 2025 22:06:28 +0000 (UTC)
 Received: from t14s.redhat.com (unknown [10.22.80.195])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id B193D30001A1;
-	Wed, 27 Aug 2025 22:05:57 +0000 (UTC)
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id AB5F630001A1;
+	Wed, 27 Aug 2025 22:06:13 +0000 (UTC)
 From: David Hildenbrand <david@redhat.com>
 To: linux-kernel@vger.kernel.org
 Cc: David Hildenbrand <david@redhat.com>,
@@ -91,9 +91,9 @@ Cc: David Hildenbrand <david@redhat.com>,
 	wireguard@lists.zx2c4.com,
 	x86@kernel.org,
 	Zi Yan <ziy@nvidia.com>
-Subject: [PATCH v1 14/36] mm/mm/percpu-km: drop nth_page() usage within single allocation
-Date: Thu, 28 Aug 2025 00:01:18 +0200
-Message-ID: <20250827220141.262669-15-david@redhat.com>
+Subject: [PATCH v1 15/36] fs: hugetlbfs: remove nth_page() usage within folio in adjust_range_hwpoison()
+Date: Thu, 28 Aug 2025 00:01:19 +0200
+Message-ID: <20250827220141.262669-16-david@redhat.com>
 In-Reply-To: <20250827220141.262669-1-david@redhat.com>
 References: <20250827220141.262669-1-david@redhat.com>
 Precedence: bulk
@@ -105,28 +105,27 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-We're allocating a higher-order page from the buddy. For these pages
-(that are guaranteed to not exceed a single memory section) there is no
-need to use nth_page().
+The nth_page() is not really required anymore, so let's remove it.
+While at it, cleanup and simplify the code a bit.
 
 Signed-off-by: David Hildenbrand <david@redhat.com>
 ---
- mm/percpu-km.c | 2 +-
+ fs/hugetlbfs/inode.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/mm/percpu-km.c b/mm/percpu-km.c
-index fe31aa19db81a..4efa74a495cb6 100644
---- a/mm/percpu-km.c
-+++ b/mm/percpu-km.c
-@@ -69,7 +69,7 @@ static struct pcpu_chunk *pcpu_create_chunk(gfp_t gfp)
+diff --git a/fs/hugetlbfs/inode.c b/fs/hugetlbfs/inode.c
+index 34d496a2b7de6..c5a46d10afaa0 100644
+--- a/fs/hugetlbfs/inode.c
++++ b/fs/hugetlbfs/inode.c
+@@ -217,7 +217,7 @@ static size_t adjust_range_hwpoison(struct folio *folio, size_t offset,
+ 			break;
+ 		offset += n;
+ 		if (offset == PAGE_SIZE) {
+-			page = nth_page(page, 1);
++			page++;
+ 			offset = 0;
+ 		}
  	}
- 
- 	for (i = 0; i < nr_pages; i++)
--		pcpu_set_page_chunk(nth_page(pages, i), chunk);
-+		pcpu_set_page_chunk(pages + i, chunk);
- 
- 	chunk->data = pages;
- 	chunk->base_addr = page_address(pages);
 -- 
 2.50.1
 
