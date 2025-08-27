@@ -1,127 +1,118 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E34C5298CAB
-	for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 11:34:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2593234A30A
+	for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 13:01:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756294476; cv=none; b=G27b8DZ5gKAx+4TZsDMIsNS6WsltxsK8vybeHKXcc2DBSqxHtmHS8ifvNPhm0Dp/NtAvs4mERZKzV07e3QyDaPsLY7eLZqXlIlNjGHzDxXEF2W6OkW58WKnMci1r8yQVOqlG3woEdfgprvj4h4WWVoc7V/gToL0ENUpbRa7VabM=
+	t=1756299667; cv=none; b=o5uwmI9hcpJFQneN4QRC1cHq6hf1zrsp3/VAneTZ/E7GrzyKsY92h3luji2/sJ4LDPZ0YUuLzu+rm3THhftGwzKJFdir8RxMQULR5kC/VLNx/8s/AGErQdjki3sQvZ/XSsfaCRePJr22QZK6XyJntXCDeDBX5p5qwuG7Ybwoepg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756294476; c=relaxed/simple;
-	bh=I0+inmiWtU61dXbcgR2SpqeAI9tYtFw+kp335l2T7XI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Eny07/83pdwRPMPbzqjpH51tUjWBimLM/QTfKsiEdbZtlHT8SW8o+mbSaXRHIupP9DJqwbgDTYBLtePxO4MN+7CeAfoKSIc+gIXBzJ4+2XNyqT5iP+6r1z/QsQlv/cey5LYmFKBw7zoX/duSzXtZ8VvB5EdFazIGFGA1bhIZY4Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=qRWfjm5B; arc=none smtp.client-ip=209.85.128.181
+	s=arc-20240116; t=1756299667; c=relaxed/simple;
+	bh=hxB5lyREhdgbUBcOx3UJyF20LvnlKY+cAGXFsyaLqBQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=SfaYwVmB8oeGUkoWrrWv0n8NBTtL+mVn1/bB3rFlWbUPvAiaFnZdmJaXDBy3cQej3636C5lixV6Ggqq1GNJGnViQUB3WRkrMPvTMyArRMSRUifXsnHrer1UczUHnQm1sUe4ghNjcWOdZxV3Zz64VO86sqxVqnWjYCJJKyHnZZwg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=b9jrQ/bv; arc=none smtp.client-ip=209.85.128.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qRWfjm5B"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-71d603b60cbso52944707b3.1
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 04:34:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="b9jrQ/bv"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-45a1b004954so54059295e9.0
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 06:01:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1756294474; x=1756899274; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=SQP3POnWLwdh4gSankJGbSD3AH7y+QQYMzA+YsTanJY=;
-        b=qRWfjm5B7ubIFZNguTfe5m4tvoLYYXWWmLZF6z9oYLnQTewq3FnwwVH35kq++n4ytZ
-         fZQtrML0NzJZnfC0FiIkLMjjzMdmjf15CKmI60GXniaU/iMFPbGwdlcrGNfchv1ely0n
-         LDX1bOgrSCVOEiB2zC8uC6pYebk48gKGq+f+bKIGoUGabsi23Njdld4tK57RcRjIdSgS
-         r3FDiVvj+wcYHM0COb+FYWySsGKfYd+t4PCaRbrPaQ9MIUOKwdhXmewY5T5+Wz0nFwhd
-         ZCM7jrfzwtBSMZyBNsplx1a8Wa1LQ66hQyroc45Iw1DX9IQ3ERaYZv540l9IQw8t6DMX
-         0SQw==
+        d=linaro.org; s=google; t=1756299663; x=1756904463; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=HR0ZA4NZ0E17Q0Z6+d0qJgv1KmpugOB/InPQaoD7lOo=;
+        b=b9jrQ/bvqyUhmac0mgQrgGlpMaYtG4ugRVamMtBvKByrnA1PBn3AZWIBZFelvmDVHP
+         8OY2ppJ71PmEcumpolpIunrlPOFHmo6OTUskP13osQtc1bksVjIxbn04OY7Gvf6HOAnI
+         BuFaL7t9XbWwKqNdlUVLFLJMQxMkY0meEkHNhhG1ZlZL8y2p69WOqEmvbAWUuAePt7ms
+         vzQettJ+WJBj54FjXnXTDzlSiTinUz0suXtx5cMtH/QgS+cEEBasmJd1lBrBDM1G859m
+         nP+LXn6ROH8f2B3522nVzbxjK2rBR+2p4u5T0S9Yw4VWk2ar34fhORYuTnST25FOZ4RA
+         Ng2w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756294474; x=1756899274;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=SQP3POnWLwdh4gSankJGbSD3AH7y+QQYMzA+YsTanJY=;
-        b=LxI0KPaUwSOzMHJsh5D6YT4cYOxGwe1u2To4waQBIg1VoDHsJGKIJArX2jyHPxpP4n
-         ThLfRrSUUiAL5GGXNkMacWHTCICH61oLvLXCmmOq0ZAqFT9H7osVCA990dL8e0kGUYZZ
-         dy3WC/bRi3xnqDzHjSTivPdk3oeqPJ1E3EY+fzwrmKGuXcSqszY4mOxdjUgIDrYH7DNf
-         8dSHBbM4oNOopZ2Z746Gqa0a5WapoMfQ38lo/2swTiTsMRdmGYCi4mY9Xe1qyN8WgWkl
-         O2nv6AKWaK09ijS3ncuHJc9s4rkopckBAcKue5kZFreottqI7xRDcftwz4M6uAf32G3t
-         GxUw==
-X-Forwarded-Encrypted: i=1; AJvYcCXiGoe4YI7MaRbqt8LYVfQJGr1UWbZTMBb45LCVrIhIZGOzvVs7vnbJ/4B1edWgBPxBUfYPekmnKKU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyBW9cvg3N7MEi6r5FzVeIWC70jMNLbUg3h5WkLZiCk2xPpzBlQ
-	vxeXc1Qko/7Jv24x3ViKgY6lEnQFSoMzT/MhtQ6UMZY6Yn5BtLtp1o2LEknrvvKnNnsYHjRMa+w
-	3Dr0BhJti+rSdWrM3xUow7FPHtL+SAYrNx+YImk3YLw==
-X-Gm-Gg: ASbGncsNFOg3ognvI1JgeKnlW1QMRCRTpH9BAbVWssksWO9kVaDy1j9mKnneIZebhkT
-	fOsCQ0GrrBZH9wsegzOmvsnek+BLcq2UemWtIOLdQxMGpPxmub1HxtWCtr+LKGc4I0KtiJPRuK1
-	5yLxS0E/4HZZVmczMuKd6Vk2omONH+Y8acahlDFXjYPnniROEbLnRt5DfzJE3ezvzdZQDxVM04P
-	ss+IWU=
-X-Google-Smtp-Source: AGHT+IEGYDfr3AO1H3X4bA6l4+sJTsSb81gSwG2hF2J0ZtRhMDZjiYt/ib/SF+R25XRB+MdDv004M0EvKZOUkf07zYw=
-X-Received: by 2002:a05:690c:6d8f:b0:71f:f24d:1adf with SMTP id
- 00721157ae682-71ff24d1d0dmr178250247b3.39.1756294473782; Wed, 27 Aug 2025
- 04:34:33 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1756299663; x=1756904463;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=HR0ZA4NZ0E17Q0Z6+d0qJgv1KmpugOB/InPQaoD7lOo=;
+        b=d2Jz3IJW6iiKg/kU5MzxysJxWtP5qlDlUaBR9XsHOSLphijeN1mieKmOx23hkc5R9d
+         OCVfRoquSRvnmqdXFq+oYT5lFbDQzoVc+ad7MHRz9zqdomjDC623oxsK9so4ggULMck6
+         Mpy/bR1WJtsDifCiAqnew+aXwDzy1mvVmyD8YGn163rYOu63nRkB6qsyFdD/C8ByCUzZ
+         7CV3g9Pzz2xwMMm1mNxbokVFXiVEx7PGcMgspHSgJvN7swZ8jYKxa/3oRP3igodl2Y4D
+         /T3ILrMzRpCCbDI713FhQ9776ZUiDwhQ87xiCzF/TrKpwi9PR3fhPfV1YOTHaNiMcL+O
+         gQOg==
+X-Forwarded-Encrypted: i=1; AJvYcCV49UTnOPeEQpH+PT0oK1lmBBMLmq6iv5OK+lrZl+7XL18dKArvsExY0XnTPEm2OqyM3xO+11V91us=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzbDdXX/FFNVfjYZPOjSejqN5WMmICu0IWvKDQ7dAXqCfYFvmv5
+	A2M8zi/H4PoT9JG5vAp89ozXe10yx5X5iwGgGauGgxKiJaTh65Qtr79XW0aa/chwjic=
+X-Gm-Gg: ASbGncvhlWaTjzy1CpqZ3u/B4e6x44H5LkGHt7tqyVSzIVQhHB3Ot9Dol0VpCeWxagy
+	JaQg8aY86P3ayxphJiZg2YAWsyoD499ANB8jVSeaf0p2Jg97oBXBE0G/4VkLI5gyLh+FUuefH+j
+	epjmyUa41d031pyUoZfd715uFVv1zerB9IeZ01RJmbIjPFInXxKlw4uo2x0p4Wm6jvpwnms8cxd
+	S9DBKIimPfd2MEazSRfGsPRSqHhV/xHMUhhPNUaVKdhzYcxnUIf4/yq/jzxpkeRut2E+RA6UoJ7
+	igY85FpT0EPyD+lQ+dd48tW8QJ3dC3Cmz315XPkdT3Vl4mAmICQlK+huN9CljImQCxjBAXrEnWz
+	8y98CH3oV96sEhphkY6E8hGF6uQ6ORbpq9gMMtg==
+X-Google-Smtp-Source: AGHT+IF1J878zuA2zsA2LZmjU+Nf3PbWC4scoCL4N2DKNTYWqSPUxijVodiq3E9n32T4M+Wmjv6xGg==
+X-Received: by 2002:a05:600c:3b0c:b0:458:a7fa:2120 with SMTP id 5b1f17b1804b1-45b517d2668mr180851495e9.25.1756299662976;
+        Wed, 27 Aug 2025 06:01:02 -0700 (PDT)
+Received: from localhost ([196.207.164.177])
+        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-45b6f2eab0csm29733035e9.20.2025.08.27.06.01.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 27 Aug 2025 06:01:02 -0700 (PDT)
+Date: Wed, 27 Aug 2025 16:00:59 +0300
+From: Dan Carpenter <dan.carpenter@linaro.org>
+To: Liao Yuanhong <liaoyuanhong@vivo.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ricky Wu <ricky_wu@realtek.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Al Viro <viro@zeniv.linux.org.uk>,
+	Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@baylibre.com>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>,
+	open list <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH 2/2] mmc: rtsx_usb_sdmmc: Remove redundant ternary
+ operators
+Message-ID: <aK8Bi0yIMW8-yb_n@stanley.mountain>
+References: <20250827093530.416071-1-liaoyuanhong@vivo.com>
+ <20250827093530.416071-3-liaoyuanhong@vivo.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250827101236.927313-1-claudiu.beznea.uj@bp.renesas.com>
-In-Reply-To: <20250827101236.927313-1-claudiu.beznea.uj@bp.renesas.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 27 Aug 2025 13:33:57 +0200
-X-Gm-Features: Ac12FXyaVa7AtwnWzwHjhQmKX8rG5UcyGXCeSmAzrw3pHhVEssS_yT1clYz720s
-Message-ID: <CAPDyKFrWOkDvfNmwTDVGC0VAFb_f0jA+vWas5cUEaPTt2t82=w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdio: Drop dev_pm_domain_detach() call
-To: Claudiu <claudiu.beznea@tuxon.dev>
-Cc: mathieu.poirier@linaro.org, rafael.j.wysocki@intel.com, 
-	wsa+renesas@sang-engineering.com, rafael@kernel.org, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250827093530.416071-3-liaoyuanhong@vivo.com>
 
-On Wed, 27 Aug 2025 at 12:12, Claudiu <claudiu.beznea@tuxon.dev> wrote:
->
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->
-> Starting with commit f99508074e78 ("PM: domains: Detach on
-> device_unbind_cleanup()"), there is no longer a need to call
-> dev_pm_domain_detach() in the bus remove function. The
-> device_unbind_cleanup() function now handles this to avoid
-> invoking devres cleanup handlers while the PM domain is
-> powered off, which could otherwise lead to failures as
-> described in the above-mentioned commit.
->
-> Drop the explicit dev_pm_domain_detach() call and rely instead
-> on the flags passed to dev_pm_domain_attach() to power off the
-> domain.
->
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
+On Wed, Aug 27, 2025 at 05:35:26PM +0800, Liao Yuanhong wrote:
+> Remove redundant ternary operators to clean up the code.
+> 
+> Signed-off-by: Liao Yuanhong <liaoyuanhong@vivo.com>
 > ---
->  drivers/mmc/core/sdio_bus.c | 3 ---
->  1 file changed, 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index 656601754966..10799772494a 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -200,7 +200,6 @@ static int sdio_bus_probe(struct device *dev)
->         atomic_dec(&func->card->sdio_funcs_probed);
->         if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
->                 pm_runtime_put_noidle(dev);
-> -       dev_pm_domain_detach(dev, false);
->         return ret;
->  }
->
-> @@ -231,8 +230,6 @@ static void sdio_bus_remove(struct device *dev)
->         /* Then undo the runtime PM settings in sdio_bus_probe() */
->         if (func->card->host->caps & MMC_CAP_POWER_OFF_CARD)
->                 pm_runtime_put_sync(dev);
-> -
-> -       dev_pm_domain_detach(dev, false);
->  }
->
->  static const struct dev_pm_ops sdio_bus_pm_ops = {
-> --
-> 2.43.0
->
+>  drivers/mmc/host/rtsx_usb_sdmmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index 84674659a84d..97bc3a2e3cca 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -1169,7 +1169,7 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		break;
+>  	}
+>  
+> -	host->initial_mode = (ios->clock <= 1000000) ? true : false;
+> +	host->initial_mode = ios->clock <= 1000000;
+
+This is more minimalist, but is it really more readable?  All the
+"redundant" bits are deliberate visual clues that this is a condition.
+Probably the most readable thing is to just make it an if statement:
+
+	if (ios->clock <= 1000000)
+		host->initial_mode = true;
+	else
+		host->initial_mode = false;
+
+I don't really have strong feelings either way...
+
+regards,
+dan carpenter
+
