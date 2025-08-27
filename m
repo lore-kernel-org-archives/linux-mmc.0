@@ -1,52 +1,53 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEA96313E1B
-	for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 22:09:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A8B930FF13
+	for <linux-mmc@vger.kernel.org>; Wed, 27 Aug 2025 22:09:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756332575; cv=none; b=b9fIWxLITZBvghBfZKVl/f9xyxTvPMJYrFUzHWlvEgVslkQy6wsGfLHQdKoHC3cfen8ERjlASY8POLor3k+6jxb1ON/VvsXITf5h0ACK8Mmy5zMUqSsC2JFJTfqEeKU9JW6JzItT/U0YXNrLqrzBkMG2G04MMUwc7KaAsLoea1Y=
+	t=1756332586; cv=none; b=fKMAnqRifrBdCXgQ7TG5QtMOiGgPq3ddc7Bdn+PZS+d49eHXLqbRCuYN7EoySOudtl/pylP5IPZ5vklUzmH2xAmr8/hOgkq8nb3wEbrJv9+Igi5X2+TYfbICyHUqw7+4yeypulttX/NjXhmb6JhQIypf+VBc96qVDAZL3obgp04=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756332575; c=relaxed/simple;
-	bh=0EqTpHeJd4fPIAuJrAXq8sz5wRlvPXL4UnkaBkaTEBI=;
+	s=arc-20240116; t=1756332586; c=relaxed/simple;
+	bh=vikAjgMEfu34bB+DcMPi8QXprFk9ySNOBn+h2WXbfDc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=nSUHfZkmXzp/uVKwg27/C5rKH70wkBwtjFURDQRnIN2RIDHLFmaoSTVU9d2EgHhRGK+qepmqB5xTs+qRzwcmcJ8bUJOfasMVju+m9jqFk+pZSvIyR+QZB7GMh2LUAo3FcN1Vcr5UPlHiZi1ehJgGCG3UHtWQZWrwftygNWbJvQQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CwLL/wbH; arc=none smtp.client-ip=170.10.129.124
+	 MIME-Version; b=CRV4Co9mf/W4EcMKGeWEb0vC0sWiRj9OFmcCxE2Ewh5GhYaFmlHE3HfN6YQjHU93LolVY9NcFCJZ4nWYDT8YBzUxEvY9oFiUaj3cIrvEOGsx9o+LOqJovT8P00pLVhvZnVm2AWl+DttQND3DUM5rYx//q1NhIuOuE0Fqk+20k9Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QDPF+yu/; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CwLL/wbH"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QDPF+yu/"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1756332573;
+	s=mimecast20190719; t=1756332583;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=fRSpRx9RRStIQ38BNC0jYyDlyXN9Nb6MMvlgPC7q7iI=;
-	b=CwLL/wbHHqhVyvWoUP+EhbLqHIB4MkF4G0XP6q5ZyfVwwhxIWFDCAWmH+9XobVuTljszo8
-	C89x+in2BIB+06fFAIdazDfTrBQA1VtvGJqpf9ugnjNy3IiIoDeltxjJykqNMazCHpmC+/
-	asu6tYYY0CuGER+8LGB3uuJQVVICbsw=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+	bh=8SUmSf66LiCJvVJzeEx0UA2HTOESqflB/UZ9jC2+86E=;
+	b=QDPF+yu/zCyx63L61fjkPKi3muSJmzNjyOxhLCTnEEWgN74F3ZPMTJMkqKiEQxv/8zIsO1
+	yN41oHw8iy2Oxjic25wQhL5QMOE4oT13dJLMU1prFCYgygTpU1Vr40cPD9MJ75iJXgeGBO
+	jKUT0gvCAmilIaWI2Sqqy+R+3hLDwNo=
+Received: from mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-125-8rLG3SX1N-GJeE1zdspl2w-1; Wed,
- 27 Aug 2025 18:09:03 -0400
-X-MC-Unique: 8rLG3SX1N-GJeE1zdspl2w-1
-X-Mimecast-MFC-AGG-ID: 8rLG3SX1N-GJeE1zdspl2w_1756332538
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-638-wuVJZl_PPm-kz40j0XhWgA-1; Wed,
+ 27 Aug 2025 18:09:38 -0400
+X-MC-Unique: wuVJZl_PPm-kz40j0XhWgA-1
+X-Mimecast-MFC-AGG-ID: wuVJZl_PPm-kz40j0XhWgA_1756332573
 Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id F35E7195608A;
-	Wed, 27 Aug 2025 22:08:57 +0000 (UTC)
+	by mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 006A91956095;
+	Wed, 27 Aug 2025 22:09:33 +0000 (UTC)
 Received: from t14s.redhat.com (unknown [10.22.80.195])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id A36C230001A1;
-	Wed, 27 Aug 2025 22:08:41 +0000 (UTC)
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id C1B9F30001A1;
+	Wed, 27 Aug 2025 22:09:16 +0000 (UTC)
 From: David Hildenbrand <david@redhat.com>
 To: linux-kernel@vger.kernel.org
 Cc: David Hildenbrand <david@redhat.com>,
-	Damien Le Moal <dlemoal@kernel.org>,
-	Niklas Cassel <cassel@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Maxim Levitsky <maximlevitsky@gmail.com>,
+	Alex Dubov <oakad@yahoo.com>,
 	Alexander Potapenko <glider@google.com>,
 	Andrew Morton <akpm@linux-foundation.org>,
 	Brendan Jackman <jackmanb@google.com>,
@@ -93,9 +94,9 @@ Cc: David Hildenbrand <david@redhat.com>,
 	wireguard@lists.zx2c4.com,
 	x86@kernel.org,
 	Zi Yan <ziy@nvidia.com>
-Subject: [PATCH v1 24/36] ata: libata-eh: drop nth_page() usage within SG entry
-Date: Thu, 28 Aug 2025 00:01:28 +0200
-Message-ID: <20250827220141.262669-25-david@redhat.com>
+Subject: [PATCH v1 26/36] mspro_block: drop nth_page() usage within SG entry
+Date: Thu, 28 Aug 2025 00:01:30 +0200
+Message-ID: <20250827220141.262669-27-david@redhat.com>
 In-Reply-To: <20250827220141.262669-1-david@redhat.com>
 References: <20250827220141.262669-1-david@redhat.com>
 Precedence: bulk
@@ -110,44 +111,29 @@ X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 It's no longer required to use nth_page() when iterating pages within a
 single SG entry, so let's drop the nth_page() usage.
 
-Cc: Damien Le Moal <dlemoal@kernel.org>
-Cc: Niklas Cassel <cassel@kernel.org>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Alex Dubov <oakad@yahoo.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: David Hildenbrand <david@redhat.com>
 ---
- drivers/ata/libata-sff.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/memstick/core/mspro_block.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/ata/libata-sff.c b/drivers/ata/libata-sff.c
-index 7fc407255eb46..1e2a2c33cdc80 100644
---- a/drivers/ata/libata-sff.c
-+++ b/drivers/ata/libata-sff.c
-@@ -614,7 +614,7 @@ static void ata_pio_sector(struct ata_queued_cmd *qc)
- 	offset = qc->cursg->offset + qc->cursg_ofs;
+diff --git a/drivers/memstick/core/mspro_block.c b/drivers/memstick/core/mspro_block.c
+index c9853d887d282..d3f160dc0da4c 100644
+--- a/drivers/memstick/core/mspro_block.c
++++ b/drivers/memstick/core/mspro_block.c
+@@ -560,8 +560,7 @@ static int h_mspro_block_transfer_data(struct memstick_dev *card,
+ 		t_offset += msb->current_page * msb->page_size;
  
- 	/* get the current page and offset */
--	page = nth_page(page, (offset >> PAGE_SHIFT));
-+	page += offset >> PAGE_SHIFT;
- 	offset %= PAGE_SIZE;
+ 		sg_set_page(&t_sg,
+-			    nth_page(sg_page(&(msb->req_sg[msb->current_seg])),
+-				     t_offset >> PAGE_SHIFT),
++			    sg_page(&(msb->req_sg[msb->current_seg])) + (t_offset >> PAGE_SHIFT),
+ 			    msb->page_size, offset_in_page(t_offset));
  
- 	/* don't overrun current sg */
-@@ -631,7 +631,7 @@ static void ata_pio_sector(struct ata_queued_cmd *qc)
- 		unsigned int split_len = PAGE_SIZE - offset;
- 
- 		ata_pio_xfer(qc, page, offset, split_len);
--		ata_pio_xfer(qc, nth_page(page, 1), 0, count - split_len);
-+		ata_pio_xfer(qc, page + 1, 0, count - split_len);
- 	} else {
- 		ata_pio_xfer(qc, page, offset, count);
- 	}
-@@ -751,7 +751,7 @@ static int __atapi_pio_bytes(struct ata_queued_cmd *qc, unsigned int bytes)
- 	offset = sg->offset + qc->cursg_ofs;
- 
- 	/* get the current page and offset */
--	page = nth_page(page, (offset >> PAGE_SHIFT));
-+	page += offset >> PAGE_SHIFT;
- 	offset %= PAGE_SIZE;
- 
- 	/* don't overrun current sg */
+ 		memstick_init_req_sg(*mrq, msb->data_dir == READ
 -- 
 2.50.1
 
