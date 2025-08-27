@@ -1,172 +1,147 @@
-Received: from OS8PR02CU002.outbound.protection.outlook.com (mail-japanwestazon11012019.outbound.protection.outlook.com [40.107.75.19])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 20CC63469E6;
-	Wed, 27 Aug 2025 09:36:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.75.19
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756287369; cv=fail; b=aAuUzuKq1Bg0so8FCe4eFhx/FII0kAJ92Mdb7/sIrBRI4JVV6tBYNhnELOD/S01IFmFfHyXSPBLdaLxXg7Vk8lGtfvFtpA5VPhOe3j7+EVweK/Y++JqtUBrvoy+H0S15lnkCf/BNTxoU0jFl+y0ehUSRGrF2pV6gf+5gXT1hLSM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756287369; c=relaxed/simple;
-	bh=Fzh/RbbnjPBViqQ7wR+ec2P0Unq8VFrGvmOhmxePhmI=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=MSYmLt5di5M0Pj6fkC0k0TlsbRvwSchLMHFRvLrx3ILpR3Kk4liDJ9zhQ/SAmLZDvFFdtAUUWiPY2+f1O1hy5oLZr8VWzxlPkhaC14Y1wkXhnouxTwM9wsw29mDthZz5bHn2k/vR/cihyDhGJjKXabGaRI34GGf0g9UhuotNKgE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com; spf=pass smtp.mailfrom=vivo.com; dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b=OqQ4lUh+; arc=fail smtp.client-ip=40.107.75.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vivo.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CC913451D1;
+	Wed, 27 Aug 2025 09:42:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.45
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1756287762; cv=none; b=nEwjm6CQGT+ALnULD2o6mBDuHpY9yOei6EKhRNECi7QqIpvr0v30qMHJNeJZoil1gow1eMFJ8+dE9zqNm5X/XIBwzCt7p57RY0DJX+j4+BODGt2bkL3a+BEYJo8mIR+M79Tq6+hm3fhjaqVMX866fCEXI0beXWqHtBf6RGi0JKY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1756287762; c=relaxed/simple;
+	bh=A0KNxlVGHuvT2hmaoiFbUd67u8sxODxt85QG+mrnbSE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=j79R7A3GCROk2ruAAuKDSgSrH794YN9YWD2icaxlv/z6gnGiNISfH9hEcl56DsFtszrir5+CdE+J0hNWdTKNLW9DrizVbSY95a7+4Yo3x7feeZlt8Htq+OsgkU5tfKAI01lwHpLbiOwe5iZmvKetqMUmmIMXVLQMIyLDX2feDYQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eq493+Om; arc=none smtp.client-ip=209.85.221.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b="OqQ4lUh+"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=t1QDeBWroIBQ2o0qwXWHAE5dmwXba0RmUjjSjPy1kcNDFAbQ4Z6D8smWmft9DpHQhhV8GbGADQXgfU/n3sQED5SdCgbXHuTWIbFDYMIlcpTNhIbRGVKk28hivcQgX1aHjKsXrmcWdBP0309oEjHAa7DClIMBO5v/8L/mbkOoNddpaaTXMpBXFHLOdWbWZFbRWJ8y65UlJKWoLST/reMHfXzdkMqApoBsY0E9kvPVrgn/uo/6pMuYsMXQ417+VQCst2jK5Dis6nROsiK5e4zNzfyYY4YTTZsHgdyaWefbiyhhZZ7628ZpLK+QsEzjqkCjGNSQsWsM6sKeiaGNU3GZbg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Zy5fSZE+h0sY5yQJkEK1ebT5nqmmH3/ua6k2AbteaL0=;
- b=SI/LYwUDnDcRX/vz6AUraE8IUvhwikUldMl7qgyDC6LUilsPmW3TZ2+NFx7MSlq2rINqwITEr7o314+na+nTfRm0ucCD3WDwmxw7Zpl2ENCXisZ87cHs32Agq9J4Tt7Pl5OHYV1ZnFXCuQOZC59UTDBydkcKLBg3bRm1E4YAP5SpoAHKbJTpKiUUHnK30yexhU+hZrqgGK48xyKwCa8amzMtKr9COFVBXp/35C/SNm5eTHS1mnvJEXNG3tUs7iW0LXabDCDuOrOUaaUbUu0nuYFmUS/s97b472Xtg9OpFw06KtqRE9yrXvT3tPeRlF5bDc83iJQLguvS5MGvW1QMbQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
- dkim=pass header.d=vivo.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Zy5fSZE+h0sY5yQJkEK1ebT5nqmmH3/ua6k2AbteaL0=;
- b=OqQ4lUh+0SJvzMXuKjPKEMr1hEXX2WLw0Au59fFNxVloULpPZbkAzk9RBHm75LpKKmM4jAeNA8VK/mvYn47s29TGuqPpvRSVRfmMI7UTWTS2eT6AT0AJ7XfpKpnPAYk+HMhGmUPPc4xMZ53+zuYS+puxsYggCifq2CnJy3TjMQ/lOXTBnI3mmCioJ4O9WRLOC6Gncp320PWll0Oa4HO9sTTBID5BfFL1RbOPPHKcyP7qUlnhHBGMdo5eLRMaYCjR5eCqfxdr2ITKgym+pONC2FY4SoA0VjMTQqxlV2cR6Khj2pCuaud4dUrowYig/lGLARRbjc1Rme2wBl4G72PSPw==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=vivo.com;
-Received: from SEZPR06MB5576.apcprd06.prod.outlook.com (2603:1096:101:c9::14)
- by KL1PR0601MB5656.apcprd06.prod.outlook.com (2603:1096:820:9c::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9052.23; Wed, 27 Aug
- 2025 09:36:03 +0000
-Received: from SEZPR06MB5576.apcprd06.prod.outlook.com
- ([fe80::5c0a:2748:6a72:99b6]) by SEZPR06MB5576.apcprd06.prod.outlook.com
- ([fe80::5c0a:2748:6a72:99b6%7]) with mapi id 15.20.9052.019; Wed, 27 Aug 2025
- 09:36:03 +0000
-From: Liao Yuanhong <liaoyuanhong@vivo.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Ricky Wu <ricky_wu@realtek.com>,
-	Avri Altman <avri.altman@sandisk.com>,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Dan Carpenter <dan.carpenter@linaro.org>,
-	Al Viro <viro@zeniv.linux.org.uk>,
-	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
-	Jisheng Zhang <jszhang@kernel.org>,
-	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
-	linux-kernel@vger.kernel.org (open list)
-Cc: Liao Yuanhong <liaoyuanhong@vivo.com>
-Subject: [PATCH 2/2] mmc: rtsx_usb_sdmmc: Remove redundant ternary operators
-Date: Wed, 27 Aug 2025 17:35:26 +0800
-Message-Id: <20250827093530.416071-3-liaoyuanhong@vivo.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20250827093530.416071-1-liaoyuanhong@vivo.com>
-References: <20250827093530.416071-1-liaoyuanhong@vivo.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SI1PR02CA0010.apcprd02.prod.outlook.com
- (2603:1096:4:1f7::17) To SEZPR06MB5576.apcprd06.prod.outlook.com
- (2603:1096:101:c9::14)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eq493+Om"
+Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-3c84925055aso2676474f8f.2;
+        Wed, 27 Aug 2025 02:42:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1756287759; x=1756892559; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=s4gNirUawo/2N73RGh/VZFmiZovBEw6Zvsz5pkyBSog=;
+        b=eq493+OmhqNBlrHmEpRZnEz1udJxBnU8wy/od2pb0QmbYFaKRSHxFcsAqHxsJ2TEzG
+         QBqejTxuUzbOVndo32LSzbSSp0rCDlR1WdSjwC3FA3DDY4NQeEbvmkxL+op4Ry1Dw9zQ
+         OORjwVyiKB660OR+sRd3CJ+vaL+LinNcNuq0rl15XuqSNQnmRP4qzaVekokcOd2D+dy3
+         dUFa5PMQezCzhuB179mlCs/5zfgfrc1lKHcDCjIiR915l+JZftBJvMbPLaFLMIvO03tx
+         TYzdoy6btAPmODdrW7nnnPzJthrK5xVn9J6LJC22uVNGCCzA1VZDXL/GZqGef9v9szJ3
+         Li7A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1756287759; x=1756892559;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=s4gNirUawo/2N73RGh/VZFmiZovBEw6Zvsz5pkyBSog=;
+        b=XJtmg7UHoVD30CoT+FKblYoZtABzlu4N3DZ6dhhPiXEfpoV9kU+NAB9KR09ra3D8dk
+         NoYjfcZlSyXnyhkrkSNqUTXFdeh490Syntu19fnH93P7KzOt3T59CcNzH1ks4e+/lboE
+         trtBxQ2orJLgABNv4jpYJ8XmGp8faHXf1VU9YiAtURgcCqwW5EIWaBoIdEdT3zYXf6j6
+         NPArsqk+0psPvBmEhyWitc9Md87LJVbBRar+9rp72JlvQPq1XC4tztmcat2hTuy3iJO4
+         huGbKp4QFhw6E5eaEVJOzL7f8F9juzjhkAWq7IWbYwi3KBNLcNeHwA5OYhRc8sE3T7On
+         Kw2A==
+X-Forwarded-Encrypted: i=1; AJvYcCUSCD9fILJ+28uBSDuNZsU5f7Pv/8U1R315+LkMl037ggSCsORSMSvIIsT8BI1aAx5UD7jzqk9fKgAt@vger.kernel.org, AJvYcCUevdMQ2U6BknqNgrRAup+8086qnra1hkhgnS8kGZwYBR8aHMwvZ2s+9Z+/7FR0Rg7zY+RZ0Iz3@vger.kernel.org, AJvYcCUwjwj2psJ3u1NTKFkvIuSk7XPiUFns5EOn/VS/D1k4GTM648TpyZF0gG4qowylcaP4+o+OyxsHSxh7b3lx@vger.kernel.org, AJvYcCVSuYnGxLEuak2LpXneBP47Ev8FwkhXNK4DhZPDbzn9+gI4U22dlBn6NSOMVxI0Y0agjI18swxby6NK+g==@vger.kernel.org, AJvYcCWHItbwDNtWiQSBUrmigpBGdHJmeHDQ0zMuMT4ythMTaaoWqMrV65v2O0zj9OS5r9kvc4rH2aHBRp92CGS8@vger.kernel.org, AJvYcCWPkyZ4ts8gDVwGjo+LVW3NWm3mKfxk/0RP7WQiR5U9Purif6HzR4nw+5MJutgu3rxI72A1baGBwviE9A==@vger.kernel.org, AJvYcCWVxViLACC6YPP+7vcfD03FZmgBbpqoP5faJU93MPVgOC+qnfp3h8nuDLn2YMvpZkIWCMbD1osNAw==@vger.kernel.org, AJvYcCWtpBu505T4zFzQadPKj4FGpkvdL3mU7z3XzmGucBfhTRR7DuFuaQJG23q8n0xbTQMdKcBcGG8miYUS@vger.kernel.org, AJvYcCX2R2aDmNtVcBcxZWgIWrEiBWjFndVBvXbAzZSXgbZn4VJ5T93jH7HlViJj6gWByHrxRqlVPP704Yim/fS+gFQW@vger.kernel.org, AJvYcCXFCJRx/mLbMBsp6wVmhJjhZVhzFvPeRvdqDo3M3lMOAEMTk7+m55WqSEA8xQzvuXszF1rD@vger.kernel.org, AJvYcCXej6CLaLomb7S9q6UVEExPEuszQhiKxOb0t4ZOUjJGyQq/Oeh/JFpg2PJ5msw8r2CU0aBLZ6vyc3bPZA==@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw3uH3XZwv1aBKWmz5rKen1jHgk3kkc+6ikF+oKvmYvv/hHoraV
+	YZto5Bc54QVEQI5XbHTi6VZ5QWjg0Eyxi1xBd7F8GPRBxGs39WuwJnyaqLgB95lE
+X-Gm-Gg: ASbGncux/p/IiTYT3fmUWgdFSu7VtvaeWMCBAcjB6Kdi5nqKmW7qlNYoWmYaihgfJRa
+	KrH7dgFPBmGdi0WMemHtFgyXlPvXydVsnmhjduvmD0zkRxm6ZU3Y2Ah53Hnt7ZEQgU270wSGFMd
+	mdoeOsI4ZRL3ttNGA0d+PLGkO0amO22cOqwv8Rmg1XdfWpi7cUGvfNd6OJFyAOqmTKvU1fnLd4E
+	Th9WaZbUAhhlQpJRm3w9UK/Ueps4M8gEo/m+fan+l3NYcIlMcsEtPsX5q7iIfoaSiMuXVC5C93R
+	m+7/zdVKbc8avq5UFxnSZmJW7a13AVpMoUrHcpBk/KD6Mv6sehhvrsTVie4QKVQ9c+I3RdVrnro
+	KYBnYQaeDHgtAVLM4ooYW0ZattqFcH+27TLMH8dXnqE/temY5qZKyGbEbJwEdf0Elmg==
+X-Google-Smtp-Source: AGHT+IFkjO5GHbU1+2MUuKQvNL0fwH2etmLb7S57NgBpdq01aCYpWSgROxwdQQpXxfO8aoPZevSNpQ==
+X-Received: by 2002:a05:6000:3105:b0:3b8:d672:3cf8 with SMTP id ffacd0b85a97d-3c5dcb10b6amr14770182f8f.43.1756287759105;
+        Wed, 27 Aug 2025 02:42:39 -0700 (PDT)
+Received: from ?IPV6:2620:10d:c096:325:77fd:1068:74c8:af87? ([2620:10d:c092:600::1:4a1a])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3cc4b102889sm3363615f8f.51.2025.08.27.02.42.37
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 27 Aug 2025 02:42:38 -0700 (PDT)
+Message-ID: <46d09557-1873-4d97-b073-ce0c7296b954@gmail.com>
+Date: Wed, 27 Aug 2025 10:43:59 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SEZPR06MB5576:EE_|KL1PR0601MB5656:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7a8ae9ee-68a2-4c6d-7193-08dde54d23c2
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|1800799024|52116014|376014|7416014|366016|921020|38350700014;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?ivo9OXoDgQAfuss9AmFZWKG1UZmqCbaJeGrEnXxaF+Luv2trbfWUBDj14YcX?=
- =?us-ascii?Q?JCRXRpNDos8sa6NWPs3xQ/Zg+SqcUbcLJWVgtH1jWboL8HJ4kIrg5mN19S2E?=
- =?us-ascii?Q?lvskc3wLzQjScCdF9s+nScJtEh7qbdYYKy+3nCLF8LSbG1wBGfSBXTyfWkSR?=
- =?us-ascii?Q?8aWmaFHLZWNQ+o47hnyW1QmBEzfA7x1pgCn1yu9xrlZfzJE7/xjiBOkNl1Zp?=
- =?us-ascii?Q?91tLdPh11AJ1xvKKOEMkSTd1DfoYTFhmnAgk6IEPrB5yWbModi8MFHZmG33C?=
- =?us-ascii?Q?Y1lZwZJP2gGmC31WNR8HJslDVhBUILvKPNCKxcEKsCwH08hxm5Y1dI5aGoNH?=
- =?us-ascii?Q?OsnQlYM12vtNx6f4/dSEYB0qEhsFuxgeE4JpL1LWeNIfwGLHAeHV3aW5pabc?=
- =?us-ascii?Q?7qHLjWY53AqB12kiP2CnBkgEl4eSXpy9RIPOfxrlh9d1HKxOBI0jU4SsSlNs?=
- =?us-ascii?Q?CzKGI7dzaLCAg7am+wMaeISPzHombEE9zYXkCP2W3NB8Z4gSCOqQ+2MGinRs?=
- =?us-ascii?Q?l/upAdNeKQoHcKZQwKz8NeO6a2H8HCUhsw2RUlZnIeYRF5EXl3kuFvb0ZtMh?=
- =?us-ascii?Q?PCgezaFFoz7mdrkrQAVA8WWcNXYEsQw30qYoLhY+t/FwqVphJfIMRE6mUnG7?=
- =?us-ascii?Q?8axsXIdF0RYgqfOtKV0DNkJIMTnmbXnkwZC3oxsANp2spD2Z310bBaMCxTL0?=
- =?us-ascii?Q?XPMOySByM+HRRlftj62MHs6FiMqBVxc2GJFgdsR/HLHDYmDp5euS+S6/j/FB?=
- =?us-ascii?Q?ni/KCf1ukTlQbJZSv7VhzGNBVEBaexHAiCoDebh+lsa/RMYwwREbZDCSbl8E?=
- =?us-ascii?Q?b1fVxPisxukyZdUNAm7sl+FB+T3qptkwXOaIMFj3qEKR9TuaFmqOgj4uMTYA?=
- =?us-ascii?Q?PSDx20TzJLn7fR8r+2a1Ux5XgQKv1C7XrXNZe+dHfQWy5AauoIsZ0+26THz4?=
- =?us-ascii?Q?Sm7zlLoZYCNR4QtIiWZDtqBHB0EjOnq1pnIFILhjGoYY66nzKUxQ0tqRbDkh?=
- =?us-ascii?Q?UVUp3pnMfHV2FhHc+yrR6Qk5qVUbMqycQmtqpYYOGiog5v+d0m0kHhNd2tRB?=
- =?us-ascii?Q?6UKXdXQeEbtiuDR3Kf2KEF18HKIkpfRqd5PCuB52w7XBzwOy+RG42IEgxmf4?=
- =?us-ascii?Q?Z+JIoIfKcoRG/hI1Pt54o5SxmiI6lTmtfCY7x2JRdRkJ7Vo1Z0cXxxwD86o1?=
- =?us-ascii?Q?BPWNzL70f8zLbKr+Cvx+ydf6TsecgS35zRrVs0p4AxuIC4aEm/rzw1Uk8jW2?=
- =?us-ascii?Q?tWN/PB1nSXuyzhFlXe/Rz0yFVSN8j9gRPN16qdEB7Wfj2AoEbvQxVtxWMQ+s?=
- =?us-ascii?Q?/v2FNNSHAzFP1dJqxYiTXMoB0YTAf+y/k+IlC/2Go5zwQBsYRNKcvEv/G8GN?=
- =?us-ascii?Q?c8zReTB8OChHWf+KwbN+pifTr/Og9Qph6z4+YRpzdwi9BWJXdPD562cKq1rT?=
- =?us-ascii?Q?GcBpBdDTz+D0fzABc5+WTMFhJZFJUNwIBC9WKRsvv8qQYF46Tbn0BcdJMS/Y?=
- =?us-ascii?Q?k/8XTY4T00lJAgo=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SEZPR06MB5576.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(52116014)(376014)(7416014)(366016)(921020)(38350700014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?0W8fUXHaLemJOcelbhihBt77etlQNB/W7ohGbJOUsFcUrpUWzdxvRxSZk+rd?=
- =?us-ascii?Q?0NqHO+tQ25F2Y5+2HYule7ZboZ5A6OK+Zq7oVvJYt7Ek0nbLLh1ePkvrurGO?=
- =?us-ascii?Q?3oA//6rUdtYms7TW7GTGiIIMLvR6/KNy8CkEKMgAS2TuGEO3BIzDOgEedGE8?=
- =?us-ascii?Q?GINMfz1294bQvkwRFpccfIdf42+TwkOfWjHh23hfCdL645Cj8yl7o/jULsgO?=
- =?us-ascii?Q?76/QlVUZKEjumOte49lh/wN/TjlwjnVa6b2WnDL0UcQNSyfVr9J1l3X1UffW?=
- =?us-ascii?Q?iRpFYvG5katf0WPwmgYob9/Qh4WIycVHxCdsYkSNrnIcEep5Hs0yQSBaugcs?=
- =?us-ascii?Q?/wzDtgDzxcdijNhLZ9n+O4rbINghEXzkNgkO+vDw++TXJBn0Ou+bz3WQVR1i?=
- =?us-ascii?Q?pEm8zfhsRWtU2vYIwcNVLvctFcfavEzvOjPH1i9RNAzkWCZ7O7CRT+IqX06T?=
- =?us-ascii?Q?nm+J2rQupPrwtKWBK/iDBF3ZjY3hnY1RRQzPfn531TkfjGesmD+RUW3JoJMW?=
- =?us-ascii?Q?L81mFmzkH1jAUuF+lg0ELZf5sE4Ey6WyVPCXJ3QPviF8aSbkCnZbFG5jGwf2?=
- =?us-ascii?Q?jipz8GVCtLXV0UZbtnQZi6r6jGA2vOHxJBur/YAxg8GfqxbuDpjUKXQdeS+/?=
- =?us-ascii?Q?HtCfuP482t8Zn7uzLUQi7duRUMDHsV6T7Vx8YfhhQXaFxHKycoGi2zvDJzry?=
- =?us-ascii?Q?oNFXJmR2U2QAFxuCSnqez9LNq0G6u4WaCuTxj6llNcYucUpqoUe3/jW5l19h?=
- =?us-ascii?Q?P8uVcIF8tUhE3WX1jKLL5q1XGSFdkvpQjBExfZcpbJQFQp8QTlO1kpMgJ33/?=
- =?us-ascii?Q?jLG263tAg6veH/pZMfXcTlddRNjaQuVZns2k1+vA2IiStRUFnReZ4ylQ4TrN?=
- =?us-ascii?Q?5IoZSh0sGJyvXLXqTYxkLuw1aaVSk3qN+ulQPLGHjZLzqygfjV4C3sN/Rgof?=
- =?us-ascii?Q?xLAhB3csX0570aLmpk+egXjlbGdg8/aVclLp2hZ+pivXr03/mAEA/Hzc3caB?=
- =?us-ascii?Q?zEGK9+mSdVDj3geXP7CHtNHJcq/uSYDKZ7bQpx76q5IYYxafQ3GLdc/iHOCw?=
- =?us-ascii?Q?G5L/LZyTNDtexQaeNa4f2epw2X/7GgoKZ59t+D9TArN7XOwYkk4K+aPalYYh?=
- =?us-ascii?Q?HfUElST2bYx04wfLekaWYt1mK0mg4YCbx78o6SKYf6VmeBXhZvvJGIwfJlea?=
- =?us-ascii?Q?IlBZu7Vu77Oher/XZku0OWTXeHaJcYy3Clp6iASrNAhSU/U6tkHBJq5DfCNl?=
- =?us-ascii?Q?IwEZ+cgT+/u8K2Cs669KBjscKM7bwB3+KhsuF81UdUGx2MA0Cu1/4tHG1K0d?=
- =?us-ascii?Q?Y77dLM0+hsec6e6cwYS5scuUgR/SWPFJ/2Oi78yEd12HABPZHELeq2iw7nzw?=
- =?us-ascii?Q?r9oQkvPleSukzs4uwFMwNTMo5xsJVtJLLz7SmBJHcuPPSuZZM52tM2d35IAU?=
- =?us-ascii?Q?3GdinfQGuzWMCpDetkilg1uznr0Mdp445owbfkt7PmQktjnKwiGDqdmwdgDy?=
- =?us-ascii?Q?5MzU5GOxaegqEQ1AYNrbury+7ZP6vGcqiGMtWYI94vJEVqs9xWdU2Gyo55o6?=
- =?us-ascii?Q?pX4MWyQ2mBL5568RA+QKNWAHxOamiclQQReuv4XU?=
-X-OriginatorOrg: vivo.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7a8ae9ee-68a2-4c6d-7193-08dde54d23c2
-X-MS-Exchange-CrossTenant-AuthSource: SEZPR06MB5576.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Aug 2025 09:36:03.3879
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: NtRWzowHwV7bLxbizCuWwjqnnxl9GrcpEIXEw32c3SIpOJ3v8mymyNGkHL8aGFlr8p0wa2YQ5r+5iSNn7SqfuA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: KL1PR0601MB5656
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 18/35] io_uring/zcrx: remove "struct io_copy_cache"
+ and one nth_page() usage
+To: David Hildenbrand <david@redhat.com>, linux-kernel@vger.kernel.org
+Cc: Jens Axboe <axboe@kernel.dk>, Alexander Potapenko <glider@google.com>,
+ Andrew Morton <akpm@linux-foundation.org>,
+ Brendan Jackman <jackmanb@google.com>, Christoph Lameter <cl@gentwo.org>,
+ Dennis Zhou <dennis@kernel.org>, Dmitry Vyukov <dvyukov@google.com>,
+ dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
+ iommu@lists.linux.dev, io-uring@vger.kernel.org,
+ Jason Gunthorpe <jgg@nvidia.com>, Johannes Weiner <hannes@cmpxchg.org>,
+ John Hubbard <jhubbard@nvidia.com>, kasan-dev@googlegroups.com,
+ kvm@vger.kernel.org, "Liam R. Howlett" <Liam.Howlett@oracle.com>,
+ Linus Torvalds <torvalds@linux-foundation.org>, linux-arm-kernel@axis.com,
+ linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
+ linux-ide@vger.kernel.org, linux-kselftest@vger.kernel.org,
+ linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+ linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
+ linux-scsi@vger.kernel.org, Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+ Marco Elver <elver@google.com>, Marek Szyprowski <m.szyprowski@samsung.com>,
+ Michal Hocko <mhocko@suse.com>, Mike Rapoport <rppt@kernel.org>,
+ Muchun Song <muchun.song@linux.dev>, netdev@vger.kernel.org,
+ Oscar Salvador <osalvador@suse.de>, Peter Xu <peterx@redhat.com>,
+ Robin Murphy <robin.murphy@arm.com>, Suren Baghdasaryan <surenb@google.com>,
+ Tejun Heo <tj@kernel.org>, virtualization@lists.linux.dev,
+ Vlastimil Babka <vbabka@suse.cz>, wireguard@lists.zx2c4.com, x86@kernel.org,
+ Zi Yan <ziy@nvidia.com>
+References: <20250821200701.1329277-1-david@redhat.com>
+ <20250821200701.1329277-19-david@redhat.com>
+ <b5b08ad3-d8cd-45ff-9767-7cf1b22b5e03@gmail.com>
+ <473f3576-ddf3-4388-aeec-d486f639950a@redhat.com>
+Content-Language: en-US
+From: Pavel Begunkov <asml.silence@gmail.com>
+In-Reply-To: <473f3576-ddf3-4388-aeec-d486f639950a@redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Remove redundant ternary operators to clean up the code.
+On 8/22/25 14:59, David Hildenbrand wrote:
+> On 22.08.25 13:32, Pavel Begunkov wrote:
+>> On 8/21/25 21:06, David Hildenbrand wrote:
+>>> We always provide a single dst page, it's unclear why the io_copy_cache
+>>> complexity is required.
+>>
+>> Because it'll need to be pulled outside the loop to reuse the page for
+>> multiple copies, i.e. packing multiple fragments of the same skb into
+>> it. Not finished, and currently it's wasting memory.
+> 
+> Okay, so what you're saying is that there will be follow-up work that will actually make this structure useful.
 
-Signed-off-by: Liao Yuanhong <liaoyuanhong@vivo.com>
----
- drivers/mmc/host/rtsx_usb_sdmmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Exactly
 
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index 84674659a84d..97bc3a2e3cca 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -1169,7 +1169,7 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 	}
- 
--	host->initial_mode = (ios->clock <= 1000000) ? true : false;
-+	host->initial_mode = ios->clock <= 1000000;
- 	host->clock = ios->clock;
- 
- 	rtsx_usb_switch_clock(host->ucr, host->clock, host->ssc_depth,
+>> Why not do as below? Pages there never cross boundaries of their folios. > Do you want it to be taken into the io_uring tree?
+> 
+> This should better all go through the MM tree where we actually guarantee contiguous pages within a folio. (see the cover letter)
+
+Makes sense. No objection, hopefully it won't cause too many conflicts.
+
+>> diff --git a/io_uring/zcrx.c b/io_uring/zcrx.c
+>> index e5ff49f3425e..18c12f4b56b6 100644
+>> --- a/io_uring/zcrx.c
+>> +++ b/io_uring/zcrx.c
+>> @@ -975,9 +975,9 @@ static ssize_t io_copy_page(struct io_copy_cache *cc, struct page *src_page,
+>>            if (folio_test_partial_kmap(page_folio(dst_page)) ||
+>>                folio_test_partial_kmap(page_folio(src_page))) {
+>> -            dst_page = nth_page(dst_page, dst_offset / PAGE_SIZE);
+>> +            dst_page += dst_offset / PAGE_SIZE;
+>>                dst_offset = offset_in_page(dst_offset);
+>> -            src_page = nth_page(src_page, src_offset / PAGE_SIZE);
+>> +            src_page += src_offset / PAGE_SIZE;
+> 
+> Yeah, I can do that in the next version given that you have plans on extending that code soon.
+
+If we go with this version:
+
+Reviewed-by: Pavel Begunkov <asml.silence@gmail.com>
+
 -- 
-2.34.1
+Pavel Begunkov
 
