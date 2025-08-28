@@ -1,90 +1,160 @@
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2432F270EBF
-	for <linux-mmc@vger.kernel.org>; Thu, 28 Aug 2025 18:33:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 659BE30DEA1
+	for <linux-mmc@vger.kernel.org>; Thu, 28 Aug 2025 18:53:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756406021; cv=none; b=mwhhnvHL5OlZudQB+NPtzpO72XGXI7GTTe0y/KlD3ndAeHGMCMa6ysF0/x093IwynygV24tYk8dKFPW6H8H9JEdqRPk/6e9oizYD/qFIo1f18vGgODnpBKjD3+neLgD1DqFpsWqhX2lOmMJ8Iov7oYqv0GR75lsyIFglAZdo50s=
+	t=1756407182; cv=none; b=mnIPgJiK8ZuyZHlBX8eylRt7m2oAl4PlrHLLkeLEwLRsUPuipIKb1XnVDOamIdCWeVvmv909qcw+nR4ORYlR/MI7+7NNx+yd1bPx7Rv6fil3zhFMzvC6VvcSd14kdrBbgCPjlOQWHTrmCfyqRsZXPQXy2qF8Eo34zLsvN3/nDR4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756406021; c=relaxed/simple;
-	bh=Ug7kHWgRNLIoSkrQx+bdDx9etZY66BZYRS/MMV25bdk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=r1w5XOnjNGi7WwnRP39oxaQPWy/NuBxPPFpnYjHVQvTmXYGQKpxAHP8risgP61d5WA6JeLYt/0OsglAbuyJtWTyjiABFOFhDfdaddpkxej0AOPxA8CjD5/6TqWRC0YE+puhWZtaOpQHrhLRB+UXD+UNiJDp1Dki7YKIS4gc51gg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ogQ7rHo1; arc=none smtp.client-ip=209.85.167.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1756407182; c=relaxed/simple;
+	bh=CgULwvBoKBpoCxSt14lLKe61Fel/Z9Jurl+x1vHCKzw=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=ZwRfk+O6KLWoAMxuAbZjPn5I3suMxXUMXx89Cr0xt8dAMVarc8cO+F42GQqVOKd2edOZbW/zGRTg+PH22orn6dpUafGaMlbMeGxZiFwO8+TuOhoLwTxBxSeOnV1J4A7j9fyIrvtssqw5X87fSMukU26n+MgoQ9EPP28wd6zcgng=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R8p7Ha3R; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ogQ7rHo1"
-Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-55f42dcbf4aso1301747e87.1
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Aug 2025 11:33:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1756406018; x=1757010818; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ug7kHWgRNLIoSkrQx+bdDx9etZY66BZYRS/MMV25bdk=;
-        b=ogQ7rHo1xUsh1MRii+DSgw79BIwRz1F5WcxON3n/wkvNlKijTpVC/UnPIEcbgpIt8C
-         fj0seneEGr1pIaqZLwOkBfUCQTczUwNMhxErC4NlbMt7Pcn9g6oQclglzaQ71N8qSOWA
-         BAYqezz4iM5ppEPnXfJGdpOGswdlzmYUZNyY4Kxz4L1Su8h4kXpPVk4zOIn57Vdqr8SX
-         6JSslz3pscHIbA7Ox04Jdi3mRCfN7cx0cdky+GlQHGQ0TI53gc3vY0uOWWtye2+KPZmm
-         VGrjDeTLP+mSoXmbzo++ENz/c/+VGtwvLKK2hEOJuU0hxDmkKZsVm/Vd8tO4IpopCT3C
-         hxeA==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R8p7Ha3R"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1756407179;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Ox+fdqHLvqvHkCQcV7jSITHMPKa6EWT2tpRcTnamaBA=;
+	b=R8p7Ha3RsimdvS9flqbcVndVCvHKgo45EKtOmpQA8EIPCsvVGQi+bsTJYQGLlSym62TPlG
+	p7RGFYB6qGaBFpesTWpbAc0aJ6i28QbXhC/jzDcrZVlKGiIH7D2i2WuUSvMew555dBjmfX
+	cq0jXEd8BmSh/AsNs51wNUj19YTY9Xg=
+Received: from mail-il1-f199.google.com (mail-il1-f199.google.com
+ [209.85.166.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-445-GAl7_1HBNuKKlKvzZAaXXQ-1; Thu, 28 Aug 2025 14:52:57 -0400
+X-MC-Unique: GAl7_1HBNuKKlKvzZAaXXQ-1
+X-Mimecast-MFC-AGG-ID: GAl7_1HBNuKKlKvzZAaXXQ_1756407176
+Received: by mail-il1-f199.google.com with SMTP id e9e14a558f8ab-3e8dffcf41eso1108105ab.0
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Aug 2025 11:52:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756406018; x=1757010818;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Ug7kHWgRNLIoSkrQx+bdDx9etZY66BZYRS/MMV25bdk=;
-        b=gLuj7NuLJlbQsplHzmy8MsipkMnM3wOeEWtVFJQiRVuNHu5pCz5CYeGtSgJRMotSW0
-         eO6Jc6FuiMISSd4i0R+5z9OoLfYexGOr3SzPQ7tMcShmSPvQBSc+I6uEcNj7kCVNjywZ
-         oT26grmxc5cI5wbQA70Kb2Ca5+z29XSFgId6O7c96JquhYaknSf4ikb1pDwVSEe2ZfpA
-         /GeEPP1SFQG4xBWgcnB7k/VWYmRGHjA2qgoHQ/gOhkN0QnQToTo+359vqj3tYbn/HLVY
-         Wbjg9Y3Y9pufPcYsS1kmAzR2kRzCJNON/vS0lZEhXATRG0dSj700cvatvGYJ2dTah1QS
-         Rwow==
-X-Forwarded-Encrypted: i=1; AJvYcCVW/BgZBbCEtqz0sPWkBCsyKh36M+1PHJQfpJ2rUKLuLbO0gMhgU+7A4l8S66qkP5wRB+d/N2CrNRU=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx8hcmIqyAYELVCVOOafycpZI87D239YFnFrpQLFPeAFz5PHNN/
-	6Ra92MQLNHC4x6haLcwSdPEmug9VW+qIlACq5iglvRzJsJTq1vS1RZkZTQWYbUCBEyfWfoyUBon
-	a+ofEwuoOCPPi05N8py8y/mIsND9z8NnEBsOAucBckw==
-X-Gm-Gg: ASbGncvrtAhyjKS5JIdMB0pOHT1zt4zB7MhwuFLroAa0+hw90MMEmevIgvkMxQPOECb
-	RNUnGNTxjImpdDBKnviPvKyHjIg7eoqFhxJFHb5k2Cawz3r7KSk92dpTI+t1zHnKCHHUv+XPRmh
-	0EDetghn4CK9HXUnJvXEqMEZE+lWaAuG0rmT/bb3H7Dt5E9I40MDA7W0MU2vVKt1bh5NoXkpwS0
-	oQzCwA=
-X-Google-Smtp-Source: AGHT+IGb4FhQgeb6pylU+foopmFlzVZy35WsHuHgEvOZCfi3ebP7rSk+t1LD48Shfg9PDb2NUWM5svtDXgFS2btqXyA=
-X-Received: by 2002:a05:6512:6cd:b0:55f:4e8a:19a4 with SMTP id
- 2adb3069b0e04-55f4e8a1b35mr3937880e87.23.1756406018199; Thu, 28 Aug 2025
- 11:33:38 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1756407176; x=1757011976;
+        h=content-transfer-encoding:mime-version:organization:references
+         :in-reply-to:message-id:subject:cc:to:from:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Ox+fdqHLvqvHkCQcV7jSITHMPKa6EWT2tpRcTnamaBA=;
+        b=hpn945YfMmEJI7DLJHshMEWiYMyiaAGxGw5mPrTPiwb6UjH9jbdkqMXBBUnoaNGiWa
+         cIO0cj6nse7RMm9CJ7TX+MlOhO7oJxUjmuSLVN49VJvkauliI/Pak51EJMNf35A7U80W
+         43f8WWPZ5SDBSJ1JPzLbdrhcGagGqaAnJd5aVCZnRzPJ7ctLI3eHlkjXGkBtAlFxZsKX
+         t9ZL51Vx300YjWKr97NGA+ocOgWkBQkbtYrm3s4utbT51c/P4AjuUDchfcdwW4tVxdJg
+         MDalSVHK6FXbrz2WEtug991dDbJDhUiDdplUOokXEDNLh35BlHAgMGuRtsPWE1znCGJy
+         pwfA==
+X-Forwarded-Encrypted: i=1; AJvYcCXStsA+W9fuh+0WB/SeK/vbJlCrrE8EVMXJNShhTM1rUS7F6WIG4lqddPR82MNSISMfVYIzb/hjMtw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwxCbHFm23dxlgybVk9e6dY4veG4iIbSixDpk3DZ+0cACNcM4nn
+	Y35SH1hQQcUYTONVayUBzY5POfFewM7xbTcL1GtPPTX4lsxx6fbJaZsONVIx7XTsYqwSmEoWtdp
+	8cTUWhLfZqMMtM33+VuzWLcpvY1kmVNs4pvqO8pmauE+Rq8OxYk61icBiys66nA==
+X-Gm-Gg: ASbGncvLvkKRwCCvjm0WiV863TJORl+nx/9jWkp7MyJTuUzAcidCDbMojrQfGNpe7VR
+	pcyy+9tEJwZZA4b/E5Cq+VVK40SOtev9C3qZI07qnNNmOBychvQ/eCaaZh9YFJfV/yAcjZIWeff
+	WF22uOhNw7uscQj6fcT1Jid/lfWaUP09aviWSDbET8PMEIX20bi9aQhnZ9u1iiT6VOLmiGatktC
+	74nZUHzDh+d90O6UiL8N1ugYjns/T6cGhIl7E6LbNQo5sI+4ml6kjrmf1MQRVqga/h/EC10dkyM
+	2ow5hPWjhkI66tQk8g5vmPad1ieZZyBLTuDRqPZEa7o=
+X-Received: by 2002:a05:6e02:1a86:b0:3ee:cb14:e90f with SMTP id e9e14a558f8ab-3eecb14ea03mr61888845ab.7.1756407176422;
+        Thu, 28 Aug 2025 11:52:56 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEP6X5C8fKyFwSWmjzqPdfkbd7PprjZnYQm1xQXLb3Ss2KjE+y/MhfTqxlaUhO3jzRNfBiTrg==
+X-Received: by 2002:a05:6e02:1a86:b0:3ee:cb14:e90f with SMTP id e9e14a558f8ab-3eecb14ea03mr61888495ab.7.1756407175934;
+        Thu, 28 Aug 2025 11:52:55 -0700 (PDT)
+Received: from redhat.com ([38.15.36.11])
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-50d78c67b4dsm47783173.7.2025.08.28.11.52.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 Aug 2025 11:52:54 -0700 (PDT)
+Date: Thu, 28 Aug 2025 12:52:51 -0600
+From: Alex Williamson <alex.williamson@redhat.com>
+To: David Hildenbrand <david@redhat.com>
+Cc: linux-kernel@vger.kernel.org, Brett Creeley <brett.creeley@amd.com>,
+ Jason Gunthorpe <jgg@ziepe.ca>, Yishai Hadas <yishaih@nvidia.com>, Shameer
+ Kolothum <shameerali.kolothum.thodi@huawei.com>, Kevin Tian
+ <kevin.tian@intel.com>, Alexander Potapenko <glider@google.com>, Andrew
+ Morton <akpm@linux-foundation.org>, Brendan Jackman <jackmanb@google.com>,
+ Christoph Lameter <cl@gentwo.org>, Dennis Zhou <dennis@kernel.org>, Dmitry
+ Vyukov <dvyukov@google.com>, dri-devel@lists.freedesktop.org,
+ intel-gfx@lists.freedesktop.org, iommu@lists.linux.dev,
+ io-uring@vger.kernel.org, Jason Gunthorpe <jgg@nvidia.com>, Jens Axboe
+ <axboe@kernel.dk>, Johannes Weiner <hannes@cmpxchg.org>, John Hubbard
+ <jhubbard@nvidia.com>, kasan-dev@googlegroups.com, kvm@vger.kernel.org,
+ "Liam R. Howlett" <Liam.Howlett@oracle.com>, Linus Torvalds
+ <torvalds@linux-foundation.org>, linux-arm-kernel@axis.com,
+ linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
+ linux-ide@vger.kernel.org, linux-kselftest@vger.kernel.org,
+ linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+ linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
+ linux-scsi@vger.kernel.org, Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+ Marco Elver <elver@google.com>, Marek Szyprowski
+ <m.szyprowski@samsung.com>, Michal Hocko <mhocko@suse.com>, Mike Rapoport
+ <rppt@kernel.org>, Muchun Song <muchun.song@linux.dev>,
+ netdev@vger.kernel.org, Oscar Salvador <osalvador@suse.de>, Peter Xu
+ <peterx@redhat.com>, Robin Murphy <robin.murphy@arm.com>, Suren
+ Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>,
+ virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
+ wireguard@lists.zx2c4.com, x86@kernel.org, Zi Yan <ziy@nvidia.com>
+Subject: Re: [PATCH v1 31/36] vfio/pci: drop nth_page() usage within SG
+ entry
+Message-ID: <20250828125251.08e4a429.alex.williamson@redhat.com>
+In-Reply-To: <20250827220141.262669-32-david@redhat.com>
+References: <20250827220141.262669-1-david@redhat.com>
+	<20250827220141.262669-32-david@redhat.com>
+Organization: Red Hat
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250826075812.82305-2-fourier.thomas@gmail.com>
-In-Reply-To: <20250826075812.82305-2-fourier.thomas@gmail.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Thu, 28 Aug 2025 20:33:27 +0200
-X-Gm-Features: Ac12FXzCysAJtxk2vG2apRImmPlR_dR4-9QzpsS002mZ0t6e2m5C_RfHnYJm73c
-Message-ID: <CACRpkdaVHTh7MJfngQ=qhe_ZfZxr7b025G=tAwsCvBfpXVYZEw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mvsdio: Fix dma_unmap_sg() nents value
-To: Thomas Fourier <fourier.thomas@gmail.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, 
-	Binbin Zhou <zhoubinbin@loongson.cn>, Pierre Ossman <drzeus@drzeus.cx>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-On Tue, Aug 26, 2025 at 9:59=E2=80=AFAM Thomas Fourier <fourier.thomas@gmai=
-l.com> wrote:
+On Thu, 28 Aug 2025 00:01:35 +0200
+David Hildenbrand <david@redhat.com> wrote:
 
-> The dma_unmap_sg() functions should be called with the same nents as the
-> dma_map_sg(), not the value the map function returned.
->
-> Fixes: 236caa7cc351 ("mmc: SDIO driver for Marvell SoCs")
-> Signed-off-by: Thomas Fourier <fourier.thomas@gmail.com>
+> It's no longer required to use nth_page() when iterating pages within a
+> single SG entry, so let's drop the nth_page() usage.
+> 
+> Cc: Brett Creeley <brett.creeley@amd.com>
+> Cc: Jason Gunthorpe <jgg@ziepe.ca>
+> Cc: Yishai Hadas <yishaih@nvidia.com>
+> Cc: Shameer Kolothum <shameerali.kolothum.thodi@huawei.com>
+> Cc: Kevin Tian <kevin.tian@intel.com>
+> Cc: Alex Williamson <alex.williamson@redhat.com>
+> Signed-off-by: David Hildenbrand <david@redhat.com>
+> ---
+>  drivers/vfio/pci/pds/lm.c         | 3 +--
+>  drivers/vfio/pci/virtio/migrate.c | 3 +--
+>  2 files changed, 2 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/vfio/pci/pds/lm.c b/drivers/vfio/pci/pds/lm.c
+> index f2673d395236a..4d70c833fa32e 100644
+> --- a/drivers/vfio/pci/pds/lm.c
+> +++ b/drivers/vfio/pci/pds/lm.c
+> @@ -151,8 +151,7 @@ static struct page *pds_vfio_get_file_page(struct pds_vfio_lm_file *lm_file,
+>  			lm_file->last_offset_sg = sg;
+>  			lm_file->sg_last_entry += i;
+>  			lm_file->last_offset = cur_offset;
+> -			return nth_page(sg_page(sg),
+> -					(offset - cur_offset) / PAGE_SIZE);
+> +			return sg_page(sg) + (offset - cur_offset) / PAGE_SIZE;
+>  		}
+>  		cur_offset += sg->length;
+>  	}
+> diff --git a/drivers/vfio/pci/virtio/migrate.c b/drivers/vfio/pci/virtio/migrate.c
+> index ba92bb4e9af94..7dd0ac866461d 100644
+> --- a/drivers/vfio/pci/virtio/migrate.c
+> +++ b/drivers/vfio/pci/virtio/migrate.c
+> @@ -53,8 +53,7 @@ virtiovf_get_migration_page(struct virtiovf_data_buffer *buf,
+>  			buf->last_offset_sg = sg;
+>  			buf->sg_last_entry += i;
+>  			buf->last_offset = cur_offset;
+> -			return nth_page(sg_page(sg),
+> -					(offset - cur_offset) / PAGE_SIZE);
+> +			return sg_page(sg) + (offset - cur_offset) / PAGE_SIZE;
+>  		}
+>  		cur_offset += sg->length;
+>  	}
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Reviewed-by: Alex Williamson <alex.williamson@redhat.com>
 
-Yours,
-Linus Walleij
