@@ -1,142 +1,190 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f51.google.com (mail-ej1-f51.google.com [209.85.218.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CE6719FA8D;
-	Thu, 28 Aug 2025 06:56:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E3E42DCF4D;
+	Thu, 28 Aug 2025 07:18:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756364173; cv=none; b=fdZC2HACDRlqMJAd8ytzI05D4zeKqVVRAd9UWJY+y0TCw12aO1m3jsAjZ3M4TdQj/PGpgUT9cAYnw5+N3fo7YM+De12PSHBP4sInjfKN5N3BGSGwLjK4cSc0XGAtkWc9KYmuqDMrEpH2rJ9yB6E/PzWFBhALjWdFEbVNPXzoc5A=
+	t=1756365535; cv=none; b=uLfLQZwW0bNd2Zw90eRt+5RGUAQzPfGSZVjn2RkQINEYbsEdtbUudbPFOpQ6tkr9nhvf6s48r8lbaBXOb8JzK/OvmEY2bcttouWteeRd78Ht3OIBo7Aympz1bnFpAUpbanpJL9L+ngOVufHTn38okqPSiTtlGlhIag8eqRWHr1U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756364173; c=relaxed/simple;
-	bh=SO3WVlFuenuLJDzM92EELg2b8Pa4R1OJ6xC3R69TLYc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kjZHkgnurwrVD0THQDYz7Y/5v++VFn7L7qV9sYSzhWjuXfesdmRwWhVuBVhA1XJKkba2ZrM1hBSGQg4yDiGoejb/swY5jT67z6ifUT8Ku3QXW0/ETCZP7YQ5AVTTLIlRLUgP42ZDpAKoJTKjB77G3KvRi63JIf9Q/Aqpqmz9Cjk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QDMRUiU6; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1756365535; c=relaxed/simple;
+	bh=RLiNIIZsDGQt0B7qhXbwVc0kC0z981GdJgTavaVVo+U=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=pPMCurDfcsANH35QmR6eeVJnkKCFzdmBmMnE6i1xTIOtEnQLxIYSu7Ph+m3lWbbkA6lbi94SHiXyJvKrf70Eo7RmCss9VGeuVKhvK0dj3QScxxGb6UP4ew2TZTqhblYDF+TdA8aPdRecYFM+rGXNIEydYhwrcH7q1otgwI9boG4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Joedf28s; arc=none smtp.client-ip=209.85.218.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QDMRUiU6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A60DCC4CEEB;
-	Thu, 28 Aug 2025 06:56:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1756364172;
-	bh=SO3WVlFuenuLJDzM92EELg2b8Pa4R1OJ6xC3R69TLYc=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=QDMRUiU65/NKhyUSoifzA/2KQYug/emesBLJ05oZhTZ4WCWGM9+Zp0I2eplR7Cphl
-	 2UOzWI9xSdqAxrxIQFzOMe6iwzD2drrId8mRGQHWVgSteUDhVO56Hg/je1xbfxozkn
-	 dGq+KT4b+UtjT9r25dfWAyf6KWZhR0KV8r4GD5EAqpeVJqsk+SKcDmOscdEws2xqwf
-	 QwNriMKoHIBpPz09AVUDYsVtK71xTaPrf4PqRcnvso87J8Rax92XYvcx9MOyFwxael
-	 dHQqf9W0T+B8bD+UUuKhjs0AC2rS3l81qB24oeJgbRu7H9PeeO216N5jYJDT8xli3F
-	 gYua7NP+Q+kPg==
-Message-ID: <bab2e05a-140f-460c-8c28-358e37727c6b@kernel.org>
-Date: Thu, 28 Aug 2025 08:56:07 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Joedf28s"
+Received: by mail-ej1-f51.google.com with SMTP id a640c23a62f3a-afe9f6caf9eso87484066b.3;
+        Thu, 28 Aug 2025 00:18:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1756365532; x=1756970332; darn=vger.kernel.org;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :reply-to:message-id:subject:cc:to:from:date:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ACPidqQG6DQZNVxh12NaJPKP3Jkf06hyqyPjQ1p5F2E=;
+        b=Joedf28s79TmVflu0u9ETaRtcuAFlF1Q+cRkj0AoHTEbZRc9ov+0LbwWVeBAOSwM5F
+         9se5m/hnaH2x9U9mqdgE1yd5LsJv+u+CbNQ1vyDpUOv4Sxm9oBRTEhDgF7ojkoYgmqJI
+         Y+SYq6V0dueE4LmZ6hHjIMNaKrWG5O8L9dHNl5Abc9vZo3kIWwP1KgyG3SwielmoovyI
+         04xgZFJ3k7phq4cCj4+/Bh/1W9xQExRwrMWhGVQQ4Y3kzygOA3KtT/uESQQs997Dil2z
+         b1DUNkXQZ6WUjeRA6av4rhkRQhoIfBHuMVhVo2zPjT/ORNlCvwABaWjy6/Iedzdn4eJh
+         AJHQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1756365532; x=1756970332;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :reply-to:message-id:subject:cc:to:from:date:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=ACPidqQG6DQZNVxh12NaJPKP3Jkf06hyqyPjQ1p5F2E=;
+        b=h7nRzuuMPqBM56Qor/d+U1MMwfU5rv2tNgKuU9BK3rrxOlM5k2dabPmNeeMyegNLXD
+         nOQl6Z6SghPGx9aibPNrqLQmcMNbs6B1vFUsVYLpoXhYwTqar3co2m0dZRu2mSY5ZJhn
+         datmC1JW7ctj+YfFezmbdMkrpNneqVI8bMbCo90t7qa25lGqFxw2YCbQu109y+ydKxP5
+         9oY4/cdVDDp+A34vqW3ddUkMwQKlZKbBfSXw8fBsrQnMSxciEwbnlqNDsORLjeWbrNGc
+         dIyNuxvTeCn5PC2zO2wsZMywBgr5qIuVePxVvBhYw+bp6WttNkOu4mAqzOaJEPLjm3PG
+         NbDw==
+X-Forwarded-Encrypted: i=1; AJvYcCUFLN461B7xX+aGitmy9WuYcSo7gPHYEzT2DSG5gglyYOoornH5S9jAsfDLGEfxq3qw2+r3FIozvAzV@vger.kernel.org, AJvYcCUdbarWq6z1eY1kJQIoM5C1kQSDv/wb0uM58WBskTOg06IFI+8J/aFXU7l3nbGo2i7UMS5E/+9UjqQH9g==@vger.kernel.org, AJvYcCV1abVnSk19u44tjzQ71TeWBmJWURclSiy/bflMR5w7t05I9fdxgKxMhMAC+90qH4owxtay@vger.kernel.org, AJvYcCVx+GXCKhwSoRFUJ4IJmArkRt4jegWeCNwvynGvLXD4/O2WhsW9GYLVGc4CvhqvDvSXIehBBC3G3A==@vger.kernel.org, AJvYcCW3xnuW0hj/5HKEs9PIkTmRIuW/vRZFT7hfhQO9Nv92f0BbFQnAYs4R41IMiTfRmGNk7/tA4NkXQqPfvQ==@vger.kernel.org, AJvYcCW91AEe/r8hDSUDTfmZBb1y3+17At/zKPFo/16Rj5EYcce6zZSkf/qlPtgP8afOuoJH1WzJ+U5SmL8P642z@vger.kernel.org, AJvYcCWRvh/RpFcSW4JMJ0y+aVIPjL22p5Jru5cgB84sewQV7SE9m/LPzjVntn07+gDDpyCFRycqbo5Y@vger.kernel.org, AJvYcCX+DNv7A5c4yvLXTsQsHhsrzwqhFvfHO5R4pEpqnjdcqCp1rKDj6EEyw/dqLmNykfObkJdasZFkM5L3mA==@vger.kernel.org, AJvYcCXiFjJCEUpPrjBN6ZReHRdoDObDbhKMzVMNpbqhu+d6eEfCk4zr8Vc36gyOka4DwhyHsAzCGXFUcJAJNVzJWNmO@vger.kernel.org, AJvYcCXjJPPIj10LXuqzOAvGWKQ86mQMCWuiJ/q2IXdTYYuXFtYzlaUPvsWbD5ez4MpKVA/U3VYUAdyhbRlA@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz2F96dDb9eVMlmDVaQA5HMcDPai70QF1BoTLh8OJ6kR96Fy2/I
+	x26FUYqT5HOOD1MUZkx6z/v9eGljUAVxV0S25pntRAKPxNQVqfelRtZz
+X-Gm-Gg: ASbGncuC4y3Zz4kTEt0Yv820rsqQxg96Tjaz12Ob+EaBF0HrYNOZke8/q8ToDkekLlm
+	LSGO1vBUGpOv/8YMgwG4OQ18cKdTLWYflSwH3UBCoxfACmIo9iraP+6EL8pxaLF21ybYRzH44XA
+	bLifwbx9AEofNbbYu4+KqGmJDUTh+mhRPhZWPxYvjR8iV/YwsZmwED8O9GVwZ/sELvA5YyoX8B3
+	kofM37I/JO8oZPRhGLL6+F4h6yCoJXRTXgJkvUNwwarOau1A4KNLoYR+KKU2YA7dsDf+5264WLY
+	fMCCyMAXdkatmAHw8tyBge03VNz/kkgCX2EfqynqrRgvOGBWJ8iYB6rLQoh1ksrE0TZNylrhfRl
+	g9pYjVvHTnaNZ/Ub9EGnb1T58H5Uav+42lWR1
+X-Google-Smtp-Source: AGHT+IEf18QCG44U8jBJ4evHstdtd0oL4Hr6BpN08BPT0cHmsLXVki3gbBRZpXohq9eRx3IUTA8+0Q==
+X-Received: by 2002:a17:907:d2a:b0:afe:dbfb:b10e with SMTP id a640c23a62f3a-afedbfbb935mr140730666b.47.1756365531421;
+        Thu, 28 Aug 2025 00:18:51 -0700 (PDT)
+Received: from localhost ([185.92.221.13])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-afe98ade972sm616427066b.50.2025.08.28.00.18.50
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Thu, 28 Aug 2025 00:18:50 -0700 (PDT)
+Date: Thu, 28 Aug 2025 07:18:50 +0000
+From: Wei Yang <richard.weiyang@gmail.com>
+To: David Hildenbrand <david@redhat.com>
+Cc: linux-kernel@vger.kernel.org, Zi Yan <ziy@nvidia.com>,
+	"Mike Rapoport (Microsoft)" <rppt@kernel.org>,
+	SeongJae Park <sj@kernel.org>, Huacai Chen <chenhuacai@kernel.org>,
+	WANG Xuerui <kernel@xen0n.name>,
+	Madhavan Srinivasan <maddy@linux.ibm.com>,
+	Michael Ellerman <mpe@ellerman.id.au>,
+	Nicholas Piggin <npiggin@gmail.com>,
+	Christophe Leroy <christophe.leroy@csgroup.eu>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	"David S. Miller" <davem@davemloft.net>,
+	Andreas Larsson <andreas@gaisler.com>,
+	Alexander Potapenko <glider@google.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Brendan Jackman <jackmanb@google.com>,
+	Christoph Lameter <cl@gentwo.org>, Dennis Zhou <dennis@kernel.org>,
+	Dmitry Vyukov <dvyukov@google.com>, dri-devel@lists.freedesktop.org,
+	intel-gfx@lists.freedesktop.org, iommu@lists.linux.dev,
+	io-uring@vger.kernel.org, Jason Gunthorpe <jgg@nvidia.com>,
+	Jens Axboe <axboe@kernel.dk>, Johannes Weiner <hannes@cmpxchg.org>,
+	John Hubbard <jhubbard@nvidia.com>, kasan-dev@googlegroups.com,
+	kvm@vger.kernel.org, "Liam R. Howlett" <Liam.Howlett@oracle.com>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	linux-arm-kernel@axis.com, linux-arm-kernel@lists.infradead.org,
+	linux-crypto@vger.kernel.org, linux-ide@vger.kernel.org,
+	linux-kselftest@vger.kernel.org, linux-mips@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+	linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
+	linux-scsi@vger.kernel.org,
+	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+	Marco Elver <elver@google.com>,
+	Marek Szyprowski <m.szyprowski@samsung.com>,
+	Michal Hocko <mhocko@suse.com>, Muchun Song <muchun.song@linux.dev>,
+	netdev@vger.kernel.org, Oscar Salvador <osalvador@suse.de>,
+	Peter Xu <peterx@redhat.com>, Robin Murphy <robin.murphy@arm.com>,
+	Suren Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>,
+	virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
+	wireguard@lists.zx2c4.com, x86@kernel.org
+Subject: Re: [PATCH v1 01/36] mm: stop making SPARSEMEM_VMEMMAP
+ user-selectable
+Message-ID: <20250828071850.kl7clyh6e75horlk@master>
+Reply-To: Wei Yang <richard.weiyang@gmail.com>
+References: <20250827220141.262669-1-david@redhat.com>
+ <20250827220141.262669-2-david@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/5] arm64: dts: qcom: lemans-evk: Extend peripheral and
- subsystem support
-To: Wasim Nazir <wasim.nazir@oss.qualcomm.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>,
- Richard Cochran <richardcochran@gmail.com>
-Cc: kernel@oss.qualcomm.com, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-arm-msm@vger.kernel.org, netdev@vger.kernel.org,
- Viken Dadhaniya <viken.dadhaniya@oss.qualcomm.com>,
- Sushrut Shree Trivedi <quic_sushruts@quicinc.com>,
- Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>,
- Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>,
- Mohd Ayaan Anwar <quic_mohdayaa@quicinc.com>,
- Dikshita Agarwal <quic_dikshita@quicinc.com>,
- Monish Chunara <quic_mchunara@quicinc.com>,
- Vishal Kumar Pal <quic_vispal@quicinc.com>
-References: <20250826-lemans-evk-bu-v1-0-08016e0d3ce5@oss.qualcomm.com>
- <20250826-lemans-evk-bu-v1-3-08016e0d3ce5@oss.qualcomm.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250826-lemans-evk-bu-v1-3-08016e0d3ce5@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250827220141.262669-2-david@redhat.com>
+User-Agent: NeoMutt/20170113 (1.7.2)
 
-On 26/08/2025 20:21, Wasim Nazir wrote:
-> +
-> +&gpi_dma0 {
-> +	status = "okay";
-> +};
-> +
-> +&gpi_dma1 {
-> +	status = "okay";
-> +};
-> +
-> +&gpi_dma2 {
-> +	status = "okay";
-> +};
-> +
-> +&i2c18 {
-> +	status = "okay";
-> +
-> +	expander0: pca953x@38 {
+On Thu, Aug 28, 2025 at 12:01:05AM +0200, David Hildenbrand wrote:
+>In an ideal world, we wouldn't have to deal with SPARSEMEM without
+>SPARSEMEM_VMEMMAP, but in particular for 32bit SPARSEMEM_VMEMMAP is
+>considered too costly and consequently not supported.
+>
+>However, if an architecture does support SPARSEMEM with
+>SPARSEMEM_VMEMMAP, let's forbid the user to disable VMEMMAP: just
+>like we already do for arm64, s390 and x86.
+>
+>So if SPARSEMEM_VMEMMAP is supported, don't allow to use SPARSEMEM without
+>SPARSEMEM_VMEMMAP.
+>
+>This implies that the option to not use SPARSEMEM_VMEMMAP will now be
+>gone for loongarch, powerpc, riscv and sparc. All architectures only
+>enable SPARSEMEM_VMEMMAP with 64bit support, so there should not really
+>be a big downside to using the VMEMMAP (quite the contrary).
+>
+>This is a preparation for not supporting
+>
+>(1) folio sizes that exceed a single memory section
+>(2) CMA allocations of non-contiguous page ranges
+>
+>in SPARSEMEM without SPARSEMEM_VMEMMAP configs, whereby we
+>want to limit possible impact as much as possible (e.g., gigantic hugetlb
+>page allocations suddenly fails).
+>
+>Acked-by: Zi Yan <ziy@nvidia.com>
+>Acked-by: Mike Rapoport (Microsoft) <rppt@kernel.org>
+>Acked-by: SeongJae Park <sj@kernel.org>
+>Cc: Huacai Chen <chenhuacai@kernel.org>
+>Cc: WANG Xuerui <kernel@xen0n.name>
+>Cc: Madhavan Srinivasan <maddy@linux.ibm.com>
+>Cc: Michael Ellerman <mpe@ellerman.id.au>
+>Cc: Nicholas Piggin <npiggin@gmail.com>
+>Cc: Christophe Leroy <christophe.leroy@csgroup.eu>
+>Cc: Paul Walmsley <paul.walmsley@sifive.com>
+>Cc: Palmer Dabbelt <palmer@dabbelt.com>
+>Cc: Albert Ou <aou@eecs.berkeley.edu>
+>Cc: Alexandre Ghiti <alex@ghiti.fr>
+>Cc: "David S. Miller" <davem@davemloft.net>
+>Cc: Andreas Larsson <andreas@gaisler.com>
+>Signed-off-by: David Hildenbrand <david@redhat.com>
 
-Node names should be generic. See also an explanation and list of
-examples (not exhaustive) in DT specification:
-https://devicetree-specification.readthedocs.io/en/latest/chapter2-devicetree-basics.html#generic-names-recommendation
+Reviewed-by: Wei Yang <richard.weiyang@gmail.com>
 
+>---
+> mm/Kconfig | 3 +--
+> 1 file changed, 1 insertion(+), 2 deletions(-)
+>
+>diff --git a/mm/Kconfig b/mm/Kconfig
+>index 4108bcd967848..330d0e698ef96 100644
+>--- a/mm/Kconfig
+>+++ b/mm/Kconfig
+>@@ -439,9 +439,8 @@ config SPARSEMEM_VMEMMAP_ENABLE
+> 	bool
+> 
+> config SPARSEMEM_VMEMMAP
+>-	bool "Sparse Memory virtual memmap"
+>+	def_bool y
+> 	depends on SPARSEMEM && SPARSEMEM_VMEMMAP_ENABLE
+>-	default y
+> 	help
+> 	  SPARSEMEM_VMEMMAP uses a virtually mapped memmap to optimise
+> 	  pfn_to_page and page_to_pfn operations.  This is the most
+>-- 
+>2.50.1
+>
 
-> +		compatible = "ti,tca9538";
-> +		#gpio-cells = <2>;
-> +		gpio-controller;
-> +		reg = <0x38>;
-> +	};
-> +
-
-
-
-Best regards,
-Krzysztof
+-- 
+Wei Yang
+Help you, Help me
