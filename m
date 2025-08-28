@@ -1,39 +1,39 @@
 Received: from smtp1.ms.mff.cuni.cz (smtp-in1.ms.mff.cuni.cz [195.113.20.234])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 791572EF66E;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 252EA2F0690;
 	Thu, 28 Aug 2025 09:51:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.113.20.234
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756374705; cv=none; b=HKPtCxU5tDBi85kmDsnnP4nJj7JfYDy5M+y8//33X3D8XhrKVLnwFKeT0KXHHX/E7NBou0/CEzk/gJRNLf1H8uJLYek5NDw8PcViRkmggbjWuY/suwGamiZWh2iz6/e288HdfTs+1RCLayNyDVo6ZwZxGmIzX5zbojFl1vtFSbg=
+	t=1756374706; cv=none; b=fP27IFnBqRN2IP/fomPDc2upPDy7rEMxZz4fsL/ljaPlVC/s2so2guPqxwIpqpHn2w3VLUyj6zl3iyZH0K8EhSrmcscVpls5ZU8iDnuzYr5GcoX4BcWho82YbNAb+byf/iiWLx4q55cAqRxS3bmaZd62fP0rlSZPrrkL+loi7vI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756374705; c=relaxed/simple;
-	bh=TskH+7GDDut36drXu3SgCZtTHGjWiJr+vY2lVLri/UE=;
+	s=arc-20240116; t=1756374706; c=relaxed/simple;
+	bh=WJI7Nd2+jQ7AaubXsM8kTP+G3+wwCUgpfmopC+FK8tE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=io3P1O5qqaxqOvWC0OqOJfa6NYI8uqj1ZZzFYXmPRYZP7qH1Rz4I0tHDrF4fnrNZuATAmf6vZGtTb0oUE7+UL+0s1JyyJZs+vBz2sI6tyCo1wJkyoAvrDmxb2txyKGnOsqGYmjl6pqRqu9SGC16IIOpFJDIFWfZjwFRIJfjyb5w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=matfyz.cz; dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b=MUVDZN2i; arc=none smtp.client-ip=195.113.20.234
+	 MIME-Version; b=OJPyAwv/1fKxuGLu9jHjbv5SMUr3TLn5dwFhXEfXbNlLoMvOFq6f/Uhudjj6eSt2DG9C3QV1E7FdYttm52+VEtRTGPIkUfvvD4PW88o8WDQq8gg5sZAVeugM4vNFLmmZxZ7Btg2yFvGivVuQofuMk8Mx8ryzu6HWpdxepE5+4/4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=matfyz.cz; dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b=R53Ja39T; arc=none smtp.client-ip=195.113.20.234
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=matfyz.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b="MUVDZN2i"
+	dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b="R53Ja39T"
 X-SubmittedBy: id balejk@matfyz.cz subject /postalCode=110+2000/O=Univerzita+20Karlova/street=Ovocn+5CxC3+5CxBD+20trh+20560/5/ST=Praha,+20Hlavn+5CxC3+5CxAD+20m+5CxC4+5Cx9Bsto/C=CZ/CN=Karel+20Balej/emailAddress=balejk@matfyz.cz
 	serial F5FD910E8FE2121B897F7E55B84E351D
 	issued by /C=NL/O=GEANT+20Vereniging/CN=GEANT+20Personal+20CA+204
 	auth type TLS.CUNI
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mff.cuni.cz;
-	s=submission; t=1756374655; x=1757674655;
-	bh=vepzPBjYXSUFrYqzyS7A/BpKb61T6nS2eQf0DEUW5nM=; h=From;
-	b=MUVDZN2iNt1PiRmodgpTFDAbxAKL1QrEsMFcxjJ7epGCyeqYpCkPiSbtFbgdBwzZq
-	 2AkNMtp4SNHshqGaIay29Fi6/6NMqXPK7qF4sc9wvFtoyzRgvb3tbMV/Qzr0Opghdo
-	 JCo/4KPGQK33BmMov+OPJ90Qy0dBRebBKPHLuWdH9JVmB0pd7zt+7PwvvvXAN5CFiV
-	 avdNQg6njbH+roGFommiwaHRUaRq1y/z174WHdeeumf9VLU6xrt0LAAm6G4P+m7/fD
-	 WCu9Li6PfOY2sB9XfnyM8XRfmtFo+Y1TT08Qi9bBhEg6ttaieo4iWpo2fkgJAZaJHj
-	 L3ndID46aW0SQ==
+	s=submission; t=1756374653; x=1757674653;
+	bh=jgSVyNvKT8tyvT/0XuoEo9brNM1Cm43Vrq9buFP014k=; h=From;
+	b=R53Ja39T30QOM1NlhT7e/7bA2JxalQbl0TlvpE5eVDx3h8RYX+YmMfQ0LBIIrKYqD
+	 pLhj0hGeLDy089hgAZNBuDRBpi72pQTsgqr5j6++/zKaA3zQedSCYONaN9FYnbmsQs
+	 e/VcHUXb/DjlStD2gxnqcZz5RP4Mz6WVTyd1zxHPO5EVj4+zk1HxeOqkJ5/AiXSiMW
+	 eHZZw3n9q0nW2CoY8R9ww3DneGrDepqsYowyUxeurxYPh8kRkNdX8qWGjX5pX7Dvgt
+	 8G4/pFsYzf72/NkNQFO2iXVLBtfQYUjkAlNUph+bRscAJaK2jVQnskxT3oFUHbJ0/W
+	 ZkD7ymMSPFtAg==
 Received: from localhost (internet5.mraknet.com [185.200.108.250])
 	(authenticated)
-	by smtp1.ms.mff.cuni.cz (8.16.1/8.16.1) with ESMTPS id 57S9osTn046282
+	by smtp1.ms.mff.cuni.cz (8.16.1/8.16.1) with ESMTPS id 57S9oqFd046278
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
-	Thu, 28 Aug 2025 11:50:55 +0200 (CEST)
+	Thu, 28 Aug 2025 11:50:53 +0200 (CEST)
 	(envelope-from balejk@matfyz.cz)
 From: Karel Balej <balejk@matfyz.cz>
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
@@ -48,9 +48,9 @@ To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
         linux-kernel@vger.kernel.org
 Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
         Karel Balej <balejk@matfyz.cz>
-Subject: [PATCH v2 3/3] arm64: dts: samsung,coreprimevelte: add SDIO
-Date: Thu, 28 Aug 2025 11:49:04 +0200
-Message-ID: <20250828095028.24503-4-balejk@matfyz.cz>
+Subject: [PATCH v2 2/3] arm64: dts: samsung,coreprimevelte: add touchscreen
+Date: Thu, 28 Aug 2025 11:49:03 +0200
+Message-ID: <20250828095028.24503-3-balejk@matfyz.cz>
 X-Mailer: git-send-email 2.51.0
 In-Reply-To: <20250828095028.24503-1-balejk@matfyz.cz>
 References: <20250828095028.24503-1-balejk@matfyz.cz>
@@ -62,124 +62,50 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Set some basic properties of the SDIO card of the samsung,coreprimevelte
-smartphone.
+Bind touchscreen for the samsung,coreprimevelte smartphone. The
+downstream code sets the VDD voltage to the exact value of 3.1 V,
+however it's been empirically verified that the lower bound used here
+sufficies for the proper operation of the chip and is thus used for
+power-saving purposes.
 
-The SDIO is used as an interface for WiFi, Bluetooth and FM radio
-serviced by the Marvell 88W8777 (SD8777) chipset. Support for this
-chipset is currently not in-tree because the firmware is not available
-in linux-firmware, however it is possible to trivially run it
-out-of-tree using the mwifiex and Marvell Bluetooth drivers with some
-caveats.
-
-Link: https://lore.kernel.org/r/20231029111807.19261-1-balejk@matfyz.cz/
 Signed-off-by: Karel Balej <balejk@matfyz.cz>
 ---
-
-Notes:
-    v2:
-    - Drop the sdh2 pinctrl configuration which was originally included by
-      accident.
-    - Drop broken-cd on the node as it's ignored with non-removable (thank
-      you to Duje for pointing this out).
-
- .../mmp/pxa1908-samsung-coreprimevelte.dts    | 72 +++++++++++++++++++
- 1 file changed, 72 insertions(+)
+ .../mmp/pxa1908-samsung-coreprimevelte.dts        | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts b/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts
-index 0ac1a24dc410..81806f655c88 100644
+index 54131b0e5617..0ac1a24dc410 100644
 --- a/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts
 +++ b/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts
-@@ -10,6 +10,7 @@ / {
- 	aliases {
- 		mmc0 = &sdh2; /* eMMC */
- 		mmc1 = &sdh0; /* SD card */
-+		mmc2 = &sdh1; /* SDIO */
- 		serial0 = &uart0;
- 	};
+@@ -311,6 +311,11 @@ pmic@30 {
+ 		wakeup-source;
  
-@@ -286,6 +287,69 @@ sdh0_pins_2: sdh0-pins-2 {
- 		pinctrl-single,input-schmitt-enable = <0x40 0 0x40 0x40>;
- 		pinctrl-single,low-power-mode = <0x208 0x388>;
- 	};
+ 		regulators {
++			ldo2: ldo2 {
++				regulator-min-microvolt = <1900000>;
++				regulator-max-microvolt = <3100000>;
++			};
 +
-+	sdh1_pins_0: sdh1-pins-0 {
-+		pinctrl-single,pins = <
-+			0x170 1
-+			0x174 1
-+			0x178 1
-+			0x17c 1
-+			0x180 1>;
-+		pinctrl-single,drive-strength = <0x1000 0x1800>;
-+		pinctrl-single,bias-pullup = <0 0xc000 0 0xc000>;
-+		pinctrl-single,bias-pulldown = <0 0xa000 0 0xa000>;
-+		pinctrl-single,input-schmitt = <0 0x30>;
-+		pinctrl-single,input-schmitt-enable = <0x40 0 0x40 0x40>;
-+		pinctrl-single,low-power-mode = <0 0x388>;
-+	};
+ 			ldo6: ldo6 {
+ 				regulator-boot-on;
+ 				regulator-min-microvolt = <1200000>;
+@@ -328,6 +333,16 @@ ldo14: ldo14 {
+ 
+ &twsi3 {
+ 	status = "okay";
 +
-+	sdh1_pins_1: sdh1-pins-1 {
-+		pinctrl-single,pins = <0x184 1>;
-+		pinctrl-single,drive-strength = <0 0x1800>;
-+		pinctrl-single,bias-pullup = <0 0xc000 0 0xc000>;
-+		pinctrl-single,bias-pulldown = <0 0xa000 0 0xa000>;
-+		pinctrl-single,input-schmitt = <0 0x30>;
-+		pinctrl-single,input-schmitt-enable = <0x40 0 0x40 0x40>;
-+		pinctrl-single,low-power-mode = <0x208 0x388>;
-+	};
-+
-+	sdh1_pins_2: sdh1-pins-2 {
-+		pinctrl-single,pins = <0xec 0>;
-+		pinctrl-single,drive-strength = <0x1000 0x1800>;
-+		pinctrl-single,bias-pullup = <0x8000 0x8000 0 0xc000>;
-+		pinctrl-single,bias-pulldown = <0x8000 0x8000 0 0xa000>;
-+		pinctrl-single,input-schmitt = <0 0x30>;
-+		pinctrl-single,input-schmitt-enable = <0x40 0 0x40 0x40>;
-+		pinctrl-single,low-power-mode = <0 0x388>;
-+	};
-+
-+	sdh1_fast_pins_0: sdh1-fast-pins-0 {
-+		pinctrl-single,pins = <
-+			0x170 1
-+			0x174 1
-+			0x178 1
-+			0x17c 1
-+			0x180 1
-+		>;
-+		pinctrl-single,drive-strength = <0x1800 0x1800>;
-+		pinctrl-single,bias-pullup = <0 0xc000 0 0xc000>;
-+		pinctrl-single,bias-pulldown = <0 0xa000 0 0xa000>;
-+		pinctrl-single,input-schmitt = <0 0x30>;
-+		pinctrl-single,input-schmitt-enable = <0x40 0 0x40 0x40>;
-+		pinctrl-single,low-power-mode = <0 0x388>;
-+	};
-+
-+	sdh1_fast_pins_1: sdh1-fast-pins-1 {
-+		pinctrl-single,pins = <
-+			0x184 1
-+		>;
-+		pinctrl-single,drive-strength = <0x1800 0x1800>;
-+		pinctrl-single,bias-pullup = <0 0xc000 0 0xc000>;
-+		pinctrl-single,bias-pulldown = <0 0xa000 0 0xa000>;
-+		pinctrl-single,input-schmitt = <0 0x30>;
-+		pinctrl-single,input-schmitt-enable = <0x40 0 0x40 0x40>;
-+		pinctrl-single,low-power-mode = <0x208 0x388>;
++	touchscreen@50 {
++		compatible = "imagis,ist3032c";
++		reg = <0x50>;
++		interrupt-parent = <&gpio>;
++		interrupts = <72 IRQ_TYPE_EDGE_FALLING>;
++		vdd-supply = <&ldo2>;
++		touchscreen-size-x = <480>;
++		touchscreen-size-y = <800>;
 +	};
  };
  
- &uart0 {
-@@ -367,3 +431,11 @@ &sdh0 {
- 	vmmc-supply = <&ldo14>;
- 	vqmmc-supply = <&ldo6>;
- };
-+
-+&sdh1 {
-+	pinctrl-names = "default", "state_uhs";
-+	pinctrl-0 = <&sdh1_pins_0 &sdh1_pins_1 &sdh1_pins_2>;
-+	pinctrl-1 = <&sdh1_fast_pins_0 &sdh1_fast_pins_1 &sdh1_pins_2>;
-+	bus-width = <4>;
-+	non-removable;
-+};
+ &usb {
 -- 
 2.51.0
 
