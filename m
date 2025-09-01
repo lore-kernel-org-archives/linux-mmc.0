@@ -1,226 +1,114 @@
-Received: from AM0PR83CU005.outbound.protection.outlook.com (mail-westeuropeazon11010006.outbound.protection.outlook.com [52.101.69.6])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F6C930F523
-	for <linux-mmc@vger.kernel.org>; Mon,  1 Sep 2025 09:26:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.69.6
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756718776; cv=fail; b=IxQTZhy30MgtRmUWwNaNbx72sxoA6WxOJziHZT3Lm9LHJf5OgmqOjZnzBOQcU5WpO3OT2VaHyW6/ec7H/y4i/EKpvqZlB4zRI9PM/vIvD5u6KHugosexJ9Ix89ItAVE+cyMkgkmK0HQSvCLDUGipqpx7PxdKwV/NXDhly3kMPnE=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756718776; c=relaxed/simple;
-	bh=hPflKntlkc76Sh8H1AH2lNnukj5RWodhugTHTG85zb4=;
-	h=Message-ID:Date:From:Subject:To:Cc:Content-Type:MIME-Version; b=cf/lCnbWT9/bxC/FNtlvwL+T/TXliPiHlxG0+5WCVxIT+Mg/e84rYpfJVDaspILLevxaJ7jO6JhcOxm7W1ASjbnTEavijBScbqMAJ4TFIFPtxDpXKk0wOwZ1A539QMFyKiXX1z4hJFiT5//0jc3qdLOhcBmXPQJzOw+a1DGOy6s=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com; spf=pass smtp.mailfrom=siemens.com; dkim=pass (2048-bit key) header.d=siemens.com header.i=@siemens.com header.b=HTKuVoXd; arc=fail smtp.client-ip=52.101.69.6
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=siemens.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1F6A30C340;
+	Mon,  1 Sep 2025 09:42:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.174
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1756719733; cv=none; b=myawXISIxQZmIqeWE9YOgTJPh8ltdck3gBHA3lY7ql3qgEbo0JvUpQlMocC1bYcO1p4ci+xZLsMbDADDQBTHTc5sInik69R2XABlmh8PgYVfuQSOQMzKCl4EHRi9VJAEdPCAt1D7WJrb/B1HT8Te92pg33mRohtmfNZlSYcDCcs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1756719733; c=relaxed/simple;
+	bh=ohQLwwvPn0VEsLSuNdmI2iuYYuo3aJYR2idTa/WzA7w=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ZnvO7XxgyMoBimUzGzF9iMXGQgzfCK1EHYz4uLdbVYyke9DFncL6iGHAeZ93oK5Gmn/oQcczewLnmG3mFE6j8DaLX+qHhDzXYPKE/i+5eO7N1Aa7uEJMPHYK7mBejL8A0S144XOvO1SMSucildXRUP6TKgqHx5CX+alE4iPqhxg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mfPp6oCE; arc=none smtp.client-ip=209.85.214.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=siemens.com header.i=@siemens.com header.b="HTKuVoXd"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=wkjd373OepyEpPCEMM78LsG2MHq8SU4hAHRHabp1ddIDHYqGGTaNao1HSxigpNfkifJk7o8XpwXMF5arSniGdgwIHW5w9EEFPss1Pu7l78SnorVLtLXkwL98zo8vAHzUCmMEVt6JR4pScgpwwLTtAhEwHP4zGMUlN/YU1z3W4NiQ+7CBh8nZttZPA+d+JslGpgeY/UuBs7bsTWba2XqM7u4e9mocqxqb283whhcap+JhjtUtfarQquzmaMwAwHLxi/Jh1x2HaPHUZWCcfKhPw0HhMb88mMvPZEclcxn6TFX1HuI2IAoAhjxyxbNrzRtlwAbM4Hih+v1HzUMzQtGggw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=NvnSG8Yvl6PRlan7N794A7NXZc5hS9vTJAf40lxRSPw=;
- b=Dj5gubE6jHQHG3kX2M/AP54hLLjd13p258N+EEdtQZVIHRpDEANI/mTDkiEmFynGTkyJeC8Pmt/8ScO8Tni4PGsugWUjL+9xhi2nzD4u1hnGZ+/2A+19nt18R9Ml+oKh8MFKbwFC4LuG+F60/Qjqk7/5N3/zQwEPbRRtHXsQVYU2Smk6aigC4TypFwnLkwS3m2t9amH3eiUxIYgWtMQPoX6+DaEfjgFnqRzpnewAp95ag0uIriqvIYuDeUOx5N8cNNvjEGLvpH8X6QgzWrzfDbEt/JZbSH5yngNLDFbZkYskF5ByoCzZ2SuC8A4EYUU8nAMlEttEY8sGeU1OOQdWig==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=siemens.com; dmarc=pass action=none header.from=siemens.com;
- dkim=pass header.d=siemens.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=siemens.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=NvnSG8Yvl6PRlan7N794A7NXZc5hS9vTJAf40lxRSPw=;
- b=HTKuVoXdzfasWpen8B3Vdr7oiwk5KTL82GKOmDeQBtXZqad+26kVU2sJPUk8Wbo71tPdmnJurXkyjRcozcRPHdqmgYVlT12AlNfHqdvpvKJG8hhreHBodFAj2+F+hgB1gjUrloaxKgbjYl8uOYEgqoZylGFISGM7yc3+o0dx9R3yq4jIc5ADU2ALylLMccWGK+yNSP2YB+tj5xjP6iD+coW+2PXGYqqMBAI5KkKD9LCffIBbXmvZKqbB6aN9L4YmQwLdp4w+/QqD8dM5UzVvLLLKgFemm2QsDk2V5Q39Zo9tD4BAsvtkJ4w2ND1WAky2ggOxJ+QUavge+cyntDzJkA==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=siemens.com;
-Received: from AS4PR10MB6181.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:20b:588::19)
- by DB4PR10MB6118.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:10:38d::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9052.14; Mon, 1 Sep
- 2025 09:26:10 +0000
-Received: from AS4PR10MB6181.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::8fe1:7e71:cf4a:7408]) by AS4PR10MB6181.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::8fe1:7e71:cf4a:7408%5]) with mapi id 15.20.9073.021; Mon, 1 Sep 2025
- 09:26:10 +0000
-Message-ID: <31fb75e1-abf4-4fb2-b838-074edbee5423@siemens.com>
-Date: Mon, 1 Sep 2025 11:26:07 +0200
-User-Agent: Mozilla Thunderbird
-From: Jan Kiszka <jan.kiszka@siemens.com>
-Subject: [PATCH] mmc-utils: Warn during rpmb read-counter on expiry
-Content-Language: en-US
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
- Avri Altman <Avri.Altman@sandisk.com>
-Autocrypt: addr=jan.kiszka@siemens.com; keydata=
- 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
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: FR5P281CA0046.DEUP281.PROD.OUTLOOK.COM
- (2603:10a6:d10:f0::9) To AS4PR10MB6181.EURPRD10.PROD.OUTLOOK.COM
- (2603:10a6:20b:588::19)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mfPp6oCE"
+Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-2487a60d649so51195805ad.2;
+        Mon, 01 Sep 2025 02:42:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1756719731; x=1757324531; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=jNIN9h8cyWuApq0UbnkozeYfxMWI9Ej0AKWovtcXtK8=;
+        b=mfPp6oCEmFcm58o9pzNukUvaSxNzNdzmwd1qmz9+bs3fQh7UhwgbZ8+l2JMgsSI9Wr
+         V9FcuxlZ1TL+9MrORzouR+SzLzmQ6ojlo4MYTzLG8WFrkWEcHJqkRdHj7hjQICVMzOFf
+         HME+K92HsxxdfGWIPzMqLwz86NBGHXfn9DSPwuX+UL4vJlAIOchL3j5LB6/03BBve5LU
+         kiPY7MaNgElcdXXSegDnmuCdW6DSqkJdEPNmfvBwtyS/Tg6y+OP33NQb1mgGfWeDU6jx
+         rQJq+C39uqsO1D4V8F4y6tEC3aryTZtb3Fv5FfOoZuN+ifR8pNbcuFz2wdATb9TgTMui
+         YXWg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1756719731; x=1757324531;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=jNIN9h8cyWuApq0UbnkozeYfxMWI9Ej0AKWovtcXtK8=;
+        b=fS7ggBXJlrjDpo20C6fdhu4Ak0a4BSNzn1JOLWxnuhiwQzlvSrsu4DD1XT6IoXlX1O
+         xXYzTfdxd37qk8ZTjIHOpWZAVCt5dZbNB2jpwj7VUmo25HGvrNuFXHnxX1VUtrB1gLvf
+         L7HZ0aHWLAo5FYNCuwLCo1fRTpTYvgnMQX9y0yKZR0k80AwtdI9YPgjGSr6bag9gtoXC
+         gqcbAg4To82tTdQxt5eywx8Q2kBcOfmKE1bTFfWEav+Bv0xzdEpVJpYNTACg9qV7p04B
+         ewH4ttfX35WMnljSYvkeEZWIQMPHRK4VUCfXyAUuN81UNt5Z6mg2kcysYF6SRjV0d0NL
+         yCJQ==
+X-Forwarded-Encrypted: i=1; AJvYcCU2SSMYaFfImV5iSTjL+JImnToz51paJNejkxpxvcbCo0N6wtRXouuDh/SyupeVmzJe/eRr38mpcnvbLf0=@vger.kernel.org, AJvYcCXG+NYtj0Gg2CQCTIOvUL2uVu6aEanKvrP4bxD0bYk6mnqjNiL+zhYV9TP3zlpmZV6+ZCZXdO7u@vger.kernel.org, AJvYcCXfAsobcaEiCDBhVgaIHN5SZzuiu7EYNH64mNyvV1/97ZkAw90+sVH0UDfg05MqTzEnO6D2w2p/csjm@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxt+1F8KC2gNC0stH2JPbFwQ9vAHgg3p/Sp8jSX8YobBMwPQBIX
+	mOfsS1RaQYp9AC0/3h+qe5b99zO3ofWAFxnzoCVRkBHrHls9U2WD3WDbazPx9A==
+X-Gm-Gg: ASbGnct50HGiQisq1MNTF+iwTtBecCmDyJElHmex4+jNbAGB76DisqjREJVk+mj5Cut
+	Yc9cLvdUKxdd5rH8ca0cBS3JknhrZ19yekfPfNSNwk4G+VJZ7Ie2DQf5Wk0zRyW1GGdPiLcXx2u
+	Ur+ij21TnBCgsQ8MURGkgcMeR649wt4XGpBg2ceSSvUSKgMdE0N0q+QKiaygaE/74yEcCwIGaCQ
+	UHDYVnd9yLAQpXeUZ3Kf7/RYr01p6ZNX/68f374mdn+YwnO7iViQyMcJCk1wEK3Ab+V6rff9K4v
+	h6Z9v3B34Bvq2FiWSnDrLqAZAZmiEjiLggMOBwQoACJFE4akZSTVwT5hg1SLyzW2T8/X6mm1VcY
+	yQpReHR8IxLt3vIHKs5BO19nEUMBKh14a0FYN4a7F7qSRcqfG9mKMdEY358BgMUGySwmSyvEmBX
+	3bdwMM1fKob4Zv8OOIHk+UvpwAEJ/J
+X-Google-Smtp-Source: AGHT+IH0gdsbntbjYezrx0g/78WyXO7oaxTBqLhqv4o0IUual83x7S/xcfq+SrSjkhXBZrLWkWpDCA==
+X-Received: by 2002:a17:903:2cf:b0:248:9e56:e806 with SMTP id d9443c01a7336-24944870a36mr113727055ad.12.1756719731052;
+        Mon, 01 Sep 2025 02:42:11 -0700 (PDT)
+Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2490370298dsm100246745ad.4.2025.09.01.02.42.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 01 Sep 2025 02:42:10 -0700 (PDT)
+From: Ben Chuang <benchuanggli@gmail.com>
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org
+Cc: victor.shih@genesyslogic.com.tw,
+	ben.chuang@genesyslogic.com.tw,
+	HL.Liu@genesyslogic.com.tw,
+	SeanHY.Chen@genesyslogic.com.tw,
+	benchuanggli@gmail.com,
+	victorshihgli@gmail.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org
+Subject: [PATCH 1/2] mmc: sdhci-uhs2: Fix calling incorrect sdhci_set_clock() function
+Date: Mon,  1 Sep 2025 17:40:46 +0800
+Message-ID: <20250901094046.3903-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: AS4PR10MB6181:EE_|DB4PR10MB6118:EE_
-X-MS-Office365-Filtering-Correlation-Id: 3a91966e-9d53-4716-516f-08dde93994ff
-X-MS-Exchange-AtpMessageProperties: SA
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|1800799024|366016;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?MjJ6ZUNuUitTZk1CRlNVQVROVVBqcnVXUTFYRWd1M3BwZ0s0VGRmRmYranJx?=
- =?utf-8?B?RHQ3WjhNRld3VWR3eHNTV0hJVlovNjdqN1ZtRWMyWnpzY01LVEYxYTViVXZW?=
- =?utf-8?B?VlJMbm1xaFVGUVdSL3V1VWJ2M1BSUnRvT09nSEMva09OSmdQdHhGQW84UE5G?=
- =?utf-8?B?SXkvS2xJTnp2eUhpSHdXMnBZV2t5U3pMZlNIOWhVNlRnbWpjSyt4NTBoUXdw?=
- =?utf-8?B?cXo4L0g1bktMTjZwUFM5bW14YmhHUldaM1NyUFY1ODlsdnZPRG9OZmxORGVK?=
- =?utf-8?B?OWtUci9BQSt4UUFoSlZ6UllBSk0wZVErdFplbDg3bXp0TFZXMWZKOWlGQXky?=
- =?utf-8?B?RFdSZklOMkxSZVFEZTNBb1VqQzFRcDQ3U1ZOclFxN1JMc1BLTEdWMU56ZnNv?=
- =?utf-8?B?elpiT3RtUjNXanV3eEFxNkoya1dPTEZjYmxsdmtmWDc2UGFDWlFKckQ2N3lC?=
- =?utf-8?B?VEFtbENsUzg0UGpaRWRYNitnK0I2eU5QbS9ueWVyNVF6S2J2SFhYTmtpakMy?=
- =?utf-8?B?RnNKL1pieUYrbGpZOUdEVHZuVSs4VFB0bVhRRm5oLzYraVJtTGNTNUZQQjRR?=
- =?utf-8?B?bTZPbUJxY2VIbVVvZGRoV1hFeExkMElSMklLTmJlZlRleDBRYmNlaDljOXN3?=
- =?utf-8?B?VCtCQ1dPTmVqM1o3LzhabUlYWi8yWm1hMVZjblc4Smw1YTZkaDdUanFKZEhT?=
- =?utf-8?B?QmVjSVBQYmN4S2Z2TXRKdHdhMHlJUm5TMHpmSG1HZFRXVlV1TXVMeHY0bGlJ?=
- =?utf-8?B?cCtJNDREa0k4aDlZUTJvenZsRTVHd1FLT0dRUEZXb0JHSUtTTGtvbFM2VHdN?=
- =?utf-8?B?WVdUSlRkL0QwdUhtd01oREZNQktyenNIK0sxMytwclFyMUFEZFJyOEFJdDly?=
- =?utf-8?B?Tm85Q1Rpbi80Z0Z6ZHJ5QS9TOWhOMmovTXJMeEoyTlJVdENGWXJtS2ZERW9l?=
- =?utf-8?B?L0dQZ2NPNWNtbVZNU24vZGhrWFMwdFlqZSs3Q1NZYjJVcnUyT0ZyR3R0UkNH?=
- =?utf-8?B?WDlkeVJGMVhyNTFlRm91Q0MwTU13TU1wZll0em1JOHhLZVZQWWpKLytRalJG?=
- =?utf-8?B?eU5zeElncnZtMkE2ODVqekd5Wms2RERpcTUveVUxMjcxSXJWS1dSaXFHcVNo?=
- =?utf-8?B?N3hSTFliVHdpZGoyZy9Bb3JwNU8yKzJFbEVReVh1N2c1dkJDbXM2U0xMK3RG?=
- =?utf-8?B?WXlzT3FpeUxodnZ4R0JtRGxHOW00ek9laDZIcUdUR25wYmZFUlNkTHFMZGpS?=
- =?utf-8?B?aktKUkdFeVYra2x0b09DSHRiTnpmVFMrZFJUclRoM3BXbnFaU0huMk1NL2xP?=
- =?utf-8?B?eVNZTEQybW8yVVZQdXVMLzg2dWt3NVBlNVc2UGNTNXhpNDZwV0tMYS9XNGNS?=
- =?utf-8?B?UmtISEI2ZVYxb2hlNlE0MEs3SzV2QlYyUEViWEsvcHF2OFRSWXVqeGxNMlV4?=
- =?utf-8?B?YzhXaTlJRzgvVE81SkR2aVZSb2pRT3lGNElscnFuKzBPb0hnbG9uMnE0YmN3?=
- =?utf-8?B?RjdPWVpod3I1NFNiRjFSSWZoMXc2eVZnK2NGMDNVRno2T0pjQVJCV1JkcnFJ?=
- =?utf-8?B?YnIzaUZOS3RIajBaN2lweWZ3anBGRnRyVVNLSytWKzUwT1J2WUx1QWVtaUI5?=
- =?utf-8?B?WVhsMXl0eldFbi9jRDZqZmZwNFBsYXUzUVdLRk5HMlNGZVFiSFZpY1hJUnVw?=
- =?utf-8?B?M29Nc0owZnFxRFNlMDA3VmF0RkI5YTk2SS9qRU1VNHZ6MWh2akxNQ0FjdUlU?=
- =?utf-8?B?RnpHY29Pc29xdEZmbWhNZWpiWTd1NkJyM1Y0bUp0OVp2QVl4T3JLUGdxR2Qr?=
- =?utf-8?B?NjhSZUR5bFloSnJ6ME5XL2tHamsyOEZNRkdVN0hDUW8wWXdXTnMzbjNPOEJQ?=
- =?utf-8?B?Z1VwTHkzcGJ0QzVxZlI5dXgwUy94SFZpVGY5NkhNVDF1VklUL253N2VLZEtP?=
- =?utf-8?Q?s8TdLDgCKB8=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AS4PR10MB6181.EURPRD10.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?SHNJTSt6SGZ2Sjc2NmFPcFg5MlZDUXFPeXVBazM0N2ZFaytRVkJjcDRTWUtx?=
- =?utf-8?B?UWIydkR5enFTRUFOcWdBQzJyRm1DWUljcVRnZFFVdHRjeEhvUlI4aWp4ekQ3?=
- =?utf-8?B?SXVwcFJlaWU0aXAvb0NpSjg3Wk1walVlM1pGUy9NNmNKMS9pREZUZDlYc01F?=
- =?utf-8?B?R1J1QitNYkFsTjZYZ0tiNlpTbWs5QXljWXRXYXlqVlI4KzFxMWFQTmxITFFw?=
- =?utf-8?B?MCtScTNqYkhLUUlObmtIQ1JYNkUzczZSdzhiUmdFTU5vQXB4Qm8zQTJJbWdW?=
- =?utf-8?B?S21SRTJmeFJhR2hFK2IrWDRqRHFKV3IwaDhuRWlDK1k3VjFHMDJOWWZyekFZ?=
- =?utf-8?B?SW8zRTlmOFdpSmVmeU9kdk9mNEcxbGsrRFh5ZFFIK2plRDBTQ0R0SE9oQnE3?=
- =?utf-8?B?dTZGbkZjd3FGK1dLc2RrWFIrWEkvRStmUHYveGlLRzFSNS9ud3VxYmx0VHd4?=
- =?utf-8?B?L2IzVzh6TFNkS3d2RnA5SEoybDM4bktFemFhT3JJTnNGS3MyaXRtS0NBM2JE?=
- =?utf-8?B?eEdZNVVyRmR1T1ZuTWNFeFFwZXVWK2RmYzhrdVk5UDg0UktITU1XZFlFNkQ1?=
- =?utf-8?B?ZlRhYjlBaUdYZ0NvblhEZG9WMWRYdGpSaUhXRmVZaXFXakFHaE9RbHpKWVNT?=
- =?utf-8?B?azJsaWFta0FIQzVzSGVXMVRBTEkvbENLeXVYSHRJTDkzcXNqUlU2TmZWNWd6?=
- =?utf-8?B?SVhQV0lJN0ppOG5wdm5TbDRIdzBTRUdBNnhQeWkxSkt3ZHBrbDFoQ2VaSWsz?=
- =?utf-8?B?bUxuaEtQVUliV1Y2RjRkMlk2d0RqQ0RrYm5SNEE0Q1pNTzRIb0JqUkxJem5t?=
- =?utf-8?B?VDJMNjg1OCsxK1l2SnA0emJiVnlXRGs0eXI1UGU1VE5BU1l4cDRtMitFK3B5?=
- =?utf-8?B?UlM1bkg1Vi9FNTJoOTF4SCtsK1N4STcrempoUnFUa2N5cXFKSmUxL1JMK1lG?=
- =?utf-8?B?YjFSMWZEK08rZG9rUUtoQUpETE5uTE1WQkQ0TkoraXZJYlpnYkVyV0U1ZTdN?=
- =?utf-8?B?aUJyOUVOelBaV3ZqZHdQRlRCWHNySmt4cVd0MElaWWVZbXQ3SFMzYWtQaTlv?=
- =?utf-8?B?L3l5Wk1yRXFQQk9JM3crZVBmTEFFK3EvU3NEK3pUNEZ6K3c5YURPTzkreHNy?=
- =?utf-8?B?R1ByYWhuaUZIUzVHclZUa1hrTHlGTlE5bU9zVjlMOWptczMxNHdwbXNQZEFs?=
- =?utf-8?B?S3hHcUd6d05ZWnlxVlhRbkNheDc3RVRrbWlhbjNPRHArV05BdWNwd2pXSXJ2?=
- =?utf-8?B?UStGVWxxMmZBbzcvblYvMWZVOW1NcDIyTDlBTEpGYmhsZ0RpaEtDMUNIdTlv?=
- =?utf-8?B?NzBUM25LNW4yMThHTzRqSXFjelBHRlk2akxGU2F3RDZMWlkvaERHK3REempt?=
- =?utf-8?B?VlBzb1V6OTBnalRzaS8rS0dXS0VHVjVmUDFTcWVGQ0hJZXhFL2lrSHNrd00r?=
- =?utf-8?B?bW5nN2JQUmd0NmlUMzZUR2JwSnZiRFdiQUJsODNWSzkrUU9wSHRMcHF4K3lP?=
- =?utf-8?B?bHc0VG8rSmp2RnVHckQ0c0lGbHRNeDRmMVlXcHRvUjFwSy85aWt5elNSQ3ZK?=
- =?utf-8?B?R3VjVldqTTVkaElpSFVpaFF0aW9LVlpCanVDU1VuT3dkS09HK3I2Mk5tZkFW?=
- =?utf-8?B?VTQ3dFNmWnFlZzJWVWFKL1lTTmRRdkJ4WjlGVzN4Q1M0Mmo5SVk3RGVoVlhu?=
- =?utf-8?B?Z1FMV2ZaT3hwZEVQMTloUzF1M1FaWHZrRG9URWd4cTdhNVVaWU16R1ovbzhw?=
- =?utf-8?B?b2pFcHcwN2hSb0ZNRkZ6NE9sRjBLY2wxTjF0ckdUeGFsSkdoNDlyU0Y4UHhj?=
- =?utf-8?B?QWVqbGJDWllQQ1NyNFNmbWNSUVNkYXpRbjZmRVVYaGFhTG13MzNia0ZTcVhZ?=
- =?utf-8?B?aktQNHBPblVjaHNobjM0aVVwNHA3cmVwZHNDWTlhZXFpYlBwb1ZjbkFlb0pX?=
- =?utf-8?B?R2pMK2dJR0xOdGJZdU0zdjgvcXFTWm5JWE9ORmpWUCsxVTJzdm5vYkFzTkZm?=
- =?utf-8?B?eHBIbkxvOHQ5SEdScm9CM1R2OTgzS2FKM2puYThOaUptaGJnUGczZUU3RUVJ?=
- =?utf-8?B?VzhwbDJ1VDRlbGpzUlNDeTJ2bWxmUi9iMHREaUNETDE1c015TzhuVXRoeVJI?=
- =?utf-8?Q?rIAIy30wMS3YUhYwU/l3N/umk?=
-X-OriginatorOrg: siemens.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3a91966e-9d53-4716-516f-08dde93994ff
-X-MS-Exchange-CrossTenant-AuthSource: AS4PR10MB6181.EURPRD10.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Sep 2025 09:26:08.1512
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 38ae3bcd-9579-4fd4-adda-b42e1495d55a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: hMVBTbVWh/jVwqCEgV6CZvOuPm6Q3fsOWaX5EWA6cMrP2U8cJKv3F/EcR9EGC/gK4/9IvGhEBn9XcRmS1iOXdg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB4PR10MB6118
+Content-Transfer-Encoding: 8bit
 
-From: Jan Kiszka <jan.kiszka@siemens.com>
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-When the counter reached its limit, any further write request will be
-rejected by the device. Warn the user in that case while showing the
-counter value.
+Fix calling incorrect sdhci_set_clock() in __sdhci_uhs2_set_ios() when the
+vendor defines its own sdhci_set_clock().
 
-Suggested by: Avri Altman <Avri.Altman@sandisk.com>
-Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+Fixes: 10c8298a052b ("mmc: sdhci-uhs2: add set_ios()")
+Cc: stable@vger.kernel.org # v6.13+
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 ---
- mmc_cmds.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci-uhs2.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 429a9c7..5990502 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2360,6 +2360,8 @@ int do_rpmb_read_counter(int nargs, char **argv)
- 	close(dev_fd);
+diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+index 0efeb9d0c376..704fdc946ac3 100644
+--- a/drivers/mmc/host/sdhci-uhs2.c
++++ b/drivers/mmc/host/sdhci-uhs2.c
+@@ -295,7 +295,10 @@ static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
  
- 	printf("Counter value: 0x%08x\n", cnt);
-+	if (cnt == 0xffffffff)
-+		printf("WARNING: Counter expired, no further writes possible\n");
- 
- 	return ret;
+-	sdhci_set_clock(host, host->clock);
++	if (host->ops->set_clock)
++		host->ops->set_clock(host, host->clock);
++	else
++		sdhci_set_clock(host, host->clock);
  }
+ 
+ static int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 -- 
-2.43.0
+2.51.0
+
