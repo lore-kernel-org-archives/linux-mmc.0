@@ -1,276 +1,145 @@
-Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6F112E6CBD;
-	Tue,  2 Sep 2025 08:55:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AD602E9EC1
+	for <linux-mmc@vger.kernel.org>; Tue,  2 Sep 2025 09:22:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756803312; cv=none; b=NudrapEVmRC1WcRGEaHyCNZctSCJc0fAtQIXfQ1Pg4m10zq18YS6RdggaKPhpo6GJfWBXDQCmBQFUfBsdx2GWMlzKQ6JynfTuIhyCuNP/xZw4BVPbwg98ZSmJoRxHjk9fsido+3jbL+2iebzjE2ddx+E0g0hYY1PD/5oJVtIjMI=
+	t=1756804935; cv=none; b=TTxoYf2z89/dyb680Y15RPo8vqwBcgqT1G+ES0OxU4Wmo1Q3LLv6y7ZjnLy7NY/Q4+mF/QCowL5PxSL1/AWwDbVDcPa7bKPm4MameN+/G3RZTqW7AQDFNoVtBAYH8BkJbREkFuNf7Y3hgCXn8Ga9WGyetWe19PB2ov1cS1HAqlw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756803312; c=relaxed/simple;
-	bh=5k/F3GPvPJX/h98yra+MrJUBJRlqT1io0eiOVQiksfw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=arWQ05CaxYmaf8WJvwWW2TvAnevbT2e6sOvObcI5fgGPCMzxf7HpdmWrw6TbozE89xOVQ98eDTnjI9SVIj4AwbBLyDK2Y8vM9Fk+bIF1JjDxgap5+p9rBhXY1y9KGg+w1JfObN8cGJTdErqqpGKiW/iCUBejKlOxTt/QV1V8xSs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=R9XVYizC; arc=none smtp.client-ip=209.85.208.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1756804935; c=relaxed/simple;
+	bh=Pv1NlzKjL0xFo8BfGbhy/7KnNZN8WrItjraHEOkXixw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=kzTZP6ZDMNgQfDToWsJCVoQX5vZT3zSvnGxa8OZJkExt6ZA2c5yv+Pu1GN9o9l6rgQL7pt10eVIeIO5QYiEvm6A1JJUYoMMxFmT2yNKAe6dam8p8lFc4jOAYKB47hifww5UAO2l01Qt7klrb/qY4Z/yTi+b901mKfZIvef1mKAQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ursulin.net; spf=none smtp.mailfrom=ursulin.net; dkim=pass (2048-bit key) header.d=ursulin-net.20230601.gappssmtp.com header.i=@ursulin-net.20230601.gappssmtp.com header.b=BjJ4DkI0; arc=none smtp.client-ip=209.85.128.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=ursulin.net
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=ursulin.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="R9XVYizC"
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-61ebe5204c2so564867a12.3;
-        Tue, 02 Sep 2025 01:55:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=ursulin-net.20230601.gappssmtp.com header.i=@ursulin-net.20230601.gappssmtp.com header.b="BjJ4DkI0"
+Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-45b873a2092so23014465e9.1
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Sep 2025 02:22:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1756803309; x=1757408109; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=4noW5v40fzmkdqqWK0thv5nhPzuPsgfgyez5/OdeZUY=;
-        b=R9XVYizCRnDm4plL8AYPaiaT4GrzSha3N2VtiHOBhvShkMhrefRG5hre/hrqeFGa3l
-         s1jPTApYPUbsV6LXebo0rqeEHXllH5X8J/k1hHtZQByP+ljrIoQ2/Eft4ORQkptT6eXa
-         vqvSZOt+ypiODSBeU9K7UYBdh3bsAPU33+kcQeBBi2ojw7wnpUunj6AEs/KTR8TO2MrQ
-         Bs25kgXKpDufcK0AavRZiAP8FfO08TQMLF+tXDO8OSiyAPV6slwp83NT9qH0Q9jasX81
-         ZsGb+iD5wnhxpbvgjJyBRGJPRF45dbUtTLUXRFj/m6fykf9mysybD0OxjPOtCau34dz1
-         Wz5A==
+        d=ursulin-net.20230601.gappssmtp.com; s=20230601; t=1756804931; x=1757409731; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=0Be300C9M54HN2j6qqn3KzILYOn0Dm/rUn/s4aJntRQ=;
+        b=BjJ4DkI0nOIeBWi829gHdcdGEnRHe1ZnQO1njdb+Jyp0kjPhbqnc/pH3IqlbX/mPRt
+         KImIiC5IOBhDUsCOe+bsijMfqcLKa+dXYa461vlf8W43jDTp2NN/HyQttUmEPfTyMDsa
+         +znjOYbf7zmMPfsw7iujVXgeGLUXtwGXlQ+SY2EucQk11hSB12zyiFkHuuLs1Vp+GMQK
+         znrByajiS5QwRXsCGGX/uEAkboujg3cDsCxXhSDvaaKtpi9xTJYSIPVmQMJW+nANv+26
+         x3bpMDTCAYkVqg6BQ0C/DVGa/O/iwl4l6QGYI8jJHyq5e0aZ7lgtishdDOyJn3yv5f02
+         d/Ew==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756803309; x=1757408109;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=4noW5v40fzmkdqqWK0thv5nhPzuPsgfgyez5/OdeZUY=;
-        b=WkO7E6L884nawYi7nNT4RI4FZa01vwrSJPvb3kiHVwv3Si0PC30b5IDXysZzAfa8Mm
-         FcRQHOHysTanYU0yUMNAw7ntXhk1DIYMzadOcUYRrjb3+h1neqHs+moyW8N8j0LQZ0uV
-         J1coTF/xZ/lkLWxonr7djL08HiMa6BwK24cRCdXLZ/FJW6HgA6NUkZLojDfEI7I/iiak
-         8EJ8GmnMdeEwELurNLUWDhxixrydHwan1Yn8RkYJRb6WPSXaQfeHZwuv2kN9HIwScvKF
-         r51apdHeGwd/d+SgkfkwaTa+6SH2Zz7pFM5RUssywcsUh8q7Zb7rThp9KFYSwPovuKH9
-         ANbA==
-X-Forwarded-Encrypted: i=1; AJvYcCU9Evbedo3W1XtWFkjqImeysolBf0yEU9pPkFtz471rt12s5AxJQcw2WGDuXbYdwqq3kdoRsh13/UQA@vger.kernel.org, AJvYcCVeSeJaEuiEBkXmIVP6ImTUzPO3SjXQONDQQbu8Qf0wXv41K/St5uI31ZAOtv8c8DtPSkPZM166@vger.kernel.org, AJvYcCXHrfNGAtN7Sfslu7BB9TmHF9/pUkxL7bY3mXpsPEw9LesgHc7lBidWqkvB4ISk/slfzEhJUC0Hm+CDR1c=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywy5Sv1yuO1ZgcCNpGWlXB3nPmISCfBlx2S4Ra1U+kDNirUVsWK
-	htCYTtchO93FW4WflPvwb+hkH0WMiQo/xGCA8wl/CzMzle8N1lsM/9n4yFa4/gDFcVDLHGeC+oZ
-	b8cgRQZxg/DRMdzy1nLcvsNWMQXJgPPo=
-X-Gm-Gg: ASbGnctmoyxWJ5sQMy5F0DPqp+lWZVeSMaFHmkq3sl/Ocucq8WoYyFoy29FU9Mouxkv
-	J2SEP21X+Kkg61G6UKKbj7OtCX3cWhVeQ9I+jVxrK6ILufCrMWX5IBue5k71TB0UOYJt2PeWqDt
-	ZFiP03Mqm9Tm4Dok2LwRRSt5WHtAfGsD/+agxBFRgcLLFEvMvL3CKcD4iPwc+XaaQfe2HZYJ9VJ
-	p5re50=
-X-Google-Smtp-Source: AGHT+IEMNgWHyzQz1NhFH2UsT7O+2jBqajcT4rLQWra0eWkr3tuGdVU4vUPZTwzS9quq/e7QnsxH1t4pZPesyZCezmw=
-X-Received: by 2002:a05:6402:27cb:b0:61c:5b94:c725 with SMTP id
- 4fb4d7f45d1cf-61d26873cf1mr9301026a12.8.1756803308846; Tue, 02 Sep 2025
- 01:55:08 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1756804931; x=1757409731;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=0Be300C9M54HN2j6qqn3KzILYOn0Dm/rUn/s4aJntRQ=;
+        b=kMM40S6Q5I37p/qyVLQbAlARCyWg8j8hSsfzInUVee2AqZPyRccQbRh/yaTqitfo9E
+         3skprK4Os1CqPi/UErzgIV1fU0IWwVDguwtbuNFXDu5OsxgSoTUEZEKMz02fS/HclhAW
+         v7DPQsSisWTg6x10W9FlzN4LZR/baO7s5yEG7ENOhCExbug4nS7MpWB7nWEFMugG7w7F
+         sYQ8A93rLM+AWX+GqE8z4RZc14CfPZySsJdBf3iiGcPzIbTWK8yJd42BOxuuuVTZot72
+         VelQrUWNifqt5Js6hFvPVZfzyEzIGAOb1bjWCwU19WMs/2DTpSxv42xG9DdnfQIK0m6e
+         xC9g==
+X-Forwarded-Encrypted: i=1; AJvYcCUH69ufvZ3uUgHL+zjU0lfmbMeIPUHnaVeRdPyL2K8Iy+E8busUHfDvdMk6cyAG4jeFnv2ImDb0bTI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzwzomuP5+wWbi6qahVfyUQj4eQc6cr4E7kfK+UtUVKgzPZhW1d
+	V0g3TSgdM2/APsfvArdvMWA6YTrKOazsxPb04z25UKzE1l6E2XjlSSdZFQrY0nsALaA=
+X-Gm-Gg: ASbGncskC9BduRdFH1IPiO3Dp2dEpuVRCkBjZ4bMXL2vqFRfF2j7J+jlzrnu+8CucFr
+	L7ZcNUZBXu6QRgosq8XPrGkEDF+G7F6FEeDLGJvaDyP6EBoEBHSK189wOWlXyutJL4ZidKocNfE
+	9LY7PAJ1LoxDCQrYwt2pGhphndkSchgv9ZXEsehqCcBxqq46eCou9jYYKBh9tjjtFqOOFPmQYo9
+	YL/A0aIG0ttqDKEtPqwrVLEIMxHmWwT9ilP88e/5DBBE4XDyvdODghQ+cXg4xaiOXMGA4M/h4oI
+	MO2KCalwgdiP3cMbWI7WTj+rfv4Z7QhgaiEKCnCynV839Oz4OUEjUSbwhAFWSVn2k7WmOaYFa95
+	6hLPFI0JQ0UdzwGBdsQB3/iXqpqx3QNOo+E0=
+X-Google-Smtp-Source: AGHT+IFjGWdM7r4OC2xPYq10JBW42QzIVS9ISDbv655toZnOdc57tKWSkMByc2ni755H7QY3mBnVYA==
+X-Received: by 2002:a05:600c:a04:b0:45b:7d24:beac with SMTP id 5b1f17b1804b1-45b8553335amr94619035e9.10.1756804930815;
+        Tue, 02 Sep 2025 02:22:10 -0700 (PDT)
+Received: from [192.168.0.101] ([84.66.36.92])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3d0b9402299sm17994846f8f.18.2025.09.02.02.22.09
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 02 Sep 2025 02:22:10 -0700 (PDT)
+Message-ID: <4bbf5590-7591-4dfc-a23e-0bda6cb31a80@ursulin.net>
+Date: Tue, 2 Sep 2025 10:22:09 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250901094224.3920-1-benchuanggli@gmail.com> <18915c80-84c3-4a61-a5d2-d40387ec4eb7@intel.com>
- <CACT4zj9n9E45E2T84ciLTEZgUAbcOzH5+ZgTYq8=m=Pusy37iA@mail.gmail.com>
- <CACT4zj-_NHV0td1RULmww4tvw3beJZASNv3+e5TG8wE318wvGg@mail.gmail.com> <6113c4e9-9141-49bf-9672-0203c5cdbf88@intel.com>
-In-Reply-To: <6113c4e9-9141-49bf-9672-0203c5cdbf88@intel.com>
-From: Ben Chuang <benchuanggli@gmail.com>
-Date: Tue, 2 Sep 2025 16:54:56 +0800
-X-Gm-Features: Ac12FXxiPTUJDQyQvLhLYcX6NDlb0XNIUZcT9xXCLHdDiQSyQkyvKZyOXwQU4v8
-Message-ID: <CACT4zj-4A9Lkx2EJY9xtPr5R0oQYjkfN4acQp8=xk0nFgc+Z-Q@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-pci-gli: GL9767: Fix initializing the
- UHS-II interface during a power-on
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, victor.shih@genesyslogic.com.tw, 
-	ben.chuang@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
-	SeanHY.Chen@genesyslogic.com.tw, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 26/37] drm/i915/gem: drop nth_page() usage within SG
+ entry
+To: David Hildenbrand <david@redhat.com>, linux-kernel@vger.kernel.org
+Cc: Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+ Jani Nikula <jani.nikula@linux.intel.com>,
+ Joonas Lahtinen <joonas.lahtinen@linux.intel.com>,
+ Rodrigo Vivi <rodrigo.vivi@intel.com>, David Airlie <airlied@gmail.com>,
+ Simona Vetter <simona@ffwll.ch>, Alexander Potapenko <glider@google.com>,
+ Andrew Morton <akpm@linux-foundation.org>,
+ Brendan Jackman <jackmanb@google.com>, Christoph Lameter <cl@gentwo.org>,
+ Dennis Zhou <dennis@kernel.org>, Dmitry Vyukov <dvyukov@google.com>,
+ dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
+ iommu@lists.linux.dev, io-uring@vger.kernel.org,
+ Jason Gunthorpe <jgg@nvidia.com>, Jens Axboe <axboe@kernel.dk>,
+ Johannes Weiner <hannes@cmpxchg.org>, John Hubbard <jhubbard@nvidia.com>,
+ kasan-dev@googlegroups.com, kvm@vger.kernel.org,
+ "Liam R. Howlett" <Liam.Howlett@oracle.com>,
+ Linus Torvalds <torvalds@linux-foundation.org>, linux-arm-kernel@axis.com,
+ linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
+ linux-ide@vger.kernel.org, linux-kselftest@vger.kernel.org,
+ linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+ linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
+ linux-scsi@vger.kernel.org, Marco Elver <elver@google.com>,
+ Marek Szyprowski <m.szyprowski@samsung.com>, Michal Hocko <mhocko@suse.com>,
+ Mike Rapoport <rppt@kernel.org>, Muchun Song <muchun.song@linux.dev>,
+ netdev@vger.kernel.org, Oscar Salvador <osalvador@suse.de>,
+ Peter Xu <peterx@redhat.com>, Robin Murphy <robin.murphy@arm.com>,
+ Suren Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>,
+ virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
+ wireguard@lists.zx2c4.com, x86@kernel.org, Zi Yan <ziy@nvidia.com>
+References: <20250901150359.867252-1-david@redhat.com>
+ <20250901150359.867252-27-david@redhat.com>
+Content-Language: en-GB
+From: Tvrtko Ursulin <tursulin@ursulin.net>
+In-Reply-To: <20250901150359.867252-27-david@redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Tue, Sep 2, 2025 at 3:47=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.c=
-om> wrote:
->
-> On 02/09/2025 10:12, Ben Chuang wrote:
-> > On Tue, Sep 2, 2025 at 2:33=E2=80=AFPM Ben Chuang <benchuanggli@gmail.c=
-om> wrote:
-> >>
-> >> On Tue, Sep 2, 2025 at 1:02=E2=80=AFAM Adrian Hunter <adrian.hunter@in=
-tel.com> wrote:
-> >>>
-> >>> On 01/09/2025 12:42, Ben Chuang wrote:
-> >>>> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>>>
-> >>>> According to the power structure of IC hardware design for UHS-II
-> >>>> interface, reset control and timing must be added to the initializat=
-ion
-> >>>> process of powering on the UHS-II interface.
-> >>>>
-> >>>> Fixes: 27dd3b82557a ("mmc: sdhci-pci-gli: enable UHS-II mode for GL9=
-767")
-> >>>> Cc: stable@vger.kernel.org # v6.13+
-> >>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>>> ---
-> >>>>  drivers/mmc/host/sdhci-pci-gli.c | 71 +++++++++++++++++++++++++++++=
-++-
-> >>>>  1 file changed, 70 insertions(+), 1 deletion(-)
-> >>>>
-> >>>> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdh=
-ci-pci-gli.c
-> >>>> index 3a1de477e9af..85d0d7e6169c 100644
-> >>>> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> >>>> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> >>>> @@ -283,6 +283,8 @@
-> >>>>  #define   PCIE_GLI_9767_UHS2_CTL2_ZC_VALUE     0xb
-> >>>>  #define   PCIE_GLI_9767_UHS2_CTL2_ZC_CTL       BIT(6)
-> >>>>  #define   PCIE_GLI_9767_UHS2_CTL2_ZC_CTL_VALUE         0x1
-> >>>> +#define   PCIE_GLI_9767_UHS2_CTL2_FORCE_PHY_RESETN   BIT(13)
-> >>>> +#define   PCIE_GLI_9767_UHS2_CTL2_FORCE_RESETN_VALUE BIT(14)
-> >>>>
-> >>>>  #define GLI_MAX_TUNING_LOOP 40
-> >>>>
-> >>>> @@ -1179,6 +1181,69 @@ static void gl9767_set_low_power_negotiation(=
-struct pci_dev *pdev, bool enable)
-> >>>>       gl9767_vhs_read(pdev);
-> >>>>  }
-> >>>>
-> >>>> +static void sdhci_gl9767_uhs2_phy_reset_assert(struct sdhci_host *h=
-ost)
-> >>>> +{
-> >>>> +     struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-> >>>> +     struct pci_dev *pdev =3D slot->chip->pdev;
-> >>>> +     u32 value;
-> >>>> +
-> >>>> +     gl9767_vhs_write(pdev);
-> >>>> +     pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, &value);
-> >>>> +     value |=3D PCIE_GLI_9767_UHS2_CTL2_FORCE_PHY_RESETN;
-> >>>> +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, value);
-> >>>> +     value &=3D ~PCIE_GLI_9767_UHS2_CTL2_FORCE_RESETN_VALUE;
-> >>>> +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, value);
-> >>>> +     gl9767_vhs_read(pdev);
-> >>>> +}
-> >>>> +
-> >>>> +static void sdhci_gl9767_uhs2_phy_reset_deassert(struct sdhci_host =
-*host)
-> >>>> +{
-> >>>> +     struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-> >>>> +     struct pci_dev *pdev =3D slot->chip->pdev;
-> >>>> +     u32 value;
-> >>>> +
-> >>>> +     gl9767_vhs_write(pdev);
-> >>>> +     pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, &value);
-> >>>> +     value |=3D PCIE_GLI_9767_UHS2_CTL2_FORCE_RESETN_VALUE;
-> >>>
-> >>> Maybe add a small comment about PCIE_GLI_9767_UHS2_CTL2_FORCE_RESETN_=
-VALUE
-> >>> and PCIE_GLI_9767_UHS2_CTL2_FORCE_PHY_RESETN being updated separately=
-.
-> >>>
-> >>>> +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, value);
-> >>>> +     value &=3D ~PCIE_GLI_9767_UHS2_CTL2_FORCE_PHY_RESETN;
-> >>>> +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, value);
-> >>>> +     gl9767_vhs_read(pdev);
-> >>>> +}
-> >>>
-> >>> sdhci_gl9767_uhs2_phy_reset_assert() and sdhci_gl9767_uhs2_phy_reset_=
-deassert()
-> >>> are fairly similar.  Maybe consider:
-> >>>
-> >>> static void sdhci_gl9767_uhs2_phy_reset(struct sdhci_host *host, bool=
- assert)
-> >>> {
-> >>>         struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-> >>>         struct pci_dev *pdev =3D slot->chip->pdev;
-> >>>         u32 value, set, clr;
-> >>>
-> >>>         if (assert) {
-> >>>                 set =3D PCIE_GLI_9767_UHS2_CTL2_FORCE_PHY_RESETN;
-> >>>                 clr =3D PCIE_GLI_9767_UHS2_CTL2_FORCE_RESETN_VALUE;
-> >>>         } else {
-> >>>                 set =3D PCIE_GLI_9767_UHS2_CTL2_FORCE_RESETN_VALUE;
-> >>>                 clr =3D PCIE_GLI_9767_UHS2_CTL2_FORCE_PHY_RESETN;
-> >>>         }
-> >>>
-> >>>         gl9767_vhs_write(pdev);
-> >>>         pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, &value);
-> >>>         value |=3D set;
-> >>>         pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, value);
-> >>>         value &=3D ~clr;
-> >>>         pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, value);
-> >>>         gl9767_vhs_read(pdev);
-> >>> }
-> >>>
-> >>
-> >> OK, I will update it. Thank you.
-> >>
-> >>>
-> >>>> +
-> >>>> +static void __gl9767_uhs2_set_power(struct sdhci_host *host, unsign=
-ed char mode, unsigned short vdd)
-> >>>> +{
-> >>>> +     u8 pwr =3D 0;
-> >>>> +
-> >>>> +     if (mode !=3D MMC_POWER_OFF) {
-> >>>> +             pwr =3D sdhci_get_vdd_value(vdd);
-> >>>> +             if (!pwr)
-> >>>> +                     WARN(1, "%s: Invalid vdd %#x\n",
-> >>>> +                          mmc_hostname(host->mmc), vdd);
-> >>>> +             pwr |=3D SDHCI_VDD2_POWER_180;
-> >>>> +     }
-> >>>> +
-> >>>> +     if (host->pwr =3D=3D pwr)
-> >>>> +             return;
-> >>>> +
-> >>>> +     host->pwr =3D pwr;
-> >>>> +
-> >>>> +     if (pwr =3D=3D 0) {
-> >>>> +             sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> >>>> +     } else {
-> >>>> +             sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> >>>> +
-> >>>> +             pwr |=3D SDHCI_POWER_ON;
-> >>>> +             sdhci_writeb(host, pwr & 0xf, SDHCI_POWER_CONTROL);
-> >>>> +             mdelay(5);
-> >>>
-> >>> Can be mmc_delay(5)
-> >>>
-> >>>> +
-> >>>> +             sdhci_gl9767_uhs2_phy_reset_assert(host);
-> >>>> +             pwr |=3D SDHCI_VDD2_POWER_ON;
-> >>>> +             sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-> >>>> +             mdelay(5);
-> >>>
-> >>> Can be mmc_delay(5)
-> >>
-> >> I may not modify it now.
-> >> mmc_delay() is in "drivers/mmc/core/core.h".
-> >> If sdhci-pci-gli.c only includes "../core/core.h", the compiler will
-> >> report some errors.
-> >
-> > Ah, just add another headersand it will build.
-> >
-> > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > @@ -14,6 +14,8 @@
-> >  #include <linux/delay.h>
-> >  #include <linux/of.h>
-> >  #include <linux/iopoll.h>
-> > +#include <linux/mmc/host.h>
-> > +#include "../core/core.h"
-> >  #include "sdhci.h"
-> >  #include "sdhci-cqhci.h"
-> >  #include "sdhci-pci.h"
-> > @@ -968,10 +970,10 @@ static void gl9755_set_power(struct sdhci_host
-> > *host, unsigned char mode,
-> >
-> >                 sdhci_writeb(host, pwr & 0xf, SDHCI_POWER_CONTROL);
-> >                 /* wait stable */
-> > -               mdelay(5);
-> > +               mmc_delay(5);
-> >                 sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-> >                 /* wait stable */
-> > -               mdelay(5);
-> > +               mmc_delay(5);
-> >                 sdhci_gli_overcurrent_event_enable(host, true);
-> >         }
->
-> It seems mmc_delay() is for core mmc code only, not host drivers.
-> But the issue with mdelay is that it does not sleep.  Other options
-> are msleep() or usleep_range().
->
 
-Ok, I will use usleep_range() instead of mdelay().
-Thanks for the suggestion.
+On 01/09/2025 16:03, David Hildenbrand wrote:
+> It's no longer required to use nth_page() when iterating pages within a
+> single SG entry, so let's drop the nth_page() usage.
+> 
+> Reviewed-by: Lorenzo Stoakes <lorenzo.stoakes@oracle.com>
+> Cc: Jani Nikula <jani.nikula@linux.intel.com>
+> Cc: Joonas Lahtinen <joonas.lahtinen@linux.intel.com>
+> Cc: Rodrigo Vivi <rodrigo.vivi@intel.com>
+> Cc: Tvrtko Ursulin <tursulin@ursulin.net>
+> Cc: David Airlie <airlied@gmail.com>
+> Cc: Simona Vetter <simona@ffwll.ch>
+> Signed-off-by: David Hildenbrand <david@redhat.com>
+> ---
+>   drivers/gpu/drm/i915/gem/i915_gem_pages.c | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/gpu/drm/i915/gem/i915_gem_pages.c b/drivers/gpu/drm/i915/gem/i915_gem_pages.c
+> index c16a57160b262..031d7acc16142 100644
+> --- a/drivers/gpu/drm/i915/gem/i915_gem_pages.c
+> +++ b/drivers/gpu/drm/i915/gem/i915_gem_pages.c
+> @@ -779,7 +779,7 @@ __i915_gem_object_get_page(struct drm_i915_gem_object *obj, pgoff_t n)
+>   	GEM_BUG_ON(!i915_gem_object_has_struct_page(obj));
+>   
+>   	sg = i915_gem_object_get_sg(obj, n, &offset);
+> -	return nth_page(sg_page(sg), offset);
+> +	return sg_page(sg) + offset;
+>   }
+>   
+>   /* Like i915_gem_object_get_page(), but mark the returned page dirty */
 
-Best regards,
-Ben Chuang
+LGTM. If you want an ack to merge via a tree other than i915 you have 
+it. I suspect it might be easier to coordinate like that.
+
+Regards,
+
+Tvrtko
+
