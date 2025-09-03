@@ -1,119 +1,260 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF53C2DF716;
-	Wed,  3 Sep 2025 08:25:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD8AF2C15AE
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Sep 2025 09:12:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756887906; cv=none; b=VZIdDmkabH3w1V5X2R0k2xX5wqRD37mvXoJzFXb72APadD1c3FX0Mi9n7iObAVfkXkeXrfWLWo63q+GCIhriMaMoh37zzV/LYq4nY3cEHnyvLIX1OE6sa9xqlvgUTzI9rerRiQwAuHUAon83Vm191/Ltwf5K6rCA9NIXxulxJs0=
+	t=1756890758; cv=none; b=aJVF4fgjORbYkcudG0xq6nmPnEH3j1/TW4Ldkp+BEqF9/Fop/KAOMr/q9dgyNgUVAK/MCQ7r3sxFWjThm4sIDz6dpNk4jD4jIxF/dmoLgyj+pmQbzY0kK71iouFtA1mcuiSRgG6YvsyDCEXx7N04BvGsQVcgIYQJdGzv9kRvV9Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756887906; c=relaxed/simple;
-	bh=aIKvsyaaE9IcH3GTXT7d6qopOlRrWy67Dm7j+/pv2qA=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=HcFx/cFvS0DtTkG4o+TrK2ZfNiH9vDUQBhQhI8zVMmIJ1D9k1ypkNEPNnmxR4fjpaGxNFzA9CW9M6m8GATLiKyg51EVBULJq5HQxkFCLe2DotlfOxaGhnOZmh6W1PB0+WkDlXSeryyUpKhiwfKXhWeofziqS/pubihDzdkpVMvI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=JgO79AiA; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	s=arc-20240116; t=1756890758; c=relaxed/simple;
+	bh=cxe3hMIZT+QIzC3aj+rChBvHjYo+TmkIeIvbyWzTbkw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=jnaXa2Dggw42vDCUFBB5i2BNZcRlK7ZRyyaCof8IyPnsQirMItLtT1Mr9fVfon0onM1+qExVMtRD40qEuWFczhqo0bCdlpiPmm3exa+w1d7Uj/rn/tRQc95qgiWuOhYKh8+5eWef/PQKDnycf/5LrCENnYkgi3vvtgqcQQLgS14=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=jf0xQhBq; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="JgO79AiA"
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="jf0xQhBq"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5832UYIc024031
+	for <linux-mmc@vger.kernel.org>; Wed, 3 Sep 2025 09:12:36 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	OVGKJk2Lv/6cSlW8nPZxFi9+cu1Hs+eu77TPY89OEGI=; b=jf0xQhBqJU+sapDh
+	N6+sOWZCLRO8J3HeukJaEd2cSVumV+Eneich3byzeYvhiObYn8nPanpNe5myqkNJ
+	1tMDZkVuJaBnmIXx2o6Hj7o9+/7q6sCAtiqfYjA7aAGgFGhVQWnzh2yS4MN/Unh4
+	rG2rKdwbOkk/la6Wf3Vm6l5XaMoTwM2pZpR/x7ZF+iAxxeJH0lohjUOsVBAJmmnq
+	nePQ88QiPYui2PR2w/7dpUh5omGNq7eD790xPQiPr0vvQKQ9bJlnPrTN3/3q8B7j
+	AO99OiN2rVy7bM5ctgPfiazHgqkWBqt64bJ5XNMqoBqHkPYYyCHY9HjZ4+qsJACI
+	b8yqNw==
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48ush32u93-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 09:12:36 +0000 (GMT)
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-24b4aa90c20so17009125ad.2
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 02:12:35 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1756890755; x=1757495555;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=OVGKJk2Lv/6cSlW8nPZxFi9+cu1Hs+eu77TPY89OEGI=;
+        b=K/HWIlzXY7Vjr+p3xXd7lmIOMJ9peLTStYwciXWSUUeq3T83jAJN3jJZkYmJ2XaKQu
+         DyaKpAQMuRLbdEgnO4oz4OwSAnrPOW+y2NVPkkh3j4TIQE2/X3tuY6v0r2ZXd0hO3Kml
+         8Y0ImhPYJ1oq5i6GIgWOr0q5xcyOgIoeuvL8OY9yOIttupJG/60sTxru9JBE6JK4+slF
+         m7cdS7b8RX5pMrBjQ4pmGNvKYH/A2ci8Edoh9btgOiUjSurP8ZtEjfca6L/ZAsoSSZlw
+         OpxU7HBQW83ElH392Ap0pPHL/BSACMB2oRAvEwrOpySnC0EBG4GqZiTh0P990lwiiYuH
+         PUQA==
+X-Forwarded-Encrypted: i=1; AJvYcCVZSPvth/VM99YqZyLwJgceB67R1bInx4QPaaiAkT+ACwQlRC0b/bwwBsJAegHTj01uIY+DscYK+Xc=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz3OEs9pkt/eg7V/E2xEzfggFTlzBHd483OB3he/uLQxR487zp9
+	v9xZw/xEF44zM4WcY9l4m891HO3l83imr+OqZSQo4Jh21ndFuuuSbIaH/OTttnwYfZEaPMeAJot
+	yZlGlZGcayZ5zxj+lJ9QPZfPyX8OhYIUl+YoSiQzMSX3njTzXTqX5xwR6yV3tUt0=
+X-Gm-Gg: ASbGnctFfetRSAHdd2viNMvAWRQZpGHbbeOj1Tps6z96XaQSWjbDtW9bmBrI+Tgonln
+	RwWKF2ErLRCs5+EGWMclCB+Q6SnwDThVHylp572802VqffSa0Vl50cchSkAHCOE0PsZWr3ciu5b
+	LhS1nCPCZSEzFtJ9D0fc8jXSLttnNSCiOXLVaVg+XycCsUoSrrvEi7/nZu4ZeZPzN76HXzkFinF
+	Gkk+6H1JIGk1uvMYnHopY6dXy0NvwlxxdjBWzJDcPrljtWJ7yizSL77RgEhuAdIQNUEP/jq7oAw
+	EFHs2KAddupLHrnSZ8TcyjuiXuiTunsqIiIHEZPAyBw2aBmJIk6ZlyslwIvldEt6OVMTKNhAVQ=
+	=
+X-Received: by 2002:a17:903:2444:b0:24b:1163:552d with SMTP id d9443c01a7336-24b11635af4mr81492555ad.11.1756890754846;
+        Wed, 03 Sep 2025 02:12:34 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFlxwNjUEHkil6HdnR5uUPgdOQXVoh/CYspkYZQI/7DHUgrQ4WqIWHgmci0fhFLFnnqV0FVUg==
+X-Received: by 2002:a17:903:2444:b0:24b:1163:552d with SMTP id d9443c01a7336-24b11635af4mr81492055ad.11.1756890754229;
+        Wed, 03 Sep 2025 02:12:34 -0700 (PDT)
+Received: from [10.218.1.199] ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-327da8e71a8sm16644559a91.15.2025.09.03.02.12.27
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 03 Sep 2025 02:12:33 -0700 (PDT)
+Message-ID: <d6816cc6-c69e-4746-932e-8b030ca17245@oss.qualcomm.com>
+Date: Wed, 3 Sep 2025 14:42:25 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1756887896;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=j7BHoohsON/uHAsQoNKnfX6vsph4pvo5v6eXoOgK4Xc=;
-	b=JgO79AiAN14ntr3cqlfxjcoIkm18Z2ZBhnHHEB34/+bYAj+zKxsa0+b4e0e8jX6xsC2IQI
-	Tfm7cnCRV9Tx4inYr0yhhbhkfXyS5auIvPCNyFgh5uFRfbBZ9z91H/MQj4BWO7yOfn+Rfe
-	HOyVAC5hSo3Y3aqjEETL6uD/OrpYlENP2KEBfLWIIfRNNyAFmk7LrNILhN+LT0OC7BExe9
-	0B/L9JwpZieirO+SmBq6SLTX941Y/Yu2XAwJw8WAsLwKHPOnYn380W/tmVh0Slc+QCvWcE
-	tIUp0oORqbh618V7Qt5QtoOHJIlwaTvGQpkg39v7gNQgMLepk5SGrh052hKwsA==
-Date: Wed, 03 Sep 2025 10:24:55 +0200
-From: Dragan Simic <dsimic@manjaro.org>
-To: Sarthak Garg <quic_sartgarg@quicinc.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio
- <konradybcio@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
- quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
- quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
- kernel@oss.qualcomm.com
-Subject: Re: [PATCH V5 0/4] Add level shifter support for qualcomm SOC's
-In-Reply-To: <20250903080404.3260135-1-quic_sartgarg@quicinc.com>
-References: <20250903080404.3260135-1-quic_sartgarg@quicinc.com>
-Message-ID: <3453985c13aa51d068c0174e51e378fb@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 3/5] arm64: dts: qcom: lemans-evk: Extend peripheral and
+ subsystem support
+To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
+Cc: Monish Chunara <quic_mchunara@quicinc.com>,
+        Sushrut Shree Trivedi <quic_sushruts@quicinc.com>,
+        Wasim Nazir <wasim.nazir@oss.qualcomm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Richard Cochran <richardcochran@gmail.com>, kernel@oss.qualcomm.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        netdev@vger.kernel.org,
+        Viken Dadhaniya <viken.dadhaniya@oss.qualcomm.com>,
+        Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>,
+        Mohd Ayaan Anwar <quic_mohdayaa@quicinc.com>,
+        Dikshita Agarwal <quic_dikshita@quicinc.com>,
+        Vishal Kumar Pal <quic_vispal@quicinc.com>
+References: <20250826-lemans-evk-bu-v1-0-08016e0d3ce5@oss.qualcomm.com>
+ <20250826-lemans-evk-bu-v1-3-08016e0d3ce5@oss.qualcomm.com>
+ <kycmxk3qag7uigoiitzcxcak22cewdv253fazgaidjcnzgzlkz@htrh22msxteq>
+ <3f94ccc8-ac8a-4c62-8ac6-93dd603dcd36@quicinc.com>
+ <zys26seraohh3gv2kl3eb3rd5pdo3y5vpfw6yxv6a7y55hpaux@myzhufokyorh>
+ <aLG3SbD1JNULED20@hu-mchunara-hyd.qualcomm.com>
+ <ozkebjk6gfgnootoyqklu5tqj7a7lgrm34xbag7yhdwn5xfpcj@zpwr6leefs3l>
+ <ed3a79e0-516e-42f4-b3c6-a78ca6c01d86@oss.qualcomm.com>
+ <ly5j2eodrajifosz34nokia4zckfftakz5253d2h6kd2cxjoq3@yrquqgpnvhp6>
+ <ctwvrrkomc3n6gginw2dp5vip7xh5jhwbi5joyr64gocsm2esb@4zfpbvvziv5i>
+Content-Language: en-US
+From: Krishna Kurapati PSSNV <krishna.kurapati@oss.qualcomm.com>
+In-Reply-To: <ctwvrrkomc3n6gginw2dp5vip7xh5jhwbi5joyr64gocsm2esb@4zfpbvvziv5i>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDAzMiBTYWx0ZWRfX/VTf5X/jOQpU
+ CT/h2WjokWi9iktlgJSiSoG6VIBz1VCdH9p+ijEkbySUaWwutxv3SxnKXoK030ypotnvx2q9iOK
+ BiuRdq3DH+Wnzy+7vYpaEhPRx1lETZuOxn1xlzJTv2eOs7WLw7L1C/dQOKRe26qMe9kSnAOwgEj
+ JIUXeJlphlojkGvIXUS+0bqz0fs/sKVeSlzUCZ4/puFuPS8CEW8vQvC+Wx63lJgZKVnWfMnrC+q
+ cpKY0h6eWkN9S1eP7sTARChQtCxzXhhR05JiDvoojiQHBwvHTwJaGM8cdBK+MEzNuqQCOsOKhIG
+ lVYyELpCj1FqmOEut3KNuS+uOkTVyaLtiUNpoOVXLK2KV1IEUQ6RwJMPEaUgl8W2p1FgQcur80I
+ YKQEEdz0
+X-Proofpoint-ORIG-GUID: GheFvB5qOuLPV1gYr2VuFvLwfoYmA2gQ
+X-Proofpoint-GUID: GheFvB5qOuLPV1gYr2VuFvLwfoYmA2gQ
+X-Authority-Analysis: v=2.4 cv=M9NNKzws c=1 sm=1 tr=0 ts=68b80684 cx=c_pps
+ a=cmESyDAEBpBGqyK7t0alAg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=EUspDBNiAAAA:8 a=COk6AnOGAAAA:8
+ a=V5NJ_6AyxSgfeeEKDpIA:9 a=QEXdDO2ut3YA:10 a=1OuFwYUASf3TG4hYMiVC:22
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-09-03_05,2025-08-28_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 adultscore=0 spamscore=0 priorityscore=1501 malwarescore=0
+ clxscore=1015 suspectscore=0 phishscore=0 bulkscore=0 classifier=typeunknown
+ authscore=0 authtc= authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2507300000 definitions=main-2508300032
 
-Hello Sarthak and Krzysztof,
 
-On 2025-09-03 10:04, Sarthak Garg wrote:
-> Add level shifter support for qualcomm SOC's.
-> 
-> - Changed from v4
->     - As suggested by Krzysztof Kozlowski Renamed the property from
->     `max-sd-hs-frequency` to `max-sd-hs-hz` for clarity.
 
-I just spotted this series, so I'm sorry for jumping in late.  To me,
-"max-sd-hs-frequency" was actually a better choice, because it goes
-together with the already existing "max-frequency" property.
+On 9/2/2025 10:46 PM, Dmitry Baryshkov wrote:
+> On Tue, Sep 02, 2025 at 05:34:27AM +0300, Dmitry Baryshkov wrote:
+>> On Mon, Sep 01, 2025 at 01:02:15PM +0530, Krishna Kurapati PSSNV wrote:
+>>>
+>>>
+>>> On 8/29/2025 9:54 PM, Dmitry Baryshkov wrote:
+>>>> On Fri, Aug 29, 2025 at 07:50:57PM +0530, Monish Chunara wrote:
+>>>>> On Thu, Aug 28, 2025 at 04:30:00PM +0300, Dmitry Baryshkov wrote:
+>>>>>> On Thu, Aug 28, 2025 at 06:38:03PM +0530, Sushrut Shree Trivedi wrote:
+>>>>>>>
+>>>>>>> On 8/27/2025 7:05 AM, Dmitry Baryshkov wrote:
+>>>>>>>> On Tue, Aug 26, 2025 at 11:51:02PM +0530, Wasim Nazir wrote:
+>>>>>>>>> Enhance the Qualcomm Lemans EVK board file to support essential
+>>>>>>>>> peripherals and improve overall hardware capabilities, as
+>>>>>>>>> outlined below:
+>>>>>>>>>      - Enable GPI (Generic Peripheral Interface) DMA-0/1/2 and QUPv3-0/2
+>>>>>>>>>        controllers to facilitate DMA and peripheral communication.
+>>>>>>>>>      - Add support for PCIe-0/1, including required regulators and PHYs,
+>>>>>>>>>        to enable high-speed external device connectivity.
+>>>>>>>>>      - Integrate the TCA9534 I/O expander via I2C to provide 8 additional
+>>>>>>>>>        GPIO lines for extended I/O functionality.
+>>>>>>>>>      - Enable the USB0 controller in device mode to support USB peripheral
+>>>>>>>>>        operations.
+>>>>>>>>>      - Activate remoteproc subsystems for supported DSPs such as Audio DSP,
+>>>>>>>>>        Compute DSP-0/1 and Generic DSP-0/1, along with their corresponding
+>>>>>>>>>        firmware.
+>>>>>>>>>      - Configure nvmem-layout on the I2C EEPROM to store data for Ethernet
+>>>>>>>>>        and other consumers.
+>>>>>>>>>      - Enable the QCA8081 2.5G Ethernet PHY on port-0 and expose the
+>>>>>>>>>        Ethernet MAC address via nvmem for network configuration.
+>>>>>>>>>        It depends on CONFIG_QCA808X_PHY to use QCA8081 PHY.
+>>>>>>>>>      - Add support for the Iris video decoder, including the required
+>>>>>>>>>        firmware, to enable video decoding capabilities.
+>>>>>>>>>      - Enable SD-card slot on SDHC.
+>>>>>>>>>
+>>>>>>>>> Co-developed-by: Viken Dadhaniya <viken.dadhaniya@oss.qualcomm.com>
+>>>>>>>>> Signed-off-by: Viken Dadhaniya <viken.dadhaniya@oss.qualcomm.com>
+>>>>>>>>> Co-developed-by: Sushrut Shree Trivedi <quic_sushruts@quicinc.com>
+>>>>>>>>> Signed-off-by: Sushrut Shree Trivedi <quic_sushruts@quicinc.com>
+>>>>>>>>> Co-developed-by: Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>
+>>>>>>>>> Signed-off-by: Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>
+>>>>>>>>> Co-developed-by: Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>
+>>>>>>>>> Signed-off-by: Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>
+>>>>>>>>> Co-developed-by: Mohd Ayaan Anwar <quic_mohdayaa@quicinc.com>
+>>>>>>>>> Signed-off-by: Mohd Ayaan Anwar <quic_mohdayaa@quicinc.com>
+>>>>>>>>> Co-developed-by: Dikshita Agarwal <quic_dikshita@quicinc.com>
+>>>>>>>>> Signed-off-by: Dikshita Agarwal <quic_dikshita@quicinc.com>
+>>>>>>>>> Co-developed-by: Monish Chunara <quic_mchunara@quicinc.com>
+>>>>>>>>> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
+>>>>>>>>> Co-developed-by: Vishal Kumar Pal <quic_vispal@quicinc.com>
+>>>>>>>>> Signed-off-by: Vishal Kumar Pal <quic_vispal@quicinc.com>
+>>>>>>>>> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+>>>>>>>>> ---
+>>>>>>>>>     arch/arm64/boot/dts/qcom/lemans-evk.dts | 387 ++++++++++++++++++++++++++++++++
+>>>>>>>>>     1 file changed, 387 insertions(+)
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>>> @@ -356,6 +720,29 @@ &ufs_mem_phy {
+>>>>>>>>>     	status = "okay";
+>>>>>>>>>     };
+>>>>>>>>> +&usb_0 {
+>>>>>>>>> +	status = "okay";
+>>>>>>>>> +};
+>>>>>>>>> +
+>>>>>>>>> +&usb_0_dwc3 {
+>>>>>>>>> +	dr_mode = "peripheral";
+>>>>>>>> Is it actually peripheral-only?
+>>>>>>>
+>>>>>>> Hi Dmitry,
+>>>>>>>
+>>>>>>> HW supports OTG mode also, but for enabling OTG we need below mentioned
+>>>>>>> driver changes in dwc3-qcom.c :
+>>>>>>
+>>>>>> Is it the USB-C port? If so, then you should likely be using some form
+>>>>>> of the Type-C port manager (in software or in hardware). These platforms
+>>>>>> usually use pmic-glink in order to handle USB-C.
+>>>>>>
+>>>>>> Or is it micro-USB-OTG port?
+>>>>>>
+>>>>>
+>>>>> Yes, it is a USB Type-C port for usb0 and we are using a 3rd party Type-C port
+>>>>> controller for the same. Will be enabling relevant dts node as part of OTG
+>>>>> enablement once driver changes are in place.
+>>>>
+>>>> Which controller are you using? In the existing designs USB-C works
+>>>> without extra patches for the DWC3 controller.
+>>>>
+>>>
+>>> Hi Dmitry,
+>>>
+>>>   On EVK Platform, the VBUS is controlled by a GPIO from expander. Unlike in
+>>> other platforms like SA8295 ADP, QCS8300 Ride, instead of keeping vbus
+>>> always on for dr_mode as host mode, we wanted to implement vbus control in
+>>> dwc3-qcom.c based on top of [1]. In this patch, there is set_role callback
+>>> present to turn off/on the vbus. So after this patch is merged, we wanted to
+>>> implement vbus control and then flatten DT node and then add vbus supply to
+>>> glue node. Hence made peripheral only dr_mode now.
+>>
+>> In such a case VBUS should be controlled by the USB-C controller rather
+>> than DWC3. The reason is pretty simple: the power direction and data
+>> direction are not 1:1 related anymore. The Type-C port manager decides
+>> whether to supply power over USB-C / Vbus or not and (if supported)
+>> which voltage to use. See TCPM's tcpc_dev::set_vbus().
+> 
+> Okay, your Type-C manager is HD3SS3220. It drives ID pin low if the VBUS
+> supply should be enabled. Please enhance the driver with this
+> functionality. You cann't use the USB role status since it doesn't
+> perform VSafe0V checks.
+> 
 
-Yes, "max-sd-hs-hz" is obviously more clear, but to me, consistency
-is more important.  Just my $.02.
+Hi Dmitry,
 
->     - As suggested by Krzysztof Kozlowski remove min/max constraints
->     and add default: 50000000 in dt-bindings.
->     - As suggested by Konrad Dybcio moved max-sd-hs-hz property in the
->     SoC dtsi.
->     - Retained sdhci-caps-mask in sm8550.dtsi for now and will revisit
->     its removal for future targets after thorough validation and 
-> testing
->     from the beginning.
-> 
-> - Changed from v3
->     - As suggested by Krzysztof Kozlowski moved the property from the
->     SoC-level DTS to the board-level DTS.
->     - Revised the commit messages to clearly explain its 
-> board-specific.
-> 
-> - Changed from v2
->     - As suggested by Konrad Dybcio and Ulf Hansson redesigned logic
->       to introduce a new DT property max-sd-hs-frequency and override
->       the hs_max_dtr accordingly in sd.c file.
-> 
-> - Changed from v1
->     - As suggested by Krzysztof Kozlowski redesigned logic to use
->     compatible property for adding this level shifter support.
->     - Addressed Adrian Hunter comments on V1 with resepect to
->       checkpatch.
->     - Cleared the bits first and then set bits in
->       sdhci_msm_execute_tuning as suggested by Adrian Hunter.
->     - Upated the if condition logic in msm_set_clock_rate_for_bus_mode
->       as suggested by Adrian Hunter.
-> 
-> Sarthak Garg (4):
->   mmc: sdhci-msm: Enable tuning for SDR50 mode for SD card
->   dt-bindings: mmc: controller: Add max-sd-hs-frequency property
->   mmc: core: Introduce a new flag max-sd-hs-hz
->   arm64: dts: qcom: sm8550: Add max-sd-hs-hz property
-> 
->  .../bindings/mmc/mmc-controller-common.yaml       |  8 ++++++++
->  arch/arm64/boot/dts/qcom/sm8550.dtsi              |  1 +
->  drivers/mmc/core/host.c                           |  2 ++
->  drivers/mmc/core/sd.c                             |  2 +-
->  drivers/mmc/host/sdhci-msm.c                      | 15 +++++++++++++++
->  include/linux/mmc/host.h                          |  1 +
->  6 files changed, 28 insertions(+), 1 deletion(-)
+  Thanks for the suggestion. Sure, will take up the task of implementing 
+vbus supply based on id-pin in hd3 driver.
+
+  Also, will move to otg once that is implemented in port controller 
+driver. Will keep it in device mode for now in this series (or its 
+further revision). Also will make sure to document it in commit text in 
+next revision.
+
+Regards,
+krishna,
