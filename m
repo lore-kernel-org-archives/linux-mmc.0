@@ -1,188 +1,194 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EEAA29B8F5
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Sep 2025 16:28:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C472B320A01
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Sep 2025 17:16:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756916924; cv=none; b=KOeQt0W4NZAh6kwNOCvP1K5IY5kDtoYeQ4UQh0/C6w2PBoi0/jSYAWljJQ+EWNBF21XQ7Jy1rmyYZn1M2dFUlDHz7UpHCzujWX4JprPNS7swrCLIU3FjcPf5kD85ZLvEKW7eZ7N4vB9/6oME06fMt+CXK59FwNOMZdBRrXjJrgQ=
+	t=1756919819; cv=none; b=i6B7Tc6d4o8LthIczfd9C6q3u1ll9iQ4G+rrXoqQQERQUFryIs9U6K4RDGmH+h+02zB+drc/t6RDhdYwaPlj6e8XB2tDgLgtIMROkwGFPHdmrhaYozlFO0r/ikd/IIb3cOjjtUwlOU/N0cmA4yHAB58YFFygG3wH5bztXSzA2PI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756916924; c=relaxed/simple;
-	bh=h4uzpxwbZv5GjsKYDvvfHvKOFpa5oECNqTN6Yy9bj4g=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=j9QQmHrc6h12CiVK6Xb9aAVaDn4RRN4nS1YwLGV8YnTXCo+bpG4WgGLiKxUDHYVq0xzRyN2dvBUFQwRDhVEFVWjHaZnTz6vpAc3qIg3d8cl/Vmv2FVDjs1NCQvBrCj67RVg6gI32ASJA2HhWs1siy4mi1QXqLy2xZkhM201y0q4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=BrtsH0fi; arc=none smtp.client-ip=205.220.180.131
+	s=arc-20240116; t=1756919819; c=relaxed/simple;
+	bh=nqlFhZhzUZ+Vy1SQPrseXFrBMF8Y98aiCpXePUraDik=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=R6jFrN+oGv1UNONnBHcqiUd3jRA17QTanh/6nYqlyNOOgbLMx1xjvKG+e/BAVHmXQo86ddJEWAB2GZnEdJr2/28QZoTcOHuA2TkQcpZKM4Mu3Djk1Wkz2bQLsMAVqppcoDRvfc26WoTsFLDc7EYRsEC24h+INg6zCpkks3pp5Zk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=FK8sRegv; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="BrtsH0fi"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 583Dwx1v007597
-	for <linux-mmc@vger.kernel.org>; Wed, 3 Sep 2025 16:28:41 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="FK8sRegv"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 583Dx5c5021846
+	for <linux-mmc@vger.kernel.org>; Wed, 3 Sep 2025 17:16:57 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	3W8v279knRH3OWhUMa8czqjX5zZ7UZx/tVNRcDruII4=; b=BrtsH0fiD+ApJV97
-	Y0r9qpTkipdek14wqYg/qYx6vUcKC5WywT42WJk+qpFhicqfMW0Y953Ef1q8HRtR
-	3XUl31g0QSVQDhyUNDwOg5IEN4A5+JfyL6cqV8MYQQCsbWtXYEeqtWCbo+GbldCq
-	FMpRJ5ISzRilwhIo6oBI1IyaWHYhqd+7YxC0pzCm+w37ldRAbgEK0ej6Bxw9d2lv
-	1eW/FOyx7Lr6LamPW/hK3uH1vcUBcFWk0pT3HtSVBnoKqELJPgLJihXSsopen1cg
-	lLsOzVMyEvFI+vf5kZe0dN/cbkmP2fBxMkmK+EJqj0jdQ9krQW7iqAqtHqw3OvOL
-	2sKAfg==
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48uscv4hsh-1
+	z7peoZhXj/0Yo2bV05F9I7qJDdTJs3fB7ALaWzJ/+MY=; b=FK8sRegvj+nzad/G
+	x4nwE2u1SOyjQfNpCwU4f8nF2eyv2gn65se1ATns8YjKgpa6WqQniAvLdySSC2So
+	ytM0qWhSipr0DmresAQA1/+GZ6Jj0Lxw/MybC+Ey2Wd9KiSFSwf1oiRRYjVccMx6
+	8RxIEwk8WF8/FoQqDiXOs0DFOgBd9VWM9BqO0c6p0CXx/fLS4n7QUwJQMWG+aowr
+	IsjKFBIEnnN5xQAWcalfDQrhTt/ZFQwsy4/+fTiLX9RMsx/8l/h2SME67nh4DbSR
+	BUU0UzIY3qQpvozGjYSZrLjYkr4fhrBj6Tb8Wc5z/iM6py7qRkFDXDSSkw44Lf6/
+	ZReCeg==
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48uq0emrf5-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 16:28:41 +0000 (GMT)
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-7725c995dd0so69714b3a.3
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 09:28:41 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 17:16:56 +0000 (GMT)
+Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-4b307e1bef2so323451cf.0
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 10:16:56 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756916920; x=1757521720;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
+        d=1e100.net; s=20230601; t=1756919815; x=1757524615;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=3W8v279knRH3OWhUMa8czqjX5zZ7UZx/tVNRcDruII4=;
-        b=YfxGkrWO3wA8fzRTje/oQf/QdNWtqosiZe9ZYbxrJN6YGm+fNjYFdA4OPqIX14MM7j
-         V8RcWrJfktdFSPGym65Qu/ZD2RLYHh6p/3eml5pfN6OqB2QDPX1JdKU+9hLNccrAI5m9
-         uqbAKPpJto3B4qDHMhHXoVP4UBOOfJNclDz8FbXjxfRAX2L1eOQwY4IM7azUQ2sCYxQp
-         mRLHlKSc7+VchIaDnridLdfvDT1Z+OvGeqVBqrqDaGMei5XbXNKX4ln2QMyIeJtW0AW3
-         PD3oYKjlbp7VXAIAhfAgeQUlxSegvrRLhW7KaLBObRg5HCW4o6x08z9z0T2BmmLbqrYf
-         WbtQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXq8DXdAEvqXIKNAbkoxTCm2dk+7e7lxKAg5S4BKijTOgjTw0dskAvs90K+naeQfa1jNFg2xN+8iHA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywd8iWt/Z2hWIZ15sjUJ2/99C3TS3NEhw+BDIc4zaNPNW3CquCJ
-	+PxLaqpFKjzQcRLFswqRANnpYxJSCYMRZqvGoTMytAW6YJmnzIxiZXWFH0RCagu+zGHAId5FFd+
-	8jzQ1nSEj8Aja+vpl8MyWbDN0tyPd143+TC5YKEF5Ukjws0Zm2YkW2W9jCKFquGc=
-X-Gm-Gg: ASbGncu64IEX7jMa+aXjthTGLDfwf74ecJocgj4uFnw6AfYxrNgS7T6eAUTCSPeGOFk
-	met5PggOLwPZiQ+F/Zul7GsgJZub3ZLHTyGwDMpoQpPMBMUYnutx7V9DfghWzdQxQsWYmpFDFpr
-	tyXUD3nXHDdPKIOAyZYPtIq/FUh7YqZRe6W3lR3vtWX7vYr7P3mgFbolx9B5E5QvrXehfDhQK8X
-	AF496qPkoqckqgAOfK2Mi6n1d0Bx/0Lz6erhiGPGspbR+0kb0yJRLgN6BUF8fldN2360Cm16xce
-	3Ai+s90kFdJgB8OiV/xIWPHPYVk0bJCuxyCrddOIMY7nQDrzaBqvtINqGfppSvVuBOzG
-X-Received: by 2002:a05:6a00:2314:b0:772:bb4:a1c8 with SMTP id d2e1a72fcca58-7723e387c08mr16394824b3a.23.1756916920255;
-        Wed, 03 Sep 2025 09:28:40 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFxMR7hBz3AXIbxT3k+26DZmNA55+biuruOPc4EMsmI//RROhDkSqh0Pri4+DqMIllJh0FwlQ==
-X-Received: by 2002:a05:6a00:2314:b0:772:bb4:a1c8 with SMTP id d2e1a72fcca58-7723e387c08mr16394797b3a.23.1756916919720;
-        Wed, 03 Sep 2025 09:28:39 -0700 (PDT)
-Received: from hu-wasimn-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7725ad1e086sm9459942b3a.20.2025.09.03.09.28.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Sep 2025 09:28:39 -0700 (PDT)
-Date: Wed, 3 Sep 2025 21:58:33 +0530
-From: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Cc: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Richard Cochran <richardcochran@gmail.com>, kernel@oss.qualcomm.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        netdev@vger.kernel.org, Monish Chunara <quic_mchunara@quicinc.com>
-Subject: Re: [PATCH 2/5] arm64: dts: qcom: lemans: Add SDHC controller and
- SDC pin configuration
-Message-ID: <aLhssUQa7tvUfu2j@hu-wasimn-hyd.qualcomm.com>
-References: <20250826-lemans-evk-bu-v1-0-08016e0d3ce5@oss.qualcomm.com>
- <20250826-lemans-evk-bu-v1-2-08016e0d3ce5@oss.qualcomm.com>
- <rxd4js6hb5ccejge2i2fp2syqlzdghqs75hb5ufqrhvpwubjyz@zwumzc7wphjx>
- <c82d44af-d107-4e84-b5ae-eeb624bc03af@oss.qualcomm.com>
+        bh=z7peoZhXj/0Yo2bV05F9I7qJDdTJs3fB7ALaWzJ/+MY=;
+        b=GC8UrIblRahZzOHcr7chxAmzXNPVCoHa9iJFvJ+YFXiFCTw1kcr691w7WKPIBtRDl7
+         C2+roEmTk8hg82qpv1vQSm7Ct6GUaCMFnrgx/WWvHBihPsUL318lJjtPpdwmy39/NAkO
+         gmQ3mJxTDjFQScAFQ8EjxXG7Tu5lBYsL9ExwBSwng0iyMuy3bK8//acSbvLWrwqHAexp
+         mdIrxXIBEsErwXAEoZU5JKNSaw8gMnduoGa18rXPlWywxFUgygInuagd0N4XRiqjyQBO
+         msqxJfh8n887krN7QxpwgX+v89lLSxuooN97EjD9bus9eeFe3iIJ2rOLkp3aHxsX46NJ
+         47sQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVJLWt5zXJiFR8LFcyzoF0fzM9NTguvgE2FiST9uo8AEUYsGydVKZFKeVwUNHhaWy0tlm63Tln92/Q=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwA4X9AQ2sz9t5smziOJ8c3SwoeNcQfGoJ21FTFn/61bZ8j+yxQ
+	eJBymyIfpjdxmuZdSEsPiT4xINPg7EdXVLM1AThMnHvAQ6bREN8vFCFIC/ePC5hBiq/UE2HADN5
+	EFrO7hKxhGYuoZgv+saEFZgt20UJRekaEgmoKD/1O/QUB8OstF2dY4F912CFhak8=
+X-Gm-Gg: ASbGncsnZJ8eESPCnEo6eK5v9qHdZSn8bYy3641GCrXerAFjpNUImWte1VfskJirfvv
+	QpJGgfd9HLLz/p/1Jc+xvCLE21n0+ykFuxRgygKYidpgtIkGvi3S8pU7cE/d9Rr9s4ghVgrfNDd
+	O4GDjlrwZ920/ywaOPubXkKUYghJH4jgWgfUgwhuDytSzB44b9XslGKsC5nynWeLb1YUcOQG3H9
+	5btXRbFR5/OzAGX1AT/rVBrdfXQqdrG+bGQbb8080b2hCzLo/piqkGOXoij+5ILrslHtCFy2MFQ
+	KyU7GyhTV8BhpNOaTgUGTekpZP5ZEXkL5qFuXFGEcQFmw+kaSLbrkqS4sn9xQlu8CCRlS9u5nio
+	Kd85522uB8nyvJlIUqV1VBA==
+X-Received: by 2002:ac8:7f53:0:b0:4b1:2122:4a51 with SMTP id d75a77b69052e-4b313e59df0mr165737231cf.4.1756919815386;
+        Wed, 03 Sep 2025 10:16:55 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGzufSNCOLJcAHJBeXbkcXSuchMY9E0g8OI9XBOLb45HVfhiGviTYDOVr814FhPcFk6atK3Vw==
+X-Received: by 2002:ac8:7f53:0:b0:4b1:2122:4a51 with SMTP id d75a77b69052e-4b313e59df0mr165736731cf.4.1756919814748;
+        Wed, 03 Sep 2025 10:16:54 -0700 (PDT)
+Received: from [192.168.149.223] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-61cfc4e50fbsm12023875a12.38.2025.09.03.10.16.51
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 03 Sep 2025 10:16:53 -0700 (PDT)
+Message-ID: <7234085c-55b6-4131-acb8-a4ec097c6668@oss.qualcomm.com>
+Date: Wed, 3 Sep 2025 19:16:50 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/5] arm64: dts: qcom: lemans: Add SDHC controller and SDC
+ pin configuration
+To: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+Cc: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Richard Cochran <richardcochran@gmail.com>, kernel@oss.qualcomm.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        netdev@vger.kernel.org, Monish Chunara <quic_mchunara@quicinc.com>
+References: <20250826-lemans-evk-bu-v1-0-08016e0d3ce5@oss.qualcomm.com>
+ <20250826-lemans-evk-bu-v1-2-08016e0d3ce5@oss.qualcomm.com>
+ <rxd4js6hb5ccejge2i2fp2syqlzdghqs75hb5ufqrhvpwubjyz@zwumzc7wphjx>
+ <c82d44af-d107-4e84-b5ae-eeb624bc03af@oss.qualcomm.com>
+ <aLhssUQa7tvUfu2j@hu-wasimn-hyd.qualcomm.com>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <aLhssUQa7tvUfu2j@hu-wasimn-hyd.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <c82d44af-d107-4e84-b5ae-eeb624bc03af@oss.qualcomm.com>
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDAzMSBTYWx0ZWRfX8esOm+/iTORM
- +629c0/GDA/nAu9v0yO6xZcK+2i5ZiA0rxOiZidH3TwR8OTKRPBIJ5dT+rVCbzo+fBIPbKvDpgC
- L9UA+EJ3iKwTEGjRfee6vivOvO2jgvnJEdNX9enBW1fjaFY6bYYKQd4k5hwm0rgIkLFmVGm4YvQ
- AI+8ousDETOMOKyj1Q5NBf7VqIkGA0yxhrGMB/Tf/UGuLIo/nPX3d7hXohVig0d2U8hWfJEWlOD
- EfWbFK8kSaabXaTK1WWsBoiLcscGtL2wCoN0itk2EKRiaHTaaDY2QFUW2lGtITlHc1vBUPZ52+A
- twfoueuD6pMLUR0h9n9QaGNfIsuM4LKe7W+bOKToHES3sL8FAEWgdT/lb+qaa9WLrDlxr7ANwF5
- wKtdtBOR
-X-Authority-Analysis: v=2.4 cv=A8xsP7WG c=1 sm=1 tr=0 ts=68b86cb9 cx=c_pps
- a=rEQLjTOiSrHUhVqRoksmgQ==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+X-Proofpoint-GUID: 2qXS1QkDVLvEGuCS_vd0W15rEBZkFGT0
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDAwNCBTYWx0ZWRfX1M/G+P9Yz9Hw
+ JdeAJW4jKqvkvI4YTZfkdsgkLTKpSpH6vicq/10tnmKLfwawyjONJhcUAH7e8xUvxHwbtHFsM0K
+ eDHlC06RsVoS1Jsu4hunxGuGcQAH5UWIm5w/FXZEQcs2kWUNQyRi7mjV+11dDWqhd6qZrZrETcE
+ ce/jtfmMfJFXuOZsUjUFnw/mt3MlmpNcvqP85EfUvMQMqmHgEdTp2jOWhRqYiz4fWNhsxA1kaBG
+ DbTOSNka9C+ZPCgKwUT7jWfF2e2aV5suIoz+azJqQNcjBlJbMPQHPfqS7TM8RHYZUJMgYs9800/
+ BnuPfDLJMFZ53vhTUcAU4BQKNumQBM/vYoZ4HWLG9WhFAch3z9KLKurl07CCYe0lvHf163hvsUO
+ 4A2xAQ3F
+X-Proofpoint-ORIG-GUID: 2qXS1QkDVLvEGuCS_vd0W15rEBZkFGT0
+X-Authority-Analysis: v=2.4 cv=ea09f6EH c=1 sm=1 tr=0 ts=68b87808 cx=c_pps
+ a=EVbN6Ke/fEF3bsl7X48z0g==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
  a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
- a=Jh9KyP6SycQYY5kWdYcA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=2VI0MkxyNR6bbpdq8BZq:22 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-ORIG-GUID: duS_N8K8JBq2HaQWyybXhdOj0lOgObTV
-X-Proofpoint-GUID: duS_N8K8JBq2HaQWyybXhdOj0lOgObTV
+ a=_TSgDihk_Fvy7NELKkkA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=a_PwQJl-kcHnX1M80qC6:22 a=TjNXssC_j7lpFel5tvFf:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
  definitions=2025-09-03_08,2025-08-28_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 spamscore=0 impostorscore=0 bulkscore=0 clxscore=1015
- suspectscore=0 malwarescore=0 priorityscore=1501 phishscore=0
+ impostorscore=0 suspectscore=0 clxscore=1015 malwarescore=0 phishscore=0
+ bulkscore=0 spamscore=0 priorityscore=1501 adultscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508300031
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508300004
 
-On Wed, Sep 03, 2025 at 06:12:59PM +0200, Konrad Dybcio wrote:
-> On 8/27/25 3:20 AM, Dmitry Baryshkov wrote:
-> > On Tue, Aug 26, 2025 at 11:51:01PM +0530, Wasim Nazir wrote:
-> >> From: Monish Chunara <quic_mchunara@quicinc.com>
-> >>
-> >> Introduce the SDHC v5 controller node for the Lemans platform.
-> >> This controller supports either eMMC or SD-card, but only one
-> >> can be active at a time. SD-card is the preferred configuration
-> >> on Lemans targets, so describe this controller.
-> >>
-> >> Define the SDC interface pins including clk, cmd, and data lines
-> >> to enable proper communication with the SDHC controller.
-> >>
-> >> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
-> >> Co-developed-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-> >> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-> >> ---
-> >>  arch/arm64/boot/dts/qcom/lemans.dtsi | 70 ++++++++++++++++++++++++++++++++++++
-> >>  1 file changed, 70 insertions(+)
-> >>
-> >> diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
-> >> index 99a566b42ef2..a5a3cdba47f3 100644
-> >> --- a/arch/arm64/boot/dts/qcom/lemans.dtsi
-> >> +++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
-> >> @@ -3834,6 +3834,36 @@ apss_tpdm2_out: endpoint {
-> >>  			};
-> >>  		};
-> >>  
-> >> +		sdhc: mmc@87c4000 {
-> >> +			compatible = "qcom,sa8775p-sdhci", "qcom,sdhci-msm-v5";
-> >> +			reg = <0x0 0x087c4000 0x0 0x1000>;
-> >> +
-> >> +			interrupts = <GIC_SPI 383 IRQ_TYPE_LEVEL_HIGH>,
-> >> +				     <GIC_SPI 521 IRQ_TYPE_LEVEL_HIGH>;
-> >> +			interrupt-names = "hc_irq", "pwr_irq";
-> >> +
-> >> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> >> +				 <&gcc GCC_SDCC1_APPS_CLK>;
-> >> +			clock-names = "iface", "core";
-> >> +
-> >> +			interconnects = <&aggre1_noc MASTER_SDC 0 &mc_virt SLAVE_EBI1 0>,
-> >> +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDC1 0>;
-> >> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
-> >> +
-> >> +			iommus = <&apps_smmu 0x0 0x0>;
-> >> +			dma-coherent;
-> >> +
-> >> +			resets = <&gcc GCC_SDCC1_BCR>;
-> >> +
-> >> +			no-sdio;
-> >> +			no-mmc;
-> >> +			bus-width = <4>;
-> > 
-> > This is the board configuration, it should be defined in the EVK DTS.
+On 9/3/25 6:28 PM, Wasim Nazir wrote:
+> On Wed, Sep 03, 2025 at 06:12:59PM +0200, Konrad Dybcio wrote:
+>> On 8/27/25 3:20 AM, Dmitry Baryshkov wrote:
+>>> On Tue, Aug 26, 2025 at 11:51:01PM +0530, Wasim Nazir wrote:
+>>>> From: Monish Chunara <quic_mchunara@quicinc.com>
+>>>>
+>>>> Introduce the SDHC v5 controller node for the Lemans platform.
+>>>> This controller supports either eMMC or SD-card, but only one
+>>>> can be active at a time. SD-card is the preferred configuration
+>>>> on Lemans targets, so describe this controller.
+>>>>
+>>>> Define the SDC interface pins including clk, cmd, and data lines
+>>>> to enable proper communication with the SDHC controller.
+>>>>
+>>>> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
+>>>> Co-developed-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+>>>> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+>>>> ---
+>>>>  arch/arm64/boot/dts/qcom/lemans.dtsi | 70 ++++++++++++++++++++++++++++++++++++
+>>>>  1 file changed, 70 insertions(+)
+>>>>
+>>>> diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
+>>>> index 99a566b42ef2..a5a3cdba47f3 100644
+>>>> --- a/arch/arm64/boot/dts/qcom/lemans.dtsi
+>>>> +++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
+>>>> @@ -3834,6 +3834,36 @@ apss_tpdm2_out: endpoint {
+>>>>  			};
+>>>>  		};
+>>>>  
+>>>> +		sdhc: mmc@87c4000 {
+>>>> +			compatible = "qcom,sa8775p-sdhci", "qcom,sdhci-msm-v5";
+>>>> +			reg = <0x0 0x087c4000 0x0 0x1000>;
+>>>> +
+>>>> +			interrupts = <GIC_SPI 383 IRQ_TYPE_LEVEL_HIGH>,
+>>>> +				     <GIC_SPI 521 IRQ_TYPE_LEVEL_HIGH>;
+>>>> +			interrupt-names = "hc_irq", "pwr_irq";
+>>>> +
+>>>> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
+>>>> +				 <&gcc GCC_SDCC1_APPS_CLK>;
+>>>> +			clock-names = "iface", "core";
+>>>> +
+>>>> +			interconnects = <&aggre1_noc MASTER_SDC 0 &mc_virt SLAVE_EBI1 0>,
+>>>> +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDC1 0>;
+>>>> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
+>>>> +
+>>>> +			iommus = <&apps_smmu 0x0 0x0>;
+>>>> +			dma-coherent;
+>>>> +
+>>>> +			resets = <&gcc GCC_SDCC1_BCR>;
+>>>> +
+>>>> +			no-sdio;
+>>>> +			no-mmc;
+>>>> +			bus-width = <4>;
+>>>
+>>> This is the board configuration, it should be defined in the EVK DTS.
+>>
+>> Unless the controller is actually incapable of doing non-SDCards
+>>
+>> But from the limited information I can find, this one should be able
+>> to do both
+>>
 > 
-> Unless the controller is actually incapable of doing non-SDCards
-> 
-> But from the limited information I can find, this one should be able
-> to do both
-> 
+> It’s doable, but the bus width differs when this controller is used for
+> eMMC, which is supported on the Mezz board. So, it’s cleaner to define
+> only what’s needed for each specific usecase on the board.
 
-It’s doable, but the bus width differs when this controller is used for
-eMMC, which is supported on the Mezz board. So, it’s cleaner to define
-only what’s needed for each specific usecase on the board.
+If SD Card is the predominately expected use case, I'm fine with keeping
+4 default (in the SoC DTSI) with the odd user overriding that
 
--- 
-Regards,
-Wasim
+Konrad
