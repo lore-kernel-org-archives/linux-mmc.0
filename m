@@ -1,74 +1,74 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D73A2FCBEB
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Sep 2025 11:47:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 211362FD1A0
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Sep 2025 11:47:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756900069; cv=none; b=ctXGYeUAOlazgRB6U6D3RHzwm0NQzyf4ykatoE0yq077lnEJxyXayfyubBk9npr50B6N12bDum1h9mTHz5BIsb1wRWE0+/Vk64NvN+uZEu7I8fU6PJdaohWY1rWex/VBnG4XE6sbX34aMXyJx3/6NvDHykpsZePYQLFZCnLx5K4=
+	t=1756900073; cv=none; b=S2zu8+wCqAshbuWx/B577V0u0ryRT+2p87di0yc3WVl/dvV6jiaVyHpW1ykWdO4cE+WDIuPxwtA9XyRSYNH8dr+Q2bAJs6Obra1MEMtx5NnWhHFpSLXAngNEmdQZXwdI/du8mJouP73xXk22hxMiK7rWIOZKDrpTwS92QhtX/uw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756900069; c=relaxed/simple;
-	bh=ysbyanGTOQDdoDKZfJO9JNRcUI5DPnSHLHid2+/WQqs=;
+	s=arc-20240116; t=1756900073; c=relaxed/simple;
+	bh=OnktyLXlAvw79LU30W2286PIYUB0ZIxd6VhBwuBv3ZQ=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=uAwUVy4UYeoHEp77C/77LYQFuE0fE94CGOUZBUAIPfZF8OWhNedpLR4p3q8D/amq0Uwq2J7em/u1vt6kYFqCU14nq5daH6up56DRyu443xkcvkytQD8O1aT0NVv7SdcjXkwUOnxRn5j4VATHcsM/FGk3ZHCl8cBNnLQLMjyhF2Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Ux+wfHK1; arc=none smtp.client-ip=205.220.180.131
+	 In-Reply-To:To:Cc; b=bF9FHJhK0qvnLnivrajamt53fqS0Hoog35q3AmQG34PCGYE4n+PCTXs+LXTDXxk7KooVhwbNDvcCKjTHfJbBXfh3AarwQdY/Kbe+83RxGZ+zGeYmZObN7cEoWQDDGYTuAVpyXUO7v9AiLrTMp783weSkRqI54Iuu56pSU9tYMM4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=fehguLeU; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Ux+wfHK1"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 583BFIK3011335
-	for <linux-mmc@vger.kernel.org>; Wed, 3 Sep 2025 11:47:47 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="fehguLeU"
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 583BFE6w021456
+	for <linux-mmc@vger.kernel.org>; Wed, 3 Sep 2025 11:47:51 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	xhPpuYTt60KwuxaKo5to6sQuHTwQVddj1aOmX6ZkoGM=; b=Ux+wfHK1cBoB0Hvk
-	rvAIe88ITSgQ8Ttq360ZDVtd/GKWMsEJi4mP/3PoEqHp2JzC8LXsKHpgR4b9B0+Z
-	Rp/+9bzgcciDH32xHnN8UQKqQHlMxJ7F693ZEU8AM3B2xQHk0y/Q1IrmpOv5F/zb
-	OHXOeUc210RTJhpX8lO5s80mo2T7c0oKvP1LrkQjBkK676GnX8g578HGPynFvg/y
-	2ocspCZP7PAVse9jCgE8AnoWS6mWTtJs4VHxYra/ztJNb2XD5yXYdXUKWxBpBnYH
-	41SircZLP1Nm6ctowKulcUwim9LaP38B+9fyI3T6AdB4AKwCTX7FEeTSGcsjX1Ei
-	97/tAg==
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com [209.85.215.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48urmjkejg-1
+	RXZGpMX3yOrOQ/k31nwEuT7jwrMYrLpKw0F69FmVEdo=; b=fehguLeU8nl85U4j
+	rhXTLdC9xdLtUq8Hg07zOGaP3Ad9x/JL4mbtOcnaFcYxeKRCQMSUIzEzsLpZWGPE
+	GoBkvDYOv3kMkp2X5ix42AsoCGdAQgtdxb4QNfwmcDIZPo+yqs2mJO8u+1UoXl3A
+	iw20o0Tr8f09+6k2YsCNuAzqfV3+rlLNTj86Dj7lQD5LLkhTz8EpWU+A4KP2QX6S
+	2yMn4pAbBXaX4qmkoR8neOp6d+5Y6j2e96SnbcKFPZ4RZd2hdEI7+iu0bO4goShF
+	g7V9a3xQNSMoNCF98k0cR9smmH29TzZ9waGzpYwcMLJpj3DY/R8VGADSqj3Saba/
+	WPcBdg==
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com [209.85.215.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48utk939u1-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 11:47:47 +0000 (GMT)
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-b47174c65b0so8940931a12.2
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 04:47:46 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 11:47:51 +0000 (GMT)
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-b4f8e079bc1so2008214a12.3
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Sep 2025 04:47:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756900066; x=1757504866;
+        d=1e100.net; s=20230601; t=1756900070; x=1757504870;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=xhPpuYTt60KwuxaKo5to6sQuHTwQVddj1aOmX6ZkoGM=;
-        b=pyhgTKQL2RVX3GYkpbTmR6UksJCXZWDV/SPx3u7r8akQ4w5WLByQZPzBsGRCvMuXBf
-         RH28zmDetjYAlAqyTqbAuf/y/6qHCOIpXI0djCmvJdeyX+l2t/GYECw+NHIgU1VOtZok
-         HCLp65FN71MPMT2CGo48BpTMCMWYkE0PWcBCDMZUvBZMzXk+i0bTOvgkxhmPSm10VQTb
-         0Nx27ODrgFhhVMkUohW//9JDjdHzuIpTXtYFvLS+gZWTpsZI1Ie+hdTISWrWSaPJZV+P
-         ZODVDEiyDYWVHQ8hU2SOHXXN7Hcx6xKn7JdHbrIP7ghskBaJl9eOR6E6KOJZ6PwzTt9r
-         l+Eg==
-X-Forwarded-Encrypted: i=1; AJvYcCWL+WfOkOl0XDXoo4XTCX0M8XJIxTj2XqIahB9fYtMJ9/+anAgbDfGyUakh3h9Dq8EyPNnDIOATT4I=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwnW4PRFCzzmXzDmptjSDliME6Dkfwn/ikvvdTNEfRkcQrGcMVM
-	RhbUgkZuGKH2G7v88HvhIIp1/E7Ba/BetuWYWeVIJaLgySLcgTQZUxfMy8FMf/vySN+ZYXlRMp6
-	3DJmELH2kMoPUTybx+nMXWDucCdJ2Rpk5OGO7GzjvtcKkQBRRtqWYH2J1F28qrUFJoLeujyc=
-X-Gm-Gg: ASbGncs3l1QuuKoXzpcJbJJQY8GA8a/y2XNb2ky3ISOEI77awZOjaucj8M8wFF+GUVx
-	i+2dUFL0B0gIO1ZN5H0iI5jCt3sY5gdL2O+WgE0R9qys42LN0ZdwjSKFjmQNVjKn7Zh5BmGmgAm
-	ujkVh3+OHMBvEzXQ9BHJaPzcauVEF8BGD37IQB6bOjUUt1YV98Y9GYZMKj/5ExwJXxR6vk0vEmb
-	t46B7+q5iJzl8o9/RwkbwkBke/gIAQRaq4RejDf9ydVpid2FKUrujzhcsH+6757oM5N7TmHmGl5
-	bv+oWeKhr9R7nbCqtn1C+tX+vW9+V7kULpgVg5OlOvi6ejLj2fm+O0tv27zLbhRoA+e1
-X-Received: by 2002:a05:6a20:3c8e:b0:243:c36f:6a5b with SMTP id adf61e73a8af0-243d6e6912dmr22964621637.24.1756900065692;
-        Wed, 03 Sep 2025 04:47:45 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEFAmG0Z03at+D5Pdmb3Z8BI8QwxUitl/Q9M4OQtvK1yAW0xniPbq3DRETbxohnwIERBbRMZA==
-X-Received: by 2002:a05:6a20:3c8e:b0:243:c36f:6a5b with SMTP id adf61e73a8af0-243d6e6912dmr22964592637.24.1756900065252;
-        Wed, 03 Sep 2025 04:47:45 -0700 (PDT)
+        bh=RXZGpMX3yOrOQ/k31nwEuT7jwrMYrLpKw0F69FmVEdo=;
+        b=xAJ8UTi9c/kvU2V3n31SWBnjachzYGYy8M7854o19S33U1Y+4y1Mbr+iX0fWdFO1yU
+         8e0cqFsjwIF+gcZmXxzCwoZy8ci+PP8lL0/hF6xxB9y4BEjaPhVRbqOOHp9Uk45itRTL
+         2RbBJgtDa6DbR/lwe7EqG7Trx+1V4VdkJu+jr5Q0sjJJIIUY6pxZcF1eZXcS75tW5thI
+         IVVLHv/2k5CnInELUcfNDq6X/kRU3ZVkMfSUj7xx7YbBiPoQ5AAaGqAFjpXCCqpVQntm
+         8CrLeDi0Axia4QMNPT+vbshshjI+7YLAVBHwHgBj2R692+bGleJhDtBkTTVSG1J/0zEl
+         wfQg==
+X-Forwarded-Encrypted: i=1; AJvYcCUfJTKJl1AoTsJVn0X3XNS5PEJVRs3PHsEpAfVTyHTtSDvz4hgKk0ao6g/OEKVJmvFQIJ/Fg1e7bbE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyMUN6k//ZJ6v16tImHl0gYZVa2Cmc4+eN5XyeXtC3ryY1BDYDR
+	q/eWqJMhj604IrnWYlIj1SfW/d00oPjfXUbpXNXS7N9Isu+bbaamaOqrC2FGacsQfM14d9Z2lm5
+	AVu+pO2NMSJQdFBS+Yb/o+SE5nOQB87yB1nP+4AzxaBQvd6hhrEbGnyj1pUBT9sE=
+X-Gm-Gg: ASbGncsqhSLns83lM+tQTTYc5OvtLqBKf96r1IQtBynWva4L4vNKv4Kv8IP9mS35gKU
+	vTGBVVK25vBrRcvaYkncuY03vgfwIgUJ6adGmWAYnlMQUFiFTE4wXCoQ7aZmWjFuTAFA82l7/DY
+	AQpSQqH61fOu/bZWoPvSLDIK/GK0BwnPEUhkXVvTgiufea7StrxPh6+PmC93rcDSOQpwjJ11inf
+	bsfRK6y9ZhAZ6ag8cOj6Gqle8xoIxzaaANr5U2pu/bkLcVezF8ZBOkS4gVe13JLLzen1OnLYY9v
+	wU5KDggFsDjvBC3m/80v9WvgE713RSAxNxyw9EwKWy7G/DGGbHAQemkWSWmluQd8xCcJ
+X-Received: by 2002:a05:6a20:7fa8:b0:243:a91c:6564 with SMTP id adf61e73a8af0-243d6f431a3mr19272864637.50.1756900070434;
+        Wed, 03 Sep 2025 04:47:50 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGE+Q7esFWKub9PAlvBnehvvfXsc6KCukl6SiDDF6aya8S/1QEYowQVoz4bs50W6LD49Jov4w==
+X-Received: by 2002:a05:6a20:7fa8:b0:243:a91c:6564 with SMTP id adf61e73a8af0-243d6f431a3mr19272834637.50.1756900069926;
+        Wed, 03 Sep 2025 04:47:49 -0700 (PDT)
 Received: from hu-wasimn-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b4f8a0a2851sm6584074a12.37.2025.09.03.04.47.41
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b4f8a0a2851sm6584074a12.37.2025.09.03.04.47.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Sep 2025 04:47:44 -0700 (PDT)
+        Wed, 03 Sep 2025 04:47:49 -0700 (PDT)
 From: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-Date: Wed, 03 Sep 2025 17:17:03 +0530
-Subject: [PATCH v2 02/13] arm64: dts: qcom: lemans: Add SDHC controller and
- SDC pin configuration
+Date: Wed, 03 Sep 2025 17:17:04 +0530
+Subject: [PATCH v2 03/13] arm64: dts: qcom: lemans-evk: Add TCA9534 I/O
+ expander
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -77,7 +77,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250903-lemans-evk-bu-v2-2-bfa381bf8ba2@oss.qualcomm.com>
+Message-Id: <20250903-lemans-evk-bu-v2-3-bfa381bf8ba2@oss.qualcomm.com>
 References: <20250903-lemans-evk-bu-v2-0-bfa381bf8ba2@oss.qualcomm.com>
 In-Reply-To: <20250903-lemans-evk-bu-v2-0-bfa381bf8ba2@oss.qualcomm.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
@@ -89,165 +89,93 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
 Cc: kernel@oss.qualcomm.com, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org, netdev@vger.kernel.org,
-        Monish Chunara <quic_mchunara@quicinc.com>,
+        Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>,
         Wasim Nazir <wasim.nazir@oss.qualcomm.com>
 X-Mailer: b4 0.15-dev-e44bb
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1756900050; l=3338;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1756900050; l=1237;
  i=wasim.nazir@oss.qualcomm.com; s=20250807; h=from:subject:message-id;
- bh=zv+OQgP7QtiWYcdAbwJZxI9mvZNQ5t0ZoDEvN2ren5k=;
- b=+pX2aDcvWB0Up+pV7UeQ36u+TUFaBDJt3mfpFYzvaSXU8X+AOhKStUH0wVGQsCKuIZpqhLntb
- sxtFEPktuRoAlmJELhEAWZ9UBStrShpYQe5dwwOEvkV9lL2vuX36Pn0
+ bh=wNPfzyJsHuof8OoLd/8jyZfN9jNfvGHQW02eb1RzEjE=;
+ b=0b/LYijs/sr4es5fM86gI5QstjtnDPg6dCaC3GynfKhA8oLib+VAZsHsOmZBI2gUq5fzF3dL0
+ K0ocgFnwazdD47ESQZRaghlLahaQT5VBA+vJ72LdfZ4XLgPnl8cC3aE
 X-Developer-Key: i=wasim.nazir@oss.qualcomm.com; a=ed25519;
  pk=4ymqwKogZUOQnbcvSUHyO19kcEVTLEk3Qc4u795hiZM=
-X-Authority-Analysis: v=2.4 cv=OemYDgTY c=1 sm=1 tr=0 ts=68b82ae3 cx=c_pps
- a=rz3CxIlbcmazkYymdCej/Q==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+X-Proofpoint-GUID: 2oUKUFJiMfnedfUwdPlBMQPMbyASdPEv
+X-Proofpoint-ORIG-GUID: 2oUKUFJiMfnedfUwdPlBMQPMbyASdPEv
+X-Authority-Analysis: v=2.4 cv=ccnSrmDM c=1 sm=1 tr=0 ts=68b82ae7 cx=c_pps
+ a=Oh5Dbbf/trHjhBongsHeRQ==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
  a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
- a=uosFifNmqa3Wiex5iiQA:9 a=QEXdDO2ut3YA:10 a=bFCP_H2QrGi7Okbo017w:22
+ a=_e_tMwhLnjs0gR3cx5AA:9 a=QEXdDO2ut3YA:10 a=_Vgx9l1VpLgwpw_dHYaR:22
  a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: Z6L6XJEd92hbOwhOJkHeYdaXuFXAYO9o
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDAyNCBTYWx0ZWRfX268EXlNef11E
- SZsUWwvKktK/lFDaWtZX056yXTPraXMs1yy0gtkmHhoSsV9/LtTyXmL9YHnJ4EpxNd6nP7bUaoE
- /+h/0iEEfCKgHJt65FsL3hxCCxUP8e7Sw5h/U4BpB3t3JBtWfbTdWjba7Rk6oRWO0ZuKGrrXU8s
- xWfpq5agRdZ8EESxtl1dzzCYTGpWA22ltQdRhXPNeYRrXWh6g37wWFplNQ69AkZUg1SQ0/TRck/
- NGpD1sgMFkU9J6e76plBEqbA4Rbb1AeuiGXBAK28Yt1ALaexeddXJHjbC0o9CdWi5AC7lWdSXGL
- TWJMNV3bQxeXK7H/GTcGbdPGR7/HMQkNZcS6+594MQwu6dUMyD4FhuyUUnumJIoX5O7Fgb9C78f
- JUm7U6k3
-X-Proofpoint-ORIG-GUID: Z6L6XJEd92hbOwhOJkHeYdaXuFXAYO9o
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDA0MiBTYWx0ZWRfX/glesygkV+YM
+ k9umvMmnKtH929l0wmrYwhbPWx/oAq4dhySEmzz2iKDaFaF74i0R8BlxufW1GzpBXRUbjLzrJpU
+ KyMICcS7jplSS92aD4HiAcz5j4LT75Ee63Isbi5LcUEZ7ANMc58ZEAkbAvWeesWwzFS0+cLAA93
+ lKP4/16ptX8NTE067aZl6bj2lJ03XTOp9iGrwP637jy22pWQiCOQjwi2gc0i0pyL62yP54Cb4F/
+ oppWrK+I7nEOJZR+WLRLOnN4lRIBZmnol5Mvkb6pHMC51Exq45MFfuQRET4+LCrN1Lj/l60GczG
+ BWUCUiyM35bqiYki4T2P2tIyoOjeLsWr/2DKwOwYlyU/WjyT47Ypwg/EsEsuGU16Dgn0tqCv3aO
+ e25rrvwI
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
  definitions=2025-09-03_06,2025-08-28_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 suspectscore=0 spamscore=0 bulkscore=0 priorityscore=1501
- adultscore=0 clxscore=1015 phishscore=0 impostorscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508300024
+ adultscore=0 phishscore=0 priorityscore=1501 impostorscore=0 malwarescore=0
+ clxscore=1015 suspectscore=0 spamscore=0 bulkscore=0 classifier=typeunknown
+ authscore=0 authtc= authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2507300000 definitions=main-2508300042
 
-From: Monish Chunara <quic_mchunara@quicinc.com>
+From: Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>
 
-Introduce the SDHC v5 controller node for the Lemans platform.
-This controller supports either eMMC or SD-card, but only one
-can be active at a time. SD-card is the preferred configuration
-on Lemans targets, so describe this controller.
+Integrate the TCA9534 I/O expander via I2C to provide 8 additional
+GPIO lines for extended I/O functionality.
 
-Define the SDC interface pins including clk, cmd, and data lines
-to enable proper communication with the SDHC controller.
-
-Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
-Co-developed-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+Signed-off-by: Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>
 Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
 ---
- arch/arm64/boot/dts/qcom/lemans.dtsi | 91 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 91 insertions(+)
+ arch/arm64/boot/dts/qcom/lemans-evk.dts | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
-index 99a566b42ef2..9e4709dce32b 100644
---- a/arch/arm64/boot/dts/qcom/lemans.dtsi
-+++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
-@@ -3834,6 +3834,57 @@ apss_tpdm2_out: endpoint {
- 			};
- 		};
+diff --git a/arch/arm64/boot/dts/qcom/lemans-evk.dts b/arch/arm64/boot/dts/qcom/lemans-evk.dts
+index 9e415012140b..753c5afc3342 100644
+--- a/arch/arm64/boot/dts/qcom/lemans-evk.dts
++++ b/arch/arm64/boot/dts/qcom/lemans-evk.dts
+@@ -277,6 +277,38 @@ vreg_l8e: ldo8 {
+ 	};
+ };
  
-+		sdhc: mmc@87c4000 {
-+			compatible = "qcom,sa8775p-sdhci", "qcom,sdhci-msm-v5";
-+			reg = <0x0 0x087c4000 0x0 0x1000>;
++&i2c18 {
++	status = "okay";
 +
-+			interrupts = <GIC_SPI 383 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 521 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq", "pwr_irq";
++	expander0: gpio@38 {
++		compatible = "ti,tca9538";
++		#gpio-cells = <2>;
++		gpio-controller;
++		reg = <0x38>;
++	};
 +
-+			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-+				 <&gcc GCC_SDCC1_APPS_CLK>;
-+			clock-names = "iface", "core";
++	expander1: gpio@39 {
++		compatible = "ti,tca9538";
++		#gpio-cells = <2>;
++		gpio-controller;
++		reg = <0x39>;
++	};
 +
-+			interconnects = <&aggre1_noc MASTER_SDC 0 &mc_virt SLAVE_EBI1 0>,
-+					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDC1 0>;
-+			interconnect-names = "sdhc-ddr", "cpu-sdhc";
++	expander2: gpio@3a {
++		compatible = "ti,tca9538";
++		#gpio-cells = <2>;
++		gpio-controller;
++		reg = <0x3a>;
++	};
 +
-+			power-domains = <&rpmhpd SA8775P_CX>;
-+			operating-points-v2 = <&sdhc_opp_table>;
++	expander3: gpio@3b {
++		compatible = "ti,tca9538";
++		#gpio-cells = <2>;
++		gpio-controller;
++		reg = <0x3b>;
++	};
++};
 +
-+			iommus = <&apps_smmu 0x0 0x0>;
-+			dma-coherent;
-+
-+			resets = <&gcc GCC_SDCC1_BCR>;
-+
-+			no-sdio;
-+			no-mmc;
-+
-+			qcom,dll-config = <0x0007642c>;
-+			qcom,ddr-config = <0x80040868>;
-+
-+			status = "disabled";
-+
-+			sdhc_opp_table: opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-100000000 {
-+					opp-hz = /bits/ 64 <100000000>;
-+					required-opps = <&rpmhpd_opp_low_svs>;
-+					opp-peak-kBps = <1800000 400000>;
-+					opp-avg-kBps = <100000 0>;
-+				};
-+
-+				opp-384000000 {
-+					opp-hz = /bits/ 64 <384000000>;
-+					required-opps = <&rpmhpd_opp_nom>;
-+					opp-peak-kBps = <5400000 1600000>;
-+					opp-avg-kBps = <390000 0>;
-+				};
-+			};
-+		};
-+
- 		usb_0_hsphy: phy@88e4000 {
- 			compatible = "qcom,sa8775p-usb-hs-phy",
- 				     "qcom,usb-snps-hs-5nm-phy";
-@@ -5643,6 +5694,46 @@ qup_uart21_rx: qup-uart21-rx-pins {
- 					function = "qup3_se0";
- 				};
- 			};
-+
-+			sdc_default: sdc-default-state {
-+				clk-pins {
-+					pins = "sdc1_clk";
-+					bias-disable;
-+					drive-strength = <16>;
-+				};
-+
-+				cmd-pins {
-+					pins = "sdc1_cmd";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				data-pins {
-+					pins = "sdc1_data";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+			};
-+
-+			sdc_sleep: sdc-sleep-state {
-+				clk-pins {
-+					pins = "sdc1_clk";
-+					drive-strength = <2>;
-+					bias-bus-hold;
-+				};
-+
-+				cmd-pins {
-+					pins = "sdc1_cmd";
-+					drive-strength = <2>;
-+					bias-bus-hold;
-+				};
-+
-+				data-pins {
-+					pins = "sdc1_data";
-+					drive-strength = <2>;
-+					bias-bus-hold;
-+				};
-+			};
- 		};
- 
- 		sram: sram@146d8000 {
+ &mdss0 {
+ 	status = "okay";
+ };
 
 -- 
 2.51.0
