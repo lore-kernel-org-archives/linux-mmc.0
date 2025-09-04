@@ -1,73 +1,72 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56F5830BF5D
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Sep 2025 14:34:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30A251F03DE
+	for <linux-mmc@vger.kernel.org>; Thu,  4 Sep 2025 14:50:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756996453; cv=none; b=cVJRKMeW/guQ9OTpHZ+6sGqVSELeerK5LNyBNNVwhJ+kgn5TsA+ZhBSyvPzhu2DVTeofns9Ygrt296bZlVqKV1PwgDhbsFh8tR7bc9zM5JGD48N424eA88dRvv2EhNj6hr0B/eMNiMLvFqakEfW1pj2ukEgu+x1W39EN7HN6qak=
+	t=1756997452; cv=none; b=o17uGORInDDdmRhhmATX8vviRx3jx4l4rmBOnmPfPKG6pEiVXllGPXoaS+Dq14XPxDT8FjaZCVEo9RAlXMLcJUe4NVvVPLhckdH7jCdmpo6HixKgHiRYF5hsduif7+xSsrdrmQVEB0wZ6y8ZjGQNkBUMozH1vWpRvItMjavg1Ig=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756996453; c=relaxed/simple;
-	bh=9kGLZsuAUdIFYWwz5hLauSws155ufe/wyvzDGbTeJKg=;
+	s=arc-20240116; t=1756997452; c=relaxed/simple;
+	bh=znzKzzYB/tVt/N9X6f5BwkJ3eba+TE6AKbyVs41GZMI=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=YSatk6kT/jwPukfWgukNUjuqfPLPBmNa3rn5fFfm2vuNhMUHXS8NJ4y602O9P916NNzqpQpb+o51vBJ/RD++4yz/p0AHHKCYyEHQm9+x6dN7tX7fqptqls2TAk8VD476NKcCN435s7vmtjj5TNDGfSLdVIcUys5a7NfCUf3QB1s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=aXt1iG0a; arc=none smtp.client-ip=205.220.180.131
+	 In-Reply-To:Content-Type; b=bs2/zuWYlE9ckBKRecTk7011SGUmAJtETzcwkZOKXeMR9/aU8MQkaBoLPuRute6CYIugIg84w13eQ/qg51ApUvcQI4h2+anhybowBM16hBUEM1v/o02FM/Oo9S62fWTlyNttlao3lvJoZsjmD6wC/NB4sMpwCC1dfRVJNnlTNFg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=bw25kJ/C; arc=none smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="aXt1iG0a"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5849X8j8008125
-	for <linux-mmc@vger.kernel.org>; Thu, 4 Sep 2025 14:34:10 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="bw25kJ/C"
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5849X8lm007551
+	for <linux-mmc@vger.kernel.org>; Thu, 4 Sep 2025 14:50:50 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	UCrAy4VBSkToOvA1xqFBwYaPjkxY7aXwIQYFx4Hsorg=; b=aXt1iG0aMxe8G6oa
-	9TMcp8SxOzjrLwZHlbrpP3ueeTw1RVsU7KX3aIPBqu1sE3S+G6kI+8Wp1JW/kGom
-	WVOoPXF2346qLO0Zy4BzFyVsvo9BrrlLFrgcAj1gMHvDZl/ZAv8wZCcs3XpyC6xj
-	eVABlJW79vRjLVHhRvm1vO1KTebmvcXBzzYaY/t8uHrZ7zWyAPPCDTxbCj6G3RCn
-	dT6IYyFes2oetlcM+4sA8lmnZJlcW8qnb70LTM5haX9GVuBn63uKLqO9KHcRbnuE
-	rBJIah4/IxGhB8OGZpB0LTPL1ASgwiJ79EYF9bGp+iSg6ggyKrCoqF4LJmfsnizf
-	dB0QqQ==
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com [209.85.160.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48urmjqr69-1
+	znzKzzYB/tVt/N9X6f5BwkJ3eba+TE6AKbyVs41GZMI=; b=bw25kJ/CriesNdcY
+	ZTuBEAUfqn1gmDXvZlNBpPY7rRCLXOgawoUnHOf6XhyPPTFS3xvIc34NKSOeJ4/f
+	bg4ASMUFy8yZPRhaVJ8JRPLM7otf51uqGlSH01SA50t/wOvjaxHjV2145tAlxF4F
+	vYf8mQpipXW3uwmOsiPVlfWyNmDUlkK7MK6yTlLmIG+x2HViK9rh+OZA3rVvtUGN
+	4UFZJ7VtfuewMRdU8X1l8r8NQVeC/vi60EElkB1MrbcCx6SFypUwttdxgKjmUu7e
+	FgNVky/qIHPNlzKLtFsywLf2e6RgwdF5eTlZM1lPq4PCDyZKcRD9eHWQlYv9Wc+A
+	xQmN/A==
+Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com [209.85.160.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48ura8yr20-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2025 14:34:10 +0000 (GMT)
-Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-4b331150323so2731251cf.0
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2025 07:34:10 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2025 14:50:49 +0000 (GMT)
+Received: by mail-qt1-f200.google.com with SMTP id d75a77b69052e-4b31f744865so1856841cf.3
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2025 07:50:49 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756996449; x=1757601249;
+        d=1e100.net; s=20230601; t=1756997449; x=1757602249;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=UCrAy4VBSkToOvA1xqFBwYaPjkxY7aXwIQYFx4Hsorg=;
-        b=BzNpdCHC3TYgaVQu7AGDqFjjfy5foeYNsZY2RrM5wR4xl1mNvjGq2LxkIja+kPnM/w
-         NpPEquHN4u62+g+50JGYrW1ozataoEIr+C4WIXl885KZqu6dHfI59wVq3A+G1GOXCD90
-         ublY4ry3M2BxWdHuJEXFRNkWq/qxAlGocWTnocZOXfQTm6EDL2oV00YQV39VDcMaDp6s
-         /I0JJqn4wmYZlbpxyWNkJe5Ii89ZD16xXipYz6xiPZ+Wm78XVVJBXt4XspcvrzPbQe6a
-         7vpAb3/e5yQDap+F8qLDeSv29NQXHytFk61Ufrh+tHLgFvXdCchzWBM/D3OKLWbh8Dqy
-         abWQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVjsH/yeNFHMqVxjrj3bOnS5Dfz6lmBFAc/1EivdiAY8gzxWlm667apPV0jIixMSpiKpMimo/VEFQs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxhL4JZ41ciVk589zOxHtF4j0t8RdykRCszGBh0r4mWQSIltsnh
-	p3Uu24PtENW2FxZa/YSK2+PdmCTuBvX1zwW/mHi+CDbJjcUVS2/Aui/8ioDzvomtvE0NnGlHL26
-	FHX6g1ov/coSzgs75quVvyeVmTbJpeyRJNphTcGoMqHqijBu2nuEUaRryCwDyPcY=
-X-Gm-Gg: ASbGncs/y8tI/Dj3F5coF9/m0Lqc0om9uWFfACkowzSHC+x3QKGjw2K/n4E8fEePrQO
-	v2SNzFU/9Nb0CAk4moqW5GF3XkLFBQsNIJCRgL9ek5SPYsIFuGrwHmu1LTdC5MaK6c9PswfbtwJ
-	P2a3El7DKdZME2UUzfvhJi5y85YZyG4t3NLRhUmhr0eaNV2DpDaQQpC4RzrsfogI9PfKklkEXGB
-	2QPfbHvWaiRWeIo7vW5EQCNrd/0s9QXtjhhtgqfomRYXTYQVPh4hjD7ShNbYiW0JAsK27zseLpW
-	UeuwtTpkf48rI/uWGuoevjf52jjAa4UH5EEg0LaLlt+/RcVfe98G9ypUWlYQ2MgSerPcrmdXlpN
-	AKqfeHv8ZaI2dYXRqFBGxng==
-X-Received: by 2002:ac8:7c55:0:b0:4b2:d981:9d4a with SMTP id d75a77b69052e-4b30e932ab7mr178894781cf.6.1756996449042;
-        Thu, 04 Sep 2025 07:34:09 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGrw5RFAVNLFohEcIYk+SdbuRFducNBzrRczOAhY4ohyswSH9BPbnDav5kTvXk4L0TpomNHGQ==
-X-Received: by 2002:ac8:7c55:0:b0:4b2:d981:9d4a with SMTP id d75a77b69052e-4b30e932ab7mr178894231cf.6.1756996448330;
-        Thu, 04 Sep 2025 07:34:08 -0700 (PDT)
+        bh=znzKzzYB/tVt/N9X6f5BwkJ3eba+TE6AKbyVs41GZMI=;
+        b=jKbADQ7zJ4dX68YoiurF7C6ahrveHjbcNPy6PmTe4U4DrJ3xSAPA4EA/vpIkK/qy8J
+         aDw4K8doXLR2Y/4pfSvAol5ll3aCkDfcszf6DLHnxPxtgL2m3oiecDqkQT1/uIDLEWWt
+         laK+FhvMdf/9sGq7XWKR7hTP8+omgdkCKjheBdauEIm04jXtbtc8UaDQj1uOccruimFE
+         3i+QfYQrGmlI+pPGOcBKy5/sggxbOhIQnVxmaAFOE8mq4IzJ6QaEw5Sjz0tNNNAKehlo
+         WYrAyjakq0opThghQjbm98rCfsVSBWcoWEFXhvQ7rbOkB2qOUlsTV59Tg6O3j9re52FD
+         cIkg==
+X-Gm-Message-State: AOJu0YxPN9EFxOgUmphRuytneHOImXRslvPA48l0vliKZ6V72wUpVdF1
+	KFlhdsQmT3lxyLwP7ElJ1iJnZpphy89cUUYtZU2WaP2cXBqD799p4EkCNP8+8qZuJWUsGiakobA
+	5H6cR/6t9oKta6NUYHePXuSpGxAjk/0hHMf/rmqEhIOw2hBelgsZBT0+/y0x3Ln0=
+X-Gm-Gg: ASbGncuuA8zZ4QagKqbyODQ0zoTFFkgwnwP9QqxcFFT/qfyfHgAZpc2k3nDCBBfjgQp
+	fbOGByd4gbN4qQR9ITLO9DciTWZh2yc+VBabx0YK1I3NEqt2Kno+aIKn6q2NGQTf7SNuRLtkx5p
+	euypF4l0IyCH9+3xJHA342Q5korjd/4qNYz4ntCl/GCol26HKf8DjUf8L4ru43p1J17hffw04+7
+	6gKgOnmHaSsja1AQ8BM4HhlSWJgH2md4wiRStJa3zfyOeF/kLJvqFrl8b8jKuWpLgOJp/sTguvx
+	KskVHJrasOkkqGjF7loxWfIG/gDcMWt35/Aq2nPrMW4F4DmFZl4QKCCYoJlq/wnaJaRZfUAPAvV
+	X+yMl0gl1G8LlNzUSGuXs8Q==
+X-Received: by 2002:a05:622a:1a04:b0:4b4:95d0:ffd3 with SMTP id d75a77b69052e-4b495d11860mr40733701cf.1.1756997449056;
+        Thu, 04 Sep 2025 07:50:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEirBU+zW87hGRQx6CbcPFRpL0Sni5GXvXTKKD/RZcQRjOUfiQBrFmsWOwLVI0eNqk4lg1AaQ==
+X-Received: by 2002:a05:622a:1a04:b0:4b4:95d0:ffd3 with SMTP id d75a77b69052e-4b495d11860mr40733461cf.1.1756997448479;
+        Thu, 04 Sep 2025 07:50:48 -0700 (PDT)
 Received: from [192.168.149.223] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-61cfc579ba9sm14097959a12.52.2025.09.04.07.34.05
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b0470f11088sm327758666b.111.2025.09.04.07.50.45
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 04 Sep 2025 07:34:07 -0700 (PDT)
-Message-ID: <3b691f3a-633c-4a7f-bc38-a9c464d83fe1@oss.qualcomm.com>
-Date: Thu, 4 Sep 2025 16:34:05 +0200
+        Thu, 04 Sep 2025 07:50:47 -0700 (PDT)
+Message-ID: <18092427-3a4a-4fb2-9f75-675de98957d4@oss.qualcomm.com>
+Date: Thu, 4 Sep 2025 16:50:45 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -75,127 +74,122 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/5] arm64: dts: qcom: lemans: Add SDHC controller and SDC
- pin configuration
-To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-        Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+Subject: Re: [PATCH V5 4/4] arm64: dts: qcom: sm8550: Add max-sd-hs-hz
+ property
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+        Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
         Krzysztof Kozlowski <krzk+dt@kernel.org>,
         Conor Dooley
  <conor+dt@kernel.org>,
         Bjorn Andersson <andersson@kernel.org>,
         Konrad Dybcio <konradybcio@kernel.org>,
-        Richard Cochran <richardcochran@gmail.com>, kernel@oss.qualcomm.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        netdev@vger.kernel.org, Monish Chunara <quic_mchunara@quicinc.com>
-References: <20250826-lemans-evk-bu-v1-0-08016e0d3ce5@oss.qualcomm.com>
- <20250826-lemans-evk-bu-v1-2-08016e0d3ce5@oss.qualcomm.com>
- <rxd4js6hb5ccejge2i2fp2syqlzdghqs75hb5ufqrhvpwubjyz@zwumzc7wphjx>
- <c82d44af-d107-4e84-b5ae-eeb624bc03af@oss.qualcomm.com>
- <aLhssUQa7tvUfu2j@hu-wasimn-hyd.qualcomm.com>
- <tqm4sxoya3hue7mof3uqo4nu2b77ionmxi65ewfxtjouvn5xlt@d6ala2j2msbn>
+        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
+        kernel@oss.qualcomm.com
+References: <20250903080404.3260135-1-quic_sartgarg@quicinc.com>
+ <20250903080404.3260135-5-quic_sartgarg@quicinc.com>
+ <6deac56f-e21a-4447-bfa7-a414084676b8@kernel.org>
+ <be87fb2f-7036-4039-8ba2-63d54a9ae732@oss.qualcomm.com>
+ <23c29fb7-c0a4-4519-9b8d-e68255b83a10@kernel.org>
+ <a304ec1c-7364-4926-8763-8c731e461eb9@kernel.org>
+ <d12957f0-f8b5-4b29-967c-576dadd565de@oss.qualcomm.com>
+ <d2d9d5fc-27c4-4a5c-8ece-0f2e8b7030e2@kernel.org>
 Content-Language: en-US
 From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <tqm4sxoya3hue7mof3uqo4nu2b77ionmxi65ewfxtjouvn5xlt@d6ala2j2msbn>
+In-Reply-To: <d2d9d5fc-27c4-4a5c-8ece-0f2e8b7030e2@kernel.org>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-Authority-Analysis: v=2.4 cv=OemYDgTY c=1 sm=1 tr=0 ts=68b9a362 cx=c_pps
- a=WeENfcodrlLV9YRTxbY/uA==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
- a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
- a=kWtGODYmnNjJKUQazbMA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=kacYvNCVWA4VmyqE58fU:22 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: sIounEGBPuRwzqQDjmc1UCL81Y6ifpVX
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDAyNCBTYWx0ZWRfX9g2lbvmTuEn4
- 1f58fIz6SUvMLzc7OWeFxwRrSxP7QbCLz9Isupj1EgdV85x74gyWkAK3iU9vQTswJR9jVkUeT/V
- QcUURCJ0zSztbI5RgSeVpfbVRsAel5GU6tTkP5n24/g0aZDDKduRpzXRO7yDAehmp13RKnxjqtI
- W2wn0jvnTvqZWbaPtwYoQ7gqos3gocBkNkDCYE9NoMsTayrTgXvajn1tP5bQrbQ8QnMnotMgOAm
- FC4CK4OqxhCs4QxQKQjwiNEfI28B43MXIDBDBQnkkzRBVkuJPrb5zvZ0667FDuwWoFYHL1BC0yS
- MGzDZB2CmZ0ivW627f/JWIYs6Db/+Pf3SIQzONTZPQhSTyW3CIOd1ThhTc3CYz2x30jCL8w4ZrF
- OsgNVubx
-X-Proofpoint-ORIG-GUID: sIounEGBPuRwzqQDjmc1UCL81Y6ifpVX
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-ORIG-GUID: fldjE24rXsumrGBIPaeBmNdxZBSnzYZ3
+X-Proofpoint-GUID: fldjE24rXsumrGBIPaeBmNdxZBSnzYZ3
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDAyMCBTYWx0ZWRfXyfktyvtkf6n3
+ KSNcgYfe/PK+gIjLIeCRw8ejcmBNJ51OYlssCtJh5dtyILQ1TwNDoVpH1zTe6u7rjlckr0WX1c+
+ MtYdxhoqEztM63zpfPjd4OB9Dtem2GsAgSWZGQNPK6SCkYWVBe0MOTqqGsX6pQt7ZvHgwxQGZbm
+ V1Ru58YmvKhSwOU6S9o7TP3znGvzVHePwtKAmQXp3M45YsygdxadFkpB8GL4hcaiuMJZtcc6wJ+
+ MhH/6pDsiVWUVLIyo+AAQbckBFXFwWcIqV6H05ZaDd7Zu6ejYTN9esWY5fs8W95E+18yK36ReHz
+ rxxrWR4/XwUaQx2f41H97eez6OaxMI4nrvhahI1K/JHy9GK1h9zhczz9M4Wi+wSm+Y8VyC17eGP
+ OLzobbX5
+X-Authority-Analysis: v=2.4 cv=VNndn8PX c=1 sm=1 tr=0 ts=68b9a74a cx=c_pps
+ a=JbAStetqSzwMeJznSMzCyw==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
+ a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=c_I0RgxThugTXrF3K4IA:9
+ a=QEXdDO2ut3YA:10 a=uxP6HrT_eTzRwkO_Te1X:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
  definitions=2025-09-04_05,2025-09-04_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 suspectscore=0 spamscore=0 bulkscore=0 priorityscore=1501
- adultscore=0 clxscore=1015 phishscore=0 impostorscore=0
+ suspectscore=0 spamscore=0 impostorscore=0 malwarescore=0 bulkscore=0
+ clxscore=1015 adultscore=0 priorityscore=1501 phishscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508300024
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508300020
 
-On 9/4/25 3:35 PM, Dmitry Baryshkov wrote:
-> On Wed, Sep 03, 2025 at 09:58:33PM +0530, Wasim Nazir wrote:
->> On Wed, Sep 03, 2025 at 06:12:59PM +0200, Konrad Dybcio wrote:
->>> On 8/27/25 3:20 AM, Dmitry Baryshkov wrote:
->>>> On Tue, Aug 26, 2025 at 11:51:01PM +0530, Wasim Nazir wrote:
->>>>> From: Monish Chunara <quic_mchunara@quicinc.com>
+On 9/4/25 3:07 PM, Krzysztof Kozlowski wrote:
+> On 04/09/2025 14:27, Konrad Dybcio wrote:
+>> On 9/4/25 12:52 PM, Krzysztof Kozlowski wrote:
+>>> On 04/09/2025 12:51, Krzysztof Kozlowski wrote:
+>>>> On 04/09/2025 10:36, Konrad Dybcio wrote:
+>>>>> On 9/3/25 10:21 AM, 'Krzysztof Kozlowski' via kernel wrote:
+>>>>>> On 03/09/2025 10:04, Sarthak Garg wrote:
+>>>>>>> Due to board-specific hardware constraints particularly related
+>>>>>>> to level shifter in this case the maximum frequency for SD High-Speed
+>>>>>>> (HS) mode must be limited to 37.5 MHz to ensure reliable operation of SD
+>>>>>>> card in HS mode.
+>>>>>>>
+>>>>>>> This is achieved by introducing the `max-sd-hs-hz` property in the
+>>>>>>> device tree, allowing the controller to operate within safe frequency
+>>>>>>> limits for HS mode.
+>>>>>>>
+>>>>>>
+>>>>>> Probably we will now replicate the same discussion... And it will be
+>>>>>> happening every time you send the same and not reflect it in commit msg.
+>>>
+>>> Just to emphasize this - it will happen EVERY time.
+>>>
+>>>>>>
+>>>>>> Bindings say board setup, this commit msg says board config, but the
+>>>>>> patch says SoC. This is not correct.
 >>>>>
->>>>> Introduce the SDHC v5 controller node for the Lemans platform.
->>>>> This controller supports either eMMC or SD-card, but only one
->>>>> can be active at a time. SD-card is the preferred configuration
->>>>> on Lemans targets, so describe this controller.
+>>>>> Both are correct, looking at the problem from two perspectives.
 >>>>>
->>>>> Define the SDC interface pins including clk, cmd, and data lines
->>>>> to enable proper communication with the SDHC controller.
+>>>>> The bindings description mentions board-specific limitations (e.g. because
+>>>>> "the board's electrical design does not allow one to achieve the full rated
+>>>>> frequency that the SoC can otherwise do, in a stable way")
 >>>>>
->>>>> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
->>>>> Co-developed-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
->>>>> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
->>>>> ---
->>>>>  arch/arm64/boot/dts/qcom/lemans.dtsi | 70 ++++++++++++++++++++++++++++++++++++
->>>>>  1 file changed, 70 insertions(+)
+>>>>> Here the author tries to argue that almost all SM8550 boards are broken
+>>>>> in this sense, because the reference design did not feature the required
+>>>>> passive components, making most (derivative) designs sort of "broken by
+>>>>> default" - and only some (if any?) vendors decided to go with the
+>>>>> additional components required to lift this limitation.
 >>>>>
->>>>> diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
->>>>> index 99a566b42ef2..a5a3cdba47f3 100644
->>>>> --- a/arch/arm64/boot/dts/qcom/lemans.dtsi
->>>>> +++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
->>>>> @@ -3834,6 +3834,36 @@ apss_tpdm2_out: endpoint {
->>>>>  			};
->>>>>  		};
->>>>>  
->>>>> +		sdhc: mmc@87c4000 {
->>>>> +			compatible = "qcom,sa8775p-sdhci", "qcom,sdhci-msm-v5";
->>>>> +			reg = <0x0 0x087c4000 0x0 0x1000>;
->>>>> +
->>>>> +			interrupts = <GIC_SPI 383 IRQ_TYPE_LEVEL_HIGH>,
->>>>> +				     <GIC_SPI 521 IRQ_TYPE_LEVEL_HIGH>;
->>>>> +			interrupt-names = "hc_irq", "pwr_irq";
->>>>> +
->>>>> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
->>>>> +				 <&gcc GCC_SDCC1_APPS_CLK>;
->>>>> +			clock-names = "iface", "core";
->>>>> +
->>>>> +			interconnects = <&aggre1_noc MASTER_SDC 0 &mc_virt SLAVE_EBI1 0>,
->>>>> +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDC1 0>;
->>>>> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
->>>>> +
->>>>> +			iommus = <&apps_smmu 0x0 0x0>;
->>>>> +			dma-coherent;
->>>>> +
->>>>> +			resets = <&gcc GCC_SDCC1_BCR>;
->>>>> +
->>>>> +			no-sdio;
->>>>> +			no-mmc;
->>>>> +			bus-width = <4>;
+>>>>> This in turn makes it fair to assume the developer experience would benefit
+>>>>> from having the SD card high speed modes always work (with the slight speed
+>>>>> cap which may not be required for the 1 or 2 designs that took the extra
+>>>>> step) without each board DT creator having to track down this property
+>>>>> separately.
 >>>>
->>>> This is the board configuration, it should be defined in the EVK DTS.
+>>>> And then if you send same v3, I will ask the same. Can the author
 >>>
->>> Unless the controller is actually incapable of doing non-SDCards
->>>
->>> But from the limited information I can find, this one should be able
->>> to do both
->>>
+>>> v3 -> v6
 >>
->> It’s doable, but the bus width differs when this controller is used for
->> eMMC, which is supported on the Mezz board. So, it’s cleaner to define
->> only what’s needed for each specific usecase on the board.
-> 
-> `git grep no-sdio arch/arm64/boot/dts/qcom/` shows that we have those
-> properties inside the board DT. I don't see a reason to deviate.
+>> So, would you be accepting of this patch if the commit message was:
+>>
+>> arm64: dts: qcom: sm8550: Limit max SD HS mode frequency by default
+>>
+>> Due to an implementation detail in this SoC, additional passive
+>> electrical components are required to achieve the maximum rated speed
+>> of the SD controller when paired with a High-Speed SD Card. Without them,
+>> the clock frequency must be limited to 37.5 MHz for link stability.
+>>
+>> Because the reference design does not contain these components, most
+>> (derivative) boards do not have them either. To accommodate for that,
+>> apply the frequency limit by default and delegate lifting it to the
+>> odd boards that do contain the necessary onboard hardware.
+> Yes, it is an excellent explanation.
 
-Just to make sure we're clear
-
-I want the author to keep bus-width in SoC dt and move the other
-properties to the board dt
+Sarthak, if you believe what I said is accurate, feel free to copy-paste
+as is
 
 Konrad
