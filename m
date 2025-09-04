@@ -1,63 +1,57 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8943274B4A;
-	Thu,  4 Sep 2025 15:35:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A04E2EBB92
+	for <linux-mmc@vger.kernel.org>; Thu,  4 Sep 2025 16:10:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757000147; cv=none; b=KkOz/FVU//eo75WyeCSw/dQLOIudOzN9JcknQDLmBRT5eS4TWzKmMm/IzhEgsMQCCM4AFS022EaR5N4iPi332fd2v84VSEpsUXCa2qD5sMYCfukvYWW2a36icFKXFybqlQ9EcfWfQen1zTU10nUONiju8OSLyX01krhF+2TCbv4=
+	t=1757002211; cv=none; b=MdSakSo5dy721P3W7uAQNOgFpv5HhADyxeCPbEVjv8Esw9V7txBfphzQkaiwpElTvj6G1r/lLak17mMrUiznUOWJiU8V3yIKS7DhS2KWB4JiwlCkxNAOHwqvugUhjWgRguitHkgwJ9VnqNdTmVrkLGJtVSobgcwlxD3h063bjaY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757000147; c=relaxed/simple;
-	bh=Ft6KnGY4c8PD7n8t21h4UKJGUFkWOKnwcy43iveeIJo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FVFw5TlEKvzQdjnRs2kAG9sxDfl9++LIzgo3N5gr6ZAFvppJbUtXQQhNSaHjHkB+fw9+tnk45WEwG+uCcTpmkMkL/dn7aYMua0hwy7JQe6AF/RgNQxlCL/5Lr0OlDNxfwbi1sVs7zOekZL3x0oawgm2YBqGrxQFcx63bG2gKMi0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3D526C4CEF0;
-	Thu,  4 Sep 2025 15:35:46 +0000 (UTC)
-From: Geert Uytterhoeven <geert+renesas@glider.be>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-sh@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] mmc: sh_mmcif: Remove dummy PM resume callback
-Date: Thu,  4 Sep 2025 17:35:43 +0200
-Message-ID: <8b73e2071a1d87c8d09b8bb24fc35f371779c2f3.1757000061.git.geert+renesas@glider.be>
-X-Mailer: git-send-email 2.43.0
+	s=arc-20240116; t=1757002211; c=relaxed/simple;
+	bh=PkmIbntlSSDbCIU3//pmB31oz3Tvb/BNxvNIJ97TuP4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OIzYX3XjW3+5GuhQUB2xW2312i1MO6QZ8iUeKPG4AARoFFThyiml1PfchRhnS0pIaoQm7cxRoJIX4vDrKGDEMMh+1yHrwKiw44z6MVq9yZfHXaxuO8w70IRuHXJ3uLItVYJpjiV6WiJPAj80N2kXct6TwORC5O1JT/Y9qLMdunE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=BUzMEvRJ; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="BUzMEvRJ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=zZOr
+	5/vzHL2/W03R7cgpjsL8TTrFvZdllQGOy/p3JI8=; b=BUzMEvRJU+/xhCMHur2c
+	1yN7qM3GQZTCT7DDlzbIBokkVtydOfccHuZ+fnaedZRVgFNyE5VjfgJ7kEiNCP8y
+	jvf/fUfWNq9ZYbrUqI0jZlWuLmNnIGHN7F1Z1reRsv1ynFYZdmj1o8mTZwLRq1hD
+	W4lYdIreDjhTfg3s5Gwhk3+uun3hVAgo6ZjDxzGLWfpfqC87LNQfONPZX+PTa4fX
+	r/O8HaPWzFbUpKZei4l6gPOq7z7wMIKifkYMFgIZwWI2fQ1vfRb76e1LxRoL6jI5
+	2K0FHleZqMVRAuV0eMMhC3fPQJXGvkGDPS5aHJaiumNKQpJsY5GJKy7F15j2THGa
+	7A==
+Received: (qmail 3728061 invoked from network); 4 Sep 2025 18:10:06 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Sep 2025 18:10:06 +0200
+X-UD-Smtp-Session: l3s3148p1@hX9e9Ps9WNUujnuV
+Date: Thu, 4 Sep 2025 18:10:06 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, linux-sh@vger.kernel.org
+Subject: Re: [PATCH] mmc: sh_mmcif: Remove dummy PM resume callback
+Message-ID: <aLm53kb0HWQK4mfe@ninjato>
+References: <8b73e2071a1d87c8d09b8bb24fc35f371779c2f3.1757000061.git.geert+renesas@glider.be>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <8b73e2071a1d87c8d09b8bb24fc35f371779c2f3.1757000061.git.geert+renesas@glider.be>
 
-Unassigned system sleep callbacks were always treated the same as dummy
-callbacks that just return zero.
+On Thu, Sep 04, 2025 at 05:35:43PM +0200, Geert Uytterhoeven wrote:
+> Unassigned system sleep callbacks were always treated the same as dummy
+> callbacks that just return zero.
+> 
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
- drivers/mmc/host/sh_mmcif.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 413c34585c90d57b..bf899c8e38f517d3 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1579,12 +1579,7 @@ static int sh_mmcif_suspend(struct device *dev)
- 	return 0;
- }
- 
--static int sh_mmcif_resume(struct device *dev)
--{
--	return 0;
--}
--
--static DEFINE_SIMPLE_DEV_PM_OPS(sh_mmcif_dev_pm_ops, sh_mmcif_suspend, sh_mmcif_resume);
-+static DEFINE_SIMPLE_DEV_PM_OPS(sh_mmcif_dev_pm_ops, sh_mmcif_suspend, NULL);
- 
- static struct platform_driver sh_mmcif_driver = {
- 	.probe		= sh_mmcif_probe,
--- 
-2.43.0
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
