@@ -1,185 +1,240 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97F1F2C21D4
-	for <linux-mmc@vger.kernel.org>; Thu,  4 Sep 2025 08:40:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACFFD2F8BD3;
+	Thu,  4 Sep 2025 09:49:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756975256; cv=none; b=isxiv5VQLSJmD9QKe1mKV58ewEN38FTdjYqeYSh0HjQnS/xXXOAoYhoMHVh6mEDktdwMx1qSt+6lBz8qlVJBUAPkyGtB3itzZoA/T3gNKCE6Jm70IgqfyoDyC2XktE660I9dwxcpSNc4FR3FoLqKUB0N4loY7DCucZJj7SRHIXM=
+	t=1756979387; cv=none; b=dfsfg/bcn0wBQbZ0K2dxQZymAI+ezpHSxWz7vG3wqb7fPLPLpTHlQViVM2Mh24tk8Yd+FKVN/sY1+ETNxwxW4a/yl5TvxbeqeFDypW1vKpnHf5suqO7Shbpq5+d2fStDiEfc710ZVESLdSmRSFoadkEHUB3wGZ38w3Qq0bcRNYo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756975256; c=relaxed/simple;
-	bh=NeuaUx7smKmYtWJXPRDCSomZ5mneveiatz9Nf9EB2u4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HUDrbuHmGZJvRWHJFT3zu4a7uTttDcn4i3YiD7HC8NoXaZOexl0vSWJupMYUiCoj74Z4qCNL0i+S/gK5QmnYCwfVcLPvq+odvxzA2BLl36DYdI3v2TWBibl0LHeLKr3z4KhyAnjjU5+fdnngn7qKzQa423P5ZdBekZQL1/xAjN0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=jzWBWKeA; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1756979387; c=relaxed/simple;
+	bh=tlQQ4A8SaD2iscfk1wzIkweYD5icMB5K/XilKna4f7w=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UZDbuICGRCMtGTjeSfbE0nnEXSrqY8GSAcly/b4q2CtwG3KgASUugW85lepfq+QMdvMcFcRmzlBwk2wlwY2HOsbx/+0z5R1Xuju5kzYjCm8mQga/UfOp1xc/Ca2E2MVoadSmx23C078rZjS4BJZyzF1fePy8FHNwRcxIBukI5qA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=c2ZuVh1I; arc=none smtp.client-ip=209.85.208.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="jzWBWKeA"
-Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5840uP2Z003933
-	for <linux-mmc@vger.kernel.org>; Thu, 4 Sep 2025 08:40:53 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=LVRFBw8y4TYM0aV+IQrAzF1l
-	KHpBMR6sAe/MnFd5W2o=; b=jzWBWKeAKpndbqbxCUK94/bpit/U2ASgLoaqpyKR
-	iq6f2IvpOPsjCXSb4dOlBcfj0HZwmrKEwdm0pAmYAcMZ27rCGVNbaiuxqaeQmaRL
-	ww8ynHlEYTgXkARIEA4SrublB4toxeQprTmMKC7HMajpw/Yb0zKDZUhn9nABOgO6
-	mLcua/gsdL4g6Cmec5xbPZ3zW8xxv6jaHsCh+D9uGQ1PTM2onq/Yio7RC8T2RWoE
-	9+Em7kGE84DrwvV2SQrW1LRy3acqFAgSRj5jl71LdKAJB5XA8HZZTapllwclTDVN
-	063Vww36bMc/WHYy8tnHeg25lGfq66TuHLNqtx++ScIflw==
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48ura8xqpe-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2025 08:40:53 +0000 (GMT)
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-7723d779674so768067b3a.3
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Sep 2025 01:40:53 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1756975252; x=1757580052;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="c2ZuVh1I"
+Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-61e3b74672cso1807886a12.0;
+        Thu, 04 Sep 2025 02:49:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1756979384; x=1757584184; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=LVRFBw8y4TYM0aV+IQrAzF1lKHpBMR6sAe/MnFd5W2o=;
-        b=m6b3jFvKs3D4bbSMcLOkztgVPHkRc9qzJN2sFdy5n/QP/uruoWLv2ORgpbNu6p0alg
-         FnuMmvc8MOmOoOVHCXwpxj7baBdziFIPrGWTVRF2wLX25j/SYOWiDM6jnxZsZ2kH+TQQ
-         rcFcQwcllPPxRYUOO8nsDYh41d40m3JG6zMcKbAryAGAYYQKE1je5omjX4xesI3pdexJ
-         AXsnT5NlszcLmk4bGL1kflFi7ys94VjV4ASw8yrUgZiRmkEJyLdrk3f6ezQmq2xJdis6
-         2a5nM4rssmh15zeeDfmNhqjPRm3wIreAVWkqRYPVSe3RPMaMlKDvDd9GEHdenkwv+Rpf
-         6lvA==
-X-Forwarded-Encrypted: i=1; AJvYcCWGxqSu8v/wI7d0SdTYsoigjHNtyJq8UJ1qF5fvMRQBpzlAjMSZo1V9aC0J6+Wtx43MyVDtHci/FkE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwtS3dlHYTQ+zrcc/VXep/AG27m/4QJN0Moy93BY29SzRgfDSpU
-	mVLRGxtk0pKYWrBGsglt/+I9xXJ3RReUoVND0bFAU0BybN2wxOulkgfVX+xTQO73fuuk4XGwkeU
-	NlLP6MNryt9S18Zglplp0fn1cp7NsWuGjsnTyRUN2VjtOMcyynyaXn6Jq0FrkqWvOz8Zk7O4=
-X-Gm-Gg: ASbGnctnYBAwKldYNtop07UG6PRDqSQkVPWdwXW8SxC8XbwUKSPuSzpaD1NBa7n0mB6
-	jVBvLtnLus7xAM06EqVOFrUHKFr29niZNV9enTJheiI3eKzQMGRnndWMkxjrS+bF5lz1HgX4BIT
-	HToOkTclcsujt1VpSgPilKQzTcyXpua29ewrLb6cn+9bnzLxhKU4qA/JtCEXifH4RGnE3UfmJHC
-	8nlZXyaa89jGipHr2OLcnUGxtr7GsJGKEel9tdxk/dq05Qkesoz/+gfaqtK8Vnng4kjovVHh0E0
-	rl60VT/fjXl8M/Jx+Hj2jW/d1ZzqTy1pVe4VtxBunb2frLBFCNGjDQT/OPUVzwHZ60i4
-X-Received: by 2002:a05:6a21:8311:b0:245:fe25:7024 with SMTP id adf61e73a8af0-245fe257561mr7818354637.30.1756975251858;
-        Thu, 04 Sep 2025 01:40:51 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHShG+ywVPwMMnN5ITlEBaV4t7zgpBVXXayaVZuxH1iz3KDcZhyTFEKIB2j/DH6XqeArvxfnw==
-X-Received: by 2002:a05:6a21:8311:b0:245:fe25:7024 with SMTP id adf61e73a8af0-245fe257561mr7818320637.30.1756975251313;
-        Thu, 04 Sep 2025 01:40:51 -0700 (PDT)
-Received: from hu-wasimn-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b4f317ee7cfsm11700910a12.3.2025.09.04.01.40.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Sep 2025 01:40:50 -0700 (PDT)
-Date: Thu, 4 Sep 2025 14:10:44 +0530
-From: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Richard Cochran <richardcochran@gmail.com>, kernel@oss.qualcomm.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        netdev@vger.kernel.org, Monish Chunara <quic_mchunara@quicinc.com>
-Subject: Re: [PATCH v2 02/13] arm64: dts: qcom: lemans: Add SDHC controller
- and SDC pin configuration
-Message-ID: <aLlQjAmEe795u+nF@hu-wasimn-hyd.qualcomm.com>
-References: <20250903-lemans-evk-bu-v2-0-bfa381bf8ba2@oss.qualcomm.com>
- <20250903-lemans-evk-bu-v2-2-bfa381bf8ba2@oss.qualcomm.com>
- <8a963e12-1113-4604-b15f-a5867c4b5bbf@oss.qualcomm.com>
+        bh=MJbNOvdwkGYJ/Frmp0x806yVuX/X2QwoxXLiar6zoiw=;
+        b=c2ZuVh1IOKdeLiDCIry4bCGIjotN0bkASA8vpHTXTLsEzCkTC3dIGhEYjkTrJgyN7M
+         T6tJ8PCBvHcPSs62P+HBoKYg1kt9RyD6f0TVpHD91L0nTfQKT43R1KfEwa+3XQK+F4hm
+         6he5H8woHlUIvcKr0D1orelL6CwAJoKAvgLHJUDShP0i53OnJ10YB9lHxgpy+4O0RCYQ
+         90nZ84esi+pljgcrr8FByREtuteb/AbiGMV1ZdFBZmBq1BYWQcUcyL8bpUP3X89dv8MW
+         Qjns595bg+vDGPXHWJWfrkVA6eynr+Ymbe/jdX9tNnkYmETddGJpasKLfpUIQEsHzqWY
+         9GcA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1756979384; x=1757584184;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=MJbNOvdwkGYJ/Frmp0x806yVuX/X2QwoxXLiar6zoiw=;
+        b=KIgHH6mcSR45zn10KLbHxCwEqwlZqg6RLhSJjpGVrmwIPjLubZRoeVivqm7A+kPJQK
+         VXxuGx8Jy3wC21XOTIBOPtKVPBXuUmL4We4PpNnhhRq3DATCHtfZI1JY3V7Dl9LhNsSA
+         KeFdwkPnkqyn9bMFaxK+WxBjuN17jjfl/kNaMf/hgIjks9kGLPwv3v73GnRIP2yGv+3l
+         jHh2e0iFATBeulfSppoDtAKp9HAJ8qW5BgCpOlScQe3JDNpJVW+uEHncolvZ3gjfshpP
+         tnNzg/JfpV28HLUEsJOSqWuH4noalzjdjczxa468f79FI6JkFw+x8FkAeMiyn9SPY13i
+         OLaA==
+X-Forwarded-Encrypted: i=1; AJvYcCUwS65O4PuLiCdZTxiSV4BF/EgoNAL89n1HhoIcGbjFUXWFqi03YZ8qVXaauziQGp75xj6BmEnR1iA9@vger.kernel.org, AJvYcCXOo6CcuN7QamoGdRZXPKqqA+p4ipVmHUnC5SkTionyVrNnLBFeMXL1S8m2juOe8N6T+3xtpSyS@vger.kernel.org, AJvYcCXSEn3g3BvfGvK+LWqVZZAlEiY7nFyFITYUsyZ840kJP21JT36ZSkL1z6uooQbSSyV+6Otnb5ILMZIYYj0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx5EtSMnLfu//oVwEvAyn2oYRmOAqVhE6poXpSNovPvbf5VhWCG
+	aSbdsDEG5B7Jq933w4X7sVH0JKx2iWOmDqrLyiNQAO0iqd49hPBDBCGYufv8sdw6Pg048UeaPkt
+	cEGB9G/I8vKeI+/HGVKHa+kLYRKmQ1Ag=
+X-Gm-Gg: ASbGncvD7f3ohR0eeNAE0WiaJCWH8VBdYbKotsYQ3RdPpb84DWhHssNFIqTRjys2fNj
+	5yk2fNmDNSreKY7gCnryKHKU71+zZ0m+5xdD6tWyekNa/I6Y543nE86dg+lfs7Yl6PZabtUhj+c
+	R22MMrXBxDM3eEGH/Qm/LP5gYLfKSPicBOaMOuW2zVN1gGBQPsz2zrSv6USSz+8Wj6RMY3d/MNL
+	MQAzll3KVQyGOxxeQ==
+X-Google-Smtp-Source: AGHT+IEym0TH2z8qEFt9WsYQjUjil/LV/1cr0gI187BMwtPUNK+/X4B9HHmhicxhhHBU3epGxzmnQxouyxtZCL40q+M=
+X-Received: by 2002:a05:6402:5252:b0:61c:899d:90cc with SMTP id
+ 4fb4d7f45d1cf-61d26d5bc94mr15686461a12.11.1756979383629; Thu, 04 Sep 2025
+ 02:49:43 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8a963e12-1113-4604-b15f-a5867c4b5bbf@oss.qualcomm.com>
-X-Proofpoint-ORIG-GUID: 4LdpLOGM61z4JAYuhlKW8j9BPV8whQcY
-X-Proofpoint-GUID: 4LdpLOGM61z4JAYuhlKW8j9BPV8whQcY
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwODMwMDAyMCBTYWx0ZWRfXxciY0PXsaWeI
- NFhHlBm8NNc/1dsExtt+ETk2fweaj7Qbs1FGQEJAGa9UtBIH8P38gRURzCsqbxwt2MEgtMvAua8
- c9UY3XVwMhUJFq8NkHNbcXmG6+p8dmDn2RgaYqI6Zxg+LaHTuGIbDodCIoUvuIM88FlG/2Uraa7
- n24rSgxSek0Z5trGmUP2Hy3shOpX5AZ9bulYxGs850olROKTK4k7Y6jEcvdrt1Irb8MZt8DN0nQ
- eNdIZFr+e+WmrDzbBEOtEW/d5qL8JTIp+mbuQQvjUPgSiaJP2psIq32oHffCakbjO2G6OnPtLkg
- f/0erSZD8cjYu8sT55AmhVmDGIkUf8p7i57vB6A12ug4hx3KY2gPlEWvaojRzHDXlU6nmQPIU+L
- GX2qc6Zf
-X-Authority-Analysis: v=2.4 cv=VNndn8PX c=1 sm=1 tr=0 ts=68b95095 cx=c_pps
- a=rEQLjTOiSrHUhVqRoksmgQ==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=kj9zAlcOel0A:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
- a=k3xEAXBReI645-sCZUAA:9 a=CjuIK1q_8ugA:10 a=2VI0MkxyNR6bbpdq8BZq:22
- a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-09-04_03,2025-08-28_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 spamscore=0 impostorscore=0 malwarescore=0 bulkscore=0
- clxscore=1015 adultscore=0 priorityscore=1501 phishscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2508300020
+References: <20250901094046.3903-1-benchuanggli@gmail.com> <86721a4f-1dbd-4ef5-a149-746111170352@intel.com>
+ <1aaeb332-255e-4689-ad82-db6b05a6e32c@intel.com> <CACT4zj8LxG_UeL22ERaP4XVwopdSjXz7mH95TyxXJ==WKZWHLw@mail.gmail.com>
+ <416be416-014c-4efb-9f85-8f7023dcdc3f@intel.com>
+In-Reply-To: <416be416-014c-4efb-9f85-8f7023dcdc3f@intel.com>
+From: Ben Chuang <benchuanggli@gmail.com>
+Date: Thu, 4 Sep 2025 17:49:31 +0800
+X-Gm-Features: Ac12FXzUZFrC1mTCqdAH4oDlb8uBabI8RAGNPVWv2KxPMYvodNfo0WIwG8me464
+Message-ID: <CACT4zj9ttNfa4FkeBQS+CRsTRuq1apqYqGUmr9xyzU2RgTsV8g@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-uhs2: Fix calling incorrect
+ sdhci_set_clock() function
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: ulf.hansson@linaro.org, victor.shih@genesyslogic.com.tw, 
+	ben.chuang@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	SeanHY.Chen@genesyslogic.com.tw, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Sep 03, 2025 at 05:48:40PM +0200, Konrad Dybcio wrote:
-> On 9/3/25 1:47 PM, Wasim Nazir wrote:
-> > From: Monish Chunara <quic_mchunara@quicinc.com>
-> > 
-> > Introduce the SDHC v5 controller node for the Lemans platform.
-> > This controller supports either eMMC or SD-card, but only one
-> > can be active at a time. SD-card is the preferred configuration
-> > on Lemans targets, so describe this controller.
-> > 
-> > Define the SDC interface pins including clk, cmd, and data lines
-> > to enable proper communication with the SDHC controller.
-> > 
-> > Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
-> > Co-developed-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-> > Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-> > ---
-> >  arch/arm64/boot/dts/qcom/lemans.dtsi | 91 ++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 91 insertions(+)
-> > 
-> > diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
-> > index 99a566b42ef2..9e4709dce32b 100644
-> > --- a/arch/arm64/boot/dts/qcom/lemans.dtsi
-> > +++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
-> > @@ -3834,6 +3834,57 @@ apss_tpdm2_out: endpoint {
-> >  			};
-> >  		};
-> >  
-> > +		sdhc: mmc@87c4000 {
-> > +			compatible = "qcom,sa8775p-sdhci", "qcom,sdhci-msm-v5";
-> > +			reg = <0x0 0x087c4000 0x0 0x1000>;
-> > +
-> > +			interrupts = <GIC_SPI 383 IRQ_TYPE_LEVEL_HIGH>,
-> > +				     <GIC_SPI 521 IRQ_TYPE_LEVEL_HIGH>;
-> > +			interrupt-names = "hc_irq", "pwr_irq";
-> 
-> 1 entry per line in xx-names too, please> +
+On Wed, Sep 3, 2025 at 7:15=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.c=
+om> wrote:
+>
+> On 02/09/2025 09:32, Ben Chuang wrote:
+> > On Tue, Sep 2, 2025 at 12:50=E2=80=AFAM Adrian Hunter <adrian.hunter@in=
+tel.com> wrote:
+> >>
+> >> On 01/09/2025 15:07, Adrian Hunter wrote:
+> >>> On 01/09/2025 12:40, Ben Chuang wrote:
+> >>>> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> >>>>
+> >>>> Fix calling incorrect sdhci_set_clock() in __sdhci_uhs2_set_ios() wh=
+en the
+> >>>> vendor defines its own sdhci_set_clock().
+> >>>>
+> >>>> Fixes: 10c8298a052b ("mmc: sdhci-uhs2: add set_ios()")
+> >>>> Cc: stable@vger.kernel.org # v6.13+
+> >>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> >>>> ---
+> >>>>  drivers/mmc/host/sdhci-uhs2.c | 5 ++++-
+> >>>>  1 file changed, 4 insertions(+), 1 deletion(-)
+> >>>>
+> >>>> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-=
+uhs2.c
+> >>>> index 0efeb9d0c376..704fdc946ac3 100644
+> >>>> --- a/drivers/mmc/host/sdhci-uhs2.c
+> >>>> +++ b/drivers/mmc/host/sdhci-uhs2.c
+> >>>> @@ -295,7 +295,10 @@ static void __sdhci_uhs2_set_ios(struct mmc_hos=
+t *mmc, struct mmc_ios *ios)
+> >>>>      else
+> >>>>              sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
+> >>>>
+> >>>> -    sdhci_set_clock(host, host->clock);
+> >>>> +    if (host->ops->set_clock)
+> >>>> +            host->ops->set_clock(host, host->clock);
+> >>>> +    else
+> >>>> +            sdhci_set_clock(host, host->clock);
+> >>>
+> >>> host->ops->set_clock is not optional.  So this should just be:
+> >>>
+> >>>       host->ops->set_clock(host, host->clock);
+> >>>
+> >
+> > I will update it. Thank you.
+> >
+> >>
+> >> Although it seems we are setting the clock in 2 places:
+> >>
+> >>         sdhci_uhs2_set_ios()
+> >>                 sdhci_set_ios_common()
+> >>                         host->ops->set_clock(host, ios->clock)
+> >>               __sdhci_uhs2_set_ios
+> >>                         sdhci_set_clock(host, host->clock)
+> >>
+> >> Do we really need both?
+> >>
+> >
+> > We only need one sdhci_set_clock() in __sdhci_uhs2_set_ios() for the
+> > UHS-II card interface detection sequence.
+> > Refer to Section 3.13.2, "Card Interface Detection Sequence" of the SD
+> > Host Controller Standard Spec. Ver. 7.00,
+> > First set the VDD1 power on and VDD2 power on, then enable the SD clock=
+ supply.
+> >
+> > Do I need to add a separate patch or add it in the same patch like this=
+?
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 3a17821efa5c..bd498b1bebce 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2369,7 +2369,8 @@ void sdhci_set_ios_common(struct mmc_host *mmc,
+> > struct mmc_ios *ios)
+> >                 sdhci_enable_preset_value(host, false);
+> >
+> >         if (!ios->clock || ios->clock !=3D host->clock) {
+> > -               host->ops->set_clock(host, ios->clock);
+> > +               if (!mmc_card_uhs2(host->mmc))
+> > +                       host->ops->set_clock(host, ios->clock);
+> >                 host->clock =3D ios->clock;
+> >
+> >                 if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK =
+&&
+>
+> It can be a separate patch, but the whole of
+>
+>         if (!ios->clock || ios->clock !=3D host->clock) {
+>                 etc
+>         }
+>
+> needs to move from sdhci_set_ios_common() into
+> sdhci_set_ios() like further below.  Note, once that is done, you need
+> to add "host->clock =3D ios->clock;" to __sdhci_uhs2_set_ios()
+> like:
+>         host->ops->set_clock(host, ios->clock);
+>         host->clock =3D ios->clock;
+>
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3a17821efa5c..ac7e11f37af7 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2367,23 +2367,6 @@ void sdhci_set_ios_common(struct mmc_host *mmc, st=
+ruct mmc_ios *ios)
+>                 (ios->power_mode =3D=3D MMC_POWER_UP) &&
+>                 !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
+>                 sdhci_enable_preset_value(host, false);
+> -
+> -       if (!ios->clock || ios->clock !=3D host->clock) {
+> -               host->ops->set_clock(host, ios->clock);
+> -               host->clock =3D ios->clock;
+> -
+> -               if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK &&
+> -                   host->clock) {
+> -                       host->timeout_clk =3D mmc->actual_clock ?
+> -                                               mmc->actual_clock / 1000 =
+:
+> -                                               host->clock / 1000;
+> -                       mmc->max_busy_timeout =3D
+> -                               host->ops->get_max_timeout_count ?
+> -                               host->ops->get_max_timeout_count(host) :
+> -                               1 << 27;
+> -                       mmc->max_busy_timeout /=3D host->timeout_clk;
+> -               }
+> -       }
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_set_ios_common);
+>
+> @@ -2410,6 +2393,23 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mm=
+c_ios *ios)
+>
+>         sdhci_set_ios_common(mmc, ios);
+>
+> +       if (!ios->clock || ios->clock !=3D host->clock) {
+> +               host->ops->set_clock(host, ios->clock);
+> +               host->clock =3D ios->clock;
+> +
+> +               if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK &&
+> +                   host->clock) {
+> +                       host->timeout_clk =3D mmc->actual_clock ?
+> +                                               mmc->actual_clock / 1000 =
+:
+> +                                               host->clock / 1000;
+> +                       mmc->max_busy_timeout =3D
+> +                               host->ops->get_max_timeout_count ?
+> +                               host->ops->get_max_timeout_count(host) :
+> +                               1 << 27;
+> +                       mmc->max_busy_timeout /=3D host->timeout_clk;
+> +               }
+> +       }
+> +
+>         if (host->ops->set_power)
+>                 host->ops->set_power(host, ios->power_mode, ios->vdd);
+>         else
+>
 
-Ack.
+I will add this as a separate patch and modify  __sdhci_uhs2_set_ios().
 
-> > +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> > +				 <&gcc GCC_SDCC1_APPS_CLK>;
-> > +			clock-names = "iface", "core";
-> > +
-> > +			interconnects = <&aggre1_noc MASTER_SDC 0 &mc_virt SLAVE_EBI1 0>,
-> > +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDC1 0>;
-> 
-> QCOM_ICC_TAG_ALWAYS for the first path, both endpoints
-> QCOM_ICC_TAG_ACTIVE_ONLY for the second one
-
-Ack.
-
-> 
-> [...]
-> 
-> > +
-> > +				data-pins {
-> > +					pins = "sdc1_data";
-> > +					bias-pull-up;
-> 
-> Please put bias properties below drive-strength for consistency
-> 
-
-Ack.
-
-> Konrad
-
--- 
-Regards,
-Wasim
+Best regards,
+Ben Chuang
