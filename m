@@ -1,142 +1,181 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28EDB362061;
-	Fri,  5 Sep 2025 14:38:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D534072639;
+	Fri,  5 Sep 2025 23:01:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757083089; cv=none; b=B75lWrric2wLhQ61X+V4aIQsCM66eSckKHtfQHiuCAl7iqbmLy+DM13jtfZF3DN2ouNTFAb3M7XYVojf/JMU0gyGpU/ZZtWPWrLJhU7DIy6kiD6DU/eBikIPk5Fr9bHfM7D5I0awwSDYN5nPu3bEtfEtG05f2QqixKZSBFaXsGs=
+	t=1757113283; cv=none; b=STHTwbkIUVyVc7/Lt3KdXJswKeeXO6ub4oO/A4fn/hio24PmAXQ4j33bZlZeIH4/EKkF1ydvJyWKcoiZL/hsxI2S6XTK5sfeeH6rQSy+d/V0WUS52Dr+w4Ga30z3Ey9QMdboVM8/bPPo7tSb/lionQYM2sHQjvtVNXMwc+y1ZZ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757083089; c=relaxed/simple;
-	bh=MASUxpUKXpFs6knVd9mA2iPrY94gWLaqivhtucbjwMc=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dUrjzkaWPS23o1SoFvAo8r2vyAseilO8AcWUwme4SFeGVXsAKj3WxksBPsvxZZm5bcxxso1mTYXFxJH0Q2CTYIi/IdrtohXGerWRjtrvdpgUX3YBnTxtV9gvlMgYaIjAE5hrBj2pSrlM2DbxvhsCDXcNrR3va7S8XS+RtfnouTs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=cBub0rmn; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1757113283; c=relaxed/simple;
+	bh=+lhopyxIHPkimkHLqjBagKsowbxPduHdhl1alB5XIHw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=N75cZXP1uVrHhIJ9EPjB03JXuyOgr/DVmBetbhnxkc2jy5WGQHWzf3CfpoeeT+fOsJzUEx47wPpgyN43SxU3d62W5Po1LCgxkA2EyKIY3vTV+zpKEov7n98vGiJUbFohpyvKvli9clGo6PdRHczPUuzF/vel7BmS57mz0Q44AUQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FKhh4N0Y; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="cBub0rmn"
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5857adqJ012043;
-	Fri, 5 Sep 2025 14:38:02 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=tkAuZrdocb41VJ8yvWLMZV4t
-	ZHhlmuHC/I9JgbqAw58=; b=cBub0rmny3LzqQSCZITCY4bfnQ9BhbkiOQaiX/s+
-	bKKM0VODb+tzX9KgCOhBTRoftdQXDguu3ihXpgQt6+gLIIkXSlidUegDFnd1jLxl
-	+bNABUE631UBUy4DSq/L57xUs9WxU4RxUovmf8scYIZIHEsI2Hmdzam0KnaWOpVu
-	4E43D1Ew2HUXn3mogm/sYq5Gu0N0QFooCjeIdN0eg0sr/ykimb8u2J2OsfsS5cJx
-	6Pgqr0gA0tG5VnHHB4trZ/JA8F1VIAKMQCT7nhgtQaJdnuHNPULcWmMer2+C5gB6
-	E1i4izB3mt5/3B4uyUCTga6jhGqRw3rADar1Ho6WIQMnew==
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48xmxj7re3-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 05 Sep 2025 14:38:02 +0000 (GMT)
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 585Ec1gw013625
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 5 Sep 2025 14:38:01 GMT
-Received: from hu-mchunara-hyd.qualcomm.com (10.80.80.8) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1748.24; Fri, 5 Sep 2025 07:37:56 -0700
-Date: Fri, 5 Sep 2025 20:07:42 +0530
-From: Monish Chunara <quic_mchunara@quicinc.com>
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-CC: Wasim Nazir <wasim.nazir@oss.qualcomm.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski
-	<krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson
-	<andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        "Richard
- Cochran" <richardcochran@gmail.com>,
-        Bartosz Golaszewski <brgl@bgdev.pl>, <kernel@oss.qualcomm.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <netdev@vger.kernel.org>, <linux-i2c@vger.kernel.org>
-Subject: Re: [PATCH v3 06/14] arm64: dts: qcom: lemans-evk: Add EEPROM and
- nvmem layout
-Message-ID: <aLr1nEKRjOtsrU7f@hu-mchunara-hyd.qualcomm.com>
-References: <20250904-lemans-evk-bu-v3-0-8bbaac1f25e8@oss.qualcomm.com>
- <20250904-lemans-evk-bu-v3-6-8bbaac1f25e8@oss.qualcomm.com>
- <e1c593d2-603c-4c3f-850a-07c14467b8e9@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FKhh4N0Y"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A2CEDC4CEF1;
+	Fri,  5 Sep 2025 23:01:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1757113280;
+	bh=+lhopyxIHPkimkHLqjBagKsowbxPduHdhl1alB5XIHw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=FKhh4N0YC7rktiPdXEfXclWanEDKYne9TN6cdcuCjqPCtcq4Rn0r96yLuECJbiw+4
+	 LjwCnjQtLBAm0edveUnCZZYiNonj/7aqKLJr2wGtnUHH+scBK/7r7JUigttXLAScDm
+	 pXeFnpIPvL1/rZKX9LdznwwDYBYkDL4/X0Q74Dlpx/NmySnEYO46ImCPWzvWXVlUfn
+	 7nKQ1fERSefzbF0N9pUOtT2Ew99OpHStRZ+01KHKpecJw2kFIukduhp+K3hQulq8o0
+	 47VhyxuU+d72ralUlgkhIgcgxiZyD9aQX9YFUuu3Ep7hq8BTDKfbNp6DFssdME8qWg
+	 uTEId8/MJZDQg==
+Date: Fri, 5 Sep 2025 16:00:06 -0700
+From: Eric Biggers <ebiggers@kernel.org>
+To: David Hildenbrand <david@redhat.com>
+Cc: linux-kernel@vger.kernel.org, Alexander Potapenko <glider@google.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Brendan Jackman <jackmanb@google.com>,
+	Christoph Lameter <cl@gentwo.org>, Dennis Zhou <dennis@kernel.org>,
+	Dmitry Vyukov <dvyukov@google.com>, dri-devel@lists.freedesktop.org,
+	intel-gfx@lists.freedesktop.org, iommu@lists.linux.dev,
+	io-uring@vger.kernel.org, Jason Gunthorpe <jgg@nvidia.com>,
+	Jens Axboe <axboe@kernel.dk>, Johannes Weiner <hannes@cmpxchg.org>,
+	John Hubbard <jhubbard@nvidia.com>, kasan-dev@googlegroups.com,
+	kvm@vger.kernel.org, "Liam R. Howlett" <Liam.Howlett@oracle.com>,
+	Linus Torvalds <torvalds@linux-foundation.org>,
+	linux-arm-kernel@axis.com, linux-arm-kernel@lists.infradead.org,
+	linux-crypto@vger.kernel.org, linux-ide@vger.kernel.org,
+	linux-kselftest@vger.kernel.org, linux-mips@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+	linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
+	linux-scsi@vger.kernel.org,
+	Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+	Marco Elver <elver@google.com>,
+	Marek Szyprowski <m.szyprowski@samsung.com>,
+	Michal Hocko <mhocko@suse.com>, Mike Rapoport <rppt@kernel.org>,
+	Muchun Song <muchun.song@linux.dev>, netdev@vger.kernel.org,
+	Oscar Salvador <osalvador@suse.de>, Peter Xu <peterx@redhat.com>,
+	Robin Murphy <robin.murphy@arm.com>,
+	Suren Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>,
+	virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
+	wireguard@lists.zx2c4.com, x86@kernel.org, Zi Yan <ziy@nvidia.com>
+Subject: Re: [PATCH v2 19/37] mm/gup: remove record_subpages()
+Message-ID: <20250905230006.GA1776@sol>
+References: <20250901150359.867252-1-david@redhat.com>
+ <20250901150359.867252-20-david@redhat.com>
+ <5090355d-546a-4d06-99e1-064354d156b5@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e1c593d2-603c-4c3f-850a-07c14467b8e9@oss.qualcomm.com>
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTAzMDExNyBTYWx0ZWRfX5L7NJqgHaBpw
- dbDaxj+rCDioODp+ofemAPqr+y+20mPAj3DqoTBhMOmWwpp+djhHXc/4gnH+asyHP7K9j73bqNV
- YoPTCUIho5vxgeq9llKVqAesWyFF3ySYm2pwlwJgZp50GMPNMRO4ffzQvicAGytnHVqh4oW3xo1
- 1jc0UYR1MaPAHZsmtWCAYEsRK8IXhjxsiFzkaHGkeS8FgTBcO3g0MATMVMdk6Bp2UNuzfTOVlw5
- xzg9IRj2img3755To4LhKfTmw/XBuOCz2TZG4i41uJ0Qfyda+ACWm4cQUGybj5YkD8F5sUprnRd
- BSoDFqpFbT4bQswYBI5aQaAcUL3as1rN3BcMGLTXyijQIvYNdDDqlCJ9H1R1P6IR4WMXJjtohne
- fFEcHjss
-X-Authority-Analysis: v=2.4 cv=a5cw9VSF c=1 sm=1 tr=0 ts=68baf5ca cx=c_pps
- a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
- a=GEpy-HfZoHoA:10 a=kj9zAlcOel0A:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8
- a=EUspDBNiAAAA:8 a=NN4jPqIYyidG5lZKxlEA:9 a=CjuIK1q_8ugA:10
- a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: k88Xu5lG7sKzzxmiKnSDX-7Yqs3T9spZ
-X-Proofpoint-ORIG-GUID: k88Xu5lG7sKzzxmiKnSDX-7Yqs3T9spZ
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-09-05_04,2025-09-04_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 suspectscore=0 clxscore=1011 bulkscore=0 priorityscore=1501
- phishscore=0 impostorscore=0 adultscore=0 spamscore=0 classifier=typeunknown
- authscore=0 authtc= authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2507300000 definitions=main-2509030117
+In-Reply-To: <5090355d-546a-4d06-99e1-064354d156b5@redhat.com>
 
-On Fri, Sep 05, 2025 at 02:07:50PM +0200, Konrad Dybcio wrote:
-> On 9/4/25 6:39 PM, Wasim Nazir wrote:
-> > From: Monish Chunara <quic_mchunara@quicinc.com>
+On Fri, Sep 05, 2025 at 08:41:23AM +0200, David Hildenbrand wrote:
+> On 01.09.25 17:03, David Hildenbrand wrote:
+> > We can just cleanup the code by calculating the #refs earlier,
+> > so we can just inline what remains of record_subpages().
 > > 
-> > Integrate the GT24C256C EEPROM via I2C to enable access to
-> > board-specific non-volatile data.
+> > Calculate the number of references/pages ahead of times, and record them
+> > only once all our tests passed.
 > > 
-> > Also, define an nvmem-layout to expose structured regions within the
-> > EEPROM, allowing consumers to retrieve configuration data such as
-> > Ethernet MAC addresses via the nvmem subsystem.
-> > 
-> > Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
-> > Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+> > Signed-off-by: David Hildenbrand <david@redhat.com>
 > > ---
-> >  arch/arm64/boot/dts/qcom/lemans-evk.dts | 12 ++++++++++++
-> >  1 file changed, 12 insertions(+)
+> >   mm/gup.c | 25 ++++++++-----------------
+> >   1 file changed, 8 insertions(+), 17 deletions(-)
 > > 
-> > diff --git a/arch/arm64/boot/dts/qcom/lemans-evk.dts b/arch/arm64/boot/dts/qcom/lemans-evk.dts
-> > index c48cb4267b72..30c3e5bead07 100644
-> > --- a/arch/arm64/boot/dts/qcom/lemans-evk.dts
-> > +++ b/arch/arm64/boot/dts/qcom/lemans-evk.dts
-> > @@ -319,6 +319,18 @@ expander3: gpio@3b {
-> >  		#gpio-cells = <2>;
-> >  		gpio-controller;
-> >  	};
-> > +
-> > +	eeprom@50 {
-> > +		compatible = "giantec,gt24c256c", "atmel,24c256";
-> > +		reg = <0x50>;
-> > +		pagesize = <64>;
-> > +
-> I'm not super happy that this would be the only line of defense, but
-> you probably want to add 'read-only' to the eeprom node (or not)
->
-The Ethernet interface requires both read and write access at the driver level
-to store and retrieve MAC address and related data; therefore 'read-only' is not
-added here.
+> > diff --git a/mm/gup.c b/mm/gup.c
+> > index c10cd969c1a3b..f0f4d1a68e094 100644
+> > --- a/mm/gup.c
+> > +++ b/mm/gup.c
+> > @@ -484,19 +484,6 @@ static inline void mm_set_has_pinned_flag(struct mm_struct *mm)
+> >   #ifdef CONFIG_MMU
+> >   #ifdef CONFIG_HAVE_GUP_FAST
+> > -static int record_subpages(struct page *page, unsigned long sz,
+> > -			   unsigned long addr, unsigned long end,
+> > -			   struct page **pages)
+> > -{
+> > -	int nr;
+> > -
+> > -	page += (addr & (sz - 1)) >> PAGE_SHIFT;
+> > -	for (nr = 0; addr != end; nr++, addr += PAGE_SIZE)
+> > -		pages[nr] = page++;
+> > -
+> > -	return nr;
+> > -}
+> > -
+> >   /**
+> >    * try_grab_folio_fast() - Attempt to get or pin a folio in fast path.
+> >    * @page:  pointer to page to be grabbed
+> > @@ -2967,8 +2954,8 @@ static int gup_fast_pmd_leaf(pmd_t orig, pmd_t *pmdp, unsigned long addr,
+> >   	if (pmd_special(orig))
+> >   		return 0;
+> > -	page = pmd_page(orig);
+> > -	refs = record_subpages(page, PMD_SIZE, addr, end, pages + *nr);
+> > +	refs = (end - addr) >> PAGE_SHIFT;
+> > +	page = pmd_page(orig) + ((addr & ~PMD_MASK) >> PAGE_SHIFT);
+> >   	folio = try_grab_folio_fast(page, refs, flags);
+> >   	if (!folio)
+> > @@ -2989,6 +2976,8 @@ static int gup_fast_pmd_leaf(pmd_t orig, pmd_t *pmdp, unsigned long addr,
+> >   	}
+> >   	*nr += refs;
+> > +	for (; refs; refs--)
+> > +		*(pages++) = page++;
+> >   	folio_set_referenced(folio);
+> >   	return 1;
+> >   }
+> > @@ -3007,8 +2996,8 @@ static int gup_fast_pud_leaf(pud_t orig, pud_t *pudp, unsigned long addr,
+> >   	if (pud_special(orig))
+> >   		return 0;
+> > -	page = pud_page(orig);
+> > -	refs = record_subpages(page, PUD_SIZE, addr, end, pages + *nr);
+> > +	refs = (end - addr) >> PAGE_SHIFT;
+> > +	page = pud_page(orig) + ((addr & ~PUD_MASK) >> PAGE_SHIFT);
+> >   	folio = try_grab_folio_fast(page, refs, flags);
+> >   	if (!folio)
+> > @@ -3030,6 +3019,8 @@ static int gup_fast_pud_leaf(pud_t orig, pud_t *pudp, unsigned long addr,
+> >   	}
+> >   	*nr += refs;
+> > +	for (; refs; refs--)
+> > +		*(pages++) = page++;
+> >   	folio_set_referenced(folio);
+> >   	return 1;
+> >   }
+> 
+> Okay, this code is nasty. We should rework this code to just return the nr and receive a the proper
+> pages pointer, getting rid of the "*nr" parameter.
+> 
+> For the time being, the following should do the trick:
+> 
+> commit bfd07c995814354f6b66c5b6a72e96a7aa9fb73b (HEAD -> nth_page)
+> Author: David Hildenbrand <david@redhat.com>
+> Date:   Fri Sep 5 08:38:43 2025 +0200
+> 
+>     fixup: mm/gup: remove record_subpages()
+>     pages is not adjusted by the caller, but idnexed by existing *nr.
+>     Signed-off-by: David Hildenbrand <david@redhat.com>
+> 
+> diff --git a/mm/gup.c b/mm/gup.c
+> index 010fe56f6e132..22420f2069ee1 100644
+> --- a/mm/gup.c
+> +++ b/mm/gup.c
+> @@ -2981,6 +2981,7 @@ static int gup_fast_pmd_leaf(pmd_t orig, pmd_t *pmdp, unsigned long addr,
+>                 return 0;
+>         }
+> +       pages += *nr;
+>         *nr += refs;
+>         for (; refs; refs--)
+>                 *(pages++) = page++;
+> @@ -3024,6 +3025,7 @@ static int gup_fast_pud_leaf(pud_t orig, pud_t *pudp, unsigned long addr,
+>                 return 0;
+>         }
+> +       pages += *nr;
+>         *nr += refs;
+>         for (; refs; refs--)
+>                 *(pages++) = page++;
 
-Regards,
-Monish 
+Can this get folded in soon?  This bug is causing crashes in AF_ALG too.
+
+Thanks,
+
+- Eric
