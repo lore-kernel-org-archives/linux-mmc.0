@@ -1,65 +1,123 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28D63302CC2;
-	Fri,  5 Sep 2025 08:00:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36D5B307AFD;
+	Fri,  5 Sep 2025 08:00:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757059234; cv=none; b=h+9V5DnbBf0xgyVuGjoh3VJ2sGA5PAWxjvawiW5Y+rgZvtXrO9i7s2RGeKYjGgdA+Jt3UxDCd2mq3VCFd1f8yxuzJgT4wYDIFX0j/0J2LNfWTIFByoy6IcpC1evAu6N0x7zaEnTwl880KCIdhbmzy+TKomtk24IQwNkKZONx+tk=
+	t=1757059248; cv=none; b=Qs8KfMIy4WjW6WftH0tAZVwS+pcgJuAM99NGOdoOlVeSqcjnlkFdsVWlzxMUHhi4Zqyn7joxpu9nZNEjWRn1sXsoyDnVwKjthrcIJiX8SmWU+me/zAYyIU/kX6ZvVDsJpFAMq2lt++8OeByGVfHj0jk4Qrhaydj5CwTIJ7UKorU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757059234; c=relaxed/simple;
-	bh=09tuQWvE36b7jo9VZQxE1OAtLMsUMH7OUiE6RAUdFs4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uVNVjOqVsHtFxXUwcVeUM6wNZZcQwwYpUEoWj9jT0VMmpHeSzykcV8fdRg6oIM7SqYZkZaZBgF2fnumgXa+vW6qTMGIL8g0FjW+dpcrFS50zXQ/OX0ZuUpwskYXk1XBgp9VK2jfWddTqZt7d5u0csLR0ab2Qq/RiQuvBnlObv6s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NAqWoevZ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1757059248; c=relaxed/simple;
+	bh=vACb045QkIDhZiJ/eUdfWeAu7UePhs1aiEPZxg+4yi4=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=pCUW5N9FdWhIj8rqPo9M2K/ldNDTW4aYtIRFKhYW7AnaBrYhIcIBX/O7KGx8FqQcSw8TBb92wH/t8QClYNUDxnS9tU9GvB/WP8aQYN4B6J3t1ScxPwFkBgD3qHlAeN9diGClbuFL6Wj1g2bi4ib7GjompT6I1L370ynIFcGa/2E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HRS5bqGr; arc=none smtp.client-ip=209.85.214.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NAqWoevZ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B72BC4CEF4;
-	Fri,  5 Sep 2025 08:00:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1757059233;
-	bh=09tuQWvE36b7jo9VZQxE1OAtLMsUMH7OUiE6RAUdFs4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=NAqWoevZjiCaqhD3q1S0Wi9LCc/ErPSFLei5ufIkKauUNhuiAG1ln9sfMBiCdJCyp
-	 mA2LT8JrxXXJ0G6qzNqeSS6aCn/mKSW2Q3NfzfvTaK3FKmXMtwr3HAkZkoJz3894jn
-	 W22wkg84edI1nhAj2B12DWR0HLCsKEgU1TIxgu6bShrRXoZeSOAMNK/3IHeP3RcdpG
-	 zWaLGSKE/Oud5IOV2eZ64qfOFAAp8MX2mB+6NgAxw6q2hTsCXmbZPoVqMQ3PlwYq13
-	 CAlagtJMLvrbUTalIChK6KbLqbxoCWjVGIRVszGLxzcTdNA0dsavP/lbDsMyL4sMlP
-	 KzlYHRmAHhIPQ==
-Date: Fri, 5 Sep 2025 10:00:31 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Richard Cochran <richardcochran@gmail.com>, Bartosz Golaszewski <brgl@bgdev.pl>, kernel@oss.qualcomm.com, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, netdev@vger.kernel.org, linux-i2c@vger.kernel.org
-Subject: Re: [PATCH v3 05/14] dt-bindings: eeprom: at24: Add compatible for
- Giantec GT24C256C
-Message-ID: <20250905-fervent-mackerel-from-camelot-a5d73d@kuoka>
-References: <20250904-lemans-evk-bu-v3-0-8bbaac1f25e8@oss.qualcomm.com>
- <20250904-lemans-evk-bu-v3-5-8bbaac1f25e8@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HRS5bqGr"
+Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-24cbd9d9f09so24886425ad.2;
+        Fri, 05 Sep 2025 01:00:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1757059246; x=1757664046; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=197N926JqxKxoYCk7QivC9r+n93Tl38dys0FCD1AK5A=;
+        b=HRS5bqGrdu5jmcxpZC/0XCrMr0iu5sNo065Gn+3aY8wDlffUb0YR46ZyZHErZVYSZY
+         Xna2TmHUjQL3PyqJV+0IYHHmDAwxp/pLsaONOpa20duZMC4Cu5InUGYuIECXSgX/21Yy
+         43KKu8g5Xwfghm6Y4vcnztnqanwrglnlA0hflVA05fW37Gj5NKoI9GwD1QKsmUgrSNSX
+         fLECAmwhBR5i4kiBE1xSex36cBuZn8cd3VkVzcX8JmQjPC8TCVPkr1ucRpIOM0FVGI5m
+         uGNhz0YzwQJS9GhGNiDOqx08vxuv2OuKh5YWVdA9D1EXkWi2dbNtbG6hg8OZuBez7goV
+         twRw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1757059246; x=1757664046;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=197N926JqxKxoYCk7QivC9r+n93Tl38dys0FCD1AK5A=;
+        b=vRmpPkH/pmcPsr9uLNqKAVh3zmeUbrgG/TA3qK2m7sITYCD5FftpJ56HZvdMBh+zBl
+         v+weJnW5cw8h0kyeZh0M5PY2rIDss/QZBMu+YRs3Dm1G4is4wg2D6WuVyXyFrn1VZ/75
+         RxXvLTTsZaueDliwZdggQSz21rdPK7BCe/IxsOIJ+IkOEr/mKgRjWJXrBpF/A7q+Q282
+         s5o7b1ki5pFUjelpF+OoXyGqfrXMl3AUNQm3ATnC+jYL28dceybtCYGZfdDGgMs7AI5d
+         MfaWkRxa9wtAuozy1HRBlv9bXUyxO2jK6q4TcovGuTLDTCEu4OmiKio2Krlnx0lyHdU5
+         Esog==
+X-Forwarded-Encrypted: i=1; AJvYcCVAg2ysVksvvh0ojbyjQw+zWLjqvMwi5K1Ep92y9TWev59cSUZzcBo7YS8AnK3tNhOaXfe/ITw1+QnCkIk=@vger.kernel.org, AJvYcCX/ZtCmH5lNlhKmzPGHWlnse1hsFmf4f3M0Ugji/6zTe8V5pPAifiOEbMNvhvzfG6s2lyLY30Zg2el9@vger.kernel.org, AJvYcCX68LNHYVFHVaw++tMes71rD6BM6lyHmbN1mLKB1pBh/zDtiUIHgZPOSBT/jYzHXymarJ+OwB1Q@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywq8xiUeSV4RYAVbDWPfjlvdJtoBL4ywg4QCqxFTEI+8VVg6z0N
+	hPVYRX6qKTGlTzw6d/5dJqznr+uTJA6AFSbX+dYQhDsYeTBs57oAMsOw
+X-Gm-Gg: ASbGncsbxnF8Cy/1uzXCCA16weOaBGvOBQ9APjXazdijnd+sdyXmkASwsLvU64aZHsU
+	n8HCJunTv9ERtSHwH+58FQFEhNPyW+hvz0v8GiUVA/odCmxN3rGu13Kb5SpagH37DEi/U9A6So0
+	vo2Jc3houZpattGvXsLt2rZrY509fAxjYzLIUcQVH604axXHfXqtJKJtPxFeKfYOuVZtGzwjUNL
+	oB9GX+W5pGdADJhXu/50D7uWQYN2l458dMIS5HG7Xq2nrpjXHA2KdwVliQ7xhrjwdMHmNjt1Rnn
+	L+r7ghTQ66y8sEIu2lerKofPYPm0vkdOIwbHAzCwCBLG3uHjuNP6BMZUdLHvvQdTbrwzVFtf0zP
+	VuVHtV+nK+S/5NAq3AglpaNWV2zryla15lwdXgHYuNcmzkbaXQs3hHC7QLbktkmVwJmaFizEr6d
+	gMliIvEJR3YaAlA1DAEs/JCt8dnjZ0
+X-Google-Smtp-Source: AGHT+IEAAeZxluRJAwDrScg9wcdhKdRd9iBWcsaHf/WV0ErTxMECs7TLt8THiqcOOq6Vlk5JPNE79w==
+X-Received: by 2002:a17:903:41d0:b0:23f:e869:9a25 with SMTP id d9443c01a7336-24944acf3b2mr265423835ad.44.1757059246213;
+        Fri, 05 Sep 2025 01:00:46 -0700 (PDT)
+Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3276fcd6232sm27910926a91.16.2025.09.05.01.00.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 05 Sep 2025 01:00:45 -0700 (PDT)
+From: Ben Chuang <benchuanggli@gmail.com>
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org
+Cc: victor.shih@genesyslogic.com.tw,
+	ben.chuang@genesyslogic.com.tw,
+	HL.Liu@genesyslogic.com.tw,
+	SeanHY.Chen@genesyslogic.com.tw,
+	benchuanggli@gmail.com,
+	victorshihgli@gmail.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	stable@vger.kernel.org
+Subject: [PATCH v2 2/3] mmc: sdhci-uhs2: Fix calling incorrect sdhci_set_clock() function
+Date: Fri,  5 Sep 2025 16:00:35 +0800
+Message-ID: <a9fdc8f66a2d928cf83a3a050e5bdb7aff4d40db.1757056421.git.benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <8772b633bd936791c2adcfbc1e161a37305a8b08.1757056421.git.benchuanggli@gmail.com>
+References: <8772b633bd936791c2adcfbc1e161a37305a8b08.1757056421.git.benchuanggli@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20250904-lemans-evk-bu-v3-5-8bbaac1f25e8@oss.qualcomm.com>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Sep 04, 2025 at 10:09:01PM +0530, Wasim Nazir wrote:
-> Add the compatible for 256Kb EEPROM from Giantec.
-> 
-> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-> ---
->  Documentation/devicetree/bindings/eeprom/at24.yaml | 1 +
->  1 file changed, 1 insertion(+)
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Fix calling incorrect sdhci_set_clock() in __sdhci_uhs2_set_ios() when the
+vendor defines its own sdhci_set_clock().
 
-Best regards,
-Krzysztof
+Fixes: 10c8298a052b ("mmc: sdhci-uhs2: add set_ios()")
+Cc: stable@vger.kernel.org # v6.13+
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+---
+v2:
+ * remove the "if (host->ops->set_clock)" statement
+ * add "host->clock = ios->clock;"
+
+v1:
+ * https://lore.kernel.org/all/20250901094046.3903-1-benchuanggli@gmail.com/
+---
+ drivers/mmc/host/sdhci-uhs2.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+index 0efeb9d0c376..c459a08d01da 100644
+--- a/drivers/mmc/host/sdhci-uhs2.c
++++ b/drivers/mmc/host/sdhci-uhs2.c
+@@ -295,7 +295,8 @@ static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
+ 
+-	sdhci_set_clock(host, host->clock);
++	host->ops->set_clock(host, ios->clock);
++	host->clock = ios->clock;
+ }
+ 
+ static int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+-- 
+2.51.0
 
