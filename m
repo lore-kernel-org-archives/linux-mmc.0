@@ -1,73 +1,73 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 291ED27A121
-	for <linux-mmc@vger.kernel.org>; Sat,  6 Sep 2025 07:01:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B34DC2C236E
+	for <linux-mmc@vger.kernel.org>; Sat,  6 Sep 2025 08:28:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757142064; cv=none; b=tdc3KeCdG4h7ggbfe1S1wo5HquSGFjJlTyF0RQukQ7tRS1eXfJPConCuVhGmBMR5hoUaJkQrla1Cf7D52p0wOwSwBbt/lWV+3HA6Hpsd8xK3sRa5XfUnzwyOQZsDM5wLDTSaB2fvSVJAikbPG0GnMV6Vz59AowrivYrn3t2AGWQ=
+	t=1757147336; cv=none; b=qCKNKDtBa7Lw+JVIMuPnQBPiCHkibtRH/B/b5tgD8bkePnXX1Xf24/Y65jfS7BKeAnEBU1iWdCBpoznTN44YJjeCC8qoNGsabHiHz4fhf5gZi3Trxb7F4JlFf9IQffBTc2WNh2sQwdWQ0WDwoJ7piY0yII/ofTzldMdk+nn2oVk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757142064; c=relaxed/simple;
-	bh=IG++ZkBD59wzKHu12fgNu7jyIoQUxrPSNiCWC9IyrGQ=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:Cc:References:
-	 In-Reply-To:Content-Type; b=i+jJw84RZWPmNoweb/e90C6QTQ+u59fb1pkP92q7kVwkihZu4T2ZwBNIc9OJYAhsog7wgRwSiGeuaJ+o70y585JoAQM/gpPhEvSl535jrKtQQGPD8QwFl8WYg/UA8xDROE1Bqr4TI82Vu7+bajmF9r0Xs4WVQ4I5CjSJp0+egi4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KGpHYhHx; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1757147336; c=relaxed/simple;
+	bh=n3YYbeyql2yL1SH/t8tDGUT7N9M3cy6l+tco6F3vxpk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ErgX4n/bMOtQAC5+qnnQZjUqjlaNrC8CeskxW+si8EeIZv8d21Cpcl3bDtXY4V2mgS31BD3Zt8hYjAwDkxKxBBPx23/GjNPcCWVZRjo3Jf08nqjaleWcOcu/NW2D1bvBRQi2tN8Y9G8Vbnel8sv3S+yJ+H7R3zNHs4FrHpWD/lo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=I8RDQYrQ; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KGpHYhHx"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1757142061;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=T2JJG+ZfsCIb5mNyWFksWhvinuGju8fueKzmBULEe5U=;
-	b=KGpHYhHxiD+7YN+3JLfySWCD7JyAQN3s8PfW4RiZZ9qT9dRIHfry+6iURcKqBrBPRxXdWb
-	rXSxYNYPeWOMiXtxXanJGit9pBd2MNdqtU4X89wcEcOUuSM+qI+s3tcka3S09glBbgvt0y
-	QDjNdBfQd+6hmiwdej2bcPn8MaAjUPI=
-Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com
- [209.85.221.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-507-B0lhxUzUMLSiJCKoDZV8Rw-1; Sat, 06 Sep 2025 03:00:59 -0400
-X-MC-Unique: B0lhxUzUMLSiJCKoDZV8Rw-1
-X-Mimecast-MFC-AGG-ID: B0lhxUzUMLSiJCKoDZV8Rw_1757142058
-Received: by mail-wr1-f72.google.com with SMTP id ffacd0b85a97d-3db89e4f443so1798525f8f.1
-        for <linux-mmc@vger.kernel.org>; Sat, 06 Sep 2025 00:00:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="I8RDQYrQ"
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5863VIBJ009260
+	for <linux-mmc@vger.kernel.org>; Sat, 6 Sep 2025 08:28:52 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	qKdwIMsuOs8hXrBNQvvXPiZ2vNFLXyJWMTWiOB3kSMs=; b=I8RDQYrQJI5XWMYG
+	CVEND3u+va15bk5ulW5EfdlM4vvd5k1tM1eUxBQixl3x5b0aeLEuMhVx8ujbbwmO
+	dqvUa93y5Nkxmvb5HExqDppVers2XyHafDjkEbjrjQXBwFFsQz9AxP/A/jECRWQc
+	J2H3Ldb3tlf8ocMeOF5MrRR1dqsqwz+T8odDroQw1p9O2KqzCfgd5rVZ2x1L4nsH
+	20fQbDThEhMx6RH9Z0U0NenbDUVy4rZMbfpLwXWS122i1WcrGqZtXpKjp52uyhwX
+	EA8keiXZ2YXIDlWxxReqhXc7n0cnJv/yuEtrrNYsSQaXkl6k5FAzS5LSgnvDLn8Q
+	LMHDzA==
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 490d1v8cc0-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Sat, 06 Sep 2025 08:28:52 +0000 (GMT)
+Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-4b32216a52cso8372381cf.2
+        for <linux-mmc@vger.kernel.org>; Sat, 06 Sep 2025 01:28:52 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757142058; x=1757746858;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :references:cc:to:from:subject:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=T2JJG+ZfsCIb5mNyWFksWhvinuGju8fueKzmBULEe5U=;
-        b=Up1Zmd0zZIIESQso14ESoXWW0/VE+l1JJRodJiM/24d7P+EQ4mOuynRmDWvwYby7eh
-         Zb//F3np/SbRHEIuJP4O4mv1lLDZkC3JSVcOHrpNpv8t0TQqq472IEsKQeAniLy8/YhF
-         rnxNzN0Nxy31gJJ71w7XLvaTGeoTqtizRfoQk2R052gBMaDv5vYc8t8Z24LX4MJTAiWA
-         TWKsBvwOsubM+wGQJid3g2c0JckxKAN7UsKRMU5wGf6Yys8qusMJErT5bL4NIPacFR1E
-         osIztsWcvM3FEmKLz0u/zfsUl/koDmeK+NBLcwfmPodTcFaH7zc6V0P0VnH8xyf2X6Vo
-         Pn3g==
-X-Forwarded-Encrypted: i=1; AJvYcCW32bEjAnPNzmAQaCxZ0V1GueqwQ6oh8KNuGfP6cZFzn6sLz424qpTOlJcseI0n/rbSOUYJvDXw2KM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyTvuj40Ib+VItu0Ub0KOr/ftQhi8pDVw0XUtBwKQvsUIhm+17/
-	WXvwFUcxoNga1zJsUDpO1B0tMYxli8DNXn+lwQZz+NQBxbKMAfMm7NvQM0/J6CO+zCmM1fcdz42
-	2OBfbt1J47FtVHnAAHTx7v4cJg39QSxuR9BA5mBZDHuZU/VNRe7jrsyHCchYNYQ==
-X-Gm-Gg: ASbGnctdvveOtpW2cVQd9rw87sxxwC17k91US+PlvdKqwihQ08qFGQ7fIKRoepM79Yc
-	25DPs3RtTiowa9Q+CBi0SZf5WcXiAidcBMsHhZ3VtOmFheY0q/UB5Ra/vllKRcwIIFU+BCqNjY0
-	8mgIQW2aY5pq59i3Vyl3WeRhjL8TR6naHC+OPd2B7eBglJH8tCtklfIO4Ts/5jH5I9NtE4nby3y
-	MZbxZMjR10Kyl5ryczagD65w9um03xOKql/9vfoPzUCoTOFivYRKOtLLQNVfF1j/bVl0ZQHOKIb
-	7S5Pcs5xtprr/phtYH4cM9vkWfhCnRClCrV5naIxqzDfTOFTZ0etk/dFF+H54JffSA13lrN+PlY
-	4lwamtwoG8UHfOZhH7er9YGPP7YHcT1+n2qSKsZ6ZoLulpa3XQYPK82iTZWHkUoAm15E=
-X-Received: by 2002:a5d:5f87:0:b0:3e2:804b:bfed with SMTP id ffacd0b85a97d-3e64c1c2183mr835280f8f.42.1757142058291;
-        Sat, 06 Sep 2025 00:00:58 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGdr4VmZX14HWt6vWJrgVQl61309Yoz3EBz+B4BvfuTuYDfgHO59nfbR4v+s7YipRZZX7VN6g==
-X-Received: by 2002:a5d:5f87:0:b0:3e2:804b:bfed with SMTP id ffacd0b85a97d-3e64c1c2183mr835230f8f.42.1757142057809;
-        Sat, 06 Sep 2025 00:00:57 -0700 (PDT)
-Received: from ?IPV6:2003:d8:2f30:de00:8132:f6dc:cba2:9134? (p200300d82f30de008132f6dccba29134.dip0.t-ipconnect.de. [2003:d8:2f30:de00:8132:f6dc:cba2:9134])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3cf3458a67fsm6794555f8f.62.2025.09.06.00.00.54
+        d=1e100.net; s=20230601; t=1757147332; x=1757752132;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=qKdwIMsuOs8hXrBNQvvXPiZ2vNFLXyJWMTWiOB3kSMs=;
+        b=LC4aJ6pWwzsCdoX8goZ4booINZzVf4rsIvxyvsIUGYicT+WjABt1NsJe9ZYyTPl0V0
+         gPvDamLtUcfAhBUFLh9Klv+3rT2NAigZjii8tWQlW8JYuH/uasS5rO62bz4sukQUKkwW
+         xnOxiIkPqc6a8hsODP7O40FtEuNhDILjhf/KYdNFfRze/437sTq2YJQrocsLD83yzJZB
+         M13xW5kkJ+zyjgHqeVh4d9JaylwrPNFQ06h6bHYCmqoUnrkIiTTR1IvTMj3fzRRRlwdO
+         ECZRIHw4Hsy6DqM/G1Ar/yn6kAkcLWvUez7OkiEevDR5P/xmbWWTjZBy9dwqdvcg9vBP
+         bQNw==
+X-Forwarded-Encrypted: i=1; AJvYcCUuAueNYwCQOGUPYR91XmDbDem4/QCsj2NM6XGk7SIIpEn5abl+MMaJqMeIQmwgKG7UmaIuBuWdiB0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywleg24n4snP+uR5yvFW4PZYYEt6sTe3Co/UF1QpxeSYay2JTOj
+	+e9HgD9NgWMPuvwrsh7vEjZqsnmHvolrv9Y1fDNy+iyDNgvtUAeHL6livOY9oEt6nP2k8mtHRKf
+	DbASzqpo4jDLkJgNSt4nFhFWxzYlUBCNQLff+blFOp/rd2S3cCaYqInxmVyFm/T8=
+X-Gm-Gg: ASbGnct0eKeBpkpix1AuAqyxTw58rc9U2e/87If7Z5pfJSRZp/0be1FJmMvtBULtEwm
+	QgBH1XdKqjpqKg077s31aYH4kruHCxps3z+8pDc43pnXTe4oDA1+kYA2Rh1YV+iWZjwcSS3kZjf
+	v7xzA21Swt1bu4+bCqynE6KhbbnyCvPJpGCE5+69EgpMYnJwM7Suk/5PscbS0231N4ya6agMA/o
+	XQoRuhtgj5FtOCylSEDCsiEuAKc8Ojd0HL6NmCBXQcVNrMMshrb0ADnQzD8TN8CKO24SCbEPChs
+	e3IbYQ9L8dMueR084tRqouBii5CMD3BpjFkr7Htumt9thWMjukB8DnfjM95pI4dhwMZ+cnZtRbQ
+	5WULtkqbqACw2sG9xhpb9LA==
+X-Received: by 2002:ac8:5a82:0:b0:4b5:eb76:3c6a with SMTP id d75a77b69052e-4b5f8464b47mr9538821cf.12.1757147331637;
+        Sat, 06 Sep 2025 01:28:51 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG3y3GSyZNNkgjIVF+qqXTkBKrkNGyGUS1amXxGqYrBzXr417aU+8RqZGf0t3Sfd6GltOwwIA==
+X-Received: by 2002:ac8:5a82:0:b0:4b5:eb76:3c6a with SMTP id d75a77b69052e-4b5f8464b47mr9538561cf.12.1757147330963;
+        Sat, 06 Sep 2025 01:28:50 -0700 (PDT)
+Received: from [192.168.149.223] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b041800e89esm1548972366b.30.2025.09.06.01.28.48
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 06 Sep 2025 00:00:56 -0700 (PDT)
-Message-ID: <815cbde4-a56d-446d-b517-c63e12e473de@redhat.com>
-Date: Sat, 6 Sep 2025 09:00:54 +0200
+        Sat, 06 Sep 2025 01:28:50 -0700 (PDT)
+Message-ID: <d3e96be4-8c78-4938-8072-abdb0f0e8f05@oss.qualcomm.com>
+Date: Sat, 6 Sep 2025 10:28:47 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -75,120 +75,161 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 19/37] mm/gup: remove record_subpages()
-From: David Hildenbrand <david@redhat.com>
-To: John Hubbard <jhubbard@nvidia.com>, linux-kernel@vger.kernel.org
-Cc: Alexander Potapenko <glider@google.com>,
- Andrew Morton <akpm@linux-foundation.org>,
- Brendan Jackman <jackmanb@google.com>, Christoph Lameter <cl@gentwo.org>,
- Dennis Zhou <dennis@kernel.org>, Dmitry Vyukov <dvyukov@google.com>,
- dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
- iommu@lists.linux.dev, io-uring@vger.kernel.org,
- Jason Gunthorpe <jgg@nvidia.com>, Jens Axboe <axboe@kernel.dk>,
- Johannes Weiner <hannes@cmpxchg.org>, kasan-dev@googlegroups.com,
- kvm@vger.kernel.org, "Liam R. Howlett" <Liam.Howlett@oracle.com>,
- Linus Torvalds <torvalds@linux-foundation.org>, linux-arm-kernel@axis.com,
- linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
- linux-ide@vger.kernel.org, linux-kselftest@vger.kernel.org,
- linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org,
- linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
- linux-scsi@vger.kernel.org, Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
- Marco Elver <elver@google.com>, Marek Szyprowski <m.szyprowski@samsung.com>,
- Michal Hocko <mhocko@suse.com>, Mike Rapoport <rppt@kernel.org>,
- Muchun Song <muchun.song@linux.dev>, netdev@vger.kernel.org,
- Oscar Salvador <osalvador@suse.de>, Peter Xu <peterx@redhat.com>,
- Robin Murphy <robin.murphy@arm.com>, Suren Baghdasaryan <surenb@google.com>,
- Tejun Heo <tj@kernel.org>, virtualization@lists.linux.dev,
- Vlastimil Babka <vbabka@suse.cz>, wireguard@lists.zx2c4.com, x86@kernel.org,
- Zi Yan <ziy@nvidia.com>
-References: <20250901150359.867252-1-david@redhat.com>
- <20250901150359.867252-20-david@redhat.com>
- <016307ba-427d-4646-8e4d-1ffefd2c1968@nvidia.com>
- <85e760cf-b994-40db-8d13-221feee55c60@redhat.com>
+Subject: Re: [PATCH 2/5] arm64: dts: qcom: lemans: Add SDHC controller and SDC
+ pin configuration
+To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
+Cc: Wasim Nazir <wasim.nazir@oss.qualcomm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Richard Cochran <richardcochran@gmail.com>, kernel@oss.qualcomm.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        netdev@vger.kernel.org, Monish Chunara <quic_mchunara@quicinc.com>
+References: <20250826-lemans-evk-bu-v1-2-08016e0d3ce5@oss.qualcomm.com>
+ <rxd4js6hb5ccejge2i2fp2syqlzdghqs75hb5ufqrhvpwubjyz@zwumzc7wphjx>
+ <c82d44af-d107-4e84-b5ae-eeb624bc03af@oss.qualcomm.com>
+ <aLhssUQa7tvUfu2j@hu-wasimn-hyd.qualcomm.com>
+ <tqm4sxoya3hue7mof3uqo4nu2b77ionmxi65ewfxtjouvn5xlt@d6ala2j2msbn>
+ <3b691f3a-633c-4a7f-bc38-a9c464d83fe1@oss.qualcomm.com>
+ <zofmya5h3yrz7wfcl4gozsmfjdeaixoir3zrk5kqpymbz5mkha@qxhj26jow5eh>
+ <57ae28ea-85fd-4f8b-8e74-1efba33f0cd2@oss.qualcomm.com>
+ <xausmwmh6ze5374eukv6pcmwe3lv4qun73pcszd3aqgjwm75u6@h3exsqf4dsfv>
+ <53aac104-76fb-42b8-9e0d-0e8a3f59b2da@oss.qualcomm.com>
+ <zw6o6nxczrzz3dkreq2nuxalbrlv7jmra2hs3pljew7xnbuepo@b6rs47vnnctx>
 Content-Language: en-US
-Autocrypt: addr=david@redhat.com; keydata=
- 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
- qIws/H2t
-In-Reply-To: <85e760cf-b994-40db-8d13-221feee55c60@redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <zw6o6nxczrzz3dkreq2nuxalbrlv7jmra2hs3pljew7xnbuepo@b6rs47vnnctx>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: IWcs_cg4fZwZA8EVUdDTh-YqqC0AroN-
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTA2MDAyNyBTYWx0ZWRfX7jQLM3eLiLHQ
+ 4DkV+ZHOM2atYJUDBxf72T3jBjfCUbNko8vcQOaMmAJ8CJo0WYtqIAlmMThDUSBJmQmuQNqjZLJ
+ 4hvJ4iRqewhFDszUxWwFQB6V3iP6PKXe0ZhocaLVZgB0qoJxSqlI0E2fq/wqQQKHFWWykGe37sI
+ F+uu4pJhkOotNUetqFUqM7aXrEVo1eDA3tTyZFb26s0L8muo7vYvud1a3X2ON5EX1WR8kAtdIEQ
+ xcerT8arLt3RFZK5JB2uvfRUx7I22bwBu22lUwUhvzScpYvqdYvMoKbxUkzosJ7GsUy1/AsOazD
+ BlH65I32zV/xT8hvDQpOYvZyjz3yZ+WjKPBgqfjLSrQpuXXjIuxWSdrGgj9ev3NETOLR4q5CeR7
+ X/o+dHbs
+X-Authority-Analysis: v=2.4 cv=cYXSrmDM c=1 sm=1 tr=0 ts=68bbf0c4 cx=c_pps
+ a=mPf7EqFMSY9/WdsSgAYMbA==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
+ a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
+ a=pmlacQdDjGSF83KW4JAA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=dawVfQjAaf238kedN5IG:22 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-GUID: IWcs_cg4fZwZA8EVUdDTh-YqqC0AroN-
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-09-06_02,2025-09-04_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 adultscore=0 impostorscore=0 clxscore=1015 malwarescore=0
+ phishscore=0 spamscore=0 suspectscore=0 priorityscore=1501
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2509060027
 
+On 9/5/25 3:44 PM, Dmitry Baryshkov wrote:
+> On Fri, Sep 05, 2025 at 02:04:47PM +0200, Konrad Dybcio wrote:
+>> On 9/5/25 1:45 PM, Dmitry Baryshkov wrote:
+>>> On Fri, Sep 05, 2025 at 01:14:29PM +0200, Konrad Dybcio wrote:
+>>>> On 9/4/25 7:32 PM, Dmitry Baryshkov wrote:
+>>>>> On Thu, Sep 04, 2025 at 04:34:05PM +0200, Konrad Dybcio wrote:
+>>>>>> On 9/4/25 3:35 PM, Dmitry Baryshkov wrote:
+>>>>>>> On Wed, Sep 03, 2025 at 09:58:33PM +0530, Wasim Nazir wrote:
+>>>>>>>> On Wed, Sep 03, 2025 at 06:12:59PM +0200, Konrad Dybcio wrote:
+>>>>>>>>> On 8/27/25 3:20 AM, Dmitry Baryshkov wrote:
+>>>>>>>>>> On Tue, Aug 26, 2025 at 11:51:01PM +0530, Wasim Nazir wrote:
+>>>>>>>>>>> From: Monish Chunara <quic_mchunara@quicinc.com>
+>>>>>>>>>>>
+>>>>>>>>>>> Introduce the SDHC v5 controller node for the Lemans platform.
+>>>>>>>>>>> This controller supports either eMMC or SD-card, but only one
+>>>>>>>>>>> can be active at a time. SD-card is the preferred configuration
+>>>>>>>>>>> on Lemans targets, so describe this controller.
+>>>>>>>>>>>
+>>>>>>>>>>> Define the SDC interface pins including clk, cmd, and data lines
+>>>>>>>>>>> to enable proper communication with the SDHC controller.
+>>>>>>>>>>>
+>>>>>>>>>>> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
+>>>>>>>>>>> Co-developed-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+>>>>>>>>>>> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+>>>>>>>>>>> ---
+>>>>>>>>>>>  arch/arm64/boot/dts/qcom/lemans.dtsi | 70 ++++++++++++++++++++++++++++++++++++
+>>>>>>>>>>>  1 file changed, 70 insertions(+)
+>>>>>>>>>>>
+>>>>>>>>>>> diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
+>>>>>>>>>>> index 99a566b42ef2..a5a3cdba47f3 100644
+>>>>>>>>>>> --- a/arch/arm64/boot/dts/qcom/lemans.dtsi
+>>>>>>>>>>> +++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
+>>>>>>>>>>> @@ -3834,6 +3834,36 @@ apss_tpdm2_out: endpoint {
+>>>>>>>>>>>  			};
+>>>>>>>>>>>  		};
+>>>>>>>>>>>  
+>>>>>>>>>>> +		sdhc: mmc@87c4000 {
+>>>>>>>>>>> +			compatible = "qcom,sa8775p-sdhci", "qcom,sdhci-msm-v5";
+>>>>>>>>>>> +			reg = <0x0 0x087c4000 0x0 0x1000>;
+>>>>>>>>>>> +
+>>>>>>>>>>> +			interrupts = <GIC_SPI 383 IRQ_TYPE_LEVEL_HIGH>,
+>>>>>>>>>>> +				     <GIC_SPI 521 IRQ_TYPE_LEVEL_HIGH>;
+>>>>>>>>>>> +			interrupt-names = "hc_irq", "pwr_irq";
+>>>>>>>>>>> +
+>>>>>>>>>>> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
+>>>>>>>>>>> +				 <&gcc GCC_SDCC1_APPS_CLK>;
+>>>>>>>>>>> +			clock-names = "iface", "core";
+>>>>>>>>>>> +
+>>>>>>>>>>> +			interconnects = <&aggre1_noc MASTER_SDC 0 &mc_virt SLAVE_EBI1 0>,
+>>>>>>>>>>> +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDC1 0>;
+>>>>>>>>>>> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
+>>>>>>>>>>> +
+>>>>>>>>>>> +			iommus = <&apps_smmu 0x0 0x0>;
+>>>>>>>>>>> +			dma-coherent;
+>>>>>>>>>>> +
+>>>>>>>>>>> +			resets = <&gcc GCC_SDCC1_BCR>;
+>>>>>>>>>>> +
+>>>>>>>>>>> +			no-sdio;
+>>>>>>>>>>> +			no-mmc;
+>>>>>>>>>>> +			bus-width = <4>;
+>>>>>>>>>>
+>>>>>>>>>> This is the board configuration, it should be defined in the EVK DTS.
+>>>>>>>>>
+>>>>>>>>> Unless the controller is actually incapable of doing non-SDCards
+>>>>>>>>>
+>>>>>>>>> But from the limited information I can find, this one should be able
+>>>>>>>>> to do both
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> It’s doable, but the bus width differs when this controller is used for
+>>>>>>>> eMMC, which is supported on the Mezz board. So, it’s cleaner to define
+>>>>>>>> only what’s needed for each specific usecase on the board.
+>>>>>>>
+>>>>>>> `git grep no-sdio arch/arm64/boot/dts/qcom/` shows that we have those
+>>>>>>> properties inside the board DT. I don't see a reason to deviate.
+>>>>>>
+>>>>>> Just to make sure we're clear
+>>>>>>
+>>>>>> I want the author to keep bus-width in SoC dt and move the other
+>>>>>> properties to the board dt
+>>>>>
+>>>>> I think bus-width is also a property of the board. In the end, it's a
+>>>>> question of schematics whether we route 1 wire or all 4 wires. git-log
+>>>>> shows that bus-width is being sent in both files (and probalby we should
+>>>>> sort that out).
+>>>>
+>>>> Actually this is the controller capability, so if it can do 8, it should
+>>>> be 8 and the MMC core will do whatever it pleases (the not-super-sure
+>>>> docs that I have say 8 for this platform)
+>>>
+>>> Isn't it a physical width of the bus between the controller and the slot
+>>> or eMMC chip?
+>>
+>> No, that's matched against reported (sd/mmc) card capabilities IIUC
+> 
+> What if both host and the card support 4 bits bus (normal SD card), but
+> board has only one data wire?
 
->    	pmdp = pmd_offset_lockless(pudp, pud, addr);
-> @@ -3046,23 +3041,21 @@ static int gup_fast_pmd_range(pud_t *pudp, pud_t pud, unsigned long addr,
->    
->    		next = pmd_addr_end(addr, end);
->    		if (!pmd_present(pmd))
-> -			return 0;
-> +			break;
->    
-> -		if (unlikely(pmd_leaf(pmd))) {
-> -			/* See gup_fast_pte_range() */
-> -			if (pmd_protnone(pmd))
-> -				return 0;
-> +		if (unlikely(pmd_leaf(pmd)))
-> +			cur_nr_pages = gup_fast_pmd_leaf(pmd, pmdp, addr, next, flags, pages);
-> +		else
-> +			cur_nr_pages = gup_fast_pte_range(pmd, pmdp, addr, next, flags, pages);
->    
-> -			if (!gup_fast_pmd_leaf(pmd, pmdp, addr, next, flags,
-> -				pages, nr))
-> -				return 0;
-> +		nr_pages += cur_nr_pages;
-> +		pages += cur_nr_pages;
->    
-> -		} else if (!gup_fast_pte_range(pmd, pmdp, addr, next, flags,
-> -					       pages, nr))
-> -			return 0;
-> +		if (nr_pages != (next - addr) >> PAGE_SIZE)
-> +			break;
+Ohhh, touche.. I assumed it's "smart" like PCIe, but it's (probably)
+not.
 
-^ cur_nr_pages. Open for suggestions on how to make that thing here even 
-better.
+Sorry for the trouble, Wasim. Let's keep 4 for now and get this patch
+merged.
 
--- 
-Cheers
-
-David / dhildenb
-
+Konrad> 
