@@ -1,366 +1,227 @@
-Received: from mail-pj1-f45.google.com (mail-pj1-f45.google.com [209.85.216.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3074236454;
-	Sat,  6 Sep 2025 09:07:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3FE81FF5F9;
+	Sat,  6 Sep 2025 10:35:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757149668; cv=none; b=jlUrsEsdjJ6OGvtXBq+2M2ditYYSCnQ1/6v+z36mxwU+8voj55FoveYRJB8721IPUZ9NFsR5NFq64nc3gtSo3+Pv8pbCBdZ1PnqyMRY2r3vf8hJEwsgSeEMg+ljZ983fLWt9UBeYH+KiM0u4q9cMJBmfFzNu1klZjGV818yJ9cs=
+	t=1757154945; cv=none; b=XxFfqzyF61stFELP0wwuotkfqnq/lHTK5qPx9hg4ZWUyko7I+67K/40rKKC4PV/fT4ixqMwqO9Obn8SUY2EIibtRtNRqMVGdm5fkWKepVtViH9pmW9KC1osxwPX1jRL+5Vjcyr7cm9rw/qHVp3kK+JYBx1RB1hhWKX2KQyugI20=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757149668; c=relaxed/simple;
-	bh=pB5gzDkI54l/i7k+HQWL1W/NVxinOhdCCa3CZsrFBvA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=V1k2Ou94wKz/M8PCyP1HONh8yA0PUiiTHSCvFit/RbAOQ85PoE/Li7q0FN9z4lJru4vhPAELZLB4wxcYtvEWJWIlsqFP+6JHfKn3dmZv/cZsiAZLvPOmNQUKiC9hwqN+3t8yp+f5Yctmz4mJSyZaOZBz72EFtB8nYD+So8wliGY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DXrsRRFK; arc=none smtp.client-ip=209.85.216.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1757154945; c=relaxed/simple;
+	bh=8vFTziuMUXf1btIls/GWESxtGi87Fv1ZcDwGDGPGAS0=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=m5P00mOzY05ZOVA95S103DZKjUVOujzi/BB4QgblDYzw3anygSWwb0dFEwlxjZ8cZ5IKZQgua2Hi0qaE1jbiPwE7oCaPwKE5234z2c80Hb82Qfy5NeZVzkaployhAVbgIeM2EGQtvEEKbqXAnjl4NGfOYQryYZkv5cEfTEG/HcM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=gXql3rHR; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DXrsRRFK"
-Received: by mail-pj1-f45.google.com with SMTP id 98e67ed59e1d1-32326e8005bso2569171a91.3;
-        Sat, 06 Sep 2025 02:07:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1757149666; x=1757754466; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=qm481bSQYAGrrJTiOApTZn1x56uPIBxlerFApUFgOH4=;
-        b=DXrsRRFKiWpCNd+SODcexWgHBR+n93SCdYQkBd63WlXHzp3/qVWz40EnX+JEozb2xf
-         BMKZEYYDtCmBhuAmXqSwM4ePvwZ7c5vS6VsoERsW4F06/L5TeuFQMnfx9/SKdGeQ0rXf
-         eZSV0YFfNydP9LXiHoL/lGu1uDhn/YkvrFLR9kBT79r+zQfiw4w/1CI9vB55MOJGoWYC
-         jLS0l+a35vnu2iSjMlAxwfFX4k9JJHYsx8q38iJ8H047K5RpjTEilTyjWPnj9Ghraru2
-         dU2Q5XEWfaRxl25SXqidD7la2XxzhLTAAT913eV56LmXR/fQMsqjmfZ6Jazpt7GSkL+q
-         ZKZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757149666; x=1757754466;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=qm481bSQYAGrrJTiOApTZn1x56uPIBxlerFApUFgOH4=;
-        b=EAX0dUDccIyJdhwCAF2O4yjPsB1w7msB5wHFDKK2ImdNLZ6Vslk0+OVofEgPsIL77z
-         4uHXyEykluCFrY8EA9dTZAJ48tFNxV+u2HAwOzbZjS6TWlosarGmKynSpSJbX+IK/Oy3
-         1kdQiGlibvVKQ1kHA8QLZCbwoB7LSVkJfm0fhoWGejcA6i0AU4MJ0rlOPJLhjqJXbH9I
-         acr7YdEhXa1HRnD3Si+tDRDLuBPxM0VaHvTJVpnrwikO7Viae+oLU8U6KXzIZx7CpZnS
-         gzdLj0w9AY+QmWoJYhX4klu5Muc11ayTr1FnBYPN61B7KqgGozAkr3Yx5+VZcU62hzmO
-         xlCQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUX3qcdCbdsY4QdwppziDxtxXe/C9CDA1oCzHluTKtiEM9wQrrSCLslO+pmZB7Ywb3cYL9eezNofETS@vger.kernel.org, AJvYcCXTFpiuX1EBExxT6J4/COvot9AqpncGRqz5T130O4YagNXHOatgqdbLFbOsebi335DC/rSUytFo8jX74OnX@vger.kernel.org
-X-Gm-Message-State: AOJu0YykP2FZqZs4te1KolvSpj7Uo3Qmfg89Q8+MvWQZxFnrIqMAlPbm
-	wrAGIaakFzefdIOqGb/2OQUmaZq8umBAwXYASG89N+FiuZ8o2Plj3nPC
-X-Gm-Gg: ASbGnctB4a6O7NQrwtMRGY113jWhDH0jJD4o6FLuRBGobWWMpi+b83Ly1pJi+RCNSKq
-	oqxK4fExOUVwcSkBJSZQSMCKZN6kvxJeJASUqjPfMir4g4oq1wNjd/ccbgpfldahccTXj5Qb3SQ
-	HlR2mYKCFbuf6JmzSjoZmPmeATNkH0nWBJWOlST7dcE5v3PO+EjwJlpXlQw+6O9h2smZodXXyS+
-	mVeTTPyVt+OSbt2NWhwtfyAEbNY81bkMDN3c0i9EtuQlS+P5g8pVW/H/DAOMd4XwZ/ZZPgBwyys
-	QH11xd0FBHrkQoOiHjAcio0iEA2/5+Yi1prTeRUD9MNyOjMzpKZJAE8cI7zE29AI9efzYCTeT3R
-	x36yH8SPuY9gxDt0g5LrkhKkY+ZkBn6TtoOX308fCfMaojV5VQF5w/PYazziCVNw3hMYy31Q=
-X-Google-Smtp-Source: AGHT+IHsJy6fckfNdVqhio0g5uj49cCKhfMsP8mPLpj8wPdCs5hRVrDe1PvRXQ/LrCtN7V2HOM+6XQ==
-X-Received: by 2002:a17:90b:3812:b0:329:87b8:9fc6 with SMTP id 98e67ed59e1d1-32d43f2b307mr2472287a91.16.1757149665993;
-        Sat, 06 Sep 2025 02:07:45 -0700 (PDT)
-Received: from [192.168.1.17] ([223.181.112.100])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-329d8ca7aa0sm13698277a91.19.2025.09.06.02.07.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 06 Sep 2025 02:07:45 -0700 (PDT)
-Message-ID: <877881b6-7d45-47ef-aa99-1827019a7c69@gmail.com>
-Date: Sat, 6 Sep 2025 14:37:40 +0530
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="gXql3rHR"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5863UKCW017416;
+	Sat, 6 Sep 2025 10:35:33 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	jw8kmorJ0/qwUgGkTKElEhslFkViZNLZD0KyvsPihag=; b=gXql3rHREMBHx37T
+	SrtS0UoyG5cEC8WteGlmN9f+WknoN294O5gGmxiDwQg8clacwQoT8cywTSHXIeZo
+	wu/yxO30ikO2WE/H84rdtaosI21rOFUllhFh89ZEQPhXsTcZ/eperSAHXeukXXLD
+	7lHgB6aqphpzYnkjqXt09w/9LmZJK+NzkmAjMpxvagOwUb1jVO0vv7G/HEenesAX
+	VqmePrE9Sxf+zP1Gs5LY55PNAAHuMKSfwcSIiz1GWXHQI/y1FQMA6I4tEMivjUci
+	CvNWRbesuX1Uvc+Z6Wjrm4oo2IMMDVWcQPS8lWUyRXZDfeiEZQcs8cOvS72kXbt1
+	UO26kQ==
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 490anf8q7q-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sat, 06 Sep 2025 10:35:32 +0000 (GMT)
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 586AZV37018165
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sat, 6 Sep 2025 10:35:31 GMT
+Received: from hu-mchunara-hyd.qualcomm.com (10.80.80.8) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1748.24; Sat, 6 Sep 2025 03:35:27 -0700
+Date: Sat, 6 Sep 2025 16:05:16 +0530
+From: Monish Chunara <quic_mchunara@quicinc.com>
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+CC: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
+        Wasim Nazir
+	<wasim.nazir@oss.qualcomm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, "Rob
+ Herring" <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        "Conor
+ Dooley" <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        "Konrad Dybcio" <konradybcio@kernel.org>,
+        Richard Cochran
+	<richardcochran@gmail.com>, <kernel@oss.qualcomm.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <netdev@vger.kernel.org>
+Subject: Re: [PATCH 2/5] arm64: dts: qcom: lemans: Add SDHC controller and
+ SDC pin configuration
+Message-ID: <aLwOZMgfRrvQJzPu@hu-mchunara-hyd.qualcomm.com>
+References: <c82d44af-d107-4e84-b5ae-eeb624bc03af@oss.qualcomm.com>
+ <aLhssUQa7tvUfu2j@hu-wasimn-hyd.qualcomm.com>
+ <tqm4sxoya3hue7mof3uqo4nu2b77ionmxi65ewfxtjouvn5xlt@d6ala2j2msbn>
+ <3b691f3a-633c-4a7f-bc38-a9c464d83fe1@oss.qualcomm.com>
+ <zofmya5h3yrz7wfcl4gozsmfjdeaixoir3zrk5kqpymbz5mkha@qxhj26jow5eh>
+ <57ae28ea-85fd-4f8b-8e74-1efba33f0cd2@oss.qualcomm.com>
+ <xausmwmh6ze5374eukv6pcmwe3lv4qun73pcszd3aqgjwm75u6@h3exsqf4dsfv>
+ <53aac104-76fb-42b8-9e0d-0e8a3f59b2da@oss.qualcomm.com>
+ <zw6o6nxczrzz3dkreq2nuxalbrlv7jmra2hs3pljew7xnbuepo@b6rs47vnnctx>
+ <d3e96be4-8c78-4938-8072-abdb0f0e8f05@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-omap: convert text based binding
- to json schema
-To: Krzysztof Kozlowski <krzk@kernel.org>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20250523-ti-sdhci-omap-v1-1-695c6eeac778@gmail.com>
- <56bcea70-6180-443b-8c9b-f5d2a129c73f@kernel.org>
- <cded96da-fdb5-4a50-9382-8f9f19589ce8@gmail.com>
- <5d3802bc-68e8-43a8-8dfa-14d5b2b9e624@kernel.org>
-Content-Language: en-US
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-In-Reply-To: <5d3802bc-68e8-43a8-8dfa-14d5b2b9e624@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <d3e96be4-8c78-4938-8072-abdb0f0e8f05@oss.qualcomm.com>
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: wo8qEMHwPp8nK8HAoRaGs2-BQ7c28M5g
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTA2MDAwNCBTYWx0ZWRfX38zelVu8tA0t
+ J/V//XuPDhFnR8ob789BhaeY/2qB/Ila1PVzFd/oZ5lnqWS5egVMolY6wljHEVYfF12zpCyKZhQ
+ l/RbaoFiqifh5vABzgFErJwloRzTp9I7FLNrcVoflCjH0flzmg+F1ZRlI/5ksup12H9bWPEvQ03
+ grkof3mIOjuqEWh6uu+g+nT87xS2q+Dk+d1xNeP7oSG5aGrfG3eR7to9DZ4AIoUzcmlzTWgQ6es
+ fDIBwEOnsBtfgt47GTvJishrGwh99/7Ht04ZlfVW10Zn+LpPSAYZelJ8/V6+4iIM6hvdU9aQWkH
+ /0R3uBBQkqJO+wF3yfcFyUsOreHkMODk2Cl4PwkUvMZIeow3iIMVI/AXycr9NMiFAQesg7HPTJe
+ h5/7A+IR
+X-Proofpoint-GUID: wo8qEMHwPp8nK8HAoRaGs2-BQ7c28M5g
+X-Authority-Analysis: v=2.4 cv=CaoI5Krl c=1 sm=1 tr=0 ts=68bc0e74 cx=c_pps
+ a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8
+ a=EUspDBNiAAAA:8 a=jXrvpXCBLM6H2ZY3dOMA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-09-06_03,2025-09-04_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 spamscore=0 clxscore=1015 malwarescore=0 adultscore=0
+ impostorscore=0 phishscore=0 bulkscore=0 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2509060004
 
-
-
-On 06-09-2025 14:25, Krzysztof Kozlowski wrote:
-> On 06/09/2025 10:43, Charan Pedumuru wrote:
->>
->>
->> On 28-05-2025 13:30, Krzysztof Kozlowski wrote:
->>> On 23/05/2025 19:05, Charan Pedumuru wrote:
->>>> Convert TI OMAP SDHCI Controller binding to YAML format.
->>>> Changes during Conversion:
->>>> - Add patternProperties for pinctrl-<n>.
->>>> - Define new properties like "ti,hwmods", "ti,needs-special-reset"
->>>>   "ti,needs-special-hs-handling", "cap-mmc-dual-data-rate"
->>>>   and "pbias-supply".
->>>
->>> Why? commit should answer this.
->>
->> The above properties are not documented in the text binding, so I defined them to resolve DTB_CHECK, I will write the reason in next revision.
+On Sat, Sep 06, 2025 at 10:28:47AM +0200, Konrad Dybcio wrote:
+> On 9/5/25 3:44 PM, Dmitry Baryshkov wrote:
+> > On Fri, Sep 05, 2025 at 02:04:47PM +0200, Konrad Dybcio wrote:
+> >> On 9/5/25 1:45 PM, Dmitry Baryshkov wrote:
+> >>> On Fri, Sep 05, 2025 at 01:14:29PM +0200, Konrad Dybcio wrote:
+> >>>> On 9/4/25 7:32 PM, Dmitry Baryshkov wrote:
+> >>>>> On Thu, Sep 04, 2025 at 04:34:05PM +0200, Konrad Dybcio wrote:
+> >>>>>> On 9/4/25 3:35 PM, Dmitry Baryshkov wrote:
+> >>>>>>> On Wed, Sep 03, 2025 at 09:58:33PM +0530, Wasim Nazir wrote:
+> >>>>>>>> On Wed, Sep 03, 2025 at 06:12:59PM +0200, Konrad Dybcio wrote:
+> >>>>>>>>> On 8/27/25 3:20 AM, Dmitry Baryshkov wrote:
+> >>>>>>>>>> On Tue, Aug 26, 2025 at 11:51:01PM +0530, Wasim Nazir wrote:
+> >>>>>>>>>>> From: Monish Chunara <quic_mchunara@quicinc.com>
+> >>>>>>>>>>>
+> >>>>>>>>>>> Introduce the SDHC v5 controller node for the Lemans platform.
+> >>>>>>>>>>> This controller supports either eMMC or SD-card, but only one
+> >>>>>>>>>>> can be active at a time. SD-card is the preferred configuration
+> >>>>>>>>>>> on Lemans targets, so describe this controller.
+> >>>>>>>>>>>
+> >>>>>>>>>>> Define the SDC interface pins including clk, cmd, and data lines
+> >>>>>>>>>>> to enable proper communication with the SDHC controller.
+> >>>>>>>>>>>
+> >>>>>>>>>>> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
+> >>>>>>>>>>> Co-developed-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+> >>>>>>>>>>> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+> >>>>>>>>>>> ---
+> >>>>>>>>>>>  arch/arm64/boot/dts/qcom/lemans.dtsi | 70 ++++++++++++++++++++++++++++++++++++
+> >>>>>>>>>>>  1 file changed, 70 insertions(+)
+> >>>>>>>>>>>
+> >>>>>>>>>>> diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
+> >>>>>>>>>>> index 99a566b42ef2..a5a3cdba47f3 100644
+> >>>>>>>>>>> --- a/arch/arm64/boot/dts/qcom/lemans.dtsi
+> >>>>>>>>>>> +++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
+> >>>>>>>>>>> @@ -3834,6 +3834,36 @@ apss_tpdm2_out: endpoint {
+> >>>>>>>>>>>  			};
+> >>>>>>>>>>>  		};
+> >>>>>>>>>>>  
+> >>>>>>>>>>> +		sdhc: mmc@87c4000 {
+> >>>>>>>>>>> +			compatible = "qcom,sa8775p-sdhci", "qcom,sdhci-msm-v5";
+> >>>>>>>>>>> +			reg = <0x0 0x087c4000 0x0 0x1000>;
+> >>>>>>>>>>> +
+> >>>>>>>>>>> +			interrupts = <GIC_SPI 383 IRQ_TYPE_LEVEL_HIGH>,
+> >>>>>>>>>>> +				     <GIC_SPI 521 IRQ_TYPE_LEVEL_HIGH>;
+> >>>>>>>>>>> +			interrupt-names = "hc_irq", "pwr_irq";
+> >>>>>>>>>>> +
+> >>>>>>>>>>> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
+> >>>>>>>>>>> +				 <&gcc GCC_SDCC1_APPS_CLK>;
+> >>>>>>>>>>> +			clock-names = "iface", "core";
+> >>>>>>>>>>> +
+> >>>>>>>>>>> +			interconnects = <&aggre1_noc MASTER_SDC 0 &mc_virt SLAVE_EBI1 0>,
+> >>>>>>>>>>> +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDC1 0>;
+> >>>>>>>>>>> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
+> >>>>>>>>>>> +
+> >>>>>>>>>>> +			iommus = <&apps_smmu 0x0 0x0>;
+> >>>>>>>>>>> +			dma-coherent;
+> >>>>>>>>>>> +
+> >>>>>>>>>>> +			resets = <&gcc GCC_SDCC1_BCR>;
+> >>>>>>>>>>> +
+> >>>>>>>>>>> +			no-sdio;
+> >>>>>>>>>>> +			no-mmc;
+> >>>>>>>>>>> +			bus-width = <4>;
+> >>>>>>>>>>
+> >>>>>>>>>> This is the board configuration, it should be defined in the EVK DTS.
+> >>>>>>>>>
+> >>>>>>>>> Unless the controller is actually incapable of doing non-SDCards
+> >>>>>>>>>
+> >>>>>>>>> But from the limited information I can find, this one should be able
+> >>>>>>>>> to do both
+> >>>>>>>>>
+> >>>>>>>>
+> >>>>>>>> It’s doable, but the bus width differs when this controller is used for
+> >>>>>>>> eMMC, which is supported on the Mezz board. So, it’s cleaner to define
+> >>>>>>>> only what’s needed for each specific usecase on the board.
+> >>>>>>>
+> >>>>>>> `git grep no-sdio arch/arm64/boot/dts/qcom/` shows that we have those
+> >>>>>>> properties inside the board DT. I don't see a reason to deviate.
+> >>>>>>
+> >>>>>> Just to make sure we're clear
+> >>>>>>
+> >>>>>> I want the author to keep bus-width in SoC dt and move the other
+> >>>>>> properties to the board dt
+> >>>>>
+> >>>>> I think bus-width is also a property of the board. In the end, it's a
+> >>>>> question of schematics whether we route 1 wire or all 4 wires. git-log
+> >>>>> shows that bus-width is being sent in both files (and probalby we should
+> >>>>> sort that out).
+> >>>>
+> >>>> Actually this is the controller capability, so if it can do 8, it should
+> >>>> be 8 and the MMC core will do whatever it pleases (the not-super-sure
+> >>>> docs that I have say 8 for this platform)
+> >>>
+> >>> Isn't it a physical width of the bus between the controller and the slot
+> >>> or eMMC chip?
+> >>
+> >> No, that's matched against reported (sd/mmc) card capabilities IIUC
+> > 
+> > What if both host and the card support 4 bits bus (normal SD card), but
+> > board has only one data wire?
 > 
-> You revive discussion from 3 months ago...
+> Ohhh, touche.. I assumed it's "smart" like PCIe, but it's (probably)
+> not.
 > 
-> Anyway, explain in the commit msg that properties are already used in
-> the DTS.
-
-Sure.
-
+> Sorry for the trouble, Wasim. Let's keep 4 for now and get this patch
+> merged.
 > 
->>
->>>
->>>> - Remove "ti,hwmods", "pinctrl-names" and "pinctrl-<n>"
->>>
->>> Why? You just added ti,hwmods, so how can you remove it from required?
->>
->> The property is defined but is not required by all DTS files and the old binding says it is required for all boards, I will add this reason to the commit message.
->>
->>>
->>>>   from required as they are not necessary for all DTS files.
->>>> - Add missing strings like "default-rev11", "sdr12-rev11", "sdr25-rev11",
->>>>   "hs-rev11", "sdr25-rev11" and "sleep" to pinctrl-names string array.
->>>>
->>>> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
->>>> ---
->>>>  .../devicetree/bindings/mmc/sdhci-omap.txt         |  43 ------
->>>>  .../devicetree/bindings/mmc/sdhci-omap.yaml        | 155 +++++++++++++++++++++
->>>
->>>
->>> Filename: ti,omap-sdhci.yaml or one of the compatibles (or anything else
->>> following convention that it should match compatible).
->>
->> Sure, I was following the name format of other files from the same directory here, but will change it to the compatible in next revision.
->>
->>>
->>>
->>> "ti,needs-special-hs-handling" is already documented in other binding
->>
->> Well, I didn't see this property defined in any common.yaml in mmc directory.
->>
->>>
->>>
->>>>  2 files changed, 155 insertions(+), 43 deletions(-)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->>>> deleted file mode 100644
->>>> index f91e341e6b36c410275e6f993dd08400be3fc1f8..0000000000000000000000000000000000000000
->>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
->>>> +++ /dev/null
->>>> @@ -1,43 +0,0 @@
->>>> -* TI OMAP SDHCI Controller
->>>
->>>
->>> ...
->>>
->>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.yaml b/Documentation/devicetree/bindings/mmc/sdhci-omap.yaml
->>>> new file mode 100644
->>>> index 0000000000000000000000000000000000000000..e707837bc242b055bbc497ed893a91c9b24f2dde
->>>> --- /dev/null
->>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.yaml
->>>> @@ -0,0 +1,155 @@
->>>> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->>>> +%YAML 1.2
->>>> +---
->>>> +$id: http://devicetree.org/schemas/mmc/sdhci-omap.yaml#
->>>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->>>> +
->>>> +title: TI OMAP SDHCI Controller
->>>> +
->>>> +maintainers:
->>>> +  - Ulf Hansson <ulf.hansson@linaro.org>
->>>
->>> This is supposed to be someone caring about this device. Eventually
->>> platform maintainer.
->>
->> Sure, I will change that, I was following the names of MAINTAINERS from the list I got from the command, "./scripts/get_maintainer.pl Documentation/dev
->> icetree/bindings/mmc/sdhci-omap.txt"
->>
->>>
->>>> +
->>>> +description:
->>>> +  For UHS devices which require tuning, the device tree should have a
->>>> +  cpu_thermal node which maps to the appropriate thermal zone. This
->>>> +  is used to get the temperature of the zone during tuning.
->>>> +
->>>> +allOf:
->>>> +  - $ref: sdhci-common.yaml#
->>>> +
->>>> +properties:
->>>> +  compatible:
->>>> +    enum:
->>>> +      - ti,omap2430-sdhci
->>>> +      - ti,omap3-sdhci
->>>> +      - ti,omap4-sdhci
->>>> +      - ti,omap5-sdhci
->>>> +      - ti,dra7-sdhci
->>>> +      - ti,k2g-sdhci
->>>> +      - ti,am335-sdhci
->>>> +      - ti,am437-sdhci
->>>> +
->>>> +  reg:
->>>> +    maxItems: 1
->>>> +
->>>> +  interrupts:
->>>> +    maxItems: 1
->>>> +
->>>> +  pinctrl-names:
->>>> +    $ref: /schemas/types.yaml#/definitions/string-array
->>>> +    minItems: 1
->>>> +    maxItems: 19
->>>> +    items:
->>>> +      enum:
->>>> +        - default
->>>> +        - default-rev11
->>>> +        - hs
->>>> +        - sdr12
->>>> +        - sdr12-rev11
->>>> +        - sdr25
->>>> +        - sdr25-rev11
->>>> +        - sdr50
->>>> +        - ddr50-rev11
->>>> +        - sdr104-rev11
->>>> +        - ddr50
->>>> +        - sdr104
->>>> +        - ddr_1_8v-rev11
->>>> +        - ddr_1_8v
->>>> +        - ddr_3_3v
->>>> +        - hs-rev11
->>>> +        - hs200_1_8v-rev11
->>>> +        - hs200_1_8v
->>>> +        - sleep
->>>> +
->>>> +  dmas:
->>>> +    maxItems: 2
->>>> +
->>>> +  dma-names:
->>>> +    items:
->>>> +      - const: tx
->>>> +      - const: rx
->>>> +
->>>> +  ti,hwmods:
->>>> +    $ref: /schemas/types.yaml#/definitions/string
->>>> +    description:
->>>> +      This field is used to fetch the information such as
->>>> +      address range, irq lines, dma lines, interconnect, PRCM register,
->>>> +      clock domain, input clocks associated with MMC.
->>>> +    pattern: "^mmc[0-9]+$"
->>>> +
->>>> +  ti,needs-special-reset:
->>>
->>> I don't understand why you added this. There is no user of it.
->>
->>
->> May be, but the DTB_CHECK failed for some boards when not defined it here.
-> 
-> Then maybe should be dropped from DTS?
+> Konrad>
 
-Okay, should I drop the properties ti,needs-special-reset, ti,needs-special-hs-handling and cap-mmc-dual-data-rate from the DTS and send a patch series?
+Thanks for the discussion Dmitry and Konrad. This has been confirmed with
+hardware team as well that only 4 lines have been routed from the controller to
+the SD card slot on the board, as per the card specifications.
 
-> 
->>
->>>
->>>> +    description:
->>>> +      It indicates that a specific soft reset sequence is required for
->>>> +      certain Texas Instruments devices, particularly those with
->>>> +      HSMMC (High-Speed MultiMediaCard) controllers.
->>>> +    type: boolean
->>>> +
->>>> +  ti,needs-special-hs-handling:
->>>
->>> I don't understand why you added this. There is no user of it.
->>
->> ...
->>
->>>
->>>
->>>> +    description:
->>>> +      It's presence in an MMC controller's DT node signals to the Linux kernel's
->>>> +      omap_hsmmc driver that this particular IP block requires special software
->>>> +      handling or workarounds to correctly manage High-Speed (HS) modes like
->>>> +      SDR25, SDR50, SDR104, DDR50.
->>>> +    type: boolean
->>>> +
->>>> +  pbias-supply:
->>>> +    description:
->>>> +      It is used to specify the voltage regulator that provides the bias
->>>> +      voltage for certain analog or I/O pads.
->>>> +
->>>> +  cap-mmc-dual-data-rate:
->>>> +    description:
->>>> +      A characteristic or capability associated with MultiMediaCard (MMC)
->>>> +      interfaces, specifically indicating that the MMC controller
->>>> +      supports Dual Data Rate (DDR) mode
->>>
->>> Drop the property. We have standard properties for this and there is no
->>> ABI for it anyway.
->>>
->>
->> Same here, the DTB_CHECK failed, so had to define it here
->>
->>>> +    type: boolean
->>>> +
->>>> +  ti,non-removable:
->>>> +    description:
->>>> +      It indicates that a component is not meant to be easily removed or
->>>> +      replaced by the user, such as an embedded battery or a non-removable
->>>> +      storage slot like eMMC.
->>>> +    type: boolean
->>>> +    deprecated: true
->>>> +
->>>> +  vmmmc-supply:
->>>> +    description:
->>>> +      It is used to specify the power supply (regulator) for the MMC/SD card's
->>>> +      main operating voltage (VCC/VDD).
->>>> +
->>>> +  clock-frequency:
->>>
->>> Why is it here? Nothing in commit msg explained adding it.
->>
->> I will add this change to commit message along with the reason.
->>
->>>
->>>> +    $ref: /schemas/types.yaml#/definitions/uint32
->>>> +    description:
->>>> +      It is used to specify the frequency of a clock in Hertz (Hz). It's a
->>>> +      fundamental property for communicating hardware clocking information from
->>>> +      the Device Tree to the Linux kernel.
->>>
->>> Redundant description. It is not a fundamental property. It is a legacy
->>> property.
->>>
->>
->> Sure, will change the description.
->>
->>>> +
->>>> +patternProperties:
->>>> +  "^pinctrl-[0-9]+$":
->>>> +    $ref: /schemas/types.yaml#/definitions/phandle-array
->>>> +    description:
->>>> +      Phandles to pinctrl states. The numeric suffix determines the
->>>> +      state index corresponding to entries in the pinctrl-names array.
->>>> +    minItems: 1
->>>
->>> Why exactly do you need these?
->>
->> Some boards have this property with multiple pincontrol states, so had to define a pattern property to recognize all the defined pinctrl properties.
-> 
-> No, that's just confusing error from dtschema. Look at other bindings -
-> no binding defines type and description for pinctrl.
+We'll keep the value 4 in the board DTS as per the discussion.
 
-Okay, I will remove this pattern property and will define it like normal property following other bindings.
-
-> 
-> It just means your schema was incomplete.
-> 
-> Best regards,
-> Krzysztof
-
--- 
 Best Regards,
-Charan.
+Monish
 
