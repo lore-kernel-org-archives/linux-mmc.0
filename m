@@ -1,311 +1,81 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFA7D2E1C7C;
-	Mon,  8 Sep 2025 16:18:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5760E30CDB4;
+	Mon,  8 Sep 2025 16:47:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757348293; cv=none; b=GksGt5TXuIGdJiExE6jTPPLC4oIyc2D2BVJ+fxyC2xhF32XHr6bAkyke7jGS87jrJWyZfURnmyIT6gRCJepj2HOgwk99Qt9wF7J6aBFAzErmT1+Uluji6NipKT9zUb8SV6Qp0HBQ32X/VveT2ObN4z35szWQf4IXCyLunUTz8ok=
+	t=1757350050; cv=none; b=bCkw/s2wDbdyLBWwKxLyOnZd8WLp0ViRO/FRZWyrOH+Inmf2uO8gMaLSG3OsTcjZkEOhyErtzqUZUQeWGJniHwH/pM2pybfvv2+zQAUxo2UYhVz3Py9PzV5AujijSetFlD8efNbr6KcXf4jdQ5pqJnUYd6RZ4jNStFuuOTlxTkU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757348293; c=relaxed/simple;
-	bh=0NUSOA/yUnRvSka+F+erNHF8ID79XG6Md4Sp1zxz/MM=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=WhLkwBAYx+QimoIlXdC02Fy1r+v8P08RYHJgEXGPISnDi1mWJ9Ys21SuUbstKT2aApkyP7O0vViT65qoQIk5POqvDbD1ubTD68zEZ0ibrftYIokS90xxLhmzGayTvFf2t39Uagsbts8fxaURqf5jwwIwJ0+hU6kKNqJtYqgcyyQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MiEBgeAR; arc=none smtp.client-ip=209.85.210.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1757350050; c=relaxed/simple;
+	bh=lHuXjtnGIwA8Zzr3bT7RPQh03xIe4TvMRJ0gk9Qtcas=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=HvhJrUz24KhWjmQ08cXpUiopmj4NdsuMP667wXLwhVVPK0k05mh643Jhpr7DdT2c88wDtmX6lsxAeIZojXKElXDJWKyuHzqQEen5k78yhK/VXlfQ9yRTY9/ZZsiBicYlzx0qJT942LSb7Ur5cclI50vTcFwcpQDX8D+iDekYhLA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b=aRSmTrDx; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MiEBgeAR"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-76e6cbb991aso3929796b3a.1;
-        Mon, 08 Sep 2025 09:18:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1757348291; x=1757953091; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=1qtec3uyx3zEz0QpxQLk+squlnPusrmyWF7QQ2lWuOc=;
-        b=MiEBgeARcD/8rceymSdt3zPWD/fvSjj3bCEbnHVzMpNsAjD9yTW6p7ScuLPK/gwMaT
-         nTJrkjIE56VQCK0OaMa6mcuKL/AaDVJuima8O8B9Te31X9JGtoAq2zxQxoTgyJFY1Jnj
-         V14wALi+JJFj4ebjJ4zlNuE4qhZeF55i+eoMZhnDz3SzoUd6JqPsyntCANOhJM7NgNNc
-         /PxEabvyLg9dFr8uxV1u4dlvswwRCe+dOruHaSaY5//cvhAz0j36yp7cqBmS+bKLQgFw
-         aGPQmPXJSz8U6aUu0QlYZectH9LS3Hh0Eog7s+dy/NZvX3e2/CDC7ElIfRbO2PDT/FEm
-         EP0Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757348291; x=1757953091;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=1qtec3uyx3zEz0QpxQLk+squlnPusrmyWF7QQ2lWuOc=;
-        b=aPMOQFMHHkG6j+XuL2uq6mYtZL63eJX2KFzQlUc+vcHoFvAOYj/zmhGJYY9DWG7OBp
-         /yo6ryyH8HuI8lt4VNEMSD/F3pLmEU2sCDLjKIwbL4cX6i4VeQ6tNL6osuiitUTaz4My
-         lNS3OALM546kUVcc/p0g/nkhOZquWMKFyCzrrDeyJZaR6vn3//t3YjJ9Sxqf215FXqpx
-         sVC8brwbVRhxM47Lybt2lmXl1ZF9Of+qGrIV9dB9vMorI1uSD4y+UZpC5sIeCl9Cf9Yk
-         cHB+vhxnAY0Mh62P8kS3x8kN//EauvLZuQ50dcvrylGiA+eL8vLiWtF17WE+Q9x5LSD9
-         YbEA==
-X-Forwarded-Encrypted: i=1; AJvYcCUPKa+aRgOodihgMjd7gGp3GeHTLUN02Ww4tY33IPIl9arT8KhOFfzhBA2TZWJ3xwPTido20ImCa3xLWA==@vger.kernel.org, AJvYcCV+FA8T2BfnuaYwQezHZTN7f7+9BCvWwvMW8zo7p+dsK7g1956Naj0B+z8u9uncFZjJ9UwT5slYZKQq@vger.kernel.org, AJvYcCVxBT+3/qr+DXNYt6yjGj/Etyv8ISt4PM2JKTZzvr7DCjQ4wg/Q48ZgyOLU72TjnHxA+Ih+wn+60HzxFSn9@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxtgm2oIvSfLFGaT4yEgMUoYS8CFc2/V7xnqcX5ZuAwz8qj1eCQ
-	PmiNSKtrN9RKqIT5RmC5rHq4WNulGPOn7guukENSOhV7D47fkCYKfY9Z
-X-Gm-Gg: ASbGncsdFZpiPbihJ7ORkW1xlzJdBdWoCtVZHoRKjN8CKZxrlct6nyQvRhRy5JrdVkY
-	XMYeNfJJC68Zv/3q3sPLLZU9lVgjxCs0J+uO3Ue3xDhqLj3OXCXVTeoPiAMZ6h+MIVGl9XnSMkA
-	6UEA19MZcnO6x8YDj1Dnd/f7U5IzjMXGdkBgBIpawE4VVjKm/z0C97kFrYaL7j322bS+48sQY+q
-	H3I7cgMMBnET1oyQJGBCHASvRdvbDIcrzGFhWDpB7QJGyE0lNPtaIsFPwAJb3WueeUR9kNGkc7R
-	lMAlRnXyZ7vM7DcjyphXZegmMQRNcgC9RivJSx1FUoBiGs5RfGRl8x1NGZbgm+vsbj0QKHXi0m3
-	g3TxnOVDhLoRVmBo9edO08o4Prl3irpbPwRUTCn5jum8iwkHE4rtkZQ==
-X-Google-Smtp-Source: AGHT+IEiQJIWMzjG8kO1ml+LQ8B0a1u6nIiZo+4kbDe84EdY9wxCBbj8j+s+Gurd/RLh4EqO7sOtow==
-X-Received: by 2002:a05:6a00:882:b0:772:4759:e433 with SMTP id d2e1a72fcca58-7742dd123eemr9937123b3a.2.1757348290796;
-        Mon, 08 Sep 2025 09:18:10 -0700 (PDT)
-Received: from Black-Pearl.localdomain ([27.7.158.204])
-        by smtp.googlemail.com with ESMTPSA id d2e1a72fcca58-772608b1b5asm21319074b3a.46.2025.09.08.09.18.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 08 Sep 2025 09:18:10 -0700 (PDT)
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-Date: Mon, 08 Sep 2025 16:17:13 +0000
-Subject: [PATCH v2 2/2] dt-bindings: mmc: sdhci-omap: convert to DT schema
+	dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="aRSmTrDx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8D15C4CEF7;
+	Mon,  8 Sep 2025 16:47:28 +0000 (UTC)
+Authentication-Results: smtp.kernel.org;
+	dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="aRSmTrDx"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
+	t=1757350043;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=lHuXjtnGIwA8Zzr3bT7RPQh03xIe4TvMRJ0gk9Qtcas=;
+	b=aRSmTrDxIs6NpeGo93fkReDvlHN1nyKT78wEVvyAxjkAXAC2k2c3mxuz/bJ82L8IZW1yN6
+	pwkX2HXRtMpvSadVNNy+vTEk636HAjXuttfeyulU58v4gROvgN5dbku8+cv8xe9AeoEtRt
+	vJnlgruF24VRNpNpSmzpwMaYauNKy6E=
+Received: 
+	by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 51884059 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
+	Mon, 8 Sep 2025 16:47:23 +0000 (UTC)
+Received: by mail-ot1-f51.google.com with SMTP id 46e09a7af769-74382041c9eso3354814a34.3;
+        Mon, 08 Sep 2025 09:47:22 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCU7Pv6YVG7Il5lZNPuFKdPV/ZNth31owx4UkUqYzKhvwZcw/HdKcdTJ8e1HQJSLBka6oWH9bMmomFMm@vger.kernel.org, AJvYcCUOqaYvG5mFXsLXXedQa+gwRe38TOfzwr0BGOcM5aNi7T5uvLIG/AYDllG6P1P/CkcyHl0t4WrQntqOED3h@vger.kernel.org, AJvYcCUigQYViV2GND3DmxJgbv0/kpp7hN2XucT5RTvsIU290xbGLhCrCQqrePRpUgvYBaphjhj72aUzyqrXow==@vger.kernel.org, AJvYcCVJi51fqijkdCF2YA0vAvPR35tRUY5itSeWU0keOGdm+StsUtp76juMOK/fcBwbDbuGr2JH@vger.kernel.org, AJvYcCVMirRgZKwR+bdaHvMMJFGZ985+jekUAe0ChGlJHxgdGaoOFfXzRHcm2xIvO3/Y2mF0BR30gU46jA==@vger.kernel.org, AJvYcCWN3RMpo/RZptUyTpqiam0AEveYrqwi7qyDloDf0JjytbpFdzHIE5ktmF94iAi0LuNUfN5cUCoraOF2rK5czBdi@vger.kernel.org, AJvYcCWiptBKvnbohr2ztuOXCUWOJhi+26Omn+OvyCW5EnqXGuFH1mBl2eAoQIEDv+ndnabc3/tToOu6g6s2Kw==@vger.kernel.org, AJvYcCWqDgHOfdhEr9YjxNlqZ3glhY5p6zS8PDQHcxbabxg4eXkoOTzmeJP/x+L7F8o/ow49oahL+eYz3mFk@vger.kernel.org, AJvYcCXpsnZWMoLrguQns5x81vpEW7ks4lgFtxUVCnB8WHYeLrNvWr76TM++aVDw/T0R6mv8zyNOyC/YIPgXHQ==@vger.kernel.org, AJvYcCXr69qyvZCcDfca7Eo4w+6MzSLcQNn0uVOfkqSQmq9VY6cJXsoopTMmn0qiZNAWjsS+BkCGEuX6@vger.kernel.org
+X-Gm-Message-State: AOJu0YxNpSyF4gzzGVujRQez0aqYHzvcoow35dour5xkma1y0Q5HA7HL
+	RfSAA0s90jFehWKpobcdB063kBKReopAJ6B1YxzYjlH2nNVpRVf+La4DMu3FFxMWugaXKQap5oy
+	BQWd0sE0NNefEHFxWpdaP1oc7XCcUmgM=
+X-Google-Smtp-Source: AGHT+IG1lksSpt4e4b7wpOLuoBOgU4CtzIVFITSYKRy7vIMNnTgG60R226zI8so9rVaf/KD14awSBHuCM8l64s4kZfU=
+X-Received: by 2002:a05:6808:2e4b:b0:438:37eb:62b2 with SMTP id
+ 5614622812f47-43b29b952ffmr4287499b6e.44.1757350039548; Mon, 08 Sep 2025
+ 09:47:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250908-ti-sdhci-omap-v2-2-72927890482f@gmail.com>
-References: <20250908-ti-sdhci-omap-v2-0-72927890482f@gmail.com>
-In-Reply-To: <20250908-ti-sdhci-omap-v2-0-72927890482f@gmail.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Paul Barker <paul.barker@sancloud.com>, 
- Marc Murphy <marc.murphy@sancloud.com>, Tony Lindgren <tony@atomide.com>, 
- Kishon Vijay Abraham I <kishon@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, 
- Charan Pedumuru <charan.pedumuru@gmail.com>
-X-Mailer: b4 0.14.2
+References: <20250821200701.1329277-1-david@redhat.com> <20250821200701.1329277-6-david@redhat.com>
+In-Reply-To: <20250821200701.1329277-6-david@redhat.com>
+From: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Date: Mon, 8 Sep 2025 18:47:08 +0200
+X-Gmail-Original-Message-ID: <CAHmME9pO-g4qUUsbF+XZqcPcwfP3-N7AxR+MX6G73adc2-NAkA@mail.gmail.com>
+X-Gm-Features: AS18NWDayNVnEOpkO7Cmy5o2hUWkz6cio8gfE7ZsOxyaASSZD8l09i-KslFVPvE
+Message-ID: <CAHmME9pO-g4qUUsbF+XZqcPcwfP3-N7AxR+MX6G73adc2-NAkA@mail.gmail.com>
+Subject: Re: [PATCH RFC 05/35] wireguard: selftests: remove
+ CONFIG_SPARSEMEM_VMEMMAP=y from qemu kernel config
+To: David Hildenbrand <david@redhat.com>
+Cc: linux-kernel@vger.kernel.org, Shuah Khan <shuah@kernel.org>, 
+	Alexander Potapenko <glider@google.com>, Andrew Morton <akpm@linux-foundation.org>, 
+	Brendan Jackman <jackmanb@google.com>, Christoph Lameter <cl@gentwo.org>, Dennis Zhou <dennis@kernel.org>, 
+	Dmitry Vyukov <dvyukov@google.com>, dri-devel@lists.freedesktop.org, 
+	intel-gfx@lists.freedesktop.org, iommu@lists.linux.dev, 
+	io-uring@vger.kernel.org, Jason Gunthorpe <jgg@nvidia.com>, Jens Axboe <axboe@kernel.dk>, 
+	Johannes Weiner <hannes@cmpxchg.org>, John Hubbard <jhubbard@nvidia.com>, kasan-dev@googlegroups.com, 
+	kvm@vger.kernel.org, "Liam R. Howlett" <Liam.Howlett@oracle.com>, 
+	Linus Torvalds <torvalds@linux-foundation.org>, linux-arm-kernel@axis.com, 
+	linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org, 
+	linux-ide@vger.kernel.org, linux-kselftest@vger.kernel.org, 
+	linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org, 
+	linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org, 
+	linux-scsi@vger.kernel.org, Lorenzo Stoakes <lorenzo.stoakes@oracle.com>, 
+	Marco Elver <elver@google.com>, Marek Szyprowski <m.szyprowski@samsung.com>, 
+	Michal Hocko <mhocko@suse.com>, Mike Rapoport <rppt@kernel.org>, Muchun Song <muchun.song@linux.dev>, 
+	netdev@vger.kernel.org, Oscar Salvador <osalvador@suse.de>, Peter Xu <peterx@redhat.com>, 
+	Robin Murphy <robin.murphy@arm.com>, Suren Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>, 
+	virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>, wireguard@lists.zx2c4.com, 
+	x86@kernel.org, Zi Yan <ziy@nvidia.com>
+Content-Type: text/plain; charset="UTF-8"
 
-Convert TI OMAP SDHCI Controller binding to YAML format.
-Changes during Conversion:
-- Define new properties like "clock-frequency"
-  and "pbias-supply" to resolve errors detected by DTB_CHECK.
-- Remove "ti,hwmods", "pinctrl-names" and "pinctrl-<n>"
-  from required as they are not necessary for all DTS files and the
-  text binding is misleading.
-- Add missing strings like "default-rev11", "sdr12-rev11", "sdr25-rev11",
-  "hs-rev11", "sdr25-rev11" and "sleep" to pinctrl-names string array.
-
-Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
----
- .../devicetree/bindings/mmc/sdhci-omap.txt         |  43 ------
- .../devicetree/bindings/mmc/ti,omap2430-sdhci.yaml | 152 +++++++++++++++++++++
- 2 files changed, 152 insertions(+), 43 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-deleted file mode 100644
-index f91e341e6b36c410275e6f993dd08400be3fc1f8..0000000000000000000000000000000000000000
---- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-+++ /dev/null
-@@ -1,43 +0,0 @@
--* TI OMAP SDHCI Controller
--
--Refer to mmc.txt for standard MMC bindings.
--
--For UHS devices which require tuning, the device tree should have a "cpu_thermal" node which maps to the appropriate thermal zone. This is used to get the temperature of the zone during tuning.
--
--Required properties:
--- compatible: Should be "ti,omap2430-sdhci" for omap2430 controllers
--	      Should be "ti,omap3-sdhci" for omap3 controllers
--	      Should be "ti,omap4-sdhci" for omap4 and ti81 controllers
--	      Should be "ti,omap5-sdhci" for omap5 controllers
--	      Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
--	      Should be "ti,k2g-sdhci" for K2G
--	      Should be "ti,am335-sdhci" for am335x controllers
--	      Should be "ti,am437-sdhci" for am437x controllers
--- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
--	     (Not required for K2G).
--- pinctrl-names: Should be subset of "default", "hs", "sdr12", "sdr25", "sdr50",
--		 "ddr50-rev11", "sdr104-rev11", "ddr50", "sdr104",
--		 "ddr_1_8v-rev11", "ddr_1_8v" or "ddr_3_3v", "hs200_1_8v-rev11",
--		 "hs200_1_8v",
--- pinctrl-<n> : Pinctrl states as described in bindings/pinctrl/pinctrl-bindings.txt
--
--Optional properties:
--- dmas:		List of DMA specifiers with the controller specific format as described
--		in the generic DMA client binding. A tx and rx specifier is required.
--- dma-names:	List of DMA request names. These strings correspond 1:1 with the
--		DMA specifiers listed in dmas. The string naming is to be "tx"
--		and "rx" for TX and RX DMA requests, respectively.
--
--Deprecated properties:
--- ti,non-removable: Compatible with the generic non-removable property
--
--Example:
--	mmc1: mmc@4809c000 {
--		compatible = "ti,dra7-sdhci";
--		reg = <0x4809c000 0x400>;
--		ti,hwmods = "mmc1";
--		bus-width = <4>;
--		vmmc-supply = <&vmmc>; /* phandle to regulator node */
--		dmas = <&sdma 61 &sdma 62>;
--		dma-names = "tx", "rx";
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/ti,omap2430-sdhci.yaml b/Documentation/devicetree/bindings/mmc/ti,omap2430-sdhci.yaml
-new file mode 100644
-index 0000000000000000000000000000000000000000..2c8be3b0986755579e0f4d3f36554f378af914d3
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/ti,omap2430-sdhci.yaml
-@@ -0,0 +1,152 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/ti,omap2430-sdhci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: TI OMAP SDHCI Controller
-+
-+maintainers:
-+  - Kishon Vijay Abraham I <kishon@ti.com>
-+
-+description:
-+  For UHS devices which require tuning, the device tree should have a
-+  cpu_thermal node which maps to the appropriate thermal zone. This
-+  is used to get the temperature of the zone during tuning.
-+
-+allOf:
-+  - $ref: sdhci-common.yaml#
-+
-+properties:
-+  compatible:
-+    enum:
-+      - ti,omap2430-sdhci
-+      - ti,omap3-sdhci
-+      - ti,omap4-sdhci
-+      - ti,omap5-sdhci
-+      - ti,dra7-sdhci
-+      - ti,k2g-sdhci
-+      - ti,am335-sdhci
-+      - ti,am437-sdhci
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  pinctrl-names:
-+    $ref: /schemas/types.yaml#/definitions/string-array
-+    minItems: 1
-+    maxItems: 19
-+    items:
-+      enum:
-+        - default
-+        - default-rev11
-+        - hs
-+        - sdr12
-+        - sdr12-rev11
-+        - sdr25
-+        - sdr25-rev11
-+        - sdr50
-+        - ddr50-rev11
-+        - sdr104-rev11
-+        - ddr50
-+        - sdr104
-+        - ddr_1_8v-rev11
-+        - ddr_1_8v
-+        - ddr_3_3v
-+        - hs-rev11
-+        - hs200_1_8v-rev11
-+        - hs200_1_8v
-+        - sleep
-+
-+  pinctrl-0:
-+    maxItems: 1
-+
-+  pinctrl-1:
-+    maxItems: 1
-+
-+  pinctrl-2:
-+    maxItems: 1
-+
-+  pinctrl-3:
-+    maxItems: 1
-+
-+  pinctrl-4:
-+    maxItems: 1
-+
-+  pinctrl-5:
-+    maxItems: 1
-+
-+  pinctrl-6:
-+    maxItems: 1
-+
-+  pinctrl-7:
-+    maxItems: 1
-+
-+  pinctrl-8:
-+    maxItems: 1
-+
-+  dmas:
-+    maxItems: 2
-+
-+  dma-names:
-+    items:
-+      - const: tx
-+      - const: rx
-+
-+  ti,hwmods:
-+    $ref: /schemas/types.yaml#/definitions/string
-+    description:
-+      This field is used to fetch the information such as
-+      address range, irq lines, dma lines, interconnect, PRCM register,
-+      clock domain, input clocks associated with MMC.
-+    pattern: "^mmc[0-9]+$"
-+
-+  pbias-supply:
-+    description:
-+      It is used to specify the voltage regulator that provides the bias
-+      voltage for certain analog or I/O pads.
-+
-+  ti,non-removable:
-+    description:
-+      It indicates that a component is not meant to be easily removed or
-+      replaced by the user, such as an embedded battery or a non-removable
-+      storage slot like eMMC.
-+    type: boolean
-+    deprecated: true
-+
-+  vmmmc-supply:
-+    description:
-+      It is used to specify the power supply (regulator) for the MMC/SD card's
-+      main operating voltage (VCC/VDD).
-+
-+  clock-frequency:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description:
-+      It represents the speed at which a clock signal associated with a device
-+      or bus operates, measured in Hertz (Hz). This value is crucial for configuring
-+      hardware components that require a specific clock speed.
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    mmc@4809c000 {
-+        compatible = "ti,omap2430-sdhci";
-+        reg = <0x4809c000 0x400>;
-+        interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
-+        ti,hwmods = "mmc1";
-+        bus-width = <4>;
-+        vmmc-supply = <&vmmc>; /* phandle to regulator node */
-+        dmas = <&sdma 61>, <&sdma 62>;
-+        dma-names = "tx", "rx";
-+    };
-+...
-
--- 
-2.51.0
-
+Applied, thanks.
