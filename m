@@ -1,248 +1,155 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CEA52ED84F
-	for <linux-mmc@vger.kernel.org>; Mon,  8 Sep 2025 08:21:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4265A2F90CE;
+	Mon,  8 Sep 2025 10:41:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757319684; cv=none; b=cAE8dH3pRCS7+CASthBtp/+InvU8gY5HJN9iEaLOuqVOiD5NrnCYoaGktlGC57cIcvrTjyiN8MCSf8DEyP4WqH6kuwcUzH1ZkwYc7fkTL6XPS1iXN7BhAhQghkLGQLVnEXhSDpaeFfbCvIRfGX/sxf0bTnVv//I4ujIdz9cXuZw=
+	t=1757328093; cv=none; b=bmxAgSViLdGEHNz5Iq+065SyjN2hbf6CSzZ5dq48VyD9zIle3XFLaJ537v/lZ94rpOIrEyW1y6rUIoe6lTVsqC3X2p2qeEZ6mHvgeVg+CiLeUn+Y6hcoFtUqbXg9vtmhQvlvwi8vMWlwvxLtjLMm1OacDNjskiWu00KB11kzrHA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757319684; c=relaxed/simple;
-	bh=pfsOZa4PQYY8ac16EANnBDTYwGzm0MqE+SKKAoXxTtQ=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=AHpbSp4xAS8nKaCzq7aQ8iqvxMCP/Q9sOxHr4L2JZNaL0GjryIVrdTkKfQkpBb3+LIXlyZs0JV7yJeYsSxjXl9LjatYUfxRiP/vhw2W1JJgm+JAb4Beev/XKEpYFO8U43G5r7v7jITUEETOtaf1n1bBgxlQn9jy8H84motn7HQU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=KjT7TGvt; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1757328093; c=relaxed/simple;
+	bh=v8eWaxnpVpapKq3qRJtlJeDU/5bKtRRJd0LjemMl1OI=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=S5i6ssDLQd7V8rVLIV+bfwu0TEzhKbZwQrlhgAkCKsTsBEq2m9dIs95jrP2u7iGRtC2fc4MoMCiXgq84Q6mOriNa0PtHIAeczqpNkWpzyZ3nwMdHxTwJ9xvqMRaqJsnT9KG5RqnMLKrgqeKgmxx7UDNiTVeCLxdWNsFvFy0D+2w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=EZtIihRz; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="KjT7TGvt"
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 587I887k002547
-	for <linux-mmc@vger.kernel.org>; Mon, 8 Sep 2025 08:21:22 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	yAyd7qftexqllcMjL67Owuu+ieAa57wWfH+BpQoRfrw=; b=KjT7TGvtaOjQN/tj
-	VTlDc0TpIiPpacl9OSFExWLQUYrWoEnt3RoS/DZEuoF8QprwFasWaEwU73WCIOf8
-	28ttUJ8G6qwetkefvzhJZ8H+fFCget9BOswkCScU5j/lAPhGmSmaR5uexABtDQxg
-	+8ChXJQVKoHwUH1bcTRpTceGEgSMXNANEPPODx/xq8ibVva+aC58K8xYpkHcSkBs
-	pk9gngOlBH6+UCbC925T3I+p973UR2RZC2xY1XJigPPTektLOfz0gmAaWsAIDJL0
-	YhpjO02ITwlU4CqaHSCzROUAn1fB7ulDBpcofNfn1SN5vr3BJmLMRajlSJC4sJ7v
-	15qV2w==
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com [209.85.214.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 490cj0ktf2-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 08 Sep 2025 08:21:22 +0000 (GMT)
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-24b18ad403eso41882635ad.1
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Sep 2025 01:21:22 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757319681; x=1757924481;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=yAyd7qftexqllcMjL67Owuu+ieAa57wWfH+BpQoRfrw=;
-        b=SPI24LdPnVOxTTsoA3KIGQr6aKS4w3C2t6ojiqgSSTuRT13Zx5dMM1FSRpst7poy96
-         YOAqwEMyC9b/wExAbldL4r9MbOrt/yj5PVTtoT2Jv8kEm57dNRyoJEpe53WVErR1AXSh
-         FldK+DvsvPt2qjArOCjWUtMcPacNeFGKfCV9QbwqlJZlRFfH5UES5REwlKYoYB8TXZWl
-         uUFwT61qK6Lmgx4ZRlX6MkSls1LcE7b5WF8obFOg5BuJnju8xZV4Mkcyf59wNmTvyT7F
-         +5CBnGoC1KLqcnWdbTpG/6IBm46ToT+16I/Cl00/PgzwTtIm1lf76UXUfanFeCbvEnU2
-         rffA==
-X-Forwarded-Encrypted: i=1; AJvYcCWdaA1ZshdV0al3Ln/42TVTnKGkSSdbpjqhShME8f3en30ohEhv/3qG7/rCPyDeUMbKvghwUWiXpio=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyzJzunmXr+Co0aHhfJcoZbkQ7pCGu90ehkg8c044ZA17KvJHpX
-	mGjm3aGrr4s9v0SHmQzGGobHfvRDrMyyvqwxRy++DXFGDOiIindvuVCY5zM6/tCCALQG09HQOtl
-	RjW0slCKORW4ammnCv3HsUuiZu/IqPAPbdWklBAhuSohiQCcroeULA6i/60S7VgQ=
-X-Gm-Gg: ASbGnctKq8bda3aAmqKWJ3It0nJ6Z1M4T+WGgC+WWo7K3rGUODMcM4aZNIIVuHBj03g
-	pvQU8DjHGLGh8f/HhJDkWp7BYFsXHARjQrNkXVUtbqg1pCwzgcNOnQ4FpOHYk4Fkmr4A86BDKgy
-	KYTHM2ev9RUPZue29snT4nYHHrdqQXtsJfFx3VU5mEeipYQwqLg2suX37L6tvZWK35RHT2O7OOe
-	yHiTTCXUdBPepq9afud+d1JjT8E2Ta9oWYNI+uW8wQcj45nCaB0THp6f6qC6m5LBpbj5bJE0zV+
-	oA/Go3ZagExG5HqReakoh32b/yYC7vb5KRVm64Ah+PfHFq8KJL/8w2GeExH+urjd5euG
-X-Received: by 2002:a17:902:f68c:b0:24c:e3c0:936b with SMTP id d9443c01a7336-25179688478mr92179425ad.22.1757319681047;
-        Mon, 08 Sep 2025 01:21:21 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGmABtt2GoCd971FxcFmc/bDoto8qOZ35qz+jN0b6cZzDBBoxXLL3v4k0ZFbMFrSlC5E9xARA==
-X-Received: by 2002:a17:902:f68c:b0:24c:e3c0:936b with SMTP id d9443c01a7336-25179688478mr92179205ad.22.1757319680571;
-        Mon, 08 Sep 2025 01:21:20 -0700 (PDT)
-Received: from hu-wasimn-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-24ccfc7f988sm104852845ad.144.2025.09.08.01.21.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 08 Sep 2025 01:21:20 -0700 (PDT)
-From: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-Date: Mon, 08 Sep 2025 13:50:04 +0530
-Subject: [PATCH v4 14/14] arm64: dts: qcom: lemans-evk: Add sound card
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="EZtIihRz"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 58895MAM013584;
+	Mon, 8 Sep 2025 10:41:28 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=0i7c4bnBPCGVB23Go3MYH2lyL3WlYJGKYdK
+	SZNNqvXI=; b=EZtIihRzmdfMxX0TW/DPwb0zWGX5AU8HaLI7Wvd3ANU/rSivkOK
+	5jjlyIbb0h3SdId5KczePeHnHuzAdEOOeKlk+ov9cJbJkaLW2BalO/OZpf3NETvm
+	9/7MYmejZ49zFgbzzZ458OdZ5ZvFLDNjHwqCtQSNVYbWTXBnFaJVflcWW2JCzdt6
+	eK2u5Fkgl9Qmeml3zf66OUbg43XraM8VX22jpuzOq8ynJvhG5hwzt4aTBdPYupF0
+	TsJPCJAcoP9xgZDSDg4je0oEjOSPTcgTruDkWMIBK7Pd3ZwOW7EE42TyiLyCptZ7
+	WxvZKx82llHLK1ivS68LN7NIPjpt4gG1xng==
+Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 490bws4dpm-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 08 Sep 2025 10:41:28 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 588AfPZO011929;
+	Mon, 8 Sep 2025 10:41:25 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 490e1kh0p2-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 08 Sep 2025 10:41:25 +0000
+Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 588AfPfE011918;
+	Mon, 8 Sep 2025 10:41:25 GMT
+Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.147.242.251])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 588AfOtA011917
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 08 Sep 2025 10:41:25 +0000
+Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2339771)
+	id EA12D5C5; Mon,  8 Sep 2025 16:11:23 +0530 (+0530)
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
+        kernel@oss.qualcomm.com, Sarthak Garg <quic_sartgarg@quicinc.com>
+Subject: [PATCH V6 0/4] Add level shifter support for qualcomm SOC's.
+Date: Mon,  8 Sep 2025 16:11:18 +0530
+Message-Id: <20250908104122.2062653-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250908-lemans-evk-bu-v4-14-5c319c696a7d@oss.qualcomm.com>
-References: <20250908-lemans-evk-bu-v4-0-5c319c696a7d@oss.qualcomm.com>
-In-Reply-To: <20250908-lemans-evk-bu-v4-0-5c319c696a7d@oss.qualcomm.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Richard Cochran <richardcochran@gmail.com>,
-        Bartosz Golaszewski <brgl@bgdev.pl>
-Cc: kernel@oss.qualcomm.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, netdev@vger.kernel.org,
-        linux-i2c@vger.kernel.org,
-        Mohammad Rafi Shaik <mohammad.rafi.shaik@oss.qualcomm.com>,
-        Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
-        Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-X-Mailer: b4 0.15-dev-e44bb
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1757319602; l=3176;
- i=wasim.nazir@oss.qualcomm.com; s=20250807; h=from:subject:message-id;
- bh=bSqKsovKabLEYEVRmwx3HGTS8mP1U287xBU61TzdZmY=;
- b=o3CtxlMysGZgkeAJBohsMTbDQzN86uBLmuhboBJBOgpjaHKKB81K1vEjyT1BwlOQG+nTgPRqb
- MIx+0ysJ0VNB4WKSngJ0XSsDlznsxiH03tTKXOSc3Uu6mOXaBc+7sX+
-X-Developer-Key: i=wasim.nazir@oss.qualcomm.com; a=ed25519;
- pk=4ymqwKogZUOQnbcvSUHyO19kcEVTLEk3Qc4u795hiZM=
-X-Proofpoint-ORIG-GUID: jip9WP5--WFdCIzV-RDKSAttKEIhqhLb
-X-Proofpoint-GUID: jip9WP5--WFdCIzV-RDKSAttKEIhqhLb
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTA2MDAyNCBTYWx0ZWRfX6i1/QJUFCwuk
- zquV4jjlSxa+jN2Pb14qx/aMe3gmAPpYye/eoj8Y+bsi9EOZ2MGwQpiDYNzIi/N1JZdFKFHwneM
- XqiBvxuvTNKsIsyybTrXIlUisB62NyXV7K3i4PHcK2iAIHt//IbVmD9AG89tkxntk6xqQ49MKnw
- 2LfvFq7Fj6wmvd0AYhU0LGhrgzRqfM33ETD9q351fMbVwZa5YuZ0oIRAvfNHJnKqdTmEhrT+fz2
- JECNt/FRq9Bpl4ACgOV4Fky0yJgR1W5esdZ8kBT0HxQYODKffMYNw1c2bKGvIQzzCXDGez7YeIO
- dBa4cCJNCE8sw+71gn9Xzl2IBfQgj7fpYms0mR4eB856S4XGIzZWKvShwM4tkVpEN7VHXyzmPns
- wSrto+Qq
-X-Authority-Analysis: v=2.4 cv=QeFmvtbv c=1 sm=1 tr=0 ts=68be9202 cx=c_pps
- a=IZJwPbhc+fLeJZngyXXI0A==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=EUspDBNiAAAA:8 a=WTMWP25ZRELiBA-utRQA:9
- a=QEXdDO2ut3YA:10 a=uG9DUKGECoFWVXl0Dc02:22
+Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: EfIYNRkBTGai_GXVWOPCbNGuQHqBGKhi
+X-Proofpoint-GUID: EfIYNRkBTGai_GXVWOPCbNGuQHqBGKhi
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTA2MDAxOCBTYWx0ZWRfXxfboL/XoTlk0
+ /Pj5DIFSD8Zb5RywwEFrcWJ+/UnlM1U67BjGamlgvrb0pNbdm6kHSFMnIMGXjyG296+l2JMiz6g
+ 4PH5p0Swzv3eCCbozm08pnWRvw3U4XahCMkB7QnGnevqqb5jhuQEhUei+8a65qT75KX9IGzX+O/
+ EJ8DuCfHRq9rlgOlSyGZB7bY9heM/WEFYpK60c1MiLxslKlsux/RsJ9xXlUKPq6i/kCLyPbLxVH
+ TEQRjNKBNi8pw5UQ/2+4RhIy341QP6AOMqjG6U3O9Wnaz+LCvLNe7jjlRV/reGpkGogu3J370Sz
+ CTcajrZw7tS1OMkeWRaHf4brl457RbWVsHrxIRoAKp7P+9YvvIuls3qpEmUWasnSlcR99UH85Ji
+ avjBNVR5
+X-Authority-Analysis: v=2.4 cv=G4kcE8k5 c=1 sm=1 tr=0 ts=68beb2d8 cx=c_pps
+ a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
+ a=yJojWOMRYYMA:10 a=6QmveexZUsv2IF3pRboA:9
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-09-08_02,2025-09-08_01,2025-03-28_01
+ definitions=2025-09-08_04,2025-09-08_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 priorityscore=1501 clxscore=1015 spamscore=0 impostorscore=0
- bulkscore=0 suspectscore=0 adultscore=0 malwarescore=0 classifier=typeunknown
- authscore=0 authtc= authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2507300000 definitions=main-2509060024
+ priorityscore=1501 phishscore=0 bulkscore=0 suspectscore=0 clxscore=1015
+ malwarescore=0 adultscore=0 impostorscore=0 spamscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2507300000 definitions=main-2509060018
 
-From: Mohammad Rafi Shaik <mohammad.rafi.shaik@oss.qualcomm.com>
+Add level shifter support for qualcomm SOC's.
 
-Add the sound card for Lemans-Evk board and verified playback
-functionality using the max98357a I2S speaker amplifier and I2S
-microphones. The max98357a speaker amplifier is connected via
-High-Speed MI2S HS0 interface, while the microphones utilize the
-HS2 interface. This patch also introduces pin control support
-for the High-Speed I2S interfaces.
+- Changed from v5
+    - As suggested by Krzysztof Kozlowski reintroduced minimum/maximum
+    in dt bindings and avoid repeating constraints in free form
+    text.
+    - As suggested by Krzysztof Kozlowski/Konrad Dybcio update commit
+    message reflecting discussions and previous disagreements.
 
-Signed-off-by: Mohammad Rafi Shaik <mohammad.rafi.shaik@oss.qualcomm.com>
-Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
----
- arch/arm64/boot/dts/qcom/lemans-evk.dts | 52 +++++++++++++++++++++++++++++++++
- arch/arm64/boot/dts/qcom/lemans.dtsi    | 14 +++++++++
- 2 files changed, 66 insertions(+)
+- Changed from v4
+    - As suggested by Krzysztof Kozlowski Renamed the property from
+    `max-sd-hs-frequency` to `max-sd-hs-hz` for clarity.
+    - As suggested by Krzysztof Kozlowski remove min/max constraints
+    and add default: 50000000 in dt-bindings.
+    - As suggested by Konrad Dybcio moved max-sd-hs-hz property in the
+    SoC dtsi.
+    - Retained sdhci-caps-mask in sm8550.dtsi for now and will revisit
+    its removal for future targets after thorough validation and testing
+    from the beginning.
 
-diff --git a/arch/arm64/boot/dts/qcom/lemans-evk.dts b/arch/arm64/boot/dts/qcom/lemans-evk.dts
-index 3e91ac928fa5..11ff6cf19832 100644
---- a/arch/arm64/boot/dts/qcom/lemans-evk.dts
-+++ b/arch/arm64/boot/dts/qcom/lemans-evk.dts
-@@ -7,6 +7,7 @@
- 
- #include <dt-bindings/gpio/gpio.h>
- #include <dt-bindings/regulator/qcom,rpmh-regulator.h>
-+#include <dt-bindings/sound/qcom,q6afe.h>
- 
- #include "lemans.dtsi"
- #include "lemans-pmics.dtsi"
-@@ -25,6 +26,17 @@ chosen {
- 		stdout-path = "serial0:115200n8";
- 	};
- 
-+	dmic: audio-codec-0 {
-+		compatible = "dmic-codec";
-+		#sound-dai-cells = <0>;
-+		num-channels = <1>;
-+	};
-+
-+	max98357a: audio-codec-1 {
-+		compatible = "maxim,max98357a";
-+		#sound-dai-cells = <0>;
-+	};
-+
- 	edp0-connector {
- 		compatible = "dp-connector";
- 		label = "EDP0";
-@@ -70,6 +82,46 @@ vreg_sdc: regulator-vreg-sdc {
- 
- 		startup-delay-us = <100>;
- 	};
-+
-+	sound {
-+		compatible = "qcom,qcs9100-sndcard";
-+		model = "LEMANS-EVK";
-+
-+		pinctrl-0 = <&hs0_mi2s_active>, <&hs2_mi2s_active>;
-+		pinctrl-names = "default";
-+
-+		hs0-mi2s-playback-dai-link {
-+			link-name = "HS0 MI2S Playback";
-+
-+			codec {
-+				sound-dai = <&max98357a>;
-+			};
-+
-+			cpu {
-+				sound-dai = <&q6apmbedai PRIMARY_MI2S_RX>;
-+			};
-+
-+			platform {
-+				sound-dai = <&q6apm>;
-+			};
-+		};
-+
-+		hs2-mi2s-capture-dai-link {
-+			link-name = "HS2 MI2S Capture";
-+
-+			codec {
-+				sound-dai = <&dmic>;
-+			};
-+
-+			cpu {
-+				sound-dai = <&q6apmbedai TERTIARY_MI2S_TX>;
-+			};
-+
-+			platform {
-+				sound-dai = <&q6apm>;
-+			};
-+		};
-+	};
- };
- 
- &apps_rsc {
-diff --git a/arch/arm64/boot/dts/qcom/lemans.dtsi b/arch/arm64/boot/dts/qcom/lemans.dtsi
-index 068acfa9a705..b7e727f01cec 100644
---- a/arch/arm64/boot/dts/qcom/lemans.dtsi
-+++ b/arch/arm64/boot/dts/qcom/lemans.dtsi
-@@ -5069,6 +5069,20 @@ dp1_hot_plug_det: dp1-hot-plug-det-state {
- 				bias-disable;
- 			};
- 
-+			hs0_mi2s_active: hs0-mi2s-active-state {
-+				pins = "gpio114", "gpio115", "gpio116", "gpio117";
-+				function = "hs0_mi2s";
-+				drive-strength = <8>;
-+				bias-disable;
-+			};
-+
-+			hs2_mi2s_active: hs2-mi2s-active-state {
-+				pins = "gpio122", "gpio123", "gpio124", "gpio125";
-+				function = "hs2_mi2s";
-+				drive-strength = <8>;
-+				bias-disable;
-+			};
-+
- 			qup_i2c0_default: qup-i2c0-state {
- 				pins = "gpio20", "gpio21";
- 				function = "qup0_se0";
+- Changed from v3
+    - As suggested by Krzysztof Kozlowski moved the property from the
+    SoC-level DTS to the board-level DTS.
+    - Revised the commit messages to clearly explain its board-specific.
+
+- Changed from v2
+    - As suggested by Konrad Dybcio and Ulf Hansson redesigned logic
+      to introduce a new DT property max-sd-hs-frequency and override
+      the hs_max_dtr accordingly in sd.c file.
+
+- Changed from v1
+    - As suggested by Krzysztof Kozlowski redesigned logic to use
+    compatible property for adding this level shifter support.
+    - Addressed Adrian Hunter comments on V1 with resepect to
+      checkpatch.
+    - Cleared the bits first and then set bits in
+      sdhci_msm_execute_tuning as suggested by Adrian Hunter.
+    - Upated the if condition logic in msm_set_clock_rate_for_bus_mode
+      as suggested by Adrian Hunter.
+
+Sarthak Garg (4):
+  mmc: sdhci-msm: Enable tuning for SDR50 mode for SD card
+  dt-bindings: mmc: controller: Add max-sd-hs-hz property
+  mmc: core: Introduce a new flag max-sd-hs-hz
+  arm64: dts: qcom: sm8550: Limit max SD HS mode frequency by default
+
+ .../bindings/mmc/mmc-controller-common.yaml       |  8 ++++++++
+ arch/arm64/boot/dts/qcom/sm8550.dtsi              |  1 +
+ drivers/mmc/core/host.c                           |  2 ++
+ drivers/mmc/core/sd.c                             |  2 +-
+ drivers/mmc/host/sdhci-msm.c                      | 15 +++++++++++++++
+ include/linux/mmc/host.h                          |  1 +
+ 6 files changed, 28 insertions(+), 1 deletion(-)
 
 -- 
-2.51.0
+2.34.1
 
