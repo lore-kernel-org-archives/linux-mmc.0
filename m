@@ -1,46 +1,45 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A9C22475F7;
-	Tue,  9 Sep 2025 07:01:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2FB9256C76;
+	Tue,  9 Sep 2025 07:20:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757401291; cv=none; b=fPckXAHmD5SjosHqhbETTn+INhU3Y1omxSDMhRoWQxO1pF1B4mMGyo2y5aC7sWWTMNer7coLTBcEESrIvjbQ03iNMeZdWJ91d9cozY671HMEi8V13z//17qpr1W43A/WG9jVQaykzRJ7enkkdwaynrXPWnp83iUyQAHxY66/mqI=
+	t=1757402423; cv=none; b=goXW+6INyLN+YdzgP4+IYTC0alhvuOFqdIAfz58/wksdEEsJ+6VlrF2TEKO6QFuIav86GdXY+W93264qD6FCgFHSfnQJuFP+m47+LgESg/gKYnQBZSuKrECZSi029E4H/uMXlcJG88vameiWUuQYgsmqSxVhIFTTO0qFPHiD/gg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757401291; c=relaxed/simple;
-	bh=fUwqFWPf1tc5NxQUOkKNLL8h6Tc0YNiYX0IEa5dKaxA=;
+	s=arc-20240116; t=1757402423; c=relaxed/simple;
+	bh=rJIPYrjDUWAPVFJhg8IR2N2TLTeJ2YBveAY2HJgHK2w=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=a95TX28XmWZrB7GMkdPJFC9gj+xMOfyNl2uB8qoWyVKWm+DW315pL7IvcSRuWwAu9XS0FX5ouxxBGfI1bc1E1gvUvZK75yObg1r88B+0pXn59ur/AjQ6OEXBc9hHdHmJ51L6XirCs5q6IPJhoXq4/wusWZfyj7wDvm5rMH/cLvs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IcXhsJN4; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=heBicDI5JB6U5aJxh95yog8QO4/MSsNOCtm+FeAruorCoGwLsUTVvV59rCAHPjTAU74pA3J7Iy5zBWyFe/K38xqHPRjP4vr/yD7hogv9pSAqKQbAcCI0114Gt/FE5RQq5aOPeCCp9iJVNG6VJBbHvtUu8kRcpMKDBYb49w867Oo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hzUfhKoG; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IcXhsJN4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 22402C4CEF5;
-	Tue,  9 Sep 2025 07:01:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hzUfhKoG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9A9D7C4CEF4;
+	Tue,  9 Sep 2025 07:20:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1757401290;
-	bh=fUwqFWPf1tc5NxQUOkKNLL8h6Tc0YNiYX0IEa5dKaxA=;
+	s=k20201202; t=1757402423;
+	bh=rJIPYrjDUWAPVFJhg8IR2N2TLTeJ2YBveAY2HJgHK2w=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=IcXhsJN4rlwnsIuyzFA4dySfEh3ch4BdYpu8tbTTjWu7yin9C0vB08jEgXWLmnmGp
-	 XvvK+YBrgWCldMQY2N3T0OI8B6qoc0ZxKIJUVx26XFt8tOGjvFCVrxoPBjUadGvol+
-	 MnRMAwnrleT3kphG5Ns9M6Gff3NV5FgN+k8iTrI7QquRigo13m+3sTfX9/0SHgynxR
-	 s/6iGhimZxUgk2fkicP9UcezA5bGFqeGmKmGQ1QDK6pg9gCc10rF4pDSnCD1uflFcV
-	 C+Jwl9/0FJ2Hv2qHBanAXtps/l4fRlDgAgkNUpRNbXk9eA+8tmbLaaQuz2jtvzZ0iW
-	 up6h2bhIiVACw==
-Date: Tue, 9 Sep 2025 09:01:28 +0200
+	b=hzUfhKoGT4E9fhtttkXp5Hvw7tj1Tqw/kd1F/8YMnrMGlrvc8QXk2VUnTO/KLs/NJ
+	 0iXPFD/Tg4N7+1wGSfxRS5dfRAwhs9BNNvCqTqT/wA0w03K9+nYqcqwm8baOSoZ9AQ
+	 kPfyXSWoyAVUtivlpwliyUsVwjP3EKiRLXJkz56crQkvmqRAgc1BfnwmyQjb3/N8EZ
+	 70pMzrvBztg2nx5cyxydIhXVZ1sgy6BKUxxvJwt3S+gT6aGOoesMrmzSIfIkpd5XLi
+	 Oe2CIq1ZNFxWYY1iL+P1ldbqWhi4Lr+vXR2Y3CQO23CopN9Vxlgarn1EqTxN4ot0Nv
+	 99wsNtQQceTNw==
+Date: Tue, 9 Sep 2025 09:20:20 +0200
 From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Sarthak Garg <quic_sartgarg@quicinc.com>
+To: Charan Pedumuru <charan.pedumuru@gmail.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
 	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, quic_nguyenb@quicinc.com, 
-	quic_rampraka@quicinc.com, quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, 
-	quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
-Subject: Re: [PATCH V6 4/4] arm64: dts: qcom: sm8550: Limit max SD HS mode
- frequency by default
-Message-ID: <20250909-flawless-enchanted-jaybird-3f5cd2@kuoka>
-References: <20250908104122.2062653-1-quic_sartgarg@quicinc.com>
- <20250908104122.2062653-5-quic_sartgarg@quicinc.com>
+	Paul Barker <paul.barker@sancloud.com>, Marc Murphy <marc.murphy@sancloud.com>, 
+	Tony Lindgren <tony@atomide.com>, Kishon Vijay Abraham I <kishon@kernel.org>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-omap@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] arm: dts: ti: omap: Drop unnecessary or unused
+ properties
+Message-ID: <20250909-uptight-fluorescent-markhor-4639db@kuoka>
+References: <20250908-ti-sdhci-omap-v2-0-72927890482f@gmail.com>
+ <20250908-ti-sdhci-omap-v2-1-72927890482f@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,25 +48,16 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20250908104122.2062653-5-quic_sartgarg@quicinc.com>
+In-Reply-To: <20250908-ti-sdhci-omap-v2-1-72927890482f@gmail.com>
 
-On Mon, Sep 08, 2025 at 04:11:22PM +0530, Sarthak Garg wrote:
-> Due to an implementation detail in this SoC, additional passive
-> electrical components are required to achieve the maximum rated speed
-> of the SD controller when paired with a High-Speed SD Card. Without
-> them, the clock frequency must be limited to 37.5 MHz for link stability.
-> 
-> Because the reference design does not contain these components, most
-> (derivative) boards do not have them either. To accommodate for that,
-> apply the frequency limit by default and delegate lifting it to the
-> odd boards that do contain the necessary onboard hardware.
-> 
-> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> ---
->  arch/arm64/boot/dts/qcom/sm8550.dtsi | 1 +
->  1 file changed, 1 insertion(+)
+On Mon, Sep 08, 2025 at 04:17:12PM +0000, Charan Pedumuru wrote:
+> Remove unnecessary properties like ti,needs-special-reset,
+> ti,needs-special-hs-handling and cap-mmc-dual-data-rate from the DTS
+> files as there is no user of them.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+No user? That's not true:
+
+git grep ti,needs-special-reset
 
 Best regards,
 Krzysztof
