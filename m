@@ -1,101 +1,104 @@
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [85.215.255.25])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1131353366;
-	Thu, 11 Sep 2025 16:06:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757606786; cv=none; b=KT7STawoZbHwmXAv31TOkAP3HwhWQH9atdJXezroaDijJ/jVOQvMOv2Ujnt/Qx2TCIqWyKcz/vPLTJXPp94ypaNzAjI2fFjhFZs7DU3XoNz4JpLf3xeY6UW2Lnh9F6wB3RMi8J+AARDtGHFS6hIYg3X1O9mmUUxxN+LssVaXO3s=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757606786; c=relaxed/simple;
-	bh=ciCOZGhabF8HNR4h9pq04kCRspkxj5kJMALIlh2nY/M=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=sLsdPYbx+oxE5m+2EPOyscB7Id0QVV11k3Q7bQUb4hJAuytVrbU8xRsXSoQOZtxwzL+3tZcpOlaiwAIDXeIyQy8bJggBgc+1ymxciBLSGfcqGA4N5yQhhp/2MZOYyXZVQvANCx3aPtEl7unG7+7H+Jip1GB8k22VNuMisXtSh6A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=lU4LzOPK; arc=none smtp.client-ip=185.11.138.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3430D2DC77C
+	for <linux-mmc@vger.kernel.org>; Thu, 11 Sep 2025 20:44:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.25
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1757623488; cv=pass; b=OLeJxxuWO5YPE0vfS3RgTT7geRphiR6+etgzZWyPreh097egURRG3JDBz4aSkvvGspWJTXb9fjGTLOKF/h/qbA0rfbBH9hkiOy6OHwxduW07Ydih0GLoO95CAQWpnu/l9Ewh/QRparqbJfam8mxI4+OwNRBj12gegwhW1upmtXs=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1757623488; c=relaxed/simple;
+	bh=P0r/PBkGfkAhl4s3cWJwj6fhaOw4IUHsM9PBWxVo5DM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=h3Cckyg+j8WOoa6DOBLo6odpk/qs3H1Hy6LktXbUokvPsM6WvKK8ZHqgIL5xdyUsWxicvlYFqSwud2aAypG2hVy4rEA5CVgJK3bJIq7qxxjmRPd/OcLVse3Tcgy8CbhVsszZthO0OWEWTmUNn5yMuGBGlOMTPS75NIfUFqh2IhE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=Rs44TMhL; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=D/BOLDXO; arc=pass smtp.client-ip=85.215.255.25
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=iokpp.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="lU4LzOPK"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
-	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
-	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Reply-To;
-	bh=itbn4svyCtOyKrWsQDdF9xn6MViM9FiPog00luIp7Hw=; b=lU4LzOPK68yTBqYSalE1clHwYN
-	5ZqJJgi9HtmpdzyYL3fKydZackJ0rBn6DiWtxo2NR2mhpxws1IaVOknCjfYk6auYUaFjRKiA2jyS4
-	xscLRNyHUm42jJrh1e2OoHgH0Oo5qw907QspE8L06J+qB5nZtgCEdeLtBjh4cfAR1+vouZ52YQDGh
-	/GNAzD46ms4S9FW30hQZNDg6LJkFVdh4QLMzdN5ab5UaAIl1TP7zm/ZD5oJWNRSr3lCsxOfMGoWp1
-	ewFyxQqNNNdlYo8e7pjQ1SVX71P20S7vc/idWdCd7lKc0TJXHXKOEhir3vv9GHvYbI7taNCXVNf8L
-	+VFLvWrQ==;
-Received: from i53875b0e.versanet.de ([83.135.91.14] helo=diego.localnet)
-	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <heiko@sntech.de>)
-	id 1uwjo8-0003Pg-EB; Thu, 11 Sep 2025 18:06:00 +0200
-From: Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>
-To: arnd@arndb.de, Mikko Rapeli <mikko.rapeli@linaro.org>,
- Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- adrian.hunter@intel.com, victor.shih@genesyslogic.com.tw,
- ben.chuang@genesyslogic.com.tw, geert+renesas@glider.be,
- angelogioacchino.delregno@collabora.com, dlan@gentoo.org,
- zhoubinbin@loongson.cn
-Subject:
- Re: [PATCH] mmc: dw_mmc-rockchip: add dependency to ROCKCHIP_PM_DOMAINS
-Date: Thu, 11 Sep 2025 18:05:59 +0200
-Message-ID: <1813054.X513TT2pbd@diego>
-In-Reply-To:
- <CAPDyKFqLag_WkxqOCebvBCJy4TzZEqt-rFD_Z30sajUxgSpcaA@mail.gmail.com>
-References:
- <20250911144313.2774171-1-mikko.rapeli@linaro.org>
- <CAPDyKFqLag_WkxqOCebvBCJy4TzZEqt-rFD_Z30sajUxgSpcaA@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="Rs44TMhL";
+	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="D/BOLDXO"
+ARC-Seal: i=1; a=rsa-sha256; t=1757623474; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=EKCogv85fAcfSF3rbVDH3zQvgb8GKck2DpNm5U8stTRk9v0KEqkKOXjkTK7ImTc53Q
+    76HEQvFQZGxahVlUZOP7k6fauzcugJ3mUR0LQLYIVj5y5rMCrGYhyK6uDpKoVRJkjfgd
+    63aDv2xTI38+IAZs2ZFJeyUaZgQQdV5FBirNSVGvgBkxEK8Hu3CcIzv40IEaqAu53tUm
+    LP553sStDMUC1yMXWC2CjOThWjEc1hQg/Yy6/KIWVYdGsefToAy/xpEMpXbjdWHr4id8
+    1+r6e4ckD9gy2vcxEn6/WznB6nUvtUaeIhAIhfcWHhRe0yabgz7Eh/KgT/AL7QieJlZc
+    0G3Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1757623474;
+    s=strato-dkim-0002; d=strato.com;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=J/vsMDbSKvqmjj+GfSxlv6VHplVEVEJwrg2KyBKcSBs=;
+    b=c7Ti1TAOHibDmt4F7CQ6y1rNZyeCatMbs/13Bfc/nrCl+US/BzNYmH913qQaA7sHde
+    E1n4dPYVaCBEZkMzkKQHnPDpQE296eULyWoB39H+JQX8bDV7od3YQuN1vqYlMRkSmb1z
+    viQQ6RKe8TbIq4/cREFVurHMgYB8AvN3RyNH/7E7Exh7A5qGxBpd8Iv+VxccgK0ekxaF
+    GO/Fy6e/SHZwxUOtyrYLw8IIMgZILhYkySRh2KWqhR4xvyADdBw5vw4JlQKrN81ha8R6
+    PPQ5cx+sRqouu2Vu0+51TiKSZUQK3eexV9uVDho6n44MdVPnCV6HwpRZa/ieKGzzxwyX
+    MQdQ==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo00
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1757623474;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=J/vsMDbSKvqmjj+GfSxlv6VHplVEVEJwrg2KyBKcSBs=;
+    b=Rs44TMhLfP4uiN+rVA01jkNjECSXGXYIFQ1T5sVIzWfUN113tpoeEJlGLkhPi4kCa+
+    FxjCLMk9xOMkvhRfjLE4RxUykiwH/ido+03LhDT0TTlo2TMqZKllsVowdI3vQ9GY+ixE
+    dypJOpRZZPSfWLqRKjW788IP2+MSGcdMf3n1D+9Mw9DP6iZBCV87Yf85vOg+YP8NCXv4
+    iX9yHhjAlxPKBDtF77hNzEyH5ia2vM0ag0oKeNV1aFYlIe6JRQJwk97v4YlY7rNWhTX5
+    BmFZIeR6nFf1gUwr2ZThOET6lUGZRgi4aFjiFDXFEsEBYZluFveE3Cy7Nxwe2S7Eq3QY
+    LeGQ==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1757623474;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=J/vsMDbSKvqmjj+GfSxlv6VHplVEVEJwrg2KyBKcSBs=;
+    b=D/BOLDXOoN11SNQawh/ozMAKBjdsa1DM6WRjYDb1bShP2georPNw53JRrpqFY+xicZ
+    ndutbC7JhEjAASdIM2BA==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O256fJ4HnWXON1RCg6IWQfI1ZDZOzYzKOl2SdacNvyFh1H/ghUw=="
+Received: from Munilab01-lab.speedport.ip
+    by smtp.strato.de (RZmta 52.1.2 AUTH)
+    with ESMTPSA id z612c918BKiYhe9
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate);
+    Thu, 11 Sep 2025 22:44:34 +0200 (CEST)
+From: Bean Huo <beanhuo@iokpp.de>
+To: ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org,
+	jens.wiklander@linaro.org,
+	Avri.Altman@sandisk.com
+Cc: Bean Huo <beanhuo@iokpp.de>
+Subject: [PATCH v2 0/2] mmc: core: RPMB code improvements
+Date: Thu, 11 Sep 2025 22:44:24 +0200
+Message-Id: <20250911204426.394260-1-beanhuo@iokpp.de>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
 
-Hi,
-
-Am Donnerstag, 11. September 2025, 17:03:14 Mitteleurop=C3=A4ische Sommerze=
-it schrieb Ulf Hansson:
-> On Thu, 11 Sept 2025 at 16:43, Mikko Rapeli <mikko.rapeli@linaro.org> wro=
-te:
-> > @@ -866,7 +866,7 @@ config MMC_DW_PCI
-> >
-> >  config MMC_DW_ROCKCHIP
-> >         tristate "Rockchip specific extensions for Synopsys DW Memory C=
-ard Interface"
-> > -       depends on MMC_DW && ARCH_ROCKCHIP
-> > +       depends on MMC_DW && ARCH_ROCKCHIP && ROCKCHIP_PM_DOMAINS
->=20
-> Rather than "depends on", I think a "select" is better to be added
-> from the platform's Kconfig. Probably drivers/soc/rockchip/Kconfig is
-> where to put this.
->=20
-> Assuming that ROCKCHIP_PM_DOMAINS is a critical piece for most
-> Rockchip platforms to work.
-
-I'd think
-=2D arch/arm64/Kconfig.platforms
-=2D arch/arm/mach-rockchip/Kconfig
-would be the correct positions.
-
-And as Ulf suggested, this should be a "select"
+This patch series improves the RPMB frame handling code in the MMC block
+driver with several code quality enhancements.
 
 
-And I guess, always selecting it makes sense as well.
+v1--v2:
+    1. Add fix tag
+    2. Oncorporate Avri's suggestions
 
-Every supported soc back to the before 2012 RK3066 has controllable
-power-domains and while the driver is selected in both the arm32+64
-defconfigs, this still allows people to manually de-select the driver
-leaving most elements to defer.
+Bean Huo (2):
+  mmc: core: Fix variable shadowing in mmc_route_rpmb_frames()
+  mmc: core: Improve RPMB frame handling code
 
-So yes, always-selecting the driver makes a lot of sense.
+ drivers/mmc/core/block.c    |  34 +++---
+ drivers/ufs/core/ufs-rpmb.c | 225 ++++++++++++++++++++++++++++++++++++
+ drivers/ufs/core/ufs-rpmb.h |  26 +++++
+ 3 files changed, 267 insertions(+), 18 deletions(-)
+ create mode 100644 drivers/ufs/core/ufs-rpmb.c
+ create mode 100644 drivers/ufs/core/ufs-rpmb.h
 
-
-Thanks
-Heiko
-
+-- 
+2.34.1
 
