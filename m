@@ -1,158 +1,129 @@
-Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [81.169.146.216])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E768B20D4FC
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Sep 2025 19:24:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.216
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757532258; cv=pass; b=ceQtivIFXkJGVu0ohJWrHDRotP9ThkKt0oB/vY+U0em7bHq2xgZhaAuETAKEI0otgXBh6WExRVTtB7+NC3H/kt6sTaPIDEu4Y2S/7ZDMtMYh/5Th5KMsGZwQkb2zwtzrpbcsutkPtbFLiajIFFrw5mDplNmtHiwAQsGDoNhedGU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757532258; c=relaxed/simple;
-	bh=QD7FCNIL/a4fX3ktT7h3kQl46FBtF0N/z/TIpN/SuXE=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=g2Mk8GTAQrObIz6tB14KJi72gj2jQDrD8iVkSNhqjT2+4YMuJb9He895SbrK8cSW9q8kieovEM3duXozsrGUxtAhkQLe/yVugllhrVGQ75yvxZM5a+lj8RJbXr7SA8mdpkTjn8Cgv63bFjcb39LJiNNZlVy2D89k7Le0iakxKMI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=T9u6Zt+J; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=gNadfN/J; arc=pass smtp.client-ip=81.169.146.216
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=iokpp.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2772717D2;
+	Thu, 11 Sep 2025 00:31:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1757550716; cv=none; b=msN8WlsZm9b7IFS3PFh31w9RfKLCSIqXohDohLHAHHJT2VDFFZloUbDBabDoozUIj2kjWwtldNNKlRqud/a96rjyQilXerDI2YOM8bCthaVijzWh3zb8THfqpCGGx/wxqiunv+XmbkeUKVXi7piysTVaR7Td2Iq1Cpsg0Zz+fJA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1757550716; c=relaxed/simple;
+	bh=yXmCe0eO/MGZamsjfTzYUhWk0GYiWGiszqdYPvI3hSE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=fdoSmT6xOe1HyJT6+hWcSLO8AOMkaY8kY/HFKhMJZVPbKjs+qRz9ttmLvSzO/ewMvzXYY6XYQUaN7v3VnvtHneCAeWRUCseX6ldDJzVG/IGfzJLEH2ssn5iLVR25grHQEtoUMqzOGBLihl9hfPgjJ9UT8tYbHB1nEt3Y9A4GF/w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kxv8q+2j; arc=none smtp.client-ip=209.85.208.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="T9u6Zt+J";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="gNadfN/J"
-ARC-Seal: i=1; a=rsa-sha256; t=1757532240; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=B4m+ejXwlKO6zqXuPzp8zVlp/USBbr4QPD2h0byzsssAvMaZAb4CJoj0Ch+92LyteH
-    7hpegqE+SgutebMlbYd8IkJxLXcDKA5BMiWKIPu5uUwslKOM3R8JV9xQ4xSmjepwyayj
-    Js64jE48q9Dv3sctzv+itGMdjJKVyx49vq5XhyEfsesAtv7LRDtHKpwZrt1oDT50zBpV
-    IEA73pU5XdC8NLEeIGdv4/y3cgoLye5FpoBECHFIYCIX7tS0aPqg8rBaptvHs2V+jcn9
-    gsNS9VjhCg0xdtejxohhJ+fF0PNnSHvgpKubxc89cQXEC/FZ7+i/cH8H9Mf8fRzGp+Bk
-    w5XQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1757532240;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=QD7FCNIL/a4fX3ktT7h3kQl46FBtF0N/z/TIpN/SuXE=;
-    b=pU8D3kY4+SdDQrka750BOYRFdqITTaVhCS/tLHr0Gt1vn71CCMx+QSuiS5lEPgMFaF
-    NPMQon0VdQTC/31o9izGz+95YySfmRN2YalNArt7sIzuqDWtC1Qh4ypRSh5jNMWMYx86
-    qT0TgUevYRPxVyVwYyJ6e/0eG0zvmAsPn+fP6UVtKwMI8z4DedPZ3nA0dkv+2gMh3y+f
-    8oYiyH8QdupXTMUwaooSW1BXhN87fvseTkeJIdMGgXoGtnaeHsHPBmUxBEnpBVcO9TKs
-    RzV3F4h/76DCZOGh01qVdDOShfZldsk3D5F8JtsmMk6kODXW1882KUPWxDOqxWY09JqO
-    75Ww==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo00
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1757532240;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=QD7FCNIL/a4fX3ktT7h3kQl46FBtF0N/z/TIpN/SuXE=;
-    b=T9u6Zt+JFMQ/qlKnxRu+4WynYFCQ0XvEVwUxz5spbMJymjzoIRHNYyaUGwnOHm5Mmu
-    /sJ2vfg4yUoJCBXeq7PZ+RW8doe5UO9Kwomnil+qjuFWsfwsir3sM/MO0gxGVGO5VMyE
-    4vEPixDF+TwKMA/DYy6n9PaSFMU1HSYVnfxCPKgEA9ATqfchBfInezs1CErO4YBmtHwv
-    LScIz4+H833Z1pAetc61m0fatKady565ATiPND99awas5recJL9tdFriXRX0JQxYBw9u
-    FlXa3myh1SgeOHW/J40ITuDd65S0yxGiiA3NklHPas72o6xHxybQ3YVgIZjASVA9uE6Q
-    GT0g==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1757532240;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=QD7FCNIL/a4fX3ktT7h3kQl46FBtF0N/z/TIpN/SuXE=;
-    b=gNadfN/JbThwD76rTZm7mt1tfAcHW7aRWKUyOsokWd7UJnIluPEJA5Ek8WD5cUsMtF
-    xz5xN7tuNd/yukZ21kCQ==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSe9tgBDSDt0V0zNriHg+YfT0rGXGpI/mNGbgRCYDpM5B+4ZihQ5uW4JDhP36UtM="
-Received: from p200300c5871f6acc946a666b51a4f26d.dip0.t-ipconnect.de
-    by smtp.strato.de (RZmta 52.1.2 AUTH)
-    with ESMTPSA id z612c918AJNxc1Q
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-	(Client did not present a certificate);
-    Wed, 10 Sep 2025 21:23:59 +0200 (CEST)
-Message-ID: <f6e512e657bfa12ac88f2ae153edcad960dfb2c4.camel@iokpp.de>
-Subject: Re: [PATCH v1 2/2] mmc: core: Improve RPMB frame handling code
-From: Bean Huo <beanhuo@iokpp.de>
-To: Avri Altman <Avri.Altman@sandisk.com>, "ulf.hansson@linaro.org"
-	 <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org"
-	 <linux-mmc@vger.kernel.org>, "jens.wiklander@linaro.org"
-	 <jens.wiklander@linaro.org>
-Cc: Bean Huo <beanhuo@micron.com>
-Date: Wed, 10 Sep 2025 21:23:59 +0200
-In-Reply-To: <PH7PR16MB61967841097FC4DC0CA94330E50EA@PH7PR16MB6196.namprd16.prod.outlook.com>
-References: <20250909211316.1857198-1-beanhuo@iokpp.de>
-	 <20250909211316.1857198-3-beanhuo@iokpp.de>
-	 <PH7PR16MB61967841097FC4DC0CA94330E50EA@PH7PR16MB6196.namprd16.prod.outlook.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: base64
-User-Agent: Evolution 3.44.4-0ubuntu2 
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kxv8q+2j"
+Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-6228de28242so284354a12.0;
+        Wed, 10 Sep 2025 17:31:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1757550712; x=1758155512; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lSwpihcUfwJPnP2twrhHg4lAoNTw6Z1GE9b1kjNX6d8=;
+        b=kxv8q+2j1gpz0Gb6u+MAp0OBRI9jiXqBPC06ujnK7Ac9aEH33ObYJ+3E6KVflCFn3O
+         i6bF+85hxcbSiOjVT7z59ruzj8gCSD5Js8xP6y7zURdxhMOBOVP6/AiSGQhNlMbqydgD
+         5tmxtu/AdEg7pjIg0jKA6Y9vyeiwzSJoQDAxQOoLThz7tjEhEiwTY1WKj4q/55nVEU+S
+         tLh4hjEhI9dn1NXgEmzMsAHCe4vFrcXkXolNKG5AbxLRSppBD2qctuGEXFUHt+tUIPfl
+         NFWKd/buy0i6KfupSqluZOxSqSAXnCNQaSCO84vqzVDgpHSint0XdRi1BCbZNWBUlLAY
+         oP4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1757550712; x=1758155512;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=lSwpihcUfwJPnP2twrhHg4lAoNTw6Z1GE9b1kjNX6d8=;
+        b=toU7NMPKD7E8zklwhMxe9l8xcZjHCyCtVg1aOn/NIGem7CSwop8eDAZcKnmG5pzMQo
+         Q58y5X9wQC2xEP/mAT1Mjc6BorblHmgmDE2L5t6bj/0Yh/8KBuiJ5+UUz3c6fyrmND59
+         5Tnzle37xjhkqjGAG8ezPP6Ms/SBRlFDWwM3uEe1o4cBjmSzNJy70zDYXdVwXS6OltJ7
+         NpYnzhILRapeyXuUym5RCZWtAmfxD5ke/NOdxYMF0Ij1/qgVeXUVkcqFP1yDlbEzQBPR
+         76GAwxq9nu5aLZEMAECm55OvMkdCkej4O+GYOjbHeDPWLMvOQCxtwZKwYaEqsRAsOIHn
+         IKzw==
+X-Forwarded-Encrypted: i=1; AJvYcCWY/T+1bUsXmpk9C8fp12EHZ0TH3Z6tqXIF5l8+XUu+gPGhMJUapjAo/n2Ch42PQwiIT+Fdjlrj@vger.kernel.org, AJvYcCWiR2OnOu8LVsAnA2isfa9xIll/odSVc/DDcp2fO2l/LdXaNrQ4XWiGEum0JeAsLx1wcQ6gIML2Si4T@vger.kernel.org, AJvYcCX8ppb2sJdlFx7VYj0O9rm2at6lQOmnteEA7Wdwsoxs7+Mzw44WIiOqWi3nQSeiMyhpXdmA9sjVwrq0Y7Q=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwmLAeR0M9jnaGS1qgvMt53cEPC6Ecys7I7B09w3jX+wFO/jxP2
+	HY90ONygZZmeAM4aOC07yqatTG+S5GkmKLjUuLMhJa6UH07XUgW20j61JQp8p+6uaC10nol+ie1
+	SYbkb1a1LSpchrbBsRYbv3fdDmXaIlek=
+X-Gm-Gg: ASbGnct0Sgd1BiZ0OCLbx5K1O6GFP+ifFWdhW1whccwq1CeJIt45xn7a22Obwrtw6eo
+	oBfVUI461ONFQ1TV8/hJvMjh5EmMvWCnJi8wLo0hCfsDoxyphATwywO0sHV5MrC6z0IoD5rF/C+
+	vtNo3bD3DY0hm5UYGD3B+PU7vGXhRx2bSGQ4V9F0hqpJL9rZgCWDnJ4hAhL3sm4vlacEZwW76Vd
+	sMHmFM=
+X-Google-Smtp-Source: AGHT+IG1XqFJ1otj8Vpfd6NEZMsXGp0V8er0kO9gouhW/ATeLKIBH9kMlg3YcwtitzuwaBb1+rjZShFy2l8ww5xn6D8=
+X-Received: by 2002:a05:6402:2b9b:b0:61a:7385:29e3 with SMTP id
+ 4fb4d7f45d1cf-62e7b009d54mr1414666a12.18.1757550712216; Wed, 10 Sep 2025
+ 17:31:52 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <8772b633bd936791c2adcfbc1e161a37305a8b08.1757056421.git.benchuanggli@gmail.com>
+ <a9fdc8f66a2d928cf83a3a050e5bdb7aff4d40db.1757056421.git.benchuanggli@gmail.com>
+ <76616ed2-ae07-4e1a-a275-e43e43fd65f6@intel.com>
+In-Reply-To: <76616ed2-ae07-4e1a-a275-e43e43fd65f6@intel.com>
+From: Ben Chuang <benchuanggli@gmail.com>
+Date: Thu, 11 Sep 2025 08:31:40 +0800
+X-Gm-Features: AS18NWCdC9PaSKUpY8PZUq71NICxFNvKt1aGrR9LrRkoFvCuJe6WWUG--PQgK-s
+Message-ID: <CACT4zj-WAayp_egCOWHf8yyNa72UReJxTpL6+YosAOQvwqqjpQ@mail.gmail.com>
+Subject: Re: [PATCH v2 2/3] mmc: sdhci-uhs2: Fix calling incorrect
+ sdhci_set_clock() function
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: victor.shih@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw, 
+	HL.Liu@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw, 
+	victorshihgli@gmail.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org, ulf.hansson@linaro.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-T24gV2VkLCAyMDI1LTA5LTEwIGF0IDA3OjE2ICswMDAwLCBBdnJpIEFsdG1hbiB3cm90ZToKPiA+
-IEZyb206IEJlYW4gSHVvIDxiZWFuaHVvQG1pY3Jvbi5jb20+Cj4gPiAKPiA+IFNpbXBsaWZ5IHRo
-ZSBzd2l0Y2ggc3RhdGVtZW50IGJ5IGNvbWJpbmluZyBSUE1CX1BST0dSQU1fS0VZIGFuZAo+ID4g
-UlBNQl9HRVRfV1JJVEVfQ09VTlRFUgo+ID4gY2FzZXMgd2hpY2ggaGF2ZSBpZGVudGljYWwgdmFs
-aWRhdGlvbiBsb2dpYy4gQWRkIFJQTUJfRlJBTUVfU0laRSBtYWNybwo+ID4gYW5kIHJlcGxhY2Ug
-YWxsCj4gPiBzaXplb2Yoc3RydWN0IHJwbWJfZnJhbWUpIG9jY3VycmVuY2VzIGZvciBiZXR0ZXIg
-bWFpbnRhaW5hYmlsaXR5IGFuZAo+ID4gcmVhZGFiaWxpdHkuCj4gPiAKPiA+IFNpZ25lZC1vZmYt
-Ynk6IEJlYW4gSHVvIDxiZWFuaHVvQG1pY3Jvbi5jb20+Cj4gPiAtLS0KPiA+IMKgIGRyaXZlcnMv
-bW1jL2NvcmUvYmxvY2suYyB8IDM1ICsrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLS0tLS0t
-Cj4gPiDCoCAxIGZpbGUgY2hhbmdlZCwgMTUgaW5zZXJ0aW9ucygrKSwgMjAgZGVsZXRpb25zKC0p
-Cj4gPiAKPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmMgYi9kcml2ZXJz
-L21tYy9jb3JlL2Jsb2NrLmMKPiA+IGluZGV4IGRkNmNmZmMwZGY3Mi4uN2ZlOWU4Y2MxY2U0IDEw
-MDY0NAo+ID4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9ibG9jay5jCj4gPiArKysgYi9kcml2ZXJz
-L21tYy9jb3JlL2Jsb2NrLmMKPiA+IEBAIC0xMjEsNiArMTIxLDggQEAgc3RydWN0IHJwbWJfZnJh
-bWUgewo+ID4gwqAgI2RlZmluZSBSUE1CX1JFQURfREFUQcKgwqDCoMKgwqDCoMKgwqAgMHg0wqDC
-oMKgIC8qIFJlYWQgZGF0YSBmcm9tIFJQTUIgcGFydGl0aW9uICovCj4gPiDCoCAjZGVmaW5lIFJQ
-TUJfUkVTVUxUX1JFQUTCoMKgwqDCoMKgwqAgMHg1wqDCoMKgIC8qIFJlYWQgcmVzdWx0IHJlcXVl
-c3TCoCAoSW50ZXJuYWwpICovCj4gPiAKPiA+ICsjZGVmaW5lIFJQTUJfRlJBTUVfU0laRcKgwqDC
-oMKgwqDCoMKgIHNpemVvZihzdHJ1Y3QgcnBtYl9mcmFtZSkKPiBTaW5jZSB5b3Ugb25seSBjaGVj
-ayAhPSBhbmQgYWxpZ25tZW50LCBtYXliZSB5b3UgY291bGQgZnVydGhlciBnZW5lcmFsaXplIGl0
-IGJ5IHVzaW5nOgo+ICNkZWZpbmUgQ0hFQ0tfU0laRV9ORVEodmFsKSAoKHZhbCkgIT0gc2l6ZW9m
-KHN0cnVjdCBycG1iX2ZyYW1lKSkKPiAjZGVmaW5lIENIRUNLX1NJWkVfQUxJR05FRCh2YWwpIElT
-X0FMSUdORUQoKHZhbCksIHNpemVvZihzdHJ1Y3QgcnBtYl9mcmFtZSkpCj4gCj4gPiDCoCBzdGF0
-aWMgREVGSU5FX01VVEVYKGJsb2NrX211dGV4KTsKPiA+IAo+ID4gwqAgLyoKPiA+IEBAIC0yODY0
-LDEyICsyODY2LDEyIEBAIHN0YXRpYyB2b2lkIHNldF9pZGF0YShzdHJ1Y3QgbW1jX2Jsa19pb2Nf
-ZGF0YQo+ID4gKmlkYXRhLCB1MzIgb3Bjb2RlLAo+ID4gwqDCoMKgwqDCoMKgwqDCoMKgICogVGhl
-IHNpemUgb2YgYW4gUlBNQiBmcmFtZSBtdXN0IG1hdGNoIHdoYXQncyBleHBlY3RlZCBieSB0aGUK
-PiA+IMKgwqDCoMKgwqDCoMKgwqDCoCAqIGhhcmR3YXJlLgo+ID4gwqDCoMKgwqDCoMKgwqDCoMKg
-ICovCj4gPiAtwqDCoMKgwqDCoMKgIEJVSUxEX0JVR19PTihzaXplb2Yoc3RydWN0IHJwbWJfZnJh
-bWUpICE9IDUxMik7Cj4gPiArwqDCoMKgwqDCoMKgIEJVSUxEX0JVR19PTihSUE1CX0ZSQU1FX1NJ
-WkUgIT0gNTEyKTsKPiBNYXliZSB3aGlsZSBhdCBpdCBjaGFuZ2UgdGhpcyB0byBzdGF0aWNfYXNz
-ZXJ0KCkgPwo+IAo+ID4gCj4gPiDCoMKgwqDCoMKgwqDCoMKgIGlkYXRhLT5pYy5vcGNvZGUgPSBv
-cGNvZGU7Cj4gPiDCoMKgwqDCoMKgwqDCoMKgIGlkYXRhLT5pYy5mbGFncyA9IE1NQ19SU1BfUjEg
-fCBNTUNfQ01EX0FEVEM7Cj4gPiDCoMKgwqDCoMKgwqDCoMKgIGlkYXRhLT5pYy53cml0ZV9mbGFn
-ID0gd3JpdGVfZmxhZzsKPiA+IC3CoMKgwqDCoMKgwqAgaWRhdGEtPmljLmJsa3N6ID0gc2l6ZW9m
-KHN0cnVjdCBycG1iX2ZyYW1lKTsKPiA+ICvCoMKgwqDCoMKgwqAgaWRhdGEtPmljLmJsa3N6ID0g
-UlBNQl9GUkFNRV9TSVpFOwo+ID4gwqDCoMKgwqDCoMKgwqDCoCBpZGF0YS0+aWMuYmxvY2tzID0g
-YnVmX2J5dGVzIC/CoCBpZGF0YS0+aWMuYmxrc3o7Cj4gPiDCoMKgwqDCoMKgwqDCoMKgIGlkYXRh
-LT5idWYgPSBidWY7Cj4gPiDCoMKgwqDCoMKgwqDCoMKgIGlkYXRhLT5idWZfYnl0ZXMgPSBidWZf
-Ynl0ZXM7Cj4gPiBAQCAtMjg5MywzMiArMjg5NSwyNyBAQCBzdGF0aWMgaW50IG1tY19yb3V0ZV9y
-cG1iX2ZyYW1lcyhzdHJ1Y3QgZGV2aWNlCj4gPiAqZGV2LCB1OCAqcmVxLAo+ID4gwqDCoMKgwqDC
-oMKgwqDCoCBpZiAoSVNfRVJSKG1kLT5xdWV1ZS5jYXJkKSkKPiA+IMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgIHJldHVybiBQVFJfRVJSKG1kLT5xdWV1ZS5jYXJkKTsKPiA+IAo+ID4g
-LcKgwqDCoMKgwqDCoCBpZiAocmVxX2xlbiA8IHNpemVvZigqZnJtKSkKPiA+ICvCoMKgwqDCoMKg
-wqAgaWYgKHJlcV9sZW4gPCBSUE1CX0ZSQU1FX1NJWkUpCj4gPiDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoCByZXR1cm4gLUVJTlZBTDsKPiA+IAo+ID4gwqDCoMKgwqDCoMKgwqDCoCBy
-ZXFfdHlwZSA9IGJlMTZfdG9fY3B1KGZybS0+cmVxX3Jlc3ApOwo+ID4gwqDCoMKgwqDCoMKgwqDC
-oCBzd2l0Y2ggKHJlcV90eXBlKSB7Cj4gPiDCoMKgwqDCoMKgwqDCoMKgIGNhc2UgUlBNQl9QUk9H
-UkFNX0tFWToKPiA+IC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIGlmIChyZXFfbGVuICE9
-IHNpemVvZihzdHJ1Y3QgcnBtYl9mcmFtZSkgfHwKPiA+IC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqAgcmVzcF9sZW4gIT0gc2l6ZW9mKHN0cnVjdCBycG1iX2ZyYW1lKSkKPiA+
-IC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCByZXR1cm4gLUVJ
-TlZBTDsKPiA+IC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIHdyaXRlID0gdHJ1ZTsKPiA+
-IC3CoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIGJyZWFrOwo+ID4gwqDCoMKgwqDCoMKgwqDC
-oCBjYXNlIFJQTUJfR0VUX1dSSVRFX0NPVU5URVI6Cj4gPiAtwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoCBpZiAocmVxX2xlbiAhPSBzaXplb2Yoc3RydWN0IHJwbWJfZnJhbWUpIHx8Cj4gPiAt
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIHJlc3BfbGVuICE9IHNpemVvZihz
-dHJ1Y3QgcnBtYl9mcmFtZSkpCj4gPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBpZiAo
-cmVxX2xlbiAhPSBSUE1CX0ZSQU1FX1NJWkUgfHwKPiA+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqAgcmVzcF9sZW4gIT0gUlBNQl9GUkFNRV9TSVpFKQo+ID4gwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIHJldHVybiAtRUlOVkFMOwo+
-ID4gLcKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgd3JpdGUgPSBmYWxzZTsKPiA+ICvCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIHdyaXRlID0gKHJlcV90eXBlID09IFJQTUJfUFJPR1JB
-TV9LRVkpOwo+IEEgbGl0dGxlIGJpdCBhd2t3YXJkP8KgIE1heWJlIGxlYXZlIHRoaXMgZm9yIG5v
-dz8KCkF2cmksIAoKdGhhbmsgeW91IGZvciByZXZpZXdpbmcuIEnigJlsbCBpbmNvcnBvcmF0ZSB5
-b3VyIHN1Z2dlc3Rpb25zIGluIHRoZSBuZXh0IHZlcnNpb24uCgpLaW5kIHJlZ2FyZHMsCkJlYW4K
+On Wed, Sep 10, 2025 at 2:55=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
+com> wrote:
+>
+> On 05/09/2025 11:00, Ben Chuang wrote:
+> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> >
+> > Fix calling incorrect sdhci_set_clock() in __sdhci_uhs2_set_ios() when =
+the
+> > vendor defines its own sdhci_set_clock().
+> >
+> > Fixes: 10c8298a052b ("mmc: sdhci-uhs2: add set_ios()")
+> > Cc: stable@vger.kernel.org # v6.13+
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > ---
+> > v2:
+> >  * remove the "if (host->ops->set_clock)" statement
+> >  * add "host->clock =3D ios->clock;"
+> >
+> > v1:
+> >  * https://lore.kernel.org/all/20250901094046.3903-1-benchuanggli@gmail=
+.com/
+> > ---
+> >  drivers/mmc/host/sdhci-uhs2.c | 3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs=
+2.c
+> > index 0efeb9d0c376..c459a08d01da 100644
+> > --- a/drivers/mmc/host/sdhci-uhs2.c
+> > +++ b/drivers/mmc/host/sdhci-uhs2.c
+> > @@ -295,7 +295,8 @@ static void __sdhci_uhs2_set_ios(struct mmc_host *m=
+mc, struct mmc_ios *ios)
+> >       else
+> >               sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
+> >
+> > -     sdhci_set_clock(host, host->clock);
+> > +     host->ops->set_clock(host, ios->clock);
+> > +     host->clock =3D ios->clock;
+>
+> The change that host->clock has not yet been
+> set to ios->clock needs to be part of patch 1.
+> i.e. put the following in patch 1
+>
+> -       sdhci_set_clock(host, host->clock);
+> +       sdhci_set_clock(host, ios->clock);
+> +       host->clock =3D ios->clock;
+>
 
-
+I will update it in the next series. Thanks.
