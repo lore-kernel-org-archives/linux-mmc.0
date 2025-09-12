@@ -1,192 +1,190 @@
-Received: from mo4-p02-ob.smtp.rzone.de (mo4-p02-ob.smtp.rzone.de [81.169.146.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A3E6226D1D
-	for <linux-mmc@vger.kernel.org>; Thu, 11 Sep 2025 21:18:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.170
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757625498; cv=pass; b=J7/iogKsUoTtV8Ljd3YlaJ6OyI1BUEPcwI+9G1lzIF5InNFDDWGatXU99+1b1hbFboJ2/MgClZNfJitHvwhzSn6iEd1dnfjPChZ5VesN0xAWInUa/g/8TGNQnxrHIzQRf0X6AFuFUX+3kZaHHZk9Tt9p0JC4/Lg4MKQZLZGfk4s=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757625498; c=relaxed/simple;
-	bh=BTywOtQLHQpsMqwU50SKbzjM59Z+Ql/iOCOPMBfLIvM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=GGbW0j8xUGK17cpaf7vWXMiwV0Iy65nrJ9bYtty4G1jQom2WL5VwP0qzIylgJQFAaAPV0pTdE72dpDll94c5MdTbjCqY079WCG3j9M0lxPTUQF8X1XT8DnSfke3zkZ7Z4wky+NGOjkFlPNNJDIZcVNHtX9PgmnZSciyNai6OhDk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=QLfMn5EH; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=0ha+FqRn; arc=pass smtp.client-ip=81.169.146.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=iokpp.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E29D726E715
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 08:41:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.42
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1757666495; cv=none; b=TA8yuy5rUmw1TRirxhA6Zf8Fs4OomhF6UbcnsJcweicQDjdXx9sHxTTUWNOtw1Fkt2n65CcVYyw10Tp5G2aU7Zh241VuXx/8gcAGnC43SwpThJG/xe/Amh/PVNne6ZgLEi1lpwN3F3EDxvakww6PSxQN65Z6f7iaT/iLv2h+tZA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1757666495; c=relaxed/simple;
+	bh=bndgV+6/m12h1ryoikeMs/qo9IYJoKbrHEVer3koavU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Go6xwcarEO3nvxOyNXHg4tOTfGqLXCdGr9H7XiHCgKgl13QKuCd7MrbPM421ZY5QrBbm3oXrPfdIQ0xPCUG/6/1i9X61Rl2etYfg3s8pwl9ju30qYMc9giaBx/pJzcpAykCDismD64BgaX/sNHU/hY5+GQLd1I00BTjy3aw8LPU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nCgNmZH3; arc=none smtp.client-ip=209.85.167.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="QLfMn5EH";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="0ha+FqRn"
-ARC-Seal: i=1; a=rsa-sha256; t=1757624774; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=AgmWYehgL+IEIbjm4No5tJly67LrXizu2r1bRUBoZjjzbce5mhVN7EYGlLLVMYMFa8
-    w6WMUiEjLb5u9ZbLOuRxsITip5BNAIOX+oH3jvvAvnQQ5p7fRq1uSMy60Qk01PXm8Xk3
-    rsBOiz7gkVdmu3vZcDwwC8Kpr6ZZQcklTkakGFDNMkSn8zNJ3YuuiCPUqgBgBcqBnH6C
-    8XUOBxCDkcmRgVDvoVnBKaoPGBMMV2em1ZBqJVwRhQ91Pr3oTjio7Djrzm3Wb009JJ0l
-    XVouXaC7qbKaSKUnQs2tuHDDfILzQnbzUSdEIm3TJR6lkqqNkY8sQyhNjXIUTZXlo3D9
-    Gprg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1757624774;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
-    From:Subject:Sender;
-    bh=rFE1N+SKv61IRj1qppOls8RqTuuJaKTkMbB2/2nCwg8=;
-    b=XVJS04eam4nZFH9r+rkyBR2eQ1LwGMDbapg11H+GuVylXoW2ea42giGFiWoNgfA23d
-    Tc/vzZJu6LacZwYeCfIRosWwknOkeg0p52xiVpwx6z82mQ2yK+iNC4Uv+G7Y3H8+Cc9o
-    YW3VMP2M+R46q3m5JPPVnBACa0T2i+j1xorbtSG1oiMr60bkt6m++fCV5yZ+6Pu44lmr
-    KsTeHYeUcI7EAcgtYR8HUmYi113c7RVQ/Y8hhqq8Sz9EKKMGWkStNZ8zbEdV3bwb6awf
-    kHeZ/o6hGq1xY8nQl/5v2+4RTLb5l21npPdtyEyaYbWEDP3y60a3CIM7Liz2GDIrhS1G
-    JXNw==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo02
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1757624774;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
-    From:Subject:Sender;
-    bh=rFE1N+SKv61IRj1qppOls8RqTuuJaKTkMbB2/2nCwg8=;
-    b=QLfMn5EHfreIhgnF2zkwIG5t5FeJqw8h7r93eLl4Y055bZKmEQwGmYrlU/mOtSVseV
-    JniP1sthmYGle08p59V6kUhm85ZF71Wrt7ocXl6hPa6qx3dpNhgBIboJqscyqK8fNH3B
-    iq0HHM484s5LH/s8tfAttAvof/WPhOPbgNYRwF6f+g/Ct/Blq9/NKuuWewa2Cwsl0S6O
-    XEbx7DyGnPtkTBjNpFlcxZRvQ8sk7GQMr3+Di2uoX8Ed2jovgXq9T8tqSGcU3m1HBW7V
-    7nX1VR/XqeGxYvC71g046BcBAeXkviKLD3U1w+kRJ4738WQWXPQg5AtnwZCr8UV8ni0n
-    SSKQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1757624774;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
-    From:Subject:Sender;
-    bh=rFE1N+SKv61IRj1qppOls8RqTuuJaKTkMbB2/2nCwg8=;
-    b=0ha+FqRnQwfDqrCKYlNCwNjAaa+lNvh0u/pmZ6UIwAePt2iIusDmsaIxjuCKLLWyTf
-    tizmfH0bHX1y/LmoCuBA==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O256fJ4HnWXON1RCg6IWQfI1ZDZOzYzKOl2SdacNvyFh1H/ghUw=="
-Received: from Munilab01-lab.speedport.ip
-    by smtp.strato.de (RZmta 52.1.2 AUTH)
-    with ESMTPSA id z612c918BL6EhgL
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-	(Client did not present a certificate);
-    Thu, 11 Sep 2025 23:06:14 +0200 (CEST)
-From: Bean Huo <beanhuo@iokpp.de>
-To: ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org,
-	jens.wiklander@linaro.org,
-	Avri.Altman@sandisk.com
-Cc: Bean Huo <beanhuo@micron.com>
-Subject: [PATCH v3 2/2] mmc: core: Improve RPMB frame handling code
-Date: Thu, 11 Sep 2025 23:06:06 +0200
-Message-Id: <20250911210606.446355-3-beanhuo@iokpp.de>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20250911210606.446355-1-beanhuo@iokpp.de>
-References: <20250911210606.446355-1-beanhuo@iokpp.de>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nCgNmZH3"
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-55f7c0fb972so1705856e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 01:41:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1757666491; x=1758271291; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=xBErhNse+j6I91tCklZOzCROEjv+OSz++yOZ5Je/Fkg=;
+        b=nCgNmZH3ijeNM5ckURts/zxHmQd994PszaDQz+AocS9blDTYc9U0r+4JJtLoTj9cUN
+         eiMvcOa5V6KZexmrF3oaLFRQcYxYl77fa10n4CzDwSQiSkSkdx2+5jhnDtTM4wybrcfw
+         hd/eMUSmhVBywG221cCm6G9glb8X+8V0ZQay7jYgNRwrP+/XQ52hMUHvwiS0hAp/4pAn
+         qw86C33UGNbxFKz3FrXSTJkUDiOyDwn3zdmMhbAJAzzaEdPi0ZTh6DZQiSQK8pKv6sKv
+         x2QyM29YxXZHcfjnK26AmZiRntxjdq+yYiyawCtlstj3iLPTovFzFc5ll2wRTxkbn3g4
+         5Www==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1757666491; x=1758271291;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=xBErhNse+j6I91tCklZOzCROEjv+OSz++yOZ5Je/Fkg=;
+        b=eUuQUzH/7jH/4BVE3zx2FUjE4NE4F4RKJAg5xddc2QFSXJIWCz6Sk4YMT4Wua78msW
+         qzxHvR4xvWQarq+QNs/mdcaXbw5VKHKRk3N8EzTNrO5Jc1TZ+tGDavHLx6JZ9n5gaB3s
+         tcv5VgmTxQF2SoSP4PH9exMvjT6cNtx/ViYBkV/iTEjD5/s5uhk2RNacfbOESMcW9bqa
+         Ibzh5W1eHHgzmBqLcNJGyfmOXMf8FRCvBGQcSxyVkWoImP4NOulxpxGt2ZRVIgJDBwkf
+         k2ZmK4NeqvZvQAzokNbrkmW5+ha3VisG//J4c5Xjq5l9qALg9yr6Ijgo8s5mJnqtPAxp
+         sEjQ==
+X-Gm-Message-State: AOJu0YwrBaY6aXkFT0sDxCCRJh+lsT1MaZeyRarq+6kwv+DuAZI0OR01
+	KnnvyoPYGe/Z5Q8wIQb8zsAx4fttrwHu3tOqPq6sXVCCPGWtjQ/Jv/SV6+WcrVLo9MSX2LAKtRe
+	YnGKXB43SVQ==
+X-Gm-Gg: ASbGnctDsF+aOELrXvOMGDr6OwWNMY/7MwFenCGh8ahcRL/tWsoEBTyqO8KIjl0NNk2
+	5UCrkzeJbd36XIH1xOAO5DMQQtDwH0Hqkkrn947PY113Cb10NaNfQ+cWh2V9LlZlQvqBamcZXdb
+	ndltZRQ2vDzG3DYLtpU+pvrE3oKKSIskS5XseOEt+7msczEFGprP3A1Q2k+j3H3raMSJ2a+FmbT
+	e7hFxbayhuo1ereXbwRWiK/hLCAgDgG7SrjUvuyFU4XPkSOC+gqurzQxasHbRw/57LgpqErabxt
+	HuBVZfccEuIZbpMioXjG/+ITFwUadsOI/6MLIEnvHxyF/IfoN9o1yX96RPFfAruQbRBtdpyNaRt
+	E+7RjdXWBmUstAX240Po0yBi01esuzWAczcIyNfr3swLfS/P2cJsES2w=
+X-Google-Smtp-Source: AGHT+IFlECbCfqHaKCOiMiZUo2tEkpklGg5vNw0995hSjAvtIzzPQhbV0GVdbxLFhZzl4M5n+xltng==
+X-Received: by 2002:a05:6512:6715:b0:55f:6831:6ee0 with SMTP id 2adb3069b0e04-5704e34e78fmr629272e87.43.1757666491000;
+        Fri, 12 Sep 2025 01:41:31 -0700 (PDT)
+Received: from nuoska (87-100-249-247.bb.dnainternet.fi. [87.100.249.247])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-56e63c63f6csm989050e87.86.2025.09.12.01.41.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 Sep 2025 01:41:30 -0700 (PDT)
+From: Mikko Rapeli <mikko.rapeli@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org,
+	=?UTF-8?q?Heiko=20St=C3=BCbner?= <heiko@sntech.de>,
+	linux-kernel@vger.kernel.org,
+	adrian.hunter@intel.com,
+	victor.shih@genesyslogic.com.tw,
+	ben.chuang@genesyslogic.com.tw,
+	geert+renesas@glider.be,
+	angelogioacchino.delregno@collabora.com,
+	dlan@gentoo.org,
+	arnd@arndb.de,
+	zhoubinbin@loongson.cn,
+	Mikko Rapeli <mikko.rapeli@linaro.org>
+Subject: [PATCH v2 1/2] arm64: select ROCKCHIP_PM_DOMAINS with ARCH_ROCKCHIP
+Date: Fri, 12 Sep 2025 11:41:11 +0300
+Message-ID: <20250912084112.2795848-1-mikko.rapeli@linaro.org>
+X-Mailer: git-send-email 2.50.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain; charset="us-ascii"
 
-From: Bean Huo <beanhuo@micron.com>
+On rk3399 based rockpi4b, mounting rootfs from mmc fails unless
+ROCKCHIP_PM_DOMAINS is enabled. Accoriding to
+Heiko Stübner <heiko@sntech.de> all SoCs since 2012 have power
+domains so the support should be enabled by default.
 
-Introduce RPMB_FRAME_SIZE, CHECK_SIZE_NEQ(), and CHECK_SIZE_ALIGNED()
-macros to replace repetitive sizeof(struct rpmb_frame) checks in
-mmc_route_rpmb_frames().
+Failing boot without CONFIG_ROCKCHIP_PM_DOMAINS=y:
 
-Signed-off-by: Bean Huo <beanhuo@micron.com>
+https://ledge.validation.linaro.org/scheduler/job/119268
+
+/dev/disk/by-partuuid/1d48ffd8-f2a7-4a33-b52f-186089b3c85e: Can't lookup blockdev
+/dev/disk/by-partuuid/1d48ffd8-f2a7-4a33-b52f-186089b3c85e: Can't lookup blockdev
+/dev/disk/by-partuuid/1d48ffd8-f2a7-4a33-b52f-186089b3c85e: Can't lookup blockdev
+/dev/disk/by-partuuid/1d48ffd8-f2a7-4a33-b52f-186089b3c85e: Can't lookup blockdev
+/dev/disk/by-partuuid/1d48ffd8-f2a7-4a33-b52f-186089b3c85e: Can't lookup blockdev
+/dev/disk/by-partuuid/1d48ffd8-f2a7-4a33-b52f-186089b3c85e: Can't lookup blockdev
+dw-apb-uart ff1a0000.serial: forbid DMA for kernel console
+root '/dev/disk/by-partuuid/1d48ffd8-f2a7-4a33-b52f-186089b3c85e' doesn't exist or does not contain a /dev.
+rk_gmac-dwmac fe300000.ethernet: deferred probe timeout, ignoring dependency
+rk_gmac-dwmac fe300000.ethernet: probe with driver rk_gmac-dwmac failed with error -110
+rk_iommu ff650800.iommu: deferred probe timeout, ignoring dependency
+rk_iommu ff650800.iommu: probe with driver rk_iommu failed with error -110
+dwmmc_rockchip fe320000.mmc: deferred probe timeout, ignoring dependency
+rockchip-typec-phy ff7c0000.phy: deferred probe timeout, ignoring dependency
+dwmmc_rockchip fe320000.mmc: probe with driver dwmmc_rockchip failed with error -110
+rockchip-typec-phy ff7c0000.phy: probe with driver rockchip-typec-phy failed with error -110
+rockchip-typec-phy ff800000.phy: deferred probe timeout, ignoring dependency
+rockchip-typec-phy ff800000.phy: probe with driver rockchip-typec-phy failed with error -110
+rk_iommu ff660480.iommu: deferred probe timeout, ignoring dependency
+rk_iommu ff660480.iommu: probe with driver rk_iommu failed with error -110
+rk_iommu ff8f3f00.iommu: deferred probe timeout, ignoring dependency
+rk_iommu ff8f3f00.iommu: probe with driver rk_iommu failed with error -110
+rk_iommu ff903f00.iommu: deferred probe timeout, ignoring dependency
+rk_iommu ff903f00.iommu: probe with driver rk_iommu failed with error -110
+rk_iommu ff914000.iommu: deferred probe timeout, ignoring dependency
+rk_iommu ff914000.iommu: probe with driver rk_iommu failed with error -110
+rk_iommu ff924000.iommu: deferred probe timeout, ignoring dependency
+rk_iommu ff924000.iommu: probe with driver rk_iommu failed with error -110
+platform fe800000.usb: deferred probe pending: platform: wait for supplier /phy@ff7c0000/usb3-port
+sdhci-arasan fe330000.mmc: deferred probe timeout, ignoring dependency
+platform fe900000.usb: deferred probe pending: platform: wait for supplier /phy@ff800000/usb3-port
+sdhci-arasan fe330000.mmc: probe with driver sdhci-arasan failed with error -110
+platform ff1d0000.spi: deferred probe pending: (reason unknown)
+platform hdmi-sound: deferred probe pending: asoc-simple-card: parse error
+
+Working boot with CONFIG_ROCKCHIP_PM_DOMAINS=y:
+
+https://ledge.validation.linaro.org/scheduler/job/119272
+
+dwmmc_rockchip fe320000.mmc: IDMAC supports 32-bit address mode.
+dwmmc_rockchip fe320000.mmc: Using internal DMA controller.
+dwmmc_rockchip fe320000.mmc: Version ID is 270a
+dwmmc_rockchip fe320000.mmc: DW MMC controller at irq 45,32 bit host data width,256 deep fifo
+dwmmc_rockchip fe320000.mmc: Got CD GPIO
+ff1a0000.serial: ttyS2 at MMIO 0xff1a0000 (irq = 44, base_baud = 1500000) is a 16550A
+printk: legacy console [ttyS2] enabled
+mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
+dw_wdt ff848000.watchdog: No valid TOPs array specified
+mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
+mmc0: CQHCI version 5.10
+rk_gmac-dwmac fe300000.ethernet: IRQ eth_wake_irq not found
+mmc1: new high speed SDHC card at address aaaa
+fan53555-regulator 0-0040: FAN53555 Option[8] Rev[1] Detected!
+fan53555-regulator 0-0041: FAN53555 Option[8] Rev[1] Detected!
+rk_gmac-dwmac fe300000.ethernet: IRQ eth_lpi not found
+mmcblk1: mmc1:aaaa SC16G 14.8 GiB
+rk_gmac-dwmac fe300000.ethernet: IRQ sfty not found
+GPT:Primary header thinks Alt. header is not at the end of the disk.
+rk_gmac-dwmac fe300000.ethernet: Deprecated MDIO bus assumption used
+GPT:1978417 != 31116287
+rk_gmac-dwmac fe300000.ethernet: PTP uses main clock
+GPT:Alternate GPT header not at the end of the disk.
+rk_gmac-dwmac fe300000.ethernet: clock input or output? (input).
+GPT:1978417 != 31116287
+rk_gmac-dwmac fe300000.ethernet: TX delay(0x28).
+GPT: Use GNU Parted to correct GPT errors.
+rk_gmac-dwmac fe300000.ethernet: RX delay(0x11).
+ mmcblk1: p1 p2 p3 p4 p5 p6 p7 p8
+
+Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
+Suggested-by: Heiko Stübner <heiko@sntech.de>
+Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
 ---
- drivers/mmc/core/block.c | 30 ++++++++++++++----------------
- 1 file changed, 14 insertions(+), 16 deletions(-)
+ arch/arm64/Kconfig.platforms | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index dd6cffc0df72..b32eefcca4b7 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -121,6 +121,10 @@ struct rpmb_frame {
- #define RPMB_READ_DATA         0x4    /* Read data from RPMB partition */
- #define RPMB_RESULT_READ       0x5    /* Read result request  (Internal) */
- 
-+#define RPMB_FRAME_SIZE        sizeof(struct rpmb_frame)
-+#define CHECK_SIZE_NEQ(val) ((val) != sizeof(struct rpmb_frame))
-+#define CHECK_SIZE_ALIGNED(val) IS_ALIGNED((val), sizeof(struct rpmb_frame))
-+
- static DEFINE_MUTEX(block_mutex);
- 
- /*
-@@ -2864,12 +2868,12 @@ static void set_idata(struct mmc_blk_ioc_data *idata, u32 opcode,
- 	 * The size of an RPMB frame must match what's expected by the
- 	 * hardware.
- 	 */
--	BUILD_BUG_ON(sizeof(struct rpmb_frame) != 512);
-+	static_assert(!CHECK_SIZE_NEQ(512), "RPMB frame size must be 512 bytes");
- 
- 	idata->ic.opcode = opcode;
- 	idata->ic.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
- 	idata->ic.write_flag = write_flag;
--	idata->ic.blksz = sizeof(struct rpmb_frame);
-+	idata->ic.blksz = RPMB_FRAME_SIZE;
- 	idata->ic.blocks = buf_bytes /  idata->ic.blksz;
- 	idata->buf = buf;
- 	idata->buf_bytes = buf_bytes;
-@@ -2893,32 +2897,28 @@ static int mmc_route_rpmb_frames(struct device *dev, u8 *req,
- 	if (IS_ERR(md->queue.card))
- 		return PTR_ERR(md->queue.card);
- 
--	if (req_len < sizeof(*frm))
-+	if (req_len < RPMB_FRAME_SIZE)
- 		return -EINVAL;
- 
- 	req_type = be16_to_cpu(frm->req_resp);
- 	switch (req_type) {
- 	case RPMB_PROGRAM_KEY:
--		if (req_len != sizeof(struct rpmb_frame) ||
--		    resp_len != sizeof(struct rpmb_frame))
-+		if (CHECK_SIZE_NEQ(req_len) || CHECK_SIZE_NEQ(resp_len))
- 			return -EINVAL;
- 		write = true;
- 		break;
- 	case RPMB_GET_WRITE_COUNTER:
--		if (req_len != sizeof(struct rpmb_frame) ||
--		    resp_len != sizeof(struct rpmb_frame))
-+		if (CHECK_SIZE_NEQ(req_len) || CHECK_SIZE_NEQ(resp_len))
- 			return -EINVAL;
- 		write = false;
- 		break;
- 	case RPMB_WRITE_DATA:
--		if (req_len % sizeof(struct rpmb_frame) ||
--		    resp_len != sizeof(struct rpmb_frame))
-+		if (!CHECK_SIZE_ALIGNED(req_len) || CHECK_SIZE_NEQ(resp_len))
- 			return -EINVAL;
- 		write = true;
- 		break;
- 	case RPMB_READ_DATA:
--		if (req_len != sizeof(struct rpmb_frame) ||
--		    resp_len % sizeof(struct rpmb_frame))
-+		if (CHECK_SIZE_NEQ(req_len) || !CHECK_SIZE_ALIGNED(resp_len))
- 			return -EINVAL;
- 		write = false;
- 		break;
-@@ -2926,10 +2926,8 @@ static int mmc_route_rpmb_frames(struct device *dev, u8 *req,
- 		return -EINVAL;
- 	}
- 
--	if (write)
--		cmd_count = 3;
--	else
--		cmd_count = 2;
-+	/* Write operations require 3 commands, read operations require 2 */
-+	cmd_count = write ? 3 : 2;
- 
- 	idata = alloc_idata(rpmb, cmd_count);
- 	if (!idata)
-@@ -2943,7 +2941,7 @@ static int mmc_route_rpmb_frames(struct device *dev, u8 *req,
- 			  1 | MMC_CMD23_ARG_REL_WR, req, req_len);
- 
- 		/* Send result request frame */
--		memset(resp_frm, 0, sizeof(*resp_frm));
-+		memset(resp_frm, 0, RPMB_FRAME_SIZE);
- 		resp_frm->req_resp = cpu_to_be16(RPMB_RESULT_READ);
- 		set_idata(idata[1], MMC_WRITE_MULTIPLE_BLOCK, 1, resp,
- 			  resp_len);
+v2: changed from "depend on" in MMC driver to "select" as default
+    on ARCH_ROCKCHIP as suggested by Ulf and Heiko
+
+v1: https://lore.kernel.org/linux-mmc/20250911144313.2774171-1-mikko.rapeli@linaro.org/
+
+diff --git a/arch/arm64/Kconfig.platforms b/arch/arm64/Kconfig.platforms
+index a88f5ad9328c2..04b3601486290 100644
+--- a/arch/arm64/Kconfig.platforms
++++ b/arch/arm64/Kconfig.platforms
+@@ -306,6 +306,7 @@ config ARCH_ROCKCHIP
+ 	select ARCH_HAS_RESET_CONTROLLER
+ 	select PINCTRL
+ 	select PM
++	select ROCKCHIP_PM_DOMAINS
+ 	select ROCKCHIP_TIMER
+ 	help
+ 	  This enables support for the ARMv8 based Rockchip chipsets,
 -- 
 2.34.1
 
