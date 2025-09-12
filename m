@@ -1,63 +1,63 @@
-Received: from mail-lj1-f171.google.com (mail-lj1-f171.google.com [209.85.208.171])
+Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A327322550
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 14:23:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1635131A576
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 14:23:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757686993; cv=none; b=hqRXQ0kQugANdp9ogV4Q1VSChbgL/muXb6HUR5Yh7+F8BXJQ/SSBSTPii8bvfZlqt5v0y7IR1ooE+P8oYl18SUiPLGLtWsUhd16ruOhFpE+BO207cuaDWIGSJdmL7g0cwm7urbqZR3BBgs9CpkU2v4zjH75MTC9D4qWIIZB8k1w=
+	t=1757686994; cv=none; b=Qom6mg6rhRTfb1AQn8dz2xP+9rQf62ALopPupWM8v7sISdTdmNzk4wo2PRF30Blq5h7hrRCctnJn+YtkcouU9Z9qJeyqSoA4XJU6zF87PFT1Gp0iXy1wH0GEuMmQu4FCJZumzY/jaTeFLo/a93rszFZrN54q+GKferX2cTV4buQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757686993; c=relaxed/simple;
-	bh=ePUrNeYcfbWDzNUMEcIA1fjUkpMsdOycpku5PEFxqG8=;
+	s=arc-20240116; t=1757686994; c=relaxed/simple;
+	bh=QFBxOpXKFdUsBBboSwrFkX85dFPDXK3RGBPvIvbMZv8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=gRIvscj5rNVvc27IF5wSdH+tEAWrGkGBekPOgfaHt0m12fRHXkzelwMTVQwnqWI0nZrxUTzErW7vCRq3KAnduaGnCc3Jv/BG4iBAYmf/e4N95SeYIbIWPe7xaxBmmNkjTm1YGqjMTXFhI6fGosAETf7nA5uaDeEvW91rryLXGq8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XQT5V/7H; arc=none smtp.client-ip=209.85.208.171
+	 MIME-Version; b=DEiCLTTcZGfmp+D4WykLQLXg3yv6Ni1usYq+VfKbpJj/YE3n4zqgHrow99fzivdIG95eim1HBhCkFNoyE75eX0adZuQDvoRbBlE6WM6p1dTfhoF07AK9E/bXBFWeNP3VwQE2GxmAtcgerFq8hZB/EqD5Aqg6CotirxnTKZclhss=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=HOafQr+8; arc=none smtp.client-ip=209.85.167.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XQT5V/7H"
-Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-33730e1cda7so18611741fa.3
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 07:23:11 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HOafQr+8"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-55f7a34fb35so1781644e87.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 07:23:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757686989; x=1758291789; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1757686991; x=1758291791; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=f2zyUFMODPm+3x9f3cYjxzBFh42dmd7tVFDAg+JdNrU=;
-        b=XQT5V/7HV9vZqdo7rWHRvt6emMp4tziXeHz2CLwPOTZUW+5g06MlU+pYt7RzcYp9XH
-         k/tD2hGhOD83urfO2KDbJSwuMxw5kg2ggR8vlWSJIusuOYVMW4DMWFXVWETwefvGQul3
-         ltO9d0OMPg8q78gOJQr/Bp81Tc+H0osp7wtmmwumGNJBHdXnuqF8kUKXyamGfjxm2Pe6
-         qqnARygAA/3IwoHh6grmw87NNPWdvkNbfYY0gztxOzqNEY9ZxzkYvidcjt0COgdz9yCH
-         h1aycf8lkCLMvB65Z+GQfCCFRJ0D7ZJaCpgM8ulyZtMP45NDlrGDRfa5KGcDpHev8tfH
-         QlQg==
+        bh=HUiyOZ4i6Z7SnqGnRt6/7sGsiUAMT9ZWi+zfYj8DH6g=;
+        b=HOafQr+8UQoklMpK2qsZ+SqaxqZXtjtXq/NmyE0AqWTV3Bu8FlsVFLd8BVneOxhh0q
+         k/zzE+vBT/OeThiM/eYBjOhLp2Kd7QXPpiqwo8pNZdMde0Y5mwvm5znlY7k06wZ4tDtO
+         WMkA9M2Fnok0VIeifmtu9d5ZOCaQGmhYA7E/+/hNNXC1jJ72HT6ugmniY+k4hDORayl/
+         mLxQYwNeWqARtBoEuC+lxensJRW5H+rst7zpMK6k/5svXbNTx522j/ulw4K5HG8da6aR
+         71dJH5An0wmAX6dCwteOpltVgT0xbHrXh8y80TyA2f6NNHXIO3cYyg4BilwkoLsTk/1+
+         N7DA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757686989; x=1758291789;
+        d=1e100.net; s=20230601; t=1757686991; x=1758291791;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=f2zyUFMODPm+3x9f3cYjxzBFh42dmd7tVFDAg+JdNrU=;
-        b=ZCreqCT5wJsSId+s+mDUFpw53lAaQN/HaeYMl4mfbUPcAyLpCDsPRNMCT5IdP5mrXi
-         UMP1tAbWl6AvG/0wn4xgE47giA0OdaxPVjyTswrU1L3V6uxcVcnWMjZb7YQZ2psGSXrY
-         3alyq4wUF1DI+KLymL6FGYEF5oDFN3RgWTw63ZIc1Q8jJ4FKPtyBuFwXF4v3HGpEyelP
-         2YmmEZ6mgmKE/AxIxQYku5ImDbduGWSLDCYCJTYczG3noN4m4bLFjZKaW/G+laOZb3v3
-         abXXCPeIDDuDgRn889joB9rkaFx/XWugwSr3ptbH8Cg+qNSBlZ+QZ657E70RkBW+uz93
-         9a3A==
-X-Gm-Message-State: AOJu0YwxkM90JSR1KgjamMKJms+z3fxF7SSpATNTQSzNl8V56MAQnZ7W
-	0AvMLucCpc+XPqyxkjmgRvW3KmXx7ww6eCO6IvJZsO2Jirgc69jDrRUtrY4SwA1ym9DS8CUuyQ/
-	QhcZlhX+Umg==
-X-Gm-Gg: ASbGncuL4UC6eEd7ejxOqlVWULE37q3ShX5oklNmFRUMI70u8KCbP5P53MUuSmoXq0f
-	iNZN2qWSCQ8cmk4NbKPv3UpBUcUel2hVvPfkNsap1QZ9e7rh0h/ifNlSpgwmGhkl/tXZYw+F6/9
-	zrAoYBNHF3ARmEaJ+U5Rv8zII8JOSBvdIFnh0mFZ+RaXJk/HPFB/GG5afI9lJSWnEXrkCTr8f8c
-	KnJnu/5eAyxGi6pousvSFxr/wl9zWJpSgOacWVFhAFJiy9GvqAenQowokz1BosXFkiMibM/LWJd
-	S3U7oU0p+NT1F2fhg+ZO/xJE7np7srVij4cycvGzPulDxA1Y80ZhKYxB9XN6srzkM8wysDjAGzX
-	+2ElraDPYDKtDRqa2Ax/ji5rh2OcvFwajI4corC66Ar0FaLtQp27w2wctw+SpL9lNFg==
-X-Google-Smtp-Source: AGHT+IHFUaseLNHfzoJaHm+RoOJjn9rz/mii36hbT1zgl7fAKkz+PFk0Q0oVaDOWjWsa7SP4UDw72Q==
-X-Received: by 2002:ac2:4e98:0:b0:55f:4c1d:47f3 with SMTP id 2adb3069b0e04-5704f1cecd3mr887911e87.28.1757686988971;
-        Fri, 12 Sep 2025 07:23:08 -0700 (PDT)
+        bh=HUiyOZ4i6Z7SnqGnRt6/7sGsiUAMT9ZWi+zfYj8DH6g=;
+        b=pK89yjoKRpe6SzBhjTBgbvWcyltwUYLal7rv79UgVqEUtj5V4xa2eLdgHSaQp54o6b
+         TPceyWA1hfgmSScY8bzj36RZ2d5WQEpI6mGc4n1GGh5QSaefqbKwsuFdDHHxkrrc72u1
+         lb9ZYYCStuVbC6bIgWSIcpRdOk8plUFHvIIetgUu63suV33jQ5hAb8rvwpX1EDQeVNtX
+         ctaWbjbThW1n0QJR42SmmzvBXRuKducqsK44Wv1oTwiEAn/ayYZvYGulrFknmH4Th7Go
+         wYaaAh5HKZ0JVDk6bc1v7o3Cs6z6CDMJZ2zuZ0E9tV3uS1+cSow3WAPoa93kLBn9hcy2
+         jxpA==
+X-Gm-Message-State: AOJu0YxonYzEAM2lCaMZKluAgWxgoYwgV2Iy/htApLCVj++LpVxzdDDl
+	KLZCnNDbB9p9o9Sf0Cf7MPZxtZGG7iN9TFnMq/Ne4Arp21SZOo7m0c+Q2tR82qNZxWUZe4aFy+T
+	KNk+tdMwB/Q==
+X-Gm-Gg: ASbGncvZuXl6OQ0sJpmLLwlhWVlBqvbFUWkoTkDnH0cT5J/7hr5CCDHrqy8UrYJKnYM
+	7JSjNCNBw0B6NBMGDwYkIDFGCLIoR1+VHiEsgwVWjIJyx3xozPN5TsQIZuph3dI9MOON0hTOUQh
+	khED+uCY6xMdMVHGOS15CUd4GyvaTx4TbMOP5OFMCqeTg3ViX4iFIlNq55RdPl0W7dzbgImG9+P
+	qD9CsMXtGzD8FwfNAhEyEoKGCO/TAyrRnOH65PK4eByTFDE7jxSPTDJSf2U9T389dHryCzVkz1b
+	sIGtA2jiwoWqeD3nHd0eSexu/GWTD5tnQjZogXRJLLB80VQxDn54j/YuW0yOoLpEYHeBecp1DOj
+	6ZifP2GIXkL4sqBm2SPJ4C0APgBKq1QmWk9hllEosMw8FGjysbRppkyUqmn2ZAD+bZw==
+X-Google-Smtp-Source: AGHT+IGdxKLtOe0+gsm8bwgR1GeYx44jfxsOGHDZU3t9lKwYxQzb6vqr4Xr/Ni+j2w631ApUy2bsKA==
+X-Received: by 2002:a05:6512:712:b0:55f:6fb4:e084 with SMTP id 2adb3069b0e04-57050fe4cbemr812199e87.50.1757686990958;
+        Fri, 12 Sep 2025 07:23:10 -0700 (PDT)
 Received: from nuoska (87-100-249-247.bb.dnainternet.fi. [87.100.249.247])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-571a5df5f74sm164981e87.54.2025.09.12.07.23.08
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-571a5df5f74sm164981e87.54.2025.09.12.07.23.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Sep 2025 07:23:08 -0700 (PDT)
+        Fri, 12 Sep 2025 07:23:10 -0700 (PDT)
 From: Mikko Rapeli <mikko.rapeli@linaro.org>
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org,
@@ -72,9 +72,9 @@ Cc: ulf.hansson@linaro.org,
 	arnd@arndb.de,
 	zhoubinbin@loongson.cn,
 	Mikko Rapeli <mikko.rapeli@linaro.org>
-Subject: [PATCH v3 2/4] mmc: add COMPILE_TEST to multiple drivers
-Date: Fri, 12 Sep 2025 17:22:51 +0300
-Message-ID: <20250912142253.2843018-3-mikko.rapeli@linaro.org>
+Subject: [PATCH v3 3/4] mmc: remove COMPILE_TEST from MMC_LOONGSON2
+Date: Fri, 12 Sep 2025 17:22:52 +0300
+Message-ID: <20250912142253.2843018-4-mikko.rapeli@linaro.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250912142253.2843018-1-mikko.rapeli@linaro.org>
 References: <20250912142253.2843018-1-mikko.rapeli@linaro.org>
@@ -86,54 +86,30 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-These compile on x86_64 with =y and =m.
+It fails to link due to undeclared dependency
+to regmap which is not enabled for COMPILE_TEST:
 
-Cc: Arnd Bergmann <arnd@arndb.de>
+ERROR: modpost: "__devm_regmap_init_mmio_clk"
+[drivers/mmc/host/loongson2-mmc.ko] undefined!
+
 Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
 ---
- drivers/mmc/host/Kconfig | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 7232de1c06887..2db46291ae442 100644
+index 2db46291ae442..e2d9a7cf9f855 100644
 --- a/drivers/mmc/host/Kconfig
 +++ b/drivers/mmc/host/Kconfig
-@@ -56,7 +56,7 @@ config MMC_STM32_SDMMC
+@@ -1113,7 +1113,7 @@ config MMC_OWL
  
- config MMC_PXA
- 	tristate "Intel PXA25x/26x/27x Multimedia Card Interface support"
--	depends on ARCH_PXA
-+	depends on ARCH_PXA || COMPILE_TEST
+ config MMC_LOONGSON2
+ 	tristate "Loongson-2K SD/SDIO/eMMC Host Interface support"
+-	depends on LOONGARCH || COMPILE_TEST
++	depends on LOONGARCH
+ 	depends on HAS_DMA
  	help
- 	  This selects the Intel(R) PXA(R) Multimedia card Interface.
- 	  If you have a PXA(R) platform with a Multimedia Card slot,
-@@ -608,7 +608,7 @@ config MMC_SDHCI_MSM
- 
- config MMC_MXC
- 	tristate "Freescale i.MX21/27/31 or MPC512x Multimedia Card support"
--	depends on ARCH_MXC || PPC_MPC512x
-+	depends on ARCH_MXC || PPC_MPC512x || COMPILE_TEST
- 	help
- 	  This selects the Freescale i.MX21, i.MX27, i.MX31 or MPC512x
- 	  Multimedia Card Interface. If you have an i.MX or MPC512x platform
-@@ -866,7 +866,7 @@ config MMC_DW_PCI
- 
- config MMC_DW_ROCKCHIP
- 	tristate "Rockchip specific extensions for Synopsys DW Memory Card Interface"
--	depends on MMC_DW && ARCH_ROCKCHIP
-+	depends on MMC_DW && ( ARCH_ROCKCHIP  || COMPILE_TEST )
- 	select MMC_DW_PLTFM
- 	help
- 	  This selects support for Rockchip SoC specific extensions to the
-@@ -948,7 +948,7 @@ config MMC_USHC
- 
- config MMC_WMT
- 	tristate "Wondermedia SD/MMC Host Controller support"
--	depends on ARCH_VT8500
-+	depends on ARCH_VT8500 || COMPILE_TEST
- 	default y
- 	help
- 	  This selects support for the SD/MMC Host Controller on
+ 	  This selects support for the SD/SDIO/eMMC Host Controller on
 -- 
 2.34.1
 
