@@ -1,63 +1,63 @@
-Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
+Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1635131A576
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 14:23:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 716EC324B15
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 14:23:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757686994; cv=none; b=Qom6mg6rhRTfb1AQn8dz2xP+9rQf62ALopPupWM8v7sISdTdmNzk4wo2PRF30Blq5h7hrRCctnJn+YtkcouU9Z9qJeyqSoA4XJU6zF87PFT1Gp0iXy1wH0GEuMmQu4FCJZumzY/jaTeFLo/a93rszFZrN54q+GKferX2cTV4buQ=
+	t=1757686997; cv=none; b=ZyYYsBCKCXGzHq6RZ0ayAdgSeGN09cs91FGwNUp4S9r326bm5QKpMG6tqYdO1b7I7Y9qqxCJ5gthH8gj3WZTGnpQs0WRPHFzMwe1RjFYMYRnNLMyXFWrm63RH+az72vO8G7ltES/i1f/bNzjE2P6kXmLiCHnuYQXzLnXVHQej6I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757686994; c=relaxed/simple;
-	bh=QFBxOpXKFdUsBBboSwrFkX85dFPDXK3RGBPvIvbMZv8=;
+	s=arc-20240116; t=1757686997; c=relaxed/simple;
+	bh=wucKZjXUVtRxrGoS9CppvLYgJwFvEG8gqGPWzlZGBag=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=DEiCLTTcZGfmp+D4WykLQLXg3yv6Ni1usYq+VfKbpJj/YE3n4zqgHrow99fzivdIG95eim1HBhCkFNoyE75eX0adZuQDvoRbBlE6WM6p1dTfhoF07AK9E/bXBFWeNP3VwQE2GxmAtcgerFq8hZB/EqD5Aqg6CotirxnTKZclhss=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=HOafQr+8; arc=none smtp.client-ip=209.85.167.54
+	 MIME-Version; b=L7Vy8jy8iyISN5j1soQveyWQmA2I/vDiFuirA/hrLh4lc5iLDQP30CZjFDLS+sJnO5+VuY6s8m2kLEmTqDM3mX+Y6P0uJkcx5/R/yC0GKrZJJ0jbOhZ+/sgCwdmQMqkVrnWFt0ui/FKVwMCIDB7IG3HDqH+Cd8In+f1D6lQQ0GM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tIq9H9Tm; arc=none smtp.client-ip=209.85.167.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HOafQr+8"
-Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-55f7a34fb35so1781644e87.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 07:23:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tIq9H9Tm"
+Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-55f6bb0a364so2426431e87.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 07:23:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757686991; x=1758291791; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1757686994; x=1758291794; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HUiyOZ4i6Z7SnqGnRt6/7sGsiUAMT9ZWi+zfYj8DH6g=;
-        b=HOafQr+8UQoklMpK2qsZ+SqaxqZXtjtXq/NmyE0AqWTV3Bu8FlsVFLd8BVneOxhh0q
-         k/zzE+vBT/OeThiM/eYBjOhLp2Kd7QXPpiqwo8pNZdMde0Y5mwvm5znlY7k06wZ4tDtO
-         WMkA9M2Fnok0VIeifmtu9d5ZOCaQGmhYA7E/+/hNNXC1jJ72HT6ugmniY+k4hDORayl/
-         mLxQYwNeWqARtBoEuC+lxensJRW5H+rst7zpMK6k/5svXbNTx522j/ulw4K5HG8da6aR
-         71dJH5An0wmAX6dCwteOpltVgT0xbHrXh8y80TyA2f6NNHXIO3cYyg4BilwkoLsTk/1+
-         N7DA==
+        bh=/qUTD8uROnoCtAqaX/Ri9iIJ3aP0OlkHXH5AZacDoiM=;
+        b=tIq9H9TmxDH/1kVDrO7qX2kdboxTA4Mb37p7mZK1STG+VIV20K8KydJK39oPBjkrL4
+         vzjv83yAWIfOSlnhD9OS4Nf3dbRHkMUGFgHnX10biqGRQaNTy194acN0Yn0Hu6If051V
+         ifLuMiOSeI64IBbPcMCLjZWYD2/oaIWmn89LQ5QCElwEZWOWPQZh/d3hhlxDdsVVFZ2n
+         13Gfb5DPaZG9tHUyNW1l0G2SogKr/lvPM8gsWQjVI4/l+mCYoV5bZy6qInYIU6AOLm8D
+         O/NX3tUUxAEstH0X03bNvwOPbT1MtHfH4eMN70J/L2qCRAWx2nDZn9ysqXG7hPDAe40i
+         WmYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757686991; x=1758291791;
+        d=1e100.net; s=20230601; t=1757686994; x=1758291794;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=HUiyOZ4i6Z7SnqGnRt6/7sGsiUAMT9ZWi+zfYj8DH6g=;
-        b=pK89yjoKRpe6SzBhjTBgbvWcyltwUYLal7rv79UgVqEUtj5V4xa2eLdgHSaQp54o6b
-         TPceyWA1hfgmSScY8bzj36RZ2d5WQEpI6mGc4n1GGh5QSaefqbKwsuFdDHHxkrrc72u1
-         lb9ZYYCStuVbC6bIgWSIcpRdOk8plUFHvIIetgUu63suV33jQ5hAb8rvwpX1EDQeVNtX
-         ctaWbjbThW1n0QJR42SmmzvBXRuKducqsK44Wv1oTwiEAn/ayYZvYGulrFknmH4Th7Go
-         wYaaAh5HKZ0JVDk6bc1v7o3Cs6z6CDMJZ2zuZ0E9tV3uS1+cSow3WAPoa93kLBn9hcy2
-         jxpA==
-X-Gm-Message-State: AOJu0YxonYzEAM2lCaMZKluAgWxgoYwgV2Iy/htApLCVj++LpVxzdDDl
-	KLZCnNDbB9p9o9Sf0Cf7MPZxtZGG7iN9TFnMq/Ne4Arp21SZOo7m0c+Q2tR82qNZxWUZe4aFy+T
-	KNk+tdMwB/Q==
-X-Gm-Gg: ASbGncvZuXl6OQ0sJpmLLwlhWVlBqvbFUWkoTkDnH0cT5J/7hr5CCDHrqy8UrYJKnYM
-	7JSjNCNBw0B6NBMGDwYkIDFGCLIoR1+VHiEsgwVWjIJyx3xozPN5TsQIZuph3dI9MOON0hTOUQh
-	khED+uCY6xMdMVHGOS15CUd4GyvaTx4TbMOP5OFMCqeTg3ViX4iFIlNq55RdPl0W7dzbgImG9+P
-	qD9CsMXtGzD8FwfNAhEyEoKGCO/TAyrRnOH65PK4eByTFDE7jxSPTDJSf2U9T389dHryCzVkz1b
-	sIGtA2jiwoWqeD3nHd0eSexu/GWTD5tnQjZogXRJLLB80VQxDn54j/YuW0yOoLpEYHeBecp1DOj
-	6ZifP2GIXkL4sqBm2SPJ4C0APgBKq1QmWk9hllEosMw8FGjysbRppkyUqmn2ZAD+bZw==
-X-Google-Smtp-Source: AGHT+IGdxKLtOe0+gsm8bwgR1GeYx44jfxsOGHDZU3t9lKwYxQzb6vqr4Xr/Ni+j2w631ApUy2bsKA==
-X-Received: by 2002:a05:6512:712:b0:55f:6fb4:e084 with SMTP id 2adb3069b0e04-57050fe4cbemr812199e87.50.1757686990958;
-        Fri, 12 Sep 2025 07:23:10 -0700 (PDT)
+        bh=/qUTD8uROnoCtAqaX/Ri9iIJ3aP0OlkHXH5AZacDoiM=;
+        b=vKormuElCFoY7d+Yly7CdPdDAxIopNKc36krp6L8xmhfieoOD2MpOBP3Zmh5tcYu+s
+         XwYujW0pmOKpFeEahAvvm2d61aC048x/lflEcltY9SB4MDnxTRmOhXZLKgTSBly2FwyE
+         mko4ljyQvpSTYoZufMNnGH191PTikD157UxW4KMXkAxcR2ndRkS6OCNeHOtE28g8/Z3u
+         vlA01CpQ49hxBNjsFWPd2FKs8icNSylt8KzBPPcVY9DJAEmXj6ZsrqnKETUzlzCJ0Qs9
+         G5kPuHCLLwo3F5jtPVPZkCj77sA4p1GC+jw0h/YVw2Kj3utphiGzYyHKiGKvjADyOhN7
+         GLIw==
+X-Gm-Message-State: AOJu0Yz7iFI2BYMmB5O6Oq8B0xWmgIOqoEYweKeFvygsZ9q9uT9+ndDi
+	kf0CDeo3XbrFiMuT+7aDGxjJoDw7WmxByhhTNmICP8mwwgVgVfB+x/SCk6CuMQ47oJPT9B6gb9B
+	IjQKuacrdXw==
+X-Gm-Gg: ASbGncuwVzoxXjp3G3hiZLSDFAlZVwjvkz2qYpHpx9RbZohhVVqDUea7IN4xfc1+msJ
+	ehtug8RERBXeRpXQT3AXiFFHIwCCx821osUGtPekP2hugVbItowflmLef88CPhMyFIhjXBPQS2o
+	CgGiFNpOqiXqBYELzP8Nz0nZArXNkuL1GYIqCanCNjT5Y+MBvbDs7hNgVlpRryHML86MfXH2VK2
+	+KEzdnVE8kgeV9+WLCVcmBYkN6jzOfSJPMl7Nc1wXmN2KxTDD+GqUVFifGaCRH54D6jCESMn1kf
+	Sig11E+8vNyVM729C3rYcVMKYVANEj/NqemhXwSafLpxZmkmPS7EEWV/ONNLMqqRRgLCfcLauOB
+	lYwzblWFgIwsj8qPDrf4MgKSNJ8bw+L0K5zZlcjv05WM6OA1RWABqdzY=
+X-Google-Smtp-Source: AGHT+IHDFRgPZbd1jhBBu88b8yJFrtWAcpBpyVnbXWAjvg5OaUKHdeJnnNgJtLSLypAN7OXDfvPL5g==
+X-Received: by 2002:a05:6512:1242:b0:55f:6649:45c5 with SMTP id 2adb3069b0e04-57048beb11dmr1249146e87.11.1757686993595;
+        Fri, 12 Sep 2025 07:23:13 -0700 (PDT)
 Received: from nuoska (87-100-249-247.bb.dnainternet.fi. [87.100.249.247])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-571a5df5f74sm164981e87.54.2025.09.12.07.23.10
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-571a5df5f74sm164981e87.54.2025.09.12.07.23.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Sep 2025 07:23:10 -0700 (PDT)
+        Fri, 12 Sep 2025 07:23:13 -0700 (PDT)
 From: Mikko Rapeli <mikko.rapeli@linaro.org>
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org,
@@ -71,10 +71,11 @@ Cc: ulf.hansson@linaro.org,
 	dlan@gentoo.org,
 	arnd@arndb.de,
 	zhoubinbin@loongson.cn,
-	Mikko Rapeli <mikko.rapeli@linaro.org>
-Subject: [PATCH v3 3/4] mmc: remove COMPILE_TEST from MMC_LOONGSON2
-Date: Fri, 12 Sep 2025 17:22:52 +0300
-Message-ID: <20250912142253.2843018-4-mikko.rapeli@linaro.org>
+	Mikko Rapeli <mikko.rapeli@linaro.org>,
+	Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: [PATCH v3 4/4] ARM: rockchip: remove REGULATOR conditional to PM
+Date: Fri, 12 Sep 2025 17:22:53 +0300
+Message-ID: <20250912142253.2843018-5-mikko.rapeli@linaro.org>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <20250912142253.2843018-1-mikko.rapeli@linaro.org>
 References: <20250912142253.2843018-1-mikko.rapeli@linaro.org>
@@ -86,30 +87,28 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-It fails to link due to undeclared dependency
-to regmap which is not enabled for COMPILE_TEST:
+PM is explicitly enabled in lines just below so
+REGULATOR can be too.
 
-ERROR: modpost: "__devm_regmap_init_mmio_clk"
-[drivers/mmc/host/loongson2-mmc.ko] undefined!
-
+Suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
 Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
 ---
- drivers/mmc/host/Kconfig | 2 +-
+ arch/arm/mach-rockchip/Kconfig | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 2db46291ae442..e2d9a7cf9f855 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -1113,7 +1113,7 @@ config MMC_OWL
- 
- config MMC_LOONGSON2
- 	tristate "Loongson-2K SD/SDIO/eMMC Host Interface support"
--	depends on LOONGARCH || COMPILE_TEST
-+	depends on LOONGARCH
- 	depends on HAS_DMA
- 	help
- 	  This selects support for the SD/SDIO/eMMC Host Controller on
+diff --git a/arch/arm/mach-rockchip/Kconfig b/arch/arm/mach-rockchip/Kconfig
+index b7855cc665e94..c90193dd39283 100644
+--- a/arch/arm/mach-rockchip/Kconfig
++++ b/arch/arm/mach-rockchip/Kconfig
+@@ -13,7 +13,7 @@ config ARCH_ROCKCHIP
+ 	select HAVE_ARM_SCU if SMP
+ 	select HAVE_ARM_TWD if SMP
+ 	select DW_APB_TIMER_OF
+-	select REGULATOR if PM
++	select REGULATOR
+ 	select ROCKCHIP_TIMER
+ 	select ARM_GLOBAL_TIMER
+ 	select CLKSRC_ARM_GLOBAL_TIMER_SCHED_CLOCK
 -- 
 2.34.1
 
