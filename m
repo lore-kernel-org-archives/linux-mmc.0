@@ -1,149 +1,111 @@
-Received: from fhigh-b1-smtp.messagingengine.com (fhigh-b1-smtp.messagingengine.com [202.12.124.152])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vk1-f169.google.com (mail-vk1-f169.google.com [209.85.221.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D53C2DC793;
-	Fri, 12 Sep 2025 08:47:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.152
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 117F11F4E59
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 08:49:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757666877; cv=none; b=LCUuJR7s41Q5iYpJuAJE+4UXxJJCFnnT4zZZU5uPMhdMj68S6ETgfLoGAtD4FPs+Opbs/RlRCDclPOM0YD/E6ebeCmBeUZDxMyxT89azrGVcBLR7l8LxkkTsVaWMmsZ1HhCdpY5n1ICRLvFEBhCLN5sCFFtvDMtjy1fWkmSENjg=
+	t=1757666944; cv=none; b=C/qrGOAKStzjz7k6cox/AY1eXeWL2di6G/7uJGrr1INYX750u3Db5oKZJlg2dXo5/pZEaG/UBL/HYexnuGUUDZVPEVtl3dihplG4XKwc6wdC8Sr66UbU8r2Typ0HBqmBLOPFGSSA+OyCeoemyv+RQxIlOuQGYXDgBzC6fg3Abps=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757666877; c=relaxed/simple;
-	bh=eo9w2VnFL3j83P+C9TJyZoTFiiG3GBq2PqaLoXMCu5I=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=t8kuDg0KiLdFaQhdxt3qi/nGW6ED+T8DzW+9M0bUcoKNtcEnPEowZEpHsbit9+JP0+1pfK8d7JAlibEs0YRlruvqHvgjj7ORf0a3uI+K4FG7EP+tPW9lVxi0Ut3V4wTcu8IE1y0Gph6XBvUyt1NZN+uHZgwe1m/A9eDX9C5ZP7g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=muBTD1ha; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=ld9ZQCjh; arc=none smtp.client-ip=202.12.124.152
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="muBTD1ha";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="ld9ZQCjh"
-Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
-	by mailfhigh.stl.internal (Postfix) with ESMTP id 000ED7A03A6;
-	Fri, 12 Sep 2025 04:47:51 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-05.internal (MEProxy); Fri, 12 Sep 2025 04:47:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm3; t=1757666871;
-	 x=1757753271; bh=iDgdGFvPVafirg3SrUddyH198xBsq9KMfs20+2Svn60=; b=
-	muBTD1hahwMhNUaNwK28ttQNJbGdOcpgk6DxpsXQuab3tUaCykcETQQ5BaTXYDy7
-	E9zldZ18KRRV5Trd5JuUMl7enoeCSu+CjcqWSj8XlkufJrgQBoINxK+DeA7CU7bO
-	6y3ycJQxDHTvLETyZHiTJ9qrnFg+qq2I/Bc8N2G5zuayXfU3C3d6a7IFH6FWysX5
-	uVcIGGz+efaLyi4oo0N2SmZtP+OrNv1N37JQ1R3rxaCe2PaEUCz62OH4jBZvk6Q7
-	/GebSd6FCn82pS8vcJ7mwIud92ijjJmodC4MVcq4anAsvpOvu+1+xBI6LcKIdggB
-	yK9hA5XuLvkIKwpP5anuFQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1757666871; x=
-	1757753271; bh=iDgdGFvPVafirg3SrUddyH198xBsq9KMfs20+2Svn60=; b=l
-	d9ZQCjhDRSNCac5T3Cmzqo9+troRqzUTGrdApG113OykShJ62UjytxwYMYel1md0
-	PHSUIspMFewbRjW3xIRnydTgFc0yhzfSGFU8CGgLWwmTys5U6xUKBtEgoU2jpk9Y
-	/p8FjyRq8uGnfM/1Y7ObZkRHFWefFCNhnjMwDChvlPNJi8eoMmJ/v4kAsi5IV9uh
-	WtU+tb06T2RLHma1GCrkYz8oVldJBHRwx5h1PaLY5vxeuG9N0u66gpBufSRnpF4i
-	wXVStOXcM+dsr368fmtpVhYfVSLTzsgRABtzvriNz2dSwLnuhCXMwki5VKF/Hqah
-	3nKJZQC04u/gazWF/z2vA==
-X-ME-Sender: <xms:Nt7DaHa3ACbyA-SqO1QiGQNN8fy6tdb47GQva02MkTxViI1x7FjZHg>
-    <xme:Nt7DaGY94I89-xyE1XDoa5FTfhUrVYMu2Xw_q3DdVpq3tQ7G6Nhf5a9pWTjKeeUM2
-    vO_R5XII579Y4EsCVk>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdeggddvkeeiudcutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
-    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
-    hrpefoggffhffvvefkjghfufgtgfesthhqredtredtjeenucfhrhhomhepfdetrhhnugcu
-    uegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrghtthgvrh
-    hnpedvhfdvkeeuudevfffftefgvdevfedvleehvddvgeejvdefhedtgeegveehfeeljeen
-    ucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnug
-    esrghrnhgusgdruggvpdhnsggprhgtphhtthhopeduvddpmhhouggvpehsmhhtphhouhht
-    pdhrtghpthhtoheprghnghgvlhhoghhiohgrtggthhhinhhordguvghlrhgvghhnohestg
-    holhhlrggsohhrrgdrtghomhdprhgtphhtthhopegsvghnrdgthhhurghnghesghgvnhgv
-    shihshhlohhgihgtrdgtohhmrdhtfidprhgtphhtthhopehvihgtthhorhdrshhhihhhse
-    hgvghnvghshihslhhoghhitgdrtghomhdrthifpdhrtghpthhtohepughlrghnsehgvghn
-    thhoohdrohhrghdprhgtphhtthhopehgvggvrhhtodhrvghnvghsrghssehglhhiuggvrh
-    drsggvpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdp
-    rhgtphhtthhopehmihhkkhhordhrrghpvghliheslhhinhgrrhhordhorhhgpdhrtghpth
-    htohepuhhlfhdrhhgrnhhsshhonheslhhinhgrrhhordhorhhgpdhrtghpthhtohepiihh
-    ohhusghinhgsihhnsehlohhonhhgshhonhdrtghn
-X-ME-Proxy: <xmx:Nt7DaB3eG7KUd06J5zP01Lig6qQhuR6NizMonnppkI5_iRX1ykURSA>
-    <xmx:Nt7DaCKrEWHNDDdAQmsP0HG7WHsRMpSWHQ1WiABlL_3hIwiewm2Hpg>
-    <xmx:Nt7DaG21SIEHcSKeL8_NFEcBxcdh5OHUFbmWbuAwA_emY66vbLtqKw>
-    <xmx:Nt7DaGkQX58TeH2VOoyAX-BUESZ6QRT9mlNeKPIn5gbbN_uFaGD0XA>
-    <xmx:N97DaJT_xaVpi35cYxUeQpT3OZhuMkWKHgWCGA9wFX1Hz8ak32lrHEmr>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 2093A700065; Fri, 12 Sep 2025 04:47:50 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	s=arc-20240116; t=1757666944; c=relaxed/simple;
+	bh=pfequ67AxMRG2qp1IorZvEGJU/BS32aaLb+8hih0caA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=lfODTFoJLn7MKYLc/0Lj8KWHy9ZX8ba+1iIOD6mOlWoxiQDIsOWeh7wg9cXvQ3A1IG0LNuVYuYbHf8BhpWCiIzEnx57JZuP4KkA8pRmo7TcN5hprhV/SjGK3WPx01370FxwIxLSV2e/Esm6xZ//JfB6ijdyvixXI9/uD+HtJsIY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vk1-f169.google.com with SMTP id 71dfb90a1353d-54a17fbd375so270786e0c.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 01:49:01 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1757666941; x=1758271741;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=kvFl2wUmtFFxKY2KBAM++CC8ombdEefvWb0q1iJCezw=;
+        b=RcenJ3Z5MXm7xxDJh1SJhicjUWlS38OLrIuy1HaAZJP7VLN0EaVqf205/MBFclm5pe
+         ea/E0q3OgaptMrlXMmee5aDOUR5ks0Lt9cIghiUUP+kkWY3BJuxSTJ6z3PmEiHP21Hf7
+         9dCG0jWVGfyKieM5DuHkeS4x6oc8f51o/I0PfOeJ2rVRqqFWDVKT98TqQlSsh5WdTFi2
+         K7wFlysVexqDYfzh6XXnJ7cubmd4qzsumVA54ZEPnCK38ruErgtT49tNju9QZP2OMqJB
+         9LodRTRRrx56vwBozsedpSj/Ak/Lva2AepLKe5FL3J0jd9VFdLJ97xsKl//ligsVQhw5
+         aFRQ==
+X-Gm-Message-State: AOJu0YwapFwCc3+b+NAEcrqlq5Xc4LkHL5D7cX3dMxu5bD6OeJUl/Pst
+	P2ha/ADZPvsNX32oJdJr766UxGv3vWBL6CaMOuVQnMOUY0zNCNJMIrMmsvjmnpV2
+X-Gm-Gg: ASbGncu1fioRVxmdwwefqONH8PmvkDSOVMaEuUCQ5nTcrx0m6PtEB2nFX+QuePhNIbE
+	MXU1lYlciMu6bjLXid9ldQ6UUK1o2jX6EoF0NUXtpUD/IOGLGjMmyzEH76h4WypkBjIrzxWLAm/
+	D6IEiW+AN4PqyXqQH6oHdp8SHlUvn6otdKFmPGavUEV8SFDfTJlgR1uoBJz3e3ceNG4qAjgAcBz
+	GLqDNh3Cxm0XqIn4PnhiOc/V68PobCVDqBDhffcfgn4XwpExcW/g8NxzY3iduEhj8f77vaYA3jf
+	VgBwX9xBi9825O1yykUDa+qlnfj1qha6zh3el+JUZPuygL+YeRAT+6ARHOrohvaYtqtb7Fzt+Pk
+	mavlWWp2fuF1lZjpAokUe8OOSqKy92zINLlUS5gNMy0y2hTsHRu1XVUkmkeWc+2ssmQax6X4=
+X-Google-Smtp-Source: AGHT+IGuDznWdx1s4xcTckY4OF4FJ1NJ8rfIcsy2ry3yLGJXRfoPNjd+rD2gHJsHyu0niD7gkOCNJg==
+X-Received: by 2002:a05:6122:1682:b0:545:eca2:1c7e with SMTP id 71dfb90a1353d-54a16980f8amr713253e0c.0.1757666940790;
+        Fri, 12 Sep 2025 01:49:00 -0700 (PDT)
+Received: from mail-vs1-f54.google.com (mail-vs1-f54.google.com. [209.85.217.54])
+        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-54a0d1bd09fsm734668e0c.3.2025.09.12.01.48.59
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 12 Sep 2025 01:48:59 -0700 (PDT)
+Received: by mail-vs1-f54.google.com with SMTP id ada2fe7eead31-529f4770585so1113239137.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 01:48:59 -0700 (PDT)
+X-Received: by 2002:a05:6102:38ca:b0:52d:56e7:379 with SMTP id
+ ada2fe7eead31-5560d94aaa2mr992401137.25.1757666938783; Fri, 12 Sep 2025
+ 01:48:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: Ab0invGq7VjZ
-Date: Fri, 12 Sep 2025 10:47:29 +0200
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
- "Mikko Rapeli" <mikko.rapeli@linaro.org>,
- "Ulf Hansson" <ulf.hansson@linaro.org>
-Cc: "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- linux-kernel@vger.kernel.org, "Adrian Hunter" <adrian.hunter@intel.com>,
- "Victor Shih" <victor.shih@genesyslogic.com.tw>,
- "Ben Chuang" <ben.chuang@genesyslogic.com.tw>,
- "Geert Uytterhoeven" <geert+renesas@glider.be>,
- "AngeloGioacchino Del Regno" <angelogioacchino.delregno@collabora.com>,
- "Yixun Lan" <dlan@gentoo.org>, "Binbin Zhou" <zhoubinbin@loongson.cn>
-Message-Id: <acbc46c8-30df-47bb-9d3d-91ba477f6029@app.fastmail.com>
-In-Reply-To: <1813054.X513TT2pbd@diego>
-References: <20250911144313.2774171-1-mikko.rapeli@linaro.org>
- <CAPDyKFqLag_WkxqOCebvBCJy4TzZEqt-rFD_Z30sajUxgSpcaA@mail.gmail.com>
- <1813054.X513TT2pbd@diego>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: add dependency to ROCKCHIP_PM_DOMAINS
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+References: <20250912084112.2795848-1-mikko.rapeli@linaro.org> <20250912084112.2795848-2-mikko.rapeli@linaro.org>
+In-Reply-To: <20250912084112.2795848-2-mikko.rapeli@linaro.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Fri, 12 Sep 2025 10:48:47 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdUUQ_raSGTjLSU0QaBxy3CMMnJJTV9BKmWQLQ7U8VE3oA@mail.gmail.com>
+X-Gm-Features: AS18NWBiuYTvyIQj6odp2YphRi_cdJn-bbWmQ3arIwrCLTZ05PO_-WVlIOuk6lU
+Message-ID: <CAMuHMdUUQ_raSGTjLSU0QaBxy3CMMnJJTV9BKmWQLQ7U8VE3oA@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] ARM: rockchip: select ROCKCHIP_PM_DOMAINS
+To: Mikko Rapeli <mikko.rapeli@linaro.org>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, 
+	=?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, 
+	linux-kernel@vger.kernel.org, adrian.hunter@intel.com, 
+	victor.shih@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw, 
+	geert+renesas@glider.be, angelogioacchino.delregno@collabora.com, 
+	dlan@gentoo.org, arnd@arndb.de, zhoubinbin@loongson.cn
+Content-Type: text/plain; charset="UTF-8"
 
-On Thu, Sep 11, 2025, at 18:05, Heiko St=C3=BCbner wrote:
+Hi Mikko,
+
+On Fri, 12 Sept 2025 at 10:41, Mikko Rapeli <mikko.rapeli@linaro.org> wrote:
+> According to Heiko Stuebner <heiko@sntech.de> all SoCs
+> since 2012 have power domain support in HW and
+> ROCKCHIP_PM_DOMAINS should always be enabled.
 >
-> Am Donnerstag, 11. September 2025, 17:03:14 Mitteleurop=C3=A4ische=20
-> Sommerzeit schrieb Ulf Hansson:
->> On Thu, 11 Sept 2025 at 16:43, Mikko Rapeli <mikko.rapeli@linaro.org>=
- wrote:
->> > @@ -866,7 +866,7 @@ config MMC_DW_PCI
->> >
->> >  config MMC_DW_ROCKCHIP
->> >         tristate "Rockchip specific extensions for Synopsys DW Memo=
-ry Card Interface"
->> > -       depends on MMC_DW && ARCH_ROCKCHIP
->> > +       depends on MMC_DW && ARCH_ROCKCHIP && ROCKCHIP_PM_DOMAINS
+> Suggested-by: Heiko Stuebner <heiko@sntech.de>
+> Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
 
-The hard dependencies are usually only for compile-time requirements.
+Thanks for your patch!
 
-Ideally this should go the other way and use
+> --- a/arch/arm/mach-rockchip/Kconfig
+> +++ b/arch/arm/mach-rockchip/Kconfig
+> @@ -14,6 +14,7 @@ config ARCH_ROCKCHIP
+>         select HAVE_ARM_TWD if SMP
+>         select DW_APB_TIMER_OF
+>         select REGULATOR if PM
+> +       select ROCKCHIP_PM_DOMAINS
 
-      depends on (ARCH_ROCKCHIP || COMPILE_TEST)
+This requires "select PM". Oh, that is done below (out-of-context).
+So the "if PM" above can be dropped.
 
-after you check that this actually builds on x86 with COMPILE_TEST
-enabled, as there may be other compile-time dependencies.
-=20
->> Rather than "depends on", I think a "select" is better to be added
->> from the platform's Kconfig. Probably drivers/soc/rockchip/Kconfig is
->> where to put this.
->>=20
->> Assuming that ROCKCHIP_PM_DOMAINS is a critical piece for most
->> Rockchip platforms to work.
->
-> I'd think
-> - arch/arm64/Kconfig.platforms
-> - arch/arm/mach-rockchip/Kconfig
-> would be the correct positions.
->
-> And as Ulf suggested, this should be a "select"
+>         select ROCKCHIP_TIMER
+>         select ARM_GLOBAL_TIMER
+>         select CLKSRC_ARM_GLOBAL_TIMER_SCHED_CLOCK
 
-I think in this case a 'default ARCH_ROCKCHIP' in the
-ROCKCHIP_PM_DOMAINS definition is sufficient to have it
-normally enabled, and still allows someone to try turning
-it into a loadable module later, which would be a requirement
-e.g. for Android GKI.
+Gr{oetje,eeting}s,
 
-    Arnd
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
