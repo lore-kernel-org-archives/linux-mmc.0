@@ -1,89 +1,83 @@
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9711030E0E4
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 13:34:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCCE630EF7C
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 13:34:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757684088; cv=none; b=MJivEMA9vjGJy/gS70rAaBFgzEkDRE7EsVEwmO1XW844R95U9Eo/AgEDAqltQwLDREf+simsNGf/Jy5N9mT04S6npdeqMStKseJyLGQoQW60gbFqVaUYYQGbxlIgGy9bjr37T9hixoBGgc++JSJZUk9oTfNo3Sog7WfIaBXz8r0=
+	t=1757684092; cv=none; b=ZxWl7KUaMEXNoHvMSupDJEMPwhOovORbEKg+k1FbOh52tzcOXyC4d8FbdAvU+GAmZ4YRah6piglhsPj6hU1Jv9EUV572XpPMzHJXshe04PpvOu4d5Udxp/9PLcRML2jltNNcVvaXZeOrI7kv0ifr8PFhwvJ3o1MESk90YO6Ki0E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757684088; c=relaxed/simple;
-	bh=jBAJnWbm3U7P7Cjj9/LDsEwkfdx+34ipvAwi6e6JbN0=;
+	s=arc-20240116; t=1757684092; c=relaxed/simple;
+	bh=utugK4HcYY18T5CEwLLLvgU2oRcmpLnYaZhUun8E3dc=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=dd3wEeQPsWEAEbzQFuR7/1zEMxVj/73Ub6qF/Z7i8dMdMBXrrxeP6tjmbErLBkbjVVNiugDieXPrbi7Y3BMsM+FTLuWyJPSapbHRpM0c1U3BezXKaqyW8xdr1l3dfwRN0rw7+lvhCYeadqJOhOF+bPDHv8FKRdpPS1vwYJegsow=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Oi3FQcvR; arc=none smtp.client-ip=209.85.219.180
+	 To:Cc:Content-Type; b=b5ShlZ/uMNOLDYjagC4bgahUFM5azscQLHgRzZtkpXMW2wf/5rftPFfooWhYZsTUPJkflj+ZrwgqcdowvwTvKZ6nZHCn2mFOwIhpSyGhRve2wTLDHWkpgPxMLC76emViBIUUYxhiL5Z10oEpPx9/zPdWvruwVNm0XB86YBxQb3U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=U8e7Z/OA; arc=none smtp.client-ip=209.85.219.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Oi3FQcvR"
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-ea3e8330e8aso388030276.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 06:34:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="U8e7Z/OA"
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e96c48e7101so1492435276.2
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 06:34:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757684085; x=1758288885; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1mZtqMj7Buty9BX5eJg7ubUn79cX89LfYOj/ik3ZHLw=;
-        b=Oi3FQcvRq0UCceorzqvufvSeyjtXGQhRDTMwu0dZ66xbAAEgaUYN+bXC/WJhCoJiXA
-         ROs71+l4unXx5dNfUfJoH5TxNstsOcBHdmtr+c6wE6PPA7Uab7z4+sDD/bvxfUBawpDc
-         VXRe5rOC4vanfTmRx+wSyBK/4V7TAacKcdGSJuR4+QNdo7Tg/VieSrCXPu9qJZ8bTx/R
-         NLsSP1ZD4O8s+LF4lRIqVWqGRP/rMy5uV32BssFd96TFNZ6NPSLylOuSM4zAkPE4tmRQ
-         MdeNiYz5e9XAYDVikY8T5qzaGx8VrgrwWXSeWFJbBRazGgdgx7UJfVaRX+88I8rIgJtZ
-         wK0Q==
+        d=linaro.org; s=google; t=1757684090; x=1758288890; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=NMoRsZDotQQreQCt//iZViK8n2fFjlTpFk9lhVbhMl8=;
+        b=U8e7Z/OAo63BAc/rUXFgTYt/pAfB9UE1vutb55p7vqQlKIU39lrD1tFi4LETJRGIsz
+         kUGZvzBTUiZVuSY0eJqRXDM3uSfI0rxNGQ6LHFpWPJwAZGdMLkS+NGo+gvSOXYPWmhnt
+         jNY8lJZ79KcaB/lPfSb09T4z7eabgGo6/S/HG8l5pAnI/wSnZIQweGyJ0ksgOzYl6MAA
+         u8DCnlhKa6HAcwzclzxNWHVLvMfA/fqhWtBYx0e7s9YcALvIS9UO3jsDzG0iN9a0T8qH
+         MlF76j72+i0P+NKnjOhw4igvNZcz7CLqkvYYAVn/xM7v107VmHn82NzQ8kvLWVEo1w3X
+         8ZgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757684085; x=1758288885;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=1mZtqMj7Buty9BX5eJg7ubUn79cX89LfYOj/ik3ZHLw=;
-        b=PyoMndV/oAMRn8I1zp0Fua21mm6/5poQX2bFPvR3VCHh/9dJRtQOE1WrVLgKzdBI0r
-         XjYBCaqxJ3d4C7Xpo9d0bBAqhX6tmUwlLK4lYhRvx9L2VI5iwNK+qOdVPaIaFWWOeIy7
-         Qpv5G24cpF3/4f4yJDyc5ieJP21FqMpy8vzev0NoQRD9UEoJKhHoC7OX+UfqSo2CPhld
-         W14dvU9EDS0a/x3w87qlfQb5sWxGACLp489oJdE1Fv4eRVESOkYya7JYEpWK/NAb4jMY
-         3n5DodYDPsTSLhwEH9mVbATziek9xsLTMnanxn+8GeOukbpsnYabeHgmRIh+S2DH1Tyc
-         1ZRw==
-X-Forwarded-Encrypted: i=1; AJvYcCXKwvZQOp1uRFNkTEPXPE/YI11lHKHS866ldRVXvowN7ju/0oS72W5u7HIyVNfDUwdZPGUHmuPXsxg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwjGpKUxlmdzBYJ3ie+ZkPvsa9+lZWZmNxlpbjx2ncJm2EZppKm
-	/GzsWBnQn7EbtltaUFaRnIePrim0OhqC+T1AbZhBwjTd5QrauYS4MSrk/ZfVehxkUUmm6OOS4j/
-	gOZeLCST1vAxSZACjXtVUDwwbf82nkgKyW5L1XlDrLQ==
-X-Gm-Gg: ASbGncuAFSP5WfaCV03iLIOvQQ02LBKo45MD3M0/7iSVbwtj9oPkSz01qr8T7iHv3dZ
-	hw6JaI8tCOJuTCgL/otlvrP0h24fVxmrZw/UayYaOxA0RRFlwKDbviTfpBIyTtJPPyMwzYlHtRk
-	Tw451qSEgck5ev5e+w9Zxqif5Z3kvcl9yP2p/WR013ytt7VloMYjlci15i894Wu/49O53i0FLJd
-	RX4BGW9
-X-Google-Smtp-Source: AGHT+IF2QK5PvgUDodJDMy1anuNhy7mAPtH2+u/Cb/GRw6eKlaFsdB7czQFqmCkQDIeivB9L2qowVeqeZqmayZt5HLU=
-X-Received: by 2002:a5b:984:0:b0:e93:2d7c:96f2 with SMTP id
- 3f1490d57ef6-ea3d9a3f50bmr2300108276.24.1757684085343; Fri, 12 Sep 2025
- 06:34:45 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1757684090; x=1758288890;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=NMoRsZDotQQreQCt//iZViK8n2fFjlTpFk9lhVbhMl8=;
+        b=W2j8QxERh0CZ5S6zptZUXMFhh1yDtZqBMZ3kdTdgeeTSIYBf5q/gALOEuJB4THZtEJ
+         HgrW1J3tk+EaQjCXPN7KrzZpDUFvZHbxMkl4QOHveg4cw9cnuHrQJAYCADT0Rx0i/19L
+         aydvqndDGSPn3VoADEoinVnHIg2CuEPvOcs5Wvg6g/6p9EQdd6V55hjUc4Kwdys5OU87
+         brlIUhcAg4+fywAul7gat1ZZcnAeRYOtSnNaKANd99t8Daqg23rb8MdSpv5b3mMh3cbv
+         ohF25LG9664EqcA3yLRVCfYgg013WA/ZiK17aFbKlzqp6JNzCK4CiAjPc/mF0ecfo7ZI
+         YmLg==
+X-Forwarded-Encrypted: i=1; AJvYcCWhGiwnO9wIr1kzN7f/jpGyCpSqLO9CvzLtQ0LVwhdU1KfmoFLxEaZG7Jiq9x3S4jNmUEAAuDyYdB0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyoQPOJ+pcyE7J5dwdVN1lUx/cTAZjM69GDwd/cmBF9g7OPUS/k
+	Kc1c/aKAjABU92eYjPngx8V+e3MRDWZioDXKPb6Y7akjx2j4V5FMUp/n5I7VMVsZCJDR14lXq+/
+	e3z3RrwU2ljUOZRKBEUgR87cKKTFzkDR4Vb84ZUbIdw==
+X-Gm-Gg: ASbGncuLJI9BZTLX8viWDQ0pwWj7wnMG4kpVh2/i4P9yW3co+BvUXDn0s2XRbq8iArI
+	v5yX43bet2DiIFj2SlEBk2SjN85Qr3vMkIiwYIWaxoNX1ESt2tHpbcTw8m5Er1xIxQxYhV+gIdu
+	gZ9CWDxLk+vCGmbwGJXy/B+1EK3G81YAyWuXBe6v1SybKVDODEvMf9vU3/7fSf01/ZumbiO8fy9
+	cH+W+Cl6tBCBpE1YuE=
+X-Google-Smtp-Source: AGHT+IFVbjGOXpmv9Rz9ElJzGIgUxQm7xkANKyEMh4qj/MGGZlpYVw7OzTsjt8Ypn7pFOkm0TZmE85K/yB72VFG+JCw=
+X-Received: by 2002:a05:6902:1444:b0:e95:1a49:9735 with SMTP id
+ 3f1490d57ef6-ea3d9c74780mr2633370276.43.1757684089646; Fri, 12 Sep 2025
+ 06:34:49 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250903-pxav3-uhs-fix-v1-1-9f56b0b54749@dujemihanovic.xyz>
-In-Reply-To: <20250903-pxav3-uhs-fix-v1-1-9f56b0b54749@dujemihanovic.xyz>
+References: <8b73e2071a1d87c8d09b8bb24fc35f371779c2f3.1757000061.git.geert+renesas@glider.be>
+In-Reply-To: <8b73e2071a1d87c8d09b8bb24fc35f371779c2f3.1757000061.git.geert+renesas@glider.be>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 12 Sep 2025 15:34:09 +0200
-X-Gm-Features: AS18NWC26DOvm0iS2ScvulN5VJ9F2qVNM2KeyrWRgOgPMN3f410QETMn0vlg0XQ
-Message-ID: <CAPDyKFowahX41+XqhQHmBcd9MCxkfo=pPSpdFinm4wHZSONJaw@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-pxa: Add minItems to pinctrl-names
-To: =?UTF-8?Q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, kernel test robot <lkp@intel.com>
+Date: Fri, 12 Sep 2025 15:34:13 +0200
+X-Gm-Features: AS18NWC65p2KribxIbig11q4x3BqzMOY-lu0OzXE__g-0uWV0PjaqNrYbfkqnZg
+Message-ID: <CAPDyKFpRbeWWjba_uVQzjEARPvQUBpoqPiAnSz7b96S_ET_zgQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sh_mmcif: Remove dummy PM resume callback
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-sh@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, 3 Sept 2025 at 12:51, Duje Mihanovi=C4=87 <duje@dujemihanovic.xyz> =
-wrote:
+On Thu, 4 Sept 2025 at 17:35, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
 >
-> Some older boards only require a default pinctrl. Add a minItems
-> property so these don't cause dt-validate warnings.
+> Unassigned system sleep callbacks were always treated the same as dummy
+> callbacks that just return zero.
 >
-> Reported-by: kernel test robot <lkp@intel.com>
-> Closes: https://lore.kernel.org/oe-kbuild-all/202509030625.PBgLIAwG-lkp@i=
-ntel.com/
-> Signed-off-by: Duje Mihanovi=C4=87 <duje@dujemihanovic.xyz>
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
 Applied for next, thanks!
 
@@ -92,37 +86,27 @@ Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml | 2 ++
->  1 file changed, 2 insertions(+)
+>  drivers/mmc/host/sh_mmcif.c | 7 +------
+>  1 file changed, 1 insertion(+), 6 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Docum=
-entation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> index fba1cc50fdf07cc25d42f45512c385a9b8207b9b..186ce8ff4626a1eb07633e08a=
-eb6322ae2eb25a8 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> @@ -44,6 +44,7 @@ allOf:
->            items:
->              - const: default
->              - const: state_cmd_gpio
-> +          minItems: 1
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 413c34585c90d57b..bf899c8e38f517d3 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1579,12 +1579,7 @@ static int sh_mmcif_suspend(struct device *dev)
+>         return 0;
+>  }
 >
->          pinctrl-1:
->            description:
-> @@ -61,6 +62,7 @@ allOf:
->            items:
->              - const: default
->              - const: state_uhs
-> +          minItems: 1
+> -static int sh_mmcif_resume(struct device *dev)
+> -{
+> -       return 0;
+> -}
+> -
+> -static DEFINE_SIMPLE_DEV_PM_OPS(sh_mmcif_dev_pm_ops, sh_mmcif_suspend, sh_mmcif_resume);
+> +static DEFINE_SIMPLE_DEV_PM_OPS(sh_mmcif_dev_pm_ops, sh_mmcif_suspend, NULL);
 >
->          pinctrl-1:
->            description:
->
-> ---
-> base-commit: 5d50cf9f7cf20a17ac469c20a2e07c29c1f6aab7
-> change-id: 20250903-pxav3-uhs-fix-9cbcfd2ec0b1
->
-> Best regards,
+>  static struct platform_driver sh_mmcif_driver = {
+>         .probe          = sh_mmcif_probe,
 > --
-> Duje Mihanovi=C4=87 <duje@dujemihanovic.xyz>
+> 2.43.0
 >
