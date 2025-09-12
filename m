@@ -1,109 +1,128 @@
-Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
+Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5E361531F9
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 13:34:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9711030E0E4
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 13:34:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757684083; cv=none; b=dv28Bo3J/tvKxiHhPPqdTxVcS7a7ZFgkNkRqrJ2BcSxFdQZxSrGBUuu8PHP+5skfeEp9X5Bb0sO42AlO+Epmd66eLebJhkNnrVh8l52v7iE04t/6JZ02M0ipaMqwu/atJiD5b/bKnK06/XCdEQBNjRk1HRMSda4tJRvmExehxEI=
+	t=1757684088; cv=none; b=MJivEMA9vjGJy/gS70rAaBFgzEkDRE7EsVEwmO1XW844R95U9Eo/AgEDAqltQwLDREf+simsNGf/Jy5N9mT04S6npdeqMStKseJyLGQoQW60gbFqVaUYYQGbxlIgGy9bjr37T9hixoBGgc++JSJZUk9oTfNo3Sog7WfIaBXz8r0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757684083; c=relaxed/simple;
-	bh=LNKzymsgb/6Iwg40XhzmFUiClYs9OYnQ0dLnby/t7ic=;
+	s=arc-20240116; t=1757684088; c=relaxed/simple;
+	bh=jBAJnWbm3U7P7Cjj9/LDsEwkfdx+34ipvAwi6e6JbN0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IPTnVLwCH84fPPlh8/ZDzlUPDuCwu+BwhK8MTviu7BFbgsTWrF2ZxCWGSa72wM0D1uKe4a0mYjwt1wxPL/vXVYJwaizzw9kbB5xFunz3Dog85aUfQWHxWDpn38+5TzKDbMVqvWVG5awRpMbcZ60Ep64eN9Dgz70gM4f9iXNg480=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=RTBiYciQ; arc=none smtp.client-ip=209.85.219.170
+	 To:Cc:Content-Type; b=dd3wEeQPsWEAEbzQFuR7/1zEMxVj/73Ub6qF/Z7i8dMdMBXrrxeP6tjmbErLBkbjVVNiugDieXPrbi7Y3BMsM+FTLuWyJPSapbHRpM0c1U3BezXKaqyW8xdr1l3dfwRN0rw7+lvhCYeadqJOhOF+bPDHv8FKRdpPS1vwYJegsow=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Oi3FQcvR; arc=none smtp.client-ip=209.85.219.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RTBiYciQ"
-Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-ea0150ee46dso1511237276.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 06:34:41 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Oi3FQcvR"
+Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-ea3e8330e8aso388030276.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 06:34:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757684081; x=1758288881; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=tJ/K8q1HzdoHIMtTKXskdUrRNYCvrta7LlIcSp9TUsU=;
-        b=RTBiYciQO3DsPhCq6bNle2T1xdIkKrALnQdabNbJ4hnl/BUqxrMQPRhoaVCotzHg7L
-         F1YytPuJm6NHIGC8+je3LkGxDxAiZCQlB0BOc/eLxz+LJztP1B/cwgd1R2JGuCMG1+eY
-         obiTq02l3MfolLpY6gumvqcSe5mqywMWHY3ywWiCkEMm0Epq3wiqDarFCwl4mhdNMy7n
-         AoAwvwtVikEvwJ9Lglc4M5PjqtKsM5qHWw0I06q1+c0DUvWOuL+9iEUj7d3+VvNRcYam
-         Ot0ffcJWh14kr0/naEVpaWensuzPYfJXcxrJr6y+WCvEY0kk/34fDk+p9p36RElTBT5a
-         N8pw==
+        d=linaro.org; s=google; t=1757684085; x=1758288885; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1mZtqMj7Buty9BX5eJg7ubUn79cX89LfYOj/ik3ZHLw=;
+        b=Oi3FQcvRq0UCceorzqvufvSeyjtXGQhRDTMwu0dZ66xbAAEgaUYN+bXC/WJhCoJiXA
+         ROs71+l4unXx5dNfUfJoH5TxNstsOcBHdmtr+c6wE6PPA7Uab7z4+sDD/bvxfUBawpDc
+         VXRe5rOC4vanfTmRx+wSyBK/4V7TAacKcdGSJuR4+QNdo7Tg/VieSrCXPu9qJZ8bTx/R
+         NLsSP1ZD4O8s+LF4lRIqVWqGRP/rMy5uV32BssFd96TFNZ6NPSLylOuSM4zAkPE4tmRQ
+         MdeNiYz5e9XAYDVikY8T5qzaGx8VrgrwWXSeWFJbBRazGgdgx7UJfVaRX+88I8rIgJtZ
+         wK0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757684081; x=1758288881;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=tJ/K8q1HzdoHIMtTKXskdUrRNYCvrta7LlIcSp9TUsU=;
-        b=qkF4d1lEULxBXtV49EcvKscvXhazDWWn/a6uv/zzjKOQod5tjG4INum68aKGTwUiow
-         SsFujntZUJqyyBbYnyI+TsGF246rwYd38lq3tZUrUtABz9uCAAL2VMMliCYW09VK3YUx
-         0N0tRgg+rzPZD0GLUh/r76g9XOkSpfvhUFOf3IZze+ZZiGBOwD5qHSUcgz51/Hy7IWR4
-         epymh95DgPu4nfXCC2exiZJ2LiYrHi3ULocLAiczxkYzLRhsVpzC5s34CJ/6JvlBYdb0
-         RUCrTCs4JiB1HWikycRL4LdqY1WBg87gOKONjk3QnYqfFVbW4sjX9IuvWdfsaB+8zzQ3
-         s7cg==
-X-Forwarded-Encrypted: i=1; AJvYcCUwOK7wC2mJD1yOhS9klpfpoE2LeV7/5IIVMcs33OghkuNn89WOFZgo4l7ZDBlnEqUvzspmtswRbok=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwZ7bafp/6uuqPTlHaBJjmnNqeEm1yzjG1J9WPA6H+oOEzUKUBQ
-	Q67AIta8TPtnLQ+EZNcyWJmnM4qowZ7+d/odaJ6LRHvYa9a3KhZ8wHnTUgJSvAG0aKi/0MY48zO
-	f8lrL3RkAqoXVyGtsnGbNfk0Nz8WPMUmWpIdL236tHw==
-X-Gm-Gg: ASbGncuGGRUVDduayLBXCysYsQeFGMRPjRVhwtiNJQs1htacwccRugjaU9SBxTGdq9q
-	Ci4YvQRm/t1DD0RIuiFmdpaLwuQeY8KCw63pWlVov/00DT5mpPZzjvYQ4ARMBTFq4ZikVrjj5O+
-	V66nuQ8u0TCIWpPIW0lQ8BxHmfcBiZSjVfBMe+npwetLvVJrC4qv8EmVxKPajb/Z113cbGySXV9
-	rdEtF5NmaLyW0JkC9s=
-X-Google-Smtp-Source: AGHT+IFU/1m7pdVKE0NcSMn+u8VXuWyV25MtsVbS6YuHqP6NuVR7mVq1wHW3//d0OvD3Ag7uQcwmsaBXlaeICB6KF/w=
-X-Received: by 2002:a05:6902:330c:b0:e96:c4f2:1f40 with SMTP id
- 3f1490d57ef6-ea3d9af39e7mr2133916276.46.1757684080633; Fri, 12 Sep 2025
- 06:34:40 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1757684085; x=1758288885;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=1mZtqMj7Buty9BX5eJg7ubUn79cX89LfYOj/ik3ZHLw=;
+        b=PyoMndV/oAMRn8I1zp0Fua21mm6/5poQX2bFPvR3VCHh/9dJRtQOE1WrVLgKzdBI0r
+         XjYBCaqxJ3d4C7Xpo9d0bBAqhX6tmUwlLK4lYhRvx9L2VI5iwNK+qOdVPaIaFWWOeIy7
+         Qpv5G24cpF3/4f4yJDyc5ieJP21FqMpy8vzev0NoQRD9UEoJKhHoC7OX+UfqSo2CPhld
+         W14dvU9EDS0a/x3w87qlfQb5sWxGACLp489oJdE1Fv4eRVESOkYya7JYEpWK/NAb4jMY
+         3n5DodYDPsTSLhwEH9mVbATziek9xsLTMnanxn+8GeOukbpsnYabeHgmRIh+S2DH1Tyc
+         1ZRw==
+X-Forwarded-Encrypted: i=1; AJvYcCXKwvZQOp1uRFNkTEPXPE/YI11lHKHS866ldRVXvowN7ju/0oS72W5u7HIyVNfDUwdZPGUHmuPXsxg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwjGpKUxlmdzBYJ3ie+ZkPvsa9+lZWZmNxlpbjx2ncJm2EZppKm
+	/GzsWBnQn7EbtltaUFaRnIePrim0OhqC+T1AbZhBwjTd5QrauYS4MSrk/ZfVehxkUUmm6OOS4j/
+	gOZeLCST1vAxSZACjXtVUDwwbf82nkgKyW5L1XlDrLQ==
+X-Gm-Gg: ASbGncuAFSP5WfaCV03iLIOvQQ02LBKo45MD3M0/7iSVbwtj9oPkSz01qr8T7iHv3dZ
+	hw6JaI8tCOJuTCgL/otlvrP0h24fVxmrZw/UayYaOxA0RRFlwKDbviTfpBIyTtJPPyMwzYlHtRk
+	Tw451qSEgck5ev5e+w9Zxqif5Z3kvcl9yP2p/WR013ytt7VloMYjlci15i894Wu/49O53i0FLJd
+	RX4BGW9
+X-Google-Smtp-Source: AGHT+IF2QK5PvgUDodJDMy1anuNhy7mAPtH2+u/Cb/GRw6eKlaFsdB7czQFqmCkQDIeivB9L2qowVeqeZqmayZt5HLU=
+X-Received: by 2002:a5b:984:0:b0:e93:2d7c:96f2 with SMTP id
+ 3f1490d57ef6-ea3d9a3f50bmr2300108276.24.1757684085343; Fri, 12 Sep 2025
+ 06:34:45 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250826075812.82305-2-fourier.thomas@gmail.com>
-In-Reply-To: <20250826075812.82305-2-fourier.thomas@gmail.com>
+References: <20250903-pxav3-uhs-fix-v1-1-9f56b0b54749@dujemihanovic.xyz>
+In-Reply-To: <20250903-pxav3-uhs-fix-v1-1-9f56b0b54749@dujemihanovic.xyz>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 12 Sep 2025 15:34:04 +0200
-X-Gm-Features: AS18NWD70Za98HPo5BqoaFdKJPpqyjBZynLCy_vXOulb13mtCddOduOwnUrku8c
-Message-ID: <CAPDyKFq=3RANVUpZEJMTLH2YewJN=_mV-kM7DBb4-hhHPFv4oA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mvsdio: Fix dma_unmap_sg() nents value
-To: Thomas Fourier <fourier.thomas@gmail.com>
-Cc: Nicolas Pitre <nico@fluxnic.net>, Ingo Molnar <mingo@kernel.org>, 
-	Thomas Gleixner <tglx@linutronix.de>, Binbin Zhou <zhoubinbin@loongson.cn>, 
-	Linus Walleij <linus.walleij@linaro.org>, Pierre Ossman <drzeus@drzeus.cx>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Fri, 12 Sep 2025 15:34:09 +0200
+X-Gm-Features: AS18NWC26DOvm0iS2ScvulN5VJ9F2qVNM2KeyrWRgOgPMN3f410QETMn0vlg0XQ
+Message-ID: <CAPDyKFowahX41+XqhQHmBcd9MCxkfo=pPSpdFinm4wHZSONJaw@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: sdhci-pxa: Add minItems to pinctrl-names
+To: =?UTF-8?Q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, kernel test robot <lkp@intel.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 26 Aug 2025 at 09:59, Thomas Fourier <fourier.thomas@gmail.com> wrote:
+On Wed, 3 Sept 2025 at 12:51, Duje Mihanovi=C4=87 <duje@dujemihanovic.xyz> =
+wrote:
 >
-> The dma_unmap_sg() functions should be called with the same nents as the
-> dma_map_sg(), not the value the map function returned.
+> Some older boards only require a default pinctrl. Add a minItems
+> property so these don't cause dt-validate warnings.
 >
-> Fixes: 236caa7cc351 ("mmc: SDIO driver for Marvell SoCs")
-> Signed-off-by: Thomas Fourier <fourier.thomas@gmail.com>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Closes: https://lore.kernel.org/oe-kbuild-all/202509030625.PBgLIAwG-lkp@i=
+ntel.com/
+> Signed-off-by: Duje Mihanovi=C4=87 <duje@dujemihanovic.xyz>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/mvsdio.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index a9e6277789ba..79df2fa89a3f 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -292,7 +292,7 @@ static u32 mvsd_finish_data(struct mvsd_host *host, struct mmc_data *data,
->                 host->pio_ptr = NULL;
->                 host->pio_size = 0;
->         } else {
-> -               dma_unmap_sg(mmc_dev(host->mmc), data->sg, host->sg_frags,
-> +               dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
->                              mmc_get_dma_dir(data));
->         }
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Docum=
+entation/devicetree/bindings/mmc/sdhci-pxa.yaml
+> index fba1cc50fdf07cc25d42f45512c385a9b8207b9b..186ce8ff4626a1eb07633e08a=
+eb6322ae2eb25a8 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+> @@ -44,6 +44,7 @@ allOf:
+>            items:
+>              - const: default
+>              - const: state_cmd_gpio
+> +          minItems: 1
 >
+>          pinctrl-1:
+>            description:
+> @@ -61,6 +62,7 @@ allOf:
+>            items:
+>              - const: default
+>              - const: state_uhs
+> +          minItems: 1
+>
+>          pinctrl-1:
+>            description:
+>
+> ---
+> base-commit: 5d50cf9f7cf20a17ac469c20a2e07c29c1f6aab7
+> change-id: 20250903-pxav3-uhs-fix-9cbcfd2ec0b1
+>
+> Best regards,
 > --
-> 2.43.0
+> Duje Mihanovi=C4=87 <duje@dujemihanovic.xyz>
 >
