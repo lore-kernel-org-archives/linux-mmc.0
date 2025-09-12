@@ -1,146 +1,182 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE2E72EC57D
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 13:35:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55D57303A13
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 13:35:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757684110; cv=none; b=KS7kzGIZ246qFXpuTk/QeVO6z4a/iJ11gtffT+xCyzLzNAi6eW457Rdq6BIpzytb9fj4LwVt4KJdBtMnP0xgfSE2UA3at5t1bUQxBef3Ap5seIsSrvE02Tg2e1YBQOVu3KYMunh6wzt+QEBE1kDpcOhNQ5qJwUKv7DAWQn/cK7w=
+	t=1757684119; cv=none; b=IwNW+ShRknCcNhuQY1QkKuM4HfeudU+EDn61En3US+yoUdoDhI+z38REBeva1/BuSKaTlDpVmDb5gr1GjqtYZgus5YQZVRrsU+Yt1W+dpwuHwfQTwD00PR4aYDPqllVRRb8KX5WOCkPV0Y1uoFNCKTMhUTdOiajyhMpln7cv8ok=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757684110; c=relaxed/simple;
-	bh=Mw1uqYx7xqErJ7dWKzMJLyxHHuWnHuDvctPdOSnJ6Uc=;
+	s=arc-20240116; t=1757684119; c=relaxed/simple;
+	bh=PttHOtNSt54YmkHpxLOxewRDuYl5ElnQt5nSiLj/+UQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Idg5DBTSSikUQXe018KcQy93osdPjdGvxaSlZ9JxhqagoXXvPtt1Dgsb5yvaRskxfD/N2EVQ/RtVTF6y8ch7wuUISV6OObDNvZg9HPydILcK9I1rqYurVgp9dimdgJtDnboHw5fD2hyUwSnIpUCBTyR5er9/Apq1LYFoGXlnuH0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ffQiWbGc; arc=none smtp.client-ip=209.85.219.176
+	 To:Cc:Content-Type; b=liQxzMYPYP2Nb4HzJhcNbzq0d4317MAzpDx7A10cb10wZ3pBsOEjKdhI3+HT4wWVpNVEfoKFEG2UG/Fm+SPlnAS49BGVecrzch0na1sJ1qensjw/8OwPpdLVfkbqU9GPLPSt+/nnnxF5qf+8xSYYHXBGjZfD99cTDHoj/DpO860=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=sY3wGmzz; arc=none smtp.client-ip=209.85.219.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ffQiWbGc"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e9d5e41c670so1741995276.0
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 06:35:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="sY3wGmzz"
+Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e951dfcbc5bso1734822276.3
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 06:35:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757684108; x=1758288908; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1757684116; x=1758288916; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Oif+Qq/ko4e9IqPBpRdx3M/nH7onkOEoHN9rr45t7A0=;
-        b=ffQiWbGc8jBI0/MMekKJOTGkZ8I5gVMNordx3lAAXmMexZijDRX/sDFrNJ3Ypu1iEM
-         SHIZsWei5E7e5pkXjsTysVPt0NtxGHy6FR8zcwp58R7e0lasL+xCANzO8/WS6UeP4JRn
-         pmf9tutWHLs+bL0uBzV9ttQ0x0eOTZaJs9Y2Lmx+5TKgq+ox+i2/MePnp7cUx0WpPOBD
-         yOYNJudMtypBBjyesWYlU2BRbqBWFzvMoqCwhzkGiTvzxGY01RT+weROfGd9SGZgv/R1
-         862GSVo1ZFhrPWa+Cji/qFWzofTLJ9zu7FAMnQ6yF8f1FNFXAfO9UjKTlI715jxsXB4k
-         VweQ==
+        bh=STW83QuqpPn8naDxab/PdZOErOUZSmZlWHjvyy+1Bc8=;
+        b=sY3wGmzzXJ3Wy37ghSS7gCJIq5Tg79SexBUJMEzolfguCgPr+Dt47t+qsomrpLFTmM
+         XrFLxd7ZM+kuBR/wNcMmR4hq7qhsMz001QtQFe5ZQoDzpLVX9Ix1dmY3+Bmvc4Uo0sh3
+         iwpqhEaS4KOX2cMRAWtoUe5GNgH2i7BvOupOClnnfhM9yQfKq1TlvB/JeC3BEBPLJ5go
+         zi0x+3cCsjJ4VuCYCqWES1/J7EVz0+XMW+EIe+0Qcw64LQHopa5AqZmeG+vklHrvLhN8
+         YR7bhrJY0mJs/SfhpmWX9+rcw5XTU3ZuYvH0a900csxx6iWtgx6Zfhnryo+ztco+4mph
+         SS2A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757684108; x=1758288908;
+        d=1e100.net; s=20230601; t=1757684116; x=1758288916;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Oif+Qq/ko4e9IqPBpRdx3M/nH7onkOEoHN9rr45t7A0=;
-        b=OvDxqgICnYraOKlU5hK0/7X1pZ84MSefc6DjmWgB71azZ04o+/BHSzwBYQCXjrYiKw
-         qqKmwMVZWNEtUmIHRcl2HoHwmsIIoWksdY58bmgvaWE66l2g5Suo2V6MWdCCIScVXSiP
-         bB9wUowsPM5P3UIAhD/46hUIlw8Uuft+cxbMkHEAJOvzpWuEpucwLcwkVSmrecu/XdyH
-         dY+8Zq79ZJ6odtvS6AVxBj6kbCJyNcgJSB5cjGSjt4YDX/jxIiZ7r5Lf9Qxy2yGZEUxd
-         b+I7pgCYF8ZtSJ4QH7d/XUXXxNqgnrznKekN6/YNekjxSxRm7Ro/umIH2qdfbyX9U7Cb
-         frNA==
-X-Forwarded-Encrypted: i=1; AJvYcCWgVV/7fPiXeMOylpMmoAy3tE8awEQG+ShL32PStP9XPpWPWiP6kfkSUM+q+2icXavFiHz7qmY9YCU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwEdlM2rpAwwHUsGcDCMSbGGLt5WLEzbBixMhGAw31iqkdpjBu4
-	n47JY1TddTnAtJn2EmKhCSFusT332U0KSP64KdOSif+zCOXI37IfEiXUnOVZX2LtEb4tRQ5J1s1
-	nQb2cAhjqpt4s0uQafSTkK0o7SDzgtrnsNCXh9oKG0w==
-X-Gm-Gg: ASbGncuEzBMZ8FLmr2q5OwCj21PuyEjDhRIWOuOzmuLOUzNB0xymBrt4mpL4fXglEwb
-	SbYlvsDV5uWu1iKVxKbAFHCxEh2U3QX8Yo8+Mh7RgkebebWP5kldzSB2Z5h8M8otyisGsCmCilW
-	A8KUFG5Ukkx2afE7phhawwrHYIRMohnwJAEx4ESnNVniUh1EodKSlLqjm0kLv1wqGAWDvE8tgAD
-	sl61dG7Azujw6FJ05kcM7Cf7x6QHw==
-X-Google-Smtp-Source: AGHT+IGATGH4zT90wO86AA8WBiOnGk/LXDY5uDAcwdw9i5ErydnHz9qSPT6Guu/RQKz7ZbqSt/y/uvpf3m3dqjiDPL4=
-X-Received: by 2002:a05:690e:155a:10b0:62a:42ce:b7b9 with SMTP id
- 956f58d0204a3-62a42ceb93fmr411217d50.1.1757684107248; Fri, 12 Sep 2025
- 06:35:07 -0700 (PDT)
+        bh=STW83QuqpPn8naDxab/PdZOErOUZSmZlWHjvyy+1Bc8=;
+        b=h2IqOLUUGcZhxb/vtfU/OOggbI0kJZ8GTK9X9amB72ixnGd15NMl3izHnew1eK82x8
+         tDDuEbe7zAOV0jHPCT2GOludN8kraOcBpZhu25RFCa62yPpl/K++nlWJUpLexmli8h1a
+         Ny3yUGOTQ1yz2ETd7/7mzQnjj8zMIs6Ofa+ebk6lbmLCzfVTsbSOQEWxl3B68bT3cGu+
+         Zt525maYS3WyLi1Gms/0b97obP2ZtcJt/STtsECXTWN38z4h4XOT+yLYbw2DvKE6dIHw
+         zSUYNKPHu1jixn5mfN0O1hGmQWjP21bbEWvkZNS/PknprMhh2IVWKA1lpENZjlAnClX/
+         F+uA==
+X-Forwarded-Encrypted: i=1; AJvYcCVqDO1S0mI/D2ghSCWgRO0TVQ3APQH9k3IYLRyTiVEfdkCkippWS/yMD0UBmwnTErPAhmAWJTl6J30=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy6tPLsqvRa5CNQq1gNf2y/rxIpt3r6ObtO5ITwym+g0TwA1q7c
+	buuXj3ptuxnRY6C1CLeOiCsJ7PpmxU2dCC9yS+Zhwn79fdNmlRxGzy08MsWBj8qQZq7WjaChvyD
+	Ubq2BRk74MGVcVL/+KiztxmnuomUgPJfgI7zejvNivg==
+X-Gm-Gg: ASbGncv+nrEppyd9LlRgFugY252S0SzfntKtTGXTgwMooxLHDNgoqBXB5SroMNo3TXX
+	GZjy5n2oCzuDBnRtJcY4DwehI/b6WD+TwXcHDlXllXFrFp7mJkK4pWCMZgGtvURFr5jhHI+eGZP
+	jsOJaM3cwkLamG4GEtXgDJJiw4GC3rVhobkgtkn/aDaz7AgO9VWQ556mNinjKK2umyRoA2ksx5h
+	oEMrv+A
+X-Google-Smtp-Source: AGHT+IFo+2s4Q86nT2eqhVliAZu16Xq60jFBF+35ttgMF2c4G40bikUsQYD5P2gDHZOjV2sSsnsF8GATwLaYyZPlNu8=
+X-Received: by 2002:a53:c485:0:b0:61c:3356:6287 with SMTP id
+ 956f58d0204a3-6271e75703emr2053628d50.6.1757684115808; Fri, 12 Sep 2025
+ 06:35:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250908104122.2062653-1-quic_sartgarg@quicinc.com>
-In-Reply-To: <20250908104122.2062653-1-quic_sartgarg@quicinc.com>
+References: <736d7edd2d361f2a8fc01b112802f7c4dd68b7d6.1757557996.git.benchuanggli@gmail.com>
+In-Reply-To: <736d7edd2d361f2a8fc01b112802f7c4dd68b7d6.1757557996.git.benchuanggli@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 12 Sep 2025 15:34:31 +0200
-X-Gm-Features: AS18NWCooWdb8G6qEjRwFzci8cfjJRbJFJ2Ea7ro1afYf_iz88sxBWUweu1ZDLI
-Message-ID: <CAPDyKFptA06Khx-9HFf9Vt+OUXRtVqmb++HQ3ZbZD0rjRkOsPg@mail.gmail.com>
-Subject: Re: [PATCH V6 0/4] Add level shifter support for qualcomm SOC's.
-To: Sarthak Garg <quic_sartgarg@quicinc.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>, 
-	Konrad Dybcio <konradybcio@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
-	quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
-	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, 
-	quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+Date: Fri, 12 Sep 2025 15:34:38 +0200
+X-Gm-Features: AS18NWDa8oAmyLB5iGs8tfqz2bWfk_t3a_iJsG9ghkszoFvcQ-b_7YQWIwr5bdU
+Message-ID: <CAPDyKFqGWRRii3z-Q3zz2+=48J7BjqdK8ab5qU75x5W==0yBYA@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] mmc: sdhci: Move the code related to setting the
+ clock from sdhci_set_ios_common() into sdhci_set_ios()
+To: Ben Chuang <benchuanggli@gmail.com>
+Cc: adrian.hunter@intel.com, victor.shih@genesyslogic.com.tw, 
+	ben.chuang@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	SeanHY.Chen@genesyslogic.com.tw, victorshihgli@gmail.com, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 8 Sept 2025 at 12:41, Sarthak Garg <quic_sartgarg@quicinc.com> wrote:
+On Thu, 11 Sept 2025 at 04:40, Ben Chuang <benchuanggli@gmail.com> wrote:
 >
-> Add level shifter support for qualcomm SOC's.
+> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 >
-> - Changed from v5
->     - As suggested by Krzysztof Kozlowski reintroduced minimum/maximum
->     in dt bindings and avoid repeating constraints in free form
->     text.
->     - As suggested by Krzysztof Kozlowski/Konrad Dybcio update commit
->     message reflecting discussions and previous disagreements.
+> The sdhci_set_clock() is called in sdhci_set_ios_common() and
+> __sdhci_uhs2_set_ios(). According to Section 3.13.2 "Card Interface
+> Detection Sequence" of the SD Host Controller Standard Specification
+> Version 7.00, the SD clock is supplied after power is supplied, so we only
+> need one in __sdhci_uhs2_set_ios(). Let's move the code related to setting
+> the clock from sdhci_set_ios_common() into sdhci_set_ios() and modify
+> the parameters passed to sdhci_set_clock() in __sdhci_uhs2_set_ios().
 >
-> - Changed from v4
->     - As suggested by Krzysztof Kozlowski Renamed the property from
->     `max-sd-hs-frequency` to `max-sd-hs-hz` for clarity.
->     - As suggested by Krzysztof Kozlowski remove min/max constraints
->     and add default: 50000000 in dt-bindings.
->     - As suggested by Konrad Dybcio moved max-sd-hs-hz property in the
->     SoC dtsi.
->     - Retained sdhci-caps-mask in sm8550.dtsi for now and will revisit
->     its removal for future targets after thorough validation and testing
->     from the beginning.
->
-> - Changed from v3
->     - As suggested by Krzysztof Kozlowski moved the property from the
->     SoC-level DTS to the board-level DTS.
->     - Revised the commit messages to clearly explain its board-specific.
->
-> - Changed from v2
->     - As suggested by Konrad Dybcio and Ulf Hansson redesigned logic
->       to introduce a new DT property max-sd-hs-frequency and override
->       the hs_max_dtr accordingly in sd.c file.
->
-> - Changed from v1
->     - As suggested by Krzysztof Kozlowski redesigned logic to use
->     compatible property for adding this level shifter support.
->     - Addressed Adrian Hunter comments on V1 with resepect to
->       checkpatch.
->     - Cleared the bits first and then set bits in
->       sdhci_msm_execute_tuning as suggested by Adrian Hunter.
->     - Upated the if condition logic in msm_set_clock_rate_for_bus_mode
->       as suggested by Adrian Hunter.
->
-> Sarthak Garg (4):
->   mmc: sdhci-msm: Enable tuning for SDR50 mode for SD card
->   dt-bindings: mmc: controller: Add max-sd-hs-hz property
->   mmc: core: Introduce a new flag max-sd-hs-hz
->   arm64: dts: qcom: sm8550: Limit max SD HS mode frequency by default
->
->  .../bindings/mmc/mmc-controller-common.yaml       |  8 ++++++++
->  arch/arm64/boot/dts/qcom/sm8550.dtsi              |  1 +
->  drivers/mmc/core/host.c                           |  2 ++
->  drivers/mmc/core/sd.c                             |  2 +-
->  drivers/mmc/host/sdhci-msm.c                      | 15 +++++++++++++++
->  include/linux/mmc/host.h                          |  1 +
->  6 files changed, 28 insertions(+), 1 deletion(-)
->
-> --
-> 2.34.1
->
+> Fixes: 10c8298a052b ("mmc: sdhci-uhs2: add set_ios()")
+> Cc: stable@vger.kernel.org # v6.13+
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-Patch 1 -> 3, applied for next, thanks!
-
-Note that, I took the liberty of amending patch3 to change the
-declaration of "max_sd_hs_hz" to an u32, rather than an unsigned int.
+The series applied for fixes, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> v3:
+>  * use ios->clock instead of host->clock as the parameter of
+>     sdhci_set_clcok() in __sdhci_uhs2_set_ios().
+>  * set ios->clock to host->clock after calling sdhci_set_clock() in
+>    __sdhci_uhs2_set_ios().
+>
+> v2: add this patch
+> v1: None
+> ---
+>  drivers/mmc/host/sdhci-uhs2.c |  3 ++-
+>  drivers/mmc/host/sdhci.c      | 34 +++++++++++++++++-----------------
+>  2 files changed, 19 insertions(+), 18 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+> index 0efeb9d0c376..18fb6ee5b96a 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.c
+> +++ b/drivers/mmc/host/sdhci-uhs2.c
+> @@ -295,7 +295,8 @@ static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         else
+>                 sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
+>
+> -       sdhci_set_clock(host, host->clock);
+> +       sdhci_set_clock(host, ios->clock);
+> +       host->clock = ios->clock;
+>  }
+>
+>  static int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 3a17821efa5c..ac7e11f37af7 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2367,23 +2367,6 @@ void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 (ios->power_mode == MMC_POWER_UP) &&
+>                 !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
+>                 sdhci_enable_preset_value(host, false);
+> -
+> -       if (!ios->clock || ios->clock != host->clock) {
+> -               host->ops->set_clock(host, ios->clock);
+> -               host->clock = ios->clock;
+> -
+> -               if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK &&
+> -                   host->clock) {
+> -                       host->timeout_clk = mmc->actual_clock ?
+> -                                               mmc->actual_clock / 1000 :
+> -                                               host->clock / 1000;
+> -                       mmc->max_busy_timeout =
+> -                               host->ops->get_max_timeout_count ?
+> -                               host->ops->get_max_timeout_count(host) :
+> -                               1 << 27;
+> -                       mmc->max_busy_timeout /= host->timeout_clk;
+> -               }
+> -       }
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_set_ios_common);
+>
+> @@ -2410,6 +2393,23 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>
+>         sdhci_set_ios_common(mmc, ios);
+>
+> +       if (!ios->clock || ios->clock != host->clock) {
+> +               host->ops->set_clock(host, ios->clock);
+> +               host->clock = ios->clock;
+> +
+> +               if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK &&
+> +                   host->clock) {
+> +                       host->timeout_clk = mmc->actual_clock ?
+> +                                               mmc->actual_clock / 1000 :
+> +                                               host->clock / 1000;
+> +                       mmc->max_busy_timeout =
+> +                               host->ops->get_max_timeout_count ?
+> +                               host->ops->get_max_timeout_count(host) :
+> +                               1 << 27;
+> +                       mmc->max_busy_timeout /= host->timeout_clk;
+> +               }
+> +       }
+> +
+>         if (host->ops->set_power)
+>                 host->ops->set_power(host, ios->power_mode, ios->vdd);
+>         else
+> --
+> 2.51.0
+>
