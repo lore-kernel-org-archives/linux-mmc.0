@@ -1,118 +1,149 @@
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from fhigh-b1-smtp.messagingengine.com (fhigh-b1-smtp.messagingengine.com [202.12.124.152])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A947F2D47F2
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 08:41:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D53C2DC793;
+	Fri, 12 Sep 2025 08:47:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.152
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757666503; cv=none; b=PyV7AISRDBWHt9VaMRUnICUkP9WGLotg3jx1Suw0Tlypuq1wVq663FON2OsnjvWgpidcZswBqO5h09qo8ZmLFp+avwlOW20rvm6zPLGLqWHlYVK5eSU7mX2pl9UWmMvRjpWiN7q2EBu1qUkMw8jexLvtn/1LbzYM8oKbC0GLZAM=
+	t=1757666877; cv=none; b=LCUuJR7s41Q5iYpJuAJE+4UXxJJCFnnT4zZZU5uPMhdMj68S6ETgfLoGAtD4FPs+Opbs/RlRCDclPOM0YD/E6ebeCmBeUZDxMyxT89azrGVcBLR7l8LxkkTsVaWMmsZ1HhCdpY5n1ICRLvFEBhCLN5sCFFtvDMtjy1fWkmSENjg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757666503; c=relaxed/simple;
-	bh=j8WiM1AwcmR4UKZ24HXYJnllvBCh9jUhE7SQfdx0nG8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=k3CZZEZVxgP8GOlHuxXA/Zzi1hpKV7rGqpkQ3EHBjg3s0y6sfIzmB5DcyhTxfMbvL0walgyrRQ0Lz2zQLKzD0N4Cl+FktX8jOhvZ/tCFXZ8chTopqAjMr4+m/RwspknAQGCPWr5D755pNeCMtsgNrdoKExcDA7ZlYd+/SqY/MLQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ocFZuqaV; arc=none smtp.client-ip=209.85.167.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1757666877; c=relaxed/simple;
+	bh=eo9w2VnFL3j83P+C9TJyZoTFiiG3GBq2PqaLoXMCu5I=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=t8kuDg0KiLdFaQhdxt3qi/nGW6ED+T8DzW+9M0bUcoKNtcEnPEowZEpHsbit9+JP0+1pfK8d7JAlibEs0YRlruvqHvgjj7ORf0a3uI+K4FG7EP+tPW9lVxi0Ut3V4wTcu8IE1y0Gph6XBvUyt1NZN+uHZgwe1m/A9eDX9C5ZP7g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=muBTD1ha; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=ld9ZQCjh; arc=none smtp.client-ip=202.12.124.152
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ocFZuqaV"
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-56088927dcbso2020656e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Sep 2025 01:41:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757666499; x=1758271299; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Zi9mhYSrg+uoSn4FWmIZqdjd0t9zWFL1Q75akd3T2yM=;
-        b=ocFZuqaVuwx3CVQKWQlJc8PMRi6+FZtfuDsu+irA033g+kqDpI1bFxPi8Rp7QQKnRe
-         9fsYpedxzehIyuLl+Cv1hTDLQq9+fZAAxXEloJrp3Ms0gMIKrpiQlRUmkiL9t2j8uc4o
-         epE57ExvvH33JU3XAkyjEfcbU8iFOVml8ClCKlHU1jEkL1iNiG3pYq8uXOLSNVdcZ8J/
-         x2z/Nuclrznfo93BSd1Am3Uhqq2RwZRvfRGY2oO54lNkQbzQpEtoNoAsAttFE0GGbahA
-         AIgl1tdCIg/SYd8u0xCIUSFTFBdiaaxmVKCidLfEQvhW/fiAiAiFVYr35RMNuXTgFmqd
-         vKYw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757666499; x=1758271299;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Zi9mhYSrg+uoSn4FWmIZqdjd0t9zWFL1Q75akd3T2yM=;
-        b=JGztti8iJt+yV/JYso43TYGUpZygEW2+4v6JcEYGvi4WNJJF1Eo5Q7HXU8CCpWlRzY
-         FlO6xf5trEx/xDVvxuKI+GmL4Lbm1u24YjuSBMsr7T+Ev559rsX5iiLNkKzKpmacFFSA
-         gkaqJpZMBrB96iu55Fup6HFOLVA58KyLQL1BoRWgZqYyDtVWFB0ueoBmgAZgP59/ODKs
-         qZ2IlcE/jAAZqly1RGRpclJxkzzHQ3y9T6SjuMMToSaKtO0sjrl3ypMEe7x3nGa2XCPV
-         H7xodpg2JlxmjsvjBdn11yglCGN66xee0mHC9tXbl/KfRP+8kmwAmm1Umk1fqs60WYNM
-         7scA==
-X-Gm-Message-State: AOJu0YzCvGAW+hToBbP5hcFVKD04Tqzb/QcrGiqX2wHyANQmxijJXyvx
-	eECwm/IDJ7EBn1NgtndqhA/PhCNsPyeOTHNZgNypnz5tDUlFDNRp5wi8t5/yaoAy/2vFAmj7K3q
-	8n6p8SMKdgA==
-X-Gm-Gg: ASbGncsPQZMWYra0VsfiqgF6Af4FGtV3GWzWbqPfsKvZCbW2d2OJ+xfHQpV2ZCS6J4J
-	WES8DC98HUlBxXsqhPj1RlZSrlQORi4EqjOx+5EvCzQOekICAzwDESg+A0mQWiSYz2+onNtElSh
-	FyMevNtzTy2Esxa7DCtZ84/ZlBZigQeeU6MM+hxUF+LedE3m3pAmnDXp7yJa05hQxs7AjJadpBA
-	5t0rnRxXPORzKhd8xeKC4rdY3OInXsLjlw+RtF6VnqmsWbr2yFwDjywaRiRaTxhU8Ko0Oc2dD2F
-	zlz1IiI+5qtStuE+QLCCPmlCI0l0lbkBFzp+jh+GKCZBpyqnxMgVr7/AG9ImHOx3NYsRYggV4Cr
-	CmhKoo7cpMEOTwrNKX9vqGxpiCYS9itFCez9ZH6L60bjJhAijGEFHs76qOkVeTtUayw==
-X-Google-Smtp-Source: AGHT+IFx7Iz5XF+xrNLJkCkiosSOnrJ09CXvrdjTO4FZGsUjEDPPR94YYqvJ/Qo7O7hEYIQNGxSzOA==
-X-Received: by 2002:a05:6512:3599:b0:569:a257:acca with SMTP id 2adb3069b0e04-5704f1ce7f2mr581298e87.32.1757666498725;
-        Fri, 12 Sep 2025 01:41:38 -0700 (PDT)
-Received: from nuoska (87-100-249-247.bb.dnainternet.fi. [87.100.249.247])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-56e63c63f6csm989050e87.86.2025.09.12.01.41.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Sep 2025 01:41:38 -0700 (PDT)
-From: Mikko Rapeli <mikko.rapeli@linaro.org>
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org,
-	=?UTF-8?q?Heiko=20St=C3=BCbner?= <heiko@sntech.de>,
-	linux-kernel@vger.kernel.org,
-	adrian.hunter@intel.com,
-	victor.shih@genesyslogic.com.tw,
-	ben.chuang@genesyslogic.com.tw,
-	geert+renesas@glider.be,
-	angelogioacchino.delregno@collabora.com,
-	dlan@gentoo.org,
-	arnd@arndb.de,
-	zhoubinbin@loongson.cn,
-	Mikko Rapeli <mikko.rapeli@linaro.org>
-Subject: [PATCH v2 2/2] ARM: rockchip: select ROCKCHIP_PM_DOMAINS
-Date: Fri, 12 Sep 2025 11:41:12 +0300
-Message-ID: <20250912084112.2795848-2-mikko.rapeli@linaro.org>
-X-Mailer: git-send-email 2.50.0
-In-Reply-To: <20250912084112.2795848-1-mikko.rapeli@linaro.org>
-References: <20250912084112.2795848-1-mikko.rapeli@linaro.org>
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="muBTD1ha";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="ld9ZQCjh"
+Received: from phl-compute-05.internal (phl-compute-05.internal [10.202.2.45])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id 000ED7A03A6;
+	Fri, 12 Sep 2025 04:47:51 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-05.internal (MEProxy); Fri, 12 Sep 2025 04:47:52 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm3; t=1757666871;
+	 x=1757753271; bh=iDgdGFvPVafirg3SrUddyH198xBsq9KMfs20+2Svn60=; b=
+	muBTD1hahwMhNUaNwK28ttQNJbGdOcpgk6DxpsXQuab3tUaCykcETQQ5BaTXYDy7
+	E9zldZ18KRRV5Trd5JuUMl7enoeCSu+CjcqWSj8XlkufJrgQBoINxK+DeA7CU7bO
+	6y3ycJQxDHTvLETyZHiTJ9qrnFg+qq2I/Bc8N2G5zuayXfU3C3d6a7IFH6FWysX5
+	uVcIGGz+efaLyi4oo0N2SmZtP+OrNv1N37JQ1R3rxaCe2PaEUCz62OH4jBZvk6Q7
+	/GebSd6FCn82pS8vcJ7mwIud92ijjJmodC4MVcq4anAsvpOvu+1+xBI6LcKIdggB
+	yK9hA5XuLvkIKwpP5anuFQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1757666871; x=
+	1757753271; bh=iDgdGFvPVafirg3SrUddyH198xBsq9KMfs20+2Svn60=; b=l
+	d9ZQCjhDRSNCac5T3Cmzqo9+troRqzUTGrdApG113OykShJ62UjytxwYMYel1md0
+	PHSUIspMFewbRjW3xIRnydTgFc0yhzfSGFU8CGgLWwmTys5U6xUKBtEgoU2jpk9Y
+	/p8FjyRq8uGnfM/1Y7ObZkRHFWefFCNhnjMwDChvlPNJi8eoMmJ/v4kAsi5IV9uh
+	WtU+tb06T2RLHma1GCrkYz8oVldJBHRwx5h1PaLY5vxeuG9N0u66gpBufSRnpF4i
+	wXVStOXcM+dsr368fmtpVhYfVSLTzsgRABtzvriNz2dSwLnuhCXMwki5VKF/Hqah
+	3nKJZQC04u/gazWF/z2vA==
+X-ME-Sender: <xms:Nt7DaHa3ACbyA-SqO1QiGQNN8fy6tdb47GQva02MkTxViI1x7FjZHg>
+    <xme:Nt7DaGY94I89-xyE1XDoa5FTfhUrVYMu2Xw_q3DdVpq3tQ7G6Nhf5a9pWTjKeeUM2
+    vO_R5XII579Y4EsCVk>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdeggddvkeeiudcutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpefoggffhffvvefkjghfufgtgfesthhqredtredtjeenucfhrhhomhepfdetrhhnugcu
+    uegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrghtthgvrh
+    hnpedvhfdvkeeuudevfffftefgvdevfedvleehvddvgeejvdefhedtgeegveehfeeljeen
+    ucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnug
+    esrghrnhgusgdruggvpdhnsggprhgtphhtthhopeduvddpmhhouggvpehsmhhtphhouhht
+    pdhrtghpthhtoheprghnghgvlhhoghhiohgrtggthhhinhhordguvghlrhgvghhnohestg
+    holhhlrggsohhrrgdrtghomhdprhgtphhtthhopegsvghnrdgthhhurghnghesghgvnhgv
+    shihshhlohhgihgtrdgtohhmrdhtfidprhgtphhtthhopehvihgtthhorhdrshhhihhhse
+    hgvghnvghshihslhhoghhitgdrtghomhdrthifpdhrtghpthhtohepughlrghnsehgvghn
+    thhoohdrohhrghdprhgtphhtthhopehgvggvrhhtodhrvghnvghsrghssehglhhiuggvrh
+    drsggvpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdp
+    rhgtphhtthhopehmihhkkhhordhrrghpvghliheslhhinhgrrhhordhorhhgpdhrtghpth
+    htohepuhhlfhdrhhgrnhhsshhonheslhhinhgrrhhordhorhhgpdhrtghpthhtohepiihh
+    ohhusghinhgsihhnsehlohhonhhgshhonhdrtghn
+X-ME-Proxy: <xmx:Nt7DaB3eG7KUd06J5zP01Lig6qQhuR6NizMonnppkI5_iRX1ykURSA>
+    <xmx:Nt7DaCKrEWHNDDdAQmsP0HG7WHsRMpSWHQ1WiABlL_3hIwiewm2Hpg>
+    <xmx:Nt7DaG21SIEHcSKeL8_NFEcBxcdh5OHUFbmWbuAwA_emY66vbLtqKw>
+    <xmx:Nt7DaGkQX58TeH2VOoyAX-BUESZ6QRT9mlNeKPIn5gbbN_uFaGD0XA>
+    <xmx:N97DaJT_xaVpi35cYxUeQpT3OZhuMkWKHgWCGA9wFX1Hz8ak32lrHEmr>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id 2093A700065; Fri, 12 Sep 2025 04:47:50 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-ThreadId: Ab0invGq7VjZ
+Date: Fri, 12 Sep 2025 10:47:29 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+ "Mikko Rapeli" <mikko.rapeli@linaro.org>,
+ "Ulf Hansson" <ulf.hansson@linaro.org>
+Cc: "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ linux-kernel@vger.kernel.org, "Adrian Hunter" <adrian.hunter@intel.com>,
+ "Victor Shih" <victor.shih@genesyslogic.com.tw>,
+ "Ben Chuang" <ben.chuang@genesyslogic.com.tw>,
+ "Geert Uytterhoeven" <geert+renesas@glider.be>,
+ "AngeloGioacchino Del Regno" <angelogioacchino.delregno@collabora.com>,
+ "Yixun Lan" <dlan@gentoo.org>, "Binbin Zhou" <zhoubinbin@loongson.cn>
+Message-Id: <acbc46c8-30df-47bb-9d3d-91ba477f6029@app.fastmail.com>
+In-Reply-To: <1813054.X513TT2pbd@diego>
+References: <20250911144313.2774171-1-mikko.rapeli@linaro.org>
+ <CAPDyKFqLag_WkxqOCebvBCJy4TzZEqt-rFD_Z30sajUxgSpcaA@mail.gmail.com>
+ <1813054.X513TT2pbd@diego>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: add dependency to ROCKCHIP_PM_DOMAINS
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-According to Heiko Stuebner <heiko@sntech.de> all SoCs
-since 2012 have power domain support in HW and
-ROCKCHIP_PM_DOMAINS should always be enabled.
+On Thu, Sep 11, 2025, at 18:05, Heiko St=C3=BCbner wrote:
+>
+> Am Donnerstag, 11. September 2025, 17:03:14 Mitteleurop=C3=A4ische=20
+> Sommerzeit schrieb Ulf Hansson:
+>> On Thu, 11 Sept 2025 at 16:43, Mikko Rapeli <mikko.rapeli@linaro.org>=
+ wrote:
+>> > @@ -866,7 +866,7 @@ config MMC_DW_PCI
+>> >
+>> >  config MMC_DW_ROCKCHIP
+>> >         tristate "Rockchip specific extensions for Synopsys DW Memo=
+ry Card Interface"
+>> > -       depends on MMC_DW && ARCH_ROCKCHIP
+>> > +       depends on MMC_DW && ARCH_ROCKCHIP && ROCKCHIP_PM_DOMAINS
 
-Suggested-by: Heiko Stuebner <heiko@sntech.de>
-Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
----
- arch/arm/mach-rockchip/Kconfig | 1 +
- 1 file changed, 1 insertion(+)
+The hard dependencies are usually only for compile-time requirements.
 
-v2: added "select" for ROCKCHIP_PM_DOMAINS also on arm
-    mach-rockchip as suggested by Heiko
+Ideally this should go the other way and use
 
-v1: https://lore.kernel.org/linux-mmc/20250911144313.2774171-1-mikko.rapeli@linaro.org/
+      depends on (ARCH_ROCKCHIP || COMPILE_TEST)
 
-diff --git a/arch/arm/mach-rockchip/Kconfig b/arch/arm/mach-rockchip/Kconfig
-index b7855cc665e94..37f1cf38a010b 100644
---- a/arch/arm/mach-rockchip/Kconfig
-+++ b/arch/arm/mach-rockchip/Kconfig
-@@ -14,6 +14,7 @@ config ARCH_ROCKCHIP
- 	select HAVE_ARM_TWD if SMP
- 	select DW_APB_TIMER_OF
- 	select REGULATOR if PM
-+	select ROCKCHIP_PM_DOMAINS
- 	select ROCKCHIP_TIMER
- 	select ARM_GLOBAL_TIMER
- 	select CLKSRC_ARM_GLOBAL_TIMER_SCHED_CLOCK
--- 
-2.34.1
+after you check that this actually builds on x86 with COMPILE_TEST
+enabled, as there may be other compile-time dependencies.
+=20
+>> Rather than "depends on", I think a "select" is better to be added
+>> from the platform's Kconfig. Probably drivers/soc/rockchip/Kconfig is
+>> where to put this.
+>>=20
+>> Assuming that ROCKCHIP_PM_DOMAINS is a critical piece for most
+>> Rockchip platforms to work.
+>
+> I'd think
+> - arch/arm64/Kconfig.platforms
+> - arch/arm/mach-rockchip/Kconfig
+> would be the correct positions.
+>
+> And as Ulf suggested, this should be a "select"
 
+I think in this case a 'default ARCH_ROCKCHIP' in the
+ROCKCHIP_PM_DOMAINS definition is sufficient to have it
+normally enabled, and still allows someone to try turning
+it into a loadable module later, which would be a requirement
+e.g. for Android GKI.
+
+    Arnd
