@@ -1,25 +1,65 @@
-Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 071AC2E0B4E;
-	Sat, 13 Sep 2025 04:58:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
+Received: from mail-pj1-f44.google.com (mail-pj1-f44.google.com [209.85.216.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D064E19258E
+	for <linux-mmc@vger.kernel.org>; Sat, 13 Sep 2025 15:10:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757739503; cv=none; b=Mguot7/VN0nh7bRg5R2Fu3TC2vBDF9dhDGITYxa1M98lNRfGQ1TnQWskiZP1pGDk6kXk7gnFN/oZtLdrtEqHVEki9QhrnR4r9kqpg5kLqvip7kVu3NSO7fgIKZyV6TqG/ymEboiKh7VVrQq86cwM8eGbr2aqO3vkdGJypcbvDrs=
+	t=1757776210; cv=none; b=ESLLlouDBtvedhPhAuclOf9ThRfacowgwJResrZrqLB0L48ltom/0nD5Eqv9TkYV9C+SE6XBxdKWzz60XNN8jZI//nIfVvt+cacxIo7yEGsQLDe/DnLEfSwN0/rBwnhxACwEeAnY8Zg5OviXqvvOd7p21Z/qLVpk+krHb6g4cp0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757739503; c=relaxed/simple;
-	bh=QKdWbEhXOdjq4saRav6ZDCQr2csgoPOIuQoBxIZ+L5Q=;
+	s=arc-20240116; t=1757776210; c=relaxed/simple;
+	bh=MJf+OC3maX2ZmdUOw7mY7bTSxAiXKJBHLm8Y1+eYoXY=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=W+G65pLj4t9agstZ3rALHzjlJKmWO6wg9wO+GEf1oWKyE9LOy9TPAqaJF2MHawqrLoW36fKI0smN6TzvAihJsGraLNDESxY674CGrLvpSmkMy4QBY4sireQ9lYX7MPsuirZZqela3E+LB9zGdirQ14HsGu5RiTzuCisCaj93sjQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
-Received: from loongson.cn (unknown [153.35.206.47])
-	by gateway (Coremail) with SMTP id _____8BxE9Dd+cRoT_EJAA--.20814S3;
-	Sat, 13 Sep 2025 12:58:05 +0800 (CST)
-Received: from [192.168.86.5] (unknown [153.35.206.47])
-	by front1 (Coremail) with SMTP id qMiowJCxrsPb+cRo2Q2SAA--.53349S2;
-	Sat, 13 Sep 2025 12:58:04 +0800 (CST)
-Message-ID: <1f09322b-6bc5-437b-88b5-dec306748d80@loongson.cn>
-Date: Sat, 13 Sep 2025 12:58:00 +0800
+	 In-Reply-To:Content-Type; b=sZIgAo6w4AamJ0vyIiNh1+UaloHWk9btXJINdP4AGittxPchsHv4CJgnfzY8GBLMin1IXfqmgrlcurIDgOtWdLIr7u8KJYYGKGrI2BfWEOThABCe+jMEtCFGBYIkRF4mLBUagk6KbbCpS1yTM1hCe5m+2YPUmyg2hvIgtItNYMU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GkowNWwM; arc=none smtp.client-ip=209.85.216.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GkowNWwM"
+Received: by mail-pj1-f44.google.com with SMTP id 98e67ed59e1d1-32e1c40ecb0so154951a91.3
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Sep 2025 08:10:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1757776208; x=1758381008; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=XzdPa1s2Ytoialc1u1fhJTSVdVzF4hVkQANScdjlGlw=;
+        b=GkowNWwM2UO5IGbP9o7MyYDkosSehC5DC28O7ahrgker2plf4x5tUJ1yzHTBTZDqEF
+         Nb15GfEvJGsN+nLWtx6cz/uHFmWLYI+SZt2v62RSK5HSQkTki0CFRQFKEIlnYiG4SRax
+         UOUCRYH6x+7tw0pv5xGhFGgS1dBVCKuEelKvclzqbYr6bPz1tKfGw8FljajcLvYqM6Gu
+         JcQLtCGpbc758pTtkju8sweD6VQC9vxGvu5lMrR50w4TQpc35YPUKFuq+8MdgpJrAzbu
+         pZCYB1I8GJf2/29i1uap9+DUJgLd0OvZ8eA4FarrOu5uCPF0OPTb/+sxrIRYGJfMYc5D
+         Sxeg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1757776208; x=1758381008;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=XzdPa1s2Ytoialc1u1fhJTSVdVzF4hVkQANScdjlGlw=;
+        b=BNOOW9Vjn2Oa2QLy/zJgkrdg8HsiOi33RitkYRU0ouP6MbaMp+4cgosWMUTlYLiOCu
+         ZSBR5xOr2eSxyI3KxMZvGTJsRVpwGmTCgkNqsTv0tO+W7JbRpPcTwy8iObdohtzbEWLx
+         ztGwetlvtBpGfy9wt7+MUtGceeQGBCETm88ZH4oc/O8SeIA0AKe/pJ+MBTEu2cx2fo63
+         HxTvjrpQnkz5vlovhB4zVAgLIkDf9hcE6Y+PP5Ejh3fTpOlWLgdpK54j11Eh/iF54X6Q
+         UDTEElVbfCHGpSO0B2P8eOrKT4M8+bpZqUVy9M+C6uRL8lkyYw8+PXU5rT4nzGRh95Bx
+         pb2g==
+X-Forwarded-Encrypted: i=1; AJvYcCUtb9gy7oNhVPWS0j7P3ta/lLZ4VUCKtv95Seq4JGaVUdDQTD26XvXm2eA2SbtfTfh3k1AyUcdFfB0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx+aX0DbEi7DjxAOkZVJceKNP3qgQRBh3PBaOGmNY/8bTcOt0Zs
+	5pMhu4/rwrA4riUli+O9WKYIM7YCqe9SulFeggGMdr7GvNd3HsMVRDB1
+X-Gm-Gg: ASbGncuaOQLzQm+lgdb0paEX6Zd2n3VBN7eTHiYmrjQbVRUlT2awwkoNAkaFWFjSyez
+	hbxTRJ3z4e5WZSH/wJu0hdisDRNredVMOYIbF40Ir+jo23e678cx5SypdZWMgebR8jxmX/bxePN
+	ajfaggQ++6KPAc6RbY0hDM/GDYC+BOCYtQdSWjgMYyO13Rd5YF5A1GEAKF9EZZAftEPqB2lpviZ
+	IrNCwbwg55tH1677Qn3ivGKI+DhNYpSOsE24L2bvkyvKBYS0y5n2ghjvuEZZAslh1L/RBFVPt2W
+	d20ywXYmS1dF9oeYe39EgzsMzn7R5Mq5JvTqVf2tC/MnH96LjJm1+5L2oyf6X36Cxe3LubHbtRw
+	u5WLCwxovmmiavAlvHQFdGHWWoWfL2p8excfZtPXmI2cWp5hdBMpe7pW1NA==
+X-Google-Smtp-Source: AGHT+IFQLwKW78Eyf3cNt54Zk3w44x+XzWX4t92z77pE9LBL04QN3MjfIphxRI6bKsbhdofevXIVfA==
+X-Received: by 2002:a17:90b:5750:b0:32b:cba3:6361 with SMTP id 98e67ed59e1d1-32de4f982bdmr7023218a91.26.1757776208005;
+        Sat, 13 Sep 2025 08:10:08 -0700 (PDT)
+Received: from [192.168.1.6] ([223.181.119.30])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-77607a4781dsm8798357b3a.33.2025.09.13.08.10.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 13 Sep 2025 08:10:07 -0700 (PDT)
+Message-ID: <3081647a-a4dd-486c-8a3f-c196580a9ee5@gmail.com>
+Date: Sat, 13 Sep 2025 20:40:01 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -27,73 +67,45 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 3/4] mmc: remove COMPILE_TEST from MMC_LOONGSON2
-To: Mikko Rapeli <mikko.rapeli@linaro.org>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
- linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
- victor.shih@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
- geert+renesas@glider.be, angelogioacchino.delregno@collabora.com,
- dlan@gentoo.org, arnd@arndb.de, zhoubb.aaron@gmail.com
-References: <20250912142253.2843018-1-mikko.rapeli@linaro.org>
- <20250912142253.2843018-4-mikko.rapeli@linaro.org>
+Subject: Re: [PATCH v2 1/2] arm: dts: ti: omap: Drop unnecessary or unused
+ properties
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Paul Barker <paul.barker@sancloud.com>,
+ Marc Murphy <marc.murphy@sancloud.com>, Tony Lindgren <tony@atomide.com>,
+ Kishon Vijay Abraham I <kishon@kernel.org>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-omap@vger.kernel.org
+References: <20250908-ti-sdhci-omap-v2-0-72927890482f@gmail.com>
+ <20250908-ti-sdhci-omap-v2-1-72927890482f@gmail.com>
+ <20250909-uptight-fluorescent-markhor-4639db@kuoka>
 Content-Language: en-US
-From: Binbin Zhou <zhoubinbin@loongson.cn>
-In-Reply-To: <20250912142253.2843018-4-mikko.rapeli@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+In-Reply-To: <20250909-uptight-fluorescent-markhor-4639db@kuoka>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-CM-TRANSID:qMiowJCxrsPb+cRo2Q2SAA--.53349S2
-X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/1tbiAQEECGjDtiYabAAAsB
-X-Coremail-Antispam: 1Uk129KBj9xXoWrur1UtryDWryUZFyrKF47KFX_yoWDGFXEga
-	yjgwn7Gr12kryxZ3W0qF1kZry3ta1kWr1UXryrKrnxua43JFnYv3W3urn0qw13ua1UuFW2
-	9rWS9r1Svw48AosvyTuYvTs0mTUanT9S1TB71UUUUbUqnTZGkaVYY2UrUUUUj1kv1TuYvT
-	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
-	cSsGvfJTRUUUbTkYFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
-	vaj40_Wr0E3s1l1IIY67AEw4v_JrI_Jryl8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
-	w2x7M28EF7xvwVC0I7IYx2IY67AKxVW8JVW5JwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxV
-	W8JVWxJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0
-	oVCq3wAaw2AFwI0_JF0_Jw1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0cIa02
-	0Ex4CE44I27wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jw0_Wryl
-	Yx0Ex4A2jsIE14v26r4j6F4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvEwIxGrwCY1x
-	0262kKe7AKxVWUtVW8ZwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwCF
-	I7km07C267AKxVWUtVW8ZwC20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r
-	106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AK
-	xVWUCVW8JwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k26cxKx2IYs7
-	xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_
-	Gr1UYxBIdaVFxhVjvjDU0xZFpf9x07jo_M-UUUUU=
 
-Hi Mikko:
 
-Thanks for your patch.
 
-On 2025/9/12 22:22, Mikko Rapeli wrote:
-> It fails to link due to undeclared dependency
-> to regmap which is not enabled for COMPILE_TEST:
+On 09-09-2025 12:50, Krzysztof Kozlowski wrote:
+> On Mon, Sep 08, 2025 at 04:17:12PM +0000, Charan Pedumuru wrote:
+>> Remove unnecessary properties like ti,needs-special-reset,
+>> ti,needs-special-hs-handling and cap-mmc-dual-data-rate from the DTS
+>> files as there is no user of them.
 > 
-> ERROR: modpost: "__devm_regmap_init_mmio_clk"
-> [drivers/mmc/host/loongson2-mmc.ko] undefined!
+> No user? That's not true:
 > 
-> Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
-> ---
->   drivers/mmc/host/Kconfig | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
+> git grep ti,needs-special-reset
+
+Yes, my bad, I removed them from the whole node. I will revert these changes for the next revision.
+
 > 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 2db46291ae442..e2d9a7cf9f855 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -1113,7 +1113,7 @@ config MMC_OWL
->   
->   config MMC_LOONGSON2
->   	tristate "Loongson-2K SD/SDIO/eMMC Host Interface support"
-> -	depends on LOONGARCH || COMPILE_TEST
-> +	depends on LOONGARCH
+> Best regards,
+> Krzysztof
+> 
 
-How about add `select REGMAP_MMIO` instead.
-
->   	depends on HAS_DMA
->   	help
->   	  This selects support for the SD/SDIO/eMMC Host Controller on
-
-Thanks.
-Binbin
+-- 
+Best Regards,
+Charan.
 
