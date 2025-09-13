@@ -1,244 +1,99 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B236309EEC;
-	Fri, 12 Sep 2025 19:10:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 071AC2E0B4E;
+	Sat, 13 Sep 2025 04:58:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757704211; cv=none; b=hI1PncQu7q2KvI/+xpicWbNPCFmxX7kavupEIlRhn+IYNueP2BjwUx6k9xpUZIDRZEuWqrAv/uirybbhAobRDpbvD/1ysDtNEg5jGp0+3q+k3h2sLPGzP8fQwbiKW/cqq510ZFFUgq8YGRLu3Ku8eO2lWQP12cbCBp7r6Im1nKw=
+	t=1757739503; cv=none; b=Mguot7/VN0nh7bRg5R2Fu3TC2vBDF9dhDGITYxa1M98lNRfGQ1TnQWskiZP1pGDk6kXk7gnFN/oZtLdrtEqHVEki9QhrnR4r9kqpg5kLqvip7kVu3NSO7fgIKZyV6TqG/ymEboiKh7VVrQq86cwM8eGbr2aqO3vkdGJypcbvDrs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757704211; c=relaxed/simple;
-	bh=BHvO3ffOu/pYItZcjhAHlIsp5Ebwcjc3/LkaEdv6EYc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EYcIM1nV26aZMYcI7bzmriu1oyPpWkkpuxz9zLUKvjBg5S/Mm3rgcNQm6jYtS4l2CDI5Zo6P7PmDagvNEeCex0J082mXfOuPQYSTynitVeVCZ+4OHWwIe6XiQtQ99VlnlIrcRQZh2QIrCSyBezMdjo7UrWT7tEzmhk6fZBLJhlI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HbdrWw+q; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HbdrWw+q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E70A4C4CEF1;
-	Fri, 12 Sep 2025 19:10:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1757704210;
-	bh=BHvO3ffOu/pYItZcjhAHlIsp5Ebwcjc3/LkaEdv6EYc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=HbdrWw+qY6KsEX7m6TBsiOQZHcO3FJQNY0FxU1AUBr89RmfNJX8ys5j0lqqRaodld
-	 FGZrkvkZAzbWh2yDTywPu7bIJLMJ4EL40PDVEWgKatHREe2006Tf0zRYH0gygHZpNm
-	 38YvJJT42306TLIRY3UDKGjU3gh+DbypDHqJYmwG8y+F/9iYtBrOMWSgwgg7BuDTe5
-	 FjxLszL6EdzIz79xcJggobJYyze67DTQUmQoVZBLAGNj2Je6OhthnMKXvTOeKDRMhZ
-	 RYifvyGjGvKIN6BMUQgUMMDeDtqxxNntYAftHrbzQfHagQjn69VIhDqdwmVTIqHb3U
-	 UOuBwU9kDMSrw==
-Date: Fri, 12 Sep 2025 20:10:04 +0100
-From: Conor Dooley <conor@kernel.org>
-To: hehuan1@eswincomputing.com
-Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-	conor+dt@kernel.org, jszhang@kernel.org, adrian.hunter@intel.com,
-	p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	ningyu@eswincomputing.com, linmin@eswincomputing.com,
-	pinkesh.vaghela@einfochips.com, xuxiang@eswincomputing.com,
-	luyulin@eswincomputing.com, dongxuyang@eswincomputing.com,
-	zhangsenchuan@eswincomputing.com, weishangjuan@eswincomputing.com,
-	lizhi2@eswincomputing.com, caohang@eswincomputing.com
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin
- EIC7700
-Message-ID: <20250912-pork-oaf-3480d3d0ef67@spud>
-References: <20250912093451.125-1-hehuan1@eswincomputing.com>
- <20250912093713.142-1-hehuan1@eswincomputing.com>
+	s=arc-20240116; t=1757739503; c=relaxed/simple;
+	bh=QKdWbEhXOdjq4saRav6ZDCQr2csgoPOIuQoBxIZ+L5Q=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=W+G65pLj4t9agstZ3rALHzjlJKmWO6wg9wO+GEf1oWKyE9LOy9TPAqaJF2MHawqrLoW36fKI0smN6TzvAihJsGraLNDESxY674CGrLvpSmkMy4QBY4sireQ9lYX7MPsuirZZqela3E+LB9zGdirQ14HsGu5RiTzuCisCaj93sjQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
+Received: from loongson.cn (unknown [153.35.206.47])
+	by gateway (Coremail) with SMTP id _____8BxE9Dd+cRoT_EJAA--.20814S3;
+	Sat, 13 Sep 2025 12:58:05 +0800 (CST)
+Received: from [192.168.86.5] (unknown [153.35.206.47])
+	by front1 (Coremail) with SMTP id qMiowJCxrsPb+cRo2Q2SAA--.53349S2;
+	Sat, 13 Sep 2025 12:58:04 +0800 (CST)
+Message-ID: <1f09322b-6bc5-437b-88b5-dec306748d80@loongson.cn>
+Date: Sat, 13 Sep 2025 12:58:00 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="er6Xm9SJtE93Y+go"
-Content-Disposition: inline
-In-Reply-To: <20250912093713.142-1-hehuan1@eswincomputing.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 3/4] mmc: remove COMPILE_TEST from MMC_LOONGSON2
+To: Mikko Rapeli <mikko.rapeli@linaro.org>, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+ linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
+ victor.shih@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+ geert+renesas@glider.be, angelogioacchino.delregno@collabora.com,
+ dlan@gentoo.org, arnd@arndb.de, zhoubb.aaron@gmail.com
+References: <20250912142253.2843018-1-mikko.rapeli@linaro.org>
+ <20250912142253.2843018-4-mikko.rapeli@linaro.org>
+Content-Language: en-US
+From: Binbin Zhou <zhoubinbin@loongson.cn>
+In-Reply-To: <20250912142253.2843018-4-mikko.rapeli@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-CM-TRANSID:qMiowJCxrsPb+cRo2Q2SAA--.53349S2
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/1tbiAQEECGjDtiYabAAAsB
+X-Coremail-Antispam: 1Uk129KBj9xXoWrur1UtryDWryUZFyrKF47KFX_yoWDGFXEga
+	yjgwn7Gr12kryxZ3W0qF1kZry3ta1kWr1UXryrKrnxua43JFnYv3W3urn0qw13ua1UuFW2
+	9rWS9r1Svw48AosvyTuYvTs0mTUanT9S1TB71UUUUbUqnTZGkaVYY2UrUUUUj1kv1TuYvT
+	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
+	cSsGvfJTRUUUbTkYFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
+	vaj40_Wr0E3s1l1IIY67AEw4v_JrI_Jryl8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
+	w2x7M28EF7xvwVC0I7IYx2IY67AKxVW8JVW5JwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxV
+	W8JVWxJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0
+	oVCq3wAaw2AFwI0_JF0_Jw1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0cIa02
+	0Ex4CE44I27wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jw0_Wryl
+	Yx0Ex4A2jsIE14v26r4j6F4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvEwIxGrwCY1x
+	0262kKe7AKxVWUtVW8ZwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwCF
+	I7km07C267AKxVWUtVW8ZwC20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r
+	106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AK
+	xVWUCVW8JwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k26cxKx2IYs7
+	xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_
+	Gr1UYxBIdaVFxhVjvjDU0xZFpf9x07jo_M-UUUUU=
 
+Hi Mikko:
 
---er6Xm9SJtE93Y+go
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Thanks for your patch.
 
-On Fri, Sep 12, 2025 at 05:37:13PM +0800, hehuan1@eswincomputing.com wrote:
-> From: Huan He <hehuan1@eswincomputing.com>
->=20
-> EIC7700 use Synopsys dwcmshc IP for SD/eMMC controllers.
-> Add Eswin EIC7700 support in sdhci-of-dwcmshc.yaml.
->=20
-> Signed-off-by: Huan He <hehuan1@eswincomputing.com>
+On 2025/9/12 22:22, Mikko Rapeli wrote:
+> It fails to link due to undeclared dependency
+> to regmap which is not enabled for COMPILE_TEST:
+> 
+> ERROR: modpost: "__devm_regmap_init_mmio_clk"
+> [drivers/mmc/host/loongson2-mmc.ko] undefined!
+> 
+> Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
 > ---
->  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 81 +++++++++++++++++--
->  1 file changed, 75 insertions(+), 6 deletions(-)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yam=
-l b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index f882219a0a26..e0f34bc28e0c 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -30,6 +30,7 @@ properties:
->            - sophgo,sg2002-dwcmshc
->            - sophgo,sg2042-dwcmshc
->            - thead,th1520-dwcmshc
-> +          - eswin,eic7700-dwcmshc
-> =20
->    reg:
->      maxItems: 1
-> @@ -52,17 +53,51 @@ properties:
->      maxItems: 5
-> =20
->    reset-names:
-> -    items:
-> -      - const: core
-> -      - const: bus
-> -      - const: axi
-> -      - const: block
-> -      - const: timer
-> +    maxItems: 5
-> =20
->    rockchip,txclk-tapnum:
->      description: Specify the number of delay for tx sampling.
->      $ref: /schemas/types.yaml#/definitions/uint8
-> =20
-> +  clock-output-names:
-> +    maxItems: 1
-> +    description:
-> +      The name of the clock output representing the card clock,
-> +      consumed by the PHY.
+>   drivers/mmc/host/Kconfig | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 2db46291ae442..e2d9a7cf9f855 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -1113,7 +1113,7 @@ config MMC_OWL
+>   
+>   config MMC_LOONGSON2
+>   	tristate "Loongson-2K SD/SDIO/eMMC Host Interface support"
+> -	depends on LOONGARCH || COMPILE_TEST
+> +	depends on LOONGARCH
 
-You have one clock, why do you need this?
+How about add `select REGMAP_MMIO` instead.
 
-> +
-> +  '#clock-cells':
-> +    enum: [0]
+>   	depends on HAS_DMA
+>   	help
+>   	  This selects support for the SD/SDIO/eMMC Host Controller on
 
-const: 0
+Thanks.
+Binbin
 
-> +    description:
-> +      Specifies how many cells are used when referencing the
-> +      exported clock from another node. This property indicates
-> +      that the clock output has no extra parameters and represents
-> +      the card clock.
-
-This description is not needed.
-
-> +
-> +  eswin,hsp-sp-csr:
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    items:
-> +      - description: Phandle to HSP(High-Speed Peripheral) device
-> +      - description: Offset of the stability status register for
-> +                     internal clock
-> +      - description: Offset of the stability register for host
-> +                     regulator voltage.
-> +    description: |
-> +      High-Speed Peripheral device needed to configure internal
-> +      clocks, and the power.
-> +
-> +  eswin,syscrg-csr:
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    items:
-> +      - description: Phandle to system CRG(System Clock and Reset
-> +                     Generator) device
-> +      - description: Offset of core clock control register
-> +    description: |
-> +      System Clock and Reset Generator device needed to configure
-> +      core clock.
-
-This reeks of improper clock tree description. Why can you not just
-request the rate that you need via the common clk framework? Likewise
-for reset. You already have a clocks property that has to include the
-core clock, so I don't see why you need another property to get around
-it.
-
-As a result, I'm also suspicious of your hsp-sp-csr, but these at least
-appear to be internal clocks if your description is to be believed.
-I'd like you to explain exactly what those clocks do and what the "HSP"
-actually is. What other peripherals use it?
-
-Also, your driver turns on this hsp clock but never turns it off. Same
-for the power.
-
-I want to see the full dts for what you're doing here before I approve
-this, there's too much here that looks wrong.
-
-> +
-> +  drive-impedance-ohm:
-
-How come this one has no eswin prefix? Also, the unit is "Ohms", not
-"Ohm".
-
-Additionally, any eswin properties should be restricted to eswin devices
-only.
-
-> +    description: Specifies the drive impedance in Ohm.
-> +    enum: [33, 40, 50, 66, 100]
-> +
->  required:
->    - compatible
->    - reg
-> @@ -110,6 +145,40 @@ allOf:
->              - const: block
->              - const: timer
-> =20
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: eswin,eic7700-dwcmshc
-> +    then:
-> +      properties:
-> +        resets:
-> +          minItems: 4
-> +          maxItems: 4
-> +        reset-names:
-> +          items:
-> +            - const: arstn
-> +            - const: phy_rst
-> +            - const: prstn
-> +            - const: txrx_rst
-
-How come you're so drastically different to the other devices?
-Also, putting "_rst" in a reset name is pointless. These are all resets
-after all by nature.
-
-Cheers,
-Conor.
-
-> +      required:
-> +        - clock-output-names
-> +        - '#clock-cells'
-> +        - eswin,hsp-sp-csr
-> +        - eswin,syscrg-csr
-> +        - drive-impedance-ohm
-> +    else:
-> +      properties:
-> +        resets:
-> +          maxItems: 5
-> +        reset-names:
-> +          items:
-> +            - const: core
-> +            - const: bus
-> +            - const: axi
-> +            - const: block
-> +            - const: timer
-> +
->    - if:
->        properties:
->          compatible:
-> --=20
-> 2.25.1
->=20
-
---er6Xm9SJtE93Y+go
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaMRwDAAKCRB4tDGHoIJi
-0shHAQC+SrqvSbv2pQ0Nma2DkzXWQp1AlSILxib/onOdJjFDjAD/StEwusEOYc0V
-WqBLKaCHIC5d9NoKe6QdUlkErvglkAY=
-=vvpd
------END PGP SIGNATURE-----
-
---er6Xm9SJtE93Y+go--
