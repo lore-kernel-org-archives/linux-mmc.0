@@ -1,107 +1,83 @@
-Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F0F525F99B
-	for <linux-mmc@vger.kernel.org>; Sun, 14 Sep 2025 13:18:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7057C1A83F7;
+	Sun, 14 Sep 2025 22:23:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757855938; cv=none; b=sSwWp0HXQX70Hn6diwhvCPFo/ViEvNhbukUlsK4zviYeab/lMUYW7MQdl/aZ2N5fVXdIw/sKKjWOF0pZXjwxVuXaQ0ZxGNQSugrYlPSklgKFupUYhfr3EiB0rRlWxDx1LUql9xN9fLkEV33hVJairZQKFnc9+k18+vwJj1eKR9U=
+	t=1757888629; cv=none; b=WAGcwmGBHO3ehNhXIci2/0OkyD/k9EoEGc3xBdQKF/PmDUBRwTlq8R9aB2OEqSWErtarLWWtmEDJmRJilAeCy9MqRlftH0pzczNkDAX+hw3o951IcdgGyR2ri/Vis3qGKua1O5RVqoAjqmIPJ6/paY3mpiNsmiN2yhVneNj/9CI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757855938; c=relaxed/simple;
-	bh=ilMxvWH2dg61Z6fyXi47Z0rAj/IgKekCXgAzquw3YXo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=I6KssGAhqLPQNZAEIgbqK3cEwkMIOLhTY+Ynhp4WFUx8a/3ql1YWvXVEhoEKbhdImBdVpUTHO4nDuK7lBJSIM96MsPf2A3u6fj4azJ/IJoob/+W9XrZOYh85fNxQ5DdtVjHAAve54azZZF7pZHXAYPym9R4C3jZufGMMzMzXltY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hVf3Cw++; arc=none smtp.client-ip=209.85.128.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1757888629; c=relaxed/simple;
+	bh=/LlF4E7qkI3Bjwu07Und525pRRyaR1UAgcj7QilxBYY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=srFcR7LtlAPHScQZj77PiJNtaOv7o8hEm5MmF4yTPpyqqHt3kq8J0rvSXTSGCLPhz0AEAxX0K0ZaNHbX4Y5s802VXQ5jjFi80Tg73DMPAdHFWPi3lCuVerjGsNYpHZmp+JChZauoASJioXfO1v98xEZD6CLggrbZvheLAMU+WKk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SHdSqdj5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hVf3Cw++"
-Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-45dde353b47so20251785e9.3
-        for <linux-mmc@vger.kernel.org>; Sun, 14 Sep 2025 06:18:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1757855934; x=1758460734; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=hpcddqPrYhRHRnLKWFJl0UXLOkAIbo7ClNO40SWmR1I=;
-        b=hVf3Cw++enjGQUC9WJ50stlt7rX4H35ZsfgQGzaiUVbxhOB32YAQdl4Dnpp1zqnTlp
-         sa6KTtBAG0/zLJE4UWOPP0ziV027L105cojgMak1t8JT2gXaBI4PoSyL/uSaGfBCt9LZ
-         voGxVCPcQjO75VppmQRCU0FPOYpQJxZtnGKcaUHg/nRQqRM6PfO3PHjOEk5cU4zboo7c
-         G+hxISv31JYJxUeDImvElLbSO9SpA1boKwB7a3Mol8ML4izkmwdrZgbJ/6Uqow7ECg66
-         nVv1jbKVTM6kDA5B4ZiUIpaPFjb8JUeD6kitjAU80jBEMrIL3xZIE0Jqb47Qt7/j+Md4
-         Qh2g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757855934; x=1758460734;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=hpcddqPrYhRHRnLKWFJl0UXLOkAIbo7ClNO40SWmR1I=;
-        b=wokBeGhVuQbq6TF5WWJ8sQB/4NdGL5fokObZEh0iSK6Ayreb7EYKeJgEkfQtqPT2hI
-         kMPG1aNic/x0Chm5Kl6lfpUi3XU/MHhhTaDO98EXBGdN0rHYym+YVLhFa/BZNO9KZlP7
-         dk7SRTnFU0+rR+pzJHLrukdEHuc+iDGe6tYiSwlZ2q4oyrKXPXFq/U79Akxqu6+o/TcI
-         0keyAOYAcYS0xjURXqsUvST8szPkzoX+VkJxL0W/nrWic79G4VLiXc5yGIi3MxGmkOMs
-         Kf47/lcxhx+FyU5taDSymflafJmCnWIcQbovTV1AWLQAksnUl+mdh9Fsf2xz9Mrfxxl8
-         1Ggg==
-X-Forwarded-Encrypted: i=1; AJvYcCWGJgkV6sgAhQu04NCKQ7h0JugRVeNfKkvRSzFGKzMhBLk9UmBDcd83odoemxtakp7LTJwZBK3rCP4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxb9jlZZEVaeL6sV2zDt7N4Nysk0/wnm+x7myZFsLaqYE05hx0w
-	NZz+4j2GxduAXPe73XonZ3jl4LuopG0xVl1Z1F1Wj3kgdIn7/suCe1vZ
-X-Gm-Gg: ASbGncuCWmzKS/oBExVDbfzKOJMmFS8fW5iKQDY3og4YQTHBN7VcKrW4D/JIJ/HEwTI
-	52hpCLKYX5FEJlFQuRtHmRR6SUbJFdd1cQOkVQm5zwhOf5nEE38ks+MYhG+Yc6hsIn3Lcj0aWkJ
-	mHqTFl/ZmgwFtOKv6T+PmDRZMX/Yx1ivdVuKa0FDAPrSrhrnl3+2jAtdGKU1PgVbgazXYzpPaGO
-	jyTFe20fUz2QUdqp5NWXO2fKwmFckhKZx1L6O5+0BA7/2pdR+uHmai9BWWyr05g0nmUV+v8sQWn
-	JCDxbeNBM9X4sewlTxy2z57WZ2e+qofuT1FX+ZtMs+6zbbv4+frtFx4uDdVImRC92ifuQdUP3MU
-	frdGG3i9gzXqdJ5R7P0FvR00ad6EghOgwSZoF2Vm2AEwUMfoRrtyEIIHrjxpw7QM38KaH907nhg
-	==
-X-Google-Smtp-Source: AGHT+IGAQ9494spxVybXeZcysph17sK0XNJ3EcpSw8C5tvKdn4tAgtOfyRpsT2ldfbY8hA09fnwBpg==
-X-Received: by 2002:a05:600c:1c0b:b0:45c:4470:271c with SMTP id 5b1f17b1804b1-45f212f9888mr83535235e9.18.1757855933631;
-        Sun, 14 Sep 2025 06:18:53 -0700 (PDT)
-Received: from ivaylo-T580.. (91-139-201-119.stz.ddns.bulsat.com. [91.139.201.119])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-45e037d62besm133359875e9.21.2025.09.14.06.18.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 14 Sep 2025 06:18:53 -0700 (PDT)
-From: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
-To: Krzysztof Kozlowski <krzk@kernel.org>,
-	Rob Herring <robh@kernel.org>,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SHdSqdj5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3F1CC4CEF0;
+	Sun, 14 Sep 2025 22:23:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1757888629;
+	bh=/LlF4E7qkI3Bjwu07Und525pRRyaR1UAgcj7QilxBYY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=SHdSqdj53/+GOcO6JK2I7FRKp0YvvkzbdIUdGq2aqqlpahr91Gn/H4EvsZsSpuIJv
+	 DKJZek42e5D6pBHxDamtY0zKHMv4AjIvbjm3aEdL9WL+RPi+6grMTv5ja5ZHLOhBo7
+	 ZDva4QF8glxeapa9FANKQAQvuvuJCMF/sL9mMZSW9ZJVQCUEz+SD1yXm6KsKSMgLN3
+	 Yg5TZ7IX2t+9ro68WFvWAyoJTYEFJRW/1XTs6IPdH+hCdOUA26BPnObzRDEzKXeMhF
+	 ZT6mnMMFqob75UN2Ln1vbhWiVVEBq5CsXjCUNTmXF4FuTqsBGuHgtjzvdnf96ODlO1
+	 /IEqbrBUN7gRw==
+Date: Sun, 14 Sep 2025 17:23:48 -0500
+From: Rob Herring <robh@kernel.org>
+To: Charan Pedumuru <charan.pedumuru@gmail.com>
+Cc: Krzysztof Kozlowski <krzk@kernel.org>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	Alim Akhtar <alim.akhtar@samsung.com>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-samsung-soc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v1] dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatible for exynos8890
-Date: Sun, 14 Sep 2025 16:18:48 +0300
-Message-ID: <20250914131848.2622817-1-ivo.ivanov.ivanov1@gmail.com>
-X-Mailer: git-send-email 2.43.0
+	Paul Barker <paul.barker@sancloud.com>,
+	Marc Murphy <marc.murphy@sancloud.com>,
+	Tony Lindgren <tony@atomide.com>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] arm: dts: ti: omap: Drop unnecessary or unused
+ properties
+Message-ID: <20250914222348.GA2080538-robh@kernel.org>
+References: <20250908-ti-sdhci-omap-v2-0-72927890482f@gmail.com>
+ <20250908-ti-sdhci-omap-v2-1-72927890482f@gmail.com>
+ <20250909-uptight-fluorescent-markhor-4639db@kuoka>
+ <501a4e0a-2d6e-4a57-9006-91413bd2ebb4@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <501a4e0a-2d6e-4a57-9006-91413bd2ebb4@gmail.com>
 
-Add samsung,exynos8890-dw-mshc-smu specific compatible to the bindings
-documentation. Since Samsung, as usual, likes reusing devices from older
-designs, use the samsung,exynos7-dw-mshc-smu compatible.
+On Sun, Sep 14, 2025 at 12:19:15AM +0530, Charan Pedumuru wrote:
+> 
+> 
+> On 09-09-2025 12:50, Krzysztof Kozlowski wrote:
+> > On Mon, Sep 08, 2025 at 04:17:12PM +0000, Charan Pedumuru wrote:
+> >> Remove unnecessary properties like ti,needs-special-reset,
+> >> ti,needs-special-hs-handling and cap-mmc-dual-data-rate from the DTS
+> >> files as there is no user of them.
+> > 
+> > No user? That's not true:
+> > 
+> > git grep ti,needs-special-reset
+> 
+> Should I remove ti,needs-special-reset property for the compatibles 
+> "ti,am335-sdhci" and "ti,am437-sdhci" instead of removing for all mmc 
+> nodes? ti,needs-special-hs-handling and cap-mmc-dual-data-rate were 
+> defined for board specific, so these two properties should be defined 
+> in the YAML file to resolve dtb_check errors or can I remove those 
+> properties for those boards too?
 
-Signed-off-by: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
----
- .../devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml          | 1 +
- 1 file changed, 1 insertion(+)
+If those 2 compatibles don't use the omap_hsmmc driver then, yes I think 
+you can remove the properties from those nodes. Otherwise, shrug. Ask 
+the TI folks if you can't figure it out.
 
-diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-index e8bd49d46..27c4060f2 100644
---- a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-@@ -31,6 +31,7 @@ properties:
-               - samsung,exynos5433-dw-mshc-smu
-               - samsung,exynos7885-dw-mshc-smu
-               - samsung,exynos850-dw-mshc-smu
-+              - samsung,exynos8890-dw-mshc-smu
-               - samsung,exynos8895-dw-mshc-smu
-           - const: samsung,exynos7-dw-mshc-smu
- 
--- 
-2.43.0
-
+Rob
