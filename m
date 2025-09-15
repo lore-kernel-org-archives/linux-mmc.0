@@ -1,128 +1,116 @@
-Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
+Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC1A5524F
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Sep 2025 07:01:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C36072E9EA8
+	for <linux-mmc@vger.kernel.org>; Mon, 15 Sep 2025 08:33:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757919712; cv=none; b=QhLtI0xm8R0rPTcnqT1LJvpv2oCXsKAZUAGYyFvfDdAgyEDYe+rnpSIkXzTC1Hrn9pJ0UtakDLw635mGF0DspKsj5nLry/AvC+IZambBz+1lFnYAbCvggluXytFczFxrph4brv4JjcKH3xwppOUy8K67yCuveI5xhVDAXSOhBgY=
+	t=1757925217; cv=none; b=bBz6L5Skl83MLLdkfckCPFPjkliV1/TPPJFrXIek0HevSv7w5W6XrsVxFK4YDivziTQ51b80KEiMWR+PFODST5qPXT08D4moxynFc4CJp2KZzXLyLG0t+iCtCr+07EuceFtWfwBtPPpt+pfRTRHm3goadX1m2aUbGsXY7bwkD0w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757919712; c=relaxed/simple;
-	bh=IIUGO/dEbzBpZ78hDxZU7VRxbR2Zz8U9O9qbR0A0xAI=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To; b=MVvPc1YeVvDAL0mtNB9syJkiWwkfhvLNzMyI4q9F5/8sTuC1prYeolcsPajnhAM2hinaBL1aMvtGxDOUqinRyLQnrtsuv0+wxG2PsQlf/GYgskJ1yu9Rb7SXhjyOMn7lSvvdrt6aGwmckksJ0hv8YihzC4BgGiYmDgZiTD1Qnmw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=b53Eb5oY; arc=none smtp.client-ip=209.85.167.42
+	s=arc-20240116; t=1757925217; c=relaxed/simple;
+	bh=qgHExHKX0GUPykcINnOhpIWsYtDUUek2qoRVQ2W22yI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=eJ4RkQmyS75iFSJu+M4zfCUvf2Bz7KGIczRAM9sJAxw/Fc1JnT7Jvj6VDMT5RB4sFdjzK/NyzaDAlcP/r9wYSg3dKHQUqQFVSRWNdWCfumXFTGAVL7hyqy/s6hMfXSyjSeiIyCFB+K5hFJQrTBKbza5zETCuWHDdpOMJrlyx2Kg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=VEURqaG7; arc=none smtp.client-ip=209.85.167.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="b53Eb5oY"
-Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-55f7ab2a84eso3639199e87.1
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Sep 2025 00:01:50 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VEURqaG7"
+Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-55f7ab2a84eso3710593e87.1
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Sep 2025 01:33:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757919709; x=1758524509; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
-         :to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=MqtUFtQXqrY0eT8Jyx/HTyjcTDqiPb75irXtglfsEWg=;
-        b=b53Eb5oYpuBSsOx2ParcturEh72/nb3ofTLo/DK42iVJLmgHX1sDFdq5u9YN2aALKk
-         ag2EyRDeZ45viEIBTLiBfdXsieaT1LviW2aM4cvsbcY8C0LL1dsdy2whg8ImEqAA+pGX
-         KURGaQKWjf39Z0qfoiZvBKOxdMkLfOedoPa3iKgpQ0Bq+I0hx1pyqdme/fn9/TIP4lf0
-         tA5u2xfY8MH+JRI/uz7WsWp0DjhmlM6ThRkC8CegY+x5qdxSyWhqEnWVW6bSSXsK2ueP
-         HElmdsRVkdPWT6NpX6bcHm1vmuzXTaMuzmauG72wSTfHHqlkn4BtQbP6bfYJRKPmI8SV
-         BTsw==
+        d=linaro.org; s=google; t=1757925213; x=1758530013; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=/EihPg0rDDUsO2zpTiZR4g9YFvnwO8fGm9cXNKFjmmM=;
+        b=VEURqaG7fwCnnAy8nXUfmDd/YFkXcSbKQuKC1SS45fz7n1jUtzoSliGXXgjAibWode
+         KBrK21App5AFoFGgoWBWLLsSkPPxWWaC41jLHUfGeMw9K3sRKvh5c22beEt1c2n+uu1z
+         9q20us91iJWPer1aNSEgtA5a3LPFftBT02DBj5qNYyYTD43y0FdSoVAVPe6tLvmYBxY0
+         FReBddjbdkHJODgNbzS1F13q5ZXjucTp6d0uh117uO73fXeTYVQmL5H6A/CJM0aWElwd
+         8NtOL+/IbvUovX1/saj+SKEXs5MLZfGA+ObACR0n14Ciyg7zUGXz5KKjj4XoAvv99FKo
+         P/0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757919709; x=1758524509;
-        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
-         :to:from:date:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1757925213; x=1758530013;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=MqtUFtQXqrY0eT8Jyx/HTyjcTDqiPb75irXtglfsEWg=;
-        b=ver1bZnKIQnz1hDfIuHcr9Hg0kGxF3oiG8phv7ScTROwL79v2sa0N03QhvDYERmZPy
-         wGqdFOSUq67hwXP2OtfN69eyNqYVKyk6nB7ujvO3m+mPZ8/7zClaPDsRY/7x5oiYi/It
-         gVLZN6JgOwn7gWSUrXxgDGROJ0/iWnkstgO4mndPEXm2oyXupAb529CD6xO//H3bWxsr
-         C2DW7dxJZf/Dl8urrs3HdECZko0++VOfPW2cPbu/RKKalfXLf0vjiPiLG9wbIQDyMJAa
-         bWLDWVMXlWQN83UHyETw5CQQW6XkgRN9sId4U2lL5FTn6HLR/VgeJnVFGUv01umgumJf
-         acmQ==
-X-Gm-Message-State: AOJu0YzW6TKEyw4Tvvs5W4VgycD48eMkzYpK6IexNTB+rYosTGjtL42c
-	F+Cz6mSIxQEriUZzwVGB78/ajHw8XVWKEwUhWBbQrHsbCpijc/zVUI2X4KBRDADDS28=
-X-Gm-Gg: ASbGncuQ/Ty1KNYmKO+TaD7nwLKWkIPlsPSHFY6sCiKmlkmyBPP+mV5GyjA39kvGDbR
-	CBXcvJrOzNgjxkezY31BTSj8uAx5mjr1YklPhrq/k1eGYT9zpmb+xG0xXaZrndRAA16EtlJKi1U
-	O+9Ue8l8Qhi+6g6Pxzd2bfdtO+D+olMGXPXOUPE42zO4AGp9aBZpNSrewFAAJSJu7LZJobII3qc
-	l0mOaSh17m/pzOao4xLdNkZhbI/cJtMbJzPTw4LKjUHumg+s+fgeMc3RHPnJ5w2PugKQWstQEEd
-	Bki6ylmKLiYCPV0wTuvJWtmsugeZ2iubzq4uqZ4Rv2EA7JBaSUNEHOgA3Lsuj/gLjt+pUMhunjh
-	OIUcT2l50ISHWbaRbOo2kqrCoZ3LnZf3pqVO9Gk2WVBaTVDeV5ZI6cvI=
-X-Google-Smtp-Source: AGHT+IFBdmNQEzyswHDpGv1SoR2koTptT4AXtjV5Z/8TKUtFo7V4yBDALIrdg96iQz/TMcSidgZeMw==
-X-Received: by 2002:a05:6512:79a:b0:55f:3f25:f036 with SMTP id 2adb3069b0e04-5704fb86967mr3095602e87.34.1757919708816;
-        Mon, 15 Sep 2025 00:01:48 -0700 (PDT)
+        bh=/EihPg0rDDUsO2zpTiZR4g9YFvnwO8fGm9cXNKFjmmM=;
+        b=FHBwEkhxvkij08kq1iFp2qnF07feVWJAF/3V0t1kUsju1Rf0Rb/L99h2I5+56U32Zy
+         TatMw1JIKZwHj4gQCe/0P56pIxtc13GBDgMsY+fR0H/oOSrGhcpRFHyzwBRAcHFGpt+/
+         14rLaYMLJow4+mt9s18OsaJLLre4Gur8g+P5zxQij3Gbh6cuGGLW9D4diKAqH7fEk9SL
+         SticSM+qt7bWzeFWb1eqZouch751kwb4mL77hcsiXhc/qCHLReelgJ57nINCgirQKFmf
+         3VxcwG9joxk1kzPdFIO+seKIRPJXT1wiX++gphnaxDHSfZyebtuR95el5IJ1YYMp5+Z9
+         1blA==
+X-Forwarded-Encrypted: i=1; AJvYcCUtg9m3rFkqlC66DgS7G1VtFEX9fgI5qQLsGpc2X/0RKVq0q15z+aOl/yXqxDu6E7NsMrcWxAGVwxk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwLnNGwI6GEQBOrrVXlhWusRHx3dOnqevRdFQZWihniB37DHBl6
+	IaQ462o9uCqYzzTHN+J7XGgoQ5IqHfWAgeLC4ge5q2Tr9nKHW0iUB3EvhNW8p3g4ywk=
+X-Gm-Gg: ASbGnct3YMrPiX4zFBfUHatmF57PZdQEpSZ8X0ggpk9C5HF/3nR0KLP4e/deTZmL8/D
+	L98bwGOnOZVFCmRg/gUZMfNjoWKEHgtNtlq+g1aIspz2WFTtRR9rT7ti7hyHfDwi/2NyPrLexcb
+	lQqiytXaGkVmymeJcg5ctd2QbBF5wgYxcq9XK1eHa9TXrpSQ4yJ3RB4Y4kng2kKBnSurnyHyHvD
+	yOSFrRhwwAdGo6J95XSIFws6rvYdMWpGRCks1syvxY5qCiUMFPsd9oiFHNR7f6pyK3nCw5pH52I
+	hyZ4i3oFkkCt2X8Q7Zh6RJQSKCxIYufNkiYo7cilfZvVCSMT9FAbnrrRzUaac+Ajww0wAGFJTh9
+	Q7BdC3N3+Sb2HbWs2sonTSbMDel0KJP14yq6Z1xswtcR1n6YOBtcUjRX2yishmo5LkUXm8NgVAj
+	K/
+X-Google-Smtp-Source: AGHT+IGOXTY6MavVKngLCpLB1G9dg0jsTMPCjkwVytxoyznWD2WrW7pxjPzUDjOIZ3mMkSDu12yFmA==
+X-Received: by 2002:a05:6512:2585:b0:55f:43ba:9410 with SMTP id 2adb3069b0e04-5704b52f23emr3366686e87.15.1757925212793;
+        Mon, 15 Sep 2025 01:33:32 -0700 (PDT)
 Received: from nuoska (87-100-249-247.bb.dnainternet.fi. [87.100.249.247])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-56e5cf300b7sm3394559e87.45.2025.09.15.00.01.47
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-571a6a33ba8sm2335142e87.46.2025.09.15.01.33.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Sep 2025 00:01:48 -0700 (PDT)
-Date: Mon, 15 Sep 2025 10:01:46 +0300
+        Mon, 15 Sep 2025 01:33:32 -0700 (PDT)
 From: Mikko Rapeli <mikko.rapeli@linaro.org>
-To: Arnd Bergmann <arnd@arndb.de>, Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>,
+To: linux-pm@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-rockchip@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Yixun Lan <dlan@gentoo.org>, zhoubb.aaron@gmail.com
-Subject: Re: [PATCH v3 3/4] mmc: remove COMPILE_TEST from MMC_LOONGSON2
-Message-ID: <aMe52k8wtQBU-eyN@nuoska>
+	linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Mikko Rapeli <mikko.rapeli@linaro.org>
+Subject: [PATCH v4 0/4] enable ROCKCHIP_PM_DOMAINS
+Date: Mon, 15 Sep 2025 11:33:13 +0300
+Message-ID: <20250915083317.2885761-1-mikko.rapeli@linaro.org>
+X-Mailer: git-send-email 2.50.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1f09322b-6bc5-437b-88b5-dec306748d80@loongson.cn>
- <413a49f5-91f3-4334-9128-29297293f953@app.fastmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 Hi,
 
-On Fri, Sep 12, 2025 at 04:50:38PM +0200, Arnd Bergmann wrote:
-> On Fri, Sep 12, 2025, at 16:22, Mikko Rapeli wrote:
-> > It fails to link due to undeclared dependency
-> > to regmap which is not enabled for COMPILE_TEST:
-> >
-> > ERROR: modpost: "__devm_regmap_init_mmio_clk"
-> > [drivers/mmc/host/loongson2-mmc.ko] undefined!
-> 
-> Nice catch! I assume my normal randconfig builds never
-> run into this because there is always something selecting
-> REGMAP_MMIO.
-> 
-> >  config MMC_LOONGSON2
-> >  	tristate "Loongson-2K SD/SDIO/eMMC Host Interface support"
-> > -	depends on LOONGARCH || COMPILE_TEST
-> > +	depends on LOONGARCH
-> >  	depends on HAS_DMA
-> 
-> I would instead add 'select REGMAP_MMIO' here, which is what
-> we do for other drivers using this.
+MMC_DW_ROCKCHIP needs ROCKCHIP_PM_DOMAINS before MMC is detected
+on Rockchip rk3399 rockpi4b and similar devices. Make this dependency
+more visible, or the default with ARCH_ROCKCHIP if possible.
 
-On Sat, Sep 13, 2025 at 12:58:00PM +0800, Binbin Zhou wrote:
-<snip>
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -1113,7 +1113,7 @@ config MMC_OWL
-> >   config MMC_LOONGSON2
-> >   	tristate "Loongson-2K SD/SDIO/eMMC Host Interface support"
-> > -	depends on LOONGARCH || COMPILE_TEST
-> > +	depends on LOONGARCH
-> 
-> How about add `select REGMAP_MMIO` instead.
+v4: fixed Kconfig whitespace, added select REGMAP_MMIO to MMC_LOONGSON2
+    instead of disabling COMPILE_TEST
 
-Sorry, my bad. I just checked drivers/base/regmap/Kconfig for COMPILE_TEST
-and since it was not found thought that it's not supported with
-COMPILE_TEST.
+v3: use "default ARCH_ROCKCHIP" in ROCKCHIP_PM_DOMAINS as suggested
+    by Arnd Bergmann <arnd@arndb.de>, enable more MMC drivers for
+    COMPILE_TEST and remove MMC_LOONGSON2 which doesn't link,
+    remove PM dependency as suggested by
+    Geert Uytterhoeven <geert@linux-m68k.org>
+    https://lore.kernel.org/linux-mmc/aMQv1V49xa_MThGq@nuoska/T/#md2b3252f9dce14f3f79a493c426f2761cba1dc25
 
-I will add the REGMAP_MMIO dependency instead in v4.
+v2: changed from "depend on" in MMC driver to "select" as default
+    on ARCH_ROCKCHIP as suggested by Ulf and Heiko
+    https://marc.info/?i=20250912084112.2795848-1-mikko.rapeli%20()%20linaro%20!%20org
 
-Cheers,
+v1: https://lore.kernel.org/linux-mmc/20250911144313.2774171-1-mikko.rapeli@linaro.org/
 
--Mikko
+Mikko Rapeli (4):
+  pmdomain: rockchip: enable ROCKCHIP_PM_DOMAINS with ARCH_ROCKCHIP
+  mmc: add COMPILE_TEST to multiple drivers
+  mmc: select REGMAP_MMIO with MMC_LOONGSON2
+  ARM: rockchip: remove REGULATOR conditional to PM
+
+ arch/arm/mach-rockchip/Kconfig    |  2 +-
+ drivers/mmc/host/Kconfig          | 10 ++++++----
+ drivers/pmdomain/rockchip/Kconfig |  1 +
+ 3 files changed, 8 insertions(+), 5 deletions(-)
+
+-- 
+2.34.1
+
