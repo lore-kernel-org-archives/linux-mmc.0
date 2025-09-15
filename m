@@ -1,108 +1,140 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE4502F0C73
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Sep 2025 08:33:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D7652FC892;
+	Mon, 15 Sep 2025 10:33:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1757925228; cv=none; b=IeTOJ8sqLrJ8Mu7AyuHSpzsvOelbT0XUj8RiBYl8zFCXqhbtNy1KKASMnff9h3abDUXCBk7DzXoEUMp8fKnY0L9nUxmYxUfjAen9txEUXJMOCeZQOYo74Tc1pY6IARqmjZ8g55iLqLfE+xU4/PO5wZjtRCnXwWtF5nS5YAYD8mM=
+	t=1757932410; cv=none; b=eO6WAj6sOMRln/hycgeqh+hSwBOUBZx3L6WQydIJX57clKAcAlbfl+5LlrYkMvMWAE/XQEOy7yhBF4ePkYHf3GkuLiGi7HdHM6Cxz7aI0E/CBm+aPeC8xXvblKt5+4cHszsRH1pW55jEeP/j0MbEoinHPBAG2+VRY9uLZrUZhvg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1757925228; c=relaxed/simple;
-	bh=wucKZjXUVtRxrGoS9CppvLYgJwFvEG8gqGPWzlZGBag=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=mBjwZRHfh76HR0+/bTzVu/x1DpGt/CbDi+fuOZypE2vbbs9ElCkUxAqjDxeRb8zUnxcXjbMVYa3/Z2/pmtlRpza6jkhrbVWxf9oSm1PPNdcblGCNSJtzPQUJLBMCOtiVeWzXnDpA44E7ASN5DLwvXi5ySZsgBlvgueqVrSmHnw8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ZLTOx798; arc=none smtp.client-ip=209.85.167.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1757932410; c=relaxed/simple;
+	bh=B+vY08F4i/HnCv1ScZcxAk8Aza1H/zvJQLkJgxXZeNM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=qlrhzXH4WYJTe9d/1W3mX/E65vnK1y6Pkbwjgq5hHvNJb39Xj+QF6O1+W9OkosBx+lZMUuhWTq0FaXC6Y7l+mq+yBUMvXY5znqAPvy2uiROcqcd7ij0AIidHYT2JBIFdnahTFIhY9gw+47ZOu9dBnSm2SYsTyyJoNmDTwRnBd5g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=n52fYylc; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ZLTOx798"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-55f74c6d316so4002737e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Sep 2025 01:33:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1757925225; x=1758530025; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/qUTD8uROnoCtAqaX/Ri9iIJ3aP0OlkHXH5AZacDoiM=;
-        b=ZLTOx79863Y9dBGRIyWS02ByXJ5b3dBO7796MWO2BA9YvYPYyrfqyKOgPJ/9O9jEcx
-         sh5ls7fehOXmv2n2NgbYuj6zvE/6WlesqtRxA2ppoFQKhxfRvwJ9ywJ1trLtSeqmO5i9
-         8rAzhG3em7G6C1rlf82Br1v205tdwLwfMqUF8+5MXsKFcMHRvsLqqeFSaAtyP+NhdZWH
-         JwIrhyPLIX/6xL6SV6p8DoBm+nx+ijjeC2QzPBpeudP/7nsbB9/C1bxzWMTSZuKBVmdd
-         ECkGS3LcnjuhKsknbC5fYIurpy211mPzM/S7nWiGEUwgrPfwtPglZrRSncoGx+SZk78m
-         vfyw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1757925225; x=1758530025;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=/qUTD8uROnoCtAqaX/Ri9iIJ3aP0OlkHXH5AZacDoiM=;
-        b=FTdiH8CUTFby3u0NqJFgwwEinPLku7W8Pzh/5H2m18GzG78G5RwgMMQwmNoAnBpKsw
-         /IwQD9DtfCrFo+W/zqQtKnHaJv9f9a4MRVXX79ZjAALeR5QEIB7VPFS/iwPgB83YAzR8
-         i2KcE0aMp9jI4d87c8ns+kTb66MV0ARh6CAJwUy3LhWv1S2Ew330Otio7DOKFZRNeZCa
-         gQto3PZ9QF8HlR+bc8vSHtnQht0e82QK//5zYKkEf7VOWfh6mhn+GmSLSa6MaFUdOs8p
-         QCOcJ2jttQsqKptP9pCiLHKK/vwHGwETcaH1plQtzRoia+ks7JcB4kon4E36bCPDpNas
-         Y5sw==
-X-Forwarded-Encrypted: i=1; AJvYcCXmEa/qKQ3V6/8lrfkaYSV0qr+9QE2LxyFCS0aH/xnZGVkqu6cfZONBoFMAgMg3AfXvnyA37TqOGxs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzNZqcq2wJ0HEK7+2fRXkoiV/XRgzFQQ1z7Qpwkwth/ydkymQxW
-	DJQpb/PvP9fgeCJTntsZCQHO00uatxm0Z8vH6sHJbk94BH9j4EK7V6SAeeNIrIq0iOo=
-X-Gm-Gg: ASbGnctb56w9Ei8sRafaIaMEmUSpoFSZW19vhdE064N8Y/vPZUev7d8uTExnM7NEro1
-	3M7uqwmdMK7QKCJvaaMflXtBYguHgRcEsjeUNwsKd4w2oPb6DkrE7ICESzURPJ4+kISIgnTTsvP
-	KC+5C5t2+MgzhEv+bzKZ4Bq84/Id7kFP4lCKC1CAbgNpLB35aKt/UJnfKJYlpgUBKWtRVvgE5UE
-	zL5Tywk/eUK5EGzUWhGPjqC4j8HLqm/8atfarMdZ9UKNx6S02MPhqwXc+YIgdK/czRXqVBdnMPb
-	jZgZzFGY9e3fBod1Ujdb+Wy370/n/DX3w77imM1ZAOvAX6HeG5PApzrUOPOMn8GAb7epJ9i7efn
-	3h9JDq2BPSToXPO1efwDrEvaM1UOtIIXi51VyOu4yxx0rAVEwVCUGlM8=
-X-Google-Smtp-Source: AGHT+IFCaOIerdSvA+z61cnaMnc6f4/AxdvboyLIWVzD2Istbx7t/KAwnGHxWdDUQK//4BQjlegbXg==
-X-Received: by 2002:a05:6512:3f05:b0:55f:3e4d:fb3b with SMTP id 2adb3069b0e04-5704d0071c6mr4042367e87.30.1757925224185;
-        Mon, 15 Sep 2025 01:33:44 -0700 (PDT)
-Received: from nuoska (87-100-249-247.bb.dnainternet.fi. [87.100.249.247])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-571a6a33ba8sm2335142e87.46.2025.09.15.01.33.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Sep 2025 01:33:43 -0700 (PDT)
-From: Mikko Rapeli <mikko.rapeli@linaro.org>
-To: linux-pm@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-rockchip@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	Mikko Rapeli <mikko.rapeli@linaro.org>,
-	Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: [PATCH v4 4/4] ARM: rockchip: remove REGULATOR conditional to PM
-Date: Mon, 15 Sep 2025 11:33:17 +0300
-Message-ID: <20250915083317.2885761-5-mikko.rapeli@linaro.org>
-X-Mailer: git-send-email 2.50.0
-In-Reply-To: <20250915083317.2885761-1-mikko.rapeli@linaro.org>
-References: <20250915083317.2885761-1-mikko.rapeli@linaro.org>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="n52fYylc"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 58F8FiYk018062;
+	Mon, 15 Sep 2025 10:33:23 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	hEwwZy8ATsI5rPJueJK8Mx9VooV1umz/QHEkRLAcREw=; b=n52fYylc7qSgB3eV
+	Yq8T9m4YvkV6suTPvdHEhNr2U53aDcWrxgSkfOVypocqN2xVZVjtVnnXxQPJPuHw
+	3TTVcLRgsoochUq7FSUQ0Eiu0B4gqImRFTAzWfzWb1ilwhwwblo/cu/eX9aakQ7u
+	wvs0TZWcn0NEF9PQSzvKq9tbKDaWShs9sBF2p4ouUr/vSuMSL5WWDdip5rG61H/s
+	Nh+2GQB40NMUZucg6oT4/6DhdOs+ekqubCdUghiyeodBdc5CPOyQ7bSDiIdEB+HH
+	RpgEQJloWZAVcqcWzBmeVveUvaJb3ppg1Mh/R13CrBCkp/MbYdO48Kug2l886uLD
+	csqK7A==
+Received: from nasanppmta04.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4950u54h7c-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 15 Sep 2025 10:33:23 +0000 (GMT)
+Received: from nasanex01c.na.qualcomm.com (nasanex01c.na.qualcomm.com [10.45.79.139])
+	by NASANPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 58FAXNwQ011646
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 15 Sep 2025 10:33:23 GMT
+Received: from [10.218.18.194] (10.80.80.8) by nasanex01c.na.qualcomm.com
+ (10.45.79.139) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.24; Mon, 15 Sep
+ 2025 03:33:16 -0700
+Message-ID: <8f8df889-3f88-4b9b-a238-16044796d897@quicinc.com>
+Date: Mon, 15 Sep 2025 16:03:14 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 07/14] arm64: dts: qcom: lemans-evk: Enable PCIe
+ support
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
+        Wasim Nazir
+	<wasim.nazir@oss.qualcomm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, "Rob
+ Herring" <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        "Conor
+ Dooley" <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        "Konrad Dybcio" <konradybcio@kernel.org>,
+        Richard Cochran
+	<richardcochran@gmail.com>,
+        Bartosz Golaszewski <brgl@bgdev.pl>
+CC: <kernel@oss.qualcomm.com>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <netdev@vger.kernel.org>,
+        <linux-i2c@vger.kernel.org>
+References: <20250908-lemans-evk-bu-v4-0-5c319c696a7d@oss.qualcomm.com>
+ <20250908-lemans-evk-bu-v4-7-5c319c696a7d@oss.qualcomm.com>
+ <cb2a5c93-0643-4c6b-a97f-b947c9aad32c@oss.qualcomm.com>
+Content-Language: en-US
+From: Sushrut Shree Trivedi <quic_sushruts@quicinc.com>
+In-Reply-To: <cb2a5c93-0643-4c6b-a97f-b947c9aad32c@oss.qualcomm.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01c.na.qualcomm.com (10.45.79.139)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: FwbzkJhGeavS9d001wAdTXfxE2E5nA0T
+X-Proofpoint-ORIG-GUID: FwbzkJhGeavS9d001wAdTXfxE2E5nA0T
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTEzMDAzMSBTYWx0ZWRfX5A8o8LawJiuj
+ ZfRqPlGLcbUehF2ldAHuPlAYE2Zqi8490lZVou3ouPVQ84oPO2siT3oo17b5qPtRA5V8tQB0+9K
+ fAByYXkREws+8q8Qg0vEIH6v3zmQKuqjfgAiTK5GfjJrUmtRS3+GbgvkjcSrYbzLkW20iXz7VOK
+ 1Tj6GWGgVSS1STzo1UEkAyO+JL6ALV7r9Nf/t2RgM+tLsluqsidDhCDf7StCNYzqFDYqiiXefss
+ 6f/Df74X+3PeRvCbSNzbles0aJYf0ItTBZnq5DD7PhaCDSCRDb9K7ab42OHzc+i+GhTz4FSzJaQ
+ V6OXqbUCHYobs7eCJUkKzMC44XxHgUE/WbV5OkCelgwLVfvdWlIGGn27sNcV98qN6JWpJaBP6UK
+ q60A0o10
+X-Authority-Analysis: v=2.4 cv=JvzxrN4C c=1 sm=1 tr=0 ts=68c7eb73 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8
+ a=EUspDBNiAAAA:8 a=XuqPMlvQ3-AsHj1PTisA:9 a=QEXdDO2ut3YA:10
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-09-15_04,2025-09-12_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 phishscore=0 suspectscore=0 clxscore=1011 impostorscore=0
+ spamscore=0 adultscore=0 malwarescore=0 bulkscore=0 classifier=typeunknown
+ authscore=0 authtc= authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2507300000 definitions=main-2509130031
 
-PM is explicitly enabled in lines just below so
-REGULATOR can be too.
 
-Suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
-Signed-off-by: Mikko Rapeli <mikko.rapeli@linaro.org>
----
- arch/arm/mach-rockchip/Kconfig | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On 9/12/2025 5:57 PM, Konrad Dybcio wrote:
+> On 9/8/25 10:19 AM, Wasim Nazir wrote:
+>> From: Sushrut Shree Trivedi <quic_sushruts@quicinc.com>
+>>
+>> Enable PCIe0 and PCIe1 along with the respective phy-nodes.
+>>
+>> PCIe0 is routed to an m.2 E key connector on the mainboard for wifi
+>> attaches while PCIe1 routes to a standard PCIe x4 expansion slot.
+>>
+>> Signed-off-by: Sushrut Shree Trivedi <quic_sushruts@quicinc.com>
+>> Signed-off-by: Wasim Nazir <wasim.nazir@oss.qualcomm.com>
+>> ---
+> [...]
+>
+>> +		perst-pins {
+>> +			pins = "gpio2";
+>> +			function = "gpio";
+>> +			drive-strength = <2>;
+>> +			bias-pull-down;
+>> +		};
+> Pulling down an active-low pin is a bad idea
 
-diff --git a/arch/arm/mach-rockchip/Kconfig b/arch/arm/mach-rockchip/Kconfig
-index b7855cc665e94..c90193dd39283 100644
---- a/arch/arm/mach-rockchip/Kconfig
-+++ b/arch/arm/mach-rockchip/Kconfig
-@@ -13,7 +13,7 @@ config ARCH_ROCKCHIP
- 	select HAVE_ARM_SCU if SMP
- 	select HAVE_ARM_TWD if SMP
- 	select DW_APB_TIMER_OF
--	select REGULATOR if PM
-+	select REGULATOR
- 	select ROCKCHIP_TIMER
- 	select ARM_GLOBAL_TIMER
- 	select CLKSRC_ARM_GLOBAL_TIMER_SCHED_CLOCK
--- 
-2.34.1
+Ack, we should do pull up.
+we took reference from the previous targets which seems to be wrong.
+we will make it pull up.
 
+Bjorn,
+can you make this change while applying or shall we send new series.
+
+- Sushrut
+
+>
+> Konrad
