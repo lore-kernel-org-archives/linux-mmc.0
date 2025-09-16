@@ -1,36 +1,36 @@
 Received: from mail.mainlining.org (mail.mainlining.org [5.75.144.95])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80C8D27AC48;
-	Tue, 16 Sep 2025 20:13:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E92827AC48;
+	Tue, 16 Sep 2025 20:13:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.75.144.95
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758053611; cv=none; b=j2bt5TOZD5YmR6hnnVxvuCkkwm8rskOhW39oDS7axv0YXeZPkVCW4h6t2LtlnN76k5Xt3ZP+em//v4ONhVgMevrJzx6Bw21kBuKHaZLREN4oTT7pNf9Im6/XXB4MXvdTsybwSAbP5byXVMQXgKrG9JZLx03nHoTm1bv4wU/jjQE=
+	t=1758053631; cv=none; b=VWeujzj2XlB6tBPQJTMaIpLgj2aIkyF0OSo84jMo+HTG6XylJ6fFmLtKXacBIQ/wm9/dfT7IFYOGnWzipUT5xy1Zn5xq4SycPw2XGUPrSrSNVVBsTc8aeEQoRlQZLQ2TFIk8JfeJdGLEM/XWhPVCeESLbGA/SfGvRsR3aHdXLsA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758053611; c=relaxed/simple;
-	bh=YAW/bGAZr0vX0B6I3xTMN5lJP76jY17Qpzu5kruaYow=;
+	s=arc-20240116; t=1758053631; c=relaxed/simple;
+	bh=Fax4H41w25n5u6GELyum7Uq2SVrab6rxKUOtQRQV09k=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=ngO2F6Rlv/ZZ8Tj3+wscsI9AtTl3YBgJ2AnDhG3LnikhrluyB3HRemdf/bhYhakrmg9Y3GCNGtdMXyMF5K9qH2VMkoPujo7mzr0NFHKrEYLQwNVsXg8DEQD8/d2SXvEY0xxElqHhdQQeAz2E593d2SmFN9ErIw0pvmF1Hl7iMTs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org; spf=pass smtp.mailfrom=mainlining.org; dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=hLpu4gSl; dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=WW2JIo0s; arc=none smtp.client-ip=5.75.144.95
+	 In-Reply-To:To:Cc; b=AlgDG+7BSCxasS8sDHCY7LNXxC06aWMvEAIgzUCySkFc8winWH4lNc9obP7wnHcar4TX7Q/8JMKgsPkdmj2jNHWRk3s1tpnpDxStRoM7ogFOVhnOIw9U0HRtugWr19dzMKgRcyF7Jfow7db9Q8Utw8ouW/6duDOGIar6t+atiFU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org; spf=pass smtp.mailfrom=mainlining.org; dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=VJhHzR1H; dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=lrjMieh9; arc=none smtp.client-ip=5.75.144.95
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mainlining.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="hLpu4gSl";
-	dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="WW2JIo0s"
+	dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="VJhHzR1H";
+	dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="lrjMieh9"
 DKIM-Signature: v=1; a=rsa-sha256; s=202507r; d=mainlining.org; c=relaxed/relaxed;
-	h=To:Message-Id:Subject:Date:From; t=1758053329; bh=6lN5YbmxbG/JdV5+gZzIcdJ
-	o4H8J9c8mF3XBOEa05S8=; b=hLpu4gSl1jUGXNE9Jtq/BksnXL/x6+ICzqiMfsphzYiXfHyPb9
-	FzXgbXb1KMk2HpiDx3H/GxNX+O+zylMx6B1er3bfaQ8poLbnrDUXnJRdyXNrULoKEwIkaCflr06
-	eW0PU1YS9x05pJS7Tb/lX5/Pkuua6NSoCfNZvpyGh3Na54OWH2lgrcDgN98BKPcqM1nnoil80Tc
-	dfChPmiDEQVQ0ZKR2TYDSuYNN1RsUoc2Znc4EQf40XEwa5tXHL4IZJl42j68daIjtnodTmq5gCR
-	GxM8UHMpv6qKv5iKMmESGTPRXAR7Ro7ekduH4NyreNgECjUK/PL4GI1Upc5lI+ugqHQ==;
+	h=To:Message-Id:Subject:Date:From; t=1758053288; bh=/MfrKbQAcxo1P+UMUl3T75e
+	+IPr/PFabDA6Xht/wT2k=; b=VJhHzR1HV/j+Qma4wsjArLbf21+pHVb08dOcDiqw8LpAPh3DW7
+	Aob2lXQ04vwOeHD9V5oMflVdOkNpaV1THNjwFADz0LSc79WBQwqQsmFN5hyd27ms9lHDL/2TtF7
+	uOkGOXvYvSezBsX15BsztxtlYbXSwGju2lk2LE1/07mpsIN6FVry7UYGPtPZf7oPZDCBhJ9FdIg
+	c4HBuFNwkfNSZlSJZ/0BGGIbinJV2HXNvEKKgQCi+8824Lxc0RLiaa/Ajw59+MzzlLQAWFlL4jT
+	B/nIQ2+i3gMyag9SMjMw10NW/5FNfZ0xzMbOxte4/9NnER1yZS7471JRO3R4izUDu5A==;
 DKIM-Signature: v=1; a=ed25519-sha256; s=202507e; d=mainlining.org; c=relaxed/relaxed;
-	h=To:Message-Id:Subject:Date:From; t=1758053329; bh=6lN5YbmxbG/JdV5+gZzIcdJ
-	o4H8J9c8mF3XBOEa05S8=; b=WW2JIo0sHtcyCBqdqSLDMcibs+YiyPBXlFihkQKr/CHOHUIjFb
-	LMMxuDRvcSYaNmZhccDXN5Cfo6aHj8e+TSCg==;
+	h=To:Message-Id:Subject:Date:From; t=1758053288; bh=/MfrKbQAcxo1P+UMUl3T75e
+	+IPr/PFabDA6Xht/wT2k=; b=lrjMieh9dKOkoNobhZqp7S+144r6DdCdWyAK9MOlkepG/rYvIZ
+	q8YOhzqs8AP/NmjvkxP7ydLOAuIGOChsDdAA==;
 From: Dang Huynh <dang.huynh@mainlining.org>
-Date: Wed, 17 Sep 2025 03:07:25 +0700
-Subject: [PATCH 08/25] ARM: dts: unisoc: rda8810pl: Enable ARM PMU
+Date: Wed, 17 Sep 2025 03:07:19 +0700
+Subject: [PATCH 02/25] drivers: gpio: rda: Make IRQ optional
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -39,7 +39,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250917-rda8810pl-drivers-v1-8-74866def1fe3@mainlining.org>
+Message-Id: <20250917-rda8810pl-drivers-v1-2-74866def1fe3@mainlining.org>
 References: <20250917-rda8810pl-drivers-v1-0-74866def1fe3@mainlining.org>
 In-Reply-To: <20250917-rda8810pl-drivers-v1-0-74866def1fe3@mainlining.org>
 To: Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
@@ -61,37 +61,31 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org,
  linux-mmc@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>
 X-Mailer: b4 0.14.2
 
-The SoC uses a standard ARM PMU, enable it.
+Not all GPIO have IRQ. When we use this driver with
+GPIOC (handled by modem) we get:
+
+rda-gpio 11a08000.gpioc: error -ENXIO: IRQ index 0 not found
+
+Let's mark IRQ as optional so this error doesn't show up.
 
 Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
 ---
- arch/arm/boot/dts/unisoc/rda8810pl.dtsi | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/gpio/gpio-rda.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/unisoc/rda8810pl.dtsi b/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-index 609359aa91537168435934077e736b216adf50f4..45a2fd3e04cea5aac4fb6b40a6b332ce3eee4f2c 100644
---- a/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-+++ b/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-@@ -6,6 +6,7 @@
-  * Copyright (c) 2018 Manivannan Sadhasivam
-  */
+diff --git a/drivers/gpio/gpio-rda.c b/drivers/gpio/gpio-rda.c
+index bcd85a2237a532b875df9470d972ac88b95a91cc..b4db8553a2371ae407fdb7e681d0f82c4d9f74b7 100644
+--- a/drivers/gpio/gpio-rda.c
++++ b/drivers/gpio/gpio-rda.c
+@@ -229,7 +229,7 @@ static int rda_gpio_probe(struct platform_device *pdev)
+ 	 * RDA8810PL, GPIOC doesn't support interrupt. So we must handle
+ 	 * those also.
+ 	 */
+-	rda_gpio->irq = platform_get_irq(pdev, 0);
++	rda_gpio->irq = platform_get_irq_optional(pdev, 0);
  
-+#include <dt-bindings/interrupt-controller/arm-gic.h>
- #include <dt-bindings/interrupt-controller/irq.h>
- 
- / {
-@@ -25,6 +26,11 @@ cpu@0 {
- 		};
- 	};
- 
-+	pmu {
-+		compatible = "arm,cortex-a5-pmu";
-+		interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;
-+	};
-+
- 	sram@100000 {
- 		compatible = "mmio-sram";
- 		reg = <0x100000 0x10000>;
+ 	rda_gpio->base = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(rda_gpio->base))
 
 -- 
 2.51.0
