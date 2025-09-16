@@ -1,62 +1,37 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.mainlining.org (mail.mainlining.org [5.75.144.95])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DAB1329517;
-	Tue, 16 Sep 2025 16:58:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04FCF2DF15A;
+	Tue, 16 Sep 2025 20:09:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.75.144.95
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758041919; cv=none; b=DUXq8vthkEBxBGZPYTU3tHm+myshRgQN8K0CgXJZt6I+UbVgTCCbLgRxSmuhET2b6g1ohxjhPviWXSjxNytzxN3fIkaN4fVsrW2junZKcVkMgDumAphRZ1CPLX/6+9r7K3X3lL8d2ytlPUYNKG5b2KG+xi3moIuLDoCUuvmu0jY=
+	t=1758053386; cv=none; b=sESXzhB4wBz9iTg1eeLoko6r/an7UVIYE61LErQ4apZ/hYXcqbLJgUnLQqO9kPvInl60lkTu+YaNwPRFjynAes35U2wKIfYuc891YSdawlHon3RkJ4T702bi61b48m2oVZZ9qp1v921qVJdIRFr99/khrGNgttf1OWV5tal6q/A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758041919; c=relaxed/simple;
-	bh=cN2ZRIwpPuuTuFydKsuswQytPt7ZVYZueiDnIohjvxg=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Zia4YqMQgCEV9MFnkqQFQMpYvuZpLaDNbOwiXJmgItyd9Sz/Sgt/SBrqvYFAjJWoI+j7t61cdevfwmXyE+plCgzQFyq90dRQWFkHNCRdblWSrsKtgw5YoSoAEvbnUXft/vr8XRfOWXBGg1PUXae2Y6ggn2xbvmkGIjmzhE4eYgw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ufGW4ipa; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1758053386; c=relaxed/simple;
+	bh=F0hJeg4vF8n1IM7OJY4KSBkC9cZRnfQ7Ctr7Iv83zwo=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=ZU5s9z2JxuRtJZBbIfd+4HwlY1BqjEwjrppxf1OSNC+wi3F04sPAWxe9PC1cVpyqDO+7KZBSrvQcD3OqeVe0uV4o38MiZ8jPRB384obZMup5PuYoPzPMB2LZLvjy37E06YwapKT5c9gDajwNHEXqaUZdbTLzQ2fMcKQUOX7F+00=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org; spf=pass smtp.mailfrom=mainlining.org; dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=GAvx5qwG; dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=UzO03XcR; arc=none smtp.client-ip=5.75.144.95
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mainlining.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ufGW4ipa"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B765AC4CEF7;
-	Tue, 16 Sep 2025 16:58:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758041919;
-	bh=cN2ZRIwpPuuTuFydKsuswQytPt7ZVYZueiDnIohjvxg=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ufGW4ipaBuqkZumNSbHozdOrPtbsJc8gOophMG/yqg6lu3A61SeJaSBfuxc/Rfoqz
-	 7HlzyPzelhOESnR9HvCdsZNEJSi0JGD8fNAsXzEEQIFoRTSAwhZcdWAv9sfxBiHIa+
-	 QsQOlGSghSU+nZNF2/mgsoKRKupQOzyAmoiHjNrT2lu9yNP/GsbWi/27oN/DI1AAfl
-	 zhkF9YltDSNt97izaa1CNRYiHmiKhHSE3sYTraXEXL+suTLKc3XHHn/EbzUMw00Lcm
-	 wpZyb0qfI6x5YGMxPsO/qMDVtdIuHtZCvSyscPc5RJV+CeIM+h3vbjB92oM0yZBh+Z
-	 f+0pQYAh9+jHA==
-From: Bjorn Andersson <andersson@kernel.org>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Richard Cochran <richardcochran@gmail.com>,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Wasim Nazir <wasim.nazir@oss.qualcomm.com>
-Cc: kernel@oss.qualcomm.com,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org,
-	netdev@vger.kernel.org,
-	linux-i2c@vger.kernel.org,
-	Monish Chunara <quic_mchunara@quicinc.com>,
-	Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
-	Viken Dadhaniya <viken.dadhaniya@oss.qualcomm.com>,
-	Nirmesh Kumar Singh <quic_nkumarsi@quicinc.com>,
-	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-	Sushrut Shree Trivedi <quic_sushruts@quicinc.com>,
-	Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>,
-	Mohd Ayaan Anwar <quic_mohdayaa@quicinc.com>,
-	Vikash Garodia <vikash.garodia@oss.qualcomm.com>
-Subject: Re: [PATCH v5 00/10] arm64: dts: qcom: lemans-evk: Extend board support for additional peripherals
-Date: Tue, 16 Sep 2025 11:58:21 -0500
-Message-ID: <175804189844.3983789.17270960228782770722.b4-ty@kernel.org>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20250916-lemans-evk-bu-v5-0-53d7d206669d@oss.qualcomm.com>
-References: <20250916-lemans-evk-bu-v5-0-53d7d206669d@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="GAvx5qwG";
+	dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="UzO03XcR"
+DKIM-Signature: v=1; a=rsa-sha256; s=202507r; d=mainlining.org; c=relaxed/relaxed;
+	h=To:Message-Id:Subject:Date:From; t=1758053336; bh=WlrpMszuag375++3au3AQMu
+	mLE/Z1ZoZmJDjJqd8ieY=; b=GAvx5qwGFbxhNRkxwhc5JSYB1VRIMjT5ITBEWXUjVNyQ0BNZ7n
+	sPJRK49nsYSihF6htA0vNokgdRIR+nQd0zL96pFlmWIrCntfk8gd5ENYJKXzz0hxoB2VikAnAhM
+	pZFG08Xt/Aw1XeI2Ygsr5tq4QthZmwtGBBU3En3e3ezDluZx5QW73yYfSUWU3hpBrQDL9fBKirG
+	ReGGVxNrWIv22KM00QZaDIvPKsnL+PUP3+VPkjeLArQes/PIm5LGDaEN334/+3Q162yDD8Z9OVz
+	Sv+iSk9BiyPut/O3rwwaTq54MfwPbnUKeTZ1bw0Vta8J/i5rFf6L154KEr+qR+hTahQ==;
+DKIM-Signature: v=1; a=ed25519-sha256; s=202507e; d=mainlining.org; c=relaxed/relaxed;
+	h=To:Message-Id:Subject:Date:From; t=1758053336; bh=WlrpMszuag375++3au3AQMu
+	mLE/Z1ZoZmJDjJqd8ieY=; b=UzO03XcRaN3wGrSqDtBkO/u7EMhC+mKUBkEupBvSBqMoLn/K9o
+	n56YX+PHZY+jiYPCh5W/1ggBp9Tr5ku7pFAw==;
+From: Dang Huynh <dang.huynh@mainlining.org>
+Date: Wed, 17 Sep 2025 03:07:26 +0700
+Subject: [PATCH 09/25] dt-bindings: clock: Add RDA Micro RDA8810PL
+ clock/reset controller
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -64,50 +39,174 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
+Message-Id: <20250917-rda8810pl-drivers-v1-9-74866def1fe3@mainlining.org>
+References: <20250917-rda8810pl-drivers-v1-0-74866def1fe3@mainlining.org>
+In-Reply-To: <20250917-rda8810pl-drivers-v1-0-74866def1fe3@mainlining.org>
+To: Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, 
+ Linus Walleij <linus.walleij@linaro.org>, 
+ Bartosz Golaszewski <brgl@bgdev.pl>, 
+ Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+ Michael Turquette <mturquette@baylibre.com>, 
+ Stephen Boyd <sboyd@kernel.org>, Philipp Zabel <p.zabel@pengutronix.de>, 
+ Sebastian Reichel <sre@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
+ Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org, 
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-gpio@vger.kernel.org, linux-rtc@vger.kernel.org, 
+ linux-clk@vger.kernel.org, linux-pm@vger.kernel.org, 
+ dmaengine@vger.kernel.org, linux-hardening@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>
+X-Mailer: b4 0.14.2
 
+Add documentation describing the RDA8810PL Clock and Reset
+controller.
 
-On Tue, 16 Sep 2025 16:16:48 +0530, Wasim Nazir wrote:
-> This series extend support for additional peripherals on the Qualcomm
-> Lemans EVK board to enhance overall hardware functionality.
-> 
-> It includes:
->   - New peripherals like:
->     - I2C based devices like GPIO I/O expander and EEPROM.
->     - GPI (Generic Peripheral Interface) DMA controllers and QUPv3 controllers
->       for peripheral communication.
->     - PCIe HW with required regulators and PHYs.
->     - Remoteproc subsystems for supported DSPs.
->     - Iris video codec.
->     - First USB controller in device mode.
->     - SD card support on SDHC v5.
->     - Qca8081 2.5G Ethernet PHY.
-> 
-> [...]
+Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
+---
+ .../bindings/clock/rda,8810pl-apsyscon.yaml        | 44 ++++++++++++
+ include/dt-bindings/clock/rda,8810pl-apclk.h       | 79 ++++++++++++++++++++++
+ 2 files changed, 123 insertions(+)
 
-Applied, thanks!
+diff --git a/Documentation/devicetree/bindings/clock/rda,8810pl-apsyscon.yaml b/Documentation/devicetree/bindings/clock/rda,8810pl-apsyscon.yaml
+new file mode 100644
+index 0000000000000000000000000000000000000000..988b609403a96abc4964ab366daa6fec0514595c
+--- /dev/null
++++ b/Documentation/devicetree/bindings/clock/rda,8810pl-apsyscon.yaml
+@@ -0,0 +1,44 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/clock/rda,8810pl-apsyscon.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: RDA Micro RDA8810PL AP Clock Controller
++
++maintainers:
++  - Dang Huynh <dang.huynh@mainlining.org>
++
++properties:
++  compatible:
++    items:
++      - const: rda,8810pl-apsyscon
++      - const: syscon
++
++  reg:
++    maxItems: 1
++
++  '#clock-cells':
++    const: 1
++
++  '#reset-cells':
++    const: 1
++
++required:
++  - compatible
++  - reg
++  - "#clock-cells"
++  - "#reset-cells"
++
++additionalProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/rda,8810pl-apclk.h>
++
++    ap_syscon: syscon@0 {
++      compatible = "rda,8810pl-apsyscon", "syscon";
++      reg = <0x0 0x1000>;
++      #clock-cells = <1>;
++      #reset-cells = <1>;
++    };
+diff --git a/include/dt-bindings/clock/rda,8810pl-apclk.h b/include/dt-bindings/clock/rda,8810pl-apclk.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..372358e72436a28c0775519f49626c9c5f4c6046
+--- /dev/null
++++ b/include/dt-bindings/clock/rda,8810pl-apclk.h
+@@ -0,0 +1,79 @@
++/* SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause) */
++
++#ifndef _DT_BINDINGS_CLK_RDA8810_H_
++#define _DT_BINDINGS_CLK_RDA8810_H_
++
++/* soc clocks */
++#define CLK_CPU 0
++#define CLK_BUS 1
++#define CLK_MEM 2
++
++#define CLK_USB 3
++#define CLK_AXI 4
++#define CLK_GCG 5
++#define CLK_AHB1 6
++#define CLK_APB1 7
++#define CLK_APB2 8
++
++#define CLK_GPU 9
++#define CLK_VPU 10
++#define CLK_VOC 11
++#define CLK_SFLSH 12
++
++#define CLK_UART1 13
++#define CLK_UART2 14
++#define CLK_UART3 15
++
++#define CLK_VOC2 16
++#define CLK_EMMC 17
++
++#define CLK_COUNT (CLK_EMMC + 1)
++
++/* resets */
++#define RST_CPU 0
++
++#define RST_AXI_VOC 1
++#define RST_AXI_DMA 2
++#define RST_AXI_CONNECT 3
++#define RST_AXI_VPU 4
++
++#define RST_GCG_GOUDA 5
++#define RST_GCG_CAMERA 6
++#define RST_GCG_LCDC 7
++
++#define RST_AHB1_USBC 8
++#define RST_AHB1_SPIFLASH 9
++
++#define RST_APB1_TIMER 10
++#define RST_APB1_KEYPAD 11
++#define RST_APB1_GPIO 12
++#define RST_APB1_PWM 13
++#define RST_APB1_AIF 14
++#define RST_APB1_AUIFC 15
++#define RST_APB1_I2C1 16
++#define RST_APB1_I2C2 17
++#define RST_APB1_I2C3 18
++#define RST_APB1_COMREGS 19
++#define RST_APB1_DMC 20
++#define RST_APB1_DDRPHY_P 21
++
++#define RST_APB2_IFC 22
++#define RST_APB2_UART1 23
++#define RST_APB2_UART2 24
++#define RST_APB2_UART3 25
++#define RST_APB2_SPI1 26
++#define RST_APB2_SPI2 27
++#define RST_APB2_SPI3 28
++#define RST_APB2_SDMMC1 29
++#define RST_APB2_SDMMC2 30
++#define RST_APB2_SDMMC3 31
++#define RST_APB2_NAND 32
++
++#define RST_MEM_GPU 33
++#define RST_MEM_VPU 34
++#define RST_MEM_DMC 35
++#define RST_MEM_DDRPHY_P 36
++
++#define RST_COUNT (RST_MEM_DDRPHY_P + 1)
++
++#endif /* _DT_BINDINGS_CLK_RDA8810_H_ */
 
-[01/10] arm64: dts: qcom: lemans: Add SDHC controller and SDC pin configuration
-        commit: dfdbe4bf6ff386d96c1dc8c7407201d882fc4113
-[02/10] arm64: dts: qcom: lemans-evk: Enable GPI DMA and QUPv3 controllers
-        commit: 5bc646aa0c7a444d4e81d8e3cae4baf463e1a018
-[03/10] arm64: dts: qcom: lemans-evk: Add TCA9534 I/O expander
-        commit: 6ae6381f871803246e9f655537999f163656de33
-[04/10] arm64: dts: qcom: lemans-evk: Add EEPROM and nvmem layout
-        commit: 81618ba3fe33017be5e1fce99891abd220a775b8
-[05/10] arm64: dts: qcom: lemans-evk: Enable PCIe support
-        commit: 94d7d37f6ac34bd683a93fbf1013736616fc3677
-[06/10] arm64: dts: qcom: lemans-evk: Enable remoteproc subsystems
-        commit: cac44c46970adb4553bab5c5aa528462a5fe98d0
-[07/10] arm64: dts: qcom: lemans-evk: Enable Iris video codec support
-        commit: fd32b5d586ac650ce1c6f58535ec79cd2632be09
-[08/10] arm64: dts: qcom: lemans-evk: Enable first USB controller in device mode
-        commit: 7bd68ef80661a9436120702e1300b56904fdd022
-[09/10] arm64: dts: qcom: lemans-evk: Enable SDHCI for SD Card
-        commit: c3f107b514c357cbc08ae70a69700222e7d1192d
-[10/10] arm64: dts: qcom: lemans-evk: Enable 2.5G Ethernet interface
-        commit: 71ee90ed1756724d62cb55873555e006372792c7
-
-Best regards,
 -- 
-Bjorn Andersson <andersson@kernel.org>
+2.51.0
+
