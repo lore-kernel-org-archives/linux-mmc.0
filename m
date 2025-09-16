@@ -1,37 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0C3B313D7A;
-	Tue, 16 Sep 2025 20:25:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EBE5323F51;
+	Tue, 16 Sep 2025 20:25:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758054326; cv=none; b=RXvA6vqsDUfFjswO5bjHKgKXOWpVSzN6tBX6qgQJRTfo/d8XOz6nUm/gU3M+YvtpSGKVEn1G/39zjamrLAh/AeVHAGe03Tet5XgebtZDyHYZ8lwegFROJczSs9eZbazdDirkbN12zkiU6EBHsBYzU9SrKJhbOALd4ujDQ9s9MnA=
+	t=1758054326; cv=none; b=s3aPkKD/Gh0zDE3f92IyZIGxpoQvwy67cCpLlX2xAAO4EziJuEVoB93sGdjxKctxU7iZEqWAUkMZWJybSZ3+MqWMAB3OeT+8V6oLEutQNBUnBRhGtlsgkIQu1DRsLiz90hJ9fw6udJM34MQZXf3p+H9V5LNDa6IW/XxLKIJJTDU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1758054326; c=relaxed/simple;
-	bh=6a7uRpDFFwmJD90P9fw5aBw9D1Bqy2wqv4v3bXssn10=;
+	bh=0gZYhLi6nnJ7pnJ+uQr6tpkm04FVOGvg4G5kCsThwkw=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=kX8gxeEH/T/Y8rqkq4/qCuC+VKE9hJdxGzGaeAT5CSnSVPtEaYZLy9+MmYwTc2BzD8bGqonrBlG32FZX2wiNZOSp3XBi6nMdL+FdNftZExcwO9BZdHKrXPxioP5C78oA1Yyqb4eDEjGMrH4SdNUoxXm4AJeXjMLpxzWec6Oj4Bg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nbqz4/4M; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=LtOFQaU8u1T1Rt7sWhRqOsHRFuJjjBjz7COqjas6W/Ph6Dq61Y4mNiwjgpy6fr1Bo4F9u7b2dP5d+zUELADpdTKqC2Y2Y0ZgMlD3SGx13O1x1ReuwHF/ATCiJho8ItZxP//k871V/UrK7zNiCLaAMCoRvdbk1EXNYNmpl9XNoYk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hT6dNmlw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nbqz4/4M"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 4CB05C116B1;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hT6dNmlw"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 899ACC4AF65;
 	Tue, 16 Sep 2025 20:25:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1758054325;
-	bh=6a7uRpDFFwmJD90P9fw5aBw9D1Bqy2wqv4v3bXssn10=;
+	bh=0gZYhLi6nnJ7pnJ+uQr6tpkm04FVOGvg4G5kCsThwkw=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=nbqz4/4Ms1V2NDIjE037IPoihF7TCtIfauQ00yIKCPcNACiZj1p6MjSeyTuT7et+C
-	 HSpG9aPw2oPL5OlRPiQPdxlCrelFCwZ8U5lfiLf8evTMNqe6oaFl9bJD3+/ZJ3rSi0
-	 MriJ2iJqJBZHmS+UFuME7QhY6k0Y9l3d4S0kDey0yhdJLxmnItCz2suMhmTYoXphLj
-	 1FPLlTURZ9QVfMpAWxlboym9P9yKkxc6xyODFY8HSC9AhWrbHUnyeWvoAlZ6STnwjM
-	 vsQvTh4PX2qIqsf0fOGDazevcjcYeimA74M2fYaSGbFTwWE4G8oBjBgGI9DqjQD/Ai
-	 QnXzBuQt/MWPw==
+	b=hT6dNmlwgc47TtqymIkxd8ygadTBdVCKXlc8gWip6Vrq/WnPw+6a2R8SQIRf3Agl5
+	 7vZ1ihedNBeptgQtkRR9Ai7Zsyc4LfMCqUCRou3pI+jrq4e7R7YhAzlrMq4okzwzRT
+	 GL9pFk5lY1Em5lyKOVgBlMQmvkVDaKTR6+y1EM5QBPh5XUj+wKdkmBCK0gu0gRs+2R
+	 44hnFLotv2P7EKmZW5ygrM9Y0eBIUfjGSF8zuNSaBpbz1Ctf8vTiGj29lmkQ3GCSpL
+	 qzwnGnFlhrv+LdBBY5v/bFgXG8l2kcKaLDP5yNG2NunPnmML1tkuQEoLgRYp4FJ3OU
+	 rBQDd9N15YGVw==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41236CAC59F;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F62BCAC59F;
 	Tue, 16 Sep 2025 20:25:25 +0000 (UTC)
 From: Dang Huynh via B4 Relay <devnull+dang.huynh.mainlining.org@kernel.org>
-Date: Wed, 17 Sep 2025 03:25:03 +0700
-Subject: [PATCH 06/25] rtc: Add driver for RDA Micro SoC
+Date: Wed, 17 Sep 2025 03:25:07 +0700
+Subject: [PATCH 10/25] drivers: clk: Add Clock and Reset Driver for RDA
+ Micro RDA8810PL SoC
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +41,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250917-rda8810pl-drivers-v1-6-9ca9184ca977@mainlining.org>
+Message-Id: <20250917-rda8810pl-drivers-v1-10-9ca9184ca977@mainlining.org>
 References: <20250917-rda8810pl-drivers-v1-0-9ca9184ca977@mainlining.org>
 In-Reply-To: <20250917-rda8810pl-drivers-v1-0-9ca9184ca977@mainlining.org>
 To: Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
@@ -61,11 +62,11 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org,
  dmaengine@vger.kernel.org, linux-hardening@vger.kernel.org, 
  linux-mmc@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1758054322; l=12867;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1758054322; l=26571;
  i=dang.huynh@mainlining.org; s=20250917; h=from:subject:message-id;
- bh=cSJlbB/SvEEJA+EINZDwWhdF79lGvQa4JzoffiXw/8A=;
- b=Kerwaw//6fBvHo9376TQSXrx+rBI8DCHbXxwdiEX7xIvpmGu5dhndFwWTM6Vg5geOi9Y7Neu5
- CSES8aJIaDmCPO9wetq+ZJzdPpI13ZweHRK6Z2NhRw7BxkASASNYofo
+ bh=viiqgCEDzz7zJ0J1XOj3LXd3b+khlbXGBeY3H7SkBMc=;
+ b=s1kimWXztfMI3RjptT8l1WdNs/VmkG8cjP/SoOZzfKLfnmFMoWDN72VKorAFCOiOLacyXmvxy
+ 60R7+ZO04QQAKfPtM+hf7SQWHhApvL3WzsDPUf2LhSkl/QH0VYalBHv
 X-Developer-Key: i=dang.huynh@mainlining.org; a=ed25519;
  pk=RyzH4CL4YU/ItXYUurA51EVBidfx4lIy8/E4EKRJCUk=
 X-Endpoint-Received: by B4 Relay for dang.huynh@mainlining.org/20250917
@@ -75,430 +76,864 @@ Reply-To: dang.huynh@mainlining.org
 
 From: Dang Huynh <dang.huynh@mainlining.org>
 
-The RDA Micro SoC has built-in RTC, it supports read/write date
-as well as alarm.
+Add a clock/reset driver for RDA8810PL SoC, which provides clocks for
+various subsystems.
 
 Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
 ---
- MAINTAINERS           |   6 +
- drivers/rtc/Kconfig   |  11 ++
- drivers/rtc/Makefile  |   1 +
- drivers/rtc/rtc-rda.c | 356 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 374 insertions(+)
+ MAINTAINERS                   |   6 +
+ drivers/clk/Kconfig           |   1 +
+ drivers/clk/Makefile          |   1 +
+ drivers/clk/rda/Kconfig       |  14 +
+ drivers/clk/rda/Makefile      |   2 +
+ drivers/clk/rda/clk-rda8810.c | 770 ++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 794 insertions(+)
 
 diff --git a/MAINTAINERS b/MAINTAINERS
-index fa7f80bd7b2f8bd2099acb9f38070498e7b1cc7e..0549b1d0657f2caaf86a723db139cf9d84d59c4a 100644
+index 0549b1d0657f2caaf86a723db139cf9d84d59c4a..cbe2ab8af6dcd40dd1456d9df55673dace3c87b2 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
 @@ -21393,6 +21393,12 @@ S:	Supported
  T:	git git://git.kernel.org/pub/scm/linux/kernel/git/rcu/linux.git rcu/dev
  F:	tools/testing/selftests/rcutorture
  
-+RDA MICRO REAL TIME CLOCK DRIVER
++RDA MICRO CLOCK AND RESET DRIVER
 +M:	Dang Huynh <dang.huynh@mainlining.org>
 +S:	Maintained
-+F:	Documentation/devicetree/bindings/rtc/rda,8810pl-rtc.yaml
-+F:	drivers/rtc/rtc-rda.c
++F:	Documentation/devicetree/bindings/clock/rda,8810pl-apsyscon.yaml
++F:	drivers/clk/rda/clk-rda8810.c
 +
- RDACM20 Camera Sensor
- M:	Jacopo Mondi <jacopo+renesas@jmondi.org>
- M:	Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>
-diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index 64f6e9756aff4a1f6f6c50f9b4fc2140f66a8578..287fc3bbd474ab78a9bd3b8813e8b9d475c07198 100644
---- a/drivers/rtc/Kconfig
-+++ b/drivers/rtc/Kconfig
-@@ -1471,6 +1471,17 @@ config RTC_DRV_OMAP
- 	  This driver can also be built as a module, if so, module
- 	  will be called rtc-omap.
- 
-+config RTC_DRV_RDA
-+	tristate "RDA Micro RTC"
-+	depends on ARCH_RDA || COMPILE_TEST
-+	select REGMAP_MMIO
-+	help
-+	  If you say yes here you get support for the built-in RTC on
-+	  RDA Micro SoC.
-+
-+	  This driver can also be built as a module, if so, the module
-+	  will be called rtc-rda.
-+
- config RTC_DRV_S3C
- 	tristate "Samsung S3C series SoC RTC"
- 	depends on ARCH_EXYNOS || ARCH_S3C64XX || ARCH_S5PV210 || \
-diff --git a/drivers/rtc/Makefile b/drivers/rtc/Makefile
-index 789bddfea99d8fcd024566891c37ee73e527cf93..02f73062bb158fe4738a3043c58ee40f8a58b3c6 100644
---- a/drivers/rtc/Makefile
-+++ b/drivers/rtc/Makefile
-@@ -141,6 +141,7 @@ obj-$(CONFIG_RTC_DRV_PS3)	+= rtc-ps3.o
- obj-$(CONFIG_RTC_DRV_PXA)	+= rtc-pxa.o
- obj-$(CONFIG_RTC_DRV_R7301)	+= rtc-r7301.o
- obj-$(CONFIG_RTC_DRV_R9701)	+= rtc-r9701.o
-+obj-$(CONFIG_RTC_DRV_RDA)	+= rtc-rda.o
- obj-$(CONFIG_RTC_DRV_RC5T583)	+= rtc-rc5t583.o
- obj-$(CONFIG_RTC_DRV_RC5T619)	+= rtc-rc5t619.o
- obj-$(CONFIG_RTC_DRV_RK808)	+= rtc-rk808.o
-diff --git a/drivers/rtc/rtc-rda.c b/drivers/rtc/rtc-rda.c
+ RDA MICRO REAL TIME CLOCK DRIVER
+ M:	Dang Huynh <dang.huynh@mainlining.org>
+ S:	Maintained
+diff --git a/drivers/clk/Kconfig b/drivers/clk/Kconfig
+index b1425aed659387a676bd933fe50ac4894c7156fe..15f5bc9108b565acb1c3c6e978ad0e5a71f5550d 100644
+--- a/drivers/clk/Kconfig
++++ b/drivers/clk/Kconfig
+@@ -520,6 +520,7 @@ source "drivers/clk/nuvoton/Kconfig"
+ source "drivers/clk/pistachio/Kconfig"
+ source "drivers/clk/qcom/Kconfig"
+ source "drivers/clk/ralink/Kconfig"
++source "drivers/clk/rda/Kconfig"
+ source "drivers/clk/renesas/Kconfig"
+ source "drivers/clk/rockchip/Kconfig"
+ source "drivers/clk/samsung/Kconfig"
+diff --git a/drivers/clk/Makefile b/drivers/clk/Makefile
+index 18ed29cfdc1133b6c254190c6092eb263366d5ac..8241bb7f88daaebde766ba92d718b2ca710d6b5f 100644
+--- a/drivers/clk/Makefile
++++ b/drivers/clk/Makefile
+@@ -141,6 +141,7 @@ obj-$(CONFIG_COMMON_CLK_PISTACHIO)	+= pistachio/
+ obj-$(CONFIG_COMMON_CLK_PXA)		+= pxa/
+ obj-$(CONFIG_COMMON_CLK_QCOM)		+= qcom/
+ obj-y					+= ralink/
++obj-y					+= rda/
+ obj-y					+= renesas/
+ obj-$(CONFIG_ARCH_ROCKCHIP)		+= rockchip/
+ obj-$(CONFIG_COMMON_CLK_SAMSUNG)	+= samsung/
+diff --git a/drivers/clk/rda/Kconfig b/drivers/clk/rda/Kconfig
 new file mode 100644
-index 0000000000000000000000000000000000000000..bb5aa25fb7d0ad538a0f7f67a80d08fe67af1c5d
+index 0000000000000000000000000000000000000000..b505e3e552cef1e7ea3da4aa46d61d0d0a3d5db0
 --- /dev/null
-+++ b/drivers/rtc/rtc-rda.c
-@@ -0,0 +1,356 @@
-+// SPDX-License-Identifier: GPL-2.0-only
++++ b/drivers/clk/rda/Kconfig
+@@ -0,0 +1,14 @@
++# SPDX-License-Identifier: GPL-2.0-only
++config CLK_RDA8810
++	bool "RDA Micro RDA8810PL Clock and Reset Controller"
++	depends on ARCH_RDA || COMPILE_TEST
++	select MFD_SYSCON
++	select REGMAP_MMIO
++	select RESET_CONTROLLER
++	help
++	  This driver supports clock and reset for RDA Micro RDA8810 platform.
++	  If you have a board with the RDA8810PL SoC, say Y to use most of the
++	  board peripherals.
++
++	  If unsure, say N.
++
+diff --git a/drivers/clk/rda/Makefile b/drivers/clk/rda/Makefile
+new file mode 100644
+index 0000000000000000000000000000000000000000..98848dccabe5d2199d5e9469d6bde154b2b3d86a
+--- /dev/null
++++ b/drivers/clk/rda/Makefile
+@@ -0,0 +1,2 @@
++# SPDX-License-Identifier: GPL-2.0-only
++obj-$(CONFIG_CLK_RDA8810) += clk-rda8810.o
+diff --git a/drivers/clk/rda/clk-rda8810.c b/drivers/clk/rda/clk-rda8810.c
+new file mode 100644
+index 0000000000000000000000000000000000000000..8bea60d5376aeb4c67cd15bc1a64dbcf7a0a1f7c
+--- /dev/null
++++ b/drivers/clk/rda/clk-rda8810.c
+@@ -0,0 +1,770 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
 +/*
-+ * RTC driver for RDA Micro
++ * RDA8810PL Clock and Reset driver
 + *
-+ * Copyright (C) 2013-2014 RDA Microelectronics Inc.
-+ * Copyright (C) 2024 Dang Huynh <dang.huynh@mainlining.org>
++ * Copyright (C) 2013 RDA Microelectronics Inc.
++ * Copyright (c) 2025 Dang Huynh <dang.huynh@mainlining.org>
 + */
 +
-+#include <linux/of.h>
++#include <linux/clk-provider.h>
++#include <linux/delay.h>
 +#include <linux/module.h>
-+#include <linux/rtc.h>
++#include <linux/slab.h>
 +#include <linux/platform_device.h>
-+#include <linux/pm.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
 +#include <linux/regmap.h>
++#include <linux/mfd/syscon.h>
++#include <linux/reset-controller.h>
++#include <dt-bindings/clock/rda,8810pl-apclk.h>
 +
-+struct rda_rtc {
-+	struct rtc_device *rtc_dev;
++#define MHZ 1000000U
++
++/*
++ * Some registers are protected, we need to write AP_CTRL_PROTECT_UNLOCK to
++ * AP_REG_DBG then we can make changes to them.
++ */
++#define AP_CTRL_PROTECT_LOCK	0xA50000
++#define AP_CTRL_PROTECT_UNLOCK	0xA50001
++
++/* Register Base */
++#define AP_REG_DBG 0x0
++#define AP_REG_CPU_ENABLE 0x60
++#define AP_REG_AXI_ENABLE 0x6C
++#define AP_REG_AXIDIV2_ENABLE 0x78
++#define AP_REG_GCG_ENABLE 0x84
++#define AP_REG_AHB1_ENABLE 0x90
++#define AP_REG_APB1_ENABLE 0x9C
++#define AP_REG_APB2_ENABLE 0xA8
++#define AP_REG_MEM_ENABLE 0xB4
++#define AP_REG_APO_ENABLE 0xC0
++
++/* AP Clk Config Bits */
++#define AP_PERI_SRC_DIV BIT(12)
++
++/* UART Clock Bits */
++#define AP_UART_DIVIDER GENMASK(9, 0)
++#define AP_UART_SET_PLL BIT(12)
++
++/* AP Clk Enable */
++#define AP_ENABLE_CPU_CORE BIT(0)
++#define AP_ENABLE_CPU_DUMMY BIT(1)
++#define AP_ENABLE_AHB0_CONF BIT(0)
++#define AP_ENABLE_APB0_CONF BIT(1)
++#define AP_ENABLE_AXI_VOC  BIT(2)
++#define AP_ENABLE_AXI_DMA  BIT(3)
++#define AP_ENABLE_AXI_ALWAYS BIT(4)
++#define AP_ENABLE_AXI_CONNECT BIT(5)
++#define AP_ENABLE_APB0_IRQ BIT(6)
++#define AP_ENABLE_AXIDIV2_IMEM BIT(0)
++#define AP_ENABLE_AXIDIV2_ALWAYS BIT(1)
++#define AP_ENABLE_AXIDIV2_CONNECT BIT(2)
++#define AP_ENABLE_AXIDIV2_VPU BIT(3)
++#define AP_ENABLE_GCG_APB_CONF BIT(0)
++#define AP_ENABLE_GCG_GOUDA BIT(1)
++#define AP_ENABLE_GCG_CAMERA BIT(2)
++#define AP_ENABLE_GCG_ALWAYS BIT(3)
++#define AP_ENABLE_GCG_CONNECT BIT(4)
++#define AP_ENABLE_GCG_DPI BIT(7)
++#define AP_ENABLE_AHB1_USBC BIT(0)
++#define AP_ENABLE_AHB1_ALWAYS BIT(1)
++#define AP_ENABLE_AHB1_SPIFLASH BIT(2)
++#define AP_ENABLE_APB1_CONF BIT(0)
++#define AP_ENABLE_APB1_AIF BIT(1)
++#define AP_ENABLE_APB1_AUIFC BIT(2)
++#define AP_ENABLE_APB1_AUIFC_CH0 BIT(3)
++#define AP_ENABLE_APB1_AUIFC_CH1 BIT(4)
++#define AP_ENABLE_APB1_I2C1 BIT(5)
++#define AP_ENABLE_APB1_I2C2 BIT(6)
++#define AP_ENABLE_APB1_I2C3 BIT(7)
++#define AP_ENABLE_APB1D_OSC BIT(8)
++#define AP_ENABLE_APB1D_PWM BIT(9)
++#define AP_ENABLE_APB1_ALWAYS BIT(10)
++#define AP_ENABLE_APB1_DAPLITE BIT(11)
++#define AP_ENABLE_APB1_TIMER BIT(12)
++#define AP_ENABLE_APB1_GPIO BIT(13)
++#define AP_ENABLE_APB2_CONF BIT(0)
++#define AP_ENABLE_APB2_IFC BIT(1)
++#define AP_ENABLE_APB2_IFC_CH0 BIT(2)
++#define AP_ENABLE_APB2_IFC_CH1 BIT(3)
++#define AP_ENABLE_APB2_IFC_CH2 BIT(4)
++#define AP_ENABLE_APB2_IFC_CH3 BIT(5)
++#define AP_ENABLE_APB2_IFC_CH4 BIT(6)
++#define AP_ENABLE_APB2_IFC_CH5 BIT(7)
++#define AP_ENABLE_APB2_IFC_CH6 BIT(8)
++#define AP_ENABLE_APB2_IFC_CH7 BIT(9)
++#define AP_ENABLE_APB2_UART1 BIT(10)
++#define AP_ENABLE_APB2_UART2 BIT(11)
++#define AP_ENABLE_APB2_UART3 BIT(12)
++#define AP_ENABLE_APB2_SPI1 BIT(13)
++#define AP_ENABLE_APB2_SPI2 BIT(14)
++#define AP_ENABLE_APB2_SPI3 BIT(15)
++#define AP_ENABLE_APB2_SDMMC1 BIT(16)
++#define AP_ENABLE_APB2_SDMMC2 BIT(17)
++#define AP_ENABLE_APB2_SDMMC3 BIT(18)
++#define AP_ENABLE_APB2_ALWAYS BIT(19)
++#define AP_ENABLE_APB2_NANDFLASH BIT(20)
++#define AP_ENABLE_MEM_CONF BIT(0)
++#define AP_ENABLE_MEM_DMC  BIT(1)
++#define AP_ENABLE_MEM_GPU  BIT(2)
++#define AP_ENABLE_MEM_VPU  BIT(3)
++#define AP_ENABLE_MEM_DDRPHY_P BIT(4)
++#define AP_ENABLE_MEM_CONNECT BIT(5)
++#define AP_ENABLE_APOC_VPU BIT(0)
++#define AP_ENABLE_APOC_BCK BIT(1)
++#define AP_ENABLE_APOC_UART1 BIT(2)
++#define AP_ENABLE_APOC_UART2 BIT(3)
++#define AP_ENABLE_APOC_UART3 BIT(4)
++#define AP_ENABLE_APOC_VOC_CORE BIT(5)
++#define AP_ENABLE_APOC_VOC BIT(6)
++#define AP_ENABLE_APOC_VOC_ALWAYS BIT(7)
++#define AP_ENABLE_APOC_DDRPHY_N BIT(8)
++#define AP_ENABLE_APOC_DDRPHY2XP BIT(9)
++#define AP_ENABLE_APOC_DDRPHY2XN BIT(10)
++#define AP_ENABLE_APOC_GPU BIT(11)
++#define AP_ENABLE_APOC_USBPHY BIT(12)
++#define AP_ENABLE_APOC_CSI BIT(13)
++#define AP_ENABLE_APOC_DSI BIT(14)
++#define AP_ENABLE_APOC_GPIO BIT(15)
++#define AP_ENABLE_APOC_SPIFLASH BIT(16)
++#define AP_ENABLE_APOC_PIX BIT(17)
++#define AP_ENABLE_APOC_PDGB BIT(18)
++
++/* AP Reset */
++#define AP_RST_CPU_REG 0x1C
++#define AP_RST_AXI_REG 0x24
++#define AP_RST_AXIDIV2_REG 0x2C
++#define AP_RST_GCG_REG 0x34
++#define AP_RST_AHB1_REG 0x3C
++#define AP_RST_APB1_REG 0x44
++#define AP_RST_APB2_REG 0x4C
++#define AP_RST_MEM_REG 0x54
++
++/* Bits */
++#define AP_RST_CPU_CORE BIT(0)
++#define AP_RST_CPU_SYS BIT(1)
++#define AP_RST_AXI_VOC BIT(0)
++#define AP_RST_AXI_DMA BIT(1)
++#define AP_RST_AXI_SYS BIT(2)
++#define AP_RST_AXI_CONNECT BIT(3)
++#define AP_RST_AXI_VPU BIT(5)
++#define AP_RST_AXIDIV2_IMEM BIT(0)
++#define AP_RST_AXIDIV2_SYS BIT(1)
++#define AP_RST_AXIDIV2_VPU BIT(2)
++#define AP_RST_GCG_SYS BIT(0)
++#define AP_RST_GCG_GOUDA BIT(1)
++#define AP_RST_GCG_CAMERA BIT(2)
++#define AP_RST_GCG_LCDC BIT(4)
++#define AP_RST_AHB1_SYS BIT(0)
++#define AP_RST_AHB1_USBC BIT(1)
++#define AP_RST_AHB1_SPIFLASH BIT(2)
++#define AP_RST_APB1_SYS BIT(0)
++#define AP_RST_APB1_TIMER BIT(1)
++#define AP_RST_APB1_KEYPAD BIT(2)
++#define AP_RST_APB1_GPIO BIT(3)
++#define AP_RST_APB1_PWM BIT(4)
++#define AP_RST_APB1_AIF BIT(5)
++#define AP_RST_APB1_AUIFC BIT(6)
++#define AP_RST_APB1_I2C1 BIT(7)
++#define AP_RST_APB1_I2C2 BIT(8)
++#define AP_RST_APB1_I2C3 BIT(9)
++#define AP_RST_APB1_COMREGS BIT(10)
++#define AP_RST_APB1_DMC BIT(11)
++#define AP_RST_APB1_DDRPHY_P BIT(12)
++#define AP_RST_APB2_SYS BIT(0)
++#define AP_RST_APB2_IFC BIT(1)
++#define AP_RST_APB2_UART1 BIT(2)
++#define AP_RST_APB2_UART2 BIT(3)
++#define AP_RST_APB2_UART3 BIT(4)
++#define AP_RST_APB2_SPI1 BIT(5)
++#define AP_RST_APB2_SPI2 BIT(6)
++#define AP_RST_APB2_SPI3 BIT(7)
++#define AP_RST_APB2_SDMMC1 BIT(8)
++#define AP_RST_APB2_SDMMC2 BIT(9)
++#define AP_RST_APB2_SDMMC3 BIT(10)
++#define AP_RST_APB2_NANDFLASH BIT(11)
++#define AP_RST_MEM_SYS BIT(0)
++#define AP_RST_MEM_GPU BIT(1)
++#define AP_RST_MEM_VPU BIT(2)
++#define AP_RST_MEM_DMC BIT(3)
++#define AP_RST_MEM_DDRPHY_P BIT(4)
++
++/* Default PLL frequency */
++#define AP_PLL_CPU_FREQ (988 * MHZ)
++#define AP_PLL_BUS_FREQ (800 * MHZ)
++#define AP_PLL_MEM_FREQ (260 * MHZ)
++#define AP_PLL_USB_FREQ (480 * MHZ)
++
++struct rda8810_reset_list {
++	int reg;
++	int bit;
++};
++
++struct rda_clk_priv {
++	struct device *dev;
 +	struct regmap *regmap;
++	struct clk_hw_onecell_data *onecell;
++	struct reset_controller_dev rstctl;
++	const struct rda8810_reset_list *rstlist;
 +};
 +
-+/* RTC Registers */
-+#define RDA_RTC_CTRL_REG 0x0
-+#define RDA_RTC_CMD_REG 0x4
-+#define RDA_RTC_STA_REG 0x8
-+#define RDA_RTC_CAL_LOAD_LOW_REG 0xC
-+#define RDA_RTC_CAL_LOAD_HIGH_REG 0x10
-+#define RDA_RTC_CUR_LOAD_LOW_REG 0x14
-+#define RDA_RTC_CUR_LOAD_HIGH_REG 0x18
-+#define RDA_RTC_ALARM_LOW_REG 0x1C
-+#define RDA_RTC_ALARM_HIGH_REG 0x20
++struct rda_clk_hw {
++	int id;
++	int reg;
++	struct clk_hw hw;
 +
-+/* RTC Bits */
-+#define RDA_RTC_CMD_CAL_LOAD BIT(0)
-+#define RDA_RTC_CMD_ALARM_LOAD BIT(4)
-+#define RDA_RTC_CMD_ALARM_ENABLE BIT(5)
-+#define RDA_RTC_CMD_ALARM_DISABLE BIT(6)
-+#define RDA_RTC_CMD_INVALID BIT(31)
-+#define RDA_RTC_STA_ALARM_ENABLE BIT(20)
-+#define RDA_RTC_STA_NOT_PROG BIT(31)
++	int ena_reg;
++	int ena_bit;
 +
-+/* RTC Masks */
-+#define RDA_SEC_MASK GENMASK(7, 0)
-+#define RDA_MIN_MASK GENMASK(15, 8)
-+#define RDA_HRS_MASK GENMASK(23, 16)
++	struct rda_clk_priv *priv;
++};
 +
-+#define RDA_MDAY_MASK GENMASK(7, 0)
-+#define RDA_MON_MASK GENMASK(11, 8)
-+#define RDA_YEAR_MASK GENMASK(22, 16)
-+#define RDA_WDAY_MASK GENMASK(26, 24)
++struct rda_clk_matchdata {
++	const struct rda_clk_hw *clk_list;
++	int max_clocks;
++};
 +
-+static int rda_rtc_settime(struct device *dev, struct rtc_time *tm)
-+{
-+	struct rda_rtc *rtc = dev_get_drvdata(dev);
-+	u32 high, low;
-+	int ret;
++static const struct clk_ops rda8810_clk_ops;
 +
-+	ret = rtc_valid_tm(tm);
-+	if (ret < 0)
-+		return ret;
-+
-+	/*
-+	 * The number of years since 1900 in kernel,
-+	 * but it is defined since 2000 by HW.
-+	 * The number of mons' range is from 0 to 11 in kernel,
-+	 * but it is defined from 1 to 12 by HW.
-+	 */
-+	low = FIELD_PREP(RDA_SEC_MASK, tm->tm_sec) |
-+		FIELD_PREP(RDA_MIN_MASK, tm->tm_min) |
-+		FIELD_PREP(RDA_HRS_MASK, tm->tm_hour);
-+
-+	high = FIELD_PREP(RDA_MDAY_MASK, tm->tm_mday) |
-+		FIELD_PREP(RDA_MON_MASK, tm->tm_mon + 1) |
-+		FIELD_PREP(RDA_YEAR_MASK, tm->tm_year - 100) |
-+		FIELD_PREP(RDA_WDAY_MASK, tm->tm_wday);
-+
-+	ret = regmap_write(rtc->regmap, RDA_RTC_CAL_LOAD_LOW_REG, low);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to update RTC low register: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = regmap_write(rtc->regmap, RDA_RTC_CAL_LOAD_HIGH_REG, high);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to update RTC low register: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = regmap_update_bits(rtc->regmap, RDA_RTC_CMD_REG, RDA_RTC_CMD_CAL_LOAD, 1);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to update RTC cal load register: %d\n", ret);
-+		return ret;
-+	}
-+
-+	return 0;
++#define RDA_CLK_INIT(_id, _name, _parent, _flags, _reg, _ena_reg, _ena_bit) { \
++	.id = _id, \
++	.reg = _reg, \
++	.ena_reg = _ena_reg, \
++	.ena_bit = _ena_bit, \
++	.hw.init = CLK_HW_INIT_PARENTS_DATA(_name, \
++			_parent, \
++			&rda8810_clk_ops, \
++			_flags) \
 +}
 +
-+static int rda_rtc_readtime(struct device *dev, struct rtc_time *tm)
++#define RDA_CLK_INIT_NO_PARENT(_id, _name, _flags, _reg, _ena_reg, _ena_bit) { \
++	.id = _id, \
++	.reg = _reg, \
++	.ena_reg = _ena_reg, \
++	.ena_bit = _ena_bit, \
++	.hw.init = CLK_HW_INIT_NO_PARENT(_name, &rda8810_clk_ops, _flags) \
++}
++
++#define to_rda_rst(p) container_of(p, struct rda_clk_priv, rstctl)
++
++static inline struct rda_clk_hw *to_rda_hw(struct clk_hw *hw)
 +{
-+	struct rda_rtc *rtc = dev_get_drvdata(dev);
-+	unsigned int high, low;
++	return container_of(hw, struct rda_clk_hw, hw);
++}
++
++/* clock division value map */
++static const u8 clk_div_map[] = {
++	4*60,	/* 0 */
++	4*60,	/* 1 */
++	4*60,	/* 2 */
++	4*60,	/* 3 */
++	4*60,	/* 4 */
++	4*60,	/* 5 */
++	4*60,	/* 6 */
++	4*60,	/* 7 */
++	4*40,	/* 8 */
++	4*30,	/* 9 */
++	4*24,	/* 10 */
++	4*20,	/* 11 */
++	4*17,	/* 12 */
++	4*15,	/* 13 */
++	4*13,	/* 14 */
++	4*12,	/* 15 */
++	4*11,	/* 16 */
++	4*10,	/* 17 */
++	4*9,	/* 18 */
++	4*8,	/* 19 */
++	4*7,	/* 20 */
++	4*13/2,	/* 21 */
++	4*6,	/* 22 */
++	4*11/2,	/* 23 */
++	4*5,	/* 24 */
++	4*9/2,	/* 25 */
++	4*4,	/* 26 */
++	4*7/2,	/* 27 */
++	4*3,	/* 28 */
++	4*5/2,	/* 29 */
++	4*2,	/* 30 */
++	4*1,	/* 31 */
++};
++
++static u32 apsys_get_divreg(u32 basefreq, u32 reqfreq, u32 *pdiv2)
++{
++	int i;
++	int index;
++	u32 adiv;
++	u32 ndiv;
++
++	adiv = basefreq / (reqfreq >> 2);
++	if (pdiv2) {
++		/* try div2 mode first */
++		ndiv = adiv >> 1;
++	} else {
++		ndiv = adiv;
++	}
++
++	for (i = ARRAY_SIZE(clk_div_map) - 1; i >= 1; i--)
++		if (ndiv < ((clk_div_map[i] + clk_div_map[i-1]) >> 1))
++			break;
++	index = i;
++
++	if (pdiv2) {
++		if (adiv == (clk_div_map[index] << 1)) {
++			/* div2 mode is OK */
++			*pdiv2 = 1;
++		} else {
++			/* try div1 mode */
++			for (i = ARRAY_SIZE(clk_div_map) - 1; i >= 1; i--)
++				if (adiv < ((clk_div_map[i] + clk_div_map[i-1]) >> 1))
++					break;
++			/* compare the results between div1 and div2 */
++			if (abs(adiv - (clk_div_map[index] << 1)) <=
++					abs(adiv - clk_div_map[i])) {
++				*pdiv2 = 1;
++			} else {
++				*pdiv2 = 0;
++				index = i;
++			}
++		}
++	}
++
++	return index;
++}
++
++static u32 apsys_cal_freq_by_divreg(u32 basefreq, u32 reg, u32 div2)
++{
++	u32 newfreq;
++
++	if (reg >= ARRAY_SIZE(clk_div_map))
++		reg = ARRAY_SIZE(clk_div_map) - 1;
++
++	/* Assuming basefreq is smaller than 2^31 (2.147G Hz) */
++	newfreq = (basefreq << (div2 ? 0 : 1)) / (clk_div_map[reg] >> 1);
++	return newfreq;
++}
++
++static void apsys_get_reg_div(struct rda_clk_hw *rda_hw, u32 *reg, u32 *div2)
++{
++	struct rda_clk_priv *priv = rda_hw->priv;
++	int tmp_reg, tmp_div2;
 +	int ret;
 +
++	ret = regmap_read(priv->regmap, rda_hw->reg, &tmp_reg);
++	if (ret)
++		return;
++
++	tmp_div2 = tmp_reg & AP_PERI_SRC_DIV;
++
++	*reg = tmp_reg;
++	*div2 = tmp_div2;
++}
++
++static int apsys_get_uart_clock(unsigned long parent_rate, u32 *reg)
++{
++	int clksrc = 26000000;
++	u32 div;
++	int rate = 0;
++
++	if (*reg & AP_UART_SET_PLL)
++		clksrc = parent_rate / 8;
++
++	div = FIELD_GET(AP_UART_DIVIDER, *reg);
++
++	/* rate = clksrc / divmode / (div+2) */
++	rate =  clksrc / 4 / (div + 2);
++
++	return rate;
++}
++
++static int apsys_cal_uart_clock(int freq)
++{
++	int new_freq = freq;
++
 +	/*
-+	 * Check if RTC data is valid.
++	 * To calculate maximum clock:
++	 *     freq = 26 MHz / div / (0 + 2)
 +	 *
-+	 * When this bit is set, it means the data in the RTC is invalid
-+	 * or not configured.
++	 * For lowest clock:
++	 *     freq = 26 MHz / div / (0x3FF + 2)
 +	 */
-+	ret = regmap_test_bits(rtc->regmap, RDA_RTC_STA_REG, RDA_RTC_STA_NOT_PROG);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to read RTC status: %d\n", ret);
-+		return ret;
-+	} else if (ret > 0)
++	if (freq > 3250000)
++		new_freq = 3250000;
++	else if (freq < 6342)
++		new_freq = 6342;
++
++	new_freq = (26000000 + 4 / 2 * new_freq) / (4 * new_freq) - 2;
++
++	return new_freq;
++}
++
++static int rda8810_clk_set_rate(struct clk_hw *clk, unsigned long rate,
++		unsigned long parent_rate)
++{
++	struct rda_clk_hw *rda_hw = to_rda_hw(clk);
++	struct rda_clk_priv *priv = rda_hw->priv;
++	struct device *dev = priv->dev;
++	int val, div2 = 0;
++	int ret;
++
++	switch (rda_hw->id) {
++	case CLK_CPU:
++		val = apsys_get_divreg(AP_PLL_CPU_FREQ, rate, NULL);
++		break;
++	case CLK_AXI:
++	case CLK_AHB1:
++	case CLK_APB1:
++	case CLK_APB2:
++	case CLK_GCG:
++	case CLK_GPU:
++	case CLK_SFLSH:
++	case CLK_VOC:
++	case CLK_VPU:
++		val = apsys_get_divreg(parent_rate, rate, &div2);
++		break;
++	case CLK_UART1:
++	case CLK_UART2:
++	case CLK_UART3:
++		val = apsys_cal_uart_clock(rate);
++		if (val == 0)
++			return -EINVAL;
++		break;
++	default:
 +		return -EINVAL;
-+
-+	ret = regmap_read(rtc->regmap, RDA_RTC_CUR_LOAD_HIGH_REG, &high);
-+	if (ret) {
-+		dev_err(dev, "Failed to read RTC high reg: %d\n", ret);
-+		return ret;
 +	}
 +
-+	ret = regmap_read(rtc->regmap, RDA_RTC_CUR_LOAD_LOW_REG, &low);
-+	if (ret) {
-+		dev_err(dev, "Failed to read RTC low reg: %d\n", ret);
-+		return ret;
-+	}
++	if (div2)
++		val |= AP_PERI_SRC_DIV;
 +
-+	tm->tm_sec = FIELD_GET(RDA_SEC_MASK, low);
-+	tm->tm_min = FIELD_GET(RDA_MIN_MASK, low);
-+	tm->tm_hour = FIELD_GET(RDA_HRS_MASK, low);
-+	tm->tm_mday = FIELD_GET(RDA_MDAY_MASK, high);
-+	tm->tm_mon = FIELD_GET(RDA_MON_MASK, high);
-+	tm->tm_year = FIELD_GET(RDA_YEAR_MASK, high);
-+	tm->tm_wday = FIELD_GET(RDA_WDAY_MASK, high);
++	dev_dbg(dev, "clk_id: %d - rate: %ld - parent rate: %ld - val: %d - div: %d\n",
++			rda_hw->id, rate, parent_rate, val, div2);
 +
-+	/*
-+	 * The number of years since 1900 in kernel,
-+	 * but it is defined since 2000 by HW.
-+	 */
-+	tm->tm_year += 100;
-+	/*
-+	 * The number of mons' range is from 0 to 11 in kernel,
-+	 * but it is defined from 1 to 12 by HW.
-+	 */
-+	tm->tm_mon -= 1;
-+
-+	return 0;
-+}
-+
-+static int rda_rtc_readalarm(struct device *dev, struct rtc_wkalrm *alrm)
-+{
-+	struct rda_rtc *rtc = dev_get_drvdata(dev);
-+	struct rtc_time *tm = &alrm->time;
-+	unsigned int high, low;
-+	int ret;
-+
-+	ret = regmap_read(rtc->regmap, RDA_RTC_ALARM_HIGH_REG, &high);
-+	if (ret) {
-+		dev_err(dev, "Failed to read alarm low reg: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = regmap_read(rtc->regmap, RDA_RTC_ALARM_LOW_REG, &low);
-+	if (ret) {
-+		dev_err(dev, "Failed to read alarm low reg: %d\n", ret);
-+		return ret;
-+	}
-+
-+	tm->tm_sec = FIELD_GET(RDA_SEC_MASK, low);
-+	tm->tm_min = FIELD_GET(RDA_MIN_MASK, low);
-+	tm->tm_hour = FIELD_GET(RDA_HRS_MASK, low);
-+	tm->tm_mday = FIELD_GET(RDA_MDAY_MASK, high);
-+	tm->tm_mon = FIELD_GET(RDA_MON_MASK, high);
-+	tm->tm_year = FIELD_GET(RDA_YEAR_MASK, high);
-+	tm->tm_wday = FIELD_GET(RDA_WDAY_MASK, high);
-+
-+	/*
-+	 * The number of years since 1900 in kernel,
-+	 * but it is defined since 2000 by HW.
-+	 */
-+	tm->tm_year += 100;
-+	/*
-+	 * The number of mons' range is from 0 to 11 in kernel,
-+	 * but it is defined from 1 to 12 by HW.
-+	 */
-+	tm->tm_mon -= 1;
-+
-+	return 0;
-+}
-+
-+static int rda_rtc_alarm_irq_enable(struct device *dev, unsigned int enabled)
-+{
-+	struct rda_rtc *rtc = dev_get_drvdata(dev);
-+
-+	if (enabled)
-+		return regmap_update_bits(rtc->regmap, RDA_RTC_CMD_REG,
-+				RDA_RTC_CMD_ALARM_ENABLE, 1);
-+
-+	return regmap_update_bits(rtc->regmap, RDA_RTC_CMD_REG,
-+			RDA_RTC_CMD_ALARM_DISABLE, 1);
-+}
-+
-+static int rda_rtc_setalarm(struct device *dev, struct rtc_wkalrm *alrm)
-+{
-+	struct rda_rtc *rtc = dev_get_drvdata(dev);
-+	struct rtc_time *tm = &alrm->time;
-+	u32 high, low;
-+	int ret;
-+
-+	ret = rtc_valid_tm(tm);
++	ret = regmap_write(priv->regmap, rda_hw->reg, val);
 +	if (ret < 0)
 +		return ret;
 +
-+	/* TODO: Check if it's necessary to disable IRQ first */
-+	rda_rtc_alarm_irq_enable(dev, 0);
-+
-+	/*
-+	 * The number of years since 1900 in kernel,
-+	 * but it is defined since 2000 by HW.
-+	 * The number of mons' range is from 0 to 11 in kernel,
-+	 * but it is defined from 1 to 12 by HW.
-+	 */
-+	low = FIELD_PREP(RDA_SEC_MASK, tm->tm_sec) |
-+		FIELD_PREP(RDA_MIN_MASK, tm->tm_min) |
-+		FIELD_PREP(RDA_HRS_MASK, tm->tm_hour);
-+
-+	high = FIELD_PREP(RDA_MDAY_MASK, tm->tm_mday) |
-+		FIELD_PREP(RDA_MON_MASK, tm->tm_mon + 1) |
-+		FIELD_PREP(RDA_YEAR_MASK, tm->tm_year - 100) |
-+		FIELD_PREP(RDA_WDAY_MASK, tm->tm_wday);
-+
-+
-+	ret = regmap_write(rtc->regmap, RDA_RTC_ALARM_LOW_REG, low);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to set low alarm register: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = regmap_write(rtc->regmap, RDA_RTC_ALARM_HIGH_REG, high);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to set low alarm register: %d\n", ret);
-+		return ret;
-+	}
-+
-+	ret = regmap_update_bits(rtc->regmap, RDA_RTC_CMD_REG, RDA_RTC_CMD_ALARM_LOAD, 1);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to set alarm register: %d\n", ret);
-+		return ret;
-+	}
-+
-+	dev_dbg(dev, "Alarm set: %4d-%02d-%02d %02d:%02d:%02d\n",
-+			2000 + (tm->tm_year - 100), tm->tm_mon + 1, tm->tm_mday,
-+			tm->tm_hour, tm->tm_min, tm->tm_sec);
-+
-+	return 0;
++	return rate;
 +}
 +
-+static int rda_rtc_proc(struct device *dev, struct seq_file *seq)
++static unsigned long rda8810_clk_recalc_rate(struct clk_hw *clk,
++		unsigned long parent_rate)
 +{
-+	struct rda_rtc *rtc = dev_get_drvdata(dev);
++	struct rda_clk_hw *rda_hw = to_rda_hw(clk);
++	u32 reg, div2;
++
++	apsys_get_reg_div(rda_hw, &reg, &div2);
++
++	switch (rda_hw->id) {
++	case CLK_CPU:
++		return apsys_cal_freq_by_divreg(AP_PLL_CPU_FREQ, reg, 0);
++	case CLK_BUS:
++		return AP_PLL_BUS_FREQ;
++	case CLK_MEM:
++		return AP_PLL_MEM_FREQ >> (2 + div2);
++	/* Bus peripherals */
++	case CLK_USB:
++		return AP_PLL_USB_FREQ;
++	case CLK_AXI:
++	case CLK_AHB1:
++	case CLK_APB1:
++	case CLK_APB2:
++	case CLK_GCG:
++	case CLK_GPU:
++	case CLK_SFLSH:
++	case CLK_VOC:
++	case CLK_VPU:
++		return apsys_cal_freq_by_divreg(parent_rate, reg, div2);
++	/* For UART clocks, we'll have to do more calculation */
++	case CLK_UART1:
++	case CLK_UART2:
++	case CLK_UART3:
++		return apsys_get_uart_clock(parent_rate, &reg);
++	default:
++		return 0;
++	}
++}
++
++static long rda8810_clk_round_rate(struct clk_hw *clk, unsigned long rate,
++		unsigned long *parent_rate)
++{
++	return rate;
++}
++
++static int rda8810_clk_enable(struct clk_hw *clk)
++{
++	struct rda_clk_hw *rda_hw = to_rda_hw(clk);
++	struct rda_clk_priv *priv = rda_hw->priv;
++
++	if (rda_hw->ena_reg < 0 || rda_hw->ena_bit < 0)
++		return 0;
++
++	return regmap_write(priv->regmap, rda_hw->ena_reg, rda_hw->ena_bit);
++}
++
++static void rda8810_clk_disable(struct clk_hw *clk)
++{
++	struct rda_clk_hw *rda_hw = to_rda_hw(clk);
++	struct rda_clk_priv *priv = rda_hw->priv;
++
++	if (rda_hw->ena_reg < 0 || rda_hw->ena_bit < 0)
++		return;
++
++	regmap_write(priv->regmap, rda_hw->ena_reg + 4, rda_hw->ena_bit);
++}
++
++static const struct clk_ops rda8810_clk_ops = {
++	.enable = rda8810_clk_enable,
++	.disable = rda8810_clk_disable,
++
++	.recalc_rate = rda8810_clk_recalc_rate,
++	.round_rate = rda8810_clk_round_rate,
++	.set_rate = rda8810_clk_set_rate,
++};
++
++/* Root clocks */
++static struct rda_clk_hw rda8810_clk_cpu_desc =
++RDA_CLK_INIT_NO_PARENT(CLK_CPU, "cpu", CLK_IS_CRITICAL, 0xC8,
++		AP_REG_CPU_ENABLE, AP_ENABLE_CPU_CORE);
++static struct rda_clk_hw rda8810_clk_mem_desc =
++RDA_CLK_INIT_NO_PARENT(CLK_MEM, "mem", CLK_IS_CRITICAL, 0xE0, -1, -1);
++
++static struct rda_clk_hw rda8810_clk_bus_desc =
++RDA_CLK_INIT_NO_PARENT(CLK_BUS, "bus", CLK_IS_CRITICAL, -1, -1, -1);
++
++/* Bus clocks */
++static struct rda_clk_hw rda8810_clk_usb_desc = RDA_CLK_INIT(CLK_USB, "usb",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, -1, -1, -1);
++static struct rda_clk_hw rda8810_clk_axi_desc = RDA_CLK_INIT(CLK_AXI, "axi",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xCC, -1, -1);
++static struct rda_clk_hw rda8810_clk_gcg_desc = RDA_CLK_INIT(CLK_GCG, "gcg",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xD0, -1, -1);
++static struct rda_clk_hw rda8810_clk_ahb1_desc = RDA_CLK_INIT(CLK_AHB1, "ahb1",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xD4, -1, -1);
++static struct rda_clk_hw rda8810_clk_apb1_desc = RDA_CLK_INIT(CLK_APB1, "apb1",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xD8, -1, -1);
++static struct rda_clk_hw rda8810_clk_apb2_desc = RDA_CLK_INIT(CLK_APB2, "apb2",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xDC, -1, -1);
++static struct rda_clk_hw rda8810_clk_gpu_desc = RDA_CLK_INIT(CLK_GPU, "gpu",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xE4, AP_REG_APO_ENABLE, AP_ENABLE_APOC_GPU);
++static struct rda_clk_hw rda8810_clk_vpu_desc = RDA_CLK_INIT(CLK_VPU, "vpu",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xE8, AP_REG_APO_ENABLE, AP_ENABLE_APOC_VPU);
++static struct rda_clk_hw rda8810_clk_voc_desc = RDA_CLK_INIT(CLK_VOC, "voc",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_bus_desc.hw } },
++		0, 0xEC, AP_REG_APO_ENABLE,
++		AP_ENABLE_APOC_VOC | AP_ENABLE_APOC_VOC_CORE | AP_ENABLE_APOC_VOC_ALWAYS);
++
++/* APB1 peripherals */
++static struct rda_clk_hw rda8810_clk_spiflash_desc = RDA_CLK_INIT(CLK_SFLSH, "spiflash",
++		(const struct clk_parent_data[]) { { .hw = &rda8810_clk_apb1_desc.hw } },
++		0, 0xF0, AP_REG_APO_ENABLE, AP_ENABLE_APOC_SPIFLASH);
++
++/* APB2 peripherals */
++static struct rda_clk_hw rda8810_clk_uart_desc[] = {
++	RDA_CLK_INIT(CLK_UART1, "uart1",
++			(const struct clk_parent_data[]) { { .hw = &rda8810_clk_apb2_desc.hw } },
++			0, 0xF4,
++			AP_REG_APO_ENABLE, AP_ENABLE_APOC_UART1),
++	RDA_CLK_INIT(CLK_UART2, "uart2",
++			(const struct clk_parent_data[]) { { .hw = &rda8810_clk_apb2_desc.hw } },
++			0, 0xF8,
++			AP_REG_APO_ENABLE, AP_ENABLE_APOC_UART2),
++	RDA_CLK_INIT(CLK_UART3, "uart3",
++			(const struct clk_parent_data[]) { { .hw = &rda8810_clk_apb2_desc.hw } },
++			0, 0xFC,
++			AP_REG_APO_ENABLE, AP_ENABLE_APOC_UART3),
++};
++
++static struct rda_clk_hw *const rda8810_clk_list[] = {
++	&rda8810_clk_cpu_desc,
++	&rda8810_clk_bus_desc,
++	&rda8810_clk_mem_desc,
++
++	&rda8810_clk_usb_desc,
++	&rda8810_clk_axi_desc,
++	&rda8810_clk_gcg_desc,
++	&rda8810_clk_ahb1_desc,
++	&rda8810_clk_apb1_desc,
++	&rda8810_clk_apb2_desc,
++
++	&rda8810_clk_gpu_desc,
++	&rda8810_clk_vpu_desc,
++	&rda8810_clk_voc_desc,
++
++	&rda8810_clk_spiflash_desc,
++
++	&rda8810_clk_uart_desc[0],
++	&rda8810_clk_uart_desc[1],
++	&rda8810_clk_uart_desc[2],
++};
++
++static const struct rda8810_reset_list rda8810_rst_data[] = {
++	/* ID, REG */
++
++	/* CPU */
++	[RST_CPU] = { AP_RST_CPU_REG, AP_RST_CPU_CORE },
++
++	/* AXI */
++	[RST_AXI_VOC] = { AP_RST_AXI_REG, AP_RST_AXI_VOC },
++	[RST_AXI_DMA] = { AP_RST_AXI_REG, AP_RST_AXI_DMA },
++	[RST_AXI_CONNECT] = { AP_RST_AXI_REG, AP_RST_AXI_CONNECT },
++	[RST_AXI_VPU] = { AP_RST_AXI_REG, AP_RST_AXI_VPU },
++
++	/* GCG */
++	[RST_GCG_GOUDA] = { AP_RST_GCG_REG, AP_RST_GCG_GOUDA },
++	[RST_GCG_CAMERA] = { AP_RST_GCG_REG, AP_RST_GCG_CAMERA },
++	[RST_GCG_LCDC] = { AP_RST_GCG_REG, AP_RST_GCG_LCDC },
++
++	/* AHB1 */
++	[RST_AHB1_USBC] = { AP_RST_AHB1_REG, AP_RST_AHB1_USBC },
++	[RST_AHB1_SPIFLASH] = { AP_RST_AHB1_REG, AP_RST_AHB1_SPIFLASH },
++
++	/* APB1 */
++	[RST_APB1_TIMER] = { AP_RST_APB1_REG, AP_RST_APB1_TIMER },
++	[RST_APB1_KEYPAD] = { AP_RST_APB1_REG, AP_RST_APB1_KEYPAD },
++	[RST_APB1_GPIO] = { AP_RST_APB1_REG, AP_RST_APB1_GPIO },
++	[RST_APB1_PWM] = { AP_RST_APB1_REG, AP_RST_APB1_PWM },
++	[RST_APB1_AIF] = { AP_RST_APB1_REG, AP_RST_APB1_AIF },
++	[RST_APB1_AUIFC] = { AP_RST_APB1_REG, AP_RST_APB1_AUIFC },
++	[RST_APB1_I2C1] = { AP_RST_APB1_REG, AP_RST_APB1_I2C1 },
++	[RST_APB1_I2C2] = { AP_RST_APB1_REG, AP_RST_APB1_I2C2 },
++	[RST_APB1_I2C3] = { AP_RST_APB1_REG, AP_RST_APB1_I2C3 },
++	[RST_APB1_COMREGS] = { AP_RST_APB1_REG, AP_RST_APB1_COMREGS },
++	[RST_APB1_DMC] = { AP_RST_APB1_REG, AP_RST_APB1_DMC },
++	[RST_APB1_DDRPHY_P] = { AP_RST_APB1_REG, AP_RST_APB1_DDRPHY_P },
++
++	/* APB2 */
++	[RST_APB2_IFC] = { AP_RST_APB2_REG, AP_RST_APB2_IFC },
++	[RST_APB2_UART1] = { AP_RST_APB2_REG, AP_RST_APB2_UART1 },
++	[RST_APB2_UART2] = { AP_RST_APB2_REG, AP_RST_APB2_UART2 },
++	[RST_APB2_UART3] = { AP_RST_APB2_REG, AP_RST_APB2_UART3 },
++	[RST_APB2_SPI1] = { AP_RST_APB2_REG, AP_RST_APB2_SPI1 },
++	[RST_APB2_SPI2] = { AP_RST_APB2_REG, AP_RST_APB2_SPI2 },
++	[RST_APB2_SPI3] = { AP_RST_APB2_REG, AP_RST_APB2_SPI3 },
++	[RST_APB2_SDMMC1] = { AP_RST_APB2_REG, AP_RST_APB2_SDMMC1 },
++	[RST_APB2_SDMMC2] = { AP_RST_APB2_REG, AP_RST_APB2_SDMMC2 },
++	[RST_APB2_SDMMC3] = { AP_RST_APB2_REG, AP_RST_APB2_SDMMC3 },
++	[RST_APB2_NAND] = { AP_RST_APB2_REG, AP_RST_APB2_NANDFLASH },
++
++	/* MEM */
++	[RST_MEM_GPU] = { AP_RST_MEM_REG, AP_RST_MEM_GPU },
++	[RST_MEM_VPU] = { AP_RST_MEM_REG, AP_RST_MEM_VPU },
++	[RST_MEM_DMC] = { AP_RST_MEM_REG, AP_RST_MEM_DMC },
++	[RST_MEM_DDRPHY_P] = { AP_RST_MEM_REG, AP_RST_MEM_DDRPHY_P },
++};
++
++static int rda8810_reset_assert(struct reset_controller_dev *rstctl, unsigned long id)
++{
++	struct rda_clk_priv *priv = to_rda_rst(rstctl);
++
++	return regmap_write(priv->regmap, rda8810_rst_data[id].reg, rda8810_rst_data[id].bit);
++}
++
++static int rda8810_reset_deassert(struct reset_controller_dev *rstctl, unsigned long id)
++{
++	struct rda_clk_priv *priv = to_rda_rst(rstctl);
++
++	return regmap_write(priv->regmap, rda8810_rst_data[id].reg + 4, rda8810_rst_data[id].bit);
++}
++
++static const struct reset_control_ops rda8810_rst_ops = {
++	.assert = &rda8810_reset_assert,
++	.deassert = &rda8810_reset_deassert,
++};
++
++static int rda8810_clk_register(struct rda_clk_priv *priv)
++{
++	struct device *dev = priv->dev;
++	struct clk_hw_onecell_data *onecell_data;
 +	int ret;
++	int i;
 +
-+	ret = regmap_test_bits(rtc->regmap, RDA_RTC_STA_REG, RDA_RTC_STA_ALARM_ENABLE);
-+	if (ret < 0) {
-+		dev_err(dev, "Failed to read alarm status: %d\n", ret);
-+		return ret;
-+	}
-+
-+	seq_printf(seq, "alarm enable\t: %s\n", (ret > 0) ? "yes" : "no");
-+
-+	return 0;
-+}
-+
-+static const struct rtc_class_ops rda_rtc_ops = {
-+	.read_time = rda_rtc_readtime,
-+	.set_time = rda_rtc_settime,
-+	.read_alarm = rda_rtc_readalarm,
-+	.set_alarm = rda_rtc_setalarm,
-+	.proc = rda_rtc_proc,
-+	.alarm_irq_enable = rda_rtc_alarm_irq_enable,
-+};
-+
-+#ifdef CONFIG_PM_SLEEP
-+static int rda_rtc_suspend(struct platform_device *pdev, pm_message_t state)
-+{
-+	/* TODO: Check if it's okay to turn on alarm IRQ when it's not set */
-+	return rda_rtc_alarm_irq_enable(&pdev->dev, 1);
-+}
-+
-+static int rda_rtc_resume(struct platform_device *pdev)
-+{
-+	/* If alarms were left, we turn them off. */
-+	return rda_rtc_alarm_irq_enable(&pdev->dev, 0);
-+}
-+#endif
-+
-+static SIMPLE_DEV_PM_OPS(rda_rtc_pm_ops, rda_rtc_suspend, rda_rtc_resume);
-+
-+static const struct regmap_config regmap_config = {
-+	.reg_bits = 32,
-+	.val_bits = 32,
-+	.reg_stride = 4,
-+};
-+
-+static int rda_rtc_probe(struct platform_device *pdev)
-+{
-+	struct rda_rtc *rda_rtc;
-+	void __iomem *base;
-+
-+	rda_rtc = devm_kzalloc(&pdev->dev, sizeof(*rda_rtc), GFP_KERNEL);
-+	if (!rda_rtc)
++	onecell_data = devm_kzalloc(dev,
++			struct_size(onecell_data, hws, ARRAY_SIZE(rda8810_clk_list)),
++			GFP_KERNEL);
++	if (!onecell_data)
 +		return -ENOMEM;
 +
-+	base = devm_platform_ioremap_resource(pdev, 0);
-+	if (IS_ERR(base))
-+		return dev_err_probe(&pdev->dev, PTR_ERR(base),
-+				"failed to remap resource\n");
++	for (i = 0; i < ARRAY_SIZE(rda8810_clk_list); i++) {
++		rda8810_clk_list[i]->priv = priv;
 +
-+	rda_rtc->regmap = devm_regmap_init_mmio(&pdev->dev, base, &regmap_config);
-+	if (!rda_rtc->regmap)
-+		return dev_err_probe(&pdev->dev, PTR_ERR(rda_rtc->regmap),
-+				"can't find regmap\n");
++		ret = devm_clk_hw_register(dev, &rda8810_clk_list[i]->hw);
++		if (ret) {
++			dev_err(dev, "Failed to register clock: %d\n", ret);
++			return ret;
++		}
++		onecell_data->hws[i] = &rda8810_clk_list[i]->hw;
++	}
++	onecell_data->num = i;
++	priv->onecell = onecell_data;
 +
-+	rda_rtc->rtc_dev = devm_rtc_allocate_device(&pdev->dev);
-+	if (IS_ERR(rda_rtc->rtc_dev))
-+		return dev_err_probe(&pdev->dev, PTR_ERR(rda_rtc->rtc_dev),
-+				"failed to allocate rtc device\n");
-+
-+	rda_rtc->rtc_dev->ops = &rda_rtc_ops;
-+	rda_rtc->rtc_dev->range_min = RTC_TIMESTAMP_BEGIN_2000;
-+	rda_rtc->rtc_dev->range_max = RTC_TIMESTAMP_END_2127;
-+
-+	platform_set_drvdata(pdev, rda_rtc);
-+
-+	return devm_rtc_register_device(rda_rtc->rtc_dev);
++	return devm_of_clk_add_hw_provider(dev, of_clk_hw_onecell_get, onecell_data);
 +}
 +
-+static const struct of_device_id rda_rtc_id_table[] = {
-+	{ .compatible = "rda,8810pl-rtc", },
-+	{ /* sentinel */ },
-+};
-+MODULE_DEVICE_TABLE(of, rda_rtc_id_table);
++static int rda8810_rst_register(struct rda_clk_priv *priv)
++{
++	struct device *dev = priv->dev;
 +
-+static struct platform_driver rda_rtc_driver = {
-+	.probe = rda_rtc_probe,
++	priv->rstctl.dev = priv->dev;
++	priv->rstctl.nr_resets = RST_COUNT;
++	priv->rstctl.of_node = priv->dev->of_node;
++	priv->rstctl.ops = &rda8810_rst_ops;
++	priv->rstctl.owner = THIS_MODULE;
++
++	return devm_reset_controller_register(dev, &priv->rstctl);
++}
++
++static int rda8810_clk_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct rda_clk_priv *priv;
++	int ret;
++
++	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv)
++		return dev_err_probe(dev, -ENOMEM, "Cannot allocate memory\n");
++
++	priv->dev = dev;
++
++	priv->regmap = syscon_node_to_regmap(dev->of_node);
++	if (IS_ERR(priv->regmap))
++		return dev_err_probe(dev, -ENOMEM, "Cannot initialize regmap\n");
++
++	ret = rda8810_clk_register(priv);
++	if (ret)
++		return dev_err_probe(dev, -EINVAL, "Failed to setup clock: %d\n", ret);
++
++	ret = rda8810_rst_register(priv);
++	if (ret)
++		return dev_err_probe(dev, -EINVAL, "Failed to setup reset: %d\n", ret);
++
++	platform_set_drvdata(pdev, priv);
++
++	return 0;
++}
++
++static const struct of_device_id rda8810_clk_of_match_table[] = {
++	{ .compatible = "rda,8810pl-apsyscon", },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, rda8810_clk_of_match_table);
++
++static struct platform_driver rda8810_clk_driver = {
++	.probe = rda8810_clk_probe,
 +	.driver = {
-+		.name = "rtc-rda",
-+		.pm = &rda_rtc_pm_ops,
-+		.of_match_table = rda_rtc_id_table,
++		.name = "rda8810-clk",
++		.of_match_table = rda8810_clk_of_match_table,
 +	},
 +};
-+module_platform_driver(rda_rtc_driver);
++module_platform_driver(rda8810_clk_driver);
 +
 +MODULE_AUTHOR("Dang Huynh <dang.huynh@mainlining.org>");
-+MODULE_DESCRIPTION("RDA Micro RTC driver");
++MODULE_DESCRIPTION("RDA8810PL clock and reset driver");
 +MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:rda8810-clk");
 
 -- 
 2.51.0
