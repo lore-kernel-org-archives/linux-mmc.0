@@ -1,36 +1,36 @@
 Received: from mail.mainlining.org (mail.mainlining.org [5.75.144.95])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA955304BCE;
-	Tue, 16 Sep 2025 20:09:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0BE23074BC;
+	Tue, 16 Sep 2025 20:09:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.75.144.95
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758053392; cv=none; b=Cxl9y9OUaZkPE+EkhXEyc8MjSk4aFE6f9I/OLZ0xC0Cgm2zlIvVQ2Vmow+Elu09UYFEeUmR3BG0oQIObYnckAIpcL3da2HZiFlQQeGh7kbiLhWjt3fcfP2DNi5qtNY4LVxbmWKczWI35zrs+CsiT1inSkRKGk23e15tfz46s774=
+	t=1758053398; cv=none; b=IWfOlEyHptNgkgQxRV/2t5AvhvmYFb/DDe3l/OcIGnME/JlL4H8Rb5K5MkfpKqz5eQtiBHBEnpbXzOPWzYXna9qbSokas2xmTBeIw4JFNZXVnDwKiuUwUFLnuQzoKXZjKrB6fS+ahQssbM89dXFy2+Ttmtm13JI/1rx4Ga5Vlqg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758053392; c=relaxed/simple;
-	bh=gehgcAARQ8SuL4G+2lQ4aVqQ18cLEbIKhDsg1ccbtlY=;
+	s=arc-20240116; t=1758053398; c=relaxed/simple;
+	bh=DzZHdJKZCRZsyIe84ay5pJ/2Z/eJ/DpBDRNQR5GG0kc=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=uQoOfsfAb5LWnZZRMoPkFFvfby/2tihHdKsuuKo345lfqL4u3AVxqioPDI4iqciY6WjZcKxnoMIbDKDsCQ2UfImKz+9AhjuC/NxlVsACD2WKv0xJUeRFJ8TT6coCjuiqCmTVYUHNRPttpEGxn7Yzc2YClZzDGIPJPYjKbCzniRs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org; spf=pass smtp.mailfrom=mainlining.org; dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=CzM2wqYQ; dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=0u96kyB7; arc=none smtp.client-ip=5.75.144.95
+	 In-Reply-To:To:Cc; b=uZ7CmqZteVEVINEt05JxnHsmdP/6Me1G41ffehER1LdElWug9BCwidTEdcG7gXsOGx2ZOd25M7rJUV3YuaLJLXhr6W4EqGIEHiGmCFiQJIjpUhZFYX7QxWdlOC7sfxBaapgCvQqWFPQhNpvU4hX/vXQUMQ+titNqahfpadkhDFQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org; spf=pass smtp.mailfrom=mainlining.org; dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=D81tWIkX; dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=vN3Lu7A/; arc=none smtp.client-ip=5.75.144.95
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mainlining.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="CzM2wqYQ";
-	dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="0u96kyB7"
+	dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="D81tWIkX";
+	dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="vN3Lu7A/"
 DKIM-Signature: v=1; a=rsa-sha256; s=202507r; d=mainlining.org; c=relaxed/relaxed;
-	h=To:Message-Id:Subject:Date:From; t=1758053282; bh=36QFNbwKpWQBiZ/Fe/Z9uxp
-	+qsQjQ+OgtXnHKonsaEA=; b=CzM2wqYQ1WOJb/8Rjo+g2lPSmj/n9yIXv7DHCra2ylSTUZTetO
-	rljZfJ2xBoXxhoE+ULS1fN2e/pIqbURiQQWZZZAmWPoWcv2KZBAr/9yK4PKZZ9pHpojPU3OEiWv
-	lfDlhVhsyXWBsbzOXCpOQgsyAo880BRWWHs0Hs5xSvHloIASIcQL9eHLOKqNv8Hhrq4uE+qJUzP
-	kOkyfRKrqnzfI+oNiAUiHMV+7u0PHOG5bNlMMQwXtUOE/xWFth2l/NrZZPSmj+j5hIemNWVcrVG
-	TuFAAq9mYhmF8UcV3TuS2xGQevf3q4cBGZVAeduaGxDcf43/8hGOHpTkERpu/5GsKrg==;
+	h=To:Message-Id:Subject:Date:From; t=1758053302; bh=oxyKpGaevdX8qzFvWgJnjXd
+	deL4fgWyDYB+tXskt0Mo=; b=D81tWIkXyJ82G+KN1ps5eQF2I4UGKqUNEoDzxjadAwW5e5TJxL
+	xCb4/7ziZYL5KVp0obAVsahMsHbbgvfdK5P4bqwG2T2PDVktlNgSZd1Ly9ydyA5TIEd+2x6RWxu
+	bgDOl7gvtwC2fBcg4dRfjDXx7sjoxVb0nTW3bZ8ooJwNJgEAbZ6c2Gp1mwrkccT6E5HKMWjhmAv
+	HmbCw98BuG/QhUB+joM9SRJ6UQH9RGOkrHlnBV0oiEP03BHVI2MJVpNJr2Xu4g+Cun9N1OGxR1g
+	i+P54a8bsCHN5PvI3OGd/aW1RdqTJKAZGNyn7arxXv3BAubYzGZ3+d1a7J+l58QylIA==;
 DKIM-Signature: v=1; a=ed25519-sha256; s=202507e; d=mainlining.org; c=relaxed/relaxed;
-	h=To:Message-Id:Subject:Date:From; t=1758053282; bh=36QFNbwKpWQBiZ/Fe/Z9uxp
-	+qsQjQ+OgtXnHKonsaEA=; b=0u96kyB746Y0WhgRMmjOIkFjt9a6HosKTwmMRJtCouDDLKSdeB
-	NSHiXR8/3PkwjeHIOxrDQbkSLZyhn5liqiDA==;
+	h=To:Message-Id:Subject:Date:From; t=1758053302; bh=oxyKpGaevdX8qzFvWgJnjXd
+	deL4fgWyDYB+tXskt0Mo=; b=vN3Lu7A/HWa/cz9tiEIR0Jnq+N4EnamrtRNsC56oqRgBpVEuW+
+	EfAFWSOeXHo0Q0rl/0wPgy4PAUWRCkd3e/AQ==;
 From: Dang Huynh <dang.huynh@mainlining.org>
-Date: Wed, 17 Sep 2025 03:07:18 +0700
-Subject: [PATCH 01/25] ARM: dts: unisoc: rda8810pl: Add label to GPIO nodes
+Date: Wed, 17 Sep 2025 03:07:21 +0700
+Subject: [PATCH 04/25] rtc: Add timestamp for the end of 2127
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -39,7 +39,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250917-rda8810pl-drivers-v1-1-74866def1fe3@mainlining.org>
+Message-Id: <20250917-rda8810pl-drivers-v1-4-74866def1fe3@mainlining.org>
 References: <20250917-rda8810pl-drivers-v1-0-74866def1fe3@mainlining.org>
 In-Reply-To: <20250917-rda8810pl-drivers-v1-0-74866def1fe3@mainlining.org>
 To: Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
@@ -61,53 +61,26 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org,
  linux-mmc@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>
 X-Mailer: b4 0.14.2
 
-So we can add devices to these GPIO nodes for each board.
+Some RTC (like MT2712 and RDA Micro) can handle until the end of
+the year 2127.
 
 Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
 ---
- arch/arm/boot/dts/unisoc/rda8810pl.dtsi | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ include/linux/rtc.h | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/unisoc/rda8810pl.dtsi b/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-index f30d6ece49fb33d9c5c3ad9522c83bb8e4f8b488..6553fc102c6751696e75e4de614fc3428d182061 100644
---- a/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-+++ b/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-@@ -39,7 +39,7 @@ modem@10000000 {
- 		#size-cells = <1>;
- 		ranges = <0x0 0x10000000 0xfffffff>;
+diff --git a/include/linux/rtc.h b/include/linux/rtc.h
+index 95da051fb155dab4c8ec72ccae7b8e12a117a7f1..ec5828ccc7449388da2ab8bc757030e6795ace30 100644
+--- a/include/linux/rtc.h
++++ b/include/linux/rtc.h
+@@ -175,6 +175,7 @@ struct rtc_device {
+ #define RTC_TIMESTAMP_END_2063		2966371199LL /* 2063-12-31 23:59:59 */
+ #define RTC_TIMESTAMP_END_2079		3471292799LL /* 2079-12-31 23:59:59 */
+ #define RTC_TIMESTAMP_END_2099		4102444799LL /* 2099-12-31 23:59:59 */
++#define RTC_TIMESTAMP_END_2127		4985971199LL /* 2127-12-31 23:59:59 */
+ #define RTC_TIMESTAMP_END_2199		7258118399LL /* 2199-12-31 23:59:59 */
+ #define RTC_TIMESTAMP_END_9999		253402300799LL /* 9999-12-31 23:59:59 */
  
--		gpioc@1a08000 {
-+		gpioc: gpioc@1a08000 {
- 			compatible = "rda,8810pl-gpio";
- 			reg = <0x1a08000 0x1000>;
- 			gpio-controller;
-@@ -76,7 +76,7 @@ timer@10000 {
- 			interrupt-names = "hwtimer", "ostimer";
- 		};
- 
--		gpioa@30000 {
-+		gpioa: gpioa@30000 {
- 			compatible = "rda,8810pl-gpio";
- 			reg = <0x30000 0x1000>;
- 			gpio-controller;
-@@ -87,7 +87,7 @@ gpioa@30000 {
- 			interrupts = <12 IRQ_TYPE_LEVEL_HIGH>;
- 		};
- 
--		gpiob@31000 {
-+		gpiob: gpiob@31000 {
- 			compatible = "rda,8810pl-gpio";
- 			reg = <0x31000 0x1000>;
- 			gpio-controller;
-@@ -98,7 +98,7 @@ gpiob@31000 {
- 			interrupts = <13 IRQ_TYPE_LEVEL_HIGH>;
- 		};
- 
--		gpiod@32000 {
-+		gpiod: gpiod@32000 {
- 			compatible = "rda,8810pl-gpio";
- 			reg = <0x32000 0x1000>;
- 			gpio-controller;
 
 -- 
 2.51.0
