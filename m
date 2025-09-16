@@ -1,37 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96933343202;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 466A93294F8;
 	Tue, 16 Sep 2025 20:25:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758054326; cv=none; b=CYcg4Ro9ETHP9BgFtcziy32+sSXUrJRKLIH6p7mdY/cbJsglJtjLI/vHOPvRXZTXXGilgGR1eXG0msHDam9P1QMz8rCWTi8wRo4mPIPcm7Z5heXzeO0qCGuYNdN473NAhImcsIwMkGWHQsBX7mSy4+R5bGUlmlnqsla6vssOBGw=
+	t=1758054326; cv=none; b=WiXkg02pcQirYjETBI1ITRBYyQ3iEHDGHUurD65N++xxEEKYZH//M2/Hy/GpvHIiU7WlIb3acBqf7wIU5Vqv39IdOCw72jfbjAaW4KmnD/FFh7RZndh4UCLGTrNUXQCcBTNmGUwupq2i3QuEX1vAotLa3KntOKJ8kPcxVRRSVvU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1758054326; c=relaxed/simple;
-	bh=cYZYP/uaZ0Z/omX0vz2UqaLnE+xmaYEf63AvynoutoE=;
+	bh=B44iCTmbdkKyp2fHglpeuA0FgGRACa5ozdrUyEJewhg=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=PI8dT5X3Rjhn4/khQaZ81JCn5/02kDgLkKFnIAId0nPbnT6jdBlQOSv9u7tx4NTYYlwJQDYISsWZoGv27kZy7CrXtF95XGiCvhVKoA6gk82cHIQpnYT4FXHV1WXjU80xMfWM4dn/TFOJ6inWvs2RVOmAEgskO/p29K5b2n0nDj0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CdmlZ+qG; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=XuEYNpXK7zK/j1FCtwSn5vFVQexyeaypmCZ8p1edvz4DYDUXLM1N6xqIUat/+6JFvO8L//HmMrPCwVhFnjh7SAqxgM0OiGS0GXSCAqo9eQD6v4nKAB9zjAbtbdP2ZqjdqBmIUTAZfEiF3ZTCBRoFDpXhhPR364dTx7/tQTkRynE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NAEBA1y1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CdmlZ+qG"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 65186C4CEF0;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NAEBA1y1"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 0A674C4AF09;
 	Tue, 16 Sep 2025 20:25:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1758054326;
-	bh=cYZYP/uaZ0Z/omX0vz2UqaLnE+xmaYEf63AvynoutoE=;
+	bh=B44iCTmbdkKyp2fHglpeuA0FgGRACa5ozdrUyEJewhg=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=CdmlZ+qGcOngd+lvNpEen5lhbh/dTmK2Q3Ty/eYlIEcqgFL6xAzwa4W/LfX34Hfx5
-	 3fBeqj5wi/oTkxuB+XEOsf+wr5Z5C3kDvwmAg/yySoVTPp1/wQFCi27WQye50Usgkv
-	 +iImavWZdMfORAQ2UjB1I4wc38wiikTwi59q2bVpn4+YW9pUHGUE/AAwM62rVqn94E
-	 WqlqiRZmqNjpFhUv/vr9EGKPedIsrCvfR5vRZB66wpqYcUT/+CzRRVuqprKSQpRlQZ
-	 7DYFjspfjwwxdE/TMkSzgMHv1n6y+KiF/8uT6fRAqtQaJ6IVtB73DOR4NjrTzrNzC/
-	 xw3Vv5VYA1S0A==
+	b=NAEBA1y1K4tD/khRpZK6HkipNJr1YfntYnA1W8a1MzEjPiEZDlIUbUrvu6Vu+pe0p
+	 dE4zzG04EM+hdn+JeTZRE7swY4dzT+d3zaZlfXt1w080wMyHCp0vmyNmcQfp1EpRk4
+	 +M5cgboJT5xIC7A1o9d3niTws0pIR9ymJ32HRLpSvJHNUrZoq77nijq2oVbdqcCnFX
+	 18h9UHBn499TLmGp8F2huiSkDw3kNFZHs2OGD4zQ9TR7ELKLZlLg2bYtnrgFtG4mkE
+	 PjuOKrBP49md3posUyZxios2JUQ0yCVcmx4UwALtpQvdrA7nF/kp1Haj/rVzLgd/N6
+	 8HwSnuIEXZLzw==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5229ACAC59F;
-	Tue, 16 Sep 2025 20:25:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3DD7CAC59F;
+	Tue, 16 Sep 2025 20:25:25 +0000 (UTC)
 From: Dang Huynh via B4 Relay <devnull+dang.huynh.mainlining.org@kernel.org>
-Date: Wed, 17 Sep 2025 03:25:20 +0700
-Subject: [PATCH 23/25] dts: unisoc: rda8810pl: Add SDMMC controllers
+Date: Wed, 17 Sep 2025 03:25:15 +0700
+Subject: [PATCH 18/25] dt-bindings: dma: Add RDA IFC DMA
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +40,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250917-rda8810pl-drivers-v1-23-9ca9184ca977@mainlining.org>
+Message-Id: <20250917-rda8810pl-drivers-v1-18-9ca9184ca977@mainlining.org>
 References: <20250917-rda8810pl-drivers-v1-0-9ca9184ca977@mainlining.org>
 In-Reply-To: <20250917-rda8810pl-drivers-v1-0-9ca9184ca977@mainlining.org>
 To: Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
@@ -61,11 +61,11 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org,
  dmaengine@vger.kernel.org, linux-hardening@vger.kernel.org, 
  linux-mmc@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1758054322; l=1669;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1758054322; l=2537;
  i=dang.huynh@mainlining.org; s=20250917; h=from:subject:message-id;
- bh=+rjfqyC6diLcCcMZpXzmNwIY3Xd0ao4URhi7mY7MeOo=;
- b=g36+c8BMuiizyAkQU5g2SVhGELtdZOZL7VmLGm9NJ65TH2ylz89Z6tGkVFMsW4PUF6yXDm1fJ
- gSr5M9xIH80CvABquDEQg1EdtLnBDMt1j/TqnDGY86xGtT9UTnG1g4P
+ bh=QY6MPTi+ZEpXp5sbdSrBjaqgS0Xhdu1ZPCH1WF+g14Y=;
+ b=f+73zCYT5uq1k6ilgLXi33C+NRy7J+fTOa4N/swr6XCdLJaXbG/yOKqpUhJI3D/PqTqY8XU0k
+ QkM4vE+PJ/5Cn0iUPmzJgeqVeko3jz25IKQyFfbLa/CoguJ6psdmMSc
 X-Developer-Key: i=dang.huynh@mainlining.org; a=ed25519;
  pk=RyzH4CL4YU/ItXYUurA51EVBidfx4lIy8/E4EKRJCUk=
 X-Endpoint-Received: by B4 Relay for dang.huynh@mainlining.org/20250917
@@ -75,56 +75,97 @@ Reply-To: dang.huynh@mainlining.org
 
 From: Dang Huynh <dang.huynh@mainlining.org>
 
-Add SDMMC1 and 2 controllers for the RDA8810PL platform.
+The Intelligent Flow Controller (IFC) is a scatter/gather DMA
+controller.
 
 Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
 ---
- arch/arm/boot/dts/unisoc/rda8810pl.dtsi | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
+ Documentation/devicetree/bindings/dma/rda,ifc.yaml | 42 ++++++++++++++++++++++
+ include/dt-bindings/dma/rda-ifc.h                  | 28 +++++++++++++++
+ 2 files changed, 70 insertions(+)
 
-diff --git a/arch/arm/boot/dts/unisoc/rda8810pl.dtsi b/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-index 4b3ae19e9da41ee9ffa76dd4fff01824c07ce045..e68f8330ce2c4750b6944612bee03b42694137e4 100644
---- a/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-+++ b/arch/arm/boot/dts/unisoc/rda8810pl.dtsi
-@@ -9,6 +9,7 @@
- #include <dt-bindings/interrupt-controller/arm-gic.h>
- #include <dt-bindings/interrupt-controller/irq.h>
- #include <dt-bindings/clock/rda,8810pl-apclk.h>
-+#include <dt-bindings/dma/rda-ifc.h>
- 
- / {
- 	compatible = "rda,8810pl";
-@@ -199,6 +200,30 @@ uart1: serial@0 {
- 			status = "disabled";
- 		};
- 
-+		mmc1: mmc@50000 {
-+			compatible = "rda,8810pl-mmc";
-+			reg = <0x50000 0x1000>;
-+			interrupts = <3 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&ap_syscon CLK_APB2>;
-+			clock-names = "apb";
-+			resets = <&ap_syscon RST_APB2_SDMMC1>;
-+			dmas = <&ifc IFC_SDMMC1_TX>, <&ifc IFC_SDMMC1_RX>;
-+			dma-names = "tx", "rx";
-+			status = "disabled";
-+		};
+diff --git a/Documentation/devicetree/bindings/dma/rda,ifc.yaml b/Documentation/devicetree/bindings/dma/rda,ifc.yaml
+new file mode 100644
+index 0000000000000000000000000000000000000000..3bb5932e8ff9404e3980eaef607efceb6d883bda
+--- /dev/null
++++ b/Documentation/devicetree/bindings/dma/rda,ifc.yaml
+@@ -0,0 +1,42 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/dma/rda,ifc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+		mmc2: mmc@60000 {
-+			compatible = "rda,8810pl-mmc";
-+			reg = <0x60000 0x1000>;
-+			interrupts = <4 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&ap_syscon CLK_APB2>;
-+			clock-names = "apb";
-+			resets = <&ap_syscon RST_APB2_SDMMC2>;
-+			dmas = <&ifc IFC_SDMMC2_TX>, <&ifc IFC_SDMMC2_RX>;
-+			dma-names = "tx", "rx";
-+			status = "disabled";
-+		};
++title: RDA Intelligent Flow Controller (IFC)
 +
- 		uart2: serial@10000 {
- 			compatible = "rda,8810pl-uart";
- 			reg = <0x10000 0x1000>;
++maintainers:
++  - Dang Huynh <dang.huynh@mainlining.org>
++
++description: |
++  RDA IFC is a DMA controller, it only supports scatter/gather lists.
++
++allOf:
++  - $ref: dma-controller.yaml#
++
++properties:
++  compatible:
++    const: rda,8810pl-ifc
++
++  reg:
++    maxItems: 1
++
++  "#dma-cells":
++    const: 1
++    description:
++      The cell corresponding to DMA request ID
++
++required:
++  - compatible
++  - reg
++
++additionalProperties: false
++
++examples:
++  - |
++    ifc: dma-controller@f0000 {
++      compatible = "rda,8810pl-ifc";
++      reg = <0xf0000 0x1000>;
++      #dma-cells = <1>;
++    };
+diff --git a/include/dt-bindings/dma/rda-ifc.h b/include/dt-bindings/dma/rda-ifc.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..e075fe26158e834d1ae87b6dce61e41fb931add3
+--- /dev/null
++++ b/include/dt-bindings/dma/rda-ifc.h
+@@ -0,0 +1,28 @@
++/* SPDX-License-Identifier: GPL-2.0 OR BSD-2-Clause */
++
++#ifndef __DT_BINDINGS_DMA_RDA_IFC_H__
++#define __DT_BINDINGS_DMA_RDA_IFC_H__
++
++#define IFC_UART1_TX 0
++#define IFC_UART1_RX 1
++#define IFC_UART2_TX 2
++#define IFC_UART2_RX 3
++#define IFC_SPI1_TX 4
++#define IFC_SPI1_RX 5
++#define IFC_SPI2_TX 6
++#define IFC_SPI2_RX 7
++#define IFC_SPI3_TX 8
++#define IFC_SPI3_RX 9
++#define IFC_SDMMC1_TX 10
++#define IFC_SDMMC1_RX 11
++#define IFC_SDMMC2_TX 12
++#define IFC_SDMMC2_RX 13
++#define IFC_SDMMC3_TX 14
++#define IFC_SDMMC3_RX 15
++#define IFC_NFSC_TX 16
++#define IFC_NFSC_RX 17
++#define IFC_UART3_TX 18
++#define IFC_UART3_RX 19
++#define IFC_NO_REQUEST 20
++
++#endif /* __DT_BINDINGS_DMA_RDA_IFC_H__ */
 
 -- 
 2.51.0
