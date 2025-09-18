@@ -1,37 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FC1B2D8774;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A136B2D8776;
 	Thu, 18 Sep 2025 18:49:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758221398; cv=none; b=DnMS9lxiX5HQlnCoXe+vZQL+K4vy2tWU/SO9V6PrUpevSfNMuPM/SrdoOeaMbmgDGh4iatn4Ot2apOO5RZUAjJf9dWzB05MXOF/n8V5ve2dwzzunUSd/CdwPlfKyXBhWrQ9BcMohFJKdiFYGrHYMee/N//fUhdyCYEGWBi3CPr8=
+	t=1758221398; cv=none; b=CMIDvglwvWCL9r9W0sjovIXbOx+Xh0EPBxR2ypkCvI9FalTbjWkSQDSfNBQFqWsbmTUR322kF6dSNUW+0b/iXO+zwkmWYZfEErk8/XIUsD32Mhd2JFWA2raovv0zxiA/8Y0v6VEdhZJflOmXyQ2VkZNGCyCitMBZSDKeh1VSxts=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1758221398; c=relaxed/simple;
-	bh=Htg5Xkrs9v7XuZNYgTVERiSjoemIaBO0jN/nY/LLRAU=;
+	bh=0toEdpgdrAHwzWBocpkLTIinw0pb9FWHXvtuM2MoRow=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Nj4ajWTsIOdCyTSzz5rvCitZZaF+mieQzT8W7vlncmqzSRRacS2zNcSlNpFN+hUWmqLPkj6R4mZFEcwoiS288a1J8imQWXKlroM85YQx4q/JTdNCAFgvEnYZxzV0+MdYosRbeW/Bqpvl2TOexZmzrqUd7E4disTMN26OXsNcg+w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kSeEVrWa; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=fyvbR/6h6P2gX/pu7AVL4kPsqzSLe64U+iDGqJ+KyMoKkkPyVPlLI0TsyuVRDPAnmcXpf/ogbGDNpR5vSX09In8wzKX6YgmvBWkeNqxgTlsitCn/9WMHdu87Kw1lc2BwwpBqfQ3uqZJYALLD5mD3WvixaJcdzxs4hrVsevE9DfU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mXTa/7ZT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kSeEVrWa"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 0EE02C4CEF1;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mXTa/7ZT"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 3B556C116B1;
 	Thu, 18 Sep 2025 18:49:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1758221398;
-	bh=Htg5Xkrs9v7XuZNYgTVERiSjoemIaBO0jN/nY/LLRAU=;
+	bh=0toEdpgdrAHwzWBocpkLTIinw0pb9FWHXvtuM2MoRow=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=kSeEVrWav2PG5BgRSfOW1+KN7xeUTx2UR9FezgyY5IT12g/PUtMp2vUOvtErW5Hqz
-	 L4lvjDfIh822AGzZF8Rc2+bR7WtWU5MBxHmv5rB+YNEP/IKaalXx4JuIMSxnMrs/z6
-	 MIjIc22S0O87HdVQThIwIAucZnr+aIDqboY09i5RZOwt2llByAFZiaFdVfQ1xxAGKA
-	 u13ap5mUeHsygRDzLGDJAun08wJnZBlmCtScaJyTZnhWpHIgNvQKMiyPAiYZTShAuh
-	 oghbtZY3/4l4751hxq9OUirOKjeRtV9IpiF8V65IvFuEG3YWwrsZmcXquKxP6mcVUV
-	 /RpETgjRTJXPg==
+	b=mXTa/7ZTSyoRUPq0LQumllP2bsy6xtHw59fnlRGrCpAMMrQy4Uls6SEbrDebF3128
+	 YpCJ1745BR8ndtD5NrHPFLqZD56yFrg463l+6bPD7F3ty+ZC8Q9ei3PjQkEVxD8KEd
+	 yZ7nhF7sgZ3vLyKHqeXo0DuVFBEh+NUdy4XZ4BxklfDLOhcSlJz3e4twocACzX0PCN
+	 wcim4j1KWKTIqVnbKUuUz65L7FokbPceYxlodBk66B0/LiHvtNCdsfluXDHoXXUJGl
+	 +DkO1/0KzhaBKatU7mmbBoW21zDgo3tPmXfjRsR2y6xhXodHQji0MdbqW01qnlIV7Y
+	 NMAB2bTu2PQQQ==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2FE7CA1013;
-	Thu, 18 Sep 2025 18:49:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D1E0CAC5A7;
+	Thu, 18 Sep 2025 18:49:58 +0000 (UTC)
 From: Dang Huynh via B4 Relay <devnull+dang.huynh.mainlining.org@kernel.org>
-Date: Fri, 19 Sep 2025 01:48:43 +0700
-Subject: [PATCH 03/10] dt-bindings: dma: Add RDA IFC DMA
+Date: Fri, 19 Sep 2025 01:48:46 +0700
+Subject: [PATCH 06/10] gpio: rda: Make direction register unreadable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +40,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250919-rda8810pl-mmc-v1-3-d4f08a05ba4d@mainlining.org>
+Message-Id: <20250919-rda8810pl-mmc-v1-6-d4f08a05ba4d@mainlining.org>
 References: <20250919-rda8810pl-mmc-v1-0-d4f08a05ba4d@mainlining.org>
 In-Reply-To: <20250919-rda8810pl-mmc-v1-0-d4f08a05ba4d@mainlining.org>
 To: Manivannan Sadhasivam <mani@kernel.org>, 
@@ -59,11 +59,11 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org,
  dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org, 
  linux-hardening@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1758221395; l=2618;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1758221395; l=985;
  i=dang.huynh@mainlining.org; s=20250917; h=from:subject:message-id;
- bh=fdIibseK6J9eF4DEbb0by9y6/svLXlDdAKxdYmnzlAc=;
- b=QviwbPBtxpdoWdT5r4lpY8XknciVPiPjmERLRTaOaBzvDTRddjvGsVcO6iHE8kT4emUpiQt4E
- 1MLJW+wwCTHAOBt+3nucNpqiToQ4PDL0uwMLtxtR+eUzpkVGgG8tCe2
+ bh=VMMKg4HONUFRzO6+25FovvsxOlucUttBjgwEeb3Ns7Q=;
+ b=iAakQHayFHGXZ7IKRgsLgfpt3RDZjxa0+TASp4ZeKYUKatPRehTsYyn/QN0h83ue75flIlEEa
+ Z292tJSmrBCA/7rCRSbbK0qIuX2/EJRrE+U7wNAYUXGkbpIODs8+5p8
 X-Developer-Key: i=dang.huynh@mainlining.org; a=ed25519;
  pk=RyzH4CL4YU/ItXYUurA51EVBidfx4lIy8/E4EKRJCUk=
 X-Endpoint-Received: by B4 Relay for dang.huynh@mainlining.org/20250917
@@ -73,100 +73,30 @@ Reply-To: dang.huynh@mainlining.org
 
 From: Dang Huynh <dang.huynh@mainlining.org>
 
-The Intelligent Flow Controller (IFC) is a scatter/gather DMA
-controller.
+The register doesn't like to be read and would cause all the input
+to be switched to output.
+
+This causes the SD Card Detect GPIO to misbehaves in the OS and/or
+may cause hardware to malfunction.
 
 Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
 ---
- Documentation/devicetree/bindings/dma/rda,ifc.yaml | 45 ++++++++++++++++++++++
- include/dt-bindings/dma/rda-ifc.h                  | 28 ++++++++++++++
- 2 files changed, 73 insertions(+)
+ drivers/gpio/gpio-rda.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/dma/rda,ifc.yaml b/Documentation/devicetree/bindings/dma/rda,ifc.yaml
-new file mode 100644
-index 0000000000000000000000000000000000000000..323e1e87cee09cfc7b64bf44bef61e4d1e91afa5
---- /dev/null
-+++ b/Documentation/devicetree/bindings/dma/rda,ifc.yaml
-@@ -0,0 +1,45 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/dma/rda,ifc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: RDA Intelligent Flow Controller (IFC)
-+
-+maintainers:
-+  - Dang Huynh <dang.huynh@mainlining.org>
-+
-+description: |
-+  RDA IFC is a DMA controller, it only supports scatter/gather lists.
-+
-+allOf:
-+  - $ref: dma-controller.yaml#
-+
-+properties:
-+  compatible:
-+    items:
-+      - enum:
-+          - rda,8810pl-ifc
-+      - const: rda,ifc
-+
-+  reg:
-+    maxItems: 1
-+
-+  "#dma-cells":
-+    const: 1
-+    description:
-+      The cell corresponding to DMA request ID
-+
-+required:
-+  - compatible
-+  - reg
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    dma-controller@f0000 {
-+      compatible = "rda,8810pl-ifc", "rda,ifc";
-+      reg = <0xf0000 0x1000>;
-+      #dma-cells = <1>;
-+    };
-diff --git a/include/dt-bindings/dma/rda-ifc.h b/include/dt-bindings/dma/rda-ifc.h
-new file mode 100644
-index 0000000000000000000000000000000000000000..af4bae0542aa71690351e2406d0945a61eff72c1
---- /dev/null
-+++ b/include/dt-bindings/dma/rda-ifc.h
-@@ -0,0 +1,28 @@
-+/* SPDX-License-Identifier: GPL-2.0 OR BSD-2-Clause */
-+
-+#ifndef __DT_BINDINGS_DMA_RDA_IFC_H__
-+#define __DT_BINDINGS_DMA_RDA_IFC_H__
-+
-+#define IFC_UART1_TX		0
-+#define IFC_UART1_RX		1
-+#define IFC_UART2_TX		2
-+#define IFC_UART2_RX		3
-+#define IFC_SPI1_TX		4
-+#define IFC_SPI1_RX		5
-+#define IFC_SPI2_TX		6
-+#define IFC_SPI2_RX		7
-+#define IFC_SPI3_TX		8
-+#define IFC_SPI3_RX		9
-+#define IFC_SDMMC1_TX		10
-+#define IFC_SDMMC1_RX		11
-+#define IFC_SDMMC2_TX		12
-+#define IFC_SDMMC2_RX		13
-+#define IFC_SDMMC3_TX		14
-+#define IFC_SDMMC3_RX		15
-+#define IFC_NFSC_TX		16
-+#define IFC_NFSC_RX		17
-+#define IFC_UART3_TX		18
-+#define IFC_UART3_RX		19
-+#define IFC_NO_REQUEST		20
-+
-+#endif /* __DT_BINDINGS_DMA_RDA_IFC_H__ */
+diff --git a/drivers/gpio/gpio-rda.c b/drivers/gpio/gpio-rda.c
+index 7d20dbbb6ec41149a1dbf4d9ef9ac86449773c35..ae2efa22755986b5445fdb8d4f004d595c189590 100644
+--- a/drivers/gpio/gpio-rda.c
++++ b/drivers/gpio/gpio-rda.c
+@@ -245,7 +245,7 @@ static int rda_gpio_probe(struct platform_device *pdev)
+ 		.clr = rda_gpio->base + RDA_GPIO_CLR,
+ 		.dirout = rda_gpio->base + RDA_GPIO_OEN_SET_OUT,
+ 		.dirin = rda_gpio->base + RDA_GPIO_OEN_SET_IN,
+-		.flags = BGPIOF_READ_OUTPUT_REG_SET,
++		.flags = BGPIOF_READ_OUTPUT_REG_SET | BGPIOF_UNREADABLE_REG_DIR,
+ 	};
+ 
+ 	ret = gpio_generic_chip_init(&rda_gpio->chip, &config);
 
 -- 
 2.51.0
