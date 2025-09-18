@@ -1,37 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B85E28CF56;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B8D12D23A9;
 	Thu, 18 Sep 2025 18:49:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758221398; cv=none; b=geCw6kZMzewxtfdC5OtVk4hjpANT0DnwUOLvkzWm6XheuFLIwC4ULPBMqZHh9WcCYYi1GwGllL8Q/hz4NS6wsbeqglyk8MFm+soGel6b2C4x3aLGRAR2p1YGdqRIkG758Xdfc37mbW6dpWbAYcUx0Uq67TVIKH2EXJUaxVgIAPg=
+	t=1758221398; cv=none; b=jOXArOORi8W/vq1lEP7yMXeBoNvMxDwIdL4hbiu+xtYiCqclbJHjVZsRJOFbUWoOr7Gnondi7PDf24K/8rlWkIQB1JegkNvMCgcAr9169nSC+qSCUBWcXBdZH9oBmJ0BguiJlKSjECvaqq8fq/o84yvoJATLpYJG7K+11nq2oDo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1758221398; c=relaxed/simple;
-	bh=kZ31Cj+9SlIwCue4nf87udZAy0O4rgTArK6cH8v5gE0=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=YTcRaeCxWhiiCNRmuIGDslsIMAM1lVEsgdsKNHtQXXJM2h+ELthpaAI+RJ3LucvsLydyjqkb0mBoRX4oQK32YAwhX5QuslE/c4lX1FZPSfthehQ8/7J0et5S90zfHOhaG66HPqckp7rV80u0ggbo5875zSmH5VkAWKATHeZ7OqM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ATGpncwy; arc=none smtp.client-ip=10.30.226.201
+	bh=m6XC20l3ClTl8r0l+5xVZWE4dMGQNb50oPXH+vTTgX0=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=AwdWn6O2hbD9YnLsxcduYWsPEQ2BDrI/p8GkmzjltWTl84EVx2vebJxCQXOTbIWoWikuYav0TheFjAyCrXweAyeTDCDGJ2a+Q/BenXPNB5StsSEZ+LL57t9HAxi14MdI5YBDbx1RBDNx2WYQt2j66aR+JYwoATVz/8T3VpKV64s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Y3Svp6kh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ATGpncwy"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id C9BD4C4CEF0;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y3Svp6kh"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id ED381C4AF0C;
 	Thu, 18 Sep 2025 18:49:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758221397;
-	bh=kZ31Cj+9SlIwCue4nf87udZAy0O4rgTArK6cH8v5gE0=;
-	h=From:Subject:Date:To:Cc:Reply-To:From;
-	b=ATGpncwy2bS+wQApNWWCLiBfVItH2WsyhrR5OU2hxOuEYThCgq5qokSue4tke0Sma
-	 9UhVm+nW7/SCeJJQS2Ti2LGwPiungb6RyUjKuG9hHRzrzxfHSlAOJb4NFJfHwZp9QZ
-	 lQWJYNZk7Kfvh5+lIa/IFCuzcVsRlrY7jwzun+mrxv7eAU3JrN3E1go77oeYZp954E
-	 tILkcGL9x9F3KSKp343DZ5TcIPDYxyvRKxa3CmR1JXU/tBLTtSamZtNqc0KlSReeuJ
-	 Blz7hd1ilSLhGOSVGxt2Q+5XH7gl56r746zq7MuwLVqarjjwJy86bblAx71C3ueyE6
-	 tfP97FdQaWD0A==
+	s=k20201202; t=1758221398;
+	bh=m6XC20l3ClTl8r0l+5xVZWE4dMGQNb50oPXH+vTTgX0=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+	b=Y3Svp6khvN7yWzF7yJAnb/6eZx8XPiIFDzCLqmaRfQN8Nt/HeWW6aIiyluudJpf92
+	 WTk0Bwpk4SYMm67ZUlmAGCk3xxCZhz7Y1d2txvccyvKoH3PBcXFRtBZX5CqePDdBpi
+	 ExHW4ymOD/m9rx9ufzSxcj4EYIGdqhXOwdipAhwXNe5vg489e+TGAsroIpfHImbRp2
+	 iEU0boEJYjE2GdxB8HD135UAdIegHrIvu3ytVTiuG01JiCyvjaHK+Nc7GZeh2Qnd6y
+	 4KBrXDzfd6BX9AmoOs6baZJO9REcAJsuufHR5nz0iU2J6qAZjMg8OI/50LGptUEu9T
+	 LRePwLcGITJcg==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB476CAC597;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E21BCCAC5A7;
 	Thu, 18 Sep 2025 18:49:57 +0000 (UTC)
 From: Dang Huynh via B4 Relay <devnull+dang.huynh.mainlining.org@kernel.org>
-Subject: [PATCH 00/10] RDA8810PL SD/MMC support
-Date: Fri, 19 Sep 2025 01:48:40 +0700
-Message-Id: <20250919-rda8810pl-mmc-v1-0-d4f08a05ba4d@mainlining.org>
+Date: Fri, 19 Sep 2025 01:48:42 +0700
+Subject: [PATCH 02/10] dt-bindings: clock: Add RDA Micro RDA8810PL
+ clock/reset controller
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,10 +41,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAAhUzGgC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
- vPSU3UzU4B8JSMDI1MDS0ML3aKURAsLQ4OCHN3c3GRd4zRj4yQL42RjQ+MUJaCegqLUtMwKsHn
- RsbW1ANyU/p1fAAAA
-X-Change-ID: 20250918-rda8810pl-mmc-3f33b83c313d
+Message-Id: <20250919-rda8810pl-mmc-v1-2-d4f08a05ba4d@mainlining.org>
+References: <20250919-rda8810pl-mmc-v1-0-d4f08a05ba4d@mainlining.org>
+In-Reply-To: <20250919-rda8810pl-mmc-v1-0-d4f08a05ba4d@mainlining.org>
 To: Manivannan Sadhasivam <mani@kernel.org>, 
  Linus Walleij <linus.walleij@linaro.org>, 
  Bartosz Golaszewski <brgl@bgdev.pl>, Rob Herring <robh@kernel.org>, 
@@ -58,14 +58,13 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org,
  linux-gpio@vger.kernel.org, devicetree@vger.kernel.org, 
  linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, 
  dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org, 
- linux-hardening@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>, 
- Conor Dooley <conor.dooley@microchip.com>
+ linux-hardening@vger.kernel.org, Dang Huynh <dang.huynh@mainlining.org>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1758221395; l=2690;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1758221395; l=3620;
  i=dang.huynh@mainlining.org; s=20250917; h=from:subject:message-id;
- bh=kZ31Cj+9SlIwCue4nf87udZAy0O4rgTArK6cH8v5gE0=;
- b=qOqMjxWy0QtL3Ogxpb8gkzjO7d5vmQGyKe+kb/6NkDaSg1BsYLRsnjbZgBDstvASeAx0n2d2c
- 3shNDl4Z4C4Bf3HZJfK9hqW3+uGf3bq50x8EsDU0gvAu95HssYcfjYM
+ bh=yG1beL4lbbZE3Cyw7kV4xFP4ZLuCcjFcdAuQ/q4oW2c=;
+ b=JF6dfaJsAusUyjBVwoIXfKUz19P5AWybOy4EvgWhd2pjj31nJtH6FOD0h+2fiLlOazh9s+xlj
+ HEwzlje4oP5DeSea12PeZ2gEI5kYukFumlHp1Rs2zLRm4HdqCrnp6ZZ
 X-Developer-Key: i=dang.huynh@mainlining.org; a=ed25519;
  pk=RyzH4CL4YU/ItXYUurA51EVBidfx4lIy8/E4EKRJCUk=
 X-Endpoint-Received: by B4 Relay for dang.huynh@mainlining.org/20250917
@@ -73,61 +72,144 @@ X-Endpoint-Received: by B4 Relay for dang.huynh@mainlining.org/20250917
 X-Original-From: Dang Huynh <dang.huynh@mainlining.org>
 Reply-To: dang.huynh@mainlining.org
 
-This patch series aims to add SDMMC driver and various drivers required
-for SDMMC controller to function.
+From: Dang Huynh <dang.huynh@mainlining.org>
 
-This also fixed a bug where all the GPIO switched from INPUT to OUTPUT
-after the GPIO driver probed or by reading the GPIO debugfs.
-
-This patch series is a split from [1] to ease the maintainers.
-
-Tested on Orange Pi 2G-IOT using a Buildroot environment.
-
-[1]: https://lore.kernel.org/all/20250917-rda8810pl-drivers-v1-0-9ca9184ca977@mainlining.org/
+Add documentation describing the RDA8810PL Clock and Reset
+controller.
 
 Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
 ---
-Dang Huynh (10):
-      dt-bindings: gpio: rda: Make interrupts optional
-      dt-bindings: clock: Add RDA Micro RDA8810PL clock/reset controller
-      dt-bindings: dma: Add RDA IFC DMA
-      dt-bindings: mmc: Add RDA SDMMC controller
-      gpio: rda: Make IRQ optional
-      gpio: rda: Make direction register unreadable
-      clk: Add Clock and Reset Driver for RDA Micro RDA8810PL SoC
-      dmaengine: Add RDA IFC driver
-      mmc: host: Add RDA Micro SD/MMC driver
-      ARM: dts: unisoc: rda8810pl: Add SDMMC controllers
+ .../bindings/clock/rda,8810pl-apsyscon.yaml        | 43 +++++++++++++
+ include/dt-bindings/clock/rda,8810pl-apclk.h       | 70 ++++++++++++++++++++++
+ 2 files changed, 113 insertions(+)
 
- .../bindings/clock/rda,8810pl-apsyscon.yaml        |  43 ++
- Documentation/devicetree/bindings/dma/rda,ifc.yaml |  45 ++
- .../devicetree/bindings/gpio/gpio-rda.yaml         |   3 -
- Documentation/devicetree/bindings/mmc/rda,mmc.yaml |  92 +++
- MAINTAINERS                                        |  18 +
- .../boot/dts/unisoc/rda8810pl-orangepi-2g-iot.dts  |  20 +
- .../arm/boot/dts/unisoc/rda8810pl-orangepi-i96.dts |  20 +
- arch/arm/boot/dts/unisoc/rda8810pl.dtsi            |  47 +-
- drivers/clk/Kconfig                                |   1 +
- drivers/clk/Makefile                               |   1 +
- drivers/clk/rda/Kconfig                            |  14 +
- drivers/clk/rda/Makefile                           |   2 +
- drivers/clk/rda/clk-rda8810.c                      | 769 +++++++++++++++++++
- drivers/dma/Kconfig                                |  10 +
- drivers/dma/Makefile                               |   1 +
- drivers/dma/rda-ifc.c                              | 450 +++++++++++
- drivers/gpio/gpio-rda.c                            |   4 +-
- drivers/mmc/host/Kconfig                           |  12 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/rda-mmc.c                         | 853 +++++++++++++++++++++
- include/dt-bindings/clock/rda,8810pl-apclk.h       |  70 ++
- include/dt-bindings/dma/rda-ifc.h                  |  28 +
- 22 files changed, 2495 insertions(+), 9 deletions(-)
----
-base-commit: ae2d20002576d2893ecaff25db3d7ef9190ac0b6
-change-id: 20250918-rda8810pl-mmc-3f33b83c313d
+diff --git a/Documentation/devicetree/bindings/clock/rda,8810pl-apsyscon.yaml b/Documentation/devicetree/bindings/clock/rda,8810pl-apsyscon.yaml
+new file mode 100644
+index 0000000000000000000000000000000000000000..d90dae8ebaa270aa822e4855d2a4a892168c5eea
+--- /dev/null
++++ b/Documentation/devicetree/bindings/clock/rda,8810pl-apsyscon.yaml
+@@ -0,0 +1,43 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/clock/rda,8810pl-apsyscon.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: RDA Micro RDA8810PL AP Clock Controller
++
++maintainers:
++  - Dang Huynh <dang.huynh@mainlining.org>
++
++properties:
++  compatible:
++    items:
++      - const: rda,8810pl-apsyscon
++      - const: syscon
++
++  reg:
++    maxItems: 1
++
++  '#clock-cells':
++    const: 1
++
++  '#reset-cells':
++    const: 1
++
++required:
++  - compatible
++  - reg
++  - '#clock-cells'
++  - '#reset-cells'
++
++additionalProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/rda,8810pl-apclk.h>
++    syscon@0 {
++      compatible = "rda,8810pl-apsyscon", "syscon";
++      reg = <0x0 0x1000>;
++      #clock-cells = <1>;
++      #reset-cells = <1>;
++    };
+diff --git a/include/dt-bindings/clock/rda,8810pl-apclk.h b/include/dt-bindings/clock/rda,8810pl-apclk.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..b6d68af9596a7ef827f6d18f1f19ed359e147629
+--- /dev/null
++++ b/include/dt-bindings/clock/rda,8810pl-apclk.h
+@@ -0,0 +1,70 @@
++/* SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause) */
++
++#ifndef _DT_BINDINGS_CLK_RDA8810_H_
++#define _DT_BINDINGS_CLK_RDA8810_H_
++
++/* soc clocks */
++#define CLK_CPU			0
++#define CLK_BUS			1
++#define CLK_MEM			2
++#define CLK_USB			3
++#define CLK_AXI			4
++#define CLK_GCG			5
++#define CLK_AHB1			6
++#define CLK_APB1			7
++#define CLK_APB2			8
++#define CLK_GPU			9
++#define CLK_VPU			10
++#define CLK_VOC			11
++#define CLK_SFLSH			12
++#define CLK_UART1			13
++#define CLK_UART2			14
++#define CLK_UART3			15
++#define CLK_VOC2			16
++#define CLK_EMMC			17
++
++/* resets */
++#define RST_CPU			0
++
++#define RST_AXI_VOC			1
++#define RST_AXI_DMA			2
++#define RST_AXI_CONNECT		3
++#define RST_AXI_VPU			4
++
++#define RST_GCG_GOUDA			5
++#define RST_GCG_CAMERA			6
++#define RST_GCG_LCDC			7
++
++#define RST_AHB1_USBC			8
++#define RST_AHB1_SPIFLASH		9
++#define RST_APB1_TIMER			10
++#define RST_APB1_KEYPAD		11
++#define RST_APB1_GPIO			12
++#define RST_APB1_PWM			13
++#define RST_APB1_AIF			14
++#define RST_APB1_AUIFC			15
++#define RST_APB1_I2C1			16
++#define RST_APB1_I2C2			17
++#define RST_APB1_I2C3			18
++#define RST_APB1_COMREGS		19
++#define RST_APB1_DMC			20
++#define RST_APB1_DDRPHY_P		21
++
++#define RST_APB2_IFC			22
++#define RST_APB2_UART1			23
++#define RST_APB2_UART2			24
++#define RST_APB2_UART3			25
++#define RST_APB2_SPI1			26
++#define RST_APB2_SPI2			27
++#define RST_APB2_SPI3			28
++#define RST_APB2_SDMMC1		29
++#define RST_APB2_SDMMC2		30
++#define RST_APB2_SDMMC3		31
++#define RST_APB2_NAND			32
++
++#define RST_MEM_GPU			33
++#define RST_MEM_VPU			34
++#define RST_MEM_DMC			35
++#define RST_MEM_DDRPHY_P		36
++
++#endif /* _DT_BINDINGS_CLK_RDA8810_H_ */
 
-Best regards,
 -- 
-Dang Huynh <dang.huynh@mainlining.org>
+2.51.0
 
 
