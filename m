@@ -1,183 +1,64 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DF9825C6FF;
-	Sun, 21 Sep 2025 04:43:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A55B229B38;
+	Sun, 21 Sep 2025 20:04:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758429815; cv=none; b=gGAZW0zCu23GSfvWmszWIxi09NjFAVLwTMYaYTPqwNdgybfrQ6/gR3Wrzyzathcf4bZESCbFF073IDIhxkjxSipqTsjPFG0JkNuMMrtsywmiIvxEKQhkveFG7PePMyFsGbcycWDIwRdS064bHgiOlB1Xuya7P3sR9Rtll2TVbUk=
+	t=1758485062; cv=none; b=KfLkcrgOP4T97uynh7avtaN83EIA7YuGtGdyvR1xRdJnoTWrT1NfFnsS92heXNBXBtL+mmg6cpl6aG2F1XTw0tSWrjFAB2yvKGRYUnXFU103mZQ0tJQObL23+bvqX1KBPd+Iu4EVjH9rcsbsuZvOinKjl7zA000p0geo1Kdmb9g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758429815; c=relaxed/simple;
-	bh=U/6aYvciv7wPkVNop93gO0dgz3bi/mpTw4Fjq0YUBCo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Rwgeg1AAkDi2cRgdsKzF82/X4zDFnEzpelbnSiOavgJLvud2aIE/zReIHLRg7Py2MnqXlFvKYXza++pB3+cw7tI5pome9HZYSe+IOF9so3MMtmlOcV+jv1DoLVaFB/VROwYc11kmtuy7O5HTxESYfcA09jo8XSowLbzcft1lxTg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=n8W+f2Q9; arc=none smtp.client-ip=192.198.163.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1758485062; c=relaxed/simple;
+	bh=oK6PNMhjBQuguBf6ZyCDvGmGsPBZFWxojb6mTU595d4=;
+	h=Content-Type:MIME-Version:In-Reply-To:References:Subject:From:Cc:
+	 To:Date:Message-ID; b=AaRp6PBxilph9v1Uvhr1LOETbN1w7tT9hWUoBmM6DBY+lZzqWufW3TIY7TMee/JE9tOKMsJzwVfCL6DWne9g4Rthqwq1sRtnvshjSiPUPDH7kRZXxOu2aJ4qKVOHE2un1cF9kDy4f5iZtuH1HSpT9mjfoBdqDJZIWg7LTVM0BEc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iCTBvx1y; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="n8W+f2Q9"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1758429814; x=1789965814;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=U/6aYvciv7wPkVNop93gO0dgz3bi/mpTw4Fjq0YUBCo=;
-  b=n8W+f2Q9NiZuZjpuVA4oHtsNgWUKeCJBz/Q4+pWZJ0cAQqcRtwNlxcXo
-   oorbujiXFWQds/W4ZPkKY2cw1+Ndw9R63OcY4trKUljGPHXwa+epjUJG8
-   ImnatBQLPQYygpA8XKllf+EKriFcQbf7UvD0qFd5kuXOt+e3AsBec+Eki
-   V79eLngannmoSxXxxEIClJxDO1Q8P5JTj1dprfMf+9b+9FAU3kz9VDdtH
-   Xet2bWcNqmnI3B5NzKv5ijXac2XXt6c96dZnchjns3pXhoBH27iPcnKuu
-   vcnG49VrPjq5JI5L8kwptl/gOfE92n18T0ngdsobMemC8k1JPxQ2W1UqG
-   w==;
-X-CSE-ConnectionGUID: 66but7PYTjyNHrtqpG+MPg==
-X-CSE-MsgGUID: 9+YSVYXbS0e0vrVkEmy9Hw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11559"; a="59945722"
-X-IronPort-AV: E=Sophos;i="6.18,282,1751266800"; 
-   d="scan'208";a="59945722"
-Received: from fmviesa003.fm.intel.com ([10.60.135.143])
-  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Sep 2025 21:43:33 -0700
-X-CSE-ConnectionGUID: 9N0FngPCSY64MExk2m5y7A==
-X-CSE-MsgGUID: eHAV4rnKRfq7zVz5rQm3vQ==
-X-ExtLoop1: 1
-Received: from lkp-server02.sh.intel.com (HELO 84c55410ccf6) ([10.239.97.151])
-  by fmviesa003.fm.intel.com with ESMTP; 20 Sep 2025 21:43:28 -0700
-Received: from kbuild by 84c55410ccf6 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1v0Bv3-0000RB-1l;
-	Sun, 21 Sep 2025 04:43:25 +0000
-Date: Sun, 21 Sep 2025 12:42:40 +0800
-From: kernel test robot <lkp@intel.com>
-To: Dang Huynh via B4 Relay <devnull+dang.huynh.mainlining.org@kernel.org>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Bartosz Golaszewski <brgl@bgdev.pl>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Michael Turquette <mturquette@baylibre.com>,
-	Stephen Boyd <sboyd@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Philipp Zabel <p.zabel@pengutronix.de>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, linux-arm-kernel@lists.infradead.org,
-	linux-unisoc@lists.infradead.org, linux-gpio@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-clk@vger.kernel.org, dmaengine@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-hardening@vger.kernel.org,
-	Dang Huynh <dang.huynh@mainlining.org>
-Subject: Re: [PATCH 08/10] dmaengine: Add RDA IFC driver
-Message-ID: <202509211252.z0s0XcXk-lkp@intel.com>
-References: <20250919-rda8810pl-mmc-v1-8-d4f08a05ba4d@mainlining.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iCTBvx1y"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5A835C4CEE7;
+	Sun, 21 Sep 2025 20:04:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1758485061;
+	bh=oK6PNMhjBQuguBf6ZyCDvGmGsPBZFWxojb6mTU595d4=;
+	h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
+	b=iCTBvx1ycWtFaxbFJjKnE8lmTRV6YKBljeoNPWr3O0f9KOI2wK+gY/chvSLppb2iw
+	 nKDM1jLs/kX3EvgUACM5BKR1e32v5rVmusbFg6REu8gh8nHtL4KnpR4cztPIEWYsyn
+	 85sV5ZWf8I2axh1P00A55pSPIoljTkKeShL0Yo6iD75KN1B4tcxd0MZkgqGmYUT1mQ
+	 IpOfY2l2pbjRNsgwxsBcIB9YfzgZxcgmX2t0tM84PDIkYUJsgjzu0i/zQZHS16n4gv
+	 WrApdIyoKSa91FOKnNUjwHaVFh7bF8WfL1saxL8xffSMJav7UkpqNUB9WhDh8//gHr
+	 V8yFvFNiMSeTQ==
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250919-rda8810pl-mmc-v1-8-d4f08a05ba4d@mainlining.org>
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20250623-byeword-update-v2-19-cf1fc08a2e1f@collabora.com>
+References: <20250623-byeword-update-v2-0-cf1fc08a2e1f@collabora.com> <20250623-byeword-update-v2-19-cf1fc08a2e1f@collabora.com>
+Subject: Re: [PATCH v2 19/20] clk: sp7021: switch to FIELD_PREP_WM16 macro
+From: Stephen Boyd <sboyd@kernel.org>
+Cc: kernel@collabora.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-phy@lists.infradead.org, linux-sound@vger.kernel.org, netdev@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, linux-pci@vger.kernel.org, linux-pm@vger.kernel.org, linux-clk@vger.kernel.org, llvm@lists.linux.dev, Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+To: Alexandre Torgue <alexandre.torgue@foss.st.com>, Andrew Lunn <andrew+netdev@lunn.ch>, Andy Yan <andy.yan@rock-chips.com>, Bill Wendling <morbo@google.com>, Bjorn Helgaas <bhelgaas@google.com>, Chanwoo Choi <cw00.choi@samsung.com>, David Airlie <airlied@gmail.com>, David S. Miller <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Jakub Kicinski <kuba@kernel.org>, Jaroslav Kysela <perex@perex.cz>, Justin Stitt <justinstitt@google.com>, Kishon Vijay Abraham I <kishon@kernel.org>, Krzysztof =?utf-8?q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lgirdwood@gmail.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Manivannan Sadhasivam <mani@kernel.org>, Mark Brown <broonie@kernel.org>, Mauro Carvalho Chehab <mchehab@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Maxime Ripard <mripard@kernel.org>, Michael Turquette <mturquette@baylibre.com>, MyungJoo Ham <myungjoo.ham@samsung.com>, Nathan Chancellor <nathan@kernel.org>, Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, Nicolas Frattaroli <frattaroli.nicolas@gmail.com>, Nicolas Frattaroli <nicolas.frattaroli@collabora.com>, Paolo Abeni <pabeni@redhat.com>, Qin Jian <qinjian@cqplus1.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Rob Herring <robh@kernel.org>, Sandy Huang <hjc@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>, Shreeya Patel <shreeya.patel@collabora.com>, Simona Vetter <simona@ffwll.ch>, Takashi Iwai <tiwai@suse.com>, Thomas Zimmermann <tzimmermann@suse.de>, Ulf Hansson <ulf.hansson@linaro.org>, Vinod Koul <vkoul@kernel.org>, Yury Norov <yury.norov@gmail.com>
+Date: Sun, 21 Sep 2025 13:04:19 -0700
+Message-ID: <175848505982.4354.2243738737036950081@lazor>
+User-Agent: alot/0.11
 
-Hi Dang,
+Quoting Nicolas Frattaroli (2025-06-23 09:05:47)
+> The sp7021 clock driver has its own shifted high word mask macro,
+> similar to the ones many Rockchip drivers have.
+>=20
+> Remove it, and replace instances of it with hw_bitfield.h's
+> FIELD_PREP_WM16 macro, which does the same thing except in a common
+> macro that also does compile-time error checking.
+>=20
+> This was compile-tested with 32-bit ARM with Clang, no runtime tests
+> were performed as I lack the hardware. However, I verified that fix
+> commit 5c667d5a5a3e ("clk: sp7021: Adjust width of _m in HWM_FIELD_PREP()=
+")
+> is not regressed. No warning is produced.
+>=20
+> Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+> ---
 
-kernel test robot noticed the following build errors:
-
-[auto build test ERROR on ae2d20002576d2893ecaff25db3d7ef9190ac0b6]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Dang-Huynh-via-B4-Relay/dt-bindings-gpio-rda-Make-interrupts-optional/20250919-025331
-base:   ae2d20002576d2893ecaff25db3d7ef9190ac0b6
-patch link:    https://lore.kernel.org/r/20250919-rda8810pl-mmc-v1-8-d4f08a05ba4d%40mainlining.org
-patch subject: [PATCH 08/10] dmaengine: Add RDA IFC driver
-config: m68k-allmodconfig (https://download.01.org/0day-ci/archive/20250921/202509211252.z0s0XcXk-lkp@intel.com/config)
-compiler: m68k-linux-gcc (GCC) 15.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250921/202509211252.z0s0XcXk-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202509211252.z0s0XcXk-lkp@intel.com/
-
-All errors (new ones prefixed by >>):
-
-   drivers/dma/rda-ifc.c: In function 'rda_ifc_prep_slave_sg':
->> drivers/dma/rda-ifc.c:180:28: error: implicit declaration of function 'FIELD_PREP' [-Wimplicit-function-declaration]
-     180 |                 control |= FIELD_PREP(IFC_CTL_SIZE, 0);
-         |                            ^~~~~~~~~~
-
-
-vim +/FIELD_PREP +180 drivers/dma/rda-ifc.c
-
-   145	
-   146	static struct dma_async_tx_descriptor *rda_ifc_prep_slave_sg(struct dma_chan *chan,
-   147			struct scatterlist *sgl, unsigned int sg_len,
-   148			enum dma_transfer_direction direction, unsigned long dma_flags,
-   149			void *context)
-   150	{
-   151		struct rda_ifc_chan *ifc_chan = to_ifc_chan(chan);
-   152		struct rda_ifc *ifc = ifc_chan->rda_ifc;
-   153		struct device *dev = dmaengine_get_dma_device(chan);
-   154		struct scatterlist *sg;
-   155		unsigned long flags;
-   156		u32 control = 0;
-   157		int width;
-   158		int i;
-   159	
-   160		if (sg_len > ifc->sg_max) {
-   161			dev_err(dev, "sg_len %d overflowed (max sg %d)\n",
-   162					sg_len, ifc->sg_max);
-   163			return NULL;
-   164		}
-   165	
-   166		if (direction != ifc_chan->direction) {
-   167			dev_err(dev, "Inconsistent transfer direction\n");
-   168			return NULL;
-   169		}
-   170	
-   171		spin_lock_irqsave(&ifc_chan->lock, flags);
-   172	
-   173		if (ifc_chan->direction == DMA_DEV_TO_MEM)
-   174			width = ifc_chan->sconfig.src_addr_width;
-   175		else
-   176			width = ifc_chan->sconfig.dst_addr_width;
-   177	
-   178		switch (width) {
-   179		case DMA_SLAVE_BUSWIDTH_1_BYTE:
- > 180			control |= FIELD_PREP(IFC_CTL_SIZE, 0);
-   181			break;
-   182		case DMA_SLAVE_BUSWIDTH_2_BYTES:
-   183			control |= FIELD_PREP(IFC_CTL_SIZE, 1);
-   184			break;
-   185		case DMA_SLAVE_BUSWIDTH_4_BYTES:
-   186			control |= FIELD_PREP(IFC_CTL_SIZE, 2);
-   187			break;
-   188		default:
-   189			return NULL;
-   190		}
-   191	
-   192		for_each_sg(sgl, sg, sg_len, i) {
-   193			if (!IS_ALIGNED(sg_dma_address(sg), width)) {
-   194				dev_err(dev, "Unaligned DMA address\n");
-   195				spin_unlock_irqrestore(&ifc_chan->lock, flags);
-   196				return NULL;
-   197			}
-   198	
-   199			writel(sg_dma_address(sg), ifc_chan->chan_base + IFC_REG_SG_START_ADDR + (8 * i));
-   200			writel(sg_dma_len(sg), ifc_chan->chan_base + IFC_REG_SG_TC + (8 * i));
-   201		}
-   202	
-   203		control |= FIELD_PREP(IFC_CTL_REQ_SRC, ifc_chan->request_id) |
-   204			IFC_CTL_CH_RD_HW_EXCH |
-   205			FIELD_PREP(IFC_CTL_SG_NUM, sg_len-1);
-   206		writel(control, ifc_chan->chan_base);
-   207	
-   208		spin_unlock_irqrestore(&ifc_chan->lock, flags);
-   209	
-   210		dma_async_tx_descriptor_init(&ifc_chan->tx, chan);
-   211		ifc_chan->tx.tx_submit = rda_ifc_tx_submit;
-   212	
-   213		return &ifc_chan->tx;
-   214	}
-   215	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Acked-by: Stephen Boyd <sboyd@kernel.org>
