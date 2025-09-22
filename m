@@ -1,64 +1,134 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A55B229B38;
-	Sun, 21 Sep 2025 20:04:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7100F4A1E
+	for <linux-mmc@vger.kernel.org>; Mon, 22 Sep 2025 12:14:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758485062; cv=none; b=KfLkcrgOP4T97uynh7avtaN83EIA7YuGtGdyvR1xRdJnoTWrT1NfFnsS92heXNBXBtL+mmg6cpl6aG2F1XTw0tSWrjFAB2yvKGRYUnXFU103mZQ0tJQObL23+bvqX1KBPd+Iu4EVjH9rcsbsuZvOinKjl7zA000p0geo1Kdmb9g=
+	t=1758543296; cv=none; b=hEud2m4e9ctDkviPlfFyHQHhA3dpFwRxYlH7ZbNamzSvuHr2L3GimTeq6mXiSh1vTK3neLdIhlo1NmvAlHSt3/Qm+d0DvgjGBeiHwMRYc0SGm4Y4QVNNJ8kxDI/J/fSDHXw88qRS2YAcnAccYgGiDoQEgwwIIoZIimtQxE9D3q4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758485062; c=relaxed/simple;
-	bh=oK6PNMhjBQuguBf6ZyCDvGmGsPBZFWxojb6mTU595d4=;
-	h=Content-Type:MIME-Version:In-Reply-To:References:Subject:From:Cc:
-	 To:Date:Message-ID; b=AaRp6PBxilph9v1Uvhr1LOETbN1w7tT9hWUoBmM6DBY+lZzqWufW3TIY7TMee/JE9tOKMsJzwVfCL6DWne9g4Rthqwq1sRtnvshjSiPUPDH7kRZXxOu2aJ4qKVOHE2un1cF9kDy4f5iZtuH1HSpT9mjfoBdqDJZIWg7LTVM0BEc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iCTBvx1y; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1758543296; c=relaxed/simple;
+	bh=s3TZHCsvBKTHC4VDJoY8CP/+x8truixAUpds0Qxw8Qo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=r3Fag9yA5Y+qc5q9esWnx1qO8YrR89rICTCGaaq5bMQKmEhRi1mOa5rafcM66qAkXV8/bDeybxWl0yvIQrBF+bWVwWxYI7N+tbTCBKltdP4Et5Pev2a2DOTlWq/0EGeYkg56LKwIRT6phxorWGFszUj3axRQ91iKUh4+/DJrymQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=JpVTTPgA; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=JpVTTPgA; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iCTBvx1y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5A835C4CEE7;
-	Sun, 21 Sep 2025 20:04:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758485061;
-	bh=oK6PNMhjBQuguBf6ZyCDvGmGsPBZFWxojb6mTU595d4=;
-	h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
-	b=iCTBvx1ycWtFaxbFJjKnE8lmTRV6YKBljeoNPWr3O0f9KOI2wK+gY/chvSLppb2iw
-	 nKDM1jLs/kX3EvgUACM5BKR1e32v5rVmusbFg6REu8gh8nHtL4KnpR4cztPIEWYsyn
-	 85sV5ZWf8I2axh1P00A55pSPIoljTkKeShL0Yo6iD75KN1B4tcxd0MZkgqGmYUT1mQ
-	 IpOfY2l2pbjRNsgwxsBcIB9YfzgZxcgmX2t0tM84PDIkYUJsgjzu0i/zQZHS16n4gv
-	 WrApdIyoKSa91FOKnNUjwHaVFh7bF8WfL1saxL8xffSMJav7UkpqNUB9WhDh8//gHr
-	 V8yFvFNiMSeTQ==
-Content-Type: text/plain; charset="utf-8"
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="JpVTTPgA";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="JpVTTPgA"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id AD50033A5A;
+	Mon, 22 Sep 2025 12:14:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1758543292; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=e6UoiFCg3+pyeaMkWnMdohoObmZ3Y84lNo209nAcLhk=;
+	b=JpVTTPgAeLzB2fx+jqSpHVFfFjs2YiXXFglG2juRQ8fhMxs90pYP8dG2P/9DnJIQY4Ab7n
+	fV2OE6pMNGLuPNJO6TX5S9csNDb9ce0krTlDUh+KoXyEhm+4ksnjOSjwwAawCmqIMMxus4
+	5M2n67TnhgezkxElGPGswtRY9BKtb8M=
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1758543292; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=e6UoiFCg3+pyeaMkWnMdohoObmZ3Y84lNo209nAcLhk=;
+	b=JpVTTPgAeLzB2fx+jqSpHVFfFjs2YiXXFglG2juRQ8fhMxs90pYP8dG2P/9DnJIQY4Ab7n
+	fV2OE6pMNGLuPNJO6TX5S9csNDb9ce0krTlDUh+KoXyEhm+4ksnjOSjwwAawCmqIMMxus4
+	5M2n67TnhgezkxElGPGswtRY9BKtb8M=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 7703213A63;
+	Mon, 22 Sep 2025 12:14:52 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id jW7fG7w90WiEYAAAD6G6ig
+	(envelope-from <oneukum@suse.com>); Mon, 22 Sep 2025 12:14:52 +0000
+From: Oliver Neukum <oneukum@suse.com>
+To: ulf.hansson@linaro.org,
+	wsa+renesas@sang-engineering.com,
+	avri.altman@wdc.com,
+	adrian.hunter@intel.com,
+	viro@zeniv.linux.org.uk,
+	ansuelsmth@gmail.com,
+	linux-mmc@vger.kernel.org
+Cc: Oliver Neukum <oneukum@suse.com>
+Subject: [PATCH] mmc: core: remove uselss memalloc_noio_save
+Date: Mon, 22 Sep 2025 14:14:30 +0200
+Message-ID: <20250922121448.1377124-1-oneukum@suse.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <20250623-byeword-update-v2-19-cf1fc08a2e1f@collabora.com>
-References: <20250623-byeword-update-v2-0-cf1fc08a2e1f@collabora.com> <20250623-byeword-update-v2-19-cf1fc08a2e1f@collabora.com>
-Subject: Re: [PATCH v2 19/20] clk: sp7021: switch to FIELD_PREP_WM16 macro
-From: Stephen Boyd <sboyd@kernel.org>
-Cc: kernel@collabora.com, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-phy@lists.infradead.org, linux-sound@vger.kernel.org, netdev@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, linux-pci@vger.kernel.org, linux-pm@vger.kernel.org, linux-clk@vger.kernel.org, llvm@lists.linux.dev, Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-To: Alexandre Torgue <alexandre.torgue@foss.st.com>, Andrew Lunn <andrew+netdev@lunn.ch>, Andy Yan <andy.yan@rock-chips.com>, Bill Wendling <morbo@google.com>, Bjorn Helgaas <bhelgaas@google.com>, Chanwoo Choi <cw00.choi@samsung.com>, David Airlie <airlied@gmail.com>, David S. Miller <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, Jakub Kicinski <kuba@kernel.org>, Jaroslav Kysela <perex@perex.cz>, Justin Stitt <justinstitt@google.com>, Kishon Vijay Abraham I <kishon@kernel.org>, Krzysztof =?utf-8?q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>, Kyungmin Park <kyungmin.park@samsung.com>, Liam Girdwood <lgirdwood@gmail.com>, Lorenzo Pieralisi <lpieralisi@kernel.org>, Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Manivannan Sadhasivam <mani@kernel.org>, Mark Brown <broonie@kernel.org>, Mauro Carvalho Chehab <mchehab@kernel.org>, Maxime Coquelin <mcoquelin.stm32@gmail.com>, Maxime Ripard <mripard@kernel.org>, Michael Turquette <mturquette@baylibre.com>, MyungJoo Ham <myungjoo.ham@samsung.com>, Nathan Chancellor <nathan@kernel.org>, Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, Nicolas Frattaroli <frattaroli.nicolas@gmail.com>, Nicolas Frattaroli <nicolas.frattaroli@collabora.com>, Paolo Abeni <pabeni@redhat.com>, Qin Jian <qinjian@cqplus1.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Rob Herring <robh@kernel.org>, Sandy Huang <hjc@rock-chips.com>, Shawn Lin <shawn.lin@rock-chips.com>, Shreeya Patel <shreeya.patel@collabora.com>, Simona Vetter <simona@ffwll.ch>, Takashi Iwai <tiwai@suse.com>, Thomas Zimmermann <tzimmermann@suse.de>, Ulf Hansson <ulf.hansson@linaro.org>, Vinod Koul <vkoul@kernel.org>, Yury Norov <yury.norov@gmail.com>
-Date: Sun, 21 Sep 2025 13:04:19 -0700
-Message-ID: <175848505982.4354.2243738737036950081@lazor>
-User-Agent: alot/0.11
+Content-Transfer-Encoding: 8bit
+X-Spam-Level: 
+X-Spamd-Result: default: False [-1.30 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_CONTAINS_FROM(1.00)[];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	TAGGED_RCPT(0.00)[renesas];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	FREEMAIL_TO(0.00)[linaro.org,sang-engineering.com,wdc.com,intel.com,zeniv.linux.org.uk,gmail.com,vger.kernel.org];
+	RCPT_COUNT_SEVEN(0.00)[8];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:mid];
+	RCVD_COUNT_TWO(0.00)[2];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com]
+X-Spam-Flag: NO
+X-Spam-Score: -1.30
 
-Quoting Nicolas Frattaroli (2025-06-23 09:05:47)
-> The sp7021 clock driver has its own shifted high word mask macro,
-> similar to the ones many Rockchip drivers have.
->=20
-> Remove it, and replace instances of it with hw_bitfield.h's
-> FIELD_PREP_WM16 macro, which does the same thing except in a common
-> macro that also does compile-time error checking.
->=20
-> This was compile-tested with 32-bit ARM with Clang, no runtime tests
-> were performed as I lack the hardware. However, I verified that fix
-> commit 5c667d5a5a3e ("clk: sp7021: Adjust width of _m in HWM_FIELD_PREP()=
-")
-> is not regressed. No warning is produced.
->=20
-> Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-> ---
+mmc_sd_num_wr_blocks() is in the block error path.
+It needs to use GFP_NOIO. There is no need to complicate
+anything here.
 
-Acked-by: Stephen Boyd <sboyd@kernel.org>
+Fixes: 869d37475788 ("mmc: core: Use GFP_NOIO in ACMD22")
+Signed-off-by: Oliver Neukum <oneukum@suse.com>
+---
+ drivers/mmc/core/block.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 9cc47bf94804..766691d27a04 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -995,7 +995,6 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
+ 	u32 result;
+ 	__be32 *blocks;
+ 	u8 resp_sz = mmc_card_ult_capacity(card) ? 8 : 4;
+-	unsigned int noio_flag;
+ 
+ 	struct mmc_request mrq = {};
+ 	struct mmc_command cmd = {};
+@@ -1020,9 +1019,7 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
+ 	mrq.cmd = &cmd;
+ 	mrq.data = &data;
+ 
+-	noio_flag = memalloc_noio_save();
+-	blocks = kmalloc(resp_sz, GFP_KERNEL);
+-	memalloc_noio_restore(noio_flag);
++	blocks = kmalloc(resp_sz, GFP_NOIO);
+ 	if (!blocks)
+ 		return -ENOMEM;
+ 
+-- 
+2.51.0
+
