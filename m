@@ -1,110 +1,90 @@
-Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F1031F2C34
-	for <linux-mmc@vger.kernel.org>; Tue, 23 Sep 2025 15:03:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6646E31CA6A
+	for <linux-mmc@vger.kernel.org>; Tue, 23 Sep 2025 16:19:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758639817; cv=none; b=FF+/xVwgSH11s6W/UTp706aGWRJRnIXTyxqJttPWSDUVNLrlKydh8WJuGa368a4N/dy4HloWG4q8B9Ksy0P61+k7BG8vQx5nwjEFgg2BqjOFfM3akg3j6UwYQtCBiznuNG2D5NnkNrYhrgq4+bXHZoHlCeKiAaHkoKm3YOYcx48=
+	t=1758644365; cv=none; b=GftQteBN6EmxPE5vagbIHs/2z/TkZy+zIuFZnk5UpsBsPtliriRGdLQ4ooWmiuCE0W1ncORrMtxXfneDK4jG3ncwWNN5r8WoqN0lGkQiuFhdOf8z+rf7hbnrH9zVirweQ+ySFdScCqC9Z08tnQmkrxMyHOVk15C/f/uxrPW/BbE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758639817; c=relaxed/simple;
-	bh=zQWTB2d0cJCKk/rrYKC1U8EECVIHzoagaVY6jLMFFHg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=M+y8gjlx5LDvM5vLzCpivgeBfgdyhUpO22OkUzKKbyAntnV70o7OfsqdBNPeI9Pe000ewCBx7CCu4YEEW8WR/3/m5zO+VgY4C/w3o87MNb2NDC0Bk/PrgGwAIIxGed1rmtJo2Z4+trv9guNF+ipNkjXvZLwzWEb67ifAhPveOoI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kZmfPz7/; arc=none smtp.client-ip=209.85.128.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1758644365; c=relaxed/simple;
+	bh=VGysIx6ugPC1wKpK4qahCFYnp3Pqi+rhySd5kllItgM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=uqOot03UmF92m35mxGsdRPMKQmWK79gdeCVj+MJl0tSiPCyMcuNFr6v3PCW9676oRGjReedOuIiPJhVt9djqltRPIaxYCZFfFCvMdfP9cjrM/xPYOIZEYO5eMR2rvmtReO8t1hfKZ/R8hqjltER25pVbF6NinPW5aawqrGApX2Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=QfEfgZK8; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kZmfPz7/"
-Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-71d6051aeafso41954527b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Sep 2025 08:03:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1758639814; x=1759244614; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=YcYie2cAKkOnUbqZ9iZ6V6CL9Gzada5AicC5iMnOBfQ=;
-        b=kZmfPz7/HQXut4TJzw4U3NWVWbx1fM6XXw+IJJ8ctWBwE3XuHgZtHAkC8msht1tc9m
-         Bd3kjcm07VwstT4oVs/f0wS+TxTwv16a7UGwRLTGQaCNMyI2l2bm6Q34mtSSiCGFIO6s
-         ft6/YfVwiymdv/AeB3JSZ6MsFbvgv7JFzx5jHjR/sMRL0jigA22H2ICVXUcR1nx/y7Fd
-         u8WFX47mfiix1j833Jhawu2LVBBiWsch+nJq7ljasSYjpb/iEurRc551YM07VWbVT/Lj
-         Y1dFqSvyKtEnM/QhEModt8dlvxXtcJcYr4MdmKW1CRagKvHZ34MlkHCc1We8nHj+mASO
-         2Eaw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758639814; x=1759244614;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=YcYie2cAKkOnUbqZ9iZ6V6CL9Gzada5AicC5iMnOBfQ=;
-        b=JuLP/ynbEHqfuMdQWS2Cn7FlfgO2yEBNYVBMVAD6SGbeamg4ciLn1qXkUIKHbcZih0
-         85oAuMZB4rUU3NphB/jyaEF97IdtAd54Hm4j3YpR3SRIf5RWKWQ0q2dFRszWqQvl1Ps2
-         XQrYgsjURTD9SzIJq4fx6bo8vKYpziSJx/uOdudv2Ygvpz2yWjio57mFByqVv0yio/Zw
-         R8UewsbIeAv85hFJ1CKUEtViO7TlhUfK6JnlnCkWZ4PHeq8i+UJJP9vZESe6HrQVzkhi
-         agBjyub46NOzMJwvyNPOJ6x86qnq638tYVhGbTS/HoomcvDFm+QeWCTpscNk6Ov+OPBn
-         7Lwg==
-X-Forwarded-Encrypted: i=1; AJvYcCUYwNFXYT7NmKmx/skJLjihjw8MuidvwyTBtbDmVua/TfQLqgvOsATzRI0T2B7HFzRFoJFl9Gz7t4w=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx1y/51rGr6nsDrt2Il+Bz1TjVrGHeRAxkUjIwFeNyerBYLBPOQ
-	9yTE7bR3Q3NBj7SHvreNuNRukgQnwMi9f6E8nZSSa7MqDEuYzy12PwtJq4lIo2iPaZgD+iQqeSW
-	XOV47gQmQl2/1cB7t5SwW86iHNK9MCivgn4ywCpRIMg==
-X-Gm-Gg: ASbGncszLwcHvbgP6/mNZFpG8m/JkLUm3Y9rdLBRt/fR9aHaRbSW5HQydZR8rvikpxR
-	gEJ671XH8PxuwBpAMzxBe0C/M43spckANu8JM07eWZAdTtbdwQ7705WN9fzSKSe9tUvJAx1jALT
-	AvklkSLLzFyAYeQ2MzUgQgrDKqIY17d+hBEof/grmYjTlUTuq6mo6YZcaZd7tqK2AZFleTsgg30
-	m/oLIJnxy/Ii9ZhaiS5x0suuRo=
-X-Google-Smtp-Source: AGHT+IFHn90x28JHbA7vjSDiwfdoTTPXMbOARP3I17KAJBJ/rJ5XITQcCBtsYmuIRAiIfgX1fgiiGgjUyy0jEa80iZ4=
-X-Received: by 2002:a05:690c:6c91:b0:725:1bc6:7cae with SMTP id
- 00721157ae682-758a43264a8mr27454997b3.41.1758639813938; Tue, 23 Sep 2025
- 08:03:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="QfEfgZK8"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=from:to:cc:subject:date:message-id
+	:mime-version:content-transfer-encoding; s=k1; bh=chZ0sj+mlqrXtm
+	JOXE5Pl98r8hL1uFNFjTT+OIyFcMg=; b=QfEfgZK8Fe1aRUXZ75wXcfDkSBnItX
+	lWhDrvrAEv4cf1BM7d+kr+fJIXGmDUPdlhm4CvofdguUUmr1dKKWuuWwUF+6jThq
+	WHu50Ctt5la0w6xhbfWKB0FBSPWwRuzOjApBRuxXJqL2nmF9uotfClPGgoxVF0RY
+	HaT7RB8o7WpCXOkZ4CpUU+Omc+RJ7rq+Il8g+IGhKrgrj/R8iSYY9Zq0ifPP+qZW
+	iglf6r7Vm8kr1wTf7t+2nfeagotXEVpcMWr7Orw5w+Dsx5nN44I0ZeZPFs/KDmBt
+	ieD3JezsK1c6OGeUFF+EMeK418R0eE0fKWhIJv9q5hmNuDMTGikyXE0g==
+Received: (qmail 1173212 invoked from network); 23 Sep 2025 18:19:20 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Sep 2025 18:19:20 +0200
+X-UD-Smtp-Session: l3s3148p1@u1RfTHo/LsIujnsp
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: renesas_sdhi: enable bigger data ports where available
+Date: Tue, 23 Sep 2025 18:17:19 +0200
+Message-ID: <20250923161915.3172-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250914131848.2622817-1-ivo.ivanov.ivanov1@gmail.com>
-In-Reply-To: <20250914131848.2622817-1-ivo.ivanov.ivanov1@gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 23 Sep 2025 17:02:58 +0200
-X-Gm-Features: AS18NWARyvKgXOeXvo9XZeI4u88VSQ5LHm-6zhc4kVML80ebLhJCorioq3hgWH0
-Message-ID: <CAPDyKFq9F6u5+aT_CkRG7rcOLrRWv-9wfw8tcT+w72kB8QVwAw@mail.gmail.com>
-Subject: Re: [PATCH v1] dt-bindings: mmc: samsung,exynos-dw-mshc: add specific
- compatible for exynos8890
-To: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Alim Akhtar <alim.akhtar@samsung.com>, Conor Dooley <conor+dt@kernel.org>, 
-	Jaehoon Chung <jh80.chung@samsung.com>, linux-samsung-soc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Sun, 14 Sept 2025 at 15:18, Ivaylo Ivanov
-<ivo.ivanov.ivanov1@gmail.com> wrote:
->
-> Add samsung,exynos8890-dw-mshc-smu specific compatible to the bindings
-> documentation. Since Samsung, as usual, likes reusing devices from older
-> designs, use the samsung,exynos7-dw-mshc-smu compatible.
->
-> Signed-off-by: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
+R-Car Gen2 SoCs have a 32 bit dataport, V3M even 64 bit. Make use of
+the bigger size in the rare case DMA is failing.
 
-Applied for next, thanks!
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-Kind regards
-Uffe
+Tested on a Renesas Lager board (Gen2) and Eagle + extension board
+(V3M). SDHI driver was hacked to avoid DMA and use PIO.
 
-> ---
->  .../devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml          | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-> index e8bd49d46..27c4060f2 100644
-> --- a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-> @@ -31,6 +31,7 @@ properties:
->                - samsung,exynos5433-dw-mshc-smu
->                - samsung,exynos7885-dw-mshc-smu
->                - samsung,exynos850-dw-mshc-smu
-> +              - samsung,exynos8890-dw-mshc-smu
->                - samsung,exynos8895-dw-mshc-smu
->            - const: samsung,exynos7-dw-mshc-smu
->
-> --
-> 2.43.0
->
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 9e3ed0bcddd6..73c84fd8a2d8 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -124,7 +124,8 @@ static const struct renesas_sdhi_of_data of_data_rcar_gen3 = {
+ 
+ static const struct renesas_sdhi_of_data of_data_rcar_gen3_no_sdh_fallback = {
+ 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
+-			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
++			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
++			  TMIO_MMC_64BIT_DATA_PORT,
+ 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+ 			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
+ 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 822a310c9bba..543ad1d0ed1c 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -60,7 +60,8 @@ static struct renesas_sdhi_scc rcar_gen2_scc_taps[] = {
+ 
+ static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
+ 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
+-			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
++			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
++			  TMIO_MMC_32BIT_DATA_PORT,
+ 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+ 			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
+ 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT,
+-- 
+2.47.2
+
