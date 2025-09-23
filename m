@@ -1,28 +1,28 @@
-Received: from mail-m3290.qiye.163.com (mail-m3290.qiye.163.com [220.197.32.90])
+Received: from mail-m49206.qiye.163.com (mail-m49206.qiye.163.com [45.254.49.206])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 506AB1990A7;
-	Tue, 23 Sep 2025 06:10:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.90
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2203261B83;
+	Tue, 23 Sep 2025 06:15:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.206
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758607850; cv=none; b=E5MJPJpyt7wuvoFHgLjZWvfRKlaTqd5gHZcAneuItqWj40ZQE8lgJv0BUxib/PYwxZMylpdun7i7cfC7+BDqfqmOln4b1gYmg8iGDU1oDa4aXV1WLfgMPrL2pgCSPucMieTR2NTj1hkODTPNIgMoHVf4dfwVO9DkH+VbMebNYFo=
+	t=1758608144; cv=none; b=NWRbxKks8E18z8oLbA944y9eN/1ziIXZ+joj8yRSrbJOTG5stn6LaIxm0emB2WG2623NSJaT6DgBf3KI7jsYfUfMiWp1LQJsCd/w5xtgiKtC+IW47+GQstMvuLVx6w+2Y5dr8WiQTq8K1oNbyEun7O/n9Q/Tgo9PWYiMJzRpke8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758607850; c=relaxed/simple;
-	bh=6Om2WbeIVDWsvp3M13b/4u8GU7cNdXlbfg/+WQNQPgc=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Lv1ZHNSdmaI9IH+wSriYMKe/DkOlMSuUu8tqMRPn2IPRj7RUqzpwdHma09WL7fXPXXpTCorGvlOKAwgxa5XO4dITvNjVQex5mIgpgr89WlEZTAv23Yxg5sAiBBJ6nSc1NZrAJcgQUpd7S4XK0UpuCizWL+uVrzZWBaorFgep4pE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=PxBbLtuq; arc=none smtp.client-ip=220.197.32.90
+	s=arc-20240116; t=1758608144; c=relaxed/simple;
+	bh=mSj2WCLDiPXpaIZH40IfbgFImD3OHx7gQZfx8yjYYTw=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=sApSWtBQzriEUrAjSq1fS9DrGZ8E3l4F1wk0n0Z79QKUmaDXnkF6nJtTMUCMYehnDc9s5v3p2sjf3yXg0ocdLthChNQTAlku1JEXsouHghqJwRrcodSdc/AAzScRheu9twWAeshvDpXdpZa+yKPkwD0poMB8ryoPZKjv1z34QR4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=SYy6zj8r; arc=none smtp.client-ip=45.254.49.206
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="PxBbLtuq"
+	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="SYy6zj8r"
 Received: from [127.0.1.1] (unknown [117.184.129.134])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 23bdec001;
-	Tue, 23 Sep 2025 14:10:37 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 23bdebfbe;
+	Tue, 23 Sep 2025 14:10:28 +0800 (GMT+08:00)
 From: Albert Yang <yangzh0906@thundersoft.com>
-Date: Tue, 23 Sep 2025 14:10:13 +0800
-Subject: [PATCH 7/9] arm64: dts: bst: add support for Black Sesame
- Technologies C1200 CDCU1.0 board
+Subject: [PATCH 0/9] arm64: introduce Black Sesame Technologies C1200 SoC
+ and CDCU1.0 board
+Date: Tue, 23 Sep 2025 14:10:06 +0800
+Message-Id: <20250923-v4-patch-final-v1-0-2283ad7cbf88@thundersoft.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -31,9 +31,10 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250923-v4-patch-final-v1-7-2283ad7cbf88@thundersoft.com>
-References: <20250923-v4-patch-final-v1-0-2283ad7cbf88@thundersoft.com>
-In-Reply-To: <20250923-v4-patch-final-v1-0-2283ad7cbf88@thundersoft.com>
+X-B4-Tracking: v=1; b=H4sIAL450mgC/x2MQQqAIBAAvxJ7bqGspPpKdBBdayEsNCQI/97Sc
+ RhmXkgUmRLM1QuRMic+g0BbV2B3EzZCdsKgGjU0k+ow93iZ2+7oOZgDnbVO+9FrkSDRFcnz8w+
+ XtZQPscQLrWAAAAA=
+X-Change-ID: 20250923-v4-patch-final-dccd6f8f6092
 To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
  Conor Dooley <conor+dt@kernel.org>, Ge Gordon <gordon.ge@bst.ai>, 
  BST Linux Kernel Upstream Group <bst-upstream@bstai.top>, 
@@ -42,266 +43,192 @@ To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  Adrian Hunter <adrian.hunter@intel.com>, Arnd Bergmann <arnd@arndb.de>
 Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
  linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
- soc@lists.linux.dev, Albert Yang <yangzh0906@thundersoft.com>
+ soc@lists.linux.dev, Albert Yang <yangzh0906@thundersoft.com>, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1758607828; l=7150;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1758607828; l=9111;
  i=yangzh0906@thundersoft.com; s=20250814; h=from:subject:message-id;
- bh=6Om2WbeIVDWsvp3M13b/4u8GU7cNdXlbfg/+WQNQPgc=;
- b=8T7fIxj2geu2rwMom6GwylX9JLZEEmL1CziNr5UJRypzXX/ic+FXHrtwhuLcv0Q1j0qZv47Hm
- vcgzwed+H07A7LOuuMNXObeDOnAAPsxS3EJkJTGgmBxD+7dMDXm0p6S
+ bh=mSj2WCLDiPXpaIZH40IfbgFImD3OHx7gQZfx8yjYYTw=;
+ b=QbXwM+/QkULWaoRTEjiB2SFAGGHhK05AV3eE3cGqksU3ZIe4ntfM4DdPuXzaJW8BACGb3ukGc
+ P5MrBqyrPTvAB72VmgNllpXXNvPCtoF7Ba9EVGP2qgandpHXzRVVG8B
 X-Developer-Key: i=yangzh0906@thundersoft.com; a=ed25519;
  pk=bEcgALL9KpUg/m7zH44r50xa/re91dI9SA0vGV1/bu4=
-X-HM-Tid: 0a9975320ab509cckunmfc27e25b4e0345
+X-HM-Tid: 0a997531e40109cckunmfc27e25b4e01c3
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlCH00dVkMfGElMSh1NQx1OGlYVFAkWGhdVEwETFh
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVkaGk5OVk5DT01CSxpNQklOT1YVFAkWGhdVEwETFh
 	oSFyQUDg9ZV1kYEgtZQVlKSkxVSkNPVUpJQlVKSE9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0hVSk
 	tLVUpCS0tZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=PxBbLtuqRJBw1EWduNdiVCU44E7LHoAlnUToASDVhd8K6Kienw66ZmKjrnNy5oB64PcCiIfi4Ietq3niO1rIZzVrLmSxRPrjiZCobyGdNctSPVwtITdx9NJV3j9/1xJSkAwG2E7GNsRKTTJ3X/283yMqmdGKoLPYq2I7Ks+BnPI=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=D/wIjlORwMfAe2A8lh3D4l0PcZesLECFnhFcbmUELsc=;
+	b=SYy6zj8rca17RJOuW4vA+kX7iL6G8V4+OykeS8g+1iGIr8L0Gb/pxUocTz7WbpgU0MMbKV1iP+BmsHA5KyJO38OiHw4f0NE5JOyi3q4ThCDYb3vczxy0blNJcer66lPvZDdmf+5wGjPm1wXHn/ljsXgKWYo/udEdBafGO9qVKnc=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
+	bh=e7JXaXPfRHuobwQOQcVJlT2z1Yhiyju5p3cQ3WcHFhM=;
 	h=date:mime-version:subject:message-id:from;
 
-Add device tree support for the Black Sesame Technologies (BST) C1200
-CDCU1.0 ADAS 4C2G platform. This platform is based on the BST C1200 SoC
-family.
+This patch series introduces comprehensive support for Black Sesame Technologies
+(BST) C1200 SoC and CDCU1.0 ADAS 4C2G board. BST is a leading automotive-grade
+computing SoC provider focusing on intelligent driving, computer vision, and AI
+capabilities for ADAS and autonomous driving applications. You can find more information
+about the SoC and related boards at: https://bst.ai
 
-The changes include:
-- Adding a new BST device tree directory
-- Adding Makefile entries to build the BST platform device trees
-- Adding the device tree for the BST C1200 CDCU1.0 ADAS 4C2G board
+The series includes complete platform enablement from device tree bindings to
+drivers and board-level support:
 
-This board features a quad-core Cortex-A78 CPU, and various peripherals
-including UART, MMC, watchdog timer, and interrupt controller.
+Patch 1: dt-bindings: vendor-prefixes: Add Black Sesame Technologies Co., Ltd.
+- Adds BST vendor prefix to device tree vendor prefixes
+- Provides company information and website link
+
+Patch 2: dt-bindings: arm: add Black Sesame Technologies (bst) SoC
+- Adds device tree bindings for BST ARM SoC family
+- Defines compatible strings for C1200 SoC and CDCU1.0 board
+
+Patch 3: arm64: Kconfig: add ARCH_BST for Black Sesame Technologies SoCs
+- Adds ARCH_BST configuration option for BST SoC family
+- Enables platform-specific features and driver dependencies
+
+Patch 4: dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
+- Adds device tree binding for BST's DWCMSHC SDHCI controller
+- Defines register layout, clocks, and controller-specific properties
+
+Patch 5: mmc: sdhci: add Black Sesame Technologies BST C1200 controller driver
+- Comprehensive SDHCI driver for BST C1200 SoC
+- Addresses specific hardware constraints with 32-bit DMA limitations
+- Implements custom clock management, power management, and tuning
+- Uses SRAM-based bounce buffer for DMA operations
+
+Patch 6: mmc: sdhci: allow drivers to pre-allocate bounce buffer
+- SDHCI core enhancement to support driver-allocated bounce buffers
+- Enables platforms with specific DMA constraints to pre-allocate buffers
+- Suggested by Adrian Hunter for better platform integration
+
+Patch 7: arm64: dts: bst: add support for Black Sesame Technologies C1200 CDCU1.0 board
+- Complete device tree support for BST C1200 CDCU1.0 ADAS 4C2G board
+- Includes SoC dtsi and board-specific dts files
+- Defines CPU, memory, peripherals, and platform-specific configurations
+
+Patch 8: arm64: defconfig: enable BST platform and SDHCI controller support
+- Enables ARCH_BST and MMC_SDHCI_BST in ARM64 defconfig
+- Provides out-of-box support for BST platforms
+
+Patch 9: MAINTAINERS: add Black Sesame Technologies (BST) ARM SoC support
+- Adds maintainer entry for BST ARM SoC support
+- Covers device tree bindings, drivers, and board files
+
+Changes for v4:
+- rebase to 6.17-rc5
+- Patch 1 (dt-bindings: vendor-prefixes):
+	- Adjust ^bst to the correct alphabetical order
+	- Adjust Acked-by order
+- Patch 2 (dt-bindings: arm):
+	- Remove Signed-off-by: Ge Gordon
+	- Add Reviewed-by Krzysztof Kozlowski info
+- Patch 3 (arm64: Kconfig):
+	- Remove Signed-off-by: Ge Gordon
+- Patch 4 (dt-bindings: mmc):
+	- Remove Signed-off-by line for Ge Gordon
+	- Change `$ref: mmc-controller.yaml#` to `$ref: sdhci-common.yaml#`
+	- Change compatible string from `bst,c1200-dwcmshc-sdhci` to `bst,c1200-sdhci`
+- Patch 5 (mmc: sdhci driver):
+	- Rename all functions from bst_* to sdhci_bst_* for better namespace consistency
+	- Rename driver file from sdhci-of-bst-c1200.c to sdhci-of-bst.c
+	- Rename dwcmshc_priv structure to sdhci_bst_priv for clarity
+	- Update driver name from "sdhci-dwcmshc" to "sdhci-bst" throughout
+	- Add comprehensive register bit mask definitions and named constants
+	- Replace manual polling loops with read_poll_timeout() for clock stability
+	- Add dedicated sdhci_bst_wait_int_clk() function for internal clock management
+	- Completely rewrite power management with proper power-off handling
+	- Enhance clock control with read-modify-write operations to avoid clobbering
+	- Add MBIU burst mode configuration based on power state
+	- Improve error handling and cleanup in probe/remove functions
+	- Simplify bounce buffer allocation and remove redundant MMC parameter adjustments
+	- Add SDHCI_QUIRK_BROKEN_ADMA quirk for hardware limitation
+	- Replace ioread32/iowrite32 with readl/writel for consistency
+	- Update copyright year and simplify license text
+	- Improve tuning algorithm with clearer variable naming
+	- Enhance register access patterns with proper bit field manipulation
+	- Add power-off clock management to reduce idle power consumption
+	- Add Acked-by: Arnd Bergmann
+- Patch 6 (mmc: sdhci bounce buffer):
+	- Add new patch by suggestion from Adrian Hunter
+- Patch 7 (arm64: dts):
+	- Remove Signed-off-by line for Ge Gordon
+	- Reorder device tree node properties for better consistency
+	- CPU nodes: move `device_type` before `compatible`, add explicit `reg` values
+	- MMC node: change compatible from `bst,c1200-dwcmshc-sdhci` to `bst,c1200-sdhci`
+	- MMC node: remove `bus-width` and `non-removable` from SoC dtsi, move to board dts
+	- SoC node: reorder properties (`ranges` before address/size cells)
+	- UART node: reorder properties (clock-frequency before interrupts)
+	- GIC node: reorder properties for better readability
+	- Timer node: reorder properties (always-on before interrupt-parent)
+	- Board DTS: add `bus-width = <8>` and `non-removable` to MMC node
+	- Board DTS: reorder MMC and UART node references
+- Patch 8 (arm64: defconfig):
+	- move CONFIG_MMC_SDHCI_BST before CONFIG_MMC_SDHCI_F_SDH30
+	- Remove Signed-off-by line for Ge Gordon
+	- Simplify commit message (remove detailed description about eMMC/SD functionality)
+- Patch 9 (MAINTAINERS):
+	- Changed file name: sdhci-of-bst-c1200.c to sdhci-of-bst.c
+	- Change title from "add and consolidate" to just "add"
+	- Simplify commit message description
+	- Remove Signed-off-by line for Ge Gordon
+
+Changes for v3:
+- Patch 2: Add Signed-off-by: Ge Gordon
+- Patch 3: Reword subject from "for bst silicons" to "for Black Sesame Technologies SoCs"
+	and drop unrelated whitespace hunk
+- Patch 4: Switch reg schema from maxItems to explicit items with per-entry descriptions,
+	improve example with irq.h include and bus node wrapper, add Signed-off-by: Ge Gordon
+- Patch 5: Simplify dwcmshc_priv structure, improve helper functions, use
+	devm_platform_ioremap_resource(), clarify hardware limitations documentation
+- Patch 6: Split defconfig enablement out into dedicated patch, refine memory description,
+	adjust node ordering, remove gic mask
+- Patch 7: Also enable CONFIG_ARCH_BST in arm64 defconfig
+
+Changes for v2:
+- Patch 2: Remove unnecessary pipe in description, drop invalid compatible entry,
+	remove root node definition
+- Patch 3: Place configuration entry in correct alphabetical order, use generic family name,
+	follow upstream naming conventions
+- Patch 4: Simplify description, update $schema reference, correct compatible string,
+	remove redundant properties, clean up required properties, standardize example format
+- Patch 5: Remove COMMON_CLK dependency, add ARCH_BST || COMPILE_TEST dependency,
+	replace temporary ioremap with persistent mapping, refactor bounce buffer allocation,
+	prune unused headers, fix register access macros, improve error handling
+- Patch 6: Reorganize memory map, update MMC controller definition, remove deprecated
+	properties, standardize interrupt definitions, add root compatible string
 
 Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
 ---
-Changes for v4:
-- Remove Signed-off-by line for Ge Gordon
-- Reorder device tree node properties for better consistency
-- CPU nodes: move `device_type` before `compatible`, add explicit `reg` values
-- MMC node: change compatible from `bst,c1200-dwcmshc-sdhci` to `bst,c1200-sdhci`
-- MMC node: remove `bus-width` and `non-removable` from SoC dtsi, move to board dts
-- SoC node: reorder properties (`ranges` before address/size cells)
-- UART node: reorder properties (clock-frequency before interrupts)
-- GIC node: reorder properties for better readability
-- Timer node: reorder properties (always-on before interrupt-parent)
-- Board DTS: add `bus-width = <8>` and `non-removable` to MMC node
-- Board DTS: reorder MMC and UART node references
+Albert Yang (9):
+      dt-bindings: vendor-prefixes: Add Black Sesame Technologies Co., Ltd.
+      dt-bindings: arm: add Black Sesame Technologies (bst) SoC
+      arm64: Kconfig: add ARCH_BST for Black Sesame Technologies SoCs
+      dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
+      mmc: sdhci: add Black Sesame Technologies BST C1200 controller driver
+      mmc: sdhci: allow drivers to pre-allocate bounce buffer
+      arm64: dts: bst: add support for Black Sesame Technologies C1200 CDCU1.0 board
+      arm64: defconfig: enable BST platform and SDHCI controller support
+      MAINTAINERS: add Black Sesame Technologies (BST) ARM SoC support
 
-Changes for v3:
-- Split defconfig enablement out into a dedicated defconfig patch
-- Refine memory description: consolidate ranges in memory node and delete unused memory ranges
-- Adjust the order of nodes
-- Remove mask of gic
-
-Changes for v2:
-- Reorganize memory map into discrete regions
-- Update MMC controller definition with split core/CRM register regions
-- Remove deprecated properties
-- Update compatible string
-- Standardize interrupt definitions and numeric formats
-- Remove reserved-memory node (superseded by bounce buffers)
-- Add root compatible string for platform identification
-- Add soc defconfig
----
+ Documentation/devicetree/bindings/arm/bst.yaml     |  31 ++
+ .../devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml |  70 +++
+ .../devicetree/bindings/vendor-prefixes.yaml       |   2 +
+ MAINTAINERS                                        |  10 +
+ arch/arm64/Kconfig.platforms                       |   8 +
  arch/arm64/boot/dts/Makefile                       |   1 +
  arch/arm64/boot/dts/bst/Makefile                   |   2 +
- .../boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts    |  43 ++++++++
- arch/arm64/boot/dts/bst/bstc1200.dtsi              | 115 +++++++++++++++++++++
- 4 files changed, 161 insertions(+)
+ .../boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts    |  43 ++
+ arch/arm64/boot/dts/bst/bstc1200.dtsi              | 115 +++++
+ arch/arm64/configs/defconfig                       |   2 +
+ drivers/mmc/host/Kconfig                           |  14 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-of-bst.c                    | 544 +++++++++++++++++++++
+ drivers/mmc/host/sdhci.c                           |   7 +
+ 14 files changed, 850 insertions(+)
+---
+base-commit: 76eeb9b8de9880ca38696b2fb56ac45ac0a25c6c
+change-id: 20250923-v4-patch-final-dccd6f8f6092
 
-diff --git a/arch/arm64/boot/dts/Makefile b/arch/arm64/boot/dts/Makefile
-index b0844404eda1835d7f3112a1250dde74ac251c50..98ec8f1b76e4753257e8678c6db918053e9c528d 100644
---- a/arch/arm64/boot/dts/Makefile
-+++ b/arch/arm64/boot/dts/Makefile
-@@ -13,6 +13,7 @@ subdir-y += axiado
- subdir-y += bitmain
- subdir-y += blaize
- subdir-y += broadcom
-+subdir-y += bst
- subdir-y += cavium
- subdir-y += cix
- subdir-y += exynos
-diff --git a/arch/arm64/boot/dts/bst/Makefile b/arch/arm64/boot/dts/bst/Makefile
-new file mode 100644
-index 0000000000000000000000000000000000000000..4c1b8b4cdad893df0cc47d81a64d9cbc7a60a9dd
---- /dev/null
-+++ b/arch/arm64/boot/dts/bst/Makefile
-@@ -0,0 +1,2 @@
-+# SPDX-License-Identifier: GPL-2.0
-+dtb-$(CONFIG_ARCH_BST) += bstc1200-cdcu1.0-adas_4c2g.dtb
-diff --git a/arch/arm64/boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts b/arch/arm64/boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts
-new file mode 100644
-index 0000000000000000000000000000000000000000..178ad4bf4f0aacf831a61af07ad151a70e075749
---- /dev/null
-+++ b/arch/arm64/boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts
-@@ -0,0 +1,43 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/dts-v1/;
-+
-+#include "bstc1200.dtsi"
-+
-+/ {
-+	model = "BST C1200-96 CDCU1.0 4C2G";
-+	compatible = "bst,c1200-cdcu1.0-adas-4c2g", "bst,c1200";
-+
-+	chosen {
-+		stdout-path = "serial0:115200n8";
-+	};
-+
-+	memory@810000000 {
-+		device_type = "memory";
-+		reg = <0x8 0x10000000 0x0 0x30000000>,
-+		      <0x8 0xc0000000 0x1 0x0>,
-+		      <0xc 0x00000000 0x0 0x40000000>;
-+	};
-+
-+	reserved-memory {
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+		ranges;
-+
-+		mmc0_reserved: mmc0-reserved@5160000 {
-+			compatible = "shared-dma-pool";
-+			reg = <0x0 0x5160000 0x0 0x10000>;
-+			no-map;
-+		};
-+	};
-+};
-+
-+&mmc0 {
-+	bus-width = <8>;
-+	memory-region = <&mmc0_reserved>;
-+	non-removable;
-+	status = "okay";
-+};
-+
-+&uart0 {
-+	status = "okay";
-+};
-diff --git a/arch/arm64/boot/dts/bst/bstc1200.dtsi b/arch/arm64/boot/dts/bst/bstc1200.dtsi
-new file mode 100644
-index 0000000000000000000000000000000000000000..9660d8396e275945b27846c80dde79478c16ae76
---- /dev/null
-+++ b/arch/arm64/boot/dts/bst/bstc1200.dtsi
-@@ -0,0 +1,115 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#include <dt-bindings/interrupt-controller/arm-gic.h>
-+#include <dt-bindings/interrupt-controller/irq.h>
-+
-+/ {
-+	compatible = "bst,c1200";
-+	#address-cells = <2>;
-+	#size-cells = <2>;
-+
-+	clk_mmc: clock-4000000 {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+		clock-frequency = <4000000>;
-+	};
-+
-+	cpus {
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+
-+		cpu@0 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a78";
-+			reg = <0x0>;
-+			enable-method = "psci";
-+			next-level-cache = <&l2_cache>;
-+		};
-+
-+		cpu@1 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a78";
-+			reg = <0x100>;
-+			enable-method = "psci";
-+			next-level-cache = <&l2_cache>;
-+		};
-+
-+		cpu@2 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a78";
-+			reg = <0x200>;
-+			enable-method = "psci";
-+			next-level-cache = <&l2_cache>;
-+		};
-+
-+		cpu@3 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a78";
-+			reg = <0x300>;
-+			enable-method = "psci";
-+			next-level-cache = <&l2_cache>;
-+		};
-+
-+		l2_cache: l2-cache {
-+			compatible = "cache";
-+			cache-level = <2>;
-+			cache-unified;
-+		};
-+	};
-+
-+	psci {
-+		compatible = "arm,psci-1.0";
-+		method = "smc";
-+	};
-+
-+	soc {
-+		compatible = "simple-bus";
-+		ranges;
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+		interrupt-parent = <&gic>;
-+
-+		uart0: serial@20008000 {
-+			compatible = "snps,dw-apb-uart";
-+			reg = <0x0 0x20008000 0x0 0x1000>;
-+			clock-frequency = <25000000>;
-+			interrupts = <GIC_SPI 211 IRQ_TYPE_LEVEL_HIGH>;
-+			reg-shift = <2>;
-+			reg-io-width = <4>;
-+			status = "disabled";
-+		};
-+
-+		mmc0: mmc@22200000 {
-+			compatible = "bst,c1200-sdhci";
-+			reg = <0x0 0x22200000 0x0 0x1000>,
-+			      <0x0 0x23006000 0x0 0x1000>;
-+			clocks = <&clk_mmc>;
-+			clock-names = "core";
-+			dma-coherent;
-+			interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>;
-+			max-frequency = <200000000>;
-+			status = "disabled";
-+		};
-+
-+		gic: interrupt-controller@32800000 {
-+			compatible = "arm,gic-v3";
-+			reg = <0x0 0x32800000 0x0 0x10000>,
-+			      <0x0 0x32880000 0x0 0x100000>;
-+			ranges;
-+			#address-cells = <2>;
-+			#size-cells = <2>;
-+			#interrupt-cells = <3>;
-+			interrupt-controller;
-+			interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_LOW>;
-+		};
-+	};
-+
-+	timer {
-+		compatible = "arm,armv8-timer";
-+		always-on;
-+		interrupt-parent = <&gic>;
-+		interrupts = <GIC_PPI 13 IRQ_TYPE_LEVEL_LOW>,
-+			     <GIC_PPI 14 IRQ_TYPE_LEVEL_LOW>,
-+			     <GIC_PPI 11 IRQ_TYPE_LEVEL_LOW>,
-+			     <GIC_PPI 10 IRQ_TYPE_LEVEL_LOW>;
-+	};
-+};
-
+Best regards,
 -- 
-2.43.0
+Albert Yang <yangzh0906@thundersoft.com>
 
