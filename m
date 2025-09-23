@@ -1,28 +1,28 @@
-Received: from mail-m32118.qiye.163.com (mail-m32118.qiye.163.com [220.197.32.118])
+Received: from mail-m155115.qiye.163.com (mail-m155115.qiye.163.com [101.71.155.115])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7B8C30DD24;
-	Tue, 23 Sep 2025 06:46:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.118
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0E2330FC3D;
+	Tue, 23 Sep 2025 06:46:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.115
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758609968; cv=none; b=Pzku2L/UuhcSmaG4sKqFpjMF8AKVZahJCybeYytsZDhKjxBoMnh6aQtrbWR2qazKzpPyCb4Fu8g8HN1WdkK2nY8mVCMZ6Dt1qGMAW2Sy7kjzJWM0/UxnhAPp9NmkfuJjIbSOmkxlCuCmEU0e4pJ1bhucB9ErtC9bkLtV4fnEBTo=
+	t=1758609973; cv=none; b=qEpzvO5zCNSSKDcb9xaUlRrFcDOAWgVEiTJN9JRAPUODWayx5XR7XjY5InpemIo/NgGhBunxdwHCtDVvJMHSkeK0lU1DIfIxgXbVK38fk+sPxFyZmvzEuuXBKGhdDoiqmj1KmQa1buz6l0lAX7/NV5j4XC9nSZe/JqpmwEujvuY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758609968; c=relaxed/simple;
-	bh=DySTBlwx8SxAqSzT6Ick6Jr1zhm5KCXfBY5QxqKIbyw=;
+	s=arc-20240116; t=1758609973; c=relaxed/simple;
+	bh=C9eK2SZ98FRgRNTa+1cHqyETU4kzXW2v/DxM1bnpBMU=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=EcHiPDgfdgXFzYxc+rw16K3Ca/ZI1dVB/g0AW1CatROEdCZB+A0JtskcZyqW75r0YiFjFDT3/wbDd0TYIHrtURVJFyzQjRcmx3rT94+Voxt4o6E/OO6gzUMsNPDIf55xamSBrc/is3lv0jqv6EDg69wntl26YSaGzBxHifPEVtQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=V2V4U78C; arc=none smtp.client-ip=220.197.32.118
+	 In-Reply-To:To:Cc; b=ttDsarY9P6c++BukvKkUoAUl16/vJxE/3N8jiz1XHGc7fhS0lFfAVeqGv2XREkAU0UFIjqTtM+KgaRxxxpWS+p1CoMFUOVo/pmeqpZV7xoTKvJuVvb7LNDekkUVVnM+nYGYSj1HBpGQEdp91neZ8bhk88abQMiHOb23fJa2oNUs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=LbGoyBP0; arc=none smtp.client-ip=101.71.155.115
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="V2V4U78C"
+	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="LbGoyBP0"
 Received: from [127.0.1.1] (unknown [117.184.129.134])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 23bdebff2;
-	Tue, 23 Sep 2025 14:10:36 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 23bdec011;
+	Tue, 23 Sep 2025 14:10:40 +0800 (GMT+08:00)
 From: Albert Yang <yangzh0906@thundersoft.com>
-Date: Tue, 23 Sep 2025 14:10:12 +0800
-Subject: [PATCH 6/9] mmc: sdhci: allow drivers to pre-allocate bounce
- buffer
+Date: Tue, 23 Sep 2025 14:10:15 +0800
+Subject: [PATCH 9/9] MAINTAINERS: add Black Sesame Technologies (BST) ARM
+ SoC support
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -31,7 +31,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250923-v4-patch-final-v1-6-2283ad7cbf88@thundersoft.com>
+Message-Id: <20250923-v4-patch-final-v1-9-2283ad7cbf88@thundersoft.com>
 References: <20250923-v4-patch-final-v1-0-2283ad7cbf88@thundersoft.com>
 In-Reply-To: <20250923-v4-patch-final-v1-0-2283ad7cbf88@thundersoft.com>
 To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
@@ -44,77 +44,66 @@ Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
  soc@lists.linux.dev, Albert Yang <yangzh0906@thundersoft.com>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1758607828; l=2071;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1758607828; l=1495;
  i=yangzh0906@thundersoft.com; s=20250814; h=from:subject:message-id;
- bh=DySTBlwx8SxAqSzT6Ick6Jr1zhm5KCXfBY5QxqKIbyw=;
- b=ix7Cn5PKa7gJNY0yDsFsWNW8nlAWEJhuVied4sPs3/t6HoDAE1rrDpPzL4sWN7KI3HOEa6wER
- xtlQvg6W2SxDUlvOWg09hjIBfy1okIjtpKO7HdTwkcnk6W89rj64E43
+ bh=C9eK2SZ98FRgRNTa+1cHqyETU4kzXW2v/DxM1bnpBMU=;
+ b=JZsgEBGpVqHN9dEd+7lGflgkQfqMK4YBfK00+eHXuadz1pZZPRk4xJZBcGPPACvibVNTyvaTn
+ sOPn6YnH8ZUCn2JLP4dwyhNNFWPnFs6c/3ui4w6sT6pCF7vQN/TId1v
 X-Developer-Key: i=yangzh0906@thundersoft.com; a=ed25519;
  pk=bEcgALL9KpUg/m7zH44r50xa/re91dI9SA0vGV1/bu4=
-X-HM-Tid: 0a99753204e409cckunmfc27e25b4e02ee
+X-HM-Tid: 0a99753214e309cckunmfc27e25b4e0397
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVkaSkkaVhpISUIZHksfGE1MSFYVFAkWGhdVEwETFh
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlCHUlIVkwYHh5MTk4ZSEJCQ1YVFAkWGhdVEwETFh
 	oSFyQUDg9ZV1kYEgtZQVlKSkxVSkNPVUpJQlVKSE9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0hVSk
 	tLVUpCS0tZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=V2V4U78ClyaDeCqDoYNIU6wni98ujkNU0fsI8Q634rn082Fjc6DyzYXjtUdnJHdQx2SOkllDk4xgZX2twmtmBI7Qa1EQGUFLDhlOJlojggJ02tl2G76z0jtUrSXTH9wAKzdJKcxaIxLarDBw5/eLdDdyRj84YkJoUJwhfz8B60g=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=4zdOECm9UDt4mSRVWdAJlFg918s9UR2BUDdjk/GLuac=;
+	b=LbGoyBP0SW2raJk+/UF4YjSKBEDUJgC+wxJdfWpg+teBxYC47z7isIEwIsVGwCtww8/0ieCI3L4T+fhKxSrp8k04FjEA1AbOBKzvHkar/f2k4EIqCZrwPVNKDchTvdl8eFOJDO+mv9zkxrbw/qbgD4GWW6D703UKgYgtWD0mRAI=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
+	bh=4dCsZ5GabPrZ/cKkHNeHxtMAqgiDoHIBMdGfIGcjzVA=;
 	h=date:mime-version:subject:message-id:from;
 
-In sdhci_allocate_bounce_buffer(), add an early path that respects a
-driver-provided pre-allocated bounce buffer (host->bounce_buffer).
+Add a MAINTAINERS entry for Black Sesame Technologies (BST) ARM SoC
+support. This entry covers device tree bindings, drivers, and board files
+for BST SoCs, including MMC and platform support.
 
-If the buffer is already allocated by the driver (e.g. coherent/SRAM
-buffer needed for platforms with 32-bit DMA constraints), just compute
-max_blocks from host->bounce_buffer_size and jump to the common "out"
-path to set mmc->max_*.
-
-This enables platform drivers to allocate the bounce buffer before
-sdhci_add_host(), avoiding starting the host without the buffer ready
-and aligning with the guidance from review.
-
-No functional change for drivers that do not pre-allocate the buffer.
-
-drivers/mmc/host/sdhci.c (sdhci_allocate_bounce_buffer): Handle
-pre-allocated bounce buffer and fall through to set mmc->max_*.
-
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-Link: https://lore.kernel.org/lkml/2b23bcb9-abc7-4667-b939-a19ecae935a2@intel.com/
 Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
-
 ---
-Changes for v4:
-- Add new patch by Suggested-by: Adrian Hunter
----
- drivers/mmc/host/sdhci.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+Change for v4:
+  - Changed file name: sdhci-of-bst-c1200.c to sdhci-of-bst.c
+  - Changed title from "add and consolidate" to just "add"
+  - Simplified commit message description
+  - Removed Signed-off-by line for Ge Gordon
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3a17821efa5ca92c6c29141d8fcb9ebf58355cc7..03fbe30cb205e16b924481caa44f0979d230f380 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -4193,6 +4193,12 @@ static void sdhci_allocate_bounce_buffer(struct sdhci_host *host)
- 	unsigned int bounce_size;
- 	int ret;
+Change for v3:
+ - No changes
+
+Change for v2:
+ - No changes
+---
+ MAINTAINERS | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index cd7ff55b5d321752ac44c91d2d7e74de28e08960..685294ef3e2ecf124219b2c5eafb8cad25600652 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -2505,6 +2505,16 @@ S:	Maintained
+ F:	Documentation/devicetree/bindings/arm/blaize.yaml
+ F:	arch/arm64/boot/dts/blaize/
  
-+	/* Drivers may have already allocated the buffer */
-+	if (host->bounce_buffer) {
-+		bounce_size = host->bounce_buffer_size;
-+		max_blocks = bounce_size / 512;
-+		goto out;
-+	}
- 	/*
- 	 * Cap the bounce buffer at 64KB. Using a bigger bounce buffer
- 	 * has diminishing returns, this is probably because SD/MMC
-@@ -4241,6 +4247,7 @@ static void sdhci_allocate_bounce_buffer(struct sdhci_host *host)
- 
- 	host->bounce_buffer_size = bounce_size;
- 
-+out:
- 	/* Lie about this since we're bouncing */
- 	mmc->max_segs = max_blocks;
- 	mmc->max_seg_size = bounce_size;
++ARM/BST SOC SUPPORT
++M:	Ge Gordon <gordon.ge@bst.ai>
++R:	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>
++L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
++S:	Maintained
++F:	Documentation/devicetree/bindings/arm/bst.yaml
++F:	Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml
++F:	arch/arm64/boot/dts/bst/
++F:	drivers/mmc/host/sdhci-of-bst.c
++
+ ARM/CALXEDA HIGHBANK ARCHITECTURE
+ M:	Andre Przywara <andre.przywara@arm.com>
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
 
 -- 
 2.43.0
