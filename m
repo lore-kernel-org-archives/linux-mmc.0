@@ -1,182 +1,131 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.mainlining.org (mail.mainlining.org [5.75.144.95])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CC0E27A919;
-	Mon, 22 Sep 2025 18:13:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7247CAD24;
+	Tue, 23 Sep 2025 03:45:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=5.75.144.95
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758564805; cv=none; b=L+kaudMK0UoXLI/rR8keSFMZRKdHaZvJ1pdOXAJ4uMwWZ9SsOJ7vERyHk51biyaFbTVbTClPBmstKD4G6W34xAc+EQWbKYZIFTY/rJooN3ckPaLb5RJmHsd9Igy91YXQlDBOFs+Z8+OTNg0uJXhvvy8QdisJRTh7iO7OPAZZfPI=
+	t=1758599150; cv=none; b=DiEgG/QxptoUILQf7LdeYU4iZJH6uREsVjMvxN1URBPav7igCAEyXisRxl/oClv9gxawt+oAgVEj+MYxsaU/b5Q0Bd5+mOB7Pjo5WeAutKA5lVPqqRH2c9DX+7JyqFjg6Fw0zLrhHCPVS6qS84OMQNefcdd708VyPA4xdYglqwM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758564805; c=relaxed/simple;
-	bh=ch3XJR3/J1ZY9eeHVCkTk3w1gXTPD/CTnWH+kKraEHE=;
+	s=arc-20240116; t=1758599150; c=relaxed/simple;
+	bh=4CMWPtu95SpMo8DXVgcYovl8qzxoxMuizAwDQxBKMCU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=puKWaC+jb+aHlo1ESPqwoKCkRx4RwmO5BymV2OcMS7fTTXdboQOhQemdW/8wt6sMlGHj33+Vxt1MCaG5/X1OEzSo1lVqPtDPzc/w0g5aoURlocx0sj1TXaxZTYZhPt3T0252eR6iNj52YYnGeZfloCEdFeMl6yw5GqSEGymHgJU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Yk6ob/OG; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=ZYboDyGOGn7NU8j1A0pDBNpWwcUMVhnXcdti9wOuB/p+TsfaL3zcWskxpaoLyIdzGCYe7uGdWWP4SmEnqMYIIFRVOD34dd2DePi+91QSBbQKE+Fto+eOUPZAhdlU7o9HGDCgGJSTJgDKgb/BbKgIMYANhyXC4czmsXhSN01c7to=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org; spf=pass smtp.mailfrom=mainlining.org; dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=sRjl/jZp; dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b=9iEveaNr; arc=none smtp.client-ip=5.75.144.95
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mainlining.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mainlining.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Yk6ob/OG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ABED0C4CEF5;
-	Mon, 22 Sep 2025 18:13:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1758564804;
-	bh=ch3XJR3/J1ZY9eeHVCkTk3w1gXTPD/CTnWH+kKraEHE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Yk6ob/OGAwkGwWAGBkC3qGsL386M31FRg5HYHcF6fPnimFhdojR95nWwH1ZyzM8So
-	 h7zcLzQJCGrZUbByHokQiq2rPXoQovFkjUIRLMWjh/C5NUAWvWT7r9jw+e6hVXqknQ
-	 v/gyeUsRx5+lyUGTRB4ay78pCyjW8zJsxawdOzJeJ9USmCKNyQChfKIqy54MA59FlL
-	 1CL0h2tfxpF4yPwQs6pFiHonmeFZIc1eK8syWFQeya/tghmGe8aRRHgEPqMyyDrhMe
-	 97Nhgnd0kWevlM6zF4bWz0Z9Fz4Rql+DkHFKCo/IXy/gL4hzqII5Izi3/JAu1UA1HN
-	 2b9fRV2dD7PDw==
-Date: Mon, 22 Sep 2025 13:13:23 -0500
-From: Rob Herring <robh@kernel.org>
-To: Dang Huynh <dang.huynh@mainlining.org>
-Cc: Manivannan Sadhasivam <mani@kernel.org>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Michael Turquette <mturquette@baylibre.com>,
-	Stephen Boyd <sboyd@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Philipp Zabel <p.zabel@pengutronix.de>, Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-arm-kernel@lists.infradead.org,
-	linux-unisoc@lists.infradead.org, linux-gpio@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-clk@vger.kernel.org, dmaengine@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH 04/10] dt-bindings: mmc: Add RDA SDMMC controller
-Message-ID: <20250922181323.GA556259-robh@kernel.org>
+	dkim=pass (2048-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="sRjl/jZp";
+	dkim=permerror (0-bit key) header.d=mainlining.org header.i=@mainlining.org header.b="9iEveaNr"
+DKIM-Signature: v=1; a=rsa-sha256; s=202507r; d=mainlining.org; c=relaxed/relaxed;
+	h=Message-ID:Subject:To:From:Date; t=1758598846; bh=RBI2aJbB7n590+KcwgaegrR
+	fg5lM30jDW0OwGnQmBL8=; b=sRjl/jZpgu8H2CCD/bvJRFr84ayFxOWFDfefDY/9M3pPOybi5w
+	lN8kDaTaV+lvXaJWoXtRLjvYQ72ke1vagpeRzkLmj9xzTdjaUUtLIcp6kNbjDTXNuUvfRjvQBGt
+	Woc9cSOZGQZHgEaNee3rLueQ/MPOLBaxqT6muqnh0yj3vVswnT4V4BGRyE4Ws2+y357MwxLDDXc
+	5zFTwjV430W2yYKhlLvSxm38QBj54ZvsJjZT1yH1zbZBRM+RcSMjtjl+He7bYMNL0vx57AC8lhu
+	0O7vO1yhF2z5AGLZyIb+D6gLV+qf+KpGapgbQ6XnOJl9oKC0A7w8P/AWbWb8IuVnPSw==;
+DKIM-Signature: v=1; a=ed25519-sha256; s=202507e; d=mainlining.org; c=relaxed/relaxed;
+	h=Message-ID:Subject:To:From:Date; t=1758598846; bh=RBI2aJbB7n590+KcwgaegrR
+	fg5lM30jDW0OwGnQmBL8=; b=9iEveaNrpfx+7EskGD80aKFQggG9+eDi7M/DmfHYjY9si7U0fL
+	1IgSpCtPfNEbyOVBCakFKmaRd5+VgsDV4/Ag==;
+Date: Tue, 23 Sep 2025 10:40:37 +0700
+From: Dang Huynh <dang.huynh@mainlining.org>
+To: Bartosz Golaszewski <brgl@bgdev.pl>
+Cc: Manivannan Sadhasivam <mani@kernel.org>, 
+	Linus Walleij <linus.walleij@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Philipp Zabel <p.zabel@pengutronix.de>, 
+	Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+	linux-arm-kernel@lists.infradead.org, linux-unisoc@lists.infradead.org, linux-gpio@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, 
+	dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org, linux-hardening@vger.kernel.org, 
+	Conor Dooley <conor.dooley@microchip.com>
+Subject: Re: [PATCH 00/10] RDA8810PL SD/MMC support
+Message-ID: <2wwi3ktbcuyp7y7mqplndvawagae5hdhcx3hn375kycoqtows6@xcww2237rxpe>
 References: <20250919-rda8810pl-mmc-v1-0-d4f08a05ba4d@mainlining.org>
- <20250919-rda8810pl-mmc-v1-4-d4f08a05ba4d@mainlining.org>
+ <CAMRc=Mc4hO1LDumxAfkB1W6miTJXR1NUVAKBVarkwiF2yGvSLA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20250919-rda8810pl-mmc-v1-4-d4f08a05ba4d@mainlining.org>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAMRc=Mc4hO1LDumxAfkB1W6miTJXR1NUVAKBVarkwiF2yGvSLA@mail.gmail.com>
 
-On Fri, Sep 19, 2025 at 01:48:44AM +0700, Dang Huynh wrote:
-> Add documentation describing the SD/MMC controller in RDA Micro
-> RDA8810PL SoC.
+On Mon, Sep 22, 2025 at 04:17:05PM +0200, Bartosz Golaszewski wrote:
+> On Thu, Sep 18, 2025 at 8:49 PM Dang Huynh via B4 Relay
+> <devnull+dang.huynh.mainlining.org@kernel.org> wrote:
+> >
+> > This patch series aims to add SDMMC driver and various drivers required
+> > for SDMMC controller to function.
+> >
+> > This also fixed a bug where all the GPIO switched from INPUT to OUTPUT
+> > after the GPIO driver probed or by reading the GPIO debugfs.
+> >
+> > This patch series is a split from [1] to ease the maintainers.
+> >
 > 
-> Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
-> ---
->  Documentation/devicetree/bindings/mmc/rda,mmc.yaml | 92 ++++++++++++++++++++++
->  1 file changed, 92 insertions(+)
+> This is still targeting at least 4 subsystems and isn't making the
+> merging any easier. Are there any build-time dependencies here? If
+> not, then split it further into small chunks targeting individual
+> subsystems and the relevant ARM SoC tree.
+The MMC driver depends on both the clock and the DMA driver.
+
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/rda,mmc.yaml b/Documentation/devicetree/bindings/mmc/rda,mmc.yaml
-> new file mode 100644
-> index 0000000000000000000000000000000000000000..f3cda38abd66023ca9bc94d1c29df5ae9e211e7c
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/rda,mmc.yaml
-> @@ -0,0 +1,92 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/rda,mmc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: RDA Micro SD/MMC Controller
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml
-> +
-> +maintainers:
-> +  - Dang Huynh <dang.huynh@mainlining.org>
-> +
-> +properties:
-> +  compatible:
-> +    items:
-> +      - enum:
-> +          - rda,8810pl-mmc
-> +      - const: rda,mmc
-
-Drop the generic compatible.
-
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 1
-> +
-> +  clock-names:
-> +    const: mclk
-> +
-> +  resets:
-> +    maxItems: 1
-> +
-> +  dmas:
-> +    maxItems: 2
-> +
-> +  dma-names:
-> +    items:
-> +      - const: tx
-> +      - const: rx
-> +
-> +  rda,mclk-adj:
-> +    $ref: /schemas/types.yaml#/definitions/uint8
-> +    description:
-> +      Some board need MCLK output to be delayed for the card to work.
-> +      If not present, MCLK output is not delayed.
-> +    minimum: 0
-> +    maximum: 255
-
-You can drop the constraints if they are not less than uint8 range.
-
-What are the units? 
-
-I guess 'adj' means adjust. Just use 'rda,mclk-delay' to be more 
-precise.
-
-> +
-> +  rda,mclk-inv:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description:
-> +      Some board need MCLK to be inverted for the card to work.
-> +      If not present, MCLK is not inverted.
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +  - resets
-> +  - dmas
-> +  - dma-names
-> +  - vmmc-supply
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    #include <dt-bindings/clock/rda,8810pl-apclk.h>
-> +    #include <dt-bindings/dma/rda-ifc.h>
-> +    mmc@20950000 {
-> +      compatible = "rda,8810pl-mmc", "rda,mmc";
-> +      reg = <0x20950000 0x1000>;
-> +      interrupts = <3 IRQ_TYPE_LEVEL_HIGH>;
-> +      clocks = <&ap_syscon CLK_APB2>;
-> +      clock-names = "mclk";
-> +      resets = <&ap_syscon RST_APB2_SDMMC1>;
-> +      dmas = <&ifc IFC_SDMMC1_TX>, <&ifc IFC_SDMMC1_RX>;
-> +      dma-names = "tx", "rx";
-> +      vmmc-supply = <&vdd_sdmmc>;
-> +      rda,mclk-adj = /bits/ 8 <1>;
-> +      rda,mclk-inv;
-> +    };
-> +
-> +...
+> Bartosz
 > 
-> -- 
-> 2.51.0
-> 
+> > Tested on Orange Pi 2G-IOT using a Buildroot environment.
+> >
+> > [1]: https://lore.kernel.org/all/20250917-rda8810pl-drivers-v1-0-9ca9184ca977@mainlining.org/
+> >
+> > Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
+> > ---
+> > Dang Huynh (10):
+> >       dt-bindings: gpio: rda: Make interrupts optional
+> >       dt-bindings: clock: Add RDA Micro RDA8810PL clock/reset controller
+> >       dt-bindings: dma: Add RDA IFC DMA
+> >       dt-bindings: mmc: Add RDA SDMMC controller
+> >       gpio: rda: Make IRQ optional
+> >       gpio: rda: Make direction register unreadable
+> >       clk: Add Clock and Reset Driver for RDA Micro RDA8810PL SoC
+> >       dmaengine: Add RDA IFC driver
+> >       mmc: host: Add RDA Micro SD/MMC driver
+> >       ARM: dts: unisoc: rda8810pl: Add SDMMC controllers
+> >
+> >  .../bindings/clock/rda,8810pl-apsyscon.yaml        |  43 ++
+> >  Documentation/devicetree/bindings/dma/rda,ifc.yaml |  45 ++
+> >  .../devicetree/bindings/gpio/gpio-rda.yaml         |   3 -
+> >  Documentation/devicetree/bindings/mmc/rda,mmc.yaml |  92 +++
+> >  MAINTAINERS                                        |  18 +
+> >  .../boot/dts/unisoc/rda8810pl-orangepi-2g-iot.dts  |  20 +
+> >  .../arm/boot/dts/unisoc/rda8810pl-orangepi-i96.dts |  20 +
+> >  arch/arm/boot/dts/unisoc/rda8810pl.dtsi            |  47 +-
+> >  drivers/clk/Kconfig                                |   1 +
+> >  drivers/clk/Makefile                               |   1 +
+> >  drivers/clk/rda/Kconfig                            |  14 +
+> >  drivers/clk/rda/Makefile                           |   2 +
+> >  drivers/clk/rda/clk-rda8810.c                      | 769 +++++++++++++++++++
+> >  drivers/dma/Kconfig                                |  10 +
+> >  drivers/dma/Makefile                               |   1 +
+> >  drivers/dma/rda-ifc.c                              | 450 +++++++++++
+> >  drivers/gpio/gpio-rda.c                            |   4 +-
+> >  drivers/mmc/host/Kconfig                           |  12 +
+> >  drivers/mmc/host/Makefile                          |   1 +
+> >  drivers/mmc/host/rda-mmc.c                         | 853 +++++++++++++++++++++
+> >  include/dt-bindings/clock/rda,8810pl-apclk.h       |  70 ++
+> >  include/dt-bindings/dma/rda-ifc.h                  |  28 +
+> >  22 files changed, 2495 insertions(+), 9 deletions(-)
+> > ---
+> > base-commit: ae2d20002576d2893ecaff25db3d7ef9190ac0b6
+> > change-id: 20250918-rda8810pl-mmc-3f33b83c313d
+> >
+> > Best regards,
+> > --
+> > Dang Huynh <dang.huynh@mainlining.org>
+> >
+> >
+
