@@ -1,171 +1,123 @@
-Received: from mail-yx1-f52.google.com (mail-yx1-f52.google.com [74.125.224.52])
+Received: from mail-yx1-f46.google.com (mail-yx1-f46.google.com [74.125.224.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC503244691
-	for <linux-mmc@vger.kernel.org>; Thu, 25 Sep 2025 13:23:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E68CD230D1E
+	for <linux-mmc@vger.kernel.org>; Thu, 25 Sep 2025 13:34:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1758806627; cv=none; b=FZEF1dr4V7ycubdBOFl5hU7dLIXd8uUoywEzWEEBr0inrog4uI0W39+zn0zU1/hAvUnb3c5dpMFRAVn/Cca9JlTd3CtnnHqXX3g4PrhDHZm172c6weLO1MHuFg7roZsak3M7aAeQwqfdybJ2J97W44nbPpIZwAxF3FqfiNNBnhc=
+	t=1758807301; cv=none; b=cDPOlYrVwSWw1EGcDvgp0oDrXTqTCyoi4EtHPhzAZsrZymZ61IxQQtJS9zI/Rw+kBFgqv+TmIQ5/e3IBR32oDfoK4S6qdRhmt/NNmFRyyZTOcnftRF2Ghe548JzkiMZEg+EbpWyXoCohiE7EPYJQrYNgEVAowE53qshX+HQlLcQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1758806627; c=relaxed/simple;
-	bh=IDkFycj+9UKtKZZOJsBm7WyqSmtlL2Fraf0qF7yWxH0=;
+	s=arc-20240116; t=1758807301; c=relaxed/simple;
+	bh=YDVkNcZQalJ2j010y9V0+C5w7+uerTdqWyV+aIv2oSE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PyONUBzDBQW7sZDqMm0uyci8qqray9F8et0idn3Nd4WPEi5/Se2Zf6sRF8/xKzb4IVP1XV5rQF3UQ9oEqpB8gRw9OrXL7XbDwK1Z7NGk+MJfOw/sM6kPXfmXH7cm+pI51osmxiQUjrPu7Ovhm5F1SPVEHwsnoGFqGdpArDK0bhI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fsQ/1uDh; arc=none smtp.client-ip=74.125.224.52
+	 To:Cc:Content-Type; b=pQ5Oum/gDzazzaPQOfP2Q/6WdGW2vTNDRlXBvrJQnk2R1ISxo715IQAeoNu57tQDpb7EQaVvLsdaMnDpewmPRdXQG2WWxdKMFi/+RUp/vvP3dvIQaG0Ey2n5hILvMmqTiaeRXsCrRZzbDXR/kWh3Qfx59KCUYrRQMnq30YuDIdM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=E+owLuDL; arc=none smtp.client-ip=74.125.224.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fsQ/1uDh"
-Received: by mail-yx1-f52.google.com with SMTP id 956f58d0204a3-63604582e53so677664d50.3
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Sep 2025 06:23:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="E+owLuDL"
+Received: by mail-yx1-f46.google.com with SMTP id 956f58d0204a3-63497c2a27dso689379d50.1
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Sep 2025 06:34:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1758806625; x=1759411425; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=2jGpcIJG4hng0BeFpGfvRbmVsEAFGkbeZpU5851V2aE=;
-        b=fsQ/1uDh8DUCfrGhE4mG/SoCir3RzjN3lhWd7VlqfWjhoRwP5l7zShI775ES0z+xQb
-         /fl/j/7fPH6NP1F+VC97jLtYCXZYpOZCEh9Y26P5UvmeKTpncdZ958RZFFiumbY992Z0
-         eGsMqONkvrCtvO3Nvkrn5p6Y+CQRigskuEEhEllEYWuw+flstcIeNhTJiNu7Ih2WZrMS
-         +JtvXa8zaY4ww5IuRDHufT1PDfw0RMDlvBmsSqJ7uQf9WAeKV7DfZZJckrGdrXQeGJkj
-         6Mav9VgaruaRdXSx6nFARxuDuzH2u2SvSqB/zB9fWU/sKsFIEQLlEfBRWeqYkaaEY9Q4
-         Uj/Q==
+        d=linaro.org; s=google; t=1758807299; x=1759412099; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BtNjzQKudYD0ky97v1743lPf/WrnfS9KJCemG7a+/I0=;
+        b=E+owLuDLYt4n1hzwq57nBBJ8yA0AlfUKkNZEFQHc09LedRYkZtyTwMec/67yXstYf1
+         3Me1GFSvw7XqEf1n/I0rwC39f/TmdwoTaGy/Q9ANGAyknZLL+LzBvCvipuIeUUdZsoTA
+         v3KqJx4O9P+004pW9tK4QuB4Ze6DF0lVi4a/ZAJi/1cXio62UYexRjOgihOLL47GfiUY
+         A1QShO/ImHlRxq9eAYbYqLxe2pcOusl9i9qK5IM2Ix7Y8sT7d1MtN3kdUarMNDw2oNiF
+         a3VxvfhMgkS4D0GTS4JjV5RpnnebLHkbmAig7F1PPCqyhdOax2Jj3CpI8IRUugX75Bgq
+         o9MA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1758806625; x=1759411425;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=2jGpcIJG4hng0BeFpGfvRbmVsEAFGkbeZpU5851V2aE=;
-        b=RHM8SmX9WDd/ulZ2qeBWh8ox7huXD5rC+KbaYIm3XNTpwqV8mpqkza5GHluYxDDt7g
-         vX8dLJDkjvyKlpV8tR87Jj3NY9XTpPn0iKEYw+WDxi4c8BKYZZEt0Tu6HP6qrAmH+sy/
-         xIq3iI923kNRti/nyMWfw4gfaREjeRNDWQ95MDA/7yqR+mpUDkU1v1Pp5fII7YOO36Gc
-         WUUjRgdxOtuX1j9r/N2d/iAKv1cewIImVYq8lM7R1oTsYob5g/G2vf39P+ZGRPH/lAy+
-         t3CpTtPqwiwKb6inrfZGZjDHdIjozAaA+xLLQJKjFp2zU6iUFcZBvYfnh27f7p0nvHmj
-         8rAA==
-X-Gm-Message-State: AOJu0Yzw6tQfwIqqJV0sZDq6oVb+D52Fss2RwWPMNBt8T+phJ75w8kQE
-	jNMFJJwbhEVNIobAYXAVS2R+a/RneR5X+rmCEnxPcKgrhA0+eQtJLh8NdQlk9EzPPuBTuHBL17h
-	SIwfgp0sAj4WWZmMFcCJjo2fDDpkoCujf/58YQ45mNmREWqUwRnTC
-X-Gm-Gg: ASbGnctChjpFCAJORoz+KPPyg3KOrMpZcsrHB+KNlC15jYqvWm0xoKmlGtWiYg+xoAL
-	AS7UB7kySvUPfAZ+eGhrK5pHltGR5HJ++qjGYZCNCgKlKY3SzwXk04ksVyLc8PpeUaOo7EgWzhh
-	kcfBhhfjto0gbA1K2ugh5f4bnOW1FwCDhBSRTlBfGwKmcyzETusDXOU0ayH9qM4ut6DKK47Pdnl
-	Da1Bg3k
-X-Google-Smtp-Source: AGHT+IEeMvSjqWSfau0ExpJcofiHdyZgwUbjcrhOFyoc5D2lal2IZDhy1lug3vRqiU4f477yB8Ze21RdBRRszAftJSc=
-X-Received: by 2002:a05:690e:244c:b0:636:149a:f579 with SMTP id
- 956f58d0204a3-6361a7a7a96mr1876603d50.23.1758806624889; Thu, 25 Sep 2025
- 06:23:44 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1758807299; x=1759412099;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=BtNjzQKudYD0ky97v1743lPf/WrnfS9KJCemG7a+/I0=;
+        b=dUhlQlExGpdYCHRs0pV+Ipza3mLDufhzmtyi5qkV/UPBrvvSElenB4FY0Wj8JbysFx
+         z2YuOe8hiqqKipRNnvARSj5WBBqAy0njwrmNmOBnM1l6Tnh7WUaTS1iAeatMAG5nB9os
+         ILPrAF0wnDHxpJ6H2IxXAbifdlzYJILGXGR2kkB20dSKRxP+oyjGYQSrhw7NfDzv2My4
+         BFUTIYkm55fv98tieJCohqxn+vtrHJT/gwcsO1fCiCzbQJmRLNgeTaW5g+zFEQ19P18w
+         BdxECv9x0Mu1mCITl2VbYBR/Ctr8Uw0QzDtBblv8CU4yjjKDpfrjV7qGVsvAKgfJobqQ
+         IACg==
+X-Forwarded-Encrypted: i=1; AJvYcCXGWAO9NHaWGkAjwRB0jJaJW4nfGFA4BeA4uRVTiQWcB5/7mRMkHAfAgE5LWHZser08frhfTVL7nHE=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx9WJMho8Etktr4ZuGQ4SeaFTQv4xQ1S8eRzkuQ7SBGK6/Fg1HH
+	o+MPmmjIB4YKp6dL0CC7HRWrvJm3bAGkh+1L/jFsdYxs6u4JzPtz2NQktxu+SdK0IxsPI11ZrD0
+	g5kYnJ1sdfv3HZlTwAgGuQmAKXABNsP1PdG5Z7t7HWw==
+X-Gm-Gg: ASbGncul/pZlaN9dO/0MYBn60wnPISMWjp1P9FXqErbWWFJXwUHcx+XpWYi/rozIw7l
+	Jw40Tz2G6M10TA3zBNEUebnQWrQqfEOpQqu214uxvNDQjiFfdf9vskZJIcgRhAlQmIIemhHQbmR
+	joUxQ/zDlLb7NMDS0IrKtF6r2VlgahcuT1HvaZSaHSdcCWMWt95tLqgw6Y8wzstmiD2MJnBHvJm
+	EoZrHBq
+X-Google-Smtp-Source: AGHT+IGimO2Q23ZQRuh/31hfKH0M0gM5VQ+Kb4vJFyOlHv/p/Vvr462F0FI6JqMOIO0OkAJ4FQSVqaMbzzoyb5VvJmI=
+X-Received: by 2002:a05:690e:240d:b0:636:d335:2515 with SMTP id
+ 956f58d0204a3-636d335263emr142033d50.3.1758807298695; Thu, 25 Sep 2025
+ 06:34:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <167acbaa-c61f-4d75-b2b6-9acee22ddee9@siemens.com> <fc592d6d-5f6b-4afd-9e4a-e77987a88a56@siemens.com>
-In-Reply-To: <fc592d6d-5f6b-4afd-9e4a-e77987a88a56@siemens.com>
+References: <20250925090412.2068216-1-yangzh0906@thundersoft.com> <20250925121155.2401934-1-yangzh0906@thundersoft.com>
+In-Reply-To: <20250925121155.2401934-1-yangzh0906@thundersoft.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 25 Sep 2025 15:23:08 +0200
-X-Gm-Features: AS18NWAZTbpyGB6Xr42xorZDT0cIBH5A30Scf0L7vi3X4roXNyHRBAoHI8pkWcA
-Message-ID: <CAPDyKForTu9xdtPbYZ-DyLPGrnx7c6aXE8E1qoz9U_yZzAhRWQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc-utils: Correctly handle write counter overflow status
-To: Jan Kiszka <jan.kiszka@siemens.com>, Avri Altman <avri.altman@sandisk.com>
-Cc: linux-mmc@vger.kernel.org
+Date: Thu, 25 Sep 2025 15:34:22 +0200
+X-Gm-Features: AS18NWBTeJE3De2V6Q2_nyOlyupwgaA4ybsnxBjHtD7xymMmZJcjw6ksT3sbAGs
+Message-ID: <CAPDyKFp3onTDGgygvOrK-G40w4mSx4S5=PbdZ+26hsQ+nPVRSA@mail.gmail.com>
+Subject: Re: [PATCH 0/9] arm64: introduce Black Sesame Technologies C1200 SoC
+ and CDCU1.0 board
+To: Albert Yang <yangzh0906@thundersoft.com>
+Cc: arnd@arndb.de, adrian.hunter@intel.com, bst-upstream@bstai.top, 
+	catalin.marinas@arm.com, conor+dt@kernel.org, devicetree@vger.kernel.org, 
+	gordon.ge@bst.ai, krzk+dt@kernel.org, krzysztof.kozlowski@linaro.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, robh@kernel.org, will@kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, 24 Sept 2025 at 09:53, Jan Kiszka <jan.kiszka@siemens.com> wrote:
+On Thu, 25 Sept 2025 at 14:12, Albert Yang <yangzh0906@thundersoft.com> wro=
+te:
 >
-> On 01.09.25 11:26, Jan Kiszka wrote:
-> > From: Jan Kiszka <jan.kiszka@siemens.com>
-> >
-> > The result field of an RPMB frame will have bit 7 set as soon as the
-> > write counter reached its limit (0xffffffff) - even if the operation was
-> > successful. Handle that correctly to avoid false error reports.
-> >
-> > This was found and fixed over the RPMB model of QEMU after adjusting it
-> > to expire earlier.
-> >
-> > Fixes: c6cb053ec59e ("mmc-utils: RPMB: add support for 4 rpmb operations")
-> > Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
-> > ---
-> >
-> > Changes in v2:
-> >  - use operation result mask, rather than masking out the counter status
-> >  - handle all result evaluation equally, even if not practically needed
-> >  - massage commit message
-> >
-> >  mmc_cmds.c | 15 +++++++++------
-> >  1 file changed, 9 insertions(+), 6 deletions(-)
-> >
-> > diff --git a/mmc_cmds.c b/mmc_cmds.c
-> > index 16c6b2e..429a9c7 100644
-> > --- a/mmc_cmds.c
-> > +++ b/mmc_cmds.c
-> > @@ -2103,6 +2103,8 @@ enum rpmb_op_type {
-> >       MMC_RPMB_READ_RESP = 0x05
-> >  };
-> >
-> > +#define RPMB_OP_RESULT_MASK          0x7f
-> > +
-> >  struct rpmb_frame {
-> >       u_int8_t  stuff[196];           /* Bytes 511 - 316 */
-> >       u_int8_t  key_mac[32];          /* Bytes 315 - 284 */
-> > @@ -2295,7 +2297,7 @@ int do_rpmb_write_key(int nargs, char **argv)
-> >       }
-> >
-> >       /* Check RPMB response */
-> > -     if (frame_out.result != 0) {
-> > +     if ((frame_out.result & htobe16(RPMB_OP_RESULT_MASK)) != 0) {
-> >               printf("RPMB operation failed, retcode 0x%04x\n",
-> >                          be16toh(frame_out.result));
-> >               exit(1);
-> > @@ -2321,7 +2323,7 @@ static int rpmb_read_counter(int dev_fd, unsigned int *cnt)
-> >       }
-> >
-> >       /* Check RPMB response */
-> > -     if (frame_out.result != 0) {
-> > +     if ((frame_out.result & htobe16(RPMB_OP_RESULT_MASK)) != 0) {
-> >               *cnt = 0;
-> >               return be16toh(frame_out.result);
-> >       }
-> > @@ -2442,7 +2444,8 @@ int do_rpmb_read_block(int nargs, char **argv)
-> >       }
-> >
-> >       /* Check RPMB response */
-> > -     if (frame_out_p[blocks_cnt - 1].result != 0) {
-> > +     if ((frame_out_p[blocks_cnt - 1].result &
-> > +          htobe16(RPMB_OP_RESULT_MASK)) != 0) {
-> >               printf("RPMB operation failed, retcode 0x%04x\n",
-> >                          be16toh(frame_out_p[blocks_cnt - 1].result));
-> >               exit(1);
-> > @@ -2573,7 +2576,7 @@ static int rpmb_auth_write(int nargs, char **argv, uint16_t addr,
-> >       }
-> >
-> >       /* Check RPMB response */
-> > -     if (frame_out.result != 0) {
-> > +     if ((frame_out.result & htobe16(RPMB_OP_RESULT_MASK)) != 0) {
-> >               printf("RPMB operation failed, retcode 0x%04x\n",
-> >                      be16toh(frame_out.result));
-> >       }
-> > @@ -2621,7 +2624,7 @@ static int rpmb_auth_read(int nargs, char **argv)
-> >       }
-> >
-> >       /* Check RPMB response */
-> > -     if (frame_out.result != 0) {
-> > +     if ((frame_out.result & htobe16(RPMB_OP_RESULT_MASK)) != 0) {
-> >               printf("RPMB operation failed, retcode 0x%04x\n", be16toh(frame_out.result));
-> >               goto out;
-> >       }
-> > @@ -2783,7 +2786,7 @@ int do_rpmb_write_block(int nargs, char **argv)
-> >       }
-> >
-> >       /* Check RPMB response */
-> > -     if (frame_out.result != 0) {
-> > +     if ((frame_out.result & htobe16(RPMB_OP_RESULT_MASK)) != 0) {
-> >               printf("RPMB operation failed, retcode 0x%04x\n",
-> >                          be16toh(frame_out.result));
-> >               exit(1);
+> On Thu, Sep 25, 2025 at 05:03:57PM +0800, Albert Yang wrote:Subject: Re: =
+[PATCH] splitting SoC and MMC parts
 >
-> Any news on this one?
+> Hi Arnd,
+>
+> I may have missed an important detail in my previous note. If I split
+> out the MMC-related patches and submit only the SoC parts first, I
+> cannot validate the SoC on real hardware: both the kernel and the root
+> filesystem live on the MMC device. Without the MMC stack (DT bindings
+> and the controller driver), the board does not boot to userspace, so I
+> cannot properly verify the SoC/DT changes in isolation.
 
-I was waiting for you and Avri to reach a conclusion. Avri, is this
-good to go or do you expect Jan to send a new version?
+At least to me, I would not consider that a problem. As long as you
+can test the pieces together "manually" that's fine, I think.
+
+I mean, the platform was not supported in the first place, so it's not
+like we would be introducing a regression - or break something, right?
+
+>
+> Would you prefer that I:
+> - keep the MMC pieces in the same series for initial bring-up; or
+> - validate everything locally, then send only the SoC/DT parts first and
+>   follow up with the MMC binding/driver as a separate series?
+>
+> I=E2=80=99m not entirely sure which approach best matches the normal work=
+flow,
+> so your guidance would be appreciated. I can proceed whichever way you
+> think is most appropriate.
+
+I think doing things in parallel would be the best/fastest way
+forward. Validating locally and sending the pieces upstream to
+different subsystems.
+
+>
+> Thanks for the review and suggestions.
+>
+> Best regards,
+> Albert
 
 Kind regards
 Uffe
