@@ -1,514 +1,327 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6784C301038;
-	Mon, 29 Sep 2025 11:35:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59970270ED9
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Sep 2025 12:42:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759145759; cv=none; b=euyK1GAGsCjuQlNd28maNVuz8z+MCp0sd0pIa/6otkNtJv89wiLhLGQBmANJgS1GDS7aIwuhZJ2QX91TC/4/7MeZZTqkiLwDuoy+/vN5E3PLdZU+QSYUhTX6A0uCuTuca9J/c3koEMeT7q47b8AviuKyg7IJsG3tnXYxYrmDS4I=
+	t=1759149748; cv=none; b=lGlOB6XbzL89t7OtDMlRalzFqhsDUMXC7mxxszS8j/x6E6D82ULoRO53G5xqzipLZiIS1Sst5te/Ylls8eFJBsj00yKVntetJ9Oe2/+PlOCkjSI1gFNNHML5rn8WZcy0S/SXfg/WME4WgvDGqSVXWsMLxAgAutMQ1l05kYPEEKo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759145759; c=relaxed/simple;
-	bh=uAfNhgwuezOpyeVE/5dToN1u2OVvIawGg/j2hZbH8Qk=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Dvd6Qfkx06J+1ASF8EGQaOlkSRUCbFuiJA+UE0uvd5gl51fcFfT6uqx2NhiWwobjLQOiR2YdcY+gZlHIJF9yvi4HxwE9T/4+e987tGyI5eKHchMQvtZrr7PQrB1Azm0hOtATWYjKwoU+UY5+rSNpKyWlR1kqqmFO0oWFVpP5VI4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=lrmwifsA; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+	s=arc-20240116; t=1759149748; c=relaxed/simple;
+	bh=jjZy6UkBfPj+MxOy7/7UZ2wPnKGSNtL3ZvEYwlgGnec=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=O9yEV6JvDM7XZ9ZQwVSBw0zhCXNQrChHgSwyXz4TZ+bsb92DdxBVkB079C6xaLybwzjlICZI5uEIAhrGbS+1uu/XhfH3ZiVIeQSwCAYJhAsbQvgpfR5RYvkk3RoyWQ6vSqPMh8JCp9PnfpE+hE9WaPAbJykfk1fKOF5E4//SAwU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Fr5sj2sC; arc=none smtp.client-ip=209.85.167.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="lrmwifsA"
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 58T9KicV019276;
-	Mon, 29 Sep 2025 11:35:53 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=qcppdkim1; bh=S1chZfs/ccI
-	ca1CVgethCUb8gWm+Q5uPlpoTVsU4On0=; b=lrmwifsA1mAgzF4ufu/rbyMj42i
-	oxYe/6azT/Z+qYiMahAh1IWBAoyYzcPq0Er+2qmt6t5cSYqfQZ68KKKwyKG7NlzI
-	UDOmNZvOKknnnHreTUAPAGmJDmO8a3bl3Br3Te5uonZHqbKb0M3SIZ1zszt3Bip2
-	smjHTjio/1EVefdsoAoSiLcQOf4O4Erydwo4Fyx9OT1NSsS1Rqs2WG/Uw3nh+qhs
-	9DVWuXK1iY6skGu4B/eqME01jHFoTvPFTPaEUC05haVacLDvc37vLz9J1I8vu7tL
-	7UgVEhuyuwjJA9zYhPbK3rzxfMjdjElKUEEawq86/eq72+mjZQO1UbUlEdA==
-Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49e93hcs9h-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 29 Sep 2025 11:35:53 +0000 (GMT)
-Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 58TBZoJ1008944;
-	Mon, 29 Sep 2025 11:35:50 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 49e90kvy6t-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 29 Sep 2025 11:35:50 +0000
-Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 58TBZouo008939;
-	Mon, 29 Sep 2025 11:35:50 GMT
-Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-rampraka-hyd.qualcomm.com [10.147.247.88])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 58TBZn2T008937
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 29 Sep 2025 11:35:50 +0000
-Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2305851)
-	id C8DA15C6; Mon, 29 Sep 2025 17:05:48 +0530 (+0530)
-From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        dmitry.baryshkov@oss.qualcomm.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
-        kernel@oss.qualcomm.com, Sachin Gupta <quic_sachgupt@quicinc.com>
-Subject: [PATCH v4 4/4] mmc: sdhci-msm: Rectify DLL programming sequence for SDCC
-Date: Mon, 29 Sep 2025 17:05:15 +0530
-Message-Id: <20250929113515.26752-5-quic_rampraka@quicinc.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20250929113515.26752-1-quic_rampraka@quicinc.com>
-References: <20250929113515.26752-1-quic_rampraka@quicinc.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Fr5sj2sC"
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-57f1b88354eso4720070e87.1
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Sep 2025 05:42:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1759149743; x=1759754543; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=P5yce84UiJOXCwi/vHCN+GF/VWSjDuegEM+VLQPICFs=;
+        b=Fr5sj2sCzzQTe5Dy8smSzsntwM2Ez7dB2kWJw79bIqDmjZiMj8KKSiWkWqKlR7bq+k
+         o7T5PiaDdS2aBw0IftB9/+/Cr03Eg0HTH0vNJU1ZNOPQPUMh/RGexIQF72wsfwWbfHcg
+         xpqM2s4ckIWwsX4vd5IJc/zQ2yBZefcPvHvDBHXsU9GJWYFig3PHEo4/AfDq6FiSe3sQ
+         MdlqgKu8ImvaZabZI9LlT07RJuMCoI9vBIGKbHMp1WdHGREPSFuth4++hkIzcuOnY4YF
+         0OStWBonblvEudGBAVJUparP3cB1hP8y8kaL/itxECxDN9rviFqoPgDDVmSsKP6ubPXe
+         QFcg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1759149743; x=1759754543;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=P5yce84UiJOXCwi/vHCN+GF/VWSjDuegEM+VLQPICFs=;
+        b=dZZVGUCpEcnIOUKWQoXlZtXSAKLoENDVcj5XRrI7l/X/en+ik8IGDgvjN/zZI27gFP
+         uVQP13sE5rI6hV4puIEiOd5HZ66WqVFt9y6JXKfXJA3Llo+u9832MZmYnxJxE1qDqXLr
+         8vhylwDmvY5VDUPB3ZzaggxYPZ48kbi4N1nrxK59qY/V8ylRwmuxzVvFM1Dz2s9HrGuw
+         j85rs+s1nwzXuOi/+quH56pX0eb6OJZyR+4gBes6xbqrmQvghU8P5ClsydTrwmKQz8li
+         BpCu+oglvSdHYal2SlcuwrvfUkbqVPBVYOJVloVfS/RPNKZ0IFeMw5FBHR8JX7rF5Toj
+         Q+vw==
+X-Forwarded-Encrypted: i=1; AJvYcCVMVZmPe9RNwiivpYA9K3LYG1R2b/OUi8KDQuuUWpBOJmyx4L6ZpMtChpC5TxJ1GCdyf2TMZ0FxVYI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzYVaF7jJJ3RmV/M0z+1gZ9m02BXXdKkFHEazNyDSP6AUTjqvoL
+	3J1dQxCMK+RXaCbVjvnbXrZ88sqyanUKq2NAyqPjoq2Tr1eTZHp8re2ImghCpBKlvaw=
+X-Gm-Gg: ASbGncuBVCAszML05LyF3mzZrfYA0UempwWWjt2BINWUIwKowlaWBglxY99fWQqiQCi
+	K6NFX+xkooNPSOcTCRp1zIGnoUXdZ2fcbYQ4kTBaA8c0l8d9HJdcCciYl2uzvWMLDrPi8GSpooP
+	V79E0Zcw2d2padIG+tQcYgsRhLnTIZqFcL7UYuUb18kP8yGwsczPtvSjBgEVrGfbrOUcHqgPNM9
+	JbR5mCQ6yi75y1TJMhgt2Gl8byZg1rcW91gqL+ZFUkfkWKqN6/vUNrNhg6GGpck+Ujex6gOQ0Mp
+	mFwteiSk4qAQXLQRlqF05EN9k16jhNiJxPozTZLuTww+TQ/Aw2uPN9SNt4nJpZhZV6L29Nbt1Vm
+	KKwKGY0JC26F+R8+0dVJX3L5KAIwhbSwLhRE0FoVNdFCzg1SNoXuY+Gux4OdndNhMr5vY5DHASw
+	aSEiGoytn3sMdioN583g==
+X-Google-Smtp-Source: AGHT+IHE/mJGSWDJNW4qd7NNhHKqmjQxQKVuNZed5r+j7Mr1bTFOPXbGy6rOJOkWuQqomzgkFqhD+g==
+X-Received: by 2002:a05:6512:234b:b0:57b:5f02:e9f1 with SMTP id 2adb3069b0e04-582d073f8c2mr5185983e87.6.1759149743313;
+        Mon, 29 Sep 2025 05:42:23 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-58313dd67c4sm4131982e87.55.2025.09.29.05.42.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 29 Sep 2025 05:42:22 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: Linus <torvalds@linux-foundation.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC/MEMSTICK updates for v6.18
+Date: Mon, 29 Sep 2025 14:42:12 +0200
+Message-ID: <20250929124221.229605-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTI3MDA0MSBTYWx0ZWRfX1+mIeY34RObC
- vPjlHW7wlOkavFjDRLDMtbRc+kpb3EaDtimCc4A9df/lWTxHWyQDENVp+aGtH4krakrvr8R3PA8
- NlSrmz402IjFS3dn+2PEOK1ULOH71pMsv5Fqf7vWphm5HmXiv4pPjSW2OmrsNiA57A1F4xQamCi
- Dd9T+4a+CmatOUl/zwjw+Gy/1RWKwNbZuzHwSRAPpyzr7NHVUonGAvoPW0mr/bzo/HQ/ZadAI3Z
- 2z8HuoSCP+eItllsG1h2DtYNYpMLLB6412h83nqYuxCicdzX71Nt1koBC460mHhSOERNLaT17Hi
- YHmc1zFmVYd2S3WxbNLEaAEKvFNjAe/zZSIL1RUPi+0qRDNj73C/I0SC/6vaSOAOSn264vAHmNQ
- 8/EbQ8iNWafDOMqvDwtq8CO4KtVRKA==
-X-Proofpoint-GUID: duNeesGCNqF8_ukBTRw81qgbQ7uX7l1E
-X-Proofpoint-ORIG-GUID: duNeesGCNqF8_ukBTRw81qgbQ7uX7l1E
-X-Authority-Analysis: v=2.4 cv=Rfydyltv c=1 sm=1 tr=0 ts=68da6f19 cx=c_pps
- a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
- a=yJojWOMRYYMA:10 a=COk6AnOGAAAA:8 a=o3FjeQ6YOhh_Ng1Uz5QA:9
- a=TjNXssC_j7lpFel5tvFf:22 a=cPQSjfK2_nFv0Q5t_7PE:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-09-29_04,2025-09-29_02,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 priorityscore=1501 bulkscore=0 adultscore=0 lowpriorityscore=0
- impostorscore=0 clxscore=1011 malwarescore=0 spamscore=0 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2509150000 definitions=main-2509270041
 
-From: Sachin Gupta <quic_sachgupt@quicinc.com>
+Hi Linus,
 
-With the current DLL sequence stability issues for data
-transfer seen in HS400 and HS200 modes.
+Here's the pull-request with the updates for MMC and MEMSTICK for v6.18.
+Details about the highlights are as usual found in the signed tag.
 
-"mmc0: cqhci: error IRQ status: 0x00000000 cmd error -84
-data error 0"
+Please pull this in!
 
-Rectify the DLL programming sequence as per latest hardware
-programming guide
+Kind regards
+Ulf Hansson
 
-Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
-Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
----
- drivers/mmc/host/sdhci-msm.c | 271 ++++++++++++++++++++++++++++++++---
- 1 file changed, 252 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index d07f0105b733..0f60a3655ef1 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -28,6 +28,7 @@
- #define CORE_VERSION_MAJOR_SHIFT	28
- #define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
- #define CORE_VERSION_MINOR_MASK		0xff
-+#define SDHCI_MSM_MIN_V_7FF		0x6e
- 
- #define CORE_MCI_GENERICS		0x70
- #define SWITCHABLE_SIGNALING_VOLTAGE	BIT(29)
-@@ -118,7 +119,8 @@
- #define CORE_PWRSAVE_DLL	BIT(3)
- 
- #define DDR_CONFIG_POR_VAL	0x80040873
--
-+#define DLL_CONFIG_3_POR_VAL	0x10
-+#define TCXO_FREQ               19200000
- 
- #define INVALID_TUNING_PHASE	-1
- #define SDHCI_MSM_MIN_CLOCK	400000
-@@ -318,6 +320,16 @@ struct sdhci_msm_host {
- 	bool artanis_dll;
- };
- 
-+enum dll_init_context {
-+	DLL_INIT_NORMAL,
-+	DLL_INIT_FROM_CX_COLLAPSE_EXIT,
-+};
-+
-+enum mode {
-+	HS400, // equivalent to SDR104 mode for DLL.
-+	HS200, // equivalent to SDR50 mode for DLL.
-+};
-+
- static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -802,6 +814,208 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	return 0;
- }
- 
-+static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
-+{
-+	return SDHCI_MSM_MIN_CLOCK;
-+}
-+
-+static unsigned int sdhci_msm_get_clk_rate(struct sdhci_host *host, u32 req_clk)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	struct clk *core_clk = msm_host->bulk_clks[0].clk;
-+	struct mmc_ios ios = host->mmc->ios;
-+	unsigned int sup_clk;
-+
-+	if (req_clk < sdhci_msm_get_min_clock(host))
-+		return sdhci_msm_get_min_clock(host);
-+
-+	sup_clk = clk_get_rate(core_clk);
-+
-+	if (ios.timing == MMC_TIMING_MMC_HS400 ||
-+	    host->flags & SDHCI_HS400_TUNING)
-+		sup_clk = sup_clk / 2;
-+
-+	return sup_clk;
-+}
-+
-+/* Initialize the DLL (Programmable Delay Line) */
-+static int sdhci_msm_configure_dll(struct sdhci_host *host, enum dll_init_context
-+				 init_context, enum mode index)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-+	struct mmc_host *mmc = host->mmc;
-+	u32 ddr_cfg_offset, core_vendor_spec, config;
-+	void __iomem *ioaddr = host->ioaddr;
-+	unsigned long flags, dll_clock;
-+	int rc = 0, wait_cnt = 50;
-+
-+	dll_clock = sdhci_msm_get_clk_rate(host, host->clock);
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	core_vendor_spec = readl_relaxed(ioaddr + msm_offset->core_vendor_spec);
-+
-+	/*
-+	 * Always disable PWRSAVE during the DLL power
-+	 * up regardless of its current setting.
-+	 */
-+	core_vendor_spec &= ~CORE_CLK_PWRSAVE;
-+	writel_relaxed(core_vendor_spec, ioaddr + msm_offset->core_vendor_spec);
-+
-+	if (msm_host->use_14lpp_dll_reset) {
-+		/* Disable CK_OUT */
-+		config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-+		config &= ~CORE_CK_OUT_EN;
-+		writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+		/* Disable the DLL clock */
-+		config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-+		config |= CORE_DLL_CLOCK_DISABLE;
-+		writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-+	}
-+
-+	/*
-+	 * Write 1 to DLL_RST bit of DLL_CONFIG register
-+	 * and Write 1 to DLL_PDN bit of DLL_CONFIG register.
-+	 */
-+	config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-+	config |= (CORE_DLL_RST | CORE_DLL_PDN);
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/*
-+	 * Configure DLL_CONFIG_3 and USER_CTRL
-+	 * (Only applicable for 7FF projects).
-+	 */
-+	if (msm_host->core_minor >= SDHCI_MSM_MIN_V_7FF) {
-+		writel_relaxed(msm_host->dll.dll_config_3[index],
-+			       ioaddr + msm_offset->core_dll_config_3);
-+		writel_relaxed(msm_host->dll.dll_usr_ctl[index],
-+			       ioaddr + msm_offset->core_dll_usr_ctl);
-+	}
-+
-+	/*
-+	 * Set DDR_CONFIG since step 7 is setting TEST_CTRL that can be skipped.
-+	 */
-+	ddr_cfg_offset = msm_host->updated_ddr_cfg ? msm_offset->core_ddr_config
-+					: msm_offset->core_ddr_config_old;
-+
-+	config = msm_host->dll.ddr_config[index];
-+	writel_relaxed(config, ioaddr + ddr_cfg_offset);
-+
-+	/* Set DLL_CONFIG_2 */
-+	if (msm_host->use_14lpp_dll_reset) {
-+		u32 mclk_freq;
-+		int cycle_cnt;
-+
-+		/*
-+		 * Only configure the mclk_freq in normal DLL init
-+		 * context. If the DLL init is coming from
-+		 * CX Collapse Exit context, the host->clock may be zero.
-+		 * The DLL_CONFIG_2 register has already been restored to
-+		 * proper value prior to getting here.
-+		 */
-+		if (init_context == DLL_INIT_NORMAL) {
-+			cycle_cnt = readl_relaxed(ioaddr +
-+					msm_offset->core_dll_config_2)
-+					& CORE_FLL_CYCLE_CNT ? 8 : 4;
-+
-+			mclk_freq = DIV_ROUND_CLOSEST_ULL(dll_clock * cycle_cnt, TCXO_FREQ);
-+
-+			if (dll_clock < 100000000) {
-+				pr_err("%s: %s: Non standard clk freq =%u\n",
-+				       mmc_hostname(mmc), __func__, dll_clock);
-+				rc = -EINVAL;
-+				goto out;
-+			}
-+
-+			config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-+			config = (config & ~GENMASK(17, 10)) |
-+					FIELD_PREP(GENMASK(17, 10), mclk_freq);
-+			writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-+		}
-+		/* wait for 5us before enabling DLL clock */
-+		udelay(5);
-+	}
-+
-+	config = msm_host->dll.dll_config[index];
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/* Wait for 52us */
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	usleep_range(60, 70);
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	/*
-+	 * Write 0 to DLL_RST bit of DLL_CONFIG register
-+	 * and Write 0 to DLL_PDN bit of DLL_CONFIG register.
-+	 */
-+	config &= ~CORE_DLL_RST;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	config &= ~CORE_DLL_PDN;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
-+	config |= CORE_DLL_RST;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
-+	config &= ~CORE_DLL_RST;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/* Set CORE_DLL_CLOCK_DISABLE to 0 */
-+	if (msm_host->use_14lpp_dll_reset) {
-+		config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-+		config &= ~CORE_DLL_CLOCK_DISABLE;
-+		writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-+	}
-+
-+	/* Set DLL_EN bit to 1. */
-+	config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-+	config |= CORE_DLL_EN;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/*
-+	 * Wait for 8000 input clock. Here we calculate the
-+	 * delay from fixed clock freq 192MHz, which turns out 42us.
-+	 */
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	usleep_range(50, 60);
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	/* Set CK_OUT_EN bit to 1. */
-+	config |= CORE_CK_OUT_EN;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/*
-+	 * Wait until DLL_LOCK bit of DLL_STATUS register
-+	 * becomes '1'.
-+	 */
-+	while (!(readl_relaxed(ioaddr + msm_offset->core_dll_status) &
-+		 CORE_DLL_LOCK)) {
-+		/* max. wait for 50us sec for LOCK bit to be set */
-+		if (--wait_cnt == 0) {
-+			dev_err(mmc_dev(mmc), "%s: DLL failed to LOCK\n",
-+				mmc_hostname(mmc));
-+			rc = -ETIMEDOUT;
-+			goto out;
-+		}
-+		/* wait for 1us before polling again */
-+		udelay(1);
-+	}
-+
-+out:
-+	if (core_vendor_spec & CORE_CLK_PWRSAVE) {
-+		/* Reenable PWRSAVE as needed */
-+		config = readl_relaxed(ioaddr + msm_offset->core_vendor_spec);
-+		config |= CORE_CLK_PWRSAVE;
-+		writel_relaxed(config, ioaddr + msm_offset->core_vendor_spec);
-+	}
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	return rc;
-+}
-+
- static void msm_hc_select_default(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -924,14 +1138,31 @@ static void sdhci_msm_hc_select_mode(struct sdhci_host *host)
- 		msm_hc_select_default(host);
- }
- 
-+static int sdhci_msm_init_dll(struct sdhci_host *host, enum dll_init_context init_context)
-+{
-+	if (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104 ||
-+	    host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
-+		return sdhci_msm_configure_dll(host, init_context, HS400);
-+
-+	return sdhci_msm_configure_dll(host, init_context, HS200);
-+}
-+
-+static int sdhci_msm_dll_config(struct sdhci_host *host, enum dll_init_context init_context)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	return msm_host->artanis_dll ? sdhci_msm_init_dll(host, init_context) :
-+		msm_init_cm_dll(host);
-+}
-+
- static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
- 	u32 config, calib_done;
- 	int ret;
--	const struct sdhci_msm_offset *msm_offset =
--					msm_host->offset;
- 
- 	pr_debug("%s: %s: Enter\n", mmc_hostname(host->mmc), __func__);
- 
-@@ -939,7 +1170,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
- 	 * Retuning in HS400 (DDR mode) will fail, just reset the
- 	 * tuning block and restore the saved tuning phase.
- 	 */
--	ret = msm_init_cm_dll(host);
-+	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
- 	if (ret)
- 		goto out;
- 
-@@ -1027,7 +1258,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
- 	return ret;
- }
- 
--static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
-+static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host, enum mode index)
- {
- 	struct mmc_host *mmc = host->mmc;
- 	u32 dll_status, config, ddr_cfg_offset;
-@@ -1050,7 +1281,11 @@ static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
- 		ddr_cfg_offset = msm_offset->core_ddr_config;
- 	else
- 		ddr_cfg_offset = msm_offset->core_ddr_config_old;
--	writel_relaxed(msm_host->ddr_config, host->ioaddr + ddr_cfg_offset);
-+
-+	if (msm_host->artanis_dll)
-+		writel_relaxed(msm_host->dll.ddr_config[index], host->ioaddr + ddr_cfg_offset);
-+	else
-+		writel_relaxed(msm_host->ddr_config, host->ioaddr + ddr_cfg_offset);
- 
- 	if (mmc->ios.enhanced_strobe) {
- 		config = readl_relaxed(host->ioaddr +
-@@ -1107,11 +1342,10 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
- 	struct mmc_host *mmc = host->mmc;
--	int ret;
- 	u32 config;
--	const struct sdhci_msm_offset *msm_offset =
--					msm_host->offset;
-+	int ret;
- 
- 	pr_debug("%s: %s: Enter\n", mmc_hostname(host->mmc), __func__);
- 
-@@ -1119,7 +1353,8 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
- 	 * Retuning in HS400 (DDR mode) will fail, just reset the
- 	 * tuning block and restore the saved tuning phase.
- 	 */
--	ret = msm_init_cm_dll(host);
-+	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-+
- 	if (ret)
- 		goto out;
- 
-@@ -1139,7 +1374,7 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
- 	if (msm_host->use_cdclp533)
- 		ret = sdhci_msm_cdclp533_calibration(host);
- 	else
--		ret = sdhci_msm_cm_dll_sdc4_calibration(host);
-+		ret = sdhci_msm_cm_dll_sdc4_calibration(host, HS400);
- out:
- 	pr_debug("%s: %s: Exit, ret %d\n", mmc_hostname(host->mmc),
- 		 __func__, ret);
-@@ -1178,7 +1413,8 @@ static int sdhci_msm_restore_sdr_dll_config(struct sdhci_host *host)
- 		return 0;
- 
- 	/* Reset the tuning block */
--	ret = msm_init_cm_dll(host);
-+	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-+
- 	if (ret)
- 		return ret;
- 
-@@ -1242,12 +1478,11 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (host->flags & SDHCI_HS400_TUNING) {
- 		sdhci_msm_hc_select_mode(host);
- 		msm_set_clock_rate_for_bus_mode(host, ios.clock);
--		host->flags &= ~SDHCI_HS400_TUNING;
- 	}
- 
- retry:
- 	/* First of all reset the tuning block */
--	rc = msm_init_cm_dll(host);
-+	rc = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
- 	if (rc)
- 		return rc;
- 
-@@ -1310,6 +1545,9 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		rc = -EIO;
- 	}
- 
-+	if (host->flags & SDHCI_HS400_TUNING)
-+		host->flags &= ~SDHCI_HS400_TUNING;
-+
- 	if (!rc)
- 		msm_host->tuning_done = true;
- 	return rc;
-@@ -1830,11 +2068,6 @@ static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
- 	return clk_round_rate(core_clk, ULONG_MAX);
- }
- 
--static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
--{
--	return SDHCI_MSM_MIN_CLOCK;
--}
--
- /*
-  * __sdhci_msm_set_clock - sdhci_msm clock control.
-  *
--- 
-2.34.1
+The following changes since commit 77a436c93d10d68201bfd4941d1ca3230dfd1f40:
 
+  mmc: sdhci-pci-gli: GL9767: Fix initializing the UHS-II interface during a power-on (2025-09-12 15:00:52 +0200)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.18
+
+for you to fetch changes up to 7aada81cd75ad844c84fb1dcdce2d67ec41763f8:
+
+  dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatible for exynos8890 (2025-09-23 16:45:04 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Improve RPMB frame handling code
+ - Add support for a new max-sd-hs-hz DT property to limit frequency
+ - Add support to manage regulator-under-voltage events
+ - Support regulator-under-voltage for eMMC to mitigate data corruptions
+ - Add mmc_read_tuning() to allow a host to validate its tuning sequence
+ - Add some helpers to align checks for CMD23 support
+ - Read the CCCR register for SDIO over SPI rather than the unsupported CMD7
+
+MMC host:
+ - Add COMPILE_TEST option for a couple of drivers
+ - Convert drivers to use the modern PM macros
+ - dw_mmc-exynos: Enable support for the Exynos8890 variant
+ - mmc_spi: Don't use crc ack during multiple block read
+ - renesas_sdhi: Enable 64-bit polling mode for R-Car gen3 and RZ/G2L SoCs
+ - rtsx_usb: Add support for over-current-protection
+ - sdhci-cadence: Add support for multi-block read gap tuning
+ - sdhci-msm: Add support for tuning for SDR50 mode for SD cards
+ - sdhci-msm: Enable support for the Lemans variant
+ - sdhci-pci: Disable SD card clock before update for a few Intel platforms
+ - sdhci-pxav3: Add support for UHS pinctrl settings
+ - tmio: Add 64-bit read/write support in polling mode
+
+MEMSTICK:
+ - Convert to use timeouts to prevent indefinite waiting
+ - rtsx_usb: Add support for over-current-protection
+
+----------------------------------------------------------------
+Alexander Stein (1):
+      dt-bindings: mmc: fsl,esdhc: Add explicit reference to mmc-controller-common
+
+Bean Huo (2):
+      mmc: core: Fix variable shadowing in mmc_route_rpmb_frames()
+      mmc: core: Improve RPMB frame handling code
+
+Benoît Monin (6):
+      mmc: core: add mmc_card_can_cmd23
+      mmc: card: add mmc_card_blk_no_cmd23
+      mmc: mmc_test: use mmc_card cmd23 helpers
+      mmc: block: use mmc_card cmd23 helpers
+      mmc: core: add mmc_read_tuning
+      mmc: sdhci-cadence: implement multi-block read gap tuning
+
+Biju Das (4):
+      mmc: host: renesas_sdhi: Fix the actual clock
+      mmc: tmio: Add 64-bit read/write support for SD_BUF0 in polling mode
+      mmc: renesas_sdhi: Enable 64-bit polling mode
+      mmc: renesas_sdhi: Replace magic number '0xff' in renesas_sdhi_set_clock()
+
+Claudiu Beznea (1):
+      mmc: sdio: Drop dev_pm_domain_detach() call
+
+Colin Ian King (2):
+      mmc: Kconfig: Fix spelling mistake "referrered" -> "referred"
+      mmc: davinci: Remove space before newline
+
+Dan Carpenter (2):
+      mmc: mmc_spi: remove unnecessary check in mmc_spi_setup_data_message()
+      mmc: rtsx_usb_sdmmc: Fix uninitialized variable issue
+
+Duje Mihanović (3):
+      dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
+      mmc: sdhci-pxav3: add state_uhs pinctrl setting
+      dt-bindings: mmc: sdhci-pxa: Add minItems to pinctrl-names
+
+Erick Shepherd (1):
+      mmc: sdhci: Disable SD card clock before changing parameters
+
+Geert Uytterhoeven (1):
+      mmc: sh_mmcif: Remove dummy PM resume callback
+
+Ivaylo Ivanov (1):
+      dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatible for exynos8890
+
+Jiayi Li (1):
+      memstick: Add timeout to prevent indefinite waiting
+
+Jisheng Zhang (38):
+      mmc: sdhci: add some simple inline functions for !CONFIG_PM
+      mmc: sdhci-of-dwcmshc: use modern PM macros
+      mmc: sdhci-xenon: use modern PM macros
+      mmc: sdhci-pxav3: use modern PM macros
+      mmc: sunxi: use modern PM macros
+      mmc: alcor: use modern PM macros
+      mmc: atmel: use modern PM macros
+      mmc: au1xmmc: use modern PM macros
+      mmc: cb710-mmc: use modern PM macros
+      mmc: davinci_mmc: use modern PM macros
+      mmc: mmci: use modern PM macros
+      mmc: mxs-mmc: use modern PM macros
+      mmc: omap_hsmmc: use modern PM macros
+      mmc: rtsx_usb_sdmmc: use modern PM macros
+      mmc: sdhci-acpi: use modern PM macros
+      mmc: sdhci_am654: use modern PM macros
+      mmc: sdhci-brcmstb: use modern PM macros
+      mmc: sdhci-esdhc-imx: use modern PM macros
+      mmc: sdhci-of-arasan: use modern PM macros
+      mmc: sdhci-of-at91: use modern PM macros
+      mmc: sdhci-of-esdhc: use modern PM macros
+      mmc: sdhci-omap: use modern PM macros
+      mmc: sdhci-cadence: use modern PM macros
+      mmc: sdhci-s3c: use modern PM macros
+      mmc: sdhci-spear: use modern PM macros
+      mmc: sdhci-sprd: use modern PM macros
+      mmc: sdhci-st: use modern PM macros
+      mmc: sdhci-tegra: use modern PM macros
+      mmc: sh_mmicf: use modern PM macros
+      mmc: toshsd: use modern PM macros
+      mmc: wmt-sdmmc: use modern PM macros
+      mmc: mtk-sd: use modern PM macros
+      mmc: sdhci-msm: use modern PM macros
+      mmc: via-sdmmc: use modern PM macros
+      mmc: dw_mmc: exynos: use modern PM macros
+      mmc: dw_mmc-k3: use modern PM macros
+      mmc: dw_mmc-pci: use modern PM macros
+      mmc: dw_mmc-rockchip: use modern PM macros
+
+Mikko Rapeli (2):
+      mmc: add COMPILE_TEST to multiple drivers
+      mmc: select REGMAP_MMIO with MMC_LOONGSON2
+
+Monish Chunara (1):
+      dt-bindings: mmc: sdhci-msm: Document the Lemans compatible
+
+Nathan Chancellor (1):
+      mmc: sdhci-cadence: Fix -Wuninitialized in sdhci_cdns_tune_blkgap()
+
+Oleksij Rempel (2):
+      mmc: core: Add infrastructure for undervoltage handling
+      mmc: core: add undervoltage handler for MMC/eMMC devices
+
+Rex Chen (2):
+      mmc: core: SPI mode remove cmd7
+      mmc: mmc_spi: multiple block read remove read crc ack
+
+Ricky Wu (1):
+      misc: rtsx: usb card reader: add OCP support
+
+Sarthak Garg (3):
+      mmc: sdhci-msm: Enable tuning for SDR50 mode for SD card
+      dt-bindings: mmc: controller: Add max-sd-hs-hz property
+      mmc: core: Parse and use the new max-sd-hs-hz DT property
+
+Ulf Hansson (3):
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+
+Wolfram Sang (1):
+      mmc: remove unneeded 'fast_io' parameter in regmap_config
+
+Xichao Zhao (1):
+      mmc: meson-mx-sdhc: use PTR_ERR_OR_ZERO() to simplify code
+
+ .../devicetree/bindings/mmc/fsl,esdhc.yaml         |  1 +
+ .../bindings/mmc/mmc-controller-common.yaml        |  8 +++
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml       |  1 +
+ .../devicetree/bindings/mmc/sdhci-msm.yaml         |  1 +
+ .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 31 ++++++++-
+ drivers/memstick/core/memstick.c                   |  8 ++-
+ drivers/memstick/host/rtsx_usb_ms.c                |  5 +-
+ drivers/misc/cardreader/rtsx_usb.c                 |  7 ++
+ drivers/mmc/core/block.c                           | 46 ++++++-------
+ drivers/mmc/core/bus.c                             | 12 ++++
+ drivers/mmc/core/card.h                            |  9 ++-
+ drivers/mmc/core/core.c                            | 32 +++++++++
+ drivers/mmc/core/core.h                            |  6 ++
+ drivers/mmc/core/host.c                            |  4 ++
+ drivers/mmc/core/mmc.c                             | 70 +++++++++++++++++++-
+ drivers/mmc/core/mmc_ops.c                         | 72 ++++++++++++++++++++
+ drivers/mmc/core/mmc_test.c                        | 10 +--
+ drivers/mmc/core/regulator.c                       | 77 ++++++++++++++++++++++
+ drivers/mmc/core/sd.c                              |  2 +-
+ drivers/mmc/core/sdio.c                            |  6 +-
+ drivers/mmc/core/sdio_bus.c                        |  3 -
+ drivers/mmc/host/Kconfig                           | 14 ++--
+ drivers/mmc/host/alcor.c                           |  8 +--
+ drivers/mmc/host/atmel-mci.c                       |  9 +--
+ drivers/mmc/host/au1xmmc.c                         | 18 ++---
+ drivers/mmc/host/cb710-mmc.c                       | 19 +++---
+ drivers/mmc/host/davinci_mmc.c                     | 16 ++---
+ drivers/mmc/host/dw_mmc-exynos.c                   | 13 +---
+ drivers/mmc/host/dw_mmc-k3.c                       |  9 +--
+ drivers/mmc/host/dw_mmc-pci.c                      |  9 +--
+ drivers/mmc/host/dw_mmc-rockchip.c                 |  9 +--
+ drivers/mmc/host/dw_mmc.h                          |  3 +
+ drivers/mmc/host/meson-mx-sdhc-clkc.c              |  4 +-
+ drivers/mmc/host/mmc_spi.c                         |  4 +-
+ drivers/mmc/host/mmci.c                            |  9 +--
+ drivers/mmc/host/mtk-sd.c                          | 14 ++--
+ drivers/mmc/host/mxs-mmc.c                         |  6 +-
+ drivers/mmc/host/omap_hsmmc.c                      | 13 ++--
+ drivers/mmc/host/renesas_sdhi_core.c               |  6 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |  3 +-
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  | 40 ++++++++---
+ drivers/mmc/host/sdhci-acpi.c                      | 18 ++---
+ drivers/mmc/host/sdhci-brcmstb.c                   |  8 +--
+ drivers/mmc/host/sdhci-cadence.c                   | 70 ++++++++++++++++++--
+ drivers/mmc/host/sdhci-esdhc-imx.c                 | 13 +---
+ drivers/mmc/host/sdhci-msm.c                       | 36 ++++++----
+ drivers/mmc/host/sdhci-of-arasan.c                 |  8 +--
+ drivers/mmc/host/sdhci-of-at91.c                   | 12 +---
+ drivers/mmc/host/sdhci-of-dwcmshc.c                | 13 +---
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  8 +--
+ drivers/mmc/host/sdhci-omap.c                      | 18 ++---
+ drivers/mmc/host/sdhci-pci-core.c                  | 15 ++++-
+ drivers/mmc/host/sdhci-pxav3.c                     | 52 ++++++++++++---
+ drivers/mmc/host/sdhci-s3c.c                       | 11 +---
+ drivers/mmc/host/sdhci-spear.c                     |  6 +-
+ drivers/mmc/host/sdhci-sprd.c                      | 10 +--
+ drivers/mmc/host/sdhci-st.c                        |  6 +-
+ drivers/mmc/host/sdhci-tegra.c                     | 13 ++--
+ drivers/mmc/host/sdhci-xenon.c                     | 13 +---
+ drivers/mmc/host/sdhci.h                           |  7 ++
+ drivers/mmc/host/sdhci_am654.c                     | 11 +---
+ drivers/mmc/host/sh_mmcif.c                        | 13 +---
+ drivers/mmc/host/sunxi-mmc.c                       | 11 +---
+ drivers/mmc/host/tmio_mmc.h                        | 15 +++++
+ drivers/mmc/host/tmio_mmc_core.c                   | 33 ++++++++++
+ drivers/mmc/host/toshsd.c                          |  8 +--
+ drivers/mmc/host/via-sdmmc.c                       | 10 +--
+ drivers/mmc/host/wmt-sdmmc.c                       | 16 +----
+ include/linux/mmc/host.h                           | 13 ++++
+ include/linux/platform_data/tmio.h                 |  3 +
+ include/linux/rtsx_usb.h                           | 11 ++++
+ 71 files changed, 754 insertions(+), 364 deletions(-)
