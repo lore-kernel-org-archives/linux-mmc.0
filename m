@@ -1,178 +1,147 @@
-Received: from fllvem-ot03.ext.ti.com (fllvem-ot03.ext.ti.com [198.47.19.245])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 665B534BA50;
-	Mon, 29 Sep 2025 04:40:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4659980604;
+	Mon, 29 Sep 2025 11:35:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759120816; cv=none; b=o2SfXX1MeD7yFV/56v6+W6SqSXL3oKEOo/wmRUJoFgug43P9q+t+Jei8T7Om+ChNTLYJH/17V7Z+btxQAV7HoZrJm/Z6NminabS4fc5PJO3UUpBNEqLBo04sot6v8lcUpQ3QevSfgD9NqGejkl03gbvatHXXdllagClN6fLIUPg=
+	t=1759145754; cv=none; b=uUs4z3IPb0hvCtrrxcrKf6sDxDjtFAHRldDwqSAFRQl+bZKf3U1lQvJbQQyrvZzaNVij4tolxBTbVFK2h8tR1MD5kJzrf2NsPzwblhyftBkjddUdGSe+ZJHNgyXyUKr8aYVNv0lSTKPqByepIPQ/kIzSLcsVX8O0UdPHh/AlTpY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759120816; c=relaxed/simple;
-	bh=uOlE6JF3Wlo/vFJGbhrugJ3aZGyj9ga2nv00JK3gbws=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=ANmcROk0+b7fim+97ljd8S0pHxdf9Z97IiEQzcwjaqEQnCAElXxywUisrXrrRJmXLABOm0wJvCZO7DnUCBeaME4HYr2lAffdQwULtVm3Gbbnm/7ZRYwwhrJ9CfNlpnKKsF7chFocUcU7M4dWRUZ3s1MRzkmn60+nCNW595OyUPQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=S9VRc4MP; arc=none smtp.client-ip=198.47.19.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1759145754; c=relaxed/simple;
+	bh=q9Mb7pcNcXXEalYS3yT1Q4mQpZ2Lm19scwoND5Vp+BA=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=l1q1hRJ8Zs92Cs7HasPqtUmhnWVpUJyVfzU8jTQHA9eKu6il7+xwUuFN+u7T5jGA32tNJLRi3GI9INOAUUmaFwnaVrNuICNJYmqtrmrBHOCJKlBcYfvs6P+TShWlwhlomWi8XQqvBTWGDJ1NRUygOUrrgdVSN46qgGosOhNB8vg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=pIk/U9Dt; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="S9VRc4MP"
-Received: from lelvem-sh01.itg.ti.com ([10.180.77.71])
-	by fllvem-ot03.ext.ti.com (8.15.2/8.15.2) with ESMTP id 58T4e58t2105225;
-	Sun, 28 Sep 2025 23:40:05 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1759120805;
-	bh=7PnRPMQlYyEfPuWVss3mAZp/DtxuUn4FykB5vQK+A5k=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=S9VRc4MPQTUnEHvMtmoyr8I2/wq1U14P59ZGfmvIeuEMGmX27Ho5pqFAx+lR1h+1/
-	 CkPRNjY8I/GTa9mOqXDePumg6vQWX9GJzcyRk74/PhCB2lB+KmdQq7xGZtEXT/yAwT
-	 8/bCNCun5LeKXJwLreL3ftXa8nacaISdr6f1DGSE=
-Received: from DFLE100.ent.ti.com (dfle100.ent.ti.com [10.64.6.21])
-	by lelvem-sh01.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 58T4e5he1078855
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
-	Sun, 28 Sep 2025 23:40:05 -0500
-Received: from DFLE207.ent.ti.com (10.64.6.65) by DFLE100.ent.ti.com
- (10.64.6.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Sun, 28
- Sep 2025 23:40:04 -0500
-Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DFLE207.ent.ti.com
- (10.64.6.65) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
- Transport; Sun, 28 Sep 2025 23:40:04 -0500
-Received: from [172.24.231.164] (chintan-thinkstation-p360-tower.dhcp.ti.com [172.24.231.164])
-	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 58T4e0mb612567;
-	Sun, 28 Sep 2025 23:40:00 -0500
-Message-ID: <0784441c-9859-4418-a4a7-85ffe3ecf860@ti.com>
-Date: Mon, 29 Sep 2025 10:09:59 +0530
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="pIk/U9Dt"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 58TAKTDC023427;
+	Mon, 29 Sep 2025 11:35:49 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=ekzUPFNQTmH1ZQ8P7rtQUH5e2D89ywMvxSC
+	/bs775+s=; b=pIk/U9Dt2wnBPNV7+dZjJvr1m1HUXXFsNXAApsdWnpWSSlmFo0/
+	Bet2upts/BlPnEzj9Ovj9hQOaCulPola2YPcuD28kirjGutf1TBzQW89A8HxN9/U
+	8Cx6t3O0K8TF8dHC1BTpp7hi0wCWKfMnqkt8sMws2xJAJ5CTR/A3q03VQZrZRO4m
+	SowpOVwt5xKSLhD1bhjzTR053bxX9LFJiVDSDgY3cdD6FRzW20rO4s5VEhPytwzi
+	UM03H+CScLmISjE18syMeuKzk/AiSL35uspMSoDkmCfumlA3QDe4vpOvqTISdDpj
+	A2kiZpYJTbbPJW0zLAps/tKvMNy3se5cAAg==
+Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49e8pdcs47-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 29 Sep 2025 11:35:49 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 58TBZjuf008883;
+	Mon, 29 Sep 2025 11:35:45 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 49e90kvy5t-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 29 Sep 2025 11:35:45 +0000
+Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 58TBZjnC008878;
+	Mon, 29 Sep 2025 11:35:45 GMT
+Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-rampraka-hyd.qualcomm.com [10.147.247.88])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 58TBZjRP008874
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 29 Sep 2025 11:35:45 +0000
+Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2305851)
+	id 2BD1D5C6; Mon, 29 Sep 2025 17:05:44 +0530 (+0530)
+From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        dmitry.baryshkov@oss.qualcomm.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
+        kernel@oss.qualcomm.com, Ram Prakash Gupta <rampraka@qti.qualcomm.com>
+Subject: [PATCH v4 0/4] mmc: sdhci-msm: Rectify DLL programming sequence for SDCC 
+Date: Mon, 29 Sep 2025 17:05:11 +0530
+Message-Id: <20250929113515.26752-1-quic_rampraka@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/3] dt-binding: Add register-settings binding
-To: Rajesh Gumasta <rgumasta@nvidia.com>, <krzk+dt@kernel.org>,
-        <robh@kernel.org>, <conor+dt@kernel.org>, <andi.shyti@kernel.org>,
-        <ulf.hansson@linaro.org>, <thierry.reding@gmail.com>,
-        <jonathanh@nvidia.com>, <kyarlagadda@nvidia.com>
-CC: <devicetree@vger.kernel.org>, <linux-tegra@vger.kernel.org>,
-        <linux-i2c@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <andersson@kernel.org>, <sjg@chromium.org>, <nm@ti.com>
-References: <20250725052225.23510-1-rgumasta@nvidia.com>
- <20250725052225.23510-2-rgumasta@nvidia.com>
-Content-Language: en-US
-From: Chintan Vankar <c-vankar@ti.com>
-In-Reply-To: <20250725052225.23510-2-rgumasta@nvidia.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 2AawOdqoEEpN915Tdon9zQxKi9feyi85
+X-Authority-Analysis: v=2.4 cv=MYZhep/f c=1 sm=1 tr=0 ts=68da6f15 cx=c_pps
+ a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
+ a=yJojWOMRYYMA:10 a=EUspDBNiAAAA:8 a=LKI8_1zPV-ZnuddBkK4A:9
+ a=cPQSjfK2_nFv0Q5t_7PE:22
+X-Proofpoint-ORIG-GUID: 2AawOdqoEEpN915Tdon9zQxKi9feyi85
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwOTI3MDAzNiBTYWx0ZWRfXz0CDStnaE+ID
+ PRoQx1yXtz2VyBXn+Vi9GyBEiaPDXFAtPJpKSqTSPHmM9SGTOOaxJj7+3ehRXLiOOD8m3QYpPo2
+ msE6jqQrlZOdTIcAXjKdkbAhN68SwXKi5qOdopoz/WiSeXRYl+beA8PMBKH/xwtBwdDEMajUcSv
+ 4dJQGXrnqsH8NInhAxx3u0lZbLwefSFGT9lP4j4MYcxIVz6+sfaus8QN/RKQmEJWLQYvEOstR3j
+ rssxalkfpkJMoy726Ufm2A1m4DaAXGI4WsJOJt9e89HQKMDEkMUkX5pzXkIVUr9om/jnxRC/ysB
+ aeEF6guHkZLbBm/NPv3NlwBq3hIyRBomHFiGfn2Xgy6n0qhaYb0arirWwQM/i6NuQnHyccX1KVT
+ i11vf90ty7SNcQyADVgWh1HIVj51Sw==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-09-29_04,2025-09-29_02,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 clxscore=1011 bulkscore=0 lowpriorityscore=0
+ priorityscore=1501 phishscore=0 malwarescore=0 spamscore=0 impostorscore=0
+ adultscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2509150000
+ definitions=main-2509270036
 
-Hello Rajesh,
+From: Ram Prakash Gupta <rampraka@qti.qualcomm.com>
 
-On 25/07/25 10:52, Rajesh Gumasta wrote:
-> Add a new device-tree binding for a 'reg-settings' node that can be
-> added to any device. This 'reg-settings' is used to populate register
-> settings that need to be programmed for a given operating mode of the
-> device. An example usage of the 'reg-settings' node is shown below for
-> the NVIDIA Tegra MMC controller which needs to program a specific
-> 'num-tuning-iterations' value in a register field for each operating
-> mode:
-> 
->    mmc@700b0000 {
-> 
->      reg-settings {
-> 
->        default-settings {
->          /* Default register setting */
->          nvidia,num-tuning-iterations = <0>;
->        };
-> 
->        sdr50 {
->          /* SDR50 register setting */
->          nvidia,num-tuning-iterations = <4>;
->        };
-> 
->        sdr104 {
->          /* SDR104 register setting */
->          nvidia,num-tuning-iterations = <2>;
->        };
-> 
->        hs200 {
->          /* HS200 register setting */
->          nvidia,num-tuning-iterations = <2>;
->        };
->      };
->    };
-> 
-> The 'reg-settings' child nodes are defined according to the operating
-> modes supported for a given device. Properties within each operating
-> mode are then defined by the bindings for the devices that require them.
-> 
-> Signed-off-by: Rajesh Gumasta <rgumasta@nvidia.com>
-> ---
->   .../bindings/regset/register-settings.yaml    | 31 +++++++++++++++++++
->   1 file changed, 31 insertions(+)
->   create mode 100644 Documentation/devicetree/bindings/regset/register-settings.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/regset/register-settings.yaml b/Documentation/devicetree/bindings/regset/register-settings.yaml
-> new file mode 100644
-> index 000000000000..4366cdd72813
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/regset/register-settings.yaml
-> @@ -0,0 +1,31 @@
-> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/regset/register-settings.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Register Settings
-> +
-> +maintainers:
-> +  - Thierry Reding <thierry.reding@gmail.com>
-> +  - Krishna Yarlagadda <kyarlagadda@nvidia.com>
-> +  - Rajesh Gumasta <rgumasta@nvidia.com>
-> +  - Jon Hunter <jonathanh@nvidia.com>
-> +
-> +description: |
-> +  Register Settings provides a generic way to specify register configurations
-> +  for any hardware controllers. Settings are specified under a "reg-settings"
-> +  sub-node under the controller device tree node. It allows defining both
-> +  default and operating mode specific register settings in the device tree.
-> +
-> +properties:
-> +  reg-settings:
-> +    type: object
-> +    description: |
-> +      Container node for register settings configurations. Each child node
-> +      represents a specific configuration mode or operating condition.
-> +
-> +    additionalProperties:
-> +      type: object
-> +
-> +additionalProperties: true
+With the current DLL sequence stability issues are seen in
+HS400 and HS200 mode for data transfers.
 
-Following your series, I would like to bring to your attention that
-Texas Instruments SoCs also have a component which requires similar kind
-of configuration, named Timesync Router(TSR). It enables the
-multiplexing of M inputs to N outputs, where inputs can be selectively
-driven based on N output configuration. A detailed explanation of the
-TSR and our attempts we tried to implement TSR can be found in following
-RFC series:
-https://lore.kernel.org/all/20250605063422.3813260-1-c-vankar@ti.com/
-https://lore.kernel.org/all/20250205160119.136639-1-c-vankar@ti.com/
+Rectify the DLL programming sequence as per latest hardware
+programming guide and also incorporate support for HS200 and
+HS400 DLL settings using the device tree.
 
-To implement TSR, the relevant registers must be configured via the
-device tree. We initially assumed that the device could be handled as a
-mux-controller and could be extended in the same subsystem, but it was
-ineffective. Having explored both the approaches, we now plan to
-implement TSR within misc subsystem, which aligns with the dt-bindings
-that you have proposed in this series.
+Changes from v3:
+1. Addressed Dmitry Baryshkov comments:
+   a. Regarding clk division by in V2 patchset
+2. Addressed Konrad Dybcio comments:
+   a. Renaming of parameters
+   b. Memory allocation
+   c. couldn't address __free, as didn't fit here
+3. Addressed Krzysztof Kozlowsk comment:
+   a. Regarding the dt binding
+   b. commit message to reflect the need of dt
+4. Additional change:
+   a. DT parsing logic
+   b. Maintain backward compatibility
 
-The purpose to replying over this series is to inform you that we also
-have a component requiring configuration as outlined in this series. Let
-us know if you have any suggestions for this.
+Changes from v2:
+1. Addressed Dmitry Baryshkov comments:
+   a. Regarding TCXO frequency.
+   b. Regarding clock rate.
+   c. regarding checkpatch.
 
-Regards,
-Chintan.
+Changes from v1:
+1. Addressed Tengfei Fan comment, added missing semicolocon
+   in sdhci_msm_host structure.
+
+
+Sachin Gupta (4):
+  dt-bindings: mmc: Add dll-hsr-list for HS400 and HS200 modes
+  mmc: sdhci-msm: Add core_major, minor to msm_host structure
+  mmc: sdhci-msm: Add Device tree parsing logic for DLL settings
+  mmc: sdhci-msm: Rectify DLL programming sequence for SDCC
+
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    |   5 +
+ drivers/mmc/host/sdhci-msm.c                  | 368 +++++++++++++++++-
+ 2 files changed, 354 insertions(+), 19 deletions(-)
+
+-- 
+2.34.1
 
