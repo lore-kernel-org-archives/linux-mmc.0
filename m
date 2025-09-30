@@ -1,89 +1,68 @@
-Received: from www.redadmin.org (ag129037.ppp.asahi-net.or.jp [157.107.129.37])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44D4D86340;
-	Tue, 30 Sep 2025 13:45:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=157.107.129.37
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759239965; cv=pass; b=CQArHjiQnMFckIbORC5WXb8CtCmbTNhCkqV2wYKU7OxfmEXIc65OvpCHgnQEjHjXn4bf0Iq3Jhu+FcYcK+NTAnn6w7a6Zmdb5IrPBFnHqnVraSecX/ALK0Gbv2sDzhP0h42ORuOZ3BzI81WdxYu1hxq3pA1uhVLkGpZ3Zi8F+f0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759239965; c=relaxed/simple;
-	bh=+FlFMn65PwSwsInMpFQINKycoHs65t4+qEHAT1KbyqQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=oNrSw+v6otl4X70O0zrf1L0VTiz5ERgLXQhyXIiHd2N2nULjaBkHC51f2Rl45tFFKGBYeFiioCOfKmMNi9WCGETTn+LwPtdpm2+ev78Wq6GhrNOnsP6Dt7HrHbtbfkHExEeLM5gXBw5EWwLbjL8K5WdRFgrVOa5oRW37NBLDzgg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redadmin.org; spf=pass smtp.mailfrom=redadmin.org; dkim=pass (1024-bit key) header.d=redadmin.org header.i=@redadmin.org header.b=T49C/t9F; arc=pass smtp.client-ip=157.107.129.37
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redadmin.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redadmin.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 584071D63FB
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2025 14:45:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1759243545; cv=none; b=noUdl3g9tS+oOGWu7ywbj6lYCCgUH6WhzQW0zIsqMnWjR9IkZdhT8NwfcNK788aYc8r8VJ0wNDf2/p+uUHPhKxthTbDtrl5tnzBnjPDLedOkC/54/o1J9ifpc0TqvcZ4+JTUEJxgDervD5qMAeLauDgKON/fhHLb9OXTNXIb42E=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1759243545; c=relaxed/simple;
+	bh=8gLdJL8Qtf+NqHZmB2i0AIoRu72Vt1AiMXEqjKqzjxg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Wvl64ZnkWf8Bx/CsAqtgVl+PzBlUKr55UXOdyCHu4h9dncpaJhsg8QjD4Mj4rQP+0CeP7EsW5T8PWiu7ks/0yVJXHtIj0yY1i6CCLnL/QW76rTvjh/ZX4cbWZ34P0WQChqJm0/S0g6tHvFo/LW4GD0wADZJG9Cg6b//pMvAq97A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=G5lYBlj4; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redadmin.org header.i=@redadmin.org header.b="T49C/t9F"
-Received: from localhost (localhost [127.0.0.1])
-	by www.redadmin.org (Postfix) with ESMTP id 2E51C10796C03;
-	Tue, 30 Sep 2025 22:45:52 +0900 (JST)
-X-Virus-Scanned: amavis at redadmin.org
-Received: from www.redadmin.org ([127.0.0.1])
- by localhost (redadmin.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id IU5Th2j-tTlN; Tue, 30 Sep 2025 22:45:48 +0900 (JST)
-Received: by www.redadmin.org (Postfix, from userid 1000)
-	id B309D109EFD83; Tue, 30 Sep 2025 22:45:48 +0900 (JST)
-Authentication-Results: www.redadmin.org; arc=none smtp.remote-ip=127.0.0.1
-ARC-Seal: i=1; a=rsa-sha256; d=redadmin.org; s=20231208space; t=1759239948;
-	cv=none; b=hJ54hEvUdA/Sgu1X7tx77ZhAiGRvKCJhc7IZako1C3m7DHYURfg2k0qWv4cFVOhHI3CPy1FO/q3tAqn7qD+mMciGi8S58ED43Q4urBXiH2NP53ccFhyrMrRpWiqf0WKbk+KY9L/gpR9snW3ehRjh4gktw4S3NXuLM1sgWMBacuM=
-ARC-Message-Signature: i=1; a=rsa-sha256; d=redadmin.org; s=20231208space;
-	t=1759239948; c=relaxed/relaxed;
-	bh=hcLsrul/wXlLzNNpWTc3vNtijAfswDidjbEuP6VB2nA=;
-	h=DKIM-Filter:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:
-	 X-Mailer:MIME-Version:Content-Transfer-Encoding; b=wKlvBM1YBjKZoT9YDy3a+/hxHfVkaNRuQc+CPagKTwiLOte07UO0B6zzBTrTEghyae0vPPRMqOG441UBoxt1VxYzhTegCf452wxAK4uGRBTTsctm5pDpgq4ALq0f/YX3WiSLk5Zr/ce3GuNosYwnHM6+OJFzWuwoxASYC5e0we4=
-ARC-Authentication-Results: i=1; www.redadmin.org
-DKIM-Filter: OpenDKIM Filter v2.11.0 www.redadmin.org B309D109EFD83
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redadmin.org;
-	s=20231208space; t=1759239948;
-	bh=hcLsrul/wXlLzNNpWTc3vNtijAfswDidjbEuP6VB2nA=;
-	h=From:To:Cc:Subject:Date:From;
-	b=T49C/t9FBor7m7YHgM8FukzdiLTFBGUBnX2xRpW6vJYc5I6aDj/PB6IT94JvbB43J
-	 d+6A2id7j/wBcGLeUMrnuR1PP7tX75p16UZclsPC6or2JfVexsMXCp8Bli6R+RROHK
-	 DwMo8thbaSW/sHMm+FeRzvclvgHe0EYQ9186H/84=
-From: Akiyoshi Kurita <weibu@redadmin.org>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Akiyoshi Kurita <weibu@redadmin.org>
-Subject: [PATCH] dt-bindings: mmc: Correct typo "upto" to "up to"
-Date: Tue, 30 Sep 2025 22:45:47 +0900
-Message-ID: <20250930134547.1096686-1-weibu@redadmin.org>
-X-Mailer: git-send-email 2.47.3
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="G5lYBlj4"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 03879C4CEF0
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2025 14:45:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1759243545;
+	bh=8gLdJL8Qtf+NqHZmB2i0AIoRu72Vt1AiMXEqjKqzjxg=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=G5lYBlj4YMFnlVxk30Ejo+DoqzFVxg9q+NMUcMTCl+Pm9XcalENXRdNjKpl+2ccxK
+	 z8aKsfImY2vMAUzZTcUptFpnbb5L5RpND5g58E1isiLk/mxc/aNA1owXLDvqZ1fhY4
+	 AjipbfbObT3kt9K1G9ZkDMYuHDm0Q31mbQxYvWTt9oSjDUh8/IH5ltnOO4xMhDwdlu
+	 u+2uPor9nfOGOzsbKJG9Ips6R8YG1Oxg8ljxKhxSVPofQ8Gptn3iKRJv3MMQIWRMht
+	 IfFaSeKVrRSyc2bT/d4Ogh+4B69+3LFXXLzUpF4pU2UWYpQTom8RkQvpldgwTif+vk
+	 LDZXZnBjP1x7A==
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-b256c8ca246so671389966b.1
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2025 07:45:44 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVQrpdHw9Dhrm4VRCzYm7JCFPy5SXt1U1yuY72EeH6WomnkzXB6lrMNSSY1KHUxis50bOiAijdO1LQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwdWCs7ZBCVl5sNPvk87JRoh6rNPbq3L99oCZIssni1+mq1msnu
+	pHYS72hdWQsMpEn+vBHpeFicE5BoET8gBP/7nppK8TnZBULjJfwoRMocqteF/6ZIiWgW2jLvFTW
+	fBR0h9dD0R1CKUNC7badfY7bdob+PYQ==
+X-Google-Smtp-Source: AGHT+IGFKuwWTxqgZFN1sKn8z44c3DsN+/zWVoH5x3IdU6B9+r5DMFiLRR9CeEZiSco4imjsr8Fjmm054z8AwbnQu8I=
+X-Received: by 2002:a17:907:94cb:b0:b3f:b7ca:26b5 with SMTP id
+ a640c23a62f3a-b3fb7ca30ecmr712122566b.23.1759243543581; Tue, 30 Sep 2025
+ 07:45:43 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <20250930134547.1096686-1-weibu@redadmin.org>
+In-Reply-To: <20250930134547.1096686-1-weibu@redadmin.org>
+From: Rob Herring <robh@kernel.org>
+Date: Tue, 30 Sep 2025 09:45:30 -0500
+X-Gmail-Original-Message-ID: <CAL_JsqL3z7P8YJuqa1tNMYSBRbxWTKfzaDE87FD2+Oe5Thoiog@mail.gmail.com>
+X-Gm-Features: AS18NWCD2uaYyjFBVGOY5TASNbgoqor92iEQrjs455o4MLprWpEFrzc6cn-wWew
+Message-ID: <CAL_JsqL3z7P8YJuqa1tNMYSBRbxWTKfzaDE87FD2+Oe5Thoiog@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: Correct typo "upto" to "up to"
+To: Akiyoshi Kurita <weibu@redadmin.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-The word "upto" is a typo for "up to". Correct this typo in the
-mmc-controller-common binding documentation.
+On Tue, Sep 30, 2025 at 8:46=E2=80=AFAM Akiyoshi Kurita <weibu@redadmin.org=
+> wrote:
+>
+> The word "upto" is a typo for "up to". Correct this typo in the
+> mmc-controller-common binding documentation.
 
-Signed-off-by: Akiyoshi Kurita <weibu@redadmin.org>
----
- .../devicetree/bindings/mmc/mmc-controller-common.yaml          | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+You just sent this yesterday. Why are you sending another version today?
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.ya=
-ml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
-index 9a7235439759..4e49035ab7a9 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
-@@ -85,7 +85,7 @@ properties:
-         - for eMMC, the maximum supported frequency is 200MHz,
-         - for SD/SDIO cards the SDR104 mode has a max supported
-           frequency of 208MHz,
--        - some mmc host controllers do support a max frequency upto
-+        - some mmc host controllers do support a max frequency up to
-           384MHz.
-       So, lets keep the maximum supported value here.
-=20
---=20
-2.47.3
-
+What changed?
