@@ -1,104 +1,98 @@
-Received: from www.redadmin.org (ag129037.ppp.asahi-net.or.jp [157.107.129.37])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 392202F2E;
-	Tue, 30 Sep 2025 21:13:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=157.107.129.37
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759266813; cv=pass; b=Y6Lh8lBJFZZVsbnqzH9VmP1gytdECB229XfXUK182CBWl7gdY6CtqklxbPVc7vxUzlqEVs8miDeZ6Bp5w1K6h8EfDP8Mnrlqn8S31Gg+h74W/YhdI4vUtaKITFlKs7VmcT5Jys4oXfY+fhIqtKJxKZEgkF3ptQUdyKW1wzs1Q1A=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759266813; c=relaxed/simple;
-	bh=p4+2uNjB35R2yeMejhwZPZ8iZyWyKs4g1sEXSzTpbF8=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=f+S+7eXeiowOHG1KmhVPDPyS6eKfwkSMA1jb8wu2lGKBvPCeUZaLrBjjKzx3T+LARI6/kvpLV435Mj97f2IH5x/SZSKDqEC83lnijUUOvmvgwizNoVzVP/BZzsFahz4DTeJzpSfiOg8nSsoATCrwivPVrfOBHlFtxbxf/52BtGU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redadmin.org; spf=pass smtp.mailfrom=redadmin.org; dkim=pass (1024-bit key) header.d=redadmin.org header.i=@redadmin.org header.b=hJM1f2ST; arc=pass smtp.client-ip=157.107.129.37
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redadmin.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redadmin.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA1E426D4CA
+	for <linux-mmc@vger.kernel.org>; Wed,  1 Oct 2025 06:24:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1759299865; cv=none; b=nRzla+w81Y3mehzCGOR3kte/J5bvK/KsXUeiC7JatKnOtA+2+ztQ35SYY40QAIpladih4T3gzzxhiqSBTgwyeFk1NqKCAfSzkQoDTSViENVYDuF3LGH0X8+rJ+4LQbdz9vze7iDg4EopVco6FDe5cJ5WQWJhgfODmtGxBrKRr5Y=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1759299865; c=relaxed/simple;
+	bh=CRAgifSudG0wZpugBPM8hbg3tAFsd9BARcUmc0q8uy0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=SzhqxPs+BO5s+inuLs0GoNrYYcuswbBNunIaNjAwneRld+SHz46gcxZHG8EsmwvCzg6l6HjdDQy2nrbgTlvNxckPRBdYunRmZG0udfRb+ppiaX/7MA5/GJXLqZ0pimU/i5CB4fDvyJeb0f47WETkrF4vqiMhJjJ7JrFeIdQrXMg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WBmH2+ws; arc=none smtp.client-ip=209.85.167.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redadmin.org header.i=@redadmin.org header.b="hJM1f2ST"
-Received: from localhost (localhost [127.0.0.1])
-	by www.redadmin.org (Postfix) with ESMTP id E3C4B10FB2DD3;
-	Wed,  1 Oct 2025 06:13:27 +0900 (JST)
-X-Virus-Scanned: amavis at redadmin.org
-Received: from www.redadmin.org ([127.0.0.1])
- by localhost (redadmin.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id yz-2FUAqnxxU; Wed,  1 Oct 2025 06:13:24 +0900 (JST)
-Received: from webmail.redadmin.org (redadmin.org [192.168.11.50])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature ECDSA (P-256) server-digest SHA256)
-	(Client did not present a certificate)
-	(Authenticated sender: weibu@redadmin.org)
-	by www.redadmin.org (Postfix) with ESMTPSA id 4E17610F40F4E;
-	Wed,  1 Oct 2025 06:13:24 +0900 (JST)
-DMARC-Filter: OpenDMARC Filter v1.4.2 www.redadmin.org 4E17610F40F4E
-Authentication-Results: www.redadmin.org; arc=none smtp.remote-ip=192.168.11.50
-ARC-Seal: i=1; a=rsa-sha256; d=redadmin.org; s=20231208space; t=1759266804;
-	cv=none; b=OTidfFNTZyozohIUeuf7BaTn6zc6+mf9Bh6tM/8rgN2wLZbeY+FqQLlwuocg/Cbn6+bu92MUpwrSuH/Q9xD0QOLQfjJiRrWndD3v+WO8MQwdjNGon1bMYBfDlkZgq8xmoET8d6c7bYoj+5H9GHx/7BKKlyn2To7//jIKodDUyO4=
-ARC-Message-Signature: i=1; a=rsa-sha256; d=redadmin.org; s=20231208space;
-	t=1759266804; c=relaxed/relaxed;
-	bh=F4qFODM3c+r4xdS4mUJwKNjV4ZswIR7t6ClHW8ShM9Y=;
-	h=DKIM-Filter:DKIM-Signature:MIME-Version:Date:From:To:Cc:Subject:
-	 In-Reply-To:References:Message-ID:X-Sender:Content-Type:
-	 Content-Transfer-Encoding; b=gcRB/PBmgD2j0nFostj9SEo6YL/Q4AYgKQrGF2B/Xb4crFWReLTsBA7ZGlMrdOIRoojWFC4fK423PnSQWKdBz83lIBxgsCSbR2s9mHhG1ZgFThJAR0auhHrnaQmyBo4yZB7PqMP0aeV0QwuEJ+ppqt1U6iWTqw8nTRToZmEV6EE=
-ARC-Authentication-Results: i=1; www.redadmin.org
-DKIM-Filter: OpenDKIM Filter v2.11.0 www.redadmin.org 4E17610F40F4E
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redadmin.org;
-	s=20231208space; t=1759266804;
-	bh=F4qFODM3c+r4xdS4mUJwKNjV4ZswIR7t6ClHW8ShM9Y=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-	b=hJM1f2ST3i99gxJ7VuKyzgin37ikifcPd1baiFxjFqXYAQ+3NvInpZ97caSGK8288
-	 bc8CfI+z0vfcYuVtT1cwRvcBWyJAbJnXyBGYt+y+wVwdkQ9r2ZkZU2FWJbPCr/MsRK
-	 9TOvj2OMY5o9JxCkfcXikEtzbsdORawd5cnPYQa8=
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WBmH2+ws"
+Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-57edfeaa05aso7102538e87.0
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Sep 2025 23:24:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1759299862; x=1759904662; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CRAgifSudG0wZpugBPM8hbg3tAFsd9BARcUmc0q8uy0=;
+        b=WBmH2+ws8/DDuBObE2cAr8KZ/24nrJYEIYCwS+M7mxGUmUwpdH3/oskZ2UqtynHEun
+         RbP2kdtvDP7liHTY7D0oF7RdORfI+HqIrEG8bC1bkBIFgoD2/Yl/x8OXTx4msfQV7+Uk
+         aDP0J/wwS1CbmxhR7grMGDhEqp5BmBP1Bp4mWug7YdxhUubT9IVlFfeuJTQY80jmRdrA
+         5YHHFLH0shOZ380FYVXwdhKOUcs1cNa1/kiNTVBNP6rLHKXWICR2pWsScOd4Xr5LFCib
+         l4CChbXU9ykn0RNwTi0ulhcAfrCw0uyxFXw/ntewc9zmIng2QDGIPBrCMdzMJa4HBkBB
+         16sQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1759299862; x=1759904662;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=CRAgifSudG0wZpugBPM8hbg3tAFsd9BARcUmc0q8uy0=;
+        b=uPtl7XQq/APezKTqYPtKhQc3P97A/g9YsG2YU2kddOk2Vm6BebXSr8pgdZqhMXS0TZ
+         aVbyMBDbZ2LdcilLAzGb3ekNOtNW+TXlhDc9BFXZXu5O3tZHEN5+eCQtX04HyMoJw8Fk
+         u6fG68OLgJfKzelGz6nsqOL6Sgar2hIrTNoQNkkal1+K2/yA+/UcyqMsowF4mH1m6wdB
+         GR/G5XHUsZL1AqjwTVMNZ8WB5iIbOFh7lElWQKO72Tnv0CdTMQCxx27Hs055CWLcy3iG
+         BiFl6E3n2zkBBWhB9i3OFUNLkUsgx7ydKzM7gCH41RFGNiKf3uLBVf0b4nvnahuTA+A8
+         cF/Q==
+X-Forwarded-Encrypted: i=1; AJvYcCV98DI7DCIABqq3/wWzg9uNCiNWhru8vK/fwo6WV7zbEE9/3VetK5w7sH8XAMoriGBxtsQ3dM+/RVk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyERI7H8pE+PwO4mP8B+gZQ8fOUOHkFgnUIpDqmL/sf+3I08URp
+	hmwHNN/HdHJmY+RAxl+hC1iXoTgpwyr2nxrplBY/RSVzSh5onn4pyvS6VsTomWHq9mcelTeOU38
+	wu9ss+vxsvKDSl+ilkyWmc971c6O3BsRJNSgL+Tn90w==
+X-Gm-Gg: ASbGnctWd5LNaU5OPj+GV0VTtj7xVe0sXTDF+YOsqSWGOlNEOjjgLdBWtFxlsiqTCiE
+	VDz5ZfdN8ihLrrej31fZB5mkCgfEyQfWfI2yI7cDt2iccugaAc7S8dwEgIcBF/hK9Fk7inyE1V8
+	PS82aQmaD2bzyMBVgoPxA8Su5lzks8JpBGdzxcK74GM9/5ve1aRoIKiUyUzDSdH17sCL44mK7ny
+	vVWMetwyxbfvI38NoIYydCvzu4SIQ0=
+X-Google-Smtp-Source: AGHT+IFozN4lyb6vOpauqxIZ3ZLWPP665BWKXXa2eLUpNSUCsqO967pjOJIApkPryd/vgSxP+dQ4iOCA8lbPex5gtHE=
+X-Received: by 2002:a05:6512:6c9:b0:57a:1818:480f with SMTP id
+ 2adb3069b0e04-58af9f6e9famr596020e87.46.1759299861855; Tue, 30 Sep 2025
+ 23:24:21 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Wed, 01 Oct 2025 06:13:24 +0900
-From: weibu@redadmin.org
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Krzysztof Kozlowski
- <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: Correct typo "upto" to "up to"
-In-Reply-To: <CAL_JsqL3z7P8YJuqa1tNMYSBRbxWTKfzaDE87FD2+Oe5Thoiog@mail.gmail.com>
-References: <20250930134547.1096686-1-weibu@redadmin.org>
- <CAL_JsqL3z7P8YJuqa1tNMYSBRbxWTKfzaDE87FD2+Oe5Thoiog@mail.gmail.com>
-Message-ID: <0aa439b55555684c1bddb082a30fb0c6@redadmin.org>
-X-Sender: weibu@redadmin.org
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
+References: <20250917-rda8810pl-drivers-v1-0-74866def1fe3@mainlining.org> <20250917-rda8810pl-drivers-v1-3-74866def1fe3@mainlining.org>
+In-Reply-To: <20250917-rda8810pl-drivers-v1-3-74866def1fe3@mainlining.org>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Wed, 1 Oct 2025 08:24:10 +0200
+X-Gm-Features: AS18NWB7xcfQD0XZT5zZ03zQzwmaWFrlIYwfqVvy-IagezTBvTp7mSD81HURh8c
+Message-ID: <CACRpkdbhTWtu1tvGQ-nY3phUeD8+0D2TmEQQUwDXhXS5thHn1g@mail.gmail.com>
+Subject: Re: [PATCH 03/25] dt-bindings: gpio: rda: Make interrupts optional
+To: Dang Huynh <dang.huynh@mainlining.org>
+Cc: Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Bartosz Golaszewski <brgl@bgdev.pl>, Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+	Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, 
+	Philipp Zabel <p.zabel@pengutronix.de>, Sebastian Reichel <sre@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
+	Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, 
+	linux-unisoc@lists.infradead.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org, 
+	linux-rtc@vger.kernel.org, linux-clk@vger.kernel.org, 
+	linux-pm@vger.kernel.org, dmaengine@vger.kernel.org, 
+	linux-hardening@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Of course. Here are the English versions of the reply.
+On Tue, Sep 16, 2025 at 10:09=E2=80=AFPM Dang Huynh <dang.huynh@mainlining.=
+org> wrote:
 
-Option 1 (Direct and concise)
-Subject: Re: [PATCH] dt-bindings: mmc: Correct typo "upto" to "up to"
+> The GPIO controller from the modem does not have an interrupt.
+>
+> Signed-off-by: Dang Huynh <dang.huynh@mainlining.org>
 
-Hi Rob,
+Can you split out the GPIO patches (like the 3? of them?)
+into it's own series and send them separately? They seem
+to be possible to review and apply separately.
 
-My apologies, this was sent again by mistake. Please discard this 
-version.
-
-There are no changes from the patch I sent yesterday.
-
-Sorry for the noise.
-
-Best regards,
-
-Akiyoshi Kurita
-
-
-2025-09-30 23:45 に Rob Herring さんは書きました:
-> On Tue, Sep 30, 2025 at 8:46 AM Akiyoshi Kurita <weibu@redadmin.org> 
-> wrote:
->> 
->> The word "upto" is a typo for "up to". Correct this typo in the
->> mmc-controller-common binding documentation.
-> 
-> You just sent this yesterday. Why are you sending another version 
-> today?
-> 
-> What changed?
+Yours,
+Linus Walleij
