@@ -1,307 +1,157 @@
-Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E2522BD11
-	for <linux-mmc@vger.kernel.org>; Thu,  2 Oct 2025 01:04:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93711175D53;
+	Thu,  2 Oct 2025 15:14:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759367059; cv=none; b=WdZbjbpjfjni9tt08cD3yis1z40lBesgV1rFOuWpe+5SQT8T/89kPtBsje8HHnGx1bPP72cdTk86RgsH9zoQ18qn2lmiPeHDnXG1vTtftLILYdKg+8y92jFLEhFbCqg+8BLxl73FS15XzN2cJqTBZoyPExFSgImAe81/L+rFsio=
+	t=1759418065; cv=none; b=aF/n2ki5hN0KyRsiqJpzjqK5fY+TDn4L3b3y+GAkxP3uWLQFXsVyz+WhLk69QbnUx2Xk/XWO/3n4jlpFza22yXi7DtosxkDJzpKcsxobmyKESW1xdsisdEr0swOn7B34XOekm1AsOTr78Bmmu8YYrPdMQhdXh4Isutw3xJj6hiE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759367059; c=relaxed/simple;
-	bh=Y505aKQKUnwUfjNG+Qp9UI4/UlFZuJIXU1Q3R7U1VQk=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=nd0mpqKzRRpjruGl1NMgMKDsq+5jlE/C5E4eOLSKe6Gd0utmvnJT0q3rweY3qsTnc+DktEmpPxW0s4lnpaOnMd41slPC5vbj8NJuGCATQ6nWi+SkjQkkxFjamV2c8jGlNUeFUgUjpeaM0NSgiTIN14RmiEiCRRSCif0u7nIIe3o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=XUVAA4jQ; arc=none smtp.client-ip=209.85.216.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1759418065; c=relaxed/simple;
+	bh=sjIOPYdX4qJbJxV2DmMmA4rLEpf5cDAztd85PV9jfpo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=qu1jdunihrxX1T6TYUKKtFbk0ufo8S7G3hsAeGKIeAHbh+Od8+WFfTw9vIS6Tg95+mzO85cmxAG88kC5HKzKNnSqJN7uc1h/Ih5aYefeejUmV2l5ZVGHdUdIpX6rwg14o2EaGskf4yszHEiRdbD4/ARg2JVu7/EYTecJqTgncrw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=eGldDdYu; arc=none smtp.client-ip=192.198.163.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XUVAA4jQ"
-Received: by mail-pj1-f54.google.com with SMTP id 98e67ed59e1d1-32eb76b9039so743763a91.1
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Oct 2025 18:04:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1759367057; x=1759971857; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=pHTDHANhx2I7dIzGsQLBn00mkeR2Scl9/Qsf768Yqmk=;
-        b=XUVAA4jQxE2GzEGj1p+3rCXuCEWhnqL9FPU18AeYaCKDXhVqXewfXVrSXjPXnYGinv
-         zrweugwmjPfeKpA0PHVipI0U9AYEtGRaUq8Dx+KIVIV+wFtxUBjtpKKEPIc0ZX2PybSF
-         yev9WGg+MEwntDz8bhgtMKBeUnQeAlTr+Wq3H6vYPChvNZdz20IA9FrUAUVgMuU7sEv1
-         X+RJJtuwAc2xSdN44aT9VA6byut8C3b0gQhvj3kTb+U67gqllF0MBVhr40CqCjEzsFAF
-         F5r9Nxhdl7stVAloWvl0gDxQkLZpMDBEd+0/IhQQMeK4vCnjrGD3eYzNZxoRgZ92B/4H
-         +gWQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759367057; x=1759971857;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=pHTDHANhx2I7dIzGsQLBn00mkeR2Scl9/Qsf768Yqmk=;
-        b=cECCuSqCbr6HHEEtCVYenmKaUa1wfJqhr/S1J8kBOXoGIJ5b1Vc72bkxe47MBWTcNM
-         ya7odlAgJxndVKXCEvQTZoztMVdAnm2UYbhTYRCxtKZEgCbAzHacZPimFq8t5CX1t+sr
-         jNL4RxugajBQdk1YTgEuzFp28cQf9e6jtrzjRNqTabDk204NLUI0x5yBykO/MMeR0H5s
-         H2MeHHLB5bW1q+Y3Fkz3s5NWfc/FC7JD7g33IGQfv+rEmlZ7Jg6fHMEjAGXO2mB6Q+yJ
-         K5/53gPjaDwN1SDX6WSOWBbIPB+wcegWii39UutvG3i7yrae0Z4ciW5BMn9ySif9HDF0
-         AxSg==
-X-Forwarded-Encrypted: i=1; AJvYcCXcVwUXZmI23VRCFVKSDSiDnDti+Hh1hDIKGAsuHd39bVN6nXsRzBlc8uU6+YgwgXy68gV437H932M=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy745ByHrtPXP4+uf2K6xMg+kX48j4E+5Sk7Zio8vYyJd6uLfJ/
-	fKGzVOGh6Mq5nBS+jM4HIcCCf5DUUePJQNlfSt9mc8BxVaeECfSJTJB+
-X-Gm-Gg: ASbGncsqk1HIxqgr3gaKPOweR9A8phlWs9NVLr/Nevm3yI2tWJQQmBPpa78sroFLhiG
-	oSlJ//YoBjxw0kJQC55pH/GTvIj4A/nkyMO3WTbXdB+gnb4CvdVolfQMO29wKloDsPIdDz4qO+V
-	N8CklMiBr1mpwajnZ11ySL6krwvbJThAhbjZr5FA2fUOBguxLLrKQYZSntZiq53CtQDpaai62iU
-	/4T5bcEylxLPegbbiEYPYhArzKVyzcNdjqM6OrU0UWCAiTLkwh8uuv/Jj9F3sK0oeAeDwIzRVyL
-	ySlCPKe0W1XTa2pIuGD0FcWjY2jh3rWHgagUyp5gay844tyqBPXLHlbkm/hKoHYfI4rohSK8wA7
-	tGE0fp3hcNl8TCaob8+N2sZkOfb51aztS+Y+/ufrSUA++k0lU5IikxDXIhg==
-X-Google-Smtp-Source: AGHT+IF3t1LeatYEk8zV1ykLzbl5xhmZAqb1p7kS4fD0Fq+BS96TmnxU8ltYTQ5Psy74eDVDoRHjJQ==
-X-Received: by 2002:a17:90b:1b0b:b0:32e:a535:4872 with SMTP id 98e67ed59e1d1-339a6e281ebmr5626461a91.2.1759367057231;
-        Wed, 01 Oct 2025 18:04:17 -0700 (PDT)
-Received: from ryzoh.. ([2804:14c:5fc8:8033:f637:ab:9082:d04])
-        by smtp.googlemail.com with ESMTPSA id 98e67ed59e1d1-339b4f3ceedsm943113a91.18.2025.10.01.18.04.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 01 Oct 2025 18:04:16 -0700 (PDT)
-From: Pedro Demarchi Gomes <pedrodemargomes@gmail.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Aubin Constans <aubin.constans@microchip.com>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Aaro Koskinen <aaro.koskinen@iki.fi>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>
-Subject: [PATCH] mmc: use octal file permissions instead of symbolic
-Date: Wed,  1 Oct 2025 21:57:14 -0300
-Message-Id: <20251002005714.6380-1-pedrodemargomes@gmail.com>
-X-Mailer: git-send-email 2.39.5
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="eGldDdYu"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1759418063; x=1790954063;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=sjIOPYdX4qJbJxV2DmMmA4rLEpf5cDAztd85PV9jfpo=;
+  b=eGldDdYuZZXOG5MryYl21AiRX0PgbfmLRsUW+8DbFCokqIgeAKnejAZp
+   aX7PsVbEmPMChHjpHJlg/0xr7vrsXVHH6qtlGykeCceB8FcdkbLAPACQG
+   u5Po02OnTLfjOAyyDMu58t7iIMb9AJ7dEgaJ/4ghbuMLeP/R2mAUwi1L6
+   /p3RlIm9ho1ym0RGYLaWe4Na1Rjo88IRbTBA37BmWPqMz72ILcWcXFq1z
+   T2va8shKKXTbwNlCkNejpwzV9i5FCHd8SpPkzXzhzrQMwvZjYzEkzIDLX
+   SHqegAfJVymBxeVGXe0J9G8VNbK8PoN4QPccutpoCJF377JePg8kPrjSs
+   g==;
+X-CSE-ConnectionGUID: HtyZZzlPQ9yvWccXBMYvWw==
+X-CSE-MsgGUID: rBL2pvBOQwWcJ8dYiBYgOw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11570"; a="60743551"
+X-IronPort-AV: E=Sophos;i="6.18,309,1751266800"; 
+   d="scan'208";a="60743551"
+Received: from orviesa010.jf.intel.com ([10.64.159.150])
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Oct 2025 08:14:23 -0700
+X-CSE-ConnectionGUID: 5BV9pExnSuuVrrJk0cMXww==
+X-CSE-MsgGUID: V0+SX+9NTgi6DfL+S4+8uQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.18,309,1751266800"; 
+   d="scan'208";a="178339629"
+Received: from lkp-server01.sh.intel.com (HELO 2f2a1232a4e4) ([10.239.97.150])
+  by orviesa010.jf.intel.com with ESMTP; 02 Oct 2025 08:14:18 -0700
+Received: from kbuild by 2f2a1232a4e4 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1v4L0Z-0003tF-1P;
+	Thu, 02 Oct 2025 15:14:15 +0000
+Date: Thu, 2 Oct 2025 23:13:38 +0800
+From: kernel test robot <lkp@intel.com>
+To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Bjorn Andersson <andersson@kernel.org>,
+	Konrad Dybcio <konradybcio@kernel.org>
+Cc: oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-arm-msm@vger.kernel.org, dmitry.baryshkov@oss.qualcomm.com,
+	quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+	quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
+	quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com,
+	Sachin Gupta <quic_sachgupt@quicinc.com>
+Subject: Re: [PATCH v4 4/4] mmc: sdhci-msm: Rectify DLL programming sequence
+ for SDCC
+Message-ID: <202510022258.5n14WOx5-lkp@intel.com>
+References: <20250929113515.26752-5-quic_rampraka@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250929113515.26752-5-quic_rampraka@quicinc.com>
 
-As stated in Documentation/dev-tools/checkpatch.rst, octal file
-permissions are preferred over symbolic constants because they are
-easier to read and understand. Replace symbolic permissions with
-their octal equivalents.
+Hi Ram,
 
-Signed-off-by: Pedro Demarchi Gomes <pedrodemargomes@gmail.com>
----
- drivers/mmc/core/block.c       |  6 +++---
- drivers/mmc/core/bus.h         |  2 +-
- drivers/mmc/core/mmc.c         |  4 ++--
- drivers/mmc/core/mmc_test.c    |  4 ++--
- drivers/mmc/core/sd.c          |  2 +-
- drivers/mmc/host/atmel-mci.c   | 10 +++++-----
- drivers/mmc/host/davinci_mmc.c |  6 +++---
- drivers/mmc/host/dw_mmc.c      | 10 +++++-----
- drivers/mmc/host/omap.c        |  4 ++--
- drivers/mmc/host/omap_hsmmc.c  |  4 ++--
- 10 files changed, 26 insertions(+), 26 deletions(-)
+kernel test robot noticed the following build warnings:
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 9cc47bf94804..78dc1a9ca2ef 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -387,10 +387,10 @@ static umode_t mmc_disk_attrs_is_visible(struct kobject *kobj,
- 	if (a == &dev_attr_ro_lock_until_next_power_on.attr &&
- 	    (md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
- 	    md->queue.card->ext_csd.boot_ro_lockable) {
--		mode = S_IRUGO;
-+		mode = 0444;
- 		if (!(md->queue.card->ext_csd.boot_ro_lock &
- 				EXT_CSD_BOOT_WP_B_PWR_WP_DIS))
--			mode |= S_IWUSR;
-+			mode |= 0200;
- 	}
- 
- 	mmc_blk_put(md);
-@@ -3244,7 +3244,7 @@ static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
- 
- 	if (mmc_card_mmc(card)) {
- 		md->ext_csd_dentry =
--			debugfs_create_file("ext_csd", S_IRUSR, root, card,
-+			debugfs_create_file("ext_csd", 0400, root, card,
- 					    &mmc_dbg_ext_csd_fops);
- 	}
- }
-diff --git a/drivers/mmc/core/bus.h b/drivers/mmc/core/bus.h
-index cfd0d02d3420..8b69624fa46e 100644
---- a/drivers/mmc/core/bus.h
-+++ b/drivers/mmc/core/bus.h
-@@ -20,7 +20,7 @@ static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *a
- 	struct mmc_card *card = mmc_dev_to_card(dev);				\
- 	return sysfs_emit(buf, fmt, args);					\
- }										\
--static DEVICE_ATTR(name, S_IRUGO, mmc_##name##_show, NULL)
-+static DEVICE_ATTR(name, 0444, mmc_##name##_show, NULL)
- 
- struct mmc_card *mmc_alloc_card(struct mmc_host *host,
- 				const struct device_type *type);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5be9b42d5057..e4b7829469ea 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -830,7 +830,7 @@ static ssize_t mmc_fwrev_show(struct device *dev,
- 				  card->ext_csd.fwrev);
- }
- 
--static DEVICE_ATTR(fwrev, S_IRUGO, mmc_fwrev_show, NULL);
-+static DEVICE_ATTR(fwrev, 0444, mmc_fwrev_show, NULL);
- 
- static ssize_t mmc_dsr_show(struct device *dev,
- 			    struct device_attribute *attr,
-@@ -846,7 +846,7 @@ static ssize_t mmc_dsr_show(struct device *dev,
- 		return sysfs_emit(buf, "0x%x\n", 0x404);
- }
- 
--static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
-+static DEVICE_ATTR(dsr, 0444, mmc_dsr_show, NULL);
- 
- static struct attribute *mmc_std_attrs[] = {
- 	&dev_attr_cid.attr,
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index 80e5d87a5e50..62b4983c1ef5 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -3218,12 +3218,12 @@ static int mmc_test_register_dbgfs_file(struct mmc_card *card)
- 
- 	mutex_lock(&mmc_test_lock);
- 
--	ret = __mmc_test_register_dbgfs_file(card, "test", S_IWUSR | S_IRUGO,
-+	ret = __mmc_test_register_dbgfs_file(card, "test", 0644,
- 		&mmc_test_fops_test);
- 	if (ret)
- 		goto err;
- 
--	ret = __mmc_test_register_dbgfs_file(card, "testlist", S_IRUGO,
-+	ret = __mmc_test_register_dbgfs_file(card, "testlist", 0444,
- 		&mtf_testlist_fops);
- 	if (ret)
- 		goto err;
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index ec02067f03c5..5ed6bc47f1c4 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -744,7 +744,7 @@ static ssize_t mmc_dsr_show(struct device *dev, struct device_attribute *attr,
- 	return sysfs_emit(buf, "0x%x\n", 0x404);
- }
- 
--static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
-+static DEVICE_ATTR(dsr, 0444, mmc_dsr_show, NULL);
- 
- MMC_DEV_ATTR(vendor, "0x%04x\n", card->cis.vendor);
- MMC_DEV_ATTR(device, "0x%04x\n", card->cis.device);
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 777342fb7657..d4a504f0aded 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -609,12 +609,12 @@ static void atmci_init_debugfs(struct atmel_mci_slot *slot)
- 	if (!root)
- 		return;
- 
--	debugfs_create_file("regs", S_IRUSR, root, host, &atmci_regs_fops);
--	debugfs_create_file("req", S_IRUSR, root, slot, &atmci_req_fops);
--	debugfs_create_u32("state", S_IRUSR, root, &host->state);
--	debugfs_create_xul("pending_events", S_IRUSR, root,
-+	debugfs_create_file("regs", 0400, root, host, &atmci_regs_fops);
-+	debugfs_create_file("req", 0400, root, slot, &atmci_req_fops);
-+	debugfs_create_u32("state", 0400, root, &host->state);
-+	debugfs_create_xul("pending_events", 0400, root,
- 			   &host->pending_events);
--	debugfs_create_xul("completed_events", S_IRUSR, root,
-+	debugfs_create_xul("completed_events", 0400, root,
- 			   &host->completed_events);
- }
- 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index c691f1b60395..3174e7ac65b3 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -145,17 +145,17 @@
- #define MAX_NR_SG	16
- 
- static unsigned rw_threshold = 32;
--module_param(rw_threshold, uint, S_IRUGO);
-+module_param(rw_threshold, uint, 0444);
- MODULE_PARM_DESC(rw_threshold,
- 		"Read/Write threshold. Default = 32");
- 
- static unsigned poll_threshold = 128;
--module_param(poll_threshold, uint, S_IRUGO);
-+module_param(poll_threshold, uint, 0444);
- MODULE_PARM_DESC(poll_threshold,
- 		 "Polling transaction size threshold. Default = 128");
- 
- static unsigned poll_loopcount = 32;
--module_param(poll_loopcount, uint, S_IRUGO);
-+module_param(poll_loopcount, uint, 0444);
- MODULE_PARM_DESC(poll_loopcount,
- 		 "Maximum polling loop count. Default = 32");
- 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index c5db92bbb094..2380ab82812a 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -175,12 +175,12 @@ static void dw_mci_init_debugfs(struct dw_mci_slot *slot)
- 	if (!root)
- 		return;
- 
--	debugfs_create_file("regs", S_IRUSR, root, host, &dw_mci_regs_fops);
--	debugfs_create_file("req", S_IRUSR, root, slot, &dw_mci_req_fops);
--	debugfs_create_u32("state", S_IRUSR, root, &host->state);
--	debugfs_create_xul("pending_events", S_IRUSR, root,
-+	debugfs_create_file("regs", 0400, root, host, &dw_mci_regs_fops);
-+	debugfs_create_file("req", 0400, root, slot, &dw_mci_req_fops);
-+	debugfs_create_u32("state", 0400, root, &host->state);
-+	debugfs_create_xul("pending_events", 0400, root,
- 			   &host->pending_events);
--	debugfs_create_xul("completed_events", S_IRUSR, root,
-+	debugfs_create_xul("completed_events", 0400, root,
- 			   &host->completed_events);
- #ifdef CONFIG_FAULT_INJECTION
- 	fault_create_debugfs_attr("fail_data_crc", root, &host->fail_data_crc);
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 52ac3f128a1c..5fc7d6d722b7 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -326,7 +326,7 @@ mmc_omap_show_cover_switch(struct device *dev, struct device_attribute *attr,
- 		       "closed");
- }
- 
--static DEVICE_ATTR(cover_switch, S_IRUGO, mmc_omap_show_cover_switch, NULL);
-+static DEVICE_ATTR(cover_switch, 0444, mmc_omap_show_cover_switch, NULL);
- 
- static ssize_t
- mmc_omap_show_slot_name(struct device *dev, struct device_attribute *attr,
-@@ -338,7 +338,7 @@ mmc_omap_show_slot_name(struct device *dev, struct device_attribute *attr,
- 	return sprintf(buf, "%s\n", slot->pdata->name);
- }
- 
--static DEVICE_ATTR(slot_name, S_IRUGO, mmc_omap_show_slot_name, NULL);
-+static DEVICE_ATTR(slot_name, 0444, mmc_omap_show_slot_name, NULL);
- 
- static void
- mmc_omap_start_command(struct mmc_omap_host *host, struct mmc_command *cmd)
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index adc0d0b6ae37..5c679b795af1 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -747,7 +747,7 @@ omap_hsmmc_show_slot_name(struct device *dev, struct device_attribute *attr,
- 	return sprintf(buf, "%s\n", mmc_pdata(host)->name);
- }
- 
--static DEVICE_ATTR(slot_name, S_IRUGO, omap_hsmmc_show_slot_name, NULL);
-+static DEVICE_ATTR(slot_name, 0444, omap_hsmmc_show_slot_name, NULL);
- 
- /*
-  * Configure the response type and send the cmd.
-@@ -1673,7 +1673,7 @@ DEFINE_SHOW_ATTRIBUTE(mmc_regs);
- static void omap_hsmmc_debugfs(struct mmc_host *mmc)
- {
- 	if (mmc->debugfs_root)
--		debugfs_create_file("regs", S_IRUSR, mmc->debugfs_root,
-+		debugfs_create_file("regs", 0400, mmc->debugfs_root,
- 			mmc, &mmc_regs_fops);
- }
- 
+[auto build test WARNING on robh/for-next]
+[also build test WARNING on krzk-dt/for-next linus/master ulf-hansson-mmc-mirror/next v6.17 next-20250929]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Ram-Prakash-Gupta/dt-bindings-mmc-Add-dll-hsr-list-for-HS400-and-HS200-modes/20250929-193817
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
+patch link:    https://lore.kernel.org/r/20250929113515.26752-5-quic_rampraka%40quicinc.com
+patch subject: [PATCH v4 4/4] mmc: sdhci-msm: Rectify DLL programming sequence for SDCC
+config: s390-allyesconfig (https://download.01.org/0day-ci/archive/20251002/202510022258.5n14WOx5-lkp@intel.com/config)
+compiler: s390-linux-gcc (GCC) 15.1.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20251002/202510022258.5n14WOx5-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202510022258.5n14WOx5-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+   In file included from include/asm-generic/bug.h:22,
+                    from arch/s390/include/asm/bug.h:69,
+                    from include/linux/bug.h:5,
+                    from include/linux/mmdebug.h:5,
+                    from arch/s390/include/asm/cmpxchg.h:11,
+                    from arch/s390/include/asm/atomic.h:16,
+                    from include/linux/atomic.h:7,
+                    from include/asm-generic/bitops/atomic.h:5,
+                    from arch/s390/include/asm/bitops.h:75,
+                    from include/linux/bitops.h:67,
+                    from arch/s390/include/asm/machine.h:25,
+                    from arch/s390/include/asm/lowcore.h:13,
+                    from arch/s390/include/asm/current.h:13,
+                    from arch/s390/include/asm/preempt.h:5,
+                    from include/linux/preempt.h:79,
+                    from arch/s390/include/asm/timex.h:13,
+                    from include/linux/timex.h:67,
+                    from include/linux/time32.h:13,
+                    from include/linux/time.h:60,
+                    from include/linux/stat.h:19,
+                    from include/linux/module.h:13,
+                    from drivers/mmc/host/sdhci-msm.c:8:
+   drivers/mmc/host/sdhci-msm.c: In function 'sdhci_msm_configure_dll':
+>> include/linux/kern_levels.h:5:25: warning: format '%u' expects argument of type 'unsigned int', but argument 4 has type 'long unsigned int' [-Wformat=]
+       5 | #define KERN_SOH        "\001"          /* ASCII Start Of Header */
+         |                         ^~~~~~
+   include/linux/printk.h:486:25: note: in definition of macro 'printk_index_wrap'
+     486 |                 _p_func(_fmt, ##__VA_ARGS__);                           \
+         |                         ^~~~
+   include/linux/printk.h:557:9: note: in expansion of macro 'printk'
+     557 |         printk(KERN_ERR pr_fmt(fmt), ##__VA_ARGS__)
+         |         ^~~~~~
+   include/linux/kern_levels.h:11:25: note: in expansion of macro 'KERN_SOH'
+      11 | #define KERN_ERR        KERN_SOH "3"    /* error conditions */
+         |                         ^~~~~~~~
+   include/linux/printk.h:557:16: note: in expansion of macro 'KERN_ERR'
+     557 |         printk(KERN_ERR pr_fmt(fmt), ##__VA_ARGS__)
+         |                ^~~~~~~~
+   drivers/mmc/host/sdhci-msm.c:927:33: note: in expansion of macro 'pr_err'
+     927 |                                 pr_err("%s: %s: Non standard clk freq =%u\n",
+         |                                 ^~~~~~
+
+
+vim +5 include/linux/kern_levels.h
+
+314ba3520e513a Joe Perches 2012-07-30  4  
+04d2c8c83d0e3a Joe Perches 2012-07-30 @5  #define KERN_SOH	"\001"		/* ASCII Start Of Header */
+04d2c8c83d0e3a Joe Perches 2012-07-30  6  #define KERN_SOH_ASCII	'\001'
+04d2c8c83d0e3a Joe Perches 2012-07-30  7  
+
 -- 
-2.39.5
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
