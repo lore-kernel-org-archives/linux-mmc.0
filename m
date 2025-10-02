@@ -1,78 +1,78 @@
-Received: from mail-io1-f98.google.com (mail-io1-f98.google.com [209.85.166.98])
+Received: from mail-pl1-f227.google.com (mail-pl1-f227.google.com [209.85.214.227])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E96E295DB8
-	for <linux-mmc@vger.kernel.org>; Thu,  2 Oct 2025 21:04:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.98
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C98D2BDC3B
+	for <linux-mmc@vger.kernel.org>; Thu,  2 Oct 2025 21:04:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.227
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759439090; cv=none; b=K1xMANmsyr2f32dq35q4CAw208AZ9xPnqmlAaRuCDDzuzxj9oePwbpEaFVf6CemJncDMthoWlhp4qwjZ0/GMPNQPxU/ODr/q5QlopsTd2LFavxuyztx+M/eLgCHPo3ufu4jHxjrmMTlRTNRMXgDQ6WCe+a5p3Sc5ZOznQgJ9/wQ=
+	t=1759439094; cv=none; b=qHh4o7Du0HDYiY6aL3dvELHvzLDzSfV/g61jlW/RjFOQwV3PQJW9TDhJeGyCwECQQCfe80PNH6YcxWGOtLEDjsyMtvU5bnlqY3Da2gCplSYP3gn9vax1pY5ZHtpkILBolHQqWCgofGMLpDBP/1K0QdH9Qs0B+GeU8GxPFxVBBDk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759439090; c=relaxed/simple;
-	bh=jK7kxcxxZSZOzxffNSAiY6865wMbhPwApNWPua55We8=;
+	s=arc-20240116; t=1759439094; c=relaxed/simple;
+	bh=SbL6UcwBpYbwRwNOueWqf3w8SnBvv9kw5WB+oOZBTow=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=no6h8CAzECHXyDVQw7RWUZPybHtNLLbDmo/VDAwiaDtJ1svQv3tbVin3mFXLc5BHTvHKVYGMD8JY56PsqBMA8YxGzWY7vFCfnXJjTu/r8YFCBe6d3u3fe+7j+y6H8xus+r874rkNeH3GmZVuOipHil1LjOal1n8VlZbW1UYWSkc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=B+mHKi7F; arc=none smtp.client-ip=209.85.166.98
+	 MIME-Version; b=tEBkqxyO3d/6saYP4rChia4LvDl15qhJIzaUyNypARjeVsR+DCAxGSjqpzjn0tFCfaM8oAMz0kd3d9C+kWpRYL0ACdYTbH9uEi8hDE1V/Qr/llg5BLUbGVTFZZNI+8bY9WCku51yKgMjhXAk2hh6ul5G6s2yFzi5jP0qEFLCiC0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=IJYG+P8C; arc=none smtp.client-ip=209.85.214.227
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="B+mHKi7F"
-Received: by mail-io1-f98.google.com with SMTP id ca18e2360f4ac-91fbba9a8f5so121759439f.0
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:48 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="IJYG+P8C"
+Received: by mail-pl1-f227.google.com with SMTP id d9443c01a7336-271067d66fbso14135235ad.3
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:52 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759439088; x=1760043888;
+        d=1e100.net; s=20230601; t=1759439092; x=1760043892;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:dkim-signature
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=d0VBquDv6g415iy1L7kGakH7H853FAzWxsvjxiCHfN8=;
-        b=TTxSvK95L9+wTiRdsnrNalyzrTpSucpL40cHyySsXcZm/GFgtMMgTB78DmtWunKQkq
-         OipvpNbGUysNCqqDsd+XBMUpJs04vVbstx0YWp6x2tETBi1B4HuScAJQvbAJw9fj3bs8
-         kkZ0et9C1qlY/5ZNtKMazJrFj8qMFAKsFhCx7MOexBrB7B0ho57Eb9F3+kzjqgQjRsfq
-         yksr47eIEoXeKyJLvcxblsJc4cG4NTLRTwGjzrykqEnC/OV5UXKkFiEUe8XEslZNloNq
-         3q4aWgbZlpB4va0+RM8EERr0D1yYF1mJJOuHocJFXE3kQ1xlXcCJJN0/EGItkjAuJxdO
-         fL9A==
-X-Forwarded-Encrypted: i=1; AJvYcCUT2QNtQwSV7F5zv9GZLM3dVTeLjPaePTzSS0YoPPIXoQFWdAqyffUO6iSODzWBwKqmy+EB+hYNTvs=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz47yx30avSqfOZ21FekJCbRHHsGx512lF5CHJ+6i/sZlk60TTp
-	3hrPnVrMtGtZM2Cegnt4jgN+FXXyecZHVEaZ//Ob6eavK4MyDioFdhP026hmoEiW6e4fqlCIzGH
-	rX1fhhFv19390uGinx4VSM0+W6PML5AquhAm0vOxCO1lESklvMMWvrPe5Sh1PtOwUnG4moMwRt1
-	tCBm5rRE1jaQZt4KZX3pBQe2lya3s0yO1VLXmeRzDCy0OnAmHcZmILjcaPrbzkdgzOvDdDHmf37
-	SUigo+oIY5l
-X-Gm-Gg: ASbGncs2Xp1Jeb0+rNJ9BIUTrcZuKPODifqzzi1oHHU9S/BRO8CshPhJ9CfbRLHCCtM
-	1T5vOwq6g6USdGaIj8jzfamV96Zf3vrGgOLpWPdqUuUlfiXFEOEotbesJ4A5w/NwXwvP0MYq6cq
-	eOgx502aZlRLBj8JkVd5Ji9+M7i+7X/uxveZ5zc7t3SoDD2mBDYIhuJoo6S27TLRIsjPm2BVOJK
-	SsiZuDAZuqMicDKxQKHTLDy0qChFQDn3mlUGFt17+TSJRneAHh/rMzgEJVjJIIDxj9ANh1zebiV
-	UDo/A3jKPQQiROPREOSHwddWbxrb4Y67T0kgv433UsWpArluTMr3MTqpZ+Udi+5c7Ux/dh0xUGc
-	qr3g+8ORPsNhh+oNPZMdJEWaw2wNr6ZurmBxMFRMhIlSpqgUpeGkQT0PRklxAyeBFPZ/dkmf1IJ
-	aQ6UrV
-X-Google-Smtp-Source: AGHT+IHHVATxbdwspUWeMLtdO5/G32K2auLnw7/22Q4dTA0DALfCu60yRxUqbF7vXvrAXXhj7ertZSauG9pa
-X-Received: by 2002:a05:6602:1688:b0:926:bbfc:a562 with SMTP id ca18e2360f4ac-93b9664cc6fmr82303739f.0.1759439088235;
-        Thu, 02 Oct 2025 14:04:48 -0700 (PDT)
+        bh=ZIU73QOdUXqw8XH54gnOsyWC2NrvdvHxRkWX7Bf2XKY=;
+        b=snLfzKJR/A6FTrHEF0tythdkOBTHrIhYnK0/wBudUfzVfkUbE/VEsu/prIJUkQWtPb
+         TsCggvyVqsLJgKAY8ANtXFCnMEHHVPeJW6DJ64FjdO9/YkmOXLEcz7MhcumVxRla9SQl
+         0fmtqCB2cHc38EkXuSWm9IcZnRxU7uUXbqPPmSnd/fJIsSsJwi32ZHm2JNGkJ6D7TFdf
+         xvkFFMym2hpTuqRJEp/lwS31O7PuGW6bak1cb44zZFNZtbV5v4W6wOnQzCZ9e+o3s6hY
+         wxSrbvOSXQmANSnY+Q9ya5VnIFu4YnQH6IFmr8yKk4NzrUyBV26c24NP81zF209WsP+0
+         ogHg==
+X-Forwarded-Encrypted: i=1; AJvYcCWWLeWLxFjgIg4nvTWPUVUhieKgtJlBD9U2/BqCshuuHDhUwbHAXARnHNss/HJxOSa+GVJC/XXmPw4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzmeDrxHizpSJYcFIR0rR1Ef9oeR/F5VaizbV0BLmo1kuNxiPS5
+	zFU1i0AmGHI71PfEH5duGQheB+tciYFsy0I8dukVp5e+in2HSa/vU4frYU2j+npuQkvBUePAFfH
+	pTNxD6nIlMv4yEIVyfMhFnieieE1xCq6YWafLDDQ3vwcXGT2XFOLgEbfW//VGculhzKqOdG/PM/
+	izmzfmr1QAZvO034fwCQDBCigCYa8LyL6FAiEVeiu13oDurV59phRqWxjGfpp5mdY6I92lOhC5z
+	s2XX2sbwFiz
+X-Gm-Gg: ASbGnctopJZAodUiSAg355M4E3McWY9Fh4rQH6VVLM2woL9HeXdyhfxnaBlLndiR/C8
+	2mLKdXqFYGfiDqVOs54CDqvmRlJIBk1EkdSC62J3mjr0bV2uqozAfpWH6UQrA8OuTayW9Uxp2Sx
+	RAmjJ/uimS7kp3n+bF9XuYkMFQptZegfgIQblupXBoYtCyJ8z0AyFn/Z63YOWmAknQFl+iqmctd
+	Wk0c4KUMcY3s/DNlt0QuYObXqvs8U56mLfFZDduRPosFSLdBNyoBmZcy+GOe/A6e005NtI2lApH
+	QL5T0FOmC6ycowRYgqMqqXGIl7A4D67EXY3Rmo9sjCsE4G93DWEPGlOAoxNezX403++KByC7hTy
+	b15EPdSunu6fAOz1PeKTyIiFEbS7/2MZc1FcD1ZaYN9sJVuqWL0VjHKwL1wU7XZrepdv347NSJS
+	ew5D3C
+X-Google-Smtp-Source: AGHT+IEDCIgVHD3DanJ2DpukN76XRajPEePgRz42YCQjgJ/YyJxP9aqe1tUvjBg19rJ2oPydCHM1Di4PTDTK
+X-Received: by 2002:a17:902:d481:b0:274:746c:b09 with SMTP id d9443c01a7336-28e9a6e4d88mr7744135ad.55.1759439092383;
+        Thu, 02 Oct 2025 14:04:52 -0700 (PDT)
 Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-101.dlp.protect.broadcom.com. [144.49.247.101])
-        by smtp-relay.gmail.com with ESMTPS id ca18e2360f4ac-93a860bdbe3sm15337539f.17.2025.10.02.14.04.47
+        by smtp-relay.gmail.com with ESMTPS id d9443c01a7336-28e8d119f53sm2511275ad.25.2025.10.02.14.04.51
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Oct 2025 14:04:48 -0700 (PDT)
+        Thu, 02 Oct 2025 14:04:52 -0700 (PDT)
 X-Relaying-Domain: broadcom.com
 X-CFilter-Loop: Reflected
-Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-46e32eb4798so11674685e9.2
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:47 -0700 (PDT)
+Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-46e3e177893so8878725e9.2
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1759439086; x=1760043886; darn=vger.kernel.org;
+        d=broadcom.com; s=google; t=1759439090; x=1760043890; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=d0VBquDv6g415iy1L7kGakH7H853FAzWxsvjxiCHfN8=;
-        b=B+mHKi7FrxKqXf4T4MBS5guhb/3IiPhc4kpJMT8Jx/STD3M/UTs5QwsYI3aQXdqBe6
-         gCg7OSputMXRtqZg/Sf3Zq6g0mwI7VaJ/P1tM5hyPlI6IDsV0YS/ZBaNgX1GlVYCbBaj
-         p6s/CpiPQ8Caear653sKwVVQ5eCE54X4YmGVY=
-X-Forwarded-Encrypted: i=1; AJvYcCW3iSgEwc4zYtbG95y/wGNd4qdI4rqgmHfPdkOR2YXufxPQ5pNn9AYge75yAQn5GS6hFxGDCkDEP/U=@vger.kernel.org
-X-Received: by 2002:a05:600d:420d:b0:45b:47e1:ef6d with SMTP id 5b1f17b1804b1-46e71172104mr4721665e9.36.1759439086300;
-        Thu, 02 Oct 2025 14:04:46 -0700 (PDT)
-X-Received: by 2002:a05:600d:420d:b0:45b:47e1:ef6d with SMTP id 5b1f17b1804b1-46e71172104mr4721505e9.36.1759439085831;
-        Thu, 02 Oct 2025 14:04:45 -0700 (PDT)
+        bh=ZIU73QOdUXqw8XH54gnOsyWC2NrvdvHxRkWX7Bf2XKY=;
+        b=IJYG+P8CWCe7DmKOCwG0Mn6Cm7Q1S/brh9hFNUgKNJIgIKNF/dP1kSYACpDfW7KmN+
+         MgVLwyzDpbB0aofhMsHOvi1pUKmFwVdvwj8ctX/rxnsQu/RoSR/yEORfMt6ujjjw5dK1
+         3uHoA1VdZcagfUVH25FAG5NfCbVohdJNkGthI=
+X-Forwarded-Encrypted: i=1; AJvYcCUPZY/GURGaZM0GP3zlgvkgahQyvSj87IREq6M5KcAGd7Iyd7Ax4RwkXqwjxIKNwxDaQJd28dBfqSs=@vger.kernel.org
+X-Received: by 2002:a05:600c:348a:b0:46e:1f92:49aa with SMTP id 5b1f17b1804b1-46e7110ef47mr4505005e9.15.1759439090549;
+        Thu, 02 Oct 2025 14:04:50 -0700 (PDT)
+X-Received: by 2002:a05:600c:348a:b0:46e:1f92:49aa with SMTP id 5b1f17b1804b1-46e7110ef47mr4504845e9.15.1759439090152;
+        Thu, 02 Oct 2025 14:04:50 -0700 (PDT)
 Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46e5c4c0321sm61711295e9.8.2025.10.02.14.04.43
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46e5c4c0321sm61711295e9.8.2025.10.02.14.04.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 02 Oct 2025 14:04:45 -0700 (PDT)
+        Thu, 02 Oct 2025 14:04:49 -0700 (PDT)
 From: Kamal Dasu <kamal.dasu@broadcom.com>
 To: andersson@kernel.org,
 	robh@kernel.org,
@@ -87,9 +87,9 @@ Cc: bcm-kernel-feedback-list@broadcom.com,
 	linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org,
 	Kamal Dasu <kamal.dasu@broadcom.com>
-Subject: [PATCH 1/3] dt-bindings: mmc: Add support for BCM72116 and BCM74371 SD host controller
-Date: Thu,  2 Oct 2025 17:04:24 -0400
-Message-Id: <20251002210426.2490368-2-kamal.dasu@broadcom.com>
+Subject: [PATCH 2/3] mmc: sdhci-brcmstb: clear CFG_OP_DLY when using HS200
+Date: Thu,  2 Oct 2025 17:04:25 -0400
+Message-Id: <20251002210426.2490368-3-kamal.dasu@broadcom.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20251002210426.2490368-1-kamal.dasu@broadcom.com>
 References: <20251002210426.2490368-1-kamal.dasu@broadcom.com>
@@ -102,30 +102,94 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
-Updating compatibility to support BCM72116 and BCM74371 SD host controller
-similar to other settop SoCs.
+Clear SDIO_1_CFG_OP_DLY register when using HS200 mode to be
+compliant with timing spec.  We only need this for on BCM72116
+SoCs.
 
 Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
 ---
- Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci-brcmstb.c | 37 ++++++++++++++++++++++++++++----
+ 1 file changed, 33 insertions(+), 4 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-index eee6be7a7867..720d0762078f 100644
---- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-+++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-@@ -21,9 +21,11 @@ properties:
-       - items:
-           - enum:
-               - brcm,bcm2712-sdhci
-+              - brcm,bcm72116-sdhci
-               - brcm,bcm74165b0-sdhci
-               - brcm,bcm7445-sdhci
-               - brcm,bcm7425-sdhci
-+              - brcm,bcm74371-sdhci
-           - const: brcm,sdhci-brcmstb
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index efc2f3bdc631..0905b316a24b 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -31,13 +31,13 @@
  
-   reg:
+ #define SDHCI_ARASAN_CQE_BASE_ADDR		0x200
+ 
+-#define SDIO_CFG_CQ_CAPABILITY			0x4c
+-#define SDIO_CFG_CQ_CAPABILITY_FMUL		GENMASK(13, 12)
+-
+ #define SDIO_CFG_CTRL				0x0
+ #define SDIO_CFG_CTRL_SDCD_N_TEST_EN		BIT(31)
+ #define SDIO_CFG_CTRL_SDCD_N_TEST_LEV		BIT(30)
+-
++#define SDIO_CFG_OP_DLY				0x34
++#define SDIO_CFG_OP_DLY_DEFAULT			0x80000003
++#define SDIO_CFG_CQ_CAPABILITY			0x4c
++#define SDIO_CFG_CQ_CAPABILITY_FMUL		GENMASK(13, 12)
+ #define SDIO_CFG_MAX_50MHZ_MODE			0x1ac
+ #define SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE	BIT(31)
+ #define SDIO_CFG_MAX_50MHZ_MODE_ENABLE		BIT(0)
+@@ -212,6 +212,22 @@ static void sdhci_brcmstb_cfginit_2712(struct sdhci_host *host)
+ 	}
+ }
+ 
++static void sdhci_brcmstb_set_72116_uhs_signaling(struct sdhci_host *host,
++						unsigned int timing)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	u32 reg;
++
++	/* no change to SDIO_CFG_OP_DLY_DEFAULT when using preset clk rate */
++	if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
++		return;
++
++	reg = (timing == MMC_TIMING_MMC_HS200) ? 0 : SDIO_CFG_OP_DLY_DEFAULT;
++	writel(reg, priv->cfg_regs + SDIO_CFG_OP_DLY);
++	sdhci_set_uhs_signaling(host, timing);
++}
++
+ static void sdhci_brcmstb_dumpregs(struct mmc_host *mmc)
+ {
+ 	sdhci_dumpregs(mmc_priv(mmc));
+@@ -252,6 +268,13 @@ static struct sdhci_ops sdhci_brcmstb_ops_2712 = {
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+ 
++static struct sdhci_ops sdhci_brcmstb_ops_72116 = {
++	.set_clock = sdhci_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.set_uhs_signaling = sdhci_brcmstb_set_72116_uhs_signaling,
++};
++
+ static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
+ 	.set_clock = sdhci_brcmstb_set_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+@@ -282,6 +305,11 @@ static struct brcmstb_match_priv match_priv_7445 = {
+ 	.ops = &sdhci_brcmstb_ops,
+ };
+ 
++static struct brcmstb_match_priv match_priv_72116 = {
++	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
++	.ops = &sdhci_brcmstb_ops_72116,
++};
++
+ static const struct brcmstb_match_priv match_priv_7216 = {
+ 	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
+ 	.hs400es = sdhci_brcmstb_hs400es,
+@@ -298,6 +326,7 @@ static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
+ 	{ .compatible = "brcm,bcm2712-sdhci", .data = &match_priv_2712 },
+ 	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
+ 	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
++	{ .compatible = "brcm,bcm72116-sdhci", .data = &match_priv_72116 },
+ 	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
+ 	{ .compatible = "brcm,bcm74165b0-sdhci", .data = &match_priv_74165b0 },
+ 	{},
 -- 
 2.34.1
 
