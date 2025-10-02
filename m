@@ -1,157 +1,116 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f225.google.com (mail-pf1-f225.google.com [209.85.210.225])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93711175D53;
-	Thu,  2 Oct 2025 15:14:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BB6613A258
+	for <linux-mmc@vger.kernel.org>; Thu,  2 Oct 2025 21:04:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.225
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759418065; cv=none; b=aF/n2ki5hN0KyRsiqJpzjqK5fY+TDn4L3b3y+GAkxP3uWLQFXsVyz+WhLk69QbnUx2Xk/XWO/3n4jlpFza22yXi7DtosxkDJzpKcsxobmyKESW1xdsisdEr0swOn7B34XOekm1AsOTr78Bmmu8YYrPdMQhdXh4Isutw3xJj6hiE=
+	t=1759439083; cv=none; b=ebH1STw8GCFffUn2J5f1XCqKuTyWX0hsz6qG0zpFkIz8i+Bq9uJv/zT67iJkNTMfxysGWBp2cg7lBlDYBaIeZx8SXZArbZ5Y1/lgJiAFdM6Ri1CtQYj9nlvIzij9rWCR6/mhb29IQ0S/i45Lw3bBY2C/FdwLBOPhz85V5HqBac0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759418065; c=relaxed/simple;
-	bh=sjIOPYdX4qJbJxV2DmMmA4rLEpf5cDAztd85PV9jfpo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qu1jdunihrxX1T6TYUKKtFbk0ufo8S7G3hsAeGKIeAHbh+Od8+WFfTw9vIS6Tg95+mzO85cmxAG88kC5HKzKNnSqJN7uc1h/Ih5aYefeejUmV2l5ZVGHdUdIpX6rwg14o2EaGskf4yszHEiRdbD4/ARg2JVu7/EYTecJqTgncrw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=eGldDdYu; arc=none smtp.client-ip=192.198.163.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1759439083; c=relaxed/simple;
+	bh=wQ1CYAjiFcO9931vPI1LjA3++HAVRuOZx4J5E9bcb2c=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Jdt3tUsfcOVq7QnktYwv5srSBjL8sfBEvXlvkrs4w9UpW8HiRFGSFUmAyiLe7c2F57I0nOXdivubFxRa9L4u5dg0LhKIWydXJeEyBq3YL5xcqwO6ZfkUA4YTv/Rpapwd6clzSvf6hwQBwWXuLCnArsjnuXfPe9gpv4SdyXS1pYY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=OFISdMeO; arc=none smtp.client-ip=209.85.210.225
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="eGldDdYu"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1759418063; x=1790954063;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=sjIOPYdX4qJbJxV2DmMmA4rLEpf5cDAztd85PV9jfpo=;
-  b=eGldDdYuZZXOG5MryYl21AiRX0PgbfmLRsUW+8DbFCokqIgeAKnejAZp
-   aX7PsVbEmPMChHjpHJlg/0xr7vrsXVHH6qtlGykeCceB8FcdkbLAPACQG
-   u5Po02OnTLfjOAyyDMu58t7iIMb9AJ7dEgaJ/4ghbuMLeP/R2mAUwi1L6
-   /p3RlIm9ho1ym0RGYLaWe4Na1Rjo88IRbTBA37BmWPqMz72ILcWcXFq1z
-   T2va8shKKXTbwNlCkNejpwzV9i5FCHd8SpPkzXzhzrQMwvZjYzEkzIDLX
-   SHqegAfJVymBxeVGXe0J9G8VNbK8PoN4QPccutpoCJF377JePg8kPrjSs
-   g==;
-X-CSE-ConnectionGUID: HtyZZzlPQ9yvWccXBMYvWw==
-X-CSE-MsgGUID: rBL2pvBOQwWcJ8dYiBYgOw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11570"; a="60743551"
-X-IronPort-AV: E=Sophos;i="6.18,309,1751266800"; 
-   d="scan'208";a="60743551"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Oct 2025 08:14:23 -0700
-X-CSE-ConnectionGUID: 5BV9pExnSuuVrrJk0cMXww==
-X-CSE-MsgGUID: V0+SX+9NTgi6DfL+S4+8uQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.18,309,1751266800"; 
-   d="scan'208";a="178339629"
-Received: from lkp-server01.sh.intel.com (HELO 2f2a1232a4e4) ([10.239.97.150])
-  by orviesa010.jf.intel.com with ESMTP; 02 Oct 2025 08:14:18 -0700
-Received: from kbuild by 2f2a1232a4e4 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1v4L0Z-0003tF-1P;
-	Thu, 02 Oct 2025 15:14:15 +0000
-Date: Thu, 2 Oct 2025 23:13:38 +0800
-From: kernel test robot <lkp@intel.com>
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, dmitry.baryshkov@oss.qualcomm.com,
-	quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-	quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
-	quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com,
-	Sachin Gupta <quic_sachgupt@quicinc.com>
-Subject: Re: [PATCH v4 4/4] mmc: sdhci-msm: Rectify DLL programming sequence
- for SDCC
-Message-ID: <202510022258.5n14WOx5-lkp@intel.com>
-References: <20250929113515.26752-5-quic_rampraka@quicinc.com>
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="OFISdMeO"
+Received: by mail-pf1-f225.google.com with SMTP id d2e1a72fcca58-781ea2cee3fso1528793b3a.0
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:41 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1759439081; x=1760043881;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:dkim-signature:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=C2UQeXeCdd38LZjkJTP74V8I/AwlCwJ5vjuI4bPLac8=;
+        b=vKVIAl0j8AIfvWNgVeLvMpOQB3XNsmtt6gXDLtIhrB6x37fyXpl3dJhO0HtCySzC/7
+         Ookt+xS6Xq2gzIqj2vGZfDb+uMjcq/pdJbPkjRZ5IQbGJ4uSAQ6Chi4qwN3xhL5zrvtD
+         MXKHJpIAGvwcBTAsOOORqvykrMUSwb9SSKVX4UJ0BiYTSVAXyvRoVy3DMg9Xwr6K4KN0
+         iFCDr1hA1SoiytfMtzjmCxkVy+F8CpJJE6QY747sKg7NZQW0cIw5RapWp8t/R1X6h0eg
+         iMLXQfdB/7wHyLZeH7zavkO7a7y6Uxyovi0kPGlFbylecsEzKNAXMMKEKCsmIhkOVSf0
+         kmcQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUaun2raPwW2rDsVlvk8W0oBQfHXvJgrJt71rrYeC2Fj1uI90BgzP+CImXL/kYNBsqG73lNKl4o0hY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwhI6hVUuUdQnF8WxzCpUs9hrODeIqmiprb168hkdlxJfk1e/3i
+	hdl0vdn+ditw++9/lu05+nK4eaOvC14QWfw1vkxwxwvh9dYHIv4NisnXacJe8/EUjqBa21z9C5q
+	anwUM1gkDaqsUERxXbfVUgufYtEdo4MywanWm4AI566MtaRksC8GDnRuA4/S5Xu0hzvP5UwY+tW
+	42cJ38jj9JCm0NpK1r6O3htd0CnkUBQCeKhw3On+j1evxOxhhp0Jz7d2FoNhM6WyDWM8Dno8jK3
+	7UI2yfR3HUZ
+X-Gm-Gg: ASbGncv/6MfNCayLCkzHYcJJIsz2cgPyBmDNPHGxKhke5DyY+LmYpmDFakGwZ8kDv85
+	4NcVYdI0XYxIBOth0GY7JebICA9NNhaEOPL3rRxEmHuScg3B3b20W0GJxpteBMYaVIOkY5tCVqA
+	FN2kY98Cvwuay1qJ00JYPs6umuIymNsyNGorwBirf/F9b6m/hBL3Fiv/g7Iv1FFxnw07/+y9C1j
+	jJ6OMK0/37wMMNcoQ0lxmAcmLjrZBoS29AdEDWlC198qu04kBllNt4YwATCHEJ8opusFqgXjo/Z
+	iBbWL2Pycp9jN/vhuTTSK8URZj+zquH+yymV7rbqeF8PcmuDKMGN1znstqpssrE2qEPZukkeCh1
+	rPxwH/+9B5MIJGfEyHb7RaO2sKtg/ncTrxTjjMo70sdJqwyeUoxYJIRLZFJxzoR93G9FfI+8l2O
+	4lxtSj
+X-Google-Smtp-Source: AGHT+IGLvSloZN9rz7Q1Ot5ySAqEGN+pD4Hy61WA/iP+ZA54x6OY7LQsv857Shn6ro0lFyz4ZSjf8OAT8yx0
+X-Received: by 2002:a05:6a21:3382:b0:2e5:c9ee:96ed with SMTP id adf61e73a8af0-32b620da92bmr925721637.43.1759439081316;
+        Thu, 02 Oct 2025 14:04:41 -0700 (PDT)
+Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-101.dlp.protect.broadcom.com. [144.49.247.101])
+        by smtp-relay.gmail.com with ESMTPS id 41be03b00d2f7-b6099b98526sm151910a12.14.2025.10.02.14.04.40
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 02 Oct 2025 14:04:41 -0700 (PDT)
+X-Relaying-Domain: broadcom.com
+X-CFilter-Loop: Reflected
+Received: by mail-wm1-f71.google.com with SMTP id 5b1f17b1804b1-46e36f9c651so9693815e9.3
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1759439079; x=1760043879; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=C2UQeXeCdd38LZjkJTP74V8I/AwlCwJ5vjuI4bPLac8=;
+        b=OFISdMeOfvEKfVtKZGfW3hrRgSBI40m3XgVOdaOCvidXH0/6AyvdqtPti0z0cWhOtk
+         GKz3SmMG7NFPshYmzDJjoOOWU1kIg0kEa7o3JoUzPhyT8fRQ/rxEuhR8YxpdyPH696uC
+         UUPqL8KsrbM1Sty+5iIvxPRoswBFsyw1wlYik=
+X-Forwarded-Encrypted: i=1; AJvYcCV0VOV4WPCt4sNnViuHukI4KxnPUZekyy6tPviZnxlRxd7AnFIiNBFCnVohOfbKY01VCFvWvAmdRGs=@vger.kernel.org
+X-Received: by 2002:a05:600c:5304:b0:46e:5df3:190d with SMTP id 5b1f17b1804b1-46e7110ef5dmr4793865e9.11.1759439079339;
+        Thu, 02 Oct 2025 14:04:39 -0700 (PDT)
+X-Received: by 2002:a05:600c:5304:b0:46e:5df3:190d with SMTP id 5b1f17b1804b1-46e7110ef5dmr4793685e9.11.1759439078875;
+        Thu, 02 Oct 2025 14:04:38 -0700 (PDT)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46e5c4c0321sm61711295e9.8.2025.10.02.14.04.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 02 Oct 2025 14:04:37 -0700 (PDT)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+To: andersson@kernel.org,
+	robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	florian.fainelli@broadcom.com,
+	ulf.hansson@linaro.org,
+	adrian.hunter@intel.com
+Cc: bcm-kernel-feedback-list@broadcom.com,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Kamal Dasu <kamal.dasu@broadcom.com>
+Subject: [PATCH 0/3] sdhci-brcmstb SD host controller SoC specific enhancements 
+Date: Thu,  2 Oct 2025 17:04:23 -0400
+Message-Id: <20251002210426.2490368-1-kamal.dasu@broadcom.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250929113515.26752-5-quic_rampraka@quicinc.com>
+Content-Transfer-Encoding: 8bit
+X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
-Hi Ram,
+sdhci-brcmstb HS200 configuration for BCM72116 and PM register save restore
+changes applicable to various SoCs. 
 
-kernel test robot noticed the following build warnings:
+Kamal Dasu (3):
+  dt-bindings: mmc: Add support for BCM72116 and BCM74371 SD host
+    controller
+  mmc: sdhci-brcmstb: clear CFG_OP_DLY when using HS200
+  mmc: brcmstb: save and restore registers during PM
 
-[auto build test WARNING on robh/for-next]
-[also build test WARNING on krzk-dt/for-next linus/master ulf-hansson-mmc-mirror/next v6.17 next-20250929]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Ram-Prakash-Gupta/dt-bindings-mmc-Add-dll-hsr-list-for-HS400-and-HS200-modes/20250929-193817
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-patch link:    https://lore.kernel.org/r/20250929113515.26752-5-quic_rampraka%40quicinc.com
-patch subject: [PATCH v4 4/4] mmc: sdhci-msm: Rectify DLL programming sequence for SDCC
-config: s390-allyesconfig (https://download.01.org/0day-ci/archive/20251002/202510022258.5n14WOx5-lkp@intel.com/config)
-compiler: s390-linux-gcc (GCC) 15.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20251002/202510022258.5n14WOx5-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202510022258.5n14WOx5-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
-   In file included from include/asm-generic/bug.h:22,
-                    from arch/s390/include/asm/bug.h:69,
-                    from include/linux/bug.h:5,
-                    from include/linux/mmdebug.h:5,
-                    from arch/s390/include/asm/cmpxchg.h:11,
-                    from arch/s390/include/asm/atomic.h:16,
-                    from include/linux/atomic.h:7,
-                    from include/asm-generic/bitops/atomic.h:5,
-                    from arch/s390/include/asm/bitops.h:75,
-                    from include/linux/bitops.h:67,
-                    from arch/s390/include/asm/machine.h:25,
-                    from arch/s390/include/asm/lowcore.h:13,
-                    from arch/s390/include/asm/current.h:13,
-                    from arch/s390/include/asm/preempt.h:5,
-                    from include/linux/preempt.h:79,
-                    from arch/s390/include/asm/timex.h:13,
-                    from include/linux/timex.h:67,
-                    from include/linux/time32.h:13,
-                    from include/linux/time.h:60,
-                    from include/linux/stat.h:19,
-                    from include/linux/module.h:13,
-                    from drivers/mmc/host/sdhci-msm.c:8:
-   drivers/mmc/host/sdhci-msm.c: In function 'sdhci_msm_configure_dll':
->> include/linux/kern_levels.h:5:25: warning: format '%u' expects argument of type 'unsigned int', but argument 4 has type 'long unsigned int' [-Wformat=]
-       5 | #define KERN_SOH        "\001"          /* ASCII Start Of Header */
-         |                         ^~~~~~
-   include/linux/printk.h:486:25: note: in definition of macro 'printk_index_wrap'
-     486 |                 _p_func(_fmt, ##__VA_ARGS__);                           \
-         |                         ^~~~
-   include/linux/printk.h:557:9: note: in expansion of macro 'printk'
-     557 |         printk(KERN_ERR pr_fmt(fmt), ##__VA_ARGS__)
-         |         ^~~~~~
-   include/linux/kern_levels.h:11:25: note: in expansion of macro 'KERN_SOH'
-      11 | #define KERN_ERR        KERN_SOH "3"    /* error conditions */
-         |                         ^~~~~~~~
-   include/linux/printk.h:557:16: note: in expansion of macro 'KERN_ERR'
-     557 |         printk(KERN_ERR pr_fmt(fmt), ##__VA_ARGS__)
-         |                ^~~~~~~~
-   drivers/mmc/host/sdhci-msm.c:927:33: note: in expansion of macro 'pr_err'
-     927 |                                 pr_err("%s: %s: Non standard clk freq =%u\n",
-         |                                 ^~~~~~
-
-
-vim +5 include/linux/kern_levels.h
-
-314ba3520e513a Joe Perches 2012-07-30  4  
-04d2c8c83d0e3a Joe Perches 2012-07-30 @5  #define KERN_SOH	"\001"		/* ASCII Start Of Header */
-04d2c8c83d0e3a Joe Perches 2012-07-30  6  #define KERN_SOH_ASCII	'\001'
-04d2c8c83d0e3a Joe Perches 2012-07-30  7  
+ .../bindings/mmc/brcm,sdhci-brcmstb.yaml      |   2 +
+ drivers/mmc/host/sdhci-brcmstb.c              | 159 +++++++++++++++++-
+ 2 files changed, 153 insertions(+), 8 deletions(-)
 
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.34.1
+
