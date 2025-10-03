@@ -1,326 +1,146 @@
-Received: from mail-qt1-f227.google.com (mail-qt1-f227.google.com [209.85.160.227])
+Received: from mail-qv1-f99.google.com (mail-qv1-f99.google.com [209.85.219.99])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B323B278E67
-	for <linux-mmc@vger.kernel.org>; Thu,  2 Oct 2025 21:04:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.227
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9DE82D8760
+	for <linux-mmc@vger.kernel.org>; Fri,  3 Oct 2025 17:09:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.99
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759439101; cv=none; b=YKy47aoxz3WsPSHRlKiO9QOJkRzeMZxM1N5rgjmW4x6EHSoNKj3zsLOJ5tLV68NRhUWhK51LYfURNrIaNUpblzNgYsjgni59CMj2yRxIco/4DijKq1AmcNzXpnlHQVTogMUy/1gv6MUuBs06VTK5Ws2PpiEjIADM/bq+srMRcuI=
+	t=1759511387; cv=none; b=FxoNbN8mErXTzP0yeNDD9iNYmTTrJhN6TCWK5Aj5+P6NmjUWWJFg1CKl+2vhmEGiGQ1sAZTCbnjqeBmW6JpNaAbdmuy0I/pwXV2lob72sD2ZeOoDZP0pbIN/14YfcdKtwy4JRayubb5vucd4cBC3oYhCh9ORS6ITNvfFKKfjlCQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759439101; c=relaxed/simple;
-	bh=6TAVlTK+sXTzkna2XCGhzK3JAQmXwZYk58u9/NK5elY=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Koz7D8W2OTdJeEJ82PJJqGG5rBtHNHEWKjRaM1IJUmfncTDqofarqSASoQoVX/CR+TL1MujfttJZp4aRI9qnclJ/3oap2ahyyotpcgRJGF1LyVub8jGjZyIxBC8eou/V9uFmr9nRfdgyEZdHoZKhStF9q1HZm1JAjD1d3ai1Ku4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=DqZIgWK2; arc=none smtp.client-ip=209.85.160.227
+	s=arc-20240116; t=1759511387; c=relaxed/simple;
+	bh=5Z1/gl8Vildjdb9LI4vL05a94ASK0LMfvbSWas9aGg8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=PdOaZzI6QGH5EKksFWSGT6MV3uDkLJHFk03kdquxd9c7nINep7mJwrLmfI0jICxseyQLtgJ36SOYRDoej5V9dIjfjaq2R87RF5lu1YSUeoSljxSsQGb2bTzbADVfCJDMWWyBr6HospRl/TcJcSKTALOeQpkDH4Dv2RqciYIeuQs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=Az4vYIaL; arc=none smtp.client-ip=209.85.219.99
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="DqZIgWK2"
-Received: by mail-qt1-f227.google.com with SMTP id d75a77b69052e-4de659d5a06so8636281cf.3
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:59 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="Az4vYIaL"
+Received: by mail-qv1-f99.google.com with SMTP id 6a1803df08f44-7957e2f6ba8so23910966d6.3
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Oct 2025 10:09:45 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759439099; x=1760043899;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:dkim-signature
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=cwbGC/K9B4U3uycXerXPSUMJfx+iuM+3b1WmPO2FpvA=;
-        b=OqMEuvSYAa/Ylv72x0pDjMhYfwwy/IzAIvknZQg6+Hy1K12P2/UToPwxw0hePANnYE
-         mNomuKCzV2dyKTrAwC1sM17cPuE/GiYNwtRZlZaJ9ouNCO1yPLphJPLOpB5LMQoma203
-         ewnNWBqkukc0BULad9efVtGwiIK58Aqw+2BTKX+WkSRW97NLR9JZgI9+DCzJojtgQ4hm
-         BAYKvA0NqmSzoAR55YM5j//hG4G44BXgXrxeHLpxe9unPaP7qaYfl5nrZxyHeEqFF83p
-         6DYRhDkxEZMqY45FLFdkr9llc3aY1P6shtqnvbasCXTUnwFvWbCp75F62HE5pIdOrSXr
-         W2Ug==
-X-Forwarded-Encrypted: i=1; AJvYcCVqyD8u1Hm2Dxq75kmLP0DNLqMmOrSCFF1r2pYXgwL/xs2AZsZXcKty1kj7ewYvlmdQ8dzT8Lt0cO8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzqQuybx5Gkao1m+CJDKSGQaoC844ssS/6dYEv20cSbQMgJqu4p
-	huptN3HOXe2qglXdaia8tvSDangzS8q0RkasGSww2DhB9wyeofudVRaof+A+g79UHxiY0na+CC4
-	xPgFzsilN2/MqHWZruylUztOgbHKEAiE6vRoAjc6RfZhfsQFxaqDjWGji2BddpIlprP+D9n9vuV
-	p11pBbga+7Oll+iQ95jg8KJc1FCQVh3YWMb9/M42qIz2YaX11DzIXhiWqpsJneyDfjWwhSWmuvX
-	rv9Tk6c0xz7
-X-Gm-Gg: ASbGncvpn29yx1Mzznb5923Ixw4OIJ6dRnLQVTEuStCrMGfkESpNgj+BleEL8TOErtm
-	0War73W0Ur/P5rdxWS9cT2wmUAbx48++Ag6HQqc0LwCXG1bt1gYaIyretQ/Cth6M946ZtQONQZT
-	llSWWT63G2mWEvki36oOWuOFG+ctF2A+336Zuifng95b/COzDEcsfJaLJvfXOr74aAQ6iRyZP72
-	fQnpUHbs0CQDI2bwdP+UoxXkLMglU1X9s1fZbQj98gMIrAYd3M+QJroqojKp+W6ZoiGOeBeXOEh
-	Sfl+beoX3ANtSecboo0jf3EjBb/Rd8TIEfHCD0PN/YGpjp7nC8/IZCoxljXuU+oorNym2GM/mCg
-	Hnxdab22/TNEARx9F8TDBNdQ0hqzd9D4fF8THRL6t1yxXv8xSon6XwQWKoKQY6EsVPb04BCuDYs
-	LmXlyk
-X-Google-Smtp-Source: AGHT+IEsu1AW3A22wSpH7RO+ShAu0qlOicAA7meEU3TekUJi1ANGwFHUk5jnZcPNIDgFrucmk7k/jqBmXESU
-X-Received: by 2002:a05:622a:a94a:10b0:4e4:f4cf:23d7 with SMTP id d75a77b69052e-4e576ada48amr9462051cf.39.1759439098524;
-        Thu, 02 Oct 2025 14:04:58 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1759511384; x=1760116184;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:dkim-signature:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Rhq5Xd4Igc9fjcR+TCYBH/u4+ukG5nbOgfFURkP/fuM=;
+        b=BuCuUkHK8R/vmF5nBzeXvO9hEbHwJ3GJF40TnlSC2azuBg0jqUawdcx3kHg8l8crmT
+         +euVP4ncvERsywvWF3gSKNzkjtLOsE9zmrMlmRoy22kYShCeBDdPI9Vqo6IJxXwABjz7
+         q4YphvmixftfnTCCy+oMYFNENkn9tnfy7TkFWxFlDiPUImXehGXkYITLLS7HmPBvM4j6
+         6uMmfKXFgwj0mwycMZ3l9/jH9+HHR8h/HeLyHSv1AJrtZ+vkb3RVH8kDyl30k3MTL8t2
+         LAXKQ0xEsDDnD6pD0n2qO0O1vkrxm4h8I5vi7FJDLzU3gjtOpq/CXFR8GMxKu2lJbnVT
+         RHYw==
+X-Forwarded-Encrypted: i=1; AJvYcCUX5p+Rf+P+CtfkZ7F6xlogZZ8cHXmNF2b0VMNw88OuWK0Lr8HBqp21wxiY7b5p6wIYL248ZQcSPoA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwXuXS/5EsiewQ/YyFtIsWFLrfAr3XMnS/4d7xJg9wo4CdhamCQ
+	udhM2g91xUaUl9kJhAiuwImYftMJd55u9OK7hgMKnUa+gISZn3dSwdc6yYI6FNSGjaMjUMBLcVK
+	GbzV0tbjdWFzPHEIp+9kx1zH0+xEwtQ2l1i+6NS+BcSigKWWd99a0oysyBSmq6NjFtsLUS3HqRD
+	C6oP3QDLKHkPEDsTBqIC8n8VcVkAr0s8LdQ28l8T8LPy2RlzgvF4MiByUH2Gca3NS2rn4pcw1Zv
+	bAvNKgTvVbIvtFmPVXd
+X-Gm-Gg: ASbGncvmpc7oAjRoSqtiBJ/JAyIUP9VOXA7dgAI3ToK1rBQM7jiSZG2py+zzMAz0lfF
+	IcdyZd+ADzXnb21Kb1YYkl3uLK8VHPdyAEtafERRFi2XLbeKk+0N7QBMgZWKIyVeyZsqWASW3Rz
+	QG5b8bWnWFLNn6rKx8paSUG+RhvkuQBbIPUYW/QLvj99S2waj2pBnOJHs7CaGDFrBKPjFGSTSYQ
+	KxW7eSCzztI7fm9XfumNb32N69i7pW7xYZgRrE8vsH4nYntYZN/ZksdjYKhnodwVbTjMWImA8Cj
+	LM/PfmJr3OLl0m2jS0iYLcvoOM4D5MT0tXjjel6yJp8OOxK4s86HSWG8M43mFp7gymbVoGPYory
+	bLOja8b9Eq/NGRREzuYjABLiu3182LDfJxuRvZAr2E/vSMBs0WoKmLxWxvj6l3VxKS6w6S99l2q
+	OSiKAnyOiZCfWj
+X-Google-Smtp-Source: AGHT+IF0rXvEcDKCD2ISO/QHLmIPhaU8CwqK++gFKNBFR9rl3FV4lJ2aoT9ysbQ+Ruh+wP+Q5OgMpmsoodI0
+X-Received: by 2002:ad4:5e89:0:b0:70d:6de2:1b2e with SMTP id 6a1803df08f44-879dc86d253mr51555206d6.58.1759511384277;
+        Fri, 03 Oct 2025 10:09:44 -0700 (PDT)
 Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-100.dlp.protect.broadcom.com. [144.49.247.100])
-        by smtp-relay.gmail.com with ESMTPS id d75a77b69052e-4e55cbd45aesm1940621cf.9.2025.10.02.14.04.57
+        by smtp-relay.gmail.com with ESMTPS id 6a1803df08f44-878bda73490sm4074856d6.19.2025.10.03.10.09.43
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Oct 2025 14:04:58 -0700 (PDT)
+        Fri, 03 Oct 2025 10:09:44 -0700 (PDT)
 X-Relaying-Domain: broadcom.com
 X-CFilter-Loop: Reflected
-Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-46e2c11b94cso8158065e9.3
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Oct 2025 14:04:57 -0700 (PDT)
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-32ec2211659so2355594a91.0
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Oct 2025 10:09:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1759439097; x=1760043897; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cwbGC/K9B4U3uycXerXPSUMJfx+iuM+3b1WmPO2FpvA=;
-        b=DqZIgWK2wqAkh5M+9VjQht8PYqTeeTbJsWST9og2lZrPPkRXD/XCJzn/aOC3R4jBl+
-         S30CiG2tNH5CzhhUupIAwRuvrkE7CKl6SFP0wPqcJsi1oCQWFJ8iduirmGKVSMvy5RSK
-         cZb1x3gMji6jvYlXOvAYBlRblmS8KcqWhw058=
-X-Forwarded-Encrypted: i=1; AJvYcCWPDl56F09hEkA/Hoy/MOVxneGArdn6WOPD+u2ae4qsqkKv33wf59uHstb2z8tR0Mv230WDeYfSn14=@vger.kernel.org
-X-Received: by 2002:a05:600c:8b22:b0:45b:4a98:91cf with SMTP id 5b1f17b1804b1-46e71102657mr4393365e9.15.1759439096538;
-        Thu, 02 Oct 2025 14:04:56 -0700 (PDT)
-X-Received: by 2002:a05:600c:8b22:b0:45b:4a98:91cf with SMTP id 5b1f17b1804b1-46e71102657mr4393165e9.15.1759439096023;
-        Thu, 02 Oct 2025 14:04:56 -0700 (PDT)
-Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46e5c4c0321sm61711295e9.8.2025.10.02.14.04.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 02 Oct 2025 14:04:55 -0700 (PDT)
-From: Kamal Dasu <kamal.dasu@broadcom.com>
-To: andersson@kernel.org,
-	robh@kernel.org,
-	krzk+dt@kernel.org,
-	conor+dt@kernel.org,
-	florian.fainelli@broadcom.com,
-	ulf.hansson@linaro.org,
-	adrian.hunter@intel.com
-Cc: bcm-kernel-feedback-list@broadcom.com,
-	devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	Kamal Dasu <kamal.dasu@broadcom.com>
-Subject: [PATCH 3/3] mmc: brcmstb: save and restore registers during PM
-Date: Thu,  2 Oct 2025 17:04:26 -0400
-Message-Id: <20251002210426.2490368-4-kamal.dasu@broadcom.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20251002210426.2490368-1-kamal.dasu@broadcom.com>
-References: <20251002210426.2490368-1-kamal.dasu@broadcom.com>
+        d=broadcom.com; s=google; t=1759511383; x=1760116183; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=Rhq5Xd4Igc9fjcR+TCYBH/u4+ukG5nbOgfFURkP/fuM=;
+        b=Az4vYIaLPQENxx7lbM5z/Mj5zGy5rE59RvI1fK1IjUVV7VQZDHnedP6TP6pXO8ZXYp
+         RZBQaFBeOS7rP61UekccNfzQhBIhCW9HBiPTAFp/ZGbxEducMnjdRCjBWgbEQ0FHutQf
+         TGoA14N6i6Tpb3nbK5TSy6imaQg+KMnCzdSBU=
+X-Forwarded-Encrypted: i=1; AJvYcCWcOsPXNVVDpDRb7qVIUbn/z6/zIvY3YCQFyBcgyXin5iKvUT/fCkm60lG+ZrvCxujQmG4QtxZR378=@vger.kernel.org
+X-Received: by 2002:a17:90b:33d1:b0:336:b563:993f with SMTP id 98e67ed59e1d1-339c27b9360mr4610183a91.34.1759511382732;
+        Fri, 03 Oct 2025 10:09:42 -0700 (PDT)
+X-Received: by 2002:a17:90b:33d1:b0:336:b563:993f with SMTP id 98e67ed59e1d1-339c27b9360mr4610148a91.34.1759511382294;
+        Fri, 03 Oct 2025 10:09:42 -0700 (PDT)
+Received: from [192.168.1.3] (ip68-4-215-93.oc.oc.cox.net. [68.4.215.93])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-339c4a1a19csm2669228a91.7.2025.10.03.10.09.38
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 03 Oct 2025 10:09:40 -0700 (PDT)
+Message-ID: <72d1e09d-f30a-4f8e-95c3-b9a40e1e1b73@broadcom.com>
+Date: Fri, 3 Oct 2025 10:09:37 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add support for BCM72116 and
+ BCM74371 SD host controller
+To: Kamal Dasu <kamal.dasu@broadcom.com>, andersson@kernel.org,
+ robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: bcm-kernel-feedback-list@broadcom.com, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org
+References: <20251002210426.2490368-1-kamal.dasu@broadcom.com>
+ <20251002210426.2490368-2-kamal.dasu@broadcom.com>
+Content-Language: en-US
+From: Florian Fainelli <florian.fainelli@broadcom.com>
+Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
+ xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
+ M0Txqn1tOWoIc4QUl6Ggqf5KP6FoRkCrgMMTnUAINsINYXK+3OLe7HjP10h2jDRX4Ajs4Ghs
+ JrZOBru6rH0YrgAhr6O5gG7NE1jhly+EsOa2MpwOiXO4DE/YKZGuVe6Bh87WqmILs9KvnNrQ
+ PcycQnYKTVpqE95d4M824M5cuRB6D1GrYovCsjA9uxo22kPdOoQRAu5gBBn3AdtALFyQj9DQ
+ KQuc39/i/Kt6XLZ/RsBc6qLs+p+JnEuPJngTSfWvzGjpx0nkwCMi4yBb+xk7Hki4kEslABEB
+ AAHNMEZsb3JpYW4gRmFpbmVsbGkgPGZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tPsLB
+ IQQQAQgAywUCZWl41AUJI+Jo+hcKAAG/SMv+fS3xUQWa0NryPuoRGjsA3SAUAAAAAAAWAAFr
+ ZXktdXNhZ2UtbWFza0BwZ3AuY29tjDAUgAAAAAAgAAdwcmVmZXJyZWQtZW1haWwtZW5jb2Rp
+ bmdAcGdwLmNvbXBncG1pbWUICwkIBwMCAQoFF4AAAAAZGGxkYXA6Ly9rZXlzLmJyb2FkY29t
+ Lm5ldAUbAwAAAAMWAgEFHgEAAAAEFQgJChYhBNXZKpfnkVze1+R8aIExtcQpvGagAAoJEIEx
+ tcQpvGagWPEH/2l0DNr9QkTwJUxOoP9wgHfmVhqc0ZlDsBFv91I3BbhGKI5UATbipKNqG13Z
+ TsBrJHcrnCqnTRS+8n9/myOF0ng2A4YT0EJnayzHugXm+hrkO5O9UEPJ8a+0553VqyoFhHqA
+ zjxj8fUu1px5cbb4R9G4UAySqyeLLeqnYLCKb4+GklGSBGsLMYvLmIDNYlkhMdnnzsSUAS61
+ WJYW6jjnzMwuKJ0ZHv7xZvSHyhIsFRiYiEs44kiYjbUUMcXor/uLEuTIazGrE3MahuGdjpT2
+ IOjoMiTsbMc0yfhHp6G/2E769oDXMVxCCbMVpA+LUtVIQEA+8Zr6mX0Yk4nDS7OiBlvOwE0E
+ U8AbwQEIAKxr71oqe+0+MYCc7WafWEcpQHFUwvYLcdBoOnmJPxDwDRpvU5LhqSPvk/yJdh9k
+ 4xUDQu3rm1qIW2I9Puk5n/Jz/lZsqGw8T13DKyu8eMcvaA/irm9lX9El27DPHy/0qsxmxVmU
+ pu9y9S+BmaMb2CM9IuyxMWEl9ruWFS2jAWh/R8CrdnL6+zLk60R7XGzmSJqF09vYNlJ6Bdbs
+ MWDXkYWWP5Ub1ZJGNJQ4qT7g8IN0qXxzLQsmz6tbgLMEHYBGx80bBF8AkdThd6SLhreCN7Uh
+ IR/5NXGqotAZao2xlDpJLuOMQtoH9WVNuuxQQZHVd8if+yp6yRJ5DAmIUt5CCPcAEQEAAcLB
+ gQQYAQIBKwUCU8AbwgUbDAAAAMBdIAQZAQgABgUCU8AbwQAKCRCTYAaomC8PVQ0VCACWk3n+
+ obFABEp5Rg6Qvspi9kWXcwCcfZV41OIYWhXMoc57ssjCand5noZi8bKg0bxw4qsg+9cNgZ3P
+ N/DFWcNKcAT3Z2/4fTnJqdJS//YcEhlr8uGs+ZWFcqAPbteFCM4dGDRruo69IrHfyyQGx16s
+ CcFlrN8vD066RKevFepb/ml7eYEdN5SRALyEdQMKeCSf3mectdoECEqdF/MWpfWIYQ1hEfdm
+ C2Kztm+h3Nkt9ZQLqc3wsPJZmbD9T0c9Rphfypgw/SfTf2/CHoYVkKqwUIzI59itl5Lze+R5
+ wDByhWHx2Ud2R7SudmT9XK1e0x7W7a5z11Q6vrzuED5nQvkhAAoJEIExtcQpvGagugcIAJd5
+ EYe6KM6Y6RvI6TvHp+QgbU5dxvjqSiSvam0Ms3QrLidCtantcGT2Wz/2PlbZqkoJxMQc40rb
+ fXa4xQSvJYj0GWpadrDJUvUu3LEsunDCxdWrmbmwGRKqZraV2oG7YEddmDqOe0Xm/NxeSobc
+ MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
+ 7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
+ 95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
+In-Reply-To: <20251002210426.2490368-2-kamal.dasu@broadcom.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
-Added support to save and restore registers that are critical
-during PM.
 
-Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
----
- drivers/mmc/host/sdhci-brcmstb.c | 124 +++++++++++++++++++++++++++++--
- 1 file changed, 119 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-index 0905b316a24b..ffa602a99ab7 100644
---- a/drivers/mmc/host/sdhci-brcmstb.c
-+++ b/drivers/mmc/host/sdhci-brcmstb.c
-@@ -24,7 +24,9 @@
- #define BRCMSTB_MATCH_FLAGS_NO_64BIT		BIT(0)
- #define BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT	BIT(1)
- #define BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE	BIT(2)
--#define BRCMSTB_MATCH_FLAGS_USE_CARD_BUSY	BIT(4)
-+#define BRCMSTB_MATCH_FLAGS_HAS_CFG_V1		BIT(3)
-+#define BRCMSTB_MATCH_FLAGS_HAS_CFG_V2		BIT(4)
-+#define BRCMSTB_MATCH_FLAGS_USE_CARD_BUSY	BIT(5)
- 
- #define BRCMSTB_PRIV_FLAGS_HAS_CQE		BIT(0)
- #define BRCMSTB_PRIV_FLAGS_GATE_CLOCK		BIT(1)
-@@ -38,19 +40,39 @@
- #define SDIO_CFG_OP_DLY_DEFAULT			0x80000003
- #define SDIO_CFG_CQ_CAPABILITY			0x4c
- #define SDIO_CFG_CQ_CAPABILITY_FMUL		GENMASK(13, 12)
-+#define SDIO_CFG_SD_PIN_SEL			0x44
-+#define SDIO_CFG_V1_SD_PIN_SEL			0x54
-+#define SDIO_CFG_PHY_SW_MODE_0_RX_CTRL		0x7C
- #define SDIO_CFG_MAX_50MHZ_MODE			0x1ac
- #define SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE	BIT(31)
- #define SDIO_CFG_MAX_50MHZ_MODE_ENABLE		BIT(0)
- 
-+#define SDIO_BOOT_MAIN_CTL			0x0
-+
- #define MMC_CAP_HSE_MASK	(MMC_CAP2_HSX00_1_2V | MMC_CAP2_HSX00_1_8V)
- /* Select all SD UHS type I SDR speed above 50MB/s */
- #define MMC_CAP_UHS_I_SDR_MASK	(MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104)
- 
-+enum cfg_core_ver {
-+	SDIO_CFG_CORE_V1 = 1,
-+	SDIO_CFG_CORE_V2,
-+};
-+
-+struct sdhci_brcmstb_saved_regs {
-+	u32 sd_pin_sel;
-+	u32 phy_sw_mode0_rxctrl;
-+	u32 max_50mhz_mode;
-+	u32 boot_main_ctl;
-+};
-+
- struct sdhci_brcmstb_priv {
- 	void __iomem *cfg_regs;
-+	void __iomem *boot_regs;
-+	struct sdhci_brcmstb_saved_regs saved_regs;
- 	unsigned int flags;
- 	struct clk *base_clk;
- 	u32 base_freq_hz;
-+	void (*save_restore_regs)(struct mmc_host *mmc, int save);
- };
- 
- struct brcmstb_match_priv {
-@@ -60,6 +82,69 @@ struct brcmstb_match_priv {
- 	const unsigned int flags;
- };
- 
-+static void sdhci_brcmstb_save_regs(struct mmc_host *mmc, enum cfg_core_ver ver)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	struct sdhci_brcmstb_saved_regs *sr = &priv->saved_regs;
-+	void __iomem *cr = priv->cfg_regs;
-+	bool is_emmc = mmc->caps & MMC_CAP_NONREMOVABLE;
-+
-+	/* save  */
-+	if (is_emmc && priv->boot_regs)
-+		sr->boot_main_ctl = readl(priv->boot_regs + SDIO_BOOT_MAIN_CTL);
-+
-+	if (ver == SDIO_CFG_CORE_V1) {
-+		sr->sd_pin_sel = readl(cr + SDIO_CFG_V1_SD_PIN_SEL);
-+		return;
-+	}
-+
-+	sr->sd_pin_sel = readl(cr + SDIO_CFG_SD_PIN_SEL);
-+	sr->phy_sw_mode0_rxctrl = readl(cr + SDIO_CFG_PHY_SW_MODE_0_RX_CTRL);
-+	sr->max_50mhz_mode = readl(cr + SDIO_CFG_MAX_50MHZ_MODE);
-+}
-+
-+static void sdhci_brcmstb_restore_regs(struct mmc_host *mmc,
-+						enum cfg_core_ver ver)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	struct sdhci_brcmstb_saved_regs *sr = &priv->saved_regs;
-+	void __iomem *cr = priv->cfg_regs;
-+	bool is_emmc = mmc->caps & MMC_CAP_NONREMOVABLE;
-+
-+	/* restore */
-+	if (is_emmc && priv->boot_regs)
-+		writel(sr->boot_main_ctl, priv->boot_regs + SDIO_BOOT_MAIN_CTL);
-+
-+	if (ver == SDIO_CFG_CORE_V1) {
-+		writel(sr->sd_pin_sel, cr + SDIO_CFG_SD_PIN_SEL);
-+		return;
-+	}
-+
-+	writel(sr->sd_pin_sel, cr + SDIO_CFG_SD_PIN_SEL);
-+	writel(sr->phy_sw_mode0_rxctrl, cr + SDIO_CFG_PHY_SW_MODE_0_RX_CTRL);
-+	writel(sr->max_50mhz_mode, cr + SDIO_CFG_MAX_50MHZ_MODE);
-+}
-+
-+static void sdhci_brcmstb_save_restore_regs_v1(struct mmc_host *mmc, int save)
-+{
-+	if (save)
-+		sdhci_brcmstb_save_regs(mmc, SDIO_CFG_CORE_V1);
-+	else
-+		sdhci_brcmstb_restore_regs(mmc, SDIO_CFG_CORE_V1);
-+}
-+
-+static void sdhci_brcmstb_save_restore_regs_v2(struct mmc_host *mmc, int save)
-+{
-+	if (save)
-+		sdhci_brcmstb_save_regs(mmc, SDIO_CFG_CORE_V2);
-+	else
-+		sdhci_brcmstb_restore_regs(mmc, SDIO_CFG_CORE_V2);
-+}
-+
- static inline void enable_clock_gating(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -300,24 +385,33 @@ static struct brcmstb_match_priv match_priv_7425 = {
- 	.ops = &sdhci_brcmstb_ops,
- };
- 
--static struct brcmstb_match_priv match_priv_7445 = {
-+static struct brcmstb_match_priv match_priv_74371 = {
- 	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
- 	.ops = &sdhci_brcmstb_ops,
- };
- 
-+static struct brcmstb_match_priv match_priv_7445 = {
-+	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT |
-+			BRCMSTB_MATCH_FLAGS_HAS_CFG_V1,
-+	.ops = &sdhci_brcmstb_ops,
-+};
-+
- static struct brcmstb_match_priv match_priv_72116 = {
--	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
-+	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT |
-+			BRCMSTB_MATCH_FLAGS_HAS_CFG_V1,
- 	.ops = &sdhci_brcmstb_ops_72116,
- };
- 
- static const struct brcmstb_match_priv match_priv_7216 = {
--	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
-+	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE |
-+			BRCMSTB_MATCH_FLAGS_HAS_CFG_V2,
- 	.hs400es = sdhci_brcmstb_hs400es,
- 	.ops = &sdhci_brcmstb_ops_7216,
- };
- 
- static struct brcmstb_match_priv match_priv_74165b0 = {
--	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
-+	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE |
-+			BRCMSTB_MATCH_FLAGS_HAS_CFG_V2,
- 	.hs400es = sdhci_brcmstb_hs400es,
- 	.ops = &sdhci_brcmstb_ops_74165b0,
- };
-@@ -325,6 +419,7 @@ static struct brcmstb_match_priv match_priv_74165b0 = {
- static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
- 	{ .compatible = "brcm,bcm2712-sdhci", .data = &match_priv_2712 },
- 	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
-+	{ .compatible = "brcm,bcm74371-sdhci", .data = &match_priv_74371 },
- 	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
- 	{ .compatible = "brcm,bcm72116-sdhci", .data = &match_priv_72116 },
- 	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
-@@ -441,6 +536,19 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
- 	if (res)
- 		goto err;
- 
-+	/* map non-standard BOOT registers if present */
-+	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
-+		priv->boot_regs = devm_platform_get_and_ioremap_resource(pdev, 2, NULL);
-+		if (IS_ERR(priv->boot_regs))
-+			priv->boot_regs = NULL;
-+	}
-+
-+	if (match_priv->flags & BRCMSTB_MATCH_FLAGS_HAS_CFG_V1)
-+		priv->save_restore_regs = sdhci_brcmstb_save_restore_regs_v1;
-+
-+	if (match_priv->flags & BRCMSTB_MATCH_FLAGS_HAS_CFG_V2)
-+		priv->save_restore_regs = sdhci_brcmstb_save_restore_regs_v2;
-+
- 	/*
- 	 * Automatic clock gating does not work for SD cards that may
- 	 * voltage switch so only enable it for non-removable devices.
-@@ -533,6 +641,9 @@ static int sdhci_brcmstb_suspend(struct device *dev)
- 	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
-+	if (priv->save_restore_regs)
-+		priv->save_restore_regs(host->mmc, 1);
-+
- 	clk_disable_unprepare(priv->base_clk);
- 	if (host->mmc->caps2 & MMC_CAP2_CQE) {
- 		ret = cqhci_suspend(host->mmc);
-@@ -564,6 +675,9 @@ static int sdhci_brcmstb_resume(struct device *dev)
- 			ret = clk_set_rate(priv->base_clk, priv->base_freq_hz);
- 	}
- 
-+	if (priv->save_restore_regs)
-+		priv->save_restore_regs(host->mmc, 0);
-+
- 	if (host->mmc->caps2 & MMC_CAP2_CQE)
- 		ret = cqhci_resume(host->mmc);
- 
+On 10/2/2025 2:04 PM, Kamal Dasu wrote:
+> Updating compatibility to support BCM72116 and BCM74371 SD host controller
+> similar to other settop SoCs.
+> 
+> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+
+Reviewed-by: Florian Fainelli <florian.fainelli@broadcom.com>
 -- 
-2.34.1
+Florian
 
