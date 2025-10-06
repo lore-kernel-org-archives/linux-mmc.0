@@ -1,104 +1,100 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBBA4226CF7;
-	Mon,  6 Oct 2025 10:22:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1C51264F81;
+	Mon,  6 Oct 2025 10:47:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.9
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759746138; cv=fail; b=d7DXGFCBla3trrNKISK/AGhxGLVv7Lks77lMi8PdoID5HGYUIw+/RZt51CAEo8EHacXhZ4z+EifwrQ96lEAADrVo4g3Hoin8ZlQTWqU28VR0vnRyFBDm1GYEp6jtrbZ9E5bpPRO93t+uQ3nO1Zv3h84dQp7UuWGtVC3BYf1e8GU=
+	t=1759747627; cv=fail; b=iZkfrC2xrw9gGLUYvfGVNLIp6o7GigHC2Gu0xQrrywkcJ9QpUBWwab+S1Z7oOHkplZib67oaf1bSQwwFet1g2kwbu9wUUlKKPj/MbG6LkaqNOicuBEPn3/cAdcakL/xXMRyJkPE/z3tYP40Pdq6qtgcd8AmDmRxzWZFU9EWfmGo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759746138; c=relaxed/simple;
-	bh=9j+/OIdyNCdXrtrS/Uq0Ylx2ksw0XyoxhCmwYM2vcNM=;
-	h=Message-ID:Date:Subject:From:To:CC:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=SH/ant/2H2QJENClQa0Dna6UVKiSWo/Q1ZvaAS52mGUzX2fi779JjzXXpS0U/lmoyirLjFGm+/A0Vh5FbfzAh72K3mZkE33ZrFU+Qp6C4gDfQsBTTdwtnoOVoCYaFjVj89zlrmLnyyZ53YVbXVu2qG5/bnS9sb04bVPsekgc2QI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=gytgzt1Z; arc=fail smtp.client-ip=198.175.65.14
+	s=arc-20240116; t=1759747627; c=relaxed/simple;
+	bh=raDioN1JnwASXG+0WC3su48YBSoyQNrzHZgKt0Q7J/g=;
+	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=Wmz/vQ/JKzQJ6+DLmVRsEQktrBFhC5CC6Aw4Afm30yS6tUfnGd2wUOIK9n8oDGv3St9tPPYu6zcYF+yZGlNt9wKh+A6zeFeQcq+sTTHRut6aeRsB8E5Scxlwvuc58hNzIcVbez8JE5EMXFvmIOUlG5+FUqW6KDPR64eIjnr9gDk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=fgxGRAJM; arc=fail smtp.client-ip=198.175.65.9
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="gytgzt1Z"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="fgxGRAJM"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1759746137; x=1791282137;
-  h=message-id:date:subject:from:to:cc:references:
+  t=1759747626; x=1791283626;
+  h=message-id:date:subject:to:cc:references:from:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=9j+/OIdyNCdXrtrS/Uq0Ylx2ksw0XyoxhCmwYM2vcNM=;
-  b=gytgzt1Z8QwFhL9J4PDEkvIcZdghxzTRi0ai0vVyDSnYVtsiolc3h7Mc
-   to2N6ugcuZMGVblCe4tfLD9eU/frUioY8F5Naa6WVlKQKb+H/uaBMPd4e
-   tqz8u1KaEAoPgM77LIEo5tfUuMP3U8aE4EH0qItMfDDqTX113VFqZsq3Z
-   vGBkPi2RUyE8VbA2oC8EzQ1e6PonSzqwkyC4w87AN2MTqnPpq27zXc8MU
-   WQ6EmpgleuibceLbGTwmY34zKb5ED1/jz3r9x9NpFl4CQ2f/2Rp4mNw6k
-   3M7ubzrftmg43qknZvQBpmUK1HOifwi8e3Isig6a38E3wK9SH0iSvIjSF
+  bh=raDioN1JnwASXG+0WC3su48YBSoyQNrzHZgKt0Q7J/g=;
+  b=fgxGRAJMhDQRJwbXroREt8ZE7NqiaNnuhy4sHDBX/NZe4p2ze6rzT9eB
+   6MngVfRJzF9wEQLlw1MkXKgId19jpQ/CBBDMsAMifzZa2HHW7/VG+dUVh
+   1McnCOu/F1AkcbATkJau5B4/hbGnmdLfDmEe6cAwIJRMkwb1ArPL/uU4H
+   tZpJCP/nHgOxd7ESovf5IwPqfc9RFBt334jZhMahJymqUBJ0NOoq1KAAM
+   loo8AqD6wP/yLl7JBFlkOV9SShbH9mtMg3XN5ZToejhBddbjUXbcVzq+X
+   lhisG7zhxy68baw/h0DkujFvTvZNOdoWsdqRisRL9tlTohKoxTdS/nI14
    w==;
-X-CSE-ConnectionGUID: qRXx+vzKRViAit2jkQyINA==
-X-CSE-MsgGUID: 24FhnVENQxGmvcszHyad6g==
-X-IronPort-AV: E=McAfee;i="6800,10657,11531"; a="65747975"
-X-IronPort-AV: E=Sophos;i="6.17,312,1747724400"; 
-   d="scan'208";a="65747975"
-Received: from fmviesa006.fm.intel.com ([10.60.135.146])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2025 03:22:16 -0700
-X-CSE-ConnectionGUID: B0WCnlcFSuuzpCmJPbmaAQ==
-X-CSE-MsgGUID: LPwHHz7kR2m7jlEQADcOFg==
+X-CSE-ConnectionGUID: YHWu+zWPT0KaPbhjR4on9w==
+X-CSE-MsgGUID: HBA4QuhQTpycU7KB9iF96A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11573"; a="84546460"
+X-IronPort-AV: E=Sophos;i="6.18,319,1751266800"; 
+   d="scan'208";a="84546460"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2025 03:47:05 -0700
+X-CSE-ConnectionGUID: 86whBuxgQOS4vHQA7pVxWw==
+X-CSE-MsgGUID: 3DpFlj6vTqK1ixLYgCMvjA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.18,319,1751266800"; 
-   d="scan'208";a="179784548"
-Received: from fmsmsx901.amr.corp.intel.com ([10.18.126.90])
-  by fmviesa006.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2025 03:22:16 -0700
-Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
- fmsmsx901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+   d="scan'208";a="203589840"
+Received: from orsmsx903.amr.corp.intel.com ([10.22.229.25])
+  by fmviesa002.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2025 03:47:03 -0700
+Received: from ORSMSX901.amr.corp.intel.com (10.22.229.23) by
+ ORSMSX903.amr.corp.intel.com (10.22.229.25) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27; Mon, 6 Oct 2025 03:22:15 -0700
-Received: from fmsedg903.ED.cps.intel.com (10.1.192.145) by
- FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+ 15.2.2562.27; Mon, 6 Oct 2025 03:47:03 -0700
+Received: from ORSEDG902.ED.cps.intel.com (10.7.248.12) by
+ ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27 via Frontend Transport; Mon, 6 Oct 2025 03:22:15 -0700
-Received: from SJ2PR03CU001.outbound.protection.outlook.com (52.101.43.21) by
- edgegateway.intel.com (192.55.55.83) with Microsoft SMTP Server
+ 15.2.2562.27 via Frontend Transport; Mon, 6 Oct 2025 03:47:03 -0700
+Received: from CH4PR04CU002.outbound.protection.outlook.com (40.107.201.68) by
+ edgegateway.intel.com (134.134.137.112) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27; Mon, 6 Oct 2025 03:22:12 -0700
+ 15.2.2562.27; Mon, 6 Oct 2025 03:47:02 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=hU3NDwom1pH9UqzKUFKtEcUUZwm8WvAXCJhTZUFNh0Y2+3VB9sGYSs4gIcA3G/+Dvkj2W+EiqYiYGmZnHFuPtzeFiRJsnB9wXE4at0yuXkbEqhys3jC/xd/Swqc1H0RRJ4IrbR3PKUUAiNa9rC3u2eBcqOCUiWNwa3JNPY6G2sHnswk5NcasvyUT+i0D0UgnbE/ExKJZ5cOIzi/qvN5MdyHIqS6WY4lmwGGCNMGohVA57II+4NBq68HDE7GZZf9J60r+FgfWH0xNIVQ8i2BLcRaWPTpzdn61Fn8IkMpXY6mQBzpm1NI5rIgoqZFsDc3TnP4Uy/LyCEbqLQhJo3X6ew==
+ b=NnNDLaFmpq53z686nd1IjIsmsgNfjiTZ5bZn2gRD6bP7wj6iETOkszuo6hSlFMMbz2bVZQ9+WKyG3mOnAsO5ogxbPJfdz3TISm3+GdguZBzpvGy9fKIYfw9BYxLSzQCrwJdCuXvWrFdwi+X0bQe9U5xY8ZRLcAPV4oM7DFK3bX7kggahLgLlFAWCsSyxkW6JEGDOoClKAnUEqmN9RL8hQ7IcuVZD5JtBN/9X2Rj8MRoP77wQwGXjmRdp9fZ5UUcs0p/vXjP3b1vzmZ9LTqg1xSMss0xNvMLiSRWV2lA1fjPlIWqryVtroUjurO2EqbTdj1pBo8LXS7OrcUs/zAFntg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=GuTEYHHA0dGDtHFSQE829sS4g8dP4a9BQgLq4sfKIPU=;
- b=uAiwovgwx1YJvpewOti1ObXEp2TGqeDHz/s6gWBuUJhxil5/I9hZ5KN9xk1iAz8diGuBMWdneXrsJ/QwRfqRHu7G9as8AnONssRiAoCP58RhpJufROD9WHCppQfyw2tcTpbPwk/SL+IeOs/wNSx1ZuYhbpyIEgsBZ/ET/050PmKCRnuim6ipUarF4ibAo7yVHijm4vChBcMRcOY3OGiDdeetM4sYWoqMXB+Coa9cttJHPUIHg/qp9v1vuUMuNRImOzsPq5rsEX+GSbLY11I+8awxR90nU0iM+gLOTpRTLHXP0T2mbN4bRBFwE2nz2Cp5DEw9HjzyejpUpq9A8C6z7g==
+ bh=R+XY7KdEOeXelmFURNAQt2ENWXyJnl9JLzNbyBQL/I0=;
+ b=uXdryQbHI6hGCRrbJsyHu4uAr2ZBinVqx6m+cBE7lnd4YGNDSHzJJrTpuxnzl3BtPZ02JdnEsItfZFVtBAdIg/B93CpTSjo9AiYSHrHCrEYzh6hHX2lnco0ipFneKi270KoJo5EQFj4TMRGFfXfotRa5V9zcXvQUQ391PwdEgBq9bXcOzGD/qlmD4cPWdq4Qk098yVjinqHCZLL3WFBkoAnW+r95J3AKFMbRj0yyaOBuyz51yLPs8nphF8ak18uCKhJ4ppwwDk9GfYvU+aGRH9tAGAq4VOW79XnZQEdHQiX9MWvXsjsqcBlixkxIgD+1F8ObzCkTcYb3LZQDslRToA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by DM6PR11MB4721.namprd11.prod.outlook.com (2603:10b6:5:2a3::14) with
+ by SA1PR11MB7063.namprd11.prod.outlook.com (2603:10b6:806:2b5::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9182.20; Mon, 6 Oct
- 2025 10:22:07 +0000
+ 2025 10:46:56 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.20.9182.017; Mon, 6 Oct 2025
- 10:22:07 +0000
-Message-ID: <957d5c73-528f-4182-b655-116fb6b94f3f@intel.com>
-Date: Mon, 6 Oct 2025 13:22:02 +0300
+ 10:46:56 +0000
+Message-ID: <6294fb07-31b4-4c0e-9023-7c5ab604bbf1@intel.com>
+Date: Mon, 6 Oct 2025 13:46:53 +0300
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/3] mmc: brcmstb: save and restore registers during PM
-From: Adrian Hunter <adrian.hunter@intel.com>
-To: Kamal Dasu <kamal.dasu@broadcom.com>, <andersson@kernel.org>,
-	<robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
-	<florian.fainelli@broadcom.com>, <ulf.hansson@linaro.org>
-CC: <bcm-kernel-feedback-list@broadcom.com>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
-	<linux-mmc@vger.kernel.org>
-References: <20251002210426.2490368-1-kamal.dasu@broadcom.com>
- <20251002210426.2490368-4-kamal.dasu@broadcom.com>
- <24a58a70-b4db-4925-8454-78dea4fb22b2@intel.com>
+Subject: Re: [PATCH 0/2] mmc: sdhci: add quirk to disable bounce buffer
+To: Michael Garofalo <officialtechflashyt@gmail.com>
+CC: <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+	<ulf.hansson@linaro.org>
+References: <21d7f0c8-9a61-4759-b655-b12a6fad9885@intel.com>
+ <20251006092815.2555733-1-officialTechflashYT@gmail.com>
 Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <24a58a70-b4db-4925-8454-78dea4fb22b2@intel.com>
+In-Reply-To: <20251006092815.2555733-1-officialTechflashYT@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DUZPR01CA0053.eurprd01.prod.exchangelabs.com
- (2603:10a6:10:469::11) To IA1PR11MB7198.namprd11.prod.outlook.com
+X-ClientProxiedBy: DU2PR04CA0245.eurprd04.prod.outlook.com
+ (2603:10a6:10:28e::10) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -107,332 +103,122 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|DM6PR11MB4721:EE_
-X-MS-Office365-Filtering-Correlation-Id: c4fe6145-bdb9-48ac-f3b7-08de04c233a1
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SA1PR11MB7063:EE_
+X-MS-Office365-Filtering-Correlation-Id: 59b37edb-1cb1-4a0c-e682-08de04c5ab3f
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014|7416014|7053199007;
-X-Microsoft-Antispam-Message-Info: =?utf-8?B?RjllQUV0TVhsZ3FyZHpoUFdaTEtwV1ZGMkpkMCs2UFd2bnc5b0JxSkNCNHdl?=
- =?utf-8?B?ekhjdmZFckxDQmlMQ1J6TEZZTHpjblVHN3dxcHFBTTIvMDBjY1dVNHluRWJh?=
- =?utf-8?B?RENaSUY2eWRoQ1VqZzNLZENRYTB0eWhVU1RwdC9ZbXM2TDB1QmdaeXY3bkZz?=
- =?utf-8?B?elhBeU9DWkFwM05maFZGaitQTlVZRXZwNXF0cEVoVUNFRXljT0NHMER2NTJD?=
- =?utf-8?B?dk5sNEhIOFowblZMSDJDeUlkVTFqZncwRXUvRzVJaDM2SUtRZGd1Rm5yRU5E?=
- =?utf-8?B?dy9hSE11b051OURhZ3huRjR4aitoa1RQeFhyK0Rzb1pZL0gxOGlNbFlFbWcy?=
- =?utf-8?B?K1FTTEkyMDBhampJc2NycVNJQ3hzeGg5RzFSSUs1ejlRR05RMWxtM0F6dnpZ?=
- =?utf-8?B?Qk1hWWE1cTh3QmExZDEwVGV5R1RldnNyc0lRR3BjdGN5SWl6ZDd2RGc5Vkpu?=
- =?utf-8?B?d2tDdDNhWVllVS9qM253dW5DbjNGbnhDUUMzSE9NZEhKZkg1SnI0VW05RDl0?=
- =?utf-8?B?LzVVSExOc1RNTGVlY1M3ZXlUUGdSallybDdKaWFaTndPSjZCbGVJUTZvQjJ0?=
- =?utf-8?B?eHZCLzYzalNHbDFUK2lESVlheVNvRmg4WVhGM2IyOUthb25hTGdBWG9YcjJa?=
- =?utf-8?B?cHFpTFZaSm1YK0p0dlZMN0IzY0VIdmZCblJhOHBic2M4K0VpNmZNWU5qcmlH?=
- =?utf-8?B?UkxoVTMxK2tpL25iamVyS3JnblBEeVBTQW1BMHl0VFNaWC9ZRlZDNjNSR2RZ?=
- =?utf-8?B?WW5UUWFQSTdTaFV0RnJ1MEVYOHZrSUh2RVVVKzRZaldBSjlXb25uYXh2RkV3?=
- =?utf-8?B?U2VCSG91K0wwKzBwSzVsK2hURDJ6aFdvckw4VTdJdkYvSzI5c1BYR0FTdDBD?=
- =?utf-8?B?aVZRbjdNVHBCQUQ5K0owQjAyMDl4RDhTTnp2eUxocndLdHF6ZDViaEs1M0Q3?=
- =?utf-8?B?T0tsU0dkbVA1RnEzb25nVnBvd1h2amdxNnJ0Ykp4NFBTWlVIeE52a0t5SEFX?=
- =?utf-8?B?UEJkbXdOdHVtWjk3RWl5Mno2a013N05SWjB4TGllRXRBOUltRDRHVnA0UDlE?=
- =?utf-8?B?L1hoSlhoSlBCKytnanJLa0JvYmJkZ2IyTFNJQWc2WDBxd2xNOWJpNlVCWTBL?=
- =?utf-8?B?Qm9nOEUrRnU4WnlJTmFYOXRZMys2SGM0WUJ6WDJlU2IyeDN4ZGxETjQxcWNZ?=
- =?utf-8?B?M0h5UFVsekhMVGdwZS9QSGs4VFNCWHEvdDFDS2JmenljM0VuaFlxcE1rdnRQ?=
- =?utf-8?B?bXN2amV3NHRPS1k5SXgwTFVHNWh4OGYxVW5nZ2xxbGc2MTE2YUNURHlZRjQr?=
- =?utf-8?B?bWRaWktaWElVSW5pZ05aNFhKWVErbWp3cWhaV2FmMlpyUDBMWjN0RDdQV0tI?=
- =?utf-8?B?TXRlTisxcnYrb0JGZGlmbWtmWHlWYVZINm5ZdGp6SUZMeHh2S2NXc0JOSkRW?=
- =?utf-8?B?QjduRmJnd2NxS1QxaTlqcE0ySStNSU9kWXRzdzFVaTEvSURYSG14bmw5N2ZC?=
- =?utf-8?B?K2h6aDZtWU4wWXU1dmdoQ1JlcmxuRVZ4OHFFbUNITXI0bGcyVlVTczNYVjhC?=
- =?utf-8?B?WTdmcXVWYlltRGdoZjhoZTJlWE44OXVUNlRGdkczUmh6Y3FRY2ErM3RPNXo3?=
- =?utf-8?B?ZngzYU53WEZrTE1LU0pUaWZiWUpVZnNueUZHYjlwbVB0WWpsUTBGZ3JqcTlQ?=
- =?utf-8?B?TUd6elc4NzRPM3YzOFZ2c1dBdDNnZ0ZXUS9iRU9ZdVRhZldKQXNJdzhQL1ph?=
- =?utf-8?B?MTQrR2YyaGltZjNsRnE5bENISVJFaSs0bHBsQnR2MGhYVWYyUWRoeXJzL00x?=
- =?utf-8?B?WG1xakRQWFlPTWRGUi9BWDZZaEZTN1lhS2FZMUJQWXJGZ3NpZ1B1SFo2SERD?=
- =?utf-8?B?OFdFWEJ1US9vREZ4OXA3WGlnVGxiZ2ZMM0VwSVU3ZEJ0dHB6ek5RV25sMTBU?=
- =?utf-8?Q?RFEnDB1EIxq/FL0Gf0JABstIaOiDvpzS?=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(7416014)(7053199007);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014;
+X-Microsoft-Antispam-Message-Info: =?utf-8?B?bmdiS0lwenc4VVp3bnRDQk5VR2dBN29LMUhDenRlTStuMGxQekJLMzFQWm8y?=
+ =?utf-8?B?a0YzdlVxaFR1blBwakZBVFl1Q3BJZnIrNWJwa3ZSQ1ZETjVSU3p1bHlqQ0N3?=
+ =?utf-8?B?VW4vMVN2Q1J3R0tmdDFNeFBnUWdYK3dvMnhhK0xHTE8zYWoyT05ldkk2VDZJ?=
+ =?utf-8?B?M3J6dzljeGRKYzlUWjdUT2ZDZERvMldXT0RxTFo3MEhHUGFkb1p4UXRtSncr?=
+ =?utf-8?B?TW9kcW1oRS9CdGNnK2FhcjhyZ3JySTNnWHlIaGhNbGYzN1I4NEV4aW13UWVx?=
+ =?utf-8?B?ZVgyYlp1cEI4bnRvVHNZeUxyRWJhaUZqR3pvQ2IxQmRDL1Z0U1d4b1RIeEFO?=
+ =?utf-8?B?WlIyUDVjZno4NEJNM05FbURIWUNoTDIxaCtNOWhyNVF2aEsyWkZEMmt5TUIw?=
+ =?utf-8?B?VWg2UkNycFZ1QkZCYXlNR2Zma0w0bGhhR3dUWkQ2bUpYRXVHcmNQdFBOempj?=
+ =?utf-8?B?aWVLbEZoZ3cyU0kxUm12RHhPOEpHNkxxL0VVNC94NG81dXVER1IxSXU3SEFq?=
+ =?utf-8?B?T2kySHB5MzlnbW12eE9wbFh2TFliZ3p4SnRWQUcxL1dycHlYL3ZoR25xekw2?=
+ =?utf-8?B?eElCbDRmQXo4YzJxcFhxVVppTWF2ckZUVWpzdjUxZlNpNzVlSWgzdmNPVGYz?=
+ =?utf-8?B?Z0Fzajl5S1l5VllaZ2lmZm5tMzFQK29oQXJIMDYxYlA2R21PSVFFdHNoV2ZI?=
+ =?utf-8?B?VG1mVmUxVWw5RUI5SnNCVStja3R4T1UxcnRSMDc5UCtEeVExTWRyVExmc1I1?=
+ =?utf-8?B?OFVyUzczcEdFNGpHUnhPWkNNd1R3a2pYUm1ZSFROZ0Q4dFhDT2o5Y29NT2No?=
+ =?utf-8?B?VUJvN2d0b0JxOTFwb0JnWFM4M2RpMGwxZjJ5ZkcxU0xPSUxjaHFYaTRDSE5B?=
+ =?utf-8?B?ZjZjOVcvQ1h1YlhUaEVMN0lpaTZ0eTRYb2s0WXVtWG04YnVCeVNHSDlncTJu?=
+ =?utf-8?B?bkRTZ3Arak45aFQ0NngrdytoZmVORUlOZjBYNkZEL1oyRDl3eGlUK3l5a0k1?=
+ =?utf-8?B?SjY2NHF1R2xsY1ZFMExqMFNwUGJvSk0wV3psVE1iazh3d1lpRnhUalpGRUVN?=
+ =?utf-8?B?OU9kSHZXZnFNWk9GS01VQmhjRERqY2pBMmVOQm51Mm5uT0JzZU14WDR1M1VG?=
+ =?utf-8?B?WEtFRTdrOTN6b1dlTHp2V0dqY0JtZE1RM1l6cEJucW13cjc4Ums4azNnb0kv?=
+ =?utf-8?B?YU5KaUtHaHVLemFVRHV2SXJ1eW1BL1BpT25iaDZjS2kyTDFkOGFzZFJ5UG1C?=
+ =?utf-8?B?MzltRkY1Ty81dmxESURiR3J6M2hDb3lOcS9XSExqWGoxVngzKytmUlQ5T3RK?=
+ =?utf-8?B?MGoxM0dGZW9lQUl4SnlKZjlNZjI5enN4N0hnRnRwNDdTN0J3ZFJSWTR2Uk5T?=
+ =?utf-8?B?dTJMWnQ3Rlg2Mmh2UEkwQkVkd1kvNXhFelFCTEdNZVBlM1JxVXIzU2dMOWRp?=
+ =?utf-8?B?ZDh4NmhDOHFXWHhYYUdHVThKY3RlbHQ1anJURXNkc0VHSjM0bmVLZ0lLcGY1?=
+ =?utf-8?B?Mm4xL1N0VFhaSEN1RHBLUkI5dS9OTDhVZnBOcHdlTmg1WElicHdJN0NnQjB5?=
+ =?utf-8?B?ekNkai9SSzAyaUpiNlB1a2JMTVhYajJiL2pjL0pWL2MxQ05iNEpnSFFLc1Zr?=
+ =?utf-8?B?bXArWDVOSy91WnFHaXorNVZtbTZQY094VVlOYkxRWEtvSkw4NVhxNFpyOFBW?=
+ =?utf-8?B?a1VLZUdGWWcyNGRkZXdscG5TaXVodGY5THJiMlBVL283YkxYRTdjWG52bmlF?=
+ =?utf-8?B?bzAvK0FFaitqOHZjRVQxakF4WStQVzZmR05iaFk3OG5zZU4yZUcvaVUrMnpC?=
+ =?utf-8?B?NzRCVEVoNS9lWXlub0lFNTM4UGxrWG5kM3J6ZVZlN3ZCeU9pbTcxMEtrYVNk?=
+ =?utf-8?B?OFhIVzlJeHpYZzFWWlc5bW5IQlo4UU9sdFU3MFJuQ3d1cGZlaTRRdWpQTzU0?=
+ =?utf-8?Q?IoIhS+0hYLtgdGNnL1FcnhncFO6qV6GX?=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?WjFPOWN2TVduMDVCcUttN2dsYkJldE96aCs0ckM0eVlJL2I4aEUxWDlGMGpK?=
- =?utf-8?B?QSttakxRcTdWRmF5RDczL1dxODI4aXlqdnB4amliVHFlWk9nenJGUnM5V0FQ?=
- =?utf-8?B?bFp4TDEvc2lpWHpaSjhWS1dYN1ROdEZST2tCbnEzd0o4Y2RIaE1mcVJIUmY1?=
- =?utf-8?B?WTIxMFdxMDIvWDY1c1VzaE5BWXdFTGhsY2l5b1VyYTVLaEZyUG1TZFRPRDNZ?=
- =?utf-8?B?RVRUaEFqOVRQYUZzaENDelBkOGZMT3dIc3RJMlZMakVFOXFZYXpTbms3SDJW?=
- =?utf-8?B?VGpwUDVWWVpVWldRLzI5QWwvdEdEZTJZdDBBaWFJMzNDWVRudi9RZll6eCt4?=
- =?utf-8?B?S3VaeGpBdHJKWVlHblppdWJQTW5Db3pxRWxFbG45akZlSUtYMHFqVVpFQVd0?=
- =?utf-8?B?TlkxMzJHSnhXSFgwU1Q0Q1I3ZGx5dUM0T1o3ZWlOVU5DYUpvNkI4b1Rwcll2?=
- =?utf-8?B?b1hRVDVQdlF1aEFNQ1FzY1NaaWFJMWdXMkYwNXNaOXdYbzZ6SXNxT1BJekJw?=
- =?utf-8?B?d0ZjTytBd2Q5ME11K2NETWh1NDZheFpTS25mTDFTM093UjRZOFFxUXdncnkv?=
- =?utf-8?B?alF0VGkxaWYyQTIra1V1Wmp5VFBEMWV1b0NGdkFlRjhpRElsTkNGNEh2bDZ3?=
- =?utf-8?B?WmN3Yy9xTzVuY1ZUNTd0OUlsbkpvT0NUWjN6TkN4RmxjSElhcDhDN3MrSHVm?=
- =?utf-8?B?cTVxTXBEcVIxbE83NWJjVDI3OHh0dWczOHpWS1JrMWM3REEwRFhBZVVHZDE0?=
- =?utf-8?B?dWxGR3UxU0FvWkpHSnR0Ny85T3hmRllsYlRMY3M0R1NkMG0yd3BRREZEV2NB?=
- =?utf-8?B?S2VZajY2cGkrRjR6VHRlRG5YaDloMVJoUjRJVml3U0ZJVGo5MU4xY0dESmYz?=
- =?utf-8?B?dkZVYmtkaEtDbWFoWjZtOWNqTXo5am1TOG9JUmdsSXBzY3AyQXdkVEhyNjNv?=
- =?utf-8?B?YmUvY3ZReEJ0V1RSUkNwNHpFME9VVVBuUW5RbjkyRDNsbnpxdktNSFNmQXdT?=
- =?utf-8?B?Y2o2VTZOdXNtdWJCKzl0aVBJN0xmV2Q5TGdxdCtYV3JaUE5WMWJBYndkRHJ4?=
- =?utf-8?B?QTdaZTRIa0lRZmNsdHdHclhkYmN1SHFHNmxyYldldlNmdE5vMmYwZjlIVG5m?=
- =?utf-8?B?Q1lZT1c0WEhkN3hEdkxobURMblhiQnZZZVIyL0ltbThlWkZoaTFoNjZOcGcx?=
- =?utf-8?B?UjZ0SE9LRlJuVkRjWUthQkszeG52QitvY3pITk5BTm9WZ3dRZ1RkYWhOb1V6?=
- =?utf-8?B?ajh5U2RJTE9sRlIweHl3SCtzK2F5Vnl4RklDaHB2dGpTNEhSWi95T2Q4UklG?=
- =?utf-8?B?Y1RiT05vMVV5YVBGdU1ldFVYZkVJdnBEUFVPOENVY1VvYUxCamhJKzhKRFNT?=
- =?utf-8?B?eXBZL3VTajNwelRScWdlUGlKMDhVRUs2WGN4TE9OZXE4WU5YMFhsMUhYb2Ix?=
- =?utf-8?B?cUErRzRwUFAxUWRWZzdZbFRWa0ZnQURjalBVVXlaN0JiTGxzS1hOMHdUdXEr?=
- =?utf-8?B?UWFMWjgyWHRleUtxWGlHQmsrU3FHSEk3aGNmUFVYTmxtUjhUbmZqZFMvVWVK?=
- =?utf-8?B?NnM3c1FQMDhKWUdPOVhDRktWVVFSbXJsMmZFSUh6ZTZtODBsdnk4Q2c5R1Uy?=
- =?utf-8?B?V3NMQ1NST3VWcERHdHRpQzJ5MHluSUVEVHRZQm9JZHlRb2ZUY1dFZTd6VEgx?=
- =?utf-8?B?bUsxVHJvMVl0bDJrOG9TQlpwR09qUFRvUUt0dXUrT1dkOG5yU2wwbzVDZDJp?=
- =?utf-8?B?YmZaZFNJd2N0UUVhNUZTdit1VjV3SXFEOE9DZHpMWENMaTdxdHBlNVoxUzh2?=
- =?utf-8?B?WlR5SFFRQlVpcVFEY2lVRzlMUytTSEppS1ZJNlJ0c29KeXZaelk2aHI1QlNj?=
- =?utf-8?B?RWxLQVFWZlFRdUNjL2FGVzFWVXRtdmF0ZVRZZmtkTDdvTUgxcWQzcWtXbGh5?=
- =?utf-8?B?TTNPcXRYeUVZbStXTEM3QXVOVjYrK0NPQnlrbytSaS94cUtSYlR6L2JSUUFr?=
- =?utf-8?B?cnlKZU5IY21KN1Z6emxURjBwdXRnUk1uTlBpQVl2OCtEdjdDaGd3blZOdW14?=
- =?utf-8?B?TW9RUS9TalNvSlNiR1crZEI5YS82RmJoTHFod0N2eERwbm1TZlFUaTFURWxr?=
- =?utf-8?B?bEN1V1p2SFc3ajJHNE9tS2hZYVJzWHY3NVl1MGVLR2NXSWVjNENLa1RNUlVT?=
- =?utf-8?B?Rnc9PQ==?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: c4fe6145-bdb9-48ac-f3b7-08de04c233a1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?MFFBU2hlR053cmRRMHhSSnZPVDdOb0dMUUVoUXZ2L0RoYkxnSEp4U2pRendn?=
+ =?utf-8?B?UlVOZC94ZGRrUk93WG1FQncrRUlwY0tpbXhqTTBzRWY0R1hoS3ZnZ3Y1Y3J1?=
+ =?utf-8?B?dnBEQXg2RXg0bXplVmFQOGZCN0RUU3o0TXlmS0trVjQxWjNCK3ZacnVuVXFE?=
+ =?utf-8?B?QWJMTHNSSXphL0l5eUVlVk1sV3VGcGdkT2kxV093UlQzeHYvbEhFQnJWdlJD?=
+ =?utf-8?B?VTl2Wno5UG9Rd1NRcmJQekRpNzNUUHFSa2ZoN2VBY0haRVYyRldYRzVvZmU0?=
+ =?utf-8?B?YVZLWXN3TVRLbG4zQ3N3UDA4eHZ0Mit2NE4vTUhnZys0cWNzY2pWV2JCREhy?=
+ =?utf-8?B?aCtGQWd6SEttbDNFUUM1UERncDR5QXdwZGpBUW1DL1BtTUhHUGdKRUdwV3JB?=
+ =?utf-8?B?bzQ0NnJYbkJwT3drbUtZTml6WFNBK0ZsV2dEVEpWcWVucFVRNU1ycnhOcHJG?=
+ =?utf-8?B?eE5qSGEyZm1id3IwWVJzM2lJWkRJYm1Bd0I3YkxRRjN4QWFtcHg2djRPUXVK?=
+ =?utf-8?B?aFdoMitrMlVCVWhLN0hiYU9qTklpM3F6NC9BbjFaakRvN2dQK2dzOENGZXZP?=
+ =?utf-8?B?RWt0MXdEMzlVeFlZOTAveXpUT0NacDhVQysxNE1nQXAxdDdjNXhEYVhKRTBx?=
+ =?utf-8?B?RnhGb0s1c2pkY3NyTXpvMDY0YkJ0QXRkMzFSRzlsVTZuODJ5aUxJR0lCMHFr?=
+ =?utf-8?B?NGxZRUJkSWNTS2haTmVtWVp6QURIZXIxbkY2ckwweGg3eWFUNmJjWmh3WGND?=
+ =?utf-8?B?ZkZERnRWTkpSZTAwOVhRZlB2dnV0UGdENUtDYzkwY1ZFbklYencvaXcxTHlP?=
+ =?utf-8?B?Q0JYU2xURWtvY2s0dS9BVFpKMDg1RmUrK2tBalRwZGllcEtaTDBJTmJCRzJp?=
+ =?utf-8?B?S2tnSDV1TTBBdFFXRkRJdmJFcXh5TTZoNzEzVmU5TUFQd2p6akRjM0xUV2M2?=
+ =?utf-8?B?YXZ2WGpPdUpOeWdZVnpMVXBPQ1ZqWTNHRFQ5cXM1WHc5VUMweCtDNmpaZkN1?=
+ =?utf-8?B?MXh3V2dhUjhsY0hNREtBck1NV1FORlM1Qmc0dlpuaDU3UWE3SmtvTEM0UCtM?=
+ =?utf-8?B?cWdGajI2QlQ2UXpLOEN1M0psNG5kN2RRR3lrWktaQURDbUdBVXVzekduM1BK?=
+ =?utf-8?B?WjJLZlBKRGU5cmtYWDlOSHpFbzdrdjhORnhtNGVLVjJhZDZBTUJiQll5RkM3?=
+ =?utf-8?B?bTgzb3RUWTZ3SytsbW1GcWxuT0duck5YOWNTMUZOdUIyQ3NrTm5TVm9SVXkz?=
+ =?utf-8?B?d25CQVcwYVYyaXIxaHo3M2hFYmdUZm4xcExVVlhjaUY5YkdNYWIreUsvS2JF?=
+ =?utf-8?B?azhLdUZJK0NyVjVCWXhvNGNZYVp2MncxNVpRVlhEQTFNN0puaUJIUUhRandF?=
+ =?utf-8?B?RWNlaXNIakRSNWd6MWRqMHBmVzE0cHR1bmpuMCswQytlblhPNGhlbWF5eExo?=
+ =?utf-8?B?cHVlcVV5MTliRjVOU2M2V000eVNsRWtRMUYxSXJUcnFqaDRFU1plNm9YaUxH?=
+ =?utf-8?B?ZVJycVMwL3FqTUQ2UWhGeHVLdjA2bEJ1dnpQR1gwWkZVT3YzTERPMk4vWWY2?=
+ =?utf-8?B?QXRiV004QmFUblRkZjJPNE92NFNiMzdseXF1d2RGRkQyR0hrdjI2OHRPcity?=
+ =?utf-8?B?dGlJU3FwQWxuUkZjdExTWHZac2pHTGY5Ri8rdVBiT1JySUJhemx1WllzUGZQ?=
+ =?utf-8?B?eTZNc3h3YmVQdjZkdU1Tb1UvbEVneTkySVNOQ1UxU0NaWnBXNklpZzV2M0oz?=
+ =?utf-8?B?Y3hTNkFMd0FhMTdLTTU4S214VWZhZFpteUdDOWV0ODdDTmY2aGJBd0M3SmxL?=
+ =?utf-8?B?NXE2bU92c0ZzT3BmbWxFZjh0N1FMaG9VSUsvc2haYmpZblByT1FwSkRKeVVK?=
+ =?utf-8?B?amFSb2tMSmZBTkpldXdiUit1LzBRTXQ5Y2w1UWVZSWdudUwyd2tBZ1FWYW5L?=
+ =?utf-8?B?bGMzSlV5RTZrNGQ5bjJWTXI2NGw2aVJhbmtVSlFiT2tIT3lkQjV2UnR6UjFY?=
+ =?utf-8?B?US82U1BiZk8reXU4Umtta043YW9waUJORlBBMFhPdXdyRkpsRENFSVFsYnFE?=
+ =?utf-8?B?SUZiVFVxMzR0SFpVVjgwVGw3S1pjZ3ZqQzUrYWtJeks3Nk1QaHBFcXR5b1VB?=
+ =?utf-8?B?dE4xd1dXNGJ6dGNOSHJLaDVheDhpUWk3MzhSQ0k5VTBuK21zWmZKUEhxMllV?=
+ =?utf-8?B?clE9PQ==?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: 59b37edb-1cb1-4a0c-e682-08de04c5ab3f
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Oct 2025 10:22:07.1671
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Oct 2025 10:46:56.4400
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: zOE0V37BhRymD4z65tWL8bFF7c0b8uaqFq1tuwWCgDWB/irj9K9NhDYd/jRTm4+M2Fdng+HRywdoxJjJ4hCLSA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR11MB4721
+X-MS-Exchange-CrossTenant-UserPrincipalName: LFZQDqkNE9039nekhngWAJhBUIKayoLn+6sJusx52CtD+Z1Z2q9nZT7RvHeFzbMEu166PT8NZAj/xKxTw3f8/g==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR11MB7063
 X-OriginatorOrg: intel.com
 
-On 06/10/2025 13:08, Adrian Hunter wrote:
-> On 03/10/2025 00:04, Kamal Dasu wrote:
->> Added support to save and restore registers that are critical
->> during PM.
->>
->> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
->> ---
->>  drivers/mmc/host/sdhci-brcmstb.c | 124 +++++++++++++++++++++++++++++--
->>  1 file changed, 119 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
->> index 0905b316a24b..ffa602a99ab7 100644
->> --- a/drivers/mmc/host/sdhci-brcmstb.c
->> +++ b/drivers/mmc/host/sdhci-brcmstb.c
->> @@ -24,7 +24,9 @@
->>  #define BRCMSTB_MATCH_FLAGS_NO_64BIT		BIT(0)
->>  #define BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT	BIT(1)
->>  #define BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE	BIT(2)
->> -#define BRCMSTB_MATCH_FLAGS_USE_CARD_BUSY	BIT(4)
->> +#define BRCMSTB_MATCH_FLAGS_HAS_CFG_V1		BIT(3)
->> +#define BRCMSTB_MATCH_FLAGS_HAS_CFG_V2		BIT(4)
->> +#define BRCMSTB_MATCH_FLAGS_USE_CARD_BUSY	BIT(5)
->>  
->>  #define BRCMSTB_PRIV_FLAGS_HAS_CQE		BIT(0)
->>  #define BRCMSTB_PRIV_FLAGS_GATE_CLOCK		BIT(1)
->> @@ -38,19 +40,39 @@
->>  #define SDIO_CFG_OP_DLY_DEFAULT			0x80000003
->>  #define SDIO_CFG_CQ_CAPABILITY			0x4c
->>  #define SDIO_CFG_CQ_CAPABILITY_FMUL		GENMASK(13, 12)
->> +#define SDIO_CFG_SD_PIN_SEL			0x44
->> +#define SDIO_CFG_V1_SD_PIN_SEL			0x54
->> +#define SDIO_CFG_PHY_SW_MODE_0_RX_CTRL		0x7C
->>  #define SDIO_CFG_MAX_50MHZ_MODE			0x1ac
->>  #define SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE	BIT(31)
->>  #define SDIO_CFG_MAX_50MHZ_MODE_ENABLE		BIT(0)
->>  
->> +#define SDIO_BOOT_MAIN_CTL			0x0
->> +
->>  #define MMC_CAP_HSE_MASK	(MMC_CAP2_HSX00_1_2V | MMC_CAP2_HSX00_1_8V)
->>  /* Select all SD UHS type I SDR speed above 50MB/s */
->>  #define MMC_CAP_UHS_I_SDR_MASK	(MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104)
->>  
->> +enum cfg_core_ver {
->> +	SDIO_CFG_CORE_V1 = 1,
->> +	SDIO_CFG_CORE_V2,
->> +};
->> +
->> +struct sdhci_brcmstb_saved_regs {
->> +	u32 sd_pin_sel;
->> +	u32 phy_sw_mode0_rxctrl;
->> +	u32 max_50mhz_mode;
->> +	u32 boot_main_ctl;
->> +};
->> +
->>  struct sdhci_brcmstb_priv {
->>  	void __iomem *cfg_regs;
->> +	void __iomem *boot_regs;
->> +	struct sdhci_brcmstb_saved_regs saved_regs;
->>  	unsigned int flags;
->>  	struct clk *base_clk;
->>  	u32 base_freq_hz;
->> +	void (*save_restore_regs)(struct mmc_host *mmc, int save);
->>  };
->>  
->>  struct brcmstb_match_priv {
->> @@ -60,6 +82,69 @@ struct brcmstb_match_priv {
->>  	const unsigned int flags;
->>  };
->>  
->> +static void sdhci_brcmstb_save_regs(struct mmc_host *mmc, enum cfg_core_ver ver)
->> +{
->> +	struct sdhci_host *host = mmc_priv(mmc);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
->> +	struct sdhci_brcmstb_saved_regs *sr = &priv->saved_regs;
->> +	void __iomem *cr = priv->cfg_regs;
->> +	bool is_emmc = mmc->caps & MMC_CAP_NONREMOVABLE;
->> +
->> +	/* save  */
+On 06/10/2025 12:28, Michael Garofalo wrote:
+>> On 06/10/2025 10:35, Adrian Hunter wrote:
+>>> On 06/10/2025 04:36, Michael Garofalo wrote:
+>>>> This patch series adds a new bit to quirks2 for disabling the bounce
+>>>> buffer.  On some hardware, this is required for proper operation.  An
+>>>> example of such hardware is the SDHCI controller of the Nintendo Wii's
+>>>> "Hollywood" chipset.  Without this patch, the onboard Broadcom 4318
+>>>> Wi-Fi fails to connect to any networks.
+>>>
+>>> The bounce buffer should not make any difference, so it is likely
+>>> a different problem that gets hidden when the bounce buffer is not
+>>> used.
+>>>
+>>>> Could you enable dynamic debug messages and show the messages
+>>>> for the failing case?
+>>>
+>>> Actually will also need to see the messages in the "fixed" case
+>>> to compare.
+> I'm afraid I won't be able to provide those easily, at least not with the
+> commands you've provided.  Since the rootfs is _also_ running from SD,
+> turning on full MMC logs like this produces an obscene amount of noise
+> from the storage, unrelated to the SDIO wireless.  It gets even worse with
+> my original intention, which was to save the logs to SD Card, (since my USB
+> Gecko serial console is rather flakey, and introduces corruption now and then),
+> since it's now logging the writes of it's own logs in a permanent loop.
+> If there's a way to narrow down the logs to specifically whatever portions
+> you're interested in, and filter out the noise, I would happily provide it.
 
-Comment is not really needed.
-
->> +	if (is_emmc && priv->boot_regs)
->> +		sr->boot_main_ctl = readl(priv->boot_regs + SDIO_BOOT_MAIN_CTL);
->> +
->> +	if (ver == SDIO_CFG_CORE_V1) {
->> +		sr->sd_pin_sel = readl(cr + SDIO_CFG_V1_SD_PIN_SEL);
->> +		return;
->> +	}
->> +
->> +	sr->sd_pin_sel = readl(cr + SDIO_CFG_SD_PIN_SEL);
->> +	sr->phy_sw_mode0_rxctrl = readl(cr + SDIO_CFG_PHY_SW_MODE_0_RX_CTRL);
->> +	sr->max_50mhz_mode = readl(cr + SDIO_CFG_MAX_50MHZ_MODE);
->> +}
->> +
->> +static void sdhci_brcmstb_restore_regs(struct mmc_host *mmc,
->> +						enum cfg_core_ver ver)
-
-Prefer to line up function parameters.  Using up to 100 columns is also ok.
-
->> +{
->> +	struct sdhci_host *host = mmc_priv(mmc);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
->> +	struct sdhci_brcmstb_saved_regs *sr = &priv->saved_regs;
->> +	void __iomem *cr = priv->cfg_regs;
->> +	bool is_emmc = mmc->caps & MMC_CAP_NONREMOVABLE;
->> +
->> +	/* restore */
-
-Comment is not really needed.
-
->> +	if (is_emmc && priv->boot_regs)
->> +		writel(sr->boot_main_ctl, priv->boot_regs + SDIO_BOOT_MAIN_CTL);
->> +
->> +	if (ver == SDIO_CFG_CORE_V1) {
->> +		writel(sr->sd_pin_sel, cr + SDIO_CFG_SD_PIN_SEL);
->> +		return;
->> +	}
->> +
->> +	writel(sr->sd_pin_sel, cr + SDIO_CFG_SD_PIN_SEL);
->> +	writel(sr->phy_sw_mode0_rxctrl, cr + SDIO_CFG_PHY_SW_MODE_0_RX_CTRL);
->> +	writel(sr->max_50mhz_mode, cr + SDIO_CFG_MAX_50MHZ_MODE);
->> +}
->> +
->> +static void sdhci_brcmstb_save_restore_regs_v1(struct mmc_host *mmc, int save)
->> +{
->> +	if (save)
->> +		sdhci_brcmstb_save_regs(mmc, SDIO_CFG_CORE_V1);
->> +	else
->> +		sdhci_brcmstb_restore_regs(mmc, SDIO_CFG_CORE_V1);
->> +}
->> +
->> +static void sdhci_brcmstb_save_restore_regs_v2(struct mmc_host *mmc, int save)
->> +{
->> +	if (save)
->> +		sdhci_brcmstb_save_regs(mmc, SDIO_CFG_CORE_V2);
->> +	else
->> +		sdhci_brcmstb_restore_regs(mmc, SDIO_CFG_CORE_V2);
->> +}
->> +
->>  static inline void enable_clock_gating(struct sdhci_host *host)
->>  {
->>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> @@ -300,24 +385,33 @@ static struct brcmstb_match_priv match_priv_7425 = {
->>  	.ops = &sdhci_brcmstb_ops,
->>  };
->>  
->> -static struct brcmstb_match_priv match_priv_7445 = {
->> +static struct brcmstb_match_priv match_priv_74371 = {
->>  	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
->>  	.ops = &sdhci_brcmstb_ops,
->>  };
->>  
->> +static struct brcmstb_match_priv match_priv_7445 = {
->> +	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT |
->> +			BRCMSTB_MATCH_FLAGS_HAS_CFG_V1,
->> +	.ops = &sdhci_brcmstb_ops,
->> +};
->> +
->>  static struct brcmstb_match_priv match_priv_72116 = {
->> -	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
->> +	.flags = BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT |
->> +			BRCMSTB_MATCH_FLAGS_HAS_CFG_V1,
->>  	.ops = &sdhci_brcmstb_ops_72116,
->>  };
->>  
->>  static const struct brcmstb_match_priv match_priv_7216 = {
->> -	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
->> +	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE |
->> +			BRCMSTB_MATCH_FLAGS_HAS_CFG_V2,
->>  	.hs400es = sdhci_brcmstb_hs400es,
->>  	.ops = &sdhci_brcmstb_ops_7216,
->>  };
->>  
->>  static struct brcmstb_match_priv match_priv_74165b0 = {
->> -	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
->> +	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE |
->> +			BRCMSTB_MATCH_FLAGS_HAS_CFG_V2,
->>  	.hs400es = sdhci_brcmstb_hs400es,
->>  	.ops = &sdhci_brcmstb_ops_74165b0,
->>  };
->> @@ -325,6 +419,7 @@ static struct brcmstb_match_priv match_priv_74165b0 = {
->>  static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
->>  	{ .compatible = "brcm,bcm2712-sdhci", .data = &match_priv_2712 },
->>  	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
->> +	{ .compatible = "brcm,bcm74371-sdhci", .data = &match_priv_74371 },
-> 
-> Shouldn't adding brcm,bcm74371-sdhci be a separate patch?
-> 
->>  	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
->>  	{ .compatible = "brcm,bcm72116-sdhci", .data = &match_priv_72116 },
->>  	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
->> @@ -441,6 +536,19 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
->>  	if (res)
->>  		goto err;
->>  
->> +	/* map non-standard BOOT registers if present */
->> +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
->> +		priv->boot_regs = devm_platform_get_and_ioremap_resource(pdev, 2, NULL);
->> +		if (IS_ERR(priv->boot_regs))
->> +			priv->boot_regs = NULL;
->> +	}
->> +
->> +	if (match_priv->flags & BRCMSTB_MATCH_FLAGS_HAS_CFG_V1)
->> +		priv->save_restore_regs = sdhci_brcmstb_save_restore_regs_v1;
->> +
->> +	if (match_priv->flags & BRCMSTB_MATCH_FLAGS_HAS_CFG_V2)
->> +		priv->save_restore_regs = sdhci_brcmstb_save_restore_regs_v2;
-> 
-> It is not ideal to use a flag to set a callback.  Perhaps sdhci_brcmstb_priv
-> should have a pointer to brcmstb_match_priv, then ->save_restore_regs() could
-> just be put there, and BRCMSTB_MATCH_FLAGS_HAS_CFG_V* are not needed.
-> 
->> +
->>  	/*
->>  	 * Automatic clock gating does not work for SD cards that may
->>  	 * voltage switch so only enable it for non-removable devices.
->> @@ -533,6 +641,9 @@ static int sdhci_brcmstb_suspend(struct device *dev)
->>  	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
->>  	int ret;
->>  
->> +	if (priv->save_restore_regs)
->> +		priv->save_restore_regs(host->mmc, 1);
->> +
->>  	clk_disable_unprepare(priv->base_clk);
->>  	if (host->mmc->caps2 & MMC_CAP2_CQE) {
->>  		ret = cqhci_suspend(host->mmc);
->> @@ -564,6 +675,9 @@ static int sdhci_brcmstb_resume(struct device *dev)
->>  			ret = clk_set_rate(priv->base_clk, priv->base_freq_hz);
->>  	}
->>  
->> +	if (priv->save_restore_regs)
->> +		priv->save_restore_regs(host->mmc, 0);
->> +
->>  	if (host->mmc->caps2 & MMC_CAP2_CQE)
->>  		ret = cqhci_resume(host->mmc);
->>  
-> 
+Are there any error messages?
 
