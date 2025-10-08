@@ -1,80 +1,54 @@
-Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41E2C2BEFE5
-	for <linux-mmc@vger.kernel.org>; Wed,  8 Oct 2025 04:25:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A07E722D4F6;
+	Wed,  8 Oct 2025 11:08:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1759897540; cv=none; b=ETVD2qs6Ps4hb/sxurqS5Md5uPI1NgbNEi5LZ9Zzuu0cm5N47hSEhIQsCiLEf0BjKNo1IGtA1AuLfmxD6gMK8Dg5F7bKSvciTbhIoXgO496ZH6/J6v1tF6ymWDQ+BhhDa7hn284gy4qQEBMaeXOe0/sPXAnfGRWs8cf+vXmYV+k=
+	t=1759921703; cv=none; b=rGFuRc/FYIM/XY2E4CohozIFucJ7cqbZK5NU7fP+YwQPQSLijyp1bEFugt93f1Ajx2VsbtDzLlvbB5QGKS2oMSYw24Dl9tOsbbwLVOUoTLQNseJYSVoZHAbtyi+ORMcdnvY4Cqb7/7Unccfo1Oz/vDcY7d44FKObmT4yLZvyWc0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1759897540; c=relaxed/simple;
-	bh=/cwkr9llp/mR6slfiaeDTI1dTaMIIZN5Dk0EHahwG00=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=R71/y5t4rJK3U0AFcK2BjoLwXlX9Cmw1pDfTwLr/PAwBS02o9SGy2xP8dijlhjaVQT2edKdxaWDJ6zg8JNe+jdE7plpWzguVE0tu72rpdjdTd3ACD3QxgCuDVNH+oWD8gsBoKZjimotr43Fh95tXF7mXvTL1xBxrhVCxUTmcTuM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=R0gPE6xM; arc=none smtp.client-ip=209.85.208.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
+	s=arc-20240116; t=1759921703; c=relaxed/simple;
+	bh=sk5WIvRK0N1Tm1xpfKtFMrUft4y8QAQc6kkNgLrBUeE=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=WfzSbtdiguN0ybDesTY4O7ZACUPXRAN2n/sOnzkzFtRYhyMo4TxRsdHN6jLjGKVtJvjA9pnBJexzwk1BDmgwxhBwaRU7gqoGtrYVnd+Oq2QUcC67OCW+Nl0GWHvylZ03jVClIRWJXrGU0cl26ZUXarrmAutAuGm8AmaUN1uORrw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=m4BepKPY; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="R0gPE6xM"
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-62fc89cd68bso14698595a12.0
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Oct 2025 21:25:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1759897536; x=1760502336; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=iosQWc3K2vVa/XAvobbGpvWGWDlaRdHniq3qdqd8DhM=;
-        b=R0gPE6xM8Pg5WRAWPEV3gWgeEpFQpa0w+WHJmWhCxBpGyKCAQPjMQHL/kOqZyrlacK
-         bzIFP95kO0wdB+5Fh5GQ9rVsu+oEDdFJDITcBYl3fObG9Xs5cxBnXJpqooc9jCcEZb/m
-         547CO7TdlJZyUyTwU6yc/SMRW/5mPWNTzgaon/3HljFlFZOWYetiXS0Y6Fj/8lp5tc7g
-         7hZSrLZsEmSrLHfVo1+DSjvxYIqmLwf/01fMd4q8mt3Ui3MlUvnfYhCqZUoOEnw+QVCm
-         GRSAxzt/iVnRBXcaFFhL2BreynV6BCejZ6iZ4BDJGuTA2aU1Qaj9/nDr7ZAGlp6bW9TG
-         XqqQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1759897536; x=1760502336;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=iosQWc3K2vVa/XAvobbGpvWGWDlaRdHniq3qdqd8DhM=;
-        b=CQBCMftUFApf58weZHm93UeKpEUVyh1mIhuW5hgj0pkF/0EBZ4hDG/p09ZOWFCCz5u
-         7VELoPLQNQJmIOoxAsdLreHsfwTAObjUMMs+NIMZJh1brjB9y2Ohdh5c7S7h7/TRNOTs
-         DJzJ9mgLrBJxFnThFAJW6MHitXScnbBHYOuymHULDQPJYIzKx6zYmzNerIlTOhp0pxw8
-         Huc95xdtZD5M39Iq1ciNRR7U1bYCvv55xCtZRMKSEWoh+9WjxSOXww5jyHs3L5WxXMlT
-         BgHz4LMxlCipFOkSB70lTBo0I7kL/N2vCZjjzzu9Xxn9LxP1g1BSPwcxSsgeqlXWQrOI
-         jbSQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXP9cy81M2bezUy1qB+OkyqjXzzUexyfsr1eLqSbK7eB3oMLHMQDw+ugBjzg4f93XhRXpmRLUJsjiE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwT3DHSL3XqTaJI97oDMlV5A0YjsksUwd+14CKoyoZAAXu+Au+T
-	ZtJ0llvUnhRiaJHJAU1Nmv+o3mIPlxEgdLpAE7TueV+xTKdzU5T2Xo+YKXFpMeIroyU=
-X-Gm-Gg: ASbGncsBIpuRsP/WKc5AF5iKb74aX25s/QcOthqtZvFAW5DP1ybc0mKrcJ/gRC+sy6N
-	f+f9XFuCybYgD3jCfrVpUh6WAHJyqhRFI9yjguHh713z0Cs760BZmnLJsv+3jY3kplwThmQOcCn
-	+DuCW+fxZJHzMbvE87h2huEnR2wUZoNyrXgd21PLmerivgrWvxGt73NrHagO8dxrWm/y8ECzZJD
-	Rk1VVg0telggmb1cHqVL9c/dMK7BlfaDaIvx0mu4Z6nRGDfvYJ/BM4sVcyiM5W1O0S25IzbC/Dx
-	EJfke15P/EQlTaJch4Bkj0pBQI5Iqychs02EqmAV5bvw8M9l5ijrHV6Hi2L9P3hQBbCxSSX1b30
-	XemaYh3lCJ67f24DCsgPsHePXCTwqPiBN9KxhXOojjzreEK3bV+CQrE8lKGy5Sbd+LcXPy7yU5h
-	A=
-X-Google-Smtp-Source: AGHT+IGeUnd2/6aVeIDKjhrDUfDyL/wkoJPBTkCJVt+SNcjIJPmnFTJLzgMbr2ZsLUVCNbNaLjPvlQ==
-X-Received: by 2002:a17:907:3e92:b0:b4d:2ac5:81b4 with SMTP id a640c23a62f3a-b50aa48fc85mr225136266b.19.1759897536567;
-        Tue, 07 Oct 2025 21:25:36 -0700 (PDT)
-Received: from claudiu-X670E-Pro-RS.. ([82.78.167.59])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b4865e77427sm1583124466b.36.2025.10.07.21.25.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Oct 2025 21:25:35 -0700 (PDT)
-From: Claudiu <claudiu.beznea@tuxon.dev>
-X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
-To: wsa+renesas@sang-engineering.com,
-	ulf.hansson@linaro.org,
-	p.zabel@pengutronix.de
-Cc: claudiu.beznea@tuxon.dev,
-	linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Subject: [PATCH 3/3] mmc: renesas_sdhi: Add suspend/resume hooks
-Date: Wed,  8 Oct 2025 07:25:25 +0300
-Message-ID: <20251008042526.3312597-4-claudiu.beznea.uj@bp.renesas.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com>
-References: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="m4BepKPY"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59890nR4029797;
+	Wed, 8 Oct 2025 11:08:19 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=pWZh6qeNk7G0jxoHNP7vx3
+	oxC+FCtYWHP7fnDeNwkMA=; b=m4BepKPYqBQ/36Njjrjg+q5uNvK1BC3kCmcCTj
+	3QwrOqVbsb2ZTkxN1L7kTm7XYb1uPmoLVy/TEuFjnUNzqbanyh9YMoxi0zCfoOqA
+	y2ajVwS2jIrCfrgcG79eACCJ8nmt80y6Gn7UmSxXVsLsVbA1TF/B4CT4NSAKAwpz
+	wl4LuQ8g11n7UP+Ea0ARaBNOD7sbFxKv2RwxzD3SpFsuHiQkZm73yHMZXPj1l2Ed
+	sAeG+jfiCNZGLfpct+hn9RxZfLTE861Hvspn5okIA+i+SJFYuwgHFAao9E/jTXSJ
+	c+4K9ndtmNUb4nbIXNFbRZTvJCul9OH5bsH1PUzif1DpkdtA==
+Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49js9e2c7q-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 08 Oct 2025 11:08:18 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 598B8I22012236
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 8 Oct 2025 11:08:18 GMT
+Received: from hu-mdalam-blr.qualcomm.com (10.80.80.8) by
+ nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1748.24; Wed, 8 Oct 2025 04:08:15 -0700
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+To: <adrian.hunter@intel.com>, <quic_asutoshd@quicinc.com>,
+        <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_varada@quicinc.com>
+CC: <quic_mdalam@quicinc.com>
+Subject: [PATCH] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC devices
+Date: Wed, 8 Oct 2025 16:37:58 +0530
+Message-ID: <20251008110758.718944-1-quic_mdalam@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -82,116 +56,236 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=Hrl72kTS c=1 sm=1 tr=0 ts=68e64622 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=x6icFKpwvdMA:10 a=COk6AnOGAAAA:8 a=x0BWNmWj6fMoAQ0tY0IA:9
+ a=TjNXssC_j7lpFel5tvFf:22 a=cPQSjfK2_nFv0Q5t_7PE:22
+X-Proofpoint-GUID: VsMqdFUa2BqiPYpGR7DorjRO2db1ox-i
+X-Proofpoint-ORIG-GUID: VsMqdFUa2BqiPYpGR7DorjRO2db1ox-i
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDA0MDAwNCBTYWx0ZWRfX0+2APgXc54oc
+ JvDHCm7ew2UX0J7GghP3WU2ejxA0CRLhvsO3LIFy14OFx7b2KsxKm7SByRhnCxlGNs1vNK/1U/U
+ F6uZxiWRIn40ZP0DifDGC9+rqthSrLsMlUVOB0QS3hBHy5LgIGxaO/7iGwjgj0zLyUZSXsCA/ZI
+ cSyq6EsSi5b+Ml1FTMoUL1GtTVNeGWmPw7S8MOQsQNqLPBtaHHAofIah+SrgPI4ZaNt16jFAjzH
+ mSBkX9M1IOgwr29ePuUxJ373JmQQleTT8LBksps30Ybak+K1fsJsOSv2FHAxEkChJt4GyU4Guyg
+ IdSMWDRgDZWzrbPewxj3AC/JHUmWCGi4lGIvIms0d3sE9cT2MLpRXj9AVXQS7qfFkjz7Q3VEeZB
+ n1z45njy3e0VNU+4TUhKgURd0mzpEg==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-10-08_03,2025-10-06_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1011 phishscore=0 spamscore=0 adultscore=0 lowpriorityscore=0
+ bulkscore=0 priorityscore=1501 malwarescore=0 impostorscore=0 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2509150000 definitions=main-2510040004
 
-From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Enable Inline Crypto Engine (ICE) support for eMMC devices that don't
+use command queuing (CQE). This allows hardware-accelerated encryption
+and decryption for standard eMMC operations without command queuing.
 
-Add suspend/resume hooks which assert/deassert the reset signals, along
-with forcing runtime suspend/resume. This allows using the driver in
-scenarios where the resume is done with the help of bootloader and the
-bootloader disables the SDHI clocks, resets, IRQs before passing execution
-to Linux.
+The changes include:
+- Add non-cmdq crypto register definitions
+- Implement crypto configuration callback for non-cmdq operations
+- Initialize ICE hardware during host setup for non-cmdq devices
+- Integrate crypto configuration into the main request path
 
-Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+This enables non-cmdq eMMC devices to benefit from hardware crypto
+acceleration, improving performance for encrypted storage operations
+while maintaining compatibility with existing cmdq crypto support.
+
+Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
 ---
- drivers/mmc/host/renesas_sdhi.h               |  3 ++
- drivers/mmc/host/renesas_sdhi_core.c          | 37 +++++++++++++++++++
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  3 +-
- 3 files changed, 41 insertions(+), 2 deletions(-)
+ drivers/mmc/host/cqhci.h     |  4 ++
+ drivers/mmc/host/sdhci-msm.c | 74 +++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.c     | 20 ++++++++++
+ drivers/mmc/host/sdhci.h     |  2 +
+ 4 files changed, 99 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index 084964cecf9d..afc36a407c2c 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -9,6 +9,7 @@
- #ifndef RENESAS_SDHI_H
- #define RENESAS_SDHI_H
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index ce189a1866b9..9bf236e27675 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -119,6 +119,10 @@
+ /* command response argument */
+ #define CQHCI_CRA			0x5C
  
-+#include <linux/device.h>
- #include <linux/dmaengine.h>
- #include <linux/platform_device.h>
- #include <linux/workqueue.h>
-@@ -107,4 +108,6 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		       const struct renesas_sdhi_of_data *of_data,
- 		       const struct renesas_sdhi_quirks *quirks);
- void renesas_sdhi_remove(struct platform_device *pdev);
-+int renesas_sdhi_suspend(struct device *dev);
-+int renesas_sdhi_resume(struct device *dev);
- #endif
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index c4aaf534868c..2a310a145785 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -31,6 +31,7 @@
- #include <linux/platform_data/tmio.h>
- #include <linux/platform_device.h>
- #include <linux/pm_domain.h>
-+#include <linux/pm_runtime.h>
- #include <linux/regulator/consumer.h>
- #include <linux/regulator/driver.h>
- #include <linux/regulator/of_regulator.h>
-@@ -1317,5 +1318,41 @@ void renesas_sdhi_remove(struct platform_device *pdev)
- }
- EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
++/* non command queue crypto enable register*/
++#define NONCQ_CRYPTO_PARM		0x70
++#define NONCQ_CRYPTO_DUN		0x74
++
+ /* crypto capabilities */
+ #define CQHCI_CCAP			0x100
+ #define CQHCI_CRYPTOCAP			0x104
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4e5edbf2fc9b..2204c6abb3fe 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -157,6 +157,23 @@
+ #define CQHCI_VENDOR_CFG1	0xA00
+ #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
  
-+int renesas_sdhi_suspend(struct device *dev)
++#define DISABLE_CRYPTO			BIT(15)
++#define CRYPTO_GENERAL_ENABLE		BIT(1)
++#define HC_VENDOR_SPECIFIC_FUNC4	0x260
++#define ICE_HCI_SUPPORT			BIT(28)
++
++/* SDHCI MSM ICE CTRL Info register offset */
++enum {
++	OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CCI	= 0,
++	OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CE	= 8,
++};
++
++/* SDHCI MSM ICE CTRL Info register masks */
++enum {
++	MASK_SDHCI_MSM_ICE_HCI_PARAM_CE		= 0x1,
++	MASK_SDHCI_MSM_ICE_HCI_PARAM_CCI	= 0xff
++};
++
+ struct sdhci_msm_offset {
+ 	u32 core_hc_mode;
+ 	u32 core_mci_data_cnt;
+@@ -1882,9 +1899,47 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+  * Inline Crypto Engine (ICE) support                                        *
+  *                                                                           *
+ \*****************************************************************************/
+-
+ #ifdef CONFIG_MMC_CRYPTO
+ 
++static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq,
++			     u32 slot)
 +{
-+	struct tmio_mmc_host *host = dev_get_drvdata(dev);
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+	int ret;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	struct mmc_host *mmc = msm_host->mmc;
++	struct cqhci_host *cq_host = mmc->cqe_private;
++	unsigned int crypto_params = 0;
++	int key_index = 0;
++	bool bypass = true;
++	u64 dun = 0;
 +
-+	ret = pm_runtime_force_suspend(dev);
-+	if (ret)
-+		return ret;
++	if (!mrq || !cq_host)
++		return -EINVAL;
 +
-+	ret = reset_control_assert(priv->rstc);
-+	if (ret)
-+		pm_runtime_force_resume(dev);
++	if (mrq->crypto_ctx) {
++		dun = mrq->crypto_ctx->bc_dun[0];
++		bypass = false;
++		key_index = mrq->crypto_key_slot;
++	}
 +
-+	return ret;
++	/* Configure ICE bypass mode */
++	crypto_params |= ((!bypass) & MASK_SDHCI_MSM_ICE_HCI_PARAM_CE)
++			 << OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CE;
++	/* Configure Crypto Configure Index (CCI) */
++	crypto_params |= (key_index & MASK_SDHCI_MSM_ICE_HCI_PARAM_CCI)
++			 << OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CCI;
++
++	cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
++
++	if (mrq->crypto_ctx)
++		cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
++
++	/* Ensure crypto configuration is written before proceeding */
++	wmb();
++
++	return 0;
 +}
-+EXPORT_SYMBOL_GPL(renesas_sdhi_suspend);
 +
-+int renesas_sdhi_resume(struct device *dev)
-+{
-+	struct tmio_mmc_host *host = dev_get_drvdata(dev);
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+	int ret;
-+
-+	ret = reset_control_deassert(priv->rstc);
-+	if (ret)
-+		return ret;
-+
-+	ret = pm_runtime_force_resume(dev);
-+	if (ret)
-+		reset_control_assert(priv->rstc);
-+
-+	return ret;
-+}
-+EXPORT_SYMBOL_GPL(renesas_sdhi_resume);
-+
- MODULE_DESCRIPTION("Renesas SDHI core driver");
- MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 7ceb7b977a0b..9347017d47c4 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -18,7 +18,6 @@
- #include <linux/pagemap.h>
- #include <linux/platform_data/tmio.h>
- #include <linux/platform_device.h>
--#include <linux/pm_runtime.h>
- #include <linux/scatterlist.h>
- #include <linux/sys_soc.h>
+ static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
  
-@@ -599,7 +598,7 @@ static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
+ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+@@ -2131,6 +2186,8 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
+ 	struct cqhci_host *cq_host;
+ 	bool dma64;
+ 	u32 cqcfg;
++	u32 config;
++	u32 ice_cap;
+ 	int ret;
+ 
+ 	/*
+@@ -2185,6 +2242,18 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
+ 	if (ret)
+ 		goto cleanup;
+ 
++	/* Initialize ICE for non-CMDQ eMMC devices */
++	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
++	config &= ~DISABLE_CRYPTO;
++	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
++	ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
++	if (ice_cap & ICE_HCI_SUPPORT) {
++		config = cqhci_readl(cq_host, CQHCI_CFG);
++		config |= CRYPTO_GENERAL_ENABLE;
++		cqhci_writel(cq_host, config, CQHCI_CFG);
++	}
++	sdhci_msm_ice_enable(msm_host);
++
+ 	dev_info(&pdev->dev, "%s: CQE init: success\n",
+ 			mmc_hostname(host->mmc));
+ 	return ret;
+@@ -2450,6 +2519,9 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
+ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+ 
+ static const struct sdhci_ops sdhci_msm_ops = {
++#ifdef CONFIG_MMC_CRYPTO
++	.crypto_engine_cfg = sdhci_msm_ice_cfg,
++#endif
+ 	.reset = sdhci_and_cqhci_reset,
+ 	.set_clock = sdhci_msm_set_clock,
+ 	.get_min_clock = sdhci_msm_get_min_clock,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ac7e11f37af7..2d636a8ee452 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2202,6 +2202,21 @@ void sdhci_set_power_and_bus_voltage(struct sdhci_host *host,
  }
+ EXPORT_SYMBOL_GPL(sdhci_set_power_and_bus_voltage);
  
- static const struct dev_pm_ops renesas_sdhi_internal_dmac_dev_pm_ops = {
--	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
-+	SYSTEM_SLEEP_PM_OPS(renesas_sdhi_suspend, renesas_sdhi_resume)
- 	RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
- 		       tmio_mmc_host_runtime_resume,
- 		       NULL)
++static int sdhci_crypto_cfg(struct sdhci_host *host, struct mmc_request *mrq,
++			    u32 slot)
++{
++	int err = 0;
++
++	if (host->ops->crypto_engine_cfg) {
++		err = host->ops->crypto_engine_cfg(host, mrq, slot);
++		if (err)
++			pr_err("%s: failed to configure crypto: %d\n",
++			       mmc_hostname(host->mmc), err);
++	}
++
++	return err;
++}
++
+ /*****************************************************************************\
+  *                                                                           *
+  * MMC callbacks                                                             *
+@@ -2227,6 +2242,11 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 
+ 	cmd = sdhci_manual_cmd23(host, mrq) ? mrq->sbc : mrq->cmd;
+ 
++	if (mmc->caps2 & MMC_CAP2_CRYPTO) {
++		if (sdhci_crypto_cfg(host, mrq, 0))
++			goto out_finish;
++	}
++
+ 	if (!sdhci_send_command_retry(host, cmd, flags))
+ 		goto out_finish;
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index b6a571d866fa..9ac32a787270 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -709,6 +709,8 @@ struct sdhci_ops {
+ 	unsigned int    (*get_ro)(struct sdhci_host *host);
+ 	void		(*reset)(struct sdhci_host *host, u8 mask);
+ 	int	(*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
++	int	(*crypto_engine_cfg)(struct sdhci_host *host,
++				     struct mmc_request *mrq, u32 slot);
+ 	void	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
+ 	void	(*hw_reset)(struct sdhci_host *host);
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
 -- 
-2.43.0
+2.34.1
 
