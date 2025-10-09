@@ -1,211 +1,221 @@
-Received: from CH1PR05CU001.outbound.protection.outlook.com (mail-northcentralusazon11010016.outbound.protection.outlook.com [52.101.193.16])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49558B67E;
-	Thu,  9 Oct 2025 10:16:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.193.16
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760004973; cv=fail; b=oJyO32FHrcTYTkenXLgDH0Sg6ghRuJ1bJQcLThKvXmzz71SXtAOn+c0lmCzMaMLKm/5JzzCwaN1zp0z6oFZ/PR28+YUDYIEB2PRJCixMdPnNGl+IZhgxH8XMuX0zlJ9RQrSmxyeY4eDM4J0MLJOlJPqOKmWM671Xj4OmVxrLEYU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760004973; c=relaxed/simple;
-	bh=UpCWJ6v46SRW+Rzd18kvGe4ucZtsOPj1YnMHnB15Xiw=;
-	h=Message-ID:Date:Subject:From:To:Cc:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=e4ZMOSxqYLmimyGgCYEb1GySx3nLAiui7ezIJShJGOORJRxy4IYxe7NGpcy9gmzyM/OSMtPfPLDxJnB4GZqHvFzeNOxJDELgjM+PN+j+whIvatRRpPJHB2HxejaLm+v8z7IRKmpOYIGPd3dcQcMZiewnjLJwgCOtfncqGWkaUgk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=KNYFwvdK; arc=fail smtp.client-ip=52.101.193.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="KNYFwvdK"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=T9hlUtRYeyy5BqEEdWTZj3fovn2dOIUf5NGeZsW5aB71l5w7BtoAQ/gXSZpdlObtj2nNdbpiYS4qLsfTf6YMLaXbW6Sz7ABxh2jwxW7p6JWHffms/qMIxyjx39RKDg0bP8wH6jSVv9xamsyw3GrM9DRBazwKre2vyLyxbW/orolABl1U1xeF+Cai+2BpoWCUMMQPNeekdWei/8IB0iPLAAKXHF6rttABTsHCH6Grud6QMYJsMZGL+d4yrKaNd8OKOI4pXXda6y33lhilhL/p6HaRS+wmhnDWj5dq1zFfj8/fYM13jeWn2b3NyJkyG9H96JEjnduvn98NnmqjcEOPtg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=YGK1RFcn3gVAojy32+3aOcbbBp5ZuCORr54b3dufe9M=;
- b=cVCVxBFaNyoAV/CSjblOuubvJ9xkdV+A/KQPUCnu71x+GMM4AeetxvqL3Ir1Yy6c621/sejQbJXbMLwBnUL9vrdb8793nhmU1jvFLiaZruikft4syRGv7cyAGFiZg21iSjCpT+dMmzxmJo8tduI5bkYIto699q0qQtu25LFabY3KtnOa9TElIF7VubpVT6ajMTnpWVbBhg57pVhQF/Bk/0+HQM8zuuuBmhTbYFIpufnLrt6MveIISq/9alREOBq+PrGlwQUdY4fV9ea5yLWp5954RR8eQgdgZK1NHdxay+aT8yPrH6g268D/6CEtQqj9LknE2fJiIQN4YgChwhRn4A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YGK1RFcn3gVAojy32+3aOcbbBp5ZuCORr54b3dufe9M=;
- b=KNYFwvdK6rTUZF2Gu2JZ23AgHVRpXQOgRIw2/IzS9MKjm+tzLRdzjqj7bKQ+uzh1HLvXlgsipBmi0wZp1A/40ujGva0s+OzjUSui6A8W+FQgjsFYc17BJYjQf6L5I8DrAavnDEol2FvN4zc93XDbe+S2gmjnc7Altdu7AtamBeYVexgZ38+3zELwK/polWAW4epzleY+TjoKzgusPJQ5Twl7KJ4Swj98XkBHPMrEvvh3H2QRLOEX78GqRPy7LSwtN5qE9VBJNRwDmRWmKG7k8q6UXO7zdDIH6Zxp0uASjrR1PHcGmi8l5mTl8MxnEzjoBi9bTlij5vWvYr1h7sIfqQ==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from SJ2PR12MB8784.namprd12.prod.outlook.com (2603:10b6:a03:4d0::11)
- by SA1PR12MB8118.namprd12.prod.outlook.com (2603:10b6:806:333::9) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9203.10; Thu, 9 Oct
- 2025 10:16:05 +0000
-Received: from SJ2PR12MB8784.namprd12.prod.outlook.com
- ([fe80::1660:3173:eef6:6cd9]) by SJ2PR12MB8784.namprd12.prod.outlook.com
- ([fe80::1660:3173:eef6:6cd9%4]) with mapi id 15.20.9182.017; Thu, 9 Oct 2025
- 10:16:05 +0000
-Message-ID: <041f2fe4-30a3-47cb-952b-1f0029fde27c@nvidia.com>
-Date: Thu, 9 Oct 2025 11:15:58 +0100
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/3] dt-binding: Add register-settings binding
-From: Jon Hunter <jonathanh@nvidia.com>
-To: krzk+dt@kernel.org, robh@kernel.org, conor+dt@kernel.org
-Cc: devicetree@vger.kernel.org, linux-tegra@vger.kernel.org,
- linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, andersson@kernel.org,
- sjg@chromium.org, nm@ti.com, Chintan Vankar <c-vankar@ti.com>,
- Rajesh Gumasta <rgumasta@nvidia.com>, andi.shyti@kernel.org,
- ulf.hansson@linaro.org, thierry.reding@gmail.com, kyarlagadda@nvidia.com
-References: <20250725052225.23510-1-rgumasta@nvidia.com>
- <20250725052225.23510-2-rgumasta@nvidia.com>
- <0784441c-9859-4418-a4a7-85ffe3ecf860@ti.com>
- <d619df1f-813d-4be5-8d24-295455f956de@nvidia.com>
-Content-Language: en-US
-In-Reply-To: <d619df1f-813d-4be5-8d24-295455f956de@nvidia.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: LO4P265CA0147.GBRP265.PROD.OUTLOOK.COM
- (2603:10a6:600:2c4::20) To SJ2PR12MB8784.namprd12.prod.outlook.com
- (2603:10b6:a03:4d0::11)
+Received: from pegase2.c-s.fr (pegase2.c-s.fr [93.17.235.10])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 33DC3275844;
+	Thu,  9 Oct 2025 10:20:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=93.17.235.10
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1760005237; cv=none; b=WIvcQ2t4cCQeAjdmm06rO8P8/i52z7+xLaegywcqXizPePR+pTGm41zfNVGBkOJULoFddUYzha9TveyLIsdlMS9LiYi+DgmhJwzrUp2kehcshQbURqm8C4InVNOvZrwVKlMFncX0EtdyJ8Wn6ykwMvGm5PjwAsHFdT4+lkpmn+4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1760005237; c=relaxed/simple;
+	bh=lUs8p2fW3v1l2sBrZO8lIJGpAyvrMi+W3vfGsTEx0nY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Gxvq81XBV4Yr5tyBP12Aekpq8rPAHuBo9JLuJk724Hf4lg6IAm1mUvBeA5qGaK9mnnrFs9nQY0XzbjdzjO6TDB2zYdBSTJsMEt0L3F+XDy5tzkwLNnHuI8zaq7Wly7ItkU7YdLwDu/0bjP0Nv2oi/C/KthYTDtuBvnX/m2fTBh0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=csgroup.eu; spf=pass smtp.mailfrom=csgroup.eu; arc=none smtp.client-ip=93.17.235.10
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=csgroup.eu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=csgroup.eu
+Received: from localhost (mailhub4.si.c-s.fr [172.26.127.67])
+	by localhost (Postfix) with ESMTP id 4cj548110xz9sSL;
+	Thu,  9 Oct 2025 12:01:12 +0200 (CEST)
+X-Virus-Scanned: amavisd-new at c-s.fr
+Received: from pegase2.c-s.fr ([172.26.127.65])
+	by localhost (pegase2.c-s.fr [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id qOLNCcqM6pFr; Thu,  9 Oct 2025 12:01:12 +0200 (CEST)
+Received: from messagerie.si.c-s.fr (messagerie.si.c-s.fr [192.168.25.192])
+	by pegase2.c-s.fr (Postfix) with ESMTP id 4cj5476tjqz9sSC;
+	Thu,  9 Oct 2025 12:01:11 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+	by messagerie.si.c-s.fr (Postfix) with ESMTP id D06108B76C;
+	Thu,  9 Oct 2025 12:01:11 +0200 (CEST)
+X-Virus-Scanned: amavisd-new at c-s.fr
+Received: from messagerie.si.c-s.fr ([127.0.0.1])
+	by localhost (messagerie.si.c-s.fr [127.0.0.1]) (amavisd-new, port 10023)
+	with ESMTP id MfDghYtIuYkA; Thu,  9 Oct 2025 12:01:11 +0200 (CEST)
+Received: from [192.168.235.99] (unknown [192.168.235.99])
+	by messagerie.si.c-s.fr (Postfix) with ESMTP id 776CE8B767;
+	Thu,  9 Oct 2025 12:01:09 +0200 (CEST)
+Message-ID: <0c730c52-97ee-43ea-9697-ac11d2880ab7@csgroup.eu>
+Date: Thu, 9 Oct 2025 12:01:08 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SJ2PR12MB8784:EE_|SA1PR12MB8118:EE_
-X-MS-Office365-Filtering-Correlation-Id: efe8561c-e3db-4463-d345-08de071cdb2c
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|366016|376014|7416014|1800799024;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?alU0VEx6YlBtVUErOXhaUWJCWmY0ZzRpdWpSelYrQ3ZRWEY0RSswLzY2MUtx?=
- =?utf-8?B?R1V1WHVpUGNaTGpqWEMvTVB2QmoxRzdESUI0SFV2TG5yYVhXS3FCUXE5aDJo?=
- =?utf-8?B?b0ZJZFh3Nitzc3I3NFFFWEZZc1V0dzAzb0hscHF2UUVEaGM3dnRXN0JtUUhY?=
- =?utf-8?B?c3J4MEp0UkFVMmlaalMrOHZOa0lHNjd6bmhPamllZUM3WHFFSGc3Yy9TVmhW?=
- =?utf-8?B?MDVPMnZ3ZUJzbk0rYmNHZ2FvcENvb0RqanNlOHRRMEs1V3ZzaEk0eVljQ2kx?=
- =?utf-8?B?RWVja3l2M0JUL2NMQTFQSWVxRFNJbGhNWnFobi90WkI3azdCRzVJbmtRMDhl?=
- =?utf-8?B?VnFZUjBUcmxYSjhwbHd6U2w0a1pzWU42Rk5lUTkvQzlBdTE4bGNRcFZNbUVP?=
- =?utf-8?B?M0dZTitOQ1lLYnd6ejRjNnduODdHWEMrVVovTS9lSVE5TUozZ0hqV0hzS05y?=
- =?utf-8?B?YTNXY3p4QTJ3M1ZUSThRRVM2RysyTW5VZURhZ1ZndkdGZFk5YjRpU0w0eUxM?=
- =?utf-8?B?WHRIN1NIRSs4Um5zZ3pyRFBVaW8wbXlFUU85cElPRDFpU0tac0dXNEhDVlRs?=
- =?utf-8?B?dEJQWFk1Qm1NTzNSY2h2OXhZaDJ5VmVWQkxaQWg4dCtnMG04MWdza01SZnc4?=
- =?utf-8?B?WGhvNldZcVZiekJIamZIRlFoSEVBOWpOQWxGVmZMV0tCcm1Lakt3UkorcXlC?=
- =?utf-8?B?bEs5bUZ6Zm9EMVVFL1F3bG9WRnYrVDZ4VnBUN3kwQzdaOTArMW5ZZGNmNEVn?=
- =?utf-8?B?Sk5WRXRlMzNZU1hodncySktVQ1dCRlE3QzdSQ0NwdktQcUFrS1ZuSUF0NlNH?=
- =?utf-8?B?ODY1NHhtZWJkM3dXaHFia2huZ2lySEkxQzdISzRVQk10MU1rbFczYVpjSndQ?=
- =?utf-8?B?UVlJTWdLcjRNdXJtU3QySzR1SlpRZVQvUmdlY1AwNlArbzRiOHVrMGVSdnFv?=
- =?utf-8?B?cnpQa2NSR1pOSVZWV1hlOUMxQ3pRRnJ6WkpqZDFHMXFIOE1LMDVURnN1L3My?=
- =?utf-8?B?M2RMVTBZMUlZZ09TY1A0RXVPSVBmSFJLQ0gwUFgzaEVlQWxDTXI2ZVlyUlM5?=
- =?utf-8?B?QUIzcjl3eVNEdUU4aDZ5OWpDM2NPSUc2N3hZNzhtNXVFeVRBQnBqVFVPY3Jv?=
- =?utf-8?B?NTI4VFh2emxMTlFpcjdOdUR1UUxjd3BwT3k1dE9ENTdOSUkvczhmY1FZODBQ?=
- =?utf-8?B?UERvQzJncjhvUnJHcjhXWUdZTG5OMVJqT1R4ZmE4K2NXalN3ZTFnNzhJWkFm?=
- =?utf-8?B?cEJzdUpBMmRlTE5Ha2pXTE1GbXM5UHZuTjErODFXNUhoTUVSd21OeHMycURy?=
- =?utf-8?B?cTAzaWc0cVl3OTlpZm1tcVdoeFRqY0VwUlR1aFRYU2xHc2hNSHhlYjM5TFpk?=
- =?utf-8?B?VGRxaHN5NjlmNC9zQnlLTGloS0V5empWT0pQTzdHdHZHeDJJajNDMXJBZnU2?=
- =?utf-8?B?R2lIcXNuVkI2MHVxNnJyY3lqOGNWcUUvOGgrQU9jOG1wVzZva3Q1M0cxNjdo?=
- =?utf-8?B?RnpVZGcvZG81MG4ycG5OSU9XMjlMNUg5R1VEVG9BeE1yVlpVdWVZdjFITUt4?=
- =?utf-8?B?RFhGeWp5dWFOMFFCaXVZblZ6eVUvNmk4L0tmYTl6OVdNcWx3aytuQm51cURI?=
- =?utf-8?B?YTVJVkVaUkxLdmVGZ0F5cGtieTAxTVdVdDI2UHg5cGVuaUV6Q3pCaFBtK1JE?=
- =?utf-8?B?clNMZDZvd2VYY0xjNGN3WGZGVUNoV0I5MENqM1lCZUwzaGJVenZUdTN3azRZ?=
- =?utf-8?B?NzBMQmFPekhJbkdDV1ovQTR1eGJxWHpNWlcwRUtpdFBqcjNINWlYa3piaExh?=
- =?utf-8?B?dzFUNms4UndTSEtVS1Y0dDE1OE5LQ1ROUVJGK2NtbStUMTRiR2RpN2xTWWZn?=
- =?utf-8?B?eW5UeDBTck9YVGRxVzk1M3dqcUVJSkkyTEpqOHNTdm1uNldadTdKa0M3aHBR?=
- =?utf-8?B?SlYvbUpKTEhxQUl2RlJ3RmRteUFKeXMvY2VBRHVJL1ZSczh5eVIyU1FNNzBl?=
- =?utf-8?B?U04xRXVNMlBnPT0=?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ2PR12MB8784.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(366016)(376014)(7416014)(1800799024);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?ZFR0dGRlQzBaUDNpTE92N20rMmZkcVc5WXduUlFVQzFGdVFJa0NsemdqdEhp?=
- =?utf-8?B?bWU0TEcxNFFMRThHMzEvamE4d2UrL0tsbDd4aVoxenJ6NWR2MWM0bEFjQ1hH?=
- =?utf-8?B?QkxFSDlQTHZMcC9HMGozRTF2Wm16ZWY1U2JBc3ZIS05HTkFLZ1ZnRTJKM2U2?=
- =?utf-8?B?MVp6UnpsUXp1dEZaMGM0ZmUrV3I1S3ZtekxIZ3doQldzckM3amlxaGdwQWNU?=
- =?utf-8?B?eWxmbUFNZGtxMEt3eXJ5T1ZWYmw2VHBOb0YzVmhSdiszNnBPNlh6b1oxNmVl?=
- =?utf-8?B?djRaNWpFckVoZHVPZ2trTUVIWFVRRDdYWDdQYVhCODUwQXcvMVRiejdVUksr?=
- =?utf-8?B?Z2M3WjhQVDFWa2plT2RWZ3VEZnArRTBSZnBlZEpVZTg2YU45Q2JmRGx5MXRS?=
- =?utf-8?B?bzNvWVdtdzJmSU5sOStGNkFsVTRqdnpjcityQ0dIbSt3UStDOFQxY1d1ZkJq?=
- =?utf-8?B?YWNLZEJQZXFFOFNBamxlTE93eFRoVXAwV1ZidmYrcEdweGhYYS9LT1E1aUts?=
- =?utf-8?B?dGIzVkwrSVlyWnZQZm5hZWhYclJPS01VMmh4MkJRcHNMZXpOUEJJVnlnTEJl?=
- =?utf-8?B?NUNORnVjbVhZSHREQjRXNzMxN29jRzZ3ZXB2ZFlkVk9wNmlvMS8xSnJ3YmUv?=
- =?utf-8?B?MDZqWmJzam5kYVpaQW1vOHpUQStnVDVYUTNNN0FzWEswS0ZaRDhxUm9GZ0lu?=
- =?utf-8?B?U200QmZoejdjQjFjcGRoVkw1Nm9uc1lLUWJDblBuTGZjcFlwV3ZhQlRHRlg1?=
- =?utf-8?B?SFNsdENsV3J5MkxHeFdObG8xRldWenkwbWVWMlI2Q1dtUXc5ZUlkVlZuaDJJ?=
- =?utf-8?B?RHY1RU1XZjIra2FvTGdONWovbGRaSmVwZUM0SlhvN1JkVHE5TkRsQWV0MUpH?=
- =?utf-8?B?eWFicmRCSVFlb083OTA0RnBGZmlLakRkdElFQkYyanMyanpMU1NVNk02c05W?=
- =?utf-8?B?TDlybXEydWdBMlZLcFNoTThsQ1VKRjBwVVRZRzlKeG9QWWVYT3hmV1VTV1Ay?=
- =?utf-8?B?U25Ib1JtZlhJSnNxTFg3NlhEYldMVzlxSVFRUHdLRWMycmhLdUU4TFhPdXJL?=
- =?utf-8?B?M3Fqcll6aGpGUjRmaWEram5SK1NiaGgyZy9BVWxRMVY5bFNwOW5rcXhyTWw4?=
- =?utf-8?B?UTNjSWpLQVo5MnI4T2xoWTVObnRNblNnUWpNb2VNdjFqSmpWdHZpcmhhWnIw?=
- =?utf-8?B?ZDN4UXNWNythL3NURzk3cnlDSkFoUHYwREgyY20rbkg1bkJzdzZ1dTNsNmFj?=
- =?utf-8?B?ZDUyV3NscGdZUTlGcGw4aHRJWWpJZGdhMDI3OHhLam1FZC9UT3lURmZRamlW?=
- =?utf-8?B?UVRId2huK0pBY2hnRHgzUEQ3V0k5YmxiWHZFZmRvS1VSOHYrVEhZdnJvUjl2?=
- =?utf-8?B?bmdzUzkrOVpDYzRkbFJrRW5aQkFqVXZsTWZnemVBMVdUUEJ5Vlk3Rkg4VlVr?=
- =?utf-8?B?Y1B4amRjRnhQOFVhbmptd3F6dkRFeE5IM3JadEFkS0VDdTV5NFJ1a21NNjBL?=
- =?utf-8?B?SGxsYThxalRYNGZOUFVpMEhBN0RlbXc4UEFTODd0Z3l5VmxzQWQxTnlzckVS?=
- =?utf-8?B?SzNYVWR2eDY0YmxHRnBGUlQrM2l3ajhhbUJldUQxMFdHcXkyRW9xM21pc2pS?=
- =?utf-8?B?Tzlsd1cyK01udFdQVEdvSFBEWkhzb1RMUDRFd2d3R0d0S0t4MHFoYkVjTm1O?=
- =?utf-8?B?VlhtQUY4R2F1L3lQNS9NOEZKRDJsdXhtbEM3eXBmcmF1QVM0QkZoU3kxTVdS?=
- =?utf-8?B?d1RFSUFKQU9xQW9LTndSblZaUkZ6Mmd3K1doM3ZMaUdZbkN6WTJWRHVERFBQ?=
- =?utf-8?B?b1lFZDRmNnZLNUZkRmlEUldMMXY1YXJrTVpVZk5heUhJbFZ1b3A0NU4vY1VO?=
- =?utf-8?B?ZGl4M09KMlYzUlNpN2JveHhnYVl3Q2svUWlBZ0g2K3JCL2Q3Y2RRa3lOUjBI?=
- =?utf-8?B?azM2YTl2eEhHWkxIN0dvRjBGbUorM0gyOS9hRGJZRXFyeDJEOE41YlpDcnhQ?=
- =?utf-8?B?M0FaTVIrUzVTSmJWUERXbDdBbi9JdzJRNEdHVitwYTRjZE4xeml5QnU2bU51?=
- =?utf-8?B?SlE3blpqTFpGNWRNRUN6dkRhNGkzZVkrYVJpSGEzQ044SWQwbGJkSllRTStt?=
- =?utf-8?B?RzErRlArRnRXRWNYT3l6SFpLbm93cFhCZHU2Y25KWTZ3ZEh6b2hiRlJ1SUJz?=
- =?utf-8?B?YWRhbzN6djczM1NqenVrZklwOWRYdFM1QmN4VVVCdk10UXpPZWtRNSsrUklC?=
- =?utf-8?B?Q3d1TC9QWmthNUVCWDc5RGtnSWJ3PT0=?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: efe8561c-e3db-4463-d345-08de071cdb2c
-X-MS-Exchange-CrossTenant-AuthSource: SJ2PR12MB8784.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Oct 2025 10:16:05.2743
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: i7pgEDcwSf1WXPcy14aYsdlnZgk0imQLz9wxfFhr/MkgLa9qEL14Hz+LPsY8JZJEhIInTyJASDPlwzoJFHsm6g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR12MB8118
+User-Agent: Mozilla Thunderbird
+Subject: Re: (bisected) [PATCH v2 08/37] mm/hugetlb: check for unreasonable
+ folio sizes when registering hstate
+To: David Hildenbrand <david@redhat.com>, linux-kernel@vger.kernel.org
+Cc: Zi Yan <ziy@nvidia.com>, Lorenzo Stoakes <lorenzo.stoakes@oracle.com>,
+ "Liam R. Howlett" <Liam.Howlett@oracle.com>,
+ Alexander Potapenko <glider@google.com>,
+ Andrew Morton <akpm@linux-foundation.org>,
+ Brendan Jackman <jackmanb@google.com>, Christoph Lameter <cl@gentwo.org>,
+ Dennis Zhou <dennis@kernel.org>, Dmitry Vyukov <dvyukov@google.com>,
+ dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
+ iommu@lists.linux.dev, io-uring@vger.kernel.org,
+ Jason Gunthorpe <jgg@nvidia.com>, Jens Axboe <axboe@kernel.dk>,
+ Johannes Weiner <hannes@cmpxchg.org>, John Hubbard <jhubbard@nvidia.com>,
+ kasan-dev@googlegroups.com, kvm@vger.kernel.org,
+ Linus Torvalds <torvalds@linux-foundation.org>, linux-arm-kernel@axis.com,
+ linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
+ linux-ide@vger.kernel.org, linux-kselftest@vger.kernel.org,
+ linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+ linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
+ linux-scsi@vger.kernel.org, Marco Elver <elver@google.com>,
+ Marek Szyprowski <m.szyprowski@samsung.com>, Michal Hocko <mhocko@suse.com>,
+ Mike Rapoport <rppt@kernel.org>, Muchun Song <muchun.song@linux.dev>,
+ netdev@vger.kernel.org, Oscar Salvador <osalvador@suse.de>,
+ Peter Xu <peterx@redhat.com>, Robin Murphy <robin.murphy@arm.com>,
+ Suren Baghdasaryan <surenb@google.com>, Tejun Heo <tj@kernel.org>,
+ virtualization@lists.linux.dev, Vlastimil Babka <vbabka@suse.cz>,
+ wireguard@lists.zx2c4.com, x86@kernel.org,
+ "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+References: <20250901150359.867252-1-david@redhat.com>
+ <20250901150359.867252-9-david@redhat.com>
+ <3e043453-3f27-48ad-b987-cc39f523060a@csgroup.eu>
+ <d3fc12d4-0b59-4b1f-bb5c-13189a01e13d@redhat.com>
+ <faf62f20-8844-42a0-a7a7-846d8ead0622@csgroup.eu>
+ <9361c75a-ab37-4d7f-8680-9833430d93d4@redhat.com>
+ <03671aa8-4276-4707-9c75-83c96968cbb2@csgroup.eu>
+ <1db15a30-72d6-4045-8aa1-68bd8411b0ba@redhat.com>
+From: Christophe Leroy <christophe.leroy@csgroup.eu>
+Content-Language: fr-FR
+In-Reply-To: <1db15a30-72d6-4045-8aa1-68bd8411b0ba@redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Hi Rob, Krzysztof, Conor,
 
-On 30/09/2025 16:01, Jon Hunter wrote:
 
-...
-
->> Following your series, I would like to bring to your attention that
->> Texas Instruments SoCs also have a component which requires similar kind
->> of configuration, named Timesync Router(TSR). It enables the
->> multiplexing of M inputs to N outputs, where inputs can be selectively
->> driven based on N output configuration. A detailed explanation of the
->> TSR and our attempts we tried to implement TSR can be found in following
->> RFC series:
->> https://lore.kernel.org/all/20250605063422.3813260-1-c-vankar@ti.com/
->> https://lore.kernel.org/all/20250205160119.136639-1-c-vankar@ti.com/
+Le 09/10/2025 à 11:20, David Hildenbrand a écrit :
+> On 09.10.25 11:16, Christophe Leroy wrote:
 >>
->> To implement TSR, the relevant registers must be configured via the
->> device tree. We initially assumed that the device could be handled as a
->> mux-controller and could be extended in the same subsystem, but it was
->> ineffective. Having explored both the approaches, we now plan to
->> implement TSR within misc subsystem, which aligns with the dt-bindings
->> that you have proposed in this series.
 >>
->> The purpose to replying over this series is to inform you that we also
->> have a component requiring configuration as outlined in this series. Let
->> us know if you have any suggestions for this.
+>> Le 09/10/2025 à 10:14, David Hildenbrand a écrit :
+>>> On 09.10.25 10:04, Christophe Leroy wrote:
+>>>>
+>>>>
+>>>> Le 09/10/2025 à 09:22, David Hildenbrand a écrit :
+>>>>> On 09.10.25 09:14, Christophe Leroy wrote:
+>>>>>> Hi David,
+>>>>>>
+>>>>>> Le 01/09/2025 à 17:03, David Hildenbrand a écrit :
+>>>>>>> diff --git a/mm/hugetlb.c b/mm/hugetlb.c
+>>>>>>> index 1e777cc51ad04..d3542e92a712e 100644
+>>>>>>> --- a/mm/hugetlb.c
+>>>>>>> +++ b/mm/hugetlb.c
+>>>>>>> @@ -4657,6 +4657,7 @@ static int __init hugetlb_init(void)
+>>>>>>>          BUILD_BUG_ON(sizeof_field(struct page, private) *
+>>>>>>> BITS_PER_BYTE <
+>>>>>>>                  __NR_HPAGEFLAGS);
+>>>>>>> +    BUILD_BUG_ON_INVALID(HUGETLB_PAGE_ORDER > MAX_FOLIO_ORDER);
+>>>>>>>          if (!hugepages_supported()) {
+>>>>>>>              if (hugetlb_max_hstate || 
+>>>>>>> default_hstate_max_huge_pages)
+>>>>>>> @@ -4740,6 +4741,7 @@ void __init hugetlb_add_hstate(unsigned int
+>>>>>>> order)
+>>>>>>>          }
+>>>>>>>          BUG_ON(hugetlb_max_hstate >= HUGE_MAX_HSTATE);
+>>>>>>>          BUG_ON(order < order_base_2(__NR_USED_SUBPAGE));
+>>>>>>> +    WARN_ON(order > MAX_FOLIO_ORDER);
+>>>>>>>          h = &hstates[hugetlb_max_hstate++];
+>>>>>>>          __mutex_init(&h->resize_lock, "resize mutex", &h- 
+>>>>>>> >resize_key);
+>>>>>>>          h->order = order;
+>>>>>
+>>>>> We end up registering hugetlb folios that are bigger than
+>>>>> MAX_FOLIO_ORDER. So we have to figure out how a config can trigger 
+>>>>> that
+>>>>> (and if we have to support that).
+>>>>>
+>>>>
+>>>> MAX_FOLIO_ORDER is defined as:
+>>>>
+>>>> #ifdef CONFIG_ARCH_HAS_GIGANTIC_PAGE
+>>>> #define MAX_FOLIO_ORDER        PUD_ORDER
+>>>> #else
+>>>> #define MAX_FOLIO_ORDER        MAX_PAGE_ORDER
+>>>> #endif
+>>>>
+>>>> MAX_PAGE_ORDER is the limit for dynamic creation of hugepages via
+>>>> /sys/kernel/mm/hugepages/ but bigger pages can be created at boottime
+>>>> with kernel boot parameters without CONFIG_ARCH_HAS_GIGANTIC_PAGE:
+>>>>
+>>>>      hugepagesz=64m hugepages=1 hugepagesz=256m hugepages=1
+>>>>
+>>>> Gives:
+>>>>
+>>>> HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+>>>> HugeTLB: 0 KiB vmemmap can be freed for a 1.00 GiB page
+>>>> HugeTLB: registered 64.0 MiB page size, pre-allocated 1 pages
+>>>> HugeTLB: 0 KiB vmemmap can be freed for a 64.0 MiB page
+>>>> HugeTLB: registered 256 MiB page size, pre-allocated 1 pages
+>>>> HugeTLB: 0 KiB vmemmap can be freed for a 256 MiB page
+>>>> HugeTLB: registered 4.00 MiB page size, pre-allocated 0 pages
+>>>> HugeTLB: 0 KiB vmemmap can be freed for a 4.00 MiB page
+>>>> HugeTLB: registered 16.0 MiB page size, pre-allocated 0 pages
+>>>> HugeTLB: 0 KiB vmemmap can be freed for a 16.0 MiB page
+>>>
+>>> I think it's a violation of CONFIG_ARCH_HAS_GIGANTIC_PAGE. The existing
+>>> folio_dump() code would not handle it correctly as well.
+>>
+>> I'm trying to dig into history and when looking at commit 4eb0716e868e
+>> ("hugetlb: allow to free gigantic pages regardless of the
+>> configuration") I understand that CONFIG_ARCH_HAS_GIGANTIC_PAGE is
+>> needed to be able to allocate gigantic pages at runtime. It is not
+>> needed to reserve gigantic pages at boottime.
+>>
+>> What am I missing ?
 > 
-> That's great! Thanks for the feedback.
+> That CONFIG_ARCH_HAS_GIGANTIC_PAGE has nothing runtime-specific in its 
+> name.
+
+In its name for sure, but the commit I mention says:
+
+     On systems without CONTIG_ALLOC activated but that support gigantic 
+pages,
+     boottime reserved gigantic pages can not be freed at all.  This patch
+     simply enables the possibility to hand back those pages to memory
+     allocator.
+
+And one of the hunks is:
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 7f7fbd8bd9d5b..7a1aa53d188d3 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -19,7 +19,7 @@ config ARM64
+         select ARCH_HAS_FAST_MULTIPLIER
+         select ARCH_HAS_FORTIFY_SOURCE
+         select ARCH_HAS_GCOV_PROFILE_ALL
+-       select ARCH_HAS_GIGANTIC_PAGE if CONTIG_ALLOC
++       select ARCH_HAS_GIGANTIC_PAGE
+         select ARCH_HAS_KCOV
+         select ARCH_HAS_KEEPINITRD
+         select ARCH_HAS_MEMBARRIER_SYNC_CORE
+
+So I understand from the commit message that it was possible at that 
+time to have gigantic pages without ARCH_HAS_GIGANTIC_PAGE as long as 
+you didn't have to be able to free them during runtime.
+
 > 
-> Rob, Krzysztof, Conor, have you guys had chance to look at this series 
-> some more? We are open to re-working it as necessary to address any 
-> concerns/comments you have. However, this appears to be stalled at the 
-> moment and I am not sure what we should do next to push this forward.
+> Can't we just select CONFIG_ARCH_HAS_GIGANTIC_PAGE for the relevant 
+> hugetlb config that allows for *gigantic pages*.
+> 
 
+We probably can, but I'd really like to understand history and how we 
+ended up in the situation we are now.
+Because blind fixes often lead to more problems.
 
-Please can you respond to this? It is unclear if/how we can move forward 
-on this.
+If I follow things correctly I see a helper gigantic_page_supported() 
+added by commit 944d9fec8d7a ("hugetlb: add support for gigantic page 
+allocation at runtime").
 
-Jon
+And then commit 461a7184320a ("mm/hugetlb: introduce 
+ARCH_HAS_GIGANTIC_PAGE") is added to wrap gigantic_page_supported()
 
--- 
-nvpublic
+Then commit 4eb0716e868e ("hugetlb: allow to free gigantic pages 
+regardless of the configuration") changed gigantic_page_supported() to 
+gigantic_page_runtime_supported()
 
+So where are we now ?
+
+Christophe
