@@ -1,67 +1,86 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2C2A2673B0;
-	Fri, 10 Oct 2025 14:24:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8204257821;
+	Fri, 10 Oct 2025 14:34:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760106247; cv=none; b=cXB/hoVY2+kRPWBiAXp3Y+cE+UwpWxvmKqSplhJNwC+pnIP5kCyPZTK9hl3myLQXiepFELMYHuSbOypRETZ+HpfpzLP1E4ah8hjJZQy3DgmZlKR8jTG/UklaArPYdUQs9ekHDB0g+c6RrirfweD3FmrRTEkCPx2iAAY475wa3po=
+	t=1760106843; cv=none; b=bgif8FL/X9SsGiDjgHXi8F+GTQCOHKEm28SGqr5g8uerfgR0A9ygbPuU6FLlAjS9fFD/9AEmLBTrI6KwbMfXReANJHdph4E5Ok2iUKdiSgRtUpi/jmX7/J4bfxh2pw2gcPJqq4Rg6zFdi2e9K81UazxRM8mrtZ/B5ucjQmMvH4E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760106247; c=relaxed/simple;
-	bh=g/CCLFYJth2UWZIRrD9Q/CZFla4xPgWxZ+t6woi5ZUU=;
+	s=arc-20240116; t=1760106843; c=relaxed/simple;
+	bh=FnS23TIvZXoikLOJ5/OdqMUZUwa1vW83VBZi/rmZ3C8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BGQ7LqgdWErb41HS8+FCZOsr0o33b3OrsPoiwcYXmb6E8rH8ID2VUAy6RQ86R0B7SpIv9jg0qC1USn2Z/WAjJV8raPsntuWKbsCFYclyJJkUxePsNRM/AhxuxY1NIrZT30NWpDXbizRfS6WvRrUk5qa0Yj8w7zflCg8F4NhpkrU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=b/2bOU4q; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=skMfdVtIDEELOMITSTrBrIw5xx6bVd8FimajeB2hAFzNLg+Wpsx7btvOkUnV63C6QmYtLM1zoBBsTk3tN5YtbR3YKA4UDImPfPS17TbWgNHmoncbCP9w9uXewXfZDmDFDUuHPDpCOL0LlehP1slT5YCUixlTDOtRqbiPeeJ8Ibc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jrX3xQa2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="b/2bOU4q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B2F5C4CEF8;
-	Fri, 10 Oct 2025 14:24:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jrX3xQa2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6633DC4CEF1;
+	Fri, 10 Oct 2025 14:33:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760106246;
-	bh=g/CCLFYJth2UWZIRrD9Q/CZFla4xPgWxZ+t6woi5ZUU=;
+	s=k20201202; t=1760106843;
+	bh=FnS23TIvZXoikLOJ5/OdqMUZUwa1vW83VBZi/rmZ3C8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=b/2bOU4qvv1Y1gvxd3uTWsxHGG33oTre9jFhgeoxJHjbyXyZAiS8W37Ctp154law9
-	 54a9B5TRQTsaKdqbxbcaZbhc71O2kbXk+qxLJznBInC0xTCSFNq8IZekTVfmvB+Zpr
-	 XufCbxrS0vI3UJGh6EJsuFsjZYufbIHU/CSQWU2O8xmb1Cc5pe0LNJDWrSukj3Syxc
-	 zs25Nn94Qrl4JxxfRaPIfa3v9ezQPVb3NVzzq55gVQPHk+j8JIO4CK5g5JMdIT3/FR
-	 tUeiA09ul6mTekNTbpDA0MiABz4wluy9gIQLe7NtT8aEhwlVuP4gvG/s9iCBdOynec
-	 c1LKn/XYNcT3g==
-Date: Fri, 10 Oct 2025 09:24:04 -0500
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>, quic_nguyenb@quicinc.com,
-	quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
-	linux-arm-msm@vger.kernel.org, kernel@oss.qualcomm.com,
-	devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-	quic_sayalil@quicinc.com, Konrad Dybcio <konradybcio@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, quic_rampraka@quicinc.com,
-	Ulf Hansson <ulf.hansson@linaro.org>, quic_pragalla@quicinc.com,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH V1 1/3] dt-bindings: mmc: sdhci-msm: Add sm8750 compatible
-Message-ID: <176010624404.239496.14425678947212580288.robh@kernel.org>
-References: <20251007054445.4096630-1-sarthak.garg@oss.qualcomm.com>
- <20251007054445.4096630-2-sarthak.garg@oss.qualcomm.com>
+	b=jrX3xQa2NuoaG6xeHmtdqRs9XZKPVFADW2WTdIcOzp8KsraJoRODhRslJhblHfIto
+	 TkUHY0IW9eA2wnw+QDkUa+tv//ri8lgEXrvMjdGqlJUODt3RYuFievjERcvcj12I92
+	 cUctd0I4EsfnXXrvg6Y+wN5g9AjNgWk+8Ecyb/EOEsI5F2KRzNNo4Q6pKtKc5IR5uY
+	 Gb/l16K9c8wwpaqE72OzrTFPJZl5aT2Zyqtr5/ywNOeXh7T3SAYv33ry18vCZsRv8f
+	 dujpy9TKuNzFvJ5hhfVYW9u5qkuWsNp/Rk4/4GgKqEHM5hWyCW7BjCMA6I8tVSrD0Y
+	 Dc/zzjV20s0mg==
+Date: Fri, 10 Oct 2025 15:33:57 +0100
+From: Conor Dooley <conor@kernel.org>
+To: hehuan1@eswincomputing.com
+Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+	conor+dt@kernel.org, jszhang@kernel.org, adrian.hunter@intel.com,
+	p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	ningyu@eswincomputing.com, linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com, xuxiang@eswincomputing.com,
+	luyulin@eswincomputing.com, dongxuyang@eswincomputing.com,
+	zhangsenchuan@eswincomputing.com, weishangjuan@eswincomputing.com,
+	lizhi2@eswincomputing.com, caohang@eswincomputing.com
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin
+ EIC7700
+Message-ID: <20251010-evergreen-scalded-058caa421214@spud>
+References: <20251010093807.1579-1-hehuan1@eswincomputing.com>
+ <20251010094014.1596-1-hehuan1@eswincomputing.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="9apZ3jHtDJ4+bC2k"
+Content-Disposition: inline
+In-Reply-To: <20251010094014.1596-1-hehuan1@eswincomputing.com>
+
+
+--9apZ3jHtDJ4+bC2k
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251007054445.4096630-2-sarthak.garg@oss.qualcomm.com>
+Content-Transfer-Encoding: quoted-printable
 
+On Fri, Oct 10, 2025 at 05:40:13PM +0800, hehuan1@eswincomputing.com wrote:
+> From: Huan He <hehuan1@eswincomputing.com>
+>=20
+> EIC7700 use Synopsys dwcmshc IP for SD/eMMC controllers.
+> Add Eswin EIC7700 support in sdhci-of-dwcmshc.yaml.
+>=20
+> Signed-off-by: Huan He <hehuan1@eswincomputing.com>
 
-On Tue, 07 Oct 2025 11:14:43 +0530, Sarthak Garg wrote:
-> Document the compatible string for the SDHCI controller on the
-> sm8750 platform.
-> 
-> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
+Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
+--
+pw-bot: not-applicable
 
-Acked-by: Rob Herring (Arm) <robh@kernel.org>
+--9apZ3jHtDJ4+bC2k
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaOkZVQAKCRB4tDGHoIJi
+0pugAQDBGEAe3AMxCAoCb7W+/GzL8Bia0+s16TRJiVIfUkkH+QEA3ukBv+q8j6lI
+zh1bHI+D2r1dMl3ye+ZzoVBSoDYu2wM=
+=Qh/h
+-----END PGP SIGNATURE-----
+
+--9apZ3jHtDJ4+bC2k--
