@@ -1,111 +1,114 @@
-Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
+Received: from mail-vk1-f182.google.com (mail-vk1-f182.google.com [209.85.221.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6508936B
-	for <linux-mmc@vger.kernel.org>; Fri, 10 Oct 2025 04:41:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2EE8F25A350
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Oct 2025 07:51:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760071274; cv=none; b=eKUl8Kvsws6Prqh/ShzEOSPLU+Si+dVZL7DTQJfNEIB9jMkYCCioxJ3ccZ0hGNFf5g1n98eLDvI/I8I8rBbss51L2FiX7ujBn+fJrjogXQ7QJFpMa6GX6JIOuwJ7BqMXzQOwuN9HbO/YTmgz/gETrk6rLN/Efs51l13kJ9fFH2w=
+	t=1760082695; cv=none; b=OqQsWtbIe9ri8KVY/af3hyWYGFTtRqjGGuTEU2yWBo9NlbAULNF0P+TfvT/BmJuPxFxT4kc4JtM3nPN+EHGF2uWOvnuJW9nTlMb7Gvr8AA4yjtXQ4dITwhKe26VIcabXwwyZ+W6/9UraEuFUJEYr+XbjVieBs3ka+HxlL9Rkv7E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760071274; c=relaxed/simple;
-	bh=Svrst4sNWvZPM9ptRkVgFgBmuigM6Siiz8w5w3Sqplk=;
-	h=From:To:Subject:Message-ID:Date:MIME-Version:Content-Type; b=VHkzZYdAlLdYpEy9skzG22eJ5psHs3w3eUjIYzu0paTDu1J/pFG8NA/F3veMjHwzicLaCs2cVyE0Qdb49oVyfMs0OInvwIyqaTUtQpiB41C+jRhs10MHjgU7NaWxy5W8wclighXINp4TMYwpypC4j8yEj8cmFj5p087JvYrRCls=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=miuGGOCa; arc=none smtp.client-ip=209.85.210.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+	s=arc-20240116; t=1760082695; c=relaxed/simple;
+	bh=tt49xrXtVpFHvrmaE8g0BGY+WJGnGApCCdck7Gjl4Og=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=SSH4KGRT3gr7Jb2w5yYEM99PSRPK5/pDn6RcBm9LmHniIiWYUPUpZ/2aidtaxZ/pm2ALyRsGpcEJb+IWZfyLMD05MTljLcRz4b/S8l5NDbLiL/47Q+Hvc3j1P8YN5XV+7zPb0Hd6XlNvUraS7jv17BX403RDW787fyxW/TG/6zk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="miuGGOCa"
-Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-782bfd0a977so1485605b3a.3
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Oct 2025 21:41:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1760071270; x=1760676070; darn=vger.kernel.org;
-        h=content-language:content-transfer-encoding:mime-version:user-agent
-         :date:message-id:subject:to:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=BzXQ6gKxFAXIJd8vP8znvGajrLDgu7v1EN7Ipv13j7s=;
-        b=miuGGOCascncdRbdvrea1WCWyUCv1YyOtHvk/HMsnurAj4y0H2Abwxo5YYG2NU9JaX
-         gvCDHVrpcRy4q0kAmriaclR4x4j6Ps0M/vIVpFIiyJNQwPrpMjUycOwIRs88qnev6q71
-         jUrX0g+3OgAEHEoQSD9OOhZIYvBf+YT96qlk8Kna/G0fN/ZsgJCZ1Aq0HBVsP3TaLHuJ
-         7SFoBifeulb1s0k1+Acf9RZ0pShA1AIA3M5gPSpFVvZvm2RhZZr11O60pkulBw6+/ptT
-         DwVMVw3lslO3yw0HoodoKhxbh8+jzRgFhRsqO6oN8lhAgTUC927yDBJuQp1jB5UiXmSq
-         IOkA==
+Received: by mail-vk1-f182.google.com with SMTP id 71dfb90a1353d-54aa0792200so1206295e0c.3
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Oct 2025 00:51:33 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760071270; x=1760676070;
-        h=content-language:content-transfer-encoding:mime-version:user-agent
-         :date:message-id:subject:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=BzXQ6gKxFAXIJd8vP8znvGajrLDgu7v1EN7Ipv13j7s=;
-        b=dnMgVOgbdDYqePZsOsETg8GA/1huX2Wu616fuePtwT5eokF6/j5afdBWhSs4YSKViY
-         hi1bxtWuHd6VAgWA1Ub0CZ0fwMuN6n1OZktctzTHcTb0L8wE//OfMUGzTFwQdyPX3T14
-         f1Bk2Dx4+CaB14WeQe0Woc/F9gwVZK7iPCH91r3zu/ULcOCRSuXkhrgFLEng3K6oInRY
-         Qu3e+t5iR4zLk/M1bFwsjiC/04FV0t3fiE9hfpP6XKqJMn7MdVD13gOAUdf7jgrZ+Pve
-         MpLBqNzNRbhS/Ay1lVo0lv1pXWznRbaSQJMRJLLdagZCNSK1hIr52w5KRwzZ1zkMu+MB
-         vmPQ==
-X-Gm-Message-State: AOJu0YzUExss1zxpDWVE+Ay4R32AAePMvpd9RWAD2MoF5I1E46PYgVJl
-	c0tYUAqSmBUydO3FeIOk7ZXerVgThvCXssum8ti4pkY5o2k6RFiR3MTQm0qA3A==
-X-Gm-Gg: ASbGncs0qX/fZLpJFsy76jtGRetIVWyJg/qtlW4cM20RfktZBOC6vCnj6tGRJEK+dyS
-	PS9kc50z/ddjEuyUqNfhqQcdaWvqKyAQ4wNlb+AGctGOFrBrp4GaqdvBW1QNAV0XjohbMpLYabP
-	jhH/mmkRIc//ge3q0rqCQCVxt1PJtwoStNEzzZX+UsMQ4Fq2iuAB7tJBPze5XHnwvj3Z2euBjcA
-	TsAuBNTNJEtoS6IkypMp7+hjhCjFnfO8GyB9xkFlHfveDodFULybKSB6pg+y9oau2jabvZK1wA5
-	yj2m/0STZTYM762oEpamo+GnG+uNj1S4y2H8OCRXmm1MvtsILm+2HUCEhsLCVKZpg90aAEMSXpl
-	pIeustGwelLSH1o/V9PRFXCa2MoEPylLjzXxIaxZZunXpMQtfvQUnyP6ULv8zqJa6krwGkgqsHT
-	r78TcuQHfbQbYL2kxHi4bsXOBIsqwI
-X-Google-Smtp-Source: AGHT+IHT/LiJv9lB8fWt5MHdf0oFjcahHACB4GQjNlEFj0mZAgT/UMpt+NVJf3p2rWEl9SP2rAf3hA==
-X-Received: by 2002:a05:6a20:914f:b0:2f9:4cde:34fb with SMTP id adf61e73a8af0-32da80bbb01mr13756813637.1.1760071270146;
-        Thu, 09 Oct 2025 21:41:10 -0700 (PDT)
-Received: from ?IPv6:2409:40e3:2084:f4c4:99fd:d346:f152:46c7? ([2409:40e3:2084:f4c4:99fd:d346:f152:46c7])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7992b060754sm1489478b3a.13.2025.10.09.21.41.08
+        d=1e100.net; s=20230601; t=1760082693; x=1760687493;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=3tf1CQi/sgE81q0/fyoZiILag+XYr+CL6lgyll+N0TY=;
+        b=FDejPzaB7rEE3zvQGvCuvFZZ2pFHweKu3sEWsQqyY8UQGYErzi2u7ZBfJWyP8I8FE9
+         m7UQLrL9bPzvN6JZy2XXAtJNYCBtxYHMvqSXR+Z9C0+I2mCeRMJhZrpaT794blVQu0LF
+         s/xEmDMCKkGV9Yiaj0fq1z72ahasLTwKHShFoBOCXQXF6F5SnbJ00oKBpwv8YcDucfVy
+         gYBDfFy11BULhOsC8/AEe7hNzwvLU3w3ZFoNJfxSXWX81swaXlIeLfGH/2lmUjbkTMjZ
+         lzbRse8DZdGOQ/sHKKMjzAUcHfB40L2faCpTuQdq+vMEqy39F95ROPQdzty6v7bKCioY
+         mQGA==
+X-Forwarded-Encrypted: i=1; AJvYcCVl5YSRcanPe5u4j87IbcNrKHgWwLRpA+z1Fswuvyq1Se8WG4cy1dyZ2Y6qRpzvyqxps0OWV7ISUv4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxT73AY+5bMJgqy2Ux14Nqmef2fp5NjK5tEk/QA+GvKqSmXDWSw
+	Vg/HY7tThj5D6RRNl2nK7ncLU+1X9xIcEXTD4l0wKyfBaslOyhWcdH3ORwQbbHcY
+X-Gm-Gg: ASbGncvkRIWRfTlkWjFNB7MJacX5Lltgy/O3w2ZpqP6lU2g8ts42XuIFTN9QrB4MbXw
+	yo3QCb4MOVhHGqYR7r/dogvmT7SGMo1vr0yqeoHb5Eso2PMzMpjOeDYu0Tw6mixHrqgZwh+Lq9r
+	WuZoaR9F9MCFlEw+DicaDto2dmdAIBRIvCvuv2LQ6bntIC0VGDOIj6EDTindD3SmJALyRns4aPF
+	NJRGGqCIVkrS8LyAAV62+GUVZmkbtB6YiFN+D94d5DCeYB5c2CxOkiMEoqDDghl8ymhHQxyqDNc
+	D+JFhhkZ8AY6kjxN4rL4QCb7cwrNF1VgVP8G3cBRlVqk8hfHsVrRZqjieQZZBJSzmqnaqcSHYmQ
+	Rww5JVyRPVL1wqBHNFs9oMeHdMUU+VrBDKSL0fLMjq87NcEHuSExqQbLpSWMzDczaZ4lbFxR6ve
+	O1QRM=
+X-Google-Smtp-Source: AGHT+IHRgc6pUKZtbeuAjgnu5y7P1SH1atVO/WTqS5RBNA4wUDvEOnoJC80I46xwSeTPPN5GQ7bwUA==
+X-Received: by 2002:a05:6122:4592:b0:549:f04a:6eb3 with SMTP id 71dfb90a1353d-554b8b95420mr4469455e0c.9.1760082692826;
+        Fri, 10 Oct 2025 00:51:32 -0700 (PDT)
+Received: from mail-vs1-f48.google.com (mail-vs1-f48.google.com. [209.85.217.48])
+        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-554d7f01e3fsm544214e0c.7.2025.10.10.00.51.32
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Oct 2025 21:41:09 -0700 (PDT)
-From: Vimal Yadav <vy147591@gmail.com>
-To: linux-mmc@vger.kernel.org
-Subject: RE:Appointment request
-Message-ID: <6414e083-d96e-3042-9331-cf1f04e01c20@gmail.com>
-Date: Fri, 10 Oct 2025 10:11:06 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+        Fri, 10 Oct 2025 00:51:32 -0700 (PDT)
+Received: by mail-vs1-f48.google.com with SMTP id ada2fe7eead31-556f7e21432so1637115137.2
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Oct 2025 00:51:32 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVONOMA/7adFTvRVwZI3Udmsfg5xpxWaaMqL/X6sVnZJBniK3BzO4bitVeYO4fzANrhz/lZOlqCF14=@vger.kernel.org
+X-Received: by 2002:a05:6102:4189:b0:59c:5e29:dd8d with SMTP id
+ ada2fe7eead31-5d5e2357eadmr5268262137.28.1760082692002; Fri, 10 Oct 2025
+ 00:51:32 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-GB
+References: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com> <20251008042526.3312597-2-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20251008042526.3312597-2-claudiu.beznea.uj@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Fri, 10 Oct 2025 09:51:21 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdW__Nw=oViQSPUb6zKbwRjXC7+6kUevHi1GzTTxrHxKkg@mail.gmail.com>
+X-Gm-Features: AS18NWB-cVB-iwvWk7EDZu1kqM52AbtETFWL0OEi3TyJ5GDM7sXgbpoJi74-NbE
+Message-ID: <CAMuHMdW__Nw=oViQSPUb6zKbwRjXC7+6kUevHi1GzTTxrHxKkg@mail.gmail.com>
+Subject: Re: [PATCH 1/3] mmc: renesas_sdhi: Deassert the reset signal on probe
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org, 
+	p.zabel@pengutronix.de, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 
-Hello there,
+Hi Claudiu,
 
-We did not hear back from you.
+On Fri, 10 Oct 2025 at 07:06, Claudiu <claudiu.beznea@tuxon.dev> wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>
+> Deassert the reset signal of the SDHI controller during probe to avoid
+> relying on the previous bootloaders. Without deasserting the reset signal,
+> the SDHI controller will not function.
+>
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-Can we schedule a call for Friday (10th october) or Monday (13th 
-october) so we
-can discuss Artificial Intelligence and Machine Learning requirements
-you may have?
+Thanks for your patch!
 
-Kindly share your contact details and suggest a day/time for our call.
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -1103,7 +1103,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>         if (IS_ERR(priv->clk_cd))
+>                 return dev_err_probe(&pdev->dev, PTR_ERR(priv->clk_cd), "cannot get cd clock");
+>
+> -       priv->rstc = devm_reset_control_get_optional_exclusive(&pdev->dev, NULL);
+> +       priv->rstc = devm_reset_control_get_optional_exclusive_deasserted(&pdev->dev, NULL);
 
-Thanks and regards
-Vimal Yadav
-Technical Solution Manager
+Note that this has the side effect of asserting reset again on probe
+failure or unbind.  Also on SoCs that boot with reset already deasserted
+(e.g. R-Car).  I don't know if that would be a problem.
 
+>         if (IS_ERR(priv->rstc))
+>                 return PTR_ERR(priv->rstc);
 
-On 28-07-2025 16:17, Vimal Yadav wrote:
+Gr{oetje,eeting}s,
 
+                        Geert
 
-Hello there,
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-Are you exploring ways to streamline operations, reduce costs, or
-deliver smarter customer experiences?
-
-We’re offering a free AI readiness consultation to help you identify
-opportunities and create a roadmap tailored to your business.
-
-Let’s talk about what AI and ML can actually do for your business.
-
-Look forward to your response.
-
-Thanks and regards
-Vimal Yadav
-Technical Solution Manager
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
