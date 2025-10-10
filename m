@@ -1,140 +1,123 @@
-Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACB7C224AEB
-	for <linux-mmc@vger.kernel.org>; Fri, 10 Oct 2025 09:35:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
+Received: from zg8tmja2lje4os4yms4ymjma.icoremail.net (zg8tmja2lje4os4yms4ymjma.icoremail.net [206.189.21.223])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id CE0B928CF49;
+	Fri, 10 Oct 2025 09:38:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=206.189.21.223
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760088952; cv=none; b=pQp4Tc+OvdkPny/V0gjYKkbdqB5//RGo0Qf5M4MrMxlnDdEU+xjWFqjXMgbqodVp/hPS+MEFaHvkg+adx96FkUsawP8zorMC+V5wLvhAdeJsNrdPW5XbRehRRNIJr6VfD9uMAxB7yPPSg+AAFB5c9W7y0WnjAhCqaYiD3+jZgB8=
+	t=1760089133; cv=none; b=MKqKiQG4UHElAFSQA4vqYhqeQd9/2dzUZ3w6Ni5rYTPwYIub4R9x+WflYOqGj85X4d/kU56DOQ9fgtiCmoulnYlHnpUG8rvz977AbG5l4Z08LyrpsAg2O/XfuojbQZFqDt14LmgYynV6QqHphbX4uyAQdeeOY8WvCCNVpiebqYU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760088952; c=relaxed/simple;
-	bh=zny5wSoIzJoSyo8CorlviCTUvLFpKork/5EFauexRBM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=tP3tkqxcBLEHvg0TPSJfJbakQraF7xPedaRIn9KPb2TIhuXUQUifTk1t3hNGAWGZKoQmXOGisWq2MiOBwWyFeLQj3ARK1QOZgH59jgXJZY9sEZTZmR/vuSaWa5K7Og0fGGNo8fcfb2pvub0xr2rVANRsOG1gNkB1FbEVj+eA3jY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=G4mf+qgG; arc=none smtp.client-ip=209.85.221.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="G4mf+qgG"
-Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-3ee12a63af1so1131678f8f.1
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Oct 2025 02:35:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1760088948; x=1760693748; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=0Z7oPxo3msRFw6jTL6tKQQ4wRSt857hLXrO6qMVjK9U=;
-        b=G4mf+qgG9JzyBaPPswQwFheyW+46aaTy9Xtm+mb3sGxfq/Q4274e9LBDeOWJ4MAQlS
-         vCAM1QJEP2T4nTKUhJfgvndzF4nhtWGb1OtD35bD2rGU6yJAMJLG65AtmEM4WgwoNR9a
-         3eStVBVfOnzpkj/54fMWspoaGN4ykxnK9BJcudZJrhfbnOm48sl1TrTk5CfjmiD31qnr
-         VZVcwwpJ19RwTGpfT2WHdoDxHoGDOk2cQVkiN1UrkwtiIt/fI+HI7HlMJ6STRwiwk7Kx
-         Zixc56kkn5eitR4IkLx7xTZwWWWAVounMLdKa9n7DLrFKOEuvAUnjuacmGs4FHYSMiJ0
-         X3UA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760088948; x=1760693748;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=0Z7oPxo3msRFw6jTL6tKQQ4wRSt857hLXrO6qMVjK9U=;
-        b=doqCsioFiTWaUAh9Zy0Q878CgydFhYnC1DKC4Z0BdvNT8GgRExgPKDCcXdePOWLmLD
-         +VfSj1+yOvHm/dlwFo/YwOb/5k+pPYRZroY0uIha0GCLkZPoZ6WAYTazco9F20ICcdzZ
-         eJor8Zbvi1rx5T81P33J9dduifmasJTyl5PUs4C4l1HiO86yDHV3/hLe3AGOD9ClaO7Y
-         ZpK9SNX40kYJbXtcIyXl9Uf/eHYAGJUsyxFRudw90YMBJUS6IgaPu+bJm742cVxnMpMr
-         Ui29hNg2Hn/Kyt5ImgYxSehwXP1xjJBHRDBc7bVzpJeKmUBamPHGh/7V+mwhuBuwdkFZ
-         s0sQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWEYz1mr00wnhL/QRToDqvXWKHM63TrW/CSn0PF5BUMCOpYutL5OMyA/jlQRCDTdMu7KWExmLquFAU=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx9ZzFTbRZOfBBMklgc79C3DBMUxii2SyL4deBYauwV1BhqZy14
-	8FC+Q7tpJGENMI9d4Dh/OX9wTXuKPDQ9Xt6ZhkVVhTbN5CBzsmxMmK6gNJglyxEJ630=
-X-Gm-Gg: ASbGnct5CxEz/WW9dH/XLqMSKv1eRvhfmX0BIAjxTBvQenzm0HcLL1oAbwX88XZso5E
-	OE+xKgHlo7maM2k1Vq1Neq1KLg8Pdcady9s8WR0BRespkxpWHQeVUI50wkC6kkZxfuPzv5aEAwO
-	+B+Y14p7SEiVgoSsFkzD/c4ZGvsXrYigxIcNdMyvSRk69sp4vl+1LqGYjznxmnuGwUP228nHR+B
-	LzadkqdJ9ETz34vag4821CLH7SC3uUCE2iAwWtknZYiUrLJIrghVoVYQsY99YMdt4BBkIdgDul9
-	Ca0qjJXaz2Pmq62sd9B6AWrRCBtas92LIkurDVtEwDdg2MB/enhh9rnziDr9ku67Rn/CQNe1PDp
-	mucfMNeeJb74Fe8GiRKzecC/Fj+I+48DeHzw7znsrjGI9Cj0EZquXmljVd/A=
-X-Google-Smtp-Source: AGHT+IHyAlOBieFD9hoZkkNP1XYcHS2L4Rw4LJHk3fKdvO9j6FchF9sThZ4fj1/AGeC/KM4a0dhxkw==
-X-Received: by 2002:a05:6000:2584:b0:3ec:c50c:7164 with SMTP id ffacd0b85a97d-4266726c309mr7801633f8f.15.1760088947436;
-        Fri, 10 Oct 2025 02:35:47 -0700 (PDT)
-Received: from [192.168.50.4] ([82.78.167.59])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-46fab36a773sm58415965e9.0.2025.10.10.02.35.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 10 Oct 2025 02:35:47 -0700 (PDT)
-Message-ID: <4cd8b624-3830-4989-b287-01e689cdb3df@tuxon.dev>
-Date: Fri, 10 Oct 2025 12:35:45 +0300
+	s=arc-20240116; t=1760089133; c=relaxed/simple;
+	bh=FtvEdaOVNeBt36y5xmuBmQSNskj9JHUU5VbtV9PuJdY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lJI99UJRKvgySjPkiilG/AiPB9Hx3Qwcldk2FBqd/l/jZu7uynUeW4ayqu03DxJZwP0qXr25HXobCTL7b642FozXB5+yBgYvwV5nBOhvumJFrSyu1Yaglk/xm6Qcq+WybEJ8aWsxWaOk1ALBBv1P+NrdZVU219BgU9o654WL7AY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=206.189.21.223
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
+Received: from E0005154LT.eswin.cn (unknown [10.12.96.103])
+	by app1 (Coremail) with SMTP id TAJkCgAXOxED1OhodEIDAQ--.1303S2;
+	Fri, 10 Oct 2025 17:38:13 +0800 (CST)
+From: hehuan1@eswincomputing.com
+To: ulf.hansson@linaro.org,
+	robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	jszhang@kernel.org,
+	adrian.hunter@intel.com,
+	p.zabel@pengutronix.de,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: ningyu@eswincomputing.com,
+	linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com,
+	xuxiang@eswincomputing.com,
+	luyulin@eswincomputing.com,
+	dongxuyang@eswincomputing.com,
+	zhangsenchuan@eswincomputing.com,
+	weishangjuan@eswincomputing.com,
+	lizhi2@eswincomputing.com,
+	caohang@eswincomputing.com,
+	hehuan1@eswincomputing.com
+Subject: [PATCH v3 0/2] Add support for Eswin EIC7700 SD/eMMC controller
+Date: Fri, 10 Oct 2025 17:38:07 +0800
+Message-ID: <20251010093807.1579-1-hehuan1@eswincomputing.com>
+X-Mailer: git-send-email 2.49.0.windows.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/3] mmc: renesas_sdhi: Deassert the reset signal on probe
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org,
- p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
- linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
- Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-References: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com>
- <20251008042526.3312597-2-claudiu.beznea.uj@bp.renesas.com>
- <CAMuHMdW__Nw=oViQSPUb6zKbwRjXC7+6kUevHi1GzTTxrHxKkg@mail.gmail.com>
-From: Claudiu Beznea <claudiu.beznea@tuxon.dev>
-Content-Language: en-US
-In-Reply-To: <CAMuHMdW__Nw=oViQSPUb6zKbwRjXC7+6kUevHi1GzTTxrHxKkg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:TAJkCgAXOxED1OhodEIDAQ--.1303S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7CrWfGFykCF4rWFWfKw4kWFg_yoW8tw1kpF
+	W5G34fGr1YyryxZan3Ka4v9a4fXws7Wryjgw13Jw1UX3yqva4jqrWIka4YkFW5Jr1xXws0
+	9ay2qF13C3WavrJanT9S1TB71UUUUUJqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUPa14x267AKxVW5JVWrJwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26w1j6s0DM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4U
+	JVWxJr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gc
+	CE3s1ln4kS14v26r1Y6r17M2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE
+	6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1Y6r17McIj6I8E87Iv67AKxVWUJVW8JwAm72
+	CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7
+	M4IIrI8v6xkF7I0E8cxan2IY04v7M4kE6xkIj40Ew7xC0wCY1x0262kKe7AKxVW8ZVWrXw
+	CY02Avz4vE-syl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAq
+	x4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r4a6r
+	W5MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF
+	7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxV
+	WUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjTR
+	ZqXHDUUUU
+X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/
 
-Hi, Geert,
+From: Huan He <hehuan1@eswincomputing.com>
 
-On 10/10/25 10:51, Geert Uytterhoeven wrote:
-> Hi Claudiu,
-> 
-> On Fri, 10 Oct 2025 at 07:06, Claudiu <claudiu.beznea@tuxon.dev> wrote:
->> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->>
->> Deassert the reset signal of the SDHI controller during probe to avoid
->> relying on the previous bootloaders. Without deasserting the reset signal,
->> the SDHI controller will not function.
->>
->> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> 
-> Thanks for your patch!
-> 
->> --- a/drivers/mmc/host/renesas_sdhi_core.c
->> +++ b/drivers/mmc/host/renesas_sdhi_core.c
->> @@ -1103,7 +1103,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->>         if (IS_ERR(priv->clk_cd))
->>                 return dev_err_probe(&pdev->dev, PTR_ERR(priv->clk_cd), "cannot get cd clock");
->>
->> -       priv->rstc = devm_reset_control_get_optional_exclusive(&pdev->dev, NULL);
->> +       priv->rstc = devm_reset_control_get_optional_exclusive_deasserted(&pdev->dev, NULL);
-> 
-> Note that this has the side effect of asserting reset again on probe
-> failure or unbind.
+Updates:
 
-I agree. I've tested unbind/bind on RZ/G3S and I saw no issue.
+  Changes in v3:
+  - Update snps,dwcmshc-sdhci.yaml
+    - Delete clock-output-names, '#clock-cells' and eswin,syscrg-csr
+    - Update description for eswin,hsp-sp-csr
+    - Update drive-impedance-ohm
+    - Update the item of reset-names
+  - Update sdhci-of-dwcmshc.c
+    - Add descriptions for PHY registers
+    - Simplify clock management(remove custom clock provider, use
+      standard clk API)
+    - Replace magic numbers with GENMASK() or FIELD_PREP() macros
+    - Add comments explaining HSP stability assertion writes
+    - Adjust line wrapping to fit within 100-column
+    - Delete forward declarations by moving function definitions
+    - Rename variable is_sdio to is_sd
+    - Replace unclear macros with meaningful alternatives
+  - Link to v2: https://lore.kernel.org/all/20250912093451.125-1-hehuan1@eswincomputing.com/
 
->  Also on SoCs that boot with reset already deasserted
-> (e.g. R-Car).  I don't know if that would be a problem.
+  Changes in v2:
+  - Delete the previous separate driver and yaml binding file
+  - Update snps,dwcmshc-sdhci.yaml to add support for Eswin EIC7700
+    - Add the new compautible string: "eswin,eic7700-dwcmshc"
+    - Add new properties: clock-output-names, '#clock-cells',
+      drive-impedance-ohm, eswin,hsp-sp-csr and eswin,syscrg-csr
+    - Add customized reset-names for EIC7700 platform
+  - Update sdhci-of-dwcmshc.c to add support for Eswin EIC7700
+    - Add a new struct eic7700_priv to hold Eswin-specific data,
+      including clock phases, register mappings, and drive
+      impedance configuration
+    - Implement EIC7700-specific sdhci_ops
+      - set_clock: support core clock configuration with phase delay
+      - reset: add PHY reset and configuration
+      - set_uhs_signaling: support HS400 DLL lock
+      - platform_execute_tuning: implement delay line tuning and phase
+        code adjustment
+    - Add initialization routine (eic7700_init)
+    - Integrate the new platform data and ops into the driver's match table
+  - Link to v1: https://lore.kernel.org/all/20250516091259.774-1-dongxuyang@eswincomputing.com/
 
-I think all SoCs boot with resets de-asserted as the driver does register
-configuration before calling reset_control_reset() in renesas_sdhi_reset(),
-e.g:
-- one register configuration is just above reset_control_reset()
-- one register configuration, through sd_ctrl_write32_as_16_and_16(), in
-  renesas_sdhi_probe()
-- register writes in tmio_mmc_reset() before host->reset() call
+Huan He (2):
+  dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin EIC7700
+  mmc: sdhci-of-dwcmshc: Add support for Eswin EIC7700
 
-I did bonnie++ tests after boot on RZ/G2{H, M, N, L, UL}, RZ/V2L and saw no
-issue.
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  57 +-
+ drivers/mmc/host/sdhci-of-dwcmshc.c           | 526 +++++++++++++++++-
+ 2 files changed, 555 insertions(+), 28 deletions(-)
 
-Thank you for your review,
-Claudiu
-
-> 
->>         if (IS_ERR(priv->rstc))
->>                 return PTR_ERR(priv->rstc);
-> 
-> Gr{oetje,eeting}s,
-> 
->                         Geert
-> 
+-- 
+2.25.1
 
