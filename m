@@ -1,131 +1,72 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m32100.qiye.163.com (mail-m32100.qiye.163.com [220.197.32.100])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 622A028506A;
-	Thu,  9 Oct 2025 22:03:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B1853D76
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Oct 2025 03:42:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.100
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760047425; cv=none; b=QoXgZ7+7wJYD/CDGjEFAVQsc0mJcOlfpYoICAY8QIWUfqyMwZ4vobihfV7i8POa/X+ZUvizv3KeU+vRDRFn8wMTmR+mxz4c36o4WDxF9QfyOhhEtj6XQn6iUhqgS7OXhRhkvsDL+KD7CnaJjHG/hvPx0BTR+bR+rcZVi1OHzuSE=
+	t=1760067771; cv=none; b=rPtVVgiUFLqEA6UBHX55qzVkyLor4iVCdzjbmwvA/cQAUeWFGPyOOdi8G0D2LZinTMXfdizWmkUylnhC3K6iLJYnvWx5FsVVK/uZwcfBTpoUteQ2MYGISsR8S5SaR5t9sWl5Jmk3TYWELxBqtGFu+aWC9RCVEelty/9oS/8QX3w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760047425; c=relaxed/simple;
-	bh=VdbrDBnRuw407eUM1cGjE4TdP1tU6b5L/a2r2dVm2yo=;
-	h=Date:Content-Type:MIME-Version:From:Cc:To:In-Reply-To:References:
-	 Message-Id:Subject; b=lqvO9Sae8Xl1WPwFHWQd6Pk5JZoRFLMyr3EsWYqktWl64I8qH5A8AO5mn3NVslTurcKi3I6u2m/CiK2ehw7bv939eQnPd+GmsCy/bWGCg2/Ro6VXC5uzqDUpcTzy2p33FA0zd85aZ+7Nw6/kLo+c3PIedHzwj44i1OfUJLh37o0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Nd3js3x9; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760067771; c=relaxed/simple;
+	bh=iS/uuiwFxFED4/pB2vSFfLcnsasy6gS9pQJtJltu6AI=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=rFPY4rG+aqwUl2Wel1StOPauLV4tT5au4LA/8vrKWuD8AWFywHAXT1jGbulWZl4vqvLIqzJKe8mnYNzMsAAbNQhRCObru+tnSWBLBAn9rSe0OAeon0/fhw70I1uXILzJo50fGW0yeLBwD/uf7/ztTC5t8+5Lk75lHf2hdl4GT+A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=RQZ6bmPe; arc=none smtp.client-ip=220.197.32.100
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Nd3js3x9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD803C4CEF5;
-	Thu,  9 Oct 2025 22:03:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760047424;
-	bh=VdbrDBnRuw407eUM1cGjE4TdP1tU6b5L/a2r2dVm2yo=;
-	h=Date:From:Cc:To:In-Reply-To:References:Subject:From;
-	b=Nd3js3x9H6Sj6EzdFe4btIdQ6XUEFFxsbvfrci8JDS1tq+0yV1wTBYFJyfXdWEjf/
-	 gs6R8isUssy4lu938tGThvQAWSa9R3H055mgfiRzWaJYTAMLHLYQXTd3kmmMi3T5oI
-	 YJ+6z9/kdTWUAFRTpLmo1P1J+uuJ8f8EyFr+AcokycQdEyxzB5ydWaEngPC/Ak4uKd
-	 cqvRXUL5AFokPvzXcLV6R1pRg52jL7I0W+IfE6yyJaLGUpHpX5VoXl/FATKkdRjPD1
-	 ZIUFPh9KVumQGo2aTBv5YK4wF+KkITvPy/IqRimdorRJ63KsVsXElTVUi+glaJ642w
-	 fXTSzeKfUopYg==
-Date: Thu, 09 Oct 2025 17:03:43 -0500
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="RQZ6bmPe"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 25653ab13;
+	Fri, 10 Oct 2025 11:37:33 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>,
+	linux-mmc@vger.kernel.org,
+	Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: Use dma_set_mask_and_coherent() helper
+Date: Fri, 10 Oct 2025 11:37:25 +0800
+Message-Id: <1760067445-165115-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+X-HM-Tid: 0a99cc3202b009cckunm3d0281e8e356f7
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQhlNGVZLS0hJSRlLSENJSEpWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=RQZ6bmPef42V3o662gYLiAJvHwQrsavq54f0rDyJwMG0sY0pipYXDllGdWgQpje5LrbLn56StZ7dAibPX5xB/a3UlbBz4JZo+zO0R2bkDkAiaG//qioVEiZFn/8MBHuD53vyyrLxq1nvWgbWirOyf6uSOWmTsCK1rl8UfQuX1rc=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=w2thKE68u2NosGxcHMYO5X/UsCJimUu0uTwiqtLhc8M=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-From: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org, 
- linux-mmc@vger.kernel.org, Konrad Dybcio <konradybcio@kernel.org>, 
- Bjorn Andersson <andersson@kernel.org>, devicetree@vger.kernel.org, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Ulf Hansson <ulf.hansson@linaro.org>, 
- "David S. Miller" <davem@davemloft.net>, 
- Herbert Xu <herbert@gondor.apana.org.au>, linux-kernel@vger.kernel.org, 
- Conor Dooley <conor+dt@kernel.org>
-To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-In-Reply-To: <20251009-add-separate-ice-ufs-and-emmc-device-nodes-for-qcs615-platform-v1-0-2a34d8d03c72@oss.qualcomm.com>
-References: <20251009-add-separate-ice-ufs-and-emmc-device-nodes-for-qcs615-platform-v1-0-2a34d8d03c72@oss.qualcomm.com>
-Message-Id: <176004726840.3398717.5566698340633844509.robh@kernel.org>
-Subject: Re: [PATCH 0/5] Add separate ICE UFS and eMMC device nodes for
- QCS615 platform
 
+Use dma_set_mask_and_coherent() instead. No functional changes.
 
-On Thu, 09 Oct 2025 11:48:50 +0530, Abhinaba Rakshit wrote:
-> This patch series introduces support for representing the Inline Crypto Engine (ICE)
-> as separate device nodes for both UFS and eMMC on the QCS615 platform.
-> Previously, ICE functionality was implicitly tied to the UFS/eMMC controllers.
-> With this update, ICE is modeled as an independent hardware block, allowing its
-> clock and frequency configuration to be managed directly by the ICE driver.
-> This separation improves modularity, aligns with hardware architecture.
-> 
-> The change allows the MMC/UFS controller to link to the ICE node for
-> crypto operations without embedding ICE-specific properties directly
-> in the MMC nodes.
-> 
-> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-> ---
-> Abhinaba Rakshit (5):
->       dt-bindings: mmc: add qcom,ice phandle to mmc
->       dt-bindings: crypto: ice: add freq-table-hz property to ICE schema
->       dt-bindings: crypto: ice: document the qcs615 inline crypto engine
->       arm64: dts: qcom: qcs615: add ufs and emmc inline crypto engine nodes
->       dts: qcom: qcs615-ride: Enable ice ufs and emmc
-> 
->  .../bindings/crypto/qcom,inline-crypto-engine.yaml |  7 +++
->  .../devicetree/bindings/mmc/sdhci-msm.yaml         |  4 ++
->  arch/arm64/boot/dts/qcom/qcs615-ride.dts           |  8 ++++
->  arch/arm64/boot/dts/qcom/sm6150.dtsi               | 51 +++++++++++++---------
->  4 files changed, 49 insertions(+), 21 deletions(-)
-> ---
-> base-commit: 47a8d4b89844f5974f634b4189a39d5ccbacd81c
-> change-id: 20251006-add-separate-ice-ufs-and-emmc-device-nodes-for-qcs615-platform-83ebc37bdddc
-> 
-> Best regards,
-> --
-> Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-> 
-> 
-> 
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
+ drivers/mmc/host/dw_mmc.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-My bot found new DTB warnings on the .dts files added or changed in this
-series.
-
-Some warnings may be from an existing SoC .dtsi. Or perhaps the warnings
-are fixed by another series. Ultimately, it is up to the platform
-maintainer whether these warnings are acceptable or not. No need to reply
-unless the platform maintainer has comments.
-
-If you already ran DT checks and didn't see these error(s), then
-make sure dt-schema is up to date:
-
-  pip3 install dtschema --upgrade
-
-
-This patch series was applied (using b4) to base:
- Base: 47a8d4b89844f5974f634b4189a39d5ccbacd81c (use --merge-base to override)
-
-If this is not the correct base, please add 'base-commit' tag
-(or use b4 which does this automatically)
-
-New warnings running 'make CHECK_DTBS=y for arch/arm64/boot/dts/qcom/' for 20251009-add-separate-ice-ufs-and-emmc-device-nodes-for-qcs615-platform-v1-0-2a34d8d03c72@oss.qualcomm.com:
-
-arch/arm64/boot/dts/qcom/qcs615-ride.dtb: ufshc@1d84000 (qcom,qcs615-ufshc): clock-names: ['core_clk', 'bus_aggr_clk', 'iface_clk', 'core_clk_unipro', 'ref_clk', 'tx_lane0_sync_clk', 'rx_lane0_sync_clk'] is too short
-	from schema $id: http://devicetree.org/schemas/ufs/qcom,ufs.yaml#
-arch/arm64/boot/dts/qcom/qcs615-ride.dtb: ufshc@1d84000 (qcom,qcs615-ufshc): clocks: [[46, 126], [46, 10], [46, 125], [46, 134], [44, 0], [46, 133], [46, 132]] is too short
-	from schema $id: http://devicetree.org/schemas/ufs/qcom,ufs.yaml#
-arch/arm64/boot/dts/qcom/qcs615-ride.dtb: ufshc@1d84000 (qcom,qcs615-ufshc): reg: [[0, 30949376, 0, 12288]] is too short
-	from schema $id: http://devicetree.org/schemas/ufs/qcom,ufs.yaml#
-arch/arm64/boot/dts/qcom/qcs615-ride.dtb: ufshc@1d84000 (qcom,qcs615-ufshc): reg-names: ['std'] is too short
-	from schema $id: http://devicetree.org/schemas/ufs/qcom,ufs.yaml#
-arch/arm64/boot/dts/qcom/qcs615-ride.dtb: ufshc@1d84000 (qcom,qcs615-ufshc): reg-names: ['std'] is too short
-	from schema $id: http://devicetree.org/schemas/ufs/qcom,ufs.yaml#
-arch/arm64/boot/dts/qcom/qcs615-ride.dtb: ufshc@1d84000 (qcom,qcs615-ufshc): Unevaluated properties are not allowed ('reg-names' was unexpected)
-	from schema $id: http://devicetree.org/schemas/ufs/qcom,ufs.yaml#
-
-
-
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c5db92b..c4f5f44 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3120,9 +3120,8 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 			host->dma_64bit_address = 1;
+ 			dev_info(host->dev,
+ 				 "IDMAC supports 64-bit address mode.\n");
+-			if (!dma_set_mask(host->dev, DMA_BIT_MASK(64)))
+-				dma_set_coherent_mask(host->dev,
+-						      DMA_BIT_MASK(64));
++			if (dma_set_mask_and_coherent(host->dev, DMA_BIT_MASK(64)))
++				dev_info(host->dev, "Fail to set 64-bit DMA mask");
+ 		} else {
+ 			/* host supports IDMAC in 32-bit address mode */
+ 			host->dma_64bit_address = 0;
+-- 
+2.7.4
 
