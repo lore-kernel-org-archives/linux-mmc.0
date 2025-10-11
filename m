@@ -1,210 +1,129 @@
-Received: from mail-pg1-f179.google.com (mail-pg1-f179.google.com [209.85.215.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 856CC21CC55
-	for <linux-mmc@vger.kernel.org>; Sat, 11 Oct 2025 08:52:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.179
+Received: from zg8tmja2lje4os4yms4ymjma.icoremail.net (zg8tmja2lje4os4yms4ymjma.icoremail.net [206.189.21.223])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 185C933F6;
+	Sat, 11 Oct 2025 11:11:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=206.189.21.223
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760172754; cv=none; b=ZRfsz389bOvDG8KIHLPYY3T0Z+P4DrHrHeN0QWGmxuliiXgjcYLqCU2dV7K6dQpHCN249A7574Zf/pat/wHceLTLzax3Wz0v4j8JALqMx7MkJybZ1aggWmlITn9RFGXokvKyQ+oRDrqnWee9HqS+CxFUjKZILCE/sWCEv45UNcc=
+	t=1760181085; cv=none; b=Ywtwz7DfKuA4Vqnhh4fIcKyPscw+eArarxmFFaAzb+Xar0LG/drKTilqB9nx62QaWRWkMKSdMQ9C7sx91sVkziCahCE7KuTVO0/W7ZwmSXkdyF31S4jaUF54AeNh9Td79FmCNgUR27w9fjoHZ/aCaru857qjjqjRCWJj702/FZE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760172754; c=relaxed/simple;
-	bh=5NLvSnyuZikWYjbw37TkUeYgoM4N/stus6HiUzrLy9Y=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=BpKshCg3JCTSZg4G0Jo5AT83Z0d+BpylL3lIBXJpLq8J1N3SEsaPhM3vwRh1gngc0mAyaTCP9ELFjhufl8shTdkrPdP9b4QmsCv90Z4l2rcbs0cC7Zr5U8qz2BZREQ+QWiztMGlAWQ8e4aOgfumeceo1Vha8kQ6ZJtD0D3ZBrXM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JTGoklak; arc=none smtp.client-ip=209.85.215.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JTGoklak"
-Received: by mail-pg1-f179.google.com with SMTP id 41be03b00d2f7-b633b54d05dso1777630a12.2
-        for <linux-mmc@vger.kernel.org>; Sat, 11 Oct 2025 01:52:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1760172749; x=1760777549; darn=vger.kernel.org;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=yiLmG63RpnkdfX+sUpwnDjdHi9WgZXbqCQLxRB/gE0k=;
-        b=JTGoklakaz4tu0inAECC4pENcTb12em6AIM8EAkA/ZHcNNw4cJTPzk9qfpVZjJLxX8
-         yahHRTT/DuSkJttspnpWb9zi8yT6m4IYG4xTU0hJARVfJZZ4KlojK2P5NxcVtLogT/lL
-         hod+PjFZUJf7JiRZgBKWRR4Wpa8uoOdLlEZ2BjH1VYYuKd3n9jHoT10Ruaq3heGs/e08
-         Opeo8kTCyXWyL0eu47agcWt38nTpbt0q6olIDPDOWVFfivJrGttqyuAiUqljpk+OpBFq
-         ftCe/dE9FZsCoBFDekKIFV0X6Ckk41yht0Wt2QRAmiWScxmIgfCgkEvyuC4jd1UMU71j
-         7Vnw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760172749; x=1760777549;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=yiLmG63RpnkdfX+sUpwnDjdHi9WgZXbqCQLxRB/gE0k=;
-        b=oIKIMT5vIsn+DsWqd0bFdX0U0YQUbDKburDRVzimIFcHqO56ZP8VeYtKqqzT+RWuB2
-         PoR0Xu1IxEayDI3wOjTtB1L+A0Inar1idqizHYJucW9c1PJlSllxtd6QFSGW7yZwUPgK
-         D+d7ZT959tHQqIem0LQzWEuOX0ErjluGb7hAzICpFDEUatfqsh7iRyq96EOedxXUXm8G
-         SSBwRhoDO8dftVhMt+Ap4awrI3MRrFWoXaxURVSTcQByeeqQPsP43AC22HkxLGCHRMd+
-         vuJr+DUlXWG1nh5NdDKNt+/CJJcjJWRoiD7LEhPp/s0jtJwMePa9WU/up23TW48gW8BC
-         QfGQ==
-X-Gm-Message-State: AOJu0YytAOjRLJ9Yn/j+IaVmY4I4eKcniLoZW7bjU5pzArpEjpA+TLRn
-	xTMaLoqsl3qNi0kgG7CnWr8ejkOx4HD+FWmRmRE2ZZgBOwiMep/EfKLh
-X-Gm-Gg: ASbGncu56CTqCwwU+zvdhmiIuNS5/N3YDGy95lm3RzjiBx1WzCBKtqSyE1LZDxDeqfB
-	9szqSHw9Fo9lo1KpMBXycVQt7Wqb0t+it9Cx936j/+I4O4MUrGvg2IGvf0dVsiNp2cD/dDRcwgj
-	L0ReIYaG27V5bMkU+E6xmR/a090MCFyRJDxOhD8JNNGqsE6jAv5BPnlzhwgphwvAq/1owBg735S
-	eyeciJ3cSKEObsg9oQqrEE6D0L6dnNmfTWiUSQXhHFgHSXrIBHaA2Hgqh5TWdVi0gRX9Vy3gmgL
-	mBhaD0BGOpIZWatw61d03t4HGhQLojjA+h5NC+JHaSuH2xp0BTsnPFVjnDnb+jhlzIdcESmLKUV
-	b7KnYfq4LgnJqtK9g/+O12p6+17DQxCC/+gn/mWZaC4EAanxMtj/kI6BGwCKs2/LR6dPe
-X-Google-Smtp-Source: AGHT+IGrw5WjnkHFl8FT4pPAuJqjzVUuVNOVKVnaUJHLbVr1wlbjuCd2icribCshUIxZPAy3fsFyKg==
-X-Received: by 2002:a17:903:1a2b:b0:268:5892:6a2e with SMTP id d9443c01a7336-290272ff539mr193038375ad.56.1760172748788;
-        Sat, 11 Oct 2025 01:52:28 -0700 (PDT)
-Received: from Black-Pearl.localdomain ([157.50.164.155])
-        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-29034f95bd3sm79050495ad.119.2025.10.11.01.52.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 11 Oct 2025 01:52:28 -0700 (PDT)
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-Date: Sat, 11 Oct 2025 08:52:07 +0000
-Subject: [PATCH v2] dt-bindings: mmc: ti,da830-mmc: convert to DT schema
+	s=arc-20240116; t=1760181085; c=relaxed/simple;
+	bh=V3PxO90ix5Arwq53CQB519eznTSh0+i9HBUEfamTvOU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=dI9lf/gFY6uVr7rcHHHP3+d2OEAFxX5tqnm7Kq9x4C2D3U7juQCP+O2d8DnVS1SfWnLoj2f4rZob9CdN6zAivLlfO6Cm3qivfqh6YeMO1EGCXjLyvDHl3kYlHO4RBGlBH2s8/d5gFKegDpOTiP+KCXn7YXMEJtFnjFQ1wshmdKg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=206.189.21.223
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
+Received: from E0005154LT.eswin.cn (unknown [10.12.96.103])
+	by app2 (Coremail) with SMTP id TQJkCgD3lZQyO+poD_IDAQ--.56190S2;
+	Sat, 11 Oct 2025 19:10:44 +0800 (CST)
+From: hehuan1@eswincomputing.com
+To: ulf.hansson@linaro.org,
+	robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	jszhang@kernel.org,
+	adrian.hunter@intel.com,
+	p.zabel@pengutronix.de,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: ningyu@eswincomputing.com,
+	linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com,
+	xuxiang@eswincomputing.com,
+	luyulin@eswincomputing.com,
+	dongxuyang@eswincomputing.com,
+	zhangsenchuan@eswincomputing.com,
+	weishangjuan@eswincomputing.com,
+	lizhi2@eswincomputing.com,
+	caohang@eswincomputing.com,
+	hehuan1@eswincomputing.com
+Subject: [PATCH v4 0/2] Add support for Eswin EIC7700 SD/eMMC controller
+Date: Sat, 11 Oct 2025 19:10:38 +0800
+Message-ID: <20251011111039.533-1-hehuan1@eswincomputing.com>
+X-Mailer: git-send-email 2.49.0.windows.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20251011-davinci-mmc-v2-1-355da3e25123@gmail.com>
-X-B4-Tracking: v=1; b=H4sIALYa6mgC/23Myw7CIBCF4VdpZi2GcomXle9husBhbCcRMGCIp
- uHdxa5d/ic53wqFMlOB87BCpsqFU+yhdgPg4uJMgn1vUFJZaZUW3lWOyCIEFHiQxhiJ2nsJ/fH
- MdOf3pl2n3guXV8qfDa/jb/3v1FGMAolu/qit8ie8zMHxY48pwNRa+wKgU4mupgAAAA==
-X-Change-ID: 20250523-davinci-mmc-c704440c3dd0
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, Charan Pedumuru <charan.pedumuru@gmail.com>
-X-Mailer: b4 0.14.2
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:TQJkCgD3lZQyO+poD_IDAQ--.56190S2
+X-Coremail-Antispam: 1UD129KBjvJXoWxAr48Cw4xWF15Gr1kXr4ktFb_yoW5GFW8pF
+	W5K34xGr4ayryxZFsYga4v9a43Xws7Wry7Kr13J3W5Xw4qva4qqrWIka4YgFW5AryxXws0
+	v3y2qF15C3Wavr7anT9S1TB71UUUUUDqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUBq14x267AKxVW5JVWrJwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26F4j
+	6r4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
+	Cq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0
+	I7IYx2IY67AKxVWUXVWUAwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r
+	4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwACI402YVCY1x02628v
+	n2kIc2xKxwAKzVCY07xG64k0F24lc7CjxVAaw2AFwI0_GFv_Wrylc2xSY4AK6svPMxAIw2
+	8IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4l
+	x2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVW8ZVWrXwCIc40Y0x0EwIxGrw
+	CI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI
+	42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z2
+	80aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7sRiBT5PUUUUU==
+X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/
 
-Convert TI Highspeed MMC host controller binding to YAML format. Define
-'clocks' and 'interrupts' properties to resolve errors identified by
-'dt_check' and 'dtb_check'.
+From: Huan He <hehuan1@eswincomputing.com>
 
-Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
----
-Changes in v2:
-- Modified the commit message.
-- Removed 'interrupts' from required properties following the old binding.
-- Changed the maintainer for the binding to "Conor Dooley".
-- Link to v1: https://lore.kernel.org/r/20250523-davinci-mmc-v1-1-ceebd8352d9c@gmail.com
----
- .../devicetree/bindings/mmc/davinci_mmc.txt        | 32 ------------
- .../devicetree/bindings/mmc/ti,da830-mmc.yaml      | 61 ++++++++++++++++++++++
- 2 files changed, 61 insertions(+), 32 deletions(-)
+Updates:
 
-diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-deleted file mode 100644
-index 516fb0143d4c21d1c8e44a8846d55ea5458d7b74..0000000000000000000000000000000000000000
---- a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-+++ /dev/null
-@@ -1,32 +0,0 @@
--* TI Highspeed MMC host controller for DaVinci
--
--The Highspeed MMC Host Controller on TI DaVinci family
--provides an interface for MMC, SD and SDIO types of memory cards.
--
--This file documents the properties used by the davinci_mmc driver.
--
--Required properties:
--- compatible:
-- Should be "ti,da830-mmc": for da830, da850, dm365
-- Should be "ti,dm355-mmc": for dm355, dm644x
--
--Optional properties:
--- bus-width: Number of data lines, can be <1>, <4>, or <8>, default <1>
--- max-frequency: Maximum operating clock frequency, default 25MHz.
--- dmas: List of DMA specifiers with the controller specific format
--	as described in the generic DMA client binding. A tx and rx
--	specifier is required.
--- dma-names: RX and TX  DMA request names. These strings correspond
--	1:1 with the DMA specifiers listed in dmas.
--
--Example:
--mmc0: mmc@1c40000 {
--	compatible = "ti,da830-mmc",
--	reg = <0x40000 0x1000>;
--	interrupts = <16>;
--	bus-width = <4>;
--	max-frequency = <50000000>;
--	dmas = <&edma 16
--		&edma 17>;
--	dma-names = "rx", "tx";
--};
-diff --git a/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml b/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
-new file mode 100644
-index 0000000000000000000000000000000000000000..1a97c3e447fd10f14bfe0af9e22f9479304f0f26
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
-@@ -0,0 +1,61 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/ti,da830-mmc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: TI Highspeed MMC host controller for DaVinci
-+
-+description:
-+  The Highspeed MMC Host Controller on TI DaVinci family
-+  provides an interface for MMC, SD and SDIO types of memory cards.
-+
-+allOf:
-+  - $ref: mmc-controller.yaml
-+
-+maintainers:
-+  - Conor Dooley <conor+dt@kernel.org>
-+
-+properties:
-+  compatible:
-+    enum:
-+      - ti,da830-mmc
-+      - ti,dm355-mmc
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 2
-+
-+  dmas:
-+    maxItems: 2
-+
-+  dma-names:
-+    items:
-+      - const: rx
-+      - const: tx
-+
-+required:
-+  - compatible
-+  - reg
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    mmc@1c40000 {
-+        compatible = "ti,da830-mmc";
-+        reg = <0x40000 0x1000>;
-+        interrupts = <16 IRQ_TYPE_LEVEL_HIGH>,
-+                     <17 IRQ_TYPE_LEVEL_HIGH>;
-+        bus-width = <4>;
-+        max-frequency = <50000000>;
-+        dmas = <&edma 16>, <&edma 17>;
-+        dma-names = "rx", "tx";
-+    };
-+...
+  Changes in v4:
+  - Update sdhci-of-dwcmshc.c
+    - Address the compile error from kernel test robot
+      - Remove duplicate implementation of dwcmshc_enable_card_clk()
+      - Add missing dwcmshc_disable_card_clk() function implementation
+  - Link to v3: https://lore.kernel.org/all/20251010093807.1579-1-hehuan1@eswincomputing.com/
 
----
-base-commit: 7bac2c97af4078d7a627500c9bcdd5b033f97718
-change-id: 20250523-davinci-mmc-c704440c3dd0
+  Changes in v3:
+  - Update snps,dwcmshc-sdhci.yaml
+    - Delete clock-output-names, '#clock-cells' and eswin,syscrg-csr
+    - Update description for eswin,hsp-sp-csr
+    - Update drive-impedance-ohm
+    - Update the item of reset-names
+  - Update sdhci-of-dwcmshc.c
+    - Add descriptions for PHY registers
+    - Simplify clock management(remove custom clock provider, use
+      standard clk API)
+    - Replace magic numbers with GENMASK() or FIELD_PREP() macros
+    - Add comments explaining HSP stability assertion writes
+    - Adjust line wrapping to fit within 100-column
+    - Delete forward declarations by moving function definitions
+    - Rename variable is_sdio to is_sd
+    - Replace unclear macros with meaningful alternatives
+  - Link to v2: https://lore.kernel.org/all/20250912093451.125-1-hehuan1@eswincomputing.com/
 
-Best regards,
+  Changes in v2:
+  - Delete the previous separate driver and yaml binding file
+  - Update snps,dwcmshc-sdhci.yaml to add support for Eswin EIC7700
+    - Add the new compautible string: "eswin,eic7700-dwcmshc"
+    - Add new properties: clock-output-names, '#clock-cells',
+      drive-impedance-ohm, eswin,hsp-sp-csr and eswin,syscrg-csr
+    - Add customized reset-names for EIC7700 platform
+  - Update sdhci-of-dwcmshc.c to add support for Eswin EIC7700
+    - Add a new struct eic7700_priv to hold Eswin-specific data,
+      including clock phases, register mappings, and drive
+      impedance configuration
+    - Implement EIC7700-specific sdhci_ops
+      - set_clock: support core clock configuration with phase delay
+      - reset: add PHY reset and configuration
+      - set_uhs_signaling: support HS400 DLL lock
+      - platform_execute_tuning: implement delay line tuning and phase
+        code adjustment
+    - Add initialization routine (eic7700_init)
+    - Integrate the new platform data and ops into the driver's match table
+  - Link to v1: https://lore.kernel.org/all/20250516091259.774-1-dongxuyang@eswincomputing.com/
+
+Huan He (2):
+  dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin EIC7700
+  mmc: sdhci-of-dwcmshc: Add support for Eswin EIC7700
+
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  57 +-
+ drivers/mmc/host/sdhci-of-dwcmshc.c           | 526 +++++++++++++++++-
+ 2 files changed, 555 insertions(+), 28 deletions(-)
+
 -- 
-Charan Pedumuru <charan.pedumuru@gmail.com>
+2.25.1
 
