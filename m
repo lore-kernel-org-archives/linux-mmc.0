@@ -1,41 +1,77 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9C861ACECE;
-	Sun, 12 Oct 2025 13:35:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 508F327F4D4
+	for <linux-mmc@vger.kernel.org>; Sun, 12 Oct 2025 14:15:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760276158; cv=none; b=JQV//WF4jYy6epQ3vIWhxtdVQkMJJU+oTsQLEApJx0y5EBIolx597EOxLsbOddykb4iuzFh+CbIfCNSqfg2cPXeEiO6enyXixSfGcZKD7FXU3qz5u0I9zpBbShX8Jwygvnr+O4StXvZJzkyaU5qqNhygcnK4MG9bYjTde81b9W4=
+	t=1760278552; cv=none; b=feNpcq1Xr3Y652e3vLaqI+gZqNP0BSdv5R4t2qFssLCpucmrhp9zFTjDH40OeF2tFd31WSks7KsiQmISnjgZaMf5LPIrM8ygc6+rrWXQP9UhleRzB+X6gvRvcsPopv4Y05a553KiGAmwPXiiTWjsYEfReAjz5KlvHP0oDYhHEqg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760276158; c=relaxed/simple;
-	bh=GghfE5YM8TPbJhlO+2xIBisZv3B2f12hUO1Bx8PrXLw=;
+	s=arc-20240116; t=1760278552; c=relaxed/simple;
+	bh=pQYo3AL0hKKQM74twJtSkHbfx6sfxE/SN/JlvBlE2gE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WkIC9dSeR8MvYeTAsmU0TVbQ7heIcQXC0iyyQl63/4Z/mTAq6oyjtxLDFUTSFntc2c3/TT2Ehn1bvqKsavx1aKo+7VEjuHUGeMk9fZeLfLgWtOPSuavUbTGEpz1j5VzNQy8icNtjfnDDbfJ0bANHspiXBvV4rs/hUfM1dho+nk4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pAECxGU9; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=VPqxIQ4T+oOugXfzIjTFIHXSlfTxcf7g/EwqHIj4H/ZIePT7YDsVTaWwYwGRYwSOXpKF2oUOt8CsD8K4DW/oulm5vJAyRd3P6sr178mvMjv2t+vItp49VwwmI8+/0gUOuY1o6dKpDwUrwGTkgszbnuTTXCm58vFmmvRbmf0Ax24=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=a4WFHAvK; arc=none smtp.client-ip=209.85.218.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pAECxGU9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 898D3C4CEE7;
-	Sun, 12 Oct 2025 13:35:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760276158;
-	bh=GghfE5YM8TPbJhlO+2xIBisZv3B2f12hUO1Bx8PrXLw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=pAECxGU9OkQcPU+8dyn7p2VwNKW9t1u2RPkZCjYkeF3DWqa97ZmnU+4SbDQSbdRd/
-	 x0MndA1vj1z9/Vz3kx9X4rA227OseTyfTZpYX4rTBcAZw9JANEFhwqXd+rx/vTdeKT
-	 STd2eGaLORGUkqgoN/dg95hBcK1rfLmIjGUwGzF0iGYHPRNmFp3iprjacZoAiUOyzq
-	 SSJs7hq8Rfo8yrYewA8t6zNi7Pk7MMJ+BcIC9o5uyKcWbF/0HUgv4VAej33lMtI0uR
-	 lpLRcdxeDNXtuJwH7jbAmcfLLKSSmNVPvrnFVaedhsjOaV+iwn74DSJlOP3nSXkVZN
-	 J45esfaTvGLdA==
-Date: Sun, 12 Oct 2025 14:35:54 +0100
-From: Conor Dooley <conor@kernel.org>
-To: Charan Pedumuru <charan.pedumuru@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] dt-bindings: mmc: ti,da830-mmc: convert to DT schema
-Message-ID: <20251012-nickname-morale-e1e21796f1f1@spud>
-References: <20251011-davinci-mmc-v2-1-355da3e25123@gmail.com>
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="a4WFHAvK"
+Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-b472842981fso433936466b.1
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Oct 2025 07:15:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1760278547; x=1760883347; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=2XMzMC6esunaiQcFjYreM2qMVnAAkLc/iCHafaRbgJo=;
+        b=a4WFHAvKBM/vx4qIGm03nVdgZ6+kSgoVDywWL9wLYkTVLBcIbtasVQta1yRDXbZDld
+         giw91L0vkW30QGKMwW3Y2Qr1MdQAQF0Tn2fArjjhEK+YLkAgHpWAynYSmp1/+15lGGve
+         2/4OdG/gs1/CsEYo4nbLgjz/QOR9IB7sBX5ZpbWD6fEZswQA0cTSBlWBGn+Lavm2vQhq
+         LOobt5vkoY/WKVvKxJqZy5pmMjrB1zFBr+JG37tPcNSUwmYb4qUmZoLXJwI4abinCOR9
+         WkBLs0L2Q6YbBrmQnc/1LU6YCnlxLcqbcfalSM3O+gY3PHMSWfO+IMnVDL+CyH/GTttc
+         0QYA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760278547; x=1760883347;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2XMzMC6esunaiQcFjYreM2qMVnAAkLc/iCHafaRbgJo=;
+        b=X2EoQjWqx0gTTg+PwI6F+JjSh5mjI3IZS1qU3357edN+IHHDS/2kUferXqV7OMkKJM
+         s+dh3Ip+ZgDIm5Kr42xApZ7H131HPfi/rEBRt8GS5yldMjLNXYUuONKuzmE7qC3nb/BY
+         vLEHBKX/8eaAMz8GZ319ELmlqjohrBHupTBxjTjCm+WNjOc4wDpzQTcdWeuW2ilWxyB5
+         +/vEUAFgE9PLYKsj2TYaBtLQbRGXxnbRIAy1YFkl+cO5H3807jU8l8W11pauiKdRuc1R
+         CZqzARvyyN3PRqN07vTVOnR8Cn01PrxCv2xpR4do3aCRhbHPZgBM7Wn3G0f/AIrNcAm9
+         AeUA==
+X-Forwarded-Encrypted: i=1; AJvYcCW2ByTtpfBEJkh357tkHRZqNhWSDogOmik8bKYWetpj/FTOcwSMAJCbe/qQfvasZrsDKCrhbx4t2UA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzGBvqxrgY5y7xk4pF4mzMbPJgfxjQkAsmRkqQhn/53sg8b6aNG
+	ksI4YHdE4T0rxXAMWBmlI9LpEJTRetx1LoVCuEE0xp5OPGMf4XZT7ecWSTPuqPJUn4w=
+X-Gm-Gg: ASbGncvZQ/YX6B87yTMtvbH5GfEGN6SGa5p/Wlr/TUOi0+yIYLJqnpGm16QTVOR68dM
+	tzKKfOf7BGjlcuGx5i/VtBDPu27JM9B1yiwrcQWILo5qaamjKj1oFjyT+wlVvc8P18D64pb1wCb
+	+neLB40DFxLTkGCS5E6QG2LsFxopwbYwhxVzES0yGafGRcYlq+JHKogydm0MYUvtRte8FIon/U1
+	YowMs1wScZLEh7l+z7wpH8GWvuLXrrwQOXymdHb4DahnmyXh1trRSMFYtKDkv2wIiCMs4ArQsDZ
+	Nn8iCXzra2/IAIIHygYilUsv3x0i0kCCL1WWNyYLTkZTfCZSCpU4+Kpme2cSXiqBOP0z/d+7vh2
+	QLDvcJSmr8yEcov6s47nN7XHyS+gjswOT/2+0B+oHFji+/g==
+X-Google-Smtp-Source: AGHT+IHW9hfSXC3QTPqo0OscrZQ5y9QPHTSmHKiSG71n5Gr9WACU3hTAEq7OXxbr/C9bpmT+R4SoBg==
+X-Received: by 2002:a17:907:7290:b0:b45:a03f:d172 with SMTP id a640c23a62f3a-b50acc2f5bemr2022051166b.57.1760278547399;
+        Sun, 12 Oct 2025 07:15:47 -0700 (PDT)
+Received: from localhost ([2a02:8071:b783:6940:36f3:9aff:fec2:7e46])
+        by smtp.gmail.com with UTF8SMTPSA id a640c23a62f3a-b55d9526885sm722816166b.84.2025.10.12.07.15.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 12 Oct 2025 07:15:46 -0700 (PDT)
+Date: Sun, 12 Oct 2025 16:15:44 +0200
+From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
+To: Khalid Aziz <khalid@kernel.org>
+Cc: Rakuram Eswaran <rakuram.e96@gmail.com>, chenhuacai@kernel.org, 
+	dan.carpenter@linaro.org, david.hunter.linux@gmail.com, 
+	linux-kernel-mentees@lists.linux.dev, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	lkp@intel.com, skhan@linuxfoundation.org, ulf.hansson@linaro.org, 
+	zhoubinbin@loongson.cn
+Subject: Re: [PATCH] mmc: pxamci: Fix passing NULL to PTR_ERR() in
+ pxamci_probe()
+Message-ID: <xxtrhbv5qm2crtvc5ejpgu5caadsmms3rfulmosjwq7lumrko3@5mlcpk24hymm>
+References: <pe4sz3hamkxhahvwqzdq3p3q5u3yeqpdscl5rvvoo5gdfbbrl7@joiz2oj5y4so>
+ <20251009152744.9734-1-rakuram.e96@gmail.com>
+ <aliep4j5jmbdixu5cmqztoxwp3jv4r4hi63qpvhughepsepzb3@qh3mwgryf5ny>
+ <3a73daeb-1353-463d-a1f1-22cdece1326b@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -43,170 +79,101 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="PY52Dy33OnbvwAen"
+	protocol="application/pgp-signature"; boundary="aiu3n4mecyew6rsx"
 Content-Disposition: inline
-In-Reply-To: <20251011-davinci-mmc-v2-1-355da3e25123@gmail.com>
+In-Reply-To: <3a73daeb-1353-463d-a1f1-22cdece1326b@kernel.org>
 
 
---PY52Dy33OnbvwAen
-Content-Type: text/plain; charset=us-ascii
+--aiu3n4mecyew6rsx
+Content-Type: text/plain; protected-headers=v1; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH] mmc: pxamci: Fix passing NULL to PTR_ERR() in
+ pxamci_probe()
+MIME-Version: 1.0
 
-On Sat, Oct 11, 2025 at 08:52:07AM +0000, Charan Pedumuru wrote:
-> Convert TI Highspeed MMC host controller binding to YAML format. Define
-> 'clocks' and 'interrupts' properties to resolve errors identified by
-> 'dt_check' and 'dtb_check'.
+On Fri, Oct 10, 2025 at 11:59:57AM -0600, Khalid Aziz wrote:
+> On 10/10/25 3:59 AM, Uwe Kleine-K=C3=B6nig wrote:
+> > Hello Rakuram,
+> >=20
+> > On Thu, Oct 09, 2025 at 08:57:38PM +0530, Rakuram Eswaran wrote:
+> > > Your suggestion makes perfect sense =E2=80=94 since host is devm-mana=
+ged,
+> > > explicitly assigning its members to NULL has no effect.
+> > > I=E2=80=99ll remove those two redundant lines in v2 as you suggested.
+> > >=20
+> > > I had one small clarification regarding the remaining host->dma_chan_=
+tx =3D NULL;
+> > > in the TX DMA error path. Since that branch uses goto out,
+> > > the cleanup section below may call dma_release_channel() on both RX
+> > > and TX pointers. Setting TX to NULL there seems like a defensive step
+> > > to avoid accidentally passing an ERR_PTR() to dma_release_channel()
+> > > =E2=80=94 is that understanding correct?
+> >=20
+> > Ah right, so either keep host->dma_chan_tx =3D NULL or improve the error
+> > handling like:
+> >=20
+> > diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> > index 26d03352af63..e5068cc55fb2 100644
+> > --- a/drivers/mmc/host/pxamci.c
+> > +++ b/drivers/mmc/host/pxamci.c
+> > @@ -715,7 +715,7 @@ static int pxamci_probe(struct platform_device *pde=
+v)
+> >   		dev_err(dev, "unable to request tx dma channel\n");
+> >   		ret =3D PTR_ERR(host->dma_chan_tx);
+> >   		host->dma_chan_tx =3D NULL;
+> > -		goto out;
+> > +		goto out_dma_tx;
+> >   	}
+> >   	if (host->pdata) {
+> > @@ -765,10 +765,11 @@ static int pxamci_probe(struct platform_device *p=
+dev)
+> >   	return 0;
+> >   out:
+> > -	if (host->dma_chan_rx)
+> > -		dma_release_channel(host->dma_chan_rx);
+> >   	if (host->dma_chan_tx)
+> >   		dma_release_channel(host->dma_chan_tx);
+> > +out_dma_tx:
+> > +	if (host->dma_chan_rx)
+> > +		dma_release_channel(host->dma_chan_rx);
+> >   	return ret;
+> >   }
 >=20
-> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
-> ---
-> Changes in v2:
-> - Modified the commit message.
-> - Removed 'interrupts' from required properties following the old binding.
-> - Changed the maintainer for the binding to "Conor Dooley".
+> I do not see the need for this code change. "if (host->dma_chan_tx)" will
+> skip "dma_release_channel(host->dma_chan_tx)" since dma_chan_tx is already
+> NULL. This code change does not add anything.
 
-Bro, what? Where did that come from? I know nothing about this device at
-all. Find someone from TI to put there.
+Yes, stand alone this change doesn't make sense, but if we want to drop
 
-Conor.
+	host->dma_chan_tx =3D NULL
 
+in the error path above, this change is needed. Maybe then even
 
-> - Link to v1: https://lore.kernel.org/r/20250523-davinci-mmc-v1-1-ceebd83=
-52d9c@gmail.com
-> ---
->  .../devicetree/bindings/mmc/davinci_mmc.txt        | 32 ------------
->  .../devicetree/bindings/mmc/ti,da830-mmc.yaml      | 61 ++++++++++++++++=
-++++++
->  2 files changed, 61 insertions(+), 32 deletions(-)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Docu=
-mentation/devicetree/bindings/mmc/davinci_mmc.txt
-> deleted file mode 100644
-> index 516fb0143d4c21d1c8e44a8846d55ea5458d7b74..0000000000000000000000000=
-000000000000000
-> --- a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-> +++ /dev/null
-> @@ -1,32 +0,0 @@
-> -* TI Highspeed MMC host controller for DaVinci
-> -
-> -The Highspeed MMC Host Controller on TI DaVinci family
-> -provides an interface for MMC, SD and SDIO types of memory cards.
-> -
-> -This file documents the properties used by the davinci_mmc driver.
-> -
-> -Required properties:
-> -- compatible:
-> - Should be "ti,da830-mmc": for da830, da850, dm365
-> - Should be "ti,dm355-mmc": for dm355, dm644x
-> -
-> -Optional properties:
-> -- bus-width: Number of data lines, can be <1>, <4>, or <8>, default <1>
-> -- max-frequency: Maximum operating clock frequency, default 25MHz.
-> -- dmas: List of DMA specifiers with the controller specific format
-> -	as described in the generic DMA client binding. A tx and rx
-> -	specifier is required.
-> -- dma-names: RX and TX  DMA request names. These strings correspond
-> -	1:1 with the DMA specifiers listed in dmas.
-> -
-> -Example:
-> -mmc0: mmc@1c40000 {
-> -	compatible =3D "ti,da830-mmc",
-> -	reg =3D <0x40000 0x1000>;
-> -	interrupts =3D <16>;
-> -	bus-width =3D <4>;
-> -	max-frequency =3D <50000000>;
-> -	dmas =3D <&edma 16
-> -		&edma 17>;
-> -	dma-names =3D "rx", "tx";
-> -};
-> diff --git a/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml b/Do=
-cumentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
-> new file mode 100644
-> index 0000000000000000000000000000000000000000..1a97c3e447fd10f14bfe0af9e=
-22f9479304f0f26
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
-> @@ -0,0 +1,61 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/ti,da830-mmc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: TI Highspeed MMC host controller for DaVinci
-> +
-> +description:
-> +  The Highspeed MMC Host Controller on TI DaVinci family
-> +  provides an interface for MMC, SD and SDIO types of memory cards.
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml
-> +
-> +maintainers:
-> +  - Conor Dooley <conor+dt@kernel.org>
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - ti,da830-mmc
-> +      - ti,dm355-mmc
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 2
-> +
-> +  dmas:
-> +    maxItems: 2
-> +
-> +  dma-names:
-> +    items:
-> +      - const: rx
-> +      - const: tx
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    mmc@1c40000 {
-> +        compatible =3D "ti,da830-mmc";
-> +        reg =3D <0x40000 0x1000>;
-> +        interrupts =3D <16 IRQ_TYPE_LEVEL_HIGH>,
-> +                     <17 IRQ_TYPE_LEVEL_HIGH>;
-> +        bus-width =3D <4>;
-> +        max-frequency =3D <50000000>;
-> +        dmas =3D <&edma 16>, <&edma 17>;
-> +        dma-names =3D "rx", "tx";
-> +    };
-> +...
->=20
-> ---
-> base-commit: 7bac2c97af4078d7a627500c9bcdd5b033f97718
-> change-id: 20250523-davinci-mmc-c704440c3dd0
->=20
-> Best regards,
-> --=20
-> Charan Pedumuru <charan.pedumuru@gmail.com>
->=20
+	if (host->dma_chan_rx)
 
---PY52Dy33OnbvwAen
+and
+
+	if (host->dma_chan_rx)
+
+can be dropped.
+
+Best regards
+Uwe
+
+--aiu3n4mecyew6rsx
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaOuutgAKCRB4tDGHoIJi
-0h/IAP0WtzbV+IXLwg7uVoHCeHVViaX/soKA93a6GBGYZf3TXAD/U+kDgIw5N/cW
-C7kCChsy3b48ylOjF6m55Qm37cnz7Qk=
-=dLIn
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmjruA0ACgkQj4D7WH0S
+/k5xlggAgtLA7I1LRrMqGE2N6WwAa5nB4GYA3H8oaIjnY1v1N7b2t/tjbdECN/3m
+wmWnIH7UeQIHQYMkvrgbI6mM04/6cozbV1BQIZoC6ZfrO19YNVaUHiSdSkVa884A
+XAD/t/z+4zSPlD9pjhAg+619Ub8KrPG7yPyARwRCN2g47NG+M0nRRjk30Y7POueH
+YY+3vQFFxB0F5dDqz1PDyrNZUrMiEOCbzVOulU03FaMyCEK5P2LFNKurm3yhO975
+Zx9pxi/JnDAw2slWZEnq+7VcuGgzpCvACFWXwM8f5jycbwnkp5/SzyNRu9x1iwRh
+6gMBuzVYVkazusRPTkjGRghdLSedgw==
+=AexD
 -----END PGP SIGNATURE-----
 
---PY52Dy33OnbvwAen--
+--aiu3n4mecyew6rsx--
