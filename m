@@ -1,106 +1,150 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D50223D7ED
-	for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 13:16:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A232830CDA6;
+	Mon, 13 Oct 2025 14:53:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760361403; cv=none; b=KPHv/BiZgVOsKLu7omRV0DNU+1vw5hkwyK5xT6xRH4QSvtRd2K5um3JOOotOU9gPrLhwpslXnX2R4p50tSjWu+YN2OObRWZzCCOGeqg5ib6q9Qi4TlDr0oKXJyzBhxpXwV8VmTavOjIqy9uylnCknYjCZPEb9Cip4pY0bbhAWW8=
+	t=1760367215; cv=none; b=t3JIbwWBy+QtsVQpCZ+9Yym6DX7t91H7+oAPFjj326qUJsB/Jm+Ff2WRbYVmf5PANFsKTq9juWf3MTK5UfAMmW/Wexu6Y75rwwfdo8SdKpfyZ02KXBzFHknFBt6uNAnb0ACYBBNmrJ7WPWo35CaWXDlWjYfKjhOXiJ9xsicg4Hw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760361403; c=relaxed/simple;
-	bh=ZSh7Dgeb0daZdF491Vcis7pf3nDHt0iUoxsLAa3xTLA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=hl9Yf6a8ve58YxE5dDM57XKip5ijxNykHYRUMHh2k8mUJ+PKU48fxiXHfsH1L6zl1o0PFs8IqOdcjxm5i4OdtvioSY0qjQ08aIrHqlRxlIqDV6diLnG8TZBYvZ03RxHB8UZ3f6DO4mKcb8H2GIyGaNeo38UeJNg3xntktPoNybM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ptywgZbp; arc=none smtp.client-ip=209.85.167.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1760367215; c=relaxed/simple;
+	bh=vXgZHGLV+vrSbr2V2AcsRP31cgZuixWbjqoaBJSPGlc=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=j5vVqEyTvTxDUsg+cH/aO3vmlloCv/ojOvNDFOHuzxw/uy6f1uwlAz9sGANWe8p2m+mDAN8Vxo3nLMEhqnhWSzVHsXEEFD56qapkWPagkakcZItdKVNSu+CUlfy0St/YVIo5uvc8yA7mLObVXssKv3Hqd8CymLTpUZLhr6wIgnc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=bdqkbqVW; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ptywgZbp"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-57da66e0dc9so4226296e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 06:16:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1760361400; x=1760966200; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ZSh7Dgeb0daZdF491Vcis7pf3nDHt0iUoxsLAa3xTLA=;
-        b=ptywgZbpHwn1bQlqj9PqmO1E8bdgwmZySxr2OnNLGloseBqJ6LPPYAszL0mXQbZtPf
-         HZ4H2LoyDIWnqLT/UjBZbKjU8tGCNNobSzMAIrHHpV+sNknalN0orh81voBuObiKLY+4
-         pdYIhAf4GWN9nNlsXIdiwtyHB9/QRa2lmPivxDnYdxrto9vuuklEPEXOgu4UMFI1xxlJ
-         Cj0EF9UOe3eyX5eNovWZWI9wyrCnfVlX/6z3MzEMENRa9FgRUjrz+G1jg0yR2jAOiUT3
-         Nzk4tlvwKUZqFNxfiSJDc9S5FDoVnJFIDgvJaYbPcHWwjxAgdcHE/9AZ44lTIOq5zLlr
-         ju+g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760361400; x=1760966200;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ZSh7Dgeb0daZdF491Vcis7pf3nDHt0iUoxsLAa3xTLA=;
-        b=lR2Ev5dfnxEXwqO5IhcZkofv7SL776hp+xXYRiAhK7kN6Zq3Bafdy12OUy+oBDDe0H
-         rRCGD3EbntLMXuqn9skgk5Ly/hHjcSBeQ/yGg82FB4yqdcK9Lym4Axu89GsZr7ZcNnZu
-         2/Cwzn2xv0BBO8FY55cKKJgo+aXXFY//8XalitPkJctOUKGatBvc7DvPMU+eTWEXcxbN
-         v6agHObeK7UPKSrTd8W5eaKY2d8Y14nwP6du0PPzC9XAIYk34tWtpfg7SqJTSPqiU7UZ
-         D2hl/gfaFKyILHQpdEP5Qo5+M0zSCsYMx4TI+oD4AZ1B5bC5o7AL3CqnKIfsQCNqxvE9
-         F1cA==
-X-Forwarded-Encrypted: i=1; AJvYcCW1t1tleRTXTilgQGfXuy/a11RhcO/PmOk4WgoBA9je+Hij0sFHR080LhIpdsG+2ISK4CqfnEMnzWQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyVG+MXErYvFBypI6ZxUch8GkLmtiyHI91QvVGBVoOJGjlkM9fg
-	5k1zzudHARZbcOAYolRaZ3LMlrbMCxof+vx2dPODSlHiSl6ExiQP7OTMvZ1im4OsE0+yDj175vO
-	gXvocac+/YmAz/Rx2C5qjfPGAGxFuDagNqHRCrFbKUw==
-X-Gm-Gg: ASbGncvo6UKnlvsR+MduIZg2qW+cS96uqOhtZroW5K+Yg+1ZKdcKGVAu3aw0bjgjj6o
-	WKYof/LLUqLGNFWJ5NxrsizlSyaFl6c0vjhfCcv3IHuCpm2vaC4tDmKOC1PPE/RvLDJPqauxr9j
-	nZkMNIf0UPp2yjtpZpkGhxk8kO1V+utvevf13gtC0MalcO6rirdV2vWPKl/7W1Ts3h+C2+sFyS9
-	BrJDdFnYf26UV9lMPrU3wu6vd3gg+VNlH2BGbuD
-X-Google-Smtp-Source: AGHT+IEZjgdJSMXGycisGGooIlBDTFc0ZlBxulr9PhHWH6RGYuSyos1294WYffX2tc7Z1J7gsvhrSvZBMucblVOe8EA=
-X-Received: by 2002:a2e:bc14:0:b0:35f:a210:2a02 with SMTP id
- 38308e7fff4ca-37609e6cfe8mr47702921fa.26.1760361400140; Mon, 13 Oct 2025
- 06:16:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="bdqkbqVW"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59D7QpWM013107;
+	Mon, 13 Oct 2025 14:53:27 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=iCUnh79ch5KB6udbNdKrZ68OI7hRghip3CA
+	voijZZMM=; b=bdqkbqVWQN7CfoptngwfGYBw896xoRsPB7EHYSGQkqNZf33i5fw
+	6cRwg4OEi0JIl/8z0EogrkIZNAUpsnzVqQ/dSk+YLH7QZX6vUrtAowuvfjV2pIV5
+	N8NUuekFZLr5lKWs7vfldu57KLCwoDhrSqifTBCl+7y/1kAKRtcBQ39ZWTcQKdGU
+	xnv+7pCgMHC0a41CqSS3yJ2ekWUgDp+n8JvvTyx+jUDU0Xd7Vkg1cdPfFXnGk9E2
+	X1vVYviJxi4LMn1wGv8ygOe/UFOfO7zj75eoJLMHLxs6rjQ1SKAoL5caqA3Ed618
+	wVqPwDSAvtVdUyEYzopAMJC4jbp61vCRqjA==
+Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49rw1a9b3k-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 13 Oct 2025 14:53:26 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 59DErMIK025960;
+	Mon, 13 Oct 2025 14:53:22 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 49qgaktjdm-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 13 Oct 2025 14:53:22 +0000
+Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 59DErLE6025955;
+	Mon, 13 Oct 2025 14:53:21 GMT
+Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-rampraka-hyd.qualcomm.com [10.147.247.88])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 59DErLpv025944
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 13 Oct 2025 14:53:21 +0000
+Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2305851)
+	id 62FCF5C8; Mon, 13 Oct 2025 20:23:20 +0530 (+0530)
+From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        dmitry.baryshkov@oss.qualcomm.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
+        kernel@oss.qualcomm.com
+Subject: [PATCH v5 0/4] mmc: sdhci-msm: Rectify DLL programming sequence for SDCC
+Date: Mon, 13 Oct 2025 20:23:12 +0530
+Message-Id: <20251013145316.1087274-1-quic_rampraka@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251008-mmc-no-advert-v2-1-45bc00006fb2@linaro.org> <82b1d733-df39-4f20-8f69-69b34bfac3b5@intel.com>
-In-Reply-To: <82b1d733-df39-4f20-8f69-69b34bfac3b5@intel.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Mon, 13 Oct 2025 15:16:27 +0200
-X-Gm-Features: AS18NWBzHhhxEZE9kPlz72rg1BVA-iIN1XSslkk1p78S4uXXy46XFsjUQ4i4LT0
-Message-ID: <CACRpkda32Dw8sxkfDy9i19UP-59H-3WPNhffKLn+Pi7UgQ54vQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci: Stop advertising the driver in dmesg
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=K88v3iWI c=1 sm=1 tr=0 ts=68ed1266 cx=c_pps
+ a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
+ a=x6icFKpwvdMA:10 a=1A1B0rMuCxM-LqAl2UMA:9 a=cPQSjfK2_nFv0Q5t_7PE:22
+X-Proofpoint-GUID: doIx6vp42mCXb2g2sEBKxNtixOohfVnO
+X-Proofpoint-ORIG-GUID: doIx6vp42mCXb2g2sEBKxNtixOohfVnO
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDEzMDAzNSBTYWx0ZWRfX2+03uFyPMILk
+ i0/CHgrBpb+pSIGLIMhAvlXjRLWTCOzONRLApfHavRHL5Xl+R7RTTBz8+fjXqTVuEEODJK6TiY4
+ PwDfmzmsODUOwygZyAo1D8HpUdDbunzUfnUWdoD8F/6gRyLSt6G1azAK5U26J+nJdsJ3AR2xg8Z
+ F6DZUh6Rgmcc4w9l/YF3oPjiar/F/pzpKepBp+TfxwX/b5W8uvIugDoNwImEj5Am7NzguRPYFyO
+ TR524qeGQry8SfAHSoulkw5CVmR98bhEzHMbds4EZIT5dXjGvFdm66IetkbZtuxFt88w4DSKujS
+ 5Q1Dg8ajhRFP0XQdW6AKtw7sAPd+R+tE9VVDpUXQmnTwHfii4AC+yGfsj6t9Yheh1cv7xx8cqLg
+ Pxjp52+/seoLSLGACd8ccNEUWh4AuA==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-10-13_05,2025-10-06_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ malwarescore=0 spamscore=0 impostorscore=0 priorityscore=1501 phishscore=0
+ adultscore=0 clxscore=1015 bulkscore=0 suspectscore=0 lowpriorityscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510130035
 
-On Thu, Oct 9, 2025 at 8:11=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.c=
-om> wrote:
-> On 08/10/2025 01:04, Linus Walleij wrote:
-> > As much as we have grown used to seeing this message on
-> > every kernel boot, it does not add any technical value.
-> >
-> > Drop all messages from sdhci_drv_init().
-> >
-> > We need to keep the module_init/exit() calls to stub
-> > functions for the module to work according to
-> > <linux/module.h>.
->
-> But is that true?
+With the current DLL sequence stability issues are seen in
+HS400 and HS200 mode for data transfers.
 
-I don't know, I don't have an SDHCI device at hand to test..
+Rectify the DLL programming sequence as per latest hardware
+programming guide and also incorporate support for HS200 and
+HS400 DLL settings using the device tree.
 
-The comments say:
+Changes from v4:
+1. Addressed Rob Herrirng & Konrad Dybcio comments:
+   a. Regarding naming of dt entry.
+2. Addressed Adrian Hunter comments:
+   a. Regarding parsing of dt and storing variable in driver.
+3. Additional change:
+   a. Changes in patch 4/4 according to parsing change.
 
-/* Each module must use one module_init(). */
+Changes from v3:
+1. Addressed Dmitry Baryshkov comments:
+   a. Regarding clk division by in V2 patchset
+2. Addressed Konrad Dybcio comments:
+   a. Renaming of parameters
+   b. Memory allocation
+   c. couldn't address __free, as didn't fit here
+3. Addressed Krzysztof Kozlowsk comment:
+   a. Regarding the dt binding
+   b. commit message to reflect the need of dt
+4. Additional change:
+   a. DT parsing logic
+   b. Maintain backward compatibility
 
-And for module_exit():
+Changes from v2:
+1. Addressed Dmitry Baryshkov comments:
+   a. Regarding TCXO frequency.
+   b. Regarding clock rate.
+   c. regarding checkpatch.
 
-/* This is only required if you want to be unloadable. */
+Changes from v1:
+1. Addressed Tengfei Fan comment, added missing semicolocon
+   in sdhci_msm_host structure.
 
-If it's not true we need to fix the docs as well...
+Sachin Gupta (4):
+  dt-bindings: mmc: Add dll-presets values for HS400 and HS200 modes
+  mmc: sdhci-msm: Add core_major, minor to msm_host structure
+  mmc: sdhci-msm: Add device tree parsing logic for DLL settings
+  mmc: sdhci-msm: Rectify DLL programming sequence for SDCC
 
-But I discussed it with Ulf in the office last week and he was
-frantically testing out dropping it altogether.
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    |   5 +
+ drivers/mmc/host/sdhci-msm.c                  | 316 ++++++++++++++++--
+ 2 files changed, 302 insertions(+), 19 deletions(-)
 
-Yours,
-Linus Walleij
+-- 
+2.34.1
+
