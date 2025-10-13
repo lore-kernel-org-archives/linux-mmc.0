@@ -1,516 +1,169 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vk1-f176.google.com (mail-vk1-f176.google.com [209.85.221.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E841731062D;
-	Mon, 13 Oct 2025 14:53:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE5D8271479
+	for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 16:20:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760367225; cv=none; b=cC2m9uZ2hD+Z3LlUuA4EtSu++cZ8VZz5tUuymb+csfxL2M0cUzyyYPUU01VGfUsP8tKgrsOVRleHBquax3KLWBi9ZN+nYiCpy6wS0uMmFqevSpr/luZkj+HwaZ5ybaX6fkXGatnoGX2uqX8YSQC3wyeMby2F/dNDyqg+GkvepTQ=
+	t=1760372419; cv=none; b=rIHx0/WXOzUI2xqaK8e+Z5jC5xHzs0ySCJ0on7/o2NWvMIAu3xkDPPRigMgVoizapdj1lhSzzogpqmW1luu61opAQqerUXleySKVyPPmFfiSXDKPy6THNo0KSBgNfm34HDTDtsowP0izq5xB1d+UyTxOXIUZGbUdHkIzLkZtEuw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760367225; c=relaxed/simple;
-	bh=ealyELSyItjneqvjZ+Ea5MzvttUx8sDdSk0xpX5c7Bo=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=KEgyQZqtgajxaxBQzV/y2netyxIRLEi58UzprrL8UAJKGouqA9i96k/OHgysIpmrCOaJmRF2RXp1caK5rXnUo7UkJmXAm69/ZzzLZL2okDQZJznSnJDYttXUrx+BCYBFWodetBytQ/BqnyXvHX7f0W0ZX7e+hfTRksfRjhcdiL8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=lxsfeI5A; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="lxsfeI5A"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59DA6v7a000691;
-	Mon, 13 Oct 2025 14:53:34 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=qcppdkim1; bh=kjZXaQVxcxK
-	d7AQy1BnV6Ph1ALfGm5jWkmb7NJpXBRs=; b=lxsfeI5AL+v4sY70ehgeTAv2V8+
-	e6tzvLA/MJyrOeAVZc9vTmHWnuGUA11TeKUZwrplDY6NHhkYBbAPP2t7VVFlX6hF
-	FbhTnHMbSu0KD7rSoX1pgR9LyfMUb7uFPS4Uhzazrhd+50FDELjo3eB6McSuwjPW
-	TK3U+SMbkqBrpKRQJoDfpd2xLZqyrbjV8XSHjJqUMQDsub9At1k8UDazzLvZKQ6t
-	AiCz8i5vS1lauCSKDTDcThOMXL/ziPcCrJ4p+pJt0vTj1bvrUKRqMMsluf1cXj/+
-	0ULa3tokrwDoOn6/DDeA2QPYz6WRPXLSTLazQcMOZduMInpuMnR4kzG5Alw==
-Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49qfd8w2ja-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 13 Oct 2025 14:53:33 +0000 (GMT)
-Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 59DErPGK025995;
-	Mon, 13 Oct 2025 14:53:30 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 49qgaktjf4-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 13 Oct 2025 14:53:30 +0000
-Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 59DErUn2026099;
-	Mon, 13 Oct 2025 14:53:30 GMT
-Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-rampraka-hyd.qualcomm.com [10.147.247.88])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 59DErTTx026090
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 13 Oct 2025 14:53:30 +0000
-Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2305851)
-	id D7E685C8; Mon, 13 Oct 2025 20:23:28 +0530 (+0530)
-From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        dmitry.baryshkov@oss.qualcomm.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
-        kernel@oss.qualcomm.com, Sachin Gupta <quic_sachgupt@quicinc.com>
-Subject: [PATCH v5 4/4] mmc: sdhci-msm: Rectify DLL programming sequence for SDCC
-Date: Mon, 13 Oct 2025 20:23:16 +0530
-Message-Id: <20251013145316.1087274-5-quic_rampraka@quicinc.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20251013145316.1087274-1-quic_rampraka@quicinc.com>
-References: <20251013145316.1087274-1-quic_rampraka@quicinc.com>
+	s=arc-20240116; t=1760372419; c=relaxed/simple;
+	bh=QZXGC+aNSm2VaxhXC6fK/8LfmGJE2quumpT2uKvw4qE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=a3KLjuJIGF/0exAb68ELZKnZpfzzdoz4UfY7H1HZMuUX+nVHrjqSqcPpnRxuMPhjhTQjOocNUQODRGrvwi05PSbtTCAFE/+Q/wqNob+zyGpCp7kxIR1b9wnHHzm4DsA6BTn5FHSKJIHJQ8CLThr22doP5EfD+lh587N5eLz0KyQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vk1-f176.google.com with SMTP id 71dfb90a1353d-54aa30f4093so1415213e0c.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 09:20:16 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760372415; x=1760977215;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=BFpRqZmIQrKu+7ylr5t2VWlgMZSJphDIQU23QX0pR+8=;
+        b=XXR48fz2l5U5d26W/RkoObBQnkZT3KRVtwG2/d3+rsFY1RsNqIEEiuDurwFD1zZA4O
+         b5dJCSds9/rct5Qpl2gUAWT+6oFhNf3xDw+7A3US0wjyrFitntWRgd6jB4uZ2jEUEG/M
+         BEVdiAYuscfncBPq7zJon44IIehuZTb9ngHkJeavkHCosPtn32CGpOSomk95mElnYHL9
+         Ohw01gRpkWD0rbHVx9HzSI9GY0rsexKKrIj50fCtI9qVRPWfp5GgCWinNoJ5IUlbeqtL
+         ij3NR7NGOH5U5xJfs6akOatT3AkCn0z7AJmnpX6dZ1D4+zJASd80yiAu58W7SmXDXssH
+         /rWQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVsCxzzM7ds35WypKBhJcZZLtsMmvOEyoCcKhIpbKenHpyokOu99cOB5+olCQLhw74GfkP6NFHMD/k=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyTHbRkU/S/dxcKsKJFvJHKs/RUz92GriHA7uDh26mx4ciYd3q/
+	0rWShCFAFEVZ6fNZaNSOFbmoi0WWNCilHcwNSobhM/qKWyWtIj1E5pWt6TDK+D8R
+X-Gm-Gg: ASbGncv7GrlFtik7xsNdqAoClpEx9vgB0e4xx7jUmbLwC09tT4zjker2eteFUwM3jPp
+	2n7rWB9O1Y1brZLYulU9oqewANX30y95XJpOcnmxV3+Oskknup4pNv3M3uHFkgnrtolp8xIXcuX
+	bZCiHJJWuSa648PSrXToXQXPtY5sfI3svWMWRBBf6qrBxP9JWQIdqaXSuTROcsWKM5TK8qPK3mQ
+	PEQsQQZdhLvJUi+FX1L+AVodAweSAfv4zdo6hD2q0HQKs5VSXuKuFHxNH+VWKRC361BWDW2U21G
+	Z3RJubmQA7RQatpzmC7fbhBAkh5DUEm9sWXf1u++fhFICOJ2NA6NhlZbIDu6O0gaSe6RPjuWlkd
+	NdAhanXrBs5ZSJ4obdLNV4jdYeDevEznjkopAIwDnybbyFumDNqBOViVcOT1lhK2Lulk46KRNtO
+	b6wVc=
+X-Google-Smtp-Source: AGHT+IHWiFYSILF6+/cZvVJ8cSy1ftrRCzhEpDnwJkjlaf+gG0VSmYKqF5wa7n9BRoeHLW4yfMsNww==
+X-Received: by 2002:a05:6102:3052:b0:523:759e:b0cf with SMTP id ada2fe7eead31-5d5e2344f40mr8604319137.21.1760372415095;
+        Mon, 13 Oct 2025 09:20:15 -0700 (PDT)
+Received: from mail-ua1-f51.google.com (mail-ua1-f51.google.com. [209.85.222.51])
+        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-5d5fc8b165dsm3492341137.9.2025.10.13.09.20.14
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 13 Oct 2025 09:20:14 -0700 (PDT)
+Received: by mail-ua1-f51.google.com with SMTP id a1e0cc1a2514c-8e401b11bfaso1124801241.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 09:20:14 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCXCJQOthur+uyr9vcnypvr4bLM66/vyZIooKsDHI9nN/fxccrHoNZdTe7exPiCEEqVHWlJVcvwbD10=@vger.kernel.org
+X-Received: by 2002:a05:6102:548b:b0:5d5:f6ae:38c0 with SMTP id
+ ada2fe7eead31-5d5f6ae3b65mr5428961137.41.1760372414371; Mon, 13 Oct 2025
+ 09:20:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: fn2Dy5k9Y78SCNUAvlnTKoTL3vHh-aBu
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDExMDAxOCBTYWx0ZWRfX1mWpNVVYTqmu
- IGspsB1Htgt1qmWuZqZp87PAp26Bi4jOHFtLkcYvzVWn4CP6ppQEpfw/cj4IdkwgxekGd691PHS
- uYRE+HvXRISdUTwjDU8XCb61pRlPQrcXdbsHwy9vYj4tdJDVCIAUP+L6oqM6VSq9i1CzPn9jTvE
- cV5y2JOzvI2wI0zpc/JGmLIQ8NivowsxDiyBefUusSsXc23PeD7V2dorIGyuC4AezMas7Wuet5M
- 8MtgqDa8o1GgHXbGjj3lmZcqRPK2QIvGDXs1JuGUNIfxgRXFzfaHngSgSC5kzGrdGGkMRemRoAf
- M42HmkS50rUWSYKzlfOjQ/B37z0+R9HbJuE3QZFuyXxjNqWUPigjyNfJqn9r425K/kDXqVMJQhO
- +3oJxKvud1OTEPPdSzY3iiA0ZzAsTg==
-X-Proofpoint-GUID: fn2Dy5k9Y78SCNUAvlnTKoTL3vHh-aBu
-X-Authority-Analysis: v=2.4 cv=PdTyRyhd c=1 sm=1 tr=0 ts=68ed126e cx=c_pps
- a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
- a=x6icFKpwvdMA:10 a=COk6AnOGAAAA:8 a=o3FjeQ6YOhh_Ng1Uz5QA:9
- a=TjNXssC_j7lpFel5tvFf:22 a=cPQSjfK2_nFv0Q5t_7PE:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-10-13_05,2025-10-06_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 phishscore=0 bulkscore=0 clxscore=1015 adultscore=0
- lowpriorityscore=0 impostorscore=0 priorityscore=1501 spamscore=0
- suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2510020000
- definitions=main-2510110018
+References: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com> <20251008042526.3312597-3-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20251008042526.3312597-3-claudiu.beznea.uj@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Mon, 13 Oct 2025 18:20:03 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXUqsU6MKh8WSO4EmrxCfUg8FZkrJKb7OH-KwMY4+iC4Q@mail.gmail.com>
+X-Gm-Features: AS18NWAZcmdiqSjfkUoPbuGPh-cNUsYtDKIlfc4ni5Js9vtMQnoS9mBsr70Q9Bc
+Message-ID: <CAMuHMdXUqsU6MKh8WSO4EmrxCfUg8FZkrJKb7OH-KwMY4+iC4Q@mail.gmail.com>
+Subject: Re: [PATCH 2/3] mmc: renesas_sdhi: Switch to SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS()
+ and pm_ptr()
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org, 
+	p.zabel@pengutronix.de, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 
-From: Sachin Gupta <quic_sachgupt@quicinc.com>
+Hi Claudiu,
 
-With the current DLL sequence stability issues for data
-transfer seen in HS400 and HS200 modes.
+On Fri, 10 Oct 2025 at 22:16, Claudiu <claudiu.beznea@tuxon.dev> wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>
+> SET_SYSTEM_SLEEP_PM_OPS() and SET_RUNTIME_PM_OPS() are deprecated now
+> and require __maybe_unused protection against unused function warnings.
+> The usage of pm_ptr() and SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() allows
+> the compiler to see the functions, thus suppressing the warning. Thus
+> drop the __maybe_unused markings.
+>
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-"mmc0: cqhci: error IRQ status: 0x00000000 cmd error -84
-data error 0"
+Thanks for your patch!
 
-Rectify the DLL programming sequence as per latest hardware
-programming guide
+> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> @@ -599,18 +599,17 @@ static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
+>  }
+>
+>  static const struct dev_pm_ops renesas_sdhi_internal_dmac_dev_pm_ops = {
+> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> -                               pm_runtime_force_resume)
+> -       SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
+> -                          tmio_mmc_host_runtime_resume,
+> -                          NULL)
+> +       SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
+> +       RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
+> +                      tmio_mmc_host_runtime_resume,
+> +                      NULL)
+>  };
+>
+>  static struct platform_driver renesas_internal_dmac_sdhi_driver = {
+>         .driver         = {
+>                 .name   = "renesas_sdhi_internal_dmac",
+>                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+> -               .pm     = &renesas_sdhi_internal_dmac_dev_pm_ops,
+> +               .pm     = pm_ptr(&renesas_sdhi_internal_dmac_dev_pm_ops),
+>                 .of_match_table = renesas_sdhi_internal_dmac_of_match,
+>         },
+>         .probe          = renesas_sdhi_internal_dmac_probe,
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index c8cdb1c0722e..b9de03325c58 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -209,10 +209,8 @@ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
+>  void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
+>  irqreturn_t tmio_mmc_irq(int irq, void *devid);
+>
+> -#ifdef CONFIG_PM
+>  int tmio_mmc_host_runtime_suspend(struct device *dev);
+>  int tmio_mmc_host_runtime_resume(struct device *dev);
+> -#endif
 
-Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
-Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
----
- drivers/mmc/host/sdhci-msm.c | 272 ++++++++++++++++++++++++++++++++---
- 1 file changed, 253 insertions(+), 19 deletions(-)
+This change is indeed needed, because RUNTIME_PM_OPS() now
+references these two functions unconditionally...
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 8038b8def355..a875e92f8663 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -28,6 +28,7 @@
- #define CORE_VERSION_MAJOR_SHIFT	28
- #define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
- #define CORE_VERSION_MINOR_MASK		0xff
-+#define SDHCI_MSM_MIN_V_7FF		0x6e
- 
- #define CORE_MCI_GENERICS		0x70
- #define SWITCHABLE_SIGNALING_VOLTAGE	BIT(29)
-@@ -119,7 +120,8 @@
- #define CORE_PWRSAVE_DLL	BIT(3)
- 
- #define DDR_CONFIG_POR_VAL	0x80040873
--
-+#define DLL_CONFIG_3_POR_VAL	0x10
-+#define TCXO_FREQ               19200000
- 
- #define INVALID_TUNING_PHASE	-1
- #define SDHCI_MSM_MIN_CLOCK	400000
-@@ -319,6 +321,16 @@ struct sdhci_msm_host {
- 	bool artanis_dll;
- };
- 
-+enum dll_init_context {
-+	DLL_INIT_NORMAL,
-+	DLL_INIT_FROM_CX_COLLAPSE_EXIT,
-+};
-+
-+enum mode {
-+	HS400, // equivalent to SDR104 mode for DLL.
-+	HS200, // equivalent to SDR50 mode for DLL.
-+};
-+
- static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -803,6 +815,209 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	return 0;
- }
- 
-+static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
-+{
-+	return SDHCI_MSM_MIN_CLOCK;
-+}
-+
-+static unsigned int sdhci_msm_get_clk_rate(struct sdhci_host *host, u32 req_clk)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	struct clk *core_clk = msm_host->bulk_clks[0].clk;
-+	struct mmc_ios ios = host->mmc->ios;
-+	unsigned int sup_clk;
-+
-+	if (req_clk < sdhci_msm_get_min_clock(host))
-+		return sdhci_msm_get_min_clock(host);
-+
-+	sup_clk = clk_get_rate(core_clk);
-+
-+	if (ios.timing == MMC_TIMING_MMC_HS400 ||
-+	    host->flags & SDHCI_HS400_TUNING)
-+		sup_clk = sup_clk / 2;
-+
-+	return sup_clk;
-+}
-+
-+/* Initialize the DLL (Programmable Delay Line) */
-+static int sdhci_msm_configure_dll(struct sdhci_host *host, enum dll_init_context
-+				 init_context, enum mode index)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-+	struct mmc_host *mmc = host->mmc;
-+	u32 ddr_cfg_offset, core_vendor_spec, config;
-+	void __iomem *ioaddr = host->ioaddr;
-+	unsigned long flags, dll_clock;
-+	int rc = 0, wait_cnt = 50;
-+
-+	dll_clock = sdhci_msm_get_clk_rate(host, host->clock);
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	core_vendor_spec = readl_relaxed(ioaddr + msm_offset->core_vendor_spec);
-+
-+	/*
-+	 * Always disable PWRSAVE during the DLL power
-+	 * up regardless of its current setting.
-+	 */
-+	core_vendor_spec &= ~CORE_CLK_PWRSAVE;
-+	writel_relaxed(core_vendor_spec, ioaddr + msm_offset->core_vendor_spec);
-+
-+	if (msm_host->use_14lpp_dll_reset) {
-+		/* Disable CK_OUT */
-+		config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-+		config &= ~CORE_CK_OUT_EN;
-+		writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+		/* Disable the DLL clock */
-+		config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-+		config |= CORE_DLL_CLOCK_DISABLE;
-+		writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-+	}
-+
-+	/*
-+	 * Write 1 to DLL_RST bit of DLL_CONFIG register
-+	 * and Write 1 to DLL_PDN bit of DLL_CONFIG register.
-+	 */
-+	config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-+	config |= (CORE_DLL_RST | CORE_DLL_PDN);
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/*
-+	 * Configure DLL_CONFIG_3 and USER_CTRL
-+	 * (Only applicable for 7FF projects).
-+	 */
-+	if (msm_host->core_minor >= SDHCI_MSM_MIN_V_7FF) {
-+		writel_relaxed(msm_host->dll[index].dll_config_3,
-+			       ioaddr + msm_offset->core_dll_config_3);
-+		writel_relaxed(msm_host->dll[index].dll_usr_ctl,
-+			       ioaddr + msm_offset->core_dll_usr_ctl);
-+	}
-+
-+	/*
-+	 * Set DDR_CONFIG since step 7 is setting TEST_CTRL that can be skipped.
-+	 */
-+	ddr_cfg_offset = msm_host->updated_ddr_cfg ? msm_offset->core_ddr_config
-+					: msm_offset->core_ddr_config_old;
-+
-+	config = msm_host->dll[index].ddr_config;
-+	writel_relaxed(config, ioaddr + ddr_cfg_offset);
-+
-+	/* Set DLL_CONFIG_2 */
-+	if (msm_host->use_14lpp_dll_reset) {
-+		u32 mclk_freq;
-+		int cycle_cnt;
-+
-+		/*
-+		 * Only configure the mclk_freq in normal DLL init
-+		 * context. If the DLL init is coming from
-+		 * CX Collapse Exit context, the host->clock may be zero.
-+		 * The DLL_CONFIG_2 register has already been restored to
-+		 * proper value prior to getting here.
-+		 */
-+		if (init_context == DLL_INIT_NORMAL) {
-+			cycle_cnt = readl_relaxed(ioaddr +
-+					msm_offset->core_dll_config_2)
-+					& CORE_FLL_CYCLE_CNT ? 8 : 4;
-+
-+			mclk_freq = DIV_ROUND_CLOSEST_ULL(dll_clock * cycle_cnt, TCXO_FREQ);
-+
-+			if (dll_clock < 100000000) {
-+				pr_err("%s: %s: Non standard clk freq =%u\n",
-+				       mmc_hostname(mmc), __func__, dll_clock);
-+				rc = -EINVAL;
-+				goto out;
-+			}
-+
-+			config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-+			config = (config & ~GENMASK(17, 10)) |
-+					FIELD_PREP(GENMASK(17, 10), mclk_freq);
-+			writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-+		}
-+		/* wait for 5us before enabling DLL clock */
-+		udelay(5);
-+	}
-+
-+	config = msm_host->dll[index].dll_config;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/* Wait for 52us */
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	usleep_range(60, 70);
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	/*
-+	 * Write 0 to DLL_RST bit of DLL_CONFIG register
-+	 * and Write 0 to DLL_PDN bit of DLL_CONFIG register.
-+	 */
-+	config &= ~CORE_DLL_RST;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	config &= ~CORE_DLL_PDN;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
-+	config |= CORE_DLL_RST;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
-+	config &= ~CORE_DLL_RST;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/* Set CORE_DLL_CLOCK_DISABLE to 0 */
-+	if (msm_host->use_14lpp_dll_reset) {
-+		config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-+		config &= ~CORE_DLL_CLOCK_DISABLE;
-+		writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-+	}
-+
-+	/* Set DLL_EN bit to 1. */
-+	config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-+	config |= CORE_DLL_EN;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/*
-+	 * Wait for 8000 input clock. Here we calculate the
-+	 * delay from fixed clock freq 192MHz, which turns out 42us.
-+	 */
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	usleep_range(50, 60);
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	/* Set CK_OUT_EN bit to 1. */
-+	config |= CORE_CK_OUT_EN;
-+	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-+
-+	/*
-+	 * Wait until DLL_LOCK bit of DLL_STATUS register
-+	 * becomes '1'.
-+	 */
-+	while (!(readl_relaxed(ioaddr + msm_offset->core_dll_status) &
-+		 CORE_DLL_LOCK)) {
-+		/* max. wait for 50us sec for LOCK bit to be set */
-+		if (--wait_cnt == 0) {
-+			dev_err(mmc_dev(mmc), "%s: DLL failed to LOCK\n",
-+				mmc_hostname(mmc));
-+			rc = -ETIMEDOUT;
-+			goto out;
-+		}
-+		/* wait for 1us before polling again */
-+		udelay(1);
-+	}
-+
-+out:
-+	if (core_vendor_spec & CORE_CLK_PWRSAVE) {
-+		/* Reenable PWRSAVE as needed */
-+		config = readl_relaxed(ioaddr + msm_offset->core_vendor_spec);
-+		config |= CORE_CLK_PWRSAVE;
-+		writel_relaxed(config, ioaddr + msm_offset->core_vendor_spec);
-+	}
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+	return rc;
-+}
-+
- static void msm_hc_select_default(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -925,14 +1140,31 @@ static void sdhci_msm_hc_select_mode(struct sdhci_host *host)
- 		msm_hc_select_default(host);
- }
- 
-+static int sdhci_msm_init_dll(struct sdhci_host *host, enum dll_init_context init_context)
-+{
-+	if (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104 ||
-+	    host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
-+		return sdhci_msm_configure_dll(host, init_context, HS400);
-+
-+	return sdhci_msm_configure_dll(host, init_context, HS200);
-+}
-+
-+static int sdhci_msm_dll_config(struct sdhci_host *host, enum dll_init_context init_context)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	return msm_host->artanis_dll ? sdhci_msm_init_dll(host, init_context) :
-+		msm_init_cm_dll(host);
-+}
-+
- static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
- 	u32 config, calib_done;
- 	int ret;
--	const struct sdhci_msm_offset *msm_offset =
--					msm_host->offset;
- 
- 	pr_debug("%s: %s: Enter\n", mmc_hostname(host->mmc), __func__);
- 
-@@ -940,7 +1172,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
- 	 * Retuning in HS400 (DDR mode) will fail, just reset the
- 	 * tuning block and restore the saved tuning phase.
- 	 */
--	ret = msm_init_cm_dll(host);
-+	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
- 	if (ret)
- 		goto out;
- 
-@@ -1028,7 +1260,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
- 	return ret;
- }
- 
--static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
-+static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host, enum mode index)
- {
- 	struct mmc_host *mmc = host->mmc;
- 	u32 dll_status, config, ddr_cfg_offset;
-@@ -1051,7 +1283,11 @@ static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
- 		ddr_cfg_offset = msm_offset->core_ddr_config;
- 	else
- 		ddr_cfg_offset = msm_offset->core_ddr_config_old;
--	writel_relaxed(msm_host->ddr_config, host->ioaddr + ddr_cfg_offset);
-+
-+	if (msm_host->artanis_dll)
-+		writel_relaxed(msm_host->dll[index].ddr_config, host->ioaddr + ddr_cfg_offset);
-+	else
-+		writel_relaxed(msm_host->ddr_config, host->ioaddr + ddr_cfg_offset);
- 
- 	if (mmc->ios.enhanced_strobe) {
- 		config = readl_relaxed(host->ioaddr +
-@@ -1108,11 +1344,10 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
- 	struct mmc_host *mmc = host->mmc;
--	int ret;
- 	u32 config;
--	const struct sdhci_msm_offset *msm_offset =
--					msm_host->offset;
-+	int ret;
- 
- 	pr_debug("%s: %s: Enter\n", mmc_hostname(host->mmc), __func__);
- 
-@@ -1120,7 +1355,8 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
- 	 * Retuning in HS400 (DDR mode) will fail, just reset the
- 	 * tuning block and restore the saved tuning phase.
- 	 */
--	ret = msm_init_cm_dll(host);
-+	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-+
- 	if (ret)
- 		goto out;
- 
-@@ -1140,7 +1376,7 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
- 	if (msm_host->use_cdclp533)
- 		ret = sdhci_msm_cdclp533_calibration(host);
- 	else
--		ret = sdhci_msm_cm_dll_sdc4_calibration(host);
-+		ret = sdhci_msm_cm_dll_sdc4_calibration(host, HS400);
- out:
- 	pr_debug("%s: %s: Exit, ret %d\n", mmc_hostname(host->mmc),
- 		 __func__, ret);
-@@ -1183,7 +1419,8 @@ static int sdhci_msm_restore_sdr_dll_config(struct sdhci_host *host)
- 		return 0;
- 
- 	/* Reset the tuning block */
--	ret = msm_init_cm_dll(host);
-+	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-+
- 	if (ret)
- 		return ret;
- 
-@@ -1257,12 +1494,11 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (host->flags & SDHCI_HS400_TUNING) {
- 		sdhci_msm_hc_select_mode(host);
- 		msm_set_clock_rate_for_bus_mode(host, ios.clock);
--		host->flags &= ~SDHCI_HS400_TUNING;
- 	}
- 
- retry:
- 	/* First of all reset the tuning block */
--	rc = msm_init_cm_dll(host);
-+	rc = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
- 	if (rc)
- 		return rc;
- 
-@@ -1325,6 +1561,9 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		rc = -EIO;
- 	}
- 
-+	if (host->flags & SDHCI_HS400_TUNING)
-+		host->flags &= ~SDHCI_HS400_TUNING;
-+
- 	if (!rc)
- 		msm_host->tuning_done = true;
- 	return rc;
-@@ -1845,11 +2084,6 @@ static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
- 	return clk_round_rate(core_clk, ULONG_MAX);
- }
- 
--static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
--{
--	return SDHCI_MSM_MIN_CLOCK;
--}
--
- /*
-  * __sdhci_msm_set_clock - sdhci_msm clock control.
-  *
+>
+>  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
+>  {
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 775e0d9353d5..8be642f737c7 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1286,7 +1286,6 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+>  }
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+>
+> -#ifdef CONFIG_PM
+>  static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+>  {
+>         if (!host->clk_enable)
+> @@ -1331,7 +1330,6 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+>         return 0;
+>  }
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_runtime_resume);
+> -#endif
+
+... however, no actual code referencing them is emitted in the
+CONFIG_PM=n case, as renesas_sdhi_internal_dmac_dev_pm_ops is not used
+due to the use of pm_ptr().  Hence the changes to this file are needed.
+(verified with m68k allmodconfig/allyesconfig builds)
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
 -- 
-2.34.1
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
