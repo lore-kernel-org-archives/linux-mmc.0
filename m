@@ -1,151 +1,106 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 969A1261B9C;
-	Mon, 13 Oct 2025 13:04:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D50223D7ED
+	for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 13:16:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760360699; cv=none; b=iFIo6Cp5VLsXhgd1d71SLTAWkQ0AUUfOQ9wG/MmcGPaxp64lsp7S6asWk2oiPN0vlV6adqWGNRozfyGhkis4pMef0N7PfV6OIsxcBki/IwxuFnEi7HEvgFNCxNhIY6cdjWqrcWkz13JqihBpYgoCfkZrBc1cb3bEtKsBXllPPTY=
+	t=1760361403; cv=none; b=KPHv/BiZgVOsKLu7omRV0DNU+1vw5hkwyK5xT6xRH4QSvtRd2K5um3JOOotOU9gPrLhwpslXnX2R4p50tSjWu+YN2OObRWZzCCOGeqg5ib6q9Qi4TlDr0oKXJyzBhxpXwV8VmTavOjIqy9uylnCknYjCZPEb9Cip4pY0bbhAWW8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760360699; c=relaxed/simple;
-	bh=Z31FwIulc8WU+gcD8GzAisYqYzH73HsiD11LIJzVDFo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=ZX1t7G0HhVIVRPM089ScieV0vwy0306xhn82lM3dd1Ssf7i8nA8KIbKqQOYChjVnkmu4aOOu2Hb7SVa6AFILErash7CEWyKTIFdFm5UIRfXHYCs2fof3xlOSyJlCk1F1aiXTqXwqJaDNhYalvGoA6QTcQFDeO1aduzF+QKHTOcw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=dtBS/5TV; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1760361403; c=relaxed/simple;
+	bh=ZSh7Dgeb0daZdF491Vcis7pf3nDHt0iUoxsLAa3xTLA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=hl9Yf6a8ve58YxE5dDM57XKip5ijxNykHYRUMHh2k8mUJ+PKU48fxiXHfsH1L6zl1o0PFs8IqOdcjxm5i4OdtvioSY0qjQ08aIrHqlRxlIqDV6diLnG8TZBYvZ03RxHB8UZ3f6DO4mKcb8H2GIyGaNeo38UeJNg3xntktPoNybM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ptywgZbp; arc=none smtp.client-ip=209.85.167.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="dtBS/5TV"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59DAeg7g024965;
-	Mon, 13 Oct 2025 13:04:51 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	u5mIcqwHkZGxdUu45ahV5aGvY4oLNJAusDI+4mcOJog=; b=dtBS/5TV2aNGPvtS
-	3c+1B97XQ5M5D9GiXRjinhrtGbJsGTtgbfz0XncuyhKNuZYTlsPmVMzqN1EYYyHh
-	9OLhl5gpLE+xi1VfE3cvNKnCCezqQzk2NOLvcdBTpL48GMKjpxB1dxeVepJyd+xb
-	sBVmcuk/8AYP7X6UVg/M9eMlhLcatRI6fdFeeAS6/UJJ9bf+52HpTLg44qw8IVp0
-	d5TAdy/2u4+1IWLhsNWm47WSxRfuM7Em5C5/HscGuizRjgyzmtoBMcd6QcvHxQQe
-	43UcmdQ65IcUmAM92pn/Yr2OHHOWmT1meHn6HLBF41anhQtxquZ/OgZ5wt7BT2LM
-	1GMbcQ==
-Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49qfa84p90-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 13 Oct 2025 13:04:51 +0000 (GMT)
-Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-	by NALASPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 59DD4o3c032493
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 13 Oct 2025 13:04:50 GMT
-Received: from [10.217.216.18] (10.80.80.8) by nalasex01a.na.qualcomm.com
- (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.24; Mon, 13 Oct
- 2025 06:04:45 -0700
-Message-ID: <88220541-e344-443d-353c-be738437254e@quicinc.com>
-Date: Mon, 13 Oct 2025 18:34:42 +0530
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ptywgZbp"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-57da66e0dc9so4226296e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 06:16:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1760361400; x=1760966200; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ZSh7Dgeb0daZdF491Vcis7pf3nDHt0iUoxsLAa3xTLA=;
+        b=ptywgZbpHwn1bQlqj9PqmO1E8bdgwmZySxr2OnNLGloseBqJ6LPPYAszL0mXQbZtPf
+         HZ4H2LoyDIWnqLT/UjBZbKjU8tGCNNobSzMAIrHHpV+sNknalN0orh81voBuObiKLY+4
+         pdYIhAf4GWN9nNlsXIdiwtyHB9/QRa2lmPivxDnYdxrto9vuuklEPEXOgu4UMFI1xxlJ
+         Cj0EF9UOe3eyX5eNovWZWI9wyrCnfVlX/6z3MzEMENRa9FgRUjrz+G1jg0yR2jAOiUT3
+         Nzk4tlvwKUZqFNxfiSJDc9S5FDoVnJFIDgvJaYbPcHWwjxAgdcHE/9AZ44lTIOq5zLlr
+         ju+g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760361400; x=1760966200;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ZSh7Dgeb0daZdF491Vcis7pf3nDHt0iUoxsLAa3xTLA=;
+        b=lR2Ev5dfnxEXwqO5IhcZkofv7SL776hp+xXYRiAhK7kN6Zq3Bafdy12OUy+oBDDe0H
+         rRCGD3EbntLMXuqn9skgk5Ly/hHjcSBeQ/yGg82FB4yqdcK9Lym4Axu89GsZr7ZcNnZu
+         2/Cwzn2xv0BBO8FY55cKKJgo+aXXFY//8XalitPkJctOUKGatBvc7DvPMU+eTWEXcxbN
+         v6agHObeK7UPKSrTd8W5eaKY2d8Y14nwP6du0PPzC9XAIYk34tWtpfg7SqJTSPqiU7UZ
+         D2hl/gfaFKyILHQpdEP5Qo5+M0zSCsYMx4TI+oD4AZ1B5bC5o7AL3CqnKIfsQCNqxvE9
+         F1cA==
+X-Forwarded-Encrypted: i=1; AJvYcCW1t1tleRTXTilgQGfXuy/a11RhcO/PmOk4WgoBA9je+Hij0sFHR080LhIpdsG+2ISK4CqfnEMnzWQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyVG+MXErYvFBypI6ZxUch8GkLmtiyHI91QvVGBVoOJGjlkM9fg
+	5k1zzudHARZbcOAYolRaZ3LMlrbMCxof+vx2dPODSlHiSl6ExiQP7OTMvZ1im4OsE0+yDj175vO
+	gXvocac+/YmAz/Rx2C5qjfPGAGxFuDagNqHRCrFbKUw==
+X-Gm-Gg: ASbGncvo6UKnlvsR+MduIZg2qW+cS96uqOhtZroW5K+Yg+1ZKdcKGVAu3aw0bjgjj6o
+	WKYof/LLUqLGNFWJ5NxrsizlSyaFl6c0vjhfCcv3IHuCpm2vaC4tDmKOC1PPE/RvLDJPqauxr9j
+	nZkMNIf0UPp2yjtpZpkGhxk8kO1V+utvevf13gtC0MalcO6rirdV2vWPKl/7W1Ts3h+C2+sFyS9
+	BrJDdFnYf26UV9lMPrU3wu6vd3gg+VNlH2BGbuD
+X-Google-Smtp-Source: AGHT+IEZjgdJSMXGycisGGooIlBDTFc0ZlBxulr9PhHWH6RGYuSyos1294WYffX2tc7Z1J7gsvhrSvZBMucblVOe8EA=
+X-Received: by 2002:a2e:bc14:0:b0:35f:a210:2a02 with SMTP id
+ 38308e7fff4ca-37609e6cfe8mr47702921fa.26.1760361400140; Mon, 13 Oct 2025
+ 06:16:40 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH v4 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
- HS200 modes
-Content-Language: en-US
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
-        Rob Herring
-	<robh@kernel.org>
-CC: Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski
-	<krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        "Konrad
- Dybcio" <konradybcio@kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-arm-msm@vger.kernel.org>, <dmitry.baryshkov@oss.qualcomm.com>,
-        <quic_pragalla@quicinc.com>, <quic_sayalil@quicinc.com>,
-        <quic_nitirawa@quicinc.com>, <quic_bhaskarv@quicinc.com>,
-        <kernel@oss.qualcomm.com>, Sachin Gupta <quic_sachgupt@quicinc.com>
-References: <20250929113515.26752-1-quic_rampraka@quicinc.com>
- <20250929113515.26752-2-quic_rampraka@quicinc.com>
- <20251006214830.GB625548-robh@kernel.org>
- <817f02aa-dfb8-a134-2fd4-fbdf8e8a714e@quicinc.com>
- <1d052b98-4dfd-4ee3-b46f-ac043b406d58@oss.qualcomm.com>
-From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-In-Reply-To: <1d052b98-4dfd-4ee3-b46f-ac043b406d58@oss.qualcomm.com>
+References: <20251008-mmc-no-advert-v2-1-45bc00006fb2@linaro.org> <82b1d733-df39-4f20-8f69-69b34bfac3b5@intel.com>
+In-Reply-To: <82b1d733-df39-4f20-8f69-69b34bfac3b5@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Mon, 13 Oct 2025 15:16:27 +0200
+X-Gm-Features: AS18NWBzHhhxEZE9kPlz72rg1BVA-iIN1XSslkk1p78S4uXXy46XFsjUQ4i4LT0
+Message-ID: <CACRpkda32Dw8sxkfDy9i19UP-59H-3WPNhffKLn+Pi7UgQ54vQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci: Stop advertising the driver in dmesg
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01a.na.qualcomm.com (10.47.209.196)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: Ff5d8oTEayibpIVhbQvK0FbTVxkqdv6z
-X-Proofpoint-ORIG-GUID: Ff5d8oTEayibpIVhbQvK0FbTVxkqdv6z
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDExMDAxNyBTYWx0ZWRfX/x8zUw4OyqgU
- jDFGVhaWOfDlodZStUtPDviW9+dWSyNFlmoi7Tn4+OFTRgQjmVCxQqYpA3wQ/fLaxblxMhx+jXV
- Fz9jVKJPhbNz84bWORPRZ0flSIWplKV53cj8f15Ln+M8U32VMwo5Lhb2AM1U9I7KywPkkozdyuB
- Q5WmT+MHGE1Z1gg6UHqlyWCKZOrMW8AVwE1hC0f7AdYUzJD2kyzDiBBnwMzNyVpLtJZu6aiFluK
- dF6/AjEw67+MXNF8OCDfj8Uikg0XIZ3pyPf+5sAHZDs2IeQL5KOxxiDdQj/M3NTbCE7Rx1jZ+CW
- kWCycwrWr6soa1ZaastG9wfeY1Bvc1tf830ufiYxrV3KxoqWGhNh3Xx+8CNvWPYzmLlLW6Rjdrm
- +DfXgaxUuebe0FVh8Y8XABeF8I41Xw==
-X-Authority-Analysis: v=2.4 cv=JLw2csKb c=1 sm=1 tr=0 ts=68ecf8f3 cx=c_pps
- a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=x6icFKpwvdMA:10 a=COk6AnOGAAAA:8
- a=NQjy_NEe_Y9d4xOi-4gA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
- a=cPQSjfK2_nFv0Q5t_7PE:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-10-13_04,2025-10-06_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 phishscore=0 adultscore=0 bulkscore=0 priorityscore=1501
- impostorscore=0 suspectscore=0 malwarescore=0 spamscore=0 clxscore=1015
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510110017
+Content-Transfer-Encoding: quoted-printable
 
-
-On 10/7/2025 5:12 PM, Konrad Dybcio wrote:
-> On 10/7/25 1:16 PM, Ram Prakash Gupta wrote:
->> On 10/7/2025 3:18 AM, Rob Herring wrote:
->>> On Mon, Sep 29, 2025 at 05:05:12PM +0530, Ram Prakash Gupta wrote:
->>>> From: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>>
->>>> Document the 'dll-hsr-list' property for MMC device tree bindings.
->>>> The 'dll-hsr-list' property defines the DLL configurations for HS400
->>>> and HS200 modes.
->>>>
->>>> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
->>>> different tuning.
->>>>
->>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
->>>> ---
->>>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>>>  1 file changed, 5 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>> index 22d1f50c3fd1..a60222473990 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>> @@ -137,6 +137,11 @@ properties:
->>>>      $ref: /schemas/types.yaml#/definitions/uint32
->>>>      description: platform specific settings for DLL_CONFIG reg.
->>>>  
->>>> +  qcom,dll-hsr-list:
->>> '-list' doesn't add anything.
->> list was used as there are 5 dll register, but '-list' can be
->> dropped, and it can be renamed to qcom,dll-hsr, I will update in
->> next patchset.
->>
->>> What is 'hsr'?
->> Hardware Settings Reference
-> Maybe "qcom,dll-presets" would be more clear?
+On Thu, Oct 9, 2025 at 8:11=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.c=
+om> wrote:
+> On 08/10/2025 01:04, Linus Walleij wrote:
+> > As much as we have grown used to seeing this message on
+> > every kernel boot, it does not add any technical value.
+> >
+> > Drop all messages from sdhci_drv_init().
+> >
+> > We need to keep the module_init/exit() calls to stub
+> > functions for the module to work according to
+> > <linux/module.h>.
 >
-> Konrad
+> But is that true?
 
-sure, sounds good.
+I don't know, I don't have an SDHCI device at hand to test..
 
+The comments say:
+
+/* Each module must use one module_init(). */
+
+And for module_exit():
+
+/* This is only required if you want to be unloadable. */
+
+If it's not true we need to fix the docs as well...
+
+But I discussed it with Ulf in the office last week and he was
+frantically testing out dropping it altogether.
+
+Yours,
+Linus Walleij
