@@ -1,172 +1,151 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 455E260B8A;
-	Mon, 13 Oct 2025 11:40:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 969A1261B9C;
+	Mon, 13 Oct 2025 13:04:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760355608; cv=none; b=mEAiHYb1edk+4v6/BWd0k+Tiw1Aj5L1P6tRTktxFeOeAyu+3n5sqQNYTKJCirY9w72+79UxXg2CcepxvWFH+7WwbLZnspdKHPRZcXWJPnRdrhO/QKEahi7LPfW3dk8mHjYcUFthJIwPzegWj3OgZ5DY/7rdSEIqVutHm+Mz3VvQ=
+	t=1760360699; cv=none; b=iFIo6Cp5VLsXhgd1d71SLTAWkQ0AUUfOQ9wG/MmcGPaxp64lsp7S6asWk2oiPN0vlV6adqWGNRozfyGhkis4pMef0N7PfV6OIsxcBki/IwxuFnEi7HEvgFNCxNhIY6cdjWqrcWkz13JqihBpYgoCfkZrBc1cb3bEtKsBXllPPTY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760355608; c=relaxed/simple;
-	bh=/nFN+Pu9AvLmWGrbw90bVYGKBnjBTI4Pl7YgnTZHZss=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jSQQkJsDX2pySz1uUQOItt7cH5kXDtKhDLFRFO0KCo9Su9zmtDZlrtfRrzwXYtrWxDgw/tFWbn6OVS9SZeTPW1eMObIbNZ4BVURY03PqWfpwH/SeDQJD2CFxrEnfiPXZ1GyY8BiSkPMXGu1hYZi2AYMpuXUmZJMNEETswgHaglE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NSMhnG8n; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760360699; c=relaxed/simple;
+	bh=Z31FwIulc8WU+gcD8GzAisYqYzH73HsiD11LIJzVDFo=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=ZX1t7G0HhVIVRPM089ScieV0vwy0306xhn82lM3dd1Ssf7i8nA8KIbKqQOYChjVnkmu4aOOu2Hb7SVa6AFILErash7CEWyKTIFdFm5UIRfXHYCs2fof3xlOSyJlCk1F1aiXTqXwqJaDNhYalvGoA6QTcQFDeO1aduzF+QKHTOcw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=dtBS/5TV; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NSMhnG8n"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73F9FC4CEE7;
-	Mon, 13 Oct 2025 11:40:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760355602;
-	bh=/nFN+Pu9AvLmWGrbw90bVYGKBnjBTI4Pl7YgnTZHZss=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=NSMhnG8nPjwfeur33NRn69MF+qY5sf9wexD14vvY8LPIBfT8tnuFybjCyI+ozHh8t
-	 HAQPT10sck3dNeyeZWuTFBL/nY57uuD7jSknkyM3miM/TuidGUbSISDIpHL5pshD+c
-	 MMeq3bSUm1Y0gXxX5bJ/+yQ2ydJtnw88dsrM8cdg1BjebIb/uHB13X8XkUTEIZnc20
-	 2ZEYFfLaeuQc9etXhsdZ7gLZRFWaZCnnlBRe6Ld5/0gQjGY/mxanoc+7CwFtc+kOvW
-	 hOf2P+u8ZnOVvuM0watGoBmBfxsTMOyFu4u9kRR239fn3Qe0K2uNgdG3JUzf1bqYqG
-	 UKW4YT8Z2qV8w==
-Date: Mon, 13 Oct 2025 06:40:00 -0500
-From: Rob Herring <robh@kernel.org>
-To: hehuan1@eswincomputing.com
-Cc: ulf.hansson@linaro.org, krzk+dt@kernel.org, conor+dt@kernel.org,
-	jszhang@kernel.org, adrian.hunter@intel.com, p.zabel@pengutronix.de,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, ningyu@eswincomputing.com,
-	linmin@eswincomputing.com, pinkesh.vaghela@einfochips.com,
-	xuxiang@eswincomputing.com, luyulin@eswincomputing.com,
-	dongxuyang@eswincomputing.com, zhangsenchuan@eswincomputing.com,
-	weishangjuan@eswincomputing.com, lizhi2@eswincomputing.com,
-	caohang@eswincomputing.com,
-	Conor Dooley <conor.dooley@microchip.com>
-Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin
- EIC7700
-Message-ID: <20251013114000.GA2755794-robh@kernel.org>
-References: <20251011111039.533-1-hehuan1@eswincomputing.com>
- <20251011111150.553-1-hehuan1@eswincomputing.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="dtBS/5TV"
+Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59DAeg7g024965;
+	Mon, 13 Oct 2025 13:04:51 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	u5mIcqwHkZGxdUu45ahV5aGvY4oLNJAusDI+4mcOJog=; b=dtBS/5TV2aNGPvtS
+	3c+1B97XQ5M5D9GiXRjinhrtGbJsGTtgbfz0XncuyhKNuZYTlsPmVMzqN1EYYyHh
+	9OLhl5gpLE+xi1VfE3cvNKnCCezqQzk2NOLvcdBTpL48GMKjpxB1dxeVepJyd+xb
+	sBVmcuk/8AYP7X6UVg/M9eMlhLcatRI6fdFeeAS6/UJJ9bf+52HpTLg44qw8IVp0
+	d5TAdy/2u4+1IWLhsNWm47WSxRfuM7Em5C5/HscGuizRjgyzmtoBMcd6QcvHxQQe
+	43UcmdQ65IcUmAM92pn/Yr2OHHOWmT1meHn6HLBF41anhQtxquZ/OgZ5wt7BT2LM
+	1GMbcQ==
+Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49qfa84p90-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 13 Oct 2025 13:04:51 +0000 (GMT)
+Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
+	by NALASPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 59DD4o3c032493
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 13 Oct 2025 13:04:50 GMT
+Received: from [10.217.216.18] (10.80.80.8) by nalasex01a.na.qualcomm.com
+ (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.24; Mon, 13 Oct
+ 2025 06:04:45 -0700
+Message-ID: <88220541-e344-443d-353c-be738437254e@quicinc.com>
+Date: Mon, 13 Oct 2025 18:34:42 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251011111150.553-1-hehuan1@eswincomputing.com>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH v4 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
+ HS200 modes
+Content-Language: en-US
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
+        Rob Herring
+	<robh@kernel.org>
+CC: Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski
+	<krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        "Konrad
+ Dybcio" <konradybcio@kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <dmitry.baryshkov@oss.qualcomm.com>,
+        <quic_pragalla@quicinc.com>, <quic_sayalil@quicinc.com>,
+        <quic_nitirawa@quicinc.com>, <quic_bhaskarv@quicinc.com>,
+        <kernel@oss.qualcomm.com>, Sachin Gupta <quic_sachgupt@quicinc.com>
+References: <20250929113515.26752-1-quic_rampraka@quicinc.com>
+ <20250929113515.26752-2-quic_rampraka@quicinc.com>
+ <20251006214830.GB625548-robh@kernel.org>
+ <817f02aa-dfb8-a134-2fd4-fbdf8e8a714e@quicinc.com>
+ <1d052b98-4dfd-4ee3-b46f-ac043b406d58@oss.qualcomm.com>
+From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+In-Reply-To: <1d052b98-4dfd-4ee3-b46f-ac043b406d58@oss.qualcomm.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: Ff5d8oTEayibpIVhbQvK0FbTVxkqdv6z
+X-Proofpoint-ORIG-GUID: Ff5d8oTEayibpIVhbQvK0FbTVxkqdv6z
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDExMDAxNyBTYWx0ZWRfX/x8zUw4OyqgU
+ jDFGVhaWOfDlodZStUtPDviW9+dWSyNFlmoi7Tn4+OFTRgQjmVCxQqYpA3wQ/fLaxblxMhx+jXV
+ Fz9jVKJPhbNz84bWORPRZ0flSIWplKV53cj8f15Ln+M8U32VMwo5Lhb2AM1U9I7KywPkkozdyuB
+ Q5WmT+MHGE1Z1gg6UHqlyWCKZOrMW8AVwE1hC0f7AdYUzJD2kyzDiBBnwMzNyVpLtJZu6aiFluK
+ dF6/AjEw67+MXNF8OCDfj8Uikg0XIZ3pyPf+5sAHZDs2IeQL5KOxxiDdQj/M3NTbCE7Rx1jZ+CW
+ kWCycwrWr6soa1ZaastG9wfeY1Bvc1tf830ufiYxrV3KxoqWGhNh3Xx+8CNvWPYzmLlLW6Rjdrm
+ +DfXgaxUuebe0FVh8Y8XABeF8I41Xw==
+X-Authority-Analysis: v=2.4 cv=JLw2csKb c=1 sm=1 tr=0 ts=68ecf8f3 cx=c_pps
+ a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=x6icFKpwvdMA:10 a=COk6AnOGAAAA:8
+ a=NQjy_NEe_Y9d4xOi-4gA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
+ a=cPQSjfK2_nFv0Q5t_7PE:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-10-13_04,2025-10-06_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ lowpriorityscore=0 phishscore=0 adultscore=0 bulkscore=0 priorityscore=1501
+ impostorscore=0 suspectscore=0 malwarescore=0 spamscore=0 clxscore=1015
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510110017
 
-On Sat, Oct 11, 2025 at 07:11:50PM +0800, hehuan1@eswincomputing.com wrote:
-> From: Huan He <hehuan1@eswincomputing.com>
-> 
-> EIC7700 use Synopsys dwcmshc IP for SD/eMMC controllers.
-> Add Eswin EIC7700 support in sdhci-of-dwcmshc.yaml.
-> 
-> Signed-off-by: Huan He <hehuan1@eswincomputing.com>
-> Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
-> ---
->  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 57 +++++++++++++++++--
->  1 file changed, 51 insertions(+), 6 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index f882219a0a26..edd6c8e90cad 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -30,6 +30,7 @@ properties:
->            - sophgo,sg2002-dwcmshc
->            - sophgo,sg2042-dwcmshc
->            - thead,th1520-dwcmshc
-> +          - eswin,eic7700-dwcmshc
->  
->    reg:
->      maxItems: 1
-> @@ -52,17 +53,30 @@ properties:
->      maxItems: 5
->  
->    reset-names:
-> -    items:
-> -      - const: core
-> -      - const: bus
-> -      - const: axi
-> -      - const: block
-> -      - const: timer
-> +    maxItems: 5
->  
->    rockchip,txclk-tapnum:
->      description: Specify the number of delay for tx sampling.
->      $ref: /schemas/types.yaml#/definitions/uint8
->  
-> +  eswin,hsp-sp-csr:
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    items:
 
-This should be:
+On 10/7/2025 5:12 PM, Konrad Dybcio wrote:
+> On 10/7/25 1:16 PM, Ram Prakash Gupta wrote:
+>> On 10/7/2025 3:18 AM, Rob Herring wrote:
+>>> On Mon, Sep 29, 2025 at 05:05:12PM +0530, Ram Prakash Gupta wrote:
+>>>> From: Sachin Gupta <quic_sachgupt@quicinc.com>
+>>>>
+>>>> Document the 'dll-hsr-list' property for MMC device tree bindings.
+>>>> The 'dll-hsr-list' property defines the DLL configurations for HS400
+>>>> and HS200 modes.
+>>>>
+>>>> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
+>>>> different tuning.
+>>>>
+>>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
+>>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+>>>> ---
+>>>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
+>>>>  1 file changed, 5 insertions(+)
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+>>>> index 22d1f50c3fd1..a60222473990 100644
+>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+>>>> @@ -137,6 +137,11 @@ properties:
+>>>>      $ref: /schemas/types.yaml#/definitions/uint32
+>>>>      description: platform specific settings for DLL_CONFIG reg.
+>>>>  
+>>>> +  qcom,dll-hsr-list:
+>>> '-list' doesn't add anything.
+>> list was used as there are 5 dll register, but '-list' can be
+>> dropped, and it can be renamed to qcom,dll-hsr, I will update in
+>> next patchset.
+>>
+>>> What is 'hsr'?
+>> Hardware Settings Reference
+> Maybe "qcom,dll-presets" would be more clear?
+>
+> Konrad
 
-items:
-  - items:
-      - description: ...
-      ...
+sure, sounds good.
 
-> +      - description: Phandle to HSP(High-Speed Peripheral) device
-> +      - description: Offset of the stability status register for
-> +                     internal clock
-> +      - description: Offset of the stability register for host regulator
-> +                     voltage.
-> +    description: |
-
-Don't need '|' if no formatting to preserve.
-
-> +      HSP CSR is to control and get status of different high-speed
-> +      peripherals (such as Ethernet, USB, SATA, etc.) via register,
-> +      which can close module's clock, reset module independently
-> +      and tune board-level's parameters of PHY, etc.
-
-Wrap lines at 80 chars.
-
-> +
-> +  eswin,drive-impedance-ohms:
-> +    description: Specifies the drive impedance in Ohm.
-> +    enum: [33, 40, 50, 66, 100]
-> +
->  required:
->    - compatible
->    - reg
-> @@ -110,6 +124,37 @@ allOf:
->              - const: block
->              - const: timer
->  
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: eswin,eic7700-dwcmshc
-> +    then:
-> +      properties:
-> +        resets:
-> +          minItems: 4
-> +          maxItems: 4
-> +        reset-names:
-> +          items:
-> +            - const: axi
-> +            - const: phy
-> +            - const: prstn
-> +            - const: txrx
-> +      required:
-> +        - eswin,hsp-sp-csr
-> +        - eswin,drive-impedance-ohms
-> +    else:
-> +      properties:
-> +        resets:
-> +          maxItems: 5
-> +        reset-names:
-> +          items:
-> +            - const: core
-> +            - const: bus
-> +            - const: axi
-> +            - const: block
-> +            - const: timer
-> +
->    - if:
->        properties:
->          compatible:
-> -- 
-> 2.25.1
-> 
