@@ -1,310 +1,330 @@
-Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C3302F9DAE
-	for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 08:45:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C819220F2A;
+	Mon, 13 Oct 2025 09:09:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760345110; cv=none; b=qduIkwffgLnwCJAXwVOZANO6DP6jckj13EqM6wDlWqARpXGaydo+QxDX86Bm60lEXKOazOTmkg3Vsl0SeMIqnIj28feRDFYwDPfwxgTe9oDoCtmc8j0PGVKDs8rpKbt18wTRniDLD0hHTQAIuM5ct1pfqCpKZjlurWX/yycHK3I=
+	t=1760346563; cv=none; b=uDDLN4wka6tX80sfI8brjusyuiqVOXoQb1eWZ/2cxsH705Mv19a37QCmjYF99olZ9BCwby4o4SWlS3KL/MvwIpEjCjrjfSldmVz7gFJWQbGpuswD6x6NOaqVM8qDzlJP+vdpJeaHQlBKnXhR72h3iz+B+fMv830m+nyVhYvzk8k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760345110; c=relaxed/simple;
-	bh=HKD1fgO6NWzojLQZEubDCaixzo3Vwrd7JG1LXMQLFcU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HtmmCm1tXFq/cKnw6ZD8wLu8mG3bo7+DIUYDkt3HaCEQPLyR7ta4QdFMa2z5bt30UJmiervqj2RixUTnf3OSEibsOCjf56LF5tuzIX3m0svPTZIEPMXMu3VwM9+PkG6NrKT2WrG1/yvMauHxtt/NRUB9IqlmurXdPDsSPjqslR4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=RG+ZVSCq; arc=none smtp.client-ip=209.85.128.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1760346563; c=relaxed/simple;
+	bh=CEGyUCOX6ZS+T7FGMZnMIzPFYMbK7M/w/q09G8pHSyc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=MhWFeJkYk6vEX4aPf3LMUyP7nkXlh0k4ptzdBM9sWkgWUFnqsuGmIPKRkhwGRn/R0S4qsO1tik9Jw/7uuj2FNHW5k/lCd2QfbdRxBcuyJlVtm1p4o/EhJuQRpBoPiOtvFJbaa0DxWK2Zlmiyicof/sHXcPOHf1FOC0VTf8XQFdE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=TuaZQXaq; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="RG+ZVSCq"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-46e326e4e99so23465245e9.1
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Oct 2025 01:45:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1760345106; x=1760949906; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=QOxheHOLbGrsxmRfqAHNSm9zz+n+Lcr4l/MDPg24sBo=;
-        b=RG+ZVSCqtFFZlctgbbvMAxJJjRQOr7xLKsDPkGw/AKVSaKnrmjgUhQ0r5oWWyhB+Y8
-         ClMs7yX5yoRHPBuecd8KyNXFuQTbbGjpHn+KS2X4FMY6XLgcfSHL9OFyQSzbtxdZr9HQ
-         Si4dtnFPxnoJuS3nJIlOulDgJt4drTuV13+b3WKfbF04n50cZT8wUjJiHCRLmr8fEuJC
-         5WByERsUCxehPO61Y0V86eYnIir+XN1V33tw4OcyyrUCHOi/JPWUolv8FAtAQS+TEmHj
-         AIkasLbsdCwbipBa8rbf1/Brwo0oVHIqyc6zKzWYaFSq4KYF9vf4FqeZTXJDKqvPIYod
-         RSIQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760345106; x=1760949906;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QOxheHOLbGrsxmRfqAHNSm9zz+n+Lcr4l/MDPg24sBo=;
-        b=PuH2vF5Q0qsELVKcidOP3uH0XO3GMonNMnxn5GL+FL38D8ZfnFyXbrT+O7Ny27I6Nb
-         ZUfPd3Y1d3WV72LvnWPcOdscDACvyyeYkluZ05DqUuaXh/TelfXORYCR83v5f3GHqJ7r
-         ehpVpfYdolsRov75GnfWbg5BWlGfhGRSlaXjunJPa35vEWSWlmkqdIZlNHPsBrGL4J14
-         5UTNcCbPfuRktIiUEitRBCwrNLmE7JriDy85Cvs7FBkZZMrqr4d3mPw7QctIsxWCE/91
-         KwXCRUibHAuvIxwB8Cws7dSIEsHtqvgBenDZGGbyy/XXjrD2KidfhnHNg7RRdqSwMAkR
-         GUrw==
-X-Forwarded-Encrypted: i=1; AJvYcCXXlsU0r+4bpNLCUr3rvebjULEeCnQTZ7MhmSpnX2J5ZLoKMqztdZtYJUzafaOS3hPj8DCLlHY5v2M=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxM69G9xEOHwS+nQT7fo1lMbhMj83nDxeg4DvhadhBxZ0Lmg3oo
-	1te2fGE+syY3gaRGnVDDA4SC5XGwdhbUto27u4sU7F5hlIvJUqObBBYuTIxYxoRhmmY=
-X-Gm-Gg: ASbGncv5Wf0qtVcijpzYG3qWjo+7K3Vhm/RYWBRhvHkbk+p06h92Qs+yVZnJojAkRPN
-	Fb+CXLNsBLuVESnErv1KNfsS9rTdCxBx/xL962CgmvAqdiiqxsc+f61SEVqqls0Y0bjnNd7a5E/
-	fsf5K5DE2JRKsKROVinEVglc9x3ldG/fJtdpNBAYJvJyensFhOGQpGBDRpXPyuRyBKZX5Kgx/t0
-	PS5kgN65IAVeIrXCICZTezLbjhJGGQymtRFmvpZMsukSMyMhL3YR6jRoMKisugLSVUEwL5ds8Hc
-	rKq4y3kGuyTrwEQYoEqoFCqKdImPWqHel0Wxrd00OJpjgpfwPw/7QHK1454RyQYi+2BRPk80FxG
-	bXZ+9aT/qLwyGOQoTX6PlOK3CYNXyUUuf+WQsUXl1c1zqmcut0pvrFi2ks8EySCH6SKXHYYSARp
-	WFBAAHnz6ngSV8eOghPA==
-X-Google-Smtp-Source: AGHT+IFlq00kushikTRZ9pQw76fYJMVGlS1KAsn1jJFd8R+YpP1z2R2tirHj7bFC2RIC39KbSdQyLw==
-X-Received: by 2002:a05:600c:4ed4:b0:46d:1a9b:6d35 with SMTP id 5b1f17b1804b1-46fa9ec7718mr147785575e9.14.1760345105437;
-        Mon, 13 Oct 2025 01:45:05 -0700 (PDT)
-Received: from localhost (p200300f65f06ab0400000000000001b9.dip0.t-ipconnect.de. [2003:f6:5f06:ab04::1b9])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-46fab3703adsm121495455e9.0.2025.10.13.01.45.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Oct 2025 01:45:04 -0700 (PDT)
-Date: Mon, 13 Oct 2025 10:45:03 +0200
-From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
-To: Rakuram Eswaran <rakuram.e96@gmail.com>
-Cc: chenhuacai@kernel.org, dan.carpenter@linaro.org, 
-	david.hunter.linux@gmail.com, khalid@kernel.org, linux-kernel-mentees@lists.linux.dev, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, lkp@intel.com, 
-	skhan@linuxfoundation.org, ulf.hansson@linaro.org, zhoubinbin@loongson.cn
-Subject: Re: [PATCH] mmc: pxamci: Fix passing NULL to PTR_ERR() in
- pxamci_probe()
-Message-ID: <6j7ix5yof7qmrp6cgxhqver7yimvmgj7dujqu4l7cnzbpjksfd@5sp7am47gigw>
-References: <xxtrhbv5qm2crtvc5ejpgu5caadsmms3rfulmosjwq7lumrko3@5mlcpk24hymm>
- <20251012183804.15171-1-rakuram.e96@gmail.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="TuaZQXaq"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59D2nTaA016994;
+	Mon, 13 Oct 2025 09:09:18 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	/QsF8cCoTrdE5JkRIq3DdpcjT6X1kiGNDmY0JMmq3Es=; b=TuaZQXaqoktwRqrt
+	XduEe0BkAfx3bhpGsk1BlWiR8LTUQu8HqzmzedGioYtVRNdchzbxhCopnSu2/jXM
+	gbw37U6hUL7cqgE65THG3Z9/0zpeVa+nwe/U+tvzbwBEg2I2qcUkGIAHBm7R/d0b
+	YBDSWDXwAKPdDy+2Hi3VsjMnVDNbaoTXU7tSwsPq4NDLszm5MRxWc29zUmHlneCQ
+	t6EP2b5faLSCtNJXdhbo7s/jWDHCJof44ZOnrRA0h2sRCGyYVv9XouLxT2LNN12h
+	zxcsh3NER7TpPmqbUkAZtrr8bXswuo3I+SrquR49FCb3LaKmQng43d4mC6l48ayh
+	pvkT2g==
+Received: from nasanppmta01.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49qfbhv0wk-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 13 Oct 2025 09:09:17 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 59D99GAA006696
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 13 Oct 2025 09:09:17 GMT
+Received: from [10.151.36.184] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.24; Mon, 13 Oct
+ 2025 02:09:14 -0700
+Message-ID: <9567ae91-c15c-8677-de78-af7ecd792970@quicinc.com>
+Date: Mon, 13 Oct 2025 14:39:11 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="q3pt22edxgvzu55u"
-Content-Disposition: inline
-In-Reply-To: <20251012183804.15171-1-rakuram.e96@gmail.com>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
+ devices
+Content-Language: en-US
+To: Adrian Hunter <adrian.hunter@intel.com>, <quic_asutoshd@quicinc.com>,
+        <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_varada@quicinc.com>
+References: <20251008110758.718944-1-quic_mdalam@quicinc.com>
+ <f4363815-a5bc-4f5a-80a1-7d4a17ad539b@intel.com>
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+In-Reply-To: <f4363815-a5bc-4f5a-80a1-7d4a17ad539b@intel.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDExMDAxOCBTYWx0ZWRfXxT8WXAQbOjWB
+ uUn13S+Kle/vfxlWjjKC9vM8GakYVpsfgP5yohs9u7RnvzffEFUtigYNymW0cEqUPJnLSa2IIzl
+ IRMaBbZVC7xaG5sHEkKM4PAZyvdTer9zX8Zdmnvx1/N8yRiPZgYnyutrTiUiBy16uKirYV9eIlU
+ 5GvcLQAP5DZpP1dksdmzTBsBDwrfIdlM7BBMCCBGvZKynQNqFsTb0LQV7rwigkxSDLQymIo7gq0
+ DSQXF7+o5CVZVI2F1aDtwTaezOIbLiEHiIO8UVQtI+mfuzjG8mBqnIG2nwU/jIVU5/jO+ira0Kk
+ ovw/e7ZypThtj9khpxX6rfnZiIHuPkZi/aPhaVUnAqZEG/o54kip08K3MYFd5zSKeEqpqZJXiyr
+ XO7hpykreV5A75GnHRJYEPRrdcOXlA==
+X-Proofpoint-ORIG-GUID: DDmsexYeRQyWh7CfLQyG9hoQQk56C3xn
+X-Authority-Analysis: v=2.4 cv=bodBxUai c=1 sm=1 tr=0 ts=68ecc1be cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=x6icFKpwvdMA:10 a=COk6AnOGAAAA:8
+ a=x3r_CPxvIv0_Sjq9o70A:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
+ a=cPQSjfK2_nFv0Q5t_7PE:22 a=HhbK4dLum7pmb74im6QT:22 a=pHzHmUro8NiASowvMSCR:22
+ a=Ew2E2A-JSTLzCXPT_086:22
+X-Proofpoint-GUID: DDmsexYeRQyWh7CfLQyG9hoQQk56C3xn
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1117,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-10-13_03,2025-10-06_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 lowpriorityscore=0 adultscore=0 impostorscore=0 suspectscore=0
+ bulkscore=0 priorityscore=1501 clxscore=1015 malwarescore=0 spamscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510110018
+
+Hi,
+
+On 10/9/2025 5:59 PM, Adrian Hunter wrote:
+> On 08/10/2025 14:07, Md Sadre Alam wrote:
+>> Enable Inline Crypto Engine (ICE) support for eMMC devices that don't
+>> use command queuing (CQE). This allows hardware-accelerated encryption
+>> and decryption for standard eMMC operations without command queuing.
+>>
+>> The changes include:
+>> - Add non-cmdq crypto register definitions
+>> - Implement crypto configuration callback for non-cmdq operations
+>> - Initialize ICE hardware during host setup for non-cmdq devices
+>> - Integrate crypto configuration into the main request path
+>>
+>> This enables non-cmdq eMMC devices to benefit from hardware crypto
+>> acceleration, improving performance for encrypted storage operations
+>> while maintaining compatibility with existing cmdq crypto support.
+>>
+>> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+>> ---
+>>   drivers/mmc/host/cqhci.h     |  4 ++
+>>   drivers/mmc/host/sdhci-msm.c | 74 +++++++++++++++++++++++++++++++++++-
+>>   drivers/mmc/host/sdhci.c     | 20 ++++++++++
+>>   drivers/mmc/host/sdhci.h     |  2 +
+>>   4 files changed, 99 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+>> index ce189a1866b9..9bf236e27675 100644
+>> --- a/drivers/mmc/host/cqhci.h
+>> +++ b/drivers/mmc/host/cqhci.h
+>> @@ -119,6 +119,10 @@
+>>   /* command response argument */
+>>   #define CQHCI_CRA			0x5C
+>>   
+>> +/* non command queue crypto enable register*/
+>> +#define NONCQ_CRYPTO_PARM		0x70
+>> +#define NONCQ_CRYPTO_DUN		0x74
+> 
+> Since cqhci is not using these, they might be better in sdhci-msm.c
+Ok
+> 
+>> +
+>>   /* crypto capabilities */
+>>   #define CQHCI_CCAP			0x100
+>>   #define CQHCI_CRYPTOCAP			0x104
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 4e5edbf2fc9b..2204c6abb3fe 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -157,6 +157,23 @@
+>>   #define CQHCI_VENDOR_CFG1	0xA00
+>>   #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
+>>   
+>> +#define DISABLE_CRYPTO			BIT(15)
+>> +#define CRYPTO_GENERAL_ENABLE		BIT(1)
+>> +#define HC_VENDOR_SPECIFIC_FUNC4	0x260
+>> +#define ICE_HCI_SUPPORT			BIT(28)
+>> +
+>> +/* SDHCI MSM ICE CTRL Info register offset */
+>> +enum {
+>> +	OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CCI	= 0,
+>> +	OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CE	= 8,
+>> +};
+>> +
+>> +/* SDHCI MSM ICE CTRL Info register masks */
+>> +enum {
+>> +	MASK_SDHCI_MSM_ICE_HCI_PARAM_CE		= 0x1,
+>> +	MASK_SDHCI_MSM_ICE_HCI_PARAM_CCI	= 0xff
+>> +};
+> 
+> Preferably use GENMASK() and FIELD_PREP()
+Ok
+> 
+>> +
+>>   struct sdhci_msm_offset {
+>>   	u32 core_hc_mode;
+>>   	u32 core_mci_data_cnt;
+>> @@ -1882,9 +1899,47 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>>    * Inline Crypto Engine (ICE) support                                        *
+>>    *                                                                           *
+>>   \*****************************************************************************/
+>> -
+> 
+> Unnecessary to delete this line
+Ok
+> 
+>>   #ifdef CONFIG_MMC_CRYPTO
+>>   
+>> +static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq,
+>> +			     u32 slot)
+>> +{
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +	struct mmc_host *mmc = msm_host->mmc;
+>> +	struct cqhci_host *cq_host = mmc->cqe_private;
+>> +	unsigned int crypto_params = 0;
+>> +	int key_index = 0;
+>> +	bool bypass = true;
+>> +	u64 dun = 0;
+>> +
+>> +	if (!mrq || !cq_host)
+>> +		return -EINVAL;
+> 
+> It should not be possible to get here if (!mrq || !cq_host)
+Ok, will remove it in next revision.
+> 
+>> +
+>> +	if (mrq->crypto_ctx) {
+>> +		dun = mrq->crypto_ctx->bc_dun[0];
+>> +		bypass = false;
+>> +		key_index = mrq->crypto_key_slot;
+>> +	}
+>> +
+>> +	/* Configure ICE bypass mode */
+>> +	crypto_params |= ((!bypass) & MASK_SDHCI_MSM_ICE_HCI_PARAM_CE)
+>> +			 << OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CE;
+>> +	/* Configure Crypto Configure Index (CCI) */
+>> +	crypto_params |= (key_index & MASK_SDHCI_MSM_ICE_HCI_PARAM_CCI)
+>> +			 << OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CCI;
+>> +
+>> +	cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
+>> +
+>> +	if (mrq->crypto_ctx)
+>> +		cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
+>> +
+>> +	/* Ensure crypto configuration is written before proceeding */
+>> +	wmb();
+>> +
+>> +	return 0;
+>> +}
+>> +
+>>   static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
+>>   
+>>   static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>> @@ -2131,6 +2186,8 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
+>>   	struct cqhci_host *cq_host;
+>>   	bool dma64;
+>>   	u32 cqcfg;
+>> +	u32 config;
+>> +	u32 ice_cap;
+>>   	int ret;
+>>   
+>>   	/*
+>> @@ -2185,6 +2242,18 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
+>>   	if (ret)
+>>   		goto cleanup;
+>>   
+>> +	/* Initialize ICE for non-CMDQ eMMC devices */
+>> +	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
+>> +	config &= ~DISABLE_CRYPTO;
+>> +	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
+>> +	ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
+>> +	if (ice_cap & ICE_HCI_SUPPORT) {
+>> +		config = cqhci_readl(cq_host, CQHCI_CFG);
+>> +		config |= CRYPTO_GENERAL_ENABLE;
+>> +		cqhci_writel(cq_host, config, CQHCI_CFG);
+>> +	}
+>> +	sdhci_msm_ice_enable(msm_host);
+>> +
+>>   	dev_info(&pdev->dev, "%s: CQE init: success\n",
+>>   			mmc_hostname(host->mmc));
+>>   	return ret;
+>> @@ -2450,6 +2519,9 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
+>>   MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>>   
+>>   static const struct sdhci_ops sdhci_msm_ops = {
+>> +#ifdef CONFIG_MMC_CRYPTO
+>> +	.crypto_engine_cfg = sdhci_msm_ice_cfg,
+>> +#endif
+>>   	.reset = sdhci_and_cqhci_reset,
+>>   	.set_clock = sdhci_msm_set_clock,
+>>   	.get_min_clock = sdhci_msm_get_min_clock,
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index ac7e11f37af7..2d636a8ee452 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -2202,6 +2202,21 @@ void sdhci_set_power_and_bus_voltage(struct sdhci_host *host,
+>>   }
+>>   EXPORT_SYMBOL_GPL(sdhci_set_power_and_bus_voltage);
+>>   
+>> +static int sdhci_crypto_cfg(struct sdhci_host *host, struct mmc_request *mrq,
+>> +			    u32 slot)
+>> +{
+>> +	int err = 0;
+>> +
+>> +	if (host->ops->crypto_engine_cfg) {
+>> +		err = host->ops->crypto_engine_cfg(host, mrq, slot);
+>> +		if (err)
+>> +			pr_err("%s: failed to configure crypto: %d\n",
+>> +			       mmc_hostname(host->mmc), err);
+>> +	}
+>> +
+>> +	return err;
+>> +}
+>> +
+>>   /*****************************************************************************\
+>>    *                                                                           *
+>>    * MMC callbacks                                                             *
+>> @@ -2227,6 +2242,11 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>   
+>>   	cmd = sdhci_manual_cmd23(host, mrq) ? mrq->sbc : mrq->cmd;
+>>   
+>> +	if (mmc->caps2 & MMC_CAP2_CRYPTO) {
+>> +		if (sdhci_crypto_cfg(host, mrq, 0))
+>> +			goto out_finish;
+>> +	}
+> 
+> It would be preferable to hook the >request() callback e.g.
+> 
+> 	host->mmc_host_ops.request = sdhci_msm_request;
+> 
+> void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> {
+> 	if (mmc->caps2 & MMC_CAP2_CRYPTO) {
+> 		etc
+> 	}
+> 
+> 	sdhci_request(mmc, mrq);
+> }
+Thanks for the suggestion. I Will update the patch to override the 
+mmc_host_ops.request callback in sdhci-msm.c via a platform-specific 
+wrapper (sdhci_msm_request). Since mmc->ops is a const pointer, I Will 
+clone the existing ops into a local copy (msm_mmc_ops) and replaced only 
+the request field. This preserves all platform-specific callbacks like 
+enable_sdio_irq and avoids probe failures. The change in probe function.
+
+#ifdef CONFIG_MMC_CRYPTO
+	memcpy(&msm_host->msm_mmc_ops, msm_host->mmc->ops, sizeof(struct
+         mmc_host_ops));
+         msm_host->msm_mmc_ops.request = sdhci_msm_request;
+         msm_host->mmc->ops = &msm_host->msm_mmc_ops;
+#endif
 
 
---q3pt22edxgvzu55u
-Content-Type: text/plain; protected-headers=v1; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-Subject: Re: [PATCH] mmc: pxamci: Fix passing NULL to PTR_ERR() in
- pxamci_probe()
-MIME-Version: 1.0
-
-Hello Rakuram,
-
-On Mon, Oct 13, 2025 at 12:07:52AM +0530, Rakuram Eswaran wrote:
-> > >
-> > > I do not see the need for this code change. "if (host->dma_chan_tx)" =
-will
-> > > skip "dma_release_channel(host->dma_chan_tx)" since dma_chan_tx is al=
-ready
-> > > NULL. This code change does not add anything.
-> >
-> > Yes, stand alone this change doesn't make sense, but if we want to drop
-> >
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 host->dma_chan_tx =3D NULL
-> >
-> > in the error path above, this change is needed. Maybe then even
-> >
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (host->dma_chan_rx)
-> >
-> > and
-> >
-> > =C2=A0 =C2=A0 =C2=A0 =C2=A0 if (host->dma_chan_rx)
-> >
-> > can be dropped.
->=20
-> Hello Uwe,=20
->=20
-> I had one quick follow-up before sending v2.
->=20
-> Regarding the devm_clk_get() error path =E2=80=94
-> you mentioned that setting host->clk =3D NULL; is redundant since host is=
-=20
-> devm-managed and the function returns immediately afterward.
->=20
-> > I am not sure that sounds right. Looking at the code for
-> > __devm_clk_get(), if devres_alloc() fails, it returns -ENOMEM. If any of
-> > the other steps after a successful devres_alloc() fail, code goes
-> > through possibly clk_put() if needed and then devres_free(). So the
-> > resources are already freed at this point before the return to
-> > pxamci_probe(). The only thing left to do is to set host->clk to NULL
-> > since it would be set to an error pointer at this point.
->=20
-> Khalid pointed out that when __devm_clk_get() fails after allocating a=20
-> devres entry, the internal cleanup (clk_put() + devres_free()) ensures=20
-> resources are released, but host->clk would still hold an ERR_PTR()=20
-> value at that point.
->=20
-> His suggestion was that setting it to NULL might be a harmless defensive=
-=20
-> step to avoid any accidental later dereference.
-
-Why is NULL better than an error pointer? (Spoiler: It isn't.)
-
-> For now, I have dropped the redundant NULL assignment from=20
-> host->dma_chan_rx =3D NULL and directly returning the ERR_PTR instead of=
-=20
-> storing in a return variable.=20
->=20
-> Below I have appended proposed changes for v2.
->=20
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index 26d03352af63..eb46a4861dbe 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -653,8 +653,9 @@ static int pxamci_probe(struct platform_device *pdev)
-> =20
->  	host->clk =3D devm_clk_get(dev, NULL);
->  	if (IS_ERR(host->clk)) {
-> +		ret =3D PTR_ERR(host->clk);
->  		host->clk =3D NULL;
-> -		return PTR_ERR(host->clk);
-> +		return ret;
->  	}
-> =20
->  	host->clkrate =3D clk_get_rate(host->clk);
-> @@ -705,7 +706,6 @@ static int pxamci_probe(struct platform_device *pdev)
-> =20
->  	host->dma_chan_rx =3D dma_request_chan(dev, "rx");
->  	if (IS_ERR(host->dma_chan_rx)) {
-> -		host->dma_chan_rx =3D NULL;
->  		return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
->  				     "unable to request rx dma channel\n");
->  	}
->=20
-> Would you prefer that I:
->=20
-> 1. Remove the host->clk =3D NULL; assignment for consistency (as you init=
-ially=20
-> suggested), or
->=20
-> 2. Keep it in v2 for defensive clarity, as Khalid reasoned?
->=20
-> I just wanted to confirm your preference before resending, to keep v2 ali=
-gned.
-
-Note that in the end it's not me who decides, but Ulf (=3D mmc
-maintainer).
-
-If you ask me however, I'd say the right thing to do there is like the
-following:
-
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index 26d03352af63..ce896b3f697b 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -652,11 +652,13 @@ static int pxamci_probe(struct platform_device *pdev)
- 	host->clkrt =3D CLKRT_OFF;
-=20
- 	host->clk =3D devm_clk_get(dev, NULL);
--	if (IS_ERR(host->clk)) {
--		host->clk =3D NULL;
--		return PTR_ERR(host->clk);
--	}
-+	if (IS_ERR(host->clk))
-+		return dev_err_probe(dev, PTR_ERR(host->clk), "Failed to aquire clock\n"=
-);
-=20
-+	/*
-+	 * XXX: Note that the return value of clk_get_rate() is only valid if
-+	 * the clock is enabled.
-+	 */
- 	host->clkrate =3D clk_get_rate(host->clk);
-=20
- 	/*
-@@ -703,20 +705,15 @@ static int pxamci_probe(struct platform_device *pdev)
-=20
- 	platform_set_drvdata(pdev, mmc);
-=20
--	host->dma_chan_rx =3D dma_request_chan(dev, "rx");
--	if (IS_ERR(host->dma_chan_rx)) {
--		host->dma_chan_rx =3D NULL;
-+	host->dma_chan_rx =3D devm_dma_request_chan(dev, "rx");
-+	if (IS_ERR(host->dma_chan_rx))
- 		return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
- 				     "unable to request rx dma channel\n");
--	}
-=20
--	host->dma_chan_tx =3D dma_request_chan(dev, "tx");
--	if (IS_ERR(host->dma_chan_tx)) {
--		dev_err(dev, "unable to request tx dma channel\n");
--		ret =3D PTR_ERR(host->dma_chan_tx);
--		host->dma_chan_tx =3D NULL;
--		goto out;
--	}
-+	host->dma_chan_tx =3D devm_dma_request_chan(dev, "tx");
-+	if (IS_ERR(host->dma_chan_tx))
-+		return dev_err_probe(dev, PTR_ERR(host->dma_chan_tx),
-+				     "unable to request tx dma channel\n");
-=20
- 	if (host->pdata) {
- 		host->detect_delay_ms =3D host->pdata->detect_delay_ms;
-@@ -724,25 +721,21 @@ static int pxamci_probe(struct platform_device *pdev)
- 		host->power =3D devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
- 		if (IS_ERR(host->power)) {
- 			ret =3D PTR_ERR(host->power);
--			dev_err(dev, "Failed requesting gpio_power\n");
--			goto out;
-+			return dev_err_probe(dev, ret, "Failed requesting gpio_power\n");
- 		}
-=20
- 		/* FIXME: should we pass detection delay to debounce? */
- 		ret =3D mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
--		if (ret && ret !=3D -ENOENT) {
--			dev_err(dev, "Failed requesting gpio_cd\n");
--			goto out;
--		}
-+		if (ret && ret !=3D -ENOENT)
-+			return dev_err_probe(dev, ret, "Failed requesting gpio_cd\n");
-=20
- 		if (!host->pdata->gpio_card_ro_invert)
- 			mmc->caps2 |=3D MMC_CAP2_RO_ACTIVE_HIGH;
-=20
- 		ret =3D mmc_gpiod_request_ro(mmc, "wp", 0, 0);
--		if (ret && ret !=3D -ENOENT) {
--			dev_err(dev, "Failed requesting gpio_ro\n");
--			goto out;
--		}
-+		if (ret && ret !=3D -ENOENT)
-+			return dev_err_probe(dev, ret, "Failed requesting gpio_ro\n");
-+
- 		if (!ret)
- 			host->use_ro_gpio =3D true;
-=20
-@@ -759,16 +752,8 @@ static int pxamci_probe(struct platform_device *pdev)
- 	if (ret) {
- 		if (host->pdata && host->pdata->exit)
- 			host->pdata->exit(dev, mmc);
--		goto out;
- 	}
-=20
--	return 0;
--
--out:
--	if (host->dma_chan_rx)
--		dma_release_channel(host->dma_chan_rx);
--	if (host->dma_chan_tx)
--		dma_release_channel(host->dma_chan_tx);
- 	return ret;
- }
-=20
-Best regards
-Uwe
-
---q3pt22edxgvzu55u
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmjsvAQACgkQj4D7WH0S
-/k6XTQgAnYuhr6HFwe0UTLXOv/qkl/ksn8ON7M6ANZgUKJX6HEyws28hsk2WIv2R
-/pbVJV/AEjvfWbX91QYyV4RhVSTA6A1E1o648gv5fFo62DvZvQ4oKKIKn1dDWdj/
-/sjm6MAju+JXmJUif6s7hQSaYuNV7dgFXG2om7PNMunKLImtwIwiBc+ggsLp/ht7
-2N2elw3IhAOn1RRzzolQiHBlR/R6PL+ut1S3rgnu8pJaNNkCzPAAt9K1pWHbKtMW
-pWBH/W0TcXbc/dRQu8yedZYEWfFTKuCgZzWkNVCR2J63aG7Kzf9lZnrImosQ60k2
-AlntrnHiS4bhdPOfPH1BpAKz3UrL0Q==
-=4Q/i
------END PGP SIGNATURE-----
-
---q3pt22edxgvzu55u--
+Thanks,
+Alam.
