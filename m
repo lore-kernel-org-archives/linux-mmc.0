@@ -1,136 +1,325 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 435CD34BA5B;
-	Tue, 14 Oct 2025 00:06:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A25F30DEBA;
+	Tue, 14 Oct 2025 06:56:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760400414; cv=none; b=En7aP5q3EzE7M4EQq0uFuTz0WBzjEACXAM+0xMaDRZIt6PbSB75Cyq9Oezooc7xAkWi6zlOxXfK+xP2/6F/17XwnatSEA4LWsEyK5ex3o4hp+OdIlKtWV4EWHh/I7ZFUmDyi2jIqF1+OOHEoIDiDzDSJUn+0EnN+9H+WIWxpQS0=
+	t=1760424991; cv=none; b=bCK1EiNHunyQudO8HdGVOA0KlnMXr4kTABjxkk+hFLOgsKG5eYLMDfxwKvIbuDpRbeQZZ1JZpcRG6PX2MrEuyNnl/w8hiCUO1aUQiiq6at7TUVY5/H+gbfaOOyLEEcXCnPKMKdhuyQWQkMzl9mSQMj24WS4T+YNt4Y4henGNUac=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760400414; c=relaxed/simple;
-	bh=XXYR+wR+uPbI+Ltuoy2z2Qb88tw6ivM08Razh0yrfy0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=IIof+cUF2gwQf/JV2IzABUVmRf1Pb2uTywYemeiKjNDE55/yudGRvJV5KiQ2DFiN48OkvTqk+DJO0V1tPz0UUnJN9pufF6nX3voT0WGSjboyv7JU8g5wuqnZmiHEsgH8oywaKifRXN7AU80WVEsylBLLIaNDvci2u5QVFoRjURg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YUvbjhcC; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760424991; c=relaxed/simple;
+	bh=rDxXSV9HGGXsg1lyE/jKnHr7AmQYtfeI8K16fi9zqo8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=TPxXNidr0ofdLZWrM9ZU8GXuusYJ4FwhFXcE7E7gMLVOyLQD/cLxBAILPC7P3H+S/plnNrbYe0x04MRU4L3vUZ5DkOFqegqDVgOBtzQc/7ejRxs3gaJageDZI4MYkRgMwO/dbejappe7XmKeKw9sEnxpaJnZxz6FFLa8k5Rxgv0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=TFCbfH2n; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YUvbjhcC"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9FA2EC4CEE7;
-	Tue, 14 Oct 2025 00:06:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760400413;
-	bh=XXYR+wR+uPbI+Ltuoy2z2Qb88tw6ivM08Razh0yrfy0=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=YUvbjhcCNjfWrgQoROeSZuaPdG6xDJiSqNHw+Jdqx/kHIkoMx4Uy7SBunIhqHsteZ
-	 sNMhwLWFBSFNK+s/bQ02BmDbKHwKDc1Yc8CyKV42ERj8KxsntWMv8/JC2E2q4YRoJW
-	 MutfQk+oFNnLM0dshAWuBlvrAS2tJjdYrW35E6ncVHyhtVh7ne+b14kR6kD8dg9abI
-	 o7eQJMVouNE0CNXClzGLyBal6g26YTicuqLCiFCSnttPoS+wvyTYwZmSe8EsbP+SPH
-	 ZcO/Hit5Gik4pn1PmkgxP/MMT8UjjCUfXMyL6B55OWkraSC3aLbDCn3PcUECX48XWb
-	 N0f/4aaMMp3VA==
-Message-ID: <cb753c72-70ca-44b9-a33c-af2b1c7e69c8@kernel.org>
-Date: Tue, 14 Oct 2025 02:06:46 +0200
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="TFCbfH2n"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59E69ckt020713;
+	Tue, 14 Oct 2025 06:56:24 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	Dr3srPZ3j5kHKrbvSdZx8aVJjt/inIcjzWACaGIZMPc=; b=TFCbfH2n2JgKGyyP
+	ThK7ojLg5OP/LG4nAYTsbuIXAlKZ9bOY9dXTbr81IS7t6C59n7j5c7KUfDTimGMU
+	VMitecUxBujeJpXjy6Q5K8mvnuy9aYn3DNmyXn7QEq9OM6HHoBI88BgnQ975SMMe
+	xBpnsnoMcPREhFVVJwh71RZ/cvEFds6DpmXBVh55Zfckas0AwTx2aLrJGWCz4HMa
+	jmGh8zoEH2624fxw8js9MHbOAiH9SKMHO3xr152FBK8Dyzg5nBba25aOZ7y2uhs8
+	0Lc/Fg8sBXHlkCewdN8ES+Q70VDUHKRudDUpFGLH0AO6KWLA753yt7LUY7B4mKHa
+	GUovbA==
+Received: from nasanppmta04.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49qfd8yhkc-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 14 Oct 2025 06:56:23 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 59E6uNfq022876
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 14 Oct 2025 06:56:23 GMT
+Received: from [10.151.36.184] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.24; Mon, 13 Oct
+ 2025 23:56:20 -0700
+Message-ID: <39230635-184e-c897-4b32-e258567d1270@quicinc.com>
+Date: Tue, 14 Oct 2025 12:26:07 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 1/4] dt-bindings: mmc: Add dll-presets values for HS400
- and HS200 modes
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- dmitry.baryshkov@oss.qualcomm.com, quic_pragalla@quicinc.com,
- quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
- quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com,
- Sachin Gupta <quic_sachgupt@quicinc.com>
-References: <20251013145316.1087274-1-quic_rampraka@quicinc.com>
- <20251013145316.1087274-2-quic_rampraka@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
+ devices
+To: Adrian Hunter <adrian.hunter@intel.com>, <quic_asutoshd@quicinc.com>,
+        <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_varada@quicinc.com>
+References: <20251008110758.718944-1-quic_mdalam@quicinc.com>
+ <f4363815-a5bc-4f5a-80a1-7d4a17ad539b@intel.com>
+ <9567ae91-c15c-8677-de78-af7ecd792970@quicinc.com>
+ <2b9c6ef7-16ee-4174-a87f-63c611657872@intel.com>
 Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20251013145316.1087274-2-quic_rampraka@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+In-Reply-To: <2b9c6ef7-16ee-4174-a87f-63c611657872@intel.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: LYBNtfExZ1dc0jKK9Y9_jToy7ZEsaxsh
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDExMDAxOCBTYWx0ZWRfX9GUivqWGjCCl
+ cpAJduAJ/KCqmdqKaj9lOlMS0FncqmIjAYDGh5fSjE053ZGnlpPZkIxdQxtOMHVa/KGJDS0pZbl
+ XFSnRWcrQTyLd9Wwk0IEelSvcmC96T/NGnpOd0tFRf5KdPwjhIG2tkwtJqfS/Dw6XJ+nl2N+DoF
+ WpUxbNTSud2DVrEkl0OrapoxhSGuJDrFeeVdwSjjrbOn9prpHD4KSz+sl3aFbfKskC1xwze9IGc
+ UaM8z+gTnaWf8V99NRqPIlR80Nk+nXyeFqfhdacQ/Uyu8R300Q28KZvjN4zGly+L/lP3HR7teDw
+ 2qE5daIxajdxcaXkJ/vSxbRepNf3vHOMOA8eVCOlLUR8qfaZpu9YtABEGl5mPGTOEpTWlW+/gX+
+ XFW0vIT8Qc76XwxL2jEH1oaWugondQ==
+X-Proofpoint-GUID: LYBNtfExZ1dc0jKK9Y9_jToy7ZEsaxsh
+X-Authority-Analysis: v=2.4 cv=PdTyRyhd c=1 sm=1 tr=0 ts=68edf417 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=x6icFKpwvdMA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=COk6AnOGAAAA:8 a=tlwrbhwh4rvmcJHJCUsA:9
+ a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
+ a=HhbK4dLum7pmb74im6QT:22 a=cPQSjfK2_nFv0Q5t_7PE:22 a=pHzHmUro8NiASowvMSCR:22
+ a=Ew2E2A-JSTLzCXPT_086:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-10-14_02,2025-10-13_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ malwarescore=0 phishscore=0 bulkscore=0 clxscore=1015 adultscore=0
+ lowpriorityscore=0 impostorscore=0 priorityscore=1501 spamscore=0
+ suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2510020000
+ definitions=main-2510110018
 
-On 13/10/2025 16:53, Ram Prakash Gupta wrote:
-> From: Sachin Gupta <quic_sachgupt@quicinc.com>
-> 
-> Document the 'dll-presets' property for MMC device tree bindings.
-> The 'dll-presets' property defines the DLL configurations for HS400
-> and HS200 modes.
-> 
-> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
-> different tuning.
-> 
-> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
-> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 594bd174ff21..f7b3b1ced3ce 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -138,6 +138,11 @@ properties:
->      $ref: /schemas/types.yaml#/definitions/uint32
->      description: platform specific settings for DLL_CONFIG reg.
->  
-> +  qcom,dll-presets:
-> +    maxItems: 10
-> +    $ref: /schemas/types.yaml#/definitions/uint32-array
-> +    description: platform specific settings for DLL registers.
 
-One of my questions, never answered in original submission and in your
-versions, was to see the DTS user of it. I still do not see the DTS user.
 
-Best regards,
-Krzysztof
+On 10/13/2025 4:23 PM, Adrian Hunter wrote:
+> On 13/10/2025 12:09, Md Sadre Alam wrote:
+>> Hi,
+>>
+>> On 10/9/2025 5:59 PM, Adrian Hunter wrote:
+>>> On 08/10/2025 14:07, Md Sadre Alam wrote:
+>>>> Enable Inline Crypto Engine (ICE) support for eMMC devices that don't
+>>>> use command queuing (CQE). This allows hardware-accelerated encryption
+>>>> and decryption for standard eMMC operations without command queuing.
+>>>>
+>>>> The changes include:
+>>>> - Add non-cmdq crypto register definitions
+>>>> - Implement crypto configuration callback for non-cmdq operations
+>>>> - Initialize ICE hardware during host setup for non-cmdq devices
+>>>> - Integrate crypto configuration into the main request path
+>>>>
+>>>> This enables non-cmdq eMMC devices to benefit from hardware crypto
+>>>> acceleration, improving performance for encrypted storage operations
+>>>> while maintaining compatibility with existing cmdq crypto support.
+>>>>
+>>>> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+>>>> ---
+>>>>    drivers/mmc/host/cqhci.h     |  4 ++
+>>>>    drivers/mmc/host/sdhci-msm.c | 74 +++++++++++++++++++++++++++++++++++-
+>>>>    drivers/mmc/host/sdhci.c     | 20 ++++++++++
+>>>>    drivers/mmc/host/sdhci.h     |  2 +
+>>>>    4 files changed, 99 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+>>>> index ce189a1866b9..9bf236e27675 100644
+>>>> --- a/drivers/mmc/host/cqhci.h
+>>>> +++ b/drivers/mmc/host/cqhci.h
+>>>> @@ -119,6 +119,10 @@
+>>>>    /* command response argument */
+>>>>    #define CQHCI_CRA            0x5C
+>>>>    +/* non command queue crypto enable register*/
+>>>> +#define NONCQ_CRYPTO_PARM        0x70
+>>>> +#define NONCQ_CRYPTO_DUN        0x74
+>>>
+>>> Since cqhci is not using these, they might be better in sdhci-msm.c
+>> Ok
+>>>
+>>>> +
+>>>>    /* crypto capabilities */
+>>>>    #define CQHCI_CCAP            0x100
+>>>>    #define CQHCI_CRYPTOCAP            0x104
+>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>>> index 4e5edbf2fc9b..2204c6abb3fe 100644
+>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>> @@ -157,6 +157,23 @@
+>>>>    #define CQHCI_VENDOR_CFG1    0xA00
+>>>>    #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN    (0x3 << 13)
+>>>>    +#define DISABLE_CRYPTO            BIT(15)
+>>>> +#define CRYPTO_GENERAL_ENABLE        BIT(1)
+>>>> +#define HC_VENDOR_SPECIFIC_FUNC4    0x260
+>>>> +#define ICE_HCI_SUPPORT            BIT(28)
+>>>> +
+>>>> +/* SDHCI MSM ICE CTRL Info register offset */
+>>>> +enum {
+>>>> +    OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CCI    = 0,
+>>>> +    OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CE    = 8,
+>>>> +};
+>>>> +
+>>>> +/* SDHCI MSM ICE CTRL Info register masks */
+>>>> +enum {
+>>>> +    MASK_SDHCI_MSM_ICE_HCI_PARAM_CE        = 0x1,
+>>>> +    MASK_SDHCI_MSM_ICE_HCI_PARAM_CCI    = 0xff
+>>>> +};
+>>>
+>>> Preferably use GENMASK() and FIELD_PREP()
+>> Ok
+>>>
+>>>> +
+>>>>    struct sdhci_msm_offset {
+>>>>        u32 core_hc_mode;
+>>>>        u32 core_mci_data_cnt;
+>>>> @@ -1882,9 +1899,47 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>>     * Inline Crypto Engine (ICE) support                                        *
+>>>>     *                                                                           *
+>>>>    \*****************************************************************************/
+>>>> -
+>>>
+>>> Unnecessary to delete this line
+>> Ok
+>>>
+>>>>    #ifdef CONFIG_MMC_CRYPTO
+>>>>    +static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq,
+>>>> +                 u32 slot)
+>>>> +{
+>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>>> +    struct mmc_host *mmc = msm_host->mmc;
+>>>> +    struct cqhci_host *cq_host = mmc->cqe_private;
+>>>> +    unsigned int crypto_params = 0;
+>>>> +    int key_index = 0;
+>>>> +    bool bypass = true;
+>>>> +    u64 dun = 0;
+>>>> +
+>>>> +    if (!mrq || !cq_host)
+>>>> +        return -EINVAL;
+>>>
+>>> It should not be possible to get here if (!mrq || !cq_host)
+>> Ok, will remove it in next revision.
+>>>
+>>>> +
+>>>> +    if (mrq->crypto_ctx) {
+>>>> +        dun = mrq->crypto_ctx->bc_dun[0];
+>>>> +        bypass = false;
+>>>> +        key_index = mrq->crypto_key_slot;
+>>>> +    }
+>>>> +
+>>>> +    /* Configure ICE bypass mode */
+>>>> +    crypto_params |= ((!bypass) & MASK_SDHCI_MSM_ICE_HCI_PARAM_CE)
+>>>> +             << OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CE;
+>>>> +    /* Configure Crypto Configure Index (CCI) */
+>>>> +    crypto_params |= (key_index & MASK_SDHCI_MSM_ICE_HCI_PARAM_CCI)
+>>>> +             << OFFSET_SDHCI_MSM_ICE_HCI_PARAM_CCI;
+>>>> +
+>>>> +    cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
+>>>> +
+>>>> +    if (mrq->crypto_ctx)
+>>>> +        cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
+>>>> +
+>>>> +    /* Ensure crypto configuration is written before proceeding */
+>>>> +    wmb();
+>>>> +
+>>>> +    return 0;
+>>>> +}
+>>>> +
+>>>>    static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
+>>>>      static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>>>> @@ -2131,6 +2186,8 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
+>>>>        struct cqhci_host *cq_host;
+>>>>        bool dma64;
+>>>>        u32 cqcfg;
+>>>> +    u32 config;
+>>>> +    u32 ice_cap;
+>>>>        int ret;
+>>>>          /*
+>>>> @@ -2185,6 +2242,18 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
+>>>>        if (ret)
+>>>>            goto cleanup;
+>>>>    +    /* Initialize ICE for non-CMDQ eMMC devices */
+>>>> +    config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
+>>>> +    config &= ~DISABLE_CRYPTO;
+>>>> +    sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
+>>>> +    ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
+>>>> +    if (ice_cap & ICE_HCI_SUPPORT) {
+>>>> +        config = cqhci_readl(cq_host, CQHCI_CFG);
+>>>> +        config |= CRYPTO_GENERAL_ENABLE;
+>>>> +        cqhci_writel(cq_host, config, CQHCI_CFG);
+>>>> +    }
+>>>> +    sdhci_msm_ice_enable(msm_host);
+>>>> +
+>>>>        dev_info(&pdev->dev, "%s: CQE init: success\n",
+>>>>                mmc_hostname(host->mmc));
+>>>>        return ret;
+>>>> @@ -2450,6 +2519,9 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
+>>>>    MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>>>>      static const struct sdhci_ops sdhci_msm_ops = {
+>>>> +#ifdef CONFIG_MMC_CRYPTO
+>>>> +    .crypto_engine_cfg = sdhci_msm_ice_cfg,
+>>>> +#endif
+>>>>        .reset = sdhci_and_cqhci_reset,
+>>>>        .set_clock = sdhci_msm_set_clock,
+>>>>        .get_min_clock = sdhci_msm_get_min_clock,
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index ac7e11f37af7..2d636a8ee452 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -2202,6 +2202,21 @@ void sdhci_set_power_and_bus_voltage(struct sdhci_host *host,
+>>>>    }
+>>>>    EXPORT_SYMBOL_GPL(sdhci_set_power_and_bus_voltage);
+>>>>    +static int sdhci_crypto_cfg(struct sdhci_host *host, struct mmc_request *mrq,
+>>>> +                u32 slot)
+>>>> +{
+>>>> +    int err = 0;
+>>>> +
+>>>> +    if (host->ops->crypto_engine_cfg) {
+>>>> +        err = host->ops->crypto_engine_cfg(host, mrq, slot);
+>>>> +        if (err)
+>>>> +            pr_err("%s: failed to configure crypto: %d\n",
+>>>> +                   mmc_hostname(host->mmc), err);
+>>>> +    }
+>>>> +
+>>>> +    return err;
+>>>> +}
+>>>> +
+>>>>    /*****************************************************************************\
+>>>>     *                                                                           *
+>>>>     * MMC callbacks                                                             *
+>>>> @@ -2227,6 +2242,11 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>>>          cmd = sdhci_manual_cmd23(host, mrq) ? mrq->sbc : mrq->cmd;
+>>>>    +    if (mmc->caps2 & MMC_CAP2_CRYPTO) {
+>>>> +        if (sdhci_crypto_cfg(host, mrq, 0))
+>>>> +            goto out_finish;
+>>>> +    }
+>>>
+>>> It would be preferable to hook the >request() callback e.g.
+>>>
+>>>      host->mmc_host_ops.request = sdhci_msm_request;
+>>>
+>>> void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>> {
+>>>      if (mmc->caps2 & MMC_CAP2_CRYPTO) {
+>>>          etc
+>>>      }
+>>>
+>>>      sdhci_request(mmc, mrq);
+>>> }
+>> Thanks for the suggestion. I Will update the patch to override the mmc_host_ops.request callback in sdhci-msm.c via a platform-specific wrapper (sdhci_msm_request). Since mmc->ops is a const pointer, I Will clone the existing ops into a local copy
+> 
+> Can just update the sdhci ops directly:
+> 
+> 	host->mmc_host_ops.request = sdhci_msm_request;
+> 
+> (msm_mmc_ops) and replaced only the request field. This preserves all platform-specific callbacks like enable_sdio_irq and avoids probe failures. The change in probe function.
+Thanks for the suggestion. Updating host->mmc_host_ops.request directly 
+to sdhci_msm_request does indeed retain the platform-specific callbacks. 
+I’ll incorporate this change in the next revision.
+
+Thanks,
+Alam.
+
