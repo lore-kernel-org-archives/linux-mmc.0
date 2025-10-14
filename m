@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3F211FCF7C;
-	Mon, 13 Oct 2025 22:54:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 435CD34BA5B;
+	Tue, 14 Oct 2025 00:06:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760396055; cv=none; b=CjzkRhTj/3ecM3wYieVAezOGguu/q2zPpfiYCvNTLlbOSxf8QYMRSOdd47jX+UuKItzyYBdUvPJRtLsacoB/n2t9VBz419IiILEm4p6DJp6VubGK3G7/WJCX4gR+suxPTFh5Zaj3TM60bKczpjkOzMMcW8wcuAy1DXjk6nyGIKI=
+	t=1760400414; cv=none; b=En7aP5q3EzE7M4EQq0uFuTz0WBzjEACXAM+0xMaDRZIt6PbSB75Cyq9Oezooc7xAkWi6zlOxXfK+xP2/6F/17XwnatSEA4LWsEyK5ex3o4hp+OdIlKtWV4EWHh/I7ZFUmDyi2jIqF1+OOHEoIDiDzDSJUn+0EnN+9H+WIWxpQS0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760396055; c=relaxed/simple;
-	bh=JAsqAOWugkDCSeK4R312V+ZOCV7tNTROXYMNfW3N0tI=;
+	s=arc-20240116; t=1760400414; c=relaxed/simple;
+	bh=XXYR+wR+uPbI+Ltuoy2z2Qb88tw6ivM08Razh0yrfy0=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=VkQsMs2teBmeHKb0HoOCT7cRyLQjAjY4h0yZlCnQqonH1wdPeKcYKWi6Rsl/mYzPbTdpuQdQH0On+ENqSVuQBxkR9ctBt9W6/97mjcI0Pq3manXpo+9lz1Hf/2QlAefDT91fJxGLjOkys8JWpgWjd/QAVkf/LMYEwnv3vErJm7c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BlAmPDy/; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=IIof+cUF2gwQf/JV2IzABUVmRf1Pb2uTywYemeiKjNDE55/yudGRvJV5KiQ2DFiN48OkvTqk+DJO0V1tPz0UUnJN9pufF6nX3voT0WGSjboyv7JU8g5wuqnZmiHEsgH8oywaKifRXN7AU80WVEsylBLLIaNDvci2u5QVFoRjURg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YUvbjhcC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BlAmPDy/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2B98DC4CEE7;
-	Mon, 13 Oct 2025 22:54:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YUvbjhcC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9FA2EC4CEE7;
+	Tue, 14 Oct 2025 00:06:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760396054;
-	bh=JAsqAOWugkDCSeK4R312V+ZOCV7tNTROXYMNfW3N0tI=;
+	s=k20201202; t=1760400413;
+	bh=XXYR+wR+uPbI+Ltuoy2z2Qb88tw6ivM08Razh0yrfy0=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=BlAmPDy/JjsiiKyhyY7taFMkVPkn2W06zVaqvzr7BcoRHMSRMagYrkwVfsZW8UJ5X
-	 eS4oCFi5qj3TYrWIs8VdeqpJE6PA3GnMuXIWqzCSl2gj/w/FcfXMgthmbtaLpVA9x0
-	 j9YzGA3RoCzyqMA2aDAZCyPa5zPsXt6z84yBHs/TUOTnmP7xBNjS0X4OER/wuRzPUn
-	 7G8f+3+nnGZunqYG3T6aH7ewc2q3sjKcdVIUStAZh1jW6hjZMMO+col3S/QMfzLtcF
-	 yN/8JifzulW+yvO+o0Zc35EvNxoNk3UZ0ro0iS8RagvQ8Hbl1UOvXOxfgGS/+TpjGm
-	 pIvO1TTFoW6Pw==
-Message-ID: <8afff048-4fe1-440a-9739-e5a5ea43d6eb@kernel.org>
-Date: Mon, 13 Oct 2025 16:54:13 -0600
+	b=YUvbjhcCNjfWrgQoROeSZuaPdG6xDJiSqNHw+Jdqx/kHIkoMx4Uy7SBunIhqHsteZ
+	 sNMhwLWFBSFNK+s/bQ02BmDbKHwKDc1Yc8CyKV42ERj8KxsntWMv8/JC2E2q4YRoJW
+	 MutfQk+oFNnLM0dshAWuBlvrAS2tJjdYrW35E6ncVHyhtVh7ne+b14kR6kD8dg9abI
+	 o7eQJMVouNE0CNXClzGLyBal6g26YTicuqLCiFCSnttPoS+wvyTYwZmSe8EsbP+SPH
+	 ZcO/Hit5Gik4pn1PmkgxP/MMT8UjjCUfXMyL6B55OWkraSC3aLbDCn3PcUECX48XWb
+	 N0f/4aaMMp3VA==
+Message-ID: <cb753c72-70ca-44b9-a33c-af2b1c7e69c8@kernel.org>
+Date: Tue, 14 Oct 2025 02:06:46 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,240 +35,102 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: pxamci: Fix passing NULL to PTR_ERR() in
- pxamci_probe()
-To: =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
- Rakuram Eswaran <rakuram.e96@gmail.com>
-Cc: chenhuacai@kernel.org, dan.carpenter@linaro.org,
- david.hunter.linux@gmail.com, linux-kernel-mentees@lists.linux.dev,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, lkp@intel.com,
- skhan@linuxfoundation.org, ulf.hansson@linaro.org, zhoubinbin@loongson.cn
-References: <xxtrhbv5qm2crtvc5ejpgu5caadsmms3rfulmosjwq7lumrko3@5mlcpk24hymm>
- <20251012183804.15171-1-rakuram.e96@gmail.com>
- <6j7ix5yof7qmrp6cgxhqver7yimvmgj7dujqu4l7cnzbpjksfd@5sp7am47gigw>
+Subject: Re: [PATCH v5 1/4] dt-bindings: mmc: Add dll-presets values for HS400
+ and HS200 modes
+To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ dmitry.baryshkov@oss.qualcomm.com, quic_pragalla@quicinc.com,
+ quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
+ quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com,
+ Sachin Gupta <quic_sachgupt@quicinc.com>
+References: <20251013145316.1087274-1-quic_rampraka@quicinc.com>
+ <20251013145316.1087274-2-quic_rampraka@quicinc.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
-From: Khalid Aziz <khalid@kernel.org>
-In-Reply-To: <6j7ix5yof7qmrp6cgxhqver7yimvmgj7dujqu4l7cnzbpjksfd@5sp7am47gigw>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <20251013145316.1087274-2-quic_rampraka@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On 10/13/25 2:45 AM, Uwe Kleine-König wrote:
-> Hello Rakuram,
+On 13/10/2025 16:53, Ram Prakash Gupta wrote:
+> From: Sachin Gupta <quic_sachgupt@quicinc.com>
 > 
-> On Mon, Oct 13, 2025 at 12:07:52AM +0530, Rakuram Eswaran wrote:
->>>>
->>>> I do not see the need for this code change. "if (host->dma_chan_tx)" will
->>>> skip "dma_release_channel(host->dma_chan_tx)" since dma_chan_tx is already
->>>> NULL. This code change does not add anything.
->>>
->>> Yes, stand alone this change doesn't make sense, but if we want to drop
->>>
->>>          host->dma_chan_tx = NULL
->>>
->>> in the error path above, this change is needed. Maybe then even
->>>
->>>          if (host->dma_chan_rx)
->>>
->>> and
->>>
->>>          if (host->dma_chan_rx)
->>>
->>> can be dropped.
->>
->> Hello Uwe,
->>
->> I had one quick follow-up before sending v2.
->>
->> Regarding the devm_clk_get() error path —
->> you mentioned that setting host->clk = NULL; is redundant since host is
->> devm-managed and the function returns immediately afterward.
->>
->>> I am not sure that sounds right. Looking at the code for
->>> __devm_clk_get(), if devres_alloc() fails, it returns -ENOMEM. If any of
->>> the other steps after a successful devres_alloc() fail, code goes
->>> through possibly clk_put() if needed and then devres_free(). So the
->>> resources are already freed at this point before the return to
->>> pxamci_probe(). The only thing left to do is to set host->clk to NULL
->>> since it would be set to an error pointer at this point.
->>
->> Khalid pointed out that when __devm_clk_get() fails after allocating a
->> devres entry, the internal cleanup (clk_put() + devres_free()) ensures
->> resources are released, but host->clk would still hold an ERR_PTR()
->> value at that point.
->>
->> His suggestion was that setting it to NULL might be a harmless defensive
->> step to avoid any accidental later dereference.
+> Document the 'dll-presets' property for MMC device tree bindings.
+> The 'dll-presets' property defines the DLL configurations for HS400
+> and HS200 modes.
 > 
-> Why is NULL better than an error pointer? (Spoiler: It isn't.)
+> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
+> different tuning.
 > 
->> For now, I have dropped the redundant NULL assignment from
->> host->dma_chan_rx = NULL and directly returning the ERR_PTR instead of
->> storing in a return variable.
->>
->> Below I have appended proposed changes for v2.
->>
->> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
->> index 26d03352af63..eb46a4861dbe 100644
->> --- a/drivers/mmc/host/pxamci.c
->> +++ b/drivers/mmc/host/pxamci.c
->> @@ -653,8 +653,9 @@ static int pxamci_probe(struct platform_device *pdev)
->>   
->>   	host->clk = devm_clk_get(dev, NULL);
->>   	if (IS_ERR(host->clk)) {
->> +		ret = PTR_ERR(host->clk);
->>   		host->clk = NULL;
->> -		return PTR_ERR(host->clk);
->> +		return ret;
->>   	}
->>   
->>   	host->clkrate = clk_get_rate(host->clk);
->> @@ -705,7 +706,6 @@ static int pxamci_probe(struct platform_device *pdev)
->>   
->>   	host->dma_chan_rx = dma_request_chan(dev, "rx");
->>   	if (IS_ERR(host->dma_chan_rx)) {
->> -		host->dma_chan_rx = NULL;
->>   		return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
->>   				     "unable to request rx dma channel\n");
->>   	}
->>
->> Would you prefer that I:
->>
->> 1. Remove the host->clk = NULL; assignment for consistency (as you initially
->> suggested), or
->>
->> 2. Keep it in v2 for defensive clarity, as Khalid reasoned?
->>
->> I just wanted to confirm your preference before resending, to keep v2 aligned.
+> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
+> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
+>  1 file changed, 5 insertions(+)
 > 
-> Note that in the end it's not me who decides, but Ulf (= mmc
-> maintainer).
-> 
-> If you ask me however, I'd say the right thing to do there is like the
-> following:
-> 
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index 26d03352af63..ce896b3f697b 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -652,11 +652,13 @@ static int pxamci_probe(struct platform_device *pdev)
->   	host->clkrt = CLKRT_OFF;
->   
->   	host->clk = devm_clk_get(dev, NULL);
-> -	if (IS_ERR(host->clk)) {
-> -		host->clk = NULL;
-> -		return PTR_ERR(host->clk);
-> -	}
-> +	if (IS_ERR(host->clk))
-> +		return dev_err_probe(dev, PTR_ERR(host->clk), "Failed to aquire clock\n");
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index 594bd174ff21..f7b3b1ced3ce 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -138,6 +138,11 @@ properties:
+>      $ref: /schemas/types.yaml#/definitions/uint32
+>      description: platform specific settings for DLL_CONFIG reg.
+>  
+> +  qcom,dll-presets:
+> +    maxItems: 10
+> +    $ref: /schemas/types.yaml#/definitions/uint32-array
+> +    description: platform specific settings for DLL registers.
 
-Hi Uwe,
+One of my questions, never answered in original submission and in your
+versions, was to see the DTS user of it. I still do not see the DTS user.
 
-I agree using dev_err_probe() is better since it leads to better logging 
-and troubleshooting.
-
->   
-> +	/*
-> +	 * XXX: Note that the return value of clk_get_rate() is only valid if
-> +	 * the clock is enabled.
-> +	 */
->   	host->clkrate = clk_get_rate(host->clk);
->   
->   	/*
-> @@ -703,20 +705,15 @@ static int pxamci_probe(struct platform_device *pdev)
->   
->   	platform_set_drvdata(pdev, mmc);
->   
-> -	host->dma_chan_rx = dma_request_chan(dev, "rx");
-> -	if (IS_ERR(host->dma_chan_rx)) {
-> -		host->dma_chan_rx = NULL;
-> +	host->dma_chan_rx = devm_dma_request_chan(dev, "rx");
-> +	if (IS_ERR(host->dma_chan_rx))
->   		return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
->   				     "unable to request rx dma channel\n");
-> -	}
->   
-> -	host->dma_chan_tx = dma_request_chan(dev, "tx");
-> -	if (IS_ERR(host->dma_chan_tx)) {
-> -		dev_err(dev, "unable to request tx dma channel\n");
-> -		ret = PTR_ERR(host->dma_chan_tx);
-> -		host->dma_chan_tx = NULL;
-> -		goto out;
-> -	}
-> +	host->dma_chan_tx = devm_dma_request_chan(dev, "tx");
-> +	if (IS_ERR(host->dma_chan_tx))
-> +		return dev_err_probe(dev, PTR_ERR(host->dma_chan_tx),
-> +				     "unable to request tx dma channel\n");
-
-We should still release DMA rx channel before returning here.
-
->   
->   	if (host->pdata) {
->   		host->detect_delay_ms = host->pdata->detect_delay_ms;
-> @@ -724,25 +721,21 @@ static int pxamci_probe(struct platform_device *pdev)
->   		host->power = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
->   		if (IS_ERR(host->power)) {
->   			ret = PTR_ERR(host->power);
-> -			dev_err(dev, "Failed requesting gpio_power\n");
-> -			goto out;
-> +			return dev_err_probe(dev, ret, "Failed requesting gpio_power\n");
-
-Don't we need to release DMA Rx and Tx channels before we return from here?
-
->   		}
->   
->   		/* FIXME: should we pass detection delay to debounce? */
->   		ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
-> -		if (ret && ret != -ENOENT) {
-> -			dev_err(dev, "Failed requesting gpio_cd\n");
-> -			goto out;
-> -		}
-> +		if (ret && ret != -ENOENT)
-> +			return dev_err_probe(dev, ret, "Failed requesting gpio_cd\n");
-
-Same here
-
->   
->   		if (!host->pdata->gpio_card_ro_invert)
->   			mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
->   
->   		ret = mmc_gpiod_request_ro(mmc, "wp", 0, 0);
-> -		if (ret && ret != -ENOENT) {
-> -			dev_err(dev, "Failed requesting gpio_ro\n");
-> -			goto out;
-> -		}
-> +		if (ret && ret != -ENOENT)
-> +			return dev_err_probe(dev, ret, "Failed requesting gpio_ro\n");
-
-and here.
-
-Looking at Documentation/driver-api/driver-model/devres.rst, 
-dma_request_chan() is not devres managed interface and thus will not be 
-released automatically. Do you agree?
-
---
-Khalid
-
-> +
->   		if (!ret)
->   			host->use_ro_gpio = true;
->   
-> @@ -759,16 +752,8 @@ static int pxamci_probe(struct platform_device *pdev)
->   	if (ret) {
->   		if (host->pdata && host->pdata->exit)
->   			host->pdata->exit(dev, mmc);
-> -		goto out;
->   	}
->   
-> -	return 0;
-> -
-> -out:
-> -	if (host->dma_chan_rx)
-> -		dma_release_channel(host->dma_chan_rx);
-> -	if (host->dma_chan_tx)
-> -		dma_release_channel(host->dma_chan_tx);
->   	return ret;
->   }
->   
-> Best regards
-> Uwe
-
+Best regards,
+Krzysztof
