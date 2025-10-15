@@ -1,52 +1,38 @@
-Received: from mail1.manjaro.org (mail1.manjaro.org [142.132.176.110])
+Received: from out28-99.mail.aliyun.com (out28-99.mail.aliyun.com [115.124.28.99])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABB652D3749;
-	Tue, 14 Oct 2025 21:47:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=142.132.176.110
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D58B913C8EA;
+	Wed, 15 Oct 2025 06:12:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.28.99
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760478461; cv=none; b=P8BSEhRw7KrxOMqIAAJKvIrNiFEmbUjOfZ+1ExOCx1N1N+fqeACKYONYK1kYB7nw65wgtGov8h4xAg4IK+QuYfYIQOBrQE3mPnHQb/rYrYZ8Jli7a0ZF792DHMQTv9CPtam0Lwf9eQ1F4H68psFM8RJXEy6hFyqqaiKmz/8o6qo=
+	t=1760508778; cv=none; b=eeP0N14tKqcUwnZ6AfLkszOnP5NI3xKDg1pzyTSk+AFTJ6pC0jw+Ja9dySTaqZ/pz7l/DGtL/2NKysnImih8rdX8CEZLde8Vje0F32HqdsefMbx/7UdYWQ/fzuj8sbOvikN21XIfGdnx7jNIcddozCE6eBkj3iALfpcNp/a8SnY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760478461; c=relaxed/simple;
-	bh=wEi7nhCjw+nkfoQaFqUoqOh5Kh5E11LLBYNyxU9hjas=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=seBBP/kr2hpynUJ5oKfb6pntYuNJSuF+Ipfzcm8cd043anSkfrhnvwz1T8f/DNK5CXdxFtVKTv8OyqflIun40b0ALR4NcYv4cmFm06i/y5HORM9xOU1ZsQuj/n+LCx9ubzi3xRXOaJ2Te60b06D0VxNkJkjxE8UU660iuxZSURk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=Zq3E+YZP; arc=none smtp.client-ip=142.132.176.110
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="Zq3E+YZP"
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id EBA46409EE;
-	Tue, 14 Oct 2025 23:47:26 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=dkim;
-	t=1760478450; h=from:subject:date:message-id:to:cc:mime-version:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=dydcnTVUuAbLmXZJFV5DtuO7kXIF77fhzGOLPlAWyaI=;
-	b=Zq3E+YZPHxSvcaUf0pyIY0MmoHAwXtzp+UYrMz/b0n04QRPnG6zO3E0NK82UYfjichERrz
-	iIRKOvG63PF8RnP8LaGhOuuEIz/dtjexVU+2aHF2z8sPMtUvC+4rNa/gJW0AWV/jBjqsDH
-	m1wU35zgZfmWn9FPHJDQ7aiJ8dgYd/PnI8qUsB4H7+fHDDWVbDAIR7oAZNUxkEZrLrI4+d
-	7RUaXh9L2LZD+HJbMgVG6zcnhGFelmF8JZFQXxgAGjlfKlS3ESDKmje+tICp0DUZDM0mhD
-	5wmbpknpThcyq/GwtRQuNFHV5rLGt/243H2sBhMX20xN8yhesBU1/iCz88iBnQ==
-From: Dragan Simic <dsimic@manjaro.org>
-To: sebastian.reichel@collabora.com
-Cc: adrian.hunter@intel.com,
-	conor+dt@kernel.org,
-	devicetree@vger.kernel.org,
-	heiko@sntech.de,
-	kernel@collabora.com,
-	krzk+dt@kernel.org,
-	linux-kernel@vger.kernel.org,
+	s=arc-20240116; t=1760508778; c=relaxed/simple;
+	bh=7AxJLTHuNLufjyzhwhMdz+Egc9IfsztB8kWgCDonfck=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=GknEdJ/iizjypM6Qz45iDadIpgRvzmqqokSMCV7LbwUFQFPsLmk0i5nlPWDbBVr/0GjzVt2H6Cxh8bRW9ngiAtpN6qyk/cmpFpLkqsdOAq/FIFKsHXZ28Qp07K3Oya/XjC9hhCkAmVqnrtRAlR+kw7DIrT5zbGVG+0mXY4aJmTs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=allwinnertech.com; spf=pass smtp.mailfrom=allwinnertech.com; arc=none smtp.client-ip=115.124.28.99
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=allwinnertech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=allwinnertech.com
+Received: from SunxiBot.allwinnertech.com(mailfrom:michael@allwinnertech.com fp:SMTPD_---.f-yOgmV_1760508437 cluster:ay29)
+          by smtp.aliyun-inc.com;
+          Wed, 15 Oct 2025 14:07:22 +0800
+From: Michael Wu <michael@allwinnertech.com>
+To: ulf.hansson@linaro.org,
+	linus.walleij@linaro.org,
+	brgl@bgdev.pl,
+	adrian.hunter@intel.com,
+	avri.altman@wdc.com,
+	wsa+renesas@sang-engineering.com,
+	victor.shih@genesyslogic.com.tw,
+	andy-ld.lu@mediatek.com
+Cc: jason.lai@genesyslogic.com.tw,
 	linux-mmc@vger.kernel.org,
-	linux-rockchip@lists.infradead.org,
-	robh@kernel.org,
-	ulf.hansson@linaro.org,
-	yifeng.zhao@rock-chips.com
-Subject: Re: [PATCH 1/2] mmc: sdhci-of-dwcmshc: Add command queue support for rockchip SOCs
-Date: Tue, 14 Oct 2025 23:47:00 +0200
-Message-Id: <20251014214700.4182858-1-dsimic@manjaro.org>
-X-Mailer: git-send-email 2.33.1
-In-Reply-To: <20251014-rockchip-emmc-cqe-support-v1-1-918f03de0cb1@collabora.com>
-References: <20251014-rockchip-emmc-cqe-support-v1-1-918f03de0cb1@collabora.com>
+	linux-kernel@vger.kernel.org,
+	linux-gpio@vger.kernel.org
+Subject: [RESEND] mmc: core: Fix system shutdown hang in mmc_bus_shutdown
+Date: Wed, 15 Oct 2025 14:07:14 +0800
+Message-Id: <20251015060714.67558-1-michael@allwinnertech.com>
+X-Mailer: git-send-email 2.29.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -54,40 +40,127 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Last-TLS-Session-Version: TLSv1.3
 
-Hello Sebastian,
+During system shutdown, mmc_bus_shutdown() calls __mmc_stop_host() which
+uses cancel_delayed_work_sync(). This can block indefinitely if the work
+queue is stuck, causing the system to hang during shutdown.
 
-> This adds CQE support for the Rockchip RK3588 and RK3576 platform. To
-> be functional, the eMMC device-tree node must have a 'supports-cqe;'
-> flag property.
+This patch introduces a new function __mmc_stop_host_no_sync() that skips
+the synchronous work cancellation, preventing potential shutdown hangs.
+The function is used in mmc_bus_shutdown() where blocking is not
+acceptable during system shutdown.
 
-> As the RK3576 devicet-tree has been upstreamed with the 'supports-cqe;'
-> property set by default, the kernel already tried to use CQE, which
-> results in system hang during suspend. This fixes the issue.
+Changes:
+- Add __mmc_stop_host_no_sync() function that avoids cancel_delayed_work_sync()
+- Update mmc_bus_shutdown() to use the new non-blocking function
+- Keep the original __mmc_stop_host() unchanged for normal operation
 
-Thanks for the patch, it's great to see this implemented!  Please,
-see a small nitpick below.
+This ensures graceful system shutdown while maintaining existing
+functionality for regular MMC host operations.
 
-> +static void rk35xx_sdhci_cqe_enable(struct mmc_host *mmc)
-> +{
-[snip]
-> +}
-> +
-> +static void rk35xx_sdhci_cqe_disabled(struct mmc_host *mmc, bool recovery)
-> +{
-[snip]
-> +}
+stack information when an error occurs:
+INFO: task init:1 blocked for more than 720 seconds.
+      Tainted: G           OE     5.15.185-android13-8-00043-gd00fb6bce7ed-ab13792018 #1
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:init            state:D stack:    0 pid:    1 ppid:     0 flags:0x04000008
+Call trace:
+ __switch_to+0x234/0x470
+ __schedule+0x694/0xb8c
+ schedule+0x150/0x254
+ schedule_timeout+0x48/0x138
+ wait_for_common+0x144/0x308
+ __flush_work+0x3d8/0x508
+ __cancel_work_timer+0x120/0x2e8
+ mmc_bus_shutdown+0x90/0x158
+ device_shutdown+0x204/0x434
+ kernel_restart+0x54/0x220
+ kernel_restart+0x0/0x220
+ invoke_syscall+0x60/0x150
+ el0_svc_common+0xb8/0xf8
+ do_el0_svc+0x28/0x98
+ el0_svc+0x24/0x84
+ el0t_64_sync_handler+0x88/0xec
+ el0t_64_sync+0x1b8/0x1bc
+INFO: task kworker/1:1:73 blocked for more than 721 seconds.
+      Tainted: G           OE     5.15.185-android13-8-00043-gd00fb6bce7ed-ab13792018 #1
+"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+task:kworker/1:1     state:D stack:    0 pid:   73 ppid:     2 flags:0x00000008
+Workqueue: events_freezable mmc_rescan.cfi_jt
+Call trace:
+ __switch_to+0x234/0x470
+ __schedule+0x694/0xb8c
+ schedule+0x150/0x254
+ schedule_preempt_disabled+0x2c/0x4c
+ __mutex_lock+0x360/0xb00
+ __mutex_lock_slowpath+0x18/0x28
+ mutex_lock+0x48/0x12c
+ device_del+0x48/0x8d0
+ mmc_remove_card+0x128/0x158
+ mmc_sdio_remove+0x190/0x1ac
+ mmc_sdio_detect+0x7c/0x118
+ mmc_rescan+0xe8/0x42c
+ process_one_work+0x248/0x55c
+ worker_thread+0x3b0/0x740
+ kthread+0x168/0x1dc
+ ret_from_fork+0x10/0x20
 
-The function rk35xx_sdhci_cqe_disabled() should obviously be called
-rk35xx_sdhci_cqe_disable() instead, i.e. it should use the standard
-imperative mood...
+Signed-off-by: Michael Wu <michael@allwinnertech.com>
+---
+ drivers/mmc/core/bus.c  |  2 +-
+ drivers/mmc/core/core.c | 14 ++++++++++++++
+ drivers/mmc/core/core.h |  1 +
+ 3 files changed, 16 insertions(+), 1 deletion(-)
 
-> +static const struct cqhci_host_ops rk35xx_cqhci_ops = {
-> +	.enable		= rk35xx_sdhci_cqe_enable,
-> +	.disable	= rk35xx_sdhci_cqe_disabled,
-> +	.dumpregs	= dwcmshc_cqhci_dumpregs,
-> +	.set_tran_desc	= dwcmshc_set_tran_desc,
-> +};
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 1cf64e0952fbe..6ff6fcb4c6f27 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -149,7 +149,7 @@ static void mmc_bus_shutdown(struct device *dev)
+ 	if (dev->driver && drv->shutdown)
+ 		drv->shutdown(card);
+ 
+-	__mmc_stop_host(host);
++	__mmc_stop_host_no_sync(host);
+ 
+ 	if (host->bus_ops->shutdown) {
+ 		ret = host->bus_ops->shutdown(host);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index a0e2dce704343..2d75ad26f84a9 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2336,6 +2336,20 @@ void __mmc_stop_host(struct mmc_host *host)
+ 	cancel_delayed_work_sync(&host->detect);
+ }
+ 
++void __mmc_stop_host_no_sync(struct mmc_host *host)
++{
++	if (host->rescan_disable)
++		return;
++
++	if (host->slot.cd_irq >= 0) {
++		mmc_gpio_set_cd_wake(host, false);
++		disable_irq(host->slot.cd_irq);
++	}
++
++	host->rescan_disable = 1;
++	/* Skip cancel_delayed_work_sync to avoid potential blocking */
++}
++
+ void mmc_stop_host(struct mmc_host *host)
+ {
+ 	__mmc_stop_host(host);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 622085cd766f9..eb59a61717357 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -71,6 +71,7 @@ static inline void mmc_delay(unsigned int ms)
+ void mmc_rescan(struct work_struct *work);
+ void mmc_start_host(struct mmc_host *host);
+ void __mmc_stop_host(struct mmc_host *host);
++void __mmc_stop_host_no_sync(struct mmc_host *host);
+ void mmc_stop_host(struct mmc_host *host);
+ 
+ void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+-- 
+2.29.0
 
-... which corresponds with the struct member names.
