@@ -1,24 +1,24 @@
-Received: from mail-m49219.qiye.163.com (mail-m49219.qiye.163.com [45.254.49.219])
+Received: from mail-m1973180.qiye.163.com (mail-m1973180.qiye.163.com [220.197.31.80])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 421973090F7;
-	Wed, 15 Oct 2025 09:10:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.219
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD6D07262F;
+	Wed, 15 Oct 2025 09:46:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.80
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760519412; cv=none; b=H2021DX9MfmuZw8jmMiuw3TiQlCpx8bWl2KnTk0h1VZN19dt1g3203yowA0OGBiTBLJWUmrg8VrubBXoPeToSUucmwARAXKw3k8BKFjvERrfBy2SNM83kEAxNczzC9n/HKW3Ny37kRA9ROybg8VrrG4XAwK7kLpXlICQvhuPwb8=
+	t=1760521586; cv=none; b=XrRfmjVb/eiikCq+yOxPT3mDMAbG+8szZKirFknvsNEe9cZ/rCOlT5cUNS6zGSo/9LxhmLXvzF9XT89I8HtAvQ6Uggrngvkl/XCt2iIPeH5aPGkZuONtI/E/XWb3962PfgLOiMKc02ze9Unvk7ffbcL2pT5qIffzQzXqMS67Z8c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760519412; c=relaxed/simple;
-	bh=nuZmFFZW/qlUylipAljtu2d8WdxO4B/y/NQgH/4GKgk=;
+	s=arc-20240116; t=1760521586; c=relaxed/simple;
+	bh=EeTz9XPuu7BAUwUtkubwAobfgHHacbYpZdkwkkjlacY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=S10kou5whcdSMfSCQHwK7xWVCMCO8Xd/RA9FSq0IEWO0EJJgqUZsefDLs6QNBYGYS+NRIoJn9sdyWJgtUThQEJ+3Tv2OTvmFuNAr5Zf2CQMacOrsobK86LDl+En3XyeWjFB0vRth3tt1oIKipTtBCeWTxy1WYfOqax+SHrwC4d0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=NvqHwAdo; arc=none smtp.client-ip=45.254.49.219
+	 MIME-Version; b=hROJz8KPKY5owbJ+fQulYFt22TYuWeBCSW2MpaK2+IQxyRWD7NDxB7fj3snBoLLclkW+ymX+2ZFb5yQiviIobkF4RZoLdoNTv52RF2PcnC4p0N3H3bTSKM+kNz2cSJjSI3pceaswgotPFya2Uk3dV77O1eAuTdb/uk2o8D11KeU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=ZF/M/Ju1; arc=none smtp.client-ip=220.197.31.80
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="NvqHwAdo"
+	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="ZF/M/Ju1"
 Received: from albert-OptiPlex-7080.. (unknown [117.184.129.134])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 25fdef37e;
-	Wed, 15 Oct 2025 17:09:58 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 25feb775a;
+	Wed, 15 Oct 2025 17:31:03 +0800 (GMT+08:00)
 From: Albert Yang <yangzh0906@thundersoft.com>
 To: robh@kernel.org
 Cc: adrian.hunter@intel.com,
@@ -35,11 +35,11 @@ Cc: adrian.hunter@intel.com,
 	will@kernel.org,
 	yangzh0906@thundersoft.com
 Subject: Re: [PATCH 4/9] dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
-Date: Wed, 15 Oct 2025 17:09:57 +0800
-Message-ID: <20251015090957.1533003-1-yangzh0906@thundersoft.com>
+Date: Wed, 15 Oct 2025 17:31:02 +0800
+Message-ID: <20251015093102.1554881-1-yangzh0906@thundersoft.com>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250923135620.GA3119392-robh@kernel.org>
-References: <20250923135620.GA3119392-robh@kernel.org>
+In-Reply-To: <175862238966.2427901.366123788055800395.robh@kernel.org>
+References: <175862238966.2427901.366123788055800395.robh@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,71 +47,46 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a99e722245609cckunmf9bb21f3648025
+X-HM-Tid: 0a99e735723809cckunmdf24c7d565021a
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlDS0tIVkseSR4ZHk9MS00fTlYVFAkWGhdVEwETFh
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVkZTB4ZVktJQ0oeSEJMTE4YQ1YVFAkWGhdVEwETFh
 	oSFyQUDg9ZV1kYEgtZQVlKSkxVSkNPVUpJQlVKSE9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0hVSk
 	tLVUpCS0tZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=NvqHwAdolml55y1fUTrEj0qHhlhHQgcCkqahnTkmRYHXHyBk03moQBZe9JrtcpSekbNZ3CyajDUuNgcNASazasgbmEHdYiBch9Vb5GOEl3QVnXV1A/pGjqbj5gZs56MALY27qwSeGUVrYVJeFFF5LyuFtkbH8soiscEbnDnrEME=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=LKQbqU+sTp1fVknZcwtJ+snTmTwbzVT7SLAG891vDvM=;
+	b=ZF/M/Ju14bJoKl5y4eEJGYP+s0aqD7uGcfvw6nQhqPmgd7COTxeBT+TFvcHvOjbd8kJlLRbTfVAIQR7H7D34x6MAH3qImVJ9geDT/PWlOacYoRi3t7NIuEmCumdyE++j2qtKrIPtAP27XwQqUMtyCXGaJHhsFv/xvD77YW+8EPQ=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
+	bh=kazy95w4NqQW9hygc2OcQJl8bs8aQ8rm5/DSPqHwz30=;
 	h=date:mime-version:subject:message-id:from;
 
 Hi Rob,
 
-Thank you for your review and feedback on v4!
+Thank you for running the dt_binding_check on this patch!
 
-On Tue, Sep 23, 2025 at 08:56:20AM -0500, Rob Herring wrote:
-> On Tue, Sep 23, 2025 at 02:10:10PM +0800, Albert Yang wrote:
-> > Changes for v4:
->
-> Thanks for the changelog here, but the subject should have 'PATCH v4' so 
-> various tools work.
+On Tue, Sep 23, 2025 at 05:13:09AM -0500, Rob Herring (Arm) wrote:
+> My bot found errors running 'make dt_binding_check' on your patch:
+> 
+> yamllint warnings/errors:
+> 
+> dtschema/dtc warnings/errors:
+> Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.example.dtb: /example-0/bus/mmc@22200000: failed to match any schema with compatible: ['bst,c1200-dwcmshc-sdhci']
 
-Acknowledged. I'll ensure the subject line follows the correct format 
-"[PATCH v5 X/Y]" in the next version.
+This error occurred because in v4, while I updated the dts compatible property 
+definition to "bst,c1200-sdhci" (as requested in review), I failed to update 
+the compatible string in the example node accordingly. The example was still 
+using the old "bst,c1200-dwcmshc-sdhci", causing the schema validation to fail.
 
-> Filename should match compatible.
-
-Agreed. I will rename the file from:
-  bst,dwcmshc-sdhci.yaml
+I have now corrected the example's compatible string from:
+    compatible = "bst,c1200-dwcmshc-sdhci";
 to:
-  bst,c1200-sdhci.yaml
+    compatible = "bst,c1200-sdhci";
 
-and update the $id field accordingly from:
-  http://devicetree.org/schemas/mmc/bst,dwcmshc-sdhci.yaml#
-to:
-  http://devicetree.org/schemas/mmc/bst,c1200-sdhci.yaml#
+Following your suggestion, I've upgraded dtschema:
+    pip3 install dtschema --upgrade
 
-> > +  clock-names:
-> > +    items:
-> > +      - const: core
->
-> Not really any point in having -names when there is only 1 entry.> Not really any point in having -names when there is only 1 entry.
+and verified the fix with:
+    make dt_binding_check DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/bst,c1200-sdhci.yaml
 
-You're right. I'll remove the clock-names property and its entry from the 
-required properties list.
-
-> > +  memory-region:
-> > +    maxItems: 1
->
-> Having this is odd. Please add a description saying what it is for.
->> Having this is odd. Please add a description saying what it is for.
-
-I'll add a description for memory-region:
-
-  memory-region:
-    maxItems: 1
-    description:
-      Phandle to a reserved memory region for DMA bounce buffer. The BST C1200
-      SDHCI controller supports only 32-bit DMA addressing, while system memory
-      may be located above 4GB address space.
-
-Additionally, I've already corrected the example's compatible string from 
-"bst,c1200-dwcmshc-sdhci" to "bst,c1200-sdhci" to match the property definition.
-
-I'll prepare v5 with all the above changes addressed.
+The binding now passes all validation checks. This fix will be included in v5.
 
 Best regards,
 Albert Yang
