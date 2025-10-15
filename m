@@ -1,166 +1,105 @@
-Received: from out28-99.mail.aliyun.com (out28-99.mail.aliyun.com [115.124.28.99])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f177.google.com (mail-lj1-f177.google.com [209.85.208.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D58B913C8EA;
-	Wed, 15 Oct 2025 06:12:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.28.99
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 310A1311C3F
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Oct 2025 06:30:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760508778; cv=none; b=eeP0N14tKqcUwnZ6AfLkszOnP5NI3xKDg1pzyTSk+AFTJ6pC0jw+Ja9dySTaqZ/pz7l/DGtL/2NKysnImih8rdX8CEZLde8Vje0F32HqdsefMbx/7UdYWQ/fzuj8sbOvikN21XIfGdnx7jNIcddozCE6eBkj3iALfpcNp/a8SnY=
+	t=1760509829; cv=none; b=Ia7lAr77BR6vnZIYuA8V6wYJxRJ9P7zyx2brUxT+niM4qNOyM675T6XERpX/+XB7+hKwY7mxp71Yo1J5FiPHKIm3kfPWf/HEPWsZNzeWYvX0VCcp4PYX98o7QcjZDoUuiT3z69w8v8WKwz45vN6FLbxvawG3QYNRTSfp2SpgyVE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760508778; c=relaxed/simple;
-	bh=7AxJLTHuNLufjyzhwhMdz+Egc9IfsztB8kWgCDonfck=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=GknEdJ/iizjypM6Qz45iDadIpgRvzmqqokSMCV7LbwUFQFPsLmk0i5nlPWDbBVr/0GjzVt2H6Cxh8bRW9ngiAtpN6qyk/cmpFpLkqsdOAq/FIFKsHXZ28Qp07K3Oya/XjC9hhCkAmVqnrtRAlR+kw7DIrT5zbGVG+0mXY4aJmTs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=allwinnertech.com; spf=pass smtp.mailfrom=allwinnertech.com; arc=none smtp.client-ip=115.124.28.99
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=allwinnertech.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=allwinnertech.com
-Received: from SunxiBot.allwinnertech.com(mailfrom:michael@allwinnertech.com fp:SMTPD_---.f-yOgmV_1760508437 cluster:ay29)
-          by smtp.aliyun-inc.com;
-          Wed, 15 Oct 2025 14:07:22 +0800
-From: Michael Wu <michael@allwinnertech.com>
-To: ulf.hansson@linaro.org,
-	linus.walleij@linaro.org,
-	brgl@bgdev.pl,
-	adrian.hunter@intel.com,
-	avri.altman@wdc.com,
-	wsa+renesas@sang-engineering.com,
-	victor.shih@genesyslogic.com.tw,
-	andy-ld.lu@mediatek.com
-Cc: jason.lai@genesyslogic.com.tw,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-gpio@vger.kernel.org
-Subject: [RESEND] mmc: core: Fix system shutdown hang in mmc_bus_shutdown
-Date: Wed, 15 Oct 2025 14:07:14 +0800
-Message-Id: <20251015060714.67558-1-michael@allwinnertech.com>
-X-Mailer: git-send-email 2.29.0
+	s=arc-20240116; t=1760509829; c=relaxed/simple;
+	bh=U+QJpInAQJD/UO7rXl6XPQY0ZAlove8LjuD2791XvXw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=P/V0VghDs47aOopSlYYeEKJ7SYBc9LMPSA4CJhSrUQmCYHlmMkSK41JEt15dJR0lRf/aIQP5KuYhVBj8yWn2c1dQSuNEImCY9NVYyOCXUwfWneubAWFbRTRQn7h6z68Uuy/xjOMLHHWpm/3OBZDYdpAXwyq/+W6PiTWVYEdBq4w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nAANDeCJ; arc=none smtp.client-ip=209.85.208.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nAANDeCJ"
+Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-373a1ab2081so58726751fa.3
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Oct 2025 23:30:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1760509825; x=1761114625; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=U+QJpInAQJD/UO7rXl6XPQY0ZAlove8LjuD2791XvXw=;
+        b=nAANDeCJQmapJM4yQy1/KPiB3mk3XqoNeCV8WlFFqb6MowF4ixgB/z5JXPfpNsooke
+         XnL+g6aBlj3aixjQga6x7w7287CwMjp6jffyK3MXTAMrnlMgS9cR1rwQT0vHWdqdCmNo
+         4DrNor8mkAIq5MJ2X5gjKj6tMcWta9qrDJAZnBAnZn6dO+JVEQOWUocalA5usOVnsPF9
+         B7kElg4sZriJ7AitutCLZfxA+UKMGK/5C90hGCKhb5ePSpp9FC680yixxCEV5kjgQEQ0
+         2ycg9egUPeMHz+8gln/LpOdd3WexEsz8JDltWl+vif8ESv1D2HEKXkQd+cXrh+PteE3A
+         l2ZA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760509825; x=1761114625;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=U+QJpInAQJD/UO7rXl6XPQY0ZAlove8LjuD2791XvXw=;
+        b=BD+/uGG5+V10pKDgKf5nZUqhBIghbGR+4/QTdirwQ4y3U7mTVPhN+q5jmnRqNFqnnh
+         UOMICIVjoU+WavjXAeM+hhhSdugkmV62FLlM4ckisJRKvkLj1JJjTTV1IxlBdzNcKA6T
+         KoKbxPAKZG+O77DG72Rnk9pvomK7uTBJIuz65sggHk34Tuy+OhkvGqYmN93+0B8jyeNN
+         EFwLiPjcaxFroBZkRBCfgTWjlekz/KpDglQQg8TvMxkV+qJ9SmheyTUPamOYb11FqUnP
+         s78J+YFJZrH1Qev3FrQ9/HRnohV313ZXJ+JcykoELBp6cShWNkNw/NKjpGnpN9/kBkmH
+         Xdxg==
+X-Forwarded-Encrypted: i=1; AJvYcCUz+N5khnw5InwKbBY3FkYQhwjyI9fEBKb7Dd9qlRryEe+O/OszvmQtC/CzpAt2ugt7ixwQQS911cY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzGAkmfDmy2hY9w7rRhBi67pUZT0cnqz+/llT6Y3WhQVij1GZcZ
+	N16zRGiR7zIjLKar+EwKpCDF5hty94WnGVoeEWKQoZ+YQuR+j/Ik6WMxOmD1MVDZQJtB/BLPnAB
+	Q+IqCdeEYG+PzEU/FI62o80SpziwgRgMBdWBpsn1gqQ==
+X-Gm-Gg: ASbGnct5+JU8GD94ZmNaMG+o/PQxMJvyhLG6oTibJ5dcDkFd1hvh03qed0S22oRa/7I
+	TKm4bIDiGAd/z2ooEQOl3W3bhk+sAWbER87+r7YNFHhsUr47eVicIwTsX3AeFP9SzceokvKuozP
+	+SJA+rBd1A4f9ytBWWMP4TRPgZBwA2lrhHzjfg++1F1kkjJ+zgrkPOyL5PJyFZmgjMU6oLZDWVj
+	npDJx15znb8tv3j4uEhKlRoOj60OvjjEr1O0s2vV1Dre+kf/6M=
+X-Google-Smtp-Source: AGHT+IGUsgryfaHD0rnj3LtJX0svvEnMtTCvHCuJxwMxVB7v78te9kwRaSVyuTsq1gSb0ZAbdHX3z/ggHAOfux8GoC4=
+X-Received: by 2002:a2e:b88e:0:b0:36d:a459:f0c6 with SMTP id
+ 38308e7fff4ca-37609cf2a61mr74137741fa.12.1760509824851; Tue, 14 Oct 2025
+ 23:30:24 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20251015060714.67558-1-michael@allwinnertech.com>
+In-Reply-To: <20251015060714.67558-1-michael@allwinnertech.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Wed, 15 Oct 2025 08:30:13 +0200
+X-Gm-Features: AS18NWAUhU_Vsd9dzfVXxTibpqYvM8QTjr1kGOPoZF-KY0GMkTVsXhlFFcZV4bU
+Message-ID: <CACRpkdbQH2+AoCVAZf_apQ=uhkbinkHtk60ssB0ODpBZY-gATw@mail.gmail.com>
+Subject: Re: [RESEND] mmc: core: Fix system shutdown hang in mmc_bus_shutdown
+To: Michael Wu <michael@allwinnertech.com>
+Cc: ulf.hansson@linaro.org, brgl@bgdev.pl, adrian.hunter@intel.com, 
+	avri.altman@wdc.com, wsa+renesas@sang-engineering.com, 
+	victor.shih@genesyslogic.com.tw, andy-ld.lu@mediatek.com, 
+	jason.lai@genesyslogic.com.tw, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-During system shutdown, mmc_bus_shutdown() calls __mmc_stop_host() which
-uses cancel_delayed_work_sync(). This can block indefinitely if the work
-queue is stuck, causing the system to hang during shutdown.
+Hi Michael,
 
-This patch introduces a new function __mmc_stop_host_no_sync() that skips
-the synchronous work cancellation, preventing potential shutdown hangs.
-The function is used in mmc_bus_shutdown() where blocking is not
-acceptable during system shutdown.
+thanks for your patch!
 
-Changes:
-- Add __mmc_stop_host_no_sync() function that avoids cancel_delayed_work_sync()
-- Update mmc_bus_shutdown() to use the new non-blocking function
-- Keep the original __mmc_stop_host() unchanged for normal operation
+On Wed, Oct 15, 2025 at 8:07=E2=80=AFAM Michael Wu <michael@allwinnertech.c=
+om> wrote:
 
-This ensures graceful system shutdown while maintaining existing
-functionality for regular MMC host operations.
+> During system shutdown, mmc_bus_shutdown() calls __mmc_stop_host() which
+> uses cancel_delayed_work_sync(). This can block indefinitely if the work
+> queue is stuck, causing the system to hang during shutdown.
+>
+> This patch introduces a new function __mmc_stop_host_no_sync() that skips
+> the synchronous work cancellation, preventing potential shutdown hangs.
+> The function is used in mmc_bus_shutdown() where blocking is not
+> acceptable during system shutdown.
+>
+> Changes:
+> - Add __mmc_stop_host_no_sync() function that avoids cancel_delayed_work_=
+sync()
 
-stack information when an error occurs:
-INFO: task init:1 blocked for more than 720 seconds.
-      Tainted: G           OE     5.15.185-android13-8-00043-gd00fb6bce7ed-ab13792018 #1
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-task:init            state:D stack:    0 pid:    1 ppid:     0 flags:0x04000008
-Call trace:
- __switch_to+0x234/0x470
- __schedule+0x694/0xb8c
- schedule+0x150/0x254
- schedule_timeout+0x48/0x138
- wait_for_common+0x144/0x308
- __flush_work+0x3d8/0x508
- __cancel_work_timer+0x120/0x2e8
- mmc_bus_shutdown+0x90/0x158
- device_shutdown+0x204/0x434
- kernel_restart+0x54/0x220
- kernel_restart+0x0/0x220
- invoke_syscall+0x60/0x150
- el0_svc_common+0xb8/0xf8
- do_el0_svc+0x28/0x98
- el0_svc+0x24/0x84
- el0t_64_sync_handler+0x88/0xec
- el0t_64_sync+0x1b8/0x1bc
-INFO: task kworker/1:1:73 blocked for more than 721 seconds.
-      Tainted: G           OE     5.15.185-android13-8-00043-gd00fb6bce7ed-ab13792018 #1
-"echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-task:kworker/1:1     state:D stack:    0 pid:   73 ppid:     2 flags:0x00000008
-Workqueue: events_freezable mmc_rescan.cfi_jt
-Call trace:
- __switch_to+0x234/0x470
- __schedule+0x694/0xb8c
- schedule+0x150/0x254
- schedule_preempt_disabled+0x2c/0x4c
- __mutex_lock+0x360/0xb00
- __mutex_lock_slowpath+0x18/0x28
- mutex_lock+0x48/0x12c
- device_del+0x48/0x8d0
- mmc_remove_card+0x128/0x158
- mmc_sdio_remove+0x190/0x1ac
- mmc_sdio_detect+0x7c/0x118
- mmc_rescan+0xe8/0x42c
- process_one_work+0x248/0x55c
- worker_thread+0x3b0/0x740
- kthread+0x168/0x1dc
- ret_from_fork+0x10/0x20
+Why is this function prefixed with __two underscores? The
+__mmc_stop_host is named like that because there is another
+function with the same name, but here is no mmc_stop_host_no_sync()
+so just name it without underscores.
 
-Signed-off-by: Michael Wu <michael@allwinnertech.com>
----
- drivers/mmc/core/bus.c  |  2 +-
- drivers/mmc/core/core.c | 14 ++++++++++++++
- drivers/mmc/core/core.h |  1 +
- 3 files changed, 16 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 1cf64e0952fbe..6ff6fcb4c6f27 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -149,7 +149,7 @@ static void mmc_bus_shutdown(struct device *dev)
- 	if (dev->driver && drv->shutdown)
- 		drv->shutdown(card);
- 
--	__mmc_stop_host(host);
-+	__mmc_stop_host_no_sync(host);
- 
- 	if (host->bus_ops->shutdown) {
- 		ret = host->bus_ops->shutdown(host);
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index a0e2dce704343..2d75ad26f84a9 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2336,6 +2336,20 @@ void __mmc_stop_host(struct mmc_host *host)
- 	cancel_delayed_work_sync(&host->detect);
- }
- 
-+void __mmc_stop_host_no_sync(struct mmc_host *host)
-+{
-+	if (host->rescan_disable)
-+		return;
-+
-+	if (host->slot.cd_irq >= 0) {
-+		mmc_gpio_set_cd_wake(host, false);
-+		disable_irq(host->slot.cd_irq);
-+	}
-+
-+	host->rescan_disable = 1;
-+	/* Skip cancel_delayed_work_sync to avoid potential blocking */
-+}
-+
- void mmc_stop_host(struct mmc_host *host)
- {
- 	__mmc_stop_host(host);
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 622085cd766f9..eb59a61717357 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -71,6 +71,7 @@ static inline void mmc_delay(unsigned int ms)
- void mmc_rescan(struct work_struct *work);
- void mmc_start_host(struct mmc_host *host);
- void __mmc_stop_host(struct mmc_host *host);
-+void __mmc_stop_host_no_sync(struct mmc_host *host);
- void mmc_stop_host(struct mmc_host *host);
- 
- void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
--- 
-2.29.0
-
+Yours,
+Linus Walleij
