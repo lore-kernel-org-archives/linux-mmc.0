@@ -1,107 +1,108 @@
-Received: from mail-yx1-f45.google.com (mail-yx1-f45.google.com [74.125.224.45])
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A96A369966
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 13:31:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A85453570D2
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 13:31:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760707872; cv=none; b=F1qEJcc+l8zzAjvtnMNZFubkoENkNTo13y12w2jK+bEb9ecTj8pgCginDXz7vbFvkGcS6VfzBfOdoffGrGVQfzso0E9U+BCWYvnEFEjmp/x/MHAlYoJ03FKB2HsVPxi6LjWbMyWkmN1Jp+DC7PHz43TLpJea3aYUPicbwJR9x20=
+	t=1760707877; cv=none; b=S5v2tvWV0C2HyTiuebzAIapSmoejfMyhaDWZ0m/VCQZ1VyvYQP5vIj0byhmz2xn95QGWtsfy5uMkgDzISC4Qeuz3QRA6kRgZ+YvWaFrCV+eVYkJW+4nyXptfrHJ8S7kNujOuSFV6+z3N6h0apqdrmH/3VtD2+0AFAQDtUqY5+6Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760707872; c=relaxed/simple;
-	bh=i+O3goYjT4QQXxLHScTtYR8tB+lqI6cv3xXIRKCisAc=;
+	s=arc-20240116; t=1760707877; c=relaxed/simple;
+	bh=H/E6eV4Q7AUMWgroZUZA6TBNnoUDvpB/AuCgLUH7pNQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=K2PsGsLssAb4LWen7ct1b/S86OJLij/ArPoUXL1G/7dz9C3cZi/YtX8qERgy1ZKD6pMEEZkWlLKKv7G+nHxZeWUbM/zETDcktlY2AsInohZFpJH9s0K49GQOX0UlMKzkcUI63xUMfHBmwDFswcIljPP2z66BOnBCvlN8Qdn5dXk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TJJTlH+A; arc=none smtp.client-ip=74.125.224.45
+	 To:Cc:Content-Type; b=BOc23wrNDzfN3EYpp7XOWGrdeZYq9LKfs9gySUBPTfLSyHGW2YPfSoLt/eT5MMViG4WjtvhOLa4I+uYU9M9w21W46Mn64L8/Fh001X4T5hsYWhdIWGEJFQix8DLxDwzDg715pDh49zJOBzTERFfferq+RagZC6aVfZ7G4/wkJ0Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lqPAh5FK; arc=none smtp.client-ip=209.85.128.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TJJTlH+A"
-Received: by mail-yx1-f45.google.com with SMTP id 956f58d0204a3-63bbf5f77daso2033361d50.3
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 06:31:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lqPAh5FK"
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-7815092cd0aso22568927b3.2
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 06:31:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1760707870; x=1761312670; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1760707875; x=1761312675; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=DUCXQ0EvV9ktxmOlNW52FjkhtUMF4mrPMo81WKGkY7k=;
-        b=TJJTlH+AdWbVPr4lWHccUlLtKQCL3SxG2ftDDibxk6+eXLd1N7cnCuLl8Kx+f2K0dB
-         dT+gLRQLmsQVVSy/FZKcbqz695iwUYEt3a6HhE1dBhPEIieivCgMMxvlwdtKh+f+62Op
-         lImGEchQ3yjfl11cG1oTk45WIZI4DtLkWuOWhw8M1snVo6RweJ327YgzPRXlgVOJNMLr
-         SzqZkJtNr+vPctEku2JQ4Xof0cM7f7xL+ujd5OQHPdQ5+tNwH8HelbtNwwksXRcPguQm
-         Iq57lKxZyB9tWpilqu29YwFnKl4uBD31YkyM3jo3g5F96p+szu7MettjmWh2GzzVBla8
-         h9JQ==
+        bh=ya09/FJ0Jt2vkZFs3L65EX9oqmt3XQlAivywk/xyHOw=;
+        b=lqPAh5FKKVXDN2Bmm1rMBYxhJtCsbWw/aifNqeDcxfWtQc/NBxsGNOxt4vGfA/mHSP
+         SBQs3rgl+6/zcvgh5vvazZCBZpBAK/vRh+b1FWXOsQUOTBinh1n8SA0dR0TISWbWrUP6
+         m/7GyUYDDMlk+Eaze24C9+Ba9ewKAp92Hzy6iZJFl99hADT0vyGEs9LI2tUyXGDlDCaw
+         QMFeoeDqLl63PzFQEEGf9C1qxxBQLqj1n/EVS7PkKwCihMjvu0d6HUW11KEDQEq9slx+
+         GYMHPzfhoAZg76RVfnd3V2j0XfVdYqNU9xaxW8OrjXKwJXSaZ2+8kuty5XZmFzfmyts8
+         ipig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760707870; x=1761312670;
+        d=1e100.net; s=20230601; t=1760707875; x=1761312675;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=DUCXQ0EvV9ktxmOlNW52FjkhtUMF4mrPMo81WKGkY7k=;
-        b=HRKirGdJ1/MX54PZAhjBdtsA4mnEDwhWy0R9g5u4Ss15Evi0RlnOc4RLUamrvkjBj1
-         XEoQsrR96v6uTHR2kY318E4qrQaWtwJsjwZGCT4xKhO7VsAJb8Oqg65jRrtCZGchlJB/
-         8wq4zlTX+KOa15o4+VKeAM7aq9UFi8slXsDOxMfjADbyRMZl7jeDkyNSJbT0XGsSnJIa
-         uqKxsmYKKV+lBUiZrSjvLNATrbOU9CXIrb2genwxkdtvSw/iV010RjFdPCmzuceC0cID
-         3WxV/l5n1slLWCJv339xtIzvQKsXNB+w3LBQO02rzFEOp2ID//0s8BVQC8Ixk2d1hv1W
-         2aCg==
-X-Forwarded-Encrypted: i=1; AJvYcCVdZb412uCyD3ZnTzy9ceKpNXxQrTD5h2pRMvyNyuqjg7rXKKTM6CuiRed/39hlYBk4he/WfKGLXgQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwqSjGiQcyyzExS40rM99QEpsK1unKSz4eJ8/kChczK7kRUUWxo
-	ovF+FsovluGQ8+YRtICEf+GI5qTHu8JuwL3kQXCFGL/Hfg78zg5lsoidOFhs9bajD6fh3qRDEGV
-	PVHm3VXbAED7J50tCnzK0wU06Pn1Sl5zNlys9uFBn0g==
-X-Gm-Gg: ASbGncsaS9KpERJyDtUpyjAJJfeD/SM0OgrcZ+MXvSPgxnQEoHxLG0hNoc6z/qoLHQJ
-	A5zXd5RHxke5MsqonFrn7+nhVWGpRdRiRO6D+Fy4NtzA4Kh1ZR2MqhY2ycpM0gYu8dQok6WYKvw
-	EqxFUIH2e917eTDtdyHyiSNr+HVQUIIsIrkw6jUPwMX/dlmptFSjj17LN5KayiYpLiQK0lBEPQJ
-	vQaYUrDW/+2SPxJWexDTNi7mbaduYwIFOpSLAGdSCQcItRfXHDb/AOzJzjJuYC9B3/vvJhc
-X-Google-Smtp-Source: AGHT+IE99aLeU1qJuGUKKD3EwC+82B0WlUi+IrZYAAKOJ3BjaAC6xXwG/vSFF6c7L0L5r1xHD6BMxG1tEIJhEP9Q9Zs=
-X-Received: by 2002:a05:690e:4009:b0:63e:17d8:d985 with SMTP id
- 956f58d0204a3-63e17d8db6emr2723484d50.53.1760707869805; Fri, 17 Oct 2025
- 06:31:09 -0700 (PDT)
+        bh=ya09/FJ0Jt2vkZFs3L65EX9oqmt3XQlAivywk/xyHOw=;
+        b=vFMg3EIaBOVb3cbFofaU7Ggho7razIDEwwvGpl6YLTLFKp+7sR54HteS94pjG2Puhd
+         NsLRNivGbgoiFvO41M+FrLyaNaKiX3NOvledWhvU2Wm+d1gOM9VxNFAh4DToxvLLkuNu
+         hDVPZIguW4qJMJUJ8O3x7SONGNlgGz16v83T2jzO/wT7wqHYbhQmTPPNKdCA3xX5mcuq
+         XbjXbYDFOb8YIGErG/Sxkf7nAv42fDgP+IF0JeCwK0dy4qYdvr/n8DUVxz8KZaChRqQ5
+         81uYzwlBHuW5hmTnHC68yrhTh45adUXKDxNXyMFvYww4lmiGyU7lB9PQcXp9FkElhgh2
+         2tzw==
+X-Forwarded-Encrypted: i=1; AJvYcCX7Zn67BxsHnX1eT6TdPVuL4FkeiKO6CUeKEeL4TfEdWUr0zE+vtNtESZd80TDVLGok9UaPp0O/SBs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzltAoIe/IL3tR/8eDQnNv2TQmvnp2DUrGIK28NvWqgFfZC6/5T
+	xqmNT3YcZHLi3wYXnc5Un68AfEsNCklWcX7odikgS0GUv0LtGSBXMfxf7cVvw6XXvLcssw5tpys
+	EAbfTN6ERFzx2cJID30MK0REpHtMeHVFNmnYjpBSAxfSJpWXS4k2c
+X-Gm-Gg: ASbGncujA0fgAp7Lv+wVT11sBSlS5+sXAQHqYpUUgiGeUk2SZb6yuQQ4pccTC5gOT9d
+	xrkH5vuvDwCt9GdHeILkq1srGWRocb3p4RBP1hPzzp4LdWSYFpD0p4GeU6bHUcIeA787sh0vNki
+	Eo86f4oU7jXBxckgV9bN8LnC34sB7Dy6x4GFy3aQ2LfFtHPreDZsEHzcVZ6Kb5K32lgjlaYafI9
+	iGAM+m0nZRUzqOL++qkcumZHry5QKGsdDfSpkyXy524sjyVUbhjzX/tf+APogDbGtABit6f
+X-Google-Smtp-Source: AGHT+IHaMyplibGsKvyBsWf4d8oq0ZtFb9Ijd7iI1n1vX2MO6Zfy04PAud6LZQhNkNWoz2gofV0tnhz9h8UzU+Vv9kY=
+X-Received: by 2002:a05:690e:2505:10b0:63c:efd6:c607 with SMTP id
+ 956f58d0204a3-63e160d904emr2631024d50.3.1760707874702; Fri, 17 Oct 2025
+ 06:31:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251007140434.606051-1-kamal.dasu@broadcom.com>
-In-Reply-To: <20251007140434.606051-1-kamal.dasu@broadcom.com>
+References: <1760067445-165115-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1760067445-165115-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 17 Oct 2025 15:30:34 +0200
-X-Gm-Features: AS18NWCxOo1IPoxvNmAyvX3kK0QzpALZz5b5Ua2IC_5KvIDu-uhmuTnAMYhlcsU
-Message-ID: <CAPDyKFrsjnSYBTpPJ1qWXVHTZSw8EuQh6b_CcNAKuKHHMwy2MQ@mail.gmail.com>
-Subject: Re: [PATCH v2 0/5] sdhci-brcmstb SD host controller SoC specific enhancements
-To: Kamal Dasu <kamal.dasu@broadcom.com>
-Cc: andersson@kernel.org, robh@kernel.org, krzk+dt@kernel.org, 
-	conor+dt@kernel.org, florian.fainelli@broadcom.com, adrian.hunter@intel.com, 
-	bcm-kernel-feedback-list@broadcom.com, devicetree@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org
+Date: Fri, 17 Oct 2025 15:30:37 +0200
+X-Gm-Features: AS18NWDwfs0DQUBqQWJnaR7XpTfTNymg8CKiu65Cb0p3e4ukXpjx9CCcZmxG414
+Message-ID: <CAPDyKFqM2bYJyY+JpTLh7zF-Kjs7HcZEX_JVHgPAyVzC9kWvkA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Use dma_set_mask_and_coherent() helper
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 7 Oct 2025 at 16:04, Kamal Dasu <kamal.dasu@broadcom.com> wrote:
+On Fri, 10 Oct 2025 at 05:37, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> sdhci-brcmstb HS200 configuration for BCM72116 and PM register save restore
-> changes applicable to various SoCs.
+> Use dma_set_mask_and_coherent() instead. No functional changes.
 >
-> v2 changes:
->  - Separate commit for SDIO_CFG register defines that moved
->  - Implemented cosmetic changes proposed for initial change for :
->      "mmc: sdhci-brcmstb: clear CFG_OP_DLY when using HS200"
->  - Moved BCM74371 support in a separate commit
->  - Implemented review comments and reorganized code for :
->      "mmc: sdhci-brcmstb: save and restore registers during PM"
->  - Added Reviewed-by and Acked-by tags wherever applicable
->
-> Kamal Dasu (5):
->   dt-bindings: mmc: Add support for BCM72116 and BCM74371 SD host
->     controller
->   mmc: sdhci-brcmstb: move SDIO_CFG_CQ_CAPABILITY define
->   mmc: sdhci-brcmstb: clear CFG_OP_DLY when using HS200
->   mmc: sdhci-brcmstb: Add BCM74371 support
->   mmc: sdhci-brcmstb: save and restore registers during PM
->
->  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      |   2 +
->  drivers/mmc/host/sdhci-brcmstb.c              | 154 +++++++++++++++++-
->  2 files changed, 147 insertions(+), 9 deletions(-)
->
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-The series applied for next, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+>  drivers/mmc/host/dw_mmc.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index c5db92b..c4f5f44 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3120,9 +3120,8 @@ static void dw_mci_init_dma(struct dw_mci *host)
+>                         host->dma_64bit_address = 1;
+>                         dev_info(host->dev,
+>                                  "IDMAC supports 64-bit address mode.\n");
+> -                       if (!dma_set_mask(host->dev, DMA_BIT_MASK(64)))
+> -                               dma_set_coherent_mask(host->dev,
+> -                                                     DMA_BIT_MASK(64));
+> +                       if (dma_set_mask_and_coherent(host->dev, DMA_BIT_MASK(64)))
+> +                               dev_info(host->dev, "Fail to set 64-bit DMA mask");
+>                 } else {
+>                         /* host supports IDMAC in 32-bit address mode */
+>                         host->dma_64bit_address = 0;
+> --
+> 2.7.4
+>
