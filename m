@@ -1,111 +1,107 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yx1-f45.google.com (mail-yx1-f45.google.com [74.125.224.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E87423570D9
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 13:31:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A96A369966
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 13:31:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760707868; cv=none; b=rrbc+KzWU9SG5gm41iLUabIaVLsUVHfoppYsrNok09Jx28j5LLwTMg10suFFbz3xS5DdM8FqSj8KjDrDQJatid/KgkyCj6Sgii1t5ATu0GhhMDD57TiSBRHD/3gmFo5TSj3CPpBcK/IeaIptI9CvwYG2j/zL9t9JmoApp7tYRYs=
+	t=1760707872; cv=none; b=F1qEJcc+l8zzAjvtnMNZFubkoENkNTo13y12w2jK+bEb9ecTj8pgCginDXz7vbFvkGcS6VfzBfOdoffGrGVQfzso0E9U+BCWYvnEFEjmp/x/MHAlYoJ03FKB2HsVPxi6LjWbMyWkmN1Jp+DC7PHz43TLpJea3aYUPicbwJR9x20=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760707868; c=relaxed/simple;
-	bh=dE9/ua2G+yDuGUrL76DK4p0HBiiblfdcYkaY/cxGS8I=;
+	s=arc-20240116; t=1760707872; c=relaxed/simple;
+	bh=i+O3goYjT4QQXxLHScTtYR8tB+lqI6cv3xXIRKCisAc=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fIjjFYZpmZ6/mPgnoQuFSNufT0KDzq1sq2oKWPMdbyehzxU+anXL7GKFg8XC6nYvy5VfhX7/dWYEXyxVandei+g1GpcHrc/JB++342ZMA2dBfhcbMHqByzwhlMR9vpVV1wmzkD8o0W6Q6YYQGqnUlX3PiLfJm+Hq6/r+IsCdwto=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=OW6YrPiI; arc=none smtp.client-ip=209.85.128.176
+	 To:Cc:Content-Type; b=K2PsGsLssAb4LWen7ct1b/S86OJLij/ArPoUXL1G/7dz9C3cZi/YtX8qERgy1ZKD6pMEEZkWlLKKv7G+nHxZeWUbM/zETDcktlY2AsInohZFpJH9s0K49GQOX0UlMKzkcUI63xUMfHBmwDFswcIljPP2z66BOnBCvlN8Qdn5dXk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TJJTlH+A; arc=none smtp.client-ip=74.125.224.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="OW6YrPiI"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-71d71bcac45so20870857b3.0
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 06:31:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TJJTlH+A"
+Received: by mail-yx1-f45.google.com with SMTP id 956f58d0204a3-63bbf5f77daso2033361d50.3
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Oct 2025 06:31:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1760707865; x=1761312665; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1760707870; x=1761312670; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=f1HM0d52xL5++z1kGRjypoT65pMC3vnmCE9M/Z2HtkI=;
-        b=OW6YrPiI8mXZzqqXJt3uJxufH6bnjTxOMFucnUji6RStU8NHoxAzwjcPK4FYI3IRo5
-         5N71rh6FfaHLxLTteOMJpfQgVfoeaFoLigIVCYbrk9+89wooLtXjjAZkmW+T1/7z9gdQ
-         JvKztkTF3sC5FN0wTfryrXCpoc42XClvMn1LtsmvqBIRVoZn6YJOHXiQW+LBTQAd53qv
-         V/gPoY/0L9+tAnXZ8icBL1DRZ//5Gl7R5tXKCHCVACKNQ0p3Hj4sl/42XanyKYsi+duZ
-         SRgvMwSf8tazfXfIeGWAlh+khPbu2wjRKyZc5qyyGEtu6YdQQvF/9jEubkgbjDNJxYiB
-         FzxA==
+        bh=DUCXQ0EvV9ktxmOlNW52FjkhtUMF4mrPMo81WKGkY7k=;
+        b=TJJTlH+AdWbVPr4lWHccUlLtKQCL3SxG2ftDDibxk6+eXLd1N7cnCuLl8Kx+f2K0dB
+         dT+gLRQLmsQVVSy/FZKcbqz695iwUYEt3a6HhE1dBhPEIieivCgMMxvlwdtKh+f+62Op
+         lImGEchQ3yjfl11cG1oTk45WIZI4DtLkWuOWhw8M1snVo6RweJ327YgzPRXlgVOJNMLr
+         SzqZkJtNr+vPctEku2JQ4Xof0cM7f7xL+ujd5OQHPdQ5+tNwH8HelbtNwwksXRcPguQm
+         Iq57lKxZyB9tWpilqu29YwFnKl4uBD31YkyM3jo3g5F96p+szu7MettjmWh2GzzVBla8
+         h9JQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1760707865; x=1761312665;
+        d=1e100.net; s=20230601; t=1760707870; x=1761312670;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=f1HM0d52xL5++z1kGRjypoT65pMC3vnmCE9M/Z2HtkI=;
-        b=iussctkAizkc2YHKWOQkvhK3CeFpbN2MWtk86KtAqpKh4HX7Ua7BBoLfAC1Yjya9tN
-         KbHRytKrfh56v1eY0vJK58/R6I7NFMwXxBUl4D7xIxkpTu3PsLbFB4BvLqn8f6pG4mkJ
-         ytK/gWnfj1mKq8xLSbBEDNTYZT8kLPDmtb1WEU/SRrul/wLKygAOujU+4TW+epZ2w9SV
-         bTJbrTvq4VXvIYZSCVy3bw/qCzb94z4AOQ04F9FjZcwuxUIzB1TMtpzA3zsTI3HVkE53
-         mA0pa6VVtecpoLlw486q/5UTjnbiNqK+R9MS7D/o/f8YEOeDt6r4XhP7Ap+p1ohP2Ee+
-         Y+Kg==
-X-Forwarded-Encrypted: i=1; AJvYcCXOPRa3rXFcxTHE25lJ9YsfBlaygQjrt2o9570p1zP7CNSxVstZNo7r/dEUe7xsqre0E91OysGax44=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyZwO7rvo86wv/K9THlkz6wjQLVn1ARcpUzEaUfbtohG4d4cwdb
-	uhiE4tgzk4JG2NQiYWh8ptAbePZTpUB0y4LFHj92noQZdSLNM/EOlsZf60i73ulcZXcc8BsFTK/
-	m3XydKxiASzk0V4rxmwGIOvRBNU+Sx/jsfmUPDwxRqg==
-X-Gm-Gg: ASbGncuXq+cb13CDeWQszlrM+oyWUYkHyxaq8g/9EYYiLtHy6vGT1X2ewwclrNHRoDz
-	U7mjwJGqX4r00KOd1LPpq/hCho/TdKgqgSPNu+1fyHDsw97mjXZbJqD/A5MqLPMOrcbKfTSTsSd
-	u12Q5KcZL9NCSMMGpgifNXDCjxHXj54Z7g184uuGl9cOiU1HJQqYlO+aCoduZtXhmaQijJCdsQp
-	yWFWX/Vdgv2WhY+Da+3wFNN81SnYHnDiLUFs6CbT3Yail6s5AvYRddJbD16Iw==
-X-Google-Smtp-Source: AGHT+IE/y08spNfC3C2r2brNPGUt04U9WD7A7XI9X/3WcTMgc7vwP8JOHw/hjXOaZRx6V9A4RKsRRr1cMaZ80YFieN4=
-X-Received: by 2002:a53:acd8:0:10b0:633:ac51:9823 with SMTP id
- 956f58d0204a3-63e160e3c31mr3275386d50.2.1760707864737; Fri, 17 Oct 2025
- 06:31:04 -0700 (PDT)
+        bh=DUCXQ0EvV9ktxmOlNW52FjkhtUMF4mrPMo81WKGkY7k=;
+        b=HRKirGdJ1/MX54PZAhjBdtsA4mnEDwhWy0R9g5u4Ss15Evi0RlnOc4RLUamrvkjBj1
+         XEoQsrR96v6uTHR2kY318E4qrQaWtwJsjwZGCT4xKhO7VsAJb8Oqg65jRrtCZGchlJB/
+         8wq4zlTX+KOa15o4+VKeAM7aq9UFi8slXsDOxMfjADbyRMZl7jeDkyNSJbT0XGsSnJIa
+         uqKxsmYKKV+lBUiZrSjvLNATrbOU9CXIrb2genwxkdtvSw/iV010RjFdPCmzuceC0cID
+         3WxV/l5n1slLWCJv339xtIzvQKsXNB+w3LBQO02rzFEOp2ID//0s8BVQC8Ixk2d1hv1W
+         2aCg==
+X-Forwarded-Encrypted: i=1; AJvYcCVdZb412uCyD3ZnTzy9ceKpNXxQrTD5h2pRMvyNyuqjg7rXKKTM6CuiRed/39hlYBk4he/WfKGLXgQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwqSjGiQcyyzExS40rM99QEpsK1unKSz4eJ8/kChczK7kRUUWxo
+	ovF+FsovluGQ8+YRtICEf+GI5qTHu8JuwL3kQXCFGL/Hfg78zg5lsoidOFhs9bajD6fh3qRDEGV
+	PVHm3VXbAED7J50tCnzK0wU06Pn1Sl5zNlys9uFBn0g==
+X-Gm-Gg: ASbGncsaS9KpERJyDtUpyjAJJfeD/SM0OgrcZ+MXvSPgxnQEoHxLG0hNoc6z/qoLHQJ
+	A5zXd5RHxke5MsqonFrn7+nhVWGpRdRiRO6D+Fy4NtzA4Kh1ZR2MqhY2ycpM0gYu8dQok6WYKvw
+	EqxFUIH2e917eTDtdyHyiSNr+HVQUIIsIrkw6jUPwMX/dlmptFSjj17LN5KayiYpLiQK0lBEPQJ
+	vQaYUrDW/+2SPxJWexDTNi7mbaduYwIFOpSLAGdSCQcItRfXHDb/AOzJzjJuYC9B3/vvJhc
+X-Google-Smtp-Source: AGHT+IE99aLeU1qJuGUKKD3EwC+82B0WlUi+IrZYAAKOJ3BjaAC6xXwG/vSFF6c7L0L5r1xHD6BMxG1tEIJhEP9Q9Zs=
+X-Received: by 2002:a05:690e:4009:b0:63e:17d8:d985 with SMTP id
+ 956f58d0204a3-63e17d8db6emr2723484d50.53.1760707869805; Fri, 17 Oct 2025
+ 06:31:09 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251007054445.4096630-1-sarthak.garg@oss.qualcomm.com> <20251007054445.4096630-2-sarthak.garg@oss.qualcomm.com>
-In-Reply-To: <20251007054445.4096630-2-sarthak.garg@oss.qualcomm.com>
+References: <20251007140434.606051-1-kamal.dasu@broadcom.com>
+In-Reply-To: <20251007140434.606051-1-kamal.dasu@broadcom.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 17 Oct 2025 15:30:29 +0200
-X-Gm-Features: AS18NWAnMhRpcm4So5FqnrddWjLlUpGh3rZ6MGn4VSylaqx5Qy76TzuXLh5A2eU
-Message-ID: <CAPDyKFpaza_wXUhkD44Jxh5MUGribDy6d=Wf+NNRO=B_cUBm1A@mail.gmail.com>
-Subject: Re: [PATCH V1 1/3] dt-bindings: mmc: sdhci-msm: Add sm8750 compatible
-To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>, 
-	Konrad Dybcio <konradybcio@kernel.org>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, quic_nguyenb@quicinc.com, 
-	quic_rampraka@quicinc.com, quic_pragalla@quicinc.com, 
-	quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, 
-	quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+Date: Fri, 17 Oct 2025 15:30:34 +0200
+X-Gm-Features: AS18NWCxOo1IPoxvNmAyvX3kK0QzpALZz5b5Ua2IC_5KvIDu-uhmuTnAMYhlcsU
+Message-ID: <CAPDyKFrsjnSYBTpPJ1qWXVHTZSw8EuQh6b_CcNAKuKHHMwy2MQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/5] sdhci-brcmstb SD host controller SoC specific enhancements
+To: Kamal Dasu <kamal.dasu@broadcom.com>
+Cc: andersson@kernel.org, robh@kernel.org, krzk+dt@kernel.org, 
+	conor+dt@kernel.org, florian.fainelli@broadcom.com, adrian.hunter@intel.com, 
+	bcm-kernel-feedback-list@broadcom.com, devicetree@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 7 Oct 2025 at 07:45, Sarthak Garg <sarthak.garg@oss.qualcomm.com> wrote:
+On Tue, 7 Oct 2025 at 16:04, Kamal Dasu <kamal.dasu@broadcom.com> wrote:
 >
-> Document the compatible string for the SDHCI controller on the
-> sm8750 platform.
+> sdhci-brcmstb HS200 configuration for BCM72116 and PM register save restore
+> changes applicable to various SoCs.
 >
-> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+> v2 changes:
+>  - Separate commit for SDIO_CFG register defines that moved
+>  - Implemented cosmetic changes proposed for initial change for :
+>      "mmc: sdhci-brcmstb: clear CFG_OP_DLY when using HS200"
+>  - Moved BCM74371 support in a separate commit
+>  - Implemented review comments and reorganized code for :
+>      "mmc: sdhci-brcmstb: save and restore registers during PM"
+>  - Added Reviewed-by and Acked-by tags wherever applicable
+>
+> Kamal Dasu (5):
+>   dt-bindings: mmc: Add support for BCM72116 and BCM74371 SD host
+>     controller
+>   mmc: sdhci-brcmstb: move SDIO_CFG_CQ_CAPABILITY define
+>   mmc: sdhci-brcmstb: clear CFG_OP_DLY when using HS200
+>   mmc: sdhci-brcmstb: Add BCM74371 support
+>   mmc: sdhci-brcmstb: save and restore registers during PM
+>
+>  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      |   2 +
+>  drivers/mmc/host/sdhci-brcmstb.c              | 154 +++++++++++++++++-
+>  2 files changed, 147 insertions(+), 9 deletions(-)
+>
 
-Applied for next, thanks!
+The series applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 594bd174ff21..027011223368 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -70,6 +70,7 @@ properties:
->                - qcom,sm8450-sdhci
->                - qcom,sm8550-sdhci
->                - qcom,sm8650-sdhci
-> +              - qcom,sm8750-sdhci
->                - qcom,x1e80100-sdhci
->            - const: qcom,sdhci-msm-v5 # for sdcc version 5.0
->
-> --
-> 2.34.1
->
