@@ -1,97 +1,234 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 107A0221F0C;
-	Mon, 20 Oct 2025 17:01:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB0E71DE4E0
+	for <linux-mmc@vger.kernel.org>; Mon, 20 Oct 2025 18:32:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1760979712; cv=none; b=RRPJ6/kdftncGtiJ5s0F5QlAb1yfH5X2VQLi7mwHnE7ju15Prrq7o5g9tnpJKAtt+7qZuizCmJ4RUtMBiLaE3DDGPVNFu/o43HiSY4kEpndElWJjoDQNjvXujSyzFwhWEPCnlhEnUm/nwjS98NISp6k5Z9lutxzmKzPGa/gaKto=
+	t=1760985141; cv=none; b=rNIYScXthUMibuxAzxcCanXDYoDcV5ZAEM4xC6iaOfoETYSWGS43XsQgbwfnzBR2Etz/PIvIXsKzRySeUQVRbQGuHLEFdMhws9AuGTbsrflWtirBpbUBcvFTHEdJUs00grOIaEexyg5WuecY8qwivgbdo6dbS6Gj1yyB8Diy/+M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1760979712; c=relaxed/simple;
-	bh=VgEmpr+DPqtaWMUYgEbrJ98w8woA/zo2OlQgPflSiFk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=V6eiu/Mn2N5yS3xLbDBoxjL+/5Jv/9iJ2dCeRrBVpRZ5J1pvmMo6FE+jH+7k7/l/RvnAjRjhqw6Gds5h2rFihD5gBubznZbLVTcz2Byq5fcgnuTQ6XYvp+bn1TQYwToGK6T+BnYOXfUd0rIt0E4q41PDsQq890Slet8Hh79z6YU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=G2Luoy03; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1760985141; c=relaxed/simple;
+	bh=VkqneVDbsyT0IzlYqd3SDo8bA2HKS26W3MsXwZnzK6A=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=ljHB6cbedOfomYZyVuKr6ljWWoAdzUYYj+7kda7pMyGlodwb47fjQ16aXFvtXr/T4l/gASRo3S9XHQcf0w25SD37hJL3OhxAH/9w7n7MKmMSNfVR9FdF0y1X6EE4yyFEFHeVp3cQcF/Aii6qolOOUzvD5Llq7Fs9Q97dm9ENdpA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ae/21XYz; arc=none smtp.client-ip=209.85.210.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="G2Luoy03"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA178C4CEF9;
-	Mon, 20 Oct 2025 17:01:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1760979710;
-	bh=VgEmpr+DPqtaWMUYgEbrJ98w8woA/zo2OlQgPflSiFk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=G2Luoy03EDvu0clu6JA7SA0dQOS29Zxvy2FtjX3BmEjnuWElr2tnDj+TnGhNjqJBl
-	 V0OWze8jjjiQrK7DmVWlxF+f+mf6BxyMI7ZBj9885uQYh2/g0ydLBJOvFsiAYcV2mo
-	 0K/QtBBU2nMZRWEzFpW7N+lJuPbXUT0xqZfc/tvXykWhoFoqT/LG0V9alenXD53fdA
-	 eTzBaFMJQg/Tz+pN62LBj835+TJ5h8Zlj8haoCbOOBTLs2ubHCfFJ2QbqG/ZeiQcls
-	 hKVx7VX7V26R2UtDjRpwkz5Aj3Q7bQ436rqxyvZVEIp9u5iT2m4y7G63Fw5L7ZKu1U
-	 csB0/weYKKYhA==
-Date: Mon, 20 Oct 2025 18:01:46 +0100
-From: Conor Dooley <conor@kernel.org>
-To: Charan Pedumuru <charan.pedumuru@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] dt-bindings: mmc: ti,da830-mmc: convert to DT schema
-Message-ID: <20251020-blimp-gravel-ca7f43294ac7@spud>
-References: <20251011-davinci-mmc-v2-1-355da3e25123@gmail.com>
- <20251012-nickname-morale-e1e21796f1f1@spud>
- <bffddadc-4235-4ccf-a0ed-7a0de68e2fbe@gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ae/21XYz"
+Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7833765433cso5881488b3a.0
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Oct 2025 11:32:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1760985139; x=1761589939; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=kThRqoFCTjPJKmH3oIqpB9iPzfqXX/RIxNab4q9zYLg=;
+        b=Ae/21XYzGGnVTsrb5xrVuMfidWBTP30immWqmqDFJ0BZFBOYiM9zU7xBZnjhwR5gVF
+         MelWxu546oTMWpDgkq5pz8GhN1omVTqOXvkey1W3B77Qdy0nRUf9rhpe3z53G3Dz0c4Z
+         vBPMtafY2wp3w4aUX5vYE0CIk+MJcxig6s6Ds5vWTFTJJ/6/IwSlFxV6TuzVOsJra/Rj
+         SyV516jM566OC1H33y/jYesfP2bxG2cekaL0bpNqcJmWFMiCC3Xxg4Rfz/5os2EyxVhM
+         e+ja8dF02xFE6JP87g3lGlaX5riL+FJDGMw7tyY2xbKXfhRCtBkkFoeLud3oYwHxqUb4
+         gYJw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1760985139; x=1761589939;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=kThRqoFCTjPJKmH3oIqpB9iPzfqXX/RIxNab4q9zYLg=;
+        b=sxQZQAqiNNwO2XuDsnunJWo18j6u/4ty8kMyC5VngWzkzxnfhp0AYSRrmWv5xSi9E5
+         cAs0hc7Beo+VxRzi5E7qkA2NwDSDRj7XvSlSeEc+8Ac+p+8oFpfKnOyWcNogaciTm2KJ
+         wvCGUotD26nJiLecYRr3A+ZmHNNwdpaV1sKEL9Pe4FzqSICROjVA+1hE9naMAtCoFX/Y
+         ee8cr3anxi5rx6Yt8O4R3zI5b7d47SYuOaw+Tmn8ForF0CMB9pLM42+TsZy5kS6DUpd0
+         Sy1vmuq7f8PxaE+H1oXYix85vrhRMHjmRze+4e7NgF6MJa50q2wtdHw2rkOjOAeGBCSA
+         FVig==
+X-Forwarded-Encrypted: i=1; AJvYcCV4UxrtiMCovzT/CN/zQ27+edq2WlM3OQY11xX7gIfCdsARNOd1SbJLEIpoISmf6IITxz29l6e1u3s=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywed9Yl3TeXnbFpysfCjp7a/9R1mwhAeTFXvFkRUgf0+DbB+452
+	zDT3QWgwvf7yixuX+TksX5AtFeypTR66aD33NnOK8upu+btIHy4oyZKD
+X-Gm-Gg: ASbGncvJLcf9JSBENeNalX7OEwCSutTWbRK0VSb9+vkpNnXchJ0JWgfTWSTJd1yA8lu
+	izf/so9Nwon96OHh+xgx4UIOGN7YiAmGCvr4tpKlv0tpXkIsWZo1UirSyrr+D0UhZpq3DL3CzLu
+	5aqtOfAEsK/7LXNf/QaV3RfO4cst0W0c3RC2U81Jk5LpvwByDVGihqGfYWqJRYk0RJFdLS7CI5J
+	kWgFvMX8tx7QEi+yJaufaJ3WoZFpnFNk5T9XNXJ6Xegoz5eGb60UfhLvI2zh3AzyOfKvR7NuCBx
+	yL/yQL9b+OuLRUoFQYxODjBwvRUdnapkjPMigYUqPr4dwJ6q65a2F0Lqck6/C8Y8eV4bP8w3qnU
+	+sGD27sDCT5QLh3P0HstXNPNmpNaEPDFL1kWlmvVumA5JCGQrzGaT5en59m8rNrRvTAqrW9eAqo
+	KChQmnWg==
+X-Google-Smtp-Source: AGHT+IFHpDDSC/ec/z6gP3yDF0Lq0IAw+hvtA6O/sngS65F0b6ioDK/6RnHMjz5+qa4OG9b5X3ZwEQ==
+X-Received: by 2002:a17:903:b10:b0:280:fe18:847b with SMTP id d9443c01a7336-290caf85191mr169484515ad.33.1760985138937;
+        Mon, 20 Oct 2025 11:32:18 -0700 (PDT)
+Received: from rakuram-MSI.. ([2409:40f4:3002:6efb:47d0:40b1:d5b:bf65])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-292471fd9e8sm86645795ad.85.2025.10.20.11.32.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 20 Oct 2025 11:32:18 -0700 (PDT)
+From: Rakuram Eswaran <rakuram.e96@gmail.com>
+To: u.kleine-koenig@baylibre.com
+Cc: chenhuacai@kernel.org,
+	dan.carpenter@linaro.org,
+	david.hunter.linux@gmail.com,
+	khalid@kernel.org,
+	linux-kernel-mentees@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	lkp@intel.com,
+	rakuram.e96@gmail.com,
+	skhan@linuxfoundation.org,
+	ulf.hansson@linaro.org,
+	zhoubinbin@loongson.cn
+Subject: Re: [PATCH v2] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
+Date: Tue, 21 Oct 2025 00:02:07 +0530
+Message-ID: <20251020183209.11040-1-rakuram.e96@gmail.com>
+X-Mailer: git-send-email 2.48.1
+In-Reply-To: o55ujlbvxwezsf3ogqx33pcbg5b2lviy6bv5ufnz6t7yi4v23t@i6uiafh6no6c 
+References: <o55ujlbvxwezsf3ogqx33pcbg5b2lviy6bv5ufnz6t7yi4v23t@i6uiafh6no6c>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ZoahM1thDyeEzw2g"
-Content-Disposition: inline
-In-Reply-To: <bffddadc-4235-4ccf-a0ed-7a0de68e2fbe@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+On Thu, 16 Oct 2025 at 14:20, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
+>
+> On Wed, Oct 15, 2025 at 12:16:57AM +0530, Rakuram Eswaran wrote:
+> > This patch refactors pxamci_probe() to use devm-managed resource
+> > allocation (e.g. devm_dma_request_chan()) and dev_err_probe() for
+> > improved readability and automatic cleanup on probe failure.
+> >
+> > This eliminates redundant NULL assignments and manual release logic.
+> >
+> > This issue was originally reported by Smatch:
+> > drivers/mmc/host/pxamci.c:709 pxamci_probe() warn: passing zero to 'PTR_ERR'
+> >
+> > The warning occurred because a pointer was set to NULL before using
+> > PTR_ERR(), leading to PTR_ERR(0) and an incorrect 0 return value.
+> > This refactor eliminates that condition while improving overall
+> > error handling robustness.
+> >
+> > Reported-by: kernel test robot <lkp@intel.com>
+> > Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+> > Closes: https://lore.kernel.org/r/202510041841.pRlunIfl-lkp@intel.com/
+> > Fixes: 58c40f3faf742c ("mmc: pxamci: Use devm_mmc_alloc_host() helper")
+> > Suggested-by: Uwe Kleine-König <u.kleine-koenig@baylibre.com>
+> > Signed-off-by: Rakuram Eswaran <rakuram.e96@gmail.com>
+> > ---
+> >
+> > Changes since v1:
+> > Following Uwe Kleine-König’s suggestion:
+> > - Replaced dma_request_chan() with devm_dma_request_chan() to make DMA
+> >   channel allocation devm-managed and avoid manual release paths.
+> > - Used dev_err_probe() for improved error reporting and consistent
+> >   probe failure handling.
+> > - Removed redundant NULL assignments and obsolete goto-based cleanup logic.
+> > - Updated commit message to better describe the intent of the change.
+> >
+> > Testing note:
+> > I do not have access to appropriate hardware for runtime testing.
+> > Any help verifying on actual hardware would be appreciated.
+> >
+> > Build and Analysis:
+> > This patch was compiled against the configuration file reported by
+> > 0day CI in the above link (config: s390-randconfig-r071-20251004) using
+> > `s390x-linux-gnu-gcc (Ubuntu 14.2.0-19ubuntu2) 14.2.0`.
+> >
+> > Static analysis was performed with Smatch to ensure the reported warning
+> > no longer reproduces after applying this fix.
+> >
+> > Command used for verification:
+> >   ARCH=s390 CROSS_COMPILE=s390x-linux-gnu- \
+> >   ~/project/smatch/smatch_scripts/kchecker ./drivers/mmc/host/pxamci.c
+> >
+> >  drivers/mmc/host/pxamci.c | 57 +++++++++++++++------------------------
+> >  1 file changed, 21 insertions(+), 36 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> > index 26d03352af63..d03388f64934 100644
+> > --- a/drivers/mmc/host/pxamci.c
+> > +++ b/drivers/mmc/host/pxamci.c
+> > @@ -652,11 +652,14 @@ static int pxamci_probe(struct platform_device *pdev)
+> >       host->clkrt = CLKRT_OFF;
+> > 
+> >       host->clk = devm_clk_get(dev, NULL);
+> > -     if (IS_ERR(host->clk)) {
+> > -             host->clk = NULL;
+> > -             return PTR_ERR(host->clk);
+> > -     }
+> > +     if (IS_ERR(host->clk))
+> > +             return dev_err_probe(dev, PTR_ERR(host->clk),
+> > +                                  "Failed to acquire clock\n");
+> >
+> > +     /*
+> > +      * Note that the return value of clk_get_rate() is only valid
+> > +      * if the clock is enabled.
+> > +      */
+>
+> The intention of this comment in my WIP suggestion was to point out
+> another thing to fix as the precondition for calling clk_get_rate()
+> isn't asserted. If you don't want to address this (which is fine),
+> drop the comment (or improve my wording to make it more obvious that
+> there is something to fix).
+>
 
---ZoahM1thDyeEzw2g
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi Uwe,
 
-On Sun, Oct 19, 2025 at 07:28:49PM +0530, Charan Pedumuru wrote:
->=20
->=20
-> On 12-10-2025 19:05, Conor Dooley wrote:
-> > On Sat, Oct 11, 2025 at 08:52:07AM +0000, Charan Pedumuru wrote:
-> >> Convert TI Highspeed MMC host controller binding to YAML format. Define
-> >> 'clocks' and 'interrupts' properties to resolve errors identified by
-> >> 'dt_check' and 'dtb_check'.
-> >>
-> >> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
-> >> ---
-> >> Changes in v2:
-> >> - Modified the commit message.
-> >> - Removed 'interrupts' from required properties following the old bind=
-ing.
-> >> - Changed the maintainer for the binding to "Conor Dooley".
-> >=20
-> > Bro, what? Where did that come from? I know nothing about this device at
-> > all. Find someone from TI to put there.
->=20
->=20
-> I checked for the compatible driver and found the author but no email add=
-ress, so can I add Ulf Hansson <ulf.hansson@linaro.org> to the maintainers =
-then?
+Sorry for the delayed reply as I was in vacation. 
 
-What about the author of the original binding? In either case, the
-original author's email should be attainable from the commit history.
+Ah, got it — I’ll drop the clk_get_rate() comment since it was only a reminder
+from your WIP suggestion.
 
---ZoahM1thDyeEzw2g
-Content-Type: application/pgp-signature; name="signature.asc"
+Just to confirm, are you referring to adding a call to clk_prepare_enable()
+before clk_get_rate()? I can move the clk_get_rate() call after
+clk_prepare_enable(), or drop the comment entirely.
 
------BEGIN PGP SIGNATURE-----
+If my understanding is correct, I’ll keep v3 focused on the current set of
+fixes and handle the clk_get_rate() precondition (by moving it after
+clk_prepare_enable()) in a follow-up patch. That should keep the scope of each
+change clean and review-friendly.
 
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaPZq9gAKCRB4tDGHoIJi
-0gHNAP9omX2gwSwH6uEZFZVp/REqDzLbsEAfRlr96cKUgLRLWAEA5qs+d0xO7EdM
-kRwYqTGUqtoHaZc1jcHjkA40F9A5uQY=
-=7XgR
------END PGP SIGNATURE-----
+> > -out:
+> > -     if (host->dma_chan_rx)
+> > -             dma_release_channel(host->dma_chan_rx);
+> > -     if (host->dma_chan_tx)
+> > -             dma_release_channel(host->dma_chan_tx);
+>
+> I was lazy in my prototype patch and didn't drop the calls to
+> dma_release_channel() in pxamci_remove(). For a proper patch this is
+> required though.
+>
+> To continue the quest: Now that I looked at pxamci_remove(): `mmc` is
+> always non-NULL, so the respective check can be dropped.
+>
 
---ZoahM1thDyeEzw2g--
+Understood. Since pxamci_remove() is only called after successful allocation
+and initialization in probe(), mmc will always be a valid pointer. I’ll drop
+the if (mmc) check in v3 as it can never be NULL in normal operation, and
+remove the dma_release_channel() calls as well.
+
+I’ve prepared a preview of the v3 patch incorporating your previous comments.
+Before sending it out formally, I wanted to share it with you to confirm that
+the updates look good — especially the cleanup changes in pxamci_remove() and
+the dropped clk_get_rate() comment.
+
+static void pxamci_remove(struct platform_device *pdev)
+{
+	struct mmc_host *mmc = platform_get_drvdata(pdev);
+	struct pxamci_host *host = mmc_priv(mmc);
+
+	mmc_remove_host(mmc);
+
+	if (host->pdata && host->pdata->exit)
+		host->pdata->exit(&pdev->dev, mmc);
+
+	pxamci_stop_clock(host);
+	writel(TXFIFO_WR_REQ|RXFIFO_RD_REQ|CLK_IS_OFF|STOP_CMD|
+			END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
+			host->base + MMC_I_MASK);
+
+	dmaengine_terminate_all(host->dma_chan_rx);
+	dmaengine_terminate_all(host->dma_chan_tx);
+}
+
+Please let me know if anything still needs adjustment before v3.
+
+Best Regards,
+Rakuram
