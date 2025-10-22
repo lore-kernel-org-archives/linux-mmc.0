@@ -1,77 +1,107 @@
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+Received: from mail-m3278.qiye.163.com (mail-m3278.qiye.163.com [220.197.32.78])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBBDC2459EA;
-	Tue, 21 Oct 2025 22:30:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E7CE1E0DFE
+	for <linux-mmc@vger.kernel.org>; Wed, 22 Oct 2025 00:45:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.78
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761085812; cv=none; b=OOtJY+EJiS3if638AIthcaN2rKmDT8hVvG21nGzW1AxNAl5ZUSXwWTZJJTAcup05MwFJxSqvq/DPH1JLqW0fQdp0uJDpVcgmlQWSmoRJ41fiDyezuLH1ac8Fh5gfdegyzvsaWBoqtiDjQESoo2zQ/VCnhkopd7zLOphcLMhRbxg=
+	t=1761093908; cv=none; b=arjV9qPUAbaLAOR20rsYCUAAXzeA8bcn82RiAPvttSV1McvXXpuBWiAFrqbJtPlRscre/K2WzSuYetkHCWXh2UHBXe7IS15bb6KPgOngxqbedep8hg/jP5oI6/wBnvK8O/yohc3trLnRI0czMfSvmRNriqhNKpMR/Ayb4EV9Fdo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761085812; c=relaxed/simple;
-	bh=o8VSDj3y67VRcgqNWb54XjaaSFgafhxwtCnN/F+UMOs=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qrMeWUVRkP9YC8oMLVkqEQbyuXaOGh43T34aQZlZTx6Bg5k2oqKldS+ikkclxTFY26hr0Pvnt5AnK6ohb7O3S3kBZtHgQkjAAlaoOsqnlqM5ZWkcnWeF3g1U/FG0S6MmjVo+JyvM7SUZlW2XZEiS8jEAYVe9m4m+XyXJNS5EmJU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=C10ZUdJk; arc=none smtp.client-ip=185.11.138.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
+	s=arc-20240116; t=1761093908; c=relaxed/simple;
+	bh=Dqfvos4lbXbNvafZ15q/VZq27hl/rmJxoZ0rzrP4gFQ=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=UyT1hx4D6UA95bXNN3FagLPLC721/n7hPtAZjXdQEg3ri3lPCiwTZZysJUuUg06LL2yTBZ/IByFRTMaU6MsOvEgNmrDdmU2azrwlxHgdNGf/9Anb1hjfhiSYEvbuZjV7L4MmwrJA04XNf+o7AozThl5MF+ffbNDO+WboLIi9XWk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=H6SDK0mk; arc=none smtp.client-ip=220.197.32.78
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="C10ZUdJk"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
-	s=gloria202408; h=Content-Transfer-Encoding:MIME-Version:Message-ID:Date:
-	Subject:Cc:To:From:Reply-To:Content-Type:In-Reply-To:References;
-	bh=JOqXWQaq3hbi4YpvtGsddkEQ1aOnP/muTiS+mWoANSs=; b=C10ZUdJkwWItkwiy4+X8dFPGeO
-	tw1dN3wb13cdOYfLar3mdlKZRvIEzmqPCFHfuxM9Jrbn5GEAakXAWFSLa39RqHpe0OsUDFKFrhhWt
-	7nfbZTZNAekNjVDYMrD/lcjpj2Ep9+Tsih4VTtrwPTxGI7ZGlYx99VUhAn4ZwWD1ItYtyTWMfiJkM
-	+DAcUXidUhOoj957446vClWuKKwk81UQqWMYBZ75kA81kI/9bLJBmlLG5mFuAjVZVFpLNWnQcFdYn
-	l6ARDgXBVM8Ap9ioAGhtSYO9xHimXc6eM6UBNAc0Flgp4TnI8KPCEwcwsHm1yVl8I1PZ0JtXpCva/
-	e+IKJg+A==;
-Received: from i53875b19.versanet.de ([83.135.91.25] helo=phil.fritz.box)
-	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <heiko@sntech.de>)
-	id 1vBKrg-0006hP-N8; Wed, 22 Oct 2025 00:30:00 +0200
-From: Heiko Stuebner <heiko@sntech.de>
-To: ulf.hansson@linaro.org
-Cc: robh@kernel.org,
-	krzk+dt@kernel.org,
-	conor+dt@kernel.org,
-	heiko@sntech.de,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-rockchip@lists.infradead.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] dt-bindings: mmc: rockchip-dw-mshc: Add compatible string for RK3506
-Date: Wed, 22 Oct 2025 00:29:55 +0200
-Message-ID: <20251021222955.193323-1-heiko@sntech.de>
-X-Mailer: git-send-email 2.47.2
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="H6SDK0mk"
+Received: from [172.16.12.129] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 26b656875;
+	Wed, 22 Oct 2025 08:39:53 +0800 (GMT+08:00)
+Message-ID: <7a1e7da3-226a-4ee9-a3f8-fa4051f833ad@rock-chips.com>
+Date: Wed, 22 Oct 2025 08:39:49 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>,
+ linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org,
+ Hugh Cole-Baker <sigmaris@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Change DLL_STRBIN_TAPNUM_DEFAULT
+ to 0x4
+To: Dragan Simic <dsimic@manjaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+References: <1760924981-52339-1-git-send-email-shawn.lin@rock-chips.com>
+ <1066e578-f543-4233-b556-ae458c9327a1@gmail.com>
+ <84a6b292-868d-c202-6e60-28f21390cc09@manjaro.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <84a6b292-868d-c202-6e60-28f21390cc09@manjaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9a095ba8b909cckunm7b21616170c274
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUlIQlZNH09JShpDHkgdTk5WFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=H6SDK0mkxM20sW3T7dPYlGrULNknEI0veGQeZIlyUo1MxbT1s4Nal1aF1cnSW5UiArz9AxXLiPpf051zbe74L6jmhFdzDTsV2sLfOd5sXXQaxXvGjBJ0/UZ4X2KmXQ4hUu09GfSiO6hvyA/ViyVCBsUNn9b/yHLkneZEHub9+5Y=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=MhuVrIb5PU98+HkpNJ24nNLmeJaLKAXov2SZm29nDKU=;
+	h=date:mime-version:subject:message-id:from;
 
-The dw-mshc controller in the RK3506 is compatible to the one first found
-in the RK3288 SoC, so add the RK3506 to the variant list.
 
-Signed-off-by: Heiko Stuebner <heiko@sntech.de>
----
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
- 1 file changed, 1 insertion(+)
+在 2025/10/22 星期三 4:24, Dragan Simic 写道:
+> Hello Hugh and Shawn.
+> 
+> On Tuesday, October 21, 2025 22:04 CEST, Hugh Cole-Baker <sigmaris@gmail.com> wrote:
+>> On 20/10/2025 02:49, Shawn Lin wrote:
+>>> strbin signal delay under 0x8 configuration is not stable after massive
+>>> test. The recommandation of it should be 0x4.
+>>>
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>> ---
+>>>
+>>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 2 +-
+>>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> index eebd453..5b61401 100644
+>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> @@ -94,7 +94,7 @@
+>>>   #define DLL_TXCLK_TAPNUM_DEFAULT	0x10
+>>>   #define DLL_TXCLK_TAPNUM_90_DEGREES	0xA
+>>>   #define DLL_TXCLK_TAPNUM_FROM_SW	BIT(24)
+>>> -#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
+>>> +#define DLL_STRBIN_TAPNUM_DEFAULT	0x4
+>>>   #define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
+>>>   #define DLL_STRBIN_DELAY_NUM_SEL	BIT(26)
+>>>   #define DLL_STRBIN_DELAY_NUM_OFFSET	16
+>>
+>> This patch gets the Foresee A3A444 eMMC on my NanoPC-T6 board to work reliably
+>> in HS400 Enhanced Strobe mode; before this patch it would suffer from I/O
+>> errors in HS400 mode as discussed in the other thread [1].
+>>
+>> Tested-by: Hugh Cole-Baker <sigmaris@gmail.com>
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-index bf273115235b..acb9fb9a92cd 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-@@ -38,6 +38,7 @@ properties:
-               - rockchip,rk3328-dw-mshc
-               - rockchip,rk3368-dw-mshc
-               - rockchip,rk3399-dw-mshc
-+              - rockchip,rk3506-dw-mshc
-               - rockchip,rk3528-dw-mshc
-               - rockchip,rk3562-dw-mshc
-               - rockchip,rk3568-dw-mshc
--- 
-2.47.2
+Thanks for testing and comfirming it works as expected.
+I think this patch also need to be backported. So Ulf,
+could you please help add fixes tag if the patch looks good
+to you, to avoid a v2 just for adding this. :)
+
+Fixes: 08f3dff799d4 ("mmc: sdhci-of-dwcmshc: add rockchip platform 
+support")
+
+> 
+> Those are great results, thanks for the testing, Hugh!  Of course,
+> huge thanks to Shawn for fixing the root cause of the issue, which
+> avoided the need for having a questionable HS200 quirk described
+> in the above-mentioned linux-rockchip thread. [1]
+> 
+>> [1]: https://lore.kernel.org/linux-rockchip/52537005-b8a3-c202-770c-599efc6a4d17@manjaro.org/T/
+> 
+> 
 
