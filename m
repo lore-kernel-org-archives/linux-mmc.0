@@ -1,154 +1,140 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD7B92F28E3;
-	Wed, 22 Oct 2025 06:47:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7978F313E37
+	for <linux-mmc@vger.kernel.org>; Wed, 22 Oct 2025 09:54:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761115663; cv=none; b=je4UcdCVkBIknNRCkPNZxNtHkHXwu2QFAdf5y6hbRLm1M2PhCpvL59043mLYmytT+SmQnqRZnvSHZPxGnWgqgbwts1E7k4QNI89aQ3dBaY1CJX85GAX3tWxWsvZGZpbkIOz4OwahvC/iKnvibC7XD/S93e9YS4ZoBzdRkzWOQIQ=
+	t=1761126867; cv=none; b=b/toQRWKgXsSAgld2AnZ0OcY7Ac9fvCG4Prpmt+lFonlVsKaDjnQ9boY3CO7ZfVOi7sneUVWj6Y+/dTVB9KfsJRpqR+3RVo2V9Gi369lPJ3rExcQbKEaibafzsh4O5De+4aHgK9OSoJcG7ftMsfj+ECAv3UQBg/kAe58U7kOCyQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761115663; c=relaxed/simple;
-	bh=ALgviHrcmTySF8+IZ0SfQ0Ca0hGXSV4wn90tAj5w4Xg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=OiFp915HGblMti3bgtiwvvYBh339Y+/OMVqNswu84uknLhXXQplCG36X6Bq3u9jsgNsxEOEHhb6Q95W4aHKNLelvl+7y0VGgoY4XPnJL0rrvKGvsnFJ9rWyP7qVQJ5kxgJ6hMKZMVKpg68vI7RjZWt5Zh8mG4HH2bozmfuz9WaM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=n1VyAoBj; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1761126867; c=relaxed/simple;
+	bh=EtmpbyasQ2LuCD2dbtC/pJs9nZwGvf9feLYKaHbanUo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=mZBPipJnHkw4jC52HCGUZ8cE4m8iLFoLfvtBdhbgPW/yPIUU5xTz7ge+glIiF52xEle3GoeqD9rxgg0nsiUmK0IxiD6/tsTgMYbIGWxIy0YP3hZZwJHwu+EvU5UO+X7iCcoHrQK2plyEKSN5Img3ZA0OR0gSeYkW56IE3ux+DMs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=npv85VOO; arc=none smtp.client-ip=209.85.208.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="n1VyAoBj"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59LKgBTN013592;
-	Wed, 22 Oct 2025 06:47:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	aTva7Kgviua/9WwAt7xR6VKt9gLR+Zs215bxSnCeN5w=; b=n1VyAoBj+e4bElwg
-	gyUTtvbRsWNxLR3C6KoheTgPZXms4vo2CmYN9JUkNgzX140tPv0ZbfibdKv6b3IU
-	U5TOoc/yt36M+m+qJPmLDJ8866nP9io5mBRv8altI6Cpbx7zeRp9jg+Rpgqyg4TQ
-	WIvJTbb+r/O9AtlMCxawqbKixMGG5XG/LsLVBlBHaklOgAhruQLC7H55u0C22rJo
-	3AKUf0Jx7O23LVwrul+tSwe1XZWykZYV63JJfBVozHuMONZQN7VBBYniQG+5lZd1
-	KfMwVfhT8LJkdGgo9vpSHKmUap9VGd5ZOaccUI6w8lqYJSHUxpXSFsbdmr2T6oiP
-	6c8fFQ==
-Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49xhe0hd8c-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 22 Oct 2025 06:47:33 +0000 (GMT)
-Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-	by NALASPPMTA03.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 59M6lWfI007765
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 22 Oct 2025 06:47:32 GMT
-Received: from [10.217.216.18] (10.80.80.8) by nalasex01a.na.qualcomm.com
- (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.24; Tue, 21 Oct
- 2025 23:47:27 -0700
-Message-ID: <aaa3c616-a317-7a87-e6ef-82ebbb06d67d@quicinc.com>
-Date: Wed, 22 Oct 2025 12:17:24 +0530
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="npv85VOO"
+Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-63c4f1e7243so6500609a12.3
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Oct 2025 02:54:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1761126864; x=1761731664; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+WAfumH2uX3Z2dq2Ora9O/PY2fjKCeePCu7c6aWb3bo=;
+        b=npv85VOObiL1ZNQ4XyAXjKC6E75qdHprbI0clWZku4FSdRjobvDUIKz/w18HcdDHR/
+         SPw3OMZNAfJ0hc0CUyVLRa+g9AE76ifxIGpXF80sevFRq+ylT+DDDmrdcl/O6LBtay+U
+         UGq1gC+puyBypFzJK1AbFqNt7/xyxHbYEkWInE2oZzPyhLIn3lJ9pNtY53UOtv02bSFk
+         Nn/QWf7P/F2zM5+P7GV6JibDlPwIITt9a3Kea8ATkbQRtQQAI/jG+65AX44k0jsIEpby
+         awzNBxj87SpePUNp7HlTSUNTaQYIhXvp9io7nNw2WtBayCdvCvFtjPTpTpOiAW4UwfDF
+         gf4g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1761126864; x=1761731664;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+WAfumH2uX3Z2dq2Ora9O/PY2fjKCeePCu7c6aWb3bo=;
+        b=GW+oq2Hk0qDc1jVlUD0omfB3MPIfZh3pK65lX9yjz8pnkZI4NsTMZ4RfJNtFyRom7v
+         wSYiNKynwhyB3ACeqg/N++sPJSrxyIbgznbcu4YpApcfvh3cwWDPCTbNKcW7YshlRuOU
+         fkpJF8aVHK7Ggao4rzTxo/swoVOInDy0FkPb816/9/aDh8a3ruMYT2grxarJR/i3NQfF
+         TeH9In2CtAciECljS/zIJtFxRutefRqvkCk0rqcwe7C+ekmlE6x4Vj6XzsmZpQYNs7ww
+         SSJDR7fTmDVeE4xJHOBUATa2mXUgBYzY7VBU/CIpeSN+jjKd5juNnPBBMgTxx9TnUzcA
+         HFug==
+X-Forwarded-Encrypted: i=1; AJvYcCWnEiHaTZHkOsm1pNupsIv2+2YaDSeNSP79g1GcZ9xPMUzRoe20X0z2Yk+v7HpAkQzbcfmzR93tw5s=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwPvYSWcdZW2c6puJn3ZertQRUJpdJs3x8YVw0Y9xN+tos7oNpY
+	MJocFe0XgkPRazABU4XUL/bDouTL57m1B4QN3DCsmEL0db+/eexNLf2IHhiC8kItm6UVM96CYsR
+	lbYtseJ7VWPhtZt0lBWg/pGm8Ky/LjTHLWrInh+uGhEVCa2y4GF3i
+X-Gm-Gg: ASbGncuQTOg/puBgeKsqBhIsTnQULi0hGbKaKaqgN8m2lACgXVCFfyeZoBlJsem8YNp
+	a4jhgWZzuLm88udptHPFB9BWt9cx77L4NwJWANXPUjyLx6aQfdYoLfcymv/ZHzaE/yQooAiqMmh
+	isxC23/J7LRk9h7ut0ePd8hqZVfTVQ5HnZgja542zNdVYsgaLAIWialW7a6QPoUNqjCv0i/Xi5n
+	SYIDfyXgvKLs/+cySNGD33ic895CIDDKswMKmBwZ8QOdB2xEnohGFDnB2xyroi1AYIOGv9H
+X-Google-Smtp-Source: AGHT+IHkJQr+syP4XIj1NXSd5IYjCrxLULtv4w/lZ3TC5j6oJlcO8HY0fyR0XJQ+hvogLv5GWo7ratm2ymqw+D8ofdw=
+X-Received: by 2002:a05:6402:2813:b0:633:d65a:af0e with SMTP id
+ 4fb4d7f45d1cf-63c1f6cee4amr20288278a12.28.1761126863838; Wed, 22 Oct 2025
+ 02:54:23 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH v5 1/4] dt-bindings: mmc: Add dll-presets values for HS400
- and HS200 modes
-Content-Language: en-US
-To: Krzysztof Kozlowski <krzk@kernel.org>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski
-	<krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        "Konrad
- Dybcio" <konradybcio@kernel.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <dmitry.baryshkov@oss.qualcomm.com>, <quic_pragalla@quicinc.com>,
-        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>,
-        Sachin Gupta
-	<quic_sachgupt@quicinc.com>
-References: <20251013145316.1087274-1-quic_rampraka@quicinc.com>
- <20251013145316.1087274-2-quic_rampraka@quicinc.com>
- <cb753c72-70ca-44b9-a33c-af2b1c7e69c8@kernel.org>
- <20251020-talented-inquisitive-bulldog-64aba0@kuoka>
-From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-In-Reply-To: <20251020-talented-inquisitive-bulldog-64aba0@kuoka>
+References: <1760924981-52339-1-git-send-email-shawn.lin@rock-chips.com>
+ <1066e578-f543-4233-b556-ae458c9327a1@gmail.com> <84a6b292-868d-c202-6e60-28f21390cc09@manjaro.org>
+ <7a1e7da3-226a-4ee9-a3f8-fa4051f833ad@rock-chips.com>
+In-Reply-To: <7a1e7da3-226a-4ee9-a3f8-fa4051f833ad@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 22 Oct 2025 11:53:45 +0200
+X-Gm-Features: AS18NWBUzt_fvNnQ0T3lLFsjYpwh3NtNycjxt0IDDOQ_s1idScunzU_ca4HSyNs
+Message-ID: <CAPDyKFowGts=3cksrvO=EAPo06yuBo1ChCGR4MmSWUCJTHA=pA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Change DLL_STRBIN_TAPNUM_DEFAULT
+ to 0x4
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Dragan Simic <dsimic@manjaro.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	Hugh Cole-Baker <sigmaris@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01a.na.qualcomm.com (10.47.209.196)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDIxMDE2NyBTYWx0ZWRfXzL+ej0JXxK69
- 2fv2GFnnlyeeirBCkuwCiq3Zog/+RFVooYFJDtKePvL92+8hmvO4iJC/JrDwy3ud7J0WunrqTJI
- 1osPmIaFEjg1q/GzbLfzvp4NME+uAz7mS6ztjTbsXsnuzE8Q5z9+tNSU/960lDCfmL1aGlXnZRg
- 01b5lZeWQdb9TJ3NlGaJRhNztl8MG12JAXYZFT3RiuirGohoEXr3UearpatCUpH74SyPI05EtBy
- 2mQhigd6YUUY2JZg/OyUWM3+YeFgTNwhfSEU6JxMbvGF+aklQe1o6sw/BFIupuginDxfRdPl3PU
- CC1pbBivOvlthUrQrm5IaUJxDy7C/cIOW2cyKKkVJ5HuM7MdrV8mbOIIUsVht08dPAKuSACUEBo
- GWdehl/5KIkI9WQd/lBIvH0kWN6BIA==
-X-Proofpoint-ORIG-GUID: g599ba8Dk9NYkIKWhXHs33IUlC_Xr7ey
-X-Authority-Analysis: v=2.4 cv=WYUBqkhX c=1 sm=1 tr=0 ts=68f87e05 cx=c_pps
- a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=x6icFKpwvdMA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=COk6AnOGAAAA:8 a=NiIIUeHpgDCADS5x9L0A:9
- a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22 a=cPQSjfK2_nFv0Q5t_7PE:22
-X-Proofpoint-GUID: g599ba8Dk9NYkIKWhXHs33IUlC_Xr7ey
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-10-22_02,2025-10-13_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 adultscore=0 bulkscore=0 impostorscore=0 spamscore=0
- priorityscore=1501 clxscore=1015 malwarescore=0 lowpriorityscore=0
- phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2510020000
- definitions=main-2510210167
+Content-Transfer-Encoding: quoted-printable
 
-
-On 10/20/2025 3:39 PM, Krzysztof Kozlowski wrote:
-> On Tue, Oct 14, 2025 at 02:06:46AM +0200, Krzysztof Kozlowski wrote:
->> On 13/10/2025 16:53, Ram Prakash Gupta wrote:
->>> From: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>
->>> Document the 'dll-presets' property for MMC device tree bindings.
->>> The 'dll-presets' property defines the DLL configurations for HS400
->>> and HS200 modes.
->>>
->>> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
->>> different tuning.
->>>
->>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>>  1 file changed, 5 insertions(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> index 594bd174ff21..f7b3b1ced3ce 100644
->>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> @@ -138,6 +138,11 @@ properties:
->>>      $ref: /schemas/types.yaml#/definitions/uint32
->>>      description: platform specific settings for DLL_CONFIG reg.
->>>  
->>> +  qcom,dll-presets:
->>> +    maxItems: 10
->>> +    $ref: /schemas/types.yaml#/definitions/uint32-array
->>> +    description: platform specific settings for DLL registers.
->> One of my questions, never answered in original submission and in your
->> versions, was to see the DTS user of it. I still do not see the DTS user.
-> There is no answer, so I mark the patch as changes requested.
+On Wed, 22 Oct 2025 at 02:39, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> Best regards,
-> Krzysztof
+>
+> =E5=9C=A8 2025/10/22 =E6=98=9F=E6=9C=9F=E4=B8=89 4:24, Dragan Simic =E5=
+=86=99=E9=81=93:
+> > Hello Hugh and Shawn.
+> >
+> > On Tuesday, October 21, 2025 22:04 CEST, Hugh Cole-Baker <sigmaris@gmai=
+l.com> wrote:
+> >> On 20/10/2025 02:49, Shawn Lin wrote:
+> >>> strbin signal delay under 0x8 configuration is not stable after massi=
+ve
+> >>> test. The recommandation of it should be 0x4.
+> >>>
+> >>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> >>> ---
+> >>>
+> >>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 2 +-
+> >>>   1 file changed, 1 insertion(+), 1 deletion(-)
+> >>>
+> >>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/s=
+dhci-of-dwcmshc.c
+> >>> index eebd453..5b61401 100644
+> >>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >>> @@ -94,7 +94,7 @@
+> >>>   #define DLL_TXCLK_TAPNUM_DEFAULT  0x10
+> >>>   #define DLL_TXCLK_TAPNUM_90_DEGREES       0xA
+> >>>   #define DLL_TXCLK_TAPNUM_FROM_SW  BIT(24)
+> >>> -#define DLL_STRBIN_TAPNUM_DEFAULT  0x8
+> >>> +#define DLL_STRBIN_TAPNUM_DEFAULT  0x4
+> >>>   #define DLL_STRBIN_TAPNUM_FROM_SW BIT(24)
+> >>>   #define DLL_STRBIN_DELAY_NUM_SEL  BIT(26)
+> >>>   #define DLL_STRBIN_DELAY_NUM_OFFSET       16
+> >>
+> >> This patch gets the Foresee A3A444 eMMC on my NanoPC-T6 board to work =
+reliably
+> >> in HS400 Enhanced Strobe mode; before this patch it would suffer from =
+I/O
+> >> errors in HS400 mode as discussed in the other thread [1].
+> >>
+> >> Tested-by: Hugh Cole-Baker <sigmaris@gmail.com>
+>
+> Thanks for testing and comfirming it works as expected.
+> I think this patch also need to be backported. So Ulf,
+> could you please help add fixes tag if the patch looks good
+> to you, to avoid a v2 just for adding this. :)
 
-ok, I will provide this in next patchset.
-
-Thanks,
-Ram
+Yes, no problem!
 
 >
+> Fixes: 08f3dff799d4 ("mmc: sdhci-of-dwcmshc: add rockchip platform
+> support")
+
+The patch is applied for fixes with the above Fixes-tag and a
+stable-tag too, thanks!
+
+[...]
+
+Kind regards
+Uffe
