@@ -1,69 +1,69 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32C0B30E822
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:29:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C77B530ACEA
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:30:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761218990; cv=none; b=M+WZrt8Q3Ppsacra+oMnaEJGPriNO0esXyYoPtUK0gplMHeMLMVfq+ejL6WKbATrVladyNckKHm0fxWgtQhMC/BJ3LU1sXHOP6klb5XaMpooccghbPqPrFftRmSg8t3ulXaKK8rxM/o1hlqMdP7Q/VvznKC4lV+xYCROTo0LHtg=
+	t=1761219002; cv=none; b=UXdcBudE8d2OiZ4UtPpxWO16KeoJ98sBPdDv/VNQQft7Bn1KK1nOGUQpudMl3p1py2QMlXtENE6PTXrV+gy7rACq/KwL4qjxSN9KOUG4h/YJn9ZPbaxiSyw6m5mIwTntM2/gDK5BmF2dlsswjr1HqLXwJxN3YM7qHngh6W8vLbA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761218990; c=relaxed/simple;
-	bh=PAltBAsIq1aC8Ll4WARAbUKEgytDMvDlximclKmHu8I=;
+	s=arc-20240116; t=1761219002; c=relaxed/simple;
+	bh=hd0CoMo58CAUzr+VqJ+RAeH8nis97OD0oQjfGlLV2Lk=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=EYQc0ZlnWQg5+68NmUPQZBj1e+YucfdG+2b86lW6NnsSYHOa6k1MZpTzu54B/kYd0iPz3QcBzbv0XYNNVTFpxXvqFdvhNvaQHkBlZbDP29tE41cJVnhDSEFXVyPH5cN3mt4GU0AbF+tfl1aZWRoGhZBZbGdQF3zXda2iviuAUJM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Bi8D4zGn; arc=none smtp.client-ip=205.220.180.131
+	 MIME-Version; b=E2GZZIIC8Z5W6hGHL3AdQ5arNEQtbdkOiJXQdPgGy5D8GdqfzJ9TblysJAn4BIB914KScHpVGrkb3QRiW6K5Fi44bvwrJ9VIQQ2D9TYavMzpVK7CizFzaE5zx1KMOLVd9F2P8cs+JpikIixhG19bU05B/K3fncYzSK43h+ridc0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=hhq5tgn0; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Bi8D4zGn"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59N7764U014615
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:29:46 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="hhq5tgn0"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59N75wBQ028844
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:30:00 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=qcppdkim1; bh=24rSamGepFz
-	DSZ1Cho4Jlk11+RwSCiIWbyoT2pF6KQs=; b=Bi8D4zGn5ip19fLDopOrHkPIOBW
-	8PQzCrrE8zLRFMtQPT0+lh3DiugiQWQLqJVmWfTtfa7iv4HpCdoC9nHbW3c5EdAu
-	dZLQijU+Yi9dEPpA2OHb4aiwJxHTVYjwiKVnDBv58Sn30o0x8tUvlQZa3v/BPkgc
-	UgqEdLrxT5pbUBiDRxEVyNRYRZqPNYhXEaCZ0ElAegqguz7IBUeM36qoi0UWmyh4
-	YOpmZVNBB1YakU4Skk8/gHuJA1rnYMY1AlyW/dmy+z24BppqWTcih6dYMyE7c8II
-	z5f/smGL2D43x5cQ8JED8MMO2yzCl/kMA4cUgEauEOledn/wyV4LbRJ/6yA==
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com [209.85.214.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49xhe0p4ag-1
+	:mime-version:references:subject:to; s=qcppdkim1; bh=fR2JDFO0Mtu
+	aMMk5vsO3PZEznusuCLxw5SSeKXZkFr0=; b=hhq5tgn0qZnnv4cXLZHGCmYzHg+
+	+b+OgLayWgJSb7LgMITUGIWgHmV8MvxU3+pBC/FzFolZxvX34HQtK3mknRYPLAAY
+	oYDQOfT7GjzZutZyv09Waap5meyrt67wc/qobDkoLT65fgmhfyJlDmo3tNp2HJ2Y
+	QCDxCWiGcwo/UmG1ggmzhDMdRw1HUpxWVZlUR1d+KLzc3rS+u/SS/QUzMdy4K1/D
+	eWdcT5dlc04lRyVly7dn1M97mLqP9bnhwdSMVO9M5aiINQ9dOKebT5fzZ6ySBLxu
+	TTtV9QeiLgxMsQqfLpcyZL1S2u0ID2PNrtEVnSthWo1vSN5eooNI6q/aFcA==
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49w08wdurb-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:29:46 +0000 (GMT)
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-269b2d8af0cso1556875ad.2
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 04:29:46 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:30:00 +0000 (GMT)
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-290950e7b1bso1513805ad.1
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 04:30:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761218985; x=1761823785;
+        d=1e100.net; s=20230601; t=1761218999; x=1761823799;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=24rSamGepFzDSZ1Cho4Jlk11+RwSCiIWbyoT2pF6KQs=;
-        b=VY2a8+PMZtqSqMVLV/ULzRFbc/jBXjrJlMrvso3ni/b47MHlivoT1w4At/h32j9jRU
-         fxieBUDMyXVsgIBzxXvjsiQBJ43FTcFfgp2b5GbP5FbEEcJ84vuP6xi/0lubUwaKcwv2
-         0RV8VSoXx5FFYH1Dy/0WI59ROSnCWsh3+aaDKY5wHZrd2N3vqAcPvIAGNGy0C+/84VX/
-         YF51ai8sLOMK4JCT4sbYrkq1FQ6CrMZs8+mYaZMCsgxiQucznb0jFSB2cuFZkzhOVzal
-         viBmWHL1VvpSZN3kh24fqICmNintVR/CNcRAjvn5qw0YDHou98FkXbP3Bd+kt6ni94kO
-         E6oA==
-X-Gm-Message-State: AOJu0YykIK98OIu/kOBAYXDufK7K2s1gBGr4qKygkS6PxSbhpo5LYk+s
-	59aLRi2GOddKoD7KG/jUBhsUuL9zMyWqK2bJ0qHM7dzY1qkiZLS6py2SlH7f1Xy5LUVuY7eRDPl
-	NstUtOZM18NUu2U5pu+DkECvgXIUo/W/dZRxcjnT8ipbRA96nhYY1sf8qTOCOpQ==
-X-Gm-Gg: ASbGncsJdW4xPawV+J8qkVydTuGoQdorldQ/3iKTmLqIP80djZLUXh3eObEA0+WtCb9
-	HtAPvnLopVcQQh/JHpUK5B3XI26b7vD+HGu1609MgVTZ1mNeARB5PYL7sd7ceuqVxlJQ8T4BhBz
-	E4+aNu33WsW9yXH70D67hoZS2O09AsS2/umupufIJAv1rifo/mD+LNrakKK8DxNFypLHIZiPobt
-	IwxnZonubUQSowmF4tion46FpwVEwqjIlH0dc9iuuW4DzSYIbuUCHR8a/Ai7AIYT3MgJQpu3aX0
-	lKoXf3wEAiElFTwLapM+oHH0EwKjVVc0qGWLtkF1N0gNAV2Rw2wOftwwHT29/T7ZcaJ7Z/C11ro
-	q/g/sveKTLpGxTUkGofCabPCWtOMK3A==
-X-Received: by 2002:a17:903:2bcc:b0:269:85aa:3776 with SMTP id d9443c01a7336-292d3feca86mr66027415ad.11.1761218985470;
-        Thu, 23 Oct 2025 04:29:45 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG8WryTUVK9uIGvfA8bBiYDlVUzKkwiJHvUyKvzEQh0yxPMRvKLMdCz3fmuq9JzQW1dIcYc+g==
-X-Received: by 2002:a17:903:2bcc:b0:269:85aa:3776 with SMTP id d9443c01a7336-292d3feca86mr66027105ad.11.1761218984963;
-        Thu, 23 Oct 2025 04:29:44 -0700 (PDT)
+        bh=fR2JDFO0MtuaMMk5vsO3PZEznusuCLxw5SSeKXZkFr0=;
+        b=KDUOXx7oWpTFflNPQh6j73ib4efohcITZbo2296QhMYeEVsSptBGI5te2uF1n0u/nN
+         lulh0KrOT8mxHeynoqP3TEqNI4qdUdJH0zM5VQu2uTAExq5l6Rssyk2rTEuY7Y2hDIf0
+         y405czKoRAyaH3yzowmpzjhPVOnx5euMBdBospxUGPgX0IUUdYJ2dCn5cdCDLrODJfmb
+         hxW4nqFeKDfEKKi5Jt8b0HRi4p1TVL0GtXtgQaGBU8xCp8jcKjnJEe/sXqJg1H0TOAHD
+         yco7kwNOByc3SsRx9Kqyf5TWosZSimna4GHffMcXAnGuVy/2cfU/4CZ95xVgeCUTtn4b
+         g/VQ==
+X-Gm-Message-State: AOJu0YzWbecAf9UijnaeoT4KZAgS8hxJEn6bfT7oZpsnOuqrEOhOYRWY
+	4lb9dfzjlcYTuE9ELe4dqKaoiBDIr0mXBSz8qnoeD8LYRYM13d5p9e98Ep/GWcGx2PfZgYX3DiW
+	tkmr+JzyFbpp0DmDG0EX9W0umGe2OHVCZRNYNoLLRQAe/xyhgNKdZIDbrnB6M7/45gmgN/w==
+X-Gm-Gg: ASbGncvTICX/7AGuBt5Y3BNhg5tL5t45gQRF5KH9atMiMyqA8g9/GSP7o85MH+Mb6OG
+	smTXqYkIpSEtYPaLyJTilvdw/2LljSQf+s2wbAZ0GAZeugAsUKl6iB5x2l0ABczIxRBxO0riZhT
+	cxMA2lU0yshVZCTY8fyJ0g5XeaV5o6WaVHgaWdV6IrKV2EaueLv8hZvJT/CZkOB2lf6FKDM708x
+	K3gh6LqUsjL5WWxP2BOGOnDlza6pgLZ+HpLm0UAA/1Xe7oE2MfurIrUfwD3U1y0oL68jPMBozQz
+	Ozfae6uxTp97BeOyUCMvuC2W5knOt+BQCEuHmgxqsNUdLW0e6NIh4iM0kc+AHSBIpYJHvo88deE
+	JIgxLIC7sJ7BMVqiFvN40QKOOjbkoSw==
+X-Received: by 2002:a17:903:1746:b0:25c:9c28:b425 with SMTP id d9443c01a7336-292d3fe2f79mr65295065ad.11.1761218999178;
+        Thu, 23 Oct 2025 04:29:59 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFuXQI9VRXhnQMSIZ4xgGvAhDSywgxIFMeOu/zYuaXfGqNrmw1i1qi4dhUipSl7+nHiLMY6pw==
+X-Received: by 2002:a17:903:1746:b0:25c:9c28:b425 with SMTP id d9443c01a7336-292d3fe2f79mr65294885ad.11.1761218998716;
+        Thu, 23 Oct 2025 04:29:58 -0700 (PDT)
 Received: from hu-sartgarg-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2946e1231b0sm20438815ad.97.2025.10.23.04.29.39
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2946e1231b0sm20438815ad.97.2025.10.23.04.29.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Oct 2025 04:29:44 -0700 (PDT)
+        Thu, 23 Oct 2025 04:29:57 -0700 (PDT)
 From: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
         Krzysztof Kozlowski <krzk+dt@kernel.org>,
@@ -76,9 +76,9 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
         quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
         kernel@oss.qualcomm.com, Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-Subject: [PATCH V2 2/4] arm64: dts: qcom: sm8750: Add SDC2 nodes for sm8750 soc
-Date: Thu, 23 Oct 2025 16:59:22 +0530
-Message-Id: <20251023112924.1073811-3-sarthak.garg@oss.qualcomm.com>
+Subject: [PATCH V2 3/4] arm64: dts: qcom: sm8750-mtp: Add SDC2 node for sm8750 mtp board
+Date: Thu, 23 Oct 2025 16:59:23 +0530
+Message-Id: <20251023112924.1073811-4-sarthak.garg@oss.qualcomm.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20251023112924.1073811-1-sarthak.garg@oss.qualcomm.com>
 References: <20251023112924.1073811-1-sarthak.garg@oss.qualcomm.com>
@@ -89,128 +89,61 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDIxMDE2NyBTYWx0ZWRfX94Ro5RQ9JECZ
- slZk8V+qJ0lbTyqvK7Uq8Yk2HXu7Y/0YMT1rYqByW1hBBgrH0mLEZcmDfQNg67SzAbiaQ/JoasN
- qVsIEBy0CP7fvLCjHpJbHPeCHKmQtY4kYgA4mbP6kz1x6BkGE+jReYwR7Opny5dAyCnM+88NTJw
- ujX1OqL5JHrNl9ZtDns4m6XRYTwwy2D2VAhrGhkTN7kZvUtFc9q2z/NBNvxGwp5VG3FcRB76O4o
- XmZT/kyfmwY72L6yW785ic1TLvBu9UX2Z5MxU8j5dNngnbHT2Du8TJb6N00H21gCHg7LJhvfPhm
- r8WqTW0Tn18kb6+oLN5+qM+EWvmS2q5NhXONbB/L7pKPu98glZVhkL/awZKf2QSAjjqGT4yFIqe
- 38QFnHItzwoHZF1HhT+65Xcfd3snYA==
-X-Proofpoint-ORIG-GUID: EazseNVOli5AgrNSwKMk3YkcH-VvPRw3
-X-Authority-Analysis: v=2.4 cv=WYUBqkhX c=1 sm=1 tr=0 ts=68fa11aa cx=c_pps
- a=IZJwPbhc+fLeJZngyXXI0A==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+X-Proofpoint-ORIG-GUID: O5_tc0dQo5TDAkj77ghbdsYqVO2RTtJb
+X-Proofpoint-GUID: O5_tc0dQo5TDAkj77ghbdsYqVO2RTtJb
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDE5MDA5MCBTYWx0ZWRfX+T2nBShPbLl4
+ h6WkpzELZNjJF1MJt+Z3marJiK0WQ0jF8CaTW8senMEKaWyAjBPbCANkWN+CqKsqvbCyTPTNKnq
+ 2MzVRIiF95KhRNCsWdg2ae2RoD2rIarqnBVJy8+0iGYPINGcHkv9m/9K+QHkXZvUMw3dY2wFfnf
+ 6qu5oLwTlTNeKFGokPb6wHlP8V4chOHelL1d5ZFk/xjpkBmrBFuh9+Je/OM37Wddv6wDfVA+K7p
+ 4F6aLnaye/k/5hjDYaDuL00Va2/K05D4YyX4VLA/azuQ0TyBFZ7Zwbnm4hlryW0Q1Cnfjztn86u
+ sprcAFXzAgC607dT9QRB+K+n39tfltlSAhuwCLh5T0jzs5LfpL5TyTE0txE82Fu3Hd8SojkVMx3
+ pDCLdwZGBmLJ+LgpaoSIzEaIIPC9pg==
+X-Authority-Analysis: v=2.4 cv=V5NwEOni c=1 sm=1 tr=0 ts=68fa11b8 cx=c_pps
+ a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
  a=x6icFKpwvdMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=EUspDBNiAAAA:8
- a=AsSGxY1rZHGoL8xKvT8A:9 a=pcaSXIDp9BJpxWmU:21 a=uG9DUKGECoFWVXl0Dc02:22
-X-Proofpoint-GUID: EazseNVOli5AgrNSwKMk3YkcH-VvPRw3
+ a=QH13294MLfywbrI7NfsA:9 a=zgiPjhLxNE0A:10 a=GvdueXVYPmCkWapjIL-Q:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.80.40
  definitions=2025-10-22_08,2025-10-22_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 adultscore=0 bulkscore=0 impostorscore=0 spamscore=0
- priorityscore=1501 clxscore=1015 malwarescore=0 lowpriorityscore=0
- phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2510020000
- definitions=main-2510210167
+ bulkscore=0 malwarescore=0 adultscore=0 priorityscore=1501 lowpriorityscore=0
+ spamscore=0 suspectscore=0 clxscore=1015 phishscore=0 impostorscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510190090
 
-Add SD Card host controller for sm8750 soc.
+Enable SD Card host controller for sm8750 mtp board.
 
 Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
 ---
- arch/arm64/boot/dts/qcom/sm8750.dtsi | 68 ++++++++++++++++++++++++++++
- 1 file changed, 68 insertions(+)
+ arch/arm64/boot/dts/qcom/sm8750-mtp.dts | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/qcom/sm8750.dtsi b/arch/arm64/boot/dts/qcom/sm8750.dtsi
-index a82d9867c7cb..1070dc5ea196 100644
---- a/arch/arm64/boot/dts/qcom/sm8750.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm8750.dtsi
-@@ -2060,6 +2060,60 @@ ice: crypto@1d88000 {
- 			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
- 		};
+diff --git a/arch/arm64/boot/dts/qcom/sm8750-mtp.dts b/arch/arm64/boot/dts/qcom/sm8750-mtp.dts
+index 3bbb53b7c71f..a8727d353b46 100644
+--- a/arch/arm64/boot/dts/qcom/sm8750-mtp.dts
++++ b/arch/arm64/boot/dts/qcom/sm8750-mtp.dts
+@@ -1030,6 +1030,22 @@ &remoteproc_mpss {
+ 	status = "fail";
+ };
  
-+		sdhc_2: mmc@8804000 {
-+			compatible = "qcom,sm8750-sdhci", "qcom,sdhci-msm-v5";
-+			reg = <0 0x08804000 0 0x1000>;
++&sdhc_2 {
++	cd-gpios = <&tlmm 55 GPIO_ACTIVE_LOW>;
 +
-+			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq",
-+					  "pwr_irq";
++	vmmc-supply = <&vreg_l9b_2p9>;
++	vqmmc-supply = <&vreg_l8b_1p8>;
 +
-+			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-+				 <&gcc GCC_SDCC2_APPS_CLK>,
-+				 <&rpmhcc RPMH_CXO_CLK>;
-+			clock-names = "iface",
-+				      "core",
-+				      "xo";
++	no-sdio;
++	no-mmc;
 +
-+			interconnects = <&aggre2_noc MASTER_SDCC_2 QCOM_ICC_TAG_ALWAYS
-+					&mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-+					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ACTIVE_ONLY
-+					&config_noc SLAVE_SDCC_2 QCOM_ICC_TAG_ACTIVE_ONLY>;
-+			interconnect-names = "sdhc-ddr",
-+					     "cpu-sdhc";
++	pinctrl-0 = <&sdc2_default>;
++	pinctrl-1 = <&sdc2_sleep>;
++	pinctrl-names = "default", "sleep";
 +
-+			power-domains = <&rpmhpd RPMHPD_CX>;
-+			operating-points-v2 = <&sdhc2_opp_table>;
++	status = "okay";
++};
 +
-+			qcom,dll-config = <0x0007442c>;
-+			qcom,ddr-config = <0x80040868>;
-+
-+			iommus = <&apps_smmu 0x540 0x0>;
-+			dma-coherent;
-+
-+			bus-width = <4>;
-+			max-sd-hs-hz = <37500000>;
-+
-+			resets = <&gcc GCC_SDCC2_BCR>;
-+
-+			status = "disabled";
-+
-+			sdhc2_opp_table: opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-100000000 {
-+					opp-hz = /bits/ 64 <100000000>;
-+					required-opps = <&rpmhpd_opp_low_svs>;
-+				};
-+
-+				opp-202000000 {
-+					opp-hz = /bits/ 64 <202000000>;
-+					required-opps = <&rpmhpd_opp_svs_l1>;
-+				};
-+			};
-+		};
-+
- 		cryptobam: dma-controller@1dc4000 {
- 			compatible = "qcom,bam-v1.7.4", "qcom,bam-v1.7.0";
- 			reg = <0x0 0x01dc4000 0x0 0x28000>;
-@@ -3121,6 +3175,13 @@ data-pins {
- 					drive-strength = <2>;
- 					bias-pull-up;
- 				};
-+
-+				card-detect-pins {
-+					pins = "gpio55";
-+					function = "gpio";
-+					drive-strength = <2>;
-+					bias-pull-up;
-+				};
- 			};
- 
- 			sdc2_default: sdc2-default-state {
-@@ -3141,6 +3202,13 @@ data-pins {
- 					drive-strength = <10>;
- 					bias-pull-up;
- 				};
-+
-+				card-detect-pins {
-+					pins = "gpio55";
-+					function = "gpio";
-+					drive-strength = <2>;
-+					bias-pull-up;
-+				};
- 			};
- 		};
+ &swr0 {
+ 	status = "okay";
  
 -- 
 2.34.1
