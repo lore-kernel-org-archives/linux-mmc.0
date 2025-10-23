@@ -1,145 +1,247 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44F13324B39
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 14:33:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84300330B2F
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 14:54:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761229982; cv=none; b=HF7X0ADn9rGh0Bn2faJE2dr3MwQPhAacopGeBb/cUGgzc08JWh2k8KFnzRTm8Ip0P8ZzlfZomKRMCWXpEvWNzZ+cRLWevc9tQn1U0haNJ+fYYZkaJ2mA7Ufc1u/KYxtQvOCuM4ViycTXYfh5Yu4BC0O+3LPe4/hpvznOXbzalWs=
+	t=1761231284; cv=none; b=NpeCoOQgcAxoHrkOTk2PpfhyQMYkD2TkdaRnEPaflXxPigC8lX3UQsT03plCjf9DG3/IiLwAXvfZjxwghgh3TZC7AqGxF8L3/Hh0F8Z/DuzIiYZh7riXPatFB5fPlWnyHtAq87HestvIeqAfbnoTwTcRsHlC81rdVQNttxSBQQ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761229982; c=relaxed/simple;
-	bh=t/hYkpSlu0vnttqha26zv1xBx0fPlg003PIh1Nzd1PI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HvEtz6xUx6tRiblb3e0qm9RHp0/QlUAMI7ulU+k5PQam6UD7hwRgKyUjOXGgV7m2LzVU4s5LSGpVniwM7zSMN7tXRVxy155U9CUpP16/Z+St1bvfoX1xYoLQRqdiYocXBGz4F48bzGnsUDCNx6qgra0uNI2A/VRriHxzrNNYNDM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kTyOxWJq; arc=none smtp.client-ip=209.85.128.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1761231284; c=relaxed/simple;
+	bh=T8WDD3FPKDFq4jZeX4r8iK4zRk5CyZideAEyYUc9+ag=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=WrARNsrCgDmMQ98k96tkuY2TRn2wGbY+++XnopEtEKkgYbnNt0RZjo0DULzs8mIdUNNPECcRH3qgwjtvNU6vI3ijkS5G6WEZ16Lxy78VITAqFPjTSx07SLw8qhbRYvyJjSiEKPs/nRAhQDiGzIqJgk2Rti8y75A8ZL5/z2lA8Qg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VS5pxEWZ; arc=none smtp.client-ip=209.85.210.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kTyOxWJq"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-783fa3aa582so10678537b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 07:33:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VS5pxEWZ"
+Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-77f343231fcso606055b3a.3
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 07:54:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1761229979; x=1761834779; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=O/xc9UniwAv60m+Rz/agyhA5vluzV9PNM3+eKoA9NbA=;
-        b=kTyOxWJqcZM8nlau9IrXueA5RcKeQeIGhEJTI01tHcOj8Gib5WZUxbxi9vL7lr6C2w
-         rDcGskdQcK2j/8mttEsqFc+FvhMwwVD3sQrPpBsOkk1/aJYqbgaPCvRy/PKaeajbqixq
-         gMp4MJd3c65ITMzke34hWouNBdRiMX7sS1ErImhVoFOoJ5OEwtMZCCXp7/qkQAl1oWiw
-         Dzp1LYPLpEIISq/HZL1xayhiKOuAGEnmFm/sPQrfyXvF3ZP792b0Lz34hwPqFObvaW6h
-         /3hz835Sy3xI4s2C8H9oxTYDQeW5al/IM7SGOt/Vemi+bAV10jjzCTQQCTlxrkI7MNYD
-         scMw==
+        d=gmail.com; s=20230601; t=1761231282; x=1761836082; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=6PWkC5vEbffnTD2msqF1a1ad0yN4rdP1qu6b7OiUsdc=;
+        b=VS5pxEWZk/niMq7N5uBMDYut0ph1bnc2N+MUl3TYHpX4rl4S/lAG9Uum6/khRr8vn4
+         nEy2iBpzoJZJsg0qK81avF4usVX0MKd6GcVoMK3suxZn53jVje4/rJ0hGNvHZ6+Exi+7
+         XJdhv3kOBinf9BM5uNMYJlRxDEHCGdvK/jonblZVGsA+6ilsogg6NcP1h9SHzSwVxmNx
+         JOAu/5N9Z6aH10bfx3IwDp1eV8lz423U5F4g4HAMo9EXi3PXoZNXFNAw10QDLwjXmHs8
+         uOk2kPa/Qg1CYG06pD0bZ43VH1zXX/F0bqTXVNyKhjSDx5SBIZ4k0loCeGw+4ePLTv4x
+         LYUQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761229979; x=1761834779;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1761231282; x=1761836082;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=O/xc9UniwAv60m+Rz/agyhA5vluzV9PNM3+eKoA9NbA=;
-        b=gJwcnVGONyosGqEEYUx0NIP+jS4FzROAybFYESvZ0HykYpyY/mrbO/DJPhsWxt/aZa
-         Wf/CF74wF0XoVz/IVsF/xp/UgRSjd4mnIggrp1H3ij4ImYevM9ZxgTXwU4bsv6XcnKM3
-         IsgWT4iX4O61B3IX5x8Nuoaa+I7ymYXAw5pxfv8NVQaol1T7p4RunQa6PHVmRZRaMQnB
-         ynsLq+Cmoo+KCtCv/+FuhlJUUob94AYr/vBkJ7FQXVbo/i4uXJrE+GW6wyQB5NiypsZn
-         FgOMtlzBEjTOtclh4Acw/7Zn5/G2oyCusGdNdPHmn8Oy49msEGhYgl3zYEoQQ9QnDmVK
-         3y3Q==
-X-Gm-Message-State: AOJu0YybSpnAVs/uGfXbS1Fv83hFP4WIV5iAjf1u6gCZEOqmbo6b0TiQ
-	PSiLNw9ch6jUJ3igAa2VcMoTpZ8c5plzAGxIajBFGqhbfFPR0avFXT/uFbOtJyi1lCp7AyCiNiQ
-	LjceqY0rDyb3PPVIH3QWU1bubTXTQPYpX7vxt/MOe7w==
-X-Gm-Gg: ASbGncuIasrst6C6efyvwVnLy8dxGK47qXQZ74jpWtfcBzvquDpddXrN5zko98rcML+
-	p4leBxJLGOnGBTUxeKRFWmKgiAnyHD0JtYy6QL1/7yVdbwSXAzsTzMte6nGvOx3IulMb7CArHNf
-	/7Sv0sJrIA6zZ1nCXChEI2Gk53DKUXTCT9SUYlUBGn8sXkVsuoAwQc0AFlrAQ7Bgpj+DwpycBhO
-	zxcxNDLCQ7ihHPMQENpSmkWTTQgSZ7aM/jXMw+qQEXYEDD2EVNXpGf4yWBBDhIud+OtFnFU5Cm2
-	tT2JgZI=
-X-Google-Smtp-Source: AGHT+IEgTaJNjs+zzx0IN94FnxxGv00PXrNGgqAoXFF/nPcpR+yDxafMeAv0ZL1vvXVSoKr9Z2ifvzlZrapBz2hajVY=
-X-Received: by 2002:a05:690c:9a01:b0:772:72d1:1610 with SMTP id
- 00721157ae682-7836d2eded0mr218084217b3.32.1761229979006; Thu, 23 Oct 2025
- 07:32:59 -0700 (PDT)
+        bh=6PWkC5vEbffnTD2msqF1a1ad0yN4rdP1qu6b7OiUsdc=;
+        b=utimvJA4g4AJGOxENP0sKi5uYHnhOPv21ekPHBRbh4kq1rLfPgjG7/EW9vjjoPgXc+
+         qkNbyKpplLSnaYlXOK9sxoMTT4pa7jmRDd2+necRIsaSk3FcknjIjFro822XNYusRDf3
+         oy9KHQWItUdNK1OXBTCTkKwOjKN2unjcF+omrg3QGEH+nAhy7I/JtXvP0NJmCaF3SlEt
+         flV/ehlgKWXecaQvBy8MGe7Hxdjxokp3bjIEiSMjIO9hTlzqGi5FaA0qpNVEzwibLmjd
+         HGbl172JzbOIMBov82vDM2Tnou6f7oNBoI9Pg8ZcJQmnOEPWlbPp6Jhhw8J/vuPVx8tu
+         hx2A==
+X-Forwarded-Encrypted: i=1; AJvYcCVGNIbR8bmISqG10ooUNxDIVlvGxZ0smv2MerWOesuh3Y0RHsXCYLsp8sLpZX8O9YjmQnTd9MAtbm4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyuqaTAo9QiF6ksABfA8OU1y9poWWcNgnhiyFKdCYQqayO0voVM
+	0+4FIocbX+gvLmOCZmeCWE4dAwYz7VBPC7iP0JtcGEUWI3piIJjEpCOP
+X-Gm-Gg: ASbGncuXdW/0K35pJFCVjYVCLUwljAbsJN58telprjQ3M2AwKA1iAVVemdkVbbH/RGL
+	6UQpDnJjMtJjlKA81k+pug/IXRnvc1AM7H7TnIRZc5tc9MPDTzMZK5kO/hdZwhXLjXsk5KEMWiY
+	RHGZMMC6IvHy7WDDO+ol1ulAav3hsVtttnVkrFUu4sqPPMuubKAwV+fuqrtEzqDlll7cHuQxeAm
+	qPl6vPtaoDcXUufleE3TXZLW8SpAtI2KqiItWom9BiLAX9x/I0x+ItbmPDNlHi1dSsYPO3AOtuf
+	FPgcOBNx5qo6lmiDdi/cxjDrsEZFR+nNd7/wTxC5MqmqWnQnUcbdRv7dCwJMdxp3dTvBjFGS2JD
+	SoSWE3yp+uuAZ00VKE/puvBrXYunkkoELPWV14QcnqZ5QcdJalMHsvbcVZtLJoRbehicdNvc/0/
+	bi77/5QDQ=
+X-Google-Smtp-Source: AGHT+IG4jW0xt+pP9DVrPMcL2PAlFdoxSZhMCK+ZCC4fZeK1oMvAPXo/S/LPShSFOkL1hwFOo7+F2w==
+X-Received: by 2002:a05:6a21:32aa:b0:306:51fd:5542 with SMTP id adf61e73a8af0-334a861feb9mr31305654637.44.1761231281323;
+        Thu, 23 Oct 2025 07:54:41 -0700 (PDT)
+Received: from rakuram-MSI.. ([2409:40f4:2040:16ed:f15f:ed0a:f0b7:34d2])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a274bb37dbsm2748241b3a.57.2025.10.23.07.54.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 23 Oct 2025 07:54:40 -0700 (PDT)
+From: Rakuram Eswaran <rakuram.e96@gmail.com>
+To: ulf.hansson@linaro.org,
+	u.kleine-koenig@baylibre.com
+Cc: chenhuacai@kernel.org,
+	dan.carpenter@linaro.org,
+	david.hunter.linux@gmail.com,
+	khalid@kernel.org,
+	zhoubinbin@loongson.cn,
+	linux-kernel-mentees@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	lkp@intel.com,
+	rakuram.e96@gmail.com,
+	skhan@linuxfoundation.org
+Subject: [PATCH v3] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
+Date: Thu, 23 Oct 2025 20:24:32 +0530
+Message-ID: <20251023145432.164696-1-rakuram.e96@gmail.com>
+X-Mailer: git-send-email 2.48.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250619085620.144181-1-avri.altman@sandisk.com> <20250619085620.144181-2-avri.altman@sandisk.com>
-In-Reply-To: <20250619085620.144181-2-avri.altman@sandisk.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 23 Oct 2025 16:32:22 +0200
-X-Gm-Features: AS18NWBhunMkKx-6DMartf6yH0-vixyPCnlYDOpeAGGrdcY4scIzm-2scSQ7xYs
-Message-ID: <CAPDyKFqgY7nVW+GYSk8xMH721Ar2myvFjFAb6EWQHYrk8zGbQw@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: core sd: Simplify current limit logic for 200mA default
-To: Avri Altman <avri.altman@sandisk.com>
-Cc: linux-mmc@vger.kernel.org, Sarthak Garg <quic_sartgarg@quicinc.com>, 
-	Abraham Bachrach <abe@skydio.com>, Prathamesh Shete <pshete@nvidia.com>, Bibek Basu <bbasu@nvidia.com>, 
-	Sagiv Aharonoff <saharonoff@nvidia.com>, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Thu, 19 Jun 2025 at 11:03, Avri Altman <avri.altman@sandisk.com> wrote:
->
-> The SD current limit logic is updated to avoid explicitly setting the
-> current limit when the maximum power is 200mA (0.72W) or less, as this
-> is already the default value. The code now only issues a current limit
-> switch if a higher limit is required, and the unused
-> SD_SET_CURRENT_NO_CHANGE constant is removed. This reduces unnecessary
-> commands and simplifies the logic.
->
-> Fixes: 0aa6770000ba ("mmc: sdhci: only set 200mA support for 1.8v if 200mA is available")
-> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
-> Cc: stable@vger.kernel.org
+This patch refactors pxamci_probe() to use devm-managed resource
+allocation (e.g. devm_dma_request_chan) and dev_err_probe() for
+improved readability and automatic cleanup on probe failure.
 
-This has fallen behind, sorry!
+It also removes redundant NULL assignments and manual resource release
+logic from pxamci_probe(), and eliminates the corresponding release
+calls from pxamci_remove().
 
-I have dropped the stable/fixes tag and clarified the commit message a
-bit, before I applied this for next, thanks!
+Reported-by: kernel test robot <lkp@intel.com>
+Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+Closes: https://lore.kernel.org/r/202510041841.pRlunIfl-lkp@intel.com/
+Fixes: 58c40f3faf742c ("mmc: pxamci: Use devm_mmc_alloc_host() helper")
+Suggested-by: Uwe Kleine-König <u.kleine-koenig@baylibre.com>
+Signed-off-by: Rakuram Eswaran <rakuram.e96@gmail.com>
+---
 
-Let's try to move forward on patch 2 too. Avri, if you have the time
-to do a re-spin? Otherwise, I will try to get some time to have a stab
-at it soon.
+Changes since v2:
+- Dropped redundant dma_release_channel() calls from pxamci_remove() as
+  devm_dma_request_chan() automatically handles resource cleanup.
+- Added link to v2 for reference:
+  https://lore.kernel.org/linux-mmc/20251014184657.111144-1-rakuram.e96@gmail.com/
 
-Kind regards
-Uffe
+Changes since v1:
+Following Uwe Kleine-König’s suggestion:
+- Replaced dma_request_chan() with devm_dma_request_chan() to make DMA
+  channel allocation devm-managed and avoid manual release paths.
+- Adopted dev_err_probe() for improved error reporting and consistent
+  probe failure handling.
+- Removed redundant NULL assignments and obsolete goto-based cleanup logic.
+- Updated commit message to better describe the intent of the change.
+- Added link to v1 for reference:
+  https://lore.kernel.org/linux-mmc/20251007161948.12442-1-rakuram.e96@gmail.com/
 
-> ---
->  drivers/mmc/core/sd.c    | 7 ++-----
->  include/linux/mmc/card.h | 1 -
->  2 files changed, 2 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index ec02067f03c5..cf92c5b2059a 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -554,7 +554,7 @@ static u32 sd_get_host_max_current(struct mmc_host *host)
->
->  static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->  {
-> -       int current_limit = SD_SET_CURRENT_NO_CHANGE;
-> +       int current_limit = SD_SET_CURRENT_LIMIT_200;
->         int err;
->         u32 max_current;
->
-> @@ -598,11 +598,8 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->         else if (max_current >= 400 &&
->                  card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_400)
->                 current_limit = SD_SET_CURRENT_LIMIT_400;
-> -       else if (max_current >= 200 &&
-> -                card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_200)
-> -               current_limit = SD_SET_CURRENT_LIMIT_200;
->
-> -       if (current_limit != SD_SET_CURRENT_NO_CHANGE) {
-> +       if (current_limit != SD_SET_CURRENT_LIMIT_200) {
->                 err = mmc_sd_switch(card, SD_SWITCH_SET, 3,
->                                 current_limit, status);
->                 if (err)
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index ddcdf23d731c..e9e964c20e53 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -182,7 +182,6 @@ struct sd_switch_caps {
->  #define SD_SET_CURRENT_LIMIT_400       1
->  #define SD_SET_CURRENT_LIMIT_600       2
->  #define SD_SET_CURRENT_LIMIT_800       3
-> -#define SD_SET_CURRENT_NO_CHANGE       (-1)
->
->  #define SD_MAX_CURRENT_200     (1 << SD_SET_CURRENT_LIMIT_200)
->  #define SD_MAX_CURRENT_400     (1 << SD_SET_CURRENT_LIMIT_400)
-> --
-> 2.25.1
->
+Testing note:
+I do not have access to appropriate hardware for runtime testing.
+Any help verifying on actual hardware would be appreciated.
+
+Build and Analysis:
+This patch was compiled against the configuration file reported by
+0day CI in the above link (config: s390-randconfig-r071-20251004) using
+`s390x-linux-gnu-gcc (Ubuntu 14.2.0-19ubuntu2) 14.2.0`.
+
+Static analysis was performed with Smatch to ensure the reported warning
+no longer reproduces after applying this fix.
+
+Command used for verification:
+  ARCH=s390 CROSS_COMPILE=s390x-linux-gnu- \
+  ~/project/smatch/smatch_scripts/kchecker ./drivers/mmc/host/pxamci.c
+
+ drivers/mmc/host/pxamci.c | 56 +++++++++++++--------------------------
+ 1 file changed, 18 insertions(+), 38 deletions(-)
+
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 26d03352af63..b5ea058ed467 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -652,10 +652,9 @@ static int pxamci_probe(struct platform_device *pdev)
+ 	host->clkrt = CLKRT_OFF;
+ 
+ 	host->clk = devm_clk_get(dev, NULL);
+-	if (IS_ERR(host->clk)) {
+-		host->clk = NULL;
+-		return PTR_ERR(host->clk);
+-	}
++	if (IS_ERR(host->clk))
++		return dev_err_probe(dev, PTR_ERR(host->clk),
++					"Failed to acquire clock\n");
+ 
+ 	host->clkrate = clk_get_rate(host->clk);
+ 
+@@ -703,46 +702,37 @@ static int pxamci_probe(struct platform_device *pdev)
+ 
+ 	platform_set_drvdata(pdev, mmc);
+ 
+-	host->dma_chan_rx = dma_request_chan(dev, "rx");
+-	if (IS_ERR(host->dma_chan_rx)) {
+-		host->dma_chan_rx = NULL;
++	host->dma_chan_rx = devm_dma_request_chan(dev, "rx");
++	if (IS_ERR(host->dma_chan_rx))
+ 		return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
+ 				     "unable to request rx dma channel\n");
+-	}
+ 
+-	host->dma_chan_tx = dma_request_chan(dev, "tx");
+-	if (IS_ERR(host->dma_chan_tx)) {
+-		dev_err(dev, "unable to request tx dma channel\n");
+-		ret = PTR_ERR(host->dma_chan_tx);
+-		host->dma_chan_tx = NULL;
+-		goto out;
+-	}
++
++	host->dma_chan_tx = devm_dma_request_chan(dev, "tx");
++	if (IS_ERR(host->dma_chan_tx))
++		return dev_err_probe(dev, PTR_ERR(host->dma_chan_tx),
++					"unable to request tx dma channel\n");
+ 
+ 	if (host->pdata) {
+ 		host->detect_delay_ms = host->pdata->detect_delay_ms;
+ 
+ 		host->power = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
+-		if (IS_ERR(host->power)) {
+-			ret = PTR_ERR(host->power);
+-			dev_err(dev, "Failed requesting gpio_power\n");
+-			goto out;
+-		}
++		if (IS_ERR(host->power))
++			return dev_err_probe(dev, PTR_ERR(host->power),
++						"Failed requesting gpio_power\n");
+ 
+ 		/* FIXME: should we pass detection delay to debounce? */
+ 		ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
+-		if (ret && ret != -ENOENT) {
+-			dev_err(dev, "Failed requesting gpio_cd\n");
+-			goto out;
+-		}
++		if (ret && ret != -ENOENT)
++			return dev_err_probe(dev, ret, "Failed requesting gpio_cd\n");
+ 
+ 		if (!host->pdata->gpio_card_ro_invert)
+ 			mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+ 
+ 		ret = mmc_gpiod_request_ro(mmc, "wp", 0, 0);
+-		if (ret && ret != -ENOENT) {
+-			dev_err(dev, "Failed requesting gpio_ro\n");
+-			goto out;
+-		}
++		if (ret && ret != -ENOENT)
++			return dev_err_probe(dev, ret, "Failed requesting gpio_ro\n");
++
+ 		if (!ret)
+ 			host->use_ro_gpio = true;
+ 
+@@ -759,16 +749,8 @@ static int pxamci_probe(struct platform_device *pdev)
+ 	if (ret) {
+ 		if (host->pdata && host->pdata->exit)
+ 			host->pdata->exit(dev, mmc);
+-		goto out;
+ 	}
+ 
+-	return 0;
+-
+-out:
+-	if (host->dma_chan_rx)
+-		dma_release_channel(host->dma_chan_rx);
+-	if (host->dma_chan_tx)
+-		dma_release_channel(host->dma_chan_tx);
+ 	return ret;
+ }
+ 
+@@ -791,8 +773,6 @@ static void pxamci_remove(struct platform_device *pdev)
+ 
+ 		dmaengine_terminate_all(host->dma_chan_rx);
+ 		dmaengine_terminate_all(host->dma_chan_tx);
+-		dma_release_channel(host->dma_chan_rx);
+-		dma_release_channel(host->dma_chan_tx);
+ 	}
+ }
+ 
+-- 
+2.48.1
+
