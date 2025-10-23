@@ -1,145 +1,223 @@
-Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
+Received: from mail-pg1-f171.google.com (mail-pg1-f171.google.com [209.85.215.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 878503370FA
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 15:40:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8483834A3B7
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 17:41:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761234046; cv=none; b=BlxfOWUT053huuAWCkx4nQmT9L9+9ryg8ZUtAOEOwDrKUBXO0ceGfUFI+lr18gBic5ezUCjsniGpexdSKONGLDxS9HWgr7LCG5BgivawtFkGGwBGFEy/qgv+lApkawjjRTac9Bml0oaW5HGNC53yKZdTUH2B8xiDbsJddN15DfU=
+	t=1761241287; cv=none; b=IqrbtYyKv01MTAAY5ftxDa5lt5GS97uDbU43dlc9UBBpiEFsM9ohfFd+w9L57mNynphk21zMqeIJeHMX6imGAMCTy9jsI5CDc4LEGVY8uEJqmsZRdHqfCEI/Wv/yq/ayFIDmMcD5BZZ1DrDRRwwZoFI+xxKHStJXVssMIyiCXBY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761234046; c=relaxed/simple;
-	bh=wo+q7gVJ0lDPvk3xTlIPPAEgAAs6cPPFBZRIlPTAefI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=HxgFQkWs/G+FZyrRpQ4VvEycktrcQPAKcGzUJA1ouRrxrMNRaCSQYS7AWi2139rL71lmjTI5QZDDSvGJhBX8FumTlSSA4m0o+k5POf7kgyNhf1effLfqi3N9Qvmir9dSnTAZfyLl3qwCNOWkJWd2+ju899qsUh/w/H7q0cNrxA8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BoO3daVA; arc=none smtp.client-ip=209.85.214.178
+	s=arc-20240116; t=1761241287; c=relaxed/simple;
+	bh=brq1Q6J/cHb72gyYM3jxDa4jInBHAcJnQ/osdj5Bc0g=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=VTDZ3zJNT1gfknnSIZU/j3lpeJ/hic27MFCDaRysngXktZ/P8CqDJeIlPgki01Zp1mQnQkvlAVtqAFCX26JjYGuhoX5mxlDcOHGMcsbviKuMkgpvHaPHKa8KEdqoEyQXuVwv6ASkd9MQb2SxBel4PXjhjElvp/J3G45yHu8Ogqg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SC+bKV1+; arc=none smtp.client-ip=209.85.215.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BoO3daVA"
-Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-27ee41e0798so13110265ad.1
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 08:40:44 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SC+bKV1+"
+Received: by mail-pg1-f171.google.com with SMTP id 41be03b00d2f7-b4fb8d3a2dbso737732a12.3
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 10:41:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761234044; x=1761838844; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=lXJXpPmoDUJ02UXvoOXxjG7CEpQb9FPd/0KUDwpNI4k=;
-        b=BoO3daVAWDIewXv5Dr8Qdw/6c/vn/DDn+MdJhJKnXe1cv5cSM8DnCml/O0S+8l+pBp
-         9IYxqKArEqk93D4Dt0XEI4CqYEdt4BAXd5Hu4d4JVhpJQ1HtSTsiz03v49P2u7VLidJR
-         hy3w9moHuSsdiq/yujrnclIQ5zeNv/uKpfE4rNGoMxQhmksdqsf1/AaQYb8R6ImC6FiP
-         ii57HM3zmPP1lbGtdv+OFWznCbNk6QllPDs0JMVBuxkYXQdsFFeoZxcMIxSXHBdh6nRN
-         Ti5+r0X77k3ZKAQvklX57wN44w/EbSZvYcRCc+0PLOJbu7wqkgktHi1ONxyWpAwqmzeH
-         lBtA==
+        d=gmail.com; s=20230601; t=1761241285; x=1761846085; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+RlscW0fJPcI4w1cVrsdBX2mHMbYD0iZ1loDXnboKus=;
+        b=SC+bKV1+3Nb2uPW+ss7ZfMAd23SDd9Swd2WfIHGku13Yn04sANHwSzXRLH6Gy8ACTI
+         fr+aaL8qKQ45qbn42nAr6VUQyvE3eb/KvUBJaeYx84utCnxEthTU6hTSFgZGjByZzP+B
+         mhnK0BqL2T+q8tuUQnFXw6/ifFqkulZzQvCeDdkwHyA5b+4aTYEBEGWYHFBcaotp4b35
+         3YdVnorLuZKWcpLAyYc/ijcTzjp6UJu3QfAxnZ9ITXQFxF/tb1X1WE1mpCb7xNAoRcMu
+         WUWJ83jWkFVOJE2A8XyHVlLRJxdjrWQ4oMXWNZ5YYw0tVPSkw2FSmCV9vjVxQq/QWoby
+         oOEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761234044; x=1761838844;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=lXJXpPmoDUJ02UXvoOXxjG7CEpQb9FPd/0KUDwpNI4k=;
-        b=kyaaeZWYuJDg/Zqqy6UgWj/baKkFKoz/1aBn9ZM2hmKYyTJIc88R6Lpw6xS4SLGRJ6
-         KZy7+MdrcO5RUy++3cHFF3XWr2lEfvOKwldEhhe2ZPaqNSfhIgvnAJ9gVfP8KU8bk2er
-         9FPJB0VXz1skyO7GkB2ktJT4toLDo9RVvGyZuz/84Y3UAZ0j5PA5zYNiZFfapmE3fUNE
-         RsYhvpmEqFO455ZnJlBzLOrogQ4wsHDaIrQMHqMdHTRBDZkd8hcgzeR6tAaElc5uAHY4
-         YtIKTZ0+/5RffNVJj7N9pYuIbf/opf/89AsMznMWzICbj6Z9LY4yjAz4T3WuivZ/j8pp
-         e/jg==
-X-Forwarded-Encrypted: i=1; AJvYcCV4tfdCME4oQJIZJQE/2frr/ayvoGc3r8mMP3qbS0x2uXPsvkzv64EZKyGBkwVR6I797cn9yZ6sgOA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyyAUdJfcOOzgyPRv9CASim18bQx0Ho93Xab6O7rPRPkrpfD4VE
-	K2e4WruPBCwIn6RywDOIEyCufye5oLfjtG4fBP4zp0ZnqIhlYBGqNGCO
-X-Gm-Gg: ASbGncsE/L9aqeXytL3jsjqjxFhnlhZII88ct3Pd4hpX6SgQfXrbgNsL9KHd0bNJDYH
-	e/PDx8ENKPVluoglysgNqV+I0a7cMs4CrOyj+kKM0os1pwbyeimDnIwCXMIGmH0vqLOtJcJffbx
-	5F4QmDSlJ88HNIWC4DibWLdwydPSKjiDK1nGi4OUcfL9Ux6qU6okGfvUrkrc6JuBRXZY8aVzh3C
-	H5dX0vX/eiwjwW1isyk7puDlE6KIxKi0ZymnmTaUpL6hjVcsJ5fuKhHQWnDXsG+WubJ4WexU8m0
-	jCYHiilFD3y160thIeAgeRirHMq+U1jr4u2WcDB6DhRfm/ISVFKMGeL8vexk4WRhutAc5yysRd4
-	ktn07M/5oBDd+mtlGPQ4+aS7H466FOD2V45xRCdDWtf23720Wus2cQPtnihuuPvKx/MUZAuPS/0
-	dxRE2mn4+hquNqm/B6LB1Z0T/E2btqOnK6
-X-Google-Smtp-Source: AGHT+IFArWijSKHwpar8JwYxB7WZc8vpMdPPlpUQNI5RWkup0YN+rTI2t69HTMgDeXnxkhaW+vdAkg==
-X-Received: by 2002:a17:903:3546:b0:267:e097:7a9c with SMTP id d9443c01a7336-290cc6d4ba8mr326690025ad.53.1761234043638;
-        Thu, 23 Oct 2025 08:40:43 -0700 (PDT)
-Received: from [192.168.1.5] ([27.7.191.116])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2946ddee569sm27029435ad.31.2025.10.23.08.40.40
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 23 Oct 2025 08:40:43 -0700 (PDT)
-Message-ID: <879da8d0-1ea5-4495-90e5-03b55aa91362@gmail.com>
-Date: Thu, 23 Oct 2025 21:10:38 +0530
+        d=1e100.net; s=20230601; t=1761241285; x=1761846085;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+RlscW0fJPcI4w1cVrsdBX2mHMbYD0iZ1loDXnboKus=;
+        b=HfC5cau/rR6FzL/yHEKhbXlmWXBsxrWemdR2QUbQNLEjRQ9BW0AVN72BXlT3vfk7TL
+         gwqNX6lu7/HkH6+prTqw1bDHaSEYUQgp8uzOZbEmGgDf1FTzolJpGlVvPq5sifoZUYBp
+         8bQgQdS52jug1/7hW8b1o5YB/3c+Q0v2W6AxOo35IVTw1eBBZZsP1Rw5uPnke2tKUyhd
+         HTq7VliAlXfdKiGUvuq+YoaLa+ZCEBuTAWDw4KGocQ6wSwcvSxi6hsX45/Pta+Q/moPr
+         3o/wpmVBI6q1IjcDbP7ZVj8AdX83xCmjicD4c7T1gk4eWaJhDsthpLLQhulUP+vLwkw0
+         TmnA==
+X-Gm-Message-State: AOJu0YxWQMEdmLGAk3CHx2xphOgKdFqBlfYpYrwVCc5jdqUdmXYeHUdR
+	HPnxvSREaiu+BtdSK3gNlLsKVlXeWQt+ngOcwumiQv06Qgi2pQZLxEGO
+X-Gm-Gg: ASbGncusD7pRaVLfToAmXkeZvRVfVvIA302E3YP+Zf6AbFXSc01hNJv45dSvLKk0GDC
+	RkwPs8LAj7G7jpVay1cfnL2SLBuD0SKdDJxZXsOy5zp1sJq86pQCOXj30x+tuSthX1W+KKYRQoy
+	V8SQxDKmGiNN7rdcUc8Nhv6TnrLcEDwCBN7INrZgSyZLfnrePSVajdYuzw3JnozZ9kjhBnBDWoW
+	WWR3h7rZ9unw252o5fq7ViRwoSdndeNRTu4MCJgCYgh1eau0NlOBy3/azJdRaHko91faIthcW80
+	NFSk9FYo+CFQ9lXFuutxvlx7m6+3GXlZluYV7/DvRp0jZzPi6+pG3SyEJNAQ5ThFeItE/YOn4Nu
+	9PctYXOligq2bKE+fUk5K0WdQZ7NWgISCaw0HO/b/HjBym+hduITbCD/K82q/uv+lWzaqqENHej
+	I0keBuXzxX7mWg5if4Httk2tYWScjAcok=
+X-Google-Smtp-Source: AGHT+IFfxGetZxOYzBkLMbSAX9vob0YlVWtcztLEw1yU6xI6aPUDPEqjnKvkoiTPdJH966r2PqACrQ==
+X-Received: by 2002:a17:903:2443:b0:24c:cca1:7cfc with SMTP id d9443c01a7336-290cb947830mr310655975ad.59.1761241284484;
+        Thu, 23 Oct 2025 10:41:24 -0700 (PDT)
+Received: from Black-Pearl.localdomain ([27.7.191.116])
+        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-2946e21fbbdsm29202205ad.99.2025.10.23.10.41.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 23 Oct 2025 10:41:24 -0700 (PDT)
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+Date: Thu, 23 Oct 2025 17:37:36 +0000
+Subject: [PATCH] dt-bindings: mmc: socionext,milbeaut-m10v-sdhci-3.0:
+ convert to DT schema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 0/2] dt-bindings: mmc: ti,omap2430-sdhci: Add json
- schema for the text binding
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Paul Barker <paul.barker@sancloud.com>,
- Marc Murphy <marc.murphy@sancloud.com>, Tony Lindgren <tony@atomide.com>,
- Kishon Vijay Abraham I <kishon@kernel.org>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-omap@vger.kernel.org
-References: <20251019-ti-sdhci-omap-v4-0-fdc63aaeb083@gmail.com>
- <20251020142710.GA576827-robh@kernel.org>
- <46aa84cd-63cc-4263-9061-021fa3205b87@gmail.com>
- <CAL_JsqKH2NTvXGPoimpVp=-yvcQgbXSoxKY6AO16WgJHSeOT5A@mail.gmail.com>
-Content-Language: en-US
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-In-Reply-To: <CAL_JsqKH2NTvXGPoimpVp=-yvcQgbXSoxKY6AO16WgJHSeOT5A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20251023-milbeaut-v1-1-3e4ff67110ad@gmail.com>
+X-B4-Tracking: v=1; b=H4sIAN9n+mgC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDI1MDUyMT3dzMnKTUxNISXdNkAyMzc6B4qlGyElB5QVFqWmYF2Kjo2NpaADb
+ XLoxaAAAA
+X-Change-ID: 20250524-milbeaut-5c0267202e2c
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, 
+ Taichi Sugaya <sugaya.taichi@socionext.com>, 
+ Takao Orito <orito.takao@socionext.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+ Charan Pedumuru <charan.pedumuru@gmail.com>
+X-Mailer: b4 0.14.3
 
+Convert SOCIONEXT Milbeaut SDHCI controller binding to YAML format.
+Add a new property "voltage-ranges" to resolve dt_check errors.
 
+Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+---
+ .../devicetree/bindings/mmc/sdhci-milbeaut.txt     | 30 ---------
+ .../mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml     | 78 ++++++++++++++++++++++
+ 2 files changed, 78 insertions(+), 30 deletions(-)
 
-On 20-10-2025 21:28, Rob Herring wrote:
-> On Mon, Oct 20, 2025 at 10:44 AM Charan Pedumuru
-> <charan.pedumuru@gmail.com> wrote:
->>
->>
->>
->> On 20-10-2025 19:57, Rob Herring wrote:
->>> On Sun, Oct 19, 2025 at 01:04:36PM +0000, Charan Pedumuru wrote:
->>>> Create a YAML binding for ti,omap2430-sdhci and fix vmmc-supply
->>>> property typo for a DTS file.
->>>>
->>>> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
->>>> ---
->>>> Note: The property "ti,needs-special-reset" was not removed from DTS cause it will
->>>>       disrupt the compilation for other compatibles as the node &mmc is used for all
->>>>       compatibles for some DTS files.
->>>
->>> I don't understand. AFIACT, "ti,needs-special-reset" is only used for
->>> the hsmmc driver/binding. But this series for for the sdhci
->>> driver/binding. So shouldn't the property be removed from sdhci nodes
->>> (and the binding), but kept for hsmmc nodes?
->>
->>
->> Yes we can remove that property from sdhci , but &mmc node in DTS is common for all mmc drivers and this "ti,needs-special-reset" property is defined there for one board, so even when I remove it from DTSI for sdhci nodes, the DTS file still contains this property in &mmc node which is also common for other mmc drivers, so even if we remove that property for sdhci node, we still need to define it in YAML to resolve dtb_check. The issue here is not removing the property from sdhci node in DTSI file, but to remove it from &mmc node from a DTS file which is common to all mmc drivers.
->>
->> Here is the DTS node (ti/omap/am5729-beagleboneai.dts) which contain that property and is common for all mmc drivers.
->> &mmc2 {
->>         status = "okay";
->>         vmmc-supply = <&vdd_1v8>;
->>         vqmmc-supply = <&vdd_1v8>;
->>         bus-width = <8>;
->>         ti,non-removable;
->>         non-removable;
->>         mmc-pwrseq = <&emmc_pwrseq>;
->>
->>         ti,needs-special-reset;
->>         dmas = <&sdma_xbar 47>, <&sdma_xbar 48>;
->>         dma-names = "tx", "rx";
->>
->> };
-> 
-> I'm pretty sure that's not how &mmc2 works and you are confused. I
-> would suggest you do a dtb->dts pass and compare the results.
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt b/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
+deleted file mode 100644
+index 627ee89c125b..000000000000
+--- a/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
++++ /dev/null
+@@ -1,30 +0,0 @@
+-* SOCIONEXT Milbeaut SDHCI controller
+-
+-This file documents differences between the core properties in mmc.txt
+-and the properties used by the sdhci_milbeaut driver.
+-
+-Required properties:
+-- compatible: "socionext,milbeaut-m10v-sdhci-3.0"
+-- clocks: Must contain an entry for each entry in clock-names. It is a
+-  list of phandles and clock-specifier pairs.
+-  See ../clocks/clock-bindings.txt for details.
+-- clock-names: Should contain the following two entries:
+-	"iface" - clock used for sdhci interface
+-	"core"  - core clock for sdhci controller
+-
+-Optional properties:
+-- fujitsu,cmd-dat-delay-select: boolean property indicating that this host
+-  requires the CMD_DAT_DELAY control to be enabled.
+-
+-Example:
+-	sdhci3: mmc@1b010000 {
+-		compatible = "socionext,milbeaut-m10v-sdhci-3.0";
+-		reg = <0x1b010000 0x10000>;
+-		interrupts = <0 265 0x4>;
+-		voltage-ranges = <3300 3300>;
+-		bus-width = <4>;
+-		clocks = <&clk 7>, <&ahb_clk>;
+-		clock-names = "core", "iface";
+-		cap-sdio-irq;
+-		fujitsu,cmd-dat-delay-select;
+-	};
+diff --git a/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml b/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml
+new file mode 100644
+index 000000000000..6b67bef30347
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml
+@@ -0,0 +1,78 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: SOCIONEXT Milbeaut SDHCI controller
++
++maintainers:
++  - Taichi Sugaya <sugaya.taichi@socionext.com>
++  - Takao Orito <orito.takao@socionext.com>
++
++description:
++  The SOCIONEXT Milbeaut SDHCI controller is a specialized SD Host
++  Controller found in some of Socionext's Milbeaut image processing SoCs.
++  It features a dedicated "bridge controller." This bridge controller
++  implements special functions like reset control, clock management for
++  various SDR modes (SDR12, SDR25, SDR50) and physical pin property settings.
++
++allOf:
++  - $ref: sdhci-common.yaml#
++
++properties:
++  compatible:
++    const: socionext,milbeaut-m10v-sdhci-3.0
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 2
++
++  clock-names:
++    items:
++      - const: core
++      - const: iface
++
++  fujitsu,cmd-dat-delay-select:
++    description:
++      Its presence indicates that the controller requires a specific command
++      and data line delay selection mechanism for proper operation, particularly
++      when dealing with high-speed SD/eMMC modes.
++    type: boolean
++
++  voltage-ranges:
++    $ref: /schemas/types.yaml#/definitions/uint32-matrix
++    description:
++      Two cells are required, first cell specifies minimum slot voltage (mV),
++      second cell specifies maximum slot voltage (mV).
++    maxItems: 1
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++    mmc@1b010000 {
++        compatible = "socionext,milbeaut-m10v-sdhci-3.0";
++        reg = <0x1b010000 0x10000>;
++        interrupts = <GIC_SPI 265 IRQ_TYPE_LEVEL_HIGH>;
++        voltage-ranges = <3300 3300>;
++        bus-width = <4>;
++        clocks = <&clk 7>, <&ahb_clk>;
++        clock-names = "core", "iface";
++        cap-sdio-irq;
++        fujitsu,cmd-dat-delay-select;
++    };
++...
 
-So, I can remove ti,needs-special-hs-handling and cap-mmc-dual-data-rate properties from a similar DTS file along with ti,needs-special-reset as these properties are not used for sdhci-omap driver and are no longer in use, I will remove these properties from YAML too, if this is true. Can you confirm this?
+---
+base-commit: 7bac2c97af4078d7a627500c9bcdd5b033f97718
+change-id: 20250524-milbeaut-5c0267202e2c
 
-> 
-> Rob
-
+Best regards,
 -- 
-Best Regards,
-Charan.
+Charan Pedumuru <charan.pedumuru@gmail.com>
 
