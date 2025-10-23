@@ -1,176 +1,195 @@
-Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70FF330DEAD
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:58:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76F31302140
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 12:14:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761220710; cv=none; b=ljSdEIKuSji6TICyrchilDlPWmvqPUvctsgjENjd2GkJhIDVNfMilAlKc5Cce35FrO1MUXtGeY0AWFLuf0VKYkjlHZfcQeh0NJzjMaGXvv6GRlty1jMBFHXsNHEzCXyT1a7vHx4A9xFWtClOOggwrjfjy/87yloWiuBUV04qNQ8=
+	t=1761221689; cv=none; b=e7XzrKVYaSl0DfiIwRqQVcZdv/RIs26oDDcYyBG8uJ/zjesztXKoXtvZz1xe+owIJoVcdOeNetRjwRS6f1pts7oBSXl8I1D3iNqniHKiHO0bILWCpW15XDGq/ilsfZMwQxReLxfP13j+VDAkLONaYk7ZtNnLeJqdZtHmAyhL8zQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761220710; c=relaxed/simple;
-	bh=4CjGKPAq1W37+N36djPYAbOeKd0dVmX3F1YsS0DBKtI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=kBgVxTkXUMbOYInxsyCl9QMAnTXjINsUB6kjURAHYpaLHKwlzEZEZiW/YqgIgGz+qSDt5ADzKwy63hO8FG0Tc+kzoW92rjSxOTmK7DhF5XMSn/17qSsAqRnO4reNYQYp4MdCwTSHzqLFcMefUVG7j4mjAeAlFDMd1oy1DvgZFyM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PfF/D/7P; arc=none smtp.client-ip=209.85.216.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1761221689; c=relaxed/simple;
+	bh=ZhystKoo43Dti+bpSBJIod4fu4Bu+YnvXyc3sQZGb9I=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=p8V6vexR/khs183ZvCtvvsDPPJX0DxZDKN+EJ9ppWD9KiRa/rjel4jX+Kbcn8OmrnndisoTxxhYUUSXFDSX7B2WkbnFBYGQ1Y9IN1gvU0oOLtA80uaflavP5fEQeBDm6fjR/AXYvOr192nFR9RCRnh1gYScVLckL1txIfhaRjzM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=UtItQApN; arc=none smtp.client-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PfF/D/7P"
-Received: by mail-pj1-f42.google.com with SMTP id 98e67ed59e1d1-339d7c4039aso772271a91.0
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 04:58:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="UtItQApN"
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-475ca9237c2so4117405e9.3
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 05:14:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761220708; x=1761825508; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=oaz37uli6J484fxFDKJ7GFD9eSfiZc74ATY0uVGQ7Go=;
-        b=PfF/D/7P8iJZvjpA1yiTU7B+q/VL1Jkd+728KIb7Hcg6u1d471rOZ2ciagZk+5dOTW
-         Rdo4MO9N7ZRshAltRqR9ua2y/cia7y1cvcNSKba1QRwKraPA5CZvHDYyEmLYtJbiiiKs
-         FpEBLahKFlf9c4qKHdP1iajDEPhPPYsWZ2+EgtaecvyqV4fbstvno9W7j3sZaFwS/1AV
-         BkRDG6IFJb+L4+M0dbqhcBeLphkI9StOzyASvfopqM2Oy4wPoNhdgRNA5HDEmXVJyY1k
-         T1m7++QFrpEFJAdn9pUPGpT2ORgg2Tpg5EaKmR0CyrPbX2YerXpFEhT38B7gLRIOGnIy
-         WrtQ==
+        d=linaro.org; s=google; t=1761221681; x=1761826481; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=vzSn/ofpSQ3cyLuuE3gy3xtWs7k4M2brzlRD1/+xzHg=;
+        b=UtItQApNiPpb0l5qHWINiHPshhfGZXyPSdjAKSDTSS9SYTz5HDXXsVZu0EJoSONd/3
+         HB8ztJ1Q1bn/plet/jmyWQgxt82UgGgE4OQOTIgTeotL64fgTmx3s/jSezhWCmjb0d+O
+         tm81s38wbNbrxGIwiALsPAX4Mka9SiJtX/qI7Hm5uvk/aFeF/04Vm7bH1MTbGCboDDpw
+         29wxQbspixRaFpUqiIDnUtokhQm3CfAADksbXzbklqmCIkORsn5HUclfWXVVRgk27tMF
+         qMKpJA+0mAlx13XzDXZTwgELI4ZxIE/gUow1GugBNdzoGcW1JXY+CrzYEuTmq7N6xUjx
+         dwgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761220708; x=1761825508;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=oaz37uli6J484fxFDKJ7GFD9eSfiZc74ATY0uVGQ7Go=;
-        b=sU6SeQN6ryByyx6uOQsJJr3FRi601FNJffj3cnRD/ptKR4CKsG0Wyyxd5M4jz0BR8n
-         AkMbsLfNT/X5URJsu19/zQkk2W8FjTYYbFcGRl3Yk2ZUM3aMXrmaYFHzVKuA2jK/i/sp
-         t/fqmaDXEROJ5cWdMsiB6plYXdyWPW7RSnjUui/ZgH9w8VvuWHFVTf32ap7b7gJPvxxI
-         7U6idzS/IPZ/V/wDHQFxV5Qt5tsrDPiyjhmfyeNZA3f/y2yxVDu3E6LWMLAefFrwVzEh
-         xlG7N4TZAyL3UrT/Y2cGuLXXw6IRrJomvATG9kfPp2W5jkbGtZF12HNSkhrcTVYAFrYY
-         wN5w==
-X-Forwarded-Encrypted: i=1; AJvYcCVExAQHviOw6X4uetM6s6edDwQcJOAe9S5px6T6+rvBntpQlNjMP890jdxfWTXHR/YjonslC581To8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyKubDWSEsXxsvd7Y7PlLdlbxppbOLs+Krma1R920VYX1yDrTmR
-	h1bSFu/4/mVWhs4wAn1sB9W84yueEhlh2OmiyGDr6235KxvUwo69mW/c
-X-Gm-Gg: ASbGncuNQqiVZp60ArMuFsEcjbxtD36XNPUijJjhwA2cTP1ZGdgMJu8IMtTSKRryAzp
-	2NVoU9z6hmK85dm2KFJEJCqgR3RZJMO5G6Uybf6ukuAyGoUe+UHH1HjCiyIhmJoPG5etpH+LGFx
-	Iw9JR9LGnRhVOht5jesQRqwuflJJCvcgyAHpCS7BiAz8RSTERE5lI7iBoJqxYJHk+jm7soyd47g
-	ajNCxlA/jktVc5OKA7Xz1IRYhWgHjKBhA2g5RTly58Z0vZunjTUJvCwdAg9mJaK90f6cjJpXc+f
-	3MH1DVhr1inSBOyspEiGsXBkQRW3+QIvybIxn3dBOw+P/U5dOQEP83/TX7QcgPL0xhKJAEd4aeX
-	DwbKFTHve9D6GsrQFPJKLZNWULClCa625eetHJbr/e45JGfb9eePYolHSvo+iLadCYsy2FwdSm5
-	KC2A2lVuMOGDKdKGQNUQ==
-X-Google-Smtp-Source: AGHT+IGz00O6KaHXIzzRCHXCrtBw16lzTqxkkQ/sun9CtpCWlM1f0PPU+ZDXb1kY+gRHfHRjuOVsug==
-X-Received: by 2002:a17:90b:3909:b0:33b:bed8:891c with SMTP id 98e67ed59e1d1-33bcf8f7376mr33270394a91.23.1761220707433;
-        Thu, 23 Oct 2025 04:58:27 -0700 (PDT)
-Received: from rakuram-MSI.. ([2409:40f4:204e:d0b9:ba00:6f56:8250:ddb3])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a274b8b259sm2295936b3a.36.2025.10.23.04.58.22
+        d=1e100.net; s=20230601; t=1761221681; x=1761826481;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vzSn/ofpSQ3cyLuuE3gy3xtWs7k4M2brzlRD1/+xzHg=;
+        b=RLsmIMAVRhUvA0kldMIkvU6ONCjKY/S1mMCwhn6W+qNTV9f1zfyt07XaQ/D1OGNqLu
+         jyYhou56U1BduHlAodxBa7fwlhOP7eswk97nnWUz7HNOuBWxi8tJmao4wlvI3lBtBIn3
+         7PsQhPDMlqvkNfcB/EWxBIvp61vyO7x8wl4ZAEY9M9oJz2Cra98liEwmW758xyB5qbpj
+         /w24syaZjCcPfu9D8J3lpIdP9VI4yn6vLnjFgXnzjunQS7Cs3Uc9PZ35cxIxcOf6APBK
+         NcIKAvvQSmf/cbec3Cfn6sN1pBV7RSUP2f6ivaPb5KovQ8ItzRT2H3nH7z9UT80kqtpn
+         agSA==
+X-Forwarded-Encrypted: i=1; AJvYcCXzrsejpo4J4fTVGuUdYfEflBi9xq6jge+fECebp5QiaExaehHhkjrk4qrJSLgmhnRHS3r5HMjagNI=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw17/8ZNrfytWAcnHpkWHqW0oekIRMWlJR3fnDOut4xoqZM3gL/
+	ba8swUMMhrr9cyB2w4vnsT9fphmfZSv4LQMkbYTA9UG+TVSxtwFzApVCELucxbHZmEA=
+X-Gm-Gg: ASbGnctc+2h7tlnaT4GYhQW6vv3sVn5EHMNvhKhgK2UIxyR1ZHyYfpXbgUoVezWo4eL
+	wst6jd1HPZJzzRmX8K5hqVOJVJg3uwC1UoCZ5AY5kcojCRlaHsPEdezEWvL9TSGNdNmUPvKDh/O
+	6XGrx7vwnd+Y7GiRR4LWKqrXPu5c2gc7DGG9XKQ93juT5Ygp4dTaUHFh+691Gw4jvTk3Cpkqu3p
+	FAYwLSZytHXjV0MqMKP8lM79wCP6YES3hoLeTelIsyO5F9xNl+vWarbY4f5DM3ANoR8RSd/uCAU
+	L6SIE2aa320hE73ZHDuPp7Rlbzu++oFoy8ZerSRxSxI9yeXdKRndqyJCWqSmY66OIQQkEfUAyLT
+	WTbxgnzrZxlL/iCL0FmZcGQSXIfnnbCiD7xp1C2xt2fEIWSkK8f3mAJLfle3mqlA9F26Z0wBFm2
+	xEGLfJMXFWC2T6LDxS4Q==
+X-Google-Smtp-Source: AGHT+IGa6YZVedfz0mGpkJYgXn+quvhlbpzP0Y7djJyWwUQrWVTgUOvmVrts9NVOpQ28SystD6Xtkg==
+X-Received: by 2002:a05:600c:34c7:b0:46f:b42e:e360 with SMTP id 5b1f17b1804b1-47117931edcmr178691255e9.40.1761221680862;
+        Thu, 23 Oct 2025 05:14:40 -0700 (PDT)
+Received: from linaro.org ([86.121.7.169])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-429898ccd88sm4402444f8f.36.2025.10.23.05.14.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Oct 2025 04:58:26 -0700 (PDT)
-From: Rakuram Eswaran <rakuram.e96@gmail.com>
-To: u.kleine-koenig@baylibre.com
-Cc: chenhuacai@kernel.org,
-	dan.carpenter@linaro.org,
-	david.hunter.linux@gmail.com,
-	khalid@kernel.org,
-	linux-kernel-mentees@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	lkp@intel.com,
-	rakuram.e96@gmail.com,
-	skhan@linuxfoundation.org,
-	ulf.hansson@linaro.org,
-	zhoubinbin@loongson.cn
-Subject: Re: [PATCH v2] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
-Date: Thu, 23 Oct 2025 17:28:17 +0530
-Message-ID: <20251023115819.11094-1-rakuram.e96@gmail.com>
-X-Mailer: git-send-email 2.48.1
-In-Reply-To: opvid2ycmgbkbmegnnzwl4hyev6e2smusxk5olkuqxfwxzykz2e@jlvolirolrxl
-References: <pvid2ycmgbkbmegnnzwl4hyev6e2smusxk5olkuqxfwxzykz2e@jlvolirolrxl>
+        Thu, 23 Oct 2025 05:14:39 -0700 (PDT)
+Date: Thu, 23 Oct 2025 15:14:37 +0300
+From: Abel Vesa <abel.vesa@linaro.org>
+To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-msm@vger.kernel.org, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
+	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, 
+	quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+Subject: Re: [PATCH V2 2/4] arm64: dts: qcom: sm8750: Add SDC2 nodes for
+ sm8750 soc
+Message-ID: <kbbebw2kr3hu6q3sb4z3i7yy7vv432rjx2ylp254cbifpcxe33@bhyldim36fff>
+References: <20251023112924.1073811-1-sarthak.garg@oss.qualcomm.com>
+ <20251023112924.1073811-3-sarthak.garg@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251023112924.1073811-3-sarthak.garg@oss.qualcomm.com>
 
-On Tue, 21 Oct 2025 at 14:01, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
->
-> Hello Rakuram,
->
-> On Tue, Oct 21, 2025 at 12:02:07AM +0530, Rakuram Eswaran wrote:
-> > On Thu, 16 Oct 2025 at 14:20, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
-> > > On Wed, Oct 15, 2025 at 12:16:57AM +0530, Rakuram Eswaran wrote:
-> > Sorry for the delayed reply as I was in vacation.
->
-> I didn't hold my breath :-O
->
-> > Ah, got it — I’ll drop the clk_get_rate() comment since it was only a reminder
-> > from your WIP suggestion.
-> >
-> > Just to confirm, are you referring to adding a call to clk_prepare_enable()
-> > before clk_get_rate()? I can move the clk_get_rate() call after
-> > clk_prepare_enable(), or drop the comment entirely.
-> >
-> > If my understanding is correct, I’ll keep v3 focused on the current set of
-> > fixes and handle the clk_get_rate() precondition (by moving it after
-> > clk_prepare_enable()) in a follow-up patch. That should keep the scope of each
-> > change clean and review-friendly.
-> >
-> > > > -out:
-> > > > -     if (host->dma_chan_rx)
-> > > > -             dma_release_channel(host->dma_chan_rx);
-> > > > -     if (host->dma_chan_tx)
-> > > > -             dma_release_channel(host->dma_chan_tx);
-> > >
-> > > I was lazy in my prototype patch and didn't drop the calls to
-> > > dma_release_channel() in pxamci_remove(). For a proper patch this is
-> > > required though.
-> > >
-> > > To continue the quest: Now that I looked at pxamci_remove(): `mmc` is
-> > > always non-NULL, so the respective check can be dropped.
-> > >
-> >
-> > Understood. Since pxamci_remove() is only called after successful allocation
-> > and initialization in probe(), mmc will always be a valid pointer. I’ll drop
-> > the if (mmc) check in v3 as it can never be NULL in normal operation, and
-> > remove the dma_release_channel() calls as well.
->
-> Yes, I suggest to make restructuring .remote a separate patch. (But
-> removing dma_release_channel belongs into the patch that introduces devm
-> to allocate the dma channels.)
->
+On 25-10-23 16:59:22, Sarthak Garg wrote:
+> Add SD Card host controller for sm8750 soc.
+> 
+> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+> ---
+>  arch/arm64/boot/dts/qcom/sm8750.dtsi | 68 ++++++++++++++++++++++++++++
+>  1 file changed, 68 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/sm8750.dtsi b/arch/arm64/boot/dts/qcom/sm8750.dtsi
+> index a82d9867c7cb..1070dc5ea196 100644
+> --- a/arch/arm64/boot/dts/qcom/sm8750.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sm8750.dtsi
+> @@ -2060,6 +2060,60 @@ ice: crypto@1d88000 {
+>  			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
+>  		};
+>  
+> +		sdhc_2: mmc@8804000 {
+> +			compatible = "qcom,sm8750-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0 0x08804000 0 0x1000>;
+> +
+> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
+> +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq",
+> +					  "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
+> +				 <&gcc GCC_SDCC2_APPS_CLK>,
+> +				 <&rpmhcc RPMH_CXO_CLK>;
+> +			clock-names = "iface",
+> +				      "core",
+> +				      "xo";
+> +
+> +			interconnects = <&aggre2_noc MASTER_SDCC_2 QCOM_ICC_TAG_ALWAYS
+> +					&mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
+> +					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ACTIVE_ONLY
+> +					&config_noc SLAVE_SDCC_2 QCOM_ICC_TAG_ACTIVE_ONLY>;
+> +			interconnect-names = "sdhc-ddr",
+> +					     "cpu-sdhc";
+> +
+> +			power-domains = <&rpmhpd RPMHPD_CX>;
+> +			operating-points-v2 = <&sdhc2_opp_table>;
+> +
+> +			qcom,dll-config = <0x0007442c>;
+> +			qcom,ddr-config = <0x80040868>;
+> +
+> +			iommus = <&apps_smmu 0x540 0x0>;
+> +			dma-coherent;
+> +
+> +			bus-width = <4>;
+> +			max-sd-hs-hz = <37500000>;
+> +
+> +			resets = <&gcc GCC_SDCC2_BCR>;
+> +
+> +			status = "disabled";
+> +
+> +			sdhc2_opp_table: opp-table {
+> +				compatible = "operating-points-v2";
+> +
+> +				opp-100000000 {
+> +					opp-hz = /bits/ 64 <100000000>;
+> +					required-opps = <&rpmhpd_opp_low_svs>;
+> +				};
+> +
+> +				opp-202000000 {
+> +					opp-hz = /bits/ 64 <202000000>;
+> +					required-opps = <&rpmhpd_opp_svs_l1>;
+> +				};
+> +			};
+> +		};
+> +
+>  		cryptobam: dma-controller@1dc4000 {
+>  			compatible = "qcom,bam-v1.7.4", "qcom,bam-v1.7.0";
+>  			reg = <0x0 0x01dc4000 0x0 0x28000>;
+> @@ -3121,6 +3175,13 @@ data-pins {
+>  					drive-strength = <2>;
+>  					bias-pull-up;
+>  				};
+> +
+> +				card-detect-pins {
+> +					pins = "gpio55";
+> +					function = "gpio";
+> +					drive-strength = <2>;
+> +					bias-pull-up;
+> +				};
 
-I believe ".remote" is a typo and you're referring to the _remove() function. 
-Removing if(mmc) condition check from pxamci_remove() can be handled in a 
-separate cleanup patch, while removing redundant dma_release_channel()
-will be included in v3. 
+These are board specific, so move them to the board dts.
 
-Is my above understanding correct?
+>  			};
+>  
+>  			sdc2_default: sdc2-default-state {
+> @@ -3141,6 +3202,13 @@ data-pins {
+>  					drive-strength = <10>;
+>  					bias-pull-up;
+>  				};
+> +
+> +				card-detect-pins {
+> +					pins = "gpio55";
+> +					function = "gpio";
+> +					drive-strength = <2>;
+> +					bias-pull-up;
+> +				};
 
-> > I’ve prepared a preview of the v3 patch incorporating your previous comments.
-> > Before sending it out formally, I wanted to share it with you to confirm that
-> > the updates look good — especially the cleanup changes in pxamci_remove() and
-> > the dropped clk_get_rate() comment.
-> >
-> > static void pxamci_remove(struct platform_device *pdev)
-> > {
-> >       struct mmc_host *mmc = platform_get_drvdata(pdev);
-> >       struct pxamci_host *host = mmc_priv(mmc);
-> >
-> >       mmc_remove_host(mmc);
-> >
-> >       if (host->pdata && host->pdata->exit)
-> >               host->pdata->exit(&pdev->dev, mmc);
-> >
-> >       pxamci_stop_clock(host);
-> >       writel(TXFIFO_WR_REQ|RXFIFO_RD_REQ|CLK_IS_OFF|STOP_CMD|
-> >                       END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
-> >                       host->base + MMC_I_MASK);
-> >
-> >       dmaengine_terminate_all(host->dma_chan_rx);
-> >       dmaengine_terminate_all(host->dma_chan_tx);
-> > }
->
-> Looks right.
->
+Ditto.
 
-Thank you for the feedback.
-
-Best Regards,
-Rakuram
-
+>  			};
+>  		};
+>  
+> -- 
+> 2.34.1
+> 
