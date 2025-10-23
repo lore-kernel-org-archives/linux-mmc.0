@@ -1,150 +1,176 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2D9D30E0E4
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:30:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70FF330DEAD
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:58:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761219009; cv=none; b=hHXw8DRlZzlbBvqOut3IU/TT6e4mtX49SxgDBpY+dIvonHbHPv1aT4uS1NI65qhYczFsbuBhqI8kigTrqsdAIILgAmly0S469401K6lVcMgXuARlcBS85OxLp4daXZa6V+cGrC/AHmhvWprqqT/d/1vmip3Bk6hCA64UuX+y4Gg=
+	t=1761220710; cv=none; b=ljSdEIKuSji6TICyrchilDlPWmvqPUvctsgjENjd2GkJhIDVNfMilAlKc5Cce35FrO1MUXtGeY0AWFLuf0VKYkjlHZfcQeh0NJzjMaGXvv6GRlty1jMBFHXsNHEzCXyT1a7vHx4A9xFWtClOOggwrjfjy/87yloWiuBUV04qNQ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761219009; c=relaxed/simple;
-	bh=Z3ZKjce1eNa7cruDaoLFpBeJDrv3LxfBcxi/KFd0kkY=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=J3PhkxFBMfiL5S3gfUP23C/TA8kaPYxlH/FYeU5VQnz+VnahXy0H2x9L/USVhGcXi4c0uC6e3OzmlqePwc5ym/kTKcv/+oitIEJk49uiA0Z+0Mwd+brqxHYt211QJ01zy3ZmjhFFLtvw5wO2XxT89s5lxsyV8ESsLMRdZLORGvY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=GeDdOsXZ; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1761220710; c=relaxed/simple;
+	bh=4CjGKPAq1W37+N36djPYAbOeKd0dVmX3F1YsS0DBKtI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=kBgVxTkXUMbOYInxsyCl9QMAnTXjINsUB6kjURAHYpaLHKwlzEZEZiW/YqgIgGz+qSDt5ADzKwy63hO8FG0Tc+kzoW92rjSxOTmK7DhF5XMSn/17qSsAqRnO4reNYQYp4MdCwTSHzqLFcMefUVG7j4mjAeAlFDMd1oy1DvgZFyM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PfF/D/7P; arc=none smtp.client-ip=209.85.216.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="GeDdOsXZ"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 59N7hc25026326
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:30:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=qcppdkim1; bh=b8+bYrK48YE
-	QxTGw52Zzv2+zkKybAeDpreZ+tSe6PU8=; b=GeDdOsXZ0bWN6rptcPdawZeuklj
-	/d4Us3XQAZWF6toxbu7X2EV+U4avFCqt7Q9shrvi7UtvABjqoMdrLtY0t45koKdW
-	FAWyZDtJujBd751D0evAXHLXwiuESAaWIlNd0hsttPoYK4GbztFYSFt7RtrHCoyL
-	gCGb5CkS1zdNBLngdO1mUSE3DZpO6EBMnbEz5ANYP2IJEmPXO39wI6idTaYx35ec
-	DMDej3wAVUMhejyLd+5ISe+1Lvq4bK4EpTrDStMtgbcdu5dSaPYh8roK4eQ2EAFP
-	w3YdL4AdymWkR0NQsTLba6bwNdnM/t+f57iD392LSbPP6XFpRUAmJkjZkdQ==
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 49y5x8ja3w-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 11:30:06 +0000 (GMT)
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-28eb07797f9so2757055ad.3
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 04:30:06 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PfF/D/7P"
+Received: by mail-pj1-f42.google.com with SMTP id 98e67ed59e1d1-339d7c4039aso772271a91.0
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 04:58:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1761220708; x=1761825508; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=oaz37uli6J484fxFDKJ7GFD9eSfiZc74ATY0uVGQ7Go=;
+        b=PfF/D/7P8iJZvjpA1yiTU7B+q/VL1Jkd+728KIb7Hcg6u1d471rOZ2ciagZk+5dOTW
+         Rdo4MO9N7ZRshAltRqR9ua2y/cia7y1cvcNSKba1QRwKraPA5CZvHDYyEmLYtJbiiiKs
+         FpEBLahKFlf9c4qKHdP1iajDEPhPPYsWZ2+EgtaecvyqV4fbstvno9W7j3sZaFwS/1AV
+         BkRDG6IFJb+L4+M0dbqhcBeLphkI9StOzyASvfopqM2Oy4wPoNhdgRNA5HDEmXVJyY1k
+         T1m7++QFrpEFJAdn9pUPGpT2ORgg2Tpg5EaKmR0CyrPbX2YerXpFEhT38B7gLRIOGnIy
+         WrtQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761219005; x=1761823805;
+        d=1e100.net; s=20230601; t=1761220708; x=1761825508;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=b8+bYrK48YEQxTGw52Zzv2+zkKybAeDpreZ+tSe6PU8=;
-        b=d1lYwBddS7g5cAodNVR54cuPOmVxK+s33/z9XNZne3DfXOAg+BhHGLjtzxfnU7n0mX
-         kYkd5b7LydT/8MsMFT68E/g6+RpLJ+S1Dv9wiOw2L8Oc4Jie49Wziryw2PqqiWi+pIJq
-         05V3wAbhPgHPm6lJ6DXttzT7FCLem87WWmDj9AhKnZVSvXKN6wwIFkf+M6Jwx+Hb9yQ6
-         o692qs4CA1EQOQEazGPTg5zptX2lNZQL1BJEmxrS4F37UUC2nuMO4Vaz/Dn+yU3ZCbT+
-         /nVuCFD5MnCytZ440kZtzvjmOGXjeQSDbtaqKvHPVOef0ov0Xku1Zs21+y/HVeEoHCx4
-         Ok3A==
-X-Gm-Message-State: AOJu0YyVAMsmPCiiVgzl2DL49sfKjk6gtnPLh+JnooDFSMmWcdXu0Mrv
-	qgU+a0qrCQygdo+x4mdf9KViQ7jyzRgcSd+ACBg6tS0ry0wNxAkU5qGJ4dDZxsjmNSf9GadCvfp
-	Ot+/bs4aNwN4juu946sIEQRQ2j0nOd3Xttpmmh7XXC85rvvv6+KgQ13o8TaF6fA==
-X-Gm-Gg: ASbGncvmuYOGk1mzmG7TkmVxnVSsFhUksAnvqYM75Hfjgk4eS1EsxCZV3RXNO1iWUP7
-	b+r5iIq3LxRXSeuOV2LkEtA7WvFD4R6OylFugt2mqcOVTMu1lUjy1PvRbVQeuGlspTZmT2gQbv/
-	PE+RtVUyogTOn6wrLA83aJfC2ZrS/9GVuTE4X1XfCtutMOCdHA3TcG/by4562N9QKyc94CWBVDz
-	FK+irE2rOgLpuedI6sY1YUTuc1GUuPMKtgiOnCGmlINUo2sRRorxOWkJBM770Q1CaTUgugLLUeS
-	uIt/x2FV15+7gMytdUMXLeVyTI2LpTOrzjJiEZx4HelOtbJjfPlHnZGGY0UdjeHqo+fS4FU+m4X
-	uO6zUM15E7h/T1ZyzqaEVfpgRvyxF5g==
-X-Received: by 2002:a17:903:46c4:b0:290:ad79:c617 with SMTP id d9443c01a7336-292d3e50ee5mr68938465ad.1.1761219005539;
-        Thu, 23 Oct 2025 04:30:05 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGMBrkCvTO1nWUE4UYg/s8tYpYtZ7BQ/m0qwKJKLmXmKfeqgrsKE3F73O+O9t1ICmCNO90HOg==
-X-Received: by 2002:a17:903:46c4:b0:290:ad79:c617 with SMTP id d9443c01a7336-292d3e50ee5mr68938145ad.1.1761219005069;
-        Thu, 23 Oct 2025 04:30:05 -0700 (PDT)
-Received: from hu-sartgarg-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2946e1231b0sm20438815ad.97.2025.10.23.04.29.59
+        bh=oaz37uli6J484fxFDKJ7GFD9eSfiZc74ATY0uVGQ7Go=;
+        b=sU6SeQN6ryByyx6uOQsJJr3FRi601FNJffj3cnRD/ptKR4CKsG0Wyyxd5M4jz0BR8n
+         AkMbsLfNT/X5URJsu19/zQkk2W8FjTYYbFcGRl3Yk2ZUM3aMXrmaYFHzVKuA2jK/i/sp
+         t/fqmaDXEROJ5cWdMsiB6plYXdyWPW7RSnjUui/ZgH9w8VvuWHFVTf32ap7b7gJPvxxI
+         7U6idzS/IPZ/V/wDHQFxV5Qt5tsrDPiyjhmfyeNZA3f/y2yxVDu3E6LWMLAefFrwVzEh
+         xlG7N4TZAyL3UrT/Y2cGuLXXw6IRrJomvATG9kfPp2W5jkbGtZF12HNSkhrcTVYAFrYY
+         wN5w==
+X-Forwarded-Encrypted: i=1; AJvYcCVExAQHviOw6X4uetM6s6edDwQcJOAe9S5px6T6+rvBntpQlNjMP890jdxfWTXHR/YjonslC581To8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyKubDWSEsXxsvd7Y7PlLdlbxppbOLs+Krma1R920VYX1yDrTmR
+	h1bSFu/4/mVWhs4wAn1sB9W84yueEhlh2OmiyGDr6235KxvUwo69mW/c
+X-Gm-Gg: ASbGncuNQqiVZp60ArMuFsEcjbxtD36XNPUijJjhwA2cTP1ZGdgMJu8IMtTSKRryAzp
+	2NVoU9z6hmK85dm2KFJEJCqgR3RZJMO5G6Uybf6ukuAyGoUe+UHH1HjCiyIhmJoPG5etpH+LGFx
+	Iw9JR9LGnRhVOht5jesQRqwuflJJCvcgyAHpCS7BiAz8RSTERE5lI7iBoJqxYJHk+jm7soyd47g
+	ajNCxlA/jktVc5OKA7Xz1IRYhWgHjKBhA2g5RTly58Z0vZunjTUJvCwdAg9mJaK90f6cjJpXc+f
+	3MH1DVhr1inSBOyspEiGsXBkQRW3+QIvybIxn3dBOw+P/U5dOQEP83/TX7QcgPL0xhKJAEd4aeX
+	DwbKFTHve9D6GsrQFPJKLZNWULClCa625eetHJbr/e45JGfb9eePYolHSvo+iLadCYsy2FwdSm5
+	KC2A2lVuMOGDKdKGQNUQ==
+X-Google-Smtp-Source: AGHT+IGz00O6KaHXIzzRCHXCrtBw16lzTqxkkQ/sun9CtpCWlM1f0PPU+ZDXb1kY+gRHfHRjuOVsug==
+X-Received: by 2002:a17:90b:3909:b0:33b:bed8:891c with SMTP id 98e67ed59e1d1-33bcf8f7376mr33270394a91.23.1761220707433;
+        Thu, 23 Oct 2025 04:58:27 -0700 (PDT)
+Received: from rakuram-MSI.. ([2409:40f4:204e:d0b9:ba00:6f56:8250:ddb3])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a274b8b259sm2295936b3a.36.2025.10.23.04.58.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Oct 2025 04:30:04 -0700 (PDT)
-From: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
-        kernel@oss.qualcomm.com, Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-Subject: [PATCH V2 4/4] arm64: dts: qcom: sm8750-qrd: Add SDC2 node for sm8750 qrd board
-Date: Thu, 23 Oct 2025 16:59:24 +0530
-Message-Id: <20251023112924.1073811-5-sarthak.garg@oss.qualcomm.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20251023112924.1073811-1-sarthak.garg@oss.qualcomm.com>
-References: <20251023112924.1073811-1-sarthak.garg@oss.qualcomm.com>
+        Thu, 23 Oct 2025 04:58:26 -0700 (PDT)
+From: Rakuram Eswaran <rakuram.e96@gmail.com>
+To: u.kleine-koenig@baylibre.com
+Cc: chenhuacai@kernel.org,
+	dan.carpenter@linaro.org,
+	david.hunter.linux@gmail.com,
+	khalid@kernel.org,
+	linux-kernel-mentees@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	lkp@intel.com,
+	rakuram.e96@gmail.com,
+	skhan@linuxfoundation.org,
+	ulf.hansson@linaro.org,
+	zhoubinbin@loongson.cn
+Subject: Re: [PATCH v2] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
+Date: Thu, 23 Oct 2025 17:28:17 +0530
+Message-ID: <20251023115819.11094-1-rakuram.e96@gmail.com>
+X-Mailer: git-send-email 2.48.1
+In-Reply-To: opvid2ycmgbkbmegnnzwl4hyev6e2smusxk5olkuqxfwxzykz2e@jlvolirolrxl
+References: <pvid2ycmgbkbmegnnzwl4hyev6e2smusxk5olkuqxfwxzykz2e@jlvolirolrxl>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Proofpoint-ORIG-GUID: mYSJzk6BBiEV8YQfRioLMJzQ-lU5J-B_
-X-Proofpoint-GUID: mYSJzk6BBiEV8YQfRioLMJzQ-lU5J-B_
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMDIyMDE2NCBTYWx0ZWRfX05SnC2yYX65n
- eDjDcw/5qE4rHEEYMnR1u6egflPPJRw89wuQNzaND6OQvBF6lhA7rY3kNfujkpK7+uG+K0eKGMb
- oXeXqozlggN1FRefYE1tuOU8s97PK5JTdt2WgpXxurn8pdIhgZ6mQMBH1OdiCYfn7glpHO29buX
- rmd0wfmquRcbHMdQGjcaNSsw8rboNjj3bQZuXVPqk6TTYQIh3Vmt1UB9hx1SPxYFG9udHt3PEM7
- gTjYJY9ka4pvu2WjCaEPLQgHWTLauS+RiN2piA+I0+bWwylgJ7mEI2EdVAfEKZmeL+bZDH0Zihi
- dQ0Emg7hYSdJvCYWlqd1b8OIprsZY5/jQdfUC8yMWnY4etiKfhr2FJ6sFdTYA4EGxFEEM7bPzvu
- cf41zTDMmfiOqYWrHliZXF+iKD/p9Q==
-X-Authority-Analysis: v=2.4 cv=UOTQ3Sfy c=1 sm=1 tr=0 ts=68fa11be cx=c_pps
- a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=x6icFKpwvdMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=EUspDBNiAAAA:8
- a=53gy1XDxZ6suxgqcjVYA:9 a=zgiPjhLxNE0A:10 a=GvdueXVYPmCkWapjIL-Q:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-10-22_08,2025-10-22_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 suspectscore=0 adultscore=0 clxscore=1015 phishscore=0
- bulkscore=0 malwarescore=0 impostorscore=0 priorityscore=1501 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.19.0-2510020000 definitions=main-2510220164
 
-Enable SD Card host controller for sm8750 qrd board.
+On Tue, 21 Oct 2025 at 14:01, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
+>
+> Hello Rakuram,
+>
+> On Tue, Oct 21, 2025 at 12:02:07AM +0530, Rakuram Eswaran wrote:
+> > On Thu, 16 Oct 2025 at 14:20, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
+> > > On Wed, Oct 15, 2025 at 12:16:57AM +0530, Rakuram Eswaran wrote:
+> > Sorry for the delayed reply as I was in vacation.
+>
+> I didn't hold my breath :-O
+>
+> > Ah, got it — I’ll drop the clk_get_rate() comment since it was only a reminder
+> > from your WIP suggestion.
+> >
+> > Just to confirm, are you referring to adding a call to clk_prepare_enable()
+> > before clk_get_rate()? I can move the clk_get_rate() call after
+> > clk_prepare_enable(), or drop the comment entirely.
+> >
+> > If my understanding is correct, I’ll keep v3 focused on the current set of
+> > fixes and handle the clk_get_rate() precondition (by moving it after
+> > clk_prepare_enable()) in a follow-up patch. That should keep the scope of each
+> > change clean and review-friendly.
+> >
+> > > > -out:
+> > > > -     if (host->dma_chan_rx)
+> > > > -             dma_release_channel(host->dma_chan_rx);
+> > > > -     if (host->dma_chan_tx)
+> > > > -             dma_release_channel(host->dma_chan_tx);
+> > >
+> > > I was lazy in my prototype patch and didn't drop the calls to
+> > > dma_release_channel() in pxamci_remove(). For a proper patch this is
+> > > required though.
+> > >
+> > > To continue the quest: Now that I looked at pxamci_remove(): `mmc` is
+> > > always non-NULL, so the respective check can be dropped.
+> > >
+> >
+> > Understood. Since pxamci_remove() is only called after successful allocation
+> > and initialization in probe(), mmc will always be a valid pointer. I’ll drop
+> > the if (mmc) check in v3 as it can never be NULL in normal operation, and
+> > remove the dma_release_channel() calls as well.
+>
+> Yes, I suggest to make restructuring .remote a separate patch. (But
+> removing dma_release_channel belongs into the patch that introduces devm
+> to allocate the dma channels.)
+>
 
-Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
----
- arch/arm64/boot/dts/qcom/sm8750-qrd.dts | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+I believe ".remote" is a typo and you're referring to the _remove() function. 
+Removing if(mmc) condition check from pxamci_remove() can be handled in a 
+separate cleanup patch, while removing redundant dma_release_channel()
+will be included in v3. 
 
-diff --git a/arch/arm64/boot/dts/qcom/sm8750-qrd.dts b/arch/arm64/boot/dts/qcom/sm8750-qrd.dts
-index 13c7b9664c89..8d018eef44da 100644
---- a/arch/arm64/boot/dts/qcom/sm8750-qrd.dts
-+++ b/arch/arm64/boot/dts/qcom/sm8750-qrd.dts
-@@ -916,6 +916,22 @@ &remoteproc_mpss {
- 	status = "okay";
- };
- 
-+&sdhc_2 {
-+	cd-gpios = <&tlmm 55 GPIO_ACTIVE_LOW>;
-+
-+	vmmc-supply = <&vreg_l9b_2p9>;
-+	vqmmc-supply = <&vreg_l8b_1p8>;
-+
-+	no-sdio;
-+	no-mmc;
-+
-+	pinctrl-0 = <&sdc2_default>;
-+	pinctrl-1 = <&sdc2_sleep>;
-+	pinctrl-names = "default", "sleep";
-+
-+	status = "okay";
-+};
-+
- &swr0 {
- 	status = "okay";
- 
--- 
-2.34.1
+Is my above understanding correct?
+
+> > I’ve prepared a preview of the v3 patch incorporating your previous comments.
+> > Before sending it out formally, I wanted to share it with you to confirm that
+> > the updates look good — especially the cleanup changes in pxamci_remove() and
+> > the dropped clk_get_rate() comment.
+> >
+> > static void pxamci_remove(struct platform_device *pdev)
+> > {
+> >       struct mmc_host *mmc = platform_get_drvdata(pdev);
+> >       struct pxamci_host *host = mmc_priv(mmc);
+> >
+> >       mmc_remove_host(mmc);
+> >
+> >       if (host->pdata && host->pdata->exit)
+> >               host->pdata->exit(&pdev->dev, mmc);
+> >
+> >       pxamci_stop_clock(host);
+> >       writel(TXFIFO_WR_REQ|RXFIFO_RD_REQ|CLK_IS_OFF|STOP_CMD|
+> >                       END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
+> >                       host->base + MMC_I_MASK);
+> >
+> >       dmaengine_terminate_all(host->dma_chan_rx);
+> >       dmaengine_terminate_all(host->dma_chan_tx);
+> > }
+>
+> Looks right.
+>
+
+Thank you for the feedback.
+
+Best Regards,
+Rakuram
 
