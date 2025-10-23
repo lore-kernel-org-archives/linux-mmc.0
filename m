@@ -1,458 +1,145 @@
-Received: from mail-yx1-f48.google.com (mail-yx1-f48.google.com [74.125.224.48])
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0225314D20
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 13:27:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44F13324B39
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 14:33:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761226024; cv=none; b=Lv5Bg2G6GJfk+z671Vko2c9e3d1aRsjUTv8Du74THovEdKZK8yzcRfviUK89vtqCpNTFRS60A053ZSZSag0F/CB+iMjoPf5GX0ICJhf4aNDtb59nBuutagHj+it1wxgHd6A/ZNkyKnIupCd0Q+UGHQpxS97I+fO+64dWkqh3JMM=
+	t=1761229982; cv=none; b=HF7X0ADn9rGh0Bn2faJE2dr3MwQPhAacopGeBb/cUGgzc08JWh2k8KFnzRTm8Ip0P8ZzlfZomKRMCWXpEvWNzZ+cRLWevc9tQn1U0haNJ+fYYZkaJ2mA7Ufc1u/KYxtQvOCuM4ViycTXYfh5Yu4BC0O+3LPe4/hpvznOXbzalWs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761226024; c=relaxed/simple;
-	bh=M/oAMP0uTJte95JsmrGl+a2ZMg/I9SR7eUc5gqd+kHU=;
+	s=arc-20240116; t=1761229982; c=relaxed/simple;
+	bh=t/hYkpSlu0vnttqha26zv1xBx0fPlg003PIh1Nzd1PI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=a7vQ1pCcOivT120l4tbRmDXvCSxUlZDcnd3nJXjHUWvs2OwwmYo+sF75bkWaVJ2M+tkv3bK/rMWv6dXDRkjaLM8ruyGfNpT4pikgMvQw1ubCN20o+Kzv3PjYZ5febDrAdItMm49N0LzjxeEADpJN2qfwpKPFEzrIQvDyhF7JuHg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bIAjFpHz; arc=none smtp.client-ip=74.125.224.48
+	 To:Cc:Content-Type; b=HvEtz6xUx6tRiblb3e0qm9RHp0/QlUAMI7ulU+k5PQam6UD7hwRgKyUjOXGgV7m2LzVU4s5LSGpVniwM7zSMN7tXRVxy155U9CUpP16/Z+St1bvfoX1xYoLQRqdiYocXBGz4F48bzGnsUDCNx6qgra0uNI2A/VRriHxzrNNYNDM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kTyOxWJq; arc=none smtp.client-ip=209.85.128.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bIAjFpHz"
-Received: by mail-yx1-f48.google.com with SMTP id 956f58d0204a3-63e1591183bso804599d50.0
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 06:27:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kTyOxWJq"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-783fa3aa582so10678537b3.3
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 07:33:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1761226022; x=1761830822; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=jdHbeL9FMaeSWSN+4vnII7Xys0y/cUm4mKiv/1TKOUw=;
-        b=bIAjFpHzYl1WESg2DIxmu9NZgpr7FVlWZETBfMkCwVYlSdHKJVaOrbkip4hvAV2bER
-         at7srUyh7hoMlpjR4WykXjIkB6vpLIl0mBEv2zbtKaR6RCOLVQrANaKsV0OHPJ1LXY6G
-         +AxvdL6njmCbViC3CklHO5fp+mwVoxlmHGj32y4tbpwVeQsJuXmXxmlRIiDjTsLnPNHJ
-         ltTlrPNoRc3B3OEi7viSMP0I7hgiGDLIyMOcCOamV70Ny6hxPgtAY7H/HA9Y4vPbGPz+
-         MbX30DjYAmIUgrKsTUgVaeAk6JAcpKdsN+05bbO1WT4Dt1yljcIMZ0P1LuPRzuVIxFYF
-         O8VA==
+        d=linaro.org; s=google; t=1761229979; x=1761834779; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=O/xc9UniwAv60m+Rz/agyhA5vluzV9PNM3+eKoA9NbA=;
+        b=kTyOxWJqcZM8nlau9IrXueA5RcKeQeIGhEJTI01tHcOj8Gib5WZUxbxi9vL7lr6C2w
+         rDcGskdQcK2j/8mttEsqFc+FvhMwwVD3sQrPpBsOkk1/aJYqbgaPCvRy/PKaeajbqixq
+         gMp4MJd3c65ITMzke34hWouNBdRiMX7sS1ErImhVoFOoJ5OEwtMZCCXp7/qkQAl1oWiw
+         Dzp1LYPLpEIISq/HZL1xayhiKOuAGEnmFm/sPQrfyXvF3ZP792b0Lz34hwPqFObvaW6h
+         /3hz835Sy3xI4s2C8H9oxTYDQeW5al/IM7SGOt/Vemi+bAV10jjzCTQQCTlxrkI7MNYD
+         scMw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761226022; x=1761830822;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=jdHbeL9FMaeSWSN+4vnII7Xys0y/cUm4mKiv/1TKOUw=;
-        b=l62gB9MJ7o9iuvMbrIm9ETdilvLvnMEGKnPk6ZnxSVt4lye1qyQ0jS44PtveNYGLR1
-         Adnvj9Di+vpZ/L8T63Qrea6R62sn95W89ZdVmk/Sqv4zbXATKr7oLuxAyy5rrGWU9dNZ
-         QBvO8cO9e8Rg99UAJNyiqftnlloDSd0PMOwg8zvsywTGMWVng4NwqOkh6FMklqod6KGK
-         GunZzwsu0cm2YCsekpFIURR5fWHVxhzIPyFHkh+sWZnPDPwRCSR/eu8GO2xAUeUMgp/x
-         axBzF/DGuZbsZ+8hcuoRjQAPLc+f67xqQGdgQCNu7OjzXUepSxhA76dYOcKLuebiPmyV
-         d0LA==
-X-Gm-Message-State: AOJu0Yw8opCQdCpkmRIgB6wu65W3qQZbXS/+IU07Pha8Be2uHgk/HyaX
-	TST8v/TEAUxk12bh3idthJ2kXeweHOl2ChxvDlyPc5Kpq5eSY2hZrZECe+1jGQUGzIqXe1FJekO
-	SQB8N6FqI5egfH/Ga0JnT3rhNTfWI89cNg/cZM2383qAos5d+lPns73A=
-X-Gm-Gg: ASbGnctUdxr6wkd4MDN61ag+aGhYk3QQPlZcnAuhBmx7iWqrs0YmSzBl3DuELsQZChs
-	eTxWT3oIPR+64b5MY5QYmvhDGP5Q6r6/305c8RwkGDLivvxkLZrend7e6QpvTuCOt96+EkbhZHK
-	5RgrPT3yRzWbGdWpovS6nrYp1DdhYxWFovKRb+lxIs/ws5kzdXmncQsDpJnaLQGHNNdOtaqriqx
-	0Jmek9pnodXcr5q6BTEica9c+AdEAo0mQui8rZk7Nce+T/4ZwIHScglurkfsA==
-X-Google-Smtp-Source: AGHT+IEMCb9HfPz7XG+HjbZgDoNRWiJzb0/mTZNpyD6Pv32WQGbfwbBd4bBZApAg4OtimiBn4lSRgB/jGQtkfHHWsMo=
-X-Received: by 2002:a53:adc2:0:b0:63c:f5a6:f2e2 with SMTP id
- 956f58d0204a3-63e162702dcmr13709344d50.68.1761226021478; Thu, 23 Oct 2025
- 06:27:01 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1761229979; x=1761834779;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=O/xc9UniwAv60m+Rz/agyhA5vluzV9PNM3+eKoA9NbA=;
+        b=gJwcnVGONyosGqEEYUx0NIP+jS4FzROAybFYESvZ0HykYpyY/mrbO/DJPhsWxt/aZa
+         Wf/CF74wF0XoVz/IVsF/xp/UgRSjd4mnIggrp1H3ij4ImYevM9ZxgTXwU4bsv6XcnKM3
+         IsgWT4iX4O61B3IX5x8Nuoaa+I7ymYXAw5pxfv8NVQaol1T7p4RunQa6PHVmRZRaMQnB
+         ynsLq+Cmoo+KCtCv/+FuhlJUUob94AYr/vBkJ7FQXVbo/i4uXJrE+GW6wyQB5NiypsZn
+         FgOMtlzBEjTOtclh4Acw/7Zn5/G2oyCusGdNdPHmn8Oy49msEGhYgl3zYEoQQ9QnDmVK
+         3y3Q==
+X-Gm-Message-State: AOJu0YybSpnAVs/uGfXbS1Fv83hFP4WIV5iAjf1u6gCZEOqmbo6b0TiQ
+	PSiLNw9ch6jUJ3igAa2VcMoTpZ8c5plzAGxIajBFGqhbfFPR0avFXT/uFbOtJyi1lCp7AyCiNiQ
+	LjceqY0rDyb3PPVIH3QWU1bubTXTQPYpX7vxt/MOe7w==
+X-Gm-Gg: ASbGncuIasrst6C6efyvwVnLy8dxGK47qXQZ74jpWtfcBzvquDpddXrN5zko98rcML+
+	p4leBxJLGOnGBTUxeKRFWmKgiAnyHD0JtYy6QL1/7yVdbwSXAzsTzMte6nGvOx3IulMb7CArHNf
+	/7Sv0sJrIA6zZ1nCXChEI2Gk53DKUXTCT9SUYlUBGn8sXkVsuoAwQc0AFlrAQ7Bgpj+DwpycBhO
+	zxcxNDLCQ7ihHPMQENpSmkWTTQgSZ7aM/jXMw+qQEXYEDD2EVNXpGf4yWBBDhIud+OtFnFU5Cm2
+	tT2JgZI=
+X-Google-Smtp-Source: AGHT+IEgTaJNjs+zzx0IN94FnxxGv00PXrNGgqAoXFF/nPcpR+yDxafMeAv0ZL1vvXVSoKr9Z2ifvzlZrapBz2hajVY=
+X-Received: by 2002:a05:690c:9a01:b0:772:72d1:1610 with SMTP id
+ 00721157ae682-7836d2eded0mr218084217b3.32.1761229979006; Thu, 23 Oct 2025
+ 07:32:59 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250824084736.172222-1-dexterkidd@gmail.com> <CAPDyKFpobot01WBzvMUH0_85aUELhtijF9Yv9giEJSworObnbA@mail.gmail.com>
- <nyiodgyzyb6f2kkjlvjdlfflfkdccr2lgnij2uxkdm4mrpznf5@srcxlmdh47da>
- <cb4iqeqwac7pv35wbs2cwkyvdztgrfke3bzmic3nnsbuulhchv@xdfrinxazr7p>
- <CAPDyKFodoD58zG3tN0_WT5Ab+hH2wXkpBTCCzSXp=_-ntc4SfQ@mail.gmail.com> <CAJQg_LrB8RmfbzmrHLHEmTJYUfyVGU5a2wxx=BdAOYssi42fvQ@mail.gmail.com>
-In-Reply-To: <CAJQg_LrB8RmfbzmrHLHEmTJYUfyVGU5a2wxx=BdAOYssi42fvQ@mail.gmail.com>
+References: <20250619085620.144181-1-avri.altman@sandisk.com> <20250619085620.144181-2-avri.altman@sandisk.com>
+In-Reply-To: <20250619085620.144181-2-avri.altman@sandisk.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 23 Oct 2025 15:26:24 +0200
-X-Gm-Features: AS18NWBETm0qH9UiMd3gcHjUPsPOaUQtsjiJI8pw5oQR04PvPuXextzbv5Dvgt0
-Message-ID: <CAPDyKFp2FOBLy-VWmHxAm8odcW3st4uh3BMqzKuSTuZ-W+KN8A@mail.gmail.com>
-Subject: Re: [PATCH] mmc_spi: Fix cd-gpios for SPI SD card insertion/removal detection
-To: dexter K <dexterkidd@gmail.com>
-Cc: linux-mmc@vger.kernel.org
+Date: Thu, 23 Oct 2025 16:32:22 +0200
+X-Gm-Features: AS18NWBhunMkKx-6DMartf6yH0-vixyPCnlYDOpeAGGrdcY4scIzm-2scSQ7xYs
+Message-ID: <CAPDyKFqgY7nVW+GYSk8xMH721Ar2myvFjFAb6EWQHYrk8zGbQw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: core sd: Simplify current limit logic for 200mA default
+To: Avri Altman <avri.altman@sandisk.com>
+Cc: linux-mmc@vger.kernel.org, Sarthak Garg <quic_sartgarg@quicinc.com>, 
+	Abraham Bachrach <abe@skydio.com>, Prathamesh Shete <pshete@nvidia.com>, Bibek Basu <bbasu@nvidia.com>, 
+	Sagiv Aharonoff <saharonoff@nvidia.com>, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, 17 Sept 2025 at 09:31, dexter K <dexterkidd@gmail.com> wrote:
+On Thu, 19 Jun 2025 at 11:03, Avri Altman <avri.altman@sandisk.com> wrote:
 >
-> On Mon, Sep 15, 2025 at 8:17=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
-> >
-> > On Fri, 12 Sept 2025 at 18:45, cuu <dexterkidd@gmail.com> wrote:
-> > >
-> > > On 25/09/13 12:23=E4=B8=8A=E5=8D=88, cuu wrote:
-> > > > On 25/09/12 01:59=E4=B8=8B=E5=8D=88, Ulf Hansson wrote:
-> > > > > On Sun, 24 Aug 2025 at 10:50, cuu <dexterkidd@gmail.com> wrote:
-> > > > > >
-> > > > > > Previously, SD cards using pure SPI protocol with mmc_spi could=
- not
-> > > > > > reliably detect card removal via cd-gpios. This patch fixes the=
- issue
-> > > > > > by extending the card alive check in _mmc_detect_card_removed()=
- to
-> > > > > > include cd-gpios detection.
-> > > > > >
-> > > > > > Additionally, mmc_rescan() now includes a status probing functi=
-on
-> > > > > > specific to SPI SD cards to ensure the card state is correctly =
-updated
-> > > > > > on insertion and removal events.
-> > > > >
-> > > > > Sorry, I don't get this.
-> > > > >
-> > > > > What is so special with SPI cards here that makes the regular car=
-d
-> > > > > detection/removal procedures not to work?
-> > > > >
-> > > > > Is there something wrong with mmc_sd_alive()?
-> > > > >
-> > > > > >
-> > > > > > Signed-off-by: cuu <dexterkidd@gmail.com>
-> > > > >
-> > > > > Please use a proper name for your sob line. I assume "cuu" is an =
-alias, no?
-> > > > >
-> > > > > Kind regards
-> > > > > Uffe
-> > > > >
-> > > > > > ---
-> > > > > >  drivers/mmc/core/core.c | 15 ++++++++++++---
-> > > > > >  drivers/mmc/core/core.h |  1 +
-> > > > > >  drivers/mmc/core/mmc.c  |  8 ++++++++
-> > > > > >  3 files changed, 21 insertions(+), 3 deletions(-)
-> > > > > >
-> > > > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > > > > > index 874c6fe92855..e028ec8fbf46 100644
-> > > > > > --- a/drivers/mmc/core/core.c
-> > > > > > +++ b/drivers/mmc/core/core.c
-> > > > > > @@ -2123,6 +2123,11 @@ int _mmc_detect_card_removed(struct mmc_=
-host *host)
-> > > > > >
-> > > > > >         ret =3D host->bus_ops->alive(host);
-> > > > > >
-> > > > > > +        if(mmc_host_is_spi(host)) {
-> > > > > > +               if(host->ops->get_cd){
-> > > > > > +                               ret =3D !host->ops->get_cd(host=
-);
-> > > > > > +                }
-> > > > > > +        }
-> > > > > >         /*
-> > > > > >          * Card detect status and alive check may be out of syn=
-c if card is
-> > > > > >          * removed slowly, when card detect switch changes whil=
-e card/slot
-> > > > > > @@ -2238,9 +2243,13 @@ void mmc_rescan(struct work_struct *work=
-)
-> > > > > >         }
-> > > > > >
-> > > > > >         /* Verify a registered card to be functional, else remo=
-ve it. */
-> > > > > > -       if (host->bus_ops)
-> > > > > > -               host->bus_ops->detect(host);
-> > > > > > -
-> > > > > > +       if (host->bus_ops){
-> > > > > > +               if (mmc_host_is_spi(host)){
-> > > > > > +                       mmc_detect_mmc(host);
-> > > > > > +               }else{
-> > > > > > +                       host->bus_ops->detect(host);
-> > > > > > +               }
-> > > > > > +       }
-> > > > > >         host->detect_change =3D 0;
-> > > > > >
-> > > > > >         /* if there still is a card present, stop here */
-> > > > > > diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> > > > > > index 622085cd766f..5b48c50b5bb5 100644
-> > > > > > --- a/drivers/mmc/core/core.h
-> > > > > > +++ b/drivers/mmc/core/core.h
-> > > > > > @@ -78,6 +78,7 @@ void _mmc_detect_change(struct mmc_host *host=
-, unsigned long delay,
-> > > > > >  int _mmc_detect_card_removed(struct mmc_host *host);
-> > > > > >  int mmc_detect_card_removed(struct mmc_host *host);
-> > > > > >
-> > > > > > +int mmc_detect_mmc(struct mmc_host *host);
-> > > > > >  int mmc_attach_mmc(struct mmc_host *host);
-> > > > > >  int mmc_attach_sd(struct mmc_host *host);
-> > > > > >  int mmc_attach_sdio(struct mmc_host *host);
-> > > > > > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > > > > > index 5be9b42d5057..e73de34e072b 100644
-> > > > > > --- a/drivers/mmc/core/mmc.c
-> > > > > > +++ b/drivers/mmc/core/mmc.c
-> > > > > > @@ -2316,6 +2316,14 @@ static const struct mmc_bus_ops mmc_ops =
-=3D {
-> > > > > >         .flush_cache =3D _mmc_flush_cache,
-> > > > > >  };
-> > > > > >
-> > > > > > +/*
-> > > > > > + * Export function for mmc detection
-> > > > > > + */
-> > > > > > +int mmc_detect_mmc(struct mmc_host *host){
-> > > > > > +       mmc_detect(host);
-> > > > > > +       return 0;
-> > > > > > +}
-> > > > > > +
-> > > > > >  /*
-> > > > > >   * Starting point for MMC card init.
-> > > > > >   */
-> > > > > > --
-> > > > > > 2.34.1
-> > > > > >
-> > > >
-> > > > Hi Ulf
-> > > >
-> > > > I worked On a PicoCalc board I added an extension board for the Ras=
-pberry Pi Zero 2W,
-> > > > while still wanting the Zero 2W to access the PicoCalc=E2=80=99s ow=
-n SPI-connected SD card.
-> > > >
-> > > > Here is the DTS I wrote:
-> > > > ```
-> > > > /dts-v1/;
-> > > > /plugin/;
-> > > >
-> > > > / {
-> > > >     compatible =3D "brcm,bcm2835";
-> > > >
-> > > >     fragment@0 {
-> > > >         target =3D <&spidev0>;
-> > > >         __overlay__ {
-> > > >             status =3D "disabled";
-> > > >         };
-> > > >     };
-> > > >
-> > > >     fragment@1 {
-> > > >         target =3D <&spi1>;
-> > > >         __overlay__ {
-> > > >             status =3D "okay";
-> > > >
-> > > >             #address-cells =3D <1>;
-> > > >             #size-cells =3D <0>;
-> > > >
-> > > >             sdslot@0 {
-> > > >                 compatible =3D "mmc-spi-slot";
-> > > >                 reg =3D <0>;                        // SPI CS0
-> > > >                 voltage-ranges =3D <3300 3300>;
-> > > >                 spi-max-frequency =3D <8000000>;
-> > > >                 gpios =3D <&gpio 6 1>;
-> > > >                 cd-gpios =3D <&gpio 6 1>;
-> > > >             };
-> > > >         };
-> > > >     };
-> > > > };
-> > > > ```
-> >
-> > Thanks for sharing this information!
-> >
-> > > >
-> > > > With this setup, card insertion is detected, but removal is not.
-> > > > From what I can tell, `mmc_sd_alive()` itself is fine, but it seems=
- does
-> > > > not check the state of `cd-gpios`.
-> > > >
-> > > > For removable SPI SD cards that provide `cd-gpios`, I believe relyi=
-ng on
-> > > > the `cd-gpios` state may be a more direct and accurate way to deter=
-mine
-> > > > card presence.
-> >
-> > Sending a CMD13 to poll for the card should work as well, I think.
-> >
-> > Or maybe there is something specific with SPI here?
-> >
+> The SD current limit logic is updated to avoid explicitly setting the
+> current limit when the maximum power is 200mA (0.72W) or less, as this
+> is already the default value. The code now only issues a current limit
+> switch if a higher limit is required, and the unused
+> SD_SET_CURRENT_NO_CHANGE constant is removed. This reduces unnecessary
+> commands and simplifies the logic.
 >
-> There is nothing specific with SPI here.
-> I mentioned pure SPI  because I don't think any SDIO high speed based
-> sd card will have problems with linux mmc drivers since we used it for
-> a long time.
->
-> But I am facing a simple SPI (4 wire, SDA SCL VCC GND) based card slot
-> problem  with detecting card removal.
->
-> I think CMD13 is not enough since we have cd-gpios here , I guess
-> CMD13 is like to wait for it to be timeout so that the system will
-> think the card is gone,right ?
+> Fixes: 0aa6770000ba ("mmc: sdhci: only set 200mA support for 1.8v if 200mA is available")
+> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
+> Cc: stable@vger.kernel.org
 
-Correct!
+This has fallen behind, sorry!
 
-> but if we configured cd-gpios,then why wait for CMD13 ?
+I have dropped the stable/fixes tag and clarified the commit message a
+bit, before I applied this for next, thanks!
 
-CMD13 should be really quick, even in the timeout case we should only
-wait for a few us.
-
-Of course, if there is a problem with the mmc host controller/driver,
-the timeout could be longer.
-
->
-> > > >
-> > > > Therefore, I added a check in `_mmc_detect_card_removed()` to handl=
-e
-> > > > the case of SPI-protocol cards with `cd-gpios`, so that removal det=
-ection
-> > > > can work properly.
-> >
-> > I see. I am not sure (yet), that this is really the problem.
-> >
-> > I had a look at the mmc_spi_probe() and there are problems with the
-> > order of how things are being registered. In general,
-> > mmc_gpiod_request_cd() should be called *before* calling
-> > mmc_add_host(), but I assume there are some legacy reasons as to why
-> > this isn't the case here.
->
-> yeah, I guess so , so my first intention is not to break these legacy cod=
-es.
->
-> > That said, can you check if you are receiving card detect/removal
-> > interrupts and thus mmc_spi_detect_irq() should be invoked, when you
-> > insert/remove the card?
->
-> In default , mmc_spi_detect_irq() won't be invoked here
-> I've changed a little of my dts to force IRQ  happen
-> ```
-> /dts-v1/;
-> /plugin/;
->
-> / {
->     compatible =3D "brcm,bcm2835";
->
->    fragment@0 {
->                 target =3D <&spidev0>;
->                 __overlay__ {
->                         status =3D "disabled";
->                 };
->    };
->
->     fragment@1 {
->         target =3D <&spi1>;
->         __overlay__ {
->             status =3D "okay";
->
->             #address-cells =3D <1>;
->             #size-cells =3D <0>;
->
->             sdslot@0 {
->                 compatible =3D "mmc-spi-slot";
->                 reg =3D <0>;                        // SPI CS0
->                 voltage-ranges =3D <3300 3300>;
->                 spi-max-frequency =3D <8000000>;
->                 gpios =3D <&gpio 6 1>;
->                 cd-gpios =3D <&gpio 6 1>;
->                 interrupts-extended =3D <&gpio 6 1>;
->
->             };
->         };
->     };
-> };
-> ```
-> added one line `interrupts-extended`
-> so that we can see interrupts to invoke `mmc_spi_detect_irq` with
-> different conditions
-> in dmesg | grep mmc ( I added a pr_info() in  mmc_spi_detect_irq )
->
-> * interrupts-extended =3D <&gpio 6 2>;
-> insert invoked mmc_spi_detect_irq()
-> eject did not invoke mmc_spi_detect_irq()
->
-> * interrupts-extended =3D <&gpio 6 1>;
-> insert invoked mmc_spi_detect_irq()
-> eject the first time, won't invoke  mmc_spi_detect_irq()
-> insert again and eject
-> now every time when inserting or ejecting, we can get a
-> mmc_spi_detect_irq() invoked
-> It is a little bit weird,but that is what happened here
-> but still, linux did not remove the node /dev/mmcblk2( my spi sd card nod=
-e)
-
-Okay, so if we are not receiving an irq at card-removal this becomes a
-problem. If it's because of GPIO or pinctrl settings needs to be
-adjusted, I can't tell, because of limited HW knowledge in this case.
-
-Nevertheless, if there are no irq available, we should fallback to
-using the polling mode with CMD13 (MMC_CAP_NEEDS_POLL).
-
-That said, to me, it looks like we should start by trying to make the
-polling mode work first. If it doesn't, we need to understand why.
-
->
-> * interrupts-extended =3D <&gpio 6 3>;
-> same as above
->
->
-> > Does the card get detected if you start without a card in the slot
-> > when you boot and insert it later?
->
-> Yes, the sd card got detected when I inserted it after the system booted =
-up.
->
-> > If you are not using the card detect interrupt, MMC_CAP_NEEDS_POLL
-> > must be set. Can you check if this is the case?
->
-> By default MMC_CAP_NEEDS_POLL is not enabled here  so I added one line
-> ```
-> @@ -1281,6 +1282,8 @@ static int mmc_spi_probe(struct spi_device *spi)
->                 mmc->caps &=3D ~MMC_CAP_NEEDS_POLL;
->                 mmc_gpiod_request_cd_irq(mmc);
->         }
-> +       mmc->caps |=3D MMC_CAP_NEEDS_POLL;
-> +
-
-This needs to be set before calling mmc_add_host(). And beyond that,
-make sure we don't request for GPIO irq (don't call
-mmc_gpiod_request_cd_irq()), to make sure we only test polling mode
-separately.
-
-Moreover, you may need to make changes in
-drivers/mmc/host/of_mmc_spi.c to avoid this too. Huh, this code is
-messy, sorry!
-
->         mmc_detect_change(mmc, 0);
->
->         /* Index 1 is write protect/read only */
-> ```
-> in  mmc_spi_probe() to force it to be enabled.
-> and tested it without IRQ modified dts
->
-> dmesg | grep mmc  shows
-> ```
-> [    9.186471] mmc_spi spi1.0: SD/MMC host mmc2, no WP, no poweroff, cd p=
-olling
-> [    9.234981] mmc2: host does not support reading read-only switch,
-> assuming write-enable
-> [    9.235039] mmc2: new SDHC card on SPI
-> [    9.238720] mmcblk2: mmc2:0000 LX32G 29.5 GiB
-> [    9.256975]  mmcblk2: p1 p2
-> [    9.263982] mmcblk2: mmc2:0000 LX32G 29.5 GiB (quirks 0x40000000)
-> ```
-> as we can see , cd polling showed up
->
-> but polling is not working as we expected
-> nothing happened when I popped out my card, /dev/mmcblk2p* still
-> remains in linux.
-> no more other lines in dmesg ,too
-
-Could it be that the CMD13 is hanging when there is no card inserted
-in the spi-slot?
-
->
-> > > >
-> > > > I am not deeply familiar with the Linux kernel, so if I am wrong
-> > > > please  correct me. Thanks a lot.
-> >
-> > No worries, I will try to help you as much as I can.
-> >
-> > [...]
-> >
-> > Kind regards
-> > Uffe
->
-> All my testings are under rpi zero 2w with
-> Linux PicoCalc 6.17.0-rc6-v7+ #2 SMP Wed Sep 17 15:21:08 CST 2025
-> armv7l GNU/Linux
->
->
-> Kind regards
-> dexter kidd
-
-Apologize for the delay!
+Let's try to move forward on patch 2 too. Avri, if you have the time
+to do a re-spin? Otherwise, I will try to get some time to have a stab
+at it soon.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/sd.c    | 7 ++-----
+>  include/linux/mmc/card.h | 1 -
+>  2 files changed, 2 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index ec02067f03c5..cf92c5b2059a 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -554,7 +554,7 @@ static u32 sd_get_host_max_current(struct mmc_host *host)
+>
+>  static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+>  {
+> -       int current_limit = SD_SET_CURRENT_NO_CHANGE;
+> +       int current_limit = SD_SET_CURRENT_LIMIT_200;
+>         int err;
+>         u32 max_current;
+>
+> @@ -598,11 +598,8 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+>         else if (max_current >= 400 &&
+>                  card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_400)
+>                 current_limit = SD_SET_CURRENT_LIMIT_400;
+> -       else if (max_current >= 200 &&
+> -                card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_200)
+> -               current_limit = SD_SET_CURRENT_LIMIT_200;
+>
+> -       if (current_limit != SD_SET_CURRENT_NO_CHANGE) {
+> +       if (current_limit != SD_SET_CURRENT_LIMIT_200) {
+>                 err = mmc_sd_switch(card, SD_SWITCH_SET, 3,
+>                                 current_limit, status);
+>                 if (err)
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index ddcdf23d731c..e9e964c20e53 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -182,7 +182,6 @@ struct sd_switch_caps {
+>  #define SD_SET_CURRENT_LIMIT_400       1
+>  #define SD_SET_CURRENT_LIMIT_600       2
+>  #define SD_SET_CURRENT_LIMIT_800       3
+> -#define SD_SET_CURRENT_NO_CHANGE       (-1)
+>
+>  #define SD_MAX_CURRENT_200     (1 << SD_SET_CURRENT_LIMIT_200)
+>  #define SD_MAX_CURRENT_400     (1 << SD_SET_CURRENT_LIMIT_400)
+> --
+> 2.25.1
+>
