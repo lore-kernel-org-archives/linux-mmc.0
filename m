@@ -1,131 +1,216 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
+Received: from mail-pg1-f170.google.com (mail-pg1-f170.google.com [209.85.215.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7767C306B02
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 12:58:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 387ED2D8376
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 13:20:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761224309; cv=none; b=bARgoJeGndiZUbh2B13ep0edDQ5isU69Zxz6Y6Rpx14BDsgQSsrs689w9x+zxNtCXWWm3K0ex6f8CevIlVVc7U9yw/MkyOLTcghsw/YTlH3VXZAoZ7/LJ2GpHT4NIRgYQUPE87HyprmpnbHC2IY7BjBXuZRzxp7OV0QwEVAcR5Q=
+	t=1761225636; cv=none; b=NELLRSY1Ywsu2eUjz1Fx4CtzSzakPqj7dNbvdlX6AiySjMnB588S0dKwlEMs42aH1aEufhgJs4UH3jWeEa460AQAMgaWW0vitEzfibHZ+aTh1F6l/sf/TR7ahYnbKcqsxEecJKqTWxWdjEFS24RmnXwu3gfFcMtXBvHVC2ZRE6k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761224309; c=relaxed/simple;
-	bh=xjeehlY0ayWZ3bhz/kWBr2+l/5odZE4178lrQkJI3IY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oSZ47tZFwSsv8ThdO+DTfKYBwG475+dQ3WKI+Fnlq2d6531iiOMDtdIeO9u8OmTserfdE7oj9e9ZmVqs8kiYvScMe+VHvoC+XSBgOLOTAmiUfXMVSQV64zAI01dq6zGTJjp+R6wb4pYSeGXwP28w3wKmE7irU4otR2nBBpybdK8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=f6yIZXKu; arc=none smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1761225636; c=relaxed/simple;
+	bh=vuViwP/s1cMS1phQ8Gat0GObNFdBTZNa1VEQfL7iJ0s=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=Wm4rr9vSWbzNmzKhYwlHuxQA5Yhz90hZ5EC2ZR7iy0NUpPtMi3WFfMq6E35SyqfWdew3phTXNtALNBHuGq9E3GwK03/KFTnwcdPQrkPcuF/tdlu6ZdFP45T/+juDvirrFAwPhf0tvnm/DPPa4Einm/pws5VK1SAApn6Pl1vWkak=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GVdtvzMk; arc=none smtp.client-ip=209.85.215.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="f6yIZXKu"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-b6d3effe106so190941066b.2
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 05:58:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GVdtvzMk"
+Received: by mail-pg1-f170.google.com with SMTP id 41be03b00d2f7-b6ceba7c97eso730156a12.0
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 06:20:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1761224306; x=1761829106; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=xjeehlY0ayWZ3bhz/kWBr2+l/5odZE4178lrQkJI3IY=;
-        b=f6yIZXKuOJEWRW81QXwDzxPRtSUgK2O3Dq48iDRNZ2098e5Yd7PsPoXHoTk8r6hj/H
-         msU7FG9vGt3rG6/EYfn7ZlPopXpbw+/9/9q8GPkANeB8EGJFhDaR6DgPVQOPUPjI0QOp
-         CXFayOUmIxrkE0FQb3hn/KJh/yPL+SUnKNf63tWkgR3BN6uEFdNoKCZyq764Vw5XW6i6
-         tgcrw1jlGTzaJbcpuT1b+BXyZUg+sTDdPhNGII2fZn2LxRBYuBNAVpGv5ZT5naRf8cdA
-         luLvA7bMae9nYU85kIg/IiN+SGrDNMw9IK7j3T1WASg34ZsZt51hkNgmuHzxn/Z3QHes
-         rcrg==
+        d=gmail.com; s=20230601; t=1761225632; x=1761830432; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=AF2NNx9hf0mnuYECQ9Zws6r6vEvdCmP6FSfqGkx7HaM=;
+        b=GVdtvzMkc5/EhtBAKGSGGjDCiBg+3TDwlkCVofyJ4KXMp8b14zY9/1K2k3tFp6iG4d
+         yNd9xllqdXUgI7QsWEAdhR402r+3JSsRit+epqTCdtzY+LBmNfet2VVEAfKXNHqrWaNi
+         Ytm3BUhQjiQ4oE/4tGThXNiaP9eWznQRRS5Q/zeNzSiakAAtJ+mMOyXlDuc24app7hUK
+         pLSMhG3vWDbZsDNji0Jg27jhPA25t0MDGm9OF5R2CqChyCrNIGnUxgDPBqa5RuFkznpq
+         MHqG5/Lzy5I8DHeEWe3puWbwN/sbhhOBGKQAFPSPTYyho1k3lfk80Y0T9G/JbGdnw7RP
+         q4JQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761224306; x=1761829106;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=xjeehlY0ayWZ3bhz/kWBr2+l/5odZE4178lrQkJI3IY=;
-        b=QZy+93XSZEMnx1cTLCfqDas9fpUF5/jUBbrPkx5ROHDiAZ4kJm7oGev5knqjzbkqX8
-         tXPHh/9/OoFMG64vJzoNBuJsueRKZXIV8SofRZufjfrDne/mMMau9UKfX7p2fCr6G05E
-         5WNEuKM8HKI2CtROYEI4X1MIwV4+8nvOcSQmajxWx+M9MeascFdtWG2Q52M0CHWT4Nid
-         Y/daTdXbKWanI45GmUBSsLuWtklRECePPovTCmfJLdRv7ut5wXnnQumPU32GsrXzTCA+
-         dS2xUm2THXGKvckByH5wU0y+DgWJPw4ffPMP2eX3D0cJQAugPseyHmUJfB8KO9x7gw12
-         +vNQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVO59vIlVkKNLF/gMXGBNpEzW30EakXCIZLs+Ve3wrxilATrXCHq6dODlAvfUX8CMcwFU1qGfd7Y7A=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzKUFpkIJYDxckQdcT4EGw/ZpypGaQTSJItfkl9Ge1fFcT7N+ay
-	PZkkcf2Q3bKjUOiZUfdztJa62jtsDlm0Nk7wxtuMNA26EbPPK9FwB3i/HkRhki35GEc=
-X-Gm-Gg: ASbGncu8xFqG+TyqaEfpJrZyagw1Akv+j6Ekay0vr81tSqP1FbVCAAhY3FUL49b4YW7
-	mh+8ZTlB1rkAZWOx/ePrxB80By+UoX11FPgCTx82wGtVmspVxfRfluAyHV20Ntp6h5xY04uYk5P
-	+4OImuxSPL8bLVvjEberEPX9AlPwwmyw29vZQrOgc5fAevVnD49VfmdZWu5rsePbjoTbeynnPBn
-	y1sdADmw5qEDsZ81guN8BTfhtwlmutVhRcToIwdfCunfbp9ueEK2OJI8vxw9w+9888B7GGpjDlW
-	R9rraVq2E2qOvN95sjq5f9oBpkufiaAkHCkYA/D0yhr4uVzNkHNCa3JU1C3wWiQ6BDcJDBlN967
-	rIBS4iLX6IIVIjjHWBKKMVRDRe8RtejFs1fV0ecNEF2xLeB4cUiWUsXIxoPEZbQ72EVo8EKaM73
-	tGqNePGwzvxMu0Lsc=
-X-Google-Smtp-Source: AGHT+IH8+w2hScL952t99dlA5WzytVfJZrsnO3QY3tAYI5JKTW4feC+qQ/6KlSZu1F3zvRjTIGTR4w==
-X-Received: by 2002:a17:907:5c8:b0:b40:2873:a60c with SMTP id a640c23a62f3a-b6472c5c6ddmr2987323466b.3.1761224305719;
-        Thu, 23 Oct 2025 05:58:25 -0700 (PDT)
-Received: from localhost ([2a02:8071:b783:6940:1d24:d58d:2b65:c291])
-        by smtp.gmail.com with UTF8SMTPSA id a640c23a62f3a-b6d511d11eesm227985566b.12.2025.10.23.05.58.24
+        d=1e100.net; s=20230601; t=1761225632; x=1761830432;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=AF2NNx9hf0mnuYECQ9Zws6r6vEvdCmP6FSfqGkx7HaM=;
+        b=JghKJTMFNVvwVTX3OLOErA2wu5Eopn8hae+dQt2TLb02Wwdop6Y3y+zuFtp4Aux3a+
+         bnNsmqENYFSH7Q106ehKcUYePDxc0ihoQ1V8v2CNXlVchQwJ3+ppM0hXyfC1IHxZnJ1E
+         PmPuq55Y6g8IJaurQDgyTknjy2qzYS0wXFZqWiDod1MxlKpnPhW3E+qW+cfyF+lRfozl
+         BbS+TG8gzDv6xequLqmGBYfKorlxyXAj/ZrTqVjZ2EqUQdWaAzmgtQzEzv14/yweyb1K
+         o7m+hfrYjPqwSaMXX3P+FRG46iuXHpX1XzXru+tQGPxpoIasdOz4fWjyYwj6Y+th72AJ
+         1mLw==
+X-Gm-Message-State: AOJu0YxOskY4O4ylhiuTtUftAAoGRyzpzT321gFV5NhPRW5n0swkjONE
+	9RL4XFag9595kq4WwsdJY1K63KzV5CYA04CdtYXOukuPcUgMeTlUpewmpZzQlA==
+X-Gm-Gg: ASbGncsjaLV+nsr9XCTgSXAdx8Ybkv/H6q8kJnQ9hcBfjHiAtL/eLx+5/tWbkf9BneP
+	SMfFglAkDRM/2xNeawp1iEx6316JDhyT0hWadFa+DQRnpQkJwr5kAbZt+VueF00+cjMDfb9IqAq
+	VqmK14/o7V7ZsduM2YwPNGJ9z9V+GvUcHCuyPl/aX2JitaUhnej2FRyuRRt6Xim+yIEi2Hn1UDR
+	C/n+K4BqykClx/g129Xskbw44M4bTZSPtErbC39t0RmuRopK2M5g1gri7t5VYA24JqNOWi1R3RE
+	dlCMuGVbpF4fqQhCwk1GXau94u2RAxan0Tt8u9t3mD5VKkziTwsrWNb6n1BK9pXznRjJvAhc3lI
+	J2JGFCqKd04d1OomiBa92/l0wVGvhIHXh0+1Ng68ZU1JIMrBs2emAIIjF2taVfv0MeuK7rM8par
+	SQ5L3XJKxVmoFWPjJB32vg+WlnSV0h8aU=
+X-Google-Smtp-Source: AGHT+IHgW9BWCG5ejHfW98SHJJuOnntPPezQy1Qb2Owph8LTgzKcuyURtOIXsoNG+tj9X4I70ae6wQ==
+X-Received: by 2002:a05:6300:6141:b0:33c:741f:7abe with SMTP id adf61e73a8af0-33c742ec0c5mr3139528637.8.1761225632239;
+        Thu, 23 Oct 2025 06:20:32 -0700 (PDT)
+Received: from Black-Pearl.localdomain ([27.7.191.116])
+        by smtp.googlemail.com with ESMTPSA id 41be03b00d2f7-b6cf4e2c95asm2088354a12.28.2025.10.23.06.20.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Oct 2025 05:58:25 -0700 (PDT)
-Date: Thu, 23 Oct 2025 14:58:22 +0200
-From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
-To: Rakuram Eswaran <rakuram.e96@gmail.com>
-Cc: chenhuacai@kernel.org, dan.carpenter@linaro.org, 
-	david.hunter.linux@gmail.com, khalid@kernel.org, linux-kernel-mentees@lists.linux.dev, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, lkp@intel.com, 
-	skhan@linuxfoundation.org, ulf.hansson@linaro.org, zhoubinbin@loongson.cn
-Subject: Re: [PATCH v2] mmc: pxamci: Simplify pxamci_probe() error handling
- using devm APIs
-Message-ID: <itxfh366j3yhshvp5abji6xussdk2fc7zrtvc3zzk27y5ouwpb@fvvxnpg3keus>
-References: <pvid2ycmgbkbmegnnzwl4hyev6e2smusxk5olkuqxfwxzykz2e@jlvolirolrxl>
- <20251023115819.11094-1-rakuram.e96@gmail.com>
+        Thu, 23 Oct 2025 06:20:31 -0700 (PDT)
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+Date: Thu, 23 Oct 2025 13:19:43 +0000
+Subject: [PATCH v3] dt-bindings: mmc: ti,da830-mmc: convert to DT schema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="wntpsxgdxjl2stru"
-Content-Disposition: inline
-In-Reply-To: <20251023115819.11094-1-rakuram.e96@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20251023-davinci-mmc-v3-1-5b27b9c9ecc4@gmail.com>
+X-B4-Tracking: v=1; b=H4sIAG4r+mgC/22MywrCMBBFf0WyNpJkGnys/A9xEWfGdsC0kkhQS
+ v/dtAtRcHnu5ZxRZU7CWR1Wo0pcJMvQV4D1SmEX+pa1UGXljPPGO9AUivQoOkbUuDVN0xgEIqO
+ qcU98ledSO50rd5IfQ3ot8WLn9X+nWG01Ml9oB97RHo9tDHLb4BDV3Cnu41pj7a/rqgveUwCut
+ 4Nvd5qmNzmF4tLiAAAA
+X-Change-ID: 20250523-davinci-mmc-c704440c3dd0
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Abraham I <kishon@kernel.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Charan Pedumuru <charan.pedumuru@gmail.com>
+X-Mailer: b4 0.14.3
 
+Convert TI Highspeed MMC host controller binding to YAML format. Define
+'clocks' and 'interrupts' properties to resolve errors identified by
+'dt_check' and 'dtb_check'.
 
---wntpsxgdxjl2stru
-Content-Type: text/plain; protected-headers=v1; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-Subject: Re: [PATCH v2] mmc: pxamci: Simplify pxamci_probe() error handling
- using devm APIs
-MIME-Version: 1.0
+Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+---
+Changes in v3:
+- Change the maintainer for the binding to "Kishon Vijay Abraham I".
+- Link to v2: https://lore.kernel.org/r/20251011-davinci-mmc-v2-1-355da3e25123@gmail.com
 
-Hello Rakuram,
+Changes in v2:
+- Modified the commit message.
+- Removed 'interrupts' from required properties following the old binding.
+- Changed the maintainer for the binding to "Conor Dooley".
+- Link to v1: https://lore.kernel.org/r/20250523-davinci-mmc-v1-1-ceebd8352d9c@gmail.com
+---
+ .../devicetree/bindings/mmc/davinci_mmc.txt        | 32 ------------
+ .../devicetree/bindings/mmc/ti,da830-mmc.yaml      | 61 ++++++++++++++++++++++
+ 2 files changed, 61 insertions(+), 32 deletions(-)
 
-On Thu, Oct 23, 2025 at 05:28:17PM +0530, Rakuram Eswaran wrote:
-> On Tue, 21 Oct 2025 at 14:01, Uwe Kleine-K=F6nig <u.kleine-koenig@baylibr=
-e.com> wrote:
-> > Yes, I suggest to make restructuring .remote a separate patch. (But
-> > removing dma_release_channel belongs into the patch that introduces devm
-> > to allocate the dma channels.)
->=20
-> I believe ".remote" is a typo and you're referring to the _remove() funct=
-ion.=20
-> Removing if(mmc) condition check from pxamci_remove() can be handled in a=
-=20
-> separate cleanup patch, while removing redundant dma_release_channel()
-> will be included in v3.=20
->=20
-> Is my above understanding correct?
+diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
+deleted file mode 100644
+index 516fb0143d4c..000000000000
+--- a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
++++ /dev/null
+@@ -1,32 +0,0 @@
+-* TI Highspeed MMC host controller for DaVinci
+-
+-The Highspeed MMC Host Controller on TI DaVinci family
+-provides an interface for MMC, SD and SDIO types of memory cards.
+-
+-This file documents the properties used by the davinci_mmc driver.
+-
+-Required properties:
+-- compatible:
+- Should be "ti,da830-mmc": for da830, da850, dm365
+- Should be "ti,dm355-mmc": for dm355, dm644x
+-
+-Optional properties:
+-- bus-width: Number of data lines, can be <1>, <4>, or <8>, default <1>
+-- max-frequency: Maximum operating clock frequency, default 25MHz.
+-- dmas: List of DMA specifiers with the controller specific format
+-	as described in the generic DMA client binding. A tx and rx
+-	specifier is required.
+-- dma-names: RX and TX  DMA request names. These strings correspond
+-	1:1 with the DMA specifiers listed in dmas.
+-
+-Example:
+-mmc0: mmc@1c40000 {
+-	compatible = "ti,da830-mmc",
+-	reg = <0x40000 0x1000>;
+-	interrupts = <16>;
+-	bus-width = <4>;
+-	max-frequency = <50000000>;
+-	dmas = <&edma 16
+-		&edma 17>;
+-	dma-names = "rx", "tx";
+-};
+diff --git a/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml b/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
+new file mode 100644
+index 000000000000..36b33dde086b
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
+@@ -0,0 +1,61 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/ti,da830-mmc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: TI Highspeed MMC host controller for DaVinci
++
++description:
++  The Highspeed MMC Host Controller on TI DaVinci family
++  provides an interface for MMC, SD and SDIO types of memory cards.
++
++allOf:
++  - $ref: mmc-controller.yaml
++
++maintainers:
++  - Kishon Vijay Abraham I <kishon@kernel.org>
++
++properties:
++  compatible:
++    enum:
++      - ti,da830-mmc
++      - ti,dm355-mmc
++
++  reg:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 2
++
++  dmas:
++    maxItems: 2
++
++  dma-names:
++    items:
++      - const: rx
++      - const: tx
++
++required:
++  - compatible
++  - reg
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++    mmc@1c40000 {
++        compatible = "ti,da830-mmc";
++        reg = <0x40000 0x1000>;
++        interrupts = <16 IRQ_TYPE_LEVEL_HIGH>,
++                     <17 IRQ_TYPE_LEVEL_HIGH>;
++        bus-width = <4>;
++        max-frequency = <50000000>;
++        dmas = <&edma 16>, <&edma 17>;
++        dma-names = "rx", "tx";
++    };
++...
 
-ack. remote vs. remove is one of my most-committed typos :-D
+---
+base-commit: 7bac2c97af4078d7a627500c9bcdd5b033f97718
+change-id: 20250523-davinci-mmc-c704440c3dd0
 
-Best regards
-Uwe
+Best regards,
+-- 
+Charan Pedumuru <charan.pedumuru@gmail.com>
 
---wntpsxgdxjl2stru
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmj6JmwACgkQj4D7WH0S
-/k7lgggAtXPs8vnFmq/fg2Ty175E+kYXR84uN5u6308vPn6bCdVgHaU62FeL4JO1
-uCQWviLkqvGqfNYKlurKsn4vSdeRK1katvsYi6BTqanuYAMcZljEO8ht0vuTYJqr
-KoFx/M7XEQun2GqDJvDr4weHJ2WgdFg4gCFuFnFxEpW2fZAaQ+MC0U0Ya69Dwf5B
-dH5fBXIdpV/9HQSceLe62tE9h5Rv3Dn7tU9FcYS5dI7vS883B1BZkrOb4e7oUary
-ED+3wJXueKXHod0aF0agKQSVyrJ/9d7XYfpQIIdYpnsLyZFAERarM+6OtWl3f0Zt
-KM5dl0uekQzPkWrWcGV2Ig06F6bDlg==
-=frsd
------END PGP SIGNATURE-----
-
---wntpsxgdxjl2stru--
