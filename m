@@ -1,118 +1,145 @@
-Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
+Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AD6E33438F
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 15:00:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 878503370FA
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 15:40:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761231637; cv=none; b=s4fjWRLCBlFw2YaomMHHzqnq35zC+81BUTnMNGA6bY2JE2gTx9IACfr1jCulKUmAr/eRVaY6ceXXsbYb/4WKxunRXVn1cEibGlNCEnm5yzBusbA0eRbKRBptR5ztl9J4sUVjZlBtOpkUE7Rv8X/5KxRXqWru4w0aMDmD7+3vBQI=
+	t=1761234046; cv=none; b=BlxfOWUT053huuAWCkx4nQmT9L9+9ryg8ZUtAOEOwDrKUBXO0ceGfUFI+lr18gBic5ezUCjsniGpexdSKONGLDxS9HWgr7LCG5BgivawtFkGGwBGFEy/qgv+lApkawjjRTac9Bml0oaW5HGNC53yKZdTUH2B8xiDbsJddN15DfU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761231637; c=relaxed/simple;
-	bh=EPTvx8s1xjF3tQm2xAcjvTwi2857pglx45RNhQja5kU=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=dRsys3gOwC8BAW/ddhNBeLZBHwKB/vVs+6TPwScLtUMHyqXlQRWdwUYjHBl+M+0Lc53xFKlL01MgiIGPrxj6BWUTi3YLwnj0/mJw91/RGdyuikgCepHy4SoBBKilun8Bl7hCEv+vM4i9/bg4BDAGdK+bKW9fEiyGlhlwMKdGreY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C+uWeNry; arc=none smtp.client-ip=209.85.216.48
+	s=arc-20240116; t=1761234046; c=relaxed/simple;
+	bh=wo+q7gVJ0lDPvk3xTlIPPAEgAAs6cPPFBZRIlPTAefI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=HxgFQkWs/G+FZyrRpQ4VvEycktrcQPAKcGzUJA1ouRrxrMNRaCSQYS7AWi2139rL71lmjTI5QZDDSvGJhBX8FumTlSSA4m0o+k5POf7kgyNhf1effLfqi3N9Qvmir9dSnTAZfyLl3qwCNOWkJWd2+ju899qsUh/w/H7q0cNrxA8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BoO3daVA; arc=none smtp.client-ip=209.85.214.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C+uWeNry"
-Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-33082c95fd0so1022421a91.1
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 08:00:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BoO3daVA"
+Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-27ee41e0798so13110265ad.1
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 08:40:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761231635; x=1761836435; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=EPTvx8s1xjF3tQm2xAcjvTwi2857pglx45RNhQja5kU=;
-        b=C+uWeNryTmjDhfNqoaZqlV5UhvfttDlkcPH6mDmNeKO/uzlVfqti8xAqmDzu3UoJPv
-         RS8xw2AdUxaywAm7fXehZuvE8l02o3wufFTujWb7tI6TTrFjKX39JKYYkI6kMXW3nqWQ
-         deoatgxPdvnNyMEgdTZZR8N914WzYfMpcacC7nnVQx5AHTof09Baj7dhHsJHQoIgeL9x
-         ROK0DPDJJ4FkIldinnbe3loSstW12CD7oZjy1Fza3muJqWnGHSubsFlXPa2qkRd+V9dn
-         3iLayCd2wzqQeH2ggiB2QxnhM6MgqFqb8Vi7MA3OLJkMvvajtJk1oTgWWW+HFe9dhnbL
-         hFZQ==
+        d=gmail.com; s=20230601; t=1761234044; x=1761838844; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=lXJXpPmoDUJ02UXvoOXxjG7CEpQb9FPd/0KUDwpNI4k=;
+        b=BoO3daVAWDIewXv5Dr8Qdw/6c/vn/DDn+MdJhJKnXe1cv5cSM8DnCml/O0S+8l+pBp
+         9IYxqKArEqk93D4Dt0XEI4CqYEdt4BAXd5Hu4d4JVhpJQ1HtSTsiz03v49P2u7VLidJR
+         hy3w9moHuSsdiq/yujrnclIQ5zeNv/uKpfE4rNGoMxQhmksdqsf1/AaQYb8R6ImC6FiP
+         ii57HM3zmPP1lbGtdv+OFWznCbNk6QllPDs0JMVBuxkYXQdsFFeoZxcMIxSXHBdh6nRN
+         Ti5+r0X77k3ZKAQvklX57wN44w/EbSZvYcRCc+0PLOJbu7wqkgktHi1ONxyWpAwqmzeH
+         lBtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761231635; x=1761836435;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=EPTvx8s1xjF3tQm2xAcjvTwi2857pglx45RNhQja5kU=;
-        b=KLvtc4gjCGCV8zPb+7oETx0qIBzMO8DJYTOcyfRNDqBCiu2aMJljyoW4iun7bw7BTR
-         597H0hncctCgp++zF/snX+YRbYnD0bi5WpVhVY1ycQLRr6Scp0fybKxXz2IRXaC7HWJU
-         R/75VggdPPTkFBAl2Ycwx1D4s4Wy0l/mgGfz9njZtVh9JT2gJOGnWKOQnlgiGes8AzoB
-         B5+omgG6Pqjh1cv+6n+ZZoIOX860QW8KhLzM+72hNCkGqTVABNMfxq4mnJrGhnZbBXH8
-         5B/9nVjEXhjH3KQ+AM+PFVpQ3lfQp1QkQSyVPufyd50EG+dRffGL0VjgaNvFE9wAfd4Q
-         /Jxw==
-X-Forwarded-Encrypted: i=1; AJvYcCUHH5RyYcvBUi5YS1uoTTHIdrTN14cI97vu/Y0qgtT/2IWSB/J0kO5ieoBVR+5uXMIo/Ub+hfzDsXU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YynF3EIw1tjoN1MhZ60hzsHZioDgOL/cjze9cEWhEIRpai19W6K
-	YABCK59V1riSke7RdrnDYQAOf62sVGdZWEoLy5t3FFokWCRGOvfN08yEK0mnbMD3
-X-Gm-Gg: ASbGnctfiOPNtqJyGC0uQFICbeD0iNSc11Wc9BevgJPLutF1PtkAM2I7KE4CYMgOwrv
-	aD9nrqSkhdI9Nw6CG5EDuQMJN8fcbxEDST0JuwbCEq3LEBo0JhlpLJJZhn4cFKPPbzHKDAlPzYR
-	SvUJJBWlEffANxnlc7N1s6oEMCiAsTAzdA25lBw2etNNyaNxgDKD4rMQDn726NANu8pa40V4AsW
-	TJ2/l0Wu1i3Ha6ozfmFYK6+Dekmt9/zUUiDXIql9RV+/0KxzepkOpaHDI9V8PWatleWdd+2+tf0
-	kuwAb/WPvbZYi0YyCrky4XktDVLhnBeTHMAve69T8950+NriPnMYcm1RquZU1THmvoYbXcdphjP
-	YjWcpYCPkTjNfFV7wTfscIGdlTda7FrD7+JJaAAbemsyklxQfZl/OCWZuJkfDerITTeugc0ymaU
-	73cSq7KIbpBpEPRCBhCRPByPTcirup
-X-Google-Smtp-Source: AGHT+IHn4PZEKXYm1+7LvVn4UMOqVz90PtQ2psqXknB6QS8j2BPnoDTfZDXsRQz5Bj7sIQFcKZg0BQ==
-X-Received: by 2002:a17:90b:2491:b0:33e:2d0f:4792 with SMTP id 98e67ed59e1d1-33e2d0f58cdmr5814814a91.28.1761231634351;
-        Thu, 23 Oct 2025 08:00:34 -0700 (PDT)
-Received: from rakuram-MSI.. ([2409:40f4:2040:16ed:f15f:ed0a:f0b7:34d2])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-33dff3704f6sm4373510a91.2.2025.10.23.08.00.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Oct 2025 08:00:34 -0700 (PDT)
-From: Rakuram Eswaran <rakuram.e96@gmail.com>
-To: u.kleine-koenig@baylibre.com
-Cc: chenhuacai@kernel.org,
-	dan.carpenter@linaro.org,
-	david.hunter.linux@gmail.com,
-	khalid@kernel.org,
-	linux-kernel-mentees@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	lkp@intel.com,
-	rakuram.e96@gmail.com,
-	skhan@linuxfoundation.org,
-	ulf.hansson@linaro.org,
-	zhoubinbin@loongson.cn
-Subject: Re: [PATCH v2] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
-Date: Thu, 23 Oct 2025 20:30:23 +0530
-Message-ID: <20251023150025.167523-1-rakuram.e96@gmail.com>
-X-Mailer: git-send-email 2.48.1
-In-Reply-To: itxfh366j3yhshvp5abji6xussdk2fc7zrtvc3zzk27y5ouwpb@fvvxnpg3keu
-References: <itxfh366j3yhshvp5abji6xussdk2fc7zrtvc3zzk27y5ouwpb@fvvxnpg3keus>
+        d=1e100.net; s=20230601; t=1761234044; x=1761838844;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=lXJXpPmoDUJ02UXvoOXxjG7CEpQb9FPd/0KUDwpNI4k=;
+        b=kyaaeZWYuJDg/Zqqy6UgWj/baKkFKoz/1aBn9ZM2hmKYyTJIc88R6Lpw6xS4SLGRJ6
+         KZy7+MdrcO5RUy++3cHFF3XWr2lEfvOKwldEhhe2ZPaqNSfhIgvnAJ9gVfP8KU8bk2er
+         9FPJB0VXz1skyO7GkB2ktJT4toLDo9RVvGyZuz/84Y3UAZ0j5PA5zYNiZFfapmE3fUNE
+         RsYhvpmEqFO455ZnJlBzLOrogQ4wsHDaIrQMHqMdHTRBDZkd8hcgzeR6tAaElc5uAHY4
+         YtIKTZ0+/5RffNVJj7N9pYuIbf/opf/89AsMznMWzICbj6Z9LY4yjAz4T3WuivZ/j8pp
+         e/jg==
+X-Forwarded-Encrypted: i=1; AJvYcCV4tfdCME4oQJIZJQE/2frr/ayvoGc3r8mMP3qbS0x2uXPsvkzv64EZKyGBkwVR6I797cn9yZ6sgOA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyyAUdJfcOOzgyPRv9CASim18bQx0Ho93Xab6O7rPRPkrpfD4VE
+	K2e4WruPBCwIn6RywDOIEyCufye5oLfjtG4fBP4zp0ZnqIhlYBGqNGCO
+X-Gm-Gg: ASbGncsE/L9aqeXytL3jsjqjxFhnlhZII88ct3Pd4hpX6SgQfXrbgNsL9KHd0bNJDYH
+	e/PDx8ENKPVluoglysgNqV+I0a7cMs4CrOyj+kKM0os1pwbyeimDnIwCXMIGmH0vqLOtJcJffbx
+	5F4QmDSlJ88HNIWC4DibWLdwydPSKjiDK1nGi4OUcfL9Ux6qU6okGfvUrkrc6JuBRXZY8aVzh3C
+	H5dX0vX/eiwjwW1isyk7puDlE6KIxKi0ZymnmTaUpL6hjVcsJ5fuKhHQWnDXsG+WubJ4WexU8m0
+	jCYHiilFD3y160thIeAgeRirHMq+U1jr4u2WcDB6DhRfm/ISVFKMGeL8vexk4WRhutAc5yysRd4
+	ktn07M/5oBDd+mtlGPQ4+aS7H466FOD2V45xRCdDWtf23720Wus2cQPtnihuuPvKx/MUZAuPS/0
+	dxRE2mn4+hquNqm/B6LB1Z0T/E2btqOnK6
+X-Google-Smtp-Source: AGHT+IFArWijSKHwpar8JwYxB7WZc8vpMdPPlpUQNI5RWkup0YN+rTI2t69HTMgDeXnxkhaW+vdAkg==
+X-Received: by 2002:a17:903:3546:b0:267:e097:7a9c with SMTP id d9443c01a7336-290cc6d4ba8mr326690025ad.53.1761234043638;
+        Thu, 23 Oct 2025 08:40:43 -0700 (PDT)
+Received: from [192.168.1.5] ([27.7.191.116])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2946ddee569sm27029435ad.31.2025.10.23.08.40.40
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 23 Oct 2025 08:40:43 -0700 (PDT)
+Message-ID: <879da8d0-1ea5-4495-90e5-03b55aa91362@gmail.com>
+Date: Thu, 23 Oct 2025 21:10:38 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 0/2] dt-bindings: mmc: ti,omap2430-sdhci: Add json
+ schema for the text binding
+To: Rob Herring <robh@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Paul Barker <paul.barker@sancloud.com>,
+ Marc Murphy <marc.murphy@sancloud.com>, Tony Lindgren <tony@atomide.com>,
+ Kishon Vijay Abraham I <kishon@kernel.org>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-omap@vger.kernel.org
+References: <20251019-ti-sdhci-omap-v4-0-fdc63aaeb083@gmail.com>
+ <20251020142710.GA576827-robh@kernel.org>
+ <46aa84cd-63cc-4263-9061-021fa3205b87@gmail.com>
+ <CAL_JsqKH2NTvXGPoimpVp=-yvcQgbXSoxKY6AO16WgJHSeOT5A@mail.gmail.com>
+Content-Language: en-US
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+In-Reply-To: <CAL_JsqKH2NTvXGPoimpVp=-yvcQgbXSoxKY6AO16WgJHSeOT5A@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-On Thu, 23 Oct 2025 at 18:28, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
->
-> Hello Rakuram,
->
-> On Thu, Oct 23, 2025 at 05:28:17PM +0530, Rakuram Eswaran wrote:
-> > On Tue, 21 Oct 2025 at 14:01, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
-> > > Yes, I suggest to make restructuring .remote a separate patch. (But
-> > > removing dma_release_channel belongs into the patch that introduces devm
-> > > to allocate the dma channels.)
-> >
-> > I believe ".remote" is a typo and you're referring to the _remove() function.
-> > Removing if(mmc) condition check from pxamci_remove() can be handled in a
-> > separate cleanup patch, while removing redundant dma_release_channel()
-> > will be included in v3.
-> >
-> > Is my above understanding correct?
->
-> ack. remote vs. remove is one of my most-committed typos :-D
->
 
-Understood, thank you for confirming.
 
-I've just sent the v3 patch. You can find it here:
-https://lore.kernel.org/linux-mmc/20251023145432.164696-1-rakuram.e96@gmail.com/T/#u
+On 20-10-2025 21:28, Rob Herring wrote:
+> On Mon, Oct 20, 2025 at 10:44 AM Charan Pedumuru
+> <charan.pedumuru@gmail.com> wrote:
+>>
+>>
+>>
+>> On 20-10-2025 19:57, Rob Herring wrote:
+>>> On Sun, Oct 19, 2025 at 01:04:36PM +0000, Charan Pedumuru wrote:
+>>>> Create a YAML binding for ti,omap2430-sdhci and fix vmmc-supply
+>>>> property typo for a DTS file.
+>>>>
+>>>> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+>>>> ---
+>>>> Note: The property "ti,needs-special-reset" was not removed from DTS cause it will
+>>>>       disrupt the compilation for other compatibles as the node &mmc is used for all
+>>>>       compatibles for some DTS files.
+>>>
+>>> I don't understand. AFIACT, "ti,needs-special-reset" is only used for
+>>> the hsmmc driver/binding. But this series for for the sdhci
+>>> driver/binding. So shouldn't the property be removed from sdhci nodes
+>>> (and the binding), but kept for hsmmc nodes?
+>>
+>>
+>> Yes we can remove that property from sdhci , but &mmc node in DTS is common for all mmc drivers and this "ti,needs-special-reset" property is defined there for one board, so even when I remove it from DTSI for sdhci nodes, the DTS file still contains this property in &mmc node which is also common for other mmc drivers, so even if we remove that property for sdhci node, we still need to define it in YAML to resolve dtb_check. The issue here is not removing the property from sdhci node in DTSI file, but to remove it from &mmc node from a DTS file which is common to all mmc drivers.
+>>
+>> Here is the DTS node (ti/omap/am5729-beagleboneai.dts) which contain that property and is common for all mmc drivers.
+>> &mmc2 {
+>>         status = "okay";
+>>         vmmc-supply = <&vdd_1v8>;
+>>         vqmmc-supply = <&vdd_1v8>;
+>>         bus-width = <8>;
+>>         ti,non-removable;
+>>         non-removable;
+>>         mmc-pwrseq = <&emmc_pwrseq>;
+>>
+>>         ti,needs-special-reset;
+>>         dmas = <&sdma_xbar 47>, <&sdma_xbar 48>;
+>>         dma-names = "tx", "rx";
+>>
+>> };
+> 
+> I'm pretty sure that's not how &mmc2 works and you are confused. I
+> would suggest you do a dtb->dts pass and compare the results.
 
+So, I can remove ti,needs-special-hs-handling and cap-mmc-dual-data-rate properties from a similar DTS file along with ti,needs-special-reset as these properties are not used for sdhci-omap driver and are no longer in use, I will remove these properties from YAML too, if this is true. Can you confirm this?
+
+> 
+> Rob
+
+-- 
 Best Regards,
-Rakuram
+Charan.
 
