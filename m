@@ -1,80 +1,84 @@
-Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+Received: from mail-pj1-f48.google.com (mail-pj1-f48.google.com [209.85.216.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84300330B2F
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 14:54:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AD6E33438F
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 15:00:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761231284; cv=none; b=NpeCoOQgcAxoHrkOTk2PpfhyQMYkD2TkdaRnEPaflXxPigC8lX3UQsT03plCjf9DG3/IiLwAXvfZjxwghgh3TZC7AqGxF8L3/Hh0F8Z/DuzIiYZh7riXPatFB5fPlWnyHtAq87HestvIeqAfbnoTwTcRsHlC81rdVQNttxSBQQ0=
+	t=1761231637; cv=none; b=s4fjWRLCBlFw2YaomMHHzqnq35zC+81BUTnMNGA6bY2JE2gTx9IACfr1jCulKUmAr/eRVaY6ceXXsbYb/4WKxunRXVn1cEibGlNCEnm5yzBusbA0eRbKRBptR5ztl9J4sUVjZlBtOpkUE7Rv8X/5KxRXqWru4w0aMDmD7+3vBQI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761231284; c=relaxed/simple;
-	bh=T8WDD3FPKDFq4jZeX4r8iK4zRk5CyZideAEyYUc9+ag=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=WrARNsrCgDmMQ98k96tkuY2TRn2wGbY+++XnopEtEKkgYbnNt0RZjo0DULzs8mIdUNNPECcRH3qgwjtvNU6vI3ijkS5G6WEZ16Lxy78VITAqFPjTSx07SLw8qhbRYvyJjSiEKPs/nRAhQDiGzIqJgk2Rti8y75A8ZL5/z2lA8Qg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VS5pxEWZ; arc=none smtp.client-ip=209.85.210.182
+	s=arc-20240116; t=1761231637; c=relaxed/simple;
+	bh=EPTvx8s1xjF3tQm2xAcjvTwi2857pglx45RNhQja5kU=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=dRsys3gOwC8BAW/ddhNBeLZBHwKB/vVs+6TPwScLtUMHyqXlQRWdwUYjHBl+M+0Lc53xFKlL01MgiIGPrxj6BWUTi3YLwnj0/mJw91/RGdyuikgCepHy4SoBBKilun8Bl7hCEv+vM4i9/bg4BDAGdK+bKW9fEiyGlhlwMKdGreY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C+uWeNry; arc=none smtp.client-ip=209.85.216.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VS5pxEWZ"
-Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-77f343231fcso606055b3a.3
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 07:54:42 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C+uWeNry"
+Received: by mail-pj1-f48.google.com with SMTP id 98e67ed59e1d1-33082c95fd0so1022421a91.1
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Oct 2025 08:00:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761231282; x=1761836082; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=6PWkC5vEbffnTD2msqF1a1ad0yN4rdP1qu6b7OiUsdc=;
-        b=VS5pxEWZk/niMq7N5uBMDYut0ph1bnc2N+MUl3TYHpX4rl4S/lAG9Uum6/khRr8vn4
-         nEy2iBpzoJZJsg0qK81avF4usVX0MKd6GcVoMK3suxZn53jVje4/rJ0hGNvHZ6+Exi+7
-         XJdhv3kOBinf9BM5uNMYJlRxDEHCGdvK/jonblZVGsA+6ilsogg6NcP1h9SHzSwVxmNx
-         JOAu/5N9Z6aH10bfx3IwDp1eV8lz423U5F4g4HAMo9EXi3PXoZNXFNAw10QDLwjXmHs8
-         uOk2kPa/Qg1CYG06pD0bZ43VH1zXX/F0bqTXVNyKhjSDx5SBIZ4k0loCeGw+4ePLTv4x
-         LYUQ==
+        d=gmail.com; s=20230601; t=1761231635; x=1761836435; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=EPTvx8s1xjF3tQm2xAcjvTwi2857pglx45RNhQja5kU=;
+        b=C+uWeNryTmjDhfNqoaZqlV5UhvfttDlkcPH6mDmNeKO/uzlVfqti8xAqmDzu3UoJPv
+         RS8xw2AdUxaywAm7fXehZuvE8l02o3wufFTujWb7tI6TTrFjKX39JKYYkI6kMXW3nqWQ
+         deoatgxPdvnNyMEgdTZZR8N914WzYfMpcacC7nnVQx5AHTof09Baj7dhHsJHQoIgeL9x
+         ROK0DPDJJ4FkIldinnbe3loSstW12CD7oZjy1Fza3muJqWnGHSubsFlXPa2qkRd+V9dn
+         3iLayCd2wzqQeH2ggiB2QxnhM6MgqFqb8Vi7MA3OLJkMvvajtJk1oTgWWW+HFe9dhnbL
+         hFZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761231282; x=1761836082;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=6PWkC5vEbffnTD2msqF1a1ad0yN4rdP1qu6b7OiUsdc=;
-        b=utimvJA4g4AJGOxENP0sKi5uYHnhOPv21ekPHBRbh4kq1rLfPgjG7/EW9vjjoPgXc+
-         qkNbyKpplLSnaYlXOK9sxoMTT4pa7jmRDd2+necRIsaSk3FcknjIjFro822XNYusRDf3
-         oy9KHQWItUdNK1OXBTCTkKwOjKN2unjcF+omrg3QGEH+nAhy7I/JtXvP0NJmCaF3SlEt
-         flV/ehlgKWXecaQvBy8MGe7Hxdjxokp3bjIEiSMjIO9hTlzqGi5FaA0qpNVEzwibLmjd
-         HGbl172JzbOIMBov82vDM2Tnou6f7oNBoI9Pg8ZcJQmnOEPWlbPp6Jhhw8J/vuPVx8tu
-         hx2A==
-X-Forwarded-Encrypted: i=1; AJvYcCVGNIbR8bmISqG10ooUNxDIVlvGxZ0smv2MerWOesuh3Y0RHsXCYLsp8sLpZX8O9YjmQnTd9MAtbm4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyuqaTAo9QiF6ksABfA8OU1y9poWWcNgnhiyFKdCYQqayO0voVM
-	0+4FIocbX+gvLmOCZmeCWE4dAwYz7VBPC7iP0JtcGEUWI3piIJjEpCOP
-X-Gm-Gg: ASbGncuXdW/0K35pJFCVjYVCLUwljAbsJN58telprjQ3M2AwKA1iAVVemdkVbbH/RGL
-	6UQpDnJjMtJjlKA81k+pug/IXRnvc1AM7H7TnIRZc5tc9MPDTzMZK5kO/hdZwhXLjXsk5KEMWiY
-	RHGZMMC6IvHy7WDDO+ol1ulAav3hsVtttnVkrFUu4sqPPMuubKAwV+fuqrtEzqDlll7cHuQxeAm
-	qPl6vPtaoDcXUufleE3TXZLW8SpAtI2KqiItWom9BiLAX9x/I0x+ItbmPDNlHi1dSsYPO3AOtuf
-	FPgcOBNx5qo6lmiDdi/cxjDrsEZFR+nNd7/wTxC5MqmqWnQnUcbdRv7dCwJMdxp3dTvBjFGS2JD
-	SoSWE3yp+uuAZ00VKE/puvBrXYunkkoELPWV14QcnqZ5QcdJalMHsvbcVZtLJoRbehicdNvc/0/
-	bi77/5QDQ=
-X-Google-Smtp-Source: AGHT+IG4jW0xt+pP9DVrPMcL2PAlFdoxSZhMCK+ZCC4fZeK1oMvAPXo/S/LPShSFOkL1hwFOo7+F2w==
-X-Received: by 2002:a05:6a21:32aa:b0:306:51fd:5542 with SMTP id adf61e73a8af0-334a861feb9mr31305654637.44.1761231281323;
-        Thu, 23 Oct 2025 07:54:41 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1761231635; x=1761836435;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=EPTvx8s1xjF3tQm2xAcjvTwi2857pglx45RNhQja5kU=;
+        b=KLvtc4gjCGCV8zPb+7oETx0qIBzMO8DJYTOcyfRNDqBCiu2aMJljyoW4iun7bw7BTR
+         597H0hncctCgp++zF/snX+YRbYnD0bi5WpVhVY1ycQLRr6Scp0fybKxXz2IRXaC7HWJU
+         R/75VggdPPTkFBAl2Ycwx1D4s4Wy0l/mgGfz9njZtVh9JT2gJOGnWKOQnlgiGes8AzoB
+         B5+omgG6Pqjh1cv+6n+ZZoIOX860QW8KhLzM+72hNCkGqTVABNMfxq4mnJrGhnZbBXH8
+         5B/9nVjEXhjH3KQ+AM+PFVpQ3lfQp1QkQSyVPufyd50EG+dRffGL0VjgaNvFE9wAfd4Q
+         /Jxw==
+X-Forwarded-Encrypted: i=1; AJvYcCUHH5RyYcvBUi5YS1uoTTHIdrTN14cI97vu/Y0qgtT/2IWSB/J0kO5ieoBVR+5uXMIo/Ub+hfzDsXU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YynF3EIw1tjoN1MhZ60hzsHZioDgOL/cjze9cEWhEIRpai19W6K
+	YABCK59V1riSke7RdrnDYQAOf62sVGdZWEoLy5t3FFokWCRGOvfN08yEK0mnbMD3
+X-Gm-Gg: ASbGnctfiOPNtqJyGC0uQFICbeD0iNSc11Wc9BevgJPLutF1PtkAM2I7KE4CYMgOwrv
+	aD9nrqSkhdI9Nw6CG5EDuQMJN8fcbxEDST0JuwbCEq3LEBo0JhlpLJJZhn4cFKPPbzHKDAlPzYR
+	SvUJJBWlEffANxnlc7N1s6oEMCiAsTAzdA25lBw2etNNyaNxgDKD4rMQDn726NANu8pa40V4AsW
+	TJ2/l0Wu1i3Ha6ozfmFYK6+Dekmt9/zUUiDXIql9RV+/0KxzepkOpaHDI9V8PWatleWdd+2+tf0
+	kuwAb/WPvbZYi0YyCrky4XktDVLhnBeTHMAve69T8950+NriPnMYcm1RquZU1THmvoYbXcdphjP
+	YjWcpYCPkTjNfFV7wTfscIGdlTda7FrD7+JJaAAbemsyklxQfZl/OCWZuJkfDerITTeugc0ymaU
+	73cSq7KIbpBpEPRCBhCRPByPTcirup
+X-Google-Smtp-Source: AGHT+IHn4PZEKXYm1+7LvVn4UMOqVz90PtQ2psqXknB6QS8j2BPnoDTfZDXsRQz5Bj7sIQFcKZg0BQ==
+X-Received: by 2002:a17:90b:2491:b0:33e:2d0f:4792 with SMTP id 98e67ed59e1d1-33e2d0f58cdmr5814814a91.28.1761231634351;
+        Thu, 23 Oct 2025 08:00:34 -0700 (PDT)
 Received: from rakuram-MSI.. ([2409:40f4:2040:16ed:f15f:ed0a:f0b7:34d2])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7a274bb37dbsm2748241b3a.57.2025.10.23.07.54.36
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-33dff3704f6sm4373510a91.2.2025.10.23.08.00.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Oct 2025 07:54:40 -0700 (PDT)
+        Thu, 23 Oct 2025 08:00:34 -0700 (PDT)
 From: Rakuram Eswaran <rakuram.e96@gmail.com>
-To: ulf.hansson@linaro.org,
-	u.kleine-koenig@baylibre.com
+To: u.kleine-koenig@baylibre.com
 Cc: chenhuacai@kernel.org,
 	dan.carpenter@linaro.org,
 	david.hunter.linux@gmail.com,
 	khalid@kernel.org,
-	zhoubinbin@loongson.cn,
 	linux-kernel-mentees@lists.linux.dev,
 	linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org,
 	lkp@intel.com,
 	rakuram.e96@gmail.com,
-	skhan@linuxfoundation.org
-Subject: [PATCH v3] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
-Date: Thu, 23 Oct 2025 20:24:32 +0530
-Message-ID: <20251023145432.164696-1-rakuram.e96@gmail.com>
+	skhan@linuxfoundation.org,
+	ulf.hansson@linaro.org,
+	zhoubinbin@loongson.cn
+Subject: Re: [PATCH v2] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
+Date: Thu, 23 Oct 2025 20:30:23 +0530
+Message-ID: <20251023150025.167523-1-rakuram.e96@gmail.com>
 X-Mailer: git-send-email 2.48.1
+In-Reply-To: itxfh366j3yhshvp5abji6xussdk2fc7zrtvc3zzk27y5ouwpb@fvvxnpg3keu
+References: <itxfh366j3yhshvp5abji6xussdk2fc7zrtvc3zzk27y5ouwpb@fvvxnpg3keus>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -84,164 +88,31 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-This patch refactors pxamci_probe() to use devm-managed resource
-allocation (e.g. devm_dma_request_chan) and dev_err_probe() for
-improved readability and automatic cleanup on probe failure.
+On Thu, 23 Oct 2025 at 18:28, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
+>
+> Hello Rakuram,
+>
+> On Thu, Oct 23, 2025 at 05:28:17PM +0530, Rakuram Eswaran wrote:
+> > On Tue, 21 Oct 2025 at 14:01, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
+> > > Yes, I suggest to make restructuring .remote a separate patch. (But
+> > > removing dma_release_channel belongs into the patch that introduces devm
+> > > to allocate the dma channels.)
+> >
+> > I believe ".remote" is a typo and you're referring to the _remove() function.
+> > Removing if(mmc) condition check from pxamci_remove() can be handled in a
+> > separate cleanup patch, while removing redundant dma_release_channel()
+> > will be included in v3.
+> >
+> > Is my above understanding correct?
+>
+> ack. remote vs. remove is one of my most-committed typos :-D
+>
 
-It also removes redundant NULL assignments and manual resource release
-logic from pxamci_probe(), and eliminates the corresponding release
-calls from pxamci_remove().
+Understood, thank you for confirming.
 
-Reported-by: kernel test robot <lkp@intel.com>
-Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
-Closes: https://lore.kernel.org/r/202510041841.pRlunIfl-lkp@intel.com/
-Fixes: 58c40f3faf742c ("mmc: pxamci: Use devm_mmc_alloc_host() helper")
-Suggested-by: Uwe Kleine-König <u.kleine-koenig@baylibre.com>
-Signed-off-by: Rakuram Eswaran <rakuram.e96@gmail.com>
----
+I've just sent the v3 patch. You can find it here:
+https://lore.kernel.org/linux-mmc/20251023145432.164696-1-rakuram.e96@gmail.com/T/#u
 
-Changes since v2:
-- Dropped redundant dma_release_channel() calls from pxamci_remove() as
-  devm_dma_request_chan() automatically handles resource cleanup.
-- Added link to v2 for reference:
-  https://lore.kernel.org/linux-mmc/20251014184657.111144-1-rakuram.e96@gmail.com/
-
-Changes since v1:
-Following Uwe Kleine-König’s suggestion:
-- Replaced dma_request_chan() with devm_dma_request_chan() to make DMA
-  channel allocation devm-managed and avoid manual release paths.
-- Adopted dev_err_probe() for improved error reporting and consistent
-  probe failure handling.
-- Removed redundant NULL assignments and obsolete goto-based cleanup logic.
-- Updated commit message to better describe the intent of the change.
-- Added link to v1 for reference:
-  https://lore.kernel.org/linux-mmc/20251007161948.12442-1-rakuram.e96@gmail.com/
-
-Testing note:
-I do not have access to appropriate hardware for runtime testing.
-Any help verifying on actual hardware would be appreciated.
-
-Build and Analysis:
-This patch was compiled against the configuration file reported by
-0day CI in the above link (config: s390-randconfig-r071-20251004) using
-`s390x-linux-gnu-gcc (Ubuntu 14.2.0-19ubuntu2) 14.2.0`.
-
-Static analysis was performed with Smatch to ensure the reported warning
-no longer reproduces after applying this fix.
-
-Command used for verification:
-  ARCH=s390 CROSS_COMPILE=s390x-linux-gnu- \
-  ~/project/smatch/smatch_scripts/kchecker ./drivers/mmc/host/pxamci.c
-
- drivers/mmc/host/pxamci.c | 56 +++++++++++++--------------------------
- 1 file changed, 18 insertions(+), 38 deletions(-)
-
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index 26d03352af63..b5ea058ed467 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -652,10 +652,9 @@ static int pxamci_probe(struct platform_device *pdev)
- 	host->clkrt = CLKRT_OFF;
- 
- 	host->clk = devm_clk_get(dev, NULL);
--	if (IS_ERR(host->clk)) {
--		host->clk = NULL;
--		return PTR_ERR(host->clk);
--	}
-+	if (IS_ERR(host->clk))
-+		return dev_err_probe(dev, PTR_ERR(host->clk),
-+					"Failed to acquire clock\n");
- 
- 	host->clkrate = clk_get_rate(host->clk);
- 
-@@ -703,46 +702,37 @@ static int pxamci_probe(struct platform_device *pdev)
- 
- 	platform_set_drvdata(pdev, mmc);
- 
--	host->dma_chan_rx = dma_request_chan(dev, "rx");
--	if (IS_ERR(host->dma_chan_rx)) {
--		host->dma_chan_rx = NULL;
-+	host->dma_chan_rx = devm_dma_request_chan(dev, "rx");
-+	if (IS_ERR(host->dma_chan_rx))
- 		return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
- 				     "unable to request rx dma channel\n");
--	}
- 
--	host->dma_chan_tx = dma_request_chan(dev, "tx");
--	if (IS_ERR(host->dma_chan_tx)) {
--		dev_err(dev, "unable to request tx dma channel\n");
--		ret = PTR_ERR(host->dma_chan_tx);
--		host->dma_chan_tx = NULL;
--		goto out;
--	}
-+
-+	host->dma_chan_tx = devm_dma_request_chan(dev, "tx");
-+	if (IS_ERR(host->dma_chan_tx))
-+		return dev_err_probe(dev, PTR_ERR(host->dma_chan_tx),
-+					"unable to request tx dma channel\n");
- 
- 	if (host->pdata) {
- 		host->detect_delay_ms = host->pdata->detect_delay_ms;
- 
- 		host->power = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
--		if (IS_ERR(host->power)) {
--			ret = PTR_ERR(host->power);
--			dev_err(dev, "Failed requesting gpio_power\n");
--			goto out;
--		}
-+		if (IS_ERR(host->power))
-+			return dev_err_probe(dev, PTR_ERR(host->power),
-+						"Failed requesting gpio_power\n");
- 
- 		/* FIXME: should we pass detection delay to debounce? */
- 		ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
--		if (ret && ret != -ENOENT) {
--			dev_err(dev, "Failed requesting gpio_cd\n");
--			goto out;
--		}
-+		if (ret && ret != -ENOENT)
-+			return dev_err_probe(dev, ret, "Failed requesting gpio_cd\n");
- 
- 		if (!host->pdata->gpio_card_ro_invert)
- 			mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
- 
- 		ret = mmc_gpiod_request_ro(mmc, "wp", 0, 0);
--		if (ret && ret != -ENOENT) {
--			dev_err(dev, "Failed requesting gpio_ro\n");
--			goto out;
--		}
-+		if (ret && ret != -ENOENT)
-+			return dev_err_probe(dev, ret, "Failed requesting gpio_ro\n");
-+
- 		if (!ret)
- 			host->use_ro_gpio = true;
- 
-@@ -759,16 +749,8 @@ static int pxamci_probe(struct platform_device *pdev)
- 	if (ret) {
- 		if (host->pdata && host->pdata->exit)
- 			host->pdata->exit(dev, mmc);
--		goto out;
- 	}
- 
--	return 0;
--
--out:
--	if (host->dma_chan_rx)
--		dma_release_channel(host->dma_chan_rx);
--	if (host->dma_chan_tx)
--		dma_release_channel(host->dma_chan_tx);
- 	return ret;
- }
- 
-@@ -791,8 +773,6 @@ static void pxamci_remove(struct platform_device *pdev)
- 
- 		dmaengine_terminate_all(host->dma_chan_rx);
- 		dmaengine_terminate_all(host->dma_chan_tx);
--		dma_release_channel(host->dma_chan_rx);
--		dma_release_channel(host->dma_chan_tx);
- 	}
- }
- 
--- 
-2.48.1
+Best Regards,
+Rakuram
 
