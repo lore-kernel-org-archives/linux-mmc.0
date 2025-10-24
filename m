@@ -1,67 +1,67 @@
-Received: from mail-pf1-f178.google.com (mail-pf1-f178.google.com [209.85.210.178])
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 218D82FAC06
-	for <linux-mmc@vger.kernel.org>; Fri, 24 Oct 2025 07:57:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 002FA2FB0AE
+	for <linux-mmc@vger.kernel.org>; Fri, 24 Oct 2025 07:57:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761292650; cv=none; b=GF6Md1teM5ea7gZ5o585RE7XAaTQlygoi3Vxv6xyt+QReCUyEzgwuioNCzIwLwnkOSpDb23w1WStpJR7M006FUOaUxk/P85CfPn/E3p+yoKA5hdK8rBWyYnB5u2xB1kXY39rzrOWEuHbk2CGW1WCPnuW7N2p/hiMnFEBehUc+qo=
+	t=1761292655; cv=none; b=AgpCapxhekmp11ePLEVY+7Y+GkuIwmqlA8nZgomyvWzeHxKNX84xs9v0OVuGYZVt3SeOgmMFj7EdxAnryJ0vIBBqcb/rxH0foUEFN9xE4yrx0cYWG5rETu4j1dONhJkHwP01qtNtTPIz6uPYnS3R2WXChByBPv1wLqBt9V1dN/s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761292650; c=relaxed/simple;
-	bh=3fOUjvWyPdLQupJigM7VabtL3miDrlYQ4ie+3GRBu0E=;
+	s=arc-20240116; t=1761292655; c=relaxed/simple;
+	bh=tW2cZj4A2kild+iwNlrsp24JcLX1QbExyS5VOwDy9+o=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=jBYxjC1sY8YHZ/8NpTpY4N3vPoWLWiJrUAQzNO8N9GuqLlinH6PddR1YibBP3DT4rbSkWJHPRxuV1Li8kqtzUgzVIsHEUAdDXRzVerzweJUiU0Td1SKiZkJyuDB63Xq4BJObD9vK/bAihxVYVPP3mSZ7dJCQGcaEb8KgoNUgQQc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Pbjv5FSb; arc=none smtp.client-ip=209.85.210.178
+	 In-Reply-To:To:Cc; b=ceyky2GEKIacvj5r7tIiUFHORfhgztlKonn6OypVEIU2iiVEgUITLe2nza5R/xjv0fGWjr9xLsvG/yixTDdJIqAimx7GjyNGg//Yvj3IyE6q7nAG7BEQi//ZlKkKLkPoBzk/R5e5LC5l0aRrF/yTKU7EfH8vaUipSDRjwit33vI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VWkj5yLS; arc=none smtp.client-ip=209.85.214.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Pbjv5FSb"
-Received: by mail-pf1-f178.google.com with SMTP id d2e1a72fcca58-7811a02316bso1333154b3a.3
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Oct 2025 00:57:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VWkj5yLS"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-28a5b8b12a1so17939405ad.0
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Oct 2025 00:57:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761292648; x=1761897448; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1761292652; x=1761897452; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=G8zJ/5Y26gbXOt35jdXlLCdG2ABnFj5sLixstcA/A5M=;
-        b=Pbjv5FSb1G8vQpfjsSSw6/4T+c0kO5J/ByeLLV71aad8d9bVwzUQXiqAEHv5XJCb56
-         hFowMd0B1DRaeDzmPY1VW9HPNWtYEUXaZaYW8wgjTmAM8s+IuBA5FqI9q2sWROsUbSwv
-         GX2Oyus5eSEpCruhBrkXa2JJ5yja8fQ27WDXBktFiXRCG7y8+igvOLHyiOcztkkgiw1u
-         69w2D9WTvk0Fgn/iHETz0S92ef5X/T/46xdfwquDOxlOXYxZ1xbSc05rj2SJ9VA9MW60
-         bbt11KrzTznfY9w6VylYJuMeZICtXJ00pSfbBWStZVu6Qw340H2NG3roldSZlfQbJ6rJ
-         iSAA==
+        bh=5TBvY2oyqcr2gNkpD6og3lmY61su8Z4ovOoReTCIYGo=;
+        b=VWkj5yLSIGc7Ipfh0w7NOws190udmoReo6YlmUf5utnEefAFaPj7PbjLdN6kql58Ez
+         JrlAedP60RnM1/blt3kVAmr51g7KaEqlO4K4X4NlK5DxKMXHyYGFSXagamQYdos83voG
+         tjKL7CrlPgEXykeqhbE8BPoY85d6jvBsQpTImIsrhpxeBrlj4iP/tjKj7Yl9lUEALxqL
+         jxRKrqVk5ylU02vyEk3aLs6XlVKrkxGOhpNsHwagYl3EMEXGzgjz5OZLOZbHOhFK1+Sm
+         yplehQFhzRxcNFM9LPUNSl9knsev1a05hoK2CnSxECHSXA51Zj5CcuRBwE3BTc60iur5
+         GRWg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761292648; x=1761897448;
+        d=1e100.net; s=20230601; t=1761292652; x=1761897452;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=G8zJ/5Y26gbXOt35jdXlLCdG2ABnFj5sLixstcA/A5M=;
-        b=pI50hMPyQRBb4yzVKILdXR5wzJNTyBFh04cN52DEisXM3ImqGICticZoeD+f4gkyJH
-         EKlnuRIAICwstr3Rud2uEpQjQairjAgWp1J7f3GSMc5SSeOLLzaNStHy3RNtv2UpsWe0
-         NirUgqg1obSv8SVCFKANkR7CHRqMX3yHLoneQolKxoe2NLrpbokLQrnOF/xYbCRmlrVI
-         RZ/oIGLvVrpT5RerMInps+TrSBo1yXBDE8jSZUbmxvLI7XytBJmxSicTjRYSKk9AHeZ5
-         mdVizoDDjkvfsbZmOs8aU8CTUzqQVb/4IuJyaT0EWMslYBlYwPcd+W7GxX5HnEM4wJdg
-         1VVA==
-X-Gm-Message-State: AOJu0YzfS3Ah/23QXNWs/hfx2MtTVaMac5gMVty06vCvZYoaT4BBhO/r
-	Uj6BxTVzRQ5Og1Ot5hhFE/c80I/1YqiS8o3Og8QGwwgS8pnjFZOM1P2w
-X-Gm-Gg: ASbGncvu8HSbyXc+bjmEIXAWeyPTCmNsDLz0mKIyYatH4AsDSJxTUew65aGdaib0SJV
-	BqF3AnFhUF1/aFV9tJQW7FG3dtJzRmafM3Lhhs4d2qJA+TFjHP6ByeFIK3g52TlC7ZtEGJcc615
-	CpXwxwp5+s80D2iT2+nxjLhq0R+cCdZqSZTbp/wwJnAjG8cRQacEX5Z9yzzFHWUuDlDzbCKvAhT
-	m6QSaBeZNjJbnUV++USAxN33KGe5bo1JUhwP8CUrMZ5bw9i/NrhgIE2Ia+Qd4Rv9ZieNn9bDXN9
-	9Dx5TfJ3jfUIOPwTpRL8Z7jed+TticmnFdMyk677+5zk9FaIF3FIwI+p496dw3uhn05G4fj3P5E
-	Onl634Y2Wjk8l+FOIrP63KN3PSURK3kcBN3SSwiyI7Ba6xCNj8QfvPbe8s9OUgWx0DCM/i0zNw0
-	Rz4lKUDOCFpmzucJU5PWRI
-X-Google-Smtp-Source: AGHT+IEGUSE5fx9yz1SLPanBG7uzkXswR8U0AQER9O6+SjsnnXCgIsesPRtPPm/9zhCI36iWczIw6g==
-X-Received: by 2002:a17:903:384c:b0:27e:d9a0:ba08 with SMTP id d9443c01a7336-290cb27dae5mr344257355ad.43.1761292648242;
-        Fri, 24 Oct 2025 00:57:28 -0700 (PDT)
+        bh=5TBvY2oyqcr2gNkpD6og3lmY61su8Z4ovOoReTCIYGo=;
+        b=SY2yh3TDOjrIHUSYrWPPaz3b/TPuVGokkbQn8gA4dpKi29lrALxoi5RI+GGIDdb/r2
+         N8RvukAy7w9T5ba5Px5unPlMUsKHLjRnmKkp3mYD8ANO8AChhwGZcmwkd0Tu86CLjRHj
+         cfuvB0EJZ6gVCJ8OXNskhqPAWPZCOE0u9Q9em2TK8ciwdS8tli7EROuCqFjhmGJf2vH4
+         SzAs7v0wuwBmk5qY6FnlpuvfcboQJbkEcmkN9JLzb9CCzroQoSr1GtIY9OKTgZRYa1ZN
+         cs1Xr5ny0aTCeZZZntrZUv0hLJxUEFyRqlNfKtdgsrVBUN2fa3Z4gZmM6CvZSjRmF2Im
+         zcqw==
+X-Gm-Message-State: AOJu0YxALtdE6HpVhbkiMC2zuVB027vedarODX4KXSBw35wp0aROVBII
+	73vCPaJyxGuAtvHsl6ZOLS0FThztHfIG7U8qY9xuL3wuCJp9VJlNhOit
+X-Gm-Gg: ASbGncs0NTKlWvW2j05gN2ogNtaWAQjpx5aIDffMhOvxEoXfa7tm3xj/5LnH3wxIw3g
+	z+jRwUq/9gRSFnHzNZazZWj27qrexoZ0vx8yYi44zIeKsSxtcJj8rkrDKJLWJAZdBXRJgK6WX3z
+	vH6qFZYtD7uxxovqvoSSO/HxAWx5k6c+DxP+hbb8KqG4JG3vlszfo4kticIFq6XgSDY1k1xZ7Bk
+	MY+hu+0v/zRz2ZJFi88lSjQTFYPgotCJowFrHMi2KAyxbRduOJnM/pQHvlvLNywbV6kiswiG96F
+	mpdoSfNd15TSO1t3rFUx+syaTKfLVvB5FmVMkh2DKBXLHKwbWpq6x+5Ep95mUPj5fHC6s0Dm8JR
+	uhWicS2bONtan/nZjuOPoLgLttecmKnUuHdg+aUejFKm162H4lmjnD8w7c0t3Y3cQLxOuGCrxQa
+	aY6H5PGDrgUk0KQJQfk9K8
+X-Google-Smtp-Source: AGHT+IHZEWd+WfHYJKNtSpssWxDvxeK3oK6rSiNGaRDKTZSQMyFDu/hsiCkgZP90gC/bvz+hzi0gsw==
+X-Received: by 2002:a17:902:d4c8:b0:27e:e96a:4c3 with SMTP id d9443c01a7336-290d14e83b6mr355043595ad.14.1761292652244;
+        Fri, 24 Oct 2025 00:57:32 -0700 (PDT)
 Received: from Black-Pearl.localdomain ([27.7.191.116])
-        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-2946dfd045esm46608205ad.64.2025.10.24.00.57.24
+        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-2946dfd045esm46608205ad.64.2025.10.24.00.57.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Oct 2025 00:57:27 -0700 (PDT)
+        Fri, 24 Oct 2025 00:57:31 -0700 (PDT)
 From: Charan Pedumuru <charan.pedumuru@gmail.com>
-Date: Fri, 24 Oct 2025 07:57:09 +0000
-Subject: [PATCH v5 2/3] arm: dts: ti: omap: Drop unnecessary properties for
- SDHCI node
+Date: Fri, 24 Oct 2025 07:57:10 +0000
+Subject: [PATCH v5 3/3] dt-bindings: mmc: ti,omap2430-sdhci: convert to DT
+ schema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -70,7 +70,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20251024-ti-sdhci-omap-v5-2-df5f6f033a38@gmail.com>
+Message-Id: <20251024-ti-sdhci-omap-v5-3-df5f6f033a38@gmail.com>
 References: <20251024-ti-sdhci-omap-v5-0-df5f6f033a38@gmail.com>
 In-Reply-To: <20251024-ti-sdhci-omap-v5-0-df5f6f033a38@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
@@ -83,129 +83,252 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  Charan Pedumuru <charan.pedumuru@gmail.com>
 X-Mailer: b4 0.14.3
 
-Remove the "ti,needs-special-reset", "ti,needs-special-hs-handling", and
-"cap-mmc-dual-data-rate" properties from the DTS for the sdhci nodes,
-as the sdhci-omap driver does not depend on these properties.
+Convert TI OMAP SDHCI Controller binding to YAML format.
+Changes during Conversion:
+- Define new properties like "clocks", "clock-names",
+  "pbias-supply" and "power-domains" to resolve dtb_check errors.
+- Remove "pinctrl-names" and "pinctrl-<n>"
+  from required as they are not necessary for all DTS files.
+- Remove "ti,hwmods" property entirely from the YAML as the
+  DTS doesn't contain this property for the given compatibles and the
+  text binding is misleading.
+- Add "clocks", "clock-names" and "max-frequency" to the required
+  properties based on the compatible and the text binding doesn't mention
+  these properties as required.
+- Add missing strings like "default-rev11", "sdr12-rev11", "sdr25-rev11",
+  "hs-rev11", "sdr25-rev11" and "sleep" to pinctrl-names string array
+  to resolve errors detected by dtb_check.
 
 Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
 ---
- arch/arm/boot/dts/ti/omap/am335x-sancloud-bbe-extended-wifi.dts | 1 -
- arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi                        | 2 --
- arch/arm/boot/dts/ti/omap/am33xx.dtsi                           | 1 -
- arch/arm/boot/dts/ti/omap/am4372.dtsi                           | 1 -
- arch/arm/boot/dts/ti/omap/am437x-l4.dtsi                        | 2 --
- arch/arm/boot/dts/ti/omap/am5729-beagleboneai.dts               | 2 --
- arch/arm/boot/dts/ti/omap/am57xx-cl-som-am57x.dts               | 1 -
- 7 files changed, 10 deletions(-)
+ .../devicetree/bindings/mmc/sdhci-omap.txt         |  43 ------
+ .../devicetree/bindings/mmc/ti,omap2430-sdhci.yaml | 169 +++++++++++++++++++++
+ 2 files changed, 169 insertions(+), 43 deletions(-)
 
-diff --git a/arch/arm/boot/dts/ti/omap/am335x-sancloud-bbe-extended-wifi.dts b/arch/arm/boot/dts/ti/omap/am335x-sancloud-bbe-extended-wifi.dts
-index 7c9f65126c63..8b47f45a9959 100644
---- a/arch/arm/boot/dts/ti/omap/am335x-sancloud-bbe-extended-wifi.dts
-+++ b/arch/arm/boot/dts/ti/omap/am335x-sancloud-bbe-extended-wifi.dts
-@@ -87,7 +87,6 @@ &mmc3 {
- 	bus-width = <4>;
- 	non-removable;
- 	cap-power-off-card;
--	ti,needs-special-hs-handling;
- 	keep-power-in-suspend;
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&mmc3_pins>;
-diff --git a/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi b/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi
-index d6a143abae5f..39278667a5a4 100644
---- a/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi
-+++ b/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi
-@@ -1501,7 +1501,6 @@ SYSC_OMAP2_SOFTRESET |
- 
- 			mmc1: mmc@0 {
- 				compatible = "ti,am335-sdhci";
--				ti,needs-special-reset;
- 				dmas = <&edma 24 0>, <&edma 25 0>;
- 				dma-names = "tx", "rx";
- 				interrupts = <64>;
-@@ -1987,7 +1986,6 @@ SYSC_OMAP2_SOFTRESET |
- 
- 			mmc2: mmc@0 {
- 				compatible = "ti,am335-sdhci";
--				ti,needs-special-reset;
- 				dmas = <&edma 2 0
- 					&edma 3 0>;
- 				dma-names = "tx", "rx";
-diff --git a/arch/arm/boot/dts/ti/omap/am33xx.dtsi b/arch/arm/boot/dts/ti/omap/am33xx.dtsi
-index 0614ffdc1578..f35f6b56e8f5 100644
---- a/arch/arm/boot/dts/ti/omap/am33xx.dtsi
-+++ b/arch/arm/boot/dts/ti/omap/am33xx.dtsi
-@@ -338,7 +338,6 @@ SYSC_OMAP2_SOFTRESET |
- 
- 			mmc3: mmc@0 {
- 				compatible = "ti,am335-sdhci";
--				ti,needs-special-reset;
- 				interrupts = <29>;
- 				reg = <0x0 0x1000>;
- 				status = "disabled";
-diff --git a/arch/arm/boot/dts/ti/omap/am4372.dtsi b/arch/arm/boot/dts/ti/omap/am4372.dtsi
-index 0a1df30f2818..504fa6b57d39 100644
---- a/arch/arm/boot/dts/ti/omap/am4372.dtsi
-+++ b/arch/arm/boot/dts/ti/omap/am4372.dtsi
-@@ -321,7 +321,6 @@ SYSC_OMAP2_SOFTRESET |
- 
- 			mmc3: mmc@0 {
- 				compatible = "ti,am437-sdhci";
--				ti,needs-special-reset;
- 				interrupts = <GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>;
- 				reg = <0x0 0x1000>;
- 				status = "disabled";
-diff --git a/arch/arm/boot/dts/ti/omap/am437x-l4.dtsi b/arch/arm/boot/dts/ti/omap/am437x-l4.dtsi
-index fd4634f8c629..e08f356e71cb 100644
---- a/arch/arm/boot/dts/ti/omap/am437x-l4.dtsi
-+++ b/arch/arm/boot/dts/ti/omap/am437x-l4.dtsi
-@@ -1103,7 +1103,6 @@ SYSC_OMAP2_SOFTRESET |
- 			mmc1: mmc@0 {
- 				compatible = "ti,am437-sdhci";
- 				reg = <0x0 0x1000>;
--				ti,needs-special-reset;
- 				dmas = <&edma 24 0>,
- 					<&edma 25 0>;
- 				dma-names = "tx", "rx";
-@@ -1620,7 +1619,6 @@ SYSC_OMAP2_SOFTRESET |
- 			mmc2: mmc@0 {
- 				compatible = "ti,am437-sdhci";
- 				reg = <0x0 0x1000>;
--				ti,needs-special-reset;
- 				dmas = <&edma 2 0>,
- 					<&edma 3 0>;
- 				dma-names = "tx", "rx";
-diff --git a/arch/arm/boot/dts/ti/omap/am5729-beagleboneai.dts b/arch/arm/boot/dts/ti/omap/am5729-beagleboneai.dts
-index e6a18954e449..43cf4ade950b 100644
---- a/arch/arm/boot/dts/ti/omap/am5729-beagleboneai.dts
-+++ b/arch/arm/boot/dts/ti/omap/am5729-beagleboneai.dts
-@@ -545,7 +545,6 @@ &mmc2 {
- 	non-removable;
- 	mmc-pwrseq = <&emmc_pwrseq>;
- 
--	ti,needs-special-reset;
- 	dmas = <&sdma_xbar 47>, <&sdma_xbar 48>;
- 	dma-names = "tx", "rx";
- 
-@@ -561,7 +560,6 @@ &mmc4 {
- 	/* DDR50: DDR up to 50 MHz (1.8 V signaling). */
- 	status = "okay";
- 
--	ti,needs-special-reset;
- 	vmmc-supply = <&vdd_3v3>;
- 	cap-power-off-card;
- 	keep-power-in-suspend;
-diff --git a/arch/arm/boot/dts/ti/omap/am57xx-cl-som-am57x.dts b/arch/arm/boot/dts/ti/omap/am57xx-cl-som-am57x.dts
-index 3dd898955e76..77c9fbb3bfbd 100644
---- a/arch/arm/boot/dts/ti/omap/am57xx-cl-som-am57x.dts
-+++ b/arch/arm/boot/dts/ti/omap/am57xx-cl-som-am57x.dts
-@@ -481,7 +481,6 @@ &mmc2 {
- 	vmmc-supply = <&vdd_3v3>;
- 	bus-width = <8>;
- 	ti,non-removable;
--	cap-mmc-dual-data-rate;
- };
- 
- &qspi {
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+deleted file mode 100644
+index f91e341e6b36..000000000000
+--- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
++++ /dev/null
+@@ -1,43 +0,0 @@
+-* TI OMAP SDHCI Controller
+-
+-Refer to mmc.txt for standard MMC bindings.
+-
+-For UHS devices which require tuning, the device tree should have a "cpu_thermal" node which maps to the appropriate thermal zone. This is used to get the temperature of the zone during tuning.
+-
+-Required properties:
+-- compatible: Should be "ti,omap2430-sdhci" for omap2430 controllers
+-	      Should be "ti,omap3-sdhci" for omap3 controllers
+-	      Should be "ti,omap4-sdhci" for omap4 and ti81 controllers
+-	      Should be "ti,omap5-sdhci" for omap5 controllers
+-	      Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
+-	      Should be "ti,k2g-sdhci" for K2G
+-	      Should be "ti,am335-sdhci" for am335x controllers
+-	      Should be "ti,am437-sdhci" for am437x controllers
+-- ti,hwmods: Must be "mmc<n>", <n> is controller instance starting 1
+-	     (Not required for K2G).
+-- pinctrl-names: Should be subset of "default", "hs", "sdr12", "sdr25", "sdr50",
+-		 "ddr50-rev11", "sdr104-rev11", "ddr50", "sdr104",
+-		 "ddr_1_8v-rev11", "ddr_1_8v" or "ddr_3_3v", "hs200_1_8v-rev11",
+-		 "hs200_1_8v",
+-- pinctrl-<n> : Pinctrl states as described in bindings/pinctrl/pinctrl-bindings.txt
+-
+-Optional properties:
+-- dmas:		List of DMA specifiers with the controller specific format as described
+-		in the generic DMA client binding. A tx and rx specifier is required.
+-- dma-names:	List of DMA request names. These strings correspond 1:1 with the
+-		DMA specifiers listed in dmas. The string naming is to be "tx"
+-		and "rx" for TX and RX DMA requests, respectively.
+-
+-Deprecated properties:
+-- ti,non-removable: Compatible with the generic non-removable property
+-
+-Example:
+-	mmc1: mmc@4809c000 {
+-		compatible = "ti,dra7-sdhci";
+-		reg = <0x4809c000 0x400>;
+-		ti,hwmods = "mmc1";
+-		bus-width = <4>;
+-		vmmc-supply = <&vmmc>; /* phandle to regulator node */
+-		dmas = <&sdma 61 &sdma 62>;
+-		dma-names = "tx", "rx";
+-	};
+diff --git a/Documentation/devicetree/bindings/mmc/ti,omap2430-sdhci.yaml b/Documentation/devicetree/bindings/mmc/ti,omap2430-sdhci.yaml
+new file mode 100644
+index 000000000000..34e288f3ef13
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/ti,omap2430-sdhci.yaml
+@@ -0,0 +1,169 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/ti,omap2430-sdhci.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: TI OMAP SDHCI Controller
++
++maintainers:
++  - Kishon Vijay Abraham I <kishon@ti.com>
++
++description:
++  For UHS devices which require tuning, the device tree should have a
++  cpu_thermal node which maps to the appropriate thermal zone. This
++  is used to get the temperature of the zone during tuning.
++
++properties:
++  compatible:
++    enum:
++      - ti,omap2430-sdhci
++      - ti,omap3-sdhci
++      - ti,omap4-sdhci
++      - ti,omap5-sdhci
++      - ti,dra7-sdhci
++      - ti,k2g-sdhci
++      - ti,am335-sdhci
++      - ti,am437-sdhci
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 2
++
++  clock-names:
++    items:
++      - const: fck
++      - const: mmchsdb_fck
++
++  dmas:
++    maxItems: 2
++
++  dma-names:
++    items:
++      - const: tx
++      - const: rx
++
++  pinctrl-names:
++    minItems: 1
++    maxItems: 14
++    items:
++      enum:
++        - default
++        - default-rev11
++        - hs
++        - sdr12
++        - sdr12-rev11
++        - sdr25
++        - sdr25-rev11
++        - sdr50
++        - ddr50-rev11
++        - sdr104-rev11
++        - ddr50
++        - sdr104
++        - ddr_1_8v-rev11
++        - ddr_1_8v
++        - ddr_3_3v
++        - hs-rev11
++        - hs200_1_8v-rev11
++        - hs200_1_8v
++        - sleep
++
++  pinctrl-0:
++    maxItems: 1
++
++  pinctrl-1:
++    maxItems: 1
++
++  pinctrl-2:
++    maxItems: 1
++
++  pinctrl-3:
++    maxItems: 1
++
++  pinctrl-4:
++    maxItems: 1
++
++  pinctrl-5:
++    maxItems: 1
++
++  pinctrl-6:
++    maxItems: 1
++
++  pinctrl-7:
++    maxItems: 1
++
++  pinctrl-8:
++    maxItems: 1
++
++  power-domains:
++    maxItems: 1
++
++  pbias-supply:
++    description:
++      It is used to specify the voltage regulator that provides the bias
++      voltage for certain analog or I/O pads.
++
++  ti,non-removable:
++    description:
++      It indicates that a component is not meant to be easily removed or
++      replaced by the user, such as an embedded battery or a non-removable
++      storage slot like eMMC.
++    type: boolean
++    deprecated: true
++
++  clock-frequency:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description:
++      It represents the speed at which a clock signal associated with a device
++      or bus operates, measured in Hertz (Hz). This value is crucial for configuring
++      hardware components that require a specific clock speed.
++
++required:
++  - compatible
++  - reg
++  - interrupts
++
++allOf:
++  - $ref: sdhci-common.yaml#
++  - if:
++      properties:
++        compatible:
++          contains:
++            enum:
++              - ti,dra7-sdhci
++              - ti,k2g-sdhci
++    then:
++      required:
++        - max-frequency
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: ti,k2g-sdhci
++    then:
++      required:
++        - clocks
++        - clock-names
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++    mmc@4809c000 {
++        compatible = "ti,dra7-sdhci";
++        reg = <0x4809c000 0x400>;
++        interrupts = <GIC_SPI 64 IRQ_TYPE_LEVEL_HIGH>;
++        max-frequency = <192000000>;
++        sdhci-caps-mask = <0x0 0x400000>;
++        bus-width = <4>;
++        vmmc-supply = <&vmmc>; /* phandle to regulator node */
++        dmas = <&sdma 61>, <&sdma 62>;
++        dma-names = "tx", "rx";
++    };
++...
 
 -- 
 2.51.1
