@@ -1,67 +1,60 @@
-Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FCE12FBE01;
-	Mon, 27 Oct 2025 12:22:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761567739; cv=pass; b=TA9r7Vpu6AWhAZ9pq6VPu72BB6aR2cRlNrMfjDdwbunvFxdirbuovo26kRA4/ollcjssL/PA47tajapzw3t5YHlWtgJ27dlJVE7EPzpJsM38qmdh3Z4EG/PoLVMwkINVhTj06d564YmN76s9EmpHPkJ7io9NUUvFF1NK/sp9Qk8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761567739; c=relaxed/simple;
-	bh=fcotC1b6A2/LrvzLBc7zjE2lH146EvlS4iCMh/bfYp8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=K3eDXkOm+efbh6C3KwytIISKMQORkhmrj03irda9BSBOvsmsE+BMTrDgrHI7c2EuryHHkqBZ9w591JfyaOGaQxpY0ijlrhpYwSkQFYgiPna/iuxi7RT/VjOHrxAASLqFrAImIoCWOy6ZedyG5jZL/IsTw3mU9BsqJVZgvU8ZeXk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=kDy9KX24; arc=pass smtp.client-ip=136.143.188.112
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE1C52580FB;
+	Mon, 27 Oct 2025 13:10:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1761570650; cv=none; b=LsK+cgWdtUGecXGuicSS+ThwXZgbkxgYcSQvHxHfZtkZdAB16hNZvQx2pVSh7XwCK0Cj5C0HUPO6pC+n8okPJ7EsLGu3ijnzQy7Y1DIglVVCNWChqh8UpPYxLreUccaGk12D7QTtZz7g8nnVNCJtegTEcuUr8oLxq7RU3XZuLh4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1761570650; c=relaxed/simple;
+	bh=f9IEcVfP2kRCqxut50nXsL8UsN+mLFg9FFXWZh9r9Ac=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Udun/wBOZ9FTxbgjnQleYxRCcaQZZZsixj1s+WqlbaViaYhB9YMBEtJ8XiSuYhFIMfRTU/LuF+rjZSJT80pe6S3/D5csRusvmh1H82vWtjyq3953ig3Z0+fT1evet4e6WiCeCy7Bi+pH32boWWBP0igLt7x0XiEQF7X/UMhDvfo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=f097X8kx; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="kDy9KX24"
-ARC-Seal: i=1; a=rsa-sha256; t=1761567688; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=B37m3tRXg9231oauumFgq3IS919cZOBg5SjkoJsfAAEv3xg7NZzheR2/o1Z6DWXuET3Phh+B65kMnrMCibaDLL47gqWercUuzNjDdQ/QEDk4PDMfokyzUxleEz3k8oEQQE8eM/LGA6cXBQj3Z5m2bCDyEdLFNH72QNvwSyqfTHs=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1761567688; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=JzOl43h72qIg903VcLgPPqEaQOxJyebUM6Y8SFlK3FI=; 
-	b=PHxByQ8byaqaWcg7cDcy7ZXDXysm3SbInlN64ODpr8FHXGPi7kW3HXHt+zOniUMSCoQtu7DUByVBCUDCbhdmo00hUk8zNn6A7YdjO/9J7MEh1bEETNOogOlizsXIBRbcRpyX3gSWzK3sSO0p/n4fuKKbZFBpqUY9Cjzvie0NDxU=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
-	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1761567688;
-	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
-	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
-	bh=JzOl43h72qIg903VcLgPPqEaQOxJyebUM6Y8SFlK3FI=;
-	b=kDy9KX2417EVcr5ZvR/y8uZmt2IgIbpSIydVjZEiNT4mUYn+LTARqHpo2PI9/c+O
-	XrqA+KwqLPKUa7++D+dlwBTP8fipyA2OMRQQKoikyQmHtIagGSU4zKzvjDMhQPiCI7W
-	A4THQcscyFyTp2lEGrAOYogNvIgC0YM8dyTtux88=
-Received: by mx.zohomail.com with SMTPS id 1761567685152749.0643459384486;
-	Mon, 27 Oct 2025 05:21:25 -0700 (PDT)
-From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-To: Linus Torvalds <torvalds@linux-foundation.org>,
- Linus Walleij <linus.walleij@linaro.org>, Sandy Huang <hjc@rock-chips.com>,
- Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>,
- Andy Yan <andy.yan@rock-chips.com>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Shreeya Patel <shreeya.patel@collabora.com>,
- Mauro Carvalho Chehab <mchehab@kernel.org>,
- Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Nicolas Frattaroli <frattaroli.nicolas@gmail.com>,
- Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>,
- Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
- "Yury Norov (NVIDIA)" <yury.norov@gmail.com>,
- dri-devel@lists.freedesktop.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-media@vger.kernel.org, kernel@collabora.com, linux-mmc@vger.kernel.org,
- linux-sound@vger.kernel.org, "Yury Norov (NVIDIA)" <yury.norov@gmail.com>
-Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="f097X8kx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B4C89C4CEF1;
+	Mon, 27 Oct 2025 13:10:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1761570649;
+	bh=f9IEcVfP2kRCqxut50nXsL8UsN+mLFg9FFXWZh9r9Ac=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=f097X8kxQ29rBIOYCXwgi0kQSgxeowPnkNwptbuTFkWy5FIvO+TtOaiMB3B0MSjpY
+	 sjORIp3f0qoAe+JsuojLKEnx6JO+n/Nr1ZOFOufKlh/hEzgFjapssLK65EGCDPx4vo
+	 VHi4eN8IRC8f+9Sn6Ef3m7aKs3wtxMkE/CrrCu2+iLqmjZR3cmYOX0tb9SPDXQDgW7
+	 NPItTTT8vcyYhsn4qqKB8sA+l2khRCMBP0SzIHokzipz6fN/09xyFJIPd9BbCh1+XV
+	 DIP9JNlraKIPn3wI42gEnOq279jGDTGK7/etbVSzdmpjmiazpTWI+8y3Z8Yvm1N5/R
+	 a+fsXXfRX6NdQ==
+Date: Mon, 27 Oct 2025 13:10:40 +0000
+From: Mark Brown <broonie@kernel.org>
+To: "Yury Norov (NVIDIA)" <yury.norov@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	Nicolas Frattaroli <nicolas.frattaroli@collabora.com>,
+	Sandy Huang <hjc@rock-chips.com>,
+	Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>,
+	Andy Yan <andy.yan@rock-chips.com>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+	Shreeya Patel <shreeya.patel@collabora.com>,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Nicolas Frattaroli <frattaroli.nicolas@gmail.com>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
+	dri-devel@lists.freedesktop.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+	linux-media@vger.kernel.org, kernel@collabora.com,
+	linux-mmc@vger.kernel.org, linux-sound@vger.kernel.org,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>
 Subject: Re: [PATCH 11/21] drivers: don't use GENMASK() in FIELD_PREP_WM16()
-Date: Mon, 27 Oct 2025 13:21:15 +0100
-Message-ID: <2824034.mvXUDI8C0e@workhorse>
-In-Reply-To: <20251025164023.308884-12-yury.norov@gmail.com>
-References:
- <20251025164023.308884-1-yury.norov@gmail.com>
+Message-ID: <432db4d2-1f36-4531-b0b3-2a06ae682fd1@sirena.org.uk>
+References: <20251025164023.308884-1-yury.norov@gmail.com>
  <20251025164023.308884-12-yury.norov@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -69,17 +62,32 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="tcUV2s8VfPxXlH7h"
+Content-Disposition: inline
+In-Reply-To: <20251025164023.308884-12-yury.norov@gmail.com>
+X-Cookie: How do I get HOME?
 
-On Saturday, 25 October 2025 18:40:10 Central European Standard Time Yury Norov (NVIDIA) wrote:
+
+--tcUV2s8VfPxXlH7h
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Sat, Oct 25, 2025 at 12:40:10PM -0400, Yury Norov (NVIDIA) wrote:
+
 > Recently added FIELD_PREP_WM16() in a few places uses GENMASK. It's
 > confusing and may mislead readers. Switch to BITS() or FIRST_BITS()
 > as appropriate.
-> 
-> Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
-> Link: https://lore.kernel.org/all/CAHk-=whoOUsqPKb7OQwhQf9H_3=5sXGPJrDbfQfwLB3Bi13tcQ@mail.gmail.com/
-> Signed-off-by: Yury Norov (NVIDIA) <yury.norov@gmail.com>
+
+This doesn't seem to line up with the actual change, you're not altering
+FIELD_PREP_WM16() at all but rather altering things that use it.
+
+As mentioned in submitting-patches.rst when submitting a patch series
+you should supply a cover letter for that patch series which describes
+the overall content of the series.  This helps people understand what
+they are looking at and how things fit together.
+
 > ---
 >  drivers/gpu/drm/rockchip/rockchip_lvds.h             | 2 +-
 >  drivers/gpu/drm/rockchip/rockchip_vop2_reg.c         | 4 ++--
@@ -88,112 +96,39 @@ On Saturday, 25 October 2025 18:40:10 Central European Standard Time Yury Norov 
 >  drivers/soc/rockchip/grf.c                           | 4 ++--
 >  sound/soc/rockchip/rockchip_i2s_tdm.h                | 2 +-
 >  6 files changed, 10 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/gpu/drm/rockchip/rockchip_lvds.h b/drivers/gpu/drm/rockchip/rockchip_lvds.h
-> index 2d92447d819b..e79e6031be59 100644
-> --- a/drivers/gpu/drm/rockchip/rockchip_lvds.h
-> +++ b/drivers/gpu/drm/rockchip/rockchip_lvds.h
-> @@ -115,7 +115,7 @@
->  #define   PX30_LVDS_INVERT_DCLK(val)		FIELD_PREP_WM16(BIT(5), (val))
->  
->  #define PX30_LVDS_GRF_PD_VO_CON1		0x438
-> -#define   PX30_LVDS_FORMAT(val)			FIELD_PREP_WM16(GENMASK(14, 13), (val))
-> +#define   PX30_LVDS_FORMAT(val)			FIELD_PREP_WM16(BITS(13, 14), (val))
->  #define   PX30_LVDS_MODE_EN(val)		FIELD_PREP_WM16(BIT(12), (val))
->  #define   PX30_LVDS_MSBSEL(val)			FIELD_PREP_WM16(BIT(11), (val))
->  #define   PX30_LVDS_P2S_EN(val)			FIELD_PREP_WM16(BIT(6), (val))
-> diff --git a/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c b/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
-> index 38c49030c7ab..438fea5f6f6d 100644
-> --- a/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
-> +++ b/drivers/gpu/drm/rockchip/rockchip_vop2_reg.c
-> @@ -1698,7 +1698,7 @@ static unsigned long rk3588_set_intf_mux(struct vop2_video_port *vp, int id, u32
->  		val = rk3588_get_hdmi_pol(polflags);
->  		regmap_write(vop2->vop_grf, RK3588_GRF_VOP_CON2, FIELD_PREP_WM16(BIT(1), 1));
->  		regmap_write(vop2->vo1_grf, RK3588_GRF_VO1_CON0,
-> -			     FIELD_PREP_WM16(GENMASK(6, 5), val));
-> +			     FIELD_PREP_WM16(BITS(5, 6), val));
->  		break;
->  	case ROCKCHIP_VOP2_EP_HDMI1:
->  		div &= ~RK3588_DSP_IF_EDP_HDMI1_DCLK_DIV;
-> @@ -1711,7 +1711,7 @@ static unsigned long rk3588_set_intf_mux(struct vop2_video_port *vp, int id, u32
->  		val = rk3588_get_hdmi_pol(polflags);
->  		regmap_write(vop2->vop_grf, RK3588_GRF_VOP_CON2, FIELD_PREP_WM16(BIT(4), 1));
->  		regmap_write(vop2->vo1_grf, RK3588_GRF_VO1_CON0,
-> -			     FIELD_PREP_WM16(GENMASK(8, 7), val));
-> +			     FIELD_PREP_WM16(BITS(7, 8), val));
->  		break;
->  	case ROCKCHIP_VOP2_EP_EDP0:
->  		div &= ~RK3588_DSP_IF_EDP_HDMI0_DCLK_DIV;
-> diff --git a/drivers/media/platform/synopsys/hdmirx/snps_hdmirx.h b/drivers/media/platform/synopsys/hdmirx/snps_hdmirx.h
-> index b13f58e31944..14df3f53ff8f 100644
-> --- a/drivers/media/platform/synopsys/hdmirx/snps_hdmirx.h
-> +++ b/drivers/media/platform/synopsys/hdmirx/snps_hdmirx.h
-> @@ -12,8 +12,8 @@
->  #include <linux/bitops.h>
->  #include <linux/hw_bitfield.h>
->  
-> -#define UPDATE(x, h, l)		FIELD_PREP(GENMASK((h), (l)), (x))
-> -#define HIWORD_UPDATE(v, h, l)	FIELD_PREP_WM16(GENMASK((h), (l)), (v))
-> +#define UPDATE(x, h, l)		FIELD_PREP(BITS((l), (h)), (x))
-> +#define HIWORD_UPDATE(v, h, l)	FIELD_PREP_WM16(BITS((l), (h)), (v))
->  
->  /* SYS_GRF */
->  #define SYS_GRF_SOC_CON1			0x0304
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 82dd906bb002..7fac1a7281bf 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -148,10 +148,10 @@ static int rockchip_mmc_set_internal_phase(struct dw_mci *host, bool sample, int
->  
->  	if (sample)
->  		mci_writel(host, TIMING_CON1,
-> -			   FIELD_PREP_WM16(GENMASK(11, 1), raw_value));
-> +			   FIELD_PREP_WM16(BITS(1, 11), raw_value));
->  	else
->  		mci_writel(host, TIMING_CON0,
-> -			   FIELD_PREP_WM16(GENMASK(11, 1), raw_value));
-> +			   FIELD_PREP_WM16(BITS(1, 11), raw_value));
->  
->  	dev_dbg(host->dev, "set %s_phase(%d) delay_nums=%u actual_degrees=%d\n",
->  		sample ? "sample" : "drv", degrees, delay_num,
-> diff --git a/drivers/soc/rockchip/grf.c b/drivers/soc/rockchip/grf.c
-> index 344870da7675..89fd4a4c69eb 100644
-> --- a/drivers/soc/rockchip/grf.c
-> +++ b/drivers/soc/rockchip/grf.c
-> @@ -125,8 +125,8 @@ static const struct rockchip_grf_info rk3566_pipegrf __initconst = {
->  #define RK3576_SYSGRF_SOC_CON1		0x0004
->  
->  static const struct rockchip_grf_value rk3576_defaults_sys_grf[] __initconst = {
-> -	{ "i3c0 weakpull", RK3576_SYSGRF_SOC_CON1, FIELD_PREP_WM16_CONST(GENMASK(7, 6), 3) },
-> -	{ "i3c1 weakpull", RK3576_SYSGRF_SOC_CON1, FIELD_PREP_WM16_CONST(GENMASK(9, 8), 3) },
-> +	{ "i3c0 weakpull", RK3576_SYSGRF_SOC_CON1, FIELD_PREP_WM16_CONST(BITS(6, 7), 3) },
-> +	{ "i3c1 weakpull", RK3576_SYSGRF_SOC_CON1, FIELD_PREP_WM16_CONST(BITS(8, 9), 3) },
->  };
->  
->  static const struct rockchip_grf_info rk3576_sysgrf __initconst = {
-> diff --git a/sound/soc/rockchip/rockchip_i2s_tdm.h b/sound/soc/rockchip/rockchip_i2s_tdm.h
-> index 0171e05ee886..eee6db372ee7 100644
+
+It doesn't help to send changes to unrelated subsystems in one patch
+either...
+
 > --- a/sound/soc/rockchip/rockchip_i2s_tdm.h
 > +++ b/sound/soc/rockchip/rockchip_i2s_tdm.h
 > @@ -287,7 +287,7 @@ enum {
 >  #define I2S_TDM_RXCR	(0x0034)
 >  #define I2S_CLKDIV	(0x0038)
->  
-> -#define HIWORD_UPDATE(v, h, l)	(FIELD_PREP_WM16_CONST(GENMASK((h), (l)), (v)))
-> +#define HIWORD_UPDATE(v, h, l)	(FIELD_PREP_WM16_CONST(BITS((l), (h)), (v)))
->  
->  /* PX30 GRF CONFIGS */
->  #define PX30_I2S0_CLK_IN_SRC_FROM_TX		HIWORD_UPDATE(1, 13, 12)
-> 
+> =20
+> -#define HIWORD_UPDATE(v, h, l)	(FIELD_PREP_WM16_CONST(GENMASK((h), (l)),=
+ (v)))
+> +#define HIWORD_UPDATE(v, h, l)	(FIELD_PREP_WM16_CONST(BITS((l), (h)), (v=
+)))
 
-Reviewed-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+This is adjusting the implementation of something that takes in h, l to
+use l, h which if anything seems likely to introduce confusion, and
+definitely feels well into bikeshed territory.  I don't *super* care but
+I'm having a hard time seeing the benefit.
 
-I made sure there were no accidental changes introduced by the
-swapping of values, so in terms of correctness, this appears
-all good to me.
+--tcUV2s8VfPxXlH7h
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Kind regards,
-Nicolas Frattaroli
+-----BEGIN PGP SIGNATURE-----
 
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmj/b08ACgkQJNaLcl1U
+h9BrOgf/WZesOvGZkIjzC0cgXcITxYU+d0wJLcf0GA0ADyZjEl0v5GWiIXwSKFZ2
+96/4KlYfP+QnWypd7OPgmCe0w8QeJJAea7lmFwnE8sqRkjyYikoRC318PN1ywNB1
+Pyuh/mtAE5cQ+9UzI7j4nKoW3MTx2p2/bulGH1TQs5DyOO9iQK1jeaVwrD3k+ZdI
+mEER+xUO2NH09agCTqrQQONeRG9S0Sfs/PstH4X744VpErUsWyuYu794BxrtC8Un
+U18ljABlmQfvRVjCV9pDq73C4qwAqAlpsW/X+bTBa0JmLo/1n84hOjdI7Fobo6Kw
+cyxDW3840JcPzrlIo2WKdbrXXVH/xw==
+=OWcQ
+-----END PGP SIGNATURE-----
 
-
+--tcUV2s8VfPxXlH7h--
