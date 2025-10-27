@@ -1,134 +1,73 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE1C52580FB;
-	Mon, 27 Oct 2025 13:10:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73B5C1C3F0C;
+	Mon, 27 Oct 2025 13:45:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761570650; cv=none; b=LsK+cgWdtUGecXGuicSS+ThwXZgbkxgYcSQvHxHfZtkZdAB16hNZvQx2pVSh7XwCK0Cj5C0HUPO6pC+n8okPJ7EsLGu3ijnzQy7Y1DIglVVCNWChqh8UpPYxLreUccaGk12D7QTtZz7g8nnVNCJtegTEcuUr8oLxq7RU3XZuLh4=
+	t=1761572717; cv=none; b=XehqhsFtRW6FgoAfndxYaNgM2Luqowly0FVXxw5R27/A3Y0eWre3EIyHEi8Vap/MRjvKYXnKIUTObkaMyn2a5bDk0tNW669DJ0z7Bd5lF6LVRe74cQpFgGGgQKQWTtbW/PbqmazaXxOaPxMytrIqWt9ioblI2nOB2/ta4DG5UUw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761570650; c=relaxed/simple;
-	bh=f9IEcVfP2kRCqxut50nXsL8UsN+mLFg9FFXWZh9r9Ac=;
+	s=arc-20240116; t=1761572717; c=relaxed/simple;
+	bh=ZefZPxlvHHfA6SOviuZmeM9TORsIaavGiKKEyD0zNuI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Udun/wBOZ9FTxbgjnQleYxRCcaQZZZsixj1s+WqlbaViaYhB9YMBEtJ8XiSuYhFIMfRTU/LuF+rjZSJT80pe6S3/D5csRusvmh1H82vWtjyq3953ig3Z0+fT1evet4e6WiCeCy7Bi+pH32boWWBP0igLt7x0XiEQF7X/UMhDvfo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=f097X8kx; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=rnjQFFxIVhK2Y0lT6EltjGpQViBrVKOm3HQso8spDRac44YvYacFY7/lNo4fK0fmgrE8piUs4QQqrdCOXTXf7q42S2M3ZvIl+tqBsi+QVVbPdIwkSKLIP3x4ZYIS0gugGNDlDeWrreeaKDUjQH/17KSE7yekEhFAa42NjDNCkpw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cJThxuyr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="f097X8kx"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B4C89C4CEF1;
-	Mon, 27 Oct 2025 13:10:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cJThxuyr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B522FC4CEF1;
+	Mon, 27 Oct 2025 13:45:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1761570649;
-	bh=f9IEcVfP2kRCqxut50nXsL8UsN+mLFg9FFXWZh9r9Ac=;
+	s=k20201202; t=1761572717;
+	bh=ZefZPxlvHHfA6SOviuZmeM9TORsIaavGiKKEyD0zNuI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=f097X8kxQ29rBIOYCXwgi0kQSgxeowPnkNwptbuTFkWy5FIvO+TtOaiMB3B0MSjpY
-	 sjORIp3f0qoAe+JsuojLKEnx6JO+n/Nr1ZOFOufKlh/hEzgFjapssLK65EGCDPx4vo
-	 VHi4eN8IRC8f+9Sn6Ef3m7aKs3wtxMkE/CrrCu2+iLqmjZR3cmYOX0tb9SPDXQDgW7
-	 NPItTTT8vcyYhsn4qqKB8sA+l2khRCMBP0SzIHokzipz6fN/09xyFJIPd9BbCh1+XV
-	 DIP9JNlraKIPn3wI42gEnOq279jGDTGK7/etbVSzdmpjmiazpTWI+8y3Z8Yvm1N5/R
-	 a+fsXXfRX6NdQ==
-Date: Mon, 27 Oct 2025 13:10:40 +0000
-From: Mark Brown <broonie@kernel.org>
-To: "Yury Norov (NVIDIA)" <yury.norov@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Nicolas Frattaroli <nicolas.frattaroli@collabora.com>,
-	Sandy Huang <hjc@rock-chips.com>,
-	Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>,
-	Andy Yan <andy.yan@rock-chips.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Shreeya Patel <shreeya.patel@collabora.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Nicolas Frattaroli <frattaroli.nicolas@gmail.com>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
-	dri-devel@lists.freedesktop.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-	linux-media@vger.kernel.org, kernel@collabora.com,
-	linux-mmc@vger.kernel.org, linux-sound@vger.kernel.org,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Subject: Re: [PATCH 11/21] drivers: don't use GENMASK() in FIELD_PREP_WM16()
-Message-ID: <432db4d2-1f36-4531-b0b3-2a06ae682fd1@sirena.org.uk>
-References: <20251025164023.308884-1-yury.norov@gmail.com>
- <20251025164023.308884-12-yury.norov@gmail.com>
+	b=cJThxuyrAA6NnVbZ04OMCGBpbWHSlbyxpJqw9Sa8rkJYd1AYcw6/QWzpOc0JjArbO
+	 s5GfSW284I8/uE5fiJ723z4w9WGvBFb+bfBNlCh9jajzNKEKVTmn1FlUEV5ibcHH6X
+	 y77aSNyM+6UktDaB8bXpml1X+KvpIfM5/we7+jJnCWhR60V54ngwY3bM5fz1mmrq64
+	 wIQJaJ8x7OhN/pMTnL+r8bQdEYAvOhT5r9CccpMcwqp8TfV4w8klptH0LEryijwVrh
+	 0TSVdCq0bsZ05Uf5nLUD21kUOEtDUlfPCW2qrgaqL2wZx3JzNrT9d8m0a/Stx+RDWi
+	 YZ9b/NonygKnQ==
+Date: Mon, 27 Oct 2025 08:45:14 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Charan Pedumuru <charan.pedumuru@gmail.com>
+Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>, Abraham I <kishon@kernel.org>,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org
+Subject: Re: [PATCH v3] dt-bindings: mmc: ti,da830-mmc: convert to DT schema
+Message-ID: <176157271074.266503.15503173472867753188.robh@kernel.org>
+References: <20251023-davinci-mmc-v3-1-5b27b9c9ecc4@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="tcUV2s8VfPxXlH7h"
-Content-Disposition: inline
-In-Reply-To: <20251025164023.308884-12-yury.norov@gmail.com>
-X-Cookie: How do I get HOME?
-
-
---tcUV2s8VfPxXlH7h
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20251023-davinci-mmc-v3-1-5b27b9c9ecc4@gmail.com>
 
-On Sat, Oct 25, 2025 at 12:40:10PM -0400, Yury Norov (NVIDIA) wrote:
 
-> Recently added FIELD_PREP_WM16() in a few places uses GENMASK. It's
-> confusing and may mislead readers. Switch to BITS() or FIRST_BITS()
-> as appropriate.
-
-This doesn't seem to line up with the actual change, you're not altering
-FIELD_PREP_WM16() at all but rather altering things that use it.
-
-As mentioned in submitting-patches.rst when submitting a patch series
-you should supply a cover letter for that patch series which describes
-the overall content of the series.  This helps people understand what
-they are looking at and how things fit together.
-
+On Thu, 23 Oct 2025 13:19:43 +0000, Charan Pedumuru wrote:
+> Convert TI Highspeed MMC host controller binding to YAML format. Define
+> 'clocks' and 'interrupts' properties to resolve errors identified by
+> 'dt_check' and 'dtb_check'.
+> 
+> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
 > ---
->  drivers/gpu/drm/rockchip/rockchip_lvds.h             | 2 +-
->  drivers/gpu/drm/rockchip/rockchip_vop2_reg.c         | 4 ++--
->  drivers/media/platform/synopsys/hdmirx/snps_hdmirx.h | 4 ++--
->  drivers/mmc/host/dw_mmc-rockchip.c                   | 4 ++--
->  drivers/soc/rockchip/grf.c                           | 4 ++--
->  sound/soc/rockchip/rockchip_i2s_tdm.h                | 2 +-
->  6 files changed, 10 insertions(+), 10 deletions(-)
+> Changes in v3:
+> - Change the maintainer for the binding to "Kishon Vijay Abraham I".
+> - Link to v2: https://lore.kernel.org/r/20251011-davinci-mmc-v2-1-355da3e25123@gmail.com
+> 
+> Changes in v2:
+> - Modified the commit message.
+> - Removed 'interrupts' from required properties following the old binding.
+> - Changed the maintainer for the binding to "Conor Dooley".
+> - Link to v1: https://lore.kernel.org/r/20250523-davinci-mmc-v1-1-ceebd8352d9c@gmail.com
+> ---
+>  .../devicetree/bindings/mmc/davinci_mmc.txt        | 32 ------------
+>  .../devicetree/bindings/mmc/ti,da830-mmc.yaml      | 61 ++++++++++++++++++++++
+>  2 files changed, 61 insertions(+), 32 deletions(-)
+> 
 
-It doesn't help to send changes to unrelated subsystems in one patch
-either...
+Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
 
-> --- a/sound/soc/rockchip/rockchip_i2s_tdm.h
-> +++ b/sound/soc/rockchip/rockchip_i2s_tdm.h
-> @@ -287,7 +287,7 @@ enum {
->  #define I2S_TDM_RXCR	(0x0034)
->  #define I2S_CLKDIV	(0x0038)
-> =20
-> -#define HIWORD_UPDATE(v, h, l)	(FIELD_PREP_WM16_CONST(GENMASK((h), (l)),=
- (v)))
-> +#define HIWORD_UPDATE(v, h, l)	(FIELD_PREP_WM16_CONST(BITS((l), (h)), (v=
-)))
-
-This is adjusting the implementation of something that takes in h, l to
-use l, h which if anything seems likely to introduce confusion, and
-definitely feels well into bikeshed territory.  I don't *super* care but
-I'm having a hard time seeing the benefit.
-
---tcUV2s8VfPxXlH7h
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmj/b08ACgkQJNaLcl1U
-h9BrOgf/WZesOvGZkIjzC0cgXcITxYU+d0wJLcf0GA0ADyZjEl0v5GWiIXwSKFZ2
-96/4KlYfP+QnWypd7OPgmCe0w8QeJJAea7lmFwnE8sqRkjyYikoRC318PN1ywNB1
-Pyuh/mtAE5cQ+9UzI7j4nKoW3MTx2p2/bulGH1TQs5DyOO9iQK1jeaVwrD3k+ZdI
-mEER+xUO2NH09agCTqrQQONeRG9S0Sfs/PstH4X744VpErUsWyuYu794BxrtC8Un
-U18ljABlmQfvRVjCV9pDq73C4qwAqAlpsW/X+bTBa0JmLo/1n84hOjdI7Fobo6Kw
-cyxDW3840JcPzrlIo2WKdbrXXVH/xw==
-=OWcQ
------END PGP SIGNATURE-----
-
---tcUV2s8VfPxXlH7h--
