@@ -1,41 +1,45 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73B5C1C3F0C;
-	Mon, 27 Oct 2025 13:45:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1F1C1C27;
+	Mon, 27 Oct 2025 13:57:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761572717; cv=none; b=XehqhsFtRW6FgoAfndxYaNgM2Luqowly0FVXxw5R27/A3Y0eWre3EIyHEi8Vap/MRjvKYXnKIUTObkaMyn2a5bDk0tNW669DJ0z7Bd5lF6LVRe74cQpFgGGgQKQWTtbW/PbqmazaXxOaPxMytrIqWt9ioblI2nOB2/ta4DG5UUw=
+	t=1761573475; cv=none; b=UiMUfxQnuesAh15DZY4UdPQf9th8CEcrTfMumAHM7PDJ9O0DZkhcj3WNk5VBKXpRdfsUJM8uSqXZLD9tK6ewZPq3kF01/zKVkIw3ZKh0KEWALflr5nQB+6ZgykBE/QuQRXLaezRR2yRhznurRgRUrjm77a4NldA1THr343ajicE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761572717; c=relaxed/simple;
-	bh=ZefZPxlvHHfA6SOviuZmeM9TORsIaavGiKKEyD0zNuI=;
+	s=arc-20240116; t=1761573475; c=relaxed/simple;
+	bh=vQlBeuOimfnDQArLcW6HVQ1cZwXaJm+WEydOmRjU5rE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rnjQFFxIVhK2Y0lT6EltjGpQViBrVKOm3HQso8spDRac44YvYacFY7/lNo4fK0fmgrE8piUs4QQqrdCOXTXf7q42S2M3ZvIl+tqBsi+QVVbPdIwkSKLIP3x4ZYIS0gugGNDlDeWrreeaKDUjQH/17KSE7yekEhFAa42NjDNCkpw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cJThxuyr; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=o44Qk05Q+12V5eTHUyXfSl+dUTxz9TI0AGlBZsdXPXb75wiyCJ3rEDXcfyLaGST7I2SkqAe3SqjCptaVlmXlrPveB7xxVv6noVAVXw7FVD/IvTCfpiRJbigSl61vfhApUU5WItvV3tgrhQRSRv7/rzBALiptXO4jUrIw6mWvMNI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QYX9aQgn; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cJThxuyr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B522FC4CEF1;
-	Mon, 27 Oct 2025 13:45:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QYX9aQgn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0E7C3C4CEF1;
+	Mon, 27 Oct 2025 13:57:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1761572717;
-	bh=ZefZPxlvHHfA6SOviuZmeM9TORsIaavGiKKEyD0zNuI=;
+	s=k20201202; t=1761573475;
+	bh=vQlBeuOimfnDQArLcW6HVQ1cZwXaJm+WEydOmRjU5rE=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=cJThxuyrAA6NnVbZ04OMCGBpbWHSlbyxpJqw9Sa8rkJYd1AYcw6/QWzpOc0JjArbO
-	 s5GfSW284I8/uE5fiJ723z4w9WGvBFb+bfBNlCh9jajzNKEKVTmn1FlUEV5ibcHH6X
-	 y77aSNyM+6UktDaB8bXpml1X+KvpIfM5/we7+jJnCWhR60V54ngwY3bM5fz1mmrq64
-	 wIQJaJ8x7OhN/pMTnL+r8bQdEYAvOhT5r9CccpMcwqp8TfV4w8klptH0LEryijwVrh
-	 0TSVdCq0bsZ05Uf5nLUD21kUOEtDUlfPCW2qrgaqL2wZx3JzNrT9d8m0a/Stx+RDWi
-	 YZ9b/NonygKnQ==
-Date: Mon, 27 Oct 2025 08:45:14 -0500
-From: "Rob Herring (Arm)" <robh@kernel.org>
+	b=QYX9aQgnXs4w4qx23uZ1wSZQTKEhkqsu6hBA8OFqCL03nz4a66I2RXsW+tItPEiZB
+	 tTr+MMdzfFfQaEPMNodsnPXLZE8WCKh+lHTgF1W4gXBIi9U6kkQI382+B2swxQjFrv
+	 S3LuZBfQXKw0wr6cX8MbB15mCu0dRuPNPFnBjdfBMMB+2YrxFlnO0UvwTjznpckpc4
+	 hptzh3FzAeEHNNnePQXkAC3No2jW9SzTVKDMCuVmwymv7m+wKfeNW97T0SZepVPJxE
+	 sn/w1JCP5khrBGhHV9essXo5om5jcbms9lj5N7tuYGT4/ExjTRd4qOejG4inPuWxaE
+	 EyOKH6g+NzS4A==
+Date: Mon, 27 Oct 2025 08:57:52 -0500
+From: Rob Herring <robh@kernel.org>
 To: Charan Pedumuru <charan.pedumuru@gmail.com>
-Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>, Abraham I <kishon@kernel.org>,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org
-Subject: Re: [PATCH v3] dt-bindings: mmc: ti,da830-mmc: convert to DT schema
-Message-ID: <176157271074.266503.15503173472867753188.robh@kernel.org>
-References: <20251023-davinci-mmc-v3-1-5b27b9c9ecc4@gmail.com>
+	Taichi Sugaya <sugaya.taichi@socionext.com>,
+	Takao Orito <orito.takao@socionext.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: socionext,milbeaut-m10v-sdhci-3.0:
+ convert to DT schema
+Message-ID: <20251027135752.GA316916-robh@kernel.org>
+References: <20251023-milbeaut-v1-1-3e4ff67110ad@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -44,30 +48,119 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251023-davinci-mmc-v3-1-5b27b9c9ecc4@gmail.com>
+In-Reply-To: <20251023-milbeaut-v1-1-3e4ff67110ad@gmail.com>
 
-
-On Thu, 23 Oct 2025 13:19:43 +0000, Charan Pedumuru wrote:
-> Convert TI Highspeed MMC host controller binding to YAML format. Define
-> 'clocks' and 'interrupts' properties to resolve errors identified by
-> 'dt_check' and 'dtb_check'.
+On Thu, Oct 23, 2025 at 05:37:36PM +0000, Charan Pedumuru wrote:
+> Convert SOCIONEXT Milbeaut SDHCI controller binding to YAML format.
+> Add a new property "voltage-ranges" to resolve dt_check errors.
 > 
 > Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
 > ---
-> Changes in v3:
-> - Change the maintainer for the binding to "Kishon Vijay Abraham I".
-> - Link to v2: https://lore.kernel.org/r/20251011-davinci-mmc-v2-1-355da3e25123@gmail.com
+>  .../devicetree/bindings/mmc/sdhci-milbeaut.txt     | 30 ---------
+>  .../mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml     | 78 ++++++++++++++++++++++
+>  2 files changed, 78 insertions(+), 30 deletions(-)
 > 
-> Changes in v2:
-> - Modified the commit message.
-> - Removed 'interrupts' from required properties following the old binding.
-> - Changed the maintainer for the binding to "Conor Dooley".
-> - Link to v1: https://lore.kernel.org/r/20250523-davinci-mmc-v1-1-ceebd8352d9c@gmail.com
-> ---
->  .../devicetree/bindings/mmc/davinci_mmc.txt        | 32 ------------
->  .../devicetree/bindings/mmc/ti,da830-mmc.yaml      | 61 ++++++++++++++++++++++
->  2 files changed, 61 insertions(+), 32 deletions(-)
-> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt b/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
+> deleted file mode 100644
+> index 627ee89c125b..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
+> +++ /dev/null
+> @@ -1,30 +0,0 @@
+> -* SOCIONEXT Milbeaut SDHCI controller
+> -
+> -This file documents differences between the core properties in mmc.txt
+> -and the properties used by the sdhci_milbeaut driver.
+> -
+> -Required properties:
+> -- compatible: "socionext,milbeaut-m10v-sdhci-3.0"
+> -- clocks: Must contain an entry for each entry in clock-names. It is a
+> -  list of phandles and clock-specifier pairs.
+> -  See ../clocks/clock-bindings.txt for details.
+> -- clock-names: Should contain the following two entries:
+> -	"iface" - clock used for sdhci interface
+> -	"core"  - core clock for sdhci controller
+> -
+> -Optional properties:
+> -- fujitsu,cmd-dat-delay-select: boolean property indicating that this host
+> -  requires the CMD_DAT_DELAY control to be enabled.
+> -
+> -Example:
+> -	sdhci3: mmc@1b010000 {
+> -		compatible = "socionext,milbeaut-m10v-sdhci-3.0";
+> -		reg = <0x1b010000 0x10000>;
+> -		interrupts = <0 265 0x4>;
+> -		voltage-ranges = <3300 3300>;
+> -		bus-width = <4>;
+> -		clocks = <&clk 7>, <&ahb_clk>;
+> -		clock-names = "core", "iface";
+> -		cap-sdio-irq;
+> -		fujitsu,cmd-dat-delay-select;
+> -	};
+> diff --git a/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml b/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml
+> new file mode 100644
+> index 000000000000..6b67bef30347
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml
+> @@ -0,0 +1,78 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: SOCIONEXT Milbeaut SDHCI controller
+> +
+> +maintainers:
+> +  - Taichi Sugaya <sugaya.taichi@socionext.com>
+> +  - Takao Orito <orito.takao@socionext.com>
+> +
+> +description:
+> +  The SOCIONEXT Milbeaut SDHCI controller is a specialized SD Host
+> +  Controller found in some of Socionext's Milbeaut image processing SoCs.
+> +  It features a dedicated "bridge controller." This bridge controller
+> +  implements special functions like reset control, clock management for
+> +  various SDR modes (SDR12, SDR25, SDR50) and physical pin property settings.
+> +
+> +allOf:
+> +  - $ref: sdhci-common.yaml#
+> +
+> +properties:
+> +  compatible:
+> +    const: socionext,milbeaut-m10v-sdhci-3.0
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    maxItems: 2
+> +
+> +  clock-names:
+> +    items:
+> +      - const: core
+> +      - const: iface
+> +
+> +  fujitsu,cmd-dat-delay-select:
+> +    description:
+> +      Its presence indicates that the controller requires a specific command
+> +      and data line delay selection mechanism for proper operation, particularly
+> +      when dealing with high-speed SD/eMMC modes.
+> +    type: boolean
+> +
+> +  voltage-ranges:
+> +    $ref: /schemas/types.yaml#/definitions/uint32-matrix
 
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+Sounds more like a uint32-array.
 
+> +    description:
+> +      Two cells are required, first cell specifies minimum slot voltage (mV),
+> +      second cell specifies maximum slot voltage (mV).
+> +    maxItems: 1
+
+You can better describe it like this:
+
+items:
+  - description: minimum slot voltage (mV)
+  - description: maximum slot voltage (mV)
