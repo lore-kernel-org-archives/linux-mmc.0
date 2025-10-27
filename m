@@ -1,93 +1,82 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
+Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF4B32E3B1C;
-	Mon, 27 Oct 2025 08:50:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761555010; cv=none; b=jI8bf5q7lPkA1jLtvd+NeHg/hDNb1bc1M4eyQfqHdyx/wULAe2AQSx8SFtHGxCZcFlKMxyuavhLorR7ascoYMsNBv42uHiBdyZREfrq0AOfy9CBhDff04vrqVhdrqL86+cVBPLW3ePo6vM6vviBhKW0cjb9L9YNUrG1G0h+eQ6g=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761555010; c=relaxed/simple;
-	bh=lQFP5i4h0NhDRiG8WGVwpbu31fE0ocV55y7NMexkC28=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=TyCKIgqCRxiiSo86vRg8fPUOXoinpIec23jvO8/qLZR7yJ0mLx6ZNV93cBWxLfCccTAyKGzrOpA224seix0h1E6I+ty+DPE2Mu0fK4szljG20FAhB51j2tTjCtxyHf8dWfMY1ndbeN5NQ7Xf+81ENulJE22tYtfktLWER/gkjPs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=fJD1tXv/; arc=none smtp.client-ip=198.175.65.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FCE12FBE01;
+	Mon, 27 Oct 2025 12:22:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1761567739; cv=pass; b=TA9r7Vpu6AWhAZ9pq6VPu72BB6aR2cRlNrMfjDdwbunvFxdirbuovo26kRA4/ollcjssL/PA47tajapzw3t5YHlWtgJ27dlJVE7EPzpJsM38qmdh3Z4EG/PoLVMwkINVhTj06d564YmN76s9EmpHPkJ7io9NUUvFF1NK/sp9Qk8=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1761567739; c=relaxed/simple;
+	bh=fcotC1b6A2/LrvzLBc7zjE2lH146EvlS4iCMh/bfYp8=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=K3eDXkOm+efbh6C3KwytIISKMQORkhmrj03irda9BSBOvsmsE+BMTrDgrHI7c2EuryHHkqBZ9w591JfyaOGaQxpY0ijlrhpYwSkQFYgiPna/iuxi7RT/VjOHrxAASLqFrAImIoCWOy6ZedyG5jZL/IsTw3mU9BsqJVZgvU8ZeXk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=kDy9KX24; arc=pass smtp.client-ip=136.143.188.112
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="fJD1tXv/"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1761555008; x=1793091008;
-  h=from:to:cc:subject:in-reply-to:references:date:
-   message-id:mime-version;
-  bh=lQFP5i4h0NhDRiG8WGVwpbu31fE0ocV55y7NMexkC28=;
-  b=fJD1tXv/L4aclYX8pE9TgIEVOUmexMmzSGSxHpOCrO0ZvXGtl1TW38jy
-   Cu4K59nr2QuOkEQbNS6XJoPylX2vzwBxsGafr4yZjMJzwB2iFvmv+77PE
-   +tlbewZXnhKbRfc0KJkwXCch9PZ+2glSutGOgFrSwbhv0PflJzSqeeaC0
-   YPlFsvZGtKRG84xL5ElToy2fpLZDSHxzzjc7V8KTt66rH+UBp3OJK7JtI
-   /Tos+OeHHXh1NWl960nWITylTl+8Adb3fBGYmvYB+slVICPHG+2uJsBOS
-   Wt7GRCtAh/lHczT1FbVeLgl4r6FOVByvy3T6tP8xv2H9wih/L/eIOTmX2
-   A==;
-X-CSE-ConnectionGUID: eFiuKwb4S8GRxqzVHufOfg==
-X-CSE-MsgGUID: UrGItXdoS8Wy5+0h3FK6og==
-X-IronPort-AV: E=McAfee;i="6800,10657,11531"; a="63530072"
-X-IronPort-AV: E=Sophos;i="6.17,312,1747724400"; 
-   d="scan'208";a="63530072"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Oct 2025 01:50:08 -0700
-X-CSE-ConnectionGUID: RWdTYCHBRXaBnyFA3fxD1Q==
-X-CSE-MsgGUID: hFLDCByJQnS1Drk++R66Ew==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.19,258,1754982000"; 
-   d="scan'208";a="184216145"
-Received: from slindbla-desk.ger.corp.intel.com (HELO localhost) ([10.245.246.35])
-  by orviesa010-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Oct 2025 01:49:59 -0700
-From: Jani Nikula <jani.nikula@linux.intel.com>
-To: "Yury Norov (NVIDIA)" <yury.norov@gmail.com>, Linus Torvalds
- <torvalds@linux-foundation.org>, Linus Walleij <linus.walleij@linaro.org>,
- Nicolas Frattaroli <nicolas.frattaroli@collabora.com>, Sandy Huang
- <hjc@rock-chips.com>, Heiko =?utf-8?Q?St=C3=BCbner?= <heiko@sntech.de>,
- Andy Yan
- <andy.yan@rock-chips.com>, Maarten Lankhorst
- <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>,
- Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>,
- Simona Vetter <simona@ffwll.ch>, Shreeya Patel
- <shreeya.patel@collabora.com>, Mauro Carvalho Chehab <mchehab@kernel.org>,
- Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Nicolas Frattaroli
- <frattaroli.nicolas@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark
- Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai
- <tiwai@suse.com>, "Yury Norov (NVIDIA)" <yury.norov@gmail.com>,
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="kDy9KX24"
+ARC-Seal: i=1; a=rsa-sha256; t=1761567688; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=B37m3tRXg9231oauumFgq3IS919cZOBg5SjkoJsfAAEv3xg7NZzheR2/o1Z6DWXuET3Phh+B65kMnrMCibaDLL47gqWercUuzNjDdQ/QEDk4PDMfokyzUxleEz3k8oEQQE8eM/LGA6cXBQj3Z5m2bCDyEdLFNH72QNvwSyqfTHs=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1761567688; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=JzOl43h72qIg903VcLgPPqEaQOxJyebUM6Y8SFlK3FI=; 
+	b=PHxByQ8byaqaWcg7cDcy7ZXDXysm3SbInlN64ODpr8FHXGPi7kW3HXHt+zOniUMSCoQtu7DUByVBCUDCbhdmo00hUk8zNn6A7YdjO/9J7MEh1bEETNOogOlizsXIBRbcRpyX3gSWzK3sSO0p/n4fuKKbZFBpqUY9Cjzvie0NDxU=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=collabora.com;
+	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
+	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1761567688;
+	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
+	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
+	bh=JzOl43h72qIg903VcLgPPqEaQOxJyebUM6Y8SFlK3FI=;
+	b=kDy9KX2417EVcr5ZvR/y8uZmt2IgIbpSIydVjZEiNT4mUYn+LTARqHpo2PI9/c+O
+	XrqA+KwqLPKUa7++D+dlwBTP8fipyA2OMRQQKoikyQmHtIagGSU4zKzvjDMhQPiCI7W
+	A4THQcscyFyTp2lEGrAOYogNvIgC0YM8dyTtux88=
+Received: by mx.zohomail.com with SMTPS id 1761567685152749.0643459384486;
+	Mon, 27 Oct 2025 05:21:25 -0700 (PDT)
+From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>,
+ Linus Walleij <linus.walleij@linaro.org>, Sandy Huang <hjc@rock-chips.com>,
+ Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>,
+ Andy Yan <andy.yan@rock-chips.com>,
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+ Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
+ David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+ Shreeya Patel <shreeya.patel@collabora.com>,
+ Mauro Carvalho Chehab <mchehab@kernel.org>,
+ Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Nicolas Frattaroli <frattaroli.nicolas@gmail.com>,
+ Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>,
+ Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
+ "Yury Norov (NVIDIA)" <yury.norov@gmail.com>,
  dri-devel@lists.freedesktop.org, linux-arm-kernel@lists.infradead.org,
  linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-media@vger.kernel.org, kernel@collabora.com,
- linux-mmc@vger.kernel.org, linux-sound@vger.kernel.org
+ linux-media@vger.kernel.org, kernel@collabora.com, linux-mmc@vger.kernel.org,
+ linux-sound@vger.kernel.org, "Yury Norov (NVIDIA)" <yury.norov@gmail.com>
 Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
 Subject: Re: [PATCH 11/21] drivers: don't use GENMASK() in FIELD_PREP_WM16()
+Date: Mon, 27 Oct 2025 13:21:15 +0100
+Message-ID: <2824034.mvXUDI8C0e@workhorse>
 In-Reply-To: <20251025164023.308884-12-yury.norov@gmail.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
-References: <20251025164023.308884-1-yury.norov@gmail.com>
+References:
+ <20251025164023.308884-1-yury.norov@gmail.com>
  <20251025164023.308884-12-yury.norov@gmail.com>
-Date: Mon, 27 Oct 2025 10:49:56 +0200
-Message-ID: <6e82c656573d436b6c53d242a0ed45007e5849ad@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
 
-On Sat, 25 Oct 2025, "Yury Norov (NVIDIA)" <yury.norov@gmail.com> wrote:
+On Saturday, 25 October 2025 18:40:10 Central European Standard Time Yury Norov (NVIDIA) wrote:
 > Recently added FIELD_PREP_WM16() in a few places uses GENMASK. It's
 > confusing and may mislead readers. Switch to BITS() or FIRST_BITS()
 > as appropriate.
-
-GENMASK argument order matches how most specs I've ever looked at define
-bits. It's high:low. I, for one, think it's silly to add another set of
-macros purely to swap the argument order.
-
+> 
 > Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
 > Link: https://lore.kernel.org/all/CAHk-=whoOUsqPKb7OQwhQf9H_3=5sXGPJrDbfQfwLB3Bi13tcQ@mail.gmail.com/
 > Signed-off-by: Yury Norov (NVIDIA) <yury.norov@gmail.com>
@@ -99,7 +88,7 @@ macros purely to swap the argument order.
 >  drivers/soc/rockchip/grf.c                           | 4 ++--
 >  sound/soc/rockchip/rockchip_i2s_tdm.h                | 2 +-
 >  6 files changed, 10 insertions(+), 10 deletions(-)
->
+> 
 > diff --git a/drivers/gpu/drm/rockchip/rockchip_lvds.h b/drivers/gpu/drm/rockchip/rockchip_lvds.h
 > index 2d92447d819b..e79e6031be59 100644
 > --- a/drivers/gpu/drm/rockchip/rockchip_lvds.h
@@ -110,18 +99,6 @@ macros purely to swap the argument order.
 >  #define PX30_LVDS_GRF_PD_VO_CON1		0x438
 > -#define   PX30_LVDS_FORMAT(val)			FIELD_PREP_WM16(GENMASK(14, 13), (val))
 > +#define   PX30_LVDS_FORMAT(val)			FIELD_PREP_WM16(BITS(13, 14), (val))
-
-IMO this change would make more sense in defining register contents:
-
-+#define   PX30_LVDS_FORMAT_MASK			GENMASK(14, 13)
--#define   PX30_LVDS_FORMAT(val)			FIELD_PREP_WM16(GENMASK(14, 13), (val))
-+#define   PX30_LVDS_FORMAT(val)			FIELD_PREP_WM16(PX30_LVDS_FORMAT_MASK, (val))
-
-
-BR,
-Jani.
-
-
 >  #define   PX30_LVDS_MODE_EN(val)		FIELD_PREP_WM16(BIT(12), (val))
 >  #define   PX30_LVDS_MSBSEL(val)			FIELD_PREP_WM16(BIT(11), (val))
 >  #define   PX30_LVDS_P2S_EN(val)			FIELD_PREP_WM16(BIT(6), (val))
@@ -207,6 +184,16 @@ Jani.
 >  
 >  /* PX30 GRF CONFIGS */
 >  #define PX30_I2S0_CLK_IN_SRC_FROM_TX		HIWORD_UPDATE(1, 13, 12)
+> 
 
--- 
-Jani Nikula, Intel
+Reviewed-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+
+I made sure there were no accidental changes introduced by the
+swapping of values, so in terms of correctness, this appears
+all good to me.
+
+Kind regards,
+Nicolas Frattaroli
+
+
+
