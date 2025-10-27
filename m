@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 864BF2C11F3;
-	Mon, 27 Oct 2025 14:30:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8739730ACF4;
+	Mon, 27 Oct 2025 14:31:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761575446; cv=none; b=TODUT7EOqE15cei4Q2bY4qCVGJayEDtX5yznTEzxSgAw9R8/dOsle8z41AdjgznlLdWeOKCdgHXsfph8pUYSLxh7UfWbm5EbHlZ5bdZcFHHYSI31mEKomE7hdfz2s2k+LaNl44+OadGW75qUjrkX13Ko/BUScGVmGyYnxlq169s=
+	t=1761575503; cv=none; b=XciWG3esMS46bmpEF/SLWXPdfktdUoKddvYw6vwkg7RzqFPr53O4IayAwGz4g6ItHKGQRk0BbYvaXaxROsdqizR2TGnX2SAwytBkYScgVcCQjgszBl5Yp50JqAl172gHE4dZimvTyOnqYYWnexcLYaF0EeTjPt4Ewquyg6iQYD4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761575446; c=relaxed/simple;
-	bh=bF7MF85PRGuE0Tue1FI7M1V+esFLj0T81IM87Zox0pk=;
+	s=arc-20240116; t=1761575503; c=relaxed/simple;
+	bh=XQalhDZ/zJowghLOOuFFpjfQp54zAIdrsBAChcBtnbA=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=jRUzNTH85K+K4lMCdPGM9mJlsAtr0nz8AnfJox7jw09BdASh1aAF2zdzq+e52YtleI1EgT9NT2pS7oK+z8SaoVBxM5kn1xofsmy5FVwtA2SIx3HEjg2h2xx7Q8VxUrYNINJ8fgqub++Bd6hbed9YH7+M8vsiOLO/aXgT9gMda6o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=h+/3Fj3Z; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=JjheqPhdL0k0R+C8ueAg6MQgX2MNLL+w2vw56iKn2qYHHIT4x20nkUwDajyYVBvsES/artTglac3QmpbBJTXUnmxH7WVFnZklel39cZ1POKDEdAqVS/evqTdtbzT3us94uoCtIOrZ8BLHETe+3+wxHI/+tWhMee3wi7BuqtBItQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RSrdWOxe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="h+/3Fj3Z"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 233BCC4CEF1;
-	Mon, 27 Oct 2025 14:30:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RSrdWOxe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DF557C4CEF1;
+	Mon, 27 Oct 2025 14:31:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1761575444;
-	bh=bF7MF85PRGuE0Tue1FI7M1V+esFLj0T81IM87Zox0pk=;
+	s=k20201202; t=1761575503;
+	bh=XQalhDZ/zJowghLOOuFFpjfQp54zAIdrsBAChcBtnbA=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=h+/3Fj3Z2SlkmdgqawtnVqyEQMEa6UAZ6HPMpuk2AMp33USkWHXGQx0wfXLOxC9j/
-	 Bzw6fm7ovtrt3sGHH+rwBtNwMlhEM9QtJeLtVJXkVaTuwg0PZS8dK4Urtu40kxusuh
-	 ujIpHj8U4zK0hlYzoDG5uQGxntP5C/sAHkvy9/WGY1bu7DT/R4pj8ShaU5EqqdgmJ1
-	 A9WT/CyfRuKHc+CZ/O9B41yv82ylIao55qlPnCdBh1tvF5mUbvdsebbAhBxnBZteTi
-	 dKXDD1cCqXAxsXNGzIUkZZ87Ji3oKXFCPAm5NEIBmHAyHXlAZmuquitqFE/sCT4MCb
-	 A5cwspNxB+DCA==
-Message-ID: <0c791304-928e-4075-87c0-bd37ebd8e351@kernel.org>
-Date: Mon, 27 Oct 2025 15:30:37 +0100
+	b=RSrdWOxeEXCUi+ztc0FnkDn3pAlhc6NEvksGqo69nwAxXw4iiQIaHO7Kty8I/VtJ6
+	 PbYajbTIwY9etaZffbB+yPx6cZ7GcWCBU5LD1JrO+8n44VbWvsE80UicN9EBkK3w8n
+	 EP/es6SgRfUFoQdaQxgdbGFxujv7btcOGiiRdSWTfFcGEOylr8CiZ0vE5DaAko28wY
+	 +RW7iMfAma8e6huynRo7NzgbPHaL945xOiz1w46iZIbuAINvdJzD1MZFsPMZ6mhiJS
+	 Wcw9JcFDNIt4oWsgDb9+H5PuaoOy/28BB8GpxcfgTvnMPo2qeMioP2k+jIQv2aU/p3
+	 OLEA9WgU1NS6w==
+Message-ID: <4394142b-c96c-464e-9e12-80904755026e@kernel.org>
+Date: Mon, 27 Oct 2025 15:31:37 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,7 +35,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: sdhci-msm: Add sm8750 compatible
+Subject: Re: [PATCH V3 3/4] arm64: dts: qcom: sm8750-mtp: Add SDC2 node for
+ sm8750 mtp board
 To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>,
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
@@ -45,9 +46,10 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
  quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
  quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
- quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+ quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
+ kernel@oss.qualcomm.com, Abel Vesa <abel.vesa@linaro.org>
 References: <20251026111746.3195861-1-sarthak.garg@oss.qualcomm.com>
- <20251026111746.3195861-2-sarthak.garg@oss.qualcomm.com>
+ <20251026111746.3195861-4-sarthak.garg@oss.qualcomm.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -93,23 +95,21 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20251026111746.3195861-2-sarthak.garg@oss.qualcomm.com>
+In-Reply-To: <20251026111746.3195861-4-sarthak.garg@oss.qualcomm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 26/10/2025 12:17, Sarthak Garg wrote:
-> Document the compatible string for the SDHCI controller on the
-> sm8750 platform.
+> Enable SD Card host controller for sm8750 mtp board.
 > 
 > Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-> Acked-by: Rob Herring (Arm) <robh@kernel.org>
+> Reviewed-by: Abel Vesa <abel.vesa@linaro.org>
 > ---
+>  arch/arm64/boot/dts/qcom/sm8750-mtp.dts | 23 +++++++++++++++++++++++
+>  1 file changed, 23 insertions(+)
 
 
-
-Why are you sending third time the same, even though this was applied
-long time ago at v1? Please do not send unnecessary patches, this just
-clutters people's mailboxes.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
 Best regards,
 Krzysztof
