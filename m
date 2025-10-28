@@ -1,228 +1,220 @@
-Received: from mail-pg1-f176.google.com (mail-pg1-f176.google.com [209.85.215.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DD10313E1C
-	for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2025 16:49:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C05E33DECB;
+	Tue, 28 Oct 2025 15:50:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1761583772; cv=none; b=fwVPaTdPlkwme23+SJFrgzthLrT4LLqKKjXG6RUQOxUDnM+zWybxgptmnhX0fpztzprY2hklwKxjcnATLHXnIZK/SQV9IvAgtT6/M1XYrIiCInPdfodwq7+ouzIlumLWPx8QNeN9oqbII+Q8An4wX0XSfM1wdd17LgckoxLTdvU=
+	t=1761666634; cv=none; b=hucX2iMaQAVpS5Usr/GWzElAUq3GUmVGHq5OVUw1HvqARiH/iycq8exDI8Ny0LkKoB27I0WyJqW0wzBW6EAdlQgvVzlV8qf/goG+oiPyTxLtxjrsayRKqfwwKn+56GJiW3fHlYUtnjSudZneuHjFASry/CoBAQYbhyRdnW2bJjk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1761583772; c=relaxed/simple;
-	bh=TWUcnMhGYjqpSEACT1hY8gU5ZXrwBEJkbZ/hFSk485A=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=sJjb3t/MebmehN8G0Iuw3VF5XVBNFxhGHlcEEuycifO/SLa8ZAYpmOrVr73Nz6fTbeD09bnVmfAta6zUX5BF0JiRRos6wmd3nZ0n+Vlgkac3E8BRJj6oiwD3fBiV7DkFxNKuWYmnTOwDHnjZbSpeTrv6CPdXS8QYd1z65YZVgjM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hx22Y6CI; arc=none smtp.client-ip=209.85.215.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1761666634; c=relaxed/simple;
+	bh=xSCOkg4ucLk3x8OtuE7FGP9DNFzTsgpO2iRYEJXYRms=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Vsj7FRb2tNbHIG14b2gthGoGzYCC4xAhVmsM+fyHxJYc1BWA21fXdsZ/SZcLfw6paWHForoDqxd1sIC+T/5Atk9urXe3tZYi9I1O0mQ3vIODqpotuYoDNNOunNbP+pPirPWo06NZdfdUhhly0XkqKi0WasqziHx5Tq2ciOnj5Fg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Pwfg2R3n; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hx22Y6CI"
-Received: by mail-pg1-f176.google.com with SMTP id 41be03b00d2f7-b6271ea3a6fso3323245a12.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Oct 2025 09:49:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1761583769; x=1762188569; darn=vger.kernel.org;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=geguZxaeJiqKqJQ0kK8UQgUfhxCEenMLMdjKppCx4hc=;
-        b=hx22Y6CI/zP/jF+Xi3eElk/Yz7VC5/ug/78dKwna2BwOd2ohPH+vrL+8J8kaf5H61z
-         GWSVoszeXs7Ig8SzkKDUo4de9dorZ1qxt88FcOchiwQBmroQgG+vr8R8F//SEHXZNNpm
-         UJIi3SOBKMsoiNqLw+J3seyPQVO3A27cZItPW4lHmYvc1L58SAk8yT3BD439mkQMoILJ
-         cPSUL1w7aLYQlg8R64r1Rvg5QqbUb9M+Y8bCKWwEolP1qJg5+GKCVWKU065jFbhwCJ0j
-         lFLpuTHoF/ZJEN3gBiuG6qmdtXQIhybs3paDZZ+lNF9ILR4lpq0EAuJZGDwpXrqYY8I9
-         jP8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1761583769; x=1762188569;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=geguZxaeJiqKqJQ0kK8UQgUfhxCEenMLMdjKppCx4hc=;
-        b=TeovZ+jQRMz4qe6KkuMPnXks3uvMAebnmNmuw2peguPUEyIK2B6LXDqIuXhdFdj1Wd
-         h1aP2VSZN6bD6EpmP+k98SOEGcG16DlehpMZzHYuVk3zGuf4pX0qbwq1vZAbuhyrrAJu
-         aoFvB2Tt1F+5ujx1vcGIvVllHRaOAzbhcFluYaz+8rP33pyU4r58D4Vj6oDedVzdOpLf
-         XMy2VOaJbtgs3QB0A4olm8QDwvmmpsDBV0ozZpWJDyj8H7up69YRneJu0OCa9d2euHcj
-         JF7NeDdOhvGNgPIa0SKuGNU42CVtyKtb/w3y3or8Fu8yisU+rVciGBbNo9vITCv7o3Hj
-         xooQ==
-X-Gm-Message-State: AOJu0YzTgwWIcbEwWNQqSTF2iI/BAKOCkCyk+lakYdj7+UuJvPMnTzWU
-	CAKpMFy6PbiF2c2he+euq4PqVb9RCVVwd8rL1Y/V+9UoHex/WEwAWyjZ
-X-Gm-Gg: ASbGnctvqlqgCinBJ6UrC3j4Jj6A/YRsm05jwk12KwlQqA/izbaXZyKNwo5mQV/PEsh
-	yh1zcAhtRrQP/8qC4YgHeewYfK2WazmgMWY/WKzMvebJTHTZuWO1fhivc0i4ZApFOOTWrmMqPaB
-	pdNAQUTXxaCptzY3IGgcOevhG5n5WbK7GoAWFmckFiapVuobTMcZqEaRkDVi2+IwniADyGy+LbP
-	pKW5S2vZrf4/s+6DqqFk1ZELV3qg6IYP/utXBGjk18OtVy/DHotCQ8sF/zY/B8zSIVctLpEjZiS
-	ebz6wHy5MPtXNUYDgS/vWobNko9VrFTx1ksyZC0PEj7UyHZnb7LA9GNyIzN8mjkZqcRxM+LqXH6
-	li0uRJSXwnbU+SD9hx6W4t2zu8XbMpRKvlTeF6eOgcjuO5fMIVUkXLRjzGaebuci71Ly1/oJ0An
-	JX6PdEf61hahggNn0i0tUv
-X-Google-Smtp-Source: AGHT+IFsZhMXjDA3rdE7firYijUNXcnLWPPnTnb2rv5dx73e9it+zwX4W3UIHnIxK9VNAzx0q7dU+A==
-X-Received: by 2002:a17:902:cecb:b0:26d:72f8:8d0a with SMTP id d9443c01a7336-294cb368bd0mr6638925ad.12.1761583768299;
-        Mon, 27 Oct 2025 09:49:28 -0700 (PDT)
-Received: from Black-Pearl.localdomain ([27.7.191.116])
-        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-29498cf358fsm86581925ad.20.2025.10.27.09.49.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Oct 2025 09:49:27 -0700 (PDT)
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-Date: Mon, 27 Oct 2025 16:46:16 +0000
-Subject: [PATCH v2] dt-bindings: mmc: socionext,milbeaut-m10v-sdhci-3.0:
- convert to DT schema
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Pwfg2R3n"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F31A6C4CEE7;
+	Tue, 28 Oct 2025 15:50:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1761666634;
+	bh=xSCOkg4ucLk3x8OtuE7FGP9DNFzTsgpO2iRYEJXYRms=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=Pwfg2R3n++bXY1DZvM+kkfq5xwFjt8aVZK7q7KwhGhd1rfJevN/MsxVeMQsG4Yz+t
+	 4KqwORGNDrIlCeus0j5iTYsXD3/9jDIAVcE9h3xn1uZo5nbAS2C4xt8/DDlZD4UGlQ
+	 tQRmzuLs0q8De5YxhPuQSMUeH9SeX+6m1mSPg1hs1QcToW39YyPbeOpkjt3kM6nRDv
+	 Yz1sgBnb25CoXQ+cfysoBLqbcLYH8xShGJC4Z/xIUIo5TBt/nYSBR9G+jmWyH9G4f6
+	 OH6O4fCLuAlotkOakXyLeh7tIUfAo5Hfe35zcMc8lsp8QpNWSHpxIsene+BPWfZn/J
+	 JDz+YnRSt2pEA==
+Message-ID: <d9478ebe-ff55-41fa-a3be-711061e988bb@kernel.org>
+Date: Tue, 28 Oct 2025 09:50:33 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20251027-milbeaut-v2-1-9e1954ff7708@gmail.com>
-X-B4-Tracking: v=1; b=H4sIANeh/2gC/0XMywqDMBCF4VeRWTclMxqFrvoe4iKNEx3wUhIbW
- sR3b+qmy/9w+HaIHIQj3IodAieJsi456FKAG+0ysJI+N5Amow1Vapbpwfa1KeM01U3emRzk+zO
- wl/dJtV3uUeK2hs8pJ/ytJ4Kayj+SUKEqufK+bhC17e/DbGW6unWG7jiOLz8RU8qgAAAA
-X-Change-ID: 20250524-milbeaut-5c0267202e2c
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, 
- Taichi Sugaya <sugaya.taichi@socionext.com>, 
- Takao Orito <orito.takao@socionext.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
- Charan Pedumuru <charan.pedumuru@gmail.com>
-X-Mailer: b4 0.14.3
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3] mmc: pxamci: Simplify pxamci_probe() error handling
+ using devm APIs
+To: Rakuram Eswaran <rakuram.e96@gmail.com>, ulf.hansson@linaro.org,
+ u.kleine-koenig@baylibre.com
+Cc: chenhuacai@kernel.org, dan.carpenter@linaro.org,
+ david.hunter.linux@gmail.com, zhoubinbin@loongson.cn,
+ linux-kernel-mentees@lists.linux.dev, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, lkp@intel.com, skhan@linuxfoundation.org
+References: <20251023145432.164696-1-rakuram.e96@gmail.com>
+From: Khalid Aziz <khalid@kernel.org>
+Content-Language: en-US
+In-Reply-To: <20251023145432.164696-1-rakuram.e96@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Convert SOCIONEXT Milbeaut SDHCI controller binding to YAML format.
-Add a new property "voltage-ranges" to resolve dt_check errors.
+On 10/23/25 8:54 AM, Rakuram Eswaran wrote:
+> This patch refactors pxamci_probe() to use devm-managed resource
+> allocation (e.g. devm_dma_request_chan) and dev_err_probe() for
+> improved readability and automatic cleanup on probe failure.
+> 
+> It also removes redundant NULL assignments and manual resource release
+> logic from pxamci_probe(), and eliminates the corresponding release
+> calls from pxamci_remove().
+> 
+> Reported-by: kernel test robot <lkp@intel.com>
+> Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+> Closes: https://lore.kernel.org/r/202510041841.pRlunIfl-lkp@intel.com/
+> Fixes: 58c40f3faf742c ("mmc: pxamci: Use devm_mmc_alloc_host() helper")
+> Suggested-by: Uwe Kleine-König <u.kleine-koenig@baylibre.com>
+> Signed-off-by: Rakuram Eswaran <rakuram.e96@gmail.com>
+> ---
 
-Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
----
-Changes in v2:
-- Change the description for the property "voltage-ranges".
-- Link to v1: https://lore.kernel.org/r/20251023-milbeaut-v1-1-3e4ff67110ad@gmail.com
----
- .../devicetree/bindings/mmc/sdhci-milbeaut.txt     | 30 --------
- .../mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml     | 79 ++++++++++++++++++++++
- 2 files changed, 79 insertions(+), 30 deletions(-)
+This looks good to me now.
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt b/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
-deleted file mode 100644
-index 627ee89c125b..000000000000
---- a/Documentation/devicetree/bindings/mmc/sdhci-milbeaut.txt
-+++ /dev/null
-@@ -1,30 +0,0 @@
--* SOCIONEXT Milbeaut SDHCI controller
--
--This file documents differences between the core properties in mmc.txt
--and the properties used by the sdhci_milbeaut driver.
--
--Required properties:
--- compatible: "socionext,milbeaut-m10v-sdhci-3.0"
--- clocks: Must contain an entry for each entry in clock-names. It is a
--  list of phandles and clock-specifier pairs.
--  See ../clocks/clock-bindings.txt for details.
--- clock-names: Should contain the following two entries:
--	"iface" - clock used for sdhci interface
--	"core"  - core clock for sdhci controller
--
--Optional properties:
--- fujitsu,cmd-dat-delay-select: boolean property indicating that this host
--  requires the CMD_DAT_DELAY control to be enabled.
--
--Example:
--	sdhci3: mmc@1b010000 {
--		compatible = "socionext,milbeaut-m10v-sdhci-3.0";
--		reg = <0x1b010000 0x10000>;
--		interrupts = <0 265 0x4>;
--		voltage-ranges = <3300 3300>;
--		bus-width = <4>;
--		clocks = <&clk 7>, <&ahb_clk>;
--		clock-names = "core", "iface";
--		cap-sdio-irq;
--		fujitsu,cmd-dat-delay-select;
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml b/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml
-new file mode 100644
-index 000000000000..2ba53626a959
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml
-@@ -0,0 +1,79 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/socionext,milbeaut-m10v-sdhci-3.0.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: SOCIONEXT Milbeaut SDHCI controller
-+
-+maintainers:
-+  - Taichi Sugaya <sugaya.taichi@socionext.com>
-+  - Takao Orito <orito.takao@socionext.com>
-+
-+description:
-+  The SOCIONEXT Milbeaut SDHCI controller is a specialized SD Host
-+  Controller found in some of Socionext's Milbeaut image processing SoCs.
-+  It features a dedicated "bridge controller." This bridge controller
-+  implements special functions like reset control, clock management for
-+  various SDR modes (SDR12, SDR25, SDR50) and physical pin property settings.
-+
-+allOf:
-+  - $ref: sdhci-common.yaml#
-+
-+properties:
-+  compatible:
-+    const: socionext,milbeaut-m10v-sdhci-3.0
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 2
-+
-+  clock-names:
-+    items:
-+      - const: core
-+      - const: iface
-+
-+  fujitsu,cmd-dat-delay-select:
-+    description:
-+      Its presence indicates that the controller requires a specific command
-+      and data line delay selection mechanism for proper operation, particularly
-+      when dealing with high-speed SD/eMMC modes.
-+    type: boolean
-+
-+  voltage-ranges:
-+    $ref: /schemas/types.yaml#/definitions/uint32-matrix
-+    items:
-+      items:
-+        - description: minimum slot voltage (mV).
-+        - description: maximum slot voltage (mV).
-+    maxItems: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    mmc@1b010000 {
-+        compatible = "socionext,milbeaut-m10v-sdhci-3.0";
-+        reg = <0x1b010000 0x10000>;
-+        interrupts = <GIC_SPI 265 IRQ_TYPE_LEVEL_HIGH>;
-+        voltage-ranges = <3300 3300>;
-+        bus-width = <4>;
-+        clocks = <&clk 7>, <&ahb_clk>;
-+        clock-names = "core", "iface";
-+        cap-sdio-irq;
-+        fujitsu,cmd-dat-delay-select;
-+    };
-+...
+Reviewed-by: Khalid Aziz <khalid@kernel.org>
 
----
-base-commit: 7bac2c97af4078d7a627500c9bcdd5b033f97718
-change-id: 20250524-milbeaut-5c0267202e2c
+--
+Khalid
 
-Best regards,
--- 
-Charan Pedumuru <charan.pedumuru@gmail.com>
+> 
+> Changes since v2:
+> - Dropped redundant dma_release_channel() calls from pxamci_remove() as
+>    devm_dma_request_chan() automatically handles resource cleanup.
+> - Added link to v2 for reference:
+>    https://lore.kernel.org/linux-mmc/20251014184657.111144-1-rakuram.e96@gmail.com/
+> 
+> Changes since v1:
+> Following Uwe Kleine-König’s suggestion:
+> - Replaced dma_request_chan() with devm_dma_request_chan() to make DMA
+>    channel allocation devm-managed and avoid manual release paths.
+> - Adopted dev_err_probe() for improved error reporting and consistent
+>    probe failure handling.
+> - Removed redundant NULL assignments and obsolete goto-based cleanup logic.
+> - Updated commit message to better describe the intent of the change.
+> - Added link to v1 for reference:
+>    https://lore.kernel.org/linux-mmc/20251007161948.12442-1-rakuram.e96@gmail.com/
+> 
+> Testing note:
+> I do not have access to appropriate hardware for runtime testing.
+> Any help verifying on actual hardware would be appreciated.
+> 
+> Build and Analysis:
+> This patch was compiled against the configuration file reported by
+> 0day CI in the above link (config: s390-randconfig-r071-20251004) using
+> `s390x-linux-gnu-gcc (Ubuntu 14.2.0-19ubuntu2) 14.2.0`.
+> 
+> Static analysis was performed with Smatch to ensure the reported warning
+> no longer reproduces after applying this fix.
+> 
+> Command used for verification:
+>    ARCH=s390 CROSS_COMPILE=s390x-linux-gnu- \
+>    ~/project/smatch/smatch_scripts/kchecker ./drivers/mmc/host/pxamci.c
+> 
+>   drivers/mmc/host/pxamci.c | 56 +++++++++++++--------------------------
+>   1 file changed, 18 insertions(+), 38 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> index 26d03352af63..b5ea058ed467 100644
+> --- a/drivers/mmc/host/pxamci.c
+> +++ b/drivers/mmc/host/pxamci.c
+> @@ -652,10 +652,9 @@ static int pxamci_probe(struct platform_device *pdev)
+>   	host->clkrt = CLKRT_OFF;
+>   
+>   	host->clk = devm_clk_get(dev, NULL);
+> -	if (IS_ERR(host->clk)) {
+> -		host->clk = NULL;
+> -		return PTR_ERR(host->clk);
+> -	}
+> +	if (IS_ERR(host->clk))
+> +		return dev_err_probe(dev, PTR_ERR(host->clk),
+> +					"Failed to acquire clock\n");
+>   
+>   	host->clkrate = clk_get_rate(host->clk);
+>   
+> @@ -703,46 +702,37 @@ static int pxamci_probe(struct platform_device *pdev)
+>   
+>   	platform_set_drvdata(pdev, mmc);
+>   
+> -	host->dma_chan_rx = dma_request_chan(dev, "rx");
+> -	if (IS_ERR(host->dma_chan_rx)) {
+> -		host->dma_chan_rx = NULL;
+> +	host->dma_chan_rx = devm_dma_request_chan(dev, "rx");
+> +	if (IS_ERR(host->dma_chan_rx))
+>   		return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
+>   				     "unable to request rx dma channel\n");
+> -	}
+>   
+> -	host->dma_chan_tx = dma_request_chan(dev, "tx");
+> -	if (IS_ERR(host->dma_chan_tx)) {
+> -		dev_err(dev, "unable to request tx dma channel\n");
+> -		ret = PTR_ERR(host->dma_chan_tx);
+> -		host->dma_chan_tx = NULL;
+> -		goto out;
+> -	}
+> +
+> +	host->dma_chan_tx = devm_dma_request_chan(dev, "tx");
+> +	if (IS_ERR(host->dma_chan_tx))
+> +		return dev_err_probe(dev, PTR_ERR(host->dma_chan_tx),
+> +					"unable to request tx dma channel\n");
+>   
+>   	if (host->pdata) {
+>   		host->detect_delay_ms = host->pdata->detect_delay_ms;
+>   
+>   		host->power = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
+> -		if (IS_ERR(host->power)) {
+> -			ret = PTR_ERR(host->power);
+> -			dev_err(dev, "Failed requesting gpio_power\n");
+> -			goto out;
+> -		}
+> +		if (IS_ERR(host->power))
+> +			return dev_err_probe(dev, PTR_ERR(host->power),
+> +						"Failed requesting gpio_power\n");
+>   
+>   		/* FIXME: should we pass detection delay to debounce? */
+>   		ret = mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
+> -		if (ret && ret != -ENOENT) {
+> -			dev_err(dev, "Failed requesting gpio_cd\n");
+> -			goto out;
+> -		}
+> +		if (ret && ret != -ENOENT)
+> +			return dev_err_probe(dev, ret, "Failed requesting gpio_cd\n");
+>   
+>   		if (!host->pdata->gpio_card_ro_invert)
+>   			mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+>   
+>   		ret = mmc_gpiod_request_ro(mmc, "wp", 0, 0);
+> -		if (ret && ret != -ENOENT) {
+> -			dev_err(dev, "Failed requesting gpio_ro\n");
+> -			goto out;
+> -		}
+> +		if (ret && ret != -ENOENT)
+> +			return dev_err_probe(dev, ret, "Failed requesting gpio_ro\n");
+> +
+>   		if (!ret)
+>   			host->use_ro_gpio = true;
+>   
+> @@ -759,16 +749,8 @@ static int pxamci_probe(struct platform_device *pdev)
+>   	if (ret) {
+>   		if (host->pdata && host->pdata->exit)
+>   			host->pdata->exit(dev, mmc);
+> -		goto out;
+>   	}
+>   
+> -	return 0;
+> -
+> -out:
+> -	if (host->dma_chan_rx)
+> -		dma_release_channel(host->dma_chan_rx);
+> -	if (host->dma_chan_tx)
+> -		dma_release_channel(host->dma_chan_tx);
+>   	return ret;
+>   }
+>   
+> @@ -791,8 +773,6 @@ static void pxamci_remove(struct platform_device *pdev)
+>   
+>   		dmaengine_terminate_all(host->dma_chan_rx);
+>   		dmaengine_terminate_all(host->dma_chan_tx);
+> -		dma_release_channel(host->dma_chan_rx);
+> -		dma_release_channel(host->dma_chan_tx);
+>   	}
+>   }
+>   
 
