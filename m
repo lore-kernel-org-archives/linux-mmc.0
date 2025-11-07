@@ -1,125 +1,136 @@
-Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [52.229.205.26])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id E4BDE2BE652;
-	Fri,  7 Nov 2025 09:03:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=52.229.205.26
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FE4F23A564
+	for <linux-mmc@vger.kernel.org>; Fri,  7 Nov 2025 14:17:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762506223; cv=none; b=uqcMyMXSOaH4SA2AGIiPRgTYWipe8PtLELOYoCPtrF4+3LN1cl9R0slqylD1AxfZmPxR+DP/6cdKTBq36L35mHI2km1SHgblC3C3f4vU+OyOQrxoSOPNt062KiEZQz4ICPBTQQrikr6GtTOn+CgyNIfjCw6ZspAcDxBWeyYeKjs=
+	t=1762525029; cv=none; b=pcj7i7nf/ElnsExqhgc/oVRcg72Nyll+35HkCsDhrO51FO7dQo9ormLYTIV5WrIvtQDbhg0UvlN6EF14BJm8HA2Jcp3F/hU7ATntHLMbGlkmmwEnPPuO1n1CeASW9CZUh6K/aPpeBEBqyhJkbQwSqSosR7apa343yfHjh4hyuRA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762506223; c=relaxed/simple;
-	bh=N6bL6ql3vlPuCcr22u3kfLRvPFOK/uKkuqNAYWxkwD4=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:Content-Type:
-	 MIME-Version:Message-ID; b=pvnyAYZJxC13JL8ok2QAQEla8F9CtwYniw2g/txxlc7Ilt13jm+gUjzp8R9UMVBQzckikLiI2SXiSLfeYQHpW762eO7qnBFOUdHOvBHS5p5AtT/9PY7pgf0ksD0ZCxAOZqMtLDhbEvR6psKbAKxI9BETVjh6mVdJiPtE88xadRM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=52.229.205.26
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
-Received: from hehuan1$eswincomputing.com ( [10.12.96.103] ) by
- ajax-webmail-app2 (Coremail) ; Fri, 7 Nov 2025 17:03:26 +0800 (GMT+08:00)
-Date: Fri, 7 Nov 2025 17:03:26 +0800 (GMT+08:00)
-X-CM-HeaderCharset: UTF-8
-From: "Huan He" <hehuan1@eswincomputing.com>
-To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-	conor+dt@kernel.org, jszhang@kernel.org, adrian.hunter@intel.com,
-	p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ningyu@eswincomputing.com, linmin@eswincomputing.com,
-	pinkesh.vaghela@einfochips.com, xuxiang@eswincomputing.com,
-	luyulin@eswincomputing.com, dongxuyang@eswincomputing.com,
-	zhangsenchuan@eswincomputing.com, weishangjuan@eswincomputing.com,
-	lizhi2@eswincomputing.com, caohang@eswincomputing.com
-Subject: Re: [PATCH v5 0/2] Add support for Eswin EIC7700 SD/eMMC controller
-X-Priority: 3
-X-Mailer: Coremail Webmail Server Version 2024.2-cmXT6 build
- 20241203(6b039d88) Copyright (c) 2002-2025 www.mailtech.cn
- mispb-72143050-eaf5-4703-89e0-86624513b4ce-eswincomputing.com
-In-Reply-To: <20251019115133.300-1-hehuan1@eswincomputing.com>
-References: <20251019115133.300-1-hehuan1@eswincomputing.com>
-Content-Transfer-Encoding: base64
-Content-Type: text/plain; charset=UTF-8
+	s=arc-20240116; t=1762525029; c=relaxed/simple;
+	bh=ZDojvFpwkc86Vneggax/ZOVs6WBS1eA7tZfZEwxALkE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Bepyu1C3XrL0mNWC28JSvBZdJeo4vfBCSU65zvrCzFjYW9Kc0ALVYKtNJwmFV927lG8tw299e82ZrlugcNVuGwFRci78LQBoEVR/S2jJwdC9BLCYG3nK/FKFdrrhsfKF1Rw35YUroZVAu5y53U/VoNK+GSJT1EN850Qkmi2gnlo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=aSFVdkpm; arc=none smtp.client-ip=209.85.221.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="aSFVdkpm"
+Received: by mail-wr1-f46.google.com with SMTP id ffacd0b85a97d-429c19b5de4so630595f8f.3
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Nov 2025 06:17:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1762525023; x=1763129823; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=mzsi+dNp+T2knF7qr9XbCjPuamEIJ82dLXer8FWdVBk=;
+        b=aSFVdkpm7QvfbNXYT6eViUVAlkqSBEJZlsWDJxJ/sA2ussZRBv7Si+KPjRABRiAZ18
+         vdZntKcx8kSJ+KwPBIWyJ6z7W+jsfrLj8aU19sj4uxuRLv+f+MTM9vdlh1Dzieud35XZ
+         grnvYr4JHPItt7jk9qLxTkOgMUuI4KmDk/r/oOQingPJmN0WreRYXlyToxXDi6btGMMJ
+         KDfDkZwkDkl/2HHGxVKLCP2/zDTm8bXLaLM9szLQqvs0UmdwITc07SlEyAOUM3ngN/zs
+         TDBmAP3vnuOuHR13TSnjk2DcK5K9yjGCIVlSYiBMr6lZ4cDSHBC99i4Nr0kkL9hucjl3
+         jC+w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762525023; x=1763129823;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mzsi+dNp+T2knF7qr9XbCjPuamEIJ82dLXer8FWdVBk=;
+        b=Wek5UQfu2O+2MbdvCk+xPitwuoa0H2GFAcN7aqlb6PGsqNA8483BueN91FPWseMYP6
+         h/OY7srsXlwXVR4MV91LomvTwDuJOSeVKU+9Mkg15MBvrVdfBFyzhdcxZWjqEmegK2E4
+         6uoRC3D9iIh20AvLUj5wi5aCzJWfHpZD4I37QZOvhXC15Y1MBdkQNBwxAJQp4iiiaHUl
+         Y0xG0x6aj1iqvn8eITrfZYQImV5pxbPNcVZ2W5oJ3pFiw3TFwHKOhZqFyrlDdLt9xTfu
+         fjXt9GKZ4oDAZGQvvyfbv1gHikxwUJsPYAfQyT62bW1W/RalchTiu5HsZxv7t1GVqhl0
+         Mnkg==
+X-Forwarded-Encrypted: i=1; AJvYcCVPNlWX+QyAp6c2Re1xl5YgFAKOKmpIWV28nGJwqg6ObbeiJZq4OemNiCaBNsnplieNEsTi/xQK8P8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxJXi5NLbBzytskzs37ai8/JT1YVxxbw8Ka1VdTBpOalxWXkrg7
+	zd1fi1RA5AVdmqyp/MeGzIIV3vRjL+EIgGzMQUEHtCcsBW+l1GqSblLLpYNOW8j7OAaJYNVgqM4
+	hrxvc
+X-Gm-Gg: ASbGncujy2uxCRVM6r2LwxzGnsOE4mifNKJvZ1UnETOb+k/OJyk+VxZHK5Pa0vRILnp
+	HFcMZHOR3ICLw0wycz4Z3f3BSfI29R/t6F03mlitYgGCW4R4H85Ptfc+CkCO2xnhAM2PUC5SbQq
+	eg1meFGoa1SRu3sG8R2VgKzEGVjvVtNMarcdvg9OXSVftJspuUmm1xFPKu4WG9CjuT0OuS190G8
+	qot+w9ABF9tCARbTc6U7IvQhAQ2xNDEW64hv/iKI7hILtxPYeSdHNj1zj5qKRkVDhcCt8FXKzeB
+	NOPeicXAlZK5KFiJmmaYTXYzCxVgLUc4kWXQD9yOR2Cv9LJUd1kXRXTqp+ojjkyIibqC4A2Xtfh
+	YlpXTrHbM0vaBvpsyTTJIvEcjFrP+laz5CIHcYals3kPJOqgWGtEJaVokLZQq4ckgxgkKXHXEr3
+	bC3Y95YGSdBusXf0+7T47plx83
+X-Google-Smtp-Source: AGHT+IFH0LXgWeIJgtl+gQta4fjJfleBNDxC0sB4rnU1I/EiNKg4zTlVBSSwvX1AJqwzlKSKz64XVQ==
+X-Received: by 2002:a05:6000:2dc9:b0:427:928:787f with SMTP id ffacd0b85a97d-42ae5888a46mr3117979f8f.21.1762525023274;
+        Fri, 07 Nov 2025 06:17:03 -0800 (PST)
+Received: from localhost.localdomain ([2a00:6d43:105:c401:e307:1a37:2e76:ce91])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-42ab6a7ad67sm5989764f8f.0.2025.11.07.06.17.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 07 Nov 2025 06:17:02 -0800 (PST)
+From: Marco Crivellari <marco.crivellari@suse.com>
+To: linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Cc: Tejun Heo <tj@kernel.org>,
+	Lai Jiangshan <jiangshanlai@gmail.com>,
+	Frederic Weisbecker <frederic@kernel.org>,
+	Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
+	Marco Crivellari <marco.crivellari@suse.com>,
+	Michal Hocko <mhocko@suse.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: core: add WQ_PERCPU to alloc_workqueue users
+Date: Fri,  7 Nov 2025 15:16:54 +0100
+Message-ID: <20251107141654.226947-1-marco.crivellari@suse.com>
+X-Mailer: git-send-email 2.51.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Message-ID: <5bbfc393.d0b.19a5d8e6f08.Coremail.hehuan1@eswincomputing.com>
-X-Coremail-Locale: zh_CN
-X-CM-TRANSID:TQJkCgDnK6_ftQ1pbeNJAA--.1102W
-X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/1tbiAgETCmkMzdo1KQAB
-	s1
-X-Coremail-Antispam: 1Ur529EdanIXcx71UUUUU7IcSsGvfJ3iIAIbVAYjsxI4VWxJw
-	CS07vEb4IE77IF4wCS07vE1I0E4x80FVAKz4kxMIAIbVAFxVCaYxvI4VCIwcAKzIAtYxBI
-	daVFxhVjvjDU=
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-PiBVcGRhdGVzOgo+IAo+ICAgQ2hhbmdlcyBpbiB2NToKPiAgIC0gVXBkYXRlIHNucHMsZHdjbXNo
-Yy1zZGhjaS55YW1sCj4gICAgIC0gVXBkYXRlIGRlc2NyaXB0aW9uIGZvciBlc3dpbixoc3Atc3At
-Y3NyCj4gICAgIC0gRml4IGVzd2luLGhzcC1zcC1jc3IgcHJvcGVydHkgc3RydWN0dXJlIHRvIHVz
-ZSBuZXN0ZWQgaXRlbXMgZm9ybWF0Cj4gICAgIC0gUmVtb3ZlIHVubmVjZXNzYXJ5ICd8JyBzeW1i
-b2wgZnJvbSBkZXNjcmlwdGlvbiBmaWVsZAo+ICAgICAtIFdyYXAgZGVzY3JpcHRpb24gbGluZXMg
-dG8gODAtY2hhcnMKPiAgIC0gVXBkYXRlIHNkaGNpLW9mLWR3Y21zaGMuYwo+ICAgICAtIFJlbW92
-ZSBpbmFwcHJvcHJpYXRlIFJlcG9ydGVkLWJ5IGFuZCBDbG9zZXMgdGFncywgYXMgdGhlIGZpeGVz
-IGFyZSBwYXJ0Cj4gICAgICAgb2YgdGhpcyBwYXRjaAo+ICAgICAtIEZpeCBlcnJvciBjb2RlIHJl
-dHVybiBpbiBlaWM3NzAwX2luaXQoKSB3aGVuIHN5c2Nvbl9ub2RlX3RvX3JlZ21hcCgpCj4gICAg
-ICAgZmFpbHMgKHJldHVybiBQVFJfRVJSKGhzcF9yZWdtYXApKQo+ICAgICAtIFJlbW92ZSB1bm5l
-Y2Vzc2FyeSBjbG9jayBkaXNhYmxlL2VuYWJsZSBvcGVyYXRpb25zIHdoZW4gY2hhbmdpbmcgY2xv
-Y2sKPiAgICAgICByYXRlcwo+ICAgICAtIFJlbW92ZSB1bm5lY2Vzc2FyeSBwYXJlbnRoZXNlcyBh
-cm91bmQgflBIWV9DTkZHX1JTVE5fREVBU1NFUlQgaW4KPiAgICAgICBzZGhjaV9laWM3NzAwX2Nv
-bmZpZ19waHkoKQo+ICAgICAtIFVwZGF0ZSBtaXNsZWFkaW5nIGNvbW1lbnRzOiBjaGFuZ2UgIlNE
-SU8gc3BlY2lmaWMiIHRvICJTRCBzcGVjaWZpYyIgaW4KPiAgICAgICB0dW5pbmcgbG9naWMKPiAg
-ICAgLSBGaXggbXVsdGktbGluZSBjb21tZW50IGZvcm1hdAo+ICAgLSBMaW5rIHRvIHY0OiBodHRw
-czovL2xvcmUua2VybmVsLm9yZy9hbGwvMjAyNTEwMTExMTEwMzkuNTMzLTEtaGVodWFuMUBlc3dp
-bmNvbXB1dGluZy5jb20vCj4gCj4gICBDaGFuZ2VzIGluIHY0Ogo+ICAgLSBVcGRhdGUgc2RoY2kt
-b2YtZHdjbXNoYy5jCj4gICAgIC0gQWRkcmVzcyB0aGUgY29tcGlsZSBlcnJvciBmcm9tIGtlcm5l
-bCB0ZXN0IHJvYm90Cj4gICAgICAgLSBSZW1vdmUgZHVwbGljYXRlIGltcGxlbWVudGF0aW9uIG9m
-IGR3Y21zaGNfZW5hYmxlX2NhcmRfY2xrKCkKPiAgICAgICAtIEFkZCBtaXNzaW5nIGR3Y21zaGNf
-ZGlzYWJsZV9jYXJkX2NsaygpIGZ1bmN0aW9uIGltcGxlbWVudGF0aW9uCj4gICAtIExpbmsgdG8g
-djM6IGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2FsbC8yMDI1MTAxMDA5MzgwNy4xNTc5LTEtaGVo
-dWFuMUBlc3dpbmNvbXB1dGluZy5jb20vCj4gCj4gICBDaGFuZ2VzIGluIHYzOgo+ICAgLSBVcGRh
-dGUgc25wcyxkd2Ntc2hjLXNkaGNpLnlhbWwKPiAgICAgLSBEZWxldGUgY2xvY2stb3V0cHV0LW5h
-bWVzLCAnI2Nsb2NrLWNlbGxzJyBhbmQgZXN3aW4sc3lzY3JnLWNzcgo+ICAgICAtIFVwZGF0ZSBk
-ZXNjcmlwdGlvbiBmb3IgZXN3aW4saHNwLXNwLWNzcgo+ICAgICAtIFVwZGF0ZSBkcml2ZS1pbXBl
-ZGFuY2Utb2htCj4gICAgIC0gVXBkYXRlIHRoZSBpdGVtIG9mIHJlc2V0LW5hbWVzCj4gICAtIFVw
-ZGF0ZSBzZGhjaS1vZi1kd2Ntc2hjLmMKPiAgICAgLSBBZGQgZGVzY3JpcHRpb25zIGZvciBQSFkg
-cmVnaXN0ZXJzCj4gICAgIC0gU2ltcGxpZnkgY2xvY2sgbWFuYWdlbWVudChyZW1vdmUgY3VzdG9t
-IGNsb2NrIHByb3ZpZGVyLCB1c2UKPiAgICAgICBzdGFuZGFyZCBjbGsgQVBJKQo+ICAgICAtIFJl
-cGxhY2UgbWFnaWMgbnVtYmVycyB3aXRoIEdFTk1BU0soKSBvciBGSUVMRF9QUkVQKCkgbWFjcm9z
-Cj4gICAgIC0gQWRkIGNvbW1lbnRzIGV4cGxhaW5pbmcgSFNQIHN0YWJpbGl0eSBhc3NlcnRpb24g
-d3JpdGVzCj4gICAgIC0gQWRqdXN0IGxpbmUgd3JhcHBpbmcgdG8gZml0IHdpdGhpbiAxMDAtY29s
-dW1uCj4gICAgIC0gRGVsZXRlIGZvcndhcmQgZGVjbGFyYXRpb25zIGJ5IG1vdmluZyBmdW5jdGlv
-biBkZWZpbml0aW9ucwo+ICAgICAtIFJlbmFtZSB2YXJpYWJsZSBpc19zZGlvIHRvIGlzX3NkCj4g
-ICAgIC0gUmVwbGFjZSB1bmNsZWFyIG1hY3JvcyB3aXRoIG1lYW5pbmdmdWwgYWx0ZXJuYXRpdmVz
-Cj4gICAtIExpbmsgdG8gdjI6IGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2FsbC8yMDI1MDkxMjA5
-MzQ1MS4xMjUtMS1oZWh1YW4xQGVzd2luY29tcHV0aW5nLmNvbS8KPiAKPiAgIENoYW5nZXMgaW4g
-djI6Cj4gICAtIERlbGV0ZSB0aGUgcHJldmlvdXMgc2VwYXJhdGUgZHJpdmVyIGFuZCB5YW1sIGJp
-bmRpbmcgZmlsZQo+ICAgLSBVcGRhdGUgc25wcyxkd2Ntc2hjLXNkaGNpLnlhbWwgdG8gYWRkIHN1
-cHBvcnQgZm9yIEVzd2luIEVJQzc3MDAKPiAgICAgLSBBZGQgdGhlIG5ldyBjb21wYXV0aWJsZSBz
-dHJpbmc6ICJlc3dpbixlaWM3NzAwLWR3Y21zaGMiCj4gICAgIC0gQWRkIG5ldyBwcm9wZXJ0aWVz
-OiBjbG9jay1vdXRwdXQtbmFtZXMsICcjY2xvY2stY2VsbHMnLAo+ICAgICAgIGRyaXZlLWltcGVk
-YW5jZS1vaG0sIGVzd2luLGhzcC1zcC1jc3IgYW5kIGVzd2luLHN5c2NyZy1jc3IKPiAgICAgLSBB
-ZGQgY3VzdG9taXplZCByZXNldC1uYW1lcyBmb3IgRUlDNzcwMCBwbGF0Zm9ybQo+ICAgLSBVcGRh
-dGUgc2RoY2ktb2YtZHdjbXNoYy5jIHRvIGFkZCBzdXBwb3J0IGZvciBFc3dpbiBFSUM3NzAwCj4g
-ICAgIC0gQWRkIGEgbmV3IHN0cnVjdCBlaWM3NzAwX3ByaXYgdG8gaG9sZCBFc3dpbi1zcGVjaWZp
-YyBkYXRhLAo+ICAgICAgIGluY2x1ZGluZyBjbG9jayBwaGFzZXMsIHJlZ2lzdGVyIG1hcHBpbmdz
-LCBhbmQgZHJpdmUKPiAgICAgICBpbXBlZGFuY2UgY29uZmlndXJhdGlvbgo+ICAgICAtIEltcGxl
-bWVudCBFSUM3NzAwLXNwZWNpZmljIHNkaGNpX29wcwo+ICAgICAgIC0gc2V0X2Nsb2NrOiBzdXBw
-b3J0IGNvcmUgY2xvY2sgY29uZmlndXJhdGlvbiB3aXRoIHBoYXNlIGRlbGF5Cj4gICAgICAgLSBy
-ZXNldDogYWRkIFBIWSByZXNldCBhbmQgY29uZmlndXJhdGlvbgo+ICAgICAgIC0gc2V0X3Voc19z
-aWduYWxpbmc6IHN1cHBvcnQgSFM0MDAgRExMIGxvY2sKPiAgICAgICAtIHBsYXRmb3JtX2V4ZWN1
-dGVfdHVuaW5nOiBpbXBsZW1lbnQgZGVsYXkgbGluZSB0dW5pbmcgYW5kIHBoYXNlCj4gICAgICAg
-ICBjb2RlIGFkanVzdG1lbnQKPiAgICAgLSBBZGQgaW5pdGlhbGl6YXRpb24gcm91dGluZSAoZWlj
-NzcwMF9pbml0KQo+ICAgICAtIEludGVncmF0ZSB0aGUgbmV3IHBsYXRmb3JtIGRhdGEgYW5kIG9w
-cyBpbnRvIHRoZSBkcml2ZXIncyBtYXRjaCB0YWJsZQo+ICAgLSBMaW5rIHRvIHYxOiBodHRwczov
-L2xvcmUua2VybmVsLm9yZy9hbGwvMjAyNTA1MTYwOTEyNTkuNzc0LTEtZG9uZ3h1eWFuZ0Blc3dp
-bmNvbXB1dGluZy5jb20vCj4gCj4gSHVhbiBIZSAoMik6Cj4gICBkdC1iaW5kaW5nczogbW1jOiBz
-ZGhjaS1vZi1kd2Ntc2hjOiBBZGQgRXN3aW4gRUlDNzcwMAo+ICAgbW1jOiBzZGhjaS1vZi1kd2Nt
-c2hjOiBBZGQgc3VwcG9ydCBmb3IgRXN3aW4gRUlDNzcwMAo+IAo+ICAuLi4vYmluZGluZ3MvbW1j
-L3NucHMsZHdjbXNoYy1zZGhjaS55YW1sICAgICAgfCAgNTcgKy0KPiAgZHJpdmVycy9tbWMvaG9z
-dC9zZGhjaS1vZi1kd2Ntc2hjLmMgICAgICAgICAgIHwgNTAyICsrKysrKysrKysrKysrKysrLQo+
-ICAyIGZpbGVzIGNoYW5nZWQsIDU0MiBpbnNlcnRpb25zKCspLCAxNyBkZWxldGlvbnMoLSkKPiAK
-CkhpIFVsZiwgUm9iLCBhbGwsCgpUaGFuayB5b3UgZm9yIHRoZSBkaXNjdXNzaW9uIGFuZCBmZWVk
-YmFjay4KClJlZ2FyZGluZyB0aGUgZHRfYmluZGluZ19jaGVjayBlcnJvciBwcmV2aW91c2x5IHJl
-cG9ydGVkIGZvciB0aGUKZXN3aW4saHNwLXNwLWNzciBwcm9wZXJ0eSBpbiB0aGUgZXN3aW4sZWlj
-NzcwMC1ldGgueWFtbCBiaW5kaW5nLCB3ZSBoYXZlCnN1Ym1pdHRlZCBhIGZpeCBwYXRjaCB0aGF0
-IGhhcyBub3cgYmVlbiBhcHBsaWVkOgpodHRwczovL2dpdC5rZXJuZWwub3JnL25ldGRldi9uZXQt
-bmV4dC9jLzA1NjdjODRkNjgzZAoKQ291bGQgeW91IHBsZWFzZSByZXZpZXcgdGhlIG1tYy1yZWxh
-dGVkIGNoYW5nZXM/ClRoYW5rcyBpbiBhZHZhbmNlIGZvciB5b3VyIHRpbWUgYW5kIGNvbnNpZGVy
-YXRpb24uCgpCZXN0IHJlZ2FyZHMsCkh1YW4gSGUK
+Currently if a user enqueues a work item using schedule_delayed_work() the
+used wq is "system_wq" (per-cpu wq) while queue_delayed_work() use
+WORK_CPU_UNBOUND (used when a cpu is not specified). The same applies to
+schedule_work() that is using system_wq and queue_work(), that makes use
+again of WORK_CPU_UNBOUND.
+This lack of consistency cannot be addressed without refactoring the API.
+
+alloc_workqueue() treats all queues as per-CPU by default, while unbound
+workqueues must opt-in via WQ_UNBOUND.
+
+This default is suboptimal: most workloads benefit from unbound queues,
+allowing the scheduler to place worker threads where they’re needed and
+reducing noise when CPUs are isolated.
+
+This continues the effort to refactor workqueue APIs, which began with
+the introduction of new workqueues and a new alloc_workqueue flag in:
+
+commit 128ea9f6ccfb ("workqueue: Add system_percpu_wq and system_dfl_wq")
+commit 930c2ea566af ("workqueue: Add new WQ_PERCPU flag")
+
+This change adds a new WQ_PERCPU flag to explicitly request
+alloc_workqueue() to be per-cpu when WQ_UNBOUND has not been specified.
+
+With the introduction of the WQ_PERCPU flag (equivalent to !WQ_UNBOUND),
+any alloc_workqueue() caller that doesn’t explicitly specify WQ_UNBOUND
+must now use WQ_PERCPU.
+
+Once migration is complete, WQ_UNBOUND can be removed and unbound will
+become the implicit default.
+
+Suggested-by: Tejun Heo <tj@kernel.org>
+Signed-off-by: Marco Crivellari <marco.crivellari@suse.com>
+---
+ drivers/mmc/core/block.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index c0ffe0817fd4..6a651ddccf28 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -3275,7 +3275,8 @@ static int mmc_blk_probe(struct mmc_card *card)
+ 	mmc_fixup_device(card, mmc_blk_fixups);
+ 
+ 	card->complete_wq = alloc_workqueue("mmc_complete",
+-					WQ_MEM_RECLAIM | WQ_HIGHPRI, 0);
++					WQ_MEM_RECLAIM | WQ_HIGHPRI | WQ_PERCPU,
++					0);
+ 	if (!card->complete_wq) {
+ 		pr_err("Failed to create mmc completion workqueue");
+ 		return -ENOMEM;
+-- 
+2.51.1
+
