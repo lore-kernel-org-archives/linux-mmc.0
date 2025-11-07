@@ -1,178 +1,125 @@
-Received: from mail-m128172.netease.com (mail-m128172.netease.com [103.209.128.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD0742F83B8
-	for <linux-mmc@vger.kernel.org>; Fri,  7 Nov 2025 01:39:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.209.128.172
+Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [52.229.205.26])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id E4BDE2BE652;
+	Fri,  7 Nov 2025 09:03:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=52.229.205.26
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762479563; cv=none; b=kf4UZMeAMys8drIFtn71hTpqP5hLc6peXxc21I/hXULPrDIXtkB/g0PP+Acc7kP3VLHvy+iWw5Hseol3YzMotXi8gJQtxOFn8WbKuyUbaXBVLcj16fwyZm9uvRvDTOyhWiJ8/TDwf02yiIPRNa7oeS4/6YSa/mhqPWsgNvw9tdo=
+	t=1762506223; cv=none; b=uqcMyMXSOaH4SA2AGIiPRgTYWipe8PtLELOYoCPtrF4+3LN1cl9R0slqylD1AxfZmPxR+DP/6cdKTBq36L35mHI2km1SHgblC3C3f4vU+OyOQrxoSOPNt062KiEZQz4ICPBTQQrikr6GtTOn+CgyNIfjCw6ZspAcDxBWeyYeKjs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762479563; c=relaxed/simple;
-	bh=JisxTYeEBHtGpujlREjBFIwlfBMKp3ga2vJX7p5jkQM=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=HmwVCrfXt8roTLBS92CrmWoZAmZg5H7N0bHJmzbdTLvWgJKRFqj4xUMzk5Tyh0Wb2oN/shkKnybE4DER6kCT1dZ7pE6Me3mvK0aTAETgv8RP6u9QIEEEL5fxmNeFpAClRuiZZkmxeG6ojtBMkxdT2jxXfEPtAFhr5RzEtAfAwsE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=iXI0AM96; arc=none smtp.client-ip=103.209.128.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="iXI0AM96"
-Received: from [172.16.12.129] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 28b4a78c4;
-	Fri, 7 Nov 2025 09:39:11 +0800 (GMT+08:00)
-Message-ID: <b568ac6f-5089-4e40-8e17-2c23e9ca85d6@rock-chips.com>
-Date: Fri, 7 Nov 2025 09:39:07 +0800
+	s=arc-20240116; t=1762506223; c=relaxed/simple;
+	bh=N6bL6ql3vlPuCcr22u3kfLRvPFOK/uKkuqNAYWxkwD4=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:Content-Type:
+	 MIME-Version:Message-ID; b=pvnyAYZJxC13JL8ok2QAQEla8F9CtwYniw2g/txxlc7Ilt13jm+gUjzp8R9UMVBQzckikLiI2SXiSLfeYQHpW762eO7qnBFOUdHOvBHS5p5AtT/9PY7pgf0ksD0ZCxAOZqMtLDhbEvR6psKbAKxI9BETVjh6mVdJiPtE88xadRM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=52.229.205.26
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
+Received: from hehuan1$eswincomputing.com ( [10.12.96.103] ) by
+ ajax-webmail-app2 (Coremail) ; Fri, 7 Nov 2025 17:03:26 +0800 (GMT+08:00)
+Date: Fri, 7 Nov 2025 17:03:26 +0800 (GMT+08:00)
+X-CM-HeaderCharset: UTF-8
+From: "Huan He" <hehuan1@eswincomputing.com>
+To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+	conor+dt@kernel.org, jszhang@kernel.org, adrian.hunter@intel.com,
+	p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: ningyu@eswincomputing.com, linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com, xuxiang@eswincomputing.com,
+	luyulin@eswincomputing.com, dongxuyang@eswincomputing.com,
+	zhangsenchuan@eswincomputing.com, weishangjuan@eswincomputing.com,
+	lizhi2@eswincomputing.com, caohang@eswincomputing.com
+Subject: Re: [PATCH v5 0/2] Add support for Eswin EIC7700 SD/eMMC controller
+X-Priority: 3
+X-Mailer: Coremail Webmail Server Version 2024.2-cmXT6 build
+ 20241203(6b039d88) Copyright (c) 2002-2025 www.mailtech.cn
+ mispb-72143050-eaf5-4703-89e0-86624513b4ce-eswincomputing.com
+In-Reply-To: <20251019115133.300-1-hehuan1@eswincomputing.com>
+References: <20251019115133.300-1-hehuan1@eswincomputing.com>
+Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Peter Korsgaard <peter@korsgaard.com>
-Subject: Re: [PATCH 1/2] mmc-utils: lsmmc.c: print_mmc_cid(): correct
- year/month parsing
-To: Avri Altman <Avri.Altman@sandisk.com>
-References: <20251104200008.940057-1-peter@korsgaard.com>
- <af77b269-a9e3-470b-a6bf-81636235bf5e@rock-chips.com>
- <87qzud6jq8.fsf@dell.be.48ers.dk>
- <77ce48fa-dfdf-43c9-8094-c1c47ff48aac@rock-chips.com>
- <PH7PR16MB619676787C5B72C51598EFEBE5C5A@PH7PR16MB6196.namprd16.prod.outlook.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <PH7PR16MB619676787C5B72C51598EFEBE5C5A@PH7PR16MB6196.namprd16.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9a5bf7b22b09cckunma417e9a3f45ea3
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGR8ZTVZIH0pCGh9KGk4eTE5WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=iXI0AM96PW3vQhgweNf4oyv3yvgy8tJoz3+/LKGFwB+lACxE5sUcM7GhNNyudmlk2Z397B3Q5+hcovMElZUDTerq1Q41E8eh77colWfD3lZFIyt9SVfFV3k+0dsJDEwjdDOQQlYNacRKLAxtNA8u1lg3ZDXiIWBr66PW46pLOKo=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=n2wJBhwT1kVUStvlWRfnOkzrTGJ7jDGO7K/Sduv6Z+M=;
-	h=date:mime-version:subject:message-id:from;
+Message-ID: <5bbfc393.d0b.19a5d8e6f08.Coremail.hehuan1@eswincomputing.com>
+X-Coremail-Locale: zh_CN
+X-CM-TRANSID:TQJkCgDnK6_ftQ1pbeNJAA--.1102W
+X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/1tbiAgETCmkMzdo1KQAB
+	s1
+X-Coremail-Antispam: 1Ur529EdanIXcx71UUUUU7IcSsGvfJ3iIAIbVAYjsxI4VWxJw
+	CS07vEb4IE77IF4wCS07vE1I0E4x80FVAKz4kxMIAIbVAFxVCaYxvI4VCIwcAKzIAtYxBI
+	daVFxhVjvjDU=
 
-在 2025/11/06 星期四 3:57, Avri Altman 写道:
-> 
-> 
->> -----Original Message-----
->> From: Shawn Lin <shawn.lin@rock-chips.com>
->> Sent: Wednesday, November 5, 2025 9:24 AM
->> To: Peter Korsgaard <peter@korsgaard.com>
->> Cc: shawn.lin@rock-chips.com; linux-mmc@vger.kernel.org; Avri Altman
->> <avri.altman@wdc.com>; Ulf Hansson <ulf.hansson@linaro.org>
->> Subject: Re: [PATCH 1/2] mmc-utils: lsmmc.c: print_mmc_cid(): correct
->> year/month parsing
->>
->> CAUTION: This email originated from outside of Sandisk. Do not click on links or
->> open attachments unless you recognize the sender and know that the contents
->> are safe.
->>
->>
->> 在 2025/11/05 星期三 15:07, Peter Korsgaard 写道:
->>>>>>>> "Shawn" == Shawn Lin <shawn.lin@rock-chips.com> writes:
->>>
->>> Hi,
->>>
->>>    > From the JESD84-B51, section 7.2.7,
->>>
->>>    > For e•MMC 4.41 and later devices, indicated by a value larger than 4 in
->>>    > EXT_CSD_REV [192], the 4-bit“y” field shall roll over after 2012, so
->>>    > that y=0 shall be used for 2013. See Table 77 for a list of valid y
->>>    > values for specific e•MMC versions.
->>>
->>>    > So mdt_year + 1997 seems wrong, too.
->>>
->>> That tweak is even not enough, E.G. I see the kernel does:
->>>
->>>          if (card->ext_csd.rev >= 5) {
->>>                   /* Adjust production date as per JEDEC JESD84-B451 */
->>>                   if (card->cid.year < 2010)
->>>                           card->cid.year += 16;
->>>
->>> 2009 + 16 = 2025, so what will happen in a few months?
->>>
->>
->> TBH, I don't know if there is any update from JEDEC. :)
-> Hi,
-> Yeah - they noticed that as well and proposed a similar approach by extending the ext-csd-rev to 9.0.
-> I had the code ready for a while now but somehow failed to submit it yet.
-> Here it is.
-> Thanks for fixing the year-month misplacement.
-> 
-> Thanks,
-> Avri
-> 
-> 
->  From c0e5ec1d3670161444943c8984b6cdafb82fac67 Mon Sep 17 00:00:00 2001
-> From: Avri Altman <avri.altman@sandisk.com>
-> Date: Thu, 13 Mar 2025 10:10:49 +0200
-> Subject: [PATCH] mmc: core: Adjust MDT beyond 2025
-> MIME-Version: 1.0
-> Content-Type: text/plain; charset=UTF-8
-> Content-Transfer-Encoding: 8bit
-> 
-> JEDEC JC64.1 proposal, which was recently approved, increases the
-
-Ah, I thinks I should have checked the JESD84-B51b.
-
-> manufacturing year limit for eMMC devices. The eMMC manufacturing year
-> is stored in a 4-bit field in the CID register. Originally, it covered
-> 1997–2012. Later, with EXT_CSD_REV=8, it was extended up to 2025. Now,
-> with EXT_CSD_REV=9, the range is rolled over by another 16 years, up to
-> 2038.
-> 
-> The mapping is as follows:
-> 
-> | cid[8..11] | ver ≤ 4 | rev > 4 | rev > 8 |
-> |------------|---------|---------|---------|
-> | 0          | 1997    | 2013    | 2029    |
-> | 1          | 1998    | 2014    | 2030    |
-> | 2          | 1999    | 2015    | 2031    |
-> | 3          | 2000    | 2016    | 2032    |
-> | 4          | 2001    | 2017    | 2033    |
-> | 5          | 2002    | 2018    | 2034    |
-> | 6          | 2003    | 2019    | 2035    |
-> | 7          | 2004    | 2020    | 2036    |
-> | 8          | 2005    | 2021    | 2037    |
-> | 9          | 2006    | 2022    | 2038    |
-> | 10         | 2007    | 2023    |         |
-> | 11         | 2008    | 2024    |         |
-> | 12         | 2009    | 2025    |         |
-> | 13         | 2010    |         | 2026    |
-> | 14         | 2011    |         | 2027    |
-> | 15         | 2012    |         | 2028    |
-> 
-> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
-
-
-LGTM,
-
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-> ---
->   drivers/mmc/core/mmc.c | 7 +++++++
->   1 file changed, 7 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 3e7d9437477c..8f355a72b84c 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -672,6 +672,13 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->   					(card->ext_csd.rel_param &
->   					 EXT_CSD_WR_REL_PARAM_EN_RPMB_REL_WR);
->   	}
-> +
-> +	if (card->ext_csd.rev >= 9) {
-> +		/* Adjust production date as per JEDEC JC64.1 */
-> +		if (card->cid.year < 2023)
-> +			card->cid.year += 16;
-> +	}
-> +
->   out:
->   	return err;
->   }
-
+PiBVcGRhdGVzOgo+IAo+ICAgQ2hhbmdlcyBpbiB2NToKPiAgIC0gVXBkYXRlIHNucHMsZHdjbXNo
+Yy1zZGhjaS55YW1sCj4gICAgIC0gVXBkYXRlIGRlc2NyaXB0aW9uIGZvciBlc3dpbixoc3Atc3At
+Y3NyCj4gICAgIC0gRml4IGVzd2luLGhzcC1zcC1jc3IgcHJvcGVydHkgc3RydWN0dXJlIHRvIHVz
+ZSBuZXN0ZWQgaXRlbXMgZm9ybWF0Cj4gICAgIC0gUmVtb3ZlIHVubmVjZXNzYXJ5ICd8JyBzeW1i
+b2wgZnJvbSBkZXNjcmlwdGlvbiBmaWVsZAo+ICAgICAtIFdyYXAgZGVzY3JpcHRpb24gbGluZXMg
+dG8gODAtY2hhcnMKPiAgIC0gVXBkYXRlIHNkaGNpLW9mLWR3Y21zaGMuYwo+ICAgICAtIFJlbW92
+ZSBpbmFwcHJvcHJpYXRlIFJlcG9ydGVkLWJ5IGFuZCBDbG9zZXMgdGFncywgYXMgdGhlIGZpeGVz
+IGFyZSBwYXJ0Cj4gICAgICAgb2YgdGhpcyBwYXRjaAo+ICAgICAtIEZpeCBlcnJvciBjb2RlIHJl
+dHVybiBpbiBlaWM3NzAwX2luaXQoKSB3aGVuIHN5c2Nvbl9ub2RlX3RvX3JlZ21hcCgpCj4gICAg
+ICAgZmFpbHMgKHJldHVybiBQVFJfRVJSKGhzcF9yZWdtYXApKQo+ICAgICAtIFJlbW92ZSB1bm5l
+Y2Vzc2FyeSBjbG9jayBkaXNhYmxlL2VuYWJsZSBvcGVyYXRpb25zIHdoZW4gY2hhbmdpbmcgY2xv
+Y2sKPiAgICAgICByYXRlcwo+ICAgICAtIFJlbW92ZSB1bm5lY2Vzc2FyeSBwYXJlbnRoZXNlcyBh
+cm91bmQgflBIWV9DTkZHX1JTVE5fREVBU1NFUlQgaW4KPiAgICAgICBzZGhjaV9laWM3NzAwX2Nv
+bmZpZ19waHkoKQo+ICAgICAtIFVwZGF0ZSBtaXNsZWFkaW5nIGNvbW1lbnRzOiBjaGFuZ2UgIlNE
+SU8gc3BlY2lmaWMiIHRvICJTRCBzcGVjaWZpYyIgaW4KPiAgICAgICB0dW5pbmcgbG9naWMKPiAg
+ICAgLSBGaXggbXVsdGktbGluZSBjb21tZW50IGZvcm1hdAo+ICAgLSBMaW5rIHRvIHY0OiBodHRw
+czovL2xvcmUua2VybmVsLm9yZy9hbGwvMjAyNTEwMTExMTEwMzkuNTMzLTEtaGVodWFuMUBlc3dp
+bmNvbXB1dGluZy5jb20vCj4gCj4gICBDaGFuZ2VzIGluIHY0Ogo+ICAgLSBVcGRhdGUgc2RoY2kt
+b2YtZHdjbXNoYy5jCj4gICAgIC0gQWRkcmVzcyB0aGUgY29tcGlsZSBlcnJvciBmcm9tIGtlcm5l
+bCB0ZXN0IHJvYm90Cj4gICAgICAgLSBSZW1vdmUgZHVwbGljYXRlIGltcGxlbWVudGF0aW9uIG9m
+IGR3Y21zaGNfZW5hYmxlX2NhcmRfY2xrKCkKPiAgICAgICAtIEFkZCBtaXNzaW5nIGR3Y21zaGNf
+ZGlzYWJsZV9jYXJkX2NsaygpIGZ1bmN0aW9uIGltcGxlbWVudGF0aW9uCj4gICAtIExpbmsgdG8g
+djM6IGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2FsbC8yMDI1MTAxMDA5MzgwNy4xNTc5LTEtaGVo
+dWFuMUBlc3dpbmNvbXB1dGluZy5jb20vCj4gCj4gICBDaGFuZ2VzIGluIHYzOgo+ICAgLSBVcGRh
+dGUgc25wcyxkd2Ntc2hjLXNkaGNpLnlhbWwKPiAgICAgLSBEZWxldGUgY2xvY2stb3V0cHV0LW5h
+bWVzLCAnI2Nsb2NrLWNlbGxzJyBhbmQgZXN3aW4sc3lzY3JnLWNzcgo+ICAgICAtIFVwZGF0ZSBk
+ZXNjcmlwdGlvbiBmb3IgZXN3aW4saHNwLXNwLWNzcgo+ICAgICAtIFVwZGF0ZSBkcml2ZS1pbXBl
+ZGFuY2Utb2htCj4gICAgIC0gVXBkYXRlIHRoZSBpdGVtIG9mIHJlc2V0LW5hbWVzCj4gICAtIFVw
+ZGF0ZSBzZGhjaS1vZi1kd2Ntc2hjLmMKPiAgICAgLSBBZGQgZGVzY3JpcHRpb25zIGZvciBQSFkg
+cmVnaXN0ZXJzCj4gICAgIC0gU2ltcGxpZnkgY2xvY2sgbWFuYWdlbWVudChyZW1vdmUgY3VzdG9t
+IGNsb2NrIHByb3ZpZGVyLCB1c2UKPiAgICAgICBzdGFuZGFyZCBjbGsgQVBJKQo+ICAgICAtIFJl
+cGxhY2UgbWFnaWMgbnVtYmVycyB3aXRoIEdFTk1BU0soKSBvciBGSUVMRF9QUkVQKCkgbWFjcm9z
+Cj4gICAgIC0gQWRkIGNvbW1lbnRzIGV4cGxhaW5pbmcgSFNQIHN0YWJpbGl0eSBhc3NlcnRpb24g
+d3JpdGVzCj4gICAgIC0gQWRqdXN0IGxpbmUgd3JhcHBpbmcgdG8gZml0IHdpdGhpbiAxMDAtY29s
+dW1uCj4gICAgIC0gRGVsZXRlIGZvcndhcmQgZGVjbGFyYXRpb25zIGJ5IG1vdmluZyBmdW5jdGlv
+biBkZWZpbml0aW9ucwo+ICAgICAtIFJlbmFtZSB2YXJpYWJsZSBpc19zZGlvIHRvIGlzX3NkCj4g
+ICAgIC0gUmVwbGFjZSB1bmNsZWFyIG1hY3JvcyB3aXRoIG1lYW5pbmdmdWwgYWx0ZXJuYXRpdmVz
+Cj4gICAtIExpbmsgdG8gdjI6IGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2FsbC8yMDI1MDkxMjA5
+MzQ1MS4xMjUtMS1oZWh1YW4xQGVzd2luY29tcHV0aW5nLmNvbS8KPiAKPiAgIENoYW5nZXMgaW4g
+djI6Cj4gICAtIERlbGV0ZSB0aGUgcHJldmlvdXMgc2VwYXJhdGUgZHJpdmVyIGFuZCB5YW1sIGJp
+bmRpbmcgZmlsZQo+ICAgLSBVcGRhdGUgc25wcyxkd2Ntc2hjLXNkaGNpLnlhbWwgdG8gYWRkIHN1
+cHBvcnQgZm9yIEVzd2luIEVJQzc3MDAKPiAgICAgLSBBZGQgdGhlIG5ldyBjb21wYXV0aWJsZSBz
+dHJpbmc6ICJlc3dpbixlaWM3NzAwLWR3Y21zaGMiCj4gICAgIC0gQWRkIG5ldyBwcm9wZXJ0aWVz
+OiBjbG9jay1vdXRwdXQtbmFtZXMsICcjY2xvY2stY2VsbHMnLAo+ICAgICAgIGRyaXZlLWltcGVk
+YW5jZS1vaG0sIGVzd2luLGhzcC1zcC1jc3IgYW5kIGVzd2luLHN5c2NyZy1jc3IKPiAgICAgLSBB
+ZGQgY3VzdG9taXplZCByZXNldC1uYW1lcyBmb3IgRUlDNzcwMCBwbGF0Zm9ybQo+ICAgLSBVcGRh
+dGUgc2RoY2ktb2YtZHdjbXNoYy5jIHRvIGFkZCBzdXBwb3J0IGZvciBFc3dpbiBFSUM3NzAwCj4g
+ICAgIC0gQWRkIGEgbmV3IHN0cnVjdCBlaWM3NzAwX3ByaXYgdG8gaG9sZCBFc3dpbi1zcGVjaWZp
+YyBkYXRhLAo+ICAgICAgIGluY2x1ZGluZyBjbG9jayBwaGFzZXMsIHJlZ2lzdGVyIG1hcHBpbmdz
+LCBhbmQgZHJpdmUKPiAgICAgICBpbXBlZGFuY2UgY29uZmlndXJhdGlvbgo+ICAgICAtIEltcGxl
+bWVudCBFSUM3NzAwLXNwZWNpZmljIHNkaGNpX29wcwo+ICAgICAgIC0gc2V0X2Nsb2NrOiBzdXBw
+b3J0IGNvcmUgY2xvY2sgY29uZmlndXJhdGlvbiB3aXRoIHBoYXNlIGRlbGF5Cj4gICAgICAgLSBy
+ZXNldDogYWRkIFBIWSByZXNldCBhbmQgY29uZmlndXJhdGlvbgo+ICAgICAgIC0gc2V0X3Voc19z
+aWduYWxpbmc6IHN1cHBvcnQgSFM0MDAgRExMIGxvY2sKPiAgICAgICAtIHBsYXRmb3JtX2V4ZWN1
+dGVfdHVuaW5nOiBpbXBsZW1lbnQgZGVsYXkgbGluZSB0dW5pbmcgYW5kIHBoYXNlCj4gICAgICAg
+ICBjb2RlIGFkanVzdG1lbnQKPiAgICAgLSBBZGQgaW5pdGlhbGl6YXRpb24gcm91dGluZSAoZWlj
+NzcwMF9pbml0KQo+ICAgICAtIEludGVncmF0ZSB0aGUgbmV3IHBsYXRmb3JtIGRhdGEgYW5kIG9w
+cyBpbnRvIHRoZSBkcml2ZXIncyBtYXRjaCB0YWJsZQo+ICAgLSBMaW5rIHRvIHYxOiBodHRwczov
+L2xvcmUua2VybmVsLm9yZy9hbGwvMjAyNTA1MTYwOTEyNTkuNzc0LTEtZG9uZ3h1eWFuZ0Blc3dp
+bmNvbXB1dGluZy5jb20vCj4gCj4gSHVhbiBIZSAoMik6Cj4gICBkdC1iaW5kaW5nczogbW1jOiBz
+ZGhjaS1vZi1kd2Ntc2hjOiBBZGQgRXN3aW4gRUlDNzcwMAo+ICAgbW1jOiBzZGhjaS1vZi1kd2Nt
+c2hjOiBBZGQgc3VwcG9ydCBmb3IgRXN3aW4gRUlDNzcwMAo+IAo+ICAuLi4vYmluZGluZ3MvbW1j
+L3NucHMsZHdjbXNoYy1zZGhjaS55YW1sICAgICAgfCAgNTcgKy0KPiAgZHJpdmVycy9tbWMvaG9z
+dC9zZGhjaS1vZi1kd2Ntc2hjLmMgICAgICAgICAgIHwgNTAyICsrKysrKysrKysrKysrKysrLQo+
+ICAyIGZpbGVzIGNoYW5nZWQsIDU0MiBpbnNlcnRpb25zKCspLCAxNyBkZWxldGlvbnMoLSkKPiAK
+CkhpIFVsZiwgUm9iLCBhbGwsCgpUaGFuayB5b3UgZm9yIHRoZSBkaXNjdXNzaW9uIGFuZCBmZWVk
+YmFjay4KClJlZ2FyZGluZyB0aGUgZHRfYmluZGluZ19jaGVjayBlcnJvciBwcmV2aW91c2x5IHJl
+cG9ydGVkIGZvciB0aGUKZXN3aW4saHNwLXNwLWNzciBwcm9wZXJ0eSBpbiB0aGUgZXN3aW4sZWlj
+NzcwMC1ldGgueWFtbCBiaW5kaW5nLCB3ZSBoYXZlCnN1Ym1pdHRlZCBhIGZpeCBwYXRjaCB0aGF0
+IGhhcyBub3cgYmVlbiBhcHBsaWVkOgpodHRwczovL2dpdC5rZXJuZWwub3JnL25ldGRldi9uZXQt
+bmV4dC9jLzA1NjdjODRkNjgzZAoKQ291bGQgeW91IHBsZWFzZSByZXZpZXcgdGhlIG1tYy1yZWxh
+dGVkIGNoYW5nZXM/ClRoYW5rcyBpbiBhZHZhbmNlIGZvciB5b3VyIHRpbWUgYW5kIGNvbnNpZGVy
+YXRpb24uCgpCZXN0IHJlZ2FyZHMsCkh1YW4gSGUK
