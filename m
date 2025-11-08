@@ -1,141 +1,111 @@
-Received: from mail-oa1-f42.google.com (mail-oa1-f42.google.com [209.85.160.42])
+Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01AE12F659F
-	for <linux-mmc@vger.kernel.org>; Fri,  7 Nov 2025 21:27:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C04323F9FB
+	for <linux-mmc@vger.kernel.org>; Sat,  8 Nov 2025 23:13:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762550883; cv=none; b=Da9N6cNiSEAxb+OnOEoCdSsyDgq+J9Qg/aaHvHpEe+aArL6C4vi+KUogH3Gnl+44VBXwQKV4vwLI8agQVh2hSHaN7m9s/l/EiEXFJqgZR1IYyBiDsof1dbCPdz9o8jra0/VTusP+C9INogKKbA35iQGbLx0TzXVsRQXefuIyk3U=
+	t=1762643598; cv=none; b=Q3/y7UhuOG1BdfkA4RQZSfW/HGpCkVTKqFaVvWI4eE9QwHCkgjeefWduEQSX/4whRNeg56Co54pfOTIYdN22GAe2LaOZMkEWtnZmXnZQ2zNi8gdO6+dRmhq71TOrwawAlogYpEJOp10wLj3nApvUHow8fa1pKIxZiOM5oMfXqyU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762550883; c=relaxed/simple;
-	bh=9S2bq/29roXXQP213//MJ4po97yVAGdfarXhQ7EpMmY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=h4ShyiqHIKq8UxK8/neYCVHzEzUyXdpVBqlpJxRbCQZemJOKDHSKZC+TlQVBmzvBxcg91gd+AFGC1QAa/FbivAZUeYFP4wUwUwvSS7F/5Dws9aOGLvDauZBQqSXCrLhPsozyyBly0ejvQ9PP73sIZneJCN9OD5waNqrsVKY4k1E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=neKlGQ6F; arc=none smtp.client-ip=209.85.160.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1762643598; c=relaxed/simple;
+	bh=mktvsbnCgQB7SIyVywpazCEAaoTh++8TaCODy4U/W4I=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=CdJ9IbI1nGcIwHfZEupRsQEZ9Xcb50aXPc8TjN1m5E22CROILE4fpO+KEvGum6BBraCkoSGgZ+nX6CDvDt1GzHOP8rodTxU22KFTE/mM6Z1u+IqqqfhVZUDQTXnfqkmp/Bnf8FchifCO/okcv/60ekUKksDcEHjp+O/fToJuVxk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=YrwdFD6/; arc=none smtp.client-ip=209.85.208.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="neKlGQ6F"
-Received: by mail-oa1-f42.google.com with SMTP id 586e51a60fabf-3d18422565eso828717fac.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Nov 2025 13:27:57 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="YrwdFD6/"
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-640a503fbe8so3497888a12.1
+        for <linux-mmc@vger.kernel.org>; Sat, 08 Nov 2025 15:13:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1762550877; x=1763155677; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=wf0Wo+91E34RuPLbAsDoo2IK5iEZKHYvFy5egqLCygs=;
-        b=neKlGQ6FLQLmvriZqx9Jx0EhTPSqKF938tjpj/gJjjFpdgKNi0078wJBZHwXzm6kk4
-         hRYwUFQbG5FffFvN6Oo1Tq4MJASUIvB0HMkwvG1Z7WQ6IFp6aECMBbsDLeVWtaRJ9T9s
-         fiQWgEmXliIQ4hgl2ZHu0W5sLMaNzvVeNWCV+9F/GQUT3OnmNK34Nyyt2MBP3eDFPK+y
-         R829aUGATkypdHG/N4rAuzBdv4x0bMi2rgCSX/GvsaCdDXWGcE/PVJKUkUOMdOBIzIhY
-         dBhnGWb8py9xHWylxSeW6u2hkYlqofK3F4EfqdpvtQ8WnvY09sKiCNImYywUHyKccwcA
-         Cyjg==
+        d=googlemail.com; s=20230601; t=1762643595; x=1763248395; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=ibTL9LFMoaISY8GQE81Db1c/RUt2bsWCzKF7aX8X54Q=;
+        b=YrwdFD6/qKHTg4gnVS1bpz7IsDR2iJ2lhqOMz4GhWMirYMRGLmYDrgkseXccCHCndF
+         d/CSpsm8kOoNwhHXOPuS0CgpmIbjPARKJ0ZDFu3F8Ggb5c0UI6oOPBj18iDT7zk9berG
+         q2VUdk6lw9EuxSUEtWdCGM4Q7bLyoGsXCSLiDsmJhUcM5iOpltkK5fgAPvKpUi/BAFvo
+         0HVaMvBq+4SkrEID1hE6tlmSNwgXJK7X3V1zVxK/NWOkEcyGgcJX10Fyg05yqHKqrXHm
+         ZbLiHZjOKwT1Ezg5gHl+po5ARXT1SoCW1+jGrSgIExNOBQqqUXncIuqrhVUXXBGOP4M+
+         MAOQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762550877; x=1763155677;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=wf0Wo+91E34RuPLbAsDoo2IK5iEZKHYvFy5egqLCygs=;
-        b=aMDO39msw+DL6QpHaKINpwy/HL+qg4/zpVRaMwggU0t6MVT+leCNglK9VU9YMeksxF
-         RHOUN7dMFUoCe6z7wtcE8z8rpD6hN/KdecjlGn3zuTF+VkD3PO5h6kI42uKVGdB7YTo/
-         foOhh198fmq5RXRGkm4kNblJEmwBjeb47EzYlNa/Roo0Wv53Bde621/t+DQlYe0G3RSk
-         mImoPFGBiSYOUAn0Lq3w0BFAEM4kiIUQditjxPINbtrghMuo+Q/hy+ZOdN3X6jAO1Mas
-         C0QySOfqWI9R+6+MgkHXBSCYrY4BdpDtg6S4hwMBw6H0Ip5dWcR2PGABRPn+Kx/PXrMY
-         Efeg==
-X-Gm-Message-State: AOJu0Yz3wSdbL4SnZsbUgqR/u2jgoZlkp/JCMKic5n2YIFbGchIedPjY
-	H3wJByh5F9mGuYU7BYr8wBOSOvtdeCc0G/9vuw5RRuiZYZQF0wyVNh455YjwDW2/AyK6ZPTcc2G
-	J4F83TPklIdcDfDEZu3Vqu5wjqQ+Dc4o=
-X-Gm-Gg: ASbGncvNnUqg6QqS52HZvgFHuUz4LYemnFkXM+d/EGjisK6YFUDIcDjngnilu1yuW/9
-	o9JYBQUV/bJ7zBYmFvzBpKdL+7Ah2CPQ5e6VTdSK+Shaz5QtceaIi34X79vNGBuOqJsiDTULvUS
-	U5fARPkUrEuaydsW6S5LLrF/YLGE4IqJlpPoGsjCURwySz12DyncYgW1HCW7ZO6QoFMnC1WfUhM
-	Wzgq1i2KpR+z1H7+na2prPxoMaBo7xB8eG9/dng4tVylJ7yMpum2FCk2kQ=
-X-Google-Smtp-Source: AGHT+IHyjZJeLsLteZuuZDK+5pBLZtEMRVKkcYVgU5gHfp+/kZ//VWjNj97aJLqnqpePBkyQzoaVsEierxISe5Kjt1o=
-X-Received: by 2002:a05:6870:1713:b0:3e2:f463:d783 with SMTP id
- 586e51a60fabf-3e7c289eb74mr593490fac.31.1762550876999; Fri, 07 Nov 2025
- 13:27:56 -0800 (PST)
+        d=1e100.net; s=20230601; t=1762643595; x=1763248395;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ibTL9LFMoaISY8GQE81Db1c/RUt2bsWCzKF7aX8X54Q=;
+        b=EoT7pAY6MksIjTDO2vz9aFB+aRbsTHajYX+KV80jxdXQ0e4OXyMZ7pCRpwjCsKTDno
+         aGjUc2c57c3puzfkPGHKG2dcBPRNYSTv2vhuYQF1830ZDbZH+u/iqos/o+UEWtzWmwEU
+         ukE7eu0QQPMnFDD/80mq/VHnJrlf6ISskftXUDMGOUEmqb3Gl+0sqqK2x5RRP7cy/DpC
+         4zDUSHnz3x/sNmpv9kOAgsFAx06JBgvWx9BlXpgmK95kjnhleZGOpT9HHFC3DOIsW3HA
+         1mEUJISY2BiSK7Wdh7/lKZzpuBv5jJh6e51ozX18WLbgsV34LZR85Cy0qXm1n1/P+xH/
+         sHtQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXaRnbsTlaxk5jnUE8Hu8OQ3qAG/Djb628ScPTrPr56tLMpbBDk2waUxQQR2AxIYraLF2yVrKqYhuI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwDoxgxPZBN8L/FdrE4Il1uA4CU1cxSLfL+qSC2KNUvOZHnqa/7
+	kUSxLcrMpou5+/3FAY7N4AtF5BPC8IWqaQp+abILo5G1FOuLgcgl4Jec
+X-Gm-Gg: ASbGncvM5BKmZFUqm8TeBJgLWOgmaSLuoCEKTYUeOAUvxJ3wut5nCOpaj0ESavJC54x
+	3mp5koVjlx86uODTHd25zMZIKE1FBBCxtDtiHnarlq2umj55grEGaCCE8OHhmFX0EzWTy4iRs82
+	rZg3eyy2vjdbt98btGSMiYghwenlqvy6Fnb8h/bNc8IhxIZPy3JNTPxDDi4Hq0zr0ndTKq9WkrG
+	+iMepDogkQirlgs98FgyGzTRoQEztcK6c4pfOJBuVM79TW02xVjNWAJnBJuEYNCJVY9UjnAyL1N
+	ITprwlgmSlpBFeOhQ0aVSIbD2CZePqFRVYOXUePQa0N3PMCSh4FsZV6t7TmyPYA6f5d6ocREVm9
+	eSNkfLtNkJ6gg9noA4LxGZlYTD8eab+xWrkK4P80iQdRBNa95Twmn9/S5gXEYsazeAOe+GzVGMy
+	1SodwWaHiopp+dqy/gIvGry/yhnGYe8hP8Ln4SvPtO7twmJfz3sXzzPzY9O8GrV5b7bFYdgSxY1
+	uMtIV4zHEt8TTHC3/PjFbr+rpAKnaBDjwZsEHthLt8=
+X-Google-Smtp-Source: AGHT+IHojjSOYkU74h70pOz5Juc0qTwy5Qm9aBj39UgCLbnQKLDh8bnfGClMfrPjx5Lm9oFsJdZQ9g==
+X-Received: by 2002:a05:6402:40d1:b0:640:bc0b:887d with SMTP id 4fb4d7f45d1cf-6415dc03146mr2946757a12.2.1762643594925;
+        Sat, 08 Nov 2025 15:13:14 -0800 (PST)
+Received: from blackbox (dynamic-2a02-3100-a9b3-6600-1e86-0bff-fe2f-57b7.310.pool.telefonica.de. [2a02:3100:a9b3:6600:1e86:bff:fe2f:57b7])
+        by smtp.googlemail.com with ESMTPSA id 4fb4d7f45d1cf-6411f814164sm7642807a12.13.2025.11.08.15.13.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 08 Nov 2025 15:13:13 -0800 (PST)
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+To: linux-amlogic@lists.infradead.org,
+	linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	ulf.hansson@linaro.org,
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: [PATCH v1 0/7] mmc: meson-mx-sdio: Various driver improvements
+Date: Sun,  9 Nov 2025 00:12:46 +0100
+Message-ID: <20251108231253.1641927-1-martin.blumenstingl@googlemail.com>
+X-Mailer: git-send-email 2.51.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAGw3uGD=jqdppGzQ9k8K6qu1znpWMrgMdcxYvtEXWi2Qwn01uw@mail.gmail.com>
- <dd3be1f2-02fd-40ef-8f52-ff5dbea3da90@intel.com>
-In-Reply-To: <dd3be1f2-02fd-40ef-8f52-ff5dbea3da90@intel.com>
-From: Steffen Pervold <spersvold@gmail.com>
-Date: Fri, 7 Nov 2025 22:27:46 +0100
-X-Gm-Features: AWmQ_blj2FZ08inPfHeu6XpyPbpNvrEra-S1kQUREU96ncWaFwZRc8p7hIlV-8Q
-Message-ID: <CAGw3uGBwz3dwuxpmgUHpwk0OD6-mhiJeYQU20N3hmkOwVC_XUw@mail.gmail.com>
-Subject: Re: SDHCI generic controller in Linux
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Fri, Nov 7, 2025 at 7:59=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.c=
-om> wrote:
->
-> On 07/11/2025 19:54, Steffen Pervold wrote:
-> > Hi Adrian,
-> >
-> > I hope this email finds you well.
-> >
-> > Recently I have developed a SDHCI compliant host controller in System V=
-erilog (for a hobby project), but I could not find any existing drivers in =
-the Linux kernel (as per 6.18) that is using just the standard functions as=
- provided by sdhci.c. All the existing ones have either some vendor specifi=
-c quirks or function handlers (specific to a SoC platform for example).
-> >
-> > So I made a "generic" SDHCI driver that should work for any SDHCI compl=
-iant controller that doesn't need any special quirks or handling (other tha=
-n what you can override in the device tree attributes).
-> >
-> > Before I post the patch to the kernel community I thought I'd ask you a=
-s I see you're listed as the maintainer of the SDHCI subsystem.
-> >
-> > I've attached the patch for your convenience.
-> >
-> > Any feedback is highly appreciated.
->
-> First, it is preferred to keep the development process in public.  In oth=
-er words, cc the appropriate mailing list with this kind of question. For S=
-DHCI it is linux-mmc@vger.kernel.org , see the archive at https://lore.kern=
-el.org/linux-mmc/
->
-> If you reply to this, I would prefer you cc linux-mmc@vger.kernel.org
+This series contains patches to improve / simplify the code of the
+meson-mx-sdio driver by:
+- using regmap for simplifying register access (patch 1)
+- switching to modern clock functions/helpers (patches 2, 3) and
+  make the clock code not interfere when switching to
+  devm_mmc_alloc_host() (patch 3)
+- making use of the devm_mmc_alloc_host (patch 4)
+- using modern dev_err_probe() for better error handling (patch 5)
+- indentation fix (patch 6)
+- ignoring disabled mmc-slot device-tree nodes to allow describing
+  all slots in device-tree, even though the driver only uses the
+  first enabled slot (patch 7)
 
-My apologies, Cc added.
 
->
-> Secondly, it sounds like you would be the only user of the driver.  You w=
-ould need to make a case for why it needs to be in the mainline kernel.  Ev=
-en Linus Torvalds has said he has code that he doesn't submit to the kernel=
- because he doesn't think it would benefit anyone else.
+Binbin Zhou (1):
+  mmc: meson-mx-sdio: Use devm_mmc_alloc_host() helper
 
-Yes, this is true as far as I know (for now). However I was slightly
-surprised that since SDHCI is a well defined standard specification
-that there was no "generic" platform driver like there is for USB
-OHCI/EHCI/XHCI/UHCI.
+Martin Blumenstingl (6):
+  mmc: meson-mx-sdio: Switch to regmap for register access
+  mmc: meson-mx-sdio: Use devm_clk_get_enabled()
+  mmc: meson-mx-sdio: Refactor internal clock initialization
+  mmc: meson-mx-sdio: Use dev_err_probe() where appropriate
+  mmc: meson-mx-sdio: Fix indentation in meson_mx_mmc_irq_thread()
+  mmc: meson-mx-sdio: Ignore disabled "mmc-slot" child-nodes
 
->
-> Note you can post a patch as an RFC (Request for comment) that is better =
-for getting feedback on whether it is a good idea.  Even if the patch is no=
-t accepted, having the patch and the discussion on the mailing list may hel=
-p others.  And of course others may have had a similar requirement to the o=
-ne you have, and have solved it another way, so there are plenty of reasons=
- for using the mailing list.
+ drivers/mmc/host/Kconfig         |   1 +
+ drivers/mmc/host/meson-mx-sdio.c | 339 +++++++++++++++----------------
+ 2 files changed, 170 insertions(+), 170 deletions(-)
 
-I will do that. Thanks for the tip.
+-- 
+2.51.2
 
->
-> And please be sure to have a look at Kernel documentation like:
->         Submitting patches
->                 https://docs.kernel.org/process/submitting-patches.html
->         Development Process
->                 https://docs.kernel.org/process/development-process.html
->
-
-Yes, thanks!
-
-Cheers,
-Steffen
