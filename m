@@ -1,65 +1,65 @@
-Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com [209.85.208.54])
+Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0309229B8F8
-	for <linux-mmc@vger.kernel.org>; Sat,  8 Nov 2025 23:13:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BDB2829D27E
+	for <linux-mmc@vger.kernel.org>; Sat,  8 Nov 2025 23:13:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762643614; cv=none; b=D3qXzIr5cdTTj9cTqNx+Ro0qy5nriw/kyaJtXb9Za7j2VqRales8sLAzujMqxazMhMZWxPXNPtdRG9ZgZvgjtQmNij1tZ5z9A96E/LZ1Ihx13x3bMf5N9F+RLGFcdEtW7mf4uEY5WK7KFp6aFIUal38VsYVHe0Wj6mpg4HcZN/I=
+	t=1762643616; cv=none; b=TNkBTw/7/3xtM9ZXZgS8uKyOyXwPJ+pI8moxyadYXLE1GSJO83W+HveR0OsZ/eCjQ3PVf63O1wmm+Dh6+tnJ4a71/7bxEqonhr7e6xEwMzGpdLWUVRHxacuM6s+L2qFFJNuK8snuoQkGAbrt/o62d+IvJSqEOAjyyMnxP90c8So=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762643614; c=relaxed/simple;
-	bh=fIhUPNIq43wji3Mk4iQYsn7ciQjs0jxKDfIN9kIEqzw=;
+	s=arc-20240116; t=1762643616; c=relaxed/simple;
+	bh=2sKf1rUf7Yyibfx/hY6iRlou4EFmIhXP3XoaRsvqQGY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=kSRZdgpjVx2ZqJjFrlGvR6oTu+LGEWWqWayOoJOvQH2whHtqhJq6tNMigpAovDmk355PNID4rolEo2x70m9usDkDboZxqt6/X0ddUJdlr2EGzL1q2QRpcAt5TIdU8E6TndsqEHHKH/NZwfuTdEltZqQZG4ENLGKyga9ZewyR3+U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=E/WIEQuN; arc=none smtp.client-ip=209.85.208.54
+	 MIME-Version; b=QHtRum/Aq5bF/7/AKc8vr3I+CLrWOe65rrL5KJkZ6NSQqNgZWJETEIA2TlocUprnmg97/TWgWvKsEjoj0F36B69U8e3m95enRzJcmZ5herPZTN3NSXai4gi8Ee3owFF259TpqKTGYRtmzdpWpxySYp+TbZTbQvfJqRfhm0SNVKw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=hRDC9uU1; arc=none smtp.client-ip=209.85.208.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="E/WIEQuN"
-Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-640b0639dabso3330655a12.3
-        for <linux-mmc@vger.kernel.org>; Sat, 08 Nov 2025 15:13:32 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="hRDC9uU1"
+Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-640aa1445c3so2875449a12.1
+        for <linux-mmc@vger.kernel.org>; Sat, 08 Nov 2025 15:13:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20230601; t=1762643611; x=1763248411; darn=vger.kernel.org;
+        d=googlemail.com; s=20230601; t=1762643613; x=1763248413; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=5oO3j4actqzf2xVKKJ0nWDgX3aF/G+cl1rlsWPWa+z8=;
-        b=E/WIEQuN6AcdfcsY/eJweh09/g73nbGarmoYlGt9et9k3fdFb2JjCYkc15ycb8kq8x
-         rtkSUpkVZKqJBypmyqJ51CcBW4mnDE/zVyOdHwO6c1WKg820EgzPqLQbewE61nOqlHlj
-         sOLu2hpmrNC2TVxIZ20AJxVzkACal9epbff06jkGr7UlXJadGRfSQSCVe6VpBd/KPTw5
-         yPNyRzBxv0zooRKqXLAx1zhxKxn/x8Yzsxe/Qmz6qGuWDfuJhhM8fe6Gnr7N8yjS9oGs
-         GLgF1DsbhVet+QCoCtdvGAYCp42Sfd2jn/3Khx9KQGb7Yf7xYBfWi5IW2vslVg6CtuSj
-         X0ww==
+        bh=jp3aBA3u4fWo7xiq7xdD0SMcDBXI+jskP2t4r2Vw08s=;
+        b=hRDC9uU13Y+ZrcO4icz5roJCxCUEROE98mBcIdH//AQTN7CaWGWRcm+zC7TpCEs7U6
+         uLKhhvclo14cf0I81Euo5QNfcG7Kh6Lgwe2UczskyKxsNuUqlyQuqWzAJJgQ+Rfx/fTN
+         5frLrGIzt4n8Gk9M+6ycTlbZwmqbZ43Wlus2RKrfOCPIXOS9RBhOgEHY1XuQMrTHi6iz
+         it+uLUsoALIs+yVBOyInDfAPmjP6LstpavisR6MsP8Dk3ZVGo618SO6s/xSsSd3O7LgJ
+         Lm8tBuMMWjuxTZfW9Rxcm3UkUlyjYWUR3qfHhYHgeaoxDePQ8Uh5FqdVkryu3gSo/ZDR
+         v5CA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762643611; x=1763248411;
+        d=1e100.net; s=20230601; t=1762643613; x=1763248413;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=5oO3j4actqzf2xVKKJ0nWDgX3aF/G+cl1rlsWPWa+z8=;
-        b=dL7YxS1JZlQNmQjrJyKs3lkjUQS13UPuiRBo8YsbWQQMHTl1N0JRKdaT7KpI8HX/+F
-         qKqCiKXrZBmFNrX63lKKP55rAJ8fN2QPPY5Y9GNPniWlKlzbEjn1sTrl06umcSe1HpC2
-         AJHqBBYkVR7fzVb8akZ2uM9RePhnEaZ4EWBwhqu+suB2K24J88LAJ4asqpI26eF5Ktxj
-         vdIloTz1LcESN2U2/nSwFQDCW0J72+QjY5MsIbBY2LCX9RM8179s6YnAVA00ElEoEHA0
-         DLoG5cuioZlsb0aFo9UUIbi5yoztDP89DccPGJUudX7VlZAsM0Bux5q6QPa8idtVTuR7
-         mFHg==
-X-Forwarded-Encrypted: i=1; AJvYcCWntZl8RHPqF5kngN9EWjGZeWvSfS4EHIuuco+YXbk2UmMYyhCFSfEwQN1/U53aYIdfB7rS1yncLKI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YydKSxTcxG1Ra/6GklLZXf6jj2Ne6QocKJSkpsarLteU2PlSatR
-	RA+fatHluBtJJkylGSFwyJD+gtJ0I35uMUN3OLlT/PPweJ0ADvWMX7or8mYkoA==
-X-Gm-Gg: ASbGnctzmf2NeqozBLTmRmPKeOfaSRSat490j29gzTdJlJxt66Id8Yts9/TtZQFueVx
-	6ikJcfJ3o9d6hnY3sKE2d67ufNfzmq3xTiQif4glduqokKoYR1Xxw4PC0F2Xb3G5rKXd93FTQtN
-	TupKL3bX/bEPwNUcQgpfIF+SdMJCnuTdWHn3cye1nMnPvPGbp3XvkphW5s4NQaM8Kr/DMtYiPPs
-	GITMTKDiivn7rA8tdsHo4mAvkFkeGglQEwXJrSz7UV8txRAc2cR1/MoiEu9CsBpLAxb/YABtsv6
-	AnUto3owhghRo8BOmKi1t9bhDe4Egn08jCFuG2OQpSZuMYZwV2oeK2y/jWvwW3l8ZX/m0SrNm/A
-	y8XjPTi0QgMpX9HVbAffHYjeZL8fZuUCxXuLLh6IqP0Y9/l35/iWJjwe6SRJjck3cxlL1q2yhOC
-	y6n3ydUQolKS/QYZ9oHL4JN6UAKq38V5zp4p2CJ0Gdg0ojYUtFLGKBdugO/xx2YZFBRtaeUXuRy
-	FaK5ITUSHppIepTj5umTAppckyITyOq96gEtiaDLYg=
-X-Google-Smtp-Source: AGHT+IGKjmu35eL8DzEjWyR+sT9K1rO2NK/av8+BPsQU60PgD99LUOCuaaHsb7hf+eDzu3/wZf4PEA==
-X-Received: by 2002:a05:6402:44c3:b0:63c:1170:656a with SMTP id 4fb4d7f45d1cf-6415e809ff8mr2471765a12.37.1762643611141;
-        Sat, 08 Nov 2025 15:13:31 -0800 (PST)
+        bh=jp3aBA3u4fWo7xiq7xdD0SMcDBXI+jskP2t4r2Vw08s=;
+        b=Z2Z00Nb05z3ZJkbwxLHi9RL+FqjDWXX7GPVGHMs/+gclXif7qvG7EZLxo2cY+E4yPn
+         SqYwRXL+0JNUVQPlh9hrjHpEyZV4uqSW1R9OI4RUdqkzpBDz1pym4gvI7aEwlsX7XafL
+         UAqFbyJY2H+GBt/D/A1LoI5QpyXmlZxcR0UiEqfMOl6agcjikGMb+xrx29xtA8h5hQV2
+         2Y6ayYrSTycuA5z32hupzUjHH9SpusXfw/0g/1nRUAKHcYa8XY3Y2fWgad3uckKHW/j4
+         gr+etZadoHl/cVE/zVN1V3G6mk7uFEuRX8LEiE30YBBXNI05ROkegwklnri2/rcpQjh7
+         KvvQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV7rdOOfoS512JJw5HclxIss2hvt+fTP5cSE9aH+mfYRB7wsraPC6D8nuGyRVHhJAIDoWTDlTvuObQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwFxy6EZroURXvuCXS7qa/ua4LnqUQtgeYZp9XhhperFrZkPEx0
+	cfcIDkzIGaCNnunov8mvYR3lBGHa2Mdmq8FI2enp8wrpEnwOOueapNlnE9dGxA==
+X-Gm-Gg: ASbGncsG5ohTVTkKX2xfheglvoE+ISFdUBVDsbIlJmv24kfe9XSIgYjQId3xIBTmjOL
+	XAM0kkkLGauQVgRRDV1jyYuZaysTalLG3GYEZfaqHa2qzQNRb1e/dlkrTD5zuh24So2uILk62R8
+	9jOh+QVV49eoocIKjYQhDYFVqGBC49END6bA5s2QrPJDyhciiZ6dRx4qaYvcqa/v4RmhGljOsyE
+	d3jg/40kk/AVQw7vau17IaqamIgB1jU3Gjqd4HqTPuTli5Sxg31SkaOiJCPI3UEEnh2DFqCU3WW
+	PyPB3wY/dndf1Nx9XWmRxlirMOU3IZ3lr+MqAi0xwmM4InsrOOOeyC0y65qg9IAr5gFBR1gMWfp
+	SqWdPOVOkUsa69HPttIlN1OrHEo4CoNjXmiQ0Fl+r88vQ/haMjh9Ze9q/FqLMafWBwZt6UhGr96
+	ZVMFfPuZVZ88SNp6yVokNJ6ld2OXh7utvbH1fJXHywSMKDUZGP3odVvWTmgD3HMbpgcH7wRys6v
+	T5V4sFAgVJ7stjBvUgQZxJWsfiqRymW
+X-Google-Smtp-Source: AGHT+IGemsR0OuxveqoCLuvT35vA4jAjT0f4VTJglt6MI1GNIHLfcz8g6Jk7qZLukmNg7JdbfDQkvg==
+X-Received: by 2002:a05:6402:4415:b0:634:6d87:1d28 with SMTP id 4fb4d7f45d1cf-6415e856c10mr2612380a12.35.1762643612939;
+        Sat, 08 Nov 2025 15:13:32 -0800 (PST)
 Received: from blackbox (dynamic-2a02-3100-a9b3-6600-1e86-0bff-fe2f-57b7.310.pool.telefonica.de. [2a02:3100:a9b3:6600:1e86:bff:fe2f:57b7])
-        by smtp.googlemail.com with ESMTPSA id 4fb4d7f45d1cf-6411f814164sm7642807a12.13.2025.11.08.15.13.28
+        by smtp.googlemail.com with ESMTPSA id 4fb4d7f45d1cf-6411f814164sm7642807a12.13.2025.11.08.15.13.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 08 Nov 2025 15:13:29 -0800 (PST)
+        Sat, 08 Nov 2025 15:13:31 -0800 (PST)
 From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 To: linux-amlogic@lists.infradead.org,
 	linux-mmc@vger.kernel.org
@@ -67,9 +67,9 @@ Cc: linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
 	ulf.hansson@linaro.org,
 	Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH v1 6/7] mmc: meson-mx-sdio: Fix indentation in meson_mx_mmc_irq_thread()
-Date: Sun,  9 Nov 2025 00:12:52 +0100
-Message-ID: <20251108231253.1641927-7-martin.blumenstingl@googlemail.com>
+Subject: [PATCH v1 7/7] mmc: meson-mx-sdio: Ignore disabled "mmc-slot" child-nodes
+Date: Sun,  9 Nov 2025 00:12:53 +0100
+Message-ID: <20251108231253.1641927-8-martin.blumenstingl@googlemail.com>
 X-Mailer: git-send-email 2.51.2
 In-Reply-To: <20251108231253.1641927-1-martin.blumenstingl@googlemail.com>
 References: <20251108231253.1641927-1-martin.blumenstingl@googlemail.com>
@@ -81,27 +81,78 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Keep the second line with arguments for dma_unmap_sg() aligned.
+The meson-mx-sdio (and mmc core) only support one MMC/SD/SDIO slot
+(device) per host. Thus having multiple mmc-slot nodes (one for the up
+to three supported slots with one device each on the meson-mx-sdio
+hardware) can be problematic.
+
+Allow specifying all slots (with their respective device) connected to
+the meson-mx-sdio hardware in device-tree, while making sure that only
+the enabled one(s) are actually considered by the driver.
 
 Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 ---
- drivers/mmc/host/meson-mx-sdio.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/mmc/host/meson-mx-sdio.c | 37 ++++++++++++++++++--------------
+ 1 file changed, 21 insertions(+), 16 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
-index 052bcf8f32df..e8b63dc45dd8 100644
+index e8b63dc45dd8..5921e2cb2180 100644
 --- a/drivers/mmc/host/meson-mx-sdio.c
 +++ b/drivers/mmc/host/meson-mx-sdio.c
-@@ -436,8 +436,7 @@ static irqreturn_t meson_mx_mmc_irq_thread(int irq, void *irq_data)
+@@ -493,23 +493,30 @@ static struct mmc_host_ops meson_mx_mmc_ops = {
  
- 	if (cmd->data) {
- 		dma_unmap_sg(mmc_dev(host->mmc), cmd->data->sg,
--				cmd->data->sg_len,
--				mmc_get_dma_dir(cmd->data));
-+			     cmd->data->sg_len, mmc_get_dma_dir(cmd->data));
+ static struct platform_device *meson_mx_mmc_slot_pdev(struct device *parent)
+ {
+-	struct device_node *slot_node;
+-	struct platform_device *pdev;
++	struct platform_device *pdev = NULL;
++
++	for_each_available_child_of_node_scoped(parent->of_node, slot_node) {
++		if (!of_device_is_compatible(slot_node, "mmc-slot"))
++			continue;
++
++		/*
++		 * TODO: the MMC core framework currently does not support
++		 * controllers with multiple slots properly. So we only
++		 * register the first slot for now.
++		 */
++		if (pdev) {
++			dev_warn(parent,
++				 "more than one 'mmc-slot' compatible child found - using the first one and ignoring all subsequent ones\n");
++			break;
++		}
  
- 		cmd->data->bytes_xfered = cmd->data->blksz * cmd->data->blocks;
+-	/*
+-	 * TODO: the MMC core framework currently does not support
+-	 * controllers with multiple slots properly. So we only register
+-	 * the first slot for now
+-	 */
+-	slot_node = of_get_compatible_child(parent->of_node, "mmc-slot");
+-	if (!slot_node) {
+-		dev_warn(parent, "no 'mmc-slot' sub-node found\n");
+-		return ERR_PTR(-ENOENT);
++		pdev = of_platform_device_create(slot_node, NULL, parent);
++		if (!pdev)
++			dev_err(parent,
++				"Failed to create platform device for mmc-slot node '%pOF'\n",
++				slot_node);
  	}
+ 
+-	pdev = of_platform_device_create(slot_node, NULL, parent);
+-	of_node_put(slot_node);
+-
+ 	return pdev;
+ }
+ 
+@@ -642,8 +649,6 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
+ 	slot_pdev = meson_mx_mmc_slot_pdev(&pdev->dev);
+ 	if (!slot_pdev)
+ 		return -ENODEV;
+-	else if (IS_ERR(slot_pdev))
+-		return PTR_ERR(slot_pdev);
+ 
+ 	mmc = devm_mmc_alloc_host(&slot_pdev->dev, sizeof(*host));
+ 	if (!mmc) {
 -- 
 2.51.2
 
