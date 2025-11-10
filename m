@@ -1,143 +1,106 @@
-Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A82121E098;
-	Mon, 10 Nov 2025 13:44:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762782252; cv=pass; b=lk2m7t+XCVnE0PllzMD99FoQj7m6byCP00DQzV/bn493ZTVvrm0Ji7wfw8pEyjGSUZ1ulr6TwpZy7jJE2tDS7indPY/Ysm32ezT31BLAAY6B2d9yzBXbmUucj8zqTYm+zURcf7O8ni1dJT12Znf/N59vdISmjx+WToeBPFUjHIk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762782252; c=relaxed/simple;
-	bh=wK41s9TTPsH+XSrQvGcL1ScrZIeDVdkh9D+PCpggJgk=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C76131355F;
+	Mon, 10 Nov 2025 14:35:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1762785315; cv=none; b=dhchazKegpdj/NLCXivlxy4tr2D3PJNeU05STXO9xhzEWA71ta5pYBO970ohHFXa+HiQq4+2d7Q+ad1fHo5T3YyGwNJXLc7PaI5e9b4mJ+wlAqxuSyKWQ7N2r4lcTSNR/XuXB099zW8Knmwy9TCBoL28D6gdrmnJ+JAQPND+TbM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1762785315; c=relaxed/simple;
+	bh=H+NeCQZyJ3FrRAyNmW1uwJi2sTQM5CPCDpAyzhoE1nA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=srTLTU7FhtgGobXN0hfmagaNUEVffu5ADinAFt/A3y3ibYBMoCSEoRRA0tuA5Gq5pPuomP2O6j07Wkni3uvw34wWf/JHSe/pwRgL+78ql/ZELpDvbO4gDaead6AYSWZt9I/VJfc4t/IeacJQiQfvatEP9faO9J7CJWcuYvESIyY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=sebastian.reichel@collabora.com header.b=g2wP67Cz; arc=pass smtp.client-ip=136.143.188.112
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=rRLcexf1j4ng77n9DViI595F7/SBkWYoVY0dthsngMEI9UqvhVqKl+W3El/BwdLx9IDgjlzXCMdHhcDr1YK0rhvuodxTbphw7eYVWfy0HBFlIAzFd1L5vK+8ex9R414Nuww+9MzpUffCOkRZqVy8b/b0MBXsxN7icJcuhg4rX7k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Y3UKjnX8; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=sebastian.reichel@collabora.com header.b="g2wP67Cz"
-ARC-Seal: i=1; a=rsa-sha256; t=1762782225; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=HSdRTwjaAi6bgsxuRDSbZsLF0DPeI+LOlnd1y9igvc4gNPWWf4KKlKpPdEAOfTaQstq/Elrkm4nlxsua8YS7r7TQxGzcIUoGFmye99W2XQCDmhFlZL65IHe2jlJ6uXaeHnPfVprdqTJExRxDG4IsmXGErXhcno5ygCrqceoO4G4=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1762782225; h=Content-Type:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=NaQSEtGafus0sgJYl14H1AHyjnLimFCe/otE/1Mn3kw=; 
-	b=gSarWGs90VIKXpnYnCyXBQUZ1/4+5W7W9NV0vwShHeZv7ylmf6NpN8vejvFMXe7Umw9ZBIvlETJNJYjYD642RIKS5sf/TDqS8LPPdl19sj70wSBxCoL0kU0QFGdIfHpCshg5gxXEpjiT5BbV8kp7ycPF9soTskb2PS4EAzXMJ6w=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=sebastian.reichel@collabora.com;
-	dmarc=pass header.from=<sebastian.reichel@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1762782225;
-	s=zohomail; d=collabora.com; i=sebastian.reichel@collabora.com;
-	h=Date:Date:From:From:To:To:Cc:Cc:Subject:Subject:Message-ID:References:MIME-Version:Content-Type:In-Reply-To:Message-Id:Reply-To;
-	bh=NaQSEtGafus0sgJYl14H1AHyjnLimFCe/otE/1Mn3kw=;
-	b=g2wP67Cz3+CvMMmpD6hniCswHIQj5NnpT7xiqlt6FzX71FphZCGERnSiHweKixQ4
-	ws7tgOQ/wENJ3VHs3Ta3tls2Lw5z6dK6AoaEpYV26oedR9I5DvnUyCjreOa6+5cMfJf
-	Gpnsfu5X6FF82r/e8Vf5k0I6Bv8G3+gFJvTYmnXQ=
-Received: by mx.zohomail.com with SMTPS id 1762782223271450.25151316746724;
-	Mon, 10 Nov 2025 05:43:43 -0800 (PST)
-Received: by venus (Postfix, from userid 1000)
-	id D8FC2180735; Mon, 10 Nov 2025 14:43:32 +0100 (CET)
-Date: Mon, 10 Nov 2025 14:43:32 +0100
-From: Sebastian Reichel <sebastian.reichel@collabora.com>
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, kernel@collabora.com, 
-	Yifeng Zhao <yifeng.zhao@rock-chips.com>
-Subject: Re: [PATCH v2 1/2] mmc: sdhci-of-dwcmshc: Add command queue support
- for rockchip SOCs
-Message-ID: <hjxwedwtwksog67mz4unm4jita2q5vvp4vkdrtpznc6mllz7q4@7a7nn3c5l7fv>
-References: <20251031-rockchip-emmc-cqe-support-v2-0-958171f5edad@collabora.com>
- <20251031-rockchip-emmc-cqe-support-v2-1-958171f5edad@collabora.com>
- <abb4a253-6f4b-4547-a238-db6f60ee3244@intel.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y3UKjnX8"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 037CFC19424;
+	Mon, 10 Nov 2025 14:35:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1762785315;
+	bh=H+NeCQZyJ3FrRAyNmW1uwJi2sTQM5CPCDpAyzhoE1nA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Y3UKjnX8hUBPhrVYuuBNZfHdauDMLUzlXl65kSP7yd4j/iPDwmNgqMjPQasE3l/+a
+	 LN012CHjB7A5J3Tm4oLVPyhJIUlv74CnNgCVTTbvKlRy06M4z0dQ5Zc4IjUr9JTmcb
+	 yutHNZUZxZHOdBGqjolmM6kOYokzwnmwUo6zmJsHhiBNNVg0AJwlzYmKdnlxQs5HH6
+	 1o6zeo7buInBDFgnOoYlC6Xxa6Kza16jhdq+lXcXDU/ZABPSmbHoLhyGjkTE7ViVpL
+	 /wYjdAWmP9brLyMjhlzXuA4y5Uj4+IXc/NSmGa+55hDOUlpxHHKkFKozjgYDHWGA6A
+	 9csQy72zVAGGg==
+Date: Mon, 10 Nov 2025 08:39:20 -0600
+From: Bjorn Andersson <andersson@kernel.org>
+To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
+	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, 
+	quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Avoid early clock doubling during
+ HS400 transition
+Message-ID: <wshfjbdjmoe5hfsmh2rrwxiy67wo4k6i7bzap4hz4n5j22uiol@xz7wfxaw4bve>
+References: <20251110063801.641866-1-sarthak.garg@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ladnhwyx55vra2te"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <abb4a253-6f4b-4547-a238-db6f60ee3244@intel.com>
-X-Zoho-Virus-Status: 1
-X-Zoho-Virus-Status: 1
-X-Zoho-AV-Stamp: zmail-av-1.5.1/262.770.93
-X-ZohoMailClient: External
+In-Reply-To: <20251110063801.641866-1-sarthak.garg@oss.qualcomm.com>
+
+On Mon, Nov 10, 2025 at 12:08:01PM +0530, Sarthak Garg wrote:
+> According to the hardware programming guide, the clock frequency must
+> remain below 52MHz during the transition to HS400 mode.
+> 
+> However,in the current implementation, the timing is set to HS400 (a
+> DDR mode) before adjusting the clock. This causes the clock to double
+> prematurely to 104MHz during the transition phase, violating the
+> specification and potentially resulting in CRC errors or CMD timeouts.
+> 
+> This change ensures that clock doubling is avoided during intermediate
+> transitions and is applied only when the card requires a 200MHz clock
+> for HS400 operation.
+> 
+> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4e5edbf2fc9b..eca6a09a4547 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -355,7 +355,8 @@ static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
+>  	 */
+>  	if (ios.timing == MMC_TIMING_UHS_DDR50 ||
+>  	    ios.timing == MMC_TIMING_MMC_DDR52 ||
+> -	    ios.timing == MMC_TIMING_MMC_HS400 ||
+> +	    (ios.timing == MMC_TIMING_MMC_HS400 &&
+> +	    ios.clock == MMC_HS200_MAX_DTR) ||
+
+It's a bit ugly that sdhci_msm_execute_tuning() passes ios.clock as an
+argument to msm_set_clock_rate_for_bus_mode(), which then calls
+msm_get_clock_mult_for_bus_mode() where you reach back into ios.clock.
+
+In fact, having msm_get_clock_mult_for_bus_mode() reach into
+host->mmc->ios to get ios.timing, seems a violation of the original
+intent of the prototype.
 
 
---ladnhwyx55vra2te
-Content-Type: text/plain; protected-headers=v1; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-Subject: Re: [PATCH v2 1/2] mmc: sdhci-of-dwcmshc: Add command queue support
- for rockchip SOCs
-MIME-Version: 1.0
+How about cleaning this up and passing "timing" as an argument to
+msm_set_clock_rate_for_bus_mode(), and then pass host, clock, and timing
+to msm_get_clock_mult_for_bus_mode()?
 
-Hi,
+That way we avoid this mix of passing parameters to the functions in
+both arguments and in state at the same time.
 
-On Mon, Nov 10, 2025 at 09:58:24AM +0200, Adrian Hunter wrote:
-> On 31/10/2025 17:58, Sebastian Reichel wrote:
-> > This adds CQE support for the Rockchip RK3588 and RK3576 platform. To
-> > be functional, the eMMC device-tree node must have a 'supports-cqe;'
-> > flag property.
-> >=20
-> > As the RK3576 device-tree has been upstreamed with the 'supports-cqe;'
-> > property set by default, the kernel already tried to use CQE, which
-> > results in system hang during suspend. This fixes the issue.
-> >=20
-> > Co-developed-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> > Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> > Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
->=20
-> One question below, otherwise:
->=20
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Regards,
+Bjorn
 
-Thanks,
-
-[...]
-
-> > @@ -687,6 +757,9 @@ static void rk35xx_sdhci_reset(struct sdhci_host *h=
-ost, u8 mask)
-> >  	}
-> > =20
-> >  	sdhci_reset(host, mask);
-> > +
-> > +	/* Enable INTERNAL CLOCK */
-> > +	sdhci_writel(host, MISC_INTCLK_EN | extra, DECMSHC_EMMC_MISC_CON);
->=20
-> rk35xx_sdhci_reset() is in sdhci_dwcmshc_rk35xx_ops.
-> sdhci_dwcmshc_rk3576_pdata also uses sdhci_dwcmshc_rk35xx_ops but isn't
-> supporting CQE ops.  Is this change OK for rk3576?
-
-How did you come to the conclusion, that rk3576 does not support CQE
-ops? Have you read the cover letter? :)
-
-Greetings,
-
--- Sebastian
-
---ladnhwyx55vra2te
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAmkR7AAACgkQ2O7X88g7
-+poq/g/6Av018KZfLynGwjZMNoFxVnLTbPCij+47pv7hWC/61IeB3Wo3ZKuWOZaT
-mJgj8ttbiE8caqUP8EusAjZpnLwmYIeoEfewsXr7mlhwzzKR1wR8xtKzkSYvSOPg
-2vjagIjI0QWubTnuyrvBihngKhpXjl9wSgWKBeY3o4PmYB5b9kHuqjBs1hoa8445
-fCu0u4zt+2BsxNQYFjCeGbM06pa4kzD00SyNW+Zl3uGPX64SaaUnGeo1k+GFyVzw
-h6Q7QmJFLY0kkXr5H5fysSQMWxuMgWyBp/hrcVrdYEx8/EaWddQVOXRIJHK7MVgB
-uTi3zilX/3+8Hx8ij+4k2Elp8ywBdoAL92ufUeaZm9va2r+iB1V0kO7YznDU4L3N
-AeDqFOG75McYdgKYD/HATaQ9gjut+13TBCvNmajPyFtu0iPww8Tg55lgvfBNOmxF
-ZTw2L3OAcfFiVpDzOZ2P5kzQ6S54yMHUE8El7OHQCvfRD3kaLXSJYBswahfh4hW6
-1Rq5uosLvZ/59EG6eGkA66xQLEam6Fgq+LmvS7XMagRZdR9EbdFHht5myxXF6lXs
-GWwqjJkHBaXFYdUa2jzF7hitnpJBMFOmwh9DjzbyVNPJKSG3504lOyb1UC+2L70R
-AMnnkw1ljj57dHDPZ+26sJZA3a37eaWbWjfPiTG/zavQCYzjaLw=
-=iosp
------END PGP SIGNATURE-----
-
---ladnhwyx55vra2te--
+>  	    host->flags & SDHCI_HS400_TUNING)
+>  		return 2;
+>  	return 1;
+> -- 
+> 2.34.1
+> 
+> 
