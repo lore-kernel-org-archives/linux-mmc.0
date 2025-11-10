@@ -1,105 +1,101 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E87A12F12D4;
-	Mon, 10 Nov 2025 07:58:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7309229CE9;
+	Mon, 10 Nov 2025 08:46:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.7
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762761519; cv=fail; b=p2FC/iZoUd5Eai1Tk7rUvzcNNcM7HkMPe1NoQYUQG7agvAeC1A3uMTnZuJ0TI3mK75n774UB7fwSbF6ADbQSb7kYtpcNdzJN+KvyOE4wDgOTgNroz2SPAOWOcTu+2AsZXWpey4KOR1Yl7QgelzVUdnjTbEWDNcJp0BzZZk548Es=
+	t=1762764401; cv=fail; b=U7CqTgoyJVPlzi6YwIGaKSi/GCk8US6Yc/3WPog5H6DWLvC9/N1uO+eIrtFCDwDbGMIdK7d6wISAxJDdqcwfmKqwWmrdSyv8/8aFkw7UOQ0X/ghcKhZv4Mquu8aUHbJygEojAaXoc6ci9vgNqS7DCmAsAE+m7hKLl1M2dkX6bcE=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762761519; c=relaxed/simple;
-	bh=6X31F61gYwMuUmvUGOKjX88KKytuiKHKar17cjekyk4=;
+	s=arc-20240116; t=1762764401; c=relaxed/simple;
+	bh=lv4AbgMU/EinS0fXkBIPzFWAQgFoa3YzPyTO/BYjFRs=;
 	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=JTeOX1tYJ0A0NaT+7njKLTw7Ax12xxYLDX4Z7v/yKr8HndKrC4gXGDBj+q/f8GK2o7PB13jq+2LuUj7GbdhCA5DjWJZSfbkXn1WAErtCdQmhBKeCyBCPYjxxLOAY0RroTost5q9dHr+aLsfF9M3j3p5mH8vYWXTmGZGJ67De/Gk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=KzKkQMaH; arc=fail smtp.client-ip=198.175.65.17
+	 Content-Type:MIME-Version; b=NbNoIlIoiQdoVazsr3YxcHEE4ylGLAPb1aTSKnqQUNqJmqZGtFk3ocAEhACLoUFKor1NYWh+64u7mu2y/tBY8YCGRbCffDmQepKC4QzfiTqN5oDOThegUJ55Sdz6xjjndle3Mmcpg8SvLC+1aU+PpJK48eoXMtf5HuOWys0dqC4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=hYK0T0KB; arc=fail smtp.client-ip=192.198.163.7
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="KzKkQMaH"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="hYK0T0KB"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1762761517; x=1794297517;
+  t=1762764400; x=1794300400;
   h=message-id:date:subject:to:cc:references:from:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=6X31F61gYwMuUmvUGOKjX88KKytuiKHKar17cjekyk4=;
-  b=KzKkQMaHxOhEtMSTYUPgYKtr/JFLDIT9QX7CMlI6s9q0OlLq7cBrUXJd
-   acUF8hd6M0Puy0cVxyURDZV6017jBK5OOyZQSaXMeKPHTIiRyvovX1/3U
-   tG49BX3J3qm9KBc9h75lq9S8ZrIb6YrkdQhNkbRwzAP4uvI9/loklKfGy
-   f2qAOEBdIUfO/XTVI1nuijDg5KwLJPpHXKq7jipL18yhTExQyK9f+curo
-   XNWv/p9m53AuSa8Kiu50O03zUdvJvQqXBE6SuBJd12OlGZMkEOAvFi0tJ
-   I1kM5VUeHcTVZmaC9LLKI6BPC45OBKCVQYWn2WOIKHzRgxgH5Rho+tYGE
-   Q==;
-X-CSE-ConnectionGUID: vEX46kjmTaCVeK1iZtj/gA==
-X-CSE-MsgGUID: uPT020odRoeC66GdG4X9fg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11531"; a="64735343"
-X-IronPort-AV: E=Sophos;i="6.17,312,1747724400"; 
-   d="scan'208";a="64735343"
-Received: from fmviesa006.fm.intel.com ([10.60.135.146])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2025 23:58:36 -0800
-X-CSE-ConnectionGUID: iunm/PObShmn0Aw8bxJK+Q==
-X-CSE-MsgGUID: NmCdyfM+QWSRAMAKdULC0g==
+  bh=lv4AbgMU/EinS0fXkBIPzFWAQgFoa3YzPyTO/BYjFRs=;
+  b=hYK0T0KBHAzO3Ezf4WHLw3Bm+RXVJxLY8VDJqhDhOt0xMXZ/exo2PfI1
+   7wN7var0Gu8jTSsbOhp7B2sFPYj8wul0yvz7BBgp6orfVYeVbstQXrSVW
+   cqCOST7rNnlvAOyuC0vx2Xc//zvVSHGQ6DHMZ86Z6FYj7jLHMZzwKkgve
+   DO0vDywKMMu3PpBC56GZNIOJ1GFpW9T/tXkGaPsYX36Ob+NVbRJmMB8Ns
+   HP78Za2Ku5pxFEwVMIv478XnuNKi3k0gYsfV4I54PEFOPm36UjjHubXXr
+   V+rL4ZEj9QDBQYhPi1aR2LKZX4gKGqiHQ0d4OM2h/eJP4a9m9mH7AfFTL
+   w==;
+X-CSE-ConnectionGUID: CTjB+Lx0Szu6S7XdkJb6wg==
+X-CSE-MsgGUID: ZKDGoPh7SNWYrD30GsoxaQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11608"; a="90280339"
+X-IronPort-AV: E=Sophos;i="6.19,293,1754982000"; 
+   d="scan'208";a="90280339"
+Received: from fmviesa004.fm.intel.com ([10.60.135.144])
+  by fmvoesa101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Nov 2025 00:46:39 -0800
+X-CSE-ConnectionGUID: vvi/wiSTSKeWAxOY3idWig==
+X-CSE-MsgGUID: MG6PZhu4QeKSGranJBjFZw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.19,293,1754982000"; 
-   d="scan'208";a="188446232"
-Received: from fmsmsx902.amr.corp.intel.com ([10.18.126.91])
-  by fmviesa006.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2025 23:58:36 -0800
-Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
- fmsmsx902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
+   d="scan'208";a="193632905"
+Received: from fmsmsx903.amr.corp.intel.com ([10.18.126.92])
+  by fmviesa004.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Nov 2025 00:46:39 -0800
+Received: from FMSMSX902.amr.corp.intel.com (10.18.126.91) by
+ fmsmsx903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27; Sun, 9 Nov 2025 23:58:35 -0800
-Received: from fmsedg903.ED.cps.intel.com (10.1.192.145) by
- FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+ 15.2.2562.27; Mon, 10 Nov 2025 00:46:38 -0800
+Received: from fmsedg901.ED.cps.intel.com (10.1.192.143) by
+ FMSMSX902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27 via Frontend Transport; Sun, 9 Nov 2025 23:58:35 -0800
-Received: from PH8PR06CU001.outbound.protection.outlook.com (40.107.209.30) by
- edgegateway.intel.com (192.55.55.83) with Microsoft SMTP Server
+ 15.2.2562.27 via Frontend Transport; Mon, 10 Nov 2025 00:46:38 -0800
+Received: from SN4PR0501CU005.outbound.protection.outlook.com (40.93.194.65)
+ by edgegateway.intel.com (192.55.55.81) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27; Sun, 9 Nov 2025 23:58:35 -0800
+ 15.2.2562.27; Mon, 10 Nov 2025 00:46:38 -0800
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=LfMuRupgqFnmsLq2DGcScec5leMzKTL0Cugv29CZjmuHD+jl+o0kZT6YhfkpwCqoknqzytZXqHePPjAt4j3avBTPC4+mvLRq655/NNnrWfYb9jpIbJ14gx/tx5RHDsbiCOP4ZtEsKwD+RCp1T4VGnKrGJY4VrEgHwRF3SlN1idTfRq/DIAgxIN7b4rl2vYKKtfXmVA3jOqdp8qpep5CHl0XlUK8U9GBgEpHHC17UIX1Gdlo5wJNZ3kbhtSV744RU0Cmfwgm3Qh5KmdxGTnOTyjaCDe9wjdztH8clU4COKYrQQOl9waA14gCEuBegS572iFvVWB5J1ATxywUwKHuV5Q==
+ b=PWRL5TDiaS5Ei8pqMd/whECQwkuNExU6RliTIGgrO3234tfs3lJIFP6vly3v1N5cVkG8YGF63bUEY9Rqy938HfOkympfZkHB4LrOWoHiwl4Kf6hv200QJsZzgiAUsP0Ed8DclIMOSJscJe4PhIrkI/wMm4TjYHvPXJpAyNVWD9ryz/DdaZ0FMb0dPEVyJmchqdwvIvSk4sCJ5BEKSYXgVDFJTeyovn60ecw9ZiOXbaDsTRB1FjzTMUAA9vetDr112QkSOYFi2KaOEaR5CbWrX1Uzx8yWNm4mi390Kfgraq0jAHrqixwdPssOv0EgHKG1T9xks9Lv2YNBC6pyh+5Umg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=I8WmskQsmnByjJr7rBEGkSTDN2MlD6olssyobd/BntE=;
- b=vv5Zq5u1KieN37ujN6d7F3u7u/rujiVBPqWXD4x3KZY0f7REV52Nr+esiDofnHM/C8d6Ja0Epieg0hKbZEyQKI7f+rprdRnVeIjphigAewWawvUWkknJs4MoSUupxZt4xSLsdle6XBeMAvRBP9LnWEgBwgz9p2bvXuwQfKRAa3h5YnwycYLzlx0PjXGBeJdY8z46br1WCIe7L59+4FL9XFkVczHPcKxZeFzsmRhEklfNpL3vNg+NUJUklyCumP92vlDTUINc3O3XUp37EPt9YDer+vYi7GP9eJRvD5TSVH7bkZZ1tgM+wbL2U/BLVVDpjlzDOSpe9e9c3M22hhlniw==
+ bh=StKRB+vBxt7BLsoJzCFtPCLBPrvlFBN+l/Fmnhd5Ilc=;
+ b=PVRpPnDeQqAm6q2hi2Q/NV4bDo9m5thTrleXzRuQfUp/bCf+vSg6sb8yq5X0qE2hyb8WQW8pLHp2MBMq1rO5iI7z17wk9yLtkWFfpKsqMErSGu0gLvmDndFKlGbAusR5e1UcW8Rv3jEUA/zeGcdjqIvpRgHYXDAyJigCoF7w9YS++CMTBVRiBiS8BMGvRSHKB3ReaYDVUItmgJ+LX8aFDOQn9UteRDMgvTf1QDrKf3eVx/KBNESLyOTHFtCYwbmB1JlN1Yyvgv7Mcqg98dDhpIpxb+JB8fDt90ya0sZDY9m4ZwdHZsCqBn2jbR/jWukoCqDu5FX9hGw3BZsm9GJwEQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by SN7PR11MB7019.namprd11.prod.outlook.com (2603:10b6:806:2ae::22) with
+ by PH7PR11MB7516.namprd11.prod.outlook.com (2603:10b6:510:275::7) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9298.16; Mon, 10 Nov
- 2025 07:58:28 +0000
+ 2025 08:46:36 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::eeac:69b0:1990:4905]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::eeac:69b0:1990:4905%7]) with mapi id 15.20.9298.015; Mon, 10 Nov 2025
- 07:58:28 +0000
-Message-ID: <abb4a253-6f4b-4547-a238-db6f60ee3244@intel.com>
-Date: Mon, 10 Nov 2025 09:58:24 +0200
+ 08:46:36 +0000
+Message-ID: <ae37c98b-927e-44e4-b83c-71753d61e2cc@intel.com>
+Date: Mon, 10 Nov 2025 10:46:32 +0200
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] mmc: sdhci-of-dwcmshc: Add command queue support
- for rockchip SOCs
-To: Sebastian Reichel <sebastian.reichel@collabora.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, Krzysztof Kozlowski
-	<krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner
-	<heiko@sntech.de>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<devicetree@vger.kernel.org>, <linux-rockchip@lists.infradead.org>,
-	<kernel@collabora.com>, Yifeng Zhao <yifeng.zhao@rock-chips.com>
-References: <20251031-rockchip-emmc-cqe-support-v2-0-958171f5edad@collabora.com>
- <20251031-rockchip-emmc-cqe-support-v2-1-958171f5edad@collabora.com>
+Subject: Re: [PATCH v3] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
+ devices
+To: Md Sadre Alam <quic_mdalam@quicinc.com>, <ulf.hansson@linaro.org>,
+	<linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, Eric Biggers <ebiggers@kernel.org>
+CC: <quic_varada@quicinc.com>
+References: <20251104063943.3424529-1-quic_mdalam@quicinc.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <20251031-rockchip-emmc-cqe-support-v2-1-958171f5edad@collabora.com>
+In-Reply-To: <20251104063943.3424529-1-quic_mdalam@quicinc.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DU2PR04CA0236.eurprd04.prod.outlook.com
- (2603:10a6:10:2b1::31) To IA1PR11MB7198.namprd11.prod.outlook.com
+X-ClientProxiedBy: DU2PR04CA0288.eurprd04.prod.outlook.com
+ (2603:10a6:10:28c::23) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -108,294 +104,270 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SN7PR11MB7019:EE_
-X-MS-Office365-Filtering-Correlation-Id: 0d33df5f-8ad3-4bba-9bce-08de202eef15
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|PH7PR11MB7516:EE_
+X-MS-Office365-Filtering-Correlation-Id: 10a6e863-1fec-4917-8bba-08de2035a83a
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|7416014|376014|366016|1800799024|7053199007;
-X-Microsoft-Antispam-Message-Info: =?utf-8?B?SUNBeHVhUVQzUXh4NXAxdTlHLzQzUzBSNTNISVVXYXNtb3hHRHV5ZThpamdJ?=
- =?utf-8?B?K2x2ektvOUVScmROaVgrRnJxd0FxcExaTXA0emx6ZTZ5aWJxeUVEQW85L3Zx?=
- =?utf-8?B?MmRhRWtnY0k3S09XdXByQkNmM0hvSE91N2lJSUhWRFJnM1NuVWo0c29MUi90?=
- =?utf-8?B?SjdrNTd4L0U0UkhKOVRjRktEbGsxZTR1bEZMeGFXc0NXcGwzRzQ1K0FQcStT?=
- =?utf-8?B?NlJVazRyTTB5WGowbHRBRTlReUNqZEprdmZZQjBiSjQ2am5CZ2ZZLzU2emEv?=
- =?utf-8?B?bGlwMmlQcWJXaWtCbzFqcE42MEVTTUpBaEw4VHdPaTFJNjRXdzJYT3IwSEpM?=
- =?utf-8?B?YjNsQ1pUSER4RTJCd3pUV285dEROdnVoL2g3Zk52K1B5a2Y4c3hWTFdJMmRY?=
- =?utf-8?B?NjFZUnp4SzFKS0I0dWdHWVluZ3hOOGZ6dm9ZUHlhTVVvelFMVi9YUlFQeUtK?=
- =?utf-8?B?Zm9oYWhQdm9Vc0NlRHBNNU00dmlXWS91M0NzUEFFVGgxNk53cjJoUThiNHF4?=
- =?utf-8?B?NWYyWEtwbHhYdnpWaVVsM2xaZ0R0T3VlcDJTc2NxcHZJNDVxMm5DWDQzVENn?=
- =?utf-8?B?ZG1wVmRidnNzeVE4Umw1RGdZVVNxNTRSS0JSMDJRaHkyU1kwRFgrRXd6Z2d3?=
- =?utf-8?B?MWs5bmhxLzYrU3pKMTJ5S0loQ1FkQ2h1RlJJU0lPcm9wT1BFb1p5bmtXb3kv?=
- =?utf-8?B?RWdKSGliZjFzYlJLcnlEdEhaUGRPZnJaUmtBeGtjQUg3T3Y2TVNmb1ltSkE3?=
- =?utf-8?B?bFlOL3NKTlFxUlM4TUlDTGM3UUlvdm9ib1lCYklDbWdKcG1DR0tUNml0ODlx?=
- =?utf-8?B?blBHNFJld1RSYnkzTWdSR2c4ZVpSZVNVYis5eTgxV2tJczBUcXFuR0hzZ1R5?=
- =?utf-8?B?dzBpaWJaN2JvSENwOHE4bUxhRVBOdktpclgyNWd0bCtTK0hyZ2ZaSTUyNmYy?=
- =?utf-8?B?UUlSbGdOOG1hVzNUdi8xcTZYRnY2QlYvNXJHTGV6M0lTZnJ1dDNZY0k4TjNj?=
- =?utf-8?B?cEg2NTdwb3VWUWxhNTZRTjNhNmFwdjEwTkRhVEJ1NUJpTSszYlRYbTVpOUdz?=
- =?utf-8?B?K2RjS01qSmZMOHFocHJCY0hnK1N0WVRyMDlBRlo2MmVmUGZ5QlMxSE12ODdo?=
- =?utf-8?B?dGNaUC9rOFBLTTMyMXYyS1pSVFNSUXNoZHdzelU2cmwvOHFsRFhZdFM3RC80?=
- =?utf-8?B?UEVoZXBGd1VJYnY4ZlJrWjRKanVBcG8yaHpCaHQrSXV6bVdyRWY3ODhWMWhm?=
- =?utf-8?B?ZWxpRkp3cm9mVzl0blo5SHB3MzZNZTN5OVFPYWxlS29Jb0wxNUVCK1J1MFly?=
- =?utf-8?B?NVJCaUk5UG5QdEZaSTVKWWFaN0J0aFRrQ2VDY2hmTVdCNnhWTk1lcmhaS1pW?=
- =?utf-8?B?V0xsd3owN0V1RVp4SUJ5c2tVVlgxTEhyczQyWkdLR3ZrRFRiL1ZJMnorUWc4?=
- =?utf-8?B?ZFVqRzdJNVQ5Mlh5QU1nelFpVGhCKzBvbmtsWVY1bHUwTytlWmZqb3dOTW8r?=
- =?utf-8?B?eFNBTVpPU0hSallmMHNGTllRSnBnQmpJRHNnRitEMHBVa2lqazIybEhRY04v?=
- =?utf-8?B?bnpDdC9VZGhPcXNpQVhoS0Z2SHZWQ2hER0haVGVOL0crRForbkRvdWJVVE5B?=
- =?utf-8?B?c3BSSzgrMEZpNGtlcXM5SERBUmNDY1QyNXFDOUQ5Znd5SXo0SVVBN0cwNE9t?=
- =?utf-8?B?dFhSU24zTjhDbDFCRnk4KzdHYktvNUhzUVN4UUp0bnF5VWhBUm93RUtINHk5?=
- =?utf-8?B?TWFOVW1jcWtMRUg3UlY5RWRjc2NONFBtcHd2TEgzdWJxdWQ3T29XNkxhWHl1?=
- =?utf-8?B?S1BwbDZkekVYRUpSb1BNSTIrZlJGNVE4cDh0WDdrcnA2RXc5SldqMDNseVdN?=
- =?utf-8?B?dDdSaGZUYTg4d1p3YVhHcDFmR0lRVy9rL01ibk93OEJ2L25aVmd2akEvY3NK?=
- =?utf-8?Q?6FZoaKPuF1e9+/Ox/HaLXxCxKv7sdWa5?=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(366016)(1800799024)(7053199007);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016|7053199007;
+X-Microsoft-Antispam-Message-Info: =?utf-8?B?VlJyY3lrR3JUM3hxVGRIVmtaTFF3V1RaV3FqdUFHVjdhcE95Wjk5UHBCdVMy?=
+ =?utf-8?B?ZURPZjZkZWR2eFhFaEFUVEhzRWVmMk1nd2VQZmgwSDREUGMyWG9NaWlmNktj?=
+ =?utf-8?B?YThMMWxqZm02di9jS1RIUm95WWc5TEI3eFJaYStPWTdDQ1RvY2txZy9RZFNU?=
+ =?utf-8?B?RFg5a29jb2R2TzBWM3lHZzFOTm0rVG51RjlZbjFabFRyVnFLaVE0R2t2SFVa?=
+ =?utf-8?B?cHlQT2hOUTJnaEdMMjQ5TEdTWjF3Y3JBN3U5QlVLNmQremlsZmxrV05MT1Z1?=
+ =?utf-8?B?V3dOc1NhSkJHYW5VUDQrbUtzbU80K1M4QzFtSEZiU1hyL0RDM2ZJc3lXbm1m?=
+ =?utf-8?B?MStxUzR4OENGYTg3M09zaThtd083VWN0YzZKTUsyNHovY3JTNVRZOElmRzdH?=
+ =?utf-8?B?MkN3aEViT013ZTFFZ1grdnFIYlVCd1ZYYmpoblk4b0hYT2tjM2NYbXNBNnUv?=
+ =?utf-8?B?dVVaYlYrMnMwaHVkelRxTDF0blErMDlVU1drU2kzTFVLcGdLL1N4cmMvUnpK?=
+ =?utf-8?B?SDUyTFFITUh4OXpHbFBKZjJEWXVEenZoTkVzQUZZeXZYaThjYVVIVGlyaDFk?=
+ =?utf-8?B?UEJCUUFsSW9acjcrR21JYXlick5kcXV1NTBXeDc5L2EzaVlxNTRFU1N5Mldn?=
+ =?utf-8?B?NDY4c3B1UDVSZlRYOVlrVC9xSUJDVXcwcG9KbTkwQ0pmWTdZQmRQdGFCOXRP?=
+ =?utf-8?B?L296RFJTYzF5bEJzcXJ2S05HMGc4cFhQZHVYalkwdVROOVZ6aFYyb0JFMFhh?=
+ =?utf-8?B?QXg4SWZZU29BNjNnK3FQVzlkaDNWNlE5SGc0WENta3RLdGV5L2xObmlmSnN6?=
+ =?utf-8?B?RTIyT0NCTlovZjRuQ3I1dDBUZ2VIT1hqLy9xYVhVZ3V1d1UyaThzODZqK2NR?=
+ =?utf-8?B?N1c4QlJUeUVNcllFdWo1UzFWc3JhaGlaQ2xqcjQyTHloSmRNMkROWkV2dnB6?=
+ =?utf-8?B?Um5iQmhwWFN0RGV5bjlrdktTWkFVcml4K1FXS3ZzQ0dqWFpnWmVlWVcvRW5J?=
+ =?utf-8?B?MlNGbTFyRG03aUEyVFN4ejdEU1BMWUhoK3d1bTR4c1pQYSs4M0tuMXZMWUlj?=
+ =?utf-8?B?Mjg5b210aFZBNHZaMjhEUlRMRngvU1ZRclFnaUF2VEpRWjZPR3lwRW9Ya1dx?=
+ =?utf-8?B?NzdpZzFZeGxWM3lGVlhyTWM0M2lKa2ozWUZuYTI2NEhyZWd5R1d3RUZKRFRV?=
+ =?utf-8?B?VW5hSGVmZnB6b0IvTzhDOHI0WnNicTdqZFJhQ2xCejlTVUsrTUZ5cklGSSt1?=
+ =?utf-8?B?eE9rQ09lbGpuTGMvbnBUelJmaVRZeUtTRWFydTkrQzE5a0d4cHp2L3MwOFR1?=
+ =?utf-8?B?V3YreHBBUDlJdlFqT1VGK1VvWDhSNVUzZGVSWXRZKzhYQWp5aGx0dDJZYlc1?=
+ =?utf-8?B?bkxuNGxyNHpickRUV3loVml1bElncFBSMTNHRXJscTNFSjdQeDlnbzB4dmIr?=
+ =?utf-8?B?NW5NaFY2QjFtRHFWUUhaRTNxTXdaNnZqYWpzeEpYS0ZuUythdnZkWHZXRHh4?=
+ =?utf-8?B?ay8way8xK3RoOWYwOTdKYURDY2ZDUEtYd1hUdjJWbWRQbEpaTHVqM2RCV2lp?=
+ =?utf-8?B?S3RIRHNUdmFOdWpEVGxOR3RGaU82NWZ1Z2ZjSjA1MSt3MmpqWGtYYXFCRzJU?=
+ =?utf-8?B?Q21adGMzWFZrN0xHaEFNNVFtTmZqaXAraDk4dFFteWZRbGVsUzdaREsrMlcx?=
+ =?utf-8?B?U09EU3FZWFlnTjBZZ01CUlB6bE5qcVBTNGFTTitreUhmS3QyTElKdXEzRnhP?=
+ =?utf-8?B?bTZQMXUrOGY1ZDNZN3R0ZUVxWk1WQ08xdDl0TU1PdlhXRVVIVDJqcE9FSnJS?=
+ =?utf-8?B?ZGlBdmFUOWRGc2JSb2dzVWtiOW5KdHFmWnhQWjd3YjlhRllCOEpLUEYyK1k5?=
+ =?utf-8?B?dFJjdlRUbHVoQWY1ZWVSM2FpeW83SENoem9WS1BGVWJ3Q3hxZ1M5bTlZOGtN?=
+ =?utf-8?Q?KWv2S27FVCOkfEoL07JiLgg9H/QH2gz+?=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016)(7053199007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?YjZaeHVjaEVqYWxPeFlvR2hhYm5DUVhJZ1JqS3prWHVOaWh0STBZQ21Xb3lC?=
- =?utf-8?B?WE1uZDVBdHVyNVVsZmdVaEFraUExSndpTGdyaWlKS25PdGtXWHJlNnc0b0Jh?=
- =?utf-8?B?ZWFXbnE1WFF4L24xa3puSjgyUzJpWTErTVcvMW5MZExyQlBQa2NMU1ZRcHdn?=
- =?utf-8?B?MExici9SZFJpRlNQZ05qWVJnUkpVQi8xT283NWxhRmtBcXR6NHVGQnQ4ZWNr?=
- =?utf-8?B?Y1hkeGp3LzlaV0pmUnY3d1ZycHRKZ3FYNWpJN3pVVVBkOWdSdFFLRG9jY2Zm?=
- =?utf-8?B?Um8yV0xRV2M4ZllsTlUxOVprTjRNOUVaaklUVWp6ZGtjTGZvVzVTQ0d0cGEy?=
- =?utf-8?B?czgzSXA5QlRXYndFSjJ0Tk9ONkc4dkp5M0w4eTBUUHp5eXY2bEN4RTBhV3ha?=
- =?utf-8?B?RWp0K3ExMkhRMzJIZ0JZWkJmMnhyLzNjeHpUK2NGNE1MblJVckFTMVdPUndi?=
- =?utf-8?B?SEU3VThiMXB6bWpjWkxLbUNQc3AvL3YzcXQvMlBMdFp4N20vUnV1SncvbHdM?=
- =?utf-8?B?MlF3Q1M0b3Jjb2xEQmd6bU9WSkFvR0JleHQxR2svRTQyejU0TkZlNzRVQlV0?=
- =?utf-8?B?d2RLblZZalVjZTFQOUN1WGxSckNEVERibTNmNTBselNnSERLZ0puWUxJbXA5?=
- =?utf-8?B?d05lOUQvUXZhbzh6WStJa3paM09nTENGQjhyaHI4Q1dBblR1aUZwd05DYVRk?=
- =?utf-8?B?VHJZR2tub01WSDFBdlFHZENaRVFrcFozSmFZUENpeEtTWXZhQlU3SFVabWVU?=
- =?utf-8?B?OGxhTmMxeVBJSGpRQ3Fmd0VVeVVCTHh5RzFhSkhGcHpXbm8vWGRSeldnMkZn?=
- =?utf-8?B?dkd5MHBmVjRoNWNBYjBWSkFtYjRxaEhKN3YvaFdRZGw1dE1SSm9DTmZQSDdl?=
- =?utf-8?B?UjFYN0dwcktYR0c0UlkxRFJZeVFOamdYZk9FdGNHWUdxbEFCN0JZTXByZG83?=
- =?utf-8?B?dGZ4UnJtMmhLaS9UNzJyZ0tHTElqSy8vSUl4b2JpSlA0TzFTNzJsWFBaQUxQ?=
- =?utf-8?B?LzZaaGJsM1Jxcklkc2pLSk5XcTB1Q3N4UDkrMTQ2OXFZaHRwOUdZN1hJb1hh?=
- =?utf-8?B?TzBjWGtZRlg2aUVsWFpCcCtpQngvaHpFeFVCeVhtaXdNNGdnK29GK1Y1NUlw?=
- =?utf-8?B?cVVwQ0VvdG9zY3hQSEJNVzVMOVhXVGkwMzNJMXV4TUd2cW0yRElzaUNhUGdp?=
- =?utf-8?B?MnpYS29VNjJGUzJjK0treTMvei9ycWhwZG52cGRkeHhwWVlwYW91R0xLSUFu?=
- =?utf-8?B?UHNIVG1vTW1VMWY3VjJCNzJSZTVzUm8yN1lVSy9VeWZNNkJvaFNUNWJNMzhD?=
- =?utf-8?B?NHhZdmJNeWRoM050NndXSGk2TEJPdHRqNzNFWkZlWTNDVzBZZzRjclpvY2JR?=
- =?utf-8?B?RDNSQkJBTitVL1h1UDMvNXN4NUhZTTY5VFVKT3hKR2ZPOVBmRm5iWWozN3RD?=
- =?utf-8?B?alNhNEJDRk5JeTZQdmI1S3NOZXIzL2FIaXhYV1ZwdTZtVER2YWIzVUJYZmhI?=
- =?utf-8?B?VlVOeVlvSFZvd3pLQXdJNlhrV3BUTVdrMGlNc0hyb1ZaYXJzL0NtVlliQno2?=
- =?utf-8?B?RVAwaVZRWmhici9GVFZ1NlJtdFY1K3M4N3RuUVN1MTdQTHVRbldEY1FoWFFh?=
- =?utf-8?B?aW9ySVZPekkwV2ovakxjejJET0RGQWtCZzBseW00T0ZxWUF4L0NkOXZJMng0?=
- =?utf-8?B?S2cvYm9GbnlQNmRaWlowRWVSMGdCN0ZvUVR4ZTB5K1FlY2p0ck8yTitYTU4z?=
- =?utf-8?B?MmlFV0tYeXhOampyTnhGNGhwUlZoMG9GVUJVT2JNN1d4UlhXNjB4aGdsUEta?=
- =?utf-8?B?TWNyQzBCbU5MZFFGbkZOTFZoTkVtbFR3UDNlckZQb1ZFc1cwSkFEeURTeGE1?=
- =?utf-8?B?TTZELzhuOGMrYTIzVll3aEYvOXR3eDNSSDFsZmI5ZnN4ajNFOUltUi9NMGJa?=
- =?utf-8?B?Q2hZanA5ZmRWV1BWdWRncWVSdW1tNXpCcVB5dE5tWmFxdWpHdys1UDR4RnpB?=
- =?utf-8?B?MVBtcFFndGI1WjVjOHczRnF1KzdRaXc0RUdMdWprVkU0VkRtVGR6cXhPUWx6?=
- =?utf-8?B?RUhQNnR1Ly92TmRZVm9DTFJLT0tPMklqZDdlVkw5MU02VEFycndJaCtTVlhM?=
- =?utf-8?B?MGxLOUhGdXQrb1daQ1lCR08yZGo4MHRYMW1TNVdnODVtSWtTR090bGJUTWZD?=
- =?utf-8?B?VXc9PQ==?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0d33df5f-8ad3-4bba-9bce-08de202eef15
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?b2t5b1ZaMWdtN2ZSQ3dibmFWQUF1UkVNYmd0dFZnVmE1SE1vcVVVOG5EOFAv?=
+ =?utf-8?B?NG1TTHF4cytCR1JSYllSTEpRZFFSeW9QbDNxcnc5L0ZLcDN3VzNSeTlaNEFW?=
+ =?utf-8?B?N2ppV1lsZmFROHVOSlU4YmFZblpTLzhnbmkycW5oak5xNHk5SENlZFhKK3c4?=
+ =?utf-8?B?ZXg4cjRsOFhVMW1xTXdlQWRrSnliby9uSDE5MTRQYkhybHROTmgwbzVSRGV6?=
+ =?utf-8?B?Z3RxQWhNTHphMHVJN3J4M002dCtJZ0h2N0dINjdhTWxYUjdLUlBhYmFqTUNL?=
+ =?utf-8?B?K3VpU1lra3FDdDU2T0tROUxka3JSZFZrS2tWbmRDbld5VytET2dxeEY1Q0o4?=
+ =?utf-8?B?M2F5SGd3V1JtcmUxK0dMaVM0YTNkeld2cStPZUc1TGdJcktDSmJ5U1BXVHJL?=
+ =?utf-8?B?Q1duQ2dpTkoxdXdyQWZWNVNNUyt3dUZjakdpRnFXMXRQVWVFWHB5SGxocnla?=
+ =?utf-8?B?dGkrT1VzRHBERTdVTDZIRkdQS3QzZTBXMUUwNGRrMjFTN0p0RGU5Y1lGaTVn?=
+ =?utf-8?B?UVhDK2JTZEVqS3dEMTlBRmtHaEdBN29IRkdBZ0dGNzZ2WVJNQ0F6WFQ3S0E2?=
+ =?utf-8?B?Z21GZS8zcG1GR3p4ZndicmhTenUvUXB5aWttSEFxK1NJekZob3NvM0hNcEcw?=
+ =?utf-8?B?YzRmcUVNT2RuSjhZcEczL09QdytPT3AvOWJnUWFyazBKMlR2LzVnUmdtbzEz?=
+ =?utf-8?B?RVQ3dHpxd25LNDBidlJZZ0R6NkZEa2plTHcxd1NqbzMwZEViSzhJSi9mbExt?=
+ =?utf-8?B?YVVBUzZhQ2tsbjQvMGFXUDBvcHI1NmNYTDJtbGxjUnlHQlZDbjhDd3JJYVRw?=
+ =?utf-8?B?QW1BWUZKN25kSmlyZ3dGL0Rmcy9lay81NkJTYzFiZjVIbHh5TEJya2Y0ZTFy?=
+ =?utf-8?B?L1pua1hRL1EvazYrMm1GUkVnMDN4ZHFYUnN5Qi9VREZzWFhROXdBMTlpU2Vk?=
+ =?utf-8?B?V3g0Nmd4a2ROTmtVTVNYUWxBYnVrTUhXN0hyM1RLMnMxak5Id0g0MTFwM1JO?=
+ =?utf-8?B?OFh5VzNTaXpYcndKcG9VWmFtWUZ6b2p6d1k4VVYzRE1XVWNIZjEydmdaaE5q?=
+ =?utf-8?B?Y2JvOGxBR3JieXVaaWtSMGQ4ZE1JbGpLa1dIbDVWTTVrMHg4WTZPR2UvQzJz?=
+ =?utf-8?B?ZzdCK0dmSnBnc1FCTnBYcEF4OG5CeUNxaUpQZDZqYStGTnovbk9xeXBpNWpH?=
+ =?utf-8?B?dkJJL2d6eTB3alBOM09pY2ZMa090SkR1UXZEWXJQbW1MOGFBT25FV1FRQXAz?=
+ =?utf-8?B?VjNETlgwYUd6eThBa3REQjdLUjhUbjFSUk9TZGdUZzFZQTVUdVVqUzFwN3pz?=
+ =?utf-8?B?N2lmVTIwNStleGhuZWxsb3JWd01VcXc2S042eWE2Mzcyc3RlMERhRXFxN1dF?=
+ =?utf-8?B?Z1A4dTJrQStGWmt5Tzk5WmR5bGxIdWhlK09JSHozdXhNeGtOb2kvaEJKSXFL?=
+ =?utf-8?B?eVZHVUhwa3lVOWdBS25VOWZ1YmN2cjk2TXlLSXNBUmtaUmxsU0xMVzdJME80?=
+ =?utf-8?B?NE1UcTM0Z2c0RnlEb3hxWWNSSk1EcVhkVVlZaWRzOS9LUGU5WDNHS25hTkpY?=
+ =?utf-8?B?dlJNU2Q1TWR3SVJ0eG4rOUJrcVY4T1pWSmhoOGMvcVU4NHQ3ZEZsbVJiVmRx?=
+ =?utf-8?B?ZnA2bUY0K2w0SGo1TVFyWmp3YXFkU3BrUGx2T1gwdGhRWS9ROVNjTEltMGhG?=
+ =?utf-8?B?cTQ1NUdNWFBJUUhITkMvMjhNaUNZakJPWWltL0xzaEVBb21RbHZEdzRJTmhF?=
+ =?utf-8?B?eTdlbk1TTTF2WjRGcVp0VS9KVmtacVhhcWp0SnVCNGNyMFRFMnF0S28ydTlS?=
+ =?utf-8?B?c3NSWWN6aWEyUTNLVTFXMHJIMFNFR0UxSndadGFFU3FLS2pHWFZjWm5oaXJY?=
+ =?utf-8?B?WGFPSFRHY3d3eE5sdmxLQlNhRms0MVdwSXdhRDRsZzhQTlBDVHlJb3FJcTJE?=
+ =?utf-8?B?VnkyazRyU2FNUUFuWHY3QS9IWW9NbVAxRGtoU2lLOVZzYm9EaG9zK3BKWVoy?=
+ =?utf-8?B?Wk51eGFPWEp2bmZyN2hkdDUzekdMSHhTdnZnUXdmNmRtSEdKYjlnakxhWVUy?=
+ =?utf-8?B?VURRVlY1R1FNaWN5UXg4UDBiZ05JU25FREJXUkpvcGlsRXFXUFV6ZjdVem9E?=
+ =?utf-8?B?eFZPaGlTYjVicmYvMWk1OTFZTStQMW51cTNJa0wzTnNJaEdVS1RwT3VCZy9I?=
+ =?utf-8?B?Unc9PQ==?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: 10a6e863-1fec-4917-8bba-08de2035a83a
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2025 07:58:28.7615
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2025 08:46:36.4176
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: MC64eJlX4Xc9QiLikWF+039AAL6ws8WS9QpCeEEdfDulb2wL/Or0muyePkmBmmwd1ue0RS5/9wqkmBzzCrhoYQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN7PR11MB7019
+X-MS-Exchange-CrossTenant-UserPrincipalName: fhYQq6gjeisJY1RDet8C3drYhnAy3MmABg8+KqpvS1nO/M927E8p52o5/xmauMzW2c14m5k5UeKKUS7XldZxoA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR11MB7516
 X-OriginatorOrg: intel.com
 
-On 31/10/2025 17:58, Sebastian Reichel wrote:
-> This adds CQE support for the Rockchip RK3588 and RK3576 platform. To
-> be functional, the eMMC device-tree node must have a 'supports-cqe;'
-> flag property.
+On 04/11/2025 08:39, Md Sadre Alam wrote:
+> Enable Inline Crypto Engine (ICE) support for eMMC devices that operate
+> without Command Queue Engine (CQE).This allows hardware-accelerated
+> encryption and decryption for standard (non-CMDQ) requests.
 > 
-> As the RK3576 device-tree has been upstreamed with the 'supports-cqe;'
-> property set by default, the kernel already tried to use CQE, which
-> results in system hang during suspend. This fixes the issue.
+> This patch:
+> - Adds ICE register definitions for non-CMDQ crypto configuration
+> - Implements a per-request crypto setup via sdhci_msm_ice_cfg()
+> - Hooks into the request path via mmc_host_ops.request
+> - Initializes ICE hardware during CQE setup for compatible platforms
 > 
-> Co-developed-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
-
-One question below, otherwise:
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
+> With this, non-CMDQ eMMC devices can benefit from inline encryption,
+> improving performance for encrypted I/O while maintaining compatibility
+> with existing CQE crypto support.
+> 
+> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 93 +++++++++++++++++++++++++++++++++++--
->  1 file changed, 90 insertions(+), 3 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index eebd45389956..47509435254b 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -24,6 +24,7 @@
+> Change in [v3]
+> 
+> * Refactored logic to use separate code paths for crypto_ctx != NULL and
+>   crypto_ctx == NULL to improve readability.
+> 
+> * Renamed bypass to crypto_enable to align with bitfield semantics.
+> 
+> * Removed slot variable
+> 
+> * Added ICE initialization sequence for non-CMDQ eMMC devices before
+>   __sdhci_add_host()
+> 
+> Change in [v2]
+> 
+> * Moved NONCQ_CRYPTO_PARM and NONCQ_CRYPTO_DUN register definitions into
+>   sdhci-msm.c
+> 
+> * Introduced use of GENMASK() and FIELD_PREP() macros for cleaner and more
+>   maintainable bitfield handling in ICE configuration.
+> 
+> * Removed redundant if (!mrq || !cq_host) check from sdhci_msm_ice_cfg()
+>   as both are guaranteed to be valid in the current call path.
+> 
+> * Added assignment of host->mmc_host_ops.request = sdhci_msm_request; to
+>   integrate ICE configuration into the standard request path for non-CMDQ
+>   eMMC devices.
+> 
+> * Removed sdhci_crypto_cfg() from sdhci.c and its invocation in sdhci_request()
+> 
+> Change in [v1]
+> 
+> * Added initial support for Inline Crypto Engine (ICE) on non-CMDQ eMMC
+>   devices.
+> 
+>  drivers/mmc/host/sdhci-msm.c | 71 ++++++++++++++++++++++++++++++++++++
+>  1 file changed, 71 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4e5edbf2fc9b..6ce205238720 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -157,6 +157,18 @@
+>  #define CQHCI_VENDOR_CFG1	0xA00
+>  #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
 >  
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
-> +#include "sdhci-cqhci.h"
+> +/* non command queue crypto enable register*/
+> +#define NONCQ_CRYPTO_PARM		0x70
+> +#define NONCQ_CRYPTO_DUN		0x74
+> +
+> +#define DISABLE_CRYPTO			BIT(15)
+> +#define CRYPTO_GENERAL_ENABLE		BIT(1)
+> +#define HC_VENDOR_SPECIFIC_FUNC4	0x260
+> +#define ICE_HCI_SUPPORT			BIT(28)
+> +
+> +#define ICE_HCI_PARAM_CCI	GENMASK(7, 0)
+> +#define ICE_HCI_PARAM_CE	GENMASK(8, 8)
+> +
+>  struct sdhci_msm_offset {
+>  	u32 core_hc_mode;
+>  	u32 core_mci_data_cnt;
+> @@ -1885,6 +1897,48 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
 >  
->  #define SDHCI_DWCMSHC_ARG2_STUFF	GENMASK(31, 16)
+>  #ifdef CONFIG_MMC_CRYPTO
 >  
-> @@ -82,6 +83,8 @@
->  #define DWCMSHC_EMMC_DLL_TXCLK		0x808
->  #define DWCMSHC_EMMC_DLL_STRBIN		0x80c
->  #define DECMSHC_EMMC_DLL_CMDOUT		0x810
-> +#define DECMSHC_EMMC_MISC_CON		0x81C
-> +#define MISC_INTCLK_EN			BIT(1)
->  #define DWCMSHC_EMMC_DLL_STATUS0	0x840
->  #define DWCMSHC_EMMC_DLL_START		BIT(0)
->  #define DWCMSHC_EMMC_DLL_LOCKED		BIT(8)
-> @@ -234,6 +237,7 @@ struct dwcmshc_priv {
->  
->  struct dwcmshc_pltfm_data {
->  	const struct sdhci_pltfm_data pdata;
-> +	const struct cqhci_host_ops *cqhci_host_ops;
->  	int (*init)(struct device *dev, struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
->  	void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
->  };
-> @@ -561,6 +565,68 @@ static void dwcmshc_cqhci_dumpregs(struct mmc_host *mmc)
->  	sdhci_dumpregs(mmc_priv(mmc));
->  }
->  
-> +static void rk35xx_sdhci_cqe_pre_enable(struct mmc_host *mmc)
+> +static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
 > +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
 > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
-> +	u32 reg;
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	struct mmc_host *mmc = msm_host->mmc;
+> +	struct cqhci_host *cq_host = mmc->cqe_private;
+> +	unsigned int crypto_params = 0;
+> +	int key_index;
+> +	bool crypto_enable;
+> +	u64 dun = 0;
 > +
-> +	reg = sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
-> +	reg |= CQHCI_ENABLE;
-> +	sdhci_writel(host, reg, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
-> +}
+> +	if (mrq->crypto_ctx) {
+> +		crypto_enable = true;
+> +		dun = mrq->crypto_ctx->bc_dun[0];
+> +		key_index = mrq->crypto_key_slot;
+> +		crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, crypto_enable) |
+> +				FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
 > +
-> +static void rk35xx_sdhci_cqe_enable(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	u32 reg;
-> +
-> +	reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
-> +	while (reg & SDHCI_DATA_AVAILABLE) {
-> +		sdhci_readl(host, SDHCI_BUFFER);
-> +		reg = sdhci_readl(host, SDHCI_PRESENT_STATE);
+> +		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
+> +		cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
+> +	} else {
+> +		crypto_enable = false;
+> +		key_index = 0;
+> +		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
 > +	}
 > +
-> +	sdhci_writew(host, DWCMSHC_SDHCI_CQE_TRNS_MODE, SDHCI_TRANSFER_MODE);
+> +	/* Ensure crypto configuration is written before proceeding */
+> +	wmb();
 > +
-> +	sdhci_cqe_enable(mmc);
+> +	return 0;
 > +}
 > +
-> +static void rk35xx_sdhci_cqe_disable(struct mmc_host *mmc, bool recovery)
+> +static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
 > +{
 > +	struct sdhci_host *host = mmc_priv(mmc);
-> +	unsigned long flags;
-> +	u32 ctrl;
 > +
-> +	/*
-> +	 * During CQE command transfers, command complete bit gets latched.
-> +	 * So s/w should clear command complete interrupt status when CQE is
-> +	 * either halted or disabled. Otherwise unexpected SDCHI legacy
-> +	 * interrupt gets triggered when CQE is halted/disabled.
-> +	 */
-> +	spin_lock_irqsave(&host->lock, flags);
-> +	ctrl = sdhci_readl(host, SDHCI_INT_ENABLE);
-> +	ctrl |= SDHCI_INT_RESPONSE;
-> +	sdhci_writel(host,  ctrl, SDHCI_INT_ENABLE);
-> +	sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-> +	spin_unlock_irqrestore(&host->lock, flags);
+> +	if (mmc->caps2 & MMC_CAP2_CRYPTO)
+> +		sdhci_msm_ice_cfg(host, mrq);
 > +
-> +	sdhci_cqe_disable(mmc, recovery);
+> +	sdhci_request(mmc, mrq);
 > +}
 > +
-> +static void rk35xx_sdhci_cqe_post_disable(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
-> +	u32 ctrl;
-> +
-> +	ctrl = sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
-> +	ctrl &= ~CQHCI_ENABLE;
-> +	sdhci_writel(host, ctrl, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
-> +}
-> +
->  static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -679,6 +745,10 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
->  	struct rk35xx_priv *priv = dwc_priv->priv;
-> +	u32 extra = sdhci_readl(host, DECMSHC_EMMC_MISC_CON);
-> +
-> +	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
-> +		cqhci_deactivate(host->mmc);
+>  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
 >  
->  	if (mask & SDHCI_RESET_ALL && priv->reset) {
->  		reset_control_assert(priv->reset);
-> @@ -687,6 +757,9 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	}
->  
->  	sdhci_reset(host, mask);
-> +
-> +	/* Enable INTERNAL CLOCK */
-> +	sdhci_writel(host, MISC_INTCLK_EN | extra, DECMSHC_EMMC_MISC_CON);
-
-rk35xx_sdhci_reset() is in sdhci_dwcmshc_rk35xx_ops.
-sdhci_dwcmshc_rk3576_pdata also uses sdhci_dwcmshc_rk35xx_ops but isn't
-supporting CQE ops.  Is this change OK for rk3576?
-
->  }
->  
->  static int dwcmshc_rk35xx_init(struct device *dev, struct sdhci_host *host,
-> @@ -1188,6 +1261,15 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_bf3_pdata = {
->  };
->  #endif
->  
-> +static const struct cqhci_host_ops rk35xx_cqhci_ops = {
-> +	.pre_enable	= rk35xx_sdhci_cqe_pre_enable,
-> +	.enable		= rk35xx_sdhci_cqe_enable,
-> +	.disable	= rk35xx_sdhci_cqe_disable,
-> +	.post_disable	= rk35xx_sdhci_cqe_post_disable,
-> +	.dumpregs	= dwcmshc_cqhci_dumpregs,
-> +	.set_tran_desc	= dwcmshc_set_tran_desc,
-> +};
-> +
->  static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
->  	.pdata = {
->  		.ops = &sdhci_dwcmshc_rk35xx_ops,
-> @@ -1196,6 +1278,7 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
->  		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
->  			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->  	},
-> +	.cqhci_host_ops = &rk35xx_cqhci_ops,
->  	.init = dwcmshc_rk35xx_init,
->  	.postinit = dwcmshc_rk35xx_postinit,
->  };
-> @@ -1245,7 +1328,8 @@ static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
->  	.set_tran_desc	= dwcmshc_set_tran_desc,
->  };
->  
-> -static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *pdev)
-> +static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *pdev,
-> +			       const struct dwcmshc_pltfm_data *pltfm_data)
->  {
+>  static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+> @@ -2131,6 +2185,8 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
 >  	struct cqhci_host *cq_host;
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1275,7 +1359,10 @@ static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *
->  	}
+>  	bool dma64;
+>  	u32 cqcfg;
+> +	u32 config;
+> +	u32 ice_cap;
+>  	int ret;
 >  
->  	cq_host->mmio = host->ioaddr + priv->vendor_specific_area2;
-> -	cq_host->ops = &dwcmshc_cqhci_ops;
-> +	if (pltfm_data->cqhci_host_ops)
-> +		cq_host->ops = pltfm_data->cqhci_host_ops;
-> +	else
-> +		cq_host->ops = &dwcmshc_cqhci_ops;
+>  	/*
+> @@ -2181,6 +2237,18 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
+>  	if (host->flags & SDHCI_USE_64_BIT_DMA)
+>  		host->desc_sz = 12;
 >  
->  	/* Enable using of 128-bit task descriptors */
->  	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
-> @@ -1443,7 +1530,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  		priv->vendor_specific_area2 =
->  			sdhci_readw(host, DWCMSHC_P_VENDOR_AREA2);
+> +	/* Initialize ICE for non-CMDQ eMMC devices */
+> +	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
+> +	config &= ~DISABLE_CRYPTO;
+> +	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
+> +	ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
+> +	if (ice_cap & ICE_HCI_SUPPORT) {
+> +		config = cqhci_readl(cq_host, CQHCI_CFG);
+> +		config |= CRYPTO_GENERAL_ENABLE;
+> +		cqhci_writel(cq_host, config, CQHCI_CFG);
+> +	}
+> +	sdhci_msm_ice_enable(msm_host);
+
+Perhaps this could all be done lazily in sdhci_msm_ice_cfg() ?
+e.g.
+
+	if (mrq->crypto_ctx) {
+		if (!msm_host->ice_init_done) {
+			sdhci_msm_non_cqe_ice_init(host, ...);
+			msm_host->ice_init_done = true;
+		}
+		...
+
+> +
+>  	ret = __sdhci_add_host(host);
+>  	if (ret)
+>  		goto cleanup;
+> @@ -2759,6 +2827,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
 >  
-> -		dwcmshc_cqhci_init(host, pdev);
-> +		dwcmshc_cqhci_init(host, pdev, pltfm_data);
->  	}
+>  	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
 >  
->  	if (pltfm_data->postinit)
-> 
+> +#ifdef CONFIG_MMC_CRYPTO
+> +	host->mmc_host_ops.request = sdhci_msm_request;
+> +#endif
+>  	/* Set the timeout value to max possible */
+>  	host->max_timeout_count = 0xF;
+>  
 
