@@ -1,212 +1,269 @@
 Received: from mail-yx1-f53.google.com (mail-yx1-f53.google.com [74.125.224.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1335A393DD7
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 17:26:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A489A3AA199
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 17:33:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762881998; cv=none; b=h0/qwn2koWITlKg1Jy57BrJCQj3MVj1AlCAWu6sP0aD1oPP3OnuOXgTo1CbndF5OOqTiz5k7uAPdHWQK7Y8ltHbrD+ZfCTnIHJsA+66ftNsyeIZgde66faZ3ZrDC/DMdNjMC0yemFRmEW5Ifp/9S0SdI7bjArGIw2MAARbaQCKk=
+	t=1762882405; cv=none; b=n6yUMtmCcPqmm05VEHDYSYjbmeM6gSAgkqc/74vWJGBrywo05YeVzilja0A6HFy2qgghFPeQcl9urno2BTj1R0YTVepQlD7PQEuL2kA2D3vA6AG4zRfvr67FbN+DWBBKA8b08UDUrDJgffHTVYMtD+ymXkZoYfcRLYbG41fV4rw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762881998; c=relaxed/simple;
-	bh=gLZlyBgtJ3MUjBcqHnvAk4QOs+M/20Vxt09pxiKh9+I=;
+	s=arc-20240116; t=1762882405; c=relaxed/simple;
+	bh=bZZmFd1HMB2tVZTcmwAggmfotETIpV8gUXPlqh0xaTk=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=D65O5QsAV62VQ/VdB22H30yuP5khfLt/qOahBTQcQLEuUUuGAinp6dKHpqOychieghq8HncM3M5DyrQ7shlT6ysJvO50oYB4Fi3mwACodoIHaGRsu8zyWTDG4BX904ihgtm/qvC13DbA+gmZTCKMba1Wh3117XlUc+gN/VvyME0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=U9dL09MU; arc=none smtp.client-ip=74.125.224.53
+	 To:Cc:Content-Type; b=LUcVPJIaYjfkCI1PAlMP3R4WK7MQfGBc/FSn2KtlK/qCVFjQGzuXdLSiFs0rjjODYgqyEBDFobh2Y7D2H4xoM4ryzozLjpXSG61uFLwPqWG/VNU9i0c3E9LzPRlU5CIcusYa8ieFaDHsjvkoEhirxswsgou05Xqkot8i6Rn1as0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=pdTKwspx; arc=none smtp.client-ip=74.125.224.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="U9dL09MU"
-Received: by mail-yx1-f53.google.com with SMTP id 956f58d0204a3-640d4f2f13dso3024676d50.1
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 09:26:36 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pdTKwspx"
+Received: by mail-yx1-f53.google.com with SMTP id 956f58d0204a3-640d4f2f13dso3031061d50.1
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 09:33:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1762881996; x=1763486796; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=TewqZFPJESwmo9iMjVP1ZKtGeHrO3yhZIYjcMZGPOps=;
-        b=U9dL09MUWEzu0EOrb1Bu/rabKOT4KJEbgAZjnjW/XjoH6tvdVg612Dvx+/Ab4kRG6m
-         Q4zRhOlv9D5HARwwouuTJx+Zy+ED0FxNbvxrBBVh6ijKwvF8cxOZmaLUbpaMZ4SnPARq
-         MWkc2nxBNxSr5aov5E0nrx26XlCu/hQUqDXJe9Rsn4x9pDKoI7xG0x1jkGeoE6Ry5ZhX
-         InQqz9MW90j6deJd63nJuq7NowiIqfFYYhBEuw8vFBHOLzArztHGWbil3jQk5GQExULt
-         16dvxEjkCZDTVtJVL08FvMKDbuw5YFfal77ir9gRRb45DUQi0Y3936f1WV0eJEPRVqEF
-         t1mg==
+        d=linaro.org; s=google; t=1762882403; x=1763487203; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=d3POagvqZPr4kctt/E0gODwrBgs1hI145Zz/JqGFl+s=;
+        b=pdTKwspxFTxHiiV3wIqBp5fk5r2wxYGMimnlDx4ntrFARfeMwu4yuoTJFgkb5ozURF
+         DJRn8fy0KVjcLIBBTpJfrxFXSDbqsmRxltI6qIt5Gppy14SMcv3VYppoINdsCP8LX2DL
+         hvubQHswb24cbA/QdMKrv+xGFqPoMmty04oyvu7u6eU/dRx1y73mpZTs/2PokxLi/ZSe
+         r7lxB7Rsjop0ZZRm7YLKt68OPExLp+2Zw72+tqa+ziLiKL7Cq0ZtQPaAquQC+od4DKMO
+         N14K984MApwALqH8uJBfHl+lxKY6XwWITix6xFA4Lz/dutzvagioovBDO9NioBLTOU/G
+         5tsQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762881996; x=1763486796;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=TewqZFPJESwmo9iMjVP1ZKtGeHrO3yhZIYjcMZGPOps=;
-        b=DyHQ2Sxr8dbqACSYEUsOdwq75bV9nYRShVZe/UwQUjLQdGlL/xi/6TL453gnErtr8d
-         YtCzS4hXV43CkdbqULAwEBKiOeVRytWXZtZD0PuJEth8s65tkYCffZC54aPU/+9cpKdp
-         yQr4vc28bq7bfxTbPonlfImtNIx3cAUaByXniuOzSgpfBWaLuPfprHC6hYslw6DPfGEJ
-         8eqVR54nG/XXlB4DEgEzx3qWylVibh0OjvFikZqwLv1o5QHfa8GABQFmnpnjBLY8Odwp
-         2cEZrsKevOcAML2phhPtJ/Igro8fOgdn1u6WFxsFkhwmLbWHC64TO2+Ug147HcwA2wL7
-         /yUQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXkIdtSusk7aXHQB5zSbOD31wgTTcuI0KyHpnC4ZoQUGoV2XgRFX+Fy31G8pa48B6LFOAisnAgMm8c=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzaj8grgtuWaSsgUWTWwY1eW8MHvc2cvUez2q3O2lJEukI+1ZpB
-	n/Hecd2xoiOs8bmasIfR+04QDy/7iNeC0FgW2HlcWokj/mNfVUjXMkCuYMDi85JzqY3+Rk0bQRI
-	E7xm+RCTpQHyPrsn3yErZIRl9Ab0n7LYYsAtj+z2tgg==
-X-Gm-Gg: ASbGnctpEBDZfoE1/UlZu+VebmKD88Td67sQPVY+XTDu3cPDOyAF1iFXhJwxefEzLab
-	d4kYHUhSeT4aQCSdeKgOlQvfrOF17ij7faif8mz4HVD9tHrVeF/691WUjYBkZhbE742a+boRgTW
-	5TGrdgjDFRyt00uq5CYEU4wal44QU/weepa4h7eZMpxtAlc8xkdKcukQ/f/EqzgfWoMAmHiiyA4
-	pvMv7gCgomi6FF60XO45BHarCfaDvw6IqV7PW87JQhMvG8/QEuS67Xqpcw3OA==
-X-Google-Smtp-Source: AGHT+IGPocF7U+zZAQlqlm4U4/N/1JnxBlUtxG84oneYZC130a7a22xb7XFY4qOmaI3tdolUZR4tgDVGn4WJ/hb/mMM=
-X-Received: by 2002:a53:acc4:0:10b0:640:d9b1:ed1c with SMTP id
- 956f58d0204a3-64101a0b3d2mr186156d50.5.1762881995961; Tue, 11 Nov 2025
- 09:26:35 -0800 (PST)
+        d=1e100.net; s=20230601; t=1762882403; x=1763487203;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=d3POagvqZPr4kctt/E0gODwrBgs1hI145Zz/JqGFl+s=;
+        b=n5XPRRPhv7D1jTdjJbPddbTGJdXsslhQHhQtbEGY0uHyUNqwjPgSKvrNRR+QBBwOWS
+         dalzuIsB2diwn9tZ7wY0eGzWVrBaNNVfyFiczesV4BfS1qF//2kHTtPuUJpK4G9UTxt0
+         adRUmcKkq5HkziCCrxtRGkIWI/MJCIjHs8elS4I6gOaSmW8+OoA2tAdKbY81DJSsPgUd
+         o0HdbefygHKums/voCfcMyM1ZhWPhC/xfS3RZTJwVSm9vSn2xbpGviPhpZuNluXPJ5DV
+         VGiwc4TLmYPJ3GOLAElV9DhyFaL7OY8PtGJryJc85oKxoRkji/2tp+S14GMaj9ukMnFi
+         /Dag==
+X-Forwarded-Encrypted: i=1; AJvYcCVyr+BtGAp9Ye6Bvozpmh+iZ5Rgf2ToLB44cjUvpNagiq4+Vnw3mfnqwZOHenCeqU826DpRHnh4/ZA=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywq8F80osn6bY7DrJx8Gje3REKsVmzwLKVNHIrk1/PS+4ojyPcx
+	1FY+CMC3pNL9fK2r0oSszDyzD6hjfXRIRuN/9k0gUlryaV8ogBwEZVUPes6vto1kFftCSUWqbsY
+	CxRdbqitOstT20arRuiO44T1BCzKnffz5oKymGRB1sQ==
+X-Gm-Gg: ASbGnctFNgLbkdcLi+INQbFRijdNBCxyDUbXEY+rxDOr3Q+y8W0M6RCMAMGiw8a+QPc
+	rVfJFQgVkM2aZjw4Z5AqGg/F2bm8y4sbpqqkygYXsdaZ3MdogacBzUG7BBafQZpiCZjSBncOCtN
+	6YrmxrJHhf8iVOcewygnc+BTVGf1Ht98/2NTJ88mSMPs1B75FF43vOwPE9L7U/FLJzGPkUgo1dp
+	oBKiEnSOcLRgQ0jrG4YDIpfjyE4YdsXDbUUGzKufoZu01QKCofTTMpLWSOCNWnR+3JVXKlq
+X-Google-Smtp-Source: AGHT+IHkL50UwyugDA2rRkIMYRNP2LCV0zzmMnWcbJ3wfIyChDwcgmKAxAgayOMrHHOnGcwiFnSUlFTpkI/1n22vPDM=
+X-Received: by 2002:a05:690c:a1dc:b0:786:8adb:8ae with SMTP id
+ 00721157ae682-787d5415677mr95593097b3.44.1762882402586; Tue, 11 Nov 2025
+ 09:33:22 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251104200008.940057-1-peter@korsgaard.com> <af77b269-a9e3-470b-a6bf-81636235bf5e@rock-chips.com>
- <87qzud6jq8.fsf@dell.be.48ers.dk> <77ce48fa-dfdf-43c9-8094-c1c47ff48aac@rock-chips.com>
- <PH7PR16MB619676787C5B72C51598EFEBE5C5A@PH7PR16MB6196.namprd16.prod.outlook.com>
-In-Reply-To: <PH7PR16MB619676787C5B72C51598EFEBE5C5A@PH7PR16MB6196.namprd16.prod.outlook.com>
+References: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
+In-Reply-To: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 11 Nov 2025 18:26:00 +0100
-X-Gm-Features: AWmQ_bkJkgflFOhtkkZMfWh46zosmM4g5Ncvfw04XYla38k-S58h5OGnXqREsSw
-Message-ID: <CAPDyKFp=mY7HprH5J6TnDO10XjyV43QHMovgLsq5oDOr_Lb_nQ@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc-utils: lsmmc.c: print_mmc_cid(): correct
- year/month parsing
-To: Avri Altman <Avri.Altman@sandisk.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Peter Korsgaard <peter@korsgaard.com>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>
+Date: Tue, 11 Nov 2025 18:32:46 +0100
+X-Gm-Features: AWmQ_bmOpHBCUP1BA5zx0K-SV6LyyIKkTRnysMH9Acvl87xHwuKqeZ7-EziMvnw
+Message-ID: <CAPDyKFomGKtznQ4wD8O83b6uAKfNkKhERjoivrbmSqtQODDDDA@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC devices
+To: Md Sadre Alam <quic_mdalam@quicinc.com>, Eric Biggers <ebiggers@google.com>, 
+	Abel Vesa <abel.vesa@linaro.org>
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	quic_varada@quicinc.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, 5 Nov 2025 at 20:58, Avri Altman <Avri.Altman@sandisk.com> wrote:
->
->
->
-> > -----Original Message-----
-> > From: Shawn Lin <shawn.lin@rock-chips.com>
-> > Sent: Wednesday, November 5, 2025 9:24 AM
-> > To: Peter Korsgaard <peter@korsgaard.com>
-> > Cc: shawn.lin@rock-chips.com; linux-mmc@vger.kernel.org; Avri Altman
-> > <avri.altman@wdc.com>; Ulf Hansson <ulf.hansson@linaro.org>
-> > Subject: Re: [PATCH 1/2] mmc-utils: lsmmc.c: print_mmc_cid(): correct
-> > year/month parsing
-> >
-> > CAUTION: This email originated from outside of Sandisk. Do not click on=
- links or
-> > open attachments unless you recognize the sender and know that the cont=
-ents
-> > are safe.
-> >
-> >
-> > =E5=9C=A8 2025/11/05 =E6=98=9F=E6=9C=9F=E4=B8=89 15:07, Peter Korsgaard=
- =E5=86=99=E9=81=93:
-> > >>>>>> "Shawn" =3D=3D Shawn Lin <shawn.lin@rock-chips.com> writes:
-> > >
-> > > Hi,
-> > >
-> > >   > From the JESD84-B51, section 7.2.7,
-> > >
-> > >   > For e=E2=80=A2MMC 4.41 and later devices, indicated by a value la=
-rger than 4 in
-> > >   > EXT_CSD_REV [192], the 4-bit=E2=80=9Cy=E2=80=9D field shall roll =
-over after 2012, so
-> > >   > that y=3D0 shall be used for 2013. See Table 77 for a list of val=
-id y
-> > >   > values for specific e=E2=80=A2MMC versions.
-> > >
-> > >   > So mdt_year + 1997 seems wrong, too.
-> > >
-> > > That tweak is even not enough, E.G. I see the kernel does:
-> > >
-> > >         if (card->ext_csd.rev >=3D 5) {
-> > >                  /* Adjust production date as per JEDEC JESD84-B451 *=
-/
-> > >                  if (card->cid.year < 2010)
-> > >                          card->cid.year +=3D 16;
-> > >
-> > > 2009 + 16 =3D 2025, so what will happen in a few months?
-> > >
-> >
-> > TBH, I don't know if there is any update from JEDEC. :)
-> Hi,
-> Yeah - they noticed that as well and proposed a similar approach by exten=
-ding the ext-csd-rev to 9.0.
-> I had the code ready for a while now but somehow failed to submit it yet.
-> Here it is.
-> Thanks for fixing the year-month misplacement.
->
-> Thanks,
-> Avri
->
->
-> From c0e5ec1d3670161444943c8984b6cdafb82fac67 Mon Sep 17 00:00:00 2001
-> From: Avri Altman <avri.altman@sandisk.com>
-> Date: Thu, 13 Mar 2025 10:10:49 +0200
-> Subject: [PATCH] mmc: core: Adjust MDT beyond 2025
-> MIME-Version: 1.0
-> Content-Type: text/plain; charset=3DUTF-8
-> Content-Transfer-Encoding: 8bit
->
-> JEDEC JC64.1 proposal, which was recently approved, increases the
-> manufacturing year limit for eMMC devices. The eMMC manufacturing year
-> is stored in a 4-bit field in the CID register. Originally, it covered
-> 1997=E2=80=932012. Later, with EXT_CSD_REV=3D8, it was extended up to 202=
-5. Now,
-> with EXT_CSD_REV=3D9, the range is rolled over by another 16 years, up to
-> 2038.
->
-> The mapping is as follows:
->
-> | cid[8..11] | ver =E2=89=A4 4 | rev > 4 | rev > 8 |
-> |------------|---------|---------|---------|
-> | 0          | 1997    | 2013    | 2029    |
-> | 1          | 1998    | 2014    | 2030    |
-> | 2          | 1999    | 2015    | 2031    |
-> | 3          | 2000    | 2016    | 2032    |
-> | 4          | 2001    | 2017    | 2033    |
-> | 5          | 2002    | 2018    | 2034    |
-> | 6          | 2003    | 2019    | 2035    |
-> | 7          | 2004    | 2020    | 2036    |
-> | 8          | 2005    | 2021    | 2037    |
-> | 9          | 2006    | 2022    | 2038    |
-> | 10         | 2007    | 2023    |         |
-> | 11         | 2008    | 2024    |         |
-> | 12         | 2009    | 2025    |         |
-> | 13         | 2010    |         | 2026    |
-> | 14         | 2011    |         | 2027    |
-> | 15         | 2012    |         | 2028    |
->
-> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
++ Eric, Abel
 
-Avri, would you mind re-submit the patch so I can pick it up via the
-patch tracker, thanks!
+On Tue, 11 Nov 2025 at 11:46, Md Sadre Alam <quic_mdalam@quicinc.com> wrote:
+>
+> Enable Inline Crypto Engine (ICE) support for eMMC devices that operate
+> without Command Queue Engine (CQE).This allows hardware-accelerated
+> encryption and decryption for standard (non-CMDQ) requests.
+>
+> This patch:
+> - Adds ICE register definitions for non-CMDQ crypto configuration
+> - Implements a per-request crypto setup via sdhci_msm_ice_cfg()
+> - Hooks into the request path via mmc_host_ops.request
+>
+> With this, non-CMDQ eMMC devices can benefit from inline encryption,
+> improving performance for encrypted I/O while maintaining compatibility
+> with existing CQE crypto support.
+>
+> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+Please add Eric/Abel for any future submission of the patch as it's
+for ICE. I don't feel completely confident to apply this without some
+of their acks.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/mmc.c | 7 +++++++
->  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 3e7d9437477c..8f355a72b84c 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -672,6 +672,13 @@ static int mmc_decode_ext_csd(struct mmc_card *card,=
- u8 *ext_csd)
->                                         (card->ext_csd.rel_param &
->                                          EXT_CSD_WR_REL_PARAM_EN_RPMB_REL=
-_WR);
->         }
+> Change in [v4]
+>
+> * Moved ICE initialization for non cmdq into sdhci_msm_ice_cfg() and made
+>   it conditional on mrq->crypto_ctx to enable lazy setup.
+>
+> * Added msm_host->ice_init_done guard to prevent redundant initialization.
+>
+> * Updated commit message
+>
+> Change in [v3]
+>
+> * Refactored logic to use separate code paths for crypto_ctx != NULL and
+>   crypto_ctx == NULL to improve readability.
+>
+> * Renamed bypass to crypto_enable to align with bitfield semantics.
+>
+> * Removed slot variable
+>
+> * Added ICE initialization sequence for non-CMDQ eMMC devices before
+>   __sdhci_add_host()
+>
+> Change in [v2]
+>
+> * Moved NONCQ_CRYPTO_PARM and NONCQ_CRYPTO_DUN register definitions into
+>   sdhci-msm.c
+>
+> * Introduced use of GENMASK() and FIELD_PREP() macros for cleaner and more
+>   maintainable bitfield handling in ICE configuration.
+>
+> * Removed redundant if (!mrq || !cq_host) check from sdhci_msm_ice_cfg()
+>   as both are guaranteed to be valid in the current call path.
+>
+> * Added assignment of host->mmc_host_ops.request = sdhci_msm_request; to
+>   integrate ICE configuration into the standard request path for non-CMDQ
+>   eMMC devices.
+>
+> * Removed sdhci_crypto_cfg() from sdhci.c and its invocation in sdhci_request()
+>
+> Change in [v1]
+>
+> * Added initial support for Inline Crypto Engine (ICE) on non-CMDQ eMMC
+>   devices.
+>
+>  drivers/mmc/host/sdhci-msm.c | 84 ++++++++++++++++++++++++++++++++++++
+>  1 file changed, 84 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4e5edbf2fc9b..3c1c20182ac7 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -157,6 +157,18 @@
+>  #define CQHCI_VENDOR_CFG1      0xA00
+>  #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN  (0x3 << 13)
+>
+> +/* non command queue crypto enable register*/
+> +#define NONCQ_CRYPTO_PARM              0x70
+> +#define NONCQ_CRYPTO_DUN               0x74
 > +
-> +       if (card->ext_csd.rev >=3D 9) {
-> +               /* Adjust production date as per JEDEC JC64.1 */
-> +               if (card->cid.year < 2023)
-> +                       card->cid.year +=3D 16;
+> +#define DISABLE_CRYPTO                 BIT(15)
+> +#define CRYPTO_GENERAL_ENABLE          BIT(1)
+> +#define HC_VENDOR_SPECIFIC_FUNC4       0x260
+> +#define ICE_HCI_SUPPORT                        BIT(28)
+> +
+> +#define ICE_HCI_PARAM_CCI      GENMASK(7, 0)
+> +#define ICE_HCI_PARAM_CE       GENMASK(8, 8)
+> +
+>  struct sdhci_msm_offset {
+>         u32 core_hc_mode;
+>         u32 core_mci_data_cnt;
+> @@ -300,6 +312,7 @@ struct sdhci_msm_host {
+>         u32 dll_config;
+>         u32 ddr_config;
+>         bool vqmmc_enabled;
+> +       bool ice_init_done;
+>  };
+>
+>  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+> @@ -2009,6 +2022,74 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
+>         return qcom_ice_evict_key(msm_host->ice, slot);
+>  }
+>
+> +static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       struct mmc_host *mmc = msm_host->mmc;
+> +       struct cqhci_host *cq_host = mmc->cqe_private;
+> +       u32 config;
+> +       u32 ice_cap;
+> +
+> +       config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
+> +       config &= ~DISABLE_CRYPTO;
+> +       sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
+> +       ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
+> +       if (ice_cap & ICE_HCI_SUPPORT) {
+> +               config = cqhci_readl(cq_host, CQHCI_CFG);
+> +               config |= CRYPTO_GENERAL_ENABLE;
+> +               cqhci_writel(cq_host, config, CQHCI_CFG);
+> +       }
+> +       sdhci_msm_ice_enable(msm_host);
+> +}
+> +
+> +static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       struct mmc_host *mmc = msm_host->mmc;
+> +       struct cqhci_host *cq_host = mmc->cqe_private;
+> +       unsigned int crypto_params = 0;
+> +       int key_index;
+> +       bool crypto_enable;
+> +       u64 dun = 0;
+> +
+> +       if (mrq->crypto_ctx) {
+> +               if (!msm_host->ice_init_done) {
+> +                       sdhci_msm_non_cqe_ice_init(host);
+> +                       msm_host->ice_init_done = true;
+> +               }
+> +
+> +               crypto_enable = true;
+> +               dun = mrq->crypto_ctx->bc_dun[0];
+> +               key_index = mrq->crypto_key_slot;
+> +               crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, crypto_enable) |
+> +                               FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
+> +
+> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
+> +               cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
+> +       } else {
+> +               crypto_enable = false;
+> +               key_index = 0;
+> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
 > +       }
 > +
->  out:
->         return err;
->  }
+> +       /* Ensure crypto configuration is written before proceeding */
+> +       wmb();
+> +
+> +       return 0;
+> +}
+> +
+> +static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> +{
+> +       struct sdhci_host *host = mmc_priv(mmc);
+> +
+> +       if (mmc->caps2 & MMC_CAP2_CRYPTO)
+> +               sdhci_msm_ice_cfg(host, mrq);
+> +
+> +       sdhci_request(mmc, mrq);
+> +}
+> +
+>  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
+>         .keyslot_program        = sdhci_msm_ice_keyslot_program,
+>         .keyslot_evict          = sdhci_msm_ice_keyslot_evict,
+> @@ -2759,6 +2840,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>
+>         msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
+>
+> +#ifdef CONFIG_MMC_CRYPTO
+> +       host->mmc_host_ops.request = sdhci_msm_request;
+> +#endif
+>         /* Set the timeout value to max possible */
+>         host->max_timeout_count = 0xF;
+>
 > --
 > 2.34.1
->
 >
