@@ -1,129 +1,123 @@
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86C733A1CE1
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 17:37:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08CF42E62A6;
+	Tue, 11 Nov 2025 20:53:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762882641; cv=none; b=pxxRARwWW0qMjtB91Y0gt41N7eHvmg4Jj6J0VUEe6mJma5/1ePOZWmT36ZO1TssxsWYBwYFnGPNm+zNuxnlrB4doVYZ5J1sdWPCl3mdtLKUDx2DxlMto61GPLa9LNDH/ibs8md7xTSoZv9heOjxnr3AbwPNyS9CJCgUGw0SPyl4=
+	t=1762894433; cv=none; b=uXFOXSuwupmT6MeZNEfMzaI4z52mcmR8MWVKXhcjYswINbo+vUbB2zknvDV/L48WjluYLLBVgvBihhFJZAPPDgu8M9zNiTizm/zqzILYxL7tDaBf2N6HVtS8el6JHonAfrMfSW4RM66PHJ4BK4UNgNYPj18f19tSPYwhjrNKFUM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762882641; c=relaxed/simple;
-	bh=CfGSUR4o5N9TNuUTcv7dWSuXXhOPdiBc/Dw38CZCoAY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=K5GhPqRdZCqZG/AAMu2elDm5RXo6b+jjGIcr+O2KWvrekDW96g77LLsD7CHQhX6uUlPw3vAIJ/KW+vFwiJr+29uItdnd95pfNyqhYPxViAq60lTJz5uQgzkvJgrtLSxRXWAdafMVN5Junr5dYQHF4IznJNJKQqfGzv3fyntR05s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Fpu5rOl9; arc=none smtp.client-ip=209.85.128.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1762894433; c=relaxed/simple;
+	bh=0YQm/4JsHCkfx5AWtL5CtnIBWM8Fu5DkUObGIb6oFbg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=sjEPvvqJu5+oXWJA18O67WLE7SeTkz69Ig8Sx6nvsdo0VYdmlUVARxacsZRK3RbTq93ZBehMTTp1bDwmZRlhxZwqv8Qo1ztyp+PTB4KfmKYd8BVNtnD1SG+yyA5pFSTCNHaI4jmscZEJXnxxvL17108BBe9wB2PuSPFqGg2mXeQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U6C44jSO; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Fpu5rOl9"
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-787be077127so45150617b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 09:37:19 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1762882638; x=1763487438; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1c/bymNR9xRZKC9iA6kuq2HmsWA5RSbpmlA89vid2uo=;
-        b=Fpu5rOl9cnkVpiwR6zUGDFXVR6KiPCZk3PjFHptRVnMhpJ1BrvezcXRE0B9Kh/vEjc
-         4U2dTF4c0LuF66ubxArxDM+qTAo5e9VozBQ3RDAHaDcgVzPUi3cUGq25xga7K/3v3lad
-         fh7q2sCo+1q3lcAB03Guo3F5QDpQ6AZG7XBDsqetYC6lj3jRTX994sz5kmU7ill2PemW
-         9a0HOQd279GRY1UomcRdLy9yOqzRFBMEgs7GhiO/AvPHSVD1UW2OC4k9iTzXoyGYj2HM
-         FE//uzPHsFpdNYMkv55IrnzN4DQldGkqjAXGGFWV/9hHVniBNzRVoPjZd9ZdLdnMHQ7R
-         x63Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762882638; x=1763487438;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=1c/bymNR9xRZKC9iA6kuq2HmsWA5RSbpmlA89vid2uo=;
-        b=GwYrFvIL1yrwRbe+AhUtDRq3PUcuERCvVST2udCZ+ND2Z8wR99BAAp/D3Fs19bKMA7
-         1ScX9qJ6OcfAj1CjJ5WxoRjuDxLekxnJOcGY/hYV8ZOcAGvwofb4HNc3e+Q2+2Q9HFrZ
-         ejRln3nuJ6CH7RxJlsBIkwd+Aphaju5/6zNUQgvJvRXGDLwUaMaoNsvbtj7a2G88aEO+
-         JvT/YVWtuvwX0eH9R7Lb8yFY7QSJUtMizf4mSNGj+WJMbmJltFh1VRDElE+PgJuHsF0p
-         y9d87RuPDDxL4T59SiyoICMqRrysQ3/zvxR6w2xrS6G4sX566AbM54QBsG9UNsfAdlTR
-         4UMw==
-X-Gm-Message-State: AOJu0Yw516CD9NahsSzTPYaefsI4nnzsQSElyg90EmAjh/wz/cylgE9m
-	FnEBoJzM6nP+JYKpN7hnlxM0qibbql/06mUPPSLfJZVcLF1RWoTvEXLpneRgClV3+8mVOUPZhyu
-	YgHVBFfHnluQ/E35b6ahWkuO+ubyp5Sf4vewaeimqaxIqOevl+YYx
-X-Gm-Gg: ASbGncukngH4LXOed7nlaRiadPHmnjzaxq4vstFO12kBXKzkxgXn5fztNNGTpJOT9PV
-	r5UUU/x95+pvqyG8ZG3LAhULEEHnKOtwpFnIlWoshytjZUYmiq2fAqzXhsLI4MNiHBZ7tf5CUlV
-	aryzUSS2PV5de1s71/lpAw+du6zugsBX2vd1gL3uJ+Duamm0c/yue5Pw7jGEg+qaMen/k6akSNl
-	t2YedC/7hcsV7YTRdSggYXDfNCdhWJXxEz1VZWMB+u15zDdNRUBgRLXqIwIYg==
-X-Google-Smtp-Source: AGHT+IEX+JzqRQl8eTTw62H/mI5FTTodjazuAyHVtBuUVGwbXFWWcwo92wKtU6BykhcY2Ch9Gv4+0AzO1g0U81xG+nQ=
-X-Received: by 2002:a05:690c:6f89:b0:787:fb60:efd9 with SMTP id
- 00721157ae682-787fb60f8a0mr58672277b3.22.1762882638467; Tue, 11 Nov 2025
- 09:37:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U6C44jSO"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 63796C113D0;
+	Tue, 11 Nov 2025 20:53:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1762894432;
+	bh=0YQm/4JsHCkfx5AWtL5CtnIBWM8Fu5DkUObGIb6oFbg=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=U6C44jSOxsRg4D1pGq/TSlRiFFX4kh4hlzlHPjBzH7n8+TZlUKHCZ4p33IwD7A+eR
+	 kbSjvwmgeODqsyiQowJHQMIFYR89EdybL9q46M2UEp3w7/sKdh/lMcUV7XBVPK4Yoc
+	 qlqjCh+zNU0il/kcq99yQfMcdjlhdVLHGrTRxn5ZmTMUcj1epsH+8KJSc9rLvW1R0x
+	 3NyTtS58/5DPOCJ5/P4j+TrCltkbKO9ef2PC9wsico68uDtzrCITqayiGCXque/Edp
+	 eRnMdz9/u/WjeV8MZOVrS3/+rulxSsqtFEeLposTSyqxUB88aIMRmqUkNZvSJRwTB8
+	 6fGNKopUIvxfg==
+Date: Tue, 11 Nov 2025 12:52:12 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: Md Sadre Alam <quic_mdalam@quicinc.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+	linux-kernel@vger.kernel.org, quic_varada@quicinc.com
+Subject: Re: [PATCH v4] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
+ devices
+Message-ID: <20251111205212.GA245945@sol>
+References: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251104200008.940057-1-peter@korsgaard.com> <20251104200008.940057-2-peter@korsgaard.com>
-In-Reply-To: <20251104200008.940057-2-peter@korsgaard.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 11 Nov 2025 18:36:42 +0100
-X-Gm-Features: AWmQ_bmBI-fFGCCt6MhfZgxOa3H5P_r5NBb1wuCGVm3GOywsdd_IThaMp9SxgRw
-Message-ID: <CAPDyKFqk-Pv-0seo=6Wxja1zkgGZ2KKq+dYm+dmtnAFPExAx0g@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc-utils: lsmmc.c: print_{mmc,sd}_cid(): correct
- month names
-To: Peter Korsgaard <peter@korsgaard.com>
-Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
 
-On Tue, 4 Nov 2025 at 21:00, Peter Korsgaard <peter@korsgaard.com> wrote:
->
-> The month nibble is 1-based, E.G. from JESD84:
->
-> The =E2=80=9Cm=E2=80=9D field, most significant nibble, is the month code=
-. 1 =3D January.
->
-> So mark 0 as invalid and shift all month names.
->
-> Signed-off-by: Peter Korsgaard <peter@korsgaard.com>
+On Tue, Nov 11, 2025 at 04:16:04PM +0530, Md Sadre Alam wrote:
+> Enable Inline Crypto Engine (ICE) support for eMMC devices that operate
+> without Command Queue Engine (CQE).This allows hardware-accelerated
+> encryption and decryption for standard (non-CMDQ) requests.
+> 
+> This patch:
+> - Adds ICE register definitions for non-CMDQ crypto configuration
+> - Implements a per-request crypto setup via sdhci_msm_ice_cfg()
+> - Hooks into the request path via mmc_host_ops.request
+> 
+> With this, non-CMDQ eMMC devices can benefit from inline encryption,
+> improving performance for encrypted I/O while maintaining compatibility
+> with existing CQE crypto support.
 
-Applied for mmc-utils master, thanks!
+This really should explain that this patch actually applies only to host
+controllers that *do* support CQE.  Just they are using a card that
+doesn't support CQE or CQE was explicitly disabled.  Right?
 
-Kind regards
-Uffe
+> +static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	struct mmc_host *mmc = msm_host->mmc;
+> +	struct cqhci_host *cq_host = mmc->cqe_private;
+> +	u32 config;
+> +	u32 ice_cap;
+> +
+> +	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
+> +	config &= ~DISABLE_CRYPTO;
+> +	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
+> +	ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
+> +	if (ice_cap & ICE_HCI_SUPPORT) {
+> +		config = cqhci_readl(cq_host, CQHCI_CFG);
+> +		config |= CRYPTO_GENERAL_ENABLE;
+> +		cqhci_writel(cq_host, config, CQHCI_CFG);
+> +	}
+> +	sdhci_msm_ice_enable(msm_host);
+> +}
+> +
+> +static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	struct mmc_host *mmc = msm_host->mmc;
+> +	struct cqhci_host *cq_host = mmc->cqe_private;
+> +	unsigned int crypto_params = 0;
+> +	int key_index;
+> +	bool crypto_enable;
+> +	u64 dun = 0;
+> +
+> +	if (mrq->crypto_ctx) {
+> +		if (!msm_host->ice_init_done) {
+> +			sdhci_msm_non_cqe_ice_init(host);
+> +			msm_host->ice_init_done = true;
+> +		}
 
+This means sdhci_msm_ice_enable() is called only once per host
+controller.  It looks like the existing call to sdhci_msm_ice_enable()
+happens each time after the host controller is resumed.  So there seems
+to be an inconsistency there.  Which way is correct?
 
-> ---
->  lsmmc.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/lsmmc.c b/lsmmc.c
-> index 7331c1b..dd3ab83 100644
-> --- a/lsmmc.c
-> +++ b/lsmmc.c
-> @@ -512,10 +512,10 @@ static void parse_bin(char *hexstr, char *fmt, ...)
->  /* MMC/SD information parsing functions */
->  static void print_sd_cid(struct config *config, char *cid)
->  {
-> -       static const char *months[] =3D {
-> +       static const char *months[] =3D { "invalid0",
->                 "jan", "feb", "mar", "apr", "may", "jun",
->                 "jul", "aug", "sep", "oct", "nov", "dec",
-> -               "invalid0", "invalid1", "invalid2", "invalid3",
-> +               "invalid1", "invalid2", "invalid3",
->         };
->         unsigned int mid;
->         char oid[3];
-> @@ -570,10 +570,10 @@ static void print_sd_cid(struct config *config, cha=
-r *cid)
->
->  static void print_mmc_cid(struct config *config, char *cid)
->  {
-> -       static const char *months[] =3D {
-> +       static const char *months[] =3D { "invalid0",
->                 "jan", "feb", "mar", "apr", "may", "jun",
->                 "jul", "aug", "sep", "oct", "nov", "dec",
-> -               "invalid0", "invalid1", "invalid2", "invalid3",
-> +               "invalid1", "invalid2", "invalid3",
->         };
->         unsigned int mid;
->         unsigned int cbx;
-> --
-> 2.39.5
->
+> +	} else {
+> +		crypto_enable = false;
+> +		key_index = 0;
+> +		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
+
+The values assigned to 'crypto_enable' and 'key_index' are never used.
+
+> +static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> +{
+
+Could you leave a comment here that notes this is used only for non-CQE
+requests and that crypto on CQE requests is handled elsewhere?
+
+- Eric
