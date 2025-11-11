@@ -1,150 +1,212 @@
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+Received: from mail-yx1-f53.google.com (mail-yx1-f53.google.com [74.125.224.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F54433086
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 17:13:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1335A393DD7
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 17:26:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762881211; cv=none; b=Kh2J5m2TijdBxzuWXmQWjpnLuYLlr+rRTYfDR+eE/pE1EvwPBjRc+O0Sy4KFupcGsb6D+1+AKBh5CySwLktaJHijyTen56n8h5RAr3m18sRvx7bYEmt7ewaCMqdxhgcT+ER8UmuCDol9EvAVe0YogbMWxI2KR49eV7+4O4TUUhQ=
+	t=1762881998; cv=none; b=h0/qwn2koWITlKg1Jy57BrJCQj3MVj1AlCAWu6sP0aD1oPP3OnuOXgTo1CbndF5OOqTiz5k7uAPdHWQK7Y8ltHbrD+ZfCTnIHJsA+66ftNsyeIZgde66faZ3ZrDC/DMdNjMC0yemFRmEW5Ifp/9S0SdI7bjArGIw2MAARbaQCKk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762881211; c=relaxed/simple;
-	bh=XWfTO4/IXYtSv4EgyQT3r4JllI6XqufjvF1l29xB2vY=;
+	s=arc-20240116; t=1762881998; c=relaxed/simple;
+	bh=gLZlyBgtJ3MUjBcqHnvAk4QOs+M/20Vxt09pxiKh9+I=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=j+fob7Qs4l5bKiUgxrtgIOPoBeR81dbYM+MLmuYEFBxABUCkZwQodq2dVSy7mKjuMiZzmp1euMSJtdYdH1uGlr6gDETVXJVFAw2XMnSLDkYATMow37KxqJ4VRuXijfwlcA2L/vHPVhBUHxyht0Sya6Jf5DGc8gq7oimKXfKdzzU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=apSJy0Yx; arc=none smtp.client-ip=209.85.128.182
+	 To:Cc:Content-Type; b=D65O5QsAV62VQ/VdB22H30yuP5khfLt/qOahBTQcQLEuUUuGAinp6dKHpqOychieghq8HncM3M5DyrQ7shlT6ysJvO50oYB4Fi3mwACodoIHaGRsu8zyWTDG4BX904ihgtm/qvC13DbA+gmZTCKMba1Wh3117XlUc+gN/VvyME0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=U9dL09MU; arc=none smtp.client-ip=74.125.224.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="apSJy0Yx"
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-71d60157747so38451407b3.0
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 09:13:29 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="U9dL09MU"
+Received: by mail-yx1-f53.google.com with SMTP id 956f58d0204a3-640d4f2f13dso3024676d50.1
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 09:26:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1762881208; x=1763486008; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1762881996; x=1763486796; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2QmKCicVCPHIj3mdKL3div0nARhe2VGZEzDrkecA8Xk=;
-        b=apSJy0YxvtCZXQJ8pRiAClvyJv2T8b3lMDkN6i8A369nLPQGR8i55fDJuD2Ul7XmPp
-         yKPME9CrcrrhG9jrrz0HNIsIPueleT89lFRzElf1StkWcRiz3N3W6O67QRyXoxmHivK1
-         3rFqtQnN2aqEw1JMtNP9CQRIy5hz0ax7pdlkmQ6+TCZJARcPFgw7UFXMZFnV4+AZFUD3
-         g0jizlkGMQNbcgCAXbwloT5wqbS8eAkhAxS7csb7UdImTg3JrzVg5tgtWnTw6FNHzBnR
-         nHd4eVQE0DFv9W9RYycUd/0B3zMYX5OQGKYSV/uPHzc4RwDwiXh4ERUnFoE07rsg7/Hg
-         uRjA==
+        bh=TewqZFPJESwmo9iMjVP1ZKtGeHrO3yhZIYjcMZGPOps=;
+        b=U9dL09MUWEzu0EOrb1Bu/rabKOT4KJEbgAZjnjW/XjoH6tvdVg612Dvx+/Ab4kRG6m
+         Q4zRhOlv9D5HARwwouuTJx+Zy+ED0FxNbvxrBBVh6ijKwvF8cxOZmaLUbpaMZ4SnPARq
+         MWkc2nxBNxSr5aov5E0nrx26XlCu/hQUqDXJe9Rsn4x9pDKoI7xG0x1jkGeoE6Ry5ZhX
+         InQqz9MW90j6deJd63nJuq7NowiIqfFYYhBEuw8vFBHOLzArztHGWbil3jQk5GQExULt
+         16dvxEjkCZDTVtJVL08FvMKDbuw5YFfal77ir9gRRb45DUQi0Y3936f1WV0eJEPRVqEF
+         t1mg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762881208; x=1763486008;
+        d=1e100.net; s=20230601; t=1762881996; x=1763486796;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=2QmKCicVCPHIj3mdKL3div0nARhe2VGZEzDrkecA8Xk=;
-        b=hLrssFpIBUsK5QzgeKcR+6a1BQaJnahgKpCvIZFqsSipmj9QKzzIoFn9gAIHAj63rh
-         AhFMXERiE0NwczvUsItXXZpXtOfgXPgw98u2oi4+7Nt9I1cPsunF+BmY3QouOmZ2QAZx
-         osE7P7bOqSjgcvgmD/zF4i+YYMhlw8flB9MaAXSUWjahIpd51//U6AW4R78gotWvStJU
-         y2BeoRdT81si7uhG9h0YUp9rDXOP9ew0AfOGFBOUYVrczB5PBleEkw35R3IBfOZZ4BCQ
-         HYJP9qH+MqLfwGtMECsQL9SxupbrUghHmwWPYXjj8HRftw2TWYPBgppXsAhAqyoUK940
-         rZxQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVdSv3kM7EUj2kv8JsQE7CxprtFN7kgcQoD3ZoMTGLQvbcjGzxP1oARlAkX22l7rjHfPteSWlgsgLI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwX0yMmsCX6FPMnKpfbuziPmsncyPIDtWIydCokAtGrl+JfTlmN
-	0/TYXnyXpBVyxoAUZ/BXzu3QGD9OylyMgMADzicEfCi8EvgcXyzuSNfsJ5rUMI4CKxQmcGTs1UF
-	BzABN7flQW2EDX3BlCwZzN9vo9JUB/5ORME9ouOCCZA==
-X-Gm-Gg: ASbGncuVx5sl7eTVzEUdalrNQnA3g8EjUj3/oZ7IHVdQqGWYuPKdPQ7jTvjxEtFEPHp
-	FICWxRGATRfKkAbxI4DZtGA9M0JbBTjECmb7L2MNpEH3msL92sibd6FN6Z5YxgADn5MERTqsPmv
-	BytXcQIUjhd96zD9QGh9keTfQzMIhWdCXHMvldYO5iM4rSdl3psuS928V1L42xBNV1n2lzg603P
-	60XjYisEdsurIYc9ooTFTPdIe9Kbgk1UoZE4/rVPVv/Z/WeDujMLfjAX5jKA3bn7XyEmqkC
-X-Google-Smtp-Source: AGHT+IHsBdT3PZHzLqRZFfNwozig+Xj22E+YyhYW2OHI0PA6fmjqwweePG9pSYLroeVpxbau2y0IZ/+9yhkJkYzwk7w=
-X-Received: by 2002:a05:690c:4c13:b0:786:5ebb:483f with SMTP id
- 00721157ae682-787d5473c6cmr123803657b3.65.1762881208594; Tue, 11 Nov 2025
- 09:13:28 -0800 (PST)
+        bh=TewqZFPJESwmo9iMjVP1ZKtGeHrO3yhZIYjcMZGPOps=;
+        b=DyHQ2Sxr8dbqACSYEUsOdwq75bV9nYRShVZe/UwQUjLQdGlL/xi/6TL453gnErtr8d
+         YtCzS4hXV43CkdbqULAwEBKiOeVRytWXZtZD0PuJEth8s65tkYCffZC54aPU/+9cpKdp
+         yQr4vc28bq7bfxTbPonlfImtNIx3cAUaByXniuOzSgpfBWaLuPfprHC6hYslw6DPfGEJ
+         8eqVR54nG/XXlB4DEgEzx3qWylVibh0OjvFikZqwLv1o5QHfa8GABQFmnpnjBLY8Odwp
+         2cEZrsKevOcAML2phhPtJ/Igro8fOgdn1u6WFxsFkhwmLbWHC64TO2+Ug147HcwA2wL7
+         /yUQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXkIdtSusk7aXHQB5zSbOD31wgTTcuI0KyHpnC4ZoQUGoV2XgRFX+Fy31G8pa48B6LFOAisnAgMm8c=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzaj8grgtuWaSsgUWTWwY1eW8MHvc2cvUez2q3O2lJEukI+1ZpB
+	n/Hecd2xoiOs8bmasIfR+04QDy/7iNeC0FgW2HlcWokj/mNfVUjXMkCuYMDi85JzqY3+Rk0bQRI
+	E7xm+RCTpQHyPrsn3yErZIRl9Ab0n7LYYsAtj+z2tgg==
+X-Gm-Gg: ASbGnctpEBDZfoE1/UlZu+VebmKD88Td67sQPVY+XTDu3cPDOyAF1iFXhJwxefEzLab
+	d4kYHUhSeT4aQCSdeKgOlQvfrOF17ij7faif8mz4HVD9tHrVeF/691WUjYBkZhbE742a+boRgTW
+	5TGrdgjDFRyt00uq5CYEU4wal44QU/weepa4h7eZMpxtAlc8xkdKcukQ/f/EqzgfWoMAmHiiyA4
+	pvMv7gCgomi6FF60XO45BHarCfaDvw6IqV7PW87JQhMvG8/QEuS67Xqpcw3OA==
+X-Google-Smtp-Source: AGHT+IGPocF7U+zZAQlqlm4U4/N/1JnxBlUtxG84oneYZC130a7a22xb7XFY4qOmaI3tdolUZR4tgDVGn4WJ/hb/mMM=
+X-Received: by 2002:a53:acc4:0:10b0:640:d9b1:ed1c with SMTP id
+ 956f58d0204a3-64101a0b3d2mr186156d50.5.1762881995961; Tue, 11 Nov 2025
+ 09:26:35 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251107141654.226947-1-marco.crivellari@suse.com>
-In-Reply-To: <20251107141654.226947-1-marco.crivellari@suse.com>
+References: <20251104200008.940057-1-peter@korsgaard.com> <af77b269-a9e3-470b-a6bf-81636235bf5e@rock-chips.com>
+ <87qzud6jq8.fsf@dell.be.48ers.dk> <77ce48fa-dfdf-43c9-8094-c1c47ff48aac@rock-chips.com>
+ <PH7PR16MB619676787C5B72C51598EFEBE5C5A@PH7PR16MB6196.namprd16.prod.outlook.com>
+In-Reply-To: <PH7PR16MB619676787C5B72C51598EFEBE5C5A@PH7PR16MB6196.namprd16.prod.outlook.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 11 Nov 2025 18:12:51 +0100
-X-Gm-Features: AWmQ_bm9jflRRYlPnBrOqM5u5sgpAgSohcTdgzu--tAO09VnwRFmrIOBZngqZcg
-Message-ID: <CAPDyKFq46qON9W5akWh7CV5fiGSLHV=K9F_Uj6u_g1g08DPV=g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: add WQ_PERCPU to alloc_workqueue users
-To: Marco Crivellari <marco.crivellari@suse.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	Tejun Heo <tj@kernel.org>, Lai Jiangshan <jiangshanlai@gmail.com>, 
-	Frederic Weisbecker <frederic@kernel.org>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, 
-	Michal Hocko <mhocko@suse.com>
+Date: Tue, 11 Nov 2025 18:26:00 +0100
+X-Gm-Features: AWmQ_bkJkgflFOhtkkZMfWh46zosmM4g5Ncvfw04XYla38k-S58h5OGnXqREsSw
+Message-ID: <CAPDyKFp=mY7HprH5J6TnDO10XjyV43QHMovgLsq5oDOr_Lb_nQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc-utils: lsmmc.c: print_mmc_cid(): correct
+ year/month parsing
+To: Avri Altman <Avri.Altman@sandisk.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Peter Korsgaard <peter@korsgaard.com>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Avri Altman <avri.altman@wdc.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-+ Adrian
+On Wed, 5 Nov 2025 at 20:58, Avri Altman <Avri.Altman@sandisk.com> wrote:
+>
+>
+>
+> > -----Original Message-----
+> > From: Shawn Lin <shawn.lin@rock-chips.com>
+> > Sent: Wednesday, November 5, 2025 9:24 AM
+> > To: Peter Korsgaard <peter@korsgaard.com>
+> > Cc: shawn.lin@rock-chips.com; linux-mmc@vger.kernel.org; Avri Altman
+> > <avri.altman@wdc.com>; Ulf Hansson <ulf.hansson@linaro.org>
+> > Subject: Re: [PATCH 1/2] mmc-utils: lsmmc.c: print_mmc_cid(): correct
+> > year/month parsing
+> >
+> > CAUTION: This email originated from outside of Sandisk. Do not click on=
+ links or
+> > open attachments unless you recognize the sender and know that the cont=
+ents
+> > are safe.
+> >
+> >
+> > =E5=9C=A8 2025/11/05 =E6=98=9F=E6=9C=9F=E4=B8=89 15:07, Peter Korsgaard=
+ =E5=86=99=E9=81=93:
+> > >>>>>> "Shawn" =3D=3D Shawn Lin <shawn.lin@rock-chips.com> writes:
+> > >
+> > > Hi,
+> > >
+> > >   > From the JESD84-B51, section 7.2.7,
+> > >
+> > >   > For e=E2=80=A2MMC 4.41 and later devices, indicated by a value la=
+rger than 4 in
+> > >   > EXT_CSD_REV [192], the 4-bit=E2=80=9Cy=E2=80=9D field shall roll =
+over after 2012, so
+> > >   > that y=3D0 shall be used for 2013. See Table 77 for a list of val=
+id y
+> > >   > values for specific e=E2=80=A2MMC versions.
+> > >
+> > >   > So mdt_year + 1997 seems wrong, too.
+> > >
+> > > That tweak is even not enough, E.G. I see the kernel does:
+> > >
+> > >         if (card->ext_csd.rev >=3D 5) {
+> > >                  /* Adjust production date as per JEDEC JESD84-B451 *=
+/
+> > >                  if (card->cid.year < 2010)
+> > >                          card->cid.year +=3D 16;
+> > >
+> > > 2009 + 16 =3D 2025, so what will happen in a few months?
+> > >
+> >
+> > TBH, I don't know if there is any update from JEDEC. :)
+> Hi,
+> Yeah - they noticed that as well and proposed a similar approach by exten=
+ding the ext-csd-rev to 9.0.
+> I had the code ready for a while now but somehow failed to submit it yet.
+> Here it is.
+> Thanks for fixing the year-month misplacement.
+>
+> Thanks,
+> Avri
+>
+>
+> From c0e5ec1d3670161444943c8984b6cdafb82fac67 Mon Sep 17 00:00:00 2001
+> From: Avri Altman <avri.altman@sandisk.com>
+> Date: Thu, 13 Mar 2025 10:10:49 +0200
+> Subject: [PATCH] mmc: core: Adjust MDT beyond 2025
+> MIME-Version: 1.0
+> Content-Type: text/plain; charset=3DUTF-8
+> Content-Transfer-Encoding: 8bit
+>
+> JEDEC JC64.1 proposal, which was recently approved, increases the
+> manufacturing year limit for eMMC devices. The eMMC manufacturing year
+> is stored in a 4-bit field in the CID register. Originally, it covered
+> 1997=E2=80=932012. Later, with EXT_CSD_REV=3D8, it was extended up to 202=
+5. Now,
+> with EXT_CSD_REV=3D9, the range is rolled over by another 16 years, up to
+> 2038.
+>
+> The mapping is as follows:
+>
+> | cid[8..11] | ver =E2=89=A4 4 | rev > 4 | rev > 8 |
+> |------------|---------|---------|---------|
+> | 0          | 1997    | 2013    | 2029    |
+> | 1          | 1998    | 2014    | 2030    |
+> | 2          | 1999    | 2015    | 2031    |
+> | 3          | 2000    | 2016    | 2032    |
+> | 4          | 2001    | 2017    | 2033    |
+> | 5          | 2002    | 2018    | 2034    |
+> | 6          | 2003    | 2019    | 2035    |
+> | 7          | 2004    | 2020    | 2036    |
+> | 8          | 2005    | 2021    | 2037    |
+> | 9          | 2006    | 2022    | 2038    |
+> | 10         | 2007    | 2023    |         |
+> | 11         | 2008    | 2024    |         |
+> | 12         | 2009    | 2025    |         |
+> | 13         | 2010    |         | 2026    |
+> | 14         | 2011    |         | 2027    |
+> | 15         | 2012    |         | 2028    |
+>
+> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 
-On Fri, 7 Nov 2025 at 15:17, Marco Crivellari <marco.crivellari@suse.com> w=
-rote:
->
-> Currently if a user enqueues a work item using schedule_delayed_work() th=
-e
-> used wq is "system_wq" (per-cpu wq) while queue_delayed_work() use
-> WORK_CPU_UNBOUND (used when a cpu is not specified). The same applies to
-> schedule_work() that is using system_wq and queue_work(), that makes use
-> again of WORK_CPU_UNBOUND.
-> This lack of consistency cannot be addressed without refactoring the API.
->
-> alloc_workqueue() treats all queues as per-CPU by default, while unbound
-> workqueues must opt-in via WQ_UNBOUND.
->
-> This default is suboptimal: most workloads benefit from unbound queues,
-> allowing the scheduler to place worker threads where they=E2=80=99re need=
-ed and
-> reducing noise when CPUs are isolated.
->
-> This continues the effort to refactor workqueue APIs, which began with
-> the introduction of new workqueues and a new alloc_workqueue flag in:
->
-> commit 128ea9f6ccfb ("workqueue: Add system_percpu_wq and system_dfl_wq")
-> commit 930c2ea566af ("workqueue: Add new WQ_PERCPU flag")
->
-> This change adds a new WQ_PERCPU flag to explicitly request
-> alloc_workqueue() to be per-cpu when WQ_UNBOUND has not been specified.
->
-> With the introduction of the WQ_PERCPU flag (equivalent to !WQ_UNBOUND),
-> any alloc_workqueue() caller that doesn=E2=80=99t explicitly specify WQ_U=
-NBOUND
-> must now use WQ_PERCPU.
->
-> Once migration is complete, WQ_UNBOUND can be removed and unbound will
-> become the implicit default.
->
-> Suggested-by: Tejun Heo <tj@kernel.org>
-> Signed-off-by: Marco Crivellari <marco.crivellari@suse.com>
-> ---
->  drivers/mmc/core/block.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index c0ffe0817fd4..6a651ddccf28 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -3275,7 +3275,8 @@ static int mmc_blk_probe(struct mmc_card *card)
->         mmc_fixup_device(card, mmc_blk_fixups);
->
->         card->complete_wq =3D alloc_workqueue("mmc_complete",
-> -                                       WQ_MEM_RECLAIM | WQ_HIGHPRI, 0);
-> +                                       WQ_MEM_RECLAIM | WQ_HIGHPRI | WQ_=
-PERCPU,
-> +                                       0);
-
-I guess we prefer to keep the existing behaviour to avoid breaking
-anything, before continuing with the refactoring. Although I think it
-should be fine to use WQ_UNBOUND here.
-
-Looping in Adrian to get his opinion around this.
-
-
->         if (!card->complete_wq) {
->                 pr_err("Failed to create mmc completion workqueue");
->                 return -ENOMEM;
-> --
-> 2.51.1
->
+Avri, would you mind re-submit the patch so I can pick it up via the
+patch tracker, thanks!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/mmc.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 3e7d9437477c..8f355a72b84c 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -672,6 +672,13 @@ static int mmc_decode_ext_csd(struct mmc_card *card,=
+ u8 *ext_csd)
+>                                         (card->ext_csd.rel_param &
+>                                          EXT_CSD_WR_REL_PARAM_EN_RPMB_REL=
+_WR);
+>         }
+> +
+> +       if (card->ext_csd.rev >=3D 9) {
+> +               /* Adjust production date as per JEDEC JC64.1 */
+> +               if (card->cid.year < 2023)
+> +                       card->cid.year +=3D 16;
+> +       }
+> +
+>  out:
+>         return err;
+>  }
+> --
+> 2.34.1
+>
+>
