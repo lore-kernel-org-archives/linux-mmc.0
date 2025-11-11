@@ -1,217 +1,263 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AB433A1CF2
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 17:36:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A84103A1D1D
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 17:36:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762882597; cv=none; b=c7GNFRjNjhwwgLiXUtGKG8xFHKDa5GqL+vvr0TLjOSKrSXK7KHlBhrCtaPPp5OCyTQCzHsYpwes7jk7dtFZQuf0nHaEUKVJ3qixRmUcUitDhgYZq0vqOkH3yHH27UiaC/RGKEl6hxNr1edSKW6nZef+8z0t2Mw5dew2uhjTTIQA=
+	t=1762882601; cv=none; b=lnR77MnIyXVlmU4/ucynkPBuT0BQJv8le6b9MIfNcTWEpmKhkW17UgS1s9OIMoX0i3Y84nVVuG6P6rXTmE1LKoE3ePVOEFkql1qQrW/jzz1UTTQGMPzGV/HA7j3MmByYj0Xl2Fx5JYovtk46Io+APTSOwn5+bccw1DbwDrPi8eQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762882597; c=relaxed/simple;
-	bh=xOKQOoM2AfNja8dsA/CxDG47x21cuiNISWWb8aEVEJI=;
+	s=arc-20240116; t=1762882601; c=relaxed/simple;
+	bh=7w69gEIQRD9DpRmZ1hipFG+Vuhi9EbgUYt2kjgHRRw8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=lc7WNEvX9ZVZyQfiYyU3ypwBpcfxH2KKtfLLemUjrhZ8A3HYo1jziMUm0YdUSFWgwqwtXfRMsVcEVdWq1SReTa1j2GfnVsvoriHoNaT8sCqnOJ3N/XnvjMhNZd2ZpvxHuVvVGQhi0ROREjHJ0R54Vuo55sWOXs5Reo7AGR1z/dM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GRKLj1cx; arc=none smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=MmRXzNGpMTnyRu8KxSDMyzJMpfvGKvrxHwQYzuHZO83NRDAlTpTxe0LL+UgFrPXve6fxRYOZi7yMzLnAv4PZeF2vvESGo80vyLOzp7gDuLmGtPUVY2oNtyPOBnhYxgs69bcr67F9tEiRH4/kTMMnJ0mT5dVeEOoH/HXZ2IY4EKE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Xyb4JMDS; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GRKLj1cx"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-787e84ceaf7so30648577b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 09:36:35 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Xyb4JMDS"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-786d1658793so40062197b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 09:36:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1762882594; x=1763487394; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=za1gdfyK3qzPGcN1dvu1lDNgvKHZXorLMMwhejsf9TA=;
-        b=GRKLj1cx7hYkLoDKUIVhvq57O40wZyIcbs2vowstDhvLHyMjlmDpcPGy5gcSKtZugs
-         qjciS3MlZ9M2xToRf1uje9yHpVPxHmijqGq7KvZ/E8Z3JohiCDQ3Wczhp0uH5/AicupE
-         Ctd1IEOZAz/U0HceO/ppsBPPhOklr//JU3A+SVaj/xyzv5pw5KVAKZQcwsnYCMH2ARcq
-         zpXUIPcCe32MbmoAdPz4HmHu1Exyxb11i58/p39oV++Ufpo+mJ0d1tGY6iPatVc3LUqt
-         ynGAL5mGT0mzZ9VxIQ0cUjh3nP8ZUIHRS55XytbRvelxJWpaDmpeUNDim4Z9KmcYr56i
-         l/rA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762882594; x=1763487394;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1762882599; x=1763487399; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=za1gdfyK3qzPGcN1dvu1lDNgvKHZXorLMMwhejsf9TA=;
-        b=JlJ09IzkcEu9w92FRd1uJcpvQs86f2OF2D6WV66Fu4/lGVI2twqUfNfTDIIpn/z4e6
-         todAeckEfUUsrCoRM7uJRsdbbjVHl7yvdFrLbFQy63CgCrD1O7h2ZFBf8QVVV9AU4t3l
-         nlGcPyh+L4l2Il6hb5JX/rRrC20VDQiLwpxJaqKwkwsDpDMvookBVMhuHhVVn6bbok69
-         7hVC5kIahz7GlJx331xRb3Ism8LE/CflH0dHnLPIL83LNgqboZW7r43s7UQCKxMTaAJp
-         TyuH5vYGV272xcsCpVLedF+/i3E/nCkLlKl9jbDIRXRrlPc2rqQhWgjcI3wU0lH9BwU+
-         75Ag==
-X-Forwarded-Encrypted: i=1; AJvYcCXJaNUCgsm6UjdrcPi8JtYy+43+ZCD2F/1l2f+yG1IM/ytNsrG0oiTyrcZanYHWS6Mzzf2vtrW+zlI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx4tVNY0JcMuZeC9CqmbsdHNFYEspB5XW6Bwor339GAkJGwozmN
-	rA8w0PxstxHYY/0XebnWkWVk5YHiD3W+qnpFIy8nnB4h6pgTKuwGSlC0+T6g+nmn/7QPD7vlhx8
-	81fa5nuPxY+kUB7tMARIDPmfXudHvKNr21vGPXkpiPQ==
-X-Gm-Gg: ASbGncuH4HpqJJT+JUIp0AUVWtyVJ2xH+GjP/wueyPL3Je9/ZzSFPPGOWoM246hfkt+
-	dWzWgS/ePZ7CAQ393/PRlJvk02WKx+/7cXrTR27LyPdanLrWzz1QhEobXTDMPxc5Y2l/cuUZUOL
-	LKzwNqvJ489e1MeLiYpQszoJjkT1GslW0lj0wSZIpmxYEu3SrvPtFEJDBMHeqoELhnrtag+XMs8
-	0ALDHgeQzHVunSBWaapW5HMDCdrtg/drrdgsr3XKxt7F1oehJISo/9Cmlt2XPrzeX0iqx+f
-X-Google-Smtp-Source: AGHT+IHCw1UcWzR9TPBE2DxyUpgbvAXRgMv7lWv2gMJ/bZXyLo3o561gH5tEFbtxTRBwtRHVUXKhCc7VU5xNaGwU2MA=
-X-Received: by 2002:a05:690c:8b90:b0:768:70a1:46c2 with SMTP id
- 00721157ae682-787d543a745mr98347307b3.48.1762882594490; Tue, 11 Nov 2025
- 09:36:34 -0800 (PST)
+        bh=cq330mV0aM3KkFwnynOWcCz+kzqPG1AsqJROu3kzYnM=;
+        b=Xyb4JMDSw86oZ4aVt3m/idh2YZSRpGxH+rtr7N8XjtXuwLDqYqN4dm40ozqoMbZu1X
+         2N8twZpE6P4gk60znAiFZx72khJJlCUzNgg/NpKAVFMzYU6ecqqGbaTQFIlsytArHuJp
+         tfIaw7OTIvazMEficm14ZH5TK8rW90/2Jo6b+tQ6dP+ftuXZl50z0xdDDVrxyvS805GG
+         EO++SYC2yyag4HEZ96zhfz3Oi/i8Ho/cex5sPv7msOmi38IzvexB4HV0c0aC3exqPJoi
+         b6hqrBpFZtfN6uJvJwP9MpqZe0aZhgBadYH8r4u2tWrUDPDynjCMLQ40NnJwgu/OsUwz
+         gZcg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762882599; x=1763487399;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=cq330mV0aM3KkFwnynOWcCz+kzqPG1AsqJROu3kzYnM=;
+        b=aUJ0Muhw+LNyXoTL3txgN8Fz8YPVLjcOySj9/1YWk/WeFDgBKwxa/qGMW7QUySQoGU
+         74gZ+oei4msr3q0xNcxkpY3sKu7mNnHnEx+3MUnZLee8xlkDGoNJGMFRO+zkQHQjaH5/
+         uvqeYeac9umF8lgL+jMFvNce3Uh5T/67x2TmlTRb80AruAg1AwuoXI4q7YhtCvb0DYoh
+         nUQSRwRTjwII/neC2lU+LziHlA7CYsdDiDptWmvgMnlRecF+aa3tUbewQhaMt+bqq3Xh
+         CtVT1GR+eIALuVwSWnSnzY/PBTx+s72S2NdlzLDir/z0gJVcV4Y8qXXx9AR4chkO1CHf
+         Ynjg==
+X-Forwarded-Encrypted: i=1; AJvYcCUhTEIBdfa7eNn25stWVdtsS9jDPnT2X2iTxHhg8rwJxvkPN5I4MgvKd2acLVMIBQNhxhH1213wnjc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzJkHPwUhliFf1LeA7S1XZzn9skywd6iiy58/TtTu0h6WDdgfc5
+	nM0qxOrOkV/vgFWhdpw15XrbbhpAQAy6PdxJj+DOQMb8BpJqW9PIeY1wnFEqhySd8hZfPYZh8Ha
+	64YM7f8MyLzQvGEN3ajrxBdLYIVfEz8YJA/DX/rpWDg==
+X-Gm-Gg: ASbGncu4kpxki971fH7jVMgw74PkuvghRbZW4un/XGLXMcXfDtvKEzsMl9zgDBqGGLG
+	RNPfRkFRvPr/RvRbTNzYqS7dfMm+cuHDVJjkmKFhX6+PcnpgIbFOjIdkAau4Oqqy6glrtpIYsb6
+	8SOqN4DdNXUl4lWOGJwUeb2ljVFE3JAoF8kqpC+MlViTtSu86eS2mKX7DkCBarmZ6jBbcmf34ap
+	M2ttHz6DTqZBZM6kFYa0P9nHbxRbWRQkOBo5bDidgda2a+qWHoAnxm5dpDIDA==
+X-Google-Smtp-Source: AGHT+IGFeWkmGYHnfsYLyug0SUXVIrlIHteZgTm7nrPaPsLkRxroQIQ00QVPMrq7+dreV7IBhR+16iaHx55xCI61maQ=
+X-Received: by 2002:a05:690c:312:b0:784:99f7:8d04 with SMTP id
+ 00721157ae682-787d541bf0dmr200759467b3.40.1762882598635; Tue, 11 Nov 2025
+ 09:36:38 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251023-davinci-mmc-v3-1-5b27b9c9ecc4@gmail.com>
-In-Reply-To: <20251023-davinci-mmc-v3-1-5b27b9c9ecc4@gmail.com>
+References: <20251023145432.164696-1-rakuram.e96@gmail.com>
+In-Reply-To: <20251023145432.164696-1-rakuram.e96@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 11 Nov 2025 18:35:58 +0100
-X-Gm-Features: AWmQ_bnvpism8NQxIoxTruBGzEdbb8m_Fhm8OHtqEgCF2-lTQKiQId72TAJ0VRU
-Message-ID: <CAPDyKFr2TrHY6VAt_1y4jKOr1J5727_osx+75U9_=+LExYZJiw@mail.gmail.com>
-Subject: Re: [PATCH v3] dt-bindings: mmc: ti,da830-mmc: convert to DT schema
-To: Charan Pedumuru <charan.pedumuru@gmail.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Abraham I <kishon@kernel.org>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Tue, 11 Nov 2025 18:36:02 +0100
+X-Gm-Features: AWmQ_bm-HtvwPjB1I0R7_VasVYGA_DNOzwFIcqKcTupiDBJdq-x3xg3-mjSwxF8
+Message-ID: <CAPDyKFoSX7QZGv78dL10C38wY0Sg5QC1qxvhyGXJ+VUYHihP3A@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: pxamci: Simplify pxamci_probe() error handling
+ using devm APIs
+To: Rakuram Eswaran <rakuram.e96@gmail.com>
+Cc: u.kleine-koenig@baylibre.com, chenhuacai@kernel.org, 
+	dan.carpenter@linaro.org, david.hunter.linux@gmail.com, khalid@kernel.org, 
+	zhoubinbin@loongson.cn, linux-kernel-mentees@lists.linux.dev, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, lkp@intel.com, 
+	skhan@linuxfoundation.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 23 Oct 2025 at 15:20, Charan Pedumuru <charan.pedumuru@gmail.com> wrote:
+On Thu, 23 Oct 2025 at 16:54, Rakuram Eswaran <rakuram.e96@gmail.com> wrote=
+:
 >
-> Convert TI Highspeed MMC host controller binding to YAML format. Define
-> 'clocks' and 'interrupts' properties to resolve errors identified by
-> 'dt_check' and 'dtb_check'.
+> This patch refactors pxamci_probe() to use devm-managed resource
+> allocation (e.g. devm_dma_request_chan) and dev_err_probe() for
+> improved readability and automatic cleanup on probe failure.
 >
-> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+> It also removes redundant NULL assignments and manual resource release
+> logic from pxamci_probe(), and eliminates the corresponding release
+> calls from pxamci_remove().
+>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+> Closes: https://lore.kernel.org/r/202510041841.pRlunIfl-lkp@intel.com/
+> Fixes: 58c40f3faf742c ("mmc: pxamci: Use devm_mmc_alloc_host() helper")
+> Suggested-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@baylibre.com>
+> Signed-off-by: Rakuram Eswaran <rakuram.e96@gmail.com>
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> Changes in v3:
-> - Change the maintainer for the binding to "Kishon Vijay Abraham I".
-> - Link to v2: https://lore.kernel.org/r/20251011-davinci-mmc-v2-1-355da3e25123@gmail.com
 >
-> Changes in v2:
-> - Modified the commit message.
-> - Removed 'interrupts' from required properties following the old binding.
-> - Changed the maintainer for the binding to "Conor Dooley".
-> - Link to v1: https://lore.kernel.org/r/20250523-davinci-mmc-v1-1-ceebd8352d9c@gmail.com
-> ---
->  .../devicetree/bindings/mmc/davinci_mmc.txt        | 32 ------------
->  .../devicetree/bindings/mmc/ti,da830-mmc.yaml      | 61 ++++++++++++++++++++++
->  2 files changed, 61 insertions(+), 32 deletions(-)
+> Changes since v2:
+> - Dropped redundant dma_release_channel() calls from pxamci_remove() as
+>   devm_dma_request_chan() automatically handles resource cleanup.
+> - Added link to v2 for reference:
+>   https://lore.kernel.org/linux-mmc/20251014184657.111144-1-rakuram.e96@g=
+mail.com/
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt b/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-> deleted file mode 100644
-> index 516fb0143d4c..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/davinci_mmc.txt
-> +++ /dev/null
-> @@ -1,32 +0,0 @@
-> -* TI Highspeed MMC host controller for DaVinci
-> -
-> -The Highspeed MMC Host Controller on TI DaVinci family
-> -provides an interface for MMC, SD and SDIO types of memory cards.
-> -
-> -This file documents the properties used by the davinci_mmc driver.
-> -
-> -Required properties:
-> -- compatible:
-> - Should be "ti,da830-mmc": for da830, da850, dm365
-> - Should be "ti,dm355-mmc": for dm355, dm644x
-> -
-> -Optional properties:
-> -- bus-width: Number of data lines, can be <1>, <4>, or <8>, default <1>
-> -- max-frequency: Maximum operating clock frequency, default 25MHz.
-> -- dmas: List of DMA specifiers with the controller specific format
-> -       as described in the generic DMA client binding. A tx and rx
-> -       specifier is required.
-> -- dma-names: RX and TX  DMA request names. These strings correspond
-> -       1:1 with the DMA specifiers listed in dmas.
-> -
-> -Example:
-> -mmc0: mmc@1c40000 {
-> -       compatible = "ti,da830-mmc",
-> -       reg = <0x40000 0x1000>;
-> -       interrupts = <16>;
-> -       bus-width = <4>;
-> -       max-frequency = <50000000>;
-> -       dmas = <&edma 16
-> -               &edma 17>;
-> -       dma-names = "rx", "tx";
-> -};
-> diff --git a/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml b/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
-> new file mode 100644
-> index 000000000000..36b33dde086b
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/ti,da830-mmc.yaml
-> @@ -0,0 +1,61 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/ti,da830-mmc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: TI Highspeed MMC host controller for DaVinci
-> +
-> +description:
-> +  The Highspeed MMC Host Controller on TI DaVinci family
-> +  provides an interface for MMC, SD and SDIO types of memory cards.
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml
-> +
-> +maintainers:
-> +  - Kishon Vijay Abraham I <kishon@kernel.org>
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - ti,da830-mmc
-> +      - ti,dm355-mmc
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 2
-> +
-> +  dmas:
-> +    maxItems: 2
-> +
-> +  dma-names:
-> +    items:
-> +      - const: rx
-> +      - const: tx
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    mmc@1c40000 {
-> +        compatible = "ti,da830-mmc";
-> +        reg = <0x40000 0x1000>;
-> +        interrupts = <16 IRQ_TYPE_LEVEL_HIGH>,
-> +                     <17 IRQ_TYPE_LEVEL_HIGH>;
-> +        bus-width = <4>;
-> +        max-frequency = <50000000>;
-> +        dmas = <&edma 16>, <&edma 17>;
-> +        dma-names = "rx", "tx";
-> +    };
-> +...
+> Changes since v1:
+> Following Uwe Kleine-K=C3=B6nig=E2=80=99s suggestion:
+> - Replaced dma_request_chan() with devm_dma_request_chan() to make DMA
+>   channel allocation devm-managed and avoid manual release paths.
+> - Adopted dev_err_probe() for improved error reporting and consistent
+>   probe failure handling.
+> - Removed redundant NULL assignments and obsolete goto-based cleanup logi=
+c.
+> - Updated commit message to better describe the intent of the change.
+> - Added link to v1 for reference:
+>   https://lore.kernel.org/linux-mmc/20251007161948.12442-1-rakuram.e96@gm=
+ail.com/
 >
-> ---
-> base-commit: 7bac2c97af4078d7a627500c9bcdd5b033f97718
-> change-id: 20250523-davinci-mmc-c704440c3dd0
+> Testing note:
+> I do not have access to appropriate hardware for runtime testing.
+> Any help verifying on actual hardware would be appreciated.
 >
-> Best regards,
+> Build and Analysis:
+> This patch was compiled against the configuration file reported by
+> 0day CI in the above link (config: s390-randconfig-r071-20251004) using
+> `s390x-linux-gnu-gcc (Ubuntu 14.2.0-19ubuntu2) 14.2.0`.
+>
+> Static analysis was performed with Smatch to ensure the reported warning
+> no longer reproduces after applying this fix.
+>
+> Command used for verification:
+>   ARCH=3Ds390 CROSS_COMPILE=3Ds390x-linux-gnu- \
+>   ~/project/smatch/smatch_scripts/kchecker ./drivers/mmc/host/pxamci.c
+>
+>  drivers/mmc/host/pxamci.c | 56 +++++++++++++--------------------------
+>  1 file changed, 18 insertions(+), 38 deletions(-)
+>
+> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+> index 26d03352af63..b5ea058ed467 100644
+> --- a/drivers/mmc/host/pxamci.c
+> +++ b/drivers/mmc/host/pxamci.c
+> @@ -652,10 +652,9 @@ static int pxamci_probe(struct platform_device *pdev=
+)
+>         host->clkrt =3D CLKRT_OFF;
+>
+>         host->clk =3D devm_clk_get(dev, NULL);
+> -       if (IS_ERR(host->clk)) {
+> -               host->clk =3D NULL;
+> -               return PTR_ERR(host->clk);
+> -       }
+> +       if (IS_ERR(host->clk))
+> +               return dev_err_probe(dev, PTR_ERR(host->clk),
+> +                                       "Failed to acquire clock\n");
+>
+>         host->clkrate =3D clk_get_rate(host->clk);
+>
+> @@ -703,46 +702,37 @@ static int pxamci_probe(struct platform_device *pde=
+v)
+>
+>         platform_set_drvdata(pdev, mmc);
+>
+> -       host->dma_chan_rx =3D dma_request_chan(dev, "rx");
+> -       if (IS_ERR(host->dma_chan_rx)) {
+> -               host->dma_chan_rx =3D NULL;
+> +       host->dma_chan_rx =3D devm_dma_request_chan(dev, "rx");
+> +       if (IS_ERR(host->dma_chan_rx))
+>                 return dev_err_probe(dev, PTR_ERR(host->dma_chan_rx),
+>                                      "unable to request rx dma channel\n"=
+);
+> -       }
+>
+> -       host->dma_chan_tx =3D dma_request_chan(dev, "tx");
+> -       if (IS_ERR(host->dma_chan_tx)) {
+> -               dev_err(dev, "unable to request tx dma channel\n");
+> -               ret =3D PTR_ERR(host->dma_chan_tx);
+> -               host->dma_chan_tx =3D NULL;
+> -               goto out;
+> -       }
+> +
+> +       host->dma_chan_tx =3D devm_dma_request_chan(dev, "tx");
+> +       if (IS_ERR(host->dma_chan_tx))
+> +               return dev_err_probe(dev, PTR_ERR(host->dma_chan_tx),
+> +                                       "unable to request tx dma channel=
+\n");
+>
+>         if (host->pdata) {
+>                 host->detect_delay_ms =3D host->pdata->detect_delay_ms;
+>
+>                 host->power =3D devm_gpiod_get_optional(dev, "power", GPI=
+OD_OUT_LOW);
+> -               if (IS_ERR(host->power)) {
+> -                       ret =3D PTR_ERR(host->power);
+> -                       dev_err(dev, "Failed requesting gpio_power\n");
+> -                       goto out;
+> -               }
+> +               if (IS_ERR(host->power))
+> +                       return dev_err_probe(dev, PTR_ERR(host->power),
+> +                                               "Failed requesting gpio_p=
+ower\n");
+>
+>                 /* FIXME: should we pass detection delay to debounce? */
+>                 ret =3D mmc_gpiod_request_cd(mmc, "cd", 0, false, 0);
+> -               if (ret && ret !=3D -ENOENT) {
+> -                       dev_err(dev, "Failed requesting gpio_cd\n");
+> -                       goto out;
+> -               }
+> +               if (ret && ret !=3D -ENOENT)
+> +                       return dev_err_probe(dev, ret, "Failed requesting=
+ gpio_cd\n");
+>
+>                 if (!host->pdata->gpio_card_ro_invert)
+>                         mmc->caps2 |=3D MMC_CAP2_RO_ACTIVE_HIGH;
+>
+>                 ret =3D mmc_gpiod_request_ro(mmc, "wp", 0, 0);
+> -               if (ret && ret !=3D -ENOENT) {
+> -                       dev_err(dev, "Failed requesting gpio_ro\n");
+> -                       goto out;
+> -               }
+> +               if (ret && ret !=3D -ENOENT)
+> +                       return dev_err_probe(dev, ret, "Failed requesting=
+ gpio_ro\n");
+> +
+>                 if (!ret)
+>                         host->use_ro_gpio =3D true;
+>
+> @@ -759,16 +749,8 @@ static int pxamci_probe(struct platform_device *pdev=
+)
+>         if (ret) {
+>                 if (host->pdata && host->pdata->exit)
+>                         host->pdata->exit(dev, mmc);
+> -               goto out;
+>         }
+>
+> -       return 0;
+> -
+> -out:
+> -       if (host->dma_chan_rx)
+> -               dma_release_channel(host->dma_chan_rx);
+> -       if (host->dma_chan_tx)
+> -               dma_release_channel(host->dma_chan_tx);
+>         return ret;
+>  }
+>
+> @@ -791,8 +773,6 @@ static void pxamci_remove(struct platform_device *pde=
+v)
+>
+>                 dmaengine_terminate_all(host->dma_chan_rx);
+>                 dmaengine_terminate_all(host->dma_chan_tx);
+> -               dma_release_channel(host->dma_chan_rx);
+> -               dma_release_channel(host->dma_chan_tx);
+>         }
+>  }
+>
 > --
-> Charan Pedumuru <charan.pedumuru@gmail.com>
+> 2.48.1
 >
