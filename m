@@ -1,273 +1,205 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55F8825A2BB;
-	Tue, 11 Nov 2025 05:51:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96F2D248883
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 06:42:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762840276; cv=none; b=LeCIEqGsd//Z2ldifiuVNfTMeAz75ncBraSxs/QA5he6zwmXcraX99S2knTaAFvF03qZSZDYlLbz+GNfUBuj7jzAeSkE6T86NGm5NH4+aJE8lMECOWX0gve4hRqj/ed+YDAhn8tQISV2KnNm/YGC3zJhYNMHbnXuHHnJx/1gnKw=
+	t=1762843351; cv=none; b=rhyT21zGu65FmbM3y3QIS4m7oQnaiFfAGLk//zADly7t1yEcmWgYIEdGkXunPaJU7nYPCqa9NNax5GLDmnrEJ0Vb5kDKndfIL/lZzFMeDhG3kKbNbD03lX4ACtL6UFT3JBYoFI7vEYmk4FEvBMLXz+0fCUthwxRlwbu7Yca+mxI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762840276; c=relaxed/simple;
-	bh=/SLqfswm1aBdyVMt43HObYBoVG/w5wutjuTmSL5va/Q=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=rXyAqCKYT2EZQQM/h1IlwiK5iv5e3a074Rtv0Uk4gETDZBAkF6hMc0sMJRI6Fq6kLYLR6QfGFBfWuoH+Xi2YtJi9qxTNAI1R88cfycReSEqqV9EZ4gydOAyDltYkUYK4xxT5IkoHbCVH/G1/TiP6H0e9yuH8wP4fAzlvWZg+uSE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=gJAMKUAP; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1762843351; c=relaxed/simple;
+	bh=ATNN5RmueLox2IC+5BDEXAgaIglCENc+yF4ZTPMaIZg=;
+	h=Date:Message-ID:From:To:Cc:Subject:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=qQpnG0isgyTjXFf7mm7+R4/7GjgrOqUiT45k+h74TIaaS542DBvJquWzdKg5V0YitYjcIFp/H3CU3BdAi6jYhix3kJVnB6S85v+heWsuVhEDlytmrkFDXzL4zeKh3wAZUa+ZxlX5tUrsasWL6PIMiCYsq+qRggkJo2X9++fw7Sc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=MJJifpxj; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=XOVf1gy9; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=MJJifpxj; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=XOVf1gy9; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="gJAMKUAP"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AB46BMV4167218;
-	Tue, 11 Nov 2025 05:51:08 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	Q/zBP6T7BvWjd8aqlVDbZzBTQ4nfBaqYzBBH1DcIAKo=; b=gJAMKUAPEEDN2cJ2
-	IqwnnBafP9aylzBIeHvOCqFkL9AmPYfosrJqekFiBywoiOTgHtxY7Bn21ZnNVUbP
-	IWINvRtLCARSmnr/co330PgpHkAw3XEaoX10CUUIFWgAkFm/MBK5W3uArCIFg44x
-	ucZ7su5y9lw/IMK7NAJcd7FoFgK7NDYKWrWTmlNlkSY/M/n1NUSLP85XfGvOtrDI
-	Q0Nal7jh4zsBPVaqUaJXUeGwI17fq994FNh3YBCvLPb3yWOSsyii+1PDdirR5fd7
-	VjUoza0tSUyFQKrf2S96X3MmBjSXrIEhndsKr1LPzWUHDgO84TkCZc1Cb1F0msZm
-	IdHKUQ==
-Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4abm4a1sw5-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 11 Nov 2025 05:51:08 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA03.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5AB5p747001273
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 11 Nov 2025 05:51:07 GMT
-Received: from [10.151.36.184] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.24; Mon, 10 Nov
- 2025 21:50:04 -0800
-Message-ID: <392ba04d-66c5-96c3-628d-8c9edf49333b@quicinc.com>
-Date: Tue, 11 Nov 2025 11:19:51 +0530
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="MJJifpxj";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="XOVf1gy9";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="MJJifpxj";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="XOVf1gy9"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 003E121D96;
+	Tue, 11 Nov 2025 06:42:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1762843347; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
+	b=MJJifpxj0d+JjXgZOzmxMDpQDTSyIadrJYsNIbJl+ULZfRSkA1F3QRigpspAqsE+66Rhp4
+	Shn7meUxG5KGJZOHhOahRAQKGy6Nb5TLhqjOSRo1AsBLy8kaYN8yBZmHfsJ+Bw3No+qv6Y
+	5wW5dT7W11nmHzpKpr6zOoTnHE6LBoQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1762843347;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
+	b=XOVf1gy9U5gZVwTjF3TZLqMUlzKAS6MC5EfTBJRYyS+0eMhaSrKs4ZKyZxOlsKibNkjCP/
+	7jvcMdxbfbH3qxAQ==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1762843347; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
+	b=MJJifpxj0d+JjXgZOzmxMDpQDTSyIadrJYsNIbJl+ULZfRSkA1F3QRigpspAqsE+66Rhp4
+	Shn7meUxG5KGJZOHhOahRAQKGy6Nb5TLhqjOSRo1AsBLy8kaYN8yBZmHfsJ+Bw3No+qv6Y
+	5wW5dT7W11nmHzpKpr6zOoTnHE6LBoQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1762843347;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
+	b=XOVf1gy9U5gZVwTjF3TZLqMUlzKAS6MC5EfTBJRYyS+0eMhaSrKs4ZKyZxOlsKibNkjCP/
+	7jvcMdxbfbH3qxAQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id EAC3E14805;
+	Tue, 11 Nov 2025 06:42:24 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id OZMhONDaEmkhSgAAD6G6ig
+	(envelope-from <tiwai@suse.de>); Tue, 11 Nov 2025 06:42:24 +0000
+Date: Tue, 11 Nov 2025 07:42:24 +0100
+Message-ID: <87jyzx2hpr.wl-tiwai@suse.de>
+From: Takashi Iwai <tiwai@suse.de>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Corey Minyard <corey@minyard.net>,	Christian =?ISO-8859-1?Q?K=F6nig?=
+ <christian.koenig@amd.com>,	"Dr. David Alan Gilbert" <linux@treblig.org>,
+	Alex Deucher <alexander.deucher@amd.com>,	Thomas Zimmermann
+ <tzimmermann@suse.de>,	Dmitry Baryshkov
+ <dmitry.baryshkov@oss.qualcomm.com>,	Rob Clark
+ <robin.clark@oss.qualcomm.com>,	Matthew Brost <matthew.brost@intel.com>,
+	Hans Verkuil <hverkuil@kernel.org>,	Laurent Pinchart
+ <laurent.pinchart+renesas@ideasonboard.com>,	Ulf Hansson
+ <ulf.hansson@linaro.org>,	Vitaly Lifshits <vitaly.lifshits@intel.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,	Niklas Cassel <cassel@kernel.org>,
+	Calvin Owens <calvin@wbinvd.org>,	Sagi Maimon <maimon.sagi@gmail.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,	Karan Tilak Kumar
+ <kartilak@cisco.com>,	Casey Schaufler <casey@schaufler-ca.com>,	Steven
+ Rostedt <rostedt@goodmis.org>,	Petr Mladek <pmladek@suse.com>,	Max
+ Kellermann <max.kellermann@ionos.com>,	Takashi Iwai <tiwai@suse.de>,
+	linux-doc@vger.kernel.org,	linux-kernel@vger.kernel.org,
+	openipmi-developer@lists.sourceforge.net,	linux-media@vger.kernel.org,
+	dri-devel@lists.freedesktop.org,	linaro-mm-sig@lists.linaro.org,
+	amd-gfx@lists.freedesktop.org,	linux-arm-msm@vger.kernel.org,
+	freedreno@lists.freedesktop.org,	intel-xe@lists.freedesktop.org,
+	linux-mmc@vger.kernel.org,	netdev@vger.kernel.org,
+	intel-wired-lan@lists.osuosl.org,	linux-pci@vger.kernel.org,
+	linux-s390@vger.kernel.org,	linux-scsi@vger.kernel.org,
+	linux-staging@lists.linux.dev,	ceph-devel@vger.kernel.org,
+	linux-trace-kernel@vger.kernel.org,	linux-sound@vger.kernel.org,	Rasmus
+ Villemoes <linux@rasmusvillemoes.dk>,	Sergey Senozhatsky
+ <senozhatsky@chromium.org>,	Jonathan Corbet <corbet@lwn.net>,	Sumit Semwal
+ <sumit.semwal@linaro.org>,	Gustavo Padovan <gustavo@padovan.org>,	David
+ Airlie <airlied@gmail.com>,	Simona Vetter <simona@ffwll.ch>,	Maarten
+ Lankhorst <maarten.lankhorst@linux.intel.com>,	Maxime Ripard
+ <mripard@kernel.org>,	Dmitry Baryshkov <lumag@kernel.org>,	Abhinav Kumar
+ <abhinav.kumar@linux.dev>,	Jessica Zhang <jesszhan0024@gmail.com>,	Sean
+ Paul <sean@poorly.run>,	Marijn Suijten <marijn.suijten@somainline.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,	Lucas De Marchi
+ <lucas.demarchi@intel.com>,	Thomas =?ISO-8859-1?Q?Hellstr=F6m?=
+ <thomas.hellstrom@linux.intel.com>,	Rodrigo Vivi <rodrigo.vivi@intel.com>,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,	Vladimir Oltean
+ <olteanv@gmail.com>,	Andrew Lunn <andrew@lunn.ch>,	"David S. Miller"
+ <davem@davemloft.net>,	Eric Dumazet <edumazet@google.com>,	Jakub Kicinski
+ <kuba@kernel.org>,	Paolo Abeni <pabeni@redhat.com>,	Tony Nguyen
+ <anthony.l.nguyen@intel.com>,	Przemek Kitszel
+ <przemyslaw.kitszel@intel.com>,	Krzysztof =?ISO-8859-2?Q?Wilczy=F1ski?=
+ <kwilczynski@kernel.org>,	Kishon Vijay Abraham I <kishon@kernel.org>,	Bjorn
+ Helgaas <bhelgaas@google.com>,	Rodolfo Giometti <giometti@enneenne.com>,
+	Jonathan Lemon <jonathan.lemon@gmail.com>,	Vadim Fedorenko
+ <vadim.fedorenko@linux.dev>,	Richard Cochran <richardcochran@gmail.com>,
+	Stefan Haberland <sth@linux.ibm.com>,	Jan Hoeppner
+ <hoeppner@linux.ibm.com>,	Heiko Carstens <hca@linux.ibm.com>,	Vasily Gorbik
+ <gor@linux.ibm.com>,	Alexander Gordeev <agordeev@linux.ibm.com>,	Christian
+ Borntraeger <borntraeger@linux.ibm.com>,	Sven Schnelle
+ <svens@linux.ibm.com>,	Satish Kharat <satishkh@cisco.com>,	Sesidhar Baddela
+ <sebaddel@cisco.com>,	"James E.J. Bottomley"
+ <James.Bottomley@HansenPartnership.com>,	Greg Kroah-Hartman
+ <gregkh@linuxfoundation.org>,	Xiubo Li <xiubli@redhat.com>,	Ilya Dryomov
+ <idryomov@gmail.com>,	Masami Hiramatsu <mhiramat@kernel.org>,	Mathieu
+ Desnoyers <mathieu.desnoyers@efficios.com>,	Andrew Morton
+ <akpm@linux-foundation.org>,	Jaroslav Kysela <perex@perex.cz>,	Takashi Iwai
+ <tiwai@suse.com>
+Subject: Re: [PATCH v1 02/23] ALSA: seq: Switch to use %ptSp
+In-Reply-To: <20251110184727.666591-3-andriy.shevchenko@linux.intel.com>
+References: <20251110184727.666591-1-andriy.shevchenko@linux.intel.com>
+	<20251110184727.666591-3-andriy.shevchenko@linux.intel.com>
+User-Agent: Wanderlust/2.15.9 (Almost Unreal) Emacs/27.2 Mule/6.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH v3] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
- devices
-To: Adrian Hunter <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Eric Biggers <ebiggers@kernel.org>
-CC: <quic_varada@quicinc.com>
-References: <20251104063943.3424529-1-quic_mdalam@quicinc.com>
- <ae37c98b-927e-44e4-b83c-71753d61e2cc@intel.com>
-Content-Language: en-US
-From: Md Sadre Alam <quic_mdalam@quicinc.com>
-In-Reply-To: <ae37c98b-927e-44e4-b83c-71753d61e2cc@intel.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: EQT8Iv1VyiPAk4vbWTE-t7LO_WtpKUSj
-X-Authority-Analysis: v=2.4 cv=G6kR0tk5 c=1 sm=1 tr=0 ts=6912cecc cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6UeiqGixMTsA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=COk6AnOGAAAA:8 a=QyXUC8HyAAAA:8
- a=8BPlPp1vl7OZ_UTcvjIA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
- a=cPQSjfK2_nFv0Q5t_7PE:22 a=HhbK4dLum7pmb74im6QT:22 a=pHzHmUro8NiASowvMSCR:22
- a=Ew2E2A-JSTLzCXPT_086:22
-X-Proofpoint-ORIG-GUID: EQT8Iv1VyiPAk4vbWTE-t7LO_WtpKUSj
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTExMDA0MyBTYWx0ZWRfX7a5FbUEglhEp
- ShyDEpce/Bv1nYnRcjN5XKn5UIqE5ovhQYHva7qbGEtWan068k/BZtJm/r05J1Bs19R1yyZL5k6
- h0Tgo/oOHj8DpSwhmuj9A8LQwROffSvmmykkEsXi09p6BWCF5/BZ7zt9fmz+5xDE5ju5NJ8Wlju
- 7Atggy10d6MhKv5k5JGGWf4zoPEedr6Rrva6G87dt0rpOS+hJBPnX4td1fNRppAakgf7n1Alnbm
- Km8n43dAajgr/KF48Ww8GS1ZwQ356IYdcSsSuhS/sEqqpumPbfRWHju7cVJHY5iJpcnOeASYJSH
- kjUdaw75LAJR0rZaFDnSu/Ay3USv09IXbyFqIbotZbbfRUhBIquzpkLgJhjr8uT05rZIn0tfMgD
- UGhYtH+9B++eVkD1VffOuI1CLmPm0A==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-11_01,2025-11-10_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 phishscore=0 spamscore=0 bulkscore=0 suspectscore=0
- lowpriorityscore=0 clxscore=1015 malwarescore=0 impostorscore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511110043
+MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
+Content-Type: text/plain; charset=US-ASCII
+X-Spam-Level: 
+X-Spamd-Result: default: False [-1.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	SUSPICIOUS_RECIPS(1.50)[];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	TO_DN_SOME(0.00)[];
+	TAGGED_RCPT(0.00)[renesas];
+	MIME_TRACE(0.00)[0:+];
+	FUZZY_RATELIMITED(0.00)[rspamd.com];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	ARC_NA(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	FROM_HAS_DN(0.00)[];
+	FREEMAIL_CC(0.00)[minyard.net,amd.com,treblig.org,suse.de,oss.qualcomm.com,intel.com,kernel.org,ideasonboard.com,linaro.org,wbinvd.org,gmail.com,oracle.com,cisco.com,schaufler-ca.com,goodmis.org,suse.com,ionos.com,vger.kernel.org,lists.sourceforge.net,lists.freedesktop.org,lists.linaro.org,lists.osuosl.org,lists.linux.dev,rasmusvillemoes.dk,chromium.org,lwn.net,padovan.org,ffwll.ch,linux.intel.com,linux.dev,poorly.run,somainline.org,lunn.ch,davemloft.net,google.com,redhat.com,enneenne.com,linux.ibm.com,HansenPartnership.com,linuxfoundation.org,efficios.com,linux-foundation.org,perex.cz];
+	R_RATELIMIT(0.00)[to_ip_from(RLmdkd3ei8pyzuqshpsr74qwzu)];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_SOME(0.00)[];
+	RCPT_COUNT_GT_50(0.00)[96];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,imap1.dmz-prg2.suse.org:helo]
+X-Spam-Flag: NO
+X-Spam-Score: -1.80
 
-Hi,
-
-On 11/10/2025 2:16 PM, Adrian Hunter wrote:
-> On 04/11/2025 08:39, Md Sadre Alam wrote:
->> Enable Inline Crypto Engine (ICE) support for eMMC devices that operate
->> without Command Queue Engine (CQE).This allows hardware-accelerated
->> encryption and decryption for standard (non-CMDQ) requests.
->>
->> This patch:
->> - Adds ICE register definitions for non-CMDQ crypto configuration
->> - Implements a per-request crypto setup via sdhci_msm_ice_cfg()
->> - Hooks into the request path via mmc_host_ops.request
->> - Initializes ICE hardware during CQE setup for compatible platforms
->>
->> With this, non-CMDQ eMMC devices can benefit from inline encryption,
->> improving performance for encrypted I/O while maintaining compatibility
->> with existing CQE crypto support.
->>
->> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>
->> Change in [v3]
->>
->> * Refactored logic to use separate code paths for crypto_ctx != NULL and
->>    crypto_ctx == NULL to improve readability.
->>
->> * Renamed bypass to crypto_enable to align with bitfield semantics.
->>
->> * Removed slot variable
->>
->> * Added ICE initialization sequence for non-CMDQ eMMC devices before
->>    __sdhci_add_host()
->>
->> Change in [v2]
->>
->> * Moved NONCQ_CRYPTO_PARM and NONCQ_CRYPTO_DUN register definitions into
->>    sdhci-msm.c
->>
->> * Introduced use of GENMASK() and FIELD_PREP() macros for cleaner and more
->>    maintainable bitfield handling in ICE configuration.
->>
->> * Removed redundant if (!mrq || !cq_host) check from sdhci_msm_ice_cfg()
->>    as both are guaranteed to be valid in the current call path.
->>
->> * Added assignment of host->mmc_host_ops.request = sdhci_msm_request; to
->>    integrate ICE configuration into the standard request path for non-CMDQ
->>    eMMC devices.
->>
->> * Removed sdhci_crypto_cfg() from sdhci.c and its invocation in sdhci_request()
->>
->> Change in [v1]
->>
->> * Added initial support for Inline Crypto Engine (ICE) on non-CMDQ eMMC
->>    devices.
->>
->>   drivers/mmc/host/sdhci-msm.c | 71 ++++++++++++++++++++++++++++++++++++
->>   1 file changed, 71 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 4e5edbf2fc9b..6ce205238720 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -157,6 +157,18 @@
->>   #define CQHCI_VENDOR_CFG1	0xA00
->>   #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
->>   
->> +/* non command queue crypto enable register*/
->> +#define NONCQ_CRYPTO_PARM		0x70
->> +#define NONCQ_CRYPTO_DUN		0x74
->> +
->> +#define DISABLE_CRYPTO			BIT(15)
->> +#define CRYPTO_GENERAL_ENABLE		BIT(1)
->> +#define HC_VENDOR_SPECIFIC_FUNC4	0x260
->> +#define ICE_HCI_SUPPORT			BIT(28)
->> +
->> +#define ICE_HCI_PARAM_CCI	GENMASK(7, 0)
->> +#define ICE_HCI_PARAM_CE	GENMASK(8, 8)
->> +
->>   struct sdhci_msm_offset {
->>   	u32 core_hc_mode;
->>   	u32 core_mci_data_cnt;
->> @@ -1885,6 +1897,48 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->>   
->>   #ifdef CONFIG_MMC_CRYPTO
->>   
->> +static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
->> +{
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +	struct mmc_host *mmc = msm_host->mmc;
->> +	struct cqhci_host *cq_host = mmc->cqe_private;
->> +	unsigned int crypto_params = 0;
->> +	int key_index;
->> +	bool crypto_enable;
->> +	u64 dun = 0;
->> +
->> +	if (mrq->crypto_ctx) {
->> +		crypto_enable = true;
->> +		dun = mrq->crypto_ctx->bc_dun[0];
->> +		key_index = mrq->crypto_key_slot;
->> +		crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, crypto_enable) |
->> +				FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
->> +
->> +		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
->> +		cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
->> +	} else {
->> +		crypto_enable = false;
->> +		key_index = 0;
->> +		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
->> +	}
->> +
->> +	/* Ensure crypto configuration is written before proceeding */
->> +	wmb();
->> +
->> +	return 0;
->> +}
->> +
->> +static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
->> +{
->> +	struct sdhci_host *host = mmc_priv(mmc);
->> +
->> +	if (mmc->caps2 & MMC_CAP2_CRYPTO)
->> +		sdhci_msm_ice_cfg(host, mrq);
->> +
->> +	sdhci_request(mmc, mrq);
->> +}
->> +
->>   static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
->>   
->>   static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->> @@ -2131,6 +2185,8 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
->>   	struct cqhci_host *cq_host;
->>   	bool dma64;
->>   	u32 cqcfg;
->> +	u32 config;
->> +	u32 ice_cap;
->>   	int ret;
->>   
->>   	/*
->> @@ -2181,6 +2237,18 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
->>   	if (host->flags & SDHCI_USE_64_BIT_DMA)
->>   		host->desc_sz = 12;
->>   
->> +	/* Initialize ICE for non-CMDQ eMMC devices */
->> +	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
->> +	config &= ~DISABLE_CRYPTO;
->> +	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
->> +	ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
->> +	if (ice_cap & ICE_HCI_SUPPORT) {
->> +		config = cqhci_readl(cq_host, CQHCI_CFG);
->> +		config |= CRYPTO_GENERAL_ENABLE;
->> +		cqhci_writel(cq_host, config, CQHCI_CFG);
->> +	}
->> +	sdhci_msm_ice_enable(msm_host);
+On Mon, 10 Nov 2025 19:40:21 +0100,
+Andy Shevchenko wrote:
 > 
-> Perhaps this could all be done lazily in sdhci_msm_ice_cfg() ?
-> e.g.
+> Use %ptSp instead of open coded variants to print content of
+> struct timespec64 in human readable format.
 > 
-> 	if (mrq->crypto_ctx) {
-> 		if (!msm_host->ice_init_done) {
-> 			sdhci_msm_non_cqe_ice_init(host, ...);
-> 			msm_host->ice_init_done = true;
-> 		}
-> 		...
->
-Thanks for the suggestion! Lazily initializing ICE in 
-sdhci_msm_ice_cfg() based on mrq->crypto_ctx does seem like
-a clean and efficient approach. It would avoid unnecessary
-setup when crypto isn't involved and keep the init path tightly
-scoped.
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+>  sound/core/seq/seq_queue.c | 2 +-
+>  sound/core/seq/seq_timer.c | 6 +++---
+>  2 files changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/sound/core/seq/seq_queue.c b/sound/core/seq/seq_queue.c
+> index f5c0e401c8ae..f6e86cbf38bc 100644
+> --- a/sound/core/seq/seq_queue.c
+> +++ b/sound/core/seq/seq_queue.c
+> @@ -699,7 +699,7 @@ void snd_seq_info_queues_read(struct snd_info_entry *entry,
+>  		snd_iprintf(buffer, "current tempo      : %d\n", tmr->tempo);
+>  		snd_iprintf(buffer, "tempo base         : %d ns\n", tmr->tempo_base);
+>  		snd_iprintf(buffer, "current BPM        : %d\n", bpm);
+> -		snd_iprintf(buffer, "current time       : %d.%09d s\n", tmr->cur_time.tv_sec, tmr->cur_time.tv_nsec);
+> +		snd_iprintf(buffer, "current time       : %ptSp s\n", &tmr->cur_time);
+>  		snd_iprintf(buffer, "current tick       : %d\n", tmr->tick.cur_tick);
+>  		snd_iprintf(buffer, "\n");
+>  	}
 
-Let me check and add in next revision.
-
-Thanks,
-Alam.
+tmr->cur_time isn't struct timespec64, but it's struct
+tmr->snd_seq_real_time.
 
 
+thanks,
+
+Takashi
