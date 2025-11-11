@@ -1,243 +1,267 @@
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A3A830C606
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 10:06:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99D401F03D2;
+	Tue, 11 Nov 2025 10:46:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762855616; cv=none; b=hMJ+z9MJuFz0Qae3fEUg0ai24lC+/1Gy7D0Y+8zNnPNTIwlG8ZoqiUgH9xFP+zc+RSCOdmnHGMpJKVybp4+AMrlDc2GA/bcDhL1FxFvCUE5kTdhNN+t0bE+3yGoWRlD2F1Wxb3PVVP6EIKX5ZfWNO6V2QIJ/WmuBsclA88ffT5o=
+	t=1762857995; cv=none; b=MxU8UzwE6Or/4PwCMlZ7o114SWOCXv5YDJZEKnJMcDKwvw+zEW8fi5xEwRB7y3Oi8AQNu9eKeGd7fNqrELaO5vf/WLmP2Qj5D7l4t3eyf1sbpnwCMSY7pCAPipfMQdwk1yH1yFPvFjbiMbR+Lv3VlU5JGmTn6iy8nm61ZvCSyeQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762855616; c=relaxed/simple;
-	bh=5mTUkfp93KIsUYNPqsai3unKtQIPn3dnkpiQvDeXpp0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=URajEwTKOxCnh50l6pjUhTCPytMEiqQgllkwJE/Lpw/JxpvgpMFo1oB+8MVnJdBx3m8QVLzxPcx+7P2du93V2EKylWRtmnnP+N7nzTZxCQpRBmR5XD5V8jXfAvpNrZdGAyng3aag3oQAI5TGmISZiXyOadsFjOAhv9X0wbSUlaU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LcaDZzFa; arc=none smtp.client-ip=209.85.208.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1762857995; c=relaxed/simple;
+	bh=7Gj4ELieYeiWyEEpQoBYEuGNma54Bl/4LhSTkGAa64Q=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=olBIvtX6DzcKa5zYNHqhm9Vme3Gprp5Ek0U2xTXrJKHmF0wSyNqsc1dD5zjX62kq4jMU5L8R6F1JEl4uzB1nx8ju43Q7jJVK4+L+6I17Zh6vlv0ZGSWdIRcESNlsHbDPNzipAYxIclFKQkwAdaSn5yAyqbvXpGBhnLFcHCu1IxA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=SZL0x+a0; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LcaDZzFa"
-Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-64175dfc338so4218642a12.0
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 02:06:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1762855613; x=1763460413; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=8eIpbr52NCtLOGESOV71v7HUuxbB65gDsLsB8CBBOWw=;
-        b=LcaDZzFajODeygfMZ3zJZCn44IOZolRDVoITTIorbMrIB0EJIdIhxNS51Yyoey0RrI
-         xoOE7tDYJ2chDq9dn7LzQybLOoz4V+xE6ALm7K7M4SmTU2aIrk2wFyNynBfaxQ3/0k+R
-         SEc5t+YVWgShbfqLcKPygU7r9lbjZQ5jYhph78xcsg/XOYDb6C+CYXXRfPoqQsnP5v0z
-         jqo1QkUgT8nx+pUfz4vauniHtJn68gflvixpmKL4gbBnZ+gzr7kqjOZGJ2sSKcdbxGGP
-         JHd3JNA3EASlzSDuc/VDN5ygXGQftiki7lmXVQ6SOh02Fd7fYYutwPhoONmIAKfsIyi5
-         Bv2Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762855613; x=1763460413;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=8eIpbr52NCtLOGESOV71v7HUuxbB65gDsLsB8CBBOWw=;
-        b=pO7iebAAJDF168h7yy/zCiorxspM259U83QQIH7GzG2ki/3Q32Ui3YJljLk/cp8HYC
-         tuIm3CzOu54PURbc14s6peL7gbiG8gfzmFf4T9ypkKlShqbUFJ0lw6NNLmnz7gWfTXbK
-         uBUE2TALcwfTnHQlUKWFJpEqKoj64Wisi3uFRn+n0+agedJ4jwWHAABO0amT9Z7rrgYh
-         Lb3raLbGTzIQ2eq4/8kl3OewuN5BgWNnB7wI2FMCbi15TSubGtm/4eQP7h2l4y6SXGZn
-         e8MfpqxoaCaO2MxFWtg51jRkHSOnnwOB9+oB5H/j6A2jt0RKtER6HVb8E+uQuZW1BkJD
-         5iHg==
-X-Forwarded-Encrypted: i=1; AJvYcCWimk0yOkFO6Fz6RlWZCphrjr9K7PJhAjijpNXO72gTLOts7Rd9qkh8H5SyRQ8rB6gFO9iXnqnkgxE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyTKsP0U+pNOsAqFtN+ERl3qslFc7oQqQGo0Natk+/vR8rohIRs
-	dxacK3ATMej18d6+8kGJlbaBq/Xs/s0kRWeIex/h1fJv2duAZLOpqV9UpT60b4KgGFJdwubEQMh
-	h/f1PhD0i2PhWhkMVT9aKxZ+1bh8AUAg=
-X-Gm-Gg: ASbGncuUzJTQOxbN+lM5IsYvlrYSF/D6r3K9kssVTv9J2/IrmiLbzF/RVOqv7ZeahD9
-	pB6Dd1uYuq2gtozl5Mon5L4qGuvslbrxfc41SZGDYGJTc9rwoC7gw1jG6Qq7UlkZAu5m9bXwaGD
-	xnPRG5jza+taDziQxiVoDmHbR0jBCXU5ZofYCmmHpChcRUJBHUspOrEC/zf2nGoTqLrg5UTRk6t
-	OQXc2PdvzUdEDNiSyiKBgqogWuhDt1DsydEpOd/AXfIdlPmbhKacYueglw=
-X-Google-Smtp-Source: AGHT+IHzqwyPFKprtsRJVa0J02F8dtz2lAga9wlx+i8BAEE7q4KZv0PT8w3HVt0xrk5KjniMlleCFy5W+PPONR0YD+4=
-X-Received: by 2002:a05:6402:278e:b0:640:ebca:e66c with SMTP id
- 4fb4d7f45d1cf-6415e6e4612mr8859862a12.23.1762855612635; Tue, 11 Nov 2025
- 02:06:52 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="SZL0x+a0"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AB7LDAs410088;
+	Tue, 11 Nov 2025 10:46:30 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=ZXagMfHHjL29NMvJC5NnMH
+	m1p/Cvakq5t63tLh8CgFg=; b=SZL0x+a082t6ONGML67EUDNvsqyMq+x4Iqcpj5
+	yEP0ZmjIa1sTotvH2wayrtjP0jzbJFByXcsZn62mGZ5HpZnGdYOuEZM4lLc8YMCA
+	eus68EVDurzQDeIDEZFPCbNfHit4CQAWi+IjIbfPBFWaVIpx05TKgKnTJz0d3PtH
+	1AqtpYD5UG0qHpu2apinGz+iznC6Bd4+OwViUrLLYOhNugmnO5ShB7JL7cBhXizp
+	HLoA9atmALfIRQOGbLqRLERYbDp26YUBO77Dq1AbDH1CsvRQxoe5BG6seycxX99v
+	iNUfwmNKNUEMK6SW0v1/2O4KFdOPw+KzGJnly7mpXOn/G5rw==
+Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4abppu2543-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 11 Nov 2025 10:46:28 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA03.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5ABAkR3U025472
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 11 Nov 2025 10:46:28 GMT
+Received: from hu-mdalam-blr.qualcomm.com (10.80.80.8) by
+ nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1748.24; Tue, 11 Nov 2025 02:46:24 -0800
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+To: <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+CC: <quic_varada@quicinc.com>, <quic_mdalam@quicinc.com>
+Subject: [PATCH v4] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC devices
+Date: Tue, 11 Nov 2025 16:16:04 +0530
+Message-ID: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251111072158.6686-1-linux.amoon@gmail.com> <b749faf3-b197-4b78-a918-501a639a8f4d@rock-chips.com>
- <CANAwSgTs1dqyF8UfizOP-8Yt4kxeRD+7ebZGkXuVbMe5HqT-XQ@mail.gmail.com> <85adb746-4ad8-425d-bea0-0e43f3158986@rock-chips.com>
-In-Reply-To: <85adb746-4ad8-425d-bea0-0e43f3158986@rock-chips.com>
-From: Anand Moon <linux.amoon@gmail.com>
-Date: Tue, 11 Nov 2025 15:36:35 +0530
-X-Gm-Features: AWmQ_bl0sy_ydB8cqR7HVHwHmbGBUmnqq_6eYot9GpcZJG2g2Q5p5xOKhf5pwmU
-Message-ID: <CANAwSgQ4S3Cpm3C8zxCUW6D3P0mHON6j8tyfOD0wNATJoUC-Qg@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: sdhci-of-dwcmshc: Enable enhanced strobe for eMMC
- in HS400 for Rockchip
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: FUKAUMI Naoki <naoki@radxa.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=TNVIilla c=1 sm=1 tr=0 ts=69131405 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=6UeiqGixMTsA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=COk6AnOGAAAA:8 a=QyXUC8HyAAAA:8 a=Kz769Q8VOxYrdAtN4ygA:9
+ a=TjNXssC_j7lpFel5tvFf:22 a=cPQSjfK2_nFv0Q5t_7PE:22
+X-Proofpoint-ORIG-GUID: y2uJSZxDksyLDJLm1XySNPTg4nc1KMan
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTExMDA4NSBTYWx0ZWRfXz7zJwl4i+46a
+ Bi3g2NZKHFdRf4/vUEzpLRoZaDV3ah2w0jPutw4OzH1Xo1xaP+2dWhW6+hzh22e8gnJnUoEE92D
+ YWpffl1vZ1Qy8L7DEKCbZJXibtH0CcPB1JkY/NRmrK6rqfKXEGLIbLo1cbfbKazZspPbJE2/xWF
+ nPr5ujg4rDtWYUb7HFwECeVlWto60qp64woOx+juFnHpbHWaFvT6a7b3mp/Kh1L8iXA2p/jfTV/
+ yRZjDFuMmIODHl8Gr2a9qTBsNsdJZXdSdUnqr/wb4TSy4qx0XSwpJP/GzMHqAgfXQ5zEwTRjLF2
+ eT8OmS6KRt0tUOFhbfDpCCEVC2WhqGyTZE0uRObw5N/R5f8BwU7gx4L/yLv6ocBgrRIueJM0gTC
+ yg5CqOQnF+gpKnUrgLDIImWaXVllAw==
+X-Proofpoint-GUID: y2uJSZxDksyLDJLm1XySNPTg4nc1KMan
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-11-11_01,2025-11-11_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 malwarescore=0 clxscore=1015 impostorscore=0 lowpriorityscore=0
+ bulkscore=0 suspectscore=0 phishscore=0 adultscore=0 priorityscore=1501
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511110085
 
-Hi Shawn
+Enable Inline Crypto Engine (ICE) support for eMMC devices that operate
+without Command Queue Engine (CQE).This allows hardware-accelerated
+encryption and decryption for standard (non-CMDQ) requests.
 
-On Tue, 11 Nov 2025 at 15:04, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
-> + Fukaumi-sang
->
-> =E5=9C=A8 2025/11/11 =E6=98=9F=E6=9C=9F=E4=BA=8C 17:11, Anand Moon =E5=86=
-=99=E9=81=93:
-> > Hi Shawn,
-> >
-> > Thanks for your review comments.
-> > On Tue, 11 Nov 2025 at 13:09, Shawn Lin <shawn.lin@rock-chips.com> wrot=
-e:
-> >>
-> >> =E5=9C=A8 2025/11/11 =E6=98=9F=E6=9C=9F=E4=BA=8C 15:21, Anand Moon =E5=
-=86=99=E9=81=93:
-> >>> As per RK3588 TRM Part 2 section EMMC_EMMC_CTRL, Add code to enable
-> >>> enhanced strobe mode, set the card type to eMMC in HS400 during clock
-> >>> configuration. This bit instructs Host to sample the CMD line using d=
-ata
-> >>> strobe for HS400 mode.
-> >>>
-> >>
-> >> Did you really test the latest kernel?
-> > Yes, with the fio command, testing before and after this patch on a
-> > Radxa Rock 5b eMMC.
->
->
-> The commit msg says RK3588, but it already supported enhanced strobe...
->
-> Quote a boot log from V6.18-rc5 of a RK3588 board without any patch:
->
-> [    0.544447] mmc0: new HS400 Enhanced strobe MMC card at address 0001
-> [    0.545540] mmcblk0: mmc0:0001 BJTD4R 29.1 GiB
-> [    0.548983]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8
-> [    0.550874] mmcblk0boot0: mmc0:0001 BJTD4R 4.00 MiB
-> [    0.552682] mmcblk0boot1: mmc0:0001 BJTD4R 4.00 MiB
-> [    0.554334] mmcblk0rpmb: mmc0:0001 BJTD4R 4.00 MiB, chardev (509:0)
->
-I was checking if the else part was true.
-> So the whole patch makes no sense.
->
-I've attempted configuration based on the TRM specification.
-If it causes issues, feel free to disregard this patch.
-Sorry for the noise.
+This patch:
+- Adds ICE register definitions for non-CMDQ crypto configuration
+- Implements a per-request crypto setup via sdhci_msm_ice_cfg()
+- Hooks into the request path via mmc_host_ops.request
 
-$ sudo mmc extcsd read /dev/mmcblk0
-[sudo] password for alarm:
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-  Extended CSD rev 1.8 (MMC 5.1)
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+With this, non-CMDQ eMMC devices can benefit from inline encryption,
+improving performance for encrypted I/O while maintaining compatibility
+with existing CQE crypto support.
 
-Card Supported Command sets [S_CMD_SET: 0x01]
-HPI Features [HPI_FEATURE: 0x01]: implementation based on CMD13
-Background operations support [BKOPS_SUPPORT: 0x01]
-Max Packet Read Cmd [MAX_PACKED_READS: 0x3f]
-Max Packet Write Cmd [MAX_PACKED_WRITES: 0x3f]
-Data TAG support [DATA_TAG_SUPPORT: 0x01]
-Data TAG Unit Size [TAG_UNIT_SIZE: 0x03]
-Tag Resources Size [TAG_RES_SIZE: 0x00]
-Context Management Capabilities [CONTEXT_CAPABILITIES: 0x05]
-Large Unit Size [LARGE_UNIT_SIZE_M1: 0x07]
-Extended partition attribute support [EXT_SUPPORT: 0x03]
-Generic CMD6 Timer [GENERIC_CMD6_TIME: 0x0a]
-Power off notification [POWER_OFF_LONG_TIME: 0x3c]
-Cache Size [CACHE_SIZE] is 8192 KiB
-Background operations status [BKOPS_STATUS: 0x00]
-1st Initialisation Time after programmed sector [INI_TIMEOUT_AP: 0x1e]
-Power class for 52MHz, DDR at 3.6V [PWR_CL_DDR_52_360: 0x00]
-Power class for 52MHz, DDR at 1.95V [PWR_CL_DDR_52_195: 0x00]
-Power class for 200MHz at 3.6V [PWR_CL_200_360: 0x00]
-Power class for 200MHz, at 1.95V [PWR_CL_200_195: 0x00]
-Minimum Performance for 8bit at 52MHz in DDR mode:
- [MIN_PERF_DDR_W_8_52: 0x00]
- [MIN_PERF_DDR_R_8_52: 0x00]
-TRIM Multiplier [TRIM_MULT: 0x05]
-Secure Feature support [SEC_FEATURE_SUPPORT: 0x55]
-Boot Information [BOOT_INFO: 0x07]
- Device supports alternative boot method
- Device supports dual data rate during boot
- Device supports high speed timing during boot
-Boot partition size [BOOT_SIZE_MULTI: 0x20]
-Access size [ACC_SIZE: 0x06]
-High-capacity erase unit size [HC_ERASE_GRP_SIZE: 0x01]
- i.e. 512 KiB
-High-capacity erase timeout [ERASE_TIMEOUT_MULT: 0x05]
-Reliable write sector count [REL_WR_SEC_C: 0x01]
-High-capacity W protect group size [HC_WP_GRP_SIZE: 0x10]
- i.e. 8192 KiB
-Sleep current (VCC) [S_C_VCC: 0x07]
-Sleep current (VCCQ) [S_C_VCCQ: 0x07]
-Sleep/awake timeout [S_A_TIMEOUT: 0x16]
-Sector Count [SEC_COUNT: 0x0733c000]
- Device is block-addressed
-Minimum Write Performance for 8bit:
- [MIN_PERF_W_8_52: 0x00]
- [MIN_PERF_R_8_52: 0x00]
- [MIN_PERF_W_8_26_4_52: 0x00]
- [MIN_PERF_R_8_26_4_52: 0x00]
-Minimum Write Performance for 4bit:
- [MIN_PERF_W_4_26: 0x00]
- [MIN_PERF_R_4_26: 0x00]
-Power classes registers:
- [PWR_CL_26_360: 0x00]
- [PWR_CL_52_360: 0x00]
- [PWR_CL_26_195: 0x00]
- [PWR_CL_52_195: 0x00]
-Partition switching timing [PARTITION_SWITCH_TIME: 0x0a]
-Out-of-interrupt busy timing [OUT_OF_INTERRUPT_TIME: 0x05]
-I/O Driver Strength [DRIVER_STRENGTH: 0x1f]
-Card Type [CARD_TYPE: 0x57]
- HS400 Dual Data Rate eMMC @200MHz 1.8VI/O
- HS200 Single Data Rate eMMC @200MHz 1.8VI/O
- HS Dual Data Rate eMMC @52MHz 1.8V or 3VI/O
- HS eMMC @52MHz - at rated device voltage(s)
- HS eMMC @26MHz - at rated device voltage(s)
-CSD structure version [CSD_STRUCTURE: 0x02]
-Command set [CMD_SET: 0x00]
-Command set revision [CMD_SET_REV: 0x00]
-Power class [POWER_CLASS: 0x00]
-High-speed interface timing [HS_TIMING: 0x03]
-Enhanced Strobe mode [STROBE_SUPPORT: 0x01]  <-----here
-Erased memory content [ERASED_MEM_CONT: 0x00]
-Boot configuration bytes [PARTITION_CONFIG: 0x00]
-> >
-> > $ dmesg | grep mmc
-> > [   16.321495] [     T60] mmc0: SDHCI controller on fe2e0000.mmc
-> > [fe2e0000.mmc] using ADMA
-> > [   16.425317] [     T72] mmc0: new HS400 Enhanced strobe MMC card at
-> > address 0001
-> > [   16.449670] [     T72] mmcblk0: mmc0:0001 SLD64G 57.6 GiB
-> > [   16.550133] [     T72]  mmcblk0: p1 p2
-> > [   16.577289] [     T72] mmcblk0boot0: mmc0:0001 SLD64G 4.00 MiB
-> > [   16.641182] [     T72] mmcblk0boot1: mmc0:0001 SLD64G 4.00 MiB
-> > [   16.699865] [     T72] mmcblk0rpmb: mmc0:0001 SLD64G 4.00 MiB,
-> > chardev (234:0)
-> >
-> >> HS400ES for Rockchip platform has been supported for 3 years..
-> >>
-> > The only modification made was to enable the strobe bit in the eMMC con=
-trol.
->
-> sdhci_dwcmshc_rk35xx_ops->dwcmshc_set_uhs_signaling=EF=BC=88=EF=BC=89 set=
- it... please
-> check the code.
->
-Ok, I will check this.
-> >> please see commit c6f361cba51c536e7a6af31973c6a4e5d7e4e2e4
-> >>
-> > Based on my analysis and the RK3568 TRM, neither the RK3566 nor the
-> > RK2568 supports
-> > HS200 or HS400 modes.
->
-> There is no a chip called RK2568, so I assume you meant RK3568?
-Typo needs to check my eyesight.
-> RK3566/RK3568 support HS200, but not HS400=EF=BC=88HS400ES also=EF=BC=89,=
- so we didn't
-> add properties in the DT. This is not because of the code, but the
-> chip design reason.
->
-Ok understood.
+Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
 
-Thanks
--Anand
+Change in [v4]
+
+* Moved ICE initialization for non cmdq into sdhci_msm_ice_cfg() and made
+  it conditional on mrq->crypto_ctx to enable lazy setup.
+
+* Added msm_host->ice_init_done guard to prevent redundant initialization.
+
+* Updated commit message
+
+Change in [v3]
+
+* Refactored logic to use separate code paths for crypto_ctx != NULL and
+  crypto_ctx == NULL to improve readability.
+
+* Renamed bypass to crypto_enable to align with bitfield semantics.
+
+* Removed slot variable
+
+* Added ICE initialization sequence for non-CMDQ eMMC devices before
+  __sdhci_add_host()
+
+Change in [v2]
+
+* Moved NONCQ_CRYPTO_PARM and NONCQ_CRYPTO_DUN register definitions into
+  sdhci-msm.c
+
+* Introduced use of GENMASK() and FIELD_PREP() macros for cleaner and more
+  maintainable bitfield handling in ICE configuration.
+
+* Removed redundant if (!mrq || !cq_host) check from sdhci_msm_ice_cfg()
+  as both are guaranteed to be valid in the current call path.
+
+* Added assignment of host->mmc_host_ops.request = sdhci_msm_request; to
+  integrate ICE configuration into the standard request path for non-CMDQ
+  eMMC devices.
+
+* Removed sdhci_crypto_cfg() from sdhci.c and its invocation in sdhci_request()
+
+Change in [v1]
+
+* Added initial support for Inline Crypto Engine (ICE) on non-CMDQ eMMC
+  devices.
+
+ drivers/mmc/host/sdhci-msm.c | 84 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 84 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4e5edbf2fc9b..3c1c20182ac7 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -157,6 +157,18 @@
+ #define CQHCI_VENDOR_CFG1	0xA00
+ #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
+ 
++/* non command queue crypto enable register*/
++#define NONCQ_CRYPTO_PARM		0x70
++#define NONCQ_CRYPTO_DUN		0x74
++
++#define DISABLE_CRYPTO			BIT(15)
++#define CRYPTO_GENERAL_ENABLE		BIT(1)
++#define HC_VENDOR_SPECIFIC_FUNC4	0x260
++#define ICE_HCI_SUPPORT			BIT(28)
++
++#define ICE_HCI_PARAM_CCI	GENMASK(7, 0)
++#define ICE_HCI_PARAM_CE	GENMASK(8, 8)
++
+ struct sdhci_msm_offset {
+ 	u32 core_hc_mode;
+ 	u32 core_mci_data_cnt;
+@@ -300,6 +312,7 @@ struct sdhci_msm_host {
+ 	u32 dll_config;
+ 	u32 ddr_config;
+ 	bool vqmmc_enabled;
++	bool ice_init_done;
+ };
+ 
+ static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+@@ -2009,6 +2022,74 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
+ 	return qcom_ice_evict_key(msm_host->ice, slot);
+ }
+ 
++static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	struct mmc_host *mmc = msm_host->mmc;
++	struct cqhci_host *cq_host = mmc->cqe_private;
++	u32 config;
++	u32 ice_cap;
++
++	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
++	config &= ~DISABLE_CRYPTO;
++	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
++	ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
++	if (ice_cap & ICE_HCI_SUPPORT) {
++		config = cqhci_readl(cq_host, CQHCI_CFG);
++		config |= CRYPTO_GENERAL_ENABLE;
++		cqhci_writel(cq_host, config, CQHCI_CFG);
++	}
++	sdhci_msm_ice_enable(msm_host);
++}
++
++static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	struct mmc_host *mmc = msm_host->mmc;
++	struct cqhci_host *cq_host = mmc->cqe_private;
++	unsigned int crypto_params = 0;
++	int key_index;
++	bool crypto_enable;
++	u64 dun = 0;
++
++	if (mrq->crypto_ctx) {
++		if (!msm_host->ice_init_done) {
++			sdhci_msm_non_cqe_ice_init(host);
++			msm_host->ice_init_done = true;
++		}
++
++		crypto_enable = true;
++		dun = mrq->crypto_ctx->bc_dun[0];
++		key_index = mrq->crypto_key_slot;
++		crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, crypto_enable) |
++				FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
++
++		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
++		cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
++	} else {
++		crypto_enable = false;
++		key_index = 0;
++		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
++	}
++
++	/* Ensure crypto configuration is written before proceeding */
++	wmb();
++
++	return 0;
++}
++
++static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	if (mmc->caps2 & MMC_CAP2_CRYPTO)
++		sdhci_msm_ice_cfg(host, mrq);
++
++	sdhci_request(mmc, mrq);
++}
++
+ static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
+ 	.keyslot_program	= sdhci_msm_ice_keyslot_program,
+ 	.keyslot_evict		= sdhci_msm_ice_keyslot_evict,
+@@ -2759,6 +2840,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 
+ 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
+ 
++#ifdef CONFIG_MMC_CRYPTO
++	host->mmc_host_ops.request = sdhci_msm_request;
++#endif
+ 	/* Set the timeout value to max possible */
+ 	host->max_timeout_count = 0xF;
+ 
+-- 
+2.34.1
+
