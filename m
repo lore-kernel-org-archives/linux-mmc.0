@@ -1,205 +1,122 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from mail-pf1-f176.google.com (mail-pf1-f176.google.com [209.85.210.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96F2D248883
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 06:42:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2B26212FB9
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 07:22:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762843351; cv=none; b=rhyT21zGu65FmbM3y3QIS4m7oQnaiFfAGLk//zADly7t1yEcmWgYIEdGkXunPaJU7nYPCqa9NNax5GLDmnrEJ0Vb5kDKndfIL/lZzFMeDhG3kKbNbD03lX4ACtL6UFT3JBYoFI7vEYmk4FEvBMLXz+0fCUthwxRlwbu7Yca+mxI=
+	t=1762845726; cv=none; b=aYOrHKf6lzlU8vfhqj3HBAsvoikEmfuuiTBmumHWuDl1zLljtpk9AAjqKlHz0hBq0hPK9UPv0YL06nUZMFeIkQBmTGc9hDMeMQqlw3tuG4lsOH8aHP5xUKXxWuBPWeLVH3bBdAP0henR1emctyx/F+QZXcmsUzsYHofBf9M9G78=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762843351; c=relaxed/simple;
-	bh=ATNN5RmueLox2IC+5BDEXAgaIglCENc+yF4ZTPMaIZg=;
-	h=Date:Message-ID:From:To:Cc:Subject:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=qQpnG0isgyTjXFf7mm7+R4/7GjgrOqUiT45k+h74TIaaS542DBvJquWzdKg5V0YitYjcIFp/H3CU3BdAi6jYhix3kJVnB6S85v+heWsuVhEDlytmrkFDXzL4zeKh3wAZUa+ZxlX5tUrsasWL6PIMiCYsq+qRggkJo2X9++fw7Sc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=MJJifpxj; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=XOVf1gy9; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=MJJifpxj; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=XOVf1gy9; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1762845726; c=relaxed/simple;
+	bh=Zf9WEFXfE6bq+Hc2EstDsmaBak2mnzhvUiacR4bC4/c=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LFkFjVSDbSVj7Yk1YFo2FWVBRce/kFbDKFKB07J6oXQPfQ2obLHP0xgPemCHuxFBDxTyge8/ZZvzFp8qvHjKGOzd9MUT3IOmw8tUrnkszEr0/u9T52ucbqHRSOHa54QZXiHU1doUD97jPm74zPdRBCITwpik1dsnFQLP5ourAWc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lIJ4uGrG; arc=none smtp.client-ip=209.85.210.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="MJJifpxj";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="XOVf1gy9";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="MJJifpxj";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="XOVf1gy9"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 003E121D96;
-	Tue, 11 Nov 2025 06:42:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1762843347; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
-	b=MJJifpxj0d+JjXgZOzmxMDpQDTSyIadrJYsNIbJl+ULZfRSkA1F3QRigpspAqsE+66Rhp4
-	Shn7meUxG5KGJZOHhOahRAQKGy6Nb5TLhqjOSRo1AsBLy8kaYN8yBZmHfsJ+Bw3No+qv6Y
-	5wW5dT7W11nmHzpKpr6zOoTnHE6LBoQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1762843347;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
-	b=XOVf1gy9U5gZVwTjF3TZLqMUlzKAS6MC5EfTBJRYyS+0eMhaSrKs4ZKyZxOlsKibNkjCP/
-	7jvcMdxbfbH3qxAQ==
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1762843347; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
-	b=MJJifpxj0d+JjXgZOzmxMDpQDTSyIadrJYsNIbJl+ULZfRSkA1F3QRigpspAqsE+66Rhp4
-	Shn7meUxG5KGJZOHhOahRAQKGy6Nb5TLhqjOSRo1AsBLy8kaYN8yBZmHfsJ+Bw3No+qv6Y
-	5wW5dT7W11nmHzpKpr6zOoTnHE6LBoQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1762843347;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=fnn8buj3dz2cAu1lwnMV3wmGOQAis/X/NnrYyJhRgpI=;
-	b=XOVf1gy9U5gZVwTjF3TZLqMUlzKAS6MC5EfTBJRYyS+0eMhaSrKs4ZKyZxOlsKibNkjCP/
-	7jvcMdxbfbH3qxAQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id EAC3E14805;
-	Tue, 11 Nov 2025 06:42:24 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id OZMhONDaEmkhSgAAD6G6ig
-	(envelope-from <tiwai@suse.de>); Tue, 11 Nov 2025 06:42:24 +0000
-Date: Tue, 11 Nov 2025 07:42:24 +0100
-Message-ID: <87jyzx2hpr.wl-tiwai@suse.de>
-From: Takashi Iwai <tiwai@suse.de>
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Corey Minyard <corey@minyard.net>,	Christian =?ISO-8859-1?Q?K=F6nig?=
- <christian.koenig@amd.com>,	"Dr. David Alan Gilbert" <linux@treblig.org>,
-	Alex Deucher <alexander.deucher@amd.com>,	Thomas Zimmermann
- <tzimmermann@suse.de>,	Dmitry Baryshkov
- <dmitry.baryshkov@oss.qualcomm.com>,	Rob Clark
- <robin.clark@oss.qualcomm.com>,	Matthew Brost <matthew.brost@intel.com>,
-	Hans Verkuil <hverkuil@kernel.org>,	Laurent Pinchart
- <laurent.pinchart+renesas@ideasonboard.com>,	Ulf Hansson
- <ulf.hansson@linaro.org>,	Vitaly Lifshits <vitaly.lifshits@intel.com>,
-	Manivannan Sadhasivam <mani@kernel.org>,	Niklas Cassel <cassel@kernel.org>,
-	Calvin Owens <calvin@wbinvd.org>,	Sagi Maimon <maimon.sagi@gmail.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,	Karan Tilak Kumar
- <kartilak@cisco.com>,	Casey Schaufler <casey@schaufler-ca.com>,	Steven
- Rostedt <rostedt@goodmis.org>,	Petr Mladek <pmladek@suse.com>,	Max
- Kellermann <max.kellermann@ionos.com>,	Takashi Iwai <tiwai@suse.de>,
-	linux-doc@vger.kernel.org,	linux-kernel@vger.kernel.org,
-	openipmi-developer@lists.sourceforge.net,	linux-media@vger.kernel.org,
-	dri-devel@lists.freedesktop.org,	linaro-mm-sig@lists.linaro.org,
-	amd-gfx@lists.freedesktop.org,	linux-arm-msm@vger.kernel.org,
-	freedreno@lists.freedesktop.org,	intel-xe@lists.freedesktop.org,
-	linux-mmc@vger.kernel.org,	netdev@vger.kernel.org,
-	intel-wired-lan@lists.osuosl.org,	linux-pci@vger.kernel.org,
-	linux-s390@vger.kernel.org,	linux-scsi@vger.kernel.org,
-	linux-staging@lists.linux.dev,	ceph-devel@vger.kernel.org,
-	linux-trace-kernel@vger.kernel.org,	linux-sound@vger.kernel.org,	Rasmus
- Villemoes <linux@rasmusvillemoes.dk>,	Sergey Senozhatsky
- <senozhatsky@chromium.org>,	Jonathan Corbet <corbet@lwn.net>,	Sumit Semwal
- <sumit.semwal@linaro.org>,	Gustavo Padovan <gustavo@padovan.org>,	David
- Airlie <airlied@gmail.com>,	Simona Vetter <simona@ffwll.ch>,	Maarten
- Lankhorst <maarten.lankhorst@linux.intel.com>,	Maxime Ripard
- <mripard@kernel.org>,	Dmitry Baryshkov <lumag@kernel.org>,	Abhinav Kumar
- <abhinav.kumar@linux.dev>,	Jessica Zhang <jesszhan0024@gmail.com>,	Sean
- Paul <sean@poorly.run>,	Marijn Suijten <marijn.suijten@somainline.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,	Lucas De Marchi
- <lucas.demarchi@intel.com>,	Thomas =?ISO-8859-1?Q?Hellstr=F6m?=
- <thomas.hellstrom@linux.intel.com>,	Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,	Vladimir Oltean
- <olteanv@gmail.com>,	Andrew Lunn <andrew@lunn.ch>,	"David S. Miller"
- <davem@davemloft.net>,	Eric Dumazet <edumazet@google.com>,	Jakub Kicinski
- <kuba@kernel.org>,	Paolo Abeni <pabeni@redhat.com>,	Tony Nguyen
- <anthony.l.nguyen@intel.com>,	Przemek Kitszel
- <przemyslaw.kitszel@intel.com>,	Krzysztof =?ISO-8859-2?Q?Wilczy=F1ski?=
- <kwilczynski@kernel.org>,	Kishon Vijay Abraham I <kishon@kernel.org>,	Bjorn
- Helgaas <bhelgaas@google.com>,	Rodolfo Giometti <giometti@enneenne.com>,
-	Jonathan Lemon <jonathan.lemon@gmail.com>,	Vadim Fedorenko
- <vadim.fedorenko@linux.dev>,	Richard Cochran <richardcochran@gmail.com>,
-	Stefan Haberland <sth@linux.ibm.com>,	Jan Hoeppner
- <hoeppner@linux.ibm.com>,	Heiko Carstens <hca@linux.ibm.com>,	Vasily Gorbik
- <gor@linux.ibm.com>,	Alexander Gordeev <agordeev@linux.ibm.com>,	Christian
- Borntraeger <borntraeger@linux.ibm.com>,	Sven Schnelle
- <svens@linux.ibm.com>,	Satish Kharat <satishkh@cisco.com>,	Sesidhar Baddela
- <sebaddel@cisco.com>,	"James E.J. Bottomley"
- <James.Bottomley@HansenPartnership.com>,	Greg Kroah-Hartman
- <gregkh@linuxfoundation.org>,	Xiubo Li <xiubli@redhat.com>,	Ilya Dryomov
- <idryomov@gmail.com>,	Masami Hiramatsu <mhiramat@kernel.org>,	Mathieu
- Desnoyers <mathieu.desnoyers@efficios.com>,	Andrew Morton
- <akpm@linux-foundation.org>,	Jaroslav Kysela <perex@perex.cz>,	Takashi Iwai
- <tiwai@suse.com>
-Subject: Re: [PATCH v1 02/23] ALSA: seq: Switch to use %ptSp
-In-Reply-To: <20251110184727.666591-3-andriy.shevchenko@linux.intel.com>
-References: <20251110184727.666591-1-andriy.shevchenko@linux.intel.com>
-	<20251110184727.666591-3-andriy.shevchenko@linux.intel.com>
-User-Agent: Wanderlust/2.15.9 (Almost Unreal) Emacs/27.2 Mule/6.0
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lIJ4uGrG"
+Received: by mail-pf1-f176.google.com with SMTP id d2e1a72fcca58-7aad4823079so3517568b3a.0
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Nov 2025 23:22:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1762845724; x=1763450524; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=0Z3L1kNsgL26Ld1VFBvRuQTF0eVIZpSLBAGlIIman4Q=;
+        b=lIJ4uGrGfFSz+tm04eVOHv04YheMMgQiJ6Scf/6sM1qMD1q+IRAX11JMmDJMe7069q
+         iKhcct61hZPT4L5YmlxR2KWQk3YLRWaBaaOAGueLwQ8WFhoU6O6AqPOXcGn17aA0S9vK
+         8XvdNW8q5A9qifoxsoOMGpExMaQGVFfHDRw2Ayrw7d3r4esAf0epCwKhRSOvnb2a/Uhd
+         ca9Gd8Ypga6FL4M0FviitGaYQYe5T/RbHMDzxMsdAw3h9YVzEm8FUFnJ6ymVIFWuvsZU
+         OHyzicaSxzMn3bnvf76l8T/FTuXBIqoT1nSzD9Kw6Chz9fVGfIWtpbRr76W4K3XjnBpc
+         6BnA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762845724; x=1763450524;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=0Z3L1kNsgL26Ld1VFBvRuQTF0eVIZpSLBAGlIIman4Q=;
+        b=fpyEIqqbMd0chna9SyZtzSi38+7hnF4AnpmSD5BiTG6oanKhKMjogF0PD6T1SIkJP+
+         21zao5NaXIyRe5BB02yuOW/V84+cnyGAOmSJEfA1ykqMA7WEeJHA5YhCcWBpmoxzm+up
+         g1EVa3TSEKOSeNNxokm/UvX/yBL69y2N5oVHWIoiysHqr7F2kDFdt0GM/wJSP3XvDIty
+         3h3mXfdpakBcSV79M/+C14iMmkRa9MQcfw98A3QsNSB6M3r92+Vvp50TVkkg1k/JFcof
+         erYUE4JmlxBk0OuLQiMZCvA1kNpKQpRhXnf7iiPYd1bXSJmHbfylakJGaWJBEHC2wbNE
+         fZlg==
+X-Forwarded-Encrypted: i=1; AJvYcCV0lnn0CqmOamGkaEbQJ0T8pM/Gw27eDzWAZfhzLJiPohgUx+X7BscMi8WDu8TwU2j12VnMN+btOd0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzq88MnR/a+u5it6Mnw0gkNKnARVNuq1Bvv4jngS/YOXknN5iWV
+	4OukE8RQDGQqSmJK3DZMlr3RqqG/YmV1u9N3QyvbxuhiKUciNljm2fio
+X-Gm-Gg: ASbGncsYGPtMioLf96LZTdi+Iqfy4i80nmYM8GrY176hORAU1yYW18t4AbusX8C01Bi
+	jHi3Ok1YGXmn0PaB380nr9mLP+QhylwsctxnhCW5WA4hdQSz1T5onUlufyZOvM6gf4rLtqL1kMF
+	fO7DY24zqcIP5Ix4+tBhOfP2rznkzrr5KpRL1yJxDjmajIIAgkPdBbVxO3AOSXGP1ePnb3RMW55
+	dphoapvPPhZqM2Fu/gxyKgmK9tDVGoDeGgbeEGzvRfT22yGS75VIxvfTijQLeZS6CCBCyKR2s4T
+	MbRhcnUdfXiNg4JlSwk7iWzpMcp49X+IJTMTqom3zZFmF2D9q6OWboMzf9MfEZlDMpGO3ap4kIw
+	fgdAFzMvT8K8EywS9fD0f4a8Od8A4AsRLBgw/cRXNFFOYsNueSE4XUmVPNvi3rbqQVhEpEkeLD6
+	F6u9jTH++l
+X-Google-Smtp-Source: AGHT+IGpsEiuiMerwOIwaAE+LQq6f13VAWzZ3g9VwGRVGMuJ4FNKoN7VNGnAwDPV3OPkWgBhWnKfHQ==
+X-Received: by 2002:a05:6a20:2450:b0:342:5ba7:dfa1 with SMTP id adf61e73a8af0-353a3859cecmr14895533637.42.1762845723981;
+        Mon, 10 Nov 2025 23:22:03 -0800 (PST)
+Received: from rockpi-5b ([45.112.0.172])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-ba8ffe33a75sm15466106a12.24.2025.11.10.23.22.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 10 Nov 2025 23:22:03 -0800 (PST)
+From: Anand Moon <linux.amoon@gmail.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org (open list:SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI...),
+	linux-kernel@vger.kernel.org (open list)
+Cc: Anand Moon <linux.amoon@gmail.com>
+Subject: [PATCH v1] mmc: sdhci-of-dwcmshc: Enable enhanced strobe for eMMC in HS400 for Rockchip
+Date: Tue, 11 Nov 2025 12:51:57 +0530
+Message-ID: <20251111072158.6686-1-linux.amoon@gmail.com>
+X-Mailer: git-send-email 2.50.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
-Content-Type: text/plain; charset=US-ASCII
-X-Spam-Level: 
-X-Spamd-Result: default: False [-1.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	SUSPICIOUS_RECIPS(1.50)[];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	TO_DN_SOME(0.00)[];
-	TAGGED_RCPT(0.00)[renesas];
-	MIME_TRACE(0.00)[0:+];
-	FUZZY_RATELIMITED(0.00)[rspamd.com];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	FROM_HAS_DN(0.00)[];
-	FREEMAIL_CC(0.00)[minyard.net,amd.com,treblig.org,suse.de,oss.qualcomm.com,intel.com,kernel.org,ideasonboard.com,linaro.org,wbinvd.org,gmail.com,oracle.com,cisco.com,schaufler-ca.com,goodmis.org,suse.com,ionos.com,vger.kernel.org,lists.sourceforge.net,lists.freedesktop.org,lists.linaro.org,lists.osuosl.org,lists.linux.dev,rasmusvillemoes.dk,chromium.org,lwn.net,padovan.org,ffwll.ch,linux.intel.com,linux.dev,poorly.run,somainline.org,lunn.ch,davemloft.net,google.com,redhat.com,enneenne.com,linux.ibm.com,HansenPartnership.com,linuxfoundation.org,efficios.com,linux-foundation.org,perex.cz];
-	R_RATELIMIT(0.00)[to_ip_from(RLmdkd3ei8pyzuqshpsr74qwzu)];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_SOME(0.00)[];
-	RCPT_COUNT_GT_50(0.00)[96];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Flag: NO
-X-Spam-Score: -1.80
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-On Mon, 10 Nov 2025 19:40:21 +0100,
-Andy Shevchenko wrote:
-> 
-> Use %ptSp instead of open coded variants to print content of
-> struct timespec64 in human readable format.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
->  sound/core/seq/seq_queue.c | 2 +-
->  sound/core/seq/seq_timer.c | 6 +++---
->  2 files changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/sound/core/seq/seq_queue.c b/sound/core/seq/seq_queue.c
-> index f5c0e401c8ae..f6e86cbf38bc 100644
-> --- a/sound/core/seq/seq_queue.c
-> +++ b/sound/core/seq/seq_queue.c
-> @@ -699,7 +699,7 @@ void snd_seq_info_queues_read(struct snd_info_entry *entry,
->  		snd_iprintf(buffer, "current tempo      : %d\n", tmr->tempo);
->  		snd_iprintf(buffer, "tempo base         : %d ns\n", tmr->tempo_base);
->  		snd_iprintf(buffer, "current BPM        : %d\n", bpm);
-> -		snd_iprintf(buffer, "current time       : %d.%09d s\n", tmr->cur_time.tv_sec, tmr->cur_time.tv_nsec);
-> +		snd_iprintf(buffer, "current time       : %ptSp s\n", &tmr->cur_time);
->  		snd_iprintf(buffer, "current tick       : %d\n", tmr->tick.cur_tick);
->  		snd_iprintf(buffer, "\n");
->  	}
+As per RK3588 TRM Part 2 section EMMC_EMMC_CTRL, Add code to enable
+enhanced strobe mode, set the card type to eMMC in HS400 during clock
+configuration. This bit instructs Host to sample the CMD line using data
+strobe for HS400 mode.
 
-tmr->cur_time isn't struct timespec64, but it's struct
-tmr->snd_seq_real_time.
+Signed-off-by: Anand Moon <linux.amoon@gmail.com>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index eebd453899566..3edde4532b13c 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -77,6 +77,10 @@
+ #define CV18XX_RETRY_TUNING_MAX			50
+ 
+ /* Rockchip specific Registers */
++#define DWCMSHC_EMMC_CTRL		0x52c
++#define  EMMC_CTRL_CARD_IS_EMMC		BIT(0)
++#define  EMMC_CTRL_ENH_STROBE_ENABLE	BIT(8)
++
+ #define DWCMSHC_EMMC_DLL_CTRL		0x800
+ #define DWCMSHC_EMMC_DLL_RXCLK		0x804
+ #define DWCMSHC_EMMC_DLL_TXCLK		0x808
+@@ -660,6 +664,14 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 			DLL_CMDOUT_TAPNUM_90_DEGREES |
+ 			DLL_CMDOUT_TAPNUM_FROM_SW;
+ 		sdhci_writel(host, extra, DECMSHC_EMMC_DLL_CMDOUT);
++
++		extra = sdhci_readl(host, DWCMSHC_EMMC_CTRL);
++		if (extra & EMMC_CTRL_CARD_IS_EMMC) {
++			extra |= EMMC_CTRL_ENH_STROBE_ENABLE;
++			sdhci_writel(host, extra, DWCMSHC_EMMC_CTRL);
++		} else {
++			dev_info(mmc_dev(host->mmc), "strobe mode not enabled!\n");
++		}
+ 	}
+ 
+ 	extra = DWCMSHC_EMMC_DLL_DLYENA |
 
-thanks,
+base-commit: 4427259cc7f7571a157fbc9b5011e1ef6fe0a4a8
+-- 
+2.50.1
 
-Takashi
