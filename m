@@ -1,237 +1,168 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35E3833F8A4
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 15:03:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3D0236A033
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 16:23:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762873441; cv=none; b=JfyHbL6CEUwMjGXKMeNjhsHUy7Z/lsv7PRrBV0fyZSIxuj2J9Ah+OELLO21O9TFdcqSNpY8+sUJv6zQLtIBMwQ0jBin1qmi4yIfMjuvVEDKh0irdHFF0Tdck1mQFFP7ll7yYVPTWyGoqll/rWAUAAPj/AQO/WIynS0/ky3bL8GY=
+	t=1762878193; cv=none; b=UoohTv0U1rDSviSq8kK/E8NZn3hEbsMQ8rN3+PK+C1PIHrZeuWNpy/BQRys1Bo47DULCKucmTLuKmoYC52GjxfJAmqpktG1u/CUPhuSvVnKiDGSdbaau3zBvGLeTvAS2IvsxgLNzc/6LR4xFP/t6YOrhIR0P/ZS4gwKpezg9EoE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762873441; c=relaxed/simple;
-	bh=ftiPYvx9c/Uo7f5Ce7Yzxcg1QUwJlxqYP2TiKTcKQ1Y=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ijMX1VUkQDwakUEkqcKp8thYVE4LzQDKYy3lmaseTgU8ulTGLjk9BUaZlhssTizchdN7F4bzModPLJedGfdVhuRBkxaJDMHBP9rCGwOvTKf/0a3DTRIU3OH4DLFS8seMUlvWW5kSJkf44Mpx7j34IdHxq18BteS8e7e8P1kbHbg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Wr3VZuHa; arc=none smtp.client-ip=209.85.218.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1762878193; c=relaxed/simple;
+	bh=XLpA0EYpR5zzkaJHl/CV48qTdO1WTdqSNFnTs6ePeII=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=e5uPL7zVJHSJL8sjMIGPI5ExclB10w1z/jvoAYYMNUMLG/EIgaFRhH9Rnz+XFxJ3DoFD2a8KDhNtFnRA9lLYAAxBRZjlW8LPOdJQ6ShAR5ne1Ehcf5Q0xZepqoOlAOxFiIM6RZ/PJdN/qhWZZjAaycv295/AHFTk50WoRi9bJmw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=cC07iDMz; arc=none smtp.client-ip=209.85.128.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Wr3VZuHa"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-b7291af7190so611433066b.3
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 07:03:59 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cC07iDMz"
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-787d5555274so33421547b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Nov 2025 08:23:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1762873437; x=1763478237; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=wi+5dbYm5JIgaP/t7Nx547fFCD450JcmYNBqfgVm42E=;
-        b=Wr3VZuHacnX19+kU8w1BvT68Xtso8bA8jlTRBVCYJ1QSuvBs90fW594AJGYD/sbcE7
-         zxfKSkMaz4WysTITq4/7YriC+cQSmhKybush57z8b7uRuaTcbHBANmIDfT/kvFehUGbD
-         sa2WDGvCupBaFLVNib0xm7M88OsMK+KVbkGvRv4wvS4KHLvTYQG7EePJTLqW1aHI85zL
-         INKcGCRRzF6J7N7BmrhtW9M7UhXv6JUTmkrQzq4x8G7ZqU0H7eSS+ojS9/DTLkAN67Bj
-         1wDhCFVl0BccErhxh7JzXNm1WChW2BMRTVSKywdBU4Q8uuZOXEejQRVPSvQONAdw7x2q
-         TGYA==
+        d=linaro.org; s=google; t=1762878191; x=1763482991; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=aKHoe4ZUftCieGZc+VBEpPhpv2xgJIE+8PlicL/y9wM=;
+        b=cC07iDMzDDWQfQiinfTnNlNdkZgVgmFUMTk/7L8Vs0Q5ChHorZRuYgayt6JPlKX4F8
+         G8OwrTAkkeG+SYNMBZUORV1v01u2Yir2h+Um0q8ss/vr/fjlQx9iDZjoXMVhNoL0eNWo
+         VHijvgnef61AllVJmCBaACmiwXz7538ZMuHAgCuqWXEhEVQyFAdoljqAzlELYDdjs2gN
+         x5HuPF4BG7GARxwvfhGoU0qlAXRvbAhlY9IrQBjbFHVZLXwQbPdSe4sxUH0I+SfHnz4T
+         /OwlitxwecDsSA8XHC/I/rouREtCl+XVqtoDqrZU2lPX5LuKVPYSEyc5qrdmpdfb2K6w
+         287Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1762873437; x=1763478237;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=wi+5dbYm5JIgaP/t7Nx547fFCD450JcmYNBqfgVm42E=;
-        b=YbGGP292+UeGi/iwQZQw2bkrNV795juagpWrp6IaWpePUkHQp12tVgqW8UaHI2WzF1
-         vVuMJ4MniCO4BY5BmITir9J23AUF0NEQJNFZpA53DcRHNfhhpxNla6rxKgmwLP9j5kx9
-         Ze0SHGKC6wRn52+An0lg9mHLvZ417xDnI/Ykgq1EIdApOybaQ8o+bFqyVWIAjXnQBvS4
-         9Igu/CqaxuHST+Tk5AWRsAxXkENNtLF1Ug3jH90uqxXsiVPXy4ROfdvXCuGAbAFZ0cuW
-         98Zjw6h0Sl5bLAnFsv3s88jBhMRNPormbGgb83O8nk5elRJ4KVej6rEch21wCuJIk5TG
-         5gMQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXO9c4dVpSfz2rZAD2cCjFWpjeg4MiqGKyesWUOxiNLGzWkszgnKSonY36L3THSDgj0L/ftmBfvmbs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwtNObo45ONyUmj6WZKReg96DtwycakWvrpOTkZeE0XdWq6v1bJ
-	GUDgbSW+qpJ7zXeVPnNPs5fZHSaqxEcKbjnTydKfr42hpWtCFNmvO9b2dk+ePUHtfX4=
-X-Gm-Gg: ASbGncu7AJuJxfUd8TD/PStnZ4bqEZQkS+7/fASiefvhqW4RBgnu1BOtj2HbnUXDsEw
-	vILfTo2YDshUinLB8eJnIxZCiU3vixAk/lP1nhLSt6JhnR1WHib+wJsU8j4PBL6wNtBdsQ9HLR7
-	g8TOb81S7b0ufpFvr2cIQxMaG/mmjbEwWdc3mZyHOBKjAN0orAfhkCUaizZxL3jpbjHW3o0W/7C
-	AdUJqJgoXzIknx6fZ/UsFXy14270Q0OfWqzw5jmcCh3r98Uhg7lGVPdZaRwmIuMT43mse8LD3ij
-	3zyO6sbNuEDTOGhQJIrE6tVqJ1Pi7fyHLkWIeuHvA0u5PHAWHJhHJfKh0MXSG+I0q2eVMEnhXm0
-	Ea13i5dGAbw9vB7FGAzrdzGzswTusN0/4OQrRC8zP+8H4FOkhvYLkyzEiufuvYLvdfhQpezSsEs
-	t4mZoR80j79tUwPEFibw==
-X-Google-Smtp-Source: AGHT+IGWUxoIalLG5xLZllX+zCkekRXIo7e3xykwl2APS2wZQPGHNLqastwX+dw6XlJnfwm9Fe+bGg==
-X-Received: by 2002:a17:906:f590:b0:b71:cec2:d54 with SMTP id a640c23a62f3a-b72e04e4ebemr1306841566b.57.1762873437355;
-        Tue, 11 Nov 2025 07:03:57 -0800 (PST)
-Received: from pathway (nat2.prg.suse.com. [195.250.132.146])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b72bdbc9656sm1374243166b.7.2025.11.11.07.03.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Nov 2025 07:03:56 -0800 (PST)
-Date: Tue, 11 Nov 2025 16:03:53 +0100
-From: Petr Mladek <pmladek@suse.com>
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Corey Minyard <corey@minyard.net>,
-	Christian =?iso-8859-1?Q?K=F6nig?= <christian.koenig@amd.com>,
-	"Dr. David Alan Gilbert" <linux@treblig.org>,
-	Alex Deucher <alexander.deucher@amd.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-	Rob Clark <robin.clark@oss.qualcomm.com>,
-	Matthew Brost <matthew.brost@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Vitaly Lifshits <vitaly.lifshits@intel.com>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Niklas Cassel <cassel@kernel.org>, Calvin Owens <calvin@wbinvd.org>,
-	Vadim Fedorenko <vadim.fedorenko@linux.dev>,
-	Sagi Maimon <maimon.sagi@gmail.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	Karan Tilak Kumar <kartilak@cisco.com>,
-	Hans Verkuil <hverkuil+cisco@kernel.org>,
-	Casey Schaufler <casey@schaufler-ca.com>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	Max Kellermann <max.kellermann@ionos.com>,
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	openipmi-developer@lists.sourceforge.net,
-	linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org,
-	linaro-mm-sig@lists.linaro.org, amd-gfx@lists.freedesktop.org,
-	linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
-	intel-xe@lists.freedesktop.org, linux-mmc@vger.kernel.org,
-	netdev@vger.kernel.org, intel-wired-lan@lists.osuosl.org,
-	linux-pci@vger.kernel.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-staging@lists.linux.dev,
-	ceph-devel@vger.kernel.org, linux-trace-kernel@vger.kernel.org,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-	Sergey Senozhatsky <senozhatsky@chromium.org>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Sumit Semwal <sumit.semwal@linaro.org>,
-	Gustavo Padovan <gustavo@padovan.org>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Dmitry Baryshkov <lumag@kernel.org>,
-	Abhinav Kumar <abhinav.kumar@linux.dev>,
-	Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>,
-	Marijn Suijten <marijn.suijten@somainline.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Lucas De Marchi <lucas.demarchi@intel.com>,
-	Thomas =?iso-8859-1?Q?Hellstr=F6m?= <thomas.hellstrom@linux.intel.com>,
-	Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Vladimir Oltean <olteanv@gmail.com>, Andrew Lunn <andrew@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Tony Nguyen <anthony.l.nguyen@intel.com>,
-	Przemek Kitszel <przemyslaw.kitszel@intel.com>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Rodolfo Giometti <giometti@enneenne.com>,
-	Richard Cochran <richardcochran@gmail.com>,
-	Jonathan Lemon <jonathan.lemon@gmail.com>,
-	Stefan Haberland <sth@linux.ibm.com>,
-	Jan Hoeppner <hoeppner@linux.ibm.com>,
-	Heiko Carstens <hca@linux.ibm.com>,
-	Vasily Gorbik <gor@linux.ibm.com>,
-	Alexander Gordeev <agordeev@linux.ibm.com>,
-	Christian Borntraeger <borntraeger@linux.ibm.com>,
-	Sven Schnelle <svens@linux.ibm.com>,
-	Satish Kharat <satishkh@cisco.com>,
-	Sesidhar Baddela <sebaddel@cisco.com>,
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH v2 01/21] lib/vsprintf: Add specifier for printing struct
- timespec64
-Message-ID: <aRNQWc8O2y94zoj8@pathway>
-References: <20251111122735.880607-1-andriy.shevchenko@linux.intel.com>
- <20251111122735.880607-2-andriy.shevchenko@linux.intel.com>
+        d=1e100.net; s=20230601; t=1762878191; x=1763482991;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=aKHoe4ZUftCieGZc+VBEpPhpv2xgJIE+8PlicL/y9wM=;
+        b=CuNvMNBjNkbFo5yGYSSGbhm8Qgx1o4kIf4RJV6efulf3MgZEHZYjW08VvXNaf8yXM4
+         TiThlDWdQKQGVYNwYuT5yVLIziXXrDZepwpaaC0G0cMJDLLP8mcDzT6SJTjn7fLOjURY
+         AWjjIbY2Vrhq9FDPOsVCvZ0eJkkgqGs+p+7YFEouyGMpUIAW4AlpW/TGZYimHE/osx3I
+         EAk1UbuWERaWdAtD1bBkD4Nwvw6FMkYbudm27F4fxqBgI0T+tN1IiPOav2v0PiZDF570
+         eHweL/jPCddD66pl+4HNIuA7zxgWMzwIcKd81MmImXBM1lyJSoJgiNr6C764Y7zqEwht
+         xQTQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWU1egDvaZP9P5qMST9BJow8mnC1F9tSkdCaXpMPa4eQUHK0lmgDsZ8YywjZbN/5UbEcSp2b0MZCMY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxtJnjcjT4rtfrRDFqdG3BygVwHccNykGQuOjRt19RSYF9hBN/q
+	BC1EmjiaIh6/Ntwb2khdUBP4oMRVJ3UuS6XPMQX4c5gnwcQ/HKcgsAYmPBWXiAa4c06Dt1JH8ty
+	tJH/PvdwUZxBoujZpwjL5/RyryF35DXuUWOwHP68U+vsJxw0HdD+p
+X-Gm-Gg: ASbGncsY6ig+9dD608WKBs5VcoWwRX29EAFzp70HWf550gaVEHREauQPPOZ7+76kU66
+	6Nu50hSqyAI4jE2W+aYsch4BTdwqTr6jDql0B6rZyCNql0CScRKg4hSpu/WhjpAqGp7sOhgimSx
+	J5cGWs7KcN996kHtWrMgDm4ZazUZRp346DbS/gamE/OxAWOZ85fUPp8GUqBb732sfIiNkdB6yPh
+	wfWjtGt2t8M0IvJ9ogyJUsG5z5hEg9W+2whCaswxKKLnj7+dg8eVP0NMjG+/P2Sy4oCroN8
+X-Google-Smtp-Source: AGHT+IHoQJuVlfR9zMeIjwFbdHyeRQTWRolkki2DvpnTUSRyJF5SQPQubSTTdGS99udcI0gt7LdJrt7VWnXSm3e14Rk=
+X-Received: by 2002:a05:690c:360e:b0:787:e3c1:99 with SMTP id
+ 00721157ae682-787e3c1484bmr93601677b3.57.1762878190703; Tue, 11 Nov 2025
+ 08:23:10 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251111122735.880607-2-andriy.shevchenko@linux.intel.com>
+References: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com> <20251008042526.3312597-3-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20251008042526.3312597-3-claudiu.beznea.uj@bp.renesas.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 11 Nov 2025 17:22:34 +0100
+X-Gm-Features: AWmQ_bkUAFq5YOr6A8R1RiBxjuQKLYXMePQi6OIcghsKKf0GW8rB8B1X1sNOzgk
+Message-ID: <CAPDyKFpFYeD9tLA+w4NARKq-Wj-7O2Caa3y8i2Z9NX6J4XLahA@mail.gmail.com>
+Subject: Re: [PATCH 2/3] mmc: renesas_sdhi: Switch to SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS()
+ and pm_ptr()
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: wsa+renesas@sang-engineering.com, p.zabel@pengutronix.de, 
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Tue 2025-11-11 13:20:01, Andy Shevchenko wrote:
-> A handful drivers want to print a content of the struct timespec64
-> in a format of %lld:%09ld. In order to make their lives easier, add
-> the respecting specifier directly to the printf() implementation.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+On Wed, 8 Oct 2025 at 06:25, Claudiu <claudiu.beznea@tuxon.dev> wrote:
+>
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>
+> SET_SYSTEM_SLEEP_PM_OPS() and SET_RUNTIME_PM_OPS() are deprecated now
+> and require __maybe_unused protection against unused function warnings.
+
+I don't see them marked deprecated, is that really the case?
+
+> The usage of pm_ptr() and SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() allows
+> the compiler to see the functions, thus suppressing the warning. Thus
+> drop the __maybe_unused markings.
+>
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+
+Other than the above, this looks fine to me!
+
+Kind regards
+Uffe
+
 > ---
->  Documentation/core-api/printk-formats.rst | 11 ++++++++--
->  lib/tests/printf_kunit.c                  |  4 ++++
->  lib/vsprintf.c                            | 25 +++++++++++++++++++++++
->  3 files changed, 38 insertions(+), 2 deletions(-)
-> 
-> diff --git a/Documentation/core-api/printk-formats.rst b/Documentation/core-api/printk-formats.rst
-> index 7f2f11b48286..c0b1b6089307 100644
-> --- a/Documentation/core-api/printk-formats.rst
-> +++ b/Documentation/core-api/printk-formats.rst
-> @@ -547,11 +547,13 @@ Time and date
->  	%pt[RT]s		YYYY-mm-dd HH:MM:SS
->  	%pt[RT]d		YYYY-mm-dd
->  	%pt[RT]t		HH:MM:SS
-> -	%pt[RT][dt][r][s]
-> +	%ptSp			<seconds>.<nanoseconds>
-
-I know that that there was no good choice. But I am curious.
-Does the 'p' stands for some particular word, for example, "plain" ?
-
-I do not want to start bike shedding but I think about
-using 'n' as "number".
-
-> +	%pt[RST][dt][r][s]
->  
->  For printing date and time as represented by::
->  
-> -	R  struct rtc_time structure
-> +	R  content of struct rtc_time
-> +	S  content of struct timespec64
->  	T  time64_t type
->  
->  in human readable format.
-> @@ -563,6 +565,11 @@ The %pt[RT]s (space) will override ISO 8601 separator by using ' ' (space)
->  instead of 'T' (Capital T) between date and time. It won't have any effect
->  when date or time is omitted.
->  
-> +The %ptSp is equivalent to %lld.%09ld for the content of the struct timespec64.
-> +When the other specifiers are given, it becomes the respective equivalent of
-> +%ptT[dt][r][s].%09ld. In other words, the seconds are being printed in
-> +the human readable format followed by a dot and nanoseconds.
-> +
->  Passed by reference.
->  
->  struct clk
-> diff --git a/lib/vsprintf.c b/lib/vsprintf.c
-> index 3f99834fd788..fdd06e8957a3 100644
-> --- a/lib/vsprintf.c
-> +++ b/lib/vsprintf.c
-> @@ -2464,6 +2488,7 @@ early_param("no_hash_pointers", no_hash_pointers_enable);
->   * - 'g' For block_device name (gendisk + partition number)
->   * - 't[RT][dt][r][s]' For time and date as represented by:
-
-We should add 'S' here as well:
-
-   * - 't[RST][dt][r][s]' For time and date as represented by:
-
-That said, I am not sure about the optional '[p]'. We could
-either do:
-
-   * - 't[RST][p][dt][r][s]' For time and date as represented by:
-
-or
-
-   * - 'tSp'	For time represented by struct timespec64 printed
-		as seconds.nanoseconds
-   * - 't[RST][dt][r][s]' For time and date as represented by:
-
->   *      R    struct rtc_time
-> + *      S    struct timespec64
->   *      T    time64_t
->   * - 'C' For a clock, it prints the name (Common Clock Framework) or address
->   *       (legacy clock framework) of the clock
-
-Otherwise, it looks good.
-
-Best Regards,
-Petr
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 11 +++++------
+>  drivers/mmc/host/tmio_mmc.h                   |  2 --
+>  drivers/mmc/host/tmio_mmc_core.c              |  2 --
+>  3 files changed, 5 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> index 9e3ed0bcddd6..7ceb7b977a0b 100644
+> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> @@ -599,18 +599,17 @@ static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
+>  }
+>
+>  static const struct dev_pm_ops renesas_sdhi_internal_dmac_dev_pm_ops = {
+> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> -                               pm_runtime_force_resume)
+> -       SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
+> -                          tmio_mmc_host_runtime_resume,
+> -                          NULL)
+> +       SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
+> +       RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
+> +                      tmio_mmc_host_runtime_resume,
+> +                      NULL)
+>  };
+>
+>  static struct platform_driver renesas_internal_dmac_sdhi_driver = {
+>         .driver         = {
+>                 .name   = "renesas_sdhi_internal_dmac",
+>                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+> -               .pm     = &renesas_sdhi_internal_dmac_dev_pm_ops,
+> +               .pm     = pm_ptr(&renesas_sdhi_internal_dmac_dev_pm_ops),
+>                 .of_match_table = renesas_sdhi_internal_dmac_of_match,
+>         },
+>         .probe          = renesas_sdhi_internal_dmac_probe,
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index c8cdb1c0722e..b9de03325c58 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -209,10 +209,8 @@ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
+>  void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
+>  irqreturn_t tmio_mmc_irq(int irq, void *devid);
+>
+> -#ifdef CONFIG_PM
+>  int tmio_mmc_host_runtime_suspend(struct device *dev);
+>  int tmio_mmc_host_runtime_resume(struct device *dev);
+> -#endif
+>
+>  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
+>  {
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 775e0d9353d5..8be642f737c7 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1286,7 +1286,6 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
+>  }
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
+>
+> -#ifdef CONFIG_PM
+>  static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+>  {
+>         if (!host->clk_enable)
+> @@ -1331,7 +1330,6 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+>         return 0;
+>  }
+>  EXPORT_SYMBOL_GPL(tmio_mmc_host_runtime_resume);
+> -#endif
+>
+>  MODULE_DESCRIPTION("TMIO MMC core driver");
+>  MODULE_LICENSE("GPL v2");
+> --
+> 2.43.0
+>
