@@ -1,157 +1,114 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m15590.qiye.163.com (mail-m15590.qiye.163.com [101.71.155.90])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6C23155C97;
-	Wed, 12 Nov 2025 00:32:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84AB114B96E
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Nov 2025 00:50:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.90
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762907534; cv=none; b=GQujTM/9iE9DaYhneW23sW+o6K4tS453kAwEvpRFWtIle4ah3jLqxyf/QcSngq0zdpmagunjAnwwpsF2RdLT4HPvYrg/c6BZZJF1oamouZNWfy3ipT7JasoFpc8lyM6OVJyC8qd8iD2HbzadUDjSywWxZttNCI/OARSeclDF5Pk=
+	t=1762908627; cv=none; b=kX3x4e/iIcS2w2u3gYle7KZCUTusL9zb4VZKO53BMWafz8RnmuF8nReuJgYeatOnyQ1i4V60JJxBZY2zv9G76FwI/B8DHKYOW4hITzhJsdH44/9h+d3qP31TRj+O7CuBXjm+MAoL57Htwru0H91FG3aYyMD1akiFcfZ59ODKKlo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762907534; c=relaxed/simple;
-	bh=EKQB2ioNu47riqAdcpw9niW4VnYXoNetzqx4WN7e1II=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=bp3kGpx9UCSzI5GoIRd9ws+0xlJDixan8bF/CYfoBibODQj8PqVp/k2zoGm39fqDA2WLcrFZ0ATaQO67GCN+4Q9mXQLO5P4UEjMqTtabPnsH2E57933jlkRmQUMs3yWTRKX3Hmp0RzLWST+3X8gfuibgL/0R6r4nj34PyZvllTc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C/h2+19x; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1762908627; c=relaxed/simple;
+	bh=VD2HQkDIoUwAlI5in2p7gYxjpZegdkYrHJ1uXTHYx+g=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=S5DF9cDAJuCBWexkQr1ad9JoM1sY5/rbDtBAfGYLjdTSSQTBCMEZjP0mwWcVesgkeLzht40pFoAr/Xlye/S2x6ULMd2+OvIX8cAVeUO5DtNtA4qqEHDU6+zPbdyhMibDfKg9NJ74A2ApmQPMBq47eJXhCiA3XTAb77Wu01EKyZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=PsQTZqQS; arc=none smtp.client-ip=101.71.155.90
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C/h2+19x"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 63479C4AF09;
-	Wed, 12 Nov 2025 00:32:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1762907533;
-	bh=EKQB2ioNu47riqAdcpw9niW4VnYXoNetzqx4WN7e1II=;
-	h=From:To:Cc:Subject:Date:From;
-	b=C/h2+19xISoHknJ4bm1dQpALU3kL9x7AstdRma/pnKIFMsSduI6zXJkfF+UwE7qxr
-	 EKFmxvyzQwsZ/mf70DuDd8Yyq2OSwt9uk5VnwLNwvJRKiibNvbkYKuDBB60bhL8DkI
-	 TTlDj5NVPtRiyNn/Fmqw+jT8DTi4XkNIyAYFqRXuHKKtDW2xZvkFlHogqVTPxYMceH
-	 tp8J9gCGbjbkImy0p7a3Qe9OzF+s3Z/uc4Ocqh0mJTG6B9eMX7qjIJ+m44Qtq/RKW9
-	 c5thc60VFBr8yboSZHxA6uKeOMTivDk1gAX9iff0YwaQ6JwUp84HcrkJXbqrnpTp6B
-	 nErJhLQSS1u1Q==
-From: Jisheng Zhang <jszhang@kernel.org>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-of-dwcmshc: Promote the th1520 reset handling to ip level
-Date: Wed, 12 Nov 2025 08:14:26 +0800
-Message-ID: <20251112001426.17252-1-jszhang@kernel.org>
-X-Mailer: git-send-email 2.50.0
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="PsQTZqQS"
+Received: from [192.168.61.151] (unknown [110.83.51.2])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 293f3b332;
+	Wed, 12 Nov 2025 08:45:07 +0800 (GMT+08:00)
+Message-ID: <fcc9262c-5bd8-4f96-971c-c61ae8cbde69@rock-chips.com>
+Date: Wed, 12 Nov 2025 08:45:03 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org,
+ linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: Add memory clock auto-gating
+ support
+To: Ulf Hansson <ulf.hansson@linaro.org>
+References: <1762242094-55346-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAPDyKFpLp--cn4T3ifL8zB=GqptHZtnRH+V8Z370LNsj7n3wNA@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <CAPDyKFpLp--cn4T3ifL8zB=GqptHZtnRH+V8Z370LNsj7n3wNA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9a7585ff7809cckunm76d3f66889b5b
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVkZSkpKVklLSkgdShgaGkNKGlYVFAkWGhdVEwETFh
+	oSFyQUDg9ZV1kYEgtZQVlKSktVQ0hVTkpVSVlXWRYaDxIVHRRZQVlPS0hVSktJT09PSFVKS0tVSk
+	JLS1kG
+DKIM-Signature: a=rsa-sha256;
+	b=PsQTZqQSj6zIF7BYo9SF9V8MSEx/vgmafUz9qE+hy+KkYq2i0wsj2Hx3HgWfhI6EccN5e0WObJIatfrXqVJxhsTDGQvYFDwjnK8F1oiYRIx3OoRrR7XGjgNexr8BdIjJ96RDA0KCy4weHovbZOW0JiPPKXNque6yFlWcvrIAJTs=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=73MhxFMtGE6PyMsXPLivPnSyiulfE+bRi+dlziNMDyU=;
+	h=date:mime-version:subject:message-id:from;
 
-Commit 27e8fe0da3b7 ("mmc: sdhci-of-dwcmshc: Prevent stale command
-interrupt handling") clears pending interrupts when resetting
-host->pending_reset to ensure no pending stale interrupts after
-sdhci_threaded_irq restores interrupts. But this fix is only added for
-th1520 platforms, in fact per my test, this issue exists on all
-dwcmshc users, such as cv1800b, sg2002, and synaptics platforms.
+在 2025/11/12 星期三 0:55, Ulf Hansson 写道:
+> On Tue, 4 Nov 2025 at 08:41, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>>
+>> Per design recommendations, the memory clock can be gated when there
+>> is no in-flight transfer, which helps save power. This feature is
+>> introduced alongside internal phase support, and this patch enables it.
+> 
+> Just to make sure, does this work if the controller is used for SDIO
+> and has SDIO irqs enabled?
+> 
+> Or perhaps that is taken care of in dw_mci_prepare_sdio_irq()?
+> 
 
-So promote the above reset handling from th1520 to ip level.
+Yes, it works for SDIO case too.
 
-Fixes: 017199c2849c ("mmc: sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002")
-Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 35 ++++++++++++++++-------------
- 1 file changed, 20 insertions(+), 15 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index eebd45389956..c17168edc9fd 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -289,6 +289,19 @@ static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
- 	sdhci_adma_write_desc(host, desc, addr, len, cmd);
- }
- 
-+static void dwcmshc_reset(struct sdhci_host *host, u8 mask)
-+{
-+	sdhci_reset(host, mask);
-+
-+	/* The dwcmshc does not comply with the SDHCI specification
-+	 * regarding the "Software Reset for CMD line should clear 'Command
-+	 * Complete' in the Normal Interrupt Status Register." Clear the bit
-+	 * here to compensate for this quirk.
-+	 */
-+	if (mask & SDHCI_RESET_CMD)
-+		sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-+}
-+
- static unsigned int dwcmshc_get_max_clock(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -686,7 +699,7 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
- 		reset_control_deassert(priv->reset);
- 	}
- 
--	sdhci_reset(host, mask);
-+	dwcmshc_reset(host, mask);
- }
- 
- static int dwcmshc_rk35xx_init(struct device *dev, struct sdhci_host *host,
-@@ -832,15 +845,7 @@ static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	u16 ctrl_2;
- 
--	sdhci_reset(host, mask);
--
--	/* The T-Head 1520 SoC does not comply with the SDHCI specification
--	 * regarding the "Software Reset for CMD line should clear 'Command
--	 * Complete' in the Normal Interrupt Status Register." Clear the bit
--	 * here to compensate for this quirk.
--	 */
--	if (mask & SDHCI_RESET_CMD)
--		sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-+	dwcmshc_reset(host, mask);
- 
- 	if (priv->flags & FLAG_IO_FIXED_1V8) {
- 		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-@@ -886,7 +891,7 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	u32 val, emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
- 
--	sdhci_reset(host, mask);
-+	dwcmshc_reset(host, mask);
- 
- 	if ((host->mmc->caps2 & emmc_caps) == emmc_caps) {
- 		val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-@@ -958,7 +963,7 @@ static void cv18xx_sdhci_post_tuning(struct sdhci_host *host)
- 	val |= SDHCI_INT_DATA_AVAIL;
- 	sdhci_writel(host, val, SDHCI_INT_STATUS);
- 
--	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+	dwcmshc_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
- }
- 
- static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-@@ -1080,7 +1085,7 @@ static inline void sg2042_sdhci_phy_init(struct sdhci_host *host)
- 
- static void sg2042_sdhci_reset(struct sdhci_host *host, u8 mask)
- {
--	sdhci_reset(host, mask);
-+	dwcmshc_reset(host, mask);
- 
- 	if (mask & SDHCI_RESET_ALL)
- 		sg2042_sdhci_phy_init(host);
-@@ -1100,7 +1105,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
- 	.get_max_clock		= dwcmshc_get_max_clock,
--	.reset			= sdhci_reset,
-+	.reset			= dwcmshc_reset,
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
- 	.irq			= dwcmshc_cqe_irq_handler,
- };
-@@ -1121,7 +1126,7 @@ static const struct sdhci_ops sdhci_dwcmshc_bf3_ops = {
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
- 	.get_max_clock		= dwcmshc_get_max_clock,
--	.reset			= sdhci_reset,
-+	.reset			= dwcmshc_reset,
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
- 	.irq			= dwcmshc_cqe_irq_handler,
- 	.hw_reset		= dwcmshc_bf3_hw_reset,
--- 
-2.50.0
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> 
+> Kind regards
+> Uffe
+> 
+>> ---
+>>
+>>   drivers/mmc/host/dw_mmc-rockchip.c | 6 ++++++
+>>   1 file changed, 6 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+>> index 6813549..62c68cd 100644
+>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+>> @@ -19,6 +19,8 @@
+>>   #define RK3288_CLKGEN_DIV              2
+>>   #define SDMMC_TIMING_CON0              0x130
+>>   #define SDMMC_TIMING_CON1              0x134
+>> +#define SDMMC_MISC_CON                 0x138
+>> +#define MEM_CLK_AUTOGATE_ENABLE                BIT(5)
+>>   #define ROCKCHIP_MMC_DELAY_SEL         BIT(10)
+>>   #define ROCKCHIP_MMC_DEGREE_MASK       0x3
+>>   #define ROCKCHIP_MMC_DEGREE_OFFSET     1
+>> @@ -470,6 +472,7 @@ static int dw_mci_rk3576_parse_dt(struct dw_mci *host)
+>>
+>>   static int dw_mci_rockchip_init(struct dw_mci *host)
+>>   {
+>> +       struct dw_mci_rockchip_priv_data *priv = host->priv;
+>>          int ret, i;
+>>
+>>          /* It is slot 8 on Rockchip SoCs */
+>> @@ -494,6 +497,9 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+>>                          dev_warn(host->dev, "no valid minimum freq: %d\n", ret);
+>>          }
+>>
+>> +       if (priv->internal_phase)
+>> +               mci_writel(host, MISC_CON, MEM_CLK_AUTOGATE_ENABLE);
+>> +
+>>          return 0;
+>>   }
+>>
+>> --
+>> 2.7.4
+>>
+> 
 
