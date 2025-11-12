@@ -1,93 +1,94 @@
-Received: from mail-m3274.qiye.163.com (mail-m3274.qiye.163.com [220.197.32.74])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B2792C21CC
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Nov 2025 07:44:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.74
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3D662FD682
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Nov 2025 08:49:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1762933488; cv=none; b=YLwVK+0fr71sW7YuYJPpzomwfMAYy8nQhm0+G7Ga1QhNCXivPysIkfDZDflennK6CS1VaWUBEMbiG0h1NNrNaIgwYSsXkJXZ+3MOSOKWNmQALtdan++a4AQ9V9mx2SR9zX0k1domVfCntgKO+RiHJCqfug0kCcmUf16Cx5Ex4GY=
+	t=1762937381; cv=none; b=sUZgMkjPxn0rH6n2C97Ld6UY/aRb0BY270nEI+Xf8DHNehiqTFGj4+3SsRkNBye135N06en06MBtJoOM9/4BY3fJzlWl9AQwz015VkmLMGsMSgNavHLv00IqMop6pUlbUY6isaLpL+c0xHTYH6aDLzRcpbAJt71CegUwMpdc5BQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1762933488; c=relaxed/simple;
-	bh=4xGUM1eN8e5kK3mFmSPZ9g/YKBDdSIKAVzwBOxwLP6k=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=WsbAO7YJqkVhJimrPb1gX3S4/oKye35SfC7pgbOcbYX/KQKok2x1L6jbkGGcMmz6J2BnGEZlx46xEff1iQ/Ei84VSsaUfgrv7grvaUXfok1cGafRbQNYnU776sSfakGITkSsJhIPgx8njIr9YrcdBuSM9k1t2XDPXYzENDyxp34=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=EqalDPPL; arc=none smtp.client-ip=220.197.32.74
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1762937381; c=relaxed/simple;
+	bh=Z99mIqeia+YwnxsvpuycDzk6TGzbqIDr6NWTdL8N780=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=HUNgu4GSYhu8+QN4p/yhzTW/TG2B0wICul7hd0x9f2vESvEpLV893yTHeNotwAwS/a34nYHMIjnP+0jmN12ftPU0ax9JM4i/f1jLiOqAGCAlpzTiF9GnGtsKBuYwiFr9lTA8zSg/p1lkYjJkG0xzDeJ0HBeDLcXB0rWaHxhsGUk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Z8e2/kwm; arc=none smtp.client-ip=209.85.167.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="EqalDPPL"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 294e35849;
-	Wed, 12 Nov 2025 15:44:35 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-rockchip@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	Sebastian Reichel <sebastian.reichel@collabora.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 2/2] mmc: sdhci-of-dwcmshc: reduce CIT for better performance
-Date: Wed, 12 Nov 2025 15:44:20 +0800
-Message-Id: <1762933460-204066-2-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1762933460-204066-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1762933460-204066-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9a7706096a09cckunm8f73707313c8a8
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQxlKSlYZShkZGklLH0pDSR9WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=EqalDPPL0j5CyaUmzf68LwMuynULiV4qfMIMJcAIk132+68QqKNr32d6N/opUnx7eNgH5T2dfiaG5yt6XHjVE1cbwOGTPiqLEuGmNFV9wJhZ5zO01gW2WBAeFxXDT1xX3xFaa8t15CSD6nKI4G2xiNp/vSq0wQ+CeJ1RFKBNjXQ=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=eQpfZEJeVDoHX/pt3LZYm2mfJEiV7aEbD+NJE5uWFxg=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Z8e2/kwm"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-592ff1d80feso627143e87.2
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Nov 2025 00:49:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1762937378; x=1763542178; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Z99mIqeia+YwnxsvpuycDzk6TGzbqIDr6NWTdL8N780=;
+        b=Z8e2/kwmWfSp8Q3897seqT1L8mx1wB9X4L6CwASrrsN4A9b+q0mAuJxAlb6midu3MV
+         gCVZ3lfOcDDG9rX8C17tFd02GAXW/7DolY8TotOg9y3LOAIY9/PxB61fmQZmPQIZcI4Z
+         14ppuCQlAkX4WQ74eyoVHXGL7hzphywLZxdpUiy594mwUabfzuDIhDMrRyHL2XwbFMdn
+         JquYBbfJuMRFCjTUQ/NL4sl1mjPowPQ9GPOj7QGJximm5HgmGlaZ4N/d+Mr7esYsKG9m
+         kn9mD7UQ7BuI3RKbtNXhI/NN8sG9sEc8tPBbnEGrMJDC4tH6wLkGr5gngfIguiklBbPJ
+         0R+A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1762937378; x=1763542178;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=Z99mIqeia+YwnxsvpuycDzk6TGzbqIDr6NWTdL8N780=;
+        b=XSU0zSXPxXni3r6iwtmxUspAk8YqKpwCtuyzd/R/rU4twntgk6ZSXEUsTquCLVyhEn
+         8XD0x1jcojSDyixz6XWlmDBSWjS8gd6wWPc7AoW/KRMr2mD8H7AraFCzGiTMVxcDzFGN
+         /dIaBeS7LFHGIqJrhTxsGSvyHhIpyw84xbzmBkNdMwuoj/Gpwf+ZqS2GqYzgqGo6TXqC
+         x4RJtOaFoDuKHRgI+ZWPsuEZZxNIIFY0TL+s3CXDVbgdlkrUKoZeXpx9rYdIPLu9aMH6
+         A5g3P+/68TNuaDpDiaguiLPxEviMmiTS0D/j4OLcviYKG+pM8Mxtu59Z1mMF8wP+S5He
+         w3TA==
+X-Forwarded-Encrypted: i=1; AJvYcCUGIS0bVNGzMddrYxBxAheCaEL7zDndF8UOcwlQCwohvORoOdHgVnP/A/m8B8ie7SSFYgbymhJ66MM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzrfViFytb/OUaQLWiF/pK51E98MSoD+PVdjD34iXA59XFpqqaI
+	6NtEHDsLRfBf7XL3V+5eXPv/Q6/q+XtdlXjF8T+8CYkh69PHXC4MzCJfwVDvnOJt3BK00Th5kwX
+	bPAYAFVtKo4ep6cUjSq5eFU2wb1FxJ+R/XwM/Kvd4Ag==
+X-Gm-Gg: ASbGncsDnazU5u+KVNmHX+jFyT8x8A/PBIIyzk8LU4rqBi1HeHdVjBPD+23YQFCA6+Y
+	a/tSWjiDhNRrUz+/SDef01QxatYwYpHBoulAsvfkmiy5BfUNiDH/M+iMXrJaHBbolx41LmVvVXz
+	bbm9T3IuP6QJ0/KvFBEDLXo0gRkcM1+C4Qsd6Sf5R/xyu1hKTs3oZPLauCX75LthOTgSsMEpfNA
+	1xkh5Hlh5pHw9s2PX7o++z5a/ljYv7wh6/0e2SRfVnpW9WN88BywOM1duUDSeFV9L1IE/1wQi+z
+	SKNcRgY8Yq8Fy7W1lui/Ux/Jzy78
+X-Google-Smtp-Source: AGHT+IHwkyX27togvHCQMW2BZonFzlk/AX1LRSnafb7ksgAGV7MSuE3/MUECC9rK4STtLAD8hduluRS8ToF2sYh+/Uk=
+X-Received: by 2002:a05:6512:a92:b0:594:2b70:6d09 with SMTP id
+ 2adb3069b0e04-59576e3a932mr714105e87.44.1762937378011; Wed, 12 Nov 2025
+ 00:49:38 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+References: <20251105145824.239054-1-marco.crivellari@suse.com> <CAPDyKFpVS9Z86D_QLhjvOYFAbXaa4_Z=ZQnV+x1ZTuXG4x8oXw@mail.gmail.com>
+In-Reply-To: <CAPDyKFpVS9Z86D_QLhjvOYFAbXaa4_Z=ZQnV+x1ZTuXG4x8oXw@mail.gmail.com>
+From: Marco Crivellari <marco.crivellari@suse.com>
+Date: Wed, 12 Nov 2025 09:49:27 +0100
+X-Gm-Features: AWmQ_bnT0AamP8qb05zC_dt0cIUnpnjMsIHeflBvyb85nhOL9I5Vg8kBfSa8zH8
+Message-ID: <CAAofZF74Ojim5fJmeu2Y3OTqi1VTTTSqLiCf9VGd6XqbXJSq+w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mtk-sd: replace use of system_wq with system_percpu_wq
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org, 
+	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	Tejun Heo <tj@kernel.org>, Lai Jiangshan <jiangshanlai@gmail.com>, 
+	Frederic Weisbecker <frederic@kernel.org>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, 
+	Michal Hocko <mhocko@suse.com>, Chaotian Jing <chaotian.jing@mediatek.com>, 
+	Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-CQHCI_SSC1.CIT indicates to the CQE the polling period to use for
-periodic SEND_QUEUE_STATUS (CMD13) polling. Some eMMCs have only one
-hardware queue, and CMD13 can only query one slot at a time for data
-transmission, which cannot be processed in parallel. Modifying the
-CMD13 query interval can increase the query frequency and improve
-random write performance.
+On Tue, Nov 11, 2025 at 6:37=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+> [...]
+> Applied for next, thanks!
+>
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+Many thanks!
 
- drivers/mmc/host/cqhci.h            | 1 +
- drivers/mmc/host/sdhci-of-dwcmshc.c | 5 +++++
- 2 files changed, 6 insertions(+)
+--=20
 
-diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-index ce189a1..3668856 100644
---- a/drivers/mmc/host/cqhci.h
-+++ b/drivers/mmc/host/cqhci.h
-@@ -93,6 +93,7 @@
- /* send status config 1 */
- #define CQHCI_SSC1			0x40
- #define CQHCI_SSC1_CBC_MASK		GENMASK(19, 16)
-+#define CQHCI_SSC1_CIT_MASK		GENMASK(15, 0)
- 
- /* send status config 2 */
- #define CQHCI_SSC2			0x44
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index e276a4e..cad5165 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -631,6 +631,11 @@ static void rk35xx_sdhci_cqe_pre_enable(struct mmc_host *mmc)
- 	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
- 	u32 reg;
- 
-+	/* Set Send Status Command Idle Timer to 10.66us (256 * 1 / 24) */
-+	reg = sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI_SSC1);
-+	reg = (reg & ~CQHCI_SSC1_CIT_MASK) | 0x0100;
-+	sdhci_writel(host, reg, dwc_priv->vendor_specific_area2 + CQHCI_SSC1);
-+
- 	reg = sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
- 	reg |= CQHCI_ENABLE;
- 	sdhci_writel(host, reg, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
--- 
-2.7.4
+Marco Crivellari
 
+L3 Support Engineer, Technology & Product
