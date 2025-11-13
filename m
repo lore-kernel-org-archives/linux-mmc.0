@@ -1,67 +1,67 @@
-Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8A2A33120D
-	for <linux-mmc@vger.kernel.org>; Thu, 13 Nov 2025 08:01:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23C5E21254B
+	for <linux-mmc@vger.kernel.org>; Thu, 13 Nov 2025 08:13:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763020899; cv=none; b=EHRAMKuklyf553L69D2Dg5mFi7haUoYKKfOjCQGZ7ycrpfp6OYQE8dITVcbUkb0DJLyIICwXdBEkChTpYemnl2Cq7OEUIDVx4s/MYHZDft58TAs6qGsrtvbR08e2SWoQcZD34h5FUQGfknkbWNxBe93Sg3TcRBtDl59QZMlbzD8=
+	t=1763021581; cv=none; b=h+N1LJW6JA+T1Z3CK1VegRYcFeh34brkSQEVAhyB+ZBvtYSveuyJAZT88NR1JuabRHEmd62Xf9N7wQ080nvJ8KACXdXXMLfh4kcqYBJ7K9hvknvOCA8ZV4X+8PTKfwL7ivQ6qxJW5RxgfpQnbFNyWpo65KabH5fiRqohCkrcFM8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763020899; c=relaxed/simple;
-	bh=YFib5AM2YDHpEw3Y828tvstnd7oYrzk80+0Tk/DHGHw=;
+	s=arc-20240116; t=1763021581; c=relaxed/simple;
+	bh=nGH0At8qBu3ZNnQzaOXu/y9T18HN37RDrbr9MtEfacg=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=QY1/cNDZJoOB64Q4yDA3WV3bcqsA8EwIhXWcNys+w3wNmAk3bw00c677z8WRB435igcjqrY3l1ar9EAgliJy3KZGURY3O7qp60fgbACZAtPxIXNL0gcCbb0tJT1PFK9njKB1bMT++Pe4RUjoJviNe7bhEJBOgUfHFcrq3DutUTc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=GnK9AE/y; arc=none smtp.client-ip=209.85.128.50
+	 In-Reply-To:Content-Type; b=Dj3XscaOunlI2KZLFWJzmHu3YivmFm5aR7gUYv0N/Bn40BageegDbnKkBgr1DJCaTB7eBdnN55b2+l4Io3GepcGGxl0X11zk71nKtaDII3F0VKPPHZTHLIxHiTKTZA9b7qy+JgfMi/zPPp3ML/8d/gBAQb2zk2fLO7Lb75X1xNU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=ToKW0Nt7; arc=none smtp.client-ip=209.85.128.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="GnK9AE/y"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-47775fb6c56so5708725e9.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Nov 2025 00:01:35 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="ToKW0Nt7"
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-477549b3082so4206875e9.0
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Nov 2025 00:12:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1763020894; x=1763625694; darn=vger.kernel.org;
+        d=tuxon.dev; s=google; t=1763021578; x=1763626378; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:content-language:from
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=+TKXpPbxSNO2sVb7821pvM7dsyeC1CYdB5v9NlDTIXY=;
-        b=GnK9AE/yOlq31IrwUr8Vrm9oQLaZbAhQ3HT+wHlUWAvsHikrzB4Sr8SfgndNeqcAKF
-         PUo/f0SjdqIhYggqwFQ4uOn6hKR+CXkLZdmT0b9t7QqENiB14YkUBXIyMkXweYiZOjS2
-         ryKnp5q5lbBYce+9ONtjjbV+zxsH+oQYBHX9JXG3dQFp6rBfxU74a/bRDmJeIf3Iyf3s
-         nwu8WSXdudeEKYS6X1Si4hBEHXDiXlN0HQtfQcgZ73Rh2elvKyy1VdVKDaFWJWesccie
-         YXPfvee9+i9IwyRHWjVvN5dSYgefN2qmyRQxGcR4fmuVEyh3MIz0hwNHVSfmRWOtYzXt
-         8QgA==
+        bh=F0hgBMveSb7cwa3tNC9/2B7T1+14tCA7kB4oFGdjB80=;
+        b=ToKW0Nt7XN3T9j1BAEs5KLpLV/TLsRYtzzJrfXARrQtkPa4j1zxkL4uoZ1hxc384hl
+         W8UJlGCttL6cjlDK0pH1w4Fiw0DFI+XIAN4RD8FphugSoonoKLZs/4TwyhIsjuKIagSx
+         tzK/8mEw0MGeNodQACJFaZI978riOsMoQkip9jPgymLFOSZfqJW+3LU6hioxSOBCa+3n
+         dS0WgEldtmtdM8fJuGzVIWPkr8iATUZfvIiCGhhlS2M70b/rF5vtPGWvxm7TRpJaM/GO
+         8dyBR1nHBEZ8mzWemUy2Xam5icOcg7F9iFRGtQAs7xzvuOPtVEPh7O9dc131cOJZi7by
+         Srgw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763020894; x=1763625694;
+        d=1e100.net; s=20230601; t=1763021578; x=1763626378;
         h=content-transfer-encoding:in-reply-to:content-language:from
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=+TKXpPbxSNO2sVb7821pvM7dsyeC1CYdB5v9NlDTIXY=;
-        b=ekIHS33YAHCaJH6EuNhAnT6ikTWqKJ4ghdhnQEdyVlwsjmsnMwjziO6SOXOLia7K6G
-         UpuNlrh4mil0C28FGK6p9qyvwuzHa9xdiZC/Y6hy+g+r5wbHy+TFD7NhMOpKi6bIeIwb
-         5rCkKDIF1ssggROrErpwODLQ9iHUEn9Bvh4DBjVFQ8He3JkVPyAuow7N7A5he0XhMN3t
-         wMv/cL4hjzbSxIkF6jbSOfSS2CN/ZMqCGUczu2niHMGGu0GKDtUVIl4amDrsRjVo1L1f
-         k6WT3bltyPxPAyFzLd9TYHLqTlVQ8NKfJ6NOz9bTmHg8JsCJf/pl6OBPeBZY3wHRq7rm
-         YMyA==
-X-Forwarded-Encrypted: i=1; AJvYcCUGdh6jqzogxX4+vt6Y0yYVxSET2izfl22KR/autpWFotIodeOTWmmUoHzt3c0SPscmo8Dm9Es6e8g=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwuA+vp+jti58CUvmqBrzQQwpMZ9iFeeO1kU4ZOt4MzK4/oT1hd
-	xKqQ36HrLxt8pwfcig7VPDLg8uMvFp46/2L1VzukPlFauYqliauKg+Nc0xOBlHLN5Ic=
-X-Gm-Gg: ASbGnct1TT5ScRDIRx+y+QrZ62jIUIza+uLkOn/0XrbOOwA5Lnie0+1sVSnF3LwcddJ
-	tVfHfxPT09mFq6njXCQK7oYz5y/S7VT8COmvQV0FjfbAB0kXc/XkeHDhl+ZJUqyHdw4uSR6+rv/
-	Bo3sEfotz8WJMm710OkpiAKjTt2jbTz0XQYg1DzZ+hQQCxKqUBQDv+caV25AigkSg0VriRRciAh
-	bFSFtgPc/Azmm5ClT/gvGZxLpfwyBJesGZGbbBSyQKyxEa54l6B+6KCqGagm7VK8ZhdbXz14fvx
-	I3Zpdl8aGoX/N6sHMOofUDY89aMp8Ru+wZy5+m58rePhCvQHDwo1WDxsQf0TmdiUqMDuG8zTeRs
-	ZWT0l1epRCLSCTdld08alqFv6tzEvbHSeBQiAdXTn49mgDnw/OQyGIwQrYUT2zQ4w/s8ty8/UP7
-	HbgRu3pk/w
-X-Google-Smtp-Source: AGHT+IE8qQ+nj44APGWUeQOkc3VUh3xrQcYOiNRiBBkMDO6sDGxE8imI7u/StM+te/EnuRU4DeBwhQ==
-X-Received: by 2002:a05:600c:3b11:b0:477:79c7:8994 with SMTP id 5b1f17b1804b1-477871c472dmr55301215e9.30.1763020893741;
-        Thu, 13 Nov 2025 00:01:33 -0800 (PST)
+        bh=F0hgBMveSb7cwa3tNC9/2B7T1+14tCA7kB4oFGdjB80=;
+        b=E21KZNMbZBqc428Phggv6T6MZPeE0JMAjnDxWIGLFa3LaXWn0FdmOhGQchTNj0Z2Sc
+         K1MWufZmIOEBbsHPEbBWfEFqD9+rhHD+EMAMda6hB3uN67ZxGhSr80fds0iUqJGOrKWU
+         uwklIkB3BdRn60aUio6PAVVDX7/w38Pw0RtjG8S9CSRz7HDmhzB3yHrYvwR7ews5mE3b
+         i6MH7DsAeQvmyDgS2ZwN4R4uaXWjI3Y7iHuLDJWFK6qCuDW+b0hNXFMCm21A+KcuC77D
+         ebTGPXL18qkfr+RoKuzFwdwjKs7ZUe3+ml7NuBspCdVgjLiBdU5rB7nHLvuEIOQpwYfv
+         IJhQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWEYKYGpuRTPGc9Xc6q/j1tiN6V9B0TnX/HfPSb0oiYi8Ndscq0iQl0mXAvSnYBAc4Ekjxa0c2O9ZU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzdUdnG5I9CW43kvrq++ZH0PaH/1pCpYHUvEcW96xTwQXC1d3WI
+	Fviafi6N5UTJzegc2riew30hqYfeumDWsSm9EZFLnAy6vxK/gghYijcmryWKBs6DlAg=
+X-Gm-Gg: ASbGncu9lEu8E4h7POVzJ5cQrn+j483w9OT66aMY9y7a8aw+y3EaB5qJ0cnBPqmL3Sp
+	ARPMCAE8h8MgECGE9kxnrx8NDBDz4AcRVqFwYnMHflX1pXK8n32IVcql7YY4x1S4ZCPHtgvlEPh
+	p2cfXLS48mo4D6SBTpU1WEXRD0Po6TsA1IadiLnhBZqZMEjZFLwD8PS58h5lmcYxqS/aEcNt0ps
+	CmbVHFt/bA0qdxFfg0nAgfhlGN6Zh5d2BxCTitfGkfTRa954JkD3+M3G2WO8n1tbbDNjLYULzK3
+	cUCAo++QrWOVM75nG0hbLLo4yuhmOMX+8j7sQ9ZFTOLW3Xmwgu5qkAq7hwT+6CX3bdI5yvEqvQJ
+	htvrkpxUdpdtVQU0UpvZ9SR86o3BvtaR5epvp5GLs723f/6r1vMlXgOL0nR6+vgeg/ZFWpAYnen
+	15/IVvDj5C
+X-Google-Smtp-Source: AGHT+IEl052iGPh1sTMIdYe2mp1cm5U3r4OeUXO5rJooo4iRckSr2LlzUUnEDP8iWmIaVkMCxaoIbA==
+X-Received: by 2002:a05:600c:8b38:b0:46e:4b79:551 with SMTP id 5b1f17b1804b1-477870b39e9mr54164035e9.31.1763021578138;
+        Thu, 13 Nov 2025 00:12:58 -0800 (PST)
 Received: from [192.168.50.4] ([82.78.167.134])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47789ffea1esm53136525e9.13.2025.11.13.00.01.32
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4778c8a9456sm20676475e9.15.2025.11.13.00.12.56
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Nov 2025 00:01:32 -0800 (PST)
-Message-ID: <5ead50cd-2855-4e46-8e9a-f0d7a16cc0ef@tuxon.dev>
-Date: Thu, 13 Nov 2025 10:01:31 +0200
+        Thu, 13 Nov 2025 00:12:57 -0800 (PST)
+Message-ID: <55e9c0c8-4360-4d08-9269-27a3ff5ba38c@tuxon.dev>
+Date: Thu, 13 Nov 2025 10:12:56 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,122 +69,40 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/3] mmc: renesas_sdhi: Switch to
- SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() and pm_ptr()
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: wsa+renesas@sang-engineering.com, p.zabel@pengutronix.de,
+Subject: Re: [PATCH 0/3] mmc: renesas_sdhi: Handle resets
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: ulf.hansson@linaro.org, p.zabel@pengutronix.de,
  linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
  linux-kernel@vger.kernel.org,
  Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 References: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com>
- <20251008042526.3312597-3-claudiu.beznea.uj@bp.renesas.com>
- <CAPDyKFpFYeD9tLA+w4NARKq-Wj-7O2Caa3y8i2Z9NX6J4XLahA@mail.gmail.com>
+ <8c654a1f-2513-4afb-b33b-fabbafbbe845@tuxon.dev> <aRTRLW4bCoZMtCaB@shikoro>
 From: Claudiu Beznea <claudiu.beznea@tuxon.dev>
 Content-Language: en-US
-In-Reply-To: <CAPDyKFpFYeD9tLA+w4NARKq-Wj-7O2Caa3y8i2Z9NX6J4XLahA@mail.gmail.com>
+In-Reply-To: <aRTRLW4bCoZMtCaB@shikoro>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-Hi, Uffe,
+Hi, Wolfram,
 
-On 11/11/25 18:22, Ulf Hansson wrote:
-> On Wed, 8 Oct 2025 at 06:25, Claudiu <claudiu.beznea@tuxon.dev> wrote:
->>
->> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->>
->> SET_SYSTEM_SLEEP_PM_OPS() and SET_RUNTIME_PM_OPS() are deprecated now
->> and require __maybe_unused protection against unused function warnings.
+On 11/12/25 20:25, Wolfram Sang wrote:
 > 
-> I don't see them marked deprecated, is that really the case?
+>> Gentle ping on this series.
+> 
+> I had a look already but want to test this series on R-Car SoCs. Which
+> tests did you apply?
+> 
 
-You're right, I got confused myself by some comments on pm.h. I'll update
-it in the next version.
+On RZ/G3S the following were checked:
+- run bonnie++ on all the SDHIs (with SD card and eMMC, where possible)
+- unbind/bind on all the SDHIs and run bonnie++ (with SD card and eMMC,
+  where possible) after re-bind
+- 32 consecutive suspend/resume (s2idle and deep) and run bonnie++ (with SD
+  card and eMMC where possible) after resume
+
+bonnie++ tests were executed after boot on RZ/G2{H, M, N, L, UL}, RZ/V2L.
 
 Thank you,
 Claudiu
 
-> 
->> The usage of pm_ptr() and SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() allows
->> the compiler to see the functions, thus suppressing the warning. Thus
->> drop the __maybe_unused markings.
->>
->> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-> 
-> Other than the above, this looks fine to me!
-> 
-> Kind regards
-> Uffe
-> 
->> ---
->>  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 11 +++++------
->>  drivers/mmc/host/tmio_mmc.h                   |  2 --
->>  drivers/mmc/host/tmio_mmc_core.c              |  2 --
->>  3 files changed, 5 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
->> index 9e3ed0bcddd6..7ceb7b977a0b 100644
->> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
->> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
->> @@ -599,18 +599,17 @@ static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
->>  }
->>
->>  static const struct dev_pm_ops renesas_sdhi_internal_dmac_dev_pm_ops = {
->> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
->> -                               pm_runtime_force_resume)
->> -       SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
->> -                          tmio_mmc_host_runtime_resume,
->> -                          NULL)
->> +       SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
->> +       RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
->> +                      tmio_mmc_host_runtime_resume,
->> +                      NULL)
->>  };
->>
->>  static struct platform_driver renesas_internal_dmac_sdhi_driver = {
->>         .driver         = {
->>                 .name   = "renesas_sdhi_internal_dmac",
->>                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
->> -               .pm     = &renesas_sdhi_internal_dmac_dev_pm_ops,
->> +               .pm     = pm_ptr(&renesas_sdhi_internal_dmac_dev_pm_ops),
->>                 .of_match_table = renesas_sdhi_internal_dmac_of_match,
->>         },
->>         .probe          = renesas_sdhi_internal_dmac_probe,
->> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
->> index c8cdb1c0722e..b9de03325c58 100644
->> --- a/drivers/mmc/host/tmio_mmc.h
->> +++ b/drivers/mmc/host/tmio_mmc.h
->> @@ -209,10 +209,8 @@ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
->>  void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
->>  irqreturn_t tmio_mmc_irq(int irq, void *devid);
->>
->> -#ifdef CONFIG_PM
->>  int tmio_mmc_host_runtime_suspend(struct device *dev);
->>  int tmio_mmc_host_runtime_resume(struct device *dev);
->> -#endif
->>
->>  static inline u16 sd_ctrl_read16(struct tmio_mmc_host *host, int addr)
->>  {
->> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
->> index 775e0d9353d5..8be642f737c7 100644
->> --- a/drivers/mmc/host/tmio_mmc_core.c
->> +++ b/drivers/mmc/host/tmio_mmc_core.c
->> @@ -1286,7 +1286,6 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
->>  }
->>  EXPORT_SYMBOL_GPL(tmio_mmc_host_remove);
->>
->> -#ifdef CONFIG_PM
->>  static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
->>  {
->>         if (!host->clk_enable)
->> @@ -1331,7 +1330,6 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
->>         return 0;
->>  }
->>  EXPORT_SYMBOL_GPL(tmio_mmc_host_runtime_resume);
->> -#endif
->>
->>  MODULE_DESCRIPTION("TMIO MMC core driver");
->>  MODULE_LICENSE("GPL v2");
->> --
->> 2.43.0
->>
 
