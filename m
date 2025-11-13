@@ -1,187 +1,77 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F4E135A125;
-	Thu, 13 Nov 2025 15:03:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 644E41ACDFD;
+	Thu, 13 Nov 2025 17:36:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763046206; cv=none; b=lAVMRdUs/shogM1reRvJOXLY0XrbL5sItC0ApdIXZ/MXUruG6fddNcl3cIzQQd2eMBXXiHI/cRfBJTl6YzQwArZsO8vvogZXo+KVrG25bEUjO49OyiAHtHOd7VdDjmj7pRW/l+xjRa9aTV9NVOr5LiJeiIDM41kBi/tadQUkj9o=
+	t=1763055402; cv=none; b=ne8SJd1Nw9oha0iaGEp2Gpq/Fnhb+PyvOm/+ULsGuu+lp103smsGcCZopLnxyGNCPZnBQx4GO7bjeDBbC/AYR47MTvKUPh4LM2kjmwuVytqZEZ2vJ4M0A08KEHRqBJ5N9QZs4zIB2MLxJ4aVbilU838DgN35L4GxZ9ZM5OItlew=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763046206; c=relaxed/simple;
-	bh=OtFs4nYXEH1ThWKykhpKfwgYG7osOn2qi/Z49bIrWUw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=e2xsrQoCaO+LsaAgsIMF0gWKSjFPdhiqFEd8Bm244lyfBeDcaHf+zi3Hn1QfDBesPRTvAkMH2CuoPesf03dRx3uNGXU1WJvuETybCf4POthb2ZWIBTj0xNrXbpJfjHrhcmxzoAEM42u9oql44adyUxwbtfIRuOnvWX8sapDMLFI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WOuQz+Me; arc=none smtp.client-ip=198.175.65.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1763055402; c=relaxed/simple;
+	bh=kVziLXfXL56TP/yKCfLu8mV1lPOEzpzNF5jNw8pDrbM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jmEE6xKskJiX594Z6DhTJBr62rW6C9DJQUpBJ4xbVpt6JNiHZFNWLMXjL+wwPkCTQgYBmG8VFmKPONVExLO7leyvaIbEKzCFB2Lm8El23Khec5SDpmGErB1VKc8OfBXrmdyptg8/6r+KnBuUYPA/auAxptdWUrPDW/GDEI14TCE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mRZN6psp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WOuQz+Me"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1763046205; x=1794582205;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=OtFs4nYXEH1ThWKykhpKfwgYG7osOn2qi/Z49bIrWUw=;
-  b=WOuQz+MeEOQavM2mL8rxvEvgJpuCI5O3AzUufeQa8/e11H0o5GTZ5GqT
-   n9cxFhd8bXBSS7O5mztTZkRV0wjoLc4Nd3Zz+OBhfrmtOMHV52kpdOSTe
-   Rl6KIdIbq8g8S3a0ftsG19Lmoc36q+tM5d1gjKNY4f8qBCsIKNU8qr9PX
-   nZXteDnIuQomJrb1YNR5hIwSkCfd+eGZbStKrhZWL0w2oeiMifj34Xfiu
-   OeQC2ewD0Z57bPNcBgZleBbS7L4GpLJXymksKUBMUPPjEdv5H+mYWwU7f
-   hbr+XEVgsT0qZ1wsuIDBJBXgiXZXqR2vib8qrTk2du0g4Bo+o+ABGNNXA
-   g==;
-X-CSE-ConnectionGUID: voUJCzjSS5mlD7Il6h4a8Q==
-X-CSE-MsgGUID: 4tcvY+JeTQ+4hNpACC1S4Q==
-X-IronPort-AV: E=McAfee;i="6800,10657,11531"; a="65054771"
-X-IronPort-AV: E=Sophos;i="6.17,312,1747724400"; 
-   d="scan'208";a="65054771"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Nov 2025 07:03:04 -0800
-X-CSE-ConnectionGUID: wsJEWqiyRSOTWbBWxtwAyw==
-X-CSE-MsgGUID: TObbgzKmSz6dKnfJs+E4CA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.19,302,1754982000"; 
-   d="scan'208";a="220325238"
-Received: from black.igk.intel.com ([10.91.253.5])
-  by fmviesa001.fm.intel.com with ESMTP; 13 Nov 2025 07:02:55 -0800
-Received: by black.igk.intel.com (Postfix, from userid 1003)
-	id 88811AB; Thu, 13 Nov 2025 16:02:19 +0100 (CET)
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: Corey Minyard <corey@minyard.net>,
-	=?UTF-8?q?Christian=20K=C3=B6nig?= <christian.koenig@amd.com>,
-	"Dr. David Alan Gilbert" <linux@treblig.org>,
-	Alex Deucher <alexander.deucher@amd.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-	Rob Clark <robin.clark@oss.qualcomm.com>,
-	Matthew Brost <matthew.brost@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-	Aleksandr Loktionov <aleksandr.loktionov@intel.com>,
-	Vitaly Lifshits <vitaly.lifshits@intel.com>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Niklas Cassel <cassel@kernel.org>,
-	Calvin Owens <calvin@wbinvd.org>,
-	Vadim Fedorenko <vadim.fedorenko@linux.dev>,
-	Sagi Maimon <maimon.sagi@gmail.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	Karan Tilak Kumar <kartilak@cisco.com>,
-	Hans Verkuil <hverkuil+cisco@kernel.org>,
-	Casey Schaufler <casey@schaufler-ca.com>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Petr Mladek <pmladek@suse.com>,
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	Max Kellermann <max.kellermann@ionos.com>,
-	linux-doc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	openipmi-developer@lists.sourceforge.net,
-	linux-media@vger.kernel.org,
-	dri-devel@lists.freedesktop.org,
-	linaro-mm-sig@lists.linaro.org,
-	amd-gfx@lists.freedesktop.org,
-	linux-arm-msm@vger.kernel.org,
-	freedreno@lists.freedesktop.org,
-	intel-xe@lists.freedesktop.org,
-	linux-mmc@vger.kernel.org,
-	netdev@vger.kernel.org,
-	intel-wired-lan@lists.osuosl.org,
-	linux-pci@vger.kernel.org,
-	linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org,
-	linux-staging@lists.linux.dev,
-	ceph-devel@vger.kernel.org,
-	linux-trace-kernel@vger.kernel.org
-Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-	Sergey Senozhatsky <senozhatsky@chromium.org>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Sumit Semwal <sumit.semwal@linaro.org>,
-	Gustavo Padovan <gustavo@padovan.org>,
-	David Airlie <airlied@gmail.com>,
-	Simona Vetter <simona@ffwll.ch>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Dmitry Baryshkov <lumag@kernel.org>,
-	Abhinav Kumar <abhinav.kumar@linux.dev>,
-	Jessica Zhang <jesszhan0024@gmail.com>,
-	Sean Paul <sean@poorly.run>,
-	Marijn Suijten <marijn.suijten@somainline.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Lucas De Marchi <lucas.demarchi@intel.com>,
-	=?UTF-8?q?Thomas=20Hellstr=C3=B6m?= <thomas.hellstrom@linux.intel.com>,
-	Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Vladimir Oltean <olteanv@gmail.com>,
-	Andrew Lunn <andrew@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>,
-	Paolo Abeni <pabeni@redhat.com>,
-	Tony Nguyen <anthony.l.nguyen@intel.com>,
-	Przemek Kitszel <przemyslaw.kitszel@intel.com>,
-	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Rodolfo Giometti <giometti@enneenne.com>,
-	Jonathan Lemon <jonathan.lemon@gmail.com>,
-	Richard Cochran <richardcochran@gmail.com>,
-	Stefan Haberland <sth@linux.ibm.com>,
-	Jan Hoeppner <hoeppner@linux.ibm.com>,
-	Heiko Carstens <hca@linux.ibm.com>,
-	Vasily Gorbik <gor@linux.ibm.com>,
-	Alexander Gordeev <agordeev@linux.ibm.com>,
-	Christian Borntraeger <borntraeger@linux.ibm.com>,
-	Sven Schnelle <svens@linux.ibm.com>,
-	Satish Kharat <satishkh@cisco.com>,
-	Sesidhar Baddela <sebaddel@cisco.com>,
-	"James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Xiubo Li <xiubli@redhat.com>,
-	Ilya Dryomov <idryomov@gmail.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Andrew Morton <akpm@linux-foundation.org>
-Subject: [PATCH v3 21/21] tracing: Switch to use %ptSp
-Date: Thu, 13 Nov 2025 15:32:35 +0100
-Message-ID: <20251113150217.3030010-22-andriy.shevchenko@linux.intel.com>
-X-Mailer: git-send-email 2.50.1
-In-Reply-To: <20251113150217.3030010-1-andriy.shevchenko@linux.intel.com>
-References: <20251113150217.3030010-1-andriy.shevchenko@linux.intel.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mRZN6psp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B95E5C4CEF5;
+	Thu, 13 Nov 2025 17:36:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1763055402;
+	bh=kVziLXfXL56TP/yKCfLu8mV1lPOEzpzNF5jNw8pDrbM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=mRZN6psplpeQvizDzb4k8mSO0ZChmTKz6tLxO7uJoe2y0rcmgcuBuOs0JfNY8ubz6
+	 Y5UkvDIenDwZ092/C1aKIDN57EHolZv8LmmVUFc1yuBkopoGOC2uPMM9gWCHGmAzcQ
+	 ANW1mZxcgbVyjbPWABLNC8EIQ7C+Ve6E/kKXjo3hyviWfgbZzXdUofy/xsJzJ4XDtA
+	 XH3tZYqb7OaWXaMInUaItcaDfgr7RmPq5osta0240Iwxu6q+xw4IXkPmaJ+0qVg38d
+	 k8FodFN+nbUdQqwczNRqTDab/0b82rGRiONgCad8sAA191SZqjpRKp+07IhaKPN83Q
+	 DzWgNBV1SGJOg==
+Date: Thu, 13 Nov 2025 09:35:00 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: Md Sadre Alam <quic_mdalam@quicinc.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+	linux-kernel@vger.kernel.org, quic_varada@quicinc.com
+Subject: Re: [PATCH v4] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
+ devices
+Message-ID: <20251113173500.GE1792@sol>
+References: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
+ <20251111205212.GA245945@sol>
+ <dbea629d-5aa9-4a85-6316-25ac82a33520@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <dbea629d-5aa9-4a85-6316-25ac82a33520@quicinc.com>
 
-Use %ptSp instead of open coded variants to print content of
-struct timespec64 in human readable format.
+On Thu, Nov 13, 2025 at 12:41:28PM +0530, Md Sadre Alam wrote:
+> > > +	if (mrq->crypto_ctx) {
+> > > +		if (!msm_host->ice_init_done) {
+> > > +			sdhci_msm_non_cqe_ice_init(host);
+> > > +			msm_host->ice_init_done = true;
+> > > +		}
+> > 
+> > This means sdhci_msm_ice_enable() is called only once per host
+> > controller.  It looks like the existing call to sdhci_msm_ice_enable()
+> > happens each time after the host controller is resumed.  So there seems
+> > to be an inconsistency there.  Which way is correct?
+> Thank you for highlighting this. After revisiting the code paths, I believe
+> the behavior is consistent across both CQE and non-CQE modes.
+> ICE is re-enabled on every resume via the common sdhci_msm_runtime_resume()
+> → sdhci_msm_ice_resume() → qcom_ice_resume() → sdhci_msm_ice_enable() path.
+> The ice_init_done flag only governs one-time initialization in
+> sdhci_msm_ice_cfg() and doesn’t interfere with the resume logic.
+> 
+> In summary:
+> CQE mode: ICE enabled during sdhci_msm_cqe_enable() + every resume
+> Non-CQE mode: ICE enabled on first crypto request + every resume
 
-Acked-by: Steven Rostedt (Google) <rostedt@goodmis.org>
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- kernel/trace/trace_output.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+I was looking at sdhci_msm_cqe_enable().  Based on the caller, it seems
+to be a per-resume thing too.  So it doesn't seem consistent.
 
-diff --git a/kernel/trace/trace_output.c b/kernel/trace/trace_output.c
-index ebbab3e9622b..cc2d3306bb60 100644
---- a/kernel/trace/trace_output.c
-+++ b/kernel/trace/trace_output.c
-@@ -1490,12 +1490,12 @@ trace_hwlat_print(struct trace_iterator *iter, int flags,
- 
- 	trace_assign_type(field, entry);
- 
--	trace_seq_printf(s, "#%-5u inner/outer(us): %4llu/%-5llu ts:%lld.%09ld count:%d",
-+	trace_seq_printf(s, "#%-5u inner/outer(us): %4llu/%-5llu ts:%ptSp count:%d",
- 			 field->seqnum,
- 			 field->duration,
- 			 field->outer_duration,
--			 (long long)field->timestamp.tv_sec,
--			 field->timestamp.tv_nsec, field->count);
-+			 &field->timestamp,
-+			 field->count);
- 
- 	if (field->nmi_count) {
- 		/*
--- 
-2.50.1
-
+- Eric
