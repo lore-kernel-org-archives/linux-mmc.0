@@ -1,77 +1,93 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 644E41ACDFD;
-	Thu, 13 Nov 2025 17:36:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A7E22BE632
+	for <linux-mmc@vger.kernel.org>; Thu, 13 Nov 2025 21:06:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763055402; cv=none; b=ne8SJd1Nw9oha0iaGEp2Gpq/Fnhb+PyvOm/+ULsGuu+lp103smsGcCZopLnxyGNCPZnBQx4GO7bjeDBbC/AYR47MTvKUPh4LM2kjmwuVytqZEZ2vJ4M0A08KEHRqBJ5N9QZs4zIB2MLxJ4aVbilU838DgN35L4GxZ9ZM5OItlew=
+	t=1763067990; cv=none; b=DVJ3cNnMrTMA05xuDkS9i3fbz9uvijJxopDbI0EnLgnavwPOdtnu8DZ6INLAgnHuemwI/L0w0qTQHFyvrLd1Xeqa52byHnAESIDZLRAbam6/X7yAQmJ1CYCtFjqJ6/F5FFDW3EkKf9WigC/+d9jD7MriONMa7l7dbbGbkHiLA28=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763055402; c=relaxed/simple;
-	bh=kVziLXfXL56TP/yKCfLu8mV1lPOEzpzNF5jNw8pDrbM=;
+	s=arc-20240116; t=1763067990; c=relaxed/simple;
+	bh=LA+AYTXaboBCeXMUYA/8qK0lyROmo8+g8ciMxm21qzc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jmEE6xKskJiX594Z6DhTJBr62rW6C9DJQUpBJ4xbVpt6JNiHZFNWLMXjL+wwPkCTQgYBmG8VFmKPONVExLO7leyvaIbEKzCFB2Lm8El23Khec5SDpmGErB1VKc8OfBXrmdyptg8/6r+KnBuUYPA/auAxptdWUrPDW/GDEI14TCE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mRZN6psp; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=EPbXC5Oa7rVEDuN8+mIEWjYumTqsn3sFo2Sxuc+eqp1OPWbAzQqQhc03FRAyAP9QxBjvjWBnEA8J9ijpXlUBHzckXg1KRAHatHIjaIY5j82kHuCRu/Suhl7NNJNZvQ+umAZSguOfVZrczVQonA1U+sWO/uQUsipFTUSf1ozTFzU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=lzKHAIFX; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mRZN6psp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B95E5C4CEF5;
-	Thu, 13 Nov 2025 17:36:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763055402;
-	bh=kVziLXfXL56TP/yKCfLu8mV1lPOEzpzNF5jNw8pDrbM=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=mRZN6psplpeQvizDzb4k8mSO0ZChmTKz6tLxO7uJoe2y0rcmgcuBuOs0JfNY8ubz6
-	 Y5UkvDIenDwZ092/C1aKIDN57EHolZv8LmmVUFc1yuBkopoGOC2uPMM9gWCHGmAzcQ
-	 ANW1mZxcgbVyjbPWABLNC8EIQ7C+Ve6E/kKXjo3hyviWfgbZzXdUofy/xsJzJ4XDtA
-	 XH3tZYqb7OaWXaMInUaItcaDfgr7RmPq5osta0240Iwxu6q+xw4IXkPmaJ+0qVg38d
-	 k8FodFN+nbUdQqwczNRqTDab/0b82rGRiONgCad8sAA191SZqjpRKp+07IhaKPN83Q
-	 DzWgNBV1SGJOg==
-Date: Thu, 13 Nov 2025 09:35:00 -0800
-From: Eric Biggers <ebiggers@kernel.org>
-To: Md Sadre Alam <quic_mdalam@quicinc.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	linux-kernel@vger.kernel.org, quic_varada@quicinc.com
-Subject: Re: [PATCH v4] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
- devices
-Message-ID: <20251113173500.GE1792@sol>
-References: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
- <20251111205212.GA245945@sol>
- <dbea629d-5aa9-4a85-6316-25ac82a33520@quicinc.com>
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="lzKHAIFX"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=LA+A
+	YTXaboBCeXMUYA/8qK0lyROmo8+g8ciMxm21qzc=; b=lzKHAIFXiIk7HVzpqlKU
+	hhh1foOJbWe8vglAYPpVHgZHUBh1z7bB8J3A/9n4WxGYaQhIcAnkqNpvnT9N/e5x
+	t+b+s4bmt0cQFs5+kg95Rj6v45WK/TT7B7Qf2ijBNt1mUaAOLCJdKMCegoX758k6
+	IiD+hrxrQ+67mnVA1UUzTlaU8lGv0CiVEzgpmQe6/7JOAAIOLGONarawkcGXDZCG
+	TgTHSOeRYZxOzLmJ76H8J9dYhpDYpKbVoNTXXIE4Fo40XzLNX3LVH2p23JjJOePE
+	4Nl3fJbwugpSI3wAa3Xa2xTNIcb8reuSxa4T09lVf7imC3tBg8DXrYONDGp+efTl
+	bg==
+Received: (qmail 2050776 invoked from network); 13 Nov 2025 22:06:17 +0100
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 13 Nov 2025 22:06:17 +0100
+X-UD-Smtp-Session: l3s3148p1@OQaAQIBD7N8ujnv+
+Date: Thu, 13 Nov 2025 22:06:16 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: ulf.hansson@linaro.org, p.zabel@pengutronix.de,
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Subject: Re: [PATCH 1/3] mmc: renesas_sdhi: Deassert the reset signal on probe
+Message-ID: <aRZISINTsymbabe4@ninjato>
+References: <20251008042526.3312597-1-claudiu.beznea.uj@bp.renesas.com>
+ <20251008042526.3312597-2-claudiu.beznea.uj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="/IIM76zHQOhlItqo"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <dbea629d-5aa9-4a85-6316-25ac82a33520@quicinc.com>
+In-Reply-To: <20251008042526.3312597-2-claudiu.beznea.uj@bp.renesas.com>
 
-On Thu, Nov 13, 2025 at 12:41:28PM +0530, Md Sadre Alam wrote:
-> > > +	if (mrq->crypto_ctx) {
-> > > +		if (!msm_host->ice_init_done) {
-> > > +			sdhci_msm_non_cqe_ice_init(host);
-> > > +			msm_host->ice_init_done = true;
-> > > +		}
-> > 
-> > This means sdhci_msm_ice_enable() is called only once per host
-> > controller.  It looks like the existing call to sdhci_msm_ice_enable()
-> > happens each time after the host controller is resumed.  So there seems
-> > to be an inconsistency there.  Which way is correct?
-> Thank you for highlighting this. After revisiting the code paths, I believe
-> the behavior is consistent across both CQE and non-CQE modes.
-> ICE is re-enabled on every resume via the common sdhci_msm_runtime_resume()
-> → sdhci_msm_ice_resume() → qcom_ice_resume() → sdhci_msm_ice_enable() path.
-> The ice_init_done flag only governs one-time initialization in
-> sdhci_msm_ice_cfg() and doesn’t interfere with the resume logic.
-> 
-> In summary:
-> CQE mode: ICE enabled during sdhci_msm_cqe_enable() + every resume
-> Non-CQE mode: ICE enabled on first crypto request + every resume
 
-I was looking at sdhci_msm_cqe_enable().  Based on the caller, it seems
-to be a per-resume thing too.  So it doesn't seem consistent.
+--/IIM76zHQOhlItqo
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-- Eric
+On Wed, Oct 08, 2025 at 07:25:23AM +0300, Claudiu wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>=20
+> Deassert the reset signal of the SDHI controller during probe to avoid
+> relying on the previous bootloaders. Without deasserting the reset signal,
+> the SDHI controller will not function.
+>=20
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--/IIM76zHQOhlItqo
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmkWSEMACgkQFA3kzBSg
+KbZbQQ//c5MsW9GD+ptuf/ibkl9YUTt2FTCAGtP/YvXEWDloKs1HPuKazbjTYawg
+k2DL8ZHya1kv3pqFs6D+aDDI9PlwJtU0RQ0EsLVI7fWJaLtWHAEps8o4rZ9itezT
+ciWRVjLxVEFEOH4bMxIjAkFBMstXmTSrjl483gPkSyE4UphgBCxQDSc6IYaOn4w7
+AGV6ybUt2Ct/wooluu1TTGYd8YJ3kZOY7KRF6PtlyLVjvDBPcTX/4/KgwaVvY2nZ
+2huJmy3blr8p7uKVepq7pTxGj5EiuoGpeW/1jZpBXmKPAp3f5QZsFstGLL0xYYhk
+0jdkjWq6j/HRCnOyay0J1/woYFfCu/ykqx5ctUlYczEhptLiYNrNQtjU4VzeoDYN
+Caze8vqjAvVNFCvoXecsCz46ZiFOzHpiJ1gfs4OWAy+M7TVsBJaVgSE0dpHlUu/i
+/yicbl66XWxsAnBQAf1EfluyfW5aizzof5Ygu8Zo6z3/8f/iPesIpZq19DonYIxO
+cadTwPbtyEgQuGtM0e/8ri1byV2Ld7uVfxIT1NZnp5mWnLKA1BNcET5UV6tNaQzt
+7xWkVFMnpElSYaUhyoM0xO04DAjEcsHuQlIBSARKxSihAcRYpWqK46TjFaL0zcMv
+fx3Zb7yjl7060kuTLc01jeDJCZ22rPfzvkmcPumxaUCoD2KuTIY=
+=iv7E
+-----END PGP SIGNATURE-----
+
+--/IIM76zHQOhlItqo--
