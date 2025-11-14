@@ -1,147 +1,43 @@
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4598324678A
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 12:59:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF3EE3254A5;
+	Fri, 14 Nov 2025 14:53:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763125188; cv=none; b=uldJakpY2DhyQ2oJU04rcgsQeOoQpO2AsNF1n5H9HJnfA1pWYna8KwJ3Fus/hG2loRmnPIqA11RYszanEoHuiQKnyKn0k4iwZAKDQmPxmcOCdsNBN0mhR9Y0UmvzqwQZ9hgRzADUipkB4P5rSGCqswG7RpARcYxXfdTkjqCAZZY=
+	t=1763132028; cv=none; b=iWmEidvq6Gepi+y2my26+zygyBGIc3GCj+QMHybc7AxWbPumjYVlDedU+V2ww1F4MgqLkZO9r4ZaRzx2YhrUfY51LaG5Ss2w8UJTmAAvq4Z/MxQy8AVM++8q9pFxYDBVNXdqByK2FBsK2LmqCGnNbctX9GZDAW5vp4kNPEdZbV4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763125188; c=relaxed/simple;
-	bh=OwXqaVYjP+AYjhrqdV/iUf65lNBgi6i65jcAVuzkims=;
+	s=arc-20240116; t=1763132028; c=relaxed/simple;
+	bh=Ro/DF230ZGwthADA1lsr1FsD+fogDSrK16pFZ2ozOzI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oQd+XvAAn0Cz5i6vGb9Rq2EeTYa25pTrXN8uznBLdS5VoOYnI+SIFWwAe53eS9b56/G866JcD909VuVxqE9dkd7RBp3A9H3hKh0rv1MMBp97l/PRiqskgsBj8J632ku1fWfFWQvV46H4Ba2bUViJSoWfMo5FBjmQ8n/CTHgp9SY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=ZbqfK4m0; arc=none smtp.client-ip=209.85.218.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=swxY9pwv7u0xg0Xfq1FtXl9sHozbameqyjFER/YZMidHsPpzuf2EtAhCr7HO5R6KzyijQW63q9NSry+WSZjgYE0oWw9HtsXbIO63h7Hfit4Dn7QAGmAWpJLxPOtukZrJ3iDuxEpO+8KNcNJScvzd6tAh1Gy0JHvnzKWsZsxDM+M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Azbldzaj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="ZbqfK4m0"
-Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-b735487129fso288066866b.0
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 04:59:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1763125183; x=1763729983; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=lIa30kEZfIOzXn6c2Ch+jzSexECrPYWXzGffwwy3r9Q=;
-        b=ZbqfK4m0Vk3QZZMUhnZ65dzeU/GFengPpj80uV976TTNT6cF3kLVFLU8dNGFNmtTBM
-         4qOp9/GpfWs9OKiNwe0QHH/jcW19OTYlr1meSgMwyMFng3k0InkVtUKHBwfo5BNYqFr+
-         4lFMJhMGNriMqn3fozHBGzFjOKEU5kUtemJ7mYPxBLflIyzVat1J4pYAXgbN4B2YnyYG
-         82UWE3kzLCNGqMlMm3yvbYBMH3F7S7iX89IYp4nrzQpu+C75oEGN3b+p3276ZuRBY6eY
-         kmTlfbRGGr9zKGdLcC+V/1s+Tfa76MlJmsfSuKTulTxUlUvcI4E9GKJuCGZhh00S7xuu
-         FnVg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763125184; x=1763729984;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=lIa30kEZfIOzXn6c2Ch+jzSexECrPYWXzGffwwy3r9Q=;
-        b=eQopUaZ0sHNnLaJ6hI9tPQwGN46dBwP0uSGgeML7vFRX1i+mnUpelhQBEKUb4fYsof
-         zMXir+yO9+ATGGw9+sB9FYfK0adHZMljThqtlfZnhe9+I/jsFXz69gJkBt4cK71BPAoX
-         ofWcmcwcXYRoRoLGkb56B+is5gBQO52/I6lucn33JwAGmOC+CBNpDFgCHULjiFyGS7uP
-         MJMjPjYWVpCqPh+/sldWbkxoJtrUW6ijV+r+8bOtC1x7PTWxN6OT/Z5aVIY5bX4cxG1a
-         8ea099GytIdfpMvGCLiWSBCUbyvHmdn8AG8uuNV/EKn1eZW4+SdcjHQ5p3Qtdt+taZiN
-         DL7g==
-X-Forwarded-Encrypted: i=1; AJvYcCVQ1iEl/8iyyBE9FLUlSVukWb4eUOJQ0rNQAZnKA7Z6PQbbF8sL1D5FfjHcRPRw3E3VVrMzFErsNM0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzgLF3IzPPtNzHd5vVy2gYhastAZuNZj0cBsivYxsYHngQDAw+B
-	BQCWQUteBhmSkGzKEoswhQBx5vJWslqQTX5q2OpVd2bH9hIro40nvfD/o+vmM6ILZPY=
-X-Gm-Gg: ASbGncsVPEvDZXjV5kexzH8w85u+GSp+Uca1DreCPJpWknxlorn+YR2O8Yr4RfczqIr
-	/1Dub9PVmzrGSDT3LKCrk7Cte5MHtf66hRhTKRcTZZ0CGgcJx0Pk+DQB+LPWGscfflLY6fGtziQ
-	yAoQdTB2CK0u28VqBEcVNLffG4Jz4Uxl7YuqTf03YfLqVycD0k7Qo6IzsI8uQxtSrAp8YoBCD4f
-	3Tocu0g+BFjmunB4EQlsVFqqCQsGToEhH0xli370yHutQO5Ua0A410PloheQjR94Kb8j9T2cN39
-	oz2NA+Jr+nLk7rWclIjPp8bPR1gv54cIDnJCVXSSlYSeqeWI9+hkWPW1H56sS5gbvx6vMId2Wi8
-	JZdgPSENAwdX+mNPjOott4SWQxCzYn8r3CC3L4mJThrcSb6ca5+xAB4E2NYTUlpUbM7FkFE1uR1
-	wWWIo=
-X-Google-Smtp-Source: AGHT+IH6H5eoyoDiGCawX8hcyfAIsFqjcgfKx5GqQ3M5ZUeRqB23EXgoQaPPEhXoJ1r2rQPfP0tLQA==
-X-Received: by 2002:a17:906:f105:b0:b73:7652:ef9e with SMTP id a640c23a62f3a-b737652f76bmr38125366b.55.1763125183501;
-        Fri, 14 Nov 2025 04:59:43 -0800 (PST)
-Received: from pathway.suse.cz ([176.114.240.130])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b734fd80a3asm382714666b.37.2025.11.14.04.59.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Nov 2025 04:59:42 -0800 (PST)
-Date: Fri, 14 Nov 2025 13:59:38 +0100
-From: Petr Mladek <pmladek@suse.com>
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Corey Minyard <corey@minyard.net>,
-	Christian =?iso-8859-1?Q?K=F6nig?= <christian.koenig@amd.com>,
-	"Dr. David Alan Gilbert" <linux@treblig.org>,
-	Alex Deucher <alexander.deucher@amd.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-	Rob Clark <robin.clark@oss.qualcomm.com>,
-	Matthew Brost <matthew.brost@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Aleksandr Loktionov <aleksandr.loktionov@intel.com>,
-	Vitaly Lifshits <vitaly.lifshits@intel.com>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Niklas Cassel <cassel@kernel.org>, Calvin Owens <calvin@wbinvd.org>,
-	Vadim Fedorenko <vadim.fedorenko@linux.dev>,
-	Sagi Maimon <maimon.sagi@gmail.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	Karan Tilak Kumar <kartilak@cisco.com>,
-	Hans Verkuil <hverkuil+cisco@kernel.org>,
-	Casey Schaufler <casey@schaufler-ca.com>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	Max Kellermann <max.kellermann@ionos.com>,
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	openipmi-developer@lists.sourceforge.net,
-	linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org,
-	linaro-mm-sig@lists.linaro.org, amd-gfx@lists.freedesktop.org,
-	linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
-	intel-xe@lists.freedesktop.org, linux-mmc@vger.kernel.org,
-	netdev@vger.kernel.org, intel-wired-lan@lists.osuosl.org,
-	linux-pci@vger.kernel.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-staging@lists.linux.dev,
-	ceph-devel@vger.kernel.org, linux-trace-kernel@vger.kernel.org,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-	Sergey Senozhatsky <senozhatsky@chromium.org>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Sumit Semwal <sumit.semwal@linaro.org>,
-	Gustavo Padovan <gustavo@padovan.org>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Dmitry Baryshkov <lumag@kernel.org>,
-	Abhinav Kumar <abhinav.kumar@linux.dev>,
-	Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>,
-	Marijn Suijten <marijn.suijten@somainline.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Lucas De Marchi <lucas.demarchi@intel.com>,
-	Thomas =?iso-8859-1?Q?Hellstr=F6m?= <thomas.hellstrom@linux.intel.com>,
-	Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Vladimir Oltean <olteanv@gmail.com>, Andrew Lunn <andrew@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Tony Nguyen <anthony.l.nguyen@intel.com>,
-	Przemek Kitszel <przemyslaw.kitszel@intel.com>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Rodolfo Giometti <giometti@enneenne.com>,
-	Jonathan Lemon <jonathan.lemon@gmail.com>,
-	Richard Cochran <richardcochran@gmail.com>,
-	Stefan Haberland <sth@linux.ibm.com>,
-	Jan Hoeppner <hoeppner@linux.ibm.com>,
-	Heiko Carstens <hca@linux.ibm.com>,
-	Vasily Gorbik <gor@linux.ibm.com>,
-	Alexander Gordeev <agordeev@linux.ibm.com>,
-	Christian Borntraeger <borntraeger@linux.ibm.com>,
-	Sven Schnelle <svens@linux.ibm.com>,
-	Satish Kharat <satishkh@cisco.com>,
-	Sesidhar Baddela <sebaddel@cisco.com>,
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH v3 01/21] lib/vsprintf: Add specifier for printing struct
- timespec64
-Message-ID: <aRcnug35DOZ3IGNi@pathway.suse.cz>
-References: <20251113150217.3030010-1-andriy.shevchenko@linux.intel.com>
- <20251113150217.3030010-2-andriy.shevchenko@linux.intel.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Azbldzaj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8D07C4CEF1;
+	Fri, 14 Nov 2025 14:53:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1763132028;
+	bh=Ro/DF230ZGwthADA1lsr1FsD+fogDSrK16pFZ2ozOzI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=AzbldzajoFm89ifePnj3q+hKc0BQlawjtpqydnTs2RlBdV/vJg4oT27SVuILz0FxR
+	 GJY8ItMS7YhGfRkj3WwF0ykprGQ9Zvg81Z1oXqV8BcmiMyLNiPReu4R4eI5ydEuY3f
+	 CzWUyKIMy5t2KOYmjfamKVwpuhOXyvuK7c9wtrLqsM7PoiUDvjkPGKiEKkkLCEXSv1
+	 FdiWvLI0ltZtmBRlEkluHIa9udlsrDkFIqoOwt5Ze03fiDDe1a9QE5VGvl8beAiEew
+	 R+Rct3HTgDEudzBRGyz0vR+/0Zp4KbTdejNBuqSjP1KZpaKaxB2nogHcaShNBbmrLe
+	 9y9u/sehJ5bZg==
+Date: Fri, 14 Nov 2025 08:58:15 -0600
+From: Bjorn Andersson <andersson@kernel.org>
+To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
+	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, 
+	quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Avoid early clock doubling during
+ HS400 transition
+Message-ID: <e4t2tutkygmka6ynytztjy47mey3trwekyyzxx7dzyqnb3xmqq@3gk5zgj5kvqg>
+References: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -150,26 +46,133 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251113150217.3030010-2-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
 
-On Thu 2025-11-13 15:32:15, Andy Shevchenko wrote:
-> A handful drivers want to print a content of the struct timespec64
-> in a format of %lld:%09ld. In order to make their lives easier, add
-> the respecting specifier directly to the printf() implementation.
+On Fri, Nov 14, 2025 at 01:58:24PM +0530, Sarthak Garg wrote:
+> According to the hardware programming guide, the clock frequency must
+> remain below 52MHz during the transition to HS400 mode.
 > 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> However,in the current implementation, the timing is set to HS400 (a
+> DDR mode) before adjusting the clock. This causes the clock to double
+> prematurely to 104MHz during the transition phase, violating the
+> specification and potentially resulting in CRC errors or CMD timeouts.
+> 
+> This change ensures that clock doubling is avoided during intermediate
+> transitions and is applied only when the card requires a 200MHz clock
+> for HS400 operation.
+> 
+> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
 
-Looks goor to me:
+Thank you for cleaning that up.
 
-Reviewed-by: Petr Mladek <pmladek@suse.com>
-Tested-by: Petr Mladek <pmladek@suse.com>
+Reviewed-by: Bjorn Andersson <andersson@kernel.org>
 
-I wonder how to move forward. I could take the whole patchset via
-printk tree. There is no conflict with linux-next at the moment.
+Regards,
+Bjorn
 
-It seems that only 3 patches haven't got any ack yet. I am going
-to wait for more feedback and push it later the following week
-(Wednesday or so) unless anyone complains.
-
-Best Regards,
-Petr
+> ---
+>  Changes from v1:
+>  As per Bjorn Andersson's comment :
+>  - Pass "timing" as an argument to msm_set_clock_rate_for_bus_mode(), and
+>  then pass host, clock, and timing to msm_get_clock_mult_for_bus_mode() to
+>  align with the original intent of the prototype.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 27 +++++++++++++++------------
+>  1 file changed, 15 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4e5edbf2fc9b..3b85233131b3 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -344,41 +344,43 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
+>  	writel_relaxed(val, host->ioaddr + offset);
+>  }
+>  
+> -static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
+> +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
+> +						    unsigned int clock,
+> +						    unsigned int timing)
+>  {
+> -	struct mmc_ios ios = host->mmc->ios;
+>  	/*
+>  	 * The SDHC requires internal clock frequency to be double the
+>  	 * actual clock that will be set for DDR mode. The controller
+>  	 * uses the faster clock(100/400MHz) for some of its parts and
+>  	 * send the actual required clock (50/200MHz) to the card.
+>  	 */
+> -	if (ios.timing == MMC_TIMING_UHS_DDR50 ||
+> -	    ios.timing == MMC_TIMING_MMC_DDR52 ||
+> -	    ios.timing == MMC_TIMING_MMC_HS400 ||
+> +	if (timing == MMC_TIMING_UHS_DDR50 ||
+> +	    timing == MMC_TIMING_MMC_DDR52 ||
+> +	    (timing == MMC_TIMING_MMC_HS400 &&
+> +	    clock == MMC_HS200_MAX_DTR) ||
+>  	    host->flags & SDHCI_HS400_TUNING)
+>  		return 2;
+>  	return 1;
+>  }
+>  
+>  static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+> -					    unsigned int clock)
+> +					    unsigned int clock,
+> +					    unsigned int timing)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> -	struct mmc_ios curr_ios = host->mmc->ios;
+>  	struct clk *core_clk = msm_host->bulk_clks[0].clk;
+>  	unsigned long achieved_rate;
+>  	unsigned int desired_rate;
+>  	unsigned int mult;
+>  	int rc;
+>  
+> -	mult = msm_get_clock_mult_for_bus_mode(host);
+> +	mult = msm_get_clock_mult_for_bus_mode(host, clock, timing);
+>  	desired_rate = clock * mult;
+>  	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
+>  	if (rc) {
+>  		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
+> -		       mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
+> +		       mmc_hostname(host->mmc), desired_rate, timing);
+>  		return;
+>  	}
+>  
+> @@ -397,7 +399,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+>  	msm_host->clk_rate = desired_rate;
+>  
+>  	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
+> -		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
+> +		 mmc_hostname(host->mmc), achieved_rate, timing);
+>  }
+>  
+>  /* Platform specific tuning */
+> @@ -1239,7 +1241,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	 */
+>  	if (host->flags & SDHCI_HS400_TUNING) {
+>  		sdhci_msm_hc_select_mode(host);
+> -		msm_set_clock_rate_for_bus_mode(host, ios.clock);
+> +		msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
+>  		host->flags &= ~SDHCI_HS400_TUNING;
+>  	}
+>  
+> @@ -1864,6 +1866,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	struct mmc_ios ios = host->mmc->ios;
+>  
+>  	if (!clock) {
+>  		host->mmc->actual_clock = msm_host->clk_rate = 0;
+> @@ -1872,7 +1875,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  
+>  	sdhci_msm_hc_select_mode(host);
+>  
+> -	msm_set_clock_rate_for_bus_mode(host, clock);
+> +	msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
+>  out:
+>  	__sdhci_msm_set_clock(host, clock);
+>  }
+> -- 
+> 2.34.1
+> 
+> 
