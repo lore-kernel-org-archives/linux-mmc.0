@@ -1,195 +1,175 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 143B02BE650
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 08:33:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4598324678A
+	for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 12:59:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763109186; cv=none; b=B22QXWpq/bFJpGlH2LPlKj/Z4G0ZvdW/QfGoXZAkE2Du/BoySomnCtCChFfkjLFlwWBRm4E9U31POOIRFtDKfkm/hBAJfvL/8xC9+voDqB51JsjtHVuGZVZPvLF+fFguskW5NklSYPj5tzlARACV7ZAvDFCv3wwqoiZH6Op8aiE=
+	t=1763125188; cv=none; b=uldJakpY2DhyQ2oJU04rcgsQeOoQpO2AsNF1n5H9HJnfA1pWYna8KwJ3Fus/hG2loRmnPIqA11RYszanEoHuiQKnyKn0k4iwZAKDQmPxmcOCdsNBN0mhR9Y0UmvzqwQZ9hgRzADUipkB4P5rSGCqswG7RpARcYxXfdTkjqCAZZY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763109186; c=relaxed/simple;
-	bh=0CYzgYnHsb5zXYx0LH5cXY0NOiMvS980i9Gh645DQQI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=g/I7FKAiTu5bjXMGyPZ13+HNOSno5Xq9J5UeqXizhB5P4OgwylKTSHo3s/gH5sg8+mGCFexCnfT4Cy7maAmdVyQM32rGfroZaVrtKzXBRzWZFrP3j65lu2DsVoE5apUNAruRTzaWeedtJXu0f4w/kiLTU48gtmh36ilzCHpSUto=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=YNjeAcuF; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=LoNjj8W/; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1763125188; c=relaxed/simple;
+	bh=OwXqaVYjP+AYjhrqdV/iUf65lNBgi6i65jcAVuzkims=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=oQd+XvAAn0Cz5i6vGb9Rq2EeTYa25pTrXN8uznBLdS5VoOYnI+SIFWwAe53eS9b56/G866JcD909VuVxqE9dkd7RBp3A9H3hKh0rv1MMBp97l/PRiqskgsBj8J632ku1fWfFWQvV46H4Ba2bUViJSoWfMo5FBjmQ8n/CTHgp9SY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=ZbqfK4m0; arc=none smtp.client-ip=209.85.218.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="YNjeAcuF";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="LoNjj8W/"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5ADMb4Jx1431650
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 08:33:04 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	e4BlQO3s0eHx1U9rvDLOT6OHLy03I7HwhTPlqhcjQYI=; b=YNjeAcuFHjMjJDPQ
-	YpLxUSrDrNUd3fn3DAOhWg+syLLbojEQEMsZFAzgwh1Vf2dZ1yV9/h2pXer7q8vQ
-	qZXZEFfaCySOr338E0krAb6lfAYERlnrGONXQaYM+Mivwnd5v4JxJrvFWzUqEfim
-	hU26qGeXkGbG5W1+iK7f44N4ARaAjdt1ltHYkF3P33rqEDolXB6QnD2VPsjPy33m
-	hZv6HijMi9R8OWhxY6I0xx7Odozk5vTXgj1eoESSmxCNTDK1zlegfT1n3RkDyUmy
-	96wkRxaAi0HP10/3+FQus3ib+P6Y0oC9h31ZVPJbCfvIDLubG4YlWVyb7KxXwky2
-	O/MBcA==
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com [209.85.210.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4adr9g1deb-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 08:33:03 +0000 (GMT)
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-7aa5e7452bcso457848b3a.3
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 00:33:03 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="ZbqfK4m0"
+Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-b735487129fso288066866b.0
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 04:59:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1763109183; x=1763713983; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=e4BlQO3s0eHx1U9rvDLOT6OHLy03I7HwhTPlqhcjQYI=;
-        b=LoNjj8W/UfhmY/l+Xf4RwvccK57MWGsvcikF59fXPPvxwPA56LojyTs+Xhbw5BVyqs
-         WddmilgDXDGeW504Oa7xvxTfwaJVVL7lGMpg81LipKh5ekZ3chzlG4McAjZQ/HdgXVUD
-         IQ5XZ4nQVMrI7BU874k+LjhMvbDYNEqa9TPEjx0N5zS7pFqzMhEMvdZZ/WG/+1vj8uBT
-         rs6tfoyhvRpV1rX5VH4ihNpKhrHJYaj+fFr7KrTtnyErS0O79ntXnv2VYW0xso0Nsajk
-         H8EoIdstXeI5CDpZo52FnRcJpRAA044iEsOG0FdYgUIxMkv1Rj0PG1I4NVaArYQNCo9J
-         ZRrg==
+        d=suse.com; s=google; t=1763125183; x=1763729983; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=lIa30kEZfIOzXn6c2Ch+jzSexECrPYWXzGffwwy3r9Q=;
+        b=ZbqfK4m0Vk3QZZMUhnZ65dzeU/GFengPpj80uV976TTNT6cF3kLVFLU8dNGFNmtTBM
+         4qOp9/GpfWs9OKiNwe0QHH/jcW19OTYlr1meSgMwyMFng3k0InkVtUKHBwfo5BNYqFr+
+         4lFMJhMGNriMqn3fozHBGzFjOKEU5kUtemJ7mYPxBLflIyzVat1J4pYAXgbN4B2YnyYG
+         82UWE3kzLCNGqMlMm3yvbYBMH3F7S7iX89IYp4nrzQpu+C75oEGN3b+p3276ZuRBY6eY
+         kmTlfbRGGr9zKGdLcC+V/1s+Tfa76MlJmsfSuKTulTxUlUvcI4E9GKJuCGZhh00S7xuu
+         FnVg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763109183; x=1763713983;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=e4BlQO3s0eHx1U9rvDLOT6OHLy03I7HwhTPlqhcjQYI=;
-        b=tTl0ikzh+jRzG/Z35CGqIWV1TzdX4r0mNnVKt1z6r8RZcNW6eqHq9SLolCpO//K5+d
-         xf3/KBck+6qUWESVwzbEBGRRDEoJgDGqWu5YSzUuCZxuAuwJNm1gNOp6G4unP45/yXWO
-         bF1ieQWxGano7C2F1EzDvs+kzNo5Zh403m7LL0tJRk5kV6qj3Yd4l7nRJaGagvGTCHiY
-         zH+TzpcElRcLqY7A34Xklqxh3DRrbRt2vtwhCjcre7GNnathoBJ7dIYBsPIDx/lnQnQO
-         6cpQP/lhNDkfjp+O95JfLB1nS5Xpm3oakdfJRbO913uzQl/OyyA56JdQ/xtqNkJ7A79y
-         R99g==
-X-Forwarded-Encrypted: i=1; AJvYcCVo2U32iPS/LAHOyG5PhChBi5MLv8aZ7/eNkYnkaOtv+SwPajQJdhYbeRiS7E/cqL63VO/6C18PWIo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxKBMoNFHgWuogK8P7sSiB5+5+hnkqs4lz/sDpAOQmlT23ZOk05
-	NTmaA+WQiuQleDgFAI6L+sL7scmaTcM+riHjDGc/skv0tU7Wpu7G2mbbpfqlJWtSdBchLsaM+Fn
-	mBdGtxAl3bqfE9fbBRstdiyI2NbKYi9lzUH5Wf8JJdwPavdhVfht035RQHna5nA==
-X-Gm-Gg: ASbGncueNRQB3u1oMd1Fy8Dx3t5/xUK9cjCMGnDEBcaN7JN6EwW7nSumHsQjoQyhkUd
-	J6BqBSUfluZh/cQSTyxYvnWrWdZYKwrYQVeMpAzGrAZ9WBTOF5SKgZhsDg56PKWwkWYeIf3qY1Z
-	DyuRh1pf9qAFmymfV/dcEVfM4U7aRnCxuMieYAVgCGHvn9B77MAXLVELjO/rXqDthTEerFYWajU
-	WMsy7+0LUujyrN0acC126wuMTNHU48lEc3Jtr4De1JqtDPml+xW6DamE50MZSCz3suDrxLdCQzx
-	GRAarKEeGllG9R6nGb638gfsxeHwgMAgzSksOH0VGtGUvie+m8pl0/l5gPrynWNZE0zgeQkSKyl
-	0SVAnytYHbDGXXjFCpG0AGnSX0VTRAiswlbSbHcc=
-X-Received: by 2002:a05:6a00:2d27:b0:776:19f6:5d3d with SMTP id d2e1a72fcca58-7ba39b3ea79mr1552880b3a.2.1763109182814;
-        Fri, 14 Nov 2025 00:33:02 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHb6ke1Nr1AEQwuzlva1GyQBZ0Mlu6vW13cRreQFxUZ2Hgfofqhff7ISlUppU0oCKqca78PRg==
-X-Received: by 2002:a05:6a00:2d27:b0:776:19f6:5d3d with SMTP id d2e1a72fcca58-7ba39b3ea79mr1552851b3a.2.1763109182293;
-        Fri, 14 Nov 2025 00:33:02 -0800 (PST)
-Received: from [10.217.216.168] ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7b924aed60bsm4530728b3a.4.2025.11.14.00.32.58
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 14 Nov 2025 00:33:01 -0800 (PST)
-Message-ID: <5dcd735d-31bf-4c7f-bf12-89a5cae0d628@oss.qualcomm.com>
-Date: Fri, 14 Nov 2025 14:02:55 +0530
+        d=1e100.net; s=20230601; t=1763125184; x=1763729984;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=lIa30kEZfIOzXn6c2Ch+jzSexECrPYWXzGffwwy3r9Q=;
+        b=eQopUaZ0sHNnLaJ6hI9tPQwGN46dBwP0uSGgeML7vFRX1i+mnUpelhQBEKUb4fYsof
+         zMXir+yO9+ATGGw9+sB9FYfK0adHZMljThqtlfZnhe9+I/jsFXz69gJkBt4cK71BPAoX
+         ofWcmcwcXYRoRoLGkb56B+is5gBQO52/I6lucn33JwAGmOC+CBNpDFgCHULjiFyGS7uP
+         MJMjPjYWVpCqPh+/sldWbkxoJtrUW6ijV+r+8bOtC1x7PTWxN6OT/Z5aVIY5bX4cxG1a
+         8ea099GytIdfpMvGCLiWSBCUbyvHmdn8AG8uuNV/EKn1eZW4+SdcjHQ5p3Qtdt+taZiN
+         DL7g==
+X-Forwarded-Encrypted: i=1; AJvYcCVQ1iEl/8iyyBE9FLUlSVukWb4eUOJQ0rNQAZnKA7Z6PQbbF8sL1D5FfjHcRPRw3E3VVrMzFErsNM0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzgLF3IzPPtNzHd5vVy2gYhastAZuNZj0cBsivYxsYHngQDAw+B
+	BQCWQUteBhmSkGzKEoswhQBx5vJWslqQTX5q2OpVd2bH9hIro40nvfD/o+vmM6ILZPY=
+X-Gm-Gg: ASbGncsVPEvDZXjV5kexzH8w85u+GSp+Uca1DreCPJpWknxlorn+YR2O8Yr4RfczqIr
+	/1Dub9PVmzrGSDT3LKCrk7Cte5MHtf66hRhTKRcTZZ0CGgcJx0Pk+DQB+LPWGscfflLY6fGtziQ
+	yAoQdTB2CK0u28VqBEcVNLffG4Jz4Uxl7YuqTf03YfLqVycD0k7Qo6IzsI8uQxtSrAp8YoBCD4f
+	3Tocu0g+BFjmunB4EQlsVFqqCQsGToEhH0xli370yHutQO5Ua0A410PloheQjR94Kb8j9T2cN39
+	oz2NA+Jr+nLk7rWclIjPp8bPR1gv54cIDnJCVXSSlYSeqeWI9+hkWPW1H56sS5gbvx6vMId2Wi8
+	JZdgPSENAwdX+mNPjOott4SWQxCzYn8r3CC3L4mJThrcSb6ca5+xAB4E2NYTUlpUbM7FkFE1uR1
+	wWWIo=
+X-Google-Smtp-Source: AGHT+IH6H5eoyoDiGCawX8hcyfAIsFqjcgfKx5GqQ3M5ZUeRqB23EXgoQaPPEhXoJ1r2rQPfP0tLQA==
+X-Received: by 2002:a17:906:f105:b0:b73:7652:ef9e with SMTP id a640c23a62f3a-b737652f76bmr38125366b.55.1763125183501;
+        Fri, 14 Nov 2025 04:59:43 -0800 (PST)
+Received: from pathway.suse.cz ([176.114.240.130])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b734fd80a3asm382714666b.37.2025.11.14.04.59.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Nov 2025 04:59:42 -0800 (PST)
+Date: Fri, 14 Nov 2025 13:59:38 +0100
+From: Petr Mladek <pmladek@suse.com>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Corey Minyard <corey@minyard.net>,
+	Christian =?iso-8859-1?Q?K=F6nig?= <christian.koenig@amd.com>,
+	"Dr. David Alan Gilbert" <linux@treblig.org>,
+	Alex Deucher <alexander.deucher@amd.com>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
+	Rob Clark <robin.clark@oss.qualcomm.com>,
+	Matthew Brost <matthew.brost@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Aleksandr Loktionov <aleksandr.loktionov@intel.com>,
+	Vitaly Lifshits <vitaly.lifshits@intel.com>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Niklas Cassel <cassel@kernel.org>, Calvin Owens <calvin@wbinvd.org>,
+	Vadim Fedorenko <vadim.fedorenko@linux.dev>,
+	Sagi Maimon <maimon.sagi@gmail.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	Karan Tilak Kumar <kartilak@cisco.com>,
+	Hans Verkuil <hverkuil+cisco@kernel.org>,
+	Casey Schaufler <casey@schaufler-ca.com>,
+	Steven Rostedt <rostedt@goodmis.org>,
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
+	Max Kellermann <max.kellermann@ionos.com>,
+	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	openipmi-developer@lists.sourceforge.net,
+	linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org,
+	linaro-mm-sig@lists.linaro.org, amd-gfx@lists.freedesktop.org,
+	linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
+	intel-xe@lists.freedesktop.org, linux-mmc@vger.kernel.org,
+	netdev@vger.kernel.org, intel-wired-lan@lists.osuosl.org,
+	linux-pci@vger.kernel.org, linux-s390@vger.kernel.org,
+	linux-scsi@vger.kernel.org, linux-staging@lists.linux.dev,
+	ceph-devel@vger.kernel.org, linux-trace-kernel@vger.kernel.org,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+	Sergey Senozhatsky <senozhatsky@chromium.org>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Sumit Semwal <sumit.semwal@linaro.org>,
+	Gustavo Padovan <gustavo@padovan.org>,
+	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Dmitry Baryshkov <lumag@kernel.org>,
+	Abhinav Kumar <abhinav.kumar@linux.dev>,
+	Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>,
+	Marijn Suijten <marijn.suijten@somainline.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Lucas De Marchi <lucas.demarchi@intel.com>,
+	Thomas =?iso-8859-1?Q?Hellstr=F6m?= <thomas.hellstrom@linux.intel.com>,
+	Rodrigo Vivi <rodrigo.vivi@intel.com>,
+	Vladimir Oltean <olteanv@gmail.com>, Andrew Lunn <andrew@lunn.ch>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+	Tony Nguyen <anthony.l.nguyen@intel.com>,
+	Przemek Kitszel <przemyslaw.kitszel@intel.com>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Rodolfo Giometti <giometti@enneenne.com>,
+	Jonathan Lemon <jonathan.lemon@gmail.com>,
+	Richard Cochran <richardcochran@gmail.com>,
+	Stefan Haberland <sth@linux.ibm.com>,
+	Jan Hoeppner <hoeppner@linux.ibm.com>,
+	Heiko Carstens <hca@linux.ibm.com>,
+	Vasily Gorbik <gor@linux.ibm.com>,
+	Alexander Gordeev <agordeev@linux.ibm.com>,
+	Christian Borntraeger <borntraeger@linux.ibm.com>,
+	Sven Schnelle <svens@linux.ibm.com>,
+	Satish Kharat <satishkh@cisco.com>,
+	Sesidhar Baddela <sebaddel@cisco.com>,
+	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
+	Masami Hiramatsu <mhiramat@kernel.org>,
+	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
+	Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v3 01/21] lib/vsprintf: Add specifier for printing struct
+ timespec64
+Message-ID: <aRcnug35DOZ3IGNi@pathway.suse.cz>
+References: <20251113150217.3030010-1-andriy.shevchenko@linux.intel.com>
+ <20251113150217.3030010-2-andriy.shevchenko@linux.intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Avoid early clock doubling during
- HS400 transition
-To: Bjorn Andersson <andersson@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
-        kernel@oss.qualcomm.com
-References: <20251110063801.641866-1-sarthak.garg@oss.qualcomm.com>
- <wshfjbdjmoe5hfsmh2rrwxiy67wo4k6i7bzap4hz4n5j22uiol@xz7wfxaw4bve>
-Content-Language: en-US
-From: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-In-Reply-To: <wshfjbdjmoe5hfsmh2rrwxiy67wo4k6i7bzap4hz4n5j22uiol@xz7wfxaw4bve>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=L+AQguT8 c=1 sm=1 tr=0 ts=6916e940 cx=c_pps
- a=mDZGXZTwRPZaeRUbqKGCBw==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=IkcTkHD0fZMA:10 a=6UeiqGixMTsA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=EUspDBNiAAAA:8 a=_Uc-8ieBvFDwtx1LFMkA:9
- a=QEXdDO2ut3YA:10 a=zc0IvFSfCIW2DFIPzwfm:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTE0MDA2NiBTYWx0ZWRfXzX3K8QJGs0QP
- 0arj826Pccri+Q8UZQQYjashi6s+5j9QwNVK7v51mxVnGaiOOP5A/xGoxrtTc9HutlC8Hcr4KRM
- KlYTVk1QR/BrduyXvmQo/1XAatKf4c6a7d5LF7i2KVZ2SmsRIaAQg9HzKVbMkGrSBB05knqkIEP
- /WF7waKYCMRpPj+4tNztwBF04ryKtDMkz2mZEx6uanWyaahEHV0Yf/dXjJvZszfAeHIOhQcRcFz
- Bh8OYRGuv6AhEqnKmcefwnU/MTDYa4h4Kj+ad3AN6B1dun46zirPtR3ajRk7yPzWNSOIrzf8S1S
- RALldsLJro42qEkLisTZY7I0YfgLwy85bUXlf9l/tsyKmZ+J3GAn47rYqAMiL3iPYjPXdLcHS23
- kFMcAxRy6a8y7w+XzwbPFJq2Be72Aw==
-X-Proofpoint-ORIG-GUID: CvRRruEWDKK5ZFRsRlKOTnBdnN7LtK3q
-X-Proofpoint-GUID: CvRRruEWDKK5ZFRsRlKOTnBdnN7LtK3q
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-14_02,2025-11-13_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 phishscore=0 impostorscore=0 priorityscore=1501 adultscore=0
- clxscore=1015 bulkscore=0 malwarescore=0 lowpriorityscore=0 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511140066
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251113150217.3030010-2-andriy.shevchenko@linux.intel.com>
 
+On Thu 2025-11-13 15:32:15, Andy Shevchenko wrote:
+> A handful drivers want to print a content of the struct timespec64
+> in a format of %lld:%09ld. In order to make their lives easier, add
+> the respecting specifier directly to the printf() implementation.
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-On 11/10/2025 8:09 PM, Bjorn Andersson wrote:
-> On Mon, Nov 10, 2025 at 12:08:01PM +0530, Sarthak Garg wrote:
->> According to the hardware programming guide, the clock frequency must
->> remain below 52MHz during the transition to HS400 mode.
->>
->> However,in the current implementation, the timing is set to HS400 (a
->> DDR mode) before adjusting the clock. This causes the clock to double
->> prematurely to 104MHz during the transition phase, violating the
->> specification and potentially resulting in CRC errors or CMD timeouts.
->>
->> This change ensures that clock doubling is avoided during intermediate
->> transitions and is applied only when the card requires a 200MHz clock
->> for HS400 operation.
->>
->> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
->> ---
->>   drivers/mmc/host/sdhci-msm.c | 3 ++-
->>   1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 4e5edbf2fc9b..eca6a09a4547 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -355,7 +355,8 @@ static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
->>   	 */
->>   	if (ios.timing == MMC_TIMING_UHS_DDR50 ||
->>   	    ios.timing == MMC_TIMING_MMC_DDR52 ||
->> -	    ios.timing == MMC_TIMING_MMC_HS400 ||
->> +	    (ios.timing == MMC_TIMING_MMC_HS400 &&
->> +	    ios.clock == MMC_HS200_MAX_DTR) ||
-> It's a bit ugly that sdhci_msm_execute_tuning() passes ios.clock as an
-> argument to msm_set_clock_rate_for_bus_mode(), which then calls
-> msm_get_clock_mult_for_bus_mode() where you reach back into ios.clock.
->
-> In fact, having msm_get_clock_mult_for_bus_mode() reach into
-> host->mmc->ios to get ios.timing, seems a violation of the original
-> intent of the prototype.
->
->
-> How about cleaning this up and passing "timing" as an argument to
-> msm_set_clock_rate_for_bus_mode(), and then pass host, clock, and timing
-> to msm_get_clock_mult_for_bus_mode()?
->
-> That way we avoid this mix of passing parameters to the functions in
-> both arguments and in state at the same time.
->
-> Regards,
-> Bjorn
+Looks goor to me:
 
+Reviewed-by: Petr Mladek <pmladek@suse.com>
+Tested-by: Petr Mladek <pmladek@suse.com>
 
-Sure will update in V2.
+I wonder how to move forward. I could take the whole patchset via
+printk tree. There is no conflict with linux-next at the moment.
 
-Regards,
-Sarthak
+It seems that only 3 patches haven't got any ack yet. I am going
+to wait for more feedback and push it later the following week
+(Wednesday or so) unless anyone complains.
 
-
->>   	    host->flags & SDHCI_HS400_TUNING)
->>   		return 2;
->>   	return 1;
->> -- 
->> 2.34.1
->>
->>
+Best Regards,
+Petr
