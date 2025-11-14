@@ -1,178 +1,122 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF3EE3254A5;
-	Fri, 14 Nov 2025 14:53:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D06521C9EA
+	for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 16:24:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763132028; cv=none; b=iWmEidvq6Gepi+y2my26+zygyBGIc3GCj+QMHybc7AxWbPumjYVlDedU+V2ww1F4MgqLkZO9r4ZaRzx2YhrUfY51LaG5Ss2w8UJTmAAvq4Z/MxQy8AVM++8q9pFxYDBVNXdqByK2FBsK2LmqCGnNbctX9GZDAW5vp4kNPEdZbV4=
+	t=1763137461; cv=none; b=ghGvhfzrgHmh4JMKIWXGq6ES+BweztQtyLCanQLC+f2Fa9c814c2Toae1W5q84j2iyaCsDzmsAwoZ4GqYtL6HBGC5R+zB9dtpTbEnOy4C3ekrYMND1Ap8gMihLVQgBUVK8dI+aJg77gokwruPMmfbjm2B9INc/O4sYxxTGZghK0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763132028; c=relaxed/simple;
-	bh=Ro/DF230ZGwthADA1lsr1FsD+fogDSrK16pFZ2ozOzI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=swxY9pwv7u0xg0Xfq1FtXl9sHozbameqyjFER/YZMidHsPpzuf2EtAhCr7HO5R6KzyijQW63q9NSry+WSZjgYE0oWw9HtsXbIO63h7Hfit4Dn7QAGmAWpJLxPOtukZrJ3iDuxEpO+8KNcNJScvzd6tAh1Gy0JHvnzKWsZsxDM+M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Azbldzaj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1763137461; c=relaxed/simple;
+	bh=AAH3gykku4WXMbVa4R4ap3QvBxN1BQpueLp+VgSoMmU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=rBW+IXSgi6IoF9zZA/zw+OIWyVGhx6U1RMC3Y06W7lwK9CfKb/iA+ZVtgxSdGtzwXPjrP7jxYcCXbuydp0UFOVe/PZNXEwNDZ3Jqqm3pECg5uD+qVnsUHDG5jRlLXa0/cPHr43axdtINaCEpCviZbjJyjN46hhKm5or/QbyErEA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=VrWCa8Ot; arc=none smtp.client-ip=209.85.167.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Azbldzaj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8D07C4CEF1;
-	Fri, 14 Nov 2025 14:53:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763132028;
-	bh=Ro/DF230ZGwthADA1lsr1FsD+fogDSrK16pFZ2ozOzI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=AzbldzajoFm89ifePnj3q+hKc0BQlawjtpqydnTs2RlBdV/vJg4oT27SVuILz0FxR
-	 GJY8ItMS7YhGfRkj3WwF0ykprGQ9Zvg81Z1oXqV8BcmiMyLNiPReu4R4eI5ydEuY3f
-	 CzWUyKIMy5t2KOYmjfamKVwpuhOXyvuK7c9wtrLqsM7PoiUDvjkPGKiEKkkLCEXSv1
-	 FdiWvLI0ltZtmBRlEkluHIa9udlsrDkFIqoOwt5Ze03fiDDe1a9QE5VGvl8beAiEew
-	 R+Rct3HTgDEudzBRGyz0vR+/0Zp4KbTdejNBuqSjP1KZpaKaxB2nogHcaShNBbmrLe
-	 9y9u/sehJ5bZg==
-Date: Fri, 14 Nov 2025 08:58:15 -0600
-From: Bjorn Andersson <andersson@kernel.org>
-To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
-	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, 
-	quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
-Subject: Re: [PATCH V2] mmc: sdhci-msm: Avoid early clock doubling during
- HS400 transition
-Message-ID: <e4t2tutkygmka6ynytztjy47mey3trwekyyzxx7dzyqnb3xmqq@3gk5zgj5kvqg>
-References: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VrWCa8Ot"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-594270ec7f9so2018410e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Nov 2025 08:24:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1763137458; x=1763742258; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=gFl8EoaueIezYiwgXnmhWkB61WZ82tpzKdrxrqQ73kg=;
+        b=VrWCa8Ot3b4lIfhvz7BBEJ0DmJFBmq38Oli3gJErUShZhHEYmnS5vVsHsOGsTO3YN9
+         T9lFBqHi3S+8CGFpK6goOQQU9SVNsvYkHexnN/x/JRjgT0CkXQ9YB9yCc3CeBmWwP9Uv
+         IKs1PpL3SP+Kio4PpiyKgq3nkDc8C2GjJw8nnz0SqFCeQBv7UZu6pOxWvvpdLXTcWNjp
+         Y2Hjp69QCA+qKEdwZiccGnupFwQVn/cnktkTMVfPV+BSIl0ogorYRBiw3mCkCZs484hN
+         ACm5Ci0XAI9V1mfYnrobZeej7LysNI8YrojkjDk3yo2j8fsNgXbQ3Rv2kmGt54vT4uAo
+         mamA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763137458; x=1763742258;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=gFl8EoaueIezYiwgXnmhWkB61WZ82tpzKdrxrqQ73kg=;
+        b=hRkJcejqaDTFIoscjBujCidk8HrNPTBoAxbzs+sv3yW5+nj3wR72CIQfS6LwQA4bc9
+         xOc3kBQf+6BUOMZTdTUPprqlr9aVI52LXBEF1FGCJ/pS6+1enVMMqNAfGop0xNnNV0m8
+         2fjAeWGa6DHa8kPmDDGD6dCkuUvLgAFnc6nXlsd4qefU9NKvEmWA7QRxoUgN++5HFPka
+         vtTdJmAvMl8A7u5JkbyjUsRLOaWgtioZCmlumgKh6ywEpCoXR852q7+YZSc3aY7eYo1+
+         ePYGGARZOMRCwwxeH03mzs7bFaGHyFQJiBK3d2bxIHwnkJM1fDezUEatYKbjiipepTkW
+         NlzA==
+X-Forwarded-Encrypted: i=1; AJvYcCXR99e0ooM9FGxRx0WLNbjUrW0NFUoBWP9cDYDohuU5YgadsJ4Dh96fYsXYCBOzs/uDTDezc0FtlFs=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxu6GDm4Pdg8KGlF8c0jE3G/wtM/HN7Gq2b9c4/tUEncb1et7gD
+	3l6279iF7UAPrlbJnyosE7Z8+MVEG1YfuD0iPq77FYqJLEGofyhdGD2os64ZbsfvP/4=
+X-Gm-Gg: ASbGncuC4v+l4LKLZ+X4DPrHtsPyF7lsP/FU50busgs+peZkFHgfoRvJroTpAYnRBYj
+	N0fWTUcykAP0JysgwuTN/o0gbUyn0wy6vbkxpGdUy9Qs65D1co/2+PX82RSaaf7qSGc32bh1804
+	cURQCIIPwreIsz2o5TqxtoVBSsyvzL/frL4+DO9YmpgscJccwU0p5iYmGiae6jC7tMkn2fCTDM/
+	UBmiWMB7iIg8sLlL7kO/hC1VtopBE+/iik+Yz+sMlA8tZomxwTaAlNvNT5ZKx9gFno4QjMfDY3m
+	oYqGt5E/WJVmHPlxhcxTPGJw59bTPUJuYwDwaNUzLo0TtirQK7DHZNEznKqwzD370LA14RAJiUq
+	oZlJtX9cONc0OIxywvBmcZp6dmWBD6mNYO/QStwJ2ImW/VuMdWhaNJ1y7bDX2mlxjNsaJUuDFp8
+	Iv4G2dSLxenU4HwJrArgzqnMOzKGGdg9G7Zfgk2A0fmKoeK9xTRE2wiX6RuCzi9RBM0+ullq0=
+X-Google-Smtp-Source: AGHT+IF9Z2Bhd5+EKzOjBJ/aic2WvX5TGNHu9hx2ffdNP81iBb/ShYffdMtxKNWwcESFG7CYiChiGw==
+X-Received: by 2002:a05:6512:3a86:b0:594:7703:dc5a with SMTP id 2adb3069b0e04-595841f8240mr1203569e87.40.1763137458163;
+        Fri, 14 Nov 2025 08:24:18 -0800 (PST)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-595803acabbsm1164863e87.1.2025.11.14.08.24.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Nov 2025 08:24:17 -0800 (PST)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: Linus <torvalds@linux-foundation.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.18-rc6
+Date: Fri, 14 Nov 2025 17:24:15 +0100
+Message-ID: <20251114162415.93883-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Nov 14, 2025 at 01:58:24PM +0530, Sarthak Garg wrote:
-> According to the hardware programming guide, the clock frequency must
-> remain below 52MHz during the transition to HS400 mode.
-> 
-> However,in the current implementation, the timing is set to HS400 (a
-> DDR mode) before adjusting the clock. This causes the clock to double
-> prematurely to 104MHz during the transition phase, violating the
-> specification and potentially resulting in CRC errors or CMD timeouts.
-> 
-> This change ensures that clock doubling is avoided during intermediate
-> transitions and is applied only when the card requires a 200MHz clock
-> for HS400 operation.
-> 
-> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+Hi Linus,
 
-Thank you for cleaning that up.
+Here's a pull-request with a couple of MMC fixes intended for v6.18-rc6.
+Details about the highlights are as usual found in the signed tag.
 
-Reviewed-by: Bjorn Andersson <andersson@kernel.org>
+Please pull this in!
 
-Regards,
-Bjorn
+Kind regards
+Ulf Hansson
 
-> ---
->  Changes from v1:
->  As per Bjorn Andersson's comment :
->  - Pass "timing" as an argument to msm_set_clock_rate_for_bus_mode(), and
->  then pass host, clock, and timing to msm_get_clock_mult_for_bus_mode() to
->  align with the original intent of the prototype.
-> ---
->  drivers/mmc/host/sdhci-msm.c | 27 +++++++++++++++------------
->  1 file changed, 15 insertions(+), 12 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 4e5edbf2fc9b..3b85233131b3 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -344,41 +344,43 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
->  	writel_relaxed(val, host->ioaddr + offset);
->  }
->  
-> -static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
-> +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
-> +						    unsigned int clock,
-> +						    unsigned int timing)
->  {
-> -	struct mmc_ios ios = host->mmc->ios;
->  	/*
->  	 * The SDHC requires internal clock frequency to be double the
->  	 * actual clock that will be set for DDR mode. The controller
->  	 * uses the faster clock(100/400MHz) for some of its parts and
->  	 * send the actual required clock (50/200MHz) to the card.
->  	 */
-> -	if (ios.timing == MMC_TIMING_UHS_DDR50 ||
-> -	    ios.timing == MMC_TIMING_MMC_DDR52 ||
-> -	    ios.timing == MMC_TIMING_MMC_HS400 ||
-> +	if (timing == MMC_TIMING_UHS_DDR50 ||
-> +	    timing == MMC_TIMING_MMC_DDR52 ||
-> +	    (timing == MMC_TIMING_MMC_HS400 &&
-> +	    clock == MMC_HS200_MAX_DTR) ||
->  	    host->flags & SDHCI_HS400_TUNING)
->  		return 2;
->  	return 1;
->  }
->  
->  static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-> -					    unsigned int clock)
-> +					    unsigned int clock,
-> +					    unsigned int timing)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> -	struct mmc_ios curr_ios = host->mmc->ios;
->  	struct clk *core_clk = msm_host->bulk_clks[0].clk;
->  	unsigned long achieved_rate;
->  	unsigned int desired_rate;
->  	unsigned int mult;
->  	int rc;
->  
-> -	mult = msm_get_clock_mult_for_bus_mode(host);
-> +	mult = msm_get_clock_mult_for_bus_mode(host, clock, timing);
->  	desired_rate = clock * mult;
->  	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
->  	if (rc) {
->  		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-> -		       mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
-> +		       mmc_hostname(host->mmc), desired_rate, timing);
->  		return;
->  	}
->  
-> @@ -397,7 +399,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
->  	msm_host->clk_rate = desired_rate;
->  
->  	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
-> -		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
-> +		 mmc_hostname(host->mmc), achieved_rate, timing);
->  }
->  
->  /* Platform specific tuning */
-> @@ -1239,7 +1241,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	 */
->  	if (host->flags & SDHCI_HS400_TUNING) {
->  		sdhci_msm_hc_select_mode(host);
-> -		msm_set_clock_rate_for_bus_mode(host, ios.clock);
-> +		msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
->  		host->flags &= ~SDHCI_HS400_TUNING;
->  	}
->  
-> @@ -1864,6 +1866,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	struct mmc_ios ios = host->mmc->ios;
->  
->  	if (!clock) {
->  		host->mmc->actual_clock = msm_host->clk_rate = 0;
-> @@ -1872,7 +1875,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  
->  	sdhci_msm_hc_select_mode(host);
->  
-> -	msm_set_clock_rate_for_bus_mode(host, clock);
-> +	msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
->  out:
->  	__sdhci_msm_set_clock(host, clock);
->  }
-> -- 
-> 2.34.1
-> 
-> 
+
+The following changes since commit 211ddde0823f1442e4ad052a2f30f050145ccada:
+
+  Linux 6.18-rc2 (2025-10-19 15:19:16 -1000)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.18-rc2
+
+for you to fetch changes up to 739f04f4a46237536aff07ff223c231da53ed8ce:
+
+  mmc: dw_mmc-rockchip: Fix wrong internal phase calculate (2025-11-11 17:47:47 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - dw_mmc-rockchip: Fix internal phase calculation
+ - pxamci: Simplify and fix ->probe() error handling
+ - sdhci-of-dwcmshc: Fix strbin signal delay
+ - wmt-sdmmc: Fix compile test default
+
+----------------------------------------------------------------
+Johan Hovold (1):
+      mmc: wmt-sdmmc: fix compile test default
+
+Rakuram Eswaran (1):
+      mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
+
+Shawn Lin (2):
+      mmc: sdhci-of-dwcmshc: Change DLL_STRBIN_TAPNUM_DEFAULT to 0x4
+      mmc: dw_mmc-rockchip: Fix wrong internal phase calculate
+
+ drivers/mmc/host/Kconfig            |  2 +-
+ drivers/mmc/host/dw_mmc-rockchip.c  |  4 +--
+ drivers/mmc/host/pxamci.c           | 56 ++++++++++++-------------------------
+ drivers/mmc/host/sdhci-of-dwcmshc.c |  2 +-
+ 4 files changed, 22 insertions(+), 42 deletions(-)
