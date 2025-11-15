@@ -1,63 +1,104 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EDE435E525;
-	Fri, 14 Nov 2025 21:43:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5273427B50C;
+	Sat, 15 Nov 2025 12:21:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763156585; cv=none; b=Lhj3Au8ymEtPnz/DfSaxxTJzIkWrSyxfLYmfd9xd1g9LfaC64QbKswTT+kGxejqDdTWtbLYuk3MhUmo4bU+SgQgc4tEvNdvbQ5TZq/pOUnaIkZcjpU16wWfOI3zIVcu6ziaQcijJZNYgUQ6fdelFoUFvDG70vasImnZYGRgaeQA=
+	t=1763209289; cv=none; b=k08pyhTFE55xqWNxkNBt3ImKk/U3/qoAqkw2mzbp4GkWp7BTg2GbFe3vCq1odWXv2YLmfMz2TzJeLvPrOQlhSuZTSi03OcQ2ycNcWZhEXcHFlsuI2Gln9lSmDeV4tCqx9330eK45LqJwkb00yD6Oc36iY5Hf7RrgqAzWIs1zEtc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763156585; c=relaxed/simple;
-	bh=JWzEnrgsNHKcOQSKggZmvaPEjqXJxlhfS/Mbp08oHpo=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=MI+XQUMsnViVK8cL3RLMd0ZGAq5hUVAtll+j2YcC35Ml1YoBBiZ2tnaliFi3/4kZd2TwJ4eA3kdFrp9+Mvg5mHBu/usa8sgesdk0El0zvyjDz1lCtAYH7CkKO3XrDt4Euu0h0ussGK7ViCPT8Ia7LDAlpY8KEOm0WE3OhCiKsYw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=K2w1hf/P; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1763209289; c=relaxed/simple;
+	bh=CvW3RPjAQHRDOfHqugrlxCPi56fwvh2F4UBJhuXf3jY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=oJBTQhEUA1QA8sJuLa1LaRmMtxVGDKb2pTfuNRiq+/Dyx8HhPV0et+DGjFQ6KSLw1pYWPcMAljHs6Eboc/LyUL7vQN/7obiz6Pv+AybhGBvmLuI+IXPg1SflasDXFpKZb6qzjsmwNdXCar/KidghOLzOPQtkc4MKHEKiB+FsH7o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qp5p5xX7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="K2w1hf/P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38E05C4CEF1;
-	Fri, 14 Nov 2025 21:43:05 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qp5p5xX7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 683ABC16AAE;
+	Sat, 15 Nov 2025 12:21:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1763156585;
-	bh=JWzEnrgsNHKcOQSKggZmvaPEjqXJxlhfS/Mbp08oHpo=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=K2w1hf/PixtYmxPwRyd6shwKu3kgoaD+SFL9KpZ+p6ITrbL1mKFbZzjtAywT36T4w
-	 DuXO1WTpg+DAgELqXYwiQEEYxrGgXtdxexEet9adNJ6bWwM+Eq2wshwm8orWbn5K1V
-	 7tQK/nSBHQ2ZdzICQQaUMYO5l2digv/4WK+FD2hoLgfRUq6oKEso6ObKjxNIUErZgb
-	 OTiqSMU3r0Eip3RM6Kcx6peS0Br0+fclbh5ZA/ooL3Zkq/Vl0BG4W0abx917vueWAv
-	 A0UWgTiTHw3RnSmp6M3UssVx+4yzw3supb8T6qWini4ArIoIOS4b0oiSYsuJ3tQrGH
-	 LIwidmHy+F/8Q==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id EAD613A78A5E;
-	Fri, 14 Nov 2025 21:42:34 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.18-rc6
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20251114162415.93883-1-ulf.hansson@linaro.org>
-References: <20251114162415.93883-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20251114162415.93883-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.18-rc2
-X-PR-Tracked-Commit-Id: 739f04f4a46237536aff07ff223c231da53ed8ce
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: ccc0011804d406493da6d97f913c43de842f1abb
-Message-Id: <176315655336.1846194.3264795607521862760.pr-tracker-bot@kernel.org>
-Date: Fri, 14 Nov 2025 21:42:33 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	s=k20201202; t=1763209289;
+	bh=CvW3RPjAQHRDOfHqugrlxCPi56fwvh2F4UBJhuXf3jY=;
+	h=From:To:Cc:Subject:Date:From;
+	b=qp5p5xX7ENbuB1mPVuIYCFnQYSYEPZ5tpWjz30Y0M31mP4b20X/sC9/9ZCzECXwMN
+	 LDbhsstItv8lHknHCJvXhUcCiRgI2oX4W0rPhrIBFQo/6FWKmqmjRUzhHStlgSZTBn
+	 NFIxnDFkB4UJsXn3jdPl/pYr3gvX/tk02FY4t8j8NiGRCvhAlWePlAG2r+NYvB7guk
+	 FzxN7BQbuBeCnKcdDQPItEO9PCTqX+o0od9GC6xr2FFu080JYl86KdwFmMl1xVpms6
+	 3+C9e4H+4hzDhu3ibGRicQ/fsSc4yLa7tEP36hiAXFcBT6bkudn2Z2RzxhBUdHLDnE
+	 OjUplpuBVEnZA==
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Jyri Sarha <jyri.sarha@iki.fi>,
+	Tomi Valkeinen <tomi.valkeinen@ideasonboard.com>,
+	David Airlie <airlied@gmail.com>,
+	Simona Vetter <simona@ffwll.ch>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Vinod Koul <vkoul@kernel.org>,
+	Michal Simek <michal.simek@amd.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Michael Tretter <m.tretter@pengutronix.de>,
+	Harini Katakam <harini.katakam@amd.com>,
+	Shyam Pandey <radhey.shyam.pandey@amd.com>,
+	dri-devel@lists.freedesktop.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	dmaengine@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mmc@vger.kernel.org
+Cc: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: [PATCH 1/3] dt-bindings: display/ti: Simplify dma-coherent property
+Date: Sat, 15 Nov 2025 13:21:21 +0100
+Message-ID: <20251115122120.35315-4-krzk@kernel.org>
+X-Mailer: git-send-email 2.48.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-The pull request you sent on Fri, 14 Nov 2025 17:24:15 +0100:
+Common boolean properties need to be only allowed in the binding
+(":true"), because their type is already defined by core DT schema.
+Simplify dma-coherent property to match common syntax.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.18-rc2
+Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+---
+ Documentation/devicetree/bindings/display/ti/ti,am65x-dss.yaml | 3 +--
+ Documentation/devicetree/bindings/display/ti/ti,j721e-dss.yaml | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/ccc0011804d406493da6d97f913c43de842f1abb
-
-Thank you!
-
+diff --git a/Documentation/devicetree/bindings/display/ti/ti,am65x-dss.yaml b/Documentation/devicetree/bindings/display/ti/ti,am65x-dss.yaml
+index 361e9cae6896..38fcee91211e 100644
+--- a/Documentation/devicetree/bindings/display/ti/ti,am65x-dss.yaml
++++ b/Documentation/devicetree/bindings/display/ti/ti,am65x-dss.yaml
+@@ -84,8 +84,7 @@ properties:
+     maxItems: 1
+     description: phandle to the associated power domain
+ 
+-  dma-coherent:
+-    type: boolean
++  dma-coherent: true
+ 
+   ports:
+     $ref: /schemas/graph.yaml#/properties/ports
+diff --git a/Documentation/devicetree/bindings/display/ti/ti,j721e-dss.yaml b/Documentation/devicetree/bindings/display/ti/ti,j721e-dss.yaml
+index fad7cba58d39..65ae8a1c3998 100644
+--- a/Documentation/devicetree/bindings/display/ti/ti,j721e-dss.yaml
++++ b/Documentation/devicetree/bindings/display/ti/ti,j721e-dss.yaml
+@@ -103,8 +103,7 @@ properties:
+     maxItems: 1
+     description: phandle to the associated power domain
+ 
+-  dma-coherent:
+-    type: boolean
++  dma-coherent: true
+ 
+   ports:
+     $ref: /schemas/graph.yaml#/properties/ports
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.48.1
+
