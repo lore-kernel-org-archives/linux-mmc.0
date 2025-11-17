@@ -1,68 +1,68 @@
-Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 126BE1F3FED
-	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 09:09:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3241B23D2B4
+	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 09:09:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763370545; cv=none; b=G3x4ZOvhxIW7mvlDwBP5Wv329xXolUd643yOv2wG/G51q2VLU0qBEBZWEVYc/VsccUm5jWqE5YyLB1FPZInXQHNtVWPNyOoC+SukHchAYtQDZYwvyugOksYxSYdVaEU+A9zy/IUO7TONlqXcqrfOcZ4TD3Ak5Gvjs0+DIx5IYxo=
+	t=1763370568; cv=none; b=GdMUUuq0RotJsnlv0YF4wxlnmBym+z+7w4QMoKTMuvZrIDcH1zLzoJYyIElf8yat9xynqm/QVbLg3DsYsdCJy3iiSsxXwfMEMumEO9hV61ZKmsyJ3v5VV3rH+ziFotBaYrcLnZfWcLUsZu7T7WeGZHXBRySZxOPH9hgcTXJyvlQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763370545; c=relaxed/simple;
-	bh=iBVn/w1aah5WydQWqagBNlkRopXgf1/J7o7NAxoJk1Q=;
+	s=arc-20240116; t=1763370568; c=relaxed/simple;
+	bh=/rW/lGUEt9cA7z4QojzSNx++UPGBTHJxL12VKoW0jsc=;
 	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=e5vWuIu0fdX410kjVjFumi8Ry9tGjQG03R6fMLpstBTfI5fcnJNhH/xAculCqQlyaMxbqZCriRrrQD9hj92fMgcaYVmQdydhqulIxIIndvBSzghTNp+KyHNciPCYIyASp9QfM9w/twYALoFJKVT0wJZCJ5LCAVEm6kBFs/GZvFM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=D9zlJ8cw; arc=none smtp.client-ip=209.85.221.54
+	 In-Reply-To:Content-Type; b=Xy2EhZmp5KoE+szC3a4hykprVeJDbH9bpFWiPuSdEZOUx0KPYlx+pO/eLIIwFvBpmY+Ooga3MJFC1a4okSg834bMHJTE4NhdPvilgHCmSYL+cYyeLstEErJH6FqiKHwoDq2UG+Tb0ew0FClEkxLuazJje2hs1gbm3N5Ja5YELP0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=colUJ5fj; arc=none smtp.client-ip=209.85.128.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D9zlJ8cw"
-Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-42b47f662a0so2378613f8f.0
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 01:09:02 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="colUJ5fj"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-47789cd2083so27394075e9.2
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 01:09:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1763370541; x=1763975341; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1763370564; x=1763975364; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:organization:autocrypt
          :content-language:references:cc:to:subject:reply-to:from:user-agent
          :mime-version:date:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=j80cA3+lrwgAsnc0giKu1MemC628u6PWriEbYYP1hp0=;
-        b=D9zlJ8cw51wZ+8atvNO5TjxAJoAAyen06epKX3q4NIbP3rI5EhvcQjj0RwJlaMuVUh
-         WZ1h0dbGVinIpUBOgnZwoafhtw6rG8AzGAvsxmFBNVTdCaSEil6Dn99vKkLOT6xloqiD
-         +NOeuEiiDCg51z8Ui+472tvejkXEVwwKt8CqwvlUQzcT3SkzP4VTUcCpzHsd16u5vhZE
-         5WkimYSvA3UfS/gBX3Bq4tMARpwcl44D0JW2QBUOm1VZgsVtPh7gpYjlnR4/gzOsknsy
-         L837BlPyex8KqE3hcJCCzu86R6vzB6JxOMKkQSMG0E5+AsNxKKdMueNm6dqhc3r4YB3T
-         OPyw==
+        bh=hNklcNl/h84G0BAPSH5Ap/sAnFYDzlujPx7lPybvZNg=;
+        b=colUJ5fj2welGtqjt+ZWY2D/lGKvbI2PbNRWdE0Npokv/l4WsMdVozQ0PUP5mTW6tu
+         +HuS8YkUSP+O7zf4mTzo+ZXqsFQIxQXpxGMiE2nptE0iLg9K3EuwMSKxqDw/T78H2uUD
+         DfbrdRalPbJ/rWKYClDyhdTNUqaRWZZHGd15dDmTF4CuXjRTPGErfkgV6HhV4bA1FJjr
+         KPFk1j/K5eiKr4DiXGzTI0/O566fEddMUz7ORJWRwQl6NkSXU+vCHqdHouek1InR3ySs
+         PLfIVVnK530KEPvWXiXAHPDTWRe25ghATGmdMT9hbUwqae8Q8DAYEipIc7mmUzjl1Zgo
+         4hJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763370541; x=1763975341;
+        d=1e100.net; s=20230601; t=1763370564; x=1763975364;
         h=content-transfer-encoding:in-reply-to:organization:autocrypt
          :content-language:references:cc:to:subject:reply-to:from:user-agent
          :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=j80cA3+lrwgAsnc0giKu1MemC628u6PWriEbYYP1hp0=;
-        b=OAizNozHo+tJe2SmTeInP1+I54Zd0V5pwso3Tdnb0P5CsAj5pa4S3x8m98LzaCOoev
-         UxIILTVzyW2VbGwDQHuVv6+xgPwLVSHOzTs4JM8bkLwAAIn92er2xBEcm2dKDexris3z
-         kIKpfYNv7MizF5MEbojxu61TxvxMlr8lenkh726xjBmd8OqPdD0iUjgKWA0lwuAUhAdV
-         vlrsvcprJAiz7s6tjywv2cAAJR2PGhfGHaqRKUMCowBzgOa2zNtsSYDYG3z4aS2ofvoQ
-         UxLwm2lQn6O7c/xrB3i2yn2Xzha/9Zlzv9ggy7fIWD7xrMBV6UDgmzRYwjps/KuX+keU
-         DpGw==
-X-Forwarded-Encrypted: i=1; AJvYcCWHcGWJAsdHiF8QaO/ZmAnAXc7WDAvBwqutilmVaQbbrO60LjrFC5ofvbRFACpLluCPK/cTHPQduas=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwPWiEnI1jazQYXIEXjWp7+/M4Kl3BiRgbwX2/eFLCeHl4vbstW
-	yBi0UsxUUOBRfzgKBmgmqke1L49vTpu0ZxNqJCXLpP+3dR0few69najhRMInlBoPS3U=
-X-Gm-Gg: ASbGncvuNCy79uEGsdJuypIs8lO+UibblTLjCQaPRf6AP+2Bg78RqQcP9LBB5jsrUrx
-	NiNW2yYdY+fji4TH5UOI1aZ0q3a+CxCWb/Dk4HVbvJ+czAJXaqeiZHVhfojHFhF0UZF6OIXhdLl
-	3faO/6N2Wpw5+l78WWxc5lGOOOkwn90ZwFUSZcYNi2bXfmTsI9r6e0vMnLlAIPrZy2mRfjNKoPx
-	VlPRwq9aFABFE39a+4y1/GM5msq7KqQpVdgQM+vQweUxNqQvO7Z6h9Qya9rSAWnYUVDjXvSirP7
-	BwvR1+BCkougO3+LAuI1/2D4cDB+/q+BkmfHMAKANbLFym078HXRniPatV1BAi25YQSsoogCxhJ
-	Nm4Mp1t1SS0tWr7uENGVnkEyN8pEgnkl/irc/6CaygcH92swH0lO8pCpossMioKJLOuzaoDwCaB
-	/4UrheVpAnxWBilEO/rD3AVHzDmv6x9RXvw75pDZJhSlcff9u+MTm0xpv5lRf2tIE=
-X-Google-Smtp-Source: AGHT+IEbamgDekUoI8tFnZIk+ynap255pwjgX7qHYaMDgfodxB1QA2SjR+XQIFkW6+XHOriFBT/Ehg==
-X-Received: by 2002:a05:6000:230b:b0:429:d253:8619 with SMTP id ffacd0b85a97d-42b52795624mr14671949f8f.5.1763370541052;
-        Mon, 17 Nov 2025 01:09:01 -0800 (PST)
+        bh=hNklcNl/h84G0BAPSH5Ap/sAnFYDzlujPx7lPybvZNg=;
+        b=mGkkgVHFsQBsr7PyMcHn/wapwdiic9lGij+F2LzU/fHN1SxY/Xxcd8Mpt//QBE/Wwb
+         Z+kNhVxwfA5YQGDYTO5aTeBKQDSX5ma7l068+oEWaCtQz2tPMLfJCZ3nGtij/oGxlaxE
+         /cg3gtuAOZ9nMfX1vIWox51bs8xjYqRU8l5AcMjZ73nAzDd19rgBD3UHTS90ue/T0vrY
+         61J6lIU/OvgO9aJrQ0KomPy9nd+UPoY2/uyudwwtqYmBPoGdwyGiVzWcz6J0z1IglL93
+         +lzg95yz9+VdkLOQ613mZ3HE/vVJ0eqw0JmXrBQvrzhQP1yRat2w4nDLJx9XHPgxoHbH
+         LPmw==
+X-Forwarded-Encrypted: i=1; AJvYcCXVwLbcb8LhmjZk/pNCac4yZjJuukYlvL6YDAxbL0/Fk9l+WcRNZMUhfN2K3tMEAEnhufz7R4Xk/FE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzxZGFQrl7jgDt81ohj3hMNpy5slvfNmFLX4917YcENjI5vUIff
+	Crb3fYvtHIp0Ef2/3fJWRJfsPmpPmKAjHP0JTqMe2jva6+bEufclFE+79IiW51OQmTU=
+X-Gm-Gg: ASbGncuKz79EANlTFSOySJUI59WKcSnh45LJqgzM9eH0uuiwCyS1Yj4sasCRquGoiLD
+	+dcI31oEpcpLZYJPOiMESS8464/Kwxf5Pc5USS58Th7J311AZ5J1CWUUWUF6YAxkSzBJRIVrGm4
+	9SspTo0B2engud1HbbKBtWXdwioKrL934EXUV6y2Y/5o17DQheloJlcJrzlw/DUdyQZIXi3d45X
+	kzyvcwfthU+nMCQxuLM3YieFEOdbyVgqVTRQkPhopkdYRDLYRaNU0dQDqoHTWNTHBrJAh6z/7pB
+	645G/Yj9WLzCdfDSEtIlM4C0Hzmjd88E392kGzYFE3aHMAptlBFTuaWxmTIGzrtrucWpddNhTcd
+	U9OuXq/ccSkAm4K1GhjSo9XrrQz7Q3wuEcJHipmZwos+0ML2UNFEc7DU0C23RdqjFrO8OXGcXMH
+	pWlUdvm2e6vPupiJ6qClEP6Y+sfkii5Mfc8aaLxXaS6Yku+J4jhJl2vqapA9PUfLc=
+X-Google-Smtp-Source: AGHT+IFEqkwxSjllnBhN7jZwXn9JEstugFlfcv/0lGieX2lTDkq55U3llo5HzCc4RWdNNcS783EXgg==
+X-Received: by 2002:a05:600c:4712:b0:46e:4586:57e4 with SMTP id 5b1f17b1804b1-4778fe9b36emr102254505e9.24.1763370564404;
+        Mon, 17 Nov 2025 01:09:24 -0800 (PST)
 Received: from ?IPV6:2a01:e0a:3d9:2080:d631:aa74:9313:e9f3? ([2a01:e0a:3d9:2080:d631:aa74:9313:e9f3])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-42b53f0b8a0sm25627416f8f.25.2025.11.17.01.08.59
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47787daab3fsm322893365e9.0.2025.11.17.01.09.23
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Nov 2025 01:09:00 -0800 (PST)
-Message-ID: <2aef88d5-b9cb-4b2a-866e-f856e49c6b85@linaro.org>
-Date: Mon, 17 Nov 2025 10:08:58 +0100
+        Mon, 17 Nov 2025 01:09:24 -0800 (PST)
+Message-ID: <5d6d8e57-a660-4b9e-9fc1-f074551f1d89@linaro.org>
+Date: Mon, 17 Nov 2025 10:09:22 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -72,14 +72,13 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 From: neil.armstrong@linaro.org
 Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH v1 1/7] mmc: meson-mx-sdio: Switch to regmap for register
- access
+Subject: Re: [PATCH v1 2/7] mmc: meson-mx-sdio: Use devm_clk_get_enabled()
 To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
  linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
  ulf.hansson@linaro.org
 References: <20251108231253.1641927-1-martin.blumenstingl@googlemail.com>
- <20251108231253.1641927-2-martin.blumenstingl@googlemail.com>
+ <20251108231253.1641927-3-martin.blumenstingl@googlemail.com>
 Content-Language: en-US, fr
 Autocrypt: addr=neil.armstrong@linaro.org; keydata=
  xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
@@ -106,318 +105,93 @@ Autocrypt: addr=neil.armstrong@linaro.org; keydata=
  4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
  QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
 Organization: Linaro
-In-Reply-To: <20251108231253.1641927-2-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20251108231253.1641927-3-martin.blumenstingl@googlemail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 On 11/9/25 00:12, Martin Blumenstingl wrote:
-> Switch the driver over to use regmap to access the registers. This makes
-> it consistent with the other Amlogic MMC drivers. No functional changes
-> intended.
+> This simplifies the code. No functional changes intended.
 > 
 > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 > ---
->   drivers/mmc/host/Kconfig         |   1 +
->   drivers/mmc/host/meson-mx-sdio.c | 125 ++++++++++++++++---------------
->   2 files changed, 64 insertions(+), 62 deletions(-)
+>   drivers/mmc/host/meson-mx-sdio.c | 23 +++++++----------------
+>   1 file changed, 7 insertions(+), 16 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 2c963cb6724b..027ef2540913 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -504,6 +504,7 @@ config MMC_MESON_MX_SDIO
->   	depends on ARCH_MESON || COMPILE_TEST
->   	depends on COMMON_CLK
->   	depends on OF_ADDRESS
-> +	select REGMAP_MMIO
->   	help
->   	  This selects support for the SD/MMC Host Controller on
->   	  Amlogic Meson6, Meson8 and Meson8b SoCs.
 > diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
-> index 8a49c32fd3f9..2448f21bd683 100644
+> index 2448f21bd683..1159cc911359 100644
 > --- a/drivers/mmc/host/meson-mx-sdio.c
 > +++ b/drivers/mmc/host/meson-mx-sdio.c
-> @@ -19,6 +19,7 @@
->   #include <linux/ioport.h>
->   #include <linux/platform_device.h>
->   #include <linux/of_platform.h>
-> +#include <linux/regmap.h>
->   #include <linux/timer.h>
->   #include <linux/types.h>
+> @@ -103,7 +103,6 @@ struct meson_mx_mmc_host {
+>   	struct device			*controller_dev;
 >   
-> @@ -108,7 +109,7 @@ struct meson_mx_mmc_host {
+>   	struct clk			*parent_clk;
+> -	struct clk			*core_clk;
+>   	struct clk_divider		cfg_div;
+>   	struct clk			*cfg_div_clk;
 >   	struct clk_fixed_factor		fixed_factor;
->   	struct clk			*fixed_factor_clk;
->   
-> -	void __iomem			*base;
-> +	struct regmap			*regmap;
->   	int				irq;
->   	spinlock_t			irq_lock;
->   
-> @@ -122,22 +123,10 @@ struct meson_mx_mmc_host {
->   	int				error;
->   };
->   
-> -static void meson_mx_mmc_mask_bits(struct mmc_host *mmc, char reg, u32 mask,
-> -				   u32 val)
-> -{
-> -	struct meson_mx_mmc_host *host = mmc_priv(mmc);
-> -	u32 regval;
-> -
-> -	regval = readl(host->base + reg);
-> -	regval &= ~mask;
-> -	regval |= (val & mask);
-> -
-> -	writel(regval, host->base + reg);
-> -}
-> -
->   static void meson_mx_mmc_soft_reset(struct meson_mx_mmc_host *host)
->   {
-> -	writel(MESON_MX_SDIO_IRQC_SOFT_RESET, host->base + MESON_MX_SDIO_IRQC);
-> +	regmap_write(host->regmap, MESON_MX_SDIO_IRQC,
-> +		     MESON_MX_SDIO_IRQC_SOFT_RESET);
->   	udelay(2);
->   }
->   
-> @@ -158,7 +147,7 @@ static void meson_mx_mmc_start_cmd(struct mmc_host *mmc,
->   	struct meson_mx_mmc_host *host = mmc_priv(mmc);
->   	unsigned int pack_size;
->   	unsigned long irqflags, timeout;
-> -	u32 mult, send = 0, ext = 0;
-> +	u32 send = 0, ext = 0;
->   
->   	host->cmd = cmd;
->   
-> @@ -215,25 +204,22 @@ static void meson_mx_mmc_start_cmd(struct mmc_host *mmc,
->   
->   	spin_lock_irqsave(&host->irq_lock, irqflags);
->   
-> -	mult = readl(host->base + MESON_MX_SDIO_MULT);
-> -	mult &= ~MESON_MX_SDIO_MULT_PORT_SEL_MASK;
-> -	mult |= FIELD_PREP(MESON_MX_SDIO_MULT_PORT_SEL_MASK, host->slot_id);
-> -	mult |= BIT(31);
-> -	writel(mult, host->base + MESON_MX_SDIO_MULT);
-> +	regmap_update_bits(host->regmap, MESON_MX_SDIO_MULT,
-> +			   MESON_MX_SDIO_MULT_PORT_SEL_MASK | BIT(31),
-> +			   FIELD_PREP(MESON_MX_SDIO_MULT_PORT_SEL_MASK,
-> +				      host->slot_id) | BIT(31));
->   
->   	/* enable the CMD done interrupt */
-> -	meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_IRQC,
-> -			       MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN,
-> -			       MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN);
-> +	regmap_set_bits(host->regmap, MESON_MX_SDIO_IRQC,
-> +			MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN);
->   
->   	/* clear pending interrupts */
-> -	meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_IRQS,
-> -			       MESON_MX_SDIO_IRQS_CMD_INT,
-> -			       MESON_MX_SDIO_IRQS_CMD_INT);
-> +	regmap_set_bits(host->regmap, MESON_MX_SDIO_IRQS,
-> +			MESON_MX_SDIO_IRQS_CMD_INT);
->   
-> -	writel(cmd->arg, host->base + MESON_MX_SDIO_ARGU);
-> -	writel(ext, host->base + MESON_MX_SDIO_EXT);
-> -	writel(send, host->base + MESON_MX_SDIO_SEND);
-> +	regmap_write(host->regmap, MESON_MX_SDIO_ARGU, cmd->arg);
-> +	regmap_write(host->regmap, MESON_MX_SDIO_EXT, ext);
-> +	regmap_write(host->regmap, MESON_MX_SDIO_SEND, send);
->   
->   	spin_unlock_irqrestore(&host->irq_lock, irqflags);
->   
-> @@ -263,14 +249,13 @@ static void meson_mx_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->   
->   	switch (ios->bus_width) {
->   	case MMC_BUS_WIDTH_1:
-> -		meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_CONF,
-> -				       MESON_MX_SDIO_CONF_BUS_WIDTH, 0);
-> +		regmap_clear_bits(host->regmap, MESON_MX_SDIO_CONF,
-> +				  MESON_MX_SDIO_CONF_BUS_WIDTH);
->   		break;
->   
->   	case MMC_BUS_WIDTH_4:
-> -		meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_CONF,
-> -				       MESON_MX_SDIO_CONF_BUS_WIDTH,
-> -				       MESON_MX_SDIO_CONF_BUS_WIDTH);
-> +		regmap_set_bits(host->regmap, MESON_MX_SDIO_CONF,
-> +				MESON_MX_SDIO_CONF_BUS_WIDTH);
->   		break;
->   
->   	case MMC_BUS_WIDTH_8:
-> @@ -351,8 +336,8 @@ static void meson_mx_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->   	host->mrq = mrq;
->   
->   	if (mrq->data)
-> -		writel(sg_dma_address(mrq->data->sg),
-> -		       host->base + MESON_MX_SDIO_ADDR);
-> +		regmap_write(host->regmap, MESON_MX_SDIO_ADDR,
-> +			     sg_dma_address(mrq->data->sg));
->   
->   	if (mrq->sbc)
->   		meson_mx_mmc_start_cmd(mmc, mrq->sbc);
-> @@ -364,24 +349,26 @@ static void meson_mx_mmc_read_response(struct mmc_host *mmc,
->   				       struct mmc_command *cmd)
->   {
->   	struct meson_mx_mmc_host *host = mmc_priv(mmc);
-> -	u32 mult;
-> -	int i, resp[4];
-> +	unsigned int i, resp[4];
->   
-> -	mult = readl(host->base + MESON_MX_SDIO_MULT);
-> -	mult |= MESON_MX_SDIO_MULT_WR_RD_OUT_INDEX;
-> -	mult &= ~MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK;
-> -	mult |= FIELD_PREP(MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK, 0);
-> -	writel(mult, host->base + MESON_MX_SDIO_MULT);
-> +	regmap_update_bits(host->regmap, MESON_MX_SDIO_MULT,
-> +			   MESON_MX_SDIO_MULT_WR_RD_OUT_INDEX |
-> +			   MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK,
-> +			   MESON_MX_SDIO_MULT_WR_RD_OUT_INDEX |
-> +			   FIELD_PREP(MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK,
-> +				      0));
->   
->   	if (cmd->flags & MMC_RSP_136) {
->   		for (i = 0; i <= 3; i++)
-> -			resp[3 - i] = readl(host->base + MESON_MX_SDIO_ARGU);
-> +			regmap_read(host->regmap, MESON_MX_SDIO_ARGU,
-> +				    &resp[3 - i]);
-> +
->   		cmd->resp[0] = (resp[0] << 8) | ((resp[1] >> 24) & 0xff);
->   		cmd->resp[1] = (resp[1] << 8) | ((resp[2] >> 24) & 0xff);
->   		cmd->resp[2] = (resp[2] << 8) | ((resp[3] >> 24) & 0xff);
->   		cmd->resp[3] = (resp[3] << 8);
->   	} else if (cmd->flags & MMC_RSP_PRESENT) {
-> -		cmd->resp[0] = readl(host->base + MESON_MX_SDIO_ARGU);
-> +		regmap_read(host->regmap, MESON_MX_SDIO_ARGU, &cmd->resp[0]);
->   	}
->   }
->   
-> @@ -422,8 +409,8 @@ static irqreturn_t meson_mx_mmc_irq(int irq, void *data)
->   
->   	spin_lock(&host->irq_lock);
->   
-> -	irqs = readl(host->base + MESON_MX_SDIO_IRQS);
-> -	send = readl(host->base + MESON_MX_SDIO_SEND);
-> +	regmap_read(host->regmap, MESON_MX_SDIO_IRQS, &irqs);
-> +	regmap_read(host->regmap, MESON_MX_SDIO_SEND, &send);
->   
->   	if (irqs & MESON_MX_SDIO_IRQS_CMD_INT)
->   		ret = meson_mx_mmc_process_cmd_irq(host, irqs, send);
-> @@ -431,7 +418,7 @@ static irqreturn_t meson_mx_mmc_irq(int irq, void *data)
->   		ret = IRQ_HANDLED;
->   
->   	/* finally ACK all pending interrupts */
-> -	writel(irqs, host->base + MESON_MX_SDIO_IRQS);
-> +	regmap_write(host->regmap, MESON_MX_SDIO_IRQS, irqs);
->   
->   	spin_unlock(&host->irq_lock);
->   
-> @@ -470,14 +457,13 @@ static void meson_mx_mmc_timeout(struct timer_list *t)
->   	struct meson_mx_mmc_host *host = timer_container_of(host, t,
->   							    cmd_timeout);
->   	unsigned long irqflags;
-> -	u32 irqc;
-> +	u32 irqs, argu;
->   
->   	spin_lock_irqsave(&host->irq_lock, irqflags);
->   
->   	/* disable the CMD interrupt */
-> -	irqc = readl(host->base + MESON_MX_SDIO_IRQC);
-> -	irqc &= ~MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN;
-> -	writel(irqc, host->base + MESON_MX_SDIO_IRQC);
-> +	regmap_clear_bits(host->regmap, MESON_MX_SDIO_IRQC,
-> +			  MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN);
->   
->   	spin_unlock_irqrestore(&host->irq_lock, irqflags);
->   
-> @@ -488,10 +474,12 @@ static void meson_mx_mmc_timeout(struct timer_list *t)
->   	if (!host->cmd)
->   		return;
->   
-> +	regmap_read(host->regmap, MESON_MX_SDIO_IRQS, &irqs);
-> +	regmap_read(host->regmap, MESON_MX_SDIO_ARGU, &argu);
-> +
->   	dev_dbg(mmc_dev(host->mmc),
->   		"Timeout on CMD%u (IRQS = 0x%08x, ARGU = 0x%08x)\n",
-> -		host->cmd->opcode, readl(host->base + MESON_MX_SDIO_IRQS),
-> -		readl(host->base + MESON_MX_SDIO_ARGU));
-> +		host->cmd->opcode, irqs, argu);
->   
->   	host->cmd->error = -ETIMEDOUT;
->   
-> @@ -578,7 +566,8 @@ static int meson_mx_mmc_add_host(struct meson_mx_mmc_host *host)
->   	return 0;
->   }
->   
-> -static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
-> +static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host,
-> +				      void __iomem *base)
->   {
->   	struct clk_init_data init;
->   	const char *clk_div_parent, *clk_fixed_factor_parent;
-> @@ -613,7 +602,7 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
->   	init.flags = CLK_SET_RATE_PARENT;
->   	init.parent_names = &clk_div_parent;
->   	init.num_parents = 1;
-> -	host->cfg_div.reg = host->base + MESON_MX_SDIO_CONF;
-> +	host->cfg_div.reg = base + MESON_MX_SDIO_CONF;
->   	host->cfg_div.shift = MESON_MX_SDIO_CONF_CMD_CLK_DIV_SHIFT;
->   	host->cfg_div.width = MESON_MX_SDIO_CONF_CMD_CLK_DIV_WIDTH;
->   	host->cfg_div.hw.init = &init;
-> @@ -629,12 +618,23 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
->   
->   static int meson_mx_mmc_probe(struct platform_device *pdev)
->   {
-> +	const struct regmap_config meson_mx_sdio_regmap_config = {
-> +		.reg_bits = 8,
-> +		.val_bits = 32,
-> +		.reg_stride = 4,
-> +		.max_register = MESON_MX_SDIO_EXT,
-> +	};
+> @@ -627,6 +626,7 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
 >   	struct platform_device *slot_pdev;
 >   	struct mmc_host *mmc;
 >   	struct meson_mx_mmc_host *host;
-> +	void __iomem *base;
+> +	struct clk *core_clk;
+>   	void __iomem *base;
 >   	int ret, irq;
 >   	u32 conf;
->   
-> +	base = devm_platform_ioremap_resource(pdev, 0);
-> +	if (IS_ERR(base))
-> +		return PTR_ERR(base);
-> +
->   	slot_pdev = meson_mx_mmc_slot_pdev(&pdev->dev);
->   	if (!slot_pdev)
->   		return -ENODEV;
-> @@ -656,9 +656,10 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
->   
->   	platform_set_drvdata(pdev, host);
->   
-> -	host->base = devm_platform_ioremap_resource(pdev, 0);
-> -	if (IS_ERR(host->base)) {
-> -		ret = PTR_ERR(host->base);
-> +	host->regmap = devm_regmap_init_mmio(&pdev->dev, base,
-> +					     &meson_mx_sdio_regmap_config);
-> +	if (IS_ERR(host->regmap)) {
-> +		ret = PTR_ERR(host->regmap);
->   		goto error_free_mmc;
->   	}
->   
-> @@ -687,7 +688,7 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
->   		goto error_free_mmc;
->   	}
->   
-> -	ret = meson_mx_mmc_register_clks(host);
-> +	ret = meson_mx_mmc_register_clks(host, base);
+> @@ -676,9 +676,9 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
 >   	if (ret)
 >   		goto error_free_mmc;
 >   
-> @@ -708,7 +709,7 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
->   	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_M_ENDIAN_MASK, 0x3);
->   	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_WRITE_NWR_MASK, 0x2);
->   	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_WRITE_CRC_OK_STATUS_MASK, 0x2);
-> -	writel(conf, host->base + MESON_MX_SDIO_CONF);
-> +	regmap_write(host->regmap, MESON_MX_SDIO_CONF, conf);
+> -	host->core_clk = devm_clk_get(host->controller_dev, "core");
+> -	if (IS_ERR(host->core_clk)) {
+> -		ret = PTR_ERR(host->core_clk);
+> +	core_clk = devm_clk_get_enabled(host->controller_dev, "core");
+> +	if (IS_ERR(core_clk)) {
+> +		ret = PTR_ERR(core_clk);
+>   		goto error_free_mmc;
+>   	}
 >   
->   	meson_mx_mmc_soft_reset(host);
+> @@ -692,16 +692,10 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
+>   	if (ret)
+>   		goto error_free_mmc;
 >   
+> -	ret = clk_prepare_enable(host->core_clk);
+> -	if (ret) {
+> -		dev_err(host->controller_dev, "Failed to enable core clock\n");
+> -		goto error_free_mmc;
+> -	}
+> -
+>   	ret = clk_prepare_enable(host->cfg_div_clk);
+>   	if (ret) {
+>   		dev_err(host->controller_dev, "Failed to enable MMC clock\n");
+> -		goto error_disable_core_clk;
+> +		goto error_free_mmc;
+>   	}
+>   
+>   	conf = 0;
+> @@ -715,14 +709,12 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
+>   
+>   	ret = meson_mx_mmc_add_host(host);
+>   	if (ret)
+> -		goto error_disable_clks;
+> +		goto error_disable_div_clk;
+>   
+>   	return 0;
+>   
+> -error_disable_clks:
+> +error_disable_div_clk:
+>   	clk_disable_unprepare(host->cfg_div_clk);
+> -error_disable_core_clk:
+> -	clk_disable_unprepare(host->core_clk);
+>   error_free_mmc:
+>   	mmc_free_host(mmc);
+>   error_unregister_slot_pdev:
+> @@ -742,7 +734,6 @@ static void meson_mx_mmc_remove(struct platform_device *pdev)
+>   	of_platform_device_destroy(slot_dev, NULL);
+>   
+>   	clk_disable_unprepare(host->cfg_div_clk);
+> -	clk_disable_unprepare(host->core_clk);
+>   
+>   	mmc_free_host(host->mmc);
+>   }
 
 Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
