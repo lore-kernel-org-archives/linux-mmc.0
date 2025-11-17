@@ -1,318 +1,423 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39934322C7B;
-	Mon, 17 Nov 2025 08:56:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.9
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763369768; cv=fail; b=ddp8utX9pVsOlbwMvcDWRJzEXJ/aaflrnVxFfCNF65n9saZoGodFeEKgtyN+GIx0OiESd5b2egh4PMJSos61gvjQZjmPA2c9yqmhD4uJkQ1i2zk7jrYAyfAO93R/VcJLUtj64IKH1XIjnBiagep+GSs0/gJn3YSTUPu0CI+fXmU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763369768; c=relaxed/simple;
-	bh=5ahedrK+2V9LNevtbt0se5T/U/jVaicco9c5aS+ovAk=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=XkVgbhABQLpLJgpO+4WrbEk3I1bc/6zTgeax7xuq0YVN4+Ce+rQtqC1j10MoureCqNJ8D29MffYv+ApFvlbjmJ0rYS2LbrM4ZNi4/bLMkVlI3ig1Qu2fEgVQQ5BhrhNhXjnT+ZF0Uo/0Bq0+1hxDeikmLOvmOIZ8oaohrLKIMII=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ElJypurF; arc=fail smtp.client-ip=198.175.65.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 126BE1F3FED
+	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 09:09:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1763370545; cv=none; b=G3x4ZOvhxIW7mvlDwBP5Wv329xXolUd643yOv2wG/G51q2VLU0qBEBZWEVYc/VsccUm5jWqE5YyLB1FPZInXQHNtVWPNyOoC+SukHchAYtQDZYwvyugOksYxSYdVaEU+A9zy/IUO7TONlqXcqrfOcZ4TD3Ak5Gvjs0+DIx5IYxo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1763370545; c=relaxed/simple;
+	bh=iBVn/w1aah5WydQWqagBNlkRopXgf1/J7o7NAxoJk1Q=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=e5vWuIu0fdX410kjVjFumi8Ry9tGjQG03R6fMLpstBTfI5fcnJNhH/xAculCqQlyaMxbqZCriRrrQD9hj92fMgcaYVmQdydhqulIxIIndvBSzghTNp+KyHNciPCYIyASp9QfM9w/twYALoFJKVT0wJZCJ5LCAVEm6kBFs/GZvFM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=D9zlJ8cw; arc=none smtp.client-ip=209.85.221.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ElJypurF"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1763369766; x=1794905766;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=5ahedrK+2V9LNevtbt0se5T/U/jVaicco9c5aS+ovAk=;
-  b=ElJypurFFB5+Cy/K7OH+iwtD9WRK03iYKdb9VSmaEorDiDKhXtoZcnWI
-   Y2L/y4vQzeTtNY9fX5hLDZSYcXAwxoryrPtYsdOndJOsXw6AOr1MfWhCA
-   wvpmJwRqjthLgbg6CUtOQycOrE7qxaWFPiNzTFrVdtE5S2++NIAM54yu4
-   x2L8tynroBhNzfvu6Jye4sI6Bdo6PDv13uub49kK+5uK5wQzuLl6KG9Gs
-   UPkQaClMNkYEvuJSqeeca3Q75wfTO1qJ5yR98ixPRxMHfQfJwiEZZY0Iy
-   YjID0zoZUP7h6SV4NBcdsb5q42Imn9vxkkc919VjEtG7ryGD+jrUYWpf6
-   w==;
-X-CSE-ConnectionGUID: +sAkDqa5T7WoNnGcRRi1FQ==
-X-CSE-MsgGUID: ocbDKYvTTAOIieA3VZo9hw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11615"; a="88011097"
-X-IronPort-AV: E=Sophos;i="6.19,311,1754982000"; 
-   d="scan'208";a="88011097"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2025 00:56:01 -0800
-X-CSE-ConnectionGUID: exGlgz/USiaGzsMDYILOxQ==
-X-CSE-MsgGUID: UUy5sU5/QyuiK5x/JLBwnA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.19,311,1754982000"; 
-   d="scan'208";a="190185299"
-Received: from orsmsx901.amr.corp.intel.com ([10.22.229.23])
-  by orviesa009.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2025 00:56:01 -0800
-Received: from ORSMSX902.amr.corp.intel.com (10.22.229.24) by
- ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27; Mon, 17 Nov 2025 00:56:00 -0800
-Received: from ORSEDG902.ED.cps.intel.com (10.7.248.12) by
- ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27 via Frontend Transport; Mon, 17 Nov 2025 00:56:00 -0800
-Received: from SJ2PR03CU001.outbound.protection.outlook.com (52.101.43.14) by
- edgegateway.intel.com (134.134.137.112) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.27; Mon, 17 Nov 2025 00:56:00 -0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=gp/lFQqQGJP42BdF1y8aB0VZtQ8/TegGTIM4ug7LOJopvi0tnX2cMbXuaaytXWMiZfE7ctwrcmWpJyP8PHHroMei7fFaP1KOFFjlSsMLvIeZd2vL54Gglj8nOvkQ4cM2MY2C2grreSUjPeLpFMFON5FvAIpGHTLeFLZ+p1+wmBsyjXCLdLdPmLgAq7mpHrLBIEzOTBRcLKxgPoNppFWBphSGfjl2BiPxvAn68tQCvrQY/e5HtWzvqUPzWzbJtwXdj1LK4RVjreUc4baJG0jZZMPWuHeUSVaPlNNzJdUSDdzQndnf+62ypn+TqPuxgfpBz7Atb+DUEw5C1ruxu8LgCA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=JFpdwj67gA5CT1z/aRInjVukRDca3ESBy1ROm6OOnBE=;
- b=sHnWyk595MpCCPmpnPCUSaGp2MgjCFpcNmhqxlfZ/CfDJmssf0z0daH5mIOP573DvwHsM1KbXf+rnFy3DmdQDwrST6Yn82uP+Zi+m533wC7uAaHsuVPG9KQO+L7M5n/5vFLfbLxvv6CW4o1bCWehepfoYqltwsT4CEWfUVyitx+x9w749PBVfbbFHP7yHkX3sjuGi/bGazw+dWHsZwBPAwFuTXmaYRuLBGdzqraKuXQAKFaBi7PBn0Djd5yAz97vjE+E4QEjVXN826v3zFzh0HIWOqCTCBHEkBffIROvM2PZ6UwGiMSjGjVM89RhTpsWmsHUk5E8LYOqPqho/+xauw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by DM3PPF1721FD39C.namprd11.prod.outlook.com (2603:10b6:f:fc00::f0a) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9320.22; Mon, 17 Nov
- 2025 08:55:53 +0000
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::eeac:69b0:1990:4905]) by IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::eeac:69b0:1990:4905%7]) with mapi id 15.20.9320.018; Mon, 17 Nov 2025
- 08:55:53 +0000
-Message-ID: <47c2b137-3abb-4933-9708-d6dfbd2f7a91@intel.com>
-Date: Mon, 17 Nov 2025 10:55:48 +0200
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V2] mmc: sdhci-msm: Avoid early clock doubling during
- HS400 transition
-To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>
-CC: <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>, <quic_nguyenb@quicinc.com>,
-	<quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
-	<quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
-	<quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>
-References: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
- 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
- 4, Domiciled in Helsinki
-In-Reply-To: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DB8P191CA0003.EURP191.PROD.OUTLOOK.COM
- (2603:10a6:10:130::13) To IA1PR11MB7198.namprd11.prod.outlook.com
- (2603:10b6:208:419::15)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D9zlJ8cw"
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-42b47f662a0so2378613f8f.0
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 01:09:02 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1763370541; x=1763975341; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=j80cA3+lrwgAsnc0giKu1MemC628u6PWriEbYYP1hp0=;
+        b=D9zlJ8cw51wZ+8atvNO5TjxAJoAAyen06epKX3q4NIbP3rI5EhvcQjj0RwJlaMuVUh
+         WZ1h0dbGVinIpUBOgnZwoafhtw6rG8AzGAvsxmFBNVTdCaSEil6Dn99vKkLOT6xloqiD
+         +NOeuEiiDCg51z8Ui+472tvejkXEVwwKt8CqwvlUQzcT3SkzP4VTUcCpzHsd16u5vhZE
+         5WkimYSvA3UfS/gBX3Bq4tMARpwcl44D0JW2QBUOm1VZgsVtPh7gpYjlnR4/gzOsknsy
+         L837BlPyex8KqE3hcJCCzu86R6vzB6JxOMKkQSMG0E5+AsNxKKdMueNm6dqhc3r4YB3T
+         OPyw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763370541; x=1763975341;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=j80cA3+lrwgAsnc0giKu1MemC628u6PWriEbYYP1hp0=;
+        b=OAizNozHo+tJe2SmTeInP1+I54Zd0V5pwso3Tdnb0P5CsAj5pa4S3x8m98LzaCOoev
+         UxIILTVzyW2VbGwDQHuVv6+xgPwLVSHOzTs4JM8bkLwAAIn92er2xBEcm2dKDexris3z
+         kIKpfYNv7MizF5MEbojxu61TxvxMlr8lenkh726xjBmd8OqPdD0iUjgKWA0lwuAUhAdV
+         vlrsvcprJAiz7s6tjywv2cAAJR2PGhfGHaqRKUMCowBzgOa2zNtsSYDYG3z4aS2ofvoQ
+         UxLwm2lQn6O7c/xrB3i2yn2Xzha/9Zlzv9ggy7fIWD7xrMBV6UDgmzRYwjps/KuX+keU
+         DpGw==
+X-Forwarded-Encrypted: i=1; AJvYcCWHcGWJAsdHiF8QaO/ZmAnAXc7WDAvBwqutilmVaQbbrO60LjrFC5ofvbRFACpLluCPK/cTHPQduas=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwPWiEnI1jazQYXIEXjWp7+/M4Kl3BiRgbwX2/eFLCeHl4vbstW
+	yBi0UsxUUOBRfzgKBmgmqke1L49vTpu0ZxNqJCXLpP+3dR0few69najhRMInlBoPS3U=
+X-Gm-Gg: ASbGncvuNCy79uEGsdJuypIs8lO+UibblTLjCQaPRf6AP+2Bg78RqQcP9LBB5jsrUrx
+	NiNW2yYdY+fji4TH5UOI1aZ0q3a+CxCWb/Dk4HVbvJ+czAJXaqeiZHVhfojHFhF0UZF6OIXhdLl
+	3faO/6N2Wpw5+l78WWxc5lGOOOkwn90ZwFUSZcYNi2bXfmTsI9r6e0vMnLlAIPrZy2mRfjNKoPx
+	VlPRwq9aFABFE39a+4y1/GM5msq7KqQpVdgQM+vQweUxNqQvO7Z6h9Qya9rSAWnYUVDjXvSirP7
+	BwvR1+BCkougO3+LAuI1/2D4cDB+/q+BkmfHMAKANbLFym078HXRniPatV1BAi25YQSsoogCxhJ
+	Nm4Mp1t1SS0tWr7uENGVnkEyN8pEgnkl/irc/6CaygcH92swH0lO8pCpossMioKJLOuzaoDwCaB
+	/4UrheVpAnxWBilEO/rD3AVHzDmv6x9RXvw75pDZJhSlcff9u+MTm0xpv5lRf2tIE=
+X-Google-Smtp-Source: AGHT+IEbamgDekUoI8tFnZIk+ynap255pwjgX7qHYaMDgfodxB1QA2SjR+XQIFkW6+XHOriFBT/Ehg==
+X-Received: by 2002:a05:6000:230b:b0:429:d253:8619 with SMTP id ffacd0b85a97d-42b52795624mr14671949f8f.5.1763370541052;
+        Mon, 17 Nov 2025 01:09:01 -0800 (PST)
+Received: from ?IPV6:2a01:e0a:3d9:2080:d631:aa74:9313:e9f3? ([2a01:e0a:3d9:2080:d631:aa74:9313:e9f3])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-42b53f0b8a0sm25627416f8f.25.2025.11.17.01.08.59
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 17 Nov 2025 01:09:00 -0800 (PST)
+Message-ID: <2aef88d5-b9cb-4b2a-866e-f856e49c6b85@linaro.org>
+Date: Mon, 17 Nov 2025 10:08:58 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|DM3PPF1721FD39C:EE_
-X-MS-Office365-Filtering-Correlation-Id: e30c7efe-4d8b-40f7-2fc5-08de25b71d48
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|7416014|366016|1800799024|7053199007;
-X-Microsoft-Antispam-Message-Info: =?utf-8?B?NFpQNFFiYUJGRU5nNFdRbnZNblJDVWo5ZTd4eVRNZzFDVTZKZnhIWEVqV3Jo?=
- =?utf-8?B?eTNJMFd1ZCtBTlk4UnlBbWxYeS9rZGxNUHJaek9UZzhldGMzaDVMaExYZjdQ?=
- =?utf-8?B?WEtmQm5PYmUzTFB6YkNKMW1LQkQ2YXI3dGF4VE1qN2M3Kzl0Ti96czFFcjlL?=
- =?utf-8?B?TWpMb0ZjNlZoTnJIbWxiVWZ3TVV3SVUxWW1Gck5udFZISDM4TlBJTFVWcWZG?=
- =?utf-8?B?eDBuem1LQVExeWhmT1R6MWFMMHJTOW5TdlZYTHdjZlAyUm16UFduN1o1elZL?=
- =?utf-8?B?aGUyVHpaM1orQWxDbkhlTmM2VlFaaGs4eW52empQcXl2UXcrSysyd3AycVB0?=
- =?utf-8?B?OHNYWjNCUDVjV08rKzVva3pvckEvdUd6cm9jWTV2N0o4czgzWm1CWThaQllz?=
- =?utf-8?B?SVFWN1lQclV6c3Z4a0U1S1NoZ0x2ckhBa1BHdmg0NVMyZDliSWhnUGZ4c2Jv?=
- =?utf-8?B?V1hIY0Z4R0tGc3JxSnN2eVU0eWFveW1IUXF6YXJnWEE4dXFnd1E3Tk1hd3dS?=
- =?utf-8?B?K0p0VFJqUmFjSjdNVW5mK3JZcWNuSFg1SThMM0dHSGs0QnBtYWZXSFpPaFZw?=
- =?utf-8?B?bzZJRVV6U3NqMTFQbmZQSUw4YjlGTDYrQ0RMR0pUM3ZJVytOek44R0ZJb2ds?=
- =?utf-8?B?cTV5cHFKczF1WlpKaUgxYUxha1BQOXdrLzZHQUdRWCtwdkI3c0kwQVI0Nnpv?=
- =?utf-8?B?TUxCVmFBcW8ra1gxVjMrOTRpWnpPem1uVHNZK1B4Z092d0cyaFZ4WTFXWEJC?=
- =?utf-8?B?QndReHJmd21EakkveEYvVERvc1cwS3lMVm5zWU5rdnNqV3lEQlovKzJxR3I4?=
- =?utf-8?B?MEd1cXcwV2ltLytLL1NnWDRyM0hnTkJGaVdlTWVnck1YQjNtMElZSEt2bGZt?=
- =?utf-8?B?dHJjUnFOd3hBSVNNQ2lwTHp1aTFlcDNXOGNHWVc2UTNxRHRKR1JyQWVseFBp?=
- =?utf-8?B?SnZlNVY4c1o2dWZZZnE5WDljOTIveThSem9sWjJuRmxBL0pCVHljakU3ZkZJ?=
- =?utf-8?B?cEp3OU1tRUlUbXRBYUFaN21xc0YzUEVmS01FR1ZvRnpibVJ0cmN1aklNWUxz?=
- =?utf-8?B?YU0yS21FbVFMZ0xwcGdtaXo2UExLdTMzK2h2eWxLdmcwNjVpM0I1NlhhYzlx?=
- =?utf-8?B?NWQvTDB4aXVNZ1hDcDM2cm4ycWJPVDJoM2lGRWtrUXp3MFlNZEoyWGJ2V0JM?=
- =?utf-8?B?SlA5SkxTU1FOQU8zekdqUE1BTE9pWmhTVU1lSnlOMVNJaUpOdFgxVkZLN1RR?=
- =?utf-8?B?SUxBdWRRR2M4ajczdGZ4Q0NwK0tnQ0Q3SlB5alpHcUx1SkI4eFhacG1PZ0VO?=
- =?utf-8?B?S0ZFeVdVLzBzRnhDUXJCVzhTRU40bncwR0V5NjVSS2Q2YlM0dkRET2dNc3lV?=
- =?utf-8?B?VkhNVUxPMW5CVHdGV1pYdXorUjY2dFFWeXlTQUJISHpCVWw4THh5bFMvZ1Na?=
- =?utf-8?B?ZzJHVTNIUVo3TTU0RERMdUhNeDNUVEdFUzFjY0VUTjVCTUZ3M2VtQUNISGhr?=
- =?utf-8?B?Z2dxQXpjQy9raU0wZ2RmSThFOUZGZ2ZDcTg1ZVpibmhEWndudnYxRmhKU0Vo?=
- =?utf-8?B?aE92ejYwbHZJRTZJQ0lDeGM3eTNBNmVmeG1RMUxYSndSalhlNVR0eGFLMk56?=
- =?utf-8?B?VnJwNUYwK2w3cFRxQi9CdlB2cTRuQmJDODlsWmFRT1JsbFZxOXhjc25PV1Zz?=
- =?utf-8?B?b2VFNFlWN1BQbkFCNmdac1hITUJyQUI5cm9PWFdRd2c1dHMrRTJibDhPTzJO?=
- =?utf-8?B?cjQrZFlwSGxEeUFVSTZTTGpjL3JRSXFOU0hEdHdIOWFUbHErQ1B5ZG5QK1pB?=
- =?utf-8?B?bE5HNys3M1p2YXhiY0k4NXRTdHVoWXluZ0NNNVBXOTBKeUxlcmx3elE4SDk3?=
- =?utf-8?B?S1lkL3RZeUJGK09Rak9BYk1oOXBJZFp0V0RTNzhFbWNLTjhoSWJxd2Z1U1By?=
- =?utf-8?Q?Hn+P1QyovjWO3eNEJbapVLYPsNXpjWFO?=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(366016)(1800799024)(7053199007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?RW5rL0ptMXkxQnNjZ1VSOFdmQllmQ0hWMUdlbUgvQ084QzRZV2MzTXlNSjZD?=
- =?utf-8?B?ZUdZVmo0eUE2V29uelZUQ0pNZThSZ09qQXJENHpsWHROSHg0S1JGZU9lR3Ew?=
- =?utf-8?B?Y1RCaTlHd3J0bGNmQkdBNDBsb1g3Mkd5MXBoZlNuN3JHWUt3R3JkUmV6Y1M3?=
- =?utf-8?B?OVF3djRMRW84YWdZQ3E0R3g2Qjh0SVFCeThxbmQrTWtEQlpOLy9qT2ZKMkNO?=
- =?utf-8?B?WXhDbTJuWnpPdXdKUklNOGZXQ3I1d205azVpbG94UmV2d0VJZ3BQaFRUS1li?=
- =?utf-8?B?K0Y3dThNK0JCMUxsV080QUtzM0xXd3RnNm5IL2ozRHRubVBTYmtpL2ZlWnZk?=
- =?utf-8?B?YWVVSXB5VGJQVzhaUkxpaXViTHNNQ25uakwrcGNjTk1tM1VIenpUZDJxbTFr?=
- =?utf-8?B?UXlxY0hYS1BMT045UXVYNG1TTmM0SjU5TkM4eTNXUDNNV2doNUV0SDR4NlFW?=
- =?utf-8?B?KzJDa3ozSFkrSk5nZXpnbmhXTzZXcXJlcjRHaTE1dzNxSFlIQVVRK2tEUk5y?=
- =?utf-8?B?LzVKcEVGQVZYTkg4K0E3QTh1Y3VaR243N3ozdDdmazZuVmsyc3MwVDJLOEw5?=
- =?utf-8?B?b0JGSUE4THpObGp1S0Yza3R2MTNDcnd3MTU3b2U2c002UXNUNVBIZm1aVmo3?=
- =?utf-8?B?Vy9aQy9oZ1VjaURCd1hZbGJiYlRqNitGUGxKMDIxd1paMHdXbFcvdU9QTEo3?=
- =?utf-8?B?MGtJd1M4cmYrWDZoQ0ErVndRaldWSjIzWm5yNzVNekd0dTFqdnorNkw1MUJp?=
- =?utf-8?B?am1qS1RjbFRubUZjTHFXYzlmUjBSUXpaaTZkc0Z1ZjYrYmpmdWZlcjBOdWs4?=
- =?utf-8?B?Tk16TzYxcE9xbHRGamlKQVlJZHlsekg1MC93bUh6aHdJWEpVUkhrVnBHK0F0?=
- =?utf-8?B?MHoweWJtT1dhTEZNSmEra1dQcXhlaUtYUW1vOGFiWXVIOTNUZkQzcXpTNnRp?=
- =?utf-8?B?Z0dqK3E2Y0FaYUIzTHhNVlJYY045aTNDMW4wZDN1Q3lqYjlOUys1QTdZczA4?=
- =?utf-8?B?NzFVTXB4ajFlVWMvTDk4NDdOMWxtQmJ5bDZwS3VkMWc3TldtMTJ3Szd2ZTR5?=
- =?utf-8?B?VUpkMm55bFVBWmlaRVJWeFB3Y0cxT1dVQVJ5a2tzT1R2TUt6b1E5RlJUSHNz?=
- =?utf-8?B?emxOU0VDTmZ5a3hQVFJpbTNVZjd0QkRaSWswRHUwVG1Ga1dNQ0xIRnBoc0dW?=
- =?utf-8?B?bUZqM3BkaWp3c2JERVdLMCtUUHp6VzFNUzFUTnMreTQ5dTRiVXNJUnp1WDhR?=
- =?utf-8?B?ZTFYVFp2eEE3WGgyL0lDcWFNejZ6OWc1K1VMOWxuMm1DajZPWDlTQkhqMWI0?=
- =?utf-8?B?RGYweDdtaEk3MzBuUkZoTG52YytXY1ZvRE1YTGFBS3c1TzFad1o4V3BYemlx?=
- =?utf-8?B?cUU1dmNwNi93Ym8zZHgwYWY5TWNFMjlMQkVQNWV5NzRmeFFNOXYvUTRSem0y?=
- =?utf-8?B?V2tpUVhNTnlVcm5DQkhUUGNnWUd4Y1gxVFJ3eVRTeXNYN3BKby9mZUx5WjZV?=
- =?utf-8?B?K3p5L2sydUNaOFRONnMwRmhMYU0rVG5uT01PZFBwQURYaUN2by9oREFad1Vt?=
- =?utf-8?B?eWowK3ZGUGVLVFEvL0dnV1dVcWZSTHB2d01yZWdBN1hzL0pRRi9BbXRSZXBz?=
- =?utf-8?B?U0VDbzNlaFBRMGY4VzdvajcvazhRc2RYYWp3aHVPSXNNNy9QK3F4VlFmc3FZ?=
- =?utf-8?B?V2NEeEVTcE9ZMEZJNHJvZDRxOS9VT3JRR0Jab0VYWmZwVU9vVlZ1bEdhWkps?=
- =?utf-8?B?RVhROVF0bCtHdzlHUlNYRmZ4MmYrTzdZcDRtaXB6U0pCRWlnakVFRnBTZTlI?=
- =?utf-8?B?K3kwOHB1RndJZXhxb2dQQnJyaGJ2TDNDT2FwdmRBZzFZeWVabTFxOEhIYnQy?=
- =?utf-8?B?Y0RVYzNMZlQ3Q0Z6bTdPbzVVS1dLbXZvRDZwS2xWSE56RDlrODlxdWJTM0Rn?=
- =?utf-8?B?VjhLeDZRV1RKYXh4MHdRendFMmhxVTNqWnFHNXpzejNGa2txUlV5VkZoQWVV?=
- =?utf-8?B?S1lzY3JTR0I5NkMvRVNSZ0lwa2dnQzJtQjUzM0NGdGV1cUl1Y3VwZjBQVnpy?=
- =?utf-8?B?SnRyVlZQeFh6K2c5WkxjS1pYK2k0QkF1MTRBYWh1a00vTitsMEsyM29YVEph?=
- =?utf-8?B?RVhUTENPcXJqTEkxSWxjMG1rUGpBZ0lPY1h5RXlidmN2cDJDblVzRnloZHBq?=
- =?utf-8?B?Mmc9PQ==?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: e30c7efe-4d8b-40f7-2fc5-08de25b71d48
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Nov 2025 08:55:53.7266
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 0x0uONGbTa6O7dX0RwZ4kMBZxg81/jFsJ5qgCiHLP6MTocWswpFb4Hi7fyjXtAv180N/ceU4nDu34Ng7jjCreg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM3PPF1721FD39C
-X-OriginatorOrg: intel.com
+User-Agent: Mozilla Thunderbird
+From: neil.armstrong@linaro.org
+Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
+Subject: Re: [PATCH v1 1/7] mmc: meson-mx-sdio: Switch to regmap for register
+ access
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+ ulf.hansson@linaro.org
+References: <20251108231253.1641927-1-martin.blumenstingl@googlemail.com>
+ <20251108231253.1641927-2-martin.blumenstingl@googlemail.com>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20251108231253.1641927-2-martin.blumenstingl@googlemail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On 14/11/2025 10:28, Sarthak Garg wrote:
-> According to the hardware programming guide, the clock frequency must
-> remain below 52MHz during the transition to HS400 mode.
+On 11/9/25 00:12, Martin Blumenstingl wrote:
+> Switch the driver over to use regmap to access the registers. This makes
+> it consistent with the other Amlogic MMC drivers. No functional changes
+> intended.
 > 
-> However,in the current implementation, the timing is set to HS400 (a
-> DDR mode) before adjusting the clock. This causes the clock to double
-> prematurely to 104MHz during the transition phase, violating the
-> specification and potentially resulting in CRC errors or CMD timeouts.
-> 
-> This change ensures that clock doubling is avoided during intermediate
-> transitions and is applied only when the card requires a 200MHz clock
-> for HS400 operation.
-> 
-> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 > ---
->  Changes from v1:
->  As per Bjorn Andersson's comment :
->  - Pass "timing" as an argument to msm_set_clock_rate_for_bus_mode(), and
->  then pass host, clock, and timing to msm_get_clock_mult_for_bus_mode() to
->  align with the original intent of the prototype.
-> ---
->  drivers/mmc/host/sdhci-msm.c | 27 +++++++++++++++------------
->  1 file changed, 15 insertions(+), 12 deletions(-)
+>   drivers/mmc/host/Kconfig         |   1 +
+>   drivers/mmc/host/meson-mx-sdio.c | 125 ++++++++++++++++---------------
+>   2 files changed, 64 insertions(+), 62 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 4e5edbf2fc9b..3b85233131b3 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -344,41 +344,43 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
->  	writel_relaxed(val, host->ioaddr + offset);
->  }
->  
-> -static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
-> +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
-> +						    unsigned int clock,
-> +						    unsigned int timing)
->  {
-> -	struct mmc_ios ios = host->mmc->ios;
->  	/*
->  	 * The SDHC requires internal clock frequency to be double the
->  	 * actual clock that will be set for DDR mode. The controller
->  	 * uses the faster clock(100/400MHz) for some of its parts and
->  	 * send the actual required clock (50/200MHz) to the card.
->  	 */
-> -	if (ios.timing == MMC_TIMING_UHS_DDR50 ||
-> -	    ios.timing == MMC_TIMING_MMC_DDR52 ||
-> -	    ios.timing == MMC_TIMING_MMC_HS400 ||
-> +	if (timing == MMC_TIMING_UHS_DDR50 ||
-> +	    timing == MMC_TIMING_MMC_DDR52 ||
-> +	    (timing == MMC_TIMING_MMC_HS400 &&
-> +	    clock == MMC_HS200_MAX_DTR) ||
->  	    host->flags & SDHCI_HS400_TUNING)
->  		return 2;
->  	return 1;
->  }
->  
->  static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-> -					    unsigned int clock)
-> +					    unsigned int clock,
-> +					    unsigned int timing)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> -	struct mmc_ios curr_ios = host->mmc->ios;
->  	struct clk *core_clk = msm_host->bulk_clks[0].clk;
->  	unsigned long achieved_rate;
->  	unsigned int desired_rate;
->  	unsigned int mult;
->  	int rc;
->  
-> -	mult = msm_get_clock_mult_for_bus_mode(host);
-> +	mult = msm_get_clock_mult_for_bus_mode(host, clock, timing);
->  	desired_rate = clock * mult;
->  	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
->  	if (rc) {
->  		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-> -		       mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
-> +		       mmc_hostname(host->mmc), desired_rate, timing);
->  		return;
->  	}
->  
-> @@ -397,7 +399,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
->  	msm_host->clk_rate = desired_rate;
->  
->  	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
-> -		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
-> +		 mmc_hostname(host->mmc), achieved_rate, timing);
->  }
->  
->  /* Platform specific tuning */
-> @@ -1239,7 +1241,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	 */
->  	if (host->flags & SDHCI_HS400_TUNING) {
->  		sdhci_msm_hc_select_mode(host);
-> -		msm_set_clock_rate_for_bus_mode(host, ios.clock);
-> +		msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
->  		host->flags &= ~SDHCI_HS400_TUNING;
->  	}
->  
-> @@ -1864,6 +1866,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	struct mmc_ios ios = host->mmc->ios;
->  
->  	if (!clock) {
->  		host->mmc->actual_clock = msm_host->clk_rate = 0;
-> @@ -1872,7 +1875,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  
->  	sdhci_msm_hc_select_mode(host);
->  
-> -	msm_set_clock_rate_for_bus_mode(host, clock);
-> +	msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
->  out:
->  	__sdhci_msm_set_clock(host, clock);
->  }
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 2c963cb6724b..027ef2540913 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -504,6 +504,7 @@ config MMC_MESON_MX_SDIO
+>   	depends on ARCH_MESON || COMPILE_TEST
+>   	depends on COMMON_CLK
+>   	depends on OF_ADDRESS
+> +	select REGMAP_MMIO
+>   	help
+>   	  This selects support for the SD/MMC Host Controller on
+>   	  Amlogic Meson6, Meson8 and Meson8b SoCs.
+> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
+> index 8a49c32fd3f9..2448f21bd683 100644
+> --- a/drivers/mmc/host/meson-mx-sdio.c
+> +++ b/drivers/mmc/host/meson-mx-sdio.c
+> @@ -19,6 +19,7 @@
+>   #include <linux/ioport.h>
+>   #include <linux/platform_device.h>
+>   #include <linux/of_platform.h>
+> +#include <linux/regmap.h>
+>   #include <linux/timer.h>
+>   #include <linux/types.h>
+>   
+> @@ -108,7 +109,7 @@ struct meson_mx_mmc_host {
+>   	struct clk_fixed_factor		fixed_factor;
+>   	struct clk			*fixed_factor_clk;
+>   
+> -	void __iomem			*base;
+> +	struct regmap			*regmap;
+>   	int				irq;
+>   	spinlock_t			irq_lock;
+>   
+> @@ -122,22 +123,10 @@ struct meson_mx_mmc_host {
+>   	int				error;
+>   };
+>   
+> -static void meson_mx_mmc_mask_bits(struct mmc_host *mmc, char reg, u32 mask,
+> -				   u32 val)
+> -{
+> -	struct meson_mx_mmc_host *host = mmc_priv(mmc);
+> -	u32 regval;
+> -
+> -	regval = readl(host->base + reg);
+> -	regval &= ~mask;
+> -	regval |= (val & mask);
+> -
+> -	writel(regval, host->base + reg);
+> -}
+> -
+>   static void meson_mx_mmc_soft_reset(struct meson_mx_mmc_host *host)
+>   {
+> -	writel(MESON_MX_SDIO_IRQC_SOFT_RESET, host->base + MESON_MX_SDIO_IRQC);
+> +	regmap_write(host->regmap, MESON_MX_SDIO_IRQC,
+> +		     MESON_MX_SDIO_IRQC_SOFT_RESET);
+>   	udelay(2);
+>   }
+>   
+> @@ -158,7 +147,7 @@ static void meson_mx_mmc_start_cmd(struct mmc_host *mmc,
+>   	struct meson_mx_mmc_host *host = mmc_priv(mmc);
+>   	unsigned int pack_size;
+>   	unsigned long irqflags, timeout;
+> -	u32 mult, send = 0, ext = 0;
+> +	u32 send = 0, ext = 0;
+>   
+>   	host->cmd = cmd;
+>   
+> @@ -215,25 +204,22 @@ static void meson_mx_mmc_start_cmd(struct mmc_host *mmc,
+>   
+>   	spin_lock_irqsave(&host->irq_lock, irqflags);
+>   
+> -	mult = readl(host->base + MESON_MX_SDIO_MULT);
+> -	mult &= ~MESON_MX_SDIO_MULT_PORT_SEL_MASK;
+> -	mult |= FIELD_PREP(MESON_MX_SDIO_MULT_PORT_SEL_MASK, host->slot_id);
+> -	mult |= BIT(31);
+> -	writel(mult, host->base + MESON_MX_SDIO_MULT);
+> +	regmap_update_bits(host->regmap, MESON_MX_SDIO_MULT,
+> +			   MESON_MX_SDIO_MULT_PORT_SEL_MASK | BIT(31),
+> +			   FIELD_PREP(MESON_MX_SDIO_MULT_PORT_SEL_MASK,
+> +				      host->slot_id) | BIT(31));
+>   
+>   	/* enable the CMD done interrupt */
+> -	meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_IRQC,
+> -			       MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN,
+> -			       MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN);
+> +	regmap_set_bits(host->regmap, MESON_MX_SDIO_IRQC,
+> +			MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN);
+>   
+>   	/* clear pending interrupts */
+> -	meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_IRQS,
+> -			       MESON_MX_SDIO_IRQS_CMD_INT,
+> -			       MESON_MX_SDIO_IRQS_CMD_INT);
+> +	regmap_set_bits(host->regmap, MESON_MX_SDIO_IRQS,
+> +			MESON_MX_SDIO_IRQS_CMD_INT);
+>   
+> -	writel(cmd->arg, host->base + MESON_MX_SDIO_ARGU);
+> -	writel(ext, host->base + MESON_MX_SDIO_EXT);
+> -	writel(send, host->base + MESON_MX_SDIO_SEND);
+> +	regmap_write(host->regmap, MESON_MX_SDIO_ARGU, cmd->arg);
+> +	regmap_write(host->regmap, MESON_MX_SDIO_EXT, ext);
+> +	regmap_write(host->regmap, MESON_MX_SDIO_SEND, send);
+>   
+>   	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+>   
+> @@ -263,14 +249,13 @@ static void meson_mx_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>   
+>   	switch (ios->bus_width) {
+>   	case MMC_BUS_WIDTH_1:
+> -		meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_CONF,
+> -				       MESON_MX_SDIO_CONF_BUS_WIDTH, 0);
+> +		regmap_clear_bits(host->regmap, MESON_MX_SDIO_CONF,
+> +				  MESON_MX_SDIO_CONF_BUS_WIDTH);
+>   		break;
+>   
+>   	case MMC_BUS_WIDTH_4:
+> -		meson_mx_mmc_mask_bits(mmc, MESON_MX_SDIO_CONF,
+> -				       MESON_MX_SDIO_CONF_BUS_WIDTH,
+> -				       MESON_MX_SDIO_CONF_BUS_WIDTH);
+> +		regmap_set_bits(host->regmap, MESON_MX_SDIO_CONF,
+> +				MESON_MX_SDIO_CONF_BUS_WIDTH);
+>   		break;
+>   
+>   	case MMC_BUS_WIDTH_8:
+> @@ -351,8 +336,8 @@ static void meson_mx_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>   	host->mrq = mrq;
+>   
+>   	if (mrq->data)
+> -		writel(sg_dma_address(mrq->data->sg),
+> -		       host->base + MESON_MX_SDIO_ADDR);
+> +		regmap_write(host->regmap, MESON_MX_SDIO_ADDR,
+> +			     sg_dma_address(mrq->data->sg));
+>   
+>   	if (mrq->sbc)
+>   		meson_mx_mmc_start_cmd(mmc, mrq->sbc);
+> @@ -364,24 +349,26 @@ static void meson_mx_mmc_read_response(struct mmc_host *mmc,
+>   				       struct mmc_command *cmd)
+>   {
+>   	struct meson_mx_mmc_host *host = mmc_priv(mmc);
+> -	u32 mult;
+> -	int i, resp[4];
+> +	unsigned int i, resp[4];
+>   
+> -	mult = readl(host->base + MESON_MX_SDIO_MULT);
+> -	mult |= MESON_MX_SDIO_MULT_WR_RD_OUT_INDEX;
+> -	mult &= ~MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK;
+> -	mult |= FIELD_PREP(MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK, 0);
+> -	writel(mult, host->base + MESON_MX_SDIO_MULT);
+> +	regmap_update_bits(host->regmap, MESON_MX_SDIO_MULT,
+> +			   MESON_MX_SDIO_MULT_WR_RD_OUT_INDEX |
+> +			   MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK,
+> +			   MESON_MX_SDIO_MULT_WR_RD_OUT_INDEX |
+> +			   FIELD_PREP(MESON_MX_SDIO_MULT_RESP_READ_INDEX_MASK,
+> +				      0));
+>   
+>   	if (cmd->flags & MMC_RSP_136) {
+>   		for (i = 0; i <= 3; i++)
+> -			resp[3 - i] = readl(host->base + MESON_MX_SDIO_ARGU);
+> +			regmap_read(host->regmap, MESON_MX_SDIO_ARGU,
+> +				    &resp[3 - i]);
+> +
+>   		cmd->resp[0] = (resp[0] << 8) | ((resp[1] >> 24) & 0xff);
+>   		cmd->resp[1] = (resp[1] << 8) | ((resp[2] >> 24) & 0xff);
+>   		cmd->resp[2] = (resp[2] << 8) | ((resp[3] >> 24) & 0xff);
+>   		cmd->resp[3] = (resp[3] << 8);
+>   	} else if (cmd->flags & MMC_RSP_PRESENT) {
+> -		cmd->resp[0] = readl(host->base + MESON_MX_SDIO_ARGU);
+> +		regmap_read(host->regmap, MESON_MX_SDIO_ARGU, &cmd->resp[0]);
+>   	}
+>   }
+>   
+> @@ -422,8 +409,8 @@ static irqreturn_t meson_mx_mmc_irq(int irq, void *data)
+>   
+>   	spin_lock(&host->irq_lock);
+>   
+> -	irqs = readl(host->base + MESON_MX_SDIO_IRQS);
+> -	send = readl(host->base + MESON_MX_SDIO_SEND);
+> +	regmap_read(host->regmap, MESON_MX_SDIO_IRQS, &irqs);
+> +	regmap_read(host->regmap, MESON_MX_SDIO_SEND, &send);
+>   
+>   	if (irqs & MESON_MX_SDIO_IRQS_CMD_INT)
+>   		ret = meson_mx_mmc_process_cmd_irq(host, irqs, send);
+> @@ -431,7 +418,7 @@ static irqreturn_t meson_mx_mmc_irq(int irq, void *data)
+>   		ret = IRQ_HANDLED;
+>   
+>   	/* finally ACK all pending interrupts */
+> -	writel(irqs, host->base + MESON_MX_SDIO_IRQS);
+> +	regmap_write(host->regmap, MESON_MX_SDIO_IRQS, irqs);
+>   
+>   	spin_unlock(&host->irq_lock);
+>   
+> @@ -470,14 +457,13 @@ static void meson_mx_mmc_timeout(struct timer_list *t)
+>   	struct meson_mx_mmc_host *host = timer_container_of(host, t,
+>   							    cmd_timeout);
+>   	unsigned long irqflags;
+> -	u32 irqc;
+> +	u32 irqs, argu;
+>   
+>   	spin_lock_irqsave(&host->irq_lock, irqflags);
+>   
+>   	/* disable the CMD interrupt */
+> -	irqc = readl(host->base + MESON_MX_SDIO_IRQC);
+> -	irqc &= ~MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN;
+> -	writel(irqc, host->base + MESON_MX_SDIO_IRQC);
+> +	regmap_clear_bits(host->regmap, MESON_MX_SDIO_IRQC,
+> +			  MESON_MX_SDIO_IRQC_ARC_CMD_INT_EN);
+>   
+>   	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+>   
+> @@ -488,10 +474,12 @@ static void meson_mx_mmc_timeout(struct timer_list *t)
+>   	if (!host->cmd)
+>   		return;
+>   
+> +	regmap_read(host->regmap, MESON_MX_SDIO_IRQS, &irqs);
+> +	regmap_read(host->regmap, MESON_MX_SDIO_ARGU, &argu);
+> +
+>   	dev_dbg(mmc_dev(host->mmc),
+>   		"Timeout on CMD%u (IRQS = 0x%08x, ARGU = 0x%08x)\n",
+> -		host->cmd->opcode, readl(host->base + MESON_MX_SDIO_IRQS),
+> -		readl(host->base + MESON_MX_SDIO_ARGU));
+> +		host->cmd->opcode, irqs, argu);
+>   
+>   	host->cmd->error = -ETIMEDOUT;
+>   
+> @@ -578,7 +566,8 @@ static int meson_mx_mmc_add_host(struct meson_mx_mmc_host *host)
+>   	return 0;
+>   }
+>   
+> -static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
+> +static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host,
+> +				      void __iomem *base)
+>   {
+>   	struct clk_init_data init;
+>   	const char *clk_div_parent, *clk_fixed_factor_parent;
+> @@ -613,7 +602,7 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
+>   	init.flags = CLK_SET_RATE_PARENT;
+>   	init.parent_names = &clk_div_parent;
+>   	init.num_parents = 1;
+> -	host->cfg_div.reg = host->base + MESON_MX_SDIO_CONF;
+> +	host->cfg_div.reg = base + MESON_MX_SDIO_CONF;
+>   	host->cfg_div.shift = MESON_MX_SDIO_CONF_CMD_CLK_DIV_SHIFT;
+>   	host->cfg_div.width = MESON_MX_SDIO_CONF_CMD_CLK_DIV_WIDTH;
+>   	host->cfg_div.hw.init = &init;
+> @@ -629,12 +618,23 @@ static int meson_mx_mmc_register_clks(struct meson_mx_mmc_host *host)
+>   
+>   static int meson_mx_mmc_probe(struct platform_device *pdev)
+>   {
+> +	const struct regmap_config meson_mx_sdio_regmap_config = {
+> +		.reg_bits = 8,
+> +		.val_bits = 32,
+> +		.reg_stride = 4,
+> +		.max_register = MESON_MX_SDIO_EXT,
+> +	};
+>   	struct platform_device *slot_pdev;
+>   	struct mmc_host *mmc;
+>   	struct meson_mx_mmc_host *host;
+> +	void __iomem *base;
+>   	int ret, irq;
+>   	u32 conf;
+>   
+> +	base = devm_platform_ioremap_resource(pdev, 0);
+> +	if (IS_ERR(base))
+> +		return PTR_ERR(base);
+> +
+>   	slot_pdev = meson_mx_mmc_slot_pdev(&pdev->dev);
+>   	if (!slot_pdev)
+>   		return -ENODEV;
+> @@ -656,9 +656,10 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
+>   
+>   	platform_set_drvdata(pdev, host);
+>   
+> -	host->base = devm_platform_ioremap_resource(pdev, 0);
+> -	if (IS_ERR(host->base)) {
+> -		ret = PTR_ERR(host->base);
+> +	host->regmap = devm_regmap_init_mmio(&pdev->dev, base,
+> +					     &meson_mx_sdio_regmap_config);
+> +	if (IS_ERR(host->regmap)) {
+> +		ret = PTR_ERR(host->regmap);
+>   		goto error_free_mmc;
+>   	}
+>   
+> @@ -687,7 +688,7 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
+>   		goto error_free_mmc;
+>   	}
+>   
+> -	ret = meson_mx_mmc_register_clks(host);
+> +	ret = meson_mx_mmc_register_clks(host, base);
+>   	if (ret)
+>   		goto error_free_mmc;
+>   
+> @@ -708,7 +709,7 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
+>   	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_M_ENDIAN_MASK, 0x3);
+>   	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_WRITE_NWR_MASK, 0x2);
+>   	conf |= FIELD_PREP(MESON_MX_SDIO_CONF_WRITE_CRC_OK_STATUS_MASK, 0x2);
+> -	writel(conf, host->base + MESON_MX_SDIO_CONF);
+> +	regmap_write(host->regmap, MESON_MX_SDIO_CONF, conf);
+>   
+>   	meson_mx_mmc_soft_reset(host);
+>   
 
+Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
