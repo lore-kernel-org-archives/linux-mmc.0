@@ -1,136 +1,318 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 112032459E5;
-	Mon, 17 Nov 2025 07:21:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763364110; cv=none; b=F/dF11ovP4EM3CI+hhzBWD3STO7vXe33YHNd8E7ttYHzZHkieJ9lJzK5ImZx3gAWw3lpnb5kxxuVH+pWtORASqdaLNX9F6jnHfPWpbrOAFCf+auFuw7Jb9ImLBEaSxyPJlgownlqs+bqyXrhdLETp1s+Wt7Lbde/OaEZzh6jfl0=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763364110; c=relaxed/simple;
-	bh=/hiUj9v7C8eFR6vyPQODkaUG6fJDfRoXrDIm9IcVOsE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=UfhDHUkkz7iyj3zb8G0m+0Kzb+FQeXQMTo4NmAUuHHEwWn6OKORJMIAgRgiRtPZIeL8KtXOKIFSEGCo2yJgbEPQh7NNcrdwY7DnTOdtheogBu27g8/JFDy5ks8PtxsbhP251Svv3ZmRe9JmAn5GdTvUXmMRzeYICtASZm7/wA2o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=JftLM7Qd; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39934322C7B;
+	Mon, 17 Nov 2025 08:56:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.9
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1763369768; cv=fail; b=ddp8utX9pVsOlbwMvcDWRJzEXJ/aaflrnVxFfCNF65n9saZoGodFeEKgtyN+GIx0OiESd5b2egh4PMJSos61gvjQZjmPA2c9yqmhD4uJkQ1i2zk7jrYAyfAO93R/VcJLUtj64IKH1XIjnBiagep+GSs0/gJn3YSTUPu0CI+fXmU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1763369768; c=relaxed/simple;
+	bh=5ahedrK+2V9LNevtbt0se5T/U/jVaicco9c5aS+ovAk=;
+	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=XkVgbhABQLpLJgpO+4WrbEk3I1bc/6zTgeax7xuq0YVN4+Ce+rQtqC1j10MoureCqNJ8D29MffYv+ApFvlbjmJ0rYS2LbrM4ZNi4/bLMkVlI3ig1Qu2fEgVQQ5BhrhNhXjnT+ZF0Uo/0Bq0+1hxDeikmLOvmOIZ8oaohrLKIMII=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ElJypurF; arc=fail smtp.client-ip=198.175.65.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="JftLM7Qd"
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AH4oW8o2911818;
-	Mon, 17 Nov 2025 07:21:43 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	CHrS6EkPR1/omWAQQChZOxtha1BhKk3YL47jFCVm+2o=; b=JftLM7QdrGbYKufL
-	1E2nWb/8/h2g1LQdFsENDKt/llE5tWZnZHZtLBYHAwYzoEMtBRK6EPzVkLCrDDHy
-	TDgFOxUBcUGXsaWOAdhk9ldjS2yQWcCZAFuenMleQQFdyw0+dzeh+1G/fMnaBZx+
-	0TiRUOhn1Ct1iMmsT5BHB3JoR9mt9k+ahguQ7LfPaGwBSzDefj3SIOjRVRn6+l++
-	KTlA0qPI8SIUbQvVHdxzUeNsMsI60YBi45q4pKXaFv8LgEtsEhXDbNtf5PnPmfhV
-	BQ955mFD4RTpxIfx+E7xlr6R8iETZOvNPtaU1n1dF4Geufyd24S6J89GI0AFAeZ0
-	SpKXZw==
-Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4aejgcbqqk-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 17 Nov 2025 07:21:43 +0000 (GMT)
-Received: from nasanex01c.na.qualcomm.com (nasanex01c.na.qualcomm.com [10.45.79.139])
-	by NASANPPMTA03.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5AH7Lhm6020937
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 17 Nov 2025 07:21:43 GMT
-Received: from [10.151.36.184] (10.80.80.8) by nasanex01c.na.qualcomm.com
- (10.45.79.139) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.17; Sun, 16 Nov
- 2025 23:21:40 -0800
-Message-ID: <1ae6abe1-ffe2-1233-0778-f5031ec239a8@quicinc.com>
-Date: Mon, 17 Nov 2025 12:51:27 +0530
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ElJypurF"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1763369766; x=1794905766;
+  h=message-id:date:subject:to:cc:references:from:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=5ahedrK+2V9LNevtbt0se5T/U/jVaicco9c5aS+ovAk=;
+  b=ElJypurFFB5+Cy/K7OH+iwtD9WRK03iYKdb9VSmaEorDiDKhXtoZcnWI
+   Y2L/y4vQzeTtNY9fX5hLDZSYcXAwxoryrPtYsdOndJOsXw6AOr1MfWhCA
+   wvpmJwRqjthLgbg6CUtOQycOrE7qxaWFPiNzTFrVdtE5S2++NIAM54yu4
+   x2L8tynroBhNzfvu6Jye4sI6Bdo6PDv13uub49kK+5uK5wQzuLl6KG9Gs
+   UPkQaClMNkYEvuJSqeeca3Q75wfTO1qJ5yR98ixPRxMHfQfJwiEZZY0Iy
+   YjID0zoZUP7h6SV4NBcdsb5q42Imn9vxkkc919VjEtG7ryGD+jrUYWpf6
+   w==;
+X-CSE-ConnectionGUID: +sAkDqa5T7WoNnGcRRi1FQ==
+X-CSE-MsgGUID: ocbDKYvTTAOIieA3VZo9hw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11615"; a="88011097"
+X-IronPort-AV: E=Sophos;i="6.19,311,1754982000"; 
+   d="scan'208";a="88011097"
+Received: from orviesa009.jf.intel.com ([10.64.159.149])
+  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2025 00:56:01 -0800
+X-CSE-ConnectionGUID: exGlgz/USiaGzsMDYILOxQ==
+X-CSE-MsgGUID: UUy5sU5/QyuiK5x/JLBwnA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.19,311,1754982000"; 
+   d="scan'208";a="190185299"
+Received: from orsmsx901.amr.corp.intel.com ([10.22.229.23])
+  by orviesa009.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2025 00:56:01 -0800
+Received: from ORSMSX902.amr.corp.intel.com (10.22.229.24) by
+ ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.27; Mon, 17 Nov 2025 00:56:00 -0800
+Received: from ORSEDG902.ED.cps.intel.com (10.7.248.12) by
+ ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.27 via Frontend Transport; Mon, 17 Nov 2025 00:56:00 -0800
+Received: from SJ2PR03CU001.outbound.protection.outlook.com (52.101.43.14) by
+ edgegateway.intel.com (134.134.137.112) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.27; Mon, 17 Nov 2025 00:56:00 -0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=gp/lFQqQGJP42BdF1y8aB0VZtQ8/TegGTIM4ug7LOJopvi0tnX2cMbXuaaytXWMiZfE7ctwrcmWpJyP8PHHroMei7fFaP1KOFFjlSsMLvIeZd2vL54Gglj8nOvkQ4cM2MY2C2grreSUjPeLpFMFON5FvAIpGHTLeFLZ+p1+wmBsyjXCLdLdPmLgAq7mpHrLBIEzOTBRcLKxgPoNppFWBphSGfjl2BiPxvAn68tQCvrQY/e5HtWzvqUPzWzbJtwXdj1LK4RVjreUc4baJG0jZZMPWuHeUSVaPlNNzJdUSDdzQndnf+62ypn+TqPuxgfpBz7Atb+DUEw5C1ruxu8LgCA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=JFpdwj67gA5CT1z/aRInjVukRDca3ESBy1ROm6OOnBE=;
+ b=sHnWyk595MpCCPmpnPCUSaGp2MgjCFpcNmhqxlfZ/CfDJmssf0z0daH5mIOP573DvwHsM1KbXf+rnFy3DmdQDwrST6Yn82uP+Zi+m533wC7uAaHsuVPG9KQO+L7M5n/5vFLfbLxvv6CW4o1bCWehepfoYqltwsT4CEWfUVyitx+x9w749PBVfbbFHP7yHkX3sjuGi/bGazw+dWHsZwBPAwFuTXmaYRuLBGdzqraKuXQAKFaBi7PBn0Djd5yAz97vjE+E4QEjVXN826v3zFzh0HIWOqCTCBHEkBffIROvM2PZ6UwGiMSjGjVM89RhTpsWmsHUk5E8LYOqPqho/+xauw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=intel.com;
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
+ by DM3PPF1721FD39C.namprd11.prod.outlook.com (2603:10b6:f:fc00::f0a) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9320.22; Mon, 17 Nov
+ 2025 08:55:53 +0000
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::eeac:69b0:1990:4905]) by IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::eeac:69b0:1990:4905%7]) with mapi id 15.20.9320.018; Mon, 17 Nov 2025
+ 08:55:53 +0000
+Message-ID: <47c2b137-3abb-4933-9708-d6dfbd2f7a91@intel.com>
+Date: Mon, 17 Nov 2025 10:55:48 +0200
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Avoid early clock doubling during
+ HS400 transition
+To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>
+CC: <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <quic_nguyenb@quicinc.com>,
+	<quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+	<quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+	<quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>
+References: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
+ 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
+ 4, Domiciled in Helsinki
+In-Reply-To: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: DB8P191CA0003.EURP191.PROD.OUTLOOK.COM
+ (2603:10a6:10:130::13) To IA1PR11MB7198.namprd11.prod.outlook.com
+ (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH v4] mmc: sdhci-msm: Enable ICE support for non-cmdq eMMC
- devices
-To: Eric Biggers <ebiggers@kernel.org>
-CC: <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <quic_varada@quicinc.com>
-References: <20251111104604.2494305-1-quic_mdalam@quicinc.com>
- <20251111205212.GA245945@sol>
- <dbea629d-5aa9-4a85-6316-25ac82a33520@quicinc.com>
- <20251113173500.GE1792@sol>
-Content-Language: en-US
-From: Md Sadre Alam <quic_mdalam@quicinc.com>
-In-Reply-To: <20251113173500.GE1792@sol>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nasanex01c.na.qualcomm.com (10.45.79.139)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: MdNmeQKNZKIa9p04xDxB1aQmdPelg0U2
-X-Proofpoint-GUID: MdNmeQKNZKIa9p04xDxB1aQmdPelg0U2
-X-Authority-Analysis: v=2.4 cv=PJECOPqC c=1 sm=1 tr=0 ts=691acd07 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6UeiqGixMTsA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=fHQkT2EN1QDR2Zix81YA:9 a=3ZKOabzyN94A:10
- a=QEXdDO2ut3YA:10 a=cPQSjfK2_nFv0Q5t_7PE:22 a=HhbK4dLum7pmb74im6QT:22
- a=pHzHmUro8NiASowvMSCR:22 a=Ew2E2A-JSTLzCXPT_086:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTE3MDA2MCBTYWx0ZWRfX5Sxzlw0W3Nwj
- /J9c0qgjI2JYFc/Hpx5r0Ap11mtVsUReZP9DPW2fZvXoxTp0Fp1o3xe1cz4CM/4+tbr84zOC3fZ
- rVryrHjmEeQLX+RSJxQBvI4L6SHVLPdT2f35u0yV8diKPWgJM2RWfcGT2YMkXMiYM+kSEXDVgTC
- AoMqdQKliwAeQXja2ShnX4kxCWw/CS8q8f0tcn/3Qs3xaW4XnlOwiT4f5lmfmXWRGGhN+rtbb0b
- xB4NDUKhBZhrFHR8OG9SVQ65d6EK0ACfhXv22CNgnuHRjc78h2+eS0rl7FO4pTF83pVMkCrvO5l
- H0Wf8iZRyQ4KHL4JTkJcSrQ9K4dI+xQ4guJQgHhsc28valCqc0c7fYyDOrzob3+feU2oQH3V5Lx
- 5gDBJWyuaKlbihuiBwdiuCcZJQqO4Q==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-17_02,2025-11-13_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 lowpriorityscore=0 clxscore=1015 spamscore=0 phishscore=0
- bulkscore=0 impostorscore=0 suspectscore=0 priorityscore=1501 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511170060
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|DM3PPF1721FD39C:EE_
+X-MS-Office365-Filtering-Correlation-Id: e30c7efe-4d8b-40f7-2fc5-08de25b71d48
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|7416014|366016|1800799024|7053199007;
+X-Microsoft-Antispam-Message-Info: =?utf-8?B?NFpQNFFiYUJGRU5nNFdRbnZNblJDVWo5ZTd4eVRNZzFDVTZKZnhIWEVqV3Jo?=
+ =?utf-8?B?eTNJMFd1ZCtBTlk4UnlBbWxYeS9rZGxNUHJaek9UZzhldGMzaDVMaExYZjdQ?=
+ =?utf-8?B?WEtmQm5PYmUzTFB6YkNKMW1LQkQ2YXI3dGF4VE1qN2M3Kzl0Ti96czFFcjlL?=
+ =?utf-8?B?TWpMb0ZjNlZoTnJIbWxiVWZ3TVV3SVUxWW1Gck5udFZISDM4TlBJTFVWcWZG?=
+ =?utf-8?B?eDBuem1LQVExeWhmT1R6MWFMMHJTOW5TdlZYTHdjZlAyUm16UFduN1o1elZL?=
+ =?utf-8?B?aGUyVHpaM1orQWxDbkhlTmM2VlFaaGs4eW52empQcXl2UXcrSysyd3AycVB0?=
+ =?utf-8?B?OHNYWjNCUDVjV08rKzVva3pvckEvdUd6cm9jWTV2N0o4czgzWm1CWThaQllz?=
+ =?utf-8?B?SVFWN1lQclV6c3Z4a0U1S1NoZ0x2ckhBa1BHdmg0NVMyZDliSWhnUGZ4c2Jv?=
+ =?utf-8?B?V1hIY0Z4R0tGc3JxSnN2eVU0eWFveW1IUXF6YXJnWEE4dXFnd1E3Tk1hd3dS?=
+ =?utf-8?B?K0p0VFJqUmFjSjdNVW5mK3JZcWNuSFg1SThMM0dHSGs0QnBtYWZXSFpPaFZw?=
+ =?utf-8?B?bzZJRVV6U3NqMTFQbmZQSUw4YjlGTDYrQ0RMR0pUM3ZJVytOek44R0ZJb2ds?=
+ =?utf-8?B?cTV5cHFKczF1WlpKaUgxYUxha1BQOXdrLzZHQUdRWCtwdkI3c0kwQVI0Nnpv?=
+ =?utf-8?B?TUxCVmFBcW8ra1gxVjMrOTRpWnpPem1uVHNZK1B4Z092d0cyaFZ4WTFXWEJC?=
+ =?utf-8?B?QndReHJmd21EakkveEYvVERvc1cwS3lMVm5zWU5rdnNqV3lEQlovKzJxR3I4?=
+ =?utf-8?B?MEd1cXcwV2ltLytLL1NnWDRyM0hnTkJGaVdlTWVnck1YQjNtMElZSEt2bGZt?=
+ =?utf-8?B?dHJjUnFOd3hBSVNNQ2lwTHp1aTFlcDNXOGNHWVc2UTNxRHRKR1JyQWVseFBp?=
+ =?utf-8?B?SnZlNVY4c1o2dWZZZnE5WDljOTIveThSem9sWjJuRmxBL0pCVHljakU3ZkZJ?=
+ =?utf-8?B?cEp3OU1tRUlUbXRBYUFaN21xc0YzUEVmS01FR1ZvRnpibVJ0cmN1aklNWUxz?=
+ =?utf-8?B?YU0yS21FbVFMZ0xwcGdtaXo2UExLdTMzK2h2eWxLdmcwNjVpM0I1NlhhYzlx?=
+ =?utf-8?B?NWQvTDB4aXVNZ1hDcDM2cm4ycWJPVDJoM2lGRWtrUXp3MFlNZEoyWGJ2V0JM?=
+ =?utf-8?B?SlA5SkxTU1FOQU8zekdqUE1BTE9pWmhTVU1lSnlOMVNJaUpOdFgxVkZLN1RR?=
+ =?utf-8?B?SUxBdWRRR2M4ajczdGZ4Q0NwK0tnQ0Q3SlB5alpHcUx1SkI4eFhacG1PZ0VO?=
+ =?utf-8?B?S0ZFeVdVLzBzRnhDUXJCVzhTRU40bncwR0V5NjVSS2Q2YlM0dkRET2dNc3lV?=
+ =?utf-8?B?VkhNVUxPMW5CVHdGV1pYdXorUjY2dFFWeXlTQUJISHpCVWw4THh5bFMvZ1Na?=
+ =?utf-8?B?ZzJHVTNIUVo3TTU0RERMdUhNeDNUVEdFUzFjY0VUTjVCTUZ3M2VtQUNISGhr?=
+ =?utf-8?B?Z2dxQXpjQy9raU0wZ2RmSThFOUZGZ2ZDcTg1ZVpibmhEWndudnYxRmhKU0Vo?=
+ =?utf-8?B?aE92ejYwbHZJRTZJQ0lDeGM3eTNBNmVmeG1RMUxYSndSalhlNVR0eGFLMk56?=
+ =?utf-8?B?VnJwNUYwK2w3cFRxQi9CdlB2cTRuQmJDODlsWmFRT1JsbFZxOXhjc25PV1Zz?=
+ =?utf-8?B?b2VFNFlWN1BQbkFCNmdac1hITUJyQUI5cm9PWFdRd2c1dHMrRTJibDhPTzJO?=
+ =?utf-8?B?cjQrZFlwSGxEeUFVSTZTTGpjL3JRSXFOU0hEdHdIOWFUbHErQ1B5ZG5QK1pB?=
+ =?utf-8?B?bE5HNys3M1p2YXhiY0k4NXRTdHVoWXluZ0NNNVBXOTBKeUxlcmx3elE4SDk3?=
+ =?utf-8?B?S1lkL3RZeUJGK09Rak9BYk1oOXBJZFp0V0RTNzhFbWNLTjhoSWJxd2Z1U1By?=
+ =?utf-8?Q?Hn+P1QyovjWO3eNEJbapVLYPsNXpjWFO?=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(366016)(1800799024)(7053199007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?RW5rL0ptMXkxQnNjZ1VSOFdmQllmQ0hWMUdlbUgvQ084QzRZV2MzTXlNSjZD?=
+ =?utf-8?B?ZUdZVmo0eUE2V29uelZUQ0pNZThSZ09qQXJENHpsWHROSHg0S1JGZU9lR3Ew?=
+ =?utf-8?B?Y1RCaTlHd3J0bGNmQkdBNDBsb1g3Mkd5MXBoZlNuN3JHWUt3R3JkUmV6Y1M3?=
+ =?utf-8?B?OVF3djRMRW84YWdZQ3E0R3g2Qjh0SVFCeThxbmQrTWtEQlpOLy9qT2ZKMkNO?=
+ =?utf-8?B?WXhDbTJuWnpPdXdKUklNOGZXQ3I1d205azVpbG94UmV2d0VJZ3BQaFRUS1li?=
+ =?utf-8?B?K0Y3dThNK0JCMUxsV080QUtzM0xXd3RnNm5IL2ozRHRubVBTYmtpL2ZlWnZk?=
+ =?utf-8?B?YWVVSXB5VGJQVzhaUkxpaXViTHNNQ25uakwrcGNjTk1tM1VIenpUZDJxbTFr?=
+ =?utf-8?B?UXlxY0hYS1BMT045UXVYNG1TTmM0SjU5TkM4eTNXUDNNV2doNUV0SDR4NlFW?=
+ =?utf-8?B?KzJDa3ozSFkrSk5nZXpnbmhXTzZXcXJlcjRHaTE1dzNxSFlIQVVRK2tEUk5y?=
+ =?utf-8?B?LzVKcEVGQVZYTkg4K0E3QTh1Y3VaR243N3ozdDdmazZuVmsyc3MwVDJLOEw5?=
+ =?utf-8?B?b0JGSUE4THpObGp1S0Yza3R2MTNDcnd3MTU3b2U2c002UXNUNVBIZm1aVmo3?=
+ =?utf-8?B?Vy9aQy9oZ1VjaURCd1hZbGJiYlRqNitGUGxKMDIxd1paMHdXbFcvdU9QTEo3?=
+ =?utf-8?B?MGtJd1M4cmYrWDZoQ0ErVndRaldWSjIzWm5yNzVNekd0dTFqdnorNkw1MUJp?=
+ =?utf-8?B?am1qS1RjbFRubUZjTHFXYzlmUjBSUXpaaTZkc0Z1ZjYrYmpmdWZlcjBOdWs4?=
+ =?utf-8?B?Tk16TzYxcE9xbHRGamlKQVlJZHlsekg1MC93bUh6aHdJWEpVUkhrVnBHK0F0?=
+ =?utf-8?B?MHoweWJtT1dhTEZNSmEra1dQcXhlaUtYUW1vOGFiWXVIOTNUZkQzcXpTNnRp?=
+ =?utf-8?B?Z0dqK3E2Y0FaYUIzTHhNVlJYY045aTNDMW4wZDN1Q3lqYjlOUys1QTdZczA4?=
+ =?utf-8?B?NzFVTXB4ajFlVWMvTDk4NDdOMWxtQmJ5bDZwS3VkMWc3TldtMTJ3Szd2ZTR5?=
+ =?utf-8?B?VUpkMm55bFVBWmlaRVJWeFB3Y0cxT1dVQVJ5a2tzT1R2TUt6b1E5RlJUSHNz?=
+ =?utf-8?B?emxOU0VDTmZ5a3hQVFJpbTNVZjd0QkRaSWswRHUwVG1Ga1dNQ0xIRnBoc0dW?=
+ =?utf-8?B?bUZqM3BkaWp3c2JERVdLMCtUUHp6VzFNUzFUTnMreTQ5dTRiVXNJUnp1WDhR?=
+ =?utf-8?B?ZTFYVFp2eEE3WGgyL0lDcWFNejZ6OWc1K1VMOWxuMm1DajZPWDlTQkhqMWI0?=
+ =?utf-8?B?RGYweDdtaEk3MzBuUkZoTG52YytXY1ZvRE1YTGFBS3c1TzFad1o4V3BYemlx?=
+ =?utf-8?B?cUU1dmNwNi93Ym8zZHgwYWY5TWNFMjlMQkVQNWV5NzRmeFFNOXYvUTRSem0y?=
+ =?utf-8?B?V2tpUVhNTnlVcm5DQkhUUGNnWUd4Y1gxVFJ3eVRTeXNYN3BKby9mZUx5WjZV?=
+ =?utf-8?B?K3p5L2sydUNaOFRONnMwRmhMYU0rVG5uT01PZFBwQURYaUN2by9oREFad1Vt?=
+ =?utf-8?B?eWowK3ZGUGVLVFEvL0dnV1dVcWZSTHB2d01yZWdBN1hzL0pRRi9BbXRSZXBz?=
+ =?utf-8?B?U0VDbzNlaFBRMGY4VzdvajcvazhRc2RYYWp3aHVPSXNNNy9QK3F4VlFmc3FZ?=
+ =?utf-8?B?V2NEeEVTcE9ZMEZJNHJvZDRxOS9VT3JRR0Jab0VYWmZwVU9vVlZ1bEdhWkps?=
+ =?utf-8?B?RVhROVF0bCtHdzlHUlNYRmZ4MmYrTzdZcDRtaXB6U0pCRWlnakVFRnBTZTlI?=
+ =?utf-8?B?K3kwOHB1RndJZXhxb2dQQnJyaGJ2TDNDT2FwdmRBZzFZeWVabTFxOEhIYnQy?=
+ =?utf-8?B?Y0RVYzNMZlQ3Q0Z6bTdPbzVVS1dLbXZvRDZwS2xWSE56RDlrODlxdWJTM0Rn?=
+ =?utf-8?B?VjhLeDZRV1RKYXh4MHdRendFMmhxVTNqWnFHNXpzejNGa2txUlV5VkZoQWVV?=
+ =?utf-8?B?S1lzY3JTR0I5NkMvRVNSZ0lwa2dnQzJtQjUzM0NGdGV1cUl1Y3VwZjBQVnpy?=
+ =?utf-8?B?SnRyVlZQeFh6K2c5WkxjS1pYK2k0QkF1MTRBYWh1a00vTitsMEsyM29YVEph?=
+ =?utf-8?B?RVhUTENPcXJqTEkxSWxjMG1rUGpBZ0lPY1h5RXlidmN2cDJDblVzRnloZHBq?=
+ =?utf-8?B?Mmc9PQ==?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: e30c7efe-4d8b-40f7-2fc5-08de25b71d48
+X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Nov 2025 08:55:53.7266
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 0x0uONGbTa6O7dX0RwZ4kMBZxg81/jFsJ5qgCiHLP6MTocWswpFb4Hi7fyjXtAv180N/ceU4nDu34Ng7jjCreg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM3PPF1721FD39C
+X-OriginatorOrg: intel.com
 
-Hi,
-
-On 11/13/2025 11:05 PM, Eric Biggers wrote:
-> On Thu, Nov 13, 2025 at 12:41:28PM +0530, Md Sadre Alam wrote:
->>>> +	if (mrq->crypto_ctx) {
->>>> +		if (!msm_host->ice_init_done) {
->>>> +			sdhci_msm_non_cqe_ice_init(host);
->>>> +			msm_host->ice_init_done = true;
->>>> +		}
->>>
->>> This means sdhci_msm_ice_enable() is called only once per host
->>> controller.  It looks like the existing call to sdhci_msm_ice_enable()
->>> happens each time after the host controller is resumed.  So there seems
->>> to be an inconsistency there.  Which way is correct?
->> Thank you for highlighting this. After revisiting the code paths, I believe
->> the behavior is consistent across both CQE and non-CQE modes.
->> ICE is re-enabled on every resume via the common sdhci_msm_runtime_resume()
->> → sdhci_msm_ice_resume() → qcom_ice_resume() → sdhci_msm_ice_enable() path.
->> The ice_init_done flag only governs one-time initialization in
->> sdhci_msm_ice_cfg() and doesn’t interfere with the resume logic.
->>
->> In summary:
->> CQE mode: ICE enabled during sdhci_msm_cqe_enable() + every resume
->> Non-CQE mode: ICE enabled on first crypto request + every resume
+On 14/11/2025 10:28, Sarthak Garg wrote:
+> According to the hardware programming guide, the clock frequency must
+> remain below 52MHz during the transition to HS400 mode.
 > 
-> I was looking at sdhci_msm_cqe_enable().  Based on the caller, it seems
-> to be a per-resume thing too.  So it doesn't seem consistent.
-You are absolutely correct. After reviewing the code paths more 
-carefully, I see that sdhci_msm_cqe_enable() is indeed called per-resume 
-(via cqhci_resume() → cqhci_enable() → sdhci_msm_cqe_enable()).
+> However,in the current implementation, the timing is set to HS400 (a
+> DDR mode) before adjusting the clock. This causes the clock to double
+> prematurely to 104MHz during the transition phase, violating the
+> specification and potentially resulting in CRC errors or CMD timeouts.
+> 
+> This change ensures that clock doubling is avoided during intermediate
+> transitions and is applied only when the card requires a 200MHz clock
+> for HS400 operation.
+> 
+> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
 
-So For consistency, I Will remove the sdhci_msm_ice_enable() call from 
-sdhci_msm_non_cqe_ice_init() ? since ICE is already enabled on every 
-resume through the runtime PM path.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks,
-Alam.
-
-
+> ---
+>  Changes from v1:
+>  As per Bjorn Andersson's comment :
+>  - Pass "timing" as an argument to msm_set_clock_rate_for_bus_mode(), and
+>  then pass host, clock, and timing to msm_get_clock_mult_for_bus_mode() to
+>  align with the original intent of the prototype.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 27 +++++++++++++++------------
+>  1 file changed, 15 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4e5edbf2fc9b..3b85233131b3 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -344,41 +344,43 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
+>  	writel_relaxed(val, host->ioaddr + offset);
+>  }
+>  
+> -static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
+> +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
+> +						    unsigned int clock,
+> +						    unsigned int timing)
+>  {
+> -	struct mmc_ios ios = host->mmc->ios;
+>  	/*
+>  	 * The SDHC requires internal clock frequency to be double the
+>  	 * actual clock that will be set for DDR mode. The controller
+>  	 * uses the faster clock(100/400MHz) for some of its parts and
+>  	 * send the actual required clock (50/200MHz) to the card.
+>  	 */
+> -	if (ios.timing == MMC_TIMING_UHS_DDR50 ||
+> -	    ios.timing == MMC_TIMING_MMC_DDR52 ||
+> -	    ios.timing == MMC_TIMING_MMC_HS400 ||
+> +	if (timing == MMC_TIMING_UHS_DDR50 ||
+> +	    timing == MMC_TIMING_MMC_DDR52 ||
+> +	    (timing == MMC_TIMING_MMC_HS400 &&
+> +	    clock == MMC_HS200_MAX_DTR) ||
+>  	    host->flags & SDHCI_HS400_TUNING)
+>  		return 2;
+>  	return 1;
+>  }
+>  
+>  static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+> -					    unsigned int clock)
+> +					    unsigned int clock,
+> +					    unsigned int timing)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> -	struct mmc_ios curr_ios = host->mmc->ios;
+>  	struct clk *core_clk = msm_host->bulk_clks[0].clk;
+>  	unsigned long achieved_rate;
+>  	unsigned int desired_rate;
+>  	unsigned int mult;
+>  	int rc;
+>  
+> -	mult = msm_get_clock_mult_for_bus_mode(host);
+> +	mult = msm_get_clock_mult_for_bus_mode(host, clock, timing);
+>  	desired_rate = clock * mult;
+>  	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
+>  	if (rc) {
+>  		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
+> -		       mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
+> +		       mmc_hostname(host->mmc), desired_rate, timing);
+>  		return;
+>  	}
+>  
+> @@ -397,7 +399,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+>  	msm_host->clk_rate = desired_rate;
+>  
+>  	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
+> -		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
+> +		 mmc_hostname(host->mmc), achieved_rate, timing);
+>  }
+>  
+>  /* Platform specific tuning */
+> @@ -1239,7 +1241,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	 */
+>  	if (host->flags & SDHCI_HS400_TUNING) {
+>  		sdhci_msm_hc_select_mode(host);
+> -		msm_set_clock_rate_for_bus_mode(host, ios.clock);
+> +		msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
+>  		host->flags &= ~SDHCI_HS400_TUNING;
+>  	}
+>  
+> @@ -1864,6 +1866,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	struct mmc_ios ios = host->mmc->ios;
+>  
+>  	if (!clock) {
+>  		host->mmc->actual_clock = msm_host->clk_rate = 0;
+> @@ -1872,7 +1875,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  
+>  	sdhci_msm_hc_select_mode(host);
+>  
+> -	msm_set_clock_rate_for_bus_mode(host, clock);
+> +	msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
+>  out:
+>  	__sdhci_msm_set_clock(host, clock);
+>  }
 
