@@ -1,204 +1,177 @@
-Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
+Received: from mail-yx1-f41.google.com (mail-yx1-f41.google.com [74.125.224.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 484AC3090E8
-	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 10:55:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 131462139C9
+	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 11:01:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763376948; cv=none; b=izQwMdu3nEDt41Hj1X+WNcCaR027c+VDysuh35dpcVGoBckwSgaSmNcDCGWOn6yogRnvVkyUbPFb46rbxl7kHEKVba6qBdPMBwIR6gE3kE67bHXHnTs74lFBx6NKBbHEGkTqyvEqtZl9HXsqULrgzk+wqngzqBJ4EmsWKsOlFbM=
+	t=1763377277; cv=none; b=pCs1M+c/RxEtdv/Gha4/h+TRceaTDy/LHMPqrrgOA+SebuIVDXEujO287MiDYNNfpHSxMKHBBF35P9gt/yO32I1zxqV3MoBJJsgZ6lCdaZpVwqEbdnwh5Q2F5VRW8vOnD1xT8rcNhXJGAwMPhAWv8gMk+GUhoFEa0P712HFd0sA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763376948; c=relaxed/simple;
-	bh=66pVVMD+SvanDW+g9S1kFS2dmB57MEXPZN1tJbMMoNE=;
+	s=arc-20240116; t=1763377277; c=relaxed/simple;
+	bh=7DAQpoB3R+EJpl7MbBOx5A+ZlzdqP6pGt/EDi4xzIlE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IHZ+kTK1ju7fHinlXMqiz6f+4B9VNGOrbe05ptk5R372wnpq9UTvgW23IuZsGHtPhQdxXTJd4lsHpppIFya4IypEL1UUMmWxvfxPjKUpY2GuruwsqXabBO1b7xYVbHR+oxQsPwaPKiK4tzVN+Y0XoL/7TTXilp5P8Juc+lmD/kc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fzAa6kXF; arc=none smtp.client-ip=74.125.224.51
+	 To:Cc:Content-Type; b=tQWGGjt0utb/9eAcIDxy08JFGX/2X6WTvUUlRxruDZtyg9SZsGD6cAf8Gmy5PVSe8EG5yzYNpwHwMcvF8T6o5Pb3Dxn0CElXcbGY0YiZb5n/8irjJHEB7Sz7dx7gNn0fipVuAD8VJzeY+HFtILkWSV9HmcIEi5n2w3bwjpf999s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=id4994FU; arc=none smtp.client-ip=74.125.224.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fzAa6kXF"
-Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-640e065991dso3583279d50.3
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 02:55:46 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="id4994FU"
+Received: by mail-yx1-f41.google.com with SMTP id 956f58d0204a3-63e393c49f1so3268772d50.0
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 03:01:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1763376945; x=1763981745; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1763377274; x=1763982074; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=SNi3DUuC4kiwYXI9QG3IaD4ATG29kHjGAl09AB3jH7s=;
-        b=fzAa6kXFGvLikESmKwUBUqVrZKTcn8yWwidMiJcWepxIZCmfKSQhFkoGhCV8JLCHDx
-         N3e5SIcPxdkV1Xi61ntOR9v8iYzUPZW+fA9NGJsNJG0j06z3r+UwQKSIvLpwZeYc4gJp
-         rgDWwGF7awEm+0P6x30L88o9yTYmV2RoO1q4YbowDrt7rk90YpKnmUVRI9oVdTfwAITW
-         IIznHz1YlxO6Xlmhq8AXUu7364G8xv0wbZGzOq9t2Rz2xY+Pf9UNBpMvHEJeiRRkvddg
-         bdNU+dR4pJHrgyhoQB9iJHGVtLUdxxS8p8kGG+ahYmpPDYvoKgWQfklV9AioKgA2Y16e
-         hTgw==
+        bh=/RSfdrwfxNJQiZz80hQXf9twz6yOQXKrW5ZfA5HxaxE=;
+        b=id4994FUPu51IRxHSspL9L3GiejmCAA8gq+5m8V5Qy/ts2ASYoQqTsF8SrZu1qJCqD
+         GUQLU1kAdP494s0MaMxk3g+bRWbLLQ5BPI6XIxP0wC9S3V9humxsjMA8QeCi1B/LHm5w
+         AXkpQrcUklRFpcssfQSH+obec9yFZUY19vuPSsAFftk2+3eEeuw6/DJGcfvHxXox61cA
+         i/3/UzvFQ9JdBpOWPQhGbPX5FT90aWLV8Y+ch9DgbpdNXYBbMtOxJibX6lfYdgRopu1w
+         tz3NewpHxpPpKQS3POc517AagIYVuMrvQtXQ5yFz/1WKQ5Nws47JvpRs7mMY5pTSnsWK
+         jK+A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763376945; x=1763981745;
+        d=1e100.net; s=20230601; t=1763377274; x=1763982074;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=SNi3DUuC4kiwYXI9QG3IaD4ATG29kHjGAl09AB3jH7s=;
-        b=gzH5/PLqWHgGtpGypJptDA8Ou0tnuhQV5j9Mag+uixjneNqlGlhKJ2Pmtt+6NIx1qW
-         tPlUYAl3wKBAgr7cxrFuOWZ+ILCAv2SOt2z7Gp+z+ZEzgamp4OwbpYeli2SsRynfSehx
-         uHgLylkoWVaOv0YCEmWYGpfyeCgy9LnrHDkQbxjTLGaDRDBsCwvynkYHZRwyqHckMNTM
-         s6zHRS1k8t21zxeqj1/8Ci7gg39I6VIamOr7XuiSXucTguKuKmcBdT2yPYCh3joHk8i3
-         kNkkPV1/Osa0oBm3UbrnpB/2BiM9HmGkAH0gFyfmzyOke+2A8q3i9X0BA2HYZpPf0D27
-         cCiw==
-X-Forwarded-Encrypted: i=1; AJvYcCWTHfVaqmkqYDsv6Yc2695/nSbE3VlqO/KXA3Mb8eamIKBZpLL2GFkBOvlUBVncTE+h3auUNEJW8j4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzAa4g6R6g6fbF+5byzOa6MWwgKKjEJtItqttqvGE/Lo/jqaSzA
-	XYzy1eaPiery5FC8fI3Fv2FBQM02aeWNuFO9jyOai3qAQ/i3qnEgAWftrAEv+YLWEH84n1wqrYI
-	nk1je8Ojk4fx1ACuM4oDs2Dram2ELse88hMvYVjCVSA==
-X-Gm-Gg: ASbGncu3KlOui+J+lIm8LE69L1HtCbtIxDe9eE2nMWpEi/XzrTJj2Sn++0U/i0OHUdI
-	I/Rs7rSUkBLpGvIL0GEdSmRIU11A6V4gnBcjNL6MT6EW+OptgIBxDM8pVgjT//wJwQ43YAR/++o
-	Q+Sy3yCXDTXoMhqqsEPbLm0w9Cmvajjj11Alpz7eANBfbHoNdtZva77tykOG/SG+EryWN73KWtd
-	ThDVBNoFHLWHAKixuvmr7791DrVB6ZGIBlW/0NZvxsOBUPaIjECELxk3VF8bWAuyKVpqK8h
-X-Google-Smtp-Source: AGHT+IHSWyBYv/fC9dZTTDOgWOaxaIvPb0/rfvyppfwI0C8aVnJNUBzDoSM8mut90PnbknCQbBjd24ydW1RF2z34MJw=
-X-Received: by 2002:a05:690e:23c3:b0:640:caa5:57b2 with SMTP id
- 956f58d0204a3-641e76a3c38mr7459702d50.44.1763376945205; Mon, 17 Nov 2025
- 02:55:45 -0800 (PST)
+        bh=/RSfdrwfxNJQiZz80hQXf9twz6yOQXKrW5ZfA5HxaxE=;
+        b=eMfwN2xkVCe2hQDF1QZVqXNdkt6KxrEuX8cYvTbKwfsztt4DxVPga0teRsH1pLsO/w
+         v14NKG5FuEV7A5zm8459/QU44UFYdhO03O50EgMeHUP4bermo40uDFxVRrGjOkU3ZET+
+         jz/pXbBdbBkNpWV5okGLVS5cNxRVGicX1ZGKevE59odcyMv5x+y5bQtcLGw1MjfRrbka
+         rAysMSXPThkjzGHGe5i6RMM8XQnbProBU6OIsVGqS8GVyPc2RDiPYhVsSrJIc5DULvks
+         A3/gHFpOXOu60fK5c8bTQzfTNRkVAsdQsCU/ZvS8UwuaOHA/IMLOTSOf08z3Q+nzCaYv
+         Xsfw==
+X-Forwarded-Encrypted: i=1; AJvYcCVJALVx9bcqnGyGLJFs5v3Ar0oPY9LLHZxOClHtMS0QoJQHhRiCNFV0JBS90/Q37Xdog3UzjM5QMoI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzIx7DscgR8ls7NofX8hq3F8OZ4Qw4jK3tHqQJO/GYo/SxtJTpL
+	bn4BOPIZn38zFAPqkL6f8cfL/54sAou2TQ/SsYk1g2RDUBYL2ZV2hz/QgE/VYIn2xP/CNb0u5mX
+	8dtrCWhHAqHwH/p2LG6VtHUU/owiRXr0kUeFUVzWR7A==
+X-Gm-Gg: ASbGnct4OmEn5Fi7Pis3B+RmIvPmuKC22gFOMmdnd3dkZ0Ql70LunKslYJe9VLQxRm4
+	2BRy83sU52sagR2XnD9qEXdKo+st08yAkS4q6cJDIGPuAeWSxGFeAbl9bDTQU0mBXbcNbCS0VGH
+	TwSBnFK7VJaRcxTkDdQ/EAYYM5IC2iQ7R1RfQrkTZuHsOMsW3BBsN09lnq18ftYl6e/p5elSv2p
+	SuIj2p89DgScUtDGo7yw4BV02nQ0AB8wDcEbEdxYy8OkSfkSVGsWZ08P1xrUWNdnYQe100O/lBC
+	ZJQMpeI=
+X-Google-Smtp-Source: AGHT+IEjvegoUIWfi8UaBD0jEKwHtT+y2Cbu5UHhJ+VHUPJu6okR0AoxTFiIq+cxtmlIxdFEnLzs3e2dtieQR/hKIVs=
+X-Received: by 2002:a05:690e:d86:b0:642:84a:7ba4 with SMTP id
+ 956f58d0204a3-642084a7c6bmr1567493d50.85.1763377273901; Mon, 17 Nov 2025
+ 03:01:13 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
-In-Reply-To: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com>
+References: <20251113150217.3030010-1-andriy.shevchenko@linux.intel.com> <20251113150217.3030010-14-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20251113150217.3030010-14-andriy.shevchenko@linux.intel.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 17 Nov 2025 11:55:07 +0100
-X-Gm-Features: AWmQ_bkD_4W_7qzohW4osy5X31ib5ETai0yHEpXe6geNQnjx-rPhkUSP9My8SYQ
-Message-ID: <CAPDyKFqssyDuyRFxRUurudWLYGiZ1AXTWV6isyYc8Wz0NLriWw@mail.gmail.com>
-Subject: Re: [PATCH V2] mmc: sdhci-msm: Avoid early clock doubling during
- HS400 transition
-To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-arm-msm@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
-	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, 
-	quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+Date: Mon, 17 Nov 2025 12:00:38 +0100
+X-Gm-Features: AWmQ_bk2fwrMGKoLr3e8DW_NORum6cYwB-Ynf9Wgckyt3WUUk5QWFuYE7vXt0wM
+Message-ID: <CAPDyKFotmQyHzBim-8nib-KVvQaQgA_ELbgdC_Q4Y95-GrvRSw@mail.gmail.com>
+Subject: Re: [PATCH v3 13/21] mmc: mmc_test: Switch to use %ptSp
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Corey Minyard <corey@minyard.net>, =?UTF-8?Q?Christian_K=C3=B6nig?= <christian.koenig@amd.com>, 
+	"Dr. David Alan Gilbert" <linux@treblig.org>, Alex Deucher <alexander.deucher@amd.com>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>, 
+	Rob Clark <robin.clark@oss.qualcomm.com>, Matthew Brost <matthew.brost@intel.com>, 
+	Aleksandr Loktionov <aleksandr.loktionov@intel.com>, Vitaly Lifshits <vitaly.lifshits@intel.com>, 
+	Manivannan Sadhasivam <mani@kernel.org>, Niklas Cassel <cassel@kernel.org>, Calvin Owens <calvin@wbinvd.org>, 
+	Vadim Fedorenko <vadim.fedorenko@linux.dev>, Sagi Maimon <maimon.sagi@gmail.com>, 
+	"Martin K. Petersen" <martin.petersen@oracle.com>, Karan Tilak Kumar <kartilak@cisco.com>, 
+	Hans Verkuil <hverkuil+cisco@kernel.org>, Casey Schaufler <casey@schaufler-ca.com>, 
+	Steven Rostedt <rostedt@goodmis.org>, Petr Mladek <pmladek@suse.com>, 
+	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, Max Kellermann <max.kellermann@ionos.com>, 
+	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	openipmi-developer@lists.sourceforge.net, linux-media@vger.kernel.org, 
+	dri-devel@lists.freedesktop.org, linaro-mm-sig@lists.linaro.org, 
+	amd-gfx@lists.freedesktop.org, linux-arm-msm@vger.kernel.org, 
+	freedreno@lists.freedesktop.org, intel-xe@lists.freedesktop.org, 
+	linux-mmc@vger.kernel.org, netdev@vger.kernel.org, 
+	intel-wired-lan@lists.osuosl.org, linux-pci@vger.kernel.org, 
+	linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	linux-staging@lists.linux.dev, ceph-devel@vger.kernel.org, 
+	linux-trace-kernel@vger.kernel.org, 
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Sergey Senozhatsky <senozhatsky@chromium.org>, 
+	Jonathan Corbet <corbet@lwn.net>, Sumit Semwal <sumit.semwal@linaro.org>, 
+	Gustavo Padovan <gustavo@padovan.org>, David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Dmitry Baryshkov <lumag@kernel.org>, Abhinav Kumar <abhinav.kumar@linux.dev>, 
+	Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>, 
+	Marijn Suijten <marijn.suijten@somainline.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Lucas De Marchi <lucas.demarchi@intel.com>, 
+	=?UTF-8?Q?Thomas_Hellstr=C3=B6m?= <thomas.hellstrom@linux.intel.com>, 
+	Rodrigo Vivi <rodrigo.vivi@intel.com>, Vladimir Oltean <olteanv@gmail.com>, Andrew Lunn <andrew@lunn.ch>, 
+	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
+	Tony Nguyen <anthony.l.nguyen@intel.com>, Przemek Kitszel <przemyslaw.kitszel@intel.com>, 
+	=?UTF-8?Q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
+	Kishon Vijay Abraham I <kishon@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, 
+	Rodolfo Giometti <giometti@enneenne.com>, Jonathan Lemon <jonathan.lemon@gmail.com>, 
+	Richard Cochran <richardcochran@gmail.com>, Stefan Haberland <sth@linux.ibm.com>, 
+	Jan Hoeppner <hoeppner@linux.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, 
+	Vasily Gorbik <gor@linux.ibm.com>, Alexander Gordeev <agordeev@linux.ibm.com>, 
+	Christian Borntraeger <borntraeger@linux.ibm.com>, Sven Schnelle <svens@linux.ibm.com>, 
+	Satish Kharat <satishkh@cisco.com>, Sesidhar Baddela <sebaddel@cisco.com>, 
+	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
+	Mauro Carvalho Chehab <mchehab@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, 
+	Masami Hiramatsu <mhiramat@kernel.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
+	Andrew Morton <akpm@linux-foundation.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 14 Nov 2025 at 09:28, Sarthak Garg
-<sarthak.garg@oss.qualcomm.com> wrote:
+On Thu, 13 Nov 2025 at 16:03, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
 >
-> According to the hardware programming guide, the clock frequency must
-> remain below 52MHz during the transition to HS400 mode.
+> Use %ptSp instead of open coded variants to print content of
+> struct timespec64 in human readable format.
 >
-> However,in the current implementation, the timing is set to HS400 (a
-> DDR mode) before adjusting the clock. This causes the clock to double
-> prematurely to 104MHz during the transition phase, violating the
-> specification and potentially resulting in CRC errors or CMD timeouts.
->
-> This change ensures that clock doubling is avoided during intermediate
-> transitions and is applied only when the card requires a 200MHz clock
-> for HS400 operation.
->
-> Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-It sounds to me that we should add a fixes/stable tag for this, right?
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
 
 > ---
->  Changes from v1:
->  As per Bjorn Andersson's comment :
->  - Pass "timing" as an argument to msm_set_clock_rate_for_bus_mode(), and
->  then pass host, clock, and timing to msm_get_clock_mult_for_bus_mode() to
->  align with the original intent of the prototype.
-> ---
->  drivers/mmc/host/sdhci-msm.c | 27 +++++++++++++++------------
->  1 file changed, 15 insertions(+), 12 deletions(-)
+>  drivers/mmc/core/mmc_test.c | 20 ++++++++------------
+>  1 file changed, 8 insertions(+), 12 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 4e5edbf2fc9b..3b85233131b3 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -344,41 +344,43 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
->         writel_relaxed(val, host->ioaddr + offset);
+> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+> index a74089df4547..01d1e62c2ce7 100644
+> --- a/drivers/mmc/core/mmc_test.c
+> +++ b/drivers/mmc/core/mmc_test.c
+> @@ -586,14 +586,11 @@ static void mmc_test_print_avg_rate(struct mmc_test_card *test, uint64_t bytes,
+>         rate = mmc_test_rate(tot, &ts);
+>         iops = mmc_test_rate(count * 100, &ts); /* I/O ops per sec x 100 */
+>
+> -       pr_info("%s: Transfer of %u x %u sectors (%u x %u%s KiB) took "
+> -                        "%llu.%09u seconds (%u kB/s, %u KiB/s, "
+> -                        "%u.%02u IOPS, sg_len %d)\n",
+> -                        mmc_hostname(test->card->host), count, sectors, count,
+> -                        sectors >> 1, (sectors & 1 ? ".5" : ""),
+> -                        (u64)ts.tv_sec, (u32)ts.tv_nsec,
+> -                        rate / 1000, rate / 1024, iops / 100, iops % 100,
+> -                        test->area.sg_len);
+> +       pr_info("%s: Transfer of %u x %u sectors (%u x %u%s KiB) took %ptSp seconds (%u kB/s, %u KiB/s, %u.%02u IOPS, sg_len %d)\n",
+> +               mmc_hostname(test->card->host), count, sectors, count,
+> +               sectors >> 1, (sectors & 1 ? ".5" : ""), &ts,
+> +               rate / 1000, rate / 1024, iops / 100, iops % 100,
+> +               test->area.sg_len);
+>
+>         mmc_test_save_transfer_result(test, count, sectors, ts, rate, iops);
 >  }
+> @@ -3074,10 +3071,9 @@ static int mtf_test_show(struct seq_file *sf, void *data)
+>                 seq_printf(sf, "Test %d: %d\n", gr->testcase + 1, gr->result);
 >
-> -static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
-> +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
-> +                                                   unsigned int clock,
-> +                                                   unsigned int timing)
->  {
-> -       struct mmc_ios ios = host->mmc->ios;
->         /*
->          * The SDHC requires internal clock frequency to be double the
->          * actual clock that will be set for DDR mode. The controller
->          * uses the faster clock(100/400MHz) for some of its parts and
->          * send the actual required clock (50/200MHz) to the card.
->          */
-> -       if (ios.timing == MMC_TIMING_UHS_DDR50 ||
-> -           ios.timing == MMC_TIMING_MMC_DDR52 ||
-> -           ios.timing == MMC_TIMING_MMC_HS400 ||
-> +       if (timing == MMC_TIMING_UHS_DDR50 ||
-> +           timing == MMC_TIMING_MMC_DDR52 ||
-> +           (timing == MMC_TIMING_MMC_HS400 &&
-> +           clock == MMC_HS200_MAX_DTR) ||
->             host->flags & SDHCI_HS400_TUNING)
->                 return 2;
->         return 1;
->  }
->
->  static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-> -                                           unsigned int clock)
-> +                                           unsigned int clock,
-> +                                           unsigned int timing)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> -       struct mmc_ios curr_ios = host->mmc->ios;
->         struct clk *core_clk = msm_host->bulk_clks[0].clk;
->         unsigned long achieved_rate;
->         unsigned int desired_rate;
->         unsigned int mult;
->         int rc;
->
-> -       mult = msm_get_clock_mult_for_bus_mode(host);
-> +       mult = msm_get_clock_mult_for_bus_mode(host, clock, timing);
->         desired_rate = clock * mult;
->         rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
->         if (rc) {
->                 pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-> -                      mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
-> +                      mmc_hostname(host->mmc), desired_rate, timing);
->                 return;
+>                 list_for_each_entry(tr, &gr->tr_lst, link) {
+> -                       seq_printf(sf, "%u %d %llu.%09u %u %u.%02u\n",
+> -                               tr->count, tr->sectors,
+> -                               (u64)tr->ts.tv_sec, (u32)tr->ts.tv_nsec,
+> -                               tr->rate, tr->iops / 100, tr->iops % 100);
+> +                       seq_printf(sf, "%u %d %ptSp %u %u.%02u\n",
+> +                                  tr->count, tr->sectors, &tr->ts, tr->rate,
+> +                                  tr->iops / 100, tr->iops % 100);
+>                 }
 >         }
 >
-> @@ -397,7 +399,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
->         msm_host->clk_rate = desired_rate;
->
->         pr_debug("%s: Setting clock at rate %lu at timing %d\n",
-> -                mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
-> +                mmc_hostname(host->mmc), achieved_rate, timing);
->  }
->
->  /* Platform specific tuning */
-> @@ -1239,7 +1241,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
->          */
->         if (host->flags & SDHCI_HS400_TUNING) {
->                 sdhci_msm_hc_select_mode(host);
-> -               msm_set_clock_rate_for_bus_mode(host, ios.clock);
-> +               msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
->                 host->flags &= ~SDHCI_HS400_TUNING;
->         }
->
-> @@ -1864,6 +1866,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +       struct mmc_ios ios = host->mmc->ios;
->
->         if (!clock) {
->                 host->mmc->actual_clock = msm_host->clk_rate = 0;
-> @@ -1872,7 +1875,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->
->         sdhci_msm_hc_select_mode(host);
->
-> -       msm_set_clock_rate_for_bus_mode(host, clock);
-> +       msm_set_clock_rate_for_bus_mode(host, ios.clock, ios.timing);
->  out:
->         __sdhci_msm_set_clock(host, clock);
->  }
 > --
-> 2.34.1
+> 2.50.1
 >
