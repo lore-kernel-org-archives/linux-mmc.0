@@ -1,63 +1,64 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B4E035CBA9
-	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 10:12:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47F3731D75C
+	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 10:12:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763374372; cv=none; b=pT5/zPeW2JkM4qQZb1Lp2EKAQnnx9HcIwN6wGivQ+fs1bh05zD4m9TbFWYYnQAoH2V1A3hg9EO+heR0fde6ojE2qw4SRR8iNLbu/lnCqB/bhPUCkipAJOHBJ7nD4ZsN16ApU5QRNB3FSrEV5YXdLSCDLMMqfD5X8I9IjQcf7thw=
+	t=1763374375; cv=none; b=Z1RvnzkcfbSN6fU6oF9hzKPggoBgi+Z+qsCjCkPQLTjuZOyHaHXyT5rRfqybFpx+2laAwaiVdKBzMqp2f4ecjPOqjjRM2CdL+Uvbq1z+YrpqWKulqaK/4kVu2UwWu/ormlr+QStLDhvJPf0+VZAq84XytouhV7HJ4Iqoe+QcGqg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763374372; c=relaxed/simple;
-	bh=fsl4GdK0w4fbHXOEuakzruyemXNmcFNvBUEzXjpWhlU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YDk5uahTcoY2s3lAhmUGUYKlKqTSPbPUDqBYpZBcoh750rKlYePHM3rVe10kZQitxJbCCyy1wUELye4/Rh1t+vsNXYuxyo8MiUB18k017xOPWwQuUvOobUFnoSLJfaEHe9mVVuihJ1vHAZLQicQjriHkiiC1+YsXD9tL1CrQV/E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=bSkbgMcZ; arc=none smtp.client-ip=209.85.221.44
+	s=arc-20240116; t=1763374375; c=relaxed/simple;
+	bh=+QKT/Rg2f4P02LTHnSwMEDGtEvvt3JIbEpU9JM+I3wk=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=hYfKzJCI40LCLfH1nv8PVgR2ti5vnedKeTnBU+oyEg+LthNklRPEHTx1qF5ZUiavR4zYBBjwd0eINPpxtjuKLjs7jjThTK08OpuGxiwOJRBRzqKXUQWLw4IPC6y764pmuJQchFdAsURVSIopn5ZDFWUNsDkoco/Y80GNg+BEWoY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=O0P8vykF; arc=none smtp.client-ip=209.85.128.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="bSkbgMcZ"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-42b3d4d9ca6so3327531f8f.2
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 02:12:50 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="O0P8vykF"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-4779a4fc95aso9402185e9.1
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 02:12:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1763374369; x=1763979169; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ha7ZKgbJ8ApHbh7yZc3t28HL0IX/pZtGOjA6oG4SIOk=;
-        b=bSkbgMcZiRrDvUdUEmx2PNxM9Z22IWZfI89ROpBxzN8A3zzLKVXlrnaoLX7P3qqGjP
-         ndrm075N2BVOMP6jFxuoTHH2xyAi2hVisohOD9trAXOTiXcmLuK2DqKecZvupvE4wHKy
-         VdEHZiHz5qTjZmAgUyQbyxhyTXqbsI0ZVWb0Q9rRiinCNcBzZqBmStN+HHt1E+dqP0X6
-         U6/IfRRZ44fOqh3BQHNrGWI6K7m7sEcJ5SyJ4Xz2c1dl1cvg4xvoBu+XSDPDJOfFL2iO
-         Ql6SpbrSmlk2iq8XiB6Hx7d2YtFFPKOiq1DbfeA1CTGQVxBSWYoB4QSJj1Dh8Q8AYF48
-         romg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763374369; x=1763979169;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=tuxon.dev; s=google; t=1763374370; x=1763979170; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Ha7ZKgbJ8ApHbh7yZc3t28HL0IX/pZtGOjA6oG4SIOk=;
-        b=w6e1tylvNvIXF3xWw5iWFR33NZG5jXYbxnRSnidYfP5x0dqSEf83nOUe4cIL27aiEd
-         woXp7ZRI9aupS9Rp6yG0PNJDsA3tHCIWtpbAL2I+N8Fn6aYQJRmxpxkekaDSzEV+KrqX
-         lBkPORDgSRCfILUyQAK7rExNMuBYMNc1HGfE+tdeJv/wTnH4QW3k3CFYI+DzUtTqtbKP
-         AA0TWvjwt2IgVPDLu1p04G86fqxQ8W/whuLUKTHMduSJsnTAqnC7vm4lO+gm4UKfRIgQ
-         QRmHY74PKQFqM8+4a4eEQjzZI1+2OEumuOXTXI0urplaDJaOxgfHII+MDTy5UXaHos+O
-         vfOg==
-X-Forwarded-Encrypted: i=1; AJvYcCWZn9FvLOTObT/erWXQzI4Et+cyRhYdrUZWpxpSbO2H2j+4AmSICgk3Ny0aV3uzPcjKxxu2F2qyzWI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwcpN53pdnpTZ5Te+oFFtrG7Ez/ccKYqNdY3NjjGiJrV4RJ1Lrz
-	Pmb0I3O73ty2Xih374weW9PmIeQWA6jeFvjX7VK12NYe93ZQcNAyPC5KbWRdSRTW5u9o5KRP4Ok
-	usrUais8=
-X-Gm-Gg: ASbGncthqoyiR0yMqKZGgzGqIy/UPlwM4a+QKuBg7LFK/eARvwXNfBo1wOrGpLfGLXH
-	grg0CdMb69gRV2dFcoU+39k1YeZTmLpiTnLq32cJs6abYS+O0PY3jUD2joPJKgbkhUFKVWi4C+N
-	RPLFdOS1gb3mClWpX5avFQw7bszf8CODHQIevO1kBt9s8RICGEx7VB3MlBUoiScuJLG5H4xXJVT
-	qQ5mhUjPeFA3FzQYEpMmZ2M0kuY3gruCtcydW3TaQ/eQjE5i9QawoooPg1vF+od+7pCDenC0tcO
-	PUgJzMJ+MIsFr/27rra24tL3mG3ATTs/H7QaXdtHcb3hX1Tbn1ytrO5w6LkhcWUB707BJ/pOQlW
-	6MCMPXW0/S64uQgtqmJN2vEIptydgQtgcgw86iTl9ZFS7WBJmLec6Ug+knGdpiWHrciLqk2lPAz
-	cD9osJHq9BGD8YtXBeJ1Nk1fdojUIJOnSIvVxnpJgN
-X-Google-Smtp-Source: AGHT+IEVUbpzsci7hh2Q7hwO7mZPiaZww0u3tvUbVJ+jQOZMQH5YZIcfcfZVXJpCw60gHMbCsJOs7A==
-X-Received: by 2002:a5d:5f47:0:b0:42b:3d9d:c5f8 with SMTP id ffacd0b85a97d-42b59328f50mr10500068f8f.6.1763374368734;
-        Mon, 17 Nov 2025 02:12:48 -0800 (PST)
+        bh=Ex+tMUFuY0anS2wKRB4rpwClxxfgy66lMucIP/0+dJM=;
+        b=O0P8vykFqyijNX+8PRgwSwVy8SGmTJjERDtSeDYyIqBNVhmn5BQIv855HI/ukaQDUe
+         sgzphdHlqfGQuGKff23Fomrkf3ZTZA/oA2ZcvZ8D/QBdtNeHemr2+qwxd4niltEnnwxw
+         fBmtExLRUW2Uxh4/Tu1gYSh0tQTE1rUqizXHOLI2G5Sly0ZT/rg2XR3jpyN4Sn830GXV
+         YTLvrNgKRZr+47EJ56/pIzAiSKVtkJontZRCIyzu4+BJ9QV+k37//qgEWB5aIWDOaCVn
+         2d8eTslM6L/hjXfTrdvNDjI0PRIIj/BmhkjS/Xk6H574/7bzaDNPwL+23gV4fwtjd3Ly
+         1SZA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763374370; x=1763979170;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=Ex+tMUFuY0anS2wKRB4rpwClxxfgy66lMucIP/0+dJM=;
+        b=SBuCJ8y/GoMo/sMT5HV0q8dkzXNaMCJH++8yX7zRo3Dlfb6B5u+NNGYWgHkKqd9VQA
+         dGcPL5cLXKWFlFEAVpb+sYy+Gi95TNXWm0qKVFstJyHbZ//8MRLDCTct/hgwrwHTq13Y
+         Z5Qlmq279pdSdk7W03PUyC6dHb9UagnCX7EUWnynHe0trgItGI9EWHnioN3uUp8Z6OR9
+         WL7Kmn9iwQRVHrAu22YwGLKrK2/eJScBoKD7DBEoXgUfJZuHB7R90cJxb/iqi6tBbK9T
+         /M3Oy7MALLXhgJfNLXaZXYFYzhh1PD4Ma4LkipW5qaskDY9hMt39mWCrMH8JaDQmDgXC
+         +Oeg==
+X-Forwarded-Encrypted: i=1; AJvYcCXi4Zo2aL85ZyUeOqXr4LRohmqOseu7wgMqB45c8ktOn3ZNNSLpuc2xNWSxbnJPODl0CZBKElOJjNU=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz1om2v7Ux1kSw0JeCNAEHdW2fMH6KI0hz7XuaVr6OowqN3aDSy
+	vcu1oqtpko1v70WBFiIpeh/aJsULI9jma1ko+juSdKyw88YeeQg+QlnvayyjvxWQ0hU=
+X-Gm-Gg: ASbGncv+vqUxhrtjcs1lQ7EvCSL3NBRjcqXqLwG5sShoYYvdThEKQ83epDFsHqNbraD
+	69PjOaSY7Pfv5/8LSL+ji3dm40stM4ebcUhycEpJau2a091ScifUnUjzfPRZaWLEJ0lZX15v9rr
+	7VrsFUSYyt2NCaMedADtRnEcXfYFam2X3Tzwo8/ysh3jG6se+gFUwx1vyxUROcCjUxiku8D2Sra
+	Y/YzBdv/ygZzJdLU6VymduQLwPalMaNt5a3YQx8wuyb9P0fnGfQnHR1KFbHKn29c2KKFJu7aGHl
+	1ljS0s3iTtYuW0wuxOxRKNJuX0SrB5E0XEipfc9ScqJEuscDtyurHysd0jsoQa4A5HAxN/q+sU/
+	qCBynV+YxCc4u2F2dciw29qjK4TzCeQhu7WrEO5+C3YBb1/mhKr/QbvxCOC4W3qIY4Q43uxyOHw
+	tAkGc0qbbGM3AGe/UMwxHO8SggE0cb6xQ/czvTGRMw
+X-Google-Smtp-Source: AGHT+IGT3sI+SDQvPoR+/Dl9yuK/0OOqHu7g4j98kCKQbIXtBdBya/HNJnhQ695H2TFveadrG52AIg==
+X-Received: by 2002:a05:6000:200e:b0:429:58f:26f with SMTP id ffacd0b85a97d-42b58dc1eb4mr12029768f8f.24.1763374370366;
+        Mon, 17 Nov 2025 02:12:50 -0800 (PST)
 Received: from claudiu-X670E-Pro-RS.. ([82.78.167.134])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-42b53f203afsm25806958f8f.39.2025.11.17.02.12.47
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-42b53f203afsm25806958f8f.39.2025.11.17.02.12.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Nov 2025 02:12:48 -0800 (PST)
+        Mon, 17 Nov 2025 02:12:49 -0800 (PST)
 From: Claudiu <claudiu.beznea@tuxon.dev>
 X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
 To: wsa+renesas@sang-engineering.com,
@@ -69,10 +70,12 @@ Cc: claudiu.beznea@tuxon.dev,
 	linux-kernel@vger.kernel.org,
 	geert@linux-m68k.org,
 	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
-Subject: [PATCH v2 0/3] mmc: renesas_sdhi: Handle resets
-Date: Mon, 17 Nov 2025 12:12:39 +0200
-Message-ID: <20251117101242.4018208-1-claudiu.beznea.uj@bp.renesas.com>
+Subject: [PATCH v2 1/3] mmc: renesas_sdhi: Deassert the reset signal on probe
+Date: Mon, 17 Nov 2025 12:12:40 +0200
+Message-ID: <20251117101242.4018208-2-claudiu.beznea.uj@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20251117101242.4018208-1-claudiu.beznea.uj@bp.renesas.com>
+References: <20251117101242.4018208-1-claudiu.beznea.uj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -83,42 +86,34 @@ Content-Transfer-Encoding: 8bit
 
 From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-Hi,
+Deassert the reset signal of the SDHI controller during probe to avoid
+relying on the previous bootloaders. Without deasserting the reset signal,
+the SDHI controller will not function.
 
-Series adds suspend/resume hooks for the Renesas SDHI driver. These
-are necessary on RZ/G3{E, S}, that supports a power saving mode where
-power to most of the SoC components (including SDHI) is turned off.
-Resume from this suspend mode is done with the help of bootloader
-and it may choose to disable the SDHI clocks, resets after it is
-done with the SDHIs.
-
-Reset signal was deasserted/asserted on probe/remove as well to
-avoid relying on previous bootloaders. This is also useful for
-unbind/bind operations.
-
-Along with it, driver was converted to use
-SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() helpers.
-
-Thank you,
-Claudiu
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+---
 
 Changes in v2:
-- in patch 2/3 drop unnecessary code changes in tmio_mmc_core.c
-- adjusted the patch description for patch 2/3
 - collected tags
 
-Claudiu Beznea (3):
-  mmc: renesas_sdhi: Deassert the reset signal on probe
-  mmc: renesas_sdhi: Switch to SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS()
-    and pm_ptr()
-  mmc: renesas_sdhi: Add suspend/resume hooks
+ drivers/mmc/host/renesas_sdhi_core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- drivers/mmc/host/renesas_sdhi.h               |  3 ++
- drivers/mmc/host/renesas_sdhi_core.c          | 39 ++++++++++++++++++-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 12 +++---
- drivers/mmc/host/tmio_mmc.h                   |  2 -
- 4 files changed, 46 insertions(+), 10 deletions(-)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index f56fa2cd208d..c4aaf534868c 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -1103,7 +1103,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	if (IS_ERR(priv->clk_cd))
+ 		return dev_err_probe(&pdev->dev, PTR_ERR(priv->clk_cd), "cannot get cd clock");
+ 
+-	priv->rstc = devm_reset_control_get_optional_exclusive(&pdev->dev, NULL);
++	priv->rstc = devm_reset_control_get_optional_exclusive_deasserted(&pdev->dev, NULL);
+ 	if (IS_ERR(priv->rstc))
+ 		return PTR_ERR(priv->rstc);
+ 
 -- 
 2.43.0
 
