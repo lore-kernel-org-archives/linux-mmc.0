@@ -1,117 +1,124 @@
-Received: from mail-yx1-f50.google.com (mail-yx1-f50.google.com [74.125.224.50])
+Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 746123624BB
-	for <linux-mmc@vger.kernel.org>; Tue, 18 Nov 2025 15:32:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A800B328B5D
+	for <linux-mmc@vger.kernel.org>; Tue, 18 Nov 2025 15:32:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763479931; cv=none; b=kncQ1UA88k731EQYIsIkFjzrX0mAk74nv6Elghm5jZAjs7XYS+Sjjudap3E0fvM44H3kYcoAnZW6hOUJ6quLQt2ICnTzjyOIeD3xuXY6rZDwTsy+J3sdg6kLp2/nnC2d7aQUAFKcFg6LG/LRySABhChefAsOvMunEy8RmdvrkG0=
+	t=1763479938; cv=none; b=IKm/Ul/fvOwiTf2vcggPNcP42Id5DsnWQdMvCR6j8ab3cAAuntiQ9MbjMi1U9KUAmLhbtGrtxhIHgbAzDfDuwEQZ63n1fAjcWs/j3OvBOIJ6Iokhfj38g8pft0PCM+enKy6f0PqUIsfVUR5EQfM3tyg9uQVuxAvp1FAlyfd9jSY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763479931; c=relaxed/simple;
-	bh=34KGTKVHVeHBF1mUoMa8kaJ38TlGQ15s8VmpnV1gKgU=;
+	s=arc-20240116; t=1763479938; c=relaxed/simple;
+	bh=m/PzBecmFoSB0WgB6AP0+aomsbeHKXLtWMavxIFy2Ws=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fggwmXmvAqDdP6vmdThPuR/3OOYnI9zOtia8vMljQku4nnxcFZCF3IiU1JZL+DcpFlOF+RvsEyQT++fMpiLVW+SLlW4lMZmmVP2HUeysSusQwwKkMs00uEQtGEPlzhrU290QNGQzFk9N1pNT+RV3Gjkngc1b70RlaRNGliiHEMc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Sj86MMpg; arc=none smtp.client-ip=74.125.224.50
+	 To:Cc:Content-Type; b=bDNjIlwyk07VelrrfM5OMuOUGY32YS4nzGOkKsgQmzxHU1+k5TEwNSOKYAsRC6MBpLa0KmVNeGs9QLxGz+iQUrRzMeWmFBx0WT+YhOCPZc/iLnkLh6qOdvSMtECvAsBgqlUTkGwGmR3hhYNvR9D5xefqBEFMdhjz8gMnYJEw9BY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oh/5kBxQ; arc=none smtp.client-ip=74.125.224.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Sj86MMpg"
-Received: by mail-yx1-f50.google.com with SMTP id 956f58d0204a3-640d0895d7cso6954679d50.1
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Nov 2025 07:32:09 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oh/5kBxQ"
+Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-63fbed0f71aso4697457d50.0
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Nov 2025 07:32:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1763479928; x=1764084728; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1763479935; x=1764084735; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=IxHLXotX/VR/smtmuGtjLAN5l6lgr5iFZlYRIN9JEyQ=;
-        b=Sj86MMpgu7xSHyQHSNTpw1C7fEl38IcKoyh4wC87f/5bCwmxyvRWVuq4GvfRfuZLyb
-         DgCGXMnxOw/pGrA1mEoZDAnAc4Kl3wlZ8/UNzIHYArNvh4tHtlyHE8MIRK9A4LPo17OJ
-         xhn+fMh9vIWBvbHgt1XzRCgO466Qers0Yj0fAJ4i9De55SiiBajKKtfkmIep1j7iW6BL
-         F+NUoshnNm6DlHfCeG3oujqar/hsHzB53vYC8iUMNsQ3cdtJPeduk/bI8qMKF34lM2+7
-         +0vmpkcvJ8iC9/BtWeniOrcCeIYRdNI/ElOuDOzrkUyAX8T4m6LKqgv8yO5+4CUa9wPX
-         ikzg==
+        bh=1HqjvHot2zaXCz+6WohQjpFioHBD8Y4L+8neqBCkVvM=;
+        b=oh/5kBxQM6BVH2XtujqeC2WTrYVithiK0eqEEvMlRP4m7z0evZ5T8Zp/r7bKx9n+as
+         qwTbPT3wyE4+f03oEQwrRCiB4HkuOJdTyOK0vvqc9hbqFIA+MTtWhIFk67qGMRec9RjB
+         2aImZRQdcFdiLr/kCQDlL6fuXDyHxNq2E4DnIXNWW5U+or5ysmuWIa+SW9e6yqPLBIqw
+         yEvjjtBjW4/XfQVTr8wL5MrIZcVe+GwP+pBCqHO77Sk2A5sHCqM5oEohg7wJs4WVQdjb
+         T2ObgcH01CI6STpMGM8tesw4IBHdwsI41Dqb8TyQtVUAICcfQDpFavSvOetMqXLklras
+         HHqA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763479928; x=1764084728;
+        d=1e100.net; s=20230601; t=1763479935; x=1764084735;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=IxHLXotX/VR/smtmuGtjLAN5l6lgr5iFZlYRIN9JEyQ=;
-        b=HcUwe6nHNTgPO9/pBu0Edp7HtCzGba+dkCSlTT+2VHVtZjBGbh0xc98U+I5Y1oDWbY
-         GS6gVYF8z20cN2F06/sSo4X1lQKfEEm0SiUS0uvNX3rEbdNgMFKY4NauLFGvhrV2dEoK
-         0UKxKz0bzPEBN2ZVZ6CVJ6juW0IMitwfguHyKNZjbp+KzyYER1dY9tDf1mkPthXwyby7
-         i5UwrdZd58sYhG/N1hE2gdIWG+wbDz3+BsEUY6jJQDeCEimJiMGpOKGJdvgbcq7JtYxF
-         Lt92GoNLJIwab4sR8VH01PDi8pPeun8UypzS07HY2aX5W5eT/R6zuhZjrrWfDpOYpFvx
-         Oz5w==
-X-Forwarded-Encrypted: i=1; AJvYcCU7cD16dFwCyZj7t+aN2dY/kvRXai8OXCj92pUXp5BxCoOExRSVPScUyylXizr+A3oi2bxsN1oTMoc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxSt9nj3W5eHE2kV5gu/1KLexviDIxCcdGoLDVS3IVxQPzeQY4E
-	NJoYJ5OOm65BoSKcs/pfTk5BJrU8KS0HrCB5AIHDOSCTuZq90vUyKJDTGyZqGKKiW9LUQ/gRNxM
-	NT3xzbZ9enYod1FY8yf5sHFUdbMUrLXd0W/Awpn9txQ==
-X-Gm-Gg: ASbGnctHC3a2mK/4kX1cdsTlZZmevOXoqN4MctulOnZS4nPLzwWwiyDIhgBf2cTkvyN
-	XHu9SMog5rvBvHLywwUH7tKH1LDRBCZVuKvBanBJ3CworXL6xA+8ZaSjXwyAru6oxW5K4ezpqvb
-	vy/SM6gjdMUnl2v73hDXWaQm1i0GitDat+vjxkvBebjg8GztnqhJdlIc1Eqb0jkQwjPWqhRBUdB
-	27U05Ob3JOMQJ+l/MLmgm7sGYEVlOG09UTcXfDQhVxPSNiz/r/2WzRYj0kNs7opQWUkV3qMhmqk
-	B75/sU2jbVkBOidWtA==
-X-Google-Smtp-Source: AGHT+IEc8GglvCIsD6cGrALsj9LLh6N+Jx7VKw+16XtXMLh8fZV72joZEMGSMeUR4bEuhwbV7IWYBeRgua2rFcuL8iQ=
-X-Received: by 2002:a05:690e:d86:b0:640:d597:4170 with SMTP id
- 956f58d0204a3-642132db3f6mr2565633d50.0.1763479928233; Tue, 18 Nov 2025
- 07:32:08 -0800 (PST)
+        bh=1HqjvHot2zaXCz+6WohQjpFioHBD8Y4L+8neqBCkVvM=;
+        b=TDUncjIjnhp7fLCsqsgRXpCMOe64ZiFSOP4irB6++9YCtHN2WZMDVbq4r2KBwx0yFG
+         bq19pHp1hDBltSEcGqvGSLKAORHrH/CJQr+s/Yuh+bgVfVujJZV6uWA31YGoAjvTRGP9
+         DEJYJnPIHry9OZItsMhGoF+aNure/tkTokS5tz5j3d9qrLl5L4EDNoS2m1XmtORgx1J7
+         IBL2pWmHWvtvfocXQAjB/fnHXFnPQ8B+dLrSmMlUouia9NyKMellss1Ph1OifaOzgAVD
+         ESD+42nWAzQsOZGqOmiqXUGOWp4MoZ6G2/5NJHROdi1ey7BSK7a2uI+W9MDaCQfl/B5e
+         XQkA==
+X-Forwarded-Encrypted: i=1; AJvYcCVuU+GHj3ZgF1XYUpeQb34/cryP7rvhZ8wKfikkXPcqU2SKg50HnkfGcbXOBPINmWpWEnRlSGdiS8U=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy3431TnFElzLhLn4Op4zSUAJwPVV+2CwGLKzUaS8qc+5s86571
+	BMQT9WF+dQCYaxrchlX0bfEyVmCmMt+pH/eUUDjw9jrgRG2CoppxO5WHDDauV92iTVphFBT0Phd
+	bvz9uo9NEHb9u/hElZPu0tEv2VmOiP9+00a82fcCYog==
+X-Gm-Gg: ASbGnctjJeb/Yz4hvIIX7a2KR7rUwdX/ydV0hzJFyR6ZPYuHEuKQxNXWCVHXfss9gj0
+	FeStuFmfBn3BRocTymVj/Hiy+4TgcrcrbyrMfQnC2vXGIS9+8HdpWoH93aj2dxrIk4XqrFz8RSL
+	em/EHzdV1PVUfeJuAioTXn7OSlInfGXMIcNKEfp11FUdGeY55xkA7LHEkYdbX+4/gwhSkTrijKr
+	aDzj+IsxWZgTWWMrl7HoljfEmTKG6jw8Zh9WU8d53OgSenatuIQqlVK6fz9tm/lFmeRfqfpODgS
+	nXcBSe0=
+X-Google-Smtp-Source: AGHT+IEPW0w7kRpHWU8HC+IJ0wheQZbZJvzoml3Vpr6Ev05Se8Sg/tgilmB7FWyYAPRCFhb7oGxKDgM3CdT9NhooaW0=
+X-Received: by 2002:a05:690e:248c:b0:63f:b434:a08e with SMTP id
+ 956f58d0204a3-641e7650a85mr10677589d50.45.1763479935441; Tue, 18 Nov 2025
+ 07:32:15 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251115122120.35315-4-krzk@kernel.org> <20251115122120.35315-6-krzk@kernel.org>
-In-Reply-To: <20251115122120.35315-6-krzk@kernel.org>
+References: <20251117101242.4018208-1-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20251117101242.4018208-1-claudiu.beznea.uj@bp.renesas.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 18 Nov 2025 16:31:32 +0100
-X-Gm-Features: AWmQ_bmXlb23IcHWwlaA2kdC6A8acUsbATP4k59c9PPxA0jX-7QbyyZj3x6u5n8
-Message-ID: <CAPDyKFpquaBo64eKvMPiCPdKrPkYc8fhpaOmFL9KN0UzFs0xkw@mail.gmail.com>
-Subject: Re: [PATCH 3/3] dt-bindings: mmc: am654: Simplify dma-coherent property
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Jyri Sarha <jyri.sarha@iki.fi>, Tomi Valkeinen <tomi.valkeinen@ideasonboard.com>, 
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	Thomas Zimmermann <tzimmermann@suse.de>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
-	Michal Simek <michal.simek@amd.com>, Michael Tretter <m.tretter@pengutronix.de>, 
-	Harini Katakam <harini.katakam@amd.com>, Shyam Pandey <radhey.shyam.pandey@amd.com>, 
-	dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Date: Tue, 18 Nov 2025 16:31:39 +0100
+X-Gm-Features: AWmQ_blohfnlmMvUuRM6S6OaffAT860CwMwae3tO0RRJnX7dRQTNPcTcl56LX90
+Message-ID: <CAPDyKFrKzvmkXb9rbjJHKaFA0ffWoH7p2_Z4_+AY26w+9Nin3A@mail.gmail.com>
+Subject: Re: [PATCH v2 0/3] mmc: renesas_sdhi: Handle resets
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: wsa+renesas@sang-engineering.com, p.zabel@pengutronix.de, 
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, geert@linux-m68k.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Sat, 15 Nov 2025 at 13:21, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Mon, 17 Nov 2025 at 11:12, Claudiu <claudiu.beznea@tuxon.dev> wrote:
 >
-> Common boolean properties need to be only allowed in the binding
-> (":true"), because their type is already defined by core DT schema.
-> Simplify dma-coherent property to match common syntax.
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 >
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Hi,
+>
+> Series adds suspend/resume hooks for the Renesas SDHI driver. These
+> are necessary on RZ/G3{E, S}, that supports a power saving mode where
+> power to most of the SoC components (including SDHI) is turned off.
+> Resume from this suspend mode is done with the help of bootloader
+> and it may choose to disable the SDHI clocks, resets after it is
+> done with the SDHIs.
+>
+> Reset signal was deasserted/asserted on probe/remove as well to
+> avoid relying on previous bootloaders. This is also useful for
+> unbind/bind operations.
+>
+> Along with it, driver was converted to use
+> SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() helpers.
+>
+> Thank you,
+> Claudiu
+>
+> Changes in v2:
+> - in patch 2/3 drop unnecessary code changes in tmio_mmc_core.c
+> - adjusted the patch description for patch 2/3
+> - collected tags
+>
+> Claudiu Beznea (3):
+>   mmc: renesas_sdhi: Deassert the reset signal on probe
+>   mmc: renesas_sdhi: Switch to SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS()
+>     and pm_ptr()
+>   mmc: renesas_sdhi: Add suspend/resume hooks
+>
+>  drivers/mmc/host/renesas_sdhi.h               |  3 ++
+>  drivers/mmc/host/renesas_sdhi_core.c          | 39 ++++++++++++++++++-
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 12 +++---
+>  drivers/mmc/host/tmio_mmc.h                   |  2 -
+>  4 files changed, 46 insertions(+), 10 deletions(-)
+>
+> --
+> 2.43.0
+>
 
-Applied for next, thanks!
+The series applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
-> index 676a74695389..242a3c6b925c 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
-> @@ -50,8 +50,7 @@ properties:
->        - const: clk_ahb
->        - const: clk_xin
->
-> -  dma-coherent:
-> -    type: boolean
-> +  dma-coherent: true
->
->    # PHY output tap delays:
->    # Used to delay the data valid window and align it to the sampling clock.
-> --
-> 2.48.1
->
