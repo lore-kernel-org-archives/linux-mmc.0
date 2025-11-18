@@ -1,177 +1,140 @@
-Received: from mail-yx1-f41.google.com (mail-yx1-f41.google.com [74.125.224.41])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 131462139C9
-	for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 11:01:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A74E135BDC6
+	for <linux-mmc@vger.kernel.org>; Tue, 18 Nov 2025 14:23:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763377277; cv=none; b=pCs1M+c/RxEtdv/Gha4/h+TRceaTDy/LHMPqrrgOA+SebuIVDXEujO287MiDYNNfpHSxMKHBBF35P9gt/yO32I1zxqV3MoBJJsgZ6lCdaZpVwqEbdnwh5Q2F5VRW8vOnD1xT8rcNhXJGAwMPhAWv8gMk+GUhoFEa0P712HFd0sA=
+	t=1763475807; cv=none; b=gwk1VMOV/H2bCBHVZ8ijaJxutVWYShfKrZiDRGlrMfFxVwxRqsdiSbGyrtwtFbkXRlAAl3jtmaFEqfHAdRCJcyGo7JMn7eZZhRkCMhClh7ZxR09Pq5ChgEou5lfFJUyVYBX5mmVtXk97KsqbAomsCtnvfB48sfiDG0GWx6sGOW8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763377277; c=relaxed/simple;
-	bh=7DAQpoB3R+EJpl7MbBOx5A+ZlzdqP6pGt/EDi4xzIlE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=tQWGGjt0utb/9eAcIDxy08JFGX/2X6WTvUUlRxruDZtyg9SZsGD6cAf8Gmy5PVSe8EG5yzYNpwHwMcvF8T6o5Pb3Dxn0CElXcbGY0YiZb5n/8irjJHEB7Sz7dx7gNn0fipVuAD8VJzeY+HFtILkWSV9HmcIEi5n2w3bwjpf999s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=id4994FU; arc=none smtp.client-ip=74.125.224.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1763475807; c=relaxed/simple;
+	bh=zZSQe2ZxHutuqSiWUIg5Vy/daN/b64qg/IMIRlyyNxs=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=fogXv291hxBmc76nlJ8PfZhjHSWzpqRoZCsVqkYBJsjeonxmNTcNWnfTxnZqFh1BaseRvHPwSlWaEf9CCVrCmqjuBhxO5FkUq15u8WZ461Uuj8Am2U33yOSFGthTehPMwrj+TnYiDkpFVqkB2MzdskyGD7l57s6DMupsG2VRQYU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nFDAZqRK; arc=none smtp.client-ip=209.85.214.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="id4994FU"
-Received: by mail-yx1-f41.google.com with SMTP id 956f58d0204a3-63e393c49f1so3268772d50.0
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Nov 2025 03:01:14 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nFDAZqRK"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-29808a9a96aso58614265ad.1
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Nov 2025 06:23:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1763377274; x=1763982074; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=/RSfdrwfxNJQiZz80hQXf9twz6yOQXKrW5ZfA5HxaxE=;
-        b=id4994FUPu51IRxHSspL9L3GiejmCAA8gq+5m8V5Qy/ts2ASYoQqTsF8SrZu1qJCqD
-         GUQLU1kAdP494s0MaMxk3g+bRWbLLQ5BPI6XIxP0wC9S3V9humxsjMA8QeCi1B/LHm5w
-         AXkpQrcUklRFpcssfQSH+obec9yFZUY19vuPSsAFftk2+3eEeuw6/DJGcfvHxXox61cA
-         i/3/UzvFQ9JdBpOWPQhGbPX5FT90aWLV8Y+ch9DgbpdNXYBbMtOxJibX6lfYdgRopu1w
-         tz3NewpHxpPpKQS3POc517AagIYVuMrvQtXQ5yFz/1WKQ5Nws47JvpRs7mMY5pTSnsWK
-         jK+A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763377274; x=1763982074;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1763475805; x=1764080605; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=/RSfdrwfxNJQiZz80hQXf9twz6yOQXKrW5ZfA5HxaxE=;
-        b=eMfwN2xkVCe2hQDF1QZVqXNdkt6KxrEuX8cYvTbKwfsztt4DxVPga0teRsH1pLsO/w
-         v14NKG5FuEV7A5zm8459/QU44UFYdhO03O50EgMeHUP4bermo40uDFxVRrGjOkU3ZET+
-         jz/pXbBdbBkNpWV5okGLVS5cNxRVGicX1ZGKevE59odcyMv5x+y5bQtcLGw1MjfRrbka
-         rAysMSXPThkjzGHGe5i6RMM8XQnbProBU6OIsVGqS8GVyPc2RDiPYhVsSrJIc5DULvks
-         A3/gHFpOXOu60fK5c8bTQzfTNRkVAsdQsCU/ZvS8UwuaOHA/IMLOTSOf08z3Q+nzCaYv
-         Xsfw==
-X-Forwarded-Encrypted: i=1; AJvYcCVJALVx9bcqnGyGLJFs5v3Ar0oPY9LLHZxOClHtMS0QoJQHhRiCNFV0JBS90/Q37Xdog3UzjM5QMoI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzIx7DscgR8ls7NofX8hq3F8OZ4Qw4jK3tHqQJO/GYo/SxtJTpL
-	bn4BOPIZn38zFAPqkL6f8cfL/54sAou2TQ/SsYk1g2RDUBYL2ZV2hz/QgE/VYIn2xP/CNb0u5mX
-	8dtrCWhHAqHwH/p2LG6VtHUU/owiRXr0kUeFUVzWR7A==
-X-Gm-Gg: ASbGnct4OmEn5Fi7Pis3B+RmIvPmuKC22gFOMmdnd3dkZ0Ql70LunKslYJe9VLQxRm4
-	2BRy83sU52sagR2XnD9qEXdKo+st08yAkS4q6cJDIGPuAeWSxGFeAbl9bDTQU0mBXbcNbCS0VGH
-	TwSBnFK7VJaRcxTkDdQ/EAYYM5IC2iQ7R1RfQrkTZuHsOMsW3BBsN09lnq18ftYl6e/p5elSv2p
-	SuIj2p89DgScUtDGo7yw4BV02nQ0AB8wDcEbEdxYy8OkSfkSVGsWZ08P1xrUWNdnYQe100O/lBC
-	ZJQMpeI=
-X-Google-Smtp-Source: AGHT+IEjvegoUIWfi8UaBD0jEKwHtT+y2Cbu5UHhJ+VHUPJu6okR0AoxTFiIq+cxtmlIxdFEnLzs3e2dtieQR/hKIVs=
-X-Received: by 2002:a05:690e:d86:b0:642:84a:7ba4 with SMTP id
- 956f58d0204a3-642084a7c6bmr1567493d50.85.1763377273901; Mon, 17 Nov 2025
- 03:01:13 -0800 (PST)
+        bh=i4UD0GpwQ8ZB6y6bn4+JVNJNgyJMPm3VDbXU5N9w4UY=;
+        b=nFDAZqRKKuCqpEbzzB1UKQAvUOH/0Qzsto635lsIeOA/P0ZpfM+mt0tAnfhy+cozIe
+         OcknJpT1XqktmZM1N03ds6zeX/zmbpvpnGDLxZSOn5PiKB3SerQufkvPjmuCjiS3MlG5
+         7x9IVz0FX4j2CHfCd6KqQazjfuRUC4npbzrER/qXYLQ4TUf1gGZtEr285wIkMsJmQe5h
+         eQqKNVSUtwSi95QNeIkcrr41jEHyniIXf3hTjlUsnzaIFwSe3OtSb8DkBkVuGJuOIcI0
+         3UeqiD8wRMxTXz9McTPWU8SjQDE4+nExj6eqF8ZvFiji6mIPjRfNzwrWd06bpxXI/0of
+         wRJA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763475805; x=1764080605;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=i4UD0GpwQ8ZB6y6bn4+JVNJNgyJMPm3VDbXU5N9w4UY=;
+        b=hztvocDdpwsni2h6t02cIHTuSi5oq7oUSUbU9Y3EUNK6XmA9gIGShH50ORfJgV3Kxk
+         dar0xCXeb5yUBu0IBtPqLebNHs6/7JWCbC4viaOwwDF8kKbVchksiiRGRbb7+RkM0gxg
+         IY3MBa6GbQkF56k0Kz0BG0PaAPok/PekPOp+idtGvMNAyoZ7XKxYybTQ3Br/nkGvq1f3
+         rdZ3+iBCm1ZArM+mU47UzhxIG66YL76rXMjXCG/p0PhUYYQ1+fnqhzoUn1sytIgs5wOK
+         4MnOvVC4ycQpHpwbXKqLI3ISW2w+Hqt//rrhpyt6f55DIVr7GXCfrgj0Ip24LpnZYPSq
+         kIAw==
+X-Forwarded-Encrypted: i=1; AJvYcCUVDyFzy71qMvslDMhmAko3V5zOj82uNKilfiFR4CH+iIOhXXkpPpy9aMwCfN+ZfTKGNxZY0JC9hlI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxB1q1q9OcoORwqzL/hj4pBEhPmqm7yzicnHXwvQwG3OOMKOfl/
+	b4p21RdgSu30T4LrB+vPMOMhWYdGqTSacfd5Ibpjrmy4vO+1VubbJRuo
+X-Gm-Gg: ASbGncu+cTr+iXIuQ1zFQPuS118P5o83qMYcaNzhFm+VRvGsIsunNqL/3Pjeia7/YTr
+	1GGyBjGKnAJQP93cbHxiXcQjeapfUVJ3k+cZP3CkqclDwnh2BGf462kmaL8z9+ss/wymvqdE2qk
+	Uxhs6razP1n+Ky97GE19LVcC7W361nddGGvzaQakPo7SVTbFhtMpeezH6/9U2u3vZykdU3Ugs/6
+	qJpN5kDVKuSO6v9wBO5bCKjKPUtKl1GC5t+PWPxHlbszzD0Q+EbLyzlkBeO9dSiNFrWhzqWCgrR
+	6VgWY+KIABzk66QS8fRDzNI5Zex9xlQ+iI62Vn9WZvUgrLyXjbX0IyNAlCLw4R+jgZl9tBfHQDl
+	H+Y0Zt6Yh6knKDX5IeMETm2QoXoMFy/Dim2UypLVREGh2+59znUMwO3e+ykgzwWfq5+jShVcsv1
+	IvYye3vhN3tsHrfVIb
+X-Google-Smtp-Source: AGHT+IEC31C+/QdlNZ28QnBzgc25thMPM7VSRkpCkiti8OLZOlHrEqIdHvn57SdKvFQQebb6wsTr7A==
+X-Received: by 2002:a17:903:120b:b0:298:60d5:d27a with SMTP id d9443c01a7336-2986a73b975mr207046245ad.28.1763475804730;
+        Tue, 18 Nov 2025 06:23:24 -0800 (PST)
+Received: from rakuram-MSI ([2405:201:d027:f05b:b076:498e:270b:2a02])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-bc377414572sm15108698a12.35.2025.11.18.06.23.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 18 Nov 2025 06:23:24 -0800 (PST)
+From: Rakuram Eswaran <rakuram.e96@gmail.com>
+To: ulf.hansson@linaro.org,
+	u.kleine-koenig@baylibre.com
+Cc: chenhuacai@kernel.org,
+	dan.carpenter@linaro.org,
+	david.hunter.linux@gmail.com,
+	khalid@kernel.org,
+	linux-kernel-mentees@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	lkp@intel.com,
+	rakuram.e96@gmail.com,
+	skhan@linuxfoundation.org,
+	zhoubinbin@loongson.cn
+Subject: Re: [PATCH v3] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
+Date: Tue, 18 Nov 2025 19:53:11 +0530
+Message-ID: <20251118142317.12921-1-rakuram.e96@gmail.com>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: CAPDyKFoSX7QZGv78dL10C38wY0Sg5QC1qxvhyGXJ+VUYHihP3A@mail.gmail.com
+References: <CAPDyKFoSX7QZGv78dL10C38wY0Sg5QC1qxvhyGXJ+VUYHihP3A@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251113150217.3030010-1-andriy.shevchenko@linux.intel.com> <20251113150217.3030010-14-andriy.shevchenko@linux.intel.com>
-In-Reply-To: <20251113150217.3030010-14-andriy.shevchenko@linux.intel.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 17 Nov 2025 12:00:38 +0100
-X-Gm-Features: AWmQ_bk2fwrMGKoLr3e8DW_NORum6cYwB-Ynf9Wgckyt3WUUk5QWFuYE7vXt0wM
-Message-ID: <CAPDyKFotmQyHzBim-8nib-KVvQaQgA_ELbgdC_Q4Y95-GrvRSw@mail.gmail.com>
-Subject: Re: [PATCH v3 13/21] mmc: mmc_test: Switch to use %ptSp
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Corey Minyard <corey@minyard.net>, =?UTF-8?Q?Christian_K=C3=B6nig?= <christian.koenig@amd.com>, 
-	"Dr. David Alan Gilbert" <linux@treblig.org>, Alex Deucher <alexander.deucher@amd.com>, 
-	Thomas Zimmermann <tzimmermann@suse.de>, Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>, 
-	Rob Clark <robin.clark@oss.qualcomm.com>, Matthew Brost <matthew.brost@intel.com>, 
-	Aleksandr Loktionov <aleksandr.loktionov@intel.com>, Vitaly Lifshits <vitaly.lifshits@intel.com>, 
-	Manivannan Sadhasivam <mani@kernel.org>, Niklas Cassel <cassel@kernel.org>, Calvin Owens <calvin@wbinvd.org>, 
-	Vadim Fedorenko <vadim.fedorenko@linux.dev>, Sagi Maimon <maimon.sagi@gmail.com>, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, Karan Tilak Kumar <kartilak@cisco.com>, 
-	Hans Verkuil <hverkuil+cisco@kernel.org>, Casey Schaufler <casey@schaufler-ca.com>, 
-	Steven Rostedt <rostedt@goodmis.org>, Petr Mladek <pmladek@suse.com>, 
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>, Max Kellermann <max.kellermann@ionos.com>, 
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	openipmi-developer@lists.sourceforge.net, linux-media@vger.kernel.org, 
-	dri-devel@lists.freedesktop.org, linaro-mm-sig@lists.linaro.org, 
-	amd-gfx@lists.freedesktop.org, linux-arm-msm@vger.kernel.org, 
-	freedreno@lists.freedesktop.org, intel-xe@lists.freedesktop.org, 
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org, 
-	intel-wired-lan@lists.osuosl.org, linux-pci@vger.kernel.org, 
-	linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	linux-staging@lists.linux.dev, ceph-devel@vger.kernel.org, 
-	linux-trace-kernel@vger.kernel.org, 
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>, Sergey Senozhatsky <senozhatsky@chromium.org>, 
-	Jonathan Corbet <corbet@lwn.net>, Sumit Semwal <sumit.semwal@linaro.org>, 
-	Gustavo Padovan <gustavo@padovan.org>, David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	Dmitry Baryshkov <lumag@kernel.org>, Abhinav Kumar <abhinav.kumar@linux.dev>, 
-	Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>, 
-	Marijn Suijten <marijn.suijten@somainline.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Lucas De Marchi <lucas.demarchi@intel.com>, 
-	=?UTF-8?Q?Thomas_Hellstr=C3=B6m?= <thomas.hellstrom@linux.intel.com>, 
-	Rodrigo Vivi <rodrigo.vivi@intel.com>, Vladimir Oltean <olteanv@gmail.com>, Andrew Lunn <andrew@lunn.ch>, 
-	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
-	Tony Nguyen <anthony.l.nguyen@intel.com>, Przemek Kitszel <przemyslaw.kitszel@intel.com>, 
-	=?UTF-8?Q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>, 
-	Rodolfo Giometti <giometti@enneenne.com>, Jonathan Lemon <jonathan.lemon@gmail.com>, 
-	Richard Cochran <richardcochran@gmail.com>, Stefan Haberland <sth@linux.ibm.com>, 
-	Jan Hoeppner <hoeppner@linux.ibm.com>, Heiko Carstens <hca@linux.ibm.com>, 
-	Vasily Gorbik <gor@linux.ibm.com>, Alexander Gordeev <agordeev@linux.ibm.com>, 
-	Christian Borntraeger <borntraeger@linux.ibm.com>, Sven Schnelle <svens@linux.ibm.com>, 
-	Satish Kharat <satishkh@cisco.com>, Sesidhar Baddela <sebaddel@cisco.com>, 
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
-	Mauro Carvalho Chehab <mchehab@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>, 
-	Masami Hiramatsu <mhiramat@kernel.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
-	Andrew Morton <akpm@linux-foundation.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 
-On Thu, 13 Nov 2025 at 16:03, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
+On Tue, 11 Nov 2025 at 23:06, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> Use %ptSp instead of open coded variants to print content of
-> struct timespec64 in human readable format.
+> On Thu, 23 Oct 2025 at 16:54, Rakuram Eswaran <rakuram.e96@gmail.com> wrote:
+> >
+> > This patch refactors pxamci_probe() to use devm-managed resource
+> > allocation (e.g. devm_dma_request_chan) and dev_err_probe() for
+> > improved readability and automatic cleanup on probe failure.
+> >
+> > It also removes redundant NULL assignments and manual resource release
+> > logic from pxamci_probe(), and eliminates the corresponding release
+> > calls from pxamci_remove().
+> >
+> > Reported-by: kernel test robot <lkp@intel.com>
+> > Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+> > Closes: https://lore.kernel.org/r/202510041841.pRlunIfl-lkp@intel.com/
+> > Fixes: 58c40f3faf742c ("mmc: pxamci: Use devm_mmc_alloc_host() helper")
+> > Suggested-by: Uwe Kleine-König <u.kleine-koenig@baylibre.com>
+> > Signed-off-by: Rakuram Eswaran <rakuram.e96@gmail.com>
 >
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> Applied for fixes, thanks!
+>
+> Kind regards
+> Uffe
+>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Hi Ulf Hansson,
 
-Kind regards
-Uffe
+Thank you for applying to fixes branch.
 
-> ---
->  drivers/mmc/core/mmc_test.c | 20 ++++++++------------
->  1 file changed, 8 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index a74089df4547..01d1e62c2ce7 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -586,14 +586,11 @@ static void mmc_test_print_avg_rate(struct mmc_test_card *test, uint64_t bytes,
->         rate = mmc_test_rate(tot, &ts);
->         iops = mmc_test_rate(count * 100, &ts); /* I/O ops per sec x 100 */
->
-> -       pr_info("%s: Transfer of %u x %u sectors (%u x %u%s KiB) took "
-> -                        "%llu.%09u seconds (%u kB/s, %u KiB/s, "
-> -                        "%u.%02u IOPS, sg_len %d)\n",
-> -                        mmc_hostname(test->card->host), count, sectors, count,
-> -                        sectors >> 1, (sectors & 1 ? ".5" : ""),
-> -                        (u64)ts.tv_sec, (u32)ts.tv_nsec,
-> -                        rate / 1000, rate / 1024, iops / 100, iops % 100,
-> -                        test->area.sg_len);
-> +       pr_info("%s: Transfer of %u x %u sectors (%u x %u%s KiB) took %ptSp seconds (%u kB/s, %u KiB/s, %u.%02u IOPS, sg_len %d)\n",
-> +               mmc_hostname(test->card->host), count, sectors, count,
-> +               sectors >> 1, (sectors & 1 ? ".5" : ""), &ts,
-> +               rate / 1000, rate / 1024, iops / 100, iops % 100,
-> +               test->area.sg_len);
->
->         mmc_test_save_transfer_result(test, count, sectors, ts, rate, iops);
->  }
-> @@ -3074,10 +3071,9 @@ static int mtf_test_show(struct seq_file *sf, void *data)
->                 seq_printf(sf, "Test %d: %d\n", gr->testcase + 1, gr->result);
->
->                 list_for_each_entry(tr, &gr->tr_lst, link) {
-> -                       seq_printf(sf, "%u %d %llu.%09u %u %u.%02u\n",
-> -                               tr->count, tr->sectors,
-> -                               (u64)tr->ts.tv_sec, (u32)tr->ts.tv_nsec,
-> -                               tr->rate, tr->iops / 100, tr->iops % 100);
-> +                       seq_printf(sf, "%u %d %ptSp %u %u.%02u\n",
-> +                                  tr->count, tr->sectors, &tr->ts, tr->rate,
-> +                                  tr->iops / 100, tr->iops % 100);
->                 }
->         }
->
-> --
-> 2.50.1
->
+Hi Uwe,
+
+Shall I start to send the patch to remove the redundant if condition
+check from pxamic_remove() function?
+
+Link to prior discussion:
+https://lore.kernel.org/linux-mmc/pvid2ycmgbkbmegnnzwl4hyev6e2smusxk5olkuqxfwxzykz2e@jlvolirolrxl/
+
+I can pull Uffe fixes branch to send the above patch? Any inputs will be
+really helpful to start working on this.
+
+Another point, I would like to ask is about the below discussion. You have
+mentioned about WIP suggestion for clk_get_rate(). 
+
+Link to that discussion:
+https://lore.kernel.org/linux-mmc/20251020183209.11040-1-rakuram.e96@gmail.com/
+
+Was my understanding is correct?
+
+Best Regards,
+Rakuram
