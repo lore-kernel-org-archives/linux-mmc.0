@@ -1,41 +1,43 @@
-Received: from mail-m49221.qiye.163.com (mail-m49221.qiye.163.com [45.254.49.221])
+Received: from mail-m15586.qiye.163.com (mail-m15586.qiye.163.com [101.71.155.86])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C8BF3203AA
-	for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2025 08:22:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.221
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C517E2F0669
+	for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2025 08:37:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.86
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763540538; cv=none; b=s/4CQOXbz6kYolWRP0kecMPaVlrf0JGkob6LcfGANbPDmxvip3oNsF1tIeOHiY2boadywNBwXlAalC0Uh/BkKVtbCE9HsLYnwr0hLv9MnZMYEpNdrEpaD13EVzDcN/RbL1lATF+RYvEpgbXXyN3cCY96K3Tr5Uuf9R3Qq+cxzyE=
+	t=1763541456; cv=none; b=AJ5gWCwQz3QaYrjZMqXg8iPccRDfnEloTKwtISRVHsKV+a2SXgJGrT/hEnoVL+987XjyVFVO14/geld/SI6P/me70Zk9aWnUcquHttl/RmvofmGhwWgEvPkmlaLvxdIhIqt+7wXF2ZDCd1X0pzDk3VjsXw5wptM1Saw9RVb0//U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763540538; c=relaxed/simple;
-	bh=w61JSqKDoYti3JcAAhaohWNg+7JjlnzN5GN8e9tmmaY=;
-	h=From:To:Cc:Subject:Date:Message-Id; b=LlxPUGIpmpdaLdRJBE0/aw/7fk0t40XDWSFitLoouBqZ2fjV5gSpM8i7i8O1WvlpNT1mDkOTA+54iUKr2sYvNnJjTguSqlLOGvu9Oj/vuwkNfInIwDdp7yVSWAHFFh/vYcgySRf7y/oeYT9bD8bF6muDEMdCF47Btkm9ZVv7vzA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=S/4diGDs; arc=none smtp.client-ip=45.254.49.221
+	s=arc-20240116; t=1763541456; c=relaxed/simple;
+	bh=h+kYeEg4u/zIGqbxhCP5fiae3HJQ0ZTXwkYv27U+P6Q=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=qrajRzDR+8yhNN67XlksU7eNEh3yIzn70ZgkaZ1S52Yz6GAkI0WEKoCo0YF+u8NaLAqY0Re8HDRMwHXYlzDeHx1Nl/v31L8rczISRRqv4SCT0puG+pXgXwXAyN7gU0SmyKDP+8o67KLipPGSFEhm0r6MVtxJADIdXqH4idiRx0w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=AM+qRhD0; arc=none smtp.client-ip=101.71.155.86
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="S/4diGDs"
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="AM+qRhD0"
 Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 2a1df4e30;
-	Wed, 19 Nov 2025 16:22:03 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2a1df4e41;
+	Wed, 19 Nov 2025 16:22:05 +0800 (GMT+08:00)
 From: Shawn Lin <shawn.lin@rock-chips.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org,
 	Jaehoon Chung <jh80.chung@samsung.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 1/2] mmc: dw_mmc: Remove unused struct dma_pdata
-Date: Wed, 19 Nov 2025 16:21:37 +0800
-Message-Id: <1763540498-84315-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 2/2] mmc: dw_mmc: add dw_mci_prepare_desc() for both of 32bit and 64bit DMA
+Date: Wed, 19 Nov 2025 16:21:38 +0800
+Message-Id: <1763540498-84315-2-git-send-email-shawn.lin@rock-chips.com>
 X-Mailer: git-send-email 2.7.4
-X-HM-Tid: 0a9a9b34d72e09cckunm1538b04d9b757
+In-Reply-To: <1763540498-84315-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1763540498-84315-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0a9a9b34e34a09cckunm1538b04d9b786
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQhkdQlZDTEIfSEhNSkhITh1WFRQJFh
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQkNDQ1ZCGUsdHh4eHktCTx5WFRQJFh
 	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
 	hVSktLVUpCS0tZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=S/4diGDsqbjB0NAQRPI7JaeyKfsjLjUNZxDFzXhANjZ0ZWDF6oZOrMM3t6b3BfxF6udNVKcIl9KIi/sIF4GhOORQSdsp8IbH+M86g/IuwJ+HmEMaAuyiuevn7U60FRJpDfD6Rk+Feoj85eHZ6T72IEk+FgAL7ivLpjhGxJqfCjU=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=WAzDTFFhVgysFvoM/cxO6xPU/fR2dn/vgcKN5p4+mtE=;
+	b=AM+qRhD0fBTwTmVLEDfwGe9sKCJ/h93PXHsdjB6QvLHMJ/WPV9dwYv7eqmd/4BE8b9mytcUiLw9LhPZVI9VSrOjfpp4OY9EuHwHzqsZTA5bP1A2H3zS+ITusu25LOPY2ABKCkgiCibVCZo+rgxJ3wD2S54HT68g8wttcZRP9O7k=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=lx/Z9imaF4v4drGnMLaOY13OMweSeFQzex0cFGhW/gY=;
 	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -43,35 +45,206 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-Thers is no public user for it.
+dw_mci_prepare_desc64() and dw_mci_prepare_desc32() duplicate a lot of
+code, add a new dw_mci_prepare_desc() to save the bits.
+
+No functional change intended.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- drivers/mmc/host/dw_mmc.h | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 147 ++++++++++++++--------------------------------
+ 1 file changed, 43 insertions(+), 104 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 648b4a5..b4ceca0 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -255,8 +255,6 @@ struct dw_mci_dma_ops {
- 	void (*exit)(struct dw_mci *host);
- };
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 9e74b67..80d3851 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -575,16 +575,19 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+ 	return 0;
+ }
  
--struct dma_pdata;
+-static inline int dw_mci_prepare_desc64(struct dw_mci *host,
+-					 struct mmc_data *data,
+-					 unsigned int sg_len)
++static inline int dw_mci_prepare_desc(struct dw_mci *host, struct mmc_data *data,
++				      unsigned int sg_len, bool is_64bit)
+ {
+ 	unsigned int desc_len;
+-	struct idmac_desc_64addr *desc_first, *desc_last, *desc;
+-	u32 val;
++	struct idmac_desc *desc_first, *desc_last, *desc;
++	struct idmac_desc_64addr *desc64_first, *desc64_last, *desc64;
++	u32 val, des0;
+ 	int i;
+ 
+-	desc_first = desc_last = desc = host->sg_cpu;
++	if (is_64bit)
++		desc64_first = desc64_last = desc64 = host->sg_cpu;
++	else
++		desc_first = desc_last = desc = host->sg_cpu;
+ 
+ 	for (i = 0; i < sg_len; i++) {
+ 		unsigned int length = sg_dma_len(&data->sg[i]);
+@@ -603,113 +606,52 @@ static inline int dw_mci_prepare_desc64(struct dw_mci *host,
+ 			 * isn't still owned by IDMAC as IDMAC's write
+ 			 * ops and CPU's read ops are asynchronous.
+ 			 */
+-			if (readl_poll_timeout_atomic(&desc->des0, val,
+-						!(val & IDMAC_DES0_OWN),
+-						10, 100 * USEC_PER_MSEC))
++			if (readl_poll_timeout_atomic(is_64bit ? &desc64->des0 : &desc->des0,
++						val, IDMAC_OWN_CLR64(val), 10, 100 * USEC_PER_MSEC))
+ 				goto err_own_bit;
+ 
+-			/*
+-			 * Set the OWN bit and disable interrupts
+-			 * for this descriptor
+-			 */
+-			desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
+-						IDMAC_DES0_CH;
 -
- /* Board platform data */
- struct dw_mci_board {
- 	unsigned int bus_hz; /* Clock speed at the cclk_in pad */
-@@ -276,7 +274,6 @@ struct dw_mci_board {
+-			/* Buffer length */
+-			IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, desc_len);
+-
+-			/* Physical address to DMA to/from */
+-			desc->des4 = mem_addr & 0xffffffff;
+-			desc->des5 = mem_addr >> 32;
+-
+-			/* Update physical address for the next desc */
+-			mem_addr += desc_len;
+-
+-			/* Save pointer to the last descriptor */
+-			desc_last = desc;
+-		}
+-	}
+-
+-	/* Set first descriptor */
+-	desc_first->des0 |= IDMAC_DES0_FD;
+-
+-	/* Set last descriptor */
+-	desc_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+-	desc_last->des0 |= IDMAC_DES0_LD;
+-
+-	return 0;
+-err_own_bit:
+-	/* restore the descriptor chain as it's polluted */
+-	dev_dbg(host->dev, "descriptor is still owned by IDMAC.\n");
+-	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
+-	dw_mci_idmac_init(host);
+-	return -EINVAL;
+-}
+-
+-
+-static inline int dw_mci_prepare_desc32(struct dw_mci *host,
+-					 struct mmc_data *data,
+-					 unsigned int sg_len)
+-{
+-	unsigned int desc_len;
+-	struct idmac_desc *desc_first, *desc_last, *desc;
+-	u32 val;
+-	int i;
+-
+-	desc_first = desc_last = desc = host->sg_cpu;
+-
+-	for (i = 0; i < sg_len; i++) {
+-		unsigned int length = sg_dma_len(&data->sg[i]);
+-
+-		u32 mem_addr = sg_dma_address(&data->sg[i]);
+-
+-		for ( ; length ; desc++) {
+-			desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+-				   length : DW_MCI_DESC_DATA_LENGTH;
+-
+-			length -= desc_len;
+-
+-			/*
+-			 * Wait for the former clear OWN bit operation
+-			 * of IDMAC to make sure that this descriptor
+-			 * isn't still owned by IDMAC as IDMAC's write
+-			 * ops and CPU's read ops are asynchronous.
+-			 */
+-			if (readl_poll_timeout_atomic(&desc->des0, val,
+-						      IDMAC_OWN_CLR64(val),
+-						      10,
+-						      100 * USEC_PER_MSEC))
+-				goto err_own_bit;
++			des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC | IDMAC_DES0_CH;
++			if (is_64bit)
++				desc64->des0 = des0;
++			else
++				desc->des0 = cpu_to_le32(des0);
  
- 	struct reset_control *rstc;
- 	struct dw_mci_dma_ops *dma_ops;
--	struct dma_pdata *data;
- };
+ 			/*
+-			 * Set the OWN bit and disable interrupts
+-			 * for this descriptor
++			 * 1. Set OWN bit and disable interrupts for this descriptor
++			 * 2. Set Buffer length
++			 * Set physical address to DMA to/from
+ 			 */
+-			desc->des0 = cpu_to_le32(IDMAC_DES0_OWN |
+-						 IDMAC_DES0_DIC |
+-						 IDMAC_DES0_CH);
+-
+-			/* Buffer length */
+-			IDMAC_SET_BUFFER1_SIZE(desc, desc_len);
+-
+-			/* Physical address to DMA to/from */
+-			desc->des2 = cpu_to_le32(mem_addr);
++			if (is_64bit) {
++				desc64->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC | IDMAC_DES0_CH;
++				IDMAC_64ADDR_SET_BUFFER1_SIZE(desc64, desc_len);
++				desc64->des4 = mem_addr & 0xffffffff;
++				desc64->des5 = mem_addr >> 32;
++			} else {
++				IDMAC_SET_BUFFER1_SIZE(desc, desc_len);
++				desc->des2 = cpu_to_le32(mem_addr);
++			}
  
- /* Support for longer data read timeout */
+ 			/* Update physical address for the next desc */
+ 			mem_addr += desc_len;
+ 
+ 			/* Save pointer to the last descriptor */
+-			desc_last = desc;
++			if (is_64bit)
++				desc64_last = desc64;
++			else
++				desc_last = desc;
+ 		}
+ 	}
+ 
+-	/* Set first descriptor */
+-	desc_first->des0 |= cpu_to_le32(IDMAC_DES0_FD);
+-
+-	/* Set last descriptor */
+-	desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH |
+-				       IDMAC_DES0_DIC));
+-	desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
++	/* Set the first descriptor and the last descriptor */
++	if (is_64bit) {
++		desc64_first->des0 |= IDMAC_DES0_FD;
++		desc64_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
++		desc64_last->des0 |= IDMAC_DES0_LD;
++	} else {
++		desc_first->des0 |= cpu_to_le32(IDMAC_DES0_FD);
++		desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH | IDMAC_DES0_DIC));
++		desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
++	}
+ 
+ 	return 0;
+ err_own_bit:
+@@ -725,10 +667,7 @@ static int dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+ 	u32 temp;
+ 	int ret;
+ 
+-	if (host->dma_64bit_address == 1)
+-		ret = dw_mci_prepare_desc64(host, host->data, sg_len);
+-	else
+-		ret = dw_mci_prepare_desc32(host, host->data, sg_len);
++	ret = dw_mci_prepare_desc(host, host->data, sg_len, host->dma_64bit_address);
+ 
+ 	if (ret)
+ 		goto out;
 -- 
 2.7.4
 
