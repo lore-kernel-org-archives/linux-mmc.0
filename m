@@ -1,135 +1,116 @@
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C63C366570
-	for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2025 16:29:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B49C341051
+	for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2025 17:16:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763569744; cv=none; b=BZtS25lmF2fsXrtcB2bdUklxUJwh3vNCG1aaG8vr64t/FYsxuNOYmUoG2lSuHiypu6kGRSezTa1jtRuwoqC1e9eRNivSWjKDDXTnUhIWzS2kq5nm/RiS1P2+qLOKUUVFXZLMoR6EbR33ue2P23m77C4a66bOTu/0MeIWaER1WOs=
+	t=1763572593; cv=none; b=rjyiCPDsJFS3tEbmAS4jLR7/kPedkpSUtEGZtbZIojLlUQLqpyveKEvoyPnE1/6w9HClJrZ2SXP9kpzK6m9b4D/symmbdj0qAfAMdeA4m7oPdfqUilHyLrZKj9MDcvLQl+ERsTtK6homAiwfWEim7nVz9cIGUGIB7pdkkZJpHro=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763569744; c=relaxed/simple;
-	bh=krS2zwvB1cIXdBUbAHpfiUxU/dm8qFPfJ2HQV4/oXFk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=jgTit3IFy01e2odXG9+53pT+TPABLIRuRK7VffzmgrxL0kKZ/ivhMgmK2OAyesAOIZTazVerQOptdyDaLUuyyokpBbLDu0GlBBOllvlzYXdv6YKQi3DT5dxE2C9BeBY9Tp0TRLiQ+cDfYA0uPgjW1O5UAhwcKBqT6RJ2NiF0L/s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DILhU4PM; arc=none smtp.client-ip=209.85.214.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1763572593; c=relaxed/simple;
+	bh=/JqEuKhBHMI5iHyyK46XY6A5LLVOk8KrFHw4B06AGpA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UCUJbt9BTymHeHZjW+Z0Bgpf/FXbOK3L4ZPJCGXzkBkiraxMcPnmf6VqOy+z4a3JHbN3YK3DAaUO6ynh9ZndmG1GeBQ97ex1sqi+bEmoVC3/DPDFZdspTndt2tCuce2EjUj2JzvRt7/7/4GCJ2RBlTwboqZzSh7pJNSYt80Hmmk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=htLByv0X; arc=none smtp.client-ip=209.85.128.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DILhU4PM"
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-298287a26c3so83883555ad.0
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2025 08:29:02 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="htLByv0X"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-787d5555274so70329647b3.1
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Nov 2025 09:16:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1763569742; x=1764174542; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1763572589; x=1764177389; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=yltoxSOQjw0YgiVe7Fz9jUncJdJ3xjf8RjpjTmk2pmA=;
-        b=DILhU4PMQ9s6DE9+Cc3xWyb1U/WYUnWCN5gSmUsEnCgPo8UxStQXdhYor7qOgLL79W
-         O30dMV5eF0dY0JCTa1KN+TpboByJp6mPuoBiEguAdARDdVDg+9LV6mf0ZbQjYgDBUocW
-         iCvTvCw+mXRqBCgt7I7JdQa27OOWwg0+uMsGo4Lx28e8zn8lTMEsDASOn4I+A6p6IlSW
-         9L9DCM4dtNjSh4n5fZHQjRx6Ir1UPoOF6ynB4cA/0t9L1vPBzBYIgtRExDRfBHiKQJGq
-         +TWy1A5tg4tDYfU5J+miUNNQQiuJw0YXSAf7IQMu7/RjO4Z7zVbtLDbq2VsKaygteYHx
-         kOag==
+        bh=/JqEuKhBHMI5iHyyK46XY6A5LLVOk8KrFHw4B06AGpA=;
+        b=htLByv0Xy7riEn6zYoZizivKaNdcvobrRwoATritYefyhzqk7P0/ohk3DzCi0TZwAI
+         Reh5azd9L+cI3EUwI1hdwQhijGg+kBzNdwMK3rRz1TuWFXtONzssOfqYHoPYUH2XSDLp
+         ZEFdxDqWotjfnBASrXNlJZW2PYZBsP/87L8GTQIF8f8hgfvLBO2f+WC36tkTVnGePY6v
+         4denyG++0CQZQi/wzdnhFXFWS0z7TGS64JJLSseO7XwtI8QUAk7g/KRQ0aYKW5FSIsG7
+         ZUeKGyeuMWve+GDKZi+AslCF2VqLCobet4ElLlG0hwqaicQECZW59A4G9D7DdGFB5PgU
+         l1RQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763569742; x=1764174542;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20230601; t=1763572589; x=1764177389;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=yltoxSOQjw0YgiVe7Fz9jUncJdJ3xjf8RjpjTmk2pmA=;
-        b=Frm7RRceU5sJuxwoIOcn5Bx0FKhqHgRcAysISFtbvg0vx/mRhywcSoxKb85tk5M1df
-         hZmvIBnOhT38izNcsZrdj01rpePzUyr4q7ZEchr+iGiIMvf4tERgbVnB1mg8wd8Jo/1O
-         t0aEKvUjqWyTItREcv+HN4qc5OX6gHEhzPwAuKKHtPmqPaj7ZHxbVVVzUJ+3ipI1DaqI
-         QB+koDsgRvVBhmnfSCJ8Yam8h8Gsz4vOSB9J24CDOQtj/1HQARMVF3WV2VZKh56Ai8Bo
-         8+wP7eUFe6xZ49PH3gYKK4IyNYyJlkW8TL9NYscByqEPy5afbQB3mmqftqKwGvW4HUoT
-         Ji8A==
-X-Forwarded-Encrypted: i=1; AJvYcCUcbQbrzIEfJRD/+QI0UzWdPu7jSh+uaUBxZAt6CaUqT5p+9xY7op+zzUZEkxRXdWg4Nno/6fLN98E=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzJ7hBG73hqIULLfhwzaEvSjTTTaPeQOB4lvYfKnP1JSCKqmVNF
-	MP2jmPsuaxccaQYfFvcz8Qe1p6YJAu6sw2shL9qv+dzTgHk9kkCS8D/x
-X-Gm-Gg: ASbGncsZuYTRsvIw0Eoj6xqn232UfKgjSLuI4scWzezIuuhZ3dm3oA9SxNN4of80kaQ
-	VLaiGqWEQkZhdQuZObPpxuHrtq8gxfZtBwKe24aqoE2d0VrmhIR0W95YXx0sgeg1yK3rDtNRP8w
-	4Xmb38shd7riZrVTffNg027zN6zFIV+qrraFL17iZp5rx6rKNEPARkn0j6n4gV2wi5SWyL0cDue
-	gJAwY1kDc4iAZJuGdJeYVVfB4aZLW5Bk/504yeNT3xxEu55Req3Nozndhb9osChJdIcRyJqTAha
-	bojHjwptpZpbQidglpb1A2S3LKYUZYRPRKkxiUvOp7zAiZLy9rAHxyZy7ERk+AGxwjbVFEzNjKN
-	yjIJnabmLa1Y9to2M+vIjSWnCfuu6dUn7c5T2VJ9uJwJ1dMp3IdFwbeNcaSXSqXeaGnfjuea9G9
-	eWaU+gKMxLJsYc3xg=
-X-Google-Smtp-Source: AGHT+IG1i3hJLHO5OeVzps6Exdjnn+jfSV4c3Xs21CET6+hpDpTaetyCzLXja69p1aS0APrPFCpnOA==
-X-Received: by 2002:a17:903:1786:b0:295:24c3:8b49 with SMTP id d9443c01a7336-2986a75676emr227289905ad.46.1763569741995;
-        Wed, 19 Nov 2025 08:29:01 -0800 (PST)
-Received: from rakuram-MSI ([2405:201:d027:f05b:837:386d:4d64:c2a5])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2985c2345e3sm209890515ad.1.2025.11.19.08.28.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Nov 2025 08:29:01 -0800 (PST)
-From: Rakuram Eswaran <rakuram.e96@gmail.com>
-To: u.kleine-koenig@baylibre.com
-Cc: chenhuacai@kernel.org,
-	dan.carpenter@linaro.org,
-	david.hunter.linux@gmail.com,
-	khalid@kernel.org,
-	linux-kernel-mentees@lists.linux.dev,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	lkp@intel.com,
-	rakuram.e96@gmail.com,
-	skhan@linuxfoundation.org,
-	ulf.hansson@linaro.org,
-	zhoubinbin@loongson.cn
-Subject: Re: [PATCH v3] mmc: pxamci: Simplify pxamci_probe() error handling using devm APIs
-Date: Wed, 19 Nov 2025 21:58:49 +0530
-Message-ID: <20251119162854.6890-1-rakuram.e96@gmail.com>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: gp4ju4m3ypaijxnll4e5246e6qu2zk7towstua3exfazdvqj5n@5zorhuwucugk
-References: <gp4ju4m3ypaijxnll4e5246e6qu2zk7towstua3exfazdvqj5n@5zorhuwucugk>
+        bh=/JqEuKhBHMI5iHyyK46XY6A5LLVOk8KrFHw4B06AGpA=;
+        b=Chz5MiDByD5udGZQuL/8+BqE5H6MmeMOLzoH9S5wFlOiWH25l5oPPiNiuH9vaTkE5w
+         oMlh4JqeOeP7F+SxaXHkihIGwgCyc5mFBznl9Sl8ihGYni/zZRFgpG9gGKVijUDI6p+I
+         MNd0tt7JO71SU1ax5FPRQQa1+ZXtUZTZ0LmnMxbF7ufB44pV3D0UwP8wqnlGRSNOKA8s
+         JYmQsnAGbz7HULe/CcVH0hXhc1+gyqiCfXaaHOEnAEk0dQ76HvqDVcfCAL01SahAgkp2
+         3JVD+2Mb9C6XpzQMgUWhWiFkYBAiDUa7VtydcZVKlF2gqHuA8moGNCJsiFEoBlmTQhsH
+         IRwg==
+X-Forwarded-Encrypted: i=1; AJvYcCXUVZDMFT8JuqmouRbjXEfCl4TIPPodJSs/1Dhds07C8FMoFf2gFPaJhbwz4Hbu6ZEilNbfFBuMe9g=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzm6y6hTUs+ZSL4SSwqEM1U3/oFCVk7Y3wf7rlU6Sp7WCWS5mtZ
+	f4Iky+rKMDHcqvuzC2HMqi/AgV0qft/W8P3X+mQqyvrdnPcjn/idLrgz1EGO1Q7S/XaObCrvcOM
+	p8eIrY3pI7DR4po2JqRtydGDCVMRlI++xPP44p7bkbA==
+X-Gm-Gg: ASbGncs8ZgRcND00jKT0xgxmhiNBG6TE6ukzSeNWnvkavkZT+fvjtUq6ZQzZMsT8aWo
+	GWTc/nmStKhHCdrdSsd3AIqNCjodIkzbdskvD6CATqto5yhOq8mPl9nPH6+Z7ImLCkxyv/33xLD
+	IF5oZlMrA2DCzheqFYTROQVFMrfGSoro+ucblS0OPDDPb+cnbEXCLxxsxKCS56n7zCZQObE/1u1
+	TRTcCO4wzSkwpkbCxm4RErrk/K5cSiNzRtaDFfUmM3o/hiyerekomHBeWh11016C9Tj0vw8
+X-Google-Smtp-Source: AGHT+IEpedBv5d2DL2YREVHAUjmFZmdbmdZiGBqyD7+KhezOuMIBtjpTYxHvkHct6URF2wTl+5vKP3L+h2LpToUMJLA=
+X-Received: by 2002:a05:690c:a87:b0:786:506c:3cba with SMTP id
+ 00721157ae682-78a79560985mr1376947b3.13.1763572589257; Wed, 19 Nov 2025
+ 09:16:29 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+References: <gp4ju4m3ypaijxnll4e5246e6qu2zk7towstua3exfazdvqj5n@5zorhuwucugk> <20251119162854.6890-1-rakuram.e96@gmail.com>
+In-Reply-To: <20251119162854.6890-1-rakuram.e96@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 19 Nov 2025 18:15:52 +0100
+X-Gm-Features: AWmQ_bm1rfV7RvTaoV3JBx67K6Dl8wwUM2Xtv6ayXDITCTKNSUd4WWwYUDacXsk
+Message-ID: <CAPDyKFq8jSp=JPULtKRV_fVZUh4qCvROh+MniXUhTufBWwRRaQ@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: pxamci: Simplify pxamci_probe() error handling
+ using devm APIs
+To: Rakuram Eswaran <rakuram.e96@gmail.com>
+Cc: u.kleine-koenig@baylibre.com, chenhuacai@kernel.org, 
+	dan.carpenter@linaro.org, david.hunter.linux@gmail.com, khalid@kernel.org, 
+	linux-kernel-mentees@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, lkp@intel.com, skhan@linuxfoundation.org, 
+	zhoubinbin@loongson.cn
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 18 Nov 2025 at 21:44, Uwe Kleine-König <u.kleine-koenig@baylibre.com> wrote:
+On Wed, 19 Nov 2025 at 17:29, Rakuram Eswaran <rakuram.e96@gmail.com> wrote=
+:
 >
-> Hello Rakuram,
->
-> On Tue, Nov 18, 2025 at 07:53:11PM +0530, Rakuram Eswaran wrote:
-> > Shall I start to send the patch to remove the redundant if condition
-> > check from pxamic_remove() function?
-> > [...]
-> > I can pull Uffe fixes branch to send the above patch? Any inputs will be
-> > really helpful to start working on this.
->
-> It's sensible to build on top of your previous patch, yes. If you do
-> that by using next as development tree once Ulf's commit made it into
-> there, or if you apply it yourself (and then use `git format-patch
-> --base` correctly) doesn't matter much.
->
-
-Ok, Uwe. Previous patch is already made it to linux-next branch. I will send the
-patch for this on top of next. 
-
-I will make sure to run this command `git format-patch --base` before sending.
-
-> > Another point, I would like to ask is about the below discussion. You have
-> > mentioned about WIP suggestion for clk_get_rate().
+> On Tue, 18 Nov 2025 at 21:44, Uwe Kleine-K=C3=B6nig <u.kleine-koenig@bayl=
+ibre.com> wrote:
 > >
-> > Link to that discussion:
-> > https://lore.kernel.org/linux-mmc/20251020183209.11040-1-rakuram.e96@gmail.com/
+> > Hello Rakuram,
 > >
-> > Was my understanding is correct?
+> > On Tue, Nov 18, 2025 at 07:53:11PM +0530, Rakuram Eswaran wrote:
+> > > Shall I start to send the patch to remove the redundant if condition
+> > > check from pxamic_remove() function?
+> > > [...]
+> > > I can pull Uffe fixes branch to send the above patch? Any inputs will=
+ be
+> > > really helpful to start working on this.
+> >
+> > It's sensible to build on top of your previous patch, yes. If you do
+> > that by using next as development tree once Ulf's commit made it into
+> > there, or if you apply it yourself (and then use `git format-patch
+> > --base` correctly) doesn't matter much.
+> >
 >
-> I think so. In my understanding clk_get_rate() must only called for an
-> enabled clock. (Though the wording in include/linux/clk.h is a bit
-> ambigous. It says: "[the returned clock rate] is only valid once the
-> clock source has been enabled." That can mean "The return value doesn't
-> mean anything when called for a disabled clock." or "The returned rate
-> is the real one once the clock is enabled." Some time ago I tried to
-> improve the wording, but IIRC I didn't get relevant feedback on my
-> patch. Assuming the former semantic is safe for sure.
->
+> Ok, Uwe. Previous patch is already made it to linux-next branch. I will s=
+end the
+> patch for this on top of next.
 
-On this one, I'll look into other implementation on how they handled it in
-sometime. 
+If you are working on mmc I strongly recommend to base your patches on top =
+of:
 
-Best Regards,
-Rakuram
+git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+
+As is described in the MAINTAINERS file.
+
+[...]
+
+Kind regards
+Uffe
