@@ -1,266 +1,304 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.20])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 707CD3446B8;
-	Wed, 19 Nov 2025 10:27:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C307A2D6612;
+	Wed, 19 Nov 2025 11:47:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763548037; cv=none; b=dRSeZ8LDNfgUew98rmwGSBUhsATKcvL0qflJm2YvRMbUc5pcDL8czuy5DJkHChOslbWl430nP/cxuospn/LS4F+uUGFJ81E6wRIrgHqxDPkXoGQt6+49qAe+Z0MDQQS3wHeMgc1Q+fENHeYTfCWJIncHi7WcaF4GM7LAv+QbKJE=
+	t=1763552854; cv=none; b=AT9m51/vGh4OS456LJ2iBnW5ZRWFmWBh5sVxbD6IMQAHVo3k2MIYbdP4dLTK5Iq0karXyXQ958L4wvu/01nLl3nCBVhpRVyZNQyZ7DcJHXf8gpCSuGY/iAKE80Y2OEA8K11XK9o2BANhBRG1ZLxUjy3PK4CnbS4TXJZIMeoETJI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763548037; c=relaxed/simple;
-	bh=jmw9bhTP6DqEEo8SaI642JH1s3dFqQGzetmEw8f3+f0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZDEndxOQsGURyNyw7HJ+3V+/jE0nKso+pQgMGxupM6YJ2sUFd8ByT5zUdqRku+eLZ/bVdynuKs7sPZ5pqALwV5kMjzwfg5VTY37HYidePcJ+UWS5jym+sVUxabI3v10TTkJHSTuvzO/b0fEfj/1JAKGuzcuYStaCZWlv5FiVTVw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=MiU7xOEM; arc=none smtp.client-ip=198.175.65.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1763552854; c=relaxed/simple;
+	bh=ite0V2+AT8K1B5e1nErWE2jj4cZ3tFTKcHcds6qzNh8=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=pltfdXRWAlnU2CfWf1Kb9QJtqJ48iFn0J1wYS6sMtc/tf82VRzTMDHyPPBZN9IkTKjNN5RxfnAKLfQeglePXRPgAciC8vzyQ9zSLnAdUQlNci6fivYFoLMFaE984VWdj2qUxvoJLgd9UN+Df8rDLUxwxJCPgmtbyWaITszDht4U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=ElfO5cdw; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="MiU7xOEM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1763548035; x=1795084035;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=jmw9bhTP6DqEEo8SaI642JH1s3dFqQGzetmEw8f3+f0=;
-  b=MiU7xOEMrvpSHRKoOGFoxjvp2olCkMHYcgyVqGCXYhxtUSjKS4HqPHZY
-   jwn1jZ20MYSLYgPZepTcbeT44WCjzhtiyp+/af2F23uBo2SxPny1E+O0E
-   i35l1wp5ztEr/UgnTalJgnFm37qhWHVpZKg8LSXY/NLmt0PE9WL14Y8tO
-   k3h/zOCwTRmKYN7LyemrWXS3V9sFi2e4KayP+OT7P6pLnL9tii32X9EIR
-   Lpgv24Cc1EEW8J6mJRkCTzvjuPiiwhLzT1y6FWYPeBcXX3xztfuWgYKGf
-   GVLiIWrx11wXkoB91Fm9V6NPb59zQvI7HbI0Bo9UlmO1kmJt9DFQYly3E
-   w==;
-X-CSE-ConnectionGUID: 2bBlveQeQxCd7RgNC0YNsw==
-X-CSE-MsgGUID: njPqeXaCSmC15wNSdDdbLw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11617"; a="65286211"
-X-IronPort-AV: E=Sophos;i="6.19,315,1754982000"; 
-   d="scan'208";a="65286211"
-Received: from fmviesa005.fm.intel.com ([10.60.135.145])
-  by orvoesa112.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Nov 2025 02:27:12 -0800
-X-CSE-ConnectionGUID: BabbyDhyQAOE+ZtEsTT7/g==
-X-CSE-MsgGUID: bIH3DAOlTZmt1WuzGTp/dQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.19,315,1754982000"; 
-   d="scan'208";a="195322765"
-Received: from rvuia-mobl.ger.corp.intel.com (HELO localhost) ([10.245.245.245])
-  by fmviesa005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Nov 2025 02:26:53 -0800
-Date: Wed, 19 Nov 2025 12:26:51 +0200
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: Petr Mladek <pmladek@suse.com>
-Cc: Corey Minyard <corey@minyard.net>,
-	Christian =?iso-8859-1?Q?K=F6nig?= <christian.koenig@amd.com>,
-	"Dr. David Alan Gilbert" <linux@treblig.org>,
-	Alex Deucher <alexander.deucher@amd.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-	Rob Clark <robin.clark@oss.qualcomm.com>,
-	Matthew Brost <matthew.brost@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Aleksandr Loktionov <aleksandr.loktionov@intel.com>,
-	Vitaly Lifshits <vitaly.lifshits@intel.com>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Niklas Cassel <cassel@kernel.org>, Calvin Owens <calvin@wbinvd.org>,
-	Vadim Fedorenko <vadim.fedorenko@linux.dev>,
-	Sagi Maimon <maimon.sagi@gmail.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	Karan Tilak Kumar <kartilak@cisco.com>,
-	Hans Verkuil <hverkuil+cisco@kernel.org>,
-	Casey Schaufler <casey@schaufler-ca.com>,
-	Steven Rostedt <rostedt@goodmis.org>,
-	Viacheslav Dubeyko <Slava.Dubeyko@ibm.com>,
-	Max Kellermann <max.kellermann@ionos.com>,
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	openipmi-developer@lists.sourceforge.net,
-	linux-media@vger.kernel.org, dri-devel@lists.freedesktop.org,
-	linaro-mm-sig@lists.linaro.org, amd-gfx@lists.freedesktop.org,
-	linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
-	intel-xe@lists.freedesktop.org, linux-mmc@vger.kernel.org,
-	netdev@vger.kernel.org, intel-wired-lan@lists.osuosl.org,
-	linux-pci@vger.kernel.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-staging@lists.linux.dev,
-	ceph-devel@vger.kernel.org, linux-trace-kernel@vger.kernel.org,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-	Sergey Senozhatsky <senozhatsky@chromium.org>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Sumit Semwal <sumit.semwal@linaro.org>,
-	Gustavo Padovan <gustavo@padovan.org>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Dmitry Baryshkov <lumag@kernel.org>,
-	Abhinav Kumar <abhinav.kumar@linux.dev>,
-	Jessica Zhang <jesszhan0024@gmail.com>, Sean Paul <sean@poorly.run>,
-	Marijn Suijten <marijn.suijten@somainline.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Lucas De Marchi <lucas.demarchi@intel.com>,
-	Thomas =?iso-8859-1?Q?Hellstr=F6m?= <thomas.hellstrom@linux.intel.com>,
-	Rodrigo Vivi <rodrigo.vivi@intel.com>,
-	Vladimir Oltean <olteanv@gmail.com>, Andrew Lunn <andrew@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Tony Nguyen <anthony.l.nguyen@intel.com>,
-	Przemek Kitszel <przemyslaw.kitszel@intel.com>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Rodolfo Giometti <giometti@enneenne.com>,
-	Jonathan Lemon <jonathan.lemon@gmail.com>,
-	Richard Cochran <richardcochran@gmail.com>,
-	Stefan Haberland <sth@linux.ibm.com>,
-	Jan Hoeppner <hoeppner@linux.ibm.com>,
-	Heiko Carstens <hca@linux.ibm.com>,
-	Vasily Gorbik <gor@linux.ibm.com>,
-	Alexander Gordeev <agordeev@linux.ibm.com>,
-	Christian Borntraeger <borntraeger@linux.ibm.com>,
-	Sven Schnelle <svens@linux.ibm.com>,
-	Satish Kharat <satishkh@cisco.com>,
-	Sesidhar Baddela <sebaddel@cisco.com>,
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Xiubo Li <xiubli@redhat.com>, Ilya Dryomov <idryomov@gmail.com>,
-	Masami Hiramatsu <mhiramat@kernel.org>,
-	Mathieu Desnoyers <mathieu.desnoyers@efficios.com>,
-	Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH v3 19/21] scsi: fnic: Switch to use %ptSp
-Message-ID: <aR2bazZn8m4EMHdW@smile.fi.intel.com>
-References: <20251113150217.3030010-1-andriy.shevchenko@linux.intel.com>
- <20251113150217.3030010-20-andriy.shevchenko@linux.intel.com>
- <aR2XAYWTEgMZu_Mx@pathway.suse.cz>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="ElfO5cdw"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AJBRcVI840101;
+	Wed, 19 Nov 2025 11:47:27 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=Rz5D3c/zwaB2OO2v62K6Cf
+	LaBJtGA5IiqpsA4nuiytU=; b=ElfO5cdwZFO1DaTr6zp2F030sUhpAifpdtENDV
+	sxR62s9vBESLJ+nCgEABC41yFrASJ+ol7s51y5J/FkPsyLv5xCbeTCXH9clgVL9r
+	VwNHKqHdvCNM57227PK7MBQt9gmDHiWBfl9kjnZ29FbmXvHjrheWxh1aYrMfqfX5
+	lV6rLsdyMf67vcr0sQAbb6aY0JetLYNW1Pc/vjQryI7DVMvEnOEVx1o4pnRx0hF+
+	27T73dJgN4Be4nWAWCSGAvfnuX5i+jN+btOHHkiDu5R5PwrODWmTuyTt9FcGmwpu
+	5msH6eU+33m6jw65oLcR0f1lVtAw6xwf1Gp9j8AY1YLNBJjg==
+Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ah6fg9bvq-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 19 Nov 2025 11:47:27 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA03.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5AJBlQl2026192
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 19 Nov 2025 11:47:26 GMT
+Received: from hu-mdalam-blr.qualcomm.com (10.80.80.8) by
+ nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.17; Wed, 19 Nov 2025 03:47:22 -0800
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+To: <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <abel.vesa@linaro.org>, <ebiggers@google.com>,
+        <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+CC: <quic_mdalam@quicinc.com>
+Subject: [PATCH v5] mmc: sdhci-msm: Enable ICE for CQE-capable controllers with non-CQE cards
+Date: Wed, 19 Nov 2025 17:16:53 +0530
+Message-ID: <20251119114653.751992-1-quic_mdalam@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aR2XAYWTEgMZu_Mx@pathway.suse.cz>
-Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
- krs, Bertel Jungin Aukio 5, 02600 Espoo
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: LNJkxqjwwuy5VY0D3b0ontuoojNjXHoy
+X-Authority-Analysis: v=2.4 cv=ZKHaWH7b c=1 sm=1 tr=0 ts=691dae4f cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6UeiqGixMTsA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=COk6AnOGAAAA:8 a=QyXUC8HyAAAA:8
+ a=raka8JUDq7p2293nCkMA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTE5MDA5MyBTYWx0ZWRfX/VfKmYOuFhoi
+ NekxdKmA8KaA2FC7aTs/cvYehLVOlQraOkaOwK+1qFCk0KM5kfyXUQMY9i1zC1Qv0qDcUCTu1CD
+ zRlokWf6aumhxXf+rH7vceu3G8t8o7rFIXZpWn8F+Utp10CfDQ9Zodow50+HpOIAIu0f9c71sF9
+ q/CAr4/ViGGpm3lngb9cVeAhXnGdWG/5B+ZsRGkP1Om3z1tlg4YShcM/dI+K0Ti+Q2tDKs03po6
+ wVo9AHlkCW64yNu5Dkh7FiUppniNVfs1JZhdd98GIkqFRU5495hAwbYzpaWi285gnbtIR9pFbLt
+ y0vWpCIhsBI0c5Lhth/PL4dH/odxqwditWtr3ogS3VL3dmhcGbzDIUhXqN5ZgCUz9+m83uBZoMC
+ Q4RFvuy5ZL3/o8ljBwqCTp6TBsi2mA==
+X-Proofpoint-ORIG-GUID: LNJkxqjwwuy5VY0D3b0ontuoojNjXHoy
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-11-19_03,2025-11-18_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 clxscore=1015 priorityscore=1501 impostorscore=0 spamscore=0
+ lowpriorityscore=0 malwarescore=0 adultscore=0 bulkscore=0 phishscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511190093
 
-On Wed, Nov 19, 2025 at 11:08:01AM +0100, Petr Mladek wrote:
-> On Thu 2025-11-13 15:32:33, Andy Shevchenko wrote:
-> > Use %ptSp instead of open coded variants to print content of
-> > struct timespec64 in human readable format.
-> 
-> I was about to commit the changes into printk/linux.git and
-> found a mistake during the final double check, see below.
-> 
-> > diff --git a/drivers/scsi/fnic/fnic_trace.c b/drivers/scsi/fnic/fnic_trace.c
-> > index cdc6b12b1ec2..0a849a195a8e 100644
-> > --- a/drivers/scsi/fnic/fnic_trace.c
-> > +++ b/drivers/scsi/fnic/fnic_trace.c
-> > @@ -215,30 +213,26 @@ int fnic_get_stats_data(struct stats_debug_info *debug,
-> >  {
-> >  	int len = 0;
-> >  	int buf_size = debug->buf_size;
-> > -	struct timespec64 val1, val2;
-> > +	struct timespec64 val, val1, val2;
-> >  	int i = 0;
-> >  
-> > -	ktime_get_real_ts64(&val1);
-> > +	ktime_get_real_ts64(&val);
-> >  	len = scnprintf(debug->debug_buffer + len, buf_size - len,
-> >  		"------------------------------------------\n"
-> >  		 "\t\tTime\n"
-> >  		"------------------------------------------\n");
-> >  
-> > +	val1 = timespec64_sub(val, stats->stats_timestamps.last_reset_time);
-> > +	val2 = timespec64_sub(val, stats->stats_timestamps.last_read_time);
-> >  	len += scnprintf(debug->debug_buffer + len, buf_size - len,
-> > -		"Current time :          [%lld:%ld]\n"
-> > -		"Last stats reset time:  [%lld:%09ld]\n"
-> > -		"Last stats read time:   [%lld:%ld]\n"
-> > -		"delta since last reset: [%lld:%ld]\n"
-> > -		"delta since last read:  [%lld:%ld]\n",
-> > -	(s64)val1.tv_sec, val1.tv_nsec,
-> > -	(s64)stats->stats_timestamps.last_reset_time.tv_sec,
-> > -	stats->stats_timestamps.last_reset_time.tv_nsec,
-> > -	(s64)stats->stats_timestamps.last_read_time.tv_sec,
-> > -	stats->stats_timestamps.last_read_time.tv_nsec,
-> > -	(s64)timespec64_sub(val1, stats->stats_timestamps.last_reset_time).tv_sec,
-> > -	timespec64_sub(val1, stats->stats_timestamps.last_reset_time).tv_nsec,
-> > -	(s64)timespec64_sub(val1, stats->stats_timestamps.last_read_time).tv_sec,
-> > -	timespec64_sub(val1, stats->stats_timestamps.last_read_time).tv_nsec);
-> > +			 "Current time :          [%ptSp]\n"
-> > +			 "Last stats reset time:  [%ptSp]\n"
-> > +			 "Last stats read time:   [%ptSp]\n"
-> > +			 "delta since last reset: [%ptSp]\n"
-> > +			 "delta since last read:  [%ptSp]\n",
-> 
-> Both delta times are printed at the end.
-> 
-> > +			 &val,
-> > +			 &stats->stats_timestamps.last_reset_time, &val1,
-> > +			 &stats->stats_timestamps.last_read_time, &val2);
-> 
-> I think that this should be:
-> 
-> 			 &stats->stats_timestamps.last_reset_time,
-> 			 &stats->stats_timestamps.last_read_time,
-> 			 &val1, &val2);
-> 
-> >  	stats->stats_timestamps.last_read_time = val1;
-> 
-> The original code stored the current time in "val1". This should be:
-> 
-> 	stats->stats_timestamps.last_read_time = val;
-> 
-> > @@ -416,8 +410,8 @@ int fnic_get_stats_data(struct stats_debug_info *debug,
-> >  	jiffies_to_timespec64(stats->misc_stats.last_ack_time, &val2);
-> 
-> Just for record. Another values are stored into @val1 and @val2 at
-> this point.
-> 
-> >  	len += scnprintf(debug->debug_buffer + len, buf_size - len,
-> > -		  "Last ISR time: %llu (%8llu.%09lu)\n"
-> > -		  "Last ACK time: %llu (%8llu.%09lu)\n"
-> > +		  "Last ISR time: %llu (%ptSp)\n"
-> > +		  "Last ACK time: %llu (%ptSp)\n"
-> >  		  "Max ISR jiffies: %llu\n"
-> >  		  "Max ISR time (ms) (0 denotes < 1 ms): %llu\n"
-> >  		  "Corr. work done: %llu\n"
-> > @@ -437,10 +431,8 @@ int fnic_get_stats_data(struct stats_debug_info *debug,
-> >  		  "Number of rport not ready: %lld\n"
-> >  		 "Number of receive frame errors: %lld\n"
-> >  		 "Port speed (in Mbps): %lld\n",
-> > -		  (u64)stats->misc_stats.last_isr_time,
-> > -		  (s64)val1.tv_sec, val1.tv_nsec,
-> > -		  (u64)stats->misc_stats.last_ack_time,
-> > -		  (s64)val2.tv_sec, val2.tv_nsec,
-> > +		  (u64)stats->misc_stats.last_isr_time, &val1,
-> > +		  (u64)stats->misc_stats.last_ack_time, &val2,
-> 
-> So, this is correct!
-> 
-> >  		  (u64)atomic64_read(&stats->misc_stats.max_isr_jiffies),
-> >  		  (u64)atomic64_read(&stats->misc_stats.max_isr_time_ms),
-> >  		  (u64)atomic64_read(&stats->misc_stats.corr_work_done),
-> 
-> 
-> Now, I think that there is no need to resend the entire huge patchset.
-> 
-> I could either fix this when comitting or commit the rest and
-> you could send only this patch for review.
+Enable Inline Crypto Engine (ICE) support for CQE-capable sdhci-msm
+controllers when used with eMMC cards that do not support CQE.
 
-Thank you for the thoroughly done review, I changed that patch between the
-versions and the problem is that for printf() specifiers (extensions) we do not
-have an automatic type checking. We starve for a GCC plugin for that, yeah...
+This addresses the scenario where:
+- The host controller supports CQE (and has CQHCI crypto infrastructure)
+- The eMMC card does not support CQE
+- Standard (non-CMDQ) requests need crypto support
 
-In any case, if you fold your changes in, I will appreciate that!
-Otherwise it's also fine with me to send a patch separately later on.
+This allows hardware-accelerated encryption and decryption for standard
+requests on CQE-capable hardware by utilizing the existing CQHCI crypto
+register space even when CQE functionality is not available due to card
+limitations.
 
-> PS: All other patches look good. Well, nobody acked 7th patch yet.
->     But I think that the change is pretty straightforward and
->     we could do it even without an ack.
+The implementation:
+- Adds ICE register definitions for non-CQE crypto configuration
+- Implements per-request crypto setup via sdhci_msm_ice_cfg()
+- Hooks into the request path via mmc_host_ops.request for non-CQE requests
+- Uses CQHCI register space (NONCQ_CRYPTO_PARM/DUN) for crypto configuration
 
-This is my understanding as well. It changes the output, but that output is
-debug anyway. So I don't expect breakage of anything we have an obligation
-to keep working.
+With this, CQE-capable controllers can benefit from inline encryption
+when paired with non-CQE cards, improving performance for encrypted I/O
+while maintaining compatibility with existing CQE crypto support.
 
+Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+
+Change in [v5]
+
+* Removed unused variable
+
+* Added proper comment for sdhci_msm_request()
+
+* Removed sdhci_msm_ice_enable(); it is already invoked during resume
+
+Change in [v4]
+
+* Moved ICE initialization for non cmdq into sdhci_msm_ice_cfg() and made
+  it conditional on mrq->crypto_ctx to enable lazy setup.
+
+* Added msm_host->ice_init_done guard to prevent redundant initialization.
+
+* Updated commit message
+
+Change in [v3]
+
+* Refactored logic to use separate code paths for crypto_ctx != NULL and
+  crypto_ctx == NULL to improve readability.
+
+* Renamed bypass to crypto_enable to align with bitfield semantics.
+
+* Removed slot variable
+
+* Added ICE initialization sequence for non-CMDQ eMMC devices before
+  __sdhci_add_host()
+
+Change in [v2]
+
+* Moved NONCQ_CRYPTO_PARM and NONCQ_CRYPTO_DUN register definitions into
+  sdhci-msm.c
+
+* Introduced use of GENMASK() and FIELD_PREP() macros for cleaner and more
+  maintainable bitfield handling in ICE configuration.
+
+* Removed redundant if (!mrq || !cq_host) check from sdhci_msm_ice_cfg()
+  as both are guaranteed to be valid in the current call path.
+
+* Added assignment of host->mmc_host_ops.request = sdhci_msm_request; to
+  integrate ICE configuration into the standard request path for non-CMDQ
+  eMMC devices.
+
+* Removed sdhci_crypto_cfg() from sdhci.c and its invocation in sdhci_request()
+
+Change in [v1]
+
+* Added initial support for Inline Crypto Engine (ICE) on non-CMDQ eMMC
+  devices.
+
+ drivers/mmc/host/sdhci-msm.c | 101 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 101 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4e5edbf2fc9b..69c67242519c 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -157,6 +157,18 @@
+ #define CQHCI_VENDOR_CFG1	0xA00
+ #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
+ 
++/* non command queue crypto enable register*/
++#define NONCQ_CRYPTO_PARM		0x70
++#define NONCQ_CRYPTO_DUN		0x74
++
++#define DISABLE_CRYPTO			BIT(15)
++#define CRYPTO_GENERAL_ENABLE		BIT(1)
++#define HC_VENDOR_SPECIFIC_FUNC4	0x260
++#define ICE_HCI_SUPPORT			BIT(28)
++
++#define ICE_HCI_PARAM_CCI	GENMASK(7, 0)
++#define ICE_HCI_PARAM_CE	GENMASK(8, 8)
++
+ struct sdhci_msm_offset {
+ 	u32 core_hc_mode;
+ 	u32 core_mci_data_cnt;
+@@ -300,6 +312,7 @@ struct sdhci_msm_host {
+ 	u32 dll_config;
+ 	u32 ddr_config;
+ 	bool vqmmc_enabled;
++	bool ice_init_done;
+ };
+ 
+ static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+@@ -2009,6 +2022,91 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
+ 	return qcom_ice_evict_key(msm_host->ice, slot);
+ }
+ 
++static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	struct mmc_host *mmc = msm_host->mmc;
++	struct cqhci_host *cq_host = mmc->cqe_private;
++	u32 config;
++	u32 ice_cap;
++
++	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
++	config &= ~DISABLE_CRYPTO;
++	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
++	ice_cap = cqhci_readl(cq_host, CQHCI_CAP);
++	if (ice_cap & ICE_HCI_SUPPORT) {
++		config = cqhci_readl(cq_host, CQHCI_CFG);
++		config |= CRYPTO_GENERAL_ENABLE;
++		cqhci_writel(cq_host, config, CQHCI_CFG);
++	}
++}
++
++static int sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	struct mmc_host *mmc = msm_host->mmc;
++	struct cqhci_host *cq_host = mmc->cqe_private;
++	unsigned int crypto_params = 0;
++	int key_index;
++	bool crypto_enable;
++	u64 dun = 0;
++
++	if (mrq->crypto_ctx) {
++		if (!msm_host->ice_init_done) {
++			sdhci_msm_non_cqe_ice_init(host);
++			msm_host->ice_init_done = true;
++		}
++
++		crypto_enable = true;
++		dun = mrq->crypto_ctx->bc_dun[0];
++		key_index = mrq->crypto_key_slot;
++		crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, crypto_enable) |
++				FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
++
++		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
++		cqhci_writel(cq_host, lower_32_bits(dun), NONCQ_CRYPTO_DUN);
++	} else {
++		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
++	}
++
++	/* Ensure crypto configuration is written before proceeding */
++	wmb();
++
++	return 0;
++}
++
++/*
++ * sdhci_msm_request - Handle non-CQE MMC requests with crypto support
++ * @mmc: MMC host
++ * @mrq: MMC request
++ *
++ * This function is called for non-CQE requests only. The MMC block layer
++ * routes requests as follows:
++ *
++ * if (host->cqe_enabled)
++ *     ret = mmc_blk_cqe_issue_rw_rq(mq, req);  // → cqhci_request()
++ * else
++ *     ret = mmc_blk_mq_issue_rw_rq(mq, req);   // → sdhci_msm_request()
++ *
++ * For CQE requests, crypto is handled in cqhci_request() in
++ * drivers/mmc/host/cqhci-core.c using the existing CQE crypto infrastructure.
++ *
++ * For non-CQE requests, this function provides crypto support by configuring
++ * the ICE (Inline Crypto Engine) registers before passing the request to
++ * the standard SDHCI request handler.
++ */
++static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	if (mmc->caps2 & MMC_CAP2_CRYPTO)
++		sdhci_msm_ice_cfg(host, mrq);
++
++	sdhci_request(mmc, mrq);
++}
++
+ static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
+ 	.keyslot_program	= sdhci_msm_ice_keyslot_program,
+ 	.keyslot_evict		= sdhci_msm_ice_keyslot_evict,
+@@ -2759,6 +2857,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 
+ 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
+ 
++#ifdef CONFIG_MMC_CRYPTO
++	host->mmc_host_ops.request = sdhci_msm_request;
++#endif
+ 	/* Set the timeout value to max possible */
+ 	host->max_timeout_count = 0xF;
+ 
 -- 
-With Best Regards,
-Andy Shevchenko
-
+2.34.1
 
