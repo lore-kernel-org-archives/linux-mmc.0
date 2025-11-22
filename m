@@ -1,72 +1,72 @@
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19DB736D4E5
-	for <linux-mmc@vger.kernel.org>; Sat, 22 Nov 2025 07:04:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6CF436D4E5
+	for <linux-mmc@vger.kernel.org>; Sat, 22 Nov 2025 07:05:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763795100; cv=none; b=M/E+EVrG40y33+qsfQ51vackKPVg/ENYpjRATj+pxjlVa2S1xj/oWl/jK2g8sR2SFJAIIM+xOigemmHSbrqa0u/NkcnYOFMt6BCm85l3th81usJB36VH6Ra+yZ3upDhMZVBUyl/SpUj958TOU+bIcADnlRwFFytAqJEtaThfgL0=
+	t=1763795110; cv=none; b=UI52o5uAYdF0+jhVbuErKs34vOVFzsLRTbmHZycAJTUDeL2o1rO17GESzbglO3p3qmmJSy9bvxZ6yqnwGovWu81elCjFIv/GsEr/ysrfPyrG+VZkHtyQukYo4JUlaC0Z+C6mmgx7RAkJG3CPkDYChPauU5O26k4i9+z+zs/BKCE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763795100; c=relaxed/simple;
-	bh=uZ1qbud89PlExS4+yDnvXeDrHQdBGKhIv0X9Azkk1KM=;
+	s=arc-20240116; t=1763795110; c=relaxed/simple;
+	bh=NNdFrvc6peiqxkZRU6uMqZ6y0cpFqPVnxJQv/cjK5Ik=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=HqMWRyM/dX8XEb7IZuC3+wkjLi7tfp3cJbgevCmxVox57LYHvMn0uyAq68Kmnnvgwvd+b45VDPSBUUp/f3RKxeoNx9+ErAyjZw5IkknidSUnKoVoq67cqHi/TI8jZAxBR31gdbqm9Xqyd+xrQyzfzD815D/3cyiULiKTiVkEM5Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ehTNjdBp; arc=none smtp.client-ip=209.85.128.42
+	 MIME-Version; b=PVJSla6a9dce+tx+71zgZiwVxf4YmIjLbBkJj1kL1XCZpeKCexbqmTq7ITnjA2NJJuLEOIRbxv4OzNB3Gq7/rcIwDerT0y4dlBSvoaWev1OOeUd1D269ktmjGuJEsiVljJtTAVm+TtZ+6Zx1KllH7Y9WQwJ7u4ouodtp2hOYDpc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Frpn6PGm; arc=none smtp.client-ip=209.85.128.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ehTNjdBp"
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-477aa218f20so17468215e9.0
-        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2025 23:04:57 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Frpn6PGm"
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-4779ce2a624so24161835e9.2
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2025 23:05:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1763795096; x=1764399896; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1763795106; x=1764399906; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bVfqE5oQf1zmohx4lqsBU8REkdX6akz5voG2q5iRJXU=;
-        b=ehTNjdBpdtHzM1344PQ6ikqEdQjhIb/O/10xKFwab53IZ5kWFyg/AprHM2d9KPPKCJ
-         AQ+7s09sE/c+tMiFzZUe2GBshP62wJkeFhSHeG6KH+9s/mD1Jefz8VOCHnihMzMyRaZ3
-         YzKCkQGzz7b9yH562qijL3AwErw1+Uynd5lLaCvJcibWoUYNDKh/fEDIZPj3QTKPNIgW
-         UgJno0D+ShSAVdVvU++dggWp370NiAJzC7YHch7JbVNe+o90VXHd76NjcdhWDGYjbo+a
-         isM7KmzNadpAJFxxGjx8X9csIkHQpBN6JLIZvP4PqRfUuW4/8ZiVmJgl0CBr5wlh40ZR
-         uULw==
+        bh=5YYiYj7BexT+9l9+lr0Xb3WUbuGDBvx1emvTl3EXrNc=;
+        b=Frpn6PGmw+kqqdBehhiL9ayjRcxenP2Te1xbc5uiY0Lg4N3ZAwhoPQiRDhMvOmWF+1
+         WqvjxMNDBUYpWmy9XOVDRnLTnumIfaptXzyazSBH/DoxRfF8sv1ONd60uA7dNstczMwT
+         Pemj7JpI67v785F1lRNihUGgFKGEFgyXUy4ZDEQdihs5kzc7E/I9lYE35f9VluYPBfSP
+         DAvM2Rq5kcmzKHBmlT3sVONjBmQqEuo3tZiLQ3F746bGEerUMe1lzGVT0he5r78Hzur/
+         KJoQQCtnBf+NbtspkejlcKOAWgaaLPblGY3RC+NqDEHPfd+oMVMK7tIOIjOlfSl8N4Bi
+         KotA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763795096; x=1764399896;
+        d=1e100.net; s=20230601; t=1763795106; x=1764399906;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=bVfqE5oQf1zmohx4lqsBU8REkdX6akz5voG2q5iRJXU=;
-        b=LkqyjUtK/EULoRrUnqfa9B3kCyz93ekcSIh9wbXqKlUbkiDRW91KdVINUZD5zu7G+Z
-         Z8QTfxhaosINymIuqzzCQR7kef77wRxUQlI0Qg3fHSWxqowEP65Rhb2z/lrsXCmPmhYT
-         Q7DFEq2Y6XYtmpKq/3porr77ymbDvz0tGA4XyXXzvuRf3P02eDEh5IFsBiBzFaBMBIIy
-         2/D/wamcqJM3/79PWqxqD85Gb4HY6lf9FjMv32QwtDq/NsfZ+fZXrG4Wfrsf2pQg+kkB
-         bstAcupnwYQ9bGJrZ7J9bZm1BY6aKWSnu2rVlcbmtBh1sWVHK+EafCHhiaC1kblNVfOD
-         7yqw==
-X-Forwarded-Encrypted: i=1; AJvYcCUVjwa6LIKldna1QGzE3GjJEJOEfHbAhPzrUB01Piz6bsFxpTaBK8kdylXAIzrZqwY+9e77gWeYm8s=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzjnl5LcGhnEVk7ukp1dk/AXftsIr0qxG+m0P0AAPr1lq4t+sYE
-	Hxpi4MxxrvC/THfSy4c5ADtdQYMmROlZHBHDOd13ZRGCYYHyR7W8QfPR
-X-Gm-Gg: ASbGncsUIgEMZYgFehrDe6WYOlQ+jBmruvU6pXiot73I/CdZC5hioK44/CmOEs4G1IS
-	NBagBXLrfU5VOlU8dbk1uZAGFIbMaE63KWjMvXTInMhYZHUZwdp09gTB09dXmD9DibSb+K81zFi
-	vRHaHx5yTFzWHRnN3vkn6lG/0SS3CpzsujvMwZZCy81UY2vZx1JhtRWTezrYTWI+slfk0oJ+pBZ
-	xsovygpzZQGRQxrLORlYtjvd1Ow4TYmVL5sIhubijBGBcK/FerpSTl/PNWCDB0/nk3FN1p+Iyjq
-	Lek9wfOvLg5JXK8iCmEbw+vWYuLJPqxBJDMlRZHvTYFJ9IAz1TakL/3NbPy0iYVXZtl9uzw5pGb
-	JqAR9o7SQLiTapLD1Le/OZQpxhpbUYaPSqh/VYAm4tX23JhVKZi5etetNJh88wsqA9QrDCRUYXI
-	1LCzpulGsPbL7UbbJN8YzOM+gZG4A8PNRdR6i2iG5bF0/q3C0AvgkENPQYI1iTZDPv7DZe04VK
-X-Google-Smtp-Source: AGHT+IHKHE+5PK43oJipc0zqbwgY9Y2cWKaCqq6mLV5325L1SCihs0xDg6Y63JcOqikNYG+efw+8SA==
-X-Received: by 2002:a05:600c:8b16:b0:477:94e3:8a96 with SMTP id 5b1f17b1804b1-477c01b512cmr39412105e9.20.1763795096195;
-        Fri, 21 Nov 2025 23:04:56 -0800 (PST)
+        bh=5YYiYj7BexT+9l9+lr0Xb3WUbuGDBvx1emvTl3EXrNc=;
+        b=k+Id9+S6en92DDhscrVFDIGLdgsFuPuI5LvRXDvDjDZ/aEK4tzJciseG6nmd2eduiu
+         gjaNDb8LU9z8oLUmqsa2atRaemnP8G1zdvwCY9XWZWP+SMvVJCDByK1HNFH8xk6nqhzB
+         F04wV0hPNqveqvdEFDazKUJv9Tuf2ulJ9PC0FxeFHfeekcq6q30Ns0dKwkjyQKwoO1G8
+         Vc5dN5Ulq9rabr6sp7PgqNzLnSPuY1xv/BQtkemXv1e1CwtIwcd+eyoz31NYv4CsRjPt
+         wClWrYH7hrGothq2kkqgcj7Ix+Ao8WO+AomulZUHJ7mIk7NtabY9HEBN1C3R23hMYUaE
+         izNA==
+X-Forwarded-Encrypted: i=1; AJvYcCXaw8JB0q8jdXctJn5rZ7VluLgqAsK3+BONEPII0rdWmk9jnkaxKf3xMY630b+hYwF5dyKN606ankk=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy7KMheZuCRi0JBC0iRIoZzaMpFV5g/+93xxYOlEhO8SPrGkFNU
+	lez49sEyHuyp+UfqBI9mD1aqW0Y3oQTJEAdduKYybwSc9O+Ywrxp1dyW
+X-Gm-Gg: ASbGnctA8XUenf6klbjruZ22uPbaV3TUYlBTSdqQBLoJB/ps08hegOxFzdHMFASq30b
+	2DEYnIe3wRgCyXlEDUcqgzCgoUbATtWCPWSKaYyZVPmcQMgscE2K3xxgf3/vVDgTFBIUzgsbG9M
+	TbjRr29dIH7izmm4iu38Fndlh/ddrIbHkgXqA7OmG4bnVTPchg8PFoECW/gS7QwsscCUYtDbN13
+	wiZSU0EAtfwK6J3BRJ91AGfpw0/j30MNYr5MNZ590xcXSwr36A8nmqZ+Xeu3CjNEmCOflX2cmL3
+	xOG/4ngY9Pq8/YIDdl9myUJE5nXrGkNbEutAlD7XonhlDGkeAUFEJkc6/A6GsI+HSb6CrrB+zj2
+	/3g84I7g+zJR0Z6KkmwVEpmZvpBvrhs3B3IkTdX1FQ/b8hyf+ELeIvmzb+YHkBWSKhie7tH8IP+
+	wV4q59jfeHJ8u1V43Vy2lS56RZDCCpTOeI7ylXUkHP5fUycGSRR9DkR2M/SY/cjEeAXgmRgJDD
+X-Google-Smtp-Source: AGHT+IGz79kMUFgeE+MKikhYj2Jr77x0V1PX4VLa+VLZmSvCkqTk3m4wzQecKp8PrPkMcPbq9qO1IA==
+X-Received: by 2002:a05:600c:314d:b0:477:7975:30ea with SMTP id 5b1f17b1804b1-477c01f2cc7mr45838615e9.29.1763795105964;
+        Fri, 21 Nov 2025 23:05:05 -0800 (PST)
 Received: from avri-office.sdcorp.global.sandisk.com ([129.253.242.14])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-477a9d198a0sm104914505e9.1.2025.11.21.23.04.55
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-477a9d198a0sm104914505e9.1.2025.11.21.23.05.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Nov 2025 23:04:55 -0800 (PST)
+        Fri, 21 Nov 2025 23:05:05 -0800 (PST)
 From: Avri Altman <avri.altman@gmail.com>
 X-Google-Original-From: Avri Altman <avri.altman@sandisk.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Avri Altman <avri.altman@sandisk.com>
-Subject: [PATCH 1/2] mmc: core: Adjust MDT beyond 2025
-Date: Sat, 22 Nov 2025 09:04:41 +0200
-Message-Id: <20251122070442.111690-2-avri.altman@sandisk.com>
+Subject: [PATCH 2/2] mmc: core: Add quirk for broken manufacturing date
+Date: Sat, 22 Nov 2025 09:04:42 +0200
+Message-Id: <20251122070442.111690-3-avri.altman@sandisk.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20251122070442.111690-1-avri.altman@sandisk.com>
 References: <20251122070442.111690-1-avri.altman@sandisk.com>
@@ -76,60 +76,93 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-JEDEC JC64.1 proposal, which was recently approved, increases the
-manufacturing year limit for eMMC devices. The eMMC manufacturing year
-is stored in a 4-bit field in the CID register. Originally, it covered
-1997–2012. Later, with EXT_CSD_REV=8, it was extended up to 2025. Now,
-with EXT_CSD_REV=9, the range is rolled over by another 16 years, up to
-2038.
+Some eMMC vendors need to report manufacturing dates beyond 2025 but are
+reluctant to update the EXT_CSD revision from 8 to 9. Changing the
+EXT_CSD revision is a firmware modification that would force these
+vendors to re-pass an exhaustive and costly set of Approved Vendor List
+(AVL) qualifications with their customers.
 
-The mapping is as follows:
-cid[8..11] | rev ≤ 4 | 8 ≥ rev > 4 | rev > 8
----------------------------------------------
-0          | 1997    | 2013        | 2029
-1          | 1998    | 2014        | 2030
-2          | 1999    | 2015        | 2031
-3          | 2000    | 2016        | 2032
-4          | 2001    | 2017        | 2033
-5          | 2002    | 2018        | 2034
-6          | 2003    | 2019        | 2035
-7          | 2004    | 2020        | 2036
-8          | 2005    | 2021        | 2037
-9          | 2006    | 2022        | 2038
-10         | 2007    | 2023        |
-11         | 2008    | 2024        |
-12         | 2009    | 2025        |
-13         | 2010    |             | 2026
-14         | 2011    |             | 2027
-15         | 2012    |             | 2028
+To avoid this re-qualification process, a workaround is needed. This
+patch introduces a temporary quirk that re-purposes the year codes
+corresponding to 2010, 2011, and 2012 to represent the years 2026, 2027,
+and 2028, respectively. This solution is only valid for this three-year
+period.
+
+After 2028, vendors must update their firmware to set EXT_CSD_REV=9 to
+continue reporting the correct manufacturing date in compliance with the
+JEDEC standard.
+
+The `MMC_QUIRK_BROKEN_MDT` is introduced and enabled for all Sandisk
+devices to handle this behavior.
 
 Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 ---
- drivers/mmc/core/mmc.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ drivers/mmc/core/card.h   | 5 +++++
+ drivers/mmc/core/mmc.c    | 7 ++++++-
+ drivers/mmc/core/quirks.h | 3 +++
+ include/linux/mmc/card.h  | 1 +
+ 4 files changed, 15 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index 1200951bab08..0d1904d87a39 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -305,4 +305,9 @@ static inline int mmc_card_no_uhs_ddr50_tuning(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING;
+ }
+ 
++static inline int mmc_card_broken_mdt(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_BROKEN_MDT;
++}
++
+ #endif
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 7c86efb1044a..4c36029b28a3 100644
+index 4c36029b28a3..564a5fb4dd96 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -671,7 +671,14 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.enhanced_rpmb_supported =
- 					(card->ext_csd.rel_param &
- 					 EXT_CSD_WR_REL_PARAM_EN_RPMB_REL_WR);
-+
-+                if (card->ext_csd.rev >= 9) {
-+		        /* Adjust production date as per JEDEC JC64.1 */
-+		        if (card->cid.year < 2023)
-+			        card->cid.year += 16;
-+	        }
+@@ -676,7 +676,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		        /* Adjust production date as per JEDEC JC64.1 */
+ 		        if (card->cid.year < 2023)
+ 			        card->cid.year += 16;
+-	        }
++	        } else {
++                        /* Handle vendors with broken MDT reporting */
++                        if (mmc_card_broken_mdt(card) && card->cid.year >= 2010
++                            && card->cid.year <= 2012)
++                                card->cid.year += 16;
++                }
  	}
-+
+ 
  out:
- 	return err;
- }
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index c417ed34c057..7bfd07ad3d7d 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -153,6 +153,9 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 	MMC_FIXUP("M62704", CID_MANFID_KINGSTON, 0x0100, add_quirk_mmc,
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
++        MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk_mmc,
++		  MMC_QUIRK_BROKEN_MDT),
++
+ 	END_FIXUP
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index e9e964c20e53..4722dd7e46ce 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -329,6 +329,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
+ #define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD poweroff notify support */
+ #define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */
++#define MMC_QUIRK_BROKEN_MDT    (1<<19) /* Wrong manufacturing year */
+ 
+ 	bool			written_flag;	/* Indicates eMMC has been written since power on */
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */
 -- 
 2.34.1
 
