@@ -1,140 +1,109 @@
-Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5EF11ACEDF;
-	Fri, 21 Nov 2025 16:27:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C50902AEE1
+	for <linux-mmc@vger.kernel.org>; Sat, 22 Nov 2025 07:04:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763742433; cv=none; b=aKVA2aBbDn1srPPLpnEIKUXBF6t4VFJTF05wSRvojPNZ0MKeLEk/0f1z6SY4l6mnjo9R6FVAGEWW0lioz4cQXEE5XJUjbUFYPlDUVVCO5pIeYfObz5pqOYwjCaDZM1+qb3IDlJVscfFqXmY7NDkkfHYVa8X8NvkP8uxI4sc+ILI=
+	t=1763795091; cv=none; b=rwCH69OdLv0tF7HxZYCv4FA1JxmEACvYSJde/gZX3oUA/Zo5KxbQbqXqJZ2n0jboXXe2sGoZQ1LS7SLXpW+dloxgIDJh328pQOCMhlYRrAcTd0RNXM941GSLrQ3ay9JhHaIfPFpxMqZyKalQggM5lKbp60Bg10gAlXBDjOGDNYo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763742433; c=relaxed/simple;
-	bh=SEOXBTXLBu4wbKauLYSnxna7hHnG1GHnaPiynnav4zQ=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=MBmB3r4wtvmetaq5XV5CVdzqC8kF9x8O3v3ahYtw3dDvawiDW7VukOIgq1OzzEqE87/IEtmXhKvnuYysaHTWMhucfkh2Tpsgyfk3ClNeue3OvUbW2iH4zexp8VCFw792pyVIhgZSgCAVQYJNSmUv6tZDOec4xymWe6ID0bc4+D8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=JXWwtmk4; arc=none smtp.client-ip=148.251.105.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	s=arc-20240116; t=1763795091; c=relaxed/simple;
+	bh=TUcKMwlo/F6aquaMxdIjTpQ88IDiMhtKBob6ZvZUZd0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=DIyy4VePxHZ+MMtGBOtAam8N+nOknZJRXRNAM5TDNeIu/3hc13Pu4445ZswdCDChHtlbINa6Oq0NW7KwcuVjkpoqqXQlUm7Wh4StfzVGUdR9fwFrtfV3C957Vllfq9J+WY0EAm5Z+KLKxB1FtAQF1NLLPR0vCTSbxbW4dVxVuEg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ADPN8tkk; arc=none smtp.client-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="JXWwtmk4"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1763742429;
-	bh=SEOXBTXLBu4wbKauLYSnxna7hHnG1GHnaPiynnav4zQ=;
-	h=From:Date:Subject:To:Cc:From;
-	b=JXWwtmk4lBLonzeNCGbEjhzxWBBxTkJWpRu8DsmfqWkTSs/VxpQ5rmf/7Urp4KtcV
-	 4xNcECIfaF3FBbipyOCO4MoPeZ0fjYQ0/hy6oj49nlBrPk0MtWHaBG0aVmdd1zCge3
-	 fI8dbyxFIzquYWnE/YDPI63NkAUqjTU/2gH0sjJlnmYnu9Y5c04+gKVr+z+XFUBPYH
-	 WCIlvrNltIOONT/DSPtvG7h32DpTff4xyEygieRxuerRM7hiIMeL0i+7sol3C52kmZ
-	 MMd29xgIU/EI8m2OYuymlsK9fMHPpxXr4Llu1HgGXZYninwD3KlTXUPaETJf2QNIBq
-	 XUDlueshm0/VQ==
-Received: from jupiter.universe (dyndsl-091-248-208-149.ewe-ip-backbone.de [91.248.208.149])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: sre)
-	by bali.collaboradmins.com (Postfix) with ESMTPSA id B77DF17E10E9;
-	Fri, 21 Nov 2025 17:27:09 +0100 (CET)
-Received: by jupiter.universe (Postfix, from userid 1000)
-	id 56B44480044; Fri, 21 Nov 2025 17:27:09 +0100 (CET)
-From: Sebastian Reichel <sebastian.reichel@collabora.com>
-Date: Fri, 21 Nov 2025 17:26:59 +0100
-Subject: [PATCH] mmc: sdhci-of-dwcmshc: Fix command queue support for
- RK3576
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ADPN8tkk"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4779aa4f928so24120445e9.1
+        for <linux-mmc@vger.kernel.org>; Fri, 21 Nov 2025 23:04:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1763795088; x=1764399888; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=7+HYBCvtLbzcg783N7MNpZNx6BpqLxSeHKCcakAKBZY=;
+        b=ADPN8tkkvwK4Ad5dSg16uuViuQ1sFxGNZ8ySE0GDYkkqCfme8DMpBAUMEo1XuOJRgv
+         CX+rHU8cDNOkFHef24mMNm4b2EgAE7M86tOdAqxf226BK1O1dhsm9uqWGDzvZZaAOrHC
+         TNJoEg9+btMSQt9nzo3NSR5WGuNzDh9xqr7iD8a0fJ0YQgOc5uQCnOYWnak97RuV6+Cv
+         P4EMf5VCIn0wlnPf2bFUX3VKHKvFGQ6AvSYnYUigwW4T6DacGomGia5eeugymsXc4M7O
+         ULBJRRTB1ViXlYm5N/52rFHSKmWzKQPPdukhDVkZCLNG3zmAUxWwMZ/uYxj1iVmllv+y
+         jxdw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763795088; x=1764399888;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=7+HYBCvtLbzcg783N7MNpZNx6BpqLxSeHKCcakAKBZY=;
+        b=jO8UDLyJtn56BvplpkmFV2pU2GPWp0uP3xMn3r8EK7gl7sTQdgRcFq0cUX7U2XFzw+
+         +KUw7MGtSx38WXvRoOSr0ow5pMP4h2OxoWYj8/dB+X5aH4sZQtAagyVpwB1BAkP7bQUQ
+         f+JgC805CKPklnLEfhitPEyqmp/wQb10kIPuy/buvjLv9elDzUNiclRWWp5WbBU4X9fE
+         7uQ7ef2+ZQSjK/DA6nir23xlSUlCrgiuDzLD00VbFQIlYsrJI66HYCEdTyvZTTMn6VSp
+         uhfRLfzY+OsxyMrqombXGBHAAV8H8ankTIZfH5Vs/cneefgt7nv16NYM4AL5zWV2UowT
+         rzxQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXENai8qnpgJDEPjgUxOFPZPTR0NTxvhQ8RV9yLx+gW5BDg7rpTetv85czIHRSsSToekyrdUnPzzeQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzWZJcfUlJcP/exaRCkcTxD93Jam1yeNCcUm1FfPvtSB5XFqI6i
+	B6MG2fc5FOdxSLrDAdAJs1sWPNFzJcJd47Q9VueAmiEB7STJFwZuSCyD
+X-Gm-Gg: ASbGncvefihkCl9VxNqlmaD5p2oXJ2zpkTnwMLAzfzCRX+bW16d9HA/di3s2RfC5ds3
+	661ER1RPomPftTddykwu15w7AF+gt69Hp4PcQbYIpryFaKpDbDfHu0RkKBHE1KfEfgWLI10ZIWN
+	WFVVUPyvSSeZvy4HjhLVYmqxVmXeOPPzNhlVajyo3dCAiUDiQaewLteGK6GKS1Akk9XNhuLOJpa
+	M7pexUlbhkL4uJkazhnTsNKv+N1k20fGYQRgbG0UDYA+GXs14Vnoxz24SEFYQNtLhBw9p//KQc+
+	CSc+w8Wj7c0LXgODaV9h6xQvFJ+7geLrtnlI37KbkIIl3B2F9/0OseTXcbLQB9nQZ8eJPCTN4da
+	19GkjIPWpU+2OfD+MTMcirzw1CLkd5BESyINwoqFHMTTKlF/ce3OMjwdcVP8nwtWreq6gJRh147
+	8LFvz0wlHZk4FNAPMBfBd6ddDEWUU+TF39ENu0ycDi4WI1BFkXuN7t1WkfjHIPkpb7eQBtfAJk
+X-Google-Smtp-Source: AGHT+IEItnyECXYDPxMnTFFsCprWbZuCxtx8TXL7mGc7W0hDXDFNV+sF5NCdJZkSwqz0cWPjcu9HXw==
+X-Received: by 2002:a05:600c:4ed2:b0:477:9cdb:e32e with SMTP id 5b1f17b1804b1-477c017d7ddmr40121385e9.9.1763795087763;
+        Fri, 21 Nov 2025 23:04:47 -0800 (PST)
+Received: from avri-office.sdcorp.global.sandisk.com ([129.253.242.14])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-477a9d198a0sm104914505e9.1.2025.11.21.23.04.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 21 Nov 2025 23:04:47 -0800 (PST)
+From: Avri Altman <avri.altman@gmail.com>
+X-Google-Original-From: Avri Altman <avri.altman@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>
+Subject: [PATCH 0/2] mmc: core: Extend manufacturing date beyond 2025
+Date: Sat, 22 Nov 2025 09:04:40 +0200
+Message-Id: <20251122070442.111690-1-avri.altman@sandisk.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20251121-rockchip-emmc-cqe-rk3576-fix-v1-1-a77805f40072@collabora.com>
-X-B4-Tracking: v=1; b=H4sIANKSIGkC/x3MywqDQAxG4VeRrA10Io6lr1JcSPrbCeKlGRBBf
- PcOLr+zOCdluCHTqzrJsVu2dSkIdUWahuULtk8xyUPaECSwrzppso0xz8r6A/vUtF3k0Q6GPgf
- tBBGNUFlsjpLv/bu/rj/GJ489bgAAAA==
-X-Change-ID: 20251121-rockchip-emmc-cqe-rk3576-fix-ec8ac72e6e32
-To: Shawn Lin <shawn.lin@rock-chips.com>, 
- Adrian Hunter <adrian.hunter@intel.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, 
- Yifeng Zhao <yifeng.zhao@rock-chips.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-rockchip@lists.infradead.org, 
- Sebastian Reichel <sebastian.reichel@collabora.com>
-X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2507;
- i=sebastian.reichel@collabora.com; h=from:subject:message-id;
- bh=SEOXBTXLBu4wbKauLYSnxna7hHnG1GHnaPiynnav4zQ=;
- b=owJ4nAFtApL9kA0DAAoB2O7X88g7+poByyZiAGkgkt2dR/Mk0wcjrGt5Z7YAtdFpjvb126MHP
- BpU76nI6bTva4kCMwQAAQoAHRYhBO9mDQdGP4tyanlUE9ju1/PIO/qaBQJpIJLdAAoJENju1/PI
- O/qa1mgP/RoxhIKpzhiVcCW9sduTsWgBlcRSl1WqtVWKdC05Z7V5MWpWLN9QaFgZiRlxPWRwz7q
- xWPZIFrfHsIArF7H1+38kA5bBdq+0eMfPddlLKhEoEWBHWgb0VVG35VzshHoCJv1O4/MkaiPjLy
- uuqf5R36BMO7wH2+94pV3CYawNFjSP9X2wwOKTlwiFjbuXJVhh9vdFIZHbT0JZFXsRD3q34xIqf
- HNOStKJ2ewWBt6YZvIUfJS7VP8U8StJ9F6lFA5noBWWdAw/y+yk/FIEErZoKth7EzH+HF08Send
- XP99odpzlL0A1idHtCxE9jwrhL8K6kA5faqRnmWUmVZvZ9GbLEQFhCtEbT3I2e2r1szFAjuja4s
- t0WTQ864/MfvLMENn47Ux83BoBfrzr5DcI3071sc23ZqQqqB+h3VCslkZJl9mxkBHKCWnnOVEeT
- p92I+1p1wWpQRsd+6r3uln86+e4pGgw0v2E7OyvHP5R7dlTGfa8HZHQLnTUX1VhL247AtfwZ7xf
- 9eJ0lKaANoo3S0cblkIlnz+2w3/91pMFJwUySwbp6eeoJ8Z5Bl0VAg5IMAoUeuMLE5WU+VTMv9h
- h2fC9S9JG0XmWLllV8Ktdt567q0kV9OIhnN46gzQMsvFhcqWlyUOv6OEdUnFgum6gycRpkudB/V
- 8PJmKjgFgL+zPTsxLVAYwKg==
-X-Developer-Key: i=sebastian.reichel@collabora.com; a=openpgp;
- fpr=EF660D07463F8B726A795413D8EED7F3C83BFA9A
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-When I added command queue engine (CQE) support for the Rockchip eMMC
-controller, I missed that RK3576 has a separate platform data struct.
-While things are working fine on RK3588 (I tested the ROCK 5B) and
-the suspend issue is fixed on the RK3576 (I tested the Sige5), this
-results in stability issues. By also adding the necessary hooks for
-the RK3576 platform the following problems can be avoided:
+Hi Ulf,
 
-[   15.606895] mmc0: running CQE recovery
-[   15.616189] mmc0: running CQE recovery
-[...]
-[   25.911484] mmc0: running CQE recovery
-[   25.926305] mmc0: running CQE recovery
-[   25.927468] mmc0: running CQE recovery
-[...]
-[   26.255719] mmc0: running CQE recovery
-[   26.257162] ------------[ cut here ]------------
-[   26.257581] mmc0: cqhci: spurious TCN for tag 31
-[   26.258034] WARNING: CPU: 0 PID: 0 at drivers/mmc/host/cqhci-core.c:796 cqhci_irq+0x440/0x68c
-[   26.263786] CPU: 0 UID: 0 PID: 0 Comm: swapper/0 Not tainted 6.18.0-rc6-gd984ebbf0d15 #1 PREEMPT
-[   26.264561] Hardware name: ArmSoM Sige5 (DT)
-[...]
-[   26.272748] Call trace:
-[   26.272964]  cqhci_irq+0x440/0x68c (P)
-[   26.273296]  dwcmshc_cqe_irq_handler+0x54/0x88
-[   26.273689]  sdhci_irq+0xbc/0x1200
-[   26.273991]  __handle_irq_event_percpu+0x54/0x1d0
-[...]
+This patch series addresses the upcoming exhaustion of the eMMC
+manufacturing date (MDT) year field, which is limited to a 4-bit value
+in the CID register. Under the current standard (EXT_CSD_REV=8), the
+representable years end in 2025.
 
-Note that the above problems do not necessarily happen with every boot.
+The first patch implements the recently approved JEDEC standard update
+for EXT_CSD_REV=9. This update rolls over the 4-bit year codes to cover
+a new 16-year period, extending the range up to 2038.
 
-Reported-by: Adrian Hunter <adrian.hunter@intel.com>
-Closes: https://lore.kernel.org/linux-rockchip/01949bc9-4873-498b-ac7d-f008393ccc4c@intel.com/
-Fixes: fda1e0af7c28f ("mmc: sdhci-of-dwcmshc: Add command queue support for rockchip SOCs")
-Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
----
-Sorry for the delay in sending this :)
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 1 +
- 1 file changed, 1 insertion(+)
+The second patch introduces a quirk to handle vendor-specific behavior.
+Some eMMC vendors are not yet updating their devices to EXT_CSD_REV=9
+but still need to report manufacturing dates for 2026 and beyond. These
+devices re-purpose the year codes for 2010-2012 to represent 2026-2028.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index c66a8dfad47c..ee0008d91b98 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -1767,6 +1767,7 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
- 		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
- 			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- 	},
-+	.cqhci_host_ops = &rk35xx_cqhci_ops,
- 	.init = dwcmshc_rk35xx_init,
- 	.postinit = dwcmshc_rk3576_postinit,
- };
+Thanks,
+Avri
 
----
-base-commit: dcbce328d3a2d87770133834210cf328c083d480
-change-id: 20251121-rockchip-emmc-cqe-rk3576-fix-ec8ac72e6e32
+Avri Altman (2):
+  mmc: core: Adjust MDT beyond 2025
+  mmc: core: Add quirk for broken manufacturing date
 
-Best regards,
+ drivers/mmc/core/card.h   |  5 +++++
+ drivers/mmc/core/mmc.c    | 12 ++++++++++++
+ drivers/mmc/core/quirks.h |  3 +++
+ include/linux/mmc/card.h  |  1 +
+ 4 files changed, 21 insertions(+)
+
 -- 
-Sebastian Reichel <sebastian.reichel@collabora.com>
+2.34.1
 
