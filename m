@@ -1,212 +1,1135 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3FD4F2FB99F
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 11:29:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14ECC31063B;
+	Mon, 24 Nov 2025 14:28:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763983755; cv=none; b=YT31UiX3Es2UGFyk7g3uAvKPZfFggwYD5oG1G92wHLWocwkbV2WXGuwx8955qAPdsTKbU2lr2D62FVV5EZlp/ktrKeocPhaHra9Q1OGj41DwKVcRhGIhC+BvrPWo52A+r20lTA+AvQzaEZu9Ybu7BxAJG0UIQpcwIH8l80Cmv/M=
+	t=1763994525; cv=none; b=A2uJXXLlYHppzmiBiCVM6NvFH8WTgO6FomqAf0qs+jMzid3dhI/XbstrIpuP44dszRrQxHFbvU3s5o5eXhy8y4j4jh25bUropZgZLS7BcZOOzLGC2bXMouHSBKGKgpKAiz0m1mixMPZii14ZaAM/2L+m4uosh1BqQq6X+XtjNz0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763983755; c=relaxed/simple;
-	bh=Ly7lLYY3bIPXjpAH7bKNc9BZsAhfKZRUM/kCY/y4Aig=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=cIOrDZ3a6fAoi3NUiulW4QsnShAFBT4bLDLuPGkYGZ3wTENuv0I4AJajJZGAI1BPmNpjCPPw/fwA10yhJHOt3UvNkJo5JluWylnEQSXQZC7aAl1wF/VYG3kFh+BsW1DRxsXSJFleeU9Fx7R1RHTbxwg9wmIUVdAbTP6dHaI8xOs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=TfgUHrDc; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=UIUA2tsj; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1763994525; c=relaxed/simple;
+	bh=EgfoIt6225PJlSWklStK+SttjLQeaPR1RUbvN+3I9oE=;
+	h=From:Date:Content-Type:MIME-Version:Cc:To:In-Reply-To:References:
+	 Message-Id:Subject; b=Y1CvQLvRDIZyC+UqqF/xGoqPRoXAbMLyQKgApenWst/AZYRPQaCOQrKu9DfNRenBNqF9MIEJ3dlipZFQTyEr+KqeZwAs3Cu84ETBef84YVu6MBrT2QwrdJ73ehFJECUX0/7XoxXkTbgwXZLJybLpW8ghWp28g/uljDxWaFwXQvY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PBKY2PHy; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="TfgUHrDc";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="UIUA2tsj"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AO7vaf42372923
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 11:29:13 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=qcppdkim1; bh=M3M9y8dqcilpF3eUX0QRY29iWzqFVt7BaBs
-	tvCWE+yo=; b=TfgUHrDcnwjv/khYff1QO0rat0iapcvQJqd1qEOSLJHvzUhEgqX
-	/anQwmYe1YnWjJt3x4DFnp36U2vprbH3QP0kIJ3gptTUxqvdSdhh0u9+5lVnmCmx
-	Ub0fhOOf5Flxajm/67G8UezTkCzbAxxb2h8Ihfs3Rr9ZRvJzTl5YTHyYiNayHmpc
-	tUTAE1CG36rzrYniB+KHdPOVEtR3jhr0gt4fD7Cukln+S2jthB4LUkauf587cH3f
-	b+Qyj0aWdCVn25mVKxnqou1vugfJa+EKCU8Ml2LI0P/bzhX35PsLS7AFllJeTOX7
-	w+8nNXcXrRqrB6ev1iEJHuxe6HkZQP9kpoQ==
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com [209.85.214.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ak694vsx4-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 11:29:13 +0000 (GMT)
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2955555f73dso67150325ad.0
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 03:29:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1763983753; x=1764588553; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=M3M9y8dqcilpF3eUX0QRY29iWzqFVt7BaBstvCWE+yo=;
-        b=UIUA2tsjydy3TiYLIUS7rF2ZCj3tmJ+TjecnOiY6r8ZEMg41awQBc2c0obdzY+4Ndg
-         qaWuOYMkBFUnJlSeTzH9D+6mtpBkVXfx7uQ31Qfj2Lk/Nuy/bgqCjxlNJidPwbEarPnh
-         qWJj9ndvRmwpkwM8IC5x6rWpPc2yY2Oez2tj8mW/WzHP4YtkkT3rJ/98i56nIiaaI5LI
-         xctUcimnrpglnJmo221NDqEeTtWJ6ck3xib3xlXQF7BNyY0F3NbpwGTMLhHmhOele8d6
-         CscPnOKWZEVL7FLbUvygnvYkUSZbfRtIxyd8xH5FCUwLKzODQvPAOlEhQWh2NQ0tJeW9
-         2Dmg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1763983753; x=1764588553;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=M3M9y8dqcilpF3eUX0QRY29iWzqFVt7BaBstvCWE+yo=;
-        b=jkDtz+Tm+g6abWBx1Nk1L3iDsS1/eI1k5z48Y2nvupyHBP9KfhiikbmphHCksyeW20
-         srHeKUezn66Rkl2ini10La+VrdMkJExKGzVuTR/N+DUBICbG3S3gcnItnIslULFjH8JV
-         rgPV1ypQeL9UT6PSAqQ3zk3Vtm3bcSJpzdj4HqUsHl6JFw+eagSq7CAoQxBJtCjKt1PB
-         pOF2cEVUJBBZDCmN0SUpqTpLCStyF57BcYieCNmdkFxNypH4mumHK72VOEnmR2sBqAQ9
-         hhCH83FnH19sipFr1aOZuHJrXTqp7qeLwLe9vxFulyGUU0QMAxjJ+CPCL9drUSyOfK9q
-         Svdw==
-X-Gm-Message-State: AOJu0YzDnnLaA9i8jjAw9dL+Fn1xJF/lEMefkrM9b20gmH0jr3VHfG4a
-	mANKdGRVpuqiXA5mMMMalm4Ux0c8hXRNgI90hEe6RbaiUTT6lNw2idB3o2KUk8chzbBSyRdmSRH
-	12ZHjOwBg3CWDtsg99FsBIhaL9GXwsyaoctprh/UCaTFYHJ0sRZR3DmjVbplLwYQ=
-X-Gm-Gg: ASbGncvpPPs3hwhU/yZbSYs59Dnt+AgJMdexf/BoSNe1+51ueyjbBda7PlXOm7TdiF8
-	/AOw0vcgjk9ujMvYSO7qsuSd702rar2HVBF6MNhzJpr06SAQyReb6qbuG2nNK58LS1wt42nUgJz
-	VIXSBfQSHzivmLBexr/w8M635TI0DAgxvhC9bxdai9SBVMNzmbRw5tq9Y+7C9XOcFl43Bb4OrvZ
-	trFDfDQTXSE2OkQCbaMrtEyhXz0cqAsNvyhCWYHyFoPkkIUpwCI6GYpWDLChimYCAQxyiWyrihy
-	/MrffwQNhoVk3ysA8lCeUJvHQ9KirQgWZKUfnaKo/CeNJhVLtS+3aE51GBOu+7q4v3x4pzQaG8o
-	UsNXosOAT/o+Gm6h2kqaILm2fwYvVkKd3BK9FKOd6
-X-Received: by 2002:a17:902:d4d0:b0:295:9383:543 with SMTP id d9443c01a7336-29b6bee2c8emr139460165ad.27.1763983752651;
-        Mon, 24 Nov 2025 03:29:12 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IF6HDY47fcT6Lp1tR/8iFhrEEnMqzWSigNega4FnN7afcdlOzSJ4ONZeVJtQJ7yGBhH6cXbog==
-X-Received: by 2002:a17:902:d4d0:b0:295:9383:543 with SMTP id d9443c01a7336-29b6bee2c8emr139459925ad.27.1763983752134;
-        Mon, 24 Nov 2025 03:29:12 -0800 (PST)
-Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29b5b27509dsm132034165ad.78.2025.11.24.03.29.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Nov 2025 03:29:11 -0800 (PST)
-From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
-Subject: [PATCH] mmc: host: sdhci-msm: Add support for wrapped keys
-Date: Mon, 24 Nov 2025 16:59:08 +0530
-Message-Id: <20251124112908.3193211-1-neeraj.soni@oss.qualcomm.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PBKY2PHy"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 380FCC116C6;
+	Mon, 24 Nov 2025 14:28:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1763994524;
+	bh=EgfoIt6225PJlSWklStK+SttjLQeaPR1RUbvN+3I9oE=;
+	h=From:Date:Cc:To:In-Reply-To:References:Subject:From;
+	b=PBKY2PHyY2TsZZftaarrjjW/T13vXEroVmJhoH33I8Ix2KmCqaTR4akXr7xIHxNZz
+	 nmxQj+cZaSKxv+5X4Qp0A/WvCatqrCJvFEV7bvuN1tEnAcF9gArmNOloKk+BHhFL7M
+	 GAS8978Vr0qVZjrcUrTtoPcjx5lUxI/L3ud+IgXbM/qd1EJgYtetPwJT5UyjomT3f4
+	 +cDBA3Sv3HqaJj8H4JHF86uHcTLDVzGwIl2r6sGHftWvx+i4Cs/R1ek429Po1hEVdj
+	 FNEVAml129gbyV74i6Ey1ihD6NNnoNQ3JIrFDzwxPIZ+BkVxIFuUuC/FgsdTzleE8s
+	 2LZ3ez2GCPDww==
+From: Rob Herring <robh@kernel.org>
+Date: Mon, 24 Nov 2025 08:28:43 -0600
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTI0MDEwMSBTYWx0ZWRfXzFzG7E78Cgl6
- P6i+GqwirxH5G9tvhlmgUEFyJ3fNEwO4ke2mWbgy+Nhi/Bc1VK7rmUSwBrOfpL0vHz/RJz/xzhZ
- Mw/+M7hOH8Y29Zi02lBeWyaP6rZcyjXwZKbs34t0ES1J+JgPvTq5m3XlLQdcXOsl1RKN0pD5pa6
- 1ectg1ml/qH64t6k17NaxGpt/v173nPTfQgEgPzJG3FpD6DVTd+uICJCR74b/brD1XERPWYZKZ7
- E6+Uxyo1WS3JBigJQoDhSzqYrfMI3lv3qTrsPO62zrvdL94tjufFgxdELyZsaby3DWIu3AJd6pJ
- vzJ1rdmlWRws4woArSR41ZSN+oKnTmi1o0FlpUr/DhHLvJPYOhyMpjV0sJsFD4XmzvvdmxmL/RO
- KM7wgWqQfv1bmKl1egNvvtw0DrtpCw==
-X-Authority-Analysis: v=2.4 cv=YJqSCBGx c=1 sm=1 tr=0 ts=69244189 cx=c_pps
- a=IZJwPbhc+fLeJZngyXXI0A==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=6UeiqGixMTsA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=VwQbUJbxAAAA:8 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8 a=ZyxRHT4sbPtUm1NgsYkA:9
- a=uG9DUKGECoFWVXl0Dc02:22 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: _kFjrD9fCLjeGzMk8q6ZAQ0D3QSbmSYX
-X-Proofpoint-ORIG-GUID: _kFjrD9fCLjeGzMk8q6ZAQ0D3QSbmSYX
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-24_04,2025-11-21_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 bulkscore=0 suspectscore=0 phishscore=0 clxscore=1015
- lowpriorityscore=0 malwarescore=0 impostorscore=0 spamscore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511240101
+Cc: devicetree@vger.kernel.org, conor+dt@kernel.org, andersson@kernel.org, 
+ linux-kernel@vger.kernel.org, krzk+dt@kernel.org, konradybcio@kernel.org, 
+ linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+In-Reply-To: <20251124111914.3187803-1-neeraj.soni@oss.qualcomm.com>
+References: <20251124111914.3187803-1-neeraj.soni@oss.qualcomm.com>
+Message-Id: <176399402112.138918.10418108466178515664.robh@kernel.org>
+Subject: Re: [PATCH 0/2] Enable Inline crypto engine for kodiak
 
-Add the wrapped key support for sdhci-msm by implementing the needed
-methods in struct blk_crypto_ll_ops and setting the appropriate flag in
-blk_crypto_profile::key_types_supported.
 
-This is a reworked version of the patchset
-https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
-that was sent by Seshu Madhavi Puppala.
+On Mon, 24 Nov 2025 16:49:12 +0530, Neeraj Soni wrote:
+> Document Inline Crypto Engine (ICE) handle for SDHC and add its device-tree
+> node to enable it for kodiak.
+> 
+> Neeraj Soni (2):
+>   dt-bindings: mmc: sdhci-msm: Add ICE phandle
+>   arm64: dts: qcom: kodiak: enable the inline crypto engine for SDHC
+> 
+>  .../devicetree/bindings/mmc/sdhci-msm.yaml    | 38 +++++++++++++++++++
+>  arch/arm64/boot/dts/qcom/kodiak.dtsi          |  9 +++++
+>  2 files changed, 47 insertions(+)
+> 
+> --
+> 2.34.1
+> 
+> 
+> 
 
-My changes rebase it to use the custom crypto profile support.
 
-Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
----
- drivers/mmc/host/sdhci-msm.c | 51 +++++++++++++++++++++++++++++++-----
- 1 file changed, 45 insertions(+), 6 deletions(-)
+My bot found new DTB warnings on the .dts files added or changed in this
+series.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 4e5edbf2fc9b..351f2a77068b 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1911,11 +1911,6 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
- 	if (IS_ERR_OR_NULL(ice))
- 		return PTR_ERR_OR_ZERO(ice);
- 
--	if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
--		dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
--		return 0;
--	}
--
- 	msm_host->ice = ice;
- 
- 	/* Initialize the blk_crypto_profile */
-@@ -1929,7 +1924,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
- 
- 	profile->ll_ops = sdhci_msm_crypto_ops;
- 	profile->max_dun_bytes_supported = 4;
--	profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
-+	profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
- 	profile->dev = dev;
- 
- 	/*
-@@ -2009,9 +2004,53 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
- 	return qcom_ice_evict_key(msm_host->ice, slot);
- }
- 
-+static int sdhci_msm_ice_derive_sw_secret(struct blk_crypto_profile *profile,
-+					  const u8 *eph_key, size_t eph_key_size,
-+					  u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_derive_sw_secret(msm_host->ice, eph_key, eph_key_size,
-+					sw_secret);
-+}
-+
-+static int sdhci_msm_ice_import_key(struct blk_crypto_profile *profile,
-+				    const u8 *raw_key, size_t raw_key_size,
-+				    u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_import_key(msm_host->ice, raw_key, raw_key_size, lt_key);
-+}
-+
-+static int sdhci_msm_ice_generate_key(struct blk_crypto_profile *profile,
-+				      u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_generate_key(msm_host->ice, lt_key);
-+}
-+
-+static int sdhci_msm_ice_prepare_key(struct blk_crypto_profile *profile,
-+				     const u8 *lt_key, size_t lt_key_size,
-+				     u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_prepare_key(msm_host->ice, lt_key, lt_key_size, eph_key);
-+}
-+
- static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
- 	.keyslot_program	= sdhci_msm_ice_keyslot_program,
- 	.keyslot_evict		= sdhci_msm_ice_keyslot_evict,
-+	.derive_sw_secret	= sdhci_msm_ice_derive_sw_secret,
-+	.import_key		= sdhci_msm_ice_import_key,
-+	.generate_key		= sdhci_msm_ice_generate_key,
-+	.prepare_key		= sdhci_msm_ice_prepare_key,
- };
- 
- #else /* CONFIG_MMC_CRYPTO */
--- 
-2.34.1
+Some warnings may be from an existing SoC .dtsi. Or perhaps the warnings
+are fixed by another series. Ultimately, it is up to the platform
+maintainer whether these warnings are acceptable or not. No need to reply
+unless the platform maintainer has comments.
+
+If you already ran DT checks and didn't see these error(s), then
+make sure dt-schema is up to date:
+
+  pip3 install dtschema --upgrade
+
+
+This patch series was applied (using b4) to base:
+ Base: attempting to guess base-commit...
+ Base: tags/next-20251120 (exact match)
+ Base: tags/next-20251120 (use --merge-base to override)
+
+If this is not the correct base, please add 'base-commit' tag
+(or use b4 which does this automatically)
+
+New warnings running 'make CHECK_DTBS=y for arch/arm64/boot/dts/qcom/' for 20251124111914.3187803-1-neeraj.soni@oss.qualcomm.com:
+
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sm7325-nothing-spacewar.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sm7325-nothing-spacewar.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sm7325-nothing-spacewar.dtb] Error 2
+arch/arm64/boot/dts/qcom/sm7125-xiaomi-curtana.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r3-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm7125-xiaomi-curtana.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc8280xp-lenovo-thinkpad-x13s.dtb: mmc@8804000 (qcom,sc8280xp-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-crd-pro.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-crd-pro.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-crd-pro.dtb] Error 2
+arch/arm64/boot/dts/qcom/x1e80100-asus-zenbook-a14.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-asus-zenbook-a14.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/qcs6490-rb3gen2.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/qcs6490-rb3gen2.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/qcs6490-rb3gen2.dtb] Error 2
+arch/arm64/boot/dts/qcom/ipq9574-rdp454.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp454.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r3-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115p-lenovo-j606f.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115p-lenovo-j606f.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115p-lenovo-j606f.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg: [[0, 74989568, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115p-lenovo-j606f.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-dell-xps13-9345.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-dell-xps13-9345.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-r4.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel360-wifi.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-r4.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-quackingstick-r0.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e78100-lenovo-thinkpad-t14s-oled.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e78100-lenovo-thinkpad-t14s-oled.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel360-wifi.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r1-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-quackingstick-r0.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-dell-latitude-7455.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-dell-latitude-7455.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb2210-rb1.dtb: mmc@4744000 (qcom,qcm2290-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb2210-rb1.dtb: mmc@4744000 (qcom,qcm2290-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb2210-rb1.dtb: mmc@4784000 (qcom,qcm2290-sdhci): reg: [[0, 74989568, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb2210-rb1.dtb: mmc@4784000 (qcom,qcm2290-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-ganges-kirin.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg: [[201867264, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-ganges-kirin.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-lg-judyp.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-ganges-kirin.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-ganges-kirin.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-zombie.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r1-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-discovery.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg: [[201867264, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-discovery.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-discovery.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-discovery.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-lenovo-yoga-slim7x.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-lenovo-yoga-slim7x.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8550-qrd.dtb: mmc@8804000 (qcom,sm8550-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8550-sony-xperia-yodo-pdx234.dtb: mmc@8804000 (qcom,sm8550-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-inx.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb5165-rb5.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc8280xp-microsoft-arcata.dtb: mmc@8804000 (qcom,sc8280xp-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg: [[201867264, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r4.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-inx.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-oneplus-fajita.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r1.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r10.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq6018-cp01-c1.dtb: mmc@7804000 (qcom,ipq6018-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/qcm6490-idp.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/qcm6490-idp.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/qcm6490-idp.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r4.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r1.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r10.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8350-microsoft-surface-duo2.dtb: mmc@8804000 (qcom,sm8350-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8550-mtp.dtb: mmc@8804000 (qcom,sm8550-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-sony-xperia-tama-akari.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r9.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-samsung-x1q.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/qcm6490-particle-tachyon.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/qcm6490-particle-tachyon.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/qcm6490-particle-tachyon.dtb] Error 2
+arch/arm64/boot/dts/qcom/sm8250-mtp.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-crd.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-crd.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r9.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-xiaomi-elish-csot.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs8550-aim300-aiot.dtb: mmc@8804000 (qcom,sm8550-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs404-evb-4000.dtb: mmc@7804000 (qcom,qcs404-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-crd.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-crd.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-crd.dtb] Error 2
+arch/arm64/boot/dts/qcom/sdm670-google-sargo.dtb: mmc@7c4000 (qcom,sdm670-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm670-google-sargo.dtb: mmc@7c4000 (qcom,sdm670-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq5424-rdp466.dtb: mmc@7804000 (qcom,ipq5424-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-xiaomi-elish-boe.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs9100-ride.dtb: mmc@87c4000 (qcom,sa8775p-sdhci): reg: [[0, 142360576, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e001de-devkit.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e001de-devkit.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r3-kb.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-xiaomi-ginkgo.dtb: mmc@4744000 (qcom,sm6125-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-xiaomi-ginkgo.dtb: mmc@4784000 (qcom,sm6125-sdhci): reg: [[74989568, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-xiaomi-ginkgo.dtb: mmc@4784000 (qcom,sm6125-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-lg-judyln.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8150-sony-xperia-kumano-griffin.dtb: mmc@8804000 (qcom,sm8150-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r3-kb.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-idp.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-idp.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-idp.dtb] Error 2
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker-lte.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker-lte.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-evoker-lte.dtb] Error 2
+arch/arm64/boot/dts/qcom/sa8775p-ride.dtb: mmc@87c4000 (qcom,sa8775p-sdhci): reg: [[0, 142360576, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-xiaomi-pipa.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-idp2.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-idp2.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-idp2.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-homestar-r4.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-oneplus-enchilada.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-homestar-r4.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp433.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp433.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp453.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp453.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8150-mtp.dtb: mmc@8804000 (qcom,sm8150-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-samsung-r8q.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-pioneer.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg: [[201867264, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-pioneer.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-pioneer.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-pioneer.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-r1.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-sony-xperia-tama-apollo.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-acer-aspire1.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dtb: mmc@7804000 (qcom,ipq5018-sdhci): reg: [[125845504, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dtb: mmc@7804000 (qcom,ipq5018-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-evoker.dtb] Error 2
+arch/arm64/boot/dts/qcom/ipq5018-tplink-archer-ax55-v1.dtb: mmc@7804000 (qcom,ipq5018-sdhci): reg: [[125845504, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq5018-tplink-archer-ax55-v1.dtb: mmc@7804000 (qcom,ipq5018-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-r1.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-acer-aspire1.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb4210-rb2.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb4210-rb2.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb4210-rb2.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg: [[0, 74989568, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qrb4210-rb2.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-kingoftown.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-hp-omnibook-x14.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-hp-omnibook-x14.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r2-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm850-huawei-matebook-e-2019.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdx75-idp.dtb: mmc@8804000 (qcom,sdx75-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-kingoftown.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r2-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8350-sony-xperia-sagami-pdx215.dtb: mmc@8804000 (qcom,sm8350-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6375-sony-xperia-murray-pdx225.dtb: mmc@4784000 (qcom,sm6375-sdhci): reg: [[0, 74989568, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-mtp.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-r9.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-hp-omnibook-x14.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-hp-omnibook-x14.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs9100-ride-r3.dtb: mmc@87c4000 (qcom,sa8775p-sdhci): reg: [[0, 142360576, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie-lte.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie-lte.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-zombie-lte.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-r9.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel360-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r3.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sar2130p-qar2130p.dtb: mmc@7c4000 (qcom,sar2130p-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-herobrine-r1.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-herobrine-r1.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-herobrine-r1.dtb] Error 2
+arch/arm64/boot/dts/qcom/sdm845-shift-axolotl.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel360-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r3.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8650-hdk.dtb: mmc@8804000 (qcom,sm8650-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/monaco-evk.dtb: mmc@87c4000 (qcom,qcs8300-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-voyager.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg: [[201867264, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-voyager.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-voyager.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm630-sony-xperia-nile-voyager.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8350-hdk.dtb: mmc@8804000 (qcom,sm8350-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm7225-fairphone-fp4.dtb: mmc@7c4000 (qcom,sm6350-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm7225-fairphone-fp4.dtb: mmc@7c4000 (qcom,sm6350-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-sony-xperia-edo-pdx203.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm7225-fairphone-fp4.dtb: mmc@8804000 (qcom,sm6350-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8450-hdk.dtb: mmc@8804000 (qcom,sm8450-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-sony-xperia-edo-pdx206.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sa8155p-adp.dtb: mmc@8804000 (qcom,sm8150-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie-nvme-lte.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie-nvme-lte.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-zombie-nvme-lte.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r1-kb.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-qcp.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-qcp.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8450-qrd.dtb: mmc@8804000 (qcom,sm8450-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r1-kb.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-homestar-r3.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8150-microsoft-surface-duo.dtb: mmc@8804000 (qcom,sm8150-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-asus-vivobook-s15.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-asus-vivobook-s15.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e78100-lenovo-thinkpad-t14s.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e78100-lenovo-thinkpad-t14s.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r10-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8150-hdk.dtb: mmc@8804000 (qcom,sm8150-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-homestar-r3.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r10-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-idp.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie-nvme.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie-nvme.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-zombie-nvme.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-r10.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-idp.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-asus-zenbook-a14.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-asus-zenbook-a14.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qru1000-idp.dtb: mmc@8804000 (qcom,qdu1000-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-hp-elitebook-ultra-g1q.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-hp-elitebook-ultra-g1q.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-r10.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-parade.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r9-kb.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-boe.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-boe-rt5682s.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-microsoft-romulus15.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-microsoft-romulus15.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-crd-r3.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-crd-r3.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-crd-r3.dtb] Error 2
+arch/arm64/boot/dts/qcom/qcs615-ride.dtb: mmc@7c4000 (qcom,qcs615-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs615-ride.dtb: mmc@7c4000 (qcom,qcs615-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-parade.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r9-kb.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-boe.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r3-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs615-ride.dtb: mmc@8804000 (qcom,qcs615-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs615-ride.dtb: mmc@8804000 (qcom,qcs615-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-villager-r1.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-villager-r1.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-villager-r1.dtb] Error 2
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/qcm6490-shift-otter.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/qcm6490-shift-otter.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/qcm6490-shift-otter.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-boe-rt5682s.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-ti.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sa8775p-ride-r3.dtb: mmc@87c4000 (qcom,sa8775p-sdhci): reg: [[0, 142360576, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-ti.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/hamoa-iot-evk.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/hamoa-iot-evk.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r1-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs8300-ride.dtb: mmc@87c4000 (qcom,qcs8300-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8450-samsung-r0q.dtb: mmc@8804000 (qcom,sm8450-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r3-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-samsung-starqltechn.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r1-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r9.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-dell-inspiron-14-plus-7441.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-dell-inspiron-14-plus-7441.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-xiaomi-laurel-sprout.dtb: mmc@4744000 (qcom,sm6125-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-xiaomi-laurel-sprout.dtb: mmc@4784000 (qcom,sm6125-sdhci): reg: [[74989568, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-xiaomi-laurel-sprout.dtb: mmc@4784000 (qcom,sm6125-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r9.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp449.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp449.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-r1-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r3.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-sony-xperia-tama-akatsuki.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-r1-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r9-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-lte-ti.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-crd.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-crd.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-lenovo-thinkbook-16.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-lenovo-thinkbook-16.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r9-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/lemans-evk.dtb: mmc@87c4000 (qcom,sa8775p-sdhci): reg: [[0, 142360576, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-coachz-r3.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-lte-ti.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sa8295p-adp.dtb: mmc@8804000 (qcom,sc8280xp-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-xiaomi-beryllium-ebbg.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r3.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/qcm6490-fairphone-fp5.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/qcm6490-fairphone-fp5.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/qcm6490-fairphone-fp5.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r1-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8650-mtp.dtb: mmc@8804000 (qcom,sm8650-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r3.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-inx-rt5682s.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8550-hdk.dtb: mmc@8804000 (qcom,sm8550-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-microsoft-romulus13.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1e80100-microsoft-romulus13.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r1-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-wormdingler-rev1-inx-rt5682s.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc8280xp-huawei-gaokun3.dtb: mmc@8804000 (qcom,sc8280xp-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6350-sony-xperia-lena-pdx213.dtb: mmc@7c4000 (qcom,sm6350-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6350-sony-xperia-lena-pdx213.dtb: mmc@7c4000 (qcom,sm6350-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r2.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6350-sony-xperia-lena-pdx213.dtb: mmc@8804000 (qcom,sm6350-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r2.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sda660-inforce-ifc6560.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg: [[201867264, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sda660-inforce-ifc6560.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sda660-inforce-ifc6560.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sda660-inforce-ifc6560.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-lte-parade.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-asus-zenbook-a14-lcd.dtb: mmc@8804000 (qcom,x1e80100-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/x1p42100-asus-zenbook-a14-lcd.dtb: mmc@8844000 (qcom,x1e80100-sdhci): reg: [[0, 142884864, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8150-sony-xperia-kumano-bahamut.dtb: mmc@8804000 (qcom,sm8150-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-homestar-r2.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pazquel-lte-parade.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc8280xp-microsoft-blackrock.dtb: mmc@8804000 (qcom,sc8280xp-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8250-hdk.dtb: mmc@8804000 (qcom,sm8250-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8650-qrd.dtb: mmc@8804000 (qcom,sm8650-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-homestar-r2.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r5.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm850-samsung-w737.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc8280xp-crd.dtb: mmc@8804000 (qcom,sc8280xp-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r5.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r10-kb.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-villager-r1-lte.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-villager-r1-lte.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-villager-r1-lte.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r3-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/qcs6490-radxa-dragon-q6a.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/qcs6490-radxa-dragon-q6a.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/qcs6490-radxa-dragon-q6a.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r10-kb.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm850-lenovo-yoga-c630.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115-fxtec-pro1x.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115-fxtec-pro1x.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115-fxtec-pro1x.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg: [[0, 74989568, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6115-fxtec-pro1x.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r3-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8350-sony-xperia-sagami-pdx214.dtb: mmc@8804000 (qcom,sm8350-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qdu1000-idp.dtb: mmc@8804000 (qcom,qdu1000-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-db845c.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sa8540p-ride.dtb: mmc@8804000 (qcom,sc8280xp-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8350-mtp.dtb: mmc@8804000 (qcom,sm8350-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8550-samsung-q5q.dtb: mmc@8804000 (qcom,sm8550-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+Error: arch/arm64/boot/dts/qcom/kodiak.dtsi:1073.4-27 Properties must precede subnodes
+FATAL ERROR: Unable to parse input tree
+make[3]: *** [scripts/Makefile.dtbs:141: arch/arm64/boot/dts/qcom/sc7280-herobrine-villager-r0.dtb] Error 1
+make[2]: *** [scripts/Makefile.build:556: arch/arm64/boot/dts/qcom] Error 2
+make[2]: Target 'arch/arm64/boot/dts/qcom/sc7280-herobrine-villager-r0.dtb' not remade because of errors.
+make[1]: *** [/home/rob/proj/linux-dt-testing/Makefile:1509: qcom/sc7280-herobrine-villager-r0.dtb] Error 2
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r1.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r1.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm4250-oneplus-billie2.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm4250-oneplus-billie2.dtb: mmc@4744000 (qcom,sm6115-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm4250-oneplus-billie2.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg: [[0, 74989568, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm4250-oneplus-billie2.dtb: mmc@4784000 (qcom,sm6115-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/qcs404-evb-1000.dtb: mmc@7804000 (qcom,qcs404-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm636-sony-xperia-ganges-mermaid.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg: [[201867264, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm636-sony-xperia-ganges-mermaid.dtb: mmc@c084000 (qcom,sdm630-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm636-sony-xperia-ganges-mermaid.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm636-sony-xperia-ganges-mermaid.dtb: mmc@c0c4000 (qcom,sdm630-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-r1.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp418.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/ipq9574-rdp418.dtb: mmc@7804000 (qcom,ipq9574-sdhci): reg-names:2: 'cqhci' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-sony-xperia-seine-pdx201.dtb: mmc@4744000 (qcom,sm6125-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-sony-xperia-seine-pdx201.dtb: mmc@4784000 (qcom,sm6125-sdhci): reg: [[74989568, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm6125-sony-xperia-seine-pdx201.dtb: mmc@4784000 (qcom,sm6125-sdhci): reg-names: ['hc'] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-pompom-r1.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-xiaomi-beryllium-tianma.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm7125-xiaomi-joyeuse.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r10.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sdm845-xiaomi-polaris.dtb: mmc@8804000 (qcom,sdm845-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-quackingstick-r0-lte.dtb: mmc@7c4000 (qcom,sc7180-sdhci): reg-names:1: 'core' was expected
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm7125-xiaomi-joyeuse.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8450-sony-xperia-nagara-pdx223.dtb: mmc@8804000 (qcom,sm8450-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-lazor-limozeen-nots-r10.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sm8450-sony-xperia-nagara-pdx224.dtb: mmc@8804000 (qcom,sm8450-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+arch/arm64/boot/dts/qcom/sc7180-trogdor-quackingstick-r0-lte.dtb: mmc@8804000 (qcom,sc7180-sdhci): reg: [[0, 142622720, 0, 4096]] is too short
+	from schema $id: http://devicetree.org/schemas/mmc/sdhci-msm.yaml
+make: *** [Makefile:248: __sub-make] Error 2
+make: Target 'qcom/apq8096-ifc6640.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-j3ltetw.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-fxtec-pro1.dtb' not remade because of errors.
+make: Target 'qcom/sm7325-nothing-spacewar.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-asus-zenbook-a14.dtb' not remade because of errors.
+make: Target 'qcom/sm7125-xiaomi-curtana.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-dell-xps13-9345.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-mtp.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-a5u-eur.dtb' not remade because of errors.
+make: Target 'qcom/sc8280xp-lenovo-thinkpad-x13s.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r3-lte.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-crd-pro.dtb' not remade because of errors.
+make: Target 'qcom/sm6115p-lenovo-j606f.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-sony-xperia-yoshino-maple.dtb' not remade because of errors.
+make: Target 'qcom/ipq9574-rdp454.dtb' not remade because of errors.
+make: Target 'qcom/qcs6490-rb3gen2.dtb' not remade because of errors.
+make: Target 'qcom/msm8992-xiaomi-libra.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-limozeen-r4.dtb' not remade because of errors.
+make: Target 'qcom/sdm450-motorola-ali.dtb' not remade because of errors.
+make: Target 'qcom/x1e78100-lenovo-thinkpad-t14s-oled.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-quackingstick-r0.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pazquel360-wifi.dtb' not remade because of errors.
+make: Target 'qcom/sdm630-sony-xperia-ganges-kirin.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-coachz-r1-lte.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-dell-latitude-7455.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-lg-judyp.dtb' not remade because of errors.
+make: Target 'qcom/msm8939-wingtech-wt82918.dtb' not remade because of errors.
+make: Target 'qcom/qrb2210-rb1.dtb' not remade because of errors.
+make: Target 'qcom/msm8996-mtp.dtb' not remade because of errors.
+make: Target 'qcom/sm8750-mtp.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-zombie.dtb' not remade because of errors.
+make: Target 'qcom/msm8992-lg-bullhead-rev-10.dtb' not remade because of errors.
+make: Target 'qcom/qrb5165-rb5.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-lenovo-yoga-slim7x.dtb' not remade because of errors.
+make: Target 'qcom/sm8550-qrd.dtb' not remade because of errors.
+make: Target 'qcom/sdm630-sony-xperia-nile-discovery.dtb' not remade because of errors.
+make: Target 'qcom/sm8550-sony-xperia-yodo-pdx234.dtb' not remade because of errors.
+make: Target 'qcom/msm8939-huawei-kiwi.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-wormdingler-rev1-inx.dtb' not remade because of errors.
+make: Target 'qcom/sc8280xp-microsoft-arcata.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-oneplus-fajita.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-limozeen-nots-r4.dtb' not remade because of errors.
+make: Target 'qcom/sdm660-xiaomi-lavender.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-coachz-r1.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r10.dtb' not remade because of errors.
+make: Target 'qcom/msm8939-wingtech-wt82918hd.dtb' not remade because of errors.
+make: Target 'qcom/ipq6018-cp01-c1.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-samsung-x1q.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-motorola-surnia.dtb' not remade because of errors.
+make: Target 'qcom/sm8350-microsoft-surface-duo2.dtb' not remade because of errors.
+make: Target 'qcom/qcm6490-idp.dtb' not remade because of errors.
+make: Target 'qcom/sm8550-mtp.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-a3u-eur.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-sony-xperia-tama-akari.dtb' not remade because of errors.
+make: Target 'qcom/x1p42100-crd.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-mtp.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-limozeen-nots-r9.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-xiaomi-elish-csot.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-wingtech-wt88047.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-thwc-ufi001c.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-xiaomi-sagit.dtb' not remade because of errors.
+make: Target 'qcom/qcm6490-particle-tachyon.dtb' not remade because of errors.
+make: Target 'qcom/qcs8550-aim300-aiot.dtb' not remade because of errors.
+make: Target 'qcom/sdm450-lenovo-tbx605f.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-xiaomi-elish-boe.dtb' not remade because of errors.
+make: Target 'qcom/qcs404-evb-4000.dtb' not remade because of errors.
+make: Target 'qcom/qcs9100-ride.dtb' not remade because of errors.
+make: Target 'qcom/msm8996-sony-xperia-tone-kagura.dtb' not remade because of errors.
+make: Target 'qcom/sm8150-sony-xperia-kumano-griffin.dtb' not remade because of errors.
+make: Target 'qcom/sdm670-google-sargo.dtb' not remade because of errors.
+make: Target 'qcom/x1e001de-devkit.dtb' not remade because of errors.
+make: Target 'qcom/sa8775p-ride.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-crd.dtb' not remade because of errors.
+make: Target 'qcom/ipq5424-rdp466.dtb' not remade because of errors.
+make: Target 'qcom/sc8180x-lenovo-flex-5g.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-lg-judyln.dtb' not remade because of errors.
+make: Target 'qcom/msm8953-flipkart-rimob.dtb' not remade because of errors.
+make: Target 'qcom/sm6125-xiaomi-ginkgo.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r3-kb.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-motorola-osprey.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-xiaomi-pipa.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-oneplus-enchilada.dtb' not remade because of errors.
+make: Target 'qcom/msm8956-sony-xperia-loire-suzu.dtb' not remade because of errors.
+make: Target 'qcom/msm8937-xiaomi-land.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-idp.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-evoker-lte.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-homestar-r4.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-rossa.dtb' not remade because of errors.
+make: Target 'qcom/apq8039-t2.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-motorola-harpia.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-e5.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-idp2.dtb' not remade because of errors.
+make: Target 'qcom/msm8939-sony-xperia-kanuti-tulip.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-samsung-r8q.dtb' not remade because of errors.
+make: Target 'qcom/ipq8074-hk01.dtb' not remade because of errors.
+make: Target 'qcom/sm8150-mtp.dtb' not remade because of errors.
+make: Target 'qcom/ipq9574-rdp433.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-sony-xperia-tama-apollo.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-lenovo-miix-630.dtb' not remade because of errors.
+make: Target 'qcom/msm8994-sony-xperia-kitakami-karin.dtb' not remade because of errors.
+make: Target 'qcom/sdm630-sony-xperia-nile-pioneer.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-grandmax.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-alcatel-idol347.dtb' not remade because of errors.
+make: Target 'qcom/ipq9574-rdp453.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-acer-aspire1.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-r1.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-e7.dtb' not remade because of errors.
+make: Target 'qcom/ipq5018-rdp432-c2.dtb' not remade because of errors.
+make: Target 'qcom/apq8016-schneider-hmibsc.dtb' not remade because of errors.
+make: Target 'qcom/qrb4210-rb2.dtb' not remade because of errors.
+make: Target 'qcom/x1p42100-hp-omnibook-x14.dtb' not remade because of errors.
+make: Target 'qcom/ipq5018-tplink-archer-ax55-v1.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-evoker.dtb' not remade because of errors.
+make: Target 'qcom/sdm850-huawei-matebook-e-2019.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-kingoftown.dtb' not remade because of errors.
+make: Target 'qcom/sm4450-qrd.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-j5.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-asus-novago-tp370ql.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pompom-r2-lte.dtb' not remade because of errors.
+make: Target 'qcom/msm8992-lg-h815.dtb' not remade because of errors.
+make: Target 'qcom/sdx75-idp.dtb' not remade because of errors.
+make: Target 'qcom/sm8350-sony-xperia-sagami-pdx215.dtb' not remade because of errors.
+make: Target 'qcom/apq8096-db820c.dtb' not remade because of errors.
+make: Target 'qcom/msm8996-sony-xperia-tone-keyaki.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-longcheer-l8150.dtb' not remade because of errors.
+make: Target 'qcom/msm8994-sony-xperia-kitakami-suzuran.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-mtp.dtb' not remade because of errors.
+make: Target 'qcom/sm6375-sony-xperia-murray-pdx225.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-yiming-uz801v3.dtb' not remade because of errors.
+make: Target 'qcom/qcs9100-ride-r3.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-hp-omnibook-x14.dtb' not remade because of errors.
+make: Target 'qcom/msm8953-xiaomi-vince.dtb' not remade because of errors.
+make: Target 'qcom/ipq5332-rdp441.dtb' not remade because of errors.
+make: Target 'qcom/msm8992-lg-bullhead-rev-101.dtb' not remade because of errors.
+make: Target 'qcom/msm8917-xiaomi-riva.dtb' not remade because of errors.
+make: Target 'qcom/msm8996-xiaomi-gemini.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-limozeen-r9.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-sony-xperia-yoshino-lilac.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-gprimeltecan.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pazquel360-lte.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-shift-axolotl.dtb' not remade because of errors.
+make: Target 'qcom/msm8996-oneplus3t.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-zombie-lte.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r3.dtb' not remade because of errors.
+make: Target 'qcom/monaco-evk.dtb' not remade because of errors.
+make: Target 'qcom/sar2130p-qar2130p.dtb' not remade because of errors.
+make: Target 'qcom/sm8650-hdk.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-herobrine-r1.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-longcheer-l8910.dtb' not remade because of errors.
+make: Target 'qcom/sdm630-sony-xperia-nile-voyager.dtb' not remade because of errors.
+make: Target 'qcom/sm8450-hdk.dtb' not remade because of errors.
+make: Target 'qcom/msm8929-wingtech-wt82918hd.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-sony-xperia-edo-pdx203.dtb' not remade because of errors.
+make: Target 'qcom/sm8350-hdk.dtb' not remade because of errors.
+make: Target 'qcom/ipq8074-hk10-c1.dtb' not remade because of errors.
+make: Target 'qcom/sm8450-qrd.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-lg-c50.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-sony-xperia-edo-pdx206.dtb' not remade because of errors.
+make: Target 'qcom/sm7225-fairphone-fp4.dtb' not remade because of errors.
+make: Target 'qcom/sa8155p-adp.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-qcp.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r1-kb.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-grandprimelte.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-zombie-nvme-lte.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-homestar-r3.dtb' not remade because of errors.
+make: Target 'qcom/ipq5332-rdp474.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-asus-vivobook-s15.dtb' not remade because of errors.
+make: Target 'qcom/sm8150-microsoft-surface-duo.dtb' not remade because of errors.
+make: Target 'qcom/msm8996pro-xiaomi-scorpio.dtb' not remade because of errors.
+make: Target 'qcom/x1e78100-lenovo-thinkpad-t14s.dtb' not remade because of errors.
+make: Target 'qcom/sm8150-hdk.dtb' not remade because of errors.
+make: Target 'qcom/sc8180x-primus.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r10-lte.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-j5x.dtb' not remade because of errors.
+make: Target 'qcom/x1p42100-asus-zenbook-a14.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-idp.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-mtp.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-hp-elitebook-ultra-g1q.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-limozeen-r10.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-zombie-nvme.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-microsoft-romulus15.dtb' not remade because of errors.
+make: Target 'qcom/qru1000-idp.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-hp-envy-x2.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-wormdingler-rev1-boe-rt5682s.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pazquel-parade.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r9-kb.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-wormdingler-rev1-boe.dtb' not remade because of errors.
+make: Target 'qcom/qcs615-ride.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-coachz-r3-lte.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-crd-r3.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-gt58.dtb' not remade because of errors.
+make: Target 'qcom/sa8775p-ride-r3.dtb' not remade because of errors.
+make: Target 'qcom/sm8450-samsung-r0q.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-villager-r1.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pazquel-ti.dtb' not remade because of errors.
+make: Target 'qcom/qcm6490-shift-otter.dtb' not remade because of errors.
+make: Target 'qcom/hamoa-iot-evk.dtb' not remade because of errors.
+make: Target 'qcom/qcs8300-ride.dtb' not remade because of errors.
+make: Target 'qcom/apq8016-sbc.dtb' not remade because of errors.
+make: Target 'qcom/msm8996pro-xiaomi-natrium.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-samsung-starqltechn.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pompom-r1-lte.dtb' not remade because of errors.
+make: Target 'qcom/msm8953-xiaomi-tissot.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-dell-inspiron-14-plus-7441.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r9.dtb' not remade because of errors.
+make: Target 'qcom/sm6125-xiaomi-laurel-sprout.dtb' not remade because of errors.
+make: Target 'qcom/msm8994-sony-xperia-kitakami-sumire.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-serranove.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-coachz-r3.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-sony-xperia-tama-akatsuki.dtb' not remade because of errors.
+make: Target 'qcom/ipq9574-rdp449.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-r1-lte.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-lg-m216.dtb' not remade because of errors.
+make: Target 'qcom/msm8939-asus-z00t.dtb' not remade because of errors.
+make: Target 'qcom/lemans-evk.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-crd.dtb' not remade because of errors.
+make: Target 'qcom/x1p42100-lenovo-thinkbook-16.dtb' not remade because of errors.
+make: Target 'qcom/apq8094-sony-xperia-kitakami-karin_windy.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r9-lte.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pazquel-lte-ti.dtb' not remade because of errors.
+make: Target 'qcom/msm8996-sony-xperia-tone-dora.dtb' not remade because of errors.
+make: Target 'qcom/sa8295p-adp.dtb' not remade because of errors.
+make: Target 'qcom/msm8994-sony-xperia-kitakami-ivy.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-xiaomi-beryllium-ebbg.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pompom-r3.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-oneplus-dumpling.dtb' not remade because of errors.
+make: Target 'qcom/sm8650-mtp.dtb' not remade because of errors.
+make: Target 'qcom/msm8996-oneplus3.dtb' not remade because of errors.
+make: Target 'qcom/sm8550-hdk.dtb' not remade because of errors.
+make: Target 'qcom/x1e80100-microsoft-romulus13.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r1-lte.dtb' not remade because of errors.
+make: Target 'qcom/msm8939-samsung-a7.dtb' not remade because of errors.
+make: Target 'qcom/qcm6490-fairphone-fp5.dtb' not remade because of errors.
+make: Target 'qcom/sc8280xp-huawei-gaokun3.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-wormdingler-rev1-inx-rt5682s.dtb' not remade because of errors.
+make: Target 'qcom/msm8953-xiaomi-mido.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-asus-z00l.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pompom-r2.dtb' not remade because of errors.
+make: Target 'qcom/sm6350-sony-xperia-lena-pdx213.dtb' not remade because of errors.
+make: Target 'qcom/sdm632-fairphone-fp3.dtb' not remade because of errors.
+make: Target 'qcom/x1p42100-asus-zenbook-a14-lcd.dtb' not remade because of errors.
+make: Target 'qcom/msm8953-motorola-potter.dtb' not remade because of errors.
+make: Target 'qcom/sda660-inforce-ifc6560.dtb' not remade because of errors.
+make: Target 'qcom/sm8150-sony-xperia-kumano-bahamut.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pazquel-lte-parade.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-homestar-r2.dtb' not remade because of errors.
+make: Target 'qcom/sm8250-hdk.dtb' not remade because of errors.
+make: Target 'qcom/sm8650-qrd.dtb' not remade because of errors.
+make: Target 'qcom/sc8280xp-microsoft-blackrock.dtb' not remade because of errors.
+make: Target 'qcom/ipq8074-hk10-c2.dtb' not remade because of errors.
+make: Target 'qcom/msm8953-xiaomi-daisy.dtb' not remade because of errors.
+make: Target 'qcom/sc8280xp-crd.dtb' not remade because of errors.
+make: Target 'qcom/sdm850-samsung-w737.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-limozeen-nots-r5.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-samsung-gt510.dtb' not remade because of errors.
+make: Target 'qcom/sdm850-lenovo-yoga-c630.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-thwc-uf896.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r10-kb.dtb' not remade because of errors.
+make: Target 'qcom/msm8994-sony-xperia-kitakami-satsuki.dtb' not remade because of errors.
+make: Target 'qcom/sdm632-motorola-ocean.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-villager-r1-lte.dtb' not remade because of errors.
+make: Target 'qcom/sm6115-fxtec-pro1x.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pompom-r3-lte.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-sony-xperia-yoshino-poplar.dtb' not remade because of errors.
+make: Target 'qcom/qcs6490-radxa-dragon-q6a.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-huawei-g7.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-wingtech-wt86518.dtb' not remade because of errors.
+make: Target 'qcom/sm8350-sony-xperia-sagami-pdx214.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-wingtech-wt86528.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-db845c.dtb' not remade because of errors.
+make: Target 'qcom/sa8540p-ride.dtb' not remade because of errors.
+make: Target 'qcom/msm8939-longcheer-l9100.dtb' not remade because of errors.
+make: Target 'qcom/qdu1000-idp.dtb' not remade because of errors.
+make: Target 'qcom/sm8550-samsung-q5q.dtb' not remade because of errors.
+make: Target 'qcom/msm8992-msft-lumia-octagon-talkman.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-gplus-fl8005a.dtb' not remade because of errors.
+make: Target 'qcom/sm8350-mtp.dtb' not remade because of errors.
+make: Target 'qcom/msm8956-sony-xperia-loire-kugo.dtb' not remade because of errors.
+make: Target 'qcom/msm8976-longcheer-l9360.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-r1.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-pompom-r1.dtb' not remade because of errors.
+make: Target 'qcom/msm8998-oneplus-cheeseburger.dtb' not remade because of errors.
+make: Target 'qcom/sc7280-herobrine-villager-r0.dtb' not remade because of errors.
+make: Target 'qcom/sm8750-qrd.dtb' not remade because of errors.
+make: Target 'qcom/sm4250-oneplus-billie2.dtb' not remade because of errors.
+make: Target 'qcom/sdm636-sony-xperia-ganges-mermaid.dtb' not remade because of errors.
+make: Target 'qcom/qcs404-evb-1000.dtb' not remade because of errors.
+make: Target 'qcom/ipq5332-rdp442.dtb' not remade because of errors.
+make: Target 'qcom/msm8994-msft-lumia-octagon-cityman.dtb' not remade because of errors.
+make: Target 'qcom/msm8916-acer-a1-724.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-xiaomi-beryllium-tianma.dtb' not remade because of errors.
+make: Target 'qcom/sm6125-sony-xperia-seine-pdx201.dtb' not remade because of errors.
+make: Target 'qcom/sdm845-xiaomi-polaris.dtb' not remade because of errors.
+make: Target 'qcom/ipq9574-rdp418.dtb' not remade because of errors.
+make: Target 'qcom/msm8216-samsung-fortuna3g.dtb' not remade because of errors.
+make: Target 'qcom/sm8450-sony-xperia-nagara-pdx223.dtb' not remade because of errors.
+make: Target 'qcom/sm8450-sony-xperia-nagara-pdx224.dtb' not remade because of errors.
+make: Target 'qcom/sm7125-xiaomi-joyeuse.dtb' not remade because of errors.
+make: Target 'qcom/msm8994-huawei-angler-rev-101.dtb' not remade because of errors.
+make: Target 'qcom/ipq5332-rdp468.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-lazor-limozeen-nots-r10.dtb' not remade because of errors.
+make: Target 'qcom/sc7180-trogdor-quackingstick-r0-lte.dtb' not remade because of errors.
+
+
+
+
 
