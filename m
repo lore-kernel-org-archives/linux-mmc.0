@@ -1,155 +1,129 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06EBC2C0262
-	for <linux-mmc@vger.kernel.org>; Sat, 22 Nov 2025 19:54:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E69F20468E
+	for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 11:19:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1763841265; cv=none; b=iIz0nT+yXZ2pI5bdz9wp8a9TPaKrUGr4FpXOVjan7MriWmferl39GKKTsO8eYIuSQLXhyHm6c4fZfooaHvojDSOiVXs0cBiVV5JRARiDVngnM9SpOl5RZ6nZHBFObLQ5GYQzYORNOHjkpkCPyVlzVfpQD1ooeh3oxTOVJXDINN4=
+	t=1763983162; cv=none; b=CFHvwN28vfPYhI+s3ezXA8Duv388J4dWrqM2E3rV6xU5LsT+ZEFbwKXeVffSYgEsdrwKAr063q7voH87tVNE7P2EqdZTC+5VQkGVAErRrfa3Xe3xbNNC5uL6za2h1DbqUOCuC+JR+c1E2EKD1SDBlRA41S9wF3JSuQqHK5CwwKQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1763841265; c=relaxed/simple;
-	bh=gdj1+AEtUYUM1rxjlUWFIsXGyxXUD0zKTWFRjlMWuFY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=o+03UjCbPyWrrnDKuS9O5L8g9Pbs2cDMkb8lYSwZgiF1ahkRNHRhD16TIbXylnYXBJ8VJfonxIS3zjFRSOhyKtqbVhI4a8srqaIEe16QdtlipH08baZ8c8qiUOdtVFNS9Hv3mGzm+S94XqhclSCWht+8+h8xwRh6vJxlHFtLyLE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=bFAW/lIs; arc=none smtp.client-ip=198.175.65.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1763983162; c=relaxed/simple;
+	bh=A1OzAYdvgc9RjdmSke7QhThevoP5kSZuGzJW5TfJ8wM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=g1WrSNAavJpq8DDwxToadqZZjEfvkY1HkOG0CwxUUGX9aeCpZHxb2Vms8YTFH9IyVaD0qbCyQeiHG6AJS4fUX/LigZqVxiVgxo0/hCneq0pNGV89pKOioH/WCI+olyXP2ykAWmktNeZjjzsiCyP69wC2fNIlbONBUrGFI7BPtsg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=PdrE/N+j; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=PjqFxbmO; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="bFAW/lIs"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1763841263; x=1795377263;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=gdj1+AEtUYUM1rxjlUWFIsXGyxXUD0zKTWFRjlMWuFY=;
-  b=bFAW/lIsAMyl3xI53LMHaeY6kE7TwmLOLsTO2nBK3po8yrdF+mJoXqOT
-   fAPBA4fIyN9cpjYab1VGNxBugHZz0jbRvMqqiCBGX1BOGlW4Rx6zMcBtO
-   C+MfAfJyY2rk5RYMgvhslKYVbvKHt6uLTw7leDITQ/sOMgGVOmP08uR4p
-   wgNGboSMBWwseCtEuIgQwmgYmW6E+HsO3tnsCZ48M/1fJ2khrK382t2F9
-   ccpXf4tx2vEc20paiHckyeNoC1qfkO6NqmXCrp/J3rBJAO7RQJt8MAznL
-   6I1dWqvvT/aSMlQSpeSvP8cL4lDC73UWfsVKlaxhxSONi3eye6nWDTkvA
-   w==;
-X-CSE-ConnectionGUID: cDwS++t4SP6z8t6COAJ9pg==
-X-CSE-MsgGUID: DS6ZBvGySQS7qVv5oBimZQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11621"; a="65841008"
-X-IronPort-AV: E=Sophos;i="6.20,219,1758610800"; 
-   d="scan'208";a="65841008"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Nov 2025 11:54:22 -0800
-X-CSE-ConnectionGUID: Qr9rNnViQzSXRnKsTOuQYQ==
-X-CSE-MsgGUID: cCeq+s4AShKdoa5Z0BCsfg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.20,219,1758610800"; 
-   d="scan'208";a="192751346"
-Received: from lkp-server01.sh.intel.com (HELO adf6d29aa8d9) ([10.239.97.150])
-  by fmviesa010.fm.intel.com with ESMTP; 22 Nov 2025 11:54:20 -0800
-Received: from kbuild by adf6d29aa8d9 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1vMtgX-0007nf-2n;
-	Sat, 22 Nov 2025 19:54:17 +0000
-Date: Sun, 23 Nov 2025 03:54:02 +0800
-From: kernel test robot <lkp@intel.com>
-To: Shawn Lin <shawn.lin@rock-chips.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 13/13] mmc: dw_mmc: Remove struct dw_mci_slot
-Message-ID: <202511230347.DmGrS3Dd-lkp@intel.com>
-References: <1763634565-183891-14-git-send-email-shawn.lin@rock-chips.com>
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="PdrE/N+j";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="PjqFxbmO"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AO8U9aJ2282482
+	for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 11:19:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=PKUXTfAuA1RceafhmYaH5E6j9u3nCyXoSEU
+	a0Yo4Bos=; b=PdrE/N+j1Ogbww5744r27n86fgvaqFg79pjlUU02XNdXHa2Vdx6
+	Pp6iX819p+TLfLjQcpqX6+MK+5u4HBXPN6ZADYY6iEG5rM3x/LjrW4ehVAu4DXJu
+	U4JnCMVQPekx46XKZ1CA8At544ISyUrvxCqJlS9LJBRiskEXRZLWURZgD/97cQh+
+	J22B3sGZfy29QVrrvh+ztQpYUaIHFLDWSzWwYzykTOTrJCKPZK7ckAFbSzyNASQc
+	50G4zxMAiZOQ5dhyTjSNw3pRB3ZQR6rFYLEZ7lWi+lbZtbntJS6hx+JTSCkIrmG0
+	UUO+Ohp5FTgl05169G8IYYf1RFJGUuxnDJg==
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com [209.85.214.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ak68dvs1e-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 11:19:20 +0000 (GMT)
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2956a694b47so63608545ad.1
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Nov 2025 03:19:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1763983160; x=1764587960; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=PKUXTfAuA1RceafhmYaH5E6j9u3nCyXoSEUa0Yo4Bos=;
+        b=PjqFxbmO6RYT1mWZzNOES4UhTqT1XygU2YfsU7SHSMPeAe+5wc4bllhjXdR2BVSWXf
+         QH8lxUfZtNCR1e/2Zb+oIgVZwu6vRt3CEtygHOrEJorJRpMTeTg1xZAbFl/aeZF6BIwy
+         o/kcj7dU5HNj4A5FIJIUjUHmZZb5zl6nom43/3JIAxSJ2SkksUI+HZGFHPHvFvnmXfkI
+         kdhnLBggjEsjKy9DFcEPSj0skdnuIco84wceJ0KObVF0B1w6Iw5q3EyRFpv8re4zXt/0
+         q4kKlLhmrXV/pG5Wo78VE8tnNVra9DimddAwgHrAyA2BuTRHluXv+mBLpe+aBxUxi9UG
+         525A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1763983160; x=1764587960;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PKUXTfAuA1RceafhmYaH5E6j9u3nCyXoSEUa0Yo4Bos=;
+        b=vwuclnSAIoxohh96ynzjQWVobBfepMj2ONrEs401uowPoNoN+bXc4+1rxPske/tiBa
+         j9lUkmtmmkXHU7ftH7HMruVq1D2dQOR+R9YknVRVLVVqL80mtJoICLV30irJ+KUnh3Ag
+         Gi1RbmQrudfRGzZqDabchamE4rGnNb2ks+0FRzLtQY+bXMfiiM3Gukyw6VZbb/hOd3gO
+         VSuD8v2CmfY2yhcXVl43nGSsg6prg+6jK20XQWdLJaqsRmEj2bf1EhXs03bTAB+loyJI
+         7KLb9Tv746C5IH1J5ALy+sl2w5mxxsuwoZQI04igNF4XdAddHLQQFKHTzRXg8y1Bc/Qt
+         ybSw==
+X-Gm-Message-State: AOJu0YwOt06NrzNftufHsBRYNNotF22IKgdrDXYn2eTWCXcdtyUuOreZ
+	V+tHSiNveimz1nPZd9CrSVAWQHtUfbAqJ9sr+w/jLz9PhEDRxKXQgLUnT8RCGtHi8JK1YT3nnH7
+	s4g6BNllwqmkFuxPYz3dUTH9ncCqqXd095OJqnJFhrejsyu6/P2bW3g26nqCsVZE=
+X-Gm-Gg: ASbGncuSWh7N0/zCJQGe8tWAUVC8RKFx0nirwmvAM4lcMWJF3R2T6T6guhh4prlGP4E
+	F1iUn4WM9b+dzgZUPegcnwLbAJizMU7G29NKAI8OBy6r95cnOkTwFDuSMsA6QpwEZdo/tuZikOk
+	8UaaW4fyboPQoHVR8zDbO13J5xVodWlOfS6XZoLLKwgAVlkQeGhbRt4sL2JcWuo14h1SaX6zMWw
+	aj6084iGy5v0p8DIcGke2SKZlmSzQtICo0kRdq6PzWSlAPrbZEzNgxgmnYiJKlAaZShBc6y2ZKe
+	zKCCpAIq+z5rW9k08XJLLVUUN6ItYtz6dn5WJOW2+gUoaKP6nbfyTkYUPhzjL2YwZ5tEXh1EtrC
+	PZ3aBp4FFXUM1Luv8j/aku0LRx7ihmCKXkhis6SrM
+X-Received: by 2002:a17:903:1746:b0:298:3a2f:2333 with SMTP id d9443c01a7336-29b6bf37ef0mr124716495ad.31.1763983160114;
+        Mon, 24 Nov 2025 03:19:20 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFS1SSMFGCqXJSIY5ZUv6ehozkXPjEbUv6YVzBln35SekyMx4VqIvEIr5Axt+7AuVfrf6C1EQ==
+X-Received: by 2002:a17:903:1746:b0:298:3a2f:2333 with SMTP id d9443c01a7336-29b6bf37ef0mr124716215ad.31.1763983159627;
+        Mon, 24 Nov 2025 03:19:19 -0800 (PST)
+Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29b5b15b851sm130313165ad.43.2025.11.24.03.19.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 24 Nov 2025 03:19:19 -0800 (PST)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+        conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
+Subject: [PATCH 0/2] Enable Inline crypto engine for kodiak
+Date: Mon, 24 Nov 2025 16:49:12 +0530
+Message-Id: <20251124111914.3187803-1-neeraj.soni@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1763634565-183891-14-git-send-email-shawn.lin@rock-chips.com>
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTI0MDEwMCBTYWx0ZWRfX9TYpeORVKmGZ
+ n24beuYggbORfCsyPaUmmFI879IwGTBB4Nc4/2uU4OUwYzrbA9J4qGFucXu8piY+y09VF6qnVRj
+ FkBCoiL3FSpBEVmwkmGER17inNpYPRSLp44lHlI/j+ZxQmDQ+I/hvLlrUyvCyXOcvx4FxUuiut5
+ i+ln1sY5J1R0idTPiORLCUqV8XNxXqZgkzvuA63Rbqr5x6UCSwFPuJK0FbxnZJt/Qe3zyz5ylHb
+ 2RjqHB41hFKcn8Vyob2DSr8EM78C31c5mD8MSr0nTtDveLZmCnE0U45cFlLGzRRj5y9sqkZTJWN
+ GOuSOkHGnJcFEbw7xvoQml+NtqJL8BZ2apTpB3Mo+R+PWeVvob22BoE/ghceO3pSzwZbHYFlLce
+ uPXBcJN85nPywv8fD6nuNSRmSGO8Eg==
+X-Proofpoint-GUID: EsFjFm5Dox1tC-0n4I1h3h6KLK5LW1yI
+X-Proofpoint-ORIG-GUID: EsFjFm5Dox1tC-0n4I1h3h6KLK5LW1yI
+X-Authority-Analysis: v=2.4 cv=UsBu9uwB c=1 sm=1 tr=0 ts=69243f38 cx=c_pps
+ a=JL+w9abYAAE89/QcEU+0QA==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=6UeiqGixMTsA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=8COUXyv7-X0OEXxtQ2MA:9 a=324X-CrmTo6CU4MGRt3R:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2025-11-24_04,2025-11-21_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ bulkscore=0 adultscore=0 priorityscore=1501 impostorscore=0 phishscore=0
+ suspectscore=0 lowpriorityscore=0 clxscore=1011 malwarescore=0 spamscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511240100
 
-Hi Shawn,
+Document Inline Crypto Engine (ICE) handle for SDHC and add its device-tree
+node to enable it for kodiak.
 
-kernel test robot noticed the following build warnings:
+Neeraj Soni (2):
+  dt-bindings: mmc: sdhci-msm: Add ICE phandle
+  arm64: dts: qcom: kodiak: enable the inline crypto engine for SDHC
 
-[auto build test WARNING on next-20251120]
-[cannot apply to krzk/for-next rockchip/for-next linus/master ulf-hansson-mmc-mirror/next v6.18-rc6 v6.18-rc5 v6.18-rc4 v6.18-rc6]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Shawn-Lin/mmc-dw_mmc-Remove-unused-struct-dma_pdata/20251120-205522
-base:   next-20251120
-patch link:    https://lore.kernel.org/r/1763634565-183891-14-git-send-email-shawn.lin%40rock-chips.com
-patch subject: [PATCH 13/13] mmc: dw_mmc: Remove struct dw_mci_slot
-config: loongarch-randconfig-002-20251123 (https://download.01.org/0day-ci/archive/20251123/202511230347.DmGrS3Dd-lkp@intel.com/config)
-compiler: clang version 18.1.8 (https://github.com/llvm/llvm-project 3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20251123/202511230347.DmGrS3Dd-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202511230347.DmGrS3Dd-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
->> drivers/mmc/host/dw_mmc.c:140:1: warning: unused variable 'dw_mci_req_fops' [-Wunused-const-variable]
-     140 | DEFINE_SHOW_ATTRIBUTE(dw_mci_req);
-         | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   include/linux/seq_file.h:213:37: note: expanded from macro 'DEFINE_SHOW_ATTRIBUTE'
-     213 | static const struct file_operations __name ## _fops = {                 \
-         |                                     ^~~~~~~~~~~~~~~
-   <scratch space>:23:1: note: expanded from here
-      23 | dw_mci_req_fops
-         | ^~~~~~~~~~~~~~~
-   1 warning generated.
-
-
-vim +/dw_mci_req_fops +140 drivers/mmc/host/dw_mmc.c
-
-f95f3850f7a9e1 Will Newton 2011-01-02   99  
-f95f3850f7a9e1 Will Newton 2011-01-02  100  #if defined(CONFIG_DEBUG_FS)
-f95f3850f7a9e1 Will Newton 2011-01-02  101  static int dw_mci_req_show(struct seq_file *s, void *v)
-f95f3850f7a9e1 Will Newton 2011-01-02  102  {
-93ac9a7f4a2ac9 Shawn Lin   2025-11-20  103  	struct dw_mci *host = s->private;
-f95f3850f7a9e1 Will Newton 2011-01-02  104  	struct mmc_request *mrq;
-f95f3850f7a9e1 Will Newton 2011-01-02  105  	struct mmc_command *cmd;
-f95f3850f7a9e1 Will Newton 2011-01-02  106  	struct mmc_command *stop;
-f95f3850f7a9e1 Will Newton 2011-01-02  107  	struct mmc_data	*data;
-f95f3850f7a9e1 Will Newton 2011-01-02  108  
-f95f3850f7a9e1 Will Newton 2011-01-02  109  	/* Make sure we get a consistent snapshot */
-93ac9a7f4a2ac9 Shawn Lin   2025-11-20  110  	spin_lock_bh(&host->lock);
-93ac9a7f4a2ac9 Shawn Lin   2025-11-20  111  	mrq = host->mrq;
-f95f3850f7a9e1 Will Newton 2011-01-02  112  
-f95f3850f7a9e1 Will Newton 2011-01-02  113  	if (mrq) {
-f95f3850f7a9e1 Will Newton 2011-01-02  114  		cmd = mrq->cmd;
-f95f3850f7a9e1 Will Newton 2011-01-02  115  		data = mrq->data;
-f95f3850f7a9e1 Will Newton 2011-01-02  116  		stop = mrq->stop;
-f95f3850f7a9e1 Will Newton 2011-01-02  117  
-f95f3850f7a9e1 Will Newton 2011-01-02  118  		if (cmd)
-f95f3850f7a9e1 Will Newton 2011-01-02  119  			seq_printf(s,
-f95f3850f7a9e1 Will Newton 2011-01-02  120  				   "CMD%u(0x%x) flg %x rsp %x %x %x %x err %d\n",
-f95f3850f7a9e1 Will Newton 2011-01-02  121  				   cmd->opcode, cmd->arg, cmd->flags,
-f95f3850f7a9e1 Will Newton 2011-01-02  122  				   cmd->resp[0], cmd->resp[1], cmd->resp[2],
-f95f3850f7a9e1 Will Newton 2011-01-02  123  				   cmd->resp[2], cmd->error);
-f95f3850f7a9e1 Will Newton 2011-01-02  124  		if (data)
-f95f3850f7a9e1 Will Newton 2011-01-02  125  			seq_printf(s, "DATA %u / %u * %u flg %x err %d\n",
-f95f3850f7a9e1 Will Newton 2011-01-02  126  				   data->bytes_xfered, data->blocks,
-f95f3850f7a9e1 Will Newton 2011-01-02  127  				   data->blksz, data->flags, data->error);
-f95f3850f7a9e1 Will Newton 2011-01-02  128  		if (stop)
-f95f3850f7a9e1 Will Newton 2011-01-02  129  			seq_printf(s,
-f95f3850f7a9e1 Will Newton 2011-01-02  130  				   "CMD%u(0x%x) flg %x rsp %x %x %x %x err %d\n",
-f95f3850f7a9e1 Will Newton 2011-01-02  131  				   stop->opcode, stop->arg, stop->flags,
-f95f3850f7a9e1 Will Newton 2011-01-02  132  				   stop->resp[0], stop->resp[1], stop->resp[2],
-f95f3850f7a9e1 Will Newton 2011-01-02  133  				   stop->resp[2], stop->error);
-f95f3850f7a9e1 Will Newton 2011-01-02  134  	}
-f95f3850f7a9e1 Will Newton 2011-01-02  135  
-93ac9a7f4a2ac9 Shawn Lin   2025-11-20  136  	spin_unlock_bh(&host->lock);
-f95f3850f7a9e1 Will Newton 2011-01-02  137  
-f95f3850f7a9e1 Will Newton 2011-01-02  138  	return 0;
-f95f3850f7a9e1 Will Newton 2011-01-02  139  }
-64c1412b77d08d Shawn Lin   2018-02-23 @140  DEFINE_SHOW_ATTRIBUTE(dw_mci_req);
-f95f3850f7a9e1 Will Newton 2011-01-02  141  
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    | 38 +++++++++++++++++++
+ arch/arm64/boot/dts/qcom/kodiak.dtsi          |  9 +++++
+ 2 files changed, 47 insertions(+)
 
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.34.1
+
