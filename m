@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82CBD2D94A1;
-	Mon, 24 Nov 2025 19:53:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01051298CC4;
+	Mon, 24 Nov 2025 19:54:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764014003; cv=none; b=IweZlcImdETP21H4JWibk4kxrPQRDL32vZtmfufNWKYP/uggiBZL429PdFYc3m7dGDLhkNRSi7DNWsOl6VSRXHGtY+Wv5SD6q02ZU/nacBskiarLJnabZkUTd8zMmdDgc155ugf304Qqv6fQyeL+C8oMztsZPNxmysS4kZG96so=
+	t=1764014058; cv=none; b=nrmoKxQiuxoQRIUJlA+OUsOXehKC3jLHEajZhGmSvDB1cFB5WhUPOnJpzY9GKhvc5+xjIjRLATJHUES2EtlchE8tQOHylj/9lhBeLdsNCJEGfY2A7HXeAxNulIU02WSiy2Sj3CoT9ymlb2LAMBbNSuySwUUNM6RSi5erlZsQG3M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764014003; c=relaxed/simple;
-	bh=FYbukajOTrobxSXh2tFonH1JZlQzoibYm4CPnUOccRc=;
+	s=arc-20240116; t=1764014058; c=relaxed/simple;
+	bh=rAB1RBzVZspJce6mDC5q/pWwzFFJ0gazIojI0FArJs8=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Bygo5wBdSzdczPu6XCTiba/dI6U8x3TQlGF8H1GANqtaXyDNtddEUMn0NxuBGOiuFf4hnV8jwt4imFCKaYUvlSjMlyg+wo1Yv+ZQ8DcHRl9fscFX9RD7Wc+vXMTeEWe9u9MM7zkchek7/nvDUSOneoW6jjqisAWIlPZK6N4ROJ0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XY/Rpkmg; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=EwJQrNzbDEeHg5PUddmPt2quZ+dTEz6wZZ2Ev81wguPy8M8CfOkbB+YAsSDeJgdKU6T5mN81DLmaCD7k76AdmsjHmGt1M11ty3rTQElKcyfQ8NWJ4GXCxyoO4j9nYxbslJ0IJy1GxWV97CMyqnI5gj5T6K+Td163oLSj3wRQjP8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kgcCLkG2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XY/Rpkmg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A9F2FC4CEF1;
-	Mon, 24 Nov 2025 19:53:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kgcCLkG2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A503EC4CEF1;
+	Mon, 24 Nov 2025 19:54:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764014003;
-	bh=FYbukajOTrobxSXh2tFonH1JZlQzoibYm4CPnUOccRc=;
+	s=k20201202; t=1764014057;
+	bh=rAB1RBzVZspJce6mDC5q/pWwzFFJ0gazIojI0FArJs8=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=XY/Rpkmg9xZtls6tugqhXz+hQYMIflqqhf5KlAZ0fWBm/Xkx65JBY/hwUR/DRJsXf
-	 5KgsJYEeup1k+vKsqaCzSU4RxuAvzG8pwEsRCnfX0udBD/nmQGM/Lq8QUAEXkTK3Ki
-	 9SKQ/lqlik2JrPsva9bmU+XWhMCwF7fiP8fOLZ/MAJRFOtPCX7PTOHC16+fMJrluWs
-	 aqZCVVP15WBsAZhK4Gde8MxGfwPfBoX8WKYO5/XM2/2BGhK2wRZ29KdNRp4O9dbKM0
-	 gDod++Zi94mAlKfwPToABcFwyxvx0D+lvzbyBl4c+/6DGFXoZV0bTH/9y6Vyr7l0gi
-	 967gf0cYLl7xw==
-Message-ID: <563ac54a-de2d-49af-a6a6-3230c8070c67@kernel.org>
-Date: Mon, 24 Nov 2025 20:53:18 +0100
+	b=kgcCLkG2M/f6Uq9/d04A/1+g/lV/b4+ogcWcJPQ+7Y7Q0RsZ1pg+XdtnhItlbHGMo
+	 2QZQj5u0j3GEVbER9+mLFFsEsQP44sxBHdnhUY5Ocvzl1iWHiinZNoxyS2b0G1AzMp
+	 F8ZWdz2puMCoe8LnLLkzoa0gcvbLEt8XnNQPbU3BRSLHEdTbtz/cJHAJ1Ui1Lx9MVL
+	 hmkbLrNC7wsIsFiw1zkggVslA7wkaPbtzTWyhvkxLCNHd8OrqdbL0N6jlj4gJGrw9+
+	 X1Y+MuDro0Rr2g8/zycey8GtpDRxaOEPbTYzGpS/JzRCTNlfO+wd3hLiv5+9bwERMi
+	 JyZUh8z2tVeAA==
+Message-ID: <db24d435-edd7-4b90-99d2-8e62c53340de@kernel.org>
+Date: Mon, 24 Nov 2025 20:54:13 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,14 +35,15 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Add ICE phandle
+Subject: Re: [PATCH 2/2] arm64: dts: qcom: kodiak: enable the inline crypto
+ engine for SDHC
 To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>, ulf.hansson@linaro.org,
  robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
  andersson@kernel.org, konradybcio@kernel.org
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org
 References: <20251124111914.3187803-1-neeraj.soni@oss.qualcomm.com>
- <20251124111914.3187803-2-neeraj.soni@oss.qualcomm.com>
+ <20251124111914.3187803-3-neeraj.soni@oss.qualcomm.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -88,46 +89,34 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20251124111914.3187803-2-neeraj.soni@oss.qualcomm.com>
+In-Reply-To: <20251124111914.3187803-3-neeraj.soni@oss.qualcomm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 24/11/2025 12:19, Neeraj Soni wrote:
-> Starting with sc7280(kodiak), the ICE will have its own device-tree node.
-
-$ git grep kodiak
-Nothing. Please do not introduce some new namings.
-
-
-
-> So add the qcom,ice property to reference it.
+> Add an ICE node to kodiak SoC description and enable it by adding a
+> phandle to the SDHC node.
 > 
+> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+> ---
+>  arch/arm64/boot/dts/qcom/kodiak.dtsi | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/kodiak.dtsi b/arch/arm64/boot/dts/qcom/kodiak.dtsi
+> index c2ccbb67f800..9d2029a906ce 100644
+> --- a/arch/arm64/boot/dts/qcom/kodiak.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/kodiak.dtsi
+> @@ -1069,6 +1069,15 @@ opp-384000000 {
+>  					opp-avg-kBps = <390000 0>;
+>  				};
+>  			};
+> +
+> +			qcom,ice = <&sdhc_ice>;
 
-...
+This wasn't tested, for sure you have warnings - you placed the property
+randomly or at the end (even worse...). Please read DTS coding style as
+well.
 
-> +    else:
-> +      properties:
-> +        reg:
-> +          minItems: 2
-> +          items:
-> +            - description: Host controller register map
-> +            - description: SD Core register map
-> +            - description: CQE register map
-> +            - description: Inline Crypto Engine register map
-> +        reg-names:
-> +          minItems: 2
-> +          items:
-> +            - const: hc
-> +            - const: core
-> +            - const: cqhci
-> +            - const: ice
-
-No, look at the binding - it says there are variants without core. You
-cannot just rewrite everyone here.
-
-I don't get what you want to achieve here, but the amount of errors this
-patch generates should make you think whether it is even correct. Or you
-never tested this?
 
 Best regards,
 Krzysztof
