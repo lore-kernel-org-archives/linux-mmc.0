@@ -1,286 +1,132 @@
-Received: from mail-m49234.qiye.163.com (mail-m49234.qiye.163.com [45.254.49.234])
+Received: from mail-m32115.qiye.163.com (mail-m32115.qiye.163.com [220.197.32.115])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 236C51AB6F1
-	for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 00:32:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.234
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB0BC2F361B
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 00:51:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.115
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764117175; cv=none; b=AIGsKK95p9Pk0qCEF7N2yz3B05Qcri4x6B3F7NfTK4QEGEtBsM8CpoRLsKGDSR5LxQIVlu2eRBg49PSFrkYfQw1nEZ9muPJsyU1RTTOft8Dv4jYxn51OV0vE/r5Ne7kPYe1HQQ9NdVTpydD9XSxf29Uo7jKqxY89+naMI08ibTM=
+	t=1764118272; cv=none; b=FxzlQzUmSMqG/qYtqyCi8MRCy1yqnbIJbFy942mRI6VSxnXaICM5d0bo1EzOeqELFkFMixQMNiFogKSRciJl+NN/YJvcq/3qhiF/Akoo2cEOaknV0ANW9b8laDpBpvg7rrEVXTVEHaLbUM5dpOkzk7h72W11+37cCPVSTQ0sFek=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764117175; c=relaxed/simple;
-	bh=F5n/Bq7RceNh+K3im8Vy7l9dmW5gmLy3DIHB3lCwiNw=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=F9eL7m3hYaqEzoSn+UsfxmdNH5FvhsquEWUgY1O6nvM5a2HYg3b6cdvJUVjb3WCntGivYm0HULenrNyqKpFDaAk8Pa3rlXOU6prak3+vPd4JYfhMcF3exVJVzsWR4ksPBLDjWB5ifnwvZFi+tDXdzwxk1cQAKHewi7vLggD3xbg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=H5bXGQQF; arc=none smtp.client-ip=45.254.49.234
+	s=arc-20240116; t=1764118272; c=relaxed/simple;
+	bh=TP9KUTd3Y46P75KFW3KLhfpIKyefyiOwq9PDMc0FJG0=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=XWICA8xqvjhZNLItMuonDfSVKNuns/N4KV9OLEibzH89XyfypDTikxL+tJ+tPaAyYyVouoiNKzEmtFgyIJsPjGMst8Byr3ni5z1GV7qDDmH/PN1L8sYp78HW6J9l7j+fbKJZfNm1NVWv69UOracFjDrkIfjHSb51V/3pTlxUUoY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=MunjuvEo; arc=none smtp.client-ip=220.197.32.115
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="H5bXGQQF"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 2ae366e1f;
-	Wed, 26 Nov 2025 08:17:26 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 06/13] mmc: dw_mmc: Let glue drivers to use struct dw_mci as possible
-Date: Wed, 26 Nov 2025 08:14:46 +0800
-Message-Id: <1764116093-5430-7-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1764116093-5430-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1764116093-5430-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9abd85afd109cckunme6f559504dd3fb
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQx5OT1ZNGkNJHkxNTENCGhlWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=H5bXGQQFHMDOxCJ/hTddaX54mGl1ooqGeR9mlExvW5uth/SG2Exk7KBPdJZvbcIN96944WKoGQqFfK0Vw4rTVAe6xHNvBI7sk90RDhBrcJugPATuVufZctlO5TaLYtbISrfwDOXkCfwrttFaL0+1x8YxYV83oeVoeH2P8lWAFOc=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=eQN9IGOEQ0Z2lmdnGD8V6R9Eu4Grb3zd6OVnMpsaR7E=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="MunjuvEo"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2ae2864cd;
+	Wed, 26 Nov 2025 07:35:32 +0800 (GMT+08:00)
+Message-ID: <ac6e55f4-faa6-4c41-a141-976fe0b15507@rock-chips.com>
+Date: Wed, 26 Nov 2025 07:35:29 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org,
+ linux-mmc@vger.kernel.org,
+ Sebastian Reichel <sebastian.reichel@collabora.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-dwcmshc: reduce CIT for better
+ performance
+To: Ulf Hansson <ulf.hansson@linaro.org>
+References: <1762933460-204066-1-git-send-email-shawn.lin@rock-chips.com>
+ <1762933460-204066-2-git-send-email-shawn.lin@rock-chips.com>
+ <7b05327d-fc76-471e-9148-3dfc0cd17623@rock-chips.com>
+ <CAPDyKFrx_5cnyFeLRhoia2aHK9Cxo+fp_kKhyQ526xE02_+vSA@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <CAPDyKFrx_5cnyFeLRhoia2aHK9Cxo+fp_kKhyQ526xE02_+vSA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9abd5f52fe09cckunmf13488f44d8cf7
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUJOQlZLHRgZSh8YHxkfH0xWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=MunjuvEo0wMP3WyIy2lDC+tzeWxHZrTG2ZQO3a6ttnyC2xRrZS1oNf9M++wXlUbPnaOfl/hdV/z2sM7//4vwZnGearFIdY9kZk4RqgKZnjndJtZBDWNXU5/5vCWC5SBUTfZ5WNFWkxBG+IFH5C03xP9YB6xEhbCsyVfeKipt4Zo=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=1fMDqlNLtATTA3YPhw1Ncna3hJAtBCXlyyomumBazcY=;
+	h=date:mime-version:subject:message-id:from;
 
-This patch changes the callbacks of switch_voltage() and execute_tuning()
-in order for glue drivers to avoid accessing to struct dw_mci_slot.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
 
-Changes in v2: None
+在 2025/11/26 星期三 0:02, Ulf Hansson 写道:
+> On Tue, 25 Nov 2025 at 14:58, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>>
+>> 在 2025/11/12 星期三 15:44, Shawn Lin 写道:
+>>> CQHCI_SSC1.CIT indicates to the CQE the polling period to use for
+>>> periodic SEND_QUEUE_STATUS (CMD13) polling. Some eMMCs have only one
+>>> hardware queue, and CMD13 can only query one slot at a time for data
+>>> transmission, which cannot be processed in parallel. Modifying the
+>>> CMD13 query interval can increase the query frequency and improve
+>>> random write performance.
+>>>
+>>
+>> Ping...
+>>
+>> Adrain acked these two patches, so will them be candidates for 6.19
+>> given the merge windows is coming soon?
+> 
+> Looks like I simply failed to see them. Possibly because there was
+> cover-letter, which makes it harder for me to follow all the different
+> series.
+> 
+> Anyway, I tried to apply them, but there are conflicts that I am not
+> sure I can resolve easily by myself. Would you mind doing a re-base
+> and post a new version, then I can apply them asap.
+> 
 
- drivers/mmc/host/dw_mmc-exynos.c      |  3 +--
- drivers/mmc/host/dw_mmc-hi3798cv200.c |  4 +---
- drivers/mmc/host/dw_mmc-hi3798mv200.c | 15 +++++++--------
- drivers/mmc/host/dw_mmc-k3.c          | 19 +++++++------------
- drivers/mmc/host/dw_mmc-rockchip.c    |  3 +--
- drivers/mmc/host/dw_mmc-starfive.c    |  3 +--
- drivers/mmc/host/dw_mmc.c             |  4 ++--
- drivers/mmc/host/dw_mmc.h             |  4 ++--
- 8 files changed, 22 insertions(+), 33 deletions(-)
+Thanks Ulf. I just did a rebase on top of linux-next and posted a new
+version[1].
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 067569b..4106985 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -530,9 +530,8 @@ static s8 dw_mci_exynos_get_best_clksmpl(u8 candidates)
- 	return loc;
- }
- 
--static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-+static int dw_mci_exynos_execute_tuning(struct dw_mci *host, u32 opcode)
- {
--	struct dw_mci *host = slot->host;
- 	struct dw_mci_exynos_priv_data *priv = host->priv;
- 	struct mmc_host *mmc = host->mmc;
- 	u8 start_smpl, smpl, candidates = 0;
-diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-hi3798cv200.c
-index 03f7ed8..4b723ed 100644
---- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
-+++ b/drivers/mmc/host/dw_mmc-hi3798cv200.c
-@@ -57,11 +57,9 @@ static void dw_mci_hi3798cv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 		clk_set_phase(priv->drive_clk, 135);
- }
- 
--static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
--					     u32 opcode)
-+static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci *host, u32 opcode)
- {
- 	static const int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
--	struct dw_mci *host = slot->host;
- 	struct hi3798cv200_priv *priv = host->priv;
- 	int raise_point = -1, fall_point = -1;
- 	int err, prev_err = -1;
-diff --git a/drivers/mmc/host/dw_mmc-hi3798mv200.c b/drivers/mmc/host/dw_mmc-hi3798mv200.c
-index 3cc4bc2..a64907e 100644
---- a/drivers/mmc/host/dw_mmc-hi3798mv200.c
-+++ b/drivers/mmc/host/dw_mmc-hi3798mv200.c
-@@ -74,25 +74,24 @@ static void dw_mci_hi3798mv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	}
- }
- 
--static inline int dw_mci_hi3798mv200_enable_tuning(struct dw_mci_slot *slot)
-+static inline int dw_mci_hi3798mv200_enable_tuning(struct dw_mci *host)
- {
--	struct dw_mci_hi3798mv200_priv *priv = slot->host->priv;
-+	struct dw_mci_hi3798mv200_priv *priv = host->priv;
- 
- 	return regmap_clear_bits(priv->crg_reg, priv->sap_dll_offset, SAP_DLL_CTRL_DLLMODE);
- }
- 
--static inline int dw_mci_hi3798mv200_disable_tuning(struct dw_mci_slot *slot)
-+static inline int dw_mci_hi3798mv200_disable_tuning(struct dw_mci *host)
- {
--	struct dw_mci_hi3798mv200_priv *priv = slot->host->priv;
-+	struct dw_mci_hi3798mv200_priv *priv = host->priv;
- 
- 	return regmap_set_bits(priv->crg_reg, priv->sap_dll_offset, SAP_DLL_CTRL_DLLMODE);
- }
- 
--static int dw_mci_hi3798mv200_execute_tuning_mix_mode(struct dw_mci_slot *slot,
-+static int dw_mci_hi3798mv200_execute_tuning_mix_mode(struct dw_mci *host,
- 					     u32 opcode)
- {
- 	static const int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
--	struct dw_mci *host = slot->host;
- 	struct dw_mci_hi3798mv200_priv *priv = host->priv;
- 	int raise_point = -1, fall_point = -1, mid;
- 	int err, prev_err = -1;
-@@ -101,7 +100,7 @@ static int dw_mci_hi3798mv200_execute_tuning_mix_mode(struct dw_mci_slot *slot,
- 	int i;
- 	int ret;
- 
--	ret = dw_mci_hi3798mv200_enable_tuning(slot);
-+	ret = dw_mci_hi3798mv200_enable_tuning(host);
- 	if (ret < 0)
- 		return ret;
- 
-@@ -136,7 +135,7 @@ static int dw_mci_hi3798mv200_execute_tuning_mix_mode(struct dw_mci_slot *slot,
- 	}
- 
- tuning_out:
--	ret = dw_mci_hi3798mv200_disable_tuning(slot);
-+	ret = dw_mci_hi3798mv200_disable_tuning(host);
- 	if (ret < 0)
- 		return ret;
- 
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index 4ef99c0..23c3031 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -138,15 +138,13 @@ static int dw_mci_hi6220_parse_dt(struct dw_mci *host)
- 	return 0;
- }
- 
--static int dw_mci_hi6220_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
-+static int dw_mci_hi6220_switch_voltage(struct dw_mci *host, struct mmc_ios *ios)
- {
--	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct k3_priv *priv;
--	struct dw_mci *host;
-+	struct mmc_host *mmc = host->mmc;
- 	int min_uv, max_uv;
- 	int ret;
- 
--	host = slot->host;
- 	priv = host->priv;
- 
- 	if (!priv || !priv->reg)
-@@ -199,7 +197,7 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	host->bus_hz = clk_get_rate(host->biu_clk);
- }
- 
--static int dw_mci_hi6220_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-+static int dw_mci_hi6220_execute_tuning(struct dw_mci *host, u32 opcode)
- {
- 	return 0;
- }
-@@ -364,10 +362,9 @@ static int dw_mci_get_best_clksmpl(unsigned int sample_flag)
- 	return middle_range;
- }
- 
--static int dw_mci_hi3660_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-+static int dw_mci_hi3660_execute_tuning(struct dw_mci *host, u32 opcode)
- {
- 	int i = 0;
--	struct dw_mci *host = slot->host;
- 	struct mmc_host *mmc = host->mmc;
- 	int smpl_phase = 0;
- 	u32 tuning_sample_flag = 0;
-@@ -398,15 +395,13 @@ static int dw_mci_hi3660_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
- 	return 0;
- }
- 
--static int dw_mci_hi3660_switch_voltage(struct mmc_host *mmc,
-+static int dw_mci_hi3660_switch_voltage(struct dw_mci *host,
- 					struct mmc_ios *ios)
- {
--	int ret = 0;
--	struct dw_mci_slot *slot = mmc_priv(mmc);
- 	struct k3_priv *priv;
--	struct dw_mci *host;
-+	struct mmc_host *mmc = host->mmc;
-+	int ret = 0;
- 
--	host = slot->host;
- 	priv = host->priv;
- 
- 	if (!priv || !priv->reg)
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index ffffbf59..743864b 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -282,9 +282,8 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- #define TUNING_ITERATION_TO_PHASE(i, num_phases) \
- 		(DIV_ROUND_UP((i) * 360, num_phases))
- 
--static int dw_mci_rk3288_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
-+static int dw_mci_rk3288_execute_tuning(struct dw_mci *host, u32 opcode)
- {
--	struct dw_mci *host = slot->host;
- 	struct dw_mci_rockchip_priv_data *priv = host->priv;
- 	struct mmc_host *mmc = host->mmc;
- 	int ret = 0;
-diff --git a/drivers/mmc/host/dw_mmc-starfive.c b/drivers/mmc/host/dw_mmc-starfive.c
-index d4ea289..11472a6 100644
---- a/drivers/mmc/host/dw_mmc-starfive.c
-+++ b/drivers/mmc/host/dw_mmc-starfive.c
-@@ -53,11 +53,10 @@ static void dw_mci_starfive_set_sample_phase(struct dw_mci *host, u32 smpl_phase
- 	mdelay(1);
- }
- 
--static int dw_mci_starfive_execute_tuning(struct dw_mci_slot *slot,
-+static int dw_mci_starfive_execute_tuning(struct dw_mci *host,
- 					     u32 opcode)
- {
- 	static const int grade  = MAX_DELAY_CHAIN;
--	struct dw_mci *host = slot->host;
- 	int smpl_phase, smpl_raise = -1, smpl_fall = -1;
- 	int ret;
- 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index f410b2f..7321fc8 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1482,7 +1482,7 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	int ret;
- 
- 	if (drv_data && drv_data->switch_voltage)
--		return drv_data->switch_voltage(mmc, ios);
-+		return drv_data->switch_voltage(host, ios);
- 
- 	/*
- 	 * Program the voltage.  Note that some instances of dw_mmc may use
-@@ -1640,7 +1640,7 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	int err = -EINVAL;
- 
- 	if (drv_data && drv_data->execute_tuning)
--		err = drv_data->execute_tuning(slot, opcode);
-+		err = drv_data->execute_tuning(host, opcode);
- 	return err;
- }
- 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index b4efc58..594c8f7 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -604,10 +604,10 @@ struct dw_mci_drv_data {
- 	int		(*init)(struct dw_mci *host);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
--	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode);
-+	int		(*execute_tuning)(struct dw_mci *host, u32 opcode);
- 	int		(*prepare_hs400_tuning)(struct dw_mci *host,
- 						struct mmc_ios *ios);
--	int		(*switch_voltage)(struct mmc_host *mmc,
-+	int		(*switch_voltage)(struct dw_mci *host,
- 					  struct mmc_ios *ios);
- 	void		(*set_data_timeout)(struct dw_mci *host,
- 					  unsigned int timeout_ns);
--- 
-2.7.4
+[1] 
+https://lore.kernel.org/all/1764113200-237279-1-git-send-email-shawn.lin@rock-chips.com/
+
+
+> Kind regards
+> Uffe
+> 
+>>
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>> ---
+>>>
+>>>    drivers/mmc/host/cqhci.h            | 1 +
+>>>    drivers/mmc/host/sdhci-of-dwcmshc.c | 5 +++++
+>>>    2 files changed, 6 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+>>> index ce189a1..3668856 100644
+>>> --- a/drivers/mmc/host/cqhci.h
+>>> +++ b/drivers/mmc/host/cqhci.h
+>>> @@ -93,6 +93,7 @@
+>>>    /* send status config 1 */
+>>>    #define CQHCI_SSC1                  0x40
+>>>    #define CQHCI_SSC1_CBC_MASK         GENMASK(19, 16)
+>>> +#define CQHCI_SSC1_CIT_MASK          GENMASK(15, 0)
+>>>
+>>>    /* send status config 2 */
+>>>    #define CQHCI_SSC2                  0x44
+>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> index e276a4e..cad5165 100644
+>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> @@ -631,6 +631,11 @@ static void rk35xx_sdhci_cqe_pre_enable(struct mmc_host *mmc)
+>>>        struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
+>>>        u32 reg;
+>>>
+>>> +     /* Set Send Status Command Idle Timer to 10.66us (256 * 1 / 24) */
+>>> +     reg = sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI_SSC1);
+>>> +     reg = (reg & ~CQHCI_SSC1_CIT_MASK) | 0x0100;
+>>> +     sdhci_writel(host, reg, dwc_priv->vendor_specific_area2 + CQHCI_SSC1);
+>>> +
+>>>        reg = sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
+>>>        reg |= CQHCI_ENABLE;
+>>>        sdhci_writel(host, reg, dwc_priv->vendor_specific_area2 + CQHCI_CFG);
+>>
+> 
 
