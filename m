@@ -1,174 +1,130 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42399322C65
-	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 13:01:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 955753770B
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 13:39:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764075662; cv=none; b=GfC3HbJS1N5JRfkj/VTtomNTVL013mvImBeWM17ukLpfuxbWJSX03/x0k5WcG6wVHii/Refl0RS6YFwQKvSIucknygYdKyZuwKY82TVvvgiDF7v6yGRJ7UC1R/uMYZ0mpaYuLsDZWfRMy+e+t96A59jSbGG2DJiSm2OyMTtuSk0=
+	t=1764077976; cv=none; b=hNx0H1d3p2r6GBfjDbfLaivM7L2WRmWkoBRMovqV5E7APHuWBAQ03hbTD234icIUO09ITfzi9QwqXFtY6W1qBaREBdKEoR9QHpTnZGylRwxnHedamxPHdPTggAi0ZEUepabEBXzVwXZBKvtG81DGqhXORXmbUiKCK2dUX9x4E4U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764075662; c=relaxed/simple;
-	bh=9tlj7eh1nYMEFcvTJszecqChW6IEzUZ36R84TFXZbmk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=KVnBdvOAHu9gXi89tJIuSXkDf3Klux+sENpMxNBoH5yCIa1v2QtzTNQMXqhNtUhFP9yvZUqiY2LZlInmjfmNgyRWemwUg6U6D1d19qAN7eDbCpcM8615cYFXOrwmjq+SOlaaM4uT8IBg12Q+XWw9PQo4UK2u5xtoJbahby+KdKo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=A80PCNBz; arc=none smtp.client-ip=209.85.128.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1764077976; c=relaxed/simple;
+	bh=xhAsizw0KL9TOlyjKHfynyAEVI1vBc9HaSgWvnRqZKw=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=k39Dm0OeIaTK+DX0H1SGtJRNw1q/xPJaDhhuy2G4ICHCt8ePDHmH25A6Z46KDz1Lc9VOCvgTn648L5ALHEpP/I1DqTm/4GqVFNw8VVgrMia2qiXhhn1v/waXEj/BVefo/OnQbBtmUzDnYAN6NvwBV8/Dw2MujIxoMlU8XfKzpGI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EBffW0v0; arc=none smtp.client-ip=209.85.218.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="A80PCNBz"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-789314f0920so47584107b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 05:01:00 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EBffW0v0"
+Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-b737c6c13e1so458460466b.3
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 05:39:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1764075659; x=1764680459; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=EwtMj9Tn26+G/BK3TdcRoi2FFA98Db2aSv5nptXisyE=;
-        b=A80PCNBzLcYxTf7/w4LbXGfOWvUXlmSlaFMVbRloV53kHn1SKwFGqH3lct59mG/klG
-         ZaePMxB8OXoA8AMv2B8vdd/o09JRT8Q6wxwI7szAZp2OwhXwn3VwVwuXh4cjO/T5D65h
-         u4CHIl9oL9yxB6q2v2ThZ9w40vzWyZ9/eQSLzZVDU0XFvQ8+NdmJd3bOt4B0uwFI5gGT
-         Omk8rIoz9iAM3ldbN/ILH3g9zNFgG/i5N0IzAe6j5KnHSy04e1gAKChd1noyCJEESsbk
-         ngNojKCWtHLGuL8E8UBqsfRB0+t5oqASz9U1ZVG77vvft8E2B6i2GKH82iTj8n8ZvBUH
-         5f7Q==
+        d=gmail.com; s=20230601; t=1764077973; x=1764682773; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=xhAsizw0KL9TOlyjKHfynyAEVI1vBc9HaSgWvnRqZKw=;
+        b=EBffW0v0b8k9H+cjDDA55eUGDclNgJZ6VqAjuHTS1BMEvKY4yZWxUsL4TeSLVU+aZ6
+         iLsbn1FRRCHA0Z9teSHeILwnlUFaMl1ZpnY3OUN7rhU99jJrtYi6zJzqOU6Zh35r9HxJ
+         OS6bJi1mNTM/aISBIbX8Uosu6oTln/ICcZS3a1J34YuS/nHH1rfrNFtS7rsFCIpDslxu
+         vOmT6v9OxYBhJtgrnfSCuqoxCWb7SKipBGPsSvazLx2CT7UXdRuC6Oa/SN//qkjhR/tJ
+         CAsWzfbbVHygHqQFTtyl4gxo2SzqrqEKALK7datDgANwVBKalKKvehgn9j9wbxBS4ofc
+         RVUw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764075659; x=1764680459;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=EwtMj9Tn26+G/BK3TdcRoi2FFA98Db2aSv5nptXisyE=;
-        b=HVu/QLkVk24HMfFlSv6xwJh3WKGblTWD3EPH0qfPNiUGbkF6Pp0P4sKuH5qr46aEvF
-         nWBrjx7Jtat5YDRXlj9AvPI+5csIF6WK07g2aTJz6CkIANGDJEYeqTJjwlXmsxRMwPk7
-         VEZG9troaBLoaX4JXXFvtxLXIfEiuApz/3Co59EwFnGnlD8gZC0rv/9tYA/WLGniUOBF
-         DKeF/eNpLmzjxFzm+1ttpxmMbR5SF1D+e6n9iL6p2ZrZbh4R4wVjFdaU92htFu5WjWXY
-         QugozBUZYTG/fk/IuptXot/R9yLjacjcOnWZ063pvxMioI/1Hq0pa7ttWmhCsEOII/CK
-         9KKg==
-X-Forwarded-Encrypted: i=1; AJvYcCWjhxQ+jIuELK5uS16Ptq2QOZ+2g/tnpIozS4OiXRlLQFnJ7nUocKuPErhc1+SkooJFfxnwBsd66k0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwOWwp58wj7AP2nHTKm/30U0Y+sHxHR2pP3mOvJ9A1kHfuflnz1
-	AecUR0Vg+7h8iRqo69ONsmTfMGcyddAtH2tGm9584OmlnpyBi6l9S2+NOwLKSm1tB/DEmYLBioo
-	xtlSArkup5cTB3Ind5KrwgShtgR/9oofGkFP986trKw==
-X-Gm-Gg: ASbGncsd8liFZt2FtRQsP0xWlbbPoYkLE9M6dsmPWgWxVgQAYAtKXTLT2Oz4sTEvnJ8
-	16UvKTDybuHPb6ul6r63xGzDKbPNuz9Zb8aITuvbYNOcuKbHG2zF1/HTbj5kNnbwNB7BzPeREn1
-	j3VymVV+oa7FwKgQz4bGli8K7JAuLEhNQs5vByET+S7+uinlDWq1FNHqs5hQIFrPG4EoAA+QYYW
-	xQQiUV8nZmie/nN0caEUeHw1s/SM0HXD2TNr+GWlLLlGhGGjA5J8sbKntPet2idY1zhaxzy
-X-Google-Smtp-Source: AGHT+IEVh0F28rwQ3ZIFgNUSGqQdc5k7F4nF8fGFXvLxcCwRiiYYXpgceMGfJqIyGaOZAKefzzRf+LWLBFk6M+BlOcs=
-X-Received: by 2002:a05:690c:61c1:b0:788:bda:4895 with SMTP id
- 00721157ae682-78ab6db10a1mr25538017b3.3.1764075658937; Tue, 25 Nov 2025
- 05:00:58 -0800 (PST)
+        d=1e100.net; s=20230601; t=1764077973; x=1764682773;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:cc:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=xhAsizw0KL9TOlyjKHfynyAEVI1vBc9HaSgWvnRqZKw=;
+        b=UWqn+WeKW5tioshV+joS4MBwMpPJA8Ip1cFpd5R1ueNpjQPpQAfGM+2ekiARblYUWB
+         IvXT/k3Mg5DaHbzrmMzcDjiSm6BfWW6bEyV5AlJKKOo8Vcp8IUD5axYcQ/5HxpUCrOUj
+         aPQZIPOp6ing9inA5QKCA1No2lHSr8lF6aUr/VR5ScHeR8vyQwqYnQAL1q7dOvjT4Ri0
+         ZJBeh18SjJx8eK9whShUAHfKXEJHePlE67DoHQlxIiBLnMYb481RB9t4PM/3w9ZGUIpL
+         HZf72W3LDDD8O20qAnrAkeG44tjC9wgPekgOAUSgkbVGG1wlL3tq9VCr9Ta2wApdsL5I
+         Ip4A==
+X-Forwarded-Encrypted: i=1; AJvYcCU7UGcu++PSmW9QwI4vvf/tpgMQR6QX2Oqpm1fguG55GFgzXlLjOenrJbE3hbEZUmb/XY9wEmW81Ys=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxou7X7hWc7oSVUeUC67wYgoY80nJ3LEjbPk3I7nX2QbMNZTCOI
+	6KSexXwV731G2FprBZeY5Xpg9VYhB0CN7DrUlLYZ2eCgwrtOOdgyU7CH
+X-Gm-Gg: ASbGncvAwVWSVE0vRXFb5B55m8mrhUxn/ucPWRoVkls/Wb6K3PcYJuM90ug2vNjDb+f
+	d9hcAIn0vIqr7wEFI0sn6UjBG3VVqNJ/iAB5qCBalaa+UElgZpkN9n1ybNvkkN/mQRYM5oI7EfT
+	H5tg4YY22cWqg0PHCGFQ6Mgq3BrnujHkpQH3jG8ek+kBtPTPak5A6qSIB7E1qmnD/0eekVLY2X9
+	rSpl0WmQu2OcO6uzSY3kG909gudKfxP0SpgcObbLesU4OD2EW0Dk0fD4x/w4XkLF3X4Do4GjJV7
+	WcESGM5BL1wDU2oW0HYYYz7Ylanu0ihd8Axc4RCNQkuVyyveDeH3umw6lNHDZRRZI7dhlGXmtNv
+	xYdAScms4Yl8A1i9NEUqizp0sy6h6qThxryCGGok6rfSfBWCicnOzcHzhTPqDNHGthfkty94Khe
+	zABmGGAa6kv/RgBw==
+X-Google-Smtp-Source: AGHT+IFKdtbtXkD8+64SstNoM+b5qwKDxuBue6K95YTTT+4Zet+Kw98HXFpGQkOXDBmDPf0lYbNcDA==
+X-Received: by 2002:a17:906:c108:b0:b72:6383:4c57 with SMTP id a640c23a62f3a-b76c566d315mr321360366b.55.1764077972747;
+        Tue, 25 Nov 2025 05:39:32 -0800 (PST)
+Received: from [10.176.235.211] ([137.201.254.43])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b7654cdd60csm1595699466b.3.2025.11.25.05.39.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Nov 2025 05:39:31 -0800 (PST)
+Message-ID: <4a9236e8a4172437874291da221ef8b82d4a1126.camel@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: core: Add quirk for broken manufacturing date
+From: Bean Huo <huobean@gmail.com>
+To: Avri Altman <avri.altman@gmail.com>, Ulf Hansson
+ <ulf.hansson@linaro.org>,  linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>
+Date: Tue, 25 Nov 2025 14:39:30 +0100
+In-Reply-To: <20251122070442.111690-3-avri.altman@sandisk.com>
+References: <20251122070442.111690-1-avri.altman@sandisk.com>
+	 <20251122070442.111690-3-avri.altman@sandisk.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: base64
+User-Agent: Evolution 3.44.4-0ubuntu2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251117000132.12131-1-jszhang@kernel.org>
-In-Reply-To: <20251117000132.12131-1-jszhang@kernel.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 25 Nov 2025 14:00:23 +0100
-X-Gm-Features: AWmQ_bliF2cqFcUg4UKi8EZNWazRCGsNxtPq3ZxBiKjQc3YXZI2wOQx5_ZRt4HI
-Message-ID: <CAPDyKFpu1Ag+dL6WqZPpE5B9kDBgo3VrpP7O64dqkgtqimUHdA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-of-dwcmshc: Promote the th1520 reset
- handling to ip level
-To: Jisheng Zhang <jszhang@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, shawn.lin@rock-chips.com
-Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 17 Nov 2025 at 01:19, Jisheng Zhang <jszhang@kernel.org> wrote:
->
-> Commit 27e8fe0da3b7 ("mmc: sdhci-of-dwcmshc: Prevent stale command
-> interrupt handling") clears pending interrupts when resetting
-> host->pending_reset to ensure no pending stale interrupts after
-> sdhci_threaded_irq restores interrupts. But this fix is only added for
-> th1520 platforms, in fact per my test, this issue exists on all
-> dwcmshc users, such as cv1800b, sg2002, and synaptics platforms.
->
-> So promote the above reset handling from th1520 to ip level. And keep
-> reset handling on rk, sg2042 and bf3 as is, until it's confirmed that
-> the same issue exists on these platforms too.
->
-> Fixes: 017199c2849c ("mmc: sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002")
-> Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+QXZyaSwgCgpXZeKAmXJlIGF3YXJlIG9mIHRoaXMgaXNzdWUgYW5kIGFwcHJlY2lhdGUgeW91ciBh
+dHRlbnRpb24gdG8gaXQuIEhlcmUgYXJlIHR3bwpjb21tZW50cyByZWdhcmRpbmcgdGhlIGNoYW5n
+ZToKCj4gwqBkcml2ZXJzL21tYy9jb3JlL2NhcmQuaMKgwqAgfCA1ICsrKysrCj4gwqBkcml2ZXJz
+L21tYy9jb3JlL21tYy5jwqDCoMKgIHwgNyArKysrKystCj4gwqBkcml2ZXJzL21tYy9jb3JlL3F1
+aXJrcy5oIHwgMyArKysKPiDCoGluY2x1ZGUvbGludXgvbW1jL2NhcmQuaMKgIHwgMSArCj4gwqA0
+IGZpbGVzIGNoYW5nZWQsIDE1IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkKPiAKPiBkaWZm
+IC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9jYXJkLmggYi9kcml2ZXJzL21tYy9jb3JlL2NhcmQu
+aAo+IGluZGV4IDEyMDA5NTFiYWIwOC4uMGQxOTA0ZDg3YTM5IDEwMDY0NAo+IC0tLSBhL2RyaXZl
+cnMvbW1jL2NvcmUvY2FyZC5oCj4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9jYXJkLmgKPiBAQCAt
+MzA1LDQgKzMwNSw5IEBAIHN0YXRpYyBpbmxpbmUgaW50IG1tY19jYXJkX25vX3Voc19kZHI1MF90
+dW5pbmcoY29uc3QKPiBzdHJ1Y3QgbW1jX2NhcmQgKmMpCj4gwqDCoMKgwqDCoMKgwqDCoHJldHVy
+biBjLT5xdWlya3MgJiBNTUNfUVVJUktfTk9fVUhTX0REUjUwX1RVTklORzsKPiDCoH0KPiDCoAo+
+ICtzdGF0aWMgaW5saW5lIGludCBtbWNfY2FyZF9icm9rZW5fbWR0KGNvbnN0IHN0cnVjdCBtbWNf
+Y2FyZCAqYykKPiArewo+ICvCoMKgwqDCoMKgwqDCoHJldHVybiBjLT5xdWlya3MgJiBNTUNfUVVJ
+UktfQlJPS0VOX01EVDsKPiArfQo+ICsKPiDCoCNlbmRpZgo+IGRpZmYgLS1naXQgYS9kcml2ZXJz
+L21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYwo+IGluZGV4IDRjMzYwMjli
+MjhhMy4uNTY0YTVmYjRkZDk2IDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMK
+PiArKysgYi9kcml2ZXJzL21tYy9jb3JlL21tYy5jCj4gQEAgLTY3Niw3ICs2NzYsMTIgQEAgc3Rh
+dGljIGludCBtbWNfZGVjb2RlX2V4dF9jc2Qoc3RydWN0IG1tY19jYXJkICpjYXJkLCB1OAo+ICpl
+eHRfY3NkKQo+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAg
+LyogQWRqdXN0IHByb2R1Y3Rpb24gZGF0ZSBhcyBwZXIgSkVERUMgSkM2NC4xICovCj4gwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBpZiAoY2FyZC0+Y2lkLnll
+YXIgPCAyMDIzKQo+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgIGNhcmQtPmNpZC55ZWFyICs9IDE2Owo+IC3CoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgIH0KPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCB9IGVsc2Ug
+ewo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIC8qIEhh
+bmRsZSB2ZW5kb3JzIHdpdGggYnJva2VuIE1EVCByZXBvcnRpbmcgKi8KPiArwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCBpZiAobW1jX2NhcmRfYnJva2VuX21k
+dChjYXJkKSAmJiBjYXJkLT5jaWQueWVhciA+PQo+IDIwMTAKPiArwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgICYmIGNhcmQtPmNpZC55ZWFyIDw9
+IDIwMTIpCj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgIGNhcmQtPmNpZC55ZWFyICs9IDE2OwoKVGhpcyBvbmx5IGFwcGxpZXMg
+dG8gdGhlIGVNTUMgd2l0aCBFWFRfQ1NEIHZlcnNpb24gOD8KCmlmIChjYXJkLT5leHRfY3NkLnJl
+diA9PSA4KSB7CglpZiAobW1jX2NhcmRfYnJva2VuX21kdChjYXJkKSAmJgoKCgo+ICvCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgfQo+IMKgwqDCoMKgwqDCoMKgwqB9Cj4gwqAKPiDCoG91
+dDoKPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9xdWlya3MuaCBiL2RyaXZlcnMvbW1j
+L2NvcmUvcXVpcmtzLmgKPiBpbmRleCBjNDE3ZWQzNGMwNTcuLjdiZmQwN2FkM2Q3ZCAxMDA2NDQK
+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL3F1aXJrcy5oCj4gKysrIGIvZHJpdmVycy9tbWMvY29y
+ZS9xdWlya3MuaAo+IEBAIC0xNTMsNiArMTUzLDkgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCBtbWNf
+Zml4dXAgX19tYXliZV91bnVzZWQKPiBtbWNfYmxrX2ZpeHVwc1tdID0gewo+IMKgwqDCoMKgwqDC
+oMKgwqBNTUNfRklYVVAoIk02MjcwNCIsIENJRF9NQU5GSURfS0lOR1NUT04sIDB4MDEwMCwgYWRk
+X3F1aXJrX21tYywKPiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIE1NQ19RVUlS
+S19UUklNX0JST0tFTiksCj4gwqAKPiArwqDCoMKgwqDCoMKgwqAgTU1DX0ZJWFVQKENJRF9OQU1F
+X0FOWSwgQ0lEX01BTkZJRF9TQU5ESVNLLCBDSURfT0VNSURfQU5ZLAo+IGFkZF9xdWlya19tbWMs
+Cj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgIE1NQ19RVUlSS19CUk9LRU5fTURU
+KSwKClRoZSBxdWlyayBpcyBhZGRlZCB0byBtbWNfYmxrX2ZpeHVwc1tdLCBidXQgaXQgbmVlZHMg
+dG8gYmUgaW4KbW1jX2V4dF9jc2RfZml4dXBzW10gaW5zdGVhZD8gCgoKS2luZCByZWdhcmRzLCAK
+QmVhbgoK
 
-Applied for fixes and by adding a stable tag, thanks!
-
-Kind regards
-Uffe
-
-
-> ---
-> since v1:
->  - limit the promotion to only cv1800b, sg2002 and generic dwcmshc
->
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 29 +++++++++++++++++------------
->  1 file changed, 17 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index eebd45389956..07e5df0f8beb 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -289,6 +289,19 @@ static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
->         sdhci_adma_write_desc(host, desc, addr, len, cmd);
->  }
->
-> +static void dwcmshc_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       sdhci_reset(host, mask);
-> +
-> +       /* The dwcmshc does not comply with the SDHCI specification
-> +        * regarding the "Software Reset for CMD line should clear 'Command
-> +        * Complete' in the Normal Interrupt Status Register." Clear the bit
-> +        * here to compensate for this quirk.
-> +        */
-> +       if (mask & SDHCI_RESET_CMD)
-> +               sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-> +}
-> +
->  static unsigned int dwcmshc_get_max_clock(struct sdhci_host *host)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -832,15 +845,7 @@ static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
->         struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
->         u16 ctrl_2;
->
-> -       sdhci_reset(host, mask);
-> -
-> -       /* The T-Head 1520 SoC does not comply with the SDHCI specification
-> -        * regarding the "Software Reset for CMD line should clear 'Command
-> -        * Complete' in the Normal Interrupt Status Register." Clear the bit
-> -        * here to compensate for this quirk.
-> -        */
-> -       if (mask & SDHCI_RESET_CMD)
-> -               sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-> +       dwcmshc_reset(host, mask);
->
->         if (priv->flags & FLAG_IO_FIXED_1V8) {
->                 ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> @@ -886,7 +891,7 @@ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->         struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
->         u32 val, emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
->
-> -       sdhci_reset(host, mask);
-> +       dwcmshc_reset(host, mask);
->
->         if ((host->mmc->caps2 & emmc_caps) == emmc_caps) {
->                 val = sdhci_readl(host, priv->vendor_specific_area1 + CV18XX_SDHCI_MSHC_CTRL);
-> @@ -958,7 +963,7 @@ static void cv18xx_sdhci_post_tuning(struct sdhci_host *host)
->         val |= SDHCI_INT_DATA_AVAIL;
->         sdhci_writel(host, val, SDHCI_INT_STATUS);
->
-> -       sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-> +       dwcmshc_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
->  }
->
->  static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-> @@ -1100,7 +1105,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
->         .set_bus_width          = sdhci_set_bus_width,
->         .set_uhs_signaling      = dwcmshc_set_uhs_signaling,
->         .get_max_clock          = dwcmshc_get_max_clock,
-> -       .reset                  = sdhci_reset,
-> +       .reset                  = dwcmshc_reset,
->         .adma_write_desc        = dwcmshc_adma_write_desc,
->         .irq                    = dwcmshc_cqe_irq_handler,
->  };
-> --
-> 2.51.0
->
