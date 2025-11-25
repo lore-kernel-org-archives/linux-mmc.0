@@ -1,60 +1,59 @@
-Received: from mail-yx1-f52.google.com (mail-yx1-f52.google.com [74.125.224.52])
+Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEBAD347DD
-	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 16:02:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4B89225779
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 16:06:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764086559; cv=none; b=pLcdKOWTgk8wGElkC9zHIL4xznhN0lnRUXy2geu4XJwP/uzG/TIeEFPGlSCxaEKMVGfT+zRb2DoZe0J38TlcDFv8zHkDD2YNFS3pnBk36HiRN5SOGEdZ2z9RLY/qevR3OIEv9rlCgbOlxG4VA3dy8CK2PRh0dyX3cePEfxwIePo=
+	t=1764086785; cv=none; b=AJbD6jeZRXYcIiW8A0Z++2Fjdsc4I8iW9nOwxdSSzznDxn9/SHpkulj0Yq8ZeHgMBVLAiUSwSCdPAA2xooSQQ2x0wPXZ47ybwqsHu96v8Eb8FFUL+ee9rzbDM+jatV0J5geI5LbqiPf/KVTflxt6Jk+7Z/PA9QSRb5k+hychkAo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764086559; c=relaxed/simple;
-	bh=YNPKpdyB5dusa8BYQdvIl1sQOW2HzGafNUHndmNDYsM=;
+	s=arc-20240116; t=1764086785; c=relaxed/simple;
+	bh=Mgxg05/WbgpnmDu8gC9V/611e7uF6txV7D50JvIbaH0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BmjASuQ7PebaJP/1ZTxDeO+jauLRFj8Ump4Ej3ElPuU5bBn/y3Z5kYy6SPPDoJ27n+fCprQH/SvKv+L7JSVeUerX2EMAyk4uHR4he2g9P8+/R6XlW0pxK4R8f6wwYfkWPaGp2bPbBb7aQtl/GOYHKyRb1sbqc216iWQfzvhl7VE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kuvzVE3h; arc=none smtp.client-ip=74.125.224.52
+	 To:Cc:Content-Type; b=u2Abl0+D56VVtQHg/CmI2NyBPSNCWlEiuTo+U8gb2Nh56Xjz7fIL2r3ZpnIPFHEZretHqylMil7VZ+RFdHdjgjpSgtMG+BO7onhhpvdDiKOmz9ze9rqlP96/CvloDsPHG+YLAYruTmpkcL7J5E32qb77SbxynV8pFhOwqG5S/CM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lJ6vLcmQ; arc=none smtp.client-ip=74.125.224.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kuvzVE3h"
-Received: by mail-yx1-f52.google.com with SMTP id 956f58d0204a3-6420c08f886so6310379d50.3
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 08:02:37 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lJ6vLcmQ"
+Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-640d0895d7cso7484320d50.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 08:06:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1764086557; x=1764691357; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1764086782; x=1764691582; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Pqpl2WN+S9iWcthCxem8RsD0XLSYeeBSXHkUH4PWWig=;
-        b=kuvzVE3htMwlThxWE5dqXAtScLV18rMcUOoEMs2G6KXbf1yaX+f/bYiNbQKbUSIjdg
-         +Hsd8lqMZL/kazFkR6u46GVAknHqeZLfOIhbjQG/UMudugwdIYfbuyU9DdMNuttj+R9L
-         +ySo3wfu1MrXzNWkuXOkXmsz9pN3t6E65tfjsr7Wd8ao1H3itjmuE6Ow8GwgsiTrHTcg
-         5TAGlWN6PEtYNbH5ZxjYAU7lTvXT+qhFj+HSCncvQqvWua96Qtttql1GpluyIFV2348Q
-         ey/FVlfMyaSQLRark1aRo45zN0kNrFZtIco+E248IylMO+r97qAHgA9X7msX1L44m6Th
-         ujdQ==
+        bh=Mgxg05/WbgpnmDu8gC9V/611e7uF6txV7D50JvIbaH0=;
+        b=lJ6vLcmQBtM7OnRreCmVHQMWMc2E3h3jVzJISm/59O1vgyDh/tTRpJKZRnnvR4QSHA
+         icjDnADPwyX7P1ysTk7VYtW8tw1EsJyvDHCRLlF2UequchU95+F75tY9TgzoSWJF845V
+         pSrjBbcbEajbp0XNMS7Y8j1ST2k7+6q/1FgKgPOqbPpHiZHd7eDRzwHNX54lNOTXQ+FR
+         T3xamuOqZTc1X/jq//2tUlOa89IMp65SkZVVHUgFZZBKnVtTirY5FPjkfzb4ZZ4SQnUN
+         gdvjsGXB27YKf+6+FFIspKsZoK9sa2gLLfG5sZZgE+DftQsXk00Tj0ZesOkZcpizZr48
+         IHkQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764086557; x=1764691357;
+        d=1e100.net; s=20230601; t=1764086782; x=1764691582;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=Pqpl2WN+S9iWcthCxem8RsD0XLSYeeBSXHkUH4PWWig=;
-        b=jowXM3oDD5QJlnY9OT2KmAQt9xxxC5lzlU0SPhRUVjpt4C+1eGYI+3le7W012d9Nyg
-         fbJ9Q9XbttDbwsF0ZVd2Eq5AbeEHn+l/xYJZVc/Iq28lCGiFP7iTMDWGBcl730s8rmup
-         aOtiYLbwf5+mvTfXsxOgh2u1I2BYMCGa1V9fyStHfxrepZ/KCHRrjKt7Y5vWDhyH8H1x
-         1RZt7Rbfs+XSyZM66R/Yk5oNn2EG+z0Nx64roWF4JW45H2ppJ+Ngf56NZ4KUril/4BYB
-         zxHhqPcUP+9B77op9iUB45NuJJwmwWI085NOMWCqOkYriq7tOeo4y59ha+tldW2vrx5i
-         muXw==
-X-Forwarded-Encrypted: i=1; AJvYcCXw0HQAozIApMihv1LThUganBk0E9/9gvnZWifJJePRKwnAERBJUAzMsQl3ncLe8s9LmUUiJ/GgHeM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx7OtobsRscyFyAviODoNvd5pVRZrJBYpZF/SeUi6GlTZh3UELH
-	AZ90jgetkxqwD11BzmrqQth3B5tIFmSUEmDTgA9IqvfdD6VazE10XYSVYAlndzxna3QNXL87+/l
-	b7zkxXwOvyYJ8UFwSrRi8ZCLg6UnfgjWkY2MfLsqZaeiRMq1jjpYD
-X-Gm-Gg: ASbGncvlQJh4+fmf5mO8ZciKwJPcUXP3xwOoTFlSHSGkX3G7J2nVKe2l72OkWzX9rY4
-	WPZ/zEJkfIp+R2keWakpai16JeU9Znr2uNC26PDfzJyIfsseavDgDl3ERwRlLraHJgsuuRHMHc0
-	qOgBaIgbc2uDr/HFxEVqWTtfuRwlfoX8KhdmWJWPFFsKAT8m0I72nK0VnsCQdcZOEVOv1f47O8s
-	Hdu2NkK2v25+wLrbKdQUS5zzjyinWxb3w3rgLLTQeTfMdO++tOLugmaIQwObEqIydIkAdv0GCKy
-	D25FXR4=
-X-Google-Smtp-Source: AGHT+IGpO5BPMxeylIdMjWariOvCpXVT6NrfqSYCzNaodeR3am93shFU9PHr+I8yfzgj0ZXah/lNbkQ8g6/k76Pzjy8=
-X-Received: by 2002:a05:690e:1548:10b0:641:f5bc:68d9 with SMTP id
- 956f58d0204a3-64302aee469mr8861206d50.70.1764086556397; Tue, 25 Nov 2025
- 08:02:36 -0800 (PST)
+        bh=Mgxg05/WbgpnmDu8gC9V/611e7uF6txV7D50JvIbaH0=;
+        b=gtnkFWqllkiIo6hZdfU25fwUMs3Ow2I36ju3ASkmRNl+vzXYoAhEmlDutHiPPLOs++
+         MPiSC18FJWmVM2691H5SW5xm/FMHem0Z8//7wcOuD2eGi+oJg+crsT9ipTOXOcpUyEAW
+         3bWAxhyocemzB0cP2PjoFSYsrVPODRHbC9CTrFxsYXc5sTio/gZxIqW7+EFtKI4PKDJk
+         yDLs3W7AUsWNWNU/SvtwgxAbE9SvzKSdC39U06P+hv0A1Bcox1VYI8EhALUfZvocewEw
+         aeL4I0xlx52wA98h8OjSLs4iNsqnyq/jwUHMO9SW4vO686DDxfNhcQ8GsbVpfaGJybcj
+         +c4w==
+X-Forwarded-Encrypted: i=1; AJvYcCWpRzmAJXikMed/bjbJUnrskmesjBPGC2An3EmB/E0IPk1K9nA0y0F6XQFRPQ3gOoAJd5BtUXkryLU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyUxTSQ2kqZ0bEeszpjQd0mepMuWzWTx0CvZVoPT1txPvn1hue9
+	fVacEuBxNE8Rj/M8qpuYw4pCaOCpzulgl2TtxRZaLpwCuTOSoAmQHt8pv82kZUghh81mHOcNI8A
+	SBUkBrOOZD7rff0aKM25OpWixLMx5vQ+7ytSWN4O672Si7xFz8LLM
+X-Gm-Gg: ASbGncuqopQRvE8iXWcx044BdZigDtPP+UFakk5Qsr7OAXUs2oRaYz0ubCCST2pbz2h
+	CXOCPXjiapQ5MTHnBFEbHpxbtwqpSc/K04x9wpw9rIuWlp/MG60T1xev33NhR0Xnlmqye5zxm8/
+	/1WIPCi/k7DZoBdl6xN3tX3iXrr2qkjIjHkmAza1YLSkeqwqnaP2u606C5ulOLSXQeKftlSt7QN
+	HWfG5rJg2Z1eCf/I/LR+6v5N8IidJ4Wq13uYPkuhwp2ZuSQU1Qsui8fFw==
+X-Google-Smtp-Source: AGHT+IG/fwrJeS4b8lAlZrSfNrGokzEhmOyZ2TLJnBVpriaPDwx4wc8ej39ZJN0/PFlzT86GGeccI3dEtLG93kPWmH0=
+X-Received: by 2002:a05:690e:1443:b0:63f:a4ca:dc21 with SMTP id
+ 956f58d0204a3-642f8e2e343mr12949162d50.19.1764086782341; Tue, 25 Nov 2025
+ 08:06:22 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,12 +61,13 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <1762933460-204066-1-git-send-email-shawn.lin@rock-chips.com>
- <1762933460-204066-2-git-send-email-shawn.lin@rock-chips.com> <7b05327d-fc76-471e-9148-3dfc0cd17623@rock-chips.com>
-In-Reply-To: <7b05327d-fc76-471e-9148-3dfc0cd17623@rock-chips.com>
+ <1762933460-204066-2-git-send-email-shawn.lin@rock-chips.com>
+ <7b05327d-fc76-471e-9148-3dfc0cd17623@rock-chips.com> <CAPDyKFrx_5cnyFeLRhoia2aHK9Cxo+fp_kKhyQ526xE02_+vSA@mail.gmail.com>
+In-Reply-To: <CAPDyKFrx_5cnyFeLRhoia2aHK9Cxo+fp_kKhyQ526xE02_+vSA@mail.gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 25 Nov 2025 17:02:00 +0100
-X-Gm-Features: AWmQ_bm9QV4yvW5iHTMzjmKdqVj9ajUyBnx67ONCeq9Q2ozIo2PPx2RYZQeLlJc
-Message-ID: <CAPDyKFrx_5cnyFeLRhoia2aHK9Cxo+fp_kKhyQ526xE02_+vSA@mail.gmail.com>
+Date: Tue, 25 Nov 2025 17:05:46 +0100
+X-Gm-Features: AWmQ_bmxgc4FwcE0BpkQ6Q6feIrE7xCIIDMFZYvC3Ae3VEbj3M5hAGVRSkguKC8
+Message-ID: <CAPDyKFoBezDP9DsCFVhS3n+Vm0rQv_Hs2g5svyD2KQ5A-rezwg@mail.gmail.com>
 Subject: Re: [PATCH 2/2] mmc: sdhci-of-dwcmshc: reduce CIT for better performance
 To: Shawn Lin <shawn.lin@rock-chips.com>
 Cc: linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, 
@@ -75,75 +75,31 @@ Cc: linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org,
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, 25 Nov 2025 at 14:58, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Tue, 25 Nov 2025 at 17:02, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> =E5=9C=A8 2025/11/12 =E6=98=9F=E6=9C=9F=E4=B8=89 15:44, Shawn Lin =E5=86=
-=99=E9=81=93:
-> > CQHCI_SSC1.CIT indicates to the CQE the polling period to use for
-> > periodic SEND_QUEUE_STATUS (CMD13) polling. Some eMMCs have only one
-> > hardware queue, and CMD13 can only query one slot at a time for data
-> > transmission, which cannot be processed in parallel. Modifying the
-> > CMD13 query interval can increase the query frequency and improve
-> > random write performance.
+> On Tue, 25 Nov 2025 at 14:58, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 > >
+> > =E5=9C=A8 2025/11/12 =E6=98=9F=E6=9C=9F=E4=B8=89 15:44, Shawn Lin =E5=
+=86=99=E9=81=93:
+> > > CQHCI_SSC1.CIT indicates to the CQE the polling period to use for
+> > > periodic SEND_QUEUE_STATUS (CMD13) polling. Some eMMCs have only one
+> > > hardware queue, and CMD13 can only query one slot at a time for data
+> > > transmission, which cannot be processed in parallel. Modifying the
+> > > CMD13 query interval can increase the query frequency and improve
+> > > random write performance.
+> > >
+> >
+> > Ping...
+> >
+> > Adrain acked these two patches, so will them be candidates for 6.19
+> > given the merge windows is coming soon?
 >
-> Ping...
->
-> Adrain acked these two patches, so will them be candidates for 6.19
-> given the merge windows is coming soon?
+> Looks like I simply failed to see them. Possibly because there was
+> cover-letter, which makes it harder for me to follow all the different
 
-Looks like I simply failed to see them. Possibly because there was
-cover-letter, which makes it harder for me to follow all the different
-series.
+/s/cover-letter/no cover-letter
 
-Anyway, I tried to apply them, but there are conflicts that I am not
-sure I can resolve easily by myself. Would you mind doing a re-base
-and post a new version, then I can apply them asap.
+[...]
 
 Kind regards
 Uffe
-
->
-> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> > ---
-> >
-> >   drivers/mmc/host/cqhci.h            | 1 +
-> >   drivers/mmc/host/sdhci-of-dwcmshc.c | 5 +++++
-> >   2 files changed, 6 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-> > index ce189a1..3668856 100644
-> > --- a/drivers/mmc/host/cqhci.h
-> > +++ b/drivers/mmc/host/cqhci.h
-> > @@ -93,6 +93,7 @@
-> >   /* send status config 1 */
-> >   #define CQHCI_SSC1                  0x40
-> >   #define CQHCI_SSC1_CBC_MASK         GENMASK(19, 16)
-> > +#define CQHCI_SSC1_CIT_MASK          GENMASK(15, 0)
-> >
-> >   /* send status config 2 */
-> >   #define CQHCI_SSC2                  0x44
-> > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdh=
-ci-of-dwcmshc.c
-> > index e276a4e..cad5165 100644
-> > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > @@ -631,6 +631,11 @@ static void rk35xx_sdhci_cqe_pre_enable(struct mmc=
-_host *mmc)
-> >       struct dwcmshc_priv *dwc_priv =3D sdhci_pltfm_priv(pltfm_host);
-> >       u32 reg;
-> >
-> > +     /* Set Send Status Command Idle Timer to 10.66us (256 * 1 / 24) *=
-/
-> > +     reg =3D sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI=
-_SSC1);
-> > +     reg =3D (reg & ~CQHCI_SSC1_CIT_MASK) | 0x0100;
-> > +     sdhci_writel(host, reg, dwc_priv->vendor_specific_area2 + CQHCI_S=
-SC1);
-> > +
-> >       reg =3D sdhci_readl(host, dwc_priv->vendor_specific_area2 + CQHCI=
-_CFG);
-> >       reg |=3D CQHCI_ENABLE;
-> >       sdhci_writel(host, reg, dwc_priv->vendor_specific_area2 + CQHCI_C=
-FG);
->
