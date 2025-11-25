@@ -1,185 +1,145 @@
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
+Received: from mail-yx1-f46.google.com (mail-yx1-f46.google.com [74.125.224.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0DFA320CA0
-	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 12:56:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B60AF31A81F
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 13:00:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764075393; cv=none; b=JriubZM1jv+cIGkaa5W5+IohMQiJg4EbbmJCNzpUlD2URUnTDoJVwpp5iUl4q+YOZW49H9oagqr4VavOHO7Du9vYEk+FP2ZKdmnMfbQkYRVAx9U0RdgmQspnov0q6YlPVaJaOxpCGK1iFMJN2+tiWQTmKiX5cOt3EuQqR8tnK6g=
+	t=1764075656; cv=none; b=DAMrcR7rHGU3w1wxw7qmnkK/bFc1AbhIV+luaP1XBipnQSLuv5tfgQR8vsJAxynszczFCKWkIfgxSOxelIC3yAxNppi2nGxgi0wCPesAPRSFUxjcDddYm6c2P1kUkluqecENBU5/V/x0cugmSroiMwYSOsyIwIs2H/pB1uFDSeA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764075393; c=relaxed/simple;
-	bh=Sk8TWnE1F8njHDuPB8T3xn5YhJaDrvsH8twkDSYX9cs=;
+	s=arc-20240116; t=1764075656; c=relaxed/simple;
+	bh=TJje+ZFmoQtgTQbXX2vXROwnFTvKvBdghzPYF7XErno=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=RnGvlIiAZpdBfYiL0DKfgdtXelblaXewV89aEDaSKP1yH0Hu00Ss8usUiZLA9pbLEOeuPv++dNUM30yMV+vtmzXHmTAh8BLX0Qg2SIfbEF05/AwwDLL8ynO+x3bt86iD+4GcZ8I7EKM98fx4Yt3svNr7SvOrOJhdQq6zBBNbiWE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vEYj685I; arc=none smtp.client-ip=209.85.128.179
+	 To:Cc:Content-Type; b=MwVYgbqya2bNKAkuss2iBP89I59sBMFpePeF9NjRNhzis40VoRWFwOtdOxnQLB1UFHJ4+HlsSqB1msnIxcJdw/ZIhOwvuXFkslC8PlmUpV5eztBU7XikbkEmJkOi1N4LVmPCPMvFSx5P7vjJgAjbogJktH8xJ7ZqBYu4XGBsNlY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=qy6HDgzA; arc=none smtp.client-ip=74.125.224.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vEYj685I"
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-78a6c7ac38fso59032537b3.0
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 04:56:31 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qy6HDgzA"
+Received: by mail-yx1-f46.google.com with SMTP id 956f58d0204a3-640c9c85255so7599670d50.3
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 05:00:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1764075390; x=1764680190; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1764075654; x=1764680454; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1nHAj4MBf6Hp5nlwpLkFtoHhFG7K6iNmZXaotwtFzZM=;
-        b=vEYj685I7p9arzIuZRJ+yQGgt739jfUQzEIBUfKG1rI7uj3W02os6hi/cWEkPS8Qy3
-         27sPnm9PHJyhSoh80ffamJUm/XLOtML/I8mlszUMzEeb4R2LRb0AzRHF/VLjNzQBprxw
-         iyRp6CAykHfQTe8pyjmPR5+qPaZsdH6Bbse0nDreHFzDfc/iT8Cjso+F8s92oTrefJId
-         8wPrXPCnw+YJal/qT+eZRhA6HGQ6l6AJcZgBclJVMH0Uw371CgXQhvrfiguXS/VFGMHi
-         H2nXDMXf3HuUEm2Wj+KheirceE150ssGO/LYU0tUWYjWJu5RJZe/5wKcymFRDlqbfDyG
-         IIJQ==
+        bh=1RsPPNmFTp7OpTkMbhK8Rgl/qW4d5zaCYUB+xPaRZ5I=;
+        b=qy6HDgzAqvDA4V+O7vdj3pdClk+5DQxkJEdIRth0axUbvSMXA0nxb5KjCoUUQItUcM
+         fkC3vE5XiQb2hGPgOB8sSEhPV2c6JWn06TE/uA64vd+Xj1KYHvBMRl9EqoKle+yBfnUH
+         dvQIxdETZb2nofVFYCQSMlZHSQezCJhF72kmaGTtVZfKRiA6qsB5JOjPCLHGz6Edd4PD
+         L4tJclp4d4hp1YEYh/TskwWUGokbvzD/pZvpnTNMkYUCMbk+aOp4TUet5WBy4kuk0zQ6
+         uNfCvnHtAJOlsFLRJv14Ol6SeOo75MN3tNmRjepJrj48HqVwVr6TyYFMnxrnD0koZODi
+         6+Qg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764075390; x=1764680190;
+        d=1e100.net; s=20230601; t=1764075654; x=1764680454;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1nHAj4MBf6Hp5nlwpLkFtoHhFG7K6iNmZXaotwtFzZM=;
-        b=KnVDJBhqv9fvWIpKV7uNMLuVNvw6tkjvz+z5Mn5lvimwVLL4Qr2MRHrlzo6yy6WBiQ
-         MQCnZgbCZU46UCA3Vmv/aWDFCtgcVSSalJLC3JCT2JcL0ylqhuxD/nBC6fo9JT3ywQkO
-         I4aK6ZMhHZbSsUq3DT8KMTjuGhP1Q0bZlSIUJeelASCZ+NOsU2wVaJLGnxg3lGLXim6c
-         sK9SqRLRXGAPAeC0kRzcKeh+cgnHEZuu5oqyjd9h3WOg2qc1NITpUW9R2eMT/5o8Zrlr
-         iGkt6tGRzTji+Htrg8bjeDRsUROLsooPfEnKju9rjIQGLe5Y0OX/UcNp3pUrwbEOvyaI
-         op4w==
-X-Forwarded-Encrypted: i=1; AJvYcCUn2IfvFORdlDMlS+E1+0G4seKp7MC8mNgeHO6P+33Gh8Vj5OYzzGhqqo3EW9Q8AYSN0HYp7Pv9cnQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwIrdXzJ2XY9XAAcYyeZe31ImqkOYm5M8VvuX6RjM60dcgNWh80
-	kP2MCpxL1A9eZTH08S31zx1gD9/x7t9Eos3Svc1F/OpPRmNkVBcuSEWv+sTM8LzO9ecqrmixo8v
-	SRO+WJO38+mdaEXJGQqGL4l6HNs4TM+K/LmOZWf2EHg==
-X-Gm-Gg: ASbGnctjgpF0odSjTu6WIhkyjgcY4by02uAChLn29eC0RNQZ7h/ca6Ynkhj7zOp8d51
-	09Gelqt8j/Au9R6dkRgT/oj+YQPhYtWpt8aKBO/q4kDB6f0jkFTL6zL9Lj6r9lpcMN/+vyyV4fI
-	vvbtklqFr863YOlPQyGS/YjBMpJhQqcL2KunyWVowQ11MppW9Punfwti4WB5xro0CMHTlKNp8h5
-	ZWky7yLJIalOZWhXPziNiHoJ7wLyvl+vpAKXPIZcTaPx6RUhRNb8bn4W+BCOPJ0NrxKvJ1wvQrc
-	rjEx9z4=
-X-Google-Smtp-Source: AGHT+IH/p+RtR6M/oxT287AHNkeQ1hbGCodsY5CHH3YFQPKesxn30gwm0wpRAVMXcD4lqQN/Zs5GZPeC84DFD074Hm4=
-X-Received: by 2002:a05:690c:74c7:b0:786:5499:634f with SMTP id
- 00721157ae682-78a8b525dcemr119304847b3.41.1764075390368; Tue, 25 Nov 2025
- 04:56:30 -0800 (PST)
+        bh=1RsPPNmFTp7OpTkMbhK8Rgl/qW4d5zaCYUB+xPaRZ5I=;
+        b=YX/q/T7NN0l1Dfz3WMMOStORmuILeXlQ7EpNVTHkyg+f467lXv1snhThbpN16p08ou
+         5bcQ5Y78BzKpy86YPup32+4t9yysHpVhPhY15JgDrU15Xv0LbLWaKhMJTES9H9wJ9Ns9
+         sITyg56/w/uw4SlS/5rqzx97O6TcMgtpHKVVa2YpGcHQaVLZyH+DwM+PiIhcOazkgyGB
+         WoNi2WJoBHH5MwgaisIH7rMdyXkFdA3iCFued1Sm3zjuPysoOhKAGvoPdvmIo9DS1B4N
+         mzCn8mSnN42heXfrw6Upye6KBABACLiokgmMnP/a5x68+B46VGti3xCtQMW9FcZB37en
+         LweQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXm/4C6kUXIGxls8wEi5Ogl29buU6ys8a6HsfZJYQHwERQpQdkdpiduyVKH4uGqPKCpJ58dQIxXMd8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyXzsJIicWM3dQxe9Vl3M9nqVlE9ZJg/SpK3Z4WDSPD02NbjI2T
+	E9d+T5gMx43z+sBsx4oI53iNrgVnKUsD7IQmNYqYzBV9iW6KICI2Q/9stjWMsWew5NYmar50X5N
+	PWeSWrJmKrvowcWX6IanAkTv8ciMQVdvbxQpeUT/tAw==
+X-Gm-Gg: ASbGnctS1ltSmGiscNEjJmbfzBUR/1Wa02wSR+U61PS9W1ocSxNb/82i8zFvQI/8Abx
+	leBMlIglnulP+S4lPMXGz/WxP5DaAJ//CEUVFbJDdmjq/7OyK8k/DiPjDCFGHrvlPvoQUdJ+MRj
+	ZjZn7CF+ZjHEF3FaCy0EISCqZYzkpylyBv4Lu0aH7X3Qy5o6YTY+C9pKdH+lenYqPvtQmRAQ1d0
+	Tq7G/QmSuCwaML1/aqwwU0P7mPSuq8vvWtvTkzao8H03UoqbrN5/dYKCUsMUVHUPw1ulVR2
+X-Google-Smtp-Source: AGHT+IEP20Hd5zXH7TaBK1luFEI91whta9/nRanMdGqkrRNeye2Tk/PEkWxVIZl9IN/yXd7H6AlOEFw6B+87i0XqsQ8=
+X-Received: by 2002:a53:d056:0:10b0:641:f5bc:68d4 with SMTP id
+ 956f58d0204a3-6432941d131mr1383516d50.81.1764075651936; Tue, 25 Nov 2025
+ 05:00:51 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251124112908.3193211-1-neeraj.soni@oss.qualcomm.com>
-In-Reply-To: <20251124112908.3193211-1-neeraj.soni@oss.qualcomm.com>
+References: <20251121-rockchip-emmc-cqe-rk3576-fix-v1-1-a77805f40072@collabora.com>
+In-Reply-To: <20251121-rockchip-emmc-cqe-rk3576-fix-v1-1-a77805f40072@collabora.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 25 Nov 2025 13:55:54 +0100
-X-Gm-Features: AWmQ_bkNGbp0sdGlVhqlYzK6csz9kqff9YvYTFYI-n19jTeHRLOi7kIWRZck88c
-Message-ID: <CAPDyKFpOuwofFGTEqkCUDXLRJ90vEypkrtg+f01KY5S=cW03Wg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: sdhci-msm: Add support for wrapped keys
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Tue, 25 Nov 2025 14:00:16 +0100
+X-Gm-Features: AWmQ_bn9XHBZp-_mXQSdYI6S_EfNS30h2ysruAh8MZxFVousTjCGxc-bOSJ4hr4
+Message-ID: <CAPDyKFp4oNWQn3xW3+GGbGmi8U7H98Bbos0vRqaQPaht54nZ=w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Fix command queue support for RK3576
+To: Sebastian Reichel <sebastian.reichel@collabora.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Yifeng Zhao <yifeng.zhao@rock-chips.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 24 Nov 2025 at 12:29, Neeraj Soni <neeraj.soni@oss.qualcomm.com> wrote:
+On Fri, 21 Nov 2025 at 17:27, Sebastian Reichel
+<sebastian.reichel@collabora.com> wrote:
 >
-> Add the wrapped key support for sdhci-msm by implementing the needed
-> methods in struct blk_crypto_ll_ops and setting the appropriate flag in
-> blk_crypto_profile::key_types_supported.
+> When I added command queue engine (CQE) support for the Rockchip eMMC
+> controller, I missed that RK3576 has a separate platform data struct.
+> While things are working fine on RK3588 (I tested the ROCK 5B) and
+> the suspend issue is fixed on the RK3576 (I tested the Sige5), this
+> results in stability issues. By also adding the necessary hooks for
+> the RK3576 platform the following problems can be avoided:
 >
-> This is a reworked version of the patchset
-> https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
-> that was sent by Seshu Madhavi Puppala.
+> [   15.606895] mmc0: running CQE recovery
+> [   15.616189] mmc0: running CQE recovery
+> [...]
+> [   25.911484] mmc0: running CQE recovery
+> [   25.926305] mmc0: running CQE recovery
+> [   25.927468] mmc0: running CQE recovery
+> [...]
+> [   26.255719] mmc0: running CQE recovery
+> [   26.257162] ------------[ cut here ]------------
+> [   26.257581] mmc0: cqhci: spurious TCN for tag 31
+> [   26.258034] WARNING: CPU: 0 PID: 0 at drivers/mmc/host/cqhci-core.c:796 cqhci_irq+0x440/0x68c
+> [   26.263786] CPU: 0 UID: 0 PID: 0 Comm: swapper/0 Not tainted 6.18.0-rc6-gd984ebbf0d15 #1 PREEMPT
+> [   26.264561] Hardware name: ArmSoM Sige5 (DT)
+> [...]
+> [   26.272748] Call trace:
+> [   26.272964]  cqhci_irq+0x440/0x68c (P)
+> [   26.273296]  dwcmshc_cqe_irq_handler+0x54/0x88
+> [   26.273689]  sdhci_irq+0xbc/0x1200
+> [   26.273991]  __handle_irq_event_percpu+0x54/0x1d0
+> [...]
 >
-> My changes rebase it to use the custom crypto profile support.
+> Note that the above problems do not necessarily happen with every boot.
+>
+> Reported-by: Adrian Hunter <adrian.hunter@intel.com>
+> Closes: https://lore.kernel.org/linux-rockchip/01949bc9-4873-498b-ac7d-f008393ccc4c@intel.com/
+> Fixes: fda1e0af7c28f ("mmc: sdhci-of-dwcmshc: Add command queue support for rockchip SOCs")
+> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 
-Part of the above is good information but doesn't belong in the commit
-message. Instead make them part of the patch-information below "---".
-
->
-> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-
-Please add Eric Biggers and Abel Vesa for any changes related to ICE.
-At least, if they have the time we would appreciate their input to
-these kind of changes.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/sdhci-msm.c | 51 +++++++++++++++++++++++++++++++-----
->  1 file changed, 45 insertions(+), 6 deletions(-)
+> Sorry for the delay in sending this :)
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 4e5edbf2fc9b..351f2a77068b 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1911,11 +1911,6 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->         if (IS_ERR_OR_NULL(ice))
->                 return PTR_ERR_OR_ZERO(ice);
->
-> -       if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
-> -               dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
-> -               return 0;
-> -       }
-> -
->         msm_host->ice = ice;
->
->         /* Initialize the blk_crypto_profile */
-> @@ -1929,7 +1924,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->
->         profile->ll_ops = sdhci_msm_crypto_ops;
->         profile->max_dun_bytes_supported = 4;
-> -       profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
-> +       profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
->         profile->dev = dev;
->
->         /*
-> @@ -2009,9 +2004,53 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
->         return qcom_ice_evict_key(msm_host->ice, slot);
->  }
->
-> +static int sdhci_msm_ice_derive_sw_secret(struct blk_crypto_profile *profile,
-> +                                         const u8 *eph_key, size_t eph_key_size,
-> +                                         u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host =
-> +               sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_derive_sw_secret(msm_host->ice, eph_key, eph_key_size,
-> +                                       sw_secret);
-> +}
-> +
-> +static int sdhci_msm_ice_import_key(struct blk_crypto_profile *profile,
-> +                                   const u8 *raw_key, size_t raw_key_size,
-> +                                   u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host =
-> +               sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_import_key(msm_host->ice, raw_key, raw_key_size, lt_key);
-> +}
-> +
-> +static int sdhci_msm_ice_generate_key(struct blk_crypto_profile *profile,
-> +                                     u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host =
-> +               sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_generate_key(msm_host->ice, lt_key);
-> +}
-> +
-> +static int sdhci_msm_ice_prepare_key(struct blk_crypto_profile *profile,
-> +                                    const u8 *lt_key, size_t lt_key_size,
-> +                                    u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host =
-> +               sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_prepare_key(msm_host->ice, lt_key, lt_key_size, eph_key);
-> +}
-> +
->  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
->         .keyslot_program        = sdhci_msm_ice_keyslot_program,
->         .keyslot_evict          = sdhci_msm_ice_keyslot_evict,
-> +       .derive_sw_secret       = sdhci_msm_ice_derive_sw_secret,
-> +       .import_key             = sdhci_msm_ice_import_key,
-> +       .generate_key           = sdhci_msm_ice_generate_key,
-> +       .prepare_key            = sdhci_msm_ice_prepare_key,
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index c66a8dfad47c..ee0008d91b98 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -1767,6 +1767,7 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
+>                 .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+>                            SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>         },
+> +       .cqhci_host_ops = &rk35xx_cqhci_ops,
+>         .init = dwcmshc_rk35xx_init,
+>         .postinit = dwcmshc_rk3576_postinit,
 >  };
 >
->  #else /* CONFIG_MMC_CRYPTO */
+> ---
+> base-commit: dcbce328d3a2d87770133834210cf328c083d480
+> change-id: 20251121-rockchip-emmc-cqe-rk3576-fix-ec8ac72e6e32
+>
+> Best regards,
 > --
-> 2.34.1
+> Sebastian Reichel <sebastian.reichel@collabora.com>
 >
