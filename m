@@ -1,175 +1,147 @@
-Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C42C1A9B58
-	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 12:24:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEA5D31D726
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 12:33:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764073460; cv=none; b=DN8gfi4y3SnJfHNlYi/9/PU+iqyn2MOgjWGLwokV/MmlDAgPibV1a1vCmQFCgfECGtiv28wQ2Wg5VNtG3Ti2oGUEjtwLgtxL+KXf82V5ybJbRGWu3FOyLwqTr1osNd8sA3rRlufuyZQmbNFjTB+y5XC0lceJnsEt4q4G80hyQTw=
+	t=1764074034; cv=none; b=RtGG8o9eRKeNGqTYN9iMLi5lQpU39ep9EnABPML6pO4ud+XKhcDj3OtwbcbytlOlmdVYZAd/jPYlVOPeZKroTd9XSiczQfYGLMXKjqQAvbkv+ckZztNDOHn1sQs4gRITooOShgtxjWFlWgX/AcucuRv6oNKZcHIfj03/J5KtS3A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764073460; c=relaxed/simple;
-	bh=8kRK3yBJdAdCfWGIEn51BM89SaZ4gS2AVzCH9BXLVAg=;
+	s=arc-20240116; t=1764074034; c=relaxed/simple;
+	bh=thpC3q1hv7PUiqwmDmoSRt8Fre2nOFVs2Oc8hREt7PU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=M4VARGsuLx2GYyRrb2x1/tVJF+qGnlgbpa+boQd43eBH8SrxjFP6pMPzIjXeLSkQU9iu7WBExB0OwNhc4xeWNjo36v4/me1DROWTJ1n18nDLCBvN/hcM/yiAYYDerb8zShwaljiw5vCNzVw4fA95R2ILuFdDG5eHOhNsU2hQeYw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ObOsQ+mz; arc=none smtp.client-ip=209.85.128.169
+	 To:Cc:Content-Type; b=WYrJ+t6KjHPUeolH0H1bBsBoaMDuzVn9q8rMiiW8PI9bLReKKm2GURbWXe7EwsriE5CTHDEDk7vsqfjI5T3wQR+Y7up+GNfmF0ptiszeKz4eovSq+yVQdNRPkHD568YSL/1+vwvZb5ycCWG/l0QfSAntDp09b9/A88KEEkAbSvM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ow0PyVfD; arc=none smtp.client-ip=209.85.128.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ObOsQ+mz"
-Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-78a6c7ac3caso53483767b3.0
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 04:24:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ow0PyVfD"
+Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-78a76afeff5so51986057b3.0
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 04:33:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1764073458; x=1764678258; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=kzqSo7cWbQYxKBUWBAYYsHMei2+c+xIFeDmwd5VQBDM=;
-        b=ObOsQ+mzviWiLz0Twp7bWAP2xjYgfZFpd7e6lrGZ+vaw3EXryGtt3fi+a/Q/MvjLxc
-         XP9fNX4+eYnWGkDdyIjb0IDwqui185Z3jzoMP6AG5AH6VDY8cFotAdJAUlJTkcaBga5C
-         WHq/sd7e+Pw2zYTLGBqIF6xe4YtdZ124ZKF8ZGTRw15GbzveUd7nWSX98O/ekz7B8q9E
-         H48kuy+2hvwI4NCEixL+P3+UHST4AhgoIUlPAIvyQqR41hCZvmN96tVHtY1SSbz2dt/w
-         EKTND2LTRZhA+Roj0QrR/Ko0LDgh6NOkaLS5Q6zzFKpD3NcMYAwRfH1WdcH8th6T9q9p
-         JSXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764073458; x=1764678258;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1764074026; x=1764678826; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kzqSo7cWbQYxKBUWBAYYsHMei2+c+xIFeDmwd5VQBDM=;
-        b=sfvnLa8zcNhV9QiQ5ed5PAkqZ8KxF+hrcnMeVS6/FZkd9jbAyEXDJysf+UOtV+4B0Q
-         Gbq9x/Xc2exa0jWHJjALDqDbSNYttoq1/zmNWjAFG76xVHeoTVx8poi94TlZSbw4L4QC
-         4WJ38buS1vYnFYftGvFYVuzjJ5z7RVJJzGP8r0kmcnqXoK5zPydzKQSzSNRldqKyMJWV
-         qk7An0w81jYVIaC+fr9Rmy0yESeAKld9t+9KsOrlvHDXUJ82HJpq7EHqnS+mpPxZHzjU
-         J5YLwOUK2x8tq/ZmXqRqz6hVV3aUrnQY9H9lOVC0Em6eP2/WvZcqeSPDUOg1ZT8ssyiQ
-         xuyw==
-X-Gm-Message-State: AOJu0YzqnsJzS/fBScJUuI0gKq8YBkOummXxle6rUiB9qwKHI2hHQRci
-	6Ma/1RGFjYn5exSu9K9KQTzzCJC1iGyNUWbmJFcfqTWuKNYGS6fSSoxYEhwHoWcdn4qREMCunou
-	eXwWpNy6gSU8lgzuatPUIY0JmYAgOLoGZzoJDsiSsBuYKQpfWx9l3E+g=
-X-Gm-Gg: ASbGncs3z0t/5fzFFiUcQHSRB9OZMn/An14bIh6S2K1XYWeMb2qFFcOixuwH717ACZ9
-	9sv8KKjOqA5uOUU5hRDU8o72fH3AU3cWVilEtDvSjC+P3uj4Xk7K0A4XD4oFpIPG8hT4FflEhOH
-	U55LD0m738gmesapKMjV90TXGoPV5PsflLULDtT4k0eeagm7ejliu8wr0DE0niFMkt8HaGoFRHx
-	smWsBdnCrXqG8fvQyiIYs/57EkAH+eogzcgKoOsHeZpfYaIL64rRSfB9UHhinAFHxrfnzu2aXNk
-	6n5Up9E=
-X-Google-Smtp-Source: AGHT+IHGFiHdCe51Jz9VXIeoPeS9TSnBCy2YVBc391U99a3xkYqxO7isAPjOAZ79Z45C2UISTdjoOl3lBKg+wduhU+w=
-X-Received: by 2002:a05:690e:849:b0:641:718:8a08 with SMTP id
- 956f58d0204a3-64302af0921mr8390961d50.52.1764073457893; Tue, 25 Nov 2025
- 04:24:17 -0800 (PST)
+        bh=7Y929ZB3hOQ0huOASE4rm5wG5Ne9+DpeH/x0/TVWvO4=;
+        b=ow0PyVfDA/gmzKIc+tXK9ZTT0xNx7y12ZjO8CmCe6jAjKHpFZIzyDySRGPiBhL/DSa
+         O+Js4UIzgWUWHxQBUO8NwDp1aUE6kAsCflf+fdGbJWZ8oam5eM+vKppud2/dla9Mvptq
+         z0I9jDr3O7fGGcUoUlKoUCvog8rIDPztB1JloOt9gyM8WE1N4N4hI3Ri1eKvRGjXM7PC
+         jh7ERGMUMNdSH0soY99cqf//mLtBETTXDvuUXTKjSnKz8Vq4V3K+cGygjaEgR/mxEmwg
+         uitdlk3lL/Sl/zrJtP6fXNRVaAKIUwJkmmuVKus+qIDyJ8YqCXSzYWPo7hrV1RsMdfFQ
+         6CoQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1764074026; x=1764678826;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=7Y929ZB3hOQ0huOASE4rm5wG5Ne9+DpeH/x0/TVWvO4=;
+        b=buCpdoMxiQ1FSQCtjrFO2kqSoh3IE0+DjhkARcqTutpkniS1zkBa2pGYkMaT7vTNUC
+         mX9XAh5UiDj8H76/BXuQDAl6Xx9jiCB/713ZWWLuUBpZ0yDpKeQa09fXlq2/w9LtdKc6
+         t+M34dBVsUl4XcCehfDzbRqOYzqQDKxaAJAKrx92LICENDQcXdXHQcji8/pokdvBz/Jo
+         csJ7+wG0BgJbutvrwDNYqTnCqSx4H/9b4OmpIBnyKkHP5XmQrkCFjq087sBTEaNSzP6P
+         VaiFDnB38kMFe3hz0Jp8dAvBdH7ko4wZuqDhhCzO9v7nsumNvgLSrXN4RQcDdD1BoV92
+         TCCw==
+X-Gm-Message-State: AOJu0YxA6MtG7mWIOb+zJSktpcqSadXXIn0q028r/qGw+B54Ji4zwLKb
+	ZRPf9Q4XonWl5zfeTQt6XHFxPJkrAZ0HJGJc5wJZwx+CemwkKSC5bJRxtSTqeI533XbmhWHGhOB
+	unx+AN/sUeLVxgmoj2nK2eyWeuF0z20eF3QlGxhftZrAQcardCRyA
+X-Gm-Gg: ASbGncsvg8xIlH22JwUHXpR49P/u3SR0coHcwwffNcRKZYwNSIiVP+1oaZbepXnUnxF
+	ZuAuF586E4m9Vo7qXECLn29AUBY6AEcsa0jsu2vRsJ0TxaMBDmTr8VTCbgyXquoEJYYg4azIh3t
+	ce2i4W8UHs/KT7cD18EkPUfqksntADgi1bj7AmJPxAMhaYfKYamohPJDy3I+uBzY8s+BL+FPN2w
+	nPgJP/b6oNZ96LElWwqtW1wFjvqmX9wH62lPyLhINaPzLGwxw+dNd+agKluX1QJAA0rlitz
+X-Google-Smtp-Source: AGHT+IEwLmUO90JusfGU99LkhdunCPNBh25OIaSeaqw7QBYPZxvX4V5bCa/q5MSaZ04IpIPRnNVJOrz1R1keY2/9Avc=
+X-Received: by 2002:a05:690c:e1e:b0:787:d188:528d with SMTP id
+ 00721157ae682-78ab6f1ab43mr24659997b3.33.1764074026408; Tue, 25 Nov 2025
+ 04:33:46 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1763634565-183891-1-git-send-email-shawn.lin@rock-chips.com> <1763634565-183891-4-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1763634565-183891-4-git-send-email-shawn.lin@rock-chips.com>
+References: <1763634565-183891-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1763634565-183891-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 25 Nov 2025 13:23:41 +0100
-X-Gm-Features: AWmQ_blwcTQbe0sn1fUvu7rajPabTfz1rA38GGTiLaU_Ntcf2HauvpLIIjhE9NE
-Message-ID: <CAPDyKFpsUYRfN8+5bthC0UttGkRDL6cf-VzgOW-6mP1L2G-_5A@mail.gmail.com>
-Subject: Re: [PATCH 03/13] mmc: dw_mmc: Remove vqmmc_enabled from struct dw_mci
+Date: Tue, 25 Nov 2025 13:33:10 +0100
+X-Gm-Features: AWmQ_bnzHXgXf2DIj-jrV9_xEGjmlVYmbnyBRmxlGhwiWxvVt6695g9_YfTHzV0
+Message-ID: <CAPDyKFp4B-=LDoc8xcLBaE-wX_H3t4BUDd99coyjxQZfbB0+GA@mail.gmail.com>
+Subject: Re: [PATCH 0/13] dw_mmc cleanup
 To: Shawn Lin <shawn.lin@rock-chips.com>
 Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 20 Nov 2025 at 11:30, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Thu, 20 Nov 2025 at 11:29, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> commit 51da2240906c ("mmc: dw_mmc: use mmc_regulator_get_supply to handle regulators")
-> introduced tracking of vqmmc_enabled. Currently, dw_mmc properly maintains power sequence
-> according to MMC_POWER_* from mmc core, which should be enough. There is nothing special
-> I could see here to still keep tracking of vqmmc status. Hence, remove it.
+> Hi Ulf & Jaehoon
 >
-> This patch is tested on RK3588s EVB1 with TF cards with both vqmmc present or not.
+> As you can see, dw_mmc is likely one of the most complex and difficult-to=
+-read
+> host driver at present. It maintains various states and bottom-half sched=
+uling,
+> containing a significant amount of redundant code=E2=80=94including a mul=
+ti-slot mechanism
+> that has been unsupported for over a decade.
 >
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
+> Jaehoon attempted to remove cur_slot more than ten years ago, but the dri=
+ver still
+> retains the slot structure and the associated queue mechanism designed to=
+ support
+> multiple slots. This has made the already complex code even harder to rea=
+d and maintain.
 >
->  drivers/mmc/host/dw_mmc.c | 28 ++++++++--------------------
->  drivers/mmc/host/dw_mmc.h |  2 --
->  2 files changed, 8 insertions(+), 22 deletions(-)
+> The first four patches aim to eliminate some of the redundant code, while=
+ the remaining
+> patches are intended to ultimately remove the dw_mci_slot variable. To fa=
+cilitate review
+> and minimize the risk of regression, each patch is designed to accomplish=
+ a single,
+> clear objective.
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 80d3851..ebbf1a6 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1436,25 +1436,12 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                 mci_writel(slot->host, PWREN, regs);
->                 break;
->         case MMC_POWER_ON:
-
-The mmc core may call the ->set_ios() callback with MMC_POWER_ON
-several times during initialization. For example, to change the clock
-rate. Hence the below is needed to keep the reference counting of the
-regulator correctly balanced.
-
-Although, we have added mmc_regulator_enable_vqmmc() which should be
-able to replace the below code.
-
-> -               if (!slot->host->vqmmc_enabled) {
-> -                       if (!IS_ERR(mmc->supply.vqmmc)) {
-> -                               ret = regulator_enable(mmc->supply.vqmmc);
-> -                               if (ret < 0)
-> -                                       dev_err(slot->host->dev,
-> -                                               "failed to enable vqmmc\n");
-> -                               else
-> -                                       slot->host->vqmmc_enabled = true;
-> -
-> -                       } else {
-> -                               /* Keep track so we don't reset again */
-> -                               slot->host->vqmmc_enabled = true;
-> -                       }
-> -
-> -                       /* Reset our state machine after powering on */
-> -                       dw_mci_ctrl_reset(slot->host,
-> -                                         SDMMC_CTRL_ALL_RESET_FLAGS);
-> +               if (!IS_ERR(mmc->supply.vqmmc)) {
-> +                       ret = regulator_enable(mmc->supply.vqmmc);
-> +                       if (ret < 0)
-> +                               dev_err(slot->host->dev,
-> +                                       "failed to enable vqmmc\n");
->                 }
-> -
->                 /* Adjust clock / bus width after power is up */
->                 dw_mci_setup_bus(slot, false);
+> This series have been tested on the RK3588S EVB1 platform.
 >
-> @@ -1466,13 +1453,14 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                 if (!IS_ERR(mmc->supply.vmmc))
->                         mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
 >
-> -               if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled)
-> +               if (!IS_ERR(mmc->supply.vqmmc))
->                         regulator_disable(mmc->supply.vqmmc);
-> -               slot->host->vqmmc_enabled = false;
 >
->                 regs = mci_readl(slot->host, PWREN);
->                 regs &= ~(1 << slot->id);
->                 mci_writel(slot->host, PWREN, regs);
-> +               /* Reset our state machine after powering off */
-> +               dw_mci_ctrl_reset(slot->host, SDMMC_CTRL_ALL_RESET_FLAGS);
->                 break;
->         default:
->                 break;
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index b4ceca0..6faa63b 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -121,7 +121,6 @@ struct dw_mci_dma_slave {
->   * @push_data: Pointer to FIFO push function.
->   * @pull_data: Pointer to FIFO pull function.
->   * @quirks: Set of quirks that apply to specific versions of the IP.
-> - * @vqmmc_enabled: Status of vqmmc, should be true or false.
->   * @irq_flags: The flags to be passed to request_irq.
->   * @irq: The irq value to be passed to request_irq.
->   * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
-> @@ -228,7 +227,6 @@ struct dw_mci {
->         void (*pull_data)(struct dw_mci *host, void *buf, int cnt);
+> Shawn Lin (13):
+>   mmc: dw_mmc: Remove unused struct dma_pdata
+>   mmc: dw_mmc: add dw_mci_prepare_desc() for both of 32bit and 64bit DMA
+>   mmc: dw_mmc: Remove vqmmc_enabled from struct dw_mci
+>   mmc: dw_mmc: Remove unused header files and keep alphabetical order
+>   mmc: dw_mmc: Move struct mmc_host from struct dw_mci_slot to struct
+>     dw_mci
+>   mmc: dw_mmc: Let glue drivers to use struct dw_mci as possible
+>   mmc: dw_mmc: Move flags from struct dw_mci_slot to struct dw_mci
+>   mmc: dw_mmc: Remove id from dw_mci_slot
+>   mmc: dw_mmc: Remove sdio_id from struct dw_mci_slot
+>   mmc: dw_mmc: Move clock rate stuff from struct dw_mci_slot to struct
+>     dw_mci
+>   mmc: dw_mmc: Remove mrq from struct dw_mci_slot
+>   mmc: dw_mmc: Remove queue from dw_mci
+>   mmc: dw_mmc: Remove struct dw_mci_slot
 >
->         u32                     quirks;
-> -       bool                    vqmmc_enabled;
->         unsigned long           irq_flags; /* IRQ flags */
->         int                     irq;
+>  drivers/mmc/host/dw_mmc-exynos.c      |   9 +-
+>  drivers/mmc/host/dw_mmc-hi3798cv200.c |   6 +-
+>  drivers/mmc/host/dw_mmc-hi3798mv200.c |  17 +-
+>  drivers/mmc/host/dw_mmc-k3.c          |  21 +-
+>  drivers/mmc/host/dw_mmc-pltfm.c       |   2 +-
+>  drivers/mmc/host/dw_mmc-rockchip.c    |   9 +-
+>  drivers/mmc/host/dw_mmc-starfive.c    |   5 +-
+>  drivers/mmc/host/dw_mmc.c             | 606 ++++++++++++++--------------=
+------
+>  drivers/mmc/host/dw_mmc.h             |  83 ++---
+>  9 files changed, 297 insertions(+), 461 deletions(-)
 >
 > --
 > 2.7.4
 >
+
+I have walked through the series and overall this looks good to me,
+besides the comments on patch 3 and the obvious reported build
+problems.
+
+Moreover, I would appreciate it if you could work a bit on the commit
+messages. No empty commit messages please - and try to describe a bit
+more on why/what each patch does.
 
 Kind regards
 Uffe
