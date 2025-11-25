@@ -1,145 +1,105 @@
-Received: from mail-yx1-f46.google.com (mail-yx1-f46.google.com [74.125.224.46])
+Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B60AF31A81F
-	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 13:00:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 553AC1EB5E1
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 13:00:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764075656; cv=none; b=DAMrcR7rHGU3w1wxw7qmnkK/bFc1AbhIV+luaP1XBipnQSLuv5tfgQR8vsJAxynszczFCKWkIfgxSOxelIC3yAxNppi2nGxgi0wCPesAPRSFUxjcDddYm6c2P1kUkluqecENBU5/V/x0cugmSroiMwYSOsyIwIs2H/pB1uFDSeA=
+	t=1764075659; cv=none; b=WgIgk7wC9m7tJX17qIFebDPAh1Ll3TVjaAzzltidZ5kx9ZlaWPwacZXT9J5C0EYwZahwdfFSMfdjAgGbphROo9Rf52CYceNPAaM7tDCrSp4UqFAHKbuzmR+ALkCzQNfK9l7r1a05bUcXxCVkZeO8yjfrWzHCVMYeHPF7lkzNIY0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764075656; c=relaxed/simple;
-	bh=TJje+ZFmoQtgTQbXX2vXROwnFTvKvBdghzPYF7XErno=;
+	s=arc-20240116; t=1764075659; c=relaxed/simple;
+	bh=MxSu7/+tDC/ewCZT6aP4aMNTRlY8x1JNcimqpkHUEjg=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=MwVYgbqya2bNKAkuss2iBP89I59sBMFpePeF9NjRNhzis40VoRWFwOtdOxnQLB1UFHJ4+HlsSqB1msnIxcJdw/ZIhOwvuXFkslC8PlmUpV5eztBU7XikbkEmJkOi1N4LVmPCPMvFSx5P7vjJgAjbogJktH8xJ7ZqBYu4XGBsNlY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=qy6HDgzA; arc=none smtp.client-ip=74.125.224.46
+	 To:Cc:Content-Type; b=Ttg8yjAmk20wsTJMtNdLBw9xjmQy6yn0+LdLDgIivYwPr9Eul/7zlylVyUXO4OBNCwTZciOkra1b/HPhsfjX/Cir9zGjWyjv00vomofT25fjvFkbeALIXYTbD+UAYx/soCwb6cNKNgRk24o4Ob7MEZFOMYkRaW2smBD2Hr0J+J0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vgMIjQjm; arc=none smtp.client-ip=209.85.128.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qy6HDgzA"
-Received: by mail-yx1-f46.google.com with SMTP id 956f58d0204a3-640c9c85255so7599670d50.3
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 05:00:54 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vgMIjQjm"
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-7815092cd0bso51703197b3.2
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 05:00:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1764075654; x=1764680454; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1764075655; x=1764680455; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1RsPPNmFTp7OpTkMbhK8Rgl/qW4d5zaCYUB+xPaRZ5I=;
-        b=qy6HDgzAqvDA4V+O7vdj3pdClk+5DQxkJEdIRth0axUbvSMXA0nxb5KjCoUUQItUcM
-         fkC3vE5XiQb2hGPgOB8sSEhPV2c6JWn06TE/uA64vd+Xj1KYHvBMRl9EqoKle+yBfnUH
-         dvQIxdETZb2nofVFYCQSMlZHSQezCJhF72kmaGTtVZfKRiA6qsB5JOjPCLHGz6Edd4PD
-         L4tJclp4d4hp1YEYh/TskwWUGokbvzD/pZvpnTNMkYUCMbk+aOp4TUet5WBy4kuk0zQ6
-         uNfCvnHtAJOlsFLRJv14Ol6SeOo75MN3tNmRjepJrj48HqVwVr6TyYFMnxrnD0koZODi
-         6+Qg==
+        bh=MxSu7/+tDC/ewCZT6aP4aMNTRlY8x1JNcimqpkHUEjg=;
+        b=vgMIjQjm5z+nPYXkl/To7CriDZnBIh4vsFw9J2rCzqDD//szGKLY0sqT3BTVZn/Sxv
+         nQPXpUYgbMfE1wKg90H9NDOS+lr1QkXm2mfVUX/rpGrXGbleVcUtdMnxcsg8X5kYhx1q
+         Z8HOLkLD+HaQoaEstOAMXojx4rJ2aVpcpWjvS/Pq1qzOZAkVufXoLK2nhBrV1c6K7P+x
+         dDcsfoyfnXoF9pK3vtB0KL+PndVlnCeRs+VK8l7MdUc92C6R/DXevnkfIoI93TEDHZUY
+         OAprMk/qew9SxghCUFMlk4audn1C9jFxr/gAtmcTqGiR01MsSRiPfyeaPXWIyLMJeXxu
+         t2zQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764075654; x=1764680454;
+        d=1e100.net; s=20230601; t=1764075655; x=1764680455;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1RsPPNmFTp7OpTkMbhK8Rgl/qW4d5zaCYUB+xPaRZ5I=;
-        b=YX/q/T7NN0l1Dfz3WMMOStORmuILeXlQ7EpNVTHkyg+f467lXv1snhThbpN16p08ou
-         5bcQ5Y78BzKpy86YPup32+4t9yysHpVhPhY15JgDrU15Xv0LbLWaKhMJTES9H9wJ9Ns9
-         sITyg56/w/uw4SlS/5rqzx97O6TcMgtpHKVVa2YpGcHQaVLZyH+DwM+PiIhcOazkgyGB
-         WoNi2WJoBHH5MwgaisIH7rMdyXkFdA3iCFued1Sm3zjuPysoOhKAGvoPdvmIo9DS1B4N
-         mzCn8mSnN42heXfrw6Upye6KBABACLiokgmMnP/a5x68+B46VGti3xCtQMW9FcZB37en
-         LweQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXm/4C6kUXIGxls8wEi5Ogl29buU6ys8a6HsfZJYQHwERQpQdkdpiduyVKH4uGqPKCpJ58dQIxXMd8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyXzsJIicWM3dQxe9Vl3M9nqVlE9ZJg/SpK3Z4WDSPD02NbjI2T
-	E9d+T5gMx43z+sBsx4oI53iNrgVnKUsD7IQmNYqYzBV9iW6KICI2Q/9stjWMsWew5NYmar50X5N
-	PWeSWrJmKrvowcWX6IanAkTv8ciMQVdvbxQpeUT/tAw==
-X-Gm-Gg: ASbGnctS1ltSmGiscNEjJmbfzBUR/1Wa02wSR+U61PS9W1ocSxNb/82i8zFvQI/8Abx
-	leBMlIglnulP+S4lPMXGz/WxP5DaAJ//CEUVFbJDdmjq/7OyK8k/DiPjDCFGHrvlPvoQUdJ+MRj
-	ZjZn7CF+ZjHEF3FaCy0EISCqZYzkpylyBv4Lu0aH7X3Qy5o6YTY+C9pKdH+lenYqPvtQmRAQ1d0
-	Tq7G/QmSuCwaML1/aqwwU0P7mPSuq8vvWtvTkzao8H03UoqbrN5/dYKCUsMUVHUPw1ulVR2
-X-Google-Smtp-Source: AGHT+IEP20Hd5zXH7TaBK1luFEI91whta9/nRanMdGqkrRNeye2Tk/PEkWxVIZl9IN/yXd7H6AlOEFw6B+87i0XqsQ8=
-X-Received: by 2002:a53:d056:0:10b0:641:f5bc:68d4 with SMTP id
- 956f58d0204a3-6432941d131mr1383516d50.81.1764075651936; Tue, 25 Nov 2025
- 05:00:51 -0800 (PST)
+        bh=MxSu7/+tDC/ewCZT6aP4aMNTRlY8x1JNcimqpkHUEjg=;
+        b=sgXgey0tGxYhWwZavA2EjUxOZN4cFrGUj3CiOarqhz6/2EQu0sXpgvKXNdpjsx7Ua4
+         n7RHvSyPeYwH139hmEpIh6D60ZDR7reoycjIc/kvC3gN0EyVlkK4YDUPmXRw3OYWaK//
+         NPSH3yp7TB//zZFU95TLZVJH80sdIGZYdqExifXzSC2FLJ7WFPAxcA2XbUygY0eRhIez
+         uRnzvNDyzSx8tuzIRsXY2sMp9e6COhWcJ9Y3T9VHBigbWc4bOiKJoXY6/D6G6mV3PsGo
+         eLNOxadxWt7/VKp1g84sLYaLdxiKh224BdDNje/DQhpyy+iGpDj9pV92sCD1eKkx7Dqj
+         VBGA==
+X-Forwarded-Encrypted: i=1; AJvYcCU22IOc2M1Sona0Mzh7wrE1zErxJH4POhl4vVy0l6kM7bMHVbTaDAWCJhg1DhiThHFVVeWbgODDCOQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz5yGJASdeodbC4kdcAKNswgBjmbb/k2FvgIVRebv13UnHQfKKo
+	87rk8f2MtPc7gTlH8XMNpONODQ3ixWgNe6e2bG6+hUUy7svCo78o/HInRxohRR12V1DsAF2tlQ+
+	hnwmH9tEsMb1XxR45ZFRJKMyiPG/W0UwMgwZEbfEUsw==
+X-Gm-Gg: ASbGncv0nccxisoBzSAaFrBUs5EZ7VhIDUDpxdl6hNmJX2pw9f7FwHmNQlOI12Wl7na
+	gVLkakCdqG7f8pik9fsmyRVloM+EynHTxU0xButr41HL7B9XSSO/KnY4i5RPmRfmLIBHCel0pFr
+	tHWNAF/t1XSUPyBX0LnPzFmxQXh+DwWybnrenetDv69iJwOrBONIqfLD1TeQ8wBbuWZPxHiV0X1
+	uk48e1uToR9tlN0P3WKiBQP4S7jyaSknJfGZVcu5K+jtZ+3TLtn2keh4DZ3mgSGyh1028LC
+X-Google-Smtp-Source: AGHT+IHlKYmpPx4ytkCZJ43o1/YRez9M93lptuGk9x+25iF18/2lXfKBMy3NSSymEMTxd9GqKo6iCsg1bhEgFKaP8Zw=
+X-Received: by 2002:a05:690c:9688:b0:789:3166:25a7 with SMTP id
+ 00721157ae682-78ab6f3d484mr38401397b3.46.1764075655052; Tue, 25 Nov 2025
+ 05:00:55 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251121-rockchip-emmc-cqe-rk3576-fix-v1-1-a77805f40072@collabora.com>
-In-Reply-To: <20251121-rockchip-emmc-cqe-rk3576-fix-v1-1-a77805f40072@collabora.com>
+References: <20251114082824.3825501-1-sarthak.garg@oss.qualcomm.com> <CAPDyKFqssyDuyRFxRUurudWLYGiZ1AXTWV6isyYc8Wz0NLriWw@mail.gmail.com>
+In-Reply-To: <CAPDyKFqssyDuyRFxRUurudWLYGiZ1AXTWV6isyYc8Wz0NLriWw@mail.gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 25 Nov 2025 14:00:16 +0100
-X-Gm-Features: AWmQ_bn9XHBZp-_mXQSdYI6S_EfNS30h2ysruAh8MZxFVousTjCGxc-bOSJ4hr4
-Message-ID: <CAPDyKFp4oNWQn3xW3+GGbGmi8U7H98Bbos0vRqaQPaht54nZ=w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Fix command queue support for RK3576
-To: Sebastian Reichel <sebastian.reichel@collabora.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Yifeng Zhao <yifeng.zhao@rock-chips.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org
+Date: Tue, 25 Nov 2025 14:00:19 +0100
+X-Gm-Features: AWmQ_blVMx1RCPDTQFql3H0BDcLS24cFJOHcU1KrNtPwwkrojK6XQDO2akwmf2k
+Message-ID: <CAPDyKFpyCHvnGQUrdMxSmksd2hQtxrfwcWKiQTz4Eu9=tyXvGQ@mail.gmail.com>
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Avoid early clock doubling during
+ HS400 transition
+To: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-arm-msm@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
+	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, 
+	quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 21 Nov 2025 at 17:27, Sebastian Reichel
-<sebastian.reichel@collabora.com> wrote:
+On Mon, 17 Nov 2025 at 11:55, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> When I added command queue engine (CQE) support for the Rockchip eMMC
-> controller, I missed that RK3576 has a separate platform data struct.
-> While things are working fine on RK3588 (I tested the ROCK 5B) and
-> the suspend issue is fixed on the RK3576 (I tested the Sige5), this
-> results in stability issues. By also adding the necessary hooks for
-> the RK3576 platform the following problems can be avoided:
+> On Fri, 14 Nov 2025 at 09:28, Sarthak Garg
+> <sarthak.garg@oss.qualcomm.com> wrote:
+> >
+> > According to the hardware programming guide, the clock frequency must
+> > remain below 52MHz during the transition to HS400 mode.
+> >
+> > However,in the current implementation, the timing is set to HS400 (a
+> > DDR mode) before adjusting the clock. This causes the clock to double
+> > prematurely to 104MHz during the transition phase, violating the
+> > specification and potentially resulting in CRC errors or CMD timeouts.
+> >
+> > This change ensures that clock doubling is avoided during intermediate
+> > transitions and is applied only when the card requires a 200MHz clock
+> > for HS400 operation.
+> >
+> > Signed-off-by: Sarthak Garg <sarthak.garg@oss.qualcomm.com>
 >
-> [   15.606895] mmc0: running CQE recovery
-> [   15.616189] mmc0: running CQE recovery
-> [...]
-> [   25.911484] mmc0: running CQE recovery
-> [   25.926305] mmc0: running CQE recovery
-> [   25.927468] mmc0: running CQE recovery
-> [...]
-> [   26.255719] mmc0: running CQE recovery
-> [   26.257162] ------------[ cut here ]------------
-> [   26.257581] mmc0: cqhci: spurious TCN for tag 31
-> [   26.258034] WARNING: CPU: 0 PID: 0 at drivers/mmc/host/cqhci-core.c:796 cqhci_irq+0x440/0x68c
-> [   26.263786] CPU: 0 UID: 0 PID: 0 Comm: swapper/0 Not tainted 6.18.0-rc6-gd984ebbf0d15 #1 PREEMPT
-> [   26.264561] Hardware name: ArmSoM Sige5 (DT)
-> [...]
-> [   26.272748] Call trace:
-> [   26.272964]  cqhci_irq+0x440/0x68c (P)
-> [   26.273296]  dwcmshc_cqe_irq_handler+0x54/0x88
-> [   26.273689]  sdhci_irq+0xbc/0x1200
-> [   26.273991]  __handle_irq_event_percpu+0x54/0x1d0
-> [...]
->
-> Note that the above problems do not necessarily happen with every boot.
->
-> Reported-by: Adrian Hunter <adrian.hunter@intel.com>
-> Closes: https://lore.kernel.org/linux-rockchip/01949bc9-4873-498b-ac7d-f008393ccc4c@intel.com/
-> Fixes: fda1e0af7c28f ("mmc: sdhci-of-dwcmshc: Add command queue support for rockchip SOCs")
-> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
+> It sounds to me that we should add a fixes/stable tag for this, right?
 
-Applied for next, thanks!
+I applied this for next and added a stable tag, please let me know if
+you prefer something different.
+
+[...]
 
 Kind regards
 Uffe
-
-
-> ---
-> Sorry for the delay in sending this :)
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index c66a8dfad47c..ee0008d91b98 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -1767,6 +1767,7 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
->                 .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
->                            SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->         },
-> +       .cqhci_host_ops = &rk35xx_cqhci_ops,
->         .init = dwcmshc_rk35xx_init,
->         .postinit = dwcmshc_rk3576_postinit,
->  };
->
-> ---
-> base-commit: dcbce328d3a2d87770133834210cf328c083d480
-> change-id: 20251121-rockchip-emmc-cqe-rk3576-fix-ec8ac72e6e32
->
-> Best regards,
-> --
-> Sebastian Reichel <sebastian.reichel@collabora.com>
->
