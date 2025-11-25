@@ -1,33 +1,26 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m49205.qiye.163.com (mail-m49205.qiye.163.com [45.254.49.205])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01051298CC4;
-	Mon, 24 Nov 2025 19:54:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D9CE46BF
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Nov 2025 00:40:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.205
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764014058; cv=none; b=nrmoKxQiuxoQRIUJlA+OUsOXehKC3jLHEajZhGmSvDB1cFB5WhUPOnJpzY9GKhvc5+xjIjRLATJHUES2EtlchE8tQOHylj/9lhBeLdsNCJEGfY2A7HXeAxNulIU02WSiy2Sj3CoT9ymlb2LAMBbNSuySwUUNM6RSi5erlZsQG3M=
+	t=1764031220; cv=none; b=E7eI1YMNiQjxvDzHkKXm/7BO649Gm6+QbJaS/REZxeQvYbG5CdSMzpMvsvQLbWvI4p+xZnPq1j93C6GPH8Bj94tqfvyIz3eJqnZnT8sxsr96mCXK7pFqdTS1hRiNAibtyKG8pElLxZ6xMEB79P8203fqT9VR2xMJmp4mjOQ4O9s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764014058; c=relaxed/simple;
-	bh=rAB1RBzVZspJce6mDC5q/pWwzFFJ0gazIojI0FArJs8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=EwJQrNzbDEeHg5PUddmPt2quZ+dTEz6wZZ2Ev81wguPy8M8CfOkbB+YAsSDeJgdKU6T5mN81DLmaCD7k76AdmsjHmGt1M11ty3rTQElKcyfQ8NWJ4GXCxyoO4j9nYxbslJ0IJy1GxWV97CMyqnI5gj5T6K+Td163oLSj3wRQjP8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kgcCLkG2; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764031220; c=relaxed/simple;
+	bh=TpZoLosKYeRiM16APevdAPz4WdRDiDTHN2SO9yyti5c=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=AHyhAruOTaORXsrHaZapbMCgvUlwTfkBlmnR0W5J/ngXcHsPPzckjEaYt2m+z+ceDTp7+r+wpncVBcPwGaO03H09geHuIX61nJQUVYj2RypkjwmUnz2pcY1bB+rOSJFr5s330Z+QEihobizAUgcaDQS6U8KEw+tRZ2IHvQ0oo1A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=AXvOrVq6; arc=none smtp.client-ip=45.254.49.205
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kgcCLkG2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A503EC4CEF1;
-	Mon, 24 Nov 2025 19:54:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764014057;
-	bh=rAB1RBzVZspJce6mDC5q/pWwzFFJ0gazIojI0FArJs8=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=kgcCLkG2M/f6Uq9/d04A/1+g/lV/b4+ogcWcJPQ+7Y7Q0RsZ1pg+XdtnhItlbHGMo
-	 2QZQj5u0j3GEVbER9+mLFFsEsQP44sxBHdnhUY5Ocvzl1iWHiinZNoxyS2b0G1AzMp
-	 F8ZWdz2puMCoe8LnLLkzoa0gcvbLEt8XnNQPbU3BRSLHEdTbtz/cJHAJ1Ui1Lx9MVL
-	 hmkbLrNC7wsIsFiw1zkggVslA7wkaPbtzTWyhvkxLCNHd8OrqdbL0N6jlj4gJGrw9+
-	 X1Y+MuDro0Rr2g8/zycey8GtpDRxaOEPbTYzGpS/JzRCTNlfO+wd3hLiv5+9bwERMi
-	 JyZUh8z2tVeAA==
-Message-ID: <db24d435-edd7-4b90-99d2-8e62c53340de@kernel.org>
-Date: Mon, 24 Nov 2025 20:54:13 +0100
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="AXvOrVq6"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2abe9d654;
+	Tue, 25 Nov 2025 08:40:06 +0800 (GMT+08:00)
+Message-ID: <c0eefc16-9e85-4ca8-a32e-28878895c65c@rock-chips.com>
+Date: Tue, 25 Nov 2025 08:40:03 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,88 +28,122 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] arm64: dts: qcom: kodiak: enable the inline crypto
- engine for SDHC
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>, ulf.hansson@linaro.org,
- robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- andersson@kernel.org, konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20251124111914.3187803-1-neeraj.soni@oss.qualcomm.com>
- <20251124111914.3187803-3-neeraj.soni@oss.qualcomm.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20251124111914.3187803-3-neeraj.soni@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Cc: shawn.lin@rock-chips.com, Avri Altman <avri.altman@sandisk.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 2/2] mmc: core: Add quirk for broken manufacturing date
+To: Avri Altman <avri.altman@gmail.com>
+References: <20251122070442.111690-1-avri.altman@sandisk.com>
+ <20251122070442.111690-3-avri.altman@sandisk.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20251122070442.111690-3-avri.altman@sandisk.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9ab874123b09cckunm99ef33d6420a9a
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGR8dH1ZLTktJGUpOTh9LSElWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=AXvOrVq6YJXpZKBQ+74kvExuzoc91L1ScGPQ5z+oDFVdizWag09WGhQ5ccSnlZWqSwrhdDiZf+4/JgmWhcKNxBF7iIAtevpDq9LOWjegLEE4Eq2fiV5yaUdvozXFn+IZwQyt4QyDmsA6TYizgVHC6WgCjbKzIoilm6HGK8WyxIY=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=2K1tSjOvv+ffEiqVDlgHySYy+wtE4fG3y5zZYkAAvO4=;
+	h=date:mime-version:subject:message-id:from;
 
-On 24/11/2025 12:19, Neeraj Soni wrote:
-> Add an ICE node to kodiak SoC description and enable it by adding a
-> phandle to the SDHC node.
+Hi Avri,
+
+在 2025/11/22 星期六 15:04, Avri Altman 写道:
+> Some eMMC vendors need to report manufacturing dates beyond 2025 but are
+> reluctant to update the EXT_CSD revision from 8 to 9. Changing the
+> EXT_CSD revision is a firmware modification that would force these
+> vendors to re-pass an exhaustive and costly set of Approved Vendor List
+> (AVL) qualifications with their customers.
 > 
-> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+
+Ack, I fully understand this situation, as we also need re-certificate
+eMMC chip on our AVL if vendor renew the firmware.
+
+> To avoid this re-qualification process, a workaround is needed. This
+> patch introduces a temporary quirk that re-purposes the year codes
+> corresponding to 2010, 2011, and 2012 to represent the years 2026, 2027,
+> and 2028, respectively. This solution is only valid for this three-year
+> period.
+> 
+> After 2028, vendors must update their firmware to set EXT_CSD_REV=9 to
+> continue reporting the correct manufacturing date in compliance with the
+> JEDEC standard.
+> 
+> The `MMC_QUIRK_BROKEN_MDT` is introduced and enabled for all Sandisk
+> devices to handle this behavior.
+
+
+Would other vendors need this quirk but with different policy/
+adjustment?
+
+> 
+> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 > ---
->  arch/arm64/boot/dts/qcom/kodiak.dtsi | 9 +++++++++
->  1 file changed, 9 insertions(+)
+>   drivers/mmc/core/card.h   | 5 +++++
+>   drivers/mmc/core/mmc.c    | 7 ++++++-
+>   drivers/mmc/core/quirks.h | 3 +++
+>   include/linux/mmc/card.h  | 1 +
+>   4 files changed, 15 insertions(+), 1 deletion(-)
 > 
-> diff --git a/arch/arm64/boot/dts/qcom/kodiak.dtsi b/arch/arm64/boot/dts/qcom/kodiak.dtsi
-> index c2ccbb67f800..9d2029a906ce 100644
-> --- a/arch/arm64/boot/dts/qcom/kodiak.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/kodiak.dtsi
-> @@ -1069,6 +1069,15 @@ opp-384000000 {
->  					opp-avg-kBps = <390000 0>;
->  				};
->  			};
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index 1200951bab08..0d1904d87a39 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -305,4 +305,9 @@ static inline int mmc_card_no_uhs_ddr50_tuning(const struct mmc_card *c)
+>   	return c->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING;
+>   }
+>   
+> +static inline int mmc_card_broken_mdt(const struct mmc_card *c)
+> +{
+> +	return c->quirks & MMC_QUIRK_BROKEN_MDT;
+> +}
 > +
-> +			qcom,ice = <&sdhc_ice>;
+>   #endif
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 4c36029b28a3..564a5fb4dd96 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -676,7 +676,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>   		        /* Adjust production date as per JEDEC JC64.1 */
+>   		        if (card->cid.year < 2023)
+>   			        card->cid.year += 16;
+> -	        }
+> +	        } else {
+> +                        /* Handle vendors with broken MDT reporting */
+> +                        if (mmc_card_broken_mdt(card) && card->cid.year >= 2010
+> +                            && card->cid.year <= 2012)
+> +                                card->cid.year += 16;
+> +                }
+>   	}
+>   
+>   out:
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index c417ed34c057..7bfd07ad3d7d 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -153,6 +153,9 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+>   	MMC_FIXUP("M62704", CID_MANFID_KINGSTON, 0x0100, add_quirk_mmc,
+>   		  MMC_QUIRK_TRIM_BROKEN),
+>   
+> +        MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK, CID_OEMID_ANY, add_quirk_mmc,
+> +		  MMC_QUIRK_BROKEN_MDT),
+> +
+>   	END_FIXUP
+>   };
+>   
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index e9e964c20e53..4722dd7e46ce 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -329,6 +329,7 @@ struct mmc_card {
+>   #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
+>   #define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD poweroff notify support */
+>   #define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */
+> +#define MMC_QUIRK_BROKEN_MDT    (1<<19) /* Wrong manufacturing year */
+>   
+>   	bool			written_flag;	/* Indicates eMMC has been written since power on */
+>   	bool			reenable_cmdq;	/* Re-enable Command Queue */
 
-This wasn't tested, for sure you have warnings - you placed the property
-randomly or at the end (even worse...). Please read DTS coding style as
-well.
-
-
-Best regards,
-Krzysztof
