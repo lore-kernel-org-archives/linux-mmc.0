@@ -1,294 +1,241 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE8C23126D4;
-	Wed, 26 Nov 2025 06:43:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8D5824166C
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 09:08:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764139403; cv=none; b=HZxkSwDdul5fDqjTY3jAenR9C1Bw1u6L3y7UDMsiBwmo+rU1C7+swwgiQtUP88PlJw90AnqLHYk1YgJfPf2mjORI70OHu16TUaG6nXMWyDEqGBSOC4QLoqLzzG7f7+MYR1hUB+JcXc+rxbjg0R7VrWkrHunYneU0Vpg9bwI4nvg=
+	t=1764148135; cv=none; b=VLYQ0wh7qwCqKw30fq6E0ND+dJg2+i1hFAjM9OCyEMYtopLZqF05H2Ew/gyKC5PYXNoiT9QcaoWHC2hAvR2K4yZt/ZzVGBbWGTeqzZELgbyxlsMwmuw3WtRidxmkXdIktXSLxea08geMING2nCCSD14+USKF/YpvQsBgCgZA+W0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764139403; c=relaxed/simple;
-	bh=kmKsnZpFmEl6BUWq+YciP0YejMR7MApvaXYd8yMllik=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=sJDf410krx3CNtVXQFdr73FtmfuMWR+lXcAPqS12KCCGaWQCmzYdkY8D5XS2PyodBakF5N8dmcK/ZgbLDXluhSw5W3mAKliloLJUrIJu5wuG+JupDTUAwuEqQPRqf0rDQ0xNRNw9azR2NKUVneOFYPBmRFrQqXn37+mXrS6I+/M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=XZmc4rU6; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1764148135; c=relaxed/simple;
+	bh=EQbQQECKL8tmYBZCR70aGCTG1qpsW/lP0HYtINfwm8c=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:Content-Type; b=qY7AKFbP09wYw+gIxlh4B9YyFgq4NKOG2GBkZ4oV4bTaFEhD8q+FvxtFKcDblvKxGc2qC3OPGMUXDWqwBlWd4/efyHz3J8VNgzPfEytrPcaIHtYEygKYTnyJn6azNaCd3pRubwE/sYgafQ5uhs6DfEcY5BtlrwBudousCpAuxlk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EbnsPhKa; arc=none smtp.client-ip=209.85.210.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="XZmc4rU6"
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AQ52wxA2726797;
-	Wed, 26 Nov 2025 06:43:15 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=qcppdkim1; bh=6lRzbzAne2eodyVs4ztJeD
-	MaNBKrvZMbavDV0LKHBPk=; b=XZmc4rU6iiXZY8zMACsoKLIO/ABuze9+Ev/0m5
-	kUsFgA+Wj7W7sQ7veyIEFd30O43rO135Ip4KqhGAOEilPt2bhqBuJWDXOEO2ha4p
-	tGbBTXD94JUrftahsn9llcwNaoRYhHG7UhWvieLDtI+MB7yS5PDRdeSy1aqTehrv
-	KpYL3Jiqwgif3FMAjjjcGg/pt8xGXUtkIy3ZvCuFMHRrZ9TcilBH+IJbAU6KUAAN
-	Hwz2zTQpgQGPw4vpbdN0k0yunSzcHMxnT3Z4c03bBSyZK30NvNOSlEK7j6pWXkl7
-	NTPZ0sGldGzFq3Qd2Jyw8RmLoy7brNCHzeNBv277dVwTDyCA==
-Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4an8rvuevn-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 26 Nov 2025 06:43:15 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5AQ6hESm032106
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 26 Nov 2025 06:43:14 GMT
-Received: from hu-mdalam-blr.qualcomm.com (10.80.80.8) by
- nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.17; Tue, 25 Nov 2025 22:43:11 -0800
-From: Md Sadre Alam <quic_mdalam@quicinc.com>
-To: <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <abel.vesa@linaro.org>,
-        <ebiggers@kernel.org>
-Subject: [PATCH v6] mmc: sdhci-msm: Enable ICE for CQE-capable controllers with non-CQE cards
-Date: Wed, 26 Nov 2025 12:12:51 +0530
-Message-ID: <20251126064251.1928529-1-quic_mdalam@quicinc.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EbnsPhKa"
+Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7a9c64dfa8aso5160917b3a.3
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 01:08:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1764148133; x=1764752933; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-language:cc:to:subject:from
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vTIeYzRvX9RmX58C/3dNB6Vl+6c7ZcJr+WiK7/9nR48=;
+        b=EbnsPhKaLY3ex8dCDCNvv4ER8ArF23wfCyiVJtQ381b8uqYo65CwRF6qrU2BEsCwPj
+         DZ6tZbSQ2omlGE0vLAucwBWX2vVm6ZEmYvracw9w/OtyQOXx/7AIAG0+Uf4D5q0Ez0SE
+         1rWoCc0jSeS7cbUkIfJmkUUat9EMjagNXWwbJqiLXeVPgwtm2baR2MvnDUZmAqHvovzO
+         O5WYpbfrvqNNv35skjznkpUbH4hDBf+kbhLg/FW9Iook+5bDe535WDCToAnd7BhFqyff
+         S1ziReIpQVRdE2HK44cFjMvLiN4r7W9+BgxweTJS/X7K1XKMLgWPHyPuUzTB1W0f9x8m
+         iF5Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1764148133; x=1764752933;
+        h=content-transfer-encoding:content-language:cc:to:subject:from
+         :user-agent:mime-version:date:message-id:x-gm-gg:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=vTIeYzRvX9RmX58C/3dNB6Vl+6c7ZcJr+WiK7/9nR48=;
+        b=U+yL/AS3r+l4Ht6M54auD8kFmfcvSSvrE7GYQXUQOu4gVf3p4HSoXRTn9Kb6nhdCKc
+         Q4/WWgRAf/Ym/SooHIb48lTinS7AG+dGBJHwBTT7bTvHZZGQQYAaYdI7OCShNv5uYJQS
+         FCTedhfU6YAclWd37Noe2blTaqWrPoX/RtJ0I9wNQKW3DtpjmV7WgZ2MYK70laLCCvSX
+         M06oJ6COoqWKtWGLdZ4IaGJ3Z1hBkTYmrgoNYjTYK0kdKClgzIRuzw2zuSc9bzqKwNh7
+         vVNtZz/JI2qDyWcrgqyuTs0Xm+zGUW7Ff/NNzLOBd0+bkXxKLAW/pjhNHp5DZ4rx/Oek
+         H/sQ==
+X-Gm-Message-State: AOJu0YwQqf+/oyVHEan88AeUPSrLo2QYSzYKRK4qwnAT8agsyR452agN
+	GgYqgIPSCuHZOONicNUYPQf3UTb628FRPhk7qp7n50rMBMAs0DjSB1m5
+X-Gm-Gg: ASbGncsxhuoIdK4dPCClDA8UGm66cl4UBcIUZ+LB/Od2/dUNT0jRisbeq3HDc+sbfBW
+	32JMvyzfhqviUUYOhuCzcOE8lDilW/U5luObDgZC/8md3dLmRujmAu0WQ1x2DLAbv0K2BHTk97a
+	jG7stm5cRDFH5dO4EtVBvR4fORI4A1huB+vdru03EbRODa+TozFaEe+prHf7m8XOJa+CZ5+FMsB
+	JTaABZ0cVW9ikQMPLsZket7Zn2NrKANdgH9Unxq0Wzw6GscJv0QuPe5JOylVLtPBD2ucvD68ytL
+	ZMG5EcB4uWqpQ6l2plOjXQ3K40wqwnen5zvdzBUQeCP4yzxSmOyrwFKnwKlnQQACncae0cKhlz2
+	bzfE/VdR9ZL4CQrgILpW5UoSX0FkVeU0Cw8WJgqTVaq5lYtU6zFUPx03pbFHK8Pjc9DTO2NjvLC
+	TKSrVEIIl5FLzCDHGPi2S6A85gZrBDq3y8mEkQk54SZxTj2qS95bgpC+XKbVkcoiZuNHY=
+X-Google-Smtp-Source: AGHT+IG7RjLZR1+drDTAi7Xx4LEIwiceWTLIWjhFr5YWza50WIYs7nWM4LrZGIoBP1JNB14K3jkFyw==
+X-Received: by 2002:a05:7022:ed03:b0:11b:9386:a38d with SMTP id a92af1059eb24-11cbba87eb2mr2921274c88.48.1764148132894;
+        Wed, 26 Nov 2025 01:08:52 -0800 (PST)
+Received: from [192.168.0.186] (c-73-189-16-174.hsd1.ca.comcast.net. [73.189.16.174])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-11c93e6dbc8sm95365061c88.10.2025.11.26.01.08.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 26 Nov 2025 01:08:52 -0800 (PST)
+Message-ID: <a242799a-d427-48e1-85ef-923f34df843a@gmail.com>
+Date: Wed, 26 Nov 2025 01:08:51 -0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+From: Tabby Kitten <nyanpasu256@gmail.com>
+Subject: rtsx_pci_sdmmc aborts suspend when /sys/power/wakeup_count is enabled
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: CJVqr-JiKHHL38SMHLvniMKDyJzjz7ct
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTI2MDA1MyBTYWx0ZWRfX3lxRAOMJWaLw
- CSVJ5ZBtFSyCBgQGBOpDJlW6emTXLbtSo7KktP1EoFmB8QDhQmcrzqUl6ujwnvk87MRqbwrNWvq
- WP/0fmt/Ju/+jXF+lkVROrbc1RJzSLuW3koGRghu+/UMgIPSCFp/TcCPgI7FPvG9ntroRXmfhf4
- EMI3iIY/j7HzWlttinuf4J628FR9gcDCylrwdyhK1D2ScYBV0cZVV0Wqnl3ocJtTmyWjQlG57wh
- mcpIG/K66M6+/k/5mwnYergKZ1uyi1f7pCiY+32jDCvcWt++Foav6OMP5JDauwqrSqhnR7yQFiv
- kEta/rS/8gBYfKmdonTj+CHv7Uvgj253ADzrvyYMJRPG/GJVDJ4nhESP29TXkfLwVgLudKGusVM
- KIYSCMNHSuXgv03JoLlxeSUDPY52NA==
-X-Proofpoint-GUID: CJVqr-JiKHHL38SMHLvniMKDyJzjz7ct
-X-Authority-Analysis: v=2.4 cv=Ushu9uwB c=1 sm=1 tr=0 ts=6926a183 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=6UeiqGixMTsA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=COk6AnOGAAAA:8 a=QyXUC8HyAAAA:8 a=VFLTqZJuPoDEIE11KTgA:9
- a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-25_02,2025-11-25_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 phishscore=0 bulkscore=0 malwarescore=0 spamscore=0
- suspectscore=0 adultscore=0 lowpriorityscore=0 priorityscore=1501
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2510240001
- definitions=main-2511260053
 
-Enable Inline Crypto Engine (ICE) support for CQE-capable sdhci-msm
-controllers when used with eMMC cards that do not support CQE.
+On a PC with a Realtek PCI Express SD reader, when you sleep with
+`wakeup_count` active (eg. sleeping from KDE's lock screen), the MMC
+driver wakes up the system and aborts suspend.
 
-This addresses the scenario where:
-- The host controller supports CQE (and has CQHCI crypto infrastructure)
-- The eMMC card does not support CQE
-- Standard (non-CMDQ) requests need crypto support
+I've found a sleep failure bug in the rtsx_pci and mmc_core drivers. 
+After userspace writes a number to `/sys/power/wakeup_count` (eg. KDE 
+Plasma does it to distinguish user wakes from timers and Wake-on-LAN), 
+if it attempts a mem suspend it will be aborted when 
+rtsx_pci_runtime_resume() -> mmc_detect_change() emits a 
+pm_wakeup_ws_event(). This breaks sleep on some hardware and desktop 
+environments.
 
-This allows hardware-accelerated encryption and decryption for standard
-requests on CQE-capable hardware by utilizing the existing CQHCI crypto
-register space even when CQE functionality is not available due to card
-limitations.
+The detailed description:
+The recently released Plasma 6.5.0 writes to `/sys/power/wakeup_count`
+before sleeping. On my computer this caused the sleep attempt to fail
+with dmesg error "PM: Some devices failed to suspend, or early wake
+event detected". I got this error on both Arch Linux and Fedora, and
+replicated it on Fedora with the mainline kernel COPR. KDE is tracking
+this error at https://bugs.kde.org/show_bug.cgi?id=510992, and have
+disabled writing to wakeup_count on Plasma 6.5.3 to work around this
+issue.
 
-The implementation:
-- Adds ICE register definitions for non-CQE crypto configuration
-- Implements per-request crypto setup via sdhci_msm_ice_cfg()
-- Hooks into the request path via mmc_host_ops.request for non-CQE requests
-- Uses CQHCI register space (NONCQ_CRYPTO_PARM/DUN) for crypto configuration
+I've written a standalone shell script to reproduce this sleep failure 
+(save as badsleep.sh):
 
-With this, CQE-capable controllers can benefit from inline encryption
-when paired with non-CQE cards, improving performance for encrypted I/O
-while maintaining compatibility with existing CQE crypto support.
+#!/bin/bash
+read wakeup_count < /sys/power/wakeup_count
+if [[ $? -ne 0 ]]; then
+    e=$?
+    echo "Failed to open wakeup_count, suspend maybe already in progress"
+    exit $e
+fi
+echo $wakeup_count > /sys/power/wakeup_count
+if [[ $? -ne 0 ]]; then
+    e=$?
+    echo "Failed to write wakeup_count, wakeup_count may have changed in between"
+    exit $e
+fi
+echo mem > /sys/power/state
 
-Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
+Running `sudo ./badsleep.sh` reproduces failed sleeps on my computer.
+(sudo is needed to write to `/sys/power/wakeup_count` on Fedora.)
 
-Change in [v6]
+* If I run the script unaltered, the screen turns off and on, and the 
+  terminal outputs
+  `./badsleep.sh: line 14: echo: write error: Device or resource busy`
+  indicating the mem sleep failed.
 
-* Changed the variable name from ice_init_done to non_cqe_ice_init_done
+* If I edit the script and comment out `echo $wakeup_count > 
+  /sys/power/wakeup_count`, the sleep succeeds, and waking the computer 
+  skips the lock screen and resumes where I left off.
 
-* Eliminated the ICE_HCI_SUPPORT check inside the sdhci_msm_non_cqe_ice_init()
-  function
+* If I run `sudo rmmod rtsx_pci_sdmmc` to disable the faulty module, the 
+  sleep succeeds, and waking the computer skips the lock screen and 
+  resumes where I left off.
 
-* Updated the sdhci_msm_ice_cfg() function to use a void return type instead
-  of int
+I think this problem happens in general when a driver spawns a wakeup 
+event from its suspend callback. On my system, the driver in question 
+lies in the MMC subsystem.
 
-* Removed the crypto_enable and dun variables from the sdhci_msm_ice_cfg()
-  function
+## Code debugging
 
-* Revised the comment associated with the sdhci_msm_request() function
+If I run `echo 1 > /sys/power/pm_debug_messages` to enable verbose 
+logging, then attempt a failed sleep, I see output:
 
-Change in [v5]
+    PM: Wakeup pending, aborting suspend
+    PM: active wakeup source: mmc0
+    PM: suspend of devices aborted after 151.615 msecs
+    PM: start suspend of devices aborted after 169.797 msecs
+    PM: Some devices failed to suspend, or early wake event detected
 
-* Removed unused variable
+The "Wakeup pending, aborting suspend" message comes from function 
+`pm_wakeup_pending()`. This function checks if event checks are enabled, 
+and if some counters have changed aborts suspend and calls 
+`pm_print_active_wakeup_sources()`, which prints `wakeup_sources`. 
+Tracing the code that modifies `wakeup_sources`, I found that 
+`pm_wakeup_ws_event()` would activate an event and 
+`wakeup_source_register() → wakeup_source_add()` would add a new one.
 
-* Added proper comment for sdhci_msm_request()
+To find who changed wakeup events, I used my stacksnoop fork at 
+https://github.com/nyanpasu64/bcc/blob/local/examples/tracing/stacksnoop
+.py to trace a failed suspend:
 
-* Removed sdhci_msm_ice_enable(); it is already invoked during resume
+nyanpasu64@ryzen ~/code/bcc (local)> sudo ./examples/tracing/stacksnoop.py pm_wakeup_ws_event wakeup_source_register
+TIME(s)            FUNCTION
+7.254676819:
+0: ret_from_fork_asm [kernel]
+1: ret_from_fork [kernel]
+2: kthread [kernel]
+3: worker_thread [kernel]
+4: process_one_work [kernel]
+5: async_run_entry_fn [kernel]
+6: async_suspend [kernel]
+7: device_suspend [kernel]
+8: dpm_run_callback [kernel]
+9: mmc_bus_suspend [mmc_core]
+10: mmc_blk_suspend [mmc_block]
+11: mmc_queue_suspend [mmc_block]
+12: __mmc_claim_host [mmc_core]
+13: __pm_runtime_resume [kernel]
+14: rpm_resume [kernel]
+15: rpm_resume [kernel]
+16: rpm_callback [kernel]
+17: __rpm_callback [kernel]
+18: rtsx_pci_runtime_resume [rtsx_pci]
+19: mmc_detect_change [mmc_core]
+20: pm_wakeup_ws_event [kernel]
 
-Change in [v4]
+On a previous kernel, lines 9-12 were replaced by a single call to 
+`pci_pm_suspend`. I've posted my detailed debugging on the older kernel 
+at https://bugs.kde.org/show_bug.cgi?id=510992#c26. There I found that 
+`pci_pm_suspend()` wakes PCI(e) devices before sending them into a full 
+sleep state, but in the process, `_mmc_detect_change()` will "Prevent 
+system sleep for 5s to allow user space to consume the\n corresponding 
+uevent"... which interrupts a system sleep in progress.
 
-* Moved ICE initialization for non cmdq into sdhci_msm_ice_cfg() and made
-  it conditional on mrq->crypto_ctx to enable lazy setup.
+On my current kernel, the same logic applies, but reading the source I
+can't tell where `__mmc_claim_host()` is actually calling
+`__pm_runtime_resume()`. Nonetheless the problem remains that
+`rpm_resume()` is called during system suspend, `mmc_detect_change()`
+wakes the system when called, and this will abort system sleep when
+`/sys/power/wakeup_count` is active.
 
-* Added msm_host->ice_init_done guard to prevent redundant initialization.
+## Next steps
 
-* Updated commit message
+How would this problem be addressed? Off the top of my head, perhaps you 
+could not call `__pm_runtime_resume()` on a SD card reader during the 
+`device_suspend()` process, not call `pm_wakeup_ws_event()` when the SD 
+card status changes, not call  `pm_wakeup_ws_event()` *specifically* 
+when system suspend is temporarily waking up a SD card reader, or 
+disable pm_wakeup_ws_event() entirely during the suspend process (does 
+this defeat the purpose of the function?).
 
-Change in [v3]
+Are there other drivers which cause the same symptoms? I don't know. I 
+asked on the KDE bug tracker for other users to attempt a failed sleep 
+with `echo 1 > /sys/power/pm_debug_messages` active, to identify which 
+driver broke suspend in their system; so far nobody has replied with 
+logs.
 
-* Refactored logic to use separate code paths for crypto_ctx != NULL and
-  crypto_ctx == NULL to improve readability.
+Given that this bug is related to `/sys/power/wakeup_count` 
+(https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-power), I 
+was considering CCing Rafael J. Wysocki <rafael@kernel.org> and 
+linux-pm@vger.kernel.org, but have decided to only message the MMC 
+maintainers for now. If necessary we may have to forward this message 
+there to get their attention.
 
-* Renamed bypass to crypto_enable to align with bitfield semantics.
+----
 
-* Removed slot variable
+System information:
 
-* Added ICE initialization sequence for non-CMDQ eMMC devices before
-  __sdhci_add_host()
+* I have an Intel NUC8i7BEH mini PC, with CPU 8 × Intel® Core™ i7-8559U 
+  CPU @ 2.70GHz.
 
-Change in [v2]
+    * uname -mi prints `x86_64 unknown`.
 
-* Moved NONCQ_CRYPTO_PARM and NONCQ_CRYPTO_DUN register definitions into
-  sdhci-msm.c
+* `lspci -nn` prints
+  "6e:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS522A PCI Express Card Reader [10ec:522a] (rev 01)".
 
-* Introduced use of GENMASK() and FIELD_PREP() macros for cleaner and more
-  maintainable bitfield handling in ICE configuration.
+* I am running kernel 6.18.0-0.rc7.357.vanilla.fc43.x86_64 from the Fedora COPRs 
+  (https://fedoraproject.org/wiki/Kernel_Vanilla_Repositories).
 
-* Removed redundant if (!mrq || !cq_host) check from sdhci_msm_ice_cfg()
-  as both are guaranteed to be valid in the current call path.
+* dmesg at https://gist.github.com/nyanpasu64/ab5d3d1565aafe6c1c08cbcaf074e44a#file-dmesg-2025-11-25-txt
 
-* Added assignment of host->mmc_host_ops.request = sdhci_msm_request; to
-  integrate ICE configuration into the standard request path for non-CMDQ
-  eMMC devices.
-
-* Removed sdhci_crypto_cfg() from sdhci.c and its invocation in sdhci_request()
-
-Change in [v1]
-
-* Added initial support for Inline Crypto Engine (ICE) on non-CMDQ eMMC
-  devices.
-
- drivers/mmc/host/sdhci-msm.c | 77 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 77 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 3b85233131b3..da356627d9de 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -157,6 +157,17 @@
- #define CQHCI_VENDOR_CFG1	0xA00
- #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
- 
-+/* non command queue crypto enable register*/
-+#define NONCQ_CRYPTO_PARM		0x70
-+#define NONCQ_CRYPTO_DUN		0x74
-+
-+#define DISABLE_CRYPTO			BIT(15)
-+#define CRYPTO_GENERAL_ENABLE		BIT(1)
-+#define HC_VENDOR_SPECIFIC_FUNC4	0x260
-+
-+#define ICE_HCI_PARAM_CCI	GENMASK(7, 0)
-+#define ICE_HCI_PARAM_CE	GENMASK(8, 8)
-+
- struct sdhci_msm_offset {
- 	u32 core_hc_mode;
- 	u32 core_mci_data_cnt;
-@@ -300,6 +311,7 @@ struct sdhci_msm_host {
- 	u32 dll_config;
- 	u32 ddr_config;
- 	bool vqmmc_enabled;
-+	bool non_cqe_ice_init_done;
- };
- 
- static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-@@ -2012,6 +2024,68 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
- 	return qcom_ice_evict_key(msm_host->ice, slot);
- }
- 
-+static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	struct mmc_host *mmc = msm_host->mmc;
-+	struct cqhci_host *cq_host = mmc->cqe_private;
-+	u32 config;
-+
-+	config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
-+	config &= ~DISABLE_CRYPTO;
-+	sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
-+	config = cqhci_readl(cq_host, CQHCI_CFG);
-+	config |= CRYPTO_GENERAL_ENABLE;
-+	cqhci_writel(cq_host, config, CQHCI_CFG);
-+}
-+
-+static void sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	struct mmc_host *mmc = msm_host->mmc;
-+	struct cqhci_host *cq_host = mmc->cqe_private;
-+	unsigned int crypto_params = 0;
-+	int key_index;
-+
-+	if (mrq->crypto_ctx) {
-+		if (!msm_host->non_cqe_ice_init_done) {
-+			sdhci_msm_non_cqe_ice_init(host);
-+			msm_host->non_cqe_ice_init_done = true;
-+		}
-+
-+		key_index = mrq->crypto_key_slot;
-+		crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, 1) |
-+				FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
-+
-+		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
-+		cqhci_writel(cq_host, lower_32_bits(mrq->crypto_ctx->bc_dun[0]),
-+			     NONCQ_CRYPTO_DUN);
-+	} else {
-+		cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
-+	}
-+
-+	/* Ensure crypto configuration is written before proceeding */
-+	wmb();
-+}
-+
-+/*
-+ * Handle non-CQE MMC requests with ICE crypto support.
-+ * Configures ICE registers before passing the request to
-+ * the standard SDHCI handler.
-+ */
-+static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	/* Only need to handle non-CQE crypto requests in this path */
-+	if (mmc->caps2 & MMC_CAP2_CRYPTO)
-+		sdhci_msm_ice_cfg(host, mrq);
-+
-+	sdhci_request(mmc, mrq);
-+}
-+
- static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
- 	.keyslot_program	= sdhci_msm_ice_keyslot_program,
- 	.keyslot_evict		= sdhci_msm_ice_keyslot_evict,
-@@ -2762,6 +2836,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 
- 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
- 
-+#ifdef CONFIG_MMC_CRYPTO
-+	host->mmc_host_ops.request = sdhci_msm_request;
-+#endif
- 	/* Set the timeout value to max possible */
- 	host->max_timeout_count = 0xF;
- 
--- 
-2.34.1
-
+* Fully resolved config at https://gist.github.com/nyanpasu64/ab5d3d1565aafe6c1c08cbcaf074e44a#file-config-6-18-0-0-rc7-357-vanilla-fc43-x86_64,
+  source at https://download.copr.fedorainfracloud.org/results/@kernel-vanilla/mainline-wo-mergew/fedora-43-x86_64/09831015-mainline-womergew-releases/kernel-6.18.0-0.rc7.357.vanilla.fc43.src.rpm
