@@ -1,102 +1,117 @@
-Received: from mail-yx1-f44.google.com (mail-yx1-f44.google.com [74.125.224.44])
+Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B5B8230D14
-	for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 10:57:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1404304BAB
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 21:42:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764154663; cv=none; b=IgwEMiamKDevdV6ljfGY3XKwaOaEWulToH8T4qM+levfgjZaw/YtouZgCczKGa/fZgJfPeCUNh1feQK566eHTdPrCALEz59piciunJuiBjSrrJhosBLbD/H5kYrCJ2gtGzbgc90nMwy7+XfUE73F9DPH9OyJlD1c49moPzNeZvk=
+	t=1764193355; cv=none; b=i1LjsGvzBYUXhi7oPfKwGhh0vObUzQOUYMd1uvsdbWYjgW6m8yEP3fHCBGOu+EiHbYJC/nWFn8l5lZ52MdXf/hTbRMbVpoXwE7XXrmDR5LkG6CZFrlxdDRb+HzpZ9kh4Qhk8Iz1JbEEVdd3m0t3KcV1KhpwOqmtXyuRMrDcSZqU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764154663; c=relaxed/simple;
-	bh=NsU6Wd1XEcomoxQo4YAXt5KUFF7FXHBdd4T+CjKp1j4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BFbZ/a6bsZEqfimnCWcwaXZFbnvnb5Bq0fNWprubVAKXUwkSrqV0b7BHta+TWZ0DGbBHAmwRrydsF3vQ2VSexsZVsk5ODI7qGStPGHdb1J1j4X050l/lYm9vcXAVMlTMN5opAungh1oWCO9rZ5zZWkRt6dGQT3VT8zormpIFGVo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FicqvStN; arc=none smtp.client-ip=74.125.224.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1764193355; c=relaxed/simple;
+	bh=Z/cWVeY4EO0d1WPO8oChRnTAPR07FnDjU74OyFdUVhw=;
+	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=PJfgKkt4S1CEpehEYhjah084eqFpYWfwIhfkGIdTW2a1iLiJ+xgV+HvMzoh2PmtvTR61P0/uz3GI1CxUIUkjnkGtRUP7DGKOT5v9Vx4Xx55IIsKFTZwfGuRgRpv68LkMBADd9qXruc0vBM4mfK38RZwOWOnJ/ARUTI9t7swM8os=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dUdb6U8S; arc=none smtp.client-ip=209.85.221.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FicqvStN"
-Received: by mail-yx1-f44.google.com with SMTP id 956f58d0204a3-640e065991dso5740683d50.3
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 02:57:41 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dUdb6U8S"
+Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-42b2dc17965so241299f8f.3
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 13:42:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1764154660; x=1764759460; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=6fJUBJYtX0hwUyO3vk+Ac1lETs5qleohrjV6r1JhUoA=;
-        b=FicqvStNda7RNyjUsS7yOUFOa8Zr+rEOW06v9fdCuMCaC3Ud6YC8Xhgh/WCHMj8uk5
-         jVqeTG49ATAPM85Z2pLClAQWpbaX0JEtJ9CL7hMgA0S68pdnwndqY8HQaoFM/UsM+HoC
-         O8+EGKazDV8tq25TQD1QTdiXrz3DR4x9LfekA2DiSBjNaLmdZBZP9Hz7s1QJH+iUqHJB
-         vNHrV7T+/PUeL4o+NrQLq59+LqbNFz26MtEpeoISmBhbfxL0gNVAAn/E9r9ITvbJYykI
-         wJKP2BaE+eT47J/NUEoOLRDsxbgxjyTihd9LvGvEUhxEs4dJf2V1HqSgyqL8N4hDErCU
-         Kj/g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764154660; x=1764759460;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1764193352; x=1764798152; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:to:from:subject:message-id:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=6fJUBJYtX0hwUyO3vk+Ac1lETs5qleohrjV6r1JhUoA=;
-        b=Io4sF79W7Em+rr2JuC+2c/H0wM4M7QKW8tV935hduQT6pYew0krf5+11MQMjrHEjtB
-         En2ndTddxlxkjJpCKyTl3EwbExoWVbD9dccpWpsvX1OoOTEILFEd6xowIBE5xfDvpbd2
-         3z3mUOKnRk36hhFuPkWYgzc325YxZ4viiKEhK+12U1c86FJP1uZDeRLiIOK//z9QAo/C
-         gzVcAH5c9KaoHzT0z5HUCdFbQHv8lTlSmFZA/w6nRGSeUl2ERWBMrC+LpgXPwh0PuUmm
-         l0uyWrjSipKZOACTPQpSbYT2RsXRE4/tBTUiKlKj3TKjB/IHSAmaxaMyP3F+LmgWzuFw
-         Ws6g==
-X-Forwarded-Encrypted: i=1; AJvYcCXwihUd1cyUdZ3iQWWJcI4MhndgUZuWpDxMR4RTj54rhknxSlZ8QwZJAUs283AwNKmMP5RWyOxWQZA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzWjiiq9AKZSEOlZWAqdsOaQ87t4ncrjykTiloW3ITcA/JAAZff
-	mTlqDKrLixVoJVYkMMjyw9dJZKgZyvNPUk537IRVvf+leCWgIFXVVyi+Zs0uaOzAusT6DVjxnLv
-	jWoBQ4QYWN1YxDVZ/Rckq5C0eyoh6vpVEWpYOB0m40g==
-X-Gm-Gg: ASbGncv8z/T5mjLzFYfwMTrHuu0mGzaC6zb49VvlDlJGEIcFo9HprJPLv4FcHIr/V3T
-	4Gp8S059nPnbWsMvhPREo956eBRsV+rylZR0HbgRwt4A+d/PGH7FlYLXW8fCLfKJ489wseUj/vS
-	yJPVpIj6gtC+7DyI6hh+ZoaQr9lE+OOOcARKeHjU0Kf0Madcj7kHzEZ5cDINCNrWb6aQabqQsRE
-	uaBY3MGWPEiwuMIigg4q5QCooO/E6yZGj6WgzzczJ+zXFMSBoBOwq+4B5hS278Jth4iG9o=
-X-Google-Smtp-Source: AGHT+IGIVfCkqztsxPovaCat3kgAGoBlqNAhzXThILxLpNm0K8yeMWglgh9uMdPakEam5up5h0WwXnH85J/mGjFP32k=
-X-Received: by 2002:a05:690e:9c9:b0:63f:c52c:3828 with SMTP id
- 956f58d0204a3-64302a4ab7fmr10632693d50.26.1764154660515; Wed, 26 Nov 2025
- 02:57:40 -0800 (PST)
+        bh=62GqJfJXdc2auRqwcd2K803/zaGb+10AHjqIsFHPDVU=;
+        b=dUdb6U8SB/M0aoYecWRHhi1laSIxIgS0ssNOhLVHk699b4j2dymv2xAaV0J2JOTlh8
+         vMLn0BmBTsdb4WtA9pWHnBzhwuPOrsAlUlf8P8SMRbO8jqv2oFUIP92VeIfc+ehHyzp0
+         ctVnhMY1IDXxZOlPBqYULGdr7GLSyRPq1HWAABG22oM4JsNf021j8rUs2BlHp5J1tVuG
+         haUiH9LgSmAxfLulnN8IURJw+uQt/NmHDrVLLtkg3COW0PGE4ygp2iiqGGQlYcS+d1qv
+         Zr5P7PWzcnKKoWFaHLdN++XV9Hd+a4SuHt3LnvTYJm1SzlLi9MNco2c1rQQsrvFaprF0
+         mZMg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1764193352; x=1764798152;
+        h=mime-version:user-agent:content-transfer-encoding:references
+         :in-reply-to:date:to:from:subject:message-id:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=62GqJfJXdc2auRqwcd2K803/zaGb+10AHjqIsFHPDVU=;
+        b=bVMvm3Q419Bi4oGHxUsIeKhJzNTRW+YMF+4e8vsYeMPW1LxaR/WtOYpwSMn0TyES8a
+         D3C65qkfE2rG2rWIIm50vLjDdU9D0Ej8xS1sODZLsCwHmZSdfc2EOEEC12dDigaKu55q
+         cwgOwLLZfbOgQzXjnW0GuJJ5kCm4/MeGPuvx+knYJmFZgG4RDRMKm9jAtMFzwCTz7Rf4
+         ELMje6ySD496BGDFHGIzp7a8Puflx8Mu/3rixalg7dJE05dqzQRbLfXXd58X0Q+Ui/Sn
+         B8v2TSa6Zg9BtJ00VQ56v+ig8fyMn2CU2qcpRjZjV3DREca1EWJTWafmcOlGWVVSJ994
+         Q7Ow==
+X-Forwarded-Encrypted: i=1; AJvYcCUAEnYnhDRyOQUTESI5XjDktx7yAhCfMTKY3drbuJ8n044BVbXymLoaTgsgPVKXuRbAQS7iepvC08Y=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxcdhYDiWuEn7kPYRcIpxUZAxnunuYtlO6wIYr6//ipwK4thCCK
+	GO7z49KpqIcVqbQfuDedsJP4MKs6R0ljqPfLv+fGPklj0Zmzup5Cxp56
+X-Gm-Gg: ASbGncsgTJInl+5SsaT1ll2Ok2KDPtmtsRe4yt0HSxhTOByEaLDtWN0aG53SYVhtFqE
+	qYvJV01UH3BCY2JVt9GahoJJzkFcvU0dxz3aM8s3r4tWXv+HiPk5rx6irJI0SBZhAO1wC7qUYBM
+	/qDWHku5HXRHAjUY7huhb6SIEt5QYwX7uDbGaEoMMWswBFVn93h5sHbU98YLR9su7tZjrxyuT//
+	DMcWKRa2CszOf6mRKylIMZoUyV71y+Gj3PSYczhSe05AYZ/1XSsLDKoRcFmamY0SjYC3lVRYIKg
+	Sv+QiXEgX6vPwN+cdMxLMzuBZs9nPHgCb9cV9JBqBa3TJUXPk1w7xGYkGhrGN/kxoWxgxYOrN3x
+	gDeZRIZfSHk+FdgkgEDh1Vr1uKXaUJ6/ZZN0g+8wtYCFJBuMKKWPqMyZvdK7AlA37EWf8Z6uGuG
+	s5hmlkmN6mp1wNiy4lua04mLMxaoKeIkwBpJQDqaXA02kUoLzj
+X-Google-Smtp-Source: AGHT+IGLIzJTVKFGod+AO4xb84kpn5bphgrlRffZAqoPS2kzsQhTbQa01DQNskvYLIsKkhq1f65O4Q==
+X-Received: by 2002:a05:6000:1ac6:b0:42b:3302:f7d0 with SMTP id ffacd0b85a97d-42cc1cbd4c5mr21463073f8f.22.1764193351974;
+        Wed, 26 Nov 2025 13:42:31 -0800 (PST)
+Received: from [10.188.249.90] (net77-43-118-186.mclink.it. [77.43.118.186])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-42cb7f34ffesm43761136f8f.10.2025.11.26.13.42.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 26 Nov 2025 13:42:30 -0800 (PST)
+Message-ID: <a05f579671751c47cfafa7ada6ba631261b7c598.camel@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: core: Add quirk for broken manufacturing date
+From: Bean Huo <huobean@gmail.com>
+To: Avri Altman <Avri.Altman@sandisk.com>, Avri Altman
+ <avri.altman@gmail.com>,  Ulf Hansson <ulf.hansson@linaro.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date: Wed, 26 Nov 2025 22:42:29 +0100
+In-Reply-To: <DS1PR16MB6753397C1F5EF5804509D39EE5D1A@DS1PR16MB6753.namprd16.prod.outlook.com>
+References: <20251122070442.111690-1-avri.altman@sandisk.com>
+	 <20251122070442.111690-3-avri.altman@sandisk.com>
+	 <4a9236e8a4172437874291da221ef8b82d4a1126.camel@gmail.com>
+	 <DS1PR16MB6753397C1F5EF5804509D39EE5D1A@DS1PR16MB6753.namprd16.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.44.4-0ubuntu2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1764113200-237279-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1764113200-237279-1-git-send-email-shawn.lin@rock-chips.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 26 Nov 2025 11:57:04 +0100
-X-Gm-Features: AWmQ_bmZ5DgR-hX_asnVCtwy_16iVOBue9S505-dzvYgvEvDIm9Pu-dLfhBhOSI
-Message-ID: <CAPDyKFrO=xft4pHn-hiTRDK4kcEvv_ANfdyT6fmeZBxjc10h1Q@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] sdhci-of-dwcmshc improvement and fix for Rockchip SoCs
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, 
-	Sebastian Reichel <sebastian.reichel@collabora.com>
-Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 26 Nov 2025 at 00:27, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
-> This's v2 of these two patches which adds ack-by tags collected and
-> rebase on top of linux-next.
->
-> The first patch fixes the auto-gating problem of dwc IP when using CQE.
-> The second one improves the performance of CQE by reducing CIT.
->
->
-> Changes in v2:
-> - rebase and add acked-by tag
->
-> Shawn Lin (2):
->   mmc: sdhci-of-dwcmshc: Disable internal clock auto gate for Rockchip
->     SOCs
->   mmc: sdhci-of-dwcmshc: reduce CIT for better performance
->
->  drivers/mmc/host/cqhci.h            | 1 +
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 8 +++++++-
->  2 files changed, 8 insertions(+), 1 deletion(-)
->
-> --
-> 2.7.4
->
+On Tue, 2025-11-25 at 14:22 +0000, Avri Altman wrote:
+> > Avri,
+> >=20
+> > We=E2=80=99re aware of this issue and appreciate your attention to it. =
+Here are two
+> > comments regarding the change:
+> Thanks.
+> Can you please comment on Shawn's proposal to elaborate this quirk to ena=
+ble
+> flavor per vendor?
 
-The series applied for next, thanks!
+This quirk only covers 3 years by mapping 2010-2012 to 2026-2028. After 202=
+8, if
+vendors still refuse to update to EXT_CSD revision 9, they'll need another =
+quirk
+probably. Maybe just add note for the quirk, this qurik only cover 2026 ~ 2=
+028,
+for year >=3D 2029, either changing version to 9, or another quirk. I didn'=
+t find
+out a proper way to let one quirk cover two year ranges with the EXT_CSD ve=
+rsion
+8. =20
 
-Kind regards
-Uffe
+The root cause for this is that the eMMC spec poorly designed the year enco=
+ding.
+It splits the 16 possible values (0-15) into two non-sequential ranges inst=
+ead
+of using them sequentially. For rev 8, codes 0-12 map to 2013-2025, leaving
+codes 13-15 unused. then  being used for version 9.
+
+
+Kind regards,
+Bean
+
