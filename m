@@ -1,43 +1,43 @@
-Received: from mail-m21468.qiye.163.com (mail-m21468.qiye.163.com [117.135.214.68])
+Received: from mail-m49221.qiye.163.com (mail-m49221.qiye.163.com [45.254.49.221])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07C5A2B9B9
-	for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 00:18:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=117.135.214.68
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41AC545C0B
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 00:18:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.221
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764116318; cv=none; b=k0W2lE1H3lTOjLrnSc87Qh1wm2idFDGk97nsprnrCZ8f4QETYVDFGmXw17WJGZaQS8imA59SrgEkEeMeCtIsSR2jfxxKXnF/yeb1Zbxl30bPXh083tX7q5EF/1hARWpFJ65qtT7oyhao1Yl2/TZsnxPHOISVPyZi7a2UDIiAC4s=
+	t=1764116333; cv=none; b=JXhxHYFSPZ28vKb09C+MyCzYKhdOoS1cOEYhu3iQDZA3zqTU4BurbfpyfDEtw56RtG0cx4x9XYvcZk2N6dmJ95UXwBAx5R6qqsZNeGvKCctNz65vBUKekVGI9W7w9QsFUFyubwVORVP8nry6GhAPge25v8iwHtRMzp2CzP0unKQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764116318; c=relaxed/simple;
-	bh=0h9zT79dQL6YRcCL31b7YijYoagrK2VehBPKVAF2sto=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=MFxNpwm7KQFXdcI9/iK869my7uW4AfXApvx0Hv9Q03UyqtjmnL8f6unPer0PQUu88enN0yKB3WWppKdyA7NyUI/SYB0UcztyNUAgbNeQ24SHLmdMH85TtvJdzShkzFRS2A91CeL6tYxNGxF9/UryDlgCVZJx/R0KewC5xnkuf0A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=kb4lSm8r; arc=none smtp.client-ip=117.135.214.68
+	s=arc-20240116; t=1764116333; c=relaxed/simple;
+	bh=lzpCdEazFHzvFeNzGPVmwnIX3PqpLCzhgZTMCGKl2Co=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=uU4L290uqBwi27nkQ4f78Tk8BTGxu0Ny27LwVBhRgF16T4/5RIQpee+FEQ3oPqwyQbcI6wK0FPjOZ/pC3NNG8xOhh/EcJAriG50gDp7Vewy3bSsWkyZKDvHk9Smr1+IxmiOwhhC3AUxEjMV50BZnF2NGuQt002DKr7QA9cQUaLk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=h+vB0dVb; arc=none smtp.client-ip=45.254.49.221
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="kb4lSm8r"
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="h+vB0dVb"
 Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 2ae366f24;
-	Wed, 26 Nov 2025 08:18:31 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2ae366f84;
+	Wed, 26 Nov 2025 08:18:47 +0800 (GMT+08:00)
 From: Shawn Lin <shawn.lin@rock-chips.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org,
 	Jaehoon Chung <jh80.chung@samsung.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 09/13] mmc: dw_mmc: Remove sdio_id from struct dw_mci_slot
-Date: Wed, 26 Nov 2025 08:14:49 +0800
-Message-Id: <1764116093-5430-10-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 10/13] mmc: dw_mmc: Move clock rate stuff from struct dw_mci_slot to struct dw_mci
+Date: Wed, 26 Nov 2025 08:14:50 +0800
+Message-Id: <1764116093-5430-11-git-send-email-shawn.lin@rock-chips.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1764116093-5430-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1764116093-5430-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9abd86ac1a09cckunme6f559504dd6f3
+X-HM-Tid: 0a9abd86eba909cckunme6f559504dd7e8
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0pCQ1ZJHh4eQkNOSUkaT0JWFRQJFh
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGhlIQlZKHUtKSEpOQk5DSB5WFRQJFh
 	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
 	hVSktLVUpCS0tZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=kb4lSm8rvuyur9ybJvaDK4Xx9XLUew12hGPg03Qrsquzv0afcjVCVR2kKrEfV8n+s8LkHN/MYHdsqcOZ3TLxXLqbuSCg236NhBKeB9V0iQ304bzWSZw93egc0ECZr8wAippO1RGE9xiFMvbl7iza4+z0qKzqkQog5Wy4xG9zZh0=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=KT1F2k6gVxsVGUkXr+mBpFHnyODckYVTYJUGGIiGMss=;
+	b=h+vB0dVbUzYsvCtF3HqI7o+qukJCdbin9DRWnVt76+napNfQLpF5MsA1ep5Lc3NF/NHVciXbymyUkh2GghXgw0OiQnGn/qEeY0mzd1Ays/vf9kj5aqO0bE/4EvG/tr+TK1udaiPUynO2PJYDW5hhUslLjLMpyoaLE/p4mADyenI=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=aXjxcZh9e4BBXMr93uozSXCtnIR8quoK5drBoZoh2fY=;
 	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -45,108 +45,95 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-There is only one slot support, the sdio_id is used to indicate the SDIO slot
-and where is the irq located. So it's pointless now, remove it. Given sdio_id0
-is only used by Rockchip to inform dwc core the irq is located with a offset,
-rename sdio_id0 to sdio_irq to reflect the fact.
+Except for moving them, this patch also renames __clk_old to clk_old.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
 Changes in v2: None
 
- drivers/mmc/host/dw_mmc-rockchip.c | 4 ++--
- drivers/mmc/host/dw_mmc.c          | 9 ++++-----
- drivers/mmc/host/dw_mmc.h          | 7 ++-----
- 3 files changed, 8 insertions(+), 12 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 8 ++++----
+ drivers/mmc/host/dw_mmc.h | 9 ++++-----
+ 2 files changed, 8 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 743864b..879188f 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -474,8 +474,8 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
- 	struct dw_mci_rockchip_priv_data *priv = host->priv;
- 	int ret, i;
- 
--	/* It is slot 8 on Rockchip SoCs */
--	host->sdio_id0 = 8;
-+	/* SDIO irq is the 8th on Rockchip SoCs */
-+	host->sdio_irq = 8;
- 
- 	if (of_device_is_compatible(host->dev->of_node, "rockchip,rk3288-dw-mshc")) {
- 		host->bus_hz /= RK3288_CLKGEN_DIV;
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 27dac5b..127abb5 100644
+index 127abb5..7386a6f 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1602,9 +1602,9 @@ static void __dw_mci_enable_sdio_irq(struct dw_mci_slot *slot, int enb)
- 	/* Enable/disable Slot Specific SDIO interrupt */
- 	int_mask = mci_readl(host, INTMASK);
- 	if (enb)
--		int_mask |= SDMMC_INT_SDIO(slot->sdio_id);
-+		int_mask |= SDMMC_INT_SDIO(host->sdio_irq);
- 	else
--		int_mask &= ~SDMMC_INT_SDIO(slot->sdio_id);
-+		int_mask &= ~SDMMC_INT_SDIO(host->sdio_irq);
- 	mci_writel(host, INTMASK, int_mask);
+@@ -1139,7 +1139,7 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ {
+ 	struct dw_mci *host = slot->host;
+-	unsigned int clock = slot->clock;
++	unsigned int clock = host->clock;
+ 	u32 div;
+ 	u32 clk_en_a;
+ 	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
+@@ -1164,7 +1164,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
  
- 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
-@@ -2827,9 +2827,9 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			dw_mci_handle_cd(host);
- 		}
+ 		div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
  
--		if (pending & SDMMC_INT_SDIO(slot->sdio_id)) {
-+		if (pending & SDMMC_INT_SDIO(host->sdio_irq)) {
- 			mci_writel(host, RINTSTS,
--				   SDMMC_INT_SDIO(slot->sdio_id));
-+				   SDMMC_INT_SDIO(host->sdio_irq));
- 			__dw_mci_enable_sdio_irq(slot, 0);
- 			sdio_signal_irq(host->mmc);
- 		}
-@@ -2926,7 +2926,6 @@ static int dw_mci_init_slot(struct dw_mci *host)
- 		return -ENOMEM;
+-		if ((clock != slot->__clk_old &&
++		if ((clock != host->clk_old &&
+ 			!test_bit(DW_MMC_CARD_NEEDS_POLL, &host->flags)) ||
+ 			force_clkinit) {
+ 			/* Silent the verbose log if calling from PM context */
+@@ -1207,7 +1207,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
  
- 	slot = mmc_priv(mmc);
--	slot->sdio_id = host->sdio_id0;
- 	host->mmc = mmc;
- 	slot->host = host;
- 	host->slot = slot;
+ 		/* keep the last clock value that was requested from core */
+-		slot->__clk_old = clock;
++		host->clk_old = clock;
+ 		host->mmc->actual_clock = div ? ((host->bus_hz / div) >> 1) :
+ 					  host->bus_hz;
+ 	}
+@@ -1410,7 +1410,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	 * Use mirror of ios->clock to prevent race with mmc
+ 	 * core ios update when finding the minimum.
+ 	 */
+-	slot->clock = ios->clock;
++	slot->host->clock = ios->clock;
+ 
+ 	if (drv_data && drv_data->set_ios)
+ 		drv_data->set_ios(slot->host, ios);
 diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 7f6efb6..3a2e1a0 100644
+index 3a2e1a0..99a69da 100644
 --- a/drivers/mmc/host/dw_mmc.h
 +++ b/drivers/mmc/host/dw_mmc.h
-@@ -123,7 +123,7 @@ struct dw_mci_dma_slave {
-  * @quirks: Set of quirks that apply to specific versions of the IP.
-  * @irq_flags: The flags to be passed to request_irq.
-  * @irq: The irq value to be passed to request_irq.
-- * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
-+ * @sdio_irq: SDIO interrupt bit in interrupt registers.
-  * @cmd11_timer: Timer for SD3.0 voltage switch over scheme.
-  * @cto_timer: Timer for broken command transfer over scheme.
-  * @dto_timer: Timer for broken data transfer over scheme.
-@@ -233,7 +233,7 @@ struct dw_mci {
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
+@@ -130,6 +130,8 @@ struct dw_mci_dma_slave {
+  * @mmc: The mmc_host representing this dw_mci.
+  * @flags: Random state bits associated with the host.
+  * @ctype: Card type for this host.
++ * @clock: Clock rate configured by set_ios(). Protected by host->lock.
++ * @clk_old: The last clock value that was requested from core.
+  *
+  * Locking
+  * =======
+@@ -251,6 +253,8 @@ struct dw_mci {
+ #define DW_MMC_CARD_NO_USE_HOLD 3
+ #define DW_MMC_CARD_NEEDS_POLL	4
+ 	u32			ctype;
++	unsigned int		clock;
++	unsigned int		clk_old;
+ };
  
--	int			sdio_id0;
-+	int			sdio_irq;
- 
- 	struct timer_list       cmd11_timer;
- 	struct timer_list       cto_timer;
-@@ -562,7 +562,6 @@ static inline int dw_mci_runtime_resume(struct device *device) { return -EOPNOTS
-  * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-  * @__clk_old: The last clock value that was requested from core.
+ /* DMA ops for Internal/External DMAC interface */
+@@ -559,8 +563,6 @@ static inline int dw_mci_runtime_resume(struct device *device) { return -EOPNOTS
+  *	processed, or NULL when the slot is idle.
+  * @queue_node: List node for placing this node in the @queue list of
+  *	&struct dw_mci.
+- * @clock: Clock rate configured by set_ios(). Protected by host->lock.
+- * @__clk_old: The last clock value that was requested from core.
   *	Keeping track of this helps us to avoid spamming the console.
-- * @sdio_id: Number of this slot in the SDIO interrupt registers.
   */
  struct dw_mci_slot {
- 	struct dw_mci		*host;
-@@ -572,8 +571,6 @@ struct dw_mci_slot {
+@@ -568,9 +570,6 @@ struct dw_mci_slot {
  
- 	unsigned int		clock;
- 	unsigned int		__clk_old;
+ 	struct mmc_request	*mrq;
+ 	struct list_head	queue_node;
 -
--	int			sdio_id;
+-	unsigned int		clock;
+-	unsigned int		__clk_old;
  };
  
  /**
