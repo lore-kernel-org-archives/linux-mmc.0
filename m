@@ -1,221 +1,142 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from smtp1.ms.mff.cuni.cz (smtp-in1.ms.mff.cuni.cz [195.113.20.234])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83ADC315D2B
-	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2025 07:30:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 043ACEACE;
+	Thu, 27 Nov 2025 15:30:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.113.20.234
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764228658; cv=none; b=fz1YToASTU9US0r02LigIZwo4MYhNkoFPdT4gk6SqFX81DmoXVqZxSVKCgxAJi8CRiPTOS9sWVdNplIFNU06IFouVYwPPRZUb3saMOGq/WKamKxWFqQ17YPCZEa2mNu32xwB/dhYyh32VCfbtzMKbY4W9c+VvMYdLWP6gerrnJ4=
+	t=1764257432; cv=none; b=nizwvoMRgVX/IqjJTxiOXwK657tVAoTvLJERXQOTmK3SdCxxQqzrx5m0r+wm4hdG7KyAprZTf/L3jbxw5zMwLPsCwJuxNiJFkf4KOiTrXmIkx+fd3dWpudRucMFD/Tc/dy03WwzEo7QRQxnxt3SD7FKxA/X5xGM/y441CNslErE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764228658; c=relaxed/simple;
-	bh=/HqXxzUq6RnJYu48ZoJP0fcWuWCt+4vybB3tnbONtlE=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Wj7go46J59TwY8Hv77gqEgm+3qv1CBe4IrKuLrCUSDsHuNX7zz4LoiZJ5SiQkykWiBlvhWyxEmuYgDs25/o68HrpvvxHf/0bxvQQkvHXoAlgUNfadoAWhHB7Tb7q2Yh6L39zgbuzHmg24YXOprjdL1Pk3fDPYA9LE73aR4eQFno=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=VVtmayMz; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=Rv1XXYjR; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1764257432; c=relaxed/simple;
+	bh=SNgekyZISVjxqm05oCPnxWNr0tSC3ioQWMN6SqIjea0=;
+	h=Mime-Version:Content-Type:Date:Message-Id:From:Cc:Subject:To:
+	 References:In-Reply-To; b=toYqIVSheA6dA1xDagXsEOEsOGDX86vxwzAC6bsb4WrjsQsriwxcKLX8UYA+ejZM2G7VCjM9bCDmg0f2LedqqrpV+FEog3Qc96GoTyp3wSJ4dq7m2HtzADjten97GD00BBs+RZASokFoNrNT86WEVLv1w6LDH7kHdxdbANS/sqE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=matfyz.cz; dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b=Iq2jQwiM; arc=none smtp.client-ip=195.113.20.234
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=matfyz.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="VVtmayMz";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="Rv1XXYjR"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5AR24rAV3840085
-	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2025 07:30:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=qcppdkim1; bh=oqFyPtIZkLJnIdiBLjjAW8uXCSO1QldO+0G
-	b72ywrxM=; b=VVtmayMzHr6xessuybatzysEI6SlKlmrCykGiPEwq0jMfjSEjvN
-	rAuopbAu+HyVOthoc+SxeGyjiMn9zhUqB2Q2O0Gvh9ePDbxrVVYj5xMiiNLXZyOI
-	pf3XIaf7CQY+h5u0yyW2WA0gf+QPgo46XRNr0fsUj2kUVWn84Gu3H2E2O1SqMRD5
-	hkVMS7F+ygi706WTSBpQjHNwvlSJx+h4uLX0obiWhEPnndCQ1RxygaDO0Btx/Q++
-	KJcT6rtzO6Kewr2ESZ993jNpAV8EM1cpyUdD6LULLWcYLaXrZ46dvCcnvJp0NM7I
-	Wi3z+OqwKY3FxyzALlCABhGUjU5EUz+m6Qw==
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4apdj08rsh-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2025 07:30:54 +0000 (GMT)
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-297dde580c8so18103415ad.1
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Nov 2025 23:30:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1764228654; x=1764833454; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=oqFyPtIZkLJnIdiBLjjAW8uXCSO1QldO+0Gb72ywrxM=;
-        b=Rv1XXYjR4JXMxzrRMNmQwPB+PL6+Pl2zexkU/4HlIlAlgrMrppwzE0aoVTzhop4lvK
-         U0FNgKYGiF3XvH/kjl82lcEy7lCrhKIBzzaqFNAJ7CUpOJ7MQtRRqbWb27Yp62REulL/
-         F9axvOC8VLISenDwEAPUZ9tQd33c0+6R6cTGQYlLedRkd9HzGWZyIKkgeQmBXfpCJ5cj
-         +bCdpB1Dvf25ogzv7tjS4jAOJ794bHZYw+U7FqsEHlemboOt4MwpbxIpErn1HssI/NEj
-         jYpIm8Z5LnLRDZP1g+jdaPeYZUBl4xGmV2Kp1msmw4pyCHENxRUE980+p1Sk3rNmqInX
-         jr8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764228654; x=1764833454;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=oqFyPtIZkLJnIdiBLjjAW8uXCSO1QldO+0Gb72ywrxM=;
-        b=q7EcGGzvLcH7HYbptFYZ8Iyu3N5Uus6KHcmu1lNoNRbFHowoYfdCron1uTg7qcLfZy
-         i/JoeMbW9iNYyMg1OEykzVwyQLSU/Mnyyi2xo3+1priSBTkqTNG8iNeNLWte5/Z14eRV
-         Qid5MESQ9LXrLS+IhYIgWcihZbX2DMwCtWsJgB3PgWn4VbCF1WEpOrWAooJxnelFIjzT
-         V3bHI5i497Ls5HT9ctT/FthqQDRVg3RBL/tlXuQ/bInosWU3CYoXw9yy0RdroA8C5fx4
-         XnuS9jVdKhcrvlp8+D74ez8IHvKNr/tYmsdOLuZIgrqV9WCvHJb9VnWZc2BAKzujBFju
-         tHmQ==
-X-Gm-Message-State: AOJu0Yz1s+Yy6mZMRvO3tJxQiXn92FSIKLGfoaqp9coShyIaeL9+DD9a
-	N5v+ijBQG0GwwX8UYPfVPwGf+wAmJXZvO6bNjt6v7HaVUAGKMkObIYuvi0pfae5LUov/8ZPvPO9
-	FaFXFLCPhQoGEVIt8Dqxvg1MScI0cro6HP4Ci5D6qDzfoIbcDxhR6dlM3MSC/RG0=
-X-Gm-Gg: ASbGncsy7bZThQi+UduYIsru8Ma4/Hea+bvf0u4Sjp1jmY5t+pThrRoIBm7L3amP+JT
-	zvgpHh63iwyf260MnVWBT/8I6fHJchXud/LD3faLSQwAo3DRmsQW81xny9eo2lRyDPZ0qRJvv0V
-	n+VkhaRpy/fW5bmXQuU48Oy/RizQ4dNIjW9z//M23Zb4crP99Nt9kUKU8ix8K1oUZc1N/j37n0z
-	vMkhyPg/GfoZp5CmArcx6L39ov3fGXo+ddXedCRv3wBmgM49KxZtx1IT3dyXDRWz2WkVw+MdKqk
-	3XnIokWbbleJCTdfPbjdcnetzb1PN04V6HGgBEhHjv00yUay7gP/0InjXsUGewKy7FbzkMG6czU
-	4CSj1kHSgoNDzqiXPvsZl77AwSP5FBSnDqCYB1zfc
-X-Received: by 2002:a17:903:3b86:b0:297:e59c:63cc with SMTP id d9443c01a7336-29bab148c59mr115917805ad.35.1764228653629;
-        Wed, 26 Nov 2025 23:30:53 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IG3AgkPTp+z2F6CoIMkOpiaOZow5qFjiecrr/JEgR34HUl/1xnIxTVopp+SGDfG6wqyDb46rg==
-X-Received: by 2002:a17:903:3b86:b0:297:e59c:63cc with SMTP id d9443c01a7336-29bab148c59mr115917545ad.35.1764228653128;
-        Wed, 26 Nov 2025 23:30:53 -0800 (PST)
-Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-29bceb7d4f4sm7621775ad.101.2025.11.26.23.30.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Nov 2025 23:30:52 -0800 (PST)
-From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, ebiggers@kernel.org,
-        abel.vesa@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
-Subject: [PATCH v2] mmc: host: sdhci-msm: Add support for wrapped keys
-Date: Thu, 27 Nov 2025 13:00:48 +0530
-Message-Id: <20251127073048.2759159-1-neeraj.soni@oss.qualcomm.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b="Iq2jQwiM"
+X-SubmittedBy: id balejk@matfyz.cz subject /postalCode=110+2000/O=Univerzita+20Karlova/street=Ovocn+5CxC3+5CxBD+20trh+20560+5C/5/ST=Praha,+20Hlavn+5CxC3+5CxAD+20m+5CxC4+5Cx9Bsto/C=CZ/CN=Karel+20Balej/emailAddress=balejk@matfyz.cz
+	serial F5FD910E8FE2121B897F7E55B84E351D
+	issued by /C=NL/O=GEANT+20Vereniging/CN=GEANT+20Personal+20CA+204
+	auth type TLS.CUNI
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mff.cuni.cz;
+	s=submission; t=1764257355; x=1765557355;
+	bh=SNgekyZISVjxqm05oCPnxWNr0tSC3ioQWMN6SqIjea0=; h=From;
+	b=Iq2jQwiMkEupB6ek14Ce9g+vzS695Dld/mYbROgXY5HV05aKY1uf5WgGM9SgPS4oj
+	 BjAdt+Y4gDElC7WIlQiD1UZ0JKPSaRYy73kVRi7GkUHmxmLGp0kvCXo4STQeaT1et/
+	 2KHhZpEx+x2rclO9FG2fMtyypT+pgidn7MMbr4NW8kOPT3xMmc69keOhfdJHYe8W7u
+	 EuHLaR5s1lNnqmEOW7U1g2dJIt+7vaMSOIDYYgE0DYdBMgI635NUE5lA5wq+jTk0fm
+	 a3YO4bLStTFVVuQEiW2fPSVOw0dVGdjHP2fXG0q9yUoux2ivIh1olMaq0IOrgp5tJV
+	 ARSc5uU222j8Q==
+Received: from localhost (nat2.prg.suse.com [195.250.132.146])
+	(authenticated)
+	by smtp1.ms.mff.cuni.cz (8.18.1/8.18.1) with ESMTPS id 5ARFTCcb000418
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
+	Thu, 27 Nov 2025 16:29:13 +0100 (CET)
+	(envelope-from balejk@matfyz.cz)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMTI3MDA1MyBTYWx0ZWRfX9jL9Gu4z7FRz
- K4rvPtEEuo62SqbRJ70xWeiire4/ejdCUlPYj1d16Va63f/40GcGaPlF+zzNQzvwKIAhIkeNdJ4
- tyScFg7OrdAtocwlP11+jYt6W4ayM3ZnT+22AMTNY00BEAvPSpm8dRfI3rQtI5kNFvjC/S3B1r5
- 5aLrf8F/4dn4vi2XsZbyiTRFSHFyJBnw+ghKmjz1/ji5FAX6Ci8GIDMJqclRCbDmsqsDjbQrK11
- O9sWfrGgtAjHIXKXxtisbPIq0sMd+5olgxgpA8DExXE16A+cwkfJ+AYjVn5JFeAIMtGJg19A3E6
- uzhrxCOB7onrSEiUH4wg3dtakJzTCEwGzvJUEJnJqRO3it4QurdcYrw3EUb7dql9UcuJ1Zl/W0C
- Y1oY39KV7bdIpWRgzX0vm6sbuvhUBw==
-X-Proofpoint-GUID: VuK9FjoUBdC2ZV9moxhaPV4nE8BMQRmE
-X-Proofpoint-ORIG-GUID: VuK9FjoUBdC2ZV9moxhaPV4nE8BMQRmE
-X-Authority-Analysis: v=2.4 cv=PJoCOPqC c=1 sm=1 tr=0 ts=6927fe2f cx=c_pps
- a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=6UeiqGixMTsA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=VwQbUJbxAAAA:8 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8 a=ZyxRHT4sbPtUm1NgsYkA:9
- a=GvdueXVYPmCkWapjIL-Q:22 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-11-25_02,2025-11-26_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 lowpriorityscore=0 suspectscore=0 phishscore=0 priorityscore=1501
- clxscore=1015 adultscore=0 impostorscore=0 malwarescore=0 bulkscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2511270053
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Date: Thu, 27 Nov 2025 16:29:12 +0100
+Message-Id: <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
+From: "Karel Balej" <balejk@matfyz.cz>
+Cc: <~postmarketos/upstreaming@lists.sr.ht>, <phone-devel@vger.kernel.org>,
+        "Karel Balej" <balejk@matfyz.cz>, "Jeff Chen" <jeff.chen_1@nxp.com>,
+        "Peng
+ Fan" <peng.fan@nxp.com>, <david@ixit.cz>
+Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
+ samsung,coreprimevelte
+To: "Johannes Berg" <johannes@sipsolutions.net>,
+        "Rob Herring"
+ <robh@kernel.org>,
+        "Krzysztof Kozlowski" <krzk+dt@kernel.org>,
+        "Conor
+ Dooley" <conor+dt@kernel.org>,
+        =?utf-8?q?Duje_Mihanovi=C4=87?=
+ <duje@dujemihanovic.xyz>,
+        "Andrew Lunn" <andrew@lunn.ch>,
+        "Gregory Clement"
+ <gregory.clement@bootlin.com>,
+        "Sebastian Hesselbarth"
+ <sebastian.hesselbarth@gmail.com>,
+        "Brian Norris"
+ <briannorris@chromium.org>,
+        "Francesco Dolcini" <francesco@dolcini.it>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>, "Frank Li" <Frank.Li@nxp.com>,
+        <linux-wireless@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        <linux-mmc@vger.kernel.org>
+References: <20251026182602.26464-1-balejk@matfyz.cz>
+In-Reply-To: <20251026182602.26464-1-balejk@matfyz.cz>
+X-Spam-Level: ****
 
-Add the wrapped key support for sdhci-msm by implementing the needed
-methods in struct blk_crypto_ll_ops and setting the appropriate flag in
-blk_crypto_profile::key_types_supported.
+Hello,
 
----
-This is a reworked version of the patchset
-https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
-that was sent by Seshu Madhavi Puppala.
+Karel Balej, 2025-10-26T19:20:37+01:00:
+> this series adds support for WiFi to the samsung,coreprimevelte
+> smartphone (and can be straightforwardly reused for the other known
+> Marvell PXA1908-based smartphones).
+>
+> The series is currently not intended for application as indicated in the
+> subject prefix as the firmware necessary for the operation of the chip is=
+ not
+> available in linux-firmware.
+>
+> Instead, my intentions are to publish the recent developments regarding
+> the chip support (see the third patch of the series) and offer them for
+> others to use and if possible get some feedback on them and also
+> hopefully to spark some conversation with NXP regarding getting the FW
+> into linux-firmware which would allow this series to be mainlined.
+>
+> Regarding the firmware I have been in contact with Jeff Chen of NXP some
+> time ago who promised to ask about it internally =E2=80=93 I am thus now =
+gently
+> reminding Jeff of the matter. I will also appreciate input from anyone
+> else who may help with upstreaming whichever version of the firmware.
+>
+> The trouble of upstreaming the FW is mostly a legal one (although an up
+> to date version of it would also be very welcome) as it is available as
+> part of the stock Android of the devices with this chip and can thus be
+> used on individual basis, it cannot however be submitted to
+> linux-firmware by myself for instance as the license is not known
+> (although probably is the same as for the other blobs in the mrvl
+> directory) and as the submission would require a sign-off from someone
+> involved with NXP.
+>
+> The third patch in this series fixes a serious issue with the WiFi
+> observed on the phone (see the relevant commit message). The form is
+> however not directly usptreamable and it is not clear to me how to best
+> make it be since it involves changing a data type which probably cannot
+> be easily be special-cased for the new chip and would likely break the
+> other chips the mwifiex driver supports if applied as is. I will thus
+> welcome suggestions on this, although I'm also hopeful that a possible
+> reasonably up to date FW would not require this workaround at all.
+>
+> The series is based on the pxa1908-dt-for-6.19 tag of Duje's tree [1] as
+> it contains the necessary SDIO description in the phone's device tree.
+>
+> I have not applied the trailers sent in response to v1 as it has been
+> some time and as this is not expected to be applied anyway.
+>
+> [1] https://gitlab.com/pxa1908-mainline/linux/-/commits/pxa1908-dt-for-6.=
+19
 
-My changes rebase it to use the custom crypto profile support.
+could I please get some feedback on this?
 
-Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
----
+Mainly I'm wondering whether there is some way I could get this in (the
+basic support, without the hack in the third patch) without the firmware
+as I have unfortunately not been successful in my communication with NXP
+yet.=20
 
-Changes in v2:
-- Updated commit message for clarity.
+To reiterate, the firmware is generally available but is not part of
+linux-firmware and the entire process of upstreaming the chipset support
+is stuck on that.
 
-Changes in v1:
-- Added initial support for wrapped keys.
----
- drivers/mmc/host/sdhci-msm.c | 51 +++++++++++++++++++++++++++++++-----
- 1 file changed, 45 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 4e5edbf2fc9b..351f2a77068b 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1911,11 +1911,6 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
- 	if (IS_ERR_OR_NULL(ice))
- 		return PTR_ERR_OR_ZERO(ice);
- 
--	if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
--		dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
--		return 0;
--	}
--
- 	msm_host->ice = ice;
- 
- 	/* Initialize the blk_crypto_profile */
-@@ -1929,7 +1924,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
- 
- 	profile->ll_ops = sdhci_msm_crypto_ops;
- 	profile->max_dun_bytes_supported = 4;
--	profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
-+	profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
- 	profile->dev = dev;
- 
- 	/*
-@@ -2009,9 +2004,53 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
- 	return qcom_ice_evict_key(msm_host->ice, slot);
- }
- 
-+static int sdhci_msm_ice_derive_sw_secret(struct blk_crypto_profile *profile,
-+					  const u8 *eph_key, size_t eph_key_size,
-+					  u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_derive_sw_secret(msm_host->ice, eph_key, eph_key_size,
-+					sw_secret);
-+}
-+
-+static int sdhci_msm_ice_import_key(struct blk_crypto_profile *profile,
-+				    const u8 *raw_key, size_t raw_key_size,
-+				    u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_import_key(msm_host->ice, raw_key, raw_key_size, lt_key);
-+}
-+
-+static int sdhci_msm_ice_generate_key(struct blk_crypto_profile *profile,
-+				      u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_generate_key(msm_host->ice, lt_key);
-+}
-+
-+static int sdhci_msm_ice_prepare_key(struct blk_crypto_profile *profile,
-+				     const u8 *lt_key, size_t lt_key_size,
-+				     u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct sdhci_msm_host *msm_host =
-+		sdhci_msm_host_from_crypto_profile(profile);
-+
-+	return qcom_ice_prepare_key(msm_host->ice, lt_key, lt_key_size, eph_key);
-+}
-+
- static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
- 	.keyslot_program	= sdhci_msm_ice_keyslot_program,
- 	.keyslot_evict		= sdhci_msm_ice_keyslot_evict,
-+	.derive_sw_secret	= sdhci_msm_ice_derive_sw_secret,
-+	.import_key		= sdhci_msm_ice_import_key,
-+	.generate_key		= sdhci_msm_ice_generate_key,
-+	.prepare_key		= sdhci_msm_ice_prepare_key,
- };
- 
- #else /* CONFIG_MMC_CRYPTO */
--- 
-2.34.1
-
+Thank you, best regards,
+K. B.
