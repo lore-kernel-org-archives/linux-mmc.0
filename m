@@ -1,63 +1,80 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEBDA2882A8;
-	Fri, 28 Nov 2025 16:35:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E482B26FD86;
+	Fri, 28 Nov 2025 17:05:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764347746; cv=none; b=XwdfrWxBvMOyYBv5QaqFNMN8RQvngiWELByFhS+z+cg+Fl+0Zj8dMipzsy2iZhmVkFziKfJsuNxpPIDTlY4iJM2AVnoBvVFwZxcGemkiNoqccPbA8PRQU0A7cV92CF12+BBkK5d5SNXQbQYXUIJ2MmqHoVQCOIMbixHETnVlSk4=
+	t=1764349551; cv=none; b=N1p7PcC4e5hAZAMW1i7Vsz1YhyEaJalvhY6TQbfjIBYxcA+UTY9ntbDVtkJswbyTCS2P8zFHd0x6GoYPthgpAYJYC3KT6TD9d9whReClvz6K+ZT/ODvZyzqGQ2xqZ3ZNVCHFWqhOWDBgHGJiOUXBaPIMtRFc7m8HGBgnARgLHNk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764347746; c=relaxed/simple;
-	bh=cnkRoqyEVxhP/jSiwqbry1gsoel+mhO4OcVeC6w933o=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=PeA9Tn9hAf8j1XheTox2PFgPfPQMNxTKPXO5z7N6Xmq74Wu4EKPkcJa2hjtQo3fPb9Yo5o0FGiQjZQLlHV56cWA3esDQKrl3SC9ZhCHt+2gpDNBFDxrwyqWQJD7vCQgZ3uaWJ0or3fA7y6yQGk0UXVmePIcvFrzQunGm5J98ZJE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Cfw/cTWu; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764349551; c=relaxed/simple;
+	bh=PvNIlld0IaNRs9dqfcFlKkKutDvX8ypz/zN3pY5PILI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=FXzCQbzDjuSSFxEJAzYatDZkIRdxVQIFbvtRzBgypsnYh1QA4MiMySBzc8AWMMmz1jYuV9Y21JpscxQLkSJW1mUaskPHxb4GAK8ucZcAKu8X8uMlOFQrKMhQm7MmYbgz7NwBRk+l9uw8gpV7n/VP7Gdm4Ps16/sFv5JszWEu7eM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=TOfp9aoW; arc=none smtp.client-ip=217.194.8.81
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Cfw/cTWu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 51ACDC4CEFB;
-	Fri, 28 Nov 2025 16:35:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764347746;
-	bh=cnkRoqyEVxhP/jSiwqbry1gsoel+mhO4OcVeC6w933o=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=Cfw/cTWub6XHcJ73bgjAJVGxXw8t/ls5/3tmIGhnldLr6W9U0tO56ML9ZJin6ALE0
-	 yoYJdxZFOJKzoCI4S08TwDDvBINiv9hupCmr5UI45v8O8V/x92QMPrH3akwmYqNsmT
-	 uWXPSsuKWejcNem37ZG0c9Tb2BSM7v92xiJ51ra3DnWOvgcbx6EXfGEyEyP04EwC9F
-	 EvwtyISL2CcmVWrIs0W3rE7ztO52QQaKZ4QGAgbRPCMQAOgyALOgakr40PTDrGjEwO
-	 /MDSW8mQgNdnjCEcxJRk0hS53RFAwfGcPsPRFJdRQn3F5sg7c5gTDuSjll52N1uCOH
-	 K5XXKu8nSt4IA==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 786693806929;
-	Fri, 28 Nov 2025 16:32:49 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.18-rc8
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20251128131739.8150-1-ulf.hansson@linaro.org>
-References: <20251128131739.8150-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20251128131739.8150-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.18-rc2-2
-X-PR-Tracked-Commit-Id: 747528729c9b6733839f9c95f300d5bef95ee52c
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 4331989728da4e868fcda75bde872d032f5ce6ac
-Message-Id: <176434756816.719139.8426441221663826591.pr-tracker-bot@kernel.org>
-Date: Fri, 28 Nov 2025 16:32:48 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="TOfp9aoW"
+Received: from gaggiata.pivistrello.it (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
+	by mail11.truemail.it (Postfix) with ESMTPA id E156C1FD35;
+	Fri, 28 Nov 2025 18:05:37 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
+	s=default; t=1764349538;
+	bh=PvNIlld0IaNRs9dqfcFlKkKutDvX8ypz/zN3pY5PILI=;
+	h=Received:From:To:Subject;
+	b=TOfp9aoWdasbKSRX3VWQIfP2S+HY1WpEpSH3mVqwdhQ5yDfS27be1AKTHvSFsjhCi
+	 rDQE1UgFPadMAHVK7KU7oLuVx4bwJwQQ/io4VYL3yv97S+YmzQAaNOmmgBH8dgWHQ9
+	 az1pFiQ5F9tQ0puODrO/55qMjJSRCmac0iCIVOz+OaFNV4MTCurJGoKoc9TnERTdQN
+	 Ng8d98Roa1Xeh7LHSG8TuK9V/9CpukRmUpYLcJrnb5Gic3xi9SNj58PKdhTSF79hfb
+	 mT5mVz0er90By9o68ZHnpnUy/593diKLafCYPRuq3QHixt07+NSv9L7pZbN9mSTE7r
+	 b/3KkV24y9CYw==
+Received: by gaggiata.pivistrello.it (Postfix, from userid 1000)
+	id 94AD87F9F8; Fri, 28 Nov 2025 18:05:37 +0100 (CET)
+Date: Fri, 28 Nov 2025 18:05:37 +0100
+From: Francesco Dolcini <francesco@dolcini.it>
+To: Karel Balej <balejk@matfyz.cz>
+Cc: Johannes Berg <johannes@sipsolutions.net>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Duje =?utf-8?Q?Mihanovi=C4=87?= <duje@dujemihanovic.xyz>,
+	Andrew Lunn <andrew@lunn.ch>,
+	Gregory Clement <gregory.clement@bootlin.com>,
+	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
+	Brian Norris <briannorris@chromium.org>,
+	Francesco Dolcini <francesco@dolcini.it>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Frank Li <Frank.Li@nxp.com>,
+	linux-wireless@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
+	phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
+	Peng Fan <peng.fan@nxp.com>, david@ixit.cz
+Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
+ samsung,coreprimevelte
+Message-ID: <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
+References: <20251026182602.26464-1-balejk@matfyz.cz>
+ <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
 
-The pull request you sent on Fri, 28 Nov 2025 14:17:38 +0100:
+Hello Karel,
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.18-rc2-2
+On Thu, Nov 27, 2025 at 04:29:12PM +0100, Karel Balej wrote:
+> To reiterate, the firmware is generally available but is not part of
+> linux-firmware and the entire process of upstreaming the chipset support is
+> stuck on that.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/4331989728da4e868fcda75bde872d032f5ce6ac
+I'll try to see if any of my contact in NXP Wi-Fi group is able to help. Give
+me a few days.
 
-Thank you!
+Francesco
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+
