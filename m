@@ -1,78 +1,151 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 690AB33373D;
-	Fri, 28 Nov 2025 18:03:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA21A26E17F;
+	Fri, 28 Nov 2025 18:49:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764353008; cv=none; b=iUm9O+GnuTBccENYCpKxUMF5J7GHOf5PXdjz9cg17H7R3rqGgjb/5gRZWd4YoZUPGDEGEMF1j0KNP0/LnLf4m59nPbJEG93JceMP/oD7OdFxYWryFNuuB60jDQclwrWCcp9vEmYfpq3ge6/mVcclE8mj55uABkK+aKsGqhtsGh0=
+	t=1764355753; cv=none; b=YvPFKDMbcdXgV+og7hDglcp6a70HIAXkamM/6MV13Fx8UOEsRfhuGK636Q/gnbLnxpLefqrfBoVPY6r/FvBv+RfMQPzzStpXGFX6HqBPZonXZqLuxj3aR4A6P8ZOr/8J3LBch9MztADmZGW2/sJI52bY2+Pyc0OVL7S1f4mb8Nw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764353008; c=relaxed/simple;
-	bh=RXJXqeobgPEAjbpuExToJm696Xmf+fdudNnvH6ua4jE=;
+	s=arc-20240116; t=1764355753; c=relaxed/simple;
+	bh=NtMfcfFfDb5zhNBtoZS860R3Lc0nUlKvsmQDGO7zgqk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Aqgr1iexaWsafSNThzMOnAGVePb2AggZ4mRkveAFfSePa10C8UcAJdY4+HsnUUj7OEicm+tzkoX+svRpB9eyp+BzNjyBxlO40ec8yQv0VnvN2cWQbUaKzkAs1zlGheeTtvClQBxQvedrn0awuk0UczVuhobvLlbaxY7XOoJIC58=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hWzVWxSD; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=GzbsXpzNqGMszUW6pidcopQpEz7bKjDZ3kmJgbb9Io+HDbmx/eti6uK/0oRdGHb+cK1NWqW9YgaxWaSJboHii69uHY9vR1aFk+f4M2swfVFqwWnNRZmBbpibd/I+mqvLuFRq8JyhxYRjyrQl8rFnQz3Z5bFrogkRwZKw045Qxzg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FvV3pvwG; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hWzVWxSD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A7FBCC4CEF1;
-	Fri, 28 Nov 2025 18:03:27 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FvV3pvwG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 969DDC4CEF1;
+	Fri, 28 Nov 2025 18:49:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764353007;
-	bh=RXJXqeobgPEAjbpuExToJm696Xmf+fdudNnvH6ua4jE=;
+	s=k20201202; t=1764355751;
+	bh=NtMfcfFfDb5zhNBtoZS860R3Lc0nUlKvsmQDGO7zgqk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=hWzVWxSDhw7+M9Tu0BE9bzmwP88omzgmxFBgoyREI7sQhIUMxtCqk+QuTsMEeU0J8
-	 WY7G/YfWUxscWAizHilisRKkC1SlAe6Z0bJHLCcebNTH1Ozr5HUPpzlShsCz1Jlk9B
-	 HG1tkizbWm9cgmOTujRK6vqFgXguE3uR3UVmSI2U7BOe0jsDUktTgLL0xrivnCKd15
-	 nkenhHhFBCvHtsYJxer5fxYwWv9Ufa7olq4zBt4VuILwsfkhf0Z7lOXwULhqJmklSr
-	 lw6UKsJw6Frdc+dta1/tbzyxJNlSiVT19XlIhZPdX4W//6sNDbvYQu4xeHDvitE/9j
-	 gsEaq5H+l+8CA==
-Date: Fri, 28 Nov 2025 10:01:38 -0800
-From: Eric Biggers <ebiggers@kernel.org>
-To: Md Sadre Alam <quic_mdalam@quicinc.com>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org,
-	linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, abel.vesa@linaro.org
-Subject: Re: [PATCH v6] mmc: sdhci-msm: Enable ICE for CQE-capable
- controllers with non-CQE cards
-Message-ID: <20251128180138.GB2000@sol>
-References: <20251126064251.1928529-1-quic_mdalam@quicinc.com>
+	b=FvV3pvwGPJW2p1is7KzglvpFu5Sx151ITH8aFIx0ZrMcY9PSwepoeamDDhHZvHs3L
+	 U9B1pOaenj0rdy5CEB7d9NukyZBOuRfgNVfVO88aFVBL3EcIFgpNH9tdgD0OFRpDfh
+	 IqkY/U63QU1X6WKIhjfqPGLaDCJmyN1c8xtR1CW/9edHXqJkWKSZvsX7oVbNrEg8Vn
+	 gX68mu28cwkj/NlVQTX9hpzauA8/1swmCe6UYtcAWnT289FwPKioWvjUaErr39JAcF
+	 xvu43VkmUvXx5H07MxfQf8HobVVZqSxdS0qm58uaZYbTeuwpaMHCISOehkGrpzMwoE
+	 z3ICzsV2m3PJA==
+Date: Fri, 28 Nov 2025 18:49:06 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Josua Mayer <josua@solid-run.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Mikhail Anikin <mikhail.anikin@solid-run.com>,
+	Yazan Shhady <yazan.shhady@solid-run.com>,
+	Jon Nettleton <jon@solid-run.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: renesas,sdhi: Add mux-states
+ property
+Message-ID: <20251128-strongbox-craziness-cea572479d17@spud>
+References: <20251128-rz-sdio-mux-v1-0-1ede318d160f@solid-run.com>
+ <20251128-rz-sdio-mux-v1-1-1ede318d160f@solid-run.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="uuY2vAqczeLfALfj"
+Content-Disposition: inline
+In-Reply-To: <20251128-rz-sdio-mux-v1-1-1ede318d160f@solid-run.com>
+
+
+--uuY2vAqczeLfALfj
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251126064251.1928529-1-quic_mdalam@quicinc.com>
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Nov 26, 2025 at 12:12:51PM +0530, Md Sadre Alam wrote:
-> Enable Inline Crypto Engine (ICE) support for CQE-capable sdhci-msm
-> controllers when used with eMMC cards that do not support CQE.
-> 
-> This addresses the scenario where:
-> - The host controller supports CQE (and has CQHCI crypto infrastructure)
-> - The eMMC card does not support CQE
-> - Standard (non-CMDQ) requests need crypto support
-> 
-> This allows hardware-accelerated encryption and decryption for standard
-> requests on CQE-capable hardware by utilizing the existing CQHCI crypto
-> register space even when CQE functionality is not available due to card
-> limitations.
-> 
-> The implementation:
-> - Adds ICE register definitions for non-CQE crypto configuration
-> - Implements per-request crypto setup via sdhci_msm_ice_cfg()
-> - Hooks into the request path via mmc_host_ops.request for non-CQE requests
-> - Uses CQHCI register space (NONCQ_CRYPTO_PARM/DUN) for crypto configuration
-> 
-> With this, CQE-capable controllers can benefit from inline encryption
-> when paired with non-CQE cards, improving performance for encrypted I/O
-> while maintaining compatibility with existing CQE crypto support.
-> 
-> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On Fri, Nov 28, 2025 at 05:15:38PM +0100, Josua Mayer wrote:
+> Add mux controller support for when sdio lines are muxed between a host
+> and multiple cards.
+>=20
+> There are several devices supporting a choice of eMMC or SD on a single
+> board by both dip switch and gpio, e.g. Renesas RZ/G2L SMARC SoM and
+> SolidRun RZ/G2L SoM.
+>=20
+> In-tree dts for the Renesas boards currently rely on preprocessor macros
+> to hog gpios and define the card.
+>=20
+> By adding mux-states property to sdio controller description, boards can
+> correctly describe the mux that already exists in hardware - and drivers
+> can coordinate between mux selection and probing for cards.
+>=20
+> Signed-off-by: Josua Mayer <josua@solid-run.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 14 +++++++++++=
++++
+>  1 file changed, 14 insertions(+)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Do=
+cumentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> index c754ea71f51f7..55635c60ad73a 100644
+> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> @@ -106,6 +106,11 @@ properties:
+>    iommus:
+>      maxItems: 1
+> =20
+> +  mux-states:
+> +    description:
+> +      mux controller node to route the SDIO signals from SoC to cards.
+> +    maxItems: 1
+> +
+>    power-domains:
+>      maxItems: 1
+> =20
+> @@ -262,9 +267,17 @@ unevaluatedProperties: false
+>  examples:
+>    - |
+>      #include <dt-bindings/clock/r8a7790-cpg-mssr.h>
+> +    #include <dt-bindings/gpio/gpio.h>
+>      #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    #include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
+>      #include <dt-bindings/power/r8a7790-sysc.h>
+> =20
+> +    mux: mux-controller {
+> +            compatible =3D "gpio-mux";
+> +            #mux-state-cells =3D <1>;
+> +            mux-gpios =3D <&pinctrl RZG2L_GPIO(22, 1) GPIO_ACTIVE_LOW>;
+> +    };
 
-Acked-by: Eric Biggers <ebiggers@kernel.org>
+This node should be removed, the tooling will provide a fake phandle to
+satisfy your mux-states property.
 
-- Eric
+pw-bot: changes-requested
+
+> +
+>      sdhi0: mmc@ee100000 {
+>          compatible =3D "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
+>          reg =3D <0xee100000 0x328>;
+> @@ -275,6 +288,7 @@ examples:
+>          max-frequency =3D <195000000>;
+>          power-domains =3D <&sysc R8A7790_PD_ALWAYS_ON>;
+>          resets =3D <&cpg 314>;
+> +        mux-states =3D <&mux 0>;
+>      };
+> =20
+>      sdhi1: mmc@ee120000 {
+>=20
+> --=20
+> 2.51.0
+>=20
+
+--uuY2vAqczeLfALfj
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaSnuogAKCRB4tDGHoIJi
+0j76AQDYhR+vDQOegSMmt7lld2bHr2IbFhzrJhaGD4IK6PD5yQD9FpFC5t5WYURu
+YH6kAC4dVJbC9mDBO40t+80PpLwvZw4=
+=nZiP
+-----END PGP SIGNATURE-----
+
+--uuY2vAqczeLfALfj--
