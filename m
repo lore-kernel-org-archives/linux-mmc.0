@@ -1,60 +1,40 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E482B26FD86;
-	Fri, 28 Nov 2025 17:05:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C9582D781E;
+	Fri, 28 Nov 2025 17:57:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764349551; cv=none; b=N1p7PcC4e5hAZAMW1i7Vsz1YhyEaJalvhY6TQbfjIBYxcA+UTY9ntbDVtkJswbyTCS2P8zFHd0x6GoYPthgpAYJYC3KT6TD9d9whReClvz6K+ZT/ODvZyzqGQ2xqZ3ZNVCHFWqhOWDBgHGJiOUXBaPIMtRFc7m8HGBgnARgLHNk=
+	t=1764352668; cv=none; b=UqMaVSWzrGXPxbMLISdQ9Abb4GduQEFh5vtyzjZ2Lc8bq0Rr4Ph1jhLNymppU6j7C9DTj/52x7zdCrZjxq0VB3X5D1Bm0BaiF2FJp2BMoZ7J3BhrYi+lLVDmaVilpp/KhdyUf6kKfQ31Sxm1kL0CkqZl31djuuPIz5NzrETju6Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764349551; c=relaxed/simple;
-	bh=PvNIlld0IaNRs9dqfcFlKkKutDvX8ypz/zN3pY5PILI=;
+	s=arc-20240116; t=1764352668; c=relaxed/simple;
+	bh=XgADMIX2UZQW5Yj7p3y5354MGXFw/VsdioJHjy2440E=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FXzCQbzDjuSSFxEJAzYatDZkIRdxVQIFbvtRzBgypsnYh1QA4MiMySBzc8AWMMmz1jYuV9Y21JpscxQLkSJW1mUaskPHxb4GAK8ucZcAKu8X8uMlOFQrKMhQm7MmYbgz7NwBRk+l9uw8gpV7n/VP7Gdm4Ps16/sFv5JszWEu7eM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=TOfp9aoW; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
+	 Content-Type:Content-Disposition:In-Reply-To; b=in6LqKl9DM3U0/UzmYYRn2qJoUCyEVkdnYurMqnHmA2CxkxoN0xSosX4G3O+gq668xlc3pxor0izKFvmaj4K9FmUclTyl2L1rPe0EsFxU9zhWIMVt5v7sTDPQ0aIMx1kuvBVX1hAiQXKxnBsWoyNED2Z4azR4EreR+FI12YiADc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Abbu+hwp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="TOfp9aoW"
-Received: from gaggiata.pivistrello.it (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
-	by mail11.truemail.it (Postfix) with ESMTPA id E156C1FD35;
-	Fri, 28 Nov 2025 18:05:37 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1764349538;
-	bh=PvNIlld0IaNRs9dqfcFlKkKutDvX8ypz/zN3pY5PILI=;
-	h=Received:From:To:Subject;
-	b=TOfp9aoWdasbKSRX3VWQIfP2S+HY1WpEpSH3mVqwdhQ5yDfS27be1AKTHvSFsjhCi
-	 rDQE1UgFPadMAHVK7KU7oLuVx4bwJwQQ/io4VYL3yv97S+YmzQAaNOmmgBH8dgWHQ9
-	 az1pFiQ5F9tQ0puODrO/55qMjJSRCmac0iCIVOz+OaFNV4MTCurJGoKoc9TnERTdQN
-	 Ng8d98Roa1Xeh7LHSG8TuK9V/9CpukRmUpYLcJrnb5Gic3xi9SNj58PKdhTSF79hfb
-	 mT5mVz0er90By9o68ZHnpnUy/593diKLafCYPRuq3QHixt07+NSv9L7pZbN9mSTE7r
-	 b/3KkV24y9CYw==
-Received: by gaggiata.pivistrello.it (Postfix, from userid 1000)
-	id 94AD87F9F8; Fri, 28 Nov 2025 18:05:37 +0100 (CET)
-Date: Fri, 28 Nov 2025 18:05:37 +0100
-From: Francesco Dolcini <francesco@dolcini.it>
-To: Karel Balej <balejk@matfyz.cz>
-Cc: Johannes Berg <johannes@sipsolutions.net>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Duje =?utf-8?Q?Mihanovi=C4=87?= <duje@dujemihanovic.xyz>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Gregory Clement <gregory.clement@bootlin.com>,
-	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
-	Brian Norris <briannorris@chromium.org>,
-	Francesco Dolcini <francesco@dolcini.it>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Frank Li <Frank.Li@nxp.com>,
-	linux-wireless@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
-	phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
-	Peng Fan <peng.fan@nxp.com>, david@ixit.cz
-Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
- samsung,coreprimevelte
-Message-ID: <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
-References: <20251026182602.26464-1-balejk@matfyz.cz>
- <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Abbu+hwp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C087C4CEFB;
+	Fri, 28 Nov 2025 17:57:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1764352668;
+	bh=XgADMIX2UZQW5Yj7p3y5354MGXFw/VsdioJHjy2440E=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Abbu+hwpnTRZ3VzwZM6UJDJiIHKjZq+dbi6JG586tKeh/AI61rNTcZniHxZIwNSGj
+	 ftAQEjJmnTA9xn6Wi6OrTX1kc5ApwKJ2KYqr7wTSUfUl63fr+Y8wHkdRNjds6LF6mk
+	 4s6r35XLB9RyGl8HLsloVuKOWxrGQdc9XwzQFbIC1lfh2veFRTXUqy1Mz0A2fkvx55
+	 UAf0pj/4q0zWBHoKXmEDvhpPCwpbXLUxS0+MEfmMZAdmPlpFSLcEhC/1qB3Sylchaz
+	 8tB66lg6iN+D8I0dMDwhLEE0oyWdCJZxar3aHNpnw9vuoWk81WQIP0Cr5tYsr8mG4I
+	 9CPgqDzSUnliA==
+Date: Fri, 28 Nov 2025 09:55:59 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, abel.vesa@linaro.org,
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: host: sdhci-msm: Add support for wrapped keys
+Message-ID: <20251128175559.GA2000@sol>
+References: <20251127073048.2759159-1-neeraj.soni@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -63,18 +43,34 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
+In-Reply-To: <20251127073048.2759159-1-neeraj.soni@oss.qualcomm.com>
 
-Hello Karel,
+On Thu, Nov 27, 2025 at 01:00:48PM +0530, Neeraj Soni wrote:
+> Add the wrapped key support for sdhci-msm by implementing the needed
+> methods in struct blk_crypto_ll_ops and setting the appropriate flag in
+> blk_crypto_profile::key_types_supported.
+> 
+> ---
+> This is a reworked version of the patchset
+> https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
+> that was sent by Seshu Madhavi Puppala.
+> 
+> My changes rebase it to use the custom crypto profile support.
+> 
+> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
 
-On Thu, Nov 27, 2025 at 04:29:12PM +0100, Karel Balej wrote:
-> To reiterate, the firmware is generally available but is not part of
-> linux-firmware and the entire process of upstreaming the chipset support is
-> stuck on that.
+Your Signed-off-by should go above the scissors line (---).
 
-I'll try to see if any of my contact in NXP Wi-Fi group is able to help. Give
-me a few days.
+> Changes in v2:
+> - Updated commit message for clarity.
+> 
+> Changes in v1:
+> - Added initial support for wrapped keys.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 51 +++++++++++++++++++++++++++++++-----
+>  1 file changed, 45 insertions(+), 6 deletions(-)
 
-Francesco
+Otherwise the patch looks okay to me.  It lines up with the UFS
+equivalent.  Can you also provide details on how you tested it?
 
-
+- Eric
