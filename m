@@ -1,142 +1,116 @@
-Received: from smtp1.ms.mff.cuni.cz (smtp-in1.ms.mff.cuni.cz [195.113.20.234])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 043ACEACE;
-	Thu, 27 Nov 2025 15:30:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.113.20.234
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 865CF25333F
+	for <linux-mmc@vger.kernel.org>; Fri, 28 Nov 2025 05:20:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764257432; cv=none; b=nizwvoMRgVX/IqjJTxiOXwK657tVAoTvLJERXQOTmK3SdCxxQqzrx5m0r+wm4hdG7KyAprZTf/L3jbxw5zMwLPsCwJuxNiJFkf4KOiTrXmIkx+fd3dWpudRucMFD/Tc/dy03WwzEo7QRQxnxt3SD7FKxA/X5xGM/y441CNslErE=
+	t=1764307231; cv=none; b=FjMWrcINhnhbh/oqe28KmG1rrYfkKI2wiTtAQBxlf/K/4yRbay+Inw5MSh62wyLSPJBNZEolTyajpbUJYqynOYkBJBDdpOM5w+ERNBkDD0dQlHKTvppAEjL0sLEYh9Z3988UAvvI05wr2Lksep+EJ8TOYsB4PC3SYdjcekMLCmM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764257432; c=relaxed/simple;
-	bh=SNgekyZISVjxqm05oCPnxWNr0tSC3ioQWMN6SqIjea0=;
-	h=Mime-Version:Content-Type:Date:Message-Id:From:Cc:Subject:To:
-	 References:In-Reply-To; b=toYqIVSheA6dA1xDagXsEOEsOGDX86vxwzAC6bsb4WrjsQsriwxcKLX8UYA+ejZM2G7VCjM9bCDmg0f2LedqqrpV+FEog3Qc96GoTyp3wSJ4dq7m2HtzADjten97GD00BBs+RZASokFoNrNT86WEVLv1w6LDH7kHdxdbANS/sqE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=matfyz.cz; dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b=Iq2jQwiM; arc=none smtp.client-ip=195.113.20.234
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=matfyz.cz
+	s=arc-20240116; t=1764307231; c=relaxed/simple;
+	bh=THmGnc3dgP2lVXCPjvN1kS7wAWxW9jiNKeJCqUBkwxk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=blcKLXRum91s22ws6mgM1wh/4mqpofSXL87Q6SwNmocsitskF1Xcw9kYLjJPacH1vD7+X8NDM3K5pS5XE0mim/FBwdP5uJQsskR6TYgJ413/IfEnaQiORnVhODnM5c3xk5nXBX/ZIL8xdRA4LgUhUURgMUt4COazLIlJIeMc17M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PFgcaWl2; arc=none smtp.client-ip=209.85.128.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b="Iq2jQwiM"
-X-SubmittedBy: id balejk@matfyz.cz subject /postalCode=110+2000/O=Univerzita+20Karlova/street=Ovocn+5CxC3+5CxBD+20trh+20560+5C/5/ST=Praha,+20Hlavn+5CxC3+5CxAD+20m+5CxC4+5Cx9Bsto/C=CZ/CN=Karel+20Balej/emailAddress=balejk@matfyz.cz
-	serial F5FD910E8FE2121B897F7E55B84E351D
-	issued by /C=NL/O=GEANT+20Vereniging/CN=GEANT+20Personal+20CA+204
-	auth type TLS.CUNI
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mff.cuni.cz;
-	s=submission; t=1764257355; x=1765557355;
-	bh=SNgekyZISVjxqm05oCPnxWNr0tSC3ioQWMN6SqIjea0=; h=From;
-	b=Iq2jQwiMkEupB6ek14Ce9g+vzS695Dld/mYbROgXY5HV05aKY1uf5WgGM9SgPS4oj
-	 BjAdt+Y4gDElC7WIlQiD1UZ0JKPSaRYy73kVRi7GkUHmxmLGp0kvCXo4STQeaT1et/
-	 2KHhZpEx+x2rclO9FG2fMtyypT+pgidn7MMbr4NW8kOPT3xMmc69keOhfdJHYe8W7u
-	 EuHLaR5s1lNnqmEOW7U1g2dJIt+7vaMSOIDYYgE0DYdBMgI635NUE5lA5wq+jTk0fm
-	 a3YO4bLStTFVVuQEiW2fPSVOw0dVGdjHP2fXG0q9yUoux2ivIh1olMaq0IOrgp5tJV
-	 ARSc5uU222j8Q==
-Received: from localhost (nat2.prg.suse.com [195.250.132.146])
-	(authenticated)
-	by smtp1.ms.mff.cuni.cz (8.18.1/8.18.1) with ESMTPS id 5ARFTCcb000418
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
-	Thu, 27 Nov 2025 16:29:13 +0100 (CET)
-	(envelope-from balejk@matfyz.cz)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PFgcaWl2"
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-47755de027eso9091085e9.0
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Nov 2025 21:20:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1764307228; x=1764912028; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=rd+4cRJO6WJEbxgEf4MunCD/7gdH3yrBq90idrCO3SE=;
+        b=PFgcaWl26ShDpdrDNeZs1jZjfx/Wq//oNCz/cVwoitoAFgaEhzKOlHPmjt3N+avEsV
+         2ZoEcxhnIj9J+dkeYYOK0kDexx8l1/5L2LAED1Q6BPmhBVa2mi+X1HXCEGbhk/n3v6Dh
+         kFEKtYMFygSu1zRx8VmSAp2ur7epyKc44d7LP5Sa7G50sU/w4XaQqShw5+kXbe7FlbtV
+         q1yzcA5acco4Jjb/ZQfzaiW8WlcQFnqluI9aQ5nxrPfb4yIqnTKrRV0JUIpB6C9dr+SU
+         5JZPLhGIFEQwh/WILpJ/ZZ5ECs9/nWR/lDVC/pCuCJD88jo4bTcs3pXsVzHeHgrLA7Bf
+         11eA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1764307228; x=1764912028;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rd+4cRJO6WJEbxgEf4MunCD/7gdH3yrBq90idrCO3SE=;
+        b=IBTIGO0ymmyz0ZYalBP1TMVM1XH3xX/pShTcbgC/DxdfeBQReU2bw8wziCWvgLc4b6
+         BhGmfAjiwe9Augy4C/JbUBIXRP5p5P2CYRP8DYdjm9b33s25JJatOtkDWeY70lOB7fCc
+         Jye0lIlqj1E6kS4TdLqN+AoNbWDudqGmV+bVRwXM29sS7oI4qlZtIw679ePk7izRhZe1
+         yAAzd4JjyQhj29gXGZm8v7awItrBiko7gP6ZnGm6yQkFtpHTIFGtZRfU88/Af88UUB7d
+         oYIpijQBAZfIxr7CaqqoayVc8Wsun+QyLXrutRF6WFxxlAxuU1NhVAbymjxSSk61xg2C
+         bl6A==
+X-Forwarded-Encrypted: i=1; AJvYcCV5R/J3iGqnC/Q//PKuUt2VLs+oI9SPT0AHIZEmBDPaRNnmDCz8/i1XeCjcTskUZRXggiejzC/VpgE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxvCgma0QtlIUUYIFNbZhog9uQE8qd3tuUZVp5lJklLTvqAtLuT
+	/u8KF/A3o01Kt4YfsCqrKGFDemsqICHf4V6yPdUWVrNOdOQUOhBOppSM
+X-Gm-Gg: ASbGncv/84g0uGYICIIUq8L0nZiiGBEbLpmaS4CsUDJzE3K8zgyFBYk+CBknQyd5JTs
+	uerVc2xSFdMN41sZYHcYC3cDQPo6cxDED9rqVVjK5iuFNApKvLHkxK3JKvL+wIDOVxV5aAxHaqB
+	WHBfosKbNAWfAesCjprksxoXHR7DtCToWEhpPu6/CDgANDlHsHx9FuQ7S9PFQt0fo+sZrEA16fR
+	1lTUmqpKvxw0XLuJ4+hHswSAQ/W2sri2x+AO3+FotMpSQUw3h8SSM8dRGN+E48LahIbLvU1uBIU
+	13GsLQz3GAIIAE6zL2VGiJzXuIKW2HFN7w1twmuQKqk99BJNlijsKbqn/rL2Fa0el8WFv0fFdTY
+	wzl7fntgJsflHrm051UE855cnwUoCUnDsFwqPHEsevl7tEGDzBE8thfJUhYghVg5PaDPE1pMNWK
+	7uATUR3thf8Y0GlcM/9S5qCooc/hxnRCxH+R5rMnNgZ6/5liIjTPEdRaFI9Sk0xb9NhWKH3e3o
+X-Google-Smtp-Source: AGHT+IF+COsn7cy7+sM+/flMyNATzLJQfAe2nsSCOkHCpatzswZIzTXsE2f+EUf7qS83QJk1tqjO1g==
+X-Received: by 2002:a05:600c:1c92:b0:477:7f4a:44b0 with SMTP id 5b1f17b1804b1-47904b2c2c5mr147859095e9.33.1764307227558;
+        Thu, 27 Nov 2025 21:20:27 -0800 (PST)
+Received: from avri-office.sdcorp.global.sandisk.com ([129.253.242.14])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4791116c3c0sm65802385e9.8.2025.11.27.21.20.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 27 Nov 2025 21:20:27 -0800 (PST)
+From: Avri Altman <avri.altman@gmail.com>
+X-Google-Original-From: Avri Altman <avri.altman@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>
+Subject: [PATCH v2 0/2] mmc: core: Extend manufacturing date beyond 2025
+Date: Fri, 28 Nov 2025 07:20:09 +0200
+Message-Id: <20251128052011.204735-1-avri.altman@sandisk.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Date: Thu, 27 Nov 2025 16:29:12 +0100
-Message-Id: <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
-From: "Karel Balej" <balejk@matfyz.cz>
-Cc: <~postmarketos/upstreaming@lists.sr.ht>, <phone-devel@vger.kernel.org>,
-        "Karel Balej" <balejk@matfyz.cz>, "Jeff Chen" <jeff.chen_1@nxp.com>,
-        "Peng
- Fan" <peng.fan@nxp.com>, <david@ixit.cz>
-Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
- samsung,coreprimevelte
-To: "Johannes Berg" <johannes@sipsolutions.net>,
-        "Rob Herring"
- <robh@kernel.org>,
-        "Krzysztof Kozlowski" <krzk+dt@kernel.org>,
-        "Conor
- Dooley" <conor+dt@kernel.org>,
-        =?utf-8?q?Duje_Mihanovi=C4=87?=
- <duje@dujemihanovic.xyz>,
-        "Andrew Lunn" <andrew@lunn.ch>,
-        "Gregory Clement"
- <gregory.clement@bootlin.com>,
-        "Sebastian Hesselbarth"
- <sebastian.hesselbarth@gmail.com>,
-        "Brian Norris"
- <briannorris@chromium.org>,
-        "Francesco Dolcini" <francesco@dolcini.it>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>, "Frank Li" <Frank.Li@nxp.com>,
-        <linux-wireless@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-        <linux-mmc@vger.kernel.org>
-References: <20251026182602.26464-1-balejk@matfyz.cz>
-In-Reply-To: <20251026182602.26464-1-balejk@matfyz.cz>
-X-Spam-Level: ****
+Content-Transfer-Encoding: 8bit
 
-Hello,
+Hi Ulf,
 
-Karel Balej, 2025-10-26T19:20:37+01:00:
-> this series adds support for WiFi to the samsung,coreprimevelte
-> smartphone (and can be straightforwardly reused for the other known
-> Marvell PXA1908-based smartphones).
->
-> The series is currently not intended for application as indicated in the
-> subject prefix as the firmware necessary for the operation of the chip is=
- not
-> available in linux-firmware.
->
-> Instead, my intentions are to publish the recent developments regarding
-> the chip support (see the third patch of the series) and offer them for
-> others to use and if possible get some feedback on them and also
-> hopefully to spark some conversation with NXP regarding getting the FW
-> into linux-firmware which would allow this series to be mainlined.
->
-> Regarding the firmware I have been in contact with Jeff Chen of NXP some
-> time ago who promised to ask about it internally =E2=80=93 I am thus now =
-gently
-> reminding Jeff of the matter. I will also appreciate input from anyone
-> else who may help with upstreaming whichever version of the firmware.
->
-> The trouble of upstreaming the FW is mostly a legal one (although an up
-> to date version of it would also be very welcome) as it is available as
-> part of the stock Android of the devices with this chip and can thus be
-> used on individual basis, it cannot however be submitted to
-> linux-firmware by myself for instance as the license is not known
-> (although probably is the same as for the other blobs in the mrvl
-> directory) and as the submission would require a sign-off from someone
-> involved with NXP.
->
-> The third patch in this series fixes a serious issue with the WiFi
-> observed on the phone (see the relevant commit message). The form is
-> however not directly usptreamable and it is not clear to me how to best
-> make it be since it involves changing a data type which probably cannot
-> be easily be special-cased for the new chip and would likely break the
-> other chips the mwifiex driver supports if applied as is. I will thus
-> welcome suggestions on this, although I'm also hopeful that a possible
-> reasonably up to date FW would not require this workaround at all.
->
-> The series is based on the pxa1908-dt-for-6.19 tag of Duje's tree [1] as
-> it contains the necessary SDIO description in the phone's device tree.
->
-> I have not applied the trailers sent in response to v1 as it has been
-> some time and as this is not expected to be applied anyway.
->
-> [1] https://gitlab.com/pxa1908-mainline/linux/-/commits/pxa1908-dt-for-6.=
-19
+This patch series addresses the upcoming exhaustion of the eMMC
+manufacturing date (MDT) year field, which is limited to a 4-bit value
+in the CID register. Under the current standard (EXT_CSD_REV=8), the
+representable years end in 2025.
 
-could I please get some feedback on this?
+The first patch implements the recently approved JEDEC standard update
+for EXT_CSD_REV=9. This update rolls over the 4-bit year codes to cover
+a new 16-year period, extending the range up to 2038.
 
-Mainly I'm wondering whether there is some way I could get this in (the
-basic support, without the hack in the third patch) without the firmware
-as I have unfortunately not been successful in my communication with NXP
-yet.=20
+The second patch introduces a quirk to handle vendor-specific behavior.
+Some eMMC vendors are not yet updating their devices to EXT_CSD_REV=9
+but still need to report manufacturing dates for 2026 and beyond. These
+devices re-purpose the year codes for 2010-2012 to represent 2026-2028.
 
-To reiterate, the firmware is generally available but is not part of
-linux-firmware and the entire process of upstreaming the chipset support
-is stuck on that.
+Thanks,
+Avri
 
-Thank you, best regards,
-K. B.
+---
+Changes in v2:
+- move the fixup to `mmc_ext_csd_fixups`
+- State the correct spec release
+- Fixed a typo in the commit message of the second patch.
+---
+
+Avri Altman (2):
+  mmc: core: Adjust MDT beyond 2025
+  mmc: core: Add quirk for incorrect manufacturing date
+
+ drivers/mmc/core/card.h   |  6 ++++++
+ drivers/mmc/core/mmc.c    | 12 ++++++++++++
+ drivers/mmc/core/quirks.h |  3 +++
+ include/linux/mmc/card.h  |  1 +
+ 4 files changed, 22 insertions(+)
+
+-- 
+2.34.1
+
