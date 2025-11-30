@@ -1,97 +1,131 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA21A26E17F;
-	Fri, 28 Nov 2025 18:49:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4D1A1391;
+	Sun, 30 Nov 2025 08:22:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764355753; cv=none; b=YvPFKDMbcdXgV+og7hDglcp6a70HIAXkamM/6MV13Fx8UOEsRfhuGK636Q/gnbLnxpLefqrfBoVPY6r/FvBv+RfMQPzzStpXGFX6HqBPZonXZqLuxj3aR4A6P8ZOr/8J3LBch9MztADmZGW2/sJI52bY2+Pyc0OVL7S1f4mb8Nw=
+	t=1764490965; cv=none; b=HiA+1GdqTshOvY0ikQU+01oYdbOiQnob+JTaFrfk182p/HF1gRfKAX11PUTR6VEM0AJhr9MLKelL59pBkkZrg9694EJ9QRzfastezvU1u50rR0R6ACv7MLg1+urJfdiGGqH0OqvID7JEjzSewSIlj5gHas07bfncQgPyqVtflZM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764355753; c=relaxed/simple;
-	bh=NtMfcfFfDb5zhNBtoZS860R3Lc0nUlKvsmQDGO7zgqk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GzbsXpzNqGMszUW6pidcopQpEz7bKjDZ3kmJgbb9Io+HDbmx/eti6uK/0oRdGHb+cK1NWqW9YgaxWaSJboHii69uHY9vR1aFk+f4M2swfVFqwWnNRZmBbpibd/I+mqvLuFRq8JyhxYRjyrQl8rFnQz3Z5bFrogkRwZKw045Qxzg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FvV3pvwG; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1764490965; c=relaxed/simple;
+	bh=bUUaXl2BJ4t+2CfI/IqewjPp7TRtclQJMBF9Fk3c3hQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=NZoKeHCR7L8bQyrVa+av+VrC7W9kaDeYQm2/aQbQ/hQARr9/oYFhNUmcTD0/C3EtH4nly1FYXxzPX+A+VycpJWnp/uKqngjwyD+jFAyFEEXIjDAnfMEnu0CW07xzEM0TEQ3rF3HvIE7wGQMBGgct6M01/Pjs6RzXNQ/cwRHeJSk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HIELzPTa; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FvV3pvwG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 969DDC4CEF1;
-	Fri, 28 Nov 2025 18:49:08 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HIELzPTa"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8712C4CEF8;
+	Sun, 30 Nov 2025 08:22:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1764355751;
-	bh=NtMfcfFfDb5zhNBtoZS860R3Lc0nUlKvsmQDGO7zgqk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=FvV3pvwGPJW2p1is7KzglvpFu5Sx151ITH8aFIx0ZrMcY9PSwepoeamDDhHZvHs3L
-	 U9B1pOaenj0rdy5CEB7d9NukyZBOuRfgNVfVO88aFVBL3EcIFgpNH9tdgD0OFRpDfh
-	 IqkY/U63QU1X6WKIhjfqPGLaDCJmyN1c8xtR1CW/9edHXqJkWKSZvsX7oVbNrEg8Vn
-	 gX68mu28cwkj/NlVQTX9hpzauA8/1swmCe6UYtcAWnT289FwPKioWvjUaErr39JAcF
-	 xvu43VkmUvXx5H07MxfQf8HobVVZqSxdS0qm58uaZYbTeuwpaMHCISOehkGrpzMwoE
-	 z3ICzsV2m3PJA==
-Date: Fri, 28 Nov 2025 18:49:06 +0000
-From: Conor Dooley <conor@kernel.org>
-To: Josua Mayer <josua@solid-run.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Mikhail Anikin <mikhail.anikin@solid-run.com>,
-	Yazan Shhady <yazan.shhady@solid-run.com>,
-	Jon Nettleton <jon@solid-run.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: renesas,sdhi: Add mux-states
- property
-Message-ID: <20251128-strongbox-craziness-cea572479d17@spud>
-References: <20251128-rz-sdio-mux-v1-0-1ede318d160f@solid-run.com>
- <20251128-rz-sdio-mux-v1-1-1ede318d160f@solid-run.com>
+	s=k20201202; t=1764490965;
+	bh=bUUaXl2BJ4t+2CfI/IqewjPp7TRtclQJMBF9Fk3c3hQ=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=HIELzPTaySdP0h91vuZ1eqAPsnckadwsikeSxfvLv09fbL5lLG2pHgRzLw2yOV0hT
+	 blr9YFcLgmOS8rbKlw9DlclJVokIKJGjvHow8CpO0Kq8t0bqvHRwbQpqqMI/juDY2P
+	 XqnDdQsbM95kJ60p6A+c0Et0LPLnp2e1hQ4qf//M8/+liUCw2NpsXGsTXap1hQtpQ+
+	 H4JgtwHzg8aAEDxAAvAKi5mP6TdxjIYbVthm+//T+AKRgGGSRpi5OpK6Ld6nrQVCrn
+	 F9oxgVEIUR3wV6V1YF2CTF/+JW6PZmdINfPaOsr0ENOVtxT2A/ZKPl1not03luGDoi
+	 lIYMvTIjThKVA==
+Message-ID: <2080db04-9845-4193-8dd9-7bb84894815b@kernel.org>
+Date: Sun, 30 Nov 2025 09:22:39 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="uuY2vAqczeLfALfj"
-Content-Disposition: inline
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: renesas,sdhi: Add mux-states
+ property
+To: Josua Mayer <josua@solid-run.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>,
+ Geert Uytterhoeven <geert+renesas@glider.be>,
+ Magnus Damm <magnus.damm@gmail.com>,
+ Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Mikhail Anikin <mikhail.anikin@solid-run.com>,
+ Yazan Shhady <yazan.shhady@solid-run.com>, Jon Nettleton
+ <jon@solid-run.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+References: <20251128-rz-sdio-mux-v1-0-1ede318d160f@solid-run.com>
+ <20251128-rz-sdio-mux-v1-1-1ede318d160f@solid-run.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
 In-Reply-To: <20251128-rz-sdio-mux-v1-1-1ede318d160f@solid-run.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-
---uuY2vAqczeLfALfj
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Fri, Nov 28, 2025 at 05:15:38PM +0100, Josua Mayer wrote:
+On 28/11/2025 17:15, Josua Mayer wrote:
 > Add mux controller support for when sdio lines are muxed between a host
 > and multiple cards.
->=20
+> 
 > There are several devices supporting a choice of eMMC or SD on a single
 > board by both dip switch and gpio, e.g. Renesas RZ/G2L SMARC SoM and
 > SolidRun RZ/G2L SoM.
->=20
+> 
 > In-tree dts for the Renesas boards currently rely on preprocessor macros
 > to hog gpios and define the card.
->=20
+> 
 > By adding mux-states property to sdio controller description, boards can
 > correctly describe the mux that already exists in hardware - and drivers
 > can coordinate between mux selection and probing for cards.
->=20
+> 
 > Signed-off-by: Josua Mayer <josua@solid-run.com>
 > ---
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 14 +++++++++++=
-+++
+>  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 14 ++++++++++++++
 >  1 file changed, 14 insertions(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Do=
-cumentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 > index c754ea71f51f7..55635c60ad73a 100644
 > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 > @@ -106,6 +106,11 @@ properties:
 >    iommus:
 >      maxItems: 1
-> =20
+>  
 > +  mux-states:
 > +    description:
 > +      mux controller node to route the SDIO signals from SoC to cards.
@@ -99,7 +133,7 @@ cumentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 > +
 >    power-domains:
 >      maxItems: 1
-> =20
+>  
 > @@ -262,9 +267,17 @@ unevaluatedProperties: false
 >  examples:
 >    - |
@@ -108,44 +142,14 @@ cumentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 >      #include <dt-bindings/interrupt-controller/arm-gic.h>
 > +    #include <dt-bindings/pinctrl/rzg2l-pinctrl.h>
 >      #include <dt-bindings/power/r8a7790-sysc.h>
-> =20
+>  
 > +    mux: mux-controller {
-> +            compatible =3D "gpio-mux";
-> +            #mux-state-cells =3D <1>;
-> +            mux-gpios =3D <&pinctrl RZG2L_GPIO(22, 1) GPIO_ACTIVE_LOW>;
-> +    };
+> +            compatible = "gpio-mux";
+> +            #mux-state-cells = <1>;
+> +            mux-gpios = <&pinctrl RZG2L_GPIO(22, 1) GPIO_ACTIVE_LOW>;
 
-This node should be removed, the tooling will provide a fake phandle to
-satisfy your mux-states property.
 
-pw-bot: changes-requested
+Wrong indentation and not really relevant here, so just drop.
 
-> +
->      sdhi0: mmc@ee100000 {
->          compatible =3D "renesas,sdhi-r8a7790", "renesas,rcar-gen2-sdhi";
->          reg =3D <0xee100000 0x328>;
-> @@ -275,6 +288,7 @@ examples:
->          max-frequency =3D <195000000>;
->          power-domains =3D <&sysc R8A7790_PD_ALWAYS_ON>;
->          resets =3D <&cpg 314>;
-> +        mux-states =3D <&mux 0>;
->      };
-> =20
->      sdhi1: mmc@ee120000 {
->=20
-> --=20
-> 2.51.0
->=20
-
---uuY2vAqczeLfALfj
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaSnuogAKCRB4tDGHoIJi
-0j76AQDYhR+vDQOegSMmt7lld2bHr2IbFhzrJhaGD4IK6PD5yQD9FpFC5t5WYURu
-YH6kAC4dVJbC9mDBO40t+80PpLwvZw4=
-=nZiP
------END PGP SIGNATURE-----
-
---uuY2vAqczeLfALfj--
+Best regards,
+Krzysztof
