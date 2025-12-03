@@ -1,41 +1,41 @@
 Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 987CF24E4A1;
-	Wed,  3 Dec 2025 11:45:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 511722E0B59;
+	Wed,  3 Dec 2025 11:45:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764762348; cv=none; b=uPiNwXDwu2sLsxd/hAJ6MQ2+E71XFMp41l1wiKitbdRq+JIEN97n5bqjupOA0spFWWg6tvkvf4hagAJ5jBNv6WwyC+rmCQDNfnrH7TBsJLw+tPWbi+eOLMZqzzFmnNftm6kSP4bLAc9VDUxYEMe5mTJCyG53xEPnzZ8oPC6RqOs=
+	t=1764762349; cv=none; b=D2ZvkqLYcv8tolRbNts/BDS15DBk0yNM1CPKh7jaDvA5rozUIi1yzZmjRcfRbMEZArpcK+F4roOmxA/vmxFxhyFZwCc1mjSRBPTWN4FG9+SHYUnVRkxJxH2qwz1tO1VRqilsEi8fKJ7lem5xmw6hIS6e3R5LsP7XDX8vTslVK8U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764762348; c=relaxed/simple;
-	bh=GVsvFJMJ9N1wsNH4BMhV4STieOC8bBaHmsMcDsgLe4w=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=RVYQhGW92mva1tLaCYNRtMWfaZ1J6ComljqBoRTq+HYE4NpskGiweoggbpdCN8g2MSMWEtnuYv5zL/3RNAbjV4l4lxevgS7qqEc76qItqX0HbOcqMy2CflWUJH/4cCiDp7kBtBAQy1K2y3kniBrYFymXDkX8Ozz9Zq6H38wB43o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=ertmZ7iC; arc=none smtp.client-ip=148.251.105.195
+	s=arc-20240116; t=1764762349; c=relaxed/simple;
+	bh=rSrS/g3GzIPfmw34zxW71s8tJc9N+7opnT4NQUPvLbs=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=PZmRRCgJbSQZ5TNVwGSDaiNSAxBBC28z17s7bOiKA0nhZquV37am7jJMDsnmgmeQx6p78421KDLPRokvwa5TbefaNk+54lpPezPl3z7VbAV/LFisNuv7yKI2Ino+uRo3Nv2IcfdKhdIbvKjenMlIVt4rMeFUv6SzNRsuAoMEA/Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=kUIP8m03; arc=none smtp.client-ip=148.251.105.195
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="ertmZ7iC"
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="kUIP8m03"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1764762344;
-	bh=GVsvFJMJ9N1wsNH4BMhV4STieOC8bBaHmsMcDsgLe4w=;
-	h=From:Subject:Date:To:Cc:From;
-	b=ertmZ7iCiPYCTgzNdCrDhswfqUjpHR4k3lTL1s7LIWWTrYW9XbnCZEqQID0zhiJ6r
-	 Aan5ISTpWm6V7l4Hu0i55Cv8ReWTfaiwhy9Y4Vjg+uMxzp9WUiIxdNGthlol2IAuXD
-	 NXEnaZP6yGstcII9GQUa1XqFCt+nMJfj0/2WlC635F0gWeinyZvZy/71aC6zrMl7Yt
-	 wbzCW6lIHL1C/4ZkSbYKzyoPPIjX3fkZvEpWVhBijqeML3IJRhV18Q+6NDiwC+NOqD
-	 UHn3KVabohseoxj4gT9PMkiNQ1QoNb7X3jOI0xsoS9k9qrXLbmQzn2sNWR8q2TZIy5
-	 siGQOp4l4S/cg==
+	s=mail; t=1764762345;
+	bh=rSrS/g3GzIPfmw34zxW71s8tJc9N+7opnT4NQUPvLbs=;
+	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
+	b=kUIP8m03uVX3YSkENNi5EZ9TI0ShKToihyvXNkhsKuGWkf9B4oEYeHoRdyZ/irGN+
+	 KHs0/oSDbnRpTltz83vxJxrUyFofIZH72R0Ug9Kf0vv3JIiIRFMfDHpfG/xDoHq8Uz
+	 9X2BBYqi1/StLLB1Who3syAAcJoP0DB3LB0sf2AuE9b3i589Udcubh++27YErifIxi
+	 1X6vUvDxVev3gYRtPeypYtHM2P9tldNbHzKd40XuIK1moa+IjHKlVn8wbWYrHWk5ox
+	 8giMK9u6cps6JpTE1yJMPaKnuPhsmSYDZiwvYq59OXZYTlVKxlAiyJE+H416umVzTq
+	 whGHDNq75H1GA==
 Received: from yukiji.home (amontpellier-657-1-116-247.w83-113.abo.wanadoo.fr [83.113.51.247])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: laeyraud)
-	by bali.collaboradmins.com (Postfix) with ESMTPSA id 3640717E110C;
+	by bali.collaboradmins.com (Postfix) with ESMTPSA id F1DBA17E1339;
 	Wed,  3 Dec 2025 12:45:44 +0100 (CET)
 From: Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
-Subject: [PATCH 0/3] Add SD/MMC Card driver support for Mediatek MT8189 SoC
-Date: Wed, 03 Dec 2025 12:45:33 +0100
-Message-Id: <20251203-mt8189-add-mmc-support-v1-0-f5ce43212fe9@collabora.com>
+Date: Wed, 03 Dec 2025 12:45:34 +0100
+Subject: [PATCH 1/3] dt-bindings: mmc: mtk-sd: Add support for MT8189 SoC
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -44,10 +44,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yWNywrDIBBFf0Vm3YFoH5j8SsnC6tjOwkfVlEDIv
- 1eS5Tlwz92gUmGqMIkNCv24cood5EWA/Zj4JmTXGdSg7lIqjaFpqUc0zmEIFuuScyoNvX84r70
- e6Sahj3Mhz+sRfs4nF/ouvd9OCS9TCW0KgdskIq0Njw81XGHe9z8w9pEFmQAAAA==
-X-Change-ID: 20251128-mt8189-add-mmc-support-ff6df8f89e41
+Message-Id: <20251203-mt8189-add-mmc-support-v1-1-f5ce43212fe9@collabora.com>
+References: <20251203-mt8189-add-mmc-support-v1-0-f5ce43212fe9@collabora.com>
+In-Reply-To: <20251203-mt8189-add-mmc-support-v1-0-f5ce43212fe9@collabora.com>
 To: Chaotian Jing <chaotian.jing@mediatek.com>, 
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
  Krzysztof Kozlowski <krzk+dt@kernel.org>, 
@@ -60,37 +59,53 @@ Cc: kernel@collabora.com, linux-mmc@vger.kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, 
  Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1764762344; l=991;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1764762344; l=1508;
  i=louisalexis.eyraud@collabora.com; s=20250113; h=from:subject:message-id;
- bh=GVsvFJMJ9N1wsNH4BMhV4STieOC8bBaHmsMcDsgLe4w=;
- b=uSJLBh6B+FOH+EPSJKMaFBFDHGGU0Q1u9uG3pq7ilcrCaZzR/IRrFpLBUB4FALTltdRD7PHvo
- JysB9LtdEwvBavezS+8USNHo/tASlNSB2b+ZSNLOl9ZyS6faqL1Be0h
+ bh=rSrS/g3GzIPfmw34zxW71s8tJc9N+7opnT4NQUPvLbs=;
+ b=qLmM9GZBF3m4ar3KUTOZb9GLigL1SpHLreXl0Q6p5wNsluo9feCpmh2tnL9pj5Hc2vU5b+qcK
+ /V9eWbtSqbWARtj8OPkzNOQb95BKu4x7Yi34jDqPq2o5Le2P3WyCEyC
 X-Developer-Key: i=louisalexis.eyraud@collabora.com; a=ed25519;
  pk=CHFBDB2Kqh4EHc6JIqFn69GhxJJAzc0Zr4e8QxtumuM=
 
-This patch series adds in the Mediatek SD/MMC Card host driver (mtk-sd)
-the support of Mediatek MT8189 SoC and its variants (MT8371 and
-MT8391).
-
-It has been tested with a kernel based on next-20251203 tag on the
-Mediatek Genio 720-EVK board, based on MT8391 SoC, using both onboard
-eMMC storage and a micro-SD card.
+Add a new compatible for MMC IP in MT8189 SoC.
+Even though this is partially compatible with the one found in MT8196
+SoC, the MT8189 SoC register layout has some slight differences and
+additional features.
 
 Signed-off-by: Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
 ---
-Louis-Alexis Eyraud (3):
-      dt-bindings: mmc: mtk-sd: Add support for MT8189 SoC
-      mmc: mtk-sd: add support for SPM resource release control
-      mmc: mtk-sd: add support for MT8189 SoC
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
 
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml |  3 +++
- drivers/mmc/host/mtk-sd.c                         | 32 ++++++++++++++++++++---
- 2 files changed, 32 insertions(+), 3 deletions(-)
----
-base-commit: e47d97576181b31291cf58e77d737d21def0e160
-change-id: 20251128-mt8189-add-mmc-support-ff6df8f89e41
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+index 6dd26ad314916a3e40cf55ff69a7d93ed63dbdd4..eb3755bdfdf7e001602c3eb870898275085df3e6 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -25,6 +25,7 @@ properties:
+           - mediatek,mt8135-mmc
+           - mediatek,mt8173-mmc
+           - mediatek,mt8183-mmc
++          - mediatek,mt8189-mmc
+           - mediatek,mt8196-mmc
+           - mediatek,mt8516-mmc
+       - items:
+@@ -192,6 +193,7 @@ allOf:
+             - mediatek,mt8183-mmc
+             - mediatek,mt8186-mmc
+             - mediatek,mt8188-mmc
++            - mediatek,mt8189-mmc
+             - mediatek,mt8195-mmc
+             - mediatek,mt8196-mmc
+             - mediatek,mt8516-mmc
+@@ -240,6 +242,7 @@ allOf:
+               - mediatek,mt7986-mmc
+               - mediatek,mt7988-mmc
+               - mediatek,mt8183-mmc
++              - mediatek,mt8189-mmc
+               - mediatek,mt8196-mmc
+     then:
+       properties:
 
-Best regards,
 -- 
-Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
+2.52.0
 
