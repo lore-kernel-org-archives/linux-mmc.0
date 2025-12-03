@@ -1,61 +1,61 @@
-Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 990B52BDC00
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Dec 2025 21:46:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 436AB2DCBE0
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Dec 2025 21:47:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1764798386; cv=none; b=pRPKm0fF1Am+gpxb/BPQM7wQhWDJHey+m3kZF54CjoDKb85xGPC7Hacn7n7woy9pIUGkMExx5DQy9e4hKYLPPjIo4mAgSxm9y+t1fw4SXZDtcxnTBme3DSzoSKsa96wAFLFlTVYA11enVogzBlyn6ikYvlrBlvfd2iLDj49CUdk=
+	t=1764798454; cv=none; b=mOH01zz5Larxk49gVz1AwhUlFHgEdPCpHVVFZD6X9hJKvZJLvsyO2lDbzi583emSctAkj31cKlmFLApmzlALDsEGrOav5CXYwDspnMu2kMHYpJttRPIiEsN7CH7DS7sTNHyPRsPsGDJXTl8xW0hlifYPiHTihL/CMMyr8r952C8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1764798386; c=relaxed/simple;
-	bh=Pz0LCWmTmPHXMcS5g7MZaY8Z5r70cZFQcxUroXiLnz0=;
+	s=arc-20240116; t=1764798454; c=relaxed/simple;
+	bh=VZVdZ44lA0brLQX2RzHeYexOKxCAhiFjKkt9kwiarbM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YiF0suJ6b40DAORxqWSFwio1G6OX46vLvNYCCKvB625ce70YbUM24HhneMVwcgAHLBP/cWryyxG2xxDhk3bft+rsrH9wRjl0Osbcl5mQxDXhUn4WQTPdr3r7vxh1rVakWHwBkwGwQC6rYMRa08MtZxiyUjvI5MwbZs+jSmh6ECo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org; spf=pass smtp.mailfrom=chromium.org; dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b=mLH841WJ; arc=none smtp.client-ip=209.85.210.175
+	 Content-Type:Content-Disposition:In-Reply-To; b=udEv5xtBgCNVaH864l+SeZMAMIl5p5zYAZUtwNgtCwbNaxrqlEtOkJ+j8FCE/1mYIPVg+/h3uOd1CAjQCvnF4dg57LgJP1hBL4gU6aOuSMt6mQbojy1ssDyyUS1g6xAf1AAO1kdxngg0X8+Y5TA9ovTeg3JrY6aLxzhu85cIlJY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org; spf=pass smtp.mailfrom=chromium.org; dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b=O2Z8ZpuV; arc=none smtp.client-ip=209.85.210.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chromium.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="mLH841WJ"
-Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7b8eff36e3bso314377b3a.2
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Dec 2025 13:46:23 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="O2Z8ZpuV"
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-7e2762ad850so57466b3a.3
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Dec 2025 13:47:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1764798383; x=1765403183; darn=vger.kernel.org;
+        d=chromium.org; s=google; t=1764798451; x=1765403251; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=unZdatKDfaPl4fyNDfiMrsCGtVnCfg5aUkCrWXueqsc=;
-        b=mLH841WJaL6NQ5kONMi7PqaT29EX/qXAQbD1CEEvBOuulY40hMI6tKjdYpZuoG3k5/
-         2qYj97PPjC7NXpwz5zpQZ8PsXt9oCU7noR+/9lzQCowvHwd5Uou27rnd8R+Aq4sRfmTw
-         hihoUECBiNQZfyWZV4HE/2TedjBdLGAVTZoYw=
+        bh=+qKeGTsD/DT+TUGUNxy2VzIns/N4h+6YktbT6beUiGo=;
+        b=O2Z8ZpuV8ycxjwkA+pLMJWenMdQAb+JyRRa6UxvQmtSp6ROtIaJ6plkjItzBou7rjJ
+         MN/Z/vt63WKG6WLo8sXOssSFEn6LOtzH8LAj4mD0dMTG1CBvpwhBRgq7KlIlSdvxbS61
+         CIyzdJRXWPjHAbknQsTe4JAFiPvS3+EBYP9Io=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1764798383; x=1765403183;
+        d=1e100.net; s=20230601; t=1764798451; x=1765403251;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=unZdatKDfaPl4fyNDfiMrsCGtVnCfg5aUkCrWXueqsc=;
-        b=mmEXp9o2zzbNjRDZJkHXVjtDO0Rt6qWegMj1FhY4tLW3doe6H+6zaZ6PAt3oYk4q43
-         wbVJ9AG6EYnFeVDEJvYRXPltFvAeRXpGHi6VqjrmxoYq2ASOBnC23uVCXVbqHXEQHg8g
-         +G1+l89Jp4L+HxGK4hmcrKrhCdiddEhFyawe9OiYEXc48BsCPL67iPBaJkE52MCMMJqd
-         cuuHo/M2j+WtNWMDQ9EuJi5KNVxboKYjiAoOIuSGyVmQFCDa4CfESUGgFNKNP4U34GH9
-         3foxdbVaySzJUI+hgYFtGVjvzFc0oaxeVqmqHOc1P8iUj19EJX16BmVXxhzl2ChQu+Se
-         NTNQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUpmBkvWKqVakmhEGKawsnqdApuH0DnQpu1QNHU/0vfitT9tBoxjuqH+IWdcRWXrgL4IYsIfj2xanE=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy/fSwkzExV3+fmZZ8KGGREX8PL6Melp2xkVgIfs6CNfpOG6H7q
-	AdlcE1wJLUY7YzDwr8D+FZvTp319kU7xDJMqKb8/5M+QbMM36/vPYhlPs++fzb0oBA==
-X-Gm-Gg: ASbGncuf0z62Ng57TRX8LIhK7iI66lgaMbry59hrIQtE+RLda1QlSEVsEST+GdXyzW2
-	8jUzTmK3UJPGXiQHNpEjIaAXtYXAJ8tiCe9TJAcSoAs6veFqYUPEJeyPab0dFmKRg+ztn1TJMDd
-	pAPUx+urLwG+9NI/wIn7KOnlOtgQCIS3viZV06qtl76FJWzTCYR9+3QOM+VSQLX/hXazdYdDpYw
-	TEp4UZABvCUHmMJ8PMYcgdEWIExFf8qi1Di0IDpLHa5Ri1fLvzOWagpAAqjqEl/7BYU5XNNxKmr
-	Fs/moP8iXwpzjWKtk/in3Pk/54h3I0LRFPM9FCMf++XNq1CDBvhU2bLxPf+7Ks23iLHAPXi+r54
-	KuXBCYHq0i66r1AQC8nzAlQxmhfzTu4MB3EGlX3Jc2OxsWG/W4yxGWg64dKVyimU7rGzJUkMtyX
-	xAdPi05JpmaMVmduPv8PXTKSwM+EMC+BBrXXcwlWX5pppew7XPg6S3jQYjjJXS
-X-Google-Smtp-Source: AGHT+IFvUUHgZfAcVFFc7DhCqAynkqIltRjiHfqkI2ovYfWjzTG4w6qTFCGmfN82OTdFMGVzSXBqQw==
-X-Received: by 2002:a05:7022:6387:b0:11b:9386:7ed3 with SMTP id a92af1059eb24-11df64bf8fcmr539452c88.48.1764798382704;
-        Wed, 03 Dec 2025 13:46:22 -0800 (PST)
+        bh=+qKeGTsD/DT+TUGUNxy2VzIns/N4h+6YktbT6beUiGo=;
+        b=vH+h9EEyAjmN78o5F3SPt1P5qm0ClbeAefldHqOLSYKNUmMJPT4JdQv8cScmmt1u5M
+         56tV2IT+3UjsS6aWXYZdRhTBL0XD9QcsDGkf+AjoL82yQ/J8Y69wrpaCr8a19jR+AFc2
+         4HKVANsk7MCNljQuBLsyBZOSH6+IoTXlBiuUIyiJujwnzeCxkaMBbJJ+GkFOYLCwLBg4
+         LTW+sEO1RF3tUgif2mEWaX+4599y11rPZH2W5qIn1TwSrywKqNag/d295coyrRKO21nq
+         pUKoqBHhH5CKVtEfo76Be6E/ADGLrFVEo2CCyPSMWm19QbIorAwj4lliqfAKlZrNu1jD
+         BVuA==
+X-Forwarded-Encrypted: i=1; AJvYcCUCE4iiNRWOBkn9eT/d/kdwb6XXLB7TIiIRGhKWTpql7UMTuXuNvIEoQai+X0r3MbDafcCXjXTidrg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwcL0VWE1GL1AYgOVNOWmXgveWUFR5qGqjBVfk0Knej1wsYoFPM
+	PXWZIiE+MGtArzTTupi7blbS5WWxJQyPlNKslBCg9amq0mtsXf26ViJb3gylIaKnfQ==
+X-Gm-Gg: ASbGnctVRoubRmoPJPrOf2egZRsGGSaZlP/+uPeGCXsuXDeuReRMADjPmPWvuP8mlOB
+	Q3c1UeYxJfGXQzSicxrzeEzoh2H6ui34pzL5YA7pGQfFWIqbSBkPcNOhO4VEhHeUznukAt5/zu5
+	eaMHs24ew/YmOKnqJ3ABv/naCXbwy5nKoMoc+mzognARcPWvE5jlj6tLPfrR2S9dcN0csUxt3Kq
+	uAwHsG+6tpIplt+YaHEtSnnMidxWg+ecMrpJm13TF5dSok+7+03KsVOtJIpHaDNYG/YYlSIocrP
+	/D+DhjTVLy3/6DFnU13Kx9bgwLPmJfqicfi/ZCCbyXcAwxNFTQFVAWDYaNsLeWAsgp/0QPGpwiX
+	a0/5TgR2vMb/3ILJvCAVokX743h+d94nDyCDAuO/Ty4Rh4F+zwCVzHrdWLUmnBCNuHCv6pNsqmW
+	9MHUev1Jx107B4mrihds/YG3XPyRb+8Jlh3Itrlkgv4J8icyDJew==
+X-Google-Smtp-Source: AGHT+IHYOL+UBYAVNBaexNp51zLW4j5ZRWtvPK/36fgfBgTEcmZyfDLkwf8DPOCYg9Guqcci0ODQoA==
+X-Received: by 2002:a05:7022:63aa:b0:11d:f464:38b3 with SMTP id a92af1059eb24-11df4643926mr1543335c88.2.1764798449474;
+        Wed, 03 Dec 2025 13:47:29 -0800 (PST)
 Received: from localhost ([2a00:79e0:2e7c:8:e953:f750:77d0:7f01])
-        by smtp.gmail.com with UTF8SMTPSA id a92af1059eb24-11dcb067088sm61855605c88.10.2025.12.03.13.46.21
+        by smtp.gmail.com with UTF8SMTPSA id a92af1059eb24-11dcb04a07bsm88741033c88.7.2025.12.03.13.47.28
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 03 Dec 2025 13:46:21 -0800 (PST)
-Date: Wed, 3 Dec 2025 13:46:19 -0800
+        Wed, 03 Dec 2025 13:47:28 -0800 (PST)
+Date: Wed, 3 Dec 2025 13:47:27 -0800
 From: Brian Norris <briannorris@chromium.org>
 To: Karel Balej <balejk@matfyz.cz>
 Cc: Johannes Berg <johannes@sipsolutions.net>,
@@ -73,11 +73,11 @@ Cc: Johannes Berg <johannes@sipsolutions.net>,
 	linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
 	phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
 	Peng Fan <peng.fan@nxp.com>
-Subject: Re: [DONOTAPPLY RFC PATCH v2 3/4] DONOTMERGE: net: mwifiex: fix
- timeouts with the SD8777 chip
-Message-ID: <aTCvq7aN_WMts6hm@google.com>
+Subject: Re: [DONOTAPPLY RFC PATCH v2 4/4] arm64: dts:
+ samsung,coreprimevelte: add wifi node
+Message-ID: <aTCv75hjdX5XvgCh@google.com>
 References: <20251026182602.26464-1-balejk@matfyz.cz>
- <20251026182602.26464-4-balejk@matfyz.cz>
+ <20251026182602.26464-5-balejk@matfyz.cz>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -86,116 +86,64 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251026182602.26464-4-balejk@matfyz.cz>
+In-Reply-To: <20251026182602.26464-5-balejk@matfyz.cz>
 
-Hi,
-
-On Sun, Oct 26, 2025 at 07:20:40PM +0100, Karel Balej wrote:
-> 	[ 2101.211178] mwifiex_sdio mmc2:0001:1: info: MWIFIEX VERSION: mwifiex 1.0 (14.75.33.p119)
-... 
-> Afterwards, a bisect was
-> performed which first indicated the commit 808bbebcc8fc ("mwifiex: add
-> Tx status support for EAPOL packets") introduced in the v3.18-v3.19
-> cycle.
+On Sun, Oct 26, 2025 at 07:20:41PM +0100, Karel Balej wrote:
+> Add a node for the phone's WiFi serviced by the Marvell SD8777 chip a
+> communication with which happens over the SDIO. Also enable a regulator
+> without which it is not possible to connect to networks although they
+> are discovered properly.
 > 
-> Reverting this commit (and the following one, commit 18ca43823f3c
-> ("mwifiex: add Tx status support for ACTION frames"), to facilitate a
-> clean revert) fixed the timeouts for v3.19, but during the next cycle,
-> v3.19-v4.0, another breakage was introduced via commit 84b313b35f81
-> ("mwifiex: make tx packet 64 byte DMA aligned").
-> 
-> Reverting all three commits fixed the timeouts on the current mainline
-> kernel also. This patch contains the minimal changes needed to achieve
-> that derived from the full revert commits.
-...
-
-(Trimmed the commit message down to the breaking commits, and the
-version info)
-
-From the looks of it, you're dealing with incompatible changes made in
-the Marvell firmware API. It seems that you have a "version 14"
-firmware, and the timeline of these mwifiex changes (~2014) is approx
-when linux-firmware started seeing v15 and v16 firmware. It *might* be
-OK to try add some versioning to these structs and padding changes, and
-make a choice based on adapter->fw_release_number or
-adapter->fw_cap_info. It might be ugly and error-prone, but possible...
-
-Or if the FW versioning doesn't work out, it's possible we could
-specifically flag these quirks for SD8777 somehow.
-
 > Signed-off-by: Karel Balej <balejk@matfyz.cz>
 > ---
->  drivers/net/wireless/marvell/mwifiex/fw.h     |  4 +---
->  drivers/net/wireless/marvell/mwifiex/sta_tx.c | 10 ++--------
->  2 files changed, 3 insertions(+), 11 deletions(-)
+>  .../mmp/pxa1908-samsung-coreprimevelte.dts        | 15 +++++++++++++++
+>  1 file changed, 15 insertions(+)
 > 
-> diff --git a/drivers/net/wireless/marvell/mwifiex/fw.h b/drivers/net/wireless/marvell/mwifiex/fw.h
-> index e9e896606912..5c4c3363c7de 100644
-> --- a/drivers/net/wireless/marvell/mwifiex/fw.h
-> +++ b/drivers/net/wireless/marvell/mwifiex/fw.h
-> @@ -690,9 +690,7 @@ struct txpd {
->  	u8 priority;
->  	u8 flags;
->  	u8 pkt_delay_2ms;
-> -	u8 reserved1[2];
-> -	u8 tx_token_id;
-> -	u8 reserved[2];
-> +	u8 reserved1;
-
-I'm inferring that 'sizeof(struct txpd)' (also spelled
-'sizeof(*local_tx_pd)' below) is relevant, and that this struct probably
-should retain the smaller size for FW version 14.
-
-Maybe you need a new 'struct txpd_v14' layout, and embed that inside
-'struct txpd'.
-
->  } __packed;
->  
->  struct rxpd {
-> diff --git a/drivers/net/wireless/marvell/mwifiex/sta_tx.c b/drivers/net/wireless/marvell/mwifiex/sta_tx.c
-> index 9d0ef04ebe02..857eb22f4c24 100644
-> --- a/drivers/net/wireless/marvell/mwifiex/sta_tx.c
-> +++ b/drivers/net/wireless/marvell/mwifiex/sta_tx.c
-> @@ -41,8 +41,8 @@ void mwifiex_process_sta_txpd(struct mwifiex_private *priv,
->  
->  	pkt_type = mwifiex_is_skb_mgmt_frame(skb) ? PKT_TYPE_MGMT : 0;
->  
-> -	pad = ((uintptr_t)skb->data - (sizeof(*local_tx_pd) + hroom)) &
-> -	       (MWIFIEX_DMA_ALIGN_SZ - 1);
-> +	pad = (4 - (((void *)skb->data - NULL) & 0x3)) % 4;
-
-It's not clear to me whether your v14 FW doesn't like the 64-byte
-alignment, or if it didn't like the new txpd header size/layout, or
-both. But obviously this line won't fly, with magic numbers and all. It
-will need to be expressed in terms of macros (MWIFIEX_DMA_ALIGN_SZ, or a
-"V14" version of that; and sizeof(...)).
-
+> diff --git a/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts b/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts
+> index b2ce5edd9c6a..36d6ae4e902e 100644
+> --- a/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts
+> +++ b/arch/arm64/boot/dts/marvell/mmp/pxa1908-samsung-coreprimevelte.dts
+> @@ -475,6 +475,14 @@ ldo14: ldo14 {
+>  				regulator-min-microvolt = <1200000>;
+>  				regulator-max-microvolt = <3300000>;
+>  			};
 > +
->  	skb_push(skb, sizeof(*local_tx_pd) + pad);
->  
->  	local_tx_pd = (struct txpd *) skb->data;
-> @@ -58,12 +58,6 @@ void mwifiex_process_sta_txpd(struct mwifiex_private *priv,
->  	local_tx_pd->pkt_delay_2ms =
->  				mwifiex_wmm_compute_drv_pkt_delay(priv, skb);
->  
-> -	if (tx_info->flags & MWIFIEX_BUF_FLAG_EAPOL_TX_STATUS ||
-> -	    tx_info->flags & MWIFIEX_BUF_FLAG_ACTION_TX_STATUS) {
-> -		local_tx_pd->tx_token_id = tx_info->ack_frame_id;
-> -		local_tx_pd->flags |= MWIFIEX_TXPD_FLAGS_REQ_TX_STATUS;
-> -	}
+> +			/*
+> +			 * Needs to be enabled in order for the WiFi to be able
+> +			 * to connect to networks.
+> +			 */
+> +			ldo15 {
+> +				regulator-always-on;
 
-Rather than dropping this block, would it work to also check:
+Do we have a min/max voltage for this regulator?
 
-	adapter->fw_api_ver >= MWIFIEX_FW_V15
+> +			};
+>  		};
+>  	};
+>  };
+> @@ -523,6 +531,13 @@ &sdh1 {
+>  	pinctrl-1 = <&sdh1_fast_pins_0 &sdh1_fast_pins_1 &sdh1_pins_2>;
+>  	bus-width = <4>;
+>  	non-removable;
+> +	#address-cells = <1>;
+> +	#size-cells = <0>;
 
-?
+I wonder if this should have:
+
+	vmmc-supply = <&ldo16>;
+
+rather than regulator-always-on above.
 
 Brian
 
-> -
->  	if (local_tx_pd->priority <
->  	    ARRAY_SIZE(priv->wmm.user_pri_pkt_tx_ctrl))
->  		/*
+> +
+> +	wifi@1 {
+> +		compatible = "marvell,sd8777";
+> +		reg = <1>;
+> +	};
+>  };
+>  
+>  &pwm3 {
 > -- 
 > 2.51.1
 > 
