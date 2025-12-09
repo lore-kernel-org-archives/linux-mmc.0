@@ -1,135 +1,129 @@
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.131])
+Received: from mailout2.samsung.com (mailout2.samsung.com [203.254.224.25])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A6423101B1
-	for <linux-mmc@vger.kernel.org>; Mon,  8 Dec 2025 10:29:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.126.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8586A1E230E
+	for <linux-mmc@vger.kernel.org>; Tue,  9 Dec 2025 06:45:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.25
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765189781; cv=none; b=TpJhbEjOaYvBnc/jUzbzxnRvmgzpg9pTU8k3XTxPrB3Nw7k7FfIRMHEYcRET2w7e98g7z0noF9B7davDV5SX9VViTsXcHysxAmRU7ub9dW5z0np96xV86h3bPHQZhd3xIp3vXiwW0afIT+txqB4Kzp7+lQSbqQGtx/njWQ7eeoA=
+	t=1765262736; cv=none; b=kA6KgYySqYS/n352Uu6EUx/4NBEcmCsepoIOa9l8Dnte4fLgXOSNBU5Uhf/Lga5ALr3tDu/r4xoOfwZVVWQf/V3f9bSPQlnSQ+9wVEgJq031Ok4aVcQ9sg0ERzhMX3XkQpPS6wCQK5ztITdtP04SD4Y4O+cGGBoHNaOEGSjgyX4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765189781; c=relaxed/simple;
-	bh=HK/yqkkTFmBLZmw2X6xV0iKMer+hVC1rCZ6BasOG4k0=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:Content-Type; b=brGOTyfSb4J1djRLKjVDUdnQREnjwxHNe6VM6rScd88RxmIIKFGe7Jekcyifop2K9oYzMrMbL6myFP/MedajIpTSUUmGXH7HQvBFGDPCK0mEHQ2G7cVfOBZFVfjpBj72GIoY8yPmRIG0A03gHmuboA70xxNu9E05ycaB+OXW7ek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=semex-engcon.com; spf=pass smtp.mailfrom=semex-engcon.com; dkim=pass (2048-bit key) header.d=semex-engcon.com header.i=u.mohr@semex-engcon.com header.b=rzMoBJGi; arc=none smtp.client-ip=212.227.126.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=semex-engcon.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=semex-engcon.com
+	s=arc-20240116; t=1765262736; c=relaxed/simple;
+	bh=tM/RH8emnj0dajYwnro6pKWfSY2epz4U0SfN5wy5xzI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type:
+	 References; b=hCxK/KOPJADjmR2XYTcWhId4JRO30dUPOiCNujsDXaA1d3yuA0Q74suOn8XrsNxinmbG1D+FWR8ixQ8MxzOrvUSzROaiaOeECulCsxkN13ZSlM/2Vkfrv+xuJ5msTcJvgNsRpfpfgCKsTcVbCeufTHjk69vTZmf6ABUusIOsIGI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=N5hQTAGZ; arc=none smtp.client-ip=203.254.224.25
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=semex-engcon.com header.i=u.mohr@semex-engcon.com header.b="rzMoBJGi"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=semex-engcon.com;
-	s=s1-ionos; t=1765189766; x=1765794566; i=u.mohr@semex-engcon.com;
-	bh=HK/yqkkTFmBLZmw2X6xV0iKMer+hVC1rCZ6BasOG4k0=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:From:Subject:To:
-	 Cc:Content-Type:Content-Transfer-Encoding:cc:
-	 content-transfer-encoding:content-type:date:from:message-id:
-	 mime-version:reply-to:subject:to;
-	b=rzMoBJGiCa2ZOqMSvm1Ia8P1GGRcVJo/n0GfmRsHHuYlJitFNElDg11jeb6k1u9H
-	 fj2o9JxR0QwjmxMnuQLKwe2KTVg4QwFhJzg0r5oyu8VCFEsitpVZcC27rth8SF6UH
-	 5Hk3Ttbf2MwodO3Y4OFn3cjrMnJOAf35ttEz0PAYIH1IMmRMz1uE5xFreEUc9vVgH
-	 CSdievXDktBYfQEahzuGMyAYPQOlDZs1Md2r7GX8o49FBQvb2B/SxFCStDvmfqRET
-	 7vf8AYiV8RGza/N3rqhvGmlBbt1BEPsZl8wf7U2Yda+JZ8tykBTMYmSGH1E6s1Yn4
-	 8TYP7bcBNYZiC1VHfw==
-X-UI-Sender-Class: 55c96926-9e95-11ee-ae09-1f7a4046a0f6
-Received: from [192.168.178.71] ([89.246.161.248]) by mrelayeu.kundenserver.de
- (mreue012 [212.227.15.167]) with ESMTPSA (Nemesis) id
- 1Mf3yk-1vysNb3maw-00fsFx; Mon, 08 Dec 2025 11:29:25 +0100
-Message-ID: <b74be2f7-e199-4b56-9094-8a093b07ac7f@semex-engcon.com>
-Date: Mon, 8 Dec 2025 11:29:16 +0100
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="N5hQTAGZ"
+Received: from epcas5p3.samsung.com (unknown [182.195.41.41])
+	by mailout2.samsung.com (KnoxPortal) with ESMTP id 20251209064525epoutp028448d69dfc82dbbeaa30626a4a6bad23~-eRiomowi2518825188epoutp02m
+	for <linux-mmc@vger.kernel.org>; Tue,  9 Dec 2025 06:45:25 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20251209064525epoutp028448d69dfc82dbbeaa30626a4a6bad23~-eRiomowi2518825188epoutp02m
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1765262725;
+	bh=l/Jpun7L3VLWtKz82wS32V7DfXju3x6UHL4G4YwT6Ns=;
+	h=From:To:Cc:Subject:Date:References:From;
+	b=N5hQTAGZfNAXo4GRPXYHWMgRTladYZ0dubciXIRIz6fAuQ3i330Ol7FVBjSegL/uT
+	 LMkXqbfM7Hf/GopCxZfIG26rZg0fwPVid4faU8U63EnsQOBPr/v86mIg3YO+iWc12v
+	 SWBTx2c6Jwk44WcqrXU0aDkogLUucW5xvUhgYKqo=
+Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
+	epcas5p2.samsung.com (KnoxPortal) with ESMTPS id
+	20251209064525epcas5p28fb2c7767e270819fda9ff45e563fecf~-eRiUQKYY2302023020epcas5p2G;
+	Tue,  9 Dec 2025 06:45:25 +0000 (GMT)
+Received: from epcas5p4.samsung.com (unknown [182.195.41.42]) by
+	epsnrtp01.localdomain (Postfix) with ESMTP id 4dQTr52pylz6B9mN; Tue,  9 Dec
+	2025 06:45:25 +0000 (GMT)
+Received: from epsmtip2.samsung.com (unknown [182.195.34.31]) by
+	epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
+	20251209064525epcas5p4904259a2a7fb971c077bfa03acce8c79~-eRiBIZca0090200902epcas5p4X;
+	Tue,  9 Dec 2025 06:45:25 +0000 (GMT)
+Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip2.samsung.com
+	(KnoxPortal) with ESMTPA id
+	20251209064524epsmtip2a60793463a9eb5979a8250de4d37b5de~-eRhpGZcu0987609876epsmtip2J;
+	Tue,  9 Dec 2025 06:45:24 +0000 (GMT)
+From: "ping.gao" <ping.gao@samsung.com>
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: "ping.gao" <ping.gao@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: Use pre_request & post_request_end helper
+Date: Tue,  9 Dec 2025 14:49:10 +0800
+Message-ID: <20251209064910.3643039-1-ping.gao@samsung.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Ulrich Mohr <u.mohr@semex-engcon.com>
-Subject: atmel-mci: slot number vs SDIO function ID
-To: linux-mmc@vger.kernel.org
-Cc: Aubin Constans <aubin.constans@microchip.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:nqO+Yo2s7TGnhJwUzQG9FglkliQ2Cr1dAb2yc8uhEyAefECkynD
- YvOr/qwnvX6vmu5Vrn3bXLo8FrSIz+ckiJl6ulmAYROZXETO7nXTvDIaLx2OBjo8jAAoxau
- mPJAwMUNrcVzi4BM5JZv0FkXXSRpPthrP92dIgllUZPSMhZxSf1y3G45PB/Pi26VYYjS5KK
- 5S1HxvoX3GXpWmGCrw2hA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:jknU6gtERUs=;zHadWvm4XQJGDoPOGYgntjRdq+I
- 522ndoZ9ic/aWQ2NoFpfy9MFJvJVG1Z3AX0UxUPXI2s7I2/yM7POBfyjIVP08qyXzsalfgWi5
- eboKHukLCmIx++RSQiwb1mKkVixWXrxeBQSktrmXyKHRvcsBEoLrmBg3BE3h/pT2Ovqlkzd/9
- jeNudTuq4nS18lQVjlA0s0cLvBPqNXZq8McuE2EXfTxXNUlLZn0k1+idt257CrKiLTe0JYxi6
- gi3tyxzN/MzpwN2+rPn7JLWiJ1mIh0sStQsQ78f9IVoq+LFemtngvIxo71KXyYdnNpu/vCIOg
- NMPIZaQ2H6QQtUCypH60CyoHW7Eey4Y2vyCawLrT7u2BLfUJ02XJxAqxDeB8IcgHvSHxvQJw7
- dOp/21GgPZ009VUKRus7hlO+VFoGkhvcj5Gd3y0Zo6o5wQf/+3Z106r5PCFGXdXwNIipFYTnT
- L/hOdr7/RudU36iqZu7g5jhniWNGvnZnONxa3t59h1BbnRMOQWyQP7hqhioS528t8D5SxU58o
- uG6vP7SxkdlgA6qE9dw7zTD+aHALu8OB3LFmBLV9uLMjqkolwzDD45HhHl2L40DTGqqUYVET2
- 0NaHm5CdbP+tGjXIIHpnpo1vNJTmaWoLEOEhYlhoczjGPOh+vAWYvrczahBAXEvrSKdPJUL5s
- XtCKoF8Ar8bqqBcrY7oLjNwWgEU1oHjGS8XfwIINGeZMbkmwO+JZ9U0M42cozlY/nf2CFk1pY
- v/wxXxl1dTzx92WXk+DprFXUj2proAmtKrGEKVDAh9H53XF/11nGRBN2mGFcY30kcKPyPA9kJ
- blibVMuAgqkzcb56PvkdOyWGIiYFOi+WS+RMnkuaRBLi5qH92fNq0TFnZNVZMvT//Sh+Z9tpG
- Tq7L06lbjDkrUYggT0INDdeCFH4hn/D/Q1CzRfPOI4axtuPvBMD2qUhizk4f5WSdjtcr9fV3d
- Dhzr6/wZ2pjqv6Z+ag6JQPbuIzIqYeBB9KXm9IHcZnZqPfCwFGKn6dWd16hehteoUEKcRmUQf
- LGuc9KcBccPAPguu9CcON/G2GetvMLqeqyu7EUY+s53o/nR1Ba4GaAO7bAUS0DUZzticOOdPQ
- 4qfTEkr2Fjrdm25oskjwKGjP7ziLZg+hTdPRn3vJcDZ3A+rk1G+ME2c0+q6BurhWWEL0d+iE7
- gyEQl1yWRy5eOe+0ylR0SeCzHdb7MvZXNWVVcfR+x3cuPLUi34mWuVYUGCa+0fDRNb2V298DD
- ssTwL7eR7QG4mA8kmCTgYHMS9uIcFOmpn8ZfaVbnVnuWjjTgx7CLCc5rL+qws2T8kZZF8yAGz
- s1cLovnJGgY0OgmME3JwaLOdKf0SoVjb8lGYOGhie6CHMGp7b0QRRpe442bfK+7z+RZaruqEX
- J2kdZBwK5zjRM0p4oLs1OBCT17rV6hn3jDWECuU51SiNXsQGCxBXDiXmn4PyWhdPr6millbfI
- E7E/95WbXblfuMGVccybFarYgC3RxG9WfUwB2shrnB/EJELRL3vPcub9zSvazZGIdO3e3JlLM
- lbS3+GCdnqJE5orOYHNJjLQ4nXz7YanVcXyS45dMRG2aHEnaqzAq0DeEBlmJwps/Ysy2agVp7
- rrcY/fJW/vfBJnqSGeHuoLfmL0mxlOLRQ75UN3yjIBjSIZG5s/KeJcy6zL5khjKyOsnGnfnGe
- jkYNm+pgRE74nq7RORuMr95P5ihCZEBpF4ri/It7mvdkr9tqGNtJZXVI/1ph43QfJcQ5OkxT+
- 1XyA2Bb63wj+5pCJxNfJmZ8d6N1vKFOHbe8kk4XujaQ8ZShVDXToMwS5tCr5Ef8sifUTNrAbO
- 6r5S
+Content-Transfer-Encoding: 8bit
+X-CMS-MailID: 20251209064525epcas5p4904259a2a7fb971c077bfa03acce8c79
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 105P
+X-CMS-RootMailID: 20251209064525epcas5p4904259a2a7fb971c077bfa03acce8c79
+References: <CGME20251209064525epcas5p4904259a2a7fb971c077bfa03acce8c79@epcas5p4.samsung.com>
 
-Hello,
+Use vendor drv function to let other vendor can add some vendor function
+before and after request
 
-I encounter problems using a specific SDIO card with the atmel-mci=20
-driver. As far as I understand, the reason for this problem is a=20
-colliding usage of the 'reg' property in the SDIO and the atmel-mci=20
-implementation.
+Signed-off-by: ping.gao <ping.gao@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 7 ++++++-
+ drivers/mmc/host/dw_mmc.h | 2 ++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
-In detail:
-
-This is a custom hardware board, based on a SAMA5D36 processor, where=20
-the SDIO card is attached to MMC2. The SDIO card is a silabs wf200 wifi=20
-transceiver.
-
-This driver need a device tree node as child to the mmc device tree node=
-=20
-to work, as documented in=20
-Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml, and this=
-=20
-device tree request the 'reg' property set to 1 to indicate that we want=
-=20
-this device tree node to match SDIO function 1. Such usage of the 'reg'=20
-property to select the SDIO function is documented in=20
-Documentation/devicetree/bindings/mmc/mmc-controller.yaml.
-On the other hand, the documentation of the atmel-mci controller claims=20
-that the 'reg' property selects the MMC slot to be used, as documented=20
-in Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
-
-These two definitions collide and prevent the driver of the wifi card to=
-=20
-work with the atmel mci controller: If I set the 'reg' value to 1, the=20
-generic SDIO implementation matches the device tree properly, but the=20
-card does not come up because it is on slot 0 and the atmel-mmc=20
-implemention uses slot 1 instead because of his interpretation of the=20
-'reg' value. If I set the 'reg' value to 0, then the card is properly=20
-detected, but the device tree node does not match and therefore the wfx=20
-driver probe fails.
-
-Since the multi-slot support in the atmel-mci is marked 'experimental'=20
-(for years...), I guess that this implementation should be changed to=20
-correspond to the definition of the 'reg' property as described=20
-in=C2=A0Documentation/devicetree/bindings/mmc/mmc-controller.yaml?
-
-I did a patch that solved my problem, by adding another device tree=20
-property 'slot' to the atmel-mci driver and use that new property=20
-instead of the 'reg' property to identify the slot. But I am unsure that=
-=20
-this is the right way.
-
-I observed this on linux kernel version 6.6.118, but there seems to be=20
-no changes handling that topic since then.
-
-Best regards, Ulrich Mohr
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c5db92bbb094..5f1353b7f8d6 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1416,6 +1416,7 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci *host = slot->host;
++	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 
+ 	WARN_ON(slot->mrq);
+ 
+@@ -1430,7 +1431,8 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		mmc_request_done(mmc, mrq);
+ 		return;
+ 	}
+-
++	if (drv_data && drv_data->pre_request)
++		drv_data->pre_request(host);
+ 	spin_lock_bh(&host->lock);
+ 
+ 	dw_mci_queue_request(host, slot, mrq);
+@@ -1897,6 +1899,7 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+ {
+ 	struct dw_mci_slot *slot;
+ 	struct mmc_host	*prev_mmc = host->slot->mmc;
++	const struct dw_mci_drv_data *drv_data = host->drv_dat
+ 
+ 	WARN_ON(host->cmd || host->data);
+ 
+@@ -1921,6 +1924,8 @@ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+ 
+ 	spin_unlock(&host->lock);
+ 	mmc_request_done(prev_mmc, mrq);
++	if (drv_data && drv_data->post_request_end)
++		drv_data->post_request_end(host);
+ 	spin_lock(&host->lock);
+ }
+ 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 648b4a5641bf..6c258e0865e7 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -618,5 +618,7 @@ struct dw_mci_drv_data {
+ 					  unsigned int timeout_ns);
+ 	u32		(*get_drto_clks)(struct dw_mci *host);
+ 	void		(*hw_reset)(struct dw_mci *host);
++	void		(*pre_request)(struct dw_mci *host);
++	void		(*post_request_end)(struct dw_mci *host);
+ };
+ #endif /* _DW_MMC_H_ */
+-- 
+2.50.1
 
