@@ -1,279 +1,162 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 096802D2384
-	for <linux-mmc@vger.kernel.org>; Tue,  9 Dec 2025 15:09:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 469812D73A6;
+	Tue,  9 Dec 2025 18:06:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765292978; cv=none; b=NgcxFvz8vKP/uJN0Rm8t+Rtxk96uQAq2m7GuC9jbuh7OFonVUByvEZPwb5SFL5hJrgLrP3H4Ih67H8k1cjSrmiDZO3Yoj6VrswfWgxZMGcOuOMSW/0stf6Sn6+ZyDoZEPLSaHVLsSuEZep9mVoGNlbjxHUiFKycBCVs0Joss4Jo=
+	t=1765303567; cv=none; b=blpObFL3oWI7BX0U1DPLkkLS2eRuvQ8A2BnKRUiu9abDAidWe39972n7De4T49brCU+tOkuV+wjGG+dS5C9j9/CxiS0HGJ9b1LGo99RWwWl+yZXKfFV5+EhaOMCt0BAHTLXU/3UsOmsMR6swbEQQuFvD//3NiUiKUg0jdlDUziw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765292978; c=relaxed/simple;
-	bh=1qHxKu0EvYbPN3yD5HxFWrzUzKG/VT7vU9nG/tmJgg4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UtVOsjt+DrwLDQyRpeDMvb4Lbp26/lFdPanHtpZRm0TdQk5Rr3z6jFseiKlHSFRlWY+kVBqE1OsFiXqU9AxvVAwIWPK+pGa6FVwnX4BeINE5JNo+BYs1qreMR3Utz/BDpxKMTPoEMNzs/ug4tTmZSJuIUsGZ8wABM32jJAiuFpI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WoV8Ly2N; arc=none smtp.client-ip=209.85.128.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1765303567; c=relaxed/simple;
+	bh=BIhbpujaBd/Ey0BGuUIoScMltJUr17Od4WaWo0SEAsg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=SPF0zbV/0sq9+YjulYnuQ5rmMeVrtfaOsd6bOzVEkS44BRiWj1h4sSP/KhnAA/1HG3Y0tcLw4LOzUVy2afpKEmWK9xUaFboVKJpY3UqLR6KTaxD+myyKmNh3Yrl32HQpy1QA7IlhHsK75tHkPC0oHjX3C3kIdKj5d0fCd/y0Z74=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=SEccFJHr; arc=none smtp.client-ip=192.198.163.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WoV8Ly2N"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-78c64370309so3474727b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Dec 2025 07:09:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765292976; x=1765897776; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=mVlvWluulxEv0GJ4cexIdlNFHd7uwHf9iig/rmN9aZ0=;
-        b=WoV8Ly2Npm21hszD7sgNNpAlyWuu+XtO902f01isQmixTByO8dLAng7YSafHDIBVdQ
-         j/IMRuge92wC5xINJqz8OOJZlgBV3koSZlzBcDTyUKfss4e4GFR+nGHunpcwFqbHekit
-         ie7rWj+EWrlj877VB0sfVvaKpgtOR7Jdsm+hQ40/2L1NcO7IZT4l1pGxbjdVI/fKRWvz
-         2OziCbJyASg3bZRiJN5CqcYih9A488c5KdC2cZ2UXET9MqGhGGpCFUkoR5CezHwB7o+U
-         cN98MCgqzi2oAOBBaEmi2sdS5LXK/HRwPvc7r5MRdP8+8s0+2dS0Hdrwpi2JpIsuv5ff
-         /yZw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765292976; x=1765897776;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=mVlvWluulxEv0GJ4cexIdlNFHd7uwHf9iig/rmN9aZ0=;
-        b=iu9EOKFcjIuQJnScSWH73yakiKkB9Juu+7oFDN8KeDsy9/JDgPRogCpUe/r1vB9cE0
-         Xs00npUWHpK6lLgtsGS+ZnYCpWS48xTuckzbCRAcXdwljWyoKRR+tzd0yaxTcNGdR3kk
-         taKtzN3lrb1prYbivrTM8vq9s46Ak1RGNRi44hotlTRb01BQes9XxZkJt2ZdcWnqFJeo
-         A87uzVhcetL6Ob8XuLDW5w5ZI2eCI1tEXg0UcBfhp9vkmgtuwwszNK0SBUE9i1GEiyse
-         74zHhMyKt053TtHLyJ+wQmtg3B6fZDYGatV+X/hwGtGRbdeDeMOFcIuQnsSMUgOHCssf
-         bfKA==
-X-Gm-Message-State: AOJu0Yws9PEY3aCivNUP/EqgkeZhAn/fz5qox9pQ+ZDyTY1k885blK2T
-	VM9nA8drp1i0nn/lW71XZBE3ZgZ6/9+UQOas0SN9lxAGJtKitDpAE9vz2DjtLu7+htnOgQ/fheL
-	BFr7ZJr1ovUkMfvzTbPb13D2ofFleIk54TVj6jKHTOCzn4DB19euXEpg=
-X-Gm-Gg: AY/fxX7ZZP4BMgyTzE/XiHEHF/Z2aaFGd5gP/Hm1NIRCAQ98OLnO8HywvUGp5LdJS9R
-	V6+Q9JICyw6p75PnMJtQTDTMYSD3BSESHzb0Jj3P+01cu2+3WpAc1J7gQhRGPJa7DpOEVZocn05
-	Q/7S0uI9IdcgQHih6vdnlNIVDtD7SVNpEjbYtxkgiKp+6zhyYjtZtkwXnZo818b21P7D/9NxCUK
-	pxtmlLbH+WRJXEi6F/JqdxtfxXGweDahAt7oliNetTbQUfXOQUKtnljKFRJlf8dziJDIigc
-X-Google-Smtp-Source: AGHT+IGH/7+0FlBskiNov2GF1FDi2N2LW3NOQlX5YRdyAahow+RMrAM18YCrk9YTyIBFeo6FacVK1SixgxvHQ0qnwLA=
-X-Received: by 2002:a05:690c:4985:b0:787:f793:b573 with SMTP id
- 00721157ae682-78c33b75270mr110455427b3.29.1765292975749; Tue, 09 Dec 2025
- 07:09:35 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="SEccFJHr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1765303562; x=1796839562;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=BIhbpujaBd/Ey0BGuUIoScMltJUr17Od4WaWo0SEAsg=;
+  b=SEccFJHrsvIcmvyxLcBc2qRxu1/rT/Ikw55K1IIZqRLnk698JiaEJFqo
+   7Uyh/PvewduWNRX4b4CUiVTr5X/ktX61Nwj31IATGgcMrprrJ1F16ahnM
+   NxD0AJI+XZO6JNT1jgXndKNV65cz+VsX/fQxScef1V+KaWLedzc3ejVAs
+   CFdssYUI1ANjvVchSIgTxtWxFFGR2inxQUft6tP8+LXwvTgqoThsLiZUd
+   puXOS5DLYRI3IfriV/t9ISMqn7lR2ECApZzBiXX8s1dtL/dWAkfTxZZ83
+   WkbPmV9d10hXga+OomJ0Qd6gSuPg3HAsGayyTnTyGuTw8b63VFcwAr/mn
+   g==;
+X-CSE-ConnectionGUID: dPn3ECe3TDaMpo3C3s32+g==
+X-CSE-MsgGUID: U9ZbZnBRTomiKwQ0dU85kg==
+X-IronPort-AV: E=McAfee;i="6800,10657,11637"; a="77884485"
+X-IronPort-AV: E=Sophos;i="6.20,262,1758610800"; 
+   d="scan'208";a="77884485"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2025 10:06:02 -0800
+X-CSE-ConnectionGUID: LRL7bE/YQkS1C+nZL/74rg==
+X-CSE-MsgGUID: jsYyQLA4Q8ahdsYXczW1TQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.20,262,1758610800"; 
+   d="scan'208";a="226955192"
+Received: from lkp-server01.sh.intel.com (HELO d335e3c6db51) ([10.239.97.150])
+  by orviesa002.jf.intel.com with ESMTP; 09 Dec 2025 10:06:00 -0800
+Received: from kbuild by d335e3c6db51 with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1vT261-0000000028D-1diS;
+	Tue, 09 Dec 2025 18:05:57 +0000
+Date: Wed, 10 Dec 2025 02:05:06 +0800
+From: kernel test robot <lkp@intel.com>
+To: "ping.gao" <ping.gao@samsung.com>, jh80.chung@samsung.com,
+	ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: oe-kbuild-all@lists.linux.dev, "ping.gao" <ping.gao@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Use pre_request & post_request_end helper
+Message-ID: <202512100130.DkmKHepR-lkp@intel.com>
+References: <20251209064910.3643039-1-ping.gao@samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <a242799a-d427-48e1-85ef-923f34df843a@gmail.com>
-In-Reply-To: <a242799a-d427-48e1-85ef-923f34df843a@gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 9 Dec 2025 16:08:59 +0100
-X-Gm-Features: AQt7F2omrK-qtMppcOtTeej_35kNUiF-Gbu3uLG-dCK8kagg3cnTM1C6f33079c
-Message-ID: <CAPDyKFq55Vqfd7cMdmQZBzvS1Xr-Z4QaTzEeuWWn3EX4HBbP3A@mail.gmail.com>
-Subject: Re: rtsx_pci_sdmmc aborts suspend when /sys/power/wakeup_count is enabled
-To: Tabby Kitten <nyanpasu256@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251209064910.3643039-1-ping.gao@samsung.com>
 
-Hi,
+Hi ping.gao,
 
-On Wed, 26 Nov 2025 at 10:08, Tabby Kitten <nyanpasu256@gmail.com> wrote:
->
-> On a PC with a Realtek PCI Express SD reader, when you sleep with
-> `wakeup_count` active (eg. sleeping from KDE's lock screen), the MMC
-> driver wakes up the system and aborts suspend.
+kernel test robot noticed the following build errors:
 
-Okay, that's clearly a problem that needs to be fixed!
+[auto build test ERROR on linus/master]
+[also build test ERROR on ulf-hansson-mmc-mirror/next v6.18 next-20251209]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
->
-> I've found a sleep failure bug in the rtsx_pci and mmc_core drivers.
-> After userspace writes a number to `/sys/power/wakeup_count` (eg. KDE
-> Plasma does it to distinguish user wakes from timers and Wake-on-LAN),
-> if it attempts a mem suspend it will be aborted when
-> rtsx_pci_runtime_resume() -> mmc_detect_change() emits a
-> pm_wakeup_ws_event(). This breaks sleep on some hardware and desktop
-> environments.
->
-> The detailed description:
-> The recently released Plasma 6.5.0 writes to `/sys/power/wakeup_count`
-> before sleeping. On my computer this caused the sleep attempt to fail
-> with dmesg error "PM: Some devices failed to suspend, or early wake
-> event detected". I got this error on both Arch Linux and Fedora, and
-> replicated it on Fedora with the mainline kernel COPR. KDE is tracking
-> this error at https://bugs.kde.org/show_bug.cgi?id=3D510992, and have
-> disabled writing to wakeup_count on Plasma 6.5.3 to work around this
-> issue.
->
-> I've written a standalone shell script to reproduce this sleep failure
-> (save as badsleep.sh):
->
-> #!/bin/bash
-> read wakeup_count < /sys/power/wakeup_count
-> if [[ $? -ne 0 ]]; then
->     e=3D$?
->     echo "Failed to open wakeup_count, suspend maybe already in progress"
->     exit $e
-> fi
-> echo $wakeup_count > /sys/power/wakeup_count
-> if [[ $? -ne 0 ]]; then
->     e=3D$?
->     echo "Failed to write wakeup_count, wakeup_count may have changed in =
-between"
->     exit $e
-> fi
-> echo mem > /sys/power/state
->
-> Running `sudo ./badsleep.sh` reproduces failed sleeps on my computer.
-> (sudo is needed to write to `/sys/power/wakeup_count` on Fedora.)
->
-> * If I run the script unaltered, the screen turns off and on, and the
->   terminal outputs
->   `./badsleep.sh: line 14: echo: write error: Device or resource busy`
->   indicating the mem sleep failed.
->
-> * If I edit the script and comment out `echo $wakeup_count >
->   /sys/power/wakeup_count`, the sleep succeeds, and waking the computer
->   skips the lock screen and resumes where I left off.
->
-> * If I run `sudo rmmod rtsx_pci_sdmmc` to disable the faulty module, the
->   sleep succeeds, and waking the computer skips the lock screen and
->   resumes where I left off.
->
-> I think this problem happens in general when a driver spawns a wakeup
-> event from its suspend callback. On my system, the driver in question
-> lies in the MMC subsystem.
->
-> ## Code debugging
->
-> If I run `echo 1 > /sys/power/pm_debug_messages` to enable verbose
-> logging, then attempt a failed sleep, I see output:
->
->     PM: Wakeup pending, aborting suspend
->     PM: active wakeup source: mmc0
->     PM: suspend of devices aborted after 151.615 msecs
->     PM: start suspend of devices aborted after 169.797 msecs
->     PM: Some devices failed to suspend, or early wake event detected
->
-> The "Wakeup pending, aborting suspend" message comes from function
-> `pm_wakeup_pending()`. This function checks if event checks are enabled,
-> and if some counters have changed aborts suspend and calls
-> `pm_print_active_wakeup_sources()`, which prints `wakeup_sources`.
-> Tracing the code that modifies `wakeup_sources`, I found that
-> `pm_wakeup_ws_event()` would activate an event and
-> `wakeup_source_register() =E2=86=92 wakeup_source_add()` would add a new =
-one.
+url:    https://github.com/intel-lab-lkp/linux/commits/ping-gao/mmc-dw_mmc-Use-pre_request-post_request_end-helper/20251209-144626
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20251209064910.3643039-1-ping.gao%40samsung.com
+patch subject: [PATCH] mmc: dw_mmc: Use pre_request & post_request_end helper
+config: csky-randconfig-002-20251209 (https://download.01.org/0day-ci/archive/20251210/202512100130.DkmKHepR-lkp@intel.com/config)
+compiler: csky-linux-gcc (GCC) 15.1.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20251210/202512100130.DkmKHepR-lkp@intel.com/reproduce)
 
-Thanks for all the details!
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202512100130.DkmKHepR-lkp@intel.com/
 
->
-> To find who changed wakeup events, I used my stacksnoop fork at
-> https://github.com/nyanpasu64/bcc/blob/local/examples/tracing/stacksnoop
-> .py to trace a failed suspend:
->
-> nyanpasu64@ryzen ~/code/bcc (local)> sudo ./examples/tracing/stacksnoop.p=
-y pm_wakeup_ws_event wakeup_source_register
-> TIME(s)            FUNCTION
-> 7.254676819:
-> 0: ret_from_fork_asm [kernel]
-> 1: ret_from_fork [kernel]
-> 2: kthread [kernel]
-> 3: worker_thread [kernel]
-> 4: process_one_work [kernel]
-> 5: async_run_entry_fn [kernel]
-> 6: async_suspend [kernel]
-> 7: device_suspend [kernel]
-> 8: dpm_run_callback [kernel]
-> 9: mmc_bus_suspend [mmc_core]
-> 10: mmc_blk_suspend [mmc_block]
-> 11: mmc_queue_suspend [mmc_block]
-> 12: __mmc_claim_host [mmc_core]
-> 13: __pm_runtime_resume [kernel]
-> 14: rpm_resume [kernel]
-> 15: rpm_resume [kernel]
-> 16: rpm_callback [kernel]
-> 17: __rpm_callback [kernel]
-> 18: rtsx_pci_runtime_resume [rtsx_pci]
-> 19: mmc_detect_change [mmc_core]
-> 20: pm_wakeup_ws_event [kernel]
->
-> On a previous kernel, lines 9-12 were replaced by a single call to
-> `pci_pm_suspend`. I've posted my detailed debugging on the older kernel
-> at https://bugs.kde.org/show_bug.cgi?id=3D510992#c26. There I found that
-> `pci_pm_suspend()` wakes PCI(e) devices before sending them into a full
-> sleep state, but in the process, `_mmc_detect_change()` will "Prevent
-> system sleep for 5s to allow user space to consume the\n corresponding
-> uevent"... which interrupts a system sleep in progress.
->
-> On my current kernel, the same logic applies, but reading the source I
-> can't tell where `__mmc_claim_host()` is actually calling
-> `__pm_runtime_resume()`. Nonetheless the problem remains that
-> `rpm_resume()` is called during system suspend, `mmc_detect_change()`
-> wakes the system when called, and this will abort system sleep when
-> `/sys/power/wakeup_count` is active.
+All errors (new ones prefixed by >>):
 
-__mmc_claim_host() will call pm_runtime_get_sync() to runtime resume
-the mmc host device.
+   drivers/mmc/host/dw_mmc.c: In function 'dw_mci_request_end':
+>> drivers/mmc/host/dw_mmc.c:1902:56: error: 'struct dw_mci' has no member named 'drv_dat'; did you mean 'drv_data'?
+    1902 |         const struct dw_mci_drv_data *drv_data = host->drv_dat
+         |                                                        ^~~~~~~
+         |                                                        drv_data
+   In file included from arch/csky/include/asm/bug.h:18,
+                    from include/linux/bug.h:5,
+                    from include/linux/random.h:6,
+                    from include/linux/nodemask.h:94,
+                    from include/linux/list_lru.h:12,
+                    from include/linux/fs/super_types.h:7,
+                    from include/linux/fs/super.h:5,
+                    from include/linux/fs.h:5,
+                    from include/linux/highmem.h:5,
+                    from include/linux/bvec.h:10,
+                    from include/linux/blk_types.h:10,
+                    from include/linux/blkdev.h:9,
+                    from drivers/mmc/host/dw_mmc.c:10:
+>> include/asm-generic/bug.h:154:29: error: expected expression before '{' token
+     154 | #define WARN_ON(condition) ({                                           \
+         |                             ^
+   drivers/mmc/host/dw_mmc.c:1904:9: note: in expansion of macro 'WARN_ON'
+    1904 |         WARN_ON(host->cmd || host->data);
+         |         ^~~~~~~
 
-The mmc host device's parent (a pci device) will then be runtime
-resumed too. That's the call to rtsx_pci_runtime_resume() we see
-above.
 
-The problem is then that rtsx_pci_runtime_resume() invokes a callback
-(->card_event())) back into the mmc host driver
-(drivers/mmc/host/rtsx_pci_sdmmc.c), which ends up calling
-mmc_detect_change() to try to detect whether a card have been
-inserted/removed.
+vim +1902 drivers/mmc/host/dw_mmc.c
 
->
-> ## Next steps
->
-> How would this problem be addressed? Off the top of my head, perhaps you
-> could not call `__pm_runtime_resume()` on a SD card reader during the
-> `device_suspend()` process, not call `pm_wakeup_ws_event()` when the SD
-> card status changes, not call  `pm_wakeup_ws_event()` *specifically*
-> when system suspend is temporarily waking up a SD card reader, or
-> disable pm_wakeup_ws_event() entirely during the suspend process (does
-> this defeat the purpose of the function?).
+  1895	
+  1896	static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+  1897		__releases(&host->lock)
+  1898		__acquires(&host->lock)
+  1899	{
+  1900		struct dw_mci_slot *slot;
+  1901		struct mmc_host	*prev_mmc = host->slot->mmc;
+> 1902		const struct dw_mci_drv_data *drv_data = host->drv_dat
+  1903	
+  1904		WARN_ON(host->cmd || host->data);
+  1905	
+  1906		host->slot->mrq = NULL;
+  1907		host->mrq = NULL;
+  1908		if (!list_empty(&host->queue)) {
+  1909			slot = list_entry(host->queue.next,
+  1910					  struct dw_mci_slot, queue_node);
+  1911			list_del(&slot->queue_node);
+  1912			dev_vdbg(host->dev, "list not empty: %s is next\n",
+  1913				 mmc_hostname(slot->mmc));
+  1914			host->state = STATE_SENDING_CMD;
+  1915			dw_mci_start_request(host, slot);
+  1916		} else {
+  1917			dev_vdbg(host->dev, "list empty\n");
+  1918	
+  1919			if (host->state == STATE_SENDING_CMD11)
+  1920				host->state = STATE_WAITING_CMD11_DONE;
+  1921			else
+  1922				host->state = STATE_IDLE;
+  1923		}
+  1924	
+  1925		spin_unlock(&host->lock);
+  1926		mmc_request_done(prev_mmc, mrq);
+  1927		if (drv_data && drv_data->post_request_end)
+  1928			drv_data->post_request_end(host);
+  1929		spin_lock(&host->lock);
+  1930	}
+  1931	
 
-Let me think a bit on what makes the best sense here. I will get back
-to you in a couple of days.
-
->
-> Are there other drivers which cause the same symptoms? I don't know. I
-> asked on the KDE bug tracker for other users to attempt a failed sleep
-> with `echo 1 > /sys/power/pm_debug_messages` active, to identify which
-> driver broke suspend in their system; so far nobody has replied with
-> logs.
->
-> Given that this bug is related to `/sys/power/wakeup_count`
-> (https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-power), I
-> was considering CCing Rafael J. Wysocki <rafael@kernel.org> and
-> linux-pm@vger.kernel.org, but have decided to only message the MMC
-> maintainers for now. If necessary we may have to forward this message
-> there to get their attention.
->
-> ----
->
-> System information:
->
-> * I have an Intel NUC8i7BEH mini PC, with CPU 8 =C3=97 Intel=C2=AE Core=
-=E2=84=A2 i7-8559U
->   CPU @ 2.70GHz.
->
->     * uname -mi prints `x86_64 unknown`.
->
-> * `lspci -nn` prints
->   "6e:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS52=
-2A PCI Express Card Reader [10ec:522a] (rev 01)".
->
-> * I am running kernel 6.18.0-0.rc7.357.vanilla.fc43.x86_64 from the Fedor=
-a COPRs
->   (https://fedoraproject.org/wiki/Kernel_Vanilla_Repositories).
->
-> * dmesg at https://gist.github.com/nyanpasu64/ab5d3d1565aafe6c1c08cbcaf07=
-4e44a#file-dmesg-2025-11-25-txt
->
-> * Fully resolved config at https://gist.github.com/nyanpasu64/ab5d3d1565a=
-afe6c1c08cbcaf074e44a#file-config-6-18-0-0-rc7-357-vanilla-fc43-x86_64,
->   source at https://download.copr.fedorainfracloud.org/results/@kernel-va=
-nilla/mainline-wo-mergew/fedora-43-x86_64/09831015-mainline-womergew-releas=
-es/kernel-6.18.0-0.rc7.357.vanilla.fc43.src.rpm
-
-Kind regards
-Uffe
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
