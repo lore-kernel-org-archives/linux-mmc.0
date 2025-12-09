@@ -1,140 +1,188 @@
-Received: from mail-yx1-f45.google.com (mail-yx1-f45.google.com [74.125.224.45])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76B0B2FC897
-	for <linux-mmc@vger.kernel.org>; Tue,  9 Dec 2025 12:09:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA0A226F443
+	for <linux-mmc@vger.kernel.org>; Tue,  9 Dec 2025 13:48:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765282165; cv=none; b=bVtQ04zYz5AGUcD2j5c6IQ1txB/nb8xiIXu4/oQgpUGgzKdBqd6d+1E1tnZ5pap1K/6LaL670FWcJFzoUS+yv+cb9P+0GF3XKgyUW0k5319OqWZy9/jDdPpuke1St1RMxuegcXoaxjFYdHoqsV0aVNv15T9i7PEqNURXrW38+oU=
+	t=1765288091; cv=none; b=mLmba+EUO8Bb83AD/7YhyyoDTp0cgv5u2c050KSlJkjX6M/Nxgn3LcdCMeMhfvB/VJxrWQDCceuE+sZRyhic57ijDaRyt0mZ2YA/HF0zvIdkA1rY+0XEbulEwvsvXtnLUhx5uJCNHWM/w32hpmaxZO4Oxioi+MbiPIwmGAm0Rek=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765282165; c=relaxed/simple;
-	bh=yCYVKKoXCSoQtguNvJbzEOrNTHKAVLyyZ77IrMgfBjA=;
+	s=arc-20240116; t=1765288091; c=relaxed/simple;
+	bh=J7R1jg7yHqWsHV4j0LSnzaT5xQsAlw72hWeQeos/AbU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QXcLyhUDCgA/cELqe9lb4ViRGk1/o9cTi71A9TnASoU/VrcDdlqyl/G+TUh5ffJASyC4Y87fdmWe6uYg7aZ/X9vFjcDPYZE1Ff8ecF40wzGYSXO+wbXVVwIefNv/qql04aLZ5hI6KsRRFjKGz2zNssEgo+fMzO9p6vgIQvv+Uo8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=L+1QO4MW; arc=none smtp.client-ip=74.125.224.45
+	 To:Cc:Content-Type; b=DCv89VlWkdbyAHlpw6wme3yXXZlHSxSwelnjG8/0VQlCg1/9Bng9BgUyma/W9vS9Iio23C9X4AiMaI7j9nmS5dcqro1AqjYHggWqLc+dCyy0ZMxYtPXC4PdfltTxm1QiDmEENCxqgmNHntnunZD+LdZTLvY7A0z3N/E8Ne5TSlE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=q0VnmOqv; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="L+1QO4MW"
-Received: by mail-yx1-f45.google.com with SMTP id 956f58d0204a3-6443bc360bdso4594164d50.0
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Dec 2025 04:09:23 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="q0VnmOqv"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-78c6277df86so4448417b3.2
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Dec 2025 05:48:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765282162; x=1765886962; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=BzmLw97ilOLn2bX7GqaP6PaM9f0k2YjRWtrW6v3bqsY=;
-        b=L+1QO4MWpFJ7MqAH/Tx93IwelJOKMdhNQec5V8gYrLCRSMp88O0gw3QhKuJSpBqqnd
-         iOX5N8QqzePnpcWr/AmS6De1R0QD+A9wKlzU3PNE9j8L+dqmeSL5VL4Y4vOD6PqZlNPQ
-         wqRedtQZl/HXRP9woakUMD8TDZvt8kTiWoXYOUvztmt9Cr48fSIedkAOnKoI3Kn6F5Jg
-         xGe0Vh1bHv9FQ1fEFJrFscXXW67hLwgZFSNKuuI2AptNVf7Fo/93Cl2nweAmT571N+lK
-         Mlaoan8fjYkrIgyl3McVIvqxx55ibGmn3g9m/+vSBR9eNUcxhIbeNTDW0vua1uwlIbDn
-         Sg5w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765282162; x=1765886962;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1765288087; x=1765892887; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=BzmLw97ilOLn2bX7GqaP6PaM9f0k2YjRWtrW6v3bqsY=;
-        b=kTzmmEL2/QJvIusofssouybzHsqucr6iUpH3Gsz2r62Pk0xmgL5JoofnZHylDsZrjP
-         SgbQe59zZ0mmrC829MSnLZAl+e8p2VNCcQXCBk3OhOUqtlm3wAjdQcS9kKRXGltBAcUO
-         fK3r6g6v75m56Q7+RSsbByyDZaP9YNwd4uTOpUBF9v5nLR82gYb6jQIW1ba++DquznPo
-         Jxk35h2XNezKsBy5bCwPzo4AgVpUw49CYuudTDg/4tgZYga1b9+zIhVp1jxJT1Zwo6Cc
-         cOk6NB6hIUuVW5N+4ibBWrPfdTeyyMRixPoqX9/kuQyT5tFt0bjn6dxrDsNfBknpf5cI
-         JB3Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXE6VKJaqwhsX2BUFoIwy2ntVcx8ONRzsjxDZ8x9efe8CpYBitZwrdH1vCzeLr93qEvLKspVbuc4aE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwsbSY1DT2fO9DQUQGIEh9mJskCGRnC6Oq6QKiXyLzay/K0NnOk
-	pVr04oma0Um177npqlkMDtfMN5UTbP/Fqi0VcxYJouGdZG4pLGnvpUhR6WUBOGcmMGXUvxHHiyy
-	cJDC+fwO3pp625WA8UF2rLyrsp7AjE0mqdu3gfX5Y5g==
-X-Gm-Gg: AY/fxX5kpirfk0r+0hG1EUX/wL2gAEB58uyXH1YOyVIRMz9tGNbKjpEEmOHOgWAHocP
-	xIZpcQvcVeVKDGR47u3BgDIsK26ipFHNrT/QN2BLt9OvybXsMBxLXcWZ6bIc3ZithBe+XPTrWaH
-	CbZJlnKaWSP/wYLq1YyI3/OvWvdmTxv0dSn+iLuSykdyzFjZWPNbasBxMa85NZCsub8ewAYfLh3
-	lrVg5F3bllt8xTvlG6InYtdUs44D29xH5e98ovpf7nQJIQJWqbOzqzOYk7SdJjEyDRvoSBh
-X-Google-Smtp-Source: AGHT+IHJMvrdiHL0dzxlye43tWxemqNsj3XKbdM5WF7g7hOQydSkyf3phIxwFJPbN9jPlEGazi0aDHDzYf+fYMSmjhQ=
-X-Received: by 2002:a05:690c:7306:b0:787:f2c3:7164 with SMTP id
- 00721157ae682-78c339d1c77mr192573057b3.0.1765282162456; Tue, 09 Dec 2025
- 04:09:22 -0800 (PST)
+        bh=PLZGxZfGPH+m9Hz1QW1ANR0vUG8mNwWWC1iVjfNrwBw=;
+        b=q0VnmOqv8qso07Erw07oGhydCfLaatmh8+vpWxIlgwI8WqXvD/R+EK1HRIRlbnoakO
+         y5gTYitaDLPX6rsUurJXj7ufLURddDjivkVeTjMNmItLXLMBmCkmrYiksATx9a2sCxQE
+         Z8MrD2uFlfaknCxzjshSiwMDegafvCHMGqBG1P4Z7NHQr6/gGUAO2lmfGmQAF6N35M0b
+         t+A8giMPzUiZ2/sqG/2IYE1O337ewqhDQANSHREHOfos10/GRoNbNStjTAq7FCAdrq9u
+         Y2m2p66BCQS0OBVirwuttkbfdSvFQyOCQdnSJFwQmtiM2DjNBUNKgb4L8d+9Py+fur/X
+         I2YA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1765288087; x=1765892887;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=PLZGxZfGPH+m9Hz1QW1ANR0vUG8mNwWWC1iVjfNrwBw=;
+        b=VxuxjPfn2ywRZ6Vk/Sq8ELs0Tvn6V0JJsN9uv72zXiaH6SfO0lycRa6VLfRU7+S5C/
+         TIPSIafYuGT17wCY1w8pKK+3+qXHzk6fPcDYBbL2vfnH75Cuk2kOZZo4mErjcYrEaceP
+         9xnupXYUUlJGGOjHg/RkWoTk+x4rpC4fpmqk5ScdkzYnDW59ux+NL2bCJAX11Zf5WlR7
+         y+RGSA2lgj6QViNw6ZPkPhfs1TMk8SomiA8I5yAgGSfgRNYz6juD2XQwk5FNh3ZLzVQ7
+         /qtDys9AxHvXt1tCCVkoGrJb6wcY+1hizemJmodhf7AHchXAFIX52jg13elEpgTHTM3h
+         c6Fw==
+X-Forwarded-Encrypted: i=1; AJvYcCXPB2tSGycARE0YvDTCrZYVvA8ZVTOuiC9mil2TUKaOCok+H962AlTUkDyarWL34bYircFdIKxrEKM=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz+ICFuKesOUjnZP2FuVZHOhGaJqZrn5RVS0t7fsCsBgpi4/eHD
+	1X3T/Ux4cxlASyaI+TU0y8hVvBK1/Z1sObV99dbzNrH4fU3QK9rTJKmlRcbn8KedfDD5G1UWzcN
+	B+YLuZSJZPfIVLuNplAe50Lu9/fTyHuSHgloD7XlGRQ==
+X-Gm-Gg: AY/fxX79wrrGuz2Bka3halMwRv2HQEKUknNSVwzI77vKJ8RkUFK7dYgIjFyWJ7IRwSL
+	vnXfDFyYiz48Zk46B2+aS+VpBfGNdtG5C0EL/ARnS6gzJXkvCsqJjlB1enTLbvMZ0zSvw+c4rKb
+	qoLvSUugIRYUicIuESNnE5gxiNaYbDxQrvASSoRwKiytu2gE0HjtEaXVfoZX7oM5Zb2D01eWcxs
+	sVUQgku4jevt90qV0EypDgMRNU0e06CLzg7Io7JOF2CE7rksozESY4XMlNJdspMKNRpxQHC
+X-Google-Smtp-Source: AGHT+IEhUYw77OAuRxBe3uwIoYgLrjRR2ua77WK+8dBaIDSS/4dMnfDxmkWH5Vf8ObUVvDYmN/ivRcBPoD/iRYvRkdY=
+X-Received: by 2002:a05:690c:6307:b0:786:4fd5:e5cb with SMTP id
+ 00721157ae682-78c33c019bbmr104464077b3.35.1765288087582; Tue, 09 Dec 2025
+ 05:48:07 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251201-rz-sdio-mux-v2-0-bcb581b88dd7@solid-run.com> <20251201-rz-sdio-mux-v2-1-bcb581b88dd7@solid-run.com>
-In-Reply-To: <20251201-rz-sdio-mux-v2-1-bcb581b88dd7@solid-run.com>
+References: <20251205071729.83857-1-ziniu.wang_1@nxp.com> <DU0PR04MB94962D103B1A92354CDD1FE690A7A@DU0PR04MB9496.eurprd04.prod.outlook.com>
+In-Reply-To: <DU0PR04MB94962D103B1A92354CDD1FE690A7A@DU0PR04MB9496.eurprd04.prod.outlook.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 9 Dec 2025 13:08:46 +0100
-X-Gm-Features: AQt7F2r1lyAuAvPl8XAr0oXpaCyrxw65vCWYOlOZTELJxwXwUotYjVniauuZrmM
-Message-ID: <CAPDyKFrD2x0U49w2Fpzrc98wKXtyyN-B1P69OMJk27+0Yzsg8Q@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: renesas,sdhi: Add mux-states property
-To: Josua Mayer <josua@solid-run.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Mikhail Anikin <mikhail.anikin@solid-run.com>, Yazan Shhady <yazan.shhady@solid-run.com>, 
-	Jon Nettleton <jon@solid-run.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Date: Tue, 9 Dec 2025 14:47:30 +0100
+X-Gm-Features: AQt7F2oaS3uBiOmr3kjDFYVzcu04ROd5j3j8IYFRAzYsQq--q0dUbLCTRNsuSTc
+Message-ID: <CAPDyKFpYU3PZs-dSREyGyyyoptY0zCQmHP+mxMMgvYQL-xXQZA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: wait for data transfer
+ completion before reset
+To: Bough Chen <haibo.chen@nxp.com>, Luke Wang <ziniu.wang_1@nxp.com>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "shawnguo@kernel.org" <shawnguo@kernel.org>, 
+	"s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, "kernel@pengutronix.de" <kernel@pengutronix.de>, 
+	"festevam@gmail.com" <festevam@gmail.com>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "imx@lists.linux.dev" <imx@lists.linux.dev>, dl-S32 <S32@nxp.com>, 
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 1 Dec 2025 at 13:31, Josua Mayer <josua@solid-run.com> wrote:
+On Fri, 5 Dec 2025 at 09:12, Bough Chen <haibo.chen@nxp.com> wrote:
 >
-> Add mux controller support for when sdio lines are muxed between a host
-> and multiple cards.
+> > -----Original Message-----
+> > From: Luke Wang <ziniu.wang_1@nxp.com>
+> > Sent: 2025=E5=B9=B412=E6=9C=885=E6=97=A5 15:17
+> > To: adrian.hunter@intel.com; Bough Chen <haibo.chen@nxp.com>;
+> > ulf.hansson@linaro.org
+> > Cc: shawnguo@kernel.org; s.hauer@pengutronix.de; kernel@pengutronix.de;
+> > festevam@gmail.com; linux-mmc@vger.kernel.org; imx@lists.linux.dev; dl-=
+S32
+> > <S32@nxp.com>; linux-arm-kernel@lists.infradead.org;
+> > linux-kernel@vger.kernel.org
+> > Subject: [PATCH v2] mmc: sdhci-esdhc-imx: wait for data transfer comple=
+tion
+> > before reset
+> >
+> > From: Luke Wang <ziniu.wang_1@nxp.com>
+> >
+> > On IMX7ULP platforms, certain SD cards (e.g. Kingston Canvas Go! Plus) =
+cause
+> > system hangs and reboots during manual tuning. These cards exhibit larg=
+e gaps
+> > (~16us) between tuning command response and data transmission.
+> > When cmd CRC errors occur during tuning, the code assumes data errors e=
+ven
+> > tuning data hasn't been fully received and then reset host data circuit=
+.
+> >
+> > Per IMX7ULP reference manual, reset operations (RESET_DATA/ALL) need to
+> > make sure no active data transfers. Previously, resetting while data wa=
+s in-flight
+> > would clear data circuit, including ADMA/SDMA address, causing data to =
+be
+> > transmitted to incorrect memory address. This patch adds polling for da=
+ta
+> > transfer completion before executing resets.
+> >
+> > Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
+> > ---
+> > v2: amend commit message
+> > ---
+> >  drivers/mmc/host/sdhci-esdhc-imx.c | 15 +++++++++++++++
+> >  1 file changed, 15 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > index a7a5df673b0f..affde1936510 100644
+> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > @@ -1453,6 +1453,21 @@ static void esdhc_set_uhs_signaling(struct
+> > sdhci_host *host, unsigned timing)
+> >
+> >  static void esdhc_reset(struct sdhci_host *host, u8 mask)  {
+> > +     u32 present_state;
+> > +     int ret;
+> > +
+> > +     /*
+> > +      * For data or full reset, ensure any active data transfer comple=
+tes
+> > +      * before resetting to avoid system hang.
+> > +      */
+> > +     if (mask & (SDHCI_RESET_DATA | SDHCI_RESET_ALL)) {
+> > +             ret =3D readl_poll_timeout_atomic(host->ioaddr + ESDHC_PR=
+SSTAT,
+> > present_state,
+>
+> I'm okay with the patch, but I find one thing here:
+>
+> I notice you use _atomic here, I guess you want to cover the case when th=
+e reset function is called in hardware irq handler sdhci_irq().
+> I'm not sure whether it is suitable to add delay in hardware iqr handler,=
+ I find there is also udelay in sdhci_reset(), sdhci_reset can also be call=
+ed in hardware irq handler when there is cmd_crc/data_crc error.
+> Adrian/Ulf, do you notice this issue before? Any comments?
 
-We have the SD, SDIO, (e)MMC interfaces with their corresponding pins.
-Using "sdio lines" becomes confusing as it kind of indicates this is
-for "SDIO" only.
+You are right. In general it's certainly not preferred to poll/delay
+in an atomic context. But if I understand correctly here, polling in
+atomic context should not happen that frequently, right?
+
+Moreover, I wonder if we really need to have a polling-timeout of
+100ms? Where did that value come from?
+
+In any case, please add a define to specify the timeout and make sure
+the define-name has the suffix corresponding to the unit (_US,
+_MS,...)
 
 >
-> There are several devices supporting a choice of eMMC or SD on a single
-> board by both dip switch and gpio, e.g. Renesas RZ/G2L SMARC SoM and
-> SolidRun RZ/G2L SoM.
+> Regards
+> Haibo Chen
 >
-> In-tree dts for the Renesas boards currently rely on preprocessor macros
-> to hog gpios and define the card.
 >
-> By adding mux-states property to sdio controller description, boards can
-
-Again, please don't use "sdio" here.
-
-> correctly describe the mux that already exists in hardware - and drivers
-> can coordinate between mux selection and probing for cards.
->
-> Signed-off-by: Josua Mayer <josua@solid-run.com>
-> ---
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index c754ea71f51f7..754ccb1c30efb 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -106,6 +106,11 @@ properties:
->    iommus:
->      maxItems: 1
->
-> +  mux-states:
-> +    description:
-> +      mux controller node to route the SDIO signals from SoC to cards.
-
-I suggest we change from "SDIO" to "SD/SDIO/eMMC".
-
-> +    maxItems: 1
-> +
->    power-domains:
->      maxItems: 1
->
-> @@ -275,6 +280,7 @@ examples:
->          max-frequency = <195000000>;
->          power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
->          resets = <&cpg 314>;
-> +        mux-states = <&mux 0>;
->      };
->
->      sdhi1: mmc@ee120000 {
->
-> --
-> 2.51.0
->
+> > +                                             !(present_state & SDHCI_D=
+ATA_INHIBIT), 2,
+> > 100000);
+> > +             if (ret =3D=3D -ETIMEDOUT)
+> > +                     dev_warn(mmc_dev(host->mmc),
+> > +                              "timeout waiting for data transfer compl=
+etion\n");
+> > +     }
+> > +
+> >       sdhci_and_cqhci_reset(host, mask);
+> >
+> >       sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> > --
+> > 2.34.1
 >
 
 Kind regards
