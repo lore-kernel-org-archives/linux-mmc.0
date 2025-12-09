@@ -1,60 +1,61 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 469812D73A6;
-	Tue,  9 Dec 2025 18:06:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 570AA1DF248;
+	Tue,  9 Dec 2025 18:58:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765303567; cv=none; b=blpObFL3oWI7BX0U1DPLkkLS2eRuvQ8A2BnKRUiu9abDAidWe39972n7De4T49brCU+tOkuV+wjGG+dS5C9j9/CxiS0HGJ9b1LGo99RWwWl+yZXKfFV5+EhaOMCt0BAHTLXU/3UsOmsMR6swbEQQuFvD//3NiUiKUg0jdlDUziw=
+	t=1765306687; cv=none; b=WXCkjTnxkrEjR80Gh9U6NJQ1JYYFGEn3I2jpg5kDRHKwkqHAKZqMoA7OqQCYUUziw2KYo32sVF8GdgecfXSjlDTOkECB9SQbpER4Hhr3uIeiHBS5P0onyqpIYkqgecngmeI7qznR/z+VqGJcrGAzivjPb74mkw4OEekvRbYXX5k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765303567; c=relaxed/simple;
-	bh=BIhbpujaBd/Ey0BGuUIoScMltJUr17Od4WaWo0SEAsg=;
+	s=arc-20240116; t=1765306687; c=relaxed/simple;
+	bh=mFbT4lH79yDTHUyS7wtXasTGzShbkPr6lyhSnS1BMmQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SPF0zbV/0sq9+YjulYnuQ5rmMeVrtfaOsd6bOzVEkS44BRiWj1h4sSP/KhnAA/1HG3Y0tcLw4LOzUVy2afpKEmWK9xUaFboVKJpY3UqLR6KTaxD+myyKmNh3Yrl32HQpy1QA7IlhHsK75tHkPC0oHjX3C3kIdKj5d0fCd/y0Z74=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=SEccFJHr; arc=none smtp.client-ip=192.198.163.11
+	 Content-Type:Content-Disposition:In-Reply-To; b=d5MeMGBE20E5eNtMuBn8/26xK5k7hZ6qnY0EwOvG/TEddz5L5hXCJWCV+xOx59tc1o0ZKIHMkvkzCMjRho25QHhCCGO3R7AQWKEqdkEFhokfvEkdMv+P8QadS8vtqdwevFQHgGAK1fPUKzbiXEAZMktv9lz9OyJjtXDVzGuyjK4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WnLe8j/K; arc=none smtp.client-ip=198.175.65.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="SEccFJHr"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WnLe8j/K"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1765303562; x=1796839562;
+  t=1765306687; x=1796842687;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=BIhbpujaBd/Ey0BGuUIoScMltJUr17Od4WaWo0SEAsg=;
-  b=SEccFJHrsvIcmvyxLcBc2qRxu1/rT/Ikw55K1IIZqRLnk698JiaEJFqo
-   7Uyh/PvewduWNRX4b4CUiVTr5X/ktX61Nwj31IATGgcMrprrJ1F16ahnM
-   NxD0AJI+XZO6JNT1jgXndKNV65cz+VsX/fQxScef1V+KaWLedzc3ejVAs
-   CFdssYUI1ANjvVchSIgTxtWxFFGR2inxQUft6tP8+LXwvTgqoThsLiZUd
-   puXOS5DLYRI3IfriV/t9ISMqn7lR2ECApZzBiXX8s1dtL/dWAkfTxZZ83
-   WkbPmV9d10hXga+OomJ0Qd6gSuPg3HAsGayyTnTyGuTw8b63VFcwAr/mn
-   g==;
-X-CSE-ConnectionGUID: dPn3ECe3TDaMpo3C3s32+g==
-X-CSE-MsgGUID: U9ZbZnBRTomiKwQ0dU85kg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11637"; a="77884485"
+  bh=mFbT4lH79yDTHUyS7wtXasTGzShbkPr6lyhSnS1BMmQ=;
+  b=WnLe8j/KKGFzFji6KBbsr+H9Zagq+ZPuTsurQKuAowQAlHITc8ME4oV3
+   OCDHM6N07130MjAHY6SlohpB186AZA0k9nZfO/hfLhVUH3M8lpJidlZTs
+   nSjsAyTGKY54nn1xX/EplAPXo9C2zaT8Qfi61Lq9T6Vx302LqgAysbWO5
+   j4/+sDaVw/+mXJk4rwXvAOiTRHvk3VQhrMgRG/UKxxUkGOx/KJy+P3Hpz
+   xxzD7H9Sc1EDQko4PNyMPNTqXv0w0tOQWV0TPoA1/far8eJdHzHlSK+fQ
+   /6RXLewOM54nQVwPwPgNqrluskre/g3we+7MwTL1g51fUAEPAv86SOCR8
+   w==;
+X-CSE-ConnectionGUID: /HduyfwfSY67VxtDR5L79w==
+X-CSE-MsgGUID: K6WXaXKYQVuQF4tY5H2f3w==
+X-IronPort-AV: E=McAfee;i="6800,10657,11637"; a="67157896"
 X-IronPort-AV: E=Sophos;i="6.20,262,1758610800"; 
-   d="scan'208";a="77884485"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2025 10:06:02 -0800
-X-CSE-ConnectionGUID: LRL7bE/YQkS1C+nZL/74rg==
-X-CSE-MsgGUID: jsYyQLA4Q8ahdsYXczW1TQ==
+   d="scan'208";a="67157896"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by orvoesa111.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2025 10:58:06 -0800
+X-CSE-ConnectionGUID: YNsiv4mCTE6VKJ2rfASCMg==
+X-CSE-MsgGUID: 79TPHIPMQIapKyEBbxu36Q==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.20,262,1758610800"; 
-   d="scan'208";a="226955192"
+   d="scan'208";a="200727249"
 Received: from lkp-server01.sh.intel.com (HELO d335e3c6db51) ([10.239.97.150])
-  by orviesa002.jf.intel.com with ESMTP; 09 Dec 2025 10:06:00 -0800
+  by fmviesa005.fm.intel.com with ESMTP; 09 Dec 2025 10:58:03 -0800
 Received: from kbuild by d335e3c6db51 with local (Exim 4.98.2)
 	(envelope-from <lkp@intel.com>)
-	id 1vT261-0000000028D-1diS;
-	Tue, 09 Dec 2025 18:05:57 +0000
-Date: Wed, 10 Dec 2025 02:05:06 +0800
+	id 1vT2uP-000000002B7-0M9u;
+	Tue, 09 Dec 2025 18:58:01 +0000
+Date: Wed, 10 Dec 2025 02:57:34 +0800
 From: kernel test robot <lkp@intel.com>
 To: "ping.gao" <ping.gao@samsung.com>, jh80.chung@samsung.com,
 	ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: oe-kbuild-all@lists.linux.dev, "ping.gao" <ping.gao@samsung.com>
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	"ping.gao" <ping.gao@samsung.com>
 Subject: Re: [PATCH] mmc: dw_mmc: Use pre_request & post_request_end helper
-Message-ID: <202512100130.DkmKHepR-lkp@intel.com>
+Message-ID: <202512100224.drEVwdNL-lkp@intel.com>
 References: <20251209064910.3643039-1-ping.gao@samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -80,41 +81,27 @@ url:    https://github.com/intel-lab-lkp/linux/commits/ping-gao/mmc-dw_mmc-Use-p
 base:   linus/master
 patch link:    https://lore.kernel.org/r/20251209064910.3643039-1-ping.gao%40samsung.com
 patch subject: [PATCH] mmc: dw_mmc: Use pre_request & post_request_end helper
-config: csky-randconfig-002-20251209 (https://download.01.org/0day-ci/archive/20251210/202512100130.DkmKHepR-lkp@intel.com/config)
-compiler: csky-linux-gcc (GCC) 15.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20251210/202512100130.DkmKHepR-lkp@intel.com/reproduce)
+config: riscv-defconfig (https://download.01.org/0day-ci/archive/20251210/202512100224.drEVwdNL-lkp@intel.com/config)
+compiler: clang version 22.0.0git (https://github.com/llvm/llvm-project 6ec8c4351cfc1d0627d1633b02ea787bd29c77d8)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20251210/202512100224.drEVwdNL-lkp@intel.com/reproduce)
 
 If you fix the issue in a separate patch/commit (i.e. not just a new version of
 the same patch/commit), kindly add following tags
 | Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202512100130.DkmKHepR-lkp@intel.com/
+| Closes: https://lore.kernel.org/oe-kbuild-all/202512100224.drEVwdNL-lkp@intel.com/
 
 All errors (new ones prefixed by >>):
 
-   drivers/mmc/host/dw_mmc.c: In function 'dw_mci_request_end':
->> drivers/mmc/host/dw_mmc.c:1902:56: error: 'struct dw_mci' has no member named 'drv_dat'; did you mean 'drv_data'?
+>> drivers/mmc/host/dw_mmc.c:1902:49: error: no member named 'drv_dat' in 'struct dw_mci'
     1902 |         const struct dw_mci_drv_data *drv_data = host->drv_dat
-         |                                                        ^~~~~~~
-         |                                                        drv_data
-   In file included from arch/csky/include/asm/bug.h:18,
-                    from include/linux/bug.h:5,
-                    from include/linux/random.h:6,
-                    from include/linux/nodemask.h:94,
-                    from include/linux/list_lru.h:12,
-                    from include/linux/fs/super_types.h:7,
-                    from include/linux/fs/super.h:5,
-                    from include/linux/fs.h:5,
-                    from include/linux/highmem.h:5,
-                    from include/linux/bvec.h:10,
-                    from include/linux/blk_types.h:10,
-                    from include/linux/blkdev.h:9,
-                    from drivers/mmc/host/dw_mmc.c:10:
->> include/asm-generic/bug.h:154:29: error: expected expression before '{' token
-     154 | #define WARN_ON(condition) ({                                           \
-         |                             ^
-   drivers/mmc/host/dw_mmc.c:1904:9: note: in expansion of macro 'WARN_ON'
+         |                                                  ~~~~  ^
+>> drivers/mmc/host/dw_mmc.c:1904:2: error: expected expression
     1904 |         WARN_ON(host->cmd || host->data);
-         |         ^~~~~~~
+         |         ^
+   include/asm-generic/bug.h:109:29: note: expanded from macro 'WARN_ON'
+     109 | #define WARN_ON(condition) ({                                           \
+         |                             ^
+   2 errors generated.
 
 
 vim +1902 drivers/mmc/host/dw_mmc.c
@@ -128,7 +115,7 @@ vim +1902 drivers/mmc/host/dw_mmc.c
   1901		struct mmc_host	*prev_mmc = host->slot->mmc;
 > 1902		const struct dw_mci_drv_data *drv_data = host->drv_dat
   1903	
-  1904		WARN_ON(host->cmd || host->data);
+> 1904		WARN_ON(host->cmd || host->data);
   1905	
   1906		host->slot->mrq = NULL;
   1907		host->mrq = NULL;
