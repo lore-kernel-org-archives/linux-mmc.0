@@ -1,227 +1,116 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
+Received: from mail-yx1-f54.google.com (mail-yx1-f54.google.com [74.125.224.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 028B7245031
-	for <linux-mmc@vger.kernel.org>; Thu, 11 Dec 2025 10:57:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2124523E356
+	for <linux-mmc@vger.kernel.org>; Thu, 11 Dec 2025 11:32:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765450648; cv=none; b=IAF4SmZ5i+gfpuCy8cHlBfocWeVAgwRUyJAJ276HrSoWDc8oq+hec5BUKehi11UuQNe9MjecWijM3qHB7uZmcU6fonyk8BaGtzVKaZXapTwo8bgJZhB8VJr29XLJwWYxBm0PRsB5M8mbHgkkKzgPaZ1VmuYuaYi7kstd0sNmOBY=
+	t=1765452738; cv=none; b=cDiVm2vrJMs6UQFh0JCSca1cfBZNWL638bQd9YaxYcReMjBdpGCWpsHFng5HFj6mtArZNEza340GUBS/injvWepsVE5PWfE4lpuX7H25wGntgu48CIPeDOK+c7D/BNDdt0dyxYbuCabqdVOo9zd3vx022rGAIpFlwWlGG54GMRQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765450648; c=relaxed/simple;
-	bh=glrxtMjqkUBaCzlmvtbPhXHIQ7qRaXR9uQHY2oHJvrE=;
+	s=arc-20240116; t=1765452738; c=relaxed/simple;
+	bh=NchHZPDCVbR2zKgQZ6II0ne2TAbumnNcDZoeVADXcKk=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=d175GKAdqZzSFQxvdH3NLyQypVvxyKwBsXpW1ggnsEghAgqDeYmy7zWtnK9UDmMwhAzf8hkTqcCtJZE0UVDeVo0mhlfHZqu6x+fRrOXizY5s/o+aWWTMt2nQCBOrkg9LVsF8rFaY8+QgZoZwqezHNMCXitbg9dJEPr8hxbQ+dAA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=REhkFIaL; arc=none smtp.client-ip=209.85.128.181
+	 To:Cc:Content-Type; b=i19LtZqG7Y5zwtn/gs25S36KgImB/0/U49YHE3kDBxUiDZua4buKDa2ehroZvy0PP9imw29pVs93ncKd9V1/jS8aaVtFTQwJvwro4S3ZjXwo3AmUNgKIxKPYdgB8TypEbstaLBf2bbyhg4Aau+JMOZVUyDi57tKCJbdczja49B0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=QQX57O8O; arc=none smtp.client-ip=74.125.224.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="REhkFIaL"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-78c696717dbso8056027b3.1
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Dec 2025 02:57:26 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QQX57O8O"
+Received: by mail-yx1-f54.google.com with SMTP id 956f58d0204a3-6446fcddf2fso697096d50.0
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Dec 2025 03:32:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765450646; x=1766055446; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=V5YEEyH51RKxGYdVyGunjy0gRdxvGTIFaECJPQw5bos=;
-        b=REhkFIaLPVXsQKYDTbZ+rePIZlVJHdEEhZzPX5BmFB9KmLUk5yGxHBO8U4ZLq1Jqds
-         l2qWo6RLiey2BqcthxRsULvjPXThCQLyOKUXO1DdyL5SFnwZa655WfocWTlb9nuZJWMF
-         AnfarOzS8VW+oMTp3dh503VKSSlcaZG/VIV+5pXZcVLoI3FYTSQ9/vFFHqCGUDR+OMtG
-         WAf9kkAguW0NLwjuZraeGjZWDD2wU4jxWLwH4D3sHYjrkBJurOwDjRd638zWyHjUEOBu
-         aE6C87xvZMRx43B5/0ZPElCsDSW4LBcdaLNwt2Y92xDMfcjkR6Pfcr6HQwdY2OpylFoB
-         UIoA==
+        d=linaro.org; s=google; t=1765452735; x=1766057535; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=vAvAduq0/fXRtJhO0coRhdPgTbJSI1bNLnmdQnPpfuY=;
+        b=QQX57O8OsKuVkASZOy3qxp6if78bDgDbkjwSeD7uaKrKurvNp1ku/3MDnCE9Bf6Mym
+         C+NxsqKpUWN8GaO+RapzoLI/tFEh9UW9QqyYNX0PmN9kAFmFVCqFATZR4TX2+JART4Ij
+         Ww1J4foYdr6vNtt8a7tOuoiWCzh7oZhR6S70cb/Kv0KsQTQyCYa60HSECZoFp77O9N8H
+         VRb0rfvZ7BoxG92nyYSOGgqg5xoWMAP23FDSPo9rP75amoW8qhfaCLkVnVG8eHhNcGb9
+         vncS2Ps5PoPRn4RlbNAcuewgWJFWm6evYv1K+ckfssLI9BeMqOCvPe8FxXjDgx8FcCr/
+         O/3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765450646; x=1766055446;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=V5YEEyH51RKxGYdVyGunjy0gRdxvGTIFaECJPQw5bos=;
-        b=Hmlz6f7t+GCViarXWknyRyYS8eVzr1S2TOMVG5qrE5rW1mgiVh0k/Q7fQpKwTlcoe9
-         JSOFAfD6pF4fwu5Ycu00yrJjXmow4CWbAdymcItoo04koo4i1QJKXnBHmIQrlMtE9xEY
-         o4kHB8OoebbdGaaqGdK5XAuoPjDdlM87FJJOQIVjVssQ9ekm5zbNvBHHFJWRC/GI48GH
-         4C7HKA4YZ4eNvT0P3mDQDYB6LVdeQTMUlsQ7GgyOVJaZBxTqgnryy95E8ItkfkZTuydV
-         4dNpY3JnI75fea8usBGrba29aoMTSZ7GCbz4iyzIvjZIoHyVMDtIFnm35yfo3fzk1hI5
-         DpWQ==
-X-Gm-Message-State: AOJu0YxkKaY3EG7vSf5FSPmBWOJtwXEOyxpUUjWfOqbI67pVM2DrpTId
-	iP9ukcpiMCkLoPUrb4cxkEeH4JOJBzhO7vowUWMzZy54LeBUxfhiZPxWX2ddTgFuCn/Ag+R/MWZ
-	tp3EjfmsbJXQlHJnhuq1f77/dhC8hV0z2nZpCuzbdDA==
-X-Gm-Gg: AY/fxX7Hfgss5K1bmcjeWdzZsJo65EVaa7XU/W694JCafBbogBs4USbZTjJUjFZ2IUi
-	Rx3ry12jVhKCHLtSPPpgVksXOlDGPxub7cGUr9LvR0ZNJdr6OkI4AL5HFLw5WCHKjoRH2CiHuNR
-	uiFihscVDC052Dlj/8h9cq4e8t72hJ5vvW2hBZMx7b9wr7lvEJEIiDqFqEMGA1cNUoNF+WUUhcu
-	5xVTqmFyOVzGrbsxxorvkwqUbO+raTOZUmHCfGbe3TLklHVDCH+1cqAUTX/ndcB5V8YMNWm
-X-Google-Smtp-Source: AGHT+IEK/ayXaIWC8j9ZcW0gKnrjpuRe6rNjQ7mkHYL6O76rQr7niJ/xofziEKAfs45lkgPwyM+WGOcfkG91xHsPjmk=
-X-Received: by 2002:a05:690c:7489:b0:788:14a2:8bba with SMTP id
- 00721157ae682-78c9d7e9e7amr45792777b3.44.1765450645786; Thu, 11 Dec 2025
- 02:57:25 -0800 (PST)
+        d=1e100.net; s=20230601; t=1765452735; x=1766057535;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vAvAduq0/fXRtJhO0coRhdPgTbJSI1bNLnmdQnPpfuY=;
+        b=WA/XxIaC2PtkqMFHJG6QIpDVejcvAQPB2JYRE55UYt7CxBpbQUItXKpw1284/2RONd
+         KPsC9TeDwbxRksT56zr9yPhj87Pmge8SnO/ddIVW0U5ZKOgwcgXoUUcZh9MpzGlF3b/v
+         hL3QlRMSGE2OPWfJ/pchpEHT+Hp+mUZlRXa+XYDeorB+1KEWKuiD1dNfLz0+xIu9exS7
+         i8yrDR4P+5li3mdwXc7ZFntNaPUFs6a313Rfc1pXC9b3Tm9jNDHwdcE2w7scSZbHgjEQ
+         +fNXNmu1anS0wm6ZglS0DSOZQBzs/rDgvm4I6P9gw01uoyG2TBNF4xjzI5MEChiVw+dd
+         7Ryg==
+X-Forwarded-Encrypted: i=1; AJvYcCV7CX/LUoIvTgmM9KAHHvxV3c95kftlk89AIgtJjy8AY8xkmTcOvrZ4hd9We/7VRJssszYusA4pAfs=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzd9O/qlbLtqbCpNIjtxGV9hVQPqSb69FvjkgDK4vgPNNC47itt
+	KrySKYU1BiZcIbUh6IUJkwccpJDJN7D6xW4czDz8fg1LClZ62WTHkNQLhkqbvQjHYXeAeIcqJ+y
+	5QzLIiOm9XwK5Mzx6yoHzq3/LeiB+6gMODLZUWagOtQ==
+X-Gm-Gg: AY/fxX5ZC/QbnARoegb4fMbx7ld6Gc1UUEoM0zY53re/Mt59FMspDH3/7pAjzQWyZAR
+	q2iU2MLpTy1iMWU5oi89m1Ha6t4GvzgOfb+3S9xeJMjTsSHqRceJIb4PcdUyOlTMKHwhL4i3xhY
+	QdZMsg6oElujFax22pXiTIU5pcZEeEZWdWQOXD2a7CXhZDoay+Sdxx1TMj0zabRehhaRveqnlk3
+	RcS8i1NwR2RAMigY7idzTya3YwLy8Zl21VzPk3v4yIPRYPjNkpwJq/0e9sTL4AxcC/intqx6Uw/
+	msOu1U4=
+X-Google-Smtp-Source: AGHT+IG8bNJ7GVmxCtKmkFoNf2sieoYkv2mgOPVq2xJndKf37hgXCewb4eZsd1D0ffqnRQUAE3M4kyCHgtlEMcMmN4I=
+X-Received: by 2002:a05:690e:191b:b0:640:db57:8d95 with SMTP id
+ 956f58d0204a3-6446eb3aa4emr5006636d50.63.1765452735377; Thu, 11 Dec 2025
+ 03:32:15 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAH1aAjJbA08ErU_NMhNDGcNfWgap+G0Fk-Ba-AgfpZcc8zHd=Q@mail.gmail.com>
-In-Reply-To: <CAH1aAjJbA08ErU_NMhNDGcNfWgap+G0Fk-Ba-AgfpZcc8zHd=Q@mail.gmail.com>
+References: <20251211-dev-dt-warnings-all-v1-0-21b18b9ada77@codeconstruct.com.au>
+ <20251211-dev-dt-warnings-all-v1-6-21b18b9ada77@codeconstruct.com.au>
+In-Reply-To: <20251211-dev-dt-warnings-all-v1-6-21b18b9ada77@codeconstruct.com.au>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 11 Dec 2025 11:56:49 +0100
-X-Gm-Features: AQt7F2oiNdNv1i-0GtKxmKFRMHuiMbzS88U9UMKwa-QZKcCU7uYyNk6WjgHiyVs
-Message-ID: <CAPDyKFrzzLTCYZnr0RFDc0NnPbeUMZzb-2NjXJZa3Q1qQ+OpTg@mail.gmail.com>
-Subject: Re: Issue with Realtek PCI SD card driver
-To: JP Dehollain <jpdehollain@gmail.com>
-Cc: linux-mmc@vger.kernel.org, =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
+Date: Thu, 11 Dec 2025 12:31:38 +0100
+X-Gm-Features: AQt7F2pSIRmWc3gz3aUnvZCl6QhFMFW_pPE_bkwFhLy-FhbClf3aqE2_J1pJY4M
+Message-ID: <CAPDyKFrbS_3XRTSuexFxTpP1ydgvfFvXNv_tninnTqum7+92ZA@mail.gmail.com>
+Subject: Re: [PATCH RFC 06/16] dt-bindings: mmc: Switch ref to sdhci-common.yaml
+To: Andrew Jeffery <andrew@codeconstruct.com.au>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Linus Walleij <linusw@kernel.org>, Joel Stanley <joel@jms.id.au>, 
+	linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-aspeed@lists.ozlabs.org, 
+	linux-kernel@vger.kernel.org, openbmc@lists.ozlabs.org, 
+	linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-crypto@vger.kernel.org, linux-iio@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-+ Ricky Wu (the main developer of the driver)
-
-On Thu, 11 Dec 2025 at 10:05, JP Dehollain <jpdehollain@gmail.com> wrote:
+On Thu, 11 Dec 2025 at 09:47, Andrew Jeffery
+<andrew@codeconstruct.com.au> wrote:
 >
-> Dear mmc kernel driver mantainers,
+> Enable use of common SDHCI-related properties such as sdhci-caps-mask as
+> found in the AST2600 EVB DTS.
 >
-> When I insert an SD card in the integrated card reader in my laptop, most=
- of the time the card gets recognised as read-only, even though the physica=
-l switch is in the unlocked position. If I remove and reinsert the card sev=
-eral times without unmounting it in the OS, I can eventually get it to load=
- in rw mode.
->
-> I am using Zorin 18, with linux kernel 6.14.
-> Attached below is the output of dmesg showing several attempts to remove =
-and reload, until it reloads in rw in line [10281.365508].
->
-> Please let me know if there any other logs and tests I can send or perfor=
-m to help resolve the issue.
+> Signed-off-by: Andrew Jeffery <andrew@codeconstruct.com.au>
 
-I found one interesting commit that may be worth trying:
-
-commit 807221d3c5ff ("misc: rtsx_pci: Add separate CD/WP pin polarity
-reversal support").
-
-Not sure if it applies on v6.14 kernel, but I suggest giving it a try.
-Or try the latest kernel, v6.18. I have also looped in Ricky Wu, to
-see if he is able to help out.
+Applied for fixes and by adding a stable-tag, thanks!
 
 Kind regards
 Uffe
 
+
+> ---
+>  Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Best regards,
-> JP
-> jpdehollain
+> diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> index 9fce8cd7b0b6..d24950ccea95 100644
+> --- a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> @@ -41,7 +41,7 @@ properties:
+>  patternProperties:
+>    "^sdhci@[0-9a-f]+$":
+>      type: object
+> -    $ref: mmc-controller.yaml
+> +    $ref: sdhci-common.yaml
+>      unevaluatedProperties: false
 >
->  [ 9367.567443] Generic FE-GE Realtek PHY r8169-0-201:00: attached PHY dr=
-iver (mii_bus:phy_addr=3Dr8169-0-201:00, irq=3DMAC)
-> [ 9367.568438] Bluetooth: MGMT ver 1.23
-> [ 9367.738206] r8169 0000:02:00.1 enp2s0f1: Link is Down
-> [ 9375.195026] wlp3s0: authenticate with c0:fd:84:c2:04:ac (local address=
-=3D40:b8:9a:b9:34:e1)
-> [ 9375.195036] wlp3s0: send auth to c0:fd:84:c2:04:ac (try 1/3)
-> [ 9375.195935] wlp3s0: authenticated
-> [ 9375.196946] wlp3s0: associate with c0:fd:84:c2:04:ac (try 1/3)
-> [ 9375.198285] wlp3s0: RX AssocResp from c0:fd:84:c2:04:ac (capab=3D0x101=
-1 status=3D0 aid=3D6)
-> [ 9375.200886] wlp3s0: associated
-> [ 9377.256424] rfkill: input handler enabled
-> [ 9377.260100] rfkill: input handler disabled
-> [ 9378.855243] lockdown_is_locked_down: 2 callbacks suppressed
-> [ 9378.855248] Lockdown: systemd-logind: hibernation is restricted; see m=
-an kernel_lockdown.7
-> [ 9842.321650] mmc0: cannot verify signal voltage switch
-> [ 9842.474907] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [ 9842.475878] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [ 9842.478394]  mmcblk0: p1
-> [ 9842.672905] /dev/mmcblk0p1: Can't open blockdev
-> [ 9884.098398] mmc0: card 0001 removed
-> [ 9898.560801] mmc0: cannot verify signal voltage switch
-> [ 9898.716638] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [ 9898.717583] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [ 9898.720430]  mmcblk0: p1
-> [ 9898.901398] /dev/mmcblk0p1: Can't open blockdev
-> [ 9926.650920] mmc0: card 0001 removed
-> [ 9932.079104] mmc0: cannot verify signal voltage switch
-> [ 9932.233022] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [ 9932.233814] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [ 9932.236526]  mmcblk0: p1
-> [ 9932.417077] /dev/mmcblk0p1: Can't open blockdev
-> [ 9945.675206] mmc0: card 0001 removed
-> [ 9954.348559] mmc0: cannot verify signal voltage switch
-> [ 9954.505148] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [ 9954.505892] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [ 9954.508907]  mmcblk0: p1
-> [ 9954.688774] /dev/mmcblk0p1: Can't open blockdev
-> [ 9969.099540] mmc0: card 0001 removed
-> [ 9975.967776] mmc0: cannot verify signal voltage switch
-> [ 9976.123568] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [ 9976.124400] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [ 9976.127501]  mmcblk0: p1
-> [ 9976.308274] /dev/mmcblk0p1: Can't open blockdev
-> [ 9989.339754] mmc0: card 0001 removed
-> [ 9998.751059] mmc0: cannot verify signal voltage switch
-> [ 9998.908154] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [ 9998.909036] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [ 9998.911611]  mmcblk0: p1
-> [ 9999.088417] /dev/mmcblk0p1: Can't open blockdev
-> [10039.268493] mmc0: card 0001 removed
-> [10046.108371] perf: interrupt took too long (3167 > 3166), lowering kern=
-el.perf_event_max_sample_rate to 63000
-> [10049.398057] mmc0: cannot verify signal voltage switch
-> [10049.554751] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10049.555751] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10049.558524]  mmcblk0: p1
-> [10049.735565] /dev/mmcblk0p1: Can't open blockdev
-> [10069.188896] mmc0: card 0001 removed
-> [10076.400515] mmc0: cannot verify signal voltage switch
-> [10076.556156] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10076.556990] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10076.559495]  mmcblk0: p1
-> [10076.744822] /dev/mmcblk0p1: Can't open blockdev
-> [10097.512910] capability: warning: `gvfsd-admin' uses 32-bit capabilitie=
-s (legacy support in use)
-> [10160.142113] mmc0: card 0001 removed
-> [10166.327484] mmc0: cannot verify signal voltage switch
-> [10166.483689] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10166.484452] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10166.486831]  mmcblk0: p1
-> [10166.673519] /dev/mmcblk0p1: Can't open blockdev
-> [10209.382671] mmc0: card 0001 removed
-> [10213.541830] mmc0: cannot verify signal voltage switch
-> [10213.698167] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10213.698682] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10213.701071]  mmcblk0: p1
-> [10213.879510] /dev/mmcblk0p1: Can't open blockdev
-> [10233.767001] mmc0: card 0001 removed
-> [10241.604535] mmc0: cannot verify signal voltage switch
-> [10241.760000] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10241.760727] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10241.763414]  mmcblk0: p1
-> [10241.942084] /dev/mmcblk0p1: Can't open blockdev
-> [10253.143302] mmc0: card 0001 removed
-> [10257.346355] mmc0: cannot verify signal voltage switch
-> [10257.501510] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10257.502301] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10257.504889]  mmcblk0: p1
-> [10257.685511] /dev/mmcblk0p1: Can't open blockdev
-> [10262.447439] mmc0: card 0001 removed
-> [10281.209724] mmc0: cannot verify signal voltage switch
-> [10281.365508] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10281.366289] mmcblk0: mmc0:0001 SD32G 29.1 GiB
-> [10281.369004]  mmcblk0: p1
-> [10281.589067] FAT-fs (mmcblk0p1): Volume was not properly unmounted. Som=
-e data may be corrupt. Please run fsck.
-> [10345.088596] mmc0: cannot verify signal voltage switch
-> [10346.904393] mmcblk0: recovery failed!
-> [10346.904422] I/O error, dev mmcblk0, sector 2049 op 0x1:(WRITE) flags 0=
-x100000 phys_seg 1 prio class 2
-> [10346.904438] Buffer I/O error on dev mmcblk0p1, logical block 1, lost a=
-sync page write
-> [10366.548533] mmc0: tuning execution failed: -22
-> [10366.548618] mmc0: card 0001 removed
-> [10370.618162] mmc0: cannot verify signal voltage switch
-> [10370.773816] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10370.774592] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10370.777138]  mmcblk0: p1
-> [10370.967092] /dev/mmcblk0p1: Can't open blockdev
-> [10397.449106] mmc0: card 0001 removed
-> [10401.424032] mmc0: cannot verify signal voltage switch
-> [10401.580344] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> [10401.581107] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> [10401.583533]  mmcblk0: p1
-> [10401.758441] /dev/mmcblk0p1: Can't open blockdev
+>      properties:
+>
+> --
+> 2.47.3
+>
+>
