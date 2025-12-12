@@ -1,68 +1,26 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m155105.qiye.163.com (mail-m155105.qiye.163.com [101.71.155.105])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4EE5314A67
-	for <linux-mmc@vger.kernel.org>; Thu, 11 Dec 2025 20:27:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 661D71DE4FB;
+	Fri, 12 Dec 2025 00:44:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.105
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765484873; cv=none; b=WvNhWMSR4uPHhVX38LSpnq8CixqCTTNgOkpHMvElQs6MBKpTDl4cDTYS9yWZEiWbrPODH5XwN6+F9FKN3wgB+lcHYj7NRtHPilXNtJXYvu0zOGU2024ixM72oxV503hVoB2Zv4cfD7+kzqITg8m/nlCOTZYIgAqLaDnxomvqRRI=
+	t=1765500254; cv=none; b=b9zMebW95pviGPy/tzi3Xl6/H4EIKylgTpvXmYKxYC9/peTPLylry5qr57VnF3QRXk1jfS9ib6UxBhY8Nke7byP/9piWDfqx4Jcy4dA85ITDM3vp+lsvYAD8lOXVwWP6gYK6fQkuDzyRn+5KUsdcpgY30+kZUHJA7rGyr9qa84o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765484873; c=relaxed/simple;
-	bh=ltkyJe63XhFW2XPK6AylI7PaYkhEU0IDnxaKPNLsdjk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=GzENG7Ztkzt6nAKcLeXZF+BRy6f8w2SLr812IsaFAIWGHgX4GpisIygS7ge6k7V1c5WmIQXNqV80zbPPorN1nJhcMfPM21Dh8u41mpaBgvFDnW3jM5cNsFcAv/1g4sM+ur78AiZWWUblMHrytzdw9Pnm33usQFc3ynZ4uLyQPPQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EVm0i7z6; arc=none smtp.client-ip=209.85.210.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1765500254; c=relaxed/simple;
+	bh=sngKfupCuj2NKI6BFsg4pEtUrOF9h+ulbmZvbj5Z/G0=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=WaJxDuRoy/TjAJMlr6m6GOepZm2Yuer4EI6qfs4YCPg1LPjxLlP6m9eHmzgmm+g1kjw8SAJGLDVqO07rPHMD7LLRDwTbGOU20YT9wqd25gCq/TLADxbKWkkxf3gHtsBPHx41seETll/bHkucprEzGRJ1K6QANbNlp7MWnLuzUjg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=XZ5xyrVH; arc=none smtp.client-ip=101.71.155.105
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EVm0i7z6"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-7b80fed1505so517112b3a.3
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Dec 2025 12:27:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1765484871; x=1766089671; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:sender:from:to:cc:subject:date:message-id:reply-to;
-        bh=RFNvjy025P4j3juJp/7mMNUGy36biZNwQLRzE8g0SZM=;
-        b=EVm0i7z6XcTCUONIW/atv1XbAXeduN/UlNnj/lH5+Q8QpeYYXuAShMZ5wKjJoQzIVj
-         AKVhPY6GcvV/oypaRXeWpeji3PmOTvxENr/lt02FnNbAjEJbUVTV8HrY7Vn3hjgqitku
-         L2JGn/IusZapvFqXQataan7FMuCVHpEo3ZcoYkOM9ndZSnmbLmLVLuDPctgcHQC7OAAk
-         JrWuH4rhOYK32M4Lp4LkKJXZdTJ5E68YKgXB4HxTrWHppZVgU6dEMWDiIDXtcwfbJbJJ
-         k4byOrTXBzUilcwg+C+om2wAMBVl9k5he4H1n3rueZLy3N9xKrAwGMD/TKiC6JwO+5Zq
-         Kg8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765484871; x=1766089671;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:sender:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=RFNvjy025P4j3juJp/7mMNUGy36biZNwQLRzE8g0SZM=;
-        b=hfbLyOK3hfEpk0inM/RdkKbC+9tz1i01jKMYkyLPWt8nGsz88QS9lhKg6gfmyC8+sH
-         RVx9ZhYNIXLt46+DYRkgDcx/YnkIVGtEM4UJneiZDsbuUdJTar0lc/fmCMcC8kmroFPE
-         ESEwsuF7jdveeRmHtr6/Obl1HH7ez9MSg5mKsTq54wU6WDNvJGAP26i+Gjna75IPA+sj
-         nqPOub0bjE5jKl5W5BA7OHm87sUJEOlQNnSCBIs64p5zXlrhzvHxLJrTXHvU1fOlhx/l
-         QMkdOZKqY7Yjw12pAK2YsNxsAXSJjHX6JsGY3KNfS9MT28I+3pTGbBsCzOPA28L8DC3l
-         u13w==
-X-Forwarded-Encrypted: i=1; AJvYcCU7Q6YtS8DnLb1ymaKW5z45PbHG4XKrtgyIoAqHktqPM1ijtxKqyeLsIJBod61H0reuh850hjQCINk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz7hjiOd87WdFSxvvvQ3oaBa+WPwDfb1T/fcaiJbQ6R5VUCGWWC
-	aA2AwfgAyGcMGwEX1botl3W4/m/rcLdrEv8QPltk7OsbguU2KjKnYxEj
-X-Gm-Gg: AY/fxX7+mVlPTVSNWEYumTTE4sKNUHSiLsmmwAa2GsJKgUgAkpIB+9jYiNZ7bIfd6iN
-	jnBPWUBfrSVrqMQzmV3d8ZHrAO1xv1FthxkDDtMUkyVRDVpAz0EIilzKgVBSkMaD09j69/tt3Ke
-	+Lbq/XNMkMk64a4En2AI7y+Pcng8GBPZpZ+GdUFMQe0Y8zazytXaJBAnYPiQ2xCfEeJFjdjb8QJ
-	N/EMXJJzVb8rn7HwFWY4ogIewriY4qCcRnQpmV6VBWDytRmP5o9ONteYIiva9oOmsaZXuettQJj
-	r1wnzF0wBETd9tGy3fTmcx8QxC8o+7QmPKXWysTCrMPB2dAXwU0pgN3Ci7bTG+KcXKFIUqog1Aq
-	4WiBgxrRcsE74mPxgveYPznmqJj1fqCxWOCdJB/d6SxrINHrOJv7TIe+k3KgVyZ0S++NLXjwWfx
-	2Z83zwzrfPd8f6Qdtj76uW0LCfIDr587uPbXAETmDbbdPC6a4UydEguVHEsCs=
-X-Google-Smtp-Source: AGHT+IHV4Iszd+K6pE+L70YOIdvHkZVJ03UYXalyKOYspoVp8AFbIBx4gAlLx501zb5azUo1ikN80g==
-X-Received: by 2002:a05:6a21:6d89:b0:244:d3d0:962a with SMTP id adf61e73a8af0-366e0de878dmr8196886637.22.1765484871216;
-        Thu, 11 Dec 2025 12:27:51 -0800 (PST)
-Received: from ?IPV6:2600:1700:e321:62f0:da43:aeff:fecc:bfd5? ([2600:1700:e321:62f0:da43:aeff:fecc:bfd5])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c0c2ae4e3casm3142680a12.21.2025.12.11.12.27.49
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 11 Dec 2025 12:27:50 -0800 (PST)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Message-ID: <f17d93db-f96b-469d-88f0-0878a0fc9fe7@roeck-us.net>
-Date: Thu, 11 Dec 2025 12:27:48 -0800
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="XZ5xyrVH"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2ceaf0308;
+	Fri, 12 Dec 2025 08:28:44 +0800 (GMT+08:00)
+Message-ID: <7a24821b-d54e-4463-9274-215c027c9be2@rock-chips.com>
+Date: Fri, 12 Dec 2025 08:28:41 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -70,86 +28,86 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RFC 01/16] dt-bindings: hwmon: Convert
- aspeed,ast2400-pwm-tacho to DT schema
-To: Andrew Jeffery <andrew@codeconstruct.com.au>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Linus Walleij <linusw@kernel.org>
-Cc: Joel Stanley <joel@jms.id.au>, linux-hwmon@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org,
- openbmc@lists.ozlabs.org, linux-gpio@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-crypto@vger.kernel.org,
- linux-iio@vger.kernel.org
-References: <20251211-dev-dt-warnings-all-v1-0-21b18b9ada77@codeconstruct.com.au>
- <20251211-dev-dt-warnings-all-v1-1-21b18b9ada77@codeconstruct.com.au>
-Content-Language: en-US
-From: Guenter Roeck <linux@roeck-us.net>
-Autocrypt: addr=linux@roeck-us.net; keydata=
- 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
- np3900V20aS7eD9K8GTU0TGC1pyz6IVJwIE=
-In-Reply-To: <20251211-dev-dt-warnings-all-v1-1-21b18b9ada77@codeconstruct.com.au>
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, jh80.chung@samsung.com, ulf.hansson@linaro.org
+Subject: Re: [PATCH] mmc: dw_mmc: Add a defensive check to prevent potential
+ null-pointer dereferences in dw_mci_runtime_resume()
+To: Tuo Li <islituo@gmail.com>
+References: <20251211161313.3994317-1-islituo@gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20251211161313.3994317-1-islituo@gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9b0ff5c74c09cckunmbded2167f39ea
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGRpNSVZMSx9KTxhKHR1MHUtWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=XZ5xyrVHFQZ96VXwUrt6PoPep1GSrcM2f3qoVdCx1xW9CVhkvUglDwW9fTPWF7yqnpp6elp38Nt1bxaFSJdp9tXbn0Nf5tKV6VhFS7ekK4hXPY/reHzQzbL43jqKXUY/pNzw+HApebSElKZQ4ZRG4lFWYEWah95WEPsgyBFu8Ls=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=1sGwBwu5F1nw5XMjQFO6kho0tSEuU2FRafWbo1kKGCU=;
+	h=date:mime-version:subject:message-id:from;
 
-On 12/11/25 00:45, Andrew Jeffery wrote:
-> From: "Rob Herring (Arm)" <robh@kernel.org>
-> 
-> Convert the ASpeed fan controller binding to DT schema format.
-> 
-> The '#cooling-cells' value used is 1 rather than 2. '#size-cells' is 0
-> rather 1.
-> 
-> Some users define more that 8 fan nodes where 2 fans share a PWM. The
-> driver seems to let the 2nd fan just overwrite the 1st one. That also
-> creates some addressing errors in the DT (duplicate addresses and wrong
-> unit-addresses).
-> 
-> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
-> Signed-off-by: Andrew Jeffery <andrew@codeconstruct.com.au>
+Hi Tuo,
 
-I am not sure I understand what the plan is here. I am assuming it will be
-applied through a non-hwmon branch.
+在 2025/12/12 星期五 0:13, Tuo Li 写道:
+> In this function, the variable host->slot is checked and then dereferenced
+> in several places which indicates it can be NULL, for example:
+> 
+>    if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+> 		dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
+> 
+> However, in the following cases, host->slot is dereferenced without a
+> preceding NULL check, which introduces a risk of null-pointer dereference:
+> 
+>    dw_mci_setup_bus(host->slot, true);
+> 
+>    if (sdio_irq_claimed(host->slot->mmc))
+>      __dw_mci_enable_sdio_irq(host->slot, 1);
+> 
+>    dw_mci_enable_cd(host);
+> 
+> To prevent such issues, add a defensive check to ensure host->slot is not
+> NULL before dereferencing it.
+> 
 
-Acked-by: Guenter Roeck <linux@roeck-us.net>
+Thanks for your patch. we plan to remove the slot design
+entirely soon, probably this cycle.
+
+> Signed-off-by: Tuo Li <islituo@gmail.com>
+> ---
+>   drivers/mmc/host/dw_mmc.c | 17 ++++++++++-------
+>   1 file changed, 10 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 9e74b675e92d..e74dea0a32d4 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3670,15 +3670,18 @@ int dw_mci_runtime_resume(struct device *dev)
+>   	if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
+>   		dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
+>   
+> -	/* Force setup bus to guarantee available clock output */
+> -	dw_mci_setup_bus(host->slot, true);
+>   
+> -	/* Re-enable SDIO interrupts. */
+> -	if (sdio_irq_claimed(host->slot->mmc))
+> -		__dw_mci_enable_sdio_irq(host->slot, 1);
+> +	if (host->slot) {
+> +		/* Force setup bus to guarantee available clock output */
+> +		dw_mci_setup_bus(host->slot, true);
+>   
+> -	/* Now that slots are all setup, we can enable card detect */
+> -	dw_mci_enable_cd(host);
+> +		/* Re-enable SDIO interrupts. */
+> +		if (sdio_irq_claimed(host->slot->mmc))
+> +			__dw_mci_enable_sdio_irq(host->slot, 1);
+> +
+> +		/* Now that slots are all setup, we can enable card detect */
+> +		dw_mci_enable_cd(host);
+> +	}
+>   
+>   	return 0;
+>   
 
