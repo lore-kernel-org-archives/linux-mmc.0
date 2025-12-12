@@ -1,107 +1,95 @@
-Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from codeconstruct.com.au (pi.codeconstruct.com.au [203.29.241.158])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAA0B2874FB;
-	Fri, 12 Dec 2025 22:44:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F204D4502A;
+	Fri, 12 Dec 2025 23:06:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.29.241.158
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765579498; cv=none; b=RDVGJuvtwWnB50OLfFa2KgXmtmZzNE1VYmYsWlf+v9QZxA1rVHykk1kGhZ3YvSPe+nBx2m+wEcboRfVuEpGzckw1SwaP7SXvCHEL4rs1IdLFCikqaYJtcSYl8y9p6fjHqi9gqDEW+nH2fDL8BwWXElt95SCxKk3O3wwtldtVXiQ=
+	t=1765580767; cv=none; b=DUcxMXiCcPavfWSrkQ5h1f2qPvxHsKFVIYrijYvJ+gpFbXMtCS+93d030/bEvLztPLl3fHf69MYo5oCx/CfzaCAHGsTDI8u71sVFuh32iDo6fhX/QLJkuQFzfb4F+2y85A2dnSVhE0N8/tAYbX4ARgiYl2ylTf5eaAQ6WhBBQrQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765579498; c=relaxed/simple;
-	bh=OIyVM6E2jjnCI4e64mE50nhFMC8YY4mZA0yBwdNNHOc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=FNnpXr6mOyRy6EOC5TvCaDtN7ChnXzwhVyPyaWsJTp+LBlGUlMQTyWWLljboXaialN8HqKUbv733XsMcwI+vO9ofcwSUXksgqJztnydlC+Qwuj+JCjXasffYA0mEErq/pg+faHezixUTNfzk97c0roFdWDD33xnDGBs54Pnevsw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=WbJJCdHM; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
+	s=arc-20240116; t=1765580767; c=relaxed/simple;
+	bh=DQY0w1fKayo2dm/UmdPeUlums+FVDB79JNxL96B2CsY=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=TyQI3+YRyZkzLQAbGQfgKOqC8PD+LUYhEXGerGD2uwks7Nj8PX0KlZLfpZzL+cEhE8ElvFAMEzo/cGjNKqBIqDenIrCerYiEnIbyW9nuEdVmOmCmKcI+Qz1gMM1VuPWhm39J2UczxeRBScSPzSx1bfHBzYBh0fKjDVdXQqjtsvA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au; spf=pass smtp.mailfrom=codeconstruct.com.au; dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b=jiFkvtOO; arc=none smtp.client-ip=203.29.241.158
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codeconstruct.com.au
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="WbJJCdHM"
-DKIM-Signature: a=rsa-sha256; bh=OIyVM6E2jjnCI4e64mE50nhFMC8YY4mZA0yBwdNNHOc=;
- c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1765579474; v=1; x=1766011474;
- b=WbJJCdHMhCtEBqknfMmY9TjyDu897IeEWZqEGa/stAH3HmI5/tfv0itmwSExzYNagE4GNg1U
- ZxUlNxN9Yii8R2LnBm0frkGyj/FOJNLlapSmBlLlvOuFJgq7U+iioQ+xYJIZ6hsm//6m2fJLI3T
- 0Am7Kwixs/rDWXPgM6pOSqBBsGWcTqSv2f4AcYIwOztzuPJ/D6ccc0BCci05j2bHyWRshz1wGQY
- NaWUVl4mYnzjUmWzSF0eUgPXoHu6we5QxAcAO6B+TZcsFTnx+d+aLkp9DS3ntJEwntr3tGrxfMY
- mQ1l8nPzPkVlFs81ZzO7cizmtHGPueIKENEIJMi8929Rg==
-Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id 8bfa23d1; Fri, 12 Dec 2025 23:44:34 +0100
-From: Duje =?UTF-8?B?TWloYW5vdmnEhw==?= <duje@dujemihanovic.xyz>
-To: Brian Norris <briannorris@chromium.org>, Karel Balej <balejk@matfyz.cz>
-Cc: Johannes Berg <johannes@sipsolutions.net>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
- Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@bootlin.com>,
- Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
- Francesco Dolcini <francesco@dolcini.it>,
- Ulf Hansson <ulf.hansson@linaro.org>, Frank Li <Frank.Li@nxp.com>,
- linux-wireless@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
- phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
- Peng Fan <peng.fan@nxp.com>
-Subject:
- Re: [DONOTAPPLY RFC PATCH v2 4/4] arm64: dts: samsung,coreprimevelte: add
- wifi node
-Date: Fri, 12 Dec 2025 23:44:33 +0100
-Message-ID: <5962754.DvuYhMxLoT@radijator>
-In-Reply-To: <DEWJTWZ6Q51B.13HQYMDJZRFWA@matfyz.cz>
-References:
- <20251026182602.26464-1-balejk@matfyz.cz>
- <b92172f3-10f4-470f-b90a-121ff7fea988@dujemihanovic.xyz>
- <DEWJTWZ6Q51B.13HQYMDJZRFWA@matfyz.cz>
+	dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b="jiFkvtOO"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=codeconstruct.com.au; s=2022a; t=1765580756;
+	bh=x5l4phBTQ5s3tak8rbu73PqDDxyijhO9BxipaFMLBH4=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References;
+	b=jiFkvtOOi1rI+ninI9Q/X+ONt7F0b8K8Rtwkl/uaSOPD7NAZAPpRNpd7GPDC5TIed
+	 ITcpORYrpcHFtU2o2l+Zy1N+h6ZB2JsFmCrExwlHN4bxLny2EC+BBe262gzuKEILVs
+	 LF2Mv+hq9Y0LnLOLiBRBlK+6VIX27ZX+ch2SPWSBORcBR4lc0a/w6pmqZSFVq2TRoW
+	 2gjww3rFueIk87oOb+83aKxIDBVxL3I/IcpyOx5au3kcJTaXPvpYReuuNqW42GMeVg
+	 kRmwx2MntlwLb9dcRj9Ad6S7kznj+oalmwbE/kszNE91aXFQdGvYYBXt49KwsoKpX7
+	 j0V4K1M6Te7Cg==
+Received: from [172.16.11.106] (fpcf41bac9.tkyc510.ap.nuro.jp [207.65.186.201])
+	by mail.codeconstruct.com.au (Postfix) with ESMTPSA id A6D3C64DF5;
+	Sat, 13 Dec 2025 07:05:50 +0800 (AWST)
+Message-ID: <35ec28a70d360b2139742e9f04ff77e4a907cd2b.camel@codeconstruct.com.au>
+Subject: Re: [PATCH RFC 00/16] Eliminate warnings for AST2500 and AST2600
+ EVB devicetrees
+From: Andrew Jeffery <andrew@codeconstruct.com.au>
+To: Rob Herring <robh@kernel.org>
+Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>,  Linus Walleij <linusw@kernel.org>, Joel Stanley
+ <joel@jms.id.au>, linux-hwmon@vger.kernel.org, 	devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, 	linux-aspeed@lists.ozlabs.org,
+ linux-kernel@vger.kernel.org, 	openbmc@lists.ozlabs.org,
+ linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-crypto@vger.kernel.org, linux-iio@vger.kernel.org
+Date: Sat, 13 Dec 2025 08:05:43 +0900
+In-Reply-To: <20251212150631.GA3997751-robh@kernel.org>
+References: 
+	<20251211-dev-dt-warnings-all-v1-0-21b18b9ada77@codeconstruct.com.au>
+	 <20251212150631.GA3997751-robh@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.56.2-0+deb13u1 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Autocrypt: addr=duje@dujemihanovic.xyz;
- keydata=
- mDMEZokhzhYJKwYBBAHaRw8BAQdAWJZ0hsI/ytTqHGFV8x6tzd5sB596cTeeDB4CQsTf+wC0KUR
- 1amUgTWloYW5vdmnEhyA8ZHVqZS5taWhhbm92aWNAc2tvbGUuaHI+iJkEMBYKAEEWIQRt/0HWDf
- MUtbdrpjCtMZNSRY+tAwUCaJ5XkSMdIEFkZHJlc3MgYm91bmNlcyBhcyBvZiB+MzEvMDgvMjAyN
- QAKCRCtMZNSRY+tA/N/AQDth3Xl3wNcETvWPqqfYfyw4BFqbOD05A/W0/G0ZIjFzgD+PZVts3sN
- p5WuEwIxUrWxwavWJQBJwhXeWdru5ol82gmImQQTFgoAQRYhBG3/QdYN8xS1t2umMK0xk1JFj60
- DBQJmiSH/AhsDBQkJZgGABQsJCAcCAiICBhUKCQgLAgQWAgMBAh4HAheAAAoJEK0xk1JFj60Dlw
- 8A/i4lPOL7NaYoYePDql8MaJaR9qoUi+D+HtD3t0Koi7ztAQCdizXbuqP3AVNxy5Gpb1ozgp9Xq
- h2MRcNmJCHA1YhWAbQoRHVqZSBNaWhhbm92acSHIDxkdWplQGR1amVtaWhhbm92aWMueHl6PoiZ
- BBMWCgBBFiEEbf9B1g3zFLW3a6YwrTGTUkWPrQMFAmaJIc4CGwMFCQlmAYAFCwkIBwICIgIGFQo
- JCAsCBBYCAwECHgcCF4AACgkQrTGTUkWPrQPUYAEAlVKitl0w6Wun+hC0JIf8bnc0TnrH8kcDxV
- f5lAF38fcA/j8RxR/p558NTFUyHZt2Sa5AqxVkaA4aJekySytWe1YGuDgEZokhzhIKKwYBBAGXV
- QEFAQEHQMRz0l4Dnk6Vl9YqC+ZGDDpr8SkFDyYOXqdBMGad3VccAwEIB4h+BBgWCgAmFiEEbf9B
- 1g3zFLW3a6YwrTGTUkWPrQMFAmaJIc4CGwwFCQlmAYAACgkQrTGTUkWPrQMbkwD+K6jiXYYMRnV
- l/5dpL//wXB1cM72ceR9tXYweMXg1lfABAOugzMF0xypW9zwYAEWVNOAaPsqtEPPYfBY3IXxl6m
- sB
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="utf-8"
 
-On Friday, 12 December 2025 22:17:12 Central European Standard Time Karel=20
-Balej wrote:
-> Duje Mihanovi=C4=87, 2025-12-12T15:55:48+01:00:
-> > On 12/12/25 09:36, Karel Balej wrote:
-> >> Not having any board schematics, I don't really know what exactly the
-> >> regulator's purpose is. As I mentioned in the commit message, the
-> >> communication with the chipset seems to work even if this is disabled
-> >> (e. g. FW loads, networks can be scanned for,...) which doesn't seem
-> >> like it should be the case if this was a main power supply for the bus,
-> >> only actual connecting to networks doesn't work (gives
-> >> CONNECT_ERR_ASSOC_ERR_TIMEOUT errors).
-> >=20
-> > To me, this strongly suggests that the regulator powers the WiFi
-> > transmitter or at least a part of it (such as the RF amp).
+Hi Rob,
+
+On Fri, 2025-12-12 at 09:06 -0600, Rob Herring wrote:
 >=20
-> Something like this occurred to me too but would the chip even see the
-> networks if this was the case? Although you are right that it could only
-> power some specific part of the radio.
-
-AFAIK you don't need the transmitter to capture and parse beacon frames. Of=
+> Don't you see warnings for at25:
+>=20
+> =C2=A0=C2=A0=C2=A0=C2=A0 89 (atmel,at25): 'size' is a required property
+> =C2=A0=C2=A0=C2=A0=C2=A0 89 (atmel,at25): 'pagesize' is a required proper=
+ty
+> =C2=A0=C2=A0=C2=A0=C2=A0 89 (atmel,at25): 'address-width' is a required p=
+roperty
+>=20
+> These are due to using the deprecated (since 2012) at25,byte-len,=20
+> at25,addr-mode, and at25,page-size properties. I think it has been long=
 =20
-course, connecting to networks is a completely different story.
+> enough you can just replace them with the new ones.
 
-Regards,
-=2D-
-Duje
+I don't see them, no. The series targets only the aspeed/aspeed-
+ast2{5,6}00-evb.dts files, and neither of them contain at25 nodes. grep
+suggests its only IBM platforms:
 
+   > git grep -l at2 ../arch/arm/boot/dts/aspeed/*.dts*
+   ../arch/arm/boot/dts/aspeed/aspeed-bmc-ibm-everest.dts
+   ../arch/arm/boot/dts/aspeed/aspeed-bmc-ibm-fuji.dts
+   ../arch/arm/boot/dts/aspeed/ibm-power10-dual.dtsi
+   ../arch/arm/boot/dts/aspeed/ibm-power10-quad.dtsi
+   ../arch/arm/boot/dts/aspeed/ibm-power11-dual.dtsi
+   ../arch/arm/boot/dts/aspeed/ibm-power11-quad.dtsi
+   >
 
+Once I've got the pieces of this series merged I'll encourage platform
+owners to start cleaning up their own devicetrees on the basis that
+there are no longer warnings that aren't their problem.
 
+Thanks for your feedback so far!
+
+Andrew
