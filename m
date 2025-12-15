@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 571E62C15BA;
-	Mon, 15 Dec 2025 12:11:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75DAE2E6CA8;
+	Mon, 15 Dec 2025 13:58:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765800678; cv=none; b=oWsrK8IgVgEZhMoPyVN1XbYNAb0Nnsval+jtKbsp9dA+nzh9B+mEqM8UOzqbAbzlx7WIuDhBYzeVbx1dGoNNW2RL9CkMh65NhtCsVBWeLWowaHqlCWn4P2UVDYHfkgqqL/2nUIFCBiyuWBBkuqpsPfAEj/Ptz6vmMc42dLuAAgY=
+	t=1765807134; cv=none; b=MQTXUWHIAD/dZrp7jW7IH9B1NLJtE7Ft4Mk81TkbLrs3L8ziUzVNjYkUFzR05lTcMHHH0hW9aZWjYz3Up8SVosV12pRpWQAChBUqqJC2GVCRr0RB/PNmdGRxo/DCoCTW4H46qIYLfGwWCz9/rRHDmUf8VJRulHAV0gyaknx0G60=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765800678; c=relaxed/simple;
-	bh=EIuw3kky5DDFeHYsBaL8oLPR2njP7DMB06/mXN26rSE=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:Cc:References:
-	 In-Reply-To:Content-Type; b=UVm3viLqurwSN6eL6rrz8g8rJd1NrBCNLYD68WwaDFXyktvFKviiiJ/0pbilPUWDPvrhnom9Sj0+7bvDZwfjKRZvZFoEDwlqcrpLPMD6VSwqvy17/03J06pFmVP+G8PrNDl+Z0abIGdODaxK2+xDicVdcZ7tM+TUwtVydPd8Mug=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O0Hem/DA; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1765807134; c=relaxed/simple;
+	bh=PoUqb8gmHE4HMrxpduUbP2u9sO6TBCXlZEd6DcQ60E4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=lfeGZU53bHC2JcTz9Y44e5/LhktR96OZrfjvSWU6ukAT6VwZ7sCGIEw7/gGebSiAv/QC43X8vtmmENP2AOWE3AWObW6nPCH64b1Yc/d9SSxKS4U6fosRKqWtlOT4hjUFHgGP6RiA8LszzA91zyA04mH0hQmeIyvUMzyhmEv6JHs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IekdMkio; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O0Hem/DA"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 33F56C4CEF5;
-	Mon, 15 Dec 2025 12:11:09 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IekdMkio"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68932C19422;
+	Mon, 15 Dec 2025 13:58:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765800675;
-	bh=EIuw3kky5DDFeHYsBaL8oLPR2njP7DMB06/mXN26rSE=;
-	h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
-	b=O0Hem/DANxPvlUoElgAYpF+Rq4dmsPLo5lcLCWKsn+Fe0YzZg9Sm2RfFhvD1FLNXA
-	 2jujBbSpdnReECAmi7u0i/4X7AN12TlAoIBYKzuJfOKP8yYRxAXK3pB/Ij9FU/aYfT
-	 FxChaiNt19brgYl1t2edisQuLl4BDa7pO4R9YJmCEwobaNrf6vjHr7/FJFqqhPVh4t
-	 kC0opuHozJ682PxFM4Zs3xHAXoeEMaBDwBNKKI+I7PdhAUh81r78xrAew1EV+U4fl2
-	 Viric0eoDGy7ZqwUs7xBVX43nXvIZba+fyPxXsYgiossxaofK2hSKQTtp/JyHjo1i4
-	 G+ESJz1AImZnQ==
-Message-ID: <1fc9ac39-231b-4fce-a354-22a21d126363@kernel.org>
-Date: Mon, 15 Dec 2025 13:11:06 +0100
+	s=k20201202; t=1765807134;
+	bh=PoUqb8gmHE4HMrxpduUbP2u9sO6TBCXlZEd6DcQ60E4=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=IekdMkioh69EXLkERwFumoEHsdTbf/Nrtnz6C/N9p65Pl61KECGBQhFfgxl7GD686
+	 oO2hga7OT/x0X55mTPoPNvbCzYgtNu78thGPhSlNrt8bLV6AURQp+UqbPI7eD3XX5w
+	 pGaRjGWQDXELd0lo5/5j51L2jh12eCwt1gqrXAO4T6wv19dEUiIOvX4LzYtUnntnkb
+	 CkfeBfncf0Z3h+Ph2cTtiyEvRSaIv9DxRtVLQa0w0DaZaNyhCXohVsDcNmoQEDGUBJ
+	 LRXfTnpFF0f/jlHKAS3rWquvHpSaJ4ndJIy+l7OlUKSdtwBJJ07/0J6FBei2F0BrTB
+	 OcmdEBBIkYnQw==
+Message-ID: <e1ae9c20-b306-4b4a-94f1-c629168c62e9@kernel.org>
+Date: Mon, 15 Dec 2025 14:58:45 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,9 +35,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 1/5] dt-bindings: mmc: Add dll-presets values for HS400
- and HS200 modes
-From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH v6 0/5] mmc: sdhci-msm: Rectify DLL programming sequence
 To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
@@ -48,11 +46,9 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
  dmitry.baryshkov@oss.qualcomm.com, quic_pragalla@quicinc.com,
  quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
- quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com,
- Sachin Gupta <quic_sachgupt@quicinc.com>
+ quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
 References: <20251215120009.3877889-1-quic_rampraka@quicinc.com>
- <20251215120009.3877889-2-quic_rampraka@quicinc.com>
- <03819cd6-9f19-4c28-806b-17c7596e5299@kernel.org>
+From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
@@ -97,54 +93,22 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <03819cd6-9f19-4c28-806b-17c7596e5299@kernel.org>
+In-Reply-To: <20251215120009.3877889-1-quic_rampraka@quicinc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 15/12/2025 13:06, Krzysztof Kozlowski wrote:
-> On 15/12/2025 13:00, Ram Prakash Gupta wrote:
->> From: Sachin Gupta <quic_sachgupt@quicinc.com>
->>
->> Document the 'dll-presets' property for MMC device tree bindings.
->> The 'dll-presets' property defines the DLL configurations for HS400
->> and HS200 modes.
->>
->> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
->> different tuning.
->>
->> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>  1 file changed, 5 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> index 938be8228d66..a1a16e6e12ce 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> @@ -140,6 +140,11 @@ properties:
->>      $ref: /schemas/types.yaml#/definitions/uint32
->>      description: platform specific settings for DLL_CONFIG reg.
->>  
->> +  qcom,dll-presets:
->> +    maxItems: 10
->> +    $ref: /schemas/types.yaml#/definitions/uint32-array
->> +    description: platform specific settings for DLL registers.
+On 15/12/2025 13:00, Ram Prakash Gupta wrote:
+> With the current DLL sequence stability issues are seen in
+> HS400 and HS200 mode for data transfers.
 > 
-> 
-> So look at your DTS - this is clearly incomplete now. So obvious. I
-> don't understand why you were hiding the DTS change, you just make
-> review more difficult.
-> 
-> Anyway, your DTS says you replace some other DLL properties and nothing
-> in the binding or commit msg explains that. Neither the reason nor the
-> impact.
+> Rectify the DLL programming sequence as per latest hardware
+> programming guide and also incorporate support for HS200 and
+> HS400 DLL settings using the device tree.
 > 
 
-Plus it looks like you are adding some meaning to the entries, judging
-by the DTS. DTS suggested something here is e.g. DLL_CONFIG, so that
-meaning - including different modes - needs description in the schema in
-items.
+Please trim your CC list. You cc-ed 4 internal Qualcomm addresses and
+also internal mailing list (kernel@oss) which you are not suppose to mix
+with upstream!
 
 Best regards,
 Krzysztof
