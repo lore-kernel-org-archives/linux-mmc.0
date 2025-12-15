@@ -1,41 +1,47 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57E07334C20;
-	Mon, 15 Dec 2025 21:27:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0273336EC7;
+	Mon, 15 Dec 2025 21:27:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765834054; cv=none; b=b5hnp4bSfbPnhBZYHMoxQhhX+Nj2dOaj7a6Tn5NRUv5762/HTM0/S8QFTZZViutF6UmKq3OPVrwTA0YhXG2WEQhKMbxbMkjTxocKLIP18QB2uto0kIsod2N0jW7r+SiaCS/IqaOle/oso3kfYZqkjbJfSYy3aqD2Wfn/LWxhp2Q=
+	t=1765834066; cv=none; b=HSbGTYTQQNlJWShxQvKiyDZP46NgWnSlvYK8frvekmPbLX+UWUqLTbA3LNgtDWAfmhPz+IY+PrXch650pSGJZkrqwHUl1eOBMJHVtIfQ9Xnw4Ymv/zsmBhxuRUDk2yoK/JaQWUfjSIqjnYorplmZcvdGVKrnr0uo40C0/nh3ia8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765834054; c=relaxed/simple;
-	bh=YVuLGATlN2h9cJd8MQeg+vX5tYMnlfhZMY4/8lRcrYY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=n48ltT/KU/DUa04w+JCmyeldfT1VnX9s4gfyxvcjcqoBhQGHo/ywPLQA/halhRA7mX1CXjerHJYiYZhoJ5UEhqXl8Q6fFWcZjIZwSNdmaSrUupNZy74SPeaxnf0fC+jE1qhAA7GrEi+Rhwpl7jH/uAb2IoVja+ulWBlardLYrf8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=X5vQz36H; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1765834066; c=relaxed/simple;
+	bh=r6glPJkGDRnE9QV9s0gHGEsKWDrDjC1sCQkD22i2y8Q=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=l9NBTLsafwQ/1JQBYYAaMYiTn1bPl99ffWYK0cK94/8nEwcoiIgi50YW+cl71UIVMX0aNN+nYNLwDPXabnQVzzRQ9G2U99RhyYXC9D/3rQZflVKg/JG6CUKP3dzjaRJ1deKhl078yrZPXACD50Ja40V0VlAsV5w74tBDj26HOUA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=csoQvDWI; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="X5vQz36H"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD849C4CEF5;
-	Mon, 15 Dec 2025 21:27:33 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="csoQvDWI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F268C4CEF5;
+	Mon, 15 Dec 2025 21:27:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765834053;
-	bh=YVuLGATlN2h9cJd8MQeg+vX5tYMnlfhZMY4/8lRcrYY=;
+	s=k20201202; t=1765834065;
+	bh=r6glPJkGDRnE9QV9s0gHGEsKWDrDjC1sCQkD22i2y8Q=;
 	h=From:To:Cc:Subject:Date:From;
-	b=X5vQz36HGMvOzHuStIBNzaYqpusVlvlkryJEJdBD+7yL1LPHdC4JYdZ875tXyL3oL
-	 qaaLpgTBvyB/UCe8mZRPHQpDS+cLGzrOE1hFt6g1fYSwPfGXnFCHGkA6OdsFpYHqgW
-	 MYQ3BEvwolJkN0UO2hrI24bvJIJMe00cl/sgRoZljIsM/XAaYxNbWjAjpuKiuq0cKA
-	 Fdm6WQs5T0/C2v8SVtL6BTXDfgQCuzKHDJ92E3F9cPjkbeleJ0HZ8ExxnU0A7COGG7
-	 tH0h8DRP2KfdoI9iUJFl+fJ4zTt6efUL6uyTktTABQ9Gwh8iWu26OOAtsSVR8/Ctgi
-	 ShY5MH4UtQ+gQ==
+	b=csoQvDWI3ZDPGBSuHtp9FdEBk/htR+inuruaN0aSZRRB92WGewLRzoLVisoHSyWsF
+	 vsbOVfCx/dpec7vtYK7bFvO/ECr03cXSIhxy9p/dh/6TRIq2A8FZXBzpsJkeYFO4ep
+	 X9gXOhXXGUOchXNlscGNc9KgLuvU2+jFyIg3ktZ5vONkWEtjP0bklJqI/YCatWGQKn
+	 rpAMCwPayvG1z3uZO1f6g2Ymlm1HNY2PFxuS4FLzs0qpvYsP/VmY6FrIIa367m5fYI
+	 CWTmVV9a/V2+58dUE7LT0tW/SPWi3DWeGd39wuY3IN8jvVbblvmraf8R71eqtjTiLw
+	 AzEuZ8yhS360g==
 From: "Rob Herring (Arm)" <robh@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc@vger.kernel.org,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Saenz Julienne <nsaenz@kernel.org>
+Cc: Ray Jui <ray.jui@broadcom.com>,
+	Scott Branden <scott.branden@broadcom.com>,
+	linux-mmc@vger.kernel.org,
 	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH] dt-bindings: mmc: cdns,sdhci: Drop required "resets" on AMD Pensando ELBA
-Date: Mon, 15 Dec 2025 15:27:27 -0600
-Message-ID: <20251215212728.3321308-1-robh@kernel.org>
+Subject: [PATCH] dt-bindings: mmc: brcm,iproc-sdhci: Allow "dma-coherent" and "iommus" properties
+Date: Mon, 15 Dec 2025 15:27:36 -0600
+Message-ID: <20251215212736.3321550-1-robh@kernel.org>
 X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -45,27 +51,33 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The AMD Pensando ELBA DT defines no reset for the SDHCI, so it is obviously
-not required.
+The Broadcom iProc SDHCI controller is DMA coherent and/or behind an IOMMU
+on some Broadcom SoCs, so allow the dma-coherent and iommus properties.
 
 Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 2 --
- 1 file changed, 2 deletions(-)
+ Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-index ac75d694611a..6c7317d13aa6 100644
---- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-@@ -134,8 +134,6 @@ allOf:
-           items:
-             - description: Host controller registers
-             - description: Elba byte-lane enable register for writes
--      required:
--        - resets
-     else:
-       properties:
-         reg:
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+index 2f63f2cdeb71..65bb2f66f8cf 100644
+--- a/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+@@ -26,9 +26,14 @@ properties:
+   reg:
+     minItems: 1
+ 
++  dma-coherent: true
++
+   interrupts:
+     maxItems: 1
+ 
++  iommus:
++    maxItems: 1
++
+   clocks:
+     maxItems: 1
+     description:
 -- 
 2.51.0
 
