@@ -1,292 +1,121 @@
-Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
+Received: from mail-yx1-f50.google.com (mail-yx1-f50.google.com [74.125.224.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB0B833554B
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Dec 2025 15:43:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 571DF223336
+	for <linux-mmc@vger.kernel.org>; Mon, 15 Dec 2025 15:44:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765813429; cv=none; b=UJhqLcNh/jCoZp7BgFORkhvcilLOHkbXedPiEZSw7ioAw2D2D3LITrSYilypbDUD3FkTvpLN7XS+vFzOECJC808TJsxrVpNzl1x4nHLBSaYwlun8IqlD60rednszi4WFDO+VDTV4wlXJspr7sncgnPVJi6hs9bAGQRkH8ulL2EI=
+	t=1765813458; cv=none; b=FwOaD4oORVXYD5wB/oyeII6Hs/T/+FksUqWO+2mFi48YRufaof0y/ygWMDy5vbXtDte7ngvO2uMh3zRh9SJdpwNCtlbSECJIU7XCOYLtlHMvaGxB4+o7jJkpez4DXZ8631uMBLG8vTdZaa0UF7Yi1XoVr0Rk6/z+d0wBj8evtn8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765813429; c=relaxed/simple;
-	bh=jbhSTUe4r1yhsr1SieK/5eiyWztSVs/GJZj2RjQNTrk=;
+	s=arc-20240116; t=1765813458; c=relaxed/simple;
+	bh=OPA+fxuief7E2SBlAHatD0kmyRya8xhOrAuKA0YWco4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OIW9lbLg045e25UQfUtC2t2pjbOKYXO/TfYQ4oaHP+e8HG38ZcOV3fMCTd4Mm3C3c7fn74j8edTlDwut603wvptiCptSXFDh1o76iMgZ/kaMCbCOH9f8vOrFep3AnAtJhaaTK91sdQQUpcHn1HIOiFsdFJXI6KJMo2ydm/b6W/I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bkF0pWpV; arc=none smtp.client-ip=209.85.167.48
+	 To:Cc:Content-Type; b=TGmxL81WJDxanPv1QkqSJ7jydf61XZfQ3PVtZSbF45rJdBQi1dGGR1kKvxtjo4LiCpBkroNJ5/6uvQ15usmuYIrb099eQrteu5fc65QpXQdsGr4jdyMq07863XZLIGRKq8gAVslCBwL651K8mQ+Ev/uR91oHt4milFTGSQRdlNo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=r7DOTqze; arc=none smtp.client-ip=74.125.224.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bkF0pWpV"
-Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-5959105629bso3800362e87.2
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Dec 2025 07:43:44 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="r7DOTqze"
+Received: by mail-yx1-f50.google.com with SMTP id 956f58d0204a3-6446c1a7a1cso3164977d50.3
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Dec 2025 07:44:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765813423; x=1766418223; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1765813455; x=1766418255; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=h1mPhr8UxqwWoKU4LPsArNXLaNjkp/q7fh9QZ2Vv5go=;
-        b=bkF0pWpVgMs+MsNynYgG0AON2ujETucxRuHgKGTxK2IJ97MgDswk/uVAUGXJlik3Sj
-         E37IjRTVqpjB3+E6OIxSkBSQbZpmo3z6sT8/ivwXXRt68XeHNyHPSovascYqlNKBSYjL
-         XBVLpis9a8g5aLLIg+Dgf+0v+5GALtKRVqWVL7syW86QmIlsNNzWh2qArzqEmNsv+g2B
-         /cfZkBFSDwr1ulgm/5I9jSgmyu0Wybl3X0qSNHaK4eksWgk3PhonoxKJWprJifjdeKp4
-         jDOGvbgk9W/TVY/tcx4YPggLsrfMvn8E9AimOU+aKn+IiQZr3ew8Iuhmj2If4Dhzapww
-         dYbQ==
+        bh=HxLO4eXVEbQkA9BtFI3B3Xjfx5jZwIu/7GRR4IzCyHo=;
+        b=r7DOTqzeObSkHf+sg/lGcHd5gPkdSbljTGLex51kN5xgmjmv3LR7AcyBsJKXUbFcLC
+         cdg/MTruMWdHoc4x2YCvFZSg6HEknSENopsZPmWo6kqz/FRbibuSYR5GT5J4fKQlrqia
+         LgN4b9USM7YKiWS4aQtqqLYaSwgxT3Umn38mL2GfLxX0SjmeT6mshRsVeQPScmrvUVPR
+         sVOLA6Nr3Q/Q70CiUtdPRpN6K6fSc7CpXKd0m1Dd0KEzDOHaUn/0BIMnAdXC5NaiH+WO
+         9ArPMt400c7dRys8WIx6oCwUDJhGEjx3rZMbIu04WKc3c2DUv+LDlwXtOusibUi0E6zX
+         nXqA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765813423; x=1766418223;
+        d=1e100.net; s=20230601; t=1765813455; x=1766418255;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=h1mPhr8UxqwWoKU4LPsArNXLaNjkp/q7fh9QZ2Vv5go=;
-        b=GQ2FfIb7jNOpODBS7oQOgN4IClh5kBiS0I9xfLWZEnd9jW1KV6eRnHY0O/rdnfMYjm
-         7Qe9Sk7PxpFi4krk0laDWjyJt5UJ0z16P/Gk4JllfUdM1XOoyzvqFLti7vLzCfpJI/EN
-         CBTJ/JWeB0pwX4Ea+hiIKDpD8MvE/haWmQe5ebQHqs90t6W2rMUGFveEYRa3nInJimUD
-         Ctw91/akTkyCSYUpSvcwjB6Ug7QXTJ7HU5XA1a0cGpm5OGAt9GKS9Vm+1ZDUDVDIHGsZ
-         1DJMEVIJdUIdYmm8j2MC9BOBrR+XEn0fvC/JtmcRMKlzn0cTzZbkwF6o+BMjlifmJFjX
-         O8Pg==
-X-Forwarded-Encrypted: i=1; AJvYcCWZZxGpk49gguyGZAhNA4e2kUlXvKEqRK4ed96WlZznz0TEuU2sb2maJu5/hm9+0Hhl2lqg63I7X2A=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx6HRkYY5OxmI2F6WsLuC5glTfaDFw5gRBuIEaLTUGhW4SiFvBe
-	uCxr1dVBQkOziEAMfzO8ct7hwIJYr7X2kUHte4XG8iZbJv9dBLsU5xOHd4uT3AXi7f9u3jxAt6z
-	q1acm4cELIW6BJrVmfy/+qvliD3tjz9w3GWvt4MYVEA==
-X-Gm-Gg: AY/fxX4WTdN7I9FKWFu96fOcrKaOf6AXXbI6YnAb4hr2bV44jrOtclB/mwvLxRHjSfV
-	tHwjnGGP/w/5QVlSNz4lX+bn3GrVoNc8z3oJYM7teYFEKT2NClcJK5abqzMxVyFTarJ6Z1IuQKC
-	AgYFBVy0KDnft22KH67kgd42672FwZhsxOQUotIX1cEBob8feTpvLTm0bkKBCcFKCLTO48NomVJ
-	lGJFHPeo5xaFWszVkFte4Ct8cPBZ2vwwYLFO00/JLMgic1lvwHr7XWD+cNCLiX+ZVdZZFC1
-X-Google-Smtp-Source: AGHT+IE3Jgck3bZQ02V3Ywy5d1qs46dgCJ2cwUL3Qp0SQkocT/ZlCk/sk6Q7Vhcfa0KPJst+iqW5iFHTALXoIY9Nb4M=
-X-Received: by 2002:a05:6512:12c7:b0:594:2d53:545 with SMTP id
- 2adb3069b0e04-598faa97a04mr3339735e87.46.1765813422439; Mon, 15 Dec 2025
- 07:43:42 -0800 (PST)
+        bh=HxLO4eXVEbQkA9BtFI3B3Xjfx5jZwIu/7GRR4IzCyHo=;
+        b=FgxH52j6RqqfQkYMEAGwe65uH88Oi8VvcRnv0v44bbZKTl5XVPX1QMtDx2jBS9BYN1
+         Tc8nB4nUA8oR0YJPyVHtIFJJVQPJpcM4PLMOzCc6IpzQoznFNQqgbIItfhH39PaxSgZN
+         2vAy0wL/+GOLx4O6zbJC1TB68G/wfvm2jLZd0pQBgaWGUVezjZ83WVg/HiEpf+7DKkFf
+         0v3PBOeVXS738CoTH/U2+p+VWiUx5G3MvSfHkX4YlwWlhLveKtNOxG2wIN9KzmZ0BCIf
+         CWfKJCl7gS8Lf5Zr8Xzx9aL9gJ2Y8SsFyehMlp/GTfYfh8w4QUEdbtElUq9soDQRGfi3
+         Q+Og==
+X-Gm-Message-State: AOJu0YxJHOgmEVUJemVKfzeAgnnW41F7mHZMJRWEC++S6A1m1Nd9ANgN
+	iJOd60CyouNYvN63TWpzcvNAFWMNIhU0UGMslq8LLDgYcqU4SEWlxVv+TzY7TE5kidQwvs06tQa
+	PcNlQYa5s52JR27093ixvXjWMjCpUpnbDrkc6cNtrHSbstKFyve7K
+X-Gm-Gg: AY/fxX5Vw3mYzlwAIQCExkVtkdfFW8WEoEn3t4sRwlWhNt03dhLAl151CWXVo8TJOYu
+	mmDwkQHwu+cc2nP8/rXg8o1mEkvAZQyEWwcFN655NVwyvIschK8Q8qOhZfwoVUcfKrK0ApEgo5h
+	naNt1JHX9iq2AXFvWNcyFYVHO6WbtKINds0aHNan7iGtl/U43KN58JcyvYy4wQ2omQlDGY0QNcX
+	mZIbcod56pyepzPQVD79CNbNMEXXPZ8NRD0c9zV87iFyk+FoojCfWP4zmye5ccW4BYMTKFl
+X-Google-Smtp-Source: AGHT+IG1uK5T0BBOLdAKplctlgz9+htwXet9zUm1yTzPSsHNKNaIyYhluNQ20EMsH/tIllKmvytz7L4txNlac1Ca14I=
+X-Received: by 2002:a53:b205:0:b0:644:6520:eadc with SMTP id
+ 956f58d0204a3-6455564e8a4mr5823439d50.50.1765813455238; Mon, 15 Dec 2025
+ 07:44:15 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251126064251.1928529-1-quic_mdalam@quicinc.com>
-In-Reply-To: <20251126064251.1928529-1-quic_mdalam@quicinc.com>
+References: <20251128052011.204735-1-avri.altman@sandisk.com>
+In-Reply-To: <20251128052011.204735-1-avri.altman@sandisk.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 15 Dec 2025 16:43:05 +0100
-X-Gm-Features: AQt7F2oQ2izP6GJIUKoN_iasULgW09Cvg1sgf5bhCj5GAinlGjPZQlAXL20QVyM
-Message-ID: <CAPDyKFqNOQW+3OCyhiQaD0FiU2tfy4OzNY+NP+gXn4RcPa_uFw@mail.gmail.com>
-Subject: Re: [PATCH v6] mmc: sdhci-msm: Enable ICE for CQE-capable controllers
- with non-CQE cards
-To: Md Sadre Alam <quic_mdalam@quicinc.com>
-Cc: adrian.hunter@intel.com, linux-arm-msm@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, abel.vesa@linaro.org, 
-	ebiggers@kernel.org
+Date: Mon, 15 Dec 2025 16:43:34 +0100
+X-Gm-Features: AQt7F2qn-ts1UtRQg5C9q5KFtRNe8QQGyZlUWTb20p_ylXQQmaJqR_8VpbxJ9Pg
+Message-ID: <CAPDyKFpshnLSa+GNOpFdQ6_Kc2ov_jofq56eq7WsqZMRVYs-NQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/2] mmc: core: Extend manufacturing date beyond 2025
+To: Avri Altman <avri.altman@gmail.com>
+Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@sandisk.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 26 Nov 2025 at 07:43, Md Sadre Alam <quic_mdalam@quicinc.com> wrote:
+On Fri, 28 Nov 2025 at 06:20, Avri Altman <avri.altman@gmail.com> wrote:
 >
-> Enable Inline Crypto Engine (ICE) support for CQE-capable sdhci-msm
-> controllers when used with eMMC cards that do not support CQE.
+> Hi Ulf,
 >
-> This addresses the scenario where:
-> - The host controller supports CQE (and has CQHCI crypto infrastructure)
-> - The eMMC card does not support CQE
-> - Standard (non-CMDQ) requests need crypto support
+> This patch series addresses the upcoming exhaustion of the eMMC
+> manufacturing date (MDT) year field, which is limited to a 4-bit value
+> in the CID register. Under the current standard (EXT_CSD_REV=8), the
+> representable years end in 2025.
 >
-> This allows hardware-accelerated encryption and decryption for standard
-> requests on CQE-capable hardware by utilizing the existing CQHCI crypto
-> register space even when CQE functionality is not available due to card
-> limitations.
+> The first patch implements the recently approved JEDEC standard update
+> for EXT_CSD_REV=9. This update rolls over the 4-bit year codes to cover
+> a new 16-year period, extending the range up to 2038.
 >
-> The implementation:
-> - Adds ICE register definitions for non-CQE crypto configuration
-> - Implements per-request crypto setup via sdhci_msm_ice_cfg()
-> - Hooks into the request path via mmc_host_ops.request for non-CQE requests
-> - Uses CQHCI register space (NONCQ_CRYPTO_PARM/DUN) for crypto configuration
+> The second patch introduces a quirk to handle vendor-specific behavior.
+> Some eMMC vendors are not yet updating their devices to EXT_CSD_REV=9
+> but still need to report manufacturing dates for 2026 and beyond. These
+> devices re-purpose the year codes for 2010-2012 to represent 2026-2028.
 >
-> With this, CQE-capable controllers can benefit from inline encryption
-> when paired with non-CQE cards, improving performance for encrypted I/O
-> while maintaining compatibility with existing CQE crypto support.
+> Thanks,
+> Avri
 >
-> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
+> ---
+> Changes in v2:
+> - move the fixup to `mmc_ext_csd_fixups`
+> - State the correct spec release
+> - Fixed a typo in the commit message of the second patch.
 > ---
 >
-> Change in [v6]
+> Avri Altman (2):
+>   mmc: core: Adjust MDT beyond 2025
+>   mmc: core: Add quirk for incorrect manufacturing date
 >
-> * Changed the variable name from ice_init_done to non_cqe_ice_init_done
->
-> * Eliminated the ICE_HCI_SUPPORT check inside the sdhci_msm_non_cqe_ice_init()
->   function
->
-> * Updated the sdhci_msm_ice_cfg() function to use a void return type instead
->   of int
->
-> * Removed the crypto_enable and dun variables from the sdhci_msm_ice_cfg()
->   function
->
-> * Revised the comment associated with the sdhci_msm_request() function
->
-> Change in [v5]
->
-> * Removed unused variable
->
-> * Added proper comment for sdhci_msm_request()
->
-> * Removed sdhci_msm_ice_enable(); it is already invoked during resume
->
-> Change in [v4]
->
-> * Moved ICE initialization for non cmdq into sdhci_msm_ice_cfg() and made
->   it conditional on mrq->crypto_ctx to enable lazy setup.
->
-> * Added msm_host->ice_init_done guard to prevent redundant initialization.
->
-> * Updated commit message
->
-> Change in [v3]
->
-> * Refactored logic to use separate code paths for crypto_ctx != NULL and
->   crypto_ctx == NULL to improve readability.
->
-> * Renamed bypass to crypto_enable to align with bitfield semantics.
->
-> * Removed slot variable
->
-> * Added ICE initialization sequence for non-CMDQ eMMC devices before
->   __sdhci_add_host()
->
-> Change in [v2]
->
-> * Moved NONCQ_CRYPTO_PARM and NONCQ_CRYPTO_DUN register definitions into
->   sdhci-msm.c
->
-> * Introduced use of GENMASK() and FIELD_PREP() macros for cleaner and more
->   maintainable bitfield handling in ICE configuration.
->
-> * Removed redundant if (!mrq || !cq_host) check from sdhci_msm_ice_cfg()
->   as both are guaranteed to be valid in the current call path.
->
-> * Added assignment of host->mmc_host_ops.request = sdhci_msm_request; to
->   integrate ICE configuration into the standard request path for non-CMDQ
->   eMMC devices.
->
-> * Removed sdhci_crypto_cfg() from sdhci.c and its invocation in sdhci_request()
->
-> Change in [v1]
->
-> * Added initial support for Inline Crypto Engine (ICE) on non-CMDQ eMMC
->   devices.
->
->  drivers/mmc/host/sdhci-msm.c | 77 ++++++++++++++++++++++++++++++++++++
->  1 file changed, 77 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 3b85233131b3..da356627d9de 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -157,6 +157,17 @@
->  #define CQHCI_VENDOR_CFG1      0xA00
->  #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN  (0x3 << 13)
->
-> +/* non command queue crypto enable register*/
-> +#define NONCQ_CRYPTO_PARM              0x70
-> +#define NONCQ_CRYPTO_DUN               0x74
-> +
-> +#define DISABLE_CRYPTO                 BIT(15)
-> +#define CRYPTO_GENERAL_ENABLE          BIT(1)
-> +#define HC_VENDOR_SPECIFIC_FUNC4       0x260
-> +
-> +#define ICE_HCI_PARAM_CCI      GENMASK(7, 0)
-> +#define ICE_HCI_PARAM_CE       GENMASK(8, 8)
-> +
->  struct sdhci_msm_offset {
->         u32 core_hc_mode;
->         u32 core_mci_data_cnt;
-> @@ -300,6 +311,7 @@ struct sdhci_msm_host {
->         u32 dll_config;
->         u32 ddr_config;
->         bool vqmmc_enabled;
-> +       bool non_cqe_ice_init_done;
->  };
->
->  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> @@ -2012,6 +2024,68 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
->         return qcom_ice_evict_key(msm_host->ice, slot);
->  }
->
-> +static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +       struct mmc_host *mmc = msm_host->mmc;
-> +       struct cqhci_host *cq_host = mmc->cqe_private;
-> +       u32 config;
-> +
-> +       config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
-> +       config &= ~DISABLE_CRYPTO;
-> +       sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
-> +       config = cqhci_readl(cq_host, CQHCI_CFG);
-> +       config |= CRYPTO_GENERAL_ENABLE;
-> +       cqhci_writel(cq_host, config, CQHCI_CFG);
-> +}
-> +
-> +static void sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +       struct mmc_host *mmc = msm_host->mmc;
-> +       struct cqhci_host *cq_host = mmc->cqe_private;
-> +       unsigned int crypto_params = 0;
-> +       int key_index;
-> +
-> +       if (mrq->crypto_ctx) {
-> +               if (!msm_host->non_cqe_ice_init_done) {
-> +                       sdhci_msm_non_cqe_ice_init(host);
-> +                       msm_host->non_cqe_ice_init_done = true;
-> +               }
-> +
-> +               key_index = mrq->crypto_key_slot;
-> +               crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, 1) |
-> +                               FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
-> +
-> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
-> +               cqhci_writel(cq_host, lower_32_bits(mrq->crypto_ctx->bc_dun[0]),
-> +                            NONCQ_CRYPTO_DUN);
-> +       } else {
-> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
-> +       }
-> +
-> +       /* Ensure crypto configuration is written before proceeding */
-> +       wmb();
-> +}
-> +
-> +/*
-> + * Handle non-CQE MMC requests with ICE crypto support.
-> + * Configures ICE registers before passing the request to
-> + * the standard SDHCI handler.
-> + */
-> +static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +
-> +       /* Only need to handle non-CQE crypto requests in this path */
-> +       if (mmc->caps2 & MMC_CAP2_CRYPTO)
-> +               sdhci_msm_ice_cfg(host, mrq);
-> +
-> +       sdhci_request(mmc, mrq);
-> +}
-> +
->  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
->         .keyslot_program        = sdhci_msm_ice_keyslot_program,
->         .keyslot_evict          = sdhci_msm_ice_keyslot_evict,
-> @@ -2762,6 +2836,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->
->         msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
->
-> +#ifdef CONFIG_MMC_CRYPTO
-> +       host->mmc_host_ops.request = sdhci_msm_request;
-> +#endif
->         /* Set the timeout value to max possible */
->         host->max_timeout_count = 0xF;
+>  drivers/mmc/core/card.h   |  6 ++++++
+>  drivers/mmc/core/mmc.c    | 12 ++++++++++++
+>  drivers/mmc/core/quirks.h |  3 +++
+>  include/linux/mmc/card.h  |  1 +
+>  4 files changed, 22 insertions(+)
 >
 > --
 > 2.34.1
 >
+
+I have applied the series for next, thanks!
+
+However, I noticed that the author of the patch has your gmail-address
+and the sob has your sandisk-address. I guess we should change to your
+sandisk-address to be in both places, no?
+
+Kind regards
+Uffe
