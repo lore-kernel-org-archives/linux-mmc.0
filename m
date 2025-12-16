@@ -1,143 +1,199 @@
-Received: from mail-m15595.qiye.163.com (mail-m15595.qiye.163.com [101.71.155.95])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DF71347BC9
-	for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2025 12:08:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.95
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1367A36656A
+	for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2025 12:16:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765886908; cv=none; b=C9y/BDPB+zS8jQBFgFM3K6IT7tcluQ2CYDRHWjBDPZq3Ogt0BwQjjcMQyhqB3nZfrS/3r7gGZD+brslDPzgOcU5ZQy+L5MIEFe31yelaz6j4WjJSP6x1UJzvuI0LsXNdVzBK3ZdesFY9q6JMO9vW2sqtNOpQEP1pdNBGSaS3hpE=
+	t=1765887370; cv=none; b=VgXeI+neNwv8//qWpKpdHe6HvGfWBSrsRP0wxEHAOM3OJn0myjixAvfvxSOz8bAfttK8CgRZ3hydcdPRTFAc4q6HXl6EEhYT02QytigHQnf+AhgmfgqfFUFPzoIjzKHE0apxnVadLE/pehZpswxOAlk9Wyu7QKJnFjkNuHc2/qY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765886908; c=relaxed/simple;
-	bh=9SnWvAlMOFU6LiH4qc9Bw9ykmLCOfoqC+fcAaq+NxUI=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=AJfpH5m6DnFW94C2PFVvz6QRa+dDfN000gKJlIz5gtkJIodPBBJzS0Iq8zH51BJXu0qN72zYdXxQyVsSZ+F5knvA5kVKicTmPrCgf/Hd6Jd6Z6o0M0uKQ0NbLZuJVwtcMFMbSJFmhflXI+stJWasd5VeVpnB0FBycT+3ILQEh1E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=DzSqbILA; arc=none smtp.client-ip=101.71.155.95
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1765887370; c=relaxed/simple;
+	bh=ygM6iPCH2TydP0HkxyKip8E+b6Ls9AqBqncVC7h+DLg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=QLJ/Y7dssHBiH7XcoX2gbweZz9DxVCOVUhYGkkr5VHBEdyVpGunNqfPzCB0gzRgRuScpmUBMkRtvTweZojUOCAVAIHHMrSKKo7ldb/MHzH76NOnsdV/velDhaXs4O1fhxQobXwswQnuqazu1K0Cs0lFl5C3y/s6m2LZPVHl65+w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=spCzNCAf; arc=none smtp.client-ip=209.85.208.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="DzSqbILA"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 2d6f8a8f6;
-	Tue, 16 Dec 2025 19:53:04 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v3 09/12] mmc: dw_mmc: Move clock rate stuff from struct dw_mci_slot to struct dw_mci
-Date: Tue, 16 Dec 2025 19:50:04 +0800
-Message-Id: <1765885807-186577-10-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1765885807-186577-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1765885807-186577-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9b2701be9b09cckunmc1d96abd3f9d02
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQk5DHVZPHxkfSh9JThpKTk1WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=DzSqbILAOBFcyrmNR3tgvOUsSt/P4YqNraYXkNmyEtxPkWgsTu2bCshm56jit8iVOS1qVQGqOPoY7OcTuONdqnbkWSc0aarKf7TJllHxpT9tsUM5Ak/JbO2OUYEWPgbU+cUu4V3q+0sBjxlGRKZH9VSpX1pg3k9W/3xMhuIeEkA=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=hVP/I3EEP/KKVAFlE03K3ekNkgwLZT5hxiZmwoTQ+ts=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="spCzNCAf"
+Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-37b97e59520so35669611fa.2
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2025 04:16:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1765887366; x=1766492166; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=5bBHT5GO4OwWFNFQ9+2hmY0RqEYQdKcZYHd8MT27q6k=;
+        b=spCzNCAfU6diO0rVR89Z7huXTIT1rPDVEjDuzwPwACYmuoEddq1o5nyZ6Al28HUY02
+         wFa2GEXvd08ONKMrTIucd2DaAuqSw5gRD4W349C8w+hQQindK+0VkQD4AnQNf5etRfMS
+         uaac1IgHT8kHg3ljn1ZsVfxRGiMH1pY7w0dXPuQP0xvYa0mPpeeRm4S511wuYS9Uuki5
+         ng/Lw7TH8XbEW8dr7ZtnyHpuaRtX1N+5N+Yk3gBD2Pgu22MsOJkP+n8eGTdxgKk8cZvn
+         oX5Kq6HV8rY1A4Fsf7MVq/eoGJaf6AOxrK9Lkzwgu2dXmZXLSunxGvFZF1K9MMEJ2LhL
+         9Gww==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1765887366; x=1766492166;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5bBHT5GO4OwWFNFQ9+2hmY0RqEYQdKcZYHd8MT27q6k=;
+        b=k5xBYRx/tpbs1mHfAq4sVC6SIhmY14KZmWrivk2xtBce153f1itXAqJ4IaBAN2Scor
+         9WYfXM0cyWwXEByFw3pxVYBpgndyQpU4zcSjKf5HQzAiiOAOPLauFAwNYgruDNz76OTY
+         rIJ4mQ4bPJ9B2uPyzQeMONTmpGfv9P0Y0UphlIxH7J/fc2qrooX4tbBKca9jFxZBJBkg
+         S7/zeDKT++GeXGQrnzFfWYDaADb6CSTh1tOMFHynJTsJmG9i+zULrHFeGPN4/GILFX2i
+         gdZfiws0AeTvxiL42cGC0Fl9oWGE9l9KzHLzZOSQh8fsgDWr0KQ+gJwXyZVEwz+TY+kk
+         SG/A==
+X-Forwarded-Encrypted: i=1; AJvYcCU5cjrIBYiB8QbJZvtnvWKW+j6x1tg0A0nOOYEkTbYm2JA+5AJ74fNDBqpGGKbRdCUPqUadeoOrGy8=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw39tVrUajUwbVuBP6L5m7PGvLxvYh8whMHCWKzNleX2PvCxLPh
+	H8g0pajsXXaX1nnafm46ey7O1QRnazOfo1C5VtB0wKv1wb5PCN1homHkme+KMryO2+G3cfoGFDf
+	8xxHsKKKpAHTWo5vIPlpWpjTOUUY63hOYOPOwV40SVg==
+X-Gm-Gg: AY/fxX4rFeiB2zZAVUx9GNx0VggGwiIRSHNlfcmzR6UARw6z+vvELh+dUOS9UJMrcNk
+	0sd/bip7kBii5yg/TjKIcSySuDTKH5C0b/+AY1zvjPyxHePMCWGcRVGNXLrF94PAsXBDOVIMk3n
+	EwtXdnu8J2vbvMHZykvjbcgW2yfCOe/7ojlLx/USATc93exgsrr2HA3CY15As5y8YDrWiwfPN1u
+	CI1brrZCTokTmLl2dDPamsG+OHmedksxKxZo/UaKCGYms1ldFMfhvVGjCqhe2pi9if/7sh5
+X-Google-Smtp-Source: AGHT+IHSOzKJUAD0VWoqMbAG9/IlbO2ZSE7puMKuCAi60z6RaWldMe2JJwlbhcYrPz8NDWuyAEiNqo14NocbJW/sTAU=
+X-Received: by 2002:a2e:b8c4:0:b0:37f:b5c8:7cc0 with SMTP id
+ 38308e7fff4ca-37fd08c7ae4mr55985981fa.33.1765887365959; Tue, 16 Dec 2025
+ 04:16:05 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+References: <20251215102010.608421-1-ziniu.wang_1@nxp.com> <CAPDyKFoLmo=qDru67rj63gQwMjLqVKS+wEQecukuC+3Pz_CjDA@mail.gmail.com>
+ <DU2PR04MB8567C09C52C66C59C9CA6607EDAAA@DU2PR04MB8567.eurprd04.prod.outlook.com>
+In-Reply-To: <DU2PR04MB8567C09C52C66C59C9CA6607EDAAA@DU2PR04MB8567.eurprd04.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 16 Dec 2025 13:15:28 +0100
+X-Gm-Features: AQt7F2qlgonHE1u8usoQ1ApRhJuG8Mj0nOYZGlZ59wEK9NLeswsioWiDble_0qg
+Message-ID: <CAPDyKFoH+B363wiPi6HoKg1VJXvJVNPoYaRTGXzEDgSTEg9TyA@mail.gmail.com>
+Subject: Re: [EXT] Re: [PATCH v2 0/2] Optimize secure erase performance for
+ certain Kingston eMMC devices
+To: Luke Wang <ziniu.wang_1@nxp.com>
+Cc: "axboe@kernel.dk" <axboe@kernel.dk>, 
+	"linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "imx@lists.linux.dev" <imx@lists.linux.dev>
+Content-Type: text/plain; charset="UTF-8"
 
-Except for moving them, this patch also renames __clk_old to clk_old.
+On Tue, 16 Dec 2025 at 11:02, Luke Wang <ziniu.wang_1@nxp.com> wrote:
+>
+>
+>
+> > -----Original Message-----
+> > From: Ulf Hansson <ulf.hansson@linaro.org>
+> > Sent: Monday, December 15, 2025 11:38 PM
+> > To: Luke Wang <ziniu.wang_1@nxp.com>
+> > Cc: axboe@kernel.dk; linux-block@vger.kernel.org; linux-
+> > mmc@vger.kernel.org; linux-kernel@vger.kernel.org; imx@lists.linux.dev
+> > Subject: [EXT] Re: [PATCH v2 0/2] Optimize secure erase performance for
+> > certain Kingston eMMC devices
+> >
+> > Caution: This is an external email. Please take care when clicking links or
+> > opening attachments. When in doubt, report the message using the 'Report
+> > this email' button
+> >
+> >
+> > On Mon, 15 Dec 2025 at 11:18, <ziniu.wang_1@nxp.com> wrote:
+> > >
+> > > From: Luke Wang <ziniu.wang_1@nxp.com>
+> > >
+> > > This patch series optimize secure erase performance for certain Kingston
+> > > eMMC devices (IY2964 and IB2932) that take a fixed ~2 seconds per secure
+> > > erase operation regardless of size.
+> >
+> > Well, that sounds to me like the eMMC isn't really erasing the blocks.
+> > I wonder how "secure" this is in practice.
+>
+> Compared to other eMMC, 2 second secure erase time for 1GB is reasonable.
+>
+> Using the default 3.5MB secure erase chunk, the total time spent secure erasing 1GB:
+> Sandisk SDINBDG4-32G-I 0.8s
+> Micron MTFC32GAKAEEF-AIT 4.7s
+> Longsys FEMDNN032G-C9A55 0.6s
+>
+> In fact, secure erase does not guarantee that data is physically erased. We previously encountered
+> an issue with long secure trim times on the MTFC32GAKAEEF-AIT eMMC, and got confirmation
+> from Micron:
+> "Secure Erase (0x80000000) is treated as a simple Erase (0x00000000), while Secure
+> Trim (0x80000001 + 0x80008000) and Trim (0x00000001) are treated differently. So, it is
+> possible that Secure Trim really is the heaviest possible erase operation for the FW to execute. "
+>
+> And the eMMC 5.1 Spec:
+> "NOTE Secure Erase is included for backwards compatibility. New system level implementations
+> (based on v4.51 devices and beyond) should use Erase combined with Sanitize instead of secure erase."
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+Right, thanks for clarifying this! I do recall the complexity around this now.
 
-Changes in v3: None
-Changes in v2: None
+>
+> >
+> > >
+> > > Currently, a 1GB secure erase requires ~300 operations (limited by max
+> > > discard size), taking ~10 minutes. With these changes, the same secure
+> > > erase completes in a single operation, reducing time to just 2 seconds.
+> >
+> > Hmm, is the problem really the size or is it the timeout? Why does 300
+> > operations to erase 1GB take ~10 minutes?
+>
+> I think the problem is caused by the fact that this Kingston eMMC secure erase
+> small chunk need ~2 second. In contrast, other eMMC secure erase small chunk
+> only take tens of milliseconds.
 
- drivers/mmc/host/dw_mmc.c | 8 ++++----
- drivers/mmc/host/dw_mmc.h | 9 ++++-----
- 2 files changed, 8 insertions(+), 9 deletions(-)
+Okay! So it looks like using a card quirk, something along what you
+propose in patch2 could make sense. I will have a closer look.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index d8ce8f6..52d5cb0 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1139,7 +1139,7 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
- static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- {
- 	struct dw_mci *host = slot->host;
--	unsigned int clock = slot->clock;
-+	unsigned int clock = host->clock;
- 	u32 div;
- 	u32 clk_en_a;
- 	u32 sdmmc_cmd_bits = SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT;
-@@ -1164,7 +1164,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 
- 		div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
- 
--		if ((clock != slot->__clk_old &&
-+		if ((clock != host->clk_old &&
- 			!test_bit(DW_MMC_CARD_NEEDS_POLL, &host->flags)) ||
- 			force_clkinit) {
- 			/* Silent the verbose log if calling from PM context */
-@@ -1207,7 +1207,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
- 
- 		/* keep the last clock value that was requested from core */
--		slot->__clk_old = clock;
-+		host->clk_old = clock;
- 		host->mmc->actual_clock = div ? ((host->bus_hz / div) >> 1) :
- 					  host->bus_hz;
- 	}
-@@ -1410,7 +1410,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	 * Use mirror of ios->clock to prevent race with mmc
- 	 * core ios update when finding the minimum.
- 	 */
--	slot->clock = ios->clock;
-+	slot->host->clock = ios->clock;
- 
- 	if (drv_data && drv_data->set_ios)
- 		drv_data->set_ios(slot->host, ios);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 3a2e1a0..99a69da 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -130,6 +130,8 @@ struct dw_mci_dma_slave {
-  * @mmc: The mmc_host representing this dw_mci.
-  * @flags: Random state bits associated with the host.
-  * @ctype: Card type for this host.
-+ * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-+ * @clk_old: The last clock value that was requested from core.
-  *
-  * Locking
-  * =======
-@@ -251,6 +253,8 @@ struct dw_mci {
- #define DW_MMC_CARD_NO_USE_HOLD 3
- #define DW_MMC_CARD_NEEDS_POLL	4
- 	u32			ctype;
-+	unsigned int		clock;
-+	unsigned int		clk_old;
- };
- 
- /* DMA ops for Internal/External DMAC interface */
-@@ -559,8 +563,6 @@ static inline int dw_mci_runtime_resume(struct device *device) { return -EOPNOTS
-  *	processed, or NULL when the slot is idle.
-  * @queue_node: List node for placing this node in the @queue list of
-  *	&struct dw_mci.
-- * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-- * @__clk_old: The last clock value that was requested from core.
-  *	Keeping track of this helps us to avoid spamming the console.
-  */
- struct dw_mci_slot {
-@@ -568,9 +570,6 @@ struct dw_mci_slot {
- 
- 	struct mmc_request	*mrq;
- 	struct list_head	queue_node;
--
--	unsigned int		clock;
--	unsigned int		__clk_old;
- };
- 
- /**
--- 
-2.7.4
+>
+> Also, the calculated max discard is too small. For the I.MX8MN USBHC controller,
+> host->max_busy_timeout is 2684ms, and the calculated max discard is always
+> card->pref_erase - 1, which is 3.5MB.
 
+I see, so regular REQ_OP_DISCARDs are suffering from similar problems
+that are taking a very long time to complete?
+
+Are you planning to make a similar card quirk for discards or what do
+you have in mind?
+
+>
+> >
+> > Can you please elaborate what happens on the mmc host driver level for
+> > each operation. What mmc host driver/controller is being used? Does it
+> > support MMC_CAP_WAIT_WHILE_BUSY or do we end up polling for
+> > busy-completion in-between each command?
+>
+> This issue is found on IMX8MN-EVK, uSDHC controller. We end up polling for
+> busy-completion in-between each command.
+>
+> I print some log during secure erasing:
+> Without this patch
+> [  126.760429] mmc2: starting CMD35 arg 01294000 flags 00000095
+> [  126.766530] mmc2: starting CMD36 arg 01295bff flags 00000095
+> [  126.772246] mmc2: starting CMD38 arg 80000000 flags 00000095
+> [  126.777988] mmc2: mmc_poll_for_busy
+> [  128.616245] mmc2: erase operation completes
+> [  128.628511] mmc2: starting CMD35 arg 01295c00 flags 00000095
+> [  128.634293] mmc2: starting CMD36 arg 012977ff flags 00000095
+> [  128.640089] mmc2: starting CMD38 arg 80000000 flags 00000095
+> [  128.645811] mmc2: mmc_poll_for_busy
+> [  130.456184] mmc2: erase operation completes
+> [  130.468390] mmc2: starting CMD35 arg 01297800 flags 00000095
+> [  130.474160] mmc2: starting CMD36 arg 012993ff flags 00000095
+> [  130.479928] mmc2: starting CMD38 arg 80000000 flags 00000095
+> [  130.485798] mmc2: mmc_poll_for_busy
+> [  132.192309] mmc2: erase operation completes
+> ...
+>
+> Apply this patch
+> [  296.480818] mmc2: starting CMD35 arg 01294000 flags 00000095
+> [  296.487219] mmc2: starting CMD36 arg 01493fff flags 00000095
+> [  296.492995] mmc2: starting CMD38 arg 80000000 flags 00000095
+> [  296.498999] mmc2: mmc_poll_for_busy
+> [  298.712865] mmc2: erase operation completes
+
+Thanks for sharing the log, much appreciated!
+
+Just to double check, I assume that you have verified that the
+busy-polling works as expected on your HW? The reason for asking is
+that we have seen problems with this several times in the past, on
+other HWs.
+
+Kind regards
+Uffe
