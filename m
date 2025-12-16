@@ -1,86 +1,33 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A45233A9E4
-	for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2025 14:29:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D9E63B7A8;
+	Tue, 16 Dec 2025 16:02:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765895376; cv=none; b=UJNXiBMHrjYzOIct8HFN/zlpfXLm6IeaOZPZkuZ6Eonch+eosXSY2Isgl/ALetroBCWXspt+vYr7ztuTkJ8FqiPRkr+2auifskk8msVWYQV0pg2RAkf4SGiuRMXAYhfCVpv6mOT31XYrlSnD7gmLtF8sdiEGhnw7fYxRvii/rvo=
+	t=1765900948; cv=none; b=MOj2cfVG86bP2iMeaEbzPbV5fGyNXDk88ZFYaMkX1Abdkra+bvfUFhUqdWiN0BlnnbT5qKtOO9ANCoLAlKlR267MTR6QF7vIHdhqAP3tItld4TqBmbUNUtecnf34pTBg73sTKjB5d63Opb015spMhd4Uk2SDuqzqqroaQdEAnk4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765895376; c=relaxed/simple;
-	bh=c3FEfOYe/jyAQH1PXJwhUM2FL/6IdIKpvjQ70OBnrDE=;
+	s=arc-20240116; t=1765900948; c=relaxed/simple;
+	bh=4dgCEM4nTnnn0sFZ8m1aMoo3gsMxbEEftNNJrXbVIlA=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=EPJR9puLfX+HH5Mv6FvBrqRm65OHQeDrobvChkwHFhd1lFlGNqtnq3fKmxD81Mta+uc9pxn+JYUZGnlFPTyWKqtT1R/OMe5dIuMpsIFpuhWrf2E1w0q47+Kh9fdYg6L9/2KZvdncUZDKbfTMJQ8ddQmE7OJKcmZoz+G3PwDre8Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=HDAS2T41; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=bLV4nS/j; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	 In-Reply-To:Content-Type; b=SaK54N7C0OSbfLqKcSw0PmIHiu+juVZW17g1lUUcMPhBjHY7NOU/ZzFQJfri/hOPgyaCW/McHeH5Mb78ubFSay7bNW8YEtnAtcoquWit7xYc7VYSwUPSEnW9Gf7aMhy4os/DB1brscVgRz9vM5JFh7E+bIcOvT1IBs8y6dVFRx8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rFrTuZ86; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="HDAS2T41";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="bLV4nS/j"
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 5BGCt1lW2869697
-	for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2025 14:29:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	Bag5kecA822pF0WQ+X7N4mbPAn0hI861/+few71vJvA=; b=HDAS2T41W7zgbG91
-	dQ4ATQkoDUOO2IEohYE//NGAlpGSldqu9Q/zy7/nzFuYa2A8a2le17sr5uK8oQWb
-	vvg3ia5z48m6+ARCafmbfOBq7eEtBdtEmULanmGRR56fXBlY5rPYEIRibuP9hxsb
-	WrJ6wLkELPi+zuEjuH6y8g7Un+DZyH3KWnVS2p+lWHqznSAK1LtDQhMjJ6ZA69bA
-	eVw+AnbdES+CT0aBzyXViAgqAovQWP1KzrgNMpHoLiH6ph/4GmMU6wc7GBArWv2H
-	6yjL+v8WT2ENJ3qHKoUS3MAdraBCHDub6+sHQqRDvjBSyWyESE6xU0dI0injBTJG
-	Qp+8ZQ==
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com [209.85.160.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4b33kw9h7f-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2025 14:29:33 +0000 (GMT)
-Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-4ee23b6b6fdso10796021cf.0
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Dec 2025 06:29:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1765895373; x=1766500173; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Bag5kecA822pF0WQ+X7N4mbPAn0hI861/+few71vJvA=;
-        b=bLV4nS/j1JtQXecfkEX0uz4lNJaEfjWhsiTUEmJjpzSUBkrgta3HhHaap2YpreOvVM
-         ZN1uTk6U+oxMgP3Bfsbstr2TdSqQKVfto6/88tYmefG39ojPYzop+12c/23Sx0g7r2OU
-         g/cJqThXh+CBgQLr+P/TPr6LIyg6B/EJi205j44k6OuHMq2oTqlNvej2gIY7aMcvy9x6
-         JUpA89wJJiygEIshuc0gbYrDzI8KriEv0dNyGBvSWL7YrVq9vTWynXcDXppwcIC3mFLC
-         MGy7xfqaGZZ7GaLxeweSoNUKCMMwlskp98zs5v4/9eozebx6pucAMI3y+ThJVoZAmyJu
-         qWhQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765895373; x=1766500173;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Bag5kecA822pF0WQ+X7N4mbPAn0hI861/+few71vJvA=;
-        b=Mw5FoHaCf5Bv2Ut3RAR1/UmS/fIFBIAUtnKqiGlvVTPPQL0v0h+lkAVBgiDeCpqMTq
-         yZ1WBxwUu7k9Qo47iKBKl1p7aNdZs5LRmG7zOVeiuiZgu74OB+9qcz60JHuNPBNtp1gI
-         OGFD8bDZBKzGBhGHvej9n0EhhszAt9t2234XYRHTyY295ndy1UOl1sFGG/2LUGMs4km9
-         92OO74AsPAJPsXSx/mBuLumWrLdFa/AGlyAd2PgXEkTHf2fXCmADrZtb0hZs7B67Qhye
-         T9hB2p19QNVXwtig45OEWYbXA2XXyX8f2yqiogqt6mErWUM7w8vjDQrSfaFkx9C2z0X7
-         RoCQ==
-X-Gm-Message-State: AOJu0Yxny3nQa/QI3NfkNGCHXsOLtHKJOAKawGIzct9Xf9yd9Nmm1Hrh
-	Mhx2/oI8W9fpnSZHc7lSvJutvn9sENvNTOHYYZzwMUTjkxsywSApJkVIOftYbKGHx4NVeMTHehe
-	yplbpLjmUNlhMqY6c4MbmBT6PUseyb/suh9HJQOfRt3dbvKuqPedktZmMeJPGJKQ=
-X-Gm-Gg: AY/fxX4kJCKA/4HqM6h/VCmRMRzqArHzvMob+YjFsRCPaI99AVwrST2DIVuhL/rbMKE
-	FufqpIaI+zos3/XLv4RR44n/qfViUZjBS5ODatHx/FCwEn+U0lxQ+SHnvJIcwjW4FKNhPmEWRA3
-	z6wJYRXaep2hKl7kfJt+cYZGOvMqFUSUxwu1gzXc2fKhflAUtRWbZg45TBXEcGK10OF9U8JON4W
-	msFpf/Io3qW77bd/m865aCVlHE0CBDwl2N46SCt4SyTnytQ0hdyooke+wpKNKCL7m+zcj3nq/SZ
-	MF4wj/aVAE07Uhntyr1XXj1hSqKj/VgcBx1HPEdEBDus50HHnrIXAP/3hP9/APZ3eu40KtFOmls
-	D++SxQ9UPPoLgz6Kb7C1oDz0sFjFRlteOI373S6g+KtIlExCbLFscDdJaQ3ZTBTWDTw==
-X-Received: by 2002:ac8:584a:0:b0:4d0:3985:e425 with SMTP id d75a77b69052e-4f1d05c4201mr153857041cf.7.1765895372682;
-        Tue, 16 Dec 2025 06:29:32 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGg56N2UhBn4mvoaYcl46OObNBBIdYEYFZMhI5Bwj0doC0rLQakzOzQraWA3NwtVCK5EegdxQ==
-X-Received: by 2002:ac8:584a:0:b0:4d0:3985:e425 with SMTP id d75a77b69052e-4f1d05c4201mr153856631cf.7.1765895372166;
-        Tue, 16 Dec 2025 06:29:32 -0800 (PST)
-Received: from [192.168.119.72] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-b7cfa29e079sm1771071266b.3.2025.12.16.06.29.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 16 Dec 2025 06:29:31 -0800 (PST)
-Message-ID: <a6c2236e-a7cd-405c-89a3-6124a588f450@oss.qualcomm.com>
-Date: Tue, 16 Dec 2025 15:29:28 +0100
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rFrTuZ86"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F644C4CEF1;
+	Tue, 16 Dec 2025 16:02:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1765900947;
+	bh=4dgCEM4nTnnn0sFZ8m1aMoo3gsMxbEEftNNJrXbVIlA=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=rFrTuZ86QqRyQSV08D118p9n5vQ2OyOm5MiEyFd++uezU33AUrwth1Qy1nCHkXJU0
+	 Im+OB3jqWGddoWb7tGoDgefOwseKq4qJnJ5I1+NZ6zz6VXvbLIsRva+OnJ3wI6d44l
+	 t7CgtgjOT9gUFjUuprW0G8r+joVRkeW14S42NNMNf5+7iOdZhRj8ojHjjeBNNJadNx
+	 iK/oN9/wisFa3oN8JNlqFfbwEfGpIFCyT0BzZXmsh5i4CpOYP9Qz90lcw1Uo4WKTCs
+	 6A57ThEZuaO5+QECzQ07ZVfG5GxUCMVGpFtqXr6M0ObNkHST7jCw7wQJRw8Pe7f+D8
+	 39IJ/ntB+1YQg==
+Message-ID: <047e0283-75be-4ce1-b6f4-e500e0a653e8@kernel.org>
+Date: Tue, 16 Dec 2025 17:02:22 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -88,99 +35,119 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 4/5] mmc: sdhci-msm: Add Device tree parsing logic for
- DLL settings
+Subject: Re: [PATCH v6 2/5] arm64: dts: qcom: Add sdhc dll-presets
 To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
- <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>,
+ Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        dmitry.baryshkov@oss.qualcomm.com, quic_pragalla@quicinc.com,
-        quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com,
-        Sachin Gupta <quic_sachgupt@quicinc.com>
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ dmitry.baryshkov@oss.qualcomm.com, quic_pragalla@quicinc.com,
+ quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
+ quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
 References: <20251215120009.3877889-1-quic_rampraka@quicinc.com>
- <20251215120009.3877889-5-quic_rampraka@quicinc.com>
+ <20251215120009.3877889-3-quic_rampraka@quicinc.com>
+ <0f7c0d5c-7f77-4669-9648-62d008f15b1c@kernel.org>
+ <9f5fcce3-b9c0-4aae-b4e0-10475eb5ec9e@kernel.org>
+ <b98eb114-6967-4ac4-8b4d-936966a58171@quicinc.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <20251215120009.3877889-5-quic_rampraka@quicinc.com>
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <b98eb114-6967-4ac4-8b4d-936966a58171@quicinc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=TLpIilla c=1 sm=1 tr=0 ts=69416ccd cx=c_pps
- a=WeENfcodrlLV9YRTxbY/uA==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
- a=IkcTkHD0fZMA:10 a=wP3pNCr1ah4A:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=COk6AnOGAAAA:8 a=kELM9RU7RCUoAihQJIwA:9
- a=QEXdDO2ut3YA:10 a=kacYvNCVWA4VmyqE58fU:22 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: D-5Th8RC4mIP36ZprTFuaIjcQ_9c6Rle
-X-Proofpoint-ORIG-GUID: D-5Th8RC4mIP36ZprTFuaIjcQ_9c6Rle
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUxMjE2MDEyNCBTYWx0ZWRfX8TEuKCGJtaNQ
- NZ/m7Hhk9yJGCkAYmYodJ7Ixd7A8fAYYcLrqT4VqtVV+DRUKpCWq2dk/c6r5/wf4B3wCBu6Z5Ou
- uyEOL5eHqsO6XzVtga+HPYRGGfohWqvrx68lQMmMwcNgizlEWofpm6YphG0Vr0TUFfskB2ZzJMC
- pW2SLPBs7aRlLxZ3Gp5v+/bFjVpeF/61QQ/g6ahCO29pDbzODZFsnfoeOppRb165GLrZNqRNOPG
- OC5SpnuofkxDtdz0UWwLJvX86Ji5FlSQA27V9CySKbEJXCfUTy0iXISl3ntBOwFa8PaQl0sNV99
- cBmI2kqAWQYUJWoLAbXFrXAYxyj0g5xxmORZfvQ59KsfvrN9A6WjkOcgSeBAimYCzCkmJ+BGDLE
- l6Aq0dVNfO4QG/0hkM+Bh7SABPdHfA==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2025-12-16_02,2025-12-16_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 spamscore=0 lowpriorityscore=0 bulkscore=0 malwarescore=0
- clxscore=1015 adultscore=0 priorityscore=1501 suspectscore=0 impostorscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2510240001 definitions=main-2512160124
 
-On 12/15/25 1:00 PM, Ram Prakash Gupta wrote:
-> From: Sachin Gupta <quic_sachgupt@quicinc.com>
+On 16/12/2025 13:41, Ram Prakash Gupta wrote:
 > 
-> This update introduces the capability to configure HS200
-> and HS400 DLL settings via the device tree and parsing it.
+> On 12/15/2025 5:37 PM, Krzysztof Kozlowski wrote:
+>> On 15/12/2025 13:05, Krzysztof Kozlowski wrote:
+>>> On 15/12/2025 13:00, Ram Prakash Gupta wrote:
+>>>> Add sdhc dll-presets for qdu1000 target.
+>>>>
+>>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+>>>> ---
+>>>>  arch/arm64/boot/dts/qcom/qdu1000.dtsi | 4 ++--
+>>>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>> Please use subject prefixes matching the subsystem. You can get them for
+>>> example with `git log --oneline -- DIRECTORY_OR_FILE` on the directory
+>>> your patch is touching. For bindings, the preferred subjects are
+>>> explained here:
+>>> https://www.kernel.org/doc/html/latest/devicetree/bindings/submitting-patches.html#i-for-patch-submitters
 > 
-> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
-> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> ---
+> sure I missed to add qdu1000:, will add in subject.
+> 
+>>>> diff --git a/arch/arm64/boot/dts/qcom/qdu1000.dtsi b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+>>>> index 846e5e5899aa..bc31504d5c8c 100644
+>>>> --- a/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+>>>> +++ b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+>>>> @@ -912,8 +912,8 @@ sdhc: mmc@8804000 {
+>>>>  
+>>>>  			bus-width = <8>;
+>>>>  
+>>>> -			qcom,dll-config = <0x0007642c>;
+>>>> -			qcom,ddr-config = <0x80040868>;
+>>>> +			qcom,dll-presets = <0x000F64EC 0x0 0x01	0x2C010800 0x80040868>,
+>>>> +					   <0x0007642C 0x0 0x10 0x2C010800 0x80040868>;
+>>>
+>>> That's non-bisectable. You just broke the users of this DTS. Also, case
+>>> change is not explained and your binding said nothing about deprecating
+>>> other properties.
+> 
+> right I will update the sequence of dt as last change in the series.
 
-[...]
+This will fix nothing. Please read maintainer soc profile how DTS is
+handled. It's still no go, shall I be explicit with NAK?
 
-> +#define DLL_SIZE 10
-> +static int sdhci_msm_dt_parse_dll_info(struct device *dev, struct sdhci_msm_host *msm_host)
-> +{
-> +	u32 *dll_table = &msm_host->dll[0].dll_config;
-> +	int ret;
-> +
-> +	msm_host->artanis_dll = false;
-> +
-> +	ret = of_property_read_variable_u32_array(dev->of_node,
-> +						  "qcom,dll-presets",
-> +						  dll_table, DLL_SIZE, DLL_SIZE);
-> +	if (ret == DLL_SIZE)
-> +		msm_host->artanis_dll = true;
+> 
+> I couldn't get "case change is not explained" but I guess ask is for
+> explanation why is this change needed. As the soc is using artanis
 
-This feels backwards.. can we first somehow determine whether this
-platform has the artanis_dll (whatever that is since you didn't explain)
-and then make decisions on what to retrieve from the DT & how to
-interpret it?
+No, why are you making it upper case. What is the preferred style for DTS?
 
-> +	return ret;
-> +}
-> +
->  static int sdhci_msm_probe(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host;
-> @@ -2580,6 +2612,15 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  
->  	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
->  
-> +	/*
-> +	 * Parse HSR dll only when property is present in DT.
-> +	 */
 
-/* Parse ... */, it's short enough
-
-Probably also "DLL"
-
-Konrad
+Best regards,
+Krzysztof
