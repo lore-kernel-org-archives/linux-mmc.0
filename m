@@ -1,188 +1,201 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from DB3PR0202CU003.outbound.protection.outlook.com (mail-northeuropeazon11010050.outbound.protection.outlook.com [52.101.84.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCDCD23B609;
-	Tue, 16 Dec 2025 16:03:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765901032; cv=none; b=KQDedjJcT8twNmBpqob2nbu15q78SCA+/I10fAoeA722LD16/OdBjeMqyIH3fVkvnW+20EU/HWoKx8JLBbHOm1BffM2WSGc0n8kDWfgPWv0n6T/6jyrdl5gFAfIrf2ppqnJU1yAef5kjIUsE0wbqOhdiRlQrWwJMoD05Sju3S7I=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765901032; c=relaxed/simple;
-	bh=nYwX+wSueMVMR+YGKaee6e2rV3N20IPf57KZu6XHhT4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=I+zRrElwFfENXZ5PrQ2y8nfKc+JAKTeKJnVNoMDgYqgO4HpPZrLZOgDZ7naHwaTJvxpp9fL3cLFFDRTkJpkqf9WGd5PCZyXAHTNlXn6OWRxB4Xl0p2kzdyYZgQo1yJShi+FWTD3EKCK8UFiFnlRTo9Bshyiv4gKuw4h9UT11O6M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jo/szr80; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 531F63A1E7E;
+	Wed, 17 Dec 2025 03:30:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.84.50
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1765942254; cv=fail; b=V3qRSKNj82hGps5l73tcf9R6f0V4KQoHw++lb9tQts4Sl6fgEwp5kuVTvlkgDh4FDq4OzcrsUGg9I3HfayJTLZpco+3E1XLBXeVtjAHXmviYOXeuOCbFxmlfKGw5+5C9aHYBD29fXgcpsvuibb8xxbYxKIzHDQYdBGkmDltlSxY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1765942254; c=relaxed/simple;
+	bh=WpB7bmcD/752ATH2F4N1RPlVieRYq9NJwGwebJnuYHs=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=L4V1JUy2v9O+LTXjhzA2jfaTOzV/vtvRf9LpElSeULeYfCWdC8sfR/8GeWEBoLE/rgv+AFC/PZ5Bc6/dh4Z9J+iQy5gB9tw7zFw/pKyd4JO22f86+eiJQvAq6AJPIVfCfNcdgl3Uu0pVE8j82meAWboRodNK/pXDREj3LqoSrp0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=jAq9+r9r; arc=fail smtp.client-ip=52.101.84.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jo/szr80"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 96014C4CEF1;
-	Tue, 16 Dec 2025 16:03:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1765901032;
-	bh=nYwX+wSueMVMR+YGKaee6e2rV3N20IPf57KZu6XHhT4=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=jo/szr80KKyxE6l8ve0Uy6xDQf7Z5qBbnDyUES6ZkSDebN/+9Q8gsVzgdDDW1Eurs
-	 Dun0oF5mZBbqlpn2CKBF0AW1gn0V/OqK9hNskwxOeRHOwRLAnkdXgKlwbCpMpKV7TO
-	 DUoEv1qne2ysffrpjmnJP4kagP4pNRtblHlx0PARMAUYnrHpajg+YQqKsft1S0wmR1
-	 xs9rT8E+shj3dk96bO6U7VDrQgkqesZrkc5eLZasj9iNB+MuqwSc8dsRm33vGIKnpF
-	 pXsReKoCkdrsxg4QBlOEcMYJV5hHZyHwwPObFLKsSCEnNa8GsaorMfOmiHiLZiOKwu
-	 FIk3zTA+HSbmA==
-Message-ID: <5c82a8d7-6632-4d3a-a6de-ad9b1641c074@kernel.org>
-Date: Tue, 16 Dec 2025 17:03:47 +0100
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="jAq9+r9r"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=wNnkDUE/jJeNEXZOp6str75cZxGrhxRfuiOnpnWNYLqVHvoLtcg46H0AAWEvoylTkK0WqoQtktsOYFDLhaVVBuzewHrD1jiFAFquOeRPdwF/YriVO70drCs52CdUNg8Y0yeoowZI02D96GG1HoxDpIkDpkBJc3UmZtu5rrlOYsWign/laLFAyNAB1MgYNG84rrIZ6xV+CaNYPA0xlohSG7NPrDHlAAHgfu4ZYqpg+UrHC0R1JX0J36VnxlC8XlZhIaFg/VbMR59Heaqz//VsY+gdY0hlH8Uv3v5NtBkkQCf9+55eG/I7aQ4aKIuDB/n19pcNRmj/oaUgxDE/9qQT8g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=MpLktXE9N+thpZTrCMpOID6YtoCbn4zzG6SP9K6ct3E=;
+ b=nYzO2QATq2Tudh8j4a4pzPgYmlxu3vD7xm0hU4OX7iUOguP40/cqJSBCRa+KRIH+3PvSyNseLjs3tuVOfdWmSqogRvy63JDs6VVYr/RCEhcLOZH5e/SUZoww4EuJwEqhMynQgbn97wmujleybCMXk90G9o+2eS8DCURDb5QzeHLaQavzrNvmLIVF+toSLqGL9USGcevL9bhEd6z7MDXeZSGupSHXa568veVcm01Pohi6c6TBqsB0McZTm0r3Bav/MkRfVqhAG1MopJbDa3NNN7K8uiluklo72uG96Ve7jM5e9PqvAshvS31XKuDcyK9DnAHn4wkxFlUPhcu33quTug==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=MpLktXE9N+thpZTrCMpOID6YtoCbn4zzG6SP9K6ct3E=;
+ b=jAq9+r9rA8zYMBGx4lkZ4jPp6MR9XHLWj8rMYK1WJddwnMVun1aM0EX/W3z9SOt676hh2Aqn3kFxlBh/QHA4y17y3RIKggmUSUBJPEBkGLG5h+zXVaL0ah4d64bIRlTmZ/gLhlrlWNzxps0eTabc89xH0jW4xBSMbRjofBSUO7Hi48Q/1r5JcgdJtFMm3sA26Yg6u+FCY9a+0a/lZnnJlD6sxcmj1Ehv6h5njqkqAU2ctxFyVL4Y1i1w2pwrJCO7fHyR3P9/p9XuQ/AFsw2MeNqFaqv5HF+CEBbd/OMU/iX3GBNefetKgx5r6DkRf0H4xrVbBrV9mJLHTbDE0+r99A==
+Received: from DU2PR04MB8567.eurprd04.prod.outlook.com (2603:10a6:10:2d6::21)
+ by PA3PR04MB11203.eurprd04.prod.outlook.com (2603:10a6:102:4ab::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9412.13; Wed, 17 Dec
+ 2025 03:30:49 +0000
+Received: from DU2PR04MB8567.eurprd04.prod.outlook.com
+ ([fe80::32c4:a8a7:1724:b754]) by DU2PR04MB8567.eurprd04.prod.outlook.com
+ ([fe80::32c4:a8a7:1724:b754%2]) with mapi id 15.20.9412.011; Wed, 17 Dec 2025
+ 03:30:49 +0000
+From: Luke Wang <ziniu.wang_1@nxp.com>
+To: Christoph Hellwig <hch@infradead.org>
+CC: "axboe@kernel.dk" <axboe@kernel.dk>, "ulf.hansson@linaro.org"
+	<ulf.hansson@linaro.org>, "linux-block@vger.kernel.org"
+	<linux-block@vger.kernel.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, "imx@lists.linux.dev" <imx@lists.linux.dev>
+Subject: RE: [EXT] Re: [PATCH v2 1/2] block: decouple secure erase size limit
+ from discard size limit
+Thread-Topic: [EXT] Re: [PATCH v2 1/2] block: decouple secure erase size limit
+ from discard size limit
+Thread-Index: AQHcbawi7YpaMPP2e0WrCcsPcWXjvbUi17EAgAJV9QA=
+Date: Wed, 17 Dec 2025 03:30:49 +0000
+Message-ID:
+ <DU2PR04MB85672571C145478700238C21EDABA@DU2PR04MB8567.eurprd04.prod.outlook.com>
+References: <20251215102010.608421-1-ziniu.wang_1@nxp.com>
+ <20251215102010.608421-2-ziniu.wang_1@nxp.com>
+ <aUAskIkCHiVmKs87@infradead.org>
+In-Reply-To: <aUAskIkCHiVmKs87@infradead.org>
+Accept-Language: en-US
+Content-Language: zh-CN
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DU2PR04MB8567:EE_|PA3PR04MB11203:EE_
+x-ms-office365-filtering-correlation-id: 7bf3a2e8-83e3-4995-3aaa-08de3d1cac7c
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|366016|376014|1800799024|19092799006|38070700021;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?IxwHopofjlMX8GiKEyhQlfas/cJLvlzNUVShkgbA9M21yVH+gorELknmWgTa?=
+ =?us-ascii?Q?hkGEjzH/AtRB4ZuYfPpN1neayoYtEhfdeM2qcy9Uw7p02soz+jFO0xba43/i?=
+ =?us-ascii?Q?NUpAB0MQhW4Sz6CZChFCYhOIu5DcFQGOPtIuUMs0Q1BIXYGKb0dxDiYSNa4P?=
+ =?us-ascii?Q?pSFfkxJtxt4hbWeuWGIicCDbteqymUvOgAsFWqlcxEAqLj0l9gWDXgxFeGZm?=
+ =?us-ascii?Q?Tr49vBGQlH7NaT1SHsXQkSlzTjTqYhlN3ae45CrIYXXZZmnvcrlPWCbbeASD?=
+ =?us-ascii?Q?6sIzTFo+6u7TjOst9cjjY0OhTFyFsycovLJhM5nbnAuElh7q3LRWJzo6vzYJ?=
+ =?us-ascii?Q?nppePV3BD4czK3nIstClfdW6ummF5ZEoi7CWIpAsGcdhHY284/gg6TBIYypK?=
+ =?us-ascii?Q?txSUbH6W16dE6jk2ND6ffvHeVqQE/dsfz37c8O/dqKSgmA/WMad0ma7ewOlU?=
+ =?us-ascii?Q?pbNehR3RVdJyU9ztdhDAyc7FYGBIjC40sXgoIPJx+JTPtPDDz3IShlQZRTdo?=
+ =?us-ascii?Q?PwJ3vjpMtCmOavwKkW9wyeXYWxynt3+XaLpfLN7V2Jf/UgYzVeGSY2cBlRBv?=
+ =?us-ascii?Q?awrIiD82TN5K+ujH099xR2PTq7XcHhvD/lUgIr4uZMZNOIj61tftAg4rptTk?=
+ =?us-ascii?Q?jvyhsC+t4sS6WMvWILwQ1PrWpv1NFOII/IG70RfE5ESZsHLvEhyfFYUubzWK?=
+ =?us-ascii?Q?LkH/V5WoOfS1Xnk+cZBdvTw+F4w8nu3InBtMmSXpfg2zUNACJ0HT8LyoyTgb?=
+ =?us-ascii?Q?F3vfqqrNj2g8weiotnWDBQfg6TExpomA1yorx4Vat2OktQDYlfOjIGckWT2y?=
+ =?us-ascii?Q?u5X5zFCnf1WIEW5iWIOXNt+LJyWCZq7tct5kz5jsgGoBphCGM0N4jV0iKkOS?=
+ =?us-ascii?Q?/86KasEjQxKXYycLbfyGa0nzrIRbDuW698akbcc6+hDfW+fgW4krdrvTL3CH?=
+ =?us-ascii?Q?5j7WfO6sw+V0bIpW9vrHyg8/U4yNIgvVDJy8/OqF/0NIbjNO7bfNmHkICRHp?=
+ =?us-ascii?Q?WFYXTo3Vc0ZM9vF/D8m2nSrGAR67dF8pgf80MQrGa0W+u4ArP1BGKsPpayP/?=
+ =?us-ascii?Q?NxjlIlgk6hmnRK+NQRbVuAl1W9a+NPepB2inazjuzDFJiD+dgU5g7o22qHqF?=
+ =?us-ascii?Q?OlCWXzSRm0tuC8+Jly/t7zY9RB9WvwaZmsmmXW6bYmmO/0SLF5AhmpKQE4iA?=
+ =?us-ascii?Q?km+A/EQaFcAf5+X4UtDpxawY2IakCsH8s3mPKlxph4TSoyd+P0eq6OfKE3Mk?=
+ =?us-ascii?Q?IPpuX9ZNN2QkHXN04bOQDGNnolb95zHMzeR+jbmsNsqbtUdP8TS6sLZc8wJ2?=
+ =?us-ascii?Q?teaWYvA5L5Z8XR4t0ZLFalEK2Goa91qJgDtyE7yBaOGqDmDCUu1H2od30SBU?=
+ =?us-ascii?Q?DLAEUSFjYmcKMSiyRTYUfapMvMGa5z34Y4iVc/T0JVPhmFCEHhPSxE9iKy+A?=
+ =?us-ascii?Q?EzVhptH66NZXaOIpeDkpktdKk2SVc972xHxTQPP6Uwh0OcfbVgclM8+g0iR2?=
+ =?us-ascii?Q?WUdsDho1xFjnJhC/btybPQpa41gyyYbfxl6y?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU2PR04MB8567.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(19092799006)(38070700021);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?S6pRjTtKWtes2GfCYSCmGmttwJLPIFAFIKkhZPiJIGQ3ih3PIDCbzL3fV+sc?=
+ =?us-ascii?Q?SSrSMV8XdupQeLxV5Xz7/2visUwQpRXR3hvsBzsoTGChTz3ruzX98Wx4Oj8m?=
+ =?us-ascii?Q?JvRpifk+RvLtlB5I+di07k7bSt8mRaiJfp08NcUfahn/JCHjW5KhCqja2hko?=
+ =?us-ascii?Q?z2AI+rslpsg4u4rubBcP0wbCD/j8BTta9sQRV24nGYJsGe8CmCwamMltIiXu?=
+ =?us-ascii?Q?faoV6ru9tXVRHahUhEGccTHQj93vI8A74KLFT/H6Nt9396F4GaiF2HZiJH7N?=
+ =?us-ascii?Q?edtGzlG31EjhDnGyg32mx0B+8eGxpOWOSCsYX8XIROnpVC9zQYrGU9L+2wHE?=
+ =?us-ascii?Q?z5RD1mGiYAapqid6faZ4Bw41O1s2zEIsM1kEwDhoF+CJMLEk0yhkW+B38Cny?=
+ =?us-ascii?Q?bubBZPKCtum6+RkLOzTzi7Fjpvi/xsmoZ3V0qu3ho5clauD097ete6lQv90Z?=
+ =?us-ascii?Q?h5v8tHhd4ntuz5TPLG8Mqw1oqYb6g2JVfutEhPqKuGXe684g7zbx054pKwcR?=
+ =?us-ascii?Q?04o/6Mpgj2zh7bqgTgsWDzjWSlQwsa4O1YHHjXXwAG36djyJrBuRt08bbWmn?=
+ =?us-ascii?Q?xIztfWweBNyaMRZCp6ktTV4Ry3vSFFscr8eOorneESUMYPNaripVDQMvzFv0?=
+ =?us-ascii?Q?vZLIeLeVYGvENNqUvg7Bz8DwzkjCD8J56cTM6mVPop14cB7bpPb6O4IlOSXr?=
+ =?us-ascii?Q?NbthdSF8z4aavYSxXD0fai168+ycZzV5P2ja9iOtIN6LWh3Cigc+fdS1hK7E?=
+ =?us-ascii?Q?ezBUMnhyBjaOIcUjU4eiA4FPzSJ/+rOyHakAxLMJmlGWEuo8beoh5srlY5Ws?=
+ =?us-ascii?Q?KWWMIbSNPKu8m8Dt/iWyVkAxV8aKBXpIoj5Y+FcjeE2giQ4WuM02aKVv69Dy?=
+ =?us-ascii?Q?OWu12krHddjCLr7Z7Kp8cRQUbOzL3djlEgiodQewoeqtW7LwFod6THV1rIaF?=
+ =?us-ascii?Q?IQeWmxzZRvnxZqnp+Ay6y6RMSyIQauCIxIKk9IqMBbFqPnUspv/7fFJyRt2o?=
+ =?us-ascii?Q?IhndKA26ZS73LbUb1QVmOtgCq0qXFIK4gF0ZNjXu2968uLTmow00VFOQVYbA?=
+ =?us-ascii?Q?oaFXabTyKxTeSOiZbo2svTU1qYC5JBElID0PRJbgFkts/zx4Vca2Z0tfFr2X?=
+ =?us-ascii?Q?dfs/P5f7b0acwQPT6HQ2U67+SQ2KrpaUSi44bGiA93cjo71B3zvF6H2c1gnE?=
+ =?us-ascii?Q?DivaQj5ZQvuWc76/NJ6LsUszMGrHbClFtcbHxVg6Tujnv4mF4zEkMHjauh9X?=
+ =?us-ascii?Q?y3wCL9IzcfQn3m4ze7ADUb9ezz/z3pw2oaEQKcA6MiMhDGPo7YAaCKRQvycw?=
+ =?us-ascii?Q?mRdH/+7OvE1zf8qeG5ZbOjCHjK/PGILwTAArFWiCGzT5R/1iTnOz183D8jgX?=
+ =?us-ascii?Q?yNVSMeEF/2n99WAmypTlyUfBwgC5phwMMRR3knajMFFkJT7r8FxJd8t96fyO?=
+ =?us-ascii?Q?At8Ewi3hPUfTqDMRC+SoC+9svBstUk1XErA7WMF6RiR0ESNyoG2jOjcp80ws?=
+ =?us-ascii?Q?IuCAh1V8YLF/tHvk4e44qeRvGwaJAND6GH2oYqmcklYhRy/0z1dxUcH+L977?=
+ =?us-ascii?Q?n1yW3qTGXJch1UJfuphbrTda2RuZqJVNMlIRHrvJ?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 1/5] dt-bindings: mmc: Add dll-presets values for HS400
- and HS200 modes
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>,
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- dmitry.baryshkov@oss.qualcomm.com
-References: <20251215120009.3877889-1-quic_rampraka@quicinc.com>
- <20251215120009.3877889-2-quic_rampraka@quicinc.com>
- <03819cd6-9f19-4c28-806b-17c7596e5299@kernel.org>
- <1fc9ac39-231b-4fce-a354-22a21d126363@kernel.org>
- <00485066-d537-4f8f-a579-efa33e69a56f@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <00485066-d537-4f8f-a579-efa33e69a56f@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-
-On 16/12/2025 13:51, Ram Prakash Gupta wrote:
-> 
-> On 12/15/2025 5:41 PM, Krzysztof Kozlowski wrote:
->> On 15/12/2025 13:06, Krzysztof Kozlowski wrote:
->>> On 15/12/2025 13:00, Ram Prakash Gupta wrote:
->>>> From: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>>
->>>> Document the 'dll-presets' property for MMC device tree bindings.
->>>> The 'dll-presets' property defines the DLL configurations for HS400
->>>> and HS200 modes.
->>>>
->>>> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
->>>> different tuning.
->>>>
->>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
->>>> ---
->>>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>>>  1 file changed, 5 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>> index 938be8228d66..a1a16e6e12ce 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>> @@ -140,6 +140,11 @@ properties:
->>>>      $ref: /schemas/types.yaml#/definitions/uint32
->>>>      description: platform specific settings for DLL_CONFIG reg.
->>>>  
->>>> +  qcom,dll-presets:
->>>> +    maxItems: 10
->>>> +    $ref: /schemas/types.yaml#/definitions/uint32-array
->>>> +    description: platform specific settings for DLL registers.
->>>
->>> So look at your DTS - this is clearly incomplete now. So obvious. I
->>> don't understand why you were hiding the DTS change, you just make
->>> review more difficult.
->>>
->>> Anyway, your DTS says you replace some other DLL properties and nothing
->>> in the binding or commit msg explains that. Neither the reason nor the
->>> impact.
-> 
-> Sorry dt change was not pushed earlier, will add dt change as well
-> going forward.
-> 
-> The existing qcom,dll-config or qcom-ddr-config are not deprecated,
-> but certainly I will add below in commit regarding the issue as well
-> which is observed without this change as below:
-
-No.
-
-You need schema for this. Actually for both cases - replacing properties
-and defining the list.
-
-> 
-> "Document the 'dll-presets' property for MMC device tree bindings.
-> The 'dll-presets' property defines the DLL configurations for HS400
-> and HS200 modes.
-> 
-> It have 2 arrays of 5 elements each for HS400 and HS200 mode.
-> The 5 elements are DLL_CONFIG, DLL_CONFIG_2,DLL_CONFIG_3, DLL_USER_CTRL
-> and DDR_CONFIG.
-> 
-> dll-presets fixes instances of CRC error observed with targets having
-> artanis dll.
-> 
-> QC SoCs can have 0 to 4 SDHCI instances, and each one may need
-> different tuning using dll-presets."
-> 
->> Plus it looks like you are adding some meaning to the entries, judging
->> by the DTS. DTS suggested something here is e.g. DLL_CONFIG, so that
->> meaning - including different modes - needs description in the schema in
->> items.
-
-Here I wrote it already. Don't ask for repeating.
-
->>
->> Best regards,
->> Krzysztof
-> 
-> I will update the schema description as well with the 2 modes and 5 elements
-
-I did not say description. I said you need schema.
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DU2PR04MB8567.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7bf3a2e8-83e3-4995-3aaa-08de3d1cac7c
+X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Dec 2025 03:30:49.5198
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: Scv0Afvvz9j89YC1clEA0bLIn6FCi0g0YAYOCqmB7ZLzp2rPj26RKlEhD9CY7A8OpQXeq0YosuIIM8r3FGVLpA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA3PR04MB11203
 
 
-Best regards,
-Krzysztof
+
+> -----Original Message-----
+> From: Christoph Hellwig <hch@infradead.org>
+> Sent: Monday, December 15, 2025 11:43 PM
+> To: Luke Wang <ziniu.wang_1@nxp.com>
+> Cc: axboe@kernel.dk; ulf.hansson@linaro.org; linux-block@vger.kernel.org;
+> linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; imx@lists.linux.=
+dev
+> Subject: [EXT] Re: [PATCH v2 1/2] block: decouple secure erase size limit=
+ from
+> discard size limit
+>=20
+> Caution: This is an external email. Please take care when clicking links =
+or
+> opening attachments. When in doubt, report the message using the 'Report =
+this
+> email' button
+>=20
+>=20
+> > --- a/block/blk-merge.c
+> > +++ b/block/blk-merge.c
+> > @@ -169,8 +169,13 @@ struct bio *bio_split_discard(struct bio *bio, con=
+st
+> struct queue_limits *lim,
+> >
+> >       granularity =3D max(lim->discard_granularity >> 9, 1U);
+> >
+> > -     max_discard_sectors =3D
+> > -             min(lim->max_discard_sectors, bio_allowed_max_sectors(lim=
+));
+> > +     if (bio_op(bio) =3D=3D REQ_OP_SECURE_ERASE)
+> > +             max_discard_sectors =3D min(lim->max_secure_erase_sectors=
+,
+> > +                                       bio_allowed_max_sectors(lim));
+> > +     else
+> > +             max_discard_sectors =3D min(lim->max_discard_sectors,
+> > +                                       bio_allowed_max_sectors(lim));
+>=20
+> Please factor our a low-level helper and pass the max_sectors
+> as argument.
+
+I'm not sure I get your point. Do you mean helper function like get_max_io_=
+size()?=20
+Or do you mean something different?  Please explain in more detail.
+
+Thanks,
+Luke
+
+
