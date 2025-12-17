@@ -1,85 +1,132 @@
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
+Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAC2836D4E7
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 13:45:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E1D42D8393
+	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 13:45:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765979108; cv=none; b=g+Jknh0q9sI5z1SyWiNw8DvyBsZh9Rg5Kn9tqF3KGKOjutAoodlJwME4Xst1xMLjx2QRBbPfhKvKh48ODS4xvqd5TR93AwE4mAWj/8yhGWfbbd2tOeXJMqUUvckK4KF/nOY4kkBwxKUFSp1D/njXpbEVghYax2ZJs9O1SsdSkJY=
+	t=1765979125; cv=none; b=AJu1SnJ5djF3LiNKLxnPW+q4zva8eD1o04zWBv34rfygLY58xafTPQolITKyzq1+saqkf7APKKTKLelbkGLWU80cV49P7K7wf14h9SWIvqnhuHQVf05+X+BW1vXuhDcaDkkts11mECCZ30SoGSRECol2mJouSYuNvVo8KOqLPUA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765979108; c=relaxed/simple;
-	bh=f6B5SW7LECquH7Dinl9RlUBMU54vE/D4a/fXNNyeTLw=;
+	s=arc-20240116; t=1765979125; c=relaxed/simple;
+	bh=CY9cIs+GAycG0BsLVMBnwB1DBDgapJYHX6gajxVkx40=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Q8KTcFtAYIZmXaey7S0jmnjFGto205peOUvWgd9UTjQm73LCh+jic0570TO8GmE31G3CxsQ2J65iTFtsmQIQEygr23V0dX0kE0nElEzT0WaHPuiWPQLGEdnWg4MhVoV58pXLmdDnyydB7v+Pj3kc748eBsvxTy6PJ7ZwiWFxwfE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DXJNgkXk; arc=none smtp.client-ip=209.85.167.52
+	 To:Cc:Content-Type; b=Cj7lyeM24VNMVbBUbGIO/NM3XNNCyJ6e+t71jsEEZPbDrWXrMVP0jY6qLRtOscE1sGjkXEaPKhy63nRZHo4p7PdxLDdq4vrq/i8FUJk9COCIoN60AC6dNh6Itrj+97B5+tmCg13UgVckUrrUxsV6WJ6gaORRs6XW1LI0h2B6tfE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GCFvfPYN; arc=none smtp.client-ip=209.85.167.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DXJNgkXk"
-Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-5959105629bso6051256e87.2
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 05:45:05 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GCFvfPYN"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-59431f57bf6so6278243e87.3
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 05:45:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765979104; x=1766583904; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1765979122; x=1766583922; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=f6B5SW7LECquH7Dinl9RlUBMU54vE/D4a/fXNNyeTLw=;
-        b=DXJNgkXk/KIAr8PWbJpSjdbfQPFkrQwKNfCnChjLG7X1DD8vHhpOmwzOOYWFsjvd2Q
-         +gAlFc2AVxTnNtcZUm8n68OHl+WYrzUE9MMR2kYB5moRqLYCsaXwROJEH6UezpVBfcxx
-         MaHNLhxww3r/hlqbN0j4E6rbikv4afndrU5OtrUth2EnWPEV3MoBk//+s9YI6xS94M+t
-         Y+U21Zu7M5DJc+57nRIHRaKgs0vJNZzuadvOIrqZyF9l+uFJh4qX8mBBzQcd+JQ94Ywj
-         fX+7l2S2UbfKOgEv8TmvpnV6x6cFWwraj2ZXx0O2Ce79kkZjBECgw0TtpGLHUUzevcbi
-         EwSw==
+        bh=GJY2xsOcGCbmVygXp1kujCxIBc5qH720XDao5/Bx6Oo=;
+        b=GCFvfPYNlD+OcExUi6RhLNBq5g0MOdwk3K7U1iCcfPDi0RB4GAj/QQInwDAjb2lWr6
+         3TL7cM1/977HdtuoDXxd2r71oV6q+pOFdqEccRelLcgkVlS/ZxWQa8QDioo/qyLpRuXL
+         y0vEMW0xVRrjn/QXz5lo3DpyXn8yLk+6glZ+pbQHEZ+MdCG+hTgKZzkrSdG9651DQl1g
+         MwMEYh65ZxdTMWv7rTpvrdxy3t++7KVMk753MgJO2ornxvmTVzPuzp+LWM92Qux/czjM
+         Iyp7Gx06nijMfIUZS0lynB38L4WyvkjQr5HCzL4s07eikecPCgCeqLhsI/jG3N93u3Av
+         tr1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765979104; x=1766583904;
+        d=1e100.net; s=20230601; t=1765979122; x=1766583922;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=f6B5SW7LECquH7Dinl9RlUBMU54vE/D4a/fXNNyeTLw=;
-        b=THfAcksCOBK9CGCUKUFP/OxTREjPcayI5p2/kduLKywDts5s/n3au7K4gYeFUKt2F9
-         XBBORcD5pwCGsSnSJn894u8s4EQ8+ZmkErt7vJ02dUwAD9XlHw7LeqjIvIiEKbtKOhGV
-         JiWkJSfFHSYPkVUpKqj7J+8jECY2kbhOdCSfvxnJieM/g6JJUnaPOI4RTcYJqY4cU93d
-         cdsSBQ3G2fV/kXyKgxwm/WUEeMH522S1Y+XIgi9VewGGBjHcz1KzJmMrlaH4Cl3+/FlR
-         1HZU30Nk2p5aO6uggErxVTK5LmKlyPXrt2+XyrFcre6DLAd1xdL+c2lz4IdsvMYjsJi1
-         6BFQ==
-X-Gm-Message-State: AOJu0YyltCyp4tuYz62hvRodWrbio7iBNdj1xhur7hztieP286nfd2Ts
-	QCibzTNXU4VedaL1aj9bYLkLHCXzvakWIJLfJP5MYqD7QEeb53eXOnRpuvnaiOimob/oKialn3U
-	b1t/zc6K2n2qY1BmBN4UiNs2SqGxOTn+IQtnVuMfuqQ==
-X-Gm-Gg: AY/fxX6iDa9nSMEN+Sr44agYajkC6tDZLa9tQiYJHsRS51vXQXUW7pokCGM3IU7/ADH
-	gLK1iFjkGz54nZEN7QaaTGcWRZcABlod90ukSzs9A9oJIO9id+4j6Uk7Cc1rEuPkfPHpYGgE2R/
-	/2XVKd03zYquOtlRKny6du6QPqTTA20QstJPyjO+8ZcyuUjetWBXyTvMzFp84nJyv+uMH4efxnb
-	EfzzQUIEpbUnrBZIaxmhBK7Ah8tl3rNTapPWL5D8Noxgf+St0seW+3vezauv542SIFIKU8=
-X-Google-Smtp-Source: AGHT+IE6H3QU/soKtgCj1SmIpi7a5VzPCSzj1rJ3p7E+A3JDLrDod8EjGZgd/BWl7aCnuLhLw1J+9LSsCRoEqYf+fBU=
-X-Received: by 2002:a05:6512:2203:b0:597:dd9b:d444 with SMTP id
- 2adb3069b0e04-598faa31282mr5999274e87.19.1765979103831; Wed, 17 Dec 2025
- 05:45:03 -0800 (PST)
+        bh=GJY2xsOcGCbmVygXp1kujCxIBc5qH720XDao5/Bx6Oo=;
+        b=U3cZLj/qtyqRmA1/x0gT5uQAaEF0IsADgjFTlJ9n/8mrO/raG5EVR6yXubaF3EifUD
+         tcFVMVbz7JX2dg/ai9fVCz+FIiReqqU3gkOajq/sjd2fbqwwpkt7X63sQ7ev3nxgA4DL
+         aJBI/tbXuE3QwogXMHN/+13nWdzeEtN2xoCqlWkb2zeUD49TfR4fyzb7p5vCbSo3WM1L
+         qYiasAkgAHcLfIzFYYMMLHxbHI+20zdNqneVlycxluY6k0QFQNa+iiqOgcgzK59FNx5V
+         CCeoGv01oGEsvWjNjxNhA2YKbIc2t4ER75Y5Eu9fTjmwGjRWPQLe6tATJOWmc7de82BK
+         opmw==
+X-Gm-Message-State: AOJu0YxBBmZhmc59v+vhMkc/Lyb3JXWPjQS7SjZPzgG2gLEvVbx0wnw7
+	U5mHijy8hiQ8qGyIR/rKk3a9E0CBpNwlFwqxUGwtdElHMltWrSL0iTEXXRfkhErrAAmrLroOlCK
+	wE8a631/lIhuxz/z1unV2jXcTLgkU74H+DQIiEDY7dQ==
+X-Gm-Gg: AY/fxX7VOe6s9gd8En+mHEZm7s9LBnedPRBY0y6xIXWSgB1cTlw6k+pWhN3fXEV6olO
+	atRqa4U3Rqbg/whGtXfIV7nQFKZAh4KZl5xtIGFvFwkZWta/dRDUEgwo9maD4hqEQT51zrqmf2A
+	z0aY8eD/579ew6yc50cmVCoE/uIlqvTXuiZpag2nmZhOrIodsg7eIKfYiqT5Smpd+f9bubWdgCQ
+	5UCJ8dbUzP+QmcgH3jXHeqsOxbnqWadl3sbI23uA9VUcX5nXFdo++dAeRM27ychhsyLnak=
+X-Google-Smtp-Source: AGHT+IEzvIPQeQe+4BQkLwY/CnFB4NdVoHOSjL/RREkTxfCYcCeKcde/RuPZczALQSrFmQypLV3dZQlz1B8TouEhKb4=
+X-Received: by 2002:a05:6512:6d3:b0:595:7fed:aae9 with SMTP id
+ 2adb3069b0e04-598faa21c46mr6132895e87.12.1765979121557; Wed, 17 Dec 2025
+ 05:45:21 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251128052011.204735-1-avri.altman@sandisk.com>
- <CAPDyKFpshnLSa+GNOpFdQ6_Kc2ov_jofq56eq7WsqZMRVYs-NQ@mail.gmail.com> <DS1PR16MB6753E217F183ADF4F6800879E5ADA@DS1PR16MB6753.namprd16.prod.outlook.com>
-In-Reply-To: <DS1PR16MB6753E217F183ADF4F6800879E5ADA@DS1PR16MB6753.namprd16.prod.outlook.com>
+References: <1765958648-218422-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1765958648-218422-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 17 Dec 2025 14:44:25 +0100
-X-Gm-Features: AQt7F2qCEDvmD2RY1GVy-i9iCIMt2e2Oy7oOTht_V0HrIUORtEnxlcCAMv25j1o
-Message-ID: <CAPDyKFpUVevhHDp2BEvAcwXkopAdo3Nb4MnppwSbpJ5pL6EQ=g@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] mmc: core: Extend manufacturing date beyond 2025
-To: Avri Altman <Avri.Altman@sandisk.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date: Wed, 17 Dec 2025 14:44:45 +0100
+X-Gm-Features: AQt7F2pQMXWZToNNO_CCgt4lRVYMhS60K5woMnjiywDzOa3vLj3TH41-xwVCPWM
+Message-ID: <CAPDyKFq2F6VU3xaP=cg66vTXj1wGK3mVVsF5mzb3HRuVhooe5w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix descriptor increasing case in 64-bit case
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
+	Dan Carpenter <dan.carpenter@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 15 Dec 2025 at 17:28, Avri Altman <Avri.Altman@sandisk.com> wrote:
->
-> > I have applied the series for next, thanks!
-> >
-> > However, I noticed that the author of the patch has your gmail-address and the
-> > sob has your sandisk-address. I guess we should change to your sandisk-address
-> > to be in both places, no?
-> Yes. Sorry for missing this.
++ Dan
 
-No worries, I have amended the commits accordingly.
+On Wed, 17 Dec 2025 at 09:04, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>
+> The original 'for ( ; length ; desc++)' loop unconditionally increments
+> the 'desc' pointer. However, in 64-bit mode (when 'is_64bit' is true),
+> the 'desc' pointer is not initialized or used; only the 'desc64' pointer
+> is valid. This leads to incorrect memory access and potential undefined
+> behavior.
+>
+> This commit replaces the flawed 'for' loop with a 'while' loop and ensures
+> that the correct pointer ('desc' or 'desc64') is incremented based on the
+> 'is_64bit' flag within each iteration.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+I amended this change into the offending commit and added a
+reported-by tag from Dan with a corresponding closes-tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+>  drivers/mmc/host/dw_mmc.c | 9 ++++++---
+>  1 file changed, 6 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 2d81d021..5d84d44 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -594,7 +594,7 @@ static inline int dw_mci_prepare_desc(struct dw_mci *host, struct mmc_data *data
+>
+>                 u64 mem_addr = sg_dma_address(&data->sg[i]);
+>
+> -               for ( ; length ; desc++) {
+> +               while (length > 0) {
+>                         desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+>                                    length : DW_MCI_DESC_DATA_LENGTH;
+>
+> @@ -640,10 +640,13 @@ static inline int dw_mci_prepare_desc(struct dw_mci *host, struct mmc_data *data
+>                         mem_addr += desc_len;
+>
+>                         /* Save pointer to the last descriptor */
+> -                       if (is_64bit)
+> +                       if (is_64bit) {
+>                                 desc64_last = desc64;
+> -                       else
+> +                               desc64++;
+> +                       } else {
+>                                 desc_last = desc;
+> +                               desc++;
+> +                       }
+>                 }
+>         }
+>
+> --
+> 2.7.4
+>
