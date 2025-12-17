@@ -1,113 +1,91 @@
-Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 641E930AAD8
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 13:45:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11766338F35
+	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 15:37:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765979279; cv=none; b=VvjQEowAFtzPBb7+xkLyB+XW4GLOSnMVx5bbnbWDfQOY7E6laSpyQTCbUUBjJ+Hh8lq66kfCTS9ZnoN8cnz8vwbbr0nSAe8ciZOfpzqMUZxilWbwkkFayPDVN22yFT+PgLy1zHYmvA3eu0WOdXOJyfj0b5Zoaj+8ooQadi/yO20=
+	t=1765985862; cv=none; b=MhaR0d5G6I8uzW6zwlNwXfHB3MRNKWM/J2aS7rczvV0+rzER5P2Jk8jjIPpAHbTi7AvywbqO1aT/1gwj1flHbHAv4sLxmKFMy48aShL9estHO8O+atBLmwBx7g1f7HkfKocm3Je8rmu5/knDnOnTl22xRS9WShte6vzNTW64yIA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765979279; c=relaxed/simple;
-	bh=arf6CZpok9qURFWUY+IVoXGLVMMIvAuPB2AyMT/tQ54=;
+	s=arc-20240116; t=1765985862; c=relaxed/simple;
+	bh=3zWGgAak/FBm7Vkk94ZrLytELeHbedaeePRas4C5o5A=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=dUCUS9xpe6Q7HtbRlxzlCjCiRASmUVZnY1Kv5mTC3EcsO/qE8Us7H79yNamMMTsWcGADId1BBDi0Y1Dwq1H0Qq4WLppef5fDkGeL6C5BeBW7ojfWu7+zCghTkx/e9oqUE5m/H7IT9gyd/uLxuK8k8WggtanrhJbDXOZ3j6Ed5P8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=unknown smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=R9rvNvDq; arc=none smtp.client-ip=209.85.208.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=tempfail smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=ATUwgId1BZmtG3uAIjtwkijS/45DrljwzfBPHbskp9WHy4kszOyexDZdrHtAm8h/37psUFj3uboi60g2/lzUI+ubETlsVN720wI+zhfwl1/Gd/YZvkx6miRtiJOLra3RF3EH12m3DFwmvO75PuIDkDqwmBvpRBfuwoTMuP5AU2Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hMNPbQfH; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="R9rvNvDq"
-Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-37fcec29834so40368391fa.0
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 05:45:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765979149; x=1766583949; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=dt0E/6+ejHTgo150Lc89xpPGXdsq1GIskbS+HNFqx4k=;
-        b=R9rvNvDqWh/pXFiPIkgZUVWiGx2r4gJKO3oWpc76HzHHMW3QJ6glTdHEy85yVUoAa8
-         CPa/zzNHv2M1+CPlKjk51DeRbM9zIIK76MouBm8lu1bQtpF3F9b3CnRqMiBefm4Uv0Ae
-         2F5Sqc39ESBv0OeliviSd3CF0S5PvlqgT7hJtKMbSDnpw5GaQQnN1/JqllleKjyBoJfD
-         /y0c0Q9uBHS2iVXfkQvwKlHqmiz1ApB0zA0Emc1Dvl+9Du++fzWdqtFbYU2ztd3AHECx
-         Fe4+X6Zppj9PaEMUtS+e/Ot0YwF9Ml2J+4YiDQ6Kz28+MmA3YbV60NEsMS0+DPwOESck
-         RpEA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765979149; x=1766583949;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dt0E/6+ejHTgo150Lc89xpPGXdsq1GIskbS+HNFqx4k=;
-        b=NuTzusYEE8uNYKnLfqNcRTXMs71uw6t2J4B5oM4AYITI0SplqhWLNlDTuzFqS22IDj
-         CCmUqqxNnUqrozxkoQvsQjhWu0Xqb9zXTJ0Lw5AeZzEQbXd8She3juX8HCv0OxsOW9AF
-         /ziJK/bP4megjEKpCfPPkq1rUofQM63TuJrXG2Q8yA43N7q+PNnWqdHDA/qT/saG76R0
-         of3w2M6+zuhPmVodFd3zkMFgAOkD9BzMixpHyP29TvybXZrddUW6ml/Dsuvy8m72yQk4
-         3QaEgGizj2BQyIzPL/nw+lgmYzTcxVNsVCTr3+beUK5RBoFj1QlmGX3yxivL+INrsSeq
-         l5Pg==
-X-Forwarded-Encrypted: i=1; AJvYcCWsG36AP1SkYitq5hhksbepIcfhGjm/HtFmBkLJrYWSDZ72LeblOgPrBQmyuvPBWpeiz9rA15TYzhE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxuN/59d+UA/xjpvz0i2RIgsY/EyaJZNCwdP+QV4SGaDV4PwsbW
-	KCW/1S2kWZWZ7ghD24ABZC0E+vCSx9J3z1odXy+yPfPVYp7ZzH6fb9P3w2WwDBrXSaHYRpL9VCw
-	YkEWI4gG01ggB9esf5poeWKFgOeVP8jEoc+noRZJWZw==
-X-Gm-Gg: AY/fxX4hrKM1TjM9H6eKBjjmwYJ84c8oJkV72bSzxtELqREk5WcCa8IOzFQh7NsKVda
-	SBNuirt/J3hAS+m6DzHbiUDDcxuwO/GuDOHr11TPUlcf9CQ2KJ9S2NPspkaSVMGK/iF9ZWCcp8s
-	ucFN1xAgkW5oJSU9sGVRMdSO+1ss43hOLUTGWAoxftFohwP1UqJihRlWf/ugdPak96evzsRsJ5v
-	hCJu4lx/caZqnRmry48OHusCaelciWxnLNEnI6y+lcGpjfMWw/L3MEzl4XLGmY9EuUGDVeNrE/h
-	uvi1tg==
-X-Google-Smtp-Source: AGHT+IExF/Q8NXh7TlarsyYw/vHK3VsdDnOYQrrieIlb5+1W8/+jeDq8koqzdO4UxR+bIVmBM4kl/UassN9xjO2VbIQ=
-X-Received: by 2002:a05:651c:544:b0:37f:cb34:2141 with SMTP id
- 38308e7fff4ca-37fd08be88fmr52413341fa.31.1765979148511; Wed, 17 Dec 2025
- 05:45:48 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hMNPbQfH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B1B93C116B1
+	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 15:37:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1765985861;
+	bh=3zWGgAak/FBm7Vkk94ZrLytELeHbedaeePRas4C5o5A=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=hMNPbQfHkiOGVqJHw5AtuOCvRV0FWKVO23ESw20F2cpxcqWTBIOhlBqGNkwequi0i
+	 3oeUmzcEgHgSCtPoeLi5W9KvVXmE1VGX7UUnHrN1mtR68GvWl08uXF7HTsH54i7ZE9
+	 KfYRP9/8MnbbeqwSYkqRzywXs1Oee8xupqaf+a3s5LDAgTLnveEoDXptQ80gqAbzq5
+	 bjMNZezJ7p4GnTY2AwYJ0eq5AHSinGdYScOtbFN/Adxv8qepgBFrnvzwv9d+LJGjra
+	 iG70B1IeKSjTYdQQgNkT1NrvCLmUQmuqa9VxS8bv5ivZq+pOTD21TTRtZYR98YCKkC
+	 GNKlOB4AN3+tA==
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-b7ce5d6627dso491671566b.2
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 07:37:41 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWs4ueYglvKZpanF13yxaaX4vlBCJ1FhUInDsxQ/WSAZuNZ61c3jnZ91IyR3/udOKPy1BK3RhuQrvk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyFny3w8oUyljXvvZpZ1rrKAwq/daOM1vQxzdSf+fyjchIYbZjt
+	DTxgYzDw+kEVtolc/7Mf8p6Zo2yw1vyDtmiKCdEW2wBkVXNl4Z01JTtL9qTArJI8/kgfQi3JfpE
+	W0cCtmWYL7Q4IV0kdjr48rlm83XucvA==
+X-Google-Smtp-Source: AGHT+IE+MbpVy0D9cI7vtayEcuAQ5BpKDVDav3dQlj552I/4svzEpwf9VDtWU/NeRoVokGuFNkCPT8ATPD0NU91eNy8=
+X-Received: by 2002:a17:907:3cca:b0:b72:c261:3ad2 with SMTP id
+ a640c23a62f3a-b7d23af00e6mr1859042566b.50.1765985860268; Wed, 17 Dec 2025
+ 07:37:40 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251212063509.2002910-1-sai.krishna.potthuri@amd.com>
-In-Reply-To: <20251212063509.2002910-1-sai.krishna.potthuri@amd.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 17 Dec 2025 14:45:11 +0100
-X-Gm-Features: AQt7F2pjYRm4v2emCNW0rzboNC08S4ZEgHkWublRSmLtXYtHl_cyJpaa9pQrJJA
-Message-ID: <CAPDyKFrA7TiqX26BrSKaKeNyq8TRSoMpxvChuE1AhdVShvspGg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Increase CD stable timeout to 2 seconds
-To: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>, 
-	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, git@amd.com, saikrishna12468@gmail.com
+References: <20251211-dev-dt-warnings-all-v1-0-21b18b9ada77@codeconstruct.com.au>
+ <20251211-dev-dt-warnings-all-v1-1-21b18b9ada77@codeconstruct.com.au>
+In-Reply-To: <20251211-dev-dt-warnings-all-v1-1-21b18b9ada77@codeconstruct.com.au>
+From: Rob Herring <robh@kernel.org>
+Date: Wed, 17 Dec 2025 09:37:28 -0600
+X-Gmail-Original-Message-ID: <CAL_JsqJUaKKsJ8BCNbVXe4vLVsQ2Av7VuWqf9DnUKHeLzLb8NQ@mail.gmail.com>
+X-Gm-Features: AQt7F2q-nb9Xy6ZmXCdkQqrO-_0mpnqJ_RWJ9ZzKv3sOBl98lQ-TH7L8rvtaBLo
+Message-ID: <CAL_JsqJUaKKsJ8BCNbVXe4vLVsQ2Av7VuWqf9DnUKHeLzLb8NQ@mail.gmail.com>
+Subject: Re: [PATCH RFC 01/16] dt-bindings: hwmon: Convert aspeed,ast2400-pwm-tacho
+ to DT schema
+To: Andrew Jeffery <andrew@codeconstruct.com.au>
+Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Linus Walleij <linusw@kernel.org>, Joel Stanley <joel@jms.id.au>, linux-hwmon@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-aspeed@lists.ozlabs.org, linux-kernel@vger.kernel.org, 
+	openbmc@lists.ozlabs.org, linux-gpio@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-crypto@vger.kernel.org, 
+	linux-iio@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 12 Dec 2025 at 07:36, Sai Krishna Potthuri
-<sai.krishna.potthuri@amd.com> wrote:
+On Thu, Dec 11, 2025 at 2:46=E2=80=AFAM Andrew Jeffery
+<andrew@codeconstruct.com.au> wrote:
 >
-> On Xilinx/AMD platforms, the CD stable bit take slightly longer than
-> one second(about an additional 100ms) to assert after a host
-> controller reset. Although no functional failure observed with the
-> existing one second delay but to ensure reliable initialization, increase
-> the CD stable timeout to 2 seconds.
+> From: "Rob Herring (Arm)" <robh@kernel.org>
 >
-> Fixes: e251709aaddb ("mmc: sdhci-of-arasan: Ensure CD logic stabilization before power-up")
-> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+> Convert the ASpeed fan controller binding to DT schema format.
+>
+> The '#cooling-cells' value used is 1 rather than 2. '#size-cells' is 0
+> rather 1.
 
-Applied for fixes and by adding a stable-tag, thanks!
+Okay, I can't figure out why I thought '#cooling-cells' needed to be 1
+here. I don't see that anywhere in the tree. The driver for sure only
+supports 2, so anything that's not is an error in any case.
 
-Kind regards
-Uffe
-
-
+> Some users define more that 8 fan nodes where 2 fans share a PWM. The
+> driver seems to let the 2nd fan just overwrite the 1st one. That also
+> creates some addressing errors in the DT (duplicate addresses and wrong
+> unit-addresses).
+>
+> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+> Signed-off-by: Andrew Jeffery <andrew@codeconstruct.com.au>
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index b97d042897ad..ab7f0ffe7b4f 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -99,7 +99,7 @@
->  #define HIWORD_UPDATE(val, mask, shift) \
->                 ((val) << (shift) | (mask) << ((shift) + 16))
->
-> -#define CD_STABLE_TIMEOUT_US           1000000
-> +#define CD_STABLE_TIMEOUT_US           2000000
->  #define CD_STABLE_MAX_SLEEP_US         10
->
->  /**
-> --
-> 2.25.1
->
+>  .../bindings/hwmon/aspeed,ast2400-pwm-tacho.yaml   | 106 +++++++++++++++=
+++++++
+>  .../devicetree/bindings/hwmon/aspeed-pwm-tacho.txt |  73 --------------
+>  2 files changed, 106 insertions(+), 73 deletions(-)
