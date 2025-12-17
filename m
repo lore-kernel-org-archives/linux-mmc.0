@@ -1,90 +1,89 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04C0A33B6F8
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 13:45:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 641E930AAD8
+	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 13:45:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765979159; cv=none; b=fff3bxvWTM96wkDYiVtEHy6t7qhesJWrnp1VEHjBSJwPHLorRbP+wIqkthXriNPDEnHYa4frhTNLRtL/6ysxVHmXmHVEnhzS/fqeDjyBeZL8ew0hXDwb+S06UBIVsO4etqzMUvaOEiKyprf5o3pXwgFqyM6Xvyz85BWnlSa208A=
+	t=1765979279; cv=none; b=VvjQEowAFtzPBb7+xkLyB+XW4GLOSnMVx5bbnbWDfQOY7E6laSpyQTCbUUBjJ+Hh8lq66kfCTS9ZnoN8cnz8vwbbr0nSAe8ciZOfpzqMUZxilWbwkkFayPDVN22yFT+PgLy1zHYmvA3eu0WOdXOJyfj0b5Zoaj+8ooQadi/yO20=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765979159; c=relaxed/simple;
-	bh=RulmqSaiOURezsD4cu1+MRR95cud3v1lRvrkSGGSSZs=;
+	s=arc-20240116; t=1765979279; c=relaxed/simple;
+	bh=arf6CZpok9qURFWUY+IVoXGLVMMIvAuPB2AyMT/tQ54=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Yes2liAAdArjcTvlJpmTeaKIEQINl/kvHs9gLrRwPa9ASEwt1P2hF8QiqYlK/Sy5LZm3sVJ/9LhwMPQjJm2ee0CgEANz31s3BqlA8srGhZQZej2L7/FCX+WCQRWzA32xtdNr96Qjn5gM2FotqZ7WapL8RIKoppync6oYgethaZA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=uiyTxbhi; arc=none smtp.client-ip=209.85.167.53
+	 To:Cc:Content-Type; b=dUCUS9xpe6Q7HtbRlxzlCjCiRASmUVZnY1Kv5mTC3EcsO/qE8Us7H79yNamMMTsWcGADId1BBDi0Y1Dwq1H0Qq4WLppef5fDkGeL6C5BeBW7ojfWu7+zCghTkx/e9oqUE5m/H7IT9gyd/uLxuK8k8WggtanrhJbDXOZ3j6Ed5P8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=unknown smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=R9rvNvDq; arc=none smtp.client-ip=209.85.208.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=tempfail smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uiyTxbhi"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-59445ee9738so4650652e87.3
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 05:45:57 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="R9rvNvDq"
+Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-37fcec29834so40368391fa.0
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 05:45:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765979156; x=1766583956; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1765979149; x=1766583949; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=HeFvcwPuMBzJwPtY2IZ75UX9BR5Ij/OppFp2JBnCGZk=;
-        b=uiyTxbhiQyHzir4bKqxNeNYkACmL+PZwUPT16pK3yrfxtY0Mug+oXPSbw8WGQT2ccP
-         msL+8aSjDHG1Oi5Tp9DC1CimmwRnmVNoZGwCIQmTh1BXLpUnBCX0lyVffcwuJPxVRVzY
-         7f3RYhYn0pd8gWwr/iOfqo8pHd02iiAoRj+pwzQC28Hvh+CqWmlPiNDnRdelZOe2qYI4
-         cyV98j9ErJWu7Y/IblFawyCzldxbN8D1tbfzk57L++eR5pDLcllQU9jyY0ZmNv227UZ1
-         E7tW4Le4KCB8zEGaE5EFcs1QD8npN84sMiW1Hy2d/ZRT+yYylHypACBpIMudMzKJpVna
-         PO3Q==
+        bh=dt0E/6+ejHTgo150Lc89xpPGXdsq1GIskbS+HNFqx4k=;
+        b=R9rvNvDqWh/pXFiPIkgZUVWiGx2r4gJKO3oWpc76HzHHMW3QJ6glTdHEy85yVUoAa8
+         CPa/zzNHv2M1+CPlKjk51DeRbM9zIIK76MouBm8lu1bQtpF3F9b3CnRqMiBefm4Uv0Ae
+         2F5Sqc39ESBv0OeliviSd3CF0S5PvlqgT7hJtKMbSDnpw5GaQQnN1/JqllleKjyBoJfD
+         /y0c0Q9uBHS2iVXfkQvwKlHqmiz1ApB0zA0Emc1Dvl+9Du++fzWdqtFbYU2ztd3AHECx
+         Fe4+X6Zppj9PaEMUtS+e/Ot0YwF9Ml2J+4YiDQ6Kz28+MmA3YbV60NEsMS0+DPwOESck
+         RpEA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765979156; x=1766583956;
+        d=1e100.net; s=20230601; t=1765979149; x=1766583949;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HeFvcwPuMBzJwPtY2IZ75UX9BR5Ij/OppFp2JBnCGZk=;
-        b=rBxW5c9zQ7zWOHYB/isZR+9wlhbrA1cYT0XkPdfnF+0EwbeZsdLMjJ9qr9u9NeN7Az
-         c3KDdZ8flm2Kgyp30K8A6sbmWPeui5ShF+kAvw+KGk3gw5suU0EJ9DFfimww2KqK7Sty
-         f4S69yUs1Dd6Se5upMPgv85KOfeAGkWF9/3FSgePlaP94bWwGsv+yMdmeuudUAsfj+t6
-         8j6HUZc9kvETEPW2O+hKxhnW3/ZqWwsnHpKHEu7u3pG0tRI7V0+3BAljpU28iGMUCBkj
-         yGyiRx0C9xGshCw6MOq4H1nN174ukpb6/nWsYI+QxuvszPkhZm4A0d+iuXjFg5Ycjidi
-         jK+A==
-X-Forwarded-Encrypted: i=1; AJvYcCXes+vx0PfMkFxj1Tsw4kQcXNoXR7JPd2+X7hF9N5vL0WTdELbqiEsgbfuWU8/32iEbGtUDEtvEjYQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxLRVXeE44IGHoqbTOEYLl00UKIGIOcAgj2DM8SfCA03Yf8DsWH
-	ioBxb6iu4qWRZ3La38oPpLvtjW0iyLkfy7OMIln7oMlGaiPGhjiX2BjRlz3QpwYkZ3CvAhudQG7
-	UefNrvuL95LxzqThtSJJsdLNAvUOKvp0LqdYeC2a0Kg==
-X-Gm-Gg: AY/fxX6R3VyjlDSYy9Zr81PIIbX6t5W0ukLELfth2XgUARUOPVf67ugs2uJkHO3uQCf
-	W4zI1Ahp3S+WPC1I+tHqtaogUICRVJC0KhuFK9ya5xM5KBFz0jfmrBZBbWLxeWxg5/5cl2LmDjJ
-	fXwZFbZGBrA9AkrufGTlmWaX0VYk6Hir0vmZJt69VuBrQdqWXn0GarCKF5fGq4jx3K3I6on3PmZ
-	oEr6CGkdKIMCaoSuuUTdd178VLq/TVWjphv3nMPQEmWwg716Sp6ZbzkQobvAG5NSg5Nexs=
-X-Google-Smtp-Source: AGHT+IF8DUR3iFEJEHIZVoppRZ2LJ1i16lHQ3Olhnesdn9YtIYVJQ/fNEdH4vIoS5b8Lw4dMFXsWFN+VTySF0wVdcVI=
-X-Received: by 2002:a05:6512:3b86:b0:597:d7dc:b7ce with SMTP id
- 2adb3069b0e04-598faa3bd8amr6408543e87.30.1765979156040; Wed, 17 Dec 2025
- 05:45:56 -0800 (PST)
+        bh=dt0E/6+ejHTgo150Lc89xpPGXdsq1GIskbS+HNFqx4k=;
+        b=NuTzusYEE8uNYKnLfqNcRTXMs71uw6t2J4B5oM4AYITI0SplqhWLNlDTuzFqS22IDj
+         CCmUqqxNnUqrozxkoQvsQjhWu0Xqb9zXTJ0Lw5AeZzEQbXd8She3juX8HCv0OxsOW9AF
+         /ziJK/bP4megjEKpCfPPkq1rUofQM63TuJrXG2Q8yA43N7q+PNnWqdHDA/qT/saG76R0
+         of3w2M6+zuhPmVodFd3zkMFgAOkD9BzMixpHyP29TvybXZrddUW6ml/Dsuvy8m72yQk4
+         3QaEgGizj2BQyIzPL/nw+lgmYzTcxVNsVCTr3+beUK5RBoFj1QlmGX3yxivL+INrsSeq
+         l5Pg==
+X-Forwarded-Encrypted: i=1; AJvYcCWsG36AP1SkYitq5hhksbepIcfhGjm/HtFmBkLJrYWSDZ72LeblOgPrBQmyuvPBWpeiz9rA15TYzhE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxuN/59d+UA/xjpvz0i2RIgsY/EyaJZNCwdP+QV4SGaDV4PwsbW
+	KCW/1S2kWZWZ7ghD24ABZC0E+vCSx9J3z1odXy+yPfPVYp7ZzH6fb9P3w2WwDBrXSaHYRpL9VCw
+	YkEWI4gG01ggB9esf5poeWKFgOeVP8jEoc+noRZJWZw==
+X-Gm-Gg: AY/fxX4hrKM1TjM9H6eKBjjmwYJ84c8oJkV72bSzxtELqREk5WcCa8IOzFQh7NsKVda
+	SBNuirt/J3hAS+m6DzHbiUDDcxuwO/GuDOHr11TPUlcf9CQ2KJ9S2NPspkaSVMGK/iF9ZWCcp8s
+	ucFN1xAgkW5oJSU9sGVRMdSO+1ss43hOLUTGWAoxftFohwP1UqJihRlWf/ugdPak96evzsRsJ5v
+	hCJu4lx/caZqnRmry48OHusCaelciWxnLNEnI6y+lcGpjfMWw/L3MEzl4XLGmY9EuUGDVeNrE/h
+	uvi1tg==
+X-Google-Smtp-Source: AGHT+IExF/Q8NXh7TlarsyYw/vHK3VsdDnOYQrrieIlb5+1W8/+jeDq8koqzdO4UxR+bIVmBM4kl/UassN9xjO2VbIQ=
+X-Received: by 2002:a05:651c:544:b0:37f:cb34:2141 with SMTP id
+ 38308e7fff4ca-37fd08be88fmr52413341fa.31.1765979148511; Wed, 17 Dec 2025
+ 05:45:48 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251212-s32g-sdhci-kconfig-v1-1-8e278c8d7f78@redhat.com>
-In-Reply-To: <20251212-s32g-sdhci-kconfig-v1-1-8e278c8d7f78@redhat.com>
+References: <20251212063509.2002910-1-sai.krishna.potthuri@amd.com>
+In-Reply-To: <20251212063509.2002910-1-sai.krishna.potthuri@amd.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 17 Dec 2025 14:45:17 +0100
-X-Gm-Features: AQt7F2p99M9efU4Kabtz6odZdNhny0sq2J-1crHyiipLb65xYIkOxCPnes_s36Q
-Message-ID: <CAPDyKFp++OQFxkY_zqkZSJz2R0sqxBnd-6U+VLsyZYDQ4H9MeA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: add alternate ARCH_S32 dependency
- to Kconfig
-To: Jared Kangas <jkangas@redhat.com>
-Cc: Haibo Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, 
-	Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, 
-	Chester Lin <chester62515@gmail.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, imx@lists.linux.dev, s32@nxp.com, 
-	linux-arm-kernel@lists.infradead.org
+Date: Wed, 17 Dec 2025 14:45:11 +0100
+X-Gm-Features: AQt7F2pjYRm4v2emCNW0rzboNC08S4ZEgHkWublRSmLtXYtHl_cyJpaa9pQrJJA
+Message-ID: <CAPDyKFrA7TiqX26BrSKaKeNyq8TRSoMpxvChuE1AhdVShvspGg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Increase CD stable timeout to 2 seconds
+To: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org, git@amd.com, saikrishna12468@gmail.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 12 Dec 2025 at 16:04, Jared Kangas <jkangas@redhat.com> wrote:
+On Fri, 12 Dec 2025 at 07:36, Sai Krishna Potthuri
+<sai.krishna.potthuri@amd.com> wrote:
 >
-> MMC_SDHCI_ESDHC_IMX requires ARCH_MXC despite also being used on
-> ARCH_S32, which results in unmet dependencies when compiling strictly
-> for ARCH_S32. Resolve this by adding ARCH_S32 as an alternative to
-> ARCH_MXC in the driver's dependencies.
+> On Xilinx/AMD platforms, the CD stable bit take slightly longer than
+> one second(about an additional 100ms) to assert after a host
+> controller reset. Although no functional failure observed with the
+> existing one second delay but to ensure reliable initialization, increase
+> the CD stable timeout to 2 seconds.
 >
-> Fixes: 5c4f00627c9a ("mmc: sdhci-esdhc-imx: add NXP S32G2 support")
-> Signed-off-by: Jared Kangas <jkangas@redhat.com>
+> Fixes: e251709aaddb ("mmc: sdhci-of-arasan: Ensure CD logic stabilization before power-up")
+> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
 
 Applied for fixes and by adding a stable-tag, thanks!
 
@@ -93,36 +92,22 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/Kconfig | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-of-arasan.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 10d0ef58ef493102d3586d7a31d755543297999a..c94ae4794545de1c818ad50be7f91331862b6acf 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -315,14 +315,14 @@ config MMC_SDHCI_ESDHC_MCF
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index b97d042897ad..ab7f0ffe7b4f 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -99,7 +99,7 @@
+>  #define HIWORD_UPDATE(val, mask, shift) \
+>                 ((val) << (shift) | (mask) << ((shift) + 16))
 >
->  config MMC_SDHCI_ESDHC_IMX
->         tristate "SDHCI support for the Freescale eSDHC/uSDHC i.MX controller"
-> -       depends on ARCH_MXC || COMPILE_TEST
-> +       depends on ARCH_MXC || ARCH_S32 || COMPILE_TEST
->         depends on MMC_SDHCI_PLTFM
->         depends on OF
->         select MMC_SDHCI_IO_ACCESSORS
->         select MMC_CQHCI
->         help
->           This selects the Freescale eSDHC/uSDHC controller support
-> -         found on i.MX25, i.MX35 i.MX5x and i.MX6x.
-> +         found on i.MX25, i.MX35, i.MX5x, i.MX6x, and S32G.
+> -#define CD_STABLE_TIMEOUT_US           1000000
+> +#define CD_STABLE_TIMEOUT_US           2000000
+>  #define CD_STABLE_MAX_SLEEP_US         10
 >
->           If you have a controller with this interface, say Y or M here.
->
->
-> ---
-> base-commit: 7d0a66e4bb9081d75c82ec4957c50034cb0ea449
-> change-id: 20251211-s32g-sdhci-kconfig-585b6909f7b4
->
-> Best regards,
+>  /**
 > --
-> Jared Kangas <jkangas@redhat.com>
+> 2.25.1
 >
