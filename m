@@ -1,70 +1,71 @@
-Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com [209.85.208.46])
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F272733B97E
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 11:09:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DE8833D4F8
+	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 11:09:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765969786; cv=none; b=SfrmJ5N+PK+wQpQthwLPDoazvdT2/9/RtRaoVL3Dv6UARRPbUnixxwFs5849ANMEIRMEH+8pgpZEG/uwKyXwzU9oWev+NZ7HxXuAEGEUl53baRiNbQfUja2EPdMjuMORmVLMd3nHuP08vRqREa/B3EklWTRHBZA7wiuCfz2S/zY=
+	t=1765969788; cv=none; b=MLk3qOS7SGmprUdph8l4ph0eSZTKg1ZAPA0RgKgpXQ3Tpt+BOZO9kV0UWhI+7xqBCyE7iurpqjtaaejyrBBYAncSYyWIc8v0RyucWdlmNjTLdrDyYHm6O2DjDb4kIpB0O46Agy9aTTuwaDgKRG4jfmbuawbDOeihKylSGfdrcT4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765969786; c=relaxed/simple;
-	bh=xWvN8DVqDcWBo/v4eE8MagMMQU8shW2qXTVYsch0jko=;
+	s=arc-20240116; t=1765969788; c=relaxed/simple;
+	bh=dkyXLuLg+7eYiSQma7cNLg4NKd9rhkvKdGkZMgOE4QY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=os6E/6xUdM2yXbe6Ds+5IzgvZHGPcVnxfxee1KTGr9xnLGNlOA3AQd7z+6xWW3cSs3HDijgl53YpRCKYrVvNrkKb8IVnl/p2/YmiDLNXTaw+l/Ko0lHqhcJhXXZfYdhqPl+FmP1kg+jEsHOPM083w/yDR+GWLOqRN6N67eu3Vlo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=FJ46O2+P; arc=none smtp.client-ip=209.85.208.46
+	 MIME-Version:Content-Type; b=kDah3KRXw0jCiESKScEZmvB3EfH2Hx6D4DoIbNrR4pJurK1Ut4SQejpKcU7I6w5s30B0L7Cv7r8DM4KwopFjVj35ozBtXfat2KMKUratwjbVUnhNsrUAKputpxh1s0RsavnXn59xaJz7pnQeKsxqqvWc8IwnzTC/Ue16mGyZALw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=zhYbuAzs; arc=none smtp.client-ip=209.85.208.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="FJ46O2+P"
-Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-644f90587e5so9581632a12.0
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 03:09:43 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="zhYbuAzs"
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-649820b4b3aso3799851a12.3
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 03:09:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1765969782; x=1766574582; darn=vger.kernel.org;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1765969784; x=1766574584; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=SFxo7q8Upg9sDha34TIZTJlyln1hXfyfUaUuvCwVFgI=;
-        b=FJ46O2+PUpl1Pf1OePIA8SU7wqH9JmlPolOZJ2NoZHmhExC9+9M+3oc/QSmaWBMHHe
-         LPEWkRyB56jUdyXRHzAr95W2fRMMK4BRe+bqdjMh2eULAwYKXEshdqCfBYUkHjo/StXM
-         UDM0SMmEO2+ghldW0xBUZaROYO9PP+uuMUOmknQHkh7SykP8DkI64b0/QFDgbV8UEl1g
-         NKL9fWvBrhCLSOTDjBr5SJ6ZXM64UQFBvwTlweoB8IjEVAb2WKmB9VHJRpKE1XflrEiv
-         i85nRAXlkdJb7M1N0kOSXFgWLkGljS/VU2BGO4oXmHbro6w3kfWvpPAhTCwQthxaCbE6
-         rvtg==
+        bh=QVXfFEnyomZ7n1+faa+96lpi1G7Z02nuAcgJTrKE1/w=;
+        b=zhYbuAzs8SLIplAIzXqbO80XdbI7uy37F61fvSV158Hz1N7WuU3ldMFFLjpFl+Rpmc
+         jHf2V90JExRXfgc/xK561V/76sin0QVkQ9iMlVKkThl60scEC6sgkyx7YEoTEwjolBwo
+         tl2VouMR6+6y+akf4SO7MdbE98VEG7akylLXOw3WLAebMbIzWXA0SRRqaJw6+Xxvp9LU
+         Nn/aGQQwOETn0o3d1rOKfKCxnvIujTaUPOh33dmrRVN4s8zCWZnKcDlry+6jZz5paaHb
+         xg0kNRNhhaWnn3U9z8fFnjQh9me2DUGN7ufmQZTkoKQkIFOjEHx+ssePHuHcI+REamvt
+         +9VQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765969782; x=1766574582;
+        d=1e100.net; s=20230601; t=1765969784; x=1766574584;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=SFxo7q8Upg9sDha34TIZTJlyln1hXfyfUaUuvCwVFgI=;
-        b=ZD73ntzAt85QxEr15YM11+/9pggHtxzrQZG1vOowFmkS1ZY5jVtd6VoYD/HrRjoerf
-         EAqyhW4FFzUQTHZF0jUfzbN08lHJjsEA+sLY5ABC6rxzBVc6LrVXVn64oKDvj2riijKW
-         6FbdUW3JbGx9HoOvPi6eqHCPdIRiU6dWX0QSFJPBMXcf7E1ehLIMKZe+ME5eAoyiPjIU
-         HCKQnznCKsifBYuHSwPLP9EICgKaZbdwrGdwYm5bbB+SOGUqq3/r/ONoaauxy2HCF00g
-         fGK52adLOsZZPicfsyvZe0s7lZkEEqrPn7j8MVtlf4hoHPB7RqMbgh6mZP7gna+0DwbY
-         /Pwg==
-X-Gm-Message-State: AOJu0Yyw7K3f9nqYmqAXU8dZMhN+Z1Oq4JxNRv+ENo3fgOILBuj/t/hY
-	LrVn0lWKBQIVcDxFB2E8B4Oxmtfb7sESEb6pWl6oPiKIblZTgbKL02LRijBhWbPDQXU=
-X-Gm-Gg: AY/fxX4VFpg+GYI9WPHlr5O0wb1QXlyg90D5ALQjCIHOfaF/kv5QHYowc/pXeYmDKcM
-	nLZ2+yAjj5edz2UnI9qHHOoOzcpQ/9VNkyfxYDPRkPLH44p2CbbwbX1MQ2GMwvqES9DuWe+QUFh
-	9dfzUQb32pdC1lGQGeLcBb1hajYxAGuWCcdjUZIgkiaWya8jNuCp56sqtocYbgPaSCBtfJMxTzK
-	MTY4+KEO3ivq8po8ndM6F6tr/c8mPl9lXCKAotLlxnG2ScbTvg3d+tzPU7JLk+Dc/JJkUxbmu01
-	i/U8LpHVcL6lwM57t/HA44TIjLk+tzKoLBQ5b6PyzypDTVTCFFEYlkL074/q68k7XayQw0eb4/k
-	PIx3OZkBNCxykuPvpd5Md/U3fGr8PEwDIjtK5PJVT0WpH+NHDNZFeRSXgUvOjE+duyZAj4GW/sK
-	bD3GfoDvop8KBo7s9jOq1dB1eQCTk=
-X-Google-Smtp-Source: AGHT+IF5iq7R0NeDYU0B0g78afNST/PVuQQcOsPbPhKkJsVqaTqu+qAJudf/rYk8PgPcpCjGsUxSiw==
-X-Received: by 2002:a05:6402:4311:b0:637:f07d:e80f with SMTP id 4fb4d7f45d1cf-6499b041413mr17015368a12.0.1765969782271;
-        Wed, 17 Dec 2025 03:09:42 -0800 (PST)
+        bh=QVXfFEnyomZ7n1+faa+96lpi1G7Z02nuAcgJTrKE1/w=;
+        b=arELMjOzR8aspMIIulGNbn17c+uAx17CvKpMMkBdCMzxI8SsrYdb1HLUxvqA0FR3Pa
+         wm7l07UJumeVW9s/qmbWZk/DslaZK0m6Faj766rq7nTo6hc1oUZPvRAv/SvgbxhmiVYQ
+         rJH2Yq8hEm8PzIDpCaZBdMjRQ+JM6BiQsQaSnXLHJptVASIKFSD3O2hiLWg2FL48IH9j
+         C4YV6PW4S1YSMSlanvULFoS472jnc79ATpDbev6dz/Z5aP+hdzR2L2e2+/f/WuGlrhmk
+         NXtHiP0+NRuo0FAJyqvbd70MLU6AzUzHpi74uSCTSvx12k/483z3RSJj9Va3IcLiRwpT
+         BgCQ==
+X-Gm-Message-State: AOJu0YwFEI3afFYubqtIJi3q9WYJt56fiWL3y+n2QH8wf/MDGy77Pa7P
+	WkR46tNini01781PAznBRTJBZz3xc0BTJ0YlFFQj0fZCa3tVmyyHPj4QoGyUKBzvs/8=
+X-Gm-Gg: AY/fxX4MyxniMNr4OpEtGvhvDJnmcxMCqxCFLZJV19DB7ghQi0HJ5eccwNlR1YKXv/Y
+	ilHhNDXEueuMPeiwNYQ6zTRRR0HHZ1WNFkJZKriu5iocYGR9KSpxKFdZjDkHR/mW6kIQQw8fFCc
+	qB6NAXP4cWcTu11KEYzwYOSY11zyf1kyBCGUHXGIHgyDWLde8B/v5pgRz+Re4EfcIizg21RkZ1j
+	XyogPNSGR8wmCfGnqoXsxMxAkFVm8lNRBlqR5Xb5pPpOdtiIu1UWZRKaXFcwSGocojPgnNzUjlt
+	Jbx7eJ52o17sf6wAptH44F7O4/sncDbd0WSfhLU2MlFnDdm4acFhMIZQbEezlDxzyqQP8jCq3ZW
+	v7bKSbVOkykC/bvf7W7FAujswXi8c2Nxo7cmrwyTxo6Hj1EYv9Gpiv+23tu8NjI9MdVy5QDDO/v
+	ySodO32T1eMTAr2BHO
+X-Google-Smtp-Source: AGHT+IG02+mlmUp75Y8aN15AB3fqyEtjlYTbsKkWc4VXMQLd8E1R2A0XY8IFh9I/XNFQRNEDDaYuBw==
+X-Received: by 2002:a17:907:6e9f:b0:b73:6c97:af49 with SMTP id a640c23a62f3a-b7d23a972c5mr1808467566b.30.1765969783886;
+        Wed, 17 Dec 2025 03:09:43 -0800 (PST)
 Received: from localhost ([2a02:8071:b783:6940:1d24:d58d:2b65:c291])
-        by smtp.gmail.com with UTF8SMTPSA id 4fb4d7f45d1cf-64b3f56b3e4sm2343875a12.28.2025.12.17.03.09.41
+        by smtp.gmail.com with UTF8SMTPSA id a640c23a62f3a-b7cfa2ebafcsm1939736266b.28.2025.12.17.03.09.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 17 Dec 2025 03:09:41 -0800 (PST)
+        Wed, 17 Dec 2025 03:09:43 -0800 (PST)
 From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org,
+	linux-wireless@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v1 1/4] sdio: Provide a bustype shutdown function
-Date: Wed, 17 Dec 2025 12:09:23 +0100
-Message-ID:  <397f45c2818f6632151f92b70e547262f373c3b6.1765968841.git.ukleinek@kernel.org>
+Subject: [PATCH v1 2/4] wifi: rsi: sdio: Reduce use of #ifdef for CONFIG_PM
+Date: Wed, 17 Dec 2025 12:09:24 +0100
+Message-ID:  <f291cca2741f6ac994b2bde1fb9d21194fec4d3e.1765968841.git.ukleinek@kernel.org>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <cover.1765968841.git.ukleinek@kernel.org>
 References: <cover.1765968841.git.ukleinek@kernel.org>
@@ -75,91 +76,55 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2714; i=u.kleine-koenig@baylibre.com; h=from:subject:message-id; bh=xWvN8DVqDcWBo/v4eE8MagMMQU8shW2qXTVYsch0jko=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBpQo9l8isJBrlUSpFk4tQ0feWeQ7zFVLKRysli4 R9Ml9XWx2mJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCaUKPZQAKCRCPgPtYfRL+ TnerB/9g1J2vhIOAmHJHDhB6LU86vr01CcpgtvQPD/axm5i5BKeBqXK9PIVWLgQQrQ5qGmzZDw+ sG6by5hal3OT837Bkz1/HKKlCwd+dfBQHtr6tGK6ylR8iL/odnQ3Mv3rIjMLzrGMVRVH9la95ra T1mXPXWls00Ho0fTXyAyBOgA1IkSdk2C9TN+m4f9p7JvbMjpA2U8yFS9x8mrteEPCY1t9op4xJ+ Kh5a5HsnFDdFIv+7EbSsUDL7vk8lSR9RUpaY+WJmhncbe/uNmLDb4G5Na/JRExU4sCQfcXrV/oJ CxRqpa0952m7NZSFhPk0yEQgt6VndtKsB3Tgm7Ml/LXPq86T
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1529; i=u.kleine-koenig@baylibre.com; h=from:subject:message-id; bh=dkyXLuLg+7eYiSQma7cNLg4NKd9rhkvKdGkZMgOE4QY=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBpQo9nGdmxPZIIu7N/pwilj9mRvyvv5BXVkckRa 2AS6RJGwcKJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCaUKPZwAKCRCPgPtYfRL+ Tj7vB/4h44YpCoZWZ3nsb90FGI3e04zfgPviKqmXaBoofMxTHX8kvhuiVW6F5dF0uaw1lqnOOeP +FFPqthr5lT396O8SnCeY2/m9Po3sMCQc8L8z42wwrWi4+1xzhvGZIvFrpCJBJuQ4TC1o7KplNu Lk2D+CWBFdTnjn+cJAk4YK7y3Tkp+CF9V+kkvtgUlGkY0qdK53shaKTQ/D/B4ngV2g1FAlm9FKY T9ZwZD2mYwEZ4v9Zu7/KBVznsaIOrY+76NGS3SBqWPyLzviCui/APNfw5bEj0/6roQUECMWMHzC w61S+QQ/YpQ77CdfBgm3FPFPPx5KKNGUJoB4/OLbHuIKOWAF
 X-Developer-Key: i=u.kleine-koenig@baylibre.com; a=openpgp; fpr=0D2511F322BFAB1C1580266BE2DCDD9132669BD6
 Content-Transfer-Encoding: 8bit
 
-To prepare sdio drivers to migrate away from struct device_driver::shutdown
-(and then eventually remove that callback) create a serdev driver shutdown
-callback and migration code to keep the existing behaviour. Note this
-introduces a warning for each driver that isn't converted yet to that
-callback at register time.
+This drops two #ifdefs (which is good because they are ugly) without
+changing semantics. This also improves compile coverage because all the
+code in the first #ifdef block is now compiled even for configurations
+without CONFIG_PM (and then thrown away).
 
 Signed-off-by: Uwe Kleine-König <u.kleine-koenig@baylibre.com>
 ---
- drivers/mmc/core/sdio_bus.c   | 25 +++++++++++++++++++++++++
- include/linux/mmc/sdio_func.h |  1 +
- 2 files changed, 26 insertions(+)
+ drivers/net/wireless/rsi/rsi_91x_sdio.c | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 10799772494a..6e5bdc2f0cc8 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -232,6 +232,15 @@ static void sdio_bus_remove(struct device *dev)
- 		pm_runtime_put_sync(dev);
+diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+index 1e578533e473..c2b2d09b616f 100644
+--- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
++++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+@@ -1243,7 +1243,6 @@ static void rsi_disconnect(struct sdio_func *pfunction)
+ 
  }
  
-+static void sdio_bus_shutdown(struct device *dev)
-+{
-+	struct sdio_driver *drv = to_sdio_driver(dev->driver);
-+	struct sdio_func *func = dev_to_sdio_func(dev);
-+
-+	if (dev->driver && drv->shutdown)
-+		drv->shutdown(func);
-+}
-+
- static const struct dev_pm_ops sdio_bus_pm_ops = {
- 	SET_SYSTEM_SLEEP_PM_OPS(pm_generic_suspend, pm_generic_resume)
- 	SET_RUNTIME_PM_OPS(
-@@ -248,6 +257,7 @@ static const struct bus_type sdio_bus_type = {
- 	.uevent		= sdio_bus_uevent,
- 	.probe		= sdio_bus_probe,
- 	.remove		= sdio_bus_remove,
-+	.shutdown	= sdio_bus_shutdown,
- 	.pm		= &sdio_bus_pm_ops,
+-#ifdef CONFIG_PM
+ static int rsi_set_sdio_pm_caps(struct rsi_hw *adapter)
+ {
+ 	struct rsi_91x_sdiodev *dev = adapter->rsi_dev;
+@@ -1499,7 +1498,6 @@ static const struct dev_pm_ops rsi_pm_ops = {
+ 	.thaw = rsi_thaw,
+ 	.restore = rsi_restore,
  };
+-#endif
  
-@@ -261,6 +271,14 @@ void sdio_unregister_bus(void)
- 	bus_unregister(&sdio_bus_type);
- }
- 
-+static void sdio_legacy_shutdown(struct sdio_func *func)
-+{
-+	struct device *dev = &func->dev;
-+	struct device_driver *driver = dev->driver;
-+
-+	driver->shutdown(dev);
-+}
-+
- /**
-  *	__sdio_register_driver - register a function driver
-  *	@drv: SDIO function driver
-@@ -272,6 +290,13 @@ int __sdio_register_driver(struct sdio_driver *drv, struct module *owner)
- 	drv->drv.bus = &sdio_bus_type;
- 	drv->drv.owner = owner;
- 
-+	/*
-+	 * This driver needs updating. Note that driver_register() warns about
-+	 * this, so we're not adding another warning here.
-+	 */
-+	if (!drv->shutdown && drv->drv.shutdown)
-+		drv->shutdown = sdio_legacy_shutdown;
-+
- 	return driver_register(&drv->drv);
- }
- EXPORT_SYMBOL_GPL(__sdio_register_driver);
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index fed1f5f4a8d3..4534bf462aac 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -78,6 +78,7 @@ struct sdio_driver {
- 
- 	int (*probe)(struct sdio_func *, const struct sdio_device_id *);
- 	void (*remove)(struct sdio_func *);
-+	void (*shutdown)(struct sdio_func *);
- 
- 	struct device_driver drv;
+ static const struct sdio_device_id rsi_dev_table[] =  {
+ 	{ SDIO_DEVICE(SDIO_VENDOR_ID_RSI, SDIO_DEVICE_ID_RSI_9113) },
+@@ -1512,12 +1510,10 @@ static struct sdio_driver rsi_driver = {
+ 	.probe      = rsi_probe,
+ 	.remove     = rsi_disconnect,
+ 	.id_table   = rsi_dev_table,
+-#ifdef CONFIG_PM
+ 	.drv = {
+-		.pm = &rsi_pm_ops,
+-		.shutdown   = rsi_shutdown,
++		.pm = pm_ptr(&rsi_pm_ops),
++		.shutdown = pm_ptr(rsi_shutdown),
+ 	}
+-#endif
  };
+ module_sdio_driver(rsi_driver);
+ 
 -- 
 2.47.3
 
