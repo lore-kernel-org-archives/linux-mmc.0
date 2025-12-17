@@ -1,82 +1,82 @@
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
+Received: from mail-lj1-f170.google.com (mail-lj1-f170.google.com [209.85.208.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EB591DBB3A
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 13:45:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E008A33556A
+	for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 13:45:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1765979132; cv=none; b=mMwGLWR7PEMip2ul86asNiduzSLzgAIkpj4PEGWX+zjzKpD32qAmUkxXzNAAGW3j7DKtD+Ayc56qlIx3245ZijxYdllr4Vol2cHMsvVRIkUVyr5gHPbCNtvn8D/a/pzharROKmEolHnMaccO8QXxg1roPrZhQJOpvqlLjQ/YjfY=
+	t=1765979136; cv=none; b=JyIjmtmHvLdydovRDN7paGX0zSs3LBsnkgCcB1ar4k4VYxmF1nRYUDUW6/mpKUASSqP2bW4nOVzW100jt+pfOteNfX9YxCU4IQ66Qd39Ku7lMp8LcBF9qIlj/IyAv56C3p5ShJum2IDJRuYH3X+x6eqy3Ha++tNJz7DBwBBwN1w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1765979132; c=relaxed/simple;
-	bh=JZdXUdAOJEWuzpYTsxKZ9buqrf2lUMZM1PsEcRK3b4A=;
+	s=arc-20240116; t=1765979136; c=relaxed/simple;
+	bh=XxM58hwtj22qUnWvSSNaFcxRSb7qgw5fmCYbYwzSuMA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VsrEAtVWmBmgyG3tRIvjbEhSLbqxR0R1jqK6+CgxJeZKT7HIFVJhhVj023SWGUmlgXgeiX2rbcUfMuijwq9qSaZQsbgULxPUhNy2Nn1Yz84s3jMuoTKNzGgFi14pl0CWLJ4tQ05twhtG3dztJyOfDEiQBIux7R4GxGeWEEwbK30=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=t3GeGGy1; arc=none smtp.client-ip=209.85.167.46
+	 To:Cc:Content-Type; b=Q3Q/AJDSlRbTwKAycYq7J+IpbH5UQt4z85MG7kl4HaA1x1Z/yVN52s4ZRuuLrFe6/ZxDg+JUkV+3mbMwhH4TsYc530w3ZkUVD6stI+RGMTsl66XlqymWKtGkEMwhoHM7LFHHrtsunjEAW+i3Zz1zUSZqM5mMUWU63n4QKTBGwhc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=O29D9vXF; arc=none smtp.client-ip=209.85.208.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="t3GeGGy1"
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-598f59996aaso543828e87.1
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 05:45:30 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="O29D9vXF"
+Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-38007fa1efbso10509981fa.0
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Dec 2025 05:45:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1765979129; x=1766583929; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1765979132; x=1766583932; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=BODOTxNk8AcmqAwPaMr4JkxtG2Ivnc3fhYwzzaB1YDQ=;
-        b=t3GeGGy1j0kFfyV38QeUXteXIDC1ZuQbBu+WHdU1O7id++7jU/j4A2CXJFKJct9e4B
-         Myaz59SruEkyJ0JCvxEH5jz6ZNNEc96EoTk7gOd4thm2dJ/srX4h1sMWuIrNvTKMxdSq
-         fG/yyVmdV5Df2AdR8Tt57Tzgl7I9POJ0eGbYyhjPf+q2AkE1ux5Whc0yGhdUDBmR7h4H
-         zozu3V54aQlWxYwhWiU39TkPWjzbo7XECd2kbF7i7fuDK7Y/QpOQSnnikM27GLz7Qftr
-         kialZWGeh3BjMdF0SI++LDYDZPRrH+AjgbtGzIEBQiBp/HjuaBcMojhCwmMzLiAT1ucs
-         Ub1g==
+        bh=FQgu+jrAqJ7zlM3HKiPD0UlVUjyuw7aGjbTjK4hdIhI=;
+        b=O29D9vXFvj00cLDYlivHBmr1U0hp1bM+Mh0gF3N6X5uFFMDpT45HPNtU1lZmz5W5Gn
+         gjM07rDtNgrdNhEDb+wtFs2KLrR2xaey3qv2uKICn2L+3TBa4O7zdnu37+guBPgSMwz8
+         ofdQkXt+xpGZUN5lQ6vOgwCZbW9Ty7HAfEYltvEAEl9zyf1hZxXmaVnzjb+T16FZmVCJ
+         jBYgtUoOzJ3elqWEsJ0yNvA25QF7tcHqKIY+XwCnCYW8bTxdvCi92qCJmLA8QOV/C9nx
+         SZSM1wvTiwtInaLXpMOSNdGA7KxNMa6M1VreqGfSX9+vjDTou4saRRxR6jMae+9MS/Vf
+         fLcg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1765979129; x=1766583929;
+        d=1e100.net; s=20230601; t=1765979132; x=1766583932;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=BODOTxNk8AcmqAwPaMr4JkxtG2Ivnc3fhYwzzaB1YDQ=;
-        b=uwTpZ6w8Vbvk/EDAHTWsnZjI+D+ixnXcXWz5E22dNSttgfj+3YWtIUwO+SpZyxtSxS
-         fExES2kfVXyLPjxCcYhd3AQRQUSeYCcocXalAd0Ky3q9bfPBeSkcfxKZc/Lgy/zoNlUR
-         aFAm4m8BVpKRNNlrhXFN3VsPts2yrz7PIgcNv31rQzMCZitya/Wbnf1lw4ppmemt6zqB
-         UdIqXWLJg9bZYNDYJ3sbpX/VHz6h3h9+bbwC74G4jdZTy2UvrRNpvmerGOkYdqxFDgXh
-         sZ3QHPdb0E0ekHO0O+mi+FCfvrljpFYW8eO5XOx1mTbtD+CCCI1AbuiIpUefKt5mCcRR
-         VnYQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVV1Rgu7ubBxc3QupfrUjjv4hCYsO0lwgTg6sh+zaXfeP1Sk8bxqpPLUH0YKc915cY2rrFFtReKkI0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzFixwomSaz2AAUXWTkKKEC811dYVC006j2DXFbs9uPuzz7d96+
-	90pkTPmzeZ5VxdzPet6gMU+oMmDdCpeF9AOx0tWjFhrTfquEHTbc+vhk8o5wC1rn+72kTqRrIRV
-	m6louxGoyBl+D36Zkch06FXyrzNodTBjlvSelPVYF6Q==
-X-Gm-Gg: AY/fxX7saUwzfnvkTBDtzg+knyU5Z31cG7ifAoxQDtTOEtMFHmRx7+X2uXQowA/MFZx
-	+VNNFlDfPva+qD6AOvJkmmFlo2Ef6gWPVT39canfgNbqC7Px5DAfRio/eMMnXBbBs5OLNu1Pt2I
-	kF0jr8HULlzxHBdxPL7vlGJ7LIERJytvxkBE6y9xoYTRBiLtcCLYeROQ2j6oUEo7bUUyOn02Zct
-	KFHeyd0THvUB0IgL3iNgxTwrYn0oWrp2vxT3WOWK+OgysqpEgetM2DhWTbWs/rLDSPcxyM=
-X-Google-Smtp-Source: AGHT+IEb4QbT1qJizq+A7uWazmE4LS47vI2CUBXKM73xbojPF6bkoElbfnixbTNGFJz0DbbNowU9Knm45YZtBVAzyzo=
-X-Received: by 2002:a05:6512:4011:b0:595:7daf:9425 with SMTP id
- 2adb3069b0e04-598faa6375dmr6274719e87.28.1765979128707; Wed, 17 Dec 2025
- 05:45:28 -0800 (PST)
+        bh=FQgu+jrAqJ7zlM3HKiPD0UlVUjyuw7aGjbTjK4hdIhI=;
+        b=DvnRKwKmm1uGteRWXISFiNFeA57jPBAD0wazS6wz9D1Au7Yu/4mezzWdc7A5irD/Sc
+         Hl1YXVU2oUYnuwv4ezqJJ0y7L279nr/na8Nv5RKvNQR/nhOc1oQWgSvskIzpHG/G5pAZ
+         D2QxrQr8GFj/74mJbisVBZ3T0E2xevOF/pXfXiDam0sul5zCo8J4kPKgUv0gbf8mkn65
+         Yt8UeTxhFVAZtG/GCsp4dXB5/j/XZDBvu7TTB7JypXILQJiOlCELQAR9xBztuhQCb+Zw
+         oGJ4g6/iYQS+LSrULVx3sD6W/Ef8+wZVByMSgovdWOaVVZLc3UBZM35xTJhoafiXvZrY
+         7WHw==
+X-Forwarded-Encrypted: i=1; AJvYcCX/bJsIyCh0gehoYHbSgzGgUNgjFsaNHD99kGeQQmNASrpZRDPklu/mNr6Z88qaEF1dF43jIZs3xa4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzqVsKmEN2Xl9OvrOyxC7kpdjqcjDNQeA66WxSp0+9ioTu85QVC
+	0oe7aORoviRimARpVoKpo5EeFHEqLxwNoABq/QdN5sFX0qpu5D7a3IuJ+JQUG0nd893fY4v0TA4
+	4eSxrFmyqI6fUIJqADvTQiQNvlWu8Psy7VLAvtkSyZg==
+X-Gm-Gg: AY/fxX5wdMWekHw5Qtrkv6OKSyCzDJqdrRtWsmK0m6GT8X8kgxIgqvhBYAGOz5yr9NO
+	D8m6k8AhfYKe9OSBxcDq+vlPQ3TE9YmKioUd0+a+NQtGLwbE9DE/AXxZEKOMKVDTSJb1D/C8SCC
+	XuD6hxy9xcGv2uSLXTiRhQGGcy76aDj1nG41dtEYZKDddTxOooWNN7RQT9wdEAOeN2KR0p9mCp/
+	aUuJnwfpznR7esTJ8VJmrtrFM9B0Q4f30xNNLehk3+2Di89ZclgmNnbjCYzO9B4EUpRAx4=
+X-Google-Smtp-Source: AGHT+IEfRhud0B1pWkJS/wAztFbIm6G//tZdQx6+V419o86fVM7qO0JyYtfpWDj0XjAhgMoqylfDNYlBEY4htHAkmmQ=
+X-Received: by 2002:a05:651c:1546:b0:37f:d484:599c with SMTP id
+ 38308e7fff4ca-37fd4845ca8mr49758851fa.28.1765979131922; Wed, 17 Dec 2025
+ 05:45:31 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251215212728.3321308-1-robh@kernel.org>
-In-Reply-To: <20251215212728.3321308-1-robh@kernel.org>
+References: <20251215212751.3321878-1-robh@kernel.org>
+In-Reply-To: <20251215212751.3321878-1-robh@kernel.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 17 Dec 2025 14:44:52 +0100
-X-Gm-Features: AQt7F2pBXb1zmev-hjgOXmdMYKCYte5-L19B0sgKMXKbmpuJfZCdUzB274-nN80
-Message-ID: <CAPDyKFq+k03t9b7GQmH_QcKNqPbKCfNqGMX4kaYqjUS7u-PbmA@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: cdns,sdhci: Drop required "resets" on
- AMD Pensando ELBA
+Date: Wed, 17 Dec 2025 14:44:56 +0100
+X-Gm-Features: AQt7F2qF8MEC-0OIk53PCkMR8aldrM0ymw1ppI8HGcJSnzd3fJG95KQBdaDGnfc
+Message-ID: <CAPDyKFoyxOBgqQTTJLFZ5W9iZj0gEiBDAT-V3h_zejqbG1mx8A@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: arasan,sdhci: Allow "dma-coherent" property
 To: "Rob Herring (Arm)" <robh@kernel.org>
 Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org, 
+	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
 	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 15 Dec 2025 at 22:27, Rob Herring (Arm) <robh@kernel.org> wrote:
+On Mon, 15 Dec 2025 at 22:28, Rob Herring (Arm) <robh@kernel.org> wrote:
 >
-> The AMD Pensando ELBA DT defines no reset for the SDHCI, so it is obviously
-> not required.
+> The Arasan SDHCI controller is DMA coherent on the APM merlin SoC, so allow
+> the dma-coherent property. No reason implementations can't also be coherent
+> and there's not an SoC specific compatible, so allow it on any platform.
 >
 > Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 
@@ -87,22 +87,22 @@ Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 2 --
->  1 file changed, 2 deletions(-)
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index ac75d694611a..6c7317d13aa6 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -134,8 +134,6 @@ allOf:
->            items:
->              - description: Host controller registers
->              - description: Elba byte-lane enable register for writes
-> -      required:
-> -        - resets
->      else:
->        properties:
->          reg:
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+> index 8e79de97b242..d6b6fa6dcffb 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+> @@ -121,6 +121,8 @@ properties:
+>        - const: clk_ahb
+>        - const: gate
+>
+> +  dma-coherent: true
+> +
+>    interrupts:
+>      minItems: 1
+>      maxItems: 2
 > --
 > 2.51.0
 >
