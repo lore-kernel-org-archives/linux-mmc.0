@@ -1,192 +1,100 @@
-Received: from mail-m1973180.qiye.163.com (mail-m1973180.qiye.163.com [220.197.31.80])
+Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3412828134F
-	for <linux-mmc@vger.kernel.org>; Thu, 18 Dec 2025 14:22:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.80
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB0EE30CDA1
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Dec 2025 18:23:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766067760; cv=none; b=n/N/FTlUMiZcebSMWkO+wJAWbNen1HoL1jXBDS4qIFfSigBRCuFpCu3T/UhetwDCDylq8XqdHU25z6zPEs42tjJx+0Vlk9uYpPnmpKp0xG7/qBvVly5t/ooELHOly/N9XftCRDyBvotqVhQGL0NdJvsPgkrRQiZpHsNbkewO3EQ=
+	t=1766082229; cv=none; b=UYh6HUF3us63HAfoCjbVxqpRlaaNFkP0UXxhMjNcv2Db7I/aydDTLPYr8zFi74gQANlJG/m2ARiRVhnA9N3Ek9/gruYriyMdPhBM3IE4q8J7AWfVqIreUbocwyr5syIld7GTOcemIhIhacEsKZEw7VOwGTpMREhOhvk8zeKWFBk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766067760; c=relaxed/simple;
-	bh=Pl4E8ccCPR0l1mDlkFLWVGiekcFR1yfgw4TfY5IAMAk=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=DgpGkw8zBuCXu4VUcwXlf8fpclaChpfOzC63CKRd7Gs+YSRk6EKKD0OYBVSGGC+l7i+WtEyPmh8WhUj7+u/KyfGXDm2cfKneiulHlyaSu9t7BhZC2dA9PPBZxZ4OlWFAvJjXzzscFUZ4LSWlBjGpO0UMscESiiJGlIylDyfh9+8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=DTIEuGLB; arc=none smtp.client-ip=220.197.31.80
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1766082229; c=relaxed/simple;
+	bh=4Vbbhfnwr61064okpxAWRk+LE/6YKSq8V65W+B+aPiU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
+	 Content-Type:References; b=J3CKR+b7aSSFOpitXINnwipIrsTGJ5Byhk0zHxJFbZwp7MhqaGQj402sTd2p1VlwzZV9s36658u/e9KZuwPwvHdCGJ6+jwsgYMhPIGgf6ew4tMY3sL+rl81kHRwSKyfnNcS5qJf+0Sd38AfCMCWs2bxl99+sdmUNcelno2G874A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=DdNeheBM; arc=none smtp.client-ip=210.118.77.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="DTIEuGLB"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 2dc3bb4ab;
-	Thu, 18 Dec 2025 22:07:07 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 17/18] mmc: dw_mmc-pltfm: use modern PM macros
-Date: Thu, 18 Dec 2025 22:00:44 +0800
-Message-Id: <1766066445-14144-18-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1766066445-14144-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1766066445-14144-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9b31c9317309cckunm1f354c4b78d0
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGh5MTVYYGUhDSU1IHUhKTU9WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=DTIEuGLBWZhKmKdVgKJvZkZpP7aof6BrMZviqxekQnegI3YYy8Ii8uXc03HLDKdPOj43IYUOHdcHcBRMnYhvQGBxnZFZo2L3OLUk/iJlpOJL+6sXDEMgfHngpOmz6PZUiGL4OZpQGLodrrWLde4e5qEZIhSyRgWp7ebwLvmU47I=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=AG/bm+pIuOM6zhmpCI7CBxuZfaVdCPgC/UlV4UE+Vw4=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="DdNeheBM"
+Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
+	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20251218182343euoutp02787b92e1b1aeb439116c0285fb54cf4d~CYmzshpzG3180131801euoutp02F
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Dec 2025 18:23:43 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20251218182343euoutp02787b92e1b1aeb439116c0285fb54cf4d~CYmzshpzG3180131801euoutp02F
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1766082223;
+	bh=jCr+tvSOjLIxUfqNp2HAh4MAw0pWzJp9NfrHTJJHQE4=;
+	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
+	b=DdNeheBMDmvQswcCHqXaF3W0AVUmMHi5IS76dwV39BlrYcTu6FwJKIJJv9cT/owZo
+	 QSWTvXDqti5CEDb1l8JX8XBn6XlTIAlo/85vtC2BDZzjx7QeSnt6NYR1TWuQNkUWhF
+	 bySL7U91ideslpe+rH0s3f3Sw+1ufljyEmqOwR9E=
+Received: from eusmtip2.samsung.com (unknown [203.254.199.222]) by
+	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+	20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf~CYmzV5nqk2545425454eucas1p2f;
+	Thu, 18 Dec 2025 18:23:43 +0000 (GMT)
+Received: from [106.210.134.192] (unknown [106.210.134.192]) by
+	eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
+	20251218182343eusmtip2504877b1d58fd318c7878a070249d613~CYmy8v6WG0717707177eusmtip2e;
+	Thu, 18 Dec 2025 18:23:42 +0000 (GMT)
+Message-ID: <75e28c6b-c62c-4c84-9b88-6bc8902b8c5b@samsung.com>
+Date: Thu, 18 Dec 2025 19:23:42 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Betterbird (Windows)
+Subject: Re: [PATCH v3 12/12] mmc: dw_mmc: Remove struct dw_mci_slot
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>,
+	'Linux Samsung SOC' <linux-samsung-soc@vger.kernel.org>
+Content-Language: en-US
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+In-Reply-To: <1765885807-186577-13-git-send-email-shawn.lin@rock-chips.com>
+Content-Transfer-Encoding: 7bit
+X-CMS-MailID: 20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-RootMTR: 20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf
+X-EPHeader: CA
+X-CMS-RootMailID: 20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf
+References: <1765885807-186577-1-git-send-email-shawn.lin@rock-chips.com>
+	<1765885807-186577-13-git-send-email-shawn.lin@rock-chips.com>
+	<CGME20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf@eucas1p2.samsung.com>
 
-Use the modern PM macros for the suspend and resume functions to be
-automatically dropped by the compiler when CONFIG_PM or CONFIG_PM_SLEEP
-are disabled, without having to use #ifdef guards.
+On 16.12.2025 12:50, Shawn Lin wrote:
+> This patch sets struct dw_mci as mmc_host's private data by
+> copying struct dw_mci passing to dw_mci_probe() in order to
+> achieve with mminimal changes. Then we remove slot everywhere.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-When this's done, remove all variant drivers' local pm definition and
-replace it with dw_mci_pltfm_pmops.
+This patch landed in today's linux-next as commit 926311cf3361 ("mmc: 
+dw_mmc: Remove struct dw_mci_slot"). In my tests I found that it breaks 
+DW-MMC driver operation on Hardkernel's Odroid-HC1 board. This is a bit 
+strange, as it works fine on other, similar, Exynos5422 based Odroid 
+boards. On Odroid-HC1 no MMC card is detected at all after this patch. I 
+briefly checked the code and I don't see anything suspicious besides 
+this host vs. local_host structure copying... Reverting $subject patch 
+on top of linux-next fixes this issue.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+> ---
+>
+> Changes in v3: None
+> Changes in v2:
+> - Fix dma_set_mask_and_coherent mistake by code rebase
+> - fix compile warning
+>
+>   drivers/mmc/host/dw_mmc-pltfm.c |   2 +-
+>   drivers/mmc/host/dw_mmc.c       | 250 ++++++++++++++++++----------------------
+>   drivers/mmc/host/dw_mmc.h       |  22 +---
+>   3 files changed, 120 insertions(+), 154 deletions(-)
+>
+> ...
 
- drivers/mmc/host/dw_mmc-bluefield.c | 2 +-
- drivers/mmc/host/dw_mmc-k3.c        | 7 +------
- drivers/mmc/host/dw_mmc-pci.c       | 7 +------
- drivers/mmc/host/dw_mmc-pltfm.c     | 4 ++--
- drivers/mmc/host/dw_mmc-rockchip.c  | 7 +------
- drivers/mmc/host/dw_mmc.c           | 2 --
- 6 files changed, 6 insertions(+), 23 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
-index 3cf526a..ed6dea4 100644
---- a/drivers/mmc/host/dw_mmc-bluefield.c
-+++ b/drivers/mmc/host/dw_mmc-bluefield.c
-@@ -73,7 +73,7 @@ static struct platform_driver dw_mci_bluefield_pltfm_driver = {
- 		.name		= "dwmmc_bluefield",
- 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
- 		.of_match_table	= dw_mci_bluefield_match,
--		.pm		= &dw_mci_pltfm_pmops,
-+		.pm		= pm_ptr(&dw_mci_pltfm_pmops),
- 	},
- };
- 
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index 4c313fc..6836710 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -453,11 +453,6 @@ static int dw_mci_k3_probe(struct platform_device *pdev)
- 	return dw_mci_pltfm_register(pdev, drv_data);
- }
- 
--static const struct dev_pm_ops dw_mci_k3_dev_pm_ops = {
--	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
--	RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
--};
--
- static struct platform_driver dw_mci_k3_pltfm_driver = {
- 	.probe		= dw_mci_k3_probe,
- 	.remove		= dw_mci_pltfm_remove,
-@@ -465,7 +460,7 @@ static struct platform_driver dw_mci_k3_pltfm_driver = {
- 		.name		= "dwmmc_k3",
- 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
- 		.of_match_table	= dw_mci_k3_match,
--		.pm		= pm_ptr(&dw_mci_k3_dev_pm_ops),
-+		.pm		= pm_ptr(&dw_mci_pltfm_pmops),
- 	},
- };
- 
-diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-index 096f5b5..a81bbd0 100644
---- a/drivers/mmc/host/dw_mmc-pci.c
-+++ b/drivers/mmc/host/dw_mmc-pci.c
-@@ -72,11 +72,6 @@ static void dw_mci_pci_remove(struct pci_dev *pdev)
- 	dw_mci_remove(host);
- }
- 
--static const struct dev_pm_ops dw_mci_pci_dev_pm_ops = {
--	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
--	RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
--};
--
- static const struct pci_device_id dw_mci_pci_id[] = {
- 	{ PCI_DEVICE(SYNOPSYS_DW_MCI_VENDOR_ID, SYNOPSYS_DW_MCI_DEVICE_ID) },
- 	{}
-@@ -89,7 +84,7 @@ static struct pci_driver dw_mci_pci_driver = {
- 	.probe		= dw_mci_pci_probe,
- 	.remove		= dw_mci_pci_remove,
- 	.driver		=	{
--		.pm =   pm_ptr(&dw_mci_pci_dev_pm_ops),
-+		.pm =   pm_ptr(&dw_mci_pltfm_pmops),
- 	},
- };
- 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-index a927f5ba..bc76b0d 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.c
-+++ b/drivers/mmc/host/dw_mmc-pltfm.c
-@@ -58,9 +58,9 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
- EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
- 
- const struct dev_pm_ops dw_mci_pltfm_pmops = {
--	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
- 				pm_runtime_force_resume)
--	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
-+	RUNTIME_PM_OPS(dw_mci_runtime_suspend,
- 			   dw_mci_runtime_resume,
- 			   NULL)
- };
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 879188f..c75bb5d1 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -573,11 +573,6 @@ static void dw_mci_rockchip_remove(struct platform_device *pdev)
- 	dw_mci_pltfm_remove(pdev);
- }
- 
--static const struct dev_pm_ops dw_mci_rockchip_dev_pm_ops = {
--	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
--	RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
--};
--
- static struct platform_driver dw_mci_rockchip_pltfm_driver = {
- 	.probe		= dw_mci_rockchip_probe,
- 	.remove		= dw_mci_rockchip_remove,
-@@ -585,7 +580,7 @@ static struct platform_driver dw_mci_rockchip_pltfm_driver = {
- 		.name		= "dwmmc_rockchip",
- 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
- 		.of_match_table	= dw_mci_rockchip_match,
--		.pm		= pm_ptr(&dw_mci_rockchip_dev_pm_ops),
-+		.pm		= pm_ptr(&dw_mci_pltfm_pmops),
- 	},
- };
- 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 9ba12e0..d2b895b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3435,7 +3435,6 @@ void dw_mci_remove(struct dw_mci *host)
- }
- EXPORT_SYMBOL(dw_mci_remove);
- 
--#ifdef CONFIG_PM
- int dw_mci_runtime_suspend(struct device *dev)
- {
- 	struct dw_mci *host = dev_get_drvdata(dev);
-@@ -3524,7 +3523,6 @@ int dw_mci_runtime_resume(struct device *dev)
- 	return ret;
- }
- EXPORT_SYMBOL(dw_mci_runtime_resume);
--#endif /* CONFIG_PM */
- 
- static int __init dw_mci_init(void)
- {
+Best regards
 -- 
-2.7.4
+Marek Szyprowski, PhD
+Samsung R&D Institute Poland
 
