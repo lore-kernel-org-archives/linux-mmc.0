@@ -1,168 +1,102 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m3272.qiye.163.com (mail-m3272.qiye.163.com [220.197.32.72])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A97A831ED91;
-	Thu, 18 Dec 2025 13:32:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0A9E340A43
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Dec 2025 14:01:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766064762; cv=none; b=XS1HYjGIbYnWLtR3I9OoTibV7FD7UpEXvjcA7spgGja3T5x/mqs0Cr8F7rKFiyMpPa1Il+XgvHlYP2SpMCO/tyuZq0KN7FTxsfH9ACv13hhlIvCWe1eGAD8PXqL12CckChQthnLWcnCSghHKh17mcFlQuPVCJA6BU474BLiZ1Ig=
+	t=1766066474; cv=none; b=UVnQZti/0nc6UtY+8DyAZ1dc43s3y34VB2MeRDTzungTQmhOO4YvaoD+L2b+uoxwv74k4klIxNcaTABS49+1TI5fOcB27SnZ2MOktnHibX846YiHC/9ToA6puGk/uM7m9/Nw9WGyRSAqNNdqMOvmCMt1MsiKwiMN6PyCgDnwi0c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766064762; c=relaxed/simple;
-	bh=L27ZwyIV0Tt+36bJmnSMXHEQzTdo+CiOZytPC3LDc4M=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BydTYV6VYCxza7Lt/O/Q1HevdqLzg0iz1+nMCpS0LMBGJj7IJSDDzyjPPednfDbswoquQfljct9CBFSrRyi6rOldpLwdfJ4kX90uI/jo9qwI+dGHLWfUjh8cb+RQGEpG1AcHK/Z5/CBjC8XsGcKGAO1jVWk5Uccr2tChvt0vFmk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=buUGKk0Z; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1766066474; c=relaxed/simple;
+	bh=bij08HCBVM54rSY5Jk53SAgHae8Q7ZtbesDeZjXKsU4=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=kXW6blgStRb13FiZv0lBLjBn7yqGE/xDhtQdSUlVkBKen1hy8uBTeqyVKYZLOau3YqPmngkfOqmu4gWqORgIUm1M5I8uT9iCy2GZTLvqPwlI1/CYm4FhAydofhS7LeMLBkiZW18fT8A/rTQKenaCJvM2E6smzKCG/GDa7b2G+fI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=JKI4RO0D; arc=none smtp.client-ip=220.197.32.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="buUGKk0Z"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1000CC4CEFB;
-	Thu, 18 Dec 2025 13:32:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1766064762;
-	bh=L27ZwyIV0Tt+36bJmnSMXHEQzTdo+CiOZytPC3LDc4M=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=buUGKk0ZCijDnpFU9DU6y7DrDJb4E/93HvA0OIKNtODCvwaIUgFQ0/cKb18hNPxSh
-	 TnxIRvEAxwQWbMPVXZ4yMb2zGxLnNQrpqDMqULVwMOg2Zjw7JLVbI5ER/LR79iIiW3
-	 OgRac0/pAWelDQ4yREvpUSLijKkrhORnoehZv1zMAVIqqYfuB1OfmocpQYkUt9KBPd
-	 Z/y2moVvmW7EJbvzSISdiP+YHd1+6FiiCrrNJJkpm8q4Bm8AMZGXsHrUVcD3G0YxAN
-	 eU6GHgi7DQWJtci1hJZ+hn6QJA/+uxGgNtn/FEd9W4S/VZGvafmcSTVU1m+bHVWmfq
-	 hk+P2ZQIF6PQA==
-Date: Thu, 18 Dec 2025 07:32:39 -0600
-From: Bjorn Andersson <andersson@kernel.org>
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Konrad Dybcio <konradybcio@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, dmitry.baryshkov@oss.qualcomm.com, quic_pragalla@quicinc.com, 
-	quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, 
-	kernel@oss.qualcomm.com, Sachin Gupta <quic_sachgupt@quicinc.com>
-Subject: Re: [PATCH v6 4/5] mmc: sdhci-msm: Add Device tree parsing logic for
- DLL settings
-Message-ID: <fkb4iietzzmhvatmvjn6s6dpdibmnhj5g4xjcsrvzfwkipgwwz@wde3bcrqxrhw>
-References: <20251215120009.3877889-1-quic_rampraka@quicinc.com>
- <20251215120009.3877889-5-quic_rampraka@quicinc.com>
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="JKI4RO0D"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2dc3bb230;
+	Thu, 18 Dec 2025 22:00:58 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 0/18] dwmmc cleanup & improve round 2
+Date: Thu, 18 Dec 2025 22:00:27 +0800
+Message-Id: <1766066445-14144-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+X-HM-Tid: 0a9b31c38d4509cckunm1f354c4b7010
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0MZTVYfS0hMGh5NTh4eTU1WFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=JKI4RO0DbpxkJlMq/ehG6aow6Fb0yB2Mljm7Mekb9skAladjirvbMhhG0TTEDeWT/OjgCNkixkRBLgB2XV1rCM0uIesC8jNm4iTnYn/9eOfadZJ9RtsTyj6gvb0/5Rg4keI2/91UFv/vZVIvRI9dfv4NImKUn+Yv8FCDXoiwFyE=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=RawG1UDq9Gcl6QPATzUXQyuMxfBlxynv52Rmc43tZKs=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251215120009.3877889-5-quic_rampraka@quicinc.com>
 
-On Mon, Dec 15, 2025 at 05:30:08PM +0530, Ram Prakash Gupta wrote:
-> From: Sachin Gupta <quic_sachgupt@quicinc.com>
-> 
-> This update introduces the capability to configure HS200
-> and HS400 DLL settings via the device tree and parsing it.
 
-No it doesn't, it merely reads a bunch of integers from DeviceTree and
-does nothing with them.
+Hi Ulf & Jaehoon
 
-Please write your commit message in imperative mood (avoid "This
-update") and please include a reasoning for why this commit exists, or
-as
-https://docs.kernel.org/process/submitting-patches.html#describe-your-changes
-says "Describe your problem.".
+This following patch series cleans up and improves the dw_mmc host controller
+driver. The changes are as follows:
 
-> 
-> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
-> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 41 ++++++++++++++++++++++++++++++++++++
->  1 file changed, 41 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index dc79f828522b..1fcd92158bee 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -266,6 +266,19 @@ struct sdhci_msm_variant_info {
->  	const struct sdhci_msm_offset *offset;
->  };
->  
-> +/*
-> + * DLL registers which needs be programmed with HSR settings.
-> + * Add any new register only at the end and don't change the
-> + * sequence.
+- Patch 1 fixes a potential error case.
+- Patches 2-10 refactor the driver by gradually removing the struct dw_mci_board
+  and integrating its members into the core struct dw_mci.
+- Patches 11-14 perform general code cleanup, removing unused macros and improving
+  the dw_mci_get_cd()function.
+- Patch 15 simplifies regulator setup by removing a redundant check before
+  mmc_regulator_set_vqmmc().
+- Patch 16 improves the PCI variant driver (dw_mmc-pci).
+- Patch 17 modernizes power management.
+- The final patch (18) adds Host Software Queue support to the driver,
+  which in testing has improved random I/O performance.
 
-/* You have to only add entries at the end, but I'm not going to tell you why... */
+To facilitate review, all the changes are as small as possible.
+Please help reivew them, thanks.
 
-> + */
-> +struct sdhci_msm_dll {
-> +	u32 dll_config;
-> +	u32 dll_config_2;
-> +	u32 dll_config_3;
-> +	u32 dll_usr_ctl;
-> +	u32 ddr_config;
-> +};
-> +
->  struct sdhci_msm_host {
->  	struct platform_device *pdev;
->  	void __iomem *core_mem;	/* MSM SDCC mapped address */
-> @@ -274,6 +287,7 @@ struct sdhci_msm_host {
->  	struct clk *xo_clk;	/* TCXO clk needed for FLL feature of cm_dll*/
->  	/* core, iface, cal and sleep clocks */
->  	struct clk_bulk_data bulk_clks[4];
-> +	struct sdhci_msm_dll dll[2];
->  #ifdef CONFIG_MMC_CRYPTO
->  	struct qcom_ice *ice;
->  #endif
-> @@ -302,6 +316,7 @@ struct sdhci_msm_host {
->  	u32 dll_config;
->  	u32 ddr_config;
 
-So this dll_config/ddr_config pair is no longer supposed to be used? Or
-are there now two sets of dll and ddr configurations to be provided?
 
-Regards,
-Bjorn
+Shawn Lin (18):
+  mmc: dw_mmc: Check return value of dma_ops->init() in resume
+  mmc: dw_mmc: Remove dma_ops from struct dw_mci_board
+  mmc: dw_mmc: Remove SDMMC_INT_ERROR
+  mmc: dw_mmc: Remove assignment of pdata in dw_mci_pltfm_register()
+  mmc: dw_mmc: Remove caps2 and pm_caps from struct dw_mci_board
+  mmc: dw_mmc: Move rstc from struct dw_mci_board to struct dw_mci
+  mmc: dw_mmc: Remove fifo_depth from struct dw_mci_board
+  mmc: dw_mmc: Move detect_delay_ms from struct dw_mci_board to struct
+    dw_mci
+  mmc: dw_mmc: Remove bus_hz from struct dw_mci_board
+  mmc: dw_mmc: Remove struct dw_mci_board
+  mmc: dw_mmc: Remove redundant struct mmc_data forward declaration
+  mmc: dw_mmc: Remove DW_MCI_SEND_STATUS and DW_MCI_RECV_STATUS macros
+  mmc: dw_mmc: Improve dw_mci_get_cd()
+  mmc: dw_mmc: Remove unused register access macros
+  mmc: dw_mmc: Remove check before calling mmc_regulator_set_vqmmc()
+  mmc: dw_mmc-pci: Use BAR_2 and pcim_iomap_region()
+  mmc: dw_mmc-pltfm: use modern PM macros
+  mmc: dw_mmc: Implement Host Software Queue support
 
->  	bool vqmmc_enabled;
-> +	bool artanis_dll;
->  };
->  
->  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> @@ -2534,6 +2549,23 @@ static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
->  	return ret;
->  }
->  
-> +#define DLL_SIZE 10
-> +static int sdhci_msm_dt_parse_dll_info(struct device *dev, struct sdhci_msm_host *msm_host)
-> +{
-> +	u32 *dll_table = &msm_host->dll[0].dll_config;
-> +	int ret;
-> +
-> +	msm_host->artanis_dll = false;
-> +
-> +	ret = of_property_read_variable_u32_array(dev->of_node,
-> +						  "qcom,dll-presets",
-> +						  dll_table, DLL_SIZE, DLL_SIZE);
-> +	if (ret == DLL_SIZE)
-> +		msm_host->artanis_dll = true;
-> +
-> +	return ret;
-> +}
-> +
->  static int sdhci_msm_probe(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host;
-> @@ -2580,6 +2612,15 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  
->  	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
->  
-> +	/*
-> +	 * Parse HSR dll only when property is present in DT.
-> +	 */
-> +	ret = sdhci_msm_dt_parse_dll_info(&pdev->dev, msm_host);
-> +	if (ret == -ENODATA || ret == -EOVERFLOW) {
-> +		dev_err(&pdev->dev, "Bad DLL in dt (%d)\n", ret);
-> +		return ret;
-> +	}
-> +
->  	ret = sdhci_msm_gcc_reset(&pdev->dev, host);
->  	if (ret)
->  		return ret;
-> -- 
-> 2.34.1
-> 
+ drivers/mmc/host/Kconfig            |   1 +
+ drivers/mmc/host/dw_mmc-bluefield.c |   2 +-
+ drivers/mmc/host/dw_mmc-k3.c        |  17 +---
+ drivers/mmc/host/dw_mmc-pci.c       |  29 ++----
+ drivers/mmc/host/dw_mmc-pltfm.c     |   5 +-
+ drivers/mmc/host/dw_mmc-rockchip.c  |   7 +-
+ drivers/mmc/host/dw_mmc.c           | 197 ++++++++++++++++--------------------
+ drivers/mmc/host/dw_mmc.h           |  72 ++-----------
+ 8 files changed, 117 insertions(+), 213 deletions(-)
+
+-- 
+2.7.4
+
