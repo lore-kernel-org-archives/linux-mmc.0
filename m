@@ -1,113 +1,119 @@
 Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6852C1E991B
-	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 11:02:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79D18274670
+	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 11:08:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766142133; cv=none; b=ep9zzOB9xLOZs1XQ+TcMAa2PS1O/jUr0sRut0KfGsz1wGKSzk+RBg+365gVF4wC3kL7lAS1fKRlhaTy71Rpn66hVPrU6aLved2grKzg1RYYOHzG3D9Li+GyKz7gxxz10ZENipYQp/C7u+hseeH3diQ5myIvhYxu7vQXb27qpa+Y=
+	t=1766142537; cv=none; b=h8+ww+0Pqc+z7l0ccU4mpv0m78H63LRlEG+z8KIw5KVWxwmeiJwL/a/jsO6PrrG5Yi/ic4zIYYjF9ssWiP3dLE88BHjCtk1dhvw7vrf8MBLdWMI7vl8omdVkWRMBLqppJyPYQHuSTiwU/ng/NYiERrnpVNTLPXaqqsd4WOKDk6o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766142133; c=relaxed/simple;
-	bh=+qzmdehfHdF14WJEjMhvv1mK3gFFR/JtnjYHpc/r8UM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=o6DGxDQOfgd+ysGJGmXPw3cgY8wi76TsDXVrgODhhLaMQ85zF8Ci+OMqbqnVl3Si/UPHo4ejHL5xaF+Hbg8bzX1jF4skbiLWFjbkIP+XXWrQ9nRkSni4NZgg7ExpfQV8BgXOoLNY7kzQRyi6qDLBm9UCoGsf85qy/kP4XWdmH00=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=QOMyjtUd; arc=none smtp.client-ip=209.85.167.54
+	s=arc-20240116; t=1766142537; c=relaxed/simple;
+	bh=nFktpdyeH9VET8soYQOLM99cpFGbj9PgEuXBzXIJveA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aTcWhBJvyjlX5Rlkr9fAV9bzWv2/VV4/88UryIMMJWkfI3hIxbIVdu80F6NyOYRh9ZfZLXcSLJ2zCOjem7as+gmj+xKHsxjr8oBKdTRVKNsCu9jkFeGK8e0Y3xoXi1JKlDYhq7mM1SKDzqN83ARrQazmxid8Ia01u0MTzMjkJ+s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=EOujUL5L; arc=none smtp.client-ip=209.85.167.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QOMyjtUd"
-Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-5942bac322dso1928193e87.0
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 03:02:11 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EOujUL5L"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-59431f57bf6so1764816e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 03:08:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1766142129; x=1766746929; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=wEd1xYkeo5a1LXVzTfQ+pHOg6Znn6zWv2kFOFCYOWco=;
-        b=QOMyjtUdqqEPeKMhFOrPMEOhFO0truXAHb+zhVbIAWi7eam0yuBNQRwfnXTxmUliHN
-         KTfOGyB5RO/F6+YTgq3u5LSrSF0LHaqIRCMAhQz2an+8sBIavlzHzDlh2za62fm0e7Dl
-         0jbLnka0XaDnHjCBA+KRVE3rmPsGGXAeWUzbQRgr3BiZwxbSBhmfktqQgZXs/qO6IIo+
-         lacwzUJKOGRP6NmO8XWs9JRh3xofajjNE+Lout7KtzAWCtq7Dd4piKBSsC6krJvSUL3k
-         ibwZywhuMZ/UYHteT0adg/HZJKuAV3gHe037L+F3LWF0iY66/MP+DaS/eOFpsvlIV9sM
-         PzAA==
+        d=linaro.org; s=google; t=1766142534; x=1766747334; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=ge6zE3JAz3CFgRMhKd1XCILF/bEXU8TaiA9a/vhQqNI=;
+        b=EOujUL5LHWr5tdui57yfRviAf6F3wZb+3EsQtfqopM53ZAbCu6tuQf8k6qYm88mlK7
+         omgWLR+jXHPfvooOBUdpYNvq7mOmP6xSzhjp0tYNNCcRwjASlJnMwkjzrGFxrZKlUftZ
+         iq/7klZwBq6MyDd/0YjbIdUQtyQflAdpdaRCN2Ep/nEXNE8C6NmOhQrgEhCTkgdUtVeh
+         1XWlDYtjfCGNk+ZTBojkFRJRmpYqoigOGPugqYdfoOp48MTXx0V5EhTcC3hoOpN8gEEy
+         cWs68G0hm6zvBfaCE75JFvcVERubciemzM/8az+x1dA2ZTgCVHKq0Uvsig9W5xqtky1l
+         YgpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766142129; x=1766746929;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=1e100.net; s=20230601; t=1766142534; x=1766747334;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=wEd1xYkeo5a1LXVzTfQ+pHOg6Znn6zWv2kFOFCYOWco=;
-        b=WHNR5pmZf+qIRQH+DhCxCWdjTgiUp6+gDLfahAmRc66hg/5ap8zhKTiZqDIKBXxrLH
-         Y6j38McFEB7XdDhz6jZp66EGebKJxY4/IDk2w1SipVHqeYirHqkkMcrAdXV9IzvOvBYz
-         Biv9mveka2+kTD64xHR//vU1Pwu6I/0ZQ/0eu2Z7nhrTdK+kV4dPv9WE8W0kOuU7E2YD
-         Cn8keKBaYAZ8MNsg5aU1TAk1P0L/y/SUrwAMMEnLhh9mtVrVlf3VjdJz0tzGAXRaXNJy
-         jwZfF79IjrdVp2R5ON3ifvK8N7MmVRvfU9mJgkEJsxxvcSPOiDTY9ZVUOe8sgJ+RXVQe
-         wfWw==
-X-Forwarded-Encrypted: i=1; AJvYcCXcjJcWpVW5pWTUJZJHm8eDNEbC7HHVL1brDgnmu28qHOOU7CI/lL+K2yryCzaEhIBwiHYXyI245ZY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxj67H6HqLpyVyhqpt1DI+PHXh19xesdJ4F3HrZlHtyZr/NbNCi
-	LSQ6tZ1Miqi856i43unTXPf4a94MKuz7AghwByaC59yLvzPZ0rFtR2N8mpJwidvuXN/FM57a4KS
-	qzIEUdkLn/QWMhmYoLlcPFdBnG0eYnnIT/Lram25Ufl+wP4f7q5Tf
-X-Gm-Gg: AY/fxX5rrRpBjTuL4qK4EnHdstp7xZxZSsTChP0Z2pONJq+GGFUuE3xeelBhSSleaLq
-	Ymio8kQ5zEyEOa3fro3nFjZ3u0qPYFM3k4VuZGNCimL/AblFXjYTJOa1N1oVhCFGvZxZVvZKAfp
-	cFYfjisTiNVOL6L+1a/FoOkandg5vW97zFd6AqLT+67I3KpttXtsulxea3qHq5Yx5jlpY8QgUS5
-	KFIIEGa6WkQb31TVVYkYggTkCeYo+FLbzv+sMMeqWaMjmt73jCTgmlgWtZO6O9l4/4+gc4Z
-X-Google-Smtp-Source: AGHT+IHP/8kLt6mI5OBbWjI6Z8CfCJE1D6mB0FHvoYxGt5wCb7rMs6xYEuolWQTsqRluUA1Vz4BLJvmzdqPD+dQSeDY=
-X-Received: by 2002:a05:6512:239e:b0:594:26cb:fce6 with SMTP id
- 2adb3069b0e04-59a17d417bemr1121069e87.34.1766142129257; Fri, 19 Dec 2025
- 03:02:09 -0800 (PST)
+        bh=ge6zE3JAz3CFgRMhKd1XCILF/bEXU8TaiA9a/vhQqNI=;
+        b=kYM0LDx1uVMl2Ys8EuOeRuzKWJhxkTHtXmWaA0wuPQifQJLC9fxVSU1S63JtKOttzd
+         QiIvK2rxyBz6rhe+lspZAP6gz3FFaoovhOClDHivtZPxzQG/kpb9QebyL51ld4oXDLTK
+         PjKvQWZoq+affK3s6KU6tI4/Gamix5x94tz7phKKRT16gjiiUnfKjMd7CPgcN1EVWsAm
+         2KsMiqS4sENUe/4mxCA8u+ljMMHa/hc9jHCJi4nATwe92f41HdLaOVgzCZFCDSxje487
+         D/Tz0u+DZkkwZJFDb0WHwUonNRoz8CM20AKxJGfmqrcBFkgB/pAzq9Ei59QPbBlhC0r5
+         l3RQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXuuazXexjzA5bUiVH074Z5mSzRtOILhzDWdUlJbbrXi8PlxaWphutuQ9JJZPXoVqGXwQerwc3y+kQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwvUE/QnGTUnR8cqKmZjsoox+DMIeflhWM+rvz47zEqIjeNvigc
+	YqKcTGH6z/s1D1oaQHD5487KO0OtAns1RCepNf/TstDLEVvNvGsH56ZHt3B4bC56WwI=
+X-Gm-Gg: AY/fxX7Jh6J6nA9iftW7ArcIKA71zH5Edyz3ffzceY8zWBTpIBFmxDjlvbK3SAJuatC
+	91VxY7zoT7JDrUYoxc81O8tIRrpcZqYwRHFf5SQ7IjXqgNAot9YWLrWZhP3OZSTsJi2ryUY7NGE
+	TMlZID/0lL8q1MFWVSL/iNehO5aqZpyxU8Ye/2eJv8wIiFNp4nzl7AllthAj4STSCFRriAfVAuc
+	srUOzyJiQKvbvbUSlNdmhxIqyUq/SGtvlxISuGiuVs6ESL+o4g22MkcdPVEEOVr6AE2rRImU6nG
+	4OnAhJ5CrZU7NTTnaoJGrhloVe0FmoFJ6nTyNHiEkh8Yr8uUL84ZUzubncV2lnozf5sa8oxhnOf
+	YynPtVIs7KXJDb1JjaSwI+nXn3pyJLRR+6Hj2RxshYqklz7OFckF1gB9UjWPjHGl1rS+f7BxQMb
+	/8BThUKUDxSatmliFhF0rLhVMV60gg7rqSDOWR0UUMaTR0ipMt76f21FmAmdsyLkwSd9VtAwM=
+X-Google-Smtp-Source: AGHT+IEIK6UKCT3BKUKZVB1WzOBz52OsinKT7VQt7KANut6VA7PXMEYE4s4U/jecQ+vX1MElzZa9oA==
+X-Received: by 2002:a05:6512:3e22:b0:595:8200:9f7e with SMTP id 2adb3069b0e04-59a17d1db16mr951294e87.20.1766142533564;
+        Fri, 19 Dec 2025 03:08:53 -0800 (PST)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-59a185d5eccsm625844e87.14.2025.12.19.03.08.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 19 Dec 2025 03:08:53 -0800 (PST)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: Linus <torvalds@linux-foundation.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.17-rc2
+Date: Fri, 19 Dec 2025 12:08:52 +0100
+Message-ID: <20251219110852.55175-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <aUUp-x2ex9I_Nd57@stanley.mountain>
-In-Reply-To: <aUUp-x2ex9I_Nd57@stanley.mountain>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 19 Dec 2025 12:01:33 +0100
-X-Gm-Features: AQt7F2r0Ok_W4IxNPHO8h10xl0mawL2KNeGUusXQKhE9blAANx-kvTq5KcKs11U
-Message-ID: <CAPDyKFp2Mysr_XB0E3mkbPG_L+wqMT_v5k=Yjgen1k_ej+Qc0w@mail.gmail.com>
-Subject: Re: [bug report] mmc: dw_mmc: Remove struct dw_mci_slot
-To: Dan Carpenter <dan.carpenter@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Fri, 19 Dec 2025 at 11:38, Dan Carpenter <dan.carpenter@linaro.org> wrote:
->
-> [ Sorry, a couple more.  I should have included these in the same email ]
->
-> Hello Shawn Lin,
->
-> This is a semi-automatic email about new static checker warnings.
->
-> Commit 926311cf3361 ("mmc: dw_mmc: Remove struct dw_mci_slot") from
-> Dec 16, 2025, leads to the following Smatch complaint:
->
-> drivers/mmc/host/dw_mmc.c:3494 dw_mci_runtime_suspend() warn: variable dereferenced before check 'host' (see line 3489)
-> drivers/mmc/host/dw_mmc.c:3546 dw_mci_runtime_resume() warn: variable dereferenced before check 'host' (see line 3516)
-> drivers/mmc/host/dw_mmc.c:3562 dw_mci_runtime_resume() warn: variable dereferenced before check 'host' (see line 3516)
->
-> drivers/mmc/host/dw_mmc.c
->   3488
->   3489          if (host->use_dma && host->dma_ops->exit)
->                     ^^^^^^
-> The host pointer is dereferenced
->
->   3490                  host->dma_ops->exit(host);
->   3491
->   3492          clk_disable_unprepare(host->ciu_clk);
->   3493
->   3494          if (host &&
->                     ^^^^
-> So this check is too late.
->
->   3495              (mmc_host_can_gpio_cd(host->mmc) ||
->   3496               !mmc_card_is_removable(host->mmc)))
->
-> regards,
-> dan carpenter
->
+Hi Linus,
 
-Thanks for reporting Dan, the offending commit has just been dropped
-from my next branch.
+Here's a pull-request with a couple of MMC fixes intended for v6.19-rc2.
+Details about the highlights are as usual found in the signed tag.
+
+Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
+
+
+The following changes since commit 8f0b4cce4481fb22653697cced8d0d04027cb1e8:
+
+  Linux 6.19-rc1 (2025-12-14 16:05:07 +1200)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.19-rc1
+
+for you to fetch changes up to d3ecb12e2e04ce53c95f933c462f2d8b150b965b:
+
+  mmc: sdhci-esdhc-imx: add alternate ARCH_S32 dependency to Kconfig (2025-12-17 14:14:51 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-esdhc-imx: Fix build problem dependency
+ - sdhci-of-arasan: Increase card-detect stable timeout to 2 seconds
+ - sdhci-of-aspeed: Fix DT doc for missing properties
+
+----------------------------------------------------------------
+Andrew Jeffery (1):
+      dt-bindings: mmc: sdhci-of-aspeed: Switch ref to sdhci-common.yaml
+
+Jared Kangas (1):
+      mmc: sdhci-esdhc-imx: add alternate ARCH_S32 dependency to Kconfig
+
+Sai Krishna Potthuri (1):
+      mmc: sdhci-of-arasan: Increase CD stable timeout to 2 seconds
+
+ Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml | 2 +-
+ drivers/mmc/host/Kconfig                                | 4 ++--
+ drivers/mmc/host/sdhci-of-arasan.c                      | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
