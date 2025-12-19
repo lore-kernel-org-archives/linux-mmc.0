@@ -1,107 +1,109 @@
-Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
+Received: from mail-lj1-f173.google.com (mail-lj1-f173.google.com [209.85.208.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8B4E22FAFD
-	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 10:33:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5E7D304BBD
+	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 11:00:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766140418; cv=none; b=aNGBPmV6U3Hqc+rE03mRufSwS2fKVwnuCSq3qLBeEpMPdzR/3WHMQeAMXLRgNlAp5qIDNyAICGmmiFB4IaaxnPeMXVS1GzeEiM8pyUuNuTNBqhCnIfWVJ5DERed/uEj5gyTlnx9flzu1H5mI9iUETwXm40B+thggCb5bJo8Hv04=
+	t=1766142017; cv=none; b=Y6RhSrOh2cfu6Oby09reLcO5Aj4xbD9ywvCI/ox6hqhSOx2yrPyqA/C8iQEeFrSj5FPb0qYRLtshR95gDhrqycLMtzwRefAc+U0Q/NgpE0jvdRL7T6bLbJbLJw/yPEEOTOD4OUCK/sesbJA/vhIMGUhkYTmUG+0TZZlrUZrA17g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766140418; c=relaxed/simple;
-	bh=ouONRlzjs7iFO8J3u1HrlNzZPxiPSU+PJSYz9yl3m0c=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=LaLfjtl2bSQH8eLIM0S/PSMQ1aaIjvVhxpwlUM6zMU4vBjV8MKu0qr4Occ4r0VtqgFIoXnM6xdVqFZIJ9xJ7nk48a0Yvvtqj20D24qINN9A3kadmQcChriHNOBxFsV/1HvEbq7IB1s61nFbHqWFZX0SBIEV8D6SJtOC4TWfcfdE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=gs6ox2xX; arc=none smtp.client-ip=209.85.221.45
+	s=arc-20240116; t=1766142017; c=relaxed/simple;
+	bh=s6x/oEPLhMgTTeO4Ahkv1T1HFAlTv9cJwpa6J77w+kw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=LtBaHFCnLve79VbhEe+c6hu1UPwpx88OLKnATgPhfbzQWUvYcLgHB5lobcJG53FSgpIfq8plu3y7CZ08n0Bu2n7B//O6+vl7chyuMcAYtWlmsnRE44h5oUiECzVovvtk686IEqbSWLx7GDddTNFRpO1PXZag8B2bHAtG1p3HCzk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=E3RCQUie; arc=none smtp.client-ip=209.85.208.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gs6ox2xX"
-Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-42b3c5defb2so909336f8f.2
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 02:33:36 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="E3RCQUie"
+Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-37ce27af365so13805991fa.0
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 03:00:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1766140415; x=1766745215; darn=vger.kernel.org;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=sbffUOvw+DNC8717fYyvrRxeRJD/DQ/Wl28bn4ox1JU=;
-        b=gs6ox2xX+eDBis2kJjCLkKpYMg3b8djI4BX/PPj8WIbbn2jml6RgQMxXXsI5C0tLKm
-         0SZ4N+38UcB6v2hpHtkPHO9R7KREPzL8dhfdRX/h4SuSKTd22RidwvPXj5F7AYOOuT3M
-         PM26h5a8xhViWpt4D8P0eDsuySl+ZfCY/KxBkkhkH3bTG7IOcKeWkVt/u+BBPeUdkoAm
-         ZA3jDoB4XK/bdRvReYEhCACxtZI4npRvcVnDLLgZclKKhYna3WHNse/LFavGoJ1Lx098
-         lFNvtUV/9G+kG3iaSYm6dB8AGGtI35Osud3VqCvAcMki9UMLTz8pPvtlWNr3kKXHE20x
-         ScNQ==
+        d=linaro.org; s=google; t=1766142014; x=1766746814; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=s6x/oEPLhMgTTeO4Ahkv1T1HFAlTv9cJwpa6J77w+kw=;
+        b=E3RCQUietxOXP7mwrpVkirkAmZyYB5jGkDn+okDIuobdu/3I/+kv/BHrC84UdaD6fX
+         jnWLVxeK6bHPUL9HH2Zzjhao5cFZDe3sxqJ3ss+Qiaa1SM/me0Xk86lcIpc/sJtnS6lO
+         h5iB5tLJ5d4XfJbb4+YDd5dEewhapAmT2GKHQFY0mJnA1XHe1hT3rQa8j+C6A+bSy2i5
+         go5zcmBHO+f221QHYG6tuAVhU/uWDkYLZOf0dsWn9Ob2K5txcMXMkvYwJoWQPCjahJcD
+         GgohEK6aAoVXC9FMJ5648+A31Ail3IITdrrEiN1HM0NBgrl/BRaVEmtEF4qf7MRWnqcu
+         o9Wg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766140415; x=1766745215;
-        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=sbffUOvw+DNC8717fYyvrRxeRJD/DQ/Wl28bn4ox1JU=;
-        b=RPpu24JtxBq/CxcVV4uF90qIwbYGlh3lkOqCqq0o1jk1HD8mt+SY88QUQn00pGZ6xH
-         EDbP9dp1S0ooVgBolPiAzyutTEwtPvEzhoa9cbpS6sjfc15iIxjZUByI6mAmdF6ZDWFs
-         iaqNlXKmuksudVxzILp/gIH/9qrVw/wQMK9uUeUfXvPnJjxwqhpyp/7ZFadeq4ny734O
-         Bnjc1WyC1veZg5Gpr3I68yEP05l9OAhiTG/RzvooGzYM3WF1RpT5+o1GDNYSnHqFCE+1
-         ojhIsmhEzqgjL74JDdQftAYiYZbwdn/NXadic+EgwrYpWUXGqLFofllZvnudE/oVEC4J
-         pGbw==
-X-Gm-Message-State: AOJu0YyujOQB6gG6HLqVokLDebhoDT1AUxBgbZyXZfuw4BurrSpONSMz
-	44/lhgXQVFPrtZf3GPkpy7P673CqLyM1kYMSHFXCcvoTGU2Ikaq7/GM1Se5+QmQJVXlNL5PdPQN
-	qJKvL
-X-Gm-Gg: AY/fxX68LR0au8nufhnSE8Xl/crIDaBHkh0GKDLHHHA31TUvqMLBam+UYI2djKoHx5D
-	SoAJ0jMEHim2KV+wXL39sA3LaCDev18HDrmdaul1Su+m6FRdpmnaZPZnoQEIYJycOZPrp0DavBf
-	GAPTo4LkHBLEXTjVdR5dvpKSqzFP/sThNuqgvSq40gBF4JO3kUe/pDW5FKoDFvU/3vxXTCx/y7n
-	YEUxvqaqOK7Ledwk9ASbZi3HKZN9+CEPBAak9b0CZbSIrNN4o+vTyWx+ANx8WSyCy0/RoxMraYu
-	tVWwuzu3qM7JiMOZ9J2YCUzAQ5xBtObBDe8KZlMSrx94IQCEhq41cCxPysVjje98yWPcQlMOpdV
-	BO+2ck8DHywQQfGoPoSMI7luSBsHzTZvN8B/+ehenBRl379BOeBAAquNYTdIchzsI9r2ZNxaHOl
-	hO3UeEj0M+2hc+5DuRvyStDOXphiY=
-X-Google-Smtp-Source: AGHT+IHgyo0ohucjsKwyyFdpRDNKZJYrIOkJc/8HaaUIMQMxaXRTFYjufRMcMkjg1RjybYrAHOkJTQ==
-X-Received: by 2002:a05:6000:2405:b0:431:656:c73e with SMTP id ffacd0b85a97d-4324e702846mr3031106f8f.62.1766140415046;
-        Fri, 19 Dec 2025 02:33:35 -0800 (PST)
-Received: from localhost ([196.207.164.177])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4324eaa64cesm4430060f8f.35.2025.12.19.02.33.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 19 Dec 2025 02:33:34 -0800 (PST)
-Date: Fri, 19 Dec 2025 13:33:31 +0300
-From: Dan Carpenter <dan.carpenter@linaro.org>
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc@vger.kernel.org
-Subject: [bug report] mmc: dw_mmc: Remove struct dw_mci_slot
-Message-ID: <aUUp-x2ex9I_Nd57@stanley.mountain>
+        d=1e100.net; s=20230601; t=1766142014; x=1766746814;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=s6x/oEPLhMgTTeO4Ahkv1T1HFAlTv9cJwpa6J77w+kw=;
+        b=b7QctgnOMy/+pZmwaGU5bAxNUlau1BVHmVMeV1F5jiT5Ba1XoqA9kpyzgLer/zOr38
+         vjpxrOTNbY2ukMS7dYkVljIO6QuVmgjyCtYJs0qIbqDqwxp6p/IHWq2mnOv4Xv4BMdz5
+         LkYGYCSfJXpJlOjVws/wnVv87Lu46LnES87pKkq2AABXdIb3sBQTPwIZ5Za+vt0uXWi4
+         ez3LpLTopMFrE0222lnLKsa9rx/Eo5krz3eMcWAmyXW6/SdBGj2rzZmYsIuR/R50eHN8
+         Sa2/VZ1u8aeXuepyIy1PRsvizVm8zZXz6yYt7oXmbe9F/igVR/Txl8iKuRntu8w4r/+0
+         ouOQ==
+X-Gm-Message-State: AOJu0YyIwrk9Hsw7qL6p9qh1u03Sn8p6wsEMXJXtiqiJU7WE4Poxb1Yr
+	zUUbkd/fScbrc4uLz8EDBOhDFbzCw7VRcoNqTd2LlySzCQawzpAxeJV0viWCw2zznaM2Uuue6sY
+	O8Y5GzOlLuRezczUTqN0zTlNxDyq/f5x71L46mLT3Qw==
+X-Gm-Gg: AY/fxX61ba06pukRcxXyBbzZvkxcNpJDLVJMyB8/QVBWC6T6GYuyUjDc83WxrSp/UTZ
+	g4DRj8FSb0lEiTfkWGnplXnpEamQye56PQCjVyFVv7aPxr/1WtiDwSAxK7pdKI9P4A5YV442nyq
+	o4AqoyyeMiVSdiIcuSRTlW9HlCgy34mbytdNDOmWY5zk6PeClccmH1dxYITNkXzpcQm2ZueOYGP
+	qP0mLd3nzRfxYbxjHHmHiyD3DPq94V7f3PQRsMr3iuPdJq866nhfiUYmkoE0pf8zwpidooi
+X-Google-Smtp-Source: AGHT+IEttooMjctn9PTkIuV8f3vwHQovTQjSbQYqje1s67e6BNM0jsY/HxweNA+t464KEMm/FbSoYdRYmcWx72TwOXs=
+X-Received: by 2002:a05:651c:211f:b0:380:c72:d495 with SMTP id
+ 38308e7fff4ca-381216e11c8mr8642701fa.32.1766142013519; Fri, 19 Dec 2025
+ 03:00:13 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <1765885807-186577-1-git-send-email-shawn.lin@rock-chips.com>
+ <CGME20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf@eucas1p2.samsung.com>
+ <1765885807-186577-13-git-send-email-shawn.lin@rock-chips.com> <75e28c6b-c62c-4c84-9b88-6bc8902b8c5b@samsung.com>
+In-Reply-To: <75e28c6b-c62c-4c84-9b88-6bc8902b8c5b@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 19 Dec 2025 11:59:37 +0100
+X-Gm-Features: AQt7F2oURQ4eEyNd-d-X-XErN-cMe4gNff2U9XSWa8nAnD2DQAQhIueK-BGrKpk
+Message-ID: <CAPDyKFpfU5Qxutx9WTz=4H0mbsvfsScWvTDi1KqP1Ab5_iaAjA@mail.gmail.com>
+Subject: Re: [PATCH v3 12/12] mmc: dw_mmc: Remove struct dw_mci_slot
+To: Shawn Lin <shawn.lin@rock-chips.com>, Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
+	Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 
-[ Sorry, a couple more.  I should have included these in the same email ]
+On Thu, 18 Dec 2025 at 19:23, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+>
+> On 16.12.2025 12:50, Shawn Lin wrote:
+> > This patch sets struct dw_mci as mmc_host's private data by
+> > copying struct dw_mci passing to dw_mci_probe() in order to
+> > achieve with mminimal changes. Then we remove slot everywhere.
+> >
+> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+> This patch landed in today's linux-next as commit 926311cf3361 ("mmc:
+> dw_mmc: Remove struct dw_mci_slot"). In my tests I found that it breaks
+> DW-MMC driver operation on Hardkernel's Odroid-HC1 board. This is a bit
+> strange, as it works fine on other, similar, Exynos5422 based Odroid
+> boards. On Odroid-HC1 no MMC card is detected at all after this patch. I
+> briefly checked the code and I don't see anything suspicious besides
+> this host vs. local_host structure copying... Reverting $subject patch
+> on top of linux-next fixes this issue.
 
-Hello Shawn Lin,
+Indeed that copying looks suspicious. In principle we end up with two
+different data structures for the struct dw_mci host, as the callers
+of dw_mci_probe() have already allocated one that they may operate
+upon too.
 
-This is a semi-automatic email about new static checker warnings.
+Instead of doing it like $subject patch implements, the allocation
+should be done only once, upfront by the callers of dw_mci_probe().
 
-Commit 926311cf3361 ("mmc: dw_mmc: Remove struct dw_mci_slot") from
-Dec 16, 2025, leads to the following Smatch complaint:
+That said, I am dropping the $subject patch for now from my next branch.
 
-drivers/mmc/host/dw_mmc.c:3494 dw_mci_runtime_suspend() warn: variable dereferenced before check 'host' (see line 3489)
-drivers/mmc/host/dw_mmc.c:3546 dw_mci_runtime_resume() warn: variable dereferenced before check 'host' (see line 3516)
-drivers/mmc/host/dw_mmc.c:3562 dw_mci_runtime_resume() warn: variable dereferenced before check 'host' (see line 3516)
+Shawn, please re-work the code according to the above. Even if that
+doesn't fix the problem, it's still the right thing to do.
 
-drivers/mmc/host/dw_mmc.c
-  3488	
-  3489		if (host->use_dma && host->dma_ops->exit)
-                    ^^^^^^
-The host pointer is dereferenced
+[...]
 
-  3490			host->dma_ops->exit(host);
-  3491	
-  3492		clk_disable_unprepare(host->ciu_clk);
-  3493	
-  3494		if (host &&
-                    ^^^^
-So this check is too late.
-
-  3495		    (mmc_host_can_gpio_cd(host->mmc) ||
-  3496		     !mmc_card_is_removable(host->mmc)))
-
-regards,
-dan carpenter
+Kind regards
+Uffe
