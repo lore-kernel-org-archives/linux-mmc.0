@@ -1,119 +1,99 @@
-Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m49207.qiye.163.com (mail-m49207.qiye.163.com [45.254.49.207])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79D18274670
-	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 11:08:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1962D33C18E;
+	Fri, 19 Dec 2025 11:48:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.207
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766142537; cv=none; b=h8+ww+0Pqc+z7l0ccU4mpv0m78H63LRlEG+z8KIw5KVWxwmeiJwL/a/jsO6PrrG5Yi/ic4zIYYjF9ssWiP3dLE88BHjCtk1dhvw7vrf8MBLdWMI7vl8omdVkWRMBLqppJyPYQHuSTiwU/ng/NYiERrnpVNTLPXaqqsd4WOKDk6o=
+	t=1766144916; cv=none; b=CotUottBvszdZPBjgSmcu7ROTPFPQsue5voCJ7AZuarmDJJy20TpiHFjUh5mYFqVNs6DWzpwJyFI6Udn73jgG9WGV7JgkT9Nr5fSydXDry6cE52O8irDMI51j7PmIcezqzAfogfF5Nl26QzVXm7o26Kjux59SaQr8YJcwmZy6Aw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766142537; c=relaxed/simple;
-	bh=nFktpdyeH9VET8soYQOLM99cpFGbj9PgEuXBzXIJveA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=aTcWhBJvyjlX5Rlkr9fAV9bzWv2/VV4/88UryIMMJWkfI3hIxbIVdu80F6NyOYRh9ZfZLXcSLJ2zCOjem7as+gmj+xKHsxjr8oBKdTRVKNsCu9jkFeGK8e0Y3xoXi1JKlDYhq7mM1SKDzqN83ARrQazmxid8Ia01u0MTzMjkJ+s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=EOujUL5L; arc=none smtp.client-ip=209.85.167.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1766144916; c=relaxed/simple;
+	bh=gpL48Oht5RUJp6VZ0xUKculnaj1Bm4MTyX6Jl2jr164=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=B5R4KPqWUUj1Yqe2FwuNWfaNNX5nfaL9KK2gy9eyGlTkelSX+2KKdFJ3H2eXt3+2gt8bxBn4QQVC+Mwx7l5i5as7NXLSRrttwG7tIPwTS0VM71otoUV2ODenW2pS0Dm6HqLsplEXONTJ+CwQi+wG3w8Kb+KMrRieStoIJbi+6UI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=JhhifqZq; arc=none smtp.client-ip=45.254.49.207
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EOujUL5L"
-Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-59431f57bf6so1764816e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 03:08:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1766142534; x=1766747334; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=ge6zE3JAz3CFgRMhKd1XCILF/bEXU8TaiA9a/vhQqNI=;
-        b=EOujUL5LHWr5tdui57yfRviAf6F3wZb+3EsQtfqopM53ZAbCu6tuQf8k6qYm88mlK7
-         omgWLR+jXHPfvooOBUdpYNvq7mOmP6xSzhjp0tYNNCcRwjASlJnMwkjzrGFxrZKlUftZ
-         iq/7klZwBq6MyDd/0YjbIdUQtyQflAdpdaRCN2Ep/nEXNE8C6NmOhQrgEhCTkgdUtVeh
-         1XWlDYtjfCGNk+ZTBojkFRJRmpYqoigOGPugqYdfoOp48MTXx0V5EhTcC3hoOpN8gEEy
-         cWs68G0hm6zvBfaCE75JFvcVERubciemzM/8az+x1dA2ZTgCVHKq0Uvsig9W5xqtky1l
-         YgpA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766142534; x=1766747334;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ge6zE3JAz3CFgRMhKd1XCILF/bEXU8TaiA9a/vhQqNI=;
-        b=kYM0LDx1uVMl2Ys8EuOeRuzKWJhxkTHtXmWaA0wuPQifQJLC9fxVSU1S63JtKOttzd
-         QiIvK2rxyBz6rhe+lspZAP6gz3FFaoovhOClDHivtZPxzQG/kpb9QebyL51ld4oXDLTK
-         PjKvQWZoq+affK3s6KU6tI4/Gamix5x94tz7phKKRT16gjiiUnfKjMd7CPgcN1EVWsAm
-         2KsMiqS4sENUe/4mxCA8u+ljMMHa/hc9jHCJi4nATwe92f41HdLaOVgzCZFCDSxje487
-         D/Tz0u+DZkkwZJFDb0WHwUonNRoz8CM20AKxJGfmqrcBFkgB/pAzq9Ei59QPbBlhC0r5
-         l3RQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXuuazXexjzA5bUiVH074Z5mSzRtOILhzDWdUlJbbrXi8PlxaWphutuQ9JJZPXoVqGXwQerwc3y+kQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwvUE/QnGTUnR8cqKmZjsoox+DMIeflhWM+rvz47zEqIjeNvigc
-	YqKcTGH6z/s1D1oaQHD5487KO0OtAns1RCepNf/TstDLEVvNvGsH56ZHt3B4bC56WwI=
-X-Gm-Gg: AY/fxX7Jh6J6nA9iftW7ArcIKA71zH5Edyz3ffzceY8zWBTpIBFmxDjlvbK3SAJuatC
-	91VxY7zoT7JDrUYoxc81O8tIRrpcZqYwRHFf5SQ7IjXqgNAot9YWLrWZhP3OZSTsJi2ryUY7NGE
-	TMlZID/0lL8q1MFWVSL/iNehO5aqZpyxU8Ye/2eJv8wIiFNp4nzl7AllthAj4STSCFRriAfVAuc
-	srUOzyJiQKvbvbUSlNdmhxIqyUq/SGtvlxISuGiuVs6ESL+o4g22MkcdPVEEOVr6AE2rRImU6nG
-	4OnAhJ5CrZU7NTTnaoJGrhloVe0FmoFJ6nTyNHiEkh8Yr8uUL84ZUzubncV2lnozf5sa8oxhnOf
-	YynPtVIs7KXJDb1JjaSwI+nXn3pyJLRR+6Hj2RxshYqklz7OFckF1gB9UjWPjHGl1rS+f7BxQMb
-	/8BThUKUDxSatmliFhF0rLhVMV60gg7rqSDOWR0UUMaTR0ipMt76f21FmAmdsyLkwSd9VtAwM=
-X-Google-Smtp-Source: AGHT+IEIK6UKCT3BKUKZVB1WzOBz52OsinKT7VQt7KANut6VA7PXMEYE4s4U/jecQ+vX1MElzZa9oA==
-X-Received: by 2002:a05:6512:3e22:b0:595:8200:9f7e with SMTP id 2adb3069b0e04-59a17d1db16mr951294e87.20.1766142533564;
-        Fri, 19 Dec 2025 03:08:53 -0800 (PST)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-59a185d5eccsm625844e87.14.2025.12.19.03.08.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 19 Dec 2025 03:08:53 -0800 (PST)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.17-rc2
-Date: Fri, 19 Dec 2025 12:08:52 +0100
-Message-ID: <20251219110852.55175-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="JhhifqZq"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2de56a93a;
+	Fri, 19 Dec 2025 19:48:22 +0800 (GMT+08:00)
+Message-ID: <ded6ac69-bc6d-46e6-a136-e4a16264d44b@rock-chips.com>
+Date: Fri, 19 Dec 2025 19:48:18 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+ Jaehoon Chung <jh80.chung@samsung.com>,
+ Linux Samsung SOC <linux-samsung-soc@vger.kernel.org>
+Subject: Re: [PATCH v3 12/12] mmc: dw_mmc: Remove struct dw_mci_slot
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+ Marek Szyprowski <m.szyprowski@samsung.com>
+References: <1765885807-186577-1-git-send-email-shawn.lin@rock-chips.com>
+ <CGME20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf@eucas1p2.samsung.com>
+ <1765885807-186577-13-git-send-email-shawn.lin@rock-chips.com>
+ <75e28c6b-c62c-4c84-9b88-6bc8902b8c5b@samsung.com>
+ <CAPDyKFpfU5Qxutx9WTz=4H0mbsvfsScWvTDi1KqP1Ab5_iaAjA@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <CAPDyKFpfU5Qxutx9WTz=4H0mbsvfsScWvTDi1KqP1Ab5_iaAjA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9b3670858a09cckunmaab57eb4b4c5a
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQh1CS1YaGBgdHx5IGkNCTkNWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=JhhifqZqypdYalovHZE75rsSanzVUFJZOoiKUBIjuzQnETpei27h8RU2GdygfvFCcyvUUSkPY9/4hgQ0AHiNBQ3hmf3o6jULAF00FPUdIIWPvj3uvYSiMdFF7E45aA4nKShH7rxEu7+3yPFS2EF/6chXyN0lrga4r0yowSqw3oE=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=TiMlQDUnbWYNNyOQDJ4k+oQqCKc9j11qp1UBoFiZ14c=;
+	h=date:mime-version:subject:message-id:from;
 
-Hi Linus,
+在 2025/12/19 星期五 18:59, Ulf Hansson 写道:
+> On Thu, 18 Dec 2025 at 19:23, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+>>
+>> On 16.12.2025 12:50, Shawn Lin wrote:
+>>> This patch sets struct dw_mci as mmc_host's private data by
+>>> copying struct dw_mci passing to dw_mci_probe() in order to
+>>> achieve with mminimal changes. Then we remove slot everywhere.
+>>>
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>
+>> This patch landed in today's linux-next as commit 926311cf3361 ("mmc:
+>> dw_mmc: Remove struct dw_mci_slot"). In my tests I found that it breaks
+>> DW-MMC driver operation on Hardkernel's Odroid-HC1 board. This is a bit
+>> strange, as it works fine on other, similar, Exynos5422 based Odroid
+>> boards. On Odroid-HC1 no MMC card is detected at all after this patch. I
+>> briefly checked the code and I don't see anything suspicious besides
+>> this host vs. local_host structure copying... Reverting $subject patch
+>> on top of linux-next fixes this issue.
+> 
+> Indeed that copying looks suspicious. In principle we end up with two
+> different data structures for the struct dw_mci host, as the callers
+> of dw_mci_probe() have already allocated one that they may operate
+> upon too.
+> 
+> Instead of doing it like $subject patch implements, the allocation
+> should be done only once, upfront by the callers of dw_mci_probe().
+> 
+> That said, I am dropping the $subject patch for now from my next branch.
+> 
+> Shawn, please re-work the code according to the above. Even if that
+> doesn't fix the problem, it's still the right thing to do.
 
-Here's a pull-request with a couple of MMC fixes intended for v6.19-rc2.
-Details about the highlights are as usual found in the signed tag.
+I must admit that it's not the best way to implement as $subject patch.
+Sure, I will rework the code. Sorry for that.
 
-Please pull this in!
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
+> 
+> 
 
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit 8f0b4cce4481fb22653697cced8d0d04027cb1e8:
-
-  Linux 6.19-rc1 (2025-12-14 16:05:07 +1200)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.19-rc1
-
-for you to fetch changes up to d3ecb12e2e04ce53c95f933c462f2d8b150b965b:
-
-  mmc: sdhci-esdhc-imx: add alternate ARCH_S32 dependency to Kconfig (2025-12-17 14:14:51 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - sdhci-esdhc-imx: Fix build problem dependency
- - sdhci-of-arasan: Increase card-detect stable timeout to 2 seconds
- - sdhci-of-aspeed: Fix DT doc for missing properties
-
-----------------------------------------------------------------
-Andrew Jeffery (1):
-      dt-bindings: mmc: sdhci-of-aspeed: Switch ref to sdhci-common.yaml
-
-Jared Kangas (1):
-      mmc: sdhci-esdhc-imx: add alternate ARCH_S32 dependency to Kconfig
-
-Sai Krishna Potthuri (1):
-      mmc: sdhci-of-arasan: Increase CD stable timeout to 2 seconds
-
- Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml | 2 +-
- drivers/mmc/host/Kconfig                                | 4 ++--
- drivers/mmc/host/sdhci-of-arasan.c                      | 2 +-
- 3 files changed, 4 insertions(+), 4 deletions(-)
