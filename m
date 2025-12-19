@@ -1,127 +1,110 @@
-Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com [209.85.208.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m1973176.qiye.163.com (mail-m1973176.qiye.163.com [220.197.31.76])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C13333FE03
-	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 12:24:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 373CE320A14;
+	Fri, 19 Dec 2025 12:26:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.76
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766147088; cv=none; b=uwVB7Uv2PngJGdk+z0b+diwboTHQ91lvnhVMg8A1u6rMeivGm77K+tk4KTS73Ui6W6ak3ShHK5EXoyLNB3RxRyx581Vlm0wBz97bLhhE9FaaqdBDIuzzEd5zjtlL6odcy/nKfJryouCVM+mBJ9OT91ByxAdz4zZ62NtwdGnE2B8=
+	t=1766147171; cv=none; b=SOLCDUan2rgB6gx7gmxgJ1dco8wPpCUuP75xnYfkHbXE/ghq8/UPy3Aw7dG7eRkId8Zds1WIhG3hfni5wK8Zb/Lu/A9zDXEtXGdOhfdH7EPQ6tktSGTjq3VkszpADCb1C+rt+D8iNc8uitKj3lvgjw84LhAsqNGlwsBSHuXf8zo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766147088; c=relaxed/simple;
-	bh=7AVmeKHEYBCPOMpl1HCtc65QrPd5PEmY7neaytSasuU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DB7OjgLMIzRiiS9Wd0vgUx12/GwFOT/4EZ6JNngBdwmO+ZiFzLgHhS6jNJmceRznqMmoXVkb4jC6GlufyHeTqFKSUbBU6g09j1IssSvuWL5bN+Q320hRITbvJoJwtlxGx/WPALA+SRTjHpuo4I23Db8XlqehvJU63nqhMmKgAWw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lZOf9nYd; arc=none smtp.client-ip=209.85.208.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1766147171; c=relaxed/simple;
+	bh=/5sXIn9JHB4By2fMdwprcYPZ97dwckcX0QlXStYrrSE=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=W2RDu8/4zHkaiiipYK7vklgyy9xN8VeJD4s07NJYkWD7v+s5VWuQU/f6EXHv69z3zYiraJaonB8RHQDf9D4ToQ+e+NgEfOfrG6QKwpvkymkCndRMhcIbwVNqbnOCMEF+cU4MYXzIHVGGzI3xpHlYGXrDb51Umt1i1cL7VM+XWZ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=E6Sq8rni; arc=none smtp.client-ip=220.197.31.76
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lZOf9nYd"
-Received: by mail-lj1-f182.google.com with SMTP id 38308e7fff4ca-37d96f97206so11452671fa.3
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 04:24:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1766147083; x=1766751883; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1fOSfl+6q/lUB1UVPybjZ2s8e57yOJ/pMd9yaLc+xqo=;
-        b=lZOf9nYdZJWLuvd9E3oWQhwjS6furR7Ko1n8r0yACJJB8+8kR7ill5OpW3x7I7EmCj
-         8x16HrEeW2MYzCkxKrn0flkNc6EJaVjrxFSSrYRTGUweHc0vIrX+tXiPYQRkvNpJLYPv
-         IEmYbz1ZX3xhGwN8Bl9Qou8uwvqTiKo7t5tksovldxJQ17xf0UD8phT/EgrKhN4dmXpd
-         90PTa881PXVdsZzzpDNhtmiLza1OXw44iHTIFTs+I7j/wqUIxI369d6OJK9G7vKZbfMJ
-         5lb+0+wopZp36O1T8CWSPdTp/7C9+9gx0hpQPytkUpHzwiKpB6xGwKFxXkcGHoKj0GFe
-         /8Mg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766147083; x=1766751883;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=1fOSfl+6q/lUB1UVPybjZ2s8e57yOJ/pMd9yaLc+xqo=;
-        b=KEViXRu8GZULI5ZsaYp8VBQwFBR7ijYGFqcdPlMxxy9j8fAQXpCQyBYf0qRsV9K6gO
-         FdzhEMJ1OEa7TGOi2XVL05VJBOyIdRYiu5QYuBaH56w+AAxNvj/UsZ2XQq4Fxl9dldY+
-         pyh50dCzP7eNnx2VBNB/iNRx9pHlYjCA9E3GvR0IVRWZG3S3tiZcLxMDSaZxSBx1yzsl
-         wGEaUH3EEXwEwLznNMWT8vDF6OXY2P9Wh30tDaZPWK5M+YQhfcEG+rlmlL0KWMVdVpyx
-         OIBUbAZgvIWeXPdok/7wXXCkRiD5+uMEt6wWzQInSjy8n2/NNmiSEQIVwcpHS55pr6Sl
-         S6/Q==
-X-Gm-Message-State: AOJu0YxdoSyXmy0aD6ue2u5Zvsqh3jiKjNhJ6hVYWq+OKWA/+O5y2s1v
-	a437puN6caclPz97aBtPuvCjCZx4xHouDfrYYTatgkH/GdhlWIi42mfV7dfln6x6vYjrJZUOut/
-	QalkjfWU+evnd/EubCVVaPHUw3AVXKMs0pX+6gTA3xA==
-X-Gm-Gg: AY/fxX5gN0Uxkl3Saz7zQo0FaWvYtQekBK2oLOSXkidkNH4ctgZPlABPwoBZ2+MXEjk
-	RoV12xgxLWuKgLsDVKyESn7y7J6qa/UbAMF5I2q/jjMhZxqGIa/ftOpFpfkHQO01WOGHTBrt0wD
-	IAPArVrpiWVlPAmR1y/421EHwomeiuZYrnA6VbyJLViBgdCx10HKjVWS+IXdBRClAhOnrVxpvb+
-	m1Y0pPeWPPpM+xD6gC7UOVwBJ+jk0caRq9Bsmnfx7aZrt5AzWCzYm99TZ1v61iDtllQtqv1
-X-Google-Smtp-Source: AGHT+IEqEqTT3JQ7a04Vg9YJD0E7wTGkYd5J22WKXtaVaWHmXCMaPZ+CL8d0xtIqX4tXtdwmfYe0ztKJUti6oec/NGo=
-X-Received: by 2002:a05:651c:f02:b0:37f:8bb4:88 with SMTP id
- 38308e7fff4ca-381216bd8cfmr8552511fa.41.1766147083069; Fri, 19 Dec 2025
- 04:24:43 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="E6Sq8rni"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2de61eb17;
+	Fri, 19 Dec 2025 20:25:54 +0800 (GMT+08:00)
+Message-ID: <85c3ab2e-e948-440f-847a-74b006b1a0b2@rock-chips.com>
+Date: Fri, 19 Dec 2025 20:25:53 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1765968841.git.ukleinek@kernel.org> <53a46d554faed2f28ac0c0e981ae12badf020cab.1765968841.git.ukleinek@kernel.org>
-In-Reply-To: <53a46d554faed2f28ac0c0e981ae12badf020cab.1765968841.git.ukleinek@kernel.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 19 Dec 2025 13:24:06 +0100
-X-Gm-Features: AQt7F2rxb3yEWUBTB67GPfxWs_btg12FwkTqcSidiq1mqsRo9eH-fu_ASfw1IBo
-Message-ID: <CAPDyKFoQVh=WhB0AFFcwX-yeGM5s5cEFTUUS4LXnAcTEnikF2g@mail.gmail.com>
-Subject: Re: [PATCH v1 3/4] wifi: rsi: sdio: Migrate to use sdio specific
- shutdown function
-To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@baylibre.com>
-Cc: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+ Jaehoon Chung <jh80.chung@samsung.com>,
+ 'Linux Samsung SOC' <linux-samsung-soc@vger.kernel.org>,
+ Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 12/12] mmc: dw_mmc: Remove struct dw_mci_slot
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+References: <1765885807-186577-1-git-send-email-shawn.lin@rock-chips.com>
+ <1765885807-186577-13-git-send-email-shawn.lin@rock-chips.com>
+ <CGME20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf@eucas1p2.samsung.com>
+ <75e28c6b-c62c-4c84-9b88-6bc8902b8c5b@samsung.com>
+ <dbee3e27-d158-43d3-88ca-a9f3a3264af7@rock-chips.com>
+ <9af391bb-b607-481e-9d12-35b892469a06@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <9af391bb-b607-481e-9d12-35b892469a06@samsung.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9b3692e0bc09cckunm2b41111eb84b7
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0weS1YaTBhOTRpLSBgeTB1WFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=E6Sq8rniSvznUMtWfJk76RtrpD28TjdxhREJkciQlst291cnk8wqd+l1jAqSBoQE67cL1pDT2xHNBbUbe+66Qo/bKvVWAK9VoZm6Gx1RZDwww8pNZ2GKI2uR5xNkBghpvX8N02GUuH18lTvss0i0IGQWp06Xvo7Du8Bz3UL5Xq4=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=amEsueT6NgILjaWM9X/Ne3m6waRdMZuPS/h0LujePsA=;
+	h=date:mime-version:subject:message-id:from;
 
-On Wed, 17 Dec 2025 at 12:09, Uwe Kleine-K=C3=B6nig
-<u.kleine-koenig@baylibre.com> wrote:
->
-> This saves a cast in the driver. The motivation is stop using the callbac=
-k
-> .shutdown in rsi_driver.drv to make it possible to drop that.
->
-> Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@baylibre.com>
-> ---
->  drivers/net/wireless/rsi/rsi_91x_sdio.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wirele=
-ss/rsi/rsi_91x_sdio.c
-> index c2b2d09b616f..a1376847ac85 100644
-> --- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
-> +++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
-> @@ -1442,9 +1442,8 @@ static int rsi_thaw(struct device *dev)
->         return 0;
->  }
->
-> -static void rsi_shutdown(struct device *dev)
-> +static void rsi_shutdown(struct sdio_func *pfunction)
->  {
-> -       struct sdio_func *pfunction =3D dev_to_sdio_func(dev);
->         struct rsi_hw *adapter =3D sdio_get_drvdata(pfunction);
->         struct rsi_91x_sdiodev *sdev =3D adapter->rsi_dev;
->         struct ieee80211_hw *hw =3D adapter->hw;
-> @@ -1509,10 +1508,10 @@ static struct sdio_driver rsi_driver =3D {
->         .name       =3D "RSI-SDIO WLAN",
->         .probe      =3D rsi_probe,
->         .remove     =3D rsi_disconnect,
-> +       .shutdown   =3D pm_ptr(rsi_shutdown),
->         .id_table   =3D rsi_dev_table,
->         .drv =3D {
->                 .pm =3D pm_ptr(&rsi_pm_ops),
-> -               .shutdown =3D pm_ptr(rsi_shutdown),
 
-Apologize for my ignorance, but why does an SDIO function driver need
-a ->shutdown() callback in the first place?
+在 2025/12/19 星期五 19:59, Marek Szyprowski 写道:
+> On 19.12.2025 02:47, Shawn Lin wrote:
+>> 在 2025/12/19 星期五 2:23, Marek Szyprowski 写道:
+>>> On 16.12.2025 12:50, Shawn Lin wrote:
+>>>> This patch sets struct dw_mci as mmc_host's private data by
+>>>> copying struct dw_mci passing to dw_mci_probe() in order to
+>>>> achieve with mminimal changes. Then we remove slot everywhere.
+>>>>
+>>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>>
+>>> This patch landed in today's linux-next as commit 926311cf3361 ("mmc:
+>>> dw_mmc: Remove struct dw_mci_slot"). In my tests I found that it breaks
+>>> DW-MMC driver operation on Hardkernel's Odroid-HC1 board. This is a bit
+>>> strange, as it works fine on other, similar, Exynos5422 based Odroid
+>>> boards. On Odroid-HC1 no MMC card is detected at all after this patch. I
+>>
+>> Sorry for breaking Odroid-HC1 board. Indeed, it's strange other
+>> Exynos5422-based bards work fine, as this patch wasn't supposed to be
+>> board depend, even SoC depend. Looking closely again, still have no
+>> idea what is happening on Odroid-HC1. I have no Odroid-HC1 board to
+>> debug, could you kindly help applied the attached debug patch and
+>> share the log?  Thanks.
+> 
+> I've played a bit with that code and the $subject patch breaks
+> propagating -EPROBE_DEFER from mmc_regulator_get_supply(). This fixes
+> the problem:
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 8a0362257a2c..6be95a440ee9 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3428,6 +3428,7 @@ int dw_mci_probe(struct dw_mci *host)
+>           local_host = dw_mci_init_host(host);
+>           if (IS_ERR(local_host)) {
+>                   dev_dbg(host->dev, "host init failed\n");
+> +               ret = PTR_ERR(local_host);
+>                   goto err_dmaunmap;
+>           }
+> 
+> BTW, the $subject patch also lacks fixing drvdata in dw_mmc-pci.c.
+> 
+> I think it would make a bit sense to simply pass dev, pdata, regs, irq
+> and flags as parameters to dw_mci_probe() instead of the second copy of
+> the dw_mci structure. Or alternatively move these to the additional
+> structure and pass a pointer to it.
+> 
 
-What does it need to do during shutdown?
+Thanks for debugging, really appreciate!
+I am going to rework it according to your and Ulf's suggestion.
 
->         }
->  };
->  module_sdio_driver(rsi_driver);
-> --
-> 2.47.3
->
+> Best regards
 
-Kind regards
-Uffe
