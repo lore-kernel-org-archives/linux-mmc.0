@@ -1,117 +1,127 @@
-Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com [209.85.208.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B232D32E730
-	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 11:59:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C13333FE03
+	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 12:24:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766145584; cv=none; b=ERVpot5sHct5w4Rs0WKIdmFWHN1XfGs1nhr8bOzCEUdK7ifdRchmCccTJWsIZB45EPMxokfomBwwrD4AwNeS0M52ra4iUeQmaBPB2GxaZrTFM3Yx0z5waXgvxf2TH4NuoXXluSPp04kUFjHNh4gGccmoi2tHVSOruiaoc8PkHwQ=
+	t=1766147088; cv=none; b=uwVB7Uv2PngJGdk+z0b+diwboTHQ91lvnhVMg8A1u6rMeivGm77K+tk4KTS73Ui6W6ak3ShHK5EXoyLNB3RxRyx581Vlm0wBz97bLhhE9FaaqdBDIuzzEd5zjtlL6odcy/nKfJryouCVM+mBJ9OT91ByxAdz4zZ62NtwdGnE2B8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766145584; c=relaxed/simple;
-	bh=2x8uXSwF/10VcLJv3HHYtx4R4qj0QGLNxZGn+WAJwEE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
-	 Content-Type:References; b=aA3KYNuuJLhVHFHoGE6HlyBWSePzvL4soGKgsKa1UUz94RxlcZdJYqpG21X7unnpaUuY8xkt4VDUYwxBPN777FuUZeytdQTgtCBfzYhC5Ia3aT4XDRejXW63Q/5rnGTYP0eFXjXWslGJv2j+gSr2ZbgbC/AXMVRgvtWDsW8+pQY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=rciGHjxj; arc=none smtp.client-ip=210.118.77.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1766147088; c=relaxed/simple;
+	bh=7AVmeKHEYBCPOMpl1HCtc65QrPd5PEmY7neaytSasuU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=DB7OjgLMIzRiiS9Wd0vgUx12/GwFOT/4EZ6JNngBdwmO+ZiFzLgHhS6jNJmceRznqMmoXVkb4jC6GlufyHeTqFKSUbBU6g09j1IssSvuWL5bN+Q320hRITbvJoJwtlxGx/WPALA+SRTjHpuo4I23Db8XlqehvJU63nqhMmKgAWw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lZOf9nYd; arc=none smtp.client-ip=209.85.208.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="rciGHjxj"
-Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
-	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20251219115931euoutp02a1d84f48418011c0667ad256d66b09b9~CnApB-DKy1060210602euoutp02l
-	for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 11:59:31 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20251219115931euoutp02a1d84f48418011c0667ad256d66b09b9~CnApB-DKy1060210602euoutp02l
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1766145571;
-	bh=2c+C6hTEHY4fUro2+YtzIUkJbBqe++RHHrWBWXSc4pU=;
-	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
-	b=rciGHjxjgrx3zh/fO2+gk5vi8UAx4Xp/ghxYqrwR2iz74Cf+B87AE4DW0l2coKZwf
-	 jtE+kgUpE6RmLVuX+T7GiSRxwOJewAoqqtx7f9oV1O+CdyaUYlIcdx7/ha89KW4/V3
-	 nywc37LqXEZJfHATr0AUJGjjGb5XHrgRsszNyTmI=
-Received: from eusmtip1.samsung.com (unknown [203.254.199.221]) by
-	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
-	20251219115931eucas1p2c8a664e7ea74074aa057df93fa9e89ae~CnAoxyc4h1691316913eucas1p28;
-	Fri, 19 Dec 2025 11:59:31 +0000 (GMT)
-Received: from [106.210.134.192] (unknown [106.210.134.192]) by
-	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
-	20251219115930eusmtip14d96bf4d67c06d2ab66c8cf83f17152e~CnAoTlhax1818118181eusmtip1P;
-	Fri, 19 Dec 2025 11:59:30 +0000 (GMT)
-Message-ID: <9af391bb-b607-481e-9d12-35b892469a06@samsung.com>
-Date: Fri, 19 Dec 2025 12:59:30 +0100
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lZOf9nYd"
+Received: by mail-lj1-f182.google.com with SMTP id 38308e7fff4ca-37d96f97206so11452671fa.3
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Dec 2025 04:24:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1766147083; x=1766751883; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1fOSfl+6q/lUB1UVPybjZ2s8e57yOJ/pMd9yaLc+xqo=;
+        b=lZOf9nYdZJWLuvd9E3oWQhwjS6furR7Ko1n8r0yACJJB8+8kR7ill5OpW3x7I7EmCj
+         8x16HrEeW2MYzCkxKrn0flkNc6EJaVjrxFSSrYRTGUweHc0vIrX+tXiPYQRkvNpJLYPv
+         IEmYbz1ZX3xhGwN8Bl9Qou8uwvqTiKo7t5tksovldxJQ17xf0UD8phT/EgrKhN4dmXpd
+         90PTa881PXVdsZzzpDNhtmiLza1OXw44iHTIFTs+I7j/wqUIxI369d6OJK9G7vKZbfMJ
+         5lb+0+wopZp36O1T8CWSPdTp/7C9+9gx0hpQPytkUpHzwiKpB6xGwKFxXkcGHoKj0GFe
+         /8Mg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1766147083; x=1766751883;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=1fOSfl+6q/lUB1UVPybjZ2s8e57yOJ/pMd9yaLc+xqo=;
+        b=KEViXRu8GZULI5ZsaYp8VBQwFBR7ijYGFqcdPlMxxy9j8fAQXpCQyBYf0qRsV9K6gO
+         FdzhEMJ1OEa7TGOi2XVL05VJBOyIdRYiu5QYuBaH56w+AAxNvj/UsZ2XQq4Fxl9dldY+
+         pyh50dCzP7eNnx2VBNB/iNRx9pHlYjCA9E3GvR0IVRWZG3S3tiZcLxMDSaZxSBx1yzsl
+         wGEaUH3EEXwEwLznNMWT8vDF6OXY2P9Wh30tDaZPWK5M+YQhfcEG+rlmlL0KWMVdVpyx
+         OIBUbAZgvIWeXPdok/7wXXCkRiD5+uMEt6wWzQInSjy8n2/NNmiSEQIVwcpHS55pr6Sl
+         S6/Q==
+X-Gm-Message-State: AOJu0YxdoSyXmy0aD6ue2u5Zvsqh3jiKjNhJ6hVYWq+OKWA/+O5y2s1v
+	a437puN6caclPz97aBtPuvCjCZx4xHouDfrYYTatgkH/GdhlWIi42mfV7dfln6x6vYjrJZUOut/
+	QalkjfWU+evnd/EubCVVaPHUw3AVXKMs0pX+6gTA3xA==
+X-Gm-Gg: AY/fxX5gN0Uxkl3Saz7zQo0FaWvYtQekBK2oLOSXkidkNH4ctgZPlABPwoBZ2+MXEjk
+	RoV12xgxLWuKgLsDVKyESn7y7J6qa/UbAMF5I2q/jjMhZxqGIa/ftOpFpfkHQO01WOGHTBrt0wD
+	IAPArVrpiWVlPAmR1y/421EHwomeiuZYrnA6VbyJLViBgdCx10HKjVWS+IXdBRClAhOnrVxpvb+
+	m1Y0pPeWPPpM+xD6gC7UOVwBJ+jk0caRq9Bsmnfx7aZrt5AzWCzYm99TZ1v61iDtllQtqv1
+X-Google-Smtp-Source: AGHT+IEqEqTT3JQ7a04Vg9YJD0E7wTGkYd5J22WKXtaVaWHmXCMaPZ+CL8d0xtIqX4tXtdwmfYe0ztKJUti6oec/NGo=
+X-Received: by 2002:a05:651c:f02:b0:37f:8bb4:88 with SMTP id
+ 38308e7fff4ca-381216bd8cfmr8552511fa.41.1766147083069; Fri, 19 Dec 2025
+ 04:24:43 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Betterbird (Windows)
-Subject: Re: [PATCH v3 12/12] mmc: dw_mmc: Remove struct dw_mci_slot
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>,
-	'Linux Samsung SOC' <linux-samsung-soc@vger.kernel.org>, Ulf Hansson
-	<ulf.hansson@linaro.org>
-Content-Language: en-US
-From: Marek Szyprowski <m.szyprowski@samsung.com>
-In-Reply-To: <dbee3e27-d158-43d3-88ca-a9f3a3264af7@rock-chips.com>
-Content-Transfer-Encoding: 8bit
-X-CMS-MailID: 20251219115931eucas1p2c8a664e7ea74074aa057df93fa9e89ae
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-RootMTR: 20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf
-X-EPHeader: CA
-X-CMS-RootMailID: 20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf
-References: <1765885807-186577-1-git-send-email-shawn.lin@rock-chips.com>
-	<1765885807-186577-13-git-send-email-shawn.lin@rock-chips.com>
-	<CGME20251218182343eucas1p2d8e8c97da2f3abdecd0a2f54b06c10cf@eucas1p2.samsung.com>
-	<75e28c6b-c62c-4c84-9b88-6bc8902b8c5b@samsung.com>
-	<dbee3e27-d158-43d3-88ca-a9f3a3264af7@rock-chips.com>
+References: <cover.1765968841.git.ukleinek@kernel.org> <53a46d554faed2f28ac0c0e981ae12badf020cab.1765968841.git.ukleinek@kernel.org>
+In-Reply-To: <53a46d554faed2f28ac0c0e981ae12badf020cab.1765968841.git.ukleinek@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 19 Dec 2025 13:24:06 +0100
+X-Gm-Features: AQt7F2rxb3yEWUBTB67GPfxWs_btg12FwkTqcSidiq1mqsRo9eH-fu_ASfw1IBo
+Message-ID: <CAPDyKFoQVh=WhB0AFFcwX-yeGM5s5cEFTUUS4LXnAcTEnikF2g@mail.gmail.com>
+Subject: Re: [PATCH v1 3/4] wifi: rsi: sdio: Migrate to use sdio specific
+ shutdown function
+To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@baylibre.com>
+Cc: linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 19.12.2025 02:47, Shawn Lin wrote:
-> 在 2025/12/19 星期五 2:23, Marek Szyprowski 写道:
->> On 16.12.2025 12:50, Shawn Lin wrote:
->>> This patch sets struct dw_mci as mmc_host's private data by
->>> copying struct dw_mci passing to dw_mci_probe() in order to
->>> achieve with mminimal changes. Then we remove slot everywhere.
->>>
->>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->> This patch landed in today's linux-next as commit 926311cf3361 ("mmc:
->> dw_mmc: Remove struct dw_mci_slot"). In my tests I found that it breaks
->> DW-MMC driver operation on Hardkernel's Odroid-HC1 board. This is a bit
->> strange, as it works fine on other, similar, Exynos5422 based Odroid
->> boards. On Odroid-HC1 no MMC card is detected at all after this patch. I
+On Wed, 17 Dec 2025 at 12:09, Uwe Kleine-K=C3=B6nig
+<u.kleine-koenig@baylibre.com> wrote:
 >
-> Sorry for breaking Odroid-HC1 board. Indeed, it's strange other
-> Exynos5422-based bards work fine, as this patch wasn't supposed to be
-> board depend, even SoC depend. Looking closely again, still have no
-> idea what is happening on Odroid-HC1. I have no Odroid-HC1 board to
-> debug, could you kindly help applied the attached debug patch and
-> share the log?  Thanks.
+> This saves a cast in the driver. The motivation is stop using the callbac=
+k
+> .shutdown in rsi_driver.drv to make it possible to drop that.
+>
+> Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@baylibre.com>
+> ---
+>  drivers/net/wireless/rsi/rsi_91x_sdio.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/net/wireless/rsi/rsi_91x_sdio.c b/drivers/net/wirele=
+ss/rsi/rsi_91x_sdio.c
+> index c2b2d09b616f..a1376847ac85 100644
+> --- a/drivers/net/wireless/rsi/rsi_91x_sdio.c
+> +++ b/drivers/net/wireless/rsi/rsi_91x_sdio.c
+> @@ -1442,9 +1442,8 @@ static int rsi_thaw(struct device *dev)
+>         return 0;
+>  }
+>
+> -static void rsi_shutdown(struct device *dev)
+> +static void rsi_shutdown(struct sdio_func *pfunction)
+>  {
+> -       struct sdio_func *pfunction =3D dev_to_sdio_func(dev);
+>         struct rsi_hw *adapter =3D sdio_get_drvdata(pfunction);
+>         struct rsi_91x_sdiodev *sdev =3D adapter->rsi_dev;
+>         struct ieee80211_hw *hw =3D adapter->hw;
+> @@ -1509,10 +1508,10 @@ static struct sdio_driver rsi_driver =3D {
+>         .name       =3D "RSI-SDIO WLAN",
+>         .probe      =3D rsi_probe,
+>         .remove     =3D rsi_disconnect,
+> +       .shutdown   =3D pm_ptr(rsi_shutdown),
+>         .id_table   =3D rsi_dev_table,
+>         .drv =3D {
+>                 .pm =3D pm_ptr(&rsi_pm_ops),
+> -               .shutdown =3D pm_ptr(rsi_shutdown),
 
-I've played a bit with that code and the $subject patch breaks 
-propagating -EPROBE_DEFER from mmc_regulator_get_supply(). This fixes 
-the problem:
+Apologize for my ignorance, but why does an SDIO function driver need
+a ->shutdown() callback in the first place?
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 8a0362257a2c..6be95a440ee9 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3428,6 +3428,7 @@ int dw_mci_probe(struct dw_mci *host)
-         local_host = dw_mci_init_host(host);
-         if (IS_ERR(local_host)) {
-                 dev_dbg(host->dev, "host init failed\n");
-+               ret = PTR_ERR(local_host);
-                 goto err_dmaunmap;
-         }
+What does it need to do during shutdown?
 
-BTW, the $subject patch also lacks fixing drvdata in dw_mmc-pci.c.
+>         }
+>  };
+>  module_sdio_driver(rsi_driver);
+> --
+> 2.47.3
+>
 
-I think it would make a bit sense to simply pass dev, pdata, regs, irq 
-and flags as parameters to dw_mci_probe() instead of the second copy of 
-the dw_mci structure. Or alternatively move these to the additional 
-structure and pass a pointer to it.
-
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
-
+Kind regards
+Uffe
