@@ -1,63 +1,91 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 878EB2C235B;
-	Sat, 20 Dec 2025 21:10:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA7C8242D83
+	for <linux-mmc@vger.kernel.org>; Sat, 20 Dec 2025 22:45:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766265006; cv=none; b=l7yp2BfZUU0+8hhHsd3zcZMn9oXWBeQBEM7UqjpRRxj2YgnYvlTaA+S8l2h/UXD5AOXJ2kybaxtlpeHN+NuKfYhjPBEENF3z+O5uA3+6Tk4X5aw+vHW41miTtGzbnedDn3m0ZXq8fbQWoq7f9aWtQ6nlaLYin0mkbdHgKXnVHPM=
+	t=1766270712; cv=none; b=QO4wNOmMmC7YPIJeSUoR4ymmtPjwPkV+idLBp2Oi6E5Q8ppVdgbWPP6LYQ91YERZtb7hsdpGYwqIlzEKcsNxj+z1mSNUKGN2hwRRBJn2fNXUCZrRfWWOO5lr+eb1Bzza/LgMs1497gt3CtPZWRm+nWRqJCsshnZyxp12ys3lfVs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766265006; c=relaxed/simple;
-	bh=YjWCInUKbck8R2MH4kUKtM9lrYAuycS0wPD3kWLwF+c=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=VzYU3iqonLkVE2ZuRf0aIFJT9ixUxu93KM5/Hw6hkySJgEeJDqXbN3b29dCa5F6RCyGPD72OEIlnUasCfgsxPttm4VhZOGkdbBM+mW+7qE1e+Gp1OBW6jZ6nC4osQpa6qGHUgI2eeTLqdVs1AWwv9qa80qlhmH5ewJELkRz50B0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tPqOinPO; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1766270712; c=relaxed/simple;
+	bh=1l3b4MIIjaNK3gvp8YpwG4zWCsJJLiV+E1lWvV1WUO4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
+	 Content-Type:References; b=ePqHkZ0bM5rbNUQX4yuNQiiBgIM9pz+Du+it+ctRnefPhGsd6wdZBlD96OfLYYKOxU5WxlaeGKUTCrQs0aLBAvdT7L8D6t4Qxnl6jeNtcbIQXpskh+nW2b68vcfS3sFKoQV8pW68+I8fNcM/+T0vW8kYjPNYbMob8ZA9UJWDp8Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=sd/uPzGY; arc=none smtp.client-ip=210.118.77.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tPqOinPO"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EBFC6C4CEF5;
-	Sat, 20 Dec 2025 21:10:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1766265006;
-	bh=YjWCInUKbck8R2MH4kUKtM9lrYAuycS0wPD3kWLwF+c=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=tPqOinPOJ3puAqOkmnrLZ9y5vMHVVbnfCRjcKfHM6WM+wp7xxPEEqKbMBqSwtNBaT
-	 3svwOwLxNlhhAOTEUM6olvIlIBfpfGst91eDxpgGHNXq6izOMLr6latZs327qyP/CZ
-	 icY0rqT10sCx8TSXwQ4MfoyNE7ogjqvzRBDKokMPvnb79kDs9u6bbcz/fIiI8AVv+8
-	 ipSnp55zE7M1ZfmsHsV6iz5K3rWvZLuOdI1F3uiLHVswoyqD7wYFqyrBIeuzlhysWN
-	 PYqG0B2d9bs608kJso3/hAO8G1ok2LMxHkKPFJMjKlRabNlWHkiR8F0wEx5zQWiP+6
-	 6Bo2fDtnI8HwA==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 3D80D3809A05;
-	Sat, 20 Dec 2025 21:06:55 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.17-rc2
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20251219110852.55175-1-ulf.hansson@linaro.org>
-References: <20251219110852.55175-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20251219110852.55175-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.19-rc1
-X-PR-Tracked-Commit-Id: d3ecb12e2e04ce53c95f933c462f2d8b150b965b
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 3ed22a356c107767bf8d5a6a22ac79a293e65956
-Message-Id: <176626481391.137737.10174520625399701699.pr-tracker-bot@kernel.org>
-Date: Sat, 20 Dec 2025 21:06:53 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="sd/uPzGY"
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20251220224458euoutp02cbf91ba2516888ff3e9314090e4e6b7b~DDdeUev3y3119231192euoutp02u
+	for <linux-mmc@vger.kernel.org>; Sat, 20 Dec 2025 22:44:58 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20251220224458euoutp02cbf91ba2516888ff3e9314090e4e6b7b~DDdeUev3y3119231192euoutp02u
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1766270698;
+	bh=+HOU1xRSRnAFm8eF6nEtxbEIW2jhBTbQCfSS2xBDpiw=;
+	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
+	b=sd/uPzGY/7N2fnbGtwOpkw2ulbEXj2QMs33ihYA49kPLOjsADJSdlqMv1IDyJjYYy
+	 77khYvm7eS08uuYyI9a1red0Acp9eveva8YG9WRqdWp00uqoEwHOny+jUPzGIRblQA
+	 GhFPGsgabUZ3I99Fq4bLsOMZyZQEQftoLnI2w81I=
+Received: from eusmtip1.samsung.com (unknown [203.254.199.221]) by
+	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+	20251220224457eucas1p2ef6f1b3dfa76fcfb37b2856c178bf8df~DDddN4t-h1686116861eucas1p27;
+	Sat, 20 Dec 2025 22:44:57 +0000 (GMT)
+Received: from [106.210.134.192] (unknown [106.210.134.192]) by
+	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
+	20251220224456eusmtip1afe429645c272fe704d5dd3886b4f1f5~DDdcjStSB2475224752eusmtip1K;
+	Sat, 20 Dec 2025 22:44:56 +0000 (GMT)
+Message-ID: <4707cf10-19e2-4253-8cc0-019eb0b83c95@samsung.com>
+Date: Sat, 20 Dec 2025 23:44:56 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Betterbird (Windows)
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: Remove struct dw_mci_slot
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
+Content-Language: en-US
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+In-Reply-To: <1766208126-42506-2-git-send-email-shawn.lin@rock-chips.com>
+Content-Transfer-Encoding: 7bit
+X-CMS-MailID: 20251220224457eucas1p2ef6f1b3dfa76fcfb37b2856c178bf8df
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-RootMTR: 20251220052224eucas1p18941ee450d7e8a0d0834f3f1d4f7bdf9
+X-EPHeader: CA
+X-CMS-RootMailID: 20251220052224eucas1p18941ee450d7e8a0d0834f3f1d4f7bdf9
+References: <1766208126-42506-1-git-send-email-shawn.lin@rock-chips.com>
+	<CGME20251220052224eucas1p18941ee450d7e8a0d0834f3f1d4f7bdf9@eucas1p1.samsung.com>
+	<1766208126-42506-2-git-send-email-shawn.lin@rock-chips.com>
 
-The pull request you sent on Fri, 19 Dec 2025 12:08:52 +0100:
+On 20.12.2025 06:22, Shawn Lin wrote:
+> Use dw_mci_alloc_host() helper to allocate struct dw_mci for dw_mmc-pci.c
+> and dw_mmc-pltfm.c. With that, we could get rid of struct dw_mci_slot and
+> remove it everywhere.
+>
+> Cc: Marek Szyprowski <m.szyprowski@samsung.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.19-rc1
+Works fine on my Exynos based tests boards.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/3ed22a356c107767bf8d5a6a22ac79a293e65956
+Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
 
-Thank you!
+> ---
+>
+>   drivers/mmc/host/dw_mmc-pci.c   |   7 +-
+>   drivers/mmc/host/dw_mmc-pltfm.c |   7 +-
+>   drivers/mmc/host/dw_mmc.c       | 227 +++++++++++++++++-----------------------
+>   drivers/mmc/host/dw_mmc.h       |  19 +---
+>   4 files changed, 103 insertions(+), 157 deletions(-)
+>
+> ...
 
+Best regards
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Marek Szyprowski, PhD
+Samsung R&D Institute Poland
+
