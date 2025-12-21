@@ -1,16 +1,16 @@
 Received: from smtp.gentoo.org (woodpecker.gentoo.org [140.211.166.183])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02AB5245019;
-	Sun, 21 Dec 2025 08:21:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FE5B244692;
+	Sun, 21 Dec 2025 08:21:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=140.211.166.183
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766305264; cv=none; b=eVIBByYkWlQgNp2pXs+wMTgFFcHnb3BnPPcDTiVM8HIEJR01lnx58EYtUGgfnMKlNnoEydLCu1ejdGf78yS9Sbc2Q9RwcVCyacq4ZJghCmDEf6xlg3xqN/oeFc9WciYopT7RydlfbVE1t7loSJ5jEu8wRoL3R40ul5AsQuukxoE=
+	t=1766305270; cv=none; b=gk6ReFDWtYMyjuUQ6SWSj0FV7WX6OOmg8v5TJFUpgWFI8oX9zGn9+//lPJQ1nRfo+7gNswIx5UmaPGHNWCIxhkvY6yM4F/PZRwXgBw+LXXxJirICiLZ95mT5K/ZnvdQkDNaIl5V4AMwgJAsxqS9Xid65kZ6jdskc1RSyjGgP/64=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766305264; c=relaxed/simple;
-	bh=vEorWhnLPp7YW7ZFYoqUseTPIMHGtfA1RoynKxTuZgY=;
+	s=arc-20240116; t=1766305270; c=relaxed/simple;
+	bh=Z3iYIOPo0NShh3wxil77tWS3egeNeNJQQuOhwb4xrME=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=C8R2xOSH5XdNlBzz8L5X1hyZbxIkZ95T/sNlZQgb1F0X7M0yS+CW7ClIIG62LE9fs33AF1SMARWpDcJLE/wM6s2L1pcXshoX1X8rmGvZmH9ZqlBWH8NvtL6K8O/DWDmC4S5ed7rWHOEciMiGVL1iJiyT0Dso7zeZekxU43/V/mU=
+	 In-Reply-To:To:Cc; b=AR/12RVnUtI56m3Q8d5TtGkKqLKXxx3rCjwjY0UbpP7l7ni9gd/khrfZmQpioSdJ/mQA1yFv58BVrb6YyJoimMbfcreZwz5a4l0PqauX68EvGAwME1C2PGJsbb62NmnurxsbVLptBWU2cosrFxG4pNum2Mo/R3tJ2Vu6po5pKEM=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gentoo.org; spf=pass smtp.mailfrom=gentoo.org; arc=none smtp.client-ip=140.211.166.183
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gentoo.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gentoo.org
@@ -19,11 +19,11 @@ Received: from [127.0.0.1] (unknown [116.232.18.222])
 	 key-exchange x25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: dlan)
-	by smtp.gentoo.org (Postfix) with ESMTPSA id 65B60341083;
-	Sun, 21 Dec 2025 08:20:55 +0000 (UTC)
+	by smtp.gentoo.org (Postfix) with ESMTPSA id 0B7A8340FA3;
+	Sun, 21 Dec 2025 08:21:02 +0000 (UTC)
 From: Yixun Lan <dlan@gentoo.org>
-Date: Sun, 21 Dec 2025 16:20:26 +0800
-Subject: [PATCH 1/3] dt-bindings: mmc: spacemit,sdhci: add reset support
+Date: Sun, 21 Dec 2025 16:20:27 +0800
+Subject: [PATCH 2/3] mmc: sdhci-of-k1: add reset support
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -32,7 +32,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20251221-07-k1-sdhci-reset-v1-1-6780af7fa6e7@gentoo.org>
+Message-Id: <20251221-07-k1-sdhci-reset-v1-2-6780af7fa6e7@gentoo.org>
 References: <20251221-07-k1-sdhci-reset-v1-0-6780af7fa6e7@gentoo.org>
 In-Reply-To: <20251221-07-k1-sdhci-reset-v1-0-6780af7fa6e7@gentoo.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
@@ -46,70 +46,79 @@ Cc: Iker Pedrosa <ikerpedrosam@gmail.com>, linux-mmc@vger.kernel.org,
  spacemit@lists.linux.dev, linux-kernel@vger.kernel.org, 
  Yixun Lan <dlan@gentoo.org>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1401; i=dlan@gentoo.org;
- h=from:subject:message-id; bh=vEorWhnLPp7YW7ZFYoqUseTPIMHGtfA1RoynKxTuZgY=;
- b=owEB6QIW/ZANAwAKATGq6kdZTbvtAcsmYgBpR63WXp1DZdTgz5ZeTce2A5ZzQyE+rrtOAkZ/u
- oLIpCmXWW6JAq8EAAEKAJkWIQS1urjJwxtxFWcCI9wxqupHWU277QUCaUet1hsUgAAAAAAEAA5t
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1560; i=dlan@gentoo.org;
+ h=from:subject:message-id; bh=Z3iYIOPo0NShh3wxil77tWS3egeNeNJQQuOhwb4xrME=;
+ b=owEB6QIW/ZANAwAKATGq6kdZTbvtAcsmYgBpR63Z1gUXGLoBEzoNgFK+4yuLCXK+1AQv9r22Z
+ Q396AjO+y6JAq8EAAEKAJkWIQS1urjJwxtxFWcCI9wxqupHWU277QUCaUet2RsUgAAAAAAEAA5t
  YW51MiwyLjUrMS4xMSwyLDJfFIAAAAAALgAoaXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5
  maWZ0aGhvcnNlbWFuLm5ldEI1QkFCOEM5QzMxQjcxMTU2NzAyMjNEQzMxQUFFQTQ3NTk0REJCRU
- QACgkQMarqR1lNu+1j4Q//dmpM5t9BNfPvoXxmOFjwe8bV9ABJWEn2i9xJO3pv8ReJIhaHDtIr/
- reNUEaPgPDN+dOPwhQXxYyAfPv2MxKZcvUcjkVwomRU7y1nJSboEsBwoS0jCE3UuZecuWE76cgC
- 72tNyaRzuuMVTmOH91VbDgRKolVrukvjN1nwci2l38uzWJ9zxPfmLC16ikTXZ6Yht0ieaxEnBBL
- +JqPOuX8KW3ZY2lRUmAwStJNBbXZWRTVDc++YocGE2hXZxCoM4PZM87iz6sqb87EIT7K1I2BGeZ
- LR2t5rXH14KwFJXBlc4DuQdalZKM4hZKLRj87oMgF1UO8vGVV++FADLal6k1ADWIRp+sty3hyrU
- Dp5aSqmMf5XPY4Jy6/pEbI9n421fG23lI5OD/P3kTz0oiZsfjCM3bC2zyLxsiN4MZtQ4yOEQYCw
- JuB6qVUOCKNvQ+AU8gj4ZMDiQ3XZ5CKKZfzkKeUMs+Y8ENl+yxtw4UHyjlqLQuJU7DVpQXPb4QX
- h3btfjDN22bWZ2kQ4SS+KN3PH1W/MdxGMoE9yiEQeARfor9ei5nuLKf8pL2BtE8uXblncQnnrpG
- Tax51Cpe5JdTP5sPiP5qhfmEiunzCR/Qjyf1Z62IRg+0gMwuWPRWozYXRz8ynnMoqJXHC+iNOKj
- BoZgNdOMQY2b78ts2pGflvonmG4hL8=
+ QACgkQMarqR1lNu+0GXg/+JDplF5Mat9kwt9zddoUs6PY0KPaGtXYn+vy7mXm5MDd3DqSLaSzAd
+ mO8jsQ0rnCIFzrxbG8Uz8RNgKR4hAHjXyvQjAoE8S1yuZh3rxjBBVjjQcSBdP0+Yq7u1eW766gR
+ cUfClbMy4pNrU4CbOoICXik3AF9OQQqxMS7Ns8U2S8UGpIAuBmGPVgA1UXI3cYMGq1jEcL1IuBw
+ Jizy9PvJrfar6CZKm7mPTTDDCNquX4NdmHbxH7D28vMqdYFGiqoe5rQpMssEdGVSc+MUvYrunZQ
+ zMj5ET0ASrdjdCPMl+MLx9JctaMMlQgbvf7Qn+dkXLuSH5jjbdzl2Nc1t8FnGjUpoBHl/DDUF6y
+ JAMHpJbRpOPmc99JnBnPg5VPdTUhInwRfKAETlUI+tNYcmv0FvTU4A76vOEsHgUneGoOwXDTYrm
+ f5L5PkdijG/rAOrYYGup41rpMVAXNe9heilxCp6gCu2gqsiBOFwteCNP2y2TIhbcBOpKDTxDWoX
+ fKr4n9hAZVEuSy+ytRQV8Ap5rzE6jC51EVotsIgToIA5vYBOmE9c97MfAN/CkDgBEk+Qk6UkgNt
+ NsKpGAqjudW6wdF+4G5x4XPdCYvFlUE6/HvbeSeW0FKOFMaKb40lJ+VOSyoVnDduVL5UbldCFUJ
+ OVmitAzqxIONf87cDS6+WR4HSyrj6k=
 X-Developer-Key: i=dlan@gentoo.org; a=openpgp;
  fpr=50B03A1A5CBCD33576EF8CD7920C0DBCAABEFD55
 
-The SpacemiT SDHCI controller has two reset lines, one connect to AXI bus
-which shared by all controllers, while another one connect to individual
-controller separately.
+The SDHCI controller of SpacemiT K1 SoC requires two resets, add
+support to explicitly request the reset line and deassert during
+initialization phase.
 
 Signed-off-by: Yixun Lan <dlan@gentoo.org>
 ---
- Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ drivers/mmc/host/sdhci-of-k1.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-index 13d9382058fb..322c69b056f4 100644
---- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-@@ -32,12 +32,24 @@ properties:
-       - const: core
-       - const: io
+diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
+index 0cc97e23a2f9..f8330cff5b2a 100644
+--- a/drivers/mmc/host/sdhci-of-k1.c
++++ b/drivers/mmc/host/sdhci-of-k1.c
+@@ -15,6 +15,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/reset.h>
+ #include <linux/platform_device.h>
  
-+  resets:
-+    items:
-+      - description: axi reset, connect to AXI bus, shared by all controllers
-+      - description: sdh reset, connect to individual controller separately
+ #include "sdhci.h"
+@@ -223,6 +224,21 @@ static inline int spacemit_sdhci_get_clocks(struct device *dev,
+ 	return 0;
+ }
+ 
++static inline int spacemit_sdhci_get_resets(struct device *dev)
++{
++	struct reset_control *rst;
 +
-+  reset-names:
-+    items:
-+      - const: axi
-+      - const: sdh
++	rst = devm_reset_control_get_shared_deasserted(dev, "axi");
++	if (IS_ERR(rst))
++		return PTR_ERR(rst);
 +
- required:
-   - compatible
-   - reg
-   - interrupts
-   - clocks
-   - clock-names
-+  - resets
-+  - reset-names
++	rst = devm_reset_control_get_exclusive_deasserted(dev, "sdh");
++	if (IS_ERR(rst))
++		return PTR_ERR(rst);
++
++	return 0;
++}
++
+ static const struct sdhci_ops spacemit_sdhci_ops = {
+ 	.get_max_clock		= spacemit_sdhci_clk_get_max_clock,
+ 	.reset			= spacemit_sdhci_reset,
+@@ -284,6 +300,10 @@ static int spacemit_sdhci_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_pltfm;
  
- unevaluatedProperties: false
- 
-@@ -50,4 +62,6 @@ examples:
-       interrupt-parent = <&plic>;
-       clocks = <&clk_apmu 10>, <&clk_apmu 13>;
-       clock-names = "core", "io";
-+      resets = <&syscon_apmu 2>, <&syscon_apmu 5>;
-+      reset-names = "axi", "sdh";
-     };
++	ret = spacemit_sdhci_get_resets(dev);
++	if (ret)
++		goto err_pltfm;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_pltfm;
 
 -- 
 2.52.0
