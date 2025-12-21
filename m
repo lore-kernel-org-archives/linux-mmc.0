@@ -1,72 +1,72 @@
-Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB8931C69D
-	for <linux-mmc@vger.kernel.org>; Sun, 21 Dec 2025 08:00:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75DCD1C69D
+	for <linux-mmc@vger.kernel.org>; Sun, 21 Dec 2025 08:00:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766304047; cv=none; b=ofF4GcH2DrHEmFHg9mGOi6mdDMReQG7HozWcQv+mvGlFIl4JMrl0VJyWhYf3IbNqDrmuq5CYdzS5xSyN5QvG/8Dm6Jm5Ipox/9vOb0QGN60qYFJl7LzHA8jQSteEpaVqooo+cxgDmZywZj7UdKSPoy6TTc6SXJl9wW84pbQLO9o=
+	t=1766304056; cv=none; b=Z4MYz9qQjHbEKIgzUdffzWkh4Nh9Wu7z/p/PAkZk1Sa0Y8d5hWvzgoTHHuzZW/gMIqk4gv8FBqz+nkWMHElrzXupaRZFIQd0PY9h0Sqs3o6WxwNDwgmDQ0R0sCJzQZJbrPnMx7IqQauDeTjeW7yzOUSWm+M9fRUuD8O6EznUfgM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766304047; c=relaxed/simple;
-	bh=y2pAxzKR9TUrrvwEKkVj2yU/cF89B3Z5apc2cJ30qfU=;
+	s=arc-20240116; t=1766304056; c=relaxed/simple;
+	bh=xj5VFd/wGT0JNCBUTP0mdIV9ztBJbkLtDXr1qW4MS+Q=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=frkAgqf9YMHJdsLIG1ZKSOpvoQeUrs98hCPmrOguMnwGR9DqiU4kKYEgdffB7LGm0JFf6Sj0C1rMiuj+6JssRqd5XLXZgURXKiMm7aEFq3YvUBPS49evZqArXqjkOh8E0yhhZ3aJ7AG3qiT79Gdu4IUQINFOPJDoT2thZrkvABA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MmB1Gpqy; arc=none smtp.client-ip=209.85.128.50
+	 MIME-Version; b=WiL5sWsgS+3JCXdN9xEdEC0PV2+bF+jK/UIexSZD4Y3s+PI60qe3a6H6lkLQpZR/hHjTPOnquu59ARLr2Nn2JoWtnTlYSWj0U8jVbyxDT2vYNbDYokSiH5cyDDFylgoEroN/5L/1AVk0+lZTIi7QYXmK/wXyKnLv+9uKeVCFX2c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dVIMHkBz; arc=none smtp.client-ip=209.85.128.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MmB1Gpqy"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-4779ce2a624so23451715e9.2
-        for <linux-mmc@vger.kernel.org>; Sun, 21 Dec 2025 00:00:45 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dVIMHkBz"
+Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4779cb0a33fso31412755e9.0
+        for <linux-mmc@vger.kernel.org>; Sun, 21 Dec 2025 00:00:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1766304044; x=1766908844; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1766304053; x=1766908853; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=GvH0sKczdoEEmB3rSknanQrZ3PQnI7/zvmgVIM1EiAk=;
-        b=MmB1Gpqyy+p9H271VCSH8kFiJDQzIP8go9y0Z6sGYXgX0BakLFVHyINAWZnu5otgIW
-         qXxN1rtDrs2L4TnPqMDxcmIaCvzP3rF3NUrngqZk67EXxWJqtki5x9RFgPXdMIqBcBfV
-         Gn9VDcrq1bqjNQPGwpry8aD7bvjbJnCUId3LGBo2ybC7zIgF0TdJBoeOE0d7ZZjDOolc
-         Npn3Tsq7qXLYNQmA4FUzcI4e8Q65bBtkPVsMj6Ml1XpdZ6YAElnVY+n2OHsjq3Lx4VKK
-         WSAhBuwd6b0YR4Pas1HlhGSLTEoBsmNcxJIOC83eZbEtpTtVKY4TPfsqisicWlHPcOcj
-         kfvA==
+        bh=VEICg7/ZZ+sFIVrpvJHRuWrrOTv4UgF3PCJArP1rKpY=;
+        b=dVIMHkBzBfLpjJV7s2a080D4p6sXHoVQ8xGbW0sAmY6yxl+9EMRs8Yft9tjbjUSek7
+         4P1b33r85qLnf0RLZD3IrmROISWienpvcXn3pXGxWt4RFfu/fklVLDgdFCbS/Mn8mbst
+         npoGaMjy34vio3DULQ3HdIfJlAV8fCAwTJv+HqFLtfZUE4Y1Z8BUhSvcfiN+yEpxkH2J
+         4e3lZYwZDabDWrp8Nx2oOUmpmmACGbC+noHM2pf/TgE8B+k2T09UBFv/uaOTcGmR4h9Z
+         58lPLirCsD8tniTvkWJKXVloYb9CjvzWtBuCjDyaONrl5J64WAhj3LlUtYdKWH1J4fKX
+         6BPw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766304044; x=1766908844;
+        d=1e100.net; s=20230601; t=1766304053; x=1766908853;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=GvH0sKczdoEEmB3rSknanQrZ3PQnI7/zvmgVIM1EiAk=;
-        b=FwzFwuVs3nFfVhgxBWUGuCozJKvh4++jNWL5ZcAz1LAOE0rbNZTSa7dwMS234UmnW0
-         x0Z46kDyW3d0xdkgZpQ3FMpteZRo8iQ9O4bLYCKx9faKS0ZmMiSsCFkogFSslevBrKQ2
-         P5zOlx1tZkv1ISkXL+9fYhABogyl5qdvvjSPw01Sz7albnlhcUbrzRu6XYVIiZgM3uUi
-         tckwUo6iedxzGzGIDOY3m2Tj9k/CeVDkwNnRjMbRCDf6bvafvm8VsYkKtEMw9ytn2XEz
-         pkSWX0LxDlkb/kp7YB8vlUa3ZkYHNLVr8R2oUQVsrgaoLcXAcp1db/fvLgDcLpPweBnP
-         kB9A==
-X-Forwarded-Encrypted: i=1; AJvYcCUjcBNCV9l2M6TJ4bPQioFOsn4z0d2vf8H/VXnaHDM6rW5B/03ozg5SDsLnzpek4LW7xZLToHqugQI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywb0whQZabXcNVgjjtIRcXfHLYb1cD8l5F4VaZaJ3zsp0Fk7rp/
-	gLEr8P+yaJ9iiVFZsgoQmyMKGR1l8CbH9IXJsu/ctoDL+gbcWkUVIJlw
-X-Gm-Gg: AY/fxX7J4J2Jissq8ebS6vDTaleh8edTmP27oKzbM4w84DKkZ/WCsFuvkciuidtm5hM
-	XyaJp8/I928BhSsGOEOFXwlM3WOOc3wZAYedXx1pkLH5sDOoFjxodt0WEfvrPW5Depyf1zCCGo0
-	6rZTDTn60LmU7DlqAYKR5uAPJjRUwXB/j+hYraw6xvk3DgppQG+4zovkYSFWD6Gs6UOmuqjXH52
-	N+zyIKqxMgYPGmTSZ6rhfl78CO+hKiN5TVM8T+FlHXJ7PNhku/E1YAGe5JOXVCyH7o/UlEzwtvE
-	7PWms68MOxPmr6KiYFonOWJXxzgl5xvzSjo39URl0e3abjKLb8xb1iL1qldHllqYH5zz9ZaYBsB
-	U2y+hm0GtY04tRtj2KMdhxmz2a9X2f6YUoPAaSo9d5SgrHRc623wbyoqHPYfzG7e+TXyg79zlJN
-	3CgILwRTEgLgFXkpMRQD2wu05L5d+LESW1ddSVz+OLudxZjk33OjTk6nbjCVG05FbF+2tvgA1YO
-	RamPaQn9GVXpRoE8ehpBLck6QVLe2B1x3w=
-X-Google-Smtp-Source: AGHT+IHJ3kc2Q9onnmhT0GGz6ScNFsTspSopXXNZaY5Xhcr4U2dsrah6iav9N/wMfVG0Sxf4XhaCQg==
-X-Received: by 2002:a05:600c:4446:b0:475:e007:bae0 with SMTP id 5b1f17b1804b1-47d1956f896mr80767245e9.16.1766304043937;
-        Sun, 21 Dec 2025 00:00:43 -0800 (PST)
+        bh=VEICg7/ZZ+sFIVrpvJHRuWrrOTv4UgF3PCJArP1rKpY=;
+        b=pNI6VSy6oLYiaq2HPQd48CznniNQrebDC3eYVHVRAIerhjPsdfkjpfsosrOrql4Xzu
+         VgQMPaZKkE8yKKzsX+uAZIMevg7iDXt9Vy64oJFwlFzhHS1BrHT6Kg8mJDS7TMzr/BuY
+         sXXBuz4lUTIpUnMt5HOLPBCxg8HFVD9lrFaM+NrsbwQYxfwbZ7hVfZDtJP+yElNpGucX
+         QoEvu9N0+ZBmhquOwbPa0IMDb1bLDW6UMWrnfYj18OxUvjrdmZjfQ2J4Tq/Gr9yjghWS
+         SH4wW67o1KtON5B/YYg5mJ9ewixy1FmWnH1n0hMSd5HF3MKO8eiyAws1k5yUGQUnYWY4
+         lxKA==
+X-Forwarded-Encrypted: i=1; AJvYcCWxRHKctZEB+UG7dg6ofRJwlJsyl883x4t0tdNy9ROrotES5kST+3XJSHbu0MKe+QySkNpxvnWNDXg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzlrDoH0/x3AcvPua7n8JkDb26y/y/uyOks3/Qf7zLfVanDzO3o
+	9Pf3bdXacsqDR0jCU1uuSeOaEieqhLoDJBVBQHluzlbJPXu8ZpfPcEMEk7PpwQ==
+X-Gm-Gg: AY/fxX7VGFcjY+v5d66l2gcHxguotITL0ydRIExQXUXicEXFSfuVXh1aM+YPVfx9TOL
+	t+C/Fh9eINFRggzkU+Dkt6OJQ2mR509275/UqNSdoNejrjJpIwOOs/qoYX4pHEGWJP901k/qBB3
+	hTzVq2WasOTxDDwLqbJW96BFl3bkUlC1u6dXO9ZBhqOuixywwygz4/WiqwrEAs8T+RzWvXItsJ+
+	gzorx7EkYW3LZD34yRz2EUy8DwIZS+NIuFdefkSLsqqlYxVnsCnPx2PmYfckuGoHPMPKTRt6drs
+	aPaS1twHqzDKE55ql81KQ1a4yupy0Ql+DHaecieWvp8/nMf0H5tW6hiy6XqvAsenQGj2NwS1Okl
+	iVyJSh9KyvN/O+h90C4gIbogzCJqAyMmZ8GQromT6md7tpDgPkmXZm0d8K8osbL2aiQ+23IwxQ9
+	NAtyliqENYGKfywE+nEkp4P/Bn3qv4qZQhpTS8RbsOj0fbyOWYCoFXLEJLKytXkJAxhLBWjBrB1
+	gJhF83MZyUNc9pe7uoYQ3h7a6aUgQGUqk8=
+X-Google-Smtp-Source: AGHT+IHsezzWA6iJUdI5UvYKMe6UT9lcAlVJ52OtK7rtfRWHQ0FR6bocrRH3Lrh6RKPY8nTVSqcTzQ==
+X-Received: by 2002:a05:600c:444b:b0:477:557b:691d with SMTP id 5b1f17b1804b1-47d1959fa3emr71070735e9.25.1766304052711;
+        Sun, 21 Dec 2025 00:00:52 -0800 (PST)
 Received: from avri-office.sdcorp.global.sandisk.com (212-235-122-32.bb.netvision.net.il. [212.235.122.32])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47d193621c8sm127174335e9.7.2025.12.21.00.00.40
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47d193621c8sm127174335e9.7.2025.12.21.00.00.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Dec 2025 00:00:41 -0800 (PST)
+        Sun, 21 Dec 2025 00:00:52 -0800 (PST)
 From: avri.altman@gmail.com
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Avri Altman <avri.altman@sandisk.com>
-Subject: [PATCH 1/2] mmc-utils: lsmmc: fix CID manufacturing date decoding
-Date: Sun, 21 Dec 2025 10:00:19 +0200
-Message-Id: <20251221080020.4532-2-avri.altman@gmail.com>
+Subject: [PATCH 2/2] mmc-utils: lsmmc: cache ext_csd revision for MMC devices
+Date: Sun, 21 Dec 2025 10:00:20 +0200
+Message-Id: <20251221080020.4532-3-avri.altman@gmail.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20251221080020.4532-1-avri.altman@gmail.com>
 References: <20251221080020.4532-1-avri.altman@gmail.com>
@@ -80,94 +80,120 @@ Content-Transfer-Encoding: 8bit
 
 From: Avri Altman <avri.altman@sandisk.com>
 
-The CID register contains a 1-byte Manufacturing Date (MDT) field, where
-4 bits represent the month and 4 bits represent the year offset.
-Originally, the base year was 1997.
+The Manufacturing Date (MDT) field in the CID register depends on the
+Extended CSD Revision (EXT_CSD_REV) to determine the correct base year
+(1997, 2013, or 2029).
 
-However, as the 4-bit year field wraps around every 16 years, newer
-MMC specifications defined new base years based on the Extended CSD
-Revision (EXT_CSD_REV):
-- Rev <= 4: Base 1997
-- Rev > 4:  Base 2013
-- Rev > 8:  Base 2029 (with specific overlap handling for 2026-2028)
+Currently, lsmmc processes registers in isolation. To enable correct MDT
+decoding in the CID print function, we need to read and cache the
+EXT_CSD revision when processing MMC devices from sysfs.
 
-Previously, lsmmc hardcoded the base year to 1997, causing newer cards
-to report incorrect manufacturing years (e.g., reporting 2000 instead
-of 2016).
+This patch adds logic to `process_reg_from_file` to attempt reading the
+`ext_csd` binary file and storing the revision byte (index 192) in the
+config structure.
 
-This patch adds logic to calculate the correct base year using the
-cached ext_csd_rev. It also adds a warning if the EXT_CSD revision is
-unavailable, as the date cannot be guaranteed accurate without it.
+Note: Opening the block device node to issue ioctls requires root
+privileges (sudo), whereas reading sysfs files might not.
 
 Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 ---
- lsmmc.c | 24 ++++++++++++++++++++++--
- 1 file changed, 22 insertions(+), 2 deletions(-)
+ lsmmc.c    | 36 ++++++++++++++++++++++++++++++++++++
+ mmc_cmds.c |  2 +-
+ mmc_cmds.h |  3 +++
+ 3 files changed, 40 insertions(+), 1 deletion(-)
 
 diff --git a/lsmmc.c b/lsmmc.c
-index dd3ab83..b7b9378 100644
+index b7b9378..e9df5e1 100644
 --- a/lsmmc.c
 +++ b/lsmmc.c
-@@ -67,6 +67,7 @@ struct config {
+@@ -45,6 +45,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <fcntl.h>
  
- 	enum bus_type bus;
- 	char *reg;
-+	unsigned int ext_csd_rev;
- };
+ #include "mmc.h"
+ #include "mmc_cmds.h"
+@@ -2201,11 +2202,46 @@ err:
+ 	return ret;
+ }
  
- enum REG_TYPE {
-@@ -586,6 +587,7 @@ static void print_mmc_cid(struct config *config, char *cid)
- 	unsigned int mdt_year;
- 	unsigned int crc;
- 	char *manufacturer = NULL;
-+	int base_year = 1997;
- 
- 	parse_bin(cid, "8u6r2u8u48a4u4u32u4u4u7u1r",
- 		&mid, &cbx, &oid, &pnm[0], &prv_major, &prv_minor, &psn,
-@@ -595,6 +597,18 @@ static void print_mmc_cid(struct config *config, char *cid)
- 
- 	manufacturer = get_manufacturer(config, mid);
- 
-+	if (config->ext_csd_rev) {
-+		/* Adjust base year according to ext_csd_rev */
-+		if (config->ext_csd_rev > 8) {
-+			base_year = 2029;
-+			if (mdt_year >= 13)
-+				base_year = 2013;
-+		} else if (config->ext_csd_rev > 4) {
-+			base_year = 2013;
++static void read_mmc_extcsd_rev(struct config *config)
++{
++	DIR *dir;
++	struct dirent *dent;
++
++	if (config->bus != MMC)
++		return;
++
++	dir = opendir("block");
++	if (!dir)
++		return;
++
++	while ((dent = readdir(dir)) != NULL) {
++		if (strncmp(dent->d_name, "mmcblk", 6) == 0) {
++			char devpath[512];
++			int fd;
++			__u8 ext_csd[512];
++
++			snprintf(devpath, sizeof(devpath), "/dev/%s", dent->d_name);
++			fd = open(devpath, O_RDONLY);
++			if (fd >= 0) {
++				if (read_extcsd(fd, ext_csd) == 0)
++					config->ext_csd_rev = ext_csd[EXT_CSD_REV];
++				close(fd);
++			}
++
++			break;
 +		}
 +	}
 +
++	closedir(dir);
++}
 +
- 	if (config->verbose) {
- 		printf("======MMC/CID======\n");
+ static int process_reg_from_file(struct config *config, enum REG_TYPE reg)
+ {
+ 	char *reg_content = NULL;
+ 	int ret = 0;
  
-@@ -626,7 +640,10 @@ static void print_mmc_cid(struct config *config, char *cid)
- 		printf("(%u.%u)\n", prv_major, prv_minor);
- 		printf("\tPSN: 0x%08x\n", psn);
- 		printf("\tMDT: 0x%01x%01x %u %s\n", mdt_month, mdt_year,
--		       1997 + mdt_year, months[mdt_month]);
-+		       base_year + mdt_year, months[mdt_month]);
-+		if (!config->ext_csd_rev)
-+			printf("\tWarn: ext_csd_rev not provided, "
-+			       "manufacturing date year may be wrong.\n");
- 		printf("\tCRC: 0x%02x\n", crc);
- 	} else {
- 		if (manufacturer)
-@@ -637,8 +654,11 @@ static void print_mmc_cid(struct config *config, char *cid)
- 
- 		printf("product: '%s' %u.%u\n", pnm, prv_major, prv_minor);
- 		printf("serial: 0x%08x\n", psn);
--		printf("manufacturing date: %u %s\n", 1997 + mdt_year,
-+		printf("manufacturing date: %u %s\n", base_year + mdt_year,
- 		       months[mdt_month]);
-+		if (!config->ext_csd_rev)
-+			printf("Warn: ext_csd_rev not provided, "
-+			       "manufacturing date year may be wrong.\n");
- 	}
++	read_mmc_extcsd_rev(config);
++
+ 	switch (reg) {
+ 	case CID:
+ 		reg_content = read_file("cid");
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 5990502..4c8c127 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -74,7 +74,7 @@ static inline __u32 per_byte_htole32(__u8 *arr)
+ 	return arr[0] | arr[1] << 8 | arr[2] << 16 | arr[3] << 24;
  }
  
+-static int read_extcsd(int fd, __u8 *ext_csd)
++int read_extcsd(int fd, __u8 *ext_csd)
+ {
+ 	int ret = 0;
+ 	struct mmc_ioc_cmd idata = {};
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index f767deb..9d5f944 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -17,12 +17,15 @@
+  * those modifications are Copyright (c) 2016 SanDisk Corp.
+  */
+ 
++#include <linux/types.h>
++
+ typedef int (*CommandFunction)(int argc, char **argv);
+ 
+ void print_usage(CommandFunction func);
+ 
+ /* mmc_cmds.c */
+ int do_read_extcsd(int nargs, char **argv);
++int read_extcsd(int fd, __u8 *ext_csd);
+ int do_write_extcsd(int nargs, char **argv);
+ int do_writeprotect_boot_get(int nargs, char **argv);
+ int do_writeprotect_boot_set(int nargs, char **argv);
 -- 
 2.34.1
 
