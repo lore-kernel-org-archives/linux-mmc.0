@@ -1,259 +1,144 @@
-Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
+Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A7992F3C22
-	for <linux-mmc@vger.kernel.org>; Mon, 22 Dec 2025 14:34:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E794932ED59
+	for <linux-mmc@vger.kernel.org>; Mon, 22 Dec 2025 14:47:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766414053; cv=none; b=LeNYdqHQBux8fqJHg40X+Tg6pPTeCjtDR9ugvA21ME8ecwKRRKjrWf7jV7m0bJPPygnlsDnTnz41vYRKbOhQKBN/PAcT0MF8eXE1v4zd6L5fX88iHXHtXeSnl+ZRBJHn9C0DFNDT8SdnhvhvdFbC6RnscL8ZicEmurz9KGn18H0=
+	t=1766414863; cv=none; b=i1C8/kD1lAwAAcJi5qK5CR2LkULt5PKhWQLOG2Kg5SN9FJJ0Tb5xUdeMHAlSaLMQLaZrc0Rn2IXzUDnbhYgTejIycptvpk7KqoDrjsszK6F75hZN5UhUhEbAaZFlmWTplitjlLzAXfRs0ymur4ign8kiAZIydF5+C08jqRY5Xa8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766414053; c=relaxed/simple;
-	bh=lQy+mZKi5UggTVO+Sm8J/mQBT4hp+xc7B/gNeXEWEno=;
+	s=arc-20240116; t=1766414863; c=relaxed/simple;
+	bh=IwLjLCoIOYSxZJTADglHFhXYcy2He7W4GE2tlYf0bXA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=j1pe2ObLYwhk4eXJDowkiRP2pbhEOZM0pd4Ee3dvjbsapB/RmPqTD7nb1EIwTjPP1IQoVkjTOvlnO/pxaq5zUgdHl9OvsePZKKnDBzc4dvtY4ueU7BKsyroTuh3VV5Kydc27Apf64Ua8WitNhng/cwwSIO/VfpnuFAiofIjGW6s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=CfQDxQ3V; arc=none smtp.client-ip=209.85.208.181
+	 To:Cc:Content-Type; b=ZPxUu1iX5fmoI//DDD3f/9POuvg+o+1ycU6KTvOx2a4lk3wDLARK8oKUm7W/7yYKskFLVTwCihb+tsAeqhz5WfhjIXNT2UlT/vDIDWSX85BwuwJbaN4f7aJ5fnJazRBMTfrb0L0tSUv0fRjDljEGejy651TzDSTymlyR78zhpgs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DAB/Amyf; arc=none smtp.client-ip=209.85.167.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CfQDxQ3V"
-Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-37fccf7035aso32643851fa.1
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Dec 2025 06:34:10 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DAB/Amyf"
+Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-59a10ef758aso3299060e87.2
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Dec 2025 06:47:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1766414049; x=1767018849; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=sgxY+6gEj9UygqLRNsiMXRwa1dAq3NfGydbYraAyFIg=;
-        b=CfQDxQ3VJ2rhE5+S9FABAC7tWaJL8aHWPQOtJE6rHvqphgM3lNR6TtJmAV7LC7NtIs
-         aAbG2ZtZJin9L+4iTHKfvegdxpepvq9Gro3HHWB5JzNqrD8JmFn2ulFZXCZyfsjGsqRe
-         o5mJ2DSQCNYnIVGHcc/LtYTQE5lPM9deYbLrgCLQGfHNKzyNcuk5THfbWcyCXQ+fQZ6R
-         8RlfXL9Z3PWU7NlLuzla4bjp4RYK/p3M86k3XI+AoI/h8vXbkMa9qIk0XNSWE2yV8K/l
-         9aLyyLMIyLZQ+CaGEbSJxtpAO5wYanjoSzo4h5bN5MfdKfv6Yh3nPnMNkHyxxJlkAwHE
-         jJXg==
+        d=linaro.org; s=google; t=1766414860; x=1767019660; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=lNpWj6TBvVji/fHBEAyDcOFnMWFot5zrE/hRwsxnXVY=;
+        b=DAB/Amyf1kdMghWpvNsR5yNnMf+GdDvgb0bA4+59mA0CrIcjf0meQgWipWa4qgI0+u
+         QzmXsaKh4CDGdPAVFemA6mB0PY7nYeYTfFKf08TKNBK7/79eZ+/5axG1Oj+c5gAmAFfg
+         T6+CWEWvYf5iQFoFrZGr06kU0xwOi/gsXNB3kQcCCxDDaqnVlheA/H95h4OGQdIrQD1T
+         DuSAeDBryQG0Va3VNcLhpD2f+qW6b93O1bCz7Ls5M2R8ZzuC60dez2dFPM0QaMrYu6X1
+         4TJcc1dZY6C1qQanrLgSyh2HkvSgJUb+rXBU+gv3hnl/FjGW4kxTqLG3nbaKx9Smpezy
+         zmVA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1766414049; x=1767018849;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=sgxY+6gEj9UygqLRNsiMXRwa1dAq3NfGydbYraAyFIg=;
-        b=MKDHbrjHU6aCTmxn9VM31CwqSECzvdJWWTSiKII8YegYOiT9a/1Y7gGzTxUDUAl9OG
-         K4PNhahaFU1COAkcpldqjMl81xbRKFXhljNm9OGzRMEInQ9eCPRq//WNzKxBxaEI/6f+
-         TVEYQcq6+FCapZHMRPrs6Mzwa8EnI3ojHz1MZzGTQDWCaNFGx0hd5dkkpLYV67E32jFP
-         uIw6qx+H+jZzsll5CrskwfF99XQpp23XHUtrjvIb+CyHvnXE1ySSmklmZp5kDfgk7ird
-         tVoMjZvZl9hFZfjZONwU8Tl1/pUiVN7Ek/Gufa16eRRE+2zRLHU1OAQfhJsl/g78SyFN
-         EP+w==
-X-Gm-Message-State: AOJu0YxQhZ9GnFRrQmY2BWivGJ34wRNCbLOUldSz3xFQawmpfNcHo7NX
-	oWv20d33MK7aC3scwy7r+b/WYyKLYuK8xkveOwkvx0UOL8TB5z+7Y7NqM0nDsnGqW4kWti33kks
-	2Nft5jBdSNAmf5agLnnEIeIkU0kZgqM3TumLEx/wi7Q==
-X-Gm-Gg: AY/fxX7N5EQLhWfqshWq6ti5cmb2+8i4nUB6StKxacpJflUGnjJ0xmW5ReXhmkymVt6
-	q3+dKuK2m3N8p9UwTFP4sQF9vDvVr4MzoFtdQcpI8vAEcv+degfeSvak8q7YO9eucCfuFDf+ajO
-	SX2VEaP2sqapZwBrmomP1YLT8H9atAsRxtEccbSEwVQKle2Ld9tPtG1OUmW/FFbSleXUsck3YmL
-	HJKqgUFr21RLRS3lPHEZQzbDddWHUXcTj36tPveTwvgBwa8qBu9CkhWdNZWw7MTm+KOnNsf
-X-Google-Smtp-Source: AGHT+IGIPsRxALBUVnYOYWNLB0WNW65j6NC13aWbk1SAhBORoZX4/yL+g8ZSROEA5Dom8QWAKwN/DPnOMa/o/SUXpp0=
-X-Received: by 2002:a05:651c:210c:b0:37f:cd21:6ad2 with SMTP id
- 38308e7fff4ca-3812162165cmr37841061fa.20.1766414049184; Mon, 22 Dec 2025
- 06:34:09 -0800 (PST)
+        d=1e100.net; s=20230601; t=1766414860; x=1767019660;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lNpWj6TBvVji/fHBEAyDcOFnMWFot5zrE/hRwsxnXVY=;
+        b=YJSJ+Q3rgQTa5vz9P28bSWx5lC7HsTii4ewizw3c6pbwXnxRU32FaukFE8K+I9mc8X
+         fKYMXwkcggeP9YlgctgWxrkhZc+MSxzrv4+T3jFQ2ctlYrQ1ONXnr6VhN05VnZ+hNsQN
+         fLHMhoTawxV5KXbBFOTKEXXu2CjYEJwkRTutpMfskZgFcdPS7pw5rZp7n7VgkXt4Ht4/
+         OjPaBcn1YNi5FZ5lm5OkaeiAZlKP76e9DUA3pr55nzEOAJrdUXjalEkKM12WlZ8Ah4EF
+         HH4FamllQsYz2OLBG1hdoL2iYqoGwWI7K/6TxjlMx0Ww43d2ZeDrfSh8TvMeeSvp+nck
+         6JdQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUEOH+3QCFWvY2X4TyPvOA8qlC4/RQlkLvriGzeK/bumJ/gjGf6IwaHA4gGJh7P1VouJ6gy0S2katc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzhVZKhgvNnLck6TL8VMtu/2miG1Bo/jf0yWiHndkFtSg4KmbfL
+	ZVqmK9fl8TQ+AaOEmuJsw+jSy17xm+wPnwnkCL3Ok+F9Qf9Pf9uoO9IM8eTbAt8SBLeuK6m+EYz
+	Yn23E+p/LzDZtvHQDLHeeJWgXtKNEdkec4CuP7WZh3w==
+X-Gm-Gg: AY/fxX7hndtWpLc90fOF22my5WRG4BCuc71LXpQ3YK8h0iluTk06Bwe/CCxzEg4X3oS
+	zznCr57bpP31+oLEytjPulWYk2stClhkEA2yVAhidW+RaE0cOJ1m5LXv1Nx5KZJ3CGfEOdpL78A
+	y93vPou9hOg3l/iIXdwAi6tgnIdaE6xp9Dq1ejXbiOrBtM5A83G4RPhrKKuS+ttZm3e8eHS9Adq
+	9h9i+PNSSInlls+pE02P8olxpFQVUlFWhnzO1SpfH78qhuKXAg3BJDi4Eoa9bH3DkkfRmHt
+X-Google-Smtp-Source: AGHT+IEmZoekCpdFdxCX6++mG8wezcWmjXxPG5ogJ3p4YsZ2il+JIIqimrrt74JmCImmja/XHDzRdip0knGEk5MWYgo=
+X-Received: by 2002:a05:6512:e9c:b0:598:faba:c8fa with SMTP id
+ 2adb3069b0e04-59a17d006e1mr4286628e87.10.1766414859977; Mon, 22 Dec 2025
+ 06:47:39 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAH1aAjJbA08ErU_NMhNDGcNfWgap+G0Fk-Ba-AgfpZcc8zHd=Q@mail.gmail.com>
- <CAPDyKFrzzLTCYZnr0RFDc0NnPbeUMZzb-2NjXJZa3Q1qQ+OpTg@mail.gmail.com> <ME6PR01MB10557F6B9C1FAF3760C56A2A6AAB7A@ME6PR01MB10557.ausprd01.prod.outlook.com>
-In-Reply-To: <ME6PR01MB10557F6B9C1FAF3760C56A2A6AAB7A@ME6PR01MB10557.ausprd01.prod.outlook.com>
+References: <20251210-rz-sdio-mux-v3-0-ca628db56d60@solid-run.com>
+ <20251210-rz-sdio-mux-v3-2-ca628db56d60@solid-run.com> <CAPDyKFoYd3WKGrjD3DEzZH8EfgZPmRkrqL=rdoKNuAADrvz3Eg@mail.gmail.com>
+ <20f2128c-c6cb-4b13-aa08-b93e540f5bd9@solid-run.com>
+In-Reply-To: <20f2128c-c6cb-4b13-aa08-b93e540f5bd9@solid-run.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 22 Dec 2025 15:33:32 +0100
-X-Gm-Features: AQt7F2qP8ilrhBMmLj2emHB8eNHp8DzUto03N9FSiaG1_5NcZ-DVtthR66GKtV4
-Message-ID: <CAPDyKFo0ZbEnpA0A8Qv+FEXctyM=UEak_vaD7_NFaw44oz3zoQ@mail.gmail.com>
-Subject: Re: Issue with Realtek PCI SD card driver
-To: JP Dehollain <jpdehollain@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
+Date: Mon, 22 Dec 2025 15:47:03 +0100
+X-Gm-Features: AQt7F2pGUIPrw4OqWueh78ppZDBGwQc_mhY3RygUrq6e1L74fXopGZ4K0V_QvZo
+Message-ID: <CAPDyKFo2jsV02qSDBSZTewJjV09AMO8iETU5Uxqz+GBnd0JY6g@mail.gmail.com>
+Subject: Re: [PATCH v3 2/6] mux: Add helper functions for getting optional and
+ selected mux-state
+To: Josua Mayer <josua@solid-run.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, 
+	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
+	Kishon Vijay Abraham I <kishon@kernel.org>, Peter Rosin <peda@axentia.se>, 
+	Aaro Koskinen <aaro.koskinen@iki.fi>, Andreas Kemnade <andreas@kemnade.info>, 
+	Kevin Hilman <khilman@baylibre.com>, Roger Quadros <rogerq@kernel.org>, 
+	Tony Lindgren <tony@atomide.com>, Vignesh R <vigneshr@ti.com>, 
+	Janusz Krzysztofik <jmkrzyszt@gmail.com>, Andi Shyti <andi.shyti@kernel.org>, 
+	Mikhail Anikin <mikhail.anikin@solid-run.com>, Yazan Shhady <yazan.shhady@solid-run.com>, 
+	Jon Nettleton <jon@solid-run.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, 
+	"linux-can@vger.kernel.org" <linux-can@vger.kernel.org>, 
+	"linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>, 
+	"linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, 
+	"linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Sun, 21 Dec 2025 at 04:19, JP Dehollain <jpdehollain@gmail.com> wrote:
+On Sun, 21 Dec 2025 at 11:38, Josua Mayer <josua@solid-run.com> wrote:
 >
-> Thanks Uffe!
+> Hi Ulf,
 >
-> It took me some effort to figure out how to make and load the patched dri=
-ver properly in my system, but it seems to be working fine now!
+> Am 17.12.25 um 14:38 schrieb Ulf Hansson:
+> > On Wed, 10 Dec 2025 at 18:39, Josua Mayer <josua@solid-run.com> wrote:
+>
+> cut
+>
+> >>  /*
+> >>   * Using subsys_initcall instead of module_init here to try to ensure - for
+> >>   * the non-modular case - that the subsystem is initialized when mux consumers
+> >> diff --git a/include/linux/mux/consumer.h b/include/linux/mux/consumer.h
+> >> index 2e25c838f8312..a5da2e33a45c0 100644
+> >> --- a/include/linux/mux/consumer.h
+> >> +++ b/include/linux/mux/consumer.h
+> >> @@ -60,5 +60,9 @@ struct mux_control *devm_mux_control_get(struct device *dev,
+> >>                                          const char *mux_name);
+> >>  struct mux_state *devm_mux_state_get(struct device *dev,
+> >>                                      const char *mux_name);
+> >> +struct mux_state *devm_mux_state_get_optional(struct device *dev,
+> >> +                                             const char *mux_name);
+> >> +struct mux_state *devm_mux_state_get_optional_selected(struct device *dev,
+> >> +                                                      const char *mux_name);
+> > Seems like we need stub-functions of these too. Otherwise
+> > subsystems/drivers need to have a "depends on MULTIPLEXER" in their
+> > Kconfigs.
+>
+> Currently the drivers that can use a mux select MULTIPLEXER in Kconfig.
 
-That's great news! So we should probably send the corresponding patch
-to stable kernels too, as currently it's included from v6.18 and
-onwards.
-
-Is it something that you want to look into? Otherwise I can certainly
-do it, but it may take some time before I get to it.
+Yes, but that's not generally how we do this. The driver may not need
+MULTIPLEXER for all platforms that driver is being used on.
 
 >
-> Thanks to all of you for all the maintaining work =E2=9D=A4=EF=B8=8F
->
-> Cheers,
-> JP
+> There already exist a few mux helpers both for mux-state and for mux-control,
+> and they might all need stubs.
 
-Thanks and kind regards
+Correct. I think we should add subs for all of them.
+
+>
+> I'd prefer the restructuring of kconfig dependencies being independent from
+> adding mux-state functionality to renesas sdhi driver.
+
+I understand your point, but adding the stubs isn't really a big thing
+- unless someone has some good arguments not to!?
+
+Moreover, since the series changes the mux-core anyways - and
+subsequent changes depend on it, I don't see an issue to fold in yet
+another patch to add the stubs.
+
+Kind regards
 Uffe
-
-> ________________________________
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> Sent: Thursday, December 11, 2025 9:56:49 PM
-> To: JP Dehollain <jpdehollain@gmail.com>
-> Cc: linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>; =E5=90=B3=E6=
-=98=8A=E6=BE=84 Ricky <ricky_wu@realtek.com>
-> Subject: Re: Issue with Realtek PCI SD card driver
->
-> + Ricky Wu (the main developer of the driver)
->
-> On Thu, 11 Dec 2025 at 10:05, JP Dehollain <jpdehollain@gmail.com> wrote:
-> >
-> > Dear mmc kernel driver mantainers,
-> >
-> > When I insert an SD card in the integrated card reader in my laptop, mo=
-st of the time the card gets recognised as read-only, even though the physi=
-cal switch is in the unlocked position. If I remove and reinsert the card s=
-everal times without unmounting it in the OS, I can eventually get it to lo=
-ad in rw mode.
-> >
-> > I am using Zorin 18, with linux kernel 6.14.
-> > Attached below is the output of dmesg showing several attempts to remov=
-e and reload, until it reloads in rw in line [10281.365508].
-> >
-> > Please let me know if there any other logs and tests I can send or perf=
-orm to help resolve the issue.
->
-> I found one interesting commit that may be worth trying:
->
-> commit 807221d3c5ff ("misc: rtsx_pci: Add separate CD/WP pin polarity
-> reversal support").
->
-> Not sure if it applies on v6.14 kernel, but I suggest giving it a try.
-> Or try the latest kernel, v6.18. I have also looped in Ricky Wu, to
-> see if he is able to help out.
->
-> Kind regards
-> Uffe
->
-> >
-> > Best regards,
-> > JP
-> > jpdehollain
-> >
-> >  [ 9367.567443] Generic FE-GE Realtek PHY r8169-0-201:00: attached PHY =
-driver (mii_bus:phy_addr=3Dr8169-0-201:00, irq=3DMAC)
-> > [ 9367.568438] Bluetooth: MGMT ver 1.23
-> > [ 9367.738206] r8169 0000:02:00.1 enp2s0f1: Link is Down
-> > [ 9375.195026] wlp3s0: authenticate with c0:fd:84:c2:04:ac (local addre=
-ss=3D40:b8:9a:b9:34:e1)
-> > [ 9375.195036] wlp3s0: send auth to c0:fd:84:c2:04:ac (try 1/3)
-> > [ 9375.195935] wlp3s0: authenticated
-> > [ 9375.196946] wlp3s0: associate with c0:fd:84:c2:04:ac (try 1/3)
-> > [ 9375.198285] wlp3s0: RX AssocResp from c0:fd:84:c2:04:ac (capab=3D0x1=
-011 status=3D0 aid=3D6)
-> > [ 9375.200886] wlp3s0: associated
-> > [ 9377.256424] rfkill: input handler enabled
-> > [ 9377.260100] rfkill: input handler disabled
-> > [ 9378.855243] lockdown_is_locked_down: 2 callbacks suppressed
-> > [ 9378.855248] Lockdown: systemd-logind: hibernation is restricted; see=
- man kernel_lockdown.7
-> > [ 9842.321650] mmc0: cannot verify signal voltage switch
-> > [ 9842.474907] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [ 9842.475878] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [ 9842.478394]  mmcblk0: p1
-> > [ 9842.672905] /dev/mmcblk0p1: Can't open blockdev
-> > [ 9884.098398] mmc0: card 0001 removed
-> > [ 9898.560801] mmc0: cannot verify signal voltage switch
-> > [ 9898.716638] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [ 9898.717583] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [ 9898.720430]  mmcblk0: p1
-> > [ 9898.901398] /dev/mmcblk0p1: Can't open blockdev
-> > [ 9926.650920] mmc0: card 0001 removed
-> > [ 9932.079104] mmc0: cannot verify signal voltage switch
-> > [ 9932.233022] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [ 9932.233814] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [ 9932.236526]  mmcblk0: p1
-> > [ 9932.417077] /dev/mmcblk0p1: Can't open blockdev
-> > [ 9945.675206] mmc0: card 0001 removed
-> > [ 9954.348559] mmc0: cannot verify signal voltage switch
-> > [ 9954.505148] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [ 9954.505892] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [ 9954.508907]  mmcblk0: p1
-> > [ 9954.688774] /dev/mmcblk0p1: Can't open blockdev
-> > [ 9969.099540] mmc0: card 0001 removed
-> > [ 9975.967776] mmc0: cannot verify signal voltage switch
-> > [ 9976.123568] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [ 9976.124400] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [ 9976.127501]  mmcblk0: p1
-> > [ 9976.308274] /dev/mmcblk0p1: Can't open blockdev
-> > [ 9989.339754] mmc0: card 0001 removed
-> > [ 9998.751059] mmc0: cannot verify signal voltage switch
-> > [ 9998.908154] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [ 9998.909036] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [ 9998.911611]  mmcblk0: p1
-> > [ 9999.088417] /dev/mmcblk0p1: Can't open blockdev
-> > [10039.268493] mmc0: card 0001 removed
-> > [10046.108371] perf: interrupt took too long (3167 > 3166), lowering ke=
-rnel.perf_event_max_sample_rate to 63000
-> > [10049.398057] mmc0: cannot verify signal voltage switch
-> > [10049.554751] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10049.555751] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10049.558524]  mmcblk0: p1
-> > [10049.735565] /dev/mmcblk0p1: Can't open blockdev
-> > [10069.188896] mmc0: card 0001 removed
-> > [10076.400515] mmc0: cannot verify signal voltage switch
-> > [10076.556156] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10076.556990] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10076.559495]  mmcblk0: p1
-> > [10076.744822] /dev/mmcblk0p1: Can't open blockdev
-> > [10097.512910] capability: warning: `gvfsd-admin' uses 32-bit capabilit=
-ies (legacy support in use)
-> > [10160.142113] mmc0: card 0001 removed
-> > [10166.327484] mmc0: cannot verify signal voltage switch
-> > [10166.483689] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10166.484452] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10166.486831]  mmcblk0: p1
-> > [10166.673519] /dev/mmcblk0p1: Can't open blockdev
-> > [10209.382671] mmc0: card 0001 removed
-> > [10213.541830] mmc0: cannot verify signal voltage switch
-> > [10213.698167] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10213.698682] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10213.701071]  mmcblk0: p1
-> > [10213.879510] /dev/mmcblk0p1: Can't open blockdev
-> > [10233.767001] mmc0: card 0001 removed
-> > [10241.604535] mmc0: cannot verify signal voltage switch
-> > [10241.760000] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10241.760727] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10241.763414]  mmcblk0: p1
-> > [10241.942084] /dev/mmcblk0p1: Can't open blockdev
-> > [10253.143302] mmc0: card 0001 removed
-> > [10257.346355] mmc0: cannot verify signal voltage switch
-> > [10257.501510] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10257.502301] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10257.504889]  mmcblk0: p1
-> > [10257.685511] /dev/mmcblk0p1: Can't open blockdev
-> > [10262.447439] mmc0: card 0001 removed
-> > [10281.209724] mmc0: cannot verify signal voltage switch
-> > [10281.365508] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10281.366289] mmcblk0: mmc0:0001 SD32G 29.1 GiB
-> > [10281.369004]  mmcblk0: p1
-> > [10281.589067] FAT-fs (mmcblk0p1): Volume was not properly unmounted. S=
-ome data may be corrupt. Please run fsck.
-> > [10345.088596] mmc0: cannot verify signal voltage switch
-> > [10346.904393] mmcblk0: recovery failed!
-> > [10346.904422] I/O error, dev mmcblk0, sector 2049 op 0x1:(WRITE) flags=
- 0x100000 phys_seg 1 prio class 2
-> > [10346.904438] Buffer I/O error on dev mmcblk0p1, logical block 1, lost=
- async page write
-> > [10366.548533] mmc0: tuning execution failed: -22
-> > [10366.548618] mmc0: card 0001 removed
-> > [10370.618162] mmc0: cannot verify signal voltage switch
-> > [10370.773816] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10370.774592] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10370.777138]  mmcblk0: p1
-> > [10370.967092] /dev/mmcblk0p1: Can't open blockdev
-> > [10397.449106] mmc0: card 0001 removed
-> > [10401.424032] mmc0: cannot verify signal voltage switch
-> > [10401.580344] mmc0: new UHS-I speed SDR104 SDHC card at address 0001
-> > [10401.581107] mmcblk0: mmc0:0001 SD32G 29.1 GiB (ro)
-> > [10401.583533]  mmcblk0: p1
-> > [10401.758441] /dev/mmcblk0p1: Can't open blockdev
