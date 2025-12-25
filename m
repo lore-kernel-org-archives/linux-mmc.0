@@ -1,117 +1,92 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+Received: from mail.mleia.com (mleia.com [178.79.152.223])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D451228D8CC;
-	Thu, 25 Dec 2025 04:30:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41EDA2BAF7;
+	Thu, 25 Dec 2025 18:16:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.79.152.223
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766637044; cv=none; b=X4oob/Qoy82Ua+Sz7mISsZlbmfTGLT7T+WT10gec8SPcTxTG4DtDr/k736586fxQl68N2jWAu3j3aCPyiNqNFrLQSLeP16EY0F7T9fjgT1xnBWNtHWuTdQOT9BF7NW2Sg6nHPNbzlbyfPN2f9esxPeyZiLVVRbfKsh9bdlnLd8g=
+	t=1766686583; cv=none; b=OPs60DCmjCJnU7KSZceL7eU3cIHfkCGBwNxr6981E27bfqulm0rGKuTiJZLSFfYR/unKb8GdmqvGAVGKVy7Erap2nfP17bXhX97IAFF7v3qts4fI3EW5oPdN6o8J2Ti8hzYxE2MIix2AYOLe8zzQ6gnjYvbQvwmNtLykSD5BHNE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766637044; c=relaxed/simple;
-	bh=0jF1HJwFcGPuiL/DoLAg+iWgJoZ/B5TQNXYupJjw4n0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ag+8WrMSNvnNrTa6/ZpvecaWwtPLLyewB2zlNSdz0Q8qyK9mPyG8jxn3vw9r/qklgtvDdFJiJRTpQXWKUXTUcZx/kTgcBBC5Gcj4HkarT2+7OMxizhcCM0MYkR9P0VrMo4KIG98UGfTv49dSHHy14aGtUG4Z7cAXKEPvK/D/tW4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=lJKY3UO4; arc=none smtp.client-ip=192.198.163.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1766686583; c=relaxed/simple;
+	bh=v6275rn6sSC2/Ycn7rIgB3jfNbMlDqc1yXe3pne4wtE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=o8gG4c8yKu6GrW+eZZGvqBBkOtw4KLuIiJvfGXGdUvTEIcXUNvp1rwiQhuhMFm1wFH2hlL/lZ+wKkIzxIraXulES9JJBmPUU0LGx+2nBA7cdLFRJYZ0jjMMaZbyqL8r2Knch5hbROFYgsXzDf9GeQSsgcIqEED/349AwZwkX810=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mleia.com; spf=none smtp.mailfrom=mleia.com; dkim=pass (2048-bit key) header.d=mleia.com header.i=@mleia.com header.b=kVsooJJQ; dkim=pass (2048-bit key) header.d=mleia.com header.i=@mleia.com header.b=kVsooJJQ; arc=none smtp.client-ip=178.79.152.223
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mleia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=mleia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="lJKY3UO4"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1766637041; x=1798173041;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=0jF1HJwFcGPuiL/DoLAg+iWgJoZ/B5TQNXYupJjw4n0=;
-  b=lJKY3UO4FYgaXl5zMRobMVoxUirktUPJlIkRgVkTBJVNldSsu6efy+xB
-   XNBbDcn3Vr9Rj8EdRpmSmcOBRpY3sk02sBZQE2XnZA0YlDxPqjfQMmQcZ
-   8/vPA9sn32G9WmOO3aypA+vYTkRs9XQUTtaNpEXlCxbVlFnS5GfyvTZAS
-   Oy0UNnTdYDa7A13/bb5Scn6twQiHT7ZcJmTEJ8MuVWQdcoNDSarHh+Ymx
-   HCFfv1ce5UNXF7iNSPvryYj9SY5DAY1x3mzIyFfHlE9UWuCiqKuDALEV/
-   u/ry81ukR6smmBvjrv0WxCj+yXdAHG8WHA+AQi/yPlouOCq5ttMDyYgMT
-   Q==;
-X-CSE-ConnectionGUID: TadSnvdERYqJQyRiWe4psw==
-X-CSE-MsgGUID: a76hEBAFTy+9wpnktei18Q==
-X-IronPort-AV: E=McAfee;i="6800,10657,11652"; a="79086189"
-X-IronPort-AV: E=Sophos;i="6.21,175,1763452800"; 
-   d="scan'208";a="79086189"
-Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Dec 2025 20:30:40 -0800
-X-CSE-ConnectionGUID: pDRKGQpkRY6j0z/ltvJafg==
-X-CSE-MsgGUID: QZM6HknrSNmRzybAjm/6kw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.21,175,1763452800"; 
-   d="scan'208";a="200453480"
-Received: from lkp-server02.sh.intel.com (HELO dd3453e2b682) ([10.239.97.151])
-  by fmviesa008.fm.intel.com with ESMTP; 24 Dec 2025 20:30:38 -0800
-Received: from kbuild by dd3453e2b682 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1vYczj-000000003k9-2jFe;
-	Thu, 25 Dec 2025 04:30:35 +0000
-Date: Thu, 25 Dec 2025 12:30:35 +0800
-From: kernel test robot <lkp@intel.com>
-To: Md Sadre Alam <quic_mdalam@quicinc.com>, adrian.hunter@intel.com,
-	quic_asutoshd@quicinc.com, ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, ebiggers@kernel.org
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	quic_mdalam@quicinc.com
-Subject: Re: [PATCH] mmc: sdhci-msm: Add quirk to disable CQE for ICE legacy
- mode
-Message-ID: <202512251242.zOsGwwe8-lkp@intel.com>
-References: <20251224101050.3497746-1-quic_mdalam@quicinc.com>
+	dkim=pass (2048-bit key) header.d=mleia.com header.i=@mleia.com header.b="kVsooJJQ";
+	dkim=pass (2048-bit key) header.d=mleia.com header.i=@mleia.com header.b="kVsooJJQ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=mleia.com; s=mail;
+	t=1766686580; bh=v6275rn6sSC2/Ycn7rIgB3jfNbMlDqc1yXe3pne4wtE=;
+	h=From:To:Cc:Subject:Date:From;
+	b=kVsooJJQHD/R43rysbKnj4dGW8xIJcDWAVhEovYd7RmbrqYSD0cunMz7qxuD+G7XI
+	 3rjJxdrqCjbcLeWqbtJRuJvxaNvZSlVgSv8tnp2PvWRZqr9bD04dv2HEpgUzMO/DkE
+	 JGMq0YZfRbCb06PR3f+qqQ5T/mz5YOmuekYOqBifT2GxllK/aLMarA0XayEK34Ldoa
+	 f1eJiDEBwu5P19tqlazCEfvPYD1RqhOyhOkbiW3atmzAb4da5F0XM2gXKpsrLZc9nD
+	 yvpZsoTSEm6c9mXeQUQee9HAvgLzHpe469EP42UKkmA5sfm5OwwlJr3BcBLN8HApfJ
+	 xfePCExxzIVaw==
+Received: from mail.mleia.com (localhost [127.0.0.1])
+	by mail.mleia.com (Postfix) with ESMTP id ABD393E8C62;
+	Thu, 25 Dec 2025 18:16:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=mleia.com; s=mail;
+	t=1766686580; bh=v6275rn6sSC2/Ycn7rIgB3jfNbMlDqc1yXe3pne4wtE=;
+	h=From:To:Cc:Subject:Date:From;
+	b=kVsooJJQHD/R43rysbKnj4dGW8xIJcDWAVhEovYd7RmbrqYSD0cunMz7qxuD+G7XI
+	 3rjJxdrqCjbcLeWqbtJRuJvxaNvZSlVgSv8tnp2PvWRZqr9bD04dv2HEpgUzMO/DkE
+	 JGMq0YZfRbCb06PR3f+qqQ5T/mz5YOmuekYOqBifT2GxllK/aLMarA0XayEK34Ldoa
+	 f1eJiDEBwu5P19tqlazCEfvPYD1RqhOyhOkbiW3atmzAb4da5F0XM2gXKpsrLZc9nD
+	 yvpZsoTSEm6c9mXeQUQee9HAvgLzHpe469EP42UKkmA5sfm5OwwlJr3BcBLN8HApfJ
+	 xfePCExxzIVaw==
+Received: from mail.mleia.com (91-159-24-186.elisa-laajakaista.fi [91.159.24.186])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mail.mleia.com (Postfix) with ESMTPSA id 2A3853E8B7A;
+	Thu, 25 Dec 2025 18:16:20 +0000 (UTC)
+From: Vladimir Zapolskiy <vz@mleia.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: arm,pl18x: Do not use plural form of a proper noun PrimeCell
+Date: Thu, 25 Dec 2025 20:16:15 +0200
+Message-ID: <20251225181615.1402052-1-vz@mleia.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251224101050.3497746-1-quic_mdalam@quicinc.com>
+Content-Transfer-Encoding: 8bit
+X-CRM114-Version: 20100106-BlameMichelson ( TRE 0.8.0 (BSD) ) MR-49551924 
+X-CRM114-CacheID: sfid-20251225_181620_720789_2E170A3B 
+X-CRM114-Status: GOOD (  10.47  )
 
-Hi Md,
+As a proper noun PrimeCell is a single entity and it can not have a plural
+form, fix the typo.
 
-kernel test robot noticed the following build warnings:
+Signed-off-by: Vladimir Zapolskiy <vz@mleia.com>
+---
+ Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on ulf-hansson-mmc-mirror/next v6.19-rc2 next-20251219]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Md-Sadre-Alam/mmc-sdhci-msm-Add-quirk-to-disable-CQE-for-ICE-legacy-mode/20251224-181537
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20251224101050.3497746-1-quic_mdalam%40quicinc.com
-patch subject: [PATCH] mmc: sdhci-msm: Add quirk to disable CQE for ICE legacy mode
-config: arm64-randconfig-004-20251225 (https://download.01.org/0day-ci/archive/20251225/202512251242.zOsGwwe8-lkp@intel.com/config)
-compiler: clang version 22.0.0git (https://github.com/llvm/llvm-project 4ef602d446057dabf5f61fb221669ecbeda49279)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20251225/202512251242.zOsGwwe8-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202512251242.zOsGwwe8-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
->> drivers/mmc/host/sdhci-msm.c:2121:36: warning: unused variable 'sdhci_msm_cqhci_ops' [-Wunused-const-variable]
-    2121 | static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
-         |                                    ^~~~~~~~~~~~~~~~~~~
-   1 warning generated.
-
-
-vim +/sdhci_msm_cqhci_ops +2121 drivers/mmc/host/sdhci-msm.c
-
-67b13f3e221ed8 Shaik Sajida Bhanu 2021-07-16  2120  
-87a8df0dce6ad0 Ritesh Harjani     2020-01-16 @2121  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
-c93767cf64ebf4 Eric Biggers       2021-01-25  2122  	.enable		= sdhci_msm_cqe_enable,
-87a8df0dce6ad0 Ritesh Harjani     2020-01-16  2123  	.disable	= sdhci_msm_cqe_disable,
-c93767cf64ebf4 Eric Biggers       2021-01-25  2124  #ifdef CONFIG_MMC_CRYPTO
-741521fa273fdd Eric Biggers       2024-12-12  2125  	.uses_custom_crypto_profile = true,
-c93767cf64ebf4 Eric Biggers       2021-01-25  2126  #endif
-87a8df0dce6ad0 Ritesh Harjani     2020-01-16  2127  };
-87a8df0dce6ad0 Ritesh Harjani     2020-01-16  2128  
-
+diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+index 8f62e2c7fa64..066f21deb3e8 100644
+--- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
++++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+@@ -11,7 +11,7 @@ maintainers:
+   - Ulf Hansson <ulf.hansson@linaro.org>
+ 
+ description:
+-  The ARM PrimeCells MMCI PL180 and PL181 provides an interface for
++  The ARM PrimeCell MMCI PL180 and PL181 provides an interface for
+   reading and writing to MultiMedia and SD cards alike. Over the years
+   vendors have use the VHDL code from ARM to create derivative MMC/SD/SDIO
+   host controllers with very similar characteristics.
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.43.0
+
