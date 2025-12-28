@@ -1,69 +1,77 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28DD831A06A;
-	Sat, 27 Dec 2025 12:50:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24428242D79;
+	Sun, 28 Dec 2025 20:20:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1766839850; cv=none; b=bvs+Ggj8xnsfa2N2fQID2gCfm9pdL92//sYps62jDEpYd+hr5eDY9XuLPmYFWIPIep/W8gJk8nBn6VjFJpVOEQDK16jdIzTzIS9o1DnnI1xr6xL6NovBroRE+mNJ3mnLiWXRen0SGe5VHKcBgLZLQdstUe8OhkCfUoYFKLypYYw=
+	t=1766953261; cv=none; b=P9uwqM5vESZpLEI4Ey2kQpk1H9AirLaecQVs6SPamFBhvsWpNiUTAfr1zDrJQ5tCwaedwDQfkb60rU9XrWe1xdohuQdzt4eEgce2Fi2P1CzOXlYGbrOFq3SAXO1tCSyu+9xK7/xzzUORPGXIJMcphGYh4u1RLo2CMn1+/3TANJQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1766839850; c=relaxed/simple;
-	bh=NoIiabkLSrEfm+Wn2XfQIhp2qSUkWHgkyhkvdmrWEUs=;
+	s=arc-20240116; t=1766953261; c=relaxed/simple;
+	bh=jkfT8Y5WEeKtdPkROxqVJmvYhof+xpbfEHNcic/Gtx0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=O/oDJCoOTqb1VZSPHM1SfCk5ioNZig7AmRtHg/c+6Eqv0PQ+dTWwRUzNvpNaDagZdPeX7u1jn0kmnRv31Tal5SyQfCIy23J/HKiU49LgAyglgeJ0UpiLgNUttLF8L+TRbdXJUWizidbhWnTsYsWZrl+uEGu4Zy3zJJGt/7tlCDQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=czEyINwS; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=P2CZqT4YKeB2WeWwXu7U9jOmP24bryI9W00bKeRLsi+s0WZJLC8gd2DV9PTNz7A8eEqV9soe1MKBwYWYxfNUZMDWxkOi4w5Y5WuW6hSCigsQqKmUvqb340Khj2nn1pH9d8PLr+vC7j60R3CcS62c+TWf2anrXJpiZ99K9GqUl/0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DISBa/r+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="czEyINwS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2A08BC4CEF1;
-	Sat, 27 Dec 2025 12:50:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DISBa/r+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 530C4C4CEFB;
+	Sun, 28 Dec 2025 20:20:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1766839849;
-	bh=NoIiabkLSrEfm+Wn2XfQIhp2qSUkWHgkyhkvdmrWEUs=;
+	s=k20201202; t=1766953259;
+	bh=jkfT8Y5WEeKtdPkROxqVJmvYhof+xpbfEHNcic/Gtx0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=czEyINwSV/6DJ3pY5shcwPoPwK3alLx1nRFTnjf5SW768UJ26RrFupOJEwMaQcI6P
-	 vCoutClLn8Fez7ZsXkieVXWo2ksY4a+IQ7cPjOtX0j92J3ENCWpHQSlwGb8Jgo2lOS
-	 gO5LDAxGuHIbrMloAymOBazQyBpdL0/lnCR0kT7dUPVhuFSk+LRu5KYnU2n+D0JeY6
-	 5eF79SRu+y3116Ip/NiZ0ls+hz1u3H5ONZxDDVCVyddmOk98r39U16eByR2+PWvbqh
-	 7R19EYGNWrRbCXtE9bw/qy4zhsmexDq7O5rNqt9NwZGIwn4Pmcz/dBeMT1/qK8g38+
-	 vGJjzkPoF3UXg==
-Date: Sat, 27 Dec 2025 13:50:47 +0100
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Tzu-Hao Wei <twei@axiado.com>
-Cc: SriNavmani A <srinavmani@axiado.com>, 
-	Prasad Bolisetty <pbolisetty@axiado.com>, Vinod Koul <vkoul@kernel.org>, 
-	Neil Armstrong <neil.armstrong@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Harshit Shah <hshah@axiado.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>, 
-	linux-phy@lists.infradead.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 5/8] dt-bindings: mmc: axiado: Add axiado eMMC variant
-Message-ID: <20251227-industrious-mammoth-of-culture-ff9dbe@quoll>
-References: <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-0-5457d0ebcdb4@axiado.com>
- <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-5-5457d0ebcdb4@axiado.com>
+	b=DISBa/r+gTCPXaCWjl8eJO+1v1j2Y8wzCdQjo6kXQo5FPMMqq10po37sW+vF9Z7NL
+	 iM/pPXDUZ2V3jPWBU5jZr0fSWMkDgnF4kDDSVKd2BRZ4qIW06cSaxDBHhDx5zn2jcf
+	 eWvoVPGCO89KzxNR0FqomsJ6se0z8yU62DREIduT2t2c501XxFcDG6iGpTtegzUjcT
+	 VIL/Xiz+Zd3bavaL84rRbIzJq7fuXvx4INpcEniy457E4lVCmtqFWfZOrJL44p0vzi
+	 oqO8Cd/cGKBlUg/hyYxSwhrfmf1WiD92kydXrHNJCC+/tduCYorfHvqb4ZupBrjg0V
+	 qDMNSuHwzSemw==
+Date: Sun, 28 Dec 2025 12:20:57 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: Md Sadre Alam <quic_mdalam@quicinc.com>
+Cc: adrian.hunter@intel.com, quic_asutoshd@quicinc.com,
+	ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-msm: Add quirk to disable CQE for ICE legacy
+ mode
+Message-ID: <20251228202057.GB2431@quark>
+References: <20251224101050.3497746-1-quic_mdalam@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-5-5457d0ebcdb4@axiado.com>
+In-Reply-To: <20251224101050.3497746-1-quic_mdalam@quicinc.com>
 
-On Mon, Dec 22, 2025 at 04:45:04PM +0800, Tzu-Hao Wei wrote:
-> From: SriNavmani A <srinavmani@axiado.com>
+On Wed, Dec 24, 2025 at 03:40:50PM +0530, Md Sadre Alam wrote:
+> Some hosts require Inline Crypto Engine (ICE) to operate in legacy mode
+> instead of Command Queue Engine (CQE) mode for platform-specific
+> requirements or compatibility reasons. Introduce a host-level quirk
+> `host_disable_cqe` to forcefully disable CQE negotiation and allow ICE
+> to function through the legacy request path.
 > 
-> Add device tree binding variant for the Axiado AX3000 Arasan eMMC
-> controller. This variant identifies the specific eMMC controller
-> implementation used on the AX3000 SoC and enables the appropriate
-> driver configuration.
+> When the device tree omits the "supports-cqe" property, the driver sets
+> `host_disable_cqe = true` and avoids enabling MMC_CAP2_CQE during card
+> initialization. This ensures that even CQE-capable hardware falls back
+> to legacy SDHCI request handling. A minimal `cqhci_disable_ops` is
+> provided with `.cqe_enable = cqhci_host_disable` returning -EINVAL to
+> force the fallback. Other ops are left NULL for safe defaults.
 > 
-> Signed-off-by: Tzu-Hao Wei <twei@axiado.com>
+> For builds without CONFIG_MMC_CRYPTO, the driver uses standard
+> sdhci_add_host() to avoid unnecessary CQE infrastructure initialization.
+> 
+> This allows platforms to forcefully opt out of CQE usage and ensure ICE
+> operates reliably in legacy mode, providing stable crypto operations
+> without command queuing complexity.
+> 
+> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
 
-Incorrect DCO chain.
+I'm confused.  If CQE isn't supported by the hardware, surely it would
+make more sense for the driver to not advertise the host as being
+CQE-capable at all?  This patch seems to introduce an ambiguous middle
+ground, where the host is CQE-capable but not really.
 
-
-Best regards,
-Krzysztof
-
+- Eric
