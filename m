@@ -1,81 +1,81 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2FD523C4FD
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 09:54:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 517F327703E
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 09:56:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767002074; cv=none; b=F512Nzlt/tbEkceo50Zu68gezVAXJrbrOT4rX87erEFQqNAjdSZ1WiDrdpXO61yRjF1WLclbswsCnE9AobnT/wnXlWLCB/zR8fL5S0IwX2vzd9Qyh9tA8zkUa+TFgUXB87p5J4OjUrM17RTo1kvYN7lqRMIm9nA6u/o8vjUQioY=
+	t=1767002163; cv=none; b=CO16dXlWUFdboj1CwEVeNzobrHn74KDwIkRGcrfZ3F9cogfZDCNR5iAOPr+h5MrMNdUwsLIumI5iyoEVrEM14ML1oOG5Clp3PjUaJvVV94u3S9gHLZ/qbQqrTfrtDr4KMX0YwxzgMPoU6Imp0zcQj5jwtjppVfpvn2qrX5opXPk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767002074; c=relaxed/simple;
-	bh=iyn+7uVvVmlzVQr4OGw9gaA43U7J6DW0cM5nn14twVk=;
+	s=arc-20240116; t=1767002163; c=relaxed/simple;
+	bh=z0YEap3u/EBh2b6OmtcTMDQvHPeE+nUA6zhZ4RivPS8=;
 	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=okQuxlG43UWtf4nvkwz5HiA5Rqq4G7uxPdSJJdvbDi0EeELShuWD8SK8Xs8Ju++bVCFYAZwJZeEtENWl3mTbXrkKfFHKtgs+vkwhiddfRsFOi13usmj8opVbgb5pyFg9tpH+yIByxNgAFFWVDjeETJYMZbEGlvOUoAvfWEfgFmw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SuqviDIE; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=ESbba3Cg; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version:Content-Type; b=q9aT5IBduDR9IFm100Cf6TMDZ+Qacuyn8ORyvrGGnwXaEgOt/TjZgXNaGn9kYpLfjPF4kQ29JO6WiA2syqatYtm48XHYGAscQPPGJF/q7WBFAiic9VyLU5q70+UxVphpwrWDmthA82FU9XITOqV5+qRrmJskuci6ycXfy7p/Zs4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CFDhKK12; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=UlnYydPO; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SuqviDIE";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="ESbba3Cg"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CFDhKK12";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="UlnYydPO"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1767002071;
+	s=mimecast20190719; t=1767002160;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=KSWobni4I8/LRXBXCGLU3hHGBFzvV9k0DPL4VmrN5NQ=;
-	b=SuqviDIE9+i5oTkJ2VU+BmLN9jGf8nbwZnyPYYd5YNEf1YtcJPEmM4AP8AZ7uVq5SWcSkZ
-	QtTbKOD1fXdDgpHKzb3JlFcbuUTSG5y2fgKIvX5RSPFpTI5eWob+CRn4tdZUq91DDWFrd9
-	qGaQMLg/kuHiQtzYGjP0FSYzwbIj4vs=
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
- [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=obH9iYXUH7PcM8LuIvRWvOaIIfnfBietKIkzq92XPAw=;
+	b=CFDhKK12FnXzdrkGiJykuUe9iFxlzEoEUbC66IBNgNhHnDmTod/lbVxQdiW8npJmZ4UJf/
+	0flouEy1TNnbBdb3XDx9HH9zbt0pv2OcDo/62Du13Y6QzkJsgy3eKJi5CCArGJq/jcpTmS
+	c08sNLyRV7YLULYeYZJnYSsM9bgFoek=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-336-Nkq1R5LoNZO4twEcZksFUA-1; Mon, 29 Dec 2025 04:54:30 -0500
-X-MC-Unique: Nkq1R5LoNZO4twEcZksFUA-1
-X-Mimecast-MFC-AGG-ID: Nkq1R5LoNZO4twEcZksFUA_1767002069
-Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-430fc83f58dso4982552f8f.2
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 01:54:30 -0800 (PST)
+ us-mta-223-unKHasJ9MBO4PCN0R3_1Tw-1; Mon, 29 Dec 2025 04:55:58 -0500
+X-MC-Unique: unKHasJ9MBO4PCN0R3_1Tw-1
+X-Mimecast-MFC-AGG-ID: unKHasJ9MBO4PCN0R3_1Tw_1767002157
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-477771366cbso66305695e9.0
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 01:55:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1767002069; x=1767606869; darn=vger.kernel.org;
+        d=redhat.com; s=google; t=1767002157; x=1767606957; darn=vger.kernel.org;
         h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
          :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=KSWobni4I8/LRXBXCGLU3hHGBFzvV9k0DPL4VmrN5NQ=;
-        b=ESbba3CgGz+F65FYRaVXtSRl0X+nc5iy0w638631g/l62syU2PfFIdh1eoTaCGDqHI
-         ClSK/DOVFnAf9dWlMsCxUOtZR22MpzwnmPiyTO6aVPiTDzyoGSbX3UIS+tqe5kXA9owQ
-         OYGgdMYofX10ZFeKOel54OdB5fTiLif1m83YZumNncEytLYv1/TavyPa0DKRNOgbGJHw
-         ot2iMbTYV8JWc0jhKQKh4oDEJ7/GEsQlQu33tuT8kZFHWGWBcZzeGTfM6UTTSwz7bpGL
-         X+2G9ONetCxtpaynnDz0J/rpR/0QE8wCyRyn7B3nKPJZmhzz8WflzaYIA0+/VumZy0xD
-         ouww==
+        bh=obH9iYXUH7PcM8LuIvRWvOaIIfnfBietKIkzq92XPAw=;
+        b=UlnYydPOxm1O+0R1LQ1jOAWV9Q97E4P8boxHvem7yA1WD/lkx+OPJRfH4SllEOD4OS
+         LDF4mJK4pHwYh8z6n5BsXX3BzlK+4wUswWMiLD46kog1R4EctbRNDGN92rK6RI7bRftd
+         hydSdLuON+Z+gijid9HLwF8B9mIxJxrRvx/heerSGqNj6H16/Oq5TPIJx/un0Ot3pIQq
+         +Vriih03SVu7uPSVJ/KwrVEd3L+1pj1Sm25EYd+XE1uFAa/paj4EZlbagJRReysxjijg
+         4TyNpzMYbxdspw5dV5Eiimlrj1eww6wrJZOfvU7+mNK6jACOXTAYpBbUcymCx5eK7+S6
+         EKkw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767002069; x=1767606869;
+        d=1e100.net; s=20230601; t=1767002157; x=1767606957;
         h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
          :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=KSWobni4I8/LRXBXCGLU3hHGBFzvV9k0DPL4VmrN5NQ=;
-        b=fPy4/CzNUElNTLHawel3rtXtjBcZHAQ3CJNFzb3NuTvqZJCMslRQI8UZ/gPBFE9yJ0
-         FIBVLq3+bQ2HHY7T5Mavq5F/5hWSfvIDbot8i0RTkCQnVS9zTYNyjvJsdpG494fvGbgi
-         EcglCVpq/ChbKZfgvmVx4Mm5r0GALRQVh5vH+Tyv+MSsf77XNemBk80SEgup4hN2V3rx
-         IKsQPAB+BF6dzO1Y1p3J2mvgMJLzkjjBb48HARi2VP+U72I71T9TrpTilLiLdCpeQT0c
-         oq17Pz47Jnh811iDy9g7Lrp28vNY7N3D6HbdC4Fl2O3YYydHfCf+euQd0LVA4TBsTSuf
-         U/Fw==
-X-Forwarded-Encrypted: i=1; AJvYcCXqchhKuUx/HqLUSHxRNXWMWlMNEIMIO2COWaGzkdCGtUldzzeyOV0bnxXjJkLKt3/FEaDF/on9T5E=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw8sEN0RQWFaxWFNMlN7z/MtkAblSNLSBobFXpdDAAHIAsTpiL4
-	HCdLaMctESZqLz0Y7VhaRw2+zPY7pjk7YVpDY8926fbWuT6aDbnqpkVSjjheSaZyyEoP1ZmK+Zt
-	rOvNQIIJEBF0a8Xr4nAKdlpcTrKfEQqSOCp2Yy34ZJM7u/EUvlng5/E6L0YL7dQ==
-X-Gm-Gg: AY/fxX5iRIpnvVoEkzf3dgHpktVmyCu55TUVqmk7Z1pl9JhZtoaKxI5ytZTsZqjUS7y
-	bKwf++o24WrpVAyj3H+FiqEkLr2Jvf2ZFtH5Q/RBI2pVCd9FiP4OZRpoDxk3+3dnHkKT3D7ZEOU
-	lz+YecKJvqngBOH4lyyB/Uo6ZE4E9Njmq8XOWn2JnnQ+naPsGOkL9KR+GLci3EJP7HZOUnBTBHw
-	X/5iAoHrJZcE9MOtM9nbZ/Ps9+tZJkI7nRZ+xsHwzcKZwm/Ws1GK9g57YiESf6L+fa7qKNfTuV7
-	YWENKU5uY6nyIVONIKcmvTrI+bsT6UFl7gzy9WTQ08xMeM0U0+ypx3uPvjW6VNODidFzTdEmWIB
-	8V3zNOipnt8/QPSxsLB9vHWZhaKe0pOWUNSWbrz3NZJwzNfICdSC5mpWt8cPwUev/vYJm
-X-Received: by 2002:a5d:5d09:0:b0:431:c60:c5ed with SMTP id ffacd0b85a97d-4324e4c1687mr36359698f8f.13.1767002069042;
-        Mon, 29 Dec 2025 01:54:29 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFsxoEoP95m6ReZSz6r1q2uhNFZf5kjQYBZyqztpeqeumiInWw6+7PbX5zUgH0PIl8ztva/+Q==
-X-Received: by 2002:a5d:5d09:0:b0:431:c60:c5ed with SMTP id ffacd0b85a97d-4324e4c1687mr36359670f8f.13.1767002068663;
-        Mon, 29 Dec 2025 01:54:28 -0800 (PST)
+        bh=obH9iYXUH7PcM8LuIvRWvOaIIfnfBietKIkzq92XPAw=;
+        b=em5z0hLJjr6tf6qSB6iMW0/dlEyQwp6NN2BHHxrn8bPPUL4woE0FHEZEhCk4/PG1++
+         54uH5qgGTpuWAcniqfLEox55FZA11LsF9EKHINCMvWeKdoAvYpN9oaeaAIJUWkHA6EWs
+         ++4N4+lSSZ4NjNkllTzBWfaMZWPkP/BRID83CgAKWyajCCSy/eVOzJaWaTrFQSW86Hu3
+         KnDuYgOeVud5a8KQuIX8RqhmtBsJbYa/Ach9Nro37541ouCSWOi1rN6VH6M3IKPOvKtG
+         qCfYfXCzL1m+EHQfyEvpZRFTs/yPe7woTrcr8XNEDT3tBU2q9SpnUVUgq08gsJZm252u
+         cSLA==
+X-Forwarded-Encrypted: i=1; AJvYcCUzqirxSw1U8lq4E+N3SxSXPfbEtNL/2GWtp4OfJ1AX8s3ow7ALalAjnbjepvoOzZBsEu/HAkQnGCo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwQQ6jorD5oAp5B09QF02DkEF45V5Q44Yia92PSnqWoqyG23X8a
+	B21HVkvf+LheOIi32BLdjtTFc5Vz+AYaYWqYiHNApLyEXRpC1fBfgM+0oDwWwQahbetXBL8/Etv
+	zJmN+TzS+upW4a6yyYTQgLqz6d75n7S0sInXY49TcbYB7NbPvDA4nr/4lNMU9yQ==
+X-Gm-Gg: AY/fxX7VPDtO/dq0UVun/Z1MJA+SUNS38w2k7QE8aRMRjWOWSexNeIQCIuXQLJqey6Q
+	wckfQ5BLc1UgQpRtTuk3A7SY1/3xm9cFpUfh5O+A5/cONHnuaOXf1wOyPcSZF+XpXIo1h0JQk/6
+	TXYdZRfBuUW3sS777GFWQhch27iniw5Kg/w97B9G3AEA3psZKHiaZtz5lla7iQw4IaRT/tw/9jX
+	FPHZYaX8WMl6I6TeVHPw8XxRl6uyuVFw2l4D3YoRvtVZvb5sX5Hk5HP8zFROWr9bHqhmS4oyeDt
+	jPbG1dhM9H8Wbr+AHZxevo4r+KQVHz1wDvfKRybTyIv430mdpjazzM0x1sHkTqHtMvox6vDnzhA
+	pPc/VIcFpdLMxN9JF4FhIvIhgb3ACvI066AcPf70/2flhc5xcZ023GSn8K4tRukXnovCA
+X-Received: by 2002:a05:600c:1c21:b0:47b:e2a9:2bd9 with SMTP id 5b1f17b1804b1-47d19583142mr410001445e9.31.1767002157341;
+        Mon, 29 Dec 2025 01:55:57 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHvt0pHSYFpii6xSHzwFuul+6dVBdHfQqlf/eiF9MlDFn+5XDqtCOM3lJyrho9dCfbqBslcow==
+X-Received: by 2002:a05:600c:1c21:b0:47b:e2a9:2bd9 with SMTP id 5b1f17b1804b1-47d19583142mr410001085e9.31.1767002156889;
+        Mon, 29 Dec 2025 01:55:56 -0800 (PST)
 Received: from localhost (62-151-111-63.jazzfree.ya.com. [62.151.111.63])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-4324ea830fesm62245404f8f.20.2025.12.29.01.54.27
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-47be3a33c1csm252799015e9.1.2025.12.29.01.55.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Dec 2025 01:54:28 -0800 (PST)
+        Mon, 29 Dec 2025 01:55:55 -0800 (PST)
 From: Javier Martinez Canillas <javierm@redhat.com>
 To: Yixun Lan <dlan@gentoo.org>, Ulf Hansson <ulf.hansson@linaro.org>, Rob
  Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor
@@ -87,12 +87,12 @@ Cc: Iker Pedrosa <ikerpedrosam@gmail.com>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
  spacemit@lists.linux.dev, linux-kernel@vger.kernel.org, Yixun Lan
  <dlan@gentoo.org>
-Subject: Re: [PATCH v2 2/3] mmc: sdhci-of-k1: add reset support
-In-Reply-To: <20251223-07-k1-sdhci-reset-v2-2-5b8248cfc522@gentoo.org>
+Subject: Re: [PATCH v2 3/3] riscv: dts: spacemit: sdhci: add reset support
+In-Reply-To: <20251223-07-k1-sdhci-reset-v2-3-5b8248cfc522@gentoo.org>
 References: <20251223-07-k1-sdhci-reset-v2-0-5b8248cfc522@gentoo.org>
- <20251223-07-k1-sdhci-reset-v2-2-5b8248cfc522@gentoo.org>
-Date: Mon, 29 Dec 2025 10:54:26 +0100
-Message-ID: <875x9phaul.fsf@ocarina.mail-host-address-is-not-set>
+ <20251223-07-k1-sdhci-reset-v2-3-5b8248cfc522@gentoo.org>
+Date: Mon, 29 Dec 2025 10:55:54 +0100
+Message-ID: <87344thas5.fsf@ocarina.mail-host-address-is-not-set>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -103,10 +103,7 @@ Content-Type: text/plain
 
 Yixun Lan <dlan@gentoo.org> writes:
 
-> The SDHCI controller of SpacemiT K1 SoC requires two resets, add
-> support to explicitly request the reset line and deassert during
-> initialization phase. Still using devm_xx_get_optional() API to
-> make the request optional.
+> Request two reset line explicitly for SDHCI controller.
 >
 > Signed-off-by: Yixun Lan <dlan@gentoo.org>
 > ---
