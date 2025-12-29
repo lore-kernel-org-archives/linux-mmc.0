@@ -1,149 +1,120 @@
-Received: from mail-yx1-f46.google.com (mail-yx1-f46.google.com [74.125.224.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out-183.mta0.migadu.com (out-183.mta0.migadu.com [91.218.175.183])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96237329C52
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 14:47:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.224.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C00BC9460
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 20:47:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.183
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767019633; cv=none; b=RYHT/KCXs3DdnBLYqoWvSbMAFCSvq4g8rjWxmLzxz3rMlyj3bKIuSJsEM5BW7zLDzDPoJJq2YbU/cI9NYyfVwCvRs1t9gF2JFxhmEk+IZfyKgaD0XsABvdj4l+wrbQBuVl6FO6Y9Cr13atl1j/YE4hTVANXblNfX+yNcIPKFFa8=
+	t=1767041263; cv=none; b=h2c8IurU/nQo+r5xnr7gb242d1HmGCvoNAEuDjstnEQMSo8bKxOPWTkY3jfQy995UE0IKUJMM8DUH/U38vXMXavIR6vEKl6rKmspYojiu0PZZ8b7rIAVjtXGK5tjJIP+M3tNjBl+axR1/QpTM1KQ7jniRDsvD3qdI4z9qg6ovGQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767019633; c=relaxed/simple;
-	bh=0fdYin/a1kGKTO0aBJq/0xsRm45K7iupOY7iUNqRRJ8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FeT2YWYc6RvvJyGVlHUl5Iahk+7WdqXRsyFYJnHIiot7EzYaF0nGrzTbJhL80D8NPCW1PvTNaMY1Ux0aIrKKk/CJjtspoMP3o+wcJuchAG1eXe49obWCczto9siAZVj5Dk+T30Oc2sIVZSA7Iv5Q37IBneaBUVeZQUC3Kqsxip8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=gZK/XVsC; arc=none smtp.client-ip=74.125.224.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1767041263; c=relaxed/simple;
+	bh=FTTWZTgWJb2pmnADYFOVZQ9XSRXJHwk/7xVUONMUFXQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=WO2xyuGZgGegjN7OIQnnuOix9VsPwFn3T3Myt7hVfAV1jLoI3NgMbj/uWLXFJV+nDSfwOkuauPT43X7byxmtpY1hNvMCr/bfEyG6uLFeEoL/09+jj/S0IwnU22hCKSi9uLK08ZsLnUqzPQPiH6z9c7LX+geC08cuWrtWnTLKyoA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=i8kxsaVw; arc=none smtp.client-ip=91.218.175.183
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gZK/XVsC"
-Received: by mail-yx1-f46.google.com with SMTP id 956f58d0204a3-6420c08f886so11087922d50.3
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 06:47:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1767019629; x=1767624429; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=hiFIGGOCel6e4RtTn/5DW6H0+gmbweG5rl/mIaIEv30=;
-        b=gZK/XVsCELIw+kf+fegZRFaWFH8spENIhMsxFJA+BlEMdUeN7lmgs9xjk+xjOMu8r9
-         LuMgJ12OEOjhLQCbXsljPAEAL95CE9jsH0C59xbNv5GR4wyoZrx+saA1yhMQgr+mA5SM
-         ECNv+N6QlgdCRCP52QCHyZIi3QpkwWubtYi2JnIreHqCTEWYa3Mz8fHipWe+jojkeeqO
-         t98ky7n+6/H/F17HzZsX5AwyKI63KX2fiCenajVFCiVpQIHnt5Kyq06SXY+gr+vH0OAK
-         srIthZ7RGMnHpSLjAWxQALybXyadnZ63Iej55QQm3efWV8MyC1877OC2VyC6YRi6oEB/
-         7K6g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767019629; x=1767624429;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=hiFIGGOCel6e4RtTn/5DW6H0+gmbweG5rl/mIaIEv30=;
-        b=ujJ5eF/LC/8/wP5kzVZFwi/Dk/Xw+V+zyx1o+yTGFTI3Djy5HvUfuIJv28Rjwi1PZV
-         qcLiOEtrA7u/JAUQgYKxh8P9PMaRMYMnrMVrG5aSka1WE9K6U3p4AbUJlYR3uN3Xb92h
-         jt8t/qdzWogZKlZPTUo4afsgevDtHtrvVVys9kXIEbAwewFBax+LuPM2XO5R6yEJXRoa
-         i8m5J/oSE2ExnXrdleUL0kZgRCRBY8aN7tSjyO3J7FFQJHHt27ztMKIWfGIWub7Tjzp7
-         UslIW2PUap2KqqK/RUpYcfPRd8h8/sdZv64zydl+O784QOWsV5FlGcLb2lMTWvEh0hdQ
-         XUWg==
-X-Forwarded-Encrypted: i=1; AJvYcCWxp1Ikh6SLW0NxGYcxxqcbdl3iyZXuJZs6JH6bAG3GdiSFaDioLMSwDVekEhkLJI2vMlrSGCnf0GA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxxNq/4c1K8jEoJW+/O0gWGnT1qgh5mYYzCUBo8VJ871L1GBNta
-	NNWhU0nIPMytBFvx771v0N4XomLmIw1w+WgAx1ybUaOSOeEeOqIrPhrCreZGjiXwnXO1HtMWUNO
-	YFFEfgPXm9BetfUwRFfyyT3LGRsVCvOd8bFG7R+TRDw==
-X-Gm-Gg: AY/fxX4vSYeZuPtIMKXurcjjfSlftbReolaUNPlgLbGWK1hql2rGzyejZ9Zlvsg2MQR
-	Rrmsu9/DO0poHQHPv7IYtUJdaAh1txZMSX1pe2COGoQ7frJ6EcO9M2OqVcW5a08KbJeSZaOUTF0
-	soOWG7rSyfE1hFQh/Ap4iYaqi8M9hwj95jRugEx3IqsWxbqR5koGdhAKsuai1fUJIRIImIG9i3V
-	rZ+K3YyvbT/QdHGH4EG7WeFoXd4y/g6bbChVzIpfx7CLUh9/9evdhbckTfvyboltPEaFgTa
-X-Google-Smtp-Source: AGHT+IGO4whynDnDczZe5aUSFNc6rZ7ClmyTEypWHVE9Jxyg/qzrfMWaETUGVpcInjLrsVhW/aWOBEshOk4ENImI9iE=
-X-Received: by 2002:a05:690e:1881:b0:646:7a21:f05c with SMTP id
- 956f58d0204a3-6467a21f232mr21185393d50.50.1767019629379; Mon, 29 Dec 2025
- 06:47:09 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="i8kxsaVw"
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1767041259;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=KEPZBRpnGB1efOd5bNDXDdGViOmX7rmQaGCX0yMPoLM=;
+	b=i8kxsaVw8077mTTEOwc8hlN6GEMB6Lw1QRZ24MrX2rKZDJMp7T0S6p0ctKc7KcAw9uwooX
+	92LOtmBkiVJlx5jk7JOVITPnblyG4+SyxmFdIV/hlhYfxrAfAdu9s5SO3tjS+TiBQ0mj2O
+	HBOl5ii8tnZsmxYp+AyV44UMYUGx4cg=
+From: Matthew Schwartz <matthew.schwartz@linux.dev>
+To: ulf.hansson@linaro.org,
+	ricky_wu@realtek.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Matthew Schwartz <matthew.schwartz@linux.dev>
+Subject: [PATCH] mmc: rtsx_pci_sdmmc: implement sdmmc_card_busy function
+Date: Mon, 29 Dec 2025 12:45:26 -0800
+Message-ID: <20251229204526.2850803-1-matthew.schwartz@linux.dev>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251210-rz-sdio-mux-v3-0-ca628db56d60@solid-run.com>
- <20251210-rz-sdio-mux-v3-2-ca628db56d60@solid-run.com> <CAPDyKFoYd3WKGrjD3DEzZH8EfgZPmRkrqL=rdoKNuAADrvz3Eg@mail.gmail.com>
- <20f2128c-c6cb-4b13-aa08-b93e540f5bd9@solid-run.com> <CAPDyKFo2jsV02qSDBSZTewJjV09AMO8iETU5Uxqz+GBnd0JY6g@mail.gmail.com>
- <e8b0579d-21b9-4072-857b-5afab92c42e6@solid-run.com>
-In-Reply-To: <e8b0579d-21b9-4072-857b-5afab92c42e6@solid-run.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 29 Dec 2025 15:46:32 +0100
-X-Gm-Features: AQt7F2qjavw22v0M0v4JRnBk0tlNXPSxJSyNw5ogCiPk3Bm42fj5er9DVY64ELg
-Message-ID: <CAPDyKFqN1Yq0atE6YaeigzR75n1Q1BSU8JjLno=ioUBwN8=FSQ@mail.gmail.com>
-Subject: Re: [PATCH v3 2/6] mux: Add helper functions for getting optional and
- selected mux-state
-To: Josua Mayer <josua@solid-run.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, Peter Rosin <peda@axentia.se>, 
-	Aaro Koskinen <aaro.koskinen@iki.fi>, Andreas Kemnade <andreas@kemnade.info>, 
-	Kevin Hilman <khilman@baylibre.com>, Roger Quadros <rogerq@kernel.org>, 
-	Tony Lindgren <tony@atomide.com>, Vignesh R <vigneshr@ti.com>, 
-	Janusz Krzysztofik <jmkrzyszt@gmail.com>, Andi Shyti <andi.shyti@kernel.org>, 
-	Mikhail Anikin <mikhail.anikin@solid-run.com>, Yazan Shhady <yazan.shhady@solid-run.com>, 
-	Jon Nettleton <jon@solid-run.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, 
-	"linux-can@vger.kernel.org" <linux-can@vger.kernel.org>, 
-	"linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>, 
-	"linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, 
-	"linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Migadu-Flow: FLOW_OUT
 
-On Mon, 29 Dec 2025 at 12:30, Josua Mayer <josua@solid-run.com> wrote:
->
-> Am 22.12.25 um 15:47 schrieb Ulf Hansson:
-> > On Sun, 21 Dec 2025 at 11:38, Josua Mayer <josua@solid-run.com> wrote:
-> >> Hi Ulf,
-> >>
-> >> Am 17.12.25 um 14:38 schrieb Ulf Hansson:
-> >>> On Wed, 10 Dec 2025 at 18:39, Josua Mayer <josua@solid-run.com> wrote:
-> >> cut
-> >>
-> >>>>  /*
-> >>>>   * Using subsys_initcall instead of module_init here to try to ensure - for
-> >>>>   * the non-modular case - that the subsystem is initialized when mux consumers
-> >>>> diff --git a/include/linux/mux/consumer.h b/include/linux/mux/consumer.h
-> >>>> index 2e25c838f8312..a5da2e33a45c0 100644
-> >>>> --- a/include/linux/mux/consumer.h
-> >>>> +++ b/include/linux/mux/consumer.h
-> >>>> @@ -60,5 +60,9 @@ struct mux_control *devm_mux_control_get(struct device *dev,
-> >>>>                                          const char *mux_name);
-> >>>>  struct mux_state *devm_mux_state_get(struct device *dev,
-> >>>>                                      const char *mux_name);
-> >>>> +struct mux_state *devm_mux_state_get_optional(struct device *dev,
-> >>>> +                                             const char *mux_name);
-> >>>> +struct mux_state *devm_mux_state_get_optional_selected(struct device *dev,
-> >>>> +                                                      const char *mux_name);
-> >>> Seems like we need stub-functions of these too. Otherwise
-> >>> subsystems/drivers need to have a "depends on MULTIPLEXER" in their
-> >>> Kconfigs.
-> >> Currently the drivers that can use a mux select MULTIPLEXER in Kconfig.
-> > Yes, but that's not generally how we do this. The driver may not need
-> > MULTIPLEXER for all platforms that driver is being used on.
-> >
-> >> There already exist a few mux helpers both for mux-state and for mux-control,
-> >> and they might all need stubs.
-> > Correct. I think we should add subs for all of them.
-> >
-> >> I'd prefer the restructuring of kconfig dependencies being independent from
-> >> adding mux-state functionality to renesas sdhi driver.
-> > I understand your point, but adding the stubs isn't really a big thing
-> > - unless someone has some good arguments not to!?
-> >
-> > Moreover, since the series changes the mux-core anyways - and
-> > subsequent changes depend on it, I don't see an issue to fold in yet
-> > another patch to add the stubs.
-> Would this also cause changing all the Kconfig "select MULTIPLEXER"?
-> If it is only the stubs - sure.
->
-> And then in the renesas sdhi patch I can drop my change to kconfig.
+rtsx_pci_sdmmc does not have an sdmmc_card_busy function, so any voltage
+switches cause a kernel warning, "mmc0: cannot verify signal voltage
+switch."
 
-Correct!
+Copy the sdmmc_card_busy function from rtsx_pci_usb to rtsx_pci_sdmmc to
+fix this.
 
-Typically, it's better to do a "select MULTIPLEXER" in the platform's
-Kconfig for those platforms that really need it.
+Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
+Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 41 +++++++++++++++++++++++++++++++
+ 1 file changed, 41 insertions(+)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index dc2587ff8519..4db3328f46df 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1306,6 +1306,46 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return err;
+ }
+ 
++static int sdmmc_card_busy(struct mmc_host *mmc)
++{
++	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
++	struct rtsx_pcr *pcr = host->pcr;
++	int err;
++	u8 stat;
++	u8 mask = SD_DAT3_STATUS | SD_DAT2_STATUS | SD_DAT1_STATUS
++	| SD_DAT0_STATUS;
++
++	mutex_lock(&pcr->pcr_mutex);
++
++	rtsx_pci_start_run(pcr);
++
++	err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
++				      SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP,
++			       SD_CLK_TOGGLE_EN);
++	if (err)
++		goto out;
++
++	mdelay(1);
++
++	err = rtsx_pci_read_register(pcr, SD_BUS_STAT, &stat);
++	if (err)
++		goto out;
++
++	err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
++				      SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
++out:
++	mutex_unlock(&pcr->pcr_mutex);
++
++	if (err)
++		return err;
++
++	/* check if any pin between dat[0:3] is low */
++	if ((stat & mask) != mask)
++		return 1;
++	else
++		return 0;
++}
++
+ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+@@ -1418,6 +1458,7 @@ static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
+ 	.get_ro = sdmmc_get_ro,
+ 	.get_cd = sdmmc_get_cd,
+ 	.start_signal_voltage_switch = sdmmc_switch_voltage,
++	.card_busy = sdmmc_card_busy,
+ 	.execute_tuning = sdmmc_execute_tuning,
+ 	.init_sd_express = sdmmc_init_sd_express,
+ };
+-- 
+2.52.0
+
