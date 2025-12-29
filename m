@@ -1,120 +1,78 @@
-Received: from out-183.mta0.migadu.com (out-183.mta0.migadu.com [91.218.175.183])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C00BC9460
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Dec 2025 20:47:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.183
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 331BD32C8B;
+	Mon, 29 Dec 2025 22:25:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767041263; cv=none; b=h2c8IurU/nQo+r5xnr7gb242d1HmGCvoNAEuDjstnEQMSo8bKxOPWTkY3jfQy995UE0IKUJMM8DUH/U38vXMXavIR6vEKl6rKmspYojiu0PZZ8b7rIAVjtXGK5tjJIP+M3tNjBl+axR1/QpTM1KQ7jniRDsvD3qdI4z9qg6ovGQ=
+	t=1767047142; cv=none; b=fNQVt5Rx+jGIng6Pxc/DBnvEXFl1mp2+rmMXTtXtgnruVwdvA48uEdKu/o67H9+2BnkiObDgyJF8rO3YOjMTkeSpbopliZ7JWQubjztDhEvxvF0sGCS1jWJ9gZOueUg45uXv60wpNEYeFKtiJzBARXfjJNdSVe9qBXP4Z8ZLKns=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767041263; c=relaxed/simple;
-	bh=FTTWZTgWJb2pmnADYFOVZQ9XSRXJHwk/7xVUONMUFXQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=WO2xyuGZgGegjN7OIQnnuOix9VsPwFn3T3Myt7hVfAV1jLoI3NgMbj/uWLXFJV+nDSfwOkuauPT43X7byxmtpY1hNvMCr/bfEyG6uLFeEoL/09+jj/S0IwnU22hCKSi9uLK08ZsLnUqzPQPiH6z9c7LX+geC08cuWrtWnTLKyoA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=i8kxsaVw; arc=none smtp.client-ip=91.218.175.183
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1767047142; c=relaxed/simple;
+	bh=DF/ovIEIpw8uEcx7QoYLBL5JXEZhIzafNtwz+ReCewA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=tgucB4fWEYC5CD479KjCAWoMqyTVvCi+p6HO+dxLqp9pf2M27FNt7VjVnNqREKWmhPbHBX0hU4/+NNKb25kZ8wHcMAjo1h5CNTZN5bW+BLysi7lKD6zF0GRUJMtuJ2BOAz//D9r8J6buvFBTgQY8UGleOkGkuHgk8o/BjqdegTE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PcrEK56f; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="i8kxsaVw"
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1767041259;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=KEPZBRpnGB1efOd5bNDXDdGViOmX7rmQaGCX0yMPoLM=;
-	b=i8kxsaVw8077mTTEOwc8hlN6GEMB6Lw1QRZ24MrX2rKZDJMp7T0S6p0ctKc7KcAw9uwooX
-	92LOtmBkiVJlx5jk7JOVITPnblyG4+SyxmFdIV/hlhYfxrAfAdu9s5SO3tjS+TiBQ0mj2O
-	HBOl5ii8tnZsmxYp+AyV44UMYUGx4cg=
-From: Matthew Schwartz <matthew.schwartz@linux.dev>
-To: ulf.hansson@linaro.org,
-	ricky_wu@realtek.com
-Cc: linux-mmc@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PcrEK56f"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7392AC4CEF7;
+	Mon, 29 Dec 2025 22:25:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1767047141;
+	bh=DF/ovIEIpw8uEcx7QoYLBL5JXEZhIzafNtwz+ReCewA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=PcrEK56fRuN8R7J7aPGWeNBqj8ytx540Eg6mYyZ2bAMeX0xJUqa3oDZJQhTm7lol5
+	 M7/RhESapFF/2pLs7lQ/2XREmpP2+fpjZG4h21M5DDqKPrzOJ0IOhMiHrDwhnkJsVe
+	 4GVJs/0WaMaz4LnifPK6MVE5vcLscczsksJRFyL9h1Dx5vV/5J20dt37eVvbK0XzYn
+	 NKlKccVlnIXkW6j0Pz10+We0jtdXNgpzAAUzXzfMpBBugluYN1TDfqeQIKZRlsov+k
+	 aL/mVOWC8bXa3MMivrFUN2creUUuIVxnbt9P+jjyRjSufXTVvupzYexuu05my4E2wT
+	 gs39jrSZnivjA==
+Date: Mon, 29 Dec 2025 14:25:28 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, abel.vesa@linaro.org,
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	Matthew Schwartz <matthew.schwartz@linux.dev>
-Subject: [PATCH] mmc: rtsx_pci_sdmmc: implement sdmmc_card_busy function
-Date: Mon, 29 Dec 2025 12:45:26 -0800
-Message-ID: <20251229204526.2850803-1-matthew.schwartz@linux.dev>
+	Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
+Subject: Re: [PATCH v3] mmc: host: sdhci-msm: Add support for wrapped keys
+Message-ID: <20251229222528.GA4684@sol>
+References: <20251229070507.3322149-1-neeraj.soni@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20251229070507.3322149-1-neeraj.soni@oss.qualcomm.com>
 
-rtsx_pci_sdmmc does not have an sdmmc_card_busy function, so any voltage
-switches cause a kernel warning, "mmc0: cannot verify signal voltage
-switch."
+On Mon, Dec 29, 2025 at 12:35:07PM +0530, Neeraj Soni wrote:
+> Add the wrapped key support for sdhci-msm by implementing the needed
+> methods in struct blk_crypto_ll_ops and setting the appropriate flag in
+> blk_crypto_profile::key_types_supported.
+> 
+> Tested on SC7280 eMMC variant.
+> 
+> How to test:
+> 
+> Use the "wip-wrapped-keys-2024-12-09" tag from https://github.com/ebiggers/fscryptctl
+> and build fscryptctl that supports generating wrapped keys.
 
-Copy the sdmmc_card_busy function from rtsx_pci_usb to rtsx_pci_sdmmc to
-fix this.
+Use the official release of fscryptctl from
+https://github.com/google/fscryptctl instead.  v1.3.0 has wrapped key
+support.
 
-Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
-Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 41 +++++++++++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
+Note that the tag you linked to was for an older version of the wrapped
+key patches that wasn't compatible with the upstreamed version.  So it
+isn't plausible that it still works.  I'll assume you actually tested a
+different version and then just listed the wrong tag in your commit
+message.  To avoid confusion, I've deleted that old tag.
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index dc2587ff8519..4db3328f46df 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1306,6 +1306,46 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return err;
- }
- 
-+static int sdmmc_card_busy(struct mmc_host *mmc)
-+{
-+	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-+	struct rtsx_pcr *pcr = host->pcr;
-+	int err;
-+	u8 stat;
-+	u8 mask = SD_DAT3_STATUS | SD_DAT2_STATUS | SD_DAT1_STATUS
-+	| SD_DAT0_STATUS;
-+
-+	mutex_lock(&pcr->pcr_mutex);
-+
-+	rtsx_pci_start_run(pcr);
-+
-+	err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
-+				      SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP,
-+			       SD_CLK_TOGGLE_EN);
-+	if (err)
-+		goto out;
-+
-+	mdelay(1);
-+
-+	err = rtsx_pci_read_register(pcr, SD_BUS_STAT, &stat);
-+	if (err)
-+		goto out;
-+
-+	err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
-+				      SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
-+out:
-+	mutex_unlock(&pcr->pcr_mutex);
-+
-+	if (err)
-+		return err;
-+
-+	/* check if any pin between dat[0:3] is low */
-+	if ((stat & mask) != mask)
-+		return 1;
-+	else
-+		return 0;
-+}
-+
- static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-@@ -1418,6 +1458,7 @@ static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
- 	.get_ro = sdmmc_get_ro,
- 	.get_cd = sdmmc_get_cd,
- 	.start_signal_voltage_switch = sdmmc_switch_voltage,
-+	.card_busy = sdmmc_card_busy,
- 	.execute_tuning = sdmmc_execute_tuning,
- 	.init_sd_express = sdmmc_init_sd_express,
- };
--- 
-2.52.0
+> Tested-by: Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
+> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
 
+Otherwise this patch looks good.
+
+Reviewed-by: Eric Biggers <ebiggers@kernel.org>
+
+- Eric
