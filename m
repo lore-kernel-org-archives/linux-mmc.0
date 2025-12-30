@@ -1,124 +1,109 @@
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F937288D6
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:18:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 659411DF736
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:33:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767107912; cv=none; b=FJ+sx1l4b/mLfc0KSWct1uFqIySPZPk1SZEieTagCcwKCGpR+Tc0JEocGaQjm8jqGo1KiDbpdPodgYiOtnsHki6sxDU6Z3sn1ZSDcBD9Ag52m34ppMqQZFco9+XxOXWVJq31mzuGjkVbUsQbsNEYqTN74oTiD6hWuzCEpCUzNPQ=
+	t=1767108837; cv=none; b=lvBUBr/EZb5EHMxVYLdmcOXDVlqmwYiEhMJ/Nu3SANsbNZbgIowgleI95nQSGlHwQUv2S9zIX44CyIpAKh/l736G+LVIKJJ4TBr9353VkrJ87ILzOyfMYShvOWj6/LjaHgx1lIUEYLh2+9FmqIaFLfg+Yv3NXZKkBWl6yIlsiZU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767107912; c=relaxed/simple;
-	bh=+gKgDwYYKlFxiM1d+fE93Zpnzzu6oyiW358H5BNiJQg=;
+	s=arc-20240116; t=1767108837; c=relaxed/simple;
+	bh=OSSJDBSmqDWMmNZLsaHKCjFMixLVoFpCKDiw4VTK//o=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=k0vDLYxymZef0oEOjZgsclrhnpCSgNfQgOMO6Hjlsg9PODHBUjCgugPUIz/bwvMb3YDH23SqdFMxh0EWSnKs2lLlNbhlNUJczcA2a50zlE3wBYlVI1TD9dtbjUTtSDO19RFP1g5Zoi0bcwxN3k3vVtbnFNjd97MPdH0UahQE1jQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fFZAL6DX; arc=none smtp.client-ip=209.85.167.47
+	 To:Cc:Content-Type; b=BZSLJ4dP631ysj6529GKg505yGHEXrnZiaX7DXHgsp+u0hH5loWmzM3QcEsPihq6q2LhsQeZYLhpJ8tXhdO2VAQKmf0EIJz7tjJA7MwGK5O/zjJwHWfEVl7Epa9oUDKsedHtAXuISKkjN8F6OhOIqEgz+TgXnzZyDyqmFJ5BUy4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ePP5oPdx; arc=none smtp.client-ip=209.85.167.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fFZAL6DX"
-Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-595819064cdso15961282e87.0
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:18:30 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ePP5oPdx"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-596ba05aaecso10896439e87.0
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:33:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1767107908; x=1767712708; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1767108833; x=1767713633; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=RRBtK3JNhggUM1K73zNRNw8Bzd7ElXh/Sim1R9PRqIo=;
-        b=fFZAL6DXyFU+cFFQDdQd6V1VsOsgCIcaS4momw8W9F+PMxytWEihWJ8CC8hcidwnFD
-         pmuYfGCm/QbDhwDgDgWV2WWufWPcEeApuc3MOwB7POr4JTIYQpyosXlOdVFZsvpVxFy/
-         Kd0WGj9W0xKW3oWlrzqLld2lhW9qHGkTjLdXvDEJMemtID+eE5Y0mDWdTAXZxtvSJRzJ
-         iPDVJq6Q+ka81iWT8ud3qtFdvCKk6Mv2XtPe6N8U2Py/P4BGu3WSiowTqSav0GWcAm69
-         BhKSs3rTkYzTUZ0nN4W4TeBgmUCn7Jo9YWNX1oZRM1e/IxOA8hsWlIvzktDM2qwSGvwu
-         KTXQ==
+        bh=TYxaROQKxWcRTHR3znN8SgtkCp/+smLe2y5BzbdH+W0=;
+        b=ePP5oPdxA4n7hi5CuF+rq3SNWeRXpZuyw3kGXse2S6WxsY2FyzSHysHzC+IAIRFBqc
+         L1ZR5RI4/DDgwjoQAjYC/YIb1+qCGv6VR4+YroswfYwVT20+wjkxSCmDVRMhWIFm4W2a
+         z7Cq5J4E40b46ugOBxImFCCeZCm9wID9MxQKlGLSs/VzHJrzj6iwIIclIx+gTgDkm7rv
+         60r+9DNp8H+zybBXeyds4SyA9UL/vVlb2VPs06VEQ9o8B5yztPbupgetg+HQmUunlk4f
+         +wvl0Hx3YAE6nzFjNJYp0+hxeZnRtwxUszfNx6p8p/nRKtRIRIvn/nY6y7HydEWJqKUx
+         +8tg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767107908; x=1767712708;
+        d=1e100.net; s=20230601; t=1767108833; x=1767713633;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=RRBtK3JNhggUM1K73zNRNw8Bzd7ElXh/Sim1R9PRqIo=;
-        b=fYDztS4BCddOv0Sy7fM0x3u+TguICuH/LQ9lPsRw9bVRrLI5jIQZ5Sy1nZrGlZeE0z
-         pA93uX6oqseP12TIq/Un5MhHFwEVpeIpa5R0W3eAKe4QoZUdRJb/OdyQRwYFcSHYWuzg
-         GHp96x9cuulMDFKamaqd3oJcHX39IuLd6oiJWY/85sKXk5gwXqBpGn6u5uQcn3c4nybh
-         yT2qpC/Ah0suGkgC/3KUMchDK+If1Ef07OzPS49zcIBY8/RngeDMeOhP/tOyTdVtock0
-         lx9xWvYGyKNTFuoaNdG8uwCrhiIb/OLVaAwYr0d2PijoWJ7U0UUvmGtHJT7iSzSimPBO
-         ftpw==
-X-Forwarded-Encrypted: i=1; AJvYcCWnfgQQDvI74yw4zFxOgqu+Ob3Wx4/WOjX8+0e2mI6bRwJ40Z+Zj89SNTlEO9Zxty3rPbO4xvdtqIw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw5H98E6BH4UR7Mk+0AjWHR2q5lX+TpHIwkSbvNh7dCSeHJ0HMw
-	Xt0BATuVeanQk7M9TpZMxNGf7gM7PxZs/m5RyHep5NoZIz3SBVvq7MRzqEplegYeA2AzaXNJj+q
-	H92phq/ne0Vm8fRK/LceB6YYi25IKlH1t0sWwOHBBQg==
-X-Gm-Gg: AY/fxX5NmXaJPayr8YUAfCjpVi5VUs+vDMiAWQU3zEWA7N0ZDeY7ueaSkowYexAOhsC
-	now9J0TR7DecuIXoGrqTg7Xbup7G7FjZv6M08fvVQqHhsAa+qc+CVLf0EN3Bwc2ePzcT7so+Q0h
-	ILzQhTdTMrfviTnJDazoePlmA5zlK8hX9IAd88wRBsYBETpjOurCpI5a5yfg16D6uIzXBNFH55T
-	E+95J6ktcldHo+RhassqLREuXGwBDJ+gWqMenD1kTAXfs4GH00WsD9BLnN0rz2gwy6Sg2+f45WC
-	6mjqRJ8=
-X-Google-Smtp-Source: AGHT+IGLdQzmsFUOaslDp4bPOX42OhRqMaPM6fexcK5h/1BBrcmh/irU+XvZYMqW+MDYb4bkjrOekUINuva9hscHHIg=
-X-Received: by 2002:a05:6512:220d:b0:59a:108a:c8bb with SMTP id
- 2adb3069b0e04-59a126e5014mr10417019e87.12.1767107908408; Tue, 30 Dec 2025
- 07:18:28 -0800 (PST)
+        bh=TYxaROQKxWcRTHR3znN8SgtkCp/+smLe2y5BzbdH+W0=;
+        b=Q6DxzqqK2vD0Glzf8FaaVNxKLcwWXfxWaqxesBGUtd1loVAbaAmJPb1OztPTbltZj4
+         yv87uE0JQJGdOsmjJqxvlBskw7NTZV2/D9WOzd8PRYZri2fdsXgWsT3kSvJFmMrzbkPI
+         34+U3Mgi9yKL4TukHtNInRixjODq6TGzZ5Bd/TDSB9ltO3mu9pTlObr72giGdhO8EuOR
+         pNiJBGBZ20KoqgorZ64bk18i7y4gTxBvGZ4vkz72bZW7Rx76U+1QNWSFc+SRCrx/hOmj
+         rKZJ+HB9kKFa/SNVldNa5aKqYpGw9mGr8wsrwXGOWkPPM6iXo0PZXnj1IuqmTHCU0HkZ
+         D8FA==
+X-Gm-Message-State: AOJu0YyhQ7sZRzIzzoSFIae9AXny2MJ14MgeMvMa89JmEIFJ0Lqi4NIL
+	xY9OKOTUrm9HJIaUOF6KRf38uORfKxrqXqNeDw8cF/DGTDysXApPSrqQMs4VQMmMo6qajmRBwuY
+	IpSvntAyJk+vfjPw3bYTF9DdHmjCSWn3qL1VU7cdNeg==
+X-Gm-Gg: AY/fxX6+jjxW0fmjvA2MHupy/jkzGwCt5z+LyBHkrEDqBfBItF6iiPIEJoTmxE+Iu+m
+	6cpG238Y1Zf7FullHhL5i+eK6ITNQfTsgJ+sRj3x9b8gaNbI0yG44jPf5r2cwL3M0DOFG+bPMnL
+	cTKrNV9LfGgkSAyaqDG9c4QRLX9wRFVM7diiI4BQYbfWXY5JbwFTmYfzcv3yybh3+jVETVo/KOz
+	WLAzbm/Cx/pOWGWp8tKfyI4rXbQpf5uIal9PsGycLywqUxFqnN3pktr7jwX5QhUelTZsByN
+X-Google-Smtp-Source: AGHT+IH2dT6/NzAqkSzuEM+m91/RcJVyafUNz4GNUxXl2AjfCw38ypa6+HhCMapwNFygiyrIYqSrrT0fObZPdesCHaI=
+X-Received: by 2002:a05:6512:3985:b0:595:83fe:6994 with SMTP id
+ 2adb3069b0e04-59a17d4ed37mr12112327e87.33.1767108831591; Tue, 30 Dec 2025
+ 07:33:51 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CGME20251223044225epcas5p2b5afed35eec4ba996a5a223e4b8779c9@epcas5p2.samsung.com>
- <20251223044621.3352567-1-ping.gao@samsung.com>
-In-Reply-To: <20251223044621.3352567-1-ping.gao@samsung.com>
+References: <20251221080020.4532-1-avri.altman@gmail.com>
+In-Reply-To: <20251221080020.4532-1-avri.altman@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 30 Dec 2025 16:17:52 +0100
-X-Gm-Features: AQt7F2qJo4yOQcd4Su8WE-5MKXg_lQvKjqPaCdiAmQtthaeUWfEPt71YLgBoS7s
-Message-ID: <CAPDyKFr_gs+KuKkSOYMUpKJyqKB3VnrRL9KPpDKiCAjwUy80fQ@mail.gmail.com>
-Subject: Re: [PATCH] MMC:dw_mmc:when enable biu_clk should check whether this
- clk is normal
-To: "ping.gao" <ping.gao@samsung.com>
-Cc: jh80.chung@samsung.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Tue, 30 Dec 2025 16:33:15 +0100
+X-Gm-Features: AQt7F2pocKbsiqOYn28Ee7OJuRIQxiWfFnniOceW89jBey_6vKP_d6WrxU2t2NY
+Message-ID: <CAPDyKFqDn=2ovsr9CtHjSp7PUSsxDPMoJxd8wndNUV2b2UxSZg@mail.gmail.com>
+Subject: Re: [PATCH 0/2] mmc-utils: lsmmc: Fix Manufacturing Date decoding
+To: avri.altman@gmail.com
+Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@sandisk.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 23 Dec 2025 at 05:42, ping.gao <ping.gao@samsung.com> wrote:
+On Sun, 21 Dec 2025 at 09:00, <avri.altman@gmail.com> wrote:
 >
-> exynos doesn't use biu_clk , enable it will panic
-
-Please elaborate a bit more on what the patch does.
-
+> From: Avri Altman <avri.altman@sandisk.com>
 >
-> Signed-off-by: ping.gao <ping.gao@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 12 +++++++++---
->  1 file changed, 9 insertions(+), 3 deletions(-)
+> This series fixes the decoding of the Manufacturing Date (MDT) field in
+> the CID register within `lsmmc`.
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index c5db92bbb094..61f6986f15ef 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3633,9 +3633,15 @@ int dw_mci_runtime_resume(struct device *dev)
->         if (host->slot &&
->             (mmc_host_can_gpio_cd(host->slot->mmc) ||
->              !mmc_card_is_removable(host->slot->mmc))) {
-> -               ret = clk_prepare_enable(host->biu_clk);
-> -               if (ret)
-> -                       return ret;
-> +               if (IS_ERR(host->biu_clk)) {
-> +                       dev_dbg(host->dev, "biu clock not available\n");
-> +               } else {
-> +                       ret = clk_prepare_enable(host->biu_clk);
-> +                       if (ret) {
-> +                               dev_err(host->dev, "failed to enable biu clock\n");
-> +                               goto err;
-> +                       }
-> +               }
-
-Rather than making the change in dw_mci_runtime_resume(), I suggest we
-set "host->biu_clk = NULL" in dw_mci_probe(), rather than keeping its
-error code.
-
-In this way, clk_prepare_enable() will not return an error code above.
-
->         }
+> The MDT year field is a 4-bit value relative to a base year. To determine
+> the correct base year (1997, 2013, or 2029), the tool must consult the
+> Extended CSD Revision (EXT_CSD_REV).
 >
->         ret = clk_prepare_enable(host->ciu_clk);
+> Previously, `lsmmc` processed registers in isolation and often lacked
+> access to the EXT_CSD revision, leading to incorrect dates (e.g.,
+> interpreting a 2022 card as 2006).
+>
+> Patch 1 updates the CID printing logic to select the correct base year
+> based on the cached EXT_CSD revision.
+>
+> Patch 2 ensures that `lsmmc` successfully retrieves and caches the
+> EXT_CSD revision.
+>
+> Avri Altman (2):
+>   mmc-utils: lsmmc: fix CID manufacturing date decoding
+>   mmc-utils: lsmmc: cache ext_csd revision for MMC devices
+>
+>  lsmmc.c    | 60 ++++++++++++++++++++++++++++++++++++++++++++++++++++--
+>  mmc_cmds.c |  2 +-
+>  mmc_cmds.h |  3 +++
+>  3 files changed, 62 insertions(+), 3 deletions(-)
+>
 > --
-> 2.50.1
+> 2.34.1
 >
+
+The series applied for mmc-utils master, thanks!
 
 Kind regards
 Uffe
