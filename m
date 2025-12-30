@@ -1,108 +1,134 @@
-Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D7FA2882D3
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:34:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C23C130B53F
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:34:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767108865; cv=none; b=gyOo5B20UI0MIS7TlxqVKxKe+Wlsj0DxVdpQEIAPe//lF3DovZm0d8R0zCK54G/4sXCMv3tvfzNbj2I++NwqjZmSfnP48lKi8r4Rv4q9cMKViSL8uiOCwyKpkBafv0lVArteBltr5C2hwIthaLxtDBW/V49twS/91MekgpsLlXg=
+	t=1767108871; cv=none; b=VxvsJCqBarXzLCRIBVXuIfnvNrLx4tgkFLE3XDQi44YPo6yGfpNfjKhc0S67Jebg9Yp6sqbuF0WAkhyEZvcgeziDjhEZAMHlP+4kqgbf5M0AH5smhcRPCkfIhRFxNAtGpW1tdcR8eQg8ovyX4mqCpUgc12MLBGVH6lilb8AWwqk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767108865; c=relaxed/simple;
-	bh=dZSodkbE5/6Z4K+bFidaBOlhacrE2QQfWb9OjIApyZU=;
+	s=arc-20240116; t=1767108871; c=relaxed/simple;
+	bh=ykdIkvx4cqaj9RPfNM0pafXHT1sVc5JnrzlKxZNQbbg=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PAB4Xh1LAVycx8L6H19jxjfuO2yc3w6IdRUUqd7o1q2wEPc3IsB3sBH6fOKn+CofHzl2QH7U6BEi+dmkwrm4FdooHg82tF9HOdj9djtJf0049qhZx4ZrhA4AITQEnFiu3y2eSgw4RgG4zf9P1xrA7yhaa+cS8YdB/f7r26ARft4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=QoGp8zVo; arc=none smtp.client-ip=209.85.208.181
+	 To:Cc:Content-Type; b=G4B4zUi5pUifzP22oAL9neJUY+3q35o7XUa778P4f6A03j6CfHNOP60ay1ruvzR9YpMP0KRWStwxluBSfvpJ/IOwLYXEymeptSRlWTuWApFUcwbarEwGVCpNq+AhJ4NTEuiBApZZHHL02cUl7HxQEYdDchTuyzsuSVsV5ZFOlJI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=riErROMm; arc=none smtp.client-ip=209.85.167.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QoGp8zVo"
-Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-37b8aa5adf9so64856991fa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:34:21 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="riErROMm"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5957ac0efc2so10800952e87.1
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:34:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1767108859; x=1767713659; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1767108868; x=1767713668; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=AnmwhxY415JhuBFjf99xT9gSeFG1Nkzo5OtJjVGKyn0=;
-        b=QoGp8zVojiySF5FfVqc8D/7SuWJshFPUYVYS7FPDUtvdQcfF+NyxZTkaPaPwE+FjNV
-         QGgNALy+J5vIzkt9mKm3orI4n0NQ3AjXzl4NsqurKtoRvATqc1S4uVMKhfGf2JAhgP/e
-         LAlQn7RMxO2EUSHpqwlAmqlss69lSNXVY0RIR2eIcJ5mQN/Cc1mg1Qcz66q6oFlsxeKX
-         5Uda+BPHfxAVbbLlJRL5uHPYvNbntTgCcFXQOf397oFh/jUPWi3/kzpYGeOI9oSBOQV2
-         bWGjpKhEwNYysYJkFsv8YrbYUsmKxtwFIkfmUMkktWdvJ5HJbp1vDhVskeCtUoCcdnXw
-         39lA==
+        bh=VVOyprJ3Cj2YRlSR4vH7ppFe43eLFh6BnkA7raxZ3uM=;
+        b=riErROMmGevHzMUX10BR01/vzWKZWplkfJIe1DZCyTF8a3u05JYXrmdn58p9gqq6TW
+         9Y8izmofrtcOo1spwRSYpzVRriZa87c7I7CxepYZNcZX50VJyiY5YsPQfMcXmmWxNTqA
+         7iZnt4SuIw15A/r+WHToy5nGecawnIHXBnYpQMzJQHY8lJWSYjWkfyBHqwOsbgwPxXUo
+         F0o/2r+8sp4gsrwsZSfWPgM1xaBEToMipx9ygrdq3fGALu7HjzRgOj2Qn970gz3XOk8+
+         PK9kPnol3FfVNE7TawaTc8/Ku4swkbKWn3aXleO9eugGu5LG7Rvq34X+jytlrno2QAc+
+         scpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767108859; x=1767713659;
+        d=1e100.net; s=20230601; t=1767108868; x=1767713668;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=AnmwhxY415JhuBFjf99xT9gSeFG1Nkzo5OtJjVGKyn0=;
-        b=VluyCwtCRWDED1a3pi4mtu1wBVvngNnzgyBLwFMiB1EK2XzyXZk0bqk4uHaqh7r9Vh
-         8JhEnn/NxDY9l26YUcwXPid9GqcqoNxzK9KrnJyOJKHXL6rVFXA+R+Z+KcYHOPca4cPt
-         SMAHyYHe5CV757diydSdqCNPh++d3Wz6+41y1Vk2kjzL4ghjX94sKFPX/2mFfFHTM1Ld
-         aVlSoLmVoDlEbeQF8ZEnjR3p/xxE1tQo6KOPiJT/msW4774deAAKs3ZUT+7EjTfx25/8
-         lUWEhJIA7rDYTtxp5Tl2cpaLymMV/WqrUKaVtm8bvK1Dk0+q4MLncfT5nqXgVVosC11l
-         4dHQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUgb1VwJyuuJvqj5ORE755qnXPcIQouO/7DkJOQRglJATrx5K8IUuMW0USqbE/CT9hhI2mOng9NgjQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzvLU+c1ddvCaDPo3VNCnCXbZLanMzmSWhuwMtI+64GldPpIV08
-	xHPm8mW5q3dYnK5JluH6zomimhgV/zslunRK8q5IXO6DoTnzMn0KKE/KtDbSvWfn1wo+Ce+6X5w
-	6us0RzgU6BLQCuz7CTuT30u+/EoENiwnPqGMMy67JZg==
-X-Gm-Gg: AY/fxX5M2Z1jL+f8IFwtiP/oF2AFY6iHPqgZIW6gNwJkZ8Osps2993ykQ+4rZm+tfcl
-	h0P/aWzRCTf2YJANapMMxnSvt/l+ZCAZdwoMsdvzEVGjAu2p4/pFKz05CxdyoNTHnmQkpmMmOdO
-	tvptxvxyHhkWkF6VdF/0z/IAU7dVje9JdEAUwCDeXe6A73EWFbJ9MTISdmnZ8lmePHG/q7m+eA1
-	QtHcU7xWSBSNgn+0gCRUJ5b6rjVyResBPHRHsu4UDDuGh03r+lxEe7qEDUKdfqrDLZ+rInL
-X-Google-Smtp-Source: AGHT+IEW5MCCMztJEcOlaEFCIvi3KU9NMQMaqTxBXuzKZPmVo1f1oxiQEdMGa9fcYX4NA2q8jUD2x8uH2/ni91ZM6F4=
-X-Received: by 2002:a2e:bc0f:0:b0:37c:c84a:99b9 with SMTP id
- 38308e7fff4ca-38121605971mr101636721fa.24.1767108859386; Tue, 30 Dec 2025
- 07:34:19 -0800 (PST)
+        bh=VVOyprJ3Cj2YRlSR4vH7ppFe43eLFh6BnkA7raxZ3uM=;
+        b=XZy2S1dyWfiEeJh5VsNcHBTTnSS2OW2j6HhhVzlgzWYMd47yyylYOyR3mm5olR/j3H
+         i9KaYeh5Jo41lKDbkSEenepO7Qr+b65cmZZ9v3gEv54oAm07YgeYfKZl8HxF1a3bvYr8
+         sxYNcNt55ki55ZnaW8Pyp7Isnv1W3NLAD4PM4V1LTe/PhqgPlpLeUeM26z+R3SYnkorL
+         LJ/WfbyeMgNOwZqgvwRQjc2fFXqr85UcHcGVTW6U4/y2X9qRf+HIIcW/SiTgxl45jaxP
+         Mm5X11FRLmNWzBdKXMx8FelGasZuo/gaAidC7cyiprgj+htjYiJ+Apck8xWyWhPXx0Yz
+         vG2w==
+X-Forwarded-Encrypted: i=1; AJvYcCXsOZv36lmQsorOn49haeAFcCP9prUGRFl5ELd3DxvICuneR5Y1DA8dVT5H3DxE0hS/rcMim1Gf2F4=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx3QewUr+1KO+YCtEgsM7JsEzoa9ukZ2AILBrWfov2U5XDV35oS
+	e+sxtoR9JF9f0qcVMYpUpo9NodEb+dYzgvH7aT5xSHeItdJ4UtN0/s8fG5jrg0ZiWErBOJll1nZ
+	TTDVqSpukf2t2Gtobf8UiOkveK6EW1fjeYsbRfC3adw==
+X-Gm-Gg: AY/fxX5TDQ9Qk+fGzKv6Qw5LfiTMFhYkpskMBfk2JCl7Wmig6UzjAM5YJ7oS3RBv80o
+	el0vA9nagzZqZV2XksPwPR0b4lH7DI00C4hdID2PgERIiO/AB+k0zs2pWeM6K/zYw9JPAhrjFaN
+	ZTIe5ajosjVAhU5Z/6ATnf06aO6azhfUqvdZdqL2gL0V1rJomz3RKMHDrbRtv1lSwwKJBghrR1j
+	tTvbw1jtus6YexyDbbhpWLI0BowZXtpTl7wdCJsYtLzDhl4Qw9eLEmzd8kSkgGDyWXFzHRR
+X-Google-Smtp-Source: AGHT+IEdpLJulaMagiCntHq1v9KxSgC049v9J3ss/UBW2tRdN7RsCII8vnj/WhdRIz5aTHz6WELoj9cCY8mYimOF/RA=
+X-Received: by 2002:a05:6512:b8b:b0:598:8f92:c33f with SMTP id
+ 2adb3069b0e04-59a17d77435mr12093495e87.51.1767108867602; Tue, 30 Dec 2025
+ 07:34:27 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251225181615.1402052-1-vz@mleia.com>
-In-Reply-To: <20251225181615.1402052-1-vz@mleia.com>
+References: <1766387485-205480-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1766387485-205480-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 30 Dec 2025 16:33:43 +0100
-X-Gm-Features: AQt7F2oBY1dHJwylW5gRmwSRBH1bYF8wF2Tb2mX6ur1EQF0YPxufnczOkLVAsew
-Message-ID: <CAPDyKFq7O1mUxpygFzy2g=MqBUxb2mXyfDS0CCUoR2CObs_2sA@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: arm,pl18x: Do not use plural form of a
- proper noun PrimeCell
-To: Vladimir Zapolskiy <vz@mleia.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Linus Walleij <linus.walleij@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Date: Tue, 30 Dec 2025 16:33:51 +0100
+X-Gm-Features: AQt7F2oM5uh2RRoQE3AlSJVcnjGKNpD0QEAOcfCTfTFC010Q-hSrZ7pgui_gOls
+Message-ID: <CAPDyKFrAyQY1o0x_-ZqxfwACZHhDPqiSWCBfLWGtHzX9fUSnTw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Prevent illegal clock reduction in
+ HS200/HS400 mode
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-rockchip@lists.infradead.org, 
+	linux-mmc@vger.kernel.org, 
+	Sebastian Reichel <sebastian.reichel@collabora.com>, Yifeng Zhao <yifeng.zhao@rock-chips.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 25 Dec 2025 at 19:16, Vladimir Zapolskiy <vz@mleia.com> wrote:
+On Mon, 22 Dec 2025 at 08:11, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> As a proper noun PrimeCell is a single entity and it can not have a plural
-> form, fix the typo.
+> When operating in HS200 or HS400 timing modes, reducing the clock frequency
+> below 52MHz will lead to link broken as the Rockchip DWC MSHC controller
+> requires maintaining a minimum clock of 52MHz in these modes.
 >
-> Signed-off-by: Vladimir Zapolskiy <vz@mleia.com>
+> Add a check to prevent illegal clock reduction through debugfs:
+>
+> root@debian:/# echo 50000000 > /sys/kernel/debug/mmc0/clock
+> root@debian:/# [   30.090146] mmc0: running CQE recovery
+> mmc0: cqhci: Failed to halt
+> mmc0: cqhci: spurious TCN for tag 0
+> WARNING: drivers/mmc/host/cqhci-core.c:797 at cqhci_irq+0x254/0x818, CPU#1: kworker/1:0H/24
+> Modules linked in:
+> CPU: 1 UID: 0 PID: 24 Comm: kworker/1:0H Not tainted 6.19.0-rc1-00001-g09db0998649d-dirty #204 PREEMPT
+> Hardware name: Rockchip RK3588 EVB1 V10 Board (DT)
+> Workqueue: kblockd blk_mq_run_work_fn
+> pstate: 604000c9 (nZCv daIF +PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+> pc : cqhci_irq+0x254/0x818
+> lr : cqhci_irq+0x254/0x818
+> ...
+>
+> Fixes: c6f361cba51c ("mmc: sdhci-of-dwcmshc: add support for rk3588")
+> Cc: Sebastian Reichel <sebastian.reichel@collabora.com>
+> Cc: Yifeng Zhao <yifeng.zhao@rock-chips.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable-tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> index 8f62e2c7fa64..066f21deb3e8 100644
-> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> @@ -11,7 +11,7 @@ maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
 >
->  description:
-> -  The ARM PrimeCells MMCI PL180 and PL181 provides an interface for
-> +  The ARM PrimeCell MMCI PL180 and PL181 provides an interface for
->    reading and writing to MultiMedia and SD cards alike. Over the years
->    vendors have use the VHDL code from ARM to create derivative MMC/SD/SDIO
->    host controllers with very similar characteristics.
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 51949cd..204830b 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -739,6 +739,13 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>         sdhci_writel(host, extra, reg);
+>
+>         if (clock <= 52000000) {
+> +               if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
+> +                   host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
+> +                       dev_err(mmc_dev(host->mmc),
+> +                               "Can't reduce the clock below 52MHz in HS200/HS400 mode");
+> +                       return;
+> +               }
+> +
+>                 /*
+>                  * Disable DLL and reset both of sample and drive clock.
+>                  * The bypass bit and start bit need to be set if DLL is not locked.
 > --
-> 2.43.0
+> 2.7.4
 >
