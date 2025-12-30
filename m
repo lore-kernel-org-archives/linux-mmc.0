@@ -1,109 +1,106 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-lj1-f177.google.com (mail-lj1-f177.google.com [209.85.208.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 659411DF736
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:33:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 204C02882D3
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:33:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767108837; cv=none; b=lvBUBr/EZb5EHMxVYLdmcOXDVlqmwYiEhMJ/Nu3SANsbNZbgIowgleI95nQSGlHwQUv2S9zIX44CyIpAKh/l736G+LVIKJJ4TBr9353VkrJ87ILzOyfMYShvOWj6/LjaHgx1lIUEYLh2+9FmqIaFLfg+Yv3NXZKkBWl6yIlsiZU=
+	t=1767108839; cv=none; b=lB6mBCbdsFqua9Xq4kObbWRDaQ2v47gd9/fBfzZ6PV8WNNyBHPmg8EK+lNRfCoMwJhylNSpmge4qhGGjVcOkuumC+kcy2GgimnNAM3Jx8Of6/FAgpi1yN7Zl7OYZgEnU+ht6LYsTZSO2qcop+c+JFUKeToatjQcnNzVIyh/nKjM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767108837; c=relaxed/simple;
-	bh=OSSJDBSmqDWMmNZLsaHKCjFMixLVoFpCKDiw4VTK//o=;
+	s=arc-20240116; t=1767108839; c=relaxed/simple;
+	bh=SGpR6lvYNkXWoIHvSOyJ2xPG4f+jR1DGYNBACFYVO8w=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BZSLJ4dP631ysj6529GKg505yGHEXrnZiaX7DXHgsp+u0hH5loWmzM3QcEsPihq6q2LhsQeZYLhpJ8tXhdO2VAQKmf0EIJz7tjJA7MwGK5O/zjJwHWfEVl7Epa9oUDKsedHtAXuISKkjN8F6OhOIqEgz+TgXnzZyDyqmFJ5BUy4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ePP5oPdx; arc=none smtp.client-ip=209.85.167.49
+	 To:Cc:Content-Type; b=aAykilkQ1q2YRDCusV7kOmLoNo1uJquvOEPL4uI3+1NJ6O2LRo9hTXMjl0owRvMpgqo7vixZmNT4js2VDVXNuumh114vY/2FkgkR7Jh7MIX1/vUAI1PDeJIm/u1hNEQCldku/PhmHN483Yxbdc2JIpFd18r9EuTUKzzmEhkp6cc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GiCF1Fkk; arc=none smtp.client-ip=209.85.208.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ePP5oPdx"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-596ba05aaecso10896439e87.0
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:33:55 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GiCF1Fkk"
+Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-37a3d86b773so79595671fa.0
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:33:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1767108833; x=1767713633; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1767108835; x=1767713635; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=TYxaROQKxWcRTHR3znN8SgtkCp/+smLe2y5BzbdH+W0=;
-        b=ePP5oPdxA4n7hi5CuF+rq3SNWeRXpZuyw3kGXse2S6WxsY2FyzSHysHzC+IAIRFBqc
-         L1ZR5RI4/DDgwjoQAjYC/YIb1+qCGv6VR4+YroswfYwVT20+wjkxSCmDVRMhWIFm4W2a
-         z7Cq5J4E40b46ugOBxImFCCeZCm9wID9MxQKlGLSs/VzHJrzj6iwIIclIx+gTgDkm7rv
-         60r+9DNp8H+zybBXeyds4SyA9UL/vVlb2VPs06VEQ9o8B5yztPbupgetg+HQmUunlk4f
-         +wvl0Hx3YAE6nzFjNJYp0+hxeZnRtwxUszfNx6p8p/nRKtRIRIvn/nY6y7HydEWJqKUx
-         +8tg==
+        bh=V6eg1Uu2/A8yMuy6RywYGumxXCYpFTWzZoQ/ScGnj6M=;
+        b=GiCF1FkkIYy8RHPyPphH3YDolEchMCEehMAcmxmnfC2DzM5CQzjRcS8zHIxLi8S2Sa
+         x//eGqhLNJSDrTo98JI0SbzAfv/gWlbD/MJzTACOZkUIIcHy+3ftUKu6Css74HVN4T3k
+         4CU51yrEI0/KMKEqn4en9ioSazYpxgc7/gB+dJXEzobv3ezpWwBXq0FPz07zDrZcqssh
+         KdcDTfIALhXz78a/i+hhYqkkwJnAJ3rAuSk0ayX0XsHNGDhxRNIR6B+j5ko6m1y63U34
+         JGMW1eYuCVI8CohX6fImnNAr1qdQdxHoJwLaRIISgXsw2D0JqRkQ44gFKKvX9lljo4+f
+         lqsg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767108833; x=1767713633;
+        d=1e100.net; s=20230601; t=1767108835; x=1767713635;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=TYxaROQKxWcRTHR3znN8SgtkCp/+smLe2y5BzbdH+W0=;
-        b=Q6DxzqqK2vD0Glzf8FaaVNxKLcwWXfxWaqxesBGUtd1loVAbaAmJPb1OztPTbltZj4
-         yv87uE0JQJGdOsmjJqxvlBskw7NTZV2/D9WOzd8PRYZri2fdsXgWsT3kSvJFmMrzbkPI
-         34+U3Mgi9yKL4TukHtNInRixjODq6TGzZ5Bd/TDSB9ltO3mu9pTlObr72giGdhO8EuOR
-         pNiJBGBZ20KoqgorZ64bk18i7y4gTxBvGZ4vkz72bZW7Rx76U+1QNWSFc+SRCrx/hOmj
-         rKZJ+HB9kKFa/SNVldNa5aKqYpGw9mGr8wsrwXGOWkPPM6iXo0PZXnj1IuqmTHCU0HkZ
-         D8FA==
-X-Gm-Message-State: AOJu0YyhQ7sZRzIzzoSFIae9AXny2MJ14MgeMvMa89JmEIFJ0Lqi4NIL
-	xY9OKOTUrm9HJIaUOF6KRf38uORfKxrqXqNeDw8cF/DGTDysXApPSrqQMs4VQMmMo6qajmRBwuY
-	IpSvntAyJk+vfjPw3bYTF9DdHmjCSWn3qL1VU7cdNeg==
-X-Gm-Gg: AY/fxX6+jjxW0fmjvA2MHupy/jkzGwCt5z+LyBHkrEDqBfBItF6iiPIEJoTmxE+Iu+m
-	6cpG238Y1Zf7FullHhL5i+eK6ITNQfTsgJ+sRj3x9b8gaNbI0yG44jPf5r2cwL3M0DOFG+bPMnL
-	cTKrNV9LfGgkSAyaqDG9c4QRLX9wRFVM7diiI4BQYbfWXY5JbwFTmYfzcv3yybh3+jVETVo/KOz
-	WLAzbm/Cx/pOWGWp8tKfyI4rXbQpf5uIal9PsGycLywqUxFqnN3pktr7jwX5QhUelTZsByN
-X-Google-Smtp-Source: AGHT+IH2dT6/NzAqkSzuEM+m91/RcJVyafUNz4GNUxXl2AjfCw38ypa6+HhCMapwNFygiyrIYqSrrT0fObZPdesCHaI=
-X-Received: by 2002:a05:6512:3985:b0:595:83fe:6994 with SMTP id
- 2adb3069b0e04-59a17d4ed37mr12112327e87.33.1767108831591; Tue, 30 Dec 2025
- 07:33:51 -0800 (PST)
+        bh=V6eg1Uu2/A8yMuy6RywYGumxXCYpFTWzZoQ/ScGnj6M=;
+        b=M1PhJgMuOKbk2JfjRASlCTfBolfLs3b0NWv80KIKemRfh7+g21glSvOTA4YAb/n7x1
+         hUIeOnTyjEwWWqtzToaeEa3ZZiaf9nOXcCcFVhhhHDs/avt/B40sMfGB2SzwFADovjEx
+         hxx90DQNQ91th/2qR7iuF0QlLc+VbknQ8DK2qVCe394OXMF4JOliXWZWEDv4kEWJ3szS
+         adEkZoMa+/E2r3rkTcwipJekd3VOJrNzSbDaYcniYyiQQb88ktkFhO6nL6h+27CjC6ga
+         65XiK8mcKFVc8lMn08hgGTUAwAJS48mpUFfZ40RQJboUYxVQjEqSeVjTZddoTkLkojPY
+         x79Q==
+X-Gm-Message-State: AOJu0Yxw+bJRtSK0MLJtSXoelXHNXh8CyjxeqnNp1VNlUfgWKltDiexX
+	UDt/XaWalY6rYLvKIEJuEKXuPcQkl3ffDFmdy7Hd82jLQAjl67o3lq7hAWu15PbDzSJ/qlMzy7y
+	Ad3a4A7hzDhYQC7jQPSGtRfjKzpx1tknfLB03AYaJNtjMA2rYumxl
+X-Gm-Gg: AY/fxX652EkPCtnzIAe76SummqnbtishJ0PaN0cmlwqezBi6aP5LaUSkQRdg3SaUr4F
+	Kz7wJpT7XnY/3YafQYpkHIMbYmiJCNOnX5Z9JGk9sEIQkVQIUUbg9buuvYLmmXBK0MGqD5CkeuU
+	JzWgPIzDud+WXWvoDYtAXHmoeFyGsrE1lEs29cnh2EfYyGJiuzJA+YWryTXPHdB8LWg69T5oMu+
+	h4pW0YrAERlnLs6iFHB/+LhBDIy1t3kBwxlNAD4CqJbj8M4WZvpecKb7yQfWByWzeeSwW4v
+X-Google-Smtp-Source: AGHT+IEvSaQC02s51RrDnA6K2nAprQB/4CnzoUKsTXSvYPvPKZsyKL8PeQXu3CeVttcPTnGBExo4A5m/528mGiA1xwc=
+X-Received: by 2002:a05:651c:544:b0:37b:95ee:f605 with SMTP id
+ 38308e7fff4ca-381215af948mr121534711fa.10.1767108835048; Tue, 30 Dec 2025
+ 07:33:55 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251221080020.4532-1-avri.altman@gmail.com>
-In-Reply-To: <20251221080020.4532-1-avri.altman@gmail.com>
+References: <20251221081207.4724-1-avri.altman@gmail.com>
+In-Reply-To: <20251221081207.4724-1-avri.altman@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 30 Dec 2025 16:33:15 +0100
-X-Gm-Features: AQt7F2pocKbsiqOYn28Ee7OJuRIQxiWfFnniOceW89jBey_6vKP_d6WrxU2t2NY
-Message-ID: <CAPDyKFqDn=2ovsr9CtHjSp7PUSsxDPMoJxd8wndNUV2b2UxSZg@mail.gmail.com>
-Subject: Re: [PATCH 0/2] mmc-utils: lsmmc: Fix Manufacturing Date decoding
+Date: Tue, 30 Dec 2025 16:33:18 +0100
+X-Gm-Features: AQt7F2ooXilDSKXvZcguBeAP4bYFcKcX6vUrBDPGfqVWdzWm4KXZJld95YCxu7o
+Message-ID: <CAPDyKFrHeeywqjYmJ-eUgKex2fZ427oqBuqym=aT9Yc2rOzqXQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc-utils: recognize ext_csd_rev 9
 To: avri.altman@gmail.com
 Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@sandisk.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Sun, 21 Dec 2025 at 09:00, <avri.altman@gmail.com> wrote:
+On Sun, 21 Dec 2025 at 09:12, <avri.altman@gmail.com> wrote:
 >
 > From: Avri Altman <avri.altman@sandisk.com>
 >
-> This series fixes the decoding of the Manufacturing Date (MDT) field in
-> the CID register within `lsmmc`.
+> JEDEC JESD84-B51B, released in September 2025, increments the Extended
+> CSD Revision (EXT_CSD_REV) index to 9.  Thus, update the `read_extcsd`
+> command to recognize this new revision value.
 >
-> The MDT year field is a 4-bit value relative to a base year. To determine
-> the correct base year (1997, 2013, or 2029), the tool must consult the
-> Extended CSD Revision (EXT_CSD_REV).
->
-> Previously, `lsmmc` processed registers in isolation and often lacked
-> access to the EXT_CSD revision, leading to incorrect dates (e.g.,
-> interpreting a 2022 card as 2006).
->
-> Patch 1 updates the CID printing logic to select the correct base year
-> based on the cached EXT_CSD revision.
->
-> Patch 2 ensures that `lsmmc` successfully retrieves and caches the
-> EXT_CSD revision.
->
-> Avri Altman (2):
->   mmc-utils: lsmmc: fix CID manufacturing date decoding
->   mmc-utils: lsmmc: cache ext_csd revision for MMC devices
->
->  lsmmc.c    | 60 ++++++++++++++++++++++++++++++++++++++++++++++++++++--
->  mmc_cmds.c |  2 +-
->  mmc_cmds.h |  3 +++
->  3 files changed, 62 insertions(+), 3 deletions(-)
->
-> --
-> 2.34.1
->
+> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 
-The series applied for mmc-utils master, thanks!
+Applied for mmc-utils master, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  mmc_cmds.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 5990502..fbf8e7d 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -1524,6 +1524,7 @@ int do_read_extcsd(int nargs, char **argv)
+>         ext_csd_rev = ext_csd[EXT_CSD_REV];
+>
+>         switch (ext_csd_rev) {
+> +       case 9:
+>         case 8:
+>                 str = "5.1";
+>                 break;
+> --
+> 2.34.1
+>
