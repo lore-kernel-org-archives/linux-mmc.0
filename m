@@ -1,117 +1,110 @@
-Received: from mail-lj1-f174.google.com (mail-lj1-f174.google.com [209.85.208.174])
+Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C95A293B5F
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:34:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E30031D72D
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:34:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767108847; cv=none; b=nC61okPxlKisdRS/qPVAiDns+hOtMLhXX7E06GM2NAATj2jlP5abzCY7la6KRG0q4L2GmiXaso/ltshgVkLHc/H/kdF6tamacfojYYczvG4QCuH2qVUl4kQmONi3XL72Gou6fBjFRpamelCCtuT7MAJ9nwTOZCHuae/3jmNBm48=
+	t=1767108851; cv=none; b=DjVef3X7Oy7se0O/6WHIPTsp5v8vKEZ2EYcy4j0DwlOye0C6pBkqinRFVE7FviA+0sN6p8iJ/lnBQAWpTV7UV20DnNinzoVFOTnar7iVGdxb8FmA+INTE81ki0p+wRhEhXGMjsMHIVfIEhY1jQbGmqJiM3hXk8yA0tvHPJtmaHk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767108847; c=relaxed/simple;
-	bh=cJNaMYuuC2I7/+95x8jcQiPUFjMk3F+7PHyjW8Lo1tg=;
+	s=arc-20240116; t=1767108851; c=relaxed/simple;
+	bh=wJqD1rgj0Lm0qQqIwi8NyDHDqRvgPLdMABaqQhTMM/w=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=d4G0KhTpjrIul3e/B5L1lDQMpGcjn55QZbLLRjl/wZGc5NcmI9CtlZ1yQmsuipqupQykL84eBhMbgl/ykHt9aHj6O+VFzOBd3rxWfczCelIZWXd3DT9xo4/BSLclVEbERvVXxLyP5oAApCVgmspZwzHIEufKNdKwfJEzg9kg54s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=wGui7GhQ; arc=none smtp.client-ip=209.85.208.174
+	 To:Cc:Content-Type; b=n0FnNtH8X1fM/6w4K4fLskqPWSIJV+vAp4iIqxmed827yZambc5vmMZiYs9awx9STY5K2CCkX5Bj+O2vKn5kdxfs5QZIKB/4qEIIYrdOBEVX/gOPY8tva4hv2SRrbXwOGI2nhHXkZsPi8e2r8WEi9YhcFmVXoztDAitEfKUvdAk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fArbTTDm; arc=none smtp.client-ip=209.85.208.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wGui7GhQ"
-Received: by mail-lj1-f174.google.com with SMTP id 38308e7fff4ca-3825ae23d95so29428501fa.0
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:34:04 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fArbTTDm"
+Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-37b983fbd45so76666591fa.3
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:34:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1767108843; x=1767713643; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1767108847; x=1767713647; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=IIQJu7CyiY9gIZvx6eWahf0Uexh2lGW7onsdB+Wi7IY=;
-        b=wGui7GhQoHJYpY2Otxo7tiH4We8oeeHpoP6VQ7TRJ9ZSzcXbqBqnJJkQcVV8/9g/2X
-         ZkGO/j/H29qUP5+hpfwFsuEA21LfmoktR79tgfwAIQc7rrml4FmkaQ2Q7xcEVj09FZ2r
-         UEXqXefVZhuXGDh7K/DNZnWHszFHxQRABknXdl+dsHlqJhEgAtWYIWPwwBgp6XZFrrss
-         BiL29uqiCNwccLKXiwpYALYjr10GYIiOY5lAUuFidugLIL7gsaF/BtxwZ6trl24aHi8a
-         iNIYA1w1qdezVc16PB491R10N7wKB5mJZAV5o4kA88XqK25DTHkIJ7l+8DtQTmoh/hr8
-         f/WA==
+        bh=WCZttmg22Qxf8kbQayNAYIvyEVoP6cFbjGsF38jBTAk=;
+        b=fArbTTDm6gNr/6eisHMkkuq51PwgYUmLWR3qmmf992vdv1q2oTRnVQeuEhm43fFD2L
+         T4NBnXta00VbnW0oAAfpiqMjSJxI0+g7lOJKRKWRYnVLWn+TeLujQMXEVALNAR3WNoWV
+         E987H3XlVPqnRbl+iccNwe5czO0tCjFu0c2ozmeYlCc3Sdd/zRtLX83+sVusTfdtkakL
+         4EeFg+LPEflg64QeY2bpBGko+cv2ELqEOLR557Paa6K65e/A4TZkWkq5a0ipfxFSn74G
+         2quvR085fxQUk793crc/cxSDZRWa1PXv23GOyMqRyEcETCGIJAzNU45wueESlrDDK+Hd
+         wUTg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767108843; x=1767713643;
+        d=1e100.net; s=20230601; t=1767108847; x=1767713647;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=IIQJu7CyiY9gIZvx6eWahf0Uexh2lGW7onsdB+Wi7IY=;
-        b=sQp8Y9h5fZAwgRaZIhGS9foaJeyUFDcpUFf0arFkmMvXrpuP4eSgfkLSR9Nj884rtl
-         kNL9EYOe3TWkH4/d1gEft3vvUayH28x6KmO00xbh80SyYW3T6LxA03/V4BCeDESr9XJy
-         ZnoFjOAn2fDFMpOa4bGK+cgiZXpiOuzT6OA++MmIYKtRsyS+rNhS+6DHT8DAC8unVBp6
-         /drV3f7qyTgSJn2BcbmUICY3Lcs0rVg5tXpuIYxQUwMTootnkjkZDrFTuSGDBANhHe2Z
-         55d/ejjujzgwIAoD39Pd4IAt+X8uq5UjV/Uc1uG89+FmxwmDCaGH8JH/ifbE4qQh+oNk
-         oINQ==
-X-Forwarded-Encrypted: i=1; AJvYcCW4Dk21EHja4CfRSR5jNh84jOtyNBMH5u7veWs2eyhKx7w27GMHmFGQaXPlfEzVIH+hs7uefL7QR+4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzbN7lD9Wr08IE63bkhM/nsxnU8+/8fWDHyrCk1Xhp/ECHmQgE9
-	BIcNzezYKPHSVbCrY3/YspMPKa3t3QtvHnxxomr/JjrHFqi22TwykdbhB9oMGnV08SRrg6GoYTj
-	/Pjk59ejzj0wuLAHhuEk+e/6D94HwuBFiJi7wwJZL7g==
-X-Gm-Gg: AY/fxX7y+AWl2SZuO3cYptavTPXf6muf83uzGVMF9+2W2JzmlQE492B6/GteXyp2gBR
-	Zw1Mpkvyc6AEwa5cU+gH+/KAeUuYmaN7ERpYnsvAHiu34LuYZn7YM+5Mrc/Dg6FgD+T1orSkJ9a
-	cTs5odyVmB5n5oJbHR8vNENZxyB/87esjm12wMA0NtDgcvCLp2l4yyjSrg5+MV6b/tmdILkCDVZ
-	UpfRw4ejz5Odu+I8JzTfWiKDIhPtruATUGVRyjl4vvOLgGFr6v/fHzagzd3DCVkhygbaO7PAL9O
-	s9m7yH8=
-X-Google-Smtp-Source: AGHT+IEEzSWxU0Fr9jtKf4rnUE+MZIqWiBIfHx6EwjCFpsAYl5LLEX7BferoDb537v/2XTB1q5TRJQn0YC6nmgiVvgg=
-X-Received: by 2002:a2e:ab89:0:b0:37a:3033:16f6 with SMTP id
- 38308e7fff4ca-3812164513emr98831031fa.35.1767108842896; Tue, 30 Dec 2025
- 07:34:02 -0800 (PST)
+        bh=WCZttmg22Qxf8kbQayNAYIvyEVoP6cFbjGsF38jBTAk=;
+        b=NZL3Htw07ehnbUGXVXsNmGiacd1QsuYOrYPBynq4/H31FaXVenzqtjJIH7OkV13NLq
+         7PkCC5DIy+oy7wrKMX+Tva3q8pQWFt0R3HWg/FC5FoT4CPymW5cuLV15986EohmbtENo
+         s+FoEmtqUY0PzELrNIh1WaiuTjz2qmJGNRVgQ2psvGhZziFAk24Zti6ZCTB6wM8dh5CT
+         y68veSi+VMREqEOmOesWQi8qEc88TBVPl4Z9aFgu4fYPDZOJw3a7ntJCF6NtBSYdZLOc
+         /11iNsRFUecz6cjxBUIOQY/SjvItEtUMPVPtlAveIlbBvnruta5q+3rUjMlJG5JM6qor
+         Y+3g==
+X-Forwarded-Encrypted: i=1; AJvYcCUhkc6F2NbVwVOUK1rC35F0nj8+WB1V2NwrPPoPQrtKXnlqW4uxYceztx10QhOsI8m14UgKSbn1T9c=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz4LRVdU5o1CVk/Zo5Hs9QIlRuQI7dOOrmEoACX9l+Fv3X+7PlS
+	ouWvg8lshqC4kloObGhlIpjz5aeh+uMt7U9qaPBrAt1HR1mdeBc26XAyGVg6CM67+gyCIZf/BYT
+	O9eNu6YoLmCkV5/llZ50pi96n6IGk1QJeAl8xb7dfUg==
+X-Gm-Gg: AY/fxX5roh7w9drLgmXMKOHb4i2qCanF9miWrQ43580Evrdv+x7LDC6bZzJdqLfhOfc
+	5eWFNJZuM84GsQMNPWnBfPHhGumEIgsRPV1NhWNZ3cxOe9111HxtwWpwfU8wEe6vz68IF7CKSp9
+	aPJYI6rh0GgFLuVH89Zm0rbAbxwAy7F4i+AGV30Zk74kxUZgS93q8iEPWfy2oeWr9H5BM9YnJnZ
+	Et6HY1v3LPcALuCddk1qrenmwdvN+Z3GssJpLi6Rvdr7Hqo2OvIY1X2IOHpGvH0X9eP9z8GSuNT
+	pKnRa1E=
+X-Google-Smtp-Source: AGHT+IF1ZRydGvnYPXNTIWd90sRtt2p02hzltXR1ku+l7cYxr8qnrN9mS9q3/OVh3HOPCTKVsuN3YUyPy/J2hA4MPVw=
+X-Received: by 2002:a2e:be20:0:b0:37f:8332:6ae0 with SMTP id
+ 38308e7fff4ca-381216428e4mr110761501fa.33.1767108847296; Tue, 30 Dec 2025
+ 07:34:07 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251223-07-k1-sdhci-reset-v2-0-5b8248cfc522@gentoo.org>
-In-Reply-To: <20251223-07-k1-sdhci-reset-v2-0-5b8248cfc522@gentoo.org>
+References: <20251222100338.634144-1-thorsten.blum@linux.dev>
+In-Reply-To: <20251222100338.634144-1-thorsten.blum@linux.dev>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 30 Dec 2025 16:33:27 +0100
-X-Gm-Features: AQt7F2oqCrEKFHiJvi35sI497oUVGoB1FksL7aATuRnp8180lObyxwQDc3LztRs
-Message-ID: <CAPDyKFo905ptdO-rSkiJ-ax2u=P_+EAJA30b14n=B4j9adaaKg@mail.gmail.com>
-Subject: Re: [PATCH v2 0/3] mmc: sdhci-of-k1: add reset support
-To: Yixun Lan <dlan@gentoo.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Philipp Zabel <p.zabel@pengutronix.de>, Paul Walmsley <pjw@kernel.org>, 
-	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Iker Pedrosa <ikerpedrosam@gmail.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
-	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
+Date: Tue, 30 Dec 2025 16:33:31 +0100
+X-Gm-Features: AQt7F2ovKt5puI0EigUj07IJmrdmNcqNK0t9LEP-gJ38HKXpGP4Lo9BsIk2bUfQ
+Message-ID: <CAPDyKFoYNRNwo8UUzwSqKF_=RM21DwTa90MFj96wPaMK24qjdg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: cavium: Use clamp to simplify cvm_mmc_set_clock
+To: Thorsten Blum <thorsten.blum@linux.dev>
+Cc: Robert Richter <rric@kernel.org>, Huacai Chen <chenhuacai@kernel.org>, 
+	Binbin Zhou <zhoubinbin@loongson.cn>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 23 Dec 2025 at 03:25, Yixun Lan <dlan@gentoo.org> wrote:
+On Mon, 22 Dec 2025 at 11:03, Thorsten Blum <thorsten.blum@linux.dev> wrote:
 >
-> This series try to add reset support explicitly to SpacemiT SDHCI controller.
-> Previous it works well for eMMC due to it's already initialized at brom or
-> bootloader phase.
->   The controller has two reset lines, one connect to AXI bus which shared by
-> all controllers, while another one connect to individual controller separately.
+> Use clamp() to simplify cvm_mmc_set_clock() and improve its readability.
 >
-> Signed-off-by: Yixun Lan <dlan@gentoo.org>
-> ---
-> Changes in v2:
-> - To not break DT ABI, make the reset line request optional
-> - Use devm_reset_control_get_optional() api
-> - Link to v1: https://lore.kernel.org/r/20251221-07-k1-sdhci-reset-v1-0-6780af7fa6e7@gentoo.org
->
-> ---
-> Yixun Lan (3):
->       dt-bindings: mmc: spacemit,sdhci: add reset support
->       mmc: sdhci-of-k1: add reset support
->       riscv: dts: spacemit: sdhci: add reset support
->
->  .../devicetree/bindings/mmc/spacemit,sdhci.yaml      | 10 ++++++++++
->  arch/riscv/boot/dts/spacemit/k1.dtsi                 |  3 +++
->  drivers/mmc/host/sdhci-of-k1.c                       | 20 ++++++++++++++++++++
->  3 files changed, 33 insertions(+)
-> ---
-> base-commit: 8f0b4cce4481fb22653697cced8d0d04027cb1e8
-> change-id: 20251221-07-k1-sdhci-reset-1990d1170437
->
-> Best regards,
-> --
-> Yixun Lan
->
+> Signed-off-by: Thorsten Blum <thorsten.blum@linux.dev>
 
-Patch 1->2 applied for next, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/cavium.c | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
+> index 9a55db0e657c..37a88f2a0c86 100644
+> --- a/drivers/mmc/host/cavium.c
+> +++ b/drivers/mmc/host/cavium.c
+> @@ -905,9 +905,7 @@ static void cvm_mmc_set_clock(struct cvm_mmc_slot *slot, unsigned int clock)
+>  {
+>         struct mmc_host *mmc = slot->mmc;
+>
+> -       clock = min(clock, mmc->f_max);
+> -       clock = max(clock, mmc->f_min);
+> -       slot->clock = clock;
+> +       slot->clock = clamp(clock, mmc->f_min, mmc->f_max);
+>  }
+>
+>  static int cvm_mmc_init_lowlevel(struct cvm_mmc_slot *slot)
+> --
+> Thorsten Blum <thorsten.blum@linux.dev>
+> GPG: 1D60 735E 8AEF 3BE4 73B6  9D84 7336 78FD 8DFE EAD4
+>
