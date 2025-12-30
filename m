@@ -1,134 +1,130 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-ed1-f42.google.com (mail-ed1-f42.google.com [209.85.208.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C23C130B53F
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 15:34:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 337ED21C160
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 18:57:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767108871; cv=none; b=VxvsJCqBarXzLCRIBVXuIfnvNrLx4tgkFLE3XDQi44YPo6yGfpNfjKhc0S67Jebg9Yp6sqbuF0WAkhyEZvcgeziDjhEZAMHlP+4kqgbf5M0AH5smhcRPCkfIhRFxNAtGpW1tdcR8eQg8ovyX4mqCpUgc12MLBGVH6lilb8AWwqk=
+	t=1767121025; cv=none; b=YTl2CEMQTd5Z4afysIN44nGO4pZUNlt5F1g6v3miY9g8X0EBNug3HTipqibeovbFITPwb5Y1k56PAIG3yOEYNEc00qfW2dGD/TJxhpFMgyvRP6XeUJ9FYjyobyReVfLbLpOLjD2QIn2JAYOjcT2RuGpsATLFU3gePExm9JXejeU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767108871; c=relaxed/simple;
-	bh=ykdIkvx4cqaj9RPfNM0pafXHT1sVc5JnrzlKxZNQbbg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=G4B4zUi5pUifzP22oAL9neJUY+3q35o7XUa778P4f6A03j6CfHNOP60ay1ruvzR9YpMP0KRWStwxluBSfvpJ/IOwLYXEymeptSRlWTuWApFUcwbarEwGVCpNq+AhJ4NTEuiBApZZHHL02cUl7HxQEYdDchTuyzsuSVsV5ZFOlJI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=riErROMm; arc=none smtp.client-ip=209.85.167.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1767121025; c=relaxed/simple;
+	bh=iZ4S3Ous4NBoV4+K7EyEggznX/9iE0fhnu2KNtimeZ0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NPHs6nyiFuWjaDr7zfySOkPsPV+6nvfsogM+DbbxwxybcMc4yEhI4QX71bLsUaq01LSqSkhSYcA1zQKHvfONiibsyH9Jsia1GqBVGh8btNQxsmjVQdNnCZu2gHEvLWLZpQssFnN4hRtWwSfrJVrgwTvuI7czAx2xZvX/+3ByGbA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=NQZbzfZe; arc=none smtp.client-ip=209.85.208.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="riErROMm"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5957ac0efc2so10800952e87.1
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 07:34:29 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="NQZbzfZe"
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-64b7318f1b0so12123923a12.2
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Dec 2025 10:57:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1767108868; x=1767713668; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=VVOyprJ3Cj2YRlSR4vH7ppFe43eLFh6BnkA7raxZ3uM=;
-        b=riErROMmGevHzMUX10BR01/vzWKZWplkfJIe1DZCyTF8a3u05JYXrmdn58p9gqq6TW
-         9Y8izmofrtcOo1spwRSYpzVRriZa87c7I7CxepYZNcZX50VJyiY5YsPQfMcXmmWxNTqA
-         7iZnt4SuIw15A/r+WHToy5nGecawnIHXBnYpQMzJQHY8lJWSYjWkfyBHqwOsbgwPxXUo
-         F0o/2r+8sp4gsrwsZSfWPgM1xaBEToMipx9ygrdq3fGALu7HjzRgOj2Qn970gz3XOk8+
-         PK9kPnol3FfVNE7TawaTc8/Ku4swkbKWn3aXleO9eugGu5LG7Rvq34X+jytlrno2QAc+
-         scpA==
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1767121021; x=1767725821; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=iZ4S3Ous4NBoV4+K7EyEggznX/9iE0fhnu2KNtimeZ0=;
+        b=NQZbzfZezIMvS6dzvJ9kebdxzRmzP+R191jJjRdviyOOaH1d1izXFFEGCx+0GAQx++
+         k4pR42T4teujTIuGU/Apag3VA047251H+AHgaberz2IvCdcGXd9A7X9TI0vEGdmFgJkp
+         /LVSB6cr6zcgS9QEd09cF/X1erMEwBPJi32EvGx9Q6r6eITFruU4y/Ujv9nKC7kdo88B
+         X4T3psYhuCftLepfZHN3fRKG/kEl55m9ATjyLSAvqlHipi7fe98z9b4vEjWYTQbTNVcR
+         e4pMfdF+X3vBCdTQlehsxIcmuLxLUPRnGQiFZdSd/Or9SgYqIgcoeajU/OBtVu912DsF
+         f7rQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767108868; x=1767713668;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=VVOyprJ3Cj2YRlSR4vH7ppFe43eLFh6BnkA7raxZ3uM=;
-        b=XZy2S1dyWfiEeJh5VsNcHBTTnSS2OW2j6HhhVzlgzWYMd47yyylYOyR3mm5olR/j3H
-         i9KaYeh5Jo41lKDbkSEenepO7Qr+b65cmZZ9v3gEv54oAm07YgeYfKZl8HxF1a3bvYr8
-         sxYNcNt55ki55ZnaW8Pyp7Isnv1W3NLAD4PM4V1LTe/PhqgPlpLeUeM26z+R3SYnkorL
-         LJ/WfbyeMgNOwZqgvwRQjc2fFXqr85UcHcGVTW6U4/y2X9qRf+HIIcW/SiTgxl45jaxP
-         Mm5X11FRLmNWzBdKXMx8FelGasZuo/gaAidC7cyiprgj+htjYiJ+Apck8xWyWhPXx0Yz
-         vG2w==
-X-Forwarded-Encrypted: i=1; AJvYcCXsOZv36lmQsorOn49haeAFcCP9prUGRFl5ELd3DxvICuneR5Y1DA8dVT5H3DxE0hS/rcMim1Gf2F4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx3QewUr+1KO+YCtEgsM7JsEzoa9ukZ2AILBrWfov2U5XDV35oS
-	e+sxtoR9JF9f0qcVMYpUpo9NodEb+dYzgvH7aT5xSHeItdJ4UtN0/s8fG5jrg0ZiWErBOJll1nZ
-	TTDVqSpukf2t2Gtobf8UiOkveK6EW1fjeYsbRfC3adw==
-X-Gm-Gg: AY/fxX5TDQ9Qk+fGzKv6Qw5LfiTMFhYkpskMBfk2JCl7Wmig6UzjAM5YJ7oS3RBv80o
-	el0vA9nagzZqZV2XksPwPR0b4lH7DI00C4hdID2PgERIiO/AB+k0zs2pWeM6K/zYw9JPAhrjFaN
-	ZTIe5ajosjVAhU5Z/6ATnf06aO6azhfUqvdZdqL2gL0V1rJomz3RKMHDrbRtv1lSwwKJBghrR1j
-	tTvbw1jtus6YexyDbbhpWLI0BowZXtpTl7wdCJsYtLzDhl4Qw9eLEmzd8kSkgGDyWXFzHRR
-X-Google-Smtp-Source: AGHT+IEdpLJulaMagiCntHq1v9KxSgC049v9J3ss/UBW2tRdN7RsCII8vnj/WhdRIz5aTHz6WELoj9cCY8mYimOF/RA=
-X-Received: by 2002:a05:6512:b8b:b0:598:8f92:c33f with SMTP id
- 2adb3069b0e04-59a17d77435mr12093495e87.51.1767108867602; Tue, 30 Dec 2025
- 07:34:27 -0800 (PST)
+        d=1e100.net; s=20230601; t=1767121021; x=1767725821;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=iZ4S3Ous4NBoV4+K7EyEggznX/9iE0fhnu2KNtimeZ0=;
+        b=uzCl9dq4/c5MRqotautVUYSvhfW78/drQA/X00PRJs1Rabbd8tL5u+XDg7MSJ3b9OV
+         P2loDwnNhwVqmgLlMo/p438FqqlHUOxUO/LZr4RbXj2N10hLwq9yIF2VeaWRYkvHRyXl
+         j3Q36VvwgZzc9QzRxPXT2Aaz7vcOWj/PLxN7tgM+CpBg5tuihyBH2bOzx2N8Bd2HurRF
+         9dgQ0eG/11uFWvOArPs8q2j9ztJKyyJIaIwQkeqQbt5qVi0ilVTioj/I04TM9WoFhBqn
+         KrGUdXGJUnrjXvruY04evNhli1WIVUB+FSfJ41m7UXeI+PuzofN/HUMTfBPCCMCwyRfj
+         PVTg==
+X-Forwarded-Encrypted: i=1; AJvYcCW2M58hgV+5LUhvtWCTM1myCX53Q8yilOO2Cd7AZF2ZoEddI+6QcxEwz3yUoEY9KRUGkqQf3JG3Tug=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwrLLVzqvhnf7Be6yCCLb2OTF4/nyIVunF/cw+PCGITRDvw+7LI
+	1nP0X+92EsMkl9gcAk6Pe6vvQmfDkfpGqBBJ+doEKGQ92Cbd3HKNx75steuoc7wxDImCp058kid
+	FAw45
+X-Gm-Gg: AY/fxX7Nj+RwMB7o3bsUv3+RI+ZI38cyO8CKVpqndw+UUTJ+heOmfuhIMywERsQaskv
+	yGCCPKK9IVyeux37zxonpCahVCEsK7DIRLY+L8cSyXQ6i0C6/lj9IUUmW7cZi16E/WyTc/0gdFD
+	uMEJulIHVS2YO5CDBZeQlsXyoeA6DOVGWIFeOJHQvNKNHX2fxRvwgjCC6pW9iwNyPVlZ7cBIavk
+	en8DT3M8Mcxj1hGQR5oGVDgXA5GSJAfC0BFEaoKF6KI8OXCeJlCZsIyw45xfd/z5Xwb2SR4inNZ
+	E2lZlREw6/4h/wjYJQbPNzDq2q6yfItIKUGDC7rY06ms9/MdzoKgbiQO/NA7q7/gOJsgZV/jJya
+	dVOgVki1sCx3a8p1n88AmRScCZsY/eZFwErHo9KoM8xv1xAbDaVHk84SBy+GZDex61Ca4MBb9MQ
+	4qjsVZQ7095GYvK9od
+X-Google-Smtp-Source: AGHT+IHX59JbGHOKLai3o+izBsjfxrJQN6eH+wJdD9Jv4Vjwu2ACPDyrp7bHX1O9h4VNAtugM0iy+w==
+X-Received: by 2002:a05:6402:2706:b0:64d:f39:3fdb with SMTP id 4fb4d7f45d1cf-64d0f3941a6mr28589514a12.13.1767121021539;
+        Tue, 30 Dec 2025 10:57:01 -0800 (PST)
+Received: from localhost ([2a02:8071:b783:6940:1d24:d58d:2b65:c291])
+        by smtp.gmail.com with UTF8SMTPSA id 4fb4d7f45d1cf-64b910601c7sm35301468a12.14.2025.12.30.10.56.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 30 Dec 2025 10:57:00 -0800 (PST)
+Date: Tue, 30 Dec 2025 19:56:57 +0100
+From: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
+	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v1 2/4] wifi: rsi: sdio: Reduce use of #ifdef for
+ CONFIG_PM
+Message-ID: <7ngbudwaq4rdb6u4r3gn6ub7hqctq3qgienciuylgqsglougnk@ckdj3wrhzyqy>
+References: <cover.1765968841.git.ukleinek@kernel.org>
+ <f291cca2741f6ac994b2bde1fb9d21194fec4d3e.1765968841.git.ukleinek@kernel.org>
+ <21f1759416ae907b8504605cd8a814dc85a99a0c.camel@sipsolutions.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1766387485-205480-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1766387485-205480-1-git-send-email-shawn.lin@rock-chips.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 30 Dec 2025 16:33:51 +0100
-X-Gm-Features: AQt7F2oM5uh2RRoQE3AlSJVcnjGKNpD0QEAOcfCTfTFC010Q-hSrZ7pgui_gOls
-Message-ID: <CAPDyKFrAyQY1o0x_-ZqxfwACZHhDPqiSWCBfLWGtHzX9fUSnTw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Prevent illegal clock reduction in
- HS200/HS400 mode
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-rockchip@lists.infradead.org, 
-	linux-mmc@vger.kernel.org, 
-	Sebastian Reichel <sebastian.reichel@collabora.com>, Yifeng Zhao <yifeng.zhao@rock-chips.com>
-Content-Type: text/plain; charset="UTF-8"
-
-On Mon, 22 Dec 2025 at 08:11, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
-> When operating in HS200 or HS400 timing modes, reducing the clock frequency
-> below 52MHz will lead to link broken as the Rockchip DWC MSHC controller
-> requires maintaining a minimum clock of 52MHz in these modes.
->
-> Add a check to prevent illegal clock reduction through debugfs:
->
-> root@debian:/# echo 50000000 > /sys/kernel/debug/mmc0/clock
-> root@debian:/# [   30.090146] mmc0: running CQE recovery
-> mmc0: cqhci: Failed to halt
-> mmc0: cqhci: spurious TCN for tag 0
-> WARNING: drivers/mmc/host/cqhci-core.c:797 at cqhci_irq+0x254/0x818, CPU#1: kworker/1:0H/24
-> Modules linked in:
-> CPU: 1 UID: 0 PID: 24 Comm: kworker/1:0H Not tainted 6.19.0-rc1-00001-g09db0998649d-dirty #204 PREEMPT
-> Hardware name: Rockchip RK3588 EVB1 V10 Board (DT)
-> Workqueue: kblockd blk_mq_run_work_fn
-> pstate: 604000c9 (nZCv daIF +PAN -UAO -TCO -DIT -SSBS BTYPE=--)
-> pc : cqhci_irq+0x254/0x818
-> lr : cqhci_irq+0x254/0x818
-> ...
->
-> Fixes: c6f361cba51c ("mmc: sdhci-of-dwcmshc: add support for rk3588")
-> Cc: Sebastian Reichel <sebastian.reichel@collabora.com>
-> Cc: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-Applied for fixes and by adding a stable-tag, thanks!
-
-Kind regards
-Uffe
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="enyljlgs5qxi4kp7"
+Content-Disposition: inline
+In-Reply-To: <21f1759416ae907b8504605cd8a814dc85a99a0c.camel@sipsolutions.net>
 
 
-> ---
->
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 51949cd..204830b 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -739,6 +739,13 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->         sdhci_writel(host, extra, reg);
->
->         if (clock <= 52000000) {
-> +               if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
-> +                   host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
-> +                       dev_err(mmc_dev(host->mmc),
-> +                               "Can't reduce the clock below 52MHz in HS200/HS400 mode");
-> +                       return;
-> +               }
-> +
->                 /*
->                  * Disable DLL and reset both of sample and drive clock.
->                  * The bypass bit and start bit need to be set if DLL is not locked.
-> --
-> 2.7.4
->
+--enyljlgs5qxi4kp7
+Content-Type: text/plain; protected-headers=v1; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH v1 2/4] wifi: rsi: sdio: Reduce use of #ifdef for
+ CONFIG_PM
+MIME-Version: 1.0
+
+On Mon, Dec 29, 2025 at 11:36:02AM +0100, Johannes Berg wrote:
+> On Wed, 2025-12-17 at 12:09 +0100, Uwe Kleine-K=F6nig wrote:
+> > This drops two #ifdefs (which is good because they are ugly) without
+> > changing semantics. This also improves compile coverage because all the
+> > code in the first #ifdef block is now compiled even for configurations
+> > without CONFIG_PM (and then thrown away).
+>=20
+> This didn't build, and given that we never got 1/4 I'm going to assume
+> it wasn't destined to the wireless tree.
+
+Yes, this depends on patch #1, I expected the series to go in via
+whatever tree sdio usually goes in and didn't notice that all users are
+in the wireless subsystem.
+
+The kernel robot also found an issue[1] that needs addressing (probably
+by dropping patch #2 from the series). Will look into that next year.
+
+Best regards
+Uwe
+
+[1] https://lore.kernel.org/all/202512210032.6Skz9prt-lkp@intel.com/
+
+--enyljlgs5qxi4kp7
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmlUIHcACgkQj4D7WH0S
+/k7Yvwf/VqVh/xAAdXcu+Daixp3XFFt++ZZUJQnoHxOoVrw0Sn8emGqZ/RvEYROc
+dYGec7UrjwBQE2UhIfWFthRv182lSY21ZVk2XHgndhgnZS/wqX19od032Mj47WoO
+TlusjIApE1C+HUDxAVFbKlAI1lclkMT509B57gGI+OYC1I8pHPjEUumPCvpnz0uy
+CwkQnH5KVqDls5cSG/4NXs4qFas0di/BezeCthbBVv3i3PovRt6m+/mQK0S23qZ9
+AcMugtV+zX6S1QbaY7wuP04V0PtK+iuzmKWmYqEME+9KHnZKDtMVrEjOVR3jaTm+
+Q/WNsLJrU1PD+g6qr49ztJHhINRV0Q==
+=HqsC
+-----END PGP SIGNATURE-----
+
+--enyljlgs5qxi4kp7--
