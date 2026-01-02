@@ -1,297 +1,263 @@
-Received: from mail-ua1-f46.google.com (mail-ua1-f46.google.com [209.85.222.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83453A41
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Jan 2026 05:11:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA9192DCBFC
+	for <linux-mmc@vger.kernel.org>; Fri,  2 Jan 2026 12:40:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767244320; cv=none; b=ahlZ84OikIwOLzZFW6p1b+hhF4bmDLrI9BQ3sUkh3HFs+kDdu0VnnxLo9oSiZkbqpoujbgi+EfuovYIsCIwtKPeON9Z3gzYV1vlXu3X77UZKnEd3s+JUIBlswiJ5TNhiliJa8Pb76m+jBVJMAfwMd33QvoRtElukZ5z/oAH1wac=
+	t=1767357628; cv=none; b=DnsdLBatvXl/GfnQiL2dMdLs/Vqte/rUAVUozKhxt83DjX7zc86a6nrhCzkoSx1Pwx6Z/d87/bBFPF6hhtU4uJPIBt4ZQKS8v8/pKwbR6MAvrgKADCOGZbH6jclqmhUfvtrNEqnypyYNoipFzxoQlpzAtOOfsD78xvpjuYoPfC8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767244320; c=relaxed/simple;
-	bh=h/royyGZIoVL78Ipke9ggyrPvwgz5qP7BWwl6uoeEAc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=R19UzBH9TbTenghQMlKmT389eXc6p43u1rCdyt7NI3FuYBOKh8M7Y2ilsek+7xhmND5aTOKJzjgk/Zyf8w6yP2pknhds+Ib6qvkYnmwKa86HCSuHLX5TMyTsuw402T1oZMgN4WfKEx7dxhg01hoBIEAy6+ovsyN6yE9NvSnJ5QI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SaUP1vND; arc=none smtp.client-ip=209.85.222.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1767357628; c=relaxed/simple;
+	bh=vV2nmrOl+t4OdYmghvPwINneUWYZKWPyzTh+ELChZx4=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=L0BL63KicEXLpeYG+iYbd81xoRN454eX8HUE8r/PmBdHAZPsJWfOKys4gmqeBEc8kFjOzyFJ8sLjiunuSp/cHc4uhNQNH1bhEpDuXtH+IuSS/4C6eVpZu5+dEZ2PAQgNqG1sdtrxd4sZTUa77odVUBlctod++ArkWzRcclE0vRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=KTS6x8EV; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=jxKAX7jh; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SaUP1vND"
-Received: by mail-ua1-f46.google.com with SMTP id a1e0cc1a2514c-94120e0acbeso6126015241.2
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Dec 2025 21:11:58 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="KTS6x8EV";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="jxKAX7jh"
+Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6029WDX7207438
+	for <linux-mmc@vger.kernel.org>; Fri, 2 Jan 2026 12:40:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=wDzocy7j+gQrNEnjx+nc/YBJjQhj3MoB0EM
+	yBICOBZI=; b=KTS6x8EVWsOGxLM+qZHr3aZdLFJC2TdCT89WL7ilH72yRoTOt+E
+	a9Ez0W3y1WTFjdaENTFKDICKGGYhjm3L8PtscP9shdHF5VQBGNqbdlhV3r+uYd7F
+	BVng3GDSG7+UPCYRFq1aBSJw5fO8OoeavoymedQudxaY25G9ILtT1sGy3sK/XZmu
+	BhuJwIk4D+/PvR1YJCaOa6w25FeJf32+0+UAqjF0p8BMQQxBQuoYRd6j6Co9FpXE
+	Ic6K6hpheLmHu0sCHkjQbc0at9fdke7T1lQtFg13DZX70fznSmLez0Zhh1Ss4vZT
+	497KC/0MKw2S38x45rihSZ+ze82OuqlJc2Q==
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com [209.85.214.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4bcx74cg25-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 02 Jan 2026 12:40:25 +0000 (GMT)
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2a0d058fc56so195061475ad.3
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Jan 2026 04:40:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1767244317; x=1767849117; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=zq6cx9sMpRva27qIsnRbjolAfnjlhU8Qgkc4DzWVXxI=;
-        b=SaUP1vNDETtxEVUsx/dtZ58fjO6SpvnjGpoYxcgLvHSPaxLrpOibXYqyjyK+3CwJGq
-         s+5iO2d//1t5C4rcHvtavBCihU/tl3qLKMPK03kv8OtxLlIMAE6T4wvKy5F+UQ8X9ccf
-         Hvm/WT/MvZHah4O5h/wBilJjZpsBLeIAiYBAFhV9XCm1gj30Rwzn6EWOsyAt0ocy0Xev
-         RmtBQh3zS/mo/uo5COn6Pc/FZ1qYtqT4kAwrHbXtQaoPY1OlHIHowpWmhVgl4TI0esGe
-         Dzz3nlyXGJf4HIL5cHlFeSLpuqgRexNb6dl/MTcDPo8qWiVikLFKQJSqoyFUXYWWcDgN
-         c/qw==
+        d=oss.qualcomm.com; s=google; t=1767357624; x=1767962424; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=wDzocy7j+gQrNEnjx+nc/YBJjQhj3MoB0EMyBICOBZI=;
+        b=jxKAX7jhbGeoggszZe3rQLYLjzHXHZRjLOEjm4PfLpDu5iqPcB//iOgWWVcQlpLrDh
+         RceTqoIM5k2WE93mBQ4q5Q+76JJK10LZ6v4l805ubXRI2KMR219vY4aR7romSzYnjBJJ
+         xH5xv12vjEdEGgQD2JICEw4COB5gX0phhEn5lDmLudIK8Si+hPlpEQBVnNkiuFC3Ir4m
+         ycZ1FPMKFOlFzLpgScJkfhve7loD3Epw3RDD2CatF+eyoeYl+bNtyeZfKnpQQZjlv1AA
+         JfY2kpM5/PGMKJsQ4tiwWixSqkhSjilGB0dsLXPgXGUKpxe57zL2X5jbPgkzMxdgtUAf
+         xkSQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767244317; x=1767849117;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=zq6cx9sMpRva27qIsnRbjolAfnjlhU8Qgkc4DzWVXxI=;
-        b=WhLnHIYRBw7yDFD0Ys19vWlL3SMUOptw0nFsx1/TOvkTrs1WqKUQ4PnTPx2+YcbNw2
-         pSs/e1IK5iYOUfUkPWlLdKP44dT9D1ZLsBwbmcwzUp0vdQEXcRMX3FnhtF72yI69UPc2
-         8272fr/PVHPXvhKEF+88gwrF1uQRIs6LXwuRjMlqypQW5OhJXnpvxRqlRtCj9rAwo0Yh
-         PQ+GFhTSozaOnOs/IanwEN8QtfL3G7Ypz9Ry/4cbWtW0+Ao/YJH3R+AbcRwHpXrb50w6
-         dyZWA7UtUJf0HiXDqQYp3tmmIEi6qTffoYFEf0277C3WHpEv+RG3oY2XscuoXdpGwcDg
-         Tz4Q==
-X-Gm-Message-State: AOJu0Ywhbeo1AFKn4rmec7IrRlwVn77tmwJyADpX+y4hE6eSXLHttbYp
-	XViO5iyckCKYz1GgRWCyDUoaZahPmaQTQYV6OaVdQk2+BAeXelG2QjWCCE36V7Xc3xWI8xu90hv
-	otK5qn+6sUy5jLouTB+dQN4tdGctaMz6CqQnqpLw=
-X-Gm-Gg: AY/fxX4z/lhJmKmXrW88F4t+l1AN3Kdc/rrBFrf7QhnYcq1RlwyoTmnhIHqV89ZKsgu
-	9/lIsQVOS4DBAlRCc9T6tjY0O+rude0V6auVdIByN4gjqcm9LU7JqQK4BMCKbKxGfQEepsZP/aX
-	BZxfeqEWuv3QAw2o0cP96cLx08RyQe/fCMbUyEPXrHbUAICLrZTQcj1oDqbg05txxP2RQ5gMxCH
-	j0+5C6UyQZHFsh7r2nE0Z1P6Tl09i6D8PospQUKfZkN5XBL+zDhaPcg0qSWYwAI8BJmIQs=
-X-Google-Smtp-Source: AGHT+IFFOGlqfl4A8P4rdfQbioZ21yDaBKR+237T39958yhW1EGzXRObG4BgUxjqDgBg07czjCGvP5bmWWAXokvkg04=
-X-Received: by 2002:a05:6102:952:b0:5db:25b5:9b5e with SMTP id
- ada2fe7eead31-5eb1a7d5662mr12148435137.22.1767244317147; Wed, 31 Dec 2025
- 21:11:57 -0800 (PST)
+        d=1e100.net; s=20230601; t=1767357624; x=1767962424;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wDzocy7j+gQrNEnjx+nc/YBJjQhj3MoB0EMyBICOBZI=;
+        b=EpYvp9zKE1+4akkOY18XnJGvLTIxCWpQq5kr6joqBjOHsm7uE00YVh96nHjXJWJAF6
+         3Spp40VBgjk/9+EuFPw0d6+stHow3kdkIN6dgTnR3itqK1QfffZnI6OKA5aoffWEWB+J
+         MEyEhThKBxrMfmm6KHPS+Qe0Pzxbt/GILGZqMCSRqyzkGZ2k3PMX9gi8J0P6do4GZKwE
+         MENkItA0dK59l4xZ5ugK5kS5bvOntLMtCm7kqnEbO4ev5TH5SwoeZ49b0rg5vNWGqJBn
+         bM1fM4+TVnoN3oumg+tveiE8ycbjk05kha3jOinP7sC132m621WboGjy9YA6eq41skTR
+         gDTQ==
+X-Gm-Message-State: AOJu0Yy0EKUBoAULOS93IIJfWm/6RKtnXxou/L1sUhF4NVtVnhBXJExg
+	IzetOSlNTHxRroQBMtAFoUX3q3KtOTpXmCN4wvjtAdFcNxmv7ppIIHC3MBl6H032FZtnCguatde
+	S85wDpPW3HJCbmwiJRdARWViZodk5v3Ta0ekINrxi8CjtbXGwy2shAz6xuhos2kU=
+X-Gm-Gg: AY/fxX5Odr92M9qRKJwOZU38K3AUc9CV9NwUSncaNOu8kBucchYD7jGL5uTxEdsYubq
+	E3gPxoJxPA8IXaM8GNfdalfywShestC4Fwwbakuuaw89mR43rogpNKy6wcMtwqsBN/Uh5R7R4PJ
+	DE8vu2yfKOPXrsDAvauZ3E4psa6woysVrVD0wVy+M2Sxvl25xLdX+2ch8wgFA/hsf4opQsxBqob
+	tARufQMVPtM0kD/iU/SNgWvQjleRyuUhgG1xHI9TEbVFXQuccozAl+V2xUWMDaUP9xj/h/5D4K/
+	I6Z/kqymEc3pXmbyLNecKPhQoEHQ1Mn5al9JD2kNOp9MGXTlzIvvt/sNVz7u7tVHTuVkgdLdzXb
+	8y2vTx4kRPVu4LSgRggQGrQ5NbhKhV1PjijN0Xn0f
+X-Received: by 2002:a17:902:d488:b0:29f:2b8a:d3d with SMTP id d9443c01a7336-2a2f2202ccamr395490605ad.4.1767357624381;
+        Fri, 02 Jan 2026 04:40:24 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE8A/uRbQ2+nH9MV72MQr84R+/Z3/LjbIDBmGCuDgNg5Cy+ibvYVOtw6HxMTm6h0Elj7WTxmg==
+X-Received: by 2002:a17:902:d488:b0:29f:2b8a:d3d with SMTP id d9443c01a7336-2a2f2202ccamr395490445ad.4.1767357623880;
+        Fri, 02 Jan 2026 04:40:23 -0800 (PST)
+Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c1e7ca0baf3sm36141763a12.34.2026.01.02.04.40.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Jan 2026 04:40:23 -0800 (PST)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, ebiggers@kernel.org,
+        abel.vesa@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com,
+        Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
+Subject: [PATCH v4] mmc: host: sdhci-msm: Add support for wrapped keys
+Date: Fri,  2 Jan 2026 18:10:18 +0530
+Message-Id: <20260102124018.3643243-1-neeraj.soni@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <a242799a-d427-48e1-85ef-923f34df843a@gmail.com> <CAPDyKFq55Vqfd7cMdmQZBzvS1Xr-Z4QaTzEeuWWn3EX4HBbP3A@mail.gmail.com>
-In-Reply-To: <CAPDyKFq55Vqfd7cMdmQZBzvS1Xr-Z4QaTzEeuWWn3EX4HBbP3A@mail.gmail.com>
-From: Tabby Kitten <nyanpasu256@gmail.com>
-Date: Wed, 31 Dec 2025 21:11:46 -0800
-X-Gm-Features: AQt7F2ofcvUjD8SlJnhzdp02YjN4VLrFdHxOvLQBMamAvg_uw-Z5sdbcz4cggTM
-Message-ID: <CAL57YxYec8x+YhHXD4G_b+4e=BL3LksT7KuyQEeL=og_4ZzCDA@mail.gmail.com>
-Subject: Re: rtsx_pci_sdmmc aborts suspend when /sys/power/wakeup_count is enabled
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: qbf8dLZY5g-Y3cMhoH0N-8WYpFrOF7jJ
+X-Proofpoint-GUID: qbf8dLZY5g-Y3cMhoH0N-8WYpFrOF7jJ
+X-Authority-Analysis: v=2.4 cv=HNvO14tv c=1 sm=1 tr=0 ts=6957bcb9 cx=c_pps
+ a=IZJwPbhc+fLeJZngyXXI0A==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=vUbySO9Y5rIA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=NEAV23lmAAAA:8 a=VwQbUJbxAAAA:8 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
+ a=qqNy_vziDfUGqepx9HcA:9 a=uG9DUKGECoFWVXl0Dc02:22 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMTAyMDExMSBTYWx0ZWRfX46e4vcIFq5vq
+ 6pkHX7bp4Cbajqu0xwvwkeKLDvidwi6gzANikhSG7dbd9hthVw4pKhM2AHEG4NbLvhqZF2bhkOP
+ o260oO7DXAudHjLI1ecHsXMHLy//+RCqkLYeYYVTgLx9UBxd2inwa6Gv7TN9UB9MKkWgaT9JmDz
+ Woi026HNj2PcynkUleVsooEqoE2QyFj2dQoZYh9Tgj0PAR7BYhAHTOQSGws6s83Am4AMdu3LMEb
+ WT4ibT8SfQ5CajOSIB1nVSyX4djZzcaKhkRJJIlHCSD9ldBeS0ggsjNZxf9usuTiuoVnae64JRp
+ tiCY6znoa2OI5ZLGwq1TwB4Za8MnSP3FHTLhSyDF58DytHtNyUm2b1C0Xiy5eIin0e09bRalY5G
+ Q1kvJndc6g+N1kLCGZNxy+MBYewHkYVw6MGYbeYJV+1NqByXDgaAVlIye5sINmfxq+JEj04LzaM
+ ShH95/8h42UcRQjCaXg==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2026-01-02_01,2025-12-31_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ malwarescore=0 impostorscore=0 bulkscore=0 adultscore=0 suspectscore=0
+ priorityscore=1501 lowpriorityscore=0 clxscore=1015 spamscore=0 phishscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2512120000 definitions=main-2601020111
 
-Hi,
+Add the wrapped key support for sdhci-msm by implementing the needed
+methods in struct blk_crypto_ll_ops and setting the appropriate flag in
+blk_crypto_profile::key_types_supported.
 
-It's been a few weeks since you looked into the bug. I think the merge
-window is over now, have you had the time to look into resolving this
-issue?
+Tested on SC7280 eMMC variant.
 
-Tabby
+How to test:
 
+Use the "v1.3.0" tag from https://github.com/google/fscryptctl and build
+fscryptctl that supports generating wrapped keys.
 
-On Tue, Dec 9, 2025 at 7:09=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.org>=
- wrote:
->
-> Hi,
->
-> On Wed, 26 Nov 2025 at 10:08, Tabby Kitten <nyanpasu256@gmail.com> wrote:
-> >
-> > On a PC with a Realtek PCI Express SD reader, when you sleep with
-> > `wakeup_count` active (eg. sleeping from KDE's lock screen), the MMC
-> > driver wakes up the system and aborts suspend.
->
-> Okay, that's clearly a problem that needs to be fixed!
->
-> >
-> > I've found a sleep failure bug in the rtsx_pci and mmc_core drivers.
-> > After userspace writes a number to `/sys/power/wakeup_count` (eg. KDE
-> > Plasma does it to distinguish user wakes from timers and Wake-on-LAN),
-> > if it attempts a mem suspend it will be aborted when
-> > rtsx_pci_runtime_resume() -> mmc_detect_change() emits a
-> > pm_wakeup_ws_event(). This breaks sleep on some hardware and desktop
-> > environments.
-> >
-> > The detailed description:
-> > The recently released Plasma 6.5.0 writes to `/sys/power/wakeup_count`
-> > before sleeping. On my computer this caused the sleep attempt to fail
-> > with dmesg error "PM: Some devices failed to suspend, or early wake
-> > event detected". I got this error on both Arch Linux and Fedora, and
-> > replicated it on Fedora with the mainline kernel COPR. KDE is tracking
-> > this error at https://bugs.kde.org/show_bug.cgi?id=3D510992, and have
-> > disabled writing to wakeup_count on Plasma 6.5.3 to work around this
-> > issue.
-> >
-> > I've written a standalone shell script to reproduce this sleep failure
-> > (save as badsleep.sh):
-> >
-> > #!/bin/bash
-> > read wakeup_count < /sys/power/wakeup_count
-> > if [[ $? -ne 0 ]]; then
-> >     e=3D$?
-> >     echo "Failed to open wakeup_count, suspend maybe already in progres=
-s"
-> >     exit $e
-> > fi
-> > echo $wakeup_count > /sys/power/wakeup_count
-> > if [[ $? -ne 0 ]]; then
-> >     e=3D$?
-> >     echo "Failed to write wakeup_count, wakeup_count may have changed i=
-n between"
-> >     exit $e
-> > fi
-> > echo mem > /sys/power/state
-> >
-> > Running `sudo ./badsleep.sh` reproduces failed sleeps on my computer.
-> > (sudo is needed to write to `/sys/power/wakeup_count` on Fedora.)
-> >
-> > * If I run the script unaltered, the screen turns off and on, and the
-> >   terminal outputs
-> >   `./badsleep.sh: line 14: echo: write error: Device or resource busy`
-> >   indicating the mem sleep failed.
-> >
-> > * If I edit the script and comment out `echo $wakeup_count >
-> >   /sys/power/wakeup_count`, the sleep succeeds, and waking the computer
-> >   skips the lock screen and resumes where I left off.
-> >
-> > * If I run `sudo rmmod rtsx_pci_sdmmc` to disable the faulty module, th=
-e
-> >   sleep succeeds, and waking the computer skips the lock screen and
-> >   resumes where I left off.
-> >
-> > I think this problem happens in general when a driver spawns a wakeup
-> > event from its suspend callback. On my system, the driver in question
-> > lies in the MMC subsystem.
-> >
-> > ## Code debugging
-> >
-> > If I run `echo 1 > /sys/power/pm_debug_messages` to enable verbose
-> > logging, then attempt a failed sleep, I see output:
-> >
-> >     PM: Wakeup pending, aborting suspend
-> >     PM: active wakeup source: mmc0
-> >     PM: suspend of devices aborted after 151.615 msecs
-> >     PM: start suspend of devices aborted after 169.797 msecs
-> >     PM: Some devices failed to suspend, or early wake event detected
-> >
-> > The "Wakeup pending, aborting suspend" message comes from function
-> > `pm_wakeup_pending()`. This function checks if event checks are enabled=
-,
-> > and if some counters have changed aborts suspend and calls
-> > `pm_print_active_wakeup_sources()`, which prints `wakeup_sources`.
-> > Tracing the code that modifies `wakeup_sources`, I found that
-> > `pm_wakeup_ws_event()` would activate an event and
-> > `wakeup_source_register() =E2=86=92 wakeup_source_add()` would add a ne=
-w one.
->
-> Thanks for all the details!
->
-> >
-> > To find who changed wakeup events, I used my stacksnoop fork at
-> > https://github.com/nyanpasu64/bcc/blob/local/examples/tracing/stacksnoo=
-p
-> > .py to trace a failed suspend:
-> >
-> > nyanpasu64@ryzen ~/code/bcc (local)> sudo ./examples/tracing/stacksnoop=
-.py pm_wakeup_ws_event wakeup_source_register
-> > TIME(s)            FUNCTION
-> > 7.254676819:
-> > 0: ret_from_fork_asm [kernel]
-> > 1: ret_from_fork [kernel]
-> > 2: kthread [kernel]
-> > 3: worker_thread [kernel]
-> > 4: process_one_work [kernel]
-> > 5: async_run_entry_fn [kernel]
-> > 6: async_suspend [kernel]
-> > 7: device_suspend [kernel]
-> > 8: dpm_run_callback [kernel]
-> > 9: mmc_bus_suspend [mmc_core]
-> > 10: mmc_blk_suspend [mmc_block]
-> > 11: mmc_queue_suspend [mmc_block]
-> > 12: __mmc_claim_host [mmc_core]
-> > 13: __pm_runtime_resume [kernel]
-> > 14: rpm_resume [kernel]
-> > 15: rpm_resume [kernel]
-> > 16: rpm_callback [kernel]
-> > 17: __rpm_callback [kernel]
-> > 18: rtsx_pci_runtime_resume [rtsx_pci]
-> > 19: mmc_detect_change [mmc_core]
-> > 20: pm_wakeup_ws_event [kernel]
-> >
-> > On a previous kernel, lines 9-12 were replaced by a single call to
-> > `pci_pm_suspend`. I've posted my detailed debugging on the older kernel
-> > at https://bugs.kde.org/show_bug.cgi?id=3D510992#c26. There I found tha=
-t
-> > `pci_pm_suspend()` wakes PCI(e) devices before sending them into a full
-> > sleep state, but in the process, `_mmc_detect_change()` will "Prevent
-> > system sleep for 5s to allow user space to consume the\n corresponding
-> > uevent"... which interrupts a system sleep in progress.
-> >
-> > On my current kernel, the same logic applies, but reading the source I
-> > can't tell where `__mmc_claim_host()` is actually calling
-> > `__pm_runtime_resume()`. Nonetheless the problem remains that
-> > `rpm_resume()` is called during system suspend, `mmc_detect_change()`
-> > wakes the system when called, and this will abort system sleep when
-> > `/sys/power/wakeup_count` is active.
->
-> __mmc_claim_host() will call pm_runtime_get_sync() to runtime resume
-> the mmc host device.
->
-> The mmc host device's parent (a pci device) will then be runtime
-> resumed too. That's the call to rtsx_pci_runtime_resume() we see
-> above.
->
-> The problem is then that rtsx_pci_runtime_resume() invokes a callback
-> (->card_event())) back into the mmc host driver
-> (drivers/mmc/host/rtsx_pci_sdmmc.c), which ends up calling
-> mmc_detect_change() to try to detect whether a card have been
-> inserted/removed.
->
-> >
-> > ## Next steps
-> >
-> > How would this problem be addressed? Off the top of my head, perhaps yo=
-u
-> > could not call `__pm_runtime_resume()` on a SD card reader during the
-> > `device_suspend()` process, not call `pm_wakeup_ws_event()` when the SD
-> > card status changes, not call  `pm_wakeup_ws_event()` *specifically*
-> > when system suspend is temporarily waking up a SD card reader, or
-> > disable pm_wakeup_ws_event() entirely during the suspend process (does
-> > this defeat the purpose of the function?).
->
-> Let me think a bit on what makes the best sense here. I will get back
-> to you in a couple of days.
->
-> >
-> > Are there other drivers which cause the same symptoms? I don't know. I
-> > asked on the KDE bug tracker for other users to attempt a failed sleep
-> > with `echo 1 > /sys/power/pm_debug_messages` active, to identify which
-> > driver broke suspend in their system; so far nobody has replied with
-> > logs.
-> >
-> > Given that this bug is related to `/sys/power/wakeup_count`
-> > (https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-power), I
-> > was considering CCing Rafael J. Wysocki <rafael@kernel.org> and
-> > linux-pm@vger.kernel.org, but have decided to only message the MMC
-> > maintainers for now. If necessary we may have to forward this message
-> > there to get their attention.
-> >
-> > ----
-> >
-> > System information:
-> >
-> > * I have an Intel NUC8i7BEH mini PC, with CPU 8 =C3=97 Intel=C2=AE Core=
-=E2=84=A2 i7-8559U
-> >   CPU @ 2.70GHz.
-> >
-> >     * uname -mi prints `x86_64 unknown`.
-> >
-> > * `lspci -nn` prints
-> >   "6e:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS=
-522A PCI Express Card Reader [10ec:522a] (rev 01)".
-> >
-> > * I am running kernel 6.18.0-0.rc7.357.vanilla.fc43.x86_64 from the Fed=
-ora COPRs
-> >   (https://fedoraproject.org/wiki/Kernel_Vanilla_Repositories).
-> >
-> > * dmesg at https://gist.github.com/nyanpasu64/ab5d3d1565aafe6c1c08cbcaf=
-074e44a#file-dmesg-2025-11-25-txt
-> >
-> > * Fully resolved config at https://gist.github.com/nyanpasu64/ab5d3d156=
-5aafe6c1c08cbcaf074e44a#file-config-6-18-0-0-rc7-357-vanilla-fc43-x86_64,
-> >   source at https://download.copr.fedorainfracloud.org/results/@kernel-=
-vanilla/mainline-wo-mergew/fedora-43-x86_64/09831015-mainline-womergew-rele=
-ases/kernel-6.18.0-0.rc7.357.vanilla.fc43.src.rpm
->
-> Kind regards
-> Uffe
+Enable the following config options:
+CONFIG_BLK_INLINE_ENCRYPTION=y
+CONFIG_QCOM_INLINE_CRYPTO_ENGINE=y
+CONFIG_FS_ENCRYPTION_INLINE_CRYPT=y
+CONFIG_MMC_CRYPTO=y
+
+Enable "qcom_ice.use_wrapped_keys" via kernel command line.
+
+$ mkfs.ext4 -F -O encrypt,stable_inodes /dev/disk/by-partlabel/vm-data
+$ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
+$ fscryptctl generate_hw_wrapped_key /dev/disk/by-partlabel/vm-data > /mnt/key.longterm
+$ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
+$ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
+$ rm -rf /mnt/dir
+$ mkdir /mnt/dir
+$ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
+$ dmesg > /mnt/dir/test.txt
+$ sync
+
+Reboot the board
+
+$ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
+$ ls /mnt/dir # File should be encrypted
+$ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
+$ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
+$ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
+$ cat /mnt/dir/test.txt # File should now be decrypted
+
+Tested-by: Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
+Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+
+---
+This is a reworked version of the patchset
+https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
+that was sent by Seshu Madhavi Puppala.
+
+My changes rebase it to use the custom crypto profile support.
+
+Changes in v4:
+- Updated the link for fscryptctl tool in commit message to "https://github.com/google/fscryptctl".
+- Aligned the indentation at few places.
+- Unwrapped few lines of code.
+
+Changes in v3:
+- Updated commit message with test details and moved "Signed-off-by" above the
+  scissors line.
+
+Changes in v2:
+- Updated commit message for clarity.
+
+Changes in v1:
+- Added initial support for wrapped keys.
+---
+ drivers/mmc/host/sdhci-msm.c | 47 +++++++++++++++++++++++++++++++-----
+ 1 file changed, 41 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4e5edbf2fc9b..8ac4aee2cb3b 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1911,11 +1911,6 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+ 	if (IS_ERR_OR_NULL(ice))
+ 		return PTR_ERR_OR_ZERO(ice);
+ 
+-	if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
+-		dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
+-		return 0;
+-	}
+-
+ 	msm_host->ice = ice;
+ 
+ 	/* Initialize the blk_crypto_profile */
+@@ -1929,7 +1924,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+ 
+ 	profile->ll_ops = sdhci_msm_crypto_ops;
+ 	profile->max_dun_bytes_supported = 4;
+-	profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
++	profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
+ 	profile->dev = dev;
+ 
+ 	/*
+@@ -2009,9 +2004,49 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
+ 	return qcom_ice_evict_key(msm_host->ice, slot);
+ }
+ 
++static int sdhci_msm_ice_derive_sw_secret(struct blk_crypto_profile *profile,
++					  const u8 *eph_key, size_t eph_key_size,
++					  u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
++{
++	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
++
++	return qcom_ice_derive_sw_secret(msm_host->ice, eph_key, eph_key_size,
++					 sw_secret);
++}
++
++static int sdhci_msm_ice_import_key(struct blk_crypto_profile *profile,
++				    const u8 *raw_key, size_t raw_key_size,
++				    u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
++{
++	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
++
++	return qcom_ice_import_key(msm_host->ice, raw_key, raw_key_size, lt_key);
++}
++
++static int sdhci_msm_ice_generate_key(struct blk_crypto_profile *profile,
++				      u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
++{
++	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
++
++	return qcom_ice_generate_key(msm_host->ice, lt_key);
++}
++
++static int sdhci_msm_ice_prepare_key(struct blk_crypto_profile *profile,
++				     const u8 *lt_key, size_t lt_key_size,
++				     u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
++{
++	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
++
++	return qcom_ice_prepare_key(msm_host->ice, lt_key, lt_key_size, eph_key);
++}
++
+ static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
+ 	.keyslot_program	= sdhci_msm_ice_keyslot_program,
+ 	.keyslot_evict		= sdhci_msm_ice_keyslot_evict,
++	.derive_sw_secret	= sdhci_msm_ice_derive_sw_secret,
++	.import_key		= sdhci_msm_ice_import_key,
++	.generate_key		= sdhci_msm_ice_generate_key,
++	.prepare_key		= sdhci_msm_ice_prepare_key,
+ };
+ 
+ #else /* CONFIG_MMC_CRYPTO */
+-- 
+2.34.1
+
