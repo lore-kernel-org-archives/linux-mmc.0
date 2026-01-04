@@ -1,806 +1,134 @@
-Received: from out-172.mta1.migadu.com (out-172.mta1.migadu.com [95.215.58.172])
+Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96DCA3A1E9D
-	for <linux-mmc@vger.kernel.org>; Sun,  4 Jan 2026 00:45:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BE7E234964
+	for <linux-mmc@vger.kernel.org>; Sun,  4 Jan 2026 02:34:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767487563; cv=none; b=ftGBYwMThaDAy1AoJb4Zro4o2fNYkyCao3qP3Tj2kjSCjfwa+jG9sxau3mas1MySfZ3Kojl3j7XB52yYk793rrqU3vCS1ccyEPgsKxd/wFrk5a0h/ifNhHLq7a1odkSGP8+rW9Ix37QO0EReSpj5IUr0ZGgD6tFY+USAyhbsyQY=
+	t=1767494103; cv=none; b=r2fqNXUqvS8GuwdxmNUaJWmy6+e3jseDOuVB3pfdRaF54Rs0h6bDwFwa1DMKzelshDU/tR7e9Ek6nkigXe13L71mqK56LO14Jvj/qjR9pw5Uf5awtTK5G7XF5iyKLIg8pUiiRiostydVnES4T36p404HQO3XSDcxwhRBUuETu3M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767487563; c=relaxed/simple;
-	bh=UWOxGi40lseqwUi1SlGgXzvxt1niDYMExVec/8F5qNM=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:Cc:References:
-	 In-Reply-To:Content-Type; b=Yv7NzpC/WDOWrd2k0bhaBPoaufndSXXpaAjkQ3jgTjmbzW8X1D/bYR33zC8/zdnBacqyRrUpbXdEsztaXTmi1ITqfQSzZv/8PxkeQ7AtrSZ9i8evC1ZoUDN1C4ekFlde+0c3hVvMGJbhsrPBxeYQP3GCkOt/eZ2EoSmtCWOXfsI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=ey8aBd75; arc=none smtp.client-ip=95.215.58.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1767494103; c=relaxed/simple;
+	bh=EUZvGoTdOkUWYz8P6OHC2+RZ6IOmZtCaGzoocb3YJ8c=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type:
+	 References; b=h9eh489Yrq14r+LjFO3zG0qfCxIGh7UXhbpRBTJP0Zl8wMGhmiyyxr/PxyChVM/7WR/YZr9fwuQdTpZ7aKXAKu26FuY3Ruup6nJHtRM9ydvTCLnZe7MkWHCtSL6mV6byKAYNBT/OpNbOqsI/ftcTrC+Zylp3gieQjYSxv0kSVPQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=Wcfww2a6; arc=none smtp.client-ip=203.254.224.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="ey8aBd75"
-Message-ID: <4777aabd-bc9e-4904-9444-892393aecb15@linux.dev>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1767487556;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Wk3feinZ8uTr59PVBz1S2sipoGqKesUkHKK/npZbBdk=;
-	b=ey8aBd75obCgJ6H2DW4jNjvUErNCrm2+cY9xBc0ZZ1+9SdOjyh5yYtIn/V/euOpiDw9fJN
-	+Hll0SlRZw8YnG4wLGaZ+L8FoMuT4JTGOjz1753+/sdKxEiP6xbR0q5MjiK8848CcfXqIO
-	T5sXdNkuUUOtFZJ+423sx7ENdRBnqBc=
-Date: Sat, 3 Jan 2026 16:45:46 -0800
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="Wcfww2a6"
+Received: from epcas5p1.samsung.com (unknown [182.195.41.39])
+	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20260104023452epoutp04bb4dc08325641a5c3f420aea6272e629~HZoMlqJLz0280902809epoutp04F
+	for <linux-mmc@vger.kernel.org>; Sun,  4 Jan 2026 02:34:52 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20260104023452epoutp04bb4dc08325641a5c3f420aea6272e629~HZoMlqJLz0280902809epoutp04F
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1767494092;
+	bh=RG/kY7Qlq4V2JzQcj5RVgZGOBVJiwVK0kGaENg9BWe4=;
+	h=From:To:Cc:Subject:Date:References:From;
+	b=Wcfww2a6wM7OM6g1RPuwCl4Xa5PPvo85+l/yHq0izURmvQVD1ct/xOt586rPUkojL
+	 ipL8DeH8I7UM5JJu0lxJXRpeFsgMM+LnqT9sTg6nCFBQMIioqahHWmEev7Dlmj3Lty
+	 uQxKiD9W9gPaVf3CNFulRIHVnxRuosKLehafAfJ8=
+Received: from epsnrtp02.localdomain (unknown [182.195.42.154]) by
+	epcas5p1.samsung.com (KnoxPortal) with ESMTPS id
+	20260104023451epcas5p12513a78a61d77e700880c29f07db4c71~HZoMFlguT2353023530epcas5p16;
+	Sun,  4 Jan 2026 02:34:51 +0000 (GMT)
+Received: from epcas5p1.samsung.com (unknown [182.195.41.39]) by
+	epsnrtp02.localdomain (Postfix) with ESMTP id 4dkM2z4gQfz2SSKY; Sun,  4 Jan
+	2026 02:34:51 +0000 (GMT)
+Received: from epsmtip2.samsung.com (unknown [182.195.34.31]) by
+	epcas5p3.samsung.com (KnoxPortal) with ESMTPA id
+	20260104023451epcas5p391708610b5ce46d0e2a5f4bfbad01c71~HZoLmPQ3I2916929169epcas5p3x;
+	Sun,  4 Jan 2026 02:34:51 +0000 (GMT)
+Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip2.samsung.com
+	(KnoxPortal) with ESMTPA id
+	20260104023450epsmtip2b15bdfc581168772419101d71a96651a~HZoLEBF-E3184731847epsmtip2L;
+	Sun,  4 Jan 2026 02:34:50 +0000 (GMT)
+From: "ping.gao" <ping.gao@samsung.com>
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: "ping.gao" <ping.gao@samsung.com>
+Subject: [PATCH] MMC:dw_mmc:when enable biu_clk should check whether this
+ clk is normal
+Date: Sun,  4 Jan 2026 10:38:57 +0800
+Message-ID: <20260104023857.213329-1-ping.gao@samsung.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Subject: Re: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
- RTS525A card reader
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Matthew Schwartz <matthew.schwartz@linux.dev>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ricky Wu <ricky_wu@realtek.com>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- linux-mmc@vger.kernel.org
-References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
- <CAPDyKFrGpvjONrDmnNZXv+SME_NCNv-LK8J-Vo88RSz1fuD7rg@mail.gmail.com>
- <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev>
-Content-Language: en-US
-In-Reply-To: <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Migadu-Flow: FLOW_OUT
+Content-Transfer-Encoding: 8bit
+X-CMS-MailID: 20260104023451epcas5p391708610b5ce46d0e2a5f4bfbad01c71
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 105P
+X-CMS-RootMailID: 20260104023451epcas5p391708610b5ce46d0e2a5f4bfbad01c71
+References: <CGME20260104023451epcas5p391708610b5ce46d0e2a5f4bfbad01c71@epcas5p3.samsung.com>
 
-On 1/3/26 11:52 AM, Matthew Schwartz wrote:
-> On 1/3/26 3:37 AM, Ulf Hansson wrote:
->> On Wed, 24 Dec 2025 at 22:01, Matthew Schwartz
->> <matthew.schwartz@linux.dev> wrote:
->>>
->>> Hello,
->>>
->>> I have several handheld devices that have a Realtek Semiconductor Co., Ltd. RTS525A PCI Express Card Reader and I am running into an issue on all of them when I try to play games off of my SanDisk Extreme PRO Micro SD cards.
->>>
->>> I have two SD cards, a 1TB and a 2TB model, and while playing games off of either one there are frequent freezes in gameplay. When this happens, the kernel has some mmc and rtsx errors:
->>>
->>> [   41.348311] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 13, arg = 0xd5550000
->>> [   41.354004] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000900
->>> [   41.354020] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>> [   41.354021] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz (cur_clock = 208)
->>> [   41.354026] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 48, arg = 0x08000200
->>> [   41.354235] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [   41.354236] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 208)
->>> [   41.354237] rtsx_pci 0000:c0:00.0: n = 118, div = 3
->>> [   41.354237] rtsx_pci 0000:c0:00.0: ssc_depth = 1
->>> [   41.601291] rtsx_pci 0000:c0:00.0: --> rtsx_pci_runtime_idle
->>> [   51.521666] rtsx_pci 0000:c0:00.0: --> rtsx_pci_runtime_suspend
->>> [  101.898966] rtsx_pci 0000:c0:00.0: --> rtsx_pci_runtime_resume
->>> [  101.899052] rtsx_pci 0000:c0:00.0: RTSX_BIER: 0x36400000
->>> [  101.910028] rtsx_pci 0000:c0:00.0: Power OFF efuse!
->>> [  102.025901] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.025907] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.025911] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sdmmc_switch_voltage: signal_voltage = 0
->>> [  102.031892] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.031900] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.037892] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.037899] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.039168] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.039172] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.039177] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 0, arg = 0x00000000
->>> [  102.040763] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.040764] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.041874] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.041875] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.041879] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 8, arg = 0x000001aa
->>> [  102.042452] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x000001aa
->>> [  102.042468] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.042469] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.042474] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.043036] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.043053] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.043057] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.043061] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.043599] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
->>> [  102.062878] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.062885] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.062890] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.063450] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.063462] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.063463] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.063467] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.064012] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
->>> [  102.104036] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.104043] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.104047] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.104603] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.104619] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.104620] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.104624] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.105162] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
->>> [  102.184867] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.184874] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.184878] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.185438] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.185446] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.185447] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.185451] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.185990] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
->>> [  102.265861] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.265868] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.265872] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.266434] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.266450] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.266452] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.266456] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.266996] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
->>> [  102.346859] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.346869] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.346875] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.347441] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.347450] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.347451] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.347455] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.348005] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
->>> [  102.427853] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.427860] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.427865] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.428434] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.428443] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.428444] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.428448] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.428995] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x41ff8000
->>> [  102.508837] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.508845] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.508852] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
->>> [  102.509408] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
->>> [  102.509440] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.509445] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.509452] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x59300000
->>> [  102.509996] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0xc1ff8000
->>> [  102.510008] mmc0: cannot verify signal voltage switch
->>> [  102.510031] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.510033] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.510038] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 11, arg = 0x00000000
->>> [  102.510587] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000320
->>> [  102.511837] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.511838] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.511840] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sdmmc_switch_voltage: signal_voltage = 1
->>> [  102.598474] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.598480] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.599674] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.599679] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.599684] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 2, arg = 0x00000000
->>> [  102.600608] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x03534453
->>> [  102.600612] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[1] = 0x52303254
->>> [  102.600613] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[2] = 0x87bacf26
->>> [  102.600614] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[3] = 0xfe018901
->>> [  102.600630] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.600631] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.600635] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 3, arg = 0x00000000
->>> [  102.601176] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0xd5550500
->>> [  102.601195] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.601199] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.601205] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 7, arg = 0xd5550000
->>> [  102.601770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000700
->>> [  102.601785] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.601786] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.601793] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 6, arg = 0x00fffff0
->>> [  102.604338] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.604340] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.604345] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0xd5550000
->>> [  102.604887] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000920
->>> [  102.604893] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.604894] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.604899] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 6, arg = 0x00000002
->>> [  102.605462] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000920
->>> [  102.605480] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.605481] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.605486] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.605487] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.605493] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 6, arg = 0x80ff1fff
->>> [  102.608016] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.608019] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.608025] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 6, arg = 0x80fffff3
->>> [  102.612934] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>> [  102.612936] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz (cur_clock = 30)
->>> [  102.612950] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>> [  102.612951] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz (cur_clock = 30)
->>> [  102.612951] rtsx_pci 0000:c0:00.0: n = 206, div = 1
->>> [  102.612952] rtsx_pci 0000:c0:00.0: ssc_depth = 2
->>> [  102.613105] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(TX): sample_point = 25
->>> [  102.613115] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 0
->>> [  102.613126] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614718] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 1
->>> [  102.614732] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614759] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 2
->>> [  102.614770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614796] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 3
->>> [  102.614815] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614842] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 4
->>> [  102.614853] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614879] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 5
->>> [  102.614890] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614916] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 6
->>> [  102.614927] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614952] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 7
->>> [  102.614963] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.614987] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 8
->>> [  102.614998] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615024] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 9
->>> [  102.615035] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615059] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 10
->>> [  102.615071] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615095] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 11
->>> [  102.615107] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615132] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 12
->>> [  102.615144] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615172] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.615178] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 13
->>> [  102.615187] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615211] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.615215] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 14
->>> [  102.615223] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615235] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.615350] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 15
->>> [  102.615358] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615383] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.615387] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 16
->>> [  102.615395] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615419] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.615424] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 17
->>> [  102.615432] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615458] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.615462] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 18
->>> [  102.615470] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615495] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.615499] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 19
->>> [  102.615507] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615531] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 20
->>> [  102.615539] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615562] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 21
->>> [  102.615570] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615594] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 22
->>> [  102.615602] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615625] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 23
->>> [  102.615633] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615657] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 24
->>> [  102.615665] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615689] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 25
->>> [  102.615697] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615722] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 26
->>> [  102.615730] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615754] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 27
->>> [  102.615762] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615785] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 28
->>> [  102.615793] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615817] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 29
->>> [  102.615825] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615849] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 30
->>> [  102.615858] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615890] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 31
->>> [  102.615907] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615933] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 0
->>> [  102.615943] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.615968] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 1
->>> [  102.615977] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616001] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 2
->>> [  102.616010] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616034] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 3
->>> [  102.616042] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616066] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 4
->>> [  102.616076] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616100] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 5
->>> [  102.616109] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616133] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 6
->>> [  102.616142] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616168] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 7
->>> [  102.616180] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616207] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 8
->>> [  102.616219] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616244] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 9
->>> [  102.616257] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616282] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 10
->>> [  102.616294] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616319] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 11
->>> [  102.616331] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616356] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 12
->>> [  102.616368] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616395] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.616402] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 13
->>> [  102.616413] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616439] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.616445] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 14
->>> [  102.616457] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616471] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.616580] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 15
->>> [  102.616592] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616606] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.616714] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 16
->>> [  102.616726] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616753] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.616758] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 17
->>> [  102.616770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616796] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.616809] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 18
->>> [  102.616821] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616848] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.616854] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 19
->>> [  102.616866] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616891] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 20
->>> [  102.616903] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616928] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 21
->>> [  102.616940] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.616965] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 22
->>> [  102.616978] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617003] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 23
->>> [  102.617015] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617040] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 24
->>> [  102.617051] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617076] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 25
->>> [  102.617088] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617111] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 26
->>> [  102.617120] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617143] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 27
->>> [  102.617152] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617175] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 28
->>> [  102.617184] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617207] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 29
->>> [  102.617216] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617239] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 30
->>> [  102.617247] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617271] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 31
->>> [  102.617280] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617303] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 0
->>> [  102.617312] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617335] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 1
->>> [  102.617343] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617367] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 2
->>> [  102.617375] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617398] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 3
->>> [  102.617407] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617430] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 4
->>> [  102.617439] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617462] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 5
->>> [  102.617471] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617494] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 6
->>> [  102.617502] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617525] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 7
->>> [  102.617534] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617557] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 8
->>> [  102.617566] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617589] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 9
->>> [  102.617598] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617621] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 10
->>> [  102.617630] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617653] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 11
->>> [  102.617662] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617686] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 12
->>> [  102.617694] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617719] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.617723] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 13
->>> [  102.617732] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617756] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.617761] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 14
->>> [  102.617770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617782] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.617889] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 15
->>> [  102.617898] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.617911] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.618017] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 16
->>> [  102.618026] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618051] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.618056] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 17
->>> [  102.618064] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618089] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.618093] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 18
->>> [  102.618102] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618127] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
->>> [  102.618132] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 19
->>> [  102.618140] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618164] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 20
->>> [  102.618173] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618196] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 21
->>> [  102.618205] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618228] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 22
->>> [  102.618237] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618260] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 23
->>> [  102.618268] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618292] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 24
->>> [  102.618301] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618324] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 25
->>> [  102.618333] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618356] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 26
->>> [  102.618364] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618388] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 27
->>> [  102.618397] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618421] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 28
->>> [  102.618429] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618454] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 29
->>> [  102.618463] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618488] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 30
->>> [  102.618497] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618520] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 31
->>> [  102.618529] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
->>> [  102.618552] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX raw_phase_map[0] = 0xfff80fff
->>> [  102.618554] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX raw_phase_map[1] = 0xfff80fff
->>> [  102.618555] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX raw_phase_map[2] = 0xfff80fff
->>> [  102.618556] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX phase_map = 0xfff80fff
->>> [  102.618558] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: phase: [map:fff80fff] [maxlen:25] [final:31]
->>> [  102.618559] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 31
->>> [  102.618579] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>> [  102.618581] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz (cur_clock = 208)
->>> [  102.618586] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_write_data: SD/MMC CMD 49, arg = 0x10020800
->>> [  102.618587] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 49, arg = 0x10020800
->>> [  102.618598] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000900
->>> [  102.618754] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>> [  102.618756] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz (cur_clock = 208)
->>> [  102.618759] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 13, arg = 0xd5550000
->>> [  102.618769] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000900
->>> [  102.618784] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 1
->>> [  102.618794] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>> [  102.618795] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz (cur_clock = 208)
->>> [  102.618798] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0xc44607f8
->>> [  102.618800] rtsx_pci 0000:c0:00.0: DMA addr: 0x675e5000, Len: 0x1000
->>> [  102.619019] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
->>> [  102.619030] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
->>> [  102.619066] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>> [  102.619068] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz (cur_clock = 208)
->>> [  102.619074] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 13, arg = 0xd5550000
->>> [  102.619085] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000900
->>> [  102.619090] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sdmmc_get_cd: RTSX_BIPR = 0x00010000
->>> [  102.624418] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 17
->>> [  102.624445] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>> [  102.624448] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz (cur_clock = 208)
->>>
->>> I've included a readout of sudo lspci -s c0:00.0 -xxxx below:
->>>
->>> c0:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS525A PCI Express Card Reader (rev 01)
->>> 00: ec 10 5a 52 06 04 10 00 01 00 00 ff 10 00 00 00
->>> 10: 00 00 00 00 00 00 b0 b0 00 00 00 00 00 00 00 00
->>> 20: 00 00 00 00 00 00 00 00 00 00 00 00 ec 10 5a 52
->>> 30: 00 00 00 00 80 00 00 00 00 00 00 00 ff 01 00 00
->>> 40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 80: 01 90 c3 f7 03 01 00 00 00 00 00 00 00 00 00 00
->>> 90: 05 b0 81 00 00 10 e0 fe 00 00 00 00 22 00 00 00
->>> a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b0: 10 00 02 00 c2 8f 2c 01 30 20 19 00 12 7c 47 00
->>> c0: 42 01 12 10 00 00 00 00 00 00 00 00 00 00 00 00
->>> d0: 00 00 00 00 10 08 0c 00 00 04 00 00 06 00 00 00
->>> e0: 02 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 100: 01 00 82 14 00 00 00 00 00 00 40 00 30 20 46 00
->>> 110: 00 20 00 00 00 60 00 00 a0 00 00 00 00 00 00 00
->>> 120: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 140: 00 00 00 00 00 00 00 00 03 00 81 15 00 e0 4c 00
->>> 150: 01 00 00 00 00 00 00 00 18 00 01 16 01 10 01 10
->>> 160: 1e 00 01 00 1f 3c 31 00 0f 00 99 40 49 00 00 00
->>> 170: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 190: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 1a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 1b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 1c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 1d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 1e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 1f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 210: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 220: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 230: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 240: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 250: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 260: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 270: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 290: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 2a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 2b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 2c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 2d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 2e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 2f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 310: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 320: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 330: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 340: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 350: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 360: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 370: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 390: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 3a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 3b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 3c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 3d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 3e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 3f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 410: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 420: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 430: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 440: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 450: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 460: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 470: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 490: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 4a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 4b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 4c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 4d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 4e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 4f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 510: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 520: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 530: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 540: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 550: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 560: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 570: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 590: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 5a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 5b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 5c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 5d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 5e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 5f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 610: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 620: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 630: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 640: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 650: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 660: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 670: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 690: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 6a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 6b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 6c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 6d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 6e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 6f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 700: 68 00 38 01 ff ff ff ff 04 00 00 07 01 ff ff 5b
->>> 710: 20 01 01 00 00 00 00 00 00 00 01 00 80 02 00 00
->>> 720: 00 00 00 00 aa ff ff ee 11 7a f6 03 10 03 00 08
->>> 730: 80 00 01 00 ff 0f 01 00 40 00 01 00 01 00 00 00
->>> 740: 0f 00 00 00 00 00 00 00 20 40 20 40 04 40 20 00
->>> 750: 00 00 80 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 760: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 770: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 790: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 7a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 7b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 7c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 7d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 7e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 7f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 800: 00 00 00 00 00 00 00 00 00 00 00 00 ff 01 00 00
->>> 810: 94 b3 c8 24 75 1f 00 00 00 00 00 00 00 00 00 00
->>> 820: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 830: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 840: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 850: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 860: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 870: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 890: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 8a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 8b0: 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00
->>> 8c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 8d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 8e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 8f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 910: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 920: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 930: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 940: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 950: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 960: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 970: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 990: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 9a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 9b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 9c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 9d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 9e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> 9f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> a90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> aa0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ab0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ac0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ad0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ae0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> af0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b40: 01 00 00 00 d3 00 00 00 00 00 00 00 00 00 00 00
->>> b50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> b90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ba0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> bb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> bc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> bd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> be0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> bf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> c90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ca0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> cb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> cc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> cd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ce0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> cf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> d90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> da0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> db0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> dc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> dd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> de0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> df0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> e90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ea0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> eb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ec0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ed0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ee0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ef0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> f90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> fa0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> fb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>> ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>
->>> deck@legion-go-2 ~> sudo cat /sys/kernel/debug/mmc0/ios
->>> clock:          208000000 Hz
->>> vdd:            21 (3.3 ~ 3.4 V)
->>> bus mode:       2 (push-pull)
->>> chip select:    0 (don't care)
->>> power mode:     2 (on)
->>> bus width:      2 (4 bits)
->>> timing spec:    6 (sd uhs SDR104)
->>> signal voltage: 1 (1.80 V)
->>> driver type:    0 (driver type B)
->>>
->>> As a workaround, not setting MMC_CAP_AGGRESSIVE_PM seems to resolve the issue:
->>>
->>> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
->>> index 1e5170435cf8..a7c7daf66d5c 100644
->>> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
->>> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
->>> @@ -1499,7 +1499,7 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
->>>         mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
->>>                 MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
->>>                 MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
->>> -       if (pcr->rtd3_en)
->>> +       if (pcr->rtd3_en && PCI_PID(pcr) != PID_525A)
->>>                 mmc->caps = mmc->caps | MMC_CAP_AGGRESSIVE_PM;
->>>         mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE |
->>>                 MMC_CAP2_NO_SDIO;
->>> --
->>> 2.52.0
->>>
->>> I think what's happening here is that RTS525A shuts off power to the card reader when games are idle for 10 seconds or more, and then when the game goes to load new assets it has to go through the whole re-tuning process which takes 1-2 seconds. The other brands of card readers I have keep the device powered the whole time so they do not have this issue, and that's what untagging MMC_CAP_AGGRESSIVE_PM seems to mimic.
->>
->> Right, MMC_CAP_AGGRESSIVE_PM does exactly what you think. If there are
->> an idle period of no requests for the SD card, the mmc core may decide
->> to power-off the card for those mmc host drivers that has set
->> MMC_CAP_AGGRESSIVE_PM. The idea is that we want to avoid wasting power
->> when the card is unused, which is typically important on some battery
->> driven devices.
->>
->> The main problem however, is that we are lacking a common policy for
->> how to handle this generically for all eMMC/SD cards. Ideally it
->> should be independent of what mmc host drivers that is managing it,
->> but that's not the case.
->>
->> That said, without changing the code you can use sysfs to either tweak
->> the idle-period or to simply prevent "runtime_suspend" (meaning
->> power-off) for the SD card.
->>
->> For example, find the corresponding device for the mmc/sd card in
->> sysfs and do: echo on >.../power/control to prevent runtime suspend.
-> 
-> I tried the runtime solution during debugging, however the card reader still shuts off while idle:
-> 
-> deck@legion-go-2 ~> cat /sys/bus/pci/drivers/rtsx_pci/0000:c0:00.0/power/control
-> on
+some vendor doesn't use biu_clk , enable it will panic
+log is below:
+[  438.400868] [7:   binder:436_2: 4998] Unable to handle kernel paging request at virtual address fffffffffffffffe
+[  438.400877] [7:   binder:436_2: 4998] Mem abort info:
+[  438.400881] [7:   binder:436_2: 4998]   ESR = 0x0000000096000005
+[  438.400887] [7:   binder:436_2: 4998]   EC = 0x25: DABT (current EL), IL = 32 bits
+[  438.400894] [7:   binder:436_2: 4998]   SET = 0, FnV = 0
+[  438.400899] [7:   binder:436_2: 4998]   EA = 0, S1PTW = 0
+[  438.400904] [7:   binder:436_2: 4998]   FSC = 0x05: level 1 translation fault
+...
+[  438.409424] [7:   binder:436_2: 4998] Call trace:
+[  438.409429] [7:   binder:436_2: 4998]  clk_prepare+0x10/0x24
+[  438.409439] [7:   binder:436_2: 4998]  dw_mci_runtime_resume+0x50/0x2d8 [dw_mmc_samsung cd210e210975263404c28fc89778f369f8398f0c]
+[  438.409471] [7:   binder:436_2: 4998]  dw_mci_exynos_runtime_resume+0x18/0x58 [dw_mmc_exynos_samsung 2735a594c7c9c9e8c65b0b87523fbf70dcaabfff]
+[  438.409496] [7:   binder:436_2: 4998]  pm_generic_runtime_resume+0x40/0x58
+[  438.409506] [7:   binder:436_2: 4998]  pm_runtime_force_resume+0x9c/0x134
+[  438.409517] [7:   binder:436_2: 4998]  platform_pm_resume+0x40/0x8c
+[  438.409529] [7:   binder:436_2: 4998]  dpm_run_callback+0x64/0x230
+[  438.409540] [7:   binder:436_2: 4998]  __device_resume+0x1d8/0x394
+[  438.409551] [7:   binder:436_2: 4998]  dpm_resume+0x110/0x2b8
+[  438.409561] [7:   binder:436_2: 4998]  dpm_resume_end+0x1c/0x38
+[  438.409570] [7:   binder:436_2: 4998]  suspend_devices_and_enter+0x828/0xab0
+[  438.409582] [7:   binder:436_2: 4998]  pm_suspend+0x334/0x618
+[  438.409592] [7:   binder:436_2: 4998]  state_store+0x104/0x144
+[  438.409601] [7:   binder:436_2: 4998]  kobj_attr_store+0x30/0x48
+[  438.409610] [7:   binder:436_2: 4998]  sysfs_kf_write+0x54/0x6c
+[  438.409619] [7:   binder:436_2: 4998]  kernfs_fop_write_iter+0x104/0x1a8
+[  438.409628] [7:   binder:436_2: 4998]  vfs_write+0x24c/0x2f4
+[  438.409640] [7:   binder:436_2: 4998]  ksys_write+0x78/0xe8
+[  438.409652] [7:   binder:436_2: 4998]  __arm64_sys_write+0x1c/0x2c
+[  438.409664] [7:   binder:436_2: 4998]  invoke_syscall+0x58/0x114
+[  438.409676] [7:   binder:436_2: 4998]  el0_svc_common+0xac/0xe0
+[  438.409687] [7:   binder:436_2: 4998]  do_el0_svc+0x1c/0x28
+[  438.409698] [7:   binder:436_2: 4998]  el0_svc+0x38/0x68
+[  438.409705] [7:   binder:436_2: 4998]  el0t_64_sync_handler+0x68/0xbc
+[  438.409712] [7:   binder:436_2: 4998]  el0t_64_sync+0x1a8/0x1ac
+Signed-off-by: ping.gao <ping.gao@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
 
-Ah, I misunderstood. I should have used /sys/bus/mmc/devices/mmc0:d555/power/control, that does work at runtime.
-
-Matt
-
-> 
-> deck@legion-go-2 ~> sudo cat /sys/kernel/debug/mmc0/ios
-> clock:          0 Hz
-> vdd:            0 (invalid)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     0 (off)
-> bus width:      0 (1 bits)
-> timing spec:    0 (legacy)
-> signal voltage: 1 (1.80 V)
-> driver type:    0 (driver type B)
-> 
-> Only removing MMC_CAP_AGGRESSIVE_PM seemed to actually work.
-> 
->>
->>>
->>> Should I upstream the above as a quirk or is there further debugging I can assist with to find another workaround for the gameplay stutter? I've found a couple other bugs with the card reader too but I will send out separate threads to keep things organized.
->>
->> Please post a formal patch, then let's discuss what to do about it.
-> 
-> Will send out that patch shortly.
-> 
-> Matt
-> 
->>
->>>
->>> Thanks!
->>>
->>> Matt
->>
->> Kind regards
->> Uffe
-> 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c5db92bbb094..61f6986f15ef 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3633,9 +3633,15 @@ int dw_mci_runtime_resume(struct device *dev)
+ 	if (host->slot &&
+ 	    (mmc_host_can_gpio_cd(host->slot->mmc) ||
+ 	     !mmc_card_is_removable(host->slot->mmc))) {
+-		ret = clk_prepare_enable(host->biu_clk);
+-		if (ret)
+-			return ret;
++		if (IS_ERR(host->biu_clk)) {
++			dev_dbg(host->dev, "biu clock not available\n");
++		} else {
++			ret = clk_prepare_enable(host->biu_clk);
++			if (ret) {
++				dev_err(host->dev, "failed to enable biu clock\n");
++				goto err;
++			}
++		}
+ 	}
+ 
+ 	ret = clk_prepare_enable(host->ciu_clk);
+-- 
+2.50.1
 
