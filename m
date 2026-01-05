@@ -1,44 +1,56 @@
-Received: from out-173.mta0.migadu.com (out-173.mta0.migadu.com [91.218.175.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70FB12D9494
-	for <linux-mmc@vger.kernel.org>; Mon,  5 Jan 2026 07:51:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9A49314A62;
+	Mon,  5 Jan 2026 08:40:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767599477; cv=none; b=oboqQMm5jeO4CbF23Kp+ePr09ulT6CvQDRuk2Ovp7I92RBxnazNgfpdljZ5pj8RaUqGbEgjMzpic4xjyykSMur+NwcRAbsMgkiJesSm7aC0DsySeIebab091wVnT2SBm3SuuGJH4Miye6N8a4ANl1AsUOoZ6mRmoSocVxwII7AQ=
+	t=1767602430; cv=none; b=u0IlFfVheBg6w85x4elAOLpvZpaVatTswwXzvKlL94V9MKXHnAqSOmdxgIUE9qZ2s+dHe0GQKxTUvYkqFVgdtIqF6bWAon2EB1N35rz1Abc+V9TkvO0/PEKjxiPHfb8LhT1V6+TWFaAAKhLWYvpVsro3HYPf61CQx/n9kY2j+4Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767599477; c=relaxed/simple;
-	bh=Y6i8hQSySSOOzWQ6KWHy4vbRQQVgEjm3Kg+EAYgvU6o=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=TS5oNttqFIVMFDsDwIUg9+ecOnpHAKNiAlb92ikG50mqXqHF0Gj1fM+N8QPOIdgMWFaiUIShocUZ9BD/W1bFQ+1HU7k/2ZDE7t/D41Rh3l8VDklKVYdb7uLDzeLQjTT071PJdCyKT4efZdAjkMTme7MX6pxOfj4fo/4YHgoiFJ0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=rDL620N2; arc=none smtp.client-ip=91.218.175.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1767602430; c=relaxed/simple;
+	bh=+jAwnlK/V9V66fIbXOxbxgBXSFO2mo3C0Q+9LvO1aLs=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=IxcOzvLICxj8JehViu8WyXxJ0y6fOF0PxPAfcMLKoNo3iVNQHIifeT/gLITVF+POc4batT2tUbi/L4HcOdvTy3uDQ9f+i0HrjUeMxEjdNasEavnXdtQ5aym55kwanNuXLOIajeiERUquJd4IGXmLZXJ/K00qoSkO5wuXu+v0R9I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b=mClXhDdW; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="rDL620N2"
-Message-ID: <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1767599458;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=gmNwXsfC5H+oUmMy+bnFKxuDI37qsHVFDSM1PVQ3RSk=;
-	b=rDL620N2N2Li0XrYo10MMC6FZPnIZzfF5tLiJFcODow/PvZK9nCNGf6g1KKGHE4JcoCW6X
-	gTPs4m6N91I6yAoJpRtPxakXeSYw0sLAbULkJMTkD7KlCym1BXqAl/tqKr5vSpVwXGZZoB
-	+NU/BXWtITVdVrF1x1zWvWFUc5GkZxM=
-Date: Sun, 4 Jan 2026 23:50:54 -0800
-Precedence: bulk
-X-Mailing-List: linux-mmc@vger.kernel.org
-List-Id: <linux-mmc.vger.kernel.org>
-List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
-List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Subject: Re: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
+	dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b="mClXhDdW"
+X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 6058dwrnF2482159, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=realtek.com; s=dkim;
+	t=1767602398; bh=+jAwnlK/V9V66fIbXOxbxgBXSFO2mo3C0Q+9LvO1aLs=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:MIME-Version;
+	b=mClXhDdWB2RhAHwfURLEkqhkwnAQ4xaxv7EEvwXEO60yAHsW/75l81nyvRc4O3v4H
+	 JmsQmhx5WEkfLyB1n/JDEdM6Wl+kSrRLRqwu31vuN8C0gwJDlZc8zzdGdJHclb9BCy
+	 vpQ7JzG1CmoUI+LaR4upv0NiCtm5MGBLGkZU3Jrh7B6Xye9gj9C5kjZ0VETYyGt8G2
+	 B8ds2GqiX0XvWseogmethIhQSnG/+ZbSY4TA7dxND7lVFyf/+1BWcYQlLt1Ws/EZ0d
+	 RtHu7Iad36mC9xVuYCzrF/fJJwopDLQDpX/x2R3z3drvr7wsstK5wuZN+cPqV+LE3n
+	 kETYJkfR6C7Rg==
+Received: from mail.realtek.com (rtkexhmbs03.realtek.com.tw[10.21.1.53])
+	by rtits2.realtek.com.tw (8.15.2/3.21/5.94) with ESMTPS id 6058dwrnF2482159
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 5 Jan 2026 16:39:58 +0800
+Received: from RTKEXHMBS04.realtek.com.tw (10.21.1.54) by
+ RTKEXHMBS03.realtek.com.tw (10.21.1.53) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1748.10; Mon, 5 Jan 2026 16:39:58 +0800
+Received: from RTKEXHMBS04.realtek.com.tw ([fe80::ee74:b1f4:bb6e:c78d]) by
+ RTKEXHMBS04.realtek.com.tw ([fe80::ee74:b1f4:bb6e:c78d%6]) with mapi id
+ 15.02.1748.010; Mon, 5 Jan 2026 16:39:58 +0800
+From: Ricky WU <ricky_wu@realtek.com>
+To: Matthew Schwartz <matthew.schwartz@linux.dev>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>
+CC: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
  RTS525A card reader
-To: Ricky WU <ricky_wu@realtek.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Thread-Topic: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM
+ on RTS525A card reader
+Thread-Index: AQHcdRh/Vu0EhIy7VkqdaylC4eYfDrU/2lyAgACKQYCAAFICAIACR/Rg//+PeICAAKgFEP//iawAgACP6VA=
+Date: Mon, 5 Jan 2026 08:39:57 +0000
+Message-ID: <4205fde06ecd4a7489b03ef25e5e4011@realtek.com>
 References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
  <CAPDyKFrGpvjONrDmnNZXv+SME_NCNv-LK8J-Vo88RSz1fuD7rg@mail.gmail.com>
  <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev>
@@ -46,1328 +58,1173 @@ References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
  <9e362d5fa2604fb0848ea28866dc45fc@realtek.com>
  <47ed09fc-047b-4f98-8df3-d11d17678c57@linux.dev>
  <380f75c7adc04cbab38cfd2f82bd0c6d@realtek.com>
-Content-Language: en-US
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Matthew Schwartz <matthew.schwartz@linux.dev>
-In-Reply-To: <380f75c7adc04cbab38cfd2f82bd0c6d@realtek.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+ <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
+In-Reply-To: <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Precedence: bulk
+X-Mailing-List: linux-mmc@vger.kernel.org
+List-Id: <linux-mmc.vger.kernel.org>
+List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
+List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
 
-On 1/4/26 11:02 PM, Ricky WU wrote:
->> On 1/4/26 7:58 PM, Ricky WU wrote:
->>>> On 1/3/26 11:52 AM, Matthew Schwartz wrote:
->>>>> On 1/3/26 3:37 AM, Ulf Hansson wrote:
->>>>>> On Wed, 24 Dec 2025 at 22:01, Matthew Schwartz
->>>>>> <matthew.schwartz@linux.dev> wrote:
->>>>>>>
->>>>>>> Hello,
->>>>>>>
->>>>>>> I have several handheld devices that have a Realtek Semiconductor Co.,
->> Ltd.
->>>> RTS525A PCI Express Card Reader and I am running into an issue on all of
->> them
->>>> when I try to play games off of my SanDisk Extreme PRO Micro SD cards.
->>>>>>>
->>>>>>> I have two SD cards, a 1TB and a 2TB model, and while playing games
->> off
->>>> of either one there are frequent freezes in gameplay. When this happens,
->> the
->>>> kernel has some mmc and rtsx errors:
->>>>>>>
->>>>>>> [   41.348311] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 13, arg = 0xd5550000
->>>>>>> [   41.354004] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000900
->>>>>>> [   41.354020] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>>>>>> [   41.354021] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz
->>>> (cur_clock = 208)
->>>>>>> [   41.354026] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 48, arg = 0x08000200
->>>>>>> [   41.354235] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [   41.354236] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 208)
->>>>>>> [   41.354237] rtsx_pci 0000:c0:00.0: n = 118, div = 3
->>>>>>> [   41.354237] rtsx_pci 0000:c0:00.0: ssc_depth = 1
->>>>>>> [   41.601291] rtsx_pci 0000:c0:00.0: --> rtsx_pci_runtime_idle
->>>>>>> [   51.521666] rtsx_pci 0000:c0:00.0: --> rtsx_pci_runtime_suspend
->>>>>>> [  101.898966] rtsx_pci 0000:c0:00.0: --> rtsx_pci_runtime_resume
->>>>>>> [  101.899052] rtsx_pci 0000:c0:00.0: RTSX_BIER: 0x36400000
->>>>>>> [  101.910028] rtsx_pci 0000:c0:00.0: Power OFF efuse!
->>>>>>> [  102.025901] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.025907] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.025911] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->>>> sdmmc_switch_voltage: signal_voltage = 0
->>>>>>> [  102.031892] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.031900] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.037892] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.037899] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.039168] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.039172] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.039177] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 0, arg = 0x00000000
->>>>>>> [  102.040763] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.040764] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.041874] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.041875] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.041879] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 8, arg = 0x000001aa
->>>>>>> [  102.042452] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x000001aa
->>>>>>> [  102.042468] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.042469] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.042474] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.043036] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.043053] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.043057] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.043061] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.043599] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00ff8000
->>>>>>> [  102.062878] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.062885] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.062890] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.063450] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.063462] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.063463] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.063467] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.064012] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00ff8000
->>>>>>> [  102.104036] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.104043] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.104047] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.104603] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.104619] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.104620] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.104624] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.105162] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00ff8000
->>>>>>> [  102.184867] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.184874] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.184878] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.185438] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.185446] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.185447] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.185451] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.185990] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00ff8000
->>>>>>> [  102.265861] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.265868] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.265872] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.266434] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.266450] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.266452] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.266456] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.266996] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00ff8000
->>>>>>> [  102.346859] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.346869] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.346875] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.347441] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.347450] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.347451] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.347455] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.348005] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00ff8000
->>>>>>> [  102.427853] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.427860] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.427865] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.428434] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.428443] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.428444] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.428448] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.428995] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x41ff8000
->>>>>>> [  102.508837] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.508845] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.508852] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0x00000000
->>>>>>> [  102.509408] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000120
->>>>>>> [  102.509440] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.509445] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.509452] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 41, arg = 0x59300000
->>>>>>> [  102.509996] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0xc1ff8000
->>>>>>> [  102.510008] mmc0: cannot verify signal voltage switch
->>>>>>> [  102.510031] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.510033] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.510038] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 11, arg = 0x00000000
->>>>>>> [  102.510587] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000320
->>>>>>> [  102.511837] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.511838] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.511840] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->>>> sdmmc_switch_voltage: signal_voltage = 1
->>>>>>> [  102.598474] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.598480] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.599674] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.599679] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.599684] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 2, arg = 0x00000000
->>>>>>> [  102.600608] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x03534453
->>>>>>> [  102.600612] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[1] =
->>>> 0x52303254
->>>>>>> [  102.600613] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[2] =
->>>> 0x87bacf26
->>>>>>> [  102.600614] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[3] =
->>>> 0xfe018901
->>>>>>> [  102.600630] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.600631] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.600635] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 3, arg = 0x00000000
->>>>>>> [  102.601176] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0xd5550500
->>>>>>> [  102.601195] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.601199] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.601205] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 7, arg = 0xd5550000
->>>>>>> [  102.601770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000700
->>>>>>> [  102.601785] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.601786] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.601793] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 6, arg = 0x00fffff0
->>>>>>> [  102.604338] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.604340] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.604345] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 55, arg = 0xd5550000
->>>>>>> [  102.604887] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000920
->>>>>>> [  102.604893] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.604894] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.604899] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 6, arg = 0x00000002
->>>>>>> [  102.605462] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000920
->>>>>>> [  102.605480] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.605481] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.605486] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.605487] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.605493] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 6, arg = 0x80ff1fff
->>>>>>> [  102.608016] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.608019] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.608025] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 6, arg = 0x80fffff3
->>>>>>> [  102.612934] rtsx_pci 0000:c0:00.0: Switch card clock to 30MHz
->>>>>>> [  102.612936] rtsx_pci 0000:c0:00.0: Internal SSC clock: 30MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.612950] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>>>>>> [  102.612951] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz
->>>> (cur_clock = 30)
->>>>>>> [  102.612951] rtsx_pci 0000:c0:00.0: n = 206, div = 1
->>>>>>> [  102.612952] rtsx_pci 0000:c0:00.0: ssc_depth = 2
->>>>>>> [  102.613105] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(TX):
->>>> sample_point = 25
->>>>>>> [  102.613115] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 0
->>>>>>> [  102.613126] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614718] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 1
->>>>>>> [  102.614732] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614759] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 2
->>>>>>> [  102.614770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614796] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 3
->>>>>>> [  102.614815] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614842] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 4
->>>>>>> [  102.614853] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614879] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 5
->>>>>>> [  102.614890] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614916] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 6
->>>>>>> [  102.614927] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614952] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 7
->>>>>>> [  102.614963] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.614987] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 8
->>>>>>> [  102.614998] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615024] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 9
->>>>>>> [  102.615035] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615059] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 10
->>>>>>> [  102.615071] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615095] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 11
->>>>>>> [  102.615107] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615132] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 12
->>>>>>> [  102.615144] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615172] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.615178] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 13
->>>>>>> [  102.615187] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615211] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.615215] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 14
->>>>>>> [  102.615223] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615235] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.615350] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 15
->>>>>>> [  102.615358] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615383] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.615387] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 16
->>>>>>> [  102.615395] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615419] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.615424] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 17
->>>>>>> [  102.615432] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615458] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.615462] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 18
->>>>>>> [  102.615470] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615495] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.615499] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 19
->>>>>>> [  102.615507] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615531] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 20
->>>>>>> [  102.615539] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615562] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 21
->>>>>>> [  102.615570] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615594] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 22
->>>>>>> [  102.615602] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615625] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 23
->>>>>>> [  102.615633] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615657] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 24
->>>>>>> [  102.615665] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615689] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 25
->>>>>>> [  102.615697] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615722] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 26
->>>>>>> [  102.615730] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615754] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 27
->>>>>>> [  102.615762] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615785] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 28
->>>>>>> [  102.615793] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615817] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 29
->>>>>>> [  102.615825] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615849] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 30
->>>>>>> [  102.615858] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615890] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 31
->>>>>>> [  102.615907] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615933] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 0
->>>>>>> [  102.615943] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.615968] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 1
->>>>>>> [  102.615977] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616001] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 2
->>>>>>> [  102.616010] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616034] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 3
->>>>>>> [  102.616042] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616066] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 4
->>>>>>> [  102.616076] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616100] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 5
->>>>>>> [  102.616109] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616133] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 6
->>>>>>> [  102.616142] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616168] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 7
->>>>>>> [  102.616180] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616207] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 8
->>>>>>> [  102.616219] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616244] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 9
->>>>>>> [  102.616257] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616282] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 10
->>>>>>> [  102.616294] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616319] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 11
->>>>>>> [  102.616331] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616356] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 12
->>>>>>> [  102.616368] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616395] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.616402] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 13
->>>>>>> [  102.616413] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616439] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.616445] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 14
->>>>>>> [  102.616457] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616471] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.616580] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 15
->>>>>>> [  102.616592] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616606] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.616714] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 16
->>>>>>> [  102.616726] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616753] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.616758] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 17
->>>>>>> [  102.616770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616796] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.616809] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 18
->>>>>>> [  102.616821] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616848] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.616854] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 19
->>>>>>> [  102.616866] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616891] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 20
->>>>>>> [  102.616903] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616928] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 21
->>>>>>> [  102.616940] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.616965] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 22
->>>>>>> [  102.616978] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617003] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 23
->>>>>>> [  102.617015] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617040] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 24
->>>>>>> [  102.617051] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617076] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 25
->>>>>>> [  102.617088] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617111] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 26
->>>>>>> [  102.617120] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617143] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 27
->>>>>>> [  102.617152] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617175] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 28
->>>>>>> [  102.617184] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617207] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 29
->>>>>>> [  102.617216] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617239] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 30
->>>>>>> [  102.617247] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617271] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 31
->>>>>>> [  102.617280] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617303] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 0
->>>>>>> [  102.617312] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617335] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 1
->>>>>>> [  102.617343] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617367] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 2
->>>>>>> [  102.617375] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617398] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 3
->>>>>>> [  102.617407] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617430] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 4
->>>>>>> [  102.617439] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617462] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 5
->>>>>>> [  102.617471] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617494] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 6
->>>>>>> [  102.617502] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617525] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 7
->>>>>>> [  102.617534] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617557] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 8
->>>>>>> [  102.617566] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617589] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 9
->>>>>>> [  102.617598] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617621] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 10
->>>>>>> [  102.617630] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617653] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 11
->>>>>>> [  102.617662] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617686] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 12
->>>>>>> [  102.617694] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617719] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.617723] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 13
->>>>>>> [  102.617732] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617756] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.617761] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 14
->>>>>>> [  102.617770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617782] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.617889] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 15
->>>>>>> [  102.617898] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.617911] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.618017] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 16
->>>>>>> [  102.618026] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618051] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.618056] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 17
->>>>>>> [  102.618064] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618089] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.618093] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 18
->>>>>>> [  102.618102] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618127] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd
->>>> fail (err = -22)
->>>>>>> [  102.618132] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 19
->>>>>>> [  102.618140] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618164] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 20
->>>>>>> [  102.618173] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618196] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 21
->>>>>>> [  102.618205] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618228] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 22
->>>>>>> [  102.618237] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618260] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 23
->>>>>>> [  102.618268] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618292] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 24
->>>>>>> [  102.618301] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618324] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 25
->>>>>>> [  102.618333] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618356] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 26
->>>>>>> [  102.618364] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618388] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 27
->>>>>>> [  102.618397] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618421] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 28
->>>>>>> [  102.618429] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618454] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 29
->>>>>>> [  102.618463] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618488] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 30
->>>>>>> [  102.618497] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618520] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 31
->>>>>>> [  102.618529] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data:
->>>> SD/MMC CMD 19, arg = 0x00000000
->>>>>>> [  102.618552] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX
->> raw_phase_map[0]
->>>> = 0xfff80fff
->>>>>>> [  102.618554] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX
->> raw_phase_map[1]
->>>> = 0xfff80fff
->>>>>>> [  102.618555] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX
->> raw_phase_map[2]
->>>> = 0xfff80fff
->>>>>>> [  102.618556] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: RX phase_map =
->>>> 0xfff80fff
->>>>>>> [  102.618558] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: phase:
->> [map:fff80fff]
->>>> [maxlen:25] [final:31]
->>>>>>> [  102.618559] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_change_phase(RX):
->>>> sample_point = 31
->>>>>>> [  102.618579] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>>>>>> [  102.618581] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz
->>>> (cur_clock = 208)
->>>>>>> [  102.618586] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_write_data:
->>>> SD/MMC CMD 49, arg = 0x10020800
->>>>>>> [  102.618587] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 49, arg = 0x10020800
->>>>>>> [  102.618598] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000900
->>>>>>> [  102.618754] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>>>>>> [  102.618756] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz
->>>> (cur_clock = 208)
->>>>>>> [  102.618759] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 13, arg = 0xd5550000
->>>>>>> [  102.618769] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000900
->>>>>>> [  102.618784] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 1
->>>>>>> [  102.618794] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>>>>>> [  102.618795] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz
->>>> (cur_clock = 208)
->>>>>>> [  102.618798] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_read_long_data:
->>>> SD/MMC CMD 18, arg = 0xc44607f8
->>>>>>> [  102.618800] rtsx_pci 0000:c0:00.0: DMA addr: 0x675e5000, Len:
->>>> 0x1000
->>>>>>> [  102.619019] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 12, arg = 0x00000000
->>>>>>> [  102.619030] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000b00
->>>>>>> [  102.619066] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>>>>>> [  102.619068] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz
->>>> (cur_clock = 208)
->>>>>>> [  102.619074] rtsx_pci_sdmmc rtsx_pci_sdmmc.0:
->> sd_send_cmd_get_rsp:
->>>> SD/MMC CMD 13, arg = 0xd5550000
->>>>>>> [  102.619085] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] =
->>>> 0x00000900
->>>>>>> [  102.619090] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sdmmc_get_cd:
->>>> RTSX_BIPR = 0x00010000
->>>>>>> [  102.624418] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 17
->>>>>>> [  102.624445] rtsx_pci 0000:c0:00.0: Switch card clock to 208MHz
->>>>>>> [  102.624448] rtsx_pci 0000:c0:00.0: Internal SSC clock: 208MHz
->>>> (cur_clock = 208)
->>>>>>>
->>>>>>> I've included a readout of sudo lspci -s c0:00.0 -xxxx below:
->>>>>>>
->>>>>>> c0:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd.
->> RTS525A
->>>> PCI Express Card Reader (rev 01)
->>>>>>> 00: ec 10 5a 52 06 04 10 00 01 00 00 ff 10 00 00 00
->>>>>>> 10: 00 00 00 00 00 00 b0 b0 00 00 00 00 00 00 00 00
->>>>>>> 20: 00 00 00 00 00 00 00 00 00 00 00 00 ec 10 5a 52
->>>>>>> 30: 00 00 00 00 80 00 00 00 00 00 00 00 ff 01 00 00
->>>>>>> 40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 80: 01 90 c3 f7 03 01 00 00 00 00 00 00 00 00 00 00
->>>>>>> 90: 05 b0 81 00 00 10 e0 fe 00 00 00 00 22 00 00 00
->>>>>>> a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b0: 10 00 02 00 c2 8f 2c 01 30 20 19 00 12 7c 47 00
->>>>>>> c0: 42 01 12 10 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d0: 00 00 00 00 10 08 0c 00 00 04 00 00 06 00 00 00
->>>>>>> e0: 02 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 100: 01 00 82 14 00 00 00 00 00 00 40 00 30 20 46 00
->>>>>>> 110: 00 20 00 00 00 60 00 00 a0 00 00 00 00 00 00 00
->>>>>>> 120: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 130: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 140: 00 00 00 00 00 00 00 00 03 00 81 15 00 e0 4c 00
->>>>>>> 150: 01 00 00 00 00 00 00 00 18 00 01 16 01 10 01 10
->>>>>>> 160: 1e 00 01 00 1f 3c 31 00 0f 00 99 40 49 00 00 00
->>>>>>> 170: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 190: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 1a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 1b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 1c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 1d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 1e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 1f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 210: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 220: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 230: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 240: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 250: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 260: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 270: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 290: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 2a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 2b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 2c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 2d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 2e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 2f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 310: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 320: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 330: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 340: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 350: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 360: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 370: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 390: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 3a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 3b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 3c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 3d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 3e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 3f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 410: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 420: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 430: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 440: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 450: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 460: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 470: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 490: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 4a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 4b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 4c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 4d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 4e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 4f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 510: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 520: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 530: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 540: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 550: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 560: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 570: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 590: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 5a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 5b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 5c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 5d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 5e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 5f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 610: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 620: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 630: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 640: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 650: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 660: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 670: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 690: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 6a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 6b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 6c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 6d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 6e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 6f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 700: 68 00 38 01 ff ff ff ff 04 00 00 07 01 ff ff 5b
->>>>>>> 710: 20 01 01 00 00 00 00 00 00 00 01 00 80 02 00 00
->>>>>>> 720: 00 00 00 00 aa ff ff ee 11 7a f6 03 10 03 00 08
->>>>>>> 730: 80 00 01 00 ff 0f 01 00 40 00 01 00 01 00 00 00
->>>>>>> 740: 0f 00 00 00 00 00 00 00 20 40 20 40 04 40 20 00
->>>>>>> 750: 00 00 80 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 760: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 770: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 790: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 7a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 7b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 7c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 7d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 7e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 7f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 800: 00 00 00 00 00 00 00 00 00 00 00 00 ff 01 00 00
->>>>>>> 810: 94 b3 c8 24 75 1f 00 00 00 00 00 00 00 00 00 00
->>>>>>> 820: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 830: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 840: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 850: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 860: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 870: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 890: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 8a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 8b0: 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00
->>>>>>> 8c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 8d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 8e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 8f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 910: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 920: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 930: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 940: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 950: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 960: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 970: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 990: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 9a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 9b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 9c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 9d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 9e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> 9f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> a90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> aa0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ab0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ac0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ad0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ae0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> af0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b40: 01 00 00 00 d3 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> b90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ba0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> bb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> bc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> bd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> be0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> bf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> c90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ca0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> cb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> cc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> cd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ce0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> cf0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> d90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> da0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> db0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> dc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> dd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> de0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> df0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> e90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ea0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> eb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ec0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ed0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ee0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ef0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f20: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f30: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f40: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f50: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f60: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f70: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> f90: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> fa0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> fb0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> fc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> fd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>> ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
->>>>>>>
->>>>>>> deck@legion-go-2 ~> sudo cat /sys/kernel/debug/mmc0/ios
->>>>>>> clock:          208000000 Hz
->>>>>>> vdd:            21 (3.3 ~ 3.4 V)
->>>>>>> bus mode:       2 (push-pull)
->>>>>>> chip select:    0 (don't care)
->>>>>>> power mode:     2 (on)
->>>>>>> bus width:      2 (4 bits)
->>>>>>> timing spec:    6 (sd uhs SDR104)
->>>>>>> signal voltage: 1 (1.80 V)
->>>>>>> driver type:    0 (driver type B)
->>>>>>>
->>>>>>> As a workaround, not setting MMC_CAP_AGGRESSIVE_PM seems to
->>>> resolve the issue:
->>>>>>>
->>>>>>> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
->>>> b/drivers/mmc/host/rtsx_pci_sdmmc.c
->>>>>>> index 1e5170435cf8..a7c7daf66d5c 100644
->>>>>>> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
->>>>>>> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
->>>>>>> @@ -1499,7 +1499,7 @@ static void realtek_init_host(struct
->>>> realtek_pci_sdmmc *host)
->>>>>>>         mmc->caps = MMC_CAP_4_BIT_DATA |
->>>> MMC_CAP_SD_HIGHSPEED |
->>>>>>>                 MMC_CAP_MMC_HIGHSPEED |
->>>> MMC_CAP_BUS_WIDTH_TEST |
->>>>>>>                 MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
->>>>>>> -       if (pcr->rtd3_en)
->>>>>>> +       if (pcr->rtd3_en && PCI_PID(pcr) != PID_525A)
->>>>>>>                 mmc->caps = mmc->caps |
->>>> MMC_CAP_AGGRESSIVE_PM;
->>>>>>>         mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP |
->>>> MMC_CAP2_FULL_PWR_CYCLE |
->>>>>>>                 MMC_CAP2_NO_SDIO;
->>>>>>> --
->>>>>>> 2.52.0
->>>>>>>
->>>>>>> I think what's happening here is that RTS525A shuts off power to the
->> card
->>>> reader when games are idle for 10 seconds or more, and then when the
->> game
->>>> goes to load new assets it has to go through the whole re-tuning process
->> which
->>>> takes 1-2 seconds. The other brands of card readers I have keep the device
->>>> powered the whole time so they do not have this issue, and that's what
->>>> untagging MMC_CAP_AGGRESSIVE_PM seems to mimic.
->>>>>>
->>>>>> Right, MMC_CAP_AGGRESSIVE_PM does exactly what you think. If there
->>>> are
->>>>>> an idle period of no requests for the SD card, the mmc core may decide
->>>>>> to power-off the card for those mmc host drivers that has set
->>>>>> MMC_CAP_AGGRESSIVE_PM. The idea is that we want to avoid wasting
->>>> power
->>>>>> when the card is unused, which is typically important on some battery
->>>>>> driven devices.
->>>>>>
->>>>>> The main problem however, is that we are lacking a common policy for
->>>>>> how to handle this generically for all eMMC/SD cards. Ideally it
->>>>>> should be independent of what mmc host drivers that is managing it,
->>>>>> but that's not the case.
->>>>>>
->>>>>> That said, without changing the code you can use sysfs to either tweak
->>>>>> the idle-period or to simply prevent "runtime_suspend" (meaning
->>>>>> power-off) for the SD card.
->>>>>>
->>>
->>> Hi Ulf, Matthew
->>>
->>> In our Windows card reader driver, the idle period time is set to
->> approximately 10 seconds.
->>> Is there any recommended way to control or configure this idle period time?
->>
->> I tried adjusting pm_schedule_suspend(device, 10000); in rtsx_pcr, but this just
->> increases the time until you inevitably run into the issue. There are some
->> games that can go a very long time in runtime_suspend without loading new
->> assets, but when they inevitably go into runtime_resume after say 3 or 5
->> minutes, this hang in gameplay seems unavoidable with
->> MMC_CAP_AGGRESSIVE_PM in particular. I found an old laptop of mine with
->> an RTS5261 reader and that has the same issue unless I disable
->> MMC_CAP_AGGRESSIVE_PM.
->>
->>> Or is it possible to introduce a capability tag that is less aggressive than
->> MMC_CAP_AGGRESSIVE_PM?
->>
->> Full disclosure: This is my first time looking at mmc/rtsx code, so I'll defer to
->> Ulf on this.
->>
->>> Since most notebooks have very strict power-saving requirements during idle
->> states,
->>> we are not able to avoid using the MMC_CAP_AGGRESSIVE_PM capability.
->>
->> The only other comparison I have is from card readers in other devices of mine,
->> a Genesys Logic GL9767 in a ROG Ally X and an O2 Micro in my Steam Deck.
->> For both of these, the card reader drivers do not seem to implement any form
->> of runtime power management on Linux, so the experience when playing
->> games off of them has been flawless.
->>
->> Matt
->>
-> 
-> Since our driver is designed to be a general-purpose driver for all readers, 
-> the scenarios you mentioned — ROG Ally X and Steam Deck — are gaming handheld devices.
-
-The drivers they use were not designed to be gaming-focused either, they are general purpose.
-O2 Micro has been around since before handheld gaming PCs were even a thing. Personally,
-I disagree with classifying gaming as falling outside of "general purpose" parameters.
-
-> For Realtek reader usage on handheld platforms, 
-> we would recommend disabling this power-saving function(pcr->rtd3_en) through BIOS settings/guidelines.
-
-Just to clarify, is the recommendation to disable this feature for every device with a Realtek card
-reader that might be used to play games from an SD card? My MSI Raider GE67HX laptop with RTS5261 has
-this same freeze in gameplay if I use an SD card. Using an SD card as a portable library is very
-common.
-
-Thanks,
-Matt
-
-> 
-> Ricky
->>>
->>>
->>>>>> For example, find the corresponding device for the mmc/sd card in
->>>>>> sysfs and do: echo on >.../power/control to prevent runtime suspend.
->>>>>
->>>>> I tried the runtime solution during debugging, however the card reader
->> still
->>>> shuts off while idle:
->>>>>
->>>>> deck@legion-go-2 ~> cat
->>>> /sys/bus/pci/drivers/rtsx_pci/0000:c0:00.0/power/control
->>>>> on
->>>>
->>>> Ah, I misunderstood. I should have used
->>>> /sys/bus/mmc/devices/mmc0:d555/power/control, that does work at
->> runtime.
->>>>
->>>> Matt
->>>>
->>>>>
->>>>> deck@legion-go-2 ~> sudo cat /sys/kernel/debug/mmc0/ios
->>>>> clock:          0 Hz
->>>>> vdd:            0 (invalid)
->>>>> bus mode:       2 (push-pull)
->>>>> chip select:    0 (don't care)
->>>>> power mode:     0 (off)
->>>>> bus width:      0 (1 bits)
->>>>> timing spec:    0 (legacy)
->>>>> signal voltage: 1 (1.80 V)
->>>>> driver type:    0 (driver type B)
->>>>>
->>>>> Only removing MMC_CAP_AGGRESSIVE_PM seemed to actually work.
->>>>>
->>>>>>
->>>>>>>
->>>>>>> Should I upstream the above as a quirk or is there further debugging I
->> can
->>>> assist with to find another workaround for the gameplay stutter? I've found
->> a
->>>> couple other bugs with the card reader too but I will send out separate
->> threads
->>>> to keep things organized.
->>>>>>
->>>>>> Please post a formal patch, then let's discuss what to do about it.
->>>>>
->>>>> Will send out that patch shortly.
->>>>>
->>>>> Matt
->>>>>
->>>>>>
->>>>>>>
->>>>>>> Thanks!
->>>>>>>
->>>>>>> Matt
->>>>>>
->>>>>> Kind regards
->>>>>> Uffe
->>>>>
->>>
-> 
-
+PiBPbiAxLzQvMjYgMTE6MDIgUE0sIFJpY2t5IFdVIHdyb3RlOg0KPiA+PiBPbiAxLzQvMjYgNzo1
+OCBQTSwgUmlja3kgV1Ugd3JvdGU6DQo+ID4+Pj4gT24gMS8zLzI2IDExOjUyIEFNLCBNYXR0aGV3
+IFNjaHdhcnR6IHdyb3RlOg0KPiA+Pj4+PiBPbiAxLzMvMjYgMzozNyBBTSwgVWxmIEhhbnNzb24g
+d3JvdGU6DQo+ID4+Pj4+PiBPbiBXZWQsIDI0IERlYyAyMDI1IGF0IDIyOjAxLCBNYXR0aGV3IFNj
+aHdhcnR6DQo+ID4+Pj4+PiA8bWF0dGhldy5zY2h3YXJ0ekBsaW51eC5kZXY+IHdyb3RlOg0KPiA+
+Pj4+Pj4+DQo+ID4+Pj4+Pj4gSGVsbG8sDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBJIGhhdmUgc2V2
+ZXJhbCBoYW5kaGVsZCBkZXZpY2VzIHRoYXQgaGF2ZSBhIFJlYWx0ZWsgU2VtaWNvbmR1Y3Rvcg0K
+PiBDby4sDQo+ID4+IEx0ZC4NCj4gPj4+PiBSVFM1MjVBIFBDSSBFeHByZXNzIENhcmQgUmVhZGVy
+IGFuZCBJIGFtIHJ1bm5pbmcgaW50byBhbiBpc3N1ZSBvbiBhbGwgb2YNCj4gPj4gdGhlbQ0KPiA+
+Pj4+IHdoZW4gSSB0cnkgdG8gcGxheSBnYW1lcyBvZmYgb2YgbXkgU2FuRGlzayBFeHRyZW1lIFBS
+TyBNaWNybyBTRCBjYXJkcy4NCj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IEkgaGF2ZSB0d28gU0QgY2Fy
+ZHMsIGEgMVRCIGFuZCBhIDJUQiBtb2RlbCwgYW5kIHdoaWxlIHBsYXlpbmcgZ2FtZXMNCj4gPj4g
+b2ZmDQo+ID4+Pj4gb2YgZWl0aGVyIG9uZSB0aGVyZSBhcmUgZnJlcXVlbnQgZnJlZXplcyBpbiBn
+YW1lcGxheS4gV2hlbiB0aGlzIGhhcHBlbnMsDQo+ID4+IHRoZQ0KPiA+Pj4+IGtlcm5lbCBoYXMg
+c29tZSBtbWMgYW5kIHJ0c3ggZXJyb3JzOg0KPiA+Pj4+Pj4+DQo+ID4+Pj4+Pj4gWyAgIDQxLjM0
+ODMxMV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rfc2VuZF9jbWRf
+Z2V0X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDEzLCBhcmcgPSAweGQ1NTUwMDAwDQo+ID4+Pj4+
+Pj4gWyAgIDQxLjM1NDAwNF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogY21kLT5y
+ZXNwWzBdID0NCj4gPj4+PiAweDAwMDAwOTAwDQo+ID4+Pj4+Pj4gWyAgIDQxLjM1NDAyMF0gcnRz
+eF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAyMDhNSHoNCj4gPj4+Pj4+
+PiBbICAgNDEuMzU0MDIxXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9j
+azogMjA4TUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDIwOCkNCj4gPj4+Pj4+PiBbICAgNDEuMzU0
+MDI2XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+
+Pj4gU0QvTU1DIENNRCA0OCwgYXJnID0gMHgwODAwMDIwMA0KPiA+Pj4+Pj4+IFsgICA0MS4zNTQy
+MzVdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4g
+Pj4+Pj4+PiBbICAgNDEuMzU0MjM2XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNT
+QyBjbG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMjA4KQ0KPiA+Pj4+Pj4+IFsgICA0
+MS4zNTQyMzddIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogbiA9IDExOCwgZGl2ID0gMw0KPiA+Pj4+
+Pj4+IFsgICA0MS4zNTQyMzddIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogc3NjX2RlcHRoID0gMQ0K
+PiA+Pj4+Pj4+IFsgICA0MS42MDEyOTFdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogLS0+IHJ0c3hf
+cGNpX3J1bnRpbWVfaWRsZQ0KPiA+Pj4+Pj4+IFsgICA1MS41MjE2NjZdIHJ0c3hfcGNpIDAwMDA6
+YzA6MDAuMDogLS0+IHJ0c3hfcGNpX3J1bnRpbWVfc3VzcGVuZA0KPiA+Pj4+Pj4+IFsgIDEwMS44
+OTg5NjZdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogLS0+IHJ0c3hfcGNpX3J1bnRpbWVfcmVzdW1l
+DQo+ID4+Pj4+Pj4gWyAgMTAxLjg5OTA1Ml0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBSVFNYX0JJ
+RVI6IDB4MzY0MDAwMDANCj4gPj4+Pj4+PiBbICAxMDEuOTEwMDI4XSBydHN4X3BjaSAwMDAwOmMw
+OjAwLjA6IFBvd2VyIE9GRiBlZnVzZSENCj4gPj4+Pj4+PiBbICAxMDIuMDI1OTAxXSBydHN4X3Bj
+aSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDMwTUh6DQo+ID4+Pj4+Pj4gWyAg
+MTAyLjAyNTkwN10gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBJbnRlcm5hbCBTU0MgY2xvY2s6IDMw
+TUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMwKQ0KPiA+Pj4+Pj4+IFsgIDEwMi4wMjU5MTFdIHJ0
+c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+Pj4gc2RtbWNfc3dpdGNoX3ZvbHRh
+Z2U6IHNpZ25hbF92b2x0YWdlID0gMA0KPiA+Pj4+Pj4+IFsgIDEwMi4wMzE4OTJdIHJ0c3hfcGNp
+IDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4gPj4+Pj4+PiBbICAx
+MDIuMDMxOTAwXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9jazogMzBN
+SHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+Pj4gWyAgMTAyLjAzNzg5Ml0gcnRz
+eF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0KPiA+Pj4+Pj4+
+IFsgIDEwMi4wMzc4OTldIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwgU1NDIGNsb2Nr
+OiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAxMDIuMDM5MTY4
+XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDMwTUh6DQo+ID4+
+Pj4+Pj4gWyAgMTAyLjAzOTE3Ml0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBJbnRlcm5hbCBTU0Mg
+Y2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMwKQ0KPiA+Pj4+Pj4+IFsgIDEwMi4w
+MzkxNzddIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX3NlbmRfY21k
+X2dldF9yc3A6DQo+ID4+Pj4gU0QvTU1DIENNRCAwLCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+
+Pj4gWyAgMTAyLjA0MDc2M10gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9j
+ayB0byAzME1Ieg0KPiA+Pj4+Pj4+IFsgIDEwMi4wNDA3NjRdIHJ0c3hfcGNpIDAwMDA6YzA6MDAu
+MDogSW50ZXJuYWwgU1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4g
+Pj4+Pj4+PiBbICAxMDIuMDQxODc0XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJk
+IGNsb2NrIHRvIDMwTUh6DQo+ID4+Pj4+Pj4gWyAgMTAyLjA0MTg3NV0gcnRzeF9wY2kgMDAwMDpj
+MDowMC4wOiBJbnRlcm5hbCBTU0MgY2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMw
+KQ0KPiA+Pj4+Pj4+IFsgIDEwMi4wNDE4NzldIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1j
+LjA6DQo+ID4+IHNkX3NlbmRfY21kX2dldF9yc3A6DQo+ID4+Pj4gU0QvTU1DIENNRCA4LCBhcmcg
+PSAweDAwMDAwMWFhDQo+ID4+Pj4+Pj4gWyAgMTAyLjA0MjQ1Ml0gcnRzeF9wY2lfc2RtbWMgcnRz
+eF9wY2lfc2RtbWMuMDogY21kLT5yZXNwWzBdID0NCj4gPj4+PiAweDAwMDAwMWFhDQo+ID4+Pj4+
+Pj4gWyAgMTAyLjA0MjQ2OF0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9j
+ayB0byAzME1Ieg0KPiA+Pj4+Pj4+IFsgIDEwMi4wNDI0NjldIHJ0c3hfcGNpIDAwMDA6YzA6MDAu
+MDogSW50ZXJuYWwgU1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4g
+Pj4+Pj4+PiBbICAxMDIuMDQyNDc0XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0K
+PiA+PiBzZF9zZW5kX2NtZF9nZXRfcnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgNTUsIGFyZyA9IDB4
+MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuMDQzMDM2XSBydHN4X3BjaV9zZG1tYyBydHN4X3Bj
+aV9zZG1tYy4wOiBjbWQtPnJlc3BbMF0gPQ0KPiA+Pj4+IDB4MDAwMDAxMjANCj4gPj4+Pj4+PiBb
+ICAxMDIuMDQzMDUzXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRv
+IDMwTUh6DQo+ID4+Pj4+Pj4gWyAgMTAyLjA0MzA1N10gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBJ
+bnRlcm5hbCBTU0MgY2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMwKQ0KPiA+Pj4+
+Pj4+IFsgIDEwMi4wNDMwNjFdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+
+IHNkX3NlbmRfY21kX2dldF9yc3A6DQo+ID4+Pj4gU0QvTU1DIENNRCA0MSwgYXJnID0gMHg1OTMw
+MDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi4wNDM1OTldIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3Nk
+bW1jLjA6IGNtZC0+cmVzcFswXSA9DQo+ID4+Pj4gMHgwMGZmODAwMA0KPiA+Pj4+Pj4+IFsgIDEw
+Mi4wNjI4NzhdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBN
+SHoNCj4gPj4+Pj4+PiBbICAxMDIuMDYyODg1XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVy
+bmFsIFNTQyBjbG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjA2Mjg5MF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rf
+c2VuZF9jbWRfZ2V0X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDU1LCBhcmcgPSAweDAwMDAwMDAw
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjA2MzQ1MF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDogY21kLT5yZXNwWzBdID0NCj4gPj4+PiAweDAwMDAwMTIwDQo+ID4+Pj4+Pj4gWyAgMTAyLjA2
+MzQ2Ml0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0K
+PiA+Pj4+Pj4+IFsgIDEwMi4wNjM0NjNdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwg
+U1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAx
+MDIuMDYzNDY3XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9zZW5k
+X2NtZF9nZXRfcnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgNDEsIGFyZyA9IDB4NTkzMDAwMDANCj4g
+Pj4+Pj4+PiBbICAxMDIuMDY0MDEyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBj
+bWQtPnJlc3BbMF0gPQ0KPiA+Pj4+IDB4MDBmZjgwMDANCj4gPj4+Pj4+PiBbICAxMDIuMTA0MDM2
+XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDMwTUh6DQo+ID4+
+Pj4+Pj4gWyAgMTAyLjEwNDA0M10gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBJbnRlcm5hbCBTU0Mg
+Y2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMwKQ0KPiA+Pj4+Pj4+IFsgIDEwMi4x
+MDQwNDddIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX3NlbmRfY21k
+X2dldF9yc3A6DQo+ID4+Pj4gU0QvTU1DIENNRCA1NSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+
+Pj4+IFsgIDEwMi4xMDQ2MDNdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IGNtZC0+
+cmVzcFswXSA9DQo+ID4+Pj4gMHgwMDAwMDEyMA0KPiA+Pj4+Pj4+IFsgIDEwMi4xMDQ2MTldIHJ0
+c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4gPj4+Pj4+
+PiBbICAxMDIuMTA0NjIwXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9j
+azogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+Pj4gWyAgMTAyLjEwNDYy
+NF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rfc2VuZF9jbWRfZ2V0
+X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDQxLCBhcmcgPSAweDU5MzAwMDAwDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjEwNTE2Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogY21kLT5yZXNw
+WzBdID0NCj4gPj4+PiAweDAwZmY4MDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjE4NDg2N10gcnRzeF9w
+Y2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0KPiA+Pj4+Pj4+IFsg
+IDEwMi4xODQ4NzRdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwgU1NDIGNsb2NrOiAz
+ME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAxMDIuMTg0ODc4XSBy
+dHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9zZW5kX2NtZF9nZXRfcnNw
+Og0KPiA+Pj4+IFNEL01NQyBDTUQgNTUsIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAx
+MDIuMTg1NDM4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBjbWQtPnJlc3BbMF0g
+PQ0KPiA+Pj4+IDB4MDAwMDAxMjANCj4gPj4+Pj4+PiBbICAxMDIuMTg1NDQ2XSBydHN4X3BjaSAw
+MDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDMwTUh6DQo+ID4+Pj4+Pj4gWyAgMTAy
+LjE4NTQ0N10gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBJbnRlcm5hbCBTU0MgY2xvY2s6IDMwTUh6
+DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMwKQ0KPiA+Pj4+Pj4+IFsgIDEwMi4xODU0NTFdIHJ0c3hf
+cGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX3NlbmRfY21kX2dldF9yc3A6DQo+
+ID4+Pj4gU0QvTU1DIENNRCA0MSwgYXJnID0gMHg1OTMwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi4x
+ODU5OTBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IGNtZC0+cmVzcFswXSA9DQo+
+ID4+Pj4gMHgwMGZmODAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi4yNjU4NjFdIHJ0c3hfcGNpIDAwMDA6
+YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4gPj4+Pj4+PiBbICAxMDIuMjY1
+ODY4XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9jazogMzBNSHoNCj4g
+Pj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+Pj4gWyAgMTAyLjI2NTg3Ml0gcnRzeF9wY2lf
+c2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rfc2VuZF9jbWRfZ2V0X3JzcDoNCj4gPj4+
+PiBTRC9NTUMgQ01EIDU1LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjI2NjQz
+NF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogY21kLT5yZXNwWzBdID0NCj4gPj4+
+PiAweDAwMDAwMTIwDQo+ID4+Pj4+Pj4gWyAgMTAyLjI2NjQ1MF0gcnRzeF9wY2kgMDAwMDpjMDow
+MC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0KPiA+Pj4+Pj4+IFsgIDEwMi4yNjY0NTJd
+IHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwgU1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+
+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAxMDIuMjY2NDU2XSBydHN4X3BjaV9zZG1t
+YyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9zZW5kX2NtZF9nZXRfcnNwOg0KPiA+Pj4+IFNE
+L01NQyBDTUQgNDEsIGFyZyA9IDB4NTkzMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuMjY2OTk2XSBy
+dHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBjbWQtPnJlc3BbMF0gPQ0KPiA+Pj4+IDB4
+MDBmZjgwMDANCj4gPj4+Pj4+PiBbICAxMDIuMzQ2ODU5XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6
+IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDMwTUh6DQo+ID4+Pj4+Pj4gWyAgMTAyLjM0Njg2OV0gcnRz
+eF9wY2kgMDAwMDpjMDowMC4wOiBJbnRlcm5hbCBTU0MgY2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1
+cl9jbG9jayA9IDMwKQ0KPiA+Pj4+Pj4+IFsgIDEwMi4zNDY4NzVdIHJ0c3hfcGNpX3NkbW1jIHJ0
+c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX3NlbmRfY21kX2dldF9yc3A6DQo+ID4+Pj4gU0QvTU1D
+IENNRCA1NSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi4zNDc0NDFdIHJ0c3hf
+cGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IGNtZC0+cmVzcFswXSA9DQo+ID4+Pj4gMHgwMDAw
+MDEyMA0KPiA+Pj4+Pj4+IFsgIDEwMi4zNDc0NTBdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dp
+dGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4gPj4+Pj4+PiBbICAxMDIuMzQ3NDUxXSBydHN4X3Bj
+aSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Ns
+b2NrID0gMzApDQo+ID4+Pj4+Pj4gWyAgMTAyLjM0NzQ1NV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9w
+Y2lfc2RtbWMuMDoNCj4gPj4gc2Rfc2VuZF9jbWRfZ2V0X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01E
+IDQxLCBhcmcgPSAweDU5MzAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjM0ODAwNV0gcnRzeF9wY2lf
+c2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogY21kLT5yZXNwWzBdID0NCj4gPj4+PiAweDAwZmY4MDAw
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjQyNzg1M10gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2gg
+Y2FyZCBjbG9jayB0byAzME1Ieg0KPiA+Pj4+Pj4+IFsgIDEwMi40Mjc4NjBdIHJ0c3hfcGNpIDAw
+MDA6YzA6MDAuMDogSW50ZXJuYWwgU1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sg
+PSAzMCkNCj4gPj4+Pj4+PiBbICAxMDIuNDI3ODY1XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9z
+ZG1tYy4wOg0KPiA+PiBzZF9zZW5kX2NtZF9nZXRfcnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgNTUs
+IGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNDI4NDM0XSBydHN4X3BjaV9zZG1t
+YyBydHN4X3BjaV9zZG1tYy4wOiBjbWQtPnJlc3BbMF0gPQ0KPiA+Pj4+IDB4MDAwMDAxMjANCj4g
+Pj4+Pj4+PiBbICAxMDIuNDI4NDQzXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJk
+IGNsb2NrIHRvIDMwTUh6DQo+ID4+Pj4+Pj4gWyAgMTAyLjQyODQ0NF0gcnRzeF9wY2kgMDAwMDpj
+MDowMC4wOiBJbnRlcm5hbCBTU0MgY2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMw
+KQ0KPiA+Pj4+Pj4+IFsgIDEwMi40Mjg0NDhdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1j
+LjA6DQo+ID4+IHNkX3NlbmRfY21kX2dldF9yc3A6DQo+ID4+Pj4gU0QvTU1DIENNRCA0MSwgYXJn
+ID0gMHg1OTMwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi40Mjg5OTVdIHJ0c3hfcGNpX3NkbW1jIHJ0
+c3hfcGNpX3NkbW1jLjA6IGNtZC0+cmVzcFswXSA9DQo+ID4+Pj4gMHg0MWZmODAwMA0KPiA+Pj4+
+Pj4+IFsgIDEwMi41MDg4MzddIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xv
+Y2sgdG8gMzBNSHoNCj4gPj4+Pj4+PiBbICAxMDIuNTA4ODQ1XSBydHN4X3BjaSAwMDAwOmMwOjAw
+LjA6IEludGVybmFsIFNTQyBjbG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+
+ID4+Pj4+Pj4gWyAgMTAyLjUwODg1Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoN
+Cj4gPj4gc2Rfc2VuZF9jbWRfZ2V0X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDU1LCBhcmcgPSAw
+eDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjUwOTQwOF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9w
+Y2lfc2RtbWMuMDogY21kLT5yZXNwWzBdID0NCj4gPj4+PiAweDAwMDAwMTIwDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjUwOTQ0MF0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0
+byAzME1Ieg0KPiA+Pj4+Pj4+IFsgIDEwMi41MDk0NDVdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDog
+SW50ZXJuYWwgU1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+
+Pj4+PiBbICAxMDIuNTA5NDUyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+
+PiBzZF9zZW5kX2NtZF9nZXRfcnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgNDEsIGFyZyA9IDB4NTkz
+MDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNTA5OTk2XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9z
+ZG1tYy4wOiBjbWQtPnJlc3BbMF0gPQ0KPiA+Pj4+IDB4YzFmZjgwMDANCj4gPj4+Pj4+PiBbICAx
+MDIuNTEwMDA4XSBtbWMwOiBjYW5ub3QgdmVyaWZ5IHNpZ25hbCB2b2x0YWdlIHN3aXRjaA0KPiA+
+Pj4+Pj4+IFsgIDEwMi41MTAwMzFdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQg
+Y2xvY2sgdG8gMzBNSHoNCj4gPj4+Pj4+PiBbICAxMDIuNTEwMDMzXSBydHN4X3BjaSAwMDAwOmMw
+OjAwLjA6IEludGVybmFsIFNTQyBjbG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzAp
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjUxMDAzOF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDoNCj4gPj4gc2Rfc2VuZF9jbWRfZ2V0X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDExLCBhcmcg
+PSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjUxMDU4N10gcnRzeF9wY2lfc2RtbWMgcnRz
+eF9wY2lfc2RtbWMuMDogY21kLT5yZXNwWzBdID0NCj4gPj4+PiAweDAwMDAwMzIwDQo+ID4+Pj4+
+Pj4gWyAgMTAyLjUxMTgzN10gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9j
+ayB0byAzME1Ieg0KPiA+Pj4+Pj4+IFsgIDEwMi41MTE4MzhdIHJ0c3hfcGNpIDAwMDA6YzA6MDAu
+MDogSW50ZXJuYWwgU1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4g
+Pj4+Pj4+PiBbICAxMDIuNTExODQwXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0K
+PiA+Pj4+IHNkbW1jX3N3aXRjaF92b2x0YWdlOiBzaWduYWxfdm9sdGFnZSA9IDENCj4gPj4+Pj4+
+PiBbICAxMDIuNTk4NDc0XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2Nr
+IHRvIDMwTUh6DQo+ID4+Pj4+Pj4gWyAgMTAyLjU5ODQ4MF0gcnRzeF9wY2kgMDAwMDpjMDowMC4w
+OiBJbnRlcm5hbCBTU0MgY2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMwKQ0KPiA+
+Pj4+Pj4+IFsgIDEwMi41OTk2NzRdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQg
+Y2xvY2sgdG8gMzBNSHoNCj4gPj4+Pj4+PiBbICAxMDIuNTk5Njc5XSBydHN4X3BjaSAwMDAwOmMw
+OjAwLjA6IEludGVybmFsIFNTQyBjbG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzAp
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjU5OTY4NF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDoNCj4gPj4gc2Rfc2VuZF9jbWRfZ2V0X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDIsIGFyZyA9
+IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjAwNjA4XSBydHN4X3BjaV9zZG1tYyBydHN4
+X3BjaV9zZG1tYy4wOiBjbWQtPnJlc3BbMF0gPQ0KPiA+Pj4+IDB4MDM1MzQ0NTMNCj4gPj4+Pj4+
+PiBbICAxMDIuNjAwNjEyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBjbWQtPnJl
+c3BbMV0gPQ0KPiA+Pj4+IDB4NTIzMDMyNTQNCj4gPj4+Pj4+PiBbICAxMDIuNjAwNjEzXSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBjbWQtPnJlc3BbMl0gPQ0KPiA+Pj4+IDB4ODdi
+YWNmMjYNCj4gPj4+Pj4+PiBbICAxMDIuNjAwNjE0XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9z
+ZG1tYy4wOiBjbWQtPnJlc3BbM10gPQ0KPiA+Pj4+IDB4ZmUwMTg5MDENCj4gPj4+Pj4+PiBbICAx
+MDIuNjAwNjMwXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDMw
+TUh6DQo+ID4+Pj4+Pj4gWyAgMTAyLjYwMDYzMV0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBJbnRl
+cm5hbCBTU0MgY2xvY2s6IDMwTUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDMwKQ0KPiA+Pj4+Pj4+
+IFsgIDEwMi42MDA2MzVdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNk
+X3NlbmRfY21kX2dldF9yc3A6DQo+ID4+Pj4gU0QvTU1DIENNRCAzLCBhcmcgPSAweDAwMDAwMDAw
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjYwMTE3Nl0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDogY21kLT5yZXNwWzBdID0NCj4gPj4+PiAweGQ1NTUwNTAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYw
+MTE5NV0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0K
+PiA+Pj4+Pj4+IFsgIDEwMi42MDExOTldIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwg
+U1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAx
+MDIuNjAxMjA1XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9zZW5k
+X2NtZF9nZXRfcnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgNywgYXJnID0gMHhkNTU1MDAwMA0KPiA+
+Pj4+Pj4+IFsgIDEwMi42MDE3NzBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IGNt
+ZC0+cmVzcFswXSA9DQo+ID4+Pj4gMHgwMDAwMDcwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MDE3ODVd
+IHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4gPj4+
+Pj4+PiBbICAxMDIuNjAxNzg2XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBj
+bG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+Pj4gWyAgMTAyLjYw
+MTc5M10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+
+Pj4+IFNEL01NQyBDTUQgNiwgYXJnID0gMHgwMGZmZmZmMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MDQz
+MzhdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4g
+Pj4+Pj4+PiBbICAxMDIuNjA0MzQwXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNT
+QyBjbG9jazogMzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+Pj4gWyAgMTAy
+LjYwNDM0NV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rfc2VuZF9j
+bWRfZ2V0X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDU1LCBhcmcgPSAweGQ1NTUwMDAwDQo+ID4+
+Pj4+Pj4gWyAgMTAyLjYwNDg4N10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogY21k
+LT5yZXNwWzBdID0NCj4gPj4+PiAweDAwMDAwOTIwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYwNDg5M10g
+cnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0KPiA+Pj4+
+Pj4+IFsgIDEwMi42MDQ4OTRdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwgU1NDIGNs
+b2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAxMDIuNjA0
+ODk5XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9zZW5kX2NtZF9n
+ZXRfcnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgNiwgYXJnID0gMHgwMDAwMDAwMg0KPiA+Pj4+Pj4+
+IFsgIDEwMi42MDU0NjJdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IGNtZC0+cmVz
+cFswXSA9DQo+ID4+Pj4gMHgwMDAwMDkyMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MDU0ODBdIHJ0c3hf
+cGNpIDAwMDA6YzA6MDAuMDogU3dpdGNoIGNhcmQgY2xvY2sgdG8gMzBNSHoNCj4gPj4+Pj4+PiBb
+ICAxMDIuNjA1NDgxXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9jazog
+MzBNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+Pj4gWyAgMTAyLjYwNTQ4Nl0g
+cnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0KPiA+Pj4+
+Pj4+IFsgIDEwMi42MDU0ODddIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwgU1NDIGNs
+b2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAxMDIuNjA1
+NDkzXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+
+Pj4gU0QvTU1DIENNRCA2LCBhcmcgPSAweDgwZmYxZmZmDQo+ID4+Pj4+Pj4gWyAgMTAyLjYwODAx
+Nl0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0KPiA+
+Pj4+Pj4+IFsgIDEwMi42MDgwMTldIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwgU1ND
+IGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAxMDIu
+NjA4MDI1XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+
+ID4+Pj4gU0QvTU1DIENNRCA2LCBhcmcgPSAweDgwZmZmZmYzDQo+ID4+Pj4+Pj4gWyAgMTAyLjYx
+MjkzNF0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAzME1Ieg0K
+PiA+Pj4+Pj4+IFsgIDEwMi42MTI5MzZdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwg
+U1NDIGNsb2NrOiAzME1Ieg0KPiA+Pj4+IChjdXJfY2xvY2sgPSAzMCkNCj4gPj4+Pj4+PiBbICAx
+MDIuNjEyOTUwXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDIw
+OE1Ieg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTI5NTFdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50
+ZXJuYWwgU1NDIGNsb2NrOiAyMDhNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMzApDQo+ID4+Pj4+
+Pj4gWyAgMTAyLjYxMjk1MV0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBuID0gMjA2LCBkaXYgPSAx
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxMjk1Ml0gcnRzeF9wY2kgMDAwMDpjMDowMC4wOiBzc2NfZGVw
+dGggPSAyDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxMzEwNV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lf
+c2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFRYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQg
+PSAyNQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTMxMTVdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3Nk
+bW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0g
+MA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTMxMjZdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1j
+LjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAw
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNDcxOF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAxDQo+
+ID4+Pj4+Pj4gWyAgMTAyLjYxNDczMl0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDog
+c2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4g
+Pj4+Pj4+PiBbICAxMDIuNjE0NzU5XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0K
+PiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDINCj4gPj4+
+Pj4+PiBbICAxMDIuNjE0NzcwXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9y
+ZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+
+Pj4+IFsgIDEwMi42MTQ3OTZdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+
+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMw0KPiA+Pj4+Pj4+
+IFsgIDEwMi42MTQ4MTVdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRf
+ZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjYxNDg0Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rf
+Y2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSA0DQo+ID4+Pj4+Pj4gWyAg
+MTAyLjYxNDg1M10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRh
+Og0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAx
+MDIuNjE0ODc5XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFu
+Z2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDUNCj4gPj4+Pj4+PiBbICAxMDIu
+NjE0ODkwXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+
+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42
+MTQ5MTZdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9w
+aGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gNg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTQ5
+MjddIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+
+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNDk1
+Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNl
+KFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSA3DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNDk2M10g
+cnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNE
+L01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE0OTg3XSBy
+dHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgp
+Og0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDgNCj4gPj4+Pj4+PiBbICAxMDIuNjE0OTk4XSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1D
+IENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUwMjRdIHJ0c3hf
+cGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+
+ID4+Pj4gc2FtcGxlX3BvaW50ID0gOQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUwMzVdIHJ0c3hfcGNp
+X3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01E
+IDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTA1OV0gcnRzeF9wY2lf
+c2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+
+PiBzYW1wbGVfcG9pbnQgPSAxMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUwNzFdIHJ0c3hfcGNpX3Nk
+bW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5
+LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTA5NV0gcnRzeF9wY2lfc2Rt
+bWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBz
+YW1wbGVfcG9pbnQgPSAxMQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUxMDddIHJ0c3hfcGNpX3NkbW1j
+IHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBh
+cmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTEzMl0gcnRzeF9wY2lfc2RtbWMg
+cnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1w
+bGVfcG9pbnQgPSAxMg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUxNDRdIHJ0c3hfcGNpX3NkbW1jIHJ0
+c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcg
+PSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTE3Ml0gcnRzeF9wY2lfc2RtbWMgcnRz
+eF9wY2lfc2RtbWMuMDoNCj4gcnRzeF9wY2lfc2VuZF9jbWQNCj4gPj4+PiBmYWlsIChlcnIgPSAt
+MjIpDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTE3OF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2Rt
+bWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAx
+Mw0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUxODddIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1j
+LjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAw
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTIxMV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDoNCj4gcnRzeF9wY2lfc2VuZF9jbWQNCj4gPj4+PiBmYWlsIChlcnIgPSAtMjIpDQo+ID4+Pj4+
+Pj4gWyAgMTAyLjYxNTIxNV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4g
+c2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAxNA0KPiA+Pj4+Pj4+
+IFsgIDEwMi42MTUyMjNdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRf
+ZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjYxNTIzNV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gcnRzeF9w
+Y2lfc2VuZF9jbWQNCj4gPj4+PiBmYWlsIChlcnIgPSAtMjIpDQo+ID4+Pj4+Pj4gWyAgMTAyLjYx
+NTM1MF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3Bo
+YXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAxNQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUz
+NThdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+
+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTM4
+M10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gcnRzeF9wY2lfc2VuZF9jbWQN
+Cj4gPj4+PiBmYWlsIChlcnIgPSAtMjIpDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTM4N10gcnRzeF9w
+Y2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4g
+Pj4+PiBzYW1wbGVfcG9pbnQgPSAxNg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTUzOTVdIHJ0c3hfcGNp
+X3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01E
+IDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTQxOV0gcnRzeF9wY2lf
+c2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gcnRzeF9wY2lfc2VuZF9jbWQNCj4gPj4+PiBmYWls
+IChlcnIgPSAtMjIpDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTQyNF0gcnRzeF9wY2lfc2RtbWMgcnRz
+eF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVf
+cG9pbnQgPSAxNw0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU0MzJdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hf
+cGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAw
+eDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTQ1OF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9w
+Y2lfc2RtbWMuMDoNCj4gcnRzeF9wY2lfc2VuZF9jbWQNCj4gPj4+PiBmYWlsIChlcnIgPSAtMjIp
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTQ2Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAxOA0K
+PiA+Pj4+Pj4+IFsgIDEwMi42MTU0NzBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6
+IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+
+ID4+Pj4+Pj4gWyAgMTAyLjYxNTQ5NV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoN
+Cj4gcnRzeF9wY2lfc2VuZF9jbWQNCj4gPj4+PiBmYWlsIChlcnIgPSAtMjIpDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjYxNTQ5OV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rf
+Y2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAxOQ0KPiA+Pj4+Pj4+IFsg
+IDEwMi42MTU1MDddIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0
+YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAg
+MTAyLjYxNTUzMV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hh
+bmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAyMA0KPiA+Pj4+Pj4+IFsgIDEw
+Mi42MTU1MzldIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToN
+Cj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAy
+LjYxNTU2Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdl
+X3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAyMQ0KPiA+Pj4+Pj4+IFsgIDEwMi42
+MTU1NzBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4g
+Pj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYx
+NTU5NF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3Bo
+YXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAyMg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU2
+MDJdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+
+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTYy
+NV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNl
+KFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAyMw0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU2MzNd
+IHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBT
+RC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTY1N10g
+cnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJY
+KToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAyNA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU2NjVdIHJ0
+c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9N
+TUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTY4OV0gcnRz
+eF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToN
+Cj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAyNQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU2OTddIHJ0c3hf
+cGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMg
+Q01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTcyMl0gcnRzeF9w
+Y2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4g
+Pj4+PiBzYW1wbGVfcG9pbnQgPSAyNg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU3MzBdIHJ0c3hfcGNp
+X3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01E
+IDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTc1NF0gcnRzeF9wY2lf
+c2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+
+PiBzYW1wbGVfcG9pbnQgPSAyNw0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU3NjJdIHJ0c3hfcGNpX3Nk
+bW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5
+LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTc4NV0gcnRzeF9wY2lfc2Rt
+bWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBz
+YW1wbGVfcG9pbnQgPSAyOA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU3OTNdIHJ0c3hfcGNpX3NkbW1j
+IHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBh
+cmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTgxN10gcnRzeF9wY2lfc2RtbWMg
+cnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1w
+bGVfcG9pbnQgPSAyOQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU4MjVdIHJ0c3hfcGNpX3NkbW1jIHJ0
+c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcg
+PSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTg0OV0gcnRzeF9wY2lfc2RtbWMgcnRz
+eF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVf
+cG9pbnQgPSAzMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU4NThdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hf
+cGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAw
+eDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTg5MF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9w
+Y2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9p
+bnQgPSAzMQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTU5MDddIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNp
+X3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAw
+MDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTkzM10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lf
+c2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQg
+PSAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNTk0M10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2Rt
+bWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAw
+MDANCj4gPj4+Pj4+PiBbICAxMDIuNjE1OTY4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1t
+Yy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDEN
+Cj4gPj4+Pj4+PiBbICAxMDIuNjE1OTc3XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4w
+OiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0K
+PiA+Pj4+Pj4+IFsgIDEwMi42MTYwMDFdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6
+DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMg0KPiA+
+Pj4+Pj4+IFsgIDEwMi42MTYwMTBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNk
+X3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+
+Pj4+Pj4gWyAgMTAyLjYxNjAzNF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4g
+Pj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAzDQo+ID4+Pj4+
+Pj4gWyAgMTAyLjYxNjA0Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVh
+ZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+
+PiBbICAxMDIuNjE2MDY2XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBz
+ZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDQNCj4gPj4+Pj4+PiBb
+ICAxMDIuNjE2MDc2XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2Rh
+dGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsg
+IDEwMi42MTYxMDBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2No
+YW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gNQ0KPiA+Pj4+Pj4+IFsgIDEw
+Mi42MTYxMDldIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToN
+Cj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAy
+LjYxNjEzM10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdl
+X3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSA2DQo+ID4+Pj4+Pj4gWyAgMTAyLjYx
+NjE0Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+
+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2
+MTY4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhh
+c2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDcNCj4gPj4+Pj4+PiBbICAxMDIuNjE2MTgw
+XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4g
+U0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTYyMDdd
+IHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShS
+WCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gOA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTYyMTldIHJ0
+c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9N
+TUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjI0NF0gcnRz
+eF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToN
+Cj4gPj4+PiBzYW1wbGVfcG9pbnQgPSA5DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjI1N10gcnRzeF9w
+Y2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBD
+TUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2MjgyXSBydHN4X3Bj
+aV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+
+Pj4+IHNhbXBsZV9wb2ludCA9IDEwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjI5NF0gcnRzeF9wY2lf
+c2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQg
+MTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2MzE5XSBydHN4X3BjaV9z
+ZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+
+IHNhbXBsZV9wb2ludCA9IDExDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjMzMV0gcnRzeF9wY2lfc2Rt
+bWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTks
+IGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2MzU2XSBydHN4X3BjaV9zZG1t
+YyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNh
+bXBsZV9wb2ludCA9IDEyDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjM2OF0gcnRzeF9wY2lfc2RtbWMg
+cnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFy
+ZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2Mzk1XSBydHN4X3BjaV9zZG1tYyBy
+dHN4X3BjaV9zZG1tYy4wOg0KPiBydHN4X3BjaV9zZW5kX2NtZA0KPiA+Pj4+IGZhaWwgKGVyciA9
+IC0yMikNCj4gPj4+Pj4+PiBbICAxMDIuNjE2NDAyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9z
+ZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9
+IDEzDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjQxM10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2Rt
+bWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAw
+MDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2NDM5XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1t
+Yy4wOg0KPiBydHN4X3BjaV9zZW5kX2NtZA0KPiA+Pj4+IGZhaWwgKGVyciA9IC0yMikNCj4gPj4+
+Pj4+PiBbICAxMDIuNjE2NDQ1XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+
+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDE0DQo+ID4+Pj4+
+Pj4gWyAgMTAyLjYxNjQ1N10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVh
+ZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+
+PiBbICAxMDIuNjE2NDcxXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiBydHN4
+X3BjaV9zZW5kX2NtZA0KPiA+Pj4+IGZhaWwgKGVyciA9IC0yMikNCj4gPj4+Pj4+PiBbICAxMDIu
+NjE2NTgwXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2Vf
+cGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDE1DQo+ID4+Pj4+Pj4gWyAgMTAyLjYx
+NjU5Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+
+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2
+NjA2XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiBydHN4X3BjaV9zZW5kX2Nt
+ZA0KPiA+Pj4+IGZhaWwgKGVyciA9IC0yMikNCj4gPj4+Pj4+PiBbICAxMDIuNjE2NzE0XSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0K
+PiA+Pj4+IHNhbXBsZV9wb2ludCA9IDE2DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjcyNl0gcnRzeF9w
+Y2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBD
+TUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2NzUzXSBydHN4X3Bj
+aV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiBydHN4X3BjaV9zZW5kX2NtZA0KPiA+Pj4+IGZh
+aWwgKGVyciA9IC0yMikNCj4gPj4+Pj4+PiBbICAxMDIuNjE2NzU4XSBydHN4X3BjaV9zZG1tYyBy
+dHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBs
+ZV9wb2ludCA9IDE3DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjc3MF0gcnRzeF9wY2lfc2RtbWMgcnRz
+eF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9
+IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE2Nzk2XSBydHN4X3BjaV9zZG1tYyBydHN4
+X3BjaV9zZG1tYy4wOg0KPiBydHN4X3BjaV9zZW5kX2NtZA0KPiA+Pj4+IGZhaWwgKGVyciA9IC0y
+MikNCj4gPj4+Pj4+PiBbICAxMDIuNjE2ODA5XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1t
+Yy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDE4
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNjgyMV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDAN
+Cj4gPj4+Pj4+PiBbICAxMDIuNjE2ODQ4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4w
+Og0KPiBydHN4X3BjaV9zZW5kX2NtZA0KPiA+Pj4+IGZhaWwgKGVyciA9IC0yMikNCj4gPj4+Pj4+
+PiBbICAxMDIuNjE2ODU0XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBz
+ZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDE5DQo+ID4+Pj4+Pj4g
+WyAgMTAyLjYxNjg2Nl0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9k
+YXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBb
+ICAxMDIuNjE2ODkxXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9j
+aGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDIwDQo+ID4+Pj4+Pj4gWyAg
+MTAyLjYxNjkwM10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRh
+Og0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAx
+MDIuNjE2OTI4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFu
+Z2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDIxDQo+ID4+Pj4+Pj4gWyAgMTAy
+LjYxNjk0MF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0K
+PiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIu
+NjE2OTY1XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2Vf
+cGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDIyDQo+ID4+Pj4+Pj4gWyAgMTAyLjYx
+Njk3OF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+
+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3
+MDAzXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhh
+c2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDIzDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzAx
+NV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+
+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MDQw
+XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2Uo
+UlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDI0DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzA1MV0g
+cnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNE
+L01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MDc2XSBy
+dHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgp
+Og0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDI1DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzA4OF0gcnRz
+eF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01N
+QyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MTExXSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0K
+PiA+Pj4+IHNhbXBsZV9wb2ludCA9IDI2DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzEyMF0gcnRzeF9w
+Y2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBD
+TUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MTQzXSBydHN4X3Bj
+aV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+
+Pj4+IHNhbXBsZV9wb2ludCA9IDI3DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzE1Ml0gcnRzeF9wY2lf
+c2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQg
+MTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MTc1XSBydHN4X3BjaV9z
+ZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+
+IHNhbXBsZV9wb2ludCA9IDI4DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzE4NF0gcnRzeF9wY2lfc2Rt
+bWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTks
+IGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MjA3XSBydHN4X3BjaV9zZG1t
+YyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNh
+bXBsZV9wb2ludCA9IDI5DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzIxNl0gcnRzeF9wY2lfc2RtbWMg
+cnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFy
+ZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MjM5XSBydHN4X3BjaV9zZG1tYyBy
+dHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBs
+ZV9wb2ludCA9IDMwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzI0N10gcnRzeF9wY2lfc2RtbWMgcnRz
+eF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9
+IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MjcxXSBydHN4X3BjaV9zZG1tYyBydHN4
+X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9w
+b2ludCA9IDMxDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzI4MF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9w
+Y2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4
+MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MzAzXSBydHN4X3BjaV9zZG1tYyBydHN4X3Bj
+aV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2lu
+dCA9IDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3MzEyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9z
+ZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAw
+MDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTczMzVdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3Nk
+bW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0g
+MQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTczNDNdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1j
+LjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAw
+DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzM2N10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMu
+MDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSAyDQo+
+ID4+Pj4+Pj4gWyAgMTAyLjYxNzM3NV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDog
+c2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4g
+Pj4+Pj4+PiBbICAxMDIuNjE3Mzk4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0K
+PiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDMNCj4gPj4+
+Pj4+PiBbICAxMDIuNjE3NDA3XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9y
+ZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+
+Pj4+IFsgIDEwMi42MTc0MzBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+
+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gNA0KPiA+Pj4+Pj4+
+IFsgIDEwMi42MTc0MzldIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRf
+ZGF0YToNCj4gPj4+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjYxNzQ2Ml0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rf
+Y2hhbmdlX3BoYXNlKFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSA1DQo+ID4+Pj4+Pj4gWyAg
+MTAyLjYxNzQ3MV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRh
+Og0KPiA+Pj4+IFNEL01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAx
+MDIuNjE3NDk0XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFu
+Z2VfcGhhc2UoUlgpOg0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDYNCj4gPj4+Pj4+PiBbICAxMDIu
+NjE3NTAyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+
+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42
+MTc1MjVdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9w
+aGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gNw0KPiA+Pj4+Pj4+IFsgIDEwMi42MTc1
+MzRdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHNkX3JlYWRfZGF0YToNCj4gPj4+
+PiBTRC9NTUMgQ01EIDE5LCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzU1
+N10gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2RfY2hhbmdlX3BoYXNl
+KFJYKToNCj4gPj4+PiBzYW1wbGVfcG9pbnQgPSA4DQo+ID4+Pj4+Pj4gWyAgMTAyLjYxNzU2Nl0g
+cnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogc2RfcmVhZF9kYXRhOg0KPiA+Pj4+IFNE
+L01NQyBDTUQgMTksIGFyZyA9IDB4MDAwMDAwMDANCj4gPj4+Pj4+PiBbICAxMDIuNjE3NTg5XSBy
+dHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgp
+Og0KPiA+Pj4+IHNhbXBsZV9wb2ludCA9IDkNCj4gPj4+Pj4+PiBbICAxMDIuNjE3NTk4XSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1D
+IENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTc2MjFdIHJ0c3hf
+cGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+
+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMTANCj4gPj4+Pj4+PiBbICAxMDIuNjE3NjMwXSBydHN4X3Bj
+aV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENN
+RCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTc2NTNdIHJ0c3hfcGNp
+X3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+
+Pj4gc2FtcGxlX3BvaW50ID0gMTENCj4gPj4+Pj4+PiBbICAxMDIuNjE3NjYyXSBydHN4X3BjaV9z
+ZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAx
+OSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTc2ODZdIHJ0c3hfcGNpX3Nk
+bW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4g
+c2FtcGxlX3BvaW50ID0gMTINCj4gPj4+Pj4+PiBbICAxMDIuNjE3Njk0XSBydHN4X3BjaV9zZG1t
+YyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwg
+YXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTc3MTldIHJ0c3hfcGNpX3NkbW1j
+IHJ0c3hfcGNpX3NkbW1jLjA6DQo+IHJ0c3hfcGNpX3NlbmRfY21kDQo+ID4+Pj4gZmFpbCAoZXJy
+ID0gLTIyKQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTc3MjNdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNp
+X3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50
+ID0gMTMNCj4gPj4+Pj4+PiBbICAxMDIuNjE3NzMyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9z
+ZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAw
+MDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTc3NTZdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3Nk
+bW1jLjA6DQo+IHJ0c3hfcGNpX3NlbmRfY21kDQo+ID4+Pj4gZmFpbCAoZXJyID0gLTIyKQ0KPiA+
+Pj4+Pj4+IFsgIDEwMi42MTc3NjFdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+
+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMTQNCj4gPj4+
+Pj4+PiBbICAxMDIuNjE3NzcwXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9y
+ZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+
+Pj4+IFsgIDEwMi42MTc3ODJdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+IHJ0
+c3hfcGNpX3NlbmRfY21kDQo+ID4+Pj4gZmFpbCAoZXJyID0gLTIyKQ0KPiA+Pj4+Pj4+IFsgIDEw
+Mi42MTc4ODldIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5n
+ZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMTUNCj4gPj4+Pj4+PiBbICAxMDIu
+NjE3ODk4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+
+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42
+MTc5MTFdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+IHJ0c3hfcGNpX3NlbmRf
+Y21kDQo+ID4+Pj4gZmFpbCAoZXJyID0gLTIyKQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgwMTddIHJ0
+c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6
+DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMTYNCj4gPj4+Pj4+PiBbICAxMDIuNjE4MDI2XSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1D
+IENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgwNTFdIHJ0c3hf
+cGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+IHJ0c3hfcGNpX3NlbmRfY21kDQo+ID4+Pj4g
+ZmFpbCAoZXJyID0gLTIyKQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgwNTZdIHJ0c3hfcGNpX3NkbW1j
+IHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2Ft
+cGxlX3BvaW50ID0gMTcNCj4gPj4+Pj4+PiBbICAxMDIuNjE4MDY0XSBydHN4X3BjaV9zZG1tYyBy
+dHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJn
+ID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgwODldIHJ0c3hfcGNpX3NkbW1jIHJ0
+c3hfcGNpX3NkbW1jLjA6DQo+IHJ0c3hfcGNpX3NlbmRfY21kDQo+ID4+Pj4gZmFpbCAoZXJyID0g
+LTIyKQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgwOTNdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3Nk
+bW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0g
+MTgNCj4gPj4+Pj4+PiBbICAxMDIuNjE4MTAyXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1t
+Yy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAw
+MA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgxMjddIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1j
+LjA6DQo+IHJ0c3hfcGNpX3NlbmRfY21kDQo+ID4+Pj4gZmFpbCAoZXJyID0gLTIyKQ0KPiA+Pj4+
+Pj4+IFsgIDEwMi42MTgxMzJdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+
+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMTkNCj4gPj4+Pj4+
+PiBbICAxMDIuNjE4MTQwXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFk
+X2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+
+IFsgIDEwMi42MTgxNjRdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNk
+X2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjANCj4gPj4+Pj4+PiBb
+ICAxMDIuNjE4MTczXSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2Rh
+dGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsg
+IDEwMi42MTgxOTZdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2No
+YW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjENCj4gPj4+Pj4+PiBbICAx
+MDIuNjE4MjA1XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6
+DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEw
+Mi42MTgyMjhdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5n
+ZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjINCj4gPj4+Pj4+PiBbICAxMDIu
+NjE4MjM3XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+
+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42
+MTgyNjBdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9w
+aGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjMNCj4gPj4+Pj4+PiBbICAxMDIuNjE4
+MjY4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+
+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgy
+OTJdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFz
+ZShSWCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjQNCj4gPj4+Pj4+PiBbICAxMDIuNjE4MzAx
+XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4g
+U0QvTU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgzMjRd
+IHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShS
+WCk6DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjUNCj4gPj4+Pj4+PiBbICAxMDIuNjE4MzMzXSBy
+dHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0Qv
+TU1DIENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgzNTZdIHJ0
+c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6
+DQo+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjYNCj4gPj4+Pj4+PiBbICAxMDIuNjE4MzY0XSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1D
+IENNRCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTgzODhdIHJ0c3hf
+cGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+
+ID4+Pj4gc2FtcGxlX3BvaW50ID0gMjcNCj4gPj4+Pj4+PiBbICAxMDIuNjE4Mzk3XSBydHN4X3Bj
+aV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENN
+RCAxOSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg0MjFdIHJ0c3hfcGNp
+X3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+
+Pj4gc2FtcGxlX3BvaW50ID0gMjgNCj4gPj4+Pj4+PiBbICAxMDIuNjE4NDI5XSBydHN4X3BjaV9z
+ZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAx
+OSwgYXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg0NTRdIHJ0c3hfcGNpX3Nk
+bW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4g
+c2FtcGxlX3BvaW50ID0gMjkNCj4gPj4+Pj4+PiBbICAxMDIuNjE4NDYzXSBydHN4X3BjaV9zZG1t
+YyBydHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwg
+YXJnID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg0ODhdIHJ0c3hfcGNpX3NkbW1j
+IHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2Ft
+cGxlX3BvaW50ID0gMzANCj4gPj4+Pj4+PiBbICAxMDIuNjE4NDk3XSBydHN4X3BjaV9zZG1tYyBy
+dHN4X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJn
+ID0gMHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg1MjBdIHJ0c3hfcGNpX3NkbW1jIHJ0
+c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX2NoYW5nZV9waGFzZShSWCk6DQo+ID4+Pj4gc2FtcGxl
+X3BvaW50ID0gMzENCj4gPj4+Pj4+PiBbICAxMDIuNjE4NTI5XSBydHN4X3BjaV9zZG1tYyBydHN4
+X3BjaV9zZG1tYy4wOiBzZF9yZWFkX2RhdGE6DQo+ID4+Pj4gU0QvTU1DIENNRCAxOSwgYXJnID0g
+MHgwMDAwMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg1NTJdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hf
+cGNpX3NkbW1jLjA6IFJYDQo+ID4+IHJhd19waGFzZV9tYXBbMF0NCj4gPj4+PiA9IDB4ZmZmODBm
+ZmYNCj4gPj4+Pj4+PiBbICAxMDIuNjE4NTU0XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1t
+Yy4wOiBSWA0KPiA+PiByYXdfcGhhc2VfbWFwWzFdDQo+ID4+Pj4gPSAweGZmZjgwZmZmDQo+ID4+
+Pj4+Pj4gWyAgMTAyLjYxODU1NV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogUlgN
+Cj4gPj4gcmF3X3BoYXNlX21hcFsyXQ0KPiA+Pj4+ID0gMHhmZmY4MGZmZg0KPiA+Pj4+Pj4+IFsg
+IDEwMi42MTg1NTZdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IFJYIHBoYXNlX21h
+cCA9DQo+ID4+Pj4gMHhmZmY4MGZmZg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg1NThdIHJ0c3hfcGNp
+X3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHBoYXNlOg0KPiA+PiBbbWFwOmZmZjgwZmZmXQ0KPiA+
+Pj4+IFttYXhsZW46MjVdIFtmaW5hbDozMV0NCj4gPj4+Pj4+PiBbICAxMDIuNjE4NTU5XSBydHN4
+X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9jaGFuZ2VfcGhhc2UoUlgpOg0K
+PiA+Pj4+IHNhbXBsZV9wb2ludCA9IDMxDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxODU3OV0gcnRzeF9w
+Y2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAyMDhNSHoNCj4gPj4+Pj4+PiBb
+ICAxMDIuNjE4NTgxXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9jazog
+MjA4TUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDIwOCkNCj4gPj4+Pj4+PiBbICAxMDIuNjE4NTg2
+XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZF93cml0ZV9kYXRhOg0KPiA+Pj4+
+IFNEL01NQyBDTUQgNDksIGFyZyA9IDB4MTAwMjA4MDANCj4gPj4+Pj4+PiBbICAxMDIuNjE4NTg3
+XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9zZW5kX2NtZF9nZXRf
+cnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgNDksIGFyZyA9IDB4MTAwMjA4MDANCj4gPj4+Pj4+PiBb
+ICAxMDIuNjE4NTk4XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBjbWQtPnJlc3Bb
+MF0gPQ0KPiA+Pj4+IDB4MDAwMDA5MDANCj4gPj4+Pj4+PiBbICAxMDIuNjE4NzU0XSBydHN4X3Bj
+aSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDIwOE1Ieg0KPiA+Pj4+Pj4+IFsg
+IDEwMi42MTg3NTZdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJuYWwgU1NDIGNsb2NrOiAy
+MDhNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMjA4KQ0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg3NTld
+IHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNkX3NlbmRfY21kX2dldF9y
+c3A6DQo+ID4+Pj4gU0QvTU1DIENNRCAxMywgYXJnID0gMHhkNTU1MDAwMA0KPiA+Pj4+Pj4+IFsg
+IDEwMi42MTg3NjldIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IGNtZC0+cmVzcFsw
+XSA9DQo+ID4+Pj4gMHgwMDAwMDkwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg3ODRdIHJ0c3hfcGNp
+X3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6IHByZSBkbWEgc2c6IDENCj4gPj4+Pj4+PiBbICAxMDIu
+NjE4Nzk0XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IFN3aXRjaCBjYXJkIGNsb2NrIHRvIDIwOE1I
+eg0KPiA+Pj4+Pj4+IFsgIDEwMi42MTg3OTVdIHJ0c3hfcGNpIDAwMDA6YzA6MDAuMDogSW50ZXJu
+YWwgU1NDIGNsb2NrOiAyMDhNSHoNCj4gPj4+PiAoY3VyX2Nsb2NrID0gMjA4KQ0KPiA+Pj4+Pj4+
+IFsgIDEwMi42MTg3OThdIHJ0c3hfcGNpX3NkbW1jIHJ0c3hfcGNpX3NkbW1jLjA6DQo+ID4+IHNk
+X3JlYWRfbG9uZ19kYXRhOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTgsIGFyZyA9IDB4YzQ0NjA3ZjgN
+Cj4gPj4+Pj4+PiBbICAxMDIuNjE4ODAwXSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IERNQSBhZGRy
+OiAweDY3NWU1MDAwLCBMZW46DQo+ID4+Pj4gMHgxMDAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxOTAx
+OV0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDoNCj4gPj4gc2Rfc2VuZF9jbWRfZ2V0
+X3JzcDoNCj4gPj4+PiBTRC9NTUMgQ01EIDEyLCBhcmcgPSAweDAwMDAwMDAwDQo+ID4+Pj4+Pj4g
+WyAgMTAyLjYxOTAzMF0gcnRzeF9wY2lfc2RtbWMgcnRzeF9wY2lfc2RtbWMuMDogY21kLT5yZXNw
+WzBdID0NCj4gPj4+PiAweDAwMDAwYjAwDQo+ID4+Pj4+Pj4gWyAgMTAyLjYxOTA2Nl0gcnRzeF9w
+Y2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAyMDhNSHoNCj4gPj4+Pj4+PiBb
+ICAxMDIuNjE5MDY4XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBjbG9jazog
+MjA4TUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDIwOCkNCj4gPj4+Pj4+PiBbICAxMDIuNjE5MDc0
+XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOg0KPiA+PiBzZF9zZW5kX2NtZF9nZXRf
+cnNwOg0KPiA+Pj4+IFNEL01NQyBDTUQgMTMsIGFyZyA9IDB4ZDU1NTAwMDANCj4gPj4+Pj4+PiBb
+ICAxMDIuNjE5MDg1XSBydHN4X3BjaV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBjbWQtPnJlc3Bb
+MF0gPQ0KPiA+Pj4+IDB4MDAwMDA5MDANCj4gPj4+Pj4+PiBbICAxMDIuNjE5MDkwXSBydHN4X3Bj
+aV9zZG1tYyBydHN4X3BjaV9zZG1tYy4wOiBzZG1tY19nZXRfY2Q6DQo+ID4+Pj4gUlRTWF9CSVBS
+ID0gMHgwMDAxMDAwMA0KPiA+Pj4+Pj4+IFsgIDEwMi42MjQ0MThdIHJ0c3hfcGNpX3NkbW1jIHJ0
+c3hfcGNpX3NkbW1jLjA6IHByZSBkbWEgc2c6IDE3DQo+ID4+Pj4+Pj4gWyAgMTAyLjYyNDQ0NV0g
+cnRzeF9wY2kgMDAwMDpjMDowMC4wOiBTd2l0Y2ggY2FyZCBjbG9jayB0byAyMDhNSHoNCj4gPj4+
+Pj4+PiBbICAxMDIuNjI0NDQ4XSBydHN4X3BjaSAwMDAwOmMwOjAwLjA6IEludGVybmFsIFNTQyBj
+bG9jazogMjA4TUh6DQo+ID4+Pj4gKGN1cl9jbG9jayA9IDIwOCkNCj4gPj4+Pj4+Pg0KPiA+Pj4+
+Pj4+IEkndmUgaW5jbHVkZWQgYSByZWFkb3V0IG9mIHN1ZG8gbHNwY2kgLXMgYzA6MDAuMCAteHh4
+eCBiZWxvdzoNCj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IGMwOjAwLjAgVW5hc3NpZ25lZCBjbGFzcyBb
+ZmYwMF06IFJlYWx0ZWsgU2VtaWNvbmR1Y3RvciBDby4sIEx0ZC4NCj4gPj4gUlRTNTI1QQ0KPiA+
+Pj4+IFBDSSBFeHByZXNzIENhcmQgUmVhZGVyIChyZXYgMDEpDQo+ID4+Pj4+Pj4gMDA6IGVjIDEw
+IDVhIDUyIDA2IDA0IDEwIDAwIDAxIDAwIDAwIGZmIDEwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMTA6
+IDAwIDAwIDAwIDAwIDAwIDAwIGIwIGIwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+
+Pj4gMjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIGVjIDEwIDVhIDUyDQo+
+ID4+Pj4+Pj4gMzA6IDAwIDAwIDAwIDAwIDgwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIGZmIDAxIDAw
+IDAwDQo+ID4+Pj4+Pj4gNDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gODA6IDAxIDkwIGMzIGY3IDAz
+IDAxIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gOTA6IDA1IGIwIDgx
+IDAwIDAwIDEwIGUwIGZlIDAwIDAwIDAwIDAwIDIyIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYTA6IDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4g
+YjA6IDEwIDAwIDAyIDAwIGMyIDhmIDJjIDAxIDMwIDIwIDE5IDAwIDEyIDdjIDQ3IDAwDQo+ID4+
+Pj4+Pj4gYzA6IDQyIDAxIDEyIDEwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+DQo+ID4+Pj4+Pj4gZDA6IDAwIDAwIDAwIDAwIDEwIDA4IDBjIDAwIDAwIDA0IDAwIDAwIDA2IDAw
+IDAwIDAwDQo+ID4+Pj4+Pj4gZTA6IDAyIDAwIDAxIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMTAwOiAwMSAwMCA4MiAxNCAwMCAwMCAwMCAw
+MCAwMCAwMCA0MCAwMCAzMCAyMCA0NiAwMA0KPiA+Pj4+Pj4+IDExMDogMDAgMjAgMDAgMDAgMDAg
+NjAgMDAgMDAgYTAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAxMjA6IDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMTMwOiAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+
+IDE0MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDMgMDAgODEgMTUgMDAgZTAgNGMgMDANCj4g
+Pj4+Pj4+PiAxNTA6IDAxIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDE4IDAwIDAxIDE2IDAxIDEwIDAx
+IDEwDQo+ID4+Pj4+Pj4gMTYwOiAxZSAwMCAwMSAwMCAxZiAzYyAzMSAwMCAwZiAwMCA5OSA0MCA0
+OSAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDE3MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAxODA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMTkwOiAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDFhMDogMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAxYjA6IDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4g
+MWMwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+
+Pj4+Pj4+IDFkMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDANCj4gPj4+Pj4+PiAxZTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMWYwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDIwMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAyMTA6IDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMjIwOiAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDIzMDogMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAy
+NDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+
+Pj4+Pj4gMjUwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MA0KPiA+Pj4+Pj4+IDI2MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDANCj4gPj4+Pj4+PiAyNzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMjgwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDI5MDogMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAyYTA6IDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMmIwOiAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDJj
+MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+
+Pj4+PiAyZDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+DQo+ID4+Pj4+Pj4gMmUwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMA0KPiA+Pj4+Pj4+IDJmMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAzMDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMzEwOiAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDMyMDogMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAzMzA6IDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gMzQw
+OiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+
+Pj4+IDM1MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAN
+Cj4gPj4+Pj4+PiAzNjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwDQo+ID4+Pj4+Pj4gMzcwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDM4MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAzOTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gM2EwOiAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDNiMDogMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiAzYzA6
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+
+Pj4gM2QwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0K
+PiA+Pj4+Pj4+IDNlMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDANCj4gPj4+Pj4+PiAzZjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNDAwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDQxMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA0MjA6IDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNDMwOiAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDQ0MDog
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+
+PiA0NTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+
+ID4+Pj4+Pj4gNDYwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMA0KPiA+Pj4+Pj4+IDQ3MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA0ODA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNDkwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDRhMDogMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA0YjA6IDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNGMwOiAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+
+IDRkMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4g
+Pj4+Pj4+PiA0ZTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwDQo+ID4+Pj4+Pj4gNGYwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDUwMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA1MTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNTIwOiAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDUzMDogMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA1NDA6IDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4g
+NTUwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+
+Pj4+Pj4+IDU2MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDANCj4gPj4+Pj4+PiA1NzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNTgwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDU5MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA1YTA6IDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNWIwOiAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDVjMDogMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA1
+ZDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+
+Pj4+Pj4gNWUwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MA0KPiA+Pj4+Pj4+IDVmMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDANCj4gPj4+Pj4+PiA2MDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNjEwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDYyMDogMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA2MzA6IDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNjQwOiAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDY1
+MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+
+Pj4+PiA2NjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+DQo+ID4+Pj4+Pj4gNjcwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMA0KPiA+Pj4+Pj4+IDY4MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA2OTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNmEwOiAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDZiMDogMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA2YzA6IDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNmQw
+OiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+
+Pj4+IDZlMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAN
+Cj4gPj4+Pj4+PiA2ZjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwDQo+ID4+Pj4+Pj4gNzAwOiA2OCAwMCAzOCAwMSBmZiBmZiBmZiBmZiAwNCAwMCAwMCAw
+NyAwMSBmZiBmZiA1Yg0KPiA+Pj4+Pj4+IDcxMDogMjAgMDEgMDEgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDEgMDAgODAgMDIgMDAgMDANCj4gPj4+Pj4+PiA3MjA6IDAwIDAwIDAwIDAwIGFhIGZmIGZm
+IGVlIDExIDdhIGY2IDAzIDEwIDAzIDAwIDA4DQo+ID4+Pj4+Pj4gNzMwOiA4MCAwMCAwMSAwMCBm
+ZiAwZiAwMSAwMCA0MCAwMCAwMSAwMCAwMSAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDc0MDogMGYgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMjAgNDAgMjAgNDAgMDQgNDAgMjAgMDANCj4gPj4+Pj4+PiA3NTA6
+IDAwIDAwIDgwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+
+Pj4gNzYwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0K
+PiA+Pj4+Pj4+IDc3MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDANCj4gPj4+Pj4+PiA3ODA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gNzkwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDdhMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA3YjA6IDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gN2MwOiAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDdkMDog
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+
+PiA3ZTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+
+ID4+Pj4+Pj4gN2YwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMA0KPiA+Pj4+Pj4+IDgwMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+ZmYgMDEgMDAgMDANCj4gPj4+Pj4+PiA4MTA6IDk0IGIzIGM4IDI0IDc1IDFmIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gODIwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDgzMDogMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA4NDA6IDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gODUwOiAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+
+IDg2MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4g
+Pj4+Pj4+PiA4NzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwDQo+ID4+Pj4+Pj4gODgwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDg5MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA4YTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gOGIwOiAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMSAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDhjMDogMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA4ZDA6IDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4g
+OGUwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+
+Pj4+Pj4+IDhmMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDANCj4gPj4+Pj4+PiA5MDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwDQo+ID4+Pj4+Pj4gOTEwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDkyMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA5MzA6IDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gOTQwOiAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDk1MDogMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA5
+NjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+
+Pj4+Pj4gOTcwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MA0KPiA+Pj4+Pj4+IDk4MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDANCj4gPj4+Pj4+PiA5OTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gOWEwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDliMDogMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiA5YzA6IDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gOWQwOiAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IDll
+MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+
+Pj4+PiA5ZjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+DQo+ID4+Pj4+Pj4gYTAwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMA0KPiA+Pj4+Pj4+IGExMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBhMjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYTMwOiAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGE0MDogMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBhNTA6IDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYTYw
+OiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+
+Pj4+IGE3MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAN
+Cj4gPj4+Pj4+PiBhODA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwDQo+ID4+Pj4+Pj4gYTkwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGFhMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBhYjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYWMwOiAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGFkMDogMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBhZTA6
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+
+Pj4gYWYwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0K
+PiA+Pj4+Pj4+IGIwMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDANCj4gPj4+Pj4+PiBiMTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYjIwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGIzMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBiNDA6IDAxIDAwIDAwIDAwIGQz
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYjUwOiAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGI2MDog
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+
+PiBiNzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+
+ID4+Pj4+Pj4gYjgwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMA0KPiA+Pj4+Pj4+IGI5MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBiYTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYmIwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGJjMDogMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBiZDA6IDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYmUwOiAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+
+IGJmMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4g
+Pj4+Pj4+PiBjMDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwDQo+ID4+Pj4+Pj4gYzEwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGMyMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBjMzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gYzQwOiAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGM1MDogMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBjNjA6IDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4g
+YzcwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+
+Pj4+Pj4+IGM4MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDANCj4gPj4+Pj4+PiBjOTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwDQo+ID4+Pj4+Pj4gY2EwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGNiMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBjYzA6IDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gY2QwOiAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGNlMDogMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBj
+ZjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+
+Pj4+Pj4gZDAwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MA0KPiA+Pj4+Pj4+IGQxMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDANCj4gPj4+Pj4+PiBkMjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZDMwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGQ0MDogMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBkNTA6IDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZDYwOiAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGQ3
+MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+
+Pj4+PiBkODA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+DQo+ID4+Pj4+Pj4gZDkwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMA0KPiA+Pj4+Pj4+IGRhMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBkYjA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZGMwOiAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGRkMDogMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBkZTA6IDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZGYw
+OiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+
+Pj4+IGUwMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAN
+Cj4gPj4+Pj4+PiBlMTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwDQo+ID4+Pj4+Pj4gZTIwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGUzMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBlNDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZTUwOiAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGU2MDogMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBlNzA6
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+
+Pj4gZTgwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0K
+PiA+Pj4+Pj4+IGU5MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDANCj4gPj4+Pj4+PiBlYTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZWIwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGVjMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBlZDA6IDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZWUwOiAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGVmMDog
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+
+PiBmMDA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+
+ID4+Pj4+Pj4gZjEwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMA0KPiA+Pj4+Pj4+IGYyMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBmMzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZjQwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGY1MDogMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBmNjA6IDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZjcwOiAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+
+IGY4MDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4g
+Pj4+Pj4+PiBmOTA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwDQo+ID4+Pj4+Pj4gZmEwOiAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGZiMDogMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBmYzA6IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4gZmQwOiAwMCAwMCAwMCAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMCAwMA0KPiA+Pj4+Pj4+IGZlMDogMDAgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDAgMDANCj4gPj4+Pj4+PiBmZjA6IDAw
+IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwDQo+ID4+Pj4+Pj4N
+Cj4gPj4+Pj4+PiBkZWNrQGxlZ2lvbi1nby0yIH4+IHN1ZG8gY2F0IC9zeXMva2VybmVsL2RlYnVn
+L21tYzAvaW9zDQo+ID4+Pj4+Pj4gY2xvY2s6ICAgICAgICAgIDIwODAwMDAwMCBIeg0KPiA+Pj4+
+Pj4+IHZkZDogICAgICAgICAgICAyMSAoMy4zIH4gMy40IFYpDQo+ID4+Pj4+Pj4gYnVzIG1vZGU6
+ICAgICAgIDIgKHB1c2gtcHVsbCkNCj4gPj4+Pj4+PiBjaGlwIHNlbGVjdDogICAgMCAoZG9uJ3Qg
+Y2FyZSkNCj4gPj4+Pj4+PiBwb3dlciBtb2RlOiAgICAgMiAob24pDQo+ID4+Pj4+Pj4gYnVzIHdp
+ZHRoOiAgICAgIDIgKDQgYml0cykNCj4gPj4+Pj4+PiB0aW1pbmcgc3BlYzogICAgNiAoc2QgdWhz
+IFNEUjEwNCkNCj4gPj4+Pj4+PiBzaWduYWwgdm9sdGFnZTogMSAoMS44MCBWKQ0KPiA+Pj4+Pj4+
+IGRyaXZlciB0eXBlOiAgICAwIChkcml2ZXIgdHlwZSBCKQ0KPiA+Pj4+Pj4+DQo+ID4+Pj4+Pj4g
+QXMgYSB3b3JrYXJvdW5kLCBub3Qgc2V0dGluZyBNTUNfQ0FQX0FHR1JFU1NJVkVfUE0gc2VlbXMg
+dG8NCj4gPj4+PiByZXNvbHZlIHRoZSBpc3N1ZToNCj4gPj4+Pj4+Pg0KPiA+Pj4+Pj4+IGRpZmYg
+LS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMNCj4gPj4+PiBiL2RyaXZl
+cnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0KPiA+Pj4+Pj4+IGluZGV4IDFlNTE3MDQzNWNm
+OC4uYTdjN2RhZjY2ZDVjIDEwMDY0NA0KPiA+Pj4+Pj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qv
+cnRzeF9wY2lfc2RtbWMuYw0KPiA+Pj4+Pj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9w
+Y2lfc2RtbWMuYw0KPiA+Pj4+Pj4+IEBAIC0xNDk5LDcgKzE0OTksNyBAQCBzdGF0aWMgdm9pZCBy
+ZWFsdGVrX2luaXRfaG9zdChzdHJ1Y3QNCj4gPj4+PiByZWFsdGVrX3BjaV9zZG1tYyAqaG9zdCkN
+Cj4gPj4+Pj4+PiAgICAgICAgIG1tYy0+Y2FwcyA9IE1NQ19DQVBfNF9CSVRfREFUQSB8DQo+ID4+
+Pj4gTU1DX0NBUF9TRF9ISUdIU1BFRUQgfA0KPiA+Pj4+Pj4+ICAgICAgICAgICAgICAgICBNTUNf
+Q0FQX01NQ19ISUdIU1BFRUQgfA0KPiA+Pj4+IE1NQ19DQVBfQlVTX1dJRFRIX1RFU1QgfA0KPiA+
+Pj4+Pj4+ICAgICAgICAgICAgICAgICBNTUNfQ0FQX1VIU19TRFIxMiB8DQo+IE1NQ19DQVBfVUhT
+X1NEUjI1Ow0KPiA+Pj4+Pj4+IC0gICAgICAgaWYgKHBjci0+cnRkM19lbikNCj4gPj4+Pj4+PiAr
+ICAgICAgIGlmIChwY3ItPnJ0ZDNfZW4gJiYgUENJX1BJRChwY3IpICE9IFBJRF81MjVBKQ0KPiA+
+Pj4+Pj4+ICAgICAgICAgICAgICAgICBtbWMtPmNhcHMgPSBtbWMtPmNhcHMgfA0KPiA+Pj4+IE1N
+Q19DQVBfQUdHUkVTU0lWRV9QTTsNCj4gPj4+Pj4+PiAgICAgICAgIG1tYy0+Y2FwczIgPSBNTUNf
+Q0FQMl9OT19QUkVTQ0FOX1BPV0VSVVAgfA0KPiA+Pj4+IE1NQ19DQVAyX0ZVTExfUFdSX0NZQ0xF
+IHwNCj4gPj4+Pj4+PiAgICAgICAgICAgICAgICAgTU1DX0NBUDJfTk9fU0RJTzsNCj4gPj4+Pj4+
+PiAtLQ0KPiA+Pj4+Pj4+IDIuNTIuMA0KPiA+Pj4+Pj4+DQo+ID4+Pj4+Pj4gSSB0aGluayB3aGF0
+J3MgaGFwcGVuaW5nIGhlcmUgaXMgdGhhdCBSVFM1MjVBIHNodXRzIG9mZiBwb3dlciB0byB0aGUN
+Cj4gPj4gY2FyZA0KPiA+Pj4+IHJlYWRlciB3aGVuIGdhbWVzIGFyZSBpZGxlIGZvciAxMCBzZWNv
+bmRzIG9yIG1vcmUsIGFuZCB0aGVuIHdoZW4gdGhlDQo+ID4+IGdhbWUNCj4gPj4+PiBnb2VzIHRv
+IGxvYWQgbmV3IGFzc2V0cyBpdCBoYXMgdG8gZ28gdGhyb3VnaCB0aGUgd2hvbGUgcmUtdHVuaW5n
+IHByb2Nlc3MNCj4gPj4gd2hpY2gNCj4gPj4+PiB0YWtlcyAxLTIgc2Vjb25kcy4gVGhlIG90aGVy
+IGJyYW5kcyBvZiBjYXJkIHJlYWRlcnMgSSBoYXZlIGtlZXAgdGhlDQo+IGRldmljZQ0KPiA+Pj4+
+IHBvd2VyZWQgdGhlIHdob2xlIHRpbWUgc28gdGhleSBkbyBub3QgaGF2ZSB0aGlzIGlzc3VlLCBh
+bmQgdGhhdCdzIHdoYXQNCj4gPj4+PiB1bnRhZ2dpbmcgTU1DX0NBUF9BR0dSRVNTSVZFX1BNIHNl
+ZW1zIHRvIG1pbWljLg0KPiA+Pj4+Pj4NCj4gPj4+Pj4+IFJpZ2h0LCBNTUNfQ0FQX0FHR1JFU1NJ
+VkVfUE0gZG9lcyBleGFjdGx5IHdoYXQgeW91IHRoaW5rLiBJZg0KPiB0aGVyZQ0KPiA+Pj4+IGFy
+ZQ0KPiA+Pj4+Pj4gYW4gaWRsZSBwZXJpb2Qgb2Ygbm8gcmVxdWVzdHMgZm9yIHRoZSBTRCBjYXJk
+LCB0aGUgbW1jIGNvcmUgbWF5DQo+IGRlY2lkZQ0KPiA+Pj4+Pj4gdG8gcG93ZXItb2ZmIHRoZSBj
+YXJkIGZvciB0aG9zZSBtbWMgaG9zdCBkcml2ZXJzIHRoYXQgaGFzIHNldA0KPiA+Pj4+Pj4gTU1D
+X0NBUF9BR0dSRVNTSVZFX1BNLiBUaGUgaWRlYSBpcyB0aGF0IHdlIHdhbnQgdG8gYXZvaWQNCj4g
+d2FzdGluZw0KPiA+Pj4+IHBvd2VyDQo+ID4+Pj4+PiB3aGVuIHRoZSBjYXJkIGlzIHVudXNlZCwg
+d2hpY2ggaXMgdHlwaWNhbGx5IGltcG9ydGFudCBvbiBzb21lIGJhdHRlcnkNCj4gPj4+Pj4+IGRy
+aXZlbiBkZXZpY2VzLg0KPiA+Pj4+Pj4NCj4gPj4+Pj4+IFRoZSBtYWluIHByb2JsZW0gaG93ZXZl
+ciwgaXMgdGhhdCB3ZSBhcmUgbGFja2luZyBhIGNvbW1vbiBwb2xpY3kgZm9yDQo+ID4+Pj4+PiBo
+b3cgdG8gaGFuZGxlIHRoaXMgZ2VuZXJpY2FsbHkgZm9yIGFsbCBlTU1DL1NEIGNhcmRzLiBJZGVh
+bGx5IGl0DQo+ID4+Pj4+PiBzaG91bGQgYmUgaW5kZXBlbmRlbnQgb2Ygd2hhdCBtbWMgaG9zdCBk
+cml2ZXJzIHRoYXQgaXMgbWFuYWdpbmcgaXQsDQo+ID4+Pj4+PiBidXQgdGhhdCdzIG5vdCB0aGUg
+Y2FzZS4NCj4gPj4+Pj4+DQo+ID4+Pj4+PiBUaGF0IHNhaWQsIHdpdGhvdXQgY2hhbmdpbmcgdGhl
+IGNvZGUgeW91IGNhbiB1c2Ugc3lzZnMgdG8gZWl0aGVyIHR3ZWFrDQo+ID4+Pj4+PiB0aGUgaWRs
+ZS1wZXJpb2Qgb3IgdG8gc2ltcGx5IHByZXZlbnQgInJ1bnRpbWVfc3VzcGVuZCIgKG1lYW5pbmcN
+Cj4gPj4+Pj4+IHBvd2VyLW9mZikgZm9yIHRoZSBTRCBjYXJkLg0KPiA+Pj4+Pj4NCj4gPj4+DQo+
+ID4+PiBIaSBVbGYsIE1hdHRoZXcNCj4gPj4+DQo+ID4+PiBJbiBvdXIgV2luZG93cyBjYXJkIHJl
+YWRlciBkcml2ZXIsIHRoZSBpZGxlIHBlcmlvZCB0aW1lIGlzIHNldCB0bw0KPiA+PiBhcHByb3hp
+bWF0ZWx5IDEwIHNlY29uZHMuDQo+ID4+PiBJcyB0aGVyZSBhbnkgcmVjb21tZW5kZWQgd2F5IHRv
+IGNvbnRyb2wgb3IgY29uZmlndXJlIHRoaXMgaWRsZSBwZXJpb2QNCj4gdGltZT8NCj4gPj4NCj4g
+Pj4gSSB0cmllZCBhZGp1c3RpbmcgcG1fc2NoZWR1bGVfc3VzcGVuZChkZXZpY2UsIDEwMDAwKTsg
+aW4gcnRzeF9wY3IsIGJ1dCB0aGlzDQo+IGp1c3QNCj4gPj4gaW5jcmVhc2VzIHRoZSB0aW1lIHVu
+dGlsIHlvdSBpbmV2aXRhYmx5IHJ1biBpbnRvIHRoZSBpc3N1ZS4gVGhlcmUgYXJlIHNvbWUNCj4g
+Pj4gZ2FtZXMgdGhhdCBjYW4gZ28gYSB2ZXJ5IGxvbmcgdGltZSBpbiBydW50aW1lX3N1c3BlbmQg
+d2l0aG91dCBsb2FkaW5nDQo+IG5ldw0KPiA+PiBhc3NldHMsIGJ1dCB3aGVuIHRoZXkgaW5ldml0
+YWJseSBnbyBpbnRvIHJ1bnRpbWVfcmVzdW1lIGFmdGVyIHNheSAzIG9yIDUNCj4gPj4gbWludXRl
+cywgdGhpcyBoYW5nIGluIGdhbWVwbGF5IHNlZW1zIHVuYXZvaWRhYmxlIHdpdGgNCj4gPj4gTU1D
+X0NBUF9BR0dSRVNTSVZFX1BNIGluIHBhcnRpY3VsYXIuIEkgZm91bmQgYW4gb2xkIGxhcHRvcCBv
+ZiBtaW5lDQo+IHdpdGgNCj4gPj4gYW4gUlRTNTI2MSByZWFkZXIgYW5kIHRoYXQgaGFzIHRoZSBz
+YW1lIGlzc3VlIHVubGVzcyBJIGRpc2FibGUNCj4gPj4gTU1DX0NBUF9BR0dSRVNTSVZFX1BNLg0K
+PiA+Pg0KPiA+Pj4gT3IgaXMgaXQgcG9zc2libGUgdG8gaW50cm9kdWNlIGEgY2FwYWJpbGl0eSB0
+YWcgdGhhdCBpcyBsZXNzIGFnZ3Jlc3NpdmUgdGhhbg0KPiA+PiBNTUNfQ0FQX0FHR1JFU1NJVkVf
+UE0/DQo+ID4+DQo+ID4+IEZ1bGwgZGlzY2xvc3VyZTogVGhpcyBpcyBteSBmaXJzdCB0aW1lIGxv
+b2tpbmcgYXQgbW1jL3J0c3ggY29kZSwgc28gSSdsbCBkZWZlciB0bw0KPiA+PiBVbGYgb24gdGhp
+cy4NCj4gPj4NCj4gPj4+IFNpbmNlIG1vc3Qgbm90ZWJvb2tzIGhhdmUgdmVyeSBzdHJpY3QgcG93
+ZXItc2F2aW5nIHJlcXVpcmVtZW50cyBkdXJpbmcNCj4gaWRsZQ0KPiA+PiBzdGF0ZXMsDQo+ID4+
+PiB3ZSBhcmUgbm90IGFibGUgdG8gYXZvaWQgdXNpbmcgdGhlIE1NQ19DQVBfQUdHUkVTU0lWRV9Q
+TSBjYXBhYmlsaXR5Lg0KPiA+Pg0KPiA+PiBUaGUgb25seSBvdGhlciBjb21wYXJpc29uIEkgaGF2
+ZSBpcyBmcm9tIGNhcmQgcmVhZGVycyBpbiBvdGhlciBkZXZpY2VzIG9mDQo+IG1pbmUsDQo+ID4+
+IGEgR2VuZXN5cyBMb2dpYyBHTDk3NjcgaW4gYSBST0cgQWxseSBYIGFuZCBhbiBPMiBNaWNybyBp
+biBteSBTdGVhbQ0KPiBEZWNrLg0KPiA+PiBGb3IgYm90aCBvZiB0aGVzZSwgdGhlIGNhcmQgcmVh
+ZGVyIGRyaXZlcnMgZG8gbm90IHNlZW0gdG8gaW1wbGVtZW50IGFueQ0KPiBmb3JtDQo+ID4+IG9m
+IHJ1bnRpbWUgcG93ZXIgbWFuYWdlbWVudCBvbiBMaW51eCwgc28gdGhlIGV4cGVyaWVuY2Ugd2hl
+biBwbGF5aW5nDQo+ID4+IGdhbWVzIG9mZiBvZiB0aGVtIGhhcyBiZWVuIGZsYXdsZXNzLg0KPiA+
+Pg0KPiA+PiBNYXR0DQo+ID4+DQo+ID4NCj4gPiBTaW5jZSBvdXIgZHJpdmVyIGlzIGRlc2lnbmVk
+IHRvIGJlIGEgZ2VuZXJhbC1wdXJwb3NlIGRyaXZlciBmb3IgYWxsIHJlYWRlcnMsDQo+ID4gdGhl
+IHNjZW5hcmlvcyB5b3UgbWVudGlvbmVkIOKAlCBST0cgQWxseSBYIGFuZCBTdGVhbSBEZWNrIOKA
+lCBhcmUgZ2FtaW5nDQo+IGhhbmRoZWxkIGRldmljZXMuDQo+IA0KPiBUaGUgZHJpdmVycyB0aGV5
+IHVzZSB3ZXJlIG5vdCBkZXNpZ25lZCB0byBiZSBnYW1pbmctZm9jdXNlZCBlaXRoZXIsIHRoZXkg
+YXJlDQo+IGdlbmVyYWwgcHVycG9zZS4NCj4gTzIgTWljcm8gaGFzIGJlZW4gYXJvdW5kIHNpbmNl
+IGJlZm9yZSBoYW5kaGVsZCBnYW1pbmcgUENzIHdlcmUgZXZlbiBhDQo+IHRoaW5nLiBQZXJzb25h
+bGx5LA0KPiBJIGRpc2FncmVlIHdpdGggY2xhc3NpZnlpbmcgZ2FtaW5nIGFzIGZhbGxpbmcgb3V0
+c2lkZSBvZiAiZ2VuZXJhbCBwdXJwb3NlIg0KPiBwYXJhbWV0ZXJzLg0KPiANCg0KV2hhdCBJ4oCZ
+bSByZWZlcnJpbmcgdG8gaGVyZSBpcyB0aGUgcHJvZHVjdCBwb3NpdGlvbmluZyDigJQgd2hldGhl
+ciB0aGUgZGV2aWNlIGlzIGNhdGVnb3JpemVkIGFzIGEgZ2FtaW5nIGhhbmRoZWxkIG9yIGEgbm90
+ZWJvb2sgUEMuDQoNCj4gPiBGb3IgUmVhbHRlayByZWFkZXIgdXNhZ2Ugb24gaGFuZGhlbGQgcGxh
+dGZvcm1zLA0KPiA+IHdlIHdvdWxkIHJlY29tbWVuZCBkaXNhYmxpbmcgdGhpcyBwb3dlci1zYXZp
+bmcgZnVuY3Rpb24ocGNyLT5ydGQzX2VuKQ0KPiB0aHJvdWdoIEJJT1Mgc2V0dGluZ3MvZ3VpZGVs
+aW5lcy4NCj4gDQo+IEp1c3QgdG8gY2xhcmlmeSwgaXMgdGhlIHJlY29tbWVuZGF0aW9uIHRvIGRp
+c2FibGUgdGhpcyBmZWF0dXJlIGZvciBldmVyeSBkZXZpY2UNCj4gd2l0aCBhIFJlYWx0ZWsgY2Fy
+ZA0KPiByZWFkZXIgdGhhdCBtaWdodCBiZSB1c2VkIHRvIHBsYXkgZ2FtZXMgZnJvbSBhbiBTRCBj
+YXJkPyBNeSBNU0kgUmFpZGVyDQo+IEdFNjdIWCBsYXB0b3Agd2l0aCBSVFM1MjYxIGhhcw0KPiB0
+aGlzIHNhbWUgZnJlZXplIGluIGdhbWVwbGF5IGlmIEkgdXNlIGFuIFNEIGNhcmQuIFVzaW5nIGFu
+IFNEIGNhcmQgYXMgYQ0KPiBwb3J0YWJsZSBsaWJyYXJ5IGlzIHZlcnkNCj4gY29tbW9uLg0KPiAN
+Cj4gVGhhbmtzLA0KPiBNYXR0DQo+IA0KDQpPdmVyIHRoZSBwYXN0IGZldyB5ZWFycywgdGhlIHZh
+c3QgbWFqb3JpdHkgb2Ygbm90ZWJvb2sgbWFudWZhY3R1cmVycyBoYXZlIHBsYWNlZCBzdHJvbmcg
+ZW1waGFzaXMgb24gcG93ZXIgY29uc3VtcHRpb24sIA0KcmVxdWlyaW5nIHN1cHBvcnQgZm9yIFMw
+aXggd2l0aCB2ZXJ5IHN0cmljdCBwb3dlciBlZmZpY2llbmN5IHRhcmdldHMuDQpBcyBhIHJlc3Vs
+dCwgd2UgdXBkYXRlZCB0aGUgZHJpdmVyIHRvIGZ1cnRoZXIgcmVkdWNlIHBvd2VyIGNvbnN1bXB0
+aW9uLg0KDQpUbyBhZGRyZXNzIHRoaXMgaXNzdWUsIGl0IHNlZW1zIG5lY2Vzc2FyeSB0byBwcm92
+aWRlIGEgbWVjaGFuaXNtIHRoYXQgYWxsb3dzIGdhbWVzIG9yIHVzZXItbW9kZSBhcHBsaWNhdGlv
+bnMgdG8gZHluYW1pY2FsbHkgZW5hYmxlIG9yIGRpc2FibGUgdGhlIHBvd2VyLW1hbmFnZW1lbnQg
+KFBNKSBmdW5jdGlvbmFsaXR5Lg0KDQpSaWNreQ0KPiA+Pj4NCj4gPj4+DQo+ID4+Pj4+PiBGb3Ig
+ZXhhbXBsZSwgZmluZCB0aGUgY29ycmVzcG9uZGluZyBkZXZpY2UgZm9yIHRoZSBtbWMvc2QgY2Fy
+ZCBpbg0KPiA+Pj4+Pj4gc3lzZnMgYW5kIGRvOiBlY2hvIG9uID4uLi4vcG93ZXIvY29udHJvbCB0
+byBwcmV2ZW50IHJ1bnRpbWUgc3VzcGVuZC4NCj4gPj4+Pj4NCj4gPj4+Pj4gSSB0cmllZCB0aGUg
+cnVudGltZSBzb2x1dGlvbiBkdXJpbmcgZGVidWdnaW5nLCBob3dldmVyIHRoZSBjYXJkIHJlYWRl
+cg0KPiA+PiBzdGlsbA0KPiA+Pj4+IHNodXRzIG9mZiB3aGlsZSBpZGxlOg0KPiA+Pj4+Pg0KPiA+
+Pj4+PiBkZWNrQGxlZ2lvbi1nby0yIH4+IGNhdA0KPiA+Pj4+IC9zeXMvYnVzL3BjaS9kcml2ZXJz
+L3J0c3hfcGNpLzAwMDA6YzA6MDAuMC9wb3dlci9jb250cm9sDQo+ID4+Pj4+IG9uDQo+ID4+Pj4N
+Cj4gPj4+PiBBaCwgSSBtaXN1bmRlcnN0b29kLiBJIHNob3VsZCBoYXZlIHVzZWQNCj4gPj4+PiAv
+c3lzL2J1cy9tbWMvZGV2aWNlcy9tbWMwOmQ1NTUvcG93ZXIvY29udHJvbCwgdGhhdCBkb2VzIHdv
+cmsgYXQNCj4gPj4gcnVudGltZS4NCj4gPj4+Pg0KPiA+Pj4+IE1hdHQNCj4gPj4+Pg0KPiA+Pj4+
+Pg0KPiA+Pj4+PiBkZWNrQGxlZ2lvbi1nby0yIH4+IHN1ZG8gY2F0IC9zeXMva2VybmVsL2RlYnVn
+L21tYzAvaW9zDQo+ID4+Pj4+IGNsb2NrOiAgICAgICAgICAwIEh6DQo+ID4+Pj4+IHZkZDogICAg
+ICAgICAgICAwIChpbnZhbGlkKQ0KPiA+Pj4+PiBidXMgbW9kZTogICAgICAgMiAocHVzaC1wdWxs
+KQ0KPiA+Pj4+PiBjaGlwIHNlbGVjdDogICAgMCAoZG9uJ3QgY2FyZSkNCj4gPj4+Pj4gcG93ZXIg
+bW9kZTogICAgIDAgKG9mZikNCj4gPj4+Pj4gYnVzIHdpZHRoOiAgICAgIDAgKDEgYml0cykNCj4g
+Pj4+Pj4gdGltaW5nIHNwZWM6ICAgIDAgKGxlZ2FjeSkNCj4gPj4+Pj4gc2lnbmFsIHZvbHRhZ2U6
+IDEgKDEuODAgVikNCj4gPj4+Pj4gZHJpdmVyIHR5cGU6ICAgIDAgKGRyaXZlciB0eXBlIEIpDQo+
+ID4+Pj4+DQo+ID4+Pj4+IE9ubHkgcmVtb3ZpbmcgTU1DX0NBUF9BR0dSRVNTSVZFX1BNIHNlZW1l
+ZCB0byBhY3R1YWxseSB3b3JrLg0KPiA+Pj4+Pg0KPiA+Pj4+Pj4NCj4gPj4+Pj4+Pg0KPiA+Pj4+
+Pj4+IFNob3VsZCBJIHVwc3RyZWFtIHRoZSBhYm92ZSBhcyBhIHF1aXJrIG9yIGlzIHRoZXJlIGZ1
+cnRoZXIgZGVidWdnaW5nIEkNCj4gPj4gY2FuDQo+ID4+Pj4gYXNzaXN0IHdpdGggdG8gZmluZCBh
+bm90aGVyIHdvcmthcm91bmQgZm9yIHRoZSBnYW1lcGxheSBzdHV0dGVyPyBJJ3ZlDQo+IGZvdW5k
+DQo+ID4+IGENCj4gPj4+PiBjb3VwbGUgb3RoZXIgYnVncyB3aXRoIHRoZSBjYXJkIHJlYWRlciB0
+b28gYnV0IEkgd2lsbCBzZW5kIG91dCBzZXBhcmF0ZQ0KPiA+PiB0aHJlYWRzDQo+ID4+Pj4gdG8g
+a2VlcCB0aGluZ3Mgb3JnYW5pemVkLg0KPiA+Pj4+Pj4NCj4gPj4+Pj4+IFBsZWFzZSBwb3N0IGEg
+Zm9ybWFsIHBhdGNoLCB0aGVuIGxldCdzIGRpc2N1c3Mgd2hhdCB0byBkbyBhYm91dCBpdC4NCj4g
+Pj4+Pj4NCj4gPj4+Pj4gV2lsbCBzZW5kIG91dCB0aGF0IHBhdGNoIHNob3J0bHkuDQo+ID4+Pj4+
+DQo+ID4+Pj4+IE1hdHQNCj4gPj4+Pj4NCj4gPj4+Pj4+DQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBU
+aGFua3MhDQo+ID4+Pj4+Pj4NCj4gPj4+Pj4+PiBNYXR0DQo+ID4+Pj4+Pg0KPiA+Pj4+Pj4gS2lu
+ZCByZWdhcmRzDQo+ID4+Pj4+PiBVZmZlDQo+ID4+Pj4+DQo+ID4+Pg0KPiA+DQoNCg==
