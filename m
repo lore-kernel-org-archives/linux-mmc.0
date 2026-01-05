@@ -1,71 +1,118 @@
-Received: from mail-m155106.qiye.163.com (mail-m155106.qiye.163.com [101.71.155.106])
+Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC1F91367;
-	Mon,  5 Jan 2026 01:46:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.106
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BBF9731E0F0
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Jan 2026 03:03:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767577591; cv=none; b=ZlfYcZGH67MRtOfxlliE1/e9RRTB2LmfyHD80kDZma66pxUEHddhAFdu7qeBA0sVl48R+ISg97yHqjwtMyQyc7NXe0JvI+/WOZH2ly6lieF4eSQAZ1zTLiPF4v1wSDaoM/unH2oM7qSf3SgvuUKfnpPzMg65ZFM3kXSfYLKPsRY=
+	t=1767582191; cv=none; b=rkizhDYkApUxLVGL2MjKl4XmwO+jitsBBxlIf0dgREB4tbCv960d8AUMc7YphfX3fIimB4+tR8C3xKwloTd//NfJdPjZqDN6U/Azk3ZxQnmxPObhL2TKh+g5DIH8RAei3cPXnry5oaCNdHzeKxuooXV6F/lvDkP4/9DCnNvqKIg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767577591; c=relaxed/simple;
-	bh=MYUQO0TOvZ5iAfqYXpbY29gT4aSoaQay8A1y73+vvnc=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=IPHGQJ21pThpKVlIvnRANfI48sEGxFDtAxyqM5lUklf3Z7/n4tGMOhB4mn5HXSiEJ67FKRXVVJZri4MFQBQdlnG9K6/2RbEQu9ulxutEJpbrBGWOlGPOpLkZFJ8LkAJS/MNbDd7np0Z22r/lbmkiR5e0xKNF1RWfZsX8cbqBK9k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=D2Q54oQj; arc=none smtp.client-ip=101.71.155.106
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1767582191; c=relaxed/simple;
+	bh=HVX/Wt2hx1JxWQ0eGmrkX1gFyOjvF6XpXj5vmMWwcfU=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:
+	 References; b=ZC31lQGAA59x0EIRIt55aNCq+Ez9P+lVb1UIrLuYunfqX7KnGUgrhJajFXa6WTltOgs4Y1rX66dpL12DGhHjnnrgllDDkZQtzkH7/aPtKGLaWoy8C8FtuLQ/CxCuq1SOTlgpfml5s0g9by4Apn5gFqHU9KA3ENnBbF8y2H+yL3A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=Pv0zd5+/; arc=none smtp.client-ip=203.254.224.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="D2Q54oQj"
-Received: from [172.16.12.14] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 2f75adb6e;
-	Mon, 5 Jan 2026 08:30:45 +0800 (GMT+08:00)
-Message-ID: <93eeb6d3-db4e-4a82-a20f-f5481415c861@rock-chips.com>
-Date: Mon, 5 Jan 2026 08:30:42 +0800
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="Pv0zd5+/"
+Received: from epcas5p3.samsung.com (unknown [182.195.41.41])
+	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20260105030301epoutp0445d02039ab9e6a0bea9851879a3ef7ac~HtqD8MX6s2663026630epoutp04L
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Jan 2026 03:03:01 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20260105030301epoutp0445d02039ab9e6a0bea9851879a3ef7ac~HtqD8MX6s2663026630epoutp04L
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1767582181;
+	bh=t4lDD3WCnMMhQlykdje1f6FHEkgbmJwv/kN8YwZTrUE=;
+	h=From:To:Subject:Date:References:From;
+	b=Pv0zd5+/QgqyS31R9djabbswqwxnupb1Qo9pKPQKMJLs31d68lwWxjr8qBVp0/sEc
+	 yanCamkMflCvaJchMtOGPm+/C4ZgjDII74FBgC6CUokWXCPEvxfbQQeYoMAx2QU6XK
+	 lxBYqbJomrdiGa9IK6rrTnsy/kBrWwMNEmfZCqF0=
+Received: from epsnrtp03.localdomain (unknown [182.195.42.155]) by
+	epcas5p2.samsung.com (KnoxPortal) with ESMTPS id
+	20260105030300epcas5p2926fade68a4c1cd88ba71e7fa6a46e29~HtqDVAZgx3250432504epcas5p2Q;
+	Mon,  5 Jan 2026 03:03:00 +0000 (GMT)
+Received: from epcas5p4.samsung.com (unknown [182.195.41.42]) by
+	epsnrtp03.localdomain (Postfix) with ESMTP id 4dkzd04Q7nz3hhT9; Mon,  5 Jan
+	2026 03:03:00 +0000 (GMT)
+Received: from epsmtip1.samsung.com (unknown [182.195.34.30]) by
+	epcas5p1.samsung.com (KnoxPortal) with ESMTPA id
+	20260105030300epcas5p14bacc43f692cb7a7c46fd32ff5779004~HtqC9lLge1213112131epcas5p1t;
+	Mon,  5 Jan 2026 03:03:00 +0000 (GMT)
+Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip1.samsung.com
+	(KnoxPortal) with ESMTPA id
+	20260105030259epsmtip124fe4762b0d1c0bf93c5f01527f94eba~HtqCaBKRJ2346223462epsmtip1F;
+	Mon,  5 Jan 2026 03:02:59 +0000 (GMT)
+From: "ping.gao" <ping.gao@samsung.com>
+To: jh80.chung@samsung.com, sebastian.reichel@collabora.com,
+	shawn.lin@rock-chips.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: RE:RE:RE:[PATCH] MMC:dw_mmc:when enable biu_clk should check
+ whether this clk
+Date: Mon,  5 Jan 2026 11:07:03 +0800
+Message-ID: <20260105030703.1265749-1-ping.gao@samsung.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, "ping.gao" <ping.gao@samsung.com>,
- jh80.chung@samsung.com, ulf.hansson@linaro.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] MMC:dw_mmc:when enable biu_clk should check whether this
- clk is normal
-To: Sebastian Reichel <sebastian.reichel@collabora.com>
-References: <CGME20260104023451epcas5p391708610b5ce46d0e2a5f4bfbad01c71@epcas5p3.samsung.com>
- <20260104023857.213329-1-ping.gao@samsung.com>
- <b30a4977-7202-4771-8977-ff03e8453d16@rock-chips.com>
- <aVn9K96d5CD5m_Y4@venus>
- <59dd1721-8913-4d62-9201-72bd17985b48@rock-chips.com>
- <aVp5IMvHKR8CtqSz@venus>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <aVp5IMvHKR8CtqSz@venus>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Hi: 1> when probe , because I not request biu_clk in dts , so it won't
+	generate -EPROBE_DEFER 2> when probe , biu request like below :
+	host->biu_clk = devm_clk_get(host->dev, "biu"); if (IS_ERR(host->biu_clk)) {
+	dev_dbg(host->dev, "biu clock not available\n"); <<<<<< only report error ,
+	probe still can run normal , I think it's no problem } else { ret =
+	clk_prepare_enable(host->biu_clk); if (ret) { dev_err(host->dev, "failed to
+ enable biu clock\n"); return ret; } } 3> when disable in suspend : int
+	dw_mci_runtime_suspend(struct device *dev)
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9b8b903f5109cckunm7d7121086c3c7d
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGhgeHVZKT0xOGktLTh4aGklWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=D2Q54oQj957M5MXDKPWrirClaGT54QWE2rDDVXXNIO+Yp4zbLAgwBb04V1QRJt3hUjuQ1jsAT4uJGdS0iM4Q4oNENALirlpemM/XCYah5683hOxvOgamKHgdP3YkEYjNGh7EhqkRxTpr7J4eDbHuKXbYpiLpOkGquz4Wu4yKRVk=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=S9oJFW0zQSJwPnYl/FryNtZ1dJFvucV+R9kj/LBYUto=;
-	h=date:mime-version:subject:message-id:from;
+X-CMS-MailID: 20260105030300epcas5p14bacc43f692cb7a7c46fd32ff5779004
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 105P
+X-CMS-RootMailID: 20260105030300epcas5p14bacc43f692cb7a7c46fd32ff5779004
+References: <CGME20260105030300epcas5p14bacc43f692cb7a7c46fd32ff5779004@epcas5p1.samsung.com>
 
-在 2026/01/04 星期日 22:48, Sebastian Reichel 写道:
+	if (host->use_dma && host->dma_ops->exit)
+		host->dma_ops->exit(host);
+
+	dw_mci_ciu_clk_dis(host);
+
+	if (host->slot &&
+	    (mmc_can_gpio_cd(host->slot->mmc) || !mmc_card_is_removable(host->slot->mmc)))
+		<<<<<<<<<<<<<<<<<when suspend it will disable, but it won't generate any problem ,because clk_disable_unprepare will use "(IS_ERR_OR_NULL(clk))" to check clk and only 
+		<<<<<<<<<<<<<<<<<do return 
+		clk_disable_unprepare(host->biu_clk);  
+
+	return 0;
+}
+
+4> but in runtime_resume use clk_prepare_enable, in this function only use  "if (!clk)" so ERR clk will make panic. I think we should change "if (!clk)" to "if (IS_ERR_OR_NULL(clk))" in clk_prepare
+int dw_mci_runtime_resume(struct device *dev)
+{
+...
+	if (host->slot &&
+	    (mmc_can_gpio_cd(host->slot->mmc) || !mmc_card_is_removable(host->slot->mmc))) {
+		ret = clk_prepare_enable(host->biu_clk); 
+		if (ret)
+			return ret;
+	}
+}
+ Gaoping
+ 
+ 
+ 
+ Sebastian Reichel wrote:
 > Hi,
 > 
 > On Sun, Jan 04, 2026 at 03:38:42PM +0800, Shawn Lin wrote:
 >> Hi Sevastian,
 >>
->> 在 2026/01/04 星期日 14:01, Sebastian Reichel 写道:
+>> 
 >>> Hi,
 >>>
 >>> On Sun, Jan 04, 2026 at 10:55:48AM +0800, Shawn Lin wrote:
->>>> 在 2026/01/04 星期日 10:38, ping.gao 写道:
+>>>> 2026/01/04  10:38, ping.gao
 >>>>> some vendor doesn't use biu_clk , enable it will panic
 >>>>> log is below:
 >>>>
@@ -245,4 +292,3 @@ optional, the code should be consistent.
 >>>>
 >>>>
 >>
-
