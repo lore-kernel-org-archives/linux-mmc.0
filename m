@@ -1,43 +1,43 @@
-Received: from mail-m15599.qiye.163.com (mail-m15599.qiye.163.com [101.71.155.99])
+Received: from mail-m32112.qiye.163.com (mail-m32112.qiye.163.com [220.197.32.112])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2D37224B15
-	for <linux-mmc@vger.kernel.org>; Tue,  6 Jan 2026 02:59:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.99
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3578B3C0C
+	for <linux-mmc@vger.kernel.org>; Tue,  6 Jan 2026 02:59:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.112
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767668352; cv=none; b=AySYxxxg+R3EeGkmDWcP0dGWxsJzD9a3dbFlNvBzHep/ojhPqoNJSlwj0jamyCkC4NyFeI6Xnf3p/5O1h8e/tR+2305OfeIbv9NAHLV9eK2ZrXlf8PVZpyp2yZVdgFZCKw9b1YQ+EDRBUyPmGsoH1zhFttyUf7dUqUeKABoaT/E=
+	t=1767668383; cv=none; b=cEXuKudEqkf8OPjpymrTMQQBpT1wiLmKYFAx9i8LFvXt+9MAAdB8l1cWqL3vfbwM8e2djNHwyMKzGQDtwYlzkZE6i5hQIrPw1unmvQHhOMqOiIvA65IjPSnw2n62GnxRMJ2bge8GCxtcrJeD02JI8OeaaUHshuPToEN1EMol60I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767668352; c=relaxed/simple;
-	bh=kk5eBHGNJ4UyPBiqsUZXDV2hIpkfnjC3xaXI46pBChk=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=qe7ZhNqbbkZQBQYiyXTvxqA9dK7Euxkvz2sR2s9t676kSfggiG1gVqmss3vtNK6gVZnzjUwq9kAjZbL4fa/VpiNRJX2gHOU/SPxjC571xOxdBRFPrXedPUnog0tiJUBWGr29UtI6LSPX5dxsm+WdBuwjtnteu5IqmDT6yxp5fCM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=ZFjvNBSa; arc=none smtp.client-ip=101.71.155.99
+	s=arc-20240116; t=1767668383; c=relaxed/simple;
+	bh=S84WoLsCkZfwRTlZTdgHzqohC2jDZ4uDUorOm6zwm2M=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=nTST6cJwEQ7UG1jWR78DcHJykA5rCkNiEdTry8PtYRBdxBAccHCrJSlugGGYyQDC4qn0Tc9e+pZpAvLdsJdn1X27n5oK8P+Xa6BXxWrtkriasp16+PMc8CqFWl1mvg0vRHJUf0uORO3owF3NnnfFDg6/fPzK0g4trE2AAelev28=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=J4UfExen; arc=none smtp.client-ip=220.197.32.112
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="ZFjvNBSa"
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="J4UfExen"
 Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 2f9c4acbc;
-	Tue, 6 Jan 2026 10:23:37 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 2f9c4adaa;
+	Tue, 6 Jan 2026 10:24:11 +0800 (GMT+08:00)
 From: Shawn Lin <shawn.lin@rock-chips.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org,
 	Jaehoon Chung <jh80.chung@samsung.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 13/18] mmc: dw_mmc: Improve dw_mci_get_cd()
-Date: Tue,  6 Jan 2026 10:17:04 +0800
-Message-Id: <1767665829-183001-14-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v2 15/18] mmc: dw_mmc: Remove check before calling mmc_regulator_set_vqmmc()
+Date: Tue,  6 Jan 2026 10:17:06 +0800
+Message-Id: <1767665829-183001-16-git-send-email-shawn.lin@rock-chips.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1767665829-183001-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1767665829-183001-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9b911df10c09cckunmc69ba49b79cd75
+X-HM-Tid: 0a9b911e78af09cckunmc69ba49b79cf61
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGU8aHlYZGRoYTEpKS0NJT0pWFRQJFh
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQxpDQ1YeSEwZHUJISRlDSR1WFRQJFh
 	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
 	hVSktLVUpCS0tZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=ZFjvNBSaU/eHNxc4HEvuhaA/K7KKDDcJW67Nr/XAEBLpRbsXIFkoCTF+Gb6OShs6ggj0PjpaGG55yJCr83hFgHfTQxwQAy1OpyEvqEfm3BfNuxqTByifyy35QRrouOUPXofiE4RZ1ZZR7TbifWdXnHqhXikQUSKtbhDQLeDVUzM=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=jGuBRvWM7xxA7/dr7ydzR/LKV0IsTwt5sd2wOx4aFYc=;
+	b=J4UfExenNDo4Xz3zKjUlqt5qIXxxBAsKJVHTYnneAWFxwx4ZcP6iNc0N68uM1FAdOqtI6RRCmEFofK4wqsWw9K4WubR5xiY1JPAnXDogqvKpqRusna5hKa1UrNi+XsA2ieZH6N5OkH4hVNfJT8OePGi/qAlaikqbR374dEPQ3oI=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=HTwDGYl2rBKmd+HGYTlUbLl/GFqw4EBe2/lF8PwLilY=;
 	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -45,116 +45,79 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-The current dw_mci_get_cd() implementation maintains a DW_MMC_CARD_PRESENT
-flag primarily for logging purposes, which adds unnecessary complexity.
-Additionally, the if-else-elif control flow does not align with the Linux
-kernel coding style.
+The vqmmc regulator is acquired as optional via devm_regulator_get_optional().
+The helper function mmc_regulator_set_vqmmc() currently returns -EINVAL when
+vqmmc is not present. This patch justifies why this error code is acceptable
+within the dwc driver's usage context.
 
-This commit simplifies the function by:
-- Removing the redundant card presence flag
-- Replacing the conditional chain with a cleaner implementation
-- Improving code readability while maintaining functionality
+The function is invoked in two scenarios:
+1. In mmc_set_initial_signal_voltage(): The return value is ignored, so
+   returning -EINVAL is harmless.
+2. In mmc_host_set_uhs_voltage(): This higher-level UHS voltage setting
+   procedure should not be attempted if the vqmmc regulator is not available
+   in the first place. Thus, signaling an error is the correct behavior.
 
-The change reduces code complexity without affecting the actual card
-detection behavior.
+In both call paths, returning -EINVAL for a missing optional regulator
+does not introduce regressions.
+
+So this patch removes the check and still returns error to the core, instead
+of zero, if vqmmc isn't present.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
 Changes in v2: None
 
- drivers/mmc/host/dw_mmc.c | 44 ++++++++++++++------------------------------
- drivers/mmc/host/dw_mmc.h |  9 ++++-----
- 2 files changed, 18 insertions(+), 35 deletions(-)
+ drivers/mmc/host/dw_mmc-k3.c | 10 ++++------
+ drivers/mmc/host/dw_mmc.c    | 14 ++++++--------
+ 2 files changed, 10 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 00b3e7e..2ad7d74 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -881,42 +881,21 @@ static void dw_mci_post_req(struct mmc_host *mmc,
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index 23c3031..4c313fc 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -417,12 +417,10 @@ static int dw_mci_hi3660_switch_voltage(struct dw_mci *host,
+ 	if (ret)
+ 		return ret;
  
- static int dw_mci_get_cd(struct mmc_host *mmc)
- {
--	int present;
- 	struct dw_mci *host = mmc_priv(mmc);
- 	int gpio_cd = mmc_gpio_get_cd(mmc);
- 
--	/* Use platform get_cd function, else try onboard card detect */
--	if (((mmc->caps & MMC_CAP_NEEDS_POLL)
--				|| !mmc_card_is_removable(mmc))) {
--		present = 1;
-+	if (mmc->caps & MMC_CAP_NEEDS_POLL)
-+		return 1;
- 
--		if (!test_bit(DW_MMC_CARD_PRESENT, &host->flags)) {
--			if (mmc->caps & MMC_CAP_NEEDS_POLL) {
--				dev_info(&mmc->class_dev,
--					"card is polling.\n");
--			} else {
--				dev_info(&mmc->class_dev,
--					"card is non-removable.\n");
--			}
--			set_bit(DW_MMC_CARD_PRESENT, &host->flags);
+-	if (!IS_ERR(mmc->supply.vqmmc)) {
+-		ret = mmc_regulator_set_vqmmc(mmc, ios);
+-		if (ret < 0) {
+-			dev_err(host->dev, "Regulator set error %d\n", ret);
+-			return ret;
 -		}
--
--		return present;
--	} else if (gpio_cd >= 0)
--		present = gpio_cd;
--	else
--		present = (mci_readl(host, CDETECT) & BIT(0))
--			== 0 ? 1 : 0;
-+	if (!mmc_card_is_removable(mmc))
-+		return 1;
- 
--	spin_lock_bh(&host->lock);
--	if (present && !test_and_set_bit(DW_MMC_CARD_PRESENT, &host->flags))
--		dev_dbg(&mmc->class_dev, "card is present\n");
--	else if (!present &&
--			!test_and_clear_bit(DW_MMC_CARD_PRESENT, &host->flags))
--		dev_dbg(&mmc->class_dev, "card is not present\n");
--	spin_unlock_bh(&host->lock);
-+	/* Try slot gpio detection */
-+	if (gpio_cd >= 0)
-+		return !!gpio_cd;
- 
--	return present;
-+	/* Host native card detect */
-+	return !(mci_readl(host, CDETECT) & BIT(0));
- }
- 
- static void dw_mci_adjust_fifoth(struct dw_mci *host, struct mmc_data *data)
-@@ -2918,6 +2897,11 @@ static int dw_mci_init_host(struct dw_mci *host)
- 		mmc->max_seg_size = mmc->max_req_size;
++	ret = mmc_regulator_set_vqmmc(mmc, ios);
++	if (ret < 0) {
++		dev_err(host->dev, "Regulator set error %d\n", ret);
++		return ret;
  	}
  
-+	if (mmc->caps & MMC_CAP_NEEDS_POLL)
-+		dev_info(&mmc->class_dev, "card is polling.\n");
-+	else if (!mmc_card_is_removable(mmc))
-+		dev_info(&mmc->class_dev, "card is non-removable.\n");
-+
- 	dw_mci_get_cd(mmc);
+ 	return 0;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 2ad7d74..fdc9dd7 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1461,14 +1461,12 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		uhs |= v18;
  
- 	ret = mmc_add_host(mmc);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 5c17bcc..6800e7c 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -240,11 +240,10 @@ struct dw_mci {
- #endif
- 	struct mmc_host		*mmc;
- 	unsigned long		flags;
--#define DW_MMC_CARD_PRESENT	0
--#define DW_MMC_CARD_NEED_INIT	1
--#define DW_MMC_CARD_NO_LOW_PWR	2
--#define DW_MMC_CARD_NO_USE_HOLD 3
--#define DW_MMC_CARD_NEEDS_POLL	4
-+#define DW_MMC_CARD_NEED_INIT	0
-+#define DW_MMC_CARD_NO_LOW_PWR	1
-+#define DW_MMC_CARD_NO_USE_HOLD 2
-+#define DW_MMC_CARD_NEEDS_POLL	3
- 	u32			ctype;
- 	unsigned int		clock;
- 	unsigned int		clk_old;
+-	if (!IS_ERR(mmc->supply.vqmmc)) {
+-		ret = mmc_regulator_set_vqmmc(mmc, ios);
+-		if (ret < 0) {
+-			dev_dbg(&mmc->class_dev,
+-					 "Regulator set error %d - %s V\n",
+-					 ret, uhs & v18 ? "1.8" : "3.3");
+-			return ret;
+-		}
++	ret = mmc_regulator_set_vqmmc(mmc, ios);
++	if (ret < 0) {
++		dev_dbg(&mmc->class_dev,
++			 "Regulator set error %d - %s V\n",
++			 ret, uhs & v18 ? "1.8" : "3.3");
++		return ret;
+ 	}
+ 	mci_writel(host, UHS_REG, uhs);
+ 
 -- 
 2.7.4
 
