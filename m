@@ -1,294 +1,125 @@
-Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB865324718
-	for <linux-mmc@vger.kernel.org>; Tue,  6 Jan 2026 10:26:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A9BA1DA23;
+	Wed,  7 Jan 2026 11:55:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767695199; cv=none; b=E0fvj2s2Po0mtakK4MHSdesh/joSV4YN+HlZeuNKRR+GAsme6S9/DG4Byqh2R/ssULEnbOgps2xsLpbuJcMwyz1dAubbWSBezlt6m/HWf4s9FZrc9mJzHg5PzWaoPOsi8GXlYX2G9RHwMRbZysKLqiY9KAVhUDHcrByzqfM91qM=
+	t=1767786956; cv=none; b=HqNVPHpvvMZCyfKG1UH+X8kbhe43Dr2obegcyYd4hKtdAtlujn3bGHNgsPKS317x+34MfLvsaxjGY8TaNVSf4/j3I6dtvn3D7EyntE+2WZD/FwiAQqIaD/Mwz4TyKjXezQhuuNJKXJd41SbY0YyaLkBmid/Kh1c4sh/xWjMfURo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767695199; c=relaxed/simple;
-	bh=HVX/Wt2hx1JxWQ0eGmrkX1gFyOjvF6XpXj5vmMWwcfU=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:
-	 References; b=fevZiXvBjgsqBn3dFVXHvEaPTczye7Jg0XfQgMyiyc4kPs5wfuP9/qvuEWJFCD/3HxctIENrl5CV6Fl/fX9/ylWU05++4y8hseaucWV7fWxTHhYzEf21DJ93mo6d/a5VqECRydksGtmcZv7915UnY/4awp9r4wm+pRgd3DphHNo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=HQJ6XRNF; arc=none smtp.client-ip=203.254.224.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1767786956; c=relaxed/simple;
+	bh=ZUlMx/j6bH/j+2Roi9ErKmb7TnceH8BH4xVGrkmbPdk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=LqIitclBGp4BAwG81urguP8CU/pul0zdzVBWKK5Wib+vAfKjF1qdJjSGHl7mrAyAazTO9Py4QoxCiJOWrth/F81fzxoIXvDOD8KDqSrpdWXTPkk+o4W0iI9CwOclf+u49YcWv/yK1ZvcklSPsxRAvBHoeVAlKt1E/IabHnv43AM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=n/tCkPSs; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="HQJ6XRNF"
-Received: from epcas5p3.samsung.com (unknown [182.195.41.41])
-	by mailout3.samsung.com (KnoxPortal) with ESMTP id 20260106102633epoutp03b5e6a44612ee696aea3f2a22782e2eaa~IHWnDXw1_3173431734epoutp036
-	for <linux-mmc@vger.kernel.org>; Tue,  6 Jan 2026 10:26:33 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20260106102633epoutp03b5e6a44612ee696aea3f2a22782e2eaa~IHWnDXw1_3173431734epoutp036
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1767695193;
-	bh=t4lDD3WCnMMhQlykdje1f6FHEkgbmJwv/kN8YwZTrUE=;
-	h=From:To:Subject:Date:References:From;
-	b=HQJ6XRNFkPtfZtbIcR5T0Bc+jBNVngN9BvoYUODrdRHbtLRGLAyCm5j0pbQm7q4Vl
-	 /IHhHcfU2hewhwhceajDB2HW5HPHY+RTPS2JHMatJqROya6eBPsml2vSXJcrJJapnW
-	 eoa4S3hM+NS2OumnDt4Fe3m53bfsz6tuAFKYHtHA=
-Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
-	epcas5p4.samsung.com (KnoxPortal) with ESMTPS id
-	20260106102633epcas5p41be8408a4f5752783572ba7aafacff8c~IHWm2M-UU2321923219epcas5p4T;
-	Tue,  6 Jan 2026 10:26:33 +0000 (GMT)
-Received: from epcas5p4.samsung.com (unknown [182.195.41.42]) by
-	epsnrtp01.localdomain (Postfix) with ESMTP id 4dlnQK46L3z6B9mG; Tue,  6 Jan
-	2026 10:26:33 +0000 (GMT)
-Received: from epsmtip2.samsung.com (unknown [182.195.34.31]) by
-	epcas5p2.samsung.com (KnoxPortal) with ESMTPA id
-	20260106102632epcas5p220e663da8bc8cf57c377dcb829f714d4~IHWl4XHdA2219322193epcas5p2l;
-	Tue,  6 Jan 2026 10:26:32 +0000 (GMT)
-Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip2.samsung.com
-	(KnoxPortal) with ESMTPA id
-	20260106102631epsmtip28a336eae6c149e7fc42ff45140f40f3e~IHWlUxQ640480904809epsmtip2b;
-	Tue,  6 Jan 2026 10:26:31 +0000 (GMT)
-From: "ping.gao" <ping.gao@samsung.com>
-To: jh80.chung@samsung.com, sebastian.reichel@collabora.com,
-	shawn.lin@rock-chips.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: RE:RE:RE:[PATCH] MMC:dw_mmc:when enable biu_clk should check
- whether this clk
-Date: Tue,  6 Jan 2026 18:30:43 +0800
-Message-ID: <20260106103043.3630199-1-ping.gao@samsung.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="n/tCkPSs"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6076tUaD2379337;
+	Wed, 7 Jan 2026 11:55:50 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	CIq+18x+soA9frLu2kF3O8pZ4WsxJURVdjCXHQ7b7ug=; b=n/tCkPSs0/V/Liq0
+	hm0Hg8DabdGu4/IYBo/KNYwAo966Y0s/SHGfeGfovzbDLK9CXr64Rw9//mSp0OBd
+	NZjxaCP31tOzYfnFXAyKdfFcAS0FfPWBnh+tlubLEbPbZZ19gfPAzSK6acDiXeVr
+	nwV9Z8npUiLTTIxr3b5wWYywZM4nnnhrO8nnzv7TMODsn4IpOz6HmO6sQzJ9rOFB
+	C63JKd8fnlmclT2c+wyO1qoOKWhKIKpeyNQTvw2uGHF+R0BpL0uDKKogOeueE3d8
+	WEofXZeX1ueJgxNYHCFh0W4RA+1X170l8HHRVQeRV/+PfuHnLjEq0SOrkIoNEo8B
+	Jjv1fg==
+Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4bhjn4rxcq-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 07 Jan 2026 11:55:50 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 607BtncY013474
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 7 Jan 2026 11:55:49 GMT
+Received: from [10.151.36.184] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.17; Wed, 7 Jan
+ 2026 03:55:47 -0800
+Message-ID: <0c33b361-8563-8aef-53d4-6158b358fb72@quicinc.com>
+Date: Wed, 7 Jan 2026 17:25:34 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Hi: 1> when probe , because I not request biu_clk in dts , so it won't
-	generate -EPROBE_DEFER 2> when probe , biu request like below :
-	host->biu_clk = devm_clk_get(host->dev, "biu"); if (IS_ERR(host->biu_clk)) {
-	dev_dbg(host->dev, "biu clock not available\n"); <<<<<< only report error ,
-	probe still can run normal , I think it's no problem } else { ret =
-	clk_prepare_enable(host->biu_clk); if (ret) { dev_err(host->dev, "failed to
- enable biu clock\n"); return ret; } } 3> when disable in suspend : int
-	dw_mci_runtime_suspend(struct device *dev)
-Content-Transfer-Encoding: 8bit
-X-CMS-MailID: 20260106102632epcas5p220e663da8bc8cf57c377dcb829f714d4
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-X-CMS-RootMailID: 20260106102632epcas5p220e663da8bc8cf57c377dcb829f714d4
-References: <CGME20260106102632epcas5p220e663da8bc8cf57c377dcb829f714d4@epcas5p2.samsung.com>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Subject: Re: [PATCH] mmc: sdhci-msm: Add quirk to disable CQE for ICE legacy
+ mode
+To: Adrian Hunter <adrian.hunter@intel.com>, <quic_asutoshd@quicinc.com>,
+        <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <ebiggers@kernel.org>
+References: <20251224101050.3497746-1-quic_mdalam@quicinc.com>
+ <f65f1647-3c95-41e0-8c6c-a25d835fcf35@intel.com>
+Content-Language: en-US
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+In-Reply-To: <f65f1647-3c95-41e0-8c6c-a25d835fcf35@intel.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=LJhrgZW9 c=1 sm=1 tr=0 ts=695e49c6 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=vUbySO9Y5rIA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=V-YQJDOuvsr3gOM6QpgA:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMTA3MDA5MyBTYWx0ZWRfX+9Z3+d7Gu3c1
+ OHx4wkPbIgq3wCFoSPHpv5ifut/MtBZzmry3QNxXG7JEws8kfGLVGBaE+nkg/nR2REPK0LAAc0h
+ XPVHK/c6EUhXALQa2TIvBlUz2vAsz8Xf4JiwTO6FagbXZtprzTa6YRyvCp1nAfNXQIPqIdPs9dG
+ yAkSBoU61OdrlF2XxarsnSqzWrgGChZRxzERcJfGSgZKGm9Idga5MjWvhzLY2upd5wULK8Zv00h
+ uMIPP+LAkJTFaSRXiV1u/HvedzWtJbylzNdZ/sW212udPplGEd6S4rZC3zk011WpuLfYw349jlO
+ NCUj62EN3fFgpJwCuNzf9kTi0O9S0cUl7mzZvwuhIM+lCpVppkzchHGNdajTbBnIR2e3fEFUn8R
+ PSLSBV9ElSVgrFreTIWz2HCXqGepW6ZCOomfbY/Cl0/DVEpLNs2P8ba6RIAWaMMVB1udpil+Hot
+ FGszwR8RkjznnJXY/2A==
+X-Proofpoint-GUID: W7_VsIFlUcfAEPNYnTQIFA-qaI1eU8zj
+X-Proofpoint-ORIG-GUID: W7_VsIFlUcfAEPNYnTQIFA-qaI1eU8zj
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2026-01-07_01,2026-01-06_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 bulkscore=0 adultscore=0 impostorscore=0 suspectscore=0
+ clxscore=1015 spamscore=0 phishscore=0 lowpriorityscore=0 malwarescore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2512120000 definitions=main-2601070093
 
-	if (host->use_dma && host->dma_ops->exit)
-		host->dma_ops->exit(host);
+HI,
 
-	dw_mci_ciu_clk_dis(host);
-
-	if (host->slot &&
-	    (mmc_can_gpio_cd(host->slot->mmc) || !mmc_card_is_removable(host->slot->mmc)))
-		<<<<<<<<<<<<<<<<<when suspend it will disable, but it won't generate any problem ,because clk_disable_unprepare will use "(IS_ERR_OR_NULL(clk))" to check clk and only 
-		<<<<<<<<<<<<<<<<<do return 
-		clk_disable_unprepare(host->biu_clk);  
-
-	return 0;
-}
-
-4> but in runtime_resume use clk_prepare_enable, in this function only use  "if (!clk)" so ERR clk will make panic. I think we should change "if (!clk)" to "if (IS_ERR_OR_NULL(clk))" in clk_prepare
-int dw_mci_runtime_resume(struct device *dev)
-{
-...
-	if (host->slot &&
-	    (mmc_can_gpio_cd(host->slot->mmc) || !mmc_card_is_removable(host->slot->mmc))) {
-		ret = clk_prepare_enable(host->biu_clk); 
-		if (ret)
-			return ret;
-	}
-}
- Gaoping
- 
- 
- 
- Sebastian Reichel wrote:
-> Hi,
-> 
-> On Sun, Jan 04, 2026 at 03:38:42PM +0800, Shawn Lin wrote:
->> Hi Sevastian,
+On 1/5/2026 8:31 PM, Adrian Hunter wrote:
+> On 24/12/2025 12:10, Md Sadre Alam wrote:
+>> Some hosts require Inline Crypto Engine (ICE) to operate in legacy mode
+>> instead of Command Queue Engine (CQE) mode for platform-specific
+>> requirements or compatibility reasons. Introduce a host-level quirk
+>> `host_disable_cqe` to forcefully disable CQE negotiation and allow ICE
+>> to function through the legacy request path.
 >>
->> 
->>> Hi,
->>>
->>> On Sun, Jan 04, 2026 at 10:55:48AM +0800, Shawn Lin wrote:
->>>> 2026/01/04  10:38, ping.gao
->>>>> some vendor doesn't use biu_clk , enable it will panic
->>>>> log is below:
->>>>
->>>> I still don't understand the real issue you tried to solve.
->>>>
->>>> host->biu_clk is got via devm_clk_get() in dw_mci_probe(). If
->>>> succeed, immediately it's enabled a few lines below. Otherwise,
->>>> dw_mci_probe() returns with failure. Seems you are not enabling it in
->>>> runtime callbacks, but why clk_prepare_enable(host->biu_clk) is able
->>>> to work when driver probed?
->>>
->>> Based on the error and this patch, I believe what happens is:
->>>
->>> 1. dw_mci_probe() calls devm_clk_get(host->dev, "biu")
->>> 2. The clock does not exist on the platform from Ping Gao, so
->>>      host->biu_clk gets an error pointer assigned
->>> 3. "biu clock not available" gets printed at debug level
->>> 4. the error is ignored, but the error pointer is still assigned to
->>>      host->biu_clk
->>> 5. in the runtime PM handler clk_prepare_enable is called for
->>>      host->biu_clk and thus for an error pointer
->>>
+>> When the device tree omits the "supports-cqe" property, the driver sets
+>> `host_disable_cqe = true` and avoids enabling MMC_CAP2_CQE during card
+>> initialization. This ensures that even CQE-capable hardware falls back
+>> to legacy SDHCI request handling. A minimal `cqhci_disable_ops` is
+>> provided with `.cqe_enable = cqhci_host_disable` returning -EINVAL to
+>> force the fallback. Other ops are left NULL for safe defaults.
 >>
->> Thanks for the details. For example,
->> 1. dw_mci_exynos_probe() enables runtime PM before calling
->> dw_mci_pltfm_register()->dw_mci_probe().
->> 2. biu_clk gets an error and propagate it to dw_mci_pltfm_register(),
+>> For builds without CONFIG_MMC_CRYPTO, the driver uses standard
+>> sdhci_add_host() to avoid unnecessary CQE infrastructure initialization.
+>>
+>> This allows platforms to forcefully opt out of CQE usage and ensure ICE
+>> operates reliably in legacy mode, providing stable crypto operations
+>> without command queuing complexity.
 > 
-> The error propagation does not happen. This is the current code in
-> dw_mci_probe():
-> 
->      host->biu_clk = devm_clk_get(host->dev, "biu");
-> 	if (IS_ERR(host->biu_clk)) {
-> 		dev_dbg(host->dev, "biu clock not available\n");
-> 		ret = PTR_ERR(host->biu_clk);
-> 		if (ret == -EPROBE_DEFER)
-> 			return ret;
->          /* --- no return here --- */
-> 	} else {
-> 		ret = clk_prepare_enable(host->biu_clk);
-> 		if (ret) {
-> 			dev_err(host->dev, "failed to enable biu clock\n");
-> 			return ret;
-> 		}
->      }
-> 
-> This code continues probing for any error code that is not
-> -EPROBE_DEFER. My understanding is, that this has been done
-> intensionally, since the clock does not exist on some platforms.
-> 
+> Can't the driver simply opt-out by not setting MMC_CAP2_CQE?
+Correct. This change is intended for the case where both host and device 
+supports CMDQ, but the host explicitly wants to disable CMDQ and want to 
+use the Inline Crypto Engine (ICE) in legacy way.Simply clearing 
+MMC_CAP2_CQE would bypass CMDQ, but it would also bypass ICE as well.
 
-I never thought of biu_clk isn't been provided as it's for accessing
-register/fifo/interrupt/DMA requested by dwc databook. I was
-suprised it's the optional case for some platforms. What I was thinking
-is all based on that defer case.
-
-> Effectively this is an open coded devm_clk_get_optional with
-> the difference that you may not use any clk_* operations on the
-> error code. A minimal fix would be to assign "host->biu_clk = NULL;"
-> at the end of the error handling code, which would open code
-> more of the devm_clk_get_optional() behaviour.
-
-Yes, if it's optional case for some platforms, we should use
-devm_clk_get_optional() instead, both for biu_clk and ciu_clk.
-Although I will also be surprised to see ciu_clk is also
-optional, the code should be consistent.
-
-> 
-> Obviously there is no point in having this open coded and the
-> helper existed since ages, so I strongly suggest to just use
-> that. Either devm_clk_get_optional() or even better
-> devm_clk_get_optional_enabled(). This results in:
-> 
->   - less code, which is easier to understand
->   - fixing the bug at hand
->   - proper error handling for errors that are neither -EPROBE_DEFER
->     nor -ENOENT.
->   - better error/debug messaging behaviour for -EPROBE_DEFER when
->     using dev_err_probe() instead of the dev_dbg print.
-> 
-> Greetings,
-> 
-> -- Sebastian
-> 
->> 3. runtime PM is disabled in dw_mci_exynos_probe() later if seeing error.
->>
->> Does that mean runtime PM handler is called between step 2 and step 3?
->> If that is the case, how could we allow this happen because the the
->> controller's configuaration isn't been finished yet. Or maybe I
->> misunderstand your point?
->>
->>
->>> Instead of hacking this up even further (as this patch does),
->>> the proper fix is to cleanup the probe function. I believe
->>> the complete biu clock handling in it could be reduced to this:
->>>
->>> 	host->biu_clk = devm_clk_get_optional_enabled(host->dev, "biu");
->>>       ret = PTR_ERR_OR_ZERO(host->biu_clk);
->>> 	if (ret)
->>> 		return dev_err_probe(host->dev, ret, "failed to get biu clock\n");
->>>
->>> That will assign NULL to host->biu_clk when there is no clock
->>> defined and it is fine to run clk_prepare_enable() with NULL
->>> as clock pointer. Note, that this will handle the clock enabling
->>> as part of devm, so you will also have to drop the
->>> clk_disable_unprepare() calls from the err_clk_biu goto label
->>> and the extra call from dw_mci_remove().
->>>
->>> Something similar should probably be done for host->ciu_clk, which
->>> seems to have the same incorrect logic.
->>>
->>> Greetings,
->>>
->>> -- Sebastian
->>>
->>>>> [  438.400868] [7:   binder:436_2: 4998] Unable to handle kernel paging request at virtual address fffffffffffffffe
->>>>> [  438.400877] [7:   binder:436_2: 4998] Mem abort info:
->>>>> [  438.400881] [7:   binder:436_2: 4998]   ESR = 0x0000000096000005
->>>>> [  438.400887] [7:   binder:436_2: 4998]   EC = 0x25: DABT (current EL), IL = 32 bits
->>>>> [  438.400894] [7:   binder:436_2: 4998]   SET = 0, FnV = 0
->>>>> [  438.400899] [7:   binder:436_2: 4998]   EA = 0, S1PTW = 0
->>>>> [  438.400904] [7:   binder:436_2: 4998]   FSC = 0x05: level 1 translation fault
->>>>> ...
->>>>> [  438.409424] [7:   binder:436_2: 4998] Call trace:
->>>>> [  438.409429] [7:   binder:436_2: 4998]  clk_prepare+0x10/0x24
->>>>> [  438.409439] [7:   binder:436_2: 4998]  dw_mci_runtime_resume+0x50/0x2d8 [dw_mmc_samsung cd210e210975263404c28fc89778f369f8398f0c]
->>>>> [  438.409471] [7:   binder:436_2: 4998]  dw_mci_exynos_runtime_resume+0x18/0x58 [dw_mmc_exynos_samsung 2735a594c7c9c9e8c65b0b87523fbf70dcaabfff]
->>>>> [  438.409496] [7:   binder:436_2: 4998]  pm_generic_runtime_resume+0x40/0x58
->>>>> [  438.409506] [7:   binder:436_2: 4998]  pm_runtime_force_resume+0x9c/0x134
->>>>> [  438.409517] [7:   binder:436_2: 4998]  platform_pm_resume+0x40/0x8c
->>>>> [  438.409529] [7:   binder:436_2: 4998]  dpm_run_callback+0x64/0x230
->>>>> [  438.409540] [7:   binder:436_2: 4998]  __device_resume+0x1d8/0x394
->>>>> [  438.409551] [7:   binder:436_2: 4998]  dpm_resume+0x110/0x2b8
->>>>> [  438.409561] [7:   binder:436_2: 4998]  dpm_resume_end+0x1c/0x38
->>>>> [  438.409570] [7:   binder:436_2: 4998]  suspend_devices_and_enter+0x828/0xab0
->>>>> [  438.409582] [7:   binder:436_2: 4998]  pm_suspend+0x334/0x618
->>>>> [  438.409592] [7:   binder:436_2: 4998]  state_store+0x104/0x144
->>>>> [  438.409601] [7:   binder:436_2: 4998]  kobj_attr_store+0x30/0x48
->>>>> [  438.409610] [7:   binder:436_2: 4998]  sysfs_kf_write+0x54/0x6c
->>>>> [  438.409619] [7:   binder:436_2: 4998]  kernfs_fop_write_iter+0x104/0x1a8
->>>>> [  438.409628] [7:   binder:436_2: 4998]  vfs_write+0x24c/0x2f4
->>>>> [  438.409640] [7:   binder:436_2: 4998]  ksys_write+0x78/0xe8
->>>>> [  438.409652] [7:   binder:436_2: 4998]  __arm64_sys_write+0x1c/0x2c
->>>>> [  438.409664] [7:   binder:436_2: 4998]  invoke_syscall+0x58/0x114
->>>>> [  438.409676] [7:   binder:436_2: 4998]  el0_svc_common+0xac/0xe0
->>>>> [  438.409687] [7:   binder:436_2: 4998]  do_el0_svc+0x1c/0x28
->>>>> [  438.409698] [7:   binder:436_2: 4998]  el0_svc+0x38/0x68
->>>>> [  438.409705] [7:   binder:436_2: 4998]  el0t_64_sync_handler+0x68/0xbc
->>>>> [  438.409712] [7:   binder:436_2: 4998]  el0t_64_sync+0x1a8/0x1ac
->>>>> Signed-off-by: ping.gao <ping.gao@samsung.com>
->>>>> ---
->>>>>     drivers/mmc/host/dw_mmc.c | 12 +++++++++---
->>>>>     1 file changed, 9 insertions(+), 3 deletions(-)
->>>>>
->>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>>> index c5db92bbb094..61f6986f15ef 100644
->>>>> --- a/drivers/mmc/host/dw_mmc.c
->>>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>>> @@ -3633,9 +3633,15 @@ int dw_mci_runtime_resume(struct device *dev)
->>>>>     	if (host->slot &&
->>>>>     	    (mmc_host_can_gpio_cd(host->slot->mmc) ||
->>>>>     	     !mmc_card_is_removable(host->slot->mmc))) {
->>>>> -		ret = clk_prepare_enable(host->biu_clk);
->>>>> -		if (ret)
->>>>> -			return ret;
->>>>> +		if (IS_ERR(host->biu_clk)) {
->>>>> +			dev_dbg(host->dev, "biu clock not available\n");
->>>>> +		} else {
->>>>> +			ret = clk_prepare_enable(host->biu_clk);
->>>>> +			if (ret) {
->>>>> +				dev_err(host->dev, "failed to enable biu clock\n");
->>>>> +				goto err;
->>>>> +			}
->>>>> +		}
->>>>>     	}
->>>>>     	ret = clk_prepare_enable(host->ciu_clk);
->>>>
->>>>
->>
+Thanks,
+Alam.
