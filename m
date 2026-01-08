@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 522112ECE9D;
-	Thu,  8 Jan 2026 17:53:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FF372F1FDA;
+	Thu,  8 Jan 2026 17:53:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767894822; cv=none; b=JcGD2fstZPJySS2hh0xhwy8gZjBK8mWmIYthrhnjET+BcYfpu8JUacoPh43r1+U77NP9fGXxTXnJMDJ2hFqpbDsHHA3aQI/L1vF5HBYzlFJrhv8wB/DqqydFyOfvdKuGNVh0G9nZ1t0IOpkXkIu6/ZvT9NDCMgUHBdD3vq7jOJA=
+	t=1767894823; cv=none; b=ZKvMaIx/hnwKnaoZ5ob4/4aPe5w7vFjv/vhyU37FR0HmtUimEBzAwUpX31Q4OZ3aS+AOYwvysExq54OcJVkY5begyw81r8Ru+AbMr/1tH+ypiUaCXTeymTEHC+iGias0yhfFJcG4mTZMTfUDWc3n3iuWZ7hCfAfvP5uFwxIIsAU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767894822; c=relaxed/simple;
-	bh=yhzVtvkMvI4BlC+wimvaT+E0X5KJhQFWtWdpmAh4oCU=;
+	s=arc-20240116; t=1767894823; c=relaxed/simple;
+	bh=NybYYQFhDpQHAUmXrGSSV36BPz67jaqMd9fSLCbvpN8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=cJtcSgjL6e9OSjgBoRdIlGddhZTJnmb/imfGx5DKqYEAjX5GXIKvuZdGejUIxUT2tKS0E9JwMmb3jpsgHWwcIDPL8WI8oMvJEqIKa9oz+5thDNbxiBv55FJmT1xz5/ooLQ3mphL9DwcLxfUo14MkPQ/gj9Uq2vpi2b8YvE7w1Do=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hrPTojfn; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=KsZeXIEznXuJizYV7wolv6jjiRRLdDhO0yt3WnqE8iJ6cU21oKuS8EAG7KAzsmmatVoD1Fl1XuPHiCsl+OpTApCilmejqP8Em9qnX8OrbuE4YcE6Stkx5mJz6vtFoQ+aUJdFY89XQU42fi06YzEShsChdpF42RLE3uMD2Tb5MBI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ei0wKvGe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hrPTojfn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0CF46C2BCB9;
-	Thu,  8 Jan 2026 17:53:41 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ei0wKvGe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01464C19422;
+	Thu,  8 Jan 2026 17:53:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767894822;
-	bh=yhzVtvkMvI4BlC+wimvaT+E0X5KJhQFWtWdpmAh4oCU=;
+	s=k20201202; t=1767894823;
+	bh=NybYYQFhDpQHAUmXrGSSV36BPz67jaqMd9fSLCbvpN8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=hrPTojfnbA6BUQ2nCn+Eco6pHIvwpP713P8KMcdQAkJfar0l4WyF4MARbr/5iQqFc
-	 aKuwCqkfqsvL/svapSP7eDK4IYH34WFkC29YDV3Ear0mi/YzpdcGEG2JIp+nGP3MkX
-	 D+Uctm+Vy1rbQ9SlYMZkNzVXI43LD2CKnTKljJusQecd5aXdGr0fT6pmV5/pWHgltY
-	 SuxH2DQOZ/J4oI+3QbvagUMoWuZ/tqoQE+bBNO9jI1qAgBUmdd4VdXVxhbijuJIU8w
-	 5mb7hppSdIZL0YmPFCAOQqPpMwxzVXs9cpTgji1qpdHYOe8FQc2OuTezljyQkOymQk
-	 c64wOv3UdORuQ==
+	b=ei0wKvGePo3aTIWYuDO2bK2KKW2iFfn3CaBTvXVzfCr3NDQyqMkH8GzPxg31Xw+1q
+	 RAUE+l8TmuvWNDwLojUwGtKynHCBp37M7siBiwLBA90LObzQGRzn5eBoYvwISLgA04
+	 zqLl7YAX/6Mn6Lidm7lJhDofrU0J65a05DcMl9RPwuA/cE3Xfd/VCkmTyaK2gMq4Rv
+	 43W0oopf1UuoR2G/YLFg1PL9e7g8+k5Hh83ACmQ1FFuvywAYeyPXNhLXBO6yAfbTbz
+	 tplYapwuY8+d2QIuf/JKPY2cnWGoT84A0AZ4EU7YyIEwEbRvXVy8cmVIiZhWOhA6Vd
+	 /NWR2wyRf6iZw==
 From: "Rob Herring (Arm)" <robh@kernel.org>
-Date: Thu, 08 Jan 2026 11:53:13 -0600
-Subject: [PATCH 04/10] dt-bindings: mtd: partitions: Allow "nvmem-layout"
- in generic partition nodes
+Date: Thu, 08 Jan 2026 11:53:14 -0600
+Subject: [PATCH 05/10] dt-bindings: mtd: partitions: Define
+ "#{address,size}-cells" in specific schemas
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260108-dt-mtd-partitions-v1-4-124a53ce6279@kernel.org>
+Message-Id: <20260108-dt-mtd-partitions-v1-5-124a53ce6279@kernel.org>
 References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
 In-Reply-To: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
 To: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -59,27 +59,67 @@ Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 X-Mailer: b4 0.15-dev
 
-An "nvmem-layout" node can be used in any partition node, so add it.
+Whether "#address-cells" and "#size-cells" are used or not depends on
+the specific partition type, so drop them from partitions.yaml and
+define them in the specific partition schemas as needed.
 
 Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mtd/partitions/partition.yaml | 3 +++
- 1 file changed, 3 insertions(+)
+ .../devicetree/bindings/mtd/partitions/fixed-partitions.yaml        | 6 ++++--
+ Documentation/devicetree/bindings/mtd/partitions/partitions.yaml    | 6 ------
+ Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml   | 4 ----
+ 3 files changed, 4 insertions(+), 12 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-index 568fac50f921..fe2f7d622e8b 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-@@ -135,6 +135,9 @@ properties:
-       but may differ if device has bad eraseblocks on a flash.
-     $ref: /schemas/types.yaml#/definitions/uint32
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
+index b504d4376d0b..26bef777353d 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
+@@ -25,9 +25,11 @@ properties:
+           - const: sercomm,sc-partitions
+           - const: fixed-partitions
  
-+  nvmem-layout:
-+    $ref: /schemas/nvmem/layouts/nvmem-layout.yaml
-+
- if:
-   not:
-     required: [ reg ]
+-  "#address-cells": true
++  "#address-cells":
++    enum: [ 1, 2 ]
+ 
+-  "#size-cells": true
++  "#size-cells":
++    enum: [ 1, 2 ]
+ 
+ patternProperties:
+   "@[0-9a-f]+$":
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/partitions.yaml
+index 1dda2c80747b..76199506d690 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/partitions.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/partitions.yaml
+@@ -26,12 +26,6 @@ oneOf:
+ properties:
+   compatible: true
+ 
+-  '#address-cells':
+-    enum: [1, 2]
+-
+-  '#size-cells':
+-    enum: [1, 2]
+-
+ patternProperties:
+   "^partition(-.+|@[0-9a-f]+)$":
+     $ref: partition.yaml
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml b/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml
+index e3978d2bc056..dc6421150c84 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml
+@@ -28,10 +28,6 @@ properties:
+       device. On a flash memory with 32KB eraseblocks, 0 means the first
+       eraseblock at 0x00000000, 1 means the second eraseblock at 0x00008000 and so on.
+ 
+-  '#address-cells': false
+-
+-  '#size-cells': false
+-
+ required:
+   - compatible
+   - fis-index-block
 
 -- 
 2.51.0
