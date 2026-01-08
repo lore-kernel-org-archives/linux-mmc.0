@@ -1,132 +1,121 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AAB52C326F;
-	Thu,  8 Jan 2026 11:00:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B3142DC32A;
+	Thu,  8 Jan 2026 17:53:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767870053; cv=none; b=N+WBc3BoxH4iBERfRwnGwXGNaX3P44jiletxhnjfXmjEHJNp6slHH7IjM6lkuWhuoMPBy0SPDWBjAqiETr4HdQp6cbdKzMccuvT4c0mKSrJRE6TPY5YBQWiOYbEIw7WkW+lINlAWUSKMxg9sLy7KvImldD02bBG5Ec+43p2/5BU=
+	t=1767894818; cv=none; b=ZBjlpHdp0Bkf+8FAGgi1FBUzy+LTRhXeOr8imYya/PaZd6t0/7p5LG6/IHTIp57Wwf/cLLq0nLZRXFkc0OP5UnMu75AFJJcb5Ow9RHdqxQmsq7bbqRzig3CelHz4/RaAyAfAisCRrZejJBjN9I63UetUkIkoCfmlTBL9Ory7Gy4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767870053; c=relaxed/simple;
-	bh=IIJSs9LrbzY8RgKWqqelh5qE0iiHiVlSTPrLZYYCcP4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=l+rLG1QZl+s20/M/KD4pNg47s+jD0zm+7Wj1C1owH/nwGaYVZWg3+IOV+YM74Uyln7cRnvYxHP29zvBi9Pn71TkpKekdGldLIrC4w/qKNq0wQD9bDxCYl5jYL+1jOe6Y8xA4qtyzjCCtSq9stlLL87IQBTYbrR7jTf9xQSI8eH0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=aOdREEQz; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1767894818; c=relaxed/simple;
+	bh=EpeLs1hupKlkC3f4T5WsMQDKzIOTZY86hves7++2JUI=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=e8vX/PNqvvmjDmUROJ06cqhJSsZ38jekGfWxqsvZD7rrEDXvjsxdQdOL2ulNU3qXUvmi3kVplKKrWnwQejR2TW2BYE9O48cuC8T9oU/iKxSsCxEmvBS+9bdfbxgECWl2F5mJaCfbhSTCQJRydcmyoTdgq+AzLOurUkeUuPui8Bs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ivZc6EBs; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="aOdREEQz"
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6085U9xO3890457;
-	Thu, 8 Jan 2026 11:00:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	jpQn1GGMJu8x4ZoFkdd7YARH1CvZwhVIgQJPhvr2nQk=; b=aOdREEQzZTSyWJn4
-	r4MIE22IKikDmkwSe/ZttM7kQEjA31+3phW/ZxRnsKa7edUiVI/NoMXcK0cwWWC7
-	BsDiUap9giT9jMZSNwF0G9i0CaTcSw72hbEcxiOD7FHTRZHzn4dt7yeX8O3FW1/c
-	gTidRU1W3ITX0hEDc3Y7zKuOoc9Z15B73rDLpZ+ZXU18RptdbNfEm/F/fX3S/885
-	cQZiIr/ixe/5Yco6WFvDPejQ0UAhCH9tnAVmzQnesCjHQhtFseM+3QuXk7n6lzjV
-	lAH/kC/Ld1h1lF9MgK8NTxXSMcmXx4TKGnGYlvJVAIPSDjJBhnBOa8cKdhfWhKaO
-	73j1Hg==
-Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4bhuy72teb-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 08 Jan 2026 11:00:32 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 608B0Vo1028526
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 8 Jan 2026 11:00:31 GMT
-Received: from [10.151.36.184] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.17; Thu, 8 Jan
- 2026 03:00:28 -0800
-Message-ID: <a807d3ac-56db-2055-0732-7347647b38fa@quicinc.com>
-Date: Thu, 8 Jan 2026 16:30:25 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ivZc6EBs"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD6F4C116C6;
+	Thu,  8 Jan 2026 17:53:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1767894817;
+	bh=EpeLs1hupKlkC3f4T5WsMQDKzIOTZY86hves7++2JUI=;
+	h=From:Subject:Date:To:Cc:From;
+	b=ivZc6EBsyPMVfPTYjQEWagwN/pirjUKfWJl4cth6wdp/9zCMNe2USua3VRpIAYRCM
+	 qcBc2Ov76Qh5DCdon9LxjVFN3u3xtw7rLEc0fQhr25C8RYGvjQokk568fJW8bnBQRb
+	 itChIgO5q8agWgYonj28sO2QyjBXfOUqvgyAkKUbCtXsc3+qhnXINg2gWqHyEf/bq2
+	 q/TYKBa8ktpF+aLQ5sPnsa2ZqOE6lC8xnNqY/VTLhgf6dOrlr2IP5ojjTXwgato2+q
+	 0GCx1IcUbP8E/PxUHtTzdvbX4pRd0MjPXAp9nu6mQGJmRwjIGyNVQwrluUSGS7IU5p
+	 dmXH1wTb3Absg==
+From: "Rob Herring (Arm)" <robh@kernel.org>
+Subject: [PATCH 00/10] dt-bindings: mtd: Partition binding fixes and
+ restructuring
+Date: Thu, 08 Jan 2026 11:53:09 -0600
+Message-Id: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH] mmc: sdhci-msm: Add quirk to disable CQE for ICE legacy
- mode
-Content-Language: en-US
-To: Adrian Hunter <adrian.hunter@intel.com>, <quic_asutoshd@quicinc.com>,
-        <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <ebiggers@kernel.org>
-References: <20251224101050.3497746-1-quic_mdalam@quicinc.com>
- <f65f1647-3c95-41e0-8c6c-a25d835fcf35@intel.com>
- <0c33b361-8563-8aef-53d4-6158b358fb72@quicinc.com>
- <db79d30b-03ee-4e98-baa4-c0201f4eca8f@intel.com>
-From: Md Sadre Alam <quic_mdalam@quicinc.com>
-In-Reply-To: <db79d30b-03ee-4e98-baa4-c0201f4eca8f@intel.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: Gq-Al0x6YOdT0VImxdUtdoD5e4dFVoaA
-X-Proofpoint-GUID: Gq-Al0x6YOdT0VImxdUtdoD5e4dFVoaA
-X-Authority-Analysis: v=2.4 cv=DZEaa/tW c=1 sm=1 tr=0 ts=695f8e50 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=vUbySO9Y5rIA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=tu0YU7S5tw2X3cI39zIA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMTA4MDA3NCBTYWx0ZWRfX7doshNr7tB4N
- pGVl6qEu3RHPpmlhejUaaVp4Pwio3cHZveX/2GG/dnlExyufU/XmFL20r5FrS8rrtMN+CQPLk/B
- R7ui9Sk1HwQ8hQ+hpKJYxx0WhBp4GeTUjvMq/ojZIIaekfn44PzglWyGr3+q2IafZYDchMfvGUk
- b7mnT2wFjA1Wvqb0HlIedVxpB9lvqoU6nOYPQ3unRDpNVYT2scuuM1f3zCa/zc1fumv4UOS+SPb
- iv1f+/9Dlm6FdTdxJV9/Ft4ZXJIJuPNZ34KcNZAr9LxMKYJclGHAAWQwak5zRpMkS5ZBQKt+uAI
- x2mirIZZnmM/dWRpYnbHpSvjg1U2g+fxds+pZKRQHKQXG26rPlRcTo5ooZF58A50vnqjCr103FI
- HrC1jE+tggV26mu0z7IdsXxv1IacTPD+rAvYMajuTz2wUO6GIRGsWGso+FaZi+M/grEvq8QliYd
- a3g+Fi6GhsOH/x+4Www==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
- definitions=2026-01-08_02,2026-01-07_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 impostorscore=0 phishscore=0 bulkscore=0 adultscore=0
- spamscore=0 clxscore=1015 suspectscore=0 lowpriorityscore=0 malwarescore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2512120000 definitions=main-2601080074
+X-B4-Tracking: v=1; b=H4sIAAbvX2kC/x2MQQqAIBAAvxJ7bkGLQvpKdLB2rT1kohKB9Pek4
+ 8DMFEgchRNMTYHItyS5fAXdNrAd1u+MQpWhU92otDJIGc9MGGzMkqucsHc0GF4tOaugdiGyk+d
+ /zsv7fqvmAHRjAAAA
+X-Change-ID: 20260108-dt-mtd-partitions-3fd58ebadfa0
+To: Miquel Raynal <miquel.raynal@bootlin.com>, 
+ Richard Weinberger <richard@nod.at>, Vignesh Raghavendra <vigneshr@ti.com>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, 
+ Brian Norris <computersforpeace@gmail.com>, 
+ Kamal Dasu <kdasu.kdev@gmail.com>, 
+ William Zhang <william.zhang@broadcom.com>, Nick Terrell <terrelln@fb.com>, 
+ David Sterba <dsterba@suse.com>, 
+ =?utf-8?q?Rafa=C5=82_Mi=C5=82ecki?= <rafal@milecki.pl>, 
+ Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>, 
+ Ulf Hansson <ulf.hansson@linaro.org>, 
+ Marcus Folkesson <marcus.folkesson@gmail.com>, 
+ Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@kernel.org>, 
+ Hauke Mehrtens <hauke@hauke-m.de>
+Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+X-Mailer: b4 0.15-dev
 
-Hi,
+The partition bindings fail to restrict undefined properties. This is 
+primarily on fixed-partitions which can be nested and partition nodes 
+without a compatible string. This series fixes those issues and then 
+several problems exposed by restricting undefined properties. As part of 
+this, the schema structure is reworked to follow more conventional 
+structure of applying schemas by compatible and a schema only checks 1 
+level of nodes (unless possible child nodes are fixed).
 
-On 1/7/2026 7:33 PM, Adrian Hunter wrote:
-> On 07/01/2026 13:55, Md Sadre Alam wrote:
->> HI,
->>
->> On 1/5/2026 8:31 PM, Adrian Hunter wrote:
->>> On 24/12/2025 12:10, Md Sadre Alam wrote:
->>>> Some hosts require Inline Crypto Engine (ICE) to operate in legacy mode
->>>> instead of Command Queue Engine (CQE) mode for platform-specific
->>>> requirements or compatibility reasons. Introduce a host-level quirk
->>>> `host_disable_cqe` to forcefully disable CQE negotiation and allow ICE
->>>> to function through the legacy request path.
->>>>
->>>> When the device tree omits the "supports-cqe" property, the driver sets
->>>> `host_disable_cqe = true` and avoids enabling MMC_CAP2_CQE during card
->>>> initialization. This ensures that even CQE-capable hardware falls back
->>>> to legacy SDHCI request handling. A minimal `cqhci_disable_ops` is
->>>> provided with `.cqe_enable = cqhci_host_disable` returning -EINVAL to
->>>> force the fallback. Other ops are left NULL for safe defaults.
->>>>
->>>> For builds without CONFIG_MMC_CRYPTO, the driver uses standard
->>>> sdhci_add_host() to avoid unnecessary CQE infrastructure initialization.
->>>>
->>>> This allows platforms to forcefully opt out of CQE usage and ensure ICE
->>>> operates reliably in legacy mode, providing stable crypto operations
->>>> without command queuing complexity.
->>>
->>> Can't the driver simply opt-out by not setting MMC_CAP2_CQE?
->> Correct. This change is intended for the case where both host and device supports CMDQ, but the host explicitly wants to disable CMDQ and want to use the Inline Crypto Engine (ICE) in legacy way.Simply clearing MMC_CAP2_CQE would bypass CMDQ, but it would also bypass ICE as well.
-> 
-> Did you try it?  Looks to me like removing MMC_CAP2_CQE is all that is needed since "mmc: sdhci-msm: Enable ICE for CQE-capable controllers with non-CQE cards"
-I will test with MMC_CAP2_CQE removed as you indicated and share the
-results.
+In theory, we could have all sorts of combinations of different 
+partition types nesting, and those may or may not work. No attempt is 
+made to support them here. Only the known cases are supported.
 
-Thanks,
-Alam.
+Rob
+
+Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+---
+Rob Herring (Arm) (10):
+      dt-bindings: mtd: brcm,brcmnand: Drop "brcm,brcmnand" compatible for iProc
+      dt-bindings: mtd: fixed-partitions: Move "compression" to partition node
+      dt-bindings: mtd: partitions: Move "sercomm,scpart-id" to partition.yaml
+      dt-bindings: mtd: partitions: Allow "nvmem-layout" in generic partition nodes
+      dt-bindings: mtd: partitions: Define "#{address,size}-cells" in specific schemas
+      dt-bindings: mtd: partitions: Drop partitions.yaml
+      dt-bindings: mtd: Ensure partition node properties are documented
+      dt-bindings: mtd: fixed-partitions: Restrict undefined properties
+      dt-bindings: mtd: partitions: Convert brcm,trx to DT schema
+      dt-bindings: mtd: partitions: Combine simple partition bindings
+
+ .../devicetree/bindings/mmc/mmc-card.yaml          | 20 ++-----
+ .../devicetree/bindings/mtd/brcm,brcmnand.yaml     |  1 -
+ Documentation/devicetree/bindings/mtd/mtd.yaml     | 10 +---
+ .../mtd/partitions/arm,arm-firmware-suite.yaml     |  2 -
+ .../devicetree/bindings/mtd/partitions/binman.yaml | 53 ------------------
+ .../mtd/partitions/brcm,bcm4908-partitions.yaml    |  8 +--
+ .../partitions/brcm,bcm947xx-cfe-partitions.yaml   |  2 -
+ .../mtd/partitions/brcm,bcm963xx-imagetag.txt      | 45 ---------------
+ .../bindings/mtd/partitions/brcm,trx.txt           | 42 --------------
+ .../bindings/mtd/partitions/brcm,trx.yaml          | 65 ++++++++++++++++++++++
+ .../bindings/mtd/partitions/fixed-partitions.yaml  | 43 ++++----------
+ .../mtd/partitions/linksys,ns-partitions.yaml      | 10 +---
+ .../bindings/mtd/partitions/partition.yaml         | 44 ++++++++++++++-
+ .../bindings/mtd/partitions/partitions.yaml        | 42 --------------
+ .../bindings/mtd/partitions/redboot-fis.yaml       |  4 --
+ .../devicetree/bindings/mtd/partitions/seama.yaml  | 44 ---------------
+ .../bindings/mtd/partitions/simple-partition.yaml  | 61 ++++++++++++++++++++
+ .../partitions/tplink,safeloader-partitions.yaml   |  2 +-
+ .../devicetree/bindings/mtd/partitions/u-boot.yaml |  2 +-
+ .../devicetree/bindings/mtd/ti,davinci-nand.yaml   |  4 +-
+ .../devicetree/bindings/mtd/ti,gpmc-onenand.yaml   |  2 +-
+ MAINTAINERS                                        |  5 --
+ 22 files changed, 196 insertions(+), 315 deletions(-)
+---
+base-commit: fc4e91c639c0af93d63c3d5bc0ee45515dd7504a
+change-id: 20260108-dt-mtd-partitions-3fd58ebadfa0
+
+Best regards,
+--  
+Rob Herring (Arm) <robh@kernel.org>
+
