@@ -1,34 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6977F2F6921;
-	Thu,  8 Jan 2026 17:53:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 271C22ECE9D;
+	Thu,  8 Jan 2026 17:53:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767894824; cv=none; b=EuKuH7jiWRGAID17RGrjj03d914K0NyyeB63T/nSx9hGXS+KRdJI6dENPEt0TW5W5e3wy0zBXorYETDyjoT87ByBoNhy8SNurb6//P2g+KJQn38y6YfYTizX9QFejqok0MVumb34IxI9rvxzlPROp8CuJiegdhdlmpLA4HCbAeI=
+	t=1767894825; cv=none; b=YUnUqM8yH5lsyu24jlSeElztGW489bfAQYsXGRv2HxagUa9R3LY436Ngpyn4KVksChDDoAEuFMKjEn6yjSWKmHboQzw+u1+O31IQ9DooHhxqsYJiSYDjqaOGLk+m8ys9gDn+bnBv6NWIbazOyjpuVxyyoHmEBwKzNtCaP8bSDR0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767894824; c=relaxed/simple;
-	bh=lUNIN0XoCUOF2F73xvfV7xbbCcqdqmvMqSrqv9berDc=;
+	s=arc-20240116; t=1767894825; c=relaxed/simple;
+	bh=fSFFqBjSxmW6GjXDFPoquLzIaZS4HePaiQdXXsrYlE8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=t+YpHipOGyBIDYw8nwFPQ+uU2no5ChSBhZWVFJeSJwW+VtTgazuq7Gk1hbl4t6LBKUxuqFZJb9J+AAmHbyGDkbp3zfb8mj6Wfw3s0N1CwbSQNGGFIiNloZgglEhN1PFHZrFB62sNmEvu38lsSmUx+egMa9OducvfCtesP/E1zzY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=I6xgCKdF; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=u9u0wXxQyTZbl6IPrL9FCzg0i+14UlZsIEGiNddB3d5w81GeQ5Cg5r4P/NeWtzGyUGFyChYTMSOqu3IMwQfwHea7rX2ieXVExXy5g07D2gLzZvzGZWlMnc7iE7PWVXCqUVEbcnX1JC63fUkGLro8Vvifb5t7ae6e0HUDKZilRhI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jGh6A2+u; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="I6xgCKdF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F0F14C4AF09;
-	Thu,  8 Jan 2026 17:53:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jGh6A2+u"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E2F2EC2BCB0;
+	Thu,  8 Jan 2026 17:53:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767894824;
-	bh=lUNIN0XoCUOF2F73xvfV7xbbCcqdqmvMqSrqv9berDc=;
+	s=k20201202; t=1767894825;
+	bh=fSFFqBjSxmW6GjXDFPoquLzIaZS4HePaiQdXXsrYlE8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=I6xgCKdFzABhYvUsxvCriCmVJY8lS1a4GUgQkn5eRoC6JG3oukwA8jNOtJl2BxyE8
-	 qnS5E9F3w5aHx90CRkZEUbO8f9/qF+tDpoK14Bz0HeP669WKvJAu90zxUW34n7ORxj
-	 0bggzpXyVXb8pSAqHBVRRhfY+gB5hCa59VE6UZOy8q/qAAN4ZPBJQR2NZhXXQdkRty
-	 8hFZsm6foCe/63Mpxw7ZnuLnEieZREPKiHXXVJdyPEWHnjke2U8FjCuuiUYcJyZnvt
-	 lmuvAVgPLI54vCZZ27HL363KOEcvTtREgNKgXvvo8CP67dzY4r1kREBC0TaSYqKiDA
-	 QuucSBMGwg1Ug==
+	b=jGh6A2+u5nsJXjQ+fzgDDdzvC9frMZdMIvyH0bUHl4Xth0CWs9n2x6YJhywVP3hLb
+	 3EUNIV1rClzM28yE3yggl9KK6CaiceWaZlqIxmr4Ccib6Q/qmkief/jHriAEsahbLF
+	 /SqGrRvwgnCMpQmkMx6dBx1YK8tyq0jHT9LYcMWJldWEu7Bo/FhEnhtbV6nNXl5FX6
+	 Ujjz68snNWp5DpDfIko7EnXZGgKFZEW9jlvvWCbG9q8Q38RSKfxiClyqKT8FVinxVa
+	 /8eLeK9SNLnio5D8Z6CXHofHDoO5l8kcfmeSViRs3g1S/DxxM28GSAdKRsqpbGhv7V
+	 zi03CiNtXQNxA==
 From: "Rob Herring (Arm)" <robh@kernel.org>
-Date: Thu, 08 Jan 2026 11:53:15 -0600
-Subject: [PATCH 06/10] dt-bindings: mtd: partitions: Drop partitions.yaml
+Date: Thu, 08 Jan 2026 11:53:16 -0600
+Subject: [PATCH 07/10] dt-bindings: mtd: Ensure partition node properties
+ are documented
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -36,8 +37,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Message-Id: <20260108-dt-mtd-partitions-v1-6-124a53ce6279@kernel.org>
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260108-dt-mtd-partitions-v1-7-124a53ce6279@kernel.org>
 References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
 In-Reply-To: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
 To: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -58,183 +59,116 @@ Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 X-Mailer: b4 0.15-dev
 
-The partitions.yaml schema is an unusual structure in that it includes
-all possible partition types, and it disables the normal matching by
-compatible strings. As partitions.yaml has nothing to match on, it is
-only applied when explicitly referenced. The use of "oneOf" also results
-in misleading warnings which are difficult to understand. Drop
-partitions.yaml and rely on the standard compatible matching instead.
-
-The "mmc-card" case previously allowed any partition type, but now only
-allows "fixed-partitions". There aren't any users and the original
-intent appeared to be only for "fixed-partitions".
+Partition nodes without a compatible have no restrictions on additional
+properties. Fix this by ensuring 'unevaluatedProperties' is set when
+there's no compatible property. If there is a compatible property, then
+there should be a specific schema for it which will enforce
+'unevaluatedProperties'.
 
 Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- .../devicetree/bindings/mmc/mmc-card.yaml          | 20 ++++--------
- Documentation/devicetree/bindings/mtd/mtd.yaml     |  2 +-
- .../mtd/partitions/arm,arm-firmware-suite.yaml     |  2 --
- .../mtd/partitions/brcm,bcm4908-partitions.yaml    |  2 --
- .../partitions/brcm,bcm947xx-cfe-partitions.yaml   |  2 --
- .../mtd/partitions/linksys,ns-partitions.yaml      |  2 --
- .../bindings/mtd/partitions/partitions.yaml        | 36 ----------------------
- .../devicetree/bindings/mtd/ti,davinci-nand.yaml   |  4 ++-
- 8 files changed, 10 insertions(+), 60 deletions(-)
+ Documentation/devicetree/bindings/mtd/mtd.yaml               |  8 ++------
+ .../devicetree/bindings/mtd/partitions/fixed-partitions.yaml |  2 +-
+ .../devicetree/bindings/mtd/partitions/partition.yaml        | 12 ++++++++++++
+ .../mtd/partitions/tplink,safeloader-partitions.yaml         |  2 +-
+ Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml |  2 +-
+ Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml   |  2 +-
+ 6 files changed, 18 insertions(+), 10 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-index 1d91d4272de0..a61d6c96df75 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-@@ -32,21 +32,13 @@ properties:
- 
- patternProperties:
-   "^partitions(-boot[12]|-gp[14])?$":
--    $ref: /schemas/mtd/partitions/partitions.yaml
-+    type: object
-+    additionalProperties: true
- 
--    patternProperties:
--      "^partition@[0-9a-f]+$":
--        $ref: /schemas/mtd/partitions/partition.yaml
--
--        properties:
--          reg:
--            description: Must be multiple of 512 as it's converted
--              internally from bytes to SECTOR_SIZE (512 bytes)
--
--        required:
--          - reg
--
--        unevaluatedProperties: false
-+    properties:
-+      compatible:
-+        contains:
-+          const: fixed-partitions
- 
- required:
-   - compatible
 diff --git a/Documentation/devicetree/bindings/mtd/mtd.yaml b/Documentation/devicetree/bindings/mtd/mtd.yaml
-index bbb56216a4e2..e56dba83f00a 100644
+index e56dba83f00a..5a2d06c96c0d 100644
 --- a/Documentation/devicetree/bindings/mtd/mtd.yaml
 +++ b/Documentation/devicetree/bindings/mtd/mtd.yaml
-@@ -30,7 +30,7 @@ properties:
+@@ -36,12 +36,8 @@ properties:
+       - compatible
+ 
+ patternProperties:
+-  "@[0-9a-f]+$":
+-    $ref: partitions/partition.yaml
+-    deprecated: true
+-
+-  "^partition@[0-9a-f]+":
+-    $ref: partitions/partition.yaml
++  "(^partition)?@[0-9a-f]+$":
++    $ref: /schemas/mtd/partitions/partition.yaml#/$defs/partition-node
      deprecated: true
  
-   partitions:
--    $ref: /schemas/mtd/partitions/partitions.yaml
+   "^otp(-[0-9]+)?$":
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
+index 26bef777353d..4d79f786fcd5 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
+@@ -33,7 +33,7 @@ properties:
+ 
+ patternProperties:
+   "@[0-9a-f]+$":
+-    $ref: partition.yaml#
++    $ref: partition.yaml#/$defs/partition-node
+ 
+ required:
+   - "#address-cells"
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
+index fe2f7d622e8b..51fd48af55ec 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
+@@ -149,6 +149,18 @@ then:
+ # This is a generic file other binding inherit from and extend
+ additionalProperties: true
+ 
++$defs:
++  partition-node:
 +    type: object
++    if:
++      not:
++        required: [ compatible ]
++    then:
++      $ref: '#'
++      unevaluatedProperties: false
++    else:
++      $ref: '#'
++
+ examples:
+   - |
+     partitions {
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml
+index a24bbaac3a90..40e6eaab03ce 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml
+@@ -38,7 +38,7 @@ properties:
  
-     required:
-       - compatible
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/arm,arm-firmware-suite.yaml b/Documentation/devicetree/bindings/mtd/partitions/arm,arm-firmware-suite.yaml
-index e9b1a6869910..d4b6013aefcc 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/arm,arm-firmware-suite.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/arm,arm-firmware-suite.yaml
-@@ -9,8 +9,6 @@ title: ARM Firmware Suite (AFS) Partitions
- maintainers:
-   - Linus Walleij <linusw@kernel.org>
+ patternProperties:
+   "^partition-.*$":
+-    $ref: partition.yaml#
++    $ref: partition.yaml#/$defs/partition-node
  
--select: false
--
- description: |
-   The ARM Firmware Suite is a flash partitioning system found on the
-   ARM reference designs: Integrator AP, Integrator CP, Versatile AB,
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm4908-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm4908-partitions.yaml
-index 94f0742b375c..159b32d12803 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm4908-partitions.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm4908-partitions.yaml
-@@ -17,8 +17,6 @@ description: |
- maintainers:
-   - Rafał Miłecki <rafal@milecki.pl>
+ required:
+   - partitions-table-offset
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml b/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml
+index 327fa872c001..d51bdcb7e585 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml
+@@ -29,7 +29,7 @@ properties:
  
--select: false
--
- properties:
-   compatible:
-     const: brcm,bcm4908-partitions
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm947xx-cfe-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm947xx-cfe-partitions.yaml
-index 939e7b50db22..3484e06d6bcb 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm947xx-cfe-partitions.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm947xx-cfe-partitions.yaml
-@@ -35,8 +35,6 @@ description: |
- maintainers:
-   - Rafał Miłecki <rafal@milecki.pl>
+ patternProperties:
+   "^partition-.*$":
+-    $ref: partition.yaml#
++    $ref: partition.yaml#/$defs/partition-node
  
--select: false
--
- properties:
-   compatible:
-     const: brcm,bcm947xx-cfe-partitions
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml
-index c5fa78ff7125..02ecb51fcece 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml
-@@ -18,8 +18,6 @@ description: |
- maintainers:
-   - Rafał Miłecki <rafal@milecki.pl>
+ unevaluatedProperties: false
  
--select: false
--
- properties:
-   compatible:
-     const: linksys,ns-partitions
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/partitions.yaml
-deleted file mode 100644
-index 76199506d690..000000000000
---- a/Documentation/devicetree/bindings/mtd/partitions/partitions.yaml
-+++ /dev/null
-@@ -1,36 +0,0 @@
--# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
--%YAML 1.2
-----
--$id: http://devicetree.org/schemas/mtd/partitions/partitions.yaml#
--$schema: http://devicetree.org/meta-schemas/core.yaml#
--
--title: Partitions
--
--description: |
--  This binding is generic and describes the content of the partitions container
--  node. All partition parsers must be referenced here.
--
--maintainers:
--  - Miquel Raynal <miquel.raynal@bootlin.com>
--
--oneOf:
--  - $ref: arm,arm-firmware-suite.yaml
--  - $ref: brcm,bcm4908-partitions.yaml
--  - $ref: brcm,bcm947xx-cfe-partitions.yaml
--  - $ref: fixed-partitions.yaml
--  - $ref: linksys,ns-partitions.yaml
--  - $ref: qcom,smem-part.yaml
--  - $ref: redboot-fis.yaml
--  - $ref: tplink,safeloader-partitions.yaml
--
--properties:
--  compatible: true
--
--patternProperties:
--  "^partition(-.+|@[0-9a-f]+)$":
--    $ref: partition.yaml
--
--required:
--  - compatible
--
--unevaluatedProperties: false
-diff --git a/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml b/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml
-index ed24b0ea86e5..7619b19e7a04 100644
---- a/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml
-+++ b/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml
-@@ -24,7 +24,9 @@ properties:
-       - description: AEMIF control registers.
+diff --git a/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml b/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml
+index 7d3ace4f5505..8db991dee7eb 100644
+--- a/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml
++++ b/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml
+@@ -36,7 +36,7 @@ properties:
  
-   partitions:
--    $ref: /schemas/mtd/partitions/partitions.yaml
-+    type: object
-+    required:
-+      - compatible
+ patternProperties:
+   "@[0-9a-f]+$":
+-    $ref: /schemas/mtd/partitions/partition.yaml
++    $ref: /schemas/mtd/partitions/partition.yaml#/$defs/partition-node
  
-   ti,davinci-chipselect:
-     description:
+ allOf:
+   - $ref: /schemas/memory-controllers/ti,gpmc-child.yaml
 
 -- 
 2.51.0
