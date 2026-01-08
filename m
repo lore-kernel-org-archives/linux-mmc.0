@@ -1,460 +1,1108 @@
-Received: from mail-dl1-f42.google.com (mail-dl1-f42.google.com [74.125.82.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from AS8PR04CU009.outbound.protection.outlook.com (mail-westeuropeazon11021116.outbound.protection.outlook.com [52.101.70.116])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A2AD2874E3
-	for <linux-mmc@vger.kernel.org>; Wed,  7 Jan 2026 22:06:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.42
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767823572; cv=none; b=M4V0ts6xNhfHrB/BkJuJQeaRPppm4xZeX383LqC3BI+AasHwxkhhv4sRYhRXA8jOiV1dHhH/X/sD0U9uF9hv/BK8ecES/+WqIDFhO4W5B7uWEY4nNMI1Yh4jpuCKVrHOFeG2Oto7JKfjueI3lNvsHsijS/D/x0dKT8WopM/pDkc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767823572; c=relaxed/simple;
-	bh=Ot5Y86aZ0R0b6nMPXRYLVaDslq687kJSb6uKMslorWM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=m4USUnBEoTV0s9u8QiPgXtkjgS+QBucYwI+DbI/HM8NnpNiVWmfg2fkgQ+X+UEdJaMq0WAOyvdjQJmJpxl6WCp1yZCzOf2cXnDt60/dtNvJzdW522dnPQ5jk03OCgd7GYRbVANYfAa0QETRWB/jrcyje4Jxq0Y4BDm7L01bK7yg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SLnoUnm3; arc=none smtp.client-ip=74.125.82.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AD6D364045;
+	Thu,  8 Jan 2026 07:42:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.70.116
+ARC-Seal:i=4; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1767858183; cv=fail; b=mxy7oW2VThdvtEpn9vzxnHyhPZh5QzDnCB+gs4QBeJtdM3HW+cpZ7BSAc2zdThfE/Q87PRj34j970ENRbe0xrHMUiDN7X6nQehXiZrcUfbEbO1plO3UurBpeojKl/6pzTnqZnmgyVvPNBtVR/3GIW8KxepnoAKNyF3RT+otS0lY=
+ARC-Message-Signature:i=4; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1767858183; c=relaxed/simple;
+	bh=6HUT3ZVqBcDl6+mb4DFYoN5fYa4BTHjqdB3ghQ+KkI8=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=G9TGAgV60nKrBUCR7wwogZ+ii6gAM7Z2SSC8UxOhuvHYnmju6593601azHGqGv57p7YyT9e5yVhkeCIbjH+YM0GgF9obSnIEO+QyH7aKRmU2iW3C7f663AnjkK8bdLCipB2PrcLX7yWkS2svi/kHKu7SZ0QYQieSh7t1L9jYqJw=
+ARC-Authentication-Results:i=4; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=solid-run.com; spf=pass smtp.mailfrom=solid-run.com; dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b=c/9PQ0L9; dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b=c/9PQ0L9; arc=fail smtp.client-ip=52.101.70.116
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=solid-run.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=solid-run.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SLnoUnm3"
-Received: by mail-dl1-f42.google.com with SMTP id a92af1059eb24-11beb0a7bd6so883560c88.1
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Jan 2026 14:06:07 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b="c/9PQ0L9";
+	dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b="c/9PQ0L9"
+ARC-Seal: i=3; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=pass;
+ b=bOnsIvuLFlMF54GsK2BvkWFLnOGm/HoLHT/3OKQWfsQ08+H/rN+Z3OImTbXWuGt2OTYz+YVNd0C0sRxmzx6HZTRsutluLzqSjC6K+70WNJkWTZLbHUVtbbsAP5VXgc2Pbibne/1LdHLrSq79k6IlOKCW+puRjnBYz8x/lDynBNOilAv4DTD7hlNn+4kEav2ldDCaIhYzPbRilnji63NrRaLs8OWX54qteEmbBrZVoF2PnLIRtj9uKlRGL+C/lJz3dvMC2NGTYwbDB7VcEYf8QvJk9mRgEszcaz0A/Hz6A6WQn7lEmA41OjuBigBgEajt8obim2KIL0UTysi628iMcg==
+ARC-Message-Signature: i=3; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=iew2lyWpItyxuMh0pLQYH7yZ/C7z3T4akgckmm4WyXU=;
+ b=EuaXawDMOorQch9GcuCfmKGt6REsy8h0dDhUJn6r2Gm7kgR6uYTmDZWXOChEzZo067j2dIYxIsv5ODTIqKDrzKar710TNgFRPb6BiXZzumU8NUjjTmgwNgMqymiNFPzQuy+J9btE2q5BGjBoIc9vDMcEPURBAj5VddtcKKNKE8Y7Aybu1c6eVqmo+N+fhPypuo0h/XM+/C/KBGE4NKWe/Z1BegLBbOp6Xns2nK+BFIrNM+OQ4ZQwLX+OHTZXByoeGxqYAeORFlE6Y3MSMD8PuTv44eOmdiEgv7xknHq8j6sD/R6ruwGzIudrHIhoaGXkyAj+bEFIITAUQKj1GwAq7w==
+ARC-Authentication-Results: i=3; mx.microsoft.com 1; spf=fail (sender ip is
+ 52.17.62.50) smtp.rcpttodomain=atomide.com smtp.mailfrom=solid-run.com;
+ dmarc=fail (p=none sp=none pct=100) action=none header.from=solid-run.com;
+ dkim=pass (signature was verified) header.d=solidrn.onmicrosoft.com; arc=pass
+ (0 oda=1 ltdi=1 spf=[1,1,smtp.mailfrom=solid-run.com]
+ dkim=[1,1,header.d=solid-run.com] dmarc=[1,1,header.from=solid-run.com])
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1767823567; x=1768428367; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=12Uy+o3o+oEZTYNVKNIdaVKdMEcJ24KSeXUMiY0DKfc=;
-        b=SLnoUnm3BvBa/lAJ0gwL7kCaaEmnmW8ZDkMDO2LwWOySIm0C/aiD3ZN5wsiQzwA5gj
-         lCCecV4w8YQ4MNrlAtgAYzU1I+PNp4vyKPah3vKWYGMAgEYpRCjw+TQTR9MfWCKn4inF
-         tU0JQ3QhULH+7XXF7Zxk/6RVfoZl+XT0Wiz050gU9fPSSPVqx+q7nkGYIg/XQqx7XlkT
-         Z/Vt9GWBxpeulgsAGtM6cHwN33yODN/YHOehTnl2y7krBqj+AQARlzqy8Eytc1ilE8mB
-         tOUZ7e5x5AyKM2CoSfdB1/ufnV/8twkHGgU4aoin3uc2MDTIVgi3CLo41DclQBcWW6Gl
-         SXCg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1767823567; x=1768428367;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=12Uy+o3o+oEZTYNVKNIdaVKdMEcJ24KSeXUMiY0DKfc=;
-        b=DCIYkqZF8FXG8BmqaqQetrx/pOwox+R0PU2/5jimLSzP/IrIcNmqgfk+vsm/OVKWrE
-         fDWHfxyaJ3kJ94zQEeoj/UxVFLxtyp4Ycs38nquTg+pnpmDozT5IWJmft8ziQJ+2MsnJ
-         oihezxnXwQ0jBq109EY6e/E+NaNKDUaoA7CacTWnnBKlwCfsTC87M/cp7ioBnKHikpbU
-         MeAH7rF7l4P3qRVo1gNbGLIQy5DgldpQxN+mjtJphTHS56s89k47d+SiVawj0/cg1+xg
-         Rdai1LvkGCCwrZEVBw4aOX8X8DoXEU49XeRBQj9MQ/nqgLB73RUGeJE4aGWkdR9Liydv
-         PxHA==
-X-Gm-Message-State: AOJu0Yx0gO0NqXhOLB1p6UM4gImKHh/p3IXeGc/7RvQYcx9mDZqm5f1Z
-	m4GEckUUmkOm/TGEun/sREnIJ8oyFCUtq+zBpRQsNkaSioN2R36EDz3wfRetxtZr
-X-Gm-Gg: AY/fxX6FFnL4Y4CFoPwh8go49ZTZUmOn8mkSsJYm9WnHnybIWM8IxGZHGlWzGY8cS5m
-	6m8CQX7QiV1UFsCZMeqia0zjLrGvVaBZ2aJXmBxRCgrXvTx0nS/6jM8SaXiB5rB6quWEa5RkhCq
-	/bwYR4J090IomrB94rs8/J3qZvoxoLFPRoQ+rFpMBiFDvlic19HGKqnmafHZ0ddZK7iOtbOlRwG
-	WECIEKoPyV4fS/Gr2ArFk3w03q9P9sPG2eXfUpojqxeHfCa6BDNq1ZnAxbnmJgMZjpFwJZn1YkV
-	vn4B2nqkbAT2iTJWEJGnrsWXJ5OwdMABsVOzwhCqohXCh1LE4Rwe6CoCYP+bkSURXMbFbi7Yvzs
-	F0zKKKuECdv7uwuisIwIfAjRM4U2Lq5O5LnAMeUaYXSZQkdm4uWFEgKAL9TiNIs0B+14tD2ZQlA
-	si3C8pFWcGVtUUZDT/dP9SllrPklnMqmiTAynxBUmkAnaZmdWWACMyu4EF
-X-Google-Smtp-Source: AGHT+IFqXckW7tjhZyyjOqNEeZs5aqgauwYdX6MniW4gn48eopdWsDkpF72kZ53X4l5cCle+obNcNg==
-X-Received: by 2002:a05:7022:3d82:b0:11b:3eb7:f9d7 with SMTP id a92af1059eb24-121f1b1eb1amr6331986c88.14.1767823566808;
-        Wed, 07 Jan 2026 14:06:06 -0800 (PST)
-Received: from [192.168.0.108] (c-73-189-16-174.hsd1.ca.comcast.net. [73.189.16.174])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-121f249894fsm8894380c88.15.2026.01.07.14.06.05
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 07 Jan 2026 14:06:06 -0800 (PST)
-Message-ID: <07c5346a-4f3c-4f91-8b32-66ebbbc08706@gmail.com>
-Date: Wed, 7 Jan 2026 14:06:04 -0800
+ d=solidrn.onmicrosoft.com; s=selector1-solidrn-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=iew2lyWpItyxuMh0pLQYH7yZ/C7z3T4akgckmm4WyXU=;
+ b=c/9PQ0L9/pRNFMnDSeakyHocgaq/E0b8K/OF+nOJgSOCyaeUstvYqSzMNJHI7ctKjd7ZslxCxFzw36ecZelqP7VabNYaDL9JPb1d6yW6qqYz8kkXam3Gj/kw4SS69FqO/esBzFgYWYSRbOqFMx3xNyEqkAhCajsd7QE6EW8g11o=
+Received: from DUZPR01CA0082.eurprd01.prod.exchangelabs.com
+ (2603:10a6:10:46a::10) by DBAPR04MB7304.eurprd04.prod.outlook.com
+ (2603:10a6:10:1ab::9) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9499.3; Thu, 8 Jan
+ 2026 07:42:51 +0000
+Received: from DU6PEPF0000A7DE.eurprd02.prod.outlook.com
+ (2603:10a6:10:46a:cafe::e1) by DUZPR01CA0082.outlook.office365.com
+ (2603:10a6:10:46a::10) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9499.3 via Frontend Transport; Thu, 8
+ Jan 2026 07:43:03 +0000
+X-MS-Exchange-Authentication-Results: spf=fail (sender IP is 52.17.62.50)
+ smtp.mailfrom=solid-run.com; dkim=pass (signature was verified)
+ header.d=solidrn.onmicrosoft.com;dmarc=fail action=none
+ header.from=solid-run.com;
+Received-SPF: Fail (protection.outlook.com: domain of solid-run.com does not
+ designate 52.17.62.50 as permitted sender) receiver=protection.outlook.com;
+ client-ip=52.17.62.50; helo=eu-dlp.cloud-sec-av.com;
+Received: from eu-dlp.cloud-sec-av.com (52.17.62.50) by
+ DU6PEPF0000A7DE.mail.protection.outlook.com (10.167.8.38) with Microsoft SMTP
+ Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9520.1 via
+ Frontend Transport; Thu, 8 Jan 2026 07:42:51 +0000
+Received: from emails-4225107-12-mt-prod-cp-eu-2.checkpointcloudsec.com (ip-10-20-6-71.eu-west-1.compute.internal [10.20.6.71])
+	by mta-outgoing-dlp-141-mt-prod-cp-eu-2.checkpointcloudsec.com (Postfix) with ESMTPS id 0FBA8809F5;
+	Thu,  8 Jan 2026 07:42:51 +0000 (UTC)
+ARC-Authentication-Results: i=2; mx.checkpointcloudsec.com;
+ arc=pass;
+ dkim=none header.d=none
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed;
+ d=checkpointcloudsec.com; s=arcselector01; t=1767858171; h=from : to :
+ subject : date : message-id : content-type : mime-version;
+ bh=iew2lyWpItyxuMh0pLQYH7yZ/C7z3T4akgckmm4WyXU=;
+ b=L8xG0YwI2dlLkKVm2RCYu58NSPBr3fsv7keMF17dpk4wgvytjbZbCQeVcGOMz040Q7tbG
+ BpyH9tCw9YSk2x9llWggacnlZeW2zwdhfR6QB+B39u2aZNfRkcz9FCOmw4vvhiM9iOI4HKI
+ /bx4zKI4IHw3v55TdkqMYWoyZeIlIGE=
+ARC-Seal: i=2; cv=pass; a=rsa-sha256; d=checkpointcloudsec.com;
+ s=arcselector01; t=1767858171;
+ b=GNsqHA+r/+OCaMMvGRgoQYp45DfCdKlMLiIjEpOASiZbCI/unrpVcusiEXq7PFX9j+0SU
+ jyIhv2yqEninw6cRfQbz59xYcLiZFs5T+z2p04q7TC+jfkzvq3R2Kmkb2YcG4fRCjMNL2bo
+ Ji+DiuxWRthCBBXMOZbfLe92spVkqiY=
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=yaze8Uu8gT+z5AqE6oNuhmdiEFwlD4S5L2DHtz/NzcqTpVx0cq4bWFzcx+58miFGBotLY+09rws2GKTAX+4v0dLQOQ2txBN/XWkFexY++RUzjU5lDVbGjA2HPZ8+d188j69Xn2Md/QybCtE2SK8wt2ioSmQhjLp3FWca2hDUIwO+/BK2+rArE/C903RnOkFgj/JE2MhaRTEVEd5SRjSQE0ljlWM/w6vvFKximD7GPvYT78ti/OQxlycPGSteoA5wKRzOY7LTg5lo7Ir0KubBt9NDMuZ2E7X3bTxJ4NCmgkis0Aay76GgQexqYYfJg1QrkiV0gp3YOO/DW0Qg/oZbJw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=iew2lyWpItyxuMh0pLQYH7yZ/C7z3T4akgckmm4WyXU=;
+ b=WQVCFbJ+9wTNtfAWx0lqr2G/PivjAyK0eRYFGIL1jUgDx4q0Q5mUu4xFQ1x1l4b0wNIhQ2rv5GDIZ/zpc378Hwu6QMR2u3WYEHDP6e5q/f0VJVCXXLArgYDiDsj+ja2Kb8/wajHNT1hUSSxhRHq0wSPQ2mBNrJGr7vKCegVKHlsxHk5SkzfwsrlbrpJh+sMsHqlz0ycEW3ghwn32dv6uXZpVUJBv8FFOZlXrVY82NqeEcrQTb40jxr7ovZjK4zA3jlJ9UJpIOjCwQge2iYcTiNgSAVyxnRrvfJqMWNY/BM6eenKUamAb1X4Iiy1Dlq8L6WQtsTj+W5JTIJHpkeWJcA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=solid-run.com; dmarc=pass action=none
+ header.from=solid-run.com; dkim=pass header.d=solid-run.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=solidrn.onmicrosoft.com; s=selector1-solidrn-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=iew2lyWpItyxuMh0pLQYH7yZ/C7z3T4akgckmm4WyXU=;
+ b=c/9PQ0L9/pRNFMnDSeakyHocgaq/E0b8K/OF+nOJgSOCyaeUstvYqSzMNJHI7ctKjd7ZslxCxFzw36ecZelqP7VabNYaDL9JPb1d6yW6qqYz8kkXam3Gj/kw4SS69FqO/esBzFgYWYSRbOqFMx3xNyEqkAhCajsd7QE6EW8g11o=
+Received: from PAXPR04MB8749.eurprd04.prod.outlook.com (2603:10a6:102:21f::22)
+ by AS1PR04MB9288.eurprd04.prod.outlook.com (2603:10a6:20b:4dc::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9499.2; Thu, 8 Jan
+ 2026 07:42:40 +0000
+Received: from PAXPR04MB8749.eurprd04.prod.outlook.com
+ ([fe80::aa83:81a0:a276:51f6]) by PAXPR04MB8749.eurprd04.prod.outlook.com
+ ([fe80::aa83:81a0:a276:51f6%4]) with mapi id 15.20.9499.003; Thu, 8 Jan 2026
+ 07:42:40 +0000
+From: Josua Mayer <josua@solid-run.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm
+	<magnus.damm@gmail.com>, Wolfram Sang <wsa-dev@sang-engineering.com>, Marc
+ Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>,
+	Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>,
+	Peter Rosin <peda@axentia.se>, Aaro Koskinen <aaro.koskinen@iki.fi>, Andreas
+ Kemnade <andreas@kemnade.info>, Kevin Hilman <khilman@baylibre.com>, Roger
+ Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>, Vignesh R
+	<vigneshr@ti.com>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Andi Shyti
+	<andi.shyti@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>, kernel
+ test robot <lkp@intel.com>
+CC: "oe-kbuild-all@lists.linux.dev" <oe-kbuild-all@lists.linux.dev>, Mikhail
+ Anikin <mikhail.anikin@solid-run.com>, Yazan Shhady
+	<yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	"linux-can@vger.kernel.org" <linux-can@vger.kernel.org>,
+	"linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>
+Subject: Re: [PATCH v4 2/7] mux: Add helper functions for getting optional and
+ selected mux-state
+Thread-Topic: [PATCH v4 2/7] mux: Add helper functions for getting optional
+ and selected mux-state
+Thread-Index: AQHceM9JqQzQE9ugI0yaCzbfoWSvFLU8IvmAgAvQIoA=
+Date: Thu, 8 Jan 2026 07:42:39 +0000
+Message-ID: <3396461.44csPzL39Z@josua-pc>
+References: <20251229-rz-sdio-mux-v4-2-a023e55758fe@solid-run.com>
+ <202601010305.tpY47HE4-lkp@intel.com>
+In-Reply-To: <202601010305.tpY47HE4-lkp@intel.com>
+Accept-Language: de-DE, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-traffictypediagnostic:
+	PAXPR04MB8749:EE_|AS1PR04MB9288:EE_|DU6PEPF0000A7DE:EE_|DBAPR04MB7304:EE_
+X-MS-Office365-Filtering-Correlation-Id: 4a07d456-380f-4e17-aada-08de4e8986cc
+x-cloud-sec-av-info: solidrun,office365_emails,sent,inline
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam-Untrusted:
+ BCL:0;ARA:13230040|366016|376014|7416014|1800799024|38070700021|13003099007|921020;
+X-Microsoft-Antispam-Message-Info-Original:
+ =?us-ascii?Q?27eWl7XoDjOWoVFmkLNhayXgN+3Sr95XN+75mEsq+PYNhbc9FjyIPgu0CwLa?=
+ =?us-ascii?Q?Pte7hKzBiJAd5UT9kUXNHuHnj/cOFBRNm56u6vfNXdKZ5dUrevkVzDuvnTNH?=
+ =?us-ascii?Q?kN9NNLyvGAZUybomFFneCElAsfehs9L5MGReTrfLyd02cgs9Kbw/X38/LCIe?=
+ =?us-ascii?Q?mnZ2qjx24xOwoDSGVC9sBTfkYSiXP+DR5Vkb2sRqTYCXKDOSTwAUELILNWba?=
+ =?us-ascii?Q?cYigjtODP3ZCbH4OrusclABMZUdrliZOI+/FclF+laVl62Vs+2cLTo9UHNuD?=
+ =?us-ascii?Q?I3hCb/X8KlLIGCI30ksAAxdHhkOHm3InoILL7oYV1rZ/NHlbLc94/WjyFv4+?=
+ =?us-ascii?Q?mqOzpCC/9s8E/WtyZXobA4BYFDT8JLhstEsOAaOLZX6osgOmDMI6sm8eOiiU?=
+ =?us-ascii?Q?madacHVdNQGBCuzcWNlucb4TJszBMKufUxP6W4oBNtnxiRDpLoPPvKP5gG9A?=
+ =?us-ascii?Q?3U1QXTNkAkmckQySFOBIbBmSClGUW2++U1QugNEzjSnxkmGT/zALqdT7/n4+?=
+ =?us-ascii?Q?Z4OrhCusiuGJWrf43sMaswnVHXijUymH1VgFTz9SR8gGlpRrlQ9cxORtbAjP?=
+ =?us-ascii?Q?rhd4eLESLIi/i45rYd6U6r66ZODKKNRX/A6daVw6IHLUWGe7uPVzvI8f+sk5?=
+ =?us-ascii?Q?S5f1St6WaHNKOe6bXX/TwVlwiWeUHhIIxjGn7BzDl8pPdGm6fqDCfazYXigW?=
+ =?us-ascii?Q?/Oe1TF7RjJOc9vTDi9mClLx9v/3pK+QSqCMgkNSthZ6RG+p6pyPDyKTjtg3i?=
+ =?us-ascii?Q?qsCKmKP1xL3n1Fpe2Z0ZVYSK1wFJA/Uod1Uq7v7r5A+CaoN5HtOkj3bNIYzE?=
+ =?us-ascii?Q?UL629vbuixOr+NfAEBHZ+l6Zc6O7A8YuK6tyfYBsv5/yUjBF3mTq23fGLaG/?=
+ =?us-ascii?Q?rvyO+gyj5pTkH5TNEANw6xpqUZ7WDhFa+y994iq7wc9FJpOSTZzR7qMr7Exx?=
+ =?us-ascii?Q?D1EJPlbX3g9A8sdeTCMOZV2vV1uYnv7FXBIC7EmXQpo0usXnFPfNujFfcs4h?=
+ =?us-ascii?Q?Nv2CXUB6Kq443okWGba45BnmNuSGvbKM2q3qa6SJQbBAvwN4R6MA/csUv+DR?=
+ =?us-ascii?Q?oFRVvwCRvR4lBt64CVnpMs4+5+PG5RSZqVwjVZhJ/GXAH1KDTwrU40f96eZj?=
+ =?us-ascii?Q?rXnp9ZmP/Cojy5yC8zgXi+M+gnUE959Bfqhowba4QDY0PYuJFG1MzfWMg4Kg?=
+ =?us-ascii?Q?Hyrlgm6I5a6KWatyeq2DO8uZYqN/fxSJosWSMnQ6LCroyINiqRRxH2k/sjp5?=
+ =?us-ascii?Q?YtcDoUD0aSF3/yKhnQ6ER8QqEOisx28LFRR1/l3vTWHcioMERmfEVRoNs3uO?=
+ =?us-ascii?Q?vr1z9qoXg69ieNxxVljzXATAtbZ/iwtbPqefSZlLqSxEZ3s+Lc9jWbIfHR53?=
+ =?us-ascii?Q?QhmvIrhrLixKfyt/ruvhDNWSOgPK0+twATPYXPDIlDv0QRK+9AWLxdUN+2ay?=
+ =?us-ascii?Q?ZCL45jiyWZq5mxih3C9PtOBSyho1mGcAq/4KdnBkvUf+rgar732CD6CMV7aC?=
+ =?us-ascii?Q?sWz0U0f/WVxtR5D0vN4L5NFnBTXxk+jMheEA/kGWSSoOv7kw6S75MlyyxQ?=
+ =?us-ascii?Q?=3D=3D?=
+X-Forefront-Antispam-Report-Untrusted:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB8749.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(7416014)(1800799024)(38070700021)(13003099007)(921020);DIR:OUT;SFP:1102;
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <23689A1EFCFB834FAFB76DF5DB22BA6F@eurprd04.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: rtsx_pci_sdmmc aborts suspend when /sys/power/wakeup_count is
- enabled
-To: Ulf Hansson <ulf.hansson@linaro.org>,
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <a242799a-d427-48e1-85ef-923f34df843a@gmail.com>
- <CAPDyKFq55Vqfd7cMdmQZBzvS1Xr-Z4QaTzEeuWWn3EX4HBbP3A@mail.gmail.com>
- <CAL57YxZagMaZF1X1bpx-nB76s=vZMWhUDiVbvB9P3CLiXG-qHQ@mail.gmail.com>
- <CAPDyKFpRi8u3MPauT1hnYC1pW7L4kAohAZDsgS2pgQ=4_sjgNA@mail.gmail.com>
-Content-Language: en-US
-From: Tabby Kitten <nyanpasu256@gmail.com>
-In-Reply-To: <CAPDyKFpRi8u3MPauT1hnYC1pW7L4kAohAZDsgS2pgQ=4_sjgNA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS1PR04MB9288
+X-CLOUD-SEC-AV-INT-Relay: sent<mta-outgoing-dlp-mt-prod-cp-eu-2.checkpointcloudsec.com>
+X-CLOUD-SEC-AV-UUID: f663b1991b574a4c93718838da6e29fb:solidrun,office365_emails,sent,inline:a110d822b3037142edc8c94754f8d9ab
+Authentication-Results-Original: mx.checkpointcloudsec.com; arc=pass;
+ dkim=none header.d=none
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Transport-CrossTenantHeadersStripped:
+ DU6PEPF0000A7DE.eurprd02.prod.outlook.com
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id-Prvs:
+	c1a480c1-489d-4152-d48e-08de4e898017
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|82310400026|35042699022|7416014|376014|36860700013|14060799003|1800799024|13003099007|921020;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?v74CFEc07TaedPjF0iCrz3h5rijjNOlnvjaSmV3TAcofiJVetPxFA1eiFHOH?=
+ =?us-ascii?Q?BvMz7zSoCg2jCTif+ZSNvgKkMbLatMuPusCkBW+06ZanjWMFElLYkpUg+tXE?=
+ =?us-ascii?Q?ONJ2YiDatHT3XVcDiCqMWj0x6bP0zHM35+mvmqzB8+yowCBKrQcL2VMaZ62a?=
+ =?us-ascii?Q?lvaVXqwkd3EmzaP3VziP1wat2nxxA6J7ro0buT2bQeodSCCNMMk40Pr07f72?=
+ =?us-ascii?Q?7akaV6sVDnG1SPlNlluVurVwWh7NHm+Sm2/578Gw6dRf3iCCPraVLfphk8BL?=
+ =?us-ascii?Q?4f3K14Sm8aXdTNNZFH3J9wkYhBhVUpyfGKMZampnp5hmHBe8U5QxzlZZG6TG?=
+ =?us-ascii?Q?8sFPLAWoX9VO+gEtS/G8mktZbDFvJHghDW73aT/astIYkZMxGb32J3T0GBFQ?=
+ =?us-ascii?Q?a39U1381Eobcph96zYiKETi1208lJm7nToIMrGoSAhDDXNr8bXHYmFZFCZcL?=
+ =?us-ascii?Q?l+ERDaMdFEKKbeDJaWYEU+sDrTOv8FuB69dkoUwRzFps0gWjJ2C/3rq86D8R?=
+ =?us-ascii?Q?aRzb9FpkVEpNO3lKzMKg7JZvXeA0ahsBdxgD79J11XAeyeT1nxs7HzQRp4xN?=
+ =?us-ascii?Q?ft0IFDW0OolzhQ8+QDSL6eA8duIrxtqK1x+Oq7HLKux8z2/a9FdOyWwPAgSU?=
+ =?us-ascii?Q?wMHVG7Vf8fQj+3mSWpjHLyta4ze+ZcT27PsmPabyetD6/5jq3wm8KOJM+GDV?=
+ =?us-ascii?Q?IPFhzyJz/iOrneyHLk3KJqkM2mtCghJGVT3JhZBqwT6/hOw35eZRje0WUh0l?=
+ =?us-ascii?Q?05mgTamIjBOB00EPUcu2no7ROf6uA7DIZdxByBrG4DDuYAY/1s1B06rhDM3W?=
+ =?us-ascii?Q?3ofoQho07M71aMnW/DIE8wB0ud0XYa93/kdzGz6qDBXNRyFOfKUDx7Bz07Jf?=
+ =?us-ascii?Q?4iOlZUUG2vXWUELhnjGquiUgnGaukbyJ7MnBtR0E7Ycqr4DTfSQaklLHI2gu?=
+ =?us-ascii?Q?/N21/uPwQDj7QMaB8kP867dkbxJTi334ubrBeJtCHw2WI0nTs9mAyw36NmJR?=
+ =?us-ascii?Q?WPQEFlG/JHhTU3HDtGeVncvUOrdPIeg0CzUz6KptZvj83C+Mv5p7wyM/DZeN?=
+ =?us-ascii?Q?ou95tGv4eCd3PQ3r0EkrhZpz8VUNx6CX7Op6BHlPp9yNsv/B/1kIZjmIfmit?=
+ =?us-ascii?Q?AwGG53fNkWiHrYcoRUBtVSeMGK23K8Kg0x90Do+TmCjxpuMIuSSYp7Do4Pim?=
+ =?us-ascii?Q?w6rweQuM81qg+6EjerLTLV1aF8TBUbjmI1+3ky0p+oK/8bfy5W6UeqN0/e9r?=
+ =?us-ascii?Q?Wzn0ci6KpljeENc/5R92IxhrTE+daN60NGVWJZ1idx0InXt/uUeVurs4UARi?=
+ =?us-ascii?Q?innVYnQFYZNWYG39WUGAbxnZdLr5uOubXgHPXCWBFJDtkkOhowsgEkW8+Ahy?=
+ =?us-ascii?Q?IrAe3DC5Db5yvLDkZMT2ZpiKGKPI8ida9rmfzZyDsn5PpC5uaF3ODzghqCzW?=
+ =?us-ascii?Q?4fp6o5b1Q+QuiliVwsG3fbDaspuN8vYvnHCe7ShLkl03K9H+x4ievCckg1gR?=
+ =?us-ascii?Q?MVmVRGF057MpkING9kqQ2JVNDqxOUb6NMC6sFnbBNaNm7UBHuY2ZCRqLVpya?=
+ =?us-ascii?Q?Oir3j4MEx8O+PMWHijEx5LCX162ofJ9NBzm2+PgW?=
+X-Forefront-Antispam-Report:
+	CIP:52.17.62.50;CTRY:IE;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:eu-dlp.cloud-sec-av.com;PTR:eu-dlp.cloud-sec-av.com;CAT:NONE;SFS:(13230040)(82310400026)(35042699022)(7416014)(376014)(36860700013)(14060799003)(1800799024)(13003099007)(921020);DIR:OUT;SFP:1102;
+X-OriginatorOrg: solid-run.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Jan 2026 07:42:51.1819
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4a07d456-380f-4e17-aada-08de4e8986cc
+X-MS-Exchange-CrossTenant-Id: a4a8aaf3-fd27-4e27-add2-604707ce5b82
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=a4a8aaf3-fd27-4e27-add2-604707ce5b82;Ip=[52.17.62.50];Helo=[eu-dlp.cloud-sec-av.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	DU6PEPF0000A7DE.eurprd02.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DBAPR04MB7304
 
-Unfortunately this patch appears corrupted, requiring me to manually
-recreate it. It seems the process of including it as text in the email
-body has corrupted the text, including hard-wrapping the @@ lines into
-multiple lines and converting tabs into spaces, so the patch no longer
-maps to the Linux source code (eg. drivers/mmc/core/core.c). These
-errors were present in Thunderbird, lore.kernel.org, and marc.info
-(where downloading the raw emails additionally
-equals-encodes/Quoted-Printable? special characters breaking the patch
-further).
+On Wednesday, 31 December 2025 21:18:51 IST kernel test robot wrote:
+> Hi Josua,
+>=20
+> kernel test robot noticed the following build errors:
+>=20
+> [auto build test ERROR on 8f0b4cce4481fb22653697cced8d0d04027cb1e8]
+>=20
+> url:  =20
+> https://github.com/intel-lab-lkp/linux/commits/Josua-Mayer/phy-can-transc=
+ei
+> ver-rename-temporary-helper-function-to-avoid-conflict/20251229-223153 ba=
+se:
+>   8f0b4cce4481fb22653697cced8d0d04027cb1e8
+> patch link:  =20
+> https://lore.kernel.org/r/20251229-rz-sdio-mux-v4-2-a023e55758fe%40solid-=
+ru
+> n.com patch subject: [PATCH v4 2/7] mux: Add helper functions for getting
+> optional and selected mux-state config: parisc-randconfig-002-20260101
+> (https://download.01.org/0day-ci/archive/20260101/202601010305.tpY47HE4-l=
+kp
+> @intel.com/config) compiler: hppa-linux-gcc (GCC) 10.5.0
+> reproduce (this is a W=3D1 build):
+> (https://download.01.org/0day-ci/archive/20260101/202601010305.tpY47HE4-l=
+kp
+> @intel.com/reproduce)
+>=20
+> If you fix the issue in a separate patch/commit (i.e. not just a new vers=
+ion
+> of the same patch/commit), kindly add following tags
+>=20
+> | Reported-by: kernel test robot <lkp@intel.com>
+> | Closes:
+> | https://lore.kernel.org/oe-kbuild-all/202601010305.tpY47HE4-lkp@intel.c=
+om
+> | /
+> All error/warnings (new ones prefixed by >>):
+>=20
+>    In file included from drivers/mux/core.c:19:
+>=20
+>    include/linux/mux/consumer.h: In function 'mux_control_put':
+> >> include/linux/mux/consumer.h:138:9: warning: 'return' with a value, in
+> >> function returning void [-Wreturn-type]
+>      138 |  return -EOPNOTSUPP;
+>=20
+>          |         ^
+>=20
+To be fixed in next version
 
-Additionally Adrian's email seems to be an informal patch rather than a
-machine-readable specification.
+>    include/linux/mux/consumer.h:136:20: note: declared here
+>      136 | static inline void mux_control_put(struct mux_control *mux)
+>=20
+>          |                    ^~~~~~~~~~~~~~~
+>=20
+>    drivers/mux/core.c: At top level:
+> >> drivers/mux/core.c:302:14: error: redefinition of 'mux_control_states'
+>=20
+>      302 | unsigned int mux_control_states(struct mux_control *mux)
+>=20
+>          |              ^~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:70:28: note: previous definition of
+> 'mux_control_states' was here 70 | static inline unsigned int
+> mux_control_states(struct mux_control *mux)
+>          |                            ^~~~~~~~~~~~~~~~~~
 
-I'm attemping to manually replicate the changes on Fedora 43's
-kernel-6.18.3 checkout
-(https://docs.fedoraproject.org/en-US/quick-docs/kernel-build-custom/),
-though I'm much less experienced building kernels here than on Arch
-Linux (the Arch SSD is currently in another computer). I will be
-replying back with results once I can build and test these patches.
+I don't understand how this is possible.
+In the header file line 136 the inline declaration for mux_control_states i=
+s=20
+gated by ifdef CONFIG_MULTIPLEXER else case.
 
-On 1/3/26 3:12 AM, Ulf Hansson wrote:
-> + Adrian
+The build of mux/core.c itself is gated in Makefile by CONFIG_MULTIPLEXER.
+
+So mux/core.c is not being built when CONFIG_MULTIPLEXER is not set.
+If it is set, we hit in the header file the non-inline declaration near sta=
+rt
+of the file.
+
+> >>=20
+> >> drivers/mux/core.c:365:5: error: redefinition of
+> >> 'mux_control_select_delay'
+>=20
+>      365 | int mux_control_select_delay(struct mux_control *mux, unsigned
+> int state,
+>          |     ^~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:74:32: note: previous definition of
+> 'mux_control_select_delay' was here 74 | static inline int __must_check
+> mux_control_select_delay(struct mux_control *mux,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:403:5: error: redefinition of 'mux_state_select_del=
+ay'
+>=20
+>      403 | int mux_state_select_delay(struct mux_state *mstate, unsigned =
+int
+> delay_us)
+>          |     ^~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:79:32: note: previous definition of
+> 'mux_state_select_delay' was here 79 | static inline int __must_check
+> mux_state_select_delay(struct mux_state *mstate,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:425:5: error: redefinition of
+> >> 'mux_control_try_select_delay'
+>      425 | int mux_control_try_select_delay(struct mux_control *mux,
+> unsigned int state,
+>          |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:84:32: note: previous definition of
+> 'mux_control_try_select_delay' was here 84 | static inline int __must_che=
+ck
+> mux_control_try_select_delay(struct mux_control *mux,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:459:5: error: redefinition of
+> >> 'mux_state_try_select_delay'
+>      459 | int mux_state_try_select_delay(struct mux_state *mstate, unsig=
+ned
+> int delay_us)
+>          |     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:90:32: note: previous definition of
+> 'mux_state_try_select_delay' was here 90 | static inline int __must_check
+> mux_state_try_select_delay(struct mux_state *mstate,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:477:5: error: redefinition of 'mux_control_deselect=
+'
+>=20
+>      477 | int mux_control_deselect(struct mux_control *mux)
+>=20
+>          |     ^~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:118:19: note: previous definition of
+> 'mux_control_deselect' was here 118 | static inline int
+> mux_control_deselect(struct mux_control *mux)
+>          |                   ^~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:503:5: error: redefinition of 'mux_state_deselect'
+>=20
+>      503 | int mux_state_deselect(struct mux_state *mstate)
+>=20
+>          |     ^~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:122:19: note: previous definition of
+> 'mux_state_deselect' was here 122 | static inline int
+> mux_state_deselect(struct mux_state *mstate)
+>          |                   ^~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:625:21: error: redefinition of 'mux_control_get'
+>=20
+>      625 | struct mux_control *mux_control_get(struct device *dev, const
+> char *mux_name)
+>          |                     ^~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:127:35: note: previous definition of
+> 'mux_control_get' was here 127 | static inline struct mux_control
+> *mux_control_get(struct device *dev, const char *mux_name)
+>          |                                   ^~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:638:21: error: redefinition of
+> >> 'mux_control_get_optional'
+>      638 | struct mux_control *mux_control_get_optional(struct device *de=
+v,
+> const char *mux_name)
+>          |                     ^~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:131:35: note: previous definition of
+> 'mux_control_get_optional' was here 131 | static inline struct mux_contro=
+l
+> *mux_control_get_optional(struct device *dev,
+>          |                                   ^~~~~~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:650:6: error: redefinition of 'mux_control_put'
+>=20
+>      650 | void mux_control_put(struct mux_control *mux)
+>=20
+>          |      ^~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:136:20: note: previous definition of
+> 'mux_control_put' was here 136 | static inline void mux_control_put(struc=
+t
+> mux_control *mux)
+>          |                    ^~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:671:21: error: redefinition of 'devm_mux_control_ge=
+t'
+>=20
+>      671 | struct mux_control *devm_mux_control_get(struct device *dev,
+>=20
+>          |                     ^~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:141:35: note: previous definition of
+> 'devm_mux_control_get' was here 141 | static inline struct mux_control
+> *devm_mux_control_get(struct device *dev, const char *mux_name)
+>          |                                   ^~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:774:19: error: redefinition of 'devm_mux_state_get'
+>=20
+>      774 | struct mux_state *devm_mux_state_get(struct device *dev, const
+> char *mux_name)
+>          |                   ^~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:145:33: note: previous definition of
+> 'devm_mux_state_get' was here 145 | static inline struct mux_state
+> *devm_mux_state_get(struct device *dev, const char *mux_name)
+>          |                                 ^~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:788:19: error: redefinition of
+> >> 'devm_mux_state_get_optional'
+>      788 | struct mux_state *devm_mux_state_get_optional(struct device *d=
+ev,
+> const char *mux_name)
+>          |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:149:33: note: previous definition of
+> 'devm_mux_state_get_optional' was here 149 | static inline struct mux_sta=
+te
+> *devm_mux_state_get_optional(struct device *dev,
+>          |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:838:19: error: redefinition of
+> >> 'devm_mux_state_get_selected'
+>      838 | struct mux_state *devm_mux_state_get_selected(struct device *d=
+ev,
+> const char *mux_name)
+>          |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:154:33: note: previous definition of
+> 'devm_mux_state_get_selected' was here 154 | static inline struct mux_sta=
+te
+> *devm_mux_state_get_selected(struct device *dev,
+>          |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >>=20
+> >> drivers/mux/core.c:854:19: error: redefinition of
+> >> 'devm_mux_state_get_optional_selected'
+>      854 | struct mux_state *devm_mux_state_get_optional_selected(struct
+> device *dev,
+>          |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from drivers/mux/core.c:19:
+>    include/linux/mux/consumer.h:159:33: note: previous definition of
+> 'devm_mux_state_get_optional_selected' was here 159 | static inline struc=
+t
+> mux_state *devm_mux_state_get_optional_selected(struct device *dev,
+>          |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~=
+~~~
+>          |                                 ~~~
+>=20
+> --
+>    In file included from core.c:19:
+>=20
+>    include/linux/mux/consumer.h: In function 'mux_control_put':
+> >> include/linux/mux/consumer.h:138:9: warning: 'return' with a value, in
+> >> function returning void [-Wreturn-type]
+>      138 |  return -EOPNOTSUPP;
+>=20
+>          |         ^
+>=20
+>    include/linux/mux/consumer.h:136:20: note: declared here
+>      136 | static inline void mux_control_put(struct mux_control *mux)
+>=20
+>          |                    ^~~~~~~~~~~~~~~
+>=20
+>    core.c: At top level:
+>    core.c:302:14: error: redefinition of 'mux_control_states'
+>      302 | unsigned int mux_control_states(struct mux_control *mux)
+>=20
+>          |              ^~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:70:28: note: previous definition of
+> 'mux_control_states' was here 70 | static inline unsigned int
+> mux_control_states(struct mux_control *mux)
+>          |                            ^~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:365:5: error: redefinition of 'mux_control_select_delay'
+>      365 | int mux_control_select_delay(struct mux_control *mux, unsigned
+> int state,
+>          |     ^~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:74:32: note: previous definition of
+> 'mux_control_select_delay' was here 74 | static inline int __must_check
+> mux_control_select_delay(struct mux_control *mux,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:403:5: error: redefinition of 'mux_state_select_delay'
+>      403 | int mux_state_select_delay(struct mux_state *mstate, unsigned =
+int
+> delay_us)
+>          |     ^~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:79:32: note: previous definition of
+> 'mux_state_select_delay' was here 79 | static inline int __must_check
+> mux_state_select_delay(struct mux_state *mstate,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:425:5: error: redefinition of 'mux_control_try_select_delay'
+>      425 | int mux_control_try_select_delay(struct mux_control *mux,
+> unsigned int state,
+>          |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:84:32: note: previous definition of
+> 'mux_control_try_select_delay' was here 84 | static inline int __must_che=
+ck
+> mux_control_try_select_delay(struct mux_control *mux,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:459:5: error: redefinition of 'mux_state_try_select_delay'
+>      459 | int mux_state_try_select_delay(struct mux_state *mstate, unsig=
+ned
+> int delay_us)
+>          |     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:90:32: note: previous definition of
+> 'mux_state_try_select_delay' was here 90 | static inline int __must_check
+> mux_state_try_select_delay(struct mux_state *mstate,
+>          |                                ^~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:477:5: error: redefinition of 'mux_control_deselect'
+>      477 | int mux_control_deselect(struct mux_control *mux)
+>=20
+>          |     ^~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:118:19: note: previous definition of
+> 'mux_control_deselect' was here 118 | static inline int
+> mux_control_deselect(struct mux_control *mux)
+>          |                   ^~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:503:5: error: redefinition of 'mux_state_deselect'
+>      503 | int mux_state_deselect(struct mux_state *mstate)
+>=20
+>          |     ^~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:122:19: note: previous definition of
+> 'mux_state_deselect' was here 122 | static inline int
+> mux_state_deselect(struct mux_state *mstate)
+>          |                   ^~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:625:21: error: redefinition of 'mux_control_get'
+>      625 | struct mux_control *mux_control_get(struct device *dev, const
+> char *mux_name)
+>          |                     ^~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:127:35: note: previous definition of
+> 'mux_control_get' was here 127 | static inline struct mux_control
+> *mux_control_get(struct device *dev, const char *mux_name)
+>          |                                   ^~~~~~~~~~~~~~~
+>=20
+>    core.c:638:21: error: redefinition of 'mux_control_get_optional'
+>      638 | struct mux_control *mux_control_get_optional(struct device *de=
+v,
+> const char *mux_name)
+>          |                     ^~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:131:35: note: previous definition of
+> 'mux_control_get_optional' was here 131 | static inline struct mux_contro=
+l
+> *mux_control_get_optional(struct device *dev,
+>          |                                   ^~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:650:6: error: redefinition of 'mux_control_put'
+>      650 | void mux_control_put(struct mux_control *mux)
+>=20
+>          |      ^~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:136:20: note: previous definition of
+> 'mux_control_put' was here 136 | static inline void mux_control_put(struc=
+t
+> mux_control *mux)
+>          |                    ^~~~~~~~~~~~~~~
+>=20
+>    core.c:671:21: error: redefinition of 'devm_mux_control_get'
+>      671 | struct mux_control *devm_mux_control_get(struct device *dev,
+>=20
+>          |                     ^~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:141:35: note: previous definition of
+> 'devm_mux_control_get' was here 141 | static inline struct mux_control
+> *devm_mux_control_get(struct device *dev, const char *mux_name)
+>          |                                   ^~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:774:19: error: redefinition of 'devm_mux_state_get'
+>      774 | struct mux_state *devm_mux_state_get(struct device *dev, const
+> char *mux_name)
+>          |                   ^~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:145:33: note: previous definition of
+> 'devm_mux_state_get' was here 145 | static inline struct mux_state
+> *devm_mux_state_get(struct device *dev, const char *mux_name)
+>          |                                 ^~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:788:19: error: redefinition of 'devm_mux_state_get_optional'
+>      788 | struct mux_state *devm_mux_state_get_optional(struct device *d=
+ev,
+> const char *mux_name)
+>          |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    In file included from core.c:19:
+>    include/linux/mux/consumer.h:149:33: note: previous definition of
+> 'devm_mux_state_get_optional' was here 149 | static inline struct mux_sta=
+te
+> *devm_mux_state_get_optional(struct device *dev,
+>          |                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+>    core.c:838:19: error: redefinition of 'devm_mux_state_get_selected'
+>      838 | struct mux_state *devm_mux_state_get_selected(struct device *d=
+ev,
+> const char *mux_name)
+>          |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+>=20
+> vim +/mux_control_states +302 drivers/mux/core.c
+>=20
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  295
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  296=
+=20
+> /** a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14=20
+> 297   * mux_control_states() - Query the number of multiplexer states.
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  298 =
+=20
+> * @mux: The mux-control to query. a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  299   * a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  300   * Return: The
+> number of multiplexer states. a3b02a9c6591ce drivers/mux/mux-core.c Peter
+> Rosin        2017-05-14  301   */ a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14 @302  unsigned int mux_control_states(struc=
+t
+> mux_control *mux) a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =
+=20
+> 2017-05-14  303  { a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin     =
+ =20
+> 2017-05-14  304  	return mux->states; a3b02a9c6591ce drivers/mux/mux-
+core.c
+> Peter Rosin        2017-05-14  305  } a3b02a9c6591ce drivers/mux/mux-core=
+.c
+> Peter Rosin        2017-05-14  306  EXPORT_SYMBOL_GPL(mux_control_states)=
+;
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  307
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  308=
+=20
+> /* a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  3=
+09
+>   * The mux->lock must be down when calling this function. a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  310   */
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  311=
+=20
+> static int __mux_control_select(struct mux_control *mux, int state)
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  312 =
+ {
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  313=
+=20
+> 	int ret; a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  314 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  315  	if (WARN_ON(state < 0 || state >=3D mux->states))
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  316=
+=20
+> 		return -EINVAL; a3b02a9c6591ce drivers/mux/mux-core.c=20
+Peter Rosin      =20
+> 2017-05-14  317 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  318  	if (mux->cached_state =3D=3D state) a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  319  	=09
+return 0;
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  320
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  321=
+=20
+> 	ret =3D mux_control_set(mux, state); a3b02a9c6591ce drivers/mux/mux-
+core.c
+> Peter Rosin        2017-05-14  322  	if (ret >=3D 0) a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  323  	=09
+return 0;
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  324
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  325=
+=20
+> 	/* The mux update failed, try to revert if appropriate... */
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  326=
+=20
+> 	if (mux->idle_state !=3D MUX_IDLE_AS_IS) a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  327=20
+> 		mux_control_set(mux, mux->idle_state); a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  328 a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  329  	return ret;
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  330 =
+ }
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  331
+> 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch 2021-10-07  332=
+=20
+> static void mux_control_delay(struct mux_control *mux, unsigned int
+> delay_us) 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch
+> 2021-10-07  333  { 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchur=
+ch
+> 2021-10-07  334  	ktime_t delayend; 17b5b576ff5faf drivers/mux/core.c   =
+=20
+> Vincent Whitchurch 2021-10-07  335  	s64 remaining; 17b5b576ff5faf
+> drivers/mux/core.c     Vincent Whitchurch 2021-10-07  336 17b5b576ff5faf
+> drivers/mux/core.c     Vincent Whitchurch 2021-10-07  337  	if (!
+delay_us)
+> 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch 2021-10-07  338=
+=20
+> 		return; 17b5b576ff5faf drivers/mux/core.c     Vincent=20
+Whitchurch
+> 2021-10-07  339 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch
+> 2021-10-07  340  	delayend =3D ktime_add_us(mux->last_change, delay_us);
+> 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch 2021-10-07  341=
+=20
+> 	remaining =3D ktime_us_delta(delayend, ktime_get()); 17b5b576ff5faf
+> drivers/mux/core.c     Vincent Whitchurch 2021-10-07  342  	if (remaining=
+=20
 >
-> On Thu, 1 Jan 2026 at 05:58, Tabby Kitten <nyanpasu256@gmail.com> wrote:
->> Hi,
->>
->> It's been a few weeks since you looked into the bug. I think the merge window is over now, have you had the time to look into resolving this issue?
-> Yes, sorry for the delay.
->
-> See below for an attached patch. Please try it out and report back.
->
-> Kind regards
-> Uffe
->
->> Tabby
->>
->> On Tue, Dec 9, 2025 at 7:09 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> Hi,
->>>
->>> On Wed, 26 Nov 2025 at 10:08, Tabby Kitten <nyanpasu256@gmail.com> wrote:
->>>> On a PC with a Realtek PCI Express SD reader, when you sleep with
->>>> `wakeup_count` active (eg. sleeping from KDE's lock screen), the MMC
->>>> driver wakes up the system and aborts suspend.
->>> Okay, that's clearly a problem that needs to be fixed!
->>>
->>>> I've found a sleep failure bug in the rtsx_pci and mmc_core drivers.
->>>> After userspace writes a number to `/sys/power/wakeup_count` (eg. KDE
->>>> Plasma does it to distinguish user wakes from timers and Wake-on-LAN),
->>>> if it attempts a mem suspend it will be aborted when
->>>> rtsx_pci_runtime_resume() -> mmc_detect_change() emits a
->>>> pm_wakeup_ws_event(). This breaks sleep on some hardware and desktop
->>>> environments.
->>>>
->>>> The detailed description:
->>>> The recently released Plasma 6.5.0 writes to `/sys/power/wakeup_count`
->>>> before sleeping. On my computer this caused the sleep attempt to fail
->>>> with dmesg error "PM: Some devices failed to suspend, or early wake
->>>> event detected". I got this error on both Arch Linux and Fedora, and
->>>> replicated it on Fedora with the mainline kernel COPR. KDE is tracking
->>>> this error at https://bugs.kde.org/show_bug.cgi?id=510992, and have
->>>> disabled writing to wakeup_count on Plasma 6.5.3 to work around this
->>>> issue.
->>>>
->>>> I've written a standalone shell script to reproduce this sleep failure
->>>> (save as badsleep.sh):
->>>>
->>>> #!/bin/bash
->>>> read wakeup_count < /sys/power/wakeup_count
->>>> if [[ $? -ne 0 ]]; then
->>>>     e=$?
->>>>     echo "Failed to open wakeup_count, suspend maybe already in progress"
->>>>     exit $e
->>>> fi
->>>> echo $wakeup_count > /sys/power/wakeup_count
->>>> if [[ $? -ne 0 ]]; then
->>>>     e=$?
->>>>     echo "Failed to write wakeup_count, wakeup_count may have changed in between"
->>>>     exit $e
->>>> fi
->>>> echo mem > /sys/power/state
->>>>
->>>> Running `sudo ./badsleep.sh` reproduces failed sleeps on my computer.
->>>> (sudo is needed to write to `/sys/power/wakeup_count` on Fedora.)
->>>>
->>>> * If I run the script unaltered, the screen turns off and on, and the
->>>>   terminal outputs
->>>>   `./badsleep.sh: line 14: echo: write error: Device or resource busy`
->>>>   indicating the mem sleep failed.
->>>>
->>>> * If I edit the script and comment out `echo $wakeup_count >
->>>>   /sys/power/wakeup_count`, the sleep succeeds, and waking the computer
->>>>   skips the lock screen and resumes where I left off.
->>>>
->>>> * If I run `sudo rmmod rtsx_pci_sdmmc` to disable the faulty module, the
->>>>   sleep succeeds, and waking the computer skips the lock screen and
->>>>   resumes where I left off.
->>>>
->>>> I think this problem happens in general when a driver spawns a wakeup
->>>> event from its suspend callback. On my system, the driver in question
->>>> lies in the MMC subsystem.
->>>>
->>>> ## Code debugging
->>>>
->>>> If I run `echo 1 > /sys/power/pm_debug_messages` to enable verbose
->>>> logging, then attempt a failed sleep, I see output:
->>>>
->>>>     PM: Wakeup pending, aborting suspend
->>>>     PM: active wakeup source: mmc0
->>>>     PM: suspend of devices aborted after 151.615 msecs
->>>>     PM: start suspend of devices aborted after 169.797 msecs
->>>>     PM: Some devices failed to suspend, or early wake event detected
->>>>
->>>> The "Wakeup pending, aborting suspend" message comes from function
->>>> `pm_wakeup_pending()`. This function checks if event checks are enabled,
->>>> and if some counters have changed aborts suspend and calls
->>>> `pm_print_active_wakeup_sources()`, which prints `wakeup_sources`.
->>>> Tracing the code that modifies `wakeup_sources`, I found that
->>>> `pm_wakeup_ws_event()` would activate an event and
->>>> `wakeup_source_register() → wakeup_source_add()` would add a new one.
->>> Thanks for all the details!
->>>
->>>> To find who changed wakeup events, I used my stacksnoop fork at
->>>> https://github.com/nyanpasu64/bcc/blob/local/examples/tracing/stacksnoop
->>>> .py to trace a failed suspend:
->>>>
->>>> nyanpasu64@ryzen ~/code/bcc (local)> sudo ./examples/tracing/stacksnoop.py pm_wakeup_ws_event wakeup_source_register
->>>> TIME(s)            FUNCTION
->>>> 7.254676819:
->>>> 0: ret_from_fork_asm [kernel]
->>>> 1: ret_from_fork [kernel]
->>>> 2: kthread [kernel]
->>>> 3: worker_thread [kernel]
->>>> 4: process_one_work [kernel]
->>>> 5: async_run_entry_fn [kernel]
->>>> 6: async_suspend [kernel]
->>>> 7: device_suspend [kernel]
->>>> 8: dpm_run_callback [kernel]
->>>> 9: mmc_bus_suspend [mmc_core]
->>>> 10: mmc_blk_suspend [mmc_block]
->>>> 11: mmc_queue_suspend [mmc_block]
->>>> 12: __mmc_claim_host [mmc_core]
->>>> 13: __pm_runtime_resume [kernel]
->>>> 14: rpm_resume [kernel]
->>>> 15: rpm_resume [kernel]
->>>> 16: rpm_callback [kernel]
->>>> 17: __rpm_callback [kernel]
->>>> 18: rtsx_pci_runtime_resume [rtsx_pci]
->>>> 19: mmc_detect_change [mmc_core]
->>>> 20: pm_wakeup_ws_event [kernel]
->>>>
->>>> On a previous kernel, lines 9-12 were replaced by a single call to
->>>> `pci_pm_suspend`. I've posted my detailed debugging on the older kernel
->>>> at https://bugs.kde.org/show_bug.cgi?id=510992#c26. There I found that
->>>> `pci_pm_suspend()` wakes PCI(e) devices before sending them into a full
->>>> sleep state, but in the process, `_mmc_detect_change()` will "Prevent
->>>> system sleep for 5s to allow user space to consume the\n corresponding
->>>> uevent"... which interrupts a system sleep in progress.
->>>>
->>>> On my current kernel, the same logic applies, but reading the source I
->>>> can't tell where `__mmc_claim_host()` is actually calling
->>>> `__pm_runtime_resume()`. Nonetheless the problem remains that
->>>> `rpm_resume()` is called during system suspend, `mmc_detect_change()`
->>>> wakes the system when called, and this will abort system sleep when
->>>> `/sys/power/wakeup_count` is active.
->>> __mmc_claim_host() will call pm_runtime_get_sync() to runtime resume
->>> the mmc host device.
->>>
->>> The mmc host device's parent (a pci device) will then be runtime
->>> resumed too. That's the call to rtsx_pci_runtime_resume() we see
->>> above.
->>>
->>> The problem is then that rtsx_pci_runtime_resume() invokes a callback
->>> (->card_event())) back into the mmc host driver
->>> (drivers/mmc/host/rtsx_pci_sdmmc.c), which ends up calling
->>> mmc_detect_change() to try to detect whether a card have been
->>> inserted/removed.
->>>
->>>> ## Next steps
->>>>
->>>> How would this problem be addressed? Off the top of my head, perhaps you
->>>> could not call `__pm_runtime_resume()` on a SD card reader during the
->>>> `device_suspend()` process, not call `pm_wakeup_ws_event()` when the SD
->>>> card status changes, not call  `pm_wakeup_ws_event()` *specifically*
->>>> when system suspend is temporarily waking up a SD card reader, or
->>>> disable pm_wakeup_ws_event() entirely during the suspend process (does
->>>> this defeat the purpose of the function?).
->>> Let me think a bit on what makes the best sense here. I will get back
->>> to you in a couple of days.
->>>
->>>> Are there other drivers which cause the same symptoms? I don't know. I
->>>> asked on the KDE bug tracker for other users to attempt a failed sleep
->>>> with `echo 1 > /sys/power/pm_debug_messages` active, to identify which
->>>> driver broke suspend in their system; so far nobody has replied with
->>>> logs.
->>>>
->>>> Given that this bug is related to `/sys/power/wakeup_count`
->>>> (https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-power), I
->>>> was considering CCing Rafael J. Wysocki <rafael@kernel.org> and
->>>> linux-pm@vger.kernel.org, but have decided to only message the MMC
->>>> maintainers for now. If necessary we may have to forward this message
->>>> there to get their attention.
->>>>
->>>> ----
->>>>
->>>> System information:
->>>>
->>>> * I have an Intel NUC8i7BEH mini PC, with CPU 8 × Intel® Core™ i7-8559U
->>>>   CPU @ 2.70GHz.
->>>>
->>>>     * uname -mi prints `x86_64 unknown`.
->>>>
->>>> * `lspci -nn` prints
->>>>   "6e:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS522A PCI Express Card Reader [10ec:522a] (rev 01)".
->>>>
->>>> * I am running kernel 6.18.0-0.rc7.357.vanilla.fc43.x86_64 from the Fedora COPRs
->>>>   (https://fedoraproject.org/wiki/Kernel_Vanilla_Repositories).
->>>>
->>>> * dmesg at https://gist.github.com/nyanpasu64/ab5d3d1565aafe6c1c08cbcaf074e44a#file-dmesg-2025-11-25-txt
->>>>
->>>> * Fully resolved config at https://gist.github.com/nyanpasu64/ab5d3d1565aafe6c1c08cbcaf074e44a#file-config-6-18-0-0-rc7-357-vanilla-fc43-x86_64,
->>>>   source at https://download.copr.fedorainfracloud.org/results/@kernel-vanilla/mainline-wo-mergew/fedora-43-x86_64/09831015-mainline-womergew-releases/kernel-6.18.0-0.rc7.357.vanilla.fc43.src.rpm
->>> Kind regards
->>> Uffe
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> Date: Sat, 3 Jan 2026 11:55:44 +0100
-> Subject: [PATCH] mmc: core: Avoid runtime PM of host in mmc_queue_suspend()
->
-> WIP
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/core.c     | 18 ++++++++++++------
->  drivers/mmc/core/core.h     | 11 ++++++++---
->  drivers/mmc/core/queue.c    |  4 ++--
->  drivers/mmc/core/sdio_irq.c |  2 +-
->  4 files changed, 23 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 860378bea557..c3923522833a 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -781,6 +781,7 @@ static inline void mmc_ctx_set_claimer(struct
-> mmc_host *host,
->   *     @ctx: context that claims the host or NULL in which case the default
->   *     context will be used
->   *     @abort: whether or not the operation should be aborted
-> + *     @do_pm: whether to use runtime PM or not
->   *
->   *     Claim a host for a set of operations.  If @abort is non null and
->   *     dereference a non-zero value then this will return prematurely with
-> @@ -788,7 +789,7 @@ static inline void mmc_ctx_set_claimer(struct
-> mmc_host *host,
->   *     with the lock held otherwise.
->   */
->  int __mmc_claim_host(struct mmc_host *host, struct mmc_ctx *ctx,
-> -                    atomic_t *abort)
-> +                    atomic_t *abort, bool do_pm)
->  {
->         struct task_struct *task = ctx ? NULL : current;
->         DECLARE_WAITQUEUE(wait, current);
-> @@ -821,7 +822,7 @@ int __mmc_claim_host(struct mmc_host *host, struct
-> mmc_ctx *ctx,
->         spin_unlock_irqrestore(&host->lock, flags);
->         remove_wait_queue(&host->wq, &wait);
->
-> -       if (pm)
-> +       if (do_pm && pm)
->                 pm_runtime_get_sync(mmc_dev(host));
->
->         return stop;
-> @@ -829,13 +830,14 @@ int __mmc_claim_host(struct mmc_host *host,
-> struct mmc_ctx *ctx,
->  EXPORT_SYMBOL(__mmc_claim_host);
->
->  /**
-> - *     mmc_release_host - release a host
-> + *     __mmc_release_host - release a host
->   *     @host: mmc host to release
-> + *     @do_pm: whether to use runtime PM or not
->   *
->   *     Release a MMC host, allowing others to claim the host
->   *     for their operations.
->   */
-> -void mmc_release_host(struct mmc_host *host)
-> +void __mmc_release_host(struct mmc_host *host, bool do_pm)
->  {
->         unsigned long flags;
->
-> @@ -851,6 +853,10 @@ void mmc_release_host(struct mmc_host *host)
->                 host->claimer = NULL;
->                 spin_unlock_irqrestore(&host->lock, flags);
->                 wake_up(&host->wq);
-> +
-> +               if (!do_pm)
-> +                       return;
-> +
->                 pm_runtime_mark_last_busy(mmc_dev(host));
->                 if (host->caps & MMC_CAP_SYNC_RUNTIME_PM)
->                         pm_runtime_put_sync_suspend(mmc_dev(host));
-> @@ -858,7 +864,7 @@ void mmc_release_host(struct mmc_host *host)
->                         pm_runtime_put_autosuspend(mmc_dev(host));
->         }
->  }
-> -EXPORT_SYMBOL(mmc_release_host);
-> +EXPORT_SYMBOL(__mmc_release_host);
->
->  /*
->   * This is a helper function, which fetches a runtime pm reference for the
-> @@ -867,7 +873,7 @@ EXPORT_SYMBOL(mmc_release_host);
->  void mmc_get_card(struct mmc_card *card, struct mmc_ctx *ctx)
->  {
->         pm_runtime_get_sync(&card->dev);
-> -       __mmc_claim_host(card->host, ctx, NULL);
-> +       __mmc_claim_host(card->host, ctx, NULL, true);
->  }
->  EXPORT_SYMBOL(mmc_get_card);
->
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index a028b48be164..5979c90d3b09 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -135,8 +135,8 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card);
->  int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
->
->  int __mmc_claim_host(struct mmc_host *host, struct mmc_ctx *ctx,
-> -                    atomic_t *abort);
-> -void mmc_release_host(struct mmc_host *host);
-> +                    atomic_t *abort, bool do_pm);
-> +void __mmc_release_host(struct mmc_host *host, bool do_pm);
->  void mmc_get_card(struct mmc_card *card, struct mmc_ctx *ctx);
->  void mmc_put_card(struct mmc_card *card, struct mmc_ctx *ctx);
->
-> @@ -150,7 +150,12 @@ int mmc_card_alternative_gpt_sector(struct
-> mmc_card *card, sector_t *sector);
->   */
->  static inline void mmc_claim_host(struct mmc_host *host)
->  {
-> -       __mmc_claim_host(host, NULL, NULL);
-> +       __mmc_claim_host(host, NULL, NULL, true);
-> +}
-> +
-> +static inline void mmc_release_host(struct mmc_host *host)
-> +{
-> +       __mmc_release_host(host, true);
->  }
->
->  int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq);
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 284856c8f655..76e83f49ff4e 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -477,8 +477,8 @@ void mmc_queue_suspend(struct mmc_queue *mq)
->          * The host remains claimed while there are outstanding requests, so
->          * simply claiming and releasing here ensures there are none.
->          */
-> -       mmc_claim_host(mq->card->host);
-> -       mmc_release_host(mq->card->host);
-> +       __mmc_claim_host(mq->card->host, NULL, NULL, false);
-> +       __mmc_release_host(mq->card->host, false);
->  }
->
->  void mmc_queue_resume(struct mmc_queue *mq)
-> diff --git a/drivers/mmc/core/sdio_irq.c b/drivers/mmc/core/sdio_irq.c
-> index 2b24bdf38296..e5d4f8c634c8 100644
-> --- a/drivers/mmc/core/sdio_irq.c
-> +++ b/drivers/mmc/core/sdio_irq.c
-> @@ -172,7 +172,7 @@ static int sdio_irq_thread(void *_host)
->                  * that doesn't require that lock to be held.
->                  */
->                 ret = __mmc_claim_host(host, NULL,
-> -                                      &host->sdio_irq_thread_abort);
-> +                                      &host->sdio_irq_thread_abort, true);
->                 if (ret)
->                         break;
->                 ret = process_sdio_pending_irqs(host);
+> 0) 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch 2021-10-07  3=
+43
+>  		fsleep(remaining); 17b5b576ff5faf drivers/mux/core.c    =20
+Vincent
+> Whitchurch 2021-10-07  344  } 17b5b576ff5faf drivers/mux/core.c     Vince=
+nt
+> Whitchurch 2021-10-07  345 a3b02a9c6591ce drivers/mux/mux-core.c Peter
+> Rosin        2017-05-14  346  /** 17b5b576ff5faf drivers/mux/core.c   =20
+> Vincent Whitchurch 2021-10-07  347   * mux_control_select_delay() - Selec=
+t
+> the given multiplexer state. a3b02a9c6591ce drivers/mux/mux-core.c Peter
+> Rosin        2017-05-14  348   * @mux: The mux-control to request a chang=
+e
+> of state from. a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  349   * @state: The new requested state. 17b5b576ff5faf
+> drivers/mux/core.c     Vincent Whitchurch 2021-10-07  350   * @delay_us:
+> The time to delay (in microseconds) if the mux state is changed.
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  351 =
+=20
+> * a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  35=
+2=20
+>  * On successfully selecting the mux-control state, it will be locked unt=
+il
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  353 =
+=20
+> * there is a call to mux_control_deselect(). If the mux-control is alread=
+y
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  354 =
+=20
+> * selected when mux_control_select() is called, the caller will be blocke=
+d
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  355 =
+=20
+> * until mux_control_deselect() or mux_state_deselect() is called (by
+> someone 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-=
+07
+>  356   * else). a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  357   * a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin    =
+ =20
+>  2017-05-14  358   * Therefore, make sure to call mux_control_deselect()
+> when the operation is a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin  =
+ =20
+>    2017-05-14  359   * complete and the mux-control is free for others to
+> use, but do not call a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin   =
+ =20
+>   2017-05-14  360   * mux_control_deselect() if mux_control_select() fail=
+s.
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  361 =
+=20
+> * a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  36=
+2=20
+>  * Return: 0 when the mux-control state has the requested state or a
+> negative a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  363   * errno on error. a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  364   */ 17b5b576ff5faf drivers/mux/core.c=
+ =20
+>   Vincent Whitchurch 2021-10-07 @365  int mux_control_select_delay(struct
+> mux_control *mux, unsigned int state, 17b5b576ff5faf drivers/mux/core.c  =
+ =20
+> Vincent Whitchurch 2021-10-07  366  			     unsigned int=20
+delay_us)
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  367 =
+ {
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  368=
+=20
+> 	int ret; a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  369 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  370  	ret =3D down_killable(&mux->lock); a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  371  	if (ret < 0)
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  372=
+=20
+> 		return ret; a3b02a9c6591ce drivers/mux/mux-core.c Peter=20
+Rosin      =20
+> 2017-05-14  373 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  374  	ret =3D __mux_control_select(mux, state); 17b5b576ff5fa=
+f
+> drivers/mux/core.c     Vincent Whitchurch 2021-10-07  375  	if (ret >=3D =
+0)
+> 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch 2021-10-07  376=
+=20
+> 		mux_control_delay(mux, delay_us); a3b02a9c6591ce=20
+drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  377 a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  378  	if (ret < 0) a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  379=20
+> 		up(&mux->lock); a3b02a9c6591ce drivers/mux/mux-core.c=20
+Peter Rosin      =20
+> 2017-05-14  380 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  381  	return ret; a3b02a9c6591ce drivers/mux/mux-core.c=20
+Peter
+> Rosin        2017-05-14  382  } 17b5b576ff5faf drivers/mux/core.c   =20
+> Vincent Whitchurch 2021-10-07  383=20
+> EXPORT_SYMBOL_GPL(mux_control_select_delay); a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  384 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  385  /**
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  386 =
+=20
+> * mux_state_select_delay() - Select the given multiplexer state.
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  387 =
+=20
+> * @mstate: The mux-state to select. 84564481bc4520 drivers/mux/core.c   =
+=20
+> Aswath Govindraju  2022-01-07  388   * @delay_us: The time to delay (in
+> microseconds) if the mux state is changed. 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  389   *
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  390 =
+=20
+> * On successfully selecting the mux-state, its mux-control will be locked
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  391 =
+=20
+> * until there is a call to mux_state_deselect(). If the mux-control is
+> already 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-=
+07
+>  392   * selected when mux_state_select() is called, the caller will be
+> blocked 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-=
+07
+>  393   * until mux_state_deselect() or mux_control_deselect() is called (=
+by
+> someone 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-=
+07
+>  394   * else). 84564481bc4520 drivers/mux/core.c     Aswath Govindraju=20
+> 2022-01-07  395   * 84564481bc4520 drivers/mux/core.c     Aswath Govindra=
+ju
+>  2022-01-07  396   * Therefore, make sure to call mux_state_deselect() wh=
+en
+> the operation is 84564481bc4520 drivers/mux/core.c     Aswath Govindraju=
+=20
+> 2022-01-07  397   * complete and the mux-control is free for others to us=
+e,
+> but do not call 84564481bc4520 drivers/mux/core.c     Aswath Govindraju=20
+> 2022-01-07  398   * mux_state_deselect() if mux_state_select() fails.
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  399 =
+=20
+> * 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  40=
+0=20
+>  * Return: 0 when the mux-state has been selected or a negative
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  401 =
+=20
+> * errno on error. 84564481bc4520 drivers/mux/core.c     Aswath Govindraju=
+=20
+> 2022-01-07  402   */ 84564481bc4520 drivers/mux/core.c     Aswath
+> Govindraju  2022-01-07 @403  int mux_state_select_delay(struct mux_state
+> *mstate, unsigned int delay_us) 84564481bc4520 drivers/mux/core.c   =20
+> Aswath Govindraju  2022-01-07  404  { 84564481bc4520 drivers/mux/core.c  =
+ =20
+> Aswath Govindraju  2022-01-07  405  	return
+> mux_control_select_delay(mstate->mux, mstate->state, delay_us);
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  406 =
+ }
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  407=
+=20
+> EXPORT_SYMBOL_GPL(mux_state_select_delay); 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  408 a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  409  /**
+> 17b5b576ff5faf drivers/mux/core.c     Vincent Whitchurch 2021-10-07  410 =
+=20
+> * mux_control_try_select_delay() - Try to select the given multiplexer
+> state. a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-1=
+4=20
+> 411   * @mux: The mux-control to request a change of state from.
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  412 =
+=20
+> * @state: The new requested state. 17b5b576ff5faf drivers/mux/core.c   =20
+> Vincent Whitchurch 2021-10-07  413   * @delay_us: The time to delay (in
+> microseconds) if the mux state is changed. a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  414   *
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  415 =
+=20
+> * On successfully selecting the mux-control state, it will be locked unti=
+l
+> f22d1117b9c3e2 drivers/mux/core.c     Peter Rosin        2022-01-07  416 =
+=20
+> * mux_control_deselect() is called. a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  417   * a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  418   * Therefore,
+> make sure to call mux_control_deselect() when the operation is
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  419 =
+=20
+> * complete and the mux-control is free for others to use, but do not call
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  420 =
+=20
+> * mux_control_deselect() if mux_control_try_select() fails. a3b02a9c6591c=
+e
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  421   *
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  422 =
+=20
+> * Return: 0 when the mux-control state has the requested state or a
+> negative a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  423   * errno on error. Specifically -EBUSY if the mux-contro=
+l
+> is contended. a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  424   */ 17b5b576ff5faf drivers/mux/core.c     Vincent
+> Whitchurch 2021-10-07 @425  int mux_control_try_select_delay(struct
+> mux_control *mux, unsigned int state, 17b5b576ff5faf drivers/mux/core.c  =
+ =20
+> Vincent Whitchurch 2021-10-07  426  				=20
+unsigned int delay_us)
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  427 =
+ {
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  428=
+=20
+> 	int ret; a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  429 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  430  	if (down_trylock(&mux->lock)) a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  431  	=09
+return -EBUSY;
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  432
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  433=
+=20
+> 	ret =3D __mux_control_select(mux, state); 17b5b576ff5faf drivers/mux/
+core.c=20
+>    Vincent Whitchurch 2021-10-07  434  	if (ret >=3D 0) 17b5b576ff5faf
+> drivers/mux/core.c     Vincent Whitchurch 2021-10-07  435=20
+> 		mux_control_delay(mux, delay_us); a3b02a9c6591ce=20
+drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  436 a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  437  	if (ret < 0) a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  438=20
+> 		up(&mux->lock); a3b02a9c6591ce drivers/mux/mux-core.c=20
+Peter Rosin      =20
+> 2017-05-14  439 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  440  	return ret; a3b02a9c6591ce drivers/mux/mux-core.c=20
+Peter
+> Rosin        2017-05-14  441  } 17b5b576ff5faf drivers/mux/core.c   =20
+> Vincent Whitchurch 2021-10-07  442=20
+> EXPORT_SYMBOL_GPL(mux_control_try_select_delay); a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  443 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  444  /**
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  445 =
+=20
+> * mux_state_try_select_delay() - Try to select the given multiplexer stat=
+e.
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  446 =
+=20
+> * @mstate: The mux-state to select. 84564481bc4520 drivers/mux/core.c   =
+=20
+> Aswath Govindraju  2022-01-07  447   * @delay_us: The time to delay (in
+> microseconds) if the mux state is changed. 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  448   *
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  449 =
+=20
+> * On successfully selecting the mux-state, its mux-control will be locked
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  450 =
+=20
+> * until mux_state_deselect() is called. 84564481bc4520 drivers/mux/core.c=
+ =20
+>   Aswath Govindraju  2022-01-07  451   * 84564481bc4520 drivers/mux/core.=
+c=20
+>    Aswath Govindraju  2022-01-07  452   * Therefore, make sure to call
+> mux_state_deselect() when the operation is 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  453   * complete an=
+d
+> the mux-control is free for others to use, but do not call 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  454   *
+> mux_state_deselect() if mux_state_try_select() fails. 84564481bc4520
+> drivers/mux/core.c     Aswath Govindraju  2022-01-07  455   *
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  456 =
+=20
+> * Return: 0 when the mux-state has been selected or a negative errno on
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  457 =
+=20
+> * error. Specifically -EBUSY if the mux-control is contended.
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  458 =
+=20
+> */ 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07 @4=
+59
+>  int mux_state_try_select_delay(struct mux_state *mstate, unsigned int
+> delay_us) 84564481bc4520 drivers/mux/core.c     Aswath Govindraju=20
+> 2022-01-07  460  { 84564481bc4520 drivers/mux/core.c     Aswath Govindraj=
+u=20
+> 2022-01-07  461  	return mux_control_try_select_delay(mstate->mux,
+> mstate->state, delay_us); 84564481bc4520 drivers/mux/core.c     Aswath
+> Govindraju  2022-01-07  462  } 84564481bc4520 drivers/mux/core.c     Aswa=
+th
+> Govindraju  2022-01-07  463  EXPORT_SYMBOL_GPL(mux_state_try_select_delay=
+);
+> 84564481bc4520 drivers/mux/core.c     Aswath Govindraju  2022-01-07  464
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  465=
+=20
+> /** a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14=20
+> 466   * mux_control_deselect() - Deselect the previously selected
+> multiplexer state. a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin     =
+ =20
+> 2017-05-14  467   * @mux: The mux-control to deselect. a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  468   *
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  469 =
+=20
+> * It is required that a single call is made to mux_control_deselect() for
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  470 =
+=20
+> * each and every successful call made to either of mux_control_select() o=
+r
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  471 =
+=20
+> * mux_control_try_select(). a3b02a9c6591ce drivers/mux/mux-core.c Peter
+> Rosin        2017-05-14  472   * a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  473   * Return: 0 on success and a negativ=
+e
+> errno on error. An error can only a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  474   * occur if the mux has an idle state=
+.
+> Note that even if an error occurs, the a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  475   * mux-control
+> is unlocked and is thus free for the next access. a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  476   */
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14 @477=
+=20
+> int mux_control_deselect(struct mux_control *mux) a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  478  { a3b02a9c6591=
+ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  479  	int ret =3D 0=
+;
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  480
+> a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin        2017-05-14  481=
+=20
+> 	if (mux->idle_state !=3D MUX_IDLE_AS_IS && a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  482  	  =20
+> mux->idle_state !=3D mux->cached_state) a3b02a9c6591ce drivers/mux/mux-co=
+re.c
+> Peter Rosin        2017-05-14  483  		ret =3D=20
+mux_control_set(mux,
+> mux->idle_state); a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =
+=20
+> 2017-05-14  484 a3b02a9c6591ce drivers/mux/mux-core.c Peter Rosin      =20
+> 2017-05-14  485  	up(&mux->lock); a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  486 a3b02a9c6591ce drivers/mux/mux-core.c
+> Peter Rosin        2017-05-14  487  	return ret; a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  488  } a3b02a9c6591=
+ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  489=20
+> EXPORT_SYMBOL_GPL(mux_control_deselect); a3b02a9c6591ce
+> drivers/mux/mux-core.c Peter Rosin        2017-05-14  490
+
+
+
+
