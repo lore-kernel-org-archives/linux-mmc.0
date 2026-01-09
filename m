@@ -1,62 +1,49 @@
-Received: from smtpout-02.galae.net (smtpout-02.galae.net [185.246.84.56])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7665B347DD
-	for <linux-mmc@vger.kernel.org>; Fri,  9 Jan 2026 09:02:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.246.84.56
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9255E3590D0;
+	Fri,  9 Jan 2026 09:23:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767949345; cv=none; b=A1C0vWzk2i2x8LXej7Gwjysdcc3tYMBhZ5VRBNKGLt+JpRgG0kDFyjaimOY+dLBcCcWIQDirhrxtF8YwjQTl0UOOIW/rLy6HsjBSKGL86lRTzhhHh69ceDMvH2n+rT6PlUXCIaAropFZRCYSyfdY5sfSH2PfWm0uKiEoQrDCjVM=
+	t=1767950580; cv=none; b=lCbqKLxTcBrxHwkvabj6nQhLKnMyVqNIEXqyWLAxYl0LcFN9qb9MryhR5fhnBMDfYqXUKQ/2ZiWucNIGP4nFDJajIQbUAI4FQPvctOxTfaDw7P1tdlCwjw5OGMTPOUWY+9pLtCu8KrH/jdYp/nfLGKrY3EV/6r32FfRaUYHPpyE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767949345; c=relaxed/simple;
-	bh=kmVu0tRy9fKfOH0WAJGuWXx3Zh4ofnNsMmmGksvk+Nc=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=R6zLVMKrPPMW8DHcdndY8DmN6VNuAO6Tf8Ws4c8LkLDMIaE8PvTu293rc7deD6KOxl73mUhgY2wOQmUfta2u9fxcnM8U1G/MCq6Dz5MOogMoGSJ6rhmdbRf1C3dNz4KIMymXL7340Et8LTd7ZYswai0U75qPL+F+lyjFTWbd1CM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=O9taR1y3; arc=none smtp.client-ip=185.246.84.56
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+	s=arc-20240116; t=1767950580; c=relaxed/simple;
+	bh=fDjknpTo2lzuUrNgnyE3m0P/unrZfxoS8RB6wXYpCeM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=seJfUIAoyyNyLSZiUQ2oaEcRGE6AYXrk/5SsXzpvYcBcDkn6suPG9Z7PoR6Z483MtyWvbyScor5TjhWzuFABCJBLqT4xJUKnzoDTvg34v8fW+Xsnos/rqQRVRJM6/FUjtx5NHQZ1J9uPJDe8e4hAafrWS9i25elcgspC7/z135U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aRVF5er2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="O9taR1y3"
-Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-02.galae.net (Postfix) with ESMTPS id 4081A1A273B;
-	Fri,  9 Jan 2026 09:02:17 +0000 (UTC)
-Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id 1261B60734;
-	Fri,  9 Jan 2026 09:02:17 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 21670103C885B;
-	Fri,  9 Jan 2026 10:02:08 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1767949335; h=from:subject:date:message-id:to:cc:mime-version:content-type:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=CTgNQ8aQKCK1awytoBCTagqusNg0f5KtpE7Bd+9hU70=;
-	b=O9taR1y3aXblZciBqRSMOSupr+ReveLz5o2s2I5yTRJOgfMafUOyTmpRscqBj/f+fZ5cLn
-	MLzyU11frfLWtCNsnWvhVdSnOPGKuOlmRtiNtkApr0XYmslk/ngrb76fkq7lo9/xRyRXox
-	YsZ6MpM2CATVxd+Z4fqxtzDhLGVOsKAmSLAELhMrDKAUFK3leQRotyrBVvfl9XeV8kbN0S
-	SJxJJ4/VqjEGLba0YB2aQRK5P46bYw9ckUzwligbrlXSX7aQdIANw1urahcxZ0dOPZ8xs5
-	mKselM63JX98wnzDCvO9OoIz0/P9AxleQNgv9QWBXcPhYZTmi7OgOxHgJeRWbw==
-From: Miquel Raynal <miquel.raynal@bootlin.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aRVF5er2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D165C4CEF1;
+	Fri,  9 Jan 2026 09:22:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1767950580;
+	bh=fDjknpTo2lzuUrNgnyE3m0P/unrZfxoS8RB6wXYpCeM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=aRVF5er2sAorYuc5fNexanbpCVcOxfnFyMsBvt3WyA8sGEKwXL3nCkQvCNmdiuLRH
+	 atKxffbSuoWb9O+SNDmWqPhMNJ0Zr+Xsp2Tbgu9zcSPrjEatme9Yj3r3ytQ4bA2h+V
+	 wWnXATGGNajVPFpHIkBa2OqrbPXKGpan/hXE1FBjb4BxdivUlt4hwxzQR6uHtYyW8z
+	 2SplE3ARhWk8Uu+e5MjlaTc3YwLbAVDe9oDEcmKSvL69rrM07wqBzYYQsfICiRX4eM
+	 nNVP/ZqL8L2Efg8+/qOED8hIo2ZG8/uJRaeg1ZNDWOcBNTZ3ij3AvXYNUvWBGcM/EQ
+	 3qNiP3KJYQCHA==
+Date: Fri, 9 Jan 2026 10:22:57 +0100
+From: Krzysztof Kozlowski <krzk@kernel.org>
 To: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: Richard Weinberger <richard@nod.at>,  Vignesh Raghavendra
- <vigneshr@ti.com>,  Krzysztof Kozlowski <krzk+dt@kernel.org>,  Conor
- Dooley <conor+dt@kernel.org>,  Brian Norris <computersforpeace@gmail.com>,
-  Kamal Dasu <kdasu.kdev@gmail.com>,  William Zhang
- <william.zhang@broadcom.com>,  Nick Terrell <terrelln@fb.com>,  David
- Sterba <dsterba@suse.com>,  =?utf-8?Q?Rafa=C5=82_Mi=C5=82ecki?=
- <rafal@milecki.pl>,  Simon Glass
- <sjg@chromium.org>,  Linus Walleij <linusw@kernel.org>,  Ulf Hansson
- <ulf.hansson@linaro.org>,  Marcus Folkesson <marcus.folkesson@gmail.com>,
-  Tony Lindgren <tony@atomide.com>,  Roger Quadros <rogerq@kernel.org>,
-  Hauke Mehrtens <hauke@hauke-m.de>,  linux-mtd@lists.infradead.org,
-  devicetree@vger.kernel.org,  linux-kernel@vger.kernel.org,
-  linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 07/10] dt-bindings: mtd: Ensure partition node
- properties are documented
-In-Reply-To: <20260108-dt-mtd-partitions-v1-7-124a53ce6279@kernel.org> (Rob
-	Herring's message of "Thu, 08 Jan 2026 11:53:16 -0600")
+Cc: Miquel Raynal <miquel.raynal@bootlin.com>, 
+	Richard Weinberger <richard@nod.at>, Vignesh Raghavendra <vigneshr@ti.com>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Brian Norris <computersforpeace@gmail.com>, Kamal Dasu <kdasu.kdev@gmail.com>, 
+	William Zhang <william.zhang@broadcom.com>, Nick Terrell <terrelln@fb.com>, David Sterba <dsterba@suse.com>, 
+	=?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>, Simon Glass <sjg@chromium.org>, 
+	Linus Walleij <linusw@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Marcus Folkesson <marcus.folkesson@gmail.com>, Tony Lindgren <tony@atomide.com>, 
+	Roger Quadros <rogerq@kernel.org>, Hauke Mehrtens <hauke@hauke-m.de>, linux-mtd@lists.infradead.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 03/10] dt-bindings: mtd: partitions: Move
+ "sercomm,scpart-id" to partition.yaml
+Message-ID: <20260109-clay-giraffe-of-typhoon-cb954f@quoll>
 References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
-	<20260108-dt-mtd-partitions-v1-7-124a53ce6279@kernel.org>
-User-Agent: mu4e 1.12.7; emacs 30.2
-Date: Fri, 09 Jan 2026 10:02:07 +0100
-Message-ID: <87fr8fxipc.fsf@bootlin.com>
+ <20260108-dt-mtd-partitions-v1-3-124a53ce6279@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -64,51 +51,24 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Last-TLS-Session-Version: TLSv1.3
+Content-Disposition: inline
+In-Reply-To: <20260108-dt-mtd-partitions-v1-3-124a53ce6279@kernel.org>
 
-Hello Rob,
-
-On 08/01/2026 at 11:53:16 -06, "Rob Herring (Arm)" <robh@kernel.org> wrote:
-
-> Partition nodes without a compatible have no restrictions on additional
-> properties. Fix this by ensuring 'unevaluatedProperties' is set when
-> there's no compatible property. If there is a compatible property, then
-> there should be a specific schema for it which will enforce
-> 'unevaluatedProperties'.
->
+On Thu, Jan 08, 2026 at 11:53:12AM -0600, Rob Herring (Arm) wrote:
+> Defining child node properties specific to the parent schema doesn't work
+> unless all the child node properties are known. They aren't known because
+> any partition can define its own properties. The solution to this is
+> typically something like spi-peripheral-props.yaml, but that's overkill for
+> this single property. Just move it to partition.yaml instead.
+> 
 > Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 > ---
+>  .../devicetree/bindings/mtd/partitions/fixed-partitions.yaml   | 10 ----------
+>  .../devicetree/bindings/mtd/partitions/partition.yaml          |  9 +++++++++
+>  2 files changed, 9 insertions(+), 10 deletions(-)
 
-Overall thank you very much for this series, I've been sruggling while
-defining these and your approach seems very relevant. I am fine with all
-the patches in this series, but will wait a bit for others to make a bit
-of feedback.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-[...]
+Best regards,
+Krzysztof
 
-> +$defs:
-> +  partition-node:
-> +    type: object
-> +    if:
-> +      not:
-> +        required: [ compatible ]
-> +    then:
-> +      $ref: '#'
-> +      unevaluatedProperties: false
-> +    else:
-> +      $ref: '#'
-
-This, however, is total blackmagic to me. Would you mind explaining what
-
-      $ref: '#'
-
-indicates? Is this a placeholder indicating "a reference must be given?
-
-Also I do not understand the final else case, what is it covering?
-
-Thanks for the little explanation (or you can give me a pointer to some
-relevant doc I could read).
-
-Thanks,
-Miqu=C3=A8l
