@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6741F355816;
-	Fri,  9 Jan 2026 08:56:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C537C3559D4;
+	Fri,  9 Jan 2026 08:58:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767949012; cv=none; b=f9/bQZkf1CwIFsgIC73Z+xD/WNT6mJT8AuxJIZ6IfaoWHXLqcYYiunaUH1bzQjUcXlp3TN9qIUN31HhEl71SZPEMLeVAoUCyC/VsBhZAetS7m9bpH1EIdtnJeGMrpR91HjDkoit4h5ktI1t03FeQGv2BFro6lMH7DKugLBu0Uu0=
+	t=1767949096; cv=none; b=VQgyKFf7hvaRjQIpLgqP/AGPk4Joeg1zLl8tStYfQJJG5ElZSnwFShTSnD4A+b6VIa4+ZfWIkHKzpEhRIcnjsX8vXW+CGE2Z25EoWu+WrqKqJRtLcNThJGCL9vibqWgzw8f3SQun64JPk6vlpimGtaPIqZCanNd1evyz0Zp77E8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767949012; c=relaxed/simple;
-	bh=wyApNeKzNR8bAWt1nSZg/uwaAH7GLDy3BTDew/IwPJU=;
+	s=arc-20240116; t=1767949096; c=relaxed/simple;
+	bh=ojRtnWmofiQARBjo7qW80usOLanqMK69sII42EyQ+c8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TnrWq+HDK5gLh/LBg59hjuC8nEzqbBiNVAUvZAlgYE9pAUz5fQbsQqviErhWdFnkLlqxaG+/oJ0IZsm0UtVO9HL5LneawVAXSvsebhaxCM9khQFtIE8I9Ed16QgY+IV19QMDf11XK+8j/KgW0QF6jDCmfeyyMDE9tobGPkIabOA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RGGQXVZh; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=DV8HLLfR4sapoMntvjY9pJhsSosr6iCCmh0Ly0F1qjuaS0DlGkchhhdgDats85NWzgT4NIP9wnK/nCVgpsv/P9qDQfsDQJTgqHIHJVpNoL/7OLBJXhMitPY90y3shCbcy9dEFZaKlJOIG9Cx0/nZA52g7hJXw44khGtQTaXRGMg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Nb0ayqB/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RGGQXVZh"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 77B0BC4CEF7;
-	Fri,  9 Jan 2026 08:56:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Nb0ayqB/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52239C16AAE;
+	Fri,  9 Jan 2026 08:58:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767949010;
-	bh=wyApNeKzNR8bAWt1nSZg/uwaAH7GLDy3BTDew/IwPJU=;
+	s=k20201202; t=1767949094;
+	bh=ojRtnWmofiQARBjo7qW80usOLanqMK69sII42EyQ+c8=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=RGGQXVZhDKTVj6dkXaQRyXSgA39RMuvlB/5kD++1j+l98uNsRGYS6I9UwJlOe1fXs
-	 WePrAu1DVbmpDP3w7JCJKBrbJaYGwgOSmRANbFfiJgTYTHMkCcB3tAR5EkJaZ6gsvI
-	 KjZxVbZehBoY8/Mx8pSedNbkfu1iSaaVpTMGRVahllSvwOBQhAjMkqBwvCjg2HxFfY
-	 Sgqxl+qeSZiKe2c1vOGDK4WHD6x6IZQTJRWBD8wvxwmn8XwDRZcxeoeljoJwgWEeEI
-	 YfrucDPAytxiZozzuPT9yeBEDWGP7J58vjx7y2ybF8NSzjJc1FC0IeXal+O2SK2l9w
-	 RvNd0d3fVZJug==
-Date: Fri, 9 Jan 2026 09:56:46 +0100
+	b=Nb0ayqB/SCXA98L61KR3yBuhxUIb5T3KqLoO9s1MORr+OPktlhNuvICzGLOC7RNJy
+	 F6Mmi6hEisoKXaZXsXVEGq46+lPrjwncQfvVVajBz2FxVRki4h4tVdAd4xwiGkLiDu
+	 6dcK3LmWBm3bguWgXvIKRbhGoVY8hGZHaztObxn8q638ywiikcnw993nvWpmXXxCk/
+	 U+zrptLJ0zUnT+bzAdNcrstJ+tUeC9cwNoSQbNWYZFFK3aznWhAmYIvWNE3Azv2HwP
+	 4krcHSEvQdt+SfcPvPt8vHgI0IfrLvwkaZwAZitTOAzormvp0N+uOttVJWIHabvWG7
+	 Em8XymrfSgC1Q==
+Date: Fri, 9 Jan 2026 09:58:12 +0100
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: "Rob Herring (Arm)" <robh@kernel.org>
 Cc: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -39,11 +39,11 @@ Cc: Miquel Raynal <miquel.raynal@bootlin.com>,
 	Marcus Folkesson <marcus.folkesson@gmail.com>, Tony Lindgren <tony@atomide.com>, 
 	Roger Quadros <rogerq@kernel.org>, Hauke Mehrtens <hauke@hauke-m.de>, linux-mtd@lists.infradead.org, 
 	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 01/10] dt-bindings: mtd: brcm,brcmnand: Drop
- "brcm,brcmnand" compatible for iProc
-Message-ID: <20260109-enthusiastic-nickel-mouse-c8d1ea@quoll>
+Subject: Re: [PATCH 02/10] dt-bindings: mtd: fixed-partitions: Move
+ "compression" to partition node
+Message-ID: <20260109-didactic-knowing-buffalo-528062@quoll>
 References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
- <20260108-dt-mtd-partitions-v1-1-124a53ce6279@kernel.org>
+ <20260108-dt-mtd-partitions-v1-2-124a53ce6279@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,17 +52,18 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260108-dt-mtd-partitions-v1-1-124a53ce6279@kernel.org>
+In-Reply-To: <20260108-dt-mtd-partitions-v1-2-124a53ce6279@kernel.org>
 
-On Thu, Jan 08, 2026 at 11:53:10AM -0600, Rob Herring (Arm) wrote:
-> Some users of "brcm,nand-iproc" include "brcm,brcmnand" and some don't.
-> The "brcm,brcmnand" compatible is not useful for iProc systems as
-> there's a separate driver for iProc. So drop it as a fallback.
+On Thu, Jan 08, 2026 at 11:53:11AM -0600, Rob Herring (Arm) wrote:
+> The "compression" property is defined in the wrong place as it applies
+> to individual partitions nodes, not all nodes.
 > 
+> Fixes: 8baba8d52ff5 ("dt-bindings: mtd: fixed-partitions: Add compression property")
 > Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 > ---
->  Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml | 1 -
->  1 file changed, 1 deletion(-)
+>  .../bindings/mtd/partitions/fixed-partitions.yaml      | 18 ------------------
+>  .../devicetree/bindings/mtd/partitions/partition.yaml  | 18 ++++++++++++++++++
+>  2 files changed, 18 insertions(+), 18 deletions(-)
 
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
