@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FE1E33343C;
-	Fri,  9 Jan 2026 09:31:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E85B332ECB;
+	Fri,  9 Jan 2026 09:34:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1767951066; cv=none; b=FOzGbg38XvISCjis2LblYkBDXqPNfffvGGR8727taPtD1tKLDkmSQxbOLgBPlcvyo+thQmgSceyOaIO7gj9wvkUgg7aqv2vom6T9GJgRSYPaj+wRoA1c4H79pYVqm2RWbSOB/7i8OD9a21zn3HR8jTcu0mBgflGcMXNquuEbXlw=
+	t=1767951243; cv=none; b=HwzcuXB69lQmgAVioIPOSAODsHgOXSV3WOKpi23V8/AoMdnu+UkATnBmxfulYe+Iv8So4CTg5G/Jqx5r05gz+d3wUp3vkQ1huZz9VYj7GyIMa74k5qZknnYeLDyjFsKQRDkRr6GoPEDRowhw0VJh6KL9S6Z5qLj+xuOakohrIJI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1767951066; c=relaxed/simple;
-	bh=MIKc/r+xHdWmFPm5tfPOSF/8DUVXSugT8lhEXzTHZJs=;
+	s=arc-20240116; t=1767951243; c=relaxed/simple;
+	bh=3AeINoDybmIWU2wLjbaEaippAGFl95KiJUHzFKs9IpQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rCXAtZfFhJ8ETpYVwFmsUw2cDWHj7A1o1SUEYgERBQ5uhTTOXVXirPfRYZrIeGY1I9Lq1huDWtCikGvruXkGoEHCiWZW4kphI5gWYNIYfzkMjLjHJgnNxFsyr+GC+AS6tAqvRq+lVvOuci91qmfpHA1xNViyT8YNbkkE+OWgFoI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q40zQrnR; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=uTtnA3P/MyazLf2NLYZWqvpCcJ3BnkHo6hwYadg65AIL6wVhlpao1W4qRkF7tBavXTvGUNhUiw6S5BkeAs1mtyIL09jKj6+YUWlHCBphOwFoSRdS2+nYqpV4O+1na33LJB07rOLhZbDBNHgN86L3I7QJ4q7XT8V73IaJqILihk4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MFKg7AGW; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q40zQrnR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1AF3DC4CEF1;
-	Fri,  9 Jan 2026 09:31:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MFKg7AGW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 43B11C4CEF1;
+	Fri,  9 Jan 2026 09:34:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1767951065;
-	bh=MIKc/r+xHdWmFPm5tfPOSF/8DUVXSugT8lhEXzTHZJs=;
+	s=k20201202; t=1767951242;
+	bh=3AeINoDybmIWU2wLjbaEaippAGFl95KiJUHzFKs9IpQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Q40zQrnRJ4ZiaZjp8Ifd5UpPCbKVjYlLrTsIQ0orcgazLQTW4QcfYH6oOf+XX8Ie3
-	 BbIa/NyUXwjXwIQ/cUfx2kvjO3BvV7NZ8lSTkOVV9oBBWgyZc/nBWvlXJNqLRsccHD
-	 UYIDSswxlpKAIaXGJOcU3l/JKYsxgOoUwGmkzY+9c66v02VOObq8XgJGF26dIZfW3s
-	 iXS+m6ZDd6AElCvT7xzMhEJKAxqT/YH35/EfJ+3REQTYV99/jrmQRc6D36ytQDAQuy
-	 s9/yYJKKuUQczsvSQt75YoQcD+qKGheHqVduKqDkuA7NSjGx2MSsDNwMigVvcAvI06
-	 KmPN7WoNXcHzA==
-Date: Fri, 9 Jan 2026 10:31:03 +0100
+	b=MFKg7AGW2kdubeInzebs0roxQzYOndkeGDjE7FGNdET4rl9eG+E1fkXngyCJoqeEc
+	 lhD0JuN9odhgzLZc8Hmh/CeMZEe/25IXcZNQ37+0eG4KDvWsHa5lOlLbTPn1hkb2/0
+	 mdB60FmAp8wB98yt76W3Gh9r4vU55elG3N7ROgvEFHLSxPtPcLZLmNU29sTrZPbEV0
+	 zW7Z7E/JmsN+B0f/E7O5pHywpa03/kwqPTscCF0NSwopZQTa7WqSnIRrAgo9VFoJpm
+	 eTa8/E2XEun+4Ox8SghYU3bl6T4QzA7P4B95J1v9FL8d/3ahqVaRaBVkFPsVkjEsvg
+	 TqWqHLkvhY7Pw==
+Date: Fri, 9 Jan 2026 10:34:00 +0100
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: "Rob Herring (Arm)" <robh@kernel.org>
 Cc: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -39,11 +39,10 @@ Cc: Miquel Raynal <miquel.raynal@bootlin.com>,
 	Marcus Folkesson <marcus.folkesson@gmail.com>, Tony Lindgren <tony@atomide.com>, 
 	Roger Quadros <rogerq@kernel.org>, Hauke Mehrtens <hauke@hauke-m.de>, linux-mtd@lists.infradead.org, 
 	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 05/10] dt-bindings: mtd: partitions: Define
- "#{address,size}-cells" in specific schemas
-Message-ID: <20260109-crouching-alligator-of-ampleness-aca683@quoll>
+Subject: Re: [PATCH 06/10] dt-bindings: mtd: partitions: Drop partitions.yaml
+Message-ID: <20260109-bright-purring-oyster-8c9f0b@quoll>
 References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
- <20260108-dt-mtd-partitions-v1-5-124a53ce6279@kernel.org>
+ <20260108-dt-mtd-partitions-v1-6-124a53ce6279@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,23 +51,71 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260108-dt-mtd-partitions-v1-5-124a53ce6279@kernel.org>
+In-Reply-To: <20260108-dt-mtd-partitions-v1-6-124a53ce6279@kernel.org>
 
-On Thu, Jan 08, 2026 at 11:53:14AM -0600, Rob Herring (Arm) wrote:
-> diff --git a/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml b/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml
-> index e3978d2bc056..dc6421150c84 100644
-> --- a/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml
-> +++ b/Documentation/devicetree/bindings/mtd/partitions/redboot-fis.yaml
-> @@ -28,10 +28,6 @@ properties:
->        device. On a flash memory with 32KB eraseblocks, 0 means the first
->        eraseblock at 0x00000000, 1 means the second eraseblock at 0x00008000 and so on.
+On Thu, Jan 08, 2026 at 11:53:15AM -0600, Rob Herring (Arm) wrote:
+>  patternProperties:
+>    "^partitions(-boot[12]|-gp[14])?$":
+> -    $ref: /schemas/mtd/partitions/partitions.yaml
+> +    type: object
+> +    additionalProperties: true
 >  
-> -  '#address-cells': false
+> -    patternProperties:
+> -      "^partition@[0-9a-f]+$":
+> -        $ref: /schemas/mtd/partitions/partition.yaml
 > -
-> -  '#size-cells': false
+> -        properties:
+> -          reg:
+> -            description: Must be multiple of 512 as it's converted
+> -              internally from bytes to SECTOR_SIZE (512 bytes)
+> -
+> -        required:
+> -          - reg
+> -
+> -        unevaluatedProperties: false
+> +    properties:
+> +      compatible:
+> +        contains:
+> +          const: fixed-partitions
+>  
+>  required:
+>    - compatible
+> diff --git a/Documentation/devicetree/bindings/mtd/mtd.yaml b/Documentation/devicetree/bindings/mtd/mtd.yaml
+> index bbb56216a4e2..e56dba83f00a 100644
+> --- a/Documentation/devicetree/bindings/mtd/mtd.yaml
+> +++ b/Documentation/devicetree/bindings/mtd/mtd.yaml
+> @@ -30,7 +30,7 @@ properties:
+>      deprecated: true
+>  
+>    partitions:
+> -    $ref: /schemas/mtd/partitions/partitions.yaml
+> +    type: object
 
-That's probably separate commit. These partitions never used child
-nodes.
+I think you need explicit, since we require it for incomplete nodes:
+
+additionalProperties: true
+
+>  
+>      required:
+>        - compatible
+
+...
+
+> -unevaluatedProperties: false
+> diff --git a/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml b/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml
+> index ed24b0ea86e5..7619b19e7a04 100644
+> --- a/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml
+> +++ b/Documentation/devicetree/bindings/mtd/ti,davinci-nand.yaml
+> @@ -24,7 +24,9 @@ properties:
+>        - description: AEMIF control registers.
+>  
+>    partitions:
+> -    $ref: /schemas/mtd/partitions/partitions.yaml
+> +    type: object
+> +    required:
+> +      - compatible
+
+Same here
 
 Best regards,
 Krzysztof
