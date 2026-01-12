@@ -1,124 +1,112 @@
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C76D315776
-	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 15:47:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CE672877DA;
+	Mon, 12 Jan 2026 15:48:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768232836; cv=none; b=KRqpeTWaT8wi8FjwIzDLmvMYpktBMPxk8A4zHuNF8NL+9a4lwyXoAU0riqUEggJbttTwfXsgmR97AZlsbLu7dEd94kH6kWGPMdU07spAZ05cxb8X1VPDpH2hsL5z0AbgvKG9yAu8PxB4Xj/YfgzVt78VwLXMHdcPda+rEzFZ2HU=
+	t=1768232886; cv=none; b=X2xoJHWTzmHmnjueniu8EDRaCaA7CtfkiVB468J3kziNeQBplNvDi9+OBiR1c9VjklELrhkU2fV+DZ/jMcdIPNvZ5NjsXv3FAR8RCqio8Dp9T2ZF3RQGFG/YeIA86j+EV2SCFf6sdwrMBYmQoXKdFh0MX6fKZSU64hDTRTb82nc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768232836; c=relaxed/simple;
-	bh=vHWFPBypaVR6QO9yY+NIT52Fwn/AnAUPV0IFF36KmuA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=VGHDSUs3s9ZrpRM4qDagBjqCI/2EZrsvdtjKf1PWGhKqmzuYvggUmDlP/5bbYvMG4aJk5yGyxZBi+XFjQCV0twasC55grAbZxMxGxb23nPNRBaHbjklRT3D6Q1RyHNshD2muxDnZofdGeFreyPzIccI3YQ953DDrr1qsLj7TWQI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=0myqGsO2; arc=none smtp.client-ip=209.85.128.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1768232886; c=relaxed/simple;
+	bh=o6bLg0ySoZFHDQc+FNwqUrcZpZi5SIhfxu4HKAZ3x7o=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=T+YRDi9hZ4K33ntfnFo/zxJJtuRU+ci5rDrSEH7qHWZ38pa1b5tvhFfakq8myJnZzI6xECjtGmW2jpG2OXKUpesFF9K1dhvQUln9d8kFKpnwQmySpxe2Bhsama2lBFSMf/7lFSnsJDSCcFK1NetAbJz91Se5EW0yhMICTl8DSwg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XWusaK50; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="0myqGsO2"
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-47d182a8c6cso38880215e9.1
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 07:47:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1768232831; x=1768837631; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=QU+wdPQeGIMx2R82MPiKqXDiY8zUt2eXhqlQOcy8HXY=;
-        b=0myqGsO2xvaRKfH8bkgIAHGNfjElsxUKLmD+oEQlq0SmO4RtzHus4Vs4d0PL2BtMhL
-         dnGnJUW73JCXZBYKkVQjEf2/PNZmtS/dg3dv6UhiJIhaBgc16QQ7lHpqUmYahVzDGWWM
-         qW0L+S8RS3qF+NaGLRqdPe57c6WCz8VE6kgvK8eEJMIJP9b11x9ZLBwwIXZ8SPQkrfo3
-         FE5la+wW6HHqnFk7VvTUAonELcwi+qNQMOEVkHecLGmlON/gg9sRKyONt2nJ2wFaQ5aR
-         wPruFAjv9ksozvnz/JaEXMyyTZoU1q/FWIFR+/g/Wd471DqPwvXMKK25UXF0YTINBc1E
-         hVLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768232831; x=1768837631;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QU+wdPQeGIMx2R82MPiKqXDiY8zUt2eXhqlQOcy8HXY=;
-        b=GWKAi9bF2Nug5jcHD7uAoZ648XQIm7QDsBhpIyullHH3TfDfJNIwrQpH9iYf7g9mYW
-         CgrrHBYtdp0bDWGre3S5i7sT3MQ9uymN4rzUZNGgB6FzC7R4NXuxHNKV5OgKzXWyH7EI
-         4RBQ2p4cUqZBzVQQFcVTAexVCNMeXOYDjcA3WqU0hYPMThGQvlRuRTEDJe+kj03AoE6H
-         EsRhV3oNHc+kEqEb46Z9Gl16eBHSNSImJLXgwLtxkbMV+SQXpJHp9BRvV/OfmIOsUlOV
-         YR11uZaupSOls8OrXR3gfOthL2pLOtWSA9Y4FB0UIlie9y9XRdw1cIw0Lbd7X6lGjb67
-         TMOg==
-X-Forwarded-Encrypted: i=1; AJvYcCW+XWun4uB/qlSCC1m6gu6ffiE7Cx8uKN5s6eoS4T1niPYS9rUBG4iA9g2kz9cFwFG8wSnmcMcZkcg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzYpw98U6O3Il6hBN1gpdsLg7btwsrbXyzAKYkqPiK8VJCS40Wq
-	iZNnAJacT+VH0DdeuUYllf0wLZaeXf1N7vMDrnXZ54n5F4dQ53DDqP7P3UWCxiUDdCc=
-X-Gm-Gg: AY/fxX588MlfIlo4pEKBCKYtnV2Xz6wC1irC+xgZailNEmOl3FBo7as+UvmQrzNDfRU
-	imB7iOoMJ5qD2VD3PeBqXJghZJACK/pRsDsvDtKd1Wr64uGu2XMT8S7gqCAJhYukhQPhWRyWbzC
-	q4eW22yuIujjGRo8bplOlqQUm0pIP27yGumADeOYuuAiNpgqRqaFZ3nYzhfSloxEgKnB1lNC7Zd
-	jd9KHupNb1exjBiE4iDRfsfSHxaNcPG+0fo4YZCZs5VBPmPYROcg4eu2/L8KwkRIpDLbjZBvAbh
-	UOH+DPBCWjIr4HJ7lxIDWIH4WsB9+IDiuFWJPA+YMXahictxKzqJskQTBgs7o2u8L9OdRriP8sN
-	6Lg8OLkLZYpy2DyMstpEyGBQLMnrrwx27mkmg+JlU0YEupfbP/4z2nZdpmRgm5NDp/NpmqElcTL
-	EN8U8sB3nEg3XwlE+bVlraZTbNry920wbxWDNLUyyKyMUutffehZBsQfFnPtUgCSyoQtv8O0aR
-X-Google-Smtp-Source: AGHT+IGBO9eGPmHs6J445wbi3UmFE0FvHJHaxJck1zKJZ9qqr1A5nU0vnmnEQ4zzMoAofUQG+ru4TA==
-X-Received: by 2002:a05:600d:41c9:b0:46e:4e6d:79f4 with SMTP id 5b1f17b1804b1-47d84b21250mr200825905e9.15.1768232830771;
-        Mon, 12 Jan 2026 07:47:10 -0800 (PST)
-Received: from localhost (p200300f65f20eb047d7efe6100b35af4.dip0.t-ipconnect.de. [2003:f6:5f20:eb04:7d7e:fe61:b3:5af4])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-47d8662ffaasm132658945e9.6.2026.01.12.07.47.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Jan 2026 07:47:10 -0800 (PST)
-From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Ping-Ke Shih <pkshih@realtek.com>,
-	Johannes Berg <johannes@sipsolutions.net>
-Cc: linux-wireless@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XWusaK50"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4705BC19422;
+	Mon, 12 Jan 2026 15:48:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1768232886;
+	bh=o6bLg0ySoZFHDQc+FNwqUrcZpZi5SIhfxu4HKAZ3x7o=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=XWusaK509HA0eIMXPq06mOSRxySQ4nCsiv9htDK34SN6ExfuIvfN1c2LG5UQcRjKE
+	 YGHBEbL7iaGIR1Ssl05VuiGyf+/WlYaReCV/Z+z3RX/3hcRAhu+OITBgT5dMI2j150
+	 3uPzWuU42Cn12bbM9fmqGhlWdgIn86/RSi8na6s2F3z4d2050vP4HDwTEn5Rcp5Q+M
+	 Dh8JOUUuULMpnUEGkCJyb7g5nhHPm491sI/+YSFRK6aXSQUJo1uZtIVuK+BEdsERW7
+	 cNizGOxXSIIMzXy06HWwvjW62qWyoVEu6bAqMDvIDyl7GdIm4Qc4OuyAgK0ffEtq+1
+	 +rYs/0VMe1sGA==
+Date: Mon, 12 Jan 2026 09:48:05 -0600
+From: Rob Herring <robh@kernel.org>
+To: William Zhang <william.zhang@broadcom.com>
+Cc: Miquel Raynal <miquel.raynal@bootlin.com>,
+	Richard Weinberger <richard@nod.at>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Brian Norris <computersforpeace@gmail.com>,
+	Kamal Dasu <kdasu.kdev@gmail.com>, Nick Terrell <terrelln@fb.com>,
+	David Sterba <dsterba@suse.com>,
+	=?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
+	Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Marcus Folkesson <marcus.folkesson@gmail.com>,
+	Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@kernel.org>,
+	Hauke Mehrtens <hauke@hauke-m.de>, linux-mtd@lists.infradead.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH v2 0/3] sdio: Use bus type function for shutdown
-Date: Mon, 12 Jan 2026 16:46:56 +0100
-Message-ID: <cover.1768232321.git.u.kleine-koenig@baylibre.com>
-X-Mailer: git-send-email 2.47.3
+Subject: Re: [PATCH 01/10] dt-bindings: mtd: brcm,brcmnand: Drop
+ "brcm,brcmnand" compatible for iProc
+Message-ID: <20260112154805.GA271138-robh@kernel.org>
+References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
+ <20260108-dt-mtd-partitions-v1-1-124a53ce6279@kernel.org>
+ <CAHi4H7GvSsX=BO2AWy4BB=FfQ8bWx_C3PBh9UQHYOo+G247P_g@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1799; i=u.kleine-koenig@baylibre.com; h=from:subject:message-id; bh=vHWFPBypaVR6QO9yY+NIT52Fwn/AnAUPV0IFF36KmuA=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBpZRdxpa+mgz/013rdQO8j6edwGc1OkH+Mw4/kK zqyYkMywumJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCaWUXcQAKCRCPgPtYfRL+ Tu0eCACAG4l5+26CC1ze23VOiVgBa3fPHJORep2Jda+t4jPg95bAUe4p9gS+vNvJVOfcG2aVPRr FyAV1rHhW2KsTYe5Cq1+o59QCfHLUEqtzninrJGVddD11Q1fxxjRNk02t4EnsM+VF1Yr2J0ESEt 7biNL5m18vKnXOhIgwT3hAjF3b1w/fXvju9KtmxTGHqfaY87xs2sP5OgshyIP4embaIhmlw7WSx Gji5CSpppjxDMFRNYBHBFci2pPQ9wfSpclApLYJ2tvTs1GJrL3GgCNdAivvwcBQ9zu6dC9t+Yds Sn8PQsTAH9oyptg2Humj9sI/TmYe624pn4VsZoZ0S66Qr1IS
-X-Developer-Key: i=u.kleine-koenig@baylibre.com; a=openpgp; fpr=0D2511F322BFAB1C1580266BE2DCDD9132669BD6
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAHi4H7GvSsX=BO2AWy4BB=FfQ8bWx_C3PBh9UQHYOo+G247P_g@mail.gmail.com>
 
-Hello,
+On Fri, Jan 09, 2026 at 10:05:04AM -0800, William Zhang wrote:
+> Hi Rob,
+> 
+> On Thu, Jan 8, 2026 at 9:53 AM Rob Herring (Arm) <robh@kernel.org> wrote:
+> >
+> > Some users of "brcm,nand-iproc" include "brcm,brcmnand" and some don't.
+> > The "brcm,brcmnand" compatible is not useful for iProc systems as
+> > there's a separate driver for iProc. So drop it as a fallback.
+> >
+> > Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+> > ---
+> >  Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml | 1 -
+> >  1 file changed, 1 deletion(-)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml b/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml
+> > index 064e840aeaa1..3105f8e6cbd6 100644
+> > --- a/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml
+> > +++ b/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml
+> > @@ -66,7 +66,6 @@ properties:
+> >          items:
+> >            - const: brcm,nand-iproc
+> >            - const: brcm,brcmnand-v6.1
+> > -          - const: brcm,brcmnand
+> >        - description: BCM63168 SoC-specific NAND controller
+> >          items:
+> >            - const: brcm,nand-bcm63168
+> >
+> > --
+> > 2.51.0
+> >
+> 
+> Another fix would be adding brcm,brcmnand to the users of
+> brcm,nand-iproc to keep consistency with all other brcmnand chips and
+> utilize the fallback mechanism in the driver, although I agree it does
+> not happen in real life case.
+> I don't have any strong opinion either way but a follow-up change is
+> needed to remove the fallback from the brcm,nand-iproc dts files if we
+> go this route.
 
-this series is part of an effort to get rid of the .shutdown() callback
-(and .probe() and .remove()) in struct device_driver. Preparing that,
-all sdio drivers that up to now use this callback are converted to a new
-sdio specific shutdown callback.
+The question to ask on a fallback is "is it usable on its own?". IOW, 
+would a driver than only understands brcm,brcmnand function in this 
+case. Given iproc needs its own driver and specific handling, the answer 
+is no here.
 
-v1 is available at https://lore.kernel.org/all/cover.1765968841.git.ukleinek@kernel.org.
+Plus, this matches what dts files actually have at least for the arm64 
+ones. 
 
-Changes since v1:
- - Drop patch 2/4 which resulted in a build failure with CONFIG_PM=n
-
-Patches #2 and #3 depend on the first patch, and with just the first
-patch applied there is a runtime warning (emitted by the driver core in
-driver_register()) for each unconverted driver. So it would be nice to
-get the whole series in during a single merge window to not let users
-face the warning.
-
-Given that all drivers are in drivers/net/wireless I suggest to apply
-the whole series via the wireless tree.
-
-Best regards
-Uwe
-
-Uwe Kleine-König (3):
-  sdio: Provide a bustype shutdown function
-  wifi: rsi: sdio: Migrate to use sdio specific shutdown function
-  wifi: rtw88: sdio: Migrate to use sdio specific shutdown function
-
- drivers/mmc/core/sdio_bus.c                   | 25 +++++++++++++++++++
- .../net/wireless/realtek/rtw88/rtw8723cs.c    |  2 +-
- .../net/wireless/realtek/rtw88/rtw8723ds.c    |  2 +-
- .../net/wireless/realtek/rtw88/rtw8821cs.c    |  2 +-
- .../net/wireless/realtek/rtw88/rtw8822bs.c    |  2 +-
- .../net/wireless/realtek/rtw88/rtw8822cs.c    |  2 +-
- drivers/net/wireless/realtek/rtw88/sdio.c     |  3 +--
- drivers/net/wireless/realtek/rtw88/sdio.h     |  2 +-
- drivers/net/wireless/rsi/rsi_91x_sdio.c       |  5 ++--
- include/linux/mmc/sdio_func.h                 |  1 +
- 10 files changed, 35 insertions(+), 11 deletions(-)
-
-base-commit: 8f0b4cce4481fb22653697cced8d0d04027cb1e8
--- 
-2.47.3
+Rob
