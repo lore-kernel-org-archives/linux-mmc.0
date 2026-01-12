@@ -1,100 +1,105 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F534319862;
-	Mon, 12 Jan 2026 07:06:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4959A331A4B;
+	Mon, 12 Jan 2026 07:39:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.15
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768201566; cv=fail; b=uOmU/G4Qkl6iWXRKDxL4yA82qya/vBII29bNH59lLkBqz3haL9Av257RWHj7Y1AdVdxT9orSClEBohnu6JqAls8X5rvgdRzZrpy+yBKbl+7qrO0W47mAEPPAWhjWlVkLo75baj60NGomnUTZeT9hoMnu3eTPbzIhDQJWD8TQFxs=
+	t=1768203575; cv=fail; b=l/hThBvy1JhtWYyNRSQNyVFEVYT/pBdxm+CzL3OkVyxQqd954qHYGrMh+9hEessHf/fwHtyC6IaIz09Iykj1VMu8g4lPO8ICbfUFeEYY7cQIX9lnxvtvxAvqpNaqqM6QS8pXUwDmAQaiUASwJm+Z+49rbyzmQPSNNnmbI/YP0Iw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768201566; c=relaxed/simple;
-	bh=5xDHnCVEDO4Jrcq/VSa6V1UCtxLEzuatvYwW4eWfxL0=;
+	s=arc-20240116; t=1768203575; c=relaxed/simple;
+	bh=oUbbYKWmy8s9TeVwNJtzwPok3GRkDzfG2bu4FEtYK2A=;
 	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=Y+Uflmhn8aBnWARImGvi+Kab/JVGN1dKjssjwHJVvs+sRkipH1MrF9km/WQ1V/sX/avFxA5JW6LLe87Q7uTDRS0YVD5p27BCwHVw3WkY1Pf/QHe2WgvCzgsixQKCwFwLVQq1St9PPBfXhZACrN0E7VhOz3vI1B9u8TS2L8Sk+f8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=JcQVDJ16; arc=fail smtp.client-ip=192.198.163.12
+	 Content-Type:MIME-Version; b=VNLjdf9Kcics0/nUbZxdYhJ7LDFWYZZy4lH7RJsS8c8XA0UVx7UYlcjNoOsctDJ68o1wpMxEBrwBHH+PdxT3pXREHLkMud36jYR7mhWIeE6eS58IgTZZFAxLQ3x4dToZFRlRXLrI1VrU78IpHcGa2C7UIBve7umzMY3KWsMDZn8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=MoMOK6Ic; arc=fail smtp.client-ip=198.175.65.15
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="JcQVDJ16"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="MoMOK6Ic"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1768201564; x=1799737564;
+  t=1768203575; x=1799739575;
   h=message-id:date:subject:to:cc:references:from:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=5xDHnCVEDO4Jrcq/VSa6V1UCtxLEzuatvYwW4eWfxL0=;
-  b=JcQVDJ16J+XFkW+CUcR8XFJKnBJb3PrfvVDRNhyfMZsRmKL2LAFuC+M9
-   yyhT3NIXd1cEiOgrMyQoA7JdFFPWq0k6R5KRBD+GdXXcUMZktTGuXMTEq
-   L27Nw9+5mD3Vo3WXJsQCZTSH4nvpP2zkk+mWmBhsCXbSsMkqWs80iYf0N
-   IcpZiYcgbUCMlIhKg9LMDCMqEGRKCycGU8zAWuoy4gPUSd5GJ0ydUKO44
-   6/QUrD5Awq6p+PonQdvMaT6/WK54ZdsPRwOZ8PzgS6flJeAQpVP0uN4nl
-   q+I/t3GKxM04bzsa+9jnfjYa0PvLMa2pQ7Fb0VEbWNvebPxfFGHGukAyy
-   A==;
-X-CSE-ConnectionGUID: Fe2mBgazTiqoo+O6IcNVrg==
-X-CSE-MsgGUID: VM2TUXsjRBKbKZ+QEgm9Eg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11668"; a="73323324"
+  bh=oUbbYKWmy8s9TeVwNJtzwPok3GRkDzfG2bu4FEtYK2A=;
+  b=MoMOK6IcpOa5BKuvVPpZmAjf3vaVchWA5STGwWjpPH0ACuZeWFkwYNFh
+   fEI0Yy+/Fkt9FZs+puTJLfZH/C/wWce/ezr4HyiDj+NbAkLdLMyAowDVI
+   A5yYXxn1dSf5paP2OOKPAegwUwN7sFXUpIbPmXHIw8USuaF7vgtzI/9m+
+   u1xebaUTXb6auIepSRzsy+UynfGpi9xGcOl3FWZCwLIRb5l+a5h0SVt+r
+   h2zn7disD/yTQca8wwGd/etW7KZttwZoCDY/a6dvndVK1vhpmdULgTUl0
+   XaP0qVVL3LRs9zfmYzdP7DDY7O2g05XOWWyclEYaq91/9s57VESD1WNgO
+   g==;
+X-CSE-ConnectionGUID: /rPR3vEoRrOSpGPxtX3tTA==
+X-CSE-MsgGUID: SFvoPxuxRTO++aahDQcQ1A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11668"; a="73106157"
 X-IronPort-AV: E=Sophos;i="6.21,219,1763452800"; 
-   d="scan'208";a="73323324"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2026 23:06:01 -0800
-X-CSE-ConnectionGUID: g6k60U1VQE24Q4LHG4uL5Q==
-X-CSE-MsgGUID: 4F18NLKQQaanTgYBtM57Mg==
+   d="scan'208";a="73106157"
+Received: from orviesa001.jf.intel.com ([10.64.159.141])
+  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2026 23:39:34 -0800
+X-CSE-ConnectionGUID: uIQT0xo9RA6zdNmVLyFBhg==
+X-CSE-MsgGUID: gKi1qvUISEmhIuF/R7laWw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.21,219,1763452800"; 
-   d="scan'208";a="203817485"
+   d="scan'208";a="241555339"
 Received: from fmsmsx901.amr.corp.intel.com ([10.18.126.90])
-  by orviesa009.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2026 23:05:58 -0800
-Received: from FMSMSX902.amr.corp.intel.com (10.18.126.91) by
+  by orviesa001.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2026 23:39:34 -0800
+Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
  fmsmsx901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.29; Sun, 11 Jan 2026 23:05:57 -0800
-Received: from fmsedg901.ED.cps.intel.com (10.1.192.143) by
- FMSMSX902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
+ 15.2.2562.29; Sun, 11 Jan 2026 23:39:33 -0800
+Received: from fmsedg903.ED.cps.intel.com (10.1.192.145) by
+ FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.29 via Frontend Transport; Sun, 11 Jan 2026 23:05:57 -0800
-Received: from CY7PR03CU001.outbound.protection.outlook.com (40.93.198.69) by
- edgegateway.intel.com (192.55.55.81) with Microsoft SMTP Server
+ 15.2.2562.29 via Frontend Transport; Sun, 11 Jan 2026 23:39:33 -0800
+Received: from CO1PR03CU002.outbound.protection.outlook.com (52.101.46.50) by
+ edgegateway.intel.com (192.55.55.83) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.29; Sun, 11 Jan 2026 23:05:57 -0800
+ 15.2.2562.29; Sun, 11 Jan 2026 23:39:32 -0800
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=TT7Us5dUlfTMgGXjSjYr3V/9cDWlvalCu146g5dR/S27Cx2fwupTmRj9SojTwO5ti5+qIoG/76WnRKoWn56LI8MCZ7F4WFt9CCCiSgdzWfR+gXz7YpA/HqRtlee1uhTc1r5FbMXjIN9Q0qLFwfweqerKketq5CLfeJDjO05PEOzuSkPZmrQZD8qrOuYQMXhbhojcxnBWPVLwo86m5xjMx7eP+F9cJBA4Xw9QUMVfRzJo8mtGqTKdYiqRo1SDINDYJDFS/tXxm5snqCp3wAcqD9pjar4qQdnYvPvq1Juu/yZV4Pcb80or8k1pJkVLlFEMa9EY2d7mpdVO5LNKj27TeA==
+ b=zRcwlznzAjuNzvKABaIow1hpowtG3iUUQ2SOJxlZHrIjMWt1Ys+WdyjuNIIh7oBBeakJcTIY7PWmO1x4p/HBw+VRTDmpZYdIjI172kccmDEqqZBaAG25E1FC+sonXK/VVqRqOJ69cx5WTktkfZHrcrVjRn12+gF35QM+L7wh2T5WbBaEHmyDmdnWnQa4iDdb08s37kI0rfZJ3Cq8ETBGG5IsLPd+2JXloBiReYdfwvdLa6mT1fhh9G0JhCHiXOTq78phaq3AHssCJ42Ed/fRxj6V+lJm2rd3JnUc5rUGlWU0mRXSuZCl5W8GkN5N2PTb2OQS34Fpcn/fvhjxprCVuA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=VzjDEYP3qSKOHdioXsZ5MipRAVAmnGJVJJRHz0qKvFg=;
- b=a1k0f+fRtpk1gZnat/pm2nEKw2l6NEqOVCUy+VQA1WB7xW30+TzJui0SA2bVNxLaKCGGJn9rXYGWcwo0nXqg/HXoq89KTQUx/AeYc7GAgZRA01fKijpaEy/uyhwCUSh1uL8WW1NfXND9mj/oj+OIlbmVGFO9buaDQYyXDwpIJvXmZL4O+eud4KJwQpY7LM0SU8OIyN/w/LYI63IOa0SDorFhVyxwx0pEK4O67HrXEccttoLNA5WP5YdwJ1+a1XfgYkQlUw4tnALxNZmFJKTd7hiU+9Ui4JYaitP7E7F1IE3srhvpDcyKyYj4Ls0vEmasMZdFFuqz1XwVSoNrPEI1ig==
+ bh=YkAmCP5yHueHjaek0Bi27vntNh9MnOBRJg5KcDuf/vw=;
+ b=qKN0adkEGo4Tya6U+K3MsgE84ET9SBSQk2DTh7zvmtXLOi26AUKjlgFotzuxhxa1VYiQRERrN5QGQw4b6qt4Tt8+bsW4SnNyOZJ8f55GIJvOXciTPp4xAsXb+QUWudulryAa/XsqVOOPSFNlwyOEehFk0XgdWY7aAOTxDsP07iP2sUrLkMfBkasc+QAPxVDzY8gCB100JJAQq2GACFSKqNX3Fog00P7boOkGB08v9O1IN8h9N7q5YpTysMMIasJWddA95sGQm6yU1nYzTci27QmO1GeDgx3DtIc7LZ7q4cXqQkhCgqpkvxnh3fheCoIly65HeX3xWmy5JeUe0KtywA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by CH0PR11MB5300.namprd11.prod.outlook.com (2603:10b6:610:bf::18) with
+ by SJ0PR11MB5008.namprd11.prod.outlook.com (2603:10b6:a03:2d5::17) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9499.7; Mon, 12 Jan
- 2026 07:05:54 +0000
+ 2026 07:39:31 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456%6]) with mapi id 15.20.9499.005; Mon, 12 Jan 2026
- 07:05:54 +0000
-Message-ID: <3a93822a-6ca1-4cc1-be12-38b2b04704da@intel.com>
-Date: Mon, 12 Jan 2026 09:05:48 +0200
+ 07:39:30 +0000
+Message-ID: <b6ddabc6-dd9c-4230-b19c-b2b1f5192635@intel.com>
+Date: Mon, 12 Jan 2026 09:39:26 +0200
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4] mmc: host: sdhci-msm: Add support for wrapped keys
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>, <ulf.hansson@linaro.org>,
-	<ebiggers@kernel.org>, <abel.vesa@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>, Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
-References: <20260102124018.3643243-1-neeraj.soni@oss.qualcomm.com>
+Subject: Re: rtsx_pci_sdmmc aborts suspend when /sys/power/wakeup_count is
+ enabled
+To: Tabby Kitten <nyanpasu256@gmail.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, <ricky_wu@realtek.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+References: <a242799a-d427-48e1-85ef-923f34df843a@gmail.com>
+ <CAPDyKFq55Vqfd7cMdmQZBzvS1Xr-Z4QaTzEeuWWn3EX4HBbP3A@mail.gmail.com>
+ <CAL57YxZagMaZF1X1bpx-nB76s=vZMWhUDiVbvB9P3CLiXG-qHQ@mail.gmail.com>
+ <CAPDyKFpRi8u3MPauT1hnYC1pW7L4kAohAZDsgS2pgQ=4_sjgNA@mail.gmail.com>
+ <f91584df-eee3-4c26-b1da-a8049a4d77bd@intel.com>
+ <b488f3d6-68bc-49ac-8cb3-0f9f05f41020@gmail.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <20260102124018.3643243-1-neeraj.soni@oss.qualcomm.com>
+In-Reply-To: <b488f3d6-68bc-49ac-8cb3-0f9f05f41020@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DU2PR04CA0169.eurprd04.prod.outlook.com
- (2603:10a6:10:2b0::24) To IA1PR11MB7198.namprd11.prod.outlook.com
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: DUZP191CA0014.EURP191.PROD.OUTLOOK.COM
+ (2603:10a6:10:4f9::18) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -103,244 +108,223 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|CH0PR11MB5300:EE_
-X-MS-Office365-Filtering-Correlation-Id: 779ae639-23b0-452b-1537-08de51a90650
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SJ0PR11MB5008:EE_
+X-MS-Office365-Filtering-Correlation-Id: 53839ba5-f9b1-4361-70c1-08de51adb8c6
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|366016|1800799024|13003099007|7053199007;
-X-Microsoft-Antispam-Message-Info: =?utf-8?B?a1BrNTNjcTZpVU9MYTRLUHcybzJYOW93QjZ1Um11L1puL3lmSEQ0QWVMTTQ5?=
- =?utf-8?B?R3hCQlhxZTYva1VTbGZWTTEyUWhqSDN5cjhmc1VxSXYvY2tKby9NZ1loN2pV?=
- =?utf-8?B?MGgwRXdOR055ak9SeHhhY1pUMlJKRDFXWWF2dTJBNEs0eW8yS2hQN1V5ZnVl?=
- =?utf-8?B?Zm5yaVM4OWF3Ym9pVFNjNngwTEd2R2hOalZDTTVHaXd1cldNN1ZmSXgwZTVt?=
- =?utf-8?B?cVJBTk41cVNaUVpkdFd5OWpYR3pzZUkyM1JCZEgvYk1CaUtRZ1hsZWwzMWNp?=
- =?utf-8?B?Y0tISVorOU9yYVY3MkRLc2hiSXhobENkK1licVZyY3lqdE1MbXVTUGFxSzdS?=
- =?utf-8?B?K3VUUE1KSkp6STdzUGRCZi9reFJLTkN3M0lCa1RtMHArU0hRUXRvQmNDSE1I?=
- =?utf-8?B?eHlFbElXeGxCNG8xNXNBRGRleFVmOEs5dms3SFlSYTRVOEdSZ2xKNVN1WEF0?=
- =?utf-8?B?Vi9SZzN2V3ZVSnIrQ3oxcGo4YmNOSEIwTTlZNVZoWTJhRWpQOVZrQ1U0VGJP?=
- =?utf-8?B?L01rTGVjY0ErckRDSllMR1gyMERMdXEyQStRVzBwZlZSTXRxOHRxQ2RkWjAz?=
- =?utf-8?B?Si9VcjU2N1hieXI1OUU1S2E3eW9oKzF5MHhNa3JNZTZybkYyRzg0RDY4YStO?=
- =?utf-8?B?Q2UyWS9hWkNiV1lsaWk5ZjE0NHA2a0RzRUpxY1ZLWGpEMitRTUthMXZlQ1Q4?=
- =?utf-8?B?dldlWi9IZ3VMblo4QXk5OEx0Q2JqNi9OWHYyRGpJRlN1UUpEY2lwaERCS0Jk?=
- =?utf-8?B?SVJCZjh3VVR2SDBvUDAzRW52ZURoMUY3L2QvZVFhREE0eW9CcTNZNWZrWjcr?=
- =?utf-8?B?Z2hvQkx5dzk4MCtxbHdkenRYTmRqSEwxMHZPTUhnS1ZnUm1yaVFOcU42SmZK?=
- =?utf-8?B?bThIZUlTY3UrTlpTNi95NDBQL0U2NTlnTWcxWkhGZDNlZ3gyaFNDWTVzZzBL?=
- =?utf-8?B?N3dyRDZ5MkN1NW9GKzZTaFR2OU1HWlZRYSt2Y0xiVTgzTi9jVUVNbVliOFhw?=
- =?utf-8?B?Y0xiSjRpUVVJR1c1eVNLL1JncEtkemNXNjVZYTNHbTNPVEVQSkNsS2YrNFZB?=
- =?utf-8?B?Z0o5Qk9HSWgwWXhmZWIzQkRPR0Y3K0Z1aURCc1F6OHJaOXgvWjdscFhXQmNo?=
- =?utf-8?B?ZWVYanRhMUNvNEF6YXBKTFBTYWNZNlBieHBjUTJhWWljN3pNdndGSWVYdEQv?=
- =?utf-8?B?Y0dNUWZxZTBQY1BXcTZ1Z2QvQkRVd1lqRWEzWEE4VTllbnJjd01uUmdMRlZt?=
- =?utf-8?B?azRDSFU5L0cvQ2ZWT0IydktveWNKcEVVNU9oQ2JkSGsvTlJiZ1ZDU0F4Y2xs?=
- =?utf-8?B?QjVkbFV3RWFnVEQrMDRQeDMxMGt1MEZoeldyT2liRGEwY1dCb1YyZzhubGxn?=
- =?utf-8?B?ZXhJVUYveFBOYlN5NEIrcG1xaDJ4R0JhYlBtbTU3UzE0TExWZUhIMmhiN1JU?=
- =?utf-8?B?OXgxSEhSNERSME5hb3NDTGVPQ3hWMWFzNVEvdHB5cXhOc281bzU2ZEU2R3ZF?=
- =?utf-8?B?dGlpWEdPQTRKRmREWC9mZDIyMlR2dE8ybWtlWDFUWXNvUGpXeVlXTlhNT3hK?=
- =?utf-8?B?MUwvRnFva2N6NmkzSGdrcHdXSVdXeUsrN05QME9rWHVNWTR6UEZLTDNOUTRu?=
- =?utf-8?B?OXVrVi9OQUtOaWExMG96WEQ0VWE0UTVtSkZqZXJBRjJDbkNWQjRaNnJQZkhr?=
- =?utf-8?B?TVhaOFFxYmdpYmk1Q3o1Q0xXbk16YXE2bWhSZ2p2cjNRZGtHYVUvdTVmTVl1?=
- =?utf-8?B?Sm55R3cxMlJMNmtkZ3NySWs1L0tPelErUjZCb2paYkV1bXZTbFViQ0F6R0VX?=
- =?utf-8?B?N1NRc3c1YlFsMUFWV0FVWGhPd0thY2dJbGhPVEFnVUVKV2dwTTRnQlBGYmZw?=
- =?utf-8?B?eG8zR21DVWxrdUtETkZKSWhkR3BLVEhQcHEwa0d6MVVNRlhsRzVJVkxxTEhz?=
- =?utf-8?B?ZlcraFN0RW00bDFTSDVzQ1FPTGhFV1M1T0JWVlBVVS9zNUNlRUdldnFqcmQv?=
- =?utf-8?B?WFJxVDczc3hRPT0=?=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024)(13003099007)(7053199007);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016;
+X-Microsoft-Antispam-Message-Info: =?utf-8?B?Y0RRT1hBQTdxUGV1NmY1TVNoT1ZHaTAyK2R3TFRiVXBvNzVsTUkyeEZEZGZs?=
+ =?utf-8?B?VTg1QjJIeExSekxxRkhITnQwRnp4OUVwYUhrWmtnSTJwT294WXhiZ2V5U1pt?=
+ =?utf-8?B?VjZFeWQ1L3lvNEhJKzh1K3kzTHlyZnI0cmgxUHh0RXBSWDA4RWd1eHI4RVNu?=
+ =?utf-8?B?U1k5aWRsUDJ0YjZ2eHJkZ0lEaEdUeDQwZ2F1bC9JcVVwWWpJMk9kczB5YWVW?=
+ =?utf-8?B?VndZNjlGcUU3U2FoSmsvdk0vclZtaTVDelkzWkp1WmViY05SdFpxY3hWK250?=
+ =?utf-8?B?Ulpmc1RRb1pDTW9kNEsydEMySXVSQ1ZGRkNnUXRBUzhobXNXcTVRb0NoTk5M?=
+ =?utf-8?B?Q0dMK3NGelhhYjZmd0RVOXJRSHZmNnZaaTd5cmI4NU1MZjhyaEJoaGZFWlJo?=
+ =?utf-8?B?S0t0Y2FBanpBVDl4ZXVDaHZrbFFUQzVaTUEybHRoM3RNcm40RmM4NVdLYXZ1?=
+ =?utf-8?B?dUUySXNkREViVEloN2s4SFQ1MzZFUnpBMWNGcFdITVFETkJtenM3YXVDRDV4?=
+ =?utf-8?B?NmwvamtLMXdOQ1g3aDRQeHIvRDBqREpMNy9IbHJxbTdDRFFuMkh3eElJN2FC?=
+ =?utf-8?B?UHF3bmFsWWhJK2tWbjhZNWVXOGcvUExTSXhURjljOGZwby9HV1VTUUlpNHRH?=
+ =?utf-8?B?cGg4N1N4SkhUQ3plcHN1Rys0SVpmL0JycXQ5Z2lMakVOT2NtWi9mMzlkWDRQ?=
+ =?utf-8?B?ZkR4UXZuRVE4WnRxQlZQeERtNVhTQjFwOGQyc0NEWVRUOWhXbHJIdXdGVE5j?=
+ =?utf-8?B?b3l3cTVVK3N1RFEyT3hFTjBDYU9BakNKZThPRUNjRFNtUVJlU2tMZWhKRGNq?=
+ =?utf-8?B?MXRZTXpWYmtRY3d2WUx0MUxQNHNNUGc0ZDFjdG5lWkhlT2UyUUlQOTE3VDMv?=
+ =?utf-8?B?dG1zbXBzcmxuZWhiT3daRkJLVnk2QjFPTlJDYmJSSXZPTmdjbm5wZlJkSnZ1?=
+ =?utf-8?B?T1hlSS8xRTRObmhHald0cEpOTDVNKzZHWmhLZWVGOGdFUkFhRStMdGpDTUdj?=
+ =?utf-8?B?bS8vaXliNy9MYmpPai9QZ0dhM3VFaEtXSmhJMzd5WUFiSlFUZnp3LzBNK2Zx?=
+ =?utf-8?B?elhjZjBObTNWTzdzWk1UZGFBSk1CdC9qcGRUUHVSQ0dzUmorampkYWQ0WUw3?=
+ =?utf-8?B?YkQxVEhPMFJyMXExcW5JNXp2TUVFN1g3ODFReEVvdjc0QkRnMUlWWlU5b0Nv?=
+ =?utf-8?B?WHhjcHVhYThyWjBGalpzVmNnYURsZmJVKzdMSE5wSmY1YytJcWRvYlV6UDVK?=
+ =?utf-8?B?OGJzNUx1SVRIT0pYbkxwQTE0RDZiY25JR2N0QXI0Uk5FMm9LejVJZldiTVMy?=
+ =?utf-8?B?NGxWNGlxR0lxZFZYQTNLZFRET1V6UDRVY25YZWE1Szg5R253REg5dVVLbjF0?=
+ =?utf-8?B?UUJvWlZQYlFvRlRGRDFiRGlBaUFXaStyTUNGVkwrdEwrc1ZKY2hjM09iWGRz?=
+ =?utf-8?B?enI3Wjd0VW9oZi9HNnBTSndvL1p2YkE5aUdJeklFTG1hL0N0S0hUTE9EYVVu?=
+ =?utf-8?B?Nlg4NDhtVTRGSFRkZ0NiMFA2Ykx6dTZGTlVBVDdabm1IN1VmdXRPVUI4L2Rt?=
+ =?utf-8?B?NVpLdWpDOGtIbzN3UTlac01Qekwvb2hmSlNrcnJpRlJGUzgzdThTbE53NkJx?=
+ =?utf-8?B?VUJ2M05BREVpYlJTOFF6M1hVb2xvVGZxL3ZXOHBjNEFnc3ZUMFh5Lzh2VGM3?=
+ =?utf-8?B?N3VNOG1rTTFvN2kxS2pXckNEaTdmVGdib0s1UTVHQWw1N05HeEs1UzcxUDNl?=
+ =?utf-8?B?dFhkbjVEWHp4QWdGcHpZVXlkZ2RTLytkSDZEMUdZZmlUY2RkUEJYWXlEc0tq?=
+ =?utf-8?B?Y0FtSTdjdlZqME5MNGJTZktuVnFXUVVTWWs4UDAzVXZoVkxFeFE0SHVBODZO?=
+ =?utf-8?B?NEo0c2VucWoreUozb2VPeHVCQ3pwNzhackMyamEzamNPcnhiSThCK0JCK0l3?=
+ =?utf-8?B?ZjlYc2NkNWJZNGl2bFhXeExTMzNTSmd0VjVMUEpncnBDektpZzg4OHlDc1Qx?=
+ =?utf-8?B?ZmhMY1hhNk9nPT0=?=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?OXFYb1NzTURQUUlDdVRjbnlmUzVNYTFQcGROV2JRMVd2WjhFS25GUEdjcXNS?=
- =?utf-8?B?a1o1OVp1S1V3SFRHZlRZdjh4blBhREU5MnpvdnQ3VUZvc0FoaFpBQUJrMGpi?=
- =?utf-8?B?OFVaSndmZHE2UHE5cHNCdzJVKzROMklqeVpuRitteDRQZldTQkVPenZsK3lO?=
- =?utf-8?B?bURxdXVSbDZscElUaXRFNWpWUXd0UHc2dzFFQTE1bDFxNDMzTU1GUWM5MU5q?=
- =?utf-8?B?YytXL0R2bXNtK0s5RDRXRDZEeTJoeDJQZG1mUWplQlRwLzFyelBKYnJWYjhE?=
- =?utf-8?B?Z0VONVR1eGhMcG0vaHNMQmJJQmllUS83SnBpdGl4MUs1SEN2SDlUSjFBN2Qy?=
- =?utf-8?B?czUrL0x6eVVJbC9lWWtrOGxmMlNwTW4ydkhPcVhWQnM2eit3bGhuSlhuTnVQ?=
- =?utf-8?B?anRiRFExZVM1bE5kd2F2VlEvdkdncnAya2RXN1RJcXZ1SEFLR1U5ODJISXNy?=
- =?utf-8?B?U3dFVElSVHFoZHhwRHgwRkZRSDQ3ZDZWMXlwQzBGNjkxZ0lLNFlGcVhBc3pL?=
- =?utf-8?B?U0lFWHVKenVLU2dudUNOL0pMTXkyVWZUT2w2eEdoSmJLNDdpb0ZRQ1pMNDhW?=
- =?utf-8?B?ZnlEY0Y3UnJEVXYxalNKTjVzOVBjM09JTjRjVDVVbTJTRG9jbUg2b1JUQjYx?=
- =?utf-8?B?SHJjM0xNc1h1bXBBMHVpUU8wNFF2QlE3WWZEenNveGR3R1ViSDVJU1hnY0Ev?=
- =?utf-8?B?SXRSTWEvaU8yTVoyalFXVHhXbUQ4VVBGSUtucVhHZFZrajJ4MXpXcE9Vc3Iz?=
- =?utf-8?B?Mml2YjhmVzZaSjIxWjRnWXlLNmhsL3g1eXJPK1ZzczdocnhKTHlZOW9DRS9P?=
- =?utf-8?B?L2RTdlBYYkFPT2VKN1VBUnkrMzI5bXY3Y3BRMzB1VjA2Q09OM1hVVFdiYXdZ?=
- =?utf-8?B?YmxBbjZaZTgrTTg0QmhQVzk3YmJJcTk2QUZsS3hjUEQyMmpKWGFDODB4RjJh?=
- =?utf-8?B?RndmUFRHSUNiUkt6YldYdk56cXdMdUU4eHhrYkJoYmQ0YUNDTFRDcWJ0UW1k?=
- =?utf-8?B?N3F0S3ZVclN0dzllckVBb1AraG0zc2hUVUIyK3BZVWJZVnFESmRDY0RtR0M3?=
- =?utf-8?B?UHdFejZQMHZYdko2UDhsWDY3VDZZQS9FM0R5VE9VaEpiSUVWQzdXV0h0Q0sr?=
- =?utf-8?B?WVhvREV5OGsreW5MQmpsVGl1RnZPNGZTaWQ0UmVkTnJtbExzOStUOVgvM3JE?=
- =?utf-8?B?azYyd3hmdFJLUWQwVko5U2tkMC9LQml6cWJUM0M3UHJ0S28zMUZ6MFB6TDVJ?=
- =?utf-8?B?ODhlQjFhK2N6NDhpTnpSaXZRdElQdTF1MnFUTS80MktMU0hnL2lrMmF1ditJ?=
- =?utf-8?B?enViRlRSbHJSRFB0WEpJYmppc0grOFZOMUUyODdHTkp5ZkhHM0VVcEViUEZr?=
- =?utf-8?B?WG0rQWlsNzBTcGtZKy9PT3lydXFINHd5SnRyUXg3ZFpQTUFkVjNzbE5WZDZa?=
- =?utf-8?B?OXN6SW9JR1NYaFg5bXUwNXBzQ0dxTWpnZU90VFpudlNUdHBUNTc1TVFpSGg2?=
- =?utf-8?B?dUZVVFAzUlZHbGEySHBBKzFEVFRGdnNCMGFucUwwUFBVWDU1azVVNUIrbHVP?=
- =?utf-8?B?WUVoZWwwbUVHeGUyQnFyRWRlbExSNGJKWjdZWkpOQnFKUkk2R2dNVEErMmVN?=
- =?utf-8?B?S2dpNytDZ2EzV3FXR20vRldXTzdwNGxVc09iR2N0MDY0RmdlMFhKV1FmRlRL?=
- =?utf-8?B?cGxGMWg4bk9FNDdPMno3ZmZheXdCcFpzUW5ScHJ6a3pXRVVCODh6bUREdVRN?=
- =?utf-8?B?ajQ2cEdaOHR5SzlUOUpHbE15UE55UW5OQlVFVUd5Z0Z4OG9CNGxwQzd2aDdG?=
- =?utf-8?B?Ui9nY243dTJMZGYzUmIxZ0ppOCtteTVteU1xcHhPd3pKSExiK3NPM08xeVkv?=
- =?utf-8?B?SFpubVAzdWF0UmhqdnJ2eGhWczg5cnM1RHBWNm1pZkpnVDJHeXpZNk1FczRt?=
- =?utf-8?B?eTN5dFloSWpKMjJMN3NySkdKQjZVK2RnQnkrUWt6TWZkcThjTW1BSW9QNGJH?=
- =?utf-8?B?VWxvUUo4Ykc1R3VLTDF1eUc4MkptZTZOMlZlQ0lURTBtMnBISis5NzFqZU9j?=
- =?utf-8?B?K2tMaDlwUEt0TyttLzRobkc5bUIyRG1FZGkxQ0pVUkh3alVHMzJlRlIybWFj?=
- =?utf-8?B?YmNYUDZncFVxYmdENlRGS3k2Y2wwRGNoWHRyVXFZdEUrOFJwcUkwQ3NLb091?=
- =?utf-8?B?S2VnN1F0WnFPZFcwMGJEZldpSS9mTTkyaVhFa3V4Q2N3RytOTEE1L0M1OCti?=
- =?utf-8?B?OUNqMFhDcEhhMmVnZGtvcW5WangxazhaMGM3NGRPZzJwMzZQb214SDJ4QWk2?=
- =?utf-8?B?MEZucjc0cWdmdE9iMWpWRFU2NkdVTEMzaHdqU0VjeTU3MXhVdGlSdz09?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: 779ae639-23b0-452b-1537-08de51a90650
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?dExhN08raDhSZDlzMVM5RC9BZFMxUnRxTlQxZFpOOWF1eDFCaEVycTZrYjgz?=
+ =?utf-8?B?alRTbktCUWtTVC9YVitIQ3pnbjVOMUpFamFVaFlTUWdsSjhnZlkrOXluck5L?=
+ =?utf-8?B?cG1NY24zMW10M1hGZHFVQUtEUWNFdGo0dlJXcGk2a1NJM2ZJaExxUkVrMjdx?=
+ =?utf-8?B?MGZCODB2ZWFCWGtKWWdlUnJydi9pMnllTloxZDk2TEg5a3Y3S2tNRmZkVUZT?=
+ =?utf-8?B?RFdqRU1WR0hmLzhjbGoyTmxGMll2alk3QkJhMk1nbGdDT3ZiaWV3YTYxaUVM?=
+ =?utf-8?B?U2huSnJ4R0hzY2JPVzNiUk9GM0R5elVLaXJvSzBUR2Izak12Z2FyY2Q5WEND?=
+ =?utf-8?B?akphQ0NQeXdQQ2xhN3gra0ZUVmJOS2RidzE1TTc2WWZ6TTFKUmVidjEvZHFH?=
+ =?utf-8?B?Rmc4d1g2MEhUODBGOHNlODlzL1I1YWlRRkJKeUlQTUVCdkZKVER4U2RLTXpK?=
+ =?utf-8?B?ZWpQRFY5cDhZK0tCTS8raFcxenFJVmdsSkU1U0JET280WDRocStoay9BQUM3?=
+ =?utf-8?B?RWc2UHdRWkJMUTQ3ZzJSb1U5TmdUY2xROGhWYi9iRkxTVmUxeCtyaVlGdTNE?=
+ =?utf-8?B?UFp0d3lobVhEWWdlZWp6c0NJWEZxSWttelVESXhLSWhtOVBMVFNETDNzZjk4?=
+ =?utf-8?B?elFEeGZxMmZrd3ltd2d2MFhpV1Zxeno3TzIzRTd3eG40RVJuK2pKUzZmdXNj?=
+ =?utf-8?B?ejRRV3gxcERHSUZyUDY3ZW8xZTdQUWdNdE9LUXpPYjlidjh6Yi9hNHI0R2Rl?=
+ =?utf-8?B?cWZKa1FreVZjUkhRS0FYWlBpRkNqNDJCT3JQdUJsbkNwaXYzcWt6eWgwdmJH?=
+ =?utf-8?B?RDhqdldMbXkvcUxqZGJHai9HZFNSQXJHS3lNUUtkdkozNk9TNEJndmNWcmFK?=
+ =?utf-8?B?T2lwVUh0YWsrclQ2eVBEOEhVMi8yRWoxZm5oMytlakFETkxkTFBCYzJnMFZP?=
+ =?utf-8?B?N3crN0I5U09OZmYyNFpaWm4rUzd1bitSTWw1eHlzYXl4d3JvOXN0M29YMGUw?=
+ =?utf-8?B?QWl2U0JkUGZPVGhnZkNuckVsM2xBTnB6QUFvQWhHQWp4MlBPZ2ZPd2NsdWpq?=
+ =?utf-8?B?cTR1U2lMMHhFMGRPRGVKMGxBUXB0VWZMUm5FbjJ4N1BzdnFpSWRJUDVRR0c3?=
+ =?utf-8?B?VWR5bG4vQU5GaUpGNjIvTUYzTHFub0hHbHJpV2VRMHkzTDUxZTVLS0ZNZXFm?=
+ =?utf-8?B?dTE2WnlBVVB0VTFrUFpiNEJhNDRxRzR5OWtsb3l2Y2JQN21RVngzODlDWkoz?=
+ =?utf-8?B?dDNnMDZIOG54Umg1T2tLRzdOZmdvUmkya3NlM3dnNWROWVhlbm1ndldIRisr?=
+ =?utf-8?B?VFkxc09HblBuMGdHYVJsTGEzZ2FKZGJXY1laTSs1MEl2eEZ6RmNPUHBzVHYr?=
+ =?utf-8?B?Sm56R0IxSmkvQTNjN0c4YXBESEQ2aFBueDFqNUJTQVQ0anlOWEhhL1B3SW5x?=
+ =?utf-8?B?SnFMd1RwUjJ2MEpGMkxNV2NVRVoxMzlCY1BUYkc0YTZlM3VTNGkvdGkrbWZY?=
+ =?utf-8?B?WXo3UjEwUE1ubGp0WE9JMWdTNmY1c0hNUkEyK2ZrMjk2S3Bqc1lVcDI0SWUr?=
+ =?utf-8?B?Z3RVaFp1dzVjNnVKd2oxa0Ziamp0aWVja2g0WkhuekxRWTQrYkVwaHhtUEs3?=
+ =?utf-8?B?eGppNk4rRGhKY082RUt3MG1TZ0ppbk05blJLWlN6d1MvWDZMZklzNkU5bDhm?=
+ =?utf-8?B?WG53MHlSR2t2Rmdvb0thMkJKU1cxblVMd2ZxbzcybTVaTlBvSkNURHlzNlVh?=
+ =?utf-8?B?R1lRTDNOdVRZdDVFdWlvbmxady9LRHNGeGU5MzlENm5KWUZpbEpxcG1YU2JL?=
+ =?utf-8?B?Q0l2WlJZZ2M1S21pbkZETFh0UXZldGZpU3J2YThDd2YyalhDWGQydERrRVNF?=
+ =?utf-8?B?RnhUb1pBdEh4NCtQWnI5bWlhbDYvWTl6c3U2Qjd5WU93K0RNekowMUpYUzA2?=
+ =?utf-8?B?VXU5ZWs4MUU2M3c2NEx6Z1NKUEF1MHFTbklSYzJsbTBOd0hxYUNpdGhvMzFt?=
+ =?utf-8?B?ZFhIdkxEVUZTR1Q3dWVMa3VDL3dMUjdkMkNvc1ZHWm1FWnUzdWVuTStldFhL?=
+ =?utf-8?B?ZGh0SjZTMlFGdXVyRWI4RU1HUjUvOG5iRnpxUnNiL1UyKzM2V2JpT2JvLzZG?=
+ =?utf-8?B?T2ZRZVRzVnZOOFlVdjd1UVRpRUNZQ0Vma1F4THZJTTR3TDBaMnJhUlYrWnhm?=
+ =?utf-8?B?eVdVdUdaVnFYNGsyUzdGYmJXbEduMG5yQXNpU09WbzNzZ2g0OVRvcjVpMnZC?=
+ =?utf-8?B?TFRURjA0T0ZLaFE2MjY4SVVrZnJCZXNrOXBROVhDQ0xtZ0Rjb3NhVDhLckxJ?=
+ =?utf-8?B?N2dNbjA2VUVFMnZVNDNZbzMxaUYxUzU2TVZwMlluUGxCcTd3UStJZz09?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: 53839ba5-f9b1-4361-70c1-08de51adb8c6
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Jan 2026 07:05:54.2368
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Jan 2026 07:39:30.8850
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 12sOr0G/RXp9lJc8zonWRMR+jcyoWWd0yVEjsZa/71NpZm2jAdSxoHOnF0gHGyPeqp3MKOT1dXbzKtQOzJwLxA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR11MB5300
+X-MS-Exchange-CrossTenant-UserPrincipalName: W9TlSjHAdKC56oV0tUWq4TdGNCByvt9REjppgTQcn4VZSymwZSQFzfuPmEI61DtoQNxaKFXLhXNut7RdVjPrsg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR11MB5008
 X-OriginatorOrg: intel.com
 
-On 02/01/2026 14:40, Neeraj Soni wrote:
-> Add the wrapped key support for sdhci-msm by implementing the needed
-> methods in struct blk_crypto_ll_ops and setting the appropriate flag in
-> blk_crypto_profile::key_types_supported.
+On 09/01/2026 04:46, Tabby Kitten wrote:
+> On 1/5/26 4:31 AM, Adrian Hunter wrote:
+>> Seems reasonable, but isn't there also:
+>> 	bus_ops->suspend() == mmc_sd_suspend()
+>> 		_mmc_sd_suspend()
+>> 			mmc_claim_host(host)
+>>
+>> In general, it looks difficult to avoid runtime resume on
+>> the suspend path.  PCI will usually runtime resume anyway
+>> i.e. from pci_pm_suspend():
+>>
+>> 	/*
+>> 	 * PCI devices suspended at run time may need to be resumed at this
+>> 	 * point, because in general it may be necessary to reconfigure them for
+>> 	 * system suspend.  Namely, if the device is expected to wake up the
+>> 	 * system from the sleep state, it may have to be reconfigured for this
+>> 	 * purpose, or if the device is not expected to wake up the system from
+>> 	 * the sleep state, it should be prevented from signaling wakeup events
+>> 	 * going forward.
+>> 	 *
+>> 	 * Also if the driver of the device does not indicate that its system
+>> 	 * suspend callbacks can cope with runtime-suspended devices, it is
+>> 	 * better to resume the device from runtime suspend here.
+>> 	 */
+>> 	if (!dev_pm_smart_suspend(dev) || pci_dev_need_resume(pci_dev)) {
+>> 		pm_runtime_resume(dev);
+>>
+>> So maybe alter rtsx_pci_runtime_resume() to avoid calling
+>> pcr->slots[RTSX_SD_CARD].card_event() == rtsx_pci_sdmmc_card_event()
+>> when suspending.  Perhaps along the lines of the hack below:
+>>
+>> static int rtsx_pci_runtime_resume(struct device *device)
+>> {
+>> 	struct pci_dev *pcidev = to_pci_dev(device);
+>> 	struct pcr_handle *handle = pci_get_drvdata(pcidev);
+>> 	struct rtsx_pcr *pcr = handle->pcr;
+>>
+>> 	dev_dbg(device, "--> %s\n", __func__);
+>>
+>> 	mutex_lock(&pcr->pcr_mutex);
+>>
+>> 	rtsx_pci_write_register(pcr, HOST_SLEEP_STATE, 0x03, 0x00);
+>>
+>> 	rtsx_pci_init_hw(pcr);
+>>
+>> 	if (pcr->slots[RTSX_SD_CARD].p_dev != NULL) {
+>> +#if IS_ENABLED(CONFIG_SUSPEND)
+>> +		if (pm_suspend_target_state == PM_SUSPEND_ON)
+>> +#endif
+>> 		pcr->slots[RTSX_SD_CARD].card_event(
+>> 			pcr->slots[RTSX_SD_CARD].p_dev);
+>> 	}
+>>
+>> 	mutex_unlock(&pcr->pcr_mutex);
+>> 	return 0;
+>> }
+>>
+>>> WIP
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>> ---
+>>>  drivers/mmc/core/core.c     | 18 ++++++++++++------
+>>>  drivers/mmc/core/core.h     | 11 ++++++++---
+>>>  drivers/mmc/core/queue.c    |  4 ++--
+>>>  drivers/mmc/core/sdio_irq.c |  2 +-
+>>>  4 files changed, 23 insertions(+), 12 deletions(-)
+>>>
+>>> ...
 > 
-> Tested on SC7280 eMMC variant.
+> Me earlier:
 > 
-> How to test:
+>> I'm attemping to manually replicate the changes on Fedora 43's
+>> kernel-6.18.3 checkout
+>> (https://docs.fedoraproject.org/en-US/quick-docs/kernel-build-custom/),
+>> though I'm much less experienced building kernels here than on Arch
+>> Linux (the Arch SSD is currently in another computer). I will be
+>> replying back with results once I can build and test these patches.
 > 
-> Use the "v1.3.0" tag from https://github.com/google/fscryptctl and build
-> fscryptctl that supports generating wrapped keys.
+> I've built a test kernel based on Fedora's 6.18.3 along with these two
+> patches. Now `sudo badsleep.sh` successfully completes on the machine
+> with the Realtek card reader.
 > 
-> Enable the following config options:
-> CONFIG_BLK_INLINE_ENCRYPTION=y
-> CONFIG_QCOM_INLINE_CRYPTO_ENGINE=y
-> CONFIG_FS_ENCRYPTION_INLINE_CRYPT=y
-> CONFIG_MMC_CRYPTO=y
-> 
-> Enable "qcom_ice.use_wrapped_keys" via kernel command line.
-> 
-> $ mkfs.ext4 -F -O encrypt,stable_inodes /dev/disk/by-partlabel/vm-data
-> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
-> $ fscryptctl generate_hw_wrapped_key /dev/disk/by-partlabel/vm-data > /mnt/key.longterm
-> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
-> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
-> $ rm -rf /mnt/dir
-> $ mkdir /mnt/dir
-> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
-> $ dmesg > /mnt/dir/test.txt
-> $ sync
-> 
-> Reboot the board
-> 
-> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
-> $ ls /mnt/dir # File should be encrypted
-> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
-> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
-> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
-> $ cat /mnt/dir/test.txt # File should now be decrypted
-> 
-> Tested-by: Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
-> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+>   * Adrian's code would not compile until I edited
+>     drivers/misc/cardreader/rtsx_pcr.c and added #include <linux/suspend.h>.
+>   * It looks a bit janky that the inner line of code is tied to a
+>     different natural indentation level based on a compile-time flag.
+>     With suspend enabled, the function call is on the same indentation
+>     level as the if statement!
+>       o One possibility is to indent the inner code one more level
+>         (which is an extraneous indentation if the #if is inactive)
+>       o Another is to move the added condition into the surrounding `if
+>         (pcr->slots[RTSX_SD_CARD].p_dev != NULL)`, but this prevents us
+>         from adding code that /doesn't/ check pm_suspend_target_state.
 
-Doesn't apply cleanly to mmc next.  Otherwise:
+Currently (since v6.5) pm_suspend_target_state gets defined even
+if !CONFIG_SUSPEND so, allowing up to 100 cols, it can be
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+-       if (pcr->slots[RTSX_SD_CARD].p_dev != NULL) {
+-               pcr->slots[RTSX_SD_CARD].card_event(
+-                               pcr->slots[RTSX_SD_CARD].p_dev);
+-       }
++       if (pcr->slots[RTSX_SD_CARD].p_dev != NULL && pm_suspend_target_state == PM_SUSPEND_ON)
++               pcr->slots[RTSX_SD_CARD].card_event(pcr->slots[RTSX_SD_CARD].p_dev);
+
+Could use a comment as well, noting that card_event() can call
+mmc_detect_change() which prevents system sleep, so it must be
+avoided if the system is suspending.
+
+Note, this change should be sufficient to fix the issue by itself.
 
 > 
-> ---
-> This is a reworked version of the patchset
-> https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
-> that was sent by Seshu Madhavi Puppala.
+> I ran into a possible bug:
 > 
-> My changes rebase it to use the custom crypto profile support.
-> 
-> Changes in v4:
-> - Updated the link for fscryptctl tool in commit message to "https://github.com/google/fscryptctl".
-> - Aligned the indentation at few places.
-> - Unwrapped few lines of code.
-> 
-> Changes in v3:
-> - Updated commit message with test details and moved "Signed-off-by" above the
->   scissors line.
-> 
-> Changes in v2:
-> - Updated commit message for clarity.
-> 
-> Changes in v1:
-> - Added initial support for wrapped keys.
-> ---
->  drivers/mmc/host/sdhci-msm.c | 47 +++++++++++++++++++++++++++++++-----
->  1 file changed, 41 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 4e5edbf2fc9b..8ac4aee2cb3b 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1911,11 +1911,6 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->  	if (IS_ERR_OR_NULL(ice))
->  		return PTR_ERR_OR_ZERO(ice);
->  
-> -	if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
-> -		dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
-> -		return 0;
-> -	}
-> -
->  	msm_host->ice = ice;
->  
->  	/* Initialize the blk_crypto_profile */
-> @@ -1929,7 +1924,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->  
->  	profile->ll_ops = sdhci_msm_crypto_ops;
->  	profile->max_dun_bytes_supported = 4;
-> -	profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
-> +	profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
->  	profile->dev = dev;
->  
->  	/*
-> @@ -2009,9 +2004,49 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
->  	return qcom_ice_evict_key(msm_host->ice, slot);
->  }
->  
-> +static int sdhci_msm_ice_derive_sw_secret(struct blk_crypto_profile *profile,
-> +					  const u8 *eph_key, size_t eph_key_size,
-> +					  u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
-> +{
-> +	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +	return qcom_ice_derive_sw_secret(msm_host->ice, eph_key, eph_key_size,
-> +					 sw_secret);
-> +}
-> +
-> +static int sdhci_msm_ice_import_key(struct blk_crypto_profile *profile,
-> +				    const u8 *raw_key, size_t raw_key_size,
-> +				    u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +	return qcom_ice_import_key(msm_host->ice, raw_key, raw_key_size, lt_key);
-> +}
-> +
-> +static int sdhci_msm_ice_generate_key(struct blk_crypto_profile *profile,
-> +				      u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +	return qcom_ice_generate_key(msm_host->ice, lt_key);
-> +}
-> +
-> +static int sdhci_msm_ice_prepare_key(struct blk_crypto_profile *profile,
-> +				     const u8 *lt_key, size_t lt_key_size,
-> +				     u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +	struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +	return qcom_ice_prepare_key(msm_host->ice, lt_key, lt_key_size, eph_key);
-> +}
-> +
->  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
->  	.keyslot_program	= sdhci_msm_ice_keyslot_program,
->  	.keyslot_evict		= sdhci_msm_ice_keyslot_evict,
-> +	.derive_sw_secret	= sdhci_msm_ice_derive_sw_secret,
-> +	.import_key		= sdhci_msm_ice_import_key,
-> +	.generate_key		= sdhci_msm_ice_generate_key,
-> +	.prepare_key		= sdhci_msm_ice_prepare_key,
->  };
->  
->  #else /* CONFIG_MMC_CRYPTO */
+>   * On my first boot attempt, I tried running badsleep.sh, waking the
+>     system, and inserted a microSD card. The card was not recognized in
+>     Dolphin or listed in lsblk. rtsx_pci_sdmmc was present in lsmod, and
+>     I saw no references to rtsx or mmc in the journal.
+>   * I could not reproduce this error on subsequent boots. I rebooted the
+>     computer, then tried badsleep.sh (with or without regular KDE sleep
+>     beforehand), then inserted the microSD card. At this point it was
+>     recognized properly. I also tried inserting the card /while/ the
+>     system was asleep, which worked too. I'm not sure why it failed the
+>     first time... dirty contacts? random bug?
+
+Well, you need not only to reproduce it, but show that it doesn't
+also happen with the old code, otherwise there is not enough information
+to work with.
 
