@@ -1,108 +1,136 @@
-Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFEC9311C33
-	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 19:09:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4086D33E377
+	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 20:54:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768244990; cv=none; b=EWDXocX0pGGJDwUyjaB3Cv8xWcxCHlLfKJXAU2BVddvRfoaNKJR7iVvJf1+n7oa3VtvaWLaOPG63wwyiIzqiCkVXG63hWyIMzMTja0ZjMkhOb+9WSJw+/kkidtVfL26Yt6zxYaSleiwCuLNp9UPy/O3HxtDA5uq9ErBXDMj3tf4=
+	t=1768251278; cv=none; b=CT4L/zVSjkH7yyAqR9V+FP/jB4m+CsRd95wdm/hvnDAB/Go/m1wO4U7mgHGJ2AJ8GCdIfsjRk+1SIFBxRxfsq/TWtnP5Nhb2dfhftg7X8XVylsZFHtBV0qXJBwTYr5MFS9fJv8wMWdGSk/t0cyMFoCXbYBQ5qgFZwSn5fOZ7opg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768244990; c=relaxed/simple;
-	bh=3xgYxXVz7pTlrANFhJdQjdekTrJ2dMKKIhvMM9hszBs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WNU1i4+0Fn7E7cBj7zLIiE5ND26vVA0f5mMQmMEl7iooMK1MbUoDGsvjrfc+Kq/XElLxGfyJPEUeVG+3mQHvRfCVimcQDK3TN5H/NYZGh3VvwLL7d+rYHXmoFTKmlxzlGkbNimQBq/xLrsapc05y7eb5kc3pu4SxVkT/mPDaWFY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=etFx61KC; arc=none smtp.client-ip=209.85.167.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1768251278; c=relaxed/simple;
+	bh=heWjzF+AmilmUzHwXu1Ept7hAquo1V8G0vGWDv2VRkQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=CNcuOZqHubL78Son8vXO1lvhyiB7nyKf5Iv42ujTVjYQ4e9Wa+w6ZOHmAfkx3U2Po6ghBf6bjjbI6ID/gcFtG7rbL+8nXEjSu0ZjxQGkaJo4NtFAs5rpYAcizB5YYpOGPFCWwrrL8DerBSnpiNTMkmaqLHqmeecLnImzp9PLGOQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EBBrTg4q; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=MNRcrFQJ; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="etFx61KC"
-Received: by mail-oi1-f182.google.com with SMTP id 5614622812f47-450ac3ed719so4384567b6e.0
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 11:09:46 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EBBrTg4q";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="MNRcrFQJ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1768251274;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=RQtLUY/JE7t2au1QRWYYIx7qIRDxSfraBeIEwjxysb0=;
+	b=EBBrTg4qNBDVgAH/2+iqjTfPMqOUExtbza/uusae7sPlUWdu4YrMRxZQuvBIk8Md2o1DK7
+	L0d8sq8XdunaB/7janAaQx75Ehsd1sCmMODnRtAtD/yvSEs7EtuCszxBKtrb5dOICAQXiz
+	rY2GNJeMG2R7/QwqoapXVRALMBRvJX0=
+Received: from mail-ua1-f72.google.com (mail-ua1-f72.google.com
+ [209.85.222.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-611-sg1fxRAlM3uapSZWBEMkfQ-1; Mon, 12 Jan 2026 15:54:30 -0500
+X-MC-Unique: sg1fxRAlM3uapSZWBEMkfQ-1
+X-Mimecast-MFC-AGG-ID: sg1fxRAlM3uapSZWBEMkfQ_1768251270
+Received: by mail-ua1-f72.google.com with SMTP id a1e0cc1a2514c-945f0b30b07so5604668241.0
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 12:54:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1768244986; x=1768849786; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=redhat.com; s=google; t=1768251270; x=1768856070; darn=vger.kernel.org;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=3xgYxXVz7pTlrANFhJdQjdekTrJ2dMKKIhvMM9hszBs=;
-        b=etFx61KCpSg30zE2a9h6DQp8IIJbxvo1WHJe9ALB77rs4QpU1RuwYf5lMObivyY7tb
-         UTRrFJiGJMYSEzCUv81mDC4lVydW0CnFbGuFxPkaPKQQBTKajaxxdoE4x5UDJUXiZ5Yf
-         uhP29RBk+ZVWuacKRRQwaaNro+JC+L0Q66x2JVO6ustYMUcuQfzmPCkYQwhkXTTyIbyq
-         eODBg48oVR9qGzOUUXDU7ls9jrQUgk3AXSbfHKuziiyphI8pC0kNavPcvuHnaFnYTH0k
-         0u1Wffu1Dvfbg44GQQpyZynKkIsw57sZ4RN+X/z1+cNSQAso4VHEQ/dafnceH3rks3QA
-         oefQ==
+        bh=RQtLUY/JE7t2au1QRWYYIx7qIRDxSfraBeIEwjxysb0=;
+        b=MNRcrFQJ67bj31HEdT9YeC9SXvV8aoX3ihVzJmfu9SvRrvCxUnrBosy05zB3PvWExw
+         8LMwxpPHM4jjbKnqcNhWMMk/G/sFVPDzDVfsp5ZpOKwKwKrkRT9kCKZg528NWoT506Pj
+         BSjNseaDV6xe5ujzxnVQV+It1rp7w8cVErl8qbMOdlnWdek0iiPLTkeUMAMbRzcfxy21
+         KlCO4UTknZEAbkuKRJeAc6CrcI+SUFcq8OlsHIIXP5ZzjO8oQzx85B7o8YX/u4pLcz36
+         WSj4IkI2HGhtVE/l2+IvMTYe5W0p5NZgwxW5FlGieqnXUP49ZXOm3djM3s35FBruxqKQ
+         Y3vA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768244986; x=1768849786;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20230601; t=1768251270; x=1768856070;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=3xgYxXVz7pTlrANFhJdQjdekTrJ2dMKKIhvMM9hszBs=;
-        b=YUC0I5jJw1OGISlwhbe5/hZ42jlXYuCTouCHfUZbF04PNAZBcCbUqmxnR2TYbwWZzI
-         rxp1J0Onx1McK9rlgbz3Xm1ogn3O1SxfOXDxJOEowADy8f3A6fJGid/0oOGPjfXJEzI7
-         xKqS/BdhZwkVPWyjEHTcXLQQDuCfMfwcLkpWtUEmAlEQHz0wO0kbAsUP4bUd/gDYwbpp
-         Qtr8GBd7F60Q85VFNqNvg4RsWEttS5NPdr157qmNCB+o5CbLPIWn3NMAwcqSrxWM0AJs
-         CVDbAVwODxHXXsY/2ps7emK7+WdXz3C8noCh5EcezNR4yMa6MNduFG+wJinx8gn1rv6Y
-         0aCw==
-X-Forwarded-Encrypted: i=1; AJvYcCUUgWyM5SedVViB4qVyl283lpYacJE85qn5QWnlu+tkHL93csuE7VUxXF36VvvoN1QeArpYfv0I9p4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzAbjSFqFZHHa1tUKP9ZOj7wQrRWgLJ6SaqUg5NAUi4Z1WWzZmp
-	+N/PnqdS8Cos10Po79hEjnMX0duCIkYRKv16vCtQxvT+dYW4L3sgjUNSiuOovEqcysEngt2tpEB
-	AfTzZbKYPjdzRa3efHxRFa6NIkHLWQh8=
-X-Gm-Gg: AY/fxX7NEfn08T+h77P1KGqWxz7rcUJuQbgoV3WA+6icavnzT8CeMim6gvnmTEJVHRu
-	icQ9tlWWzpybMYdvME0bl6L4c+9q1XZREv0i3Hkv9Y+lYoD+9PwrIATGA3R/BzvN8xsHpE84OXq
-	METVI9ySiX5CHd3SwqK0wkEM8Q0bi9crTvieNuh4Dq7uBmqkJs3fxPnB9me9bsv1xWfg0LOXBZV
-	w9Y/1yDJIFDQC5VvdO1V7zDkcpsieGD8h9DOh44npNxw/nCF+mtJPZLVZXekPpmrBZMicJFZYYZ
-	T+VMiz58oz/lD3yCLgA/sOrLB3Q=
-X-Google-Smtp-Source: AGHT+IEwDmLeVhBFXh9EVFS3176R5WTz9bHFuYfygwgWJn3bI7U+szmlFfINN1R6jPICkSRAQjR3WA/cuwePtfThcjs=
-X-Received: by 2002:a05:6808:18aa:b0:450:32f0:4887 with SMTP id
- 5614622812f47-45a6bdfd28fmr7796703b6e.31.1768244985965; Mon, 12 Jan 2026
- 11:09:45 -0800 (PST)
+        bh=RQtLUY/JE7t2au1QRWYYIx7qIRDxSfraBeIEwjxysb0=;
+        b=XaUCz7KXibGkZXqXJo/nCgXXvLxk12zSmLe36+Y/eCVnrdDOy+Sv5LHiOhWzksTeqv
+         bykb3EU2nzQD4PGt62nxjMOWPAovIpNxjQKe5N92ccS8uJaQIzhwrOhml16wv/pt1wvq
+         CH5qs7fAaaEDJbZwLwkEPrdQwOxniNUSFscHD4lC6aoAuS0PkN6IDWXCNsbtiMhPj5pD
+         pJUcaoJLzZ/AgBMs4UKSd+iBjAo4adF/CknuxSbw4F33bbzA18xXCsWuwZnMg9eBKTG/
+         tycrLQqWashRrHMNgKceOueh7FhHQ5wnCQSLC/bmgJAtdsgsn9PEY5TwWxr8q9e1Dq80
+         a+eA==
+X-Forwarded-Encrypted: i=1; AJvYcCXy25hqvwQAwtUo8l1bg5JzRyCcmYrt46JEStXJX79Z/zFr7ZmvKI95PubxKwrc9LIsfdgvSkzGiJk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxTvFHKjP1kAhiuXaB1kClrpX8mDcqkvIjrmRreA4RsXf1ARWk5
+	732ZaYu55sATXVb8zgUWbrRYpKbFa2zVRIwIjqCc4q6VLZZjt/SuM7Xdl4YS/dyp+8m6wDPXtMw
+	hyYfap+tcAx6I4GwBTVJPCsJj5Dkktm0fv+ZiowcHPQv1BJ8uyLi5efk1D/cGxQ==
+X-Gm-Gg: AY/fxX40xw6KWmTfC3JCNupvjVvljchRHWR7TgfavS3LEfdxGu0GLhZ68M77jKHP1iN
+	+Qb47POCgi8ILpoQe8rR4C2xaUzRjrJdc7Gx9ztpUbYjUNRG77hzofvKJOoaPb4OBIFtI0rufOL
+	xLGE8pXREfvEUsU75cMxeBnNdVPFutVazXdnd2kwpYXVEZIVC5WbNWAVba3SXiw90OxfI7Lx5xZ
+	kXPHlPWhiNGPihYuufK+zjUcF/a/Zk6QzPTjMl2ca8zmazlND8Dvludidm+K9VwOzcKl3jpJxr/
+	0qGwwvbX8uWLnFquV9qCiurPlDoN8P/X8CpUtJH1kMmU3+jt3FITZVsbkhkNx4cY2kCfqG7njnV
+	32lOnw5gL
+X-Received: by 2002:a05:6102:f0b:b0:5db:ecac:5800 with SMTP id ada2fe7eead31-5f16cacb7b5mr354897137.19.1768251270179;
+        Mon, 12 Jan 2026 12:54:30 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEUy4CpEwuxm8S3FrkZ8Tlt99aDpzL3BC+8t5fBT66xtDR5qpVls7IxrVD5mbftlUkdr9xx2A==
+X-Received: by 2002:a05:6102:f0b:b0:5db:ecac:5800 with SMTP id ada2fe7eead31-5f16cacb7b5mr354883137.19.1768251269697;
+        Mon, 12 Jan 2026 12:54:29 -0800 (PST)
+Received: from redhat.com ([2600:382:771e:5aa5:103f:e4ff:d734:7cd4])
+        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-5ef15be79c6sm11394917137.12.2026.01.12.12.54.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 Jan 2026 12:54:29 -0800 (PST)
+Date: Mon, 12 Jan 2026 15:54:20 -0500
+From: Brian Masney <bmasney@redhat.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 06/13] mmc: sdhci-pic32: update include to use pic32.h
+ from platform_data
+Message-ID: <aWVffIGEtPYZmdkh@redhat.com>
+References: <20260109-mips-pic32-header-move-v1-0-99859c55783d@redhat.com>
+ <20260109-mips-pic32-header-move-v1-6-99859c55783d@redhat.com>
+ <eb84ecc7-e409-4e2e-b609-7fe68336feff@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260110010715.1610159-1-mschirrmeister@gmail.com>
- <67ccb8f6-f9bd-4266-b79a-b688bd6d030b@rock-chips.com> <8536413c-8687-4d75-befb-8f25e54838bf@rock-chips.com>
- <c3ee063c-ca11-44e4-9e7d-3861a82db3ea@rock-chips.com> <a346ba30-43f1-4579-91e7-f10d2ccff039@rock-chips.com>
-In-Reply-To: <a346ba30-43f1-4579-91e7-f10d2ccff039@rock-chips.com>
-From: Marco Schirrmeister <mschirrmeister@gmail.com>
-Date: Mon, 12 Jan 2026 20:09:35 +0100
-X-Gm-Features: AZwV_QhduoYwkSZhCEw-t8HBLxeWwsxbNWZkTjbia4I_1o_9SGTrHxB5ncQ2lVs
-Message-ID: <CAGJh8eCJEwSySH3jddmcLjdtbFkn2yDmoE4mH1snmZJQHopA0Q@mail.gmail.com>
-Subject: Re: [PATCH v1 0/3] mmc: dw_mmc-rockchip: Add stability quirk for
- NanoPi R76S
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Chaoyi Chen <chaoyi.chen@rock-chips.com>, robh@kernel.org, krzk+dt@kernel.org, 
-	conor+dt@kernel.org, linux-rockchip@lists.infradead.org, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, heiko@sntech.de, ulf.hansson@linaro.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <eb84ecc7-e409-4e2e-b609-7fe68336feff@intel.com>
+User-Agent: Mutt/2.2.14 (2025-02-20)
 
-On Mon, Jan 12, 2026 at 9:58=E2=80=AFAM Shawn Lin <shawn.lin@rock-chips.com=
-> wrote:
+Hi Adrian,
 
-> >> I found several problems on RK3576 for supporting sd cards. I wondered
-> >> how all upstream RK3576 boards claiming SD support work? Anyway, I sen=
-t
-> >> a series to the list[1], not sure if it fixes the problem you faced, b=
-ut
-> >> these should be the right patches you should have a try.
-> >>
-> >> [1]https://lore.kernel.org/linux-rockchip/1768189768-96333-1-git-send-=
-email-shawn.lin@rock-chips.com/T/#t
+On Mon, Jan 12, 2026 at 10:40:03AM +0200, Adrian Hunter wrote:
+> On 09/01/2026 18:41, Brian Masney wrote:
+> > Use the linux/platform_data/pic32.h include instead of
+> > asm/mach-pic32/pic32.h so that the asm variant can be dropped. This
+> > is in preparation for allowing some drivers to be compiled on other
+> > architectures with COMPILE_TEST enabled.
+> > 
+> > Signed-off-by: Brian Masney <bmasney@redhat.com>
+> 
+> Seemed to compile on x86 with COMPILE_TEST, so please also add
+> COMPILE_TEST for sdhci-pic32.
 
-I will give it a try on the NanoPi R76S. Have also ordered a Rock 4D.
-But it will take a while before it arrives.
+I can do that in a later series once this series that moves the header
+file and updates the includes lands in Linus' tree. These are low
+priority fixes, and I don't want to create extra work for the various
+subsystem maintainers with all of these cross tree merges, and
+immutable branches.
 
-> > cannot be detected. However, if the SD card is inserted before Linux
-> > boots, it can at least start up. I suspect that other boards may behave
-> > the same way :)
->
-> This is true, because .get_cd() returns card present when booting for
-> the first time, you the only way for upstream RK3576 boards to use sd
-> cards is to insert the card before booting. But then hot-plug case will
-> not able to work.
+If patches across the tree get merged in the wrong order, then Linus
+will get some build warnings, and I'd really like to avoid that. :)
 
-I can confirm the same. sd card only works, when inserted before boot.
-No hotplug.
+I'm sending out a v2 of this series in a few hours. Hopefully the MIPS
+maintainers can merge this for v6.20 / v7.0, and in about a month, I'll
+post patches to various subsystems that enable COMPILE_TEST for these
+pic32 drivers. Based on the clk driver, there's likely to be other
+cleanup pathces that will be required as well, such as to fix sparse
+errors that will be newly introduced since the drivers will appear as
+"new".
+
+Brian
+
