@@ -1,33 +1,26 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m19731109.qiye.163.com (mail-m19731109.qiye.163.com [220.197.31.109])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 910A9245008;
-	Mon, 12 Jan 2026 08:46:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 288AC346787;
+	Mon, 12 Jan 2026 08:58:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.109
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768207601; cv=none; b=Hs96XUMqNhJo1EZPwgYVrHh5ce0yxZ5sjlDLQvM2t3vlwtE2P2RjqRHUAYiL75pduH1+KPI21L2WblbLoe2xkowtC4cqj3eHLsVWEB6kQiBXIZO2gGhcdLSGOkpsbsNlwVlFVomeofBOggnB9f68RglapnQSlY6/m/rCpNSDM0M=
+	t=1768208298; cv=none; b=FGChlb7jQUKQ3pHWDSkl4ujRM2EudxE3/TDzi8yt87aAsljbIul/zwPTTbqCjYCLfZ9HPOA7KmoXlR+dSpqhKlQTl38ehbt8oL6W1/FRvXcw+EmLMbzrPcNtCwtRSHMQRAqumLb9s/5y+JPhiAyMF0cHyobf44A53jINbSRHnD4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768207601; c=relaxed/simple;
-	bh=WpfJMmBzcHGsu9Xvvxs8fzsL5XDQagQrLpb/lIYEouk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=p30uV3k/fulv2UcaWyWijY8vUHX/eclCx/WEr0SsEwU7kX0bpx+UYMBqFiDotKSSldkrNcA9CqjgOZ4c2cpq9VNf3XVezzyNH0c9kpiuQ+aGbuaLwccVC1HW1qODizCZDWZvn+rRnxk0L//GM3AsHocb6M6ywKXWv91t6IuzBDQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qc/IufOG; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768208298; c=relaxed/simple;
+	bh=mhRV4RszuvlNMkXJhHZmrq7OlzdMGpEjotoCimX5KaU=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=V2ulHX69r5sOaP5z4RGOIBpvifqTdcqi/ocyig+BAkdLMAxEPdF5+PnLSUmVvAAkpT+ySxkcoWe6SumlMBNFrrdwLNBYa5J47gBERhSZViMJ7TG8VaPbmbKxjn8I0z+Nz6P6tpob64n3jDGAuwZeTfBtL6sBDhJ0YyhjuOPRmCk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=UhWoW7kY; arc=none smtp.client-ip=220.197.31.109
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qc/IufOG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5351C19422;
-	Mon, 12 Jan 2026 08:46:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768207601;
-	bh=WpfJMmBzcHGsu9Xvvxs8fzsL5XDQagQrLpb/lIYEouk=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=qc/IufOGo3hIkqQIVrdAsghOhjoKZBYwMPGL06aAC2NCQbTLwnSI1niSBDrvBcf2O
-	 ZhE5+MAcXTL9uOdZmIp1/N+tJBYOFreWZFZVG2KLmlXUF9d13uJU/gUwktMDatr/H5
-	 sdPl/1SG2nv2omDDok0nFpU9k0C+Omnhw72r7LODe4TVYSfEyRi2L0y7z1nTgrJUFo
-	 ZooYRCjx/FuZqrzL7dFC4mGz1of5d13FHIYmeaDkHhT6r9OCFNt2ONkQqQaTpzOWlf
-	 Z0C+I3eC4wPI9++QROx1buCAH8d+yyrwmqtzzUD+68hEHOW20J/b5pLGVZiKXqMPn0
-	 sOFNsSkgioj+g==
-Message-ID: <3ad4b8a7-d8f4-447d-8c34-28ecccaaafd0@kernel.org>
-Date: Mon, 12 Jan 2026 09:46:35 +0100
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="UhWoW7kY"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 30503549a;
+	Mon, 12 Jan 2026 16:58:05 +0800 (GMT+08:00)
+Message-ID: <a346ba30-43f1-4579-91e7-f10d2ccff039@rock-chips.com>
+Date: Mon, 12 Jan 2026 16:58:03 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,81 +28,83 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: arasan,sdhci: Add Axiado AX3000
- SoC
-To: Tzu-Hao Wei <twei@axiado.com>, SriNavmani A <srinavmani@axiado.com>,
- Prasad Bolisetty <pbolisetty@axiado.com>, Vinod Koul <vkoul@kernel.org>,
- Neil Armstrong <neil.armstrong@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>
-Cc: linux-phy@lists.infradead.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
-References: <20260109-axiado-ax3000-add-emmc-host-driver-support-v2-0-934f1a61f7c0@axiado.com>
- <20260109-axiado-ax3000-add-emmc-host-driver-support-v2-1-934f1a61f7c0@axiado.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20260109-axiado-ax3000-add-emmc-host-driver-support-v2-1-934f1a61f7c0@axiado.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Cc: shawn.lin@rock-chips.com, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org, linux-rockchip@lists.infradead.org,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, heiko@sntech.de,
+ ulf.hansson@linaro.org, Marco Schirrmeister <mschirrmeister@gmail.com>
+Subject: Re: [PATCH v1 0/3] mmc: dw_mmc-rockchip: Add stability quirk for
+ NanoPi R76S
+To: Chaoyi Chen <chaoyi.chen@rock-chips.com>
+References: <20260110010715.1610159-1-mschirrmeister@gmail.com>
+ <67ccb8f6-f9bd-4266-b79a-b688bd6d030b@rock-chips.com>
+ <8536413c-8687-4d75-befb-8f25e54838bf@rock-chips.com>
+ <c3ee063c-ca11-44e4-9e7d-3861a82db3ea@rock-chips.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <c3ee063c-ca11-44e4-9e7d-3861a82db3ea@rock-chips.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9bb16d3dad09cckunmbb41a1112d58c1
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGhodQlZPH0tDTRofTkJJSE9WFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=UhWoW7kYX66ut3wPXEqeaqrStdUT65OVLJVljFYrFzAtKSuAfDr5Nj5Jx+o9RG2o5GOl4ti7GN4rUCtv9n8sZNMrC6iuDoI1DHO1KJu0zH8PGgYwSODdl6HJjYMT8/xg3nI7FLlQCIaCKzIp69lC+lThQLXLDukwOmOG1kfdABM=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=n0N5cpDzl2Io3llDYSRDqgK0DrphJVLWFS2vQbYLFZc=;
+	h=date:mime-version:subject:message-id:from;
 
-On 09/01/2026 10:46, Tzu-Hao Wei wrote:
-> From: SriNavmani A <srinavmani@axiado.com>
+在 2026/01/12 星期一 16:29, Chaoyi Chen 写道:
+> Hi Shawn,
 > 
-> Add compatible strings for Axiado AX3000 SoC eMMC controller which
-> is based on Arasan eMMC controller.
+> On 1/12/2026 11:56 AM, Shawn Lin wrote:
+>> 在 2026/01/12 星期一 9:32, Shawn Lin 写道:
+>>> 在 2026/01/10 星期六 9:07, Marco Schirrmeister 写道:
+>>>> This series addresses a microSD stability issue on the FriendlyElec
+>>>> NanoPi R76S (RK3576). The board currently suffers from a 400kHz
+>>>> retuning loop when the controller attempts to enter runtime-suspend
+>>>> during idle periods.
+>>>>
+>>>> Evidence of the failure in dmesg:
+>>>> [Fri Jan  2 01:28:02 2026] mmc_host mmc1: Bus speed (slot 0) = 400000Hz
+>>>> [Fri Jan  2 01:28:03 2026] mmc_host mmc1: Bus speed (slot 0) = 198000000Hz
+>>>> [Fri Jan  2 01:28:03 2026] dwmmc_rockchip 2a310000.mmc: Successfully tuned phase to 233
+>>>> [Fri Jan  2 01:28:04 2026] mmc_host mmc1: Bus speed (slot 0) = 400000Hz
+>>>>
+>>>
+>>> Does this problem happen with all microSDs or just *a* microSD per
+>>> your description?
+>>> Have you ever tried to disable SDR104 support?
+>>>
+>>
+>> A quick update.
+>>
+>> I found several problems on RK3576 for supporting sd cards. I wondered
+>> how all upstream RK3576 boards claiming SD support work? Anyway, I sent
+>> a series to the list[1], not sure if it fixes the problem you faced, but
+>> these should be the right patches you should have a try.
+>>
+>>
+>> [1]https://lore.kernel.org/linux-rockchip/1768189768-96333-1-git-send-email-shawn.lin@rock-chips.com/T/#t
+>>
 > 
-> Signed-off-by: SriNavmani A <srinavmani@axiado.com>
-> Signed-off-by: Tzu-Hao Wei <twei@axiado.com>
-> ---
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml | 3 +++
->  1 file changed, 3 insertions(+)
+> I encountered a similar issue on the RK3576 EVB2.
+> 
+> It seems that the cd-gpios feature are broken, so SD card events
 
-Your patchset is impossible to apply. Do not add fake dependencies.
 
-Best regards,
-Krzysztof
+Yes, cd-gpios method for RK3576 is broken now, so you need to apply
+my first 2 fix patches.
+
+> cannot be detected. However, if the SD card is inserted before Linux
+> boots, it can at least start up. I suspect that other boards may behave
+> the same way :)
+
+This is true, because .get_cd() returns card present when booting for
+the first time, you the only way for upstream RK3576 boards to use sd 
+cards is to insert the card before booting. But then hot-plug case will
+not able to work.
+
+> 
+
