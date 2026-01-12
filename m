@@ -1,151 +1,118 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D76022C1788
-	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 22:49:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 362A72C028B
+	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 22:58:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768258163; cv=none; b=gzBg2p5B/KFrwdTNPTmELUTDPbvYeBWYAtf2pHxcsFMqujoka9A0XWr7PgsefZ3WxTqZVahXjgiqGZ+quSqfpWd0ldLzWjSsyN/SHi3jlQ/GyUcsh6ImgwsHZzIJOtD7q16/2rYJYXyUQlWohgxUiRIROfRUaR7xCYbHy53Oihg=
+	t=1768258687; cv=none; b=Oq8+wrN9vpUIitqlsofkScq8lX2N6MFu39+FdzGbgNq5sgoo3DbhWCvnqolLdzRQBIqfEoRB4cZOJeg06awZ+G7ieqrwmA9rd9gAqhFvcM4DkJolHlmkfTrfVc2LyJjwUNq87gTBg40giRAr5P9djxHUZm26nxyUvM2G7Igan7Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768258163; c=relaxed/simple;
-	bh=iCdp8gctkLaPW3D/fei6jxGKlMAA2QOc3/o0wQqctm0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=HifhMLzSPnxNqvrX5qu7PhL7Q5kCXsa72qdd4PwH6g90KzXqn0S1kIkstmBGpMjLARC5Ar1KDl1qUdCYO6uBuQQUHjHkAeHt3XLT1NUajxe6+9VMspHwiFIbWDJGzrlMFfSvnr2ns0iDBQP7DkE+CUg/bwkscs1Jcb/M3+uuw0M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=BYve7gLJ; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=m4wJ37Wh; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1768258687; c=relaxed/simple;
+	bh=rGR4ZRN/eUN4de0udno9CMQ1JKZLoES5FgqCMPiLzqs=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=m0u7pxEOtKKCtFAPBUyTVtTl/2AksY/sIoX/gDWde5P0VWOCYCv1mOcSCYXZZHesuJkg8q7nYNpOiInVoWCVO7VrzqZpC0gMPe8k73q3qLqvQLbVP/ZzBrAtzaI2SzYsRKOZBJvxdokMZ9ULjBqHMq/nk6jUWTl9EWztz71gORw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZF1A2oSw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="BYve7gLJ";
-	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="m4wJ37Wh"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1768258141;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=YD4ytu1UC7PeOKKacILQRYf/wWE4kZNXtZ0iRfKR+V8=;
-	b=BYve7gLJrkHfeK5feRE1VT/x654c4gASvX44Vw4qfqyxr5f5rstBTf38LYNFXITElhId+o
-	KgboPCHcNLhwPEB/z5Hl6c/ZtT1QRLljlOBQ/sztYypxr9u/uSUszy2mJ51h20LSp3S3th
-	PsnfjVoyIkXt3k9ySPEK8TzYyM3KCd4=
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com
- [209.85.222.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-120-shSUF-0TMkGwNNzcxVcUeg-1; Mon, 12 Jan 2026 17:49:00 -0500
-X-MC-Unique: shSUF-0TMkGwNNzcxVcUeg-1
-X-Mimecast-MFC-AGG-ID: shSUF-0TMkGwNNzcxVcUeg_1768258140
-Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-8b2217a9c60so2158137485a.3
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 14:49:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=redhat.com; s=google; t=1768258140; x=1768862940; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=YD4ytu1UC7PeOKKacILQRYf/wWE4kZNXtZ0iRfKR+V8=;
-        b=m4wJ37WhhPaCKUPOpoK5fqS/rng3r+lGtLvgtxOGsouNIDVI6SAibGVzrsO1zQvdbW
-         lMkeU/i0ZXl5uj2uPpSUsJhHeaLkDbdoQgON2DAFpWKJ1/W1lvDP7bJx4QZIQntnk5Pm
-         ZuOMC753NZTOyLfN3o/cP0fsapvv8nv52/QDdoK+vWJPzxKYJugW8NgtY4VilER3wJea
-         RGSV5huF6iw+u+vekm8WTpjMpkHfU5Szb358OwbM9F2RApl4ZO3w2s+iiOsJPoTTWAJ8
-         GceA1Q+FwSgZ5cgfXlrult5qJxbHZiTmVFFAV6zExqQylTAnsLRRSrTKRWU17iskvKDQ
-         x8fw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768258140; x=1768862940;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=YD4ytu1UC7PeOKKacILQRYf/wWE4kZNXtZ0iRfKR+V8=;
-        b=AkFIOst8+8uE2w4V7OqgM5lo+zG8IU3MtuQdDzZPSlGCXt0LEaI+xVeS390b7ali+i
-         x4X3Zqp/JF0LlGhFTwJDvTn7y+lfBVHefP+xTqy7tmohlBpQDr0NR8993G4j6o7pEd9q
-         ePh19pNkK6zmbHtu/xMzw1OgIR5hv8PFaXd8eOnCdyc5RCrQbmZnLZLrOep+HkRg12bD
-         zVSbX6kDHbB/9Zcf5WkWuDeksQ757wk39KqPZS2KOQF+HnCS0ZYK7gNi2HkjBZGzQQyt
-         Pa1UwfXzxde1G5XepxB0VYiQvVXos0WgVP5KsA4LZSvcKYeWdM3IILEdVgP7TnlIpJFp
-         3+eA==
-X-Forwarded-Encrypted: i=1; AJvYcCWw4YMB7DA7DMGuqOwSMFQpifMBLxmtwXIoITiBmjqniK4bG8guAqG45hZVJOV74H+Qvk1i0mcMJps=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx8eshKMLvYvYjgjRvh4psJsKkW5kDU7AaZ7gWKew+UdPEZiQ+o
-	gNVg5eA6XBNjMtx0Ufbvy1qofbAUvxuz2nJWlJYcMcCmmfrkoxwjPi32ABVHBT3yJLmwWAvCvvm
-	5Xl8EYojIOEZmmJddaFdwMPqDXtlvSRIHQR/1Q3tHL+mr+aOiJmi43dPYmGvXtA==
-X-Gm-Gg: AY/fxX7d7L9BgU9LiKE7Rlq/D5h1RBcgLkcxQ+rMOOGdBsOlZHW0u3Ja5uOT4jg/k7P
-	KqqbFn1fgVS+AMiPTbmLkRQtALiUK6sVcriH+1gQcJdaIZICc8onXGw8XcwaJAcxUZFJZanHeoZ
-	V/UmPCeZU6oRbws+PYU4aC6Xeq4PFXmxji4yl2pCcquDbRQofWHfMi9wapMefaWG1K66JbYnZql
-	2q78xqNZMx8M/Pnhz6V/7zE3n4vzpwzTnMb3bFtwCLDZJPSeLj+K3eoNZFsY8iQHD/R4Xvx1wi8
-	KvbF5i2s3MSOoQfypHYLIvqIe/DaRh7R0po88kpcnp8jrcEC9ZjELgsdFB0ettgnzJh4AHejgn5
-	6BHt3Owj7uiH/m4ZdRlxK3/CERicrHV6tluXS3Gre4mE8hXWUrA==
-X-Received: by 2002:a05:620a:4108:b0:891:ff1e:f6ad with SMTP id af79cd13be357-8c3894074b8mr2453278085a.69.1768258140185;
-        Mon, 12 Jan 2026 14:49:00 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IG201o4ExC/9sZW9hmJWN6Sg/WNrAeO7v2m8Isi7OqtUUCnuLGIBG6+RVNvUpMuFweqnF6Qcg==
-X-Received: by 2002:a05:620a:4108:b0:891:ff1e:f6ad with SMTP id af79cd13be357-8c3894074b8mr2453276785a.69.1768258139846;
-        Mon, 12 Jan 2026 14:48:59 -0800 (PST)
-Received: from [192.168.1.15] (c-73-183-52-120.hsd1.pa.comcast.net. [73.183.52.120])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-8c37f4a6145sm1580930385a.5.2026.01.12.14.48.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Jan 2026 14:48:59 -0800 (PST)
-From: Brian Masney <bmasney@redhat.com>
-Date: Mon, 12 Jan 2026 17:48:03 -0500
-Subject: [PATCH v2 09/16] mmc: sdhci-pic32: update include to use pic32.h
- from platform_data
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZF1A2oSw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E0744C2BC9E
+	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 22:58:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1768258686;
+	bh=rGR4ZRN/eUN4de0udno9CMQ1JKZLoES5FgqCMPiLzqs=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=ZF1A2oSwK1WsbWs/HUBcLdTtmiUbK6URLC2b/N/uRpduXWfNWd7sFJHylH1WBFPGl
+	 4W0qbD7+vI9ygSTKuxXub3hNW7e1OIABaHbvYwbMe1ze08bnQOEEeoYfB68cbMoZT4
+	 t67BRBrPgRvrAJE9u9zTWFlb/F60evXfpOPf++hM/o6hBw3aSuKfcMvBGTetT6KeKP
+	 QVOleN8aFaTqWZvRKkG6U13zjX8OYXDZDZOi6QHouEIPkJGHxnUt9q/x82RH815ikV
+	 TjLUQA5zdmbV8F+L7qyGbJfx//yFgmhG46XYsjeZN8DO4O5jXhEpEuN5jtVf6u/Nc4
+	 7naZe4GyxLteA==
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-b83122f9d78so1101690366b.0
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 14:58:06 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWclzmo0AtsyBGxQCuBwvo2RQBxBgGQi9+xWbgpJLl5iKutcZrrX5PFn+15VEY7//KBXlJ9zEkABf0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwOxCdPoxZ1SrHJtbzqJrPiei7GjliqfY61/k1zzRpeBCPt3Vx7
+	P52es85DoPAY1QErvQR6K8ziWCsl+TXDCgxDiRTQ4Jdrw9g6gu5uMICWAecBrwE3mlnFxsvtsfI
+	FuT39dH8Uq5qOAi+cgf1Tk1ayL8KlAg==
+X-Google-Smtp-Source: AGHT+IFvZMR6ZXQzmmWssKqU5VU1/QG0Dy+4mHOcf7yoi13by1s1GpP8Cl1/EvHF9RRVm6QkOUCvmPjShbd8Q2d+EvI=
+X-Received: by 2002:a17:907:1ca8:b0:b72:b289:6de3 with SMTP id
+ a640c23a62f3a-b84453ff014mr1934265266b.58.1768258685308; Mon, 12 Jan 2026
+ 14:58:05 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260112-mips-pic32-header-move-v2-9-927d516b1ff9@redhat.com>
-References: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com>
-In-Reply-To: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com>
-To: Thomas Bogendoerfer <tsbogend@alpha.franken.de>, 
- Claudiu Beznea <claudiu.beznea@tuxon.dev>
-Cc: linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Brian Masney <bmasney@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1270; i=bmasney@redhat.com;
- s=20250903; h=from:subject:message-id;
- bh=iCdp8gctkLaPW3D/fei6jxGKlMAA2QOc3/o0wQqctm0=;
- b=owGbwMvMwCW2/dJd9di6A+2Mp9WSGDJTq7y/57X/4i3dN2fFy5u7fHKs/TKqBd2DFpzsU71/X
- WPVzTV3O0pZGMS4GGTFFFmW5BoVRKSusr13R5MFZg4rE8gQBi5OAZjI3s2MDFeK3/4+sMcj+4xY
- 0qTsysWH+KfNDPOwdw/On8oUyqJQsoKR4XBdg3NARmvz74KEfSsLDotMnrOx+UjObaaN15WtIxp
- T+QA=
-X-Developer-Key: i=bmasney@redhat.com; a=openpgp;
- fpr=A46D32705865AA3DDEDC2904B7D2DD275D7EC087
+References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
+ <20260108-dt-mtd-partitions-v1-6-124a53ce6279@kernel.org> <20260109-bright-purring-oyster-8c9f0b@quoll>
+In-Reply-To: <20260109-bright-purring-oyster-8c9f0b@quoll>
+From: Rob Herring <robh@kernel.org>
+Date: Mon, 12 Jan 2026 16:57:54 -0600
+X-Gmail-Original-Message-ID: <CAL_Jsq+0NRHx5JVvcZZC1PX0UByFq7PmvZbH6QoNn3kBZgrbPg@mail.gmail.com>
+X-Gm-Features: AZwV_Qju7S_APdjvo6ENgv2SSZg3sdeIvTR8mamw1g2_RQbQl5m7gRsuwu8q2uU
+Message-ID: <CAL_Jsq+0NRHx5JVvcZZC1PX0UByFq7PmvZbH6QoNn3kBZgrbPg@mail.gmail.com>
+Subject: Re: [PATCH 06/10] dt-bindings: mtd: partitions: Drop partitions.yaml
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Miquel Raynal <miquel.raynal@bootlin.com>, Richard Weinberger <richard@nod.at>, 
+	Vignesh Raghavendra <vigneshr@ti.com>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Brian Norris <computersforpeace@gmail.com>, Kamal Dasu <kdasu.kdev@gmail.com>, 
+	William Zhang <william.zhang@broadcom.com>, Nick Terrell <terrelln@fb.com>, 
+	David Sterba <dsterba@suse.com>, =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>, 
+	Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Marcus Folkesson <marcus.folkesson@gmail.com>, 
+	Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@kernel.org>, Hauke Mehrtens <hauke@hauke-m.de>, 
+	linux-mtd@lists.infradead.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Use the linux/platform_data/pic32.h include instead of
-asm/mach-pic32/pic32.h so that the asm variant can be dropped. This
-is in preparation for allowing some drivers to be compiled on other
-architectures with COMPILE_TEST enabled.
+On Fri, Jan 9, 2026 at 3:34=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.org=
+> wrote:
+>
+> On Thu, Jan 08, 2026 at 11:53:15AM -0600, Rob Herring (Arm) wrote:
+> >  patternProperties:
+> >    "^partitions(-boot[12]|-gp[14])?$":
+> > -    $ref: /schemas/mtd/partitions/partitions.yaml
+> > +    type: object
+> > +    additionalProperties: true
+> >
+> > -    patternProperties:
+> > -      "^partition@[0-9a-f]+$":
+> > -        $ref: /schemas/mtd/partitions/partition.yaml
+> > -
+> > -        properties:
+> > -          reg:
+> > -            description: Must be multiple of 512 as it's converted
+> > -              internally from bytes to SECTOR_SIZE (512 bytes)
+> > -
+> > -        required:
+> > -          - reg
+> > -
+> > -        unevaluatedProperties: false
+> > +    properties:
+> > +      compatible:
+> > +        contains:
+> > +          const: fixed-partitions
+> >
+> >  required:
+> >    - compatible
+> > diff --git a/Documentation/devicetree/bindings/mtd/mtd.yaml b/Documenta=
+tion/devicetree/bindings/mtd/mtd.yaml
+> > index bbb56216a4e2..e56dba83f00a 100644
+> > --- a/Documentation/devicetree/bindings/mtd/mtd.yaml
+> > +++ b/Documentation/devicetree/bindings/mtd/mtd.yaml
+> > @@ -30,7 +30,7 @@ properties:
+> >      deprecated: true
+> >
+> >    partitions:
+> > -    $ref: /schemas/mtd/partitions/partitions.yaml
+> > +    type: object
+>
+> I think you need explicit, since we require it for incomplete nodes:
+>
+> additionalProperties: true
 
-Signed-off-by: Brian Masney <bmasney@redhat.com>
+I put what the tools required me to put. :) We only require it when
+properties get defined because that's the case we don't know if the
+schema is *all* properties or not.
 
----
-To: Adrian Hunter <adrian.hunter@intel.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
----
- drivers/mmc/host/sdhci-pic32.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
-index 7ddac0befed87e6e46acfa7593203a5b540558bf..2cc632e91fe454bf29c1da22e45135d5d0267f54 100644
---- a/drivers/mmc/host/sdhci-pic32.c
-+++ b/drivers/mmc/host/sdhci-pic32.c
-@@ -18,6 +18,7 @@
- #include <linux/interrupt.h>
- #include <linux/irq.h>
- #include <linux/of.h>
-+#include <linux/platform_data/sdhci-pic32.h>
- #include <linux/platform_device.h>
- #include <linux/pm.h>
- #include <linux/slab.h>
-@@ -25,7 +26,6 @@
- #include <linux/io.h>
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
--#include <linux/platform_data/sdhci-pic32.h>
- 
- #define SDH_SHARED_BUS_CTRL		0x000000E0
- #define SDH_SHARED_BUS_NR_CLK_PINS_MASK	0x7
-
--- 
-2.52.0
-
+Rob
