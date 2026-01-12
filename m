@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71F9430F92F;
-	Mon, 12 Jan 2026 08:30:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EF891FB1;
+	Mon, 12 Jan 2026 08:33:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768206630; cv=none; b=LfSwNyk2B0EzHDtP95jbaAJ+9RqUPV5dflfllA7p3HpGJNQb19f5UCGwgxZrX1VtLnsKyDf8zXLvcFGpAWIiBiICdp8HdONFvRXOhbamMKN2MAWzz95sKK/DAIBQsr983gRxruYI3akKvTxuyxpWkuUcuHB3U6pFysXSYV3U6PI=
+	t=1768206833; cv=none; b=uNfvG1IkjK3tmBThJd7m/sYdOdYO3pVByA3AtIDmXDGjmEeNbi/LNW9iEoohHAI+Y4dfC0R3LGnbkA+Ez5fASgUW3ywwk7UJHiIoFGnoL14xIq5USx3+vqw+Wv3UeeNA1WsYCwu1enyW7+65AqESQFfka9GbFR0w8n/N+vdmzr8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768206630; c=relaxed/simple;
-	bh=S/2O9k6BAmXtV41W0BCUF8zMdfng6qfMm7Fbec/Ssp8=;
+	s=arc-20240116; t=1768206833; c=relaxed/simple;
+	bh=UCzdoUwYhlGLLDgyfIRB50a+jZq2xHM3IR77wRJv6WQ=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=H+GNptiXUntwgGH2jIXLv4I+70GHRALXn3A6RS+go3FQwzF90BjhbsTKTdbLLlnly5p/iK41ttjpRoyYyiMg/7OIJS4KuwZOwjjTmeGWMv759rUlNHYRtFOQF6qN123+gy5ufyMPVUlZxr9Kp1qQchxXNfv403pMShKnaS1OL0w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=u5kVPdf1; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=fVKfWQBAz0eLlvFTwz6or3L9sMf08GRM2K/p8hYibkWT82mFUxvtFIwxUUt2ieWSme+YACyAulcdcq57KIJcNQcDaiGD5s8ZB3nEDZ3qY7fSSGxM520Iz35u7w50o+GqiPXywmoIM0h56UgN7Xz5+wFoy1xy1smb+WHk+YLOb7A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tHfYUFeJ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="u5kVPdf1"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F168C116D0;
-	Mon, 12 Jan 2026 08:30:26 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tHfYUFeJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 53CCBC116D0;
+	Mon, 12 Jan 2026 08:33:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768206630;
-	bh=S/2O9k6BAmXtV41W0BCUF8zMdfng6qfMm7Fbec/Ssp8=;
+	s=k20201202; t=1768206832;
+	bh=UCzdoUwYhlGLLDgyfIRB50a+jZq2xHM3IR77wRJv6WQ=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=u5kVPdf1hGojtOP370/DPw/VDkNYiUOO/E2eJUbqmWev+mClSmfVZ6Rf2keN+7bMQ
-	 9Mi1dLL8kr/FNeAio7m7sVJ33JbnUexbxlezW8uU3+CMrCIC70W7UfjMUd+Ein62hO
-	 3MhWCRZMko4CVG2AkV6rJH13LbfmrWpjN8kpQtzXd412fyJjM7Qbh4V0LXXlG0FXr9
-	 SPc2uxCLx+SS/r0ABR25AYgDSiVu0gCWPLZKIll7PLNJdXBP74L5CMrtYFk+wZGvsS
-	 zGt9WDNFiEeafegkjRXUbfFleP4fzbFbPLZ5HYTBdH+e2sVh2aHAQNssBSm+yTKd8I
-	 6mv8xhGsQ0W0Q==
-Message-ID: <55a2c060-014f-4077-85a1-15f6f799d263@kernel.org>
-Date: Mon, 12 Jan 2026 09:30:24 +0100
+	b=tHfYUFeJVyU1xAl+LgVjVPKQlOvn5VSbVna+ZXEtTGVdKpaQsmnksUr5201XzYTQn
+	 Bt6ue/+CJd/bFYuGPZ7kA8X8VIfBtsZKzOTt9We/dUNpaoaLbT1rV4wGx+fxmT0PTR
+	 OiFvfGWySshNHdIKzSoFGbLrJ+KKsY96fVJCPYnFRlx6h6AQ0tV84Z3WuQepWuEDID
+	 9CAAiYAOybzBh2+pjoB7jmtEj/8Qpgo28QwUMXaqOAh7r0JqX3qX4rCFQ2MhhOCMoV
+	 YaKRR89IEg8LpWDc7fVFPQajU9IfWFZn/5VfpucIMSZwUIsOyu9g2YnGmsIHr9PFC7
+	 Scpap6pmOvZWg==
+Message-ID: <0cc2b2a0-25ba-493e-9134-f109de922218@kernel.org>
+Date: Mon, 12 Jan 2026 09:33:47 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,17 +35,21 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 0/2] Add Axiado AX3000 eMMC Host Controller Support
-To: Tzu-Hao Wei <twei@axiado.com>, SriNavmani A <srinavmani@axiado.com>,
+Subject: Re: [PATCH 0/8] Add Axiado AX3000 eMMC Host Controller Support
+To: Tzu-Hao Wei <twei@axiado.com>
+Cc: SriNavmani A <srinavmani@axiado.com>,
  Prasad Bolisetty <pbolisetty@axiado.com>, Vinod Koul <vkoul@kernel.org>,
  Neil Armstrong <neil.armstrong@linaro.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>
-Cc: linux-phy@lists.infradead.org, devicetree@vger.kernel.org,
+ <conor+dt@kernel.org>, Harshit Shah <hshah@axiado.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter
+ <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>,
+ linux-phy@lists.infradead.org, devicetree@vger.kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
-References: <20260109-axiado-ax3000-add-emmc-host-driver-support-v2-0-934f1a61f7c0@axiado.com>
+ linux-mmc@vger.kernel.org
+References: <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-0-5457d0ebcdb4@axiado.com>
+ <20251223-black-auk-of-priority-8b48ae@quoll>
+ <108cf065-e2ac-4ab7-9c39-6e52cb5439fa@axiado.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -91,45 +95,38 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20260109-axiado-ax3000-add-emmc-host-driver-support-v2-0-934f1a61f7c0@axiado.com>
+In-Reply-To: <108cf065-e2ac-4ab7-9c39-6e52cb5439fa@axiado.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 09/01/2026 10:46, Tzu-Hao Wei wrote:
-> Axiado AX3000 SoC eMMC controller is based on Arasan eMMC controller.
+On 09/01/2026 10:48, Tzu-Hao Wei wrote:
+> On 12/23/2025 10:33 PM, Krzysztof Kozlowski wrote:
+>>
+>> You completely disorganized the patch.. dts is mixed all over driver
+>> code, you combined two or three completely independent subsystems into
+>> one.
+>>
+>> Read submitting patches in DT dir to understand how DTS must be sent.
+>>
+>>
+>> Best regards,
+>> Krzysztof
+>>
+> Hi Krzysztof,
 > 
-> This series includes:
-> 1. Add bindings for AX3000 SoC eMMC controller
-> 2. Add arasan sdhci support for eMMC in Axiado AX3000
-> 
-> Signed-off-by: Tzu-Hao Wei <twei@axiado.com>
-> ---
-> Changes in v2:
-> - Keep host controller changes in this patchset
-> - Use pdata instead of mix compatible string
-> - Fix coding style
-> - Link to v1: https://lore.kernel.org/r/20251222-axiado-ax3000-add-emmc-host-driver-support-v1-0-5457d0ebcdb4@axiado.com
-> 
-> ---
-> SriNavmani A (2):
->       dt-bindings: mmc: arasan,sdhci: Add Axiado AX3000 SoC
->       mmc: sdhci-of-arasan: add support on Axiado AX3000 SoC
-> 
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml |  3 +++
->  drivers/mmc/host/sdhci-of-arasan.c                      | 14 ++++++++++++++
->  2 files changed, 17 insertions(+)
-> ---
-> base-commit: f10c325a345fef0a688a2bcdfab1540d1c924148
-> change-id: 20251222-axiado-ax3000-add-emmc-host-driver-support-2cc84a8f889a
-> prerequisite-change-id: 20260108-axiado-ax3000-add-emmc-phy-driver-support-d61aead8f622:v1
-> prerequisite-patch-id: 03617f4dadb7ed33653d1e0b3c03e732ed4948c5
-> prerequisite-patch-id: 454a64fb94f3c1b6cf6fb7fbfce97f706933b7e3
-> prerequisite-patch-id: 7961935b88d6c3056b55b4058c1ba878aa00490c
-> prerequisite-patch-id: f87b65e3c93f8f1edf2305784ea3f81a04c4ad58
+> Appreciate your review comments. We reorganized the patch series per your review comments, separating the DTS changes and applying the driver code changes to the respective subsystems as following
 
-Huh, why and how?
+Please wrap your emails correctly.
 
-It's impossible to apply this.
+> https://lore.kernel.org/all/20260109-axiado-ax3000-add-emmc-phy-driver-support-v1-0-dd43459dbfea@axiado.com/
+
+
+You sent this as v1, which I noticed only now. If I knew you ignored my
+feedback, I would not care to review again... Lesson for me.
+
+> https://lore.kernel.org/all/20260109-axiado-ax3000-add-emmc-host-driver-support-v2-0-934f1a61f7c0@axiado.com/
+> 
+> We will also sync up internally and tighten our review process to ensure this kind of mistake does not happen again in future submissions.
 
 Best regards,
 Krzysztof
