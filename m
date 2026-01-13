@@ -1,118 +1,94 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 362A72C028B
-	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 22:58:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D94F262808;
+	Tue, 13 Jan 2026 00:32:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768258687; cv=none; b=Oq8+wrN9vpUIitqlsofkScq8lX2N6MFu39+FdzGbgNq5sgoo3DbhWCvnqolLdzRQBIqfEoRB4cZOJeg06awZ+G7ieqrwmA9rd9gAqhFvcM4DkJolHlmkfTrfVc2LyJjwUNq87gTBg40giRAr5P9djxHUZm26nxyUvM2G7Igan7Y=
+	t=1768264325; cv=none; b=kXspPyxk9SLcNwEpXH4ZsE3ffdWay451Zu0getT10YkRWocuv6XRI5C8iTbSoBiYAZLqS/NsFv86B/MBJTz4hEuY9/os8XVsJA/FSf+4FyK7yzhjehP033hwXGzpM25A4/Vfp3v96WztlhDbd6aF1rtvrDBs8GPgh+VxEQt05Rw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768258687; c=relaxed/simple;
-	bh=rGR4ZRN/eUN4de0udno9CMQ1JKZLoES5FgqCMPiLzqs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=m0u7pxEOtKKCtFAPBUyTVtTl/2AksY/sIoX/gDWde5P0VWOCYCv1mOcSCYXZZHesuJkg8q7nYNpOiInVoWCVO7VrzqZpC0gMPe8k73q3qLqvQLbVP/ZzBrAtzaI2SzYsRKOZBJvxdokMZ9ULjBqHMq/nk6jUWTl9EWztz71gORw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZF1A2oSw; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768264325; c=relaxed/simple;
+	bh=r3SC90hJJ1X8+TKF0Dz+DVyi18IYWKfVpwH7hwOEfTU=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=qOFYgZuZpMhlMGTk6delxsCt99l+2UalUzRVtPvDLvOx09Oi3+ZGYsvYpGqE5cVCCKnzmyBft1GzQsRW7NXnYMdjrn6bnUpLOfTCmd5uogifYpjl1dlilmUYGRiM7M8boouDrTpeqKE8+WgJrCp/+HCX5g0qaciFKG8PuS2kzrU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b=c4LLaagf; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZF1A2oSw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E0744C2BC9E
-	for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 22:58:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768258686;
-	bh=rGR4ZRN/eUN4de0udno9CMQ1JKZLoES5FgqCMPiLzqs=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=ZF1A2oSwK1WsbWs/HUBcLdTtmiUbK6URLC2b/N/uRpduXWfNWd7sFJHylH1WBFPGl
-	 4W0qbD7+vI9ygSTKuxXub3hNW7e1OIABaHbvYwbMe1ze08bnQOEEeoYfB68cbMoZT4
-	 t67BRBrPgRvrAJE9u9zTWFlb/F60evXfpOPf++hM/o6hBw3aSuKfcMvBGTetT6KeKP
-	 QVOleN8aFaTqWZvRKkG6U13zjX8OYXDZDZOi6QHouEIPkJGHxnUt9q/x82RH815ikV
-	 TjLUQA5zdmbV8F+L7qyGbJfx//yFgmhG46XYsjeZN8DO4O5jXhEpEuN5jtVf6u/Nc4
-	 7naZe4GyxLteA==
-Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-b83122f9d78so1101690366b.0
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Jan 2026 14:58:06 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWclzmo0AtsyBGxQCuBwvo2RQBxBgGQi9+xWbgpJLl5iKutcZrrX5PFn+15VEY7//KBXlJ9zEkABf0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwOxCdPoxZ1SrHJtbzqJrPiei7GjliqfY61/k1zzRpeBCPt3Vx7
-	P52es85DoPAY1QErvQR6K8ziWCsl+TXDCgxDiRTQ4Jdrw9g6gu5uMICWAecBrwE3mlnFxsvtsfI
-	FuT39dH8Uq5qOAi+cgf1Tk1ayL8KlAg==
-X-Google-Smtp-Source: AGHT+IFvZMR6ZXQzmmWssKqU5VU1/QG0Dy+4mHOcf7yoi13by1s1GpP8Cl1/EvHF9RRVm6QkOUCvmPjShbd8Q2d+EvI=
-X-Received: by 2002:a17:907:1ca8:b0:b72:b289:6de3 with SMTP id
- a640c23a62f3a-b84453ff014mr1934265266b.58.1768258685308; Mon, 12 Jan 2026
- 14:58:05 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b="c4LLaagf"
+X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 60D0Vn8621915520, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=realtek.com; s=dkim;
+	t=1768264309; bh=r3SC90hJJ1X8+TKF0Dz+DVyi18IYWKfVpwH7hwOEfTU=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:MIME-Version;
+	b=c4LLaagfqdzuWRhrgZfir/tfe4CfNKNO8d+McPjQzdCUxCn0ASJakOg2bdMr9Qd/h
+	 5MJdmZQ60rzPdqbPFOlDB6LGYbXjmRAkttVGrxiFEhtP6eL1F5CiCgSFolSoVI7WuU
+	 6mYKrS2I2I7mbJaWuWLRDH5XzwX6diJj6EnM4eIsiMQV5T/cQNOc629RnDqC5y9C4F
+	 ox3M9alUFI6gsuM+lftKCbcmE+ph7cUlnRzFvkhwJtA+bzaKQ7GLN7iGgzz2+X3KTO
+	 EW4epw6OD8a+nL2IhH3cpv7fwWVL5jWpV1Qix80drOMziqJgcF51sME31Dqw/7Jwn1
+	 3fiicFgnaEnrQ==
+Received: from mail.realtek.com (rtkexhmbs04.realtek.com.tw[10.21.1.54])
+	by rtits2.realtek.com.tw (8.15.2/3.21/5.94) with ESMTPS id 60D0Vn8621915520
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 13 Jan 2026 08:31:49 +0800
+Received: from RTKEXHMBS06.realtek.com.tw (10.21.1.56) by
+ RTKEXHMBS04.realtek.com.tw (10.21.1.54) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1748.10; Tue, 13 Jan 2026 08:31:50 +0800
+Received: from RTKEXHMBS06.realtek.com.tw (10.21.1.56) by
+ RTKEXHMBS06.realtek.com.tw (10.21.1.56) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1748.10; Tue, 13 Jan 2026 08:31:50 +0800
+Received: from RTKEXHMBS06.realtek.com.tw ([fe80::4cbd:6c6c:b92b:3913]) by
+ RTKEXHMBS06.realtek.com.tw ([fe80::4cbd:6c6c:b92b:3913%10]) with mapi id
+ 15.02.1748.010; Tue, 13 Jan 2026 08:31:50 +0800
+From: Ping-Ke Shih <pkshih@realtek.com>
+To: Johannes Berg <johannes@sipsolutions.net>,
+        =?utf-8?B?VXdlIEtsZWluZS1Lw7ZuaWc=?= <u.kleine-koenig@baylibre.com>,
+        "Ulf
+ Hansson" <ulf.hansson@linaro.org>
+CC: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH v2 0/3] sdio: Use bus type function for shutdown
+Thread-Topic: [PATCH v2 0/3] sdio: Use bus type function for shutdown
+Thread-Index: AQHcg9q8Z99/jlpXQUWuVez96n59WLVOrvf6gACQ7VA=
+Date: Tue, 13 Jan 2026 00:31:49 +0000
+Message-ID: <c33e54f94ffc459eab8c6857c2d78b51@realtek.com>
+References: <cover.1768232321.git.u.kleine-koenig@baylibre.com>
+	 (sfid-20260112_164712_157423_ABC1CD8C)
+ <dc096cdc77d42bd90f3e3e3f420912bf365793ad.camel@sipsolutions.net>
+In-Reply-To: <dc096cdc77d42bd90f3e3e3f420912bf365793ad.camel@sipsolutions.net>
+Accept-Language: en-US, zh-TW
+Content-Language: zh-TW
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
- <20260108-dt-mtd-partitions-v1-6-124a53ce6279@kernel.org> <20260109-bright-purring-oyster-8c9f0b@quoll>
-In-Reply-To: <20260109-bright-purring-oyster-8c9f0b@quoll>
-From: Rob Herring <robh@kernel.org>
-Date: Mon, 12 Jan 2026 16:57:54 -0600
-X-Gmail-Original-Message-ID: <CAL_Jsq+0NRHx5JVvcZZC1PX0UByFq7PmvZbH6QoNn3kBZgrbPg@mail.gmail.com>
-X-Gm-Features: AZwV_Qju7S_APdjvo6ENgv2SSZg3sdeIvTR8mamw1g2_RQbQl5m7gRsuwu8q2uU
-Message-ID: <CAL_Jsq+0NRHx5JVvcZZC1PX0UByFq7PmvZbH6QoNn3kBZgrbPg@mail.gmail.com>
-Subject: Re: [PATCH 06/10] dt-bindings: mtd: partitions: Drop partitions.yaml
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Miquel Raynal <miquel.raynal@bootlin.com>, Richard Weinberger <richard@nod.at>, 
-	Vignesh Raghavendra <vigneshr@ti.com>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Brian Norris <computersforpeace@gmail.com>, Kamal Dasu <kdasu.kdev@gmail.com>, 
-	William Zhang <william.zhang@broadcom.com>, Nick Terrell <terrelln@fb.com>, 
-	David Sterba <dsterba@suse.com>, =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>, 
-	Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Marcus Folkesson <marcus.folkesson@gmail.com>, 
-	Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@kernel.org>, Hauke Mehrtens <hauke@hauke-m.de>, 
-	linux-mtd@lists.infradead.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Fri, Jan 9, 2026 at 3:34=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.org=
-> wrote:
->
-> On Thu, Jan 08, 2026 at 11:53:15AM -0600, Rob Herring (Arm) wrote:
-> >  patternProperties:
-> >    "^partitions(-boot[12]|-gp[14])?$":
-> > -    $ref: /schemas/mtd/partitions/partitions.yaml
-> > +    type: object
-> > +    additionalProperties: true
-> >
-> > -    patternProperties:
-> > -      "^partition@[0-9a-f]+$":
-> > -        $ref: /schemas/mtd/partitions/partition.yaml
-> > -
-> > -        properties:
-> > -          reg:
-> > -            description: Must be multiple of 512 as it's converted
-> > -              internally from bytes to SECTOR_SIZE (512 bytes)
-> > -
-> > -        required:
-> > -          - reg
-> > -
-> > -        unevaluatedProperties: false
-> > +    properties:
-> > +      compatible:
-> > +        contains:
-> > +          const: fixed-partitions
-> >
-> >  required:
-> >    - compatible
-> > diff --git a/Documentation/devicetree/bindings/mtd/mtd.yaml b/Documenta=
-tion/devicetree/bindings/mtd/mtd.yaml
-> > index bbb56216a4e2..e56dba83f00a 100644
-> > --- a/Documentation/devicetree/bindings/mtd/mtd.yaml
-> > +++ b/Documentation/devicetree/bindings/mtd/mtd.yaml
-> > @@ -30,7 +30,7 @@ properties:
-> >      deprecated: true
-> >
-> >    partitions:
-> > -    $ref: /schemas/mtd/partitions/partitions.yaml
-> > +    type: object
->
-> I think you need explicit, since we require it for incomplete nodes:
->
-> additionalProperties: true
-
-I put what the tools required me to put. :) We only require it when
-properties get defined because that's the case we don't know if the
-schema is *all* properties or not.
-
-Rob
+Sm9oYW5uZXMgQmVyZyA8am9oYW5uZXNAc2lwc29sdXRpb25zLm5ldD4gd3JvdGU6DQo+IE9uIE1v
+biwgMjAyNi0wMS0xMiBhdCAxNjo0NiArMDEwMCwgVXdlIEtsZWluZS1Lw7ZuaWcgd3JvdGU6DQo+
+ID4gSGVsbG8sDQo+ID4NCj4gPiB0aGlzIHNlcmllcyBpcyBwYXJ0IG9mIGFuIGVmZm9ydCB0byBn
+ZXQgcmlkIG9mIHRoZSAuc2h1dGRvd24oKSBjYWxsYmFjaw0KPiA+IChhbmQgLnByb2JlKCkgYW5k
+IC5yZW1vdmUoKSkgaW4gc3RydWN0IGRldmljZV9kcml2ZXIuIFByZXBhcmluZyB0aGF0LA0KPiA+
+IGFsbCBzZGlvIGRyaXZlcnMgdGhhdCB1cCB0byBub3cgdXNlIHRoaXMgY2FsbGJhY2sgYXJlIGNv
+bnZlcnRlZCB0byBhIG5ldw0KPiA+IHNkaW8gc3BlY2lmaWMgc2h1dGRvd24gY2FsbGJhY2suDQo+
+ID4NCj4gPiB2MSBpcyBhdmFpbGFibGUgYXQgaHR0cHM6Ly9sb3JlLmtlcm5lbC5vcmcvYWxsL2Nv
+dmVyLjE3NjU5Njg4NDEuZ2l0LnVrbGVpbmVrQGtlcm5lbC5vcmcuDQo+ID4NCj4gPiBDaGFuZ2Vz
+IHNpbmNlIHYxOg0KPiA+ICAtIERyb3AgcGF0Y2ggMi80IHdoaWNoIHJlc3VsdGVkIGluIGEgYnVp
+bGQgZmFpbHVyZSB3aXRoIENPTkZJR19QTT1uDQo+ID4NCj4gPiBQYXRjaGVzICMyIGFuZCAjMyBk
+ZXBlbmQgb24gdGhlIGZpcnN0IHBhdGNoLCBhbmQgd2l0aCBqdXN0IHRoZSBmaXJzdA0KPiA+IHBh
+dGNoIGFwcGxpZWQgdGhlcmUgaXMgYSBydW50aW1lIHdhcm5pbmcgKGVtaXR0ZWQgYnkgdGhlIGRy
+aXZlciBjb3JlIGluDQo+ID4gZHJpdmVyX3JlZ2lzdGVyKCkpIGZvciBlYWNoIHVuY29udmVydGVk
+IGRyaXZlci4gU28gaXQgd291bGQgYmUgbmljZSB0bw0KPiA+IGdldCB0aGUgd2hvbGUgc2VyaWVz
+IGluIGR1cmluZyBhIHNpbmdsZSBtZXJnZSB3aW5kb3cgdG8gbm90IGxldCB1c2Vycw0KPiA+IGZh
+Y2UgdGhlIHdhcm5pbmcuDQo+ID4NCj4gPiBHaXZlbiB0aGF0IGFsbCBkcml2ZXJzIGFyZSBpbiBk
+cml2ZXJzL25ldC93aXJlbGVzcyBJIHN1Z2dlc3QgdG8gYXBwbHkNCj4gPiB0aGUgd2hvbGUgc2Vy
+aWVzIHZpYSB0aGUgd2lyZWxlc3MgdHJlZS4NCj4gPg0KPiANCj4gU291bmRzIGdvb2QsIHRoYW5r
+cyBmb3IgdGhlIGhlYWRzLXVwLg0KPiANCj4gSSBndWVzcyBJIHNob3VsZCBnZXQgVWxmJ3MgYWNr
+IGZvciB0aGUgTU1DIHBhcnQsIGFuZCBQaW5nLUtlJ3MgZm9yIHRoZQ0KPiBydHcgcGFydCwgYW5k
+IG5vYm9keSBjYXJlcyBhYm91dCByc2kgOikNCg0KQWNrZWQuIEFuZCBhc3NpZ25lZCB0aGlzIHBh
+dGNoIHRvIHlvdSBpbiBwYXRjaHdvcmsuIFRoYW5rcy4gDQoNCg0K
