@@ -1,82 +1,121 @@
-Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [52.237.72.81])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 27CFB39447C;
-	Wed, 14 Jan 2026 12:23:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=52.237.72.81
+Received: from smtpout-03.galae.net (smtpout-03.galae.net [185.246.85.4])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7AE2280014
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 13:58:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.246.85.4
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768393393; cv=none; b=KeK7/EXWi9BECJTgbeiL1GJVLlSO7veENGj7xVrkcxBeDn+bOjuhsYHXvwO64EH9/uVErPiWLs4wWj8gn9mijvasSBGjHvJr8qwpFROwHfR/e93aoE7ZbGS+RqqLVMy3Z+7Dq+lcn1GJfSdDEbWFMcBSXWJX1KfP9x4OSLi1tOg=
+	t=1768399128; cv=none; b=TxxbIkT9XXZIZAM7hxOI1kBpG5O33OJvcu+LY/UCCiBi6dNTO2yhN8Cr4MMKrAIr9a3fSVe8n36e5JC1grk5Sw9EYaxRagaRWewOtMINj+zZbhsZtlSSheciMcMtFDr8PKhdI7qyRfxR6BpEzLrLIe55ngqcn47fbWdIcIrA5h4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768393393; c=relaxed/simple;
-	bh=GrWSKSwZtvr+JMHE5z+04H9SwwgIwWz5iLjIuhBx4kY=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=IprBVWeQfVsZ0uaUavmn77JEhsgRxOSxH1tX4xVk1B1tKiS6A/kWOwX9Qa1mdGFeJh8GDFSdsLoUbP438PFXxndPzukuQdjLmfsGp6v5gs7FLJwVjNcfl+wL3cQWrsde6PcnGxN5H7bFyqeMo4l4u2+hsEEsgo8fU89oK7+NbmE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=52.237.72.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
-Received: from E0005182LT.eswin.cn (unknown [10.12.96.155])
-	by app1 (Coremail) with SMTP id TAJkCgCH22yjimdpwzcBAA--.5985S2;
-	Wed, 14 Jan 2026 20:23:00 +0800 (CST)
-From: hehuan1@eswincomputing.com
-To: adrian.hunter@intel.com,
-	ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: ningyu@eswincomputing.com,
-	linmin@eswincomputing.com,
-	pinkesh.vaghela@einfochips.com,
-	xuxiang@eswincomputing.com,
-	hehuan1@eswincomputing.com
-Subject: [PATCH v1] mmc: sdhci-of-dwcmshc: fix DMA 128MB boundary
-Date: Wed, 14 Jan 2026 20:22:56 +0800
-Message-Id: <20260114122256.1587-1-hehuan1@eswincomputing.com>
-X-Mailer: git-send-email 2.31.1.windows.1
+	s=arc-20240116; t=1768399128; c=relaxed/simple;
+	bh=QpeOW/sEaOfEuvoIhUjTAMw7y96h/aW+EFhSth1UXkg=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=myCk+xyDwCVkeVpKKak0XhKVOXWbu9HHeGoHQJdQM9hW4GslUvRjfarsgf3/hCN7y95oo+uHdFvpmCsRqawBvKaR8ZZeOFA+RajmYTszIKUbNkp2+nSvG7lg7WYBX7APPZJgQanOU3PGfNO6++8FCRVCzDZExN3nRdlzTm1Kx2Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=RbaU2diT; arc=none smtp.client-ip=185.246.85.4
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="RbaU2diT"
+Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
+	by smtpout-03.galae.net (Postfix) with ESMTPS id 9263D4E420D5;
+	Wed, 14 Jan 2026 13:58:43 +0000 (UTC)
+Received: from mail.galae.net (mail.galae.net [212.83.136.155])
+	by smtpout-01.galae.net (Postfix) with ESMTPS id 642E06074A;
+	Wed, 14 Jan 2026 13:58:43 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 03BC910B6824C;
+	Wed, 14 Jan 2026 14:58:35 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
+	t=1768399122; h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	 content-transfer-encoding:in-reply-to:references;
+	bh=YNjffRp1/8+T59mlTHNitsw61Xuht8VMpF+gPH6kU5M=;
+	b=RbaU2diT+2o3nYB+qso994IAQmLHQwmq2nb5Cm1S9sWjjd2N+g9lyE1PdQq6qr2dcnN0K+
+	PjOdZ5IKST7oHXinJnIYyn3PT3yAmfDlxk/9qYNbc9iDtqTCVRS6fWWHoUIdMrTENH2zjl
+	L6IGjRDuGzHQspn8gMkoYiQbyQwNaY+YI+uTmwQ/yrdrAdN6NH6phsf22oGnt1p5aoI4C7
+	/Wo6Inw3e8tZA+sijnhWDwdmRU52crDrkE9NfW8byUv1DZFjaTRGmJruYxeij3y3CNxyTk
+	RfRlF6UmoxshF9bek40/kEqIDjKA0QoSRep7ESTW522/Zx/K6pqUADvOErmXoQ==
+From: Miquel Raynal <miquel.raynal@bootlin.com>
+To: Rob Herring <robh@kernel.org>
+Cc: Richard Weinberger <richard@nod.at>,  Vignesh Raghavendra
+ <vigneshr@ti.com>,  Krzysztof Kozlowski <krzk+dt@kernel.org>,  Conor
+ Dooley <conor+dt@kernel.org>,  Brian Norris <computersforpeace@gmail.com>,
+  Kamal Dasu <kdasu.kdev@gmail.com>,  William Zhang
+ <william.zhang@broadcom.com>,  Nick Terrell <terrelln@fb.com>,  David
+ Sterba <dsterba@suse.com>,  =?utf-8?Q?Rafa=C5=82_Mi=C5=82ecki?=
+ <rafal@milecki.pl>,  Simon Glass
+ <sjg@chromium.org>,  Linus Walleij <linusw@kernel.org>,  Ulf Hansson
+ <ulf.hansson@linaro.org>,  Marcus Folkesson <marcus.folkesson@gmail.com>,
+  Tony Lindgren <tony@atomide.com>,  Roger Quadros <rogerq@kernel.org>,
+  Hauke Mehrtens <hauke@hauke-m.de>,  linux-mtd@lists.infradead.org,
+  devicetree@vger.kernel.org,  linux-kernel@vger.kernel.org,
+  linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 07/10] dt-bindings: mtd: Ensure partition node
+ properties are documented
+In-Reply-To: <CAL_JsqKV+3ZnqpbQ4USmJh-dngik_jZdnpOw0bGcxD0RSSzfxA@mail.gmail.com>
+	(Rob Herring's message of "Fri, 9 Jan 2026 18:34:17 -0600")
+References: <20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org>
+	<20260108-dt-mtd-partitions-v1-7-124a53ce6279@kernel.org>
+	<87fr8fxipc.fsf@bootlin.com>
+	<CAL_JsqKV+3ZnqpbQ4USmJh-dngik_jZdnpOw0bGcxD0RSSzfxA@mail.gmail.com>
+User-Agent: mu4e 1.12.7; emacs 30.2
+Date: Wed, 14 Jan 2026 14:58:35 +0100
+Message-ID: <87ms2gwb1w.fsf@bootlin.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:TAJkCgCH22yjimdpwzcBAA--.5985S2
-X-Coremail-Antispam: 1UD129KBjvdXoWrZF47JFWUGw1kAr45Aw1xGrg_yoWDJFg_Ca
-	4UX3Z7uFy8ArZ2vw12yF9Iyr1rCa4YgF1DWry0g3yYk3W3ur1kXFn2vr1DJr45WF42kFW7
-	GrZ8JrWxXFsrKjkaLaAFLSUrUUUUbb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
-	9fnUUIcSsGvfJTRUUUbhxFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k26cxKx2IYs7xG
-	6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4kI8w
-	A2z4x0Y4vE2Ix0cI8IcVAFwI0_Ar0_tr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_Cr0_
-	Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s
-	0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xII
-	jxv20xvE14v26r126r1DMcIj6xkF7I0En7xvr7AKxVWUJVW8JwAv7VC2z280aVAFwI0_Jr
-	0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8v
-	x2IErcIFxwAKzVCY07xG64k0F24lc7CjxVAaw2AFwI0_Jw0_GFylc2xSY4AK6svPMxAIw2
-	8IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4l
-	x2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrw
-	CI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI
-	42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z2
-	80aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7VUbU73PUUUUU==
-X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+X-Last-TLS-Session-Version: TLSv1.3
 
-From: Huan He <hehuan1@eswincomputing.com>
+Hi Rob,
 
-This DWC MSHC has a 128MB limitation where the data buffer size and start
-address must not exceed the 128MB boundary. Registering the missing
-'adma_write_desc' callback function.
+>> > +$defs:
+>> > +  partition-node:
+>> > +    type: object
+>> > +    if:
+>> > +      not:
+>> > +        required: [ compatible ]
+>> > +    then:
+>> > +      $ref: '#'
+>> > +      unevaluatedProperties: false
+>> > +    else:
+>> > +      $ref: '#'
+>>
+>> This, however, is total blackmagic to me. Would you mind explaining what
+>>
+>>       $ref: '#'
+>>
+>> indicates? Is this a placeholder indicating "a reference must be given?
+>
+> It's what's known as JSON pointers. The '#' is a reference to the top
+> level of this schema.
+>
+>> Also I do not understand the final else case, what is it covering?
+>
+> It's really just there so a $ref to
+> partition.yaml#/$defs/partition-node applies the schema (all of
+> partition.yaml) whether there's a compatible property or not.
+>
+> This all just works around that a schema like this doesn't work:
+>
+> $ref: foo.yaml
+> if:
+>   ...
+> then:
+>   unevaluatedProperties: false
+>
+> The evaluation of unevaluatedProperties doesn't "see" the $ref being
+> in the parent. So we can't factor out the $ref.
 
-Signed-off-by: Huan He <hehuan1@eswincomputing.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 1 +
- 1 file changed, 1 insertion(+)
+Oooh, ok, fully understood. I think I already faced that problem
+before. First time I hear about JSON pointers, thanks a lot for the
+heads up.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 51949cde0958..cabb709a8108 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -1726,6 +1726,7 @@ static const struct sdhci_ops sdhci_dwcmshc_eic7700_ops = {
- 	.set_uhs_signaling = sdhci_eic7700_set_uhs_wrapper,
- 	.set_power = sdhci_set_power_and_bus_voltage,
- 	.irq = dwcmshc_cqe_irq_handler,
-+	.adma_write_desc = dwcmshc_adma_write_desc,
- 	.platform_execute_tuning = sdhci_eic7700_executing_tuning,
- };
- 
--- 
-2.25.1
+Regarding this series, it feels like in the end, if I understood the
+discussion with Krzysztof correctly, there is no modification to bring?
+Let me know if you plan on sending a v2 of if I shall take v1 otherwise.
 
+Thanks,
+Miqu=C3=A8l
