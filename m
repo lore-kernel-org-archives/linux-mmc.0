@@ -1,35 +1,35 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABEB238A288
-	for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 11:50:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07FFC396B6F
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 11:52:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768391403; cv=none; b=GlmJWFzcLBIFo4Bwmw0Uulc6tSyP90CZjwnC944op7UEQomm79l2Oyw10k0+bqZeDusG/UXCuyeeOn5MqljMWbuC1E2SukpuifL6kP/ERWsLiETbHYeUww6Hl/ghEbe9IdL12bII49MSYWgrzU+jhSE4vIMxrdpPo7XnWd8CcEM=
+	t=1768391539; cv=none; b=qZthHzFxkOuZ7YZbON21AwiYvErzRKgBMx6Jm6TW7PXzoaTvmEOcGExAfhQZ7ZGIS4wF9YKcLk4aU4nsnApmRBXnftK96GCSSQ3lJsNN9uVMAk8M2TkLuVEJXG5wcLl6Mc1Cp4tTLah9Mr4weFVY517RhA7oLXZRKhP9fnh1CBc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768391403; c=relaxed/simple;
-	bh=5G3bZDFv1qBG7SvPosgBK8cERnxjv6HIzxzWgJHcMAI=;
+	s=arc-20240116; t=1768391539; c=relaxed/simple;
+	bh=x41W9sfytGVKn5Dnw2ED9SlJy9/zuqHB/qFAvmU+OSk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Jx5zIZg+610g6sAj9y3ZT9OMIcvsMLoHfTQXRnF3BnUGDWPdZ1vp2/m6Z4RcBBMidVAS/Zpjael9bB5s/z2Dept0nuW0oWNxGwXNvbOb6kVnaUH7fbI2AN6+AHkL2Eo7Upu9UIENOQmfvjFkWZpO01iw9PjhnKjyuSo2gXsNUtY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=Z+N4yast; arc=none smtp.client-ip=194.117.254.33
+	 Content-Type:Content-Disposition:In-Reply-To; b=pCPiNQfNUxlSz79Bdst3ITvwzpGNaQP6OL6c31YIa8izd/tQuwGxR6SwtDvmSegZyIlEfMuJ9Np6ciM/WEQyIxJcC/HtSg/ScLzCmCP4mdA8R3pmV2z5cOiCaqyaG7bcYy4rFopbK0vvGgKCqTXhOW44faLNOlTaso+6iSLWmbg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=AA8cnIAy; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="Z+N4yast"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="AA8cnIAy"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=gNMi
-	hpzhf2NxKZIcbZg7O2NEUbdwfbHtTszJtzgTj5I=; b=Z+N4yastOsG1hmW6/MpE
-	qJn3S1j5gjDiWLbMXPIr5OKNab4rVxTQ1ISuU/PcwKJNFCP4kxxx0cMd9ocJEYwl
-	rBtM208IDnsTl8YCpApJaEv88+NT0Em1NPc6Tbvj3/9uHqA8vQBIxg0QH3KVhUAz
-	SwzHYADFiSMrJvV/ycsNqExqc0zRxVlOU39NKRHInFy+QXnjDjIz30avvFuZ8F5g
-	Gri7hALcq59mlzxXhbANhpN56BlQ/DVpj6Snpm6iAjr2YruLmkQC+vnuhFN6BWmF
-	JGzVQI/FhDVQVlpXXlNU8Dcyl5bl8RnycG1yAVJyIZ51ICoNtHhpMUKvwBQ20Fi/
-	7Q==
-Received: (qmail 2113255 invoked from network); 14 Jan 2026 12:49:58 +0100
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 14 Jan 2026 12:49:58 +0100
-X-UD-Smtp-Session: l3s3148p1@tokXtVdIoNkujnsM
-Date: Wed, 14 Jan 2026 12:49:57 +0100
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=BTPE
+	LIS8djx1OvkVEDR+BzQIn/xiv3BxFTaCezloF98=; b=AA8cnIAylx1xeiFkNT4T
+	ZIrmdY27f3LYoZO3GRgu9YyNYNLzRuyeH48q3dx+Ek0PAHENTGgXTSyzrtt7vTQt
+	n5325scCcMepdnx/OYcgu8QMPQSzDguoUnV4dh34+BqqD2S4YDZqMbR6OIkqkT/v
+	OxW4Fx9WoayurfG3rqbz05Td1BBdLEXFVfIIAbFtH8PATca+96Bbmfi0zb9+TNpu
+	hIe2YYAbjs89/lwtJuw0mhom4UPGL0S9inZomLXBsrPNCCRFf76yHn2NmqF4popp
+	LOTgKHK8dQS1+uPIIGLkxC7nZNlt4kjn1fXF2v+J4e2tCtpdmNZVwC6ISSxq5cpp
+	Mw==
+Received: (qmail 2114186 invoked from network); 14 Jan 2026 12:52:12 +0100
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 14 Jan 2026 12:52:12 +0100
+X-UD-Smtp-Session: l3s3148p1@WQkZvVdI3K8ujnsM
+Date: Wed, 14 Jan 2026 12:52:11 +0100
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: Josua Mayer <josua@solid-run.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
@@ -55,11 +55,11 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
 	linux-renesas-soc@vger.kernel.org, linux-can@vger.kernel.org,
 	linux-phy@lists.infradead.org, linux-omap@vger.kernel.org,
 	linux-i2c@vger.kernel.org
-Subject: Re: [PATCH v4 7/7] mmc: host: renesas_sdhi_core: support selecting
- an optional mux
-Message-ID: <aWeC5brP_KdrCmHz@ninjato>
+Subject: Re: [PATCH v4 5/7] i2c: omap: switch to new generic helper for
+ getting selected mux-state
+Message-ID: <aWeDa6o0fOh1pGW5@ninjato>
 References: <20251229-rz-sdio-mux-v4-0-a023e55758fe@solid-run.com>
- <20251229-rz-sdio-mux-v4-7-a023e55758fe@solid-run.com>
+ <20251229-rz-sdio-mux-v4-5-a023e55758fe@solid-run.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,31 +68,21 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20251229-rz-sdio-mux-v4-7-a023e55758fe@solid-run.com>
+In-Reply-To: <20251229-rz-sdio-mux-v4-5-a023e55758fe@solid-run.com>
 
-Hi Josua,
+On Mon, Dec 29, 2025 at 03:27:29PM +0100, Josua Mayer wrote:
+> Multiplexer subsystem has added generic helper functions for getting an
+> already selected mux-state object.
+> 
+> Replace existing logic in probe with the equivalent helper function.
+> 
+> This change is only compile-tested.
+> 
+> Reviewed-by: Andreas Kemnade <andreas@kemnade.info>
+> Signed-off-by: Josua Mayer <josua@solid-run.com>
 
-thanks for your work and kudos for striving for a generic solution. It
-seems worthwhile to me to add the helpers. I have questions, though:
+Despite the pending discussion about the function name, it is clear that
+the final patch will not go via i2c but some other tree. So, already:
 
-> +	priv->mux_state = devm_mux_state_get_optional_selected(&pdev->dev, NULL);
-
-The minor nit (which may be bike-shedding): Maybe the function name
-could be '*_select' instead of '*_selected'. To make more explicit that
-this function is actively changing the selection and not passively
-retrieving the current state?
-
-The bigger thing is that with devm_* I had the expectation that
-deselection is also handled automatically...
-
-> +edselmux:
-> +	if (priv->mux_state)
-> +		mux_state_deselect(priv->mux_state);
-
-... so I was a bit surprised to see this manual cleanup. Has it been
-discussed if that deselection can also be in the helpers?
-
-Happy hacking,
-
-   Wolfram
+Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
