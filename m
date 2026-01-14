@@ -1,88 +1,92 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07FFC396B6F
-	for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 11:52:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [207.46.229.174])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 438A23939D2;
+	Wed, 14 Jan 2026 12:21:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=207.46.229.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768391539; cv=none; b=qZthHzFxkOuZ7YZbON21AwiYvErzRKgBMx6Jm6TW7PXzoaTvmEOcGExAfhQZ7ZGIS4wF9YKcLk4aU4nsnApmRBXnftK96GCSSQ3lJsNN9uVMAk8M2TkLuVEJXG5wcLl6Mc1Cp4tTLah9Mr4weFVY517RhA7oLXZRKhP9fnh1CBc=
+	t=1768393319; cv=none; b=Os5nEuwpmSCGCxLhSOkGQAA6xO0znFjZapLj/kIS2U5D7cYkMCrWFjRp7sab1mrAftuJ9HS/P2Z3s3ZY0yjT4dj6cbDMS8pYUYQggidwLDZ9X87FjrzwaKa6HHIz3NJVKL2oXmWdnLQsOFEHvqbYN3bR/on1GkZ+hqY7qyGefnM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768391539; c=relaxed/simple;
-	bh=x41W9sfytGVKn5Dnw2ED9SlJy9/zuqHB/qFAvmU+OSk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pCPiNQfNUxlSz79Bdst3ITvwzpGNaQP6OL6c31YIa8izd/tQuwGxR6SwtDvmSegZyIlEfMuJ9Np6ciM/WEQyIxJcC/HtSg/ScLzCmCP4mdA8R3pmV2z5cOiCaqyaG7bcYy4rFopbK0vvGgKCqTXhOW44faLNOlTaso+6iSLWmbg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=AA8cnIAy; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="AA8cnIAy"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=BTPE
-	LIS8djx1OvkVEDR+BzQIn/xiv3BxFTaCezloF98=; b=AA8cnIAylx1xeiFkNT4T
-	ZIrmdY27f3LYoZO3GRgu9YyNYNLzRuyeH48q3dx+Ek0PAHENTGgXTSyzrtt7vTQt
-	n5325scCcMepdnx/OYcgu8QMPQSzDguoUnV4dh34+BqqD2S4YDZqMbR6OIkqkT/v
-	OxW4Fx9WoayurfG3rqbz05Td1BBdLEXFVfIIAbFtH8PATca+96Bbmfi0zb9+TNpu
-	hIe2YYAbjs89/lwtJuw0mhom4UPGL0S9inZomLXBsrPNCCRFf76yHn2NmqF4popp
-	LOTgKHK8dQS1+uPIIGLkxC7nZNlt4kjn1fXF2v+J4e2tCtpdmNZVwC6ISSxq5cpp
-	Mw==
-Received: (qmail 2114186 invoked from network); 14 Jan 2026 12:52:12 +0100
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 14 Jan 2026 12:52:12 +0100
-X-UD-Smtp-Session: l3s3148p1@WQkZvVdI3K8ujnsM
-Date: Wed, 14 Jan 2026 12:52:11 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Josua Mayer <josua@solid-run.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Marc Kleine-Budde <mkl@pengutronix.de>,
-	Vincent Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Peter Rosin <peda@axentia.se>, Aaro Koskinen <aaro.koskinen@iki.fi>,
-	Andreas Kemnade <andreas@kemnade.info>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>,
-	Vignesh R <vigneshr@ti.com>,
-	Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Mikhail Anikin <mikhail.anikin@solid-run.com>,
-	Yazan Shhady <yazan.shhady@solid-run.com>,
-	Jon Nettleton <jon@solid-run.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-can@vger.kernel.org,
-	linux-phy@lists.infradead.org, linux-omap@vger.kernel.org,
-	linux-i2c@vger.kernel.org
-Subject: Re: [PATCH v4 5/7] i2c: omap: switch to new generic helper for
- getting selected mux-state
-Message-ID: <aWeDa6o0fOh1pGW5@ninjato>
-References: <20251229-rz-sdio-mux-v4-0-a023e55758fe@solid-run.com>
- <20251229-rz-sdio-mux-v4-5-a023e55758fe@solid-run.com>
+	s=arc-20240116; t=1768393319; c=relaxed/simple;
+	bh=f1xGIOi0RVwj2Q0pZ82NSqMjRr1A+nixk8xHB8tZfeo=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=jMpHVVQCGbBhWgInDAPbOS59XgJk7DgF3nEplxNxw3x1jFLKYJTS8sCUX8DURUvvj4jb3SPRzlD12AkLKCjvPdJ+MAlCScWMvDRLdTFnCmu/2eNT5wjSvS4CacMxjzZjKQHWaRKwKfSvfZvFfSflZR0DG00WfaIGLOoC+3TTXHE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=207.46.229.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
+Received: from E0005182LT.eswin.cn (unknown [10.12.96.155])
+	by app1 (Coremail) with SMTP id TAJkCgAXbG1YimdprzcBAA--.6061S2;
+	Wed, 14 Jan 2026 20:21:45 +0800 (CST)
+From: hehuan1@eswincomputing.com
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: ningyu@eswincomputing.com,
+	linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com,
+	xuxiang@eswincomputing.com,
+	hehuan1@eswincomputing.com
+Subject: [PATCH v1] mmc: sdhci-of-dwcmshc: fix init for AXI clock
+Date: Wed, 14 Jan 2026 20:21:41 +0800
+Message-Id: <20260114122141.1529-1-hehuan1@eswincomputing.com>
+X-Mailer: git-send-email 2.31.1.windows.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20251229-rz-sdio-mux-v4-5-a023e55758fe@solid-run.com>
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:TAJkCgAXbG1YimdprzcBAA--.6061S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7uw45tw18JrykXF1UGrWDXFb_yoW8Jw13pa
+	1kXFyYkFW5GFsagFZ7Aa1Du3W3Kws2ga9rtrWfGw4Fva12yFyUGF9rCa4jyFyrGFWfu3WS
+	qF4kXr15CF17AaUanT9S1TB71UUUUUDqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUBv14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26F1j6w1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26F4j
+	6r4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
+	Cq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0
+	I7IYx2IY67AKxVWUXVWUAwAv7VCY1x0262k0Y48FwI0_Jr0_Gr1lYx0Ex4A2jsIE14v26r
+	1j6r4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAq
+	YI8I648v4I1lw4CEc2x0rVAKj4xxMxkF7I0En4kS14v26r1q6r43MxkIecxEwVCm-wCF04
+	k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r18
+	MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr4
+	1lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr0_Cr1l
+	IxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4
+	A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x0JUqFAJUUUUU=
+X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/
 
-On Mon, Dec 29, 2025 at 03:27:29PM +0100, Josua Mayer wrote:
-> Multiplexer subsystem has added generic helper functions for getting an
-> already selected mux-state object.
-> 
-> Replace existing logic in probe with the equivalent helper function.
-> 
-> This change is only compile-tested.
-> 
-> Reviewed-by: Andreas Kemnade <andreas@kemnade.info>
-> Signed-off-by: Josua Mayer <josua@solid-run.com>
+From: Huan He <hehuan1@eswincomputing.com>
 
-Despite the pending discussion about the function name, it is clear that
-the final patch will not go via i2c but some other tree. So, already:
+Accessing the High-Speed registers requires the AXI clock to be enabled.
 
-Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Huan He <hehuan1@eswincomputing.com>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 51949cde0958..d795745987e3 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -1588,6 +1588,7 @@ static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcm
+ {
+ 	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
+ 	unsigned int val, hsp_int_status, hsp_pwr_ctrl;
++	static const char * const clk_ids[] = {"axi"};
+ 	struct of_phandle_args args;
+ 	struct eic7700_priv *priv;
+ 	struct regmap *hsp_regmap;
+@@ -1605,6 +1606,11 @@ static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcm
+ 		return ret;
+ 	}
+ 
++	ret = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
++					    ARRAY_SIZE(clk_ids), clk_ids);
++	if (ret)
++		return ret;
++
+ 	ret = of_parse_phandle_with_fixed_args(dev->of_node, "eswin,hsp-sp-csr", 2, 0, &args);
+ 	if (ret) {
+ 		dev_err(dev, "Fail to parse 'eswin,hsp-sp-csr' phandle (%d)\n", ret);
+-- 
+2.25.1
 
