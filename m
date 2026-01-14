@@ -1,187 +1,149 @@
-Received: from mail-m49194.qiye.163.com (mail-m49194.qiye.163.com [45.254.49.194])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 939342FB977;
-	Wed, 14 Jan 2026 08:14:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.194
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05DD51E5B7A
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 09:48:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768378452; cv=none; b=AGuhjt/x+1lGyP7yaALxQt0cYLCjKyEQAnW10MG6oWmHrfTUJLEsMAZIHweWQuGue6M/LmRYgHewm1295H+yz0ck58lr9/HV13nUOefRl/I2dNueF/bwYqFHO/lGhtLw693/cDhcYOFtibrGgrpl+1xeW0G9hreMlezjbMmx8mM=
+	t=1768384136; cv=none; b=YV/+BpTfeJDFQO6D7o1+xkvww4Rg6CAQM5jDQEQc56gywINfGaRy0RELPxbPfpL+OOxOzuuhMgW3aox/17YYP3MtQwXTA0Kk46z/Se7nLnbfhTNxKDhJt6W0BGCHPcv3+Xgin8Ctp1s8qWazWTMEc3zNrxsgQyjT4HkiQzd7JQs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768378452; c=relaxed/simple;
-	bh=zGn/XRcMqwwFuNLx0uSDVvM6VyHfqCJQGeCI1eHoVDQ=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=qBdi93kzkIn3UPStbHTJdmGk8CTLaBDSYQogm82lk9+tLLvrMgxFdOxny9tCo5k9aDDtjoO6xDk96tbO5+xmPVBrlivtUgbY1eiXTvNA3lK5ed95ddWaSBayaJf6mczI0LKkBNhXle9sS+aJM7UOWyf7ypdjjipu8gwsf/58EYE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=jt/DYDIZ; arc=none smtp.client-ip=45.254.49.194
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1768384136; c=relaxed/simple;
+	bh=XKbQTgAiCmuD4bNEnAkHacxTQerpy/XXCG2fPU0ianY=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=YdlEj69SdlnYy144acrxYrBMHeMLYPGP2HA3iGRq9/qjyWN9vTorRomEarqtL/kTXXUpQpHTX2I31oiHmx9cXJ8QbllVNuziu8L7IZ8pOniJ5qJy2a5xnqXH8/TLerPP6futm7/WvK+REHWlPkv65H7s7cHMiWEpN/yrqta9qJk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=l+o4dDen; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=JYSwEKBa; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="jt/DYDIZ"
-Received: from [172.16.12.14] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 309b22e7b;
-	Wed, 14 Jan 2026 16:08:44 +0800 (GMT+08:00)
-Message-ID: <6934ae0d-16c5-436f-97f6-c11d304ca51d@rock-chips.com>
-Date: Wed, 14 Jan 2026 16:08:43 +0800
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="l+o4dDen";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="JYSwEKBa"
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 60E7jH9X2841471
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 09:48:54 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=WcNoruIEiYTEC0I/gLNDb0GHjNtpSFU1h1V
+	6HGFR5iQ=; b=l+o4dDenMh5tmH1dRGHUJa+BgAu/QlcN8eQmU4nnvKZl9IJLidc
+	NWxkL6wm/tgOW/M5jdG+eKiZGsOefV+J8q5oAb0DrOw2EGPsTR1gh7OZoAlsSoaO
+	BTepoQUQVKTS/+IrRp9YNReCj/AnPMyuAuQ5SsHXrMuea9nskJRRML5I74lEmtxr
+	ZxRCswn7iyaAo/0RNaC17wEWOQfOE+Vy516Jkxu/1abrx6Mtu5gjvI0rE+SGYhg8
+	KEE3QMxS9yhlJ6Gn6efOmW6XnkgGsoMO4uBYyETqsH3oFHj02kP5yny/P6uiWa+x
+	xd/GsVTeLPOUmpJs4ooViZL7PCZWZSXYHiA==
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com [209.85.214.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4bnuk92ssk-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 09:48:54 +0000 (GMT)
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2a0f4822f77so167780505ad.2
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Jan 2026 01:48:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1768384133; x=1768988933; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=WcNoruIEiYTEC0I/gLNDb0GHjNtpSFU1h1V6HGFR5iQ=;
+        b=JYSwEKBatbNLvVHC1e1jVhicBkPKd9vqqWIqOpjDiZVHo4of9RunPf4kTcROLBcKDc
+         BroV44zZFyvgsVVDesOhxrLILTKHYxDJ9WooOnXpCbARuXR375X72IOm9Ow0eCbcTaI6
+         FChOgNt0FVZDNdakgG7iSiWYNUPk/oEEdcNp7zf+kKJ2U2TNA3OM6luuMBJ/BmGPnx1n
+         hI2AWa6tXyaOaVCrRp6sOOjw0I0AyYLcxkF6J/F17OUkN0Ko76xvlTi7WyFB/FolKDm1
+         qvFf82TAB5kcYc9cDelnAoIBZvIl91SarTKW6xbZ32U1eIRpU/rccnZduOp6g0fz2Suk
+         namA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1768384133; x=1768988933;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WcNoruIEiYTEC0I/gLNDb0GHjNtpSFU1h1V6HGFR5iQ=;
+        b=avohLrs/GO1sTFHC2C3GjGaxYdZ/bky8W02Gr/zKqw03TEP4R9w5IaEe4Y8Li6Tlny
+         fG3sn6Rv5ybJWNUuHnWv5whoGqFNeN3SBGC6TSsyvjBSfRZv/II61Ce+2a5dATuc/UK2
+         MGp6binNnzgaXOdwfjqMEdXUk9lCVaAxr5Thwkn3yWP4pam1mx7DCf8Lp0U5K1mjGAZd
+         410SpH8/yqlLe0pkBs1ztsRskoAfpiTP5cfHgfQSKTKtgaECYspyWLen8gsL5CCEQMZE
+         NEBs7xd7cqzKvys5priwUdbJ4ExHitTzv/gFRvNXOsX9oexLqO4MR82o0jzLe5rOpDWv
+         +HEA==
+X-Gm-Message-State: AOJu0YzC65LWXBR6UNMBdSrkaodAfAMNu92AplVbv1gZvaFBNTzY+3/t
+	PAV47h5UO+uVEhZ7oUflogTAutJfIteIDQ872YA0nrosGtVPU9vqwkiRz/3aRNU2P/rwaOBj95k
+	JTIN5vssZxpJK6CTsoKc6vESB2fG24fqgBUZh1A1OH/HpXTcJcukOYjY3Ys4/ETA=
+X-Gm-Gg: AY/fxX6Yt3r0yYmMpjEHWTpJ2g+AVlUlQdO7S+8z53TDGaklWiXHjtzLsLAwmlqH/5X
+	iOyhm8GAU01OmWc9VQsiLZ8s4/flkqtRIY0RCJJ8MQNRYHggJy+v62AZMOmHSL4E8KFiDDcW2KA
+	Q06Ti8SUbPHnQI1vFSRnPXEqA5CFEKN7dFaMUon2bDNuyB318jcwjGuHu1x6QRfbXMCYPEHcVK5
+	tGx+mhAoFvTznFSqjxBXPExanm230nBJ8+eVNEUsPD6zABBp/9/v5/gU9x+iR2HhnZ31IvxMaO3
+	6onEFUFjtMoJlA+mlpzOQVfDjldV37aHlmjtUsJbYNoywUC+feZ8I060DMdVd5P7W8+XPWWwDl8
+	x++/2Vy0udJLsQ5C4bJNMjvuzMxpxhpsElVQ6fS0v
+X-Received: by 2002:a17:903:b83:b0:2a0:b62e:e012 with SMTP id d9443c01a7336-2a599e121a4mr19779615ad.38.1768384132960;
+        Wed, 14 Jan 2026 01:48:52 -0800 (PST)
+X-Received: by 2002:a17:903:b83:b0:2a0:b62e:e012 with SMTP id d9443c01a7336-2a599e121a4mr19779415ad.38.1768384132511;
+        Wed, 14 Jan 2026 01:48:52 -0800 (PST)
+Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2a3e3cb2d93sm225335075ad.63.2026.01.14.01.48.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 14 Jan 2026 01:48:52 -0800 (PST)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+        conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
+Subject: [PATCH v2 0/2] Enable Inline crypto engine for kodiak
+Date: Wed, 14 Jan 2026 15:18:46 +0530
+Message-Id: <20260114094848.3790487-1-neeraj.soni@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, linux-rockchip@lists.infradead.org,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, heiko@sntech.de, ulf.hansson@linaro.org
-Subject: Re: [PATCH v1 0/3] mmc: dw_mmc-rockchip: Add stability quirk for
- NanoPi R76S
-To: Marco Schirrmeister <mschirrmeister@gmail.com>
-References: <20260110010715.1610159-1-mschirrmeister@gmail.com>
- <67ccb8f6-f9bd-4266-b79a-b688bd6d030b@rock-chips.com>
- <8536413c-8687-4d75-befb-8f25e54838bf@rock-chips.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <8536413c-8687-4d75-befb-8f25e54838bf@rock-chips.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9bbb8cc99a09cckunm9a308b3948f3f9
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQkxMQlYaGE5PSx5OGkxPH05WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=jt/DYDIZPuInsl91a4KACW2hxs/z0RuH25bcKV7dul2XAuJBK6dSpkMoPrFZiufslHvTBdw6k63r1heN1qGUMdrl+snPB6OUfwOyQteYKn1TnIfMxUSGknCjppyYocg8r9VyH4ToDIZgaLjI1ib6+xWaECZ+pAEW1uzaL95PNsQ=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=8+Ps+QJX7O1TTlQB7KtvJFbgo7HUqA8ymA/xt0D2c0U=;
-	h=date:mime-version:subject:message-id:from;
+X-Authority-Analysis: v=2.4 cv=ebQwvrEH c=1 sm=1 tr=0 ts=69676686 cx=c_pps
+ a=JL+w9abYAAE89/QcEU+0QA==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=vUbySO9Y5rIA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=OaewepulewRRD3_FMPAA:9 a=324X-CrmTo6CU4MGRt3R:22
+X-Proofpoint-ORIG-GUID: tiOdxbKQEhT45Qqndslm0JZEyqYNeWGV
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMTE0MDA3OSBTYWx0ZWRfX/z0XgKKM1y5A
+ gAtygKiUyNuCVbtPsLKMYK8lE9ixKkuQxAVcbwY4ZrD8H4vnyAIxZefQ7c/+B3x3cnP9TiMmHiO
+ hOjWSo9gmzruYbslAWmmdDoJO/Q920D6uQ8fe5NHFJ4SDvq6/zrWpdtphZVr1RDOaFT/d5E7fqr
+ nPnAT0fMsnj1ORAYRbBgyPTqdMbMWbXOfrF1Unfg3xQ/3XZyjoRAjGKbrkSvpoVCTNBNHkuBfTy
+ ImvQt5B0iC26Z2ZURJAzKxbB5JzdNgVYUhHDDZ242IpTPDVCVgONHMqjA+sUVVPMo3QRHVzOmte
+ oDdiJ/5SFitu5FD1y4AEpQYoYbbekTZU8lTZRIqM0sZITu4ILWPnjqEMM72Tk3BhDiHI4/5XzWH
+ EkcMwbe+DcLuNmh6xH1kwK/rlDUO49sp5W+h8NGfp2SSeMdgPU7RNRL3jTXMdqYdKwfkW0upg4t
+ 3OK+DpMPbuJh5kbWqJg==
+X-Proofpoint-GUID: tiOdxbKQEhT45Qqndslm0JZEyqYNeWGV
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.9,FMLib:17.12.100.49
+ definitions=2026-01-14_03,2026-01-09_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ priorityscore=1501 adultscore=0 impostorscore=0 clxscore=1015
+ lowpriorityscore=0 suspectscore=0 phishscore=0 spamscore=0 malwarescore=0
+ bulkscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
+ adjust=0 reason=mlx scancount=1 engine=8.22.0-2512120000
+ definitions=main-2601140079
 
-在 2026/01/12 星期一 11:56, Shawn Lin 写道:
-> 在 2026/01/12 星期一 9:32, Shawn Lin 写道:
->> 在 2026/01/10 星期六 9:07, Marco Schirrmeister 写道:
->>> This series addresses a microSD stability issue on the FriendlyElec
->>> NanoPi R76S (RK3576). The board currently suffers from a 400kHz
->>> retuning loop when the controller attempts to enter runtime-suspend
->>> during idle periods.
->>>
->>> Evidence of the failure in dmesg:
->>> [Fri Jan  2 01:28:02 2026] mmc_host mmc1: Bus speed (slot 0) = 400000Hz
->>> [Fri Jan  2 01:28:03 2026] mmc_host mmc1: Bus speed (slot 0) = 
->>> 198000000Hz
->>> [Fri Jan  2 01:28:03 2026] dwmmc_rockchip 2a310000.mmc: Successfully 
->>> tuned phase to 233
->>> [Fri Jan  2 01:28:04 2026] mmc_host mmc1: Bus speed (slot 0) = 400000Hz
->>>
->>
->> Does this problem happen with all microSDs or just *a* microSD per
->> your description?
->> Have you ever tried to disable SDR104 support?
->>
-> 
-> A quick update.
-> 
-> I found several problems on RK3576 for supporting sd cards. I wondered
-> how all upstream RK3576 boards claiming SD support work? Anyway, I sent
-> a series to the list[1], not sure if it fixes the problem you faced, but
-> these should be the right patches you should have a try.
-> 
-> 
-> [1]https://lore.kernel.org/linux-rockchip/1768189768-96333-1-git-send- 
-> email-shawn.lin@rock-chips.com/T/#t
+Document Inline Crypto Engine (ICE) handle for SDHC and add its device-tree
+node to enable it for kodiak.
 
+How this patch was tested:
+- export ARCH=arm64
+- export CROSS_COMPILE=aarch64-linux-gnu-
+- make menuconfig
+- make defconifg
+- make DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/sdhci-msm.yaml dt_binding_check
+- make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CHECK_DTBS=y dtbs
 
-Except for the patch mentioned above for fixing the hot-plug problem
-which you confirmed to work fine. I looked the code a bit and see
-a potential problem related to the runtime suspend + power-domain.
-Please check the patch to see if it fixes your problem:
+---
+Changes in v2:
+- Removed the "if: required:" description for "qcom,ice" dt-binding
+  as the ICE node is optional.
+- Corrected the ICE dt node entry according to the dt-binding description.
+- Added test details.
 
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -36,6 +36,8 @@ struct dw_mci_rockchip_priv_data {
-         int                     default_sample_phase;
-         int                     num_phases;
-         bool                    internal_phase;
-+       int                     sample_phase;
-+       int                     drv_phase;
-  };
+Changes in v1:
+- Updated the dt-binding for ICE node.
+- Added the dt node for ICE for kodiak.
 
-  /*
-@@ -573,9 +575,43 @@ static void dw_mci_rockchip_remove(struct 
-platform_device *pdev)
-         dw_mci_pltfm_remove(pdev);
-  }
+Neeraj Soni (2):
+  dt-bindings: mmc: sdhci-msm: Add ICE phandle
+  arm64: dts: qcom: kodiak: enable the inline crypto engine for SDHC
 
-+static int dw_mci_rockchip_runtime_suspend(struct device *dev)
-+{
-+       struct platform_device *pdev = to_platform_device(dev);
-+       struct dw_mci *host = platform_get_drvdata(pdev);
-+       struct dw_mci_rockchip_priv_data *priv = host->priv;
-+
-+       if (priv->internal_phase) {
-+               priv->sample_phase = rockchip_mmc_get_phase(host, true);
-+               priv->drv_phase = rockchip_mmc_get_phase(host, false);
-+       }
-+
-+       return dw_mci_runtime_suspend(dev);
-+}
-+
-+static int dw_mci_rockchip_runtime_resume(struct device *dev)
-+{
-+       struct platform_device *pdev = to_platform_device(dev);
-+       struct dw_mci *host = platform_get_drvdata(pdev);
-+       struct dw_mci_rockchip_priv_data *priv = host->priv;
-+       int ret;
-+
-+       ret = dw_mci_runtime_resume(dev);
-+       if (ret)
-+               return ret;
-+
-+       if (priv->internal_phase) {
-+               rockchip_mmc_set_phase(host, true, priv->sample_phase);
-+               rockchip_mmc_set_phase(host, false, priv->drv_phase);
-+               mci_writel(host, MISC_CON, MEM_CLK_AUTOGATE_ENABLE);
-+       }
-+
-+       return ret;
-+}
-+
-  static const struct dev_pm_ops dw_mci_rockchip_dev_pm_ops = {
-         SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, 
-pm_runtime_force_resume)
--       RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
-+       RUNTIME_PM_OPS(dw_mci_rockchip_runtime_suspend, 
-dw_mci_rockchip_runtime_resume, NULL)
-  };
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 4 ++++
+ arch/arm64/boot/dts/qcom/kodiak.dtsi                 | 9 +++++++++
+ 2 files changed, 13 insertions(+)
 
-  static struct platform_driver dw_mci_rockchip_pltfm_driver = {
-
-
-
-
-> 
->>> Testing confirmed that the issue can be manually addressed by
->>> disabling runtime PM via sysfs:
->>> echo on > /sys/devices/platform/soc/2a310000.mmc/power/control
->>>
->>> I experimented with various changes in the Device Tree, including
->>> lowering the bus frequency and attempting to keep the power domains
->>> active, but nothing stopped the retuning loop.
->>> The issue only went away when I forced the controller to stay active
->>> by disabling the runtime power management.
->>>
->>> This quirk is the only way I have found to keep the SDR104 link from
->>> crashing on the NanoPi R76S, I am open to suggestions if there is
->>> a better way to handle this in the driver or the DTS.
->>>
->>> Marco Schirrmeister (3):
->>>    dt-bindings: mmc: rockchip-dw-mshc: add rockchip,disable-runtime-pm
->>>    mmc: host: dw_mmc-rockchip: add rockchip,disable-runtime-pm quirk
->>>    arm64: dts: rockchip: add stability quirk to NanoPi R76S
->>>
->>>   .../bindings/mmc/rockchip-dw-mshc.yaml        |  8 ++++++
->>>   .../boot/dts/rockchip/rk3576-nanopi-r76s.dts  |  1 +
->>>   drivers/mmc/host/dw_mmc-rockchip.c            | 25 ++++++++++++++++---
->>>   3 files changed, 31 insertions(+), 3 deletions(-)
->>>
->>
->>
-> 
-> 
+--
+2.34.1
 
