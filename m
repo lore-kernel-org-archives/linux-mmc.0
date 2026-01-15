@@ -1,136 +1,92 @@
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8C74362120;
-	Thu, 15 Jan 2026 10:23:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1F803BFE46;
+	Thu, 15 Jan 2026 17:25:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768472621; cv=none; b=dkcshnxHUVNByOD4xQTp7ceZwKuVwx5JtNFsg8j2qWcb/hNFj6eZhEDzWJK/UCYP/k4LVSyX2/SQNX8OovXk8HLsTO3Ed72tdALJIBYHo1/P3U9sS+x8romwhC6a91GzM3e4yznMRGsCX976HhM3NS4FC0kliOamTiJ/lagO8Yk=
+	t=1768497911; cv=none; b=n3yargCxnR0E/6FF55vV2GykYk53+4YnuYqeJ61sYI3Df68nvmcQbMfxAgXPaFtnRPSB/HV1ooYe9S3IBoXk7VYpSGwSiJTehYIkIEN2W1QWimxo05z0Ac8iCtFicSqirO+vTrBgqiOOwZDWEhBAzeY58Cgs+Rz/C6TgtJSST1U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768472621; c=relaxed/simple;
-	bh=Uu2c+2aufJRq9E3iM/5uMovcG2TqdNJmfEE/yVPt2HE=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=OtwY0lh6RNAmgmzCyJeTNgqxdUsGSrPeHjaVmPeMyfLBSlUJwEw0BZDC9PLmlrpc1w1HdLdTx8LjBYmWht4imnqD1z8nQN4XmsisfAGg6lpJ1fd0GRZxP2mHJJevCKEC9MClm5KvkAy5rXymIYoO5xJ6QXc1hGI0k9VOtTC+7ok=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b=E9WY3PSr; arc=none smtp.client-ip=211.75.126.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+	s=arc-20240116; t=1768497911; c=relaxed/simple;
+	bh=F301zU1vCBsJJwhbHsinIGYvb2uYINoBUeXNJkJ9o9Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=GCNM3BEQuAMd9c1y6AEzs3XR4TnTqo0OqIB6Fsne+Y89lTkJIiD0tB2lfmp0qILpQMR5fqhyDuqusTXAsxIRorfBkwdWkrStsK1/oVMqMJeJg6UAy5OM4a+IpykCT26vG6GMPfgRli9vpXsiquzMBRaAK82mvqZv4iN3Z2Z8OhU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=W5NEArbr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b="E9WY3PSr"
-X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 60FANFRs82859213, This message is accepted by code: ctloc85258
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=realtek.com; s=dkim;
-	t=1768472595; bh=Uu2c+2aufJRq9E3iM/5uMovcG2TqdNJmfEE/yVPt2HE=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:MIME-Version;
-	b=E9WY3PSr8kq/T1cGTNX9kXlhIUU2xSyqF0a76htrGkMK3/c9Z0cG0AHv7Tb9o4d6t
-	 Z15d6lEiaMwSY+VpmaD4sNeEc7j+GCyJ1ZujqwQcfzh0LzJMmTATUscEKF1TQyt8bS
-	 zNB31K5lBYX3gW717spGgExMK7jk+STQiqMaaKTTRBm6/LyqJmNT4r2BrSwrAjJTkw
-	 m4BXmu2Mx8CBg/6ix5WBDwanLa5ktQwK+dP7L3ST8WKuYWkLaA4RR2HOJph8TD2Dun
-	 02L1LF15OwwGKNXeqz/iI+f5meRPZ6a/9cvPjoL+p+KMdNzevHYGeQA76I4jXa+GCp
-	 8ZlCpgZX2lbtQ==
-Received: from mail.realtek.com (rtkexhmbs02.realtek.com.tw[172.21.6.41])
-	by rtits2.realtek.com.tw (8.15.2/3.21/5.94) with ESMTPS id 60FANFRs82859213
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 15 Jan 2026 18:23:15 +0800
-Received: from RTKEXHMBS04.realtek.com.tw (10.21.1.54) by
- RTKEXHMBS02.realtek.com.tw (172.21.6.41) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1748.10; Thu, 15 Jan 2026 18:23:16 +0800
-Received: from RTKEXHMBS04.realtek.com.tw ([fe80::ee74:b1f4:bb6e:c78d]) by
- RTKEXHMBS04.realtek.com.tw ([fe80::ee74:b1f4:bb6e:c78d%6]) with mapi id
- 15.02.1748.010; Thu, 15 Jan 2026 18:23:16 +0800
-From: Ricky WU <ricky_wu@realtek.com>
-To: Matthew Schwartz <matthew.schwartz@linux.dev>,
-        "ulf.hansson@linaro.org"
-	<ulf.hansson@linaro.org>
-CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH] mmc: rtsx_pci_sdmmc: implement sdmmc_card_busy function
-Thread-Topic: [PATCH] mmc: rtsx_pci_sdmmc: implement sdmmc_card_busy function
-Thread-Index: AQHceQRkLnb7EmC95kS/HOptKpYFOLVTHP+w
-Date: Thu, 15 Jan 2026 10:23:16 +0000
-Message-ID: <220bd61b3ab743b492632764a38f95f0@realtek.com>
-References: <20251229204526.2850803-1-matthew.schwartz@linux.dev>
-In-Reply-To: <20251229204526.2850803-1-matthew.schwartz@linux.dev>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="W5NEArbr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5C42AC19422;
+	Thu, 15 Jan 2026 17:25:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1768497911;
+	bh=F301zU1vCBsJJwhbHsinIGYvb2uYINoBUeXNJkJ9o9Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=W5NEArbrEFalAlEMGWfQYfz8F8ozBniK0/E+j/Xcyee57fhbtiuM3A5wqwTQo/kSE
+	 5Qmt0iocmyAhTCgyChCXJHqcPxZ2m/M8LIP/x4OGtPexlhrD+cKG9YZ81e1S9grPMa
+	 03Kj7oFRSssmrzo4j/PSnDusZ4YuSXnTf8aVYLYiP9FRqMxnGTYwcXjkYNfn+qBzA+
+	 bKZxNUG3l2JYlly1CP4LjTMQ3MXaudRSab6U/F748Yy3RIdHnGOB3DoenjNOqZet0M
+	 qU3Pl/vFg/SnxGqhCWJS9o9SNnRhpsudlk/IDY6Ss0GvRL78wVOPVCOC3xIXd3lqBi
+	 6XGHYJhCcz6Iw==
+Date: Thu, 15 Jan 2026 11:25:10 -0600
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Francesco Valla <francesco@valla.it>
+Cc: linux-kernel@vger.kernel.org, Saravana Kannan <saravanak@kernel.org>,
+	linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+	devicetree@vger.kernel.org
+Subject: Re: [PATCH] of: property: fw_devlink: Add support for "mmc-pwrseq"
+Message-ID: <176849790816.916369.13545562565648281883.robh@kernel.org>
+References: <20260110-mmc-pwrseq-v1-1-73de9d6456f4@valla.it>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260110-mmc-pwrseq-v1-1-73de9d6456f4@valla.it>
 
-SGkgTWF0dGhldywNCg0KVGhhbmtzIGZvciB3b3JraW5nIG9uIHRoaXMgcGF0Y2guDQoNCldl4oCZ
-dmUgdGVzdGVkIHRoaXMgY2hhbmdlIG9uIG91ciBwbGF0Zm9ybXMgYW5kIGNhbiBjb25maXJtIHRo
-YXQgYWRkaW5nIHRoZQ0KY2FyZF9idXN5KCkgY2FsbGJhY2sgZG9lcyByZXNvbHZlIHRoZQ0K4oCc
-Y2Fubm90IHZlcmlmeSBzaWduYWwgdm9sdGFnZSBzd2l0Y2jigJ0gaXNzdWUgZm9yIHVzIPCfkY0u
-DQoNClRoYXQgc2FpZCwgd2hpbGUgcmV2aWV3aW5nIHRoZSBjaGFuZ2Ugd2Ugbm90aWNlZCBhIHBv
-dGVudGlhbCByZWR1bmRhbmN5IGluDQp0aGUgZXhpc3RpbmcgZHJpdmVyIGxvZ2ljLiBJbiBzZG1t
-Y19zd2l0Y2hfdm9sdGFnZSgpIHdlIGFscmVhZHkgcGVyZm9ybQ0KZXhwbGljaXQgREFUIGxpbmUg
-c3RhYmlsaXphdGlvbiBjaGVja3MgdmlhDQpzZF93YWl0X3ZvbHRhZ2Vfc3RhYmxlXzEoKSBhbmQg
-c2Rfd2FpdF92b2x0YWdlX3N0YWJsZV8yKCkuDQoNCk9uY2UgY2FyZF9idXN5KCkgaXMgaW1wbGVt
-ZW50ZWQgYW5kIHVzZWQgYnkgdGhlIE1NQyBjb3JlIGR1cmluZyB0aGUNCnZvbHRhZ2Utc3dpdGNo
-IHZlcmlmaWNhdGlvbiBwaGFzZSwgdGhlc2UgdHdvIHN0YWJpbGl6YXRpb24gc3RlcHMgYXBwZWFy
-IHRvDQpiZSBwYXJ0aWFsbHkgb3ZlcmxhcHBpbmcgd2l0aCB3aGF0IHRoZSBjb3JlIG5vdyB2YWxp
-ZGF0ZXMgdmlhDQpjYXJkX2J1c3koKS4gSW4gb3VyIHRlc3RpbmcsIHdpdGggY2FyZF9idXN5KCkg
-cHJlc2VudCwgdGhlIHN0YWJsZV8xIC8NCnN0YWJsZV8yIGxvZ2ljIG5vIGxvbmdlciBzZWVtcyBz
-dHJpY3RseSBuZWNlc3NhcnkgYW5kIGNvdWxkIGxpa2VseSBiZQ0Kc2ltcGxpZmllZCBvciByZW1v
-dmVkIHdpdGggc29tZSBhZGp1c3RtZW50Lg0KDQpGcm9tIGEgcHJvY2VzcyBwb2ludCBvZiB2aWV3
-LCB3ZeKAmXJlIG5vdCBzdXJlIHdoaWNoIGFwcHJvYWNoIHlvdeKAmWQgcHJlZmVyOg0KDQpMYW5k
-IHlvdXIgcGF0Y2ggYXMtaXMgZmlyc3QsIGFuZCB0aGVuIHdlIGNhbiBmb2xsb3cgdXAgd2l0aCBh
-IHNlcGFyYXRlDQpjbGVhbnVwL21vZGlmaWNhdGlvbiBwYXRjaCB0byBhZGp1c3Qgc2RtbWNfc3dp
-dGNoX3ZvbHRhZ2UoKSwgb3INCg0KV2UgY2FuIHByZXBhcmUgYW4gYWRkaXRpb25hbCBwYXRjaCB0
-aGF0IGJ1aWxkcyBvbiB0b3Agb2YgeW91cnMgYW5kIHNoYXJlDQppdCB3aXRoIHlvdSBmb3IgcmV2
-aWV3LCBzbyB0aGUgY2hhbmdlcyBjYW4gYmUgYWxpZ25lZCB0b2dldGhlci4NCg0KUGxlYXNlIGxl
-dCB1cyBrbm93IHdoaWNoIG9wdGlvbiB5b3UgdGhpbmsgbWFrZXMgbW9yZSBzZW5zZSBmb3IgdXBz
-dHJlYW0sIG9yDQppZiB5b3XigJlkIHByZWZlciBhIGRpZmZlcmVudCBhcHByb2FjaC4NCg0KVGhh
-bmtzIGFnYWluIGZvciB0aGUgZml4IGFuZCBmb3IgbG9va2luZyBpbnRvIHRoaXMgZHJpdmVyLg0K
-DQpCZXN0IHJlZ2FyZHMsDQpSaWNreQ0KDQo+IHJ0c3hfcGNpX3NkbW1jIGRvZXMgbm90IGhhdmUg
-YW4gc2RtbWNfY2FyZF9idXN5IGZ1bmN0aW9uLCBzbyBhbnkgdm9sdGFnZQ0KPiBzd2l0Y2hlcyBj
-YXVzZSBhIGtlcm5lbCB3YXJuaW5nLCAibW1jMDogY2Fubm90IHZlcmlmeSBzaWduYWwgdm9sdGFn
-ZSBzd2l0Y2guIg0KPiANCj4gQ29weSB0aGUgc2RtbWNfY2FyZF9idXN5IGZ1bmN0aW9uIGZyb20g
-cnRzeF9wY2lfdXNiIHRvIHJ0c3hfcGNpX3NkbW1jIHRvDQo+IGZpeCB0aGlzLg0KPiANCj4gRml4
-ZXM6IGZmOTg0ZTU3ZDM2ZSAoIm1tYzogQWRkIHJlYWx0ZWsgcGNpZSBzZG1tYyBob3N0IGRyaXZl
-ciIpDQo+IFNpZ25lZC1vZmYtYnk6IE1hdHRoZXcgU2Nod2FydHogPG1hdHRoZXcuc2Nod2FydHpA
-bGludXguZGV2Pg0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYyB8
-IDQxDQo+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysNCj4gIDEgZmlsZSBjaGFuZ2Vk
-LCA0MSBpbnNlcnRpb25zKCspDQo+IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9y
-dHN4X3BjaV9zZG1tYy5jDQo+IGIvZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5jDQo+
-IGluZGV4IGRjMjU4N2ZmODUxOS4uNGRiMzMyOGY0NmRmIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJz
-L21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMNCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9ydHN4
-X3BjaV9zZG1tYy5jDQo+IEBAIC0xMzA2LDYgKzEzMDYsNDYgQEAgc3RhdGljIGludCBzZG1tY19z
-d2l0Y2hfdm9sdGFnZShzdHJ1Y3QgbW1jX2hvc3QNCj4gKm1tYywgc3RydWN0IG1tY19pb3MgKmlv
-cykNCj4gICAgICAgICByZXR1cm4gZXJyOw0KPiAgfQ0KPiANCj4gK3N0YXRpYyBpbnQgc2RtbWNf
-Y2FyZF9idXN5KHN0cnVjdCBtbWNfaG9zdCAqbW1jKSB7DQo+ICsgICAgICAgc3RydWN0IHJlYWx0
-ZWtfcGNpX3NkbW1jICpob3N0ID0gbW1jX3ByaXYobW1jKTsNCj4gKyAgICAgICBzdHJ1Y3QgcnRz
-eF9wY3IgKnBjciA9IGhvc3QtPnBjcjsNCj4gKyAgICAgICBpbnQgZXJyOw0KPiArICAgICAgIHU4
-IHN0YXQ7DQo+ICsgICAgICAgdTggbWFzayA9IFNEX0RBVDNfU1RBVFVTIHwgU0RfREFUMl9TVEFU
-VVMgfCBTRF9EQVQxX1NUQVRVUw0KPiArICAgICAgIHwgU0RfREFUMF9TVEFUVVM7DQo+ICsNCj4g
-KyAgICAgICBtdXRleF9sb2NrKCZwY3ItPnBjcl9tdXRleCk7DQo+ICsNCj4gKyAgICAgICBydHN4
-X3BjaV9zdGFydF9ydW4ocGNyKTsNCj4gKw0KPiArICAgICAgIGVyciA9IHJ0c3hfcGNpX3dyaXRl
-X3JlZ2lzdGVyKHBjciwgU0RfQlVTX1NUQVQsDQo+ICsgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgU0RfQ0xLX1RPR0dMRV9FTiB8DQo+IFNEX0NMS19GT1JDRV9TVE9QLA0KPiAr
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgU0RfQ0xLX1RPR0dMRV9FTik7DQo+ICsgICAg
-ICAgaWYgKGVycikNCj4gKyAgICAgICAgICAgICAgIGdvdG8gb3V0Ow0KPiArDQo+ICsgICAgICAg
-bWRlbGF5KDEpOw0KPiArDQo+ICsgICAgICAgZXJyID0gcnRzeF9wY2lfcmVhZF9yZWdpc3Rlcihw
-Y3IsIFNEX0JVU19TVEFULCAmc3RhdCk7DQo+ICsgICAgICAgaWYgKGVycikNCj4gKyAgICAgICAg
-ICAgICAgIGdvdG8gb3V0Ow0KPiArDQo+ICsgICAgICAgZXJyID0gcnRzeF9wY2lfd3JpdGVfcmVn
-aXN0ZXIocGNyLCBTRF9CVVNfU1RBVCwNCj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICBTRF9DTEtfVE9HR0xFX0VOIHwNCj4gK1NEX0NMS19GT1JDRV9TVE9QLCAwKTsNCj4g
-K291dDoNCj4gKyAgICAgICBtdXRleF91bmxvY2soJnBjci0+cGNyX211dGV4KTsNCj4gKw0KPiAr
-ICAgICAgIGlmIChlcnIpDQo+ICsgICAgICAgICAgICAgICByZXR1cm4gZXJyOw0KPiArDQo+ICsg
-ICAgICAgLyogY2hlY2sgaWYgYW55IHBpbiBiZXR3ZWVuIGRhdFswOjNdIGlzIGxvdyAqLw0KPiAr
-ICAgICAgIGlmICgoc3RhdCAmIG1hc2spICE9IG1hc2spDQo+ICsgICAgICAgICAgICAgICByZXR1
-cm4gMTsNCj4gKyAgICAgICBlbHNlDQo+ICsgICAgICAgICAgICAgICByZXR1cm4gMDsNCj4gK30N
-Cj4gKw0KPiAgc3RhdGljIGludCBzZG1tY19leGVjdXRlX3R1bmluZyhzdHJ1Y3QgbW1jX2hvc3Qg
-Km1tYywgdTMyIG9wY29kZSkgIHsNCj4gICAgICAgICBzdHJ1Y3QgcmVhbHRla19wY2lfc2RtbWMg
-Kmhvc3QgPSBtbWNfcHJpdihtbWMpOyBAQCAtMTQxOCw2DQo+ICsxNDU4LDcgQEAgc3RhdGljIGNv
-bnN0IHN0cnVjdCBtbWNfaG9zdF9vcHMgcmVhbHRla19wY2lfc2RtbWNfb3BzID0gew0KPiAgICAg
-ICAgIC5nZXRfcm8gPSBzZG1tY19nZXRfcm8sDQo+ICAgICAgICAgLmdldF9jZCA9IHNkbW1jX2dl
-dF9jZCwNCj4gICAgICAgICAuc3RhcnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoID0gc2RtbWNfc3dp
-dGNoX3ZvbHRhZ2UsDQo+ICsgICAgICAgLmNhcmRfYnVzeSA9IHNkbW1jX2NhcmRfYnVzeSwNCj4g
-ICAgICAgICAuZXhlY3V0ZV90dW5pbmcgPSBzZG1tY19leGVjdXRlX3R1bmluZywNCj4gICAgICAg
-ICAuaW5pdF9zZF9leHByZXNzID0gc2RtbWNfaW5pdF9zZF9leHByZXNzLCAgfTsNCj4gLS0NCj4g
-Mi41Mi4wDQoNCg==
+
+On Sat, 10 Jan 2026 16:27:59 +0100, Francesco Valla wrote:
+> Add support for parsing MMC power sequencing (pwrseq) binding so that
+> fw_devlink can enforce the dependency.
+> 
+> Signed-off-by: Francesco Valla <francesco@valla.it>
+> ---
+> Resending this patch as it slipped through the cracks (of my attention,
+> at least).
+> 
+> Original submission is at [0]; there it appears as a v2 because it was
+> the first time I used b4. It was also part of [1], which wasn't really
+> a patchset but a follow-up to the boot time SIG meeting.
+> 
+> I added Ulf and CC'd the mmc list, hoping they can (more
+> authoritatively than me) reply to Saravan's question:
+> 
+> """
+> I took a quick look at the documentation. It's not clear to me that
+> mmc-pwrseq always points to a supplier. Can someone with more
+> experience on this confirm that is what it's supposed to point at?
+> 
+> Meaning if A lists B as pwrseq, is it always the case that B needs to
+> be powered on? The binding documentation doesn't say anything about B
+> needs to be powered on first. It's just saying A and B have an
+> ordering requirement.
+> 
+> If the meaning of the binding is _ALWAYS_ B needs to be powered on
+> first, then yes, this patch is correct and I can give a reviewed-by.
+> """
+> 
+> [0] https://lore.kernel.org/all/20250930-mmc_pwrseq-v2-1-80a8c6be0fb0@valla.it/
+> [1] https://lore.kernel.org/linux-embedded/20251126-beagleplay-probes-v1-0-c833defd4c9b@valla.it/T/
+> 
+> Thank you!
+> 
+> Regards,
+> Francesco
+> ---
+>  drivers/of/property.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+
+Applied, thanks!
+
