@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9AE62D47F4;
-	Fri, 16 Jan 2026 07:18:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D1192F619D;
+	Fri, 16 Jan 2026 07:19:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768547933; cv=none; b=XcjfXvQmYAcEfLseEVQm4lr42MVxPEWxxYpuKRhsKOf32hn1eieihCF2EeCfBkjlpeffVyTpG+dMzclBkxY0QINMIktjM1WDtVYz46KXjEhgaMHmokp00F9BN2mKCUbWRX8RzoT61Oy7bCAKFygRxiJnr4ASMNBgMs3c5VTI7Q8=
+	t=1768547990; cv=none; b=QJ2jEW7+sNwVR8Sp1khv5R5Mz4+Uh6omBqW///VHYX4ojmOD/qjiP43VKmgdsYGln1hMU0oZe5mMlm9uy1X7ILIQXQG8puVXDxFkT+r29qXRd1t+JOTcC1T3v2Zr5Fm+fWHONkQMV2m/zG1yEvmnnnmCrllA5L8sKHDpz0hD3Xg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768547933; c=relaxed/simple;
-	bh=oeEaOPaa89SvWKws7bLkmTCRn70xiJOI6jiu0rkHdZc=;
+	s=arc-20240116; t=1768547990; c=relaxed/simple;
+	bh=reOtgTsgainSPvlftSf44T+RETRioCaQA9eGb1UnSPE=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=I8+cV8UPWQCoMgqSu1QUMED3tqO1/qq2z1Kd2lByQjcRQcbEfCkGH1orAurpqQwGhJQMrFX8gdxXJxxmmFPyx6jC6f6pSfFJkveMGerNPE+9ZTLk5BXOUnuXs9dB4dPvSZCXdpephuaH+T+m8JbzQ/xQfrjKRyp8Q1TXfXnPL8k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SDQjXRNw; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=Ni5nd8AJf9WbAspdhacJ1K/WXM8sdNzaEQhhOJiXxVPqlSE18I4XL6rcGqONcwSbH+gJm5flNIxIB6UCNlGnL5zCgXIfpDBuHbUd0jrXX7KJeUd6UvVvHjhV23IdZXF2BIUjLxB9uo6DVHyIXpraA7Tt4B2LC/4686ViFd8Auj4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HsEryaSj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SDQjXRNw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1BAACC19421;
-	Fri, 16 Jan 2026 07:18:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HsEryaSj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE8B8C116C6;
+	Fri, 16 Jan 2026 07:19:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768547933;
-	bh=oeEaOPaa89SvWKws7bLkmTCRn70xiJOI6jiu0rkHdZc=;
+	s=k20201202; t=1768547990;
+	bh=reOtgTsgainSPvlftSf44T+RETRioCaQA9eGb1UnSPE=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=SDQjXRNwk1K1c0t2ZZIY9yHIno14jhyltiK0T6z8PVCQ8Lu8H1kBCXuhYe0nIlizd
-	 hTaxsRRg9mkKTCAcHKO20Z8Vu50Myu2Es93HsChtA6h25ivWnN/lWAHpCWsr/qGiuj
-	 YACu3cg4ijXORJ64ebGgqn9tDMa34WbGggba9uKJY+pCsR/7zjYMLEx6sVh39/3aEr
-	 CNPJBH7Rvi6hH66k//yQwse3JXG9CdUYQpXxHk29BurBhIOENYorgyamDq9/vCCXey
-	 /BkzyqLotuUgJQfsAEd0/utxDmN1ffAH5nBWSXoXA8eoMY+zfzx5AUl1jzqbfMI1zC
-	 K7VncclxK32LA==
-Message-ID: <6d14abf7-da78-4ccd-8032-d0197098982c@kernel.org>
-Date: Fri, 16 Jan 2026 08:18:49 +0100
+	b=HsEryaSjhIHWusmM9JxycvcgzbZVkybqjC5lT0vpfclY45sSWQhyH5PdOMhTB01PN
+	 MbXvHVhzScQTyvZAZDhpOhr0mUzB3VNvHFmWFqh2RtgCa91XGoJRIGHPySYA/DE4Qy
+	 lygEJ7cg6oEmXQ9u8C7Mlsb9VN/TuXFTrqPEhxAFQ1A+WCG9fubdq+UfY9+mib3Gf2
+	 XxS946WOoTCGLOougV3nv/+HrdHeEtJYWIzh0t6FZHrbYXTq1Eqp9/v8vnwfJN8i1S
+	 SPpOP51RO/1GfNfPOL4c6W/JsvmZInvdQRDl9P9rXEqd/F0W7VxJPqcCl/cT93tasc
+	 xtDGgrIhouOmQ==
+Message-ID: <0f1afc5e-d5f4-444e-819c-594f0b1e125b@kernel.org>
+Date: Fri, 16 Jan 2026 08:19:46 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,16 +35,17 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: sdhci-msm: Add ICE phandle
+Subject: Re: [PATCH v2 2/2] arm64: dts: qcom: kodiak: enable the inline crypto
+ engine for SDHC
 To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
 Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
  conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org,
  linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org
 References: <20260114094848.3790487-1-neeraj.soni@oss.qualcomm.com>
- <20260114094848.3790487-2-neeraj.soni@oss.qualcomm.com>
- <20260115-intrepid-space-meerkat-d44ec9@quoll>
- <ce49730e-75d3-87fd-3190-44e45cf83fe0@oss.qualcomm.com>
+ <20260114094848.3790487-3-neeraj.soni@oss.qualcomm.com>
+ <20260115-versatile-bustard-of-bliss-059e5a@quoll>
+ <e10f846c-e81b-1d5b-1be2-8c41ca61b8b0@oss.qualcomm.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -90,67 +91,25 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <ce49730e-75d3-87fd-3190-44e45cf83fe0@oss.qualcomm.com>
+In-Reply-To: <e10f846c-e81b-1d5b-1be2-8c41ca61b8b0@oss.qualcomm.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 16/01/2026 07:50, Neeraj Soni wrote:
-> Hi,
-> 
-> On 1/15/2026 2:33 PM, Krzysztof Kozlowski wrote:
->> On Wed, Jan 14, 2026 at 03:18:47PM +0530, Neeraj Soni wrote:
->>> Starting with sc7280(kodiak), the ICE will have its own device-tree node.
->>> So add the qcom,ice property to reference it.
->>>
->>> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 4 ++++
->>>  1 file changed, 4 insertions(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> index 938be8228d66..8a6a25ceabe1 100644
->>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> @@ -140,6 +140,10 @@ properties:
->>>      $ref: /schemas/types.yaml#/definitions/uint32
->>>      description: platform specific settings for DLL_CONFIG reg.
->>>  
->>> +  qcom,ice:
->>> +    $ref: /schemas/types.yaml#/definitions/phandle
->>> +    description: phandle to the Inline Crypto Engine node
+On 16/01/2026 06:59, Neeraj Soni wrote:
+>> Why this became uppercase?
+> Thnaks for pointing out. I will fix this next patch.
 >>
->> Description should also say: for what purpose.
+>>> +			compatible = "qcom,sc7280-inline-crypto-engine",
+>>> +				     "qcom,inline-crypto-engine";
+>>> +			reg = <0x0 0x007C8000 0x0 0x18000>;
 >>
->> You either have this phandle or ICE address space on sc7280 and newer.
->> You cannot have both, so your schema should encode it properly.
+>> And this? there is no uppercase at all, so maybye you copied it from
+>> downstream, but that's not right approach - do not use downstream code.
 >>
-> Sure. I will update this in next patch.
-> 
->> Otherwise you just sent something which already was on the list and it
->> even was reviewed:
->>
->> https://lore.kernel.org/all/ba3da82d-999b-b040-5230-36e60293e0fd@linaro.org/
->>
->> You even copied the commit msg but did copy the authorship!
->>
-> Sure. Thanks for pointing out. I will fix the authorship in next patch.
+> Yes it was copied but i missed to align with upstream. Thanks for pointing out. This will be fixed in next patch.
 
-If you add if:then: cases, the patch will differ, so make it your own.
-But sending exactly the same patch with the same commit msg as what is
-already on the lists under your own name is not correct.
-
-> 
->> Anyway v3 and v4 were not correct and probably v2 should be used after
->> adjusting it with my comments.
->>
-> Okay. As i see your comment in v2 here:
-> https://lore.kernel.org/all/c8eea30f-5ea2-cfc9-273a-3c6e99a316b9@linaro.org/
-> 
-> i guess what you want is not to drop the entries for clock but rather capture it
-> in the "description" of the ICE phandle entry. Is this understanding correct?
-
-Clocks should not be touched, but reg should.
-
+And that's the problem. You must NEVER COPY downstream DTS. We repeat it
+and repeat it...
 
 Best regards,
 Krzysztof
