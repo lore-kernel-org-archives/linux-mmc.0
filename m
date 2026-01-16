@@ -1,155 +1,149 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 555B3221726;
-	Fri, 16 Jan 2026 10:20:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF43330FC03;
+	Fri, 16 Jan 2026 10:28:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768558835; cv=none; b=Ha4DHqtsf3LVNfdO13AMxR2ERtco4k0OQQLf1m5F9/XUd5TrIyixYDvFGSKmHVsKE+3k8RBIp8+xXkz7EU8oIY+NCg/vVktAExGAL+FMM8ogqpKttSfWTBMgDZxyi4WlxCN4+WUYUim3EiZr0vxqZeclqqfGiyxOyjhtS3sicZg=
+	t=1768559300; cv=none; b=V7iWQmBD2YTJj2s/gY2ShTCBxeN3YLTdPIb/LxyZxt4K4mKwtXcTPllijfrCc3plpMm+cnfe8B+Ywk5wlBGwEvqUiZhkpypkDjNdx13UiVF8tHKuNdmpUVBoqfSWb4W36E5Wykvgt+leLtp2pT5VofmIAXelGvGmHbXEgpJremQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768558835; c=relaxed/simple;
-	bh=1JZLMS1HVsbd6aWEx+GimXeEmDseHFvWx560rTN8Xww=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=G3vOEPQLHgSGsbBX1ZrliXtkff6Z5zN1Bhx7YOPVaSOhL0f6OYcBs9CCcxbmP5384k08Ts0JuTKTFibKWRFT9eLy5D+PkPrSFdv3qlYeNJH35HvDIR89xc1K23vnvrWMS4wU5NiUaSeDRYADPvTcPxHo4VWBCNg0eMQKIIrG+vM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ensECWlL; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768559300; c=relaxed/simple;
+	bh=zD8AU6NzHFIIoKcrjXbRgLe+2FtOW9kcD33SDh9vELQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=m+8viaocHxp+sM2HkiHdKNzUeKLP4b8oa5YQDThloLSgtro8j4ZI6mxoXeWX51eKv1pMr+/s80Q6UYZU7Mep/OMQOxm5IG9Yf788RsdoX+iOSDbnhGxe0zEf37B1IOr8tqt2W5PSVGFCO/au1nT7CgNyLoSBdDaGcwixFAoBDxs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=gQAPVs7Z; arc=none smtp.client-ip=185.11.138.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ensECWlL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AA4D2C116C6;
-	Fri, 16 Jan 2026 10:20:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768558835;
-	bh=1JZLMS1HVsbd6aWEx+GimXeEmDseHFvWx560rTN8Xww=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=ensECWlLD29cMvgjZm38/hPpVFtsmbJMXILx0Yqwpbfj6HPK6Fit3bcD4dSr0M+D1
-	 qWfg1/ZUqaSFWbWmwx5gJV6qHCTYrmKct3GvuoV+CjWoY5eT/fMiLlWWOPLEhg3IkB
-	 l4FfKaakjdSiQ5CKrXG9UmlkKUq9I5o/SdeXxZMPuGjn/nko7hpNsNVObkClete8AX
-	 +ajcUjEPaNhohL73gub37pmu/gH4VPr2scgaPS64ZkMiTy1kz4Ox9mxrEIkIa421tl
-	 gAMAqzimBonxCmxl1W+mVcO7vmlPbETgQMfmGAaSFtSZLZRpLDs0LlE/6cM5hhVqEa
-	 opMEKMZpubsog==
-Message-ID: <8ba68d9c-5cd1-4616-998e-2ff5d3440984@kernel.org>
-Date: Fri, 16 Jan 2026 11:20:30 +0100
+	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="gQAPVs7Z"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Reply-To;
+	bh=GVzSHRUEj/E6nV+rHedhrqKBXQLAnvBfWRGUtGolWvE=; b=gQAPVs7ZTCDzkRDgbYPwlnKf8G
+	ZrHj01SD5bH3OmUWcRtvx4MtDS7vSh9MMVZT8427Pf7is5diyHDlRx7X0umes/9JE8Nf4t3MSe/wh
+	9940jR5s+gSPVXv3oZq1HhqeIIZLf8Ywy+g8Afx+YayqX03VT6kmk2idKk+Fw4VsTh1YXjinSHMYD
+	hrTMrqSzF7Y3jR0qQCtZ92gFAeStAfBL11GNujRlvDJ4C3yAWlLLJbBwFVEWYVLY1opUpuqWf3S48
+	ECjuGGCNjHX03flsZwBT4drAhqyFgCkMLYJ36PpmQdA5zcXCBjn9l75IA6ZDnYpTQpHFMeDN2qzLk
+	vjlNuMCQ==;
+Received: from i53875a97.versanet.de ([83.135.90.151] helo=diego.localnet)
+	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <heiko@sntech.de>)
+	id 1vgh3t-002brq-Ht; Fri, 16 Jan 2026 11:28:14 +0100
+From: Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, FUKAUMI Naoki <naoki@radxa.com>,
+ Marco Schirrmeister <mschirrmeister@gmail.com>,
+ John Clark <inindev@gmail.com>, Tianling Shen <cnsztl@gmail.com>,
+ Detlev Casanova <detlev.casanova@collabora.com>,
+ Shawn Lin <shawn.lin@rock-chips.com>
+Subject:
+ Re: [PATCH v4 3/5] mmc: dw_mmc-rockchip: Fix runtime PM support for internal
+ phase support
+Date: Fri, 16 Jan 2026 11:28:13 +0100
+Message-ID: <15381717.O6BkTfRZtg@diego>
+In-Reply-To: <1768524932-163929-4-git-send-email-shawn.lin@rock-chips.com>
+References:
+ <1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com>
+ <1768524932-163929-4-git-send-email-shawn.lin@rock-chips.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: rockchip-dw-mshc: add
- rockchip,disable-runtime-pm
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
- Marco Schirrmeister <mschirrmeister@gmail.com>
-Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, linux-rockchip@lists.infradead.org,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org
-References: <20260110010715.1610159-1-mschirrmeister@gmail.com>
- <20260111-melodic-chestnut-coua-73e6ec@quoll>
- <CAGJh8eAWNe0JzC7BdA2Rw5etCYgGq3O5Zdgk9zSzsLNv18k=ag@mail.gmail.com>
- <1791168.izSxrag8PF@diego>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <1791168.izSxrag8PF@diego>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-On 16/01/2026 10:43, Heiko Stübner wrote:
-> Hi Marco,
-> 
-> Am Montag, 12. Januar 2026, 00:51:24 Mitteleuropäische Normalzeit schrieb Marco Schirrmeister:
->> On Sun, Jan 11, 2026 at 10:41 AM Krzysztof Kozlowski <krzk@kernel.org> wrote:
->>>> +  rockchip,disable-runtime-pm:
->>>> +    type: boolean
->>>> +    description:
->>>> +      Inhibit runtime power management. This is required for boards
->>>
->>> What is runtime power management? Like Linux PM? If anything phrased
->>> like that is it is a clear no go. Bindings describe hardware.
->>
->> You are right. This refers to the Linux PM subsystem and describes
->> software behavior.
->>
->>>> +      where the bus timing becomes unstable if the controller is
->>>> +      runtime-suspended.
->>>
->>> You described the desired Linux feature or behavior, not the actual
->>> hardware. The bindings are about the latter, so instead you need to
->>> rephrase the property and its description to match actual hardware
->>> capabilities/features/configuration etc.
->>
->> On this board, the bus timing becomes unstable when waking up from
->> a low-power state. This causes a constant retraining loop.
-> 
-> As you describe it here, it does sound like a real hardware quirk (which
-> would be a dt-thing) ... it's just that the previous wording describes it
-> in a non-hardware way - as Krzysztof pointed out in his reply.
+Am Freitag, 16. Januar 2026, 01:55:30 Mitteleurop=C3=A4ische Normalzeit sch=
+rieb Shawn Lin:
+> RK3576 is the first platform to introduce internal phase support, and
+> subsequent platforms are expected to adopt a similar design. In this
+> architecture, runtime suspend powers off the attached power domain, which
+> resets registers, including vendor-specific ones such as SDMMC_TIMING_CON=
+0,
+> SDMMC_TIMING_CON1, and SDMMC_MISC_CON. These registers must be saved and
+> restored, a requirement that falls outside the scope of the dw_mmc core.
+>=20
+> Fixes: 59903441f5e4 ("mmc: dw_mmc-rockchip: Add internal phase support")
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Tested-by: Marco Schirrmeister <mschirrmeister@gmail.com>
 
-I can also imagine that you miss some register programming, clocks or
-regulator voltage, so "unstable" has to be actually analyzed.
+Reviewed-by: Heiko Stuebner <heiko@sntech.de>
 
-You should not really disable a Linux driver feature just because your
-hardware has issues. And even then it's more likely some MMC core part,
-not entire runtime PM, is problematic here.
-
-> 
-> 
->> I will move this logic into the driver and handle it as a board specific
->> quirk using of_machine_is_compatible("friendlyarm,nanopi-r76s")
->> instead. I will send a v2.
-> 
-> This won't fly I think. We can't really have a (possibly long) list of
-> 
-> If (boardA) foo();
-> if (boardB) bar();
-> if (boardC) bas();
-> 
-> That really is not sustainable and most likely won't get accepted.
-
-Yep
+> ---
+>=20
+> Changes in v3: None
+> Changes in v2: None
+>=20
+>  drivers/mmc/host/dw_mmc-rockchip.c | 38 ++++++++++++++++++++++++++++++++=
++++++-
+>  1 file changed, 37 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc=
+=2Drockchip.c
+> index 879188f..2fe0896 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -36,6 +36,8 @@ struct dw_mci_rockchip_priv_data {
+>  	int			default_sample_phase;
+>  	int			num_phases;
+>  	bool			internal_phase;
+> +	int                     sample_phase;
+> +	int                     drv_phase;
+>  };
+> =20
+>  /*
+> @@ -573,9 +575,43 @@ static void dw_mci_rockchip_remove(struct platform_d=
+evice *pdev)
+>  	dw_mci_pltfm_remove(pdev);
+>  }
+> =20
+> +static int dw_mci_rockchip_runtime_suspend(struct device *dev)
+> +{
+> +	struct platform_device *pdev =3D to_platform_device(dev);
+> +	struct dw_mci *host =3D platform_get_drvdata(pdev);
+> +	struct dw_mci_rockchip_priv_data *priv =3D host->priv;
+> +
+> +	if (priv->internal_phase) {
+> +		priv->sample_phase =3D rockchip_mmc_get_phase(host, true);
+> +		priv->drv_phase =3D rockchip_mmc_get_phase(host, false);
+> +	}
+> +
+> +	return dw_mci_runtime_suspend(dev);
+> +}
+> +
+> +static int dw_mci_rockchip_runtime_resume(struct device *dev)
+> +{
+> +	struct platform_device *pdev =3D to_platform_device(dev);
+> +	struct dw_mci *host =3D platform_get_drvdata(pdev);
+> +	struct dw_mci_rockchip_priv_data *priv =3D host->priv;
+> +	int ret;
+> +
+> +	ret =3D dw_mci_runtime_resume(dev);
+> +	if (ret)
+> +		return ret;
+> +
+> +	if (priv->internal_phase) {
+> +		rockchip_mmc_set_phase(host, true, priv->sample_phase);
+> +		rockchip_mmc_set_phase(host, false, priv->drv_phase);
+> +		mci_writel(host, MISC_CON, MEM_CLK_AUTOGATE_ENABLE);
+> +	}
+> +
+> +	return ret;
+> +}
+> +
+>  static const struct dev_pm_ops dw_mci_rockchip_dev_pm_ops =3D {
+>  	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
+> -	RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
+> +	RUNTIME_PM_OPS(dw_mci_rockchip_runtime_suspend, dw_mci_rockchip_runtime=
+_resume, NULL)
+>  };
+> =20
+>  static struct platform_driver dw_mci_rockchip_pltfm_driver =3D {
+>=20
 
 
-Best regards,
-Krzysztof
+
+
