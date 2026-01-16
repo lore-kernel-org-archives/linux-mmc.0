@@ -1,23 +1,23 @@
-Received: from mail-m82213657.xmail.ntesmail.com (mail-m82213657.xmail.ntesmail.com [8.221.36.57])
+Received: from mail-m49248.qiye.163.com (mail-m49248.qiye.163.com [45.254.49.248])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED6A8311959;
-	Fri, 16 Jan 2026 01:01:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=8.221.36.57
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FD6031985E;
+	Fri, 16 Jan 2026 01:11:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.248
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768525286; cv=none; b=Ed4fTXj4dxuSSQT7jRatHLbhwiI7K5SeMWxHjgwm++eWhd04exkxzx+NtzqwWnezUf+Qq5F4hsQfwEQswTHYcGI2jGlMorIgHZ9gCt4JIK8TvQY4er1tgsqQXxP1LepDaZZjbiAbnpWv9HEEvQ5+i5jbPNWbOYXKfYnRsXPDeoM=
+	t=1768525881; cv=none; b=Ov0cyi/rRYTEYsrjadBnhzmrFdjr0VqLyEtdmnh4iBfOhaTzW7oNZdi1MvS7Tj3xeBSfTjJrMCxCX4AccONfAJ7Rs4ms3yg5TKNEuyjBvoda6eZDOHavjP+3lArgyMo3Fb7hFudpaX3X0cqOa1xwApluayVPliJODIe5JNPc0rE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768525286; c=relaxed/simple;
-	bh=X0UfiKigxkqZLFmOKiSHfROsQYIxfeCEt6GG120ngQI=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=X4TEYbCIoa9ZYRlvekVLucbBXM121Kr5EYFoMbjRIe/RUJ1ECQzRo22XwRMqLtmZZUg6V1mHDL10+P97RCGfYsG6RUMnNJdYdk7DU2FIuPpe/zyBMV+/MDKec55+gdfgQesALiUuuIKT2johfpNfj2tWNB+Q3qv27e1Q8gxMWUM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=B41+5BNN; arc=none smtp.client-ip=8.221.36.57
+	s=arc-20240116; t=1768525881; c=relaxed/simple;
+	bh=wdhCYNerUT5x76FPQQYhTof1wRylgDxTq3K0Gs/qeQo=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=hf0rNyHBaupo55/6WPZCQ/6yO7sbS66rPizybLq5RhO+VxB1wrJd/VPM6qncWwzlKTJX+UbsBfmWUL45UsohwVNEVcFs/RIXcElJjGUL6/4WE346EkQqInui+4nREHVepS8mYTFdg05G15/7bTDmhSJ+FhdCzlKwaArF+GyfAwg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=RpNt6cpl; arc=none smtp.client-ip=45.254.49.248
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="B41+5BNN"
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="RpNt6cpl"
 Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 30d5a76e2;
-	Fri, 16 Jan 2026 08:56:07 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 30d5a768d;
+	Fri, 16 Jan 2026 08:55:43 +0800 (GMT+08:00)
 From: Shawn Lin <shawn.lin@rock-chips.com>
 To: Heiko Stuebner <heiko@sntech.de>,
 	Ulf Hansson <ulf.hansson@linaro.org>
@@ -30,21 +30,19 @@ Cc: linux-rockchip@lists.infradead.org,
 	Tianling Shen <cnsztl@gmail.com>,
 	Detlev Casanova <detlev.casanova@collabora.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v4 4/5] arm64: dts: rockchip: Fix SD card support for RK3576 EVB1
-Date: Fri, 16 Jan 2026 08:55:31 +0800
-Message-Id: <1768524932-163929-5-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v4 0/5] Fix sd card support for RK3576 platform
+Date: Fri, 16 Jan 2026 08:55:27 +0800
+Message-Id: <1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com>
 X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9bc44d6d6709cckunm67a197c8691c66
+X-HM-Tid: 0a9bc44d0ff109cckunm67a197c8691b6e
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUMfTFZKShlISEkZGEpCHRlWFRQJFh
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQx8ZTFZKSkhJT0tCT0NJGBpWFRQJFh
 	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
+	tVSktLVUtZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=B41+5BNN8U8LwQOv+Cw+mwykc51TOmSanrzWjIkf+AuztK+zBGMyCYMDusIQnpezJc9l2GVRFCW51Z9IbVFrwbtsvCu5oOaj/ct/Wxfj+P2Imwz/ZSqR8HauPu0gtPN9gA2faDyc5RoN5+MaOXEWFqf1Acem2b8543axCxuy3J0=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=nq2tVcXmboBM5WaNxo3fVBNL6liOQSzqhx/PdcQP5Zg=;
+	b=RpNt6cpls4sQKPLRsFD5RNbnQn+fmwg8Nb3IyAn6sxjbGG4D9uRgDvmAssf1sf1x6hoxJa9Lhnob/1hylagLNoG2syzsVpbkSPkD47di6a/tR6rrO5GcpkCKz4RM4C6WRUR5V3rjXcu4gyqYF6qKfVQC68OPtlhzY+GdavQi92g=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=uoK5EkOo3ZU7QkVzkaMiSPAUrQMKeBC87ZTj6FI/yvE=;
 	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -52,76 +50,72 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-When runtime suspend is enabled, the associated power domain is powered
-off, which resets the registers, including the power control bit. As a result,
-the card loses power during runtime suspend. The card should still be able
-to process I/O with the help of mmc_blk_mq_rw_recovery(), which is suboptimal.
-To address this issue, we must use vmmc-supply with a GPIO based method to
-maintain power to the card. Also, add cd-gpios method to make hot-plug work
-correctly during idle periods.
 
-Fixes: f135a1a07352 ("arm64: dts: rockchip: Add rk3576 evb1 board")
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+Marco reported a problem[1] for his FriendlyElec NanoPi R76S board. The problem
+is becuase after runtime suspend, the associated power domain is powered off, which
+resets the registers including power control bit, card detection logic and internal
+phase registers. This leads to three problems need to be solved.
 
-Changes in v3: None
-Changes in v2: None
+1. hot-plug broken:
 
- arch/arm64/boot/dts/rockchip/rk3576-evb1-v10.dts | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+SD card hot-plug support for RK3576 boards is broken, because sd slot should try to
+use slot-gpio(cd-gpios) instead of function IO for supporting runtime PM. In order
+to support slot-gpio detection method, we should disable jtag switching for RK3576.
 
-diff --git a/arch/arm64/boot/dts/rockchip/rk3576-evb1-v10.dts b/arch/arm64/boot/dts/rockchip/rk3576-evb1-v10.dts
-index 0789733..f5746bc 100644
---- a/arch/arm64/boot/dts/rockchip/rk3576-evb1-v10.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3576-evb1-v10.dts
-@@ -223,6 +223,18 @@
- 		vin-supply = <&vcc_3v3_s3>;
- 	};
- 
-+	vcc3v3_sd: regulator-vcc-3v3-sd {
-+		compatible = "regulator-fixed";
-+		enable-active-high;
-+		gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&sdmmc_pwren>;
-+		regulator-name = "vcc3v3_sd";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		vin-supply = <&vcc_3v3_s0>;
-+	};
-+
- 	vcc_ufs_s0: regulator-vcc-ufs-s0 {
- 		compatible = "regulator-fixed";
- 		regulator-name = "vcc_ufs_s0";
-@@ -904,6 +916,12 @@
- 		};
- 	};
- 
-+	sdmmc {
-+		sdmmc_pwren: sdmmc-pwren {
-+			rockchip,pins = <0 RK_PB6 RK_FUNC_GPIO &pcfg_pull_none>;
-+		};
-+	};
-+
- 	usb {
- 		usb_host_pwren: usb-host-pwren {
- 			rockchip,pins = <0 RK_PC7 RK_FUNC_GPIO &pcfg_pull_none>;
-@@ -958,11 +976,15 @@
- 	bus-width = <4>;
- 	cap-mmc-highspeed;
- 	cap-sd-highspeed;
-+	cd-gpios = <&gpio0 RK_PA7 GPIO_ACTIVE_LOW>;
- 	disable-wp;
- 	max-frequency = <200000000>;
- 	no-sdio;
- 	no-mmc;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&sdmmc0_clk &sdmmc0_cmd &sdmmc0_det &sdmmc0_bus4>;
- 	sd-uhs-sdr104;
-+	vmmc-supply = <&vcc3v3_sd>;
- 	vqmmc-supply = <&vccio_sd_s0>;
- 	status = "okay";
- };
+But the rockchip_grf_init fails to handle this because it couldn't handle
+multiple grf nodes. In this case, iocgrf is in behind of sysgrf, so only
+sysgrf is handled. We should scan all possible nodes.
+
+Moreover, the offset is wrong as well. Per the TRM, the address of
+TOP_IOC_IOC_MISC_CON is 0x260440F0, which means the offset if 0x40F0
+instead of 0x040F.
+
+2. cards lost power:
+
+When powering off the power domain during runtime suspend, the controller fails to
+maintain the power control status as all the registers is cleared. This results in
+power lost for cards during runtime suspend and have to reset the card each time
+exiting from runtime supended state. Should use gpio-based regulator for vmmc-suppy
+for the boards.
+
+3. controller lost internal phases/mem-clock settings
+
+As the same reason mentioned above, should invent rockchip specific runtime PM
+callbacks to save and restore internal phase related settings.
+
+Note: An examination of the RK3576 related dts files suggests that several other boards
+may also not function correctly, because I noticed signs of copy-pasting, but I don't have
+the schematics to confirm it, I've cc'ed the users of these boards. I hope they can verify
+their own boards and submit separate patches if fixes are needed.
+
+Please help review and test.
+
+[1] https://lore.kernel.org/all/20260110010715.1610159-1-mschirrmeister@gmail.com/T/#t
+
+
+Changes in v4
+- add fix patches for RK3576 EVB1 and NanoPi R76S
+
+Changes in v3:
+- remove of_node_put() (Heiko)
+
+Changes in v2:
+- use for_each_matching_node_and_match(Heiko)
+
+Shawn Lin (5):
+  soc: rockchip: grf: Fix wrong RK3576_IOCGRF_MISC_CON definition
+  soc: rockchip: grf: Support multiple grf to be handled
+  mmc: dw_mmc-rockchip: Fix runtime PM support for internal phase
+    support
+  arm64: dts: rockchip: Fix SD card support for RK3576 EVB1
+  arm64: dts: rockchip: Fix SD card support for RK3576 Nanopi R76s
+
+ arch/arm64/boot/dts/rockchip/rk3576-evb1-v10.dts   | 22 +++++++++
+ .../arm64/boot/dts/rockchip/rk3576-nanopi-r76s.dts | 23 ++++++++-
+ drivers/mmc/host/dw_mmc-rockchip.c                 | 38 ++++++++++++++-
+ drivers/soc/rockchip/grf.c                         | 57 +++++++++++-----------
+ 4 files changed, 109 insertions(+), 31 deletions(-)
+
 -- 
 2.7.4
 
