@@ -1,115 +1,107 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D1192F619D;
-	Fri, 16 Jan 2026 07:19:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFE813590C4;
+	Fri, 16 Jan 2026 09:44:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768547990; cv=none; b=QJ2jEW7+sNwVR8Sp1khv5R5Mz4+Uh6omBqW///VHYX4ojmOD/qjiP43VKmgdsYGln1hMU0oZe5mMlm9uy1X7ILIQXQG8puVXDxFkT+r29qXRd1t+JOTcC1T3v2Zr5Fm+fWHONkQMV2m/zG1yEvmnnnmCrllA5L8sKHDpz0hD3Xg=
+	t=1768556647; cv=none; b=N2YwxV5ukvMA8Pv57vD9/NjNDo2RvzC+K+3TGnloswEzjeieOV/NUGtV5vJdiGd9c9tulCaIsIS0bY8fU7c1vw0lhvcv3B4l0iUs9A9Lu3KDjGWpkSpIj45Q7i4D3tB6STYDIP9xnTTIInFww7WaaEMUwtHV3EE9O2RIs5WurUk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768547990; c=relaxed/simple;
-	bh=reOtgTsgainSPvlftSf44T+RETRioCaQA9eGb1UnSPE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Ni5nd8AJf9WbAspdhacJ1K/WXM8sdNzaEQhhOJiXxVPqlSE18I4XL6rcGqONcwSbH+gJm5flNIxIB6UCNlGnL5zCgXIfpDBuHbUd0jrXX7KJeUd6UvVvHjhV23IdZXF2BIUjLxB9uo6DVHyIXpraA7Tt4B2LC/4686ViFd8Auj4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HsEryaSj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768556647; c=relaxed/simple;
+	bh=1c4EcBFwNDwcjlcibwyZ+c6q6z+rAR6cb1ZILyUaqEs=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=c/dWZglKNmFcTZYKVjC10HOuf+2D3XDSu8jFx14Y+tqn8rLd8yXC8kloNZ8eyW5DYvg0Z3pAIvGcE9b5rQcIqwIoiOP8+amN8VbEm83HXAGYgDsJpjYxK7VyqRSTOqxF/g4A0sK/6xae3z+smF48XS/PSuv+esQKwCI2llj5Yh0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=X/EKOz3y; arc=none smtp.client-ip=185.11.138.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HsEryaSj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE8B8C116C6;
-	Fri, 16 Jan 2026 07:19:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768547990;
-	bh=reOtgTsgainSPvlftSf44T+RETRioCaQA9eGb1UnSPE=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=HsEryaSjhIHWusmM9JxycvcgzbZVkybqjC5lT0vpfclY45sSWQhyH5PdOMhTB01PN
-	 MbXvHVhzScQTyvZAZDhpOhr0mUzB3VNvHFmWFqh2RtgCa91XGoJRIGHPySYA/DE4Qy
-	 lygEJ7cg6oEmXQ9u8C7Mlsb9VN/TuXFTrqPEhxAFQ1A+WCG9fubdq+UfY9+mib3Gf2
-	 XxS946WOoTCGLOougV3nv/+HrdHeEtJYWIzh0t6FZHrbYXTq1Eqp9/v8vnwfJN8i1S
-	 SPpOP51RO/1GfNfPOL4c6W/JsvmZInvdQRDl9P9rXEqd/F0W7VxJPqcCl/cT93tasc
-	 xtDGgrIhouOmQ==
-Message-ID: <0f1afc5e-d5f4-444e-819c-594f0b1e125b@kernel.org>
-Date: Fri, 16 Jan 2026 08:19:46 +0100
+	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="X/EKOz3y"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Reply-To;
+	bh=QGCCaGWgIfg2vfdsl9W+Yld60nDB/Iv9Cfq95SmZGJI=; b=X/EKOz3ywJYWTNlqdF9VO9mql5
+	4xqoQqvalFKibN2AMQncOi+i9nZUxkoIuPYhvI/FtRsNo66DBdHnsn2ZmwMZWbrE8IoJDy2XZmuNG
+	tfYsgLEUU+slhtyaVTt+tpeVhn5ZM8pmMHPoymFb/5qk5v/tUXpchepygjStqoQWSvfpaSeU9sOST
+	EcbAMgR6GRYyjFX3guDim1kIMORAtWLZpKTcAazE2T82Jn8BbsikfwlRm8I1fsC1wM0tvyhnGVdVx
+	x8zrOWwE7JUtitXUbMgt1xZvks2AYJ5P+sF5DcMYS8Hm+M+V2aF8W42uSzgafMAiEqGLbKpeXowEO
+	rlWUq23Q==;
+Received: from i53875a97.versanet.de ([83.135.90.151] helo=diego.localnet)
+	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <heiko@sntech.de>)
+	id 1vggN5-002bUI-F4; Fri, 16 Jan 2026 10:44:00 +0100
+From: Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+ Marco Schirrmeister <mschirrmeister@gmail.com>
+Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org, linux-rockchip@lists.infradead.org,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org
+Subject:
+ Re: [PATCH v1 1/3] dt-bindings: mmc: rockchip-dw-mshc: add
+ rockchip,disable-runtime-pm
+Date: Fri, 16 Jan 2026 10:43:57 +0100
+Message-ID: <1791168.izSxrag8PF@diego>
+In-Reply-To:
+ <CAGJh8eAWNe0JzC7BdA2Rw5etCYgGq3O5Zdgk9zSzsLNv18k=ag@mail.gmail.com>
+References:
+ <20260110010715.1610159-1-mschirrmeister@gmail.com>
+ <20260111-melodic-chestnut-coua-73e6ec@quoll>
+ <CAGJh8eAWNe0JzC7BdA2Rw5etCYgGq3O5Zdgk9zSzsLNv18k=ag@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/2] arm64: dts: qcom: kodiak: enable the inline crypto
- engine for SDHC
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20260114094848.3790487-1-neeraj.soni@oss.qualcomm.com>
- <20260114094848.3790487-3-neeraj.soni@oss.qualcomm.com>
- <20260115-versatile-bustard-of-bliss-059e5a@quoll>
- <e10f846c-e81b-1d5b-1be2-8c41ca61b8b0@oss.qualcomm.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <e10f846c-e81b-1d5b-1be2-8c41ca61b8b0@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-On 16/01/2026 06:59, Neeraj Soni wrote:
->> Why this became uppercase?
-> Thnaks for pointing out. I will fix this next patch.
->>
->>> +			compatible = "qcom,sc7280-inline-crypto-engine",
->>> +				     "qcom,inline-crypto-engine";
->>> +			reg = <0x0 0x007C8000 0x0 0x18000>;
->>
->> And this? there is no uppercase at all, so maybye you copied it from
->> downstream, but that's not right approach - do not use downstream code.
->>
-> Yes it was copied but i missed to align with upstream. Thanks for pointing out. This will be fixed in next patch.
+Hi Marco,
 
-And that's the problem. You must NEVER COPY downstream DTS. We repeat it
-and repeat it...
+Am Montag, 12. Januar 2026, 00:51:24 Mitteleurop=C3=A4ische Normalzeit schr=
+ieb Marco Schirrmeister:
+> On Sun, Jan 11, 2026 at 10:41=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel=
+=2Eorg> wrote:
+> > > +  rockchip,disable-runtime-pm:
+> > > +    type: boolean
+> > > +    description:
+> > > +      Inhibit runtime power management. This is required for boards
+> >
+> > What is runtime power management? Like Linux PM? If anything phrased
+> > like that is it is a clear no go. Bindings describe hardware.
+>=20
+> You are right. This refers to the Linux PM subsystem and describes
+> software behavior.
+>=20
+> > > +      where the bus timing becomes unstable if the controller is
+> > > +      runtime-suspended.
+> >
+> > You described the desired Linux feature or behavior, not the actual
+> > hardware. The bindings are about the latter, so instead you need to
+> > rephrase the property and its description to match actual hardware
+> > capabilities/features/configuration etc.
+>=20
+> On this board, the bus timing becomes unstable when waking up from
+> a low-power state. This causes a constant retraining loop.
 
-Best regards,
-Krzysztof
+As you describe it here, it does sound like a real hardware quirk (which
+would be a dt-thing) ... it's just that the previous wording describes it
+in a non-hardware way - as Krzysztof pointed out in his reply.
+
+
+> I will move this logic into the driver and handle it as a board specific
+> quirk using of_machine_is_compatible("friendlyarm,nanopi-r76s")
+> instead. I will send a v2.
+
+This won't fly I think. We can't really have a (possibly long) list of
+
+If (boardA) foo();
+if (boardB) bar();
+if (boardC) bas();
+
+That really is not sustainable and most likely won't get accepted.
+
+Heiko
+
+
