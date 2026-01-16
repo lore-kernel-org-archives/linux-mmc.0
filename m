@@ -1,92 +1,92 @@
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+Received: from mail-m1973171.qiye.163.com (mail-m1973171.qiye.163.com [220.197.31.71])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAD4429D273;
-	Fri, 16 Jan 2026 14:04:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B50C1336EE5;
+	Fri, 16 Jan 2026 14:24:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.71
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768572285; cv=none; b=OnDmywRxe1fbkiJ3phKZL/Y5QQhCQBAAqC0XFZX/xtCY+n4FFTmRtDFH3bozQubYvum4GF3e2tj3pPe6DGf0oel5/+JpLyiBTAxKfBpU5/B+BvQGydyfSZaewL5ZNFIpcjW+1ZW7QTURL+yaj7PCQQ2MRZzMisX/r3WuLmgshHY=
+	t=1768573498; cv=none; b=Vq9X+sWtoPkTFBQzqO15Kelv4SfxNcf21yfNYRPztXf4xGc2r6Tx3fSQUViki5ST1Xm+68lcdt/CIVlF8NR/6mDGRXSEqhW/3Je7XIjSPI06jHTxZxhaIQj/i22CRkCc/R6fHcuhklD5A7irdYPXCKtveC0SAky0cHyFGmyPp0E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768572285; c=relaxed/simple;
-	bh=ivDBro5kI3qNDPy8Ve1VgAn6c10vJNqBNQqHRKeokgM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=eEZfiyU2A/9ZYcY5IpCUq2rbLHT99OFfAiSwxfM5C0tCVIup6F3UfnETtSq64VlCsWsJYy0xgOR9Utus4qIzNlknH4L5j7pnV8C3ddIAdbxiRXC0t2Budwlh+HKMbE0RocOpAPsAvLSqtRLWBe0x7YqmTlftbkB4qlb4KCETyFc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=GcflGdy5; arc=none smtp.client-ip=185.11.138.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
+	s=arc-20240116; t=1768573498; c=relaxed/simple;
+	bh=Q9+N2kdQwF676ptVfBkQ+HfHccfecqxsnM1b7Iz4UOw=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=XzOERO+EHwVGntucNJMBkmknZ4qop8B3YlYAXfcA4Jx6SbOEmTDFL/pWzICtmSI1evK8Jv0L7QdjPO7DJ7Fy52yvBWfi2FXn+DZEyNzReqgV2R7wtebwPyV7QObsefScS+FrsOlNdDl0/NMPGOa7nQwCK/dRufaAuAEH1xGQZUw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=Sb+rY8nk; arc=none smtp.client-ip=220.197.31.71
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="GcflGdy5"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
-	s=gloria202408; h=Content-Transfer-Encoding:Content-Type:MIME-Version:
-	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Reply-To;
-	bh=m02yp4JILyjMta4cx49jNz+oe5Rk9FKD3X/QrnGlQEM=; b=GcflGdy5p1u9xWicgSscH0o80G
-	Uh478MPGX7lAw3bT36bK/itHD2n72665izwcMtPl6gUt/MtWGEniBrZWk3p4tB4rzzmh6qn5fJ9R0
-	aqCGKcUuVqfeEPVrxLZY+zuXvC92gR1JI5ZvwsUgvT9xC82xjg5AC0OoFpV/QmP2q5PYYy+XbfQ/6
-	c1B2qX6YTZTtx46k1eUcXDmAWGsTGZsGePErvyt1BpddawW1SfVLAJitDoTe9+FfpTw0HJqXFjhEB
-	ACBwlcgnBIWpugAomOAnrsJhayJga0VPJjU25PmRCzSmxbgUnud5ztmkRxhTIYr40njEQqN11IqsZ
-	2ioUdsVQ==;
-Received: from i53875a97.versanet.de ([83.135.90.151] helo=phil..)
-	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <heiko@sntech.de>)
-	id 1vgkRA-002dRO-68; Fri, 16 Jan 2026 15:04:28 +0100
-From: Heiko Stuebner <heiko@sntech.de>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Heiko Stuebner <heiko@sntech.de>,
-	linux-rockchip@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	FUKAUMI Naoki <naoki@radxa.com>,
-	Marco Schirrmeister <mschirrmeister@gmail.com>,
-	John Clark <inindev@gmail.com>,
-	Tianling Shen <cnsztl@gmail.com>,
-	Detlev Casanova <detlev.casanova@collabora.com>
-Subject: Re: (subset) [PATCH v4 0/5] Fix sd card support for RK3576 platform
-Date: Fri, 16 Jan 2026 15:04:25 +0100
-Message-ID: <176857210194.116631.11189192556414524729.b4-ty@sntech.de>
-X-Mailer: git-send-email 2.47.2
-In-Reply-To: <1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com>
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="Sb+rY8nk"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 30ef46e5a;
+	Fri, 16 Jan 2026 22:24:40 +0800 (GMT+08:00)
+Message-ID: <0c6b4cc1-ce99-4d59-a470-b07dec763e8b@rock-chips.com>
+Date: Fri, 16 Jan 2026 22:24:38 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ FUKAUMI Naoki <naoki@radxa.com>,
+ Marco Schirrmeister <mschirrmeister@gmail.com>,
+ John Clark <inindev@gmail.com>, Tianling Shen <cnsztl@gmail.com>,
+ Detlev Casanova <detlev.casanova@collabora.com>
+Subject: Re: (subset) [PATCH v4 0/5] Fix sd card support for RK3576 platform
+To: Heiko Stuebner <heiko@sntech.de>, Ulf Hansson <ulf.hansson@linaro.org>
+References: <1768524932-163929-1-git-send-email-shawn.lin@rock-chips.com>
+ <176857210194.116631.11189192556414524729.b4-ty@sntech.de>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <176857210194.116631.11189192556414524729.b4-ty@sntech.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9bc731aea209cckunma7c09507737a3c
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUgaQlZJSk8dHktIHUlPTUNWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=Sb+rY8nk8Ejra1PEfQhzgPPEi7zoTmfua3u4T3ZLfEzIZimP+iLjTUczs2Q/u7ML0JsvPRmfptEh9QF1QcdaERr6e4Pet/umJumuiaYX05kjmGuSKXIwx40j18+2imsv+HoIJUjyOk60TKCZt5Fr0ar2XTAgETW2Lv6Kg8CaUHI=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=xpJGynjXo2jFqQ092nLYCB2ielun+b6JZDAUGmUfEc4=;
+	h=date:mime-version:subject:message-id:from;
 
 
-On Fri, 16 Jan 2026 08:55:27 +0800, Shawn Lin wrote:
-> Marco reported a problem[1] for his FriendlyElec NanoPi R76S board. The problem
-> is becuase after runtime suspend, the associated power domain is powered off, which
-> resets the registers including power control bit, card detection logic and internal
-> phase registers. This leads to three problems need to be solved.
+在 2026/01/16 星期五 22:04, Heiko Stuebner 写道:
 > 
-> 1. hot-plug broken:
+> On Fri, 16 Jan 2026 08:55:27 +0800, Shawn Lin wrote:
+>> Marco reported a problem[1] for his FriendlyElec NanoPi R76S board. The problem
+>> is becuase after runtime suspend, the associated power domain is powered off, which
+>> resets the registers including power control bit, card detection logic and internal
+>> phase registers. This leads to three problems need to be solved.
+>>
+>> 1. hot-plug broken:
+>>
+>> [...]
 > 
-> [...]
+> Applied, thanks!
+> 
+> [1/5] soc: rockchip: grf: Fix wrong RK3576_IOCGRF_MISC_CON definition
+>        commit: 3cdc30c42d4a87444f6c7afbefd6a9381c4caa27
+> [2/5] soc: rockchip: grf: Support multiple grf to be handled
+>        commit: 75fb63ae031211e9264ac888fabc2ca9cd3fcccf
+> [4/5] arm64: dts: rockchip: Fix SD card support for RK3576 EVB1
+>        commit: 7226664bf952c4cfddccd74b154a7d994608d153
+> [5/5] arm64: dts: rockchip: Fix SD card support for RK3576 Nanopi R76s
+>        commit: a9c1acebfe0484343a443d082e039ca77186ed22
+> 
+> I've queued them for 6.20 because I'd like them to marinate a bit longer
+> due to the size of the changes, but added Cc-stable tags so that they
+> then can make their way into stable kernels.
+> 
 
-Applied, thanks!
+Sure, thanks Heiko.
 
-[1/5] soc: rockchip: grf: Fix wrong RK3576_IOCGRF_MISC_CON definition
-      commit: 3cdc30c42d4a87444f6c7afbefd6a9381c4caa27
-[2/5] soc: rockchip: grf: Support multiple grf to be handled
-      commit: 75fb63ae031211e9264ac888fabc2ca9cd3fcccf
-[4/5] arm64: dts: rockchip: Fix SD card support for RK3576 EVB1
-      commit: 7226664bf952c4cfddccd74b154a7d994608d153
-[5/5] arm64: dts: rockchip: Fix SD card support for RK3576 Nanopi R76s
-      commit: a9c1acebfe0484343a443d082e039ca77186ed22
+> Depending if MMC maintainers see patch3, you might want to resend it
+> individually at some point.
+> 
+> 
+> Best regards,
 
-I've queued them for 6.20 because I'd like them to marinate a bit longer
-due to the size of the changes, but added Cc-stable tags so that they
-then can make their way into stable kernels.
-
-Depending if MMC maintainers see patch3, you might want to resend it
-individually at some point.
-
-
-Best regards,
--- 
-Heiko Stuebner <heiko@sntech.de>
