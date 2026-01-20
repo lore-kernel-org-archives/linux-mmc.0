@@ -1,128 +1,215 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from out-172.mta0.migadu.com (out-172.mta0.migadu.com [91.218.175.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98CD143CEF4
-	for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2026 18:20:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71C262C2340
+	for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2026 18:39:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768933230; cv=none; b=d4X30pb0VFon7ak7qouKTSbHXbuWKHLf5KnKWPh5n5rkhKoK46X3lWYFLEy/mg1JCq9VONWdOqV2S2wBfsdzISdo/wEFGk8qokOvexc41R1SBNnCkwQRyRTU6nBc91KERsjb2musAFIWbSdg+uhaY872iGu4igAjmKsUB//s0/U=
+	t=1768934357; cv=none; b=LcElwp07PE+B3lFNmJHCdshUlaqk9Zhlck4/iZyRYv2p5V9b8LD4RYtcoOR64aZp2/ROvIwwDacJdLlnt39o6k1eivGh6exQDt11GAMo1v5NvMzCZ5f2za2H9m2VCJbaHUh945cLNHMIdVyrJG3Uj/X1NXHfYfy48gaGosRfK1c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768933230; c=relaxed/simple;
-	bh=8iO9X24WNf+b/ZqILypVRhAtLKW2GNEsE317PhISvII=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=KeLYwMzI+gYJsdTXt3mH6R2UQ0O0ih6+r/p0WheeK4Tl5CG8Em6q0kEc2vcrW5oyUdrwtmqFenuxOjCTR/MBLu9S2iTJAElYi7HV805zKEdyEZ6gk4pm4VZCL81CQpKzqFGUQKeORGmAvwX82LcRNRr8E85vzRlkYITiuD9NPaY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OqG2B3WU; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768934357; c=relaxed/simple;
+	bh=xrY69wmIKc7aobZglNVfDsftlxrFJdNVc2TiaBpSEDM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Zy4GQRerPOHdo+0kVhgbJAMNWjrc2l6ioTuRlGWZQWZj3zbNGINaTf9EpKwRIcx4mOraHgkv2cthk17DnDB5HcPWarPWvteJKwa5VeklcpdcAJKZJSTspnknNLN0HgYaJQh0DVyVHhS99LHIWpg0Ha0q2KXoz5ZJvsAQKt3qszs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=Zlm6HyiS; arc=none smtp.client-ip=91.218.175.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OqG2B3WU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 548C4C19421
-	for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2026 18:20:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768933230;
-	bh=8iO9X24WNf+b/ZqILypVRhAtLKW2GNEsE317PhISvII=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=OqG2B3WU+Z4fD0gfU8cJI6c/Z52wM0jvStPnU76E2b2gx+LA4c9y9EiBIp91puWNr
-	 H59O8NLGNSoydAPEnj+D7QCWNK3BTjxBssD/OGJnNjqeKNyFbBJuKTiRQkrLG0BP+s
-	 GLjjYIScfmz+fzUAgZFrTJqKYwou4K3cvv537LlOSvpcAw9gUFVKC1Q+iImxI4CB0j
-	 EpiT/xTNVFs1tx3/To4RhH2Nr7Ir5JsSepNjp4wAwAePM50X+OltrjyuSM1jgWqGOs
-	 2XKJCf25J7N4VjOyjuoP1RJ8eCxNJrzT195CD6ora7w0XdBQYXO14bOeWq5sJC2kDW
-	 EQVDakJM837iA==
-Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-b874c00a39fso19408866b.0
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2026 10:20:30 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUwHuT+AmYrICCrkgwPMJ3xStJan33PmQNFhcRsi9Yr4/CBYyIre9QDatEdnh0KfuhI9Y7KkFklAH0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxyXA0/PQ92OWFtHr63QaDcvgYAQEwsd7vTq0u3VdhmzOetmhnh
-	/63+U9G5EtY8XB5qxmITiX5His0YOtXDrE8waebfQoDbxD0CwVQHU780YbrFOB4GKNG2mEl7hVb
-	PwEBjO+xCPsRBB16gahKqr8zR+eDgvw==
-X-Received: by 2002:a17:907:971e:b0:b7c:cc8d:14f4 with SMTP id
- a640c23a62f3a-b8777a09915mr1649298166b.4.1768933228493; Tue, 20 Jan 2026
- 10:20:28 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="Zlm6HyiS"
+Message-ID: <79349439-97ea-4147-961e-63cd6a5bfd68@linux.dev>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1768934343;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Han09Jh4jiXzSruYuj/qCe993x0+mxiP2QO6E7k7pUM=;
+	b=Zlm6HyiSz3CsKr0mB8+CoCZok3AzY+qNLSSovkISavZdHDWtgiX4DMzRC+qhplwUMTfCOn
+	FDwNJQZIkp3jg1mY9ycyVRQcbBkOK6YACVFX3RT5xvpOXjs3jHP12fZqGVwWLNp7fzMHA9
+	MqrBsw/Ud50qTSFUd3f8kvegUPDBMgc=
+Date: Tue, 20 Jan 2026 10:38:59 -0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260119-dt-mtd-partitions-v2-0-77ebb958a312@kernel.org>
- <20260119-dt-mtd-partitions-v2-10-77ebb958a312@kernel.org> <20260120-origami-lori-of-genius-8fd944@quoll>
-In-Reply-To: <20260120-origami-lori-of-genius-8fd944@quoll>
-From: Rob Herring <robh@kernel.org>
-Date: Tue, 20 Jan 2026 12:20:17 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqL+pO7fQp7gYe4AvX9G-cOykreU3xTieUw2Q2PAZf4NUQ@mail.gmail.com>
-X-Gm-Features: AZwV_QhKFpVtz-Uqzq0wFapMdB8t9l7NvlfaSwcJmbkHLKd8OZ8fsyVii9Phizo
-Message-ID: <CAL_JsqL+pO7fQp7gYe4AvX9G-cOykreU3xTieUw2Q2PAZf4NUQ@mail.gmail.com>
-Subject: Re: [PATCH v2 10/10] dt-bindings: mtd: partitions: Combine simple
- partition bindings
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Miquel Raynal <miquel.raynal@bootlin.com>, Richard Weinberger <richard@nod.at>, 
-	Vignesh Raghavendra <vigneshr@ti.com>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Brian Norris <computersforpeace@gmail.com>, Kamal Dasu <kdasu.kdev@gmail.com>, 
-	William Zhang <william.zhang@broadcom.com>, Nick Terrell <terrelln@fb.com>, 
-	David Sterba <dsterba@suse.com>, =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>, 
-	Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Marcus Folkesson <marcus.folkesson@gmail.com>, 
-	Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@kernel.org>, Hauke Mehrtens <hauke@hauke-m.de>, 
-	linux-mtd@lists.infradead.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH 1/2] mmc: rtsx: reset power state on suspend
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Ricky Wu <ricky_wu@realtek.com>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20260105060236.400366-1-matthew.schwartz@linux.dev>
+ <20260105060236.400366-2-matthew.schwartz@linux.dev>
+ <CAPDyKFo-2TcU6MPZpeEU7kPx4tOLG4ekEFyZnzy1qeH09MTNfQ@mail.gmail.com>
+Content-Language: en-US
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Matthew Schwartz <matthew.schwartz@linux.dev>
+In-Reply-To: <CAPDyKFo-2TcU6MPZpeEU7kPx4tOLG4ekEFyZnzy1qeH09MTNfQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Migadu-Flow: FLOW_OUT
 
-On Tue, Jan 20, 2026 at 3:04=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.or=
-g> wrote:
->
-> On Mon, Jan 19, 2026 at 07:48:31PM -0600, Rob Herring (Arm) wrote:
-> > Several partition node bindings are just a compatible plus properties
-> > defined in partition.yaml. Move all of these bindings to a single schem=
-a
-> > file.
-> >
-> > Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
-> > -        partition@200000 {
-> > -            compatible =3D "tfa-bl31";
-> > -            reg =3D <0x200000 0x100000>;
-> > -            align =3D <0x4000>;
-> > -        };
-> > -    };
-> > diff --git a/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm4=
-908-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/brcm=
-,bcm4908-partitions.yaml
-> > index 159b32d12803..a6edf145df57 100644
-> > --- a/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm4908-par=
-titions.yaml
-> > +++ b/Documentation/devicetree/bindings/mtd/partitions/brcm,bcm4908-par=
-titions.yaml
-> > @@ -29,11 +29,7 @@ properties:
-> >
-> >  patternProperties:
-> >    "^partition@[0-9a-f]+$":
-> > -    $ref: partition.yaml#
-> > -    properties:
-> > -      compatible:
-> > -        const: brcm,bcm4908-firmware
-> > -    unevaluatedProperties: false
-> > +    type: object
->
-> I think this is not specific enough now and you should have here $ref
-> (e.g. to simple-partition.yaml) with unevaluatedProperties. Otherwise
-> schema does not report:
-> 1. bogus properties in partition@ nodes without compatibles (like the
->    first one in the example),
+On 1/20/26 4:41 AM, Ulf Hansson wrote:
+> On Mon, 5 Jan 2026 at 07:02, Matthew Schwartz
+> <matthew.schwartz@linux.dev> wrote:
+>>
+>> When rtsx_pci suspends, the card reader hardware powers off but the sdmmc
+>> driver's prev_power_state remains as MMC_POWER_ON. This causes sd_power_on
+>> to skip reinitialization on the next I/O request, leading to DMA transfer
+>> timeouts and errors on resume 20% of the time.
+> 
+> The mmc core should power-off the card, via the ->set_ios() callback
+> before the rtsx_pci suspends. In other words, the mmc core should have
+> set MMC_POWER_OFF.
+> 
+> That said, there seems to be something wrong in
+> drivers/mmc/host/rtsx_pci_sdmmc.c's ->set_ios(), if that isn't tracked
+> correctly. The parent device/driver, rtsx_pci should not need to
+> inform that the power to the card is removed, as that should be known
+> already by the rtsx_pci_sdmmc driver.
 
-Yes, it should be "$ref: partition.yaml#/$defs/partition-node" rather
-than simple-partition.yaml IMO.
+Ah, I see what you mean now, I think it should be fixed in rtsx_pci_sdmmc
+too.
 
-> 2. partition@ nodes with some other compatibles (non-partition like,
->    e.g. whatever I2C device stuffed there for which there is a schema of
->    course)
+These already seem to be in char-misc-next, so I think I need to wait
+until those hit upstream and then revert as a part of a v2 patch? If I revert
+from char-misc-next I'm worried the commit id won't match once it gets merged
+into master.
 
-We don't really enforce something like that anywhere else except when
-the child nodes are fixed and there's only 1 possible option. I don't
-think the schemas need to check for obviously nonsensical DTs. We can
-put I2C device on simple-bus or vendorA device in vendorB SoC. Trying
-to combine all possibilities is what was tried in partitions.yaml, but
-that doesn't really work well when there are multiple combinations and
-nesting is possible. Maybe "brcm,bcm4908-firmware" is the only one
-used, but there's not really any reason others can't be used. The
-other way around already happened. "brcm,bcm4908-firmware" is used
-under a "fixed-partitions" node (in bcm4906-netgear-r8000p.dts) which
-wasn't allowed before this series.
+Thanks,
+Matt
 
-Rob
+> 
+>>
+>> Add a power_off slot callback so the PCR can notify the sdmmc driver
+>> during suspend. The sdmmc driver resets prev_power_state, and sd_request
+>> checks this to reinitialize the card before the next I/O.
+>>
+>> Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
+>> ---
+>>  drivers/misc/cardreader/rtsx_pcr.c |  9 +++++++++
+>>  drivers/mmc/host/rtsx_pci_sdmmc.c  | 22 ++++++++++++++++++++++
+>>  include/linux/rtsx_common.h        |  1 +
+>>  3 files changed, 32 insertions(+)
+>>
+>> diff --git a/drivers/misc/cardreader/rtsx_pcr.c b/drivers/misc/cardreader/rtsx_pcr.c
+>> index f9952d76d6ed..f1f4d8ed544d 100644
+>> --- a/drivers/misc/cardreader/rtsx_pcr.c
+>> +++ b/drivers/misc/cardreader/rtsx_pcr.c
+>> @@ -1654,6 +1654,7 @@ static int __maybe_unused rtsx_pci_suspend(struct device *dev_d)
+>>         struct pci_dev *pcidev = to_pci_dev(dev_d);
+>>         struct pcr_handle *handle = pci_get_drvdata(pcidev);
+>>         struct rtsx_pcr *pcr = handle->pcr;
+>> +       struct rtsx_slot *slot = &pcr->slots[RTSX_SD_CARD];
+>>
+>>         dev_dbg(&(pcidev->dev), "--> %s\n", __func__);
+>>
+>> @@ -1661,6 +1662,9 @@ static int __maybe_unused rtsx_pci_suspend(struct device *dev_d)
+>>
+>>         mutex_lock(&pcr->pcr_mutex);
+>>
+>> +       if (slot->p_dev && slot->power_off)
+>> +               slot->power_off(slot->p_dev);
+>> +
+>>         rtsx_pci_power_off(pcr, HOST_ENTER_S3, false);
+>>
+>>         mutex_unlock(&pcr->pcr_mutex);
+>> @@ -1772,12 +1776,17 @@ static int rtsx_pci_runtime_suspend(struct device *device)
+>>         struct pci_dev *pcidev = to_pci_dev(device);
+>>         struct pcr_handle *handle = pci_get_drvdata(pcidev);
+>>         struct rtsx_pcr *pcr = handle->pcr;
+>> +       struct rtsx_slot *slot = &pcr->slots[RTSX_SD_CARD];
+>>
+>>         dev_dbg(device, "--> %s\n", __func__);
+>>
+>>         cancel_delayed_work_sync(&pcr->carddet_work);
+>>
+>>         mutex_lock(&pcr->pcr_mutex);
+>> +
+>> +       if (slot->p_dev && slot->power_off)
+>> +               slot->power_off(slot->p_dev);
+>> +
+>>         rtsx_pci_power_off(pcr, HOST_ENTER_S3, true);
+>>
+>>         mutex_unlock(&pcr->pcr_mutex);
+>> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> index 792ebae46697..74ee8623ad4e 100644
+>> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+>> @@ -47,6 +47,7 @@ struct realtek_pci_sdmmc {
+>>  };
+>>
+>>  static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios);
+>> +static int sd_power_on(struct realtek_pci_sdmmc *host, unsigned char power_mode);
+>>
+>>  static inline struct device *sdmmc_dev(struct realtek_pci_sdmmc *host)
+>>  {
+>> @@ -821,6 +822,15 @@ static void sd_request(struct work_struct *work)
+>>
+>>         rtsx_pci_start_run(pcr);
+>>
+>> +       if (host->prev_power_state == MMC_POWER_OFF) {
+>> +               err = sd_power_on(host, MMC_POWER_ON);
+>> +               if (err) {
+>> +                       cmd->error = err;
+>> +                       mutex_unlock(&pcr->pcr_mutex);
+>> +                       goto finish;
+>> +               }
+>> +       }
+>> +
+>>         rtsx_pci_switch_clock(pcr, host->clock, host->ssc_depth,
+>>                         host->initial_mode, host->double_clk, host->vpclk);
+>>         rtsx_pci_write_register(pcr, CARD_SELECT, 0x07, SD_MOD_SEL);
+>> @@ -1524,6 +1534,16 @@ static void rtsx_pci_sdmmc_card_event(struct platform_device *pdev)
+>>         mmc_detect_change(host->mmc, 0);
+>>  }
+>>
+>> +static void rtsx_pci_sdmmc_power_off(struct platform_device *pdev)
+>> +{
+>> +       struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
+>> +
+>> +       if (!host)
+>> +               return;
+>> +
+>> +       host->prev_power_state = MMC_POWER_OFF;
+>> +}
+>> +
+>>  static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+>>  {
+>>         struct mmc_host *mmc;
+>> @@ -1556,6 +1576,7 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+>>         platform_set_drvdata(pdev, host);
+>>         pcr->slots[RTSX_SD_CARD].p_dev = pdev;
+>>         pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
+>> +       pcr->slots[RTSX_SD_CARD].power_off = rtsx_pci_sdmmc_power_off;
+>>
+>>         mutex_init(&host->host_mutex);
+>>
+>> @@ -1587,6 +1608,7 @@ static void rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+>>         pcr = host->pcr;
+>>         pcr->slots[RTSX_SD_CARD].p_dev = NULL;
+>>         pcr->slots[RTSX_SD_CARD].card_event = NULL;
+>> +       pcr->slots[RTSX_SD_CARD].power_off = NULL;
+>>         mmc = host->mmc;
+>>
+>>         cancel_work_sync(&host->work);
+>> diff --git a/include/linux/rtsx_common.h b/include/linux/rtsx_common.h
+>> index da9c8c6b5d50..f294f478f0c0 100644
+>> --- a/include/linux/rtsx_common.h
+>> +++ b/include/linux/rtsx_common.h
+>> @@ -32,6 +32,7 @@ struct platform_device;
+>>  struct rtsx_slot {
+>>         struct platform_device  *p_dev;
+>>         void                    (*card_event)(struct platform_device *p_dev);
+>> +       void                    (*power_off)(struct platform_device *p_dev);
+>>  };
+>>
+>>  #endif
+>> --
+>> 2.52.0
+>>
+> 
+> Kind regards
+> Uffe
+
