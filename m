@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23DAB24DCEB;
-	Tue, 20 Jan 2026 01:48:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C8BB263C8C;
+	Tue, 20 Jan 2026 01:48:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768873738; cv=none; b=D0u0BNgO6Wr+iG/H7GVLfIXScr4ak0pRCj74OV842MF7JpZaloeUJU3nrZBrAeQsleEg9b8ydtA2uU+ifvE6j7Vq9+1t0rx3ej0c7xhc4ACa2s9Cjd/lHLK0Dgdv0loxcYKsCf40LtRMIfzsVXtM93hG3M1YxSGmSAxc2iOvNKE=
+	t=1768873739; cv=none; b=D9YYzB+yWCMM6JwWDXW7RiHjGW8XXeQr01MOegIJtN+gQ4J/eEi3QEC87ulwSiD/lzjnJ4H/LFXAjNQBxxM2YkdfCrrLT4M0fvAUsxgv1vzJdWl0L3vOyDI2XfDWvS5tYG7IT1yO8VjmdN13IFBCgfIzsmWncrivdd85Eq/d2rk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768873738; c=relaxed/simple;
-	bh=/ZlnKnKx7utqc5wND/d2GRMNuYYpxYnoMehK3GUY9hQ=;
+	s=arc-20240116; t=1768873739; c=relaxed/simple;
+	bh=g/uMQusRPTzXLgyH55SF2Z0Ew27f2Lx3R56DScAIcKE=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Yt7TU136db/nq3GY7fLJ1/QLGnoL451EGivVQB8mvMJMDeEw0z4vWhTOtWywXSa55CHV+sOki+QOtyg5MfWwGo8pviEzkRs2F700FKQVZszmmltqc8/tmHe2ZP+TMFwlRFXc0w6Akg9Y6Emn1OukuSeyqK0pT2CWX/UCDoOyY/4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jEEJuJlj; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=lihcEzKmI6+JQHJBDL0wmcR9X2WAi8dcIMeBja92qZ+vp9aq0JCsTyW1tjD117CImJ+OFTOyIc340xkL3dq66WCfHxUlLrF0664G9tdRcWgAPeon3VPGdM74LpnhT0UdYgENnF1IYXjhmhEjspRNvBf1HjR9tzorwXX0zqsiadc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ncyo4giv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jEEJuJlj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B110BC19424;
-	Tue, 20 Jan 2026 01:48:57 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ncyo4giv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C09D0C116C6;
+	Tue, 20 Jan 2026 01:48:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768873737;
-	bh=/ZlnKnKx7utqc5wND/d2GRMNuYYpxYnoMehK3GUY9hQ=;
+	s=k20201202; t=1768873738;
+	bh=g/uMQusRPTzXLgyH55SF2Z0Ew27f2Lx3R56DScAIcKE=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=jEEJuJljiPATumdLNELfSGh7SGdYUJPcXbVE72c0SE+CmKNtyUkkUcwSSI/xF8p8J
-	 nIQlT/T/JDUB+L+uusoha0kDwwf2R8Dw4MR+sX+NwKkVeRFi2jt9ZPEtZ2fk198SXJ
-	 +7hodq5wcKqUa8qP4OjlULgqBhRU00zCvGqvxdQFk/tFeHClxFByruqorCUCAxLeng
-	 tCufp3bTckdf6sPsdwrhN7e5Vn1GReYH3WGkLMtIeLn0UWh3qpToDfeYCpR1/SDHHA
-	 585R1tsBEZjSctmvOMO6THZYJvMLDIe/rvapAvmRvgVonendHKK3sKYH0KdbeVb5P7
-	 WLwlZ47KalCcw==
+	b=Ncyo4giv2phgkfri7JiliRauLyWNGyPHeJ7eBayc+j+tixYyhVmHowa/m4lPQ1UH1
+	 5LpZkYZ/yBich6u93+kfAo9UaIPDemKL4XZX4mlpbf2NfCFeKBdRn/B3aLX0/ptu8c
+	 k0rviGH3w/irU75dZ1gyGKjIMQiv9SeWr1oyQLgvjs9MnfjsZ79a5YE5XWZdGGCgid
+	 QC9Fy4buIEv5Aw+XF7ZZUy+OXXBpkvm10vpB5eHf0SVE3uxpe2qLONpFFeb2bKZxG7
+	 mm4dyEo2nU94gC8AXqsWaqPIStNQIPoN3BCJuW5Q85oUxzyFLvXfgFvImwhAER7nUm
+	 xOD7dw562bH2g==
 From: "Rob Herring (Arm)" <robh@kernel.org>
-Date: Mon, 19 Jan 2026 19:48:22 -0600
-Subject: [PATCH v2 01/10] dt-bindings: mtd: brcm,brcmnand: Drop
- "brcm,brcmnand" compatible for iProc
+Date: Mon, 19 Jan 2026 19:48:23 -0600
+Subject: [PATCH v2 02/10] dt-bindings: mtd: fixed-partitions: Move
+ "compression" to partition node
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -37,8 +37,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260119-dt-mtd-partitions-v2-1-77ebb958a312@kernel.org>
+Content-Transfer-Encoding: 8bit
+Message-Id: <20260119-dt-mtd-partitions-v2-2-77ebb958a312@kernel.org>
 References: <20260119-dt-mtd-partitions-v2-0-77ebb958a312@kernel.org>
 In-Reply-To: <20260119-dt-mtd-partitions-v2-0-77ebb958a312@kernel.org>
 To: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -57,32 +57,80 @@ To: Miquel Raynal <miquel.raynal@bootlin.com>,
  Hauke Mehrtens <hauke@hauke-m.de>
 Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org, 
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+ Simon Glass <simon.glass@canonical.com>, 
  Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 X-Mailer: b4 0.15-dev
 
-Some users of "brcm,nand-iproc" include "brcm,brcmnand" and some don't.
-The "brcm,brcmnand" compatible is not useful for iProc systems as
-there's a separate driver for iProc. So drop it as a fallback.
+The "compression" property is defined in the wrong place as it applies
+to individual partitions nodes, not all nodes.
 
-Reviewed-by: William Zhang <william.zhang@broadcom.com>
+Fixes: 8baba8d52ff5 ("dt-bindings: mtd: fixed-partitions: Add compression property")
+Reviewed-by: Simon Glass <simon.glass@canonical.com>
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml | 1 -
- 1 file changed, 1 deletion(-)
+ .../bindings/mtd/partitions/fixed-partitions.yaml      | 18 ------------------
+ .../devicetree/bindings/mtd/partitions/partition.yaml  | 18 ++++++++++++++++++
+ 2 files changed, 18 insertions(+), 18 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml b/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml
-index 064e840aeaa1..3105f8e6cbd6 100644
---- a/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml
-+++ b/Documentation/devicetree/bindings/mtd/brcm,brcmnand.yaml
-@@ -66,7 +66,6 @@ properties:
-         items:
-           - const: brcm,nand-iproc
-           - const: brcm,brcmnand-v6.1
--          - const: brcm,brcmnand
-       - description: BCM63168 SoC-specific NAND controller
-         items:
-           - const: brcm,nand-bcm63168
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
+index 62086366837c..73d74c0f5cb7 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
+@@ -29,24 +29,6 @@ properties:
+ 
+   "#size-cells": true
+ 
+-  compression:
+-    $ref: /schemas/types.yaml#/definitions/string
+-    description: |
+-      Compression algorithm used to store the data in this partition, chosen
+-      from a list of well-known algorithms.
+-
+-      The contents are compressed using this algorithm.
+-
+-    enum:
+-      - none
+-      - bzip2
+-      - gzip
+-      - lzop
+-      - lz4
+-      - lzma
+-      - xz
+-      - zstd
+-
+ patternProperties:
+   "@[0-9a-f]+$":
+     $ref: partition.yaml#
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
+index 80d0452a2a33..0b989037a005 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
+@@ -108,6 +108,24 @@ properties:
+       with the padding bytes, so may grow. If ‘align-end’ is not provided,
+       no alignment is performed.
+ 
++  compression:
++    $ref: /schemas/types.yaml#/definitions/string
++    description: |
++      Compression algorithm used to store the data in this partition, chosen
++      from a list of well-known algorithms.
++
++      The contents are compressed using this algorithm.
++
++    enum:
++      - none
++      - bzip2
++      - gzip
++      - lzop
++      - lz4
++      - lzma
++      - xz
++      - zstd
++
+ if:
+   not:
+     required: [ reg ]
 
 -- 
 2.51.0
