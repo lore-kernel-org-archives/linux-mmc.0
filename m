@@ -1,113 +1,128 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC46F125A0
-	for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2026 01:29:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 311F31E487;
+	Tue, 20 Jan 2026 01:48:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768872557; cv=none; b=Pnhk/lEb6aHveBSATSXvUGsrpX4SD/1x0OHRbXTjNXpyiMEQn+H0xY21jq2St38Bj9xYRlNn7pCDQofPRJCl7xwbOzYpfX51OeYddIB+pmleRKHjjoGEbnTqQ39oa9HKkEhjutep+gGy/rTlOc0VPTGr/G8y9wGF0Ow/bGOKXmg=
+	t=1768873737; cv=none; b=RzDIsaUlof1oEKGBOFQpQ+LbGYA8+rvpokoPdd1azWTgodphhVP0ydwjeOjP+PjD8rY9fvcuNa1N7reCmsy8XrkVem1u+9FE8p0iFLrDcUeJfpbbIutIPHp0TaQjjJdtLIw08WB+wtnv/V+EGyzO6CKHmoEK5ld5bRxUo5snNb0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768872557; c=relaxed/simple;
-	bh=KRBgkounHWrv8OcZaMyJfm1hupS42tciSdEMXMqtvmg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=TqA+DrEHyzNfhiaKUgY+Do5OeANEoyqp8+fdUz6rv4xVnJ+V+lUvmUvVnINFYQexL+RMp1vYcCfBA3Ap2HBYmZuFcwbxnWFeBJMsa/E8Jf9fjgRn1yk2SD61y6LPZ78ut+5GUklUn8J6OJASEOcWGpkk/DyHDlZdanCzrTptIf8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UBkMuooP; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768873737; c=relaxed/simple;
+	bh=9ZjpuakurDGJy/MQHe8tjppqpyV7PRn2yRritAjgYVE=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=i0wRAYmFbuSb2+5RaBiq6pycR7jbV2YAaPaRcDb3kLX6GBQk/04OdHs8kDtLfNXN2kiW1dTGRosk34OgZ6BkUsjNGPNIM41Y2SDpm+auivKmrwOY8H3Z+hGpU3X3wo6zQTlp0JVOmaIs9CEf0JJrbSAhj/hkQIkuagqLu2UJshY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=N/z37+rt; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UBkMuooP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AFABBC4AF09
-	for <linux-mmc@vger.kernel.org>; Tue, 20 Jan 2026 01:29:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="N/z37+rt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1C5BC116C6;
+	Tue, 20 Jan 2026 01:48:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768872557;
-	bh=KRBgkounHWrv8OcZaMyJfm1hupS42tciSdEMXMqtvmg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=UBkMuooP3a1zSNAQ6aQU5J6y1ROzxxSlknF0OkBSyuhyGkU/M1Mx4fj5StUVu0/kS
-	 Y9HmjimCkYPOomBeJBAxihExE+LDPJAVdLxas/47e/Av+Uf6cM9Zp+O2hmKdjH9Cnt
-	 BTKsq1ScuBuC9h0p1SjDZKWU6VMi4Dk5kHmsDv7cYBseBukMLdB3UmB+fbJv9uDN/o
-	 q7CGm7Uvrzmi9fwASowTVzCtKLym1WayZVvHd6bLB5V7I1BrzOsjQKQZg4nLH2ZFQV
-	 oK5z1Ht4VGI4MJD1ssoeYlmzGQAk+sSvgwypwWW+flnlXzHN07rhFV6nssr/DN9EdS
-	 qt2tiUvIeQ1CA==
-Received: by mail-ed1-f49.google.com with SMTP id 4fb4d7f45d1cf-65089cebdb4so7632524a12.0
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jan 2026 17:29:17 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCW5VuuYmwk4sO7or0lVzNp0FhESREmDpFMVsRxAEmBDcyICCUBHQ+qarge0L+mu40jhJEOtZkWKkFg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwMm29QAe3CxlaVYBzblUNoqPzuJg+9nu/KmImVTLNnBAN7kde3
-	mPi0WhHMZn+91IWN9rBRq8ix8nLy2G02ShIFAjdfud6u6hTzLHKDZwdDK1HGkmDquoftdFhXFXb
-	Yqtds4vCkjgOha0Dzp9MUvVY0vlDT4g==
-X-Received: by 2002:a05:6402:13d6:b0:64b:46ce:4706 with SMTP id
- 4fb4d7f45d1cf-654b93641b4mr9128952a12.1.1768872556264; Mon, 19 Jan 2026
- 17:29:16 -0800 (PST)
+	s=k20201202; t=1768873736;
+	bh=9ZjpuakurDGJy/MQHe8tjppqpyV7PRn2yRritAjgYVE=;
+	h=From:Subject:Date:To:Cc:From;
+	b=N/z37+rtTvXz2v7eVPkIP373YNS7Mhsw3N8/Z3J6771p24bYGmMMt7TJx1aBzGzxH
+	 rY/GBOO79P+2DYYovugGnjq8Tao6eQ0POnu2hC6a67MWsyvEqNdGs/LjiHALELKMD0
+	 fBvupMHPPbTwFzU71HHI9E2cQsY6E0UQs50Jx6iSUHJKdnLlc9J6Ae9P9u/ba1M/XP
+	 v82lzvVTd7FvWKk6gvD4BI7NDijTBUeoFuKq4vDAi0DQhEDXdgBZXfFfpJQ2zxrHMU
+	 oxGtjNrz+SuAJyHYtIA2AR6xCutsUBW4UnsrCmq4cVVW4z/i6FLeai8sD7yJAT93Q3
+	 EI9QKB1qJNmkg==
+From: "Rob Herring (Arm)" <robh@kernel.org>
+Subject: [PATCH v2 00/10] dt-bindings: mtd: Partition binding fixes and
+ restructuring
+Date: Mon, 19 Jan 2026 19:48:21 -0600
+Message-Id: <20260119-dt-mtd-partitions-v2-0-77ebb958a312@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260114094848.3790487-1-neeraj.soni@oss.qualcomm.com>
- <176840729246.2734238.959231359705262987.robh@kernel.org> <2956f2bb-7db4-4d66-aa71-2017c9a4a057@kernel.org>
- <38b979a1-8499-abaf-c990-2986971ffa7c@oss.qualcomm.com>
-In-Reply-To: <38b979a1-8499-abaf-c990-2986971ffa7c@oss.qualcomm.com>
-From: Rob Herring <robh@kernel.org>
-Date: Mon, 19 Jan 2026 19:29:04 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqLk=pOqpdX2RPGRsNgd_ka4wd3Vi8YVmYgG4pMpio6mjw@mail.gmail.com>
-X-Gm-Features: AZwV_Qgli2NPOkmb3PhgqHtWt8BK5EVwNACrxTYUprfIEX-xV18L7S9DTNWf6Dc
-Message-ID: <CAL_JsqLk=pOqpdX2RPGRsNgd_ka4wd3Vi8YVmYgG4pMpio6mjw@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] Enable Inline crypto engine for kodiak
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, krzk+dt@kernel.org, ulf.hansson@linaro.org, 
-	devicetree@vger.kernel.org, andersson@kernel.org, konradybcio@kernel.org, 
-	conor+dt@kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAOXebmkC/32NQQ6CMBBFr0Jm7Zi2CCIr72FYVDqFiQpk2hAN6
+ d2tHMDl+/n//Q0CCVOAtthAaOXA85TBHAroRzsNhOwyg1GmVlo16CK+osPFSuSYywFL76qG7tZ
+ 5qyDvFiHP79156zKPHOIsn/1i1b/0n23VqFCbk63KnmpzvlwfJBM9j7MM0KWUvuhOAhKzAAAA
+X-Change-ID: 20260108-dt-mtd-partitions-3fd58ebadfa0
+To: Miquel Raynal <miquel.raynal@bootlin.com>, 
+ Richard Weinberger <richard@nod.at>, Vignesh Raghavendra <vigneshr@ti.com>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, 
+ Brian Norris <computersforpeace@gmail.com>, 
+ Kamal Dasu <kdasu.kdev@gmail.com>, 
+ William Zhang <william.zhang@broadcom.com>, Nick Terrell <terrelln@fb.com>, 
+ David Sterba <dsterba@suse.com>, 
+ =?utf-8?q?Rafa=C5=82_Mi=C5=82ecki?= <rafal@milecki.pl>, 
+ Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>, 
+ Ulf Hansson <ulf.hansson@linaro.org>, 
+ Marcus Folkesson <marcus.folkesson@gmail.com>, 
+ Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@kernel.org>, 
+ Hauke Mehrtens <hauke@hauke-m.de>
+Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>, 
+ Simon Glass <simon.glass@canonical.com>
+X-Mailer: b4 0.15-dev
 
-On Mon, Jan 19, 2026 at 4:04=E2=80=AFAM Neeraj Soni
-<neeraj.soni@oss.qualcomm.com> wrote:
->
-> Hi,
->
-> On 1/16/2026 10:24 PM, Krzysztof Kozlowski wrote:
-> > On 14/01/2026 17:18, Rob Herring wrote:
-> >>
-> >> On Wed, 14 Jan 2026 15:18:46 +0530, Neeraj Soni wrote:
-> >>> Document Inline Crypto Engine (ICE) handle for SDHC and add its devic=
-e-tree
-> >>> node to enable it for kodiak.
-> >>>
-> >>> How this patch was tested:
-> >>> - export ARCH=3Darm64
-> >>> - export CROSS_COMPILE=3Daarch64-linux-gnu-
-> >>> - make menuconfig
-> >>> - make defconifg
-> >>> - make DT_SCHEMA_FILES=3DDocumentation/devicetree/bindings/mmc/sdhci-=
-msm.yaml dt_binding_check
-> >>> - make ARCH=3Darm64 CROSS_COMPILE=3Daarch64-linux-gnu- CHECK_DTBS=3Dy=
- dtbs
-> >>>
-> >>> ---
-> >>> Changes in v2:
-> >>> - Removed the "if: required:" description for "qcom,ice" dt-binding
-> >>>   as the ICE node is optional.
-> >>> - Corrected the ICE dt node entry according to the dt-binding descrip=
-tion.
-> >>> - Added test details.
-> >>>
-> >
-> > Is this another report being ignored by the author? I'll start the list=
-.
-> >
-> No i did not ignore this. I see this comment in the message:
->
-> "Ultimately, it is up to the platform maintainer whether these warnings a=
-re acceptable or not.
-> No need to reply unless the platform maintainer has comments."
+The partition bindings fail to restrict undefined properties. This is 
+primarily on fixed-partitions which can be nested and partition nodes 
+without a compatible string. This series fixes those issues and then 
+several problems exposed by restricting undefined properties. As part of 
+this, the schema structure is reworked to follow more conventional 
+structure of applying schemas by compatible and a schema only checks 1 
+level of nodes (unless possible child nodes are fixed).
 
-This statement applies when the previous sentences in that paragraph
-are true. Those say:
-
-> Some warnings may be from an existing SoC .dtsi. Or perhaps the warnings
-> are fixed by another series.
-
-You are adding a new node here and there's warnings for that node.
-Clearly these are not existing warnings and unlikely fixed by another
-series.
+In theory, we could have all sorts of combinations of different 
+partition types nesting, and those may or may not work. No attempt is 
+made to support them here. Only the known cases are supported.
 
 Rob
+
+Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+---
+Changes in v2:
+- Rebase on mtd/next
+- Link to v1: https://patch.msgid.link/20260108-dt-mtd-partitions-v1-0-124a53ce6279@kernel.org
+
+---
+Rob Herring (Arm) (10):
+      dt-bindings: mtd: brcm,brcmnand: Drop "brcm,brcmnand" compatible for iProc
+      dt-bindings: mtd: fixed-partitions: Move "compression" to partition node
+      dt-bindings: mtd: partitions: Move "sercomm,scpart-id" to partition.yaml
+      dt-bindings: mtd: partitions: Allow "nvmem-layout" in generic partition nodes
+      dt-bindings: mtd: partitions: Define "#{address,size}-cells" in specific schemas
+      dt-bindings: mtd: partitions: Drop partitions.yaml
+      dt-bindings: mtd: Ensure partition node properties are documented
+      dt-bindings: mtd: fixed-partitions: Restrict undefined properties
+      dt-bindings: mtd: partitions: Convert brcm,trx to DT schema
+      dt-bindings: mtd: partitions: Combine simple partition bindings
+
+ .../devicetree/bindings/mmc/mmc-card.yaml          | 20 ++-----
+ .../devicetree/bindings/mtd/brcm,brcmnand.yaml     |  1 -
+ Documentation/devicetree/bindings/mtd/mtd.yaml     | 10 +---
+ .../mtd/partitions/arm,arm-firmware-suite.yaml     |  2 -
+ .../devicetree/bindings/mtd/partitions/binman.yaml | 53 ------------------
+ .../mtd/partitions/brcm,bcm4908-partitions.yaml    |  8 +--
+ .../partitions/brcm,bcm947xx-cfe-partitions.yaml   |  2 -
+ .../mtd/partitions/brcm,bcm963xx-imagetag.txt      | 45 ---------------
+ .../bindings/mtd/partitions/brcm,trx.txt           | 42 --------------
+ .../bindings/mtd/partitions/brcm,trx.yaml          | 65 ++++++++++++++++++++++
+ .../bindings/mtd/partitions/fixed-partitions.yaml  | 43 ++++----------
+ .../mtd/partitions/linksys,ns-partitions.yaml      | 10 +---
+ .../bindings/mtd/partitions/partition.yaml         | 44 ++++++++++++++-
+ .../bindings/mtd/partitions/partitions.yaml        | 42 --------------
+ .../bindings/mtd/partitions/redboot-fis.yaml       |  4 --
+ .../devicetree/bindings/mtd/partitions/seama.yaml  | 44 ---------------
+ .../bindings/mtd/partitions/simple-partition.yaml  | 61 ++++++++++++++++++++
+ .../partitions/tplink,safeloader-partitions.yaml   |  2 +-
+ .../devicetree/bindings/mtd/partitions/u-boot.yaml |  2 +-
+ .../devicetree/bindings/mtd/ti,davinci-nand.yaml   |  4 +-
+ .../devicetree/bindings/mtd/ti,gpmc-onenand.yaml   |  2 +-
+ MAINTAINERS                                        |  5 --
+ 22 files changed, 196 insertions(+), 315 deletions(-)
+---
+base-commit: 779c59274d03cc5c07237a2c845dfb71cff77705
+change-id: 20260108-dt-mtd-partitions-3fd58ebadfa0
+
+Best regards,
+--  
+Rob Herring (Arm) <robh@kernel.org>
+
