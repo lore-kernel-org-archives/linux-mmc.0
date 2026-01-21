@@ -1,35 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BDB6B4657C3;
-	Wed, 21 Jan 2026 07:28:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 637F844E050;
+	Wed, 21 Jan 2026 07:28:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768980491; cv=none; b=t6H0+v/1Dw60ES2ppp8ChC/lQczI8sNtfY08nylHyoq24XB6wDzV9JuUTxe7Ct0LKs7ejZoLoHbrpOHLgvsBzMtmdctwYxM6kt883ZJI1xbR1Ur3X6qPYQHDSaK75BON8VCcQwOrz4fni6/xJYZrwwRfoXV9LkDFg8S7qWPI8qA=
+	t=1768980494; cv=none; b=q6X2pQaTbd2yLs+jeta3oCuMDUJ1VjQKedCNlbr98tFA88rHmsdJypdKXuItalcTANF8WGGFLzGAOPk2BlDHZVawWpb713bO5DooWS7UuDpzPB5b0tSPKQtMF2sdENTdP0d/WTNv7uW4Y6ZrGW/FoQyhhY+QohGlNdjq8STHAPM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768980491; c=relaxed/simple;
-	bh=QeG4nnxg3Z51cpWjKcP61JzmFp2YGJm8LfLD4oaoy8U=;
+	s=arc-20240116; t=1768980494; c=relaxed/simple;
+	bh=v62227FUEh7SlB1Slighgoemv0vqLqgB0U/fyZlE6Uo=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=rcwyWLt7dj0kkghZvVGLGkaeiEcBQGJG/9xg4hOdo2KgJWcojNBR+j9C8nym4AbtW0qY5PA207NT1mb72buQ/RoMu8lorOPVy5POx3CL6+wtjxSVTmAIXsi6ZsXMXaKoGKSTjM7rYRja6vHTp0BWG4zKr35EerY3tSx+fX7TXgY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iFkOGEal; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=FGiln/aLL1Ttlt+V2R+5ZCtHlFiqtAOetRWHiixYr5Ldp0Bin+4fUfLOg0gojOq+eiujcy1UOwPKkgC07RXLf7scI0kj1/QpQtKg3NCPWzhbCGw5Vnxr6+L9PntJJf5RdETqM09m95b8/ZflF0J7JxrmyJ62BM4LW8ej66Yl9k8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=io7o7FFr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iFkOGEal"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5937BC19422;
-	Wed, 21 Jan 2026 07:28:07 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="io7o7FFr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5073C16AAE;
+	Wed, 21 Jan 2026 07:28:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768980490;
-	bh=QeG4nnxg3Z51cpWjKcP61JzmFp2YGJm8LfLD4oaoy8U=;
+	s=k20201202; t=1768980492;
+	bh=v62227FUEh7SlB1Slighgoemv0vqLqgB0U/fyZlE6Uo=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=iFkOGEalBip8wI2VzLFYM/E8GwHwKaeM/gCFpYtsExzrPGcxZZf3APVaozHgT1N3b
-	 w2OTNd5OyGlfK092no+0aaC9jQmvQ0zTpbyIbnLLT5/yvKoEKKgeSyThM+BQq8q0fb
-	 IJUyRHDqpFg1RLlaH7SMCZS7hUX4iA4IQJbtUx/EgZiXhd/s4p6UOMaVOF+D43tsAJ
-	 SftIrIAuSwQkfHnqEWqemPv1y/6qaM64z80erQ2e5eiJBvVoYqDQGOOnBeE8XMQwET
-	 u70L8ggOfpoUlB1KO9jzXYIPUwegebE1KiqWTIZQWCXkqdAejIhhWmqBi/8sjyrdhD
-	 rnVPgw2Uc55+w==
+	b=io7o7FFrLMWCCtKWTrgyB4YHnunW9pfgEophMURZGXZXRVQ/pf4eDiajANNglpcko
+	 BYNu0jOKEJqO49jvWsyQijpwy9Nr9wcwJBnvGTWWnDvzniaV7La8aDMBUxmrWrfO3c
+	 sxtLD0kXLuRgHns0khGZBY7dotk9qd7kD5ibCsFjjfJF4DVs94p8Sslf4ZtlDAsqB9
+	 xcz6Ttug/h1QxyGEm2r0Yi0tS7FzTIMhD680t2vEiX/CfjfXtUy7u4sR7vDkYqfXYq
+	 F/dw4p2JS4ne51/VW24zyX6C875KPABpuSzhcjEVsq9fMvr0dLQlFfWnyY/qYx9xwH
+	 Kxs/SYjnDZ/og==
 From: Yixun Lan <dlan@kernel.org>
-Date: Wed, 21 Jan 2026 15:27:35 +0800
-Subject: [PATCH 1/2] dt-bindings: mmc: spacemit,sdhci: add support for K3
- SoC
+Date: Wed, 21 Jan 2026 15:27:36 +0800
+Subject: [PATCH 2/2] mmc: sdhci-of-k1: spacemit: Add support for K3 SoC
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,7 +37,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260121-07-k3-mmc-v1-1-ff77c07bfdf6@kernel.org>
+Message-Id: <20260121-07-k3-mmc-v1-2-ff77c07bfdf6@kernel.org>
 References: <20260121-07-k3-mmc-v1-0-ff77c07bfdf6@kernel.org>
 In-Reply-To: <20260121-07-k3-mmc-v1-0-ff77c07bfdf6@kernel.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
@@ -48,49 +47,78 @@ Cc: Yixun Lan <dlan@kernel.org>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
  spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=860; i=dlan@kernel.org;
- h=from:subject:message-id; bh=QeG4nnxg3Z51cpWjKcP61JzmFp2YGJm8LfLD4oaoy8U=;
- b=owEB6QIW/ZANAwAKATGq6kdZTbvtAcsmYgBpcH/96qp2jXu4fXgJ8Y6kFmPxqTwCqDVE42OWl
- x74C6WGSS+JAq8EAAEKAJkWIQS1urjJwxtxFWcCI9wxqupHWU277QUCaXB//RsUgAAAAAAEAA5t
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2036; i=dlan@kernel.org;
+ h=from:subject:message-id; bh=v62227FUEh7SlB1Slighgoemv0vqLqgB0U/fyZlE6Uo=;
+ b=owEB6QIW/ZANAwAKATGq6kdZTbvtAcsmYgBpcIAA125EduKPyHGpyZkQWQm0Ruppw/jqojoHV
+ pK8q0MbKr2JAq8EAAEKAJkWIQS1urjJwxtxFWcCI9wxqupHWU277QUCaXCAABsUgAAAAAAEAA5t
  YW51MiwyLjUrMS4xMSwyLDJfFIAAAAAALgAoaXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5
  maWZ0aGhvcnNlbWFuLm5ldEI1QkFCOEM5QzMxQjcxMTU2NzAyMjNEQzMxQUFFQTQ3NTk0REJCRU
- QACgkQMarqR1lNu+2LPQ//ScM+Sc67IfaSp4iOiDDdA8oCud9EFwgJkD/DGkeNiRB+0fRIvjdGs
- 4dK7dVm5y1tje7gL+q0SUH+tq3tJlGAQIkPTzmNE+TGizoO9keYWNoyuA58L5SqnqHxnziM2xZz
- TVLWMorOECa+AcBTnlNx/ShDQxxJFo7cdnsQLJ5YI2e83RuSI0ZAc9QPwtEfSXWE2yqHOOHplHF
- YZGV/oyaCCqjBqp0GOzS9m6AiwHzihIUeGZ1LWEtMhDMWGgGGnzJylJEGPCtCmQaZ9oNNAzBpVN
- T+626hIrDGofvgKHL229U7+8iVQ0mtJGGWLb2fchkaZ4hfvERapTnwPArBhAPck41049WiFijNV
- ajzs4R65t9dsU662l5jzyWCP0kEfMIk2lvtMOU7+LpNCv/vVeNRvuSU1reR6YFp1tm6jLyJUfxj
- qupXpeULsEPBX14sg+JoXIr4SujowjF+r5OGGLm5ukhBQ8H8p4r52Eknja1M+XjLNO0Z6Ye1l79
- uCDLZ+5t3aVLrNAAjg49lfJlzHC0QoS+I1uj7VNPtJCjTFjG4slUBxxTKOl5QXAzuYlNIBtomv5
- XJOUvr01JoGjF1tLwEtQnZy7iMnKFlFdAWk5DuQIekXzDP93IZIP4Wv7aTgHFfHpiToXEesCCPs
- TkSjqO2yYgBt5JlF64IvuMrs0dnK5U=
+ QACgkQMarqR1lNu+1v/Q/+IYGdvuySTpHcRs4eWwSu5b/IhDgPw/C4rXa5s2ayUbw7ILDr8oU31
+ ABOBhNnakbAaFbK1bWC7/fVQ07F9rW/UHMBSC1PU4LAXNI39iHADMXIsxVXpZr2oPl11eEYdRAP
+ q9OaV5rnn64nD7pAUQKSh9iXFduRzWbhIn2PiVOZb+SEHDkw69aRLvjM5Cgtq5v40+N0YAsDy86
+ +1+nnPN8My81wX3Vmt46TO8e+RYbLefo6nVzu4zrme4F8p6uiEVlY2AhTQHlLvo3YM7cCYMAARx
+ PU+kssSiht5S4NGjdmmJ+9vHkhUBZK9QFwvUfSShKeODsCIhv9lFI4oMoOY8pkBL/B/+N4/yWxd
+ pHE7d+fP44h92ql4LaGMLNny0jpMB0/AyhxL+iAxG/cGIi4vwWtX2h4Rr7p5rYpdB7q8YlelXPy
+ BGGhZVMU3wh7Dt2ppqVktPfCfNCDo+RE5HN3RmYAA2neSqbbuKO7HF2LN/gyws/BmtpjUbhW41A
+ HcowFb3YfA8tVkXCpmi1iZ+tWRdOsyv3iO65EBPdNmwSmcCFcGx5ldUTQ+ZweQ/014i0N37bEbM
+ i2L3g/heLu1lqU2pgWQfdrADTxVVHiZdp6C1Qv2GauglVYTW8WKSd0Hn5cghF3KpMHR8F0dDD6N
+ uXaIBAwejZO28a7TRpIVCfSem+QfJk=
 X-Developer-Key: i=dlan@kernel.org; a=openpgp;
  fpr=50B03A1A5CBCD33576EF8CD7920C0DBCAABEFD55
 
-The SDHCI controller found on SpacemiT K3 SoC share the same IP with
-K1 generation, while fixed the broken 64BIT DMA issue. Introduce a
-compatible string to enable support for it.
+The SDHCI controller found on SpacemiT K3 SoC share the same IP with K1
+generation and introduce a compatible data to denote the change that broken
+64BIT DMA issue has been fixed.
 
 Signed-off-by: Yixun Lan <dlan@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-of-k1.c | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-index de4e9efeb666..9a055d963a7f 100644
---- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-@@ -14,7 +14,9 @@ allOf:
+diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
+index a160e1d5d9bd..a56cb8a36982 100644
+--- a/drivers/mmc/host/sdhci-of-k1.c
++++ b/drivers/mmc/host/sdhci-of-k1.c
+@@ -259,8 +259,20 @@ static const struct sdhci_pltfm_data spacemit_sdhci_k1_pdata = {
+ 		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ };
  
- properties:
-   compatible:
--    const: spacemit,k1-sdhci
-+    enum:
-+      - spacemit,k1-sdhci
-+      - spacemit,k3-sdhci
++static const struct sdhci_pltfm_data spacemit_sdhci_k3_pdata = {
++	.ops = &spacemit_sdhci_ops,
++	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
++		  SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
++		  SDHCI_QUIRK_32BIT_ADMA_SIZE |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
++		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
++
+ static const struct of_device_id spacemit_sdhci_of_match[] = {
+-	{ .compatible = "spacemit,k1-sdhci" },
++	{ .compatible = "spacemit,k1-sdhci", .data = &spacemit_sdhci_k1_pdata },
++	{ .compatible = "spacemit,k3-sdhci", .data = &spacemit_sdhci_k3_pdata },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, spacemit_sdhci_of_match);
+@@ -271,10 +283,16 @@ static int spacemit_sdhci_probe(struct platform_device *pdev)
+ 	struct spacemit_sdhci_host *sdhst;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_host *host;
++	const struct sdhci_pltfm_data *data;
+ 	struct mmc_host_ops *mops;
+ 	int ret;
  
-   reg:
-     maxItems: 1
+-	host = sdhci_pltfm_init(pdev, &spacemit_sdhci_k1_pdata, sizeof(*sdhst));
++
++	data = of_device_get_match_data(&pdev->dev);
++	if (!data)
++		return dev_err_probe(dev, -EINVAL, "failed to get platform data\n");
++
++	host = sdhci_pltfm_init(pdev, data, sizeof(*sdhst));
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+ 
 
 -- 
 2.52.0
