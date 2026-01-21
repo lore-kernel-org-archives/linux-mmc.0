@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65C193F075E;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 655E13EDACF;
 	Wed, 21 Jan 2026 19:57:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769025425; cv=none; b=o/3SZvpg6A9Vv3Y8CZonyAVQONAWglkdQ1g1/xECK+jwZqOQu3cVeKRFFngCjtbCgf/6Psaw9lSRXjHpOAL17s+P9s6lnutiDmC+w3P3FfXvFWvAOgoGMevVRmzWoQkyFV7PZhK+sgUCi61WkcQCf4AZ6CRgy9zpIeidl3vrF68=
+	t=1769025425; cv=none; b=lJONfBm6JF7FNKEeBfKevdO/deF8RdkDUMhf+6otq6/Z6vI14aAWdRbWjQ5oct2baVmHlHfgo3xPGHEcmZHvT5hb/XfGkVSCbmPkQxy8PYS8Ag2FljwIfl3m2wkt11HYEEwEbPr2zglpGvmF62XwISLJHlDsaDIJllK1JOrd2og=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1769025425; c=relaxed/simple;
-	bh=hqmmibdeyEIA8HNBIkJ+3aEvL37E5fI2EktVUAcmCS8=;
+	bh=6bTsyC3swP6BR3RHzzbYpQ94rLBiUEN72oKtqXPZ8W8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=qbWqlXd28PDEV3CGBFMFqJ6zyDXHeNoILgDXa5hQNXXKLOjGMEOpHOiddBZ9rkryVqBsbti6A1TUi8pQ8l0LGLznSBIyYunZ0/JBI04q+wiCjWF4b+Dq0x2Fj9/unP6EEv5LC9bLJg+PpXYdmIYrgMCn6duD4ZtYQJw4HR3MXhQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IsPbwjxS; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=A9RLx/BnxQO9XxECrZkO69dJdusuMUBHGlUUAuRuDC5Os721HYY8hmn48nQBz/l7x3UpE2uYdN7fhU1xQgxHOxPsNjaJue6nOE7y03ObA/vu7o5R5D4e60ZpqIvQ+6voyttRNHiuMkSvfiEBgwQ26EqI7k/tmRdyU2CHAc8f4sQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fLKlHWEl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IsPbwjxS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C2C94C19422;
-	Wed, 21 Jan 2026 19:57:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fLKlHWEl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B6790C19425;
+	Wed, 21 Jan 2026 19:57:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1769025423;
-	bh=hqmmibdeyEIA8HNBIkJ+3aEvL37E5fI2EktVUAcmCS8=;
+	s=k20201202; t=1769025424;
+	bh=6bTsyC3swP6BR3RHzzbYpQ94rLBiUEN72oKtqXPZ8W8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=IsPbwjxSd8RkF1rK+DN5NR3Dxc/glKA9poYj4V9fJePMCs72ej85Qz6wuvWWxYf3A
-	 PWspl3Y9vXmkrv3hBB3/ZylxG60kOzFb69XezwvGygIOr2K6vQyejy299ovegD0OLf
-	 mFCUwl3f9ANqvonrsuW0DsI3ZU4sRwxW4qPCnL5SEHDFjW573AHeg0EGwwPDFst5TF
-	 /JsrDZ8MIjBloxT8ZAjbDfkIMuX+0hJCpJsIu/KCYN6ebheMyeXTEJhVb0sTkM+r73
-	 Ok71EmZTy95s2V9kD9bYTqNpwh2AN2NNYEbXBO0jj6iFChMtdVqTCe9YTHDK5MbSw0
-	 bSdp2Ton2B20g==
+	b=fLKlHWElS6KV5noT9celW8c9chnO/ITX63bCA5Jj09AvgEpCkgJNcEutmeh5Ldpie
+	 X0rGMIcla8T/zuACAO353ZQieDjXEFcmpyv41BADOkB6iEqF9uowmbuZh7tHubszkW
+	 UQwLAq9SiJoqNu6gj/RFoAvdYpMEKDJfVfUiGwpRqeEB373KCHleSIBs5zjMq7Yc7A
+	 bmdZLFjOEK4nUe/W6RgaZxVYuAMVt9JHhAG/kmDFXrt7S3SXbA1L1vl6Aw0oy9mHjH
+	 zNQIWM1ZtYDAdszswSpGteu+UNBS4sc39qvyXjhkCHTGQ9xuLiOAABmZZBX3EbjJPg
+	 FZHpjLFIVNT7g==
 From: "Rob Herring (Arm)" <robh@kernel.org>
-Date: Wed, 21 Jan 2026 13:56:41 -0600
-Subject: [PATCH v3 08/10] dt-bindings: mtd: fixed-partitions: Restrict
- undefined properties
+Date: Wed, 21 Jan 2026 13:56:42 -0600
+Subject: [PATCH v3 09/10] dt-bindings: mtd: partitions: Convert brcm,trx to
+ DT schema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -37,8 +37,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260121-dt-mtd-partitions-v3-8-ec3af93c8f93@kernel.org>
+Content-Transfer-Encoding: 8bit
+Message-Id: <20260121-dt-mtd-partitions-v3-9-ec3af93c8f93@kernel.org>
 References: <20260121-dt-mtd-partitions-v3-0-ec3af93c8f93@kernel.org>
 In-Reply-To: <20260121-dt-mtd-partitions-v3-0-ec3af93c8f93@kernel.org>
 To: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -60,54 +60,157 @@ Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org,
  Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 X-Mailer: b4 0.15-dev
 
-The fixed-partitions schema allowed undefined properties in order to
-avoid warnings when there are nested fixed-partitions.
+Convert the brcm,trx partition binding to DT schema format.
+
+As the "linksys,ns-firmware" compatible also uses "brcm,trx" as a
+fallback, move it to the converted binding.
 
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- .../devicetree/bindings/mtd/partitions/fixed-partitions.yaml       | 7 +++++--
- Documentation/devicetree/bindings/mtd/partitions/partition.yaml    | 2 +-
- 2 files changed, 6 insertions(+), 3 deletions(-)
+ .../bindings/mtd/partitions/brcm,trx.txt           | 42 --------------
+ .../bindings/mtd/partitions/brcm,trx.yaml          | 65 ++++++++++++++++++++++
+ .../mtd/partitions/linksys,ns-partitions.yaml      |  8 +--
+ 3 files changed, 66 insertions(+), 49 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-index 4d79f786fcd5..984823108f9c 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-@@ -39,7 +39,11 @@ required:
-   - "#address-cells"
-   - "#size-cells"
- 
--additionalProperties: true
-+# fixed-partitions can be nested
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/brcm,trx.txt b/Documentation/devicetree/bindings/mtd/partitions/brcm,trx.txt
+deleted file mode 100644
+index c2175d3c82ec..000000000000
+--- a/Documentation/devicetree/bindings/mtd/partitions/brcm,trx.txt
++++ /dev/null
+@@ -1,42 +0,0 @@
+-Broadcom TRX Container Partition
+-================================
+-
+-TRX is Broadcom's official firmware format for the BCM947xx boards. It's used by
+-most of the vendors building devices based on Broadcom's BCM47xx SoCs and is
+-supported by the CFE bootloader.
+-
+-Design of the TRX format is very minimalistic. Its header contains
+-identification fields, CRC32 checksum and the locations of embedded partitions.
+-Its purpose is to store a few partitions in a format that can be distributed as
+-a standalone file and written in a flash memory.
+-
+-Container can hold up to 4 partitions. The first partition has to contain a
+-device executable binary (e.g. a kernel) as it's what the CFE bootloader starts
+-executing. Other partitions can be used for operating system purposes. This is
+-useful for systems that keep kernel and rootfs separated.
+-
+-TRX doesn't enforce any strict partition boundaries or size limits. All
+-partitions have to be less than the 4GiB max size limit.
+-
+-There are two existing/known TRX variants:
+-1) v1 which contains 3 partitions
+-2) v2 which contains 4 partitions
+-
+-There aren't separated compatible bindings for them as version can be trivialy
+-detected by a software parsing TRX header.
+-
+-Required properties:
+-- compatible : (required) must be "brcm,trx"
+-
+-Optional properties:
+-
+-- brcm,trx-magic: TRX magic, if it is different from the default magic
+-		  0x30524448 as a u32.
+-
+-Example:
+-
+-flash@0 {
+-	partitions {
+-		compatible = "brcm,trx";
+-	};
+-};
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/brcm,trx.yaml b/Documentation/devicetree/bindings/mtd/partitions/brcm,trx.yaml
+new file mode 100644
+index 000000000000..71458b2c05fe
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mtd/partitions/brcm,trx.yaml
+@@ -0,0 +1,65 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mtd/partitions/brcm,trx.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Broadcom TRX Container Partition
++
++maintainers:
++  - Hauke Mehrtens <hauke@hauke-m.de>
++  - Rafał Miłecki <rafal@milecki.pl>
++
++description: >
++  TRX is Broadcom's official firmware format for the BCM947xx boards. It's used by
++  most of the vendors building devices based on Broadcom's BCM47xx SoCs and is
++  supported by the CFE bootloader.
++
++  Design of the TRX format is very minimalistic. Its header contains
++  identification fields, CRC32 checksum and the locations of embedded partitions.
++  Its purpose is to store a few partitions in a format that can be distributed as
++  a standalone file and written in a flash memory.
++
++  Container can hold up to 4 partitions. The first partition has to contain a
++  device executable binary (e.g. a kernel) as it's what the CFE bootloader starts
++  executing. Other partitions can be used for operating system purposes. This is
++  useful for systems that keep kernel and rootfs separated.
++
++  TRX doesn't enforce any strict partition boundaries or size limits. All
++  partitions have to be less than the 4GiB max size limit.
++
++  There are two existing/known TRX variants:
++    1) v1 which contains 3 partitions
++    2) v2 which contains 4 partitions
++
++  There aren't separated compatible bindings for them as version can be trivially
++  detected by a software parsing TRX header.
++
++properties:
++  compatible:
++    oneOf:
++      - items:
++          - const: linksys,ns-firmware
++          - const: brcm,trx
++      - const: brcm,trx
++
++  brcm,trx-magic:
++    description: TRX magic, if it is different from the default magic.
++    $ref: /schemas/types.yaml#/definitions/uint32
++    default: 0x30524448
++
++required:
++  - compatible
++
 +allOf:
 +  - $ref: partition.yaml#
 +
 +unevaluatedProperties: false
++
++examples:
++  - |
++    flash {
++        partitions {
++            compatible = "brcm,trx";
++        };
++    };
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml
+index 02ecb51fcece..61d7e701b110 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/linksys,ns-partitions.yaml
+@@ -30,13 +30,7 @@ properties:
  
- examples:
-   - |
-@@ -115,7 +119,6 @@ examples:
-             compatible = "fixed-partitions";
-             label = "calibration";
-             reg = <0xf00000 0x100000>;
--            ranges = <0 0xf00000 0x100000>;
-             #address-cells = <1>;
-             #size-cells = <1>;
+ patternProperties:
+   "^partition@[0-9a-f]+$":
+-    $ref: partition.yaml#
+-    properties:
+-      compatible:
+-        items:
+-          - const: linksys,ns-firmware
+-          - const: brcm,trx
+-    unevaluatedProperties: false
++    $ref: partition.yaml#/$defs/partition-node
  
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-index 51fd48af55ec..2397d97ecac5 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-@@ -144,7 +144,7 @@ if:
- then:
-   properties:
-     $nodename:
--      pattern: '^partition-.*$'
-+      pattern: '^partitions?(-.+)?$'
- 
- # This is a generic file other binding inherit from and extend
- additionalProperties: true
+ required:
+   - "#address-cells"
 
 -- 
 2.51.0
