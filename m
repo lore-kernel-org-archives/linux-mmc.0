@@ -1,129 +1,94 @@
-Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C60243793D3
-	for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 07:00:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4674B43CECB;
+	Wed, 21 Jan 2026 07:28:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768978846; cv=none; b=VSEyFW7wP+Fo6RI8RXHc9MG+mK6yt01BOnHM+CSnmHz6sIgXwtAIUeID4xBaTfN8oReRr5cFyasHiGaUz4yMlkC8uU7o1qNJ1UsM00y2dg29hZiLrxBeeI9TzkCwLrBuv3BeDF/L1DCK9eI0vbszrfgNgCNkoac1pRwyzA2xXX4=
+	t=1768980487; cv=none; b=d5Fb56swdu3WvjfAvyCIsErUus8rlr+DeE/zYg5Bv2CKzUTshqaFsAVCkmtsAWptYD6K9nwDF0s40NNawf2l8uZEZeGsOp+kxiBtSzb3tQZ/tivALgdDLZB0FNvmUKcWksamPsj1O5Al0JPDvT4M1sb5skFc3FAsm2ghalTxiE0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768978846; c=relaxed/simple;
-	bh=WnKGtndWDvdK4W52T0Zx45m220krEQGQRrR9ni8FBN8=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:
-	 References; b=KPw8l+KXFjhAjdIaKxcZP3oW545i73mtStNxqa0Abr1g8idXSbrEa6nlGXfs1syVLU3Z1JHT+dxMiaZjAXoJxRpb+SufBa4TttOyn7PEJzWFHdBpx5gSVFeOnEqoMKGCZLurgUNgZUL0Khl7bp+66Fp2IMh+tegSFkuIQT9XVIg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=GHnpBwIq; arc=none smtp.client-ip=203.254.224.34
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1768980487; c=relaxed/simple;
+	bh=1Oh94yu/kL/t6er6f7NIe1Qp1FFW9S+PybGe6FlLZHU=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=X+eUpHPwPZ2o9EOfAIM4w+I9J+RMKfPG8GkRdMTj25AYR8WMJoAgFjGa0TSqk6d8TKRKXHs+/vyVU99h66kUzGriy/uE7xhRSBlHhIDDUz6yu2XwWwbLJxMxsGr/0KDwQhGO/hLR5IudvTpK9DfqnDpXuXKN2V13LeFVbUcbMEw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QhjfZJ21; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="GHnpBwIq"
-Received: from epcas5p2.samsung.com (unknown [182.195.41.40])
-	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20260121070041epoutp04ee253abfb2778917e14e4d2e0943a8b8~MrOJb7b-o3088130881epoutp04j
-	for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 07:00:41 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20260121070041epoutp04ee253abfb2778917e14e4d2e0943a8b8~MrOJb7b-o3088130881epoutp04j
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1768978841;
-	bh=XnK+KinQJ9dYBwjYD5+UzxC6+YDiKsYq0vJbllct4hg=;
-	h=From:To:Subject:Date:References:From;
-	b=GHnpBwIqmozTTLl9FspgPU2+nUR10rffXblG0Ubn2nmjV0y9FVBfb+1ISezVnu229
-	 V56AkDAMBGBC5Iq7Avdewdzvdtzg8VVmYlMzCgZTaAtTaLpQD7hONGhB5sABgVgnn3
-	 2YWq+FnAghP7pG1tt4swuW+KknbWVqAKESs/k45Y=
-Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
-	epcas5p1.samsung.com (KnoxPortal) with ESMTPS id
-	20260121070041epcas5p141dbd17f6f7c9503c515d85df698da54~MrOJKvyVh1653216532epcas5p1-;
-	Wed, 21 Jan 2026 07:00:41 +0000 (GMT)
-Received: from epcas5p4.samsung.com (unknown [182.195.41.42]) by
-	epsnrtp01.localdomain (Postfix) with ESMTP id 4dww7s3xyzz6B9mL; Wed, 21 Jan
-	2026 07:00:41 +0000 (GMT)
-Received: from epsmtip2.samsung.com (unknown [182.195.34.31]) by
-	epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
-	20260121070041epcas5p4687d60f28911c7e97497a80adb87232c~MrOIueSMQ1496114961epcas5p4h;
-	Wed, 21 Jan 2026 07:00:41 +0000 (GMT)
-Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip2.samsung.com
-	(KnoxPortal) with ESMTPA id
-	20260121070040epsmtip24bf4115cb398a12f02bf556b25d02423~MrOILzOKo3054030540epsmtip2m;
-	Wed, 21 Jan 2026 07:00:40 +0000 (GMT)
-From: "ping.gao" <ping.gao@samsung.com>
-To: jh80.chung@samsung.com, sebastian.reichel@collabora.com,
-	shawn.lin@rock-chips.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, hy50.seo@samsung.com,
-	kwangwon.min@samsung.com, ping.gao@samsung.com
-Subject: [PATCH]     drivers: clk: keystone: Fix parameter judgment in
- clk_prepare
-Date: Wed, 21 Jan 2026 15:05:03 +0800
-Message-ID: <20260121070503.100283-1-ping.gao@samsung.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QhjfZJ21"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5CAB6C16AAE;
+	Wed, 21 Jan 2026 07:28:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1768980486;
+	bh=1Oh94yu/kL/t6er6f7NIe1Qp1FFW9S+PybGe6FlLZHU=;
+	h=From:Subject:Date:To:Cc:From;
+	b=QhjfZJ21jf6EGEXDW6+iEsvj5JDAHD9edFPeLIuMM8e8nwANaobZbxDUZ5dxWZV17
+	 wxm9odXvvWo4fdU0COQCyxHF4+t9rfgfTRddCZr8Feb66/KbqARhVYHom9R1g1Et/4
+	 1VzyiFDToeWmeFXnQ1W7ShRqZDteAwPcXQ2eUZZGx9xEmiuhUw0P+Gn4WKjQPC3pNB
+	 rwUd1kZsHpPvrPht4nYe8uScubX71CrXKimmgPfTt1pLegEKlcXMWn2Y/h8iJ1uP0T
+	 eErtKZU0RCB78S/aeNLfT5+kecGK8hnWQ9J7NQd1HXKFzDg/UE0O3JEo7C9j6I8NQ+
+	 amAYe5ZANSTsw==
+From: Yixun Lan <dlan@kernel.org>
+Subject: [PATCH 0/2] mmc: spacemit: Add support for K3 SoC
+Date: Wed, 21 Jan 2026 15:27:34 +0800
+Message-Id: <20260121-07-k3-mmc-v1-0-ff77c07bfdf6@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CMS-MailID: 20260121070041epcas5p4687d60f28911c7e97497a80adb87232c
-X-Msg-Generator: CA
 Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-X-CMS-RootMailID: 20260121070041epcas5p4687d60f28911c7e97497a80adb87232c
-References: <CGME20260121070041epcas5p4687d60f28911c7e97497a80adb87232c@epcas5p4.samsung.com>
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAOZ/cGkC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDIzMDQ0MjXQNz3Wxj3dzcZF2z5EQDQyMz81QLYxMloPqCotS0zAqwWdGxtbU
+ AOlcaI1sAAAA=
+X-Change-ID: 20260112-07-k3-mmc-6ca01267e834
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Yixun Lan <dlan@kernel.org>, linux-mmc@vger.kernel.org, 
+ devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
+ spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
+X-Mailer: b4 0.14.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=930; i=dlan@kernel.org;
+ h=from:subject:message-id; bh=1Oh94yu/kL/t6er6f7NIe1Qp1FFW9S+PybGe6FlLZHU=;
+ b=kA0DAAoBMarqR1lNu+0ByyZiAGlwf/qiAxUKtChbUUvTE3OCecGbEPBUlt4Vu8bn/vU6Op0QS
+ 4kCrwQAAQoAmRYhBLW6uMnDG3EVZwIj3DGq6kdZTbvtBQJpcH/6GxSAAAAAAAQADm1hbnUyLDIu
+ NSsxLjExLDIsMl8UgAAAAAAuAChpc3N1ZXItZnByQG5vdGF0aW9ucy5vcGVucGdwLmZpZnRoaG9
+ yc2VtYW4ubmV0QjVCQUI4QzlDMzFCNzExNTY3MDIyM0RDMzFBQUVBNDc1OTREQkJFRAAKCRAxqu
+ pHWU277bsuD/4s7LzzrEsbzAHo6QjeIKdv/YeJsWD/JLVS4oubGZBLufaEkBnbVgNMyeBP5Ok8z
+ 6t5sbZn0OeI/a31RsbMPPRphnuWh2bjgJQ7bMUoA4FntwG+rmSWTmhsFWz6hPO4MbdvufTgtUXm
+ DUMa7VhiYvkEiar+pALY9j2LNEmh6VxPGfZYf5Wz1ZEDWsREFy0jJY1n8bjdBYzTpsqpe7h3ZxY
+ LLsTblrlxvkdHRAYaAphRYk3El8I2K9qPH82tjDiCQPKswYQJ/DMJg30el0xE/cb80UKlEa6ook
+ lqB0fimro7mjKjorA3wOWNrd/VLWhYovBnnM3LiX0q/bMGD6gfRF9AndBkihCUhF3UU6zmP+v9c
+ GsksDPjvnLOHmmw94GVnBxgpaZe6YFT+wEhzQ1/lLYd+8frij99hxMLil+avZvYRwz+Cw018U8p
+ b7wDiRgjNG1gjEy0plJIfPLEf5dagvo6nyC5QsyV9yotiEYHh8ypikV4RcgoujBgUMhbEw32yej
+ zGy0WS83dELVp5Kd448gyAmkgQNd6YIvU10P7B1X5+yBnO8f422c2TAQd5+eb4PJZP6C7mjaLx8
+ XvXwc46xwelmgGH0RzugcnzsuUP9K1SLBeNI17W6iirBj9xdO8vvXJ6UpvDNEFgT3y571jBlYYr
+ 7nwmjgbFyOxP8tJ8qbl7g==
+X-Developer-Key: i=dlan@kernel.org; a=openpgp;
+ fpr=50B03A1A5CBCD33576EF8CD7920C0DBCAABEFD55
 
-    The clk may return NULL or an ERR_PTR. Don't
-    treat an ERR_PTR as valid.
+Enable SDHCI controller support on new SpacemiT K3 SoC, while as before
+only the third controller and the eMMC device has been tested which using
+vendor K3 evb board. This board has not acquired support in mainline
+kernel, so I've omitted the DT part patches for now.
 
-    for example: biu_clk in dwmmc driver request fail, but it's ERR_PTR, not null , it will panic when call clk_prepare
-    log is below:
-    [  438.400868] [7:   binder:436_2: 4998] Unable to handle kernel paging request at virtual address fffffffffffffffe
-    [  438.400877] [7:   binder:436_2: 4998] Mem abort info:
-    [  438.400881] [7:   binder:436_2: 4998]   ESR = 0x0000000096000005
-    [  438.400887] [7:   binder:436_2: 4998]   EC = 0x25: DABT (current EL), IL = 32 bits
-    [  438.400894] [7:   binder:436_2: 4998]   SET = 0, FnV = 0
-    [  438.400899] [7:   binder:436_2: 4998]   EA = 0, S1PTW = 0
-    [  438.400904] [7:   binder:436_2: 4998]   FSC = 0x05: level 1 translation fault
-    ...
-    [  438.409424] [7:   binder:436_2: 4998] Call trace:
-    [  438.409429] [7:   binder:436_2: 4998]  clk_prepare+0x10/0x24
-    [  438.409439] [7:   binder:436_2: 4998]  dw_mci_runtime_resume+0x50/0x2d8 [dw_mmc_samsung cd210e210975263404c28fc89778f369f8398f0c]
-    [  438.409471] [7:   binder:436_2: 4998]  dw_mci_exynos_runtime_resume+0x18/0x58 [dw_mmc_exynos_samsung 2735a594c7c9c9e8c65b0b87523fbf70dcaabfff]
-    [  438.409496] [7:   binder:436_2: 4998]  pm_generic_runtime_resume+0x40/0x58
-    [  438.409506] [7:   binder:436_2: 4998]  pm_runtime_force_resume+0x9c/0x134
-    [  438.409517] [7:   binder:436_2: 4998]  platform_pm_resume+0x40/0x8c
-    [  438.409529] [7:   binder:436_2: 4998]  dpm_run_callback+0x64/0x230
-    [  438.409540] [7:   binder:436_2: 4998]  __device_resume+0x1d8/0x394
-    [  438.409551] [7:   binder:436_2: 4998]  dpm_resume+0x110/0x2b8
-    [  438.409561] [7:   binder:436_2: 4998]  dpm_resume_end+0x1c/0x38
-    [  438.409570] [7:   binder:436_2: 4998]  suspend_devices_and_enter+0x828/0xab0
-    [  438.409582] [7:   binder:436_2: 4998]  pm_suspend+0x334/0x618
-    [  438.409592] [7:   binder:436_2: 4998]  state_store+0x104/0x144
-    [  438.409601] [7:   binder:436_2: 4998]  kobj_attr_store+0x30/0x48
-    [  438.409610] [7:   binder:436_2: 4998]  sysfs_kf_write+0x54/0x6c
-    [  438.409619] [7:   binder:436_2: 4998]  kernfs_fop_write_iter+0x104/0x1a8
-    [  438.409628] [7:   binder:436_2: 4998]  vfs_write+0x24c/0x2f4
-    [  438.409640] [7:   binder:436_2: 4998]  ksys_write+0x78/0xe8
-    [  438.409652] [7:   binder:436_2: 4998]  __arm64_sys_write+0x1c/0x2c
-    [  438.409664] [7:   binder:436_2: 4998]  invoke_syscall+0x58/0x114
-    [  438.409676] [7:   binder:436_2: 4998]  el0_svc_common+0xac/0xe0
-    [  438.409687] [7:   binder:436_2: 4998]  do_el0_svc+0x1c/0x28
-    [  438.409698] [7:   binder:436_2: 4998]  el0_svc+0x38/0x68
-    [  438.409705] [7:   binder:436_2: 4998]  el0t_64_sync_handler+0x68/0xbc
-    [  438.409712] [7:   binder:436_2: 4998]  el0t_64_sync+0x1a8/0x1ac
+The new SDHCI controller almost reuse the same IP as old K1 generation,
+while fixed the broken 64BIT DMA issue.
 
-Signed-off-by: ping.gao <ping.gao@samsung.com>
+Signed-off-by: Yixun Lan <dlan@kernel.org>
 ---
- drivers/clk/clk.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Yixun Lan (2):
+      dt-bindings: mmc: spacemit,sdhci: add support for K3 SoC
+      mmc: sdhci-of-k1: spacemit: Add support for K3 SoC
 
-diff --git a/drivers/clk/clk.c b/drivers/clk/clk.c
-index 85d2f2481acf..6d62f69323b5 100644
---- a/drivers/clk/clk.c
-+++ b/drivers/clk/clk.c
-@@ -1171,7 +1171,7 @@ static int clk_core_prepare_lock(struct clk_core *core)
-  */
- int clk_prepare(struct clk *clk)
- {
--	if (!clk)
-+	if (IS_ERR_OR_NULL(clk))
- 		return 0;
- 
- 	return clk_core_prepare_lock(clk->core);
+ .../devicetree/bindings/mmc/spacemit,sdhci.yaml    |  4 +++-
+ drivers/mmc/host/sdhci-of-k1.c                     | 22 ++++++++++++++++++++--
+ 2 files changed, 23 insertions(+), 3 deletions(-)
+---
+base-commit: 6cefff068d030786d63fa50970d6581c354630b2
+change-id: 20260112-07-k3-mmc-6ca01267e834
+
+Best regards,
 -- 
-2.50.1
+Yixun Lan <dlan@kernel.org>
 
