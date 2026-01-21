@@ -1,78 +1,78 @@
-Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4EEC142E000
-	for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 10:13:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8621D480DE4
+	for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 10:17:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.43
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768990423; cv=pass; b=pbZl7ks6Ye5lunGeRRV1dAdx1oYkddUTzlcryFYYcWOQ4NcVRYmwBGv/kX8OS0Xiq8D1Ewyx8qgyxsNSUv0mR52x+ERvhZkEGqcxImWjluTkrKp4MOxsAVzemLH9XLywZ4EDM7N1Me/yMM5P7i8R6dOFadfq4y465MW2cU0UdAw=
+	t=1768990648; cv=pass; b=e4zz2Vp3ktp8nY7Q298odvBbjEZdjJUCOcV6/8t+9G7YS8SIAW8SMHh5behwyIyLY0DMEzuWWeydM+MlcZEl9oeVGVJJ3iybMuw+b0UNPihgeN6FmsGB+Kumc/jNAIx18plSMKKXKSe6rW1sayvXStq3BvJBzpvN7cBTxrSrx60=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768990423; c=relaxed/simple;
-	bh=6DCfspdJDhzmigRzyYHjs9jJhl6CF8SnO82nc++HNuI=;
+	s=arc-20240116; t=1768990648; c=relaxed/simple;
+	bh=yLQMzxIhT7zp8auXJr0IV3M6Il9Pl78mfxbzfuc1jCA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DZdT7OYqs3s3ABeVGEGYYHOdE2y6RogMJwybMBFZNaMSYQfZhqVn/IJXdsqiEUeM5Ss8OUHmJ0hycO1hM0v+UITlOrzJYqfgCP6h+fUIcBu/23abStsj0+yK1s2E6BZ40jwzvC5728wy8ZqcR2sLFRdLmBO1A7UwXTwMTgHUMB8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=PoIi6mdi; arc=pass smtp.client-ip=209.85.167.48
+	 To:Cc:Content-Type; b=NkUHOt+23HHT09asz4TGYwNhbAUK6kwtlAhk3mnqIBhT1yapXrCjFbkNicaHhDpcWJhoLnr7chhZwVj6iNkMOpfim5jX7a8oJNUFJaDIITDmYYtXVuP5WrLprQ0WqHJfTOazzSYCK9U4LgUYNCCbl24m+zsvyuL5xzYYL+j0bHw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xA/vj/x7; arc=pass smtp.client-ip=209.85.167.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="PoIi6mdi"
-Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-59b79451206so5768096e87.1
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 02:13:41 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1768990419; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xA/vj/x7"
+Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-59b834e3d64so9208561e87.2
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 02:17:26 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1768990644; cv=none;
         d=google.com; s=arc-20240605;
-        b=DHqJ+XBrOvuBkOlH1RrUwjH5RSSA7Aa9sTBPpyGx2ihdUw2JMyeAm5Kg4I9FluStER
-         UtghBLkZbCufn9vd0dNddr5fFd556QXA3eI37jlEv7mRFCPg+2UzJ76Q2zjoGbEmvRs5
-         32u2XkFAsYqw9B1RPnNWPAwTcEzarGXhgo7os+nJoiooHv3Ta8xusfvrwc6/zx94nu8Q
-         wCt/S4I5+7ifouYOBhww4nGBjR4F6aMKyqh5xaq76Diuxu2qFI8wLGdoKwt6cEXohtit
-         gQnS0P4jDqCGB6HG7hf+Dn+W4NV11XFbQXxfV++8+UKtgLGFZisH38+55VKUTNQQWPaY
-         E+Dg==
+        b=cw22efpJ2FCeLXw2LxdF15aUcuwSzTVdmFX8DRogfY1Q9triuPY/lsj5NF1ArL2BAw
+         XJMOVYyTCZIo6cqcin9X1ps6VWA4za9Q95YSoZgA8BSl2+kdIZA+1kPXsxwp2fIQpjho
+         uuEsICzOflrC6YNLddrldVqObCxtjyCO7icJkioN5FqK6mhK824xs54s4ao8MWI1GVLC
+         5mR9Xus6bMcvNPvcSngYZkozK25kkobZm79tZuZudwmis6L8NoQjR4FLElZZj81ioJ59
+         wq/Li+19jaxtEyemtC2za4eULT3AuhMpqgjtfOxjMeZ2dZrAdza1KwFLj/pHbMQCVxkN
+         HNZg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=36bIbYK3MtK1cWYhPBtCXZHXMGIRLoboyU5uxmXHH9Y=;
-        fh=kexRyz+bm+5KfxjN7LdNPbUEdTXR6BrPz5GyTPnLAqk=;
-        b=bGk4GMENpBpf+yiI+krT1piH4pfRb1PJmABigaBPcopv4CsINWG5F9PnFYx6U0euNH
-         IliZSP+dt2zpSlCXTujua23nfeBRkyh6w3R6MtJ40WiKUbppTZJo7puqP0f3OMbOsrGE
-         wJkYXDwn10uj4FxcpJ9A62s49txoIphkkh14OBKegGl1wlPJ614tBdRRpuAUIvI2Jl0X
-         D6+844X/lL6xwBQhn70L0jaLWZSu8IWqOSkeqDgY7EhpKwEh3yB1/wbxxIf4z7wjwYIQ
-         Jd0q1izC7qGYqx5HnJvRbM0Eeg1wsJesbIyp83VOjzpBhpsyFPn2KJ2BR7/Khu9o/fxq
-         hf0A==;
+        bh=yLQMzxIhT7zp8auXJr0IV3M6Il9Pl78mfxbzfuc1jCA=;
+        fh=qGPFKfu4f1gUmrmW/EWhkTyjQXbBaSqtV2jH7BL6Uh8=;
+        b=lWo/aPzgaPGuTiWocHL78EIzvO14krCf7TefBh1Fq2ImBPFAD7n6NLNh2N1sJEV6zO
+         lO9kTwFUBpAPQpO3waX07G8dSOdIBlgsdorBcs4FOctlZsS5dgV3lwQYxW3f2IOJ678Z
+         4/SMhy7SUDY0wXAWG8A58gnE11qLMu77ZeyencKji79DKyrb7EhvP4xu8Sq08CR5ID/g
+         u7qmMukxKfJE1qfCd9iLS96EyAqkFuLnb+cRRq/sODBWYotbGQaFwaHMVjMnceyY48U/
+         N+lVW7pmjH5JW/N3WbOwDNT8qVIN6UBTBaUXf7iKopeWIEUBkdep0uSjNQFC3cjOT/+W
+         as1Q==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1768990419; x=1769595219; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1768990644; x=1769595444; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=36bIbYK3MtK1cWYhPBtCXZHXMGIRLoboyU5uxmXHH9Y=;
-        b=PoIi6mdiV9zUkHNtWMBm8Dq7szj4hJNlNM7xgy6fJHCPK/8OK3QaJ0JiMN5opqivxY
-         FqJSvqRD7v1o3kMFMb++GE1KE/FFIS09I0FHdwB8qPumX3KtAH6Kr+q4/mDkqSkUvVCo
-         dYSZ+NlEiS5PJ3URBYZ584nBWCQNZdfO/hEEIVPcwCXDBnvebFP2bIlElkWN0gnnJwju
-         ybjNY9rV5C3e5m4eNYZZkIQVicRz+r9tLCfDRpTQ9XpJ96fuqqhtfUiH3dUZQO625O/k
-         AN9Jnxl/qBwXirXhks5z2eQF7V4I43lnr3Z7LXSjR8fZMcgcJKqjhEzb4iXMFz85gUcn
-         dmkA==
+        bh=yLQMzxIhT7zp8auXJr0IV3M6Il9Pl78mfxbzfuc1jCA=;
+        b=xA/vj/x797jCOGZHn1lE7a1pKP32A7B9FAnP4aqaBHpAvXEFjih5rEvFmHouIcOidy
+         qRvXNWtonPo9AIBEqLM1I721RFdBEyt5dnqshhwNrau5B50SZjQSVFr9ck8wXX0hlERu
+         gmoo5BWun/iBZu5CGkTaPeJIUMgR7hNMBlGsn4waIJSz4x5oiRKGbl9KISWYHivafMbf
+         QFPZ/y7wqfnUDmwzZARY94SfubJELT4v3UG/NfLDg9eFPFIsJE3pKEp7hDqopoqQin1I
+         ta1ndargLw49+YpNKYdwzk8bxYaI+dDVYsx1LOY2/ExAQr8148uOzkt3/u4VTgJbR3tf
+         XfiA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1768990419; x=1769595219;
+        d=1e100.net; s=20230601; t=1768990644; x=1769595444;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=36bIbYK3MtK1cWYhPBtCXZHXMGIRLoboyU5uxmXHH9Y=;
-        b=GIH9qytwAybbTqQd8/5Aswb7TD/ZQ+70nbDt3nzXzx5m0DTNAvxiayMHSXKe5Jx5MM
-         kGQxnHOxct0dSTaPKs6pstiRoo8Ifz35FWluTKPXrHmQqVQ5V90SKfZGBBMn0xtV7TL0
-         L7qjLTRLyRb/laZBelKNJkNKTpoxja31n5foSR4WI5fd7jqFF4Hfmn3Mp9uJi9lEGsBz
-         J2VnCprFOMMqKWEk3+FGHygOzw4HeRFDzaAlnzc89rpsRI/z0NrcDkrJ3NGsLfqa4qS6
-         xRDiTYt3K62ekD6nmoQViIlmX+jaTJBQzny5c6viExKnEOMPJPK1beSbStGgAMHkXoVn
-         j17Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUBMuMR8miAjh4LXq2xlGAAifaLKYKKlHqYwXzqBC2/d2XyY8p+Yv/fVCQR+qcLwQqTs44BG3ySC3I=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyfssmk6uJT5hEFXIeWLpaSnnao2PHyvSLGNADsvR445eMpipU5
-	spkaZn/Bnm764RF/p63MG6JZBwUvLf+3qmxQ8KoEbw7rx99v1acWilBwsRAVlhlS3rvumJD0+r5
-	/PRjUm6NvX5UHlQ5Ee2Ub5a+KBG0oI7L+pnAX+fDCTw==
-X-Gm-Gg: AZuq6aLD0wg0y22UnJDNiwLK/9YHuEDJW9ZE3fF4razXOCAbm37rCrcFanQnLKD7G8R
-	hbj2i+X9+Hhb5uZzAVTzWBo2OBY5TEvFynveqL4KcmZ1AELPAjrn0vICJOcE9Vauxl7UEZLBGTu
-	cosMlx94fHWkKmoJawShw3a7bGj+zslEkgSYVkyVXr8wYHuIcG1Z9+P2LualtpNoQF2KC4dXL3z
-	lI/V81LVY/lGUk0nP+AYc9rUb+I0Hf+ssSKr19Q7hhyPaDgn+30th2MeNjBsf36B0q/++Ji
-X-Received: by 2002:a05:6512:61a8:b0:595:7f66:b6a with SMTP id
- 2adb3069b0e04-59dc9350aeemr1634134e87.35.1768990419326; Wed, 21 Jan 2026
- 02:13:39 -0800 (PST)
+        bh=yLQMzxIhT7zp8auXJr0IV3M6Il9Pl78mfxbzfuc1jCA=;
+        b=W6M7zQiK5FBHhEEXahDyepSp73tUyu6v8bS/glK3ZXKqvVYByhcAcYdWgtNcYqj0fP
+         8pVs7rAZN/hdmXFzUlqRRLEuT2Yjf0KgRRMcbXWoAnt5UzJp355fR2GmGunPLRunJGOp
+         /KpKwG5BQaUueM2868OKON4ky7jR22zvFC/3Yx6Mh1jyb077cuMQV7OdHptZYXpnyvYR
+         gz8tFb6C9dZs4QEaJCrcXEkfMRpZPKlJuL3sZMUUy7u8Jc429h5b2svYesbrBwp0U3XU
+         0vnmj8bi1V4wLEb2INNzM1AFjFtB4nLSosNnqlKSXCsLp+we4htdVPTRsxOEZW03r7EI
+         mx8w==
+X-Forwarded-Encrypted: i=1; AJvYcCWrCjfJa3fo6R+1fiQRj/ThcaISz+lTZ4OrpB2AHWPwkdgeLo1PMAJZjoDWLunypjl+3y0DKb3uBrc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzEJS4lSrezB3uZ88H2wm3GZUDz6tv0CfkfKgo9IDmtYf5jMLl7
+	e8OckxYmcncWKxdnsKfQ9c6vl83E+//QJk8q2Hd6IXsEzPsYJDOoVNL/+Px9MppEt2UV7xGq4of
+	xcBp5vG89jXdK4La0tGuAr58knbiWwMIRCpLtp8SvDQ==
+X-Gm-Gg: AZuq6aK0/awQnvP7seldmHBeEDC+FuJ1A6uGjY3nIsKc0eyzIar0q04T+xBKPQFWVFZ
+	zTTHdVLETSQqsjMGWTgFpoGWNCGRQ+HbeMeq4kNAWpUttcbruMezqoiQZmIeV9Erl3OqLEZEmfE
+	m7Wa33UJSaWpWzDBxMQ4yTw4ruVdfwLtkb1UTeHVoa7wl7DnsgJypE9IDt6K9wX+9O50/ka213k
+	P9yQBQWjGbf8rA7RCw+YLZgK7TWtm73Owt5XohgNLIU2eV60GIkfc5g46wOyS6Os0Av/5Wo
+X-Received: by 2002:a05:6512:1289:b0:595:7cf5:f7cf with SMTP id
+ 2adb3069b0e04-59baffd366amr5983334e87.38.1768990644254; Wed, 21 Jan 2026
+ 02:17:24 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -80,69 +80,57 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20260105060236.400366-1-matthew.schwartz@linux.dev>
-In-Reply-To: <20260105060236.400366-1-matthew.schwartz@linux.dev>
+ <20260105060236.400366-2-matthew.schwartz@linux.dev> <CAPDyKFo-2TcU6MPZpeEU7kPx4tOLG4ekEFyZnzy1qeH09MTNfQ@mail.gmail.com>
+ <79349439-97ea-4147-961e-63cd6a5bfd68@linux.dev>
+In-Reply-To: <79349439-97ea-4147-961e-63cd6a5bfd68@linux.dev>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 21 Jan 2026 11:13:03 +0100
-X-Gm-Features: AZwV_QhXOgfkSJHmLAUv1HRpcB1xB2FSZ4hz1qO6PEtBw2e_W4hfYSVqvrsfKD4
-Message-ID: <CAPDyKFozgK_W98=-wqE2fxBsSkKvCU=mYH7WkKVXQPiB3+og3w@mail.gmail.com>
-Subject: Re: [PATCH 0/2] mmc: rtsx: card stuck busy fixes for Realtek PCI SD
- card readers
-To: Matthew Schwartz <matthew.schwartz@linux.dev>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Ricky Wu <ricky_wu@realtek.com>, linux-mmc@vger.kernel.org, 
+Date: Wed, 21 Jan 2026 11:16:48 +0100
+X-Gm-Features: AZwV_QiKgW5jdxGgRp-26RB1awU388_dZ037chnvZPErE_NqpYc1s6mT-EACuiQ
+Message-ID: <CAPDyKFrg4-QxDpE_MkQacK_VRA6yQyFk4N3umZ1i2D=RTQisAA@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: rtsx: reset power state on suspend
+To: Matthew Schwartz <matthew.schwartz@linux.dev>
+Cc: Arnd Bergmann <arnd@arndb.de>, Ricky Wu <ricky_wu@realtek.com>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, 
 	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 5 Jan 2026 at 07:02, Matthew Schwartz
+On Tue, 20 Jan 2026 at 19:39, Matthew Schwartz
 <matthew.schwartz@linux.dev> wrote:
 >
-> This series fixes some SD card timeout errors that occur after suspend and
-> resume ops on systems with Realtek PCI card readers. These issues occur on
-> my 2 RTS525A card readers and my RTS5261 card reader.
+> On 1/20/26 4:41 AM, Ulf Hansson wrote:
+> > On Mon, 5 Jan 2026 at 07:02, Matthew Schwartz
+> > <matthew.schwartz@linux.dev> wrote:
+> >>
+> >> When rtsx_pci suspends, the card reader hardware powers off but the sdmmc
+> >> driver's prev_power_state remains as MMC_POWER_ON. This causes sd_power_on
+> >> to skip reinitialization on the next I/O request, leading to DMA transfer
+> >> timeouts and errors on resume 20% of the time.
+> >
+> > The mmc core should power-off the card, via the ->set_ios() callback
+> > before the rtsx_pci suspends. In other words, the mmc core should have
+> > set MMC_POWER_OFF.
+> >
+> > That said, there seems to be something wrong in
+> > drivers/mmc/host/rtsx_pci_sdmmc.c's ->set_ios(), if that isn't tracked
+> > correctly. The parent device/driver, rtsx_pci should not need to
+> > inform that the power to the card is removed, as that should be known
+> > already by the rtsx_pci_sdmmc driver.
 >
-> As a stress test, I ran the amd-s2idle script from amd-debug-tools to
-> automate s2idle cycles and I launched a visual novel, WITCH ON THE HOLY
-> NIGHT, from the SD card. Visual novels are basically just slideshows, and
-> waiting for 10 seconds without advancing the text is an easy way to
-> trigger rtsx_pci_runtime_suspend/rtsx_pci_runtime_resume. I set amd-s2idle
-> to test with a 10 second long s2idle length with 13 seconds between runs.
+> Ah, I see what you mean now, I think it should be fixed in rtsx_pci_sdmmc
+> too.
 >
-> The main symptom that always shows up is "mmc0: Card stuck being busy!"
-> followed by timeouts and filesystem errors. This can occur during both
-> runtime resume and s2idle resume:
->
-> [  260.638214] mmc0: error -110 doing runtime resume
-> [  261.054214] mmc0: card d555 removed
-> [  261.054382] Aborting journal on device mmcblk0p1-8.
-> [  261.054386] JBD2: I/O error when updating journal superblock for mmcblk0p1-8.
-> [  261.067729] EXT4-fs (mmcblk0p1): shut down requested (2)
->
-> Patch 1 adds a power_off callback so rtsx_pcr can notify the sdmmc driver
-> during suspend, allowing it to reset prev_power_state. This ensures
-> sd_power_on properly reinitializes the card on resume. It reduces the
-> failure rate of "mmc0: Card stuck being busy!" after resume from 20% down
-> to 4%.
->
-> Patch 2 increases the post-power-on settling delay from 1ms to 5ms. The
-> shorter delay seems insufficient for reliable reinitialization after the
-> hardware has been powered off during suspend. Increasing this reduces the
-> failure rate from 4% down to 0%, tested with over 300 s2idle cycles.
->
-> Matthew Schwartz (2):
->   mmc: rtsx: reset power state on suspend
->   mmc: rtsx_pci_sdmmc: increase power-on settling delay to 5ms
->
->  drivers/misc/cardreader/rtsx_pcr.c |  9 +++++++++
->  drivers/mmc/host/rtsx_pci_sdmmc.c  | 24 +++++++++++++++++++++++-
->  include/linux/rtsx_common.h        |  1 +
->  3 files changed, 33 insertions(+), 1 deletion(-)
->
-> --
-> 2.52.0
->
+> These already seem to be in char-misc-next, so I think I need to wait
+> until those hit upstream and then revert as a part of a v2 patch? If I revert
+> from char-misc-next I'm worried the commit id won't match once it gets merged
+> into master.
 
-Greg, looks like you have queued up these patches via your misc tree,
-can you please drop them? We need a different approach to the problem.
+I have asked Greg to drop them from his misc tree. We should either do
+that or revert them in his tree. Let's see what he responds.
+
+In the meantime, it's perfectly possible to continue working on the
+issue and please base your patches on top of the mmc tree.
+
+[...]
 
 Kind regards
 Uffe
