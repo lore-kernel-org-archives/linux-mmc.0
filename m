@@ -1,116 +1,147 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vs1-f42.google.com (mail-vs1-f42.google.com [209.85.217.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED2C83D2FEE;
-	Wed, 21 Jan 2026 10:44:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC19136CE04
+	for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 11:00:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768992297; cv=none; b=YItmgVHz/n8dCZN5mVBblz9+jaFlhgUDrVwIPnpPruuI2m/mcKlURwDpneAQKuDFs9Uxbh7jmocU+gp4bVaf3fkonqfi8SHX2uUANgX/w2RYScb85RkBCGjk6t3fTyU1OJG02D41Ess0zd3S7wI1LD72Lq85PAtu0zlSUcQMhPo=
+	t=1768993213; cv=none; b=ghggHsUV2NTdN1qqL2XxYQ6yrccB/cNt38p1xC5f1bLIqorarpNV7/ge07qt7m/I1RjnsBnu/bQBEjCT9Y1IaLmdmVe+TnkbkI25J5QW1qZ23zmBOK7WagHXfVZZwy9mX67PR8gS7af/rlQ9HUefFp+YWD4MpoBn4rGp7zLynPA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768992297; c=relaxed/simple;
-	bh=TOZuB+2yqLbtJOMDd2WB+YZbOWhoxkhnNzCazqbFRCw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=K4AUwRNLzbn7x8DIg2LVmNc0fCY7L6Ui0qZYoW82Ij+sPusc8vr6zJhGokZL8fl4nnx4C6+nPnQuD5mPQQvpl/Yhav4LEgw92u5gJ1lWku2B+xN0ooZhd2J7Xw3rNVtcMz9HMZNfRwDW02N6pbQ4tYAWYHe22wSkjr6kQSJY6/E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iiPtYKt9; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iiPtYKt9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 13358C16AAE;
-	Wed, 21 Jan 2026 10:44:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1768992296;
-	bh=TOZuB+2yqLbtJOMDd2WB+YZbOWhoxkhnNzCazqbFRCw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=iiPtYKt9Si/btGlU9/TFr3qPVEcQOcRQPpIcJiSL5YCrbN5/ELnWMM177CE9wTxDM
-	 le8mVg11Ne6WCa9i6ni2vxkgo6oXGFSR1mBIXFrXMacq61FoLSt9gfdvd3KzwS9XiO
-	 V2ZH6D+utSEed4khFweEWJYllW9+IWH41loNFYzCCxjkRzymKi/6s1+Tg7A8yykqp/
-	 BCOAa0g9IaJxvCeYwG01url82nsL/XFeHN8piti1CJcJE0z/h0PdT5gsvAetlf+VLy
-	 yH7ptho0I/ZUPh+tDB/Joe6p4wmvgdhAQl4R7N4ebDtCGKDunxzeNUI+JYtL6qFi9m
-	 becMyE3a+mhuw==
-Date: Wed, 21 Jan 2026 18:44:53 +0800
-From: Yixun Lan <dlan@kernel.org>
-To: Yao Zi <me@ziyao.cc>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
-	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc: sdhci-of-k1: spacemit: Add support for K3 SoC
-Message-ID: <20260121104453-GKD61591@kernel.org>
-References: <20260121-07-k3-mmc-v1-0-ff77c07bfdf6@kernel.org>
- <20260121-07-k3-mmc-v1-2-ff77c07bfdf6@kernel.org>
- <aXCg43ZepMm1DNHq@pie>
+	s=arc-20240116; t=1768993213; c=relaxed/simple;
+	bh=cysOwS5g5dZRSxtVrJ3zv/VB5w+D2iLkyCuaPMhXFP4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Hi36LnZjmIT0Fg17z+xGaKgN+WLNKR1CJq2a6Ei2sDIfzdOaZOnpwIT8CMqPSPRcJdorcBst5AB5G6xPSC1NVIBclPuXadvkRR4LZwwkdteYdSfALESmvJrC/iKF/GAc6It78sTSw7tbwvGtto+LLUcezwbt5XmpcKIDF24CUNU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.217.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vs1-f42.google.com with SMTP id ada2fe7eead31-5eb8f9be588so5580904137.3
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 03:00:10 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1768993209; x=1769598009;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=VSYJm8i9wWqRvGvRTZz6VIsl7/oMewZT8tw/+hAgWzw=;
+        b=Fbm8YGFEG2tYCWPliUYHjkHae1vmiLxIZO71BIsGHXEefo/1cDqYvr4OW0erjMJlJx
+         ygnaoUZVU9J/i6q0hEIbj8V1HgWmn/OcjOVY2KPYpeYwjqqdRZemUsMTfvgViJO3junh
+         jdB+ogtyXkGTcauq2aNtoPMcSQrRhKBNRqlim6MD/ncyK5po28ml47c+lenDP9w+d/Bv
+         bUB7eL6S+1msrksqbPfFV98farAqp7/Gx5iY7ibAqCuQ1OjW2Ax/zybPTv4E/iM7MDM6
+         XL+jWSpQmEzwbO2uByWzz7zbSnkzu7BlnSFlfrOgun6kDZhyMzQwm3pobcRMHp3sQYF8
+         68nQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXmXaCBZtsAM97hniva4Cuy6nZeUfe3PvHiEEgn8gxuk90D1DtJQaJp2C79ejn9YlZ8vRhTZpchSeY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy+GyDocHYmNxkvXi8NkhGYgz1q5Ib3hBggBjcc15yVssYmmZwr
+	iIHbevICufjZ/c2+pqPmMj0sy1F+y8p0YTpke2BMtP8hpkUrxP8KGoEIdWXcb134
+X-Gm-Gg: AZuq6aLb2RtTjphGKbTXAgMNTahULis4bwNGLFjaR6p0eFp/fqHBwm/iHzX4G2xJect
+	tqrf1OpmDTnim+Im21SNuuV/n0A9cnV7wuFhgGzpPmaoHqosxz6t9tf0xVrgxDZJ/BAo7mZAGMi
+	s891ureQiYayg66ADI3FrGd2NYoktuvDhR6T/BHmc7YJz4yyyoTimIpQTgoh2vRfRwxuEquJu6S
+	L9uuwuenbxU4l6AZqqz82F7NoCg5PM6czuWl8pNGhJEPSGxPovO1Z8fEDqU+wyHyDYXgseL9+GS
+	KEzPLN3iS3cD+ZV8FdvipSwdyZGl6pd7KLOOkXewhWrtm+/LyK6PjrJ5Vq/YAeajlEPG3D9fciy
+	9mJj2xa93PUgFrdhFk2PZ3D5n+ymwrDqIy6/omDPOFjp/+7LHYhQJP+/GwKp+zo478U10GPecPn
+	ElTzpRhNh/OHJlkrmOtSlykGfp36Q5QVD0pzTpul9btUGeRCgZ
+X-Received: by 2002:a05:6102:54a8:b0:5dd:c533:1655 with SMTP id ada2fe7eead31-5f1a712884emr6578080137.20.1768993208009;
+        Wed, 21 Jan 2026 03:00:08 -0800 (PST)
+Received: from mail-ua1-f44.google.com (mail-ua1-f44.google.com. [209.85.222.44])
+        by smtp.gmail.com with ESMTPSA id a1e0cc1a2514c-947d03eaf17sm4631000241.8.2026.01.21.03.00.04
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 21 Jan 2026 03:00:04 -0800 (PST)
+Received: by mail-ua1-f44.google.com with SMTP id a1e0cc1a2514c-94121102a54so4244262241.1
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Jan 2026 03:00:04 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXsCrFGnZ8S8SJ4T09M2GMy7hMeck8ifRgklXEaZzqf+BZrq2RjEA/IqDllioTQjDWNMNm5SGBrWKk=@vger.kernel.org
+X-Received: by 2002:a05:6102:2ad6:b0:5ef:248b:d533 with SMTP id
+ ada2fe7eead31-5f1a716fcbcmr6150752137.31.1768993204250; Wed, 21 Jan 2026
+ 03:00:04 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aXCg43ZepMm1DNHq@pie>
+References: <20260121-rz-sdio-mux-v6-0-38aa39527928@solid-run.com> <20260121-rz-sdio-mux-v6-3-38aa39527928@solid-run.com>
+In-Reply-To: <20260121-rz-sdio-mux-v6-3-38aa39527928@solid-run.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Wed, 21 Jan 2026 11:59:52 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdX_rKgfusHP5qVny8OZufU6VAiA6sqg1LP3T2jikSz7yQ@mail.gmail.com>
+X-Gm-Features: AZwV_QifTISU05sQ0lYySqx5XyPjAzUqa1H8fmOUOfLhWhGN7rzCzfM2UGq26-s
+Message-ID: <CAMuHMdX_rKgfusHP5qVny8OZufU6VAiA6sqg1LP3T2jikSz7yQ@mail.gmail.com>
+Subject: Re: [PATCH v6 3/7] mux: add help text for MULTIPLEXER config option
+To: Josua Mayer <josua@solid-run.com>
+Cc: Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>, 
+	Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
+	Peter Rosin <peda@axentia.se>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
+	Andreas Kemnade <andreas@kemnade.info>, Kevin Hilman <khilman@baylibre.com>, 
+	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>, 
+	Janusz Krzysztofik <jmkrzyszt@gmail.com>, Vignesh R <vigneshr@ti.com>, 
+	Andi Shyti <andi.shyti@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, 
+	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Yazan Shhady <yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>, 
+	Mikhail Anikin <mikhail.anikin@solid-run.com>, linux-can@vger.kernel.org, 
+	linux-phy@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-omap@vger.kernel.org, linux-i2c@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 09:48 Wed 21 Jan     , Yao Zi wrote:
-> On Wed, Jan 21, 2026 at 03:27:36PM +0800, Yixun Lan wrote:
-> > The SDHCI controller found on SpacemiT K3 SoC share the same IP with K1
-> > generation and introduce a compatible data to denote the change that broken
-> > 64BIT DMA issue has been fixed.
-> > 
-> > Signed-off-by: Yixun Lan <dlan@kernel.org>
-> > ---
-> >  drivers/mmc/host/sdhci-of-k1.c | 22 ++++++++++++++++++++--
-> >  1 file changed, 20 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
-> > index a160e1d5d9bd..a56cb8a36982 100644
-> > --- a/drivers/mmc/host/sdhci-of-k1.c
-> > +++ b/drivers/mmc/host/sdhci-of-k1.c
-> > @@ -259,8 +259,20 @@ static const struct sdhci_pltfm_data spacemit_sdhci_k1_pdata = {
-> >  		   SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> >  };
-> >  
-> > +static const struct sdhci_pltfm_data spacemit_sdhci_k3_pdata = {
-> > +	.ops = &spacemit_sdhci_ops,
-> > +	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> > +		  SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC |
-> > +		  SDHCI_QUIRK_32BIT_ADMA_SIZE |
-> > +		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-> > +		  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
-> > +		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
-> > +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> > +};
-> > +
-> >  static const struct of_device_id spacemit_sdhci_of_match[] = {
-> > -	{ .compatible = "spacemit,k1-sdhci" },
-> > +	{ .compatible = "spacemit,k1-sdhci", .data = &spacemit_sdhci_k1_pdata },
-> > +	{ .compatible = "spacemit,k3-sdhci", .data = &spacemit_sdhci_k3_pdata },
-> >  	{ /* sentinel */ }
-> >  };
-> >  MODULE_DEVICE_TABLE(of, spacemit_sdhci_of_match);
-> > @@ -271,10 +283,16 @@ static int spacemit_sdhci_probe(struct platform_device *pdev)
-> >  	struct spacemit_sdhci_host *sdhst;
-> >  	struct sdhci_pltfm_host *pltfm_host;
-> >  	struct sdhci_host *host;
-> > +	const struct sdhci_pltfm_data *data;
-> >  	struct mmc_host_ops *mops;
-> >  	int ret;
-> >  
-> > -	host = sdhci_pltfm_init(pdev, &spacemit_sdhci_k1_pdata, sizeof(*sdhst));
-> > +
-got one extra blank line here, will drop in next version
+Hi Josua,
 
-> > +	data = of_device_get_match_data(&pdev->dev);
-> > +	if (!data)
-> > +		return dev_err_probe(dev, -EINVAL, "failed to get platform data\n");
-> 
-> Is there a need to check against return value of
-> of_device_get_match_data()? It isn't a user input, instead missing the
-> data seems a kernel bug to me, and shouldn't happen in production.
-> 
-I agree, it should be safe to drop this check
+On Wed, 21 Jan 2026 at 11:02, Josua Mayer <josua@solid-run.com> wrote:
+> Add help text for CONFIG_MULTIPLEXER to allow enabling this option
+> through the kernel configuration without explicit "select" driver
+> dependencies.
+>
+> Signed-off-by: Josua Mayer <josua@solid-run.com>
 
-> Regards,
-> Yao Zi
+Thanks for your patch!
+
+> --- a/drivers/mux/Kconfig
+> +++ b/drivers/mux/Kconfig
+> @@ -5,6 +5,14 @@
+>
+>  config MULTIPLEXER
+>         tristate
+> +       help
+> +         Generic Multiplexer Support.
+> +
+> +         This framework is designed to abstract multiplexer handling for
+> +         devices via various GPIO-, MMIO/Regmap or specific multiplexer
+> +         controller chips.
+> +
+> +         If unsure, say no.
+>
+>  menu "Multiplexer drivers"
+>         depends on MULTIPLEXER
+>
+
+Unfortunately it doesn't work like that. As the tristate has no prompt
+specified, the user will never be asked about this.
+You should use something like below:
+
+--- a/drivers/mux/Kconfig
++++ b/drivers/mux/Kconfig
+@@ -4,10 +4,8 @@
+ #
+
+ config MULTIPLEXER
+-       tristate
++       tristate "Generic Multiplexer Support" if COMPILE_TEST
+        help
+-         Generic Multiplexer Support.
+-
+          This framework is designed to abstract multiplexer handling for
+          devices via various GPIO-, MMIO/Regmap or specific multiplexer
+          controller chips.
+
+Sorry for not noticing before.
+
+Gr{oetje,eeting}s,
+
+                        Geert
 
 -- 
-Yixun Lan (dlan)
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
