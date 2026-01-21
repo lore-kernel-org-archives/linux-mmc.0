@@ -1,104 +1,81 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.andi.de1.cc (mail.andi.de1.cc [178.238.236.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2433633F8C2;
-	Wed, 21 Jan 2026 10:31:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1F1D466B4D;
+	Wed, 21 Jan 2026 10:42:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.238.236.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1768991483; cv=none; b=mS7sPGk7MogMiJfVAsMiGEJaoLSFbyNXHpXavYfwzCFdIEPxPe9UZBXhKmpE5mNcB6jB8rzyUvj2UwlAfJdtzePybHJTAGJXs1DnKpMuUKB9zNoZg+wrWHTSgrq1klrrx44eJeGQj7YiGiqNpcvKpgCew1R9dkdFTzx4Ce3C/vg=
+	t=1768992130; cv=none; b=DPDjxoz/g+SSLpZNLdpvT7+GVWBb0gsX4eGHvd/vNr4pUeBtIk99R0jQxfS0b+6WWoc7VjMKnXGOWUSV8Ou+qOWW7e1tciDYP04uBz0eMr8RkxNVHjwc5OTyxu+kZ+5vhIxBynYILGbDs8UN6BGDlZ2XQnCZ6T7fBDEltgOTljA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1768991483; c=relaxed/simple;
-	bh=F6IMZtymsou4/jFhN42/rSlL9NbQaIeYV6dILNk2qZI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bM+FxHJaRw4u31BGixxQYDuKFvjbJgZtdRjBXpwtWzoOE0xzVdMMtwcFtJ0qDwU0SsniJcRInBvMkZOVh0HOTcz/K0DEJXK+HddDuHF7dIlemB3v6VB+L5hl9JrSgXdI0OyndsD58NPQY+c3efwQhE0mydHNIG8PCYGcRkiZbYo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=SKJ5ebwD; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1768992130; c=relaxed/simple;
+	bh=6Mm+8vvI82qWANtr0924YRHfmaPBHTkKc0qZ79hky3w=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=uA/yZtkctUJ0tmSUNJEjkVBn3TWq4mAZONvHraf1TUcl/WACkDLdHVj0s5d7W0F7dxNqGwtPvNVQQ2rK2vEhkeeAx4TWwCqZdZu515ZNHXgM7RPC9cp4qJFY5FHBIPGPnaGcs4qXOwniIIWp+dz2RDHMoB6RVMJCXT6HuNa8Yuc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kemnade.info; spf=pass smtp.mailfrom=kemnade.info; dkim=pass (2048-bit key) header.d=kemnade.info header.i=@kemnade.info header.b=dz7OEZuA; arc=none smtp.client-ip=178.238.236.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kemnade.info
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kemnade.info
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="SKJ5ebwD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9661EC19422;
-	Wed, 21 Jan 2026 10:31:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1768991481;
-	bh=F6IMZtymsou4/jFhN42/rSlL9NbQaIeYV6dILNk2qZI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=SKJ5ebwDxSiz9E1w8Z30OMPMCE9DVmbh9YwskO9cnJckJPeWtiLy7uvBJw/fpoJgl
-	 uvP8TjYuyPxqekDVC7pQetP/SJQBPxrxKOsoBAUhiLtvg/5ZylwdEGhgOKq27EQsh4
-	 RRs/o7d9iFCX6p0xq+YcsOeZ+uF+zBk0JOmTQ1YI=
-Date: Wed, 21 Jan 2026 11:31:17 +0100
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthew Schwartz <matthew.schwartz@linux.dev>,
-	Arnd Bergmann <arnd@arndb.de>, Ricky Wu <ricky_wu@realtek.com>,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 0/2] mmc: rtsx: card stuck busy fixes for Realtek PCI SD
- card readers
-Message-ID: <2026012150-overreact-cash-bf4d@gregkh>
-References: <20260105060236.400366-1-matthew.schwartz@linux.dev>
- <CAPDyKFozgK_W98=-wqE2fxBsSkKvCU=mYH7WkKVXQPiB3+og3w@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=kemnade.info header.i=@kemnade.info header.b="dz7OEZuA"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=kemnade.info; s=20220719; h=References:In-Reply-To:Cc:From:Sender:Reply-To:
+	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+	Resent-To:Resent-Cc:Resent-Message-ID;
+	bh=zscoPbAmvaBIRYYbo4mpG1SqTAb008m2Pl3AR9bRiGQ=; b=dz7OEZuASZtsmaiXkF8jYgXP9a
+	w3cJUYrWcpA7PBV9qalUgu2ggp/lw9eEeLq/yQ10tZxqa6+dKqBxX8zFtKQJF4ov9bCKHNZS0mckw
+	08Wrc+FQfGmYpoeUar0EoVjZAhlMx1c2KhemQRwK1e6paEcxhmt4CJKneVPqHv3O3Asgh8x+igIYr
+	NquodIvuh4+iBo4qN8fMpXZu1WlQmYRS3/qHc5Sp+oh3yIqNlHRTPdETZfP/yAi+s+JBmAMmlaLXh
+	aqGGUWxUhpQVk4c6rB63PLMXq40LMY9yrD4MeYgvJ6XZKCRUGWr4wM0LW3n72nCn2PA41+BhcdDzD
+	R6GWy8Rw==;
+Date: Wed, 21 Jan 2026 11:39:41 +0100
+From: Andreas Kemnade <andreas@kemnade.info>
+To: Josua Mayer <josua@solid-run.com>
+Cc: Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol
+ <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>, Neil Armstrong
+ <neil.armstrong@linaro.org>, Peter Rosin <peda@axentia.se>, Aaro Koskinen
+ <aaro.koskinen@iki.fi>, Kevin Hilman <khilman@baylibre.com>, Roger Quadros
+ <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>, Janusz Krzysztofik
+ <jmkrzyszt@gmail.com>, Vignesh R <vigneshr@ti.com>, Andi Shyti
+ <andi.shyti@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring
+ <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, Magnus
+ Damm <magnus.damm@gmail.com>, Wolfram Sang
+ <wsa+renesas@sang-engineering.com>, Yazan Shhady
+ <yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>, Mikhail
+ Anikin <mikhail.anikin@solid-run.com>, linux-can@vger.kernel.org,
+ linux-phy@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-omap@vger.kernel.org, linux-i2c@vger.kernel.org,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH v6 5/7] i2c: omap: switch to new generic helper for
+ getting selected mux-state
+Message-ID: <20260121113941.68328962@kemnade.info>
+In-Reply-To: <20260121-rz-sdio-mux-v6-5-38aa39527928@solid-run.com>
+References: <20260121-rz-sdio-mux-v6-0-38aa39527928@solid-run.com>
+	<20260121-rz-sdio-mux-v6-5-38aa39527928@solid-run.com>
+X-Mailer: Claws Mail 4.3.1 (GTK 3.24.49; aarch64-unknown-linux-gnu)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFozgK_W98=-wqE2fxBsSkKvCU=mYH7WkKVXQPiB3+og3w@mail.gmail.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-On Wed, Jan 21, 2026 at 11:13:03AM +0100, Ulf Hansson wrote:
-> On Mon, 5 Jan 2026 at 07:02, Matthew Schwartz
-> <matthew.schwartz@linux.dev> wrote:
-> >
-> > This series fixes some SD card timeout errors that occur after suspend and
-> > resume ops on systems with Realtek PCI card readers. These issues occur on
-> > my 2 RTS525A card readers and my RTS5261 card reader.
-> >
-> > As a stress test, I ran the amd-s2idle script from amd-debug-tools to
-> > automate s2idle cycles and I launched a visual novel, WITCH ON THE HOLY
-> > NIGHT, from the SD card. Visual novels are basically just slideshows, and
-> > waiting for 10 seconds without advancing the text is an easy way to
-> > trigger rtsx_pci_runtime_suspend/rtsx_pci_runtime_resume. I set amd-s2idle
-> > to test with a 10 second long s2idle length with 13 seconds between runs.
-> >
-> > The main symptom that always shows up is "mmc0: Card stuck being busy!"
-> > followed by timeouts and filesystem errors. This can occur during both
-> > runtime resume and s2idle resume:
-> >
-> > [  260.638214] mmc0: error -110 doing runtime resume
-> > [  261.054214] mmc0: card d555 removed
-> > [  261.054382] Aborting journal on device mmcblk0p1-8.
-> > [  261.054386] JBD2: I/O error when updating journal superblock for mmcblk0p1-8.
-> > [  261.067729] EXT4-fs (mmcblk0p1): shut down requested (2)
-> >
-> > Patch 1 adds a power_off callback so rtsx_pcr can notify the sdmmc driver
-> > during suspend, allowing it to reset prev_power_state. This ensures
-> > sd_power_on properly reinitializes the card on resume. It reduces the
-> > failure rate of "mmc0: Card stuck being busy!" after resume from 20% down
-> > to 4%.
-> >
-> > Patch 2 increases the post-power-on settling delay from 1ms to 5ms. The
-> > shorter delay seems insufficient for reliable reinitialization after the
-> > hardware has been powered off during suspend. Increasing this reduces the
-> > failure rate from 4% down to 0%, tested with over 300 s2idle cycles.
-> >
-> > Matthew Schwartz (2):
-> >   mmc: rtsx: reset power state on suspend
-> >   mmc: rtsx_pci_sdmmc: increase power-on settling delay to 5ms
-> >
-> >  drivers/misc/cardreader/rtsx_pcr.c |  9 +++++++++
-> >  drivers/mmc/host/rtsx_pci_sdmmc.c  | 24 +++++++++++++++++++++++-
-> >  include/linux/rtsx_common.h        |  1 +
-> >  3 files changed, 33 insertions(+), 1 deletion(-)
-> >
-> > --
-> > 2.52.0
-> >
+On Wed, 21 Jan 2026 11:20:42 +0200
+Josua Mayer <josua@solid-run.com> wrote:
+
+> Multiplexer subsystem has added generic helper functions for getting an
+> already selected mux-state object.
 > 
-> Greg, looks like you have queued up these patches via your misc tree,
-> can you please drop them? We need a different approach to the problem.
+> Replace existing logic in probe with the equivalent helper function.
+> 
+> There is a functional difference in that the mux is now automatically
+> deselected on release, replacing the explicit mux_state_deselect call.
+> 
+> This change is only compile-tested.
+> 
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Josua Mayer <josua@solid-run.com>
 
-They need to be reverted (my tree can not be rebased.)  Should I do
-that, or does someone want to send me the reverts?
-
-thanks,
-
-greg k-h
+Reviewed-by: Andreas Kemnade <andreas@kemnade.info>
