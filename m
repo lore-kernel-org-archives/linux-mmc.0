@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63DBE3EF0B7;
-	Wed, 21 Jan 2026 19:56:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA2762BE035;
+	Wed, 21 Jan 2026 19:57:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769025419; cv=none; b=rDIrHiUXtyr2NhsHSloj9hsyOWkUi+FlORO0ipV1f5OqNqXD6TlwcdS1PakUDCBJKELZx21zW7LCB0FCPAKZCS5ipfKD0dTewDzBP/0VEiah8Tu5Fanihlvyky6bjBSPcX9riSWeYRhRyP3X1tRTO5vs3ddMBkyqOsQtNYa2vPI=
+	t=1769025420; cv=none; b=Ojk/W2KE1ZKyiboBt1TXI5/C8EkRuiiZ74K/DIXbXoZ9oh6Aje73V55Y1cgQ6SgFvc+x7H9qXhr5l90S7L49SqEhMaQMrcI5S17xTRb7/IjyZ/bxVc9Q3iPTa/jVh1GrChkhZ7x6XVrUmSbmECfXQ4WRQVDF2grm1iM2gV5fb0E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769025419; c=relaxed/simple;
-	bh=q5vfvsNNHukkTxi4H/nQ+vW1T6KSyihaVNfG3gXPrN0=;
+	s=arc-20240116; t=1769025420; c=relaxed/simple;
+	bh=OsjbooI0PzsSGUgngyI7clHgsjttkcXNF84NTeIQn64=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=EbGgyP0JJyPnPPerq+bFCePpLfG0q0OxRYUHVtrxdiz2BfL/YKhrzVG77cDYFg1JyS/rO8LlObjeLms9l9EL+Lgaqgm33VA0EoRWyVkOstAlKIulNmnm/zx2HYL5EzGUitYdg8OzKO1tmX/WaZtKGotXdH960vO4rN6teeQEJZk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GwNB7NoE; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=ECB3WPXMc97Xc1hsJ5+WRbLBSwGupOuRDTBw7y4jE+6Om0dmI0XTVV7kLQVvMpFauEnQb3BGgb44Q13YZnGXxi5ZJ5f249WZXusDWee2DZhailsPvZijCnwu3dIBmY4KBjr5siQNVMiwerEnpVHmjNhl5Y0KoLbwVHbNS1FCJSM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nAMgMGsA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GwNB7NoE"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3FBBC4CEF1;
-	Wed, 21 Jan 2026 19:56:58 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nAMgMGsA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D362DC4CEF1;
+	Wed, 21 Jan 2026 19:56:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1769025419;
-	bh=q5vfvsNNHukkTxi4H/nQ+vW1T6KSyihaVNfG3gXPrN0=;
+	s=k20201202; t=1769025420;
+	bh=OsjbooI0PzsSGUgngyI7clHgsjttkcXNF84NTeIQn64=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=GwNB7NoERjnv/TWEUdI4m+Mbl66+sWj7fdEihgLCZ2hmkMR3CArfpqzDAr36xJ+/o
-	 V/4Wiy6KPSWtn4MyEDQoFreDR3jephPTE7RrcYM3aSO27GrSpIkbzrS/fW67Nktf8S
-	 hdkgnEkjR3KmCIW7UPX2V+cD/xjFYLWSCW75u1R6dJxtId5usgEpLyhonju6xxH7pt
-	 vaMN9vBymJsXFHrId0pIAjPrvksISS8PYghA8G+i5MjkWxgQG/ewX1JIBFPUH6qjZ5
-	 hCNanwtEkprVksKJ/bPgrirHDzc//CocUE3ZAefROXXFaMcago5BX4xe+72pfmQ2ED
-	 IEH1WzLWsn4gQ==
+	b=nAMgMGsAlFypN4Ya2goe99Kc/ynhx11xJAcCtHPXg+DD1DaBZeFLBLUzVUtT0zcn3
+	 B7oWBBg71kLI6delh0CBhqJHStvuws/Eba2MC08DMRf7TwoZbBK1+CWCyQYph8Lw9I
+	 /t938+stLXCjaERmVrW5MuO6I2xzCRNiuUF6YY4RRuirkjUNtprI0WpqrU87ZS2cZ/
+	 Cn6d5o3sk6RjxS7AVcvEM1EF+vn9NiNUBDqjMkvKcSTepD1PSwSFrR0Qfe/6iwRZm3
+	 rI1CUk/IFLnuBmfzEwdQdWRISU4xBiXWInmijLXz0NthsliZR7vNRhYHRdeD0xx2KV
+	 R+G9i3bAYdoFA==
 From: "Rob Herring (Arm)" <robh@kernel.org>
-Date: Wed, 21 Jan 2026 13:56:36 -0600
-Subject: [PATCH v3 03/10] dt-bindings: mtd: partitions: Move
- "sercomm,scpart-id" to partition.yaml
+Date: Wed, 21 Jan 2026 13:56:37 -0600
+Subject: [PATCH v3 04/10] dt-bindings: mtd: partitions: Allow
+ "nvmem-layout" in generic partition nodes
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260121-dt-mtd-partitions-v3-3-ec3af93c8f93@kernel.org>
+Message-Id: <20260121-dt-mtd-partitions-v3-4-ec3af93c8f93@kernel.org>
 References: <20260121-dt-mtd-partitions-v3-0-ec3af93c8f93@kernel.org>
 In-Reply-To: <20260121-dt-mtd-partitions-v3-0-ec3af93c8f93@kernel.org>
 To: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -60,56 +60,24 @@ Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org,
  Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 X-Mailer: b4 0.15-dev
 
-Defining child node properties specific to the parent schema doesn't work
-unless all the child node properties are known. They aren't known because
-any partition can define its own properties. The solution to this is
-typically something like spi-peripheral-props.yaml, but that's overkill for
-this single property. Just move it to partition.yaml instead.
+An "nvmem-layout" node can be used in any partition node, so add it.
 
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- .../devicetree/bindings/mtd/partitions/fixed-partitions.yaml   | 10 ----------
- .../devicetree/bindings/mtd/partitions/partition.yaml          |  9 +++++++++
- 2 files changed, 9 insertions(+), 10 deletions(-)
+ Documentation/devicetree/bindings/mtd/partitions/partition.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-index 73d74c0f5cb7..b504d4376d0b 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-@@ -33,16 +33,6 @@ patternProperties:
-   "@[0-9a-f]+$":
-     $ref: partition.yaml#
- 
--    properties:
--      sercomm,scpart-id:
--        description: Partition id in Sercomm partition map. Mtd parser
--          uses this id to find a record in the partition map containing
--          offset and size of the current partition. The values from
--          partition map overrides partition offset and size defined in
--          reg property of the dts. Frequently these values are the same,
--          but may differ if device has bad eraseblocks on a flash.
--        $ref: /schemas/types.yaml#/definitions/uint32
--
- required:
-   - "#address-cells"
-   - "#size-cells"
 diff --git a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-index 0b989037a005..568fac50f921 100644
+index 568fac50f921..fe2f7d622e8b 100644
 --- a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
 +++ b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-@@ -126,6 +126,15 @@ properties:
-       - xz
-       - zstd
+@@ -135,6 +135,9 @@ properties:
+       but may differ if device has bad eraseblocks on a flash.
+     $ref: /schemas/types.yaml#/definitions/uint32
  
-+  sercomm,scpart-id:
-+    description: Partition id in Sercomm partition map. Mtd parser
-+      uses this id to find a record in the partition map containing
-+      offset and size of the current partition. The values from
-+      partition map overrides partition offset and size defined in
-+      reg property of the dts. Frequently these values are the same,
-+      but may differ if device has bad eraseblocks on a flash.
-+    $ref: /schemas/types.yaml#/definitions/uint32
++  nvmem-layout:
++    $ref: /schemas/nvmem/layouts/nvmem-layout.yaml
 +
  if:
    not:
