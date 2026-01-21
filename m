@@ -1,82 +1,41 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DC203C008E;
-	Wed, 21 Jan 2026 14:49:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 733F6399A62;
+	Wed, 21 Jan 2026 14:52:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769006992; cv=none; b=LO8rMUnWuUtSSwti7Jb6OeONWhxgax1Wfs0ebJEJ9GFpx+s/8BcBaMCFQJVenzA45Ng2f+mCDSYF1vAmcXgwzCc04f42/OAc+R4IPvXV3NUPwrr2/qO8wpOxKeVJPsKEoOHJwIh2y+eKOe6cWvO1Is/+V3AlE1sBL2e+p8X+jM8=
+	t=1769007121; cv=none; b=EmBFjZaDUQrneP3HVhzQlLtwYptbQNdHhpdiDnLQgYXCV+7MHsr5RqSZJhXfu2WkUEGA9M1FrmHmqQdS2cEc2QdQUYdAgQEy5IyLYOoFkYUwgbDZcsR/nXY8M8gxQgk4eIC5vY2FICmLxfXfv6aKZemhbBSLclCMrBKsKRUjAIM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769006992; c=relaxed/simple;
-	bh=6LTNJOg2E8MaKxl1xCHKvy5jwJaoAeaRCG+agnK2yY8=;
+	s=arc-20240116; t=1769007121; c=relaxed/simple;
+	bh=TXkqW/heyZJHJy3LYHs4xpaX+9fsdSZ4YWEwlutPzHE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cauelZZt9Vxe1N2S6Ngyk56pN9PUC6O0OCtowIEN6zgP/vOXI8oNZsxdZ/QzD6kNXzZ833v6wdV4kJw/KXwh0koG6fEuZiHefFTFyu/7KzILCAWI6+VsehDWB1hU+nN6mzoBf8GZ9xTVVl+64wdkseFVeS647XzAvsJOW59p6sE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=QBATCApT; arc=none smtp.client-ip=198.175.65.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=soq8NufnF+twZzzxkwFvOGHP1CcD6isdoZofkl8UrabVSDp9DDMVWZCFtzfMW5UUsWRXM+tjFxTg4911iyuY/ib3uz1kCYohzb+UexibvJiwRxz2Q2+hAf4sMld6Uv/W+TdmZOF4mJcnZGxo7TnSTk/CtEzyVQGVpuN38+++IPY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=e82E5NL3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="QBATCApT"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1769006991; x=1800542991;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=6LTNJOg2E8MaKxl1xCHKvy5jwJaoAeaRCG+agnK2yY8=;
-  b=QBATCApTNclQtfCtM8qF18hoPqgLFjfIIFA223ORHq+oq9IdRg7CvTlj
-   3Q8QEIkva4enhUdsOa6C/2Y2OsWLZRvc5StxdQIY89g79oyjWjJXf22Jt
-   naZUCxEeLYte9Y/tHAyFEdy/KJcHvftCRe2C+RfO98JSkYK2E/O/TJeRC
-   LzJX1MSUKwuP9dOFmC++NoJvL1cLk1janrALa4b5gEULV57GwlCovzGPD
-   LDqGBmYaO2h70Gp7FRQ+H93MXsnBKZbp6wt0fAZX55tWfSD82YyaErerR
-   LPs196vcVYskgL4yuaiEBaTpU4g6hgwiZUteVs1gAzk9+n0VhZ0zBQ/OL
-   A==;
-X-CSE-ConnectionGUID: xcqdNcMiS+69pLtcRktYbg==
-X-CSE-MsgGUID: ZApQ79opR9+ZNqLaD6kxRA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11678"; a="74087018"
-X-IronPort-AV: E=Sophos;i="6.21,242,1763452800"; 
-   d="scan'208";a="74087018"
-Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Jan 2026 06:49:48 -0800
-X-CSE-ConnectionGUID: n3tKdQlJR0Kh2goUKtuKHg==
-X-CSE-MsgGUID: FgiU5irsRD68qf9iNbOS1g==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.21,242,1763452800"; 
-   d="scan'208";a="229432837"
-Received: from lkp-server01.sh.intel.com (HELO 765f4a05e27f) ([10.239.97.150])
-  by fmviesa002.fm.intel.com with ESMTP; 21 Jan 2026 06:49:41 -0800
-Received: from kbuild by 765f4a05e27f with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1viZWc-00000000RJx-31ND;
-	Wed, 21 Jan 2026 14:49:38 +0000
-Date: Wed, 21 Jan 2026 22:49:09 +0800
-From: kernel test robot <lkp@intel.com>
-To: Josua Mayer <josua@solid-run.com>,
-	Marc Kleine-Budde <mkl@pengutronix.de>,
-	Vincent Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Peter Rosin <peda@axentia.se>, Aaro Koskinen <aaro.koskinen@iki.fi>,
-	Andreas Kemnade <andreas@kemnade.info>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>,
-	Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-	Vignesh R <vigneshr@ti.com>, Andi Shyti <andi.shyti@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Wolfram Sang <wsa-dev@sang-engineering.com>
-Cc: oe-kbuild-all@lists.linux.dev,
-	Yazan Shhady <yazan.shhady@solid-run.com>,
-	Jon Nettleton <jon@solid-run.com>,
-	Mikhail Anikin <mikhail.anikin@solid-run.com>,
-	linux-can@vger.kernel.org, linux-phy@lists.infradead.org,
-	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org,
-	linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org
-Subject: Re: [PATCH v6 2/7] mux: Add helper functions for getting optional
- and selected mux-state
-Message-ID: <202601212215.qNGA0wVh-lkp@intel.com>
-References: <20260121-rz-sdio-mux-v6-2-38aa39527928@solid-run.com>
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="e82E5NL3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A78B6C4CEF1;
+	Wed, 21 Jan 2026 14:52:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+	s=korg; t=1769007121;
+	bh=TXkqW/heyZJHJy3LYHs4xpaX+9fsdSZ4YWEwlutPzHE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=e82E5NL3WUiCRcEsc5WpOkk2zzWP8LAxmRSRtxK5HedaEVY+UprI0229uA2yRmjYq
+	 qE2VdpMU3K5ksMC4K0mT1s9ircFKvjqn5xRrPUA4MzfLOUQd9xG73OdHhq7Al/3DnL
+	 2aQeItPZyX7WMl4xCfJbJFl3KzHCoXQQlq3LmOFE=
+Date: Wed, 21 Jan 2026 15:51:58 +0100
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Matthew Schwartz <matthew.schwartz@linux.dev>,
+	Arnd Bergmann <arnd@arndb.de>, Ricky Wu <ricky_wu@realtek.com>,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 0/2] mmc: rtsx: card stuck busy fixes for Realtek PCI SD
+ card readers
+Message-ID: <2026012152-botany-celery-2710@gregkh>
+References: <20260105060236.400366-1-matthew.schwartz@linux.dev>
+ <CAPDyKFozgK_W98=-wqE2fxBsSkKvCU=mYH7WkKVXQPiB3+og3w@mail.gmail.com>
+ <2026012150-overreact-cash-bf4d@gregkh>
+ <CAPDyKFq4UaB9OZf2nhrja-kv7UwwOXR36Sxa6gF-wDXip=FiVA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -85,32 +44,72 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260121-rz-sdio-mux-v6-2-38aa39527928@solid-run.com>
+In-Reply-To: <CAPDyKFq4UaB9OZf2nhrja-kv7UwwOXR36Sxa6gF-wDXip=FiVA@mail.gmail.com>
 
-Hi Josua,
+On Wed, Jan 21, 2026 at 01:49:11PM +0100, Ulf Hansson wrote:
+> On Wed, 21 Jan 2026 at 11:31, Greg Kroah-Hartman
+> <gregkh@linuxfoundation.org> wrote:
+> >
+> > On Wed, Jan 21, 2026 at 11:13:03AM +0100, Ulf Hansson wrote:
+> > > On Mon, 5 Jan 2026 at 07:02, Matthew Schwartz
+> > > <matthew.schwartz@linux.dev> wrote:
+> > > >
+> > > > This series fixes some SD card timeout errors that occur after suspend and
+> > > > resume ops on systems with Realtek PCI card readers. These issues occur on
+> > > > my 2 RTS525A card readers and my RTS5261 card reader.
+> > > >
+> > > > As a stress test, I ran the amd-s2idle script from amd-debug-tools to
+> > > > automate s2idle cycles and I launched a visual novel, WITCH ON THE HOLY
+> > > > NIGHT, from the SD card. Visual novels are basically just slideshows, and
+> > > > waiting for 10 seconds without advancing the text is an easy way to
+> > > > trigger rtsx_pci_runtime_suspend/rtsx_pci_runtime_resume. I set amd-s2idle
+> > > > to test with a 10 second long s2idle length with 13 seconds between runs.
+> > > >
+> > > > The main symptom that always shows up is "mmc0: Card stuck being busy!"
+> > > > followed by timeouts and filesystem errors. This can occur during both
+> > > > runtime resume and s2idle resume:
+> > > >
+> > > > [  260.638214] mmc0: error -110 doing runtime resume
+> > > > [  261.054214] mmc0: card d555 removed
+> > > > [  261.054382] Aborting journal on device mmcblk0p1-8.
+> > > > [  261.054386] JBD2: I/O error when updating journal superblock for mmcblk0p1-8.
+> > > > [  261.067729] EXT4-fs (mmcblk0p1): shut down requested (2)
+> > > >
+> > > > Patch 1 adds a power_off callback so rtsx_pcr can notify the sdmmc driver
+> > > > during suspend, allowing it to reset prev_power_state. This ensures
+> > > > sd_power_on properly reinitializes the card on resume. It reduces the
+> > > > failure rate of "mmc0: Card stuck being busy!" after resume from 20% down
+> > > > to 4%.
+> > > >
+> > > > Patch 2 increases the post-power-on settling delay from 1ms to 5ms. The
+> > > > shorter delay seems insufficient for reliable reinitialization after the
+> > > > hardware has been powered off during suspend. Increasing this reduces the
+> > > > failure rate from 4% down to 0%, tested with over 300 s2idle cycles.
+> > > >
+> > > > Matthew Schwartz (2):
+> > > >   mmc: rtsx: reset power state on suspend
+> > > >   mmc: rtsx_pci_sdmmc: increase power-on settling delay to 5ms
+> > > >
+> > > >  drivers/misc/cardreader/rtsx_pcr.c |  9 +++++++++
+> > > >  drivers/mmc/host/rtsx_pci_sdmmc.c  | 24 +++++++++++++++++++++++-
+> > > >  include/linux/rtsx_common.h        |  1 +
+> > > >  3 files changed, 33 insertions(+), 1 deletion(-)
+> > > >
+> > > > --
+> > > > 2.52.0
+> > > >
+> > >
+> > > Greg, looks like you have queued up these patches via your misc tree,
+> > > can you please drop them? We need a different approach to the problem.
+> >
+> > They need to be reverted (my tree can not be rebased.)  Should I do
+> > that, or does someone want to send me the reverts?
+> 
+> If you can revert them, that would be great!
+> 
+> Then I will continue to work with Matthew to fix the problem in a more
+> proper way.
 
-kernel test robot noticed the following build warnings:
+All now reverted, thanks!
 
-[auto build test WARNING on 8f0b4cce4481fb22653697cced8d0d04027cb1e8]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Josua-Mayer/phy-can-transceiver-rename-temporary-helper-function-to-avoid-conflict/20260121-173607
-base:   8f0b4cce4481fb22653697cced8d0d04027cb1e8
-patch link:    https://lore.kernel.org/r/20260121-rz-sdio-mux-v6-2-38aa39527928%40solid-run.com
-patch subject: [PATCH v6 2/7] mux: Add helper functions for getting optional and selected mux-state
-config: i386-randconfig-001-20260121 (https://download.01.org/0day-ci/archive/20260121/202601212215.qNGA0wVh-lkp@intel.com/config)
-compiler: gcc-14 (Debian 14.2.0-19) 14.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260121/202601212215.qNGA0wVh-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202601212215.qNGA0wVh-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
->> Warning: drivers/mux/core.c:56 struct member 'mstate' not described in 'devm_mux_state_state'
->> Warning: drivers/mux/core.c:56 struct member 'mstate' not described in 'devm_mux_state_state'
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+greg k-h
