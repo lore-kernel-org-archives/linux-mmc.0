@@ -1,35 +1,35 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 326E53D6677;
-	Wed, 21 Jan 2026 19:57:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65C193F075E;
+	Wed, 21 Jan 2026 19:57:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769025424; cv=none; b=U8EYxP7ju0n1MyLQfgiak9nWL7YAGkFcvHy9HeWLN2CVuzYBQoa3WeUwmgzozdqgEW4D3MZ6m4ijIWgtQ2WBcWceEXKYDjxoalIGKM7rANDNlaf/zInvZ2TogYhFkPd9GwMNbe6pYeUgBwlnfqX7RBlTvoun193/OxsevAyaMjI=
+	t=1769025425; cv=none; b=o/3SZvpg6A9Vv3Y8CZonyAVQONAWglkdQ1g1/xECK+jwZqOQu3cVeKRFFngCjtbCgf/6Psaw9lSRXjHpOAL17s+P9s6lnutiDmC+w3P3FfXvFWvAOgoGMevVRmzWoQkyFV7PZhK+sgUCi61WkcQCf4AZ6CRgy9zpIeidl3vrF68=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769025424; c=relaxed/simple;
-	bh=bA0IrXZIRAmvLVMEUnj2msq0bjns/r0LlSygkXY7W14=;
+	s=arc-20240116; t=1769025425; c=relaxed/simple;
+	bh=hqmmibdeyEIA8HNBIkJ+3aEvL37E5fI2EktVUAcmCS8=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=ElySa7p+v6K5x5QsCCW8g27Ayh7ESypHIKrGI/BXVdbCLhLaWEFCwc2xfTAF/nBwdIGD0solDnA6gQXlqtfjWV/BgcfZSNFwPdd6Mgohe6nQ9Wrqua9xtVrz7Q3d44PUvGPW7jUIJ14lrv3NA1KaLb0bSXplawWMa82z6fis+mI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ru4sJb+a; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=qbWqlXd28PDEV3CGBFMFqJ6zyDXHeNoILgDXa5hQNXXKLOjGMEOpHOiddBZ9rkryVqBsbti6A1TUi8pQ8l0LGLznSBIyYunZ0/JBI04q+wiCjWF4b+Dq0x2Fj9/unP6EEv5LC9bLJg+PpXYdmIYrgMCn6duD4ZtYQJw4HR3MXhQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IsPbwjxS; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ru4sJb+a"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C862DC4CEF1;
-	Wed, 21 Jan 2026 19:57:02 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IsPbwjxS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C2C94C19422;
+	Wed, 21 Jan 2026 19:57:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1769025422;
-	bh=bA0IrXZIRAmvLVMEUnj2msq0bjns/r0LlSygkXY7W14=;
+	s=k20201202; t=1769025423;
+	bh=hqmmibdeyEIA8HNBIkJ+3aEvL37E5fI2EktVUAcmCS8=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-	b=ru4sJb+aJUJEHhmUlzhvQv36xoUGNyPg+YRCDt4jJBk0qYnPq6baZoCfgzYB3Gl5y
-	 owypAn504JSqmytb9A9I7TZ3kSJFtk+2TAsNkRhcdcHOA9VB//gD069/DzpU0/T5Ia
-	 MVnIyQcsIvG9+Zq/iEjRC5/D8F3zC9tL1E70um/6I1D/iDKuhkCVrnU9b0INMqoCrh
-	 JVUBgg/ATkL2p99x5eDOU8ZUdDqO2idOuBdlFajKBg9M4MTHUKUDvanXewwNMAz8we
-	 rK+S8Tb54JolMRoYhafvB1buf6uSML9xfUERS85XoSRCCbEkf8KJdK7PeCVSM5smAX
-	 8yns/iR/aMHcg==
+	b=IsPbwjxSd8RkF1rK+DN5NR3Dxc/glKA9poYj4V9fJePMCs72ej85Qz6wuvWWxYf3A
+	 PWspl3Y9vXmkrv3hBB3/ZylxG60kOzFb69XezwvGygIOr2K6vQyejy299ovegD0OLf
+	 mFCUwl3f9ANqvonrsuW0DsI3ZU4sRwxW4qPCnL5SEHDFjW573AHeg0EGwwPDFst5TF
+	 /JsrDZ8MIjBloxT8ZAjbDfkIMuX+0hJCpJsIu/KCYN6ebheMyeXTEJhVb0sTkM+r73
+	 Ok71EmZTy95s2V9kD9bYTqNpwh2AN2NNYEbXBO0jj6iFChMtdVqTCe9YTHDK5MbSw0
+	 bSdp2Ton2B20g==
 From: "Rob Herring (Arm)" <robh@kernel.org>
-Date: Wed, 21 Jan 2026 13:56:40 -0600
-Subject: [PATCH v3 07/10] dt-bindings: mtd: Ensure partition node
- properties are documented
+Date: Wed, 21 Jan 2026 13:56:41 -0600
+Subject: [PATCH v3 08/10] dt-bindings: mtd: fixed-partitions: Restrict
+ undefined properties
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,7 +38,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260121-dt-mtd-partitions-v3-7-ec3af93c8f93@kernel.org>
+Message-Id: <20260121-dt-mtd-partitions-v3-8-ec3af93c8f93@kernel.org>
 References: <20260121-dt-mtd-partitions-v3-0-ec3af93c8f93@kernel.org>
 In-Reply-To: <20260121-dt-mtd-partitions-v3-0-ec3af93c8f93@kernel.org>
 To: Miquel Raynal <miquel.raynal@bootlin.com>, 
@@ -60,117 +60,54 @@ Cc: linux-mtd@lists.infradead.org, devicetree@vger.kernel.org,
  Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 X-Mailer: b4 0.15-dev
 
-Partition nodes without a compatible have no restrictions on additional
-properties. Fix this by ensuring 'unevaluatedProperties' is set when
-there's no compatible property. If there is a compatible property, then
-there should be a specific schema for it which will enforce
-'unevaluatedProperties'.
+The fixed-partitions schema allowed undefined properties in order to
+avoid warnings when there are nested fixed-partitions.
 
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mtd/mtd.yaml               |  8 ++------
- .../devicetree/bindings/mtd/partitions/fixed-partitions.yaml |  2 +-
- .../devicetree/bindings/mtd/partitions/partition.yaml        | 12 ++++++++++++
- .../mtd/partitions/tplink,safeloader-partitions.yaml         |  2 +-
- Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml |  2 +-
- Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml   |  2 +-
- 6 files changed, 18 insertions(+), 10 deletions(-)
+ .../devicetree/bindings/mtd/partitions/fixed-partitions.yaml       | 7 +++++--
+ Documentation/devicetree/bindings/mtd/partitions/partition.yaml    | 2 +-
+ 2 files changed, 6 insertions(+), 3 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mtd/mtd.yaml b/Documentation/devicetree/bindings/mtd/mtd.yaml
-index e56dba83f00a..5a2d06c96c0d 100644
---- a/Documentation/devicetree/bindings/mtd/mtd.yaml
-+++ b/Documentation/devicetree/bindings/mtd/mtd.yaml
-@@ -36,12 +36,8 @@ properties:
-       - compatible
- 
- patternProperties:
--  "@[0-9a-f]+$":
--    $ref: partitions/partition.yaml
--    deprecated: true
--
--  "^partition@[0-9a-f]+":
--    $ref: partitions/partition.yaml
-+  "(^partition)?@[0-9a-f]+$":
-+    $ref: /schemas/mtd/partitions/partition.yaml#/$defs/partition-node
-     deprecated: true
- 
-   "^otp(-[0-9]+)?$":
 diff --git a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-index 26bef777353d..4d79f786fcd5 100644
+index 4d79f786fcd5..984823108f9c 100644
 --- a/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
 +++ b/Documentation/devicetree/bindings/mtd/partitions/fixed-partitions.yaml
-@@ -33,7 +33,7 @@ properties:
- 
- patternProperties:
-   "@[0-9a-f]+$":
--    $ref: partition.yaml#
-+    $ref: partition.yaml#/$defs/partition-node
- 
- required:
+@@ -39,7 +39,11 @@ required:
    - "#address-cells"
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-index fe2f7d622e8b..51fd48af55ec 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
-@@ -149,6 +149,18 @@ then:
- # This is a generic file other binding inherit from and extend
- additionalProperties: true
+   - "#size-cells"
  
-+$defs:
-+  partition-node:
-+    type: object
-+    if:
-+      not:
-+        required: [ compatible ]
-+    then:
-+      $ref: '#'
-+      unevaluatedProperties: false
-+    else:
-+      $ref: '#'
+-additionalProperties: true
++# fixed-partitions can be nested
++allOf:
++  - $ref: partition.yaml#
 +
++unevaluatedProperties: false
+ 
  examples:
    - |
-     partitions {
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml
-index a24bbaac3a90..40e6eaab03ce 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/tplink,safeloader-partitions.yaml
-@@ -38,7 +38,7 @@ properties:
+@@ -115,7 +119,6 @@ examples:
+             compatible = "fixed-partitions";
+             label = "calibration";
+             reg = <0xf00000 0x100000>;
+-            ranges = <0 0xf00000 0x100000>;
+             #address-cells = <1>;
+             #size-cells = <1>;
  
- patternProperties:
-   "^partition-.*$":
--    $ref: partition.yaml#
-+    $ref: partition.yaml#/$defs/partition-node
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
+index 51fd48af55ec..2397d97ecac5 100644
+--- a/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
++++ b/Documentation/devicetree/bindings/mtd/partitions/partition.yaml
+@@ -144,7 +144,7 @@ if:
+ then:
+   properties:
+     $nodename:
+-      pattern: '^partition-.*$'
++      pattern: '^partitions?(-.+)?$'
  
- required:
-   - partitions-table-offset
-diff --git a/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml b/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml
-index 327fa872c001..d51bdcb7e585 100644
---- a/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml
-+++ b/Documentation/devicetree/bindings/mtd/partitions/u-boot.yaml
-@@ -29,7 +29,7 @@ properties:
- 
- patternProperties:
-   "^partition-.*$":
--    $ref: partition.yaml#
-+    $ref: partition.yaml#/$defs/partition-node
- 
- unevaluatedProperties: false
- 
-diff --git a/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml b/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml
-index 7d3ace4f5505..8db991dee7eb 100644
---- a/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml
-+++ b/Documentation/devicetree/bindings/mtd/ti,gpmc-onenand.yaml
-@@ -36,7 +36,7 @@ properties:
- 
- patternProperties:
-   "@[0-9a-f]+$":
--    $ref: /schemas/mtd/partitions/partition.yaml
-+    $ref: /schemas/mtd/partitions/partition.yaml#/$defs/partition-node
- 
- allOf:
-   - $ref: /schemas/memory-controllers/ti,gpmc-child.yaml
+ # This is a generic file other binding inherit from and extend
+ additionalProperties: true
 
 -- 
 2.51.0
