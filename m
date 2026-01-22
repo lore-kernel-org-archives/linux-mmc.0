@@ -1,287 +1,201 @@
-Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8B074279FA
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 12:09:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.54
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769083749; cv=pass; b=H4Lq+/jwDzUD4uQmhyz5JGz8RfUA0Ty4tvCN805Dr6s/TZXEJ5u+N2wFtpgApda86DIKrFS9z0Ni4K4ayakiy4RJRF6p9lZkGE9KAcF+9JZKwd9SVepH6wiRKvwnfPgvfzSR9Va2BkbjmWlYemZzdScZIpraazhQ3p2342lZAD8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769083749; c=relaxed/simple;
-	bh=ZHhFrvHNtPemaDw3sRn5VfXn7aqVCVTY0i9LFdN2dNE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=gr7jdxU4ouYL9gDSk4xZ9Bud6vsguXrW5e7EqynUCUhvtLfiy3vk58d0iDHlT0X5LzzPNyf0I6DTSEIyHbeTI6M5H/E6sbQibJ+yWeg061iON2ZDZQNNNY82LJ0wEkuJEV8bjB/Uf7NpMTxHex0DH206IO3T0/yK4KUEbTmJ86U=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=do6hTI9q; arc=pass smtp.client-ip=209.85.167.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E85FC26A1AC
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 13:01:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1769086907; cv=none; b=VJ5ftyxXeBo+CECtHyNlCWkmMmiZizDeizPlmajsKLXmQ/mv6WgtUEq6XMyNd4unjnb1+b5JAcMgfpMo3RAcdfeFB6e33Ma+kDN3+jMCWzB7TqmejPg+uRwMY56uJdZjJG3SqDYxS12if8VmnXDC+ndIBk+eaYHk3SXUKxGWJ2g=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1769086907; c=relaxed/simple;
+	bh=gADdveSoM8o+46ZADSQxyRa26NdWa+6jBjOUZ7l3SSc=;
+	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=unuAdPHL1Xe/bXbTTZW9LvNjJsFJ6fsOL2kUK178loGlrYyKAKFdB1598HPVb49t5TvisKHb6l9tzpFUreEWGStEaz5+Q4Pc6a3YeVbXmbuckgIOQwm9SPh/Oky8gc3l5/Smi6TDWe4+tKxDOjCq4hepPL8VXQPio5cb+BFrGaA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=g9UNW76H; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=MFdqQcui; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="do6hTI9q"
-Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-59b76844f89so809605e87.1
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 04:09:04 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1769083743; cv=none;
-        d=google.com; s=arc-20240605;
-        b=fA5/3SeVOxkf3bvR1RvGXfi2S7fB8cBe6gzPMwzSUjnQirXELi+DFfvjzpCJwjksj2
-         JmJYrMtgWJhdEhVVWy5dYk0cQTvc4IVaDQVYPh+GMsLCQ9aSCjmXPB9jIPoiEd5YkB/5
-         SqMDs/7ajDoROSZuRGU1Cmc1kn83oV4usI6OLydl+5J+WzTjqC55rPrpDEzCYHZ+uVyE
-         6ErClCuvmwLdMowvpSypfIXmMXfTHqa0ZmutRBqjd62UOvzJmFJoPH85Tm/y/GQSt2jd
-         E6gmjLfPNSMf/j9Ofh+JPxDCvOmJ0PaciP+hRPRQe8sN+niprbUYN08wX+hpmaGdMiUK
-         hM5w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=6dPEI6i2Pbcf5L6RRn/o/v6uVfOVu0UCYbEOntwFjnM=;
-        fh=UAr3Iio88/+/uOeam1rbsH+SPH1h1m2u3IVWGD99Xhc=;
-        b=H2tJ9Ea0K2SWTmUPaJnOOzHgM1zPUQLjyFdUY6H7SzpPgKlIaismOre58Dzm0o1rKc
-         Oej6V7CsufOzukUa333+t2mPv1ihkr+oa35M3sXuZK6/snzLCgKy7TiMCxhZjq6T+/fi
-         5QemGrEjKNEl6IyrwZMaYD6jMpdlMQppVL2LWwKNYaiycGufvh0shylPaA6x7GNYgpEb
-         kC+iS0KM0HRne7TAQrXW3XEGdFvfPycPUwRmVQwT7OZqBGKDNGinO9qjBGqMtey6pJmj
-         VXv+aA9jgHf5dG6h8xKyAKT9b2xRDgPOK6BGo8TqqnDrCXV+YZXj+UCn75OX5s0FaYrb
-         o1Dg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="g9UNW76H";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="MFdqQcui"
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 60M7X25P4057918
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 13:01:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	tTcYS5tH3ozwmazFbcCVIeHW08C2pZQa4cHM4VRC0zM=; b=g9UNW76HTEYdo3OP
+	z6c2axRHwNTqA4vntKiqYbwbYqH5x+4RHQdAymVx8Gm1mX1O9nmErcBHEKQzBj2O
+	OolNy8vZXflv4Muw8c6pLrimw9aGTV4phz4dYlypyZPj9GJXHAg67LHLSfaXLdFL
+	LRuzKaACPffc2JSBB/yXaancJqHrx3OJ1f3DocG52DlciLST85I/QwhOlWCAJcb1
+	EJoHC26i9qkn/ZpGdjVk5P49vj159CFQM86AVVPT9Lhtp92TbuNXJsEUT1XbFBiU
+	T7j9EXbJavzOEsGfYFgAHr6VkywGAADPpL+nniAZgtLoaYZtk2qEFzkFi9tFwva6
+	ifSpiQ==
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4bu7nbtajt-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 13:01:44 +0000 (GMT)
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2a0f4822f77so18391935ad.2
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 05:01:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1769083743; x=1769688543; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=6dPEI6i2Pbcf5L6RRn/o/v6uVfOVu0UCYbEOntwFjnM=;
-        b=do6hTI9qW0L+Rfr2nUZMRiy3y2bVx77d8ltvGJ9KRhKyA5/NwkjzkENtvKyKJmHPvo
-         F2FOkGo4UxzjZC9qblxTK8X3C0lG33mc0i2HAhOc/NSO7XgiP0tS2zchN4VJulxZjo1Y
-         DfeugchTP3qLUhI9si4iOoGrQJ8fRxNDzTeR82bDds5RlYXbAzMZYs+mjluyajwYffGx
-         M93KyJwuMeLqlzBlcCzKzZvJuuY/ivXG+Uq8VxFkbB5WftHl06PBanoqGcB72WY2em96
-         FeFKK/2dTw3EbSv68jFI+BrO/j3tApGpMs7L0/UWAiUNkBI4LbJ2eWZi43DpZFb+DFzl
-         1PWg==
+        d=oss.qualcomm.com; s=google; t=1769086903; x=1769691703; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-language:in-reply-to:mime-version
+         :user-agent:date:message-id:from:references:cc:to:subject:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=tTcYS5tH3ozwmazFbcCVIeHW08C2pZQa4cHM4VRC0zM=;
+        b=MFdqQcuiBhBNvXZEOxICzAwuA7NUTk9RaFy1Xm6r9KBSEVptMubSYb3zZhfCr0MIgp
+         DCByarrKBzhwWi/kgDru5sm8msO8O3S7o6Bjm0jayeF4npmld3IDPojnIxOXHDIVd7xk
+         j8etV5kCNr79Gb2NTMi2vtpD8CbjJx3YEBVF/35xz3/wiw8i79KXEW8mh0YRwHMQA5hh
+         2nmMW+UyqUitCjVnjSp8BiC0K/lMbk3HtF23ACuyCPdikI5ieHR3FFQ8/01A/SDgNoji
+         FivQQGhk0hhTT2rCEwXcInPUu18MA6ZselMluqiYoCQ6atV8iuLZgc1osFT9v8zp66N1
+         jyXw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769083743; x=1769688543;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=6dPEI6i2Pbcf5L6RRn/o/v6uVfOVu0UCYbEOntwFjnM=;
-        b=p46Di/S9bhjHeYG0Nbqum+U8KPorIkarrOp5oPLiIO6QjFtHN0nOYnGGZ6mr6VFHLp
-         7rFe5xB3GLBXajK69HL2OZ+GE/D2cl6LYJRXoQTPMsaX+x9UaoQvpPPsTnKCLtzCaXI5
-         7zKcSue72s5TN1SO9vHaCbmJ8HDfCBTLnw52f9qUk1BHEQ4Bi5sbh/LF69Nxrea+qSwl
-         U1q9QAdIxdiWIYEH5N2/WUayA3niNZcoUey0ZwdFXzqMu6BhhA5x4C6hUmTGG5vNtRwN
-         t0bn9zBt6qWa7/1CWdWBusTFgS6vOwnbZyNeLev3oPkFkpbnSUutv+1EathQL2mepMbW
-         /XCw==
-X-Gm-Message-State: AOJu0YwarLaDKgNFe7SXAD3FtiIrcSZfRXU9LBf842mZ9hb0HYRfmK4T
-	2yabCCkFY8qXVFPO92r1IoUnZdekvmvL0EYqlX9lOEDJ5fXlSfKrXMPjNKyJgMIvbee7BJHvqn2
-	SHdHf9mMUlSShZB+KECjHo1YNN5CYfB88anuj/PiZBQ==
-X-Gm-Gg: AZuq6aJmbOJtq2X2RiJ+kPmXUXWGKUgCbzcVguAC/6A5anzY9kwkPN5kXyGwkqya924
-	M6u2K9SnOyj9rZxFZS0H/xesr2NTTJ7WI0r8A0Q4SboAGfzeg8G+0dffbYeByxvjOieL+IdQxMA
-	dDsFmwuKAc2IeaduBdqULQKyhxbnJlF7Hkjo8H/yNqL7ZGvq7qYTKsz5BC2gRjO4eRgYL4BCXot
-	wLh6/+Rxa6xHP5FXppYwUpkT0LPUSJntMhCx+FiANfrnXNa8bKR8W9e07oNFXtGGxExjpcM
-X-Received: by 2002:a05:6512:aca:b0:59b:7d3a:2a26 with SMTP id
- 2adb3069b0e04-59baef00dfdmr7488353e87.44.1769083742410; Thu, 22 Jan 2026
- 04:09:02 -0800 (PST)
+        d=1e100.net; s=20230601; t=1769086903; x=1769691703;
+        h=content-transfer-encoding:content-language:in-reply-to:mime-version
+         :user-agent:date:message-id:from:references:cc:to:subject:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=tTcYS5tH3ozwmazFbcCVIeHW08C2pZQa4cHM4VRC0zM=;
+        b=mcF4CNPxv1sgNnyHIoUgoSTi8LlFGk/dtncbEvqXLeF1yoEs/GXfmHL67rTmJV2xa9
+         jwT3ItYXyGXyLKL/7g3CpEnn1hs1sI5OXXfgcLKmS9O1czlRTVwAT6WXXWEOQXuCDwJG
+         /9z7d9L7vBoyeqWpz4XViK6qvBQKkbQZ90sK+h1LCy7FbTdZvgnS5bNdKFFHuTNum5Wq
+         yAC2dMjtLJciyuobUaSIEptnAMC+Dyr8Qk3net+Y2WV5IJjlcGeZdcnxZeyGzObjnlyA
+         aS/WOBov1JOzuwj7wh/tjIXiC9d56PwUWiHrZerJ3C8nXv1JPULSIboOqrCufTrnpVmR
+         tGmQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWzRVHTINHOUrgESdoe0E0GIGdWxKotalcK90myZzGNU6OmEsE0CgiKBzlgdie/hnny8g4/m+AxXlA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyXOEEbNCjGdRQP1ZK9S1X51Np/FPcOmt2TDnganUNo0qOyGr+E
+	VTrc78wqqhL3R5k4VAxsfz0d12pe9aAXBuqq0reo6J3bINwA+N/nQrp5CHnNOK2G1GKnTqeS3Fl
+	0Acc95h05ZRnOWWIz4gpu4PyiM33DS+gEXVokci7KnigvulWmKdw0biXDerLNKxk=
+X-Gm-Gg: AZuq6aK5HzwiYn+ZCHD3M+dQ5/nkL/tlTEkTPVzv4SGCCLiCfXbjlUvXvOvUixOAV7S
+	WmyWKxox9rQRnUgu9yHNHlBeRvOFEklltaHMWDWUtZTKGGiL8gP3VjsS2FPhAIxunyBhh36eG9r
+	NzuxxHa3OU7BfnKPEoc0NrnFjn+EBsi+ghywu1ion/snW4ECWZTYo1f5pO4SJHXehzsxh6vAW3I
+	HlajxhvsA8H1R/DtrAxC3JII9EcDvRMbNYpyFplBdeqppUKA4y5p4IklnZTPvrU9vZETQ0Vi5Cd
+	JIJlTnpNUsZ5BdDTGw9d2FEm8BLQs/jxPqMk8KCrdhJDFIyzonSVYFo6zCt//2QgPlqp0A+fHKN
+	B6vwErKBP/61OXCvFPt6be80/vpqqk0/WLTnl75o=
+X-Received: by 2002:a17:903:1a2b:b0:2a7:8839:dda1 with SMTP id d9443c01a7336-2a78839e2a9mr64350355ad.13.1769086903137;
+        Thu, 22 Jan 2026 05:01:43 -0800 (PST)
+X-Received: by 2002:a17:903:1a2b:b0:2a7:8839:dda1 with SMTP id d9443c01a7336-2a78839e2a9mr64349165ad.13.1769086901094;
+        Thu, 22 Jan 2026 05:01:41 -0800 (PST)
+Received: from [192.168.29.77] ([49.37.153.155])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-81fa127875esm18117296b3a.35.2026.01.22.05.01.37
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 22 Jan 2026 05:01:40 -0800 (PST)
+Subject: Re: [PATCH v4] mmc: host: sdhci-msm: Add support for wrapped keys
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, ebiggers@kernel.org,
+        abel.vesa@linaro.org, linux-mmc@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
+References: <20260102124018.3643243-1-neeraj.soni@oss.qualcomm.com>
+ <3a93822a-6ca1-4cc1-be12-38b2b04704da@intel.com>
+ <23c9f3b9-f575-5bc6-e7f0-46238c26a7e5@oss.qualcomm.com>
+ <CAPDyKFqJXQ1dYhgfO7bV2ha+GgyOtOtGcm0e-knYCRZCMteu5g@mail.gmail.com>
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Message-ID: <e0d5640a-61de-fc8c-ddea-cb695f45641c@oss.qualcomm.com>
+Date: Thu, 22 Jan 2026 18:31:36 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260105064607.1554629-1-daniel@thingy.jp>
-In-Reply-To: <20260105064607.1554629-1-daniel@thingy.jp>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 22 Jan 2026 13:08:25 +0100
-X-Gm-Features: AZwV_QhceT5McIJW1m9u0CCv7nrgY88Wv-GAKRTK1SATv4BVjIAYhx3OnmRbDqQ
-Message-ID: <CAPDyKFptzJfxCeqNjAMsu2q4nEOiaKg6xFjNud9RR=QS1HQW-w@mail.gmail.com>
-Subject: Re: [RFC PATCH] mmc: sdio: Allow sdio code to be build time disabled
-To: Daniel Palmer <daniel@thingy.jp>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <CAPDyKFqJXQ1dYhgfO7bV2ha+GgyOtOtGcm0e-knYCRZCMteu5g@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-GUID: RJeeoInnOjRueoEgzi0Z6qiaaId2ohKU
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMTIyMDA5NyBTYWx0ZWRfXw50U9thgMTW/
+ DmE0FXMpKTb/DYi2QuYwqwY8/sxwWQ1C90HKzMoNxPf0yqUtcMpyPv5NMmJpc4W9WFphkZhtAMK
+ DtGFGcrL6M/0c6yc1FlLXH7Chz7NLP8FBjxHrp/IPa6gSSfRn2U9NH7YB33SbYO+Of6w+1pw6U0
+ zbocjrH0ortxlVxlTOGkA+0C7ZeKWZVd9ei2SVw+lwL8oyDQMMbS/auvSoHfAcx2Mp5ATu6yE2s
+ w4h/NmdAvO2OwWV0PSK0KP54d1HG7sYWfBnNuxtw9ZDNsrGgKGvIXTErSodqmQJth6Y7bxTo+LI
+ PHpHs1tNd47sTMYJBX9SFTBzgUf5Y31qs84fL+NYoVuARARn7pQrNDbtnzOMaRYX5TGa/Dc1mc3
+ QTUurrJXcv2O+oAdTiRMfth6q0jcQacgoWyXJxoq8LAOCa//XxqIfQr4Yn62mKIMwiz5fDTtZtM
+ T12PKOMdpqCgpnFl6kQ==
+X-Authority-Analysis: v=2.4 cv=dZGNHHXe c=1 sm=1 tr=0 ts=69721fb8 cx=c_pps
+ a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=mUqJYtKm3DnVQPgbyYslow==:17
+ a=IkcTkHD0fZMA:10 a=vUbySO9Y5rIA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=NEAV23lmAAAA:8 a=EUspDBNiAAAA:8 a=QyXUC8HyAAAA:8
+ a=DbZcFCj0BrKUjWguvZgA:9 a=QEXdDO2ut3YA:10 a=GvdueXVYPmCkWapjIL-Q:22
+X-Proofpoint-ORIG-GUID: RJeeoInnOjRueoEgzi0Z6qiaaId2ohKU
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.20,FMLib:17.12.100.49
+ definitions=2026-01-22_01,2026-01-22_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 spamscore=0 phishscore=0 lowpriorityscore=0 malwarescore=0
+ bulkscore=0 clxscore=1015 priorityscore=1501 adultscore=0 impostorscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2601150000 definitions=main-2601220097
 
-On Mon, 5 Jan 2026 at 07:46, Daniel Palmer <daniel@thingy.jp> wrote:
->
-> In some cases the sdio support is not needed but the compiler
-> cannot tell this and it ends up in your binary.
->
-> This might not matter so much on generic kernels for systems
-> with gigabytes of memory but in situations with megabytes
-> of memory that just have an SD card attached via bitbanged SPI
-> over GPIO this is wasteful.
->
-> For amd64 disabling SDIO reduces the size of the kernel by ~26KiB.
->
-> Signed-off-by: Daniel Palmer <daniel@thingy.jp>
-> ---
->
-> RFC because this is probably incomplete, maybe not a good idea,..
-> I have only tested that this removes the unneeded SDIO code on my
-> machine with 8MB of RAM and its still able to enumerate and access
-> a 64GB SD card it has connected over SPI.
+Hi,
 
-Hmm, in principle I don't mind this. Although, I assume there are lots
-of other subsystems that can be split up using additional Kconfigs in
-the similar manner.
-
-Doing this for MMC/SD/SDIO alone seems silly unless we have a broader
-consensus to do things like this. Do we have that?
-
-In regards to the implementation and from a very brief review, I
-observed two issues.
-1) We don't want "#ifdef"-s sprinkled all over the place in the c-code
-(headers are fine), then better to use stub-functions.
-2) We need to be careful about Kconfig dependencies. The SDIO func
-drivers are implemented across various subsystems (bluetooth, wifi,
-etc), those corresponding Kconfigs probably need a "depends on SDIO"
-too.
-
-Kind regards
-Uffe
-
->
->  drivers/mmc/core/Kconfig    | 12 +++++++++++-
->  drivers/mmc/core/Makefile   |  6 +++---
->  drivers/mmc/core/core.h     |  7 +++++++
->  drivers/mmc/core/host.c     |  2 ++
->  drivers/mmc/core/sdio_bus.h |  5 +++++
->  drivers/mmc/core/sdio_cis.h |  4 ++++
->  drivers/mmc/core/sdio_ops.h | 14 ++++++++++++++
->  7 files changed, 46 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-> index 14d2ecbb04d3..4112242a6c98 100644
-> --- a/drivers/mmc/core/Kconfig
-> +++ b/drivers/mmc/core/Kconfig
-> @@ -64,9 +64,19 @@ config MMC_BLOCK_MINORS
->
->           If unsure, say 8 here.
->
-> +config MMC_SDIO
-> +       bool "Support SDIO in MMC core" if EXPERT
-> +       default y
-> +       help
-> +         Enable SDIO support in the MMC core. If you will never use
-> +         SDIO because your hardware can't support it or your usecase
-> +         will never need it i.e. you have one SD host and it has fixed
-> +         eMMC attached to it you can set this to N and remove some
-> +         unneeded code.
-> +
->  config SDIO_UART
->         tristate "SDIO UART/GPS class support"
-> -       depends on TTY
-> +       depends on MMC_SDIO && TTY
->         help
->           SDIO function driver for SDIO cards that implements the UART
->           class, as well as the GPS class which appears like a UART.
-> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-> index 15b067e8b0d1..efc354150e8a 100644
-> --- a/drivers/mmc/core/Makefile
-> +++ b/drivers/mmc/core/Makefile
-> @@ -6,9 +6,9 @@
->  obj-$(CONFIG_MMC)              += mmc_core.o
->  mmc_core-y                     := core.o bus.o host.o \
->                                    mmc.o mmc_ops.o sd.o sd_ops.o \
-> -                                  sdio.o sdio_ops.o sdio_bus.o \
-> -                                  sdio_cis.o sdio_io.o sdio_irq.o sd_uhs2.o\
-> -                                  slot-gpio.o regulator.o
-> +                                  sd_uhs2.o slot-gpio.o regulator.o
-> +mmc_core-$(CONFIG_MMC_SDIO)    += sdio.o sdio_ops.o sdio_bus.o \
-> +                                  sdio_cis.o sdio_io.o sdio_irq.o
->  mmc_core-$(CONFIG_OF)          += pwrseq.o
->  obj-$(CONFIG_PWRSEQ_SIMPLE)    += pwrseq_simple.o
->  obj-$(CONFIG_PWRSEQ_SD8787)    += pwrseq_sd8787.o
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index a028b48be164..8e2a1abc5523 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -85,7 +85,14 @@ int mmc_detect_card_removed(struct mmc_host *host);
->
->  int mmc_attach_mmc(struct mmc_host *host);
->  int mmc_attach_sd(struct mmc_host *host);
-> +#ifdef CONFIG_MMC_SDIO
->  int mmc_attach_sdio(struct mmc_host *host);
-> +#else
-> +static inline int mmc_attach_sdio(struct mmc_host *host)
-> +{
-> +       return -EOPNOTSUPP;
-> +}
-> +#endif
->  int mmc_attach_sd_uhs2(struct mmc_host *host);
->
->  /* Module parameters */
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 88c95dbfd9cf..0216953b8906 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -563,7 +563,9 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->         spin_lock_init(&host->lock);
->         init_waitqueue_head(&host->wq);
->         INIT_DELAYED_WORK(&host->detect, mmc_rescan);
-> +#ifdef CONFIG_MMC_SDIO
->         INIT_WORK(&host->sdio_irq_work, sdio_irq_work);
-> +#endif
->         timer_setup(&host->retune_timer, mmc_retune_timer, 0);
->
->         INIT_WORK(&host->supply.uv_work, mmc_undervoltage_workfn);
-> diff --git a/drivers/mmc/core/sdio_bus.h b/drivers/mmc/core/sdio_bus.h
-> index 27b8069a72ab..ad14784b37d1 100644
-> --- a/drivers/mmc/core/sdio_bus.h
-> +++ b/drivers/mmc/core/sdio_bus.h
-> @@ -14,8 +14,13 @@ struct sdio_func *sdio_alloc_func(struct mmc_card *card);
->  int sdio_add_func(struct sdio_func *func);
->  void sdio_remove_func(struct sdio_func *func);
->
-> +#ifdef CONFIG_MMC_SDIO
->  int sdio_register_bus(void);
->  void sdio_unregister_bus(void);
-> +#else
-> +#define sdio_register_bus() 0
-> +#define sdio_unregister_bus()
-> +#endif
->
->  #endif
->
-> diff --git a/drivers/mmc/core/sdio_cis.h b/drivers/mmc/core/sdio_cis.h
-> index 6d76f6fa608c..486eeb802162 100644
-> --- a/drivers/mmc/core/sdio_cis.h
-> +++ b/drivers/mmc/core/sdio_cis.h
-> @@ -13,10 +13,14 @@
->  struct mmc_card;
->  struct sdio_func;
->
-> +#ifdef CONFIG_MMC_SDIO
->  int sdio_read_common_cis(struct mmc_card *card);
->  void sdio_free_common_cis(struct mmc_card *card);
->
->  int sdio_read_func_cis(struct sdio_func *func);
->  void sdio_free_func_cis(struct sdio_func *func);
-> +#else
-> +#define sdio_free_common_cis(card)
-> +#endif
->
->  #endif
-> diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
-> index 37f79732a206..dc16e80aa361 100644
-> --- a/drivers/mmc/core/sdio_ops.h
-> +++ b/drivers/mmc/core/sdio_ops.h
-> @@ -12,6 +12,7 @@
->  #include <linux/mmc/sdio.h>
->
->  struct mmc_host;
-> +#ifdef CONFIG_MMC_SDIO
->  struct mmc_card;
->  struct work_struct;
->
-> @@ -33,6 +34,19 @@ static inline bool sdio_is_io_busy(u32 opcode, u32 arg)
->                 (opcode == SD_IO_RW_DIRECT &&
->                 !(addr == SDIO_CCCR_ABORT || addr == SDIO_CCCR_SUSPEND)));
->  }
-> +#else
-> +/* These are referenced in code outside of the sdio files so define dummy versions */
-> +static inline int sdio_reset(struct mmc_host *host)
-> +{
-> +       return 0;
-> +}
-> +
-> +static inline bool sdio_is_io_busy(u32 opcode, u32 arg)
-> +{
-> +       return false;
-> +}
-> +#endif
-> +
->
->  #endif
->
-> --
-> 2.51.0
->
+On 1/21/2026 3:56 PM, Ulf Hansson wrote:
+> On Mon, 19 Jan 2026 at 11:19, Neeraj Soni <neeraj.soni@oss.qualcomm.com> wrote:
+>>
+>> Hi,
+>>
+>> On 1/12/2026 12:35 PM, Adrian Hunter wrote:
+>>> On 02/01/2026 14:40, Neeraj Soni wrote:
+>>>> Add the wrapped key support for sdhci-msm by implementing the needed
+>>>> methods in struct blk_crypto_ll_ops and setting the appropriate flag in
+>>>> blk_crypto_profile::key_types_supported.
+>>>>
+>>>> Tested on SC7280 eMMC variant.
+>>>>
+>>>> How to test:
+>>>>
+>>>> Use the "v1.3.0" tag from https://github.com/google/fscryptctl and build
+>>>> fscryptctl that supports generating wrapped keys.
+>>>>
+>>>> Enable the following config options:
+>>>> CONFIG_BLK_INLINE_ENCRYPTION=y
+>>>> CONFIG_QCOM_INLINE_CRYPTO_ENGINE=y
+>>>> CONFIG_FS_ENCRYPTION_INLINE_CRYPT=y
+>>>> CONFIG_MMC_CRYPTO=y
+>>>>
+>>>> Enable "qcom_ice.use_wrapped_keys" via kernel command line.
+>>>>
+>>>> $ mkfs.ext4 -F -O encrypt,stable_inodes /dev/disk/by-partlabel/vm-data
+>>>> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
+>>>> $ fscryptctl generate_hw_wrapped_key /dev/disk/by-partlabel/vm-data > /mnt/key.longterm
+>>>> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
+>>>> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
+>>>> $ rm -rf /mnt/dir
+>>>> $ mkdir /mnt/dir
+>>>> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
+>>>> $ dmesg > /mnt/dir/test.txt
+>>>> $ sync
+>>>>
+>>>> Reboot the board
+>>>>
+>>>> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
+>>>> $ ls /mnt/dir # File should be encrypted
+>>>> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
+>>>> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
+>>>> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
+>>>> $ cat /mnt/dir/test.txt # File should now be decrypted
+>>>>
+>>>> Tested-by: Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
+>>>> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+>>>
+>>> Doesn't apply cleanly to mmc next.  Otherwise:
+>>>
+>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>
+>> Is this a blocker for the patch to get merged? I will anyway see why it is not applying cleanly on mmc next
+>> but wanted to know if this is necessary to resolve for these chagnes to get merged in Linux-next?
+>>
+> 
+> In some cases I decide to resolve the conflict when applying, but
+> there is no guarantee that I do that, especially during busy periods.
+> 
+> In this case, I prefer that you re-base and send a v5 please.
+Sure. I will resolve and post v5.
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
+> 
+Regards
+Neeraj
