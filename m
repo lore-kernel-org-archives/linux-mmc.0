@@ -1,106 +1,114 @@
-Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
+Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99B5727B353
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 18:04:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B87AE207DE2
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 18:04:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.181
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769105067; cv=pass; b=WBhZtE6muwazPhKrr9ZqozpdqvRPMsycolkTqro26fFX8LT7x/PBWdBniDaPZ+dTLnbsdnN5mIx/It2j6DxO/KdjGWikOxZAz0QHa4cGB1lV/HYShMkDmj8e/sSEcNk+4Eb1eY0i0g8zi8segyqLqJEGHuZ0Xkk2Gij/ZqCadw8=
+	t=1769105067; cv=pass; b=nxGdaYcV4crvBps2zQ9dWP7OXFyZ3GRKwVsbCF2Ujc3b3MRmPgckaddnHcZBeDdEgFnAM1b73zUXV4KTrJojIGs520Sm2lMzjggi/Axnq5hyjnQ6FW8m8R2AIN9UawGovPi5jsFvDgh2PzcflIjepULzMVPqQWkafwHxXrHWefs=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1769105067; c=relaxed/simple;
-	bh=+is2jLbMzq0Z6Kfc8fC+eUDq4l5RgoKWrFKSARRKu4A=;
+	bh=jwn1iki7W739NPph6CGujtYaaW5pQXnVefzP5pPy7hw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Y3YgMF4mdPOSJso6q6inSuzuGqodGbYYRnckad63B21duvDKT0dc9AnLgv7wXNFKPFzZ8tdCsScVEZt8C6W1SuLeqiPvYiCtVpNBjMCikU79kozZYEtMPelZrt2Hr+jCbn8SbXqno5QEozMysK/P94RHbgekqHiJcs1ODxBTzl8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SKJzSfL5; arc=pass smtp.client-ip=209.85.167.42
+	 To:Cc:Content-Type; b=WybrC24HpUDaCDgYfmvA3kkuOIOh5VB90isPknVQal2atNkkKXLot2wvaVuteCBuyBax8WB9jSTDSaMVn4ABftEHe5EkkvVnEvJ+MZZYXmOdBIcV3oeGBYVozUjSmF8aBmml27wVkKTHg8uewcQGL+yEngnpwKhe2GG5iDuWP+0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=PYn0v/Bm; arc=pass smtp.client-ip=209.85.208.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SKJzSfL5"
-Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-59dd34f8120so1476313e87.3
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 10:04:08 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1769105046; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="PYn0v/Bm"
+Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-385cfc572f1so8103541fa.3
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 10:04:06 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769105042; cv=none;
         d=google.com; s=arc-20240605;
-        b=VcGkKkq/i2dK80DxmDHC/rRd1Mele71NIReC4WV59dHX3jk15LPTh/zKanzKakzaad
-         MmkxI8zbgYu/ls8IGeb+hOA/Josngw4AyDPtxb2JDyHlNfxW379g1F8FuNnIV1HQPjsf
-         8/tfFbe78q69PqCaNy0VTkdPPfillzC16ApRm3nNBnSp9JgsFX+2uMacMK6KZvjpHJVf
-         QAc3GD1hKi17nL4KLoaY+Ce6dvlrCuDA8AWxpALgN911ODp/2exxgElB14tLB9THFqQl
-         9/kiKxal60WtJchvVb20BS4wqsiV0dl2ANDXNha7Lb9IQDTM9YP2eudjsoTxWYkGdQh8
-         j9hA==
+        b=KyP6ZlgvS7s4KtsAbtYme5iQazI39VXAlfITMp+A8W007TE34hjh1HmipAfy0DlX6g
+         eCin3ZvO2evnJ2fM22ijdBAbg/qN0yrdVONNE6H2nUxfZ1BkiK8qCiy5bsv6iud2rG8k
+         0fmqj7EkEMFDYl63Rs8Y105BDLvot+r5OSojOWqRwVUlvw1XctuyaaaUTGyWaIXqpW/o
+         GQN5vduLgE0pk57vlDiFnrE/CR773n2YCDElnqjwSjo1T59WmI8RLMDl5aGArZxjcHIe
+         Kfh3xhfZrUN/1QlIkBuIdHxFfkpRcZruzCWsVJEYKQfvS+yF4G2Lr2WPwHgejrzj/Blu
+         Yr+g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=+7GHTE3dRB5BqKenpbv68JYHRVBWjnrm6Bs4wCM6D8g=;
-        fh=lv/93G5qe+cTmhzs1mQWnILj9dEionhefPGo0Qp4B9A=;
-        b=B+sGVlI3PLlFijgV6I+Mg3qDr1yhGINCINsbYabmqYCQscULWxha8DFFA1SI1M7A66
-         QxnEXXQ7gv4rB/kHJ8+4xjiJQQOiNXeG06geLYwntd+/UC+aC5MYrPoYhq/nzNFso1HC
-         +mV9lH0fLr07Rsg+f5lf76LroI6CFvj2c1kyS/3ssbzpK4lzniYd5jf99Tj6Rsf4oOV2
-         721MyfVKfqryLfddn3054WRaWNhAsGJcEt1OcrJp4Ovs60a8hKfvzM/riGvJDBwc2chL
-         cl3hjZ75TRDpknQ/3FKvOoqVkrmHPrKKwtDSBF+03KMktp8nhcr9eUEi3dyDhpsA0B2s
-         ZXGw==;
+        bh=44MyyOg8u+kawBMQPv0pxBijnkCh1p4X+LE9snSz38c=;
+        fh=gNLAIxkssxALOakdKtoBJLm6HAxuqHlaOUDsEHSF+pc=;
+        b=Y3BCjBLRXfWmM0g47OUDD6HAR8/2IWAKEQSf0QebnJdS5Cv2UXYZJD8qB6NJ5uD/C7
+         bBbMLynat/mOFoQcRIRQfpiMD4rKh89IIJYqklv/il0h1yqLZgr8H9CZPXLy6Wqas1Mq
+         eOg+Ncd+E2DRcpSDyhLkSDBeqXOv4m+8nBoE5k3IYjFedGORKUxiRR2Kye29yxmFTV5m
+         SNIILqxErmFWLsHlHdp3817/C72lSoyOQvX56i8OKPr/gUbFDSLm0b7QzWk3kvKWhoVZ
+         Ns4cQtSrVscCamhgF9Kw46mhS8fo1c63/NTKxoLASGzeXupIfGikDDc2XawacwbZewYN
+         Yo9g==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1769105046; x=1769709846; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1769105042; x=1769709842; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=+7GHTE3dRB5BqKenpbv68JYHRVBWjnrm6Bs4wCM6D8g=;
-        b=SKJzSfL5d3wEX2z6hbrPD6DLES1jROK4dOOOSXJP5GWwvKwsEfEhvs+WUuFeVPTZxV
-         OAN94/BVDIKBh03rLQHKuGJ/uLPHPgBGa58Mklud7zz74G/KHKUdDIsnOoCj2M9j9aj8
-         Y/5bNTZ82CcxDuCcFs3s+86T84gpUfntljgvEnazTwgscayv5uBLrDDdAb4xZYZ6j4kn
-         cJO1arn893VS1VQl9R9nu2JMEpWORBQg603NX8WGIEyWVJfjIJD6fstntBI8G/nbETWB
-         O+O+pvHRINiSRXcjxZa+BJXz+j3StGPZKrmerzp+/+KozQ+S1UR2sE4ASPOIbqsEToV4
-         A33w==
+        bh=44MyyOg8u+kawBMQPv0pxBijnkCh1p4X+LE9snSz38c=;
+        b=PYn0v/BmEIsrQuxgOAcyVmxJ2xiwz8kwp9YxPgF4fxLsAPxWS8+TOS8hhbvS6y4jyA
+         g1gmG3d+Axqo5bZbyPIu+yd7lvfEOlU2SSWR8EOwUnz3p9IXDVE2efC8zZeaWX0QB1W4
+         TLusvWoOJjdVCVFipEroi6zD/oL3o/gAkhlEZ81PGntsWhJaYj7m3bgB27Ms6IAn+GeC
+         bRCq5liYM+Teu46ya+9MXE3V9IJYzNijChHOen0ZHNpv76rK/cHwpoJN5wdJ7TOL+n4i
+         bJQA30ZxARKkb94KgMMxhdjDEE5sabjph3Jli+ybCZLPF+Ld64gMBmkMt9z/Bzd4wo0o
+         KeEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769105046; x=1769709846;
+        d=1e100.net; s=20230601; t=1769105042; x=1769709842;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=+7GHTE3dRB5BqKenpbv68JYHRVBWjnrm6Bs4wCM6D8g=;
-        b=wagy/4Ofbve0Y9ja453LG2+7xUWqoOjlbsHwnkGbDsfjWJD4AogdQOppwCmZ2oPF9S
-         +v+tPRvxWmlA9HAVoQSQqzjcvl6Orem90CFmc5vZ7UPpSLULTx9+WxLD6pDJ1bTDkTqZ
-         zxbR/QH2pDbDX6glc3U9J4fQQ8Ar5CrUcSZEtzi9dVe6B5nnR6rpTsmgIhXOGOtmfx9r
-         aSR7DogDZuEkGFcHrcAXZysP3Q6hS0BoN+oalsnd05c44KbHWHTkA6xxchctKdUVGQ/K
-         7gNOJfI+1AAfmmHaBLiVDC+FUa5SfQ+3TLSoWON4uJzWydPeO9AMUPQbiufRGSF2xD37
-         ekFA==
-X-Forwarded-Encrypted: i=1; AJvYcCUvdNUu9CwPdw69/0gs195PnSmdpZLzeaQLfO1tKIPfjR3+wrMzvO5OUtrzLjglaMdMbWdvnm+PsL8=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz3LKAO5xKfPV68M5f9d8WzC8sL7rm37/bCC2SqcsmUb8TAz0f7
-	Hurbe4c+BeCkdt0CTETRgmiwJQrpwddZ8LxXWEVRcc9BaXaRuVwwLbYKl0GHtjBhzDKX85BzQHJ
-	0LwuoKqDAqylHshsde2D9iAZWh+jqD+Zp+2EPst55VA==
-X-Gm-Gg: AZuq6aJ30QRcivnmwP+AUyiL80/rQVGIG4DDsMIRfLLjcO9/kXbyeyd/q0A2OXBPs3h
-	ebtfwyOtVHYs9Q0rwQ82s62LjmVq1fM8FXcm/gQSQsMrlifG6PVLXcs/rf7/aUhgpqwu4D7DKgA
-	zgTBLeFIHB5kKUaf6Zv7C8Z99axHezhcrG493FBdPtl81ypkeqNYNzPa5CDBSd67mUuQygR3GP9
-	WZNm03UVa6C+CLPbA+L6lOtRJmv3K2I5cHu1jveMnix+eviR+lYF/RqNQfH15V1WlMAWchh
-X-Received: by 2002:a05:6512:3b97:b0:59c:ba5b:ff62 with SMTP id
- 2adb3069b0e04-59de490d21amr53289e87.15.1769105045566; Thu, 22 Jan 2026
- 10:04:05 -0800 (PST)
+        bh=44MyyOg8u+kawBMQPv0pxBijnkCh1p4X+LE9snSz38c=;
+        b=uriOKPj5YAXaXtErXelLx9SfygPb8J1Yqu2nIRRe7RqOp5gFIO2iRn4yCpDN9MZxET
+         ud1nimZOaq/WEgmw2JhNHuXPR2GLX6VQ89uEzo5dQ4UiMPeqL2niPksLDEGmzKvJEoQn
+         bV5gAiA18gm1+wR7fQ0MKven1pPqh5YAn+obwUqg+6Zxeq3j5/CTyZGOYuryoybMEAW1
+         ee5IJxWPIvAtzq/BAgoXVm2HZixB3lkLQCn3VQfcvYFZ9L/TEpLgHe1rc1u4/24/fwRT
+         HWWi7NemlnO9CJDpJyvG9uDH59foKzjTsdtc/Hy3MzU/6+fsDHKKRVO+1vixqudkcCJV
+         L6gw==
+X-Forwarded-Encrypted: i=1; AJvYcCUoD1bsqIXVeaSJixricQqf621fKIo9LD5NmjWJ+b0t5+hrMcMoMvfymnfGrkuqOsRmSJ1Zil4U4yo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzG9UFJhO/PMnecfG2y6fCa24aj07dtDzxWodhIn8/IDmbisxh5
+	hpxKAkMbgXcNVQmzqPAmPxEBjuJ/NcN/didVHyHlES3vgCU+JHH12XM1hiNGLKhNNBwW59CSnw/
+	15kSZnIAZbExP+0hW6yhpR91lmR7D6jpGN/gyaBagY4gVBN5woat7
+X-Gm-Gg: AZuq6aJ86BAnM+aAaiiMrMCxickOVzyTw59C12rzqnBTAFkvqE5jkNOeUpQkDYnoBlX
+	IMI9SXUzjb5oZq063x0GN6qyNmtAoPIpACelMQWqShtJQsf8kgSMiLEuB2gqaL4yEWXwuwMKu/r
+	Z/mtnxtk98iC0Fst9jeEgg0kuz8D5h8bH7bmMCu6E8t1OSQeW03t5kSFxKFaWzJeCOaA5oR/Ts1
+	fVBNbNIBAn8YKJGDPdv4pesGbVng5SWf8ZwpzkJ52driAt3rbjfmQpPKmabvzFTYcIR+bje
+X-Received: by 2002:a05:6512:61a6:b0:59d:d65c:ba2b with SMTP id
+ 2adb3069b0e04-59de490a921mr69586e87.19.1769105042267; Thu, 22 Jan 2026
+ 10:04:02 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260120-mmci_qcom_dml-v1-1-9b334479968e@qq.com>
-In-Reply-To: <20260120-mmci_qcom_dml-v1-1-9b334479968e@qq.com>
+References: <20260120-mmc-no-advert-v3-1-1c7a6a55ef9c@kernel.org>
+In-Reply-To: <20260120-mmc-no-advert-v3-1-1c7a6a55ef9c@kernel.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 22 Jan 2026 19:03:29 +0100
-X-Gm-Features: AZwV_QjDIpmCdl3xsITbV6Pt2jHn3-Pc7ojNKEOQi8IB6Ipjt84DU72iscHsb2U
-Message-ID: <CAPDyKFpJuUL-GfpYDUNK_e0r-CS=oX-tPXozOtvVmFZ8XLBTTw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci: Fix device_node reference leak in of_get_dml_pipe_index()
-To: Felix Gu <ustc.gu@gmail.com>
-Cc: Linus Walleij <linusw@kernel.org>, Srinivas Kandagatla <srini@kernel.org>, 
-	Stephen Boyd <sboyd@codeaurora.org>, linux-arm-msm@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Felix Gu <gu_0233@qq.com>
+Date: Thu, 22 Jan 2026 19:03:25 +0100
+X-Gm-Features: AZwV_Qj-pTJLH0Yy6UqyEsJ9NNZ6UWDTtTvMv7DsKPT68zX8czML7g-4Qi3H86o
+Message-ID: <CAPDyKFpAid8zkLfZxi2fzouYyibPYYvhDZ+bsH8=hZAewMGyeQ@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: sdhci: Stop advertising the driver in dmesg
+To: Linus Walleij <linusw@kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 20 Jan 2026 at 15:26, Felix Gu <ustc.gu@gmail.com> wrote:
+On Tue, 20 Jan 2026 at 14:05, Linus Walleij <linusw@kernel.org> wrote:
 >
-> When calling of_parse_phandle_with_args(), the caller is responsible
-> to call of_node_put() to release the reference of device node.
-> In of_get_dml_pipe_index(), it does not release the reference.
+> From: Linus Walleij <linus.walleij@linaro.org>
 >
-> Fixes: 9cb15142d0e3 ("mmc: mmci: Add qcom dml support to the driver.")
-> Signed-off-by: Felix Gu <gu_0233@qq.com>
+> As much as we have grown used to seeing this message on
+> every kernel boot, it does not add any technical value.
+>
+> Drop all messages from sdhci_drv_init(), and drop the
+> module_init() and module_exit() calls as well since they
+> now become empty.
+>
+> The modules becomes a pure library module, meaning it will
+> get pulled in by modprobe() when the symbols inside it
+> are needed, or compiled in if any users are compiled in.
+> Kconfig already makes sure this module is compiled in
+> the users are compiled in.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
 Applied for next, thanks!
 
@@ -109,27 +117,50 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/mmci_qcom_dml.c | 1 +
->  1 file changed, 1 insertion(+)
+> Changes in v3:
+> - Rebased on v6.19-rc1
+> - Link to v2: https://lore.kernel.org/r/20251008-mmc-no-advert-v2-1-45bc00006fb2@linaro.org
 >
-> diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-> index 3da6112fbe39..67371389cc33 100644
-> --- a/drivers/mmc/host/mmci_qcom_dml.c
-> +++ b/drivers/mmc/host/mmci_qcom_dml.c
-> @@ -109,6 +109,7 @@ static int of_get_dml_pipe_index(struct device_node *np, const char *name)
->                                        &dma_spec))
->                 return -ENODEV;
+> Changes in v2:
+> - Drop all the messages instead of demoting.
+> - Link to v1: https://lore.kernel.org/r/20251007-mmc-no-advert-v1-1-0e16989d28ef@linaro.org
+> ---
+>  drivers/mmc/host/sdhci.c | 16 ----------------
+>  1 file changed, 16 deletions(-)
 >
-> +       of_node_put(dma_spec.np);
->         if (dma_spec.args_count)
->                 return dma_spec.args[0];
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ac7e11f37af7..1ff15fa9b042 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -4997,22 +4997,6 @@ EXPORT_SYMBOL_GPL(sdhci_remove_host);
+>   *                                                                           *
+>  \*****************************************************************************/
+>
+> -static int __init sdhci_drv_init(void)
+> -{
+> -       pr_info(DRIVER_NAME
+> -               ": Secure Digital Host Controller Interface driver\n");
+> -       pr_info(DRIVER_NAME ": Copyright(c) Pierre Ossman\n");
+> -
+> -       return 0;
+> -}
+> -
+> -static void __exit sdhci_drv_exit(void)
+> -{
+> -}
+> -
+> -module_init(sdhci_drv_init);
+> -module_exit(sdhci_drv_exit);
+> -
+>  module_param(debug_quirks, uint, 0444);
+>  module_param(debug_quirks2, uint, 0444);
 >
 >
 > ---
-> base-commit: 9b7977f9e39b7768c70c2aa497f04e7569fd3e00
-> change-id: 20260117-mmci_qcom_dml-e169407da7bf
+> base-commit: 8f0b4cce4481fb22653697cced8d0d04027cb1e8
+> change-id: 20251007-mmc-no-advert-8f5646c44dd6
 >
 > Best regards,
 > --
-> Felix Gu <gu_0233@qq.com>
+> Linus Walleij <linusw@kernel.org>
 >
