@@ -1,90 +1,146 @@
-Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71DCC3DC96F;
-	Thu, 22 Jan 2026 16:42:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.142.180.65
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769100173; cv=none; b=uN/rSQlcbKNdMao2Jqz3QDZRSRXbbgzuK0HRVMCMl7/CLxCtn97mlkZOcTbWnX734arxo2rg49pIk2ImQfcg2lXK67oAPQXwNNf0MP3FsVLkIDl84sr5IdkESRza3QeJTQavzxuCEp3nBbz6vFYBg2SPs73+eQlUUK4hfbn57qA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769100173; c=relaxed/simple;
-	bh=6P0n0yRlYMIV56MqouKV3LIVah5f3lMN4f0w/T0gbNY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Mpi2yqQs5nMyrIJ+VqlCtzovgrJc3b6lzlcDlhp/SqJZN0fYaDs8Lx7FOw6mS06V4LO7cIEJeOjmUbIwpD0DQjCcbpZ+nGxIx8bGFwoGMS+b9XnT9XHcTWy9l/95OcGxn8AF44xllqYfmywAWj+ZJ35WT4Ra8kbsX+/ImMGzWYM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org; spf=pass smtp.mailfrom=makrotopia.org; arc=none smtp.client-ip=185.142.180.65
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=makrotopia.org
-Received: from local
-	by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
-	 (Exim 4.99)
-	(envelope-from <daniel@makrotopia.org>)
-	id 1vixlK-000000001Tb-1Okc;
-	Thu, 22 Jan 2026 16:42:26 +0000
-Date: Thu, 22 Jan 2026 16:42:23 +0000
-From: Daniel Golle <daniel@makrotopia.org>
-To: Miquel Raynal <miquel.raynal@bootlin.com>
-Cc: "Rob Herring (Arm)" <robh@kernel.org>,
-	Chad Monroe <chad.monroe@adtran.com>,
-	Richard Weinberger <richard@nod.at>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Brian Norris <computersforpeace@gmail.com>,
-	Kamal Dasu <kdasu.kdev@gmail.com>,
-	William Zhang <william.zhang@broadcom.com>,
-	Nick Terrell <terrelln@fb.com>, David Sterba <dsterba@suse.com>,
-	=?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-	Simon Glass <sjg@chromium.org>, Linus Walleij <linusw@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Marcus Folkesson <marcus.folkesson@gmail.com>,
-	Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@kernel.org>,
-	Hauke Mehrtens <hauke@hauke-m.de>, linux-mtd@lists.infradead.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
-Subject: Re: [PATCH v3 06/10] dt-bindings: mtd: partitions: Drop
- partitions.yaml
-Message-ID: <aXJTb0-YMu9gf5SB@makrotopia.org>
-References: <20260121-dt-mtd-partitions-v3-0-ec3af93c8f93@kernel.org>
- <20260121-dt-mtd-partitions-v3-6-ec3af93c8f93@kernel.org>
- <aXFCws0XUToQ03UH@makrotopia.org>
- <87tsweos4l.fsf@bootlin.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5721399A41
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 17:26:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1769102831; cv=pass; b=hvJNVEyeWq8PiDjngWv6UGU+w+KeRKV8A/VWR/yuoOdiKz69ls//wlNy8zS0tVIXmeEHmnMnlXTknlwEj2sopLx/8QnBeymXm2jtkXHOhl70RZFDnlFMezYe9KyHRU0WWVhvSk4u/fXL3Z892xxtngKxt3sasyfmU67h+jFfxwY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1769102831; c=relaxed/simple;
+	bh=BYyLZBP8y8y8dYg70IIuqbmfbBD25HnRi0CsXenU/+8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=hKawjtmH+4y+LN7MDEhTunD7qdRaEjt/pZzPMec/DT0Uf8/Ruj4XyfYQQoGtz0hXkg+FbYWA17DtcxGrgUKsKasBupAx0Y1XBo4YUKLHdpxL2uDGLpvqbpQVGGy7PidxPVmV8tdU7g7oE/is0LHULHllNDdwpK8oQUf5CQVaVhQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lVZmkcwn; arc=pass smtp.client-ip=209.85.167.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lVZmkcwn"
+Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-59b77f2e43aso3039403e87.1
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 09:26:58 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769102815; cv=none;
+        d=google.com; s=arc-20240605;
+        b=IalqPFJpvvXc1hPgi8z+xrHQ6hS4b15QuOj4bmdyf3rIffTWfhLPbRtLTVibYqlF7J
+         sXN8IjGE9Xqi62/KfYA3Qoh+Ixi+knk8IhXnutk4Lm2K2vTHv0463xCaTDcfuZL8Jxj0
+         1lrxqaH35jIaGo4c1EPMQx2/ixccdKhY/tPKQWMUInZ2lIVBxrytg7iJ7b/A8GnAoaPp
+         NWkS4fdXRucq4NhjHahFoTyFlT5Xn9Wa1msfeGJG9TuSWJ79pWFxlpjIW/nnGujOsbsn
+         JojKnl2dWqkiqv3z49g19nc+7Dhdzodr+0KGhToAD+q4C8W0a/YkCLsKOjlzflAor0lG
+         b/fg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=O0wwwgamx5qsFGEUilYG/RiRlT7XyKwhafQRv/ycuZ4=;
+        fh=SvYE6LuC8kkkkv7AjGa/0vANvkDkPcD0KBwJKc2fcY4=;
+        b=Kqa8KhFganFzbaO1nceDqo1fDM+wdl50nZb0jE8UQ/lTkGCgI80lJH6U5X/bPtxb0h
+         1W/wu/1ft2C6e4QMkqOqrTq1MSvN/15DDNNHjBbx/9gDnQsDAdvXt7BUpCawftvLwYPB
+         A/0JOxJEMdsDd5oKxr6Vp8cYags26ejtv1ObuH2uViQcqVJX+u/QnreRC18KWwuPN70Q
+         jGkQMKT6JDJwngsdBsM2ooCWtQAl2m+PvAnaLHrCdzA1ltoQNRNIO29bFxd6P1LPe+jb
+         WivE2mCXWxy4cbzo+uMJbcvmYhSzx465Hw5sjWeoiUsKZQkoIUawCVN3I8GynCdSbbpP
+         oo5g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1769102815; x=1769707615; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=O0wwwgamx5qsFGEUilYG/RiRlT7XyKwhafQRv/ycuZ4=;
+        b=lVZmkcwncUrKQsCr9iZZ2DDZYy48Aq5IhASQaJm71kNC1ujNZd1gErmimptQIJw4l8
+         9kA4tlZftyYXDrUeST2dgeKkfkxV+CJjfXLhPtIcVtYjiT2CQ8zbT8VpIUqiKfFdcoKN
+         SVjwx2/bn1TIqc2vSEeqPYxtfkKTRx2ChdkNMmOqtqDvmPXJouseINFPl439+JCfRvXc
+         339iWo5naNAYe8rbV6Q5hoDXVNXxARVgrBIxMerU8azZ3rdHb5tP98tZb1bTjBI9J0n6
+         J9dJTQzHv/s7EkpWF/iEfZc2xsbW0GaQwXVvXCKBFoECOUR5y3tP3mn/fiLPKVeZ7l8v
+         +oSA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769102815; x=1769707615;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=O0wwwgamx5qsFGEUilYG/RiRlT7XyKwhafQRv/ycuZ4=;
+        b=tvW7dN+UTv3zeyNb0BAb51xxiNmOUifw4xI3kABV0ja3SnFt0/MxMvTuZ7SgCnwCf1
+         RqqCgKtdU1nljj4KHYh30D8w0KtID+TCHLdgQkKqVV7XJ2bpk94zvNZO53NJFKWHHP5R
+         HL4r4fZM5MeSeP1PNmDjCZGWOsbZT5wXzSN1zuuwoQiwlBfOYuj2FHM7ZEwF736WWN38
+         DkmGw/mbQ0Pj835cbfU1L4ppRr5lx3t29t9dNqpevWDoOhxHmra1rCh6ku39yH1fi1h7
+         HWJvYEMXGDb6ZclBeYSTbj/6zbXv/f7juLm8+0geJkaTxj6p8drpHiRDuCyy6K7eEjl8
+         1Rjw==
+X-Forwarded-Encrypted: i=1; AJvYcCV+yDmLuQiNzd/OJ131Pv5tIZ/WpvkwSckg4Nz+7nHFl/Lc+lMo8Bz/ozEIv/63zO1Y8cJ9VhJO0Fk=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy3jQWYziPOje4M5VuZJPjKArVrbS0Br+oBVEkPwCA3cJrJFdtD
+	w9r+mI/1/qzsbhiqfQY6XlgS62XFnVBxi5ytjJ2bqa2ZSNpJ2P7feZEmu6S4H35HG8wzcmBzy2S
+	P3KRzW19YUwT5FnSWnYa/eYVEJtt2gSqn+HLROAEs7Q==
+X-Gm-Gg: AZuq6aJqDiyBUNZxxf82KOZsmrU2NOBYlZ2a3sDfeBdbgbYg82T7f+gTABVe80joQNJ
+	kMJ6fj9EdlB5sb3S4nivtMtmu6X9hdO29QV7UHAIvywZdYrPG9ZtM8XVLyhwLgMb6JJUgXuQ6ND
+	AGyBmEIkGHOe4GvRFAjOgm82mYoaAFB4c8XpS0WIydqT/SPzisAmLNiZByMUaNHBXhx1H4Y8A9U
+	oboBBAG3QrB65U29+pqwsEuIEqklx/ZNRzj3WsgFJh31+riVUZmFgEDeb2z9l/orKkM7NIP
+X-Received: by 2002:ac2:4f0e:0:b0:59b:6ac6:115f with SMTP id
+ 2adb3069b0e04-59de45b3cc0mr47745e87.18.1769102815205; Thu, 22 Jan 2026
+ 09:26:55 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <87tsweos4l.fsf@bootlin.com>
+References: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com> <20260112-mips-pic32-header-move-v2-9-927d516b1ff9@redhat.com>
+In-Reply-To: <20260112-mips-pic32-header-move-v2-9-927d516b1ff9@redhat.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 22 Jan 2026 18:26:18 +0100
+X-Gm-Features: AZwV_QhnJ9ztXIYztk-bUWG2DWjCH9tOitqOdGADe2tFkQurOXElAaxhsGE8iIA
+Message-ID: <CAPDyKFoS-HBNm7m7AyGvm8nr82hN09qeAo+O4GADr-jO_mX+iA@mail.gmail.com>
+Subject: Re: [PATCH v2 09/16] mmc: sdhci-pic32: update include to use pic32.h
+ from platform_data
+To: Brian Masney <bmasney@redhat.com>
+Cc: Thomas Bogendoerfer <tsbogend@alpha.franken.de>, Claudiu Beznea <claudiu.beznea@tuxon.dev>, 
+	linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Thu, Jan 22, 2026 at 11:31:54AM +0100, Miquel Raynal wrote:
-> On 21/01/2026 at 21:18:58 GMT, Daniel Golle <daniel@makrotopia.org> wrote:
-> 
-> > On Wed, Jan 21, 2026 at 01:56:39PM -0600, Rob Herring (Arm) wrote:
-> >> The partitions.yaml schema is an unusual structure in that it includes
-> >> all possible partition types, and it disables the normal matching by
-> >> compatible strings. As partitions.yaml has nothing to match on, it is
-> >> only applied when explicitly referenced. The use of "oneOf" also results
-> >> in misleading warnings which are difficult to understand. Drop
-> >> partitions.yaml and rely on the standard compatible matching instead.
-> >> 
-> >> The "mmc-card" case previously allowed any partition type, but now only
-> >> allows "fixed-partitions". There aren't any users and the original
-> >> intent appeared to be only for "fixed-partitions".
-> >
-> > It would actually be great to also allow 'gpt-partitions' as compatible
-> > type with #address-cells = <0> and #size-cells = <0> and allow matching
-> > on partition UUID, name or index. This has previously been discussed and
-> > would avoid having to extract MAC addresses and WiFi EEPROM data in
-> > userspace on many devices which rely on such conventions.
-> 
-> Out of curiosity, why not exposing this data through an NVMEM cell
-> instead? Anyway, this (re?)addition can probably be part of a follow-up
-> series and is almost orthogonal to this cleanup IMO.
+On Mon, 12 Jan 2026 at 23:49, Brian Masney <bmasney@redhat.com> wrote:
+>
+> Use the linux/platform_data/pic32.h include instead of
+> asm/mach-pic32/pic32.h so that the asm variant can be dropped. This
+> is in preparation for allowing some drivers to be compiled on other
+> architectures with COMPILE_TEST enabled.
+>
+> Signed-off-by: Brian Masney <bmasney@redhat.com>
 
-Exposing this data via NVMEM cell is exactly what I'd like to see.
-However, for that the location of the data to be exposed as NVMEM cell
-needs to be identified in the same way as done by the stock firmware,
-which uses a GPT partition name in case of Adtran, for example.
+I noticed Adrian has acked this already, but if not too late, feel
+free to add my ack too.
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Kind regards
+Uffe
+
+>
+> ---
+> To: Adrian Hunter <adrian.hunter@intel.com>
+> To: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-kernel@vger.kernel.org
+> ---
+>  drivers/mmc/host/sdhci-pic32.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
+> index 7ddac0befed87e6e46acfa7593203a5b540558bf..2cc632e91fe454bf29c1da22e45135d5d0267f54 100644
+> --- a/drivers/mmc/host/sdhci-pic32.c
+> +++ b/drivers/mmc/host/sdhci-pic32.c
+> @@ -18,6 +18,7 @@
+>  #include <linux/interrupt.h>
+>  #include <linux/irq.h>
+>  #include <linux/of.h>
+> +#include <linux/platform_data/sdhci-pic32.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/pm.h>
+>  #include <linux/slab.h>
+> @@ -25,7 +26,6 @@
+>  #include <linux/io.h>
+>  #include "sdhci.h"
+>  #include "sdhci-pltfm.h"
+> -#include <linux/platform_data/sdhci-pic32.h>
+>
+>  #define SDH_SHARED_BUS_CTRL            0x000000E0
+>  #define SDH_SHARED_BUS_NR_CLK_PINS_MASK        0x7
+>
+> --
+> 2.52.0
+>
