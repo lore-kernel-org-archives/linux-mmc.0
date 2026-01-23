@@ -1,223 +1,110 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mail-m1973196.qiye.163.com (mail-m1973196.qiye.163.com [220.197.31.96])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60D7539DB1D;
-	Fri, 23 Jan 2026 06:10:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54CA031B117;
+	Fri, 23 Jan 2026 06:53:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.96
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769148623; cv=none; b=iDSWmXfi303yfVxsOi1ZvxxMW7ODNJnn0ivEm7GlXQWjC431bZ/YUoAxFUmJ9OyuV6l6bWYiEuKGkjGoSo0eHZk7zgUjgIrKy++dJzqJTRn8vlyKg718j/klqH0txlfk6pAfcY14KMDojWpTu+ghFUQ5ba9WAU2fTqYmK452Qx4=
+	t=1769151217; cv=none; b=IddZ/290/vMSc8mTa/6jKfiCS6SuXZgArlnpoUTh8g6pT3+IzAPw2nLAJtnpvOrE3Gv/rkWgTdarEWvE0Nb/R58mDYnLTLB0o9ZWXe4TSrDaIy3nBKmyPtBX0C5LO34ZPcaKGLhll2LUPmnGpBhD1DBVKGD3OLtC1VfkvGUasmc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769148623; c=relaxed/simple;
-	bh=dfpWKxpIfuxVovqrNknmYppEYvMNoabwozeJP6tGAxI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=VmFhThyE40xNB1/jnIuXgWJ0CG32+LYRQHLgWDcyKcZNv3rH6Z8rFgui3Zatc59K5BDCj0g6OHwg/6G9gl+gnOzJr1HyX+5sxmItDCwS07n9iC84kE3hksmRX0jX1+wChDJGLRjaT+kTrXQBkVk47WYZeqqIssvN7v/zB8QCtyA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=SHJxauZ9; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1769151217; c=relaxed/simple;
+	bh=6LUwwmwztLUjSDZq1YEuRoX0MroxWAMBlYIvltVfvNg=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=T0QcQG8SALEb+nRzCbk7WQpza8Hr6dHluUAmPWHFBVmEllj8gW00eRc+o4Vt/LSdqiBM/vJBuPSkS63jZdDRDf7L9DdfNo+lo3atafyJvvM6Kn+t46cM0OPcJ4Kld9BIoIT05HbQdbJ0p4wQdR35vCn+U6l4z17s5EkSi+D7OKU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=YTO3Vo/c; arc=none smtp.client-ip=220.197.31.96
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="SHJxauZ9"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 60N5m0S53504255;
-	Fri, 23 Jan 2026 06:10:09 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	Yhhc+9jljv1DLMMKeNn6k6bItM8clsa4abB8yMtaIJY=; b=SHJxauZ9SopCrhyx
-	oAMa1eOnKlw+EP7tPs7oEgsOgwLL4xa2O+htT2uZ9/EkNidrj2cbRfrUNNHfXUpR
-	RekzMV6E2QjABohaMv17/I5xDIT/A/bu6i4zkMUiD4LXmFTWpyU0X/ym/7xGx40z
-	U/AiMAhoXjL6Z5aU9AVA7EkLOupekGqNLjNlabBhW9S5rSwo5zeZzRx026ln9hTb
-	PjHDE42BIlpR8pOzLkmk+sfjsITyqQfX4Kgo4h4Pu7icEfUBoY9FjIwuQZf0qXih
-	aSMXqpBA4dZ7vmN3DxDFQP80Vw6FnZO6FyNjydz+KeqeXcPgf4caTDbOSHrBsMna
-	Q29vSw==
-Received: from nasanppmta01.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4bus981x1k-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 23 Jan 2026 06:10:09 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 60N6A95u016585
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 23 Jan 2026 06:10:09 GMT
-Received: from [10.151.36.184] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.17; Thu, 22 Jan
- 2026 22:10:06 -0800
-Message-ID: <3df0ad20-61c0-73c4-be8f-aea43f70cb69@quicinc.com>
-Date: Fri, 23 Jan 2026 11:39:49 +0530
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="YTO3Vo/c"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 31b4a530a;
+	Fri, 23 Jan 2026 14:48:15 +0800 (GMT+08:00)
+Message-ID: <2531d1ef-2450-4479-b32e-b9c861ffadd1@rock-chips.com>
+Date: Fri, 23 Jan 2026 14:48:14 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Subject: Re: [PATCH v6] mmc: sdhci-msm: Enable ICE for CQE-capable controllers
- with non-CQE cards
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: <adrian.hunter@intel.com>, <linux-arm-msm@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <abel.vesa@linaro.org>, <ebiggers@kernel.org>
-References: <20251126064251.1928529-1-quic_mdalam@quicinc.com>
- <CAPDyKFppNgYvHJDqfvyQ0DTYCwgcSR12D+-=04NGEDtbM8FmTA@mail.gmail.com>
-Content-Language: en-US
-From: Md Sadre Alam <quic_mdalam@quicinc.com>
-In-Reply-To: <CAPDyKFppNgYvHJDqfvyQ0DTYCwgcSR12D+-=04NGEDtbM8FmTA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, jh80.chung@samsung.com,
+ sebastian.reichel@collabora.com, linux-mmc@vger.kernel.org,
+ ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, hy50.seo@samsung.com,
+ kwangwon.min@samsung.com
+Subject: Re: [PATCH] drivers: mmc: Replace manual
+ devm_clk_get/clk_prepare_enable with devm_clk_get_optional_enabled
+To: "ping.gao" <ping.gao@samsung.com>
+References: <CGME20260123054113epcas5p26e6418eb49d2caa8e3ad048d14386189@epcas5p2.samsung.com>
+ <20260123054527.4151947-1-ping.gao@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20260123054527.4151947-1-ping.gao@samsung.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMTIzMDA0NCBTYWx0ZWRfXyGbOkZShMDxr
- D6sgbajJWy24htHb8PE7mHfAQpWPoio91dcKvl/W5PXaeFjQ+mzb+GV+IoAInstrKZaTetyKFsE
- boehyCgZp+WuEltm8n07R0p9xA38rtiw1HYu9TW/4l1BrMd1VDSBxxP6mDnkyHu868luQApKnb1
- df7o/hn60gfA7pbHz4EFel9cE0sOdMmyvhRsHuoAtBAcXXFxM/wNpeKS7g29vLq1531U3K6AXFk
- 2qfYygRoZaVNYjUMmdiZ/qAHO3Ebs0U7TRkj1+9J/iU8AnHL1vNs90T72gpO9ZBtzHShSLVe2KQ
- /u9kxTHQpjJfWwj1FXpSx3ae171Rva1kAI80t6ynKOMRFr64c5GvPfgGMyQIVDSxrTPACFvIH1k
- aVJvIxAVU5HMohU1O7jZB7s1lDc8aQvwddR1PK0KfsQVkAuS/1foq8pOQHVYi2MTXyRl2+eoyVm
- wK57X8lo+7yXfKvEldg==
-X-Authority-Analysis: v=2.4 cv=JuX8bc4C c=1 sm=1 tr=0 ts=697310c1 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=vUbySO9Y5rIA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=COk6AnOGAAAA:8 a=QyXUC8HyAAAA:8
- a=xIS0LuMThQ_u9C2hoikA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: -0vaCrYYhC7-mesM5c_gB1yBuzzVFR2Z
-X-Proofpoint-ORIG-GUID: -0vaCrYYhC7-mesM5c_gB1yBuzzVFR2Z
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.20,FMLib:17.12.100.49
- definitions=2026-01-22_06,2026-01-22_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 priorityscore=1501 spamscore=0 bulkscore=0 lowpriorityscore=0
- phishscore=0 suspectscore=0 clxscore=1015 impostorscore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2601150000 definitions=main-2601230044
+X-HM-Tid: 0a9be99c567309cckunmc86b751a195e5e
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQx0eGFYZSUsYT0tLHh0YT0NWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSEpOTE
+	pVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=YTO3Vo/cTl0+ruF3Gm+owbiMuYjpJBy5hb0fWRp10k53B+Kqp0p4Db4Dlfu/icuLtYmQGSTb1BLiGslQ4lIhzOMSm+8eEJJvo646f4w1CQ9OLFBC9Ijx/Ypw5GpssKG9aC0zlG/i8vDoqpzc01Y4QiLfN6EKF/4PRPD6GZNTA2g=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=oew3EVh7JfF8+84rw/TVugGeLDHqJZfIAe4RibowC1s=;
+	h=date:mime-version:subject:message-id:from;
 
-Hi,
+在 2026/01/23 星期五 13:45, ping.gao 写道:
+> By using , we:
+> - Automatically handle optional clocks (return NULL if not present).
+> - Ensure the clock is enabled upon acquisition.
+> This change reduces code complexity and improves reliability.
+> 
 
-On 1/21/2026 6:14 PM, Ulf Hansson wrote:
-> On Wed, 26 Nov 2025 at 07:43, Md Sadre Alam <quic_mdalam@quicinc.com> wrote:
->>
->> Enable Inline Crypto Engine (ICE) support for CQE-capable sdhci-msm
->> controllers when used with eMMC cards that do not support CQE.
->>
->> This addresses the scenario where:
->> - The host controller supports CQE (and has CQHCI crypto infrastructure)
->> - The eMMC card does not support CQE
->> - Standard (non-CMDQ) requests need crypto support
->>
->> This allows hardware-accelerated encryption and decryption for standard
->> requests on CQE-capable hardware by utilizing the existing CQHCI crypto
->> register space even when CQE functionality is not available due to card
->> limitations.
->>
->> The implementation:
->> - Adds ICE register definitions for non-CQE crypto configuration
->> - Implements per-request crypto setup via sdhci_msm_ice_cfg()
->> - Hooks into the request path via mmc_host_ops.request for non-CQE requests
->> - Uses CQHCI register space (NONCQ_CRYPTO_PARM/DUN) for crypto configuration
->>
->> With this, CQE-capable controllers can benefit from inline encryption
->> when paired with non-CQE cards, improving performance for encrypted I/O
->> while maintaining compatibility with existing CQE crypto support.
->>
->> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> This has been applied for next since a few weeks, but I have a
-> question. See more below.
-> 
-> [...]
-> 
->>
->>   drivers/mmc/host/sdhci-msm.c | 77 ++++++++++++++++++++++++++++++++++++
->>   1 file changed, 77 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 3b85233131b3..da356627d9de 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -157,6 +157,17 @@
->>   #define CQHCI_VENDOR_CFG1      0xA00
->>   #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN  (0x3 << 13)
->>
->> +/* non command queue crypto enable register*/
->> +#define NONCQ_CRYPTO_PARM              0x70
->> +#define NONCQ_CRYPTO_DUN               0x74
->> +
->> +#define DISABLE_CRYPTO                 BIT(15)
->> +#define CRYPTO_GENERAL_ENABLE          BIT(1)
->> +#define HC_VENDOR_SPECIFIC_FUNC4       0x260
->> +
->> +#define ICE_HCI_PARAM_CCI      GENMASK(7, 0)
->> +#define ICE_HCI_PARAM_CE       GENMASK(8, 8)
->> +
->>   struct sdhci_msm_offset {
->>          u32 core_hc_mode;
->>          u32 core_mci_data_cnt;
->> @@ -300,6 +311,7 @@ struct sdhci_msm_host {
->>          u32 dll_config;
->>          u32 ddr_config;
->>          bool vqmmc_enabled;
->> +       bool non_cqe_ice_init_done;
->>   };
->>
->>   static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
->> @@ -2012,6 +2024,68 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
->>          return qcom_ice_evict_key(msm_host->ice, slot);
->>   }
->>
->> +static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
->> +{
->> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +       struct mmc_host *mmc = msm_host->mmc;
->> +       struct cqhci_host *cq_host = mmc->cqe_private;
->> +       u32 config;
->> +
->> +       config = sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
->> +       config &= ~DISABLE_CRYPTO;
->> +       sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
->> +       config = cqhci_readl(cq_host, CQHCI_CFG);
->> +       config |= CRYPTO_GENERAL_ENABLE;
->> +       cqhci_writel(cq_host, config, CQHCI_CFG);
->> +}
->> +
->> +static void sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_request *mrq)
->> +{
->> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +       struct mmc_host *mmc = msm_host->mmc;
->> +       struct cqhci_host *cq_host = mmc->cqe_private;
->> +       unsigned int crypto_params = 0;
->> +       int key_index;
->> +
->> +       if (mrq->crypto_ctx) {
->> +               if (!msm_host->non_cqe_ice_init_done) {
->> +                       sdhci_msm_non_cqe_ice_init(host);
->> +                       msm_host->non_cqe_ice_init_done = true;
->> +               }
->> +
->> +               key_index = mrq->crypto_key_slot;
->> +               crypto_params = FIELD_PREP(ICE_HCI_PARAM_CE, 1) |
->> +                               FIELD_PREP(ICE_HCI_PARAM_CCI, key_index);
->> +
->> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
->> +               cqhci_writel(cq_host, lower_32_bits(mrq->crypto_ctx->bc_dun[0]),
->> +                            NONCQ_CRYPTO_DUN);
->> +       } else {
->> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM);
-> 
-> Should we really call cqhci_writel() here, even if
-> sdhci_msm_non_cqe_ice_init() has not been called yet?
-> 
-Thanks for the pointing this. The else branch is intentional.
-for plain requests we must clear the crypto registers, otherwise
-the ICE hardware would continue using the previous encryption context.
-ICE initialization is only required when programming an encryption 
-context, so we don’t call sdhci_msm_non_cqe_ice_init() in the plain 
-path. Writing 0 to NONCQ_CRYPTO_PARM is safe without ICE init and 
-ensures that subsequent plain requests are handled correctly
+The commit tile should be:
 
-Thanks,
-Alam.
+mmc: dw_mmc: Replace....
+
+> before biu_clk in dwmmc driver devm_clk_get fail, but it's ERR_PTR,
+> not null,it will panic when call clk_prepare
+> log is below:
+
+----8<----
+
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 61f6986f15ef..18981d010b62 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3375,20 +3375,10 @@ int dw_mci_probe(struct dw_mci *host)
+>   					     "platform data not available\n");
+>   	}
+>   
+> -	host->biu_clk = devm_clk_get(host->dev, "biu");
+> -	if (IS_ERR(host->biu_clk)) {
+> -		dev_dbg(host->dev, "biu clock not available\n");
+> -		ret = PTR_ERR(host->biu_clk);
+> -		if (ret == -EPROBE_DEFER)
+> -			return ret;
+> -
+> -	} else {
+> -		ret = clk_prepare_enable(host->biu_clk);
+> -		if (ret) {
+> -			dev_err(host->dev, "failed to enable biu clock\n");
+> -			return ret;
+> -		}
+> -	}
+> +	host->biu_clk = devm_clk_get_optional_enabled(host->dev, "biu");
+
+This won't work, as biu_clk will automatically be disabled, unprepared
+and freed when dwmmc host is unbound from the bus. Given we need to
+control biu_clk in runtime, you could just use devm_clk_get_optional,
+it will return NULL which serves as a dummy clk, if biu isn't present.
+Then clk_prepare_enable/clk_disable_unprepare for biu_clk is safe to
+bail out internally.
+
+> +	ret = PTR_ERR_OR_ZERO(host->biu_clk);
+> +	if (ret)
+> +		return dev_err_probe(host->dev, ret, "failed to get biu clock\n");
+>   
+>   	host->ciu_clk = devm_clk_get(host->dev, "ciu");
+>   	if (IS_ERR(host->ciu_clk)) {
+
