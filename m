@@ -1,158 +1,131 @@
-Received: from mail-m15578.qiye.163.com (mail-m15578.qiye.163.com [101.71.155.78])
+Received: from mailout2.samsung.com (mailout2.samsung.com [203.254.224.25])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6334D19EED3;
-	Fri, 23 Jan 2026 08:20:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.78
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69E6122156F
+	for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 08:51:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.25
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769156417; cv=none; b=MQrH9B3y5+ZXjNhNWQinUXQQGDrFjc4ExlFaEjb23fM7f/6hPr9gPYq2MGNItBxP7IIDjTLZwzlWNdBbJXsWdCdSudV0ngpsb3Y68W6JUd8ro6dCSXRQrwTpwSUsc7Q4mq83y/ypwWBOW1fU+agNPGegevxYSzOowLWG4Z6qbM0=
+	t=1769158316; cv=none; b=duQAo7lJmGbifIXl/RYM1zFcgCOyELA8aMlQc3VBhLfuJwtNvrp7MVAxWGSO3OnzvvTSUfoUfVKUJeulIIk41K8Mu52AGiCIkKOCwdzxJSsWwCDxYiuzCdozTFt7GYNGmUv/ly/0pTQGbeOaQsfaru097sud63tTaTsgQkEcClA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769156417; c=relaxed/simple;
-	bh=IYCmvBsbmv3kbUzepTmrDx9V8IbGtZjrChe2Iob6zcM=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=LOFtRJkOjNLgu+JMHzPuCk8YqDUUZrOfMnbdWmbeIEjaWWIm6vopk/cgZXOz8wRtGrAJZACJ0NLlxGZcDanUta3MeRjE8GgCJNFTfvun3iN6MD5Ibc4GAjPIPxDiVgVbHo/QhJv1+O/xrJEJAM76Gi2Y7G39+UWv3UD91tCTr/Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=RXAH0D89; arc=none smtp.client-ip=101.71.155.78
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1769158316; c=relaxed/simple;
+	bh=uTMJ9l0r63/LJTtY6CTa9e88NhY2wag90snqQBwAD5c=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:
+	 References; b=TYkeq8iaB5OZKPz5WEZ1W7PgjVAe932vRqqn471gYO5A7qExzN+Oc1llwBG/WTZUQx9qiOkWtdFhNql9ojTncY1ov6mblvBVM3vATr8rGjWNFJK99S3E0hFnUg7cjr9JShQRJ20bbF5TOIJEdR/wXdGUT4AVU/r7hXOS8XC2J6Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=fevL4Bsy; arc=none smtp.client-ip=203.254.224.25
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="RXAH0D89"
-Received: from [172.16.12.14] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 31b860454;
-	Fri, 23 Jan 2026 16:14:55 +0800 (GMT+08:00)
-Message-ID: <1c275ed9-70ee-4eba-b3d5-0f0c19a3a2d1@rock-chips.com>
-Date: Fri, 23 Jan 2026 16:14:54 +0800
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="fevL4Bsy"
+Received: from epcas5p3.samsung.com (unknown [182.195.41.41])
+	by mailout2.samsung.com (KnoxPortal) with ESMTP id 20260123085151epoutp02923b88c4ad3d9079697b42d24f6289ee~NUBxRuJgw1650516505epoutp028
+	for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 08:51:51 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20260123085151epoutp02923b88c4ad3d9079697b42d24f6289ee~NUBxRuJgw1650516505epoutp028
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1769158311;
+	bh=CKHP6ZlZ2SfMMnfTu33Mh/XqWqhdnfxn6P0CP/3rVto=;
+	h=From:To:Subject:Date:References:From;
+	b=fevL4BsyCNS9FmYWK4IvkGT9LUhYrp8LrFbzlxLbOj7k+aZOOIKWwegcHl0p3GzBi
+	 Egpg+kHBvYMtZEklTxb38xBkUsJDYQLPwXaehYLgu3EqDWfEyKr6NJWkD7D6ZtwuvX
+	 th9Xveve9VIKlx1TbIOC4infWvBpxDCJGgnsXLXM=
+Received: from epsnrtp02.localdomain (unknown [182.195.42.154]) by
+	epcas5p2.samsung.com (KnoxPortal) with ESMTPS id
+	20260123085150epcas5p2d24c80d2533e2686ae44851c933af356~NUBwx8Xsz0573405734epcas5p2I;
+	Fri, 23 Jan 2026 08:51:50 +0000 (GMT)
+Received: from epcas5p3.samsung.com (unknown [182.195.41.41]) by
+	epsnrtp02.localdomain (Postfix) with ESMTP id 4dyBWB4RNyz2SSKX; Fri, 23 Jan
+	2026 08:51:50 +0000 (GMT)
+Received: from epsmtip1.samsung.com (unknown [182.195.34.30]) by
+	epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
+	20260123085150epcas5p42f2cc04843ae7657380b2968261246cb~NUBwacDK80358703587epcas5p4b;
+	Fri, 23 Jan 2026 08:51:50 +0000 (GMT)
+Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip1.samsung.com
+	(KnoxPortal) with ESMTPA id
+	20260123085149epsmtip150ee5a375d81d7371abf8766781cc373~NUBv8EOkD1815018150epsmtip1O;
+	Fri, 23 Jan 2026 08:51:49 +0000 (GMT)
+From: "ping.gao" <ping.gao@samsung.com>
+To: jh80.chung@samsung.com, sebastian.reichel@collabora.com,
+	shawn.lin@rock-chips.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, hy50.seo@samsung.com,
+	kwangwon.min@samsung.com, ping.gao@samsung.com
+Subject: [PATCH] drivers: dw_mmc: Replace  devm_clk_get with
+ devm_clk_get_optional
+Date: Fri, 23 Jan 2026 16:56:13 +0800
+Message-ID: <20260123085613.182773-1-ping.gao@samsung.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, oe-kbuild-all@lists.linux.dev,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/3] mmc: dw_mmc-k3: Remove mshc alias support
-To: kernel test robot <lkp@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Wei Xu <xuwei5@hisilicon.com>
-References: <1769132482-177365-2-git-send-email-shawn.lin@rock-chips.com>
- <202601231543.IzsYNOzJ-lkp@intel.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <202601231543.IzsYNOzJ-lkp@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9be9ebaeb309cckunmd7e25a7d1ac2f7
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQxpNQ1ZDTEtNGEhJTEIZT0pWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSEpKQk
-	xVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=RXAH0D89cH6q4GBkk69sDDStWYj96MI9ROl/xzkurdP1fq3lqI96TU1NMhbcS6teqcUJn7+YeG5v2+7V/bEmEn770Mup6IywksNpKXjV0hGBB4sk2kWxJg5uWp3xQ67LDK30F5xAHbJ/FfbwWPH/gVm4VSQB/xtZtSX/74qCj30=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=7ak2ukuGBc+Ys62uKbyQTY4W4bSjYwRQNwZcxuDSuWU=;
-	h=date:mime-version:subject:message-id:from;
+X-CMS-MailID: 20260123085150epcas5p42f2cc04843ae7657380b2968261246cb
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 105P
+X-CMS-RootMailID: 20260123085150epcas5p42f2cc04843ae7657380b2968261246cb
+References: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
 
-在 2026/01/23 星期五 15:59, kernel test robot 写道:
-> Hi Shawn,
-> 
-> kernel test robot noticed the following build warnings:
-> 
-> [auto build test WARNING on robh/for-next]
-> [also build test WARNING on linus/master ulf-hansson-mmc-mirror/next v6.19-rc6 next-20260122]
-> [If your patch is applied to the wrong git tree, kindly drop us a note.
-> And when submitting patch, we suggest to use '--base' as documented in
-> https://git-scm.com/docs/git-format-patch#_base_tree_information]
-> 
-> url:    https://github.com/intel-lab-lkp/linux/commits/Shawn-Lin/mmc-dw_mmc-k3-Remove-mshc-alias-support/20260123-095950
-> base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-> patch link:    https://lore.kernel.org/r/1769132482-177365-2-git-send-email-shawn.lin%40rock-chips.com
-> patch subject: [PATCH 1/3] mmc: dw_mmc-k3: Remove mshc alias support
-> config: arc-randconfig-002-20260123 (https://download.01.org/0day-ci/archive/20260123/202601231543.IzsYNOzJ-lkp@intel.com/config)
-> compiler: arc-linux-gcc (GCC) 8.5.0
-> reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260123/202601231543.IzsYNOzJ-lkp@intel.com/reproduce)
-> 
-> If you fix the issue in a separate patch/commit (i.e. not just a new version of
-> the same patch/commit), kindly add following tags
-> | Reported-by: kernel test robot <lkp@intel.com>
-> | Closes: https://lore.kernel.org/oe-kbuild-all/202601231543.IzsYNOzJ-lkp@intel.com/
-> 
-> All warnings (new ones prefixed by >>):
-> 
->     drivers/mmc/host/dw_mmc-k3.c: In function 'dw_mci_hs_set_timing':
->     drivers/mmc/host/dw_mmc-k3.c:220:16: error: 'struct dw_mci' has no member named 'mmc'
+By using devm_clk_get_optional, if clk is optional for device and not define in dts
+it will return NULL, then clk_prepare_enable/clk_disable_unprepare for biu_clk is safe to
+bail out internally.
 
-I think this is a false-positive warning as it's based on latest
-linux-next tree.
+before biu_clk in dwmmc driver devm_clk_get fail, but it's ERR_PTR,
+not null,it will panic when call clk_prepare
+log is below:
+[  438.400868] [7:   binder:436_2: 4998] Unable to handle kernel paging request at virtual address fffffffffffffffe
+[  438.400877] [7:   binder:436_2: 4998] Mem abort info:
+[  438.400881] [7:   binder:436_2: 4998]   ESR = 0x0000000096000005
+[  438.400887] [7:   binder:436_2: 4998]   EC = 0x25: DABT (current EL), IL = 32 bits
+[  438.400894] [7:   binder:436_2: 4998]   SET = 0, FnV = 0
+[  438.400899] [7:   binder:436_2: 4998]   EA = 0, S1PTW = 0
+[  438.400904] [7:   binder:436_2: 4998]   FSC = 0x05: level 1 translation fault
+...
+[  438.409424] [7:   binder:436_2: 4998] Call trace:
+[  438.409429] [7:   binder:436_2: 4998]  clk_prepare+0x10/0x24
+[  438.409439] [7:   binder:436_2: 4998]  dw_mci_runtime_resume+0x50/0x2d8 [dw_mmc_samsung cd210e210975263404c28fc89778f369f8398f0c]
+[  438.409471] [7:   binder:436_2: 4998]  dw_mci_exynos_runtime_resume+0x18/0x58 [dw_mmc_exynos_samsung 2735a594c7c9c9e8c65b0b87523fbf70dcaabfff]
+[  438.409496] [7:   binder:436_2: 4998]  pm_generic_runtime_resume+0x40/0x58
+[  438.409506] [7:   binder:436_2: 4998]  pm_runtime_force_resume+0x9c/0x134
+[  438.409517] [7:   binder:436_2: 4998]  platform_pm_resume+0x40/0x8c
+[  438.409529] [7:   binder:436_2: 4998]  dpm_run_callback+0x64/0x230
+[  438.409540] [7:   binder:436_2: 4998]  __device_resume+0x1d8/0x394
+[  438.409551] [7:   binder:436_2: 4998]  dpm_resume+0x110/0x2b8
+[  438.409561] [7:   binder:436_2: 4998]  dpm_resume_end+0x1c/0x38
+[  438.409570] [7:   binder:436_2: 4998]  suspend_devices_and_enter+0x828/0xab0
+[  438.409582] [7:   binder:436_2: 4998]  pm_suspend+0x334/0x618
+[  438.409592] [7:   binder:436_2: 4998]  state_store+0x104/0x144
+[  438.409601] [7:   binder:436_2: 4998]  kobj_attr_store+0x30/0x48
+[  438.409610] [7:   binder:436_2: 4998]  sysfs_kf_write+0x54/0x6c
+[  438.409619] [7:   binder:436_2: 4998]  kernfs_fop_write_iter+0x104/0x1a8
+[  438.409628] [7:   binder:436_2: 4998]  vfs_write+0x24c/0x2f4
+[  438.409640] [7:   binder:436_2: 4998]  ksys_write+0x78/0xe8
+[  438.409652] [7:   binder:436_2: 4998]  __arm64_sys_write+0x1c/0x2c
+[  438.409664] [7:   binder:436_2: 4998]  invoke_syscall+0x58/0x114
+[  438.409676] [7:   binder:436_2: 4998]  el0_svc_common+0xac/0xe0
+[  438.409687] [7:   binder:436_2: 4998]  do_el0_svc+0x1c/0x28
+[  438.409698] [7:   binder:436_2: 4998]  el0_svc+0x38/0x68
+[  438.409705] [7:   binder:436_2: 4998]  el0t_64_sync_handler+0x68/0xbc
+[  438.409712] [7:   binder:436_2: 4998]  el0t_64_sync+0x1a8/0x1ac
 
->       ctrl_id = host->mmc->index;
->                     ^~
->>> drivers/mmc/host/dw_mmc-k3.c:217:18: warning: variable 'priv' set but not used [-Wunused-but-set-variable]
->       struct k3_priv *priv;
->                       ^~~~
+Signed-off-by: ping.gao <ping.gao@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-But this one is indeed a valid warning, will fix.
-
-Thanks, lkp.
-
-> 
-> 
-> vim +/priv +217 drivers/mmc/host/dw_mmc-k3.c
-> 
-> 0293efddaddfcb Zhangfei Gao        2015-05-14  207
-> d53e39b1131c08 Shawn Lin           2026-01-23  208  static int dw_mci_hs_set_timing(struct dw_mci *host, int timing,
-> 361c7fe9b02eee liwei               2017-08-11  209  				     int smpl_phase)
-> 361c7fe9b02eee liwei               2017-08-11  210  {
-> 361c7fe9b02eee liwei               2017-08-11  211  	u32 drv_phase;
-> 361c7fe9b02eee liwei               2017-08-11  212  	u32 smpl_dly;
-> 361c7fe9b02eee liwei               2017-08-11  213  	u32 use_smpl_dly = 0;
-> 361c7fe9b02eee liwei               2017-08-11  214  	u32 enable_shift = 0;
-> 361c7fe9b02eee liwei               2017-08-11  215  	u32 reg_value;
-> 361c7fe9b02eee liwei               2017-08-11  216  	int ctrl_id;
-> 361c7fe9b02eee liwei               2017-08-11 @217  	struct k3_priv *priv;
-> 361c7fe9b02eee liwei               2017-08-11  218
-> 361c7fe9b02eee liwei               2017-08-11  219  	priv = host->priv;
-> d53e39b1131c08 Shawn Lin           2026-01-23 @220  	ctrl_id = host->mmc->index;
-> d53e39b1131c08 Shawn Lin           2026-01-23  221
-> d53e39b1131c08 Shawn Lin           2026-01-23  222  	if (ctrl_id >= TIMING_MODE)
-> d53e39b1131c08 Shawn Lin           2026-01-23  223  		return -EINVAL;
-> 361c7fe9b02eee liwei               2017-08-11  224
-> 361c7fe9b02eee liwei               2017-08-11  225  	drv_phase = hs_timing_cfg[ctrl_id][timing].drv_phase;
-> 361c7fe9b02eee liwei               2017-08-11  226  	smpl_dly   = hs_timing_cfg[ctrl_id][timing].smpl_dly;
-> 361c7fe9b02eee liwei               2017-08-11  227  	if (smpl_phase == -1)
-> 361c7fe9b02eee liwei               2017-08-11  228  		smpl_phase = (hs_timing_cfg[ctrl_id][timing].smpl_phase_max +
-> 361c7fe9b02eee liwei               2017-08-11  229  			     hs_timing_cfg[ctrl_id][timing].smpl_phase_min) / 2;
-> 361c7fe9b02eee liwei               2017-08-11  230
-> 361c7fe9b02eee liwei               2017-08-11  231  	switch (timing) {
-> 361c7fe9b02eee liwei               2017-08-11  232  	case MMC_TIMING_UHS_SDR104:
-> 361c7fe9b02eee liwei               2017-08-11  233  		if (smpl_phase >= USE_DLY_MIN_SMPL &&
-> 361c7fe9b02eee liwei               2017-08-11  234  				smpl_phase <= USE_DLY_MAX_SMPL)
-> 361c7fe9b02eee liwei               2017-08-11  235  			use_smpl_dly = 1;
-> df561f6688fef7 Gustavo A. R. Silva 2020-08-23  236  		fallthrough;
-> 361c7fe9b02eee liwei               2017-08-11  237  	case MMC_TIMING_UHS_SDR50:
-> 361c7fe9b02eee liwei               2017-08-11  238  		if (smpl_phase >= ENABLE_SHIFT_MIN_SMPL &&
-> 361c7fe9b02eee liwei               2017-08-11  239  				smpl_phase <= ENABLE_SHIFT_MAX_SMPL)
-> 361c7fe9b02eee liwei               2017-08-11  240  			enable_shift = 1;
-> 361c7fe9b02eee liwei               2017-08-11  241  		break;
-> 361c7fe9b02eee liwei               2017-08-11  242  	}
-> 361c7fe9b02eee liwei               2017-08-11  243
-> 361c7fe9b02eee liwei               2017-08-11  244  	mci_writel(host, GPIO, 0x0);
-> 361c7fe9b02eee liwei               2017-08-11  245  	usleep_range(5, 10);
-> 361c7fe9b02eee liwei               2017-08-11  246
-> 361c7fe9b02eee liwei               2017-08-11  247  	reg_value = FIELD_PREP(UHS_REG_EXT_SAMPLE_PHASE_MASK, smpl_phase) |
-> 361c7fe9b02eee liwei               2017-08-11  248  		    FIELD_PREP(UHS_REG_EXT_SAMPLE_DLY_MASK, smpl_dly) |
-> 361c7fe9b02eee liwei               2017-08-11  249  		    FIELD_PREP(UHS_REG_EXT_SAMPLE_DRVPHASE_MASK, drv_phase);
-> 361c7fe9b02eee liwei               2017-08-11  250  	mci_writel(host, UHS_REG_EXT, reg_value);
-> 361c7fe9b02eee liwei               2017-08-11  251
-> 361c7fe9b02eee liwei               2017-08-11  252  	mci_writel(host, ENABLE_SHIFT, enable_shift);
-> 361c7fe9b02eee liwei               2017-08-11  253
-> 361c7fe9b02eee liwei               2017-08-11  254  	reg_value = FIELD_PREP(GPIO_CLK_DIV_MASK, GENCLK_DIV) |
-> 361c7fe9b02eee liwei               2017-08-11  255  			     FIELD_PREP(GPIO_USE_SAMPLE_DLY_MASK, use_smpl_dly);
-> 361c7fe9b02eee liwei               2017-08-11  256  	mci_writel(host, GPIO, (unsigned int)reg_value | GPIO_CLK_ENABLE);
-> 361c7fe9b02eee liwei               2017-08-11  257
-> 361c7fe9b02eee liwei               2017-08-11  258  	/* We should delay 1ms wait for timing setting finished. */
-> 361c7fe9b02eee liwei               2017-08-11  259  	usleep_range(1000, 2000);
-> d53e39b1131c08 Shawn Lin           2026-01-23  260
-> d53e39b1131c08 Shawn Lin           2026-01-23  261  	return 0;
-> 361c7fe9b02eee liwei               2017-08-11  262  }
-> 361c7fe9b02eee liwei               2017-08-11  263
-> 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c5db92bbb094..6bcc1e7233c0 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3375,7 +3375,7 @@ int dw_mci_probe(struct dw_mci *host)
+ 					     "platform data not available\n");
+ 	}
+ 
+-	host->biu_clk = devm_clk_get(host->dev, "biu");
++	host->biu_clk = devm_clk_get_optional(host->dev, "biu");
+ 	if (IS_ERR(host->biu_clk)) {
+ 		dev_dbg(host->dev, "biu clock not available\n");
+ 		ret = PTR_ERR(host->biu_clk);
+-- 
+2.50.1
 
