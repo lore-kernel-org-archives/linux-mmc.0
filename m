@@ -1,74 +1,63 @@
-Received: from forward500d.mail.yandex.net (forward500d.mail.yandex.net [178.154.239.208])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4888628FFFB;
-	Fri, 23 Jan 2026 14:07:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.154.239.208
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D2B52EBB8C;
+	Fri, 23 Jan 2026 21:25:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769177269; cv=none; b=GxHb6sYC3jwvDirmZMTySMgoKmUOqOI7sYM1SGOIzOyTNLxZbHB+L2j8rXHvdI5qVQsNez8EIwbbO99voMJh18zel/OQkP/RFBwiRxM10ZiOiT34ZYkb85A2yybAiv2vqWGGavqPjQ3YX68xPij8FV1GWZB+c4wnmlaeaZjlETw=
+	t=1769203505; cv=none; b=Wl3ruu7QuVXsRotMOR7XUeyoa6orTPC1TWeszEqnWjqwW0Scpr7BMs5hxgj/7xtWD0i7eDCWUcbX6T8KTaTbfM5ChP/FKsNJtifAZo6inY48gG7qvqXg0ngjwJ588lENE3kJQVuIPopMoXNsOQ0htQinNffzlFUGHCZl2rWD94w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769177269; c=relaxed/simple;
-	bh=UjxLxOv6k/KKY/E5QC+AXvm93An86ypnEiXwu8GVUZI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=qJDrZPWcPRsfNLI9klgvv0KYlsPrqWb1LLbmJnuEXrYM0uFvJaLRGrYKHue47oILODBW+xnRwhgvErj2qPW/x/+7roI3r997yv+H6TboPCkjubE6Ze7LJNUFdZqEpGNuqtCJaaiEm1kQqml8c/UsA8a+K7ReYYTw+vFlfreO3ow=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sezginduran.net; spf=pass smtp.mailfrom=sezginduran.net; dkim=pass (1024-bit key) header.d=sezginduran.net header.i=@sezginduran.net header.b=TQsEYBFT; arc=none smtp.client-ip=178.154.239.208
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sezginduran.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sezginduran.net
+	s=arc-20240116; t=1769203505; c=relaxed/simple;
+	bh=pN6r67huTH7QCj7hehbc1Cr+M4ntExShxAUwJ46t/NU=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=AoXCOHPTOZmDehtB5QvanXdCWOyjz+wsH7FQiP8nUWDc4ynCQcz9dKO/hdDs1z0JyxVq6Xa74I7rDRYO3yVqM0BxeafAYwo6OX2vp7PQE85im9lYBO4x69mxpfMt7JyqnHq6RJINrBTfyX2qhqQ2+DSBtmd/7NX+HCzf6Yovdtg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tdIU5TJf; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=sezginduran.net header.i=@sezginduran.net header.b="TQsEYBFT"
-Received: from mail-nwsmtp-smtp-production-main-77.klg.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-77.klg.yp-c.yandex.net [IPv6:2a02:6b8:c42:9a4b:0:640:e388:0])
-	by forward500d.mail.yandex.net (Yandex) with ESMTPS id E1AB5815B5;
-	Fri, 23 Jan 2026 17:02:29 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-77.klg.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id R2evPXBGAuQ0-B2E7EIxr;
-	Fri, 23 Jan 2026 17:02:29 +0300
-X-Yandex-Fwd: 1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sezginduran.net;
-	s=mail; t=1769176949;
-	bh=iVP9mAjTPWUl2CV3OnCBzVglVAJt10vV23uAwIopzfo=;
-	h=From:In-Reply-To:Cc:Date:References:To:Subject:Message-ID;
-	b=TQsEYBFT4JRWe7u/2F8F49oqiowLRPc+BYMIitzfSVCEsyRf1hQR7uGqodT+QT14Y
-	 SVADSS9ih/rBTREDXMUcE6HhFWM2jsHUL1BrlnnK7C9IJl6GCs+qhjqboCKB00hniV
-	 e8NgQxhWTKq4SVwvO6SRgZ5jh35dMjmd5soYHgj0=
-Authentication-Results: mail-nwsmtp-smtp-production-main-77.klg.yp-c.yandex.net; dkim=pass header.i=@sezginduran.net
-Message-ID: <57e07c9b-b8fe-49b6-9ad5-ef6ba0e763c7@sezginduran.net>
-Date: Fri, 23 Jan 2026 17:02:27 +0300
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tdIU5TJf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BBE9FC116D0;
+	Fri, 23 Jan 2026 21:25:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1769203504;
+	bh=pN6r67huTH7QCj7hehbc1Cr+M4ntExShxAUwJ46t/NU=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+	b=tdIU5TJf+mRpWV45hptwtmbR+Qru14kVteT/EmIm0MTXgWRxnalT1qsX7XHg8qnbv
+	 SSlFFeufPk3ZXxiV7GHq1BP8VJAipnYhObEh/FpeHvlqArTA/nrxVtMXBT3SWU4cq+
+	 C0W5VPnbzVRCncKH8IrVf/Tjifpn/qJ1qBdFCxdvhlpmWOtYawjGnkgeu9J1DbnAyu
+	 bf+lN8iuOz5HdHrqGqODEUlkL1ZdcYujrt0MImtKZsyMLkxz6Wo4FNoIMR3YJ18IBm
+	 aFV/IXGzO6E47T3IznJtctswo0QE6r/8FXdiABfGoGdLxEcw/hHZFpe+K3aV8hcehP
+	 NqpmTJ99Sou4A==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id C88FB3808200;
+	Fri, 23 Jan 2026 21:25:01 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v6.19-rc7
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20260123120454.244414-1-ulf.hansson@linaro.org>
+References: <20260123120454.244414-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20260123120454.244414-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.19-rc3
+X-PR-Tracked-Commit-Id: 5cfc828502cbd0c827113bdb5694c2658af2c37c
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: d4be90cce60e60cf99c419b74105d217eec194c1
+Message-Id: <176920350037.2720183.7047825118387582966.pr-tracker-bot@kernel.org>
+Date: Fri, 23 Jan 2026 21:25:00 +0000
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: pxamci: do not complete requests under host spinlock
-Content-Language: tr
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20260110144432.176015-1-ahmet@sezginduran.net>
- <CAPDyKFq0a9VjRFQsk=kU63ULwHtZqmq5ocBFj5=GfHhBo8F5DA@mail.gmail.com>
- <CAPDyKFrVLmZ=T3VuFmKn=PiVbv65NEhCsQNDV3YyFwp=Uz=EyQ@mail.gmail.com>
-From: Ahmet Sezgin Duran <ahmet@sezginduran.net>
-In-Reply-To: <CAPDyKFrVLmZ=T3VuFmKn=PiVbv65NEhCsQNDV3YyFwp=Uz=EyQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
 
-On 1/23/26 2:58 PM, Ulf Hansson wrote:
+The pull request you sent on Fri, 23 Jan 2026 13:04:54 +0100:
 
- > I was too quick here. Is this really a problem that you have tested or
- > just something that you believe is the right thing to do?
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.19-rc3
 
-The latter. I thought this could be an issue and tried to handle it 
-defensively.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/d4be90cce60e60cf99c419b74105d217eec194c1
 
- > Other drivers are holding spinlocks too when they call the mmc core to
- > complete requests. In principle it depends on how the host implements
- > locking, whether it's fine or not. For pxamci, I think it should be
- > fine to keep the lock held as the core will only kick a completion
- > variable in this case.
- >
- > That said, I am going to drop this
+Thank you!
 
-Got it, thanks for the clarification.
-
-Regards,
-
-Ahmet Sezgin Duran
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
