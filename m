@@ -1,97 +1,88 @@
-Received: from mail-m49212.qiye.163.com (mail-m49212.qiye.163.com [45.254.49.212])
+Received: from mail-m21471.qiye.163.com (mail-m21471.qiye.163.com [117.135.214.71])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8575318B0F;
-	Fri, 23 Jan 2026 12:16:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.212
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A45882E7F11;
+	Fri, 23 Jan 2026 12:24:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=117.135.214.71
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769170592; cv=none; b=uHz3bm3uPWhLaDBQOJ1PMZMmR5Z16Cj+sw7c+vnEQl7BJaBeXkU3KNJF9i2cjubXarXGwHkqRTMFyBK219Grp8CMKnEuDjCR08NLuKRkgYMJA1bOHKTW/1HI/HWKgPoLIG+fY/9ZE+wgJS/ipGvjtv8l57dnfpXNkGdsBcWkJDo=
+	t=1769171086; cv=none; b=HDCJt4EJetnoMLg+lIPxOzhhClYNxEefwnAAEjp2vn2+zMD2wZ87JYE/imHuAmmEbor/yEMEhwtSLO/9AJUuVQ/cElYW60uSZQFoMKg4UZlcoovsPWKA7Z1LL8lirjeU+ImwC4RuVLTr6kqRe71Pf6dwuVR9QRfBl+zn7eiwbCs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769170592; c=relaxed/simple;
-	bh=5b+EqFVBinWJKb0EnQmnHGSfuLFUwA5RDPzOHE/pCAg=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HZF+0bLSaAdAxxAix39qJOM3q3oD63R2ewDqjGllbEuTu/c0Y78OLHAevKuyjKVfWhK+LlI1/YpKIjeMNt+NDXPepS0ZPM7ujlRp9U53P7x2D+u6IbYgXVCGVNRfKoVH2O4e+MILIyZwn+3KysaDQBqrA6HP+hz5c7S/3t6QnzU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=WP/u8Kwx; arc=none smtp.client-ip=45.254.49.212
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
+	s=arc-20240116; t=1769171086; c=relaxed/simple;
+	bh=/0anf8W8F688Pcefl2iIScs+826ZJL01MUHHYclCHPk=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=Z8yXSBnG7Tt7+lBFtXNu5q9emQaw8YQd+MzExKfDLXBB8v8DCI9bCNFFNlA3xUVQmag+0M3PhNrNrhusmfdEOhAWQLAmnNPnmSYt4bc9MjWDtb6aXfGlligkQvq9dOXZ2jP8FmOp04SkXiRZ3cw9LxhL7VrrVd8s9UiK5WWopWk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=J4HIcYoF; arc=none smtp.client-ip=117.135.214.71
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="WP/u8Kwx"
-Received: from albert-OptiPlex-7080.. (unknown [112.65.126.162])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 31bc9a775;
-	Fri, 23 Jan 2026 17:53:56 +0800 (GMT+08:00)
-From: Albert Yang <yangzh0906@thundersoft.com>
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="J4HIcYoF"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 31c0b4b12;
+	Fri, 23 Jan 2026 20:24:30 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ge Gordon <gordon.ge@bst.ai>,
-	Arnd Bergmann <arnd@arndb.de>
-Cc: BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
-	linux-mmc@vger.kernel.org,
+	Wei Xu <xuwei5@hisilicon.com>
+Cc: linux-mmc@vger.kernel.org,
 	devicetree@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	Albert Yang <yangzh0906@thundersoft.com>
-Subject: [PATCH v5 6/6] MAINTAINERS: add MMC files to BST entry
-Date: Fri, 23 Jan 2026 17:53:42 +0800
-Message-ID: <20260123095342.272505-7-yangzh0906@thundersoft.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260123095342.272505-1-yangzh0906@thundersoft.com>
-References: <20260123095342.272505-1-yangzh0906@thundersoft.com>
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2 3/3] mmc: dw_mmc: Remove mshc alias support
+Date: Fri, 23 Jan 2026 20:24:09 +0800
+Message-Id: <1769171049-74327-4-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1769171049-74327-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1769171049-74327-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0a9bead02d3009cckunm9fc1f74e1df715
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQh5PGlZIH0lLSE9KHkJDSUpWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=J4HIcYoFyiE5ZXAU1Qi1RcA3nJDEOy7gNMOkIydFCkx1o5QCxEl8XHs4Rguu0BPlw6raPCAe4/H/ifS6N7OMYM/3bNw9lG3jJOWh6c8wBfrad04lLyRXWSjDerfyvbGTiITWX/4Ok9Zsm/r+AbY8mVzl4mH/+tQi/oxDO14Mhz4=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=kA6UWnSApNuXEqPHoMKu9WTrSs0y5Kcyf2773WqKu/M=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9bea4655bf09cckunm2b675df11c3dd3
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlDThhPVhlPHR9OGU0eHR1CQlYVFAkWGhdVEwETFh
-	oSFyQUDg9ZV1kYEgtZQVlKSklVTU5VSklNVUpNSVlXWRYaDxIVHRRZQVlPS0hVSktJT09PSFVKS0
-	tVSkJLS1kG
-DKIM-Signature: a=rsa-sha256;
-	b=WP/u8KwxJExyov9NG3WKDd5xGRSRKPcmAaXaUKvTKPS1xI43q9Z/yXvzqi1T4WnYuNjlBVlo4wmY1F2hIh9O2e8xwbtQPY6w4v6cTSwP7J4x+PTnFyfcXhPOfudd63Drtmk7WMSbhBkeBpC/4sDNiUhkhmARLK2JXut6FSdxpBk=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=cGm0MWwkBdQUJ6VMHylNjNY5VUzuxOyf/oKBwqDK+ZM=;
-	h=date:mime-version:subject:message-id:from;
 
-Add the MMC device tree binding and driver files to the existing
-ARM/BST SOC SUPPORT maintainer entry.
+Remove the long-deprecated mshc alias support, as the mmc core already
+provides alias functionality through the standard mmc alias. This eliminates
+the redundant dual-alias system. The driver now obtains the controller ID
+from struct mmc_host::index(supplied by mmc alias) instead of the legacy mshc
+alias.
 
-Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
-
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
-Changes for v5:
-- Split from platform series per Arnd's feedback
 
-Changes for v4:
-- Changed driver file name to sdhci-of-bst.c
+Changes in v2: None
 
-Changes for v3:
-- Consolidate BST maintainer entries
+ drivers/mmc/host/dw_mmc.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-Changes for v2:
-- Initial MAINTAINERS entry in platform patch
----
- MAINTAINERS | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 0d044a58cbfe..dc7f716f9811 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -2596,7 +2596,9 @@ R:	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>
- L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
- S:	Supported
- F:	Documentation/devicetree/bindings/arm/bst.yaml
-+F:	Documentation/devicetree/bindings/mmc/bst,c1200-sdhci.yaml
- F:	arch/arm64/boot/dts/bst/
-+F:	drivers/mmc/host/sdhci-of-bst.c
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index a328a36..8cbaa9e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2846,13 +2846,10 @@ static int dw_mci_init_host_caps(struct dw_mci *host)
+ 	if (drv_data)
+ 		mmc->caps |= drv_data->common_caps;
  
- ARM/CALXEDA HIGHBANK ARCHITECTURE
- M:	Andre Przywara <andre.przywara@arm.com>
+-	if (host->dev->of_node) {
+-		ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
+-		if (ctrl_id < 0)
+-			ctrl_id = 0;
+-	} else {
++	if (host->dev->of_node)
++		ctrl_id = mmc->index;
++	else
+ 		ctrl_id = to_platform_device(host->dev)->id;
+-	}
+ 
+ 	if (drv_data && drv_data->caps) {
+ 		if (ctrl_id >= drv_data->num_caps) {
 -- 
-2.43.0
+2.7.4
 
