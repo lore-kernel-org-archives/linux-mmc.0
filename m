@@ -1,70 +1,44 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m49212.qiye.163.com (mail-m49212.qiye.163.com [45.254.49.212])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD07921D5B0
-	for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 12:04:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8575318B0F;
+	Fri, 23 Jan 2026 12:16:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.212
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769169899; cv=none; b=nqchix20+0R72QQ3IaTj5uRXfLFGZDjNxJyXUtQ9J44ZUtHH6R/MimPpQiJK4TQR96SnSUASAPogaF+djNB4fkzXZLRtsPR2PZYdvlBDay9bYIUuDPYQQsCNLCH8JGRBDl9qAjfdVBnziP/BjLH/ixLDmsXwbFP0iegJ44RUvk8=
+	t=1769170592; cv=none; b=uHz3bm3uPWhLaDBQOJ1PMZMmR5Z16Cj+sw7c+vnEQl7BJaBeXkU3KNJF9i2cjubXarXGwHkqRTMFyBK219Grp8CMKnEuDjCR08NLuKRkgYMJA1bOHKTW/1HI/HWKgPoLIG+fY/9ZE+wgJS/ipGvjtv8l57dnfpXNkGdsBcWkJDo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769169899; c=relaxed/simple;
-	bh=Lp3o+tSy/M7+YG04tdmmfMV1cyXU4R6LEZua2RNI4+I=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=QfvuT9OXfIRPutbJIwPXLHTimG4HNuECmE0dYrqcj8V3X2RrjRW6vk60Ypu7BOUvsb/GT96j2xvQApMG+WY+8NPImoDVvqmJysi7EuKMY/RmQ1zl5fwGu5GsAwS0pFCce5li/AXbpsymiB45wouLqnw0EDmw+vNoqVCfSNuKvtI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=D3cP3R+7; arc=none smtp.client-ip=209.85.167.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1769170592; c=relaxed/simple;
+	bh=5b+EqFVBinWJKb0EnQmnHGSfuLFUwA5RDPzOHE/pCAg=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=HZF+0bLSaAdAxxAix39qJOM3q3oD63R2ewDqjGllbEuTu/c0Y78OLHAevKuyjKVfWhK+LlI1/YpKIjeMNt+NDXPepS0ZPM7ujlRp9U53P7x2D+u6IbYgXVCGVNRfKoVH2O4e+MILIyZwn+3KysaDQBqrA6HP+hz5c7S/3t6QnzU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=WP/u8Kwx; arc=none smtp.client-ip=45.254.49.212
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D3cP3R+7"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-59de66fdb53so575641e87.2
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 04:04:57 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1769169896; x=1769774696; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=goSO9cwNRkNHcU03Rct2+gTP+3bOWRDA8ejCpOj4Uq4=;
-        b=D3cP3R+7GwTIq8JjlAQSm5zYtdYUFp/hJez/t6Hw+UPiNULLkmh7aVlDeyvm0cw+dq
-         adCHImnxGvW24TA6SsNT4/Wa7fu6kapedTkblxCwxfsbI/lbBykiFOEMkqcuirLc2/OM
-         4eU57BBIuxKkQ2ps6y+1HYSzQNl/H6lBklSMbKNCcFeoyeP0pMjA0xQbyaI99Ftm6WIu
-         5OLF9ETJFY3i809hoX7QBxZrn61S8I18WFw/FIOEl3qAYQeJk25S9nZynzn77iTGtXDU
-         CpR4lCBVxhBQ7bGKnVKio3BsrLlPxJ9adKfOzaE2YsAYbxoZUK02CFmytSvm7dM/lbZ/
-         AiNA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769169896; x=1769774696;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=goSO9cwNRkNHcU03Rct2+gTP+3bOWRDA8ejCpOj4Uq4=;
-        b=ArYgRqNK2dILf34m4DU/bT0OTnQW5HkDAezwbNkQ6JuvVUYL8Dt0JnB92yfBr/qfiB
-         4DDadVrh43FvrC064USx3zfxSaclt4ERuDGxkf4MvgDA1yqY+6v4k1w3oFwD09do/Rsy
-         iRVDFz4NudhT2v4H4dyztQnNCAcEP/fSvl8sk2VsAOGr6yj1y4qfRakhZy/w+xdldfFG
-         q7eiFvUG4Kty2RU+tfT/jYBqGxonjLlGpa1oWxN6JZAcJ7Dh6/VPFzExeVrS7XEw4evB
-         SafrFquxfvoEXsbNZCxWEpjnIm36a2Br73r4g7FRDD5t3umzKsE4yDWLZrHFx1IfUCAK
-         gK+w==
-X-Forwarded-Encrypted: i=1; AJvYcCXAl5KO3PiiXImzyemR4cbdkPeVzsatOLaJK6U1gXzYoQwDAcx4DAu38fLhpeOYf6kPNyseIqIG0SY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxnQpQ1cBor4SI7nicXSdGX0mBw6LPRJ3VaHyHt9a7P9G9StfxP
-	9dlTUeSDHw1w6aThSroyVaY8VzxBmg8iofxlE+dB/7aVx9mSAa9E7hn8YXctohs3ecY=
-X-Gm-Gg: AZuq6aKhuUF8p2jhFrNtihmUSrt6GT6TtLGlCiswrxOkA2nLo2S9L2ti6JyxDvRGnac
-	eQflfMKMl4P84plexj6OrfV9gB501WRUHE0qqOeLLa//WOEOHUtjg870/0FYDNSy2TGd/yf00RM
-	MVMNcuvlEO0wqRmeA0G+Uzrcv4y/0CMDpJ7+8yv2iG8Icz6sat+lS5ezBSGqs3G/mJjk9e9bADD
-	AO6TYTGHeeXBEcdbpvBJ39YfLXnDFkrxp5pZt0kFwV2qHEKy3jKq7Gm/l4H723L2Ju+zHnKaJzB
-	Eqn/E1Iy1luC6p/jElof+oOsb5HRvniAs8Yrzt6AqHws5diykmS1xEVuZNW0WDBIH551jeQw/iy
-	dPnlEGoxLEJsUQGos9ah54fd1MI/kwhZ4Fi3hqAYXJwMPAiYMsRyyBYWvMApnyOZpExzFGv0ahc
-	g1LDl2FhCdcKFbGxNfTPSCau8Y+30cBDj0uqVVm59WbBbOhIklEKOcAQQCN3NE
-X-Received: by 2002:a05:6512:10ca:b0:59b:6f90:4a2 with SMTP id 2adb3069b0e04-59de4905108mr1033601e87.16.1769169895794;
-        Fri, 23 Jan 2026 04:04:55 -0800 (PST)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-59de49287e1sm623349e87.95.2026.01.23.04.04.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 Jan 2026 04:04:55 -0800 (PST)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
+	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="WP/u8Kwx"
+Received: from albert-OptiPlex-7080.. (unknown [112.65.126.162])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 31bc9a775;
+	Fri, 23 Jan 2026 17:53:56 +0800 (GMT+08:00)
+From: Albert Yang <yangzh0906@thundersoft.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ge Gordon <gordon.ge@bst.ai>,
+	Arnd Bergmann <arnd@arndb.de>
+Cc: BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
 	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.19-rc7
-Date: Fri, 23 Jan 2026 13:04:54 +0100
-Message-ID: <20260123120454.244414-1-ulf.hansson@linaro.org>
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	Albert Yang <yangzh0906@thundersoft.com>
+Subject: [PATCH v5 6/6] MAINTAINERS: add MMC files to BST entry
+Date: Fri, 23 Jan 2026 17:53:42 +0800
+Message-ID: <20260123095342.272505-7-yangzh0906@thundersoft.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20260123095342.272505-1-yangzh0906@thundersoft.com>
+References: <20260123095342.272505-1-yangzh0906@thundersoft.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -72,47 +46,52 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9bea4655bf09cckunm2b675df11c3dd3
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlDThhPVhlPHR9OGU0eHR1CQlYVFAkWGhdVEwETFh
+	oSFyQUDg9ZV1kYEgtZQVlKSklVTU5VSklNVUpNSVlXWRYaDxIVHRRZQVlPS0hVSktJT09PSFVKS0
+	tVSkJLS1kG
+DKIM-Signature: a=rsa-sha256;
+	b=WP/u8KwxJExyov9NG3WKDd5xGRSRKPcmAaXaUKvTKPS1xI43q9Z/yXvzqi1T4WnYuNjlBVlo4wmY1F2hIh9O2e8xwbtQPY6w4v6cTSwP7J4x+PTnFyfcXhPOfudd63Drtmk7WMSbhBkeBpC/4sDNiUhkhmARLK2JXut6FSdxpBk=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
+	bh=cGm0MWwkBdQUJ6VMHylNjNY5VUzuxOyf/oKBwqDK+ZM=;
+	h=date:mime-version:subject:message-id:from;
 
-Hi Linus,
+Add the MMC device tree binding and driver files to the existing
+ARM/BST SOC SUPPORT maintainer entry.
 
-Here's a pull-request with a couple of MMC fixes intended for v6.19-rc7.
-Details about the highlights are as usual found in the signed tag.
+Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
 
-Please pull this in!
+---
+Changes for v5:
+- Split from platform series per Arnd's feedback
 
-Kind regards
-Ulf Hansson
+Changes for v4:
+- Changed driver file name to sdhci-of-bst.c
 
+Changes for v3:
+- Consolidate BST maintainer entries
 
-The following changes since commit f8f9c1f4d0c7a64600e2ca312dec824a0bc2f1da:
+Changes for v2:
+- Initial MAINTAINERS entry in platform patch
+---
+ MAINTAINERS | 2 ++
+ 1 file changed, 2 insertions(+)
 
-  Linux 6.19-rc3 (2025-12-28 13:24:26 -0800)
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 0d044a58cbfe..dc7f716f9811 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -2596,7 +2596,9 @@ R:	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
+ S:	Supported
+ F:	Documentation/devicetree/bindings/arm/bst.yaml
++F:	Documentation/devicetree/bindings/mmc/bst,c1200-sdhci.yaml
+ F:	arch/arm64/boot/dts/bst/
++F:	drivers/mmc/host/sdhci-of-bst.c
+ 
+ ARM/CALXEDA HIGHBANK ARCHITECTURE
+ M:	Andre Przywara <andre.przywara@arm.com>
+-- 
+2.43.0
 
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.19-rc3
-
-for you to fetch changes up to 5cfc828502cbd0c827113bdb5694c2658af2c37c:
-
-  mmc: sdhci-of-dwcmshc: Fix DMA 128MB boundary for Eswin EIC7700 (2026-01-22 13:26:08 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - rtsx_pci_sdmmc: Fix signal voltage switch
- - sdhci-of-dwcmshc: A couple of fixes for Eswin EIC7700
- - sdhci-of-dwcmshc: Fix support for HS200/HS400 mode
-
-----------------------------------------------------------------
-Huan He (2):
-      mmc: sdhci-of-dwcmshc: Fix init for AXI clock for Eswin EIC7700
-      mmc: sdhci-of-dwcmshc: Fix DMA 128MB boundary for Eswin EIC7700
-
-Matthew Schwartz (1):
-      mmc: rtsx_pci_sdmmc: implement sdmmc_card_busy function
-
-Shawn Lin (1):
-      mmc: sdhci-of-dwcmshc: Prevent illegal clock reduction in HS200/HS400 mode
-
- drivers/mmc/host/rtsx_pci_sdmmc.c   | 41 +++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-of-dwcmshc.c | 14 +++++++++++++
- 2 files changed, 55 insertions(+)
