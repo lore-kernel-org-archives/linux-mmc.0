@@ -1,139 +1,158 @@
-Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7D18306486
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 18:04:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.43
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769105069; cv=pass; b=GnLjo47ERtkNX7dfN3RClEuf2+Kxq5tU6vGeuWFVHrtJzpPE1dqBtp3QSzUCeRFe2bdWJeEsLQY7QtYfRNp8Q/zGiE1x2FQOIcPBJIQQQQGGZ4JHnTbQbVj16y/Sz41uly4mKasSiNgBuB1SynJZKrrc2HM/hztCvw7Eo14zRBc=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769105069; c=relaxed/simple;
-	bh=JoJqK6ZMjXBJh/XZxPRXUeBhD4yr+ijhekfGT0tzlJk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mtSzYcyma3sEqRiVQYxJjgM+gr5U293sY/71ob+Auh01UWz/mmofker0JVJhfspl74JWO4vgXCtKx3z+8+93SWxXqftEXtLQVX2kCXtqeiO5EGrhiAyw7mXe7dnItQ+auRmGoatY6jxnSz62gG7NQqUJD645m10DWCWHDslSF7U=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=UcNfPHvw; arc=pass smtp.client-ip=209.85.167.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F4CD318EF6
+	for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 00:50:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1769129406; cv=none; b=GbhxDoU41g1hK+85SJbb/U2Ejwc9iP+U805monjkTt3AbHctaYAbWJRvGq6bs0JJbf9HS4ORUzmqhlD1bhbsHGO6TjRMC2lcNHLZctxe7+v5ZTAj9m3XPzC9Je8XRizTP4qliCKPuJzEwncH4cOVuof4Z/sgf9bOWJ6rtWfQw1M=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1769129406; c=relaxed/simple;
+	bh=61fxTBvmM+nEDTnrxV8wyBLBgYPiDsz7hg08HBbLwi8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=K8yPE2rG4L2y2Uk7n0uJLHFQP3FwnJs5OzuLJSSSbClTUsF6JHi09Bkgu8043d0KwDZGPEUpwu2s9NeGPqOqXBdyhg7t/dCYZL8pQVFkKRD3xiocluSp/Kxonz/JyZo3bLr5mx1vDNklOk4JNk0mJ80qbQXVnd509y9+L6OX/uA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UEWrLgmH; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=szdmPHyL; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="UcNfPHvw"
-Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-59b679cff1fso1197574e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 10:04:16 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1769105054; cv=none;
-        d=google.com; s=arc-20240605;
-        b=CIlozLsXNzu+jB/mjA/h32kMA8D8A7hIOLOOHUnYI/mQBgC0Nwtao1pfPkVONOhSaq
-         C4/Y4QpgdYs0nnfJdglcOJ67Rcwf8Ielr66u+Ulg9Fcxsuv0NmNszDL0hbZQeFT3jNxp
-         EfjIyQxRAeE/uigIhngYDVF1JQVW+/zO2bTnojsaE2ldLu0xceTL/8CZq2Fej5cslgjl
-         +SUUc9qUL1fN/d4jyD/VbzPnvm899mRYhs82a/zxwBYVZmzy7xRsK1uAZtUgxRPpNJdi
-         BxneuOefX8OTVVP98TLjfI/a/nejaNOFait7dytcPYu+lYbOPfQR/lmNoM9ovwXBNFF6
-         2+hQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=1dAdnI02pT5EuloFaObahJw7pcpTRooaOZFcQF4dsRc=;
-        fh=tWF4ElJ0SlfKVWGYNikX21TBLpcK06kR1liD/5tqrSg=;
-        b=SO6S9IpgjubTw56qEwhE+bDSEt9BmN0mRLbnulbEpNmY40B5jq/KsHpVPL7lHKmHz1
-         xRVboLNlmf2RQ2Gao/szQ2KBUDuIkIK05bRYTDVn8qrKFWeYAXkLq3YPArhmUYb7tgwz
-         v1oAPNj0ZJRJX8niYl3xACSQ5zM8QJQ2lP3AYlUo5aMAx0qU0Y6hIV4VdAWgVidQMo50
-         CP6X02v76fZwoTDiNkwGXBY9VlbmiCID4M6BQc21+9OK61bEfx/zK6hs1uHj2c32YGyu
-         PeMdhsRfm7r6vfHrUXERIT3wD4vSthR8avrzRhzjZoUwbB6X+ZOq1vENVivFhHd6z4pL
-         Yohg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UEWrLgmH";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="szdmPHyL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1769129397;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=GoBRPgL92gOt6XV5p8QK+5WmhSABAsu+khI/gr5kMBo=;
+	b=UEWrLgmHHcRpi51aAWBwZQW32Ki5r9cXzrC6+n0xO92Vbca3hnrziZEUOwgdpnPUbntI/a
+	roend+QGV0UZ5yzWIILvUwrXRVetYIYEACXpKkVGk401RZKHs9zz24nPVOJiOkqXm8YZOU
+	b4ZSr3l2spEdOvw5xz2sWukDUfz2vcI=
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com
+ [209.85.222.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-584-FADUaNjTM7mUEpc3iAQpAQ-1; Thu, 22 Jan 2026 19:49:55 -0500
+X-MC-Unique: FADUaNjTM7mUEpc3iAQpAQ-1
+X-Mimecast-MFC-AGG-ID: FADUaNjTM7mUEpc3iAQpAQ_1769129395
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-8ba026720eeso516333185a.1
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Jan 2026 16:49:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1769105054; x=1769709854; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1dAdnI02pT5EuloFaObahJw7pcpTRooaOZFcQF4dsRc=;
-        b=UcNfPHvwthfAkHTUj1Epxq0cIarHw3rNWTwVAe1VGU+BLEXOkkA+kjUlqRiPMDs13G
-         r0pXd8j21YV7sZe07ICWpqsl/2sjkQl31CoEaI2ZLVH5+DW/ZpTFiXonSpqOjrwIqdjw
-         jhj59cqA4DYhtIZsDELGC5eqQj3dwVKcplinjAhYxMDWNHVekUzTlh6Wemh/XJyf8A2A
-         grF9EOtUZvNWfBtCpDhdZXsyijQTBmh0ARm8NNsZs17J6tgmDAqzKD7cA5hc9WK8svSe
-         uBGHhLfZohoS71lR8iHlsujYo9FW5+MLEPv02fqjd2V0OxwXKmHWIQYLrxDjAUaNr4do
-         lczw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769105054; x=1769709854;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=redhat.com; s=google; t=1769129395; x=1769734195; darn=vger.kernel.org;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1dAdnI02pT5EuloFaObahJw7pcpTRooaOZFcQF4dsRc=;
-        b=ex3XZZFCmibn4pduPUv7VZOLtHenioNFrGCQjcHFtle9LKFiAIbhjQS1qfLGXPPpY9
-         I1p/F+z8kK8S2vtXotaNyfsst+gz5vovH+348eCC0Tnh7CJorSSMB9ZcQpXTJMPGivAL
-         le0JGTWA5DGUdTXyWU6sZ94dRR3JdsLhavT6Ykd3Fa4MjHLllYwY0BpwpQFJY/fXmm14
-         zDjkX0ejyzybouKjI/lLxnRGk434Dz66s5sVkQwJ4YPZ8zqDnIewTq3yjKl1Qp8zO3ne
-         6QKI3TO+doWfkzaMKEysxSs2CNEV9OYdsLbrDKhfuu72D3W52fBq27Qfj44gzz9evFZo
-         V91w==
-X-Forwarded-Encrypted: i=1; AJvYcCXNxqI7WHOSI6Wp7MtrEzVZlWlIzC+MuRt0zSEg14N8/N4K9AQbgjeKVaU/+H90wogynYc5WAntGZc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwFgSzLVMh92WkxFwFxIzWJecuk39F951V7rdwugaM2np04X1an
-	fR5tNZGk8VuIQL1K7yV9eoizWcXXCeRx1g/E7np9XjTOEUToRE0hptUfuEtpD6SlHsYtcJwF6IB
-	mqnz9C7NAJT3DQScKNjDnn/BxcpZQEKiQHw6mIt+WuaRFVlK5BNsn
-X-Gm-Gg: AZuq6aIys4I/smXcvde8wgnr9rDkPZKtgLdSV/A2Q1McnQsdAGroFOPam7+aGVqshBS
-	6YGYIrOjf6clm5Mkcgk3CeMcqIV3u6/1SeeHFFBxnEEgj0U/IO0oTedkAsztoV17jbCXjF9mzd2
-	CNv/AmWXF1P/kE9WdB6UNUEezDYKMrgYXgkVNK5fbqr0RzddEWzkA+E6ZetG6hbSGDx2YvIOVY6
-	T9V28JP+Pq5cJ5WtkW9iisCiUjNwds6EGfnQmEPR1SCYijz62WDL9CcaGiP4DexxTD9m+GlWksv
-	jxrk9wU=
-X-Received: by 2002:a05:6512:2513:b0:59d:e07e:8f38 with SMTP id
- 2adb3069b0e04-59de48f58f7mr64524e87.10.1769105053659; Thu, 22 Jan 2026
- 10:04:13 -0800 (PST)
+        bh=GoBRPgL92gOt6XV5p8QK+5WmhSABAsu+khI/gr5kMBo=;
+        b=szdmPHyLXUq0kYRZ3/oR6NhVM7v/p/1dn3wFOAKID2ISmeBlGwJ+Q5GO8Snz39Suwz
+         rrPDOGaFywpXkwpA95R96xF4i5A5TS35qFkbD6bpMMTLP3sq7dJlpt+hb1+vRramO4CD
+         RQyyqJHpEN+7DgoVdI2xhetCQIThHaufiRwzE1YUZiZMewpjYwygi3Rsqn783T84VPt7
+         RSdg1EynPNX2FZNI7ok5MUkCx0RRBn6mP1+k90f6GyYUEFw3NsUIorxHpTx+J0ec+1R7
+         4NnvTTxjtfgGuYrXZWspOVkaJQxK3OjabSMv4tC6QFBSJB6UyVXR/aYb1jNGc40ro9xj
+         JkSA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769129395; x=1769734195;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=GoBRPgL92gOt6XV5p8QK+5WmhSABAsu+khI/gr5kMBo=;
+        b=J8D9bFZqEvmETFaZY5KPj3nPtwRBokKrHF69ZxUvYxhR0F6KegFmvbaXbzf27q/m2j
+         V+aW6JkkUl+FR+vm3gHSwaP5LGyTbzeCThMDq7/m4HfNF9aaq2hQvwxdiVhDlmq9QGk2
+         bHDlTuCN1QNPk+EeYnVNsbSDXqsfdel2o2B9UuuuU1ANpXq1IRLeY454MPmVuG7FK+BD
+         gSLwU/pPBihD4yRQduRSpRCnZhGF0ME31zGhQoVgBvdDLx1aaPajVOrXDFB14D460X1Y
+         HCgvdUF/0o6e7H2SW03cZthFFHYOpi+/zMG8JiFk6q3boLYdt1GiIX67YWJdZWSnmT2u
+         AgOA==
+X-Forwarded-Encrypted: i=1; AJvYcCUNlTOdHPuD9iAS3GGa752F968x7qKm52YFdu+VP41QIKl89BsoCsB7rxZ/muFnDiPkydK9ApugEsY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw0mlWjT1ZiOorB+m6uGq0R/60iQiMjDZ9fd7er1NNgRpKvftik
+	AbyOtLsw+baEU9e1Qm16DwW9keycc7+V3SinN6246t08Uo5V7o7jUXGAQTJ2+6fw5M8DL1alJDN
+	C7Pr6oX380AGIgZaVPyjJAQ4zVBSH01nqOyMPvUQ6r5SJIw66uDOd/GyYKyooxA==
+X-Gm-Gg: AZuq6aImDZL6dubrRD2DrC3KiTv8x+ZEMfA5SWklW1ZIcfOUqYLY7W4mDQNeE7e7gBp
+	JYZAXbm6d5Ops7XJPZBCID6XadX9ET1COJ2Jy3geXdO1sFmGcxqv9JRPGGRmYJ6VPYwBxDxpDE3
+	SPzSFxrhBYR5kGRExFFy0V9MJnFv6UBxXVyDDauj2kPE19CXD8JKf1kVrqQVdUe+eoZ3PWLxdvg
+	HK4LopM7mAxzsf9AQDYWLrYpYx8ikBosgd4RDekLgfBZJO1osFsirgi77DDCAoYmuRH3ihdfybe
+	zh0f5lNR/+U3W3ZIJlYD/a9IMCG80alyqRy/FmXdkukEPO9rnAEtdwdFNMrO5F7y4ZEIHuZpdye
+	S38FA7US82fjKys5/+G7Y0xCZeezDS7MrHllYUVxfkcH5
+X-Received: by 2002:a05:620a:298e:b0:8c5:2bcc:fbc2 with SMTP id af79cd13be357-8c6e2e4bf45mr189823485a.81.1769129395205;
+        Thu, 22 Jan 2026 16:49:55 -0800 (PST)
+X-Received: by 2002:a05:620a:298e:b0:8c5:2bcc:fbc2 with SMTP id af79cd13be357-8c6e2e4bf45mr189821085a.81.1769129394805;
+        Thu, 22 Jan 2026 16:49:54 -0800 (PST)
+Received: from redhat.com (c-73-183-52-120.hsd1.pa.comcast.net. [73.183.52.120])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-8c6e383c2bfsm54737785a.29.2026.01.22.16.49.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 22 Jan 2026 16:49:54 -0800 (PST)
+Date: Thu, 22 Jan 2026 19:49:52 -0500
+From: Brian Masney <bmasney@redhat.com>
+To: Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>
+Cc: linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	Linus Walleij <linusw@kernel.org>, linux-gpio@vger.kernel.org,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	linux-rtc@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>, linux-serial@vger.kernel.org,
+	Guenter Roeck <linux@roeck-us.net>,
+	Wim Van Sebroeck <wim@linux-watchdog.org>,
+	linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH v2 00/16] MIPS: move pic32.h header file from asm to
+ platform_data
+Message-ID: <aXLFsA_bEkXLr33P@redhat.com>
+References: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260122-07-k3-mmc-v2-0-3c3ffef25e94@kernel.org>
-In-Reply-To: <20260122-07-k3-mmc-v2-0-3c3ffef25e94@kernel.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 22 Jan 2026 19:03:36 +0100
-X-Gm-Features: AZwV_Qi_ZbdqQa48xiUnmVYX5skEPfI-gSYl1dRWblEnVxVJaaRBzgmXmm23av4
-Message-ID: <CAPDyKFrXNj-FwGvCet6rw3NA8zshLAi02AGPeUQ8zLy6iQ3uiw@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] mmc: spacemit: Add support for K3 SoC
-To: Yixun Lan <dlan@kernel.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
-	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com>
+User-Agent: Mutt/2.2.14 (2025-02-20)
 
-On Thu, 22 Jan 2026 at 10:38, Yixun Lan <dlan@kernel.org> wrote:
->
-> Enable SDHCI controller support on new SpacemiT K3 SoC, while as before
-> only the third controller and the eMMC device has been tested which using
-> vendor K3 evb board. This board has not acquired support in mainline
-> kernel, so I've omitted the DT part patches for now.
->
-> The new SDHCI controller almost reuse the same IP as old K1 generation,
-> while fixed the broken 64BIT DMA issue.
->
-> Hi Ulf,
->  Any chance to queue this for v6.20? I know it's a little bit late,
-> but the patch itself is quite simple and we've tested on evb board.
->
-> Signed-off-by: Yixun Lan <dlan@kernel.org>
-> ---
-> Changes in v2:
-> - collect Rob's Ack
-> - drop uncessary blank line
-> - drop return check from of_device_get_match_data
-> - Link to v1: https://lore.kernel.org/r/20260121-07-k3-mmc-v1-0-ff77c07bfdf6@kernel.org
->
-> ---
-> Yixun Lan (2):
->       dt-bindings: mmc: spacemit,sdhci: add support for K3 SoC
->       mmc: sdhci-of-k1: spacemit: Add support for K3 SoC
->
->  .../devicetree/bindings/mmc/spacemit,sdhci.yaml       |  4 +++-
->  drivers/mmc/host/sdhci-of-k1.c                        | 19 +++++++++++++++++--
->  2 files changed, 20 insertions(+), 3 deletions(-)
-> ---
-> base-commit: 6cefff068d030786d63fa50970d6581c354630b2
-> change-id: 20260112-07-k3-mmc-6ca01267e834
->
-> Best regards,
-> --
-> Yixun Lan <dlan@kernel.org>
->
+Hi Thomas,
 
-The series applied for next, thanks!
+On Mon, Jan 12, 2026 at 05:47:54PM -0500, Brian Masney wrote:
+> There are currently some pic32 MIPS drivers that are in tree, and are
+> only configured to be compiled on the MIPS pic32 platform. There's a
+> risk of breaking some of these drivers when migrating drivers away from
+> legacy APIs. It happened to me with a pic32 clk driver.
+> 
+> Let's go ahead and move the pic32.h from the asm to the platform_data
+> include directory in the tree. This will make it easier, and cleaner to
+> enable COMPILE_TEST for some of these pic32 drivers. To do this requires
+> updating some includes, which I do at the beginning of this series.
+> 
+> This series was compile tested on a centos-stream-10 arm64 host in two
+> different configurations:
+> 
+> - native arm64 build with COMPILE_TEST (via make allmodconfig)
+> - MIPS cross compile on arm64 with:
+>       ARCH=mips CROSS_COMPILE=mips64-linux-gnu- make pic32mzda_defconfig
+> 
+> Note that there is a separate MIPS compile error in linux-next, and I
+> reported it at https://lore.kernel.org/all/aWVs2gVB418WiMVa@redhat.com/
+> 
+> I included a patch at the end that shows enabling COMPILE_TEST for a
+> pic32 clk driver.
+> 
+> Merge Strategy
+> ==============
+> - Patches 1-15 can go through the MIPS tree.
 
-Kind regards
-Uffe
+I'm just checking if you'll be able to take patches 1-15 this
+development cycle before the merge window opens?
+
+If this series goes to Linus during this upcoming merge window, then
+I have 17 patches ready to post in a month for the next development
+cycle that can go to various individual subsystems that allows all
+of these pic32 MIPS drivers to be compiled on all architectures. The
+patches also fix some issues in those drivers that were found by
+kernel CI.
+
+This merge strategy makes it so that we won't have to deal with any
+cross tree merge issues, or immutable branches.
+
+Thanks,
+
+Brian
+
