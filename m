@@ -1,131 +1,251 @@
-Received: from mailout2.samsung.com (mailout2.samsung.com [203.254.224.25])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69E6122156F
-	for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 08:51:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.25
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769158316; cv=none; b=duQAo7lJmGbifIXl/RYM1zFcgCOyELA8aMlQc3VBhLfuJwtNvrp7MVAxWGSO3OnzvvTSUfoUfVKUJeulIIk41K8Mu52AGiCIkKOCwdzxJSsWwCDxYiuzCdozTFt7GYNGmUv/ly/0pTQGbeOaQsfaru097sud63tTaTsgQkEcClA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769158316; c=relaxed/simple;
-	bh=uTMJ9l0r63/LJTtY6CTa9e88NhY2wag90snqQBwAD5c=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:
-	 References; b=TYkeq8iaB5OZKPz5WEZ1W7PgjVAe932vRqqn471gYO5A7qExzN+Oc1llwBG/WTZUQx9qiOkWtdFhNql9ojTncY1ov6mblvBVM3vATr8rGjWNFJK99S3E0hFnUg7cjr9JShQRJ20bbF5TOIJEdR/wXdGUT4AVU/r7hXOS8XC2J6Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=fevL4Bsy; arc=none smtp.client-ip=203.254.224.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF0FD371075
+	for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 09:39:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.51
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1769161158; cv=pass; b=PAs+NHWsK+vhcqvtSU2HYWse064wtrHp1JG2XaSPjO60bTbQ/iIYDBEyFTleTBshJzjlLlL+0Q9GIJj0P7Do1T/ojyyPMK+BelaPgfvOU18+8u8Ey3uKWufNo65eAohaVbU7qUzL7mZt7lVbtMt9sHilrZGvuJVTKAGxXL994Ik=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1769161158; c=relaxed/simple;
+	bh=E9sY73mzI8WIkjfDsoZWnuIR2fVyge0FFmizubuNHXA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qmN7LUIsXB6iud0YcGrV+MEgIoEa4yUHXLQWx25BEQiqQgmCMVGdN9QWxuNrr4FdaL34BiTxStMHhz0Xj6EdyxQbz9JFNujPjs6p4UN+Vp7s86edHvfNqoaYVkYA0SPkIBlSGvG2Edluw4h+qPWTpWhfwddCXfFYYFCe8EW+0GY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jOq3pRio; arc=pass smtp.client-ip=209.85.167.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="fevL4Bsy"
-Received: from epcas5p3.samsung.com (unknown [182.195.41.41])
-	by mailout2.samsung.com (KnoxPortal) with ESMTP id 20260123085151epoutp02923b88c4ad3d9079697b42d24f6289ee~NUBxRuJgw1650516505epoutp028
-	for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 08:51:51 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20260123085151epoutp02923b88c4ad3d9079697b42d24f6289ee~NUBxRuJgw1650516505epoutp028
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1769158311;
-	bh=CKHP6ZlZ2SfMMnfTu33Mh/XqWqhdnfxn6P0CP/3rVto=;
-	h=From:To:Subject:Date:References:From;
-	b=fevL4BsyCNS9FmYWK4IvkGT9LUhYrp8LrFbzlxLbOj7k+aZOOIKWwegcHl0p3GzBi
-	 Egpg+kHBvYMtZEklTxb38xBkUsJDYQLPwXaehYLgu3EqDWfEyKr6NJWkD7D6ZtwuvX
-	 th9Xveve9VIKlx1TbIOC4infWvBpxDCJGgnsXLXM=
-Received: from epsnrtp02.localdomain (unknown [182.195.42.154]) by
-	epcas5p2.samsung.com (KnoxPortal) with ESMTPS id
-	20260123085150epcas5p2d24c80d2533e2686ae44851c933af356~NUBwx8Xsz0573405734epcas5p2I;
-	Fri, 23 Jan 2026 08:51:50 +0000 (GMT)
-Received: from epcas5p3.samsung.com (unknown [182.195.41.41]) by
-	epsnrtp02.localdomain (Postfix) with ESMTP id 4dyBWB4RNyz2SSKX; Fri, 23 Jan
-	2026 08:51:50 +0000 (GMT)
-Received: from epsmtip1.samsung.com (unknown [182.195.34.30]) by
-	epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
-	20260123085150epcas5p42f2cc04843ae7657380b2968261246cb~NUBwacDK80358703587epcas5p4b;
-	Fri, 23 Jan 2026 08:51:50 +0000 (GMT)
-Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip1.samsung.com
-	(KnoxPortal) with ESMTPA id
-	20260123085149epsmtip150ee5a375d81d7371abf8766781cc373~NUBv8EOkD1815018150epsmtip1O;
-	Fri, 23 Jan 2026 08:51:49 +0000 (GMT)
-From: "ping.gao" <ping.gao@samsung.com>
-To: jh80.chung@samsung.com, sebastian.reichel@collabora.com,
-	shawn.lin@rock-chips.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, hy50.seo@samsung.com,
-	kwangwon.min@samsung.com, ping.gao@samsung.com
-Subject: [PATCH] drivers: dw_mmc: Replace  devm_clk_get with
- devm_clk_get_optional
-Date: Fri, 23 Jan 2026 16:56:13 +0800
-Message-ID: <20260123085613.182773-1-ping.gao@samsung.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jOq3pRio"
+Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-59dd7bfeb8aso2584283e87.0
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Jan 2026 01:39:12 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769161150; cv=none;
+        d=google.com; s=arc-20240605;
+        b=Tc2FixYgZ+5+k497lcSXIa+oWq39WCG0cqiYctrkiVvC0o9oWAOAdLoB7FJuLlOcDl
+         7RFxQsOGwr2xeT1dAfWs9THH3eRzI5CB52hpBE5OdAVx5Xbugbc6DgzGvq8oy47zPPDM
+         QcMwBRXkdGE/+syrU6akLN3xa3iZtPWEwzPCK0UnoQBve8i6T21b16igN8cEy0FHo74y
+         1emhZoPyQaM39iUcLx53URoQjMF8Z9tl6XNYk1Cgw21OGzXqUpX32E/UUh6gMI2FwzsP
+         0qKvRxLfbzKZAZ9YpxGjFZbZuqIRzl9T95Xdb/p2YH7yrG3iPE5TIQz2FVV6BpGISz5e
+         UlVQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=rG52QXraaViSSSy0BOpcFpXuiB3xymU1NOmvEWWxI0g=;
+        fh=tAps2YfZzdVbHnCsi9yVNKvLeJjXEN6jKd8E2VXHBnI=;
+        b=aYkZZ4Vf0xvlWjioy5DoGUWnqhz1mSIs50zUkPCgZOkMY6rPifPSnuXuAmkdUuDXMs
+         FktszC6uQmlhmnPXiH1su2jqRfIujA8zMrJ99WJNxt1uhLef7Ya85rwjIqzz/m9D6ZKi
+         onDH7ExxShyC8nWDd6RGByAMR/fnjGp2GgLAQFv8mHdzVYEsUG3jBEYhpiINoKqfvCVn
+         01j1Kf95r9H3/+9XZmP2fhgnyaK0hdlufWqESL5RAgE2cdvNIS9nFiJoQf+9bHOSiXo8
+         D3NqaNMPL/o/VJy3R2w5njMo1LfEYU0SoyOzfgJh+kg5IG+EKSqXA+YQIMaID2NOjVPG
+         RrtQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1769161150; x=1769765950; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rG52QXraaViSSSy0BOpcFpXuiB3xymU1NOmvEWWxI0g=;
+        b=jOq3pRioWt9pVUiWulyxA+CNpHXtnKAoAL0ppF4VN7sPCybk7m9gew0c2Adp0rqVUR
+         lijiw0lWA+byQBkz773d8e3pI5XH1MKkWVEjCuqKvzN4p/PPjhIVn9JKnpTPMQWubHXC
+         3AM+9RAbCo5/Pjg21zUa9FrlF0DSxOcGUG6oHUk1BVcjiRwvaCwRqo+zVSleaKz+hmYk
+         v7aJ01+H8tQ8tFQ53Q653T0TH3Q4IeBViHr0DhZGs+6U/8/GoxGsRLMbexKMqWyRV0oI
+         vOo2h7DiTqNPsJbZdf8R8OezbWR7l1PZIPFsBZ1dRbQMigHaI2OELXG6pSoetg7JV6+q
+         4M2A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769161150; x=1769765950;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=rG52QXraaViSSSy0BOpcFpXuiB3xymU1NOmvEWWxI0g=;
+        b=jq+TWsdPAFfbP1H3lBsLfbR78PZsClwTafRTZi2UIV0swaBAw8YBXOZt+fA7glxJdy
+         2TLY7LhHvis1d7idGn++bfrJ+CWZDEia4pMnXumcSkcqq4naeOlSABGUdA9M75q+/vR5
+         ONTcC13utt7vIqv0kA4zed6c4JwmTB8bftpOsBSmm/AN80JMlFJDp5yZVebuAjMyydDq
+         jZxznJWcW14Ii+40zAa3aGP6qMnQOj1ruh5HG7CByqizllVH26f+EiWEGo3uxFNtiDWf
+         qErW+TGkAPqUbtV4oiv4bmqgWjVTk7tPgJ+hx0pgw2hj3e9xDe/Z5T//Y16z3A6tkhMz
+         j1tg==
+X-Forwarded-Encrypted: i=1; AJvYcCU59Hio8OZCWAOGBVD2N2wisIRl+GhzgLrdj76a6w88MMKqnfg2Ii6WX6aBhhFeJI/VGJqppvLzO+g=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzS5p06uEIQ9DLWxIXAOGSXPDrpdk0y5x+sC9kmOFFcAkDOmBfA
+	bkNPYibn87S9qeQX0uSl4ot5AzwQiMjfhy58bM94i/+zCztI4DXj7lWvQ8JrMRYQkEridDIuIha
+	D/Oj1ibaeTPXDx/0LhFhWvK5FMJzrcLvs7p5ZJtG7XxmxMxgmud2m
+X-Gm-Gg: AZuq6aJqkdYZRp/o11FwHflGZ8f1lFcDH0OYh7RofDkIxdUeBYqABo85Pd/3O47hG9h
+	ws9W+nqa3qwyoGiBz3L66bhJnGD7jgPRAo1l9Irxo13y/td8Y38D1MLvvqmae7R9DQ2EfGj9zOv
+	Sip2s6k2cr8pxuzUmWgihHJTT9CJ3cZnnCWxTCuPmYL0uSX7FfyZMw/sq0+PrKtZb6o3MPiY8Ar
+	Opg3a9U8cmRZo95kujCzRCJLBl2tCtBIpJiFydbFRxRIre4EFwvE254gtQU7NY61h+7VTTm
+X-Received: by 2002:a05:6512:61a6:b0:59b:b0f9:53ee with SMTP id
+ 2adb3069b0e04-59de48f39b4mr696019e87.7.1769161150160; Fri, 23 Jan 2026
+ 01:39:10 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CMS-MailID: 20260123085150epcas5p42f2cc04843ae7657380b2968261246cb
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-X-CMS-RootMailID: 20260123085150epcas5p42f2cc04843ae7657380b2968261246cb
-References: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
+References: <20251126064251.1928529-1-quic_mdalam@quicinc.com>
+ <CAPDyKFppNgYvHJDqfvyQ0DTYCwgcSR12D+-=04NGEDtbM8FmTA@mail.gmail.com> <3df0ad20-61c0-73c4-be8f-aea43f70cb69@quicinc.com>
+In-Reply-To: <3df0ad20-61c0-73c4-be8f-aea43f70cb69@quicinc.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 23 Jan 2026 10:38:33 +0100
+X-Gm-Features: AZwV_Qj-fRTlNB7M0mC81wCnKPw6IPYxZZexdPMmRUIdx1ZRPaLvBhXQXt4TZrg
+Message-ID: <CAPDyKFpcGvhp82MTcN3wTeLrxErQC6Cficva341VVLWBf6zL9w@mail.gmail.com>
+Subject: Re: [PATCH v6] mmc: sdhci-msm: Enable ICE for CQE-capable controllers
+ with non-CQE cards
+To: Md Sadre Alam <quic_mdalam@quicinc.com>
+Cc: adrian.hunter@intel.com, linux-arm-msm@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, abel.vesa@linaro.org, 
+	ebiggers@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-By using devm_clk_get_optional, if clk is optional for device and not define in dts
-it will return NULL, then clk_prepare_enable/clk_disable_unprepare for biu_clk is safe to
-bail out internally.
+On Fri, 23 Jan 2026 at 07:10, Md Sadre Alam <quic_mdalam@quicinc.com> wrote=
+:
+>
+> Hi,
+>
+> On 1/21/2026 6:14 PM, Ulf Hansson wrote:
+> > On Wed, 26 Nov 2025 at 07:43, Md Sadre Alam <quic_mdalam@quicinc.com> w=
+rote:
+> >>
+> >> Enable Inline Crypto Engine (ICE) support for CQE-capable sdhci-msm
+> >> controllers when used with eMMC cards that do not support CQE.
+> >>
+> >> This addresses the scenario where:
+> >> - The host controller supports CQE (and has CQHCI crypto infrastructur=
+e)
+> >> - The eMMC card does not support CQE
+> >> - Standard (non-CMDQ) requests need crypto support
+> >>
+> >> This allows hardware-accelerated encryption and decryption for standar=
+d
+> >> requests on CQE-capable hardware by utilizing the existing CQHCI crypt=
+o
+> >> register space even when CQE functionality is not available due to car=
+d
+> >> limitations.
+> >>
+> >> The implementation:
+> >> - Adds ICE register definitions for non-CQE crypto configuration
+> >> - Implements per-request crypto setup via sdhci_msm_ice_cfg()
+> >> - Hooks into the request path via mmc_host_ops.request for non-CQE req=
+uests
+> >> - Uses CQHCI register space (NONCQ_CRYPTO_PARM/DUN) for crypto configu=
+ration
+> >>
+> >> With this, CQE-capable controllers can benefit from inline encryption
+> >> when paired with non-CQE cards, improving performance for encrypted I/=
+O
+> >> while maintaining compatibility with existing CQE crypto support.
+> >>
+> >> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+> >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> >
+> > This has been applied for next since a few weeks, but I have a
+> > question. See more below.
+> >
+> > [...]
+> >
+> >>
+> >>   drivers/mmc/host/sdhci-msm.c | 77 ++++++++++++++++++++++++++++++++++=
+++
+> >>   1 file changed, 77 insertions(+)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm=
+.c
+> >> index 3b85233131b3..da356627d9de 100644
+> >> --- a/drivers/mmc/host/sdhci-msm.c
+> >> +++ b/drivers/mmc/host/sdhci-msm.c
+> >> @@ -157,6 +157,17 @@
+> >>   #define CQHCI_VENDOR_CFG1      0xA00
+> >>   #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN  (0x3 << 13)
+> >>
+> >> +/* non command queue crypto enable register*/
+> >> +#define NONCQ_CRYPTO_PARM              0x70
+> >> +#define NONCQ_CRYPTO_DUN               0x74
+> >> +
+> >> +#define DISABLE_CRYPTO                 BIT(15)
+> >> +#define CRYPTO_GENERAL_ENABLE          BIT(1)
+> >> +#define HC_VENDOR_SPECIFIC_FUNC4       0x260
+> >> +
+> >> +#define ICE_HCI_PARAM_CCI      GENMASK(7, 0)
+> >> +#define ICE_HCI_PARAM_CE       GENMASK(8, 8)
+> >> +
+> >>   struct sdhci_msm_offset {
+> >>          u32 core_hc_mode;
+> >>          u32 core_mci_data_cnt;
+> >> @@ -300,6 +311,7 @@ struct sdhci_msm_host {
+> >>          u32 dll_config;
+> >>          u32 ddr_config;
+> >>          bool vqmmc_enabled;
+> >> +       bool non_cqe_ice_init_done;
+> >>   };
+> >>
+> >>   static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct s=
+dhci_host *host)
+> >> @@ -2012,6 +2024,68 @@ static int sdhci_msm_ice_keyslot_evict(struct b=
+lk_crypto_profile *profile,
+> >>          return qcom_ice_evict_key(msm_host->ice, slot);
+> >>   }
+> >>
+> >> +static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
+> >> +{
+> >> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> >> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_hos=
+t);
+> >> +       struct mmc_host *mmc =3D msm_host->mmc;
+> >> +       struct cqhci_host *cq_host =3D mmc->cqe_private;
+> >> +       u32 config;
+> >> +
+> >> +       config =3D sdhci_readl(host, HC_VENDOR_SPECIFIC_FUNC4);
+> >> +       config &=3D ~DISABLE_CRYPTO;
+> >> +       sdhci_writel(host, config, HC_VENDOR_SPECIFIC_FUNC4);
+> >> +       config =3D cqhci_readl(cq_host, CQHCI_CFG);
+> >> +       config |=3D CRYPTO_GENERAL_ENABLE;
+> >> +       cqhci_writel(cq_host, config, CQHCI_CFG);
+> >> +}
+> >> +
+> >> +static void sdhci_msm_ice_cfg(struct sdhci_host *host, struct mmc_req=
+uest *mrq)
+> >> +{
+> >> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> >> +       struct sdhci_msm_host *msm_host =3D sdhci_pltfm_priv(pltfm_hos=
+t);
+> >> +       struct mmc_host *mmc =3D msm_host->mmc;
+> >> +       struct cqhci_host *cq_host =3D mmc->cqe_private;
+> >> +       unsigned int crypto_params =3D 0;
+> >> +       int key_index;
+> >> +
+> >> +       if (mrq->crypto_ctx) {
+> >> +               if (!msm_host->non_cqe_ice_init_done) {
+> >> +                       sdhci_msm_non_cqe_ice_init(host);
+> >> +                       msm_host->non_cqe_ice_init_done =3D true;
+> >> +               }
+> >> +
+> >> +               key_index =3D mrq->crypto_key_slot;
+> >> +               crypto_params =3D FIELD_PREP(ICE_HCI_PARAM_CE, 1) |
+> >> +                               FIELD_PREP(ICE_HCI_PARAM_CCI, key_inde=
+x);
+> >> +
+> >> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM=
+);
+> >> +               cqhci_writel(cq_host, lower_32_bits(mrq->crypto_ctx->b=
+c_dun[0]),
+> >> +                            NONCQ_CRYPTO_DUN);
+> >> +       } else {
+> >> +               cqhci_writel(cq_host, crypto_params, NONCQ_CRYPTO_PARM=
+);
+> >
+> > Should we really call cqhci_writel() here, even if
+> > sdhci_msm_non_cqe_ice_init() has not been called yet?
+> >
+> Thanks for the pointing this. The else branch is intentional.
+> for plain requests we must clear the crypto registers, otherwise
+> the ICE hardware would continue using the previous encryption context.
+> ICE initialization is only required when programming an encryption
+> context, so we don=E2=80=99t call sdhci_msm_non_cqe_ice_init() in the pla=
+in
+> path. Writing 0 to NONCQ_CRYPTO_PARM is safe without ICE init and
+> ensures that subsequent plain requests are handled correctly
 
-before biu_clk in dwmmc driver devm_clk_get fail, but it's ERR_PTR,
-not null,it will panic when call clk_prepare
-log is below:
-[  438.400868] [7:   binder:436_2: 4998] Unable to handle kernel paging request at virtual address fffffffffffffffe
-[  438.400877] [7:   binder:436_2: 4998] Mem abort info:
-[  438.400881] [7:   binder:436_2: 4998]   ESR = 0x0000000096000005
-[  438.400887] [7:   binder:436_2: 4998]   EC = 0x25: DABT (current EL), IL = 32 bits
-[  438.400894] [7:   binder:436_2: 4998]   SET = 0, FnV = 0
-[  438.400899] [7:   binder:436_2: 4998]   EA = 0, S1PTW = 0
-[  438.400904] [7:   binder:436_2: 4998]   FSC = 0x05: level 1 translation fault
-...
-[  438.409424] [7:   binder:436_2: 4998] Call trace:
-[  438.409429] [7:   binder:436_2: 4998]  clk_prepare+0x10/0x24
-[  438.409439] [7:   binder:436_2: 4998]  dw_mci_runtime_resume+0x50/0x2d8 [dw_mmc_samsung cd210e210975263404c28fc89778f369f8398f0c]
-[  438.409471] [7:   binder:436_2: 4998]  dw_mci_exynos_runtime_resume+0x18/0x58 [dw_mmc_exynos_samsung 2735a594c7c9c9e8c65b0b87523fbf70dcaabfff]
-[  438.409496] [7:   binder:436_2: 4998]  pm_generic_runtime_resume+0x40/0x58
-[  438.409506] [7:   binder:436_2: 4998]  pm_runtime_force_resume+0x9c/0x134
-[  438.409517] [7:   binder:436_2: 4998]  platform_pm_resume+0x40/0x8c
-[  438.409529] [7:   binder:436_2: 4998]  dpm_run_callback+0x64/0x230
-[  438.409540] [7:   binder:436_2: 4998]  __device_resume+0x1d8/0x394
-[  438.409551] [7:   binder:436_2: 4998]  dpm_resume+0x110/0x2b8
-[  438.409561] [7:   binder:436_2: 4998]  dpm_resume_end+0x1c/0x38
-[  438.409570] [7:   binder:436_2: 4998]  suspend_devices_and_enter+0x828/0xab0
-[  438.409582] [7:   binder:436_2: 4998]  pm_suspend+0x334/0x618
-[  438.409592] [7:   binder:436_2: 4998]  state_store+0x104/0x144
-[  438.409601] [7:   binder:436_2: 4998]  kobj_attr_store+0x30/0x48
-[  438.409610] [7:   binder:436_2: 4998]  sysfs_kf_write+0x54/0x6c
-[  438.409619] [7:   binder:436_2: 4998]  kernfs_fop_write_iter+0x104/0x1a8
-[  438.409628] [7:   binder:436_2: 4998]  vfs_write+0x24c/0x2f4
-[  438.409640] [7:   binder:436_2: 4998]  ksys_write+0x78/0xe8
-[  438.409652] [7:   binder:436_2: 4998]  __arm64_sys_write+0x1c/0x2c
-[  438.409664] [7:   binder:436_2: 4998]  invoke_syscall+0x58/0x114
-[  438.409676] [7:   binder:436_2: 4998]  el0_svc_common+0xac/0xe0
-[  438.409687] [7:   binder:436_2: 4998]  do_el0_svc+0x1c/0x28
-[  438.409698] [7:   binder:436_2: 4998]  el0_svc+0x38/0x68
-[  438.409705] [7:   binder:436_2: 4998]  el0t_64_sync_handler+0x68/0xbc
-[  438.409712] [7:   binder:436_2: 4998]  el0t_64_sync+0x1a8/0x1ac
+Thanks for clarifying!
 
-Signed-off-by: ping.gao <ping.gao@samsung.com>
----
- drivers/mmc/host/dw_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index c5db92bbb094..6bcc1e7233c0 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3375,7 +3375,7 @@ int dw_mci_probe(struct dw_mci *host)
- 					     "platform data not available\n");
- 	}
- 
--	host->biu_clk = devm_clk_get(host->dev, "biu");
-+	host->biu_clk = devm_clk_get_optional(host->dev, "biu");
- 	if (IS_ERR(host->biu_clk)) {
- 		dev_dbg(host->dev, "biu clock not available\n");
- 		ret = PTR_ERR(host->biu_clk);
--- 
-2.50.1
-
+Kind regards
+Uffe
