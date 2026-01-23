@@ -1,23 +1,24 @@
-Received: from mail-m4921.qiye.163.com (mail-m4921.qiye.163.com [45.254.49.21])
+Received: from mail-m49235.qiye.163.com (mail-m49235.qiye.163.com [45.254.49.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DFA221ABBB;
-	Fri, 23 Jan 2026 10:29:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 936F2324B10;
+	Fri, 23 Jan 2026 10:29:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.235
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769164167; cv=none; b=K6mDnlqKSJcc8KMt8VbLh5xHfuFaaVFoz0kK3geD04/Fkt2kNuQH8GpD9Sd28oauIDD5ts0v0FPcrpOT7gWIcYCooXrMkuxaA20ZlLHnoNAy48RRXG7ZuSezKEpnec7W74TCHD9/l+8D4zZ4dkQuihsOd+Vpg2+hlYRNxLykhbU=
+	t=1769164169; cv=none; b=e11c8rpw6so3BYGaQUcNxdKlrtY3Fyel/GzOnnmp73G6pKpUWQDAugfKJgYLNrVtgZqCDXf/eTrxl9tPpaioL1TPhB7d5JDEsVYtV4ob3YtQalsxawhWNMe6WueBODga0VBJ4k8L1rffRdlEZaaaCZbE+B64mfqv9EQr8vxQHN8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769164167; c=relaxed/simple;
-	bh=tpeh31nmEUxZ3JAN+LltrnTkA8QXHD2f31rI6Qz/9Mo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PnUg3pBXw4zd27aixQo4mvFKM1QXxYbGIdAP2j4qpC5Jge/MJ8/JbgAIJ2N25sc0sm3tsl0vtFXeYfU4m4HZYHDNOX9IC30XHxu5EVaIDRjGkUZPnqdaWCaknQCvz1Kg/uKX9O/jgII4+WkQNilKIvxmtNY8lZD6k6DE4kndw/o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=FEab32P+; arc=none smtp.client-ip=45.254.49.21
+	s=arc-20240116; t=1769164169; c=relaxed/simple;
+	bh=G9kSOeRdG80AqV09qDQiqWxjA4BgykgzjBvnImH2LEg=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=cUQgvVlLp6BKuVChXlHKYdWSdpVziBYOCAJK/65DOKj6OMYxDx6txgJf/vexdv7IhYIavZkFmTQSBMitdQK2rvj6WYYQoMiZjnm+LIwH/rx552n+q4GwJiyDcRmhyGNbPDfAIc6w+wXrbXkh6Q8XUNFkTiksSWY+r9we9NOBfm0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=G0Mp+95W; arc=none smtp.client-ip=45.254.49.235
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="FEab32P+"
+	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="G0Mp+95W"
 Received: from albert-OptiPlex-7080.. (unknown [112.65.126.162])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 31bc9a75e;
-	Fri, 23 Jan 2026 17:53:50 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 31bc9a762;
+	Fri, 23 Jan 2026 17:53:51 +0800 (GMT+08:00)
 From: Albert Yang <yangzh0906@thundersoft.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Adrian Hunter <adrian.hunter@intel.com>,
@@ -31,11 +32,14 @@ Cc: BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
 	devicetree@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
-	Albert Yang <yangzh0906@thundersoft.com>
-Subject: [PATCH v5 0/6] mmc: add support for BST C1200 SDHCI controller
-Date: Fri, 23 Jan 2026 17:53:36 +0800
-Message-ID: <20260123095342.272505-1-yangzh0906@thundersoft.com>
+	Albert Yang <yangzh0906@thundersoft.com>,
+	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH v5 1/6] dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
+Date: Fri, 23 Jan 2026 17:53:37 +0800
+Message-ID: <20260123095342.272505-2-yangzh0906@thundersoft.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20260123095342.272505-1-yangzh0906@thundersoft.com>
+References: <20260123095342.272505-1-yangzh0906@thundersoft.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -43,94 +47,127 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9bea463c2709cckunm2b675df11c3d86
+X-HM-Tid: 0a9bea46407509cckunm2b675df11c3d92
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVkaSEpCVhhMGhpNShhPQh1OT1YVFAkWGhdVEwETFh
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlDTU1DVkxLTEsaSxhOSR4ZGFYVFAkWGhdVEwETFh
 	oSFyQUDg9ZV1kYEgtZQVlKSklVTU5VSklNVUpNSVlXWRYaDxIVHRRZQVlPS0hVSktJT09PSFVKS0
 	tVSkJLS1kG
 DKIM-Signature: a=rsa-sha256;
-	b=FEab32P+zcZXZFCMSdiOH2kEhavXVqtATqWfMdbsLa6WtU+tCRK7IPsRE4ZRAPHVYjRt6HVq0//JaBoziCAsfatIhgmD+UOPKYxxOhpXa4fjRDpD5d7VeTlh2EeAn4etETjKyxTjktIqdl373jo1nWddkLB/v+culGDEinl2SCw=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=R2dnjTDdAxtFe1SNVIGyD//Zr6oIkw6elS/2GxgPMzM=;
+	b=G0Mp+95WLthVROKr3d15RQfSVmDxgMA+rddZtpSIqwfoTEiyB8f5WuTqV1ww8dNuCphKsZh26PEk3K0mqzdYVqJRXpIUe9BVUBXqwXnpvtdDpnT5XMhz+3BGxzl9oHTdBq2CHVbD4hTvvdT4hs5d9nVfUabqxdCIK8ernzoDEQA=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
+	bh=dt7SFNpRRmwCzfAPdXJL6wTGemkfb+ijvHXnv/nSzY0=;
 	h=date:mime-version:subject:message-id:from;
 
-This series adds MMC/eMMC controller support for Black Sesame Technologies
-C1200 SoC. BST is a leading automotive-grade computing SoC provider focusing
-on intelligent driving, computer vision, and AI capabilities for ADAS and
-autonomous driving applications. More information: https://bst.ai
+Add device tree bindings for the Black Sesame Technologies
+DWCMSHC SDHCI controller used in C1200 SoC.
 
-== Background ==
+The binding describes a Synopsys DesignWare Cores Mobile Storage
+Host Controller with BST-specific extensions including:
+- Two register regions (core SDHCI and CRM registers)
+- Optional memory-region for bounce buffer support
+- Fixed clock input
 
-This is the MMC portion split from the original v4 series [1] following
-feedback from Arnd Bergmann [2]. The platform support (vendor-prefix,
-SoC bindings, Kconfig ARCH_BST, base DTS, defconfig ARCH_BST) has already
-been merged into Linux 6.19 through the SoC tree [3].
+Signed-off-by: Ge Gordon <gordon.ge@bst.ai>
+Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-== Series Overview ==
+---
+Changes for v5:
+- Rename file from bst,dwcmshc-sdhci.yaml to bst,c1200-sdhci.yaml
+- Fix example compatible string to match property definition
+- Split from platform series per Arnd's feedback
 
-Patch 1: dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
-Patch 2: mmc: sdhci: allow drivers to pre-allocate bounce buffer
-Patch 3: mmc: sdhci: add Black Sesame Technologies BST C1200 controller driver
-Patch 4: arm64: dts: bst: enable eMMC controller in C1200 CDCU1.0 board
-Patch 5: arm64: defconfig: enable BST SDHCI controller
-Patch 6: MAINTAINERS: add MMC files to BST entry
+Changes for v4:
+- Change \$ref to sdhci-common.yaml#
+- Change compatible to bst,c1200-sdhci
 
-== Testing ==
+Changes for v3:
+- Switch reg schema to explicit items with descriptions
+- Improve example with bus node wrapper
 
-  - checkpatch.pl: PASS (all patches)
-  - dt_binding_check: PASS
-  - dtbs_check (CHECK_DTBS=y): PASS
-  - Build tested with ARCH=arm64 defconfig
-
-== Changes since v4 ==
-
-  - Split: Platform patches merged separately via SoC tree; this series is
-    MMC-only, submitted to MMC maintainers
-
-  DT binding (patch 1):
-  - Rename file from bst,dwcmshc-sdhci.yaml to bst,c1200-sdhci.yaml
-  - Fix example compatible string to match property definition
-
-  Driver (patch 3):
-  - Fix compatible string to match dt-bindings (bst,c1200-sdhci)
-  - Simplify clock divider calculation with clearer frequency range logic
-  - Add linux/bits.h and linux/bitfield.h headers
-  - Remove unused linux/ioport.h header
-  - Rename SDHCI_TUNING_COUNT to BST_TUNING_COUNT
-  - Rename BST_EMMC_CTRL_BIT2 to BST_EMMC_CTRL_RST_N
-  - Fix BST_DEFAULT_MAX_FREQ from 2MHz to 200MHz
-  - Convert kernel-doc to regular comments (per Adrian Hunter)
-  - Add sdhci_bst_free_bounce_buffer() helper (per Adrian Hunter)
-
-
-== References ==
-
-[1] v4: https://lore.kernel.org/lkml/20250923-v4-patch-final-v1-0-2283ad7cbf88@thundersoft.com/
-[2] Split: https://lore.kernel.org/lkml/09b1318e-21dc-4354-8733-866b70696295@app.fastmail.com/
-[3] Merged via soc-newsoc-6.19
-
-Albert Yang (6):
-  dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
-  mmc: sdhci: allow drivers to pre-allocate bounce buffer
-  mmc: sdhci: add Black Sesame Technologies BST C1200 controller driver
-  arm64: dts: bst: enable eMMC controller in C1200 CDCU1.0 board
-  arm64: defconfig: enable BST SDHCI controller
-  MAINTAINERS: add MMC files to BST entry
-
- .../bindings/mmc/bst,c1200-sdhci.yaml         |  70 +++
- MAINTAINERS                                   |   2 +
- .../dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts    |  19 +
- arch/arm64/boot/dts/bst/bstc1200.dtsi         |  18 +
- arch/arm64/configs/defconfig                  |   1 +
- drivers/mmc/host/Kconfig                      |  14 +
- drivers/mmc/host/Makefile                     |   1 +
- drivers/mmc/host/sdhci-of-bst.c               | 521 ++++++++++++++++++
- drivers/mmc/host/sdhci.c                      |   7 +
- 9 files changed, 653 insertions(+)
+Changes for v2:
+- Simplify description, correct compatible string
+---
+ .../bindings/mmc/bst,c1200-sdhci.yaml         | 70 +++++++++++++++++++
+ 1 file changed, 70 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/mmc/bst,c1200-sdhci.yaml
- create mode 100644 drivers/mmc/host/sdhci-of-bst.c
 
-base-commit: 0f61b1860cc3f52aef9036d7235ed1f017632193
+diff --git a/Documentation/devicetree/bindings/mmc/bst,c1200-sdhci.yaml b/Documentation/devicetree/bindings/mmc/bst,c1200-sdhci.yaml
+new file mode 100644
+index 000000000000..8358bb70c333
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/bst,c1200-sdhci.yaml
+@@ -0,0 +1,70 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/bst,c1200-sdhci.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Black Sesame Technologies DWCMSHC SDHCI Controller
++
++maintainers:
++  - Ge Gordon <gordon.ge@bst.ai>
++
++allOf:
++  - $ref: sdhci-common.yaml#
++
++properties:
++  compatible:
++    const: bst,c1200-sdhci
++
++  reg:
++    items:
++      - description: Core SDHCI registers
++      - description: CRM registers
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  clock-names:
++    items:
++      - const: core
++
++  memory-region:
++    maxItems: 1
++
++  dma-coherent: true
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++    #include <dt-bindings/interrupt-controller/irq.h>
++
++    bus {
++        #address-cells = <2>;
++        #size-cells = <2>;
++
++        mmc@22200000 {
++            compatible = "bst,c1200-sdhci";
++            reg = <0x0 0x22200000 0x0 0x1000>,
++                  <0x0 0x23006000 0x0 0x1000>;
++            interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>;
++            clocks = <&clk_mmc>;
++            clock-names = "core";
++            memory-region = <&mmc0_reserved>;
++            max-frequency = <200000000>;
++            bus-width = <8>;
++            non-removable;
++            dma-coherent;
++        };
++    };
 -- 
 2.43.0
 
