@@ -1,116 +1,125 @@
-Received: from canpmsgout04.his.huawei.com (canpmsgout04.his.huawei.com [113.46.200.219])
+Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD243313550;
-	Mon, 26 Jan 2026 12:08:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.219
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF633337BAA
+	for <linux-mmc@vger.kernel.org>; Mon, 26 Jan 2026 13:22:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769429330; cv=none; b=BsfwmYWIjJDqN5FRsx2jxKgaFKtiZzzngunRxBeOY7YAIc4hFQidZFm8mQtQMLV/08dTRYzpmsGaFT5pdDqHoYK3jRjbpqiqbXg4aoFvYwodXiD4pHViBR+CzP7rjo6j0uw0O682zDPiHCPt1gD08m4kYrxav2eLEYv9iDWl6qo=
+	t=1769433734; cv=none; b=txyu4VJ+VNWgm4gQY9AqiqSnYRWu8KACvCENiGQISquZRgZ7KCbvz7jLpwaXN/UhTIxlQEdENBxvATzWiUVT/IqlAmxdavBJJ0KxCnGAfohXYAPT664f3LTIJcl8bY+rhE4tTp8o3oRc5Ylo4fI7PXl4BxM5Toifo+1eB+oBz6E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769429330; c=relaxed/simple;
-	bh=BuU1XdUnu9/+Zs3Udkm0xIjf8J3hHXLRYzMRS57s/aQ=;
-	h=Message-ID:Date:From:MIME-Version:To:CC:Subject:References:
-	 In-Reply-To:Content-Type; b=lmMB/X4erqv24HUB4Arxny37xRyb6K0+vQ7yAL+zVAM4lPcj6O3FCUKmmhq8xxaCcB1RhTm/UuJqbX78RjiU9L4YUm+XnyiM2i7v/Ziubu4YeF9ge1BqjcKbcK25aIILWZkFMXb200iMaDlml4/QteeJlZDocIWPWQatCWPc93I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=hisilicon.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=sLcuE2pr; arc=none smtp.client-ip=113.46.200.219
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=hisilicon.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+	s=arc-20240116; t=1769433734; c=relaxed/simple;
+	bh=U+c8ZIwYNnuckjMqVW4HlV5hWVmaBY/Xta2VJXaum2Y=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:From:In-Reply-To:
+	 Content-Type:References; b=NxSAc2JiFbwxDzpHs2doQCbfSrZwSOqKDBY6f6gp384y9QyRyjav2pcGVU8fobPPm0iOjaZqmp47RqQBQLY4j7Q5sZJFLLkDxLf/E7pduGrtzLknVSHC24q7x+W5g6IhQNwUQoKrJLQ3jrpo+5NLVgqel1duNpZgqlgeUk2YFCU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=XvsFw5L7; arc=none smtp.client-ip=210.118.77.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="sLcuE2pr"
-dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
-	c=relaxed/relaxed; q=dns/txt;
-	h=From;
-	bh=xAe6f3N2n6bbqsz2DCjAXYNczPYRCiPzRDAZXc0IYt8=;
-	b=sLcuE2prG4LYTvO7k6nsDzHaUg17oytddjyh0XMcu27j0O5VV+gybAFvXyBmghtRUzSF/aa/M
-	CoiF2NP3bZ9FHsiskyrZepMk6tAqgQcBiCPtiWJeo+XjAYdhbk9w3RAx0B5LPSNU9ZFZRTyByFr
-	Xbb/693FoRcaj7TV3O6xbME=
-Received: from mail.maildlp.com (unknown [172.19.163.104])
-	by canpmsgout04.his.huawei.com (SkyGuard) with ESMTPS id 4f06g00Kytz1prKP;
-	Mon, 26 Jan 2026 20:05:16 +0800 (CST)
-Received: from dggemv706-chm.china.huawei.com (unknown [10.3.19.33])
-	by mail.maildlp.com (Postfix) with ESMTPS id C7FCC404AD;
-	Mon, 26 Jan 2026 20:08:44 +0800 (CST)
-Received: from kwepemq100003.china.huawei.com (7.202.195.72) by
- dggemv706-chm.china.huawei.com (10.3.19.33) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.11; Mon, 26 Jan 2026 20:08:44 +0800
-Received: from [10.67.112.52] (10.67.112.52) by kwepemq100003.china.huawei.com
- (7.202.195.72) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.11; Mon, 26 Jan
- 2026 20:08:44 +0800
-Message-ID: <6977594B.4020902@hisilicon.com>
-Date: Mon, 26 Jan 2026 20:08:43 +0800
-From: Wei Xu <xuwei5@hisilicon.com>
-User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:24.0) Gecko/20100101 Thunderbird/24.2.0
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="XvsFw5L7"
+Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
+	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20260126132210euoutp013a355736b7040d53cd358321d2615134~OSppEnLHZ0808808088euoutp01F
+	for <linux-mmc@vger.kernel.org>; Mon, 26 Jan 2026 13:22:10 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20260126132210euoutp013a355736b7040d53cd358321d2615134~OSppEnLHZ0808808088euoutp01F
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1769433730;
+	bh=MtEdSqzHCkU44IqpH+pElriHyb8dI7mu/rz9KfZ7Xjc=;
+	h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
+	b=XvsFw5L7/1wtcNRdbXBCFF8flA7IaajvENoWupGkRSoDh4XQAUgn9/3JzfKQ2FgKO
+	 Cq8tP0+7ldaSAJJZagpQ43IWJgF6vD5AS1W11C/yi0dF1AOoRQAwO2ACQ9kUr4U9Zf
+	 0BQx4bH3vKm77NEtpVpFRNF/9F4Gq5fXf7gogy98=
+Received: from eusmtip1.samsung.com (unknown [203.254.199.221]) by
+	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
+	20260126132209eucas1p17cd332f56bbe6aa2f168d50b44626ebe~OSpo7Gr172605726057eucas1p1M;
+	Mon, 26 Jan 2026 13:22:09 +0000 (GMT)
+Received: from [106.210.134.192] (unknown [106.210.134.192]) by
+	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
+	20260126132209eusmtip1e9a1ed8dad458fec5a76506423258c88~OSpoq-Ne33000630006eusmtip1s;
+	Mon, 26 Jan 2026 13:22:09 +0000 (GMT)
+Message-ID: <55a29373-fe1f-4628-9e0e-e1ade3a64edd@samsung.com>
+Date: Mon, 26 Jan 2026 14:22:09 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, Jaehoon Chung
-	<jh80.chung@samsung.com>, <xuwei5@hisilicon.com>
-Subject: Re: [PATCH v2 1/3] arm64: dts: hisilicon: hikey960/970: Convert to
- use standard mmc alias
-References: <1769171049-74327-1-git-send-email-shawn.lin@rock-chips.com> <1769171049-74327-2-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1769171049-74327-2-git-send-email-shawn.lin@rock-chips.com>
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: kwepems500002.china.huawei.com (7.221.188.17) To
- kwepemq100003.china.huawei.com (7.202.195.72)
+User-Agent: Betterbird (Windows)
+Subject: Re: [PATCH v2 15/18] mmc: dw_mmc: Remove check before calling
+ mmc_regulator_set_vqmmc()
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
+Content-Language: en-US
+From: Marek Szyprowski <m.szyprowski@samsung.com>
+In-Reply-To: <1767665829-183001-16-git-send-email-shawn.lin@rock-chips.com>
+Content-Transfer-Encoding: 8bit
+X-CMS-MailID: 20260126132209eucas1p17cd332f56bbe6aa2f168d50b44626ebe
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-RootMTR: 20260126132209eucas1p17cd332f56bbe6aa2f168d50b44626ebe
+X-EPHeader: CA
+X-CMS-RootMailID: 20260126132209eucas1p17cd332f56bbe6aa2f168d50b44626ebe
+References: <1767665829-183001-1-git-send-email-shawn.lin@rock-chips.com>
+	<1767665829-183001-16-git-send-email-shawn.lin@rock-chips.com>
+	<CGME20260126132209eucas1p17cd332f56bbe6aa2f168d50b44626ebe@eucas1p1.samsung.com>
 
-Hi Shawn,
+On 06.01.2026 03:17, Shawn Lin wrote:
+> The vqmmc regulator is acquired as optional via devm_regulator_get_optional().
+> The helper function mmc_regulator_set_vqmmc() currently returns -EINVAL when
+> vqmmc is not present. This patch justifies why this error code is acceptable
+> within the dwc driver's usage context.
+>
+> The function is invoked in two scenarios:
+> 1. In mmc_set_initial_signal_voltage(): The return value is ignored, so
+>     returning -EINVAL is harmless.
+> 2. In mmc_host_set_uhs_voltage(): This higher-level UHS voltage setting
+>     procedure should not be attempted if the vqmmc regulator is not available
+>     in the first place. Thus, signaling an error is the correct behavior.
+>
+> In both call paths, returning -EINVAL for a missing optional regulator
+> does not introduce regressions.
+>
+> So this patch removes the check and still returns error to the core, instead
+> of zero, if vqmmc isn't present.
 
-On 2026/1/23 20:24, Shawn Lin wrote:
-> Convert the long-deprecated mshc alias to standard mmc alias.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Unfortunately this change, merged recently to linux-next as commit 
+9157b7f91ed6 ("mmc: dw_mmc: Remove check before calling 
+mmc_regulator_set_vqmmc()"), introduces a regression: it breaks probing 
+of the built-in eMMC storage device on Samsung Exynos3250 based Rinato 
+board (arch/arm/boot/dts/samsung/exynos3250-rinato.dts). In the kernel 
+log there are only a few lines about EINVAL error:
 
-LGTM,
+dwmmc_exynos 12510000.mmc: IDMAC supports 32-bit address mode.
+dwmmc_exynos 12510000.mmc: Using internal DMA controller.
+dwmmc_exynos 12510000.mmc: Version ID is 260a
+dwmmc_exynos 12510000.mmc: DW MMC controller at irq 65,64 bit host data 
+width,128 deep fifo
+mmc_host mmc0: card is non-removable.
+mmc0: error -22 whilst initialising MMC card
+mmc_host mmc0: Bus speed = 50000000Hz (req 100000Hz, actual 100000HZ div 
+= 250)
+mmc0: error -22 whilst initialising MMC card
+mmc0: Failed to initialize a non-removable card
 
-Reviewed-by: Wei Xu <xuwei5@hisilicon.com>
+It looks that the vqmmc regulator is optional and eMMC chip can switch 
+to HS without changing the (optional) regulator voltage. Without this 
+patch the mmc0 is probed properly on this board:
 
-Thanks!
-Best Regards,
-Wei
+mmc_host mmc0: card is non-removable.
+mmc_host mmc0: Bus speed = 50000000Hz (req 400000Hz, actual 396825HZ div 
+= 63)
+mmc_host mmc0: Bus speed = 50000000Hz (req 52000000Hz, actual 50000000HZ 
+div = 0)
+mmc_host mmc0: Bus speed = 100000000Hz (req 100000000Hz, actual 
+100000000HZ div = 0)
+mmc0: new HS200 MMC card at address 0001
+mmcblk0: mmc0:0001 F5X5MA 3.64 GiB
+mmcblk0boot0: mmc0:0001 F5X5MA 4.00 MiB
+mmcblk0boot1: mmc0:0001 F5X5MA 4.00 MiB
+mmcblk0rpmb: mmc0:0001 F5X5MA 512 KiB, chardev (244:0)
 
-> ---
-> 
-> Changes in v2: None
-> 
->  arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts | 4 ++--
->  arch/arm64/boot/dts/hisilicon/hi3670-hikey970.dts | 4 ++--
->  2 files changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-> index ed84ab9..c6056a8 100644
-> --- a/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-> +++ b/arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
-> @@ -20,8 +20,8 @@
->  	compatible = "hisilicon,hi3660-hikey960", "hisilicon,hi3660";
->  
->  	aliases {
-> -		mshc1 = &dwmmc1;
-> -		mshc2 = &dwmmc2;
-> +		mmc1 = &dwmmc1;
-> +		mmc2 = &dwmmc2;
->  		serial0 = &uart0;
->  		serial1 = &uart1;
->  		serial2 = &uart2;
-> diff --git a/arch/arm64/boot/dts/hisilicon/hi3670-hikey970.dts b/arch/arm64/boot/dts/hisilicon/hi3670-hikey970.dts
-> index 7c32f5f..65764b3 100644
-> --- a/arch/arm64/boot/dts/hisilicon/hi3670-hikey970.dts
-> +++ b/arch/arm64/boot/dts/hisilicon/hi3670-hikey970.dts
-> @@ -19,8 +19,8 @@
->  	compatible = "hisilicon,hi3670-hikey970", "hisilicon,hi3670";
->  
->  	aliases {
-> -		mshc1 = &dwmmc1;
-> -		mshc2 = &dwmmc2;
-> +		mmc1 = &dwmmc1;
-> +		mmc2 = &dwmmc2;
->  		serial0 = &uart0;
->  		serial1 = &uart1;
->  		serial2 = &uart2;
-> 
+Best regards
+-- 
+Marek Szyprowski, PhD
+Samsung R&D Institute Poland
+
