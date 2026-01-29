@@ -1,92 +1,92 @@
-Received: from mail-lj1-f178.google.com (mail-lj1-f178.google.com [209.85.208.178])
+Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 345F632B9A0
-	for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2026 16:06:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61DC233D6F1
+	for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2026 16:15:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.46
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769702811; cv=pass; b=AOjI5y5dTijda1ptjq2MrFqZuFlizj+rYMeWjcVdkcHNvpFO0zg0MrO/SaqrbKUM/KctauAgvwjKVapj2nUjRvsBQTmDptSg26xLGPHp9C3Ocaa0T5cYbRIhXxS3AT18e8E8pupYPjLjqB92gyvMOn+PM0PbMiLnaLMyYeERN80=
+	t=1769703350; cv=pass; b=OAs6HWWhmDzyBcMSRThXWGSKKtBzYlbHwPhkhrk1gK8el3wfylcA8zMm/zq7OCPhdqVe/kqGY8fSKFQVRUH8n9At6HXsnRSE/3t2a/XZ32ZeoHm7lReF7VIeMJA28m+waqYdYH/mOLAgS3+8hPWq9H+YkPi8AZbr6fSqUN8n/gk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769702811; c=relaxed/simple;
-	bh=07694nkibp+Ukt/3oCjWp5i0EIYQ4hrhXlidSnaNpN4=;
+	s=arc-20240116; t=1769703350; c=relaxed/simple;
+	bh=1a2qdSYst23Ql9WM1gLQFpUCuswuU/Q+CP4seG8rf9k=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=V4E+iRifq35fcuJQwlCB34h4myA3TiCAi4tq/Iw1aSfmw2qkoYGNuuEGKeM+NN4Udp0O+2D6nvsKiWdoS43ZRIyMhocrVb4kffCfFDwV97XDDXdkqfwQa6/C9SLrvCHeAIc64l+LZ8NR0nkxGc2UHfy+HeEnGc3d7x8Z7zM8smE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DXCleRDE; arc=pass smtp.client-ip=209.85.208.178
+	 To:Cc:Content-Type; b=FPX7CKRL6UF+69MLwyqhlaxN19FF9cZM2n3vSqPi5WdnIboUR9O0awY6ldcoy1q7iIAujNvJ+ed50F5SwZxntFg61Dg9B6F6jDATTs/QyPmSa7nQTYrbFf+lXKyeAtX1K8GSPjroizN5X442JJviSotLWRSpQ3oG6F8p+Ie4WQk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=HtWuaZii; arc=pass smtp.client-ip=209.85.167.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DXCleRDE"
-Received: by mail-lj1-f178.google.com with SMTP id 38308e7fff4ca-385c2f88618so10141571fa.2
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2026 08:06:49 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1769702807; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HtWuaZii"
+Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-59de66fdb53so1060341e87.2
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2026 08:15:45 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1769703343; cv=none;
         d=google.com; s=arc-20240605;
-        b=JSKvHQliPXQOEwGfIh+kPW7nhta9AFno1LpZbugGseUR7M6YghIXnT+ikIwWycNrMT
-         aJwHj8QLnpPLSyP91qf+HK8UUTJnGYQnrJ74t/SkVguLfgXUTom9qTcV2VRCeZH4Kfam
-         TjuTNu5Xt/K1ehQLDogBnRh0/cCVCJNsEi2lwLlIsdP+YLcArR76X+P4vTvOB8fw/hL6
-         5gUgzjXSiSuLmgs6GNYvBDx9VtNviIf+YjLd2xQWElN1AAiNNiFhRlRBWIek5RPISTVK
-         ZUSIMj4FbN5iUGCBnTpAPl3S7N+eSA19BCmkU6cWX90gRTJ9c2J8rWF4A1r/4pQZQfXR
-         ii5Q==
+        b=fbt+BcLQkzlVtQkxgz1JySNHrnAFptaPidXdAIsLMfotsI/+b3/0Kj8+ridrsYaQf9
+         A+kF4UfegqPrn4rJsLE6e/WB6osoKNFNMapSfBn9bYD01WdEfS6eGgYJCnj5vbos2Ejp
+         KSQo7pbN5WBPxCV6dsPilgxcoqeLcYyfe4+dWyRWzuGQzcsrGyRqfDdyb60spue48C1S
+         vlomPipzR7YiolAkpxnGWfPUBWoRaVE/BPiQJEf0jeWe9TinOrWOMczEZLp5+5SPOCNW
+         4wCmmEjS2p5ZEoADO1QgiOwgNuA/sO+c9kmPMxVRM/H20EUqaYgYO05/7lOgxgqkgeuD
+         98hg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=sjBE9CcEx3FGX02UcUqw+G+HOHlTgyZhIWMhdAQnoXg=;
-        fh=D0xUc+SkayqLrbNPccIS/JMTM7dyBSXDE7BhHq3L35E=;
-        b=i68V0spBlhsuUNzn9P4nuHK3x3KgSZwaaR71bfExJcMAfniKrujedoZrlEQd1SX0EU
-         8rJ/F72u4ifM0WK5aV3Yt24g2injk+vKc5OB2/v1HVM1aZmKqKrnOCL6daikeWOE8Pku
-         WVEXS2qyvYX8Y0zRfgPnMUavXdMVHgv8GVgZefmJgukiltOVw73I35qTanWEheM6pk4x
-         L2F6Nv7exO9Y2lugo82GmZhfxdgMVN4AfI5YduMkTOA/2Mo21rhBB2IYceDBlAKN1bqv
-         +hdmXzuUomKJNWvzKSWlZBayRInM61X03q5fOw0EvxF/zUjJ3fjmkMyBFcrfiioPGGoC
-         D1gw==;
+        bh=mcZyL8rlWiol7qHJKX4MkvpKMN+RPE+vXis8g5P5uMA=;
+        fh=ZBYbQbeE3FXXoLH+sBbs75z4JPtI7ZjeftJCYPAnlow=;
+        b=R/l99I//5Mr8AkstBBlSJV6ZkqScTQnfn96J33g46ZFH3JxjXWQN47fWJS1gxsGsix
+         pPdKvv7RJDDumE//neB20xk6QbDNmPp0cyUzR8ux5BSwZ3KHiZ2r0fztG1IBI3DReN7i
+         YROMNa91qzbgqIl2/3K/6Lz+0vKVGCOs3hsre40ToyRD6kb/DnjcRpwfS/6zsgyblU8B
+         z+siVGuwR4y/uUJr/MdwGVD2tlap6vFUoMbgQhUuL6xnggNXAfoz2ZYQSfHW+oOML3FT
+         zBxjDCGo2tdcCf3lkFE18C//xRB+HT8JZH9S2TwBzpDTiDiwXC77LEKeExDDBojnhJ4O
+         RfuA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1769702807; x=1770307607; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1769703343; x=1770308143; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=sjBE9CcEx3FGX02UcUqw+G+HOHlTgyZhIWMhdAQnoXg=;
-        b=DXCleRDExChl/h8Dg365AhW/r2JRAOHymIXupLWJFbwgmikGA4eODDcSKgC+rsAUw8
-         Gbtqv3xam1Iq2YgyRShLO6ZY+gE7W1cb5FSqCtwdFbAFpfZ20B5S5hBZ0c5QfL/Y3kp3
-         0fkeMTyY4dpHbo68v70VVRELvZymtLFJBdr7P83S9290IfRJ6mvImZdqKzYo+DOYNRmM
-         GRRF70fAKQBP5txyVS77t55eFa3cu8f7N8k6hKVThxV31rX3xacnejRqFHLA+NyG464d
-         jCbjC3xPS0kQM2aoDQNfidex/DN41SePdLmegi0BMnL9PuGWZirC8TW/c64TVnhi0LnV
-         9fFg==
+        bh=mcZyL8rlWiol7qHJKX4MkvpKMN+RPE+vXis8g5P5uMA=;
+        b=HtWuaZiiIIttIDYuqQXvc9JwVdhw1g13h/MSl3cj41S1Ogt8ICxBfGSlgrlqdHD960
+         BA4uczgz+WwyE+jKg82BAqrG7+xkY3jnQhPuJcu1EbHIOFz/NefO6ITbSGDtcLkQns0V
+         8NnF7OF/kM498AUmRBINnK6kcgVezpFtE+LVc6uTNltgMhkFWRsaXVde1To+VDiOcaPu
+         qXmRD126R2sDHYcthUEeOtMneu39Rt3sXWal1Ru6EMPB9IE+DrCyQPP4s0ClxvopG0WV
+         7m2sre1fmjyGS/satGxi76j/FH3N2DELjnvIXdj73O6/Y5HuzamIVdXU4VKEhdMFdboG
+         Ugrw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1769702807; x=1770307607;
+        d=1e100.net; s=20230601; t=1769703343; x=1770308143;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=sjBE9CcEx3FGX02UcUqw+G+HOHlTgyZhIWMhdAQnoXg=;
-        b=gr4/Aaooodbk/xXdfClu2sZ8iVqyzZEY1PhhuRFshQWNszLJuSCXpj9ZFk9h1q3eNJ
-         1ICpm5NfTwRJclSW+zfDKHjHhtUrs9fuNvT8KxghtR1kQMFwLRwqNW9OU+ktDjMf5Etl
-         /AmPJlD2s6QfdPGr4NrUWBjt3egDSey0xK4srnXbAxWbSGoJ2R6nDkD4QYrs0vpEFBWz
-         C5ePaJAlUC0YWXTliTP82NFWhbuSMnThvBw0qdZEqF4s0yIyNlu8vv64tsaf2hAu5c5z
-         hs+o5PGaDXRg6m+Hi/qxMzEuJh5LVsQzkZrC9I8xDa36Fiu7Q6u9bCIRSvjtFMbLRUIx
-         dRJg==
-X-Forwarded-Encrypted: i=1; AJvYcCV2n8luwQgOYpqpUnlrbcvZeS9EZumR+V0zlgX08PVEKBIyd5g2ThD9CkHmQ7u2Hk8KLCdBRQIxR6c=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyloaVcuMZm/r2dL5RFaYEvBsq8v10sgKjjhEIlykETXutrOFNi
-	3h4c6DSYnT6Thdjg0FGBC5ZA6IR8uyBO+t3swk6u05rRyzGjAMryikeZ1Crm78sP6WIwW44YNMr
-	29pbD1IYCKGqohqC3EG9dCYmVOBdgCFhXFh4psVuPFA==
-X-Gm-Gg: AZuq6aLeRxMCVfXVcPxvCXrm5crA8pb/WrITdYe2cUTCvPjhyFFsWCXwJ+X7VZCdnse
-	Dk/m4HNZ9oilhmH8ukT4GZQfAFl7XT+DvG9HIaDDoTvzme/+IzbPsiyDI7ic+iOVXaUBeg9WxtY
-	F0oIttUW5s2GvGTIYsSff7VoMYrjormeS6F96QVL5UwvPpg1V53CRUZSkMzjibTAqLGt+pOgRSX
-	R7YsqS1kjUxA4P9Xnx4+7WcWRpInXJoSD/Y+xMB+8RKHt+jOtHtHQ2NMgq4+y9PS3zvzJ2d
-X-Received: by 2002:a05:6512:234e:b0:59d:d799:b7a0 with SMTP id
- 2adb3069b0e04-59e040299admr4006653e87.36.1769702806877; Thu, 29 Jan 2026
- 08:06:46 -0800 (PST)
+        bh=mcZyL8rlWiol7qHJKX4MkvpKMN+RPE+vXis8g5P5uMA=;
+        b=oxqTnA4LSsYqH/iKZtJRAqTJ4r4jyum//ibZd3EjM9WHepOwIZPwYxt2xCq+JNp4O0
+         WiiFWIVdeKXt+WP0d4EkLFdAzVTpsZBXuXISDotoO5az0QwbDdxwGKX9w2ldmtvW16a4
+         9akQfysWWwEjscx1pohkxHiMXf4LBJibs6E38KMivM1xLoAh2bSsTec0qx62sITKyuuh
+         D4rii5R8MTKN/DwVzJorDDSQdesyt0qxKSNFQa1Am47HWqn6K+OjGveS36vN8c9iMkk+
+         JMxx/YZV/j5jrYXSqpWpqTSRyNCENZ+IIGy97MPg7s2jQYV/Y0oBokCu4ajLZVMN03ck
+         ovhQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUE+LULutLLqzNVhmxERIHsZauDO1hkAYNLJeAOnbd2LQctF8eDaV4C0eb/hH/QPWWZ3PW9vv6Ff1E=@vger.kernel.org
+X-Gm-Message-State: AOJu0YySbWnLs+zreyoxkgIpwSh0is0HVZIuMZ83jdgc79yvdDWChxEq
+	79TjZ5L0q5hDPEeutHgDdPqoiO6YEYKiqtbOtyTv0NRWTEdKMywIOtZDZCNww7uuvoFDLog2pWR
+	pvUjhxnI6lz1dU9Wlf0haejjln63zt9cJnV1PNp/llw==
+X-Gm-Gg: AZuq6aI3VmTOZCRjtHm6g7xI00NcHQ/RErNHrIswIS55JmdVjn5FN9UQDnWEOqWOQe6
+	d/Jyh+aglpBNK8jaVp9i5BbEtBJnjXs8ke1C/zrQPDXTZDygIYTHJXjRSaXiQ/B1k4+YlM5RLDz
+	9zS9o0vQA5ILIxOdN7HAZwhB6AiCPoXkt0AOeQKB5v0RScTJF74y5irCesACXVCQNqCs3n8K29J
+	6s2/3u8dxsaZiMqjcEPy/cM728ED6bPfzMuvV2Cg55n0F5DkxzPBSzqX4iWBJXDFgszfekt
+X-Received: by 2002:a05:6512:1394:b0:59e:15a:d704 with SMTP id
+ 2adb3069b0e04-59e04015669mr4368983e87.13.1769703343301; Thu, 29 Jan 2026
+ 08:15:43 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260128-rz-sdio-mux-v7-0-92ebb6da0df8@solid-run.com> <20260128-rz-sdio-mux-v7-2-92ebb6da0df8@solid-run.com>
-In-Reply-To: <20260128-rz-sdio-mux-v7-2-92ebb6da0df8@solid-run.com>
+References: <20260128-rz-sdio-mux-v7-0-92ebb6da0df8@solid-run.com>
+In-Reply-To: <20260128-rz-sdio-mux-v7-0-92ebb6da0df8@solid-run.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 29 Jan 2026 17:06:10 +0100
-X-Gm-Features: AZwV_QhXWgEPoSG5cEeDEK7X9sYP3SyTXeMqEgA9rOrQCY9Is43DwQw7rMGTcAc
-Message-ID: <CAPDyKFrBuL+747QUJJUejtcvjm0V7Lt=vHwjvcMdCt_h4=sFwg@mail.gmail.com>
-Subject: Re: [PATCH v7 2/7] mux: Add helper functions for getting optional and
- selected mux-state
+Date: Thu, 29 Jan 2026 17:15:06 +0100
+X-Gm-Features: AZwV_Qg3mhJxcxsaaNM16DuqcQOXYrDFWwz2xcBsELVK6E8j4cCnjP0a7TG6aus
+Message-ID: <CAPDyKFp9StNf1eLaSETxC72=7sXYBmGFmHnv0CXysUGcYma5VA@mail.gmail.com>
+Subject: Re: [PATCH v7 0/7] mmc: host: renesas_sdhi_core: support configuring
+ an optional sdio mux
 To: Josua Mayer <josua@solid-run.com>
 Cc: Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>, 
 	Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
@@ -108,157 +108,109 @@ Content-Type: text/plain; charset="UTF-8"
 
 On Wed, 28 Jan 2026 at 15:46, Josua Mayer <josua@solid-run.com> wrote:
 >
-> In-tree phy-can-transceiver driver has already implemented a local
-> version of devm_mux_state_get_optional.
+> Some Renesas SoC based boards mux SD and eMMC on a single sdio
+> controller, exposing user control by dip switch and software control by
+> gpio.
 >
-> The omap-i2c driver gets and selects an optional mux in its probe
-> function without using any helper.
+> Purpose is to simplify development and provisioning by selecting boot
+> media at power-on, and again before starting linux.
 >
-> Add new helper functions covering both aforementioned use-cases:
+> Add binding and driver support for linking a (gpio) mux to renesas sdio
+> controller.
 >
-> - mux_control_get_optional:
->   Get a mux-control if specified in dt, return NULL otherwise.
-> - devm_mux_state_get_optional:
->   Get a mux-state if specified in dt, return NULL otherwise.
-> - devm_mux_state_get_selected:
->   Get and select a mux-state specified in dt, return error otherwise.
-> - devm_mux_state_get_optional_selected:
->   Get and select a mux-state if specified in dt, return error or NULL.
->
-> Existing mux_get helper function is changed to take an extra argument
-> indicating whether the mux is optional.
-> In this case no error is printed, and NULL returned in case of ENOENT.
->
-> Calling code is adapted to handle NULL return case, and to pass optional
-> argument as required.
->
-> To support automatic deselect for _selected helper, a new structure is
-> created storing an exit pointer similar to clock core which is called on
-> release.
->
-> To facilitate code sharing between optional/mandatory/selected helpers,
-> a new internal helper function is added to handle quiet (optional) and
-> verbose (mandatory) errors, as well as storing the correct callback for
-> devm release: __devm_mux_state_get
->
-> Due to this structure devm_mux_state_get_*_selected can no longer print
-> a useful error message when select fails. Instead callers should print
-> errors where needed.
->
-> Commit e153fdea9db04 ("phy: can-transceiver: Re-instate "mux-states"
-> property presence check") noted that "mux_get() always prints an error
-> message in case of an error, including when the property is not present,
-> confusing the user."
->
-> The first error message covers the case that a mux name is not matched
-> in dt. The second error message is based on of_parse_phandle_with_args
-> return value.
->
-> In optional case no error is printed and NULL is returned.
-> This ensures that the new helper functions will not confuse the user
-> either.
->
-> With the addition of optional helper functions it became clear that
-> drivers should compile and link even if CONFIG_MULTIPLEXER was not enabled.
-> Add stubs for all symbols exported by mux core.
+> Introduce generic helper functions for getting managed and selected
+> mux-state objects, and switch i2c-omap and phy-can-transceiver drivers.
 >
 > Signed-off-by: Josua Mayer <josua@solid-run.com>
-> ---
->  drivers/mux/core.c           | 178 ++++++++++++++++++++++++++++++++++++-------
->  include/linux/mux/consumer.h | 108 +++++++++++++++++++++++++-
->  2 files changed, 253 insertions(+), 33 deletions(-)
->
-> diff --git a/drivers/mux/core.c b/drivers/mux/core.c
-> index a3840fe0995f..b01ec126caaf 100644
-> --- a/drivers/mux/core.c
-> +++ b/drivers/mux/core.c
 
-[...]
-
->  static void devm_mux_state_release(struct device *dev, void *res)
->  {
-> -       struct mux_state *mstate = *(struct mux_state **)res;
-> +       struct devm_mux_state_state *devm_state = res;
->
-> -       mux_state_put(mstate);
-> +       if (devm_state->exit)
-> +               devm_state->exit(devm_state->mstate);
-> +
-> +       mux_state_put(devm_state->mstate);
->  }
->
->  /**
-> - * devm_mux_state_get() - Get the mux-state for a device, with resource
-> - *                       management.
-> - * @dev: The device that needs a mux-control.
-> - * @mux_name: The name identifying the mux-control.
-> + * __devm_mux_state_get() - Get the optional mux-state for a device,
-> + *                         with resource management.
-> + * @dev: The device that needs a mux-state.
-> + * @mux_name: The name identifying the mux-state.
-> + * @optional: Whether to return NULL and silence errors when mux doesn't exist.
-> + * @init: Optional function pointer for mux-state object initialisation.
-> + * @exit: Optional function pointer for mux-state object cleanup on release.
->   *
->   * Return: Pointer to the mux-state, or an ERR_PTR with a negative errno.
->   */
-> -struct mux_state *devm_mux_state_get(struct device *dev,
-> -                                    const char *mux_name)
-> +static struct mux_state *__devm_mux_state_get(struct device *dev, const char *mux_name,
-> +                                             bool optional,
-> +                                             int (*init)(struct mux_state *mstate),
-> +                                             int (*exit)(struct mux_state *mstate))
->  {
-> -       struct mux_state **ptr, *mstate;
-> +       struct devm_mux_state_state *devm_state;
-> +       struct mux_state *mstate;
-> +       int ret;
->
-> -       ptr = devres_alloc(devm_mux_state_release, sizeof(*ptr), GFP_KERNEL);
-> -       if (!ptr)
-> +       devm_state = devres_alloc(devm_mux_state_release, sizeof(*devm_state), GFP_KERNEL);
-> +       if (!devm_state)
->                 return ERR_PTR(-ENOMEM);
->
-> -       mstate = mux_state_get(dev, mux_name);
-> -       if (IS_ERR(mstate)) {
-> -               devres_free(ptr);
-> -               return mstate;
-> +       mstate = mux_state_get(dev, mux_name, optional);
-> +       if (IS_ERR_OR_NULL(mstate)) {
-> +               ret = PTR_ERR(mstate);
-
-Should this be PTR_ERR_OR_ZERO?
-
-> +               goto err_mux_state_get;
->         }
->
-> -       *ptr = mstate;
-> -       devres_add(dev, ptr);
-> +       if (init) {
-> +               ret = init(mstate);
-> +               if (ret)
-> +                       goto err_mux_state_init;
-> +       }
-> +
-> +       devm_state->mstate = mstate;
-> +       devm_state->exit = exit;
-> +       devres_add(dev, devm_state);
->
->         return mstate;
-> +
-> +err_mux_state_init:
-> +       mux_state_put(mstate);
-> +err_mux_state_get:
-> +       devres_free(devm_state);
-> +       return ERR_PTR(ret);
-
-If PTR_ERR_OR_ZERO is used above as I suggested, ret may be 0 here.
-
-Then it is probably clearer to add a check if (!ret) and return NULL
-explicitly for that case, I think.
-
-[...]
+This series needs to go together in some way. If you like, I can
+funnel it via my mmc tree, unless someone (Wolfram for the i2c part?)
+has objections to this of course.
 
 Kind regards
 Uffe
+
+> ---
+> Changes in v7:
+> - picked up reviewed-tags
+> - fix Kconfig change to add the missing prompt for CONFIG_MULTIPLEXER,
+>   and enable it by default when COMPILE_TEST is set.
+>   (Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>)
+> - fix another kernel build robot warning: undocumented C struct member
+> - Link to v6: https://lore.kernel.org/r/20260121-rz-sdio-mux-v6-0-38aa39527928@solid-run.com
+>
+> Changes in v6:
+> - replaced /* with /** for devm_mux_state_state function description.
+> - collected review tags.
+> - fixed checkpatch warnings (space-before-tab, void-return).
+>   (Reported-by: Geert Uytterhoeven)
+> - fixed use-after-free in mux core mux_get function.
+>   (Reported-by: Geert Uytterhoeven)
+> - fix mux helper error path uninitialised return code variable.
+>   (Reported-by: kernel test robot <lkp@intel.com>)
+> - Link to v5: https://lore.kernel.org/r/20260118-rz-sdio-mux-v5-0-3c37e8872683@solid-run.com
+>
+> Changes in v5:
+> - implemented automatic mux deselect for devm_*_selected.
+>   (Reported-by: Wolfram Sang <wsa+renesas@sang-engineering.com>)
+> - because of semantic changes I dropped reviewed and acks from omap-i2c
+>   patch (Andreas Kemnade / Wolfram Sang).
+> - fix invalid return value in void function for mux helper stubs
+>   (Reported-by: kernel test robot <lkp@intel.com>)
+> - Link to v4: https://lore.kernel.org/r/20251229-rz-sdio-mux-v4-0-a023e55758fe@solid-run.com
+>
+> Changes in v4:
+> - added MULTIPLEXER Kconfig help text.
+> - removed "select MULTIPLEXER" from renesas sdhi Kconfig, as it is
+>   not required for all devices using this driver.
+> - added stubs for all symbols exported by mux core.
+>   (Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>)
+> - refactored mux core logic to silence ENOENT errors only on optional
+>   code paths, keeping error printing unchanged otherwise.
+>   (Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>)
+> - picked up various reviewed- and acked-by tags
+> - Link to v3: https://lore.kernel.org/r/20251210-rz-sdio-mux-v3-0-ca628db56d60@solid-run.com
+>
+> Changes in v3:
+> - updated omap-i2c and phy-can-transceiver to use new helpers.
+> - created generic helper functions for getting managed optional mux-state.
+>   (Reported-by: Rob Herring <robh@kernel.org>)
+> - picked up binding ack by Rob Herring.
+> - replaced use of "SDIO" with "SD/SDIO/eMMC" in binding document and
+>   commit descriptions.
+>   (Reported-by: Ulf Hansson <ulf.hansson@linaro.org>)
+> - Link to v2: https://lore.kernel.org/r/20251201-rz-sdio-mux-v2-0-bcb581b88dd7@solid-run.com
+>
+> Changes in v2:
+> - dropped mux-controller node from dt binding example
+>   (Reported-by: Conor Dooley <conor@kernel.org>
+>    Reported-by: Krzysztof Kozlowski <krzk@kernel.org>)
+> - Link to v1: https://lore.kernel.org/r/20251128-rz-sdio-mux-v1-0-1ede318d160f@solid-run.com
+>
+> ---
+> Josua Mayer (7):
+>       phy: can-transceiver: rename temporary helper function to avoid conflict
+>       mux: Add helper functions for getting optional and selected mux-state
+>       mux: add help text for MULTIPLEXER config option
+>       phy: can-transceiver: drop temporary helper getting optional mux-state
+>       i2c: omap: switch to new generic helper for getting selected mux-state
+>       dt-bindings: mmc: renesas,sdhi: Add mux-states property
+>       mmc: host: renesas_sdhi_core: support selecting an optional mux
+>
+>  .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   6 +
+>  drivers/i2c/busses/i2c-omap.c                      |  24 +--
+>  drivers/mmc/host/renesas_sdhi_core.c               |   6 +
+>  drivers/mux/Kconfig                                |   8 +-
+>  drivers/mux/core.c                                 | 178 +++++++++++++++++----
+>  drivers/phy/phy-can-transceiver.c                  |  10 --
+>  include/linux/mux/consumer.h                       | 108 ++++++++++++-
+>  7 files changed, 277 insertions(+), 63 deletions(-)
+> ---
+> base-commit: 8f0b4cce4481fb22653697cced8d0d04027cb1e8
+> change-id: 20251128-rz-sdio-mux-acc5137f1618
+>
+> Best regards,
+> --
+> Josua Mayer <josua@solid-run.com>
+>
+>
