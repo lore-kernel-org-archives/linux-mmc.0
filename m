@@ -1,97 +1,98 @@
-Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f48.google.com (mail-dl1-f48.google.com [74.125.82.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36B3E32BF41;
-	Wed, 28 Jan 2026 17:14:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B937D28D8F1
+	for <linux-mmc@vger.kernel.org>; Thu, 29 Jan 2026 03:59:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769620486; cv=none; b=TTuFi5JuR254LyUWu3vlpuga8ayLeNqOx5Ase+fIa5lIdrfaW+mnjLLvPOdgZjE0epyvyO2wivA20ktMb2O1SMLv0tQPwWiarueWgRn91CprX8zuzaqaqZzv0shyu7UM3lEY6pHLJUOw+gQd1N2qRCTuYxlvOzfys8GmUYqj6hw=
+	t=1769659176; cv=none; b=bMPMfKCFI/zELAyBlKqlnuBexBt2PJC1OiXE2I68eKluHWGFIrcBpirSSMRX0mkHBamKcDxjFB+h20HZ1k1oWGzoeIfWbpvs28WypzhCa9DR5zdbsbfwZet+thFhI0xW9eHtahubqqRTUEtNsqVxrveh014/TWkuHKbji3Ex9eo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769620486; c=relaxed/simple;
-	bh=uJmOXwecgfaKijpkk3nPT+5dUyYku1dakt4++ErgJyY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=mgGUP46JOr+q6ZIos3yVewRCIPNLiIgW7wJhR/zCsvPcGXm31vLJXI9i4OayTURL5V1UKVAzP6dOdOqKlPq4fh1VNfYju+qar1vef8zEQG2JqcZg7xzZiJ2dvT1ZKvuHzlcXkEJdfIIE1ic9ykifLPgXDrO4gX7KY3RI8Yhfw8E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=4DAxXZ0I; arc=none smtp.client-ip=199.89.1.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
+	s=arc-20240116; t=1769659176; c=relaxed/simple;
+	bh=5bdmB25tVaWd8+gOnwukbZvqaaCU2a5c3UopFBfj1QQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=DDhAM2/DFj+F1naPFwy6Dq/+qolVAFpBThhfl2Rd4h0momFizH9+DYJgr4hBxb5Oq9rIlYOFYfrS7frfLZJBbrOZ6sPXMqADQ6czEK5DVHOVOlMyeyrpkJxpQi+VrlQLsB0vogsPy+RTLaaF7yYzkDz8iJbiVwPvjJVSzshPRac=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fnKZIjZA; arc=none smtp.client-ip=74.125.82.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="4DAxXZ0I"
-Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4f1TR53xR9z1XMG4k;
-	Wed, 28 Jan 2026 17:14:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
-	content-transfer-encoding:content-type:content-type:in-reply-to
-	:from:from:content-language:references:subject:subject
-	:user-agent:mime-version:date:date:message-id:received:received;
-	 s=mr01; t=1769620479; x=1772212480; bh=uJmOXwecgfaKijpkk3nPT+5d
-	UyYku1dakt4++ErgJyY=; b=4DAxXZ0ItLJw2yMC4dQjwhoNRcwamfyxc/NiUnos
-	3ud5meI7sXXoahmhlOi9Qd8fI8apTaWaw7PbYLfi8TvOWt4QOXPmQcv1DrKBv435
-	/tuow1vri+vbEghrUKntNdkYsjb9btR0lGc3xyYocQ2nIeWo/dthF3tT4PIzSIxD
-	6uyxICQmpnnhUuIxniYO6WYEuH47dQa9E4I0rzM24eL2Pp3b8w8POJLbqyRbRpwO
-	db9vBV5nTtwqRcznZXnYOSZjB4smmYjtzn6IK4YO1NoEdT+k7Gj3W802O7lxVTzK
-	AuunAT4/PwZxnPYGfkL4SZgfC6aNcqVMEgjJD6R1ksbVgA==
-X-Virus-Scanned: by MailRoute
-Received: from 011.lax.mailroute.net ([127.0.0.1])
- by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id 7YScFzrTrQAT; Wed, 28 Jan 2026 17:14:39 +0000 (UTC)
-Received: from [100.119.48.131] (unknown [104.135.180.219])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4f1TR15dnkz1XMG4X;
-	Wed, 28 Jan 2026 17:14:37 +0000 (UTC)
-Message-ID: <0b6fd99b-54a6-45f1-942e-94f707f2fbf5@acm.org>
-Date: Wed, 28 Jan 2026 09:14:36 -0800
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fnKZIjZA"
+Received: by mail-dl1-f48.google.com with SMTP id a92af1059eb24-124afd03fd1so802206c88.0
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Jan 2026 19:59:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1769659174; x=1770263974; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=KRHz22JTQQqshfZxaDzpPbMH6KcD18UIYRklaLC1nf8=;
+        b=fnKZIjZA5FENaIAhpXjIWysEtmJtzm18einXRr8mKZSm/ivkuTS5eOALK0Tv3QwNNq
+         5LCVOfTZ55l6+TlnXCMPiJx16k57W66HGUtX7oBxbOuxVH1Mbp3XjCvwkHb8m7pDEJ3m
+         QX38jyHmVvkvVxveOpIjl7JdTLFWTPWF1G+QWyqUb5kIehKYUgxfdPlMX3dCZxOqZsE8
+         L51D29opG/xFluR9/NsosZYziERZ+hQghXfCgdSsLDTiSphBIBGLirG7i/PrsKYoXa4n
+         5oidgAjSk268WpqwlJ2YPCRAO2X9LowLMJuXHZB2JnpnKn2wbEoxA2VE+M5zIHye70V0
+         Xg/w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1769659174; x=1770263974;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KRHz22JTQQqshfZxaDzpPbMH6KcD18UIYRklaLC1nf8=;
+        b=Dr312d8axrX3WT4qet+/cg686echS5QbEArkO317DJu076JhE0f7Q3hXNX5Oxi1B5k
+         C13UhZ4To4jyJ8fxgawlbSBR6E5yCgLI/av5rVC8br0h12rWXdaxCrj2CfF8zWmwQQ7D
+         YMsIV8dFvp6y1JuWhu4JVacjkoAh5oBazQiv5wh1034+OTTC0C0EgJ4oHcyl7v+NAIIf
+         Y9qKNNtsUzPNryP4uyUxPcXaHYnMUIPqEgcdKu68VJPJZr70VqVJObDHdeqMPqSM8ZYO
+         2ITNB+33oUz7HqYhvMnZgLIUSq1BLLlHZBQUihx3rGsSfcvqW127DBWxhZIjLB1+3xvA
+         H1pg==
+X-Gm-Message-State: AOJu0YxXq0gVixVzvsdTHAURsijvc2F+YDNv0VQWm7hBYIu3MQucN2Uh
+	bIP+zZRw72GxHfBtTmJh+hMZyLqu8bZjo8HZlaEk3T6KSWpZERK4BJ+lwsSeThxV
+X-Gm-Gg: AZuq6aLuZXhZ0KZr6N6UXcSS9NjQKi5atemyPumfwcXtzI2vb1k4Nb/eDEPsiVgtqyK
+	8m2S9ngt8NbFn1hho7DTiVtXITeR8WXHIH4FR4nq2w6CLM0VXsn/irr1Od3l+wONdoxG7usEs7a
+	jNFX2QpW18eYlNqoCNdm5SkHDxmoJbzPyhtYUvFFRcBQk2eW11oyxpkxmqe3wF12E3uMJ5MrqDI
+	P9f9ZHQFHXWRFJ4J7pBeulUz3rYiyjyBV1bt0I+ZPqgvm9+rizdcGj6yhEkUJ40vm15HVBKNF00
+	E4oy7taYRIzpjeGJ6V/gPaYisPFntyQG8yI74YdiYz4GscQGfGPVwTvipAD3IURpd/kgHGu1MuD
+	V9uHou/rjvIDhMq97g1nu9sUmpndD7LBm1teVU70tCG18N947nE1o/dvDvTZSWeQYFx70S/E/LI
+	n5wHkct5oWCFvVwstSdx9ClpBzw9XiQog=
+X-Received: by 2002:a05:7022:f85:b0:119:e56b:91f2 with SMTP id a92af1059eb24-124a00d087fmr4660148c88.35.1769659174376;
+        Wed, 28 Jan 2026 19:59:34 -0800 (PST)
+Received: from valhalla.localdomain ([201.75.187.231])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-124a9d6b663sm4882289c88.1.2026.01.28.19.59.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 Jan 2026 19:59:33 -0800 (PST)
+From: Andre Korol <andre.korol.dev@gmail.com>
+To: ulf.hansson@linaro.org,
+	zhoubinbin@loongson.cn
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Andre Korol <andre.korol.dev@gmail.com>
+Subject: [PATCH] mmc: loongson2-mmc: drop redundant memset after dma_alloc_coherent()
+Date: Thu, 29 Jan 2026 00:59:17 -0300
+Message-ID: <20260129035917.48080-1-andre.korol.dev@gmail.com>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
- RTS525A card reader
-To: Ulf Hansson <ulf.hansson@linaro.org>, Christoph Hellwig <hch@lst.de>,
- Jens Axboe <axboe@kernel.dk>, Ricky WU <ricky_wu@realtek.com>,
- Matthew Schwartz <matthew.schwartz@linux.dev>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- linux-block <linux-block@vger.kernel.org>
-References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
- <CAPDyKFrGpvjONrDmnNZXv+SME_NCNv-LK8J-Vo88RSz1fuD7rg@mail.gmail.com>
- <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev>
- <4777aabd-bc9e-4904-9444-892393aecb15@linux.dev>
- <9e362d5fa2604fb0848ea28866dc45fc@realtek.com>
- <47ed09fc-047b-4f98-8df3-d11d17678c57@linux.dev>
- <380f75c7adc04cbab38cfd2f82bd0c6d@realtek.com>
- <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
- <4205fde06ecd4a7489b03ef25e5e4011@realtek.com>
- <CAPDyKFoC-dwzcsABNy9pA=GGirBWwcxQhNMeTSSStXHtXmWbcg@mail.gmail.com>
-Content-Language: en-US
-From: Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <CAPDyKFoC-dwzcsABNy9pA=GGirBWwcxQhNMeTSSStXHtXmWbcg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 1/28/26 5:23 AM, Ulf Hansson wrote:
-> How does other block device drivers do this?
+dma_alloc_coherent() returns zeroed memory, so the memset() immediately
+after allocation is redundant.
 
-The role of the Linux kernel is to provide mechanisms while remaining as
-policy-neutral as possible. In other words, it is up to user space to
-decide whether to enable or to disable runtime PM.
+Signed-off-by: Andre Korol <andre.korol.dev@gmail.com>
+---
+ drivers/mmc/host/loongson2-mmc.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-For UFS devices some form of runtime PM is enabled by default for
-battery-powered devices because otherwise the impact on battery life
-would be unacceptable. If the latency impact of runtime resume is not
-acceptable for some applications then it is up to user space software to
-tune runtime power management as necessary.
+diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
+index da3daab5f3d6..026cbd80f114 100644
+--- a/drivers/mmc/host/loongson2-mmc.c
++++ b/drivers/mmc/host/loongson2-mmc.c
+@@ -846,7 +846,6 @@ static int ls2k2000_mmc_set_internal_dma(struct loongson2_mmc_host *host,
+ 	if (!host->sg_cpu)
+ 		return -ENOMEM;
+ 
+-	memset(host->sg_cpu, 0, PAGE_SIZE);
+ 	return 0;
+ }
+ 
+-- 
+2.51.0
 
-Additionally, cpu_latency_qos_update_request() is called by the UFS
-driver during runtime suspend and resume to prevent that CPU frequency
-scaling negatively affects UFS processing latency. I'd like to move
-these cpu_latency_qos_update_request() calls from the UFS driver into
-the block layer core because I think that every block driver that
-supports runtime power management needs this.
-
-Bart.
