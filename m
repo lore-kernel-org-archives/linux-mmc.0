@@ -1,123 +1,133 @@
-Received: from out-187.mta1.migadu.com (out-187.mta1.migadu.com [95.215.58.187])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B893221B9D2
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Jan 2026 11:06:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.187
+Received: from elvis.franken.de (elvis.franken.de [193.175.24.41])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 948A0329E40;
+	Fri, 30 Jan 2026 14:38:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.175.24.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1769771203; cv=none; b=JlI70LV51YVM2uIRJVvxMIzp0yVmXzTAxH9l5ylE6IBz/BM0ByQHCY+aRWl2vS9KBCKIouLh54fnZ9qXz37PteY8KghQUaEJH1Z0Yi2tbBkNy3+JM5tVTjBQAKq9fBul+RsRbzd+EfFcZhKuRlsIeEUBemm/kIfYtmOS9ymflZs=
+	t=1769783905; cv=none; b=Sp+fnFLzGlAACs4horA3lwN6bjd+0BbnhcHuGGZbwjUpseMJCEL7uL5Bb649mW76hZmW9EBVAMQ8/SgHelTGm1K5Ksz2BG4WRRbjeFYW0MYsVDi8PRa6AnBYCR+DdOWWIP8/MhOgmXp89ovQ1V0tqOXMiWyFtOWXjQ0lLW0mVq8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1769771203; c=relaxed/simple;
-	bh=a/zVTBTJCkhqwYXrRY+kvqL7QQoB6agEJ522P8fp8X8=;
-	h=Content-Type:From:Mime-Version:Subject:Message-Id:Date:Cc:To; b=B4KEJdG7ytYf37mBoVQNRiFsgl/rvNJgAJnDc8OZSPbZyWGH4LzangLFmwxYXN4w3aXVTLju1HxDXeN3JxIoG4JCQ+BqiSRkfoY1yhCkb2RuaQYf1bTrw6T30QZFzFrPJ1uDYU7xYyQOOdHeSkO8ZC3kjU03hcGWlJaRBZkoiGw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=id9qbyNY; arc=none smtp.client-ip=95.215.58.187
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="id9qbyNY"
-Content-Type: text/plain; charset=utf-8
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1769771197;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=3vxerl3l/rTYyFUDIDIlNUdhJIJrffcuAG4CqptJc/s=;
-	b=id9qbyNYPtxzV6e9loV9fl2jQrot2PnXfSu+GHErqSJ+3B36R8yAmsR1p+ryQyvYQ/YBl/
-	ztnWl8OZv0atKv6CcyQ4leEVoa6F0b1Yf2fGbUATE8pelalgxskyM5h0dSc5cyniaheqMt
-	bYvK4vXJHYP5sFNQbp10+FWvPMbd7fQ=
-Content-Transfer-Encoding: quoted-printable
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Matthew Schwartz <matthew.schwartz@linux.dev>
+	s=arc-20240116; t=1769783905; c=relaxed/simple;
+	bh=JwWdTtXP6aYnY46cQ244PNUDxwPqzAMtK4NQiX4+FVM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=kIuWLFlnvqvTggP/P41qqTpHYwBBeCEB45H/fsfUg/19yNprMkAHhqbpI3mdwwIs/5bUryWqaDLxrYkhivgeL1cISebyfViCv0sTyCegS+yJb1h9lgJNtICeljuhD1MXs8gF1OQDZnHZB7GJcV+0r30VpL+4BHxrIzPp40Nwzlg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alpha.franken.de; spf=pass smtp.mailfrom=alpha.franken.de; arc=none smtp.client-ip=193.175.24.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alpha.franken.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=alpha.franken.de
+Received: from uucp by elvis.franken.de with local-rmail (Exim 3.36 #1)
+	id 1vlpdb-0007Ev-00; Fri, 30 Jan 2026 15:38:19 +0100
+Received: by alpha.franken.de (Postfix, from userid 1000)
+	id C4CE7C0748; Fri, 30 Jan 2026 15:37:58 +0100 (CET)
+Date: Fri, 30 Jan 2026 15:37:58 +0100
+From: Thomas Bogendoerfer <tsbogend@alpha.franken.de>
+To: Brian Masney <bmasney@redhat.com>
+Cc: Claudiu Beznea <claudiu.beznea@tuxon.dev>, linux-mips@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	Linus Walleij <linusw@kernel.org>, linux-gpio@vger.kernel.org,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	linux-rtc@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>, linux-serial@vger.kernel.org,
+	Guenter Roeck <linux@roeck-us.net>,
+	Wim Van Sebroeck <wim@linux-watchdog.org>,
+	linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH v2 00/16] MIPS: move pic32.h header file from asm to
+ platform_data
+Message-ID: <aXzCRgyHjG-NfiRw@alpha.franken.de>
+References: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0 (1.0)
-Subject: Re: [RFC PATCH] mmc: sdhci-pci-gli: fix GL9750 DMA write corruption
-Message-Id: <56AD8238-302F-4FDC-8ECD-842B0B92F1BE@linux.dev>
-Date: Fri, 30 Jan 2026 03:06:21 -0800
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
- Ben Chuang <ben.chuang@genesyslogic.com.tw>,
- Victor Shih <victor.shih@genesyslogic.com.tw>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-X-Migadu-Flow: FLOW_OUT
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com>
 
-=EF=BB=BF
+On Mon, Jan 12, 2026 at 05:47:54PM -0500, Brian Masney wrote:
+> There are currently some pic32 MIPS drivers that are in tree, and are
+> only configured to be compiled on the MIPS pic32 platform. There's a
+> risk of breaking some of these drivers when migrating drivers away from
+> legacy APIs. It happened to me with a pic32 clk driver.
+> 
+> Let's go ahead and move the pic32.h from the asm to the platform_data
+> include directory in the tree. This will make it easier, and cleaner to
+> enable COMPILE_TEST for some of these pic32 drivers. To do this requires
+> updating some includes, which I do at the beginning of this series.
+> 
+> This series was compile tested on a centos-stream-10 arm64 host in two
+> different configurations:
+> 
+> - native arm64 build with COMPILE_TEST (via make allmodconfig)
+> - MIPS cross compile on arm64 with:
+>       ARCH=mips CROSS_COMPILE=mips64-linux-gnu- make pic32mzda_defconfig
+> 
+> Note that there is a separate MIPS compile error in linux-next, and I
+> reported it at https://lore.kernel.org/all/aWVs2gVB418WiMVa@redhat.com/
+> 
+> I included a patch at the end that shows enabling COMPILE_TEST for a
+> pic32 clk driver.
+> 
+> Merge Strategy
+> ==============
+> - Patches 1-15 can go through the MIPS tree.
+> - Patch 16 I can repost to Claudiu after patches 1-15 are in Linus's
+>   tree after the next merge window. There is a separate patch set that
+>   fixes a compiler error I unintentionally introduced via the clk tree.
+>   https://lore.kernel.org/linux-clk/CABx5tq+eOocJ41X-GSgkGy6S+s+Am1yCS099wqP695NtwALTmg@mail.gmail.com/T/
+> 
+> Signed-off-by: Brian Masney <bmasney@redhat.com>
+> ---
+> Changes in v2:
+> - Fix native MIPS build by updating include files
+> - Link to v1: https://lore.kernel.org/r/20260109-mips-pic32-header-move-v1-0-99859c55783d@redhat.com
+> 
+> ---
+> Brian Masney (16):
+>       MIPS: pic32: include linux/io.h header on several files
+>       MIPS: pic32: include linux/types.h on pic32.h
+>       MIPS: pic32: drop unused include linux/io.h from pic32.h
+>       MIPS: copy pic32.h header file from asm/mach-pic32/ to include/platform-data/
+>       MAINTAINERS: add include/linux/platform_data/pic32.h to MIPS entry
+>       MIPS: update include to use pic32.h from platform_data
+>       clk: microchip: core: update include to use pic32.h from platform_data
+>       irqchip/irq-pic32-evic: update include to use pic32.h from platform_data
+>       mmc: sdhci-pic32: update include to use pic32.h from platform_data
+>       pinctrl: pic32: update include to use pic32.h from platform_data
+>       rtc: pic32: update include to use pic32.h from platform_data
+>       serial: pic32_uart: update include to use pic32.h from platform_data
+>       watchdog: pic32-dmt: update include to use pic32.h from platform_data
+>       watchdog: pic32-wdt: update include to use pic32.h from platform_data
+>       MIPS: drop unused pic32.h header
+>       clk: microchip: core: allow driver to be compiled with COMPILE_TEST
+> 
+>  MAINTAINERS                                             |  1 +
+>  arch/mips/pic32/common/reset.c                          |  3 ++-
+>  arch/mips/pic32/pic32mzda/config.c                      |  3 +--
+>  arch/mips/pic32/pic32mzda/early_clk.c                   |  3 ++-
+>  arch/mips/pic32/pic32mzda/early_console.c               |  3 ++-
+>  drivers/clk/microchip/Kconfig                           |  2 +-
+>  drivers/clk/microchip/clk-core.c                        |  6 +++++-
+>  drivers/irqchip/irq-pic32-evic.c                        |  2 +-
+>  drivers/mmc/host/sdhci-pic32.c                          |  2 +-
+>  drivers/pinctrl/pinctrl-pic32.c                         |  3 +--
+>  drivers/rtc/rtc-pic32.c                                 |  3 +--
+>  drivers/tty/serial/pic32_uart.c                         |  3 +--
+>  drivers/watchdog/pic32-dmt.c                            |  3 +--
+>  drivers/watchdog/pic32-wdt.c                            |  3 +--
+>  .../mach-pic32 => include/linux/platform_data}/pic32.h  | 17 ++++++++++-------
+>  15 files changed, 31 insertions(+), 26 deletions(-)
+> ---
+> base-commit: f417b7ffcbef7d76b0d8860518f50dae0e7e5eda
+> change-id: 20260109-mips-pic32-header-move-6ac9965aa70a
 
-> On Jan 30, 2026, at 2:53=E2=80=AFAM, Adrian Hunter <adrian.hunter@intel.co=
-m> wrote:
->=20
-> =EF=BB=BFGenesys folks : Any comment on this?
+series applied to mips-next
+Thomas.
 
-As an update on my end, I=E2=80=99ve heard positive feedback from several us=
-ers testing this out saying it=E2=80=99s the first time they have not had is=
-sues writing data to an SD card with GL9750. They were able to install games=
- that would previously fail with file integrity errors and then game off the=
- SD card.
-
-I was planning on sending this out as a v1 before I leave on vacation next w=
-eek unless there were any further comments here.
-
->=20
->> On 18/01/2026 01:48, Matthew Schwartz wrote:
->> The GL9750 SD host controller has intermittent data corruption during
->> DMA write operations, which has been traced to an incorrect burst
->> configuration. This was discovered by comparing initialization sequences
->> between the working GL9767 controller and GL9750 and seeing that the
->> GM_BURST register was handled differently.
->> Clearing bits 16-17 eliminates the corruption with f3write/f3read tests
->> while maintaining full DMA write/read performance.
->> Fixes: e51df6ce668a ("mmc: host: sdhci-pci: Add Genesys Logic GL975x supp=
-ort")
->> Closes: https://lore.kernel.org/linux-mmc/33d12807-5c72-41ce-8679-57aa118=
-31fad@linux.dev/
->> Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
->> ---
->> Hi all,
->> I arrived at this after a whole bunch of guesswork based on the other
->> Genesys card readers in the kernel that do work, like GL9767. I landed on=
-
->> register 0x510 which appears to be "GM_BURST_SIZE" and ended up going
->> through each bit and either setting it or masking it. Eventually, I
->> arrived at masking bits 16-17 which seemed to stabilize writes completely=
-.
->> Could someone at Genesys confirm what this register is for on GL9750, and=
-
->> what those bits are? At least locally, I have been able to run 50GB of
->> f3write/f3read without any corruption while before even 1GB would corrupt=
-.
->> This also maintains the same read/write speed as before this change. I
->> tried searching online but was unable to find any relevant docs, and I'd
->> like to confirm the purpose of those bits before sending this out as v1.
->> Thanks,
->> Matt
->> ---
->> drivers/mmc/host/sdhci-pci-gli.c | 8 ++++++++
->> 1 file changed, 8 insertions(+)
->> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pc=
-i-gli.c
->> index b0f91cc9e40e4..a06b0cf11f12d 100644
->> --- a/drivers/mmc/host/sdhci-pci-gli.c
->> +++ b/drivers/mmc/host/sdhci-pci-gli.c
->> @@ -26,6 +26,9 @@
->> #define   GLI_9750_WT_EN_ON        0x1
->> #define   GLI_9750_WT_EN_OFF        0x0
->> +#define SDHCI_GLI_9750_GM_BURST_SIZE          0x510
->> +#define   SDHCI_GLI_9750_GM_BURST_SIZE_MASK        GENMASK(17, 16)
->> +
->> #define SDHCI_GLI_9750_CFG2          0x848
->> #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
->> #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
->> @@ -629,6 +632,11 @@ static void gl9750_hw_setting(struct sdhci_host *hos=
-t)
->>   gl9750_wt_on(host);
->> +    /* clear GM_BURST bits to avoid corruption with DMA writes */
->> +    value =3D sdhci_readl(host, SDHCI_GLI_9750_GM_BURST_SIZE);
->> +    value &=3D ~SDHCI_GLI_9750_GM_BURST_SIZE_MASK;
->> +    sdhci_writel(host, value, SDHCI_GLI_9750_GM_BURST_SIZE);
->> +
->>   value =3D sdhci_readl(host, SDHCI_GLI_9750_CFG2);
->>   value &=3D ~SDHCI_GLI_9750_CFG2_L1DLY;
->>   /* set ASPM L1 entry delay to 7.9us */
+-- 
+Crap can work. Given enough thrust pigs will fly, but it's not necessarily a
+good idea.                                                [ RFC1925, 2.3 ]
