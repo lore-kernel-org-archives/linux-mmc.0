@@ -1,92 +1,93 @@
-Received: from mail-qk1-f194.google.com (mail-qk1-f194.google.com [209.85.222.194])
+Received: from mail-qt1-f193.google.com (mail-qt1-f193.google.com [209.85.160.193])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD45926158C
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Feb 2026 20:40:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.194
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C72426158C
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Feb 2026 20:42:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.160.193
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770064842; cv=pass; b=bUymoXOGZIRz0a4tzZkY+8dAIrajTUWVvz4JHVNOdEW7YvY17XQ70R8vYh8UfBcpbPjbt3XB6fEgiMvJ34oiGOeoDqzdsRtUh6dFTixM+Rq+Lgx65li5d0v5WJgAJVCDAR1HxjaOk2VoP1oDqH9gN0xJbRu4/jxpkZ00iT/QTyw=
+	t=1770064922; cv=pass; b=g5vmzJf3L5MJEzLjYX8OzwId/T1l5SPqFs0rkNbf1tuDOwWsC6/WLUPiQcLVjpeNQEXfUUd9Sz2N/G4g/NK2nj1WEjf2Msjg3R+vv/uqbdwhK3omjt+SdGszVq/ufpSVgUZsn9BH5LNPUc3PCMy0cx7hUkrxdE1UIk9ZPfMkqnc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770064842; c=relaxed/simple;
-	bh=sDW+dDq8/2w2wCpoXZZxgatMa+nKPrsA3Kzbb7Lpmx8=;
+	s=arc-20240116; t=1770064922; c=relaxed/simple;
+	bh=x8PvMabAxTZQrsN3m38TJhIAVXnRpXGoLfKKF05Z3Qw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GxoPRwezBi4p59zFf0UWJpKyF6Bd9LZG4DsJi+44pCG1AW5bRwwRzCSbjP2c9+E8fGqkP7c7ns208ASL6YiadiRHEX34sn8RlanXUPQ5FcE+uTtcuTmMrE5GUz6jAZOPr1w53Y7sK5+02PhZb/gvcyN/0l62de4KPg15S75vWnI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=l+PT+Wzb; arc=pass smtp.client-ip=209.85.222.194
+	 To:Cc:Content-Type; b=NpZ6MzJdLZzU7Y38s3t6JcXBM+6Qpr+zSNkV+ahzdnyZLST+4f2PEYPK6FKujAjcfYJvwfzJ1/QBYCio9F6eVKjFNEGp0+u4hIa4ihzM3XgP3jTRIigWU73Zo5+uNHzryyIA3R4m1sgjiN6xLrwAUQU/hfwU0EWjsFVH0RDxro4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lOzWgdqR; arc=pass smtp.client-ip=209.85.160.193
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="l+PT+Wzb"
-Received: by mail-qk1-f194.google.com with SMTP id af79cd13be357-8c5386f1c9fso665825585a.1
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Feb 2026 12:40:40 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770064840; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lOzWgdqR"
+Received: by mail-qt1-f193.google.com with SMTP id d75a77b69052e-5029aa94f28so1332811cf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Feb 2026 12:42:01 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770064920; cv=none;
         d=google.com; s=arc-20240605;
-        b=F9d+9bQQ1SHz1a8fW21EkStlpL8WB2Wr2XHWBGo5Z02AdsiPWdGKnbIK8QpB/Mmx4R
-         oPdCpFLC7Rx1HxkAOna4g4NxB/w50+PPa2LFUGLPdczATxSM3co5573zKQBIBCwS35uU
-         5wHIkfL5DqpSIAZvJ0s/NL8WaitJA0XdUHorjod4gYfDL5wlRwTqmY/CTTn7F7MG76X1
-         09iCGwt/7EnEbolPjpRc4/TmoAKN4jAWGQ6b2mchGbMyJIDEuY/L1s0JwGw3in3Dj3t2
-         Q6Eir1PoRH24U1sbYbfcYR/27599tQNRQTpYzQwB4IQ2Ba1YD0i20l77p0h9gFL0EjML
-         Hyig==
+        b=lxylE2po1LR9oaR91SUIWpYm6bKNhm3p3Av7TAJ2kekvLt/zeM/jNtglWeDS+m8Inc
+         RQ/7c4MfVANhk6rkiQ4XLTh9aC7uEfW0Pzy0oSqHixYlf3K/qL01Y/X3x79APRikpDbW
+         4ooIBZcIr6WivqFOYdv4SNMJmUJ6qLuw1HpDwXQ2esm9kQHxNhnu7HJbIb06B01Vzuf/
+         TkoadYv88xKTcg4R/YLhkq8k5QSqbT51TNSOlyL8zy7vRWL7VADFC7SxN92b9Krz+QBv
+         1gE8yh+a0fCHtMdaRrrqx+2wgGK/MwjoMgeI7Z5LNocaSI527YG3wnLAHyoYLPXoEe67
+         pyFg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=sDW+dDq8/2w2wCpoXZZxgatMa+nKPrsA3Kzbb7Lpmx8=;
+        bh=x8PvMabAxTZQrsN3m38TJhIAVXnRpXGoLfKKF05Z3Qw=;
         fh=M7UOd/t5//Qe9QvEc+sgAdznt0bpWIM/Iw0CVNsYa9U=;
-        b=Ndabca4j7Z+xT2CXn+mZJ38YoOI6qOE2THMLtBet3rkP6Vqu3A+Yh3dFpSyXUT2M/H
-         CFPTWLc9VN6WWMVygEFwRLhqxsinBmnU9rqaCCnwOXaQR/ADrPARJ8ZhYNewyX0ThV3L
-         eJZ5O9i9KFQaEYrz49Mn5BDb5gryeWA4hFo07O9de6sfUea4ing62beUc2+TmMsLRNRV
-         Fo7E7eiecKcLxzam1K4uLaQkTl3WpR4aX0eNMtObYcdz9vXnRigO97XoQnAjJJASViMw
-         F73arPKMqmhjNfgI+y93v1pk8NTsu42ay1ACyYYvxKIyzktLXAcfoOKn9zvejMGaO2uM
-         NAmw==;
+        b=ZlruC+ty+0IQsQNHz8BTd907QD9WtVqgVHeWWrPmL060GZxVaOw8bOtG0o2o8cKbye
+         hhPo5d+rgu4mRLNSBjKlllTzyKeShShBDMzvCybSFuhHQ4h8/uc85avgei+mMsaRaob+
+         tFuII6GHNkwU1G+QOSmnMx7OB1S43sYri7Psc2bzOfxGEBqPgx4K1gfstfLSoRwcMhU2
+         4SKAA+8h4mChrKkHahHNnxsU4l6qvIv2IClqNbl/wJ0yWjDfg3F9aSG0mZAflqBg/fYT
+         WyMeHoCVdpUBQpqRP42DlnEiscBsMDs19aoz67QgGDRjykMmGfSQYqobbg2wCsFZN3U6
+         8o+A==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1770064840; x=1770669640; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1770064920; x=1770669720; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=sDW+dDq8/2w2wCpoXZZxgatMa+nKPrsA3Kzbb7Lpmx8=;
-        b=l+PT+WzbePp8wZbgdvhzu8qphMksDwk65DxtIELVMB27ZjypBVEuBhr1KPZPiKrUt0
-         LW6id/vb56RT8wq6SXxfFjJQYFEfvUT4uiIq+XRpwO13MQaQm300exq8umo2BeVyGAs+
-         8fjHeHTyMnNpwzPniIu0NVGSNYSTIw8o7VRWG/prKKqMMVwXNb4LrTKODS/s4+TXnmsU
-         V5jIjKvhx3y5tZc7aVT4rkGYi/gso2M83HKAZA/JIs0MSGkkOz78JOx2tktedV1BYmtb
-         n7Yv/1wHjf5e3DSIDsxUKHpVG388IcKw21a0xwKQJj76DUsKZ8rdTbL1ITEOR11pZ5h4
-         ws9A==
+        bh=x8PvMabAxTZQrsN3m38TJhIAVXnRpXGoLfKKF05Z3Qw=;
+        b=lOzWgdqR9YK3f4any7KnQaeDYGwcScvQlUpucZxZb7tmJL28QUpxUxzEL8KVAL15Tq
+         gD2EctfVcxmsrQc/kqsij+OxUimpR04tiV3T17Q78R492s91OS7PhZoxrsEy8Lln9FNZ
+         B3EEp6dmImNQCzK5IhhTyMUGrLcxCO/ut9uVkVIsTJbVOpstDXELjWsnVpQk3fr81vPd
+         xn5ui1uuyDZSM5MkIWn0d5PdPYe9L3XWtYIq7rsvUidgHKpndp+8oS9hlZIEck0cBBDS
+         xztIcUnhBxq94VXn+FJGF+5bWi3aJUFSSOWjnKg4h90YwPiDeVQlw87RvWof2cdpAvly
+         pAmg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770064840; x=1770669640;
+        d=1e100.net; s=20230601; t=1770064920; x=1770669720;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=sDW+dDq8/2w2wCpoXZZxgatMa+nKPrsA3Kzbb7Lpmx8=;
-        b=vHG8lJQpcYYkmft4ocLZNBlUvhC9I+/H8XrIwsJNxl/FtXtYS40cRfMoOkSXbk53O3
-         gemBMUQ4Cf6zWsf7PbAC3mX3wh7q2XX+49ux6AWWnbswR/ExYz/o9P83kpHN1pLXB0fp
-         qCqQnCIcYphlYS3+w3TXio5awb5KLtxc3Z+SBBAqSp6ajbmeEzt2h4/oDS9meVF5J9JH
-         Hhd77DdUZ0qlFLXDPQUIuzybF4h2GmhzSPz0fAxOw5CqL5EPxJuE4i2tDxQhMnKdEB33
-         w2xMLjaRuWt+dvb+/rRKvz0xwMzxkxPwiY5RxMrZIKBw3UY6mf6sO0GtmE8dQec692SU
-         QVDQ==
-X-Gm-Message-State: AOJu0YzHxg4dnlFy7BJfWNzdYAKv1zWerb76hUVNMLRxSRLm3TGHmbGq
-	dNfHsNbVMYHyjjPCaEHAPjYGQ/2HX51rrG2WmK0ajIjCG+dDRYgaxYBn6Uzy2GxNbUR0cKF+pBP
-	UBJR5b5keBSGN6+voahn0edHeDf7fz2rmemRH
-X-Gm-Gg: AZuq6aKirh/s71AIQ9Z5QlNf3Jr1OExYHEkxprbNExlTKryQu/jCl9eC8VtX9uG8m6U
-	m6LRMsL8gmjxj7NTAFjJGgCI+JXC7AGknMc2pR8mdcvSkjwc0G5OpjTQ2ckJFLnNLDVOUpD67Zb
-	KlfQPHzk8HYcrM1NtUDgTgTLs0preCSlaJqb6yRRASq54LK7IydnGJsOIBmzowrocVpyNZPpcQT
-	v1NOpHh/zFpmcNgt868/vMxNLNiHJlccW/awPN1R1uE7RVuKEfjMmIqhiheJ2tPkv8S41tyi4L3
-	5POK9HhmwA5l8qxmvrvGTyDBxxhZuDsOd++nd+MIpzOIPEQIbT/FLhZfFq/v5MtbQDbRe3jL8gD
-	3AFQvZw8KDjzJMf7PANF+R7iU
-X-Received: by 2002:a05:620a:44cd:b0:8ca:12b5:9a7e with SMTP id
- af79cd13be357-8ca12b59b1amr531072285a.76.1770064839815; Mon, 02 Feb 2026
- 12:40:39 -0800 (PST)
+        bh=x8PvMabAxTZQrsN3m38TJhIAVXnRpXGoLfKKF05Z3Qw=;
+        b=e2UWPvWtMboT6hL6TrUh3T2gdeFxG8LW41kuOFcF32CDMaRKccBp/Xq7BXHxwj4T1j
+         4y4lrTRmV0rcCZWJI17ayw0JC+RL9R+JzOM90o1WCFE1zwbvpBoswf+H5wSYQE5Wzd19
+         RRcHNjw4Or3pAMA63DaFpgeAScriAPtmVZMPY9WKDquuLTveNklEQWccgSEI7S27Ddjk
+         44GoPoYrpzvuvlGPqgPLlt13zjXrjYuA2cYpA9Ek7NjZyINlc5SRipUBhEjE+tRNVDHY
+         bw3yT2DmStdTcKzohrkxW2ztFW2CqY+kmXXEfmnrH/rVcOpW4BfYbV6GcbxytH53pSaw
+         iRTg==
+X-Gm-Message-State: AOJu0Yz5jKKreaSpnyrCTaUsfzZrLe0HbBVORArCQEQGd4fPbIVrn7UR
+	f9+dAiBjQBoEe04Q6w1mzhIYcWwKOUstpuYdzC7eQ6ql14wRSfot8f27eqvY7j7MQtzRD7l7FLU
+	uHW3DGkPeS8y1BPnZF/M/x9EG2yDYk34=
+X-Gm-Gg: AZuq6aK6jVxdQcSsOmqBLGKKtBnJziOBlk9yxbuoI3HX7Ncbw5Or0e7RU7iy43bplla
+	qWIyyoQQcT9iQ4j5Q4mdb4SD0QVlV6OH33V9QcjWtp+UpQE/p9P2fRDVNn+YxOCATkE/wvcflYQ
+	VSgKJnMIhutcLTm1h+a5QhxC83DDgwGzmQ4xP/3lQITnHZZu/mUeZDIwF3FFeM+CyaWCS0MPcLq
+	xz1vYhbxM+3jCJc4IIy7wrLjOTDwi9r4DBQKqSjLN9jhGin9g8GznfGMC5kgbJEFJkA47JKcoeY
+	yH/TImTw4/4SSPIGUMd/JInn4mZzRrqzk49ik4MBFMR0hu1uz6vDUQ4kSJvulpLKFjCk85Gwyy4
+	4Q7sa0B6vvhTzmg==
+X-Received: by 2002:ac8:5a54:0:b0:501:45d7:10cd with SMTP id
+ d75a77b69052e-506092c7f24mr8594851cf.20.1770064920512; Mon, 02 Feb 2026
+ 12:42:00 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260131020039.45966-1-enelsonmoore@gmail.com> <CAPDyKFps1oX=aKuUYFbXNQXM3rGtZOwTfgCaiHgDvGOb3qGc5w@mail.gmail.com>
-In-Reply-To: <CAPDyKFps1oX=aKuUYFbXNQXM3rGtZOwTfgCaiHgDvGOb3qGc5w@mail.gmail.com>
+References: <20260131020039.45966-1-enelsonmoore@gmail.com>
+ <CAPDyKFps1oX=aKuUYFbXNQXM3rGtZOwTfgCaiHgDvGOb3qGc5w@mail.gmail.com> <CADkSEUhk1TfJXvLYOrx0OvVCgCA=L+CEZXGzQAhdTgkKz3a=bw@mail.gmail.com>
+In-Reply-To: <CADkSEUhk1TfJXvLYOrx0OvVCgCA=L+CEZXGzQAhdTgkKz3a=bw@mail.gmail.com>
 From: Ethan Nelson-Moore <enelsonmoore@gmail.com>
-Date: Mon, 2 Feb 2026 12:40:28 -0800
-X-Gm-Features: AZwV_QjHzd04gvjhRn0I74SzHqaIKp0f3MahU-OOixIXf9Am-4ifCjdqXL9iUWg
-Message-ID: <CADkSEUhk1TfJXvLYOrx0OvVCgCA=L+CEZXGzQAhdTgkKz3a=bw@mail.gmail.com>
+Date: Mon, 2 Feb 2026 12:41:49 -0800
+X-Gm-Features: AZwV_QhBvfCKv4AsLQxuoRW4O5tLik_pRwNEE0LhoukFq7Yx_peoFKRdoZgkJH0
+Message-ID: <CADkSEUgopExHdfSwyHWOEF8V+HvqeBFqRyqm0T7y=JBd-4Hs=A@mail.gmail.com>
 Subject: Re: [PATCH] mmc: remove unnecessary module_init/exit functions
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
@@ -94,25 +95,9 @@ Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>,
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Hi, Ulf,
-
-On Mon, Feb 2, 2026 at 4:32=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.org>=
- wrote:
-> The above doesn't mention that omitting the _init/exit and functions
-> also makes the module unloadable.
-I can add that in the next version.
-
-> I think this should be perfectly fine for these cases, assuming that
-> we never want to unload the modules as they are pure library
-> functions. That said, please clarify this in the commit message.
-My understanding is that modules can be unloaded if one of the
-following is true:
-- They have neither init nor exit functions
-- They have both, and the exit function returns zero
-but that if a module has an init function but no exit function, it
-cannot be unloaded.
-Therefore, this change would result in the modules being able to be
-unloaded as they are currently.
-Feel free to correct me if I'm wrong.
+On Mon, Feb 2, 2026 at 12:40=E2=80=AFPM Ethan Nelson-Moore
+<enelsonmoore@gmail.com> wrote:
+> and the exit function returns zero
+Ignore this part. I forgot that the exit function returns void.
 
 Ethan
