@@ -1,110 +1,178 @@
-Received: from 011.lax.mailroute.net (011.lax.mailroute.net [199.89.1.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f68.google.com (mail-dl1-f68.google.com [74.125.82.68])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4BC22A1AA;
-	Mon,  2 Feb 2026 22:47:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F2C61519AC
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Feb 2026 01:23:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.68
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770072467; cv=none; b=cW+h13T3Ygz0HYrym6lKNUoPkcLkW02vjKj8+DvRv+Z6t1Eh8o68IQmHFSEVdrmfMVg1W5rMe1JOqtTmZB3zw5OXtimLiv5EETu+bG+ZB9WBE58V08qcBE5e2gKiPOx81BzLbCQpUoBtVxl4RLXVR6JJMsy5+IN2M+eK7CXijbU=
+	t=1770081818; cv=none; b=QMiO0gzVv6RAt5S9KazAvHtLF4I4eO2R1UxDS33HpZKMmbARKKR5Q9ZXl5HlGMsV6FyfXaw1+VNK5r2ZpK+kE1kjiRc72XOBGn4Znxue+Mn70z9sft2wbwcy5e3fhoNzph2KXTPWvFQI4LxJwv15huMh+mH6xcymLgivRMegzdE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770072467; c=relaxed/simple;
-	bh=SPpBEUvu6r8zw8PNhiYZfHfRjOBsvaCErYOCwPHwVZY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=YXg+tHW8sn0eGiqzTgURz+cotl1RpLUAe8l4T3KjEpUvcJnZ3swe6onC49KRphHyU9odOqyYN3wlHHBvUgG3kpuRmwnPFoluKe8uWMlTIVQWmGN/gW6OKmjn3vDEEwqCvhJG1VkeCAtBZ+oPJhV1w3s93qIO3FkeUqZm620UJzA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=qgNAskiP; arc=none smtp.client-ip=199.89.1.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
+	s=arc-20240116; t=1770081818; c=relaxed/simple;
+	bh=bV92YUEk0Kbdtkf8yzyT5tItqUNNVYgGk5GRcEgwsa0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jp25A4CrPmQUOFuMe9i3sdIAzUcIGUIrPZg+Q7ZrD8tZhb1Pim8uVND6NUArApc3Kk87Uc8rnU8V8OOC04z2FEpooJmbnSRqAC4Avoov0Sv/AWBxv4/4ZOmzPP64XQUhbyfPzA13/7ET2GX1B55mToj0ReHQYNKjzaZSTTCeVG4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NW/rjB31; arc=none smtp.client-ip=74.125.82.68
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="qgNAskiP"
-Received: from localhost (localhost [127.0.0.1])
-	by 011.lax.mailroute.net (Postfix) with ESMTP id 4f4hZz4Bt7z1XLwWq;
-	Mon,  2 Feb 2026 22:47:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
-	content-transfer-encoding:content-type:content-type:in-reply-to
-	:from:from:content-language:references:subject:subject
-	:user-agent:mime-version:date:date:message-id:received:received;
-	 s=mr01; t=1770072457; x=1772664458; bh=kMLi0PRdQ2R4Lc8dp/YJ9+g2
-	e2BNpL4rDmGrhxAGpGc=; b=qgNAskiPgtyPs88fYXCcTcy8TuKMyQcdilZV/wIr
-	+1wLHZoN9hZ+uPCPcHHAEE5kGNKvhDj9K74yGZB7Ap15YfO6xalexA9r9LzVxhfc
-	kAyPzkRqtI3d62EXp0JtscfFGRWv4aPT0edWzrw8tzAoCrvqczbzvEMc14xpUW8z
-	gAccdKKlxVIpgXcaqE6uxq8AB8RtZn/e3YWYTS+y77mrRS2uX+P+eh/p94WsDsIR
-	liFCDFGTjWhEeXdHTtmg6LW1ADrCn2b+3WRiy3QwllNMRCuUYHXhpJE9YwT/PvsC
-	qg+1pnoIJhWHjAWGEl/KCufqESgemUFlFoDIEJqNpT7ajA==
-X-Virus-Scanned: by MailRoute
-Received: from 011.lax.mailroute.net ([127.0.0.1])
- by localhost (011.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id nui1yG5mA9PR; Mon,  2 Feb 2026 22:47:37 +0000 (UTC)
-Received: from [100.119.48.131] (unknown [104.135.180.219])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: bvanassche@acm.org)
-	by 011.lax.mailroute.net (Postfix) with ESMTPSA id 4f4hZw0Qwcz1XM6Jk;
-	Mon,  2 Feb 2026 22:47:35 +0000 (UTC)
-Message-ID: <dc1ac2e5-1db1-49b5-847d-a10a611027ae@acm.org>
-Date: Mon, 2 Feb 2026 14:47:35 -0800
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NW/rjB31"
+Received: by mail-dl1-f68.google.com with SMTP id a92af1059eb24-124a1b4dd40so2364244c88.0
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Feb 2026 17:23:37 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1770081816; x=1770686616; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=QiPCt+o8rhd3MPjYrARh+lPIFZjBaiPX2nn/xL1HQLw=;
+        b=NW/rjB31JjpifpR6SKA063nGGC7gxf0BNRng+BAniJhTslZ8EkeFfNOjBxsgxVwoli
+         XoqRqVj9l03TES6peawl0+izwePpKdZXBnH5B387s1nKdRWzE4aekOFAWx4UYtcBbOJH
+         +H2caDUcXxGDCFelYO2/lLoexzX4rrs35xnd/a5iT0PzXc9sCcErYFJ8RMMHUqHzuRut
+         C2JeslYsD6Qwy0roE3MU27ucerJlPpXCbRQu958g7bMorAI0LiaxaR/jGvD32dsqoKYE
+         rT2BLPMKGt/zzhW+PbXI+QXvhwCg7Sht0qhhP0t4pDig1nYg+PCOnojMJrYbLq50qnqI
+         bAVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770081816; x=1770686616;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=QiPCt+o8rhd3MPjYrARh+lPIFZjBaiPX2nn/xL1HQLw=;
+        b=ZltiR93wMFMCs1imRHrXTt1y6I1Y05Z+c9U+pRdMIhe4j/ZAmdhhDxBBK9QFP4zzSH
+         6qCUACBmpPxj6Ve9qI3s0DUFLHmnYGzmTXWNlzcBe1M85x3XIe/EvmKRlhmrC5wgTJxj
+         nTsbDZBqUe9TJutsDvkBSbl2jreCYpgWGd/SVWjI99x9APuRJC9/vS6GnCrYOFtMrZiX
+         mmlc0HAjIRDTWzpenIa3rUQclZ+1Bq2yJawTHcjLG87fUjuRKoEgT94e6JumkKfY0bnq
+         CTilc0UlHOecs0AzZblelXIpqEyN3tUv9we0nP/VrkvI43fxhb07RHqS72ecXPujM9p9
+         1pyw==
+X-Gm-Message-State: AOJu0YySatqnzIGGdvRx9SXYLc7CYBJRSmjUHL+eY7vFH+VCXWOyWWYl
+	FtAQixMacoO9TM0SK+isTTrH1LGtgWmWuWOhdacb/OIzIrBr2iGUsQ/d0ARtabLz
+X-Gm-Gg: AZuq6aIvogbiatfBXxoKVaKprcn/7HJc9BK893nPmtmgKzCUZCGxj8yKWq3JDW0LTpd
+	m9Asi8HphQWhMSJd/wS+XkqDi3B+ohafgKR2ABiSqoqMhP6CsbXnZQJbuyEbphrGRK6gNiYY2dR
+	EzItceklJ9YRnGqkV3i2so4prEh6umVBD+TkTN90QuZEWsBIAY9+WkkTxsUKOszm+joFqDH/GBY
+	c4EhcXnpdMS8NKCqtxMH4QNGtZlKekDtscQR6wC4ZPMK/8BVW8an7WTkkP6K1dnPU4ukrUIX+O1
+	Z0GQKcIwb2tiky/DGSEvEKl8Wy/VbhRCWWWii3rndw1G+Tej93CA7q28+wl46fU4SBqxjEV4VYF
+	Xa1kcJ0AOOVK6kQq5ZH9/KSg7kEbZXaPQilN2vJ4+vQhgtr3l4P59KO6yqCfUBGW11GaPVYmgLt
+	JU+YM3DoZ6kLxRucGcZHehnX1gO3iFsTsQt6OGwzzhOuigb+X3tf3pnY7wJ874i7dGGeTT0Xf9V
+	li8WVY379aEHSNQRVK6bMVQ5B0jXo6aBg/eXcyYGPzWwv461rj1KH4seFGPbQVaPXh8OGRet8Bx
+	HeJy
+X-Received: by 2002:a05:7022:2206:b0:123:2c98:f6ac with SMTP id a92af1059eb24-125c0f88a8emr7360784c88.12.1770081816375;
+        Mon, 02 Feb 2026 17:23:36 -0800 (PST)
+Received: from ethan-latitude5420.. (host-127-24.cafrjco.fresno.ca.us.clients.pavlovmedia.net. [68.180.127.24])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-124a9d8ba78sm18218039c88.8.2026.02.02.17.23.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Feb 2026 17:23:36 -0800 (PST)
+From: Ethan Nelson-Moore <enelsonmoore@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: Ethan Nelson-Moore <enelsonmoore@gmail.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH v2] mmc: remove unnecessary module_init/exit functions
+Date: Mon,  2 Feb 2026 17:23:21 -0800
+Message-ID: <20260203012322.20827-1-enelsonmoore@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
- RTS525A card reader
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
- Ricky WU <ricky_wu@realtek.com>,
- Matthew Schwartz <matthew.schwartz@linux.dev>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- linux-block <linux-block@vger.kernel.org>
-References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
- <CAPDyKFrGpvjONrDmnNZXv+SME_NCNv-LK8J-Vo88RSz1fuD7rg@mail.gmail.com>
- <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev>
- <4777aabd-bc9e-4904-9444-892393aecb15@linux.dev>
- <9e362d5fa2604fb0848ea28866dc45fc@realtek.com>
- <47ed09fc-047b-4f98-8df3-d11d17678c57@linux.dev>
- <380f75c7adc04cbab38cfd2f82bd0c6d@realtek.com>
- <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
- <4205fde06ecd4a7489b03ef25e5e4011@realtek.com>
- <CAPDyKFoC-dwzcsABNy9pA=GGirBWwcxQhNMeTSSStXHtXmWbcg@mail.gmail.com>
- <0b6fd99b-54a6-45f1-942e-94f707f2fbf5@acm.org>
- <CAPDyKFqic-rFe95g657MdZHtdPXTmFmYQG4ZSBV56S3DhMEF-A@mail.gmail.com>
-Content-Language: en-US
-From: Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <CAPDyKFqic-rFe95g657MdZHtdPXTmFmYQG4ZSBV56S3DhMEF-A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 1/29/26 8:30 AM, Ulf Hansson wrote:
-> Seems reasonable to me, but how do we distinguish that it's a
-> battery-powered device?
+Three MMC drivers have unnecessary module_init and module_exit
+functions that are empty or just print a message. Drivers that do not
+have module_init or module_exit functions can still be unloaded
+successfully. Remove them.
 
-RPM can be enabled or disabled from the scripts executed during boot.
-At build time it should be known whether or not the device is battery-
-powered.
+---
+Changes from v1:
+Rebase on latest mmc next branch
+Improve commit message
 
-> Are we considering UFS a technology that is used solely for
-> battery-powered devices or is there something else we consider?
+Acked-by: Adrian Hunter <adrian.hunter@intel.com> (v1)
+Signed-off-by: Ethan Nelson-Moore <enelsonmoore@gmail.com>
 
-I think there are devices that use UFS and that are not battery-powered,
-e.g. smart TVs.
+ drivers/mmc/host/dw_mmc.c      | 13 -------------
+ drivers/mmc/host/sdhci-pltfm.c | 13 -------------
+ drivers/mmc/host/sdhci-uhs2.c  | 13 +------------
+ 3 files changed, 1 insertion(+), 38 deletions(-)
 
-> Although, a tricky part when moving it upwards into the more common
-> layers, is that those latency constraint values may have a very
-> different impact, as the numbers are platform specific, right?
-
- From the UFS driver:
-
-cpu_latency_qos_update_request(&hba->pm_qos_req, on ?
-                                0 : PM_QOS_DEFAULT_VALUE);
-
-In other words, if no block I/O is ongoing the CPU latency is set to
-PM_QOS_DEFAULT_VALUE (-1 or no constraint) and if block I/O is ongoing
-the maximum CPU latency is set to 0 (no CPU power savings allowed). I
-think these parameters are independent of the platform and storage
-device :-)
-
-Bart.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index b2ac61f3a8f7..2006ffe7eac7 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3523,19 +3523,6 @@ int dw_mci_runtime_resume(struct device *dev)
+ }
+ EXPORT_SYMBOL(dw_mci_runtime_resume);
+ 
+-static int __init dw_mci_init(void)
+-{
+-	pr_info("Synopsys Designware Multimedia Card Interface Driver\n");
+-	return 0;
+-}
+-
+-static void __exit dw_mci_exit(void)
+-{
+-}
+-
+-module_init(dw_mci_init);
+-module_exit(dw_mci_exit);
+-
+ MODULE_DESCRIPTION("DW Multimedia Card Interface driver");
+ MODULE_AUTHOR("NXP Semiconductor VietNam");
+ MODULE_AUTHOR("Imagination Technologies Ltd");
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 7f6ac636f040..d4fb60c1ef69 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -215,19 +215,6 @@ const struct dev_pm_ops sdhci_pltfm_pmops = {
+ };
+ EXPORT_SYMBOL_GPL(sdhci_pltfm_pmops);
+ 
+-static int __init sdhci_pltfm_drv_init(void)
+-{
+-	pr_info("sdhci-pltfm: SDHCI platform and OF driver helper\n");
+-
+-	return 0;
+-}
+-module_init(sdhci_pltfm_drv_init);
+-
+-static void __exit sdhci_pltfm_drv_exit(void)
+-{
+-}
+-module_exit(sdhci_pltfm_drv_exit);
+-
+ MODULE_DESCRIPTION("SDHCI platform and OF driver helper");
+ MODULE_AUTHOR("Intel Corporation");
+ MODULE_LICENSE("GPL v2");
+diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+index c459a08d01da..41e49c6cc751 100644
+--- a/drivers/mmc/host/sdhci-uhs2.c
++++ b/drivers/mmc/host/sdhci-uhs2.c
+@@ -1126,7 +1126,7 @@ static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
+ 
+ /*****************************************************************************\
+  *                                                                           *
+- * Driver init/exit                                                          *
++ * Driver init                                                               *
+  *                                                                           *
+ \*****************************************************************************/
+ 
+@@ -1138,17 +1138,6 @@ static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
+ 	return 0;
+ }
+ 
+-static int __init sdhci_uhs2_mod_init(void)
+-{
+-	return 0;
+-}
+-module_init(sdhci_uhs2_mod_init);
+-
+-static void __exit sdhci_uhs2_mod_exit(void)
+-{
+-}
+-module_exit(sdhci_uhs2_mod_exit);
+-
+ /*****************************************************************************\
+  *
+  * Device allocation/registration                                            *
+-- 
+2.43.0
 
