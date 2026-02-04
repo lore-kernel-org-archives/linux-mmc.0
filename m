@@ -1,93 +1,103 @@
-Received: from 013.lax.mailroute.net (013.lax.mailroute.net [199.89.1.16])
+Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 022C227FD6D;
-	Tue,  3 Feb 2026 18:11:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E125F22D4DC;
+	Wed,  4 Feb 2026 02:09:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=60.244.123.138
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770142267; cv=none; b=tOhYNcfet5c3vaRkX7Vk11pkoUq8Ssk0qN5dy9ZaM9pADXzxtyCDiZNN3Lkd+o+49TWdxGz81GonwI63LV7hje4BM+h4ItL3XscfSzbu/T5OmkUuu7oTo0Bv9qPebP4YqWz+p5z/trP+45RhrLrNmku0FCb2S+8vtZ6O1+FCiQA=
+	t=1770170957; cv=none; b=DDnopV8W4YJgv3E4M5r5sV8Tk5P/vYaWnWQ1kA3rgV9aasoDhE1/H8skSXQyflUBZQS+68By5EOPGzGSAYIyB4LMR84yJHEb9M94e+sNj+aNMNJ0RJS39umIqskeDN1ZgyYPULAAaHnjpwkMBAa3R0nAz91QU2+SfIwBr0xw/ww=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770142267; c=relaxed/simple;
-	bh=X4qaHjFRIDiCbiijmjrj2V9sL/nMIfkCZfKs0c1cB2M=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=SbBdAmo8wlJCNtsb6wFpdygR7hjd1bs6/5E5pL0yGSZMW20GNDUVNKOR+6oYylEdkDQljqFHHgW3EEzRjK8wbrKfJSut+bQW0/jec/uT+nRORRR3jFv2yn7NGgs/v4ybpOeNobLWYfHU4MHUzvaPLJV7uGhjrD6uF4bFVJGiRro=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=gYfVC6/j; arc=none smtp.client-ip=199.89.1.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
+	s=arc-20240116; t=1770170957; c=relaxed/simple;
+	bh=4aZcYhZaxYj/vdnrYr6ArFYr3k4sSNAghTjOODPo2b0=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=HiwxMz47eipJDWxiGLvXVbpsDIgDJ9FxxjwRZHZuja9/QpfZg26FjL1Gcw1nbBjoX3YSHjafZ8sW50K2+DsIOM56YszwSAR+NQ64PUVoL9vAf1zGsKtuBzEqYP01cDCJeCwUBsl0WP/kYvTXtHHmZmGaKq5DClp9/bFqCwPUtu8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=KbCMShlS; arc=none smtp.client-ip=60.244.123.138
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="gYfVC6/j"
-Received: from localhost (localhost [127.0.0.1])
-	by 013.lax.mailroute.net (Postfix) with ESMTP id 4f5BPH37CYzlfgfB;
-	Tue,  3 Feb 2026 18:10:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
-	content-transfer-encoding:content-type:content-type:in-reply-to
-	:from:from:content-language:references:subject:subject
-	:user-agent:mime-version:date:date:message-id:received:received;
-	 s=mr01; t=1770142257; x=1772734258; bh=X4qaHjFRIDiCbiijmjrj2V9s
-	L/nMIfkCZfKs0c1cB2M=; b=gYfVC6/j4ypsXHIgVcugwzL3FiY2kq7YnZ9ys2NR
-	zfdLEJQ6fUYEyRY0EPqVvKOqNA9fCe5fewjo2avy9VaMYJptqXZI66hy7NG0xtQA
-	w/i82TvilAHAOuubMViv00BLP8Gbg9DpsShiBpV6YA1HBcov5WD8j5Fk4QqC0qgp
-	bm4NjDiiZ/RX9FGclk0/LIK9ALv72gyF8QQ3qAOKwaHFLxSzGm5xLv7kBTFCySRt
-	JQJztJQ3YNhOXSlLUSwO1Wi15TsBCJAtR5i6nAUy0RnhW2NKRmerr/8XiF7ML6t/
-	kBXZ/3uZgacchNLa4Li8a+W8On2c6a24F5/ozbVdZggSng==
-X-Virus-Scanned: by MailRoute
-Received: from 013.lax.mailroute.net ([127.0.0.1])
- by localhost (013.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
- id cd7CaZhGwjLJ; Tue,  3 Feb 2026 18:10:57 +0000 (UTC)
-Received: from [100.119.48.131] (unknown [104.135.180.219])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: bvanassche@acm.org)
-	by 013.lax.mailroute.net (Postfix) with ESMTPSA id 4f5BPD1SGwzlfgf6;
-	Tue,  3 Feb 2026 18:10:55 +0000 (UTC)
-Message-ID: <2d3b720c-5637-45e7-887d-077b1e9b3c23@acm.org>
-Date: Tue, 3 Feb 2026 10:10:55 -0800
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="KbCMShlS"
+X-UUID: 7ede0446016e11f185319dbc3099e8fb-20260204
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=j2Fm07/YQ7UyZ+aL7eB1qY+4/c0JV0+nTKdkopufncI=;
+	b=KbCMShlS8bPDor02S73ZOYAhQS0DV3WHxOkxbotAFGF3RWhHzV3OXh8v+z+4sCJoSgwHt7Zdxq7Je5yQdtRJ/80VUjs5VtL3Y1J4jfoJt16lzDlooTehfprGqTB19zgrCrP4N5taMZqcCAh/Yc2AbAlq9zXmYko4dUd1Wx2UQng=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.11,REQID:bd3f62b0-7ecb-4f3a-b52a-f865704a0b35,IP:0,U
+	RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+	release,TS:0
+X-CID-META: VersionHash:89c9d04,CLOUDID:88fd8e7a-8c8a-4fc4-88c0-3556e7711556,B
+	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102|836|888|898,TC:-5,Content:0|15|5
+	0,EDM:-3,IP:nil,URL:0,File:130,RT:0,Bulk:nil,QS:nil,BEC:-1,COL:0,OSI:0,OSA
+	:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: 7ede0446016e11f185319dbc3099e8fb-20260204
+Received: from mtkmbs09n2.mediatek.inc [(172.21.101.94)] by mailgw01.mediatek.com
+	(envelope-from <ot_cathy.xu@mediatek.com>)
+	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+	with ESMTP id 548406614; Wed, 04 Feb 2026 10:09:11 +0800
+Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
+ mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.29; Wed, 4 Feb 2026 10:09:09 +0800
+Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
+ mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.2562.29 via Frontend Transport; Wed, 4 Feb 2026 10:09:09 +0800
+From: Cathy Xu <ot_cathy.xu@mediatek.com>
+To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-mediatek@lists.infradead.org>,
+	Mengqi Zhang <Mengqi.Zhang@mediatek.com>, Wenbin Mei
+	<Wenbin.Mei@mediatek.com>, Andy-ld Lu <Andy-ld.Lu@mediatek.com>, Yong Mao
+	<yong.mao@mediatek.com>, Cathy Xu <ot_cathy.xu@mediatek.com>
+Subject: [PATCH] mmc: mtk-sd: disable new_tx/rx and modify related settings for mt8189
+Date: Wed, 4 Feb 2026 10:06:29 +0800
+Message-ID: <20260204020709.24604-1-ot_cathy.xu@mediatek.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
- RTS525A card reader
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
- Ricky WU <ricky_wu@realtek.com>,
- Matthew Schwartz <matthew.schwartz@linux.dev>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- linux-block <linux-block@vger.kernel.org>
-References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
- <CAPDyKFrGpvjONrDmnNZXv+SME_NCNv-LK8J-Vo88RSz1fuD7rg@mail.gmail.com>
- <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev>
- <4777aabd-bc9e-4904-9444-892393aecb15@linux.dev>
- <9e362d5fa2604fb0848ea28866dc45fc@realtek.com>
- <47ed09fc-047b-4f98-8df3-d11d17678c57@linux.dev>
- <380f75c7adc04cbab38cfd2f82bd0c6d@realtek.com>
- <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
- <4205fde06ecd4a7489b03ef25e5e4011@realtek.com>
- <CAPDyKFoC-dwzcsABNy9pA=GGirBWwcxQhNMeTSSStXHtXmWbcg@mail.gmail.com>
- <0b6fd99b-54a6-45f1-942e-94f707f2fbf5@acm.org>
- <CAPDyKFqic-rFe95g657MdZHtdPXTmFmYQG4ZSBV56S3DhMEF-A@mail.gmail.com>
- <dc1ac2e5-1db1-49b5-847d-a10a611027ae@acm.org>
- <CAPDyKFrNHc4FexuTbdWM-Kvo0mn9C51nJN5b=e0jZR8miFho+g@mail.gmail.com>
-Content-Language: en-US
-From: Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <CAPDyKFrNHc4FexuTbdWM-Kvo0mn9C51nJN5b=e0jZR8miFho+g@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-On 2/3/26 3:28 AM, Ulf Hansson wrote:
-> I guess the question then is, do we always want zero latency, which I
-> assume must be costly from a power savings point of view. At least
-> during the idle period, while not serving I/O and waiting for the
-> device to be runtime suspended.
+Disable new_tx/rx and modify related settings helps avoid data
+transmission instability, and better compatibility for mt8189.
 
-Block I/O latency suffers if a CPU core enters a lower power state while
-waiting for an I/O completion. Hence the choice in the UFS driver for
-not allowing CPU cores to enter a lower power state while any block I/O
-is in progress.
+Signed-off-by: Cathy Xu <ot_cathy.xu@mediatek.com>
+---
+ drivers/mmc/host/mtk-sd.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-Bart.
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 302ac8529c4f..b2680cc054bd 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -682,15 +682,15 @@ static const struct mtk_mmc_compatible mt8189_compat = {
+ 	.needs_top_base = true,
+ 	.pad_tune_reg = MSDC_PAD_TUNE0,
+ 	.async_fifo = true,
+-	.data_tune = true,
++	.data_tune = false,
+ 	.busy_check = true,
+ 	.stop_clk_fix = true,
+-	.stop_dly_sel = 1,
+-	.pop_en_cnt = 2,
++	.stop_dly_sel = 3,
++	.pop_en_cnt = 8,
+ 	.enhance_rx = true,
+ 	.support_64g = true,
+-	.support_new_tx = true,
+-	.support_new_rx = true,
++	.support_new_tx = false,
++	.support_new_rx = false,
+ 	.support_spm_res_release = true,
+ };
+ 
+-- 
+2.45.2
+
