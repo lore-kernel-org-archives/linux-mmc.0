@@ -1,105 +1,150 @@
-Received: from mail-ot1-f42.google.com (mail-ot1-f42.google.com [209.85.210.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 365712D8382
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Feb 2026 03:42:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 019691A2C0B;
+	Thu,  5 Feb 2026 07:13:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770262971; cv=none; b=NEN037CA11nUm+RKVcWLlJTIX8yfvWKQYMLFx9J2QcKH5mbOXaX7s8Fu6aBy2/ikS4Man5uN3eKZg/rQxE+fO5lSkT9WewNnj5NyNC+1QXfe4vPd2s1qwPrLUUtZvossPV6pzFPrxhLLXF1a6kJFDC0BZZBpRnctq3d+qwBB694=
+	t=1770275604; cv=none; b=qwD7o7dPWMj6fuUgS3XPSl+TxbcpsvDIhkhgXpTRdRVFC1OKkScwqH5tGA2ZDuqAB0ly9JoayxyJBK6ZEfSFq7SBIrgccNVZ5pJa3F0CA2meWqFB2IEvE4wu6uEnAEq+onWm40Tl0fe3vPOhM8BYBu5OmNXFdbSITwI05R4ND0U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770262971; c=relaxed/simple;
-	bh=yTIiCoPaf2axh3yw/BOxlWdHS8hPHmnROAwOuIuJHy0=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=YSxkOF4KPhrRgd9k49cw3h8RKDxJD4RFMmO7DVDhaxFWIKsWQzb7G2EA8fHeB1lht31KVFoyDsJNgUYCJqSaG9XRViB0SRA3JIssv/aZv44g+B25eQKdo6wdC7dMmESmzI3FEF9xb/1SGiKTuaiSnhi8aL6Kq9iLfAmGtvgp6xA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=pLM6QYAQ; arc=none smtp.client-ip=209.85.210.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="pLM6QYAQ"
-Received: by mail-ot1-f42.google.com with SMTP id 46e09a7af769-7cfca52ac2dso340055a34.0
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Feb 2026 19:42:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1770262969; x=1770867769; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=p8odmZP3AsmwWLVEEIesC2LXuxYRFDXqGBxQCRutSXw=;
-        b=pLM6QYAQ5CfrvbDksf4Mmr3MPy2EfVQZ1L0qPsiGZtaGnPErGd/Ni6fr/653IYFbRp
-         Kc8+qfHniWCFlpXqFTffcTgP1HTKOcT5CTLKCMOH0EUjOXdbJ5lCw6YH2NkQHNsnE4pX
-         FWt882SOfdLZCaTdeHLU49v1/ZQ5D/lksOk12qEiN8Kxr4PVDSUrkGJf2D1P8gbEl6Lr
-         DAXWfWNVOEgcyeuP/xwIvM9SO8F4NXvAV/GHIr5Eo9hLL3N7h3NJmK5sWt+J5bijidwJ
-         lPGaxJg0sHTe2gyh2juXlV2b3xUuFVoGQ/wvG/nCpJ7wjAWihSngNyHrLD89/5Ap73uT
-         ZxGQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770262969; x=1770867769;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=p8odmZP3AsmwWLVEEIesC2LXuxYRFDXqGBxQCRutSXw=;
-        b=HWqRIjA4XxHHwQX3mUbn+XbiBXa9PBrm6v/LXOdIDp7NpHdUsrqmHdeK4sb7p9CreH
-         1U1Pyn3FmJM5XisIdueWHWYQOnZgGlpIE5/dLW+LPggtFRTonYrhfP94tfd9dq64N4v4
-         Zi/M4UqerIS43cvyhzAp5hY65RI8ozTy2FPcdDXB2vtx97kNqUKTtwm3j+nacsrPHXXl
-         P9f7430Qk80TD8S6M8o/EtQFwKZQH/KJYZ6qjtN2qjBd9ApwV4BgiNX39vzBEWXIiHas
-         rlakp3+gQ5jgX3+CaoNgBdEMypsQWDtmxaRAhoHL6rbHtCOpOjqOuvAbW3w7wmJfSG0r
-         je8Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWoxIfOvHLd1tkyg1h6nUwqVH7ZhjeBYf6R0f9J7ea+PH4BNi9Lq6XFTmPzM1jqXl8z7Ofknxe6Wkc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzQHuuE4XwM2SGoSl7apyOWcOSlBZXVr+3MLApQw7uAKkqrpmOd
-	eZOmKZ/bxNPJXf+l2SP8CcynGBj4MC5KxKIOdzc5Auwd8CgD1xeUxLsBEuAOM0YK1I8f9exMIWF
-	Oe+ktwJ0=
-X-Gm-Gg: AZuq6aI6USQRM994Qj3nHbZua/ErCK9+zyZMwkjal0ewFvQdsvaOeXwkZQ935/051lD
-	ZXoTc/lcrCOZiDkE56zT6W318eZPNw21z3rWZlwNa7adx6QqafMXmCWiKqEONECTQh7Nx3fnZaP
-	eblEuPdNyVPnG/VQlDzDPDGZ2pFpotzTldqCx+scwms1OliUfaNyJt9cHDesMTNj1dflSXwTDGP
-	kviC6Pc3SgoquHqHmOHkZQbYSV1hSC6dwei4wklhIr3/0ivJMsUjIMp7WIN4c5zRcHxjyJ+/gfq
-	n7z32lKWrWknACrAWDdO9UYsa1BDMH92uT23uq+UDYyUvlxq7GG8rjpe1URPJApYNIZ8nGPXK27
-	YaiI/2xEk8GY5PhHRBNkMqIaVKMjLP7cqkUJOWVMihsUkvbVg7FPXlCcQp/AkACbYlXz4t6zB4r
-	RPKIi1Ockj1GLIl7LzZPmWWtpn6m/ym2eMrcto2RvqkFxIP5vK4YCou7fET6kh94ZFBd0/HDxLo
-	sc=
-X-Received: by 2002:a05:6830:3901:b0:7d1:4d71:95c7 with SMTP id 46e09a7af769-7d448abb460mr3043741a34.26.1770262969619;
-        Wed, 04 Feb 2026 19:42:49 -0800 (PST)
-Received: from [127.0.0.1] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7d4490f35b7sm2812181a34.1.2026.02.04.19.42.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Feb 2026 19:42:49 -0800 (PST)
-From: Jens Axboe <axboe@kernel.dk>
-To: ulf.hansson@linaro.org, hch@infradead.org, ziniu.wang_1@nxp.com
-Cc: linux-block@vger.kernel.org, linux-mmc@vger.kernel.org, 
- linux-kernel@vger.kernel.org, imx@lists.linux.dev
-In-Reply-To: <20260204034003.2961402-1-ziniu.wang_1@nxp.com>
-References: <20260204034003.2961402-1-ziniu.wang_1@nxp.com>
-Subject: Re: (subset) [PATCH v4 0/2] Optimize secure erase performance for
- certain Kingston eMMC devices
-Message-Id: <177026296860.37701.668895586539274878.b4-ty@kernel.dk>
-Date: Wed, 04 Feb 2026 20:42:48 -0700
+	s=arc-20240116; t=1770275604; c=relaxed/simple;
+	bh=iQnThWuJKbYKeBJspJKK9ibp8Rkh45Ss2zcl2WrMBS4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=inSqXygltXBCHyiwHmiBPkYSytXmEBKbUHPxXmu5ozgsULX3qFz7G84L2WH2wjL9neI4VHh+ZlMh0UkLQJ/wRoGy4f+vq3WoE2H7y785h5T/97KBPg/3eRHIMP0XN33XopzEzqzHW2CCSUZp+FpLtVPV3oIpPyc/Zqk5m2Ag/Yc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn; spf=pass smtp.mailfrom=isrc.iscas.ac.cn; arc=none smtp.client-ip=159.226.251.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isrc.iscas.ac.cn
+Received: from duge-virtual-machine (unknown [223.160.207.25])
+	by APP-01 (Coremail) with SMTP id qwCowAAHr2r9QoRpcakuBw--.23082S2;
+	Thu, 05 Feb 2026 15:13:03 +0800 (CST)
+Date: Thu, 5 Feb 2026 15:13:00 +0800
+From: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+To: Conor Dooley <conor@kernel.org>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, robh@kernel.org,
+	krzk+dt@kernel.org, conor+dt@kernel.org, pjw@kernel.org,
+	palmer@dabbelt.com, aou@eecs.berkeley.edu,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+	gaohan@iscas.ac.cn, me@ziyao.cc
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add sdhci support for Canaan k230
+Message-ID: <aYRC/JVvyI6znWS6@duge-virtual-machine>
+References: <20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn>
+ <20260204082908.27501-2-jiayu.riscv@isrc.iscas.ac.cn>
+ <20260204-imperfect-blitz-55fe5a85590f@spud>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.14.3
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260204-imperfect-blitz-55fe5a85590f@spud>
+X-CM-TRANSID:qwCowAAHr2r9QoRpcakuBw--.23082S2
+X-Coremail-Antispam: 1UD129KBjvJXoWxZF43XryfZF45Ww1rtFy8uFg_yoW5WrW8pF
+	ZrCF9xKF1vgF1rZ34Fv3Wvk3Wayrs7tr4jyr1aqryIqFs5Wa4jg3yfKwn0qr17WF1xJaya
+	9FWDWr15CwsFyFJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUvvb7Iv0xC_Kw4lb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I2
+	0VC2zVCF04k26cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rw
+	A2F7IY1VAKz4vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xII
+	jxv20xvEc7CjxVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWUJVW8JwA2z4x0Y4vEx4
+	A2jsIEc7CjxVAFwI0_Gr0_Gr1UM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI
+	64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8Jw
+	Am72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lFIxGxcIEc7CjxVA2Y2ka0xkIwI1l
+	c7CjxVAaw2AFwI0_Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr
+	1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE
+	14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7
+	IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E
+	87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73Uj
+	IFyTuYvjxUqiFxDUUUU
+X-CM-SenderInfo: 5mld534oul2uny6l223fol2u1dvotugofq/
 
-
-On Wed, 04 Feb 2026 11:40:01 +0800, ziniu.wang_1@nxp.com wrote:
-> This patch series optimize secure erase performance for certain Kingston
-> eMMC devices (IY2964 and IB2932) that take a fixed ~2 seconds per secure
-> erase operation regardless of size.
+On Wed, Feb 04, 2026 at 06:10:25PM +0000, Conor Dooley wrote:
+> On Wed, Feb 04, 2026 at 04:29:06PM +0800, Jiayu Du wrote:
+> > The Canaan k230 uses the SDHCI from Synopsys. Add compatible strings
+> > to the k230. The k230 has two controllers. MMC0 supports eMMC, while
+> > MMC1 supports SDIO.
+> > 
+> > Signed-off-by: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+> > ---
+> >  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 22 +++++++++++++++++++
+> >  1 file changed, 22 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > index 7e7c55dc2440..cab33da3af7d 100644
+> > --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > @@ -23,6 +23,8 @@ properties:
+> >            - const: sophgo,sg2044-dwcmshc
+> >            - const: sophgo,sg2042-dwcmshc
+> >        - enum:
+> > +          - canaan,k230-emmc
+> > +          - canaan,k230-sdio
 > 
-> Currently, a 1GB secure erase requires ~300 operations (limited by max
-> discard size), taking ~10 minutes. With these changes, the same secure
-> erase completes in a single operation, reducing time to just 2 seconds.
+> I don't understand why there are two compatibles here, when the driver
+> is able to handle them both identically, using the common properties for
+> mmc controllers to differentiate. Is which is emmc and which sdio
+> actually just determined by how the k230 boards use them?
 > 
-> [...]
+> Or, if there are pinout differences, would pinctrl allow each to be used
+> for either?
 
-Applied, thanks!
+Hi, Thanks for the review!
 
-[1/2] block: decouple secure erase size limit from discard size limit
-      commit: ee81212f74a57c5d2b56cf504f40d528dac6faaf
+Actually, the two compatibles aren't just board choices. They come from
+real SoC-level differences between the two MMC controllers.
 
-Best regards,
--- 
-Jens Axboe
+From the K230 Hardware Guide [1]:
+- MMC0 supports eMMC5.0 and SDIO3.0, usually for eMMC chips.
+- MMC1 only does SDIO3.0 in 4/1-bit mode up to SDR104, and the manual
+  clearly says it can't handle eMMC because of pin count and limits.
 
+And the driver treats them a bit differently, such as whether there
+is a phy and the initialization method. So I think keeping separate
+compatibles makes sense to show these hardware differences clearly.
+
+About pinctrl, MMC1 pins can mux to other things like GPIO, but MMC0
+pins are fixed in hardware. In next version, I will add pinctrl node
+for MMC1 in the board dts.
+
+Link: https://github.com/kendryte/k230_docs/blob/main/en/00_hardware/K230_Hardware_Design_Guide.md#mmc-circuit [1]
+
+Regards,
+Jiayu Du
+
+> 
+> >            - rockchip,rk3568-dwcmshc
+> >            - rockchip,rk3588-dwcmshc
+> >            - snps,dwcmshc-sdhci
+> > @@ -87,6 +89,26 @@ required:
+> >  allOf:
+> >    - $ref: mmc-controller.yaml#
+> >  
+> > +  - if:
+> > +      properties:
+> > +        compatible:
+> > +          contains:
+> > +            enum:
+> > +              - canaan,k230-emmc
+> > +              - canaan,k230-sdio
+> > +    then:
+> > +      properties:
+> > +        clocks:
+> > +          minItems: 2
+> > +          maxItems: 5
+> > +        clock-names:
+> > +          items:
+> > +            - const: core
+> > +            - const: bus
+> > +            - const: axi
+> > +            - const: block
+> > +            - const: timer
+> > +
+> >    - if:
+> >        properties:
+> >          compatible:
+> > -- 
+> > 2.52.0
+> > 
 
 
