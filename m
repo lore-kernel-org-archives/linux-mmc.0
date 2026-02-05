@@ -1,150 +1,127 @@
-Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 019691A2C0B;
-	Thu,  5 Feb 2026 07:13:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAB0C22301;
+	Thu,  5 Feb 2026 09:47:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770275604; cv=none; b=qwD7o7dPWMj6fuUgS3XPSl+TxbcpsvDIhkhgXpTRdRVFC1OKkScwqH5tGA2ZDuqAB0ly9JoayxyJBK6ZEfSFq7SBIrgccNVZ5pJa3F0CA2meWqFB2IEvE4wu6uEnAEq+onWm40Tl0fe3vPOhM8BYBu5OmNXFdbSITwI05R4ND0U=
+	t=1770284827; cv=none; b=LSzcXZ/HWy66tqcxu4wskaoC1yPDSivN49K+orXBTvgoEtsdagohk0dLlqtEFpo6Cg26xHB5b/i2+KCQBJKS6otVCEbL/ksFGyfzLwXCwY1sH+6WWT5DS5Oc1eYuobC5509o4+lSfgXVfyFP/GdaM+cSXcBA1Vm5BxIfTzHJinQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770275604; c=relaxed/simple;
-	bh=iQnThWuJKbYKeBJspJKK9ibp8Rkh45Ss2zcl2WrMBS4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=inSqXygltXBCHyiwHmiBPkYSytXmEBKbUHPxXmu5ozgsULX3qFz7G84L2WH2wjL9neI4VHh+ZlMh0UkLQJ/wRoGy4f+vq3WoE2H7y785h5T/97KBPg/3eRHIMP0XN33XopzEzqzHW2CCSUZp+FpLtVPV3oIpPyc/Zqk5m2Ag/Yc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn; spf=pass smtp.mailfrom=isrc.iscas.ac.cn; arc=none smtp.client-ip=159.226.251.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isrc.iscas.ac.cn
-Received: from duge-virtual-machine (unknown [223.160.207.25])
-	by APP-01 (Coremail) with SMTP id qwCowAAHr2r9QoRpcakuBw--.23082S2;
-	Thu, 05 Feb 2026 15:13:03 +0800 (CST)
-Date: Thu, 5 Feb 2026 15:13:00 +0800
-From: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
-To: Conor Dooley <conor@kernel.org>
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, robh@kernel.org,
-	krzk+dt@kernel.org, conor+dt@kernel.org, pjw@kernel.org,
-	palmer@dabbelt.com, aou@eecs.berkeley.edu,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
-	gaohan@iscas.ac.cn, me@ziyao.cc
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add sdhci support for Canaan k230
-Message-ID: <aYRC/JVvyI6znWS6@duge-virtual-machine>
-References: <20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn>
- <20260204082908.27501-2-jiayu.riscv@isrc.iscas.ac.cn>
- <20260204-imperfect-blitz-55fe5a85590f@spud>
+	s=arc-20240116; t=1770284827; c=relaxed/simple;
+	bh=zfalYb5m4jmXJdvgdsS+kkeIDs7H5lnyloDkGHgpMaU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=cxotqWpxB07alBDnOLv/UE1VusAy1FB6b0NSlGCxtW+T+56WC7QhsnnMkwtmvHv4fSXTt7fMwWwROK1YamFy0jyBVz811RnXiLyLsg/MhrYswcqRWeZsruc/sJ6EhbZUEk/uEJC2StzaUAbjaBrbGUaFWgvxdjqyLRjD41i/DUc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=s5EQfpNI; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="s5EQfpNI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5AEE1C4CEF7;
+	Thu,  5 Feb 2026 09:47:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1770284827;
+	bh=zfalYb5m4jmXJdvgdsS+kkeIDs7H5lnyloDkGHgpMaU=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=s5EQfpNIk22AtBe6vtAD0GjSFWGJK0obgQNkek5tXC69qTS7oSMcZC9i08SdOnxH4
+	 tXcuyJHcXw7oUBADxRpL8p4jG3T9HK4gqR0QYhdDMPYCABtmmNzIbmi3h9E9lb2JAW
+	 NVkeq/nNGIaadv239wleyCvTtCONLvYEdkCOwIipCkaExHmo5S8m2yBn7a1MyMAEt3
+	 8rlQ4rFrfiMbuj0ZRqjf4TUpoVYDdZC9o09Jhrmn//fPv2OzGxJFjNWBIPV5WfECT3
+	 nejO9V6h7lKid0CM1OEnmOgU9QdxUSH0Fysy+KGJINB67Fe5dUBDAxqVTl6RZgipZy
+	 h3pPzaJRWkJSg==
+Message-ID: <c3cfb8c8-649e-479c-a4b5-186913db1520@kernel.org>
+Date: Thu, 5 Feb 2026 10:47:01 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260204-imperfect-blitz-55fe5a85590f@spud>
-X-CM-TRANSID:qwCowAAHr2r9QoRpcakuBw--.23082S2
-X-Coremail-Antispam: 1UD129KBjvJXoWxZF43XryfZF45Ww1rtFy8uFg_yoW5WrW8pF
-	ZrCF9xKF1vgF1rZ34Fv3Wvk3Wayrs7tr4jyr1aqryIqFs5Wa4jg3yfKwn0qr17WF1xJaya
-	9FWDWr15CwsFyFJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUvvb7Iv0xC_Kw4lb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I2
-	0VC2zVCF04k26cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rw
-	A2F7IY1VAKz4vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xII
-	jxv20xvEc7CjxVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWUJVW8JwA2z4x0Y4vEx4
-	A2jsIEc7CjxVAFwI0_Gr0_Gr1UM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI
-	64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8Jw
-	Am72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lFIxGxcIEc7CjxVA2Y2ka0xkIwI1l
-	c7CjxVAaw2AFwI0_Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr
-	1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE
-	14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7
-	IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E
-	87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73Uj
-	IFyTuYvjxUqiFxDUUUU
-X-CM-SenderInfo: 5mld534oul2uny6l223fol2u1dvotugofq/
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 6/8] mmc: host: axiado: add AX3000 eMMC PHY support to
+ sdhci-of-arasan
+To: Tzu-Hao Wei <twei@axiado.com>
+Cc: SriNavmani A <srinavmani@axiado.com>,
+ Prasad Bolisetty <pbolisetty@axiado.com>, Vinod Koul <vkoul@kernel.org>,
+ Neil Armstrong <neil.armstrong@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Harshit Shah <hshah@axiado.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter
+ <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>,
+ linux-phy@lists.infradead.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org
+References: <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-0-5457d0ebcdb4@axiado.com>
+ <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-6-5457d0ebcdb4@axiado.com>
+ <20251223-optimal-ochre-kestrel-a8cb1c@quoll>
+ <c96d21ab-2a76-46ca-8392-6edde3b9ce2d@axiado.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <c96d21ab-2a76-46ca-8392-6edde3b9ce2d@axiado.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Wed, Feb 04, 2026 at 06:10:25PM +0000, Conor Dooley wrote:
-> On Wed, Feb 04, 2026 at 04:29:06PM +0800, Jiayu Du wrote:
-> > The Canaan k230 uses the SDHCI from Synopsys. Add compatible strings
-> > to the k230. The k230 has two controllers. MMC0 supports eMMC, while
-> > MMC1 supports SDIO.
-> > 
-> > Signed-off-by: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
-> > ---
-> >  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 22 +++++++++++++++++++
-> >  1 file changed, 22 insertions(+)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > index 7e7c55dc2440..cab33da3af7d 100644
-> > --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > @@ -23,6 +23,8 @@ properties:
-> >            - const: sophgo,sg2044-dwcmshc
-> >            - const: sophgo,sg2042-dwcmshc
-> >        - enum:
-> > +          - canaan,k230-emmc
-> > +          - canaan,k230-sdio
-> 
-> I don't understand why there are two compatibles here, when the driver
-> is able to handle them both identically, using the common properties for
-> mmc controllers to differentiate. Is which is emmc and which sdio
-> actually just determined by how the k230 boards use them?
-> 
-> Or, if there are pinout differences, would pinctrl allow each to be used
-> for either?
+On 05/02/2026 04:36, Tzu-Hao Wei wrote:
+> On 12/23/2025 10:34 PM, Krzysztof Kozlowski wrote:
+>>> @@ -2019,15 +2023,17 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>>>                       goto unreg_clk;
+>>>               }
+>>>
+>>> -             host->mmc_host_ops.hs400_enhanced_strobe =
+>>> +             if (!of_device_is_compatible(np, "axiado,ax3000-sdhci-5.1-emmc")) {
+>>
+>> No, don't sprinkle compatibles all around. You should use driver match
+>> data for this.
+>>
+>> Best regards,
+>> Krzysztof
+>>
+> Thanks for suggestion. The new patch uses driver match data instead of sprinkling compatibles.
 
-Hi, Thanks for the review!
+You replied to a review from more than a month ago, even though I gave
+you review after one day. I don't have anything of this in my inbox, so
+in case you asked of something - I still expect all feedback to be
+implemented.
 
-Actually, the two compatibles aren't just board choices. They come from
-real SoC-level differences between the two MMC controllers.
-
-From the K230 Hardware Guide [1]:
-- MMC0 supports eMMC5.0 and SDIO3.0, usually for eMMC chips.
-- MMC1 only does SDIO3.0 in 4/1-bit mode up to SDR104, and the manual
-  clearly says it can't handle eMMC because of pin count and limits.
-
-And the driver treats them a bit differently, such as whether there
-is a phy and the initialization method. So I think keeping separate
-compatibles makes sense to show these hardware differences clearly.
-
-About pinctrl, MMC1 pins can mux to other things like GPIO, but MMC0
-pins are fixed in hardware. In next version, I will add pinctrl node
-for MMC1 in the board dts.
-
-Link: https://github.com/kendryte/k230_docs/blob/main/en/00_hardware/K230_Hardware_Design_Guide.md#mmc-circuit [1]
-
-Regards,
-Jiayu Du
-
-> 
-> >            - rockchip,rk3568-dwcmshc
-> >            - rockchip,rk3588-dwcmshc
-> >            - snps,dwcmshc-sdhci
-> > @@ -87,6 +89,26 @@ required:
-> >  allOf:
-> >    - $ref: mmc-controller.yaml#
-> >  
-> > +  - if:
-> > +      properties:
-> > +        compatible:
-> > +          contains:
-> > +            enum:
-> > +              - canaan,k230-emmc
-> > +              - canaan,k230-sdio
-> > +    then:
-> > +      properties:
-> > +        clocks:
-> > +          minItems: 2
-> > +          maxItems: 5
-> > +        clock-names:
-> > +          items:
-> > +            - const: core
-> > +            - const: bus
-> > +            - const: axi
-> > +            - const: block
-> > +            - const: timer
-> > +
-> >    - if:
-> >        properties:
-> >          compatible:
-> > -- 
-> > 2.52.0
-> > 
-
-
+Best regards,
+Krzysztof
