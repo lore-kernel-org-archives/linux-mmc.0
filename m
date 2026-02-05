@@ -1,127 +1,142 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAB0C22301;
-	Thu,  5 Feb 2026 09:47:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770284827; cv=none; b=LSzcXZ/HWy66tqcxu4wskaoC1yPDSivN49K+orXBTvgoEtsdagohk0dLlqtEFpo6Cg26xHB5b/i2+KCQBJKS6otVCEbL/ksFGyfzLwXCwY1sH+6WWT5DS5Oc1eYuobC5509o4+lSfgXVfyFP/GdaM+cSXcBA1Vm5BxIfTzHJinQ=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770284827; c=relaxed/simple;
-	bh=zfalYb5m4jmXJdvgdsS+kkeIDs7H5lnyloDkGHgpMaU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=cxotqWpxB07alBDnOLv/UE1VusAy1FB6b0NSlGCxtW+T+56WC7QhsnnMkwtmvHv4fSXTt7fMwWwROK1YamFy0jyBVz811RnXiLyLsg/MhrYswcqRWeZsruc/sJ6EhbZUEk/uEJC2StzaUAbjaBrbGUaFWgvxdjqyLRjD41i/DUc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=s5EQfpNI; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFEB33ACEE6
+	for <linux-mmc@vger.kernel.org>; Thu,  5 Feb 2026 11:26:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.43
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770290819; cv=pass; b=iAzybt4L7H4g3NNw7MsrqIRHz0sqVvqUU4lGfw+vMyDyIqiXeXhPrVRHxB1K2XAhHW07X/GSuKNkHV10cbGCpTr1pCZ/2eyClaSgFOETZtnIbp/6yHOQh+hS17VF2ixJyi0XpjbgNvm61/SOBMl9A0dhkuMTjtg6vNzZTnsPR8M=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770290819; c=relaxed/simple;
+	bh=mGTIDf7ATEDXLxYZ2BPNG7jAnvGsS/6ibRxfNlu9lN4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=QhyQXa1aoMbSG17G7Iw8RUQ2fTXYEexiMn8iHPu30rC7nanUljPz+IDQTQ6KcTDqVvqtkWXeim33bh1jiW8DTt44hoAEzKT0kPup2k2jo0zofJSuS23FeUYc841LAb6LvBSaOVxJ4mOV8EFyZR8knl1Ld0Kbcg2Xl9sWG+0OWqc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GnCs2IJz; arc=pass smtp.client-ip=209.85.167.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="s5EQfpNI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5AEE1C4CEF7;
-	Thu,  5 Feb 2026 09:47:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770284827;
-	bh=zfalYb5m4jmXJdvgdsS+kkeIDs7H5lnyloDkGHgpMaU=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=s5EQfpNIk22AtBe6vtAD0GjSFWGJK0obgQNkek5tXC69qTS7oSMcZC9i08SdOnxH4
-	 tXcuyJHcXw7oUBADxRpL8p4jG3T9HK4gqR0QYhdDMPYCABtmmNzIbmi3h9E9lb2JAW
-	 NVkeq/nNGIaadv239wleyCvTtCONLvYEdkCOwIipCkaExHmo5S8m2yBn7a1MyMAEt3
-	 8rlQ4rFrfiMbuj0ZRqjf4TUpoVYDdZC9o09Jhrmn//fPv2OzGxJFjNWBIPV5WfECT3
-	 nejO9V6h7lKid0CM1OEnmOgU9QdxUSH0Fysy+KGJINB67Fe5dUBDAxqVTl6RZgipZy
-	 h3pPzaJRWkJSg==
-Message-ID: <c3cfb8c8-649e-479c-a4b5-186913db1520@kernel.org>
-Date: Thu, 5 Feb 2026 10:47:01 +0100
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GnCs2IJz"
+Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-59dd490be5fso1009549e87.2
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Feb 2026 03:26:58 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770290817; cv=none;
+        d=google.com; s=arc-20240605;
+        b=AG69UuEdCdmp5R30VMEMZuuwegfZ09vX13t+VbS8hujMaLT/eRaZ8HkjBS246Vp192
+         dv8fLIGbjwrRbzcG0NWCcPAz45pcI8rqadTyTVLmAW9t9IDaF2/c2DQ06Ez0mmUvvVZS
+         rrWMLm+bL2BAXMcZIDQTSxRQoPvdkVKqNr5j6r99+2u7qUhouTbZDrwpCgQgQds6qlCu
+         sCWifdsBwmItvPG1SN/+zyrclRLGAiLnzM+sqeL1UrGaWNFDs5fJQwkqu44JKikULiBq
+         zkIdYy22tEU27F/CIBXaOVUpgDqcYrSpBUeeyRk8AKbeqM2iGILWa7iQg4L6qXRE5hXB
+         UKuA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=mGTIDf7ATEDXLxYZ2BPNG7jAnvGsS/6ibRxfNlu9lN4=;
+        fh=1UpGUCLRCc0v/245SHgAMgwcCix+YKZC6xh3Mbmw1TI=;
+        b=O5+gRDTdVCCHQWvM4i5W2stGM1VOK2c/OQFjaPtERjs+ibV9C84jmv0o9PSSiw9qQP
+         ZYhtG3G5Aj8WF1monNYS75HxMW+XCIv7sFKloG5Zs2hamMqZ/RMmsAdiG9H4gyltJuOQ
+         bcZedpjgaYRMlnzgZPX2EFavziAG/e9AFLy5DvX8g5vO9XZkj7tUnek/g4orLYKZNaHv
+         OFYKfUWp0z/7quZyYr2vVt2KVlGpber+JQ3Ph6sDJrZjmBf7UZhjDe8EtwFAoUPIgTWq
+         v7cRFF+jIUsdfNNht38cGXPcCBfJ19ppFLAhpQ+i5nPBnFJFtdelpegs3rrMy3XcaMaN
+         NUog==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1770290817; x=1770895617; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=mGTIDf7ATEDXLxYZ2BPNG7jAnvGsS/6ibRxfNlu9lN4=;
+        b=GnCs2IJzwiFZxSGo1spMMprploUI5Ycn6teJay6bf07fY3/STpL7tYdGAB4ktLHE9d
+         oi4W/GyJaPgKYc0jdLAgjsPjeOApixPkKhV+9m5lrYPlXsgzl1CZRAX2QXt/+Is3PlBY
+         6x93OnQg9G9RIABVddFNDerS36ECWjJ7sMC/ybYzuti7favK8EiTuwG+JRW709u2sKdq
+         r9KQLOm+2bGoylvQJ+E/6aZHaILTuJJ7JTa9lbt5v9uJr2xZnbZLn6rZhgjsBRrkrNEW
+         lkXg9jmtcMHw6BOksr3DgS4nt9316EuuVE6gbeTZlQhmgKOHRCQGYDrTqID34wUk5fXp
+         nmNw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770290817; x=1770895617;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mGTIDf7ATEDXLxYZ2BPNG7jAnvGsS/6ibRxfNlu9lN4=;
+        b=Es5mSN3X6ExUsgSKYqIAYQr/U8t4i3nTRaSU5YGARAOgCIDUYHepGjHTpvR5TSvNOM
+         UqyxuSe09GSgaDJWLu9+r/WlxzA9tLUhOP31SyQd6lUS6bCT1Gddxrrv8qH2wYGttukb
+         2B8aXATEpy3VonguMkP2cyOraxGTl277dMTAeIMKSotBVOgkF3pJefei7VrNPfuzzs7Y
+         2DZCKL9od4dBkoBmszWKXJf2jihoM49TlqLtSDElztDjFPteCRT3j51Qe24ofD0id1jL
+         yd1/aKpdwYjSzx1Gp0I4GXyW0YUg7eqlN6M5bRejOP06S84F8wx94M5YDbDijXfC3QRv
+         +KOg==
+X-Forwarded-Encrypted: i=1; AJvYcCW7d1b/01T/0IsvbjLwhyfB8pVQgdbUaik3mPTgM1os5lfk3OjSd5ejOnvWtY5y1svFlRFW29CKEsM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzBscoxtesQXOdeXVjYVFJhbeqkYvmHLbQ97XiiQRZOSiXL0FW5
+	0NTT5OFNOx+937GhHjcy8MvXhmyawVnQjcYPaa3FWkVSq8yPYQECEEtLAEZnNt40aRpTua55lr8
+	GLKZgovYIn23ED0rsRvls3tS2QGGfq8zKUExxhYE7OUJGUboK4pvU8Gw=
+X-Gm-Gg: AZuq6aJclN3Y9B90JWc4WvHcPkXmsJScjz27vxb8XrbXunnxjHuIrOPM50sB2E2jw79
+	YpSlOXsapiBbnk5K5w3LPnRrr9+51uHLvIjpMx0t5SSDmymoVoPVtDuKNYhJUuCrP9aOFQ7a3Dc
+	ZGFeB9R23S5DlBgFQolufWrHHw/DijtzQafkw9vtPWDnPDdiXwsWZCUmuhpxSsxCfRtITL5U06z
+	AMU78jLXQfJONns+DYsEzexnvReOBM0xX0tpSgQa7Y8/9j7LbW4F2f6uoL9P/SSPAGK0LX8
+X-Received: by 2002:a05:6512:b25:b0:59e:49a:1eaf with SMTP id
+ 2adb3069b0e04-59e38c431f2mr2304967e87.40.1770290816974; Thu, 05 Feb 2026
+ 03:26:56 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 6/8] mmc: host: axiado: add AX3000 eMMC PHY support to
- sdhci-of-arasan
-To: Tzu-Hao Wei <twei@axiado.com>
-Cc: SriNavmani A <srinavmani@axiado.com>,
- Prasad Bolisetty <pbolisetty@axiado.com>, Vinod Koul <vkoul@kernel.org>,
- Neil Armstrong <neil.armstrong@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Harshit Shah <hshah@axiado.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter
- <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>,
- linux-phy@lists.infradead.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org
-References: <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-0-5457d0ebcdb4@axiado.com>
- <20251222-axiado-ax3000-add-emmc-host-driver-support-v1-6-5457d0ebcdb4@axiado.com>
- <20251223-optimal-ochre-kestrel-a8cb1c@quoll>
- <c96d21ab-2a76-46ca-8392-6edde3b9ce2d@axiado.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <c96d21ab-2a76-46ca-8392-6edde3b9ce2d@axiado.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
+ <CAPDyKFrGpvjONrDmnNZXv+SME_NCNv-LK8J-Vo88RSz1fuD7rg@mail.gmail.com>
+ <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev> <4777aabd-bc9e-4904-9444-892393aecb15@linux.dev>
+ <9e362d5fa2604fb0848ea28866dc45fc@realtek.com> <47ed09fc-047b-4f98-8df3-d11d17678c57@linux.dev>
+ <380f75c7adc04cbab38cfd2f82bd0c6d@realtek.com> <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
+ <4205fde06ecd4a7489b03ef25e5e4011@realtek.com> <CAPDyKFoC-dwzcsABNy9pA=GGirBWwcxQhNMeTSSStXHtXmWbcg@mail.gmail.com>
+ <0b6fd99b-54a6-45f1-942e-94f707f2fbf5@acm.org> <CAPDyKFqic-rFe95g657MdZHtdPXTmFmYQG4ZSBV56S3DhMEF-A@mail.gmail.com>
+ <dc1ac2e5-1db1-49b5-847d-a10a611027ae@acm.org> <CAPDyKFrNHc4FexuTbdWM-Kvo0mn9C51nJN5b=e0jZR8miFho+g@mail.gmail.com>
+ <2d3b720c-5637-45e7-887d-077b1e9b3c23@acm.org>
+In-Reply-To: <2d3b720c-5637-45e7-887d-077b1e9b3c23@acm.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 5 Feb 2026 12:26:20 +0100
+X-Gm-Features: AZwV_QidTK3-LL5BRcsQOANx3I9-wfMadBNJN25RW-bBgNYtc6cvI_SW9Xk-ml0
+Message-ID: <CAPDyKFqQCtXzRruVSy0RLfWw11=TB+HAqN=+0P7St=aovZOoEg@mail.gmail.com>
+Subject: Re: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
+ RTS525A card reader
+To: Bart Van Assche <bvanassche@acm.org>
+Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ricky WU <ricky_wu@realtek.com>, 
+	Matthew Schwartz <matthew.schwartz@linux.dev>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On 05/02/2026 04:36, Tzu-Hao Wei wrote:
-> On 12/23/2025 10:34 PM, Krzysztof Kozlowski wrote:
->>> @@ -2019,15 +2023,17 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->>>                       goto unreg_clk;
->>>               }
->>>
->>> -             host->mmc_host_ops.hs400_enhanced_strobe =
->>> +             if (!of_device_is_compatible(np, "axiado,ax3000-sdhci-5.1-emmc")) {
->>
->> No, don't sprinkle compatibles all around. You should use driver match
->> data for this.
->>
->> Best regards,
->> Krzysztof
->>
-> Thanks for suggestion. The new patch uses driver match data instead of sprinkling compatibles.
+On Tue, 3 Feb 2026 at 19:10, Bart Van Assche <bvanassche@acm.org> wrote:
+>
+> On 2/3/26 3:28 AM, Ulf Hansson wrote:
+> > I guess the question then is, do we always want zero latency, which I
+> > assume must be costly from a power savings point of view. At least
+> > during the idle period, while not serving I/O and waiting for the
+> > device to be runtime suspended.
+>
+> Block I/O latency suffers if a CPU core enters a lower power state while
+> waiting for an I/O completion. Hence the choice in the UFS driver for
+> not allowing CPU cores to enter a lower power state while any block I/O
+> is in progress.
 
-You replied to a review from more than a month ago, even though I gave
-you review after one day. I don't have anything of this in my inbox, so
-in case you asked of something - I still expect all feedback to be
-implemented.
+Right, this seems reasonable to me too. Although, in a way it is a
+policy decision, as it means favoring block I/O performance, above
+trusting the cpuidle governor to pick an optimal low power state (from
+performance and power point of view) for the CPUs.
 
-Best regards,
-Krzysztof
+The other concern I was trying to point out, is that using the runtime
+PM suspend/resume callbacks for managing the QoS constraint isn't
+really a good fit in my opinion, because of the potential idle period
+beyond the point when I/O was completed and when we may be waiting for
+the device to be runtime suspended (especially when runtime PM
+autosuspend is used).
+
+More precisely, during this idle period there is no point in keeping
+the QoS constraint as it would mean potentially wasting unnecessary
+energy by preventing low power states for CPUs. Ideally, I think it
+would be better if we could monitor the I/O request queue to manage
+the QoS constraint directly. Perhaps that is what you suggested too, I
+just didn't get it. :-)
+
+That said, speaking about runtime suspend for UFS. Is runtime PM
+enabled for the UFS card too or is it just the UFS host controller
+that supports it?
+
+Kind regards
+Uffe
