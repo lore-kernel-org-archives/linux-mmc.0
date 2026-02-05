@@ -1,161 +1,171 @@
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA54B2D46A2
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Feb 2026 14:56:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.52
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770303381; cv=pass; b=WBBRgF80aY0eodpSz9MZMnJuNod0UjW9W5xD3PM9+oRENboWJwwwWkrksz+ZYMwWqieOTP6cxAXm55cjBNYu0YsKoAT/K+J7LgcItNsn5t6x7Ctfg3eOtCeIqj8Egk8PKm/k2z+2GQjU3WLhLn49N3lG/WOyK+rQvWORxKhN90w=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770303381; c=relaxed/simple;
-	bh=a8UGlQ4it/4rjmlTSwbY3biq3UiTr0x4Cw6OqgopNZ8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GTBoCrQHbYhfiLkwKN7mqBkZC+BZc/f+oNXtspQzRUe/QOeUd6aHxrlazUCSZvoLpg4Cp6pxdHqy2IGXHixlj1lPvxoovjAbGpk4jmQdmz23LPcHv+YMNJD1t8etO4HRdOWNafom7ZP08WdNuYa1ku7ENxJKdJrnajebrilgyBw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=zZt6dC5H; arc=pass smtp.client-ip=209.85.167.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79CB62EAB6F;
+	Thu,  5 Feb 2026 19:19:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770319182; cv=none; b=am7hv5eILBgZkkQiuSXZLe1mkGBpTpYuwHCUly48c74a/qS1FbDjWAF3g03UadSpNcg7jC6LN0PfYpUUAbebrJD8FZx1u0iS5dJPiH5T9X2edjqoQY0cKYl7aXkXc6NtJWFQoyxuCuSaCSbwoy+wM9Z8NIRMcYeYnMalkX8Bd4U=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770319182; c=relaxed/simple;
+	bh=UzMdSswZQOZGh4NcKoenKaqT+G8h9UNzdi6R0YEqBmo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Tp33T10aRE1V5JA1XEmnURN/MGl+KZ9Y9ClwmqzFh3PYbBbeNToz5J5CZv6wUtHdR5eCEYRnPZUj3pwaA7ME6Uy7fy4jJW66L9KthmuBdQtuWJTIj+3v3Tgn0Uh8yw3VrhVT6Ay2fKOdoXbU6s+GL8BTSX7vBf+fM8UHN8Y9qLg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ai/KJBM5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zZt6dC5H"
-Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-59b834e3d64so1257728e87.2
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Feb 2026 06:56:20 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770303379; cv=none;
-        d=google.com; s=arc-20240605;
-        b=POtHsKz5aDrHnpjnC+RwPpeiMz/tqrVcw5pseSeDtox6H6sys/eVrc4n250qPu6SwV
-         yxkLJ0lsdecEmTasBdOWuN7YAeXMooT96IACTqWnvW9J7SnWti0JEdD1un4qbYW6kymq
-         b75tL6deLX5egdsdcottdBqlkWB/rm/I2U0skzRuWX3MnKV3KIcwsL4dpDIpwtaS2s0B
-         qvkQzSKApcQ4aO/6v74i5wSUsxLRc9tJHbcluCIpDCb9cMIL/GJ+VPs8Pcqv8pcn0h56
-         l0JJpCUjzkqzdHoOpudJvsLaEldVdiKfxdYAIBURakTyXno/7Vm1kGHinhGIQSxu0Uoj
-         GGKA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=a8UGlQ4it/4rjmlTSwbY3biq3UiTr0x4Cw6OqgopNZ8=;
-        fh=WMfkQOdNCyummXFmXqwdHEVkGq9CubtC/c3Ck6fGw5E=;
-        b=OYkEBlXTTGFb7Ms5mDrj0VA1YhMI5fJq+bIbo2Ab93Re19YPSqUHIILLG1K/tPeiiy
-         ABUqVc5IE92P92hOnt1LMslPQ5OJ46/gitcqXp4MqfuYbfnrAJJkNX29/564nYpUToM/
-         6IiQByNyoKBZtsaj/mvs8cKTj3tCpc1dkoxNkUBzgshPMJsfEW3fKbsz54T1X/2rg5Sv
-         k7Y86tmlriCoJGxmvAVyGlbc6O3ZFaaXey/TslfaHd/OH8knHMaC5ySuVFihVu2IbF+c
-         F4HI7+H3a3fKRjxKmfL96a5WYqsr5D7r1e++zRLDW0IojVrifpYOLBm7cTZBzl1uOgh6
-         atsg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1770303379; x=1770908179; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=a8UGlQ4it/4rjmlTSwbY3biq3UiTr0x4Cw6OqgopNZ8=;
-        b=zZt6dC5HbiB2zRJV65Iim6TsolfX1HXSI4TBaFPbEMYkZz9fDi4iohN+6FXfPO7FhX
-         XwnTtAYbjStJ7o2mE+vvsXbQ8ml61gOkLroHe9wubAJghxEvCBDhsYzQP0bvsQdmFkNG
-         ctRGtFOB7tRkWi69iKkp4g89QKTgkHLBC4I7PDHDBumBkfL9TxJzq3d7zwbJJwU25ZZP
-         QMBD9RhkCPdmO9NYZMW+SWi+kstfzC4dSx/YQClk60qvCfw1wwwZ9B4VS7Rjl2e3yvv1
-         o3PFfoSxrSGGG8bcVRWcFUbK1O3V3mfUhGy8ptcM9JneOXG1j4Kd8aGc6prwjhsrgEn5
-         QVDw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770303379; x=1770908179;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=a8UGlQ4it/4rjmlTSwbY3biq3UiTr0x4Cw6OqgopNZ8=;
-        b=df7Hcpm3MfE9rNPAETBp/5WJk9VLllxiirM6dtTjOAVXSE4XxAaiYaqU4X9F4VlpXt
-         vBDy5epUTF0L4aOFjzHb+jcz1cz4UMMHRHMqXJiT/HPdDoS3IXYKl36JteW4ihvIPsMz
-         WPyhb7N2BGhrxpmR4c21wzLR8pWNie2gu+vW8rti0Xa7af/kofXumeD6QSgtJEusHnMU
-         kd41HQFmGoNB+6b1J3gyEZF8lomnpBIWUC/Lr6s4T8ckVYEAgkdXjC399e/0mp0sYi1I
-         ByQmgKKnlxOBNGIZsWCXS4rX4RX/NhdVpPZGlqnUR6gQ+aiZUX54LRiXDh4tKWHIiall
-         WeNg==
-X-Forwarded-Encrypted: i=1; AJvYcCXcU2pcnWHzvIfDDrE/RMeHQ6HyFBhp5hCqWP03YxlQ4TlcsBdyIRt+dbztWCFcs0/DefwrOp9E2EI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy5VNtvVwMQekIDoVaSE1gM3cQ4uDjCCFbkMc21FNfC4GMSqeGX
-	j+j/MYlUgig1iNby2rSJuNRPDQbbb8mj8nBHnflwqLNE+yrGiwunc0ie+OsIARDihmJTcqZnYEH
-	M2n9DeLA2QbrqTmKkmnfXSvvLSp4VjcXpo74OmN2jOQ==
-X-Gm-Gg: AZuq6aLW821jIw79h3ycL5REXTupXMIPhvBjCmvjByG4rn3C+wCHQAkJ6Ir1yZgkAK8
-	x6dP+308QN6IFIZvVsrmdWgeR7vcH76ZV768o0Oc+ER04b5B8j7cd9i4AXsGq65QOBFjdQeG5Bp
-	fbe+fkhGKgWLuVcG5fWRBtPpUdKK6Q+zmOE8eaagJb/jRkzsi+luEfsoYHQrI5NvCR0kyemYcad
-	CG9D3yoRuEfpzN/EIoLwQaljLZ4XG6toa4YxkZjlfA+JYcqk+7j/bYfRwYVpKeYIv0C4mOs
-X-Received: by 2002:a05:6512:2523:b0:59d:f473:aa8e with SMTP id
- 2adb3069b0e04-59e38c27a3emr2431070e87.27.1770303378986; Thu, 05 Feb 2026
- 06:56:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ai/KJBM5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 45BA0C4CEF7;
+	Thu,  5 Feb 2026 19:19:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1770319182;
+	bh=UzMdSswZQOZGh4NcKoenKaqT+G8h9UNzdi6R0YEqBmo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=ai/KJBM5LyRPQQ2DGzHeSO50lRZttbq1SqxlhyAG4gi0p9v7TqhtCBd8kvuHpfNUR
+	 4eDk5nABTSIglVGhtglj/6IOGTyQhSiflETD2EfCxS3LUeFhKqbEse95aTH5KDQSqA
+	 bL8QVxCgYC6F5IHCHU6lHnrg3rhIGSjeSwo8zpj94DKFSS9qXs0zWB8oQN2GPZ5/Vv
+	 ZoCHHmXNsV7HQl6ZAVWCjuWO8UsyKroSdKrZ0ZjgQAPFdMViS7sx4A2OvLUN0xdPuK
+	 DqkmeReF9N5XjxWQ+zN0H5Bqvm2IARNHTtAnbo078J39gEK8eBzkJFvLPjEQLuckkT
+	 lzFNrO2Lf4rfQ==
+Date: Thu, 5 Feb 2026 19:19:36 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, robh@kernel.org,
+	krzk+dt@kernel.org, conor+dt@kernel.org, pjw@kernel.org,
+	palmer@dabbelt.com, aou@eecs.berkeley.edu,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+	gaohan@iscas.ac.cn, me@ziyao.cc
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: Add sdhci support for Canaan k230
+Message-ID: <20260205-choice-require-1794796b10e5@spud>
+References: <20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn>
+ <20260204082908.27501-2-jiayu.riscv@isrc.iscas.ac.cn>
+ <20260204-imperfect-blitz-55fe5a85590f@spud>
+ <aYRC/JVvyI6znWS6@duge-virtual-machine>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev>
- <CAPDyKFrGpvjONrDmnNZXv+SME_NCNv-LK8J-Vo88RSz1fuD7rg@mail.gmail.com>
- <787171c6-0b9c-400b-8a95-b331b58e284c@linux.dev> <4777aabd-bc9e-4904-9444-892393aecb15@linux.dev>
- <9e362d5fa2604fb0848ea28866dc45fc@realtek.com> <47ed09fc-047b-4f98-8df3-d11d17678c57@linux.dev>
- <380f75c7adc04cbab38cfd2f82bd0c6d@realtek.com> <d46dcebe-ca58-44c4-87ee-cade2e478572@linux.dev>
- <4205fde06ecd4a7489b03ef25e5e4011@realtek.com> <CAPDyKFoC-dwzcsABNy9pA=GGirBWwcxQhNMeTSSStXHtXmWbcg@mail.gmail.com>
- <0b6fd99b-54a6-45f1-942e-94f707f2fbf5@acm.org> <CAPDyKFqic-rFe95g657MdZHtdPXTmFmYQG4ZSBV56S3DhMEF-A@mail.gmail.com>
- <dc1ac2e5-1db1-49b5-847d-a10a611027ae@acm.org> <CAPDyKFrNHc4FexuTbdWM-Kvo0mn9C51nJN5b=e0jZR8miFho+g@mail.gmail.com>
- <2d3b720c-5637-45e7-887d-077b1e9b3c23@acm.org> <CAPDyKFqQCtXzRruVSy0RLfWw11=TB+HAqN=+0P7St=aovZOoEg@mail.gmail.com>
- <4f1d5c9a-f261-49da-9ae6-f068bcd7402c@acm.org>
-In-Reply-To: <4f1d5c9a-f261-49da-9ae6-f068bcd7402c@acm.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 5 Feb 2026 15:55:42 +0100
-X-Gm-Features: AZwV_QiIMgeILf_6udDuquP88lDGVGj5C32chTiT5zTMK1nwYFJwXumF4IHZ8Ic
-Message-ID: <CAPDyKFqUw-HaKpvqBzoYm8K5gTjdwskAEcWGxnMHaj17QcKLjQ@mail.gmail.com>
-Subject: Re: [BUG] - Short freezes in gameplay due to MMC_CAP_AGGRESSIVE_PM on
- RTS525A card reader
-To: Bart Van Assche <bvanassche@acm.org>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>, Ricky WU <ricky_wu@realtek.com>, 
-	Matthew Schwartz <matthew.schwartz@linux.dev>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="7eHTfwTxGj0wRf4P"
+Content-Disposition: inline
+In-Reply-To: <aYRC/JVvyI6znWS6@duge-virtual-machine>
 
-On Thu, 5 Feb 2026 at 15:21, Bart Van Assche <bvanassche@acm.org> wrote:
->
-> On 2/5/26 3:26 AM, Ulf Hansson wrote:
-> > The other concern I was trying to point out, is that using the runtime
-> > PM suspend/resume callbacks for managing the QoS constraint isn't
-> > really a good fit in my opinion, because of the potential idle period
-> > beyond the point when I/O was completed and when we may be waiting for
-> > the device to be runtime suspended (especially when runtime PM
-> > autosuspend is used).
-> >
-> > More precisely, during this idle period there is no point in keeping
-> > the QoS constraint as it would mean potentially wasting unnecessary
-> > energy by preventing low power states for CPUs. Ideally, I think it
-> > would be better if we could monitor the I/O request queue to manage
-> > the QoS constraint directly. Perhaps that is what you suggested too, I
-> > just didn't get it. :-)
->
-> Hmm ... the block layer RPM code monitors the request queue, isn't it?
-> I don't see how the request queue could be monitored more directly than
-> how the block layer RPM code does it today - by checking the counter of
-> the number of requests that is in flight?
->
-> Deciding that the I/O request queue is empty is not possible without
-> waiting until the idle period has expired, isn't it?
 
-Right, this is how it works today. We would need something additional
-to what we have, to allow us to better manage performance
-optimizations dynamically for block I/O. Exactly how to implement
-this, needs further exploring, at least from my side.
+--7eHTfwTxGj0wRf4P
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-FYI, related to this, there is a series from Qcom [1], that in
-principle wants to allow some of the CPUs to enter deep idle states,
-while keeping others to only shallow idle states. This is especially
-useful for some UFS based platforms it seems.
+On Thu, Feb 05, 2026 at 03:13:00PM +0800, Jiayu Du wrote:
+> On Wed, Feb 04, 2026 at 06:10:25PM +0000, Conor Dooley wrote:
+> > On Wed, Feb 04, 2026 at 04:29:06PM +0800, Jiayu Du wrote:
+> > > The Canaan k230 uses the SDHCI from Synopsys. Add compatible strings
+> > > to the k230. The k230 has two controllers. MMC0 supports eMMC, while
+> > > MMC1 supports SDIO.
+> > >=20
+> > > Signed-off-by: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+> > > ---
+> > >  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 22 +++++++++++++++++=
+++
+> > >  1 file changed, 22 insertions(+)
+> > >=20
+> > > diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci=
+=2Eyaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > > index 7e7c55dc2440..cab33da3af7d 100644
+> > > --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > > +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> > > @@ -23,6 +23,8 @@ properties:
+> > >            - const: sophgo,sg2044-dwcmshc
+> > >            - const: sophgo,sg2042-dwcmshc
+> > >        - enum:
+> > > +          - canaan,k230-emmc
+> > > +          - canaan,k230-sdio
+> >=20
+> > I don't understand why there are two compatibles here, when the driver
+> > is able to handle them both identically, using the common properties for
+> > mmc controllers to differentiate. Is which is emmc and which sdio
+> > actually just determined by how the k230 boards use them?
+> >=20
+> > Or, if there are pinout differences, would pinctrl allow each to be used
+> > for either?
+>=20
+> Hi, Thanks for the review!
+>=20
+> Actually, the two compatibles aren't just board choices. They come from
+> real SoC-level differences between the two MMC controllers.
+>=20
+> From the K230 Hardware Guide [1]:
+> - MMC0 supports eMMC5.0 and SDIO3.0, usually for eMMC chips.
+> - MMC1 only does SDIO3.0 in 4/1-bit mode up to SDR104, and the manual
+>   clearly says it can't handle eMMC because of pin count and limits.
+>=20
+> And the driver treats them a bit differently, such as whether there
+> is a phy and the initialization method. So I think keeping separate
+> compatibles makes sense to show these hardware differences clearly.
 
->
-> > That said, speaking about runtime suspend for UFS. Is runtime PM
-> > enabled for the UFS card too or is it just the UFS host controller
-> > that supports it?
->
-> It depends on the decisions made by the manufacturer of the device that
-> includes the UFS device.
->
-> In multiple recent UFS-powered devices RPM is enabled for both the UFS
-> device and the UFS host controller.
+Ah, I didn't notice that there was some logic, I just checked the match
+data and I missed that. What you have is fine then I think.
 
-Okay, thanks for letting me know and taking your time to answer all my
-questions!
+>=20
+> About pinctrl, MMC1 pins can mux to other things like GPIO, but MMC0
+> pins are fixed in hardware. In next version, I will add pinctrl node
+> for MMC1 in the board dts.
+>=20
+> Link: https://github.com/kendryte/k230_docs/blob/main/en/00_hardware/K230=
+_Hardware_Design_Guide.md#mmc-circuit [1]
+> >=20
+> > >            - rockchip,rk3568-dwcmshc
+> > >            - rockchip,rk3588-dwcmshc
+> > >            - snps,dwcmshc-sdhci
+> > > @@ -87,6 +89,26 @@ required:
+> > >  allOf:
+> > >    - $ref: mmc-controller.yaml#
+> > > =20
+> > > +  - if:
+> > > +      properties:
+> > > +        compatible:
+> > > +          contains:
+> > > +            enum:
+> > > +              - canaan,k230-emmc
+> > > +              - canaan,k230-sdio
+> > > +    then:
+> > > +      properties:
+> > > +        clocks:
+> > > +          minItems: 2
+> > > +          maxItems: 5
 
-Kind regards
-Uffe
+Additionally, why does this have a range? Why is it not minItems: 5?
+You've got only one instance per compatible, so the number of clocks for
+each compatible is not variable.
 
-[1]
-[PATCH v2 0/5] PM QoS: Add CPU affinity latency QoS support and
-resctrl integration
-https://lore.kernel.org/all/20250721124104.806120-1-quic_zhonhan@quicinc.com/
+> > > +        clock-names:
+> > > +          items:
+> > > +            - const: core
+> > > +            - const: bus
+> > > +            - const: axi
+> > > +            - const: block
+> > > +            - const: timer
+> > > +
+> > >    - if:
+> > >        properties:
+> > >          compatible:
+> > > --=20
+> > > 2.52.0
+> > >=20
+>=20
+>=20
+
+--7eHTfwTxGj0wRf4P
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaYTtSAAKCRB4tDGHoIJi
+0tZjAQDTymGYi6A5F3OEmHSp98izoRjyvyN6cbDuLn5AnhU53QD+LbK8MUALBaaM
+mkOTaJUMInjD97RaMG7Y8s7Q5BG7GQM=
+=WnK+
+-----END PGP SIGNATURE-----
+
+--7eHTfwTxGj0wRf4P--
