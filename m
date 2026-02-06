@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 308D3392827;
-	Fri,  6 Feb 2026 11:26:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3B7936C5BB;
+	Fri,  6 Feb 2026 13:26:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770377213; cv=none; b=QpeYkuUmwUPrNrp8hCj1wqjj7N8I5KLzn4Faehs9RpudXcORFgXCdh3ABZ5zJZ6RPzBTXs62VCQKcFiuuzzJRmID5KIUof/izYpErtz/rUg+xlVlwipVAJAfkCuGlu1gvSymOc8ww9B+Fu6CDoL9gHhjL4rqt32GYvcGZcBo7Dk=
+	t=1770384405; cv=none; b=KpEAHjbEHl0wm7Lt49o3InDwVS2sCknCLcqLQB5Rm3Ia33o9f2ipnGNUDcVNIRlBesIDx4GPikjCIKUxRL7kt/pCZoqm2lhK4BHrsZiKSu4sjIcqbDZAys6XJLoiIiFIdFZtcin9xiTVkVyK1v68+R31I4FvI0yCqPFlCBcv/iA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770377213; c=relaxed/simple;
-	bh=ED3zbhQfENqAFaxT9UiKAFxmka6MtEDNkf96uyC/3xE=;
+	s=arc-20240116; t=1770384405; c=relaxed/simple;
+	bh=oJHVy75SFVRMUlFGhtQOJ6ZioOzAKeIEQtFpWlVXd60=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=K7m5a12ZhTSno26FOz7N0MLXNyi9uD2JgLO5PSD30B9DdvvoHRTeH10YzZXNEN4X3g/6XiyoxFIAkmxVSDtCp1DJuQyZvrBaAvLdLeOoOw7lyPyP+CQ48oK4rLU6wmexFNlCj3ZwiSLf9QbII1n1wMiAbqGdHRZg5bUblcynpKg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lborFZjy; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=syDdu5gOHtC0ezV+4iefRl3GLC4BQ0lB7wADoIAfi1qhhHsZts3Z3dI2k6vU+fT9qXpd/MAbFxiXnaaQhylVmWnnvL1SCwlzlrFfyKgPE/JQrHlOeLCUUv1A3h75bVICU2e5q8lUn3UX0zrNKrn4G6OKHtZuG7bOUMnqNZUGIBY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Zdrie+5P; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lborFZjy"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 20E73C116C6;
-	Fri,  6 Feb 2026 11:26:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Zdrie+5P"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 363B9C116C6;
+	Fri,  6 Feb 2026 13:26:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770377212;
-	bh=ED3zbhQfENqAFaxT9UiKAFxmka6MtEDNkf96uyC/3xE=;
+	s=k20201202; t=1770384405;
+	bh=oJHVy75SFVRMUlFGhtQOJ6ZioOzAKeIEQtFpWlVXd60=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=lborFZjycl7paIrACeiwDqa1t5a3ZZfhAM5yk7hbBbvM3WbwQ9zq92/LJTb7oK3hB
-	 sa09Y3ZMAdLe5WDRqbAAaXK7/0LBZ9t/s9auozeJS11EQhdrdPn00qLZDlpA8NSXoS
-	 j7M1rDk+hC/ypBSN7koXczLsYJKcIJyf8ZTscIsWDaTi2234rgQ+KyP+My1IS7M9hr
-	 a1cd0owJdcms7lcRaRxeH1dqcEU184b+t40s78lbTqIVmEF7f5AtzVNjoC0xuuWpJF
-	 BmYir04cHJYVt+k3i1dNR8YSvkRPY99afgTOxmBCzbC/usVeReTHkGXb4j56cZNil+
-	 9B8PWxYB2jUVg==
-Message-ID: <b6e510da-b369-4c43-b9a1-455478af4948@kernel.org>
-Date: Fri, 6 Feb 2026 12:26:48 +0100
+	b=Zdrie+5PnfGAKyXQ8OTEdnV88LjAQpW3IHYK1FcvqLnZzBXU2mcKZuWu6IT/knTBN
+	 gQUq9eX8sVQhU+uz99KJ5ZmekM7CjA0TR1dgrAnxkeHMJgiDuhLQ5fDs26VzXLABRV
+	 eHBq3ZnYzXyFIOFgRx2F3XiQksoX/CY+QSL2uGf2AnidzvhdNz0eVwla1Xq56evvY4
+	 Mk2Up4KWRp5Km7UEW3RWxARXXo8lKxUpwKqKdez9h3+oHSv/+dK/eGzCAA1uYMqL1N
+	 fV6vuQLFH4S3q4yjYFA6/t8Rq9Exl4YPE0XTQ1oOsd+omFAu8P5kx9uIPCOmK7YhKg
+	 +6A/HqUckGrJw==
+Message-ID: <e06bd9ca-11bb-4d87-9db5-87139731f181@kernel.org>
+Date: Fri, 6 Feb 2026 14:26:40 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,15 +35,17 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: sdhci-msm: Add ICE phandle
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>, ulf.hansson@linaro.org,
- robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- andersson@kernel.org, konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, Abel Vesa <abel.vesa@linaro.org>,
- Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-References: <20260206112053.3287756-1-neeraj.soni@oss.qualcomm.com>
- <20260206112053.3287756-2-neeraj.soni@oss.qualcomm.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci-dwcmshc: Add Canaan K230 DWCMSHC
+ controller support
+To: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>, ulf.hansson@linaro.org,
+ adrian.hunter@intel.com, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org
+Cc: pjw@kernel.org, palmer@dabbelt.com, aou@eecs.berkeley.edu,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+ gaohan@iscas.ac.cn, me@ziyao.cc
+References: <20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn>
+ <20260204082908.27501-3-jiayu.riscv@isrc.iscas.ac.cn>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -89,66 +91,54 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20260206112053.3287756-2-neeraj.soni@oss.qualcomm.com>
+In-Reply-To: <20260204082908.27501-3-jiayu.riscv@isrc.iscas.ac.cn>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 06/02/2026 12:20, Neeraj Soni wrote:
-> Starting with sc7280(kodiak), the ICE will have its own device-tree node.
-> So add the qcom,ice property to reference it.
-> 
-> Co-developed-by: Abel Vesa <abel.vesa@linaro.org>
-> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> Co-developed-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-> 
-> ---
-> 
-> Some initial work is done by Abel here:
-> https://lore.kernel.org/all/ba3da82d-999b-b040-5230-36e60293e0fd@linaro.org/
-> and by Abhinaba here:
-> https://lore.kernel.org/all/20251009-add-separate-ice-ufs-and-emmc-device-nodes-for-qcs615-platform-v1-1-2a34d8d03c72@oss.qualcomm.com/
-> 
-> This patch adds the purpose and usage for phandle in the description and encodes
-> it properly in the schema.
-> ---
->  .../devicetree/bindings/mmc/sdhci-msm.yaml    | 26 +++++++++++++++++++
->  1 file changed, 26 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 938be8228d66..f35b675c9f16 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -140,6 +140,12 @@ properties:
->      $ref: /schemas/types.yaml#/definitions/uint32
->      description: platform specific settings for DLL_CONFIG reg.
->  
-> +  qcom,ice:
-> +    $ref: /schemas/types.yaml#/definitions/phandle
-> +    description: |
-> +      phandle to the Inline Crypto Engine node. ICE having its own platform driver will use this phandle to
+On 04/02/2026 09:29, Jiayu Du wrote:
+> +static int dwcmshc_k230_init(struct device *dev, struct sdhci_host *host,
+> +			     struct dwcmshc_priv *dwc_priv)
+> +{
+> +	static const char * const clk_ids[] = {"base", "timer", "ahb"};
+> +	struct device_node *usb_phy_node;
+> +	struct k230_priv *k230_priv;
+> +	u32 data;
+> +	int ret;
+> +
+> +	k230_priv = devm_kzalloc(dev, sizeof(struct k230_priv), GFP_KERNEL);
+> +	if (!k230_priv)
+> +		return -ENOMEM;
+> +	dwc_priv->priv = k230_priv;
+> +
+> +	usb_phy_node = of_find_compatible_node(NULL, NULL, "canaan,k230-usb-phy");
 
-Please wrap code according to the preferred limit expressed in Kernel
-coding style (checkpatch is not a coding style description, but only a
-tool).  However don't wrap blindly (see Kernel coding style).
+Hm? You should use phandles, not look for various nodes.
 
-Do not need '|' unless you need to preserve formatting.
+> +	if (!usb_phy_node) {
 
+Please follow Linux coding style.
 
-I do not understand the platform driver reference here. You are supposed
-to explain how the hardware uses it, for what purpose. If I change Linux
-to use auxilary driver, then the binding is incorrect?
+> +		return dev_err_probe(dev, -ENODEV,
+> +				     "Failed to find k230-usb-phy node\n");
+> +	}
+> +
+> +	k230_priv->hi_sys_regmap = device_node_to_regmap(usb_phy_node);
+> +	of_node_put(usb_phy_node);
+> +	if (IS_ERR(k230_priv->hi_sys_regmap)) {
+> +		return dev_err_probe(dev, PTR_ERR(k230_priv->hi_sys_regmap),
+> +				     "Failed to get k230-usb-phy regmap\n");
+> +	}
+> +
+> +	ret = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
+> +					    ARRAY_SIZE(clk_ids), clk_ids);
+> +	if (ret) {
+> +		return dev_err_probe(dev, ret,
+> +				     "Failed to get/enable k230 mmc other clocks\n");
+> +	}
+> +
+> +	if (of_device_is_compatible(dev->of_node, "canaan,k230-sdio")) {
 
-
-> +      manage its resources independently. Either add this phandle or ICE address space for ICE to work.
-
-Don't repeat constraints in free form text.
-
-Such trivialities should not happen, I am sometimes skipping deep dive
-review, so I skipped the rest.
-
-:
+Driver match data is for this.
 
 
 Best regards,
