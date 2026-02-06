@@ -1,145 +1,112 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dy1-f170.google.com (mail-dy1-f170.google.com [74.125.82.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3B7936C5BB;
-	Fri,  6 Feb 2026 13:26:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6812E35DCEF
+	for <linux-mmc@vger.kernel.org>; Fri,  6 Feb 2026 18:13:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770384405; cv=none; b=KpEAHjbEHl0wm7Lt49o3InDwVS2sCknCLcqLQB5Rm3Ia33o9f2ipnGNUDcVNIRlBesIDx4GPikjCIKUxRL7kt/pCZoqm2lhK4BHrsZiKSu4sjIcqbDZAys6XJLoiIiFIdFZtcin9xiTVkVyK1v68+R31I4FvI0yCqPFlCBcv/iA=
+	t=1770401620; cv=none; b=JME9cwtxCXmLUOW7Y8RCVsTP4sclSPYZNsilLmCBJ4qhHTaCSfhaNPWYtQeX+z91y1NNZTgOqN+e9ojAmpz4oouc81bzvB6aBxCoOZ3JJvEWtMxVptT9A9O10+WxTLKYd6mu/wVGqd/glnArT4HII99WpMpdePjzh4bOo92Ij5c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770384405; c=relaxed/simple;
-	bh=oJHVy75SFVRMUlFGhtQOJ6ZioOzAKeIEQtFpWlVXd60=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=syDdu5gOHtC0ezV+4iefRl3GLC4BQ0lB7wADoIAfi1qhhHsZts3Z3dI2k6vU+fT9qXpd/MAbFxiXnaaQhylVmWnnvL1SCwlzlrFfyKgPE/JQrHlOeLCUUv1A3h75bVICU2e5q8lUn3UX0zrNKrn4G6OKHtZuG7bOUMnqNZUGIBY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Zdrie+5P; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1770401620; c=relaxed/simple;
+	bh=NzDFBFbCVGzKBFvJlT5stD8040LteH5XcM9Cm8vtdFM=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=MMJb+Z5ki2aKoe4cDRsv2WJHqD+SZwJxAj3q8BhAo7d/ihRi2Tv4smsQ7fGeXKPTzqAIKHXy5A/vWfg/nSvzjRXMxMY3aucGqEwF6aTk4cHecq8r2zP/fVAHcr81G7cNB77Z7CRnzReBx5YL7uubKOYlnjDf5QsstlxQCZq/BJY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=S1TyTumD; arc=none smtp.client-ip=74.125.82.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Zdrie+5P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 363B9C116C6;
-	Fri,  6 Feb 2026 13:26:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770384405;
-	bh=oJHVy75SFVRMUlFGhtQOJ6ZioOzAKeIEQtFpWlVXd60=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=Zdrie+5PnfGAKyXQ8OTEdnV88LjAQpW3IHYK1FcvqLnZzBXU2mcKZuWu6IT/knTBN
-	 gQUq9eX8sVQhU+uz99KJ5ZmekM7CjA0TR1dgrAnxkeHMJgiDuhLQ5fDs26VzXLABRV
-	 eHBq3ZnYzXyFIOFgRx2F3XiQksoX/CY+QSL2uGf2AnidzvhdNz0eVwla1Xq56evvY4
-	 Mk2Up4KWRp5Km7UEW3RWxARXXo8lKxUpwKqKdez9h3+oHSv/+dK/eGzCAA1uYMqL1N
-	 fV6vuQLFH4S3q4yjYFA6/t8Rq9Exl4YPE0XTQ1oOsd+omFAu8P5kx9uIPCOmK7YhKg
-	 +6A/HqUckGrJw==
-Message-ID: <e06bd9ca-11bb-4d87-9db5-87139731f181@kernel.org>
-Date: Fri, 6 Feb 2026 14:26:40 +0100
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="S1TyTumD"
+Received: by mail-dy1-f170.google.com with SMTP id 5a478bee46e88-2b71557299dso952832eec.1
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Feb 2026 10:13:40 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1770401620; x=1771006420; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Plp3Yk6cNKttphBRZ6WkXav3acKM+/WvJHxDeTend20=;
+        b=S1TyTumDHl1nOU4mx0i4839gl1yw72r5z/RVmQlUVzVOItSS4k1DLb80HNxUddph+T
+         gs2X75eiUOkBEAKUtlWoB+vtOjTicmXiyYd9D1Kt2F6ixMbVUgeetonNSc+O6HUbRG1u
+         qglyg2BxV3dRJg7ZZ+qmmwBHH+aoS7CnW7MFXPM02rRWq/n+WvlafmudP4+oEckxyO+K
+         tSirB/BrOyt00HCWDPqlP454LDQ0CQjInoZMMO5dm085X4dQ80t3JiI96Iq2UrI4AIjN
+         iETBMmp4/yFl1aWQYuBvbSUIJNgH2Mh6L/HUT2fplpbD4DRU981nmBiBzQ/hQqViCzwv
+         vA3w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770401620; x=1771006420;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=Plp3Yk6cNKttphBRZ6WkXav3acKM+/WvJHxDeTend20=;
+        b=e4UCQpykxY6EOwB7RNL5qy0Sz/XzFLzb+Z1LUuNYVhptS1LBZoXnFerBoImt8tgWVX
+         ePvhazRXXf7UF9jsyLmkGvzO6HX37O1AN1uqOFeLY4BWOGuK10H/MJ9OO4ml0oP/xuch
+         rnzq+i+DcJHKDyWMNn8mWeklPAp+6oOIa0kuXfgFMyVXtbSc1EcTWqZjbR0/QDROjD/B
+         9BVR6fq22jj3WgWKDz0B3qv6C+wYA5zqxKntoWnxRYI9LydJTWuabzuRLOHkg6skzcaY
+         9Cx/up/1OZPuybsmp1DSIfPA4/1ybvLzhAYk3ahZGVuTJd4cOod9kV4Q4ars+xAwgbLe
+         PWug==
+X-Forwarded-Encrypted: i=1; AJvYcCXiELlBGKK6N+a3rnwtLs4oF+JB/Ez4eh3XIYVaN478iB8ua+mTCyA7I4Sg8RLLUmDiLro737BWRVU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyMggnDlgl2MvwmbVePsa4MO/8Cy0Yf0/adtpMb23zxxKZEZqo5
+	1ZS0+1/2eiOP6FdQQmv4NB5rR9k/H13hWlUug5qVsASxuE+YUOV/2+w7mrTI+w==
+X-Gm-Gg: AZuq6aLlMvy68oxpt2RjQYSFLceIMI01hBlOynMI96JQwOOtgWMtjHOnTAFlYa002+w
+	CP07xLMTf+8EoRci9ySgt02RNVOEyt2lpnoSPqcnqXqb/m9I+eFS/Mm1J/SLaM1Ncsya7YSe5/Z
+	L/1kKuQP8NSionYEfJzKibfbzMUvhpFyaSBHMwvwv6GCEYGXNMDyPcDp2TeFa72jrUuEqKwGRki
+	PplD+dchsFyWR6YE/MgbAnWEn7yFr04EW11qNlk3RFkIQHBcFoX5dD8ZFx1zjX5ULsZS7LIXRX0
+	VccEAlGVXMc/zYrI0Yj8KxQCffEXeNygd7IpFYoIOAdmml5j4jIkKRq1z01Biiws4hc9FCrkuyO
+	0+mDEdsSbmO0MqnHTcqM2ZYmpk818RzzzpXdWyU7Cthe17c8mfrYUqRCZ11py5/qMWXzOtmS6sV
+	zBouRE8Q4S3AwEUAEizT4W1jdl
+X-Received: by 2002:a05:7301:19a5:b0:2b7:24ad:5c54 with SMTP id 5a478bee46e88-2b85644ec11mr1930047eec.9.1770401619551;
+        Fri, 06 Feb 2026 10:13:39 -0800 (PST)
+Received: from fabio-Precision-3551.. ([2804:14c:485:4b61:44a3:2bb7:a035:fd7e])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-1270433ab31sm2782500c88.11.2026.02.06.10.13.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 06 Feb 2026 10:13:39 -0800 (PST)
+From: Fabio Estevam <festevam@gmail.com>
+To: heiko@sntech.de
+Cc: robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-rockchip@lists.infradead.org,
+	Fabio Estevam <festevam@nabladev.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH 06/11] dt-bindings: mmc: rockchip-dw-mshc: Add compatible string for R1103B
+Date: Fri,  6 Feb 2026 15:13:04 -0300
+Message-Id: <20260206181309.2696095-7-festevam@gmail.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260206181309.2696095-1-festevam@gmail.com>
+References: <20260206181309.2696095-1-festevam@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/3] mmc: sdhci-dwcmshc: Add Canaan K230 DWCMSHC
- controller support
-To: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>, ulf.hansson@linaro.org,
- adrian.hunter@intel.com, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org
-Cc: pjw@kernel.org, palmer@dabbelt.com, aou@eecs.berkeley.edu,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
- gaohan@iscas.ac.cn, me@ziyao.cc
-References: <20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn>
- <20260204082908.27501-3-jiayu.riscv@isrc.iscas.ac.cn>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20260204082908.27501-3-jiayu.riscv@isrc.iscas.ac.cn>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 04/02/2026 09:29, Jiayu Du wrote:
-> +static int dwcmshc_k230_init(struct device *dev, struct sdhci_host *host,
-> +			     struct dwcmshc_priv *dwc_priv)
-> +{
-> +	static const char * const clk_ids[] = {"base", "timer", "ahb"};
-> +	struct device_node *usb_phy_node;
-> +	struct k230_priv *k230_priv;
-> +	u32 data;
-> +	int ret;
-> +
-> +	k230_priv = devm_kzalloc(dev, sizeof(struct k230_priv), GFP_KERNEL);
-> +	if (!k230_priv)
-> +		return -ENOMEM;
-> +	dwc_priv->priv = k230_priv;
-> +
-> +	usb_phy_node = of_find_compatible_node(NULL, NULL, "canaan,k230-usb-phy");
+From: Fabio Estevam <festevam@nabladev.com>
 
-Hm? You should use phandles, not look for various nodes.
+The dw-mshc controller in the RV1103B is compatible to the one first found
+in the RK3288 SoC, so add the RV1103B to the variant list.
 
-> +	if (!usb_phy_node) {
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Fabio Estevam <festevam@nabladev.com>
+---
+ Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-Please follow Linux coding style.
+diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+index acb9fb9a92cd..a75209bd2710 100644
+--- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
++++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+@@ -43,6 +43,7 @@ properties:
+               - rockchip,rk3562-dw-mshc
+               - rockchip,rk3568-dw-mshc
+               - rockchip,rk3588-dw-mshc
++              - rockchip,rv1103b-dw-mshc
+               - rockchip,rv1108-dw-mshc
+               - rockchip,rv1126-dw-mshc
+           - const: rockchip,rk3288-dw-mshc
+-- 
+2.34.1
 
-> +		return dev_err_probe(dev, -ENODEV,
-> +				     "Failed to find k230-usb-phy node\n");
-> +	}
-> +
-> +	k230_priv->hi_sys_regmap = device_node_to_regmap(usb_phy_node);
-> +	of_node_put(usb_phy_node);
-> +	if (IS_ERR(k230_priv->hi_sys_regmap)) {
-> +		return dev_err_probe(dev, PTR_ERR(k230_priv->hi_sys_regmap),
-> +				     "Failed to get k230-usb-phy regmap\n");
-> +	}
-> +
-> +	ret = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
-> +					    ARRAY_SIZE(clk_ids), clk_ids);
-> +	if (ret) {
-> +		return dev_err_probe(dev, ret,
-> +				     "Failed to get/enable k230 mmc other clocks\n");
-> +	}
-> +
-> +	if (of_device_is_compatible(dev->of_node, "canaan,k230-sdio")) {
-
-Driver match data is for this.
-
-
-Best regards,
-Krzysztof
