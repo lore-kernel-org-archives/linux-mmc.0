@@ -1,127 +1,170 @@
-Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A7405B21A;
-	Sat,  7 Feb 2026 08:45:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5916E2882C9;
+	Sat,  7 Feb 2026 09:33:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770453929; cv=none; b=pJ1idf3fb7aNiCRbXu7KOYwepLbUM+ct+YOkrgTawArcbjGWWCE111VlqB7LULAnUIFlegnexOG4wrLDF1GOI72hgulaRoTJbH4BmqtM9kO3MUaWd7/2t0RXNn35FyAFj3RRBONHBB5gYwfPH5ZgcQI7xWlTvgzbpjgZCkLSN+U=
+	t=1770456781; cv=none; b=HofEdD8U6sjXl3w7/VeqROae6TFxtPlBuyA/SqBlqy/hMB4uZp7ycNW+9hxEkOyDUnk7Oi+/m9V8tFPv+1Fg/E/ivD7ZoESgISlFBvcMnnUiBxD2jTPJYXnELq5SBGJwqGnl9BRNdJxPJU6liULra3MAXp5TtJwCFQtCpiTGVdU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770453929; c=relaxed/simple;
-	bh=/vRmSo3ylGZuMVGf9dI+Y6aYrNLzZaOCcztKgeDcQbM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=T8lufYkYNCIEcSYS8nW2e0YmoDTyYmsdufsASrR7e3CikyTIXOAOPzsLjasTPvZz3bOH2u0uB2esVZ0IyKP/Yv3gjXLQ8yW6G4WPaSRrQQ4EuLotwAyiPVKyt1PBte5aDothUcqeSzeT5CsBBiZFmg7URlbkbRqROTppUjgdYXg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn; spf=pass smtp.mailfrom=isrc.iscas.ac.cn; arc=none smtp.client-ip=159.226.251.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isrc.iscas.ac.cn
-Received: from duge-virtual-machine (unknown [112.53.146.143])
-	by APP-01 (Coremail) with SMTP id qwCowACnUm6b+4ZpnYJXBw--.38548S2;
-	Sat, 07 Feb 2026 16:45:16 +0800 (CST)
-Date: Sat, 7 Feb 2026 16:45:15 +0800
-From: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
-To: Krzysztof Kozlowski <krzk@kernel.org>, ulf.hansson@linaro.org,
-	adrian.hunter@intel.com, robh@kernel.org, krzk+dt@kernel.org,
-	conor+dt@kernel.org
-Cc: pjw@kernel.org, palmer@dabbelt.com, aou@eecs.berkeley.edu,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
-	gaohan@iscas.ac.cn, me@ziyao.cc
-Subject: Re: [PATCH 2/3] mmc: sdhci-dwcmshc: Add Canaan K230 DWCMSHC
- controller support
-Message-ID: <aYb7m+ioAmqXFhWX@duge-virtual-machine>
-References: <20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn>
- <20260204082908.27501-3-jiayu.riscv@isrc.iscas.ac.cn>
- <e06bd9ca-11bb-4d87-9db5-87139731f181@kernel.org>
+	s=arc-20240116; t=1770456781; c=relaxed/simple;
+	bh=m28hVEoYGXGdSVHJTvId02ur1GW69gv/fYpnU07qYLQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Gm3Z6DUHN78IAALzXIZoHjH5SsWOk8QClJPEpne4hyCXC8i7vv2UOxfPts5ix82LVRZ4/8BLAUbd/TG9N24fGqkB+Aoe6+GwL9eC0i0hamnFjiZA/8VRAo1N7AF+1l8wwpagSsya0JD+TOV0XD66hNhECwzO22veecm7uM+8V1c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Bpm7RajQ; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Bpm7RajQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE907C116D0;
+	Sat,  7 Feb 2026 09:32:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1770456780;
+	bh=m28hVEoYGXGdSVHJTvId02ur1GW69gv/fYpnU07qYLQ=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=Bpm7RajQ4+/4DDwLZQcG/B8g2SwBqBUzD4TeGeQ7YaPOWJSX+79wk5sePsPFxy2VV
+	 k+Yegsu2dAGMeIcSJWkQUvS+Z9aKD8GNMbPDfUE6Vo8/At4J8JAWgtUMayQYtdCAPt
+	 VsAG6HVRu7ZvUd72+TGT/vHm3hwKHz5JljfIc4R7hKIJ8MLJYulYgPVWbwNKSUecMz
+	 0FGVxietb0gqpbMTfxhbCnUIJiTdjX4TH1qaIka5QF7cxEXrq83BhG6gs7I/9ocGbs
+	 Y6FSkdo5S7MDCHc7R6RBdzNSWbikJJceG03KlBGf9jlLAOD3ceDNYKvgcRDAO8uB6N
+	 ehS4b83JwKQHg==
+Message-ID: <def032d1-b1c5-4a75-88de-cbb7c1293e61@kernel.org>
+Date: Sat, 7 Feb 2026 10:32:55 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e06bd9ca-11bb-4d87-9db5-87139731f181@kernel.org>
-X-CM-TRANSID:qwCowACnUm6b+4ZpnYJXBw--.38548S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7KryDKw18Zr1UJF4UXr47Arb_yoW8uF1fpF
-	ykJFW5tFy8JF1Sgw1ktF4kCa4ayw1DGF4aqw4ft34UKwnFyryxWF40gryY9as5AFW5CF4Y
-	v3yjqr9rCanrGrJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUvvb7Iv0xC_Kw4lb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I2
-	0VC2zVCF04k26cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rw
-	A2F7IY1VAKz4vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xII
-	jxv20xvEc7CjxVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWUJVW8JwA2z4x0Y4vEx4
-	A2jsIEc7CjxVAFwI0_Gr0_Gr1UM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI
-	64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8Jw
-	Am72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lFIxGxcIEc7CjxVA2Y2ka0xkIwI1l
-	c7CjxVAaw2AFwI0_Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr
-	1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE
-	14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7
-	IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E
-	87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73Uj
-	IFyTuYvjxUqiFxDUUUU
-X-CM-SenderInfo: 5mld534oul2uny6l223fol2u1dvotugofq/
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/3] mmc: sdhci-dwcmshc: Add Canaan K230 DWCMSHC
+ controller support
+To: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>, ulf.hansson@linaro.org,
+ adrian.hunter@intel.com, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org
+Cc: pjw@kernel.org, palmer@dabbelt.com, aou@eecs.berkeley.edu,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+ gaohan@iscas.ac.cn, me@ziyao.cc
+References: <20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn>
+ <20260204082908.27501-3-jiayu.riscv@isrc.iscas.ac.cn>
+ <e06bd9ca-11bb-4d87-9db5-87139731f181@kernel.org>
+ <aYb7m+ioAmqXFhWX@duge-virtual-machine>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <aYb7m+ioAmqXFhWX@duge-virtual-machine>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Fri, Feb 06, 2026 at 02:26:40PM +0100, Krzysztof Kozlowski wrote:
-> On 04/02/2026 09:29, Jiayu Du wrote:
-> > +static int dwcmshc_k230_init(struct device *dev, struct sdhci_host *host,
-> > +			     struct dwcmshc_priv *dwc_priv)
-> > +{
-> > +	static const char * const clk_ids[] = {"base", "timer", "ahb"};
-> > +	struct device_node *usb_phy_node;
-> > +	struct k230_priv *k230_priv;
-> > +	u32 data;
-> > +	int ret;
-> > +
-> > +	k230_priv = devm_kzalloc(dev, sizeof(struct k230_priv), GFP_KERNEL);
-> > +	if (!k230_priv)
-> > +		return -ENOMEM;
-> > +	dwc_priv->priv = k230_priv;
-> > +
-> > +	usb_phy_node = of_find_compatible_node(NULL, NULL, "canaan,k230-usb-phy");
+On 07/02/2026 09:45, Jiayu Du wrote:
+> On Fri, Feb 06, 2026 at 02:26:40PM +0100, Krzysztof Kozlowski wrote:
+>> On 04/02/2026 09:29, Jiayu Du wrote:
+>>> +static int dwcmshc_k230_init(struct device *dev, struct sdhci_host *host,
+>>> +			     struct dwcmshc_priv *dwc_priv)
+>>> +{
+>>> +	static const char * const clk_ids[] = {"base", "timer", "ahb"};
+>>> +	struct device_node *usb_phy_node;
+>>> +	struct k230_priv *k230_priv;
+>>> +	u32 data;
+>>> +	int ret;
+>>> +
+>>> +	k230_priv = devm_kzalloc(dev, sizeof(struct k230_priv), GFP_KERNEL);
+>>> +	if (!k230_priv)
+>>> +		return -ENOMEM;
+>>> +	dwc_priv->priv = k230_priv;
+>>> +
+>>> +	usb_phy_node = of_find_compatible_node(NULL, NULL, "canaan,k230-usb-phy");
+>>
+>> Hm? You should use phandles, not look for various nodes.
 > 
-> Hm? You should use phandles, not look for various nodes.
+> Only one usbphy node has the canaan, k230-usb-phy compatibility.
+> So in this situation, is it ok to continue using of_find_compatible_node?
 
-Only one usbphy node has the canaan, k230-usb-phy compatibility.
-So in this situation, is it ok to continue using of_find_compatible_node?
+Amount of nodes does not matter. This is not how you express
+links/dependencies between devices. Phandle is for this. This is wrong
+on many levels, including missing device links, bypassing kernel API/layers.
 
-> > +	if (!usb_phy_node) {
+
 > 
-> Please follow Linux coding style.
-
-I will fix it in next version.
-
-> > +		return dev_err_probe(dev, -ENODEV,
-> > +				     "Failed to find k230-usb-phy node\n");
-> > +	}
-> > +
-> > +	k230_priv->hi_sys_regmap = device_node_to_regmap(usb_phy_node);
-> > +	of_node_put(usb_phy_node);
-> > +	if (IS_ERR(k230_priv->hi_sys_regmap)) {
-> > +		return dev_err_probe(dev, PTR_ERR(k230_priv->hi_sys_regmap),
-> > +				     "Failed to get k230-usb-phy regmap\n");
-> > +	}
-> > +
-> > +	ret = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
-> > +					    ARRAY_SIZE(clk_ids), clk_ids);
-> > +	if (ret) {
-> > +		return dev_err_probe(dev, ret,
-> > +				     "Failed to get/enable k230 mmc other clocks\n");
-> > +	}
-> > +
-> > +	if (of_device_is_compatible(dev->of_node, "canaan,k230-sdio")) {
+>>> +	if (!usb_phy_node) {
+>>
+>> Please follow Linux coding style.
 > 
-> Driver match data is for this.
-
-What you mean is that I shouldn't use of_find_compatible_node, but I can
-use device_get_match_data instead? Then I can continue to distinguish
-between SDIO and eMMC to do parameter configuration
-
-Or do you mean that I should put the parameters to be adjusted into the
-pdata structure? But currently, the dwcmshc structure is not suitable for
-containing vendor-specific properties.
-
-Regards,
-Jiayu Du
+> I will fix it in next version.
 > 
-> Best regards,
-> Krzysztof
+>>> +		return dev_err_probe(dev, -ENODEV,
+>>> +				     "Failed to find k230-usb-phy node\n");
+>>> +	}
+>>> +
+>>> +	k230_priv->hi_sys_regmap = device_node_to_regmap(usb_phy_node);
+>>> +	of_node_put(usb_phy_node);
+>>> +	if (IS_ERR(k230_priv->hi_sys_regmap)) {
+>>> +		return dev_err_probe(dev, PTR_ERR(k230_priv->hi_sys_regmap),
+>>> +				     "Failed to get k230-usb-phy regmap\n");
+>>> +	}
+>>> +
+>>> +	ret = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
+>>> +					    ARRAY_SIZE(clk_ids), clk_ids);
+>>> +	if (ret) {
+>>> +		return dev_err_probe(dev, ret,
+>>> +				     "Failed to get/enable k230 mmc other clocks\n");
+>>> +	}
+>>> +
+>>> +	if (of_device_is_compatible(dev->of_node, "canaan,k230-sdio")) {
+>>
+>> Driver match data is for this.
+> 
+> What you mean is that I shouldn't use of_find_compatible_node, but I can
+> use device_get_match_data instead? Then I can continue to distinguish
+> between SDIO and eMMC to do parameter configuration
+> 
+> Or do you mean that I should put the parameters to be adjusted into the
+> pdata structure? But currently, the dwcmshc structure is not suitable for
+> containing vendor-specific properties.
 
+Parameters should go to driver match data. I already requested this for
+some other driver and this has to be fixed.
+
+Best regards,
+Krzysztof
