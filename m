@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 781CA1E1DEC;
-	Sat,  7 Feb 2026 20:04:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 467F223D7EC;
+	Sun,  8 Feb 2026 11:38:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770494660; cv=none; b=eh1OP2E8qy308z1G8O8mIEnTJ485j+JRzrIajV/MEc8EHI90o9bd1Mb7qQx6d5Z82MdZYGngLc+LjLfIgoiEdJifiPe7jy5/4XGDZEkkLXK7JBnS99dtSwb0QBD47l2HZfFQhadKt9iTWqo3IZMzGlZBgs8oNFEH3/9ismi8EZw=
+	t=1770550692; cv=none; b=DSvCRfL69XYIXur0fz/i9FE2IE3LPOCFnG+IQDky9FXZbVmlsO5LAGbQVPfKYfMpR8HVDPPKej5E9+/1y4lLqPKC9H+ju2xKMTFy7RzCtaXhDqY9/RJrIKuMHoHx5OTa31rF258vbtYPjcws+qkpCyMaviViKdTnKvHvY29mOpw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770494660; c=relaxed/simple;
-	bh=2jeQxRfoq98l2EYhh2rcsa0tafMwqM6E4J5O/g+Qt8o=;
+	s=arc-20240116; t=1770550692; c=relaxed/simple;
+	bh=Otsv2hhWWXfzPOEXDIDyWe5r/Zr/yGDR9ck6A6xi8qE=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Veuf5hQ9fgkcq06RVFXsJ19B+AgSy888drsqAKrMpMfM6hc6UwRa07t9O/0wKnzeEMf7YslZdRj/ZoMlX7WibfN2zh2Fkn2q0Y4izWq32UquNmw+UElbQwlPY9EXoClWnCNlqnArZLN3dZTLaRCO9wlVY9XtkeVqKVghwKvuDGU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=chGJkXU8; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=IC+cw79HLtm8DcaKfEROyaNtHbHmNSUH2uW7X0SU445n/wYjknY/vVBpYUHXn0ydUx9WIlLOBvAENs7UWkNJtmNOD5Ov+8PhXACSUyCPZQswsw4QVtAhTO04BtRm43JP6K/XdjZqP59+Y02nLB6blLycJYEtj+Nw4LrNidizQco=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mTgX4lJP; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="chGJkXU8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 07623C116D0;
-	Sat,  7 Feb 2026 20:04:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mTgX4lJP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D076AC4CEF7;
+	Sun,  8 Feb 2026 11:38:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770494660;
-	bh=2jeQxRfoq98l2EYhh2rcsa0tafMwqM6E4J5O/g+Qt8o=;
+	s=k20201202; t=1770550691;
+	bh=Otsv2hhWWXfzPOEXDIDyWe5r/Zr/yGDR9ck6A6xi8qE=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=chGJkXU8M1mOl/vU/Oj3Iwcl3W8zmrI6RjdQnXOPPVwTeGS7ba8yVCz59RMFZwlZN
-	 pc6zxB4OPG9Iy52xmcFf+rHo5R4QBwVNTeaefJPvnQW0ni7iiKp0sAm7shAg+8I8M+
-	 LAOs441//ELNT/AErWX/zd/g6MlTEnPmdsebKilf+ZEoir0W6P0/u/Tf14on5IpP5q
-	 762I+bqcAFuQhDesj9IKmE4+E5rRVG5GMxbf03NSR/YfIXRLURx3q1Ptn3mwzJLO+m
-	 ue3yslGvpH7k+i6pxJm4Z/kjasP8+A/zrNYJRQu0Z+IvAdcQNIauoZo/F6DPB79RL7
-	 JMyxytdyySELQ==
-Message-ID: <47561412-cbaa-42c7-b8ab-9cafb7e0f9be@kernel.org>
-Date: Sat, 7 Feb 2026 21:04:16 +0100
+	b=mTgX4lJPwZlXyXOYnLKYPQE63CGGNkQqmY50R9JUseP5pDaCRAQYWulyaymZW31v8
+	 Wpb3ocGWDKV1oN9bZiVqJsnDWkakft1TNtfFObB6NfnjDm1ZoVZ/yJm3suhpE45qOb
+	 fx0OjfJwcz9JsFIFDGyXs1nT7kkckv54Gas8PUSr/eNObcQyPFcrVSjJ0EG+9cfvgQ
+	 vrnHcwO8ze/N5mSPa2s12gQyEYKkPG2FgMpvG76QJQLYuL5bH73yvtYV1BoL5l48ue
+	 //+eDSy6J7Zt8xeJVbjuSeCibPidhgnicOs0quHDnXPMkADJ5Vzq4BBgdDaC9fcW4z
+	 4NxV83nhkGcsQ==
+Message-ID: <93bff61b-ffc3-4b09-ac97-99f576e6d48f@kernel.org>
+Date: Sun, 8 Feb 2026 12:38:06 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,13 +35,18 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] dt-bindings: mmc: rockchip-dw-mshc: Add RV1103B
- compatible
-To: Fabio Estevam <festevam@gmail.com>, ulf.hansson@linaro.org
-Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- heiko@sntech.de, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-rockchip@lists.infradead.org, Fabio Estevam <festevam@nabladev.com>
-References: <20260207131041.2833840-1-festevam@gmail.com>
+Subject: Re: [PATCH v5 5/6] arm64: defconfig: enable BST SDHCI controller
+To: Albert Yang <yangzh0906@thundersoft.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter
+ <adrian.hunter@intel.com>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ge Gordon <gordon.ge@bst.ai>,
+ Arnd Bergmann <arnd@arndb.de>
+Cc: BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20260123095342.272505-1-yangzh0906@thundersoft.com>
+ <20260123095342.272505-6-yangzh0906@thundersoft.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -87,21 +92,22 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20260207131041.2833840-1-festevam@gmail.com>
+In-Reply-To: <20260123095342.272505-6-yangzh0906@thundersoft.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 07/02/2026 14:10, Fabio Estevam wrote:
-> From: Fabio Estevam <festevam@nabladev.com>
-> 
-> The RV1103B uses the DesignWare MSHC controller compatible with the
-> existing Rockchip RK3288 variant. Add the rockchip,rv1103b-dw-mshc
-> compatible string.
-> 
-> Signed-off-by: Fabio Estevam <festevam@nabladev.com>
+On 23/01/2026 10:53, Albert Yang wrote:
+> diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+> index 45288ec9eaf7..7f4da3117329 100644
+> --- a/arch/arm64/configs/defconfig
+> +++ b/arch/arm64/configs/defconfig
+> @@ -1222,6 +1222,7 @@ CONFIG_MMC_BLOCK_MINORS=32
+>  CONFIG_MMC_ARMMMCI=y
+>  CONFIG_MMC_SDHCI=y
+>  CONFIG_MMC_SDHCI_ACPI=y
+> +CONFIG_MMC_SDHCI_BST=y
 
-
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+This is still wrongly ordered. Look at your Kconfig. Run savedefconfig.
 
 Best regards,
 Krzysztof
