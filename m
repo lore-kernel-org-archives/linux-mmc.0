@@ -1,71 +1,92 @@
-Received: from mail-qt1-f182.google.com (mail-qt1-f182.google.com [209.85.160.182])
+Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93BC32DB7B7
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Feb 2026 08:13:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.182
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770624809; cv=none; b=S1FEdfrj7cqyk3QHctDUxSJHPGzXW6kWkycHdMFMQ9p0wbj5XikfIcA63ALxrvxPMIuu8EqZT2jLks1Gv/zBiM+tncv277EfgAECp3qTKaaYGeHm4xtzg6ijS63Pb50rd/mtN/qkGO0/mpglyzeKN608C89akk7fs3D30uznv4I=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770624809; c=relaxed/simple;
-	bh=jGnKFIqAqLu+rNpANBkHFw8kJ3LdtX3G4oazBBlCuPY=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 327D0366049
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Feb 2026 09:57:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.41
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770631069; cv=pass; b=ixb5czFBrKPohi3rQEkZybRzQoF4St3hGElfo+WuvysIoxZ52DQW79UBOb6+xK4d60ydt9G0fmXG+V9CLzjapcLSY3SaoKnHiN3iafBO5NM4uiHOB2QYxxxSEPfkpCQArAPY/0AcvRQU637QJ5V8aCfOe5hvNtwzAiPnzNwClcg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770631069; c=relaxed/simple;
+	bh=bC10K83OlDdfvr2htwpjLlKwvpR995Jtaa8b2VaNWRw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UMtP6I6EelNep1BZmNTGLGhddxoeehNPSoofnUMGfVjTmYjGjK45OpSDKY3yPnJOphbrIcOg+4aWZxI4zdby0fEno2YH7zLURptgCv2cEguS8YM9YaJbi4HB/nMxYOQI4DVrb3q+2JJsHDKFKLs88kWU4/10hbL7zAMWxij3Z1c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.160.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-qt1-f182.google.com with SMTP id d75a77b69052e-503347e8715so34059961cf.2
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2026 00:13:29 -0800 (PST)
+	 To:Cc:Content-Type; b=QjUke2LAvMPXZjEUzngqXNcMYZOlbM1hl/V7uP1czWy1fz5bKdO0ovQacjfUN9CEctxLAySjqDXhf2TzcKLqGrd8x1A+ias3v7mpwj4CU10oUbhvrqpfKOtqagRPr2TwwfAMmq9vGUiy2g3YFA0iDFp8EUIznuFQdfq6cORjSeI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IHe4hmOl; arc=pass smtp.client-ip=209.85.167.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IHe4hmOl"
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-59deec3d8dcso3874600e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2026 01:57:46 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770631065; cv=none;
+        d=google.com; s=arc-20240605;
+        b=KSo5c7WvLhiQ/pp4CzMfaXi1Hk+6atqmvxxZxAq/OealF3Wrki97Jxh/cFgrKtAUO9
+         HAEuMarHRSMWouaAPCmIKw7zwvEUtf40huiD2oTG03E0YQS6CW8IyW27JcZfqwXwekbV
+         7jBD38X1sUGZhlC8TDxOFvOJTaKM9ceGjroU7ikbvieUmRBw4yUkT3vcSAnwOSlI0N64
+         uhHC5gphvh+/bHLDCzbYglOuW3QCVnVokmsNafEA4Ll6EQIPWyEF8zqXz7iYrL3kzshz
+         S/OnAIwKAfnhmauzlcdnlynW9//AldaBwyZIyzT2ZhggQFf4URYg5tHskWX2XPA1M2YD
+         b8OQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=fzG/baFh/xjTaP0Ii0cvwWmrEVxPL+eR3yu7Xbk6kuo=;
+        fh=qWNvhqkxSwySGiWY4jW0Vc3VbvegH7VL2ZPWLUsa9Wc=;
+        b=SXvAfHQe05+17fpq8AVe5jZzWV/b7AvPiwmrgFSlHBzcuGaKxe4dgeVL0E459Zz1pF
+         Zv3ORGm7e6JUCf4yvE2e5wKrF1BwiQ7OqnmMMCbJatF8Z5h5noklLDQC/OS85HtZW+Ke
+         z0lzfAfsKgM6IJwg5ThLxDB4cJNR/Jhx9fOyyVAo6e+OJ6K6YmV/XLgXgDDgowFK2036
+         Mo1IVPG5sNTG/fUI70QTnKKnEqYb9R0C/tY4H9jujJZ27WYh3VQUEPTq+clDG9pPk6uN
+         ArsnpG0cQxf2TGwqDE8l7PXn61RWqA1kpFf5zTddTdZ/gId29F6WUYX6oYqz+eYvP6pi
+         mrfA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1770631065; x=1771235865; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=fzG/baFh/xjTaP0Ii0cvwWmrEVxPL+eR3yu7Xbk6kuo=;
+        b=IHe4hmOl9w7pUpUQyLkq/OgztYofxuV5/j5kZqVf8IuLW8jsfSkKju7oFLOuFmO+Ok
+         OuFB7tI5XhFwXmudwca2G0nYRBQ7eEr59JH2p9nQqOTDdW7Y2gLLMsCnKuWV4LpK8sMg
+         QEhJgWugZkGH8AlPG3KIjl+KmD0zJUnuheHF85f1h7T24sKIswi0tGubJyQrgfXVOHcH
+         068szk1RA7QB0OCEWzd4kP3VEp4dtKPFLkidYA4mXBpOOysC+6s4HXG+8zne7P8+mUJC
+         0JfCkcMfokYv8neInNUS7ZSf0KHQvK4NmCQEumO+4rTfN36qUquObsdAu9osKWCZSwzx
+         gwzg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770624808; x=1771229608;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=l9pK4QYIZutXAE3AMWeCiy3lF4Ku+2UbgC78kdie5tY=;
-        b=QI5R4YA2V+XE5EEdGERGFM/3s6u1M9LaBTlsjcPAIxKOLVgUA1mjB0KbiHrucWI9GP
-         s5jZFvL6tQOOEgPTOceqBj/t4Z/5oTF4QsIW6jJlkoUEO/nSazCpfxOtjuPbAUktsELN
-         psX0o7V/4anBTE6sCD1XQctDfzIWrD/dfQKsIEdwVr14PuJsxfO0UWz8IjIuW0sJIsqC
-         XrkaL5M0t/TCI9IGWGC6+WNxhvaIq9iZZLYH3dYBROhADOY/jZbuEA8EW2//Iio+ZLUp
-         LVD0SYa7rBonRhr3ED9vfOnRsRuYONXLJ5QSjYzX1CO/Llc1qB9+Fs955w7ZuN02BNli
-         AJow==
-X-Forwarded-Encrypted: i=1; AJvYcCV5AQkRkhTyhebANXYa+6n/Q/oVDvOJrH1LsuvJaxYxuoDJ7hbaLmTdkDgP87v+R/oR9rks2Vgstxc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxIc4WTAfguzFiWuR6dQjzxSxMIQyzQd2oU5yPVe3Yd54/YnSUd
-	kVbDOdgkWVQV9SavHLPdfFOrQkvqPdjO0izqlMtKAlMgOQc2KNFAT7sdMTJoAcnU
-X-Gm-Gg: AZuq6aLl+Jwpn09IKxKb1JFskUTS1Byjv9tHcY8iujkPegklzvAey8P7OtFNQYYRJEy
-	TnnYZTyCcx6w+45vKnVjjMJ0E8uWsmpY/BfVLkGdhLmjMSxm8xWTs+w+/6ZPE+NzI6z2uPkhG82
-	BMAuKBdRXi2tfy3kha4TWLwNZWvmLADdFMze4z9rN9wBTGG3QO/jUGCfaqzyYGvKJ6cGf0u9HCV
-	kMD7rvJPF4GeBsLs0Tj5696mAwlv9p4C69A/qsaw7q8mXZuiHblmLUB7hEVkpTAmhMlLDwvr/7H
-	LfiNpTPFO1rnPxVN081mFeZIhk4RpPBTeu71R8+lB4lS3TnlvKJuVm0MJIK9Nh/cpRABEB2b8vI
-	dlwvsDUhM3Z02aZeWBsznA7QhbqJMZyyZ5hEZNvk+JXAm++QeesefUHucAjY4vnaj5XVFwOfEiw
-	XpbPT4zUIQCg2dWq4yaO4fhLCqgfGeB5Ml1SS0Thtw41AOnlOcQ3js2Ih2CoU=
-X-Received: by 2002:a05:622a:1aa4:b0:501:8643:aed3 with SMTP id d75a77b69052e-506398b4586mr139165811cf.35.1770624808516;
-        Mon, 09 Feb 2026 00:13:28 -0800 (PST)
-Received: from mail-qv1-f49.google.com (mail-qv1-f49.google.com. [209.85.219.49])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-506392c1d4esm72692201cf.27.2026.02.09.00.13.27
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 09 Feb 2026 00:13:27 -0800 (PST)
-Received: by mail-qv1-f49.google.com with SMTP id 6a1803df08f44-89473dca8aaso39137246d6.0
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2026 00:13:27 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUGnPuuvYliak3c9ipbCyinVqgpNQQMLE3DFPjVbI0xR+K5n7w/BSAzB437HxlHw6w4YwdhGDJvWTo=@vger.kernel.org
-X-Received: by 2002:a05:6102:3747:b0:5f8:e2d3:c463 with SMTP id
- ada2fe7eead31-5fae8a3b31bmr2934943137.3.1770624379360; Mon, 09 Feb 2026
- 00:06:19 -0800 (PST)
+        d=1e100.net; s=20230601; t=1770631065; x=1771235865;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=fzG/baFh/xjTaP0Ii0cvwWmrEVxPL+eR3yu7Xbk6kuo=;
+        b=uKvB9pFrl7jnjN5XjVsYqVbAxsyiaftWgM88fcz3YuJIXB5SFWqyLA6/KSYm+J4459
+         2vL7Hyg6pO50u4ClhnNB8juvI/KFzLyoS8+7DbatiCaJAW4bhDLbU1WZW9ce5cNz/oyL
+         xiVzCSuwVqs9xHMRpZxbBpHBh4QX5ZtdxOlI5eU6CvLfVoSiZbuhucDVqB/p0G/TFfmj
+         nxOQUwKM0OXK9jgW5/NbVRRqzPsljPa+P/ev1PmI7fnZSfY7xnKc2KBhA3tPBt9KTt+h
+         8M8Xdk5hn5FBA4s1cqSDGRwtDlV+YOoOtgcTh994e8ZOzEZyVP4mheacI52NuVSl0nQB
+         OwYA==
+X-Forwarded-Encrypted: i=1; AJvYcCWSaNbTQZdnGFZQXV2NKgo4aqhP20f/Sr/5llHrEaCi639X/SG9MMe570EmcPAKICI2oClj2Ate+6U=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxIS1SpMxRaT03zXMD5MAGClgMc45MnZ3qy3MdRuQ4uvGybwUl8
+	gaR+vlWdOCtxh0xCiZ/rlOsp5SjkuTtOpXtSlSReS+qB9jg4xV0uMEfNVM0t08bifVYmK7lt9uN
+	mt7m8D5NmyOrWhwzhO9QWlAItf06yO0jXD8W5/Trb6Q==
+X-Gm-Gg: AZuq6aJ9l2efhPGJPDqI6IFNZt6bYne5uvWWoIN33FaWMlJeO8OT3KchSBJYbzz8EmE
+	VE7A37WTzakBVzEO/7Xey+IR9hyNMAdRH1cxit+yC/B2qFSXu+tawdi2ofE9zdp1sOco0dTjObI
+	3/Q7iE7OmshqAbmCgV6ZCc0Mx1+xneK3AYTkgQAHlsTtJVj4lM1bi0Sriz/OQJUtaZbt2Xdobde
+	iX/C/HWecq9TnS6gGugFa10OzNG88GraTkmhw1TL7w1fpTsxdDBjUnFN4Y9PaPjjbTgmxV+
+X-Received: by 2002:a05:6512:230e:b0:59e:25a7:e46e with SMTP id
+ 2adb3069b0e04-59e4517351bmr3165761e87.36.1770631065180; Mon, 09 Feb 2026
+ 01:57:45 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260203-rz-sdio-mux-v8-0-024ea405863e@solid-run.com>
- <20260203-rz-sdio-mux-v8-3-024ea405863e@solid-run.com> <b7dcb374-b79c-4e9f-ac30-2f507127cfb3@solid-run.com>
-In-Reply-To: <b7dcb374-b79c-4e9f-ac30-2f507127cfb3@solid-run.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Mon, 9 Feb 2026 09:06:08 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdU01vwif4H6H-cYUfW0Y56fN6Anp9F4Ru7q3fveNqqoXA@mail.gmail.com>
-X-Gm-Features: AZwV_QiiqRuDaFts73-z5beOOIXm-WRqeTDAQV4zcAAegTI5YGKcuRUZfqXMUrE
-Message-ID: <CAMuHMdU01vwif4H6H-cYUfW0Y56fN6Anp9F4Ru7q3fveNqqoXA@mail.gmail.com>
-Subject: Re: [PATCH v8 3/7] mux: add help text for MULTIPLEXER config option
+References: <20260208-rz-sdio-mux-v9-0-9a3be13c1280@solid-run.com>
+In-Reply-To: <20260208-rz-sdio-mux-v9-0-9a3be13c1280@solid-run.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 9 Feb 2026 10:57:09 +0100
+X-Gm-Features: AZwV_QjtuvXehDumL81rfo3XecEhBGMIVZdeTW9qGb9n_Rk2fTCxSh0YYaQSYSY
+Message-ID: <CAPDyKFpbpcg3ei51hEcG5FzJL7tK44PdBcMbxfOdON7ozxP2Xg@mail.gmail.com>
+Subject: Re: [PATCH v9 0/7] mmc: host: renesas_sdhi_core: support configuring
+ an optional sdio mux
 To: Josua Mayer <josua@solid-run.com>
 Cc: Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>, 
 	Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
@@ -73,87 +94,53 @@ Cc: Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>
 	Andreas Kemnade <andreas@kemnade.info>, Kevin Hilman <khilman@baylibre.com>, 
 	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>, 
 	Janusz Krzysztofik <jmkrzyszt@gmail.com>, Vignesh R <vigneshr@ti.com>, 
-	Andi Shyti <andi.shyti@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Andi Shyti <andi.shyti@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
 	Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, 
 	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
 	Yazan Shhady <yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>, 
-	Mikhail Anikin <mikhail.anikin@solid-run.com>, 
-	"linux-can@vger.kernel.org" <linux-can@vger.kernel.org>, 
-	"linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, 
-	"linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, 
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+	Mikhail Anikin <mikhail.anikin@solid-run.com>, linux-can@vger.kernel.org, 
+	linux-phy@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-omap@vger.kernel.org, linux-i2c@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Hi Josua,
-
-On Sun, 8 Feb 2026 at 16:16, Josua Mayer <josua@solid-run.com> wrote:
-> On 03/02/2026 15:01, Josua Mayer wrote:
-> > Add prompt and help text for CONFIG_MULTIPLEXER to allow enabling this
-> > option thorugh the kernel configuration without explicit "select" drive=
-r
-> > dependencies.
-> >
-> > Select it by default when COMPILE_TEST is set for better coverage.
-> >
-> > Signed-off-by: Josua Mayer <josua@solid-run.com>
-> > ---
-> >   drivers/mux/Kconfig | 8 +++++++-
-> >   1 file changed, 7 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mux/Kconfig b/drivers/mux/Kconfig
-> > index c68132e38138..e31c46820bdf 100644
-> > --- a/drivers/mux/Kconfig
-> > +++ b/drivers/mux/Kconfig
-> > @@ -4,7 +4,13 @@
-> >   #
-> >
-> >   config MULTIPLEXER
-> > -     tristate
-> > +     tristate "Generic Multiplexer Support" if COMPILE_TEST
+On Sun, 8 Feb 2026 at 16:39, Josua Mayer <josua@solid-run.com> wrote:
 >
-> This didn't do what I thought it would.
-> It was my intention to allow enabling this through menuconfig / .config.
+> Some Renesas SoC based boards mux SD and eMMC on a single sdio
+> controller, exposing user control by dip switch and software control by
+> gpio.
 >
-> With the syntax above menuconfig shows:
+> Purpose is to simplify development and provisioning by selecting boot
+> media at power-on, and again before starting linux.
 >
-> =E2=94=82 Symbol: MULTIPLEXER [=3Dn]
-> =E2=94=82 Type  : tristate
-> =E2=94=82 Defined at drivers/mux/Kconfig:6
-> =E2=94=82   Prompt: Generic Multiplexer Support
-> =E2=94=82   Visible if: COMPILE_TEST [=3Dn]
+> Add binding and driver support for linking a (gpio) mux to renesas sdio
+> controller.
 >
-> This means it cannot be selected.
+> Introduce generic helper functions for getting managed and selected
+> mux-state objects, and switch i2c-omap and phy-can-transceiver drivers.
+>
+> Signed-off-by: Josua Mayer <josua@solid-run.com>
+> ---
+> Changes in v9:
+> - compile-tested on x86 with MULTIPLEXER=m/y/unset.
+> - fixed Kconfig changes so that CONFIG_MULTIPLEXER can be selected.
+>   through menuconfig / .config as intended.
+> - updated trailers
+> - document null return value for mux_control_get_optional.
+> - fix build error for CONFIG_MULTIPLEXER=m, found with x86_64
+>   allmodconfig: replaced ifdef ... with if IS_ENABLED(...).
+>   (Reported-by: Mark Brown <broonie@kernel.org>)
+> - Link to v8: https://lore.kernel.org/r/20260203-rz-sdio-mux-v8-0-024ea405863e@solid-run.com
 
-Looks like you haven't enabled COMPILE_TEST first?
+[...]
 
-> Instead I (think I) should use
-> default m if COMPILE_TEST
+I have already applied for v8 and it's going to be in my pull-request
+for v7.0 in a few hours.
 
-No, merely enabling COMPILE_TEST must not enable additional
-functionality.
+Please send incremental fixes on top instead of a new version of the
+series, then I can pick them as fixes for v7.0.
 
-> Since my patch-set broke x86_64 allmodconfig and failed merge into
-> linux-next,
-> this presents an opportunity to change the above as well with v9.
-
-Ulf has already applied this series to mmc/next.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+Kind regards
+Uffe
