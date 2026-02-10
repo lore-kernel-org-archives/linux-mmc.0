@@ -1,114 +1,201 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f180.google.com (mail-pg1-f180.google.com [209.85.215.180])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED4B732E750;
-	Tue, 10 Feb 2026 06:56:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79823336EC9
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 07:56:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770706619; cv=none; b=tVEHBRGhzGyRuIUmhQnh1TDf7i/3AQv2n3dfrfWVFygj8exse2whj5qJiWqiYBnSHiq7ZV2eIQSl6nw33QFQ6vm3D342BUJLt29dAz98xf8utmzbQGQeXdYv53heGOXiefsHuAb2rpLWdQ3mLJBSkddJJTQFp2JILum5qoNhUCw=
+	t=1770710177; cv=none; b=hFuqUPIWDVkGVPGeZJSCGzdGCHfIBjHepH4FSqr7r/pwhal92OErdJhbZMmyIQuTzlQ9r9wEDpq3IXSC9fU+wAduKJXBKV/Dd0H5RkAEIWkiEn0s9hwLdL322g9OjnH12wvjXKEHgF3gmTmPdMYMu9cJdtAoUoyXrZ8syY6DqG4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770706619; c=relaxed/simple;
-	bh=BqHZGQIeCQ45SHzcHrF0Fr/DAKVMrwgf/SUEWdoIFb0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=csyFe/Uom5cH49FAhH8FNWR57GbbGV+Mam0h79VSGsCrkkVT20GALPZ+/d3gu3WgVsQs/yyWq7MyRcbDBBNm8HouQNYEOq9Jt9O84Xh/ZG7JzqF/wkNx8XM7W7ojbD9jxMzRfK+AtI4InJa5fAEe46U251MJUHR8YGuxMsQwNVc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pi7wZMB4; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pi7wZMB4"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id C8ADCC4AF0D;
-	Tue, 10 Feb 2026 06:56:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770706618;
-	bh=BqHZGQIeCQ45SHzcHrF0Fr/DAKVMrwgf/SUEWdoIFb0=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=pi7wZMB4OyDrcCpDoqfQdeZ6mbBCKxYR3hG/5x0+Vmr6DrP3p4ybynWxeVtj9IX9j
-	 +hyHd9AoVtBYa45lYUKHTX6SFdl4JLPEkWJzkEXNuNIEg227d3xHEBu1mnnGBvQEJ+
-	 8C+x02pGjckz7KjdhdAJasoLt1NfV5Xru5/iA9eUWIeu8N5LtF0JvzmuAxaf0lkyLp
-	 DIPdTu5o3QstdFHxQ7su/1CWdSZdG1AkgC9nnqkFK3Wv+gEZe5TJOgju28VB3H0geF
-	 PDuow52fo/WkqcGHhL7H1LrcRtlALC/cCUbWvjcSHSxUeU2Me1mimLlLhzx0X1fOZo
-	 Zq1QvqSmHHYjg==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE6E9EA3F12;
-	Tue, 10 Feb 2026 06:56:58 +0000 (UTC)
-From: Manivannan Sadhasivam via B4 Relay <devnull+manivannan.sadhasivam.oss.qualcomm.com@kernel.org>
-Date: Tue, 10 Feb 2026 12:26:53 +0530
-Subject: [PATCH v2 4/4] scsi: ufs: ufs-qcom: Remove NULL check from
- devm_of_qcom_ice_get()
+	s=arc-20240116; t=1770710177; c=relaxed/simple;
+	bh=ZBrn2V6Ps9nAXfcemoiQWj+7Cl/HyRPhAU9WPaB6Fxc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Fini0tltou53dHf5FDVAP201zmfeOIvZDggICYbhhgUPCZHvpmBJURxrE70UVS7t47/MVjlXe3NuytXKrW5LsvHsnelrv7PpclzBUGsELMjqfirR4msuVBo9BC/vKARwEqsPMHNd0fv9G9nmmBnUUxKAOenpw2m2+T9GXW72JFc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.215.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-pg1-f180.google.com with SMTP id 41be03b00d2f7-c6c67bc8b9eso2142597a12.1
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2026 23:56:15 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770710175; x=1771314975;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=za+ffUzQm9VRZ3fSQVHtfuOR3ywRY/ywHi+DZoQjMUc=;
+        b=QX4uOdUynqx5MzGrzRLMDT1e3/dr2Slf1IwL+ntV2+i79j5wx1Otg9cCeM3RyPUVDP
+         3AedG51IW5VG8WFN2MJJFaMVGskyutVVeAHEoilm86hPyok7+XqL4VS08gZqdFJeK4LS
+         BqzW/F54o4RTJYyOd+sCHWFehQnDr1ZKutgrvGymvlILnsb15MkMFcpkn0TF3bWl8N6n
+         HLEjPYhCdBIvny3WjKXsWZQxLeJGQGetsVqwnek9wgWS0NFHNR8uyCFXmqVRYtVzMEWk
+         027/eyB85hmQvTYV2w6VX/Y/6JyMVIPd5Dkc7cwn9Ps4NeW0yKyZqmo7hT+FEJ2cUy5r
+         Q1PQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWOjxIHR9He1kD+tPH0QQDDcFifVpvu7Uyn2pw0mrRrLHU9wyE2ltZOz+7Le0DNDt4jF7PK/ZAB4r8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwK3p32iPCxSR4EPpVdudO6yKNNNXQ61bKKd6wy7VPFghAf+LZk
+	76QJhUXhmrCCd+blc1eR7kPneifBm898U22G/JUBa8qjvIHS217i0vamu9mdvVYS
+X-Gm-Gg: AZuq6aJFgVfuQXT+GDmdklCgqcsPwIfnhsVaHAzdHwYAM24FTZfVhEIe9wWWOd4hrHA
+	D04LNLfx4eOA8Y0WpVpOKK8gAxp+nfC/m8dvo2t2Ii5SUarDDLpPgpSGAHXgde940kUYXuKsVlj
+	F65qqAyG6qdNGKEtZPzBFDv/266SHVErVEFzagJKD5iU/wznBkd0YAvzZsR/4Cun+1F4b5tH1MD
+	E76JhDDsJqDZ5Z/QSeJIN6eX9FBtIpJmddA9qAoAou2xroBuAQjZTtumVcykncCP4E3LfszIbnj
+	V6m3c26/npnyusn1V9Epg+KPLVnp/DM2zPF7Cof19vFQ4AvUrMwnF8uifL3xzeCn8VLUS0w2fU5
+	mooqll8opIQW4D3h6kXlYR5iATLTiJJWnU8zVEcpqXMz2tZn5LlbN8mZKjA83awrAjjOEKh4fQw
+	tAcWzfG3tkGNZE8hG+4BL57at6EEPbOJywq0N1UtFUEGTvxzWFuihskcYKZEo=
+X-Received: by 2002:a17:902:db08:b0:2a9:63de:b374 with SMTP id d9443c01a7336-2ab102f4f52mr13508555ad.3.1770710175079;
+        Mon, 09 Feb 2026 23:56:15 -0800 (PST)
+Received: from mail-dl1-f52.google.com (mail-dl1-f52.google.com. [74.125.82.52])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2aad371919csm85220195ad.62.2026.02.09.23.56.14
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 09 Feb 2026 23:56:14 -0800 (PST)
+Received: by mail-dl1-f52.google.com with SMTP id a92af1059eb24-124a1b4dd40so4231237c88.0
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2026 23:56:14 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCVhItePR1rXB1JpRwHVPN9AplQf6xtgiNWQaWtPq5Ey07jlFa30uImrUPt6uOBYDXh87vSfjP6sCww=@vger.kernel.org
+X-Received: by 2002:a05:6122:920:b0:55b:305b:4e31 with SMTP id
+ 71dfb90a1353d-5673dad68b3mr278879e0c.17.1770709845104; Mon, 09 Feb 2026
+ 23:50:45 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260210-qcom-ice-fix-v2-4-9c1ab5d6502c@oss.qualcomm.com>
-References: <20260210-qcom-ice-fix-v2-0-9c1ab5d6502c@oss.qualcomm.com>
-In-Reply-To: <20260210-qcom-ice-fix-v2-0-9c1ab5d6502c@oss.qualcomm.com>
-To: Bjorn Andersson <andersson@kernel.org>, 
- Konrad Dybcio <konradybcio@kernel.org>, Abel Vesa <abel.vesa@linaro.org>, 
- Adrian Hunter <adrian.hunter@intel.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, 
- Manivannan Sadhasivam <mani@kernel.org>, 
- "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, 
- "Martin K. Petersen" <martin.petersen@oracle.com>
-Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
- Sumit Garg <sumit.garg@oss.qualcomm.com>, mani@kernel.org, 
- Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=988;
- i=manivannan.sadhasivam@oss.qualcomm.com; h=from:subject:message-id;
- bh=FiX0U3Dm1c+1x6b4FdICdmWPYMgaPZ7RllOZdWKy2K8=;
- b=owEBbQGS/pANAwAKAVWfEeb+kc71AcsmYgBpita42yOVZvNIs7XIN83MKt1HqaVNv0rUcGwMj
- 6V1ximH0EqJATMEAAEKAB0WIQRnpUMqgUjL2KRYJ5dVnxHm/pHO9QUCaYrWuAAKCRBVnxHm/pHO
- 9fx+B/4gycPlxXLFgpHn+yVLSbelGWv8BKp29Oc7vTQvS5fmWt73d9YPbmyfTZdS8oyUixibIyB
- kEyYLxKTqDBjV3Xq7GHx0bCc5xIzKWwchVW3NvP9qB3AzNYy3QkEmTj/8YOmAh6OrhxFL4cw3wd
- I3Ag5/FxcdSd/ND04ug4B+P6dW97zvT+0DimBimsGGDX3QJvmwcW3xqEn2IJ6A7rkIpFgl5kXmH
- j63Rj5wJFbkYT1xlpiZBYWtJMhJS9aOhm5elMwC6f5YsPncwIGULfaioRb0R3Q5Lh66+NG7u+Wa
- MjQd/jeTErP7lOn9qp1F1Zr3knyHdvU8hZWWs+G1OjBi3juG
-X-Developer-Key: i=manivannan.sadhasivam@oss.qualcomm.com; a=openpgp;
- fpr=C668AEC3C3188E4C611465E7488550E901166008
-X-Endpoint-Received: by B4 Relay for
- manivannan.sadhasivam@oss.qualcomm.com/default with auth_id=461
-X-Original-From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-Reply-To: manivannan.sadhasivam@oss.qualcomm.com
+References: <20260208-rz-sdio-mux-v9-0-9a3be13c1280@solid-run.com>
+ <20260208-rz-sdio-mux-v9-3-9a3be13c1280@solid-run.com> <bc5fbfc5-6f71-eeed-ad90-0c1b835e65ea@axentia.se>
+ <fcef2798-1645-41fb-952e-daf3657bc231@solid-run.com> <704210e0-2e53-09f6-9f8c-3ae0c4b8e0da@axentia.se>
+ <9d7bda92-e520-466a-a0be-d01686af1d56@solid-run.com> <f4d8547d-3de3-0de5-da61-3de57d9af895@axentia.se>
+In-Reply-To: <f4d8547d-3de3-0de5-da61-3de57d9af895@axentia.se>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Tue, 10 Feb 2026 08:50:33 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdUEZZ+p+yaQDWhVCRNEQUygR2j=HpCp5LuzFU3E=qVNXg@mail.gmail.com>
+X-Gm-Features: AZwV_QjWs_kGwWtLP-4KOwLJynmxdzZD9XMo5f_JCKEF6YiXm5BZAUIGiU8_kRM
+Message-ID: <CAMuHMdUEZZ+p+yaQDWhVCRNEQUygR2j=HpCp5LuzFU3E=qVNXg@mail.gmail.com>
+Subject: Re: [PATCH v9 3/7] mux: add help text for MULTIPLEXER config option
+To: Peter Rosin <peda@axentia.se>
+Cc: Josua Mayer <josua@solid-run.com>, Marc Kleine-Budde <mkl@pengutronix.de>, 
+	Vincent Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
+	Neil Armstrong <neil.armstrong@linaro.org>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
+	Andreas Kemnade <andreas@kemnade.info>, Kevin Hilman <khilman@baylibre.com>, 
+	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>, 
+	Janusz Krzysztofik <jmkrzyszt@gmail.com>, Vignesh R <vigneshr@ti.com>, 
+	Andi Shyti <andi.shyti@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, 
+	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Yazan Shhady <yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>, 
+	Mikhail Anikin <mikhail.anikin@solid-run.com>, 
+	"linux-can@vger.kernel.org" <linux-can@vger.kernel.org>, 
+	"linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, 
+	"linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, 
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 
-From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+Hi Peter,
 
-Now since the devm_of_qcom_ice_get() API never returns NULL, remove the
-NULL check and also simplify the error handling.
+On Mon, 9 Feb 2026 at 14:09, Peter Rosin <peda@axentia.se> wrote:
+> 2026-02-09 at 13:07, Josua Mayer wrote:
+> > On 09/02/2026 13:43, Peter Rosin wrote:
+> >> 2026-02-09 at 12:31, Josua Mayer wrote:
+> >>> On 09/02/2026 13:10, Peter Rosin wrote:
+> >>>> 2026-02-08 at 16:38, Josua Mayer wrote:
+> >>>>> Add prompt and help text for CONFIG_MULTIPLEXER to allow enabling this
+> >>>>> option thorugh the kernel configuration without explicit "select" driver
+> >>>>> dependencies.
+> >>>>>
+> >>>>> Select it by default when COMPILE_TEST is set for better coverage.
+> >>>>>
+> >>>>> Signed-off-by: Josua Mayer <josua@solid-run.com>
+> >>>>> ---
+> >>>>>    drivers/mux/Kconfig | 9 ++++++++-
+> >>>>>    1 file changed, 8 insertions(+), 1 deletion(-)
+> >>>>>
+> >>>>> diff --git a/drivers/mux/Kconfig b/drivers/mux/Kconfig
+> >>>>> index c68132e38138..4f7c6bb86fc6 100644
+> >>>>> --- a/drivers/mux/Kconfig
+> >>>>> +++ b/drivers/mux/Kconfig
+> >>>>> @@ -4,7 +4,14 @@
+> >>>>>    #
+> >>>>>
+> >>>>>    config MULTIPLEXER
+> >>>>> - tristate
+> >>>>> + tristate "Generic Multiplexer Support"
+> >>>>> + default m if COMPILE_TEST
+> >>>>> + help
+> >>>>> +   This framework is designed to abstract multiplexer handling for
+> >>>>> +   devices via various GPIO-, MMIO/Regmap or specific multiplexer
+> >>>>> +   controller chips.
+> >>>>> +
+> >>>>> +   If unsure, say no.
+> >>>>>
+> >>>>>    menu "Multiplexer drivers"
+> >>>>>           depends on MULTIPLEXER
+> >>>>>
+> >>>> I'm not comfortable with making MULTIPLEXER a visible symbol. It is meant to
+> >>>> be selected when needed (and there are a dozen or so instances). The kbuild
+> >>>> docs has this on the subject:
+> >>>>
+> >>>>    "In general use select only for non-visible symbols (no prompts
+> >>>>     anywhere) and for symbols with no dependencies."
+> >>> The patch description didn't make the decision logic clear,
+> >>> and I plan to submit a standalone patch for this after v7.0-rc1.
+> >>>
+> >>> Basically existing drivers using mux core used "select" to enable it,
+> >>> even though the core can function standalone with device-tree.
+> >>>
+> >>> Some of these users (phy-can-transceiver) function perfectly
+> >>> perfectly fine without mux, and use it as an optional feature.
+> >>>
+> >>> Likely drivers only used "select" to avoid writing helper functions,
+> >>> prompt, kconfig description and stubs - which this patch-set added.
+> >>>
+> >>> So I will argue that some existing users relying on "select" was wrong,
+> >>> and that the mux framework is generally useful on its own.
+> >> When I wrote the mux sub-system it was very much intentional and by
+> >> design that drivers needing a mux should select MULTIPLEXER, and that
+> >> MULTIPLEXER should not be a visible symbol.
+> > Need is a strong word here, and doesn't address the optional case.
+>
+> "Need" was the correct verb up until you needed the subsystem to be
+> optional. If you need the mux subsystem to be optional, you need to
+> do it in a way that does not introduce headaches.
 
-Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
----
- drivers/ufs/host/ufs-qcom.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+In the other thread, Josua pointed out that there are already several
+drivers that cannot be enabled if MULTIPLEXER is not selected by
+something else:
 
-diff --git a/drivers/ufs/host/ufs-qcom.c b/drivers/ufs/host/ufs-qcom.c
-index 8ebee0cc5313..6ab08565413b 100644
---- a/drivers/ufs/host/ufs-qcom.c
-+++ b/drivers/ufs/host/ufs-qcom.c
-@@ -176,14 +176,14 @@ static int ufs_qcom_ice_init(struct ufs_qcom_host *host)
- 	int i;
- 
- 	ice = devm_of_qcom_ice_get(dev);
--	if (ice == ERR_PTR(-EOPNOTSUPP)) {
-+	if (IS_ERR(ice)) {
-+		if (ice != ERR_PTR(-EOPNOTSUPP))
-+			return PTR_ERR(ice);
-+
- 		dev_warn(dev, "Disabling inline encryption support\n");
--		ice = NULL;
-+		return 0;
- 	}
- 
--	if (IS_ERR_OR_NULL(ice))
--		return PTR_ERR_OR_ZERO(ice);
--
- 	host->ice = ice;
- 
- 	/* Initialize the blk_crypto_profile */
+drivers/mux/Kconfig:
+
+    menu "Multiplexer drivers"
+            depends on MULTIPLEXER
+
+    config MUX_ADG792A
+            tristate "Analog Devices ADG792A/ADG792G Multiplexers"
+            depends on I2C
+
+    config MUX_ADGS1408
+            tristate "Analog Devices ADGS1408/ADGS1409 Multiplexers"
+            depends on SPI
+
+    config MUX_GPIO
+            tristate "GPIO-controlled Multiplexer"
+            depends on GPIOLIB || COMPILE_TEST
+
+    config MUX_MMIO
+            tristate "MMIO/Regmap register bitfield-controlled Multiplexer"
+            depends on OF
+
+While MUX_MMIO is selected by some/all(?) symbols that need it,
+the other three are not.  Are these three really dependent on another
+symbol selecting MULTIPLEXER?
+
+Gr{oetje,eeting}s,
+
+                        Geert
 
 -- 
-2.51.0
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
