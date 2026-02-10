@@ -1,146 +1,106 @@
-Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E4E932A3D7
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 15:24:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.41
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770737053; cv=pass; b=fkb6FOFKu81RL+klakU/FD+xsLm+qqIhJSkKlpNGEg/JwpLGr7Y51MQwBHMn2CZ5KTO67h6/UcsmclJR/ue9jtBlb9Y0i3jNHg0PC+XT3S6ak/Jd/Qj3r3L/uO4QuJbpDqgbmKYNXfWj0guR8cLvfTXeftJDW3deIJD0g2ZiSSQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770737053; c=relaxed/simple;
-	bh=k0gmt2SK6YJLMLSXE/TJpOL6RyovHLpu3hpDi2DSn3o=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=eFiSNjn2wdVaq7JOhSEYkY2tu5GNhxjqdLQtXinUZyNVaIce202EjW2wptX82gQNNd7GQnuvhJrtjG6ZIG+nZWOl+GhAbQD65erN/PmOg8dQrcboO4CYRuOFhr3npj1YqOM7+4/J+rNoPL76zeSStt85U3+yPwX8FO+bEvziOD4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=D72UpHgx; arc=pass smtp.client-ip=209.85.167.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D72UpHgx"
-Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-59e4989dacdso3589162e87.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 07:24:12 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770737051; cv=none;
-        d=google.com; s=arc-20240605;
-        b=EX/Xff8IMGhN2wj5+xPzK8S5ZTTgsTcNq+gqEjkNXnDCm2VS7R32+vkaUMdkzD26iD
-         XZw/jz7SJIhSo74GzuvCsxpRi2mp2RryHLVH7OlqpchBN0AmPitsBssAtImal/GOHuHx
-         Z8lwobd2C10nG5NsJ1jEG/z22bOI6+w8FqhH8c2/E7mbKCeLVWb821fZD8HiPBaJAZCp
-         CbABazQDzi7c7T5TbQmDcNjBpkMCp/j+7Z8yT99ugZFCiG/qpCpIGLyoiYOxGIDcAy5+
-         /jld8SXSY/9PIZwPoj+XObe3ObPm4WNp9askZHW69SrmMMlsenXC9BRtQRpJYdCJZ42R
-         Ez5Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=GxQFlDkHrupA4LseelclaxK8eMfOdVdlkWQK4k7mZ+0=;
-        fh=F4F/bq2Ajmh2waB3vXFgAatAF/UIpYR6WKOdLaA8rxA=;
-        b=CUkOLskCm0tZCB/qMwhsaACLPKgOpFFw4/VF4sh3s0Tz+8UOkjWvLGEUbpfvQjnOUJ
-         UNScL/hTHFHDogm3iGTR1LU5XDOlMUB1FM6ijkmzw7QwpTD0GBsBi9NdGERoIyAPBoaE
-         yd+5dPiLy4/ZXbb+65FXP1EuIEzsE5dI8ujGt/2qiCfihdhgZmrkesrT+1SxHGHJ4Cdy
-         VErgNYGTa9gBE7PZls3NoToC0oNI34q9/QjkWaw6dxGKM5hb7BlzRWNDo6di1L3OHGwm
-         vNRKhzXXErYxUyK1P+txq/H6zElRj/VWSW/dBq5WnuWfrjZBdjtv9wvz+yR/x4xfa2FK
-         t+rw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1770737051; x=1771341851; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=GxQFlDkHrupA4LseelclaxK8eMfOdVdlkWQK4k7mZ+0=;
-        b=D72UpHgxhDUkjrXSG0pnzdiDMJKPqQXlXpA9RzIdiiltVSj8RkQvuY4wBIa2SbfZym
-         +kSztaMsXMC3M7wmBJtuE6Cfj7N7bd8KUyoM3xoaB77afcJGcjLjweWGdF+mpOccHVYw
-         Q7WHJumbRqt+N/Rs1ejDbYGatWJ4dM0iDkxOwdc+DNmuDiwsSlRYX5vOvnaCmKCJaeO/
-         dVaeikN7Sa/l7JhiQgSB1iSisN+oo5x8feMgOr04iyHxfJIlt8X/kAciqNgcPEVlMOtu
-         IdyVo1zUuBxX8rLLPPOhZA9DT+yOxm3nDXzOZQPCQg54xRptxKlNWo0/rpzWCuigt/th
-         hpfQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770737051; x=1771341851;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GxQFlDkHrupA4LseelclaxK8eMfOdVdlkWQK4k7mZ+0=;
-        b=YHbzjCe+O23VChEmIhwJdjxKCujVqiT8zgsshbygMSv/COdUMEw/3fPWR4jOFeWP3o
-         GYwvuSB6f5e7F2CFJICTWKOr8cwVvqNPpyNfhEj4oSAlfWv4R0KUCtRdW7JfglJW904Y
-         wNJMdiRZdSq/cojvWaO8MnDyuQDeUlfWeGGhA6CIXEZuM9XoFYS4/wVQUXurYxHajwOo
-         y+9F82tYR1jFbhyvRT5KYG6imHeN5BlGIPeit3Tm6GKpf6g9cwNFy7xnbWDAncvTEIAu
-         H3GZ+QUU6BUnAwfZviVuFYORt4vu3gMZG1fTjgCRQ1d8s8hzVSg9B0QCEHXlNwUwlai8
-         WjlQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXYi0pLiDN9nQ+dT03nUpS5Fny1U1f6ipSLF3S6rl7wVJ71OqWCQsyzPK0ynJJgvuoSxczvG9mt2Fw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw18dRW05OI1LKe9pH5gAyuQ4ZXaMU1FmQFKa6pyXggcBHAH5df
-	O3Mmy/nvn0iZqkL56BX2JQd7XrWbxgCGuhHLOEKyDUNEs31LFOrWWKDJRAFW/4lzFMtf+haIoww
-	jx2Y84K7vYEE4hmzQLYpUOb/R/KwBqcm+oo62aSzynQ==
-X-Gm-Gg: AZuq6aLm4lVE1q6iIMisBM+pUyzu/PhqeIbcDXPaY+2jpMQqkwnKPpl0EDWQchos+xK
-	W9IJSW8IQ52hLsqz4254zeEDJC27tAzbJZ11zRhUWESDSxtORQnR8d1ZvkThDOzfFpCZo2ED6cs
-	dN3ci4AFnVCSFON/iFcxnajwklvb2chMjBlI5Ll3uxLSIGQMJ3CqWAdukbDKYBAFIMUk8+sJRp0
-	tlh6HUmnW4V+Ipdx9MSKve+m1YG+2EFTczIgYCIWQee6JtzGmDShICd4xbGNcGIY04GKsf7yc1r
-	ba7KcgvQh11KRJrrmbnGiRor2lFZAWxTrBczinqV
-X-Received: by 2002:a05:6512:ad5:b0:59e:45ae:7034 with SMTP id
- 2adb3069b0e04-59e55bdc59fmr883838e87.36.1770737050449; Tue, 10 Feb 2026
- 07:24:10 -0800 (PST)
+Received: from elvis.franken.de (elvis.franken.de [193.175.24.41])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id B1E3B1DF970;
+	Tue, 10 Feb 2026 15:50:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.175.24.41
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770738650; cv=none; b=DiFigO+72GyCdq3zpeIOudQB+fkLHcDIHoe2tU9oorxsS6u2cyE1CoihdoOskD1+7cDBK0pCQIhVV0KfRCcJlyxMAERTNAUV56v8uIxWNxZ54l+6u8hma426p5bbFIirE8tKBct/plmVfmW3MRQWCQLXBK02jyeD/BgAo8sPel4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770738650; c=relaxed/simple;
+	bh=7JUi+OMO7WaXxsmWScbHoICpLOvTDMMszEg+PGE+fh0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=af/5fJF/z9o13s6BDHiWFi/O/9WjpTZtPpFvNXwYJsQ/w4j7itDgqlNXwVdXB3Sl+ihlZIWaP4RzejpKS3BU6vnjynBKxhmC5UZbYCAF1DT9jkUZ78OzBejQHqUbuSQSktbttfCvNBR+udpjgbg/xHc+TNwXG+zRc6VvNduL4c4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alpha.franken.de; spf=pass smtp.mailfrom=alpha.franken.de; arc=none smtp.client-ip=193.175.24.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alpha.franken.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=alpha.franken.de
+Received: from uucp by elvis.franken.de with local-rmail (Exim 3.36 #1)
+	id 1vpq0Z-0000iT-00; Tue, 10 Feb 2026 16:50:35 +0100
+Received: by alpha.franken.de (Postfix, from userid 1000)
+	id 07982C0084; Tue, 10 Feb 2026 16:50:20 +0100 (CET)
+Date: Tue, 10 Feb 2026 16:50:20 +0100
+From: Thomas Bogendoerfer <tsbogend@alpha.franken.de>
+To: Brian Masney <bmasney@redhat.com>
+Cc: Claudiu Beznea <claudiu.beznea@tuxon.dev>, linux-mips@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	Linus Walleij <linusw@kernel.org>, linux-gpio@vger.kernel.org,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	linux-rtc@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>, linux-serial@vger.kernel.org,
+	Guenter Roeck <linux@roeck-us.net>,
+	Wim Van Sebroeck <wim@linux-watchdog.org>,
+	linux-watchdog@vger.kernel.org,
+	Lukas Bulwahn <lukas.bulwahn@redhat.com>
+Subject: Re: [PATCH v2 00/16] MIPS: move pic32.h header file from asm to
+ platform_data
+Message-ID: <aYtTvEmuaaOxmdAR@alpha.franken.de>
+References: <20260112-mips-pic32-header-move-v2-0-927d516b1ff9@redhat.com>
+ <aYsnsecPa8bWMbaA@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260210-qcom-ice-fix-v2-0-9c1ab5d6502c@oss.qualcomm.com> <20260210-qcom-ice-fix-v2-3-9c1ab5d6502c@oss.qualcomm.com>
-In-Reply-To: <20260210-qcom-ice-fix-v2-3-9c1ab5d6502c@oss.qualcomm.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 10 Feb 2026 16:23:32 +0100
-X-Gm-Features: AZwV_QjnOROVr9Ygs9hCFhr8L9ZPMcLim0_8y8vdfEht-oO3Vkh2tAqIyIExc0o
-Message-ID: <CAPDyKFoYAqkLxJTN8BWGWkcjaD7fs+XkfqWhgnTbhekUnXUw9A@mail.gmail.com>
-Subject: Re: [PATCH v2 3/4] mmc: sdhci-msm: Remove NULL check from devm_of_qcom_ice_get()
-To: manivannan.sadhasivam@oss.qualcomm.com
-Cc: Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Abel Vesa <abel.vesa@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Manivannan Sadhasivam <mani@kernel.org>, 
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, linux-arm-msm@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-scsi@vger.kernel.org, Sumit Garg <sumit.garg@oss.qualcomm.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aYsnsecPa8bWMbaA@redhat.com>
 
-On Tue, 10 Feb 2026 at 07:56, Manivannan Sadhasivam via B4 Relay
-<devnull+manivannan.sadhasivam.oss.qualcomm.com@kernel.org> wrote:
->
-> From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
->
-> Now since the devm_of_qcom_ice_get() API never returns NULL, remove the
-> NULL check and also simplify the error handling.
->
-> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+On Tue, Feb 10, 2026 at 07:42:25AM -0500, Brian Masney wrote:
+> Hi Thomas,
+> 
+> On Mon, Jan 12, 2026 at 05:47:54PM -0500, Brian Masney wrote:
+> > There are currently some pic32 MIPS drivers that are in tree, and are
+> > only configured to be compiled on the MIPS pic32 platform. There's a
+> > risk of breaking some of these drivers when migrating drivers away from
+> > legacy APIs. It happened to me with a pic32 clk driver.
+> > 
+> > Let's go ahead and move the pic32.h from the asm to the platform_data
+> > include directory in the tree. This will make it easier, and cleaner to
+> > enable COMPILE_TEST for some of these pic32 drivers. To do this requires
+> > updating some includes, which I do at the beginning of this series.
+> > 
+> > This series was compile tested on a centos-stream-10 arm64 host in two
+> > different configurations:
+> > 
+> > - native arm64 build with COMPILE_TEST (via make allmodconfig)
+> > - MIPS cross compile on arm64 with:
+> >       ARCH=mips CROSS_COMPILE=mips64-linux-gnu- make pic32mzda_defconfig
+> > 
+> > Note that there is a separate MIPS compile error in linux-next, and I
+> > reported it at https://lore.kernel.org/all/aWVs2gVB418WiMVa@redhat.com/
+> > 
+> > I included a patch at the end that shows enabling COMPILE_TEST for a
+> > pic32 clk driver.
+> > 
+> > Merge Strategy
+> > ==============
+> > - Patches 1-15 can go through the MIPS tree.
+> > - Patch 16 I can repost to Claudiu after patches 1-15 are in Linus's
+> >   tree after the next merge window. There is a separate patch set that
+> >   fixes a compiler error I unintentionally introduced via the clk tree.
+> >   https://lore.kernel.org/linux-clk/CABx5tq+eOocJ41X-GSgkGy6S+s+Am1yCS099wqP695NtwALTmg@mail.gmail.com/T/
+> 
+> Sorry about the duplicate message. I just wanted to reply to the series
+> with MIPS in the header so this message isn't lost.
+> 
+> Can you back out these two patches from your tree in linux-next, and not
+> send these to Linus?
+> 
+> clk: microchip: core: allow driver to be compiled with COMPILE_TEST
+> https://git.kernel.org/pub/scm/linux/kernel/git/mips/linux.git/commit/?id=026d70dcfe5de1543bb8edb8e50d22dc16863e6b
+> 
+> clk: microchip: fix typo in reference to a config option
+> https://git.kernel.org/pub/scm/linux/kernel/git/mips/linux.git/commit/?id=a6ab150deb4b740334721d18e02ad400a9d888f5
 
-Please take this through the qcom-soc tree.
+I've reverted both patches in mips-next.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Thomas.
 
-> ---
->  drivers/mmc/host/sdhci-msm.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 3b85233131b3..8d862079cf17 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1906,14 +1906,14 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->                 return 0;
->
->         ice = devm_of_qcom_ice_get(dev);
-> -       if (ice == ERR_PTR(-EOPNOTSUPP)) {
-> +       if (IS_ERR(ice)) {
-> +               if (ice != ERR_PTR(-EOPNOTSUPP))
-> +                       return PTR_ERR(ice);
-> +
->                 dev_warn(dev, "Disabling inline encryption support\n");
-> -               ice = NULL;
-> +               return 0;
->         }
->
-> -       if (IS_ERR_OR_NULL(ice))
-> -               return PTR_ERR_OR_ZERO(ice);
-> -
->         if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
->                 dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
->                 return 0;
->
-> --
-> 2.51.0
->
->
+-- 
+Crap can work. Given enough thrust pigs will fly, but it's not necessarily a
+good idea.                                                [ RFC1925, 2.3 ]
