@@ -1,201 +1,245 @@
-Received: from mail-pg1-f180.google.com (mail-pg1-f180.google.com [209.85.215.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79823336EC9
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 07:56:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.180
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770710177; cv=none; b=hFuqUPIWDVkGVPGeZJSCGzdGCHfIBjHepH4FSqr7r/pwhal92OErdJhbZMmyIQuTzlQ9r9wEDpq3IXSC9fU+wAduKJXBKV/Dd0H5RkAEIWkiEn0s9hwLdL322g9OjnH12wvjXKEHgF3gmTmPdMYMu9cJdtAoUoyXrZ8syY6DqG4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770710177; c=relaxed/simple;
-	bh=ZBrn2V6Ps9nAXfcemoiQWj+7Cl/HyRPhAU9WPaB6Fxc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Fini0tltou53dHf5FDVAP201zmfeOIvZDggICYbhhgUPCZHvpmBJURxrE70UVS7t47/MVjlXe3NuytXKrW5LsvHsnelrv7PpclzBUGsELMjqfirR4msuVBo9BC/vKARwEqsPMHNd0fv9G9nmmBnUUxKAOenpw2m2+T9GXW72JFc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.215.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-pg1-f180.google.com with SMTP id 41be03b00d2f7-c6c67bc8b9eso2142597a12.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2026 23:56:15 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770710175; x=1771314975;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=za+ffUzQm9VRZ3fSQVHtfuOR3ywRY/ywHi+DZoQjMUc=;
-        b=QX4uOdUynqx5MzGrzRLMDT1e3/dr2Slf1IwL+ntV2+i79j5wx1Otg9cCeM3RyPUVDP
-         3AedG51IW5VG8WFN2MJJFaMVGskyutVVeAHEoilm86hPyok7+XqL4VS08gZqdFJeK4LS
-         BqzW/F54o4RTJYyOd+sCHWFehQnDr1ZKutgrvGymvlILnsb15MkMFcpkn0TF3bWl8N6n
-         HLEjPYhCdBIvny3WjKXsWZQxLeJGQGetsVqwnek9wgWS0NFHNR8uyCFXmqVRYtVzMEWk
-         027/eyB85hmQvTYV2w6VX/Y/6JyMVIPd5Dkc7cwn9Ps4NeW0yKyZqmo7hT+FEJ2cUy5r
-         Q1PQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWOjxIHR9He1kD+tPH0QQDDcFifVpvu7Uyn2pw0mrRrLHU9wyE2ltZOz+7Le0DNDt4jF7PK/ZAB4r8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwK3p32iPCxSR4EPpVdudO6yKNNNXQ61bKKd6wy7VPFghAf+LZk
-	76QJhUXhmrCCd+blc1eR7kPneifBm898U22G/JUBa8qjvIHS217i0vamu9mdvVYS
-X-Gm-Gg: AZuq6aJFgVfuQXT+GDmdklCgqcsPwIfnhsVaHAzdHwYAM24FTZfVhEIe9wWWOd4hrHA
-	D04LNLfx4eOA8Y0WpVpOKK8gAxp+nfC/m8dvo2t2Ii5SUarDDLpPgpSGAHXgde940kUYXuKsVlj
-	F65qqAyG6qdNGKEtZPzBFDv/266SHVErVEFzagJKD5iU/wznBkd0YAvzZsR/4Cun+1F4b5tH1MD
-	E76JhDDsJqDZ5Z/QSeJIN6eX9FBtIpJmddA9qAoAou2xroBuAQjZTtumVcykncCP4E3LfszIbnj
-	V6m3c26/npnyusn1V9Epg+KPLVnp/DM2zPF7Cof19vFQ4AvUrMwnF8uifL3xzeCn8VLUS0w2fU5
-	mooqll8opIQW4D3h6kXlYR5iATLTiJJWnU8zVEcpqXMz2tZn5LlbN8mZKjA83awrAjjOEKh4fQw
-	tAcWzfG3tkGNZE8hG+4BL57at6EEPbOJywq0N1UtFUEGTvxzWFuihskcYKZEo=
-X-Received: by 2002:a17:902:db08:b0:2a9:63de:b374 with SMTP id d9443c01a7336-2ab102f4f52mr13508555ad.3.1770710175079;
-        Mon, 09 Feb 2026 23:56:15 -0800 (PST)
-Received: from mail-dl1-f52.google.com (mail-dl1-f52.google.com. [74.125.82.52])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2aad371919csm85220195ad.62.2026.02.09.23.56.14
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 09 Feb 2026 23:56:14 -0800 (PST)
-Received: by mail-dl1-f52.google.com with SMTP id a92af1059eb24-124a1b4dd40so4231237c88.0
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Feb 2026 23:56:14 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCVhItePR1rXB1JpRwHVPN9AplQf6xtgiNWQaWtPq5Ey07jlFa30uImrUPt6uOBYDXh87vSfjP6sCww=@vger.kernel.org
-X-Received: by 2002:a05:6122:920:b0:55b:305b:4e31 with SMTP id
- 71dfb90a1353d-5673dad68b3mr278879e0c.17.1770709845104; Mon, 09 Feb 2026
- 23:50:45 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85C0527E1DC;
+	Tue, 10 Feb 2026 08:38:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.16
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770712682; cv=fail; b=mZ60B+PEsdEbGy/BWz7dpbbbYyZyjzSkMbLXtnCrkhCeB8DytLUl6V6b4PIrUdG8Mi2ddKxohK2mjDXTU8sYSPoj7wSR5irqvKF1kAWdCxQDQNXleXWYXbuV1JyIXsX1fkeJ6rHudbQ3mlO0qQwntxP2DtRBCMq8yLmn7khaGog=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770712682; c=relaxed/simple;
+	bh=+iAUUq7krhi2BM7x/EQ3i9RVhN6lvT+M8GFGSP2lHjc=;
+	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=d8W4ajNiLUpVsZFzN8BL0KRgdEDPTb4TfaPPE7SmqsuFTpIYcwqObwYiWBnuUPJmHQm/y3Bhxn9e4/6e77MAH6mgRHhWKDDvVlUeGoBqp2ZaPfPZRz+2Ng0KwS0DF/1cv81PVEuG4FaCWpqJVW4VWVMMUi898mWGEZMWPuJjMwI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=A6wnSwM0; arc=fail smtp.client-ip=198.175.65.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="A6wnSwM0"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1770712682; x=1802248682;
+  h=message-id:date:subject:to:cc:references:from:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=+iAUUq7krhi2BM7x/EQ3i9RVhN6lvT+M8GFGSP2lHjc=;
+  b=A6wnSwM0asAivvbT8QTTKyW3f5a79uRtW8QdjFiTBnpFD/ZphjNZZ0DN
+   kMT0PleXCEhz2AVGnbnGjq9MnbgV9occVTXilFMoouHbwCrQSN/2M3/FZ
+   hHOZbX82GpbRZEutFpD9EL8wySEdEx/kjKdytP0/F82SyTDKFWX9Np32k
+   SwbtYtr8fRLOrsKXSZ8iIuKRBH13onBYBoaeF2OQTbXMT4TrDfpqr252S
+   MaIp/vNFkwBpHsOReETaNiOg24R7IGyLzJCQIkga0u+aL3P7ZeMRLVKEG
+   uNI64y79l+y/ClV2XigIWs1kGPaWAiQ2FZmYBC97QJjA9+18ygbE27qfr
+   w==;
+X-CSE-ConnectionGUID: 9XaeSbADSfmkrgc6pZEwfg==
+X-CSE-MsgGUID: 3F7BPGdvRzG4r7KhbzdmiQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11696"; a="72018702"
+X-IronPort-AV: E=Sophos;i="6.21,283,1763452800"; 
+   d="scan'208";a="72018702"
+Received: from fmviesa007.fm.intel.com ([10.60.135.147])
+  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Feb 2026 00:38:01 -0800
+X-CSE-ConnectionGUID: 9u0zGau6SSicbtgAlLHDug==
+X-CSE-MsgGUID: WLdz477wTbykt4Jc3KvpzQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.21,283,1763452800"; 
+   d="scan'208";a="210946014"
+Received: from fmsmsx901.amr.corp.intel.com ([10.18.126.90])
+  by fmviesa007.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Feb 2026 00:38:00 -0800
+Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
+ fmsmsx901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.35; Tue, 10 Feb 2026 00:37:59 -0800
+Received: from fmsedg901.ED.cps.intel.com (10.1.192.143) by
+ FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.35 via Frontend Transport; Tue, 10 Feb 2026 00:37:59 -0800
+Received: from CH4PR04CU002.outbound.protection.outlook.com (40.107.201.55) by
+ edgegateway.intel.com (192.55.55.81) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.35; Tue, 10 Feb 2026 00:37:59 -0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=oZi2W2GsaqGefwQmHuljN3TaZm01znj1s1BdqXYsKJa+7b53cW0kr8dObAqLmEvggldwOKqM2N55EvlD6MskikZPdegEcFjq8TnCCksYM5ZM5BpSVD7r3yfNdsm4uP/lwm7BPuVrF/gjK9tIKo5XFTWEPgJY+2khqLuJSPc99pL1a3HrlP5Mn+FVriClDGTEQaNJA66UDhXcAg6Jd0jq/zaxnBnGx3EeF0VQ+hkAAwXJ53K+g+MQMxXUkytzWq+oa7Dvs7JX2tGi2evCVRzn97xgypgAqeRprOeWwHFIpVkxULgwKwJkd3yz4ki68+RFkYT7ICWMpv0WiCqEy2uDKQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=dWFgo3Dcaf3x5X3MOmQ0XnBvc/iLF3LtwRAZCGFu+Ko=;
+ b=mq7Qu+Fdkn2LTFl4iaQ876oZx7FkPgpFvw5GiEX9/9PhBsQIRIbDin9Z5r/c+v226MED+R4NC6OWahouAR9JDCBcxnsJe0qHWMr4RfJF+YZkUHV8gCvT40A3G0LbFwF3y80+irK2EHnHrHOt2r3ybl4IM9zs94gda9Iy8SXZZczmoqxffmkRNofz0SGUbrHW+2Z21F17pzlIPmsPfEqFQZ8TqdKxEVHXTjTOhJWxdwZQkGHh61ncSmzUxWgXvmSC/E2C5pcZlVAX9uZxKtuClQSscwHI0J/9Vh2PRbkWnnVTRviOEnKpemSeaeTqTBRT4PYlbxWQy28SBXmWaytVkw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=intel.com;
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
+ by CH3PR11MB8705.namprd11.prod.outlook.com (2603:10b6:610:1cc::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9611.8; Tue, 10 Feb
+ 2026 08:37:55 +0000
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456%6]) with mapi id 15.20.9587.017; Tue, 10 Feb 2026
+ 08:37:55 +0000
+Message-ID: <5cb8c03b-638a-4677-a537-974eba41b358@intel.com>
+Date: Tue, 10 Feb 2026 10:37:49 +0200
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 3/4] mmc: sdhci-msm: Remove NULL check from
+ devm_of_qcom_ice_get()
+To: <manivannan.sadhasivam@oss.qualcomm.com>, Bjorn Andersson
+	<andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, Abel Vesa
+	<abel.vesa@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Manivannan
+ Sadhasivam" <mani@kernel.org>, "James E.J. Bottomley"
+	<James.Bottomley@HansenPartnership.com>, "Martin K. Petersen"
+	<martin.petersen@oracle.com>
+CC: <linux-arm-msm@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<linux-mmc@vger.kernel.org>, <linux-scsi@vger.kernel.org>, Sumit Garg
+	<sumit.garg@oss.qualcomm.com>
+References: <20260210-qcom-ice-fix-v2-0-9c1ab5d6502c@oss.qualcomm.com>
+ <20260210-qcom-ice-fix-v2-3-9c1ab5d6502c@oss.qualcomm.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
+ 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
+ 4, Domiciled in Helsinki
+In-Reply-To: <20260210-qcom-ice-fix-v2-3-9c1ab5d6502c@oss.qualcomm.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: DB3PR08CA0010.eurprd08.prod.outlook.com (2603:10a6:8::23)
+ To IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260208-rz-sdio-mux-v9-0-9a3be13c1280@solid-run.com>
- <20260208-rz-sdio-mux-v9-3-9a3be13c1280@solid-run.com> <bc5fbfc5-6f71-eeed-ad90-0c1b835e65ea@axentia.se>
- <fcef2798-1645-41fb-952e-daf3657bc231@solid-run.com> <704210e0-2e53-09f6-9f8c-3ae0c4b8e0da@axentia.se>
- <9d7bda92-e520-466a-a0be-d01686af1d56@solid-run.com> <f4d8547d-3de3-0de5-da61-3de57d9af895@axentia.se>
-In-Reply-To: <f4d8547d-3de3-0de5-da61-3de57d9af895@axentia.se>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Tue, 10 Feb 2026 08:50:33 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUEZZ+p+yaQDWhVCRNEQUygR2j=HpCp5LuzFU3E=qVNXg@mail.gmail.com>
-X-Gm-Features: AZwV_QjWs_kGwWtLP-4KOwLJynmxdzZD9XMo5f_JCKEF6YiXm5BZAUIGiU8_kRM
-Message-ID: <CAMuHMdUEZZ+p+yaQDWhVCRNEQUygR2j=HpCp5LuzFU3E=qVNXg@mail.gmail.com>
-Subject: Re: [PATCH v9 3/7] mux: add help text for MULTIPLEXER config option
-To: Peter Rosin <peda@axentia.se>
-Cc: Josua Mayer <josua@solid-run.com>, Marc Kleine-Budde <mkl@pengutronix.de>, 
-	Vincent Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>, 
-	Neil Armstrong <neil.armstrong@linaro.org>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
-	Andreas Kemnade <andreas@kemnade.info>, Kevin Hilman <khilman@baylibre.com>, 
-	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>, 
-	Janusz Krzysztofik <jmkrzyszt@gmail.com>, Vignesh R <vigneshr@ti.com>, 
-	Andi Shyti <andi.shyti@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Yazan Shhady <yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>, 
-	Mikhail Anikin <mikhail.anikin@solid-run.com>, 
-	"linux-can@vger.kernel.org" <linux-can@vger.kernel.org>, 
-	"linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, 
-	"linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, 
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|CH3PR11MB8705:EE_
+X-MS-Office365-Filtering-Correlation-Id: 4a061b23-cf17-4b71-500c-08de687fafdc
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014|7416014|7053199007;
+X-Microsoft-Antispam-Message-Info: =?utf-8?B?SUZ5R1VPRDBnZ3EyMld3QzdicDNaNDhlM2s2eFN5dTRjN25uNDZIUzhkTmZO?=
+ =?utf-8?B?OXpWTVJDTDRtdmhocFpXWFQrZHh5dE1QYjZPOW9GVjFDZDd2MnB4YnFNODFR?=
+ =?utf-8?B?eExmM0t2NGNIU3ZWREJ0TXN4WGhVbWZ0eS8yem1aZWVnelh5VXJveWRlUlA1?=
+ =?utf-8?B?WFE3M0pPdmNoaDVXTjBIWE5IMFVpaHVuRE1UZHpBQ3ZpdVRVV0JjS2ZSQ2hr?=
+ =?utf-8?B?SEY3OW50eFNsRkI4WnJXL2NYTXVUWG0wK3JnVFlpNytKb1ZJK3NmUTV2azdx?=
+ =?utf-8?B?ek9XZzVXNFlQN2k3eGtTY3hZSlk5L1lvaFlzN2huNERhSW05Zi9rYnI0V3R4?=
+ =?utf-8?B?UlJWRWhjWlRTWWl6dFIvT3VNWVpHcDJ3RFR2ZnRCK25FUXc0dTVYRFp4L2xX?=
+ =?utf-8?B?ZktoazJ2L0QrdDNtYVA3Y29CSnVBei9QUWJjeThMZFlmMm5ldDB3RG5nekZ3?=
+ =?utf-8?B?V09wMEtKb3FFbjFyUUFpWHJrMURXZG56THlQZitDQkFqaFZTQStPZnJZUEpO?=
+ =?utf-8?B?YytHemhLY0tJZW5sZUdaeG5wbG1qMDA0bjgyZFR6OTQ2NjhpSE9DUVJvMWlP?=
+ =?utf-8?B?Y0ltNmo0WTY2NVZhL3Z4R2VGRFg5b3JxVHI4SkJNVlVIK0RaUVd3c2VITVhx?=
+ =?utf-8?B?bmEwU2lyYjJlMHRjNlNpYnVxNGszU0c1ZXJOVUVMVHIycytIQ3FoREdiUDYr?=
+ =?utf-8?B?d2UxeGdCYVFETC9OOWp5ZFZjZUdsWW5oVjFhL0JRRzBQSzYvc055OElsUDFn?=
+ =?utf-8?B?L09hSDljSklxNFFQTTRiMDAva0RFcmxHSUx3WlFzQnpmVXl0TmtkVC80WS8z?=
+ =?utf-8?B?RDVKem9qRXlRUUJVSW12Ui9DektyelNHdXE4eFJKeWpkbmgxUXE3dzNuRXhz?=
+ =?utf-8?B?NzZKaGl3WTh5eXJWZTZOTHdXY1MyOGUvcEprdldHc1B6N0NtSmYveVVXaHo1?=
+ =?utf-8?B?SlZQOVB0bjd4RkFaRldHZGQ2YmJReGJWNjRTVU1vMTJXUkZNS0JQOEh4K1Rz?=
+ =?utf-8?B?amE5bTFLaUVEQlVrRHh3Y1RIay9DOHZZRDZRckR2OHJ0czB3SjFRNlZIdldR?=
+ =?utf-8?B?SW9hbWt5S256VFhzUlZtdGxlb3VQc010L1lVOUJ5NWF1ZWhLaUh1UzlTVXpU?=
+ =?utf-8?B?d0lCeHJQMW1sNXUwUmpzSjRKd3VIejY5N2FtcnBxQnUvNnZmREQ0MTNQK3lT?=
+ =?utf-8?B?Yk1Td3k5QmxvL0IyMXN0ckQwNFc4bXdPMzVBeUlPNjRDbjdXb0xaTzFpVzYy?=
+ =?utf-8?B?RE9wN0sxZFlEdnlMQjFIdElqRVI4TmowcTFMZ3FUSkRnZEY1QnpVNnVIdXlD?=
+ =?utf-8?B?UXJwTkdOWC9aMjE0eVV0d1UrcXltSlJnWG5aUC9wOGdHNGYrSGhTRTdaUm8y?=
+ =?utf-8?B?M1Y2c2tHS0QzOC9HN3lMeTMwQ1UwS09GYkhqdnU0eXlrM1VzaWx4RVpFMEEy?=
+ =?utf-8?B?K1A3NGUyL3lTdXVmYys5UWxMdlVCVENxTmVYMkxLQVlMMHJzSlRYdXB2dXZK?=
+ =?utf-8?B?SnlwMXhLZUdJSjlxWjVLNXdXaC90clBzQXJzTUZLczM2cVZqSUZrbjRqeXNR?=
+ =?utf-8?B?MUdtTDNnU2E5OXVWNnFqeEFMYm1JcURlbXpsaFQ5K056aHJ4anEvK3h0cURr?=
+ =?utf-8?B?NW0xVW4xSmY4OHY3MmFlRVZVaDV5dFdmdmcxZlhreHIybmlwS1dPVklpellh?=
+ =?utf-8?B?SU5qUDZlUUFmcE1YaXVUa3FnYlYwQVFwVEpqb2lkOFF2UlV6dlUzTEltVW1G?=
+ =?utf-8?B?VDJzOXlDTkxQREpaNmlpdW5vUFIwWnhYczJvSjhvOThDUVBORi8xdGFzWlNt?=
+ =?utf-8?B?czFVNEMzZngrUHppWW5HY3EwdWdSTldpODBZc01hUXpkQnR2SUI1SlhoKzJO?=
+ =?utf-8?B?Vlhid3Y0bkpjOWZZOHpPR2l6Mnoza3FxQ1Q5a1hjTkp5UnJvak9iR25ydXVz?=
+ =?utf-8?B?K1NCcHVVdFliWlNPMG44bk5kTzBKY0JSZHhtSFhBMTVONFh0OFd1SVZpWGU0?=
+ =?utf-8?B?blNCS3dpSXlKTnBDR1dLczM4VHZzd3pqZllEYlV1clVta2NYZFJqWWZhR1dJ?=
+ =?utf-8?B?Y3RPSUlHUForN2loeUx2THB1dlR2Vi9RbWJMZ0lyb01mZHRyNEtiNEliL1lL?=
+ =?utf-8?Q?r2+o=3D?=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(7416014)(7053199007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?OThmNTZOR1I1N0k0dmkwSXJBaFB6S3hDNGhibEpJSk9WZWUrWFBnbEU1bkQw?=
+ =?utf-8?B?d29BWFM1T0txdU02R2ZOdlZHSU9TYjVBNXl5SkZNMWt4amRBRjM4RFlmajVx?=
+ =?utf-8?B?NmpYa2svUjRsM3BwQ3hZcEkzZ2huK29LU2dsVW1LQW13QXAraXhNYjBJalFl?=
+ =?utf-8?B?a2gzV3RoQUs2SWRWUThiVFhnVW1NS0tzcEVjUDZjVVBJd1VodWFpNnZMUE0r?=
+ =?utf-8?B?ZmdydUNTWkluQ0JxUTZ1WWlsbktGcDRLMU9ZVDg2U3NBMFpjYjFreVY0Z2hh?=
+ =?utf-8?B?cUJWR1lvUkx1OWtmTmc0bk1vbS91cDdXaWVtbjB0L0lBL0pkblNUeE1yc3Nr?=
+ =?utf-8?B?MEdxb2k5K20raXpQY1VTVXorWFNQa0J3MHVJUWJIOFNuK1VyVEJQRVYwazI4?=
+ =?utf-8?B?bml6TE13NktSYUYrRmRJTEVRSVJlSHpSdEtSQXVObERFV1BLVEpIalJ3dnE3?=
+ =?utf-8?B?SUdYRDdOcXV0aklYNHlUWGVJZW0vNDR5cGhOZjE2eVp4Z2Q2d3pGQUpkUmk3?=
+ =?utf-8?B?eHZNMHVmaFNlalB6TTlPdkJRbEdFemo1SkUzY0dwbjhoK0FzWU1nb0IwTWdM?=
+ =?utf-8?B?YkJuQ0lsUk9yY0N0bEE4djB4Y2F4d2FndnUwbE1nbWpMbEtUN0xiZFNUUWRo?=
+ =?utf-8?B?TDBOOVhuN3NhaXF3WENvS04yUHNoRlZKWXl6MDlySGlFWTVLMFdzeGpSN3BK?=
+ =?utf-8?B?ODFtNmF4ck8zTFl1VjhaclN2Zi9YRHRNQmhXZmtmaE5mQnBEcmpkTmpCNzFR?=
+ =?utf-8?B?OG1GdlROL3Z1RVk3YkNUYkpSemh0OS9lR0oxM2tFZ05XV3dxVTZVT0ZLQitR?=
+ =?utf-8?B?U1BuemxsekFoalRVQlJrWTlzOUVqOTN6aWxzZzdpVlA1dWIyWmwwUzZta2NG?=
+ =?utf-8?B?d1J0TnZMb3dvS1I5Nml5dndQcUlUdUNLQ3dIN2wydncxbk1GUWN2YUUxVFBR?=
+ =?utf-8?B?VTU4UG9tVWJZZTFDQ1prMXVxTXdrb0JmSWUvOW9BU2FjQVF6cnh1L1BPa0gv?=
+ =?utf-8?B?YnlVTHh0a1NzMCtnRHRhS0xrQk1rc3AwaFovOCtCU0l5U2ZWU0VEdFhqbHVq?=
+ =?utf-8?B?ejZ4K1FtNGZiUUNIWDBYSVdKSEN4USszYWUxQmtQSVNxUFYwUEJJVytscCtz?=
+ =?utf-8?B?aUpISmVsa2NmSDBEVkY0RlJ3OGhRckVqelpJS1pubE1tSVNSTTR0Uk9pSGhG?=
+ =?utf-8?B?NGVqUDBrZGkxOGo3bW1ZSktLVlo3VFNnVVh4aVlFL3FLMk43dGhhQ1lBaWdB?=
+ =?utf-8?B?dTNNbFFwd2tucjJCVW9yQXkvYVIzMjV6WDFWZlNCZ0NEalhaVm1FcFdzZmNp?=
+ =?utf-8?B?dWZrbnh3VlNndEVTSFpxMnBkNnE1ZCtkVWlKRGZ0L0YrNXM4SFFURmg4ZDd5?=
+ =?utf-8?B?T0gzanpxcXBuRkdCNnhPUkNTTi8ySExMeHU2dkVLRmRaN2JWN2w4b1p4NjYx?=
+ =?utf-8?B?Q1BZUXNKVmhKOExPdU5zM1p0UGp6cWlka29GUkg1UElFdi9HY01MeFhoYWdI?=
+ =?utf-8?B?T1p3andLQ2JYZ1loTVljajhKb2ZBT2hXUGw4VDV1a0RMY2JXbERTM3NkYzc1?=
+ =?utf-8?B?dXJMcXNPTHpEdCtpN2xLcmlhRGhyd053OGJxQ0M1RVhpazQwY3c2SGN1TmF4?=
+ =?utf-8?B?aFlONDMwN0hnK2RCZWpDaEtRTTl6YkVjaFI2VnpCT0dPOStmZTNGbTRIK1Ez?=
+ =?utf-8?B?bTRnWW81N2VzaXRhNWZiNlNnOE1acEIzbG5tMmlDUFBGQnJXTzhWREJyMFQz?=
+ =?utf-8?B?MzVZWTduaVdINlNyVk5RTVh1eXRhWlVWYnhIUDNzWUtMdVZoTHpOM3RYQ3la?=
+ =?utf-8?B?ZGl5amZUNHhDbVRoRXdBSVp3SVNiR3NYSEVLRTlWd1RST3hwblY2NWlnL29y?=
+ =?utf-8?B?d1ZCVkpSWXVQWGlnN0dNQjRwWjFNd3k3OVVFSVlqYk5yTVhIR2F5clY3dXVJ?=
+ =?utf-8?B?d3JObUc4dGJaRXdqTit6TUJaYU1XL1BmSnNlZkNZQ214c1RJQUJId3o0UXN1?=
+ =?utf-8?B?dzVEVGNTUEx1N2hXTzBDbURXQys5eW5FRFdTKytMZnpCR2RoQkQrTkh0Y1BT?=
+ =?utf-8?B?YkRMSG02S0g4Z0Y1QmdTcmROdEhqNXkwZlg2VmU2VklEWnAwNWFPUkk0S3lD?=
+ =?utf-8?B?S1pVUnRiQWcvR3gwcFFibXV1L1JPaXZlR2dxM0RHZTZITE9FQng5cy84Sml5?=
+ =?utf-8?B?OXFNUHU3a25OZ3p5WVdKZzJ1TE5iZDhCZURVVy9abTVPTnZOSVBpb0RvazZE?=
+ =?utf-8?B?ZExBZEpyZXJwT1JNZEFrTGtGdGNRQ0g4ZVlDNWc0bW1kM0JEejROOFVhNC85?=
+ =?utf-8?B?a2pjRmU5amdHR1lKWlJvbU1XUllmSHRoZEVqNlBxeTRPVVZhWXBQZz09?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4a061b23-cf17-4b71-500c-08de687fafdc
+X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Feb 2026 08:37:55.5764
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: gh2VQfyqdYIjS+yobnu63wcA+KJJuPOy63b1R/uFCtxNh4SPukHuCiYC0KnMnckyStM/vqrXjKrgoSGhER8Bsg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR11MB8705
+X-OriginatorOrg: intel.com
 
-Hi Peter,
+On 10/02/2026 08:56, Manivannan Sadhasivam via B4 Relay wrote:
+> From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+> 
+> Now since the devm_of_qcom_ice_get() API never returns NULL, remove the
+> NULL check and also simplify the error handling.
+> 
+> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
 
-On Mon, 9 Feb 2026 at 14:09, Peter Rosin <peda@axentia.se> wrote:
-> 2026-02-09 at 13:07, Josua Mayer wrote:
-> > On 09/02/2026 13:43, Peter Rosin wrote:
-> >> 2026-02-09 at 12:31, Josua Mayer wrote:
-> >>> On 09/02/2026 13:10, Peter Rosin wrote:
-> >>>> 2026-02-08 at 16:38, Josua Mayer wrote:
-> >>>>> Add prompt and help text for CONFIG_MULTIPLEXER to allow enabling this
-> >>>>> option thorugh the kernel configuration without explicit "select" driver
-> >>>>> dependencies.
-> >>>>>
-> >>>>> Select it by default when COMPILE_TEST is set for better coverage.
-> >>>>>
-> >>>>> Signed-off-by: Josua Mayer <josua@solid-run.com>
-> >>>>> ---
-> >>>>>    drivers/mux/Kconfig | 9 ++++++++-
-> >>>>>    1 file changed, 8 insertions(+), 1 deletion(-)
-> >>>>>
-> >>>>> diff --git a/drivers/mux/Kconfig b/drivers/mux/Kconfig
-> >>>>> index c68132e38138..4f7c6bb86fc6 100644
-> >>>>> --- a/drivers/mux/Kconfig
-> >>>>> +++ b/drivers/mux/Kconfig
-> >>>>> @@ -4,7 +4,14 @@
-> >>>>>    #
-> >>>>>
-> >>>>>    config MULTIPLEXER
-> >>>>> - tristate
-> >>>>> + tristate "Generic Multiplexer Support"
-> >>>>> + default m if COMPILE_TEST
-> >>>>> + help
-> >>>>> +   This framework is designed to abstract multiplexer handling for
-> >>>>> +   devices via various GPIO-, MMIO/Regmap or specific multiplexer
-> >>>>> +   controller chips.
-> >>>>> +
-> >>>>> +   If unsure, say no.
-> >>>>>
-> >>>>>    menu "Multiplexer drivers"
-> >>>>>           depends on MULTIPLEXER
-> >>>>>
-> >>>> I'm not comfortable with making MULTIPLEXER a visible symbol. It is meant to
-> >>>> be selected when needed (and there are a dozen or so instances). The kbuild
-> >>>> docs has this on the subject:
-> >>>>
-> >>>>    "In general use select only for non-visible symbols (no prompts
-> >>>>     anywhere) and for symbols with no dependencies."
-> >>> The patch description didn't make the decision logic clear,
-> >>> and I plan to submit a standalone patch for this after v7.0-rc1.
-> >>>
-> >>> Basically existing drivers using mux core used "select" to enable it,
-> >>> even though the core can function standalone with device-tree.
-> >>>
-> >>> Some of these users (phy-can-transceiver) function perfectly
-> >>> perfectly fine without mux, and use it as an optional feature.
-> >>>
-> >>> Likely drivers only used "select" to avoid writing helper functions,
-> >>> prompt, kconfig description and stubs - which this patch-set added.
-> >>>
-> >>> So I will argue that some existing users relying on "select" was wrong,
-> >>> and that the mux framework is generally useful on its own.
-> >> When I wrote the mux sub-system it was very much intentional and by
-> >> design that drivers needing a mux should select MULTIPLEXER, and that
-> >> MULTIPLEXER should not be a visible symbol.
-> > Need is a strong word here, and doesn't address the optional case.
->
-> "Need" was the correct verb up until you needed the subsystem to be
-> optional. If you need the mux subsystem to be optional, you need to
-> do it in a way that does not introduce headaches.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-In the other thread, Josua pointed out that there are already several
-drivers that cannot be enabled if MULTIPLEXER is not selected by
-something else:
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3b85233131b3..8d862079cf17 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1906,14 +1906,14 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>  		return 0;
+>  
+>  	ice = devm_of_qcom_ice_get(dev);
+> -	if (ice == ERR_PTR(-EOPNOTSUPP)) {
+> +	if (IS_ERR(ice)) {
+> +		if (ice != ERR_PTR(-EOPNOTSUPP))
+> +			return PTR_ERR(ice);
+> +
+>  		dev_warn(dev, "Disabling inline encryption support\n");
+> -		ice = NULL;
+> +		return 0;
+>  	}
+>  
+> -	if (IS_ERR_OR_NULL(ice))
+> -		return PTR_ERR_OR_ZERO(ice);
+> -
+>  	if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
+>  		dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
+>  		return 0;
+> 
 
-drivers/mux/Kconfig:
-
-    menu "Multiplexer drivers"
-            depends on MULTIPLEXER
-
-    config MUX_ADG792A
-            tristate "Analog Devices ADG792A/ADG792G Multiplexers"
-            depends on I2C
-
-    config MUX_ADGS1408
-            tristate "Analog Devices ADGS1408/ADGS1409 Multiplexers"
-            depends on SPI
-
-    config MUX_GPIO
-            tristate "GPIO-controlled Multiplexer"
-            depends on GPIOLIB || COMPILE_TEST
-
-    config MUX_MMIO
-            tristate "MMIO/Regmap register bitfield-controlled Multiplexer"
-            depends on OF
-
-While MUX_MMIO is selected by some/all(?) symbols that need it,
-the other three are not.  Are these three really dependent on another
-symbol selecting MULTIPLEXER?
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
