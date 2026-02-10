@@ -1,173 +1,154 @@
-Received: from mail-yx1-f49.google.com (mail-yx1-f49.google.com [74.125.224.49])
+Received: from mail-yx1-f50.google.com (mail-yx1-f50.google.com [74.125.224.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E753328B5B
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 13:34:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22A3B328B7D
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 13:44:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.50
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770730491; cv=pass; b=FhNcdfXXKmE4n39Fm/RnoBLzVZ9/d2zRDT6wiBh0xV4SpkVn2yx3cocM2w7u0tjfSAca02kKbd1UnDDROLSXYph3STM9sdDPUQu/cYNZQQJ2V+C6KKpSVZ/+Hw7rS6Seh83qhY7beRcvhijT5mmTLTWCYLVo533Hg2RCSDcUA7U=
+	t=1770731074; cv=pass; b=K2dv4RWPrMpiz5Cgcj3sfvKF+0WvDvzg1LmoP1krwGPg30qPrdOY4BTx4L3lGaQTsP8xcoWnJSmwZ7QNnxLFq1wqwmD+VcUy1cUszVHmGTVIkb9GOodaOyTRUNqVgXA+s06+yJ4hI95+v2QbXBlMuJxXzbfQtVrU+OMjn+QAWq4=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770730491; c=relaxed/simple;
-	bh=AdpjSw7dNkdr+/tjYVp8tYBCboA8uj/PFr3NOiu6QnE=;
+	s=arc-20240116; t=1770731074; c=relaxed/simple;
+	bh=My7H0zv9om6eGFOqwrY8WEQgO1PL3LXVOyrjI3ZQRjo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PH5SXN+iIg4hmLxXOZkAMFaRyWHjKtlYkahtyrD8OP+dkMNzSFL0axt1ObdDhxoAGp2iT7V4N4X99clkeIHzzBdILXsqygd9+I1OHwLWUuHHwfpN6gRFyW77hZEwgg+O0i89l8FWC97hxYn7r96ld0k0KtS1b2ndaQSDYGYtja4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xClPmlTp; arc=pass smtp.client-ip=74.125.224.49
+	 To:Cc:Content-Type; b=g3JASjYJm9cbQBhaL3JwFscgZ+bnZVdgBzwxscACB3buvqeQaP3TeOJB7qb864DZYquwhz6YI96mIr1Nz8eOUT6QG7Eu3eTgP59Pd7ZZkluGN3rwUVdGQ1wBbnZJP8IO9RcsVHclb90m0OF9w6QUpy/A92Vb14LrqrLTDo2OMv8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Vw8WzPB0; arc=pass smtp.client-ip=74.125.224.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xClPmlTp"
-Received: by mail-yx1-f49.google.com with SMTP id 956f58d0204a3-64ad9fabd08so2657286d50.2
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 05:34:50 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770730489; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Vw8WzPB0"
+Received: by mail-yx1-f50.google.com with SMTP id 956f58d0204a3-64ad8435f46so3372013d50.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 05:44:32 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770731072; cv=none;
         d=google.com; s=arc-20240605;
-        b=aYB9gHLiL4bv72E6pBgbHAics3DsQl9muCZFcd6xoEmSo9oWeubGyJKyWsv/6Yqp+9
-         klQebf8le5+BnlG5MmUfluRhXlV8ZQljN+hd8GtFyNl0iNCgVPGPMESa/rgVtVVa1e0k
-         xymKX/JPjQWWF9NBe4rZukKfEBb34ckbouYf8qulz1XSxmbo7EwWOYrcmdG5eXj34UXP
-         VcpD8DYBcT4Pew7O7Woe5ljaVE4aueLWSXgyqX11CQrk7ZZ0TAhQBxkp/rLhNHvHQopU
-         m7vry+cTVstmnaQ1LDFKjFn/4l43+YrkyLerQ4sdT4ZucP+lmpsl0YCEseieXwP5ReU4
-         7eDw==
+        b=EH2f8faN9vzjz0JkAAY7sSBUDOferuj5cH96NRzrJCZIF7qoxVKhtgGkONpsodR7lV
+         qmf3LDlo3msNIoKGQVvjDO5Rkf1ZFv61StCE2fRZA+3EuRC5fIL0Dl3yA/kpVgpjEdE5
+         n6Xned2idgsY0ZmIZ9u0plCPOYcWmm1xdbm29dgR9zHzvJc2aA8b9x3N91pHhhCHchKK
+         lTMhCKeqCmT6evHebjKhn1jDOJC5OVx0VwKlpuf4KQoBGqg/CmwAuwnnX7nkWuWJHgHW
+         lUT9myNR0djgguAAC31r+/+2ELNSaPXjRCYSmppc3dl4iAFIbzT2ciiDI9o1Mwtya37P
+         M6HA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=Awy7xGMtWG+lB2DiLFib9mc4+as+WZ2R0n66soYWbRE=;
-        fh=eaujysUDGpfVbLxVCakYH6t6IWNGNANB1Msgb3WCg+o=;
-        b=ZA42MuPFjFoYNIw0eaoViIDCjpvmitkNKDfYqV2+GKo55aWNEspzZdKVyDoMQ6iDvD
-         1o1qiU53a9VexidtweG/HyJriNksqo4uVXGcO+A627qKnTZbZGYwfNkhXhXwTReonuIu
-         zdBsAk1kZDQ8aTHQBfDigcWCFSYJfWdaWy+LRLSlXhiSTx6ardX9vfBiexBd1Ov1zH2B
-         D5CTB3J5bZlEh2ETmX11iUoe/A5vjXcTT5wFDYyY8r9K2hawi5/zvuN6+UJuA0yZQUZD
-         x3SPNHrNCfFs4mNEEDhS5rZJDj0OWrkX9FZg5/jF7KVcmDxGW/g6AylwMSXWvjd9JlWq
-         M7Jg==;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=cO0B8QPhPo0Y3GlbKCDusifXNzaiAeSd4InIZCnguwY=;
+        fh=K+waowAMsWZFUvGIefIxN5XNWuXu8odPIrRLe6epYmU=;
+        b=PRBMlBfSc3Pv0npWLqDcbtwHAnlj2+KlNtnYNsH8dn41jnlHI7i9JoYUW2g5UlWQtk
+         KTRnfaPG5lra+Z8pLTFEy2DK72pBaiTHeS4jGgRJCH6kTzt8OwucgDC7y72B+1e3U5Kv
+         nAxZOyLOdbuEmvN3yOldzQ9OIaQBorSrHrF12jZgUhFaI4MWJtyK/X1tMZPUp9DAJoDN
+         lrqcIZ3Skfg0xP2h/QdejtH8e6+z1uUlm+n76WIjVqBBYnJq8rzBLPbNiWlhIT1AmjjX
+         sC02yjYhoRC17fOKsCvxQUmfbny7saCBXodoU/ggECS8gZ3C5jE79BEImM8l71OYLTqO
+         4tmQ==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1770730489; x=1771335289; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Awy7xGMtWG+lB2DiLFib9mc4+as+WZ2R0n66soYWbRE=;
-        b=xClPmlTpW83778ogu7Eud87AdTFkK5Y4I3tN0m07H8z5/B5dd+cfmFGGyaSSVyrVDi
-         tzg+ya1XVE4Pvenqpeg/8oeXjW7X4IyqTr/UKqJO0zse1lvk/OM/HkUfQTEvAaWjoaae
-         /ADxiDrH0cDK6FYyrQ/AArhpdTpKVzCPthnM7YY65W8kmBgepquzR5y6cTi9XKq8HWQK
-         qMxzVpOc9WQ5FuA0iQc9mGLTM/YW7S0220kmZPsRn4OcnIhyOAPmBX/KhBTlrW9IbUC+
-         Dh0YgD4uc6qoNVG++fqfUW2VdaCIryq0Du5K5OqEuHGSWipPPRmcEie1wIhWOuAgLES5
-         BraQ==
+        d=linaro.org; s=google; t=1770731072; x=1771335872; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=cO0B8QPhPo0Y3GlbKCDusifXNzaiAeSd4InIZCnguwY=;
+        b=Vw8WzPB0oLcYWhtQSx/BjgeR0IIJffAqCy/AtF/PqSjkoeWAJ3MPMv1QGab0EKCEJp
+         hYOrRYbpzrt0KLCPL8dv2ImW+w3GICWzj0n+MLSB8F4DaPx0w3X9pqcj/75b/SrDmK+0
+         dS6JJILoKeKUQwgO44dPaUMEmOtfdsgxTXuM9w/SFYfhDEhVXbdIppsVZ474fE4EH5z8
+         W5tQMD6yyOGACdGI2sBNuBPlvNFy1h5C8ojSZJ9FMMJx7l2OTuwjy/VDX4yB7L05G2NR
+         AU1NqixA2Lis3AnkTkzixffUUqPnjIMvk9NfWEWDvDQciQRcfQzdH3t2uFPeYph0ihxZ
+         tAwA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770730489; x=1771335289;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=Awy7xGMtWG+lB2DiLFib9mc4+as+WZ2R0n66soYWbRE=;
-        b=rVANXC6U2iEV37X7j963othFtAct6GhmK0UyrerKOyTbsfyrjJ0XnhVmpASU/coZHU
-         ZtuhQM506sqhjm+DUl7Q7tktttk0Afy2uTg5X3XVkJPc8oI3INKqJerMWGAke4A2bKeQ
-         mDC/3auUv8YRxbkawuco50gEh2LL979r46wUcIrL6Vi1yHdpSpVHplyFK/BItx8MNyc1
-         nHkOMjc4w//MdBaoxxCrx8LX45IDdhoOfOghDKxT6wEaFlUMDO0e1MoOolcOscTR+ePc
-         Ef5Mf5uW3IqmRHlBKPbnwH/83uxipd7ERQQ+BodPYnSTYSaZiTGqVNzxrgMSubr8igdh
-         0IjA==
-X-Forwarded-Encrypted: i=1; AJvYcCUsKThB6luuNvdqpg//xgo7ZiTjq1D5La7jLZTGOcuCBGu1XDq8qzi6TRKutMaqYJSb/UfDsjrO+YI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzMlICfw62oAr19t7+6bs45z9NfOMSA/wvqdGWV0eQOA3mX96Wg
-	MsJXGitdtWPJss/psDJGOmfbxlSEyA9F5D2ve8Vb0TFP2ZGZvcyL5+7nq0y8giSm8OzZG/R0wsp
-	KAgpfhg19mrNhnY5QH22wav+tGB9Uphe7DeeGNdAtHQ==
-X-Gm-Gg: AZuq6aL0O5hdMwivLkKJVWN09eJTSTySp7HhiYUIAENPBcAyUTiqnouiffcNOLpNayf
-	1/U2zOETcpWyM64U2D+sGCPTXBz1RKl1Z2LBOQgOPlRUNRQhVH4o/D8t9EsCpOet+a1MQBOp7ps
-	UC2tDetpoxZ1eDreVjKqXxDz0CoCP5XZJRbU5eoD94zifqMaum9us9mX0f4qfddisKqUXtoD34x
-	Uj5BSJ6otXwRGo7iQklSvlMOr366/RMGzTjlNduENZkTTpsoLjZU/RppQqD7t+Dr2zP22NmZp0g
-	LTxnOQ2/Y9EaUOyKTik=
-X-Received: by 2002:a05:690e:4082:b0:649:f272:4e71 with SMTP id
- 956f58d0204a3-64af2194733mr1895375d50.61.1770730489200; Tue, 10 Feb 2026
- 05:34:49 -0800 (PST)
+        d=1e100.net; s=20230601; t=1770731072; x=1771335872;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cO0B8QPhPo0Y3GlbKCDusifXNzaiAeSd4InIZCnguwY=;
+        b=nSaEW4dZZBuSte2ILZyOVcuDKhp3GDT48ZgNLgAtN+bMTYb24p+UT2FveoCYDK3MUj
+         cjEh+ZLtH3AoJj+6nFvJFvEve0JlCcq1rJ+bg66RMy0koTId3WmkyyboyI/ewwvkqYf/
+         cfbHuEenm2Cw2891Xswx9FbpIjSSI2xsYk3HcGwkTCE1VzMKEG65jh2/M9iakx5nv6Je
+         N0yELLeljLiAxFa0GJSerQhms8SSm5Yt4vNcv/b4s3Er/asrHmFJLdlQbxxThIEKNKAs
+         vZLTi7wT0fl5MEgPNm4gl/IkLHh0uGQQANQclH3DsNLGk5tC/0AoYG+8IvRcz8hzh5Fn
+         8GAg==
+X-Forwarded-Encrypted: i=1; AJvYcCVAT4uwkEA8dokQ+wdojaagWAMmvYMz2QhUwEbRRwrt8KMJOrc+QD7C0Ua6w2dBc1aZuSSq3dfDQPE=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyv5LQKABBKT1U9iOMFlTo53ak8a6r4rTWt6TWXVBgu8otVw/7q
+	/+1rAzBDK1MaW1RgoydZLRzorGgci8IIqx9x+ZzE+3a+qJS1zY512Vpq8okKnHETcObK+hCav6g
+	1eLmiaTnlRqCv9s39UIxlaAVoYjv0Da3jvrVQ6jXCyg==
+X-Gm-Gg: AZuq6aLPTJMJmDIohgoPlEeXm2+H18MJBlSv5kNP6n19Mmqo8hOdtnayVAHTTSkykey
+	pubhIDO4tE8eIuqd57Mzl9VII0g6H+2j/Ih3KlKteiMtoshXmGHKPgMPK24gL6i7kPiOifQboTz
+	kCIn5DcIB+U1nBFAKIRXn/LD7ivIKTwUgMQ3J2ewoD7R5DN8dW82r921yy/UIxaHyVGjzYI1P5F
+	qFKv6Tr2H9HqK2DcPZt6G68FpmGeOxTpSt+lIFabJevaWFsOldeC/DjKx2lV1AUh+KnTzx64TTo
+	UCr0FJHY
+X-Received: by 2002:a05:690e:b4e:b0:64a:f188:976f with SMTP id
+ 956f58d0204a3-64af1889b6fmr1730648d50.45.1770731072184; Tue, 10 Feb 2026
+ 05:44:32 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
-In-Reply-To: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
+References: <20260210-qcom-ice-fix-v2-0-9c1ab5d6502c@oss.qualcomm.com>
+In-Reply-To: <20260210-qcom-ice-fix-v2-0-9c1ab5d6502c@oss.qualcomm.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 10 Feb 2026 14:34:11 +0100
-X-Gm-Features: AZwV_Qh7YZqJ6fn57eqSKDNnShG5y8_vQaT5Jjd2bk1tO-PMV5NbiA4MiAomS4E
-Message-ID: <CAPDyKFpY2X8hephSfHq7rj_DaKX76ZSkWSCYXrGTEBUFHkvOzg@mail.gmail.com>
-Subject: Re: [PATCH next] phy: renesas: rcar-gen3-usb2: Drop local devm_mux_state_get_optional()
-To: Vinod Koul <vkoul@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, 
-	Neil Armstrong <neil.armstrong@linaro.org>, Josua Mayer <josua@solid-run.com>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>, linux-phy@lists.infradead.org, 
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	linux-next@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Tue, 10 Feb 2026 14:43:53 +0100
+X-Gm-Features: AZwV_QhTZ9KRaRA5GTHx4N22K6Lp6hSICHstQ6937DBI5S-nFi13iuFlfu6mtC8
+Message-ID: <CAPDyKFocm3yRTG0TJJRxfDvJMjvvvri5fzi_HoNY4YSd-41oKA@mail.gmail.com>
+Subject: Re: [PATCH v2 0/4] soc: qcom: ice: Remove platform_driver support and
+ expose as a pure library
+To: manivannan.sadhasivam@oss.qualcomm.com
+Cc: Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Abel Vesa <abel.vesa@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Manivannan Sadhasivam <mani@kernel.org>, 
+	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
+	"Martin K. Petersen" <martin.petersen@oracle.com>, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-scsi@vger.kernel.org, Sumit Garg <sumit.garg@oss.qualcomm.com>, 
+	stable@vger.kernel.org, Abel Vesa <abel.vesa@oss.qualcomm.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, 10 Feb 2026 at 11:53, Geert Uytterhoeven
-<geert+renesas@glider.be> wrote:
+On Tue, 10 Feb 2026 at 07:56, Manivannan Sadhasivam via B4 Relay
+<devnull+manivannan.sadhasivam.oss.qualcomm.com@kernel.org> wrote:
 >
-> Now the mux core provides devm_mux_state_get_optional():
+> Hi,
 >
->     drivers/phy/renesas/phy-rcar-gen3-usb2.c:944:1: error: static declara=
-tion of =E2=80=98devm_mux_state_get_optional=E2=80=99 follows non-static
->      declaration
->       944 | devm_mux_state_get_optional(struct device *dev, const char *m=
-ux_name)
->           | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
->     In file included from drivers/phy/renesas/phy-rcar-gen3-usb2.c:20:
->     include/linux/mux/consumer.h:64:19: note: previous declaration of =E2=
-=80=98devm_mux_state_get_optional=E2=80=99 with type =E2=80=98struct mux_st=
-ate *(struct device *, const char *)=E2=80=99
->        64 | struct mux_state *devm_mux_state_get_optional(struct device *=
-dev, const char *mux_name);
->           |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> This series removes the platform_driver support from Qcom ICE driver and
+> exposes it as a pure library to the clients to avoid race conditions with ICE
+> SCM call availability.
 >
-> Fix this by dropping the temporary local wrapper.
+> Merge Strategy
+> ==============
 >
-> Fixes: ad314348ceb4fe1f ("mux: Add helper functions for getting optional =
-and selected mux-state")
-> Fixes: 8bb92fd7a0407792 ("phy: renesas: rcar-gen3-usb2: Use mux-state for=
- phyrst management")
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> ICE patches (1,2) through Qcom tree and MMC/UFS patches (3,4) through respective
+> subsystem trees as there is no dependency.
 
-Thanks Geert for helping out!
+Just wanted to double check that this is really correct....
 
-> ---
->   - ad314348ceb4fe1f is in mmc/next, and a PR has already been sent
->     https://lore.kernel.org/20260209133441.556464-1-ulf.hansson@linaro.or=
-g
->   - 8bb92fd7a0407792 is in phy/next
-
-Vinod, do you want to pick up the $subject patch as a fix for 7.0-rc1
-or do you prefer me to handle it?
+The propagated error codes (or NULL) are changed in patch1/patch2, so
+is it really okay to pick the mmc/ufs patches (patch3 and patch4)
+independently?
 
 Kind regards
 Uffe
 
+>
+> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
 > ---
->  drivers/phy/renesas/phy-rcar-gen3-usb2.c | 10 ----------
->  1 file changed, 10 deletions(-)
+> Changes in v2:
 >
-> diff --git a/drivers/phy/renesas/phy-rcar-gen3-usb2.c b/drivers/phy/renes=
-as/phy-rcar-gen3-usb2.c
-> index cfc2a8d9028d58d0..65cbf330bd8fa10c 100644
-> --- a/drivers/phy/renesas/phy-rcar-gen3-usb2.c
-> +++ b/drivers/phy/renesas/phy-rcar-gen3-usb2.c
-> @@ -939,16 +939,6 @@ static int rcar_gen3_phy_usb2_vbus_regulator_registe=
-r(struct rcar_gen3_chan *cha
->         return rcar_gen3_phy_usb2_vbus_regulator_get_exclusive_enable(cha=
-nnel, enable);
->  }
+> * Added MODULE_* macros back
+> * Removed spurious platform_device_put()
+> * Added patches to remove NULL return
 >
-> -/* Temporary wrapper until the multiplexer subsystem supports optional m=
-uxes */
-> -static inline struct mux_state *
-> -devm_mux_state_get_optional(struct device *dev, const char *mux_name)
-> -{
-> -       if (!of_property_present(dev->of_node, "mux-states"))
-> -               return NULL;
-> -
-> -       return devm_mux_state_get(dev, mux_name);
-> -}
-> -
->  static void rcar_gen3_phy_mux_state_deselect(void *data)
->  {
->         mux_state_deselect(data);
+> ---
+> Manivannan Sadhasivam (4):
+>       soc: qcom: ice: Remove platform_driver support and expose as a pure library
+>       soc: qcom: ice: Return proper error codes from devm_of_qcom_ice_get() instead of NULL
+>       mmc: sdhci-msm: Remove NULL check from devm_of_qcom_ice_get()
+>       scsi: ufs: ufs-qcom: Remove NULL check from devm_of_qcom_ice_get()
+>
+>  drivers/mmc/host/sdhci-msm.c |  10 ++--
+>  drivers/soc/qcom/ice.c       | 127 ++++++++++++++++---------------------------
+>  drivers/ufs/host/ufs-qcom.c  |  10 ++--
+>  3 files changed, 58 insertions(+), 89 deletions(-)
+> ---
+> base-commit: 8f0b4cce4481fb22653697cced8d0d04027cb1e8
+> change-id: 20260210-qcom-ice-fix-d2a3a045b32d
+>
+> Best regards,
 > --
-> 2.43.0
+> Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+>
 >
