@@ -1,121 +1,173 @@
-Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
+Received: from mail-yx1-f49.google.com (mail-yx1-f49.google.com [74.125.224.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0214D27E074
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 13:05:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.222.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E753328B5B
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 13:34:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.49
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770728715; cv=pass; b=UDohCjfKbbSoKfwxd/3pFBirVh41OKIaQmGJuFhSqbh7FC9nYxFeOnjK3SWrGf+xN/aH3TWZLoMA7vVmbDhQPnliEtmauuyc2inFkJHtwV4SmDikpoSt6lRARQ1n9mQP0BcVnb9YBPJGCyrkxRfTQ5MP/4mLKqUHUGuG/h5GdoA=
+	t=1770730491; cv=pass; b=FhNcdfXXKmE4n39Fm/RnoBLzVZ9/d2zRDT6wiBh0xV4SpkVn2yx3cocM2w7u0tjfSAca02kKbd1UnDDROLSXYph3STM9sdDPUQu/cYNZQQJ2V+C6KKpSVZ/+Hw7rS6Seh83qhY7beRcvhijT5mmTLTWCYLVo533Hg2RCSDcUA7U=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770728715; c=relaxed/simple;
-	bh=dSnUJA3+yHZ/FYLf6h1sLv4QGMAR4RIhE/hIaBv2kww=;
+	s=arc-20240116; t=1770730491; c=relaxed/simple;
+	bh=AdpjSw7dNkdr+/tjYVp8tYBCboA8uj/PFr3NOiu6QnE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FdbSYfvqMfQE+ouM9Qi/ze+CR7yRlz6cNfHNa/0XGQE5ZhLrWqYCPLotgzJ/JE4ipedSOd8qn8HcT0yhAOUZmbVps//8Soj18Jv77EZzJsTJmlcjC1CKnKBfQSa+b2u9udhsroKp0Fu8gXOJ0GIsEiBDTgaAuNgJwWk1/mRA8lc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=osht1QX4; arc=pass smtp.client-ip=209.85.222.178
+	 To:Cc:Content-Type; b=PH5SXN+iIg4hmLxXOZkAMFaRyWHjKtlYkahtyrD8OP+dkMNzSFL0axt1ObdDhxoAGp2iT7V4N4X99clkeIHzzBdILXsqygd9+I1OHwLWUuHHwfpN6gRFyW77hZEwgg+O0i89l8FWC97hxYn7r96ld0k0KtS1b2ndaQSDYGYtja4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xClPmlTp; arc=pass smtp.client-ip=74.125.224.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="osht1QX4"
-Received: by mail-qk1-f178.google.com with SMTP id af79cd13be357-8c59bce68a1so56677985a.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 05:05:13 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770728713; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xClPmlTp"
+Received: by mail-yx1-f49.google.com with SMTP id 956f58d0204a3-64ad9fabd08so2657286d50.2
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Feb 2026 05:34:50 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770730489; cv=none;
         d=google.com; s=arc-20240605;
-        b=fKIzq1p/6fhf/cJqvo6u8xCxdFPS1wBOC7wn9elal5Z7RVzIC7QugXZEG+ra/63IEM
-         VJKH6PIefwig6+8i4PPb+JLkHCTfu/MuQzAPpD9RcWgMcJcjpMTzQyVu90nU1OxK5jqy
-         oefgZAHxrUIW+aBuFkST08buU4b6UCGCvkxyKXsa+XFr+CJbjNLI0XcJsTde62+LZDJy
-         /0+DF+VhlYKmyni35emBt7JcDqQ9U7GEGDav9W5r5VmSWGLABjV/TLsORnVGsW4i430v
-         oYIjaQ2OEDpN36VIc7snBVexOkriv73PfyRkJihjRPNouqHIO3j5yCYQKfc4cthAVc0g
-         WDDw==
+        b=aYB9gHLiL4bv72E6pBgbHAics3DsQl9muCZFcd6xoEmSo9oWeubGyJKyWsv/6Yqp+9
+         klQebf8le5+BnlG5MmUfluRhXlV8ZQljN+hd8GtFyNl0iNCgVPGPMESa/rgVtVVa1e0k
+         xymKX/JPjQWWF9NBe4rZukKfEBb34ckbouYf8qulz1XSxmbo7EwWOYrcmdG5eXj34UXP
+         VcpD8DYBcT4Pew7O7Woe5ljaVE4aueLWSXgyqX11CQrk7ZZ0TAhQBxkp/rLhNHvHQopU
+         m7vry+cTVstmnaQ1LDFKjFn/4l43+YrkyLerQ4sdT4ZucP+lmpsl0YCEseieXwP5ReU4
+         7eDw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=dSnUJA3+yHZ/FYLf6h1sLv4QGMAR4RIhE/hIaBv2kww=;
-        fh=2iKz3AqYxwGck4acAtQJ6/208mwqzO+86tu6uoAL4Eg=;
-        b=LapYm4V2yYwDkax2iNchV86g0UzWT5PZmV02VzIWEJZJ1Dz5wOVwLhzMzJiSN3YISm
-         m+naUiVoc8/cHoTMnZWIqY0RnwQUH9dVjwBwQdD3nx8c6ENZfd2oM4UK0dpqJgbmcYoB
-         0ClyFpMYPSpaytF1HQZITKNqgYEDDW22dXzUoxeZK9o2JXZY8uM5brgcnF0eMGZhASwO
-         NAHBLSaEfDJDyDiOYMnoCtg/zza+Wv0edvZOFtwN0wge9a4jApVC5VzpZ1o7Z935/VDL
-         3mzt3Jt+pLJiOl2+HrW5Hy62XoCl3jV6jJnrDZ1wavCra0yl10mFZmJeWhO1bs9XzngR
-         XU0g==;
+        bh=Awy7xGMtWG+lB2DiLFib9mc4+as+WZ2R0n66soYWbRE=;
+        fh=eaujysUDGpfVbLxVCakYH6t6IWNGNANB1Msgb3WCg+o=;
+        b=ZA42MuPFjFoYNIw0eaoViIDCjpvmitkNKDfYqV2+GKo55aWNEspzZdKVyDoMQ6iDvD
+         1o1qiU53a9VexidtweG/HyJriNksqo4uVXGcO+A627qKnTZbZGYwfNkhXhXwTReonuIu
+         zdBsAk1kZDQ8aTHQBfDigcWCFSYJfWdaWy+LRLSlXhiSTx6ardX9vfBiexBd1Ov1zH2B
+         D5CTB3J5bZlEh2ETmX11iUoe/A5vjXcTT5wFDYyY8r9K2hawi5/zvuN6+UJuA0yZQUZD
+         x3SPNHrNCfFs4mNEEDhS5rZJDj0OWrkX9FZg5/jF7KVcmDxGW/g6AylwMSXWvjd9JlWq
+         M7Jg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1770728713; x=1771333513; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1770730489; x=1771335289; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=dSnUJA3+yHZ/FYLf6h1sLv4QGMAR4RIhE/hIaBv2kww=;
-        b=osht1QX4FhlsA7if+s0SmUErLog7jzd32ainuMMorfSWCj2xjOUOLluDRTOwNwJ7dI
-         4lqqqq8FgiqedLl4Q3OIs/9xirpKI00DndxFJhd1kEPdMRwRBZHKBIUm/PKz4TmwqxQT
-         qN/KcTywKdPqLuMNYPcqoWq+Xzba3BiLRiTmQgyrWwOkSud8u30H8Sw6rFKwbgWVxVA5
-         tdFyQX/8iWMT+GuPctMaU7HIh8Z/8cdZYsrWPUDjycmTc0hBgN9HfV1/8/XxFV6+R7LW
-         o0MhBW1YDd3s801c4oI3y5jVHFxeCgpPt0zEzWcDh4dyQGItztPRstH2fOasaeKdOtsl
-         kxuQ==
+        bh=Awy7xGMtWG+lB2DiLFib9mc4+as+WZ2R0n66soYWbRE=;
+        b=xClPmlTpW83778ogu7Eud87AdTFkK5Y4I3tN0m07H8z5/B5dd+cfmFGGyaSSVyrVDi
+         tzg+ya1XVE4Pvenqpeg/8oeXjW7X4IyqTr/UKqJO0zse1lvk/OM/HkUfQTEvAaWjoaae
+         /ADxiDrH0cDK6FYyrQ/AArhpdTpKVzCPthnM7YY65W8kmBgepquzR5y6cTi9XKq8HWQK
+         qMxzVpOc9WQ5FuA0iQc9mGLTM/YW7S0220kmZPsRn4OcnIhyOAPmBX/KhBTlrW9IbUC+
+         Dh0YgD4uc6qoNVG++fqfUW2VdaCIryq0Du5K5OqEuHGSWipPPRmcEie1wIhWOuAgLES5
+         BraQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770728713; x=1771333513;
+        d=1e100.net; s=20230601; t=1770730489; x=1771335289;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=dSnUJA3+yHZ/FYLf6h1sLv4QGMAR4RIhE/hIaBv2kww=;
-        b=PJVzIvDzG45pNS10t0i0DsRiQ25j7khHKuElgsDnUGFPDjo6X/Q+h50LJmErhwXC21
-         sf3PLkix7p66mqQqhizcIKRX8bfxmmu2DBfWTTVFPUmXF96EfZ3QRTYWrKZxz8LEXZOj
-         vU13JuK4CWRXfDMfTei3FlDma/NFB/jsmOta7yaEU+Nr1iYEBSpY4X/Ej60+a+sobOtK
-         maWjVgK9/jCRpnRQiM25atT0JnlrGZXwGMeYbiXcjTeZz+Yv0ngn/gsQBK9v6pvP3CL5
-         5PENKx81P4D6v7POhLhu4E52vYb25BPAo2PpoJZDz3l3TNSsKEBb8SIWPCKbrpzlRK/C
-         OWTQ==
-X-Gm-Message-State: AOJu0YySrOAGRR9AQNn0vvMGAfgSP7I4OHqYfHgwbdCCoBSK4ze8pVUa
-	ozaIb1BzK+lDD/ULaB84K/LW2YAIcX2MQM4SFN/+4NE6SY5DdhEag80n80ELluog2AaavnS4iyK
-	mn2H4Ivfu2Q99aM4DCAQgks83+cfrLn7MfI7a4djItQ==
-X-Gm-Gg: AZuq6aIgeuUGEFse76eddq7eZpdqNaDsbf5wq7KB94UyG06A3StGKV7a/FIeYeDaMiq
-	IccbkpZNbhkEBVhNpcn84zt8TC+05UdomC5y9hV3LzdDus1vwMBd9564oXKcpMZzHlQnrx7+3L1
-	ZEpeyNUjWN+FE7get/vopeHU8mvadmwuA8vuyI6bqSEMK36TGEK/zYM0JpxeKI9cvNBm41YPC0P
-	g5ij/FeJhauDLENHEzfmNfmAyO1gKaGOdRqPYXhjzUGH8fLtyPTUErQ+ZBtiYyInUyRyXSauN5i
-	1m8ozv+M
-X-Received: by 2002:a05:620a:29cc:b0:8c0:e5ac:af12 with SMTP id
- af79cd13be357-8caeeb50fa0mr2024634985a.5.1770728712674; Tue, 10 Feb 2026
- 05:05:12 -0800 (PST)
+        bh=Awy7xGMtWG+lB2DiLFib9mc4+as+WZ2R0n66soYWbRE=;
+        b=rVANXC6U2iEV37X7j963othFtAct6GhmK0UyrerKOyTbsfyrjJ0XnhVmpASU/coZHU
+         ZtuhQM506sqhjm+DUl7Q7tktttk0Afy2uTg5X3XVkJPc8oI3INKqJerMWGAke4A2bKeQ
+         mDC/3auUv8YRxbkawuco50gEh2LL979r46wUcIrL6Vi1yHdpSpVHplyFK/BItx8MNyc1
+         nHkOMjc4w//MdBaoxxCrx8LX45IDdhoOfOghDKxT6wEaFlUMDO0e1MoOolcOscTR+ePc
+         Ef5Mf5uW3IqmRHlBKPbnwH/83uxipd7ERQQ+BodPYnSTYSaZiTGqVNzxrgMSubr8igdh
+         0IjA==
+X-Forwarded-Encrypted: i=1; AJvYcCUsKThB6luuNvdqpg//xgo7ZiTjq1D5La7jLZTGOcuCBGu1XDq8qzi6TRKutMaqYJSb/UfDsjrO+YI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzMlICfw62oAr19t7+6bs45z9NfOMSA/wvqdGWV0eQOA3mX96Wg
+	MsJXGitdtWPJss/psDJGOmfbxlSEyA9F5D2ve8Vb0TFP2ZGZvcyL5+7nq0y8giSm8OzZG/R0wsp
+	KAgpfhg19mrNhnY5QH22wav+tGB9Uphe7DeeGNdAtHQ==
+X-Gm-Gg: AZuq6aL0O5hdMwivLkKJVWN09eJTSTySp7HhiYUIAENPBcAyUTiqnouiffcNOLpNayf
+	1/U2zOETcpWyM64U2D+sGCPTXBz1RKl1Z2LBOQgOPlRUNRQhVH4o/D8t9EsCpOet+a1MQBOp7ps
+	UC2tDetpoxZ1eDreVjKqXxDz0CoCP5XZJRbU5eoD94zifqMaum9us9mX0f4qfddisKqUXtoD34x
+	Uj5BSJ6otXwRGo7iQklSvlMOr366/RMGzTjlNduENZkTTpsoLjZU/RppQqD7t+Dr2zP22NmZp0g
+	LTxnOQ2/Y9EaUOyKTik=
+X-Received: by 2002:a05:690e:4082:b0:649:f272:4e71 with SMTP id
+ 956f58d0204a3-64af2194733mr1895375d50.61.1770730489200; Tue, 10 Feb 2026
+ 05:34:49 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260131020039.45966-1-enelsonmoore@gmail.com>
- <CAPDyKFps1oX=aKuUYFbXNQXM3rGtZOwTfgCaiHgDvGOb3qGc5w@mail.gmail.com>
- <CADkSEUhk1TfJXvLYOrx0OvVCgCA=L+CEZXGzQAhdTgkKz3a=bw@mail.gmail.com>
- <CAPDyKFrfXgCZJtFHttA1E0Tn1tSugHWsSfZvP1RAOOx5=ViWQw@mail.gmail.com> <CADkSEUj1TsZLXNO-GPU-5c19RPV-9d8os9HnxVOxrygvyTtqJg@mail.gmail.com>
-In-Reply-To: <CADkSEUj1TsZLXNO-GPU-5c19RPV-9d8os9HnxVOxrygvyTtqJg@mail.gmail.com>
+References: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
+In-Reply-To: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 10 Feb 2026 14:04:33 +0100
-X-Gm-Features: AZwV_QhfvEvh9N5jfSGMRrxI1aETXJw7zL9vey9hTy8fsc81MxpQyFP0Q3u5_4w
-Message-ID: <CAPDyKFrxNM81N=_jvkLtkzjgnbWKJ9CE8a-3DUrRoZkJoNNQ8A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: remove unnecessary module_init/exit functions
-To: Ethan Nelson-Moore <enelsonmoore@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>
+Date: Tue, 10 Feb 2026 14:34:11 +0100
+X-Gm-Features: AZwV_Qh7YZqJ6fn57eqSKDNnShG5y8_vQaT5Jjd2bk1tO-PMV5NbiA4MiAomS4E
+Message-ID: <CAPDyKFpY2X8hephSfHq7rj_DaKX76ZSkWSCYXrGTEBUFHkvOzg@mail.gmail.com>
+Subject: Re: [PATCH next] phy: renesas: rcar-gen3-usb2: Drop local devm_mux_state_get_optional()
+To: Vinod Koul <vkoul@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, 
+	Neil Armstrong <neil.armstrong@linaro.org>, Josua Mayer <josua@solid-run.com>, 
+	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>, linux-phy@lists.infradead.org, 
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	linux-next@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, 10 Feb 2026 at 03:25, Ethan Nelson-Moore <enelsonmoore@gmail.com> w=
-rote:
+On Tue, 10 Feb 2026 at 11:53, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
 >
-> Hi, Uffe,
+> Now the mux core provides devm_mux_state_get_optional():
 >
-> On Tue, Feb 3, 2026 at 3:16=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.or=
-g> wrote:
-> > > - They have neither init nor exit functions
-> >
-> > I don't think that's correct. At least this is my understanding of how
-> > this works.
+>     drivers/phy/renesas/phy-rcar-gen3-usb2.c:944:1: error: static declara=
+tion of =E2=80=98devm_mux_state_get_optional=E2=80=99 follows non-static
+>      declaration
+>       944 | devm_mux_state_get_optional(struct device *dev, const char *m=
+ux_name)
+>           | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+>     In file included from drivers/phy/renesas/phy-rcar-gen3-usb2.c:20:
+>     include/linux/mux/consumer.h:64:19: note: previous declaration of =E2=
+=80=98devm_mux_state_get_optional=E2=80=99 with type =E2=80=98struct mux_st=
+ate *(struct device *, const char *)=E2=80=99
+>        64 | struct mux_state *devm_mux_state_get_optional(struct device *=
+dev, const char *mux_name);
+>           |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
 >
-> Yes, it is correct. You can easily verify it - for example,
-> drivers/net/mii.c has neither init nor exit functions, but you can
-> still freely run "rmmod mii", assuming you don't have anything loaded
-> that uses it.
+> Fix this by dropping the temporary local wrapper.
+>
+> Fixes: ad314348ceb4fe1f ("mux: Add helper functions for getting optional =
+and selected mux-state")
+> Fixes: 8bb92fd7a0407792 ("phy: renesas: rcar-gen3-usb2: Use mux-state for=
+ phyrst management")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-That doesn't mean that module will be unloaded, as far as I understand.
+Thanks Geert for helping out!
 
-If there is no exit function, the module will stick around in memory.
+> ---
+>   - ad314348ceb4fe1f is in mmc/next, and a PR has already been sent
+>     https://lore.kernel.org/20260209133441.556464-1-ulf.hansson@linaro.or=
+g
+>   - 8bb92fd7a0407792 is in phy/next
+
+Vinod, do you want to pick up the $subject patch as a fix for 7.0-rc1
+or do you prefer me to handle it?
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/phy/renesas/phy-rcar-gen3-usb2.c | 10 ----------
+>  1 file changed, 10 deletions(-)
+>
+> diff --git a/drivers/phy/renesas/phy-rcar-gen3-usb2.c b/drivers/phy/renes=
+as/phy-rcar-gen3-usb2.c
+> index cfc2a8d9028d58d0..65cbf330bd8fa10c 100644
+> --- a/drivers/phy/renesas/phy-rcar-gen3-usb2.c
+> +++ b/drivers/phy/renesas/phy-rcar-gen3-usb2.c
+> @@ -939,16 +939,6 @@ static int rcar_gen3_phy_usb2_vbus_regulator_registe=
+r(struct rcar_gen3_chan *cha
+>         return rcar_gen3_phy_usb2_vbus_regulator_get_exclusive_enable(cha=
+nnel, enable);
+>  }
+>
+> -/* Temporary wrapper until the multiplexer subsystem supports optional m=
+uxes */
+> -static inline struct mux_state *
+> -devm_mux_state_get_optional(struct device *dev, const char *mux_name)
+> -{
+> -       if (!of_property_present(dev->of_node, "mux-states"))
+> -               return NULL;
+> -
+> -       return devm_mux_state_get(dev, mux_name);
+> -}
+> -
+>  static void rcar_gen3_phy_mux_state_deselect(void *data)
+>  {
+>         mux_state_deselect(data);
+> --
+> 2.43.0
+>
