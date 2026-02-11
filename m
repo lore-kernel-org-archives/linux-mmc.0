@@ -1,85 +1,97 @@
-Received: from mail-m3296.qiye.163.com (mail-m3296.qiye.163.com [220.197.32.96])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 745992C11E1;
-	Wed, 11 Feb 2026 14:40:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.96
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BB8633E355;
+	Wed, 11 Feb 2026 16:17:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770820805; cv=none; b=ONNzZxZ4HxDlIdUgMY+YbW8UdqtS/TBz+bNhx7PM1z1PbOrDpae4cXNoLqO8RElN+XljNJt+VtzHXd6YO/yMIq7fjbvBt2YTP1BO7jErkWEQjxqxCUZT/4tBD/EjSRZCDCaNTbmGsImcgRlpu526SpNaABmpRcKaZr7vjjdveWo=
+	t=1770826676; cv=none; b=RmzcASVLdmEz9LtV5G9zpZQgCg80AxaKORtn519jFtwZueG7B58U/ZeKrlhh6bZ/idhUeIdzvm4KgsyqkDFYax7YHt5aHJkRWO5JAfZBIS27WOcfcXl8w4ZHOxjUscGEvNVvH0nLLAznPouAvsRnExfouprgK+GMggV1M5d874g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770820805; c=relaxed/simple;
-	bh=URVyB8RrPwXiiiW3LJ7u+j4fw/b2mC4jWGMw1C1dSLk=;
-	h=Cc:Subject:To:References:From:Message-ID:Date:MIME-Version:
-	 In-Reply-To:Content-Type; b=iXxaAhib1hqv33mC4M2iu9vHsJDn9s/KHIttgbvkPa3Lxg0Bf7Y9mmA8qmH6c2yWC0A4UFCUPDd7s5u0Vllt7pFtJ+gF7JQSs3plYWJxHb1D4cPYQaPaM+Imn9bv9xugBFWvrrRFxj64t3sWOzsGFTCELWwM3g34pQFiXPwY73g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=ZGyScfI7; arc=none smtp.client-ip=220.197.32.96
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1770826676; c=relaxed/simple;
+	bh=18o8X62YvanS093uMPggd8PbG5ryv2EK9QMou/okpbY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=o5OF47NCf9UdfvpQAXfnxSgFWQQ7jZIsa9r0ColR0DOEU5tuFDUZ6Xby75JlGQvxwe+fjijsinR/2M9nD/FjPHPGPy6wBT/aSgM1MuARdfYGBNQpqveT7XRXPB5pue4N8TLvIp4i0Gd7b+x/4yjQQsBoxF3ZJRFJGBu7iNxyG3k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MB8We5Y6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="ZGyScfI7"
-Received: from [172.16.12.14] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 33e08660a;
-	Wed, 11 Feb 2026 22:04:26 +0800 (GMT+08:00)
-Cc: shawn.lin@rock-chips.com, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, heiko@sntech.de, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org,
- Fabio Estevam <festevam@nabladev.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: rockchip-dw-mshc: Add RV1103B
- compatible
-To: Fabio Estevam <festevam@gmail.com>, ulf.hansson@linaro.org
-References: <20260207131041.2833840-1-festevam@gmail.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Message-ID: <181120ce-2ba5-ff20-951b-e6b5d65995ae@rock-chips.com>
-Date: Wed, 11 Feb 2026 22:04:23 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MB8We5Y6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9726EC19423;
+	Wed, 11 Feb 2026 16:17:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1770826676;
+	bh=18o8X62YvanS093uMPggd8PbG5ryv2EK9QMou/okpbY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=MB8We5Y6o1kt/kCfSmacIh7m1Ca7XBsgDXkhhPkmAn6zH7gvm7qfVzEB9CqjX7CW+
+	 TSQPKpc9AhrWmh4MovqTvW+ui/DP+wzpZKcBXoAyxnCnfSQEVM2ZTluI9ttayJ90TV
+	 iLuhZoFxUqqCjLJfh93CL+QhCsf08z6sklw8Y9p+m5ACFVWNbx4YVQx3VZJamvWWPM
+	 IkT/1ozSBiPxqwRZ8vj+dJ0lmddC38e83LK3uhrQLPpYgPwUaV8Ln9s53E8+KXi9E+
+	 bzta94dKj91dQacKCr1wCuL303N2uVpxXEM7cONqPPKtRHrNs1prTSOiPBTbR9T2ox
+	 2vVOee6RL9gzg==
+Date: Wed, 11 Feb 2026 21:47:52 +0530
+From: Vinod Koul <vkoul@kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>,
+	Vladimir Oltean <olteanv@gmail.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Josua Mayer <josua@solid-run.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>,
+	linux-phy@lists.infradead.org, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, linux-next@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH next] phy: renesas: rcar-gen3-usb2: Drop local
+ devm_mux_state_get_optional()
+Message-ID: <aYyrsPTH1923jV7y@vaman>
+References: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
+ <CAPDyKFpY2X8hephSfHq7rj_DaKX76ZSkWSCYXrGTEBUFHkvOzg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20260207131041.2833840-1-festevam@gmail.com>
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9c4d047de109cckunmb311f1781114cd
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQkNOHVZISEwfSEwdTU4eGEJWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=ZGyScfI7bU8+1wFbfFPm+PUfnmYts3g9ia1xMhf6BsC3CuveXH69Oje5KEL3ofp+9a0JuboGgq6qSLqYO+KwUmGiAfR/ApfzA/FXB10M4V9yYBFepmcL76bLyuBRBpKyV3BE1pW5QFnFbEYFmjqGox7JtVBfjad3rbJa74D8v0A=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=eZbiOdABFeV6km7MW+Bf453bvMNUUhmLzSEIjWFy8dI=;
-	h=date:mime-version:subject:message-id:from;
+In-Reply-To: <CAPDyKFpY2X8hephSfHq7rj_DaKX76ZSkWSCYXrGTEBUFHkvOzg@mail.gmail.com>
 
-ÔÚ 2026/02/07 ÐÇÆÚÁù 21:10, Fabio Estevam Ð´µÀ:
-> From: Fabio Estevam <festevam@nabladev.com>
+On 10-02-26, 14:34, Ulf Hansson wrote:
+> On Tue, 10 Feb 2026 at 11:53, Geert Uytterhoeven
+> <geert+renesas@glider.be> wrote:
+> >
+> > Now the mux core provides devm_mux_state_get_optional():
+> >
+> >     drivers/phy/renesas/phy-rcar-gen3-usb2.c:944:1: error: static declaration of â€˜devm_mux_state_get_optionalâ€™ follows non-static
+> >      declaration
+> >       944 | devm_mux_state_get_optional(struct device *dev, const char *mux_name)
+> >           | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >     In file included from drivers/phy/renesas/phy-rcar-gen3-usb2.c:20:
+> >     include/linux/mux/consumer.h:64:19: note: previous declaration of â€˜devm_mux_state_get_optionalâ€™ with type â€˜struct mux_state *(struct device *, const char *)â€™
+> >        64 | struct mux_state *devm_mux_state_get_optional(struct device *dev, const char *mux_name);
+> >           |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >
+> > Fix this by dropping the temporary local wrapper.
+> >
+> > Fixes: ad314348ceb4fe1f ("mux: Add helper functions for getting optional and selected mux-state")
+> > Fixes: 8bb92fd7a0407792 ("phy: renesas: rcar-gen3-usb2: Use mux-state for phyrst management")
+> > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 > 
-> The RV1103B uses the DesignWare MSHC controller compatible with the
-> existing Rockchip RK3288 variant. Add the rockchip,rv1103b-dw-mshc
-> compatible string.
+> Thanks Geert for helping out!
 > 
-> Signed-off-by: Fabio Estevam <festevam@nabladev.com>
+> > ---
+> >   - ad314348ceb4fe1f is in mmc/next, and a PR has already been sent
+> >     https://lore.kernel.org/20260209133441.556464-1-ulf.hansson@linaro.org
+> >   - 8bb92fd7a0407792 is in phy/next
+> 
+> Vinod, do you want to pick up the $subject patch as a fix for 7.0-rc1
+> or do you prefer me to handle it?
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Should I drop the 8bb92fd7a0407792 and it makes things easier for
+everyone and then we can pick fixed commit for 7.1 cycle..
 
-> ---
-> Changes since v1:
-> - Make commit log more concise.
-> 
->   Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
->   1 file changed, 1 insertion(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index acb9fb9a92cd..a75209bd2710 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -43,6 +43,7 @@ properties:
->                 - rockchip,rk3562-dw-mshc
->                 - rockchip,rk3568-dw-mshc
->                 - rockchip,rk3588-dw-mshc
-> +              - rockchip,rv1103b-dw-mshc
->                 - rockchip,rv1108-dw-mshc
->                 - rockchip,rv1126-dw-mshc
->             - const: rockchip,rk3288-dw-mshc
-> 
+Does that work for everyone. I was about to send PR, will hold off for a
+bit.
+
+Thanks
+-- 
+~Vinod
