@@ -1,206 +1,163 @@
-Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8676E6F2F2
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 10:31:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.33
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770892308; cv=none; b=hfyIU5d3CSjXfpKLHMwkXQe38ZPJV3Fxv7835Cn67ziCXZJalo49+7q5rBLVSN8yP5BFSgp+UjYaKm05WAD65SdMDYUmTYtY2MedTxYXCxFnEuFeeizczvSskMLWvjoWbrR9DSnFV10MjSNzOLUcjliawIlDpjgrZQfQPpQ5J1Q=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770892308; c=relaxed/simple;
-	bh=HaEWXM3b8FGPAgoqcY9sQqxJ+qAzeeE9g7GbKzdtLWs=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:MIME-Version:
-	 Content-Type:References; b=ePJnl97mVK0z+u8mDMUYyqyB2xhQITkvfvbXvo4i414jtu8CedG5BeE9Ag4vM/eUDtCbpKYU3Eljbl52XGBgYokAJ1O6VJem4p6+uHhhBGadxdkgAC4Wpd0IPNk9cRHSByXFPcjNsgnZfG+8L3eaYy/iFYXoVBtMYm1HIXsWkiA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=eYsFrVJT; arc=none smtp.client-ip=203.254.224.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F0712EDD63
+	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 10:40:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770892814; cv=pass; b=N76bXe8wq1GGTfg20ZKMpEEnl4cuKyiwe/HTHGMcIV7w3loIrgR2Q0WUjWQl8ongQ6DotmYzxVe68SIL9tdzg4fF1DbjNraDVOFX6jps4XaSViUS7vJXAIbajizmjb4oYB/ENU1mFtmeZWqkBX2y3KnOonQR5qXOSX0leGLfWIY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770892814; c=relaxed/simple;
+	bh=lj0/gjhdUqOPwKmAM6VN//Fw8Q95Z7mUIRimgBZXmW4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Ct5C+VSV+puL5zJ+vcRJYwi/+sQH2rpOzc8iSjhanWVe0lOR79U9whGHAhJq4+SOMACCkzG9WC+PKFS4SR9sx4B5yoddhUnAqQaFAMVkBEsotmY/8Gs4FlaKtEqSdxiWp0EhRUyuRkol3jscdId5EGfL2I/BKEGuBX9NfabgMG8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lc4+cgQR; arc=pass smtp.client-ip=209.85.167.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="eYsFrVJT"
-Received: from epcas5p1.samsung.com (unknown [182.195.41.39])
-	by mailout3.samsung.com (KnoxPortal) with ESMTP id 20260212103143epoutp034ecc716716bc396239c22e8f4f9deff6~TeSrSkfAi1100211002epoutp03Z
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 10:31:43 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20260212103143epoutp034ecc716716bc396239c22e8f4f9deff6~TeSrSkfAi1100211002epoutp03Z
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1770892303;
-	bh=HaEWXM3b8FGPAgoqcY9sQqxJ+qAzeeE9g7GbKzdtLWs=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=eYsFrVJTlGz1UkdI6Z5naGNsNTAzvnX7soPF/T74BlasZyI/xh2YGEmM/mAxgTgcn
-	 uRLNcRItcLLy4KXhSeKES8kIpbHj9lv9iNpZOK+RoiVUJ+HWYm7aL7sMIPTusiu+x9
-	 mBWdRtYYahz/RuRj+ifenq6dKuXizUpqmrebzX14=
-Received: from epsnrtp02.localdomain (unknown [182.195.42.154]) by
-	epcas5p2.samsung.com (KnoxPortal) with ESMTPS id
-	20260212103142epcas5p2c1a2fc86f4676e29513466a6c16a07dd~TeSq6FicP2581425814epcas5p2x;
-	Thu, 12 Feb 2026 10:31:42 +0000 (GMT)
-Received: from epcas5p4.samsung.com (unknown [182.195.41.42]) by
-	epsnrtp02.localdomain (Postfix) with ESMTP id 4fBWnB6DD9z2SSKd; Thu, 12 Feb
-	2026 10:31:42 +0000 (GMT)
-Received: from epsmtip2.samsung.com (unknown [182.195.34.31]) by
-	epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
-	20260212103142epcas5p4bd370c87ca730d591a795fc8c562e350~TeSqq7x9k0745207452epcas5p40;
-	Thu, 12 Feb 2026 10:31:42 +0000 (GMT)
-Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip2.samsung.com
-	(KnoxPortal) with ESMTPA id
-	20260212103142epsmtip262f9bc972facc734ce92068a6ca03a91~TeSqHfiwR0585205852epsmtip2z;
-	Thu, 12 Feb 2026 10:31:42 +0000 (GMT)
-From: "ping.gao" <ping.gao@samsung.com>
-To: shawn.lin@rock-chips.com, ulf.hansson@linaro.org,
-	jh80.chung@samsung.com, sebastian.reichel@collabora.com,
-	ping.gao@samsung.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	hy50.seo@samsung.com, kwangwon.min@samsung.com
-Subject: Re: [PATCH] drivers: dw_mmc: Replace devm_clk_get with
- devm_clk_get_optional
-Date: Thu, 12 Feb 2026 18:36:27 +0800
-Message-ID: <20260212103627.3677417-1-ping.gao@samsung.com>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lc4+cgQR"
+Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-59e60925251so1824798e87.3
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 02:40:11 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1770892810; cv=none;
+        d=google.com; s=arc-20240605;
+        b=I4rHhXditA7tyDu7EXBUKwr1znnvMvNVeJu9pCX8brR4oDDexV0D3SkNfHSp/Qp5zz
+         sKbUlIR4MXACvQqy+r1wV4p0GuWLbA7Tt0hydQf1S1mfTd5CrvjpPNVIL2bmQJ3inODC
+         O6Ja8ruF2F3aN6Aeubs4qLbzVCzKbseRrWDQB3qyt2ryeJ8C/V8qAEe5CMNaserDVRIa
+         hrhhTwOG+j6zC9Bv0Ik+ztWyqv2Q2ljVOD0ev940hSyCIhTOy0aOhmxjrUwx0A0o06Q3
+         iyjw8VBxPQJDGNJCNeM4Jqv+7zsMlt9e8vjp8kbbIE1pJ63ylCpr2WqV1hWVOkIs/QvG
+         RPFg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=2QFiFFZSy2peF3P/wq5YLTidjl6EH3wfnbLnCbW9XTY=;
+        fh=Gc7skgEoObCg95HsqM8jFWSge52fYMppZ4vdaVuT33g=;
+        b=DK3jNeBVvfN1oCt5r+UY/qHKftVH0tNE0K/2/Ar/0ltWtnnjL0KiJM2PHeKvMY40//
+         5odiWfiNkRO2RjE9WEF+DlB/CP16qKXhaaRDkMtElXy83RrfA43rcGiC1Om7jq1hy1Up
+         Ss5ejmA3D/fmRNErAeq1AVBxxtTY8Jjc3Rq/mUovXAgHj7jj9IgMXmxrmKdFzEbBzXdw
+         6ROO1hC2r/ezXHXky0l6pVBc2cM2lUC2v5KownA/u549wbbnavjGAp7/C890sIic44Nd
+         uwC1HFgj1mTM7gcq+CjDHTiP+6jklsb58y7oOIscilcO/rJMmGLmxX1huLFrslJiixVy
+         fG8g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1770892810; x=1771497610; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2QFiFFZSy2peF3P/wq5YLTidjl6EH3wfnbLnCbW9XTY=;
+        b=lc4+cgQRHNqrVdvpkYaggFLjowju1ehJ4RRU0gmMdioYhkrtHaX4rhIEyo8MUiP/qo
+         NWlGkTpHyihGZWLuBLPfYx0RrR11cRax7k/OZWqK1rUS80FQpO8EMmPWn+NUEysFqbHl
+         l07BFreVRNIkEWPwpkaTxomdWHI6eZmKln3DJWH0DolNMB9zLx/f6zQAcZSxT1QWHObe
+         CU3dNN7yEv/YwjrHqr8gxIxvqQatOHGdDbfhtdo2VfPpmiIZdWwawG1pLflp89J/RCqh
+         CtnuvCCA7eHW5vsg3hFTCxK4WyswjKIhFoxw0Nr1XjF7B6vwpFYMgifFXGDhIuCmk9nM
+         Z4HA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1770892810; x=1771497610;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=2QFiFFZSy2peF3P/wq5YLTidjl6EH3wfnbLnCbW9XTY=;
+        b=ghYqHTsZZZE+YpqoDHSr7AwlXRqwsarPcLKA2KzpDX94KPn4/A3Ci7Fm2YWslj3g1D
+         MeygqQPpqwz+fQu3r2cvl7bH0gAhfofXsWkRK2PbbteJQVDeffYOFLCRxavwqbg2Zrhv
+         /KlIFPZLXQ2J4b4o/Ul6iWpKyNskopDrS+SDeqq2s1V1+qS0y7LWNbRGYBw+LdUJ6nhp
+         PjLKdFEFP5b/1SgjuB+4RnrZVRl1LrtgDzakrAsycj4sa7/DLdu9D9tETqwjSi9mYN0V
+         zZQ39cv4SrjQFcRwTiHRD4weeNsEFq6g3Egic9Ap6/lZMP3OCgBokNGBrXORe/SautwG
+         3gcw==
+X-Forwarded-Encrypted: i=1; AJvYcCUddj2UfjOBQoIhiF4z2+2vtQmUAoCkXXCkXIlqtbg3ieIKXFMuyNSOV8/i88GFOQAVhlCWlS++r3g=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxAvdEM3KfySGnBlTMDyXgzBQ0czSWxliDdVMNEdNmuVdE0083u
+	4dYFmk2cGKjdbH1foxsVkluCTnA6qSXKURosJw+4L+4Stxl+r1Y4CnuGufvl/kq6JnVaXX7xAb1
+	YMEagBhznq2SOQwDvxk5BecwJ/Z32rOk6Z7mZTCnMOQ==
+X-Gm-Gg: AZuq6aLMFvAphU5Cg7adnLz70XsipPTXrlqnCOdIrNo8hi1IjiT6bdYve9QVu7fNx9o
+	oYbI/BK25uZqX4ddgeGGNgHRlScrBgxBsEn+o2Cc1x/qQ6CW0jFzl9CJpdpipqyZyvogyaCPXPF
+	HlQQzpWuW6s1lLXc1QM+/siCLTa7O3O64N6e+NNSyH4gPFysTwr7/qn6SsV38E0nyro042rsGs/
+	YwpGDnyjHY07GSyE4yanko36cblFMJLRACA/bakPEShCFLa709bPh3pNxifTM230NbG3YGcY5Uu
+	Xw1FB5Re
+X-Received: by 2002:a05:6512:3d1b:b0:59d:f69e:16c2 with SMTP id
+ 2adb3069b0e04-59e640214bfmr777362e87.12.1770892809915; Thu, 12 Feb 2026
+ 02:40:09 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
+ <CAPDyKFpY2X8hephSfHq7rj_DaKX76ZSkWSCYXrGTEBUFHkvOzg@mail.gmail.com> <aYyrsPTH1923jV7y@vaman>
+In-Reply-To: <aYyrsPTH1923jV7y@vaman>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 12 Feb 2026 11:39:31 +0100
+X-Gm-Features: AZwV_QgmPkOET-FDUx-HmcWBF5gAKY3tXEOlKsTxUDKVx9vpnPTXKu6513pj8u4
+Message-ID: <CAPDyKFo92pOimvtGdN4yvFtFkc3vB+ex2OH10WmoKXcVSS+iAA@mail.gmail.com>
+Subject: Re: [PATCH next] phy: renesas: rcar-gen3-usb2: Drop local devm_mux_state_get_optional()
+To: Vinod Koul <vkoul@kernel.org>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Vladimir Oltean <olteanv@gmail.com>, 
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, 
+	Neil Armstrong <neil.armstrong@linaro.org>, Josua Mayer <josua@solid-run.com>, 
+	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>, linux-phy@lists.infradead.org, 
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	linux-next@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-CMS-MailID: 20260212103142epcas5p4bd370c87ca730d591a795fc8c562e350
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-X-CMS-RootMailID: 20260123085150epcas5p42f2cc04843ae7657380b2968261246cb
-References: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
 
-=E5=9C=A8=202026/01/23=20=E6=98=9F=E6=9C=9F=E4=BA=94=2018:56,=20shawn=20lin=
-=20=E5=86=99=E9=81=93:=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20Hi=20Ping=20Gao=0D=0D=
-=0D=0A>=20=0D=0D=0D=0A>=20=E5=9C=A8=202026/01/23=20=E6=98=9F=E6=9C=9F=E4=BA=
-=94=2016:56,=20ping.gao=20=E5=86=99=E9=81=93:=0D=0D=0D=0A>=20>=20By=20using=
-=20devm_clk_get_optional,=20if=20clk=20is=20optional=20for=20device=20and=
-=20not=20define=20in=20dts=0D=0D=0D=0A>=20>=20it=20will=20return=20NULL,=20=
-then=20clk_prepare_enable/clk_disable_unprepare=20for=20biu_clk=20is=20safe=
-=20to=0D=0D=0D=0A>=20>=20bail=20out=20internally.=0D=0D=0D=0A>=20>=20=0D=0D=
-=0D=0A>=20=0D=0D=0D=0A>=20Sorry=20for=20not=20noticing=20this=20patch=20as=
-=20the=20versioning=20problem.=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20You=20should=
-=20improve=20the=20commit=20title=20to=20match=20the=20convention=20like:=
-=0D=0D=0D=0A>=20mmc:=20dw_mmc:=20Using=20devm_clk_get_optional()=20for=20bi=
-u_clk=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20>=20before=20biu_clk=20in=20dwmmc=20dr=
-iver=20devm_clk_get=20fail,=20but=20it's=20ERR_PTR,=0D=0D=0D=0A>=20>=20not=
-=20null,it=20will=20panic=20when=20call=20clk_prepare=0D=0D=0D=0A>=20>=20lo=
-g=20is=20below:=0D=0D=0D=0A>=20>=20=5B=20=20438.400868=5D=20=5B7:=20=20=20b=
-inder:436_2:=204998=5D=20Unable=20to=20handle=20kernel=20paging=20request=
-=20at=20virtual=20address=20fffffffffffffffe=0D=0D=0D=0A>=20>=20=5B=20=2043=
-8.400877=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20Mem=20abort=20info:=
-=0D=0D=0D=0A>=20>=20=5B=20=20438.400881=5D=20=5B7:=20=20=20binder:436_2:=20=
-4998=5D=20=20=20ESR=20=3D=200x0000000096000005=0D=0D=0D=0A>=20>=20=5B=20=20=
-438.400887=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20=20EC=20=3D=200x=
-25:=20DABT=20(current=20EL),=20IL=20=3D=2032=20bits=0D=0D=0D=0A>=20>=20=5B=
-=20=20438.400894=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20=20SET=20=
-=3D=200,=20FnV=20=3D=200=0D=0D=0D=0A>=20>=20=5B=20=20438.400899=5D=20=5B7:=
-=20=20=20binder:436_2:=204998=5D=20=20=20EA=20=3D=200,=20S1PTW=20=3D=200=0D=
-=0D=0D=0A>=20>=20=5B=20=20438.400904=5D=20=5B7:=20=20=20binder:436_2:=20499=
-8=5D=20=20=20FSC=20=3D=200x05:=20level=201=20translation=20fault=0D=0D=0D=
-=0A>=20>=20...=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20The=20timestamp=20could=20be=
-=20trimmed.=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20>=20=5B=20=20438.409424=5D=20=5B=
-7:=20=20=20binder:436_2:=204998=5D=20Call=20trace:=0D=0D=0D=0A>=20>=20=5B=
-=20=20438.409429=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20clk_prepar=
-e+0x10/0x24=0D=0D=0D=0A>=20>=20=5B=20=20438.409439=5D=20=5B7:=20=20=20binde=
-r:436_2:=204998=5D=20=20dw_mci_runtime_resume+0x50/0x2d8=20=5Bdw_mmc_samsun=
-g=20cd210e210975263404c28fc89778f369f8398f0c=5D=0D=0D=0D=0A>=20>=20=5B=20=
-=20438.409471=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20dw_mci_exynos=
-_runtime_resume+0x18/0x58=20=5Bdw_mmc_exynos_samsung=202735a594c7c9c9e8c65b=
-0b87523fbf70dcaabfff=5D=0D=0D=0D=0A>=20>=20=5B=20=20438.409496=5D=20=5B7:=
-=20=20=20binder:436_2:=204998=5D=20=20pm_generic_runtime_resume+0x40/0x58=
-=0D=0D=0D=0A>=20>=20=5B=20=20438.409506=5D=20=5B7:=20=20=20binder:436_2:=20=
-4998=5D=20=20pm_runtime_force_resume+0x9c/0x134=0D=0D=0D=0A>=20>=20=5B=20=
-=20438.409517=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20platform_pm_r=
-esume+0x40/0x8c=0D=0D=0D=0A>=20>=20=5B=20=20438.409529=5D=20=5B7:=20=20=20b=
-inder:436_2:=204998=5D=20=20dpm_run_callback+0x64/0x230=0D=0D=0D=0A>=20>=20=
-=5B=20=20438.409540=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20__devic=
-e_resume+0x1d8/0x394=0D=0D=0D=0A>=20>=20=5B=20=20438.409551=5D=20=5B7:=20=
-=20=20binder:436_2:=204998=5D=20=20dpm_resume+0x110/0x2b8=0D=0D=0D=0A>=20>=
-=20=5B=20=20438.409561=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20dpm_=
-resume_end+0x1c/0x38=0D=0D=0D=0A>=20>=20=5B=20=20438.409570=5D=20=5B7:=20=
-=20=20binder:436_2:=204998=5D=20=20suspend_devices_and_enter+0x828/0xab0=0D=
-=0D=0D=0A>=20>=20=5B=20=20438.409582=5D=20=5B7:=20=20=20binder:436_2:=20499=
-8=5D=20=20pm_suspend+0x334/0x618=0D=0D=0D=0A>=20>=20=5B=20=20438.409592=5D=
-=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20state_store+0x104/0x144=0D=0D=
-=0D=0A>=20>=20=5B=20=20438.409601=5D=20=5B7:=20=20=20binder:436_2:=204998=
-=5D=20=20kobj_attr_store+0x30/0x48=0D=0D=0D=0A>=20>=20=5B=20=20438.409610=
-=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20sysfs_kf_write+0x54/0x6c=
-=0D=0D=0D=0A>=20>=20=5B=20=20438.409619=5D=20=5B7:=20=20=20binder:436_2:=20=
-4998=5D=20=20kernfs_fop_write_iter+0x104/0x1a8=0D=0D=0D=0A>=20>=20=5B=20=20=
-438.409628=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20vfs_write+0x24c/=
-0x2f4=0D=0D=0D=0A>=20>=20=5B=20=20438.409640=5D=20=5B7:=20=20=20binder:436_=
-2:=204998=5D=20=20ksys_write+0x78/0xe8=0D=0D=0D=0A>=20>=20=5B=20=20438.4096=
-52=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20__arm64_sys_write+0x1c/0=
-x2c=0D=0D=0D=0A>=20>=20=5B=20=20438.409664=5D=20=5B7:=20=20=20binder:436_2:=
-=204998=5D=20=20invoke_syscall+0x58/0x114=0D=0D=0D=0A>=20>=20=5B=20=20438.4=
-09676=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20el0_svc_common+0xac/0=
-xe0=0D=0D=0D=0A>=20>=20=5B=20=20438.409687=5D=20=5B7:=20=20=20binder:436_2:=
-=204998=5D=20=20do_el0_svc+0x1c/0x28=0D=0D=0D=0A>=20>=20=5B=20=20438.409698=
-=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20el0_svc+0x38/0x68=0D=0D=0D=
-=0A>=20>=20=5B=20=20438.409705=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=
-=20=20el0t_64_sync_handler+0x68/0xbc=0D=0D=0D=0A>=20>=20=5B=20=20438.409712=
-=5D=20=5B7:=20=20=20binder:436_2:=204998=5D=20=20el0t_64_sync+0x1a8/0x1ac=
-=0D=0D=0D=0A>=20>=20=0D=0D=0D=0A>=20>=20Signed-off-by:=20ping.gao=20<ping.g=
-ao=40samsung.com>=0D=0D=0D=0A>=20>=20---=0D=0D=0D=0A>=20>=20=20=20drivers/m=
-mc/host/dw_mmc.c=20=7C=202=20+-=0D=0D=0D=0A>=20>=20=20=201=20file=20changed=
-,=201=20insertion(+),=201=20deletion(-)=0D=0D=0D=0A>=20>=20=0D=0D=0D=0A>=20=
->=20diff=20--git=20a/drivers/mmc/host/dw_mmc.c=20b/drivers/mmc/host/dw_mmc.=
-c=0D=0D=0D=0A>=20>=20index=20c5db92bbb094..6bcc1e7233c0=20100644=0D=0D=0D=
-=0A>=20>=20---=20a/drivers/mmc/host/dw_mmc.c=0D=0D=0D=0A>=20>=20+++=20b/dri=
-vers/mmc/host/dw_mmc.c=0D=0D=0D=0A>=20>=20=40=40=20-3375,7=20+3375,7=20=40=
-=40=20int=20dw_mci_probe(struct=20dw_mci=20*host)=0D=0D=0D=0A>=20>=20=20=20=
-=09=09=09=09=09=20=20=20=20=20=22platform=20data=20not=20available=5Cn=22);=
-=0D=0D=0D=0A>=20>=20=20=20=09=7D=0D=0D=0D=0A>=20>=20=20=20=0D=0D=0D=0A>=20>=
-=20-=09host->biu_clk=20=3D=20devm_clk_get(host->dev,=20=22biu=22);=0D=0D=0D=
-=0A>=20>=20+=09host->biu_clk=20=3D=20devm_clk_get_optional(host->dev,=20=22=
-biu=22);=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20You=20change=20biu_clk=20to=20optio=
-nal,=20so=20you=20need=20to=20update=0D=0D=0D=0A>=20Documentation/devicetre=
-e/bindings/mmc/synopsys-dw-mshc.yaml=0D=0D=0D=0A>=20because=20minItems=20sa=
-ys=202=20there.=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20And=20you=20also=20change=20=
-the=20behaviour=20of=20drivers/mmc/host/dw_mmc-k3.c=0D=0D=0D=0A>=20which=20=
-tries=20to=20set/get=20biu_clk=20and=20setup=20cards,=20it's=20apparently=
-=20rely=20on=0D=0D=0D=0A>=20dw_mmc=20core=20to=20make=20biu_clk=20a=20must=
-=20one.=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20So=20I=20suggest=20you=20at=20least=
-=20need=20a=20extra=203rd=20patch=20to=20help=20dw_mmc-k3=0D=0D=0D=0A>=20id=
-entify=20missing=20biu_clk=20case.=0D=0D=0D=0A>=20=0D=0D=0D=0A>=20For=20the=
-=20next=20submission,=20please=20order=20the=20patchset=20as=0D=0D=0D=0A>=
-=201.=20synopsys-dw-mshc.yaml=20change=0D=0D=0D=0A>=202.=20dw_mmc-k3=20chan=
-ge=0D=0D=0D=0A>=203.=20dw_mmc.c=20change=0D=0D=0D=0A>=20=0D=0D=0D=0A=0D=0D=
-=0D=0AHi,=20Shawn=20Lin:=0D=0D=0D=0AI'd=20like=20to=20talk=20to=20you=20abo=
-ut=20next=20version=20=20patch=EF=BC=9A=0D=0D=0D=0A1.=20=20I=20think=20=22s=
-ynopsys-dw-mshc.yaml=22=20needn't=20change=20,=20because=20biu=20must=20be=
-=20set=20for=20hisilicon,=20they=20will=20set=20rate=20for=20biu_clk=0D=0D=
-=0D=0A2.=20=20we=20should=20add=20another=20patch=20for=20hisilicon=20like=
-=20below,=20do=20you=20agree?=0D=0D=0D=0Adiff=20--git=20a/drivers/mmc/host/=
-dw_mmc.c=20b/drivers/mmc/host/dw_mmc.c=0D=0D=0D=0Aindex=206bcc1e7233c0..7a2=
-149435894=20100644=0D=0D=0D=0A---=20a/drivers/mmc/host/dw_mmc.c=0D=0D=0D=0A=
-+++=20b/drivers/mmc/host/dw_mmc.c=0D=0D=0D=0A=40=40=20-3383,6=20+3383,17=20=
-=40=40=20int=20dw_mci_probe(struct=20dw_mci=20*host)=0D=0D=0D=0A=20=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20return=20ret=
-;=0D=0D=0D=0A=0D=0D=0D=0A=20=20=20=20=20=20=20=20=7D=20else=20=7B=0D=0D=0D=
-=0A+=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20const=20char=20*compatible=
-_str=20=3D=20NULL;=0D=0D=0D=0A+=0D=0D=0D=0A+=20=20=20=20=20=20=20=20=20=20=
-=20=20=20=20=20if=20(of_property_read_string(host->dev->of_node,=20=22compa=
-tible=22,=0D=0D=0D=0A+=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=
-=20=20=20=20=20=20&compatible_str)=20=3D=3D=200)=20=7B=0D=0D=0D=0A+=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20if=20(strstr=
-(compatible_str,=20=22hisilicon=22))=20=7B=0D=0D=0D=0A+=20=20=20=20=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=
-if=20(=21host->biu_clk)=20=7B=0D=0D=0D=0A+=20=20=20=20=20=20=20=20=20=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=
-=20=20=20dev_err(host->dev,=20=22biu=20clock=20not=20available=20,it=20must=
-=20be=20set=5Cn=22);=0D=0D=0D=0A+=20=20=20=20=20=20=20=20=20=20=20=20=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=
-return=20-EINVAL;=0D=0D=0D=0A+=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=7D=0D=0D=0D=0A+=20=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=7D=0D=0D=0D=0A=
-+=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=7D=0D=0D=0D=0A=20=20=20=20=
-=20=20=20=20=20=20=20=20=20=20=20=20ret=20=3D=20clk_prepare_enable(host->bi=
-u_clk);=0D=0D=0D=0A=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20if=20(re=
-t)=20=7B=0D=0D=0D=0A=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=20=
-=20=20=20=20=20=20dev_err(host->dev,=20=22failed=20to=20enable=20biu=20cloc=
-k=5Cn=22);=0D=0D=0D=0A--=0D=0D=0D=0Acould=20you=20please=20give=20me=20some=
-=20advice?=20thanks.=0D=0D=0D=0AGaoping=0D=0D=0D=0A=0D=0D=0D=0A>=20>=20=20=
-=20=09if=20(IS_ERR(host->biu_clk))=20=7B=0D=0D=0D=0A>=20>=20=20=20=09=09dev=
-_dbg(host->dev,=20=22biu=20clock=20not=20available=5Cn=22);=0D=0D=0D=0A>=20=
->=20=20=20=09=09ret=20=3D=20PTR_ERR(host->biu_clk);=0D=0D=0D=0A>=20>=20=0D=
-=0D=0D=0A
+On Wed, 11 Feb 2026 at 17:17, Vinod Koul <vkoul@kernel.org> wrote:
+>
+> On 10-02-26, 14:34, Ulf Hansson wrote:
+> > On Tue, 10 Feb 2026 at 11:53, Geert Uytterhoeven
+> > <geert+renesas@glider.be> wrote:
+> > >
+> > > Now the mux core provides devm_mux_state_get_optional():
+> > >
+> > >     drivers/phy/renesas/phy-rcar-gen3-usb2.c:944:1: error: static dec=
+laration of =E2=80=98devm_mux_state_get_optional=E2=80=99 follows non-stati=
+c
+> > >      declaration
+> > >       944 | devm_mux_state_get_optional(struct device *dev, const cha=
+r *mux_name)
+> > >           | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> > >     In file included from drivers/phy/renesas/phy-rcar-gen3-usb2.c:20=
+:
+> > >     include/linux/mux/consumer.h:64:19: note: previous declaration of=
+ =E2=80=98devm_mux_state_get_optional=E2=80=99 with type =E2=80=98struct mu=
+x_state *(struct device *, const char *)=E2=80=99
+> > >        64 | struct mux_state *devm_mux_state_get_optional(struct devi=
+ce *dev, const char *mux_name);
+> > >           |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> > >
+> > > Fix this by dropping the temporary local wrapper.
+> > >
+> > > Fixes: ad314348ceb4fe1f ("mux: Add helper functions for getting optio=
+nal and selected mux-state")
+> > > Fixes: 8bb92fd7a0407792 ("phy: renesas: rcar-gen3-usb2: Use mux-state=
+ for phyrst management")
+> > > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> >
+> > Thanks Geert for helping out!
+> >
+> > > ---
+> > >   - ad314348ceb4fe1f is in mmc/next, and a PR has already been sent
+> > >     https://lore.kernel.org/20260209133441.556464-1-ulf.hansson@linar=
+o.org
+> > >   - 8bb92fd7a0407792 is in phy/next
+> >
+> > Vinod, do you want to pick up the $subject patch as a fix for 7.0-rc1
+> > or do you prefer me to handle it?
+>
+> Should I drop the 8bb92fd7a0407792 and it makes things easier for
+> everyone and then we can pick fixed commit for 7.1 cycle..
+
+Well, my pull request for MMC was broken (the mux patches didn't get
+properly tested in linux-next, until it was too late), so Linus will
+not take it.
+
+At this point I would say that 8bb92fd7a0407792 is still a bit
+problematic as it uses the same name of the helper that the mux core
+intends to use. It would be better with a phy specific name for it, so
+it becomes easier to convert to the common mux helper, later on.
+Although, at this point it's still okay as is, as we will need to
+defer the mux core changes to v7.1 anyway.
+
+So up to you!
+
+Kind regards
+Uffe
