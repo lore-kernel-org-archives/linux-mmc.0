@@ -1,222 +1,151 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BE02318131
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 10:55:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770893707; cv=pass; b=gng0Sq7P7gi8+BorSuD03jN//bKxSaYUo9KEvCaGzlvLCN8mddnRu/Ekdid9cWbS0O3CQ1XsrmF5g0HQLPVbHinGIM99Xa6yqwHz8UjdERQe0TnIBoMgENe4R1X3AyFzQhAp/03rquLJpk0PTI+nrxjVyF7nFyj9SJSTvDStmF8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770893707; c=relaxed/simple;
-	bh=w3CchY0uFIH+Vgi4lhzqK4sMBvwiNTP/iMAUdwR0HLc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UwcPTPvoooFPlW6KpxhxUOhRYRFu5dRg+M7ggqaUn/dasYltE627aSLcpiqcFRfnuTK7E/tXfNBMQJN7qyVbWurjW8YLLzhYUA5lAxAbXdhK3okGfJkPADyqxRQOhd1e3LRdrpGPbrBqBCrYOJKFQGJLNcawtZS0xRIp1jiFudA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=yiPvRN/9; arc=pass smtp.client-ip=209.85.167.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9560BEEAB
+	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 11:08:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.46
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770894522; cv=none; b=VQM87lexXM+YiSTh/arsMZWO7RKqQpTgoLt5s9cSSZZhzWBq0vZGJJkRGn3BbIDAeIn0SGyztiOEn5HQYYLpRMkelFWNwq9HfWzU6v/NNalXjw3RMWhLWQbIZLNy2xrO+P5hDPMm/ZUKxAjY5A1R3ui96mdSXfEKi1wnyqE56mw=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770894522; c=relaxed/simple;
+	bh=ELesR79nEgzbYvbVtbkai+gF5L9OXkkQBqsB+SAv8Ms=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ood0RIuCJyqFy5S0laasNc+ym4gB9+QU9TWsBQbhQxOxDY++PiKOjficmTChRESpE+w5QRRlGwo1rwOSPG4eFa5Eyfnyr8wYLJm9IkBYno+UWbShq2FwxvWvPHhtkog38RqXROGkgfbkGQ5ZmsyYiOpOYRnV/JOPRuR9ptaLGek=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QDy6DNJh; arc=none smtp.client-ip=209.85.167.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yiPvRN/9"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-59e60b3ccdfso1989611e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 02:55:04 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770893702; cv=none;
-        d=google.com; s=arc-20240605;
-        b=hfjdxAt7UlfV4GsDW0Hw6wmlVMVtkvN6Auyc5xlheSsDgYnkru9yp3amFRNaMRafRC
-         wS59r/m91ooTRW1vYa9bI+Fw9itUFizkLWzivucnvCItyYvT0Ysk9yGIQUFZ0PD+KiLL
-         tBMCwagjJRSk8Rd2Ci17ax8ktrCzDDxbpUMXRClkbz+jRZ/PwqlutxYwFuQkEJJ7TO5z
-         Zu/JEB1L+eZ+PUmLEK6mIXjYrFCf1yjy0PIFnRE7F78B3rUZFvDZk7655RWirI0bpZrs
-         Ood5t6yoBMqLfrBFzaOUOqSEoEkdhRn5bqueV3l9zle6L724PXOdzA8NWGECjjITBBLG
-         rtmw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=ajA+sy3Xe/1exOS23gS5NwTkJzQ9VPYQTIkZGNkhgck=;
-        fh=KPplrZSM6gUPynIbDpg3OFG1yWGPAmwlaozM+f+IyoI=;
-        b=CmAXoT0gYqPKnbQZZnwqnWLKPgkylfKs6wmijbZg8lxqoanSlaRBKranNtr+3SgXhv
-         SFFV2E6P2z9lLL+lsUND8fsudJq/z1lbf+4onmb73H83pmqTwlrWcsnKKZlZLw5KiRjs
-         0Ps9SBkatcBjgHQwuad6weDOK4Ue75JRN0ZZb1shI2lRiBsoS665B9UDDmPa2AOlk+wH
-         kyQlqJ4Fxl98YlxY4PEvhERYMN3I8ZluGf9Wkk4/TAiIZmV9c3QI6up4n/1NzejQUrpX
-         xoQChD485AYcEza+quAnbj7s2nej0g5mDWeysqw974Ak1up2LmJgQ1nVQHAX8pWTSzT9
-         Td+g==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QDy6DNJh"
+Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-59dd784efddso870142e87.1
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 03:08:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1770893702; x=1771498502; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ajA+sy3Xe/1exOS23gS5NwTkJzQ9VPYQTIkZGNkhgck=;
-        b=yiPvRN/9fpaVryImXlG8/g0a9jKZlRBlutznvEQ2Ug3lS3GyWaKimU6GVGu7OE5eVl
-         Kw8goxUDDYMODRzS++4QDVAHiLzbUgIgb92dhcaSZq2h552Sq5jmp2XWagV4o9qR9sCf
-         lmDHA8SuK1x2XmkvQMT7bwxtsMcOWKdhB+FZtcCCkc6Z23GX3Sd/Vw9UQQSMrvBatWbU
-         v0UtUJuMbwOvTVF8DTUw2DTapJnUARQu9r20cI17SkO7RZkcZfLMMUfzc5UdoV8Y9QY6
-         s/RhvcrVyrdqSqIx2RplAPO/TvVxAfzvm/0moMCIf30cuLlEMQ5uyPqwXd5j+VWCHs+c
-         U6ZA==
+        d=gmail.com; s=20230601; t=1770894520; x=1771499320; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=Te28COGsJvbZjhoIswrSDU/sOtkJ6DypnGTOIiAuYoo=;
+        b=QDy6DNJhzkVfmTpwHIsWj/4KJ5S65DCJPk0nh9d5V5ljKXOuWLFU075lwXPJBiR3CW
+         V2+iQQqaBby7OYy+aJo2NWiaGnf9aQAyfaFpbeuCIjN8XT42LDMzawZd02DLV6oxtZrz
+         /bZnYWlkDbOZy9S+Px+fvg41Rz8gSvFSG0OEeI/SBPtPrgHOJE3pDJqva1JQg2HR0h3q
+         sUKhfLv4/WAfjciSO7IbqInSnd6KdJeoOMI6wTAnRRcbLQKqYN/iopGPObTuEySQ4LxA
+         oU63lMNKfOGdMMR8ZRyqgoqDNumirw3v3gjfIaEvs/sr4WtfA7RbgHjRdi+dZJePl75P
+         rCkw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770893702; x=1771498502;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ajA+sy3Xe/1exOS23gS5NwTkJzQ9VPYQTIkZGNkhgck=;
-        b=o62sEujzwfkXvBcgSLdjwAWvhbcOjDKXtn2RGD5/sAOiTnFA8vnNTIycTRBApBvU05
-         11jC6RE5//KfhL0j23xr3zbogJBq0GFg7AmE18HwhXEagZD7nNU0NllnheV5CReAaNCM
-         VwyX1uUDa+thX2SwiTvkg7EzTUfE++SEbB9cYcQkV9Fh9Pe9hCOUxUvGuR3kLNtI97g0
-         TUv98/vYuJLjoUVsn6en330Gh9c4iZKrRAaJHK/XVacWIRWPqcrYm4JHs7McF+vwhmDA
-         4YEm4kVUV3c9kMpBMrh00w4E8QWXZyv+jytD0DhM3N9OJnQE2Wd9jvjgo8fY3lV/0ih0
-         bYjA==
-X-Forwarded-Encrypted: i=1; AJvYcCVcOUCMaIvBpl+/DspfTs9MhOh9cFiVPzuLmkcCSdh6/U3Z7j2cZOQi2DjF/570gjRkVlu0eHxdgAM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyo0DK2L+BYfs4jLXHXJ6sB+WNIeaLKtT5tzfdkxl9X+BxJ8FF9
-	VvQklls8TotRDSE96TgghTod2S6NHWcn2XweSQr2EbZTCM+fwkBcG8z3cLfzOHV2EnwKML2uiP6
-	0pdyWpEB84pDDVpjJqgkDqm6fhhS2f7b6NBMr6olU4Q==
-X-Gm-Gg: AZuq6aKU1oypYvNCxCRVYKXyaSmPYoSbCUMJGNS7CJQceStwuPovN4Rv1aLl2nLTL1E
-	p9DPrng9iNRQ3YlJZjxxUm+b4z3BpM3hAEVpxGJ/WI62NuKCJrmD96SGWl4yn0f92ftmHJ3+OYZ
-	+czI2uRlzZ+c8gXDQs4vSnMFv0C2PHzbbQrwGcumbsTNlYmxnjJQpjSHhe51+elVn0v9mByUuDy
-	aKYY6fh/HpEMopzVTVutmFNVo7NDizV7DeszdrSTzSf2OPWi63HdwwdPiYq5b6TynPJ4dg7wqnt
-	P9tq6kak
-X-Received: by 2002:a05:6512:118f:b0:59e:5fc6:f9f9 with SMTP id
- 2adb3069b0e04-59e6415571dmr680909e87.53.1770893702365; Thu, 12 Feb 2026
- 02:55:02 -0800 (PST)
+        d=1e100.net; s=20230601; t=1770894520; x=1771499320;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Te28COGsJvbZjhoIswrSDU/sOtkJ6DypnGTOIiAuYoo=;
+        b=GCevEMDCLnnvLlQsB9/qCukTDt8C1wQISo6bBtpYMEzkIjcIEkvJpiiaguq7RWMggT
+         QDV1fLdHZ4FZBgXwsONZkRkRbUsDv5pbrwfBEmAh0j06yHoe9LLkblN2iny/kRJexww3
+         /q5KltmpBkce3CPyrXBgKreSqkHrlTZ5zh98WWs+vVEkdbEN8BBs34KSPl5bLQZa6VBI
+         iDaNbXWtmkQ51/rlQwsf/891KPlwKiKO3gdIM28EXhmCswp/5g1TwsMtQvBX7xvQnMZW
+         wTlIJzvKIm553Q1vidyevO8CRcnt9GKJt+noUdq/RwTbv8UVO9bb63+llAxopvl0D62U
+         nndQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWHgkDcpjmg4hCT6jKYab0P2viuzv8GgckiOvU2H7CnrVxjffWRWrIlgfFVsw6FE9KEh5M18WRBM54=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyBoUVCUuIPTGnYTEOgNDWWtRhtPvIfWxpTJzTO070PMegSeMlg
+	xyKGVuY7r4ykwQ4NzJECEqW4/uUvXUWvEFMp7WHM74TGLdc3xTA8Za+UbHB54Q==
+X-Gm-Gg: AZuq6aKfJGmdjjwwiOimIzHHtLxPD4UgukLpj5KvlWbxwl1ogyXvmVURaFz9a7RWc99
+	Cf9dyoiwFepqfAxZt7SKag82Yb24Rju3Gf9B3CagUXUN6iOc+cVNZOepbguEciv+Jrm+px20Uwy
+	2VNZ6VvPRbMeIP14tWblCQDOo3jPKPcIoxdFSlRZF38rq7mLcFVnwQU/HMUz4xSfYzbznt1Smar
+	hd5NCjgjWXbDnlKy8pw9MtTffn3K6Jb2zbwFf3fdE798xgkUnWCdlaSzmqueXb0lPWNPOZO0XBy
+	K3kknLc4X7Bg8TI71CUhszlNEMLY/LLp+kxDPiG+/Kdjz+FVqP9fl5XgFYJM1npHF8KA9GF/cWM
+	uvqG2doYQ9QkadEMeRGJAPa4cJvGAkOC01Iblyb6OseGve/scTq+3gsTqERDrxHQGMOUWYvL6FR
+	SBO1L+uPhmhmGHicM=
+X-Received: by 2002:a05:600c:524a:b0:477:7a78:3000 with SMTP id 5b1f17b1804b1-48365718323mr18483945e9.6.1770888685036;
+        Thu, 12 Feb 2026 01:31:25 -0800 (PST)
+Received: from skbuf ([2a02:2f04:d501:d900:2f75:bf70:f0b9:4586])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4834d482480sm215126875e9.0.2026.02.12.01.31.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Feb 2026 01:31:24 -0800 (PST)
+Date: Thu, 12 Feb 2026 11:31:21 +0200
+From: Vladimir Oltean <olteanv@gmail.com>
+To: Vinod Koul <vkoul@kernel.org>,
+	Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Josua Mayer <josua@solid-run.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>,
+	linux-phy@lists.infradead.org, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, linux-next@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH next] phy: renesas: rcar-gen3-usb2: Drop local
+ devm_mux_state_get_optional()
+Message-ID: <20260212093121.2c6o6pkk4riphbel@skbuf>
+References: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
+ <CAPDyKFpY2X8hephSfHq7rj_DaKX76ZSkWSCYXrGTEBUFHkvOzg@mail.gmail.com>
+ <aYyrsPTH1923jV7y@vaman>
+ <CAMuHMdUHNRuMmHU2ACX84nsZdXn_-fSamnF+LMFvZS3vkHnEWA@mail.gmail.com>
+ <aY1eIG_U_GBOFQGt@vaman>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260203-rz-sdio-mux-v8-0-024ea405863e@solid-run.com> <CAPDyKFoeKCPbsaRh+0t7=naO0pFvFCD3NV9nA7a4UOjxj4aDwg@mail.gmail.com>
-In-Reply-To: <CAPDyKFoeKCPbsaRh+0t7=naO0pFvFCD3NV9nA7a4UOjxj4aDwg@mail.gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 12 Feb 2026 11:54:24 +0100
-X-Gm-Features: AZwV_QgH6xQOsSZnPCYqI4_A3u7a0hrcCfd0biG9sH8dO0e0qMSbOfjKg-6eIYY
-Message-ID: <CAPDyKFpjuk12PEdfwADgADKvkHmD_djOAt1zs1EYsbaibT1BhQ@mail.gmail.com>
-Subject: Re: [PATCH v8 0/7] mmc: host: renesas_sdhi_core: support configuring
- an optional sdio mux
-To: Josua Mayer <josua@solid-run.com>
-Cc: Vinod Koul <vkoul@kernel.org>, Peter Rosin <peda@axentia.se>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, Yazan Shhady <yazan.shhady@solid-run.com>, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <aY1eIG_U_GBOFQGt@vaman>
 
-On Wed, 4 Feb 2026 at 16:33, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Tue, 3 Feb 2026 at 14:01, Josua Mayer <josua@solid-run.com> wrote:
-> >
-> > Some Renesas SoC based boards mux SD and eMMC on a single sdio
-> > controller, exposing user control by dip switch and software control by
-> > gpio.
-> >
-> > Purpose is to simplify development and provisioning by selecting boot
-> > media at power-on, and again before starting linux.
-> >
-> > Add binding and driver support for linking a (gpio) mux to renesas sdio
-> > controller.
-> >
-> > Introduce generic helper functions for getting managed and selected
-> > mux-state objects, and switch i2c-omap and phy-can-transceiver drivers.
-> >
-> > Signed-off-by: Josua Mayer <josua@solid-run.com>
-> > ---
-> > Changes in v8:
-> > - Add defensive null checks for all non-optional calls to internal
-> >   mux_get function.
-> > - Document NULL return value on applicable functions.
-> > - Avoid IS_ERR_OR_NULL and ERR_PTR(0) to disarm smatch errors.
-> > - Link to v7: https://lore.kernel.org/r/20260128-rz-sdio-mux-v7-0-92ebb6da0df8@solid-run.com
-> >
-> > Changes in v7:
-> > - picked up reviewed-tags
-> > - fix Kconfig change to add the missing prompt for CONFIG_MULTIPLEXER,
-> >   and enable it by default when COMPILE_TEST is set.
-> >   (Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>)
-> > - fix another kernel build robot warning: undocumented C struct member
-> > - Link to v6: https://lore.kernel.org/r/20260121-rz-sdio-mux-v6-0-38aa39527928@solid-run.com
-> >
-> > Changes in v6:
-> > - replaced /* with /** for devm_mux_state_state function description.
-> > - collected review tags.
-> > - fixed checkpatch warnings (space-before-tab, void-return).
-> >   (Reported-by: Geert Uytterhoeven)
-> > - fixed use-after-free in mux core mux_get function.
-> >   (Reported-by: Geert Uytterhoeven)
-> > - fix mux helper error path uninitialised return code variable.
-> >   (Reported-by: kernel test robot <lkp@intel.com>)
-> > - Link to v5: https://lore.kernel.org/r/20260118-rz-sdio-mux-v5-0-3c37e8872683@solid-run.com
-> >
-> > Changes in v5:
-> > - implemented automatic mux deselect for devm_*_selected.
-> >   (Reported-by: Wolfram Sang <wsa+renesas@sang-engineering.com>)
-> > - because of semantic changes I dropped reviewed and acks from omap-i2c
-> >   patch (Andreas Kemnade / Wolfram Sang).
-> > - fix invalid return value in void function for mux helper stubs
-> >   (Reported-by: kernel test robot <lkp@intel.com>)
-> > - Link to v4: https://lore.kernel.org/r/20251229-rz-sdio-mux-v4-0-a023e55758fe@solid-run.com
-> >
-> > Changes in v4:
-> > - added MULTIPLEXER Kconfig help text.
-> > - removed "select MULTIPLEXER" from renesas sdhi Kconfig, as it is
-> >   not required for all devices using this driver.
-> > - added stubs for all symbols exported by mux core.
-> >   (Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>)
-> > - refactored mux core logic to silence ENOENT errors only on optional
-> >   code paths, keeping error printing unchanged otherwise.
-> >   (Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>)
-> > - picked up various reviewed- and acked-by tags
-> > - Link to v3: https://lore.kernel.org/r/20251210-rz-sdio-mux-v3-0-ca628db56d60@solid-run.com
-> >
-> > Changes in v3:
-> > - updated omap-i2c and phy-can-transceiver to use new helpers.
-> > - created generic helper functions for getting managed optional mux-state.
-> >   (Reported-by: Rob Herring <robh@kernel.org>)
-> > - picked up binding ack by Rob Herring.
-> > - replaced use of "SDIO" with "SD/SDIO/eMMC" in binding document and
-> >   commit descriptions.
-> >   (Reported-by: Ulf Hansson <ulf.hansson@linaro.org>)
-> > - Link to v2: https://lore.kernel.org/r/20251201-rz-sdio-mux-v2-0-bcb581b88dd7@solid-run.com
-> >
-> > Changes in v2:
-> > - dropped mux-controller node from dt binding example
-> >   (Reported-by: Conor Dooley <conor@kernel.org>
-> >    Reported-by: Krzysztof Kozlowski <krzk@kernel.org>)
-> > - Link to v1: https://lore.kernel.org/r/20251128-rz-sdio-mux-v1-0-1ede318d160f@solid-run.com
-> >
-> > ---
-> > Josua Mayer (7):
-> >       phy: can-transceiver: rename temporary helper function to avoid conflict
-> >       mux: Add helper functions for getting optional and selected mux-state
-> >       mux: add help text for MULTIPLEXER config option
-> >       phy: can-transceiver: drop temporary helper getting optional mux-state
-> >       i2c: omap: switch to new generic helper for getting selected mux-state
-> >       dt-bindings: mmc: renesas,sdhi: Add mux-states property
-> >       mmc: host: renesas_sdhi_core: support selecting an optional mux
-> >
-> >  .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   6 +
-> >  drivers/i2c/busses/i2c-omap.c                      |  24 +--
-> >  drivers/mmc/host/renesas_sdhi_core.c               |   6 +
-> >  drivers/mux/Kconfig                                |   8 +-
-> >  drivers/mux/core.c                                 | 205 +++++++++++++++++----
-> >  drivers/phy/phy-can-transceiver.c                  |  10 -
-> >  include/linux/mux/consumer.h                       | 108 ++++++++++-
-> >  7 files changed, 302 insertions(+), 65 deletions(-)
-> > ---
-> > base-commit: 8f0b4cce4481fb22653697cced8d0d04027cb1e8
-> > change-id: 20251128-rz-sdio-mux-acc5137f1618
-> >
-> > Best regards,
-> > --
-> > Josua Mayer <josua@solid-run.com>
-> >
-> >
->
-> The series applied for next, thanks!
+On Thu, Feb 12, 2026 at 10:29:12AM +0530, Vinod Koul wrote:
+> Hi Geert,
+> 
+> On 11-02-26, 17:30, Geert Uytterhoeven wrote:
+> > Hi Vinod,
+> > 
+> > On Wed, 11 Feb 2026 at 17:17, Vinod Koul <vkoul@kernel.org> wrote:
+> > > On 10-02-26, 14:34, Ulf Hansson wrote:
+> > > > On Tue, 10 Feb 2026 at 11:53, Geert Uytterhoeven
+> > > > <geert+renesas@glider.be> wrote:
+> > > > > Now the mux core provides devm_mux_state_get_optional():
+> > > > >
+> > > > >     drivers/phy/renesas/phy-rcar-gen3-usb2.c:944:1: error: static declaration of ‘devm_mux_state_get_optional’ follows non-static
+> > > > >      declaration
+> > > > >       944 | devm_mux_state_get_optional(struct device *dev, const char *mux_name)
+> > > > >           | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> > > > >     In file included from drivers/phy/renesas/phy-rcar-gen3-usb2.c:20:
+> > > > >     include/linux/mux/consumer.h:64:19: note: previous declaration of ‘devm_mux_state_get_optional’ with type ‘struct mux_state *(struct device *, const char *)’
+> > > > >        64 | struct mux_state *devm_mux_state_get_optional(struct device *dev, const char *mux_name);
+> > > > >           |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+> > > > >
+> > > > > Fix this by dropping the temporary local wrapper.
+> > > > >
+> > > > > Fixes: ad314348ceb4fe1f ("mux: Add helper functions for getting optional and selected mux-state")
+> > > > > Fixes: 8bb92fd7a0407792 ("phy: renesas: rcar-gen3-usb2: Use mux-state for phyrst management")
+> > > > > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> > > >
+> > > > Thanks Geert for helping out!
+> > > >
+> > > > > ---
+> > > > >   - ad314348ceb4fe1f is in mmc/next, and a PR has already been sent
+> > > > >     https://lore.kernel.org/20260209133441.556464-1-ulf.hansson@linaro.org
+> > > > >   - 8bb92fd7a0407792 is in phy/next
+> > > >
+> > > > Vinod, do you want to pick up the $subject patch as a fix for 7.0-rc1
+> > > > or do you prefer me to handle it?
+> > >
+> > > Should I drop the 8bb92fd7a0407792 and it makes things easier for
+> > > everyone and then we can pick fixed commit for 7.1 cycle..
+> > >
+> > > Does that work for everyone. I was about to send PR, will hold off for a
+> > > bit.
+> > 
+> > Alternatively, you can mention the semantic conflict in your PR to Linus,
+> > and ask him to fold my patch into the merge commit.
+> 
+> Hmmm, that is also a good option but might leave Linus a bit grumpy so
+> bit reluctant. Dropping and getting right implementation would be
+> better. I think it was a mistake to pick or this all could have gone
+> thru mux tree.
+> 
+> Thanks
+> -- 
+> ~Vinod
 
-Unfortunately my pull request for MMC for v7.0 was broken and will not
-be pulled by Linus, hence I need to drop the $subject series from my
-next branch.
-
-Please submit a new version of the series when v7.0-rc1 is out and
-let's fix the build errors and the dependency to the phy subsystem [1]
-properly, so we can land this for v7.1 instead.
-
-Kind regards
-Uffe
-
-[1]
-https://lkml.org/lkml/2026/2/12/399 (lore was down, so pointing to
-lkml.org instead)
+I think with Linus' refusal of the mmc/next PR, there is no longer any
+need either for this patch or for the revert of 8bb92fd7a040 ("phy:
+renesas: rcar-gen3-usb2: Use mux-state for phyrst management").
+http://lore.kernel.org/lkml/CAHk-=wgnRQiKqWVrO_uF1btYM2K8r8xL95RGdKU3QLe8B58nrw@mail.gmail.com
