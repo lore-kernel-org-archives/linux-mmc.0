@@ -1,163 +1,169 @@
-Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m15590.qiye.163.com (mail-m15590.qiye.163.com [101.71.155.90])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F0712EDD63
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 10:40:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770892814; cv=pass; b=N76bXe8wq1GGTfg20ZKMpEEnl4cuKyiwe/HTHGMcIV7w3loIrgR2Q0WUjWQl8ongQ6DotmYzxVe68SIL9tdzg4fF1DbjNraDVOFX6jps4XaSViUS7vJXAIbajizmjb4oYB/ENU1mFtmeZWqkBX2y3KnOonQR5qXOSX0leGLfWIY=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770892814; c=relaxed/simple;
-	bh=lj0/gjhdUqOPwKmAM6VN//Fw8Q95Z7mUIRimgBZXmW4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Ct5C+VSV+puL5zJ+vcRJYwi/+sQH2rpOzc8iSjhanWVe0lOR79U9whGHAhJq4+SOMACCkzG9WC+PKFS4SR9sx4B5yoddhUnAqQaFAMVkBEsotmY/8Gs4FlaKtEqSdxiWp0EhRUyuRkol3jscdId5EGfL2I/BKEGuBX9NfabgMG8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lc4+cgQR; arc=pass smtp.client-ip=209.85.167.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 640C729D297;
+	Thu, 12 Feb 2026 10:45:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.90
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1770893116; cv=none; b=oS+klJMTKS4s2kBnWaEqGWrjFrXv69qlrnxSmJmS8abLCblh5B0/nnvgu6rPQj8iGuGyVBghkS7lsOSPui0zB5Y+SCYZ0RWZd/t5YD18GUoTeLLQnKwomHQNjvifBgiyhTvdWJ7FBVWwpNWHwpoiGB73iSc6gRCLF0m23AiiYsA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1770893116; c=relaxed/simple;
+	bh=0ZuZJsbubu1mQp2OIurzEABXpjL9pB+HslqalqPNR28=;
+	h=Cc:Subject:To:References:From:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=eQfIE/fgle+pu+r11LZ51la9UDW7Z9YalQnsB6pLf5G4Ey3wGd0iDDj7CxgIUZboo4CqOoPD0305LNdJUgV77PJ7/iXpzDYyL0+sCv2qkXnclNiowT7QR3KrSJ7XV7zpoRVw5qWSOHAf1bRtFG9pAHob2Vxy7VZxNJaEUkNgXa4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=DgEQMcU3; arc=none smtp.client-ip=101.71.155.90
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lc4+cgQR"
-Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-59e60925251so1824798e87.3
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 02:40:11 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1770892810; cv=none;
-        d=google.com; s=arc-20240605;
-        b=I4rHhXditA7tyDu7EXBUKwr1znnvMvNVeJu9pCX8brR4oDDexV0D3SkNfHSp/Qp5zz
-         sKbUlIR4MXACvQqy+r1wV4p0GuWLbA7Tt0hydQf1S1mfTd5CrvjpPNVIL2bmQJ3inODC
-         O6Ja8ruF2F3aN6Aeubs4qLbzVCzKbseRrWDQB3qyt2ryeJ8C/V8qAEe5CMNaserDVRIa
-         hrhhTwOG+j6zC9Bv0Ik+ztWyqv2Q2ljVOD0ev940hSyCIhTOy0aOhmxjrUwx0A0o06Q3
-         iyjw8VBxPQJDGNJCNeM4Jqv+7zsMlt9e8vjp8kbbIE1pJ63ylCpr2WqV1hWVOkIs/QvG
-         RPFg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=2QFiFFZSy2peF3P/wq5YLTidjl6EH3wfnbLnCbW9XTY=;
-        fh=Gc7skgEoObCg95HsqM8jFWSge52fYMppZ4vdaVuT33g=;
-        b=DK3jNeBVvfN1oCt5r+UY/qHKftVH0tNE0K/2/Ar/0ltWtnnjL0KiJM2PHeKvMY40//
-         5odiWfiNkRO2RjE9WEF+DlB/CP16qKXhaaRDkMtElXy83RrfA43rcGiC1Om7jq1hy1Up
-         Ss5ejmA3D/fmRNErAeq1AVBxxtTY8Jjc3Rq/mUovXAgHj7jj9IgMXmxrmKdFzEbBzXdw
-         6ROO1hC2r/ezXHXky0l6pVBc2cM2lUC2v5KownA/u549wbbnavjGAp7/C890sIic44Nd
-         uwC1HFgj1mTM7gcq+CjDHTiP+6jklsb58y7oOIscilcO/rJMmGLmxX1huLFrslJiixVy
-         fG8g==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1770892810; x=1771497610; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2QFiFFZSy2peF3P/wq5YLTidjl6EH3wfnbLnCbW9XTY=;
-        b=lc4+cgQRHNqrVdvpkYaggFLjowju1ehJ4RRU0gmMdioYhkrtHaX4rhIEyo8MUiP/qo
-         NWlGkTpHyihGZWLuBLPfYx0RrR11cRax7k/OZWqK1rUS80FQpO8EMmPWn+NUEysFqbHl
-         l07BFreVRNIkEWPwpkaTxomdWHI6eZmKln3DJWH0DolNMB9zLx/f6zQAcZSxT1QWHObe
-         CU3dNN7yEv/YwjrHqr8gxIxvqQatOHGdDbfhtdo2VfPpmiIZdWwawG1pLflp89J/RCqh
-         CtnuvCCA7eHW5vsg3hFTCxK4WyswjKIhFoxw0Nr1XjF7B6vwpFYMgifFXGDhIuCmk9nM
-         Z4HA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1770892810; x=1771497610;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=2QFiFFZSy2peF3P/wq5YLTidjl6EH3wfnbLnCbW9XTY=;
-        b=ghYqHTsZZZE+YpqoDHSr7AwlXRqwsarPcLKA2KzpDX94KPn4/A3Ci7Fm2YWslj3g1D
-         MeygqQPpqwz+fQu3r2cvl7bH0gAhfofXsWkRK2PbbteJQVDeffYOFLCRxavwqbg2Zrhv
-         /KlIFPZLXQ2J4b4o/Ul6iWpKyNskopDrS+SDeqq2s1V1+qS0y7LWNbRGYBw+LdUJ6nhp
-         PjLKdFEFP5b/1SgjuB+4RnrZVRl1LrtgDzakrAsycj4sa7/DLdu9D9tETqwjSi9mYN0V
-         zZQ39cv4SrjQFcRwTiHRD4weeNsEFq6g3Egic9Ap6/lZMP3OCgBokNGBrXORe/SautwG
-         3gcw==
-X-Forwarded-Encrypted: i=1; AJvYcCUddj2UfjOBQoIhiF4z2+2vtQmUAoCkXXCkXIlqtbg3ieIKXFMuyNSOV8/i88GFOQAVhlCWlS++r3g=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxAvdEM3KfySGnBlTMDyXgzBQ0czSWxliDdVMNEdNmuVdE0083u
-	4dYFmk2cGKjdbH1foxsVkluCTnA6qSXKURosJw+4L+4Stxl+r1Y4CnuGufvl/kq6JnVaXX7xAb1
-	YMEagBhznq2SOQwDvxk5BecwJ/Z32rOk6Z7mZTCnMOQ==
-X-Gm-Gg: AZuq6aLMFvAphU5Cg7adnLz70XsipPTXrlqnCOdIrNo8hi1IjiT6bdYve9QVu7fNx9o
-	oYbI/BK25uZqX4ddgeGGNgHRlScrBgxBsEn+o2Cc1x/qQ6CW0jFzl9CJpdpipqyZyvogyaCPXPF
-	HlQQzpWuW6s1lLXc1QM+/siCLTa7O3O64N6e+NNSyH4gPFysTwr7/qn6SsV38E0nyro042rsGs/
-	YwpGDnyjHY07GSyE4yanko36cblFMJLRACA/bakPEShCFLa709bPh3pNxifTM230NbG3YGcY5Uu
-	Xw1FB5Re
-X-Received: by 2002:a05:6512:3d1b:b0:59d:f69e:16c2 with SMTP id
- 2adb3069b0e04-59e640214bfmr777362e87.12.1770892809915; Thu, 12 Feb 2026
- 02:40:09 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="DgEQMcU3"
+Received: from [172.16.12.14] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 33faa7800;
+	Thu, 12 Feb 2026 18:45:04 +0800 (GMT+08:00)
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, hy50.seo@samsung.com, kwangwon.min@samsung.com
+Subject: Re: [PATCH] drivers: dw_mmc: Replace devm_clk_get with
+ devm_clk_get_optional
+To: "ping.gao" <ping.gao@samsung.com>, ulf.hansson@linaro.org,
+ jh80.chung@samsung.com, sebastian.reichel@collabora.com
+References: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
+ <20260212103627.3677417-1-ping.gao@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Message-ID: <a1e0ad87-a657-0e45-2701-d23cbfe8d523@rock-chips.com>
+Date: Thu, 12 Feb 2026 18:45:03 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <67c8c4f9bf9f09fd0c13daedef27b82ff389ddfb.1770720452.git.geert+renesas@glider.be>
- <CAPDyKFpY2X8hephSfHq7rj_DaKX76ZSkWSCYXrGTEBUFHkvOzg@mail.gmail.com> <aYyrsPTH1923jV7y@vaman>
-In-Reply-To: <aYyrsPTH1923jV7y@vaman>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 12 Feb 2026 11:39:31 +0100
-X-Gm-Features: AZwV_QgmPkOET-FDUx-HmcWBF5gAKY3tXEOlKsTxUDKVx9vpnPTXKu6513pj8u4
-Message-ID: <CAPDyKFo92pOimvtGdN4yvFtFkc3vB+ex2OH10WmoKXcVSS+iAA@mail.gmail.com>
-Subject: Re: [PATCH next] phy: renesas: rcar-gen3-usb2: Drop local devm_mux_state_get_optional()
-To: Vinod Koul <vkoul@kernel.org>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Vladimir Oltean <olteanv@gmail.com>, 
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, 
-	Neil Armstrong <neil.armstrong@linaro.org>, Josua Mayer <josua@solid-run.com>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>, linux-phy@lists.infradead.org, 
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	linux-next@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20260212103627.3677417-1-ping.gao@samsung.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9c5174545c09cckunmd920d1121f3390
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUtLSVZMHR1CSU0ZTkhKS05WFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=DgEQMcU396lv3Iw/7JVodO1bBa0Tf8QE/FF9dkegNpdQDD9eGef6q6WStGgwT8AEprc0lEg9W4DJHmTogpQryVDr5i6YIZw6FpR9yBcj4qpWW42IOrrmjhxneqUQBXo/a09s9Dp/TqZ6TQCDG7GNGYafq5izUeYbAP0AssJTYm8=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=tePzdhnMX98i53d3zPbT3U3A3gRzRp+Y4bv1BAKPP24=;
+	h=date:mime-version:subject:message-id:from;
 
-On Wed, 11 Feb 2026 at 17:17, Vinod Koul <vkoul@kernel.org> wrote:
->
-> On 10-02-26, 14:34, Ulf Hansson wrote:
-> > On Tue, 10 Feb 2026 at 11:53, Geert Uytterhoeven
-> > <geert+renesas@glider.be> wrote:
-> > >
-> > > Now the mux core provides devm_mux_state_get_optional():
-> > >
-> > >     drivers/phy/renesas/phy-rcar-gen3-usb2.c:944:1: error: static dec=
-laration of =E2=80=98devm_mux_state_get_optional=E2=80=99 follows non-stati=
-c
-> > >      declaration
-> > >       944 | devm_mux_state_get_optional(struct device *dev, const cha=
-r *mux_name)
-> > >           | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-> > >     In file included from drivers/phy/renesas/phy-rcar-gen3-usb2.c:20=
-:
-> > >     include/linux/mux/consumer.h:64:19: note: previous declaration of=
- =E2=80=98devm_mux_state_get_optional=E2=80=99 with type =E2=80=98struct mu=
-x_state *(struct device *, const char *)=E2=80=99
-> > >        64 | struct mux_state *devm_mux_state_get_optional(struct devi=
-ce *dev, const char *mux_name);
-> > >           |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-> > >
-> > > Fix this by dropping the temporary local wrapper.
-> > >
-> > > Fixes: ad314348ceb4fe1f ("mux: Add helper functions for getting optio=
-nal and selected mux-state")
-> > > Fixes: 8bb92fd7a0407792 ("phy: renesas: rcar-gen3-usb2: Use mux-state=
- for phyrst management")
-> > > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> >
-> > Thanks Geert for helping out!
-> >
-> > > ---
-> > >   - ad314348ceb4fe1f is in mmc/next, and a PR has already been sent
-> > >     https://lore.kernel.org/20260209133441.556464-1-ulf.hansson@linar=
-o.org
-> > >   - 8bb92fd7a0407792 is in phy/next
-> >
-> > Vinod, do you want to pick up the $subject patch as a fix for 7.0-rc1
-> > or do you prefer me to handle it?
->
-> Should I drop the 8bb92fd7a0407792 and it makes things easier for
-> everyone and then we can pick fixed commit for 7.1 cycle..
 
-Well, my pull request for MMC was broken (the mux patches didn't get
-properly tested in linux-next, until it was too late), so Linus will
-not take it.
 
-At this point I would say that 8bb92fd7a0407792 is still a bit
-problematic as it uses the same name of the helper that the mux core
-intends to use. It would be better with a phy specific name for it, so
-it becomes easier to convert to the common mux helper, later on.
-Although, at this point it's still okay as is, as we will need to
-defer the mux core changes to v7.1 anyway.
+在 2026/02/12 星期四 18:36, ping.gao 写道:
+> 在 2026/01/23 星期五 18:56, shawn lin 写道:
+> 
+> 
 
-So up to you!
+...
 
-Kind regards
-Uffe
+> 
+> 
+> 1.  I think "synopsys-dw-mshc.yaml" needn't change , because biu must be set for hisilicon, they will set rate for biu_clk
+> 
+
+No, otherwise you can't pass the dtschema checking.
+
+> 
+> 2.  we should add another patch for hisilicon like below, do you agree?
+> 
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> 
+
+Please check it in dw_mmc-k3 code.
+
+> 
+> index 6bcc1e7233c0..7a2149435894 100644
+> 
+> 
+> --- a/drivers/mmc/host/dw_mmc.c
+> 
+> 
+> +++ b/drivers/mmc/host/dw_mmc.c
+> 
+> 
+> @@ -3383,6 +3383,17 @@ int dw_mci_probe(struct dw_mci *host)
+> 
+> 
+>                          return ret;
+> 
+> 
+> 
+> 
+> 
+>          } else {
+> 
+> 
+> +               const char *compatible_str = NULL;
+> 
+> 
+> +
+> 
+> 
+> +               if (of_property_read_string(host->dev->of_node, "compatible",
+> 
+> 
+> +                       &compatible_str) == 0) {
+> 
+> 
+> +                       if (strstr(compatible_str, "hisilicon")) {
+> 
+> 
+> +                               if (!host->biu_clk) {
+> 
+> 
+> +                                       dev_err(host->dev, "biu clock not available ,it must be set\n");
+> 
+> 
+> +                                       return -EINVAL;
+> 
+> 
+> +                               }
+> 
+> 
+> +                       }
+> 
+> 
+> +               }
+> 
+> 
+>                  ret = clk_prepare_enable(host->biu_clk);
+> 
+> 
+>                  if (ret) {
+> 
+> 
+>                          dev_err(host->dev, "failed to enable biu clock\n");
+> 
+> 
+> --
+> 
+> 
+> could you please give me some advice? thanks.
+> 
+> 
+> Gaoping
+> 
+> 
+> 
+> 
+> 
+>>>    	if (IS_ERR(host->biu_clk)) {
+> 
+> 
+>>>    		dev_dbg(host->dev, "biu clock not available\n");
+> 
+> 
+>>>    		ret = PTR_ERR(host->biu_clk);
+> 
+> 
+>>>
+> 
+> 
+> 
+> 
