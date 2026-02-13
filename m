@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E54DF23E320;
-	Fri, 13 Feb 2026 07:37:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DBA1A23E320;
+	Fri, 13 Feb 2026 07:38:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770968233; cv=none; b=a06KkmIY/dhgkaJ2Q4B+97rxczOlqlLHNeyOmpp8qiyewsMoW38qV/PrFVqdrLk/63o3+rIQEjuUWvqoVgmk9tfeiyP8iYLgAqQiL3+sVYAHxo+4/Y/+7ihwqHvMVoEjaJYBUq7Ijo8/uo2o6tVHSQ7oeQrLv0YUmgQjpQURxe4=
+	t=1770968283; cv=none; b=MZ879RuwrihyThrDgRsKVd0+LMeOXyXDBOyP2zjc7wiWZ3jVvvyD8FEz+1FPHl7AAv55FKcMihMXEPG67vmvft66/Du3nl3PcXzTpppJDqqWplV2/ZWz4yfGkfda+7k3X9sF9bytD//ePUwQVrhLJHF74oCrGX0Rw9d6Qqu6rMs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770968233; c=relaxed/simple;
-	bh=IOqPdLzu4Vk4vJkrJbgudO2XM7orT1xMJKnAcRw/su0=;
+	s=arc-20240116; t=1770968283; c=relaxed/simple;
+	bh=v9oJ67F8b484EbAtptAM7uDYNfE9mWP54mOpn2hN1Wo=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=nK9mB3u3aQNSRoU2vdz5Pjlnk2nX+pOmoUQgUmcak6uTTPbCfGNfBBTgTwpaG3Gx2D3xTq+mBpVHE2cPf2qhHYMkE+/AUwfZZ5RbfOtF+uAinW/QQoFAL/OnAjIFK7MSVJpHTPWvKxO7f0acJBCSiAFVaca803sVL/IzbTiYh/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CF203gzQ; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=YsmAcfIKQNtBaXIpFYqAsFT9wPbgtQz+DYfmgo6gqxjXwPGys4AFgJa0N1bWRMtEzAfkV89LV8H1F9PNnBlgFx9CVj8KU3fNOjuS0Wez5+M5rU4tw3TGkKY8++M0iYzQQaG6crbzD5IWV5SbdMExplj5U8i9CjC9bfIV/R22YgA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=W8MULMPM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CF203gzQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7728EC116C6;
-	Fri, 13 Feb 2026 07:37:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="W8MULMPM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 353B8C116C6;
+	Fri, 13 Feb 2026 07:38:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770968232;
-	bh=IOqPdLzu4Vk4vJkrJbgudO2XM7orT1xMJKnAcRw/su0=;
+	s=k20201202; t=1770968283;
+	bh=v9oJ67F8b484EbAtptAM7uDYNfE9mWP54mOpn2hN1Wo=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=CF203gzQuRhr10JCWORPSMQwZrwKFi1EO5UsvJNNDk0aN3/TZZzjVEM/vn+B2Lmp0
-	 vWsQApLT8W+bL9nkaClEyPNmmCEk9PeibG7j5bSx97ED8uiBApc8ktKhoVdQzfE90X
-	 Cwk7U247UcYj5OZYE1HlU/B27qO3xeTQEAx5YN5E/+QEHU5HXZlQ8tQzQTPE5osvHl
-	 MnsW9mU1rI4I/yQJgGFoT2u1z+Cakjrv04hOPy1j3jyLlkdenPOAXBuaCcpweHTeSs
-	 2+p3CycM1KYA3kojk8Ba87j6oJpAjvF+2dAQYaaPbGertyYymLYJFpQLOQlJWAEk1v
-	 hXg3UKEVEbQZQ==
-Message-ID: <8a3be8ef-854e-4242-aa63-d10c1649bc9f@kernel.org>
-Date: Fri, 13 Feb 2026 08:37:08 +0100
+	b=W8MULMPM4SnAw5krOnYdzu2bUovWvBdGz+7LukU2cyPy5RMTPUSV6VU+qiEQyOvHx
+	 3tK52AnKahVir9obdY9u1aDvcrFNH97zXmMvjA4efWjj1L/dPj49JBdFgOaWe1t/Eu
+	 DkYIPShfs98ePn3ku1emlfNuLkHByyquDCI04Wt6yWSzCZpmL048J+d+ZYPakS7Q9R
+	 RkqF9lUkOZK5EiUpN6URXC9C3jCwoVd84mGPhC5+VReQBKzZvouvhOd9P7LvS5jBiK
+	 VWGqa9yZWugmwD0Xs7flYwMk8tbHiPQwVN1+Z95R/xDkYiQwbSNmo9ftjbKn2SA3TT
+	 efUkKIdlEGd2w==
+Message-ID: <18365001-aa80-4434-9f4a-2e0c1b19b6bf@kernel.org>
+Date: Fri, 13 Feb 2026 08:37:59 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,15 +35,15 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 3/3] dt-bindings: mmc: synopsys-dw-mshc: clk is not a
- must of two
+Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: synopsys-dw-mshc: No need to
+ enforce setting two clocks
 To: "ping.gao" <ping.gao@samsung.com>, shawn.lin@rock-chips.com,
  ulf.hansson@linaro.org, jh80.chung@samsung.com,
  sebastian.reichel@collabora.com
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
  hy50.seo@samsung.com, kwangwon.min@samsung.com
 References: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
- <20260213030905.1134519-1-ping.gao@samsung.com>
+ <20260213053415.1337541-1-ping.gao@samsung.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -89,44 +89,19 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20260213030905.1134519-1-ping.gao@samsung.com>
+In-Reply-To: <20260213053415.1337541-1-ping.gao@samsung.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 13/02/2026 04:09, ping.gao wrote:
-> mmc biu and ciu clk don't have to be set
-
-This makes no sense, you changed nothing.
-
-Please use scripts/get_maintainers.pl to get a list of necessary people
-and lists to CC. It might happen, that command when run on an older
-kernel, gives you outdated entries. Therefore please be sure you base
-your patches on recent Linux kernel.
-
-Tools like b4 or scripts/get_maintainer.pl provide you proper list of
-people, so fix your workflow. Tools might also fail if you work on some
-ancient tree (don't, instead use mainline) or work on fork of kernel
-(don't, instead use mainline). Just use b4 and everything should be
-fine, although remember about `b4 prep --auto-to-cc` if you added new
-patches to the patchset.
-
-You missed at least devicetree list (maybe more), so this won't be
-tested by automated tooling. Performing review on untested code might be
-a waste of time.
-
-Please kindly resend and include all necessary To/Cc entries.
-
-Do not attach (thread) your patchsets to some other threads (unrelated
-or older versions). This buries them deep in the mailbox and might
-interfere with applying entire sets. See also:
-https://elixir.bootlin.com/linux/v6.16-rc2/source/Documentation/process/submitting-patches.rst#L830
-
+On 13/02/2026 06:34, ping.gao wrote:
+> mmc biu_clk don't have to be set
 > 
 > Signed-off-by: ping.gao <ping.gao@samsung.com>
 
-Use real name.
+No, stop sending multiple versions same day and attaching them next to
+each other. It's so difficult to spot v3, I already applied to v2.
 
+NAK, read v2 feedback.
 
-> ---
 Best regards,
 Krzysztof
