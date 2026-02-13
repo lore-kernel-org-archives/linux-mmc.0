@@ -1,114 +1,115 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 707F0134AB
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 17:23:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 531993EBF33;
+	Fri, 13 Feb 2026 01:02:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1770917022; cv=none; b=k17ddNUiuCPidTYVD2bAKkN1oQTc+Lj61q3/3mwciBN7b91uELxOceBqk4zZCwtJajaQjYxSds6QJnR90FDWRckXxpwIoXn+xMSApQ1JAwcE8m126wqd2FeydVmAuDwaHj/n6F221MOEalKM6A+ZrTTse+a8qRY6Q849AOo6GOo=
+	t=1770944575; cv=none; b=FNNIsLfFyH3TaroHblwyF+TD2VWF2IU6RMKmhNXEc3OEURMBCNFBqiIkOQ2psHcqkqiirt3EY5F49ejnBBmM8XbTJYTqgLZhKXFVvaZI9YsW8zrMEKnOqw3hfzqgvm5A5I3SCgn4wlszvefJ/CmH2ofrlrcw2LwRDL0Ke69c2CE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1770917022; c=relaxed/simple;
-	bh=PXUOOzNqnHMX+0XnIWqWXRpUxu/0JJ4vrNFn8/nFqss=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=gK7BjnjAfp8vT1AeWAuQqTiw+AE6Tj/tHNVwAKruH/KrME84y3dQso/fzcZBMexSiwkfu6JYmUynYNwyMLuw8yLPtkzqjMW9NgsD8BKNvLB9genMcvB51AapRCWcmlnybkTrj2Dc5z4+yc5DPfsH44ilNR6xtdgzGElymgOjv7U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=q4cqJBmv; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1770944575; c=relaxed/simple;
+	bh=KwbmCqQa/Q37dD8NJdF3IkFjL0StaTgXiGrl/kaJs5Q=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DPaNHGvHT7Ilopg77ovsCEDwvjKKEwWacfk1Bf8XLe8amtRJJk4GzhjxqahKnRKkbIWx4pX7YdtVABdjduzISUZUnMKz1Or5zNbGH2oQKrEJu9KSBO9uLib2n0Kd/Px/Y+nRoA1sjxffg1opo626tU9CVDLNIyAnJbltgx7Dfos=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k1r/4Yxz; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="q4cqJBmv"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52249C4AF0C
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 17:23:42 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k1r/4Yxz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6F376C4CEF7;
+	Fri, 13 Feb 2026 01:02:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1770917022;
-	bh=PXUOOzNqnHMX+0XnIWqWXRpUxu/0JJ4vrNFn8/nFqss=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=q4cqJBmvcXvukKQnTyBEXAfOq2U6CrE080zMq6pRoXH9RcDF3Jj53d5Hiv9QKexWV
-	 GD13xOf12bufh1npU4shUVOKNmzbgQjpfcS1OQxydQiACxbXhjinWCrkA+x9XZOFPy
-	 xTNmoupasg950/KbrRZiQJnQokpT7CCq+oiCAtUgbsG91dBpq9PBvHqwuVUD3xMcZz
-	 HkDsx87M5XRsvsvjdvsTYPApvBjUHR7jI9uVaxwkw/PSb/7bUU9ubscktzlIZhpFeS
-	 q6j6jFEBwM3UyTSmkW89LGW6rwpR3fsHpkSmC0n9mPdOx3SykFO8dT1RcErjaCAKFO
-	 9ka4GnEqid9zg==
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-65956402da9so15089a12.1
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Feb 2026 09:23:42 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUQU7haXieLaJXwZw8d3PqrGZtNJNJ3R+5s4n26y3Y2fjk1LDOhw9cvKHcDTzG7Bra5K/csrXfFCLs=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx5X1qbRlZV0DHqdHw7d0s54KHdU2v25CGxn/csZKltCL/CFN2Z
-	CVRI+ap7StXYr9b3jvJkxBKTPjOoRZHUM0J02DJeLksbBRlPtsoB9g7iRjmag5mynvJarR4o3Pg
-	58aeiptb3vwTXSWwUPSTLZAQ+JF7I/A==
-X-Received: by 2002:a05:6402:42c9:b0:659:3d7d:e38 with SMTP id
- 4fb4d7f45d1cf-65b96e50d45mr2054024a12.32.1770917020827; Thu, 12 Feb 2026
- 09:23:40 -0800 (PST)
+	s=k20201202; t=1770944574;
+	bh=KwbmCqQa/Q37dD8NJdF3IkFjL0StaTgXiGrl/kaJs5Q=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=k1r/4Yxz7bCefYO+ld67cg3Bg1TPvFMtLZxiDotgFV/1EE86IolC4qpNqp2Mp/RCy
+	 0fy0cSCyNtjTmBWiQ77+78NduSt+GWYmjnFvDxs8CBtcLMGv7mb1DX6JgNxtFoY3L1
+	 DEjgpdi899HXRRQAn5rNrxP2U/PZooLV6dVFJCgMtBCMC4Kz9Tqd3HgGZWdLHffYVH
+	 hL0uj7J4B01tLYLd5n8E1DjU8C4IYDeYA9/VYamdSuBTAh9+JY81YNT9r4TzPP2hnm
+	 8yN78C7o4TLtT/LEfz5L+ccWzn7XHxIMqVipKdRAHCsKkCxESD1LO0x8/qd6IeXbkl
+	 fm6voAeBhpjIQ==
+Date: Thu, 12 Feb 2026 17:02:53 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: manivannan.sadhasivam@oss.qualcomm.com
+Cc: Bjorn Andersson <andersson@kernel.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Abel Vesa <abel.vesa@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
+	Sumit Garg <sumit.garg@oss.qualcomm.com>, stable@vger.kernel.org,
+	Abel Vesa <abel.vesa@oss.qualcomm.com>
+Subject: Re: [PATCH v2 1/4] soc: qcom: ice: Remove platform_driver support
+ and expose as a pure library
+Message-ID: <20260213010253.GA6208@quark>
+References: <20260210-qcom-ice-fix-v2-0-9c1ab5d6502c@oss.qualcomm.com>
+ <20260210-qcom-ice-fix-v2-1-9c1ab5d6502c@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260211094736.88-1-hehuan1@eswincomputing.com>
- <20260211221017.GA3976151-robh@kernel.org> <b0805c4.368e.19c50c8c197.Coremail.hehuan1@eswincomputing.com>
-In-Reply-To: <b0805c4.368e.19c50c8c197.Coremail.hehuan1@eswincomputing.com>
-From: Rob Herring <robh@kernel.org>
-Date: Thu, 12 Feb 2026 11:23:29 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqLa+Wehi5SSOm6A4jkRMKMvB2J3OG7DR+aAwCPrS4jGnA@mail.gmail.com>
-X-Gm-Features: AZwV_QhBYRB4GsWZrFbzudGCr8iVnYKK4zgVAcmHAZVw9ORJzGDwJrwJIogyyHc
-Message-ID: <CAL_JsqLa+Wehi5SSOm6A4jkRMKMvB2J3OG7DR+aAwCPrS4jGnA@mail.gmail.com>
-Subject: Re: Re: [PATCH v1] dt-bindings: mmc: dwcmshc-sdhci: Fix resets array validation
-To: Huan He <hehuan1@eswincomputing.com>
-Cc: ulf.hansson@linaro.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
-	jszhang@kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, ningyu@eswincomputing.com, 
-	linmin@eswincomputing.com, pinkesh.vaghela@einfochips.com, 
-	xuxiang@eswincomputing.com, Pritesh Patel <pritesh.patel@einfochips.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260210-qcom-ice-fix-v2-1-9c1ab5d6502c@oss.qualcomm.com>
 
-On Thu, Feb 12, 2026 at 1:37=E2=80=AFAM Huan He <hehuan1@eswincomputing.com=
-> wrote:
->
-> > > The binding defines tuple-style reset-names items for some
-> > > compatibles, which implicitly enforces a fixed array length
-> > > via JSON Schema.
-> > >
-> > > Defining global maxItems for resets and reset-names causes these
-> > > constraints to be intersected via allOf, resulting in an effective
-> > > minItems equal to the global maxItems. This leads to dtbs_check
-> > > failures reporting reset arrays as too short, even when the DTS
-> > > provides the correct number of entries.
-> > >
-> > > Remove the global maxItems constraints and let the per-compatible
-> > > schema branches define the required reset array sizes explicitly.
-> > >
-> > > Fixes: 30009a21f257 ("dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin E=
-IC7700")
-> > > Signed-off-by: Pritesh Patel <pritesh.patel@einfochips.com>
-> > > Signed-off-by: Huan He <hehuan1@eswincomputing.com>
-> > > ---
-> > >  .../devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml         | 6 ----=
---
-> > >  1 file changed, 6 deletions(-)
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci=
-.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > > index 7e7c55dc2440..8af55a53b569 100644
-> > > --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > > +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> > > @@ -49,12 +49,6 @@ properties:
-> > >    power-domains:
-> > >      maxItems: 1
-> > >
-> > > -  resets:
-> > > -    maxItems: 5
-> > > -
-> > > -  reset-names:
-> > > -    maxItems: 5
-> >
-> > No, add 'minItems' that covers the whole range needed.
->
-> Thank you very much for taking the time to review the patch and for your
-> valuable feedback.
->
-> I have checked other vendors in the kernel that use the resets property.
-> The minimum number in actual use is 4 (Eswin uses 4, others use 5).
->
-> Is it reasonable to add "minItems: 1"?
+On Tue, Feb 10, 2026 at 12:26:50PM +0530, Manivannan Sadhasivam via B4 Relay wrote:
+>  drivers/soc/qcom/ice.c | 118 ++++++++++++++++++-------------------------------
+>  1 file changed, 44 insertions(+), 74 deletions(-)
 
-No, if 4 is the min, then you use 'minItems: 4'.
+I don't yet know enough to be confident that this is the correct fix,
+but there are a few things I noticed that look like bugs:
 
-Rob
+> +static DEFINE_MUTEX(ice_mutex);
+> +struct qcom_ice *ice_handle;
+
+ice_handle is used only in this file, so it should be static
+
+> @@ -643,41 +645,42 @@ static struct qcom_ice *of_qcom_ice_get(struct device *dev)
+[...]
+> +	ice = qcom_ice_create(&pdev->dev, base);
+> +	if (IS_ERR(ice)) {
+>  		platform_device_put(pdev);
+> -		ice = ERR_PTR(-EINVAL);
+> +		return ice_handle;
+>  	}
+
+This error path returns NULL, where this patch seems to have been
+intended to remove NULL as a possible return value.
+
+> -static void qcom_ice_put(const struct qcom_ice *ice)
+> +static void qcom_ice_put(struct kref *kref)
+>  {
+> -	struct platform_device *pdev = to_platform_device(ice->dev);
+> -
+> -	if (!platform_get_resource_byname(pdev, IORESOURCE_MEM, "ice"))
+> -		platform_device_put(pdev);
+> +	platform_device_put(to_platform_device(ice_handle->dev));
+> +	ice_handle = NULL;
+>  }
+
+Elsewhere ice_handle is protected by ice_mutex, but this seems to modify
+it without holding the mutex.
+
+I'm also wondering what happens if all consumer devices are removed.
+platform_device_put() gets executed on the ICE platform_device for each
+one, but does that actually drop the last reference and cause the
+resources allocated with devm_*() to be freed?  On do they stick around
+until/unless the ICE device is actually removed as well?
+
+>  static void devm_of_qcom_ice_put(struct device *dev, void *res)
+>  {
+> -	qcom_ice_put(*(struct qcom_ice **)res);
+> +	const struct qcom_ice *ice = *(struct qcom_ice **)res;
+> +	struct platform_device *pdev = to_platform_device(ice->dev);
+> +
+> +	if (!platform_get_resource_byname(pdev, IORESOURCE_MEM, "ice"))
+> +		kref_put(&ice_handle->refcount, qcom_ice_put);
+>  }
+
+Above probably should use the ice local variable, not ice_handle.
+
+- Eric
