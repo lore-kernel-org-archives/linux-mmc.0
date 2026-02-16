@@ -1,128 +1,122 @@
-Received: from mail.andi.de1.cc (mail.andi.de1.cc [178.238.236.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vk1-f226.google.com (mail-vk1-f226.google.com [209.85.221.226])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76B8C3164C2;
-	Mon, 16 Feb 2026 15:25:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.238.236.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59D361DF963
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 19:15:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.226
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771255535; cv=none; b=syI6h/6BOV8LB6E265Q8DahJFXr3pjQNPTCc00/EH73b/RqmIlMjvclCzHZMGQGphj8ljwEHwAkjopQeeOKuhwuCwWMaf0ddyNGIRQuhW2EFLqh8xXgMdvjcILSnZHyaUm82dICj2fk1MD9UKY1r93cURSUe9PeWeyW/f0mOm9k=
+	t=1771269353; cv=none; b=FPDk7+8C+S8zXfbPuED6R16b0VQodToHp4BehJNg+hPkDEV9k35DkDtaxgpbyzGzyP/BjMpUVGqihs/xdicK54VDPVGY4nv934zcFdu6oGRKdYDqCttbXLrtxpy4AHNN5oegij2VD/9ejdUjYHJ+bRp7WiH0+IlyfwfcjMcH3dw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771255535; c=relaxed/simple;
-	bh=K3lRTqVkgTbsUZEdt0AotXacxdi5Nb+Ix685DjTsOz0=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=X96MBk9WCXgvTsD2MB8t2KtocbGROaLSVBuv+5gF1vsNSzKTSZ/1UY+S/4w4oLAe4Lyhh+BC9a/abXjP/rFcSTPipcBkQvONXaCROWoFjxKu2bFwS6IQJs6e80ooT54szqGNmFI9GJNZUh9HgkXgM+g8fKw9AW1CKzRf5NUkzc4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kemnade.info; spf=pass smtp.mailfrom=kemnade.info; dkim=pass (2048-bit key) header.d=kemnade.info header.i=@kemnade.info header.b=3I3ct1mS; arc=none smtp.client-ip=178.238.236.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kemnade.info
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kemnade.info
+	s=arc-20240116; t=1771269353; c=relaxed/simple;
+	bh=8x/wvBM+OG9JdM5lpNSxPpncq9AHJ/Gaw3amH4rui80=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=gicGKP5KL+ljQOMdQ3LGDZaHEcUt5AalVclBrvQOMGsjulwEdT4tkgh0c1dTo3HmTBE4w129WyY+23K2c1vHKcHxaLsWwirc1byXlb3eYoItVqmFea2pSxnjkpCk58kwON5/dJodJdxClSKZK8B32/PO2of7000aXPsc52Imha0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=UJ0Oy61D; arc=none smtp.client-ip=209.85.221.226
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kemnade.info header.i=@kemnade.info header.b="3I3ct1mS"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=kemnade.info; s=20220719; h=References:In-Reply-To:Cc:From:Sender:Reply-To:
-	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-	Resent-To:Resent-Cc:Resent-Message-ID;
-	bh=+NuGee1f3YReNLAkZ92SuV7HlsXpngRlfWnVEVSkgmQ=; b=3I3ct1mSQotzkI0CFg0yUeDyPU
-	uszNV5kuZ5BoqCMC6ea1ywRQ9F8zCXOL/daxPnD8zkNgUHA+mmizXUBINHJxHNlw7hMr4s0IHioh9
-	5rlaft8K+ZH5XDqp0Yd3XdFnTcTPA0XAPgtXdL/jwazhLlNkinKzlgXymtdDixCgO7CocgnDF5suu
-	iCBCt9pqxSEP8lbjwY7jbss/nmXL51hQ0fv4jm+WRPHHO549392zOcsxYzRk4jTZQeTcsDoqFc90M
-	+tiUVHW2jQH47ycjEgqCjs3dAESLSss5wECck4GJNgxvFwo7SB0sPhR8g79fm5Jur8p5mkQOASMuj
-	68a4dnlQ==;
-Date: Mon, 16 Feb 2026 16:24:06 +0100
-From: Andreas Kemnade <andreas@kemnade.info>
-To: Vladimir Oltean <olteanv@gmail.com>
-Cc: Josua Mayer <josua@solid-run.com>, Geert Uytterhoeven
- <geert@linux-m68k.org>, Marc Kleine-Budde <mkl@pengutronix.de>, Vincent
- Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>, Neil Armstrong
- <neil.armstrong@linaro.org>, Peter Rosin <peda@axentia.se>, Aaro Koskinen
- <aaro.koskinen@iki.fi>, Kevin Hilman <khilman@baylibre.com>, Roger Quadros
- <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>, Janusz Krzysztofik
- <jmkrzyszt@gmail.com>, Vignesh R <vigneshr@ti.com>, Andi Shyti
- <andi.shyti@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring
- <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, Magnus
- Damm <magnus.damm@gmail.com>, Wolfram Sang
- <wsa+renesas@sang-engineering.com>, Yazan Shhady
- <yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>, Mikhail
- Anikin <mikhail.anikin@solid-run.com>, "linux-can@vger.kernel.org"
- <linux-can@vger.kernel.org>, "linux-phy@lists.infradead.org"
- <linux-phy@lists.infradead.org>, "linux-kernel@vger.kernel.org"
- <linux-kernel@vger.kernel.org>, "linux-omap@vger.kernel.org"
- <linux-omap@vger.kernel.org>, "linux-i2c@vger.kernel.org"
- <linux-i2c@vger.kernel.org>, "linux-mmc@vger.kernel.org"
- <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org"
- <devicetree@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
- <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH v9 1/7] phy: can-transceiver: rename temporary helper
- function to avoid conflict
-Message-ID: <20260216162406.0121dd91@kemnade.info>
-In-Reply-To: <20260216092914.kmvl7aep7dantcsd@skbuf>
-References: <20260208-rz-sdio-mux-v9-0-9a3be13c1280@solid-run.com>
-	<20260208-rz-sdio-mux-v9-1-9a3be13c1280@solid-run.com>
-	<20260212164823.mbeycqwzsy2dfq6e@skbuf>
-	<CAMuHMdVOqovkugmCnR4FOfk8VkQyN_dmyKFzbsOSN0mPKQedeQ@mail.gmail.com>
-	<f9ede0d3-6a37-449c-b62b-a5c761ece097@solid-run.com>
-	<20260216092914.kmvl7aep7dantcsd@skbuf>
-X-Mailer: Claws Mail 4.3.1 (GTK 3.24.49; aarch64-unknown-linux-gnu)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="UJ0Oy61D"
+Received: by mail-vk1-f226.google.com with SMTP id 71dfb90a1353d-5673804da95so1366064e0c.0
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 11:15:52 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771269351; x=1771874151;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:dkim-signature:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=NJl/yKqTclNT9kEkBmAeTF7lEJo3F6xT2CC7EiH5zHk=;
+        b=AQD9bDrvVVYMg6H6F3tH6MEV8qxY4VGjmwQCW2cjt7Of58BFsmedJAlBM9qI767vFy
+         auDfG5mYK2665o+fAH1BT4834E9kD1ledso9e8HuCxOCv9j2O6fjFKc4EwHSYdXKuzWS
+         2mo04+twW5Y2s1iHwmpT/Boo2KusE67wRLyHa/kjWkKFCvPCGTkOeDBZV62+riEOpAE+
+         WCk1AOzJl+NQZLVMmH+QU9MCLOz4QpPduA3Tdv/oO/az7VgnAFcYcNyyFNHHMjVYpMtJ
+         FU25aAhdQ2Sf1YvF6B85qAY1DeVcRvkm28vMb4+zbDylT7Z6CYHbx7W/oThI7GDJ1MZB
+         8q/A==
+X-Forwarded-Encrypted: i=1; AJvYcCW24Kx/Mtxxn3EDspEebnqNSUm4J1Klw5oikGGiPONhSO11zuDHC05koE42irkoVomE69EBWNI5ZyQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyEnwCj3SedveleJtG9bsrDEPoLnDJGXEASN79WWzkInkQRMlyO
+	cgF5owLX9h9Z1f8lzxxAbiSiOn9W8czjpxSojhB+yOLXRZpcORDsiQ8GYFm7Gh/C25N5iths1Gv
+	dk9Mf2YpBZXP+1orQsqXFBpPZymrPG+AiqUoS61xcr9/Ply8EBr7jW+oy8rRzTQzFwjSeUK+lqb
+	GM/yYiIDal58gCY0j95yWqij9DK5YBIhP/trtw3rmWK5p5UChS45bCsF7h0zIQ87oox8xHQN7vK
+	LcIOFUKz34B
+X-Gm-Gg: AZuq6aLyg7yQOQtkbsoVIsfiZmLNbC/vlak7UkKaUznWUJgkDU+SV6f3tgjfMx3qpAF
+	p5SBygWE0/nKO88ihixtyNoa1+2eyXN8mUuDEedUMqg65h3jfNCqj6Ky38HyB38+V8p+gzp/yOJ
+	SncwD/Vq9ld6JBDs4u1lYJbgLYdfXKFKr0/6PhCCMWv578AelAeNK3yLQOWTWkjkL+fVcfb4+ox
+	nyxF/kQHkOUnlhn/MDG/JydXC/PC07L4hlJFC/IqmrR8QJz8I8nwmeHYrkWJv7VH5w/OfVIsyJv
+	dtMH0s0OONDYkVIcTKbuacRNnowo6Gj7An3VprxGUnno1eZaIPc3+FicSSkJ4DCTtyhmU0sdHJl
+	aCJjCAH1/rp4ca3ZaBwbv0T1BdGNKLe6728t1UKcITygbPubPz98jiNCmG3SjTV1k7D5v5MrIXQ
+	+B6HAa/8+A+gq4vdeTs9vk02TGF7rEuqEudeo/uT7bjm3xxopeqdWDrg==
+X-Received: by 2002:a05:6122:4d84:b0:567:d87:e152 with SMTP id 71dfb90a1353d-5676aa6454fmr3175581e0c.18.1771269351046;
+        Mon, 16 Feb 2026 11:15:51 -0800 (PST)
+Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-94.dlp.protect.broadcom.com. [144.49.247.94])
+        by smtp-relay.gmail.com with ESMTPS id 71dfb90a1353d-5674c1c2146sm2340266e0c.8.2026.02.16.11.15.50
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 16 Feb 2026 11:15:51 -0800 (PST)
+X-Relaying-Domain: broadcom.com
+X-CFilter-Loop: Reflected
+Received: by mail-dl1-f71.google.com with SMTP id a92af1059eb24-124a95b6f61so61568777c88.0
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 11:15:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1771269349; x=1771874149; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=NJl/yKqTclNT9kEkBmAeTF7lEJo3F6xT2CC7EiH5zHk=;
+        b=UJ0Oy61D3UOfKoBaExzYzym7+EqIiB67Wm6FxNQA1mf9STV23cbzbgwTgVBEj0w/lw
+         ng7Hdlrnzj0vRKWX8PfuQyJ3hBo8QjU0NrONCghoYb0dBv9CNgOs/zZVgIV6M2czTbHH
+         D6qyInvuosJgm2+oFQkkTzrSJAQO2F1m0VZWg=
+X-Forwarded-Encrypted: i=1; AJvYcCXerbPGYWhnegHrPHX1cBzLMWZaumFnQLSwVR9OEX3YZKLZjISUP5Xy8UkxI+RhBahVQcVXF38KOxM=@vger.kernel.org
+X-Received: by 2002:a05:7022:439e:b0:122:153:d161 with SMTP id a92af1059eb24-1273ae1655dmr5050539c88.17.1771269349597;
+        Mon, 16 Feb 2026 11:15:49 -0800 (PST)
+X-Received: by 2002:a05:7022:439e:b0:122:153:d161 with SMTP id a92af1059eb24-1273ae1655dmr5050523c88.17.1771269348982;
+        Mon, 16 Feb 2026 11:15:48 -0800 (PST)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-12742cada1csm11067327c88.9.2026.02.16.11.15.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Feb 2026 11:15:48 -0800 (PST)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org,
+	florian.fainelli@broadcom.com
+Cc: bcm-kernel-feedback-list@broadcom.com,
+	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	Kamal Dasu <kamal.dasu@broadcom.com>
+Subject: [PATCH] mmc: sdhci-brcmstb: use correct register offset for V1 pin_sel restore
+Date: Mon, 16 Feb 2026 14:15:43 -0500
+Message-Id: <20260216191543.2514647-1-kamal.dasu@broadcom.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
-On Mon, 16 Feb 2026 11:29:14 +0200
-Vladimir Oltean <olteanv@gmail.com> wrote:
+The restore path for SDIO_CFG_CORE_V1 was incorrectly using
+SDIO_CFG_SD_PIN_SEL (offset 0x44) instead of SDIO_CFG_V1_SD_PIN_SEL
+(offset 0x54), causing the wrong register to be written on resume.
+The save path already uses the correct V1-specific offset. This
+affects BCM7445 and BCM72116 platforms which use the V1 config core.
 
-> Hi Josua,
-> 
-> On Mon, Feb 16, 2026 at 08:19:27AM +0000, Josua Mayer wrote:
-> > >> In the future, when you have a series with cross-tree dependencies,
-> > >> please try to think of it as individual mini-series for each tree's
-> > >> 'next' branch, and specify clearly that you need stable tags (to be
-> > >> pulled into other trees).  
-> > 
-> > I don't really understand how I could split my series up to avoid this 
-> > issue.
-> > 
-> > Due to the fact that one (and now two) drivers implemented local
-> > mux helpers, to undo that an atomic change must be made tree-wide.
-> > 
-> > Meanwhile it must be avoided that while the mux core helpers are being
-> > tested / reviewed, that any tree adds another driver-local mux helper
-> > like appears to have happened here.
-> > 
-> > Note that my patch-set did go to linux-phy@lists.infradead.org list, too.
-> > 
-> > The second challenge for this series was that mux framework is being
-> > enabled only by drivers Kconfig "select" - and not possible by menuconfig.
-> > This is e.g. responsible for being unable to test =m build with arm64
-> > defconfig - and lead to it only being detected through kernel robot
-> > x86_64 allmodconfig.  
-> 
-> To avoid this, a combination of developer due diligence + maintainer due
-> diligence is probably required.
-> 
-> From linux-phy perspective, there will be some automated build testing
-> (which did not exist at the time of your submission). This would have
-> caught the 'hidden' devm_mux_state_get_optional() call present only in
-> linux-phy/next, when testing patch 2/7.
-> 
-> But, to work, the build automation needs to be able to apply the entire
-> patch set on linux-phy/next. So expect some pushback if it doesn't
-> (hence the recommendation to send a mini-series to linux-phy first, and
-> request a stable tag).
-> 
-I do not think that is at all the duty of the patch submitter. I think as
-long as every dependencies and side effects are documented, it is IMHO up to the
-maintainers to decide how it can be merged best. They know best whether there
-is any danger of conflicts in their working tree because that is an area 
-where people are working on. Especially this patchset is around for months.
+Fixes: b7e614802e3f ("mmc: sdhci-brcmstb: save and restore registers during PM")
+Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+---
+ drivers/mmc/host/sdhci-brcmstb.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- In MFD where it is
-more common practice to have cross-subsystem patchsets, once acks from
-everyone are there, MFD Maintainer creates an immutable branch with a tag.
-The maintainers of the affected subsystems pull it in. 
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index c9442499876c..57e45951644e 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -116,7 +116,7 @@ static void sdhci_brcmstb_restore_regs(struct mmc_host *mmc, enum cfg_core_ver v
+ 		writel(sr->boot_main_ctl, priv->boot_regs + SDIO_BOOT_MAIN_CTL);
+ 
+ 	if (ver == SDIO_CFG_CORE_V1) {
+-		writel(sr->sd_pin_sel, cr + SDIO_CFG_SD_PIN_SEL);
++		writel(sr->sd_pin_sel, cr + SDIO_CFG_V1_SD_PIN_SEL);
+ 		return;
+ 	}
+ 
+-- 
+2.34.1
 
-Regards,
-Andreas
