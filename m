@@ -1,87 +1,87 @@
-Received: from mail-vk1-f226.google.com (mail-vk1-f226.google.com [209.85.221.226])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59D361DF963
-	for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 19:15:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.226
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9528F271443
+	for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 05:25:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771269353; cv=none; b=FPDk7+8C+S8zXfbPuED6R16b0VQodToHp4BehJNg+hPkDEV9k35DkDtaxgpbyzGzyP/BjMpUVGqihs/xdicK54VDPVGY4nv934zcFdu6oGRKdYDqCttbXLrtxpy4AHNN5oegij2VD/9ejdUjYHJ+bRp7WiH0+IlyfwfcjMcH3dw=
+	t=1771305935; cv=none; b=q0y9AipcrnIXi5u24Bky1PCgSsKheevUFQoYRTEsB1MbKgKJkFYYejKdbfgcF6hLmGPZOoi9vnpVleiDW/9wi5cuLhJ6z4r+AetRPhRQLgpuPsliCupppe4Tq/Zjo6umpEOBW5VClvM0E9gqb4e4BRojNLKlmKZYzsw501LpQRU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771269353; c=relaxed/simple;
-	bh=8x/wvBM+OG9JdM5lpNSxPpncq9AHJ/Gaw3amH4rui80=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=gicGKP5KL+ljQOMdQ3LGDZaHEcUt5AalVclBrvQOMGsjulwEdT4tkgh0c1dTo3HmTBE4w129WyY+23K2c1vHKcHxaLsWwirc1byXlb3eYoItVqmFea2pSxnjkpCk58kwON5/dJodJdxClSKZK8B32/PO2of7000aXPsc52Imha0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=UJ0Oy61D; arc=none smtp.client-ip=209.85.221.226
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	s=arc-20240116; t=1771305935; c=relaxed/simple;
+	bh=4IUnM654Ar4fSWUu/NzKK40+sy6o/VU5RUmxIfrKHQY=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=cQJLKowln6fdn3X5ouC7dhDrTp8VMw+wC2WXMM380hOstdQIApQfOfx+CCuiU9KEXKw3TD5RZajhxf6efs7PJdN3eEH6AdY/n2ZUK94FlZSRiLn9N/d5ZZCPFpuTA6fUumXgovYjN/6Tmd6pgwFJ22q2YazeooJAOw1Snbkc/C0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=nP+0NvI+; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=aSL4Fg5s; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="UJ0Oy61D"
-Received: by mail-vk1-f226.google.com with SMTP id 71dfb90a1353d-5673804da95so1366064e0c.0
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 11:15:52 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771269351; x=1771874151;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:dkim-signature:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NJl/yKqTclNT9kEkBmAeTF7lEJo3F6xT2CC7EiH5zHk=;
-        b=AQD9bDrvVVYMg6H6F3tH6MEV8qxY4VGjmwQCW2cjt7Of58BFsmedJAlBM9qI767vFy
-         auDfG5mYK2665o+fAH1BT4834E9kD1ledso9e8HuCxOCv9j2O6fjFKc4EwHSYdXKuzWS
-         2mo04+twW5Y2s1iHwmpT/Boo2KusE67wRLyHa/kjWkKFCvPCGTkOeDBZV62+riEOpAE+
-         WCk1AOzJl+NQZLVMmH+QU9MCLOz4QpPduA3Tdv/oO/az7VgnAFcYcNyyFNHHMjVYpMtJ
-         FU25aAhdQ2Sf1YvF6B85qAY1DeVcRvkm28vMb4+zbDylT7Z6CYHbx7W/oThI7GDJ1MZB
-         8q/A==
-X-Forwarded-Encrypted: i=1; AJvYcCW24Kx/Mtxxn3EDspEebnqNSUm4J1Klw5oikGGiPONhSO11zuDHC05koE42irkoVomE69EBWNI5ZyQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyEnwCj3SedveleJtG9bsrDEPoLnDJGXEASN79WWzkInkQRMlyO
-	cgF5owLX9h9Z1f8lzxxAbiSiOn9W8czjpxSojhB+yOLXRZpcORDsiQ8GYFm7Gh/C25N5iths1Gv
-	dk9Mf2YpBZXP+1orQsqXFBpPZymrPG+AiqUoS61xcr9/Ply8EBr7jW+oy8rRzTQzFwjSeUK+lqb
-	GM/yYiIDal58gCY0j95yWqij9DK5YBIhP/trtw3rmWK5p5UChS45bCsF7h0zIQ87oox8xHQN7vK
-	LcIOFUKz34B
-X-Gm-Gg: AZuq6aLyg7yQOQtkbsoVIsfiZmLNbC/vlak7UkKaUznWUJgkDU+SV6f3tgjfMx3qpAF
-	p5SBygWE0/nKO88ihixtyNoa1+2eyXN8mUuDEedUMqg65h3jfNCqj6Ky38HyB38+V8p+gzp/yOJ
-	SncwD/Vq9ld6JBDs4u1lYJbgLYdfXKFKr0/6PhCCMWv578AelAeNK3yLQOWTWkjkL+fVcfb4+ox
-	nyxF/kQHkOUnlhn/MDG/JydXC/PC07L4hlJFC/IqmrR8QJz8I8nwmeHYrkWJv7VH5w/OfVIsyJv
-	dtMH0s0OONDYkVIcTKbuacRNnowo6Gj7An3VprxGUnno1eZaIPc3+FicSSkJ4DCTtyhmU0sdHJl
-	aCJjCAH1/rp4ca3ZaBwbv0T1BdGNKLe6728t1UKcITygbPubPz98jiNCmG3SjTV1k7D5v5MrIXQ
-	+B6HAa/8+A+gq4vdeTs9vk02TGF7rEuqEudeo/uT7bjm3xxopeqdWDrg==
-X-Received: by 2002:a05:6122:4d84:b0:567:d87:e152 with SMTP id 71dfb90a1353d-5676aa6454fmr3175581e0c.18.1771269351046;
-        Mon, 16 Feb 2026 11:15:51 -0800 (PST)
-Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-94.dlp.protect.broadcom.com. [144.49.247.94])
-        by smtp-relay.gmail.com with ESMTPS id 71dfb90a1353d-5674c1c2146sm2340266e0c.8.2026.02.16.11.15.50
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 16 Feb 2026 11:15:51 -0800 (PST)
-X-Relaying-Domain: broadcom.com
-X-CFilter-Loop: Reflected
-Received: by mail-dl1-f71.google.com with SMTP id a92af1059eb24-124a95b6f61so61568777c88.0
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 11:15:50 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="nP+0NvI+";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="aSL4Fg5s"
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61GL7iDu125852
+	for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 05:25:33 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=LYIcSfbMA1RittLgd3Rfimx4PDL61+MOKk5
+	Kw+KK4GY=; b=nP+0NvI+71qihla3A77mg1akS8jEHn2RMxf09UQEXqxB7BDFd5t
+	w/dIjc4G+wbQZbGnlQUMeta0guiX/ZnGyM1WQgLubOmTPhZ9J0ttpaETYO28Jx2S
+	Iw0UcihKDfzi4YBNd6gQRiJ31qVYPMGomz2m+2erxpVKol8hH04y71TfPiy0msDL
+	NXDVZd+cGuQmkTkc3z+GLbX/7ZgR09jl4cA195ysQPsnxT49vmGZ/RLXBVKV9WTr
+	No14jILiNWmUo9vEqRQLRYFLc3/ezxNgbgN2+QtnYf3eTYvwN0eerAD4HV5CqMl5
+	rXD1TIbreWQp1uz9wtnL2jaxSrjEgvO5uLg==
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com [209.85.215.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4cbyxujbyv-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 05:25:33 +0000 (GMT)
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-c6df833e1efso13229176a12.2
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 21:25:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1771269349; x=1771874149; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1771305932; x=1771910732; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=NJl/yKqTclNT9kEkBmAeTF7lEJo3F6xT2CC7EiH5zHk=;
-        b=UJ0Oy61D3UOfKoBaExzYzym7+EqIiB67Wm6FxNQA1mf9STV23cbzbgwTgVBEj0w/lw
-         ng7Hdlrnzj0vRKWX8PfuQyJ3hBo8QjU0NrONCghoYb0dBv9CNgOs/zZVgIV6M2czTbHH
-         D6qyInvuosJgm2+oFQkkTzrSJAQO2F1m0VZWg=
-X-Forwarded-Encrypted: i=1; AJvYcCXerbPGYWhnegHrPHX1cBzLMWZaumFnQLSwVR9OEX3YZKLZjISUP5Xy8UkxI+RhBahVQcVXF38KOxM=@vger.kernel.org
-X-Received: by 2002:a05:7022:439e:b0:122:153:d161 with SMTP id a92af1059eb24-1273ae1655dmr5050539c88.17.1771269349597;
-        Mon, 16 Feb 2026 11:15:49 -0800 (PST)
-X-Received: by 2002:a05:7022:439e:b0:122:153:d161 with SMTP id a92af1059eb24-1273ae1655dmr5050523c88.17.1771269348982;
-        Mon, 16 Feb 2026 11:15:48 -0800 (PST)
-Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id a92af1059eb24-12742cada1csm11067327c88.9.2026.02.16.11.15.47
+        bh=LYIcSfbMA1RittLgd3Rfimx4PDL61+MOKk5Kw+KK4GY=;
+        b=aSL4Fg5sbErwuWCPrmYp0knVldiQC/QJruiBhhYOgnlNypnNQ1eaZwu9PI0iRPfPxl
+         hvOATb3Gk79u5XS+VkZKanFSW3YjyBcXmnsv/a76kmVzfD/LALib6+b1nhayU0neEYvP
+         4c7IaoAjM/idoK1j2fxdMTncURLWzNYSYLUGkNWUryaE/437bvuPssBQvKOp9y/Iulj0
+         5dTmB9Ze0X2apsbFneppwrRf6cxSet7Je+vpCoYx6TyJuWSYVO8RSfSw+I1E/gGBv/tq
+         Tc6a0ZPROOEyPAJEBJTpWN0Ex+g1LCK2CmLiwbttxXfWaCTdeC+jRYT9hj95pHa7Nn5K
+         aYLw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771305932; x=1771910732;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=LYIcSfbMA1RittLgd3Rfimx4PDL61+MOKk5Kw+KK4GY=;
+        b=ctVEnP/YSf9zJCI0AEF0wZjbHLjCHYPBSXTcB6n6lfCqyvr6LraJc7Uwbt2IK+nEHP
+         D782zOG73d0F9fuSvz5FpdPqqsjcz3nQkKvhffUAX2b+sJzOPgcJhkgQdTI4EHNmeLRi
+         gwSpTWsYwoRbBBS8F5qYaUAxgewE1GOnsQTIjcuw6l/GtoIP+glo25GGRVz7qFmVZUCZ
+         89d61Zj7ZIjK2zMvp0mk7dWZSiSWCxBZDLU1twAkSNLRQejrUq4ncFIzTR7MRZJ0z3ij
+         iingDbV5ikpuXMIXns1Qf0zjpchwWTKmmVkoOaHm9OQDURT5O9NXQSj1Yy5olUgssLqe
+         96Cg==
+X-Gm-Message-State: AOJu0YxTXnUIP69g7vzpMM248XvQmtAkdKAH2cJrbxXe6QhpFEsfQty0
+	o/X7kaHf4XcYES/tESyhDVt5hRfppE1AiRVcT2/4voJGzBN+HLkLntdY55j1MYD+Pd/MKrZlgsQ
+	3tuHLspK2PMWxCrwvvsxE5PkajPlwbavLzq9w1HjsBk9N874uiJuTjbTz8bTxPX0=
+X-Gm-Gg: AZuq6aKlwtfDAWQAWd9x47yoK/Z6cZE+k+EBqM77oBb/RBkZeaZ6ski+RUdHCvF+6YK
+	y439RKPCg1jRknYxmUSHxWefeOTuNuENpG0feAZbEEOIsXo6VGTi6c1KaWrTj1saCJhNBEGi+nU
+	XZCt817BDr3wYB1auA4vT/A564UzQeJyGlJhG3VfIr5q9L0vXLPhXtxAfSvoWgraqRH+5r2JmgI
+	CFUtq0BqzPYsB7JOicCG88EYqW2RXg1sEly5NVR26gtPs+FUY4TCONUKfzLTGyUBHSNsuwYBriw
+	PVMhl5a8RK9QsoJlEo/PY2qGD2m3ozK/FVFAp1LQcqfKqx1rTIqsPIU6ONI7mRBr26zW7FIC/lL
+	vJlaToURp+Wd8CesbxnNxh56R+nROunERfhC6gsu7WPOzUoJpd82Q
+X-Received: by 2002:a05:6a20:12c9:b0:393:625:ef20 with SMTP id adf61e73a8af0-39467116735mr12413761637.4.1771305932443;
+        Mon, 16 Feb 2026 21:25:32 -0800 (PST)
+X-Received: by 2002:a05:6a20:12c9:b0:393:625:ef20 with SMTP id adf61e73a8af0-39467116735mr12413739637.4.1771305931980;
+        Mon, 16 Feb 2026 21:25:31 -0800 (PST)
+Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-356a87f47f1sm6537685a91.8.2026.02.16.21.25.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Feb 2026 11:15:48 -0800 (PST)
-From: Kamal Dasu <kamal.dasu@broadcom.com>
-To: adrian.hunter@intel.com,
-	ulf.hansson@linaro.org,
-	florian.fainelli@broadcom.com
-Cc: bcm-kernel-feedback-list@broadcom.com,
-	linux-mmc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	Kamal Dasu <kamal.dasu@broadcom.com>
-Subject: [PATCH] mmc: sdhci-brcmstb: use correct register offset for V1 pin_sel restore
-Date: Mon, 16 Feb 2026 14:15:43 -0500
-Message-Id: <20260216191543.2514647-1-kamal.dasu@broadcom.com>
+        Mon, 16 Feb 2026 21:25:31 -0800 (PST)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+        conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
+Subject: [PATCH v4 0/3] Enable Inline crypto engine for kodiak and monaco
+Date: Tue, 17 Feb 2026 10:55:23 +0530
+Message-Id: <20260217052526.2335759-1-neeraj.soni@oss.qualcomm.com>
 X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -90,33 +90,76 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
+X-Proofpoint-GUID: BrirXaoBtFIfnDnvyMNRSjuIZOuQOuYL
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjE3MDA0MiBTYWx0ZWRfX8Ofvj61SaBPi
+ +15GYgUq5cCmcyzq/NoAtA+Z7/GGopzyWMitQ7m28g6VjgXexZutp/vC8oHsUPwXQ7bHlnRbc9U
+ x1q+wC8t8NHi2sQbAy1VR9TxpXxYUvDM94bFxXkLT6kk0mhtxLe27ivTyaCtNPhCn/6NRbRySaw
+ U9zmzeXUS6n18PU25jzinmUh/OiRf6an0v/EhqCIgdvL//YH+qosKrc3Bs5FiCkRK298n1j0jHG
+ yEhAGNjGDEq/W24p8HiE3xWkNNtCcOEtLxzGq7AUcfgFl2YVSZQnW8/VnRy+7Ib2akXEnOrNqku
+ e2RdQgFWuxb2OwxkxctaWLuFWncTqZksMylJ9v5qFjIl5fN9kHEXvbb2X2oub9AM8PppqZ/yr8Y
+ oD+VYcicgJ/jr7Wdq2wIC+xxzxP+h/0lcu6awdnOtgYR1nKuXzVkzqA7y5XwDB3hCLUsBLVDSYq
+ gcDjGT21U/XTZPY/V+Q==
+X-Authority-Analysis: v=2.4 cv=BpuQAIX5 c=1 sm=1 tr=0 ts=6993fbcd cx=c_pps
+ a=rz3CxIlbcmazkYymdCej/Q==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=HzLeVaNsDn8A:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=Mpw57Om8IfrbqaoTuvik:22 a=GgsMoib0sEa3-_RKJdDe:22 a=OaewepulewRRD3_FMPAA:9
+ a=bFCP_H2QrGi7Okbo017w:22
+X-Proofpoint-ORIG-GUID: BrirXaoBtFIfnDnvyMNRSjuIZOuQOuYL
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-02-16_08,2026-02-16_04,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 priorityscore=1501 adultscore=0 clxscore=1015 phishscore=0
+ lowpriorityscore=0 suspectscore=0 spamscore=0 malwarescore=0 bulkscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2601150000 definitions=main-2602170042
 
-The restore path for SDIO_CFG_CORE_V1 was incorrectly using
-SDIO_CFG_SD_PIN_SEL (offset 0x44) instead of SDIO_CFG_V1_SD_PIN_SEL
-(offset 0x54), causing the wrong register to be written on resume.
-The save path already uses the correct V1-specific offset. This
-affects BCM7445 and BCM72116 platforms which use the V1 config core.
+Document Inline Crypto Engine (ICE) handle for SDHC and add its device-tree
+node to enable it for kodiak and monaco.
 
-Fixes: b7e614802e3f ("mmc: sdhci-brcmstb: save and restore registers during PM")
-Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+How this patch was tested:
+- export ARCH=arm64
+- export CROSS_COMPILE=aarch64-linux-gnu-
+- make menuconfig
+- make defconifg
+- make DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/sdhci-msm.yaml dt_binding_check
+- make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CHECK_DTBS=y dtbs
+
 ---
- drivers/mmc/host/sdhci-brcmstb.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Changes in v4:
+- Added a new patch (3/3) for device tree changes for Monaco SoC.
+- Updated commit subject of cover letter to reflect "monaco".
+- Removed the text description of constraints from "description:" for "qcom,ice" and
+  wrapped the code.
+- Corrected the schema code to reflect the constraint of "qcom,ice" usage properly.
 
-diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-index c9442499876c..57e45951644e 100644
---- a/drivers/mmc/host/sdhci-brcmstb.c
-+++ b/drivers/mmc/host/sdhci-brcmstb.c
-@@ -116,7 +116,7 @@ static void sdhci_brcmstb_restore_regs(struct mmc_host *mmc, enum cfg_core_ver v
- 		writel(sr->boot_main_ctl, priv->boot_regs + SDIO_BOOT_MAIN_CTL);
- 
- 	if (ver == SDIO_CFG_CORE_V1) {
--		writel(sr->sd_pin_sel, cr + SDIO_CFG_SD_PIN_SEL);
-+		writel(sr->sd_pin_sel, cr + SDIO_CFG_V1_SD_PIN_SEL);
- 		return;
- 	}
- 
--- 
+Changes in v3:
+- Described the purpose for phandle in "description:" for "qcom,ice".
+- Re-added the "if: required:" description for "qcom,ice" with proper
+  encoding.
+- Corrected the uppercase for base address and reg address space for ICE DT node.
+
+Changes in v2:
+- Removed the "if: required:" description for "qcom,ice" dt-binding
+  as the ICE node is optional.
+- Corrected the ICE dt node entry according to the dt-binding description.
+- Added test details.
+
+Changes in v1:
+- Updated the dt-binding for ICE node.
+- Added the dt node for ICE for kodiak.
+
+
+Neeraj Soni (3):
+  dt-bindings: mmc: sdhci-msm: Add ICE phandle
+  arm64: dts: qcom: kodiak: enable the inline crypto engine for SDHC
+  arm64: dts: qcom: monaco: enable the inline crypto engine for SDHC
+
+ .../devicetree/bindings/mmc/sdhci-msm.yaml        | 15 +++++++++++++++
+ arch/arm64/boot/dts/qcom/kodiak.dtsi              |  9 +++++++++
+ arch/arm64/boot/dts/qcom/monaco.dtsi              |  9 +++++++++
+ 3 files changed, 33 insertions(+)
+
+--
 2.34.1
 
