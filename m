@@ -1,156 +1,176 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD370296BD0
-	for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 05:25:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771305945; cv=none; b=lH1rnJYRgiXGX51KZkagNzvA+jHmEzGh8Td8bZmBP1BbEgZK3gI1x0p2s461XEYwqXj+xvdVN3zeI0QsVdqcUCziasa/IEau4yT5eJOpOYVjCgpd+kxE708MgJbzDbv38t/5rHmTDGycFNWpLD9tJNfN5RMpaaO6bUu3MPY3Xgs=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771305945; c=relaxed/simple;
-	bh=n4OspjWSZagJvM5sUsKFGeAfc/MvM9mYMg22T2KPfuc=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=bQ9cppDYwnEstiVHHeyO42XRC7/8bdWWbH9RWvXQpaAxlBPxq+ZNi9YWpqUWM/n9vzIW8HQRLn9tlYUXNiehQSrqCN0+yB8y8AR3G3KQJpNnP1Td7oph4uBOFzm6zWt7h1R17dj8drp9eEaxhEhmZ6sSgSk2khG5+i1wnxGKmJM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Idccab01; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=WO7M61Nj; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70A7D2D949F
+	for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 09:03:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771319009; cv=pass; b=QG//rGJ8wvNE9Pk0E6ILsDUI7PBk0C88HIc5iCSI/omwT2PH25MHP2zI3/Nwydrayf9GfWNxosmm0z4241CCGOtlkca0VJA5jMj6obSkS4RjOYcTQhWa8AZkmM7i1IIRhvYO4RVOSD85YXtqdZE2F8J0yOG+OKQVBluueOPHGjk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771319009; c=relaxed/simple;
+	bh=v5EoAdPTQfqXTcoEvCiQDaYYtk4+qlcwUAwcrKadu1k=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=sxJP3JW2wUX59l7EXQ1g3H26dqXb0UnMUK1og0Jak9Imiv+vzdw/m/foTeNYm1KUsepc+0YWGUEEx2uaoxfmXj+G4m+UHB7pZLBSiOL/yXqzWrT/1bMjjp3WTmPDsNNYB4wcVgqErcMFsAQq3RAwCkmn6lbHM0D5g5OrinukM38=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=sJyxvR8D; arc=pass smtp.client-ip=209.85.167.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Idccab01";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="WO7M61Nj"
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 61GNvE3j241227
-	for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 05:25:44 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=qcppdkim1; bh=6XSNpW0E5rM
-	zc7aMxxDVhfPGX98lq9GTw7LghKYK+SA=; b=Idccab01nJg7M17L357QDeY8kFA
-	vHcRVBPYPVkdxCe1asaGFtkac7L8Vjh7APv+MJlbwuEWhTRxo3gHKwmnB03EcOg9
-	fo2wn4Zo/bZy4saaQdyizNsJs+N/Widy1KEnZExf205KVLVv+m27mVpVryr+j95V
-	KrnEXySLNFGVHLNRcBY1lQLyQ+PiAKHApDnmKeS8NgrICZNyQocjuBeicvO5jci7
-	uWDoni5jAIjHxaIrnc38XIGsG575QAUE9kJgFDqYbrNiaGX5L0DIW0xLyYziXK3Q
-	Xjyj+fgQK8tjhR32w+pK2Ldicv+SkqTxrfXMWRoNFHtQDh1VjIwaZB35a+Q==
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com [209.85.216.70])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4cc5kh9f4e-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 05:25:44 +0000 (GMT)
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-35626b11c51so2969604a91.1
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Feb 2026 21:25:44 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="sJyxvR8D"
+Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-59e65b8e268so3641439e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Feb 2026 01:03:28 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1771319007; cv=none;
+        d=google.com; s=arc-20240605;
+        b=UIww9e+99T2Y/d+oNja8VJA5W6/1/yhB4tEBYXOIgbi/nnBocxo/TYXc3D0PEq0tLv
+         GtwhNR51jY8g3B4AzBfs+QbgR7u9vycRrD4VR8afqDhPsRqtSy9j5ShKs6iHJB9B6UEI
+         FaNNYHBU85VoRechiKnaJftL9kj7oluwtdKUMEFKW997YPoiUWaRjsJg+Zd9d07Y5dya
+         vO3Z5TUdXTgMgKCp8j8n0aTszhEry43O4fOemfTmbDUb9N4u6K7NaFo0DQ2XD/Gtr+EK
+         6RJN6HGHP5EpXORQPjWuWX4NN0p4nK4xkrkZcFsnilS5aj028yLQnLu96103oIQKg9wM
+         yJww==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=RoxFTC0oUorf76Kf6dX+GhEcbA32G2mdakarqzc/Cv0=;
+        fh=jSR2SMmwAPRyGd7qX/6ieaKbiPhlfv5jaKLhtZxzwB4=;
+        b=LzO+7iN56ywXaMReU2FqLWakOeR6IxuseXJcguPgSZmk+w86y043KbmaMxDv5q6iay
+         MaWJrNn70GFcBQtD0YHpefzdcaHpo0R9vFs0xl/M1PZo3o8hWuNXfHw6se2gkjeHOUHH
+         JDKbfaSkzB1l8qzcXPyOm9t81L9b/3r8zLEYbz2m5B+bIF+vv9wBLB5jh7UYwkpuHe5t
+         yh6GfBQ973u8OJRy2ZvTFXcmn/rK5rWdAsB0zE33O4xF6VkUfDM/hnVPAsxCqBy/B7Ot
+         k2ZAE5EImFGxCPSKap1+a0d4zo15btXBRRSzPpNBNe+5LQT3LP38AlhO3hTqs0pKNF+U
+         SO0g==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1771305944; x=1771910744; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1771319007; x=1771923807; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=6XSNpW0E5rMzc7aMxxDVhfPGX98lq9GTw7LghKYK+SA=;
-        b=WO7M61NjFxiQYFGtiogle+507VzNFLGc2MFIWflL1VQ+yL/mcW3KX0BsdOXpAswb4X
-         SEfUM/myuR8dQ9w2gc6iYpLmlaflkbD28PdUhG+Z8uOG/BQsB7akepSuoeMM5xyuGPgo
-         HQlXRZEMvmfh4GAhY3v8RU9v91Q12WQo8W/Jh778q4uT+wZ70pa/4VFygbO1FflExFiE
-         +osdJNq6P9ROeVzIV96t2ymvDJbyh3NaNrSv5FS7/KpNajPiRvyDwA/xbj+YERjbDOar
-         wTnuC8Ip0LDclEaNmRfGty+JqLtuouV9/nSWHQ3fc1bwZHb5VuFG0rriEtXyqQopjm3g
-         v7wA==
+        bh=RoxFTC0oUorf76Kf6dX+GhEcbA32G2mdakarqzc/Cv0=;
+        b=sJyxvR8DO88JiKK3LbIBBKuCsL/XTXLBQ5nLdxnlEKi4EEvOspSRYo7ma9JxNLbhva
+         oZGZy0eZM/q75xQLx3PFt5XTFN+/rUy4oP8x3GeMd/+8ktLw3uvZyg0gfVSo3tsovbr4
+         ZxSGRvMFrNWGkDXE5uZSP+SuJP8yLT+uIazV410dvXV1QykZAASy85vH2m3/hiwbC+Le
+         jXH7oK0yF+d0SasgaMFyDVJWIgGi89B37oWZsS1qGPQLl9y2JJHRtQ9qMrJTjVDP5sFb
+         jYzvPg8RE6wT2GGLSnB0dtL1LO0boGj3lt9HnfINL2hMtEawmkOc657E0HeOPfGNv5u4
+         e49g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771305944; x=1771910744;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20230601; t=1771319007; x=1771923807;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=6XSNpW0E5rMzc7aMxxDVhfPGX98lq9GTw7LghKYK+SA=;
-        b=ekYP+bzhzy3/TnMMIXE+/tsn7Sw4U6IMq08zW0Rw0UerxDYgMkxXhye6mkRVxXcw87
-         j6lVzR8tmVtZ0ef2UxSvPB6yEeOjE/r1H0ByFgdpdzUvPxw15btTMe7R0mJOiVBwfOC7
-         EyzUuxHdheRHfyVV8vsoQZwNYk0Q3sHlR1TW99oESnzjyvCuZKRhTRav/QMzj50QZ4be
-         +C9EMZUyqUGHCIcjzp97GtSGrxUrGcSEA1wlH5FmYLtCeOpdrmtEq12aE3IlmLLKiCZp
-         cb+X6fr3q/GMFFgRUxjg/gBBvbIrneDgWS2Vfk4yFMdgdcx6bRgut5yrB94YUb5vvcUw
-         Dx4Q==
-X-Gm-Message-State: AOJu0Yw6d0CeppBHTPR9qx+ZkXOvrng0j/jwsnhYgQ7YH5YhDKnAm8OG
-	z91svZqvD8DIhaDJkvG1Aa7ZrElaMlcnUwIrSSKwiAZbw1CeFOrA6bKw5PXBDT7/Xn8W75Drh/D
-	qYErOcadpeXwmo7zpPO0QXUCpEVoFNMHzQgvIE5IywmcJAVTl3Ibd+F0RLvA9OOk=
-X-Gm-Gg: AZuq6aIS66tNpC4LIIxoelLsEe3Plm7OpdkWL2jcI8l+DTRzwviBO1ZgHhzaAPRQc1b
-	KjgYss0ARuwYM/o5u07w6Rg+qUWW+n5yidDdnDfIWSBMjUnDT3RtUeuKNy1jyfmiPvvXuZI7XgE
-	Q2i1groj8c5Gk8bCMMOuuyyUAuIA+P0DA7E5wCE3SDEL1GLMtr4xNMy74/3IF/KBVM8NLj8Z5I/
-	4cf/VY4pkohpuTY5N4i9u9Yh/EJRFKJb+EM4LDdwQdikwaA6SUf+LtzAYGloQhJ3ZoBAtawFchs
-	cuk4Mh6p2IcOL9X6qgNCGNVggl/Z8OS+C4aDitsRr7ulL26IARujbHvO7dj+guRlysv3cfmuMVc
-	lz2g7JUsB1o8Ie6dxNwryiUWzFhEoOBUJEMEqD+QaKkC3UtAEIg+i
-X-Received: by 2002:a17:90b:5648:b0:356:1edc:b31 with SMTP id 98e67ed59e1d1-356aad5f600mr11599593a91.20.1771305943572;
-        Mon, 16 Feb 2026 21:25:43 -0800 (PST)
-X-Received: by 2002:a17:90b:5648:b0:356:1edc:b31 with SMTP id 98e67ed59e1d1-356aad5f600mr11599569a91.20.1771305943099;
-        Mon, 16 Feb 2026 21:25:43 -0800 (PST)
-Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-356a87f47f1sm6537685a91.8.2026.02.16.21.25.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Feb 2026 21:25:42 -0800 (PST)
-From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-        conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
-Subject: [PATCH v4 3/3] arm64: dts: qcom: monaco: enable the inline crypto engine for SDHC
-Date: Tue, 17 Feb 2026 10:55:26 +0530
-Message-Id: <20260217052526.2335759-4-neeraj.soni@oss.qualcomm.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260217052526.2335759-1-neeraj.soni@oss.qualcomm.com>
-References: <20260217052526.2335759-1-neeraj.soni@oss.qualcomm.com>
+        bh=RoxFTC0oUorf76Kf6dX+GhEcbA32G2mdakarqzc/Cv0=;
+        b=bQ2eLX7A0HjR2bItoMa8EGwoQ7S+jk9n6DwhxUMu4t++Oel9wE+F0XOqtjLghaziFO
+         u1k7jfk97dRKpQ/XeF7n3rvdjVrRbpQZVQ6rOhRE50fUmTxLjitnkJ0BWCLsnMKrRy9h
+         +EKV3tKQAl818p3g6BF65LUbfQ+c2m1O4OFOGpDIWEDhbVXaiHIgcMhlBu8IMUfj1WxR
+         6+mR8m5J4dR/T6EfEKI3ti2aiD+TSut7kPpzwqcp3RqLU/dmnvMnGuTR0KJtTIy7lbO/
+         aVe7BLWdRyIQzQUxu/dV92hG0hvPWQTcHvliH3HnLyFRAZ9AOpJagZQTdmoXJOYExPJ7
+         pPHQ==
+X-Gm-Message-State: AOJu0Yx2+WWGBalvSkd8fluMj+nDFJwF9f9OD5Zrms9EUhCVz+0wz3B5
+	+zxn3ezalIHDq+UyHof28n13nuR/OR0VpXTG5/4ijgXoAM/Z73p63R1leAFQykrOkYdsO+IkGBp
+	hP43iokkw1a6Nj39nWPL1sSynzaX5BNlK5i4jMb0Ziw==
+X-Gm-Gg: AZuq6aKvkQcPcPvqPZ2ictg8OYY/JNjwgl08qB48DvMstW0f5uC2nvhmCz0O0qOBS9y
+	yB2om3583uV/KrcsCRZ1FPUF3ydTP7ToxTj6wm6vUTagnLDEhmFOiK6a9mmTr5EnMcXoTxppoOh
+	3fuzqTU9/akNXJ3GcU9N7UbsPvd7Ibbn9ns8kBpStGDlLpSpevvFsvygdN68ohLAoPaIANenHlg
+	DSVxuiJBjpP7GVJcYK8QaDgWwJYbb1XTTYS+U0UUroEEOm7+gVB/fTUz2OKLsQQAEA8F8l6OvCb
+	vhpusThK
+X-Received: by 2002:a05:6512:686:b0:59d:f71b:3608 with SMTP id
+ 2adb3069b0e04-59f02632deamr4608618e87.31.1771319006245; Tue, 17 Feb 2026
+ 01:03:26 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Authority-Analysis: v=2.4 cv=Coyys34D c=1 sm=1 tr=0 ts=6993fbd8 cx=c_pps
- a=0uOsjrqzRL749jD1oC5vDA==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=HzLeVaNsDn8A:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=Mpw57Om8IfrbqaoTuvik:22 a=GgsMoib0sEa3-_RKJdDe:22 a=X7TbQ3M2BclZft3SHBIA:9
- a=mQ_c8vxmzFEMiUWkPHU9:22
-X-Proofpoint-GUID: nJQVNCya4bglVoe5XYo_rVePmTl6v8yr
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMjE3MDA0MyBTYWx0ZWRfX/Geyn/9S8fRr
- RWL4uRa2v1aK6YbgmJ3kP7ukuQkDa83ZJJWmmxV9WkEz3RDS1HSFIz3EnGSbgCLzEYs9GGUwmTp
- RjFkux/0lrHKXvwtvIIV6cnPwLUyWxls/SOKH1SdPau6NbWipkvGKCCJa4jGdLmCIJznOeBBKug
- skK0ys7EddAiyreSvzC8QVMJkd/s27udcc+wfMcF+bsz3Y+C+HpQFDs1Q6adhwp7IiNMb8qahJJ
- uTfjLdTqWhfdR8DZDBGk0gYL5VJ8egZWcyb5f/yC6nnpvUuvv9fJsmkjchciaXcMxpgeljLLPyE
- aikp7PrA6dZnKRVtfETF5d9gSdtTa/MYEIDSPO9gY5SSFoVoTXSrbil3J5nXWI0BI/oS3PtfBKH
- WIWonqTPL1OeHtwJ1iMUrYh7M1cQ+o2pnOt7jKrtmWHGK5xIqwtqRWOh04AZ+kqs2tyXqSlM/DU
- Gs9QpLx/rhIfK45JmLw==
-X-Proofpoint-ORIG-GUID: nJQVNCya4bglVoe5XYo_rVePmTl6v8yr
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1121,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-02-16_08,2026-02-16_04,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 lowpriorityscore=0 spamscore=0 bulkscore=0 impostorscore=0
- priorityscore=1501 clxscore=1015 phishscore=0 adultscore=0 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2601150000 definitions=main-2602170043
+References: <20260209133441.556464-1-ulf.hansson@linaro.org>
+ <CAHk-=wgnRQiKqWVrO_uF1btYM2K8r8xL95RGdKU3QLe8B58nrw@mail.gmail.com> <CAPDyKFrFez=tDXLqRmeS1qpnVMCUPi8POjYkbRGiwAhcT3shfA@mail.gmail.com>
+In-Reply-To: <CAPDyKFrFez=tDXLqRmeS1qpnVMCUPi8POjYkbRGiwAhcT3shfA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 17 Feb 2026 10:02:49 +0100
+X-Gm-Features: AaiRm53KmI70BKbWNw9Xq3JvVR9m-mRxjNHBlBG5QN2KQr0qJYRa5NdW_h5SmgE
+Message-ID: <CAPDyKFrO2HGMeyg6+UKseU2T3b0+yLBdo1y0O3Teo8zk0rC5rQ@mail.gmail.com>
+Subject: Re: [GIT PULL] MMC updates for v7.0
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Add an ICE node to monaco SoC description and enable it by adding a
-phandle to the SDHC node.
----
- arch/arm64/boot/dts/qcom/monaco.dtsi | 9 +++++++++
- 1 file changed, 9 insertions(+)
+On Wed, 11 Feb 2026 at 22:29, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Wed, 11 Feb 2026 at 19:32, Linus Torvalds
+> <torvalds@linux-foundation.org> wrote:
+> >
+> > On Mon, 9 Feb 2026 at 05:34, Ulf Hansson <ulf.hansson@linaro.org> wrote=
+:
+> > >
+> > > Note that, this time I have picked up some changes to improve the mux=
+ subsystem
+> > > and those are part of this pull-request, as these changes are require=
+d for mmc.
+> >
+> > No.
+> >
+> > Those changes are complete garbage and don't even compile. It has
+> > apparently never been in linux-next or been build-tested in any way.
+> >
+> > When CONFIG_MULTIPLEXER=3Dm, we build that core.o file
+> >
+> >    obj-$(CONFIG_MULTIPLEXER)  +=3D mux-core.o
+> >
+> > but in include/linux/mux/consumer.h you have
+> >
+> >    #ifdef CONFIG_MULTIPLEXER
+> >
+> > which won't be true (because what will be defined is
+> > CONFIG_MULTIPLEXER_MODULE), so then you get a long stream of things
+> > like
+> >
+> >   drivers/mux/core.c:312:14: error: redefinition of =E2=80=98mux_contro=
+l_states=E2=80=99
+> >
+> > because the mux/consumer.h header will have defined the dummy wrapper f=
+unction.
+> >
+> > In other words, that commit ad314348ceb4 ("mux: Add helper functions
+> > for getting optional and selected mux-state") is pure unadulterated
+> > untested garbage.
+> >
+> > I do not want to see a "fixed" pull request from you. This was
+> > entirely unacceptable, and I will not be pulling anything more from
+> > you this merge window.
+> >
+> > Stop sending me untested crap that hasn't been in linux-next and
+> > doesn't even pass the most cursory smell test.
+> >
+> > You can try again for 7.1, but only if it has been actually in
+> > linux-next and properly tested.
+>
+> Hi Linus,
+>
+> Sorry for the mess!
+>
+> I queued up the mux patches on Wed 4th last week (which is certainly a
+> stretch that is unusual for me), but they did not reach linux-next for
+> some reason, which I should have paid attention to. So, I simply
+> trusted the build boots not reporting any errors to me, believing
+> everything was fine.
 
-diff --git a/arch/arm64/boot/dts/qcom/monaco.dtsi b/arch/arm64/boot/dts/qcom/monaco.dtsi
-index 816fa2af8a9a..365af78b01ae 100644
---- a/arch/arm64/boot/dts/qcom/monaco.dtsi
-+++ b/arch/arm64/boot/dts/qcom/monaco.dtsi
-@@ -4202,6 +4202,8 @@ &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
- 			supports-cqe;
- 			dma-coherent;
- 
-+			qcom,ice = <&sdhc_ice>;
-+
- 			status = "disabled";
- 
- 			sdhc1_opp_table: opp-table {
-@@ -4229,6 +4231,13 @@ opp-384000000 {
- 			};
- 		};
- 
-+		sdhc_ice: crypto@87c8000 {
-+			compatible = "qcom,qcs8300-inline-crypto-engine",
-+				     "qcom,inline-crypto-engine";
-+			reg = <0x0 0x087c8000 0x0 0x18000>;
-+			clocks = <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+		};
-+
- 		usb_1_hsphy: phy@8904000 {
- 			compatible = "qcom,qcs8300-usb-hs-phy",
- 				     "qcom,usb-snps-hs-7nm-phy";
--- 
-2.34.1
+FYI, this turned out to be a really silly issue on my end. My old
+email filter was tagging emails from Stephen and simply didn't catch
+the build error-report from Mark the 5th.
 
+I thought it was important to share this, as the above reply from me
+kind of indicated that there was a hiccup with the integration of my
+mmc tree in linux-next, while there certainly isn't. Mark rightfully
+throwed away my latest next branch, because it was broken.
+
+That said, my other pull-request for pmdomain [1] should be perfectly
+fine for you to pull, it's been tested thoroughly in linux-next, but I
+fully understand if you rather not at this point.
+
+[...]
+
+Kind regards
+Uffe
+
+[1]
+[GIT PULL] pmdomain updates for v7.0
+https://lore.kernel.org/all/20260209124757.554032-1-ulf.hansson@linaro.org/
