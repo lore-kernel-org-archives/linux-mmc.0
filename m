@@ -1,121 +1,166 @@
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0509C30BBAC
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 11:29:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.47
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771414163; cv=pass; b=ZXQczO6hcaT4G2KXlqnESAUAdRcJW7pBSItTkwirKFaBWgjxqFf84zQERF9e3pt02PvhRsOEZi54c4lfnTGRuxvFJLYWcUTGIqI4lGONjlPVudkCp16PBZlgPud5QvxRBTIcWPJYKw1k40dKlxOfePXWGn7N8HV5vqKgW1Z2NWk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771414163; c=relaxed/simple;
-	bh=IIJ4sJBvPTCTKAiqjqkQeomyIzptNmJbKLz8jcJSeeQ=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7822B31960D
+	for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 12:33:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771418030; cv=none; b=Q6kFdIAOW+58W6fYfXQvLTl8/oBwojegwpwcg/jRa/iAvCu5pyI0G/cuKjoJFsaNx33aVZ+IY6Q0Ig9kuVbPw9CwuXdTr6KbBntGl2vHr19Sz4IG0N39Vj/HO5li1F1MhOCtqFOmYdh8F3ncZmrZDkHOM+1JF54OzKks49c2v2k=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771418030; c=relaxed/simple;
+	bh=PcdZIrVKr/Pd1Zn/N/Z35F9qghKTj/esGt6SKwLxzS4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Wr1fjyxOQLWRhqopNnd9wYrDx0SBUSrcgWafm8RGZKO3UsQFUsZ3HPdjeIH12Kat1SMfLMY6dGAtM5p5EKjXzzatk/Y71D6F55XuumJrPQxFR1zCT2o0sJkaPwkIccRkIWI3hFeHjlNxi+puAlBIym8lXWK3pE+QBeO/3MRyrqY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=t07fnlrT; arc=pass smtp.client-ip=209.85.167.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=jtf+j14gENGDA+A/0w6XKI63Go3x25heJjaIImZktpw3elfQaf4I9NmXLnWPMvM1TFa+GwV8dhmJwXyDyqFWkK5EcHbt/3oCPQUbOJqSN5ZUmTUsPnCt58UtEXczQdcA+cgrSR85eYw524HTim0dR2LBlTAeRRUa6ysvSeQ1iNw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WvxHpD9F; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="t07fnlrT"
-Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-59b672f8ec4so4970560e87.1
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 03:29:21 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1771414160; cv=none;
-        d=google.com; s=arc-20240605;
-        b=deVc7aQqHuFupVp+1l0zuyiCd7LolyDRXhUQ1wk4Jc/ERgWYIEm+/zaUo3zRfqoCKw
-         p+HndHAHdn0X1Z7WOeM+n9TfcRBP0MF7XCw7gFJA4CS1m4zJoLX0Da6OMecjHB1HKv2q
-         cyva/kkgQPseVC7/SKAOX7RMD26B3SkKwvTL7Qsyh3bj3szp5v7VddfQY5giq7igS7NJ
-         xVABGGS6M6z5WQbiRRzd5Q6IpeqyZ6w2Dvz6T396t2SgDgARYOct9wyBICVxer5C/VFv
-         F3PDJ4RBnlKpi6i+dXYhw1gFBT9V2CUbB3GqCbrZs3DNUfyAexYXpXEQY5zvo+Lg56C/
-         Y1gw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=IIJ4sJBvPTCTKAiqjqkQeomyIzptNmJbKLz8jcJSeeQ=;
-        fh=CVWtvClrPtT3MXM7vrpeEDn0oWBOQ0hKnUNj5oVb9Eg=;
-        b=U6dxMC6j75fHE9jBk1kZwKVF8eDvrlQEymEcJdR2AEyu/I4vM/iu6ZZpQyLmQwDO5S
-         fzspfbPnUcxL4z2gEGUHP7x/Axeirvx/agb/8aU8CxCamWoDW3gJ2AGGXBsIR+axF8dy
-         jxthd89TD2j6XK6Gam9YH3DbrohpVnzPW1GDAnnS5rNwJf0H5L+hkWT+Asnu6+fPAT3V
-         EokEbQzmNIeWc8iE3QM7bQmGPBGGnuNTRPGfZrCIiBBLjKgQPdkWHiYiYByzG/HlVTJy
-         i4QuR1RFF9Y+b9w1E+pBrBnzxpUsaRxOhr8BOyU8NS/QGEE9ds0wfUxIJKrKoGn3LEH7
-         Gutw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1771414160; x=1772018960; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=IIJ4sJBvPTCTKAiqjqkQeomyIzptNmJbKLz8jcJSeeQ=;
-        b=t07fnlrTUy+LohJkIAyvGuDak1OWNHrBJcpWf5Dd17HYZkZqZBLYjux6BoCuurS97S
-         Mn9thYUe2lPgiR6F4iaXmoJT/0KwFa9Sf2gdbQ4u6/Z1FRYJ2aLwfiZrBAG7jqWAoBLp
-         UDp6HI5O2j1nOURlrhdzOK0g1n3DFmDQd5w5ltDSVh616Alvdw+9BofJyxBpB8igv5bc
-         KtY7nLlfJnpyvS1DGUHndckBneNiuLT+6VqiKHDNUIGAUpR19wiTxgzt4LlPGBh2SdUj
-         VfnGPEeCh/2vkyDq39vu0tK+j3JzwEpdn8oS0Ah7fGlqsYy+qSVIdKcSt2sHv6bsXiUm
-         ODcA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771414160; x=1772018960;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IIJ4sJBvPTCTKAiqjqkQeomyIzptNmJbKLz8jcJSeeQ=;
-        b=nzGv3b4t71KSxIhogN17NZwFECZ1PmyoPwhm1L8YSNmTDwEGpF86cz0PxLbEMQrNJE
-         cNZn4JWwr2iNAT2aUWtQ/z+MzYJr9IAJbHyNoxQVaQmUFMWS+qo6RfU0jwQIdvN+BPD8
-         A1HkxJiPGIo1IK01GOAT3B/YdODEu7XzNpTC9/27L2RZ2f9r08HNQhiAL7i6w96o2mR/
-         UvJnk8ipoYUYBAOg1Z4Vg6eCsAzlZoCcXmk/xw8Ofv6DlbV5Qq3+UiC3A2JbzmtCtCS4
-         KMLylGcaIGQhcLn8EwOOmHlzfKA3FSZMO8rHxhf+EsyhXFcgMZ0eyoKko9LGqvyhrdmH
-         CcbQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXhj0YxvUIvtouVLHpS2TDajIqJea141jVPrmWkIaAWoQbZ5sPk8yqVCcwvrCet1qym2vjwadUDOls=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyT+gdLbul0XDBE1U9Lkgq1ZxOaO2CY1EQ/ryYwGtQ5uv+lLLFL
-	7XDMLCSBjwQ0XzL6jKFUi/6480UWhGQlfocLU5VZsa6SmGmK6f1ZQAEsM4ZT7lYusvZtbzBRkbF
-	vQiyXFGQo0uqXO8qucbpJyBVD8ikWRUIzbtEIfXk7sQ==
-X-Gm-Gg: AZuq6aKcX6VJHifqwK3glOJthmsqzX6xrsjTf/NBs4bGsvDhmLV5yfl0UHSzkp2ra7R
-	MTh5mit2l+ofDxls61bWB+sxQ0fF0UMzpy0guakkt0dfJA+kNAYj/vhNQ1LOK9fHx7xXlMfX4w7
-	g/FEumvqRmgIjPpSHRScP62lJIG3b5/Z9HAnoUJ0Drol1kHx9pbTgX/F1GUw59kD2GRcNiWNyfK
-	N1h+onZtZ/8604zXHKFf0bjaNNsKCKveOapJSpsPwxeIj+Tw/ROfJvBm5ewaiKfvSzwof5y6lub
-	bRbIR58i
-X-Received: by 2002:a05:6512:3f07:b0:59e:5d0c:ce with SMTP id
- 2adb3069b0e04-59f83bbad80mr515595e87.30.1771414160049; Wed, 18 Feb 2026
- 03:29:20 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WvxHpD9F"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F30EC2BCAF
+	for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 12:33:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1771418030;
+	bh=PcdZIrVKr/Pd1Zn/N/Z35F9qghKTj/esGt6SKwLxzS4=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=WvxHpD9FwSWpsrs6FKcLEMn3HuFKNyIKS0XxxxZFyVahyWEQhyi2dKjsB4W7Zuykm
+	 JZDio9KPtRbeWiUSyu/ISvTmF+wQpY4qUD5CVQWjKqkC6gkHX8UR4pPg+yUOn+0QlD
+	 EnG81OqeJKvn8chTH7I9Sifb2AosVlLCPMWyuMqvZpCPSH9JIOVp3t8HROOpCdbkns
+	 jAfT+bT9vACxPANRAt0BwOTQx/ezNTzf17B5f/eOK2PsKrOEqCxOrPfB2LDfgVFIN8
+	 HjvbH+ag1lKzTSwICd0lYRX/9xKTtfTj+HvQDD33winl1sPVZx0YF43WF2l7JIJT7G
+	 OfiWmhj2gVCpw==
+Received: by mail-yx1-f42.google.com with SMTP id 956f58d0204a3-64ad9fabd08so4545783d50.2
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 04:33:50 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXeXC/4onPZ6zJXiBUXr2dYsdeRkl8vw6hjk8eAVE8tyK6IvrenjwzNLOq3pPWBZ4l4vvuPgddKTaM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxNHNSTuvGAoto3id1/wr9zSGUJ1CD5B0eTxVCmNELbD04ENtAF
+	o+UJwvcyXo1mTUCw4315mMkh+UJJtrReELjiTfm4cCPDvRdKUU09T5RC3QA9JPALDcUe+2Hflwp
+	FWsR4AK8qsqEAPeL/pUuR8HzlW0PfV9M=
+X-Received: by 2002:a05:690e:20c3:b0:649:f002:582b with SMTP id
+ 956f58d0204a3-64c14ac48e4mr10700712d50.7.1771418029646; Wed, 18 Feb 2026
+ 04:33:49 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260216191543.2514647-1-kamal.dasu@broadcom.com> <dd8c6277-9ca0-4d9f-88bb-362c5b96843b@broadcom.com>
-In-Reply-To: <dd8c6277-9ca0-4d9f-88bb-362c5b96843b@broadcom.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 18 Feb 2026 12:28:42 +0100
-X-Gm-Features: AaiRm53qSojgtbY0tqDCYOXdN2UAIV1pZkOA_ObLi5mp1xNnSnfgnFwgFfwwVvI
-Message-ID: <CAPDyKFprVGSu9DQAC=8d9sOCVQPuLFQmfeP9M8osxwijO3t5rQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: use correct register offset for V1
- pin_sel restore
-To: Florian Fainelli <florian.fainelli@broadcom.com>
-Cc: Kamal Dasu <kamal.dasu@broadcom.com>, adrian.hunter@intel.com, 
-	bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20251024-sdhci-bb-regression-v1-1-b57a3d4dbc9f@linaro.org>
+In-Reply-To: <20251024-sdhci-bb-regression-v1-1-b57a3d4dbc9f@linaro.org>
+From: Linus Walleij <linusw@kernel.org>
+Date: Wed, 18 Feb 2026 13:33:38 +0100
+X-Gmail-Original-Message-ID: <CAD++jLkWut=YDiv0uEffmYNTjrHhwY3=O3+ffDtMVU80wczXBQ@mail.gmail.com>
+X-Gm-Features: AaiRm50ISFJ2laD-LdXSm0tILGGW0eWjtaB7cSVwFtj6rrKYccvTvDDUG284NZs
+Message-ID: <CAD++jLkWut=YDiv0uEffmYNTjrHhwY3=O3+ffDtMVU80wczXBQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Disable bounce buffer on SDIO
+To: Michael Garofalo <officialtechflashyt@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	linux-mmc@vger.kernel.org, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 17 Feb 2026 at 19:47, Florian Fainelli
-<florian.fainelli@broadcom.com> wrote:
+Michael,
+
+1. Did you verify that you were using in-tree drivers with B43?
+
+2. Did you get a chance to test this?
+
+Yours,
+Linus Walleij
+
+On Fri, Oct 24, 2025 at 10:40=E2=80=AFAM Linus Walleij <linus.walleij@linar=
+o.org> wrote:
 >
-> On 2/16/26 11:15, Kamal Dasu wrote:
-> > The restore path for SDIO_CFG_CORE_V1 was incorrectly using
-> > SDIO_CFG_SD_PIN_SEL (offset 0x44) instead of SDIO_CFG_V1_SD_PIN_SEL
-> > (offset 0x54), causing the wrong register to be written on resume.
-> > The save path already uses the correct V1-specific offset. This
-> > affects BCM7445 and BCM72116 platforms which use the V1 config core.
-> >
-> > Fixes: b7e614802e3f ("mmc: sdhci-brcmstb: save and restore registers during PM")
-> > Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+> As reported by Michael Garofalo, the b43 WLAN driver request
+> a strict 64 byte block size because of FIFO limitations.
 >
-> Late to the party but:
-
-No worries!
-
+> When the bounce buffer is active, all requests will be coalesced
+> into bigger (up to 64KB) chunks, which breaks SDIO.
 >
-> Tested-by: Florian Fainelli <florian.fainelli@broadcom.com>
-> Reviewed-by: Florian Fainelli <florian.fainelli@broadcom.com>
-
-The tags added to the commit and thanks for testing/reviewing!
-
-Kind regards
-Uffe
+> Fix this by checking if we are using an SDIO card, and in that
+> case do not use the bounce buffer.
+>
+> Link: https://lore.kernel.org/linux-mmc/20251006013700.2272166-1-official=
+TechflashYT@gmail.com/
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 23 +++++++++++++++++++----
+>  1 file changed, 19 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ac7e11f37af71fa5a70eb579fd812227b9347f83..c349e5b507b63a5ee9a9dcb08=
+ac95cae6b3d7075 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -650,6 +650,21 @@ static void sdhci_transfer_pio(struct sdhci_host *ho=
+st)
+>         DBG("PIO transfer complete.\n");
+>  }
+>
+> +static bool sdhci_use_bounce_buffer(struct sdhci_host *host)
+> +{
+> +       /*
+> +        * Don't bounce SDIO messages: these need the block size
+> +        * to be strictly respected (FIFOs in the device).
+> +        */
+> +       if (mmc_card_sdio(host->mmc->card))
+> +               return false;
+> +
+> +       if (host->bounce_buffer)
+> +               return true;
+> +
+> +       return false;
+> +}
+> +
+>  static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+>                                   struct mmc_data *data, int cookie)
+>  {
+> @@ -663,7 +678,7 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *=
+host,
+>                 return data->sg_count;
+>
+>         /* Bounce write requests to the bounce buffer */
+> -       if (host->bounce_buffer) {
+> +       if (sdhci_use_bounce_buffer(host)) {
+>                 unsigned int length =3D data->blksz * data->blocks;
+>
+>                 if (length > host->bounce_buffer_size) {
+> @@ -890,7 +905,7 @@ static void sdhci_set_adma_addr(struct sdhci_host *ho=
+st, dma_addr_t addr)
+>
+>  static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
+>  {
+> -       if (host->bounce_buffer)
+> +       if (sdhci_use_bounce_buffer(host))
+>                 return host->bounce_addr;
+>         else
+>                 return sg_dma_address(host->data->sg);
+> @@ -3030,7 +3045,7 @@ static void sdhci_pre_req(struct mmc_host *mmc, str=
+uct mmc_request *mrq)
+>          * for that we would need two bounce buffers since one buffer is
+>          * in flight when this is getting called.
+>          */
+> -       if (host->flags & SDHCI_REQ_USE_DMA && !host->bounce_buffer)
+> +       if (host->flags & SDHCI_REQ_USE_DMA && !sdhci_use_bounce_buffer(h=
+ost))
+>                 sdhci_pre_dma_transfer(host, mrq->data, COOKIE_PRE_MAPPED=
+);
+>  }
+>
+> @@ -3104,7 +3119,7 @@ void sdhci_request_done_dma(struct sdhci_host *host=
+, struct mmc_request *mrq)
+>         struct mmc_data *data =3D mrq->data;
+>
+>         if (data && data->host_cookie =3D=3D COOKIE_MAPPED) {
+> -               if (host->bounce_buffer) {
+> +               if (sdhci_use_bounce_buffer(host)) {
+>                         /*
+>                          * On reads, copy the bounced data into the
+>                          * sglist
+>
+> ---
+> base-commit: 3a8660878839faadb4f1a6dd72c3179c1df56787
+> change-id: 20251024-sdhci-bb-regression-a26822c56951
+>
+> Best regards,
+> --
+> Linus Walleij <linus.walleij@linaro.org>
+>
+>
