@@ -1,198 +1,328 @@
-Received: from PH0PR06CU001.outbound.protection.outlook.com (mail-westus3azon11011069.outbound.protection.outlook.com [40.107.208.69])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E196B318EC6;
-	Thu, 19 Feb 2026 20:30:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.208.69
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771533005; cv=fail; b=sqQnBWfURP7B7NP/KPRGFMARnU0nO1Nmodm4abLlLCrrYItUnYAwptaYPO/xrh57Ed2UvZvedCizlhbKALAV7wZCxU8zZeHoZ59ouu/2LUHevXg2MX36nME2fpUWW8YzFCAPBnZAOIs58CdiRa/mPy1ZxzoxdP/EHH0XJn28J3o=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771533005; c=relaxed/simple;
-	bh=vm2XWJwD3BiUhH1eJu1/0McR/0IDL/C4khLxZXz3H3c=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=YsFvhWkU8+pvkVgEb85vOrNrDg5fKT+fJblhTjFnl/hTT+lPpxdMhBaLUmdOy4tkzM4t7ixvag4hGd/mnqenoOEdtABKAAbyq5EUeMrKRJ3zT5eVzsx6vp6rpnLqAKxyziaAVKzPb53R4mDWwJ3HgDwkJixWVav4d+ZYWKRyCvk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=ITQ4ilOe; arc=fail smtp.client-ip=40.107.208.69
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB17B30DD00
+	for <linux-mmc@vger.kernel.org>; Thu, 19 Feb 2026 20:39:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771533596; cv=none; b=RQZfxBcer7YwXn8JyjOu1TCn3D2CpwTDfAQ0wxkZEig7QSNUSgKkgbOAVKzmef6OcFSW+FakEviS8P6lpPjqPwmrVLoDR64gRWPGM4v4kobVWQsXFFQmWqsEHjnSib55LFyoofCGSnRl0INgAfubkcVw90Vj9oOmUfsSsmLMYx4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771533596; c=relaxed/simple;
+	bh=G+UmSvJ/mogFhvBvrBYtM1J+Zu9ud3Q0gu1d/a4pkLA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=OWlPi4MRIG+yaTfRc+MlQ1vUYlhSzB0vf5WwVri/JNupDhdQsreRkkVWK+mwDY5POvfCW6aHi96Ce5AXu+N1q7MruvjNtuua5TDLK5Az/nvkDV5yEBq2KHZ+Pcmp25D1DUKyLIVBUg6RRn/B2cIsG4qjuK3SrJX4Ai/+FAdojik=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b=bgCYjOID; arc=none smtp.client-ip=209.85.128.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="ITQ4ilOe"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=HHdXGh/cbRu6NZQ7t3RgmMQztGhzPgBOr4ruRyJXN021lPz5y5GRgX4HkzbsvYX3KX98AG+vCeHI7M1Ln2r2eDdOSAOUBLk2/9ySv+9Qk4NBeztua9DYCq06kAVv6pY8NyLf2Y39M21lqhWX4WYO7VzExwiKLHc9YyEI/7bkEMm6o8A/bwahlmVRDu6XkEPZs+VqUZZOEZK1cdfTn77B/bAIRRx3BQAzg1DyFv2oi4ys1ls4Wh+HbAuo4s6tQmsByYj/dkRSy6r8UX9SirlO/KFXF9NbelUFbJ2K/gjOeeRtI8fHNQngatUhpo3XKLlkKsJ99C0EjuZAwB7rjF7O5g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=RBxzM6QoskUMzzAywqqZZGzd7qAyH4En44omQbZ9Lwg=;
- b=d81x0Km6lVs/xjV3Q8uEBd7MxcLLmPjd6xBD2gYr9tpNoogt7olKPJC1/c/p3haZ8+ANGXH5F7DgLpqtA+aswmL7yd0Py2m/7kTe67vtbdzDmg9DV5iFk6q4gjoiXvmcaHygAhobS90lVD3XnwxDJKs2LNcTjDlyBiTKhAtiCQ5oGv+FRQFkDBn2m5mv2plqYvPe52WBRfVygoHA9FX2qkoaVwiplmgvZ9RFF6nOBAe+6HbaDxSkclFlfr14bUE8IX4RuJ33ozKDif5ctMTE7Wg+KAEfYJQ55+IIbtLop5X1CqDeg0U1CGsjLdtXgLVeq9sfhOXJ4hFgihTo80ENRA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=RBxzM6QoskUMzzAywqqZZGzd7qAyH4En44omQbZ9Lwg=;
- b=ITQ4ilOe1UY1R2XjJjdqBDEjJqAoqHCRHVRYtTbZfUJ0bLny1QVw9e8Nl9RqSfEMil2TjnBlfJswsLBYRydCMcm6kcYTviFoX/3rgSr5QlchDTTWlxP497aiR6GngZVfsGO/QD9veV9AqyPxkpQZiMOz96Gmk3sSXPr9PKg0ak8m3mgT+HAk6nw4S78ooQJNC4x5GDM8hNgyTu8lT3MG1QH63RNXmTQ358c5Q4iCkMliQ3hP8bjoIdzwVZh5O7XHh/2Sv5f3lFSMf6WStKMFVsvBvDQtH++XlGJLZGKVnUOx2lyy054M58G0s2iEDaUGsbma9bxSGdrl8E6blKYGsw==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from CY3PR12MB9630.namprd12.prod.outlook.com (2603:10b6:930:101::14)
- by DM4PR12MB6542.namprd12.prod.outlook.com (2603:10b6:8:89::8) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.9632.15; Thu, 19 Feb 2026 20:29:58 +0000
-Received: from CY3PR12MB9630.namprd12.prod.outlook.com
- ([fe80::cd62:8049:5d73:ae2f]) by CY3PR12MB9630.namprd12.prod.outlook.com
- ([fe80::cd62:8049:5d73:ae2f%6]) with mapi id 15.20.9632.010; Thu, 19 Feb 2026
- 20:29:57 +0000
-From: Penghe Geng <pgeng@nvidia.com>
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Penghe Geng <pgeng@nvidia.com>,
-	stable@vger.kernel.org
-Subject: [PATCH mmc v2] mmc: core: Avoid bitfield RMW for claim/retune flags
-Date: Thu, 19 Feb 2026 15:29:54 -0500
-Message-ID: <20260219202954.937508-1-pgeng@nvidia.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260115214648.168365-1-pgeng@nvidia.com>
-References: <20260115214648.168365-1-pgeng@nvidia.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SJ0PR03CA0233.namprd03.prod.outlook.com
- (2603:10b6:a03:39f::28) To CY3PR12MB9630.namprd12.prod.outlook.com
- (2603:10b6:930:101::14)
+	dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b="bgCYjOID"
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4837584120eso9977205e9.1
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Feb 2026 12:39:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=starlabs-systems.20230601.gappssmtp.com; s=20230601; t=1771533593; x=1772138393; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=fpZqiageYAEzhLdcOQIy6H2gADhn8PAzdRurtJ0NPdk=;
+        b=bgCYjOID26/JYGU/XUgSsVmlTzPpfFHjjMG+XcbA0wKvvd7YCi8Yd7jbsVOqk7oI8r
+         zQJIjzmmA2gInVCT8yzYC83bfBuuKPnb48Ozfj/gBFaZS8CKGOi7iqcLNmonIuXCKDNo
+         9KeQmIpf1upySjioydn/HaSSjWAqWG/NS7Ud35ataeNhWMnslwG68/2PaNH/ps0qRukE
+         gH74bRs4f8uiuWCvD2nBpfgun+zlA8QjOuoeUxE/VnRoXjoVp4j5L4nHH5m2SAtLgR8H
+         wnDwFoLGZaYmn4+7iVavgIprL4rJY9vDw9vSYnT1hCrNm018MMf8RyYAMxq68oISWL8w
+         e2xw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771533593; x=1772138393;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=fpZqiageYAEzhLdcOQIy6H2gADhn8PAzdRurtJ0NPdk=;
+        b=A9g5cVXtsXvvoqMewW+C6DNbnzN8B75YxehaSQu03Undp63MyJUFHmunzgF24x+br2
+         +J49XtZxSEWx04khCrrkeR2xtvgHwL+26S/yajbkX036KRl84GfnJS9kQJl7nQYYWYUA
+         LAkBk8HKsglIOHbWBkiG2xKUu1bCmGXc4l1J0fFSTXyxFP6wPLtoXzR19JJH8+7/OkFx
+         ph7HVsH9O1rGLlwnfF2N3g3vlCDDO1WAHw3mVJRP6EgzVnccdK9LdRpUoK7pfHV059h6
+         jzcAslsTPX0gS272RiGpKaUmagaEcNzNFRy1xRuCpzHLmFYbzuqjcn1bQj3ikd3OHKxw
+         LtIg==
+X-Forwarded-Encrypted: i=1; AJvYcCXwojNXiutdkTgZ7zDZWpJqGtV1SrsStGls1d/mfyrp4fFjwu4rSbkJnptNiqUcfZTO32GdHMN8OD4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwmMObZMDD61Bpb+v4r99EafrEn5LwhjJRFfibA1Q5SCGOkYQGJ
+	E16z3Y5plsIaP8Si/drUKtYcy+GoICbf3sUANwnWb0iFdqhBGIWc/mjOD935Ifx2RQ==
+X-Gm-Gg: AZuq6aIYzzZwgr5XmZoaJj+Lgec1IUWx+gjDe1Ctr2xZDbZKUkej5JueqpsAccvbFDk
+	yxCLFFWFebAncTlGKhAuqcEpW8cj2g5xdOv160nq4rWD7C9yGFZns07URzuLuiouxGeQ5nf9O1v
+	gAJ93V3HXdeKKsuBg0tPEK0yfKp+2l7rg8PTvY5ECB8+iAFnj6U/bcm+sQeJLjbXNDJ4xlB6Yv5
+	NQvI9NNK1qNuqXNmr0UBBm5wl/TBudZBNmUQZ8KqN+Wh6dn4gc9Ltz6/iqDNmfvyd1norVoScCp
+	mw4uShbp13Pz0YoB2aQQWbMdQsBukJloaUD2lC7PGQtzOm7qGO7gPaQyNSDZIjymZoaDiQnCyFa
+	mlIEy1Tq1vYlFKs13EZVsp3lLUhWO1cd/8E2Eiycbvvcv9opg8Jah0+Esvh59jyd8ktT5DBNFjC
+	iVz+xW7uxsxNsTb+Ffvdd8RUEhJAPkht5b2gnAvXBsXa7JZBf/lk8=
+X-Received: by 2002:a05:600c:444f:b0:471:1765:839c with SMTP id 5b1f17b1804b1-48379bd7414mr301491845e9.20.1771533592908;
+        Thu, 19 Feb 2026 12:39:52 -0800 (PST)
+Received: from starbook ([217.155.46.38])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-483a31efe02sm24947825e9.10.2026.02.19.12.39.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Feb 2026 12:39:52 -0800 (PST)
+From: Sean Rhodes <sean@starlabs.systems>
+To: linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Ricky Wu <ricky_wu@realtek.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Dan Carpenter <dan.carpenter@linaro.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Sean Rhodes <sean@starlabs.systems>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: rtsx_usb_sdmmc: avoid false card-detect on tray readers
+Date: Thu, 19 Feb 2026 20:39:51 +0000
+Message-ID: <1ca7b488a11e03b3f107f1829a40cf2c92c7d5fd.1771533586.git.sean@starlabs.systems>
+X-Mailer: git-send-email 2.51.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CY3PR12MB9630:EE_|DM4PR12MB6542:EE_
-X-MS-Office365-Filtering-Correlation-Id: b00d22a7-2d30-4f69-cdc5-08de6ff5a59f
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|1800799024|366016|7053199007;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?YpW9pPEAIR3lgb+tCEr8guG0ci0ADYQZTLQBPbyYApXrDrOQdpBXPHtVF4+k?=
- =?us-ascii?Q?CpWo9PRw6ZE/Ror5RbhrdXsVQx3Y7gTRDV0iTxJKIE9/jhidSVjyJ3sh6RgK?=
- =?us-ascii?Q?e1ahXI9pOfz+u/UqRiyp1NcGeV7/64SpmPKpBzX77qLWDm/aO9ok6R4DAzqL?=
- =?us-ascii?Q?r+WHLgSF7ySQ5IQmYTHMLNKuLe6KTcpDCOF8R6kgkdHlGZsMzdk7YYQCB9s5?=
- =?us-ascii?Q?uPIEAuvGnmQcOgrXJbBUgwqZwk4WX/aynWrxCQEWzP/sRk3aS84KX09pNtrR?=
- =?us-ascii?Q?H5vuOGDI+fsXn4Uu5XhNGj4IJjXdI0X5MUyUtoDV3QKJSS52Ivv5qijMDAQM?=
- =?us-ascii?Q?3weW/NXU3aSyv8SbBe6ibUx14kmRg2RTlep4XFWcnCUX8GQYPvr4063DT43F?=
- =?us-ascii?Q?VovIL5mY1kk7Rg62CuJG+82aX8WFWc7tX75iafglYnvSUQBUuYQ5n8l3GMOG?=
- =?us-ascii?Q?0RV/XY4I9vrNPQhB0Z5ysPQ12yrfJFqEbTXFkAq3DiJM8WLk8GILcFxf8fz0?=
- =?us-ascii?Q?wmxhm8tB4AxYP7B+Y5+xrXXrPqmQeAI/qK5Y4bu/1ehNTRzlXRHhY3br57+d?=
- =?us-ascii?Q?+RuOD6gVjwNeuKVZy2t2hgLJN7+dUdLTV9j6gqv/Koj747HgGtozoTIybPOS?=
- =?us-ascii?Q?D/zZL0rKrUWsPYxBaiEBdVrDr9RXhOqieEM/LJOARKtTooVY1kZAOrvAvSDQ?=
- =?us-ascii?Q?fwx/UxlWal+WwZWNBw2ePcq5zTEW/uTRDIZFoO+dZvfGiKZosMl3nR4y32ph?=
- =?us-ascii?Q?YGgQxZYk+TqrkFb0YWWbuR3BsFHaiiaqsE4yEOiYJMBlZZ1QM7TFfEzWsVtT?=
- =?us-ascii?Q?dQx6eaqJYwXilGDYBfy2F78QQQFRU8/TNGe2u8/91eSWkMfTtAnGmhv6BJqt?=
- =?us-ascii?Q?8ApSc6JQsJY0LfRYdS3a7GD/IP/7o7SZJyPHF85pSZFKJej5Jhad149K+agn?=
- =?us-ascii?Q?KnKuhyERtKlxPNmd9DGp5wvkNDSAmCUBUptD7K2h/uFMhSR4Ue7+UVjIJmlD?=
- =?us-ascii?Q?yUgEPC1MlqZfrr782LZZ1+Oa0/ag5YbToYoYYfxuZtt94bEQHMa6d9UxUFpO?=
- =?us-ascii?Q?phbCefqzzSxK8psBkKpCHI7eyVo+fqexa4zlFxPLAXYOFKzt+atX7LATVFKc?=
- =?us-ascii?Q?6c+kltV+hzuA9Pych3r072n5G/pZJcZmIHDxKgxgMz4X+XwhVSrNKeHjS2B6?=
- =?us-ascii?Q?jsQvboqoTHrI9dMvPjbpqI0QrGaj+GNU0hE2D/HL81EpDLIZ9wNljCnKRfRC?=
- =?us-ascii?Q?kkZnRh4kP/3CdfE8YYpEYb+49sLNSvnJdX0Pv04Upo6Rn0V7OhOVnFFkA1Z/?=
- =?us-ascii?Q?pwk2tqV+Jd9PSuWZE31IvcNT4ymcBVMArV7kLpWW6yD6pWZ27MbFrcouaayE?=
- =?us-ascii?Q?WSfePqQ92JqPWc5sc6ivdCTDNVntJn2lXpkUcz6g1Hm08sPGPqelcxCLMn5a?=
- =?us-ascii?Q?9QMIdehm1KytAS+bmOoNNmpqwUQr0lY8i+iFFedSgYORa/nvLIQLklZXAGfZ?=
- =?us-ascii?Q?dv+xcwHmzkQookActKTVJ9pORkKpdsj3MzNGnT4CHrU8SMJ9gAMN3c0hm5Dn?=
- =?us-ascii?Q?43LQa4Cj2gHAfY5kJLM=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CY3PR12MB9630.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(7053199007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?C0iPzcjIwSO18117Fp05IwUpJJJp7pST9yskENrnplvHRI/ck1L68HkRPWM1?=
- =?us-ascii?Q?BzPsOYzTonKP3PvdNfLIbjkUq5ZZoT7srgws3kh4+xN/laTWUg8U8XB3oM/x?=
- =?us-ascii?Q?GHz3ftmxntBToEDcajDDkM3N2Tvx1m8XaT1HdGhFaZtckNbBk0IlkQpCZYEn?=
- =?us-ascii?Q?n2nA9DSPKp+AediM7ivE57S1KvRlKRPgFpSfhEh78/hZJUJNVCphTohSx5N8?=
- =?us-ascii?Q?Zlv8PVNhbCdchvWMshJpIWVlIjQJawU+LViIEoMk+TjWjmk3HucNNZ9O1MQQ?=
- =?us-ascii?Q?Eu6NHkv12pC70fKEAObHrxKkWmF1talPjkXAjy97N5XPsmm3P25RQjobDuW3?=
- =?us-ascii?Q?886Z96MrHRRbvV9nLo3xCHw+VCWuT49b6vPsjSYhKHC2UKkfl5mOjWetrtUw?=
- =?us-ascii?Q?zl8ddZzffWv0hPnfb0NLXn/ZopnXGK5BIkU11ky/QoYkaxtYOFzS4zRQm9L/?=
- =?us-ascii?Q?BGbjBGmxYBitXYuk4ettmu8RYzVdkYEVsUDnkcsNmaFzJOSNf0l24y6+KbFj?=
- =?us-ascii?Q?dY9IAn+DNgOeK73scKNFD8nnkr0dEf5ap7mWovWOB+cd3Z3Zo5t30DQg7mn+?=
- =?us-ascii?Q?1UBVexjWLTnaoNg6r6N6Rn15iGMkHNilEPYfn6JLstOWTlr3RZOGbO+JrWtc?=
- =?us-ascii?Q?xKOs6Xg0KSyAuWRCTM772zR2DgCLY90Q5Aw2V86f3/85H7H5piTOq4sTOQh6?=
- =?us-ascii?Q?e4Yx0nXwT5nPMuzNy5HSADfgX4rp+SeRFM3W+e09bsiHCOgK6S78nPf0SbvF?=
- =?us-ascii?Q?aKtIVe4WGsBKblat7XCb8TlajmBE8ZqxKLdfl0vOZoKKhJq6245LHrCe7xMq?=
- =?us-ascii?Q?sH86lhVxoOSllXf8bRGdt1fp8FdG1bFZH1KYTC36W/vSe0MFpeufdN1kS1D5?=
- =?us-ascii?Q?IS6PdZUSW7JCpJ59VF3eccYiFGN5XoKq9S5IhC/DO2XTXEqgJtsk2O2hY/SR?=
- =?us-ascii?Q?VPoyYQwTgmeJFjBVYbYJruzvJZX17zJy22SzL81JSAQxLQ/wPJVzYxUoMMIi?=
- =?us-ascii?Q?3JVebcVTyJvICZLwzjDMgAHFFNzKeptzrHV5Tcl+BN4wqfq1Kzwgzo+cfnsX?=
- =?us-ascii?Q?VKrMtLxZF0jZ7xD0MvM8D6HS/bho2qmQXOqt9OsvUAZUwBIY45+YVxPzQ1rS?=
- =?us-ascii?Q?rT6zdt87Kqcfabu1TqPkcU5FvJoxh90fsndYKQHmzD+TV8ndVojLZkp3Lkc1?=
- =?us-ascii?Q?y/e7WRelVBPJIfxrO3Qw6tMdjA+/YM1HY51ujCFhvgY1rUJfz6Sc5r1Mm20D?=
- =?us-ascii?Q?xveoW89mNSdZw4zzWhnpH7VCN+zF9D4iDWSWLMyLcRf900LsGGcNQsiq+JT4?=
- =?us-ascii?Q?YSBwzAoBpuQ0hsfe/YwKbeyd87lIte1BxVTZvKsvIg6oKs1j5JYbVrAUorfe?=
- =?us-ascii?Q?Ai/ikdaO2x8Hy/W++irOXL1usabyUPNYErnYMpsVJlj8Zj3R04mgE0Dy1N2W?=
- =?us-ascii?Q?yrKeM5zZrqOpUpFubIqm835v/4Pl8lk19VfaZcDuRtqJ0qtlon41UvBEgsj1?=
- =?us-ascii?Q?e7C6X+2Wl8jX3d8pB6NN9qsn+YJf2XI+KynDV5U+rHjQ/NaSRLOyjn9kb0Ir?=
- =?us-ascii?Q?qd7lYOM8EE7zkP3NlMNWzjW2Anc7kS+QLlhvVMO3O62V+WyBB+ueq+KnpSKo?=
- =?us-ascii?Q?aJUAePK6ZF/9AL0lXuurDu2NjPT7XEdp59FG2rcbwXygWis00jsMtHsOpkDM?=
- =?us-ascii?Q?4VMcd0gTpVczNawIzcxiY/muHgm+Q96ocjkxt7HNXVXHgo2VVRMw7woCMLlC?=
- =?us-ascii?Q?OU+il2IFkQ=3D=3D?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b00d22a7-2d30-4f69-cdc5-08de6ff5a59f
-X-MS-Exchange-CrossTenant-AuthSource: CY3PR12MB9630.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Feb 2026 20:29:57.1390
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: dpVDbvTHXW+aNMQCBeW6viKNYUdtvQjmmFN+IAwhreletg4ft0VsjOU3SXiG3OlFxV76paudNDlZYemVSEkLbA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB6542
+Content-Transfer-Encoding: 8bit
 
-Move claimed and retune control flags out of the bitfield word to
-avoid unrelated RMW side effects in asynchronous contexts.
+Some Realtek USB SD readers with a tray can assert SD_CD even when no
+card is present. This can make the MMC core believe a card exists, and
+may trigger unnecessary initialization and suspend failures.
 
-The host->claimed bit shared a word with retune flags. Writes to claimed
-in __mmc_claim_host() or retune_now in mmc_mq_queue_rq() can overwrite
-other bits when concurrent updates happen in other contexts, triggering
-spurious WARN_ON(!host->claimed). Convert claimed, can_retune,
-retune_now and retune_paused to bool to remove shared-word coupling.
+Debounce the CD signal and validate a newly detected card by probing for
+a response (CMD0 + CMD8/CMD55/CMD1) before reporting it present. Also
+treat SD_INT as a removal indication even if SD_CD stays asserted.
 
-Fixes: 6c0cedd1ef952 ("mmc: core: Introduce host claiming by context")
-Fixes: 1e8e55b67030c ("mmc: block: Add CQE support")
-Cc: stable@vger.kernel.org
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Penghe Geng <pgeng@nvidia.com>
+Tested on a Realtek RTS5129 USB reader (0bda:0129) with tray inserted
+and no card. No mmc device was created, and suspend pm_test=devices
+passed.
+
+Tested-by: Sean Rhodes <sean@starlabs.systems>
+Signed-off-by: Sean Rhodes <sean@starlabs.systems>
 ---
- include/linux/mmc/host.h | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 156 ++++++++++++++++++++++++++++--
+ 1 file changed, 148 insertions(+), 8 deletions(-)
 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index e0e2c265e5d1..ba84f02c2a10 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -486,14 +486,12 @@ struct mmc_host {
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index 84674659a84d..ec3eeea78e95 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -19,6 +19,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
++#include <linux/jiffies.h>
  
- 	struct mmc_ios		ios;		/* current io bus settings */
+ #include <linux/rtsx_usb.h>
+ #include <linux/unaligned.h>
+@@ -30,6 +31,9 @@
+ #define RTSX_USB_USE_LEDS_CLASS
+ #endif
  
-+	bool			claimed;	/* host exclusively claimed */
++#define RTSX_USB_SD_CD_DEBOUNCE_CNT	2
++#define RTSX_USB_SD_INSERT_RETRY_MS	1000
 +
- 	/* group bitfields together to minimize padding */
- 	unsigned int		use_spi_crc:1;
--	unsigned int		claimed:1;	/* host exclusively claimed */
- 	unsigned int		doing_init_tune:1; /* initial tuning in progress */
--	unsigned int		can_retune:1;	/* re-tuning can be used */
- 	unsigned int		doing_retune:1;	/* re-tuning in progress */
--	unsigned int		retune_now:1;	/* do re-tuning at next req */
--	unsigned int		retune_paused:1; /* re-tuning is temporarily disabled */
- 	unsigned int		retune_crc_disable:1; /* don't trigger retune upon crc */
- 	unsigned int		can_dma_map_merge:1; /* merging can be used */
- 	unsigned int		vqmmc_enabled:1; /* vqmmc regulator is enabled */
-@@ -508,6 +506,9 @@ struct mmc_host {
- 	int			rescan_disable;	/* disable card detection */
- 	int			rescan_entered;	/* used with nonremovable devices */
+ struct rtsx_usb_sdmmc {
+ 	struct platform_device	*pdev;
+ 	struct rtsx_ucr	*ucr;
+@@ -46,6 +50,8 @@ struct rtsx_usb_sdmmc {
+ 	bool			card_exist;
+ 	bool			initial_mode;
+ 	bool			ddr_mode;
++	u8			cd_debounce;
++	unsigned long		next_insert_check;
  
-+	bool			can_retune;	/* re-tuning can be used */
-+	bool			retune_now;	/* do re-tuning at next req */
-+	bool			retune_paused;	/* re-tuning is temporarily disabled */
- 	int			need_retune;	/* re-tuning is needed */
- 	int			hold_retune;	/* hold off re-tuning */
- 	unsigned int		retune_period;	/* re-tuning period in secs */
--- 
-2.43.0
-
+ 	unsigned char		power_mode;
+ 	u16			ocp_stat;
+@@ -72,6 +78,13 @@ static inline void sd_clear_error(struct rtsx_usb_sdmmc *host)
+ 	rtsx_usb_clear_fsm_err(ucr);
+ }
+ 
++static int sd_set_bus_width(struct rtsx_usb_sdmmc *host,
++			    unsigned char bus_width);
++static int sd_set_timing(struct rtsx_usb_sdmmc *host,
++			 unsigned char timing, bool *ddr_mode);
++static int sd_power_on(struct rtsx_usb_sdmmc *host);
++static int sd_power_off(struct rtsx_usb_sdmmc *host);
++
+ #ifdef DEBUG
+ static void sd_print_debug_regs(struct rtsx_usb_sdmmc *host)
+ {
+@@ -768,12 +781,94 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
+ 	return 0;
+ }
+ 
++static bool sdmmc_validate_insert_locked(struct rtsx_usb_sdmmc *host)
++{
++	struct rtsx_ucr *ucr = host->ucr;
++	struct mmc_command cmd = { };
++	int err = 0;
++	bool probe_powered = false;
++	bool ddr_mode = false;
++
++	/*
++	 * Some readers with a tray assert the mechanical SD_CD pin even when no
++	 * card is present. Only report a card present when it responds to a
++	 * minimal reset/probe sequence, similar to the old rts5139 behavior.
++	 *
++	 * Must be called with ucr->dev_mutex held.
++	 */
++	if (host->power_mode == MMC_POWER_OFF) {
++		err = sd_power_on(host);
++		if (err)
++			return false;
++		probe_powered = true;
++
++		/* Issue clock signals to card for at least 74 clocks. */
++		rtsx_usb_write_register(ucr, SD_BUS_STAT,
++					SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
++		usleep_range(200, 400);
++		rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
++	}
++
++	/*
++	 * Ensure the interface is in a safe, legacy / initial-clock mode before
++	 * probing for a response. The MMC core may not have configured ios yet.
++	 */
++	err = sd_set_bus_width(host, MMC_BUS_WIDTH_1);
++	if (err)
++		goto out;
++
++	err = sd_set_timing(host, MMC_TIMING_LEGACY, &ddr_mode);
++	if (err)
++		goto out;
++
++	ucr->cur_clk = 0;
++	err = rtsx_usb_switch_clock(ucr, 400000, SSC_DEPTH_512K,
++				    true, true, false);
++	if (err)
++		goto out;
++
++	cmd.opcode = MMC_GO_IDLE_STATE;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_NONE | MMC_CMD_BC;
++	sd_send_cmd_get_rsp(host, &cmd);
++
++	/* SD v2.0+: CMD8 */
++	cmd.opcode = SD_SEND_IF_COND;
++	cmd.arg = 0x1aa;
++	cmd.flags = MMC_RSP_R7 | MMC_CMD_BCR;
++	sd_send_cmd_get_rsp(host, &cmd);
++	if (!cmd.error)
++		goto out;
++
++	/* SD v1.x: CMD55 */
++	cmd.opcode = MMC_APP_CMD;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
++	sd_send_cmd_get_rsp(host, &cmd);
++	if (!cmd.error)
++		goto out;
++
++	/* MMC: CMD1 */
++	cmd.opcode = MMC_SEND_OP_COND;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R3 | MMC_CMD_BCR;
++	sd_send_cmd_get_rsp(host, &cmd);
++
++out:
++	if (probe_powered)
++		sd_power_off(host);
++	return !err && !cmd.error;
++}
++
+ static int sdmmc_get_cd(struct mmc_host *mmc)
+ {
+ 	struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_ucr *ucr = host->ucr;
+ 	int err;
+ 	u16 val;
++	u8 pend;
++	bool sd_int = false;
++	bool cd_raw = false;
+ 
+ 	if (host->host_removal)
+ 		return -ENOMEDIUM;
+@@ -782,28 +877,71 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+ 
+ 	/* Check SD card detect */
+ 	err = rtsx_usb_get_card_status(ucr, &val);
+-
+-	mutex_unlock(&ucr->dev_mutex);
+-
+-	/* Treat failed detection as non-exist */
+ 	if (err)
+-		goto no_card;
++		goto no_card_unlock;
+ 
+ 	/* get OCP status */
+ 	host->ocp_stat = (val >> 4) & 0x03;
+ 
+-	if (val & SD_CD) {
+-		host->card_exist = true;
++	cd_raw = !!(val & SD_CD);
++
++	/* Use SD_INT as a reliable removal indication on some tray readers. */
++	err = rtsx_usb_read_register(ucr, CARD_INT_PEND, &pend);
++	if (!err) {
++		sd_int = !!(pend & SD_INT);
++		if (sd_int)
++			rtsx_usb_write_register(ucr, CARD_INT_PEND,
++						SD_INT, SD_INT);
++	}
++
++	if (!cd_raw) {
++		host->cd_debounce = 0;
++		host->next_insert_check = 0;
++		goto no_card_unlock;
++	}
++
++	/*
++	 * rts5139-style: when a card is already known present, treat SD_INT as
++	 * a removal event even if SD_CD stays high (e.g. tray-based readers).
++	 */
++	if (host->card_exist) {
++		if (sd_int) {
++			host->cd_debounce = 0;
++			host->next_insert_check = 0;
++			goto no_card_unlock;
++		}
++		mutex_unlock(&ucr->dev_mutex);
+ 		return 1;
+ 	}
+ 
+-no_card:
++	/* Debounce mechanical CD before probing for a response. */
++	if (host->cd_debounce < RTSX_USB_SD_CD_DEBOUNCE_CNT) {
++		host->cd_debounce++;
++		goto no_card_unlock;
++	}
++
++	/* Avoid pounding the bus with probes if CD is stuck asserted. */
++	if (time_before(jiffies, host->next_insert_check))
++		goto no_card_unlock;
++
++	if (!sdmmc_validate_insert_locked(host)) {
++		host->next_insert_check = jiffies +
++			msecs_to_jiffies(RTSX_USB_SD_INSERT_RETRY_MS);
++		goto no_card_unlock;
++	}
++
++	host->card_exist = true;
++	mutex_unlock(&ucr->dev_mutex);
++	return 1;
++
++no_card_unlock:
+ 	/* clear OCP status */
+ 	if (host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)) {
+ 		rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
+ 		host->ocp_stat = 0;
+ 	}
+ 	host->card_exist = false;
++	mutex_unlock(&ucr->dev_mutex);
+ 	return 0;
+ }
+ 
+@@ -1359,6 +1497,8 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
+ 
+ 	host->power_mode = MMC_POWER_OFF;
+ 	host->ocp_stat = 0;
++	host->cd_debounce = 0;
++	host->next_insert_check = 0;
+ }
+ 
+ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
