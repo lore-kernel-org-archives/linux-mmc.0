@@ -1,166 +1,205 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7822B31960D
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 12:33:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 803AF284896;
+	Thu, 19 Feb 2026 02:04:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771418030; cv=none; b=Q6kFdIAOW+58W6fYfXQvLTl8/oBwojegwpwcg/jRa/iAvCu5pyI0G/cuKjoJFsaNx33aVZ+IY6Q0Ig9kuVbPw9CwuXdTr6KbBntGl2vHr19Sz4IG0N39Vj/HO5li1F1MhOCtqFOmYdh8F3ncZmrZDkHOM+1JF54OzKks49c2v2k=
+	t=1771466672; cv=none; b=KGidQqO3GazTQL2H0Vf5/CWpEzvUJ6N/m8aR7oo4gm09pYicf9vD0ycGdw3xzL9MMbKS7YFWiwAOBTQhqZuqYZ5TQZC0UXkARnMpjpn+TOQMZmloBy4qEHUuPKZxAjpT1xSU1+OPPdher7oRM6zbWpH1lV7kexxe0IXBPQggx/c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771418030; c=relaxed/simple;
-	bh=PcdZIrVKr/Pd1Zn/N/Z35F9qghKTj/esGt6SKwLxzS4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jtf+j14gENGDA+A/0w6XKI63Go3x25heJjaIImZktpw3elfQaf4I9NmXLnWPMvM1TFa+GwV8dhmJwXyDyqFWkK5EcHbt/3oCPQUbOJqSN5ZUmTUsPnCt58UtEXczQdcA+cgrSR85eYw524HTim0dR2LBlTAeRRUa6ysvSeQ1iNw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WvxHpD9F; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771466672; c=relaxed/simple;
+	bh=rAe4ps5q6e4DIfaR9GY8Om27+K6JRSY5/98vs/RSyi0=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=J22L617/3foSABykOy1oFrpJql2XnGmkenSOVE/KsFedHV01Ei1r/URHAdA4VajuAp9jNAMVqEBeua3uLEIqy0xaxh7fNBBgfZQtuSM0yqjh8otGoh7JJaMk/K+k4c020U0AzQqntfCmH+IUlqWbZBzBV/M9zupneUDDFNvIP5M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pd9HYyjR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WvxHpD9F"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F30EC2BCAF
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 12:33:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pd9HYyjR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55B65C4AF09;
+	Thu, 19 Feb 2026 02:04:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771418030;
-	bh=PcdZIrVKr/Pd1Zn/N/Z35F9qghKTj/esGt6SKwLxzS4=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=WvxHpD9FwSWpsrs6FKcLEMn3HuFKNyIKS0XxxxZFyVahyWEQhyi2dKjsB4W7Zuykm
-	 JZDio9KPtRbeWiUSyu/ISvTmF+wQpY4qUD5CVQWjKqkC6gkHX8UR4pPg+yUOn+0QlD
-	 EnG81OqeJKvn8chTH7I9Sifb2AosVlLCPMWyuMqvZpCPSH9JIOVp3t8HROOpCdbkns
-	 jAfT+bT9vACxPANRAt0BwOTQx/ezNTzf17B5f/eOK2PsKrOEqCxOrPfB2LDfgVFIN8
-	 HjvbH+ag1lKzTSwICd0lYRX/9xKTtfTj+HvQDD33winl1sPVZx0YF43WF2l7JIJT7G
-	 OfiWmhj2gVCpw==
-Received: by mail-yx1-f42.google.com with SMTP id 956f58d0204a3-64ad9fabd08so4545783d50.2
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Feb 2026 04:33:50 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCXeXC/4onPZ6zJXiBUXr2dYsdeRkl8vw6hjk8eAVE8tyK6IvrenjwzNLOq3pPWBZ4l4vvuPgddKTaM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxNHNSTuvGAoto3id1/wr9zSGUJ1CD5B0eTxVCmNELbD04ENtAF
-	o+UJwvcyXo1mTUCw4315mMkh+UJJtrReELjiTfm4cCPDvRdKUU09T5RC3QA9JPALDcUe+2Hflwp
-	FWsR4AK8qsqEAPeL/pUuR8HzlW0PfV9M=
-X-Received: by 2002:a05:690e:20c3:b0:649:f002:582b with SMTP id
- 956f58d0204a3-64c14ac48e4mr10700712d50.7.1771418029646; Wed, 18 Feb 2026
- 04:33:49 -0800 (PST)
+	s=k20201202; t=1771466672;
+	bh=rAe4ps5q6e4DIfaR9GY8Om27+K6JRSY5/98vs/RSyi0=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=pd9HYyjRhEdTc2I1fuOCVF1zPUp3TrM+OWkFiILZwxW20HvMaTp0WK8tLs0lyLose
+	 E/DqJgseLHMC64FM3hwl9PUtl8ojIeh09W0T1K8/vU7cMczotafWTr5rY3mz4x8inA
+	 QdB8W+Hf2emk5Zfh4piHw4Uxei4PXZT8AwPH6CBskKBFJSEfL27dkBQtlpuqrmcVu2
+	 4Gmgz44nTfmrTNmNESRzCqqkdnFAdCXoBhx9N4vt7U6bkacxTLuyjfh0Tzi6YLiAw0
+	 Qt58a6XeOxVmq9VKci0aKYgdS9pFoKv+KIrME2h5yx7agDOHy3VUfpWaliOudRxqap
+	 9KbIhHmZKHt6A==
+From: Sasha Levin <sashal@kernel.org>
+To: patches@lists.linux.dev,
+	stable@vger.kernel.org
+Cc: Matthew Schwartz <matthew.schwartz@linux.dev>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Sasha Levin <sashal@kernel.org>,
+	ulf.hansson@linaro.org,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 6.19-5.15] mmc: rtsx_pci: add quirk to disable MMC_CAP_AGGRESSIVE_PM for RTS525A
+Date: Wed, 18 Feb 2026 21:03:43 -0500
+Message-ID: <20260219020422.1539798-7-sashal@kernel.org>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260219020422.1539798-1-sashal@kernel.org>
+References: <20260219020422.1539798-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20251024-sdhci-bb-regression-v1-1-b57a3d4dbc9f@linaro.org>
-In-Reply-To: <20251024-sdhci-bb-regression-v1-1-b57a3d4dbc9f@linaro.org>
-From: Linus Walleij <linusw@kernel.org>
-Date: Wed, 18 Feb 2026 13:33:38 +0100
-X-Gmail-Original-Message-ID: <CAD++jLkWut=YDiv0uEffmYNTjrHhwY3=O3+ffDtMVU80wczXBQ@mail.gmail.com>
-X-Gm-Features: AaiRm50ISFJ2laD-LdXSm0tILGGW0eWjtaB7cSVwFtj6rrKYccvTvDDUG284NZs
-Message-ID: <CAD++jLkWut=YDiv0uEffmYNTjrHhwY3=O3+ffDtMVU80wczXBQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: Disable bounce buffer on SDIO
-To: Michael Garofalo <officialtechflashyt@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	linux-mmc@vger.kernel.org, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-stable: review
+X-Patchwork-Hint: Ignore
+X-stable-base: Linux 6.19.2
+Content-Transfer-Encoding: 8bit
 
-Michael,
+From: Matthew Schwartz <matthew.schwartz@linux.dev>
 
-1. Did you verify that you were using in-tree drivers with B43?
+[ Upstream commit 5f0bf80cc5e04d31eeb201683e0b477c24bd18e7 ]
 
-2. Did you get a chance to test this?
+Using MMC_CAP_AGGRESSIVE_PM on RTS525A card readers causes game
+performance issues when the card reader comes back from idle into active
+use. This can be observed in Hades II when loading new sections of the
+game or menu after the card reader puts itself into idle, and presents
+as a 1-2 second hang.
 
-Yours,
-Linus Walleij
+Add EXTRA_CAPS_NO_AGGRESSIVE_PM quirk to allow cardreader drivers to
+opt-out of aggressive PM, and set it for RTS525A.
 
-On Fri, Oct 24, 2025 at 10:40=E2=80=AFAM Linus Walleij <linus.walleij@linar=
-o.org> wrote:
->
-> As reported by Michael Garofalo, the b43 WLAN driver request
-> a strict 64 byte block size because of FIFO limitations.
->
-> When the bounce buffer is active, all requests will be coalesced
-> into bigger (up to 64KB) chunks, which breaks SDIO.
->
-> Fix this by checking if we are using an SDIO card, and in that
-> case do not use the bounce buffer.
->
-> Link: https://lore.kernel.org/linux-mmc/20251006013700.2272166-1-official=
-TechflashYT@gmail.com/
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  drivers/mmc/host/sdhci.c | 23 +++++++++++++++++++----
->  1 file changed, 19 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index ac7e11f37af71fa5a70eb579fd812227b9347f83..c349e5b507b63a5ee9a9dcb08=
-ac95cae6b3d7075 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -650,6 +650,21 @@ static void sdhci_transfer_pio(struct sdhci_host *ho=
-st)
->         DBG("PIO transfer complete.\n");
->  }
->
-> +static bool sdhci_use_bounce_buffer(struct sdhci_host *host)
-> +{
-> +       /*
-> +        * Don't bounce SDIO messages: these need the block size
-> +        * to be strictly respected (FIFOs in the device).
-> +        */
-> +       if (mmc_card_sdio(host->mmc->card))
-> +               return false;
-> +
-> +       if (host->bounce_buffer)
-> +               return true;
-> +
-> +       return false;
-> +}
-> +
->  static int sdhci_pre_dma_transfer(struct sdhci_host *host,
->                                   struct mmc_data *data, int cookie)
->  {
-> @@ -663,7 +678,7 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *=
-host,
->                 return data->sg_count;
->
->         /* Bounce write requests to the bounce buffer */
-> -       if (host->bounce_buffer) {
-> +       if (sdhci_use_bounce_buffer(host)) {
->                 unsigned int length =3D data->blksz * data->blocks;
->
->                 if (length > host->bounce_buffer_size) {
-> @@ -890,7 +905,7 @@ static void sdhci_set_adma_addr(struct sdhci_host *ho=
-st, dma_addr_t addr)
->
->  static dma_addr_t sdhci_sdma_address(struct sdhci_host *host)
->  {
-> -       if (host->bounce_buffer)
-> +       if (sdhci_use_bounce_buffer(host))
->                 return host->bounce_addr;
->         else
->                 return sg_dma_address(host->data->sg);
-> @@ -3030,7 +3045,7 @@ static void sdhci_pre_req(struct mmc_host *mmc, str=
-uct mmc_request *mrq)
->          * for that we would need two bounce buffers since one buffer is
->          * in flight when this is getting called.
->          */
-> -       if (host->flags & SDHCI_REQ_USE_DMA && !host->bounce_buffer)
-> +       if (host->flags & SDHCI_REQ_USE_DMA && !sdhci_use_bounce_buffer(h=
-ost))
->                 sdhci_pre_dma_transfer(host, mrq->data, COOKIE_PRE_MAPPED=
-);
->  }
->
-> @@ -3104,7 +3119,7 @@ void sdhci_request_done_dma(struct sdhci_host *host=
-, struct mmc_request *mrq)
->         struct mmc_data *data =3D mrq->data;
->
->         if (data && data->host_cookie =3D=3D COOKIE_MAPPED) {
-> -               if (host->bounce_buffer) {
-> +               if (sdhci_use_bounce_buffer(host)) {
->                         /*
->                          * On reads, copy the bounced data into the
->                          * sglist
->
-> ---
-> base-commit: 3a8660878839faadb4f1a6dd72c3179c1df56787
-> change-id: 20251024-sdhci-bb-regression-a26822c56951
->
-> Best regards,
-> --
-> Linus Walleij <linus.walleij@linaro.org>
->
->
+Closes: https://lore.kernel.org/linux-mmc/ff9a7c20-f465-4afa-bf29-708d4a52974a@linux.dev/
+Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
+Link: https://patch.msgid.link/20260103204226.71752-1-matthew.schwartz@linux.dev
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+
+LLM Generated explanations, may be completely bogus:
+
+### Summary Analysis
+
+**What the commit does:**
+This commit adds a device-specific quirk for the Realtek RTS525A card
+reader to disable `MMC_CAP_AGGRESSIVE_PM`. When aggressive PM is enabled
+on this device, it powers down the card reader after 10 seconds of idle,
+and re-tuning when waking up causes 1-2 second hangs that are user-
+visible and impact performance.
+
+**Does it fix a real bug?**
+Yes. The aggressive PM behavior on RTS525A causes real, user-observable
+1-2 second hangs during normal use. This was reported by a real user
+with concrete reproduction steps (playing a game that loads data from a
+micro SD card). The "Closes:" tag links to a real mailing list report.
+
+**Stable kernel criteria assessment:**
+
+1. **Obviously correct and tested**: The change follows an existing
+   pattern (`EXTRA_CAPS_NO_MMC` is the exact same kind of quirk flag).
+   The author tested it on affected hardware.
+
+2. **Fixes a real bug**: Yes - user-visible performance degradation (1-2
+   second hangs) on specific hardware.
+
+3. **Important issue**: It's a usability issue rather than a
+   crash/security issue. However, hardware quirks for broken behavior
+   are explicitly allowed in stable.
+
+4. **Small and contained**: The change is minimal - 3 new lines of code
+   plus a new flag definition. It only affects RTS525A devices and
+   doesn't change behavior for any other hardware.
+
+5. **No new features**: This is a hardware quirk/workaround, which is an
+   explicitly allowed exception to the "no new features" rule.
+
+6. **Clean application**: The change builds on existing infrastructure
+   (`extra_caps` flags) that exists in all stable trees since v5.11.
+
+**Risk assessment:**
+- **Very low risk**: The quirk only affects RTS525A devices
+  (`PID_525A`). All other devices are completely unaffected.
+- The code pattern is identical to existing quirks
+  (`EXTRA_CAPS_NO_MMC`).
+- The worst case if the quirk is wrong is slightly higher power
+  consumption on RTS525A (no aggressive PM = card reader stays powered).
+
+**Dependencies:**
+None. The change uses existing infrastructure (`extra_caps`,
+`CHK_PCI_PID`, `PID_525A`) that has been present since before v5.11.
+
+### Verification
+
+- **git log** showed `rtd3_en` / `MMC_CAP_AGGRESSIVE_PM` was introduced
+  in commit `5b4258f6721f4` (v5.11), confirming all current stable trees
+  have the affected code.
+- **git tag --contains** confirmed the runtime PM commit is in stable
+  trees (p-5.15, p-6.1, p-6.12).
+- **Grep for EXTRA_CAPS_** confirmed the existing quirk flag pattern
+  (NO_MMC at bit 7, SD_EXPRESS at bit 8, new flag at bit 9 - clean
+  progression).
+- **lore.kernel.org fetch** confirmed the bug report describes real
+  user-reported 1-2 second hangs on RTS525A with concrete reproduction
+  steps.
+- **Code review** verified the change only adds a condition check and
+  flag - no behavioral change for non-RTS525A devices.
+- The commit was signed off by Greg Kroah-Hartman, the stable tree
+  maintainer, indicating it went through proper review.
+- Could NOT verify whether any stable tree has already picked this up
+  (unverified, but not relevant to the YES/NO decision).
+
+### Conclusion
+
+This is a textbook hardware quirk for a specific device with a real,
+user-reported issue. It follows existing patterns in the codebase, is
+minimal in scope, and has zero risk to other devices. Hardware quirks
+are explicitly listed as appropriate for stable backporting. The
+affected code exists in all current stable trees (5.15+).
+
+**YES**
+
+ drivers/misc/cardreader/rts5249.c | 3 +++
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 4 ++--
+ include/linux/rtsx_pci.h          | 1 +
+ 3 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/misc/cardreader/rts5249.c b/drivers/misc/cardreader/rts5249.c
+index 38aefd8db452a..87d576a03e68e 100644
+--- a/drivers/misc/cardreader/rts5249.c
++++ b/drivers/misc/cardreader/rts5249.c
+@@ -78,6 +78,9 @@ static void rtsx_base_fetch_vendor_settings(struct rtsx_pcr *pcr)
+ 	if (CHK_PCI_PID(pcr, PID_524A) || CHK_PCI_PID(pcr, PID_525A))
+ 		pcr->rtd3_en = rtsx_reg_to_rtd3_uhsii(reg);
+ 
++	if (CHK_PCI_PID(pcr, PID_525A))
++		pcr->extra_caps |= EXTRA_CAPS_NO_AGGRESSIVE_PM;
++
+ 	if (rtsx_check_mmc_support(reg))
+ 		pcr->extra_caps |= EXTRA_CAPS_NO_MMC;
+ 	pcr->sd30_drive_sel_3v3 = rtsx_reg_to_sd30_drive_sel_3v3(reg);
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 4db3328f46dfb..8df60000b5b41 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1497,8 +1497,8 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
+ 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
+ 		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
+ 		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
+-	if (pcr->rtd3_en)
+-		mmc->caps = mmc->caps | MMC_CAP_AGGRESSIVE_PM;
++	if (pcr->rtd3_en && !(pcr->extra_caps & EXTRA_CAPS_NO_AGGRESSIVE_PM))
++		mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
+ 	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE |
+ 		MMC_CAP2_NO_SDIO;
+ 	mmc->max_current_330 = 400;
+diff --git a/include/linux/rtsx_pci.h b/include/linux/rtsx_pci.h
+index 3c5689356004e..f6122349c00ec 100644
+--- a/include/linux/rtsx_pci.h
++++ b/include/linux/rtsx_pci.h
+@@ -1230,6 +1230,7 @@ struct rtsx_pcr {
+ #define EXTRA_CAPS_MMC_8BIT		(1 << 5)
+ #define EXTRA_CAPS_NO_MMC		(1 << 7)
+ #define EXTRA_CAPS_SD_EXPRESS		(1 << 8)
++#define EXTRA_CAPS_NO_AGGRESSIVE_PM	(1 << 9)
+ 	u32				extra_caps;
+ 
+ #define IC_VER_A			0
+-- 
+2.51.0
+
