@@ -1,109 +1,133 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A11E8237707
-	for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2026 18:31:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45BB829A9E9
+	for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2026 19:47:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771612270; cv=none; b=WCyy420B3NONXKBfEkWVkbCiff6pBuQ0SlqTViONRDr1RI3uePyo4VJONMgr7t3hjyL6h2J5rZVZGjb91zIm6Py2uwU8lSzW0HJA0nm1Ds5DIyDCX+2rSDUQGouRw91XGvQznBX5xEYXSkGntcQbQ94irL0SxigCi8wpR8trGkY=
+	t=1771616852; cv=none; b=U15VfFSfZIKVdIDwBiCBoH+ghvbK7pU9RtNf+Od0nE+uvfLAbIhQXsllpmMC/0xUrsDy7I2tAov5PP84UWqYFHpgy3/x4yR7zxjwcWMvhUkdH+TLKEHG5AWt1DJxa4lZ5kNjc8VKUNoNK93PGdtOg555Qg1+ug0aNfMhlc29iuA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771612270; c=relaxed/simple;
-	bh=jtxdnsFoaJ7ZZ3Cqn+tSp7m5G53dJk4cSH6H7At3v18=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Kp+rtEdgDOEtbWG7SCBtv4TW0TrfNUrlv9mj/mYcyfGxxatKWUIFc1dOjdF5G4MffLKPRWa7FJ/Z28d1jL1YfwrFGH3NQCTBO3sX/jIVXPlvhMUV/l/e8R5CnKVhZeBc94DAfKXuU97NROSZIyyhMnX4H85XzsmGrA9YJjueW50=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a6uJkrPw; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771616852; c=relaxed/simple;
+	bh=0G4KFfYK1+YXwVEigy9PGfxDtl6ONA/O/odMVh65a1w=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=JBGy7IMXerJ7sx6ZS80e0B0DVGeuetzCc7LW5cGiaqDTRTEF+Llxz5OagmUyChnZrsupExAjqnjNWYyB0YI3xhv2U9ptKXCuVXEvFmTD7vI1yE/QyL2EuOchobrNj1so7Or/HLvVMtV6huJXaHRaR4l2sIAd9rFTLDdeCmqPf4Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aov4icyP; arc=none smtp.client-ip=209.85.167.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a6uJkrPw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32876C19425
-	for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2026 18:31:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771612270;
-	bh=jtxdnsFoaJ7ZZ3Cqn+tSp7m5G53dJk4cSH6H7At3v18=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=a6uJkrPwgYJUifSyCTS6qLRblT3UuP8pQhDCmNAd2ogqq5vgBEsHwq8dslg95Fr1M
-	 QE1qEwpPqLbgGyGBKdPG/vP4VNWVDlhs9IYK06sSbep9fCo3MBIK+S5fNuzsKmGmWL
-	 h2/G71sxc2mVMfFqbdMY7IclfV225a4CVo51pykG11YGDk2h68oBqoWRHwrOTXN+eB
-	 HsbrO5uBlRdRKmL/zJwkT1bbPqJYSawCm7Zz78cgYbavZ+KUnACdpmbZj5IO+i0aRE
-	 XNBFYKoaXBvfdKZOJURklibqI4NNg3hc/C/o8ekrxP3QxYh6KF4Kdav65dJaAoaVfg
-	 nEz+gA8l7HzDQ==
-Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-59de2d1fc2cso2777979e87.2
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2026 10:31:10 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWbhRCV71OvUEteN8SBihpdbIv8hQa5P3M4IcT9NnbBSCNFXO8HxSmQM+e1D+5qnHCUmTdy+zWOalg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzV0l5zJLUa6rbEu1E/EbVB66O8Im+afyDXDd7OUzZCvuMEswUG
-	MUZfF4Ft8ZYzzjjRuEgHZIEzXpU+I9Vu+VsOpnqNQV28GbLnPXSvWgEXbaLMlaqFhGsT9xY0DzC
-	31T08KFJ1Q08/n3gtfZZm5YpPC14sbt0=
-X-Received: by 2002:ac2:4f0d:0:b0:59d:f2a4:3e98 with SMTP id
- 2adb3069b0e04-5a0ed88d733mr123595e87.4.1771612268567; Fri, 20 Feb 2026
- 10:31:08 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aov4icyP"
+Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-59dcdf60427so2628761e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2026 11:47:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1771616849; x=1772221649; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=5Owyf7V4DSAu+UKDutdINA5uU1OgJ5uFzzkQ0lvvCGc=;
+        b=aov4icyPIQ25wscXvqYR8XSzT8nshExy7O5xamJCJLp5zqPWCvhw7uMzd0cnO0vB9C
+         l7IbyKFuD1aubDGsRPDTsEP9aUTOtV/b5kuZq2rc/ngxuiHgYl4H2luoISUqlnXbbXoK
+         5VC9iFcTGShDw7SiLRvQIhc/tYO5YOZuQ5Ph/pIlQJHjcjJcLsrLp7RFBSvQ/OnGDJvh
+         BSslnuMKIPRsttx0GAVOm5uhJ3iw+TSEVvNJhdXgABqEIq5c2Gpnk2LrjCxVWjQwC4y8
+         AVu9IAvKXsFft/IFaU3Bd0qL6XpfpCcVfbosHGgVIbxym2EL+B1NkdZvZffU0jOiEPMU
+         9uFg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771616849; x=1772221649;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5Owyf7V4DSAu+UKDutdINA5uU1OgJ5uFzzkQ0lvvCGc=;
+        b=K2agSuszSzIzYtOJzdardziAKOoAUQdW02/QQ1Q1aZTs6VErfQju1YGhXjMGmzySiT
+         ws0Aj5+Iik5MK+tEehRi6xicvIvXI3dhiqTorosrodQyA17hZuqEsVGzFRMEgOgXmVj2
+         oc4Wd7uWjSI3vG+V2nTXISmwm1+htKGkj/87K3oShZh5iM6pCAOpY0fyLxSf9TkunKI3
+         gVCzYm8O203ARadxX1eNVMGtHDFUSQ2EmfqcuRXlF8gxbn+P5oyMZtFDOYl/fHvbyn4m
+         RuAI06xDVaWyDaFvI5IfejP2QjjaMjw4PGtW88xQqsjNxdeKuEEkhkZqNe3IOcJF69hl
+         Gh6A==
+X-Forwarded-Encrypted: i=1; AJvYcCXVBYG3tp5eb3qKnth8fmER73NGAGoABqp/oMUDdmJvaU3K+1KI4KEw+CAO/Hv9e9bO9Q+/6LU/5bs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwEy58uutNwlKJADXuqyz+CpbDCG5Nbc6yaDe5MeCzSvZpdbrsm
+	fd75LSsnyxQkO7mqb7/SQ/WdJJcQc7s6159sbM/MWmxyQ019W7PhBGHz
+X-Gm-Gg: AZuq6aKlWnFWleqM/XXIKj2qsG46DZV9a+U/OoLFU581mRegzPNo9qpZM4WgtLJZVzD
+	ay8b1TnA7vLJus675Ml95WI7qvqFdAiqaq/R6r/XKYNO0Ijya0QJEMe86ZdMn3K1fLokOUautAy
+	cCbBjImnILyGLFjY0JeVtPVnnoQgbT5T/6qTyxaMz/pU9lDP/s39wfq97vsXCs1qW5xzVe16VH8
+	3NU9F+B6NdiwCnzDqjHWtXFJpeJMZeHBPl3L+yBbC2R5pvzdvDGS/MCgEAvBY6RGRXyFt1/8moD
+	6XsqH3BZPDEQ8Lkc7j/XKVIbyFxfjKkqcbYfUBpbEGg8ORnzbabKxiZjMoaKkEoziS3M5zsuTW2
+	HJgovF5zFN2TxVzsgHWhWlkFmRf/vwVKSKEybBg9fQcjanvEaSza8sZIclmMM+N2b4uFOXVVlLO
+	I2EEOFPHobPMIjSDVPCHkNOgQyma3e+dt/SPjwa40=
+X-Received: by 2002:a05:6512:aca:b0:59e:5d0d:c1dc with SMTP id 2adb3069b0e04-5a0ed9c21ddmr157115e87.48.1771616849140;
+        Fri, 20 Feb 2026 11:47:29 -0800 (PST)
+Received: from localhost ([2a00:1e88:4473:5f00:3201:1ad1:d6d0:d47d])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5a0eeb3ea50sm15968e87.57.2026.02.20.11.47.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Feb 2026 11:47:28 -0800 (PST)
+From: Sergey Suloev <sergey.suloev@gmail.com>
+To: ulf.hansson@linaro.org
+Cc: catalin.popescu@leica-geosystems.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Sergey Suloev <sergey.suloev@gmail.com>
+Subject: [PATCH] mmc: pwrseq_simple: fix probe failure when CONFIG_RESET_GPIO is enabled
+Date: Fri, 20 Feb 2026 22:47:25 +0300
+Message-ID: <20260220194725.1341281-1-sergey.suloev@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260219231624.8226-1-sean.wang@kernel.org> <0cb6c45b-a5a4-46bf-a73d-97c482da9339@molgen.mpg.de>
-In-Reply-To: <0cb6c45b-a5a4-46bf-a73d-97c482da9339@molgen.mpg.de>
-From: Sean Wang <sean.wang@kernel.org>
-Date: Fri, 20 Feb 2026 12:30:56 -0600
-X-Gmail-Original-Message-ID: <CAGp9LzqYB=xPfAuL61xi-ve=f6PZWWaa2gpf50-75yXWee-ZHA@mail.gmail.com>
-X-Gm-Features: AaiRm50CGzZAUpdHBs8DARRVcPhWLB2FVeLnVfyzVg436zGF1NWQ8dHO4F1lG6w
-Message-ID: <CAGp9LzqYB=xPfAuL61xi-ve=f6PZWWaa2gpf50-75yXWee-ZHA@mail.gmail.com>
-Subject: Re: [PATCH 1/4] mmc: sdio: add MediaTek MT7902 SDIO device ID
-To: Paul Menzel <pmenzel@molgen.mpg.de>
-Cc: marcel@holtmann.org, luiz.dentz@gmail.com, ulf.hansson@linaro.org, 
-	linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, 
-	linux-mmc@vger.kernel.org, Sean Wang <sean.wang@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Dear Paul,
+The driver uses a heuristic — checking if exactly one entry exists in
+'reset-gpios' — to decide whether to attempt reset controller API usage
+via devm_reset_control_get_optional_shared(). This is semantically
+incorrect and causes a permanent probe failure when CONFIG_RESET_GPIO
+is enabled.
 
-On Thu, Feb 19, 2026 at 5:28=E2=80=AFPM Paul Menzel <pmenzel@molgen.mpg.de>=
- wrote:
->
-> Dear Sean,
->
->
-> Thank you for the patch.
->
-> Am 20.02.26 um 00:16 schrieb Sean Wang:
-> > From: Sean Wang <sean.wang@mediatek.com>
-> >
-> > Add SDIO device ID (0x790a) for MediaTek MT7902 to sdio_ids.h.
->
-> Tested how?
+When CONFIG_RESET_GPIO=y, __of_reset_control_get() intercepts the
+'reset-gpios' DT property and attempts to register the GPIO as a reset
+controller via __reset_add_reset_gpio_device(). If the GPIO controller
+is not yet fully initialized at probe time, this returns -ENOENT instead
+of -EPROBE_DEFER, and the error path does not respect the 'optional'
+flag, causing pwrseq_simple to fail permanently rather than defer.
+This prevents mmc1 from probing on boards that use 'reset-gpios' for
+WiFi power sequencing, such as BananaPi M2 Magic with AP6212/BCM43430
+on Allwinner R16.
 
-Tested on real hardware with successful card detection, driver
-initialization and the connectivity.
+The correct indicator of reset controller intent is the explicit presence
+of a 'resets' property in the device tree node, not the count of
+'reset-gpios' entries. A single 'reset-gpios' entry is just as likely
+to be a plain GPIO as multiple entries.
 
->
-> > Signed-off-by: Sean Wang <sean.wang@mediatek.com>
-> > ---
-> >   include/linux/mmc/sdio_ids.h | 1 +
-> >   1 file changed, 1 insertion(+)
-> >
-> > diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.=
-h
-> > index 673cbdf43453..97cc834fb3d5 100644
-> > --- a/include/linux/mmc/sdio_ids.h
-> > +++ b/include/linux/mmc/sdio_ids.h
-> > @@ -112,6 +112,7 @@
-> >   #define SDIO_DEVICE_ID_MEDIATEK_MT7663              0x7663
-> >   #define SDIO_DEVICE_ID_MEDIATEK_MT7668              0x7668
-> >   #define SDIO_DEVICE_ID_MEDIATEK_MT7961              0x7961
-> > +#define SDIO_DEVICE_ID_MEDIATEK_MT7902               0x790a
->
-> Please sort it.
+Replace the ngpio == 1 heuristic with an explicit check for the 'resets'
+DT property, making the behavior unambiguous and immune to
+CONFIG_RESET_GPIO interference.
 
-I will address the sorting in v2.
-Thanks for the review.
+Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset control")
+Signed-off-by: Sergey Suloev <sergey.suloev@gmail.com>
+---
+ drivers/mmc/core/pwrseq_simple.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
->
-> >
-> >   #define SDIO_VENDOR_ID_MICROCHIP_WILC               0x0296
-> >   #define SDIO_DEVICE_ID_MICROCHIP_WILC1000   0x5347
->
->
-> Kind regards,
->
-> Paul
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 4b47e6c3b04b..780c8818a273 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -124,7 +124,6 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ {
+ 	struct mmc_pwrseq_simple *pwrseq;
+ 	struct device *dev = &pdev->dev;
+-	int ngpio;
+ 
+ 	pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
+ 	if (!pwrseq)
+@@ -134,8 +133,7 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ 	if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) != -ENOENT)
+ 		return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock not ready\n");
+ 
+-	ngpio = of_count_phandle_with_args(dev->of_node, "reset-gpios", "#gpio-cells");
+-	if (ngpio == 1) {
++	if (device_property_present(dev, "resets")) {
+ 		pwrseq->reset_ctrl = devm_reset_control_get_optional_shared(dev, NULL);
+ 		if (IS_ERR(pwrseq->reset_ctrl))
+ 			return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
+-- 
+2.43.0
+
