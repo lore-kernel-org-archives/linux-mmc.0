@@ -1,133 +1,233 @@
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
+Received: from mail-pg1-f169.google.com (mail-pg1-f169.google.com [209.85.215.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45BB829A9E9
-	for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2026 19:47:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C89B6DCE1
+	for <linux-mmc@vger.kernel.org>; Sat, 21 Feb 2026 13:38:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771616852; cv=none; b=U15VfFSfZIKVdIDwBiCBoH+ghvbK7pU9RtNf+Od0nE+uvfLAbIhQXsllpmMC/0xUrsDy7I2tAov5PP84UWqYFHpgy3/x4yR7zxjwcWMvhUkdH+TLKEHG5AWt1DJxa4lZ5kNjc8VKUNoNK93PGdtOg555Qg1+ug0aNfMhlc29iuA=
+	t=1771681083; cv=none; b=slNqrGgoradbqFnX9sqg8FL6x0MIecox5cq9Fd5oxClzdruGsK4h30rnO5H8OMk+Zt93IWn7fSyhup2yTahfxuGCzXJYcoEn7EOWEMCf42NQoiWk4kQpcUkZLSPObGxznqOry3f8P9atUrJtU/qZSo8oih/QTmxma2NiA78rtyE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771616852; c=relaxed/simple;
-	bh=0G4KFfYK1+YXwVEigy9PGfxDtl6ONA/O/odMVh65a1w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=JBGy7IMXerJ7sx6ZS80e0B0DVGeuetzCc7LW5cGiaqDTRTEF+Llxz5OagmUyChnZrsupExAjqnjNWYyB0YI3xhv2U9ptKXCuVXEvFmTD7vI1yE/QyL2EuOchobrNj1so7Or/HLvVMtV6huJXaHRaR4l2sIAd9rFTLDdeCmqPf4Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aov4icyP; arc=none smtp.client-ip=209.85.167.52
+	s=arc-20240116; t=1771681083; c=relaxed/simple;
+	bh=z6zf5bZnGhemRs/rm0HDlDXkI65kNH5qErAtFJBDB/A=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=CjBLUp72N5uPlxJsWlMwrh6H1Ho5N7ylG92wo7+YLfVlWKoDf70Nnc+M5EgMRdHz4Z0Nk7BkGk5kjDhkGRiYdqcyNxfl44nJzCU+3bWQpzNYxANh3HdFUQfegL0XFrMYpXKoqCn4CMjBy5aqBOMd09kp+aeWOFcPcLolSSrN+PU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GzPXRB9r; arc=none smtp.client-ip=209.85.215.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aov4icyP"
-Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-59dcdf60427so2628761e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Feb 2026 11:47:31 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GzPXRB9r"
+Received: by mail-pg1-f169.google.com with SMTP id 41be03b00d2f7-c6f306faaffso1122207a12.0
+        for <linux-mmc@vger.kernel.org>; Sat, 21 Feb 2026 05:38:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771616849; x=1772221649; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=5Owyf7V4DSAu+UKDutdINA5uU1OgJ5uFzzkQ0lvvCGc=;
-        b=aov4icyPIQ25wscXvqYR8XSzT8nshExy7O5xamJCJLp5zqPWCvhw7uMzd0cnO0vB9C
-         l7IbyKFuD1aubDGsRPDTsEP9aUTOtV/b5kuZq2rc/ngxuiHgYl4H2luoISUqlnXbbXoK
-         5VC9iFcTGShDw7SiLRvQIhc/tYO5YOZuQ5Ph/pIlQJHjcjJcLsrLp7RFBSvQ/OnGDJvh
-         BSslnuMKIPRsttx0GAVOm5uhJ3iw+TSEVvNJhdXgABqEIq5c2Gpnk2LrjCxVWjQwC4y8
-         AVu9IAvKXsFft/IFaU3Bd0qL6XpfpCcVfbosHGgVIbxym2EL+B1NkdZvZffU0jOiEPMU
-         9uFg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771616849; x=1772221649;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1771681082; x=1772285882; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=5Owyf7V4DSAu+UKDutdINA5uU1OgJ5uFzzkQ0lvvCGc=;
-        b=K2agSuszSzIzYtOJzdardziAKOoAUQdW02/QQ1Q1aZTs6VErfQju1YGhXjMGmzySiT
-         ws0Aj5+Iik5MK+tEehRi6xicvIvXI3dhiqTorosrodQyA17hZuqEsVGzFRMEgOgXmVj2
-         oc4Wd7uWjSI3vG+V2nTXISmwm1+htKGkj/87K3oShZh5iM6pCAOpY0fyLxSf9TkunKI3
-         gVCzYm8O203ARadxX1eNVMGtHDFUSQ2EmfqcuRXlF8gxbn+P5oyMZtFDOYl/fHvbyn4m
-         RuAI06xDVaWyDaFvI5IfejP2QjjaMjw4PGtW88xQqsjNxdeKuEEkhkZqNe3IOcJF69hl
-         Gh6A==
-X-Forwarded-Encrypted: i=1; AJvYcCXVBYG3tp5eb3qKnth8fmER73NGAGoABqp/oMUDdmJvaU3K+1KI4KEw+CAO/Hv9e9bO9Q+/6LU/5bs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwEy58uutNwlKJADXuqyz+CpbDCG5Nbc6yaDe5MeCzSvZpdbrsm
-	fd75LSsnyxQkO7mqb7/SQ/WdJJcQc7s6159sbM/MWmxyQ019W7PhBGHz
-X-Gm-Gg: AZuq6aKlWnFWleqM/XXIKj2qsG46DZV9a+U/OoLFU581mRegzPNo9qpZM4WgtLJZVzD
-	ay8b1TnA7vLJus675Ml95WI7qvqFdAiqaq/R6r/XKYNO0Ijya0QJEMe86ZdMn3K1fLokOUautAy
-	cCbBjImnILyGLFjY0JeVtPVnnoQgbT5T/6qTyxaMz/pU9lDP/s39wfq97vsXCs1qW5xzVe16VH8
-	3NU9F+B6NdiwCnzDqjHWtXFJpeJMZeHBPl3L+yBbC2R5pvzdvDGS/MCgEAvBY6RGRXyFt1/8moD
-	6XsqH3BZPDEQ8Lkc7j/XKVIbyFxfjKkqcbYfUBpbEGg8ORnzbabKxiZjMoaKkEoziS3M5zsuTW2
-	HJgovF5zFN2TxVzsgHWhWlkFmRf/vwVKSKEybBg9fQcjanvEaSza8sZIclmMM+N2b4uFOXVVlLO
-	I2EEOFPHobPMIjSDVPCHkNOgQyma3e+dt/SPjwa40=
-X-Received: by 2002:a05:6512:aca:b0:59e:5d0d:c1dc with SMTP id 2adb3069b0e04-5a0ed9c21ddmr157115e87.48.1771616849140;
-        Fri, 20 Feb 2026 11:47:29 -0800 (PST)
-Received: from localhost ([2a00:1e88:4473:5f00:3201:1ad1:d6d0:d47d])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5a0eeb3ea50sm15968e87.57.2026.02.20.11.47.27
+        bh=Pyk6Z+VoDuJMdL4eJZ3cKHVL9+OM0IxwS6L8hXr1m84=;
+        b=GzPXRB9rERwgIdqyW3Oi6pYjmZP97qvhi/XB4tBntWOGaiDhQOfNxjiYxA5DMX4C2x
+         tOmUVv8nWAA+Ik1zavjUJOg2Vrwq2zV0qehg2P5I8sM+t/vaL5dy3kN9j4Vct11o6xAq
+         1F6RQ8KLz1txtEBa+x3VKO//otxxTbVKTbrE1cRvQDC/9a/M3mGxGAxFi8cLaWGm+vP5
+         cU10CeOw0TJKnv7BapChIyO9VmM0m7CGgENJI5u/XFBvtb+00xR25CJZPQXaehZfF3lK
+         XXceOuDMDJLcm9bEvlhV7W7eErNLOBAwJIc/U1ftIWAlNFmhI07oF8/w1rNz+yqZk2Eh
+         fsrw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771681082; x=1772285882;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=Pyk6Z+VoDuJMdL4eJZ3cKHVL9+OM0IxwS6L8hXr1m84=;
+        b=Toy5dTpdbW10mRcRQ/C01YyRe9Nu+/DbmmZRFIPdEaStdLoFX2/hOmf93h8fy2jEhz
+         kCSjgSm4RDV0yXh6mM7oZLi5W1U8hWXuFzl0gU/nMYX6RLVQm4WI/n9B0e8hN4tjnN6B
+         1EgMqMWbnpA4NHCTKZ5zmuXiZ9pPmbTiHwkkFF3Q+vEznSMa9DPBQeAJ5hYTkTHV3w4S
+         4ei18IUn6gkYIIVFK2IyiJqsQ5GPoG15R6+u0qGzFEk4Il8FgmUYVAOCVFK5SW/sStCf
+         gL8K/PEkP3ZKal83egZ+Jtagpgm8pVgS/zGpMuT87qunF1r87e1N4JuGPY+Xxdbm7nB3
+         129w==
+X-Forwarded-Encrypted: i=1; AJvYcCUZg9XAs8BYcBhhQs8zeu2ILYRIwjH9GdglMoSMLG2/CoeTUV85X546WX/nIKrpGTxEmJTE0mzlVYw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxB6uNWAUzDWCDbstPXFKeTyKp8cH4FVRR9vb/qCgilUWXzERer
+	ZAAx/6m96jmwAi6h5g0n+mu0sZyP8vhAyZrvxVY2fCY7cBeJl2aU2N/x
+X-Gm-Gg: AZuq6aKFXPBd6JtccZzJf3Z4LgNs1Nztj1a4ve1ufSi3AGRiQJftRea2xrzMchA97Bb
+	Y0IYLCRfyDmHoHbH1IK/KisBh+61J7Ha2njghSuzYFYTHVli9TbNCxzdL8HrOTFfz4RRkoEBcH/
+	TNGra3h/nhwm+O2DkW+eqhqP0mW9+tSPhalS1aEbbUSzjmncmnChSMsYHRXeGZjIlUl2IHJ4uqW
+	mTjozZ/elB7l8m28m30riTfE/0YC3do9NvNb87KNVyg+4awOQHQw9dT9Kk2hxpK02I1Z64LuJ4B
+	brurX8TDdFbJwsUgveDPO1+hTBwU0stErSMtzFndpp2nuRSjhFC0s1SeDSUDEHIsBe7US7OqAt5
+	yGSjel3VkudhvBxjoj27U7sbYjzybrPbdtE9wPkw9Ste/z5S5j9luN/pTvhXrzD7j1QB+/4VuiB
+	2Cy5wIWqHhszY42Vt7HwCLm/8iZRDK8VXunT0++rU=
+X-Received: by 2002:a17:903:11cc:b0:2ab:344e:1400 with SMTP id d9443c01a7336-2ad74515cccmr29318235ad.37.1771681081793;
+        Sat, 21 Feb 2026 05:38:01 -0800 (PST)
+Received: from kush-pc.lan ([2409:40d4:420d:708c:4402:953d:ce2d:1659])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ad7500e29asm21493075ad.44.2026.02.21.05.37.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 Feb 2026 11:47:28 -0800 (PST)
-From: Sergey Suloev <sergey.suloev@gmail.com>
-To: ulf.hansson@linaro.org
-Cc: catalin.popescu@leica-geosystems.com,
+        Sat, 21 Feb 2026 05:38:01 -0800 (PST)
+From: OnlineLearningTutorials <kush.kulshrestha5@gmail.com>
+X-Google-Original-From: OnlineLearningTutorials <kush.kulshrestha.5@gmail.com>
+To: sean.wang@kernel.org
+Cc: linux-bluetooth@vger.kernel.org,
+	linux-mediatek@lists.infradead.org,
 	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Sergey Suloev <sergey.suloev@gmail.com>
-Subject: [PATCH] mmc: pwrseq_simple: fix probe failure when CONFIG_RESET_GPIO is enabled
-Date: Fri, 20 Feb 2026 22:47:25 +0300
-Message-ID: <20260220194725.1341281-1-sergey.suloev@gmail.com>
-X-Mailer: git-send-email 2.43.0
+	luiz.dentz@gmail.com,
+	marcel@holtmann.org,
+	sean.wang@mediatek.com,
+	ulf.hansson@linaro.org
+Subject: Re: [PATCH 3/4] Bluetooth: btusb: Add new VID/PID 13d3/3579 for MT7902
+Date: Sat, 21 Feb 2026 19:07:48 +0530
+Message-ID: <20260221133748.309045-1-kush.kulshrestha.5@gmail.com>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260219231624.8226-3-sean.wang@kernel.org>
+References: <20260219231624.8226-3-sean.wang@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-The driver uses a heuristic — checking if exactly one entry exists in
-'reset-gpios' — to decide whether to attempt reset controller API usage
-via devm_reset_control_get_optional_shared(). This is semantically
-incorrect and causes a permanent probe failure when CONFIG_RESET_GPIO
-is enabled.
+Hi Sean,
 
-When CONFIG_RESET_GPIO=y, __of_reset_control_get() intercepts the
-'reset-gpios' DT property and attempts to register the GPIO as a reset
-controller via __reset_add_reset_gpio_device(). If the GPIO controller
-is not yet fully initialized at probe time, this returns -ENOENT instead
-of -EPROBE_DEFER, and the error path does not respect the 'optional'
-flag, causing pwrseq_simple to fail permanently rather than defer.
-This prevents mmc1 from probing on boards that use 'reset-gpios' for
-WiFi power sequencing, such as BananaPi M2 Magic with AP6212/BCM43430
-on Allwinner R16.
+Thanks for helping me to add driver for mt7902 chip.
 
-The correct indicator of reset controller intent is the explicit presence
-of a 'resets' property in the device tree node, not the count of
-'reset-gpios' entries. A single 'reset-gpios' entry is just as likely
-to be a plain GPIO as multiple entries.
+I have checked the wifi driver for mt7902 and it is working correctly with new firmware,
+earlier I have issue with old firmware, thanks.
 
-Replace the ngpio == 1 heuristic with an explicit check for the 'resets'
-DT property, making the behavior unambiguous and immune to
-CONFIG_RESET_GPIO interference.
+For Bluetooth driver, you already added VID/PID 13d3/3579 for MT7902
+There are some other VID/PID which are part of mt7902 bluetooth chip
+	13d3/3580 - (my chip)
+	13d3/3594 - https://github.com/OnlineLearningTutorials/mt7902_temp/commit/f94e0075ca04e50629852adbb567e130f8784873
+	13d3/3596 - https://github.com/OnlineLearningTutorials/mt7902_temp/commit/2a3db89c7a87241846d166defa17ebd22d4be337
+	
+Please add these VID/PID or instruct me to add, 
+below are device debug - cat /sys/kernel/debug/usb/devices
 
-Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset control")
-Signed-off-by: Sergey Suloev <sergey.suloev@gmail.com>
----
- drivers/mmc/core/pwrseq_simple.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 4b47e6c3b04b..780c8818a273 100644
---- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -124,7 +124,6 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
- {
- 	struct mmc_pwrseq_simple *pwrseq;
- 	struct device *dev = &pdev->dev;
--	int ngpio;
- 
- 	pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
- 	if (!pwrseq)
-@@ -134,8 +133,7 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
- 	if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) != -ENOENT)
- 		return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock not ready\n");
- 
--	ngpio = of_count_phandle_with_args(dev->of_node, "reset-gpios", "#gpio-cells");
--	if (ngpio == 1) {
-+	if (device_property_present(dev, "resets")) {
- 		pwrseq->reset_ctrl = devm_reset_control_get_optional_shared(dev, NULL);
- 		if (IS_ERR(pwrseq->reset_ctrl))
- 			return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
--- 
-2.43.0
+cat /sys/kernel/debug/usb/devices
+
+T:  Bus=03 Lev=01 Prnt=01 Port=02 Cnt=01 Dev#=  2 Spd=480  MxCh= 0
+D:  Ver= 2.10 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs=  1
+P:  Vendor=13d3 ProdID=3580 Rev= 1.00
+S:  Manufacturer=MediaTek Inc.
+S:  Product=Wireless_Device
+S:  SerialNumber=000000000
+C:* #Ifs= 3 Cfg#= 1 Atr=e0 MxPwr=100mA
+A:  FirstIf#= 0 IfCount= 3 Cls=e0(wlcon) Sub=01 Prot=01
+I:* If#= 0 Alt= 0 #EPs= 3 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=81(I) Atr=03(Int.) MxPS=  16 Ivl=125us
+E:  Ad=82(I) Atr=02(Bulk) MxPS= 512 Ivl=0ms
+E:  Ad=02(O) Atr=02(Bulk) MxPS= 512 Ivl=0ms
+I:* If#= 1 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=   0 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=   0 Ivl=1ms
+I:  If#= 1 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=   9 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=   9 Ivl=1ms
+I:  If#= 1 Alt= 2 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  17 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  17 Ivl=1ms
+I:  If#= 1 Alt= 3 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  25 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  25 Ivl=1ms
+I:  If#= 1 Alt= 4 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  33 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  33 Ivl=1ms
+I:  If#= 1 Alt= 5 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  49 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  49 Ivl=1ms
+I:  If#= 1 Alt= 6 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  63 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  63 Ivl=1ms
+I:  If#= 2 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=8a(I) Atr=03(Int.) MxPS=  64 Ivl=125us
+E:  Ad=0a(O) Atr=03(Int.) MxPS=  64 Ivl=125us
+I:* If#= 2 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=8a(I) Atr=03(Int.) MxPS= 512 Ivl=125us
+E:  Ad=0a(O) Atr=03(Int.) MxPS= 512 Ivl=125us
+
+
+
+cat /sys/kernel/debug/usb/devices
+
+T: Bus=03 Lev=01 Prnt=01 Port=02 Cnt=01 Dev#= 3 Spd=480 MxCh= 0
+D: Ver= 2.10 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs= 1
+P: Vendor=13d3 ProdID=3594 Rev= 1.00
+S: Manufacturer=MediaTek Inc.
+S: Product=Wireless_Device
+S: SerialNumber=000000000
+C:* #Ifs= 3 Cfg#= 1 Atr=e0 MxPwr=100mA
+A: FirstIf#= 0 IfCount= 3 Cls=e0(wlcon) Sub=01 Prot=01
+I:* If#= 0 Alt= 0 #EPs= 3 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=81(I) Atr=03(Int.) MxPS= 16 Ivl=125us
+E: Ad=82(I) Atr=02(Bulk) MxPS= 512 Ivl=0ms
+E: Ad=02(O) Atr=02(Bulk) MxPS= 512 Ivl=0ms
+I:* If#= 1 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=83(I) Atr=01(Isoc) MxPS= 0 Ivl=1ms
+E: Ad=03(O) Atr=01(Isoc) MxPS= 0 Ivl=1ms
+I: If#= 1 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=83(I) Atr=01(Isoc) MxPS= 9 Ivl=1ms
+E: Ad=03(O) Atr=01(Isoc) MxPS= 9 Ivl=1ms
+I: If#= 1 Alt= 2 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=83(I) Atr=01(Isoc) MxPS= 17 Ivl=1ms
+E: Ad=03(O) Atr=01(Isoc) MxPS= 17 Ivl=1ms
+I: If#= 1 Alt= 3 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=83(I) Atr=01(Isoc) MxPS= 25 Ivl=1ms
+E: Ad=03(O) Atr=01(Isoc) MxPS= 25 Ivl=1ms
+I: If#= 1 Alt= 4 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=83(I) Atr=01(Isoc) MxPS= 33 Ivl=1ms
+E: Ad=03(O) Atr=01(Isoc) MxPS= 33 Ivl=1ms
+I: If#= 1 Alt= 5 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=83(I) Atr=01(Isoc) MxPS= 49 Ivl=1ms
+E: Ad=03(O) Atr=01(Isoc) MxPS= 49 Ivl=1ms
+I: If#= 1 Alt= 6 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E: Ad=83(I) Atr=01(Isoc) MxPS= 63 Ivl=1ms
+E: Ad=03(O) Atr=01(Isoc) MxPS= 63 Ivl=1ms
+I:* If#= 2 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
+E: Ad=8a(I) Atr=03(Int.) MxPS= 64 Ivl=125us
+E: Ad=0a(O) Atr=03(Int.) MxPS= 64 Ivl=125us
+I: If#= 2 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
+E: Ad=8a(I) Atr=03(Int.) MxPS= 512 Ivl=125us
+E: Ad=0a(O) Atr=03(Int.) MxPS= 512 Ivl=125us
+
+
+cat /sys/kernel/debug/usb/devices
+
+T:  Bus=07 Lev=01 Prnt=01 Port=00 Cnt=01 Dev#=  2 Spd=480  MxCh= 0
+D:  Ver= 2.10 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs=  1
+P:  Vendor=13d3 ProdID=3596 Rev= 1.00
+S:  Manufacturer=MediaTek Inc.
+S:  Product=Wireless_Device
+S:  SerialNumber=000000000
+C:* #Ifs= 3 Cfg#= 1 Atr=e0 MxPwr=100mA
+A:  FirstIf#= 0 IfCount= 3 Cls=e0(wlcon) Sub=01 Prot=01
+I:* If#= 0 Alt= 0 #EPs= 3 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=81(I) Atr=03(Int.) MxPS=  16 Ivl=125us
+E:  Ad=82(I) Atr=02(Bulk) MxPS= 512 Ivl=0ms
+E:  Ad=02(O) Atr=02(Bulk) MxPS= 512 Ivl=0ms
+I:* If#= 1 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=   0 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=   0 Ivl=1ms
+I:  If#= 1 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=   9 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=   9 Ivl=1ms
+I:  If#= 1 Alt= 2 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  17 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  17 Ivl=1ms
+I:  If#= 1 Alt= 3 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  25 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  25 Ivl=1ms
+I:  If#= 1 Alt= 4 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  33 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  33 Ivl=1ms
+I:  If#= 1 Alt= 5 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  49 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  49 Ivl=1ms
+I:  If#= 1 Alt= 6 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
+E:  Ad=83(I) Atr=01(Isoc) MxPS=  63 Ivl=1ms
+E:  Ad=03(O) Atr=01(Isoc) MxPS=  63 Ivl=1ms
+I:* If#= 2 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
+E:  Ad=8a(I) Atr=03(Int.) MxPS=  64 Ivl=125us
+E:  Ad=0a(O) Atr=03(Int.) MxPS=  64 Ivl=125us
+I:  If#= 2 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
+E:  Ad=8a(I) Atr=03(Int.) MxPS= 512 Ivl=125us
+E:  Ad=0a(O) Atr=03(Int.) MxPS= 512 Ivl=125us
+
+
+Thanks
 
