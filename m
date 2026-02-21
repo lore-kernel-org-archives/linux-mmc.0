@@ -1,233 +1,255 @@
-Received: from mail-pg1-f169.google.com (mail-pg1-f169.google.com [209.85.215.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C89B6DCE1
-	for <linux-mmc@vger.kernel.org>; Sat, 21 Feb 2026 13:38:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8DE036606E
+	for <linux-mmc@vger.kernel.org>; Sat, 21 Feb 2026 20:27:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771681083; cv=none; b=slNqrGgoradbqFnX9sqg8FL6x0MIecox5cq9Fd5oxClzdruGsK4h30rnO5H8OMk+Zt93IWn7fSyhup2yTahfxuGCzXJYcoEn7EOWEMCf42NQoiWk4kQpcUkZLSPObGxznqOry3f8P9atUrJtU/qZSo8oih/QTmxma2NiA78rtyE=
+	t=1771705674; cv=none; b=EnUhe1tI024dqn3zdKtV/5emjbIKYStutLJBv2lNUYhfUWCJYDz2baqBc5WjgbGErR4dndridy40S5hFAd+hBIOxacFsOrI7RRbOD2wKmECALSsXlPURKFv+WTqLASWgvkQUAma4eaIyWvGPEAwrSqkAiXUCB5+tLN8AgK/svas=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771681083; c=relaxed/simple;
-	bh=z6zf5bZnGhemRs/rm0HDlDXkI65kNH5qErAtFJBDB/A=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CjBLUp72N5uPlxJsWlMwrh6H1Ho5N7ylG92wo7+YLfVlWKoDf70Nnc+M5EgMRdHz4Z0Nk7BkGk5kjDhkGRiYdqcyNxfl44nJzCU+3bWQpzNYxANh3HdFUQfegL0XFrMYpXKoqCn4CMjBy5aqBOMd09kp+aeWOFcPcLolSSrN+PU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GzPXRB9r; arc=none smtp.client-ip=209.85.215.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1771705674; c=relaxed/simple;
+	bh=zneKyBJndQq0Mj4R/3czIhM2Q/54LTosY2Thm/qYPqQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ZImzAeh49gha9Ns/1gaZP59huqymir/VW5mvxhnycPXnM66ComfZ7zJgFcUOt2uHWuA4g00M+/TaFcrs9jNmjuNGiCb4wVJiCBxbu1NjO77h51f68AllB/F0NPXo5/S+nIR1KYk5OZ10G9MQeFa99+6S6gcIyP5oMetBDN8Pgfo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eD3ip8A+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GzPXRB9r"
-Received: by mail-pg1-f169.google.com with SMTP id 41be03b00d2f7-c6f306faaffso1122207a12.0
-        for <linux-mmc@vger.kernel.org>; Sat, 21 Feb 2026 05:38:02 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771681082; x=1772285882; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Pyk6Z+VoDuJMdL4eJZ3cKHVL9+OM0IxwS6L8hXr1m84=;
-        b=GzPXRB9rERwgIdqyW3Oi6pYjmZP97qvhi/XB4tBntWOGaiDhQOfNxjiYxA5DMX4C2x
-         tOmUVv8nWAA+Ik1zavjUJOg2Vrwq2zV0qehg2P5I8sM+t/vaL5dy3kN9j4Vct11o6xAq
-         1F6RQ8KLz1txtEBa+x3VKO//otxxTbVKTbrE1cRvQDC/9a/M3mGxGAxFi8cLaWGm+vP5
-         cU10CeOw0TJKnv7BapChIyO9VmM0m7CGgENJI5u/XFBvtb+00xR25CJZPQXaehZfF3lK
-         XXceOuDMDJLcm9bEvlhV7W7eErNLOBAwJIc/U1ftIWAlNFmhI07oF8/w1rNz+yqZk2Eh
-         fsrw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771681082; x=1772285882;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=Pyk6Z+VoDuJMdL4eJZ3cKHVL9+OM0IxwS6L8hXr1m84=;
-        b=Toy5dTpdbW10mRcRQ/C01YyRe9Nu+/DbmmZRFIPdEaStdLoFX2/hOmf93h8fy2jEhz
-         kCSjgSm4RDV0yXh6mM7oZLi5W1U8hWXuFzl0gU/nMYX6RLVQm4WI/n9B0e8hN4tjnN6B
-         1EgMqMWbnpA4NHCTKZ5zmuXiZ9pPmbTiHwkkFF3Q+vEznSMa9DPBQeAJ5hYTkTHV3w4S
-         4ei18IUn6gkYIIVFK2IyiJqsQ5GPoG15R6+u0qGzFEk4Il8FgmUYVAOCVFK5SW/sStCf
-         gL8K/PEkP3ZKal83egZ+Jtagpgm8pVgS/zGpMuT87qunF1r87e1N4JuGPY+Xxdbm7nB3
-         129w==
-X-Forwarded-Encrypted: i=1; AJvYcCUZg9XAs8BYcBhhQs8zeu2ILYRIwjH9GdglMoSMLG2/CoeTUV85X546WX/nIKrpGTxEmJTE0mzlVYw=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxB6uNWAUzDWCDbstPXFKeTyKp8cH4FVRR9vb/qCgilUWXzERer
-	ZAAx/6m96jmwAi6h5g0n+mu0sZyP8vhAyZrvxVY2fCY7cBeJl2aU2N/x
-X-Gm-Gg: AZuq6aKFXPBd6JtccZzJf3Z4LgNs1Nztj1a4ve1ufSi3AGRiQJftRea2xrzMchA97Bb
-	Y0IYLCRfyDmHoHbH1IK/KisBh+61J7Ha2njghSuzYFYTHVli9TbNCxzdL8HrOTFfz4RRkoEBcH/
-	TNGra3h/nhwm+O2DkW+eqhqP0mW9+tSPhalS1aEbbUSzjmncmnChSMsYHRXeGZjIlUl2IHJ4uqW
-	mTjozZ/elB7l8m28m30riTfE/0YC3do9NvNb87KNVyg+4awOQHQw9dT9Kk2hxpK02I1Z64LuJ4B
-	brurX8TDdFbJwsUgveDPO1+hTBwU0stErSMtzFndpp2nuRSjhFC0s1SeDSUDEHIsBe7US7OqAt5
-	yGSjel3VkudhvBxjoj27U7sbYjzybrPbdtE9wPkw9Ste/z5S5j9luN/pTvhXrzD7j1QB+/4VuiB
-	2Cy5wIWqHhszY42Vt7HwCLm/8iZRDK8VXunT0++rU=
-X-Received: by 2002:a17:903:11cc:b0:2ab:344e:1400 with SMTP id d9443c01a7336-2ad74515cccmr29318235ad.37.1771681081793;
-        Sat, 21 Feb 2026 05:38:01 -0800 (PST)
-Received: from kush-pc.lan ([2409:40d4:420d:708c:4402:953d:ce2d:1659])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ad7500e29asm21493075ad.44.2026.02.21.05.37.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 Feb 2026 05:38:01 -0800 (PST)
-From: OnlineLearningTutorials <kush.kulshrestha5@gmail.com>
-X-Google-Original-From: OnlineLearningTutorials <kush.kulshrestha.5@gmail.com>
-To: sean.wang@kernel.org
-Cc: linux-bluetooth@vger.kernel.org,
-	linux-mediatek@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	luiz.dentz@gmail.com,
-	marcel@holtmann.org,
-	sean.wang@mediatek.com,
-	ulf.hansson@linaro.org
-Subject: Re: [PATCH 3/4] Bluetooth: btusb: Add new VID/PID 13d3/3579 for MT7902
-Date: Sat, 21 Feb 2026 19:07:48 +0530
-Message-ID: <20260221133748.309045-1-kush.kulshrestha.5@gmail.com>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20260219231624.8226-3-sean.wang@kernel.org>
-References: <20260219231624.8226-3-sean.wang@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eD3ip8A+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F785C2BC9E
+	for <linux-mmc@vger.kernel.org>; Sat, 21 Feb 2026 20:27:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1771705674;
+	bh=zneKyBJndQq0Mj4R/3czIhM2Q/54LTosY2Thm/qYPqQ=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=eD3ip8A+YBW3KNk2kDd6MXbtXNuRSpQdp+c9+UBK5cs7m4Ltt6fVt8BRxOQxXSDJe
+	 fXZb5Xu25fXXKlX5Qiy04NxE/ek9dIHIhyPTTPfvGakk9wFcbYWz4YpnqMc5uJek6g
+	 p56xMVQ6+GuYL6RmEK8AKFcAkmI/yfnC/0UDCgFGkYKbIbweqBj7/7Ms9JQWSU5xrR
+	 WbpUjCswf/VvBEFSsBRdfuJn+XV0xgO7SRsWlX4PNnWqIGZo7Uv2doyepdw78t2iDn
+	 Wbz6i0lmBPLzQRansr4DdTcy9F2NhzqM9MEtGP1iAy3O78fjtw1enSbffGdZ38QXnn
+	 5pslqUa5AkPMA==
+Received: by mail-lj1-f180.google.com with SMTP id 38308e7fff4ca-38713b53915so29833741fa.0
+        for <linux-mmc@vger.kernel.org>; Sat, 21 Feb 2026 12:27:54 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUY1GDuoTHfFNb5On5ZENTkEYVIJCo/n9iSl4n4t1gjh1wQMzojIg4JOc9hvmPijmyT89M/VGcxFFQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz3jvmvKIpX1y2rBj0zhBfp040Omm4jQtcJNcWxBmL474toz9uY
+	0Jwj8ZKkx0wQXrUPwlbrty8dHV+zFP5aFXdL3UEpcwet79wgJghpe+GKFvJCUZQMDb11pa+HOvj
+	L3ajp1zU0kEIjnDTCL8AA5W1XGC+4tIY=
+X-Received: by 2002:a2e:3212:0:b0:386:4942:246d with SMTP id
+ 38308e7fff4ca-38853a09209mr26215631fa.21.1771705672809; Sat, 21 Feb 2026
+ 12:27:52 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260219231624.8226-3-sean.wang@kernel.org> <20260221133748.309045-1-kush.kulshrestha.5@gmail.com>
+In-Reply-To: <20260221133748.309045-1-kush.kulshrestha.5@gmail.com>
+From: Sean Wang <sean.wang@kernel.org>
+Date: Sat, 21 Feb 2026 14:27:41 -0600
+X-Gmail-Original-Message-ID: <CAGp9Lzoq3nZS8A9m=H9JJmiCv11bWDmoLXqBLCU-Qm80k7=R1Q@mail.gmail.com>
+X-Gm-Features: AaiRm51aTshfZS8JovVoAN872wiVNqYZMZDUTqUzHSK5_NRtRPr2fd9rGAtzk0U
+Message-ID: <CAGp9Lzoq3nZS8A9m=H9JJmiCv11bWDmoLXqBLCU-Qm80k7=R1Q@mail.gmail.com>
+Subject: Re: [PATCH 3/4] Bluetooth: btusb: Add new VID/PID 13d3/3579 for MT7902
+To: OnlineLearningTutorials <kush.kulshrestha5@gmail.com>
+Cc: linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org, 
+	linux-mmc@vger.kernel.org, luiz.dentz@gmail.com, marcel@holtmann.org, 
+	sean.wang@mediatek.com, ulf.hansson@linaro.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Sean,
+On Sat, Feb 21, 2026 at 7:38=E2=80=AFAM OnlineLearningTutorials
+<kush.kulshrestha5@gmail.com> wrote:
+>
+> Hi Sean,
+>
+> Thanks for helping me to add driver for mt7902 chip.
+>
+> I have checked the wifi driver for mt7902 and it is working correctly wit=
+h new firmware,
+> earlier I have issue with old firmware, thanks.
+>
+> For Bluetooth driver, you already added VID/PID 13d3/3579 for MT7902
+> There are some other VID/PID which are part of mt7902 bluetooth chip
+>         13d3/3580 - (my chip)
+>         13d3/3594 - https://github.com/OnlineLearningTutorials/mt7902_tem=
+p/commit/f94e0075ca04e50629852adbb567e130f8784873
+>         13d3/3596 - https://github.com/OnlineLearningTutorials/mt7902_tem=
+p/commit/2a3db89c7a87241846d166defa17ebd22d4be337
+>
+> Please add these VID/PID or instruct me to add,
 
-Thanks for helping me to add driver for mt7902 chip.
+Hi Kush,
 
-I have checked the wifi driver for mt7902 and it is working correctly with new firmware,
-earlier I have issue with old firmware, thanks.
+Glad to hear Wi-Fi works with the new firmware.
+I=E2=80=99ll add the additional Bluetooth VID/PIDs in the next version to m=
+ake
+the MT7902 chipset more accessible.
+Appreciate the report and logs.
 
-For Bluetooth driver, you already added VID/PID 13d3/3579 for MT7902
-There are some other VID/PID which are part of mt7902 bluetooth chip
-	13d3/3580 - (my chip)
-	13d3/3594 - https://github.com/OnlineLearningTutorials/mt7902_temp/commit/f94e0075ca04e50629852adbb567e130f8784873
-	13d3/3596 - https://github.com/OnlineLearningTutorials/mt7902_temp/commit/2a3db89c7a87241846d166defa17ebd22d4be337
-	
-Please add these VID/PID or instruct me to add, 
-below are device debug - cat /sys/kernel/debug/usb/devices
-
-
-cat /sys/kernel/debug/usb/devices
-
-T:  Bus=03 Lev=01 Prnt=01 Port=02 Cnt=01 Dev#=  2 Spd=480  MxCh= 0
-D:  Ver= 2.10 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs=  1
-P:  Vendor=13d3 ProdID=3580 Rev= 1.00
-S:  Manufacturer=MediaTek Inc.
-S:  Product=Wireless_Device
-S:  SerialNumber=000000000
-C:* #Ifs= 3 Cfg#= 1 Atr=e0 MxPwr=100mA
-A:  FirstIf#= 0 IfCount= 3 Cls=e0(wlcon) Sub=01 Prot=01
-I:* If#= 0 Alt= 0 #EPs= 3 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=81(I) Atr=03(Int.) MxPS=  16 Ivl=125us
-E:  Ad=82(I) Atr=02(Bulk) MxPS= 512 Ivl=0ms
-E:  Ad=02(O) Atr=02(Bulk) MxPS= 512 Ivl=0ms
-I:* If#= 1 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=   0 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=   0 Ivl=1ms
-I:  If#= 1 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=   9 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=   9 Ivl=1ms
-I:  If#= 1 Alt= 2 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  17 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  17 Ivl=1ms
-I:  If#= 1 Alt= 3 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  25 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  25 Ivl=1ms
-I:  If#= 1 Alt= 4 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  33 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  33 Ivl=1ms
-I:  If#= 1 Alt= 5 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  49 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  49 Ivl=1ms
-I:  If#= 1 Alt= 6 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  63 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  63 Ivl=1ms
-I:  If#= 2 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=8a(I) Atr=03(Int.) MxPS=  64 Ivl=125us
-E:  Ad=0a(O) Atr=03(Int.) MxPS=  64 Ivl=125us
-I:* If#= 2 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=8a(I) Atr=03(Int.) MxPS= 512 Ivl=125us
-E:  Ad=0a(O) Atr=03(Int.) MxPS= 512 Ivl=125us
-
-
-
-cat /sys/kernel/debug/usb/devices
-
-T: Bus=03 Lev=01 Prnt=01 Port=02 Cnt=01 Dev#= 3 Spd=480 MxCh= 0
-D: Ver= 2.10 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs= 1
-P: Vendor=13d3 ProdID=3594 Rev= 1.00
-S: Manufacturer=MediaTek Inc.
-S: Product=Wireless_Device
-S: SerialNumber=000000000
-C:* #Ifs= 3 Cfg#= 1 Atr=e0 MxPwr=100mA
-A: FirstIf#= 0 IfCount= 3 Cls=e0(wlcon) Sub=01 Prot=01
-I:* If#= 0 Alt= 0 #EPs= 3 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=81(I) Atr=03(Int.) MxPS= 16 Ivl=125us
-E: Ad=82(I) Atr=02(Bulk) MxPS= 512 Ivl=0ms
-E: Ad=02(O) Atr=02(Bulk) MxPS= 512 Ivl=0ms
-I:* If#= 1 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=83(I) Atr=01(Isoc) MxPS= 0 Ivl=1ms
-E: Ad=03(O) Atr=01(Isoc) MxPS= 0 Ivl=1ms
-I: If#= 1 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=83(I) Atr=01(Isoc) MxPS= 9 Ivl=1ms
-E: Ad=03(O) Atr=01(Isoc) MxPS= 9 Ivl=1ms
-I: If#= 1 Alt= 2 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=83(I) Atr=01(Isoc) MxPS= 17 Ivl=1ms
-E: Ad=03(O) Atr=01(Isoc) MxPS= 17 Ivl=1ms
-I: If#= 1 Alt= 3 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=83(I) Atr=01(Isoc) MxPS= 25 Ivl=1ms
-E: Ad=03(O) Atr=01(Isoc) MxPS= 25 Ivl=1ms
-I: If#= 1 Alt= 4 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=83(I) Atr=01(Isoc) MxPS= 33 Ivl=1ms
-E: Ad=03(O) Atr=01(Isoc) MxPS= 33 Ivl=1ms
-I: If#= 1 Alt= 5 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=83(I) Atr=01(Isoc) MxPS= 49 Ivl=1ms
-E: Ad=03(O) Atr=01(Isoc) MxPS= 49 Ivl=1ms
-I: If#= 1 Alt= 6 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E: Ad=83(I) Atr=01(Isoc) MxPS= 63 Ivl=1ms
-E: Ad=03(O) Atr=01(Isoc) MxPS= 63 Ivl=1ms
-I:* If#= 2 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
-E: Ad=8a(I) Atr=03(Int.) MxPS= 64 Ivl=125us
-E: Ad=0a(O) Atr=03(Int.) MxPS= 64 Ivl=125us
-I: If#= 2 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
-E: Ad=8a(I) Atr=03(Int.) MxPS= 512 Ivl=125us
-E: Ad=0a(O) Atr=03(Int.) MxPS= 512 Ivl=125us
-
-
-cat /sys/kernel/debug/usb/devices
-
-T:  Bus=07 Lev=01 Prnt=01 Port=00 Cnt=01 Dev#=  2 Spd=480  MxCh= 0
-D:  Ver= 2.10 Cls=ef(misc ) Sub=02 Prot=01 MxPS=64 #Cfgs=  1
-P:  Vendor=13d3 ProdID=3596 Rev= 1.00
-S:  Manufacturer=MediaTek Inc.
-S:  Product=Wireless_Device
-S:  SerialNumber=000000000
-C:* #Ifs= 3 Cfg#= 1 Atr=e0 MxPwr=100mA
-A:  FirstIf#= 0 IfCount= 3 Cls=e0(wlcon) Sub=01 Prot=01
-I:* If#= 0 Alt= 0 #EPs= 3 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=81(I) Atr=03(Int.) MxPS=  16 Ivl=125us
-E:  Ad=82(I) Atr=02(Bulk) MxPS= 512 Ivl=0ms
-E:  Ad=02(O) Atr=02(Bulk) MxPS= 512 Ivl=0ms
-I:* If#= 1 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=   0 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=   0 Ivl=1ms
-I:  If#= 1 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=   9 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=   9 Ivl=1ms
-I:  If#= 1 Alt= 2 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  17 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  17 Ivl=1ms
-I:  If#= 1 Alt= 3 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  25 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  25 Ivl=1ms
-I:  If#= 1 Alt= 4 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  33 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  33 Ivl=1ms
-I:  If#= 1 Alt= 5 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  49 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  49 Ivl=1ms
-I:  If#= 1 Alt= 6 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=btusb
-E:  Ad=83(I) Atr=01(Isoc) MxPS=  63 Ivl=1ms
-E:  Ad=03(O) Atr=01(Isoc) MxPS=  63 Ivl=1ms
-I:* If#= 2 Alt= 0 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
-E:  Ad=8a(I) Atr=03(Int.) MxPS=  64 Ivl=125us
-E:  Ad=0a(O) Atr=03(Int.) MxPS=  64 Ivl=125us
-I:  If#= 2 Alt= 1 #EPs= 2 Cls=e0(wlcon) Sub=01 Prot=01 Driver=(none)
-E:  Ad=8a(I) Atr=03(Int.) MxPS= 512 Ivl=125us
-E:  Ad=0a(O) Atr=03(Int.) MxPS= 512 Ivl=125us
-
-
-Thanks
-
+> below are device debug - cat /sys/kernel/debug/usb/devices
+>
+>
+> cat /sys/kernel/debug/usb/devices
+>
+> T:  Bus=3D03 Lev=3D01 Prnt=3D01 Port=3D02 Cnt=3D01 Dev#=3D  2 Spd=3D480  =
+MxCh=3D 0
+> D:  Ver=3D 2.10 Cls=3Def(misc ) Sub=3D02 Prot=3D01 MxPS=3D64 #Cfgs=3D  1
+> P:  Vendor=3D13d3 ProdID=3D3580 Rev=3D 1.00
+> S:  Manufacturer=3DMediaTek Inc.
+> S:  Product=3DWireless_Device
+> S:  SerialNumber=3D000000000
+> C:* #Ifs=3D 3 Cfg#=3D 1 Atr=3De0 MxPwr=3D100mA
+> A:  FirstIf#=3D 0 IfCount=3D 3 Cls=3De0(wlcon) Sub=3D01 Prot=3D01
+> I:* If#=3D 0 Alt=3D 0 #EPs=3D 3 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D81(I) Atr=3D03(Int.) MxPS=3D  16 Ivl=3D125us
+> E:  Ad=3D82(I) Atr=3D02(Bulk) MxPS=3D 512 Ivl=3D0ms
+> E:  Ad=3D02(O) Atr=3D02(Bulk) MxPS=3D 512 Ivl=3D0ms
+> I:* If#=3D 1 Alt=3D 0 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D   0 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D   0 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 1 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D   9 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D   9 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 2 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  17 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  17 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 3 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  25 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  25 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 4 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  33 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  33 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 5 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  49 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  49 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 6 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  63 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  63 Ivl=3D1ms
+> I:  If#=3D 2 Alt=3D 0 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D8a(I) Atr=3D03(Int.) MxPS=3D  64 Ivl=3D125us
+> E:  Ad=3D0a(O) Atr=3D03(Int.) MxPS=3D  64 Ivl=3D125us
+> I:* If#=3D 2 Alt=3D 1 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D8a(I) Atr=3D03(Int.) MxPS=3D 512 Ivl=3D125us
+> E:  Ad=3D0a(O) Atr=3D03(Int.) MxPS=3D 512 Ivl=3D125us
+>
+>
+>
+> cat /sys/kernel/debug/usb/devices
+>
+> T: Bus=3D03 Lev=3D01 Prnt=3D01 Port=3D02 Cnt=3D01 Dev#=3D 3 Spd=3D480 MxC=
+h=3D 0
+> D: Ver=3D 2.10 Cls=3Def(misc ) Sub=3D02 Prot=3D01 MxPS=3D64 #Cfgs=3D 1
+> P: Vendor=3D13d3 ProdID=3D3594 Rev=3D 1.00
+> S: Manufacturer=3DMediaTek Inc.
+> S: Product=3DWireless_Device
+> S: SerialNumber=3D000000000
+> C:* #Ifs=3D 3 Cfg#=3D 1 Atr=3De0 MxPwr=3D100mA
+> A: FirstIf#=3D 0 IfCount=3D 3 Cls=3De0(wlcon) Sub=3D01 Prot=3D01
+> I:* If#=3D 0 Alt=3D 0 #EPs=3D 3 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D81(I) Atr=3D03(Int.) MxPS=3D 16 Ivl=3D125us
+> E: Ad=3D82(I) Atr=3D02(Bulk) MxPS=3D 512 Ivl=3D0ms
+> E: Ad=3D02(O) Atr=3D02(Bulk) MxPS=3D 512 Ivl=3D0ms
+> I:* If#=3D 1 Alt=3D 0 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D 0 Ivl=3D1ms
+> E: Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D 0 Ivl=3D1ms
+> I: If#=3D 1 Alt=3D 1 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D 9 Ivl=3D1ms
+> E: Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D 9 Ivl=3D1ms
+> I: If#=3D 1 Alt=3D 2 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D 17 Ivl=3D1ms
+> E: Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D 17 Ivl=3D1ms
+> I: If#=3D 1 Alt=3D 3 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D 25 Ivl=3D1ms
+> E: Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D 25 Ivl=3D1ms
+> I: If#=3D 1 Alt=3D 4 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D 33 Ivl=3D1ms
+> E: Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D 33 Ivl=3D1ms
+> I: If#=3D 1 Alt=3D 5 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D 49 Ivl=3D1ms
+> E: Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D 49 Ivl=3D1ms
+> I: If#=3D 1 Alt=3D 6 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E: Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D 63 Ivl=3D1ms
+> E: Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D 63 Ivl=3D1ms
+> I:* If#=3D 2 Alt=3D 0 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3D(none)
+> E: Ad=3D8a(I) Atr=3D03(Int.) MxPS=3D 64 Ivl=3D125us
+> E: Ad=3D0a(O) Atr=3D03(Int.) MxPS=3D 64 Ivl=3D125us
+> I: If#=3D 2 Alt=3D 1 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3D(none)
+> E: Ad=3D8a(I) Atr=3D03(Int.) MxPS=3D 512 Ivl=3D125us
+> E: Ad=3D0a(O) Atr=3D03(Int.) MxPS=3D 512 Ivl=3D125us
+>
+>
+> cat /sys/kernel/debug/usb/devices
+>
+> T:  Bus=3D07 Lev=3D01 Prnt=3D01 Port=3D00 Cnt=3D01 Dev#=3D  2 Spd=3D480  =
+MxCh=3D 0
+> D:  Ver=3D 2.10 Cls=3Def(misc ) Sub=3D02 Prot=3D01 MxPS=3D64 #Cfgs=3D  1
+> P:  Vendor=3D13d3 ProdID=3D3596 Rev=3D 1.00
+> S:  Manufacturer=3DMediaTek Inc.
+> S:  Product=3DWireless_Device
+> S:  SerialNumber=3D000000000
+> C:* #Ifs=3D 3 Cfg#=3D 1 Atr=3De0 MxPwr=3D100mA
+> A:  FirstIf#=3D 0 IfCount=3D 3 Cls=3De0(wlcon) Sub=3D01 Prot=3D01
+> I:* If#=3D 0 Alt=3D 0 #EPs=3D 3 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D81(I) Atr=3D03(Int.) MxPS=3D  16 Ivl=3D125us
+> E:  Ad=3D82(I) Atr=3D02(Bulk) MxPS=3D 512 Ivl=3D0ms
+> E:  Ad=3D02(O) Atr=3D02(Bulk) MxPS=3D 512 Ivl=3D0ms
+> I:* If#=3D 1 Alt=3D 0 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D   0 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D   0 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 1 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D   9 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D   9 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 2 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  17 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  17 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 3 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  25 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  25 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 4 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  33 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  33 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 5 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  49 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  49 Ivl=3D1ms
+> I:  If#=3D 1 Alt=3D 6 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3Dbtusb
+> E:  Ad=3D83(I) Atr=3D01(Isoc) MxPS=3D  63 Ivl=3D1ms
+> E:  Ad=3D03(O) Atr=3D01(Isoc) MxPS=3D  63 Ivl=3D1ms
+> I:* If#=3D 2 Alt=3D 0 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3D(none)
+> E:  Ad=3D8a(I) Atr=3D03(Int.) MxPS=3D  64 Ivl=3D125us
+> E:  Ad=3D0a(O) Atr=3D03(Int.) MxPS=3D  64 Ivl=3D125us
+> I:  If#=3D 2 Alt=3D 1 #EPs=3D 2 Cls=3De0(wlcon) Sub=3D01 Prot=3D01 Driver=
+=3D(none)
+> E:  Ad=3D8a(I) Atr=3D03(Int.) MxPS=3D 512 Ivl=3D125us
+> E:  Ad=3D0a(O) Atr=3D03(Int.) MxPS=3D 512 Ivl=3D125us
+>
+>
+> Thanks
+>
