@@ -1,107 +1,103 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4962827FD49
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 14:13:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F0861BC46
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 14:13:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771856014; cv=pass; b=ryqy78c5qr2P7m/BkmFV+sn3KOMibMwcSC/3HD7xfkJMck2nnIEN2Rvz800DX84V6W+/6xgBTEr4o1x0DudKFjjdL67fS1ueXqCkwzJUBeg7elZ4uWai3q6gMD0Kd638C2OY1Y+EDtSafIno1SdcMeens5rpWXLjS4/2keJwn0Y=
+	t=1771856018; cv=pass; b=GxXp5Aj31lnW1JZ0lrlmIO+Rjli1sNc5zqOhGgLvxIgO8chKvVeN171As1VvIp9FL36MYYf0W8AzodiwdVyDr50rsUi8DzP2EBkv2DYvrKx8xa7OmvkqwdMLVzN9Ejpt/U20S6gNLB/3hHZnf+NszgtsFEQR/pBoXhFfu5gD2CQ=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771856014; c=relaxed/simple;
-	bh=76oCx/ttrzREgYvfMWN9RbVec2xG7i0o/OAeFdl2DbQ=;
+	s=arc-20240116; t=1771856018; c=relaxed/simple;
+	bh=lVzAKetV3kjvZsxfpFYPUnjLYpAZnA4ROKcACNVd6Vo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=uggXz3jiv7uax4o0toY/BG6PNOFDXYtudhsItE4dcdTMExMAnfw3MgJvEftPOqJKrr0aBFaSdmYibjXAQRkPxmyY+d6OTj1wXCjLUS0DcNqmIjldxIRLvxr7L9imdNZX14G4fJDTbnSIVOCM4K1m9GtKD7MRp3Qa3r87PwI4KWk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=t+g6Zznb; arc=pass smtp.client-ip=209.85.167.49
+	 To:Cc:Content-Type; b=nLnSoBNBWGrMlkAaQzuTBjiQFLi8/3KpKfNN4V0d7jBdmAVuhefEnsFN4r+ddZJ98DztYHKQJEUe92INVsnsvUTwgfPOKgb9uthSelqmEEwp0jzwkc51aTDquUoPLXhiztjIJnw1/ZHnHU0sWeICJI33ufHh5AQSulnYHF72b6k=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Wz6eDIJk; arc=pass smtp.client-ip=209.85.167.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="t+g6Zznb"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-59e4a04f059so5622006e87.2
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 06:13:33 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1771856011; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Wz6eDIJk"
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-59e63b427aaso4587211e87.2
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 06:13:37 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1771856015; cv=none;
         d=google.com; s=arc-20240605;
-        b=R3/WNzrE5uP2LZrkzmsWjaXko/IR4ZqftJTgwSai9JQ8zTB913IY3E5u5iFfnbv80y
-         GOVooCGEXnckn9J+hQJW0ndgzt8kU6dQ2M5rUVh3xQzpArXgm0neKJoWuR3vG0zqp2Ae
-         /zCVH1QDXhqtaLMdNYo144NvW+WpxaZRvK+jurQMIzEBPpMuTpBmBVGj85gcWu79zpW+
-         O89VC+3zflmhsi86TYtyIRCmrrjIm8tSKk+GS+3oKILAgyD4CDSSfFeknOibZtrM6tPI
-         i7RNxMWo75RK5NMffFq5BxlMr6BQfA1IERSoDFVEsPmTTBWlOiG0/zbvDEhE21gA8258
-         1EBg==
+        b=Ab3OoDoIUiZHpgZD0DjPhf3Mo8ojr+6iU45zRmFT8FC434ARHeMc3QEgikXBmoSoPZ
+         Nb5let6PPgGc6pTm2mJ2yBfmsh6Msc/f/jQYz3oZfGUII/9Y8DWdFyDwZSJI69Au6j1D
+         Y+Y6xtqPgkkJ4gVhdux+usxtcC1QrAiTbq/4sn7jw9PejoTEqIe4PQajhkFNGIOfSpZ7
+         IFkOjUwrfnGLDrt5lK0vEJmDMBfm9f7llnI/G6qet9cISponiF7XS/YzHhfcawPA5Vbo
+         TyB9T/j3w2DFdyeyRifuc7NlIRlzrzvhbvMDIGMq1t3hCBWftr8W+fyMgXKKsPeLagoQ
+         nlBA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=597mQmEUNbkIDS8qk+5/zMm26WxivzZ2OThkmt6poH8=;
-        fh=50mXZKPl44hP+zbFOZu320cQAiRhPiROzt3bryo3xd0=;
-        b=BCkMvQ9OET7Dhgj8o1lSL8GWbH5k37kXuf0XDTKvgYesES88K5oumtq4nY5/gS7+Hh
-         l4piMkwIRh73nbTd6Koc+KBsORy17Cf51jAjCcPuvtEWDS9vxWpgtOit9jQsaiA6FEJ1
-         ZEilPEBFZyt3CknwfqYqgJBwK6onlvgWO9xdeNSUtMlx3vcdg7eTCsI9P025W6WWR7Fm
-         zh+FNihl4BNgH+WNYame1BoZUk3dDDUwJ7zMv/e7jJEDcS8s4nuWWrTc+aVL3XXDTESz
-         FrPiIZxODVUidUd12eqbT9QqX622qxxhzImLuarTctDBYm0G8ipR8A7+bkcZkctKcPhI
-         OmcA==;
+        bh=TmjBplTn8jYs+VwG3/g2W5Aubg2dV/4A2mYzzDQ5dvE=;
+        fh=gecxUnJdZU9MwXiwHK5Fk5Qd/8fiMkSlBtSXNktKX6k=;
+        b=CkhJHbcqsuRHpNuaBpPKdxdLdLWHeMKAW84XvHsWHxdAxlMU+7Fh91/41fTBmVsRoe
+         zt2sIX+DNvIheiWQ2gTmaGK+Rvba13cF7Ab/CiBaRnMBdRM0pcKLedFg7HMB6rA8QGAf
+         LuDyQTMWTcc2DhExtaumVawD+M5gLUfV6zzDwFRut330zKhRQX0eHbm0CrJnn8gzhuVA
+         ckfh7xfgusyYFSDdEQJGuot1sapqrwWDnVmCNPcPPa4tQF4ioFIbtzENyX6ynwOEr4Xg
+         QNlccKeET2U2+JeXn+qt2vGcZ+rda3pr83O5DSdjvhmmVHN8RJBYn8PYmvt9eaUp4fUb
+         xsMw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1771856011; x=1772460811; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1771856015; x=1772460815; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=597mQmEUNbkIDS8qk+5/zMm26WxivzZ2OThkmt6poH8=;
-        b=t+g6Zznbffu9mWS8rFtNQBxx2nzF5u3GxqFW/f4cWpN4RJAi6WFfRbOeSZi47trmjl
-         CSPqBIZq9SN3mBk+rG+VbtmyIvfts1X1C2g8FmVX/bTL8p2b6XXQmbETBzc9GleACd+x
-         7lmKwJ9noNAWJx3vJei4Bmkszncf5yqzEQJEpUXkZr4nWxz+IlZ/+dKPHK9u7C/fU9B+
-         vdKphR9GVSeW2BdT9Egi6ZjQRHC8r+m8xy4MrQOWAmq4CoIGAhiSPN54HU8GxTeX3sS0
-         RBuE0VFiGYMuxoAJeYY0i+qNjkQ2exfjDnTTOQiG0MpV6DHesJRCtLg9yYuEI9i3/VmK
-         bKJg==
+        bh=TmjBplTn8jYs+VwG3/g2W5Aubg2dV/4A2mYzzDQ5dvE=;
+        b=Wz6eDIJkyowz2faq63xDlY6sgJbCE73JNKmz9fhZqgdLLmOhHcelRUT5pmPHdbJ2X/
+         mhiy5J5qwZNUmuuFOfpdSbiotgBA+Q3zr/GvUtIwOXpU89QgFqd5JH+68ifwYsz7WlQX
+         GQP0cmrue1oQXCYGCDM1j185uuWaLzwTLsxTK/eLXs92V/dkMwGRoz1PAjzQZv9H3nKe
+         XK8hyQCDNaZbGJHztjDUUIz1Gcue0H9D5P831aVsu96p/h0FUFdRZuEcjkN6L/PbYvcX
+         8EcrlxWBtuDtMsSxaK54F7xvxgoYanSqR7DOjj8jkm+M7L4t6HIJqoDzeOYvad02G1bH
+         Mp7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771856011; x=1772460811;
+        d=1e100.net; s=20230601; t=1771856015; x=1772460815;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=597mQmEUNbkIDS8qk+5/zMm26WxivzZ2OThkmt6poH8=;
-        b=KciO0g/CEXsEZetLeSSSF+eqLtjg24BmIn5xkuLp+XMef7ZEdCP4p18bD89/pd0vAL
-         vM8qFbm6XCYELZq61bCH5BTzL2XNyZPHBSHJcWWnyW7uoGv9ST4Ti6nPWhRhHwztgUJU
-         56SizO6i1EaDJZAZ8F++3gY3pzc04k61ieZ7GJA6UftvOs5PXr0c2urstbGlOlmo5UbV
-         AbN8P8K5WqDfK7w4NVGW18hhEiae/iFMRx2SZU2tqvAkyyZrPh4nCERFrKHEhPpx1WQf
-         QrWGwWbuHatWA/OTKxzCNdmQuPflgeOI4V0WlrHc4Ev9FhseqMorwQuCEtpeXPkyk+k2
-         1XRQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVYOKDLF4qBC59KmCodB0LmATWgb5KAHVZD8nb7PgPdxU9Wwoq+XBKGc7xdLfwMlGbSZS4t4XozdyM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwOz/0nUmmTuvO308gOOS+PRtWwrigcfhaYHkjz0zFNS8uWE2Pe
-	mQe8jJFV9EuTTVeSrbVJl5ASwkO8ALG0p359S6YYbc/odz0hPr4E349qqMKOpqS2LBmZFu3uAPw
-	PamSJh4VqLEGShnneB73rkd48G5JxvtYQqLCLlMKbtg==
-X-Gm-Gg: AZuq6aKdCqfVR5pGBObZVNPD5FXJCUREozQxjzR65LI6lGH0oikLYSLLgR1uZhjSnNt
-	yp3UtOJB+lk8v4IQIDsy8oMZYgc1QowOH2QuCznvalrvp6m+HeFByNxlEnP9OSFzvFfyMJiqDbq
-	7fsLFK1klBuaifUeebwSeEzsTc216ogJ6IdO0O2zTLoORKUs/ugCQL41MzD92EACQo3tD/GmfLg
-	YBCh8PKvf29Ycmimh3YtXsH0GDMezEm6ZOgtBBGUVNzPi5rvtI4MNkYMuB9Of4Ou4rzapO6VXUf
-	i5q1NZWW
-X-Received: by 2002:a05:6512:64c1:b0:5a0:ee0b:c263 with SMTP id
- 2adb3069b0e04-5a0ee0bc30emr1881073e87.3.1771856011225; Mon, 23 Feb 2026
- 06:13:31 -0800 (PST)
+        bh=TmjBplTn8jYs+VwG3/g2W5Aubg2dV/4A2mYzzDQ5dvE=;
+        b=wbdIMYiFT2LEjxnJHq/6cSdlYWDM4KbDniFEXFMnLrQtWBos+bO8LINwyCa4p1W0yT
+         QQqm+tY4bFm0m2Ge7ftMrti9Ak6THoIYWqSFAHcE1PvEFhmWRtIQI5J3rsIDF8tRJvBi
+         ddYpDkVfhNo55jluQjyKyqqKjP+Ko1v5ebKw1MaNp2hJFn7SXYRFp8zcr9HLWMOcSWud
+         z1OuNPlwhs6kwHJhu+aqjlOdCleCT2StHLwgfF4QXFP9FEZI7oEhmGpbhlEZbKToddqD
+         4lYj0fCIUpYHt6Mdlq0mi49j+cH3HtvViijp+BtW5qshV7fVXhujNAk4jn/Zx26G0rvv
+         6Hjw==
+X-Gm-Message-State: AOJu0YxYhjv6DoyhfsQEIH8un93EeAY5+C8nkkaumnxzty+8rzE9QrpM
+	f45CcLpLn7Lwhk7HD9CDqSft4f4uhjNlAJUF+0ztQcqhNkmJZ94tIsSDAPIHpBRw5U9Szao+0RM
+	NQiebN96leSaxoWwENGs6kTzGEf/cmEpslBJDXwK9wg==
+X-Gm-Gg: AZuq6aJanz5FZ654/+8lWlLWzTD1ZC1TZ83rFsGqlGUYtWrlB+kK2RigCoy9ZUJiMjs
+	oGFrq43X1f2CGmeAJ3kDEJjgW2WY9gu06o+MGJLOKEYUXMc2t6VwoKhKX6GJkBjb5AeOJTj+xYb
+	yJlHrA+g/Oz1lk+yAnS2XO2E8li5aBLs48H8eNBtq21dCj/lpIABgxcocF0KYN61iOBAH8qc/ha
+	Kf0BqE+uuDqXeIdOSnt24rxKkd7rsdRjsDnNcLEtDdI8JJco7XwgSB2B3IHPm4y1yut1V2Cze81
+	H8sW/1hk
+X-Received: by 2002:a05:6512:3409:b0:59e:13de:fe32 with SMTP id
+ 2adb3069b0e04-5a0ed896f49mr2697234e87.18.1771856015442; Mon, 23 Feb 2026
+ 06:13:35 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260207131041.2833840-1-festevam@gmail.com>
-In-Reply-To: <20260207131041.2833840-1-festevam@gmail.com>
+References: <1770818434-31096-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1770818434-31096-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Feb 2026 15:12:55 +0100
-X-Gm-Features: AaiRm51IoOEGcQThAZL7Wz9Wjj3_Ac4tq7Xg58f_oxy_-Jx4aKch58W-NfM592A
-Message-ID: <CAPDyKFqmO0DEnmYO4uZEYjDErk+sjH1D8S-djvc83KCETf+ooA@mail.gmail.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: rockchip-dw-mshc: Add RV1103B compatible
-To: Fabio Estevam <festevam@gmail.com>
-Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, heiko@sntech.de, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-rockchip@lists.infradead.org, Fabio Estevam <festevam@nabladev.com>
+Date: Mon, 23 Feb 2026 15:12:59 +0100
+X-Gm-Features: AaiRm50lEXuaG6_yWJefslBtu4oc0grTs_Hyna6NoCD-eItzrKGBfWqYjkreluk
+Message-ID: <CAPDyKFrjngB_CXEAXLeEqEgpcOMsq+J0qCHry9z6CJrZ_oADAA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Rename dw_mci_pltfm_pmops to dw_mci_pmops
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sat, 7 Feb 2026 at 14:10, Fabio Estevam <festevam@gmail.com> wrote:
+On Wed, 11 Feb 2026 at 15:00, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> From: Fabio Estevam <festevam@nabladev.com>
+> Since it's moved to dw_mmc core and resued by others variant host
+> drivers, so drop the pltfm notation.
 >
-> The RV1103B uses the DesignWare MSHC controller compatible with the
-> existing Rockchip RK3288 variant. Add the rockchip,rv1103b-dw-mshc
-> compatible string.
->
-> Signed-off-by: Fabio Estevam <festevam@nabladev.com>
+> Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 Applied for next, thanks!
 
@@ -110,24 +106,96 @@ Uffe
 
 
 > ---
-> Changes since v1:
-> - Make commit log more concise.
+>  drivers/mmc/host/dw_mmc-bluefield.c | 2 +-
+>  drivers/mmc/host/dw_mmc-k3.c        | 2 +-
+>  drivers/mmc/host/dw_mmc-pci.c       | 2 +-
+>  drivers/mmc/host/dw_mmc-pltfm.c     | 2 +-
+>  drivers/mmc/host/dw_mmc-pltfm.h     | 2 +-
+>  drivers/mmc/host/dw_mmc.c           | 4 ++--
+>  6 files changed, 7 insertions(+), 7 deletions(-)
 >
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
->  1 file changed, 1 insertion(+)
+> diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
+> index ed6dea4..81dc072 100644
+> --- a/drivers/mmc/host/dw_mmc-bluefield.c
+> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
+> @@ -73,7 +73,7 @@ static struct platform_driver dw_mci_bluefield_pltfm_driver = {
+>                 .name           = "dwmmc_bluefield",
+>                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
+>                 .of_match_table = dw_mci_bluefield_match,
+> -               .pm             = pm_ptr(&dw_mci_pltfm_pmops),
+> +               .pm             = pm_ptr(&dw_mci_pmops),
+>         },
+>  };
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index acb9fb9a92cd..a75209bd2710 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -43,6 +43,7 @@ properties:
->                - rockchip,rk3562-dw-mshc
->                - rockchip,rk3568-dw-mshc
->                - rockchip,rk3588-dw-mshc
-> +              - rockchip,rv1103b-dw-mshc
->                - rockchip,rv1108-dw-mshc
->                - rockchip,rv1126-dw-mshc
->            - const: rockchip,rk3288-dw-mshc
+> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+> index 8b1b4cf..59b802c 100644
+> --- a/drivers/mmc/host/dw_mmc-k3.c
+> +++ b/drivers/mmc/host/dw_mmc-k3.c
+> @@ -455,7 +455,7 @@ static struct platform_driver dw_mci_k3_pltfm_driver = {
+>                 .name           = "dwmmc_k3",
+>                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
+>                 .of_match_table = dw_mci_k3_match,
+> -               .pm             = pm_ptr(&dw_mci_pltfm_pmops),
+> +               .pm             = pm_ptr(&dw_mci_pmops),
+>         },
+>  };
+>
+> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
+> index e046674..a2e1b4d 100644
+> --- a/drivers/mmc/host/dw_mmc-pci.c
+> +++ b/drivers/mmc/host/dw_mmc-pci.c
+> @@ -84,7 +84,7 @@ static struct pci_driver dw_mci_pci_driver = {
+>         .probe          = dw_mci_pci_probe,
+>         .remove         = dw_mci_pci_remove,
+>         .driver         =       {
+> -               .pm =   pm_ptr(&dw_mci_pltfm_pmops),
+> +               .pm =   pm_ptr(&dw_mci_pmops),
+>         },
+>  };
+>
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index 079d0cc..68770aa 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -125,7 +125,7 @@ static struct platform_driver dw_mci_pltfm_driver = {
+>                 .name           = "dw_mmc",
+>                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
+>                 .of_match_table = dw_mci_pltfm_match,
+> -               .pm             = &dw_mci_pltfm_pmops,
+> +               .pm             = pm_ptr(&dw_mci_pmops),
+>         },
+>  };
+>
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-pltfm.h
+> index 64cf752..ef1b05d 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.h
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.h
+> @@ -11,6 +11,6 @@
+>  extern int dw_mci_pltfm_register(struct platform_device *pdev,
+>                                 const struct dw_mci_drv_data *drv_data);
+>  extern void dw_mci_pltfm_remove(struct platform_device *pdev);
+> -extern const struct dev_pm_ops dw_mci_pltfm_pmops;
+> +extern const struct dev_pm_ops dw_mci_pmops;
+>
+>  #endif /* _DW_MMC_PLTFM_H_ */
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 97e8800..b2a6538 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -3523,11 +3523,11 @@ int dw_mci_runtime_resume(struct device *dev)
+>  }
+>  EXPORT_SYMBOL(dw_mci_runtime_resume);
+>
+> -const struct dev_pm_ops dw_mci_pltfm_pmops = {
+> +const struct dev_pm_ops dw_mci_pmops = {
+>         SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
+>         RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
+>  };
+> -EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+> +EXPORT_SYMBOL_GPL(dw_mci_pmops);
+>
+>  static int __init dw_mci_init(void)
+>  {
 > --
-> 2.34.1
+> 2.7.4
 >
