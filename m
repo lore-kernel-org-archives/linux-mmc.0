@@ -1,201 +1,156 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F0861BC46
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 14:13:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEBDA281358
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 14:13:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771856018; cv=pass; b=GxXp5Aj31lnW1JZ0lrlmIO+Rjli1sNc5zqOhGgLvxIgO8chKvVeN171As1VvIp9FL36MYYf0W8AzodiwdVyDr50rsUi8DzP2EBkv2DYvrKx8xa7OmvkqwdMLVzN9Ejpt/U20S6gNLB/3hHZnf+NszgtsFEQR/pBoXhFfu5gD2CQ=
+	t=1771856026; cv=pass; b=E8VfWZbof451OEZ3kgudxk/yf5w0dHL6KISWmdPWANDTvlK5Q6mY8yLTMME9yHfLbV1+dBHfy8uguEcq04f9BYYh3AxhFMMc++ZsVFCZIK0SNobFsTXh6Nah5iFd2KODMXEtrNTEYnf0nJtnekoM1kSAj7ZeWoBipTiqyUwBPu0=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771856018; c=relaxed/simple;
-	bh=lVzAKetV3kjvZsxfpFYPUnjLYpAZnA4ROKcACNVd6Vo=;
+	s=arc-20240116; t=1771856026; c=relaxed/simple;
+	bh=4KkXfb0hX48GWnAgt+Gf2q0dnfvPe2syfroDOciYpG0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nLnSoBNBWGrMlkAaQzuTBjiQFLi8/3KpKfNN4V0d7jBdmAVuhefEnsFN4r+ddZJ98DztYHKQJEUe92INVsnsvUTwgfPOKgb9uthSelqmEEwp0jzwkc51aTDquUoPLXhiztjIJnw1/ZHnHU0sWeICJI33ufHh5AQSulnYHF72b6k=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Wz6eDIJk; arc=pass smtp.client-ip=209.85.167.45
+	 To:Cc:Content-Type; b=KNOhq+20NFw0KMR9PzwAR9E2MMJ015+m1IFEf2AfUELbz9cbuOX8gj9G8y8ekla0PvBOALy7mRXP2np10A1/rvnXxYTlnzCy/SSL1OVqSLzyJtqM1AHdnb+V7k1o43Awq72Rn6lDfywDsbsKQ938brm1IM/46INkNwTiyAxSmME=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ay9uNtRW; arc=pass smtp.client-ip=209.85.167.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Wz6eDIJk"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-59e63b427aaso4587211e87.2
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 06:13:37 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1771856015; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ay9uNtRW"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-59de66fda55so4903308e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 06:13:44 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1771856023; cv=none;
         d=google.com; s=arc-20240605;
-        b=Ab3OoDoIUiZHpgZD0DjPhf3Mo8ojr+6iU45zRmFT8FC434ARHeMc3QEgikXBmoSoPZ
-         Nb5let6PPgGc6pTm2mJ2yBfmsh6Msc/f/jQYz3oZfGUII/9Y8DWdFyDwZSJI69Au6j1D
-         Y+Y6xtqPgkkJ4gVhdux+usxtcC1QrAiTbq/4sn7jw9PejoTEqIe4PQajhkFNGIOfSpZ7
-         IFkOjUwrfnGLDrt5lK0vEJmDMBfm9f7llnI/G6qet9cISponiF7XS/YzHhfcawPA5Vbo
-         TyB9T/j3w2DFdyeyRifuc7NlIRlzrzvhbvMDIGMq1t3hCBWftr8W+fyMgXKKsPeLagoQ
-         nlBA==
+        b=izWjDBVI8AIfFIfDyQ7rc/72w38i1ceWD6N9GhbO3wfrEoJppyHV/q4GYlazK4Pmn8
+         VeGxAahpvz5mgB3ju0iNo85kb/GbHuDqua75ik6A3UUepma496aceI87mMNlOvlpr7ps
+         qLtZL4APMczIXvKDwW6zCjSpujwKDMlwJl//XtZ2Ub+i1s2OrodXFYS2v39fYtcKUln1
+         lEIyGe0muEJvPZ/5CDkRQHR8IU0wuWg/M1ZcOH65p75SZRIhSgRlwDUNGINzbe9W9I9T
+         oGyFQN9KVyPn1nl/I90YqndZT700Kr8K059b419YL/40etZY0G4VC3ursRYp9qTY5Rcy
+         Kyxw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=TmjBplTn8jYs+VwG3/g2W5Aubg2dV/4A2mYzzDQ5dvE=;
-        fh=gecxUnJdZU9MwXiwHK5Fk5Qd/8fiMkSlBtSXNktKX6k=;
-        b=CkhJHbcqsuRHpNuaBpPKdxdLdLWHeMKAW84XvHsWHxdAxlMU+7Fh91/41fTBmVsRoe
-         zt2sIX+DNvIheiWQ2gTmaGK+Rvba13cF7Ab/CiBaRnMBdRM0pcKLedFg7HMB6rA8QGAf
-         LuDyQTMWTcc2DhExtaumVawD+M5gLUfV6zzDwFRut330zKhRQX0eHbm0CrJnn8gzhuVA
-         ckfh7xfgusyYFSDdEQJGuot1sapqrwWDnVmCNPcPPa4tQF4ioFIbtzENyX6ynwOEr4Xg
-         QNlccKeET2U2+JeXn+qt2vGcZ+rda3pr83O5DSdjvhmmVHN8RJBYn8PYmvt9eaUp4fUb
-         xsMw==;
+        bh=ZSkS4xSTQDd/nSKVQ38rSQfj2WvDl93Pr4Jl1qJpA/E=;
+        fh=kWhYNB06xWP1qtllEh8Cf6U9SRkjVdh/gJ/uBNAjC7c=;
+        b=UyRjMGWuUcn5oVYjwT3hj4KtIL4TgaLslqVEsGv1Kdo+zs4O0k5sCX3WcQvY/nAiP0
+         hrWmv674E8sKXFHAJr4FngB6uDvt/gam3ArUzNVKfQzt3NCEL2TzPgAq8S2TqOrdmJHw
+         VSpvXo+JTCgg9/0gOMTcqoCCQzBAVW1j2dOtfLKu+N+2Q7IesqD1XBy8KNxhudbjHQ/s
+         ycY3YVmpPYvDs8GvRPA+6oHGyYXOYy8WgkQGIu6NNouspdiKH7uMOQ6PXwCGFpthETmj
+         dnACuDeM+fI1TOrND+y4gsy5B2gJfGb+7fPfrH4DyTRe0PdJooFicMZrXONL+YaJEqav
+         fQ6A==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1771856015; x=1772460815; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1771856023; x=1772460823; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=TmjBplTn8jYs+VwG3/g2W5Aubg2dV/4A2mYzzDQ5dvE=;
-        b=Wz6eDIJkyowz2faq63xDlY6sgJbCE73JNKmz9fhZqgdLLmOhHcelRUT5pmPHdbJ2X/
-         mhiy5J5qwZNUmuuFOfpdSbiotgBA+Q3zr/GvUtIwOXpU89QgFqd5JH+68ifwYsz7WlQX
-         GQP0cmrue1oQXCYGCDM1j185uuWaLzwTLsxTK/eLXs92V/dkMwGRoz1PAjzQZv9H3nKe
-         XK8hyQCDNaZbGJHztjDUUIz1Gcue0H9D5P831aVsu96p/h0FUFdRZuEcjkN6L/PbYvcX
-         8EcrlxWBtuDtMsSxaK54F7xvxgoYanSqR7DOjj8jkm+M7L4t6HIJqoDzeOYvad02G1bH
-         Mp7A==
+        bh=ZSkS4xSTQDd/nSKVQ38rSQfj2WvDl93Pr4Jl1qJpA/E=;
+        b=ay9uNtRWfsroWDhWra3P/fVC3FaHx730i8NDjSneTGNlcz0AmiYYki7kSPVRA+iSMS
+         q7VYS9GwzcTsMe22o2kjSsQgtD1DgVGyyINLNbDs7HHJWOEKWqwvukKa3lv8e+H0wk3T
+         b53y5tsQzrHeW0yrTp01uztImjyOC7wKbJLWeAj6fAD27c784Nw0D0AtrNBhDjTy6+Fa
+         EQgz8eTiHIRR1y23rpTpwc8Jl+OHyPHFv7a7V3Q+Mv9Gaw9kfon+3pLbFpYIHh7ljCE8
+         cMEKg5eRt1B3dYX8KOttPYkGV9pVNvw1/zLaPNhwjT60IMq5M1Uy71vucP1d1/jB4eWb
+         cfRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771856015; x=1772460815;
+        d=1e100.net; s=20230601; t=1771856023; x=1772460823;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=TmjBplTn8jYs+VwG3/g2W5Aubg2dV/4A2mYzzDQ5dvE=;
-        b=wbdIMYiFT2LEjxnJHq/6cSdlYWDM4KbDniFEXFMnLrQtWBos+bO8LINwyCa4p1W0yT
-         QQqm+tY4bFm0m2Ge7ftMrti9Ak6THoIYWqSFAHcE1PvEFhmWRtIQI5J3rsIDF8tRJvBi
-         ddYpDkVfhNo55jluQjyKyqqKjP+Ko1v5ebKw1MaNp2hJFn7SXYRFp8zcr9HLWMOcSWud
-         z1OuNPlwhs6kwHJhu+aqjlOdCleCT2StHLwgfF4QXFP9FEZI7oEhmGpbhlEZbKToddqD
-         4lYj0fCIUpYHt6Mdlq0mi49j+cH3HtvViijp+BtW5qshV7fVXhujNAk4jn/Zx26G0rvv
-         6Hjw==
-X-Gm-Message-State: AOJu0YxYhjv6DoyhfsQEIH8un93EeAY5+C8nkkaumnxzty+8rzE9QrpM
-	f45CcLpLn7Lwhk7HD9CDqSft4f4uhjNlAJUF+0ztQcqhNkmJZ94tIsSDAPIHpBRw5U9Szao+0RM
-	NQiebN96leSaxoWwENGs6kTzGEf/cmEpslBJDXwK9wg==
-X-Gm-Gg: AZuq6aJanz5FZ654/+8lWlLWzTD1ZC1TZ83rFsGqlGUYtWrlB+kK2RigCoy9ZUJiMjs
-	oGFrq43X1f2CGmeAJ3kDEJjgW2WY9gu06o+MGJLOKEYUXMc2t6VwoKhKX6GJkBjb5AeOJTj+xYb
-	yJlHrA+g/Oz1lk+yAnS2XO2E8li5aBLs48H8eNBtq21dCj/lpIABgxcocF0KYN61iOBAH8qc/ha
-	Kf0BqE+uuDqXeIdOSnt24rxKkd7rsdRjsDnNcLEtDdI8JJco7XwgSB2B3IHPm4y1yut1V2Cze81
-	H8sW/1hk
-X-Received: by 2002:a05:6512:3409:b0:59e:13de:fe32 with SMTP id
- 2adb3069b0e04-5a0ed896f49mr2697234e87.18.1771856015442; Mon, 23 Feb 2026
- 06:13:35 -0800 (PST)
+        bh=ZSkS4xSTQDd/nSKVQ38rSQfj2WvDl93Pr4Jl1qJpA/E=;
+        b=FTJo+wmWhDLxqm1m1Fug4my6tE3dcu/Gpjz4vtzMGGc9pLDLd+RFyn2tBgWfAITVUE
+         gN9F7rRKB9Z4gDRwFnl5I7m1RlDmVGkJhYWcPgdIuPm8T5+n/E87vYc+mzRcdKIEmbg8
+         +m3AoD5SFFHE1I4YjNlgjxEhRYSdfxcE+auK+xEh5LCxO7GvuruCa1f98ZMQiC5nfEYk
+         b7cUo7bHXztzc4GfmoG7FboW1T+du7f1yMBRMdsRjqZWgxJTx5BfyfQoayBPkU4R21LW
+         4aYHX+09ZOHFzpbxNmLUk9YPmFbMLmKS64uX6jlJ7MyTDsDNJITpv6JYzKOfmMJZoZmH
+         AmcA==
+X-Forwarded-Encrypted: i=1; AJvYcCVCFe/I6k739UOL/5HSY0M4YJvwhyjwCFc3WGsaIoIL+9FyUUKMU+poAJV8p8ixYlZbYdWwVo3aruw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxQM04T8LFIkZS5YFBR7HgDvO9tdLu4iTmVd9KKbRisl++PoXcG
+	peU4i2QwTUkGLrY9cai9nk+Z0k7v0vD397D+fCGjeaoyWF+xmHoMh2aeivpR4AMiJ3IFzf0+SU7
+	bufKMRjfUUCSVf6yc0/CJ60/OjYaMDBXVcZe0Rcl7yB6IbfxbU20/
+X-Gm-Gg: AZuq6aJ+D4e/XFEb+3iaL2VxJ11W9umgUAK0piKcRNk7oMGBjSjfVuQSkNNLzxO218c
+	JQdcGWo49oubvMk69ODzO8sIJYZ/QcWM/0z/Gq6n10lWSu45vFsU12rpkqeHDBYZ3EFXICSmJ5K
+	EwfPsh/RiLWe2Sp+6hQ82JVWDQA9tI398Q/CwB2wPe0aFuGcGQ/EF6Boe/5ApW73kVQ942xLCD+
+	UQpf5FFp+RcfXqzdLyXdly64niAY6jthkvV8JkJTPXkbWbd0gcinaJqvYkF4QPnN8tUqMu7Z5X+
+	gjTfNRRz
+X-Received: by 2002:a05:6512:63ce:20b0:5a0:ee55:3dbd with SMTP id
+ 2adb3069b0e04-5a0ee553e23mr1810374e87.9.1771856022895; Mon, 23 Feb 2026
+ 06:13:42 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1770818434-31096-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1770818434-31096-1-git-send-email-shawn.lin@rock-chips.com>
+References: <20260115214648.168365-1-pgeng@nvidia.com> <20260219202954.937508-1-pgeng@nvidia.com>
+In-Reply-To: <20260219202954.937508-1-pgeng@nvidia.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Feb 2026 15:12:59 +0100
-X-Gm-Features: AaiRm50lEXuaG6_yWJefslBtu4oc0grTs_Hyna6NoCD-eItzrKGBfWqYjkreluk
-Message-ID: <CAPDyKFrjngB_CXEAXLeEqEgpcOMsq+J0qCHry9z6CJrZ_oADAA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Rename dw_mci_pltfm_pmops to dw_mci_pmops
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 23 Feb 2026 15:13:05 +0100
+X-Gm-Features: AaiRm52TCuoishBZCXeYAUbucX7Og7doxnsYuSPgLiLI9z3JRm4io_MyXU9Dlak
+Message-ID: <CAPDyKFpw0Qe0doJ_H0E++4+OtGR0xBCqMDxZ_FHvTLPk1-AK-w@mail.gmail.com>
+Subject: Re: [PATCH mmc v2] mmc: core: Avoid bitfield RMW for claim/retune flags
+To: Penghe Geng <pgeng@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 11 Feb 2026 at 15:00, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Thu, 19 Feb 2026 at 21:31, Penghe Geng <pgeng@nvidia.com> wrote:
 >
-> Since it's moved to dw_mmc core and resued by others variant host
-> drivers, so drop the pltfm notation.
+> Move claimed and retune control flags out of the bitfield word to
+> avoid unrelated RMW side effects in asynchronous contexts.
 >
-> Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> The host->claimed bit shared a word with retune flags. Writes to claimed
+> in __mmc_claim_host() or retune_now in mmc_mq_queue_rq() can overwrite
+> other bits when concurrent updates happen in other contexts, triggering
+> spurious WARN_ON(!host->claimed). Convert claimed, can_retune,
+> retune_now and retune_paused to bool to remove shared-word coupling.
+>
+> Fixes: 6c0cedd1ef952 ("mmc: core: Introduce host claiming by context")
+> Fixes: 1e8e55b67030c ("mmc: block: Add CQE support")
+> Cc: stable@vger.kernel.org
+> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Penghe Geng <pgeng@nvidia.com>
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/dw_mmc-bluefield.c | 2 +-
->  drivers/mmc/host/dw_mmc-k3.c        | 2 +-
->  drivers/mmc/host/dw_mmc-pci.c       | 2 +-
->  drivers/mmc/host/dw_mmc-pltfm.c     | 2 +-
->  drivers/mmc/host/dw_mmc-pltfm.h     | 2 +-
->  drivers/mmc/host/dw_mmc.c           | 4 ++--
->  6 files changed, 7 insertions(+), 7 deletions(-)
+>  include/linux/mmc/host.h | 9 +++++----
+>  1 file changed, 5 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mmc-bluefield.c
-> index ed6dea4..81dc072 100644
-> --- a/drivers/mmc/host/dw_mmc-bluefield.c
-> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
-> @@ -73,7 +73,7 @@ static struct platform_driver dw_mci_bluefield_pltfm_driver = {
->                 .name           = "dwmmc_bluefield",
->                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
->                 .of_match_table = dw_mci_bluefield_match,
-> -               .pm             = pm_ptr(&dw_mci_pltfm_pmops),
-> +               .pm             = pm_ptr(&dw_mci_pmops),
->         },
->  };
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index e0e2c265e5d1..ba84f02c2a10 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -486,14 +486,12 @@ struct mmc_host {
 >
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 8b1b4cf..59b802c 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -455,7 +455,7 @@ static struct platform_driver dw_mci_k3_pltfm_driver = {
->                 .name           = "dwmmc_k3",
->                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
->                 .of_match_table = dw_mci_k3_match,
-> -               .pm             = pm_ptr(&dw_mci_pltfm_pmops),
-> +               .pm             = pm_ptr(&dw_mci_pmops),
->         },
->  };
+>         struct mmc_ios          ios;            /* current io bus settings */
 >
-> diff --git a/drivers/mmc/host/dw_mmc-pci.c b/drivers/mmc/host/dw_mmc-pci.c
-> index e046674..a2e1b4d 100644
-> --- a/drivers/mmc/host/dw_mmc-pci.c
-> +++ b/drivers/mmc/host/dw_mmc-pci.c
-> @@ -84,7 +84,7 @@ static struct pci_driver dw_mci_pci_driver = {
->         .probe          = dw_mci_pci_probe,
->         .remove         = dw_mci_pci_remove,
->         .driver         =       {
-> -               .pm =   pm_ptr(&dw_mci_pltfm_pmops),
-> +               .pm =   pm_ptr(&dw_mci_pmops),
->         },
->  };
+> +       bool                    claimed;        /* host exclusively claimed */
+> +
+>         /* group bitfields together to minimize padding */
+>         unsigned int            use_spi_crc:1;
+> -       unsigned int            claimed:1;      /* host exclusively claimed */
+>         unsigned int            doing_init_tune:1; /* initial tuning in progress */
+> -       unsigned int            can_retune:1;   /* re-tuning can be used */
+>         unsigned int            doing_retune:1; /* re-tuning in progress */
+> -       unsigned int            retune_now:1;   /* do re-tuning at next req */
+> -       unsigned int            retune_paused:1; /* re-tuning is temporarily disabled */
+>         unsigned int            retune_crc_disable:1; /* don't trigger retune upon crc */
+>         unsigned int            can_dma_map_merge:1; /* merging can be used */
+>         unsigned int            vqmmc_enabled:1; /* vqmmc regulator is enabled */
+> @@ -508,6 +506,9 @@ struct mmc_host {
+>         int                     rescan_disable; /* disable card detection */
+>         int                     rescan_entered; /* used with nonremovable devices */
 >
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index 079d0cc..68770aa 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -125,7 +125,7 @@ static struct platform_driver dw_mci_pltfm_driver = {
->                 .name           = "dw_mmc",
->                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
->                 .of_match_table = dw_mci_pltfm_match,
-> -               .pm             = &dw_mci_pltfm_pmops,
-> +               .pm             = pm_ptr(&dw_mci_pmops),
->         },
->  };
->
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-pltfm.h
-> index 64cf752..ef1b05d 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.h
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.h
-> @@ -11,6 +11,6 @@
->  extern int dw_mci_pltfm_register(struct platform_device *pdev,
->                                 const struct dw_mci_drv_data *drv_data);
->  extern void dw_mci_pltfm_remove(struct platform_device *pdev);
-> -extern const struct dev_pm_ops dw_mci_pltfm_pmops;
-> +extern const struct dev_pm_ops dw_mci_pmops;
->
->  #endif /* _DW_MMC_PLTFM_H_ */
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 97e8800..b2a6538 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3523,11 +3523,11 @@ int dw_mci_runtime_resume(struct device *dev)
->  }
->  EXPORT_SYMBOL(dw_mci_runtime_resume);
->
-> -const struct dev_pm_ops dw_mci_pltfm_pmops = {
-> +const struct dev_pm_ops dw_mci_pmops = {
->         SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
->         RUNTIME_PM_OPS(dw_mci_runtime_suspend, dw_mci_runtime_resume, NULL)
->  };
-> -EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
-> +EXPORT_SYMBOL_GPL(dw_mci_pmops);
->
->  static int __init dw_mci_init(void)
->  {
+> +       bool                    can_retune;     /* re-tuning can be used */
+> +       bool                    retune_now;     /* do re-tuning at next req */
+> +       bool                    retune_paused;  /* re-tuning is temporarily disabled */
+>         int                     need_retune;    /* re-tuning is needed */
+>         int                     hold_retune;    /* hold off re-tuning */
+>         unsigned int            retune_period;  /* re-tuning period in secs */
 > --
-> 2.7.4
+> 2.43.0
+>
 >
