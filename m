@@ -1,152 +1,132 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92AF7365A0D
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 13:12:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771852347; cv=none; b=az9Q+eZiA2uMLD15VBlEzIYfaZl2rgRZ5qOXysjU1aDPBNw9rrQsAGHgMr7k83AG+AOc+FlkLNbvxphsKPsGsSYM/EM0nUP4wQnXABFsXfX7ypt1zccJ/5mbH9BMomhr2nlKCF9/jW+uT1x2mTh5GZGta2TxL2Gm187J5E3TC6o=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771852347; c=relaxed/simple;
-	bh=UelqCIooRDzXzu6GGwJNPnHTqntDSLz5KWUuE06LKeg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nGpYPOe0R4ylnGYHoExV4UJdigD7dW2uTUnD2t8BHefexmf1HcIqVAyXoptXmUPHLW/iORG+BWQRmWdfIMJNjJR45MBnWzY+L1GP0Cwz+DZoIvTR9vTFIxkKXF5iBEaf9FJGbOb+8p6DLWPh+97Ku67Y3TmBqlA6v/FQXcaDRXM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KiUbJoDg; arc=none smtp.client-ip=209.85.128.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4267919D081
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 13:19:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.46
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771852752; cv=pass; b=KdMp6qOlKHkVIac07En8E2WSxegoaBmfxNFm+79f4rlgv2e/a5JinpvdK4sQJXWQsxyFEYg5VoWMcZxtwMs0/D65DXabxlEHoTYUN83qIQWjz54t4M+hQPkVKX4bMsiyN6n6cd+yOa6V7R6J3G4/CPFbC+UL6wpyWLsIuhe6ga4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771852752; c=relaxed/simple;
+	bh=gg6EEWL1wsmVRXBl55TcEhNDiGUYMpBTtL91XSq64PU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=RHDyoYIXo+a7smI5W966oIf8MOMDhq49Y4wyKU57545QGJA6LdUax8TmPXLf3k7lqf6233/2RXrQlX/saQWmNg7IOWrt1ffRzCKQpGDmNz4SYNI5y/TNDq0+SxRc0uLwaX77T7JGk5IahZuinDlDHBWGnixggrFTt4rrSKbM/1U=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DBvHQ5tP; arc=pass smtp.client-ip=209.85.167.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KiUbJoDg"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4836d9d54f6so6687685e9.1
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 05:12:26 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DBvHQ5tP"
+Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-59f855fd0d9so4391376e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 05:19:11 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1771852749; cv=none;
+        d=google.com; s=arc-20240605;
+        b=gqjNWozjm70sZZFSmF9EHe2dnK3p7YlnGqH8Kaykgr///vBjJX+hPpeTrnlRbGMEH9
+         CikzNljNmltzlaMZJfXF6App/VjCMzAIuoks95dVOF7CdW0kqsd5+ekTuQ2xjoj/6HV/
+         xnUtSJmHO0PNV7TKDg7OtnDneAy6j7w2cIoojEIW7zfDEdjIl8Z6uK58UqLYrn5BF5f8
+         YrY4Ev6WY8ET7AOBpJ+N0Y8uHou+TMgxMxmV4toT947VJKWGBmI4L7MmxeOFj8Pksl32
+         40Kq7b2BV2/tpfYS2Vf0sZnzkHpeif/hbCwjqvC7cqxIJPDWIe6K0oeHMGy60vTM+Kmt
+         SwaQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=u47cn9soFrW8BHoPy5Odl1FEs5rvVnzdpDoreo2Nl90=;
+        fh=ODSP/RqcHQZF8Vz1MI71aBT3ftaoj/9VwtGcRk33fR0=;
+        b=J9MtBdG0jIcKcfiEAI2W0uxhgzsXARbZTQo3BQdA9KDyIhdfzUi/nHnZ+7/Xm4+U+e
+         VwUp6ajKlQbGDb5v0knoCjryBdi/m/UIi8c1HfO7ZaJBLJY7nqZ6zPTpZwM4lzjZXJTv
+         urfpuRxbW8ucEKOTJf6G5L+of+5UQYKK5zRiqU6eTPKdMGnVTo+K11G5E2YIr0ZuYZKa
+         IKuvtNMpnIRyxCNWvkKI5IBg2DPh8HkC0fr4/M4UvizwPhe0eqOoxrFGCgv/AFoboULy
+         5fh06MEiaWNweHz/obi7+TGlB5nJjIatDE5W2Q3kvP5CHu6wGJ8Sr3/tDK8Kg9GU/y2p
+         4DbA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1771852345; x=1772457145; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=zTyRvgzsFp6gxgHmcwTyuSKYelY9uTSe0Y6njaYUk74=;
-        b=KiUbJoDgAy5LHc/Z2unOl01huhD5gypy7MemonxqkLwMvl5jhri2dAM2kzsUScb6SO
-         IKJVD6jHk9CtP6lQ+2JZTULcLpZKpnQQrQIATfWmVsEiTIOqs3jnbt3fGn7KMTIJ7bTQ
-         5+aajvXt7Gtj6g4ma1DpaJ7XJYrXY+NUJ6CAmQ2SM9I82zn+TQVbKjjOJ0vwARM/EiD7
-         0zlzLr1fkNQNbGNTaP/3kJbje1Ei1nNFEthcixKlKiR6ia+kk5xsStM2NuB33L2vjEps
-         tB6EyBDJEdpTGs0MUxQ/sMBwShV6HGmwxVMxqtxR5bYJ9cJK8DDEJbDnM1ufpG41NXyh
-         MPZg==
+        d=linaro.org; s=google; t=1771852749; x=1772457549; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=u47cn9soFrW8BHoPy5Odl1FEs5rvVnzdpDoreo2Nl90=;
+        b=DBvHQ5tPBiwhVgVW2qHFSvG4oHzeJuhKr4h49FS8Pkf5ncLtO5lBl4D7AHimZ/nPZl
+         wk3xUCGXFjJBtsfFmS9pu6VV1wbthkMgZX3xKOZFhiVbk6dpRqBhXJ7mR9weeGK3MMnd
+         yImUv5e1UVpQ4qAW5cUDDmCPstFCqqoqedjknaMcewSGVDmhRBPgcUfddfoiH4bPjmcj
+         TozJ6nDyWLUZjY6rlBw7OORqV7ttQQTXglz6/B1t7adLZ106C+FF4XJO87L1mKmMxDIc
+         ylD4cxJcWOBQiVsq24tbavKDmIqn8UKH5fbgMIrSZsBoohgqPmGMDqa+FYz6wJHGqVkk
+         9o+w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771852345; x=1772457145;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=zTyRvgzsFp6gxgHmcwTyuSKYelY9uTSe0Y6njaYUk74=;
-        b=Oz2at+bi8UF8YWc5axzweLYtlandL3VvhXmjXHpGIiD2m1OYaO1lIXNUZCWvj5r3Fv
-         MGxCIf0jVcDQzjCGY/+ZNOoRig3cdQl599VbT1yt3vQ62nuO0Z86EFGoBrcSV9MwYX64
-         HaEF7hhs7sT29V/aC1nZJ/Y4AYH8TddfpeCSH8tDvRPeun4G40x/EqWUOzX41ZuzV5+H
-         BOQ4hG4MCgIxtfdlavbzXmSwsLi6WYUDqArZn9u6++VZOa+8zY4QCfB58/gYLIOiqqpK
-         etwH+B3DMwGcT17iFF6LIl/okQEZJpK6JCv+Z8dExUy7a4D/bJac2pKywK1W8rPBXipS
-         amYg==
-X-Forwarded-Encrypted: i=1; AJvYcCXBXNXH6rCE7l7yyo0JYUKNBUojaQ18q35yFNuBNAPyUVg/X8orB8gjfkMLW0bj3dnUg4SfE7T3MMg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxIxwgpRk48eLNFng0IhC0UqeL7U6BFodv4iR+42GxoFTCGtDtS
-	A+Z3b3IMdAxKAS5e3Iw3s2QiE8Ua3Xq5aYlJhsQSwjTQPhJs6Wvyqay/
-X-Gm-Gg: AZuq6aJRhkXi6GKZJptJiTj5Jbz0Sm7arP5szLJm4MRsdoj2QroXCoWzxLxQSQWyZ5a
-	GXtm+1HeFFRrmDMp+I8gTQwt9whMFyxyYfo5ADlmwXXqcN1rR6MJXvsYIL8Gj2mqXedjnefb5Rv
-	xd1CvM4jS0HS6oHND2BxaZAQEDuvypYqdlmz9uwNdg0Dk8gpA7YKZdfSoInWtMZ6h93f7lNtQGO
-	MxfoOtzXE3lY8ORZb70rkkh8fMiAZp7okNpzsPkLs16G78iIkToIzEZHLkodpJqNuE6tmCgHfNc
-	5VSs21Wvs2l9TfI5N0zrQT61o1d8h/KDiQbWVnwLCrpU7GSOR+fyD0/KzqyFeb41zoQS36mEA06
-	uI1r2p8zZskYFSEo15gqqfOVEz+Su1NYMpc4uAca59tUi4/sQLcLDzF4LKO+qasDJ059S1AU+el
-	NsTYBeA/gYKXVLcGI=
-X-Received: by 2002:a05:600c:1d04:b0:47d:6f12:de57 with SMTP id 5b1f17b1804b1-483a95e2493mr74965915e9.4.1771852344731;
-        Mon, 23 Feb 2026 05:12:24 -0800 (PST)
-Received: from skbuf ([2a02:2f04:d809:4b00:a289:4e95:a726:c01d])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-483a9b75e51sm195718605e9.5.2026.02.23.05.12.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Feb 2026 05:12:23 -0800 (PST)
-Date: Mon, 23 Feb 2026 15:12:20 +0200
-From: Vladimir Oltean <olteanv@gmail.com>
-To: Josua Mayer <josua@solid-run.com>
-Cc: Andreas Kemnade <andreas@kemnade.info>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Marc Kleine-Budde <mkl@pengutronix.de>,
-	Vincent Mailhol <mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Peter Rosin <peda@axentia.se>, Aaro Koskinen <aaro.koskinen@iki.fi>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>,
-	Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-	Vignesh R <vigneshr@ti.com>, Andi Shyti <andi.shyti@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Yazan Shhady <yazan.shhady@solid-run.com>,
-	Jon Nettleton <jon@solid-run.com>,
-	Mikhail Anikin <mikhail.anikin@solid-run.com>,
-	"linux-can@vger.kernel.org" <linux-can@vger.kernel.org>,
-	"linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>,
-	"linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH v9 1/7] phy: can-transceiver: rename temporary helper
- function to avoid conflict
-Message-ID: <20260223131220.evt33bzga5lafwzw@skbuf>
-References: <20260208-rz-sdio-mux-v9-0-9a3be13c1280@solid-run.com>
- <20260208-rz-sdio-mux-v9-1-9a3be13c1280@solid-run.com>
- <20260212164823.mbeycqwzsy2dfq6e@skbuf>
- <CAMuHMdVOqovkugmCnR4FOfk8VkQyN_dmyKFzbsOSN0mPKQedeQ@mail.gmail.com>
- <f9ede0d3-6a37-449c-b62b-a5c761ece097@solid-run.com>
- <20260216092914.kmvl7aep7dantcsd@skbuf>
- <20260216162406.0121dd91@kemnade.info>
- <203a36fb-6ac9-41f6-80ce-b137b9db4ad1@solid-run.com>
+        d=1e100.net; s=20230601; t=1771852749; x=1772457549;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=u47cn9soFrW8BHoPy5Odl1FEs5rvVnzdpDoreo2Nl90=;
+        b=pxf36crXcge/JfVdpWUmDjMzqtpeFeAjftpzhIBfK6s01B+3Z7Gu3MHPhpf8CwZHOE
+         hKfuhhQ3NfI+jer1g0l4vzGMTwjnth9GP1171vDxHpf97Xg4SRf2NaPeCXNiZSNy8xv/
+         tGRqZbwcJBQWbq5VJFHwZNYC2BXphHjC+0UdB7KCS2tglFJQyAkMJqnwYEJaMV1l+ggS
+         FwRPaKYTrk/dDyBuNDplc22tYFzJyvyFiSp82mMcDdz2o3HeUv1wCR+FCON1E3KopKyw
+         zX8bhrLfPCQ95smG6ajaZhUDBM5w26Jj+y9fYNUIx/ujPbJA93vgrSNhGSr9FpLGoGDu
+         /eNA==
+X-Forwarded-Encrypted: i=1; AJvYcCUFWD87NnJEqm7RtqYI4yRJ4R3VejArX+1KgbwbaBknU0HaWKBl2BD7u82EOeQQUgcK9Ow5LIhjwr8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxwglyxNYXDL/NgOjYr+44VLyzXYVWf9A0aUklhZMcfo17poXGk
+	KWoQLOeHBsNSQGyiVhF5bavbmfhSiRBgnKaC0xEd+TfK9J5B6Hw7k7al0RAdaTfpqHY9LB3wBNU
+	CZ0a4ceCpnqUg06Y3PyPPymtS9WCBi46nalJ8dS7s1w==
+X-Gm-Gg: AZuq6aJFV6BjoLz/90sFsxW9tMMeFfytJLtChXxXIAv4k1/m3V8+8vpoOWS1xfFzrdo
+	PWSPCxwfKdKL1jQuEOyfWo6Is3bWcNdFM9zEMFpvHbozK3uo3JO4aa58EK7bxDADuM5v4Ndz7aG
+	/CmV44aHpwQdi9uWHZb/OWlDiJ1VIM9tFPv34bwrLkW+faZSQps26K47wMadkMRzXb4/qELlh47
+	ua7FidlTC+Psv5hHVrQXLHiMMoumBtqUYPGSUmlsanqcwXaM94TNlOq1ULJlTxUSu5tet/RCMNH
+	deYoGVWx
+X-Received: by 2002:ac2:4bc1:0:b0:59d:e9df:6dcd with SMTP id
+ 2adb3069b0e04-5a0ed87df97mr2593500e87.15.1771852749330; Mon, 23 Feb 2026
+ 05:19:09 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <203a36fb-6ac9-41f6-80ce-b137b9db4ad1@solid-run.com>
+References: <20260219231624.8226-1-sean.wang@kernel.org>
+In-Reply-To: <20260219231624.8226-1-sean.wang@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 23 Feb 2026 14:18:33 +0100
+X-Gm-Features: AaiRm53UIVVBouS8ori9IKqoVA3ZwCaDsyl3whmD_0t9aHnCuwJJwIQxLct_CEw
+Message-ID: <CAPDyKFoiqit-_PWQ3SitGD2YV=J3ZcD97T4p-+MwYXjLVe6fdA@mail.gmail.com>
+Subject: Re: [PATCH 1/4] mmc: sdio: add MediaTek MT7902 SDIO device ID
+To: Sean Wang <sean.wang@kernel.org>
+Cc: marcel@holtmann.org, luiz.dentz@gmail.com, linux-bluetooth@vger.kernel.org, 
+	linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	Sean Wang <sean.wang@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, Feb 23, 2026 at 12:43:48PM +0000, Josua Mayer wrote:
-> It would help immensely if there was a way to get the patches renaming
-> driver-local conflicting helper-functions very early, before anything else.
-> 
-> Would this sort of patch be acceptable in linux-next now, so it can make
-> it into v7.0-rc1?
-> 
-> If not then that mini-patchset would be the first one I shall submit after
-> v7.0-rc1 is released.
+On Fri, 20 Feb 2026 at 00:16, Sean Wang <sean.wang@kernel.org> wrote:
+>
+> From: Sean Wang <sean.wang@mediatek.com>
+>
+> Add SDIO device ID (0x790a) for MediaTek MT7902 to sdio_ids.h.
+>
+> Signed-off-by: Sean Wang <sean.wang@mediatek.com>
 
-v7.0-rc1 was already tagged as commit 6de23f81a5e08be8fbf5e8d7e9febc72a5b5f27f.
+This should go along with the other patches, so I am not picking this
+via my mmc tree.
 
-Additionally, patches are not accepted directly *in* linux-next. They
-are accepted in subsystem trees (linux-phy, mmc, etc) which are then
-integrated all together in linux-next.
+With the sorting (pointed out by other reviewers) fixed, please add:
 
-> 
-> Then I can treat the actual implementation of the devm_mux_* helpers
-> as a second standalone patch-set.
-> 
-> And finally patching all drivers with local helpers to use the new global ones
-> can be patch-set number 3.
-> 
-> Any opinions on this?
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-From linux-phy perspective, I think in this particular case the following
-would help:
-- submit the patches at the beginning of the development cycle (i.e.
-  now) while the subsystem trees didn't diverge too much
-- submit the patch series *in full* (to get build testing of the later
-  devm_mux_state_get_optional() introduction too, even if that is not
-  for linux-phy)
-- keep all patches pertaining to linux-phy (the mini-patchset) together
-  and close to the beginning of the series, so they can be picked
-  without other dependencies
-- be clear in the cover letter if you require a stable tag for the
-  linux-phy patches to be picked in other trees. You seem to be in the
-  best position to be aware of all dependencies.
+Kind regards
+Uffe
 
-I don't know what is the exact status with the MULTIPLEXER SUBSYSTEM
-which is marked as Odd Fixes and doesn't have appear to have a subsystem
-tree. I have no recommendation there.
+> ---
+>  include/linux/mmc/sdio_ids.h | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index 673cbdf43453..97cc834fb3d5 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -112,6 +112,7 @@
+>  #define SDIO_DEVICE_ID_MEDIATEK_MT7663         0x7663
+>  #define SDIO_DEVICE_ID_MEDIATEK_MT7668         0x7668
+>  #define SDIO_DEVICE_ID_MEDIATEK_MT7961         0x7961
+> +#define SDIO_DEVICE_ID_MEDIATEK_MT7902         0x790a
+>
+>  #define SDIO_VENDOR_ID_MICROCHIP_WILC          0x0296
+>  #define SDIO_DEVICE_ID_MICROCHIP_WILC1000      0x5347
+> --
+> 2.43.0
+>
