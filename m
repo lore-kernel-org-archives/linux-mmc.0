@@ -1,198 +1,220 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m2489.xmail.ntesmail.com (mail-m2489.xmail.ntesmail.com [45.195.24.89])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5D7A24C076;
-	Mon, 23 Feb 2026 20:35:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0A52F4F1;
+	Mon, 23 Feb 2026 21:15:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.195.24.89
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771878908; cv=none; b=FjLYFOjji/RL9MgFbwFjG9gSk4eZgPxDfPYIRclkV7GFR6s7AYL4kwnVb4GbMqSIZzFg+7jPqkFsB0LA1azFKZPqla2L5KebTMGlmzo23nhEFs40ZxdxVjHqp5/LfwoxmwUSn/E0bW3CYlv8cAypv4wDX23A7KAXyuWUHts62rM=
+	t=1771881338; cv=none; b=XIzvgnF5YHIvLQ5rvQ2Fp6GSRNSTOuJl0gWB9tA80rI7ELoF7VP5JGCNCpwHs3mZXu/mZ5VeXVDovRe0X7fpK6fwEAQD6p1xoZigHWiFviMeXVkTtpj5AhsZB6eGNv8oV032o//jIPER2lrAMgzIyThwyzLr7uEXs9TmPcIJdag=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771878908; c=relaxed/simple;
-	bh=rOqSdRScNFD29t+Pk6i05NgN3EhYNGzQOGIkyT1MpKs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jYzKRlq0i6RTAcZWRJ/gh5guhsQAAHNwtmSD2HaDjJnQWZNrc9ffd/FSG3ng0UdV7EDmZur292ABGwXhL39XCTzvTlv65XKm2SZdVp0CyUVRgTTPeHk9CNx76+SF+ID3n1iDct48+PmblNOIufXKnYT/HuY2nh+1sJ24RccnJiE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YTDwjTaY; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771881338; c=relaxed/simple;
+	bh=Zq2IirUyfEPFzMu6m9iwUulfmXx1dT5LTcM+Mxmn32U=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=dsFWsyABv064nHcTNUQ6KXGD+JLy6v2oGHDMVluIPYUfcq/t0OvUwiuRNhF1P+d0ysqUlxao3g9emPtNMdyj65954rNAVQQb1THqCzAnbj1w0z/wOqLoBeGofYeorsnkWCp1Qcx3ikE9PRCQS9tFncv66UvJ+5Ed1ikQdGcNv9A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=hesEBWpu; arc=none smtp.client-ip=45.195.24.89
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YTDwjTaY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 382F5C19421;
-	Mon, 23 Feb 2026 20:35:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771878907;
-	bh=rOqSdRScNFD29t+Pk6i05NgN3EhYNGzQOGIkyT1MpKs=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=YTDwjTaY1ti8LJ0EyGob64e68Sxmt9wuBPSpSfdDHG/n4Yi3vIFcdkGd97DTKZ9vz
-	 7+M1I7ZjM+0uT9ucuRrloNrhMqm8bvItgf/mEetZB4HoeSe2y+UWW+Ua7R51G4lccc
-	 SAVl2nZEtCfFyegsO3i7K2/vdag/R2lWNo91l0tdQIHylgpf/OTdTb8TnuPCcfhMde
-	 gLdkOtLztpS3OIQ1GfBAIcHtiLd74xSRvZ3UtF531uwv1VNEt+70vQOCbx4FiFR/kL
-	 HCn7f+bsmD3Pzh5tWy48AlxIln8ea0s38uN05xG057Psk/9XDIW04bLE409hldciKs
-	 LQ6WF5NQlBJqQ==
-Date: Mon, 23 Feb 2026 14:35:04 -0600
-From: Bjorn Andersson <andersson@kernel.org>
-To: manivannan.sadhasivam@oss.qualcomm.com
-Cc: Konrad Dybcio <konradybcio@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Manivannan Sadhasivam <mani@kernel.org>, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, Abel Vesa <abelvesa@kernel.org>, linux-arm-msm@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	Sumit Garg <sumit.garg@oss.qualcomm.com>, stable@vger.kernel.org
-Subject: Re: [PATCH v3 1/4] soc: qcom: ice: Fix race between qcom_ice_probe()
- and of_qcom_ice_get()
-Message-ID: <h2uhrsjlvovjcj7k2ckpkgrhpuwm6biun4ueq7kyzcm4hqcsjr@y3iiqx2vo6s2>
-References: <20260223-qcom-ice-fix-v3-0-6ca5846329f7@oss.qualcomm.com>
- <20260223-qcom-ice-fix-v3-1-6ca5846329f7@oss.qualcomm.com>
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="hesEBWpu"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 34b37f77f;
+	Mon, 23 Feb 2026 23:31:55 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Bjorn Helgaas <bhelgaas@google.com>,
+	"Vaibhaav Ram T . L" <vaibhaavram.tl@microchip.com>,
+	Kumaravel Thiagarajan <kumaravel.thiagarajan@microchip.com>,
+	Even Xu <even.xu@intel.com>,
+	Xinpeng Sun <xinpeng.sun@intel.com>,
+	Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+	Jiri Kosina <jikos@kernel.org>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Zhou Wang <wangzhou1@hisilicon.com>,
+	Longfang Liu <liulongfang@huawei.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Lee Jones <lee@kernel.org>,
+	Jijie Shao <shaojijie@huawei.com>,
+	Jian Shen <shenjian15@huawei.com>,
+	Sunil Goutham <sgoutham@marvell.com>,
+	Andrew Lunn <andrew+netdev@lunn.ch>,
+	Heiner Kallweit <hkallweit1@gmail.com>,
+	"David S . Miller" <davem@davemloft.net>,
+	Jeff Hugo <jeff.hugo@oss.qualcomm.com>,
+	Oded Gabbay <ogabbay@kernel.org>,
+	Maciej Falkowski <maciej.falkowski@linux.intel.com>,
+	Karol Wachowski <karol.wachowski@linux.intel.com>,
+	Min Ma <mamin506@gmail.com>,
+	Lizhi Hou <lizhi.hou@amd.com>,
+	Andreas Noever <andreas.noever@gmail.com>,
+	Mika Westerberg <westeri@kernel.org>,
+	Tomasz Jeznach <tjeznach@rivosinc.com>,
+	Will Deacon <will@kernel.org>,
+	Xinliang Liu <xinliang.liu@linaro.org>,
+	Tian Tao <tiantao6@hisilicon.com>,
+	Davidlohr Bueso <dave@stgolabs.net>,
+	Jonathan Cameron <jonathan.cameron@huawei.com>,
+	Srujana Challa <schalla@marvell.com>,
+	Bharat Bhushan <bbhushan2@marvell.com>,
+	Antoine Tenart <atenart@kernel.org>,
+	Herbert Xu <herbert@gondor.apana.org.au>,
+	Raag Jadav <raag.jadav@intel.com>,
+	Hans de Goede <hansg@kernel.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>,
+	Andy Shevchenko <andy@kernel.org>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Mika Westerberg <mika.westerberg@linux.intel.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Robert Richter <rric@kernel.org>,
+	Mark Brown <broonie@kernel.org>,
+	Nirmal Patel <nirmal.patel@linux.intel.com>,
+	Kurt Schwemmer <kurt.schwemmer@microsemi.com>,
+	Logan Gunthorpe <logang@deltatee.com>,
+	Linus Walleij <linusw@kernel.org>,
+	Bartosz Golaszewski <brgl@kernel.org>,
+	Sakari Ailus <sakari.ailus@linux.intel.com>,
+	Bingbu Cao <bingbu.cao@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>,
+	Benjamin Tissoires <bentiss@kernel.org>,
+	linux-input@vger.kernel.org,
+	linux-i3c@lists.infradead.org,
+	dmaengine@vger.kernel.org,
+	Philipp Stanner <phasta@kernel.org>,
+	netdev@vger.kernel.org,
+	nic_swsd@realtek.com,
+	linux-arm-msm@vger.kernel.org,
+	dri-devel@lists.freedesktop.org,
+	linux-usb@vger.kernel.org,
+	iommu@lists.linux.dev,
+	linux-riscv@lists.infradead.org,
+	David Airlie <airlied@gmail.com>,
+	Simona Vetter <simona@ffwll.ch>,
+	linux-cxl@vger.kernel.org,
+	linux-crypto@vger.kernel.org,
+	platform-driver-x86@vger.kernel.org,
+	linux-serial@vger.kernel.org,
+	mhi@lists.linux.dev,
+	Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+	Jan Dabros <jsd@semihalf.com>,
+	linux-i2c@vger.kernel.org,
+	Daniel Mack <daniel@zonque.org>,
+	Haojian Zhuang <haojian.zhuang@gmail.com>,
+	linux-spi@vger.kernel.org,
+	Jonathan Derrick <jonathan.derrick@linux.dev>,
+	linux-pci@vger.kernel.org,
+	linux-gpio@vger.kernel.org,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	linux-media@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 01/37] PCI/MSI: Add Devres managed IRQ vectors allocation
+Date: Mon, 23 Feb 2026 23:29:40 +0800
+Message-Id: <1771860581-82092-2-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1771860581-82092-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1771860581-82092-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0a9c8b20e63209cckunm6946b3c7986369
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUtXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGh5JGFYdQhpNQ0tOHx8aQhpWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZS1VLVUtVS1kG
+DKIM-Signature: a=rsa-sha256;
+	b=hesEBWpuUfkngcgz1f2Ig1nlGmmzRwW4WQwqVSHNJo/8mDrQHyi2jBXfpRejbQ5213Bi/x3y5ZKsO4yPdU29saCaBfjZuhiQPZrXuFi/nfbjzR0kpb+gL5Eft5gNlVXtMsgoBjIOykghNIgFG4xZvqITu8wqjNed5lf17v/+SjU=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=j3H95hgVRLs6dldnhhXVuqSGrPI2yynu10KTCXrGKLk=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260223-qcom-ice-fix-v3-1-6ca5846329f7@oss.qualcomm.com>
 
-On Mon, Feb 23, 2026 at 01:32:52PM +0530, Manivannan Sadhasivam via B4 Relay wrote:
-> From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-> 
-> The current platform driver design causes probe ordering races with
-> consumers (UFS, eMMC) due to ICE's dependency on SCM firmware calls. If ICE
-> probe fails (missing ICE SCM or DT registers), devm_of_qcom_ice_get() loops
-> with -EPROBE_DEFER, leaving consumers non-functional even when ICE should
-> be gracefully disabled. devm_of_qcom_ice_get() doesn't know if the ICE
-> driver probe has failed due to above reasons or it is waiting for the SCM
-> driver.
-> 
-> Moreover, there is no devlink dependency between ICE and consumer drivers
-> as 'qcom,ice' is not considered as a DT 'supplier'. So the consumer drivers
-> have no idea of when the ICE driver is going to probe.
-> 
-> To address these issues, introduce a global ice_handle to store the valid
-> ICE handle pointer, and set during successful ICE driver probe. On probe
-> failure, set it to an error pointer and propagate the error from
-> of_qcom_ice_get().
-> 
-> Additionally, add a global ice_mutex to synchronize qcom_ice_probe() and
-> of_qcom_ice_get().
-> 
-> Note that this change only fixes the standalone ICE DT node bindings and
-> not the ones with 'ice' range embedded in the consumer nodes, where there
-> is no issue.
-> 
-> Cc: <stable@vger.kernel.org> # 6.4
-> Fixes: 2afbf43a4aec ("soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver")
-> Reported-by: Sumit Garg <sumit.garg@oss.qualcomm.com>
-> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-> ---
->  drivers/soc/qcom/ice.c | 44 +++++++++++++++++++++++++++-----------------
->  1 file changed, 27 insertions(+), 17 deletions(-)
-> 
-> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
-> index b203bc685cad..3c3c189e24f9 100644
-> --- a/drivers/soc/qcom/ice.c
-> +++ b/drivers/soc/qcom/ice.c
-> @@ -113,6 +113,9 @@ struct qcom_ice {
->  	u8 hwkm_version;
->  };
->  
-> +static DEFINE_MUTEX(ice_mutex);
-> +static struct qcom_ice *ice_handle;
+pcim_alloc_irq_vectors() and pcim_alloc_irq_vectors_affinity() are created for
+pci device drivers which rely on the devres machinery to help cleanup the IRQ
+vectors.
 
-Did we get confirmation that in the UFS + SDCC case, there's only a
-single ICE instance per SoC?
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-Regards,
-Bjorn
+ drivers/pci/msi/api.c | 26 ++++++++++++++++++++++++++
+ include/linux/pci.h   | 22 ++++++++++++++++++++++
+ 2 files changed, 48 insertions(+)
 
-> +
->  static bool qcom_ice_check_supported(struct qcom_ice *ice)
->  {
->  	u32 regval = qcom_ice_readl(ice, QCOM_ICE_REG_VERSION);
-> @@ -608,7 +611,6 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
->  static struct qcom_ice *of_qcom_ice_get(struct device *dev)
->  {
->  	struct platform_device *pdev = to_platform_device(dev);
-> -	struct qcom_ice *ice;
->  	struct resource *res;
->  	void __iomem *base;
->  	struct device_link *link;
-> @@ -631,6 +633,22 @@ static struct qcom_ice *of_qcom_ice_get(struct device *dev)
->  		return qcom_ice_create(&pdev->dev, base);
->  	}
->  
-> +	guard(mutex)(&ice_mutex);
-> +
-> +	/*
-> +	 * If ice_handle is NULL, then it means the ICE driver is not probed
-> +	 * yet. So return -EPROBE_DEFER to let the client try later.
-> +	 */
-> +	if (!ice_handle)
-> +		return ERR_PTR(-EPROBE_DEFER);
-> +
-> +	/*
-> +	 * If ice_handle has error code, then it means the ICE driver has probe
-> +	 * failed. So return the handle for the client to digest it.
-> +	 */
-> +	if (IS_ERR(ice_handle))
-> +		return ice_handle;
-> +
->  	/*
->  	 * If the consumer node does not provider an 'ice' reg range
->  	 * (legacy DT binding), then it must at least provide a phandle
-> @@ -647,24 +665,16 @@ static struct qcom_ice *of_qcom_ice_get(struct device *dev)
->  		return ERR_PTR(-EPROBE_DEFER);
->  	}
->  
-> -	ice = platform_get_drvdata(pdev);
-> -	if (!ice) {
-> -		dev_err(dev, "Cannot get ice instance from %s\n",
-> -			dev_name(&pdev->dev));
-> -		platform_device_put(pdev);
-> -		return ERR_PTR(-EPROBE_DEFER);
-> -	}
-> -
->  	link = device_link_add(dev, &pdev->dev, DL_FLAG_AUTOREMOVE_SUPPLIER);
->  	if (!link) {
->  		dev_err(&pdev->dev,
->  			"Failed to create device link to consumer %s\n",
->  			dev_name(dev));
->  		platform_device_put(pdev);
-> -		ice = ERR_PTR(-EINVAL);
-> +		return ERR_PTR(-EINVAL);
->  	}
->  
-> -	return ice;
-> +	return ice_handle;
->  }
->  
->  static void qcom_ice_put(const struct qcom_ice *ice)
-> @@ -716,20 +726,20 @@ EXPORT_SYMBOL_GPL(devm_of_qcom_ice_get);
->  
->  static int qcom_ice_probe(struct platform_device *pdev)
->  {
-> -	struct qcom_ice *engine;
->  	void __iomem *base;
->  
-> +	guard(mutex)(&ice_mutex);
-> +
->  	base = devm_platform_ioremap_resource(pdev, 0);
->  	if (IS_ERR(base)) {
->  		dev_warn(&pdev->dev, "ICE registers not found\n");
-> +		ice_handle = base;
->  		return PTR_ERR(base);
->  	}
->  
-> -	engine = qcom_ice_create(&pdev->dev, base);
-> -	if (IS_ERR(engine))
-> -		return PTR_ERR(engine);
-> -
-> -	platform_set_drvdata(pdev, engine);
-> +	ice_handle = qcom_ice_create(&pdev->dev, base);
-> +	if (IS_ERR(ice_handle))
-> +		return PTR_ERR(ice_handle);
->  
->  	return 0;
->  }
-> 
-> -- 
-> 2.51.0
-> 
-> 
+diff --git a/drivers/pci/msi/api.c b/drivers/pci/msi/api.c
+index c18559b..2362fca 100644
+--- a/drivers/pci/msi/api.c
++++ b/drivers/pci/msi/api.c
+@@ -297,6 +297,32 @@ int pci_alloc_irq_vectors_affinity(struct pci_dev *dev, unsigned int min_vecs,
+ EXPORT_SYMBOL(pci_alloc_irq_vectors_affinity);
+ 
+ /**
++ * pcim_alloc_irq_vectors() - devres managed pci_alloc_irq_vectors()
++ * Interrupt vectors are automatically freed by the devres machinery
++ */
++int pcim_alloc_irq_vectors(struct pci_dev *dev, unsigned int min_vecs,
++			   unsigned int max_vecs, unsigned int flags)
++{
++	return pcim_alloc_irq_vectors_affinity(dev, min_vecs, max_vecs,
++					       flags, NULL);
++}
++EXPORT_SYMBOL(pcim_alloc_irq_vectors);
++
++/**
++ * pcim_alloc_irq_vectors_affinity() - devres managed pci_alloc_irq_vectors_affinity()
++ * Interrupt vectors are automatically freed by the devres machinery
++ */
++int pcim_alloc_irq_vectors_affinity(struct pci_dev *dev, unsigned int min_vecs,
++				   unsigned int max_vecs, unsigned int flags,
++				   struct irq_affinity *affd)
++{
++	dev->is_msi_managed = true;
++	return pci_alloc_irq_vectors_affinity(dev, min_vecs, max_vecs,
++					      flags, affd);
++}
++EXPORT_SYMBOL(pcim_alloc_irq_vectors_affinity);
++
++/**
+  * pci_irq_vector() - Get Linux IRQ number of a device interrupt vector
+  * @dev: the PCI device to operate on
+  * @nr:  device-relative interrupt vector index (0-based); has different
+diff --git a/include/linux/pci.h b/include/linux/pci.h
+index d5ec0f8..ae58f70 100644
+--- a/include/linux/pci.h
++++ b/include/linux/pci.h
+@@ -1764,6 +1764,12 @@ int pci_alloc_irq_vectors_affinity(struct pci_dev *dev, unsigned int min_vecs,
+ 				   unsigned int max_vecs, unsigned int flags,
+ 				   struct irq_affinity *affd);
+ 
++int pcim_alloc_irq_vectors(struct pci_dev *dev, unsigned int min_vecs,
++			  unsigned int max_vecs, unsigned int flags);
++int pcim_alloc_irq_vectors_affinity(struct pci_dev *dev, unsigned int min_vecs,
++				   unsigned int max_vecs, unsigned int flags,
++				   struct irq_affinity *affd);
++
+ bool pci_msix_can_alloc_dyn(struct pci_dev *dev);
+ struct msi_map pci_msix_alloc_irq_at(struct pci_dev *dev, unsigned int index,
+ 				     const struct irq_affinity_desc *affdesc);
+@@ -1806,6 +1812,22 @@ pci_alloc_irq_vectors(struct pci_dev *dev, unsigned int min_vecs,
+ 					      flags, NULL);
+ }
+ 
++static inline int
++pcim_alloc_irq_vectors_affinity(struct pci_dev *dev, unsigned int min_vecs,
++			       unsigned int max_vecs, unsigned int flags,
++			       struct irq_affinity *aff_desc)
++{
++	return pci_alloc_irq_vectors_affinity(dev, min_vecs, max_vecs,
++					      flags, aff_desc);
++}
++static inline int
++pcim_alloc_irq_vectors(struct pci_dev *dev, unsigned int min_vecs,
++		      unsigned int max_vecs, unsigned int flags)
++{
++	return pcim_alloc_irq_vectors_affinity(dev, min_vecs, max_vecs,
++					      flags, NULL);
++}
++
+ static inline bool pci_msix_can_alloc_dyn(struct pci_dev *dev)
+ { return false; }
+ static inline struct msi_map pci_msix_alloc_irq_at(struct pci_dev *dev, unsigned int index,
+-- 
+2.7.4
+
