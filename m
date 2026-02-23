@@ -1,126 +1,80 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m1973182.qiye.163.com (mail-m1973182.qiye.163.com [220.197.31.82])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6C451BC46
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 14:13:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771856032; cv=pass; b=iIhXQ3M2eO3Kb0ofWcsYnxTB677VN0DeRCOmTpbwcftY7GcU4+KNC0fNHjjeL9KBdEp4UxtkCGe3MheHGYNvrkSd27tbx8UcRYVWCQe06/pHqm09nwAVtXoBMHZNeUrDYNKZtv1wLLgsgP2WJUVPSJMEUUJ8KbxZ8jor0ADnf/0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771856032; c=relaxed/simple;
-	bh=LlIochDNkBSTg+8NAW8Qf3EC9A/pn1xYqt0R0kwbDwo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=NPj8LR99QcOvaSlXzoTBC7G2EDvDUmb0cThqBA/fOYXvOKlA4DC19ik1roMhpt0+vNp2aRAMENHKpciaajKDBhTgSxHKf2klLtY2JimUVocf0nPBWWQFeLhsXmwCmCU25v97YOGzvzXd6KQTFlGtRm3kgg46WKh0lnCQtxhjhdY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lwtc2hJN; arc=pass smtp.client-ip=209.85.167.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3A9F25DD1E;
+	Mon, 23 Feb 2026 15:42:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.82
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1771861338; cv=none; b=IvJvHxWWgXWRVhmY/Bol+VXyiGn4g+nvwzZD5oU1j1qGTJkb3LNJ0Zq5dlFhUqCB6Bc91TFkI/i22/3a5gbxoonlATm/n3yHdv7Ieswpr9hVEsPl/ib6tPAOEvGIVqt5riqrH3VPvqTHULGLnjXimO2tO5kyuUoYsT7ImaP3FJA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1771861338; c=relaxed/simple;
+	bh=Ogeto/EnD71LOarK5o3fEJM9A88tBkrJwTRn9x7DRhU=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=eoA2rlmd4tvdjwIqpy+XOa+NuV3yazCrmc4Vin++OEU7XWfkyQOcQuxBS4qMSRjKV99ht+911vEigvOPAlzLGBePrOSBi2/wO6pJCmbzXQ4hALozqF8YEi3BJ1opMA/7A04Uvz7DYK8nhQnFaZAvJo6rg0s2L5UvMVUhUDMPcHQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=NUJS3oSB; arc=none smtp.client-ip=220.197.31.82
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lwtc2hJN"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-59e0d5c446cso4992786e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 06:13:50 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1771856029; cv=none;
-        d=google.com; s=arc-20240605;
-        b=VMLHvk3/iVYGzr32BxkRZKIgshSlU0FHcbG+gY8wAnpAUVhRJz1aQeyaw6Egg6Lal1
-         sHKyqlq51iimmGKPiEGcQOyOvgXGfIKfXPhaWy2+HsV0jMzvhWbL+0v3BQFYNx+Tb76p
-         uSyCBUyiuYViu2BblS+W+WFYV0gKL6SVZZqyxVjfq5nt47QNg1zdFgwcsT/jnrC5RTZP
-         Xlw8lhgExKZOvq0gHce6kcuzae5CJekaufEnrytnQ9ZOfyQgroTHZLsP8i9SpRQ3WICX
-         He9HAQ26h7qhAjqX/seAImIn6fJn0+iNdcyHewPXsnlsBTETwsZG1ph9T4IwGpc1IGfo
-         L1tw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=Z365Ew48+czBlM95FTfIaD+tm+sBdKd6v75QU+ouN7w=;
-        fh=R7WbjQ81d50QjU0ztl8RJxeBnWj/cAWPjWkEQwQ32Dk=;
-        b=LYrFmwEjpVNY/WffgF9zu3KDGEycSrxop+CBLLwQrxbIjROEtgWmxlCMVzjd3wmeRp
-         qB9pyKISmgDqwKvOwRsbFOVXJfTXldETFSvW7j+sjsqiq+deI2egPv/RzYpMq2sAGxGc
-         kPcUaQlTzWxAzUIdq2CVscQTVXvQVvaboIqH2uKdBqzw8at1o+UhYgnOr9rL6DrsjFF8
-         tPEOmfl12pcDAQwrSnaD+kMFVbjjZGehi/huo1Tl8zV4xl2y+Y7wr9k7jM8enr9BVeoh
-         ntswRb1RgXajTe9ygavd2qKP/qLk/LQo+/zNwpOMgL/N5Dh5o6PaFVraNIru/aqEGNbr
-         FLCA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1771856029; x=1772460829; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Z365Ew48+czBlM95FTfIaD+tm+sBdKd6v75QU+ouN7w=;
-        b=lwtc2hJNgHnTg/RsyjcuXZRB/M2dYL3n8MX89e2qHWmPM4FpyIKbYXhMygQFoP360+
-         z02IzTX2L96mLZwnV65HRkC0HfiOZwxukHfJda8XtdkTXm0AC7mqItBJpok2ofYilniQ
-         85SItBPqXBZDVVE5swjtDyMvgQlSB/5cdzk1vYp7BASEHjKYEfJ2yNwLQYKz9P0FZB15
-         520StCZg8S3J05O9YGHeHtrMpKlFXFj25/rTmv3YWW2oYO/Y/AKxVCEEipseiiFwcdHG
-         LPopjcaxwVvh3w0cs96putGnp4nOg08IHj0Ezuuu3IdoIIfm/J8PXSKbuOAMn0Fkq72z
-         1JKQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771856029; x=1772460829;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Z365Ew48+czBlM95FTfIaD+tm+sBdKd6v75QU+ouN7w=;
-        b=bDqzbe7ucFbhxrJflFv0TXKe8uE67Ooh5p9/ZJKKZkaH70Tj3reBit7u3KMXDkERQ0
-         JpbNVi4NVkMEAieMZu2oWJ4RtpBophKrz7FFNm72dKhU5z8pBSggwP5oMjnaam/sNj11
-         hMCWESsxIKujaQD2hKyvrMsi9FC7qR7atEm4EdHVQp0/RDXlPoKFhEG02fmHdCsNj9ok
-         Hh1/hee5Mhj3O02OhU3uZevnuiLXqhOFMRrLKh16Rp+zbTIxw9XMrtggS8LR+A3YTDDq
-         3+O5O1hijkpH1XAr/oA13ZO5h0LszvlhSRbtfHWAdpUohBj/fxejfjQJW2xYkztn87hl
-         ZpLQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXnaQolWBLaUddztNAa+zjmVT7Tv2y8qYrAONVXzYqQ+4jWF2LUrUhJkWN0wbS+XNWCW6Ej/Il3qHk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YytuukGGdBXQKYoKmTelMDP1VxVbOEMyVlf5XoHwQzQfSz05UFw
-	BJ/rZreFqT6cD5GqobW9RCZtszuxebkxReBZ/m8ncqYcLFDFFJ+GfxJu7gdE/zDrN/9H4xEFJ/6
-	wUI8IU2KKHe86lVzV4/I8PKr21iTGkcb1ZlZRi5rDPg==
-X-Gm-Gg: AZuq6aI3afPbLcG2Q6ecz+tJwYAu7E905PYUsX9jb0+/jjZLlycuioaqCjL6yqmxT8k
-	rW7vSlpkgt0ukgtu3OnPNp2O7jvD0vvDK55rq/ZuHcf+M9/rKLLTUdiL5Znl1B+kw+qCnHUr0H0
-	M1jzx2wVK5q170xi7tRElC3IyPhIEd7FvOndlCDM6l7dwWpvR0GKlC9b8wyCJfs/IP5dgHy2QUS
-	kGLT/Q2L0HOvRWm/BkXqQ9sonjXdUet61iWRT+ol8dRQmPhIOoa8tMJZt5G67uFgXwql3aA2HEQ
-	75/XDJow
-X-Received: by 2002:a2e:a984:0:b0:385:d6b2:f4cc with SMTP id
- 38308e7fff4ca-389a5dbcf47mr27888201fa.19.1771856029038; Mon, 23 Feb 2026
- 06:13:49 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="NUJS3oSB"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 34b3c9167;
+	Mon, 23 Feb 2026 23:42:09 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-pci@vger.kernel.org,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Philipp Stanner <phasta@kernel.org>,
+	Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 02/37] mmc: cavium: Replace pci_alloc_irq_vectors() with pcim_alloc_irq_vectors()
+Date: Mon, 23 Feb 2026 23:41:50 +0800
+Message-Id: <1771861310-84988-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1771860581-82092-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1771860581-82092-1-git-send-email-shawn.lin@rock-chips.com>
+X-HM-Tid: 0a9c8b2a43ea09cckunm7f2aa7e0986f0c
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQx8YSlZMSxoeGB9KGkoYSR9WFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=NUJS3oSBGeWqnMxrcPY69IM1XQxic2UBGfUfSO71zOvOcnHABCm++sJPY64O/aTVFRZ/NgFZSp5/ns9sN582nNdOMqKzePQrSzUPEMfh/pNTDwksu2waW8NYmzOjck9Tukcq3RFstJ1DOmyM+J3vMlxktqrXCh3mcO/cEexh+zg=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=razRCj/KdwH/QWQ4NPFgL/dcqZf1iVw1sY1Lb13uoWA=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20260222-mmc-pic32-v1-0-110382af02b0@redhat.com>
-In-Reply-To: <20260222-mmc-pic32-v1-0-110382af02b0@redhat.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Feb 2026 15:13:13 +0100
-X-Gm-Features: AaiRm5063zwSFsLmpAu8KKQoob-Xrkb5LYHlwF_yOCR9Qri5bmnQY0n5wA-UtxU
-Message-ID: <CAPDyKFpVxiEwXtxnrjpLsrwCXSo=LfPMRJd2APAberOg=ME-jg@mail.gmail.com>
-Subject: Re: [PATCH 0/2] mmc: sdhci-pic32: allow driver to be compiled with COMPILE_TEST
-To: Brian Masney <bmasney@redhat.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-spdx@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 23 Feb 2026 at 00:39, Brian Masney <bmasney@redhat.com> wrote:
->
-> While migrating a pic32 clk driver off of a legacy API, I mistakenly
-> broke one of the drivers, and the issue could have been caught with a
-> simple compile test. Now that the dependent patches have been merged
-> into Linus's tree via the MIPS tree, we can now enable COMPILE_TEST
-> for pic32 driver in this subsystem.
->
-> While changes are being made to this driver, let's also fix a single
-> outstanding checkpatch.pl error with this driver.
->
-> Signed-off-by: Brian Masney <bmasney@redhat.com>
-> ---
-> Brian Masney (2):
->       mmc: sdhci-pic32: add SPDX license identifier
->       mmc: sdhci-pic32: allow driver to be compiled with COMPILE_TEST
->
->  drivers/mmc/host/Kconfig       | 2 +-
->  drivers/mmc/host/sdhci-pic32.c | 5 +----
->  2 files changed, 2 insertions(+), 5 deletions(-)
-> ---
-> base-commit: 6de23f81a5e08be8fbf5e8d7e9febc72a5b5f27f
-> change-id: 20260222-mmc-pic32-137b3eae8e66
->
-> Best regards,
-> --
-> Brian Masney <bmasney@redhat.com>
+pcim_enable_device() no longer automatically manages IRQ vectors via devres.
+Drivers must now manually call pci_free_irq_vectors() for cleanup. Alternatively,
+pcim_alloc_irq_vectors() should be used.
 
-The series applied for next, thanks!
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-pci@vger.kernel.org
+Cc: Bjorn Helgaas <bhelgaas@google.com>
+Cc: Philipp Stanner <phasta@kernel.org>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-Kind regards
-Uffe
+ drivers/mmc/host/cavium-thunderx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/cavium-thunderx.c b/drivers/mmc/host/cavium-thunderx.c
+index 1373deb..55c46ae 100644
+--- a/drivers/mmc/host/cavium-thunderx.c
++++ b/drivers/mmc/host/cavium-thunderx.c
+@@ -39,7 +39,7 @@ static int thunder_mmc_register_interrupts(struct cvm_mmc_host *host,
+ {
+ 	int nvec, ret, i;
+ 
+-	nvec = pci_alloc_irq_vectors(pdev, 1, 9, PCI_IRQ_MSIX);
++	nvec = pcim_alloc_irq_vectors(pdev, 1, 9, PCI_IRQ_MSIX);
+ 	if (nvec < 0)
+ 		return nvec;
+ 
+-- 
+2.7.4
+
