@@ -1,147 +1,133 @@
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBCEF1BC46
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 14:13:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4962827FD49
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 14:13:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771856010; cv=pass; b=uP11QYpaCBRrgubA/zzEfSAmpSWS28HOCnS1Gf9Dpv4mg2cOU3C6JxYdrO4Wb7DbZmDOvSpdXLgblukMGJSEnglz8s6BG3EV9qWvj8n/j/8x5V2bFNt81hiIFs+ORCFUE0CojIvYM8sL43Y9XXrcALhzj9f3g7QQDiIjHprzOnM=
+	t=1771856014; cv=pass; b=ryqy78c5qr2P7m/BkmFV+sn3KOMibMwcSC/3HD7xfkJMck2nnIEN2Rvz800DX84V6W+/6xgBTEr4o1x0DudKFjjdL67fS1ueXqCkwzJUBeg7elZ4uWai3q6gMD0Kd638C2OY1Y+EDtSafIno1SdcMeens5rpWXLjS4/2keJwn0Y=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771856010; c=relaxed/simple;
-	bh=DEy3igJL1rnXb1XQTLdcuyQYF3Tqk3XhzqptPi+Dy1I=;
+	s=arc-20240116; t=1771856014; c=relaxed/simple;
+	bh=76oCx/ttrzREgYvfMWN9RbVec2xG7i0o/OAeFdl2DbQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HFOWwaWJPWhGzkCCoanA2Qm62ZZyi0X4xoaPxip+oDVuLPcfOWFD+STiD/avFQOhQOR555KATNr1m6oukyQvC9uLeA1fh3pOGzzrQhzGBOtfiB0WerdqfgchiqaQi2I4jsl0pv7TcJ9dRf/mQw7o2ChFimb2Y19Pj/yiN9s14Ng=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=s3+GAuxb; arc=pass smtp.client-ip=209.85.167.46
+	 To:Cc:Content-Type; b=uggXz3jiv7uax4o0toY/BG6PNOFDXYtudhsItE4dcdTMExMAnfw3MgJvEftPOqJKrr0aBFaSdmYibjXAQRkPxmyY+d6OTj1wXCjLUS0DcNqmIjldxIRLvxr7L9imdNZX14G4fJDTbnSIVOCM4K1m9GtKD7MRp3Qa3r87PwI4KWk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=t+g6Zznb; arc=pass smtp.client-ip=209.85.167.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="s3+GAuxb"
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-59e6491f1a2so4943289e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 06:13:28 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1771856007; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="t+g6Zznb"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-59e4a04f059so5622006e87.2
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 06:13:33 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1771856011; cv=none;
         d=google.com; s=arc-20240605;
-        b=FgxFvpeIMdPa3NwFhH4zOq2OnKpxPlAZnP8soLZGKmmILTWHxqMPEN0Oea7JgUxunH
-         +gx99T4sxMDmOJP038lA+Bf2DJ5BSu2tdroBM7S54U3wSCzdZYupli3nAbYhhU5k9TCV
-         YBNVokFyMeSuw0ndTTJveXpZmxg4OYthGpqgRBLOQYYJtEOfY0iaQ7Mjt5RWq5pHZlN0
-         CWPrXH0Vt0eKv6j0hdlER/FYFiyK7KTZT0jBzK/zntHIm4jREWkX/QsqPfcZnjFBq+tO
-         TIfYjVCVB/v31uXSjgUvYPgLgzYgeh7vebtfuUUhf1V+ovD2RzeUsdL2p7P5Q7Q6rkF2
-         mYaQ==
+        b=R3/WNzrE5uP2LZrkzmsWjaXko/IR4ZqftJTgwSai9JQ8zTB913IY3E5u5iFfnbv80y
+         GOVooCGEXnckn9J+hQJW0ndgzt8kU6dQ2M5rUVh3xQzpArXgm0neKJoWuR3vG0zqp2Ae
+         /zCVH1QDXhqtaLMdNYo144NvW+WpxaZRvK+jurQMIzEBPpMuTpBmBVGj85gcWu79zpW+
+         O89VC+3zflmhsi86TYtyIRCmrrjIm8tSKk+GS+3oKILAgyD4CDSSfFeknOibZtrM6tPI
+         i7RNxMWo75RK5NMffFq5BxlMr6BQfA1IERSoDFVEsPmTTBWlOiG0/zbvDEhE21gA8258
+         1EBg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=7UcNIiszEKvIE+Kf7TAf++7dJZgkiPPqma20oF8iNSw=;
-        fh=WKlbvzaEBhCHfiMZPjosvwnNAqtpzMAacakVGU/sVM4=;
-        b=WAvZMbjq59mLBIe//9ipPy0KqrgxgpiXI7IfigE9Wqm8RYIFxcuTYQaGwdhaXfCOW5
-         Uoav9F203VP1+AtwKJ4AYtKGyEK4IhoL70kodZ/oCGeUYFV9V8n8LtP71/aqrw56ukee
-         bkeLGCFE91tpztE1NsDGyJZ5JEUjlQ2elpB6qA2ASp9nEmxesKgQK+aaK34few8J8/n9
-         o1nGiBlfPhgL+LlQnGUXNPJ1bNjv+RyMwrCgUBYPl0+XDOyDmTXocwezmjhdL5kSm1Za
-         jODcRFoh6qXXELClSd6iqIYH5mlb2FAC7OkP1j1+8S9WEcy9SPe5aGHEsX8XQkuFpJw3
-         q0mQ==;
+        bh=597mQmEUNbkIDS8qk+5/zMm26WxivzZ2OThkmt6poH8=;
+        fh=50mXZKPl44hP+zbFOZu320cQAiRhPiROzt3bryo3xd0=;
+        b=BCkMvQ9OET7Dhgj8o1lSL8GWbH5k37kXuf0XDTKvgYesES88K5oumtq4nY5/gS7+Hh
+         l4piMkwIRh73nbTd6Koc+KBsORy17Cf51jAjCcPuvtEWDS9vxWpgtOit9jQsaiA6FEJ1
+         ZEilPEBFZyt3CknwfqYqgJBwK6onlvgWO9xdeNSUtMlx3vcdg7eTCsI9P025W6WWR7Fm
+         zh+FNihl4BNgH+WNYame1BoZUk3dDDUwJ7zMv/e7jJEDcS8s4nuWWrTc+aVL3XXDTESz
+         FrPiIZxODVUidUd12eqbT9QqX622qxxhzImLuarTctDBYm0G8ipR8A7+bkcZkctKcPhI
+         OmcA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1771856007; x=1772460807; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1771856011; x=1772460811; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=7UcNIiszEKvIE+Kf7TAf++7dJZgkiPPqma20oF8iNSw=;
-        b=s3+GAuxbKrXYFcFtPDerz2EAOBfCPm+22uloOdyuAScdQJMDZVVPW+PLkpbjMPrnkV
-         UTTRUzQh/jRRK4syYmSJUCiUL/sfKm5RoPvKGL8JxpBdATZ7uNVv2f+wTFRJZ/V3IKkA
-         1rqwe0X0EloAucZ8iDUqcbBDAJldBpeQ1Y3Ckp7heEbHtmZe0Kvwfp5ZynXjKgFZpvXb
-         vFx4ojCMqbn0YLSSHVWWwSr7YoM6RyTs1x4duUxwfnlBo6sSdVIP+SrIOCHrULlbU0E2
-         x1UNluqQo6TVxYzXCGW9/o+nXno889PdiXXnoCZBJ/+0lFQxNRipr6rJgnQ5/ilzyrk+
-         d+Sw==
+        bh=597mQmEUNbkIDS8qk+5/zMm26WxivzZ2OThkmt6poH8=;
+        b=t+g6Zznbffu9mWS8rFtNQBxx2nzF5u3GxqFW/f4cWpN4RJAi6WFfRbOeSZi47trmjl
+         CSPqBIZq9SN3mBk+rG+VbtmyIvfts1X1C2g8FmVX/bTL8p2b6XXQmbETBzc9GleACd+x
+         7lmKwJ9noNAWJx3vJei4Bmkszncf5yqzEQJEpUXkZr4nWxz+IlZ/+dKPHK9u7C/fU9B+
+         vdKphR9GVSeW2BdT9Egi6ZjQRHC8r+m8xy4MrQOWAmq4CoIGAhiSPN54HU8GxTeX3sS0
+         RBuE0VFiGYMuxoAJeYY0i+qNjkQ2exfjDnTTOQiG0MpV6DHesJRCtLg9yYuEI9i3/VmK
+         bKJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1771856007; x=1772460807;
+        d=1e100.net; s=20230601; t=1771856011; x=1772460811;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=7UcNIiszEKvIE+Kf7TAf++7dJZgkiPPqma20oF8iNSw=;
-        b=t89a9zMxYPZL710UCsrrqtd22bxU15LfUCLPJeV9uHwJs8MfFwPjc++X2Bm+7vwLf4
-         23Xh/Bsin+peDh5hBbbqk8kbMsnxXY3YvaCAQagDRGUjnDjA3SmHt8MY9cdHORG+NDGZ
-         sgpKPfBNVVFv9j7q7yklZ9in7+p11kEsNMrzyhJYnI/xvw4f5Ne6ITqbAZIU9BH057QL
-         TDFSYUUPpuoK8IxDOzVP2dICrf8BPY/2MzovLHV2KSrt1m4oK1+c+HR+kTnwwP97X+XW
-         6wDtePdesOWYAHC6qDOqQVjihgfIx8R+aKDvCpbQoIM23kQ/3DU3BpdBzH6TnunZ6JfI
-         XaxQ==
-X-Forwarded-Encrypted: i=1; AJvYcCV6rSHihRLQnl4NZUj3s2057K/eWN0P0fyccvfPeT0NVyf8tku0wtROyhBP3O9K/LTMdL/RvZowcZs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzBiETf62wjkrAL0X8LSW2nciykCFsLqw3KP4mo2365iz2ipUMW
-	c0ihWBzyDbaTPvsl5fvMFH8C4ISZcdzg6i/01OInO0oScm0s/EFs+FNTIfMn15ErBRwVqbfNQYn
-	ASti68BHhzuO2qrZp26tlvAA8/9C4YKU8gIWQP5A/qQ==
-X-Gm-Gg: AZuq6aIvo5vI3nUUKkZQbcYaK1CDwX1KW9yJN96Uj1K1l0IHkZCb6Z+4zU8w3cW9/zY
-	Z4QjbtHCOIRFW6YDmDPJkHxA9oSj1QYrNEdeZxpGHEtV+3ezsku8nyHGFIRu++f4K+9e5lU8M3p
-	AkTmkHg0MbcQil9OAVc6Awp2Df4XkS2V3URs1BqDF3JqtIugIkzKvLK14j5j8hDBsC0a1wdLNUe
-	K6U/y6nM/oOZzuYW4vR4z43/wE9r0YIsibVKS7b4rA5jknmlBKvKQfbRmcB84A5a7FamCaTmGX4
-	gmUNxTa7
-X-Received: by 2002:a05:6512:108c:b0:59f:822b:b739 with SMTP id
- 2adb3069b0e04-59f8abde44cmr5314261e87.4.1771856006894; Mon, 23 Feb 2026
- 06:13:26 -0800 (PST)
+        bh=597mQmEUNbkIDS8qk+5/zMm26WxivzZ2OThkmt6poH8=;
+        b=KciO0g/CEXsEZetLeSSSF+eqLtjg24BmIn5xkuLp+XMef7ZEdCP4p18bD89/pd0vAL
+         vM8qFbm6XCYELZq61bCH5BTzL2XNyZPHBSHJcWWnyW7uoGv9ST4Ti6nPWhRhHwztgUJU
+         56SizO6i1EaDJZAZ8F++3gY3pzc04k61ieZ7GJA6UftvOs5PXr0c2urstbGlOlmo5UbV
+         AbN8P8K5WqDfK7w4NVGW18hhEiae/iFMRx2SZU2tqvAkyyZrPh4nCERFrKHEhPpx1WQf
+         QrWGwWbuHatWA/OTKxzCNdmQuPflgeOI4V0WlrHc4Ev9FhseqMorwQuCEtpeXPkyk+k2
+         1XRQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVYOKDLF4qBC59KmCodB0LmATWgb5KAHVZD8nb7PgPdxU9Wwoq+XBKGc7xdLfwMlGbSZS4t4XozdyM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwOz/0nUmmTuvO308gOOS+PRtWwrigcfhaYHkjz0zFNS8uWE2Pe
+	mQe8jJFV9EuTTVeSrbVJl5ASwkO8ALG0p359S6YYbc/odz0hPr4E349qqMKOpqS2LBmZFu3uAPw
+	PamSJh4VqLEGShnneB73rkd48G5JxvtYQqLCLlMKbtg==
+X-Gm-Gg: AZuq6aKdCqfVR5pGBObZVNPD5FXJCUREozQxjzR65LI6lGH0oikLYSLLgR1uZhjSnNt
+	yp3UtOJB+lk8v4IQIDsy8oMZYgc1QowOH2QuCznvalrvp6m+HeFByNxlEnP9OSFzvFfyMJiqDbq
+	7fsLFK1klBuaifUeebwSeEzsTc216ogJ6IdO0O2zTLoORKUs/ugCQL41MzD92EACQo3tD/GmfLg
+	YBCh8PKvf29Ycmimh3YtXsH0GDMezEm6ZOgtBBGUVNzPi5rvtI4MNkYMuB9Of4Ou4rzapO6VXUf
+	i5q1NZWW
+X-Received: by 2002:a05:6512:64c1:b0:5a0:ee0b:c263 with SMTP id
+ 2adb3069b0e04-5a0ee0bc30emr1881073e87.3.1771856011225; Mon, 23 Feb 2026
+ 06:13:31 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260206-axiado-ax3000-add-emmc-host-driver-support-v3-0-ef83b09325be@axiado.com>
-In-Reply-To: <20260206-axiado-ax3000-add-emmc-host-driver-support-v3-0-ef83b09325be@axiado.com>
+References: <20260207131041.2833840-1-festevam@gmail.com>
+In-Reply-To: <20260207131041.2833840-1-festevam@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Feb 2026 15:12:50 +0100
-X-Gm-Features: AaiRm52Jn7GtelEGkOZ9XPfUniIrpYcIWOFdBS3zcfWiZwJDEnJ15M24z8fGJdw
-Message-ID: <CAPDyKFr-N=P1vKSHGtOr1surWApBUz630v2xsBD+5KkPWaPZbg@mail.gmail.com>
-Subject: Re: [PATCH v3 0/2] Add Axiado AX3000 eMMC Host Controller Support
-To: Tzu-Hao Wei <twei@axiado.com>
-Cc: SriNavmani A <srinavmani@axiado.com>, Prasad Bolisetty <pbolisetty@axiado.com>, 
-	Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@amd.com>, 
-	linux-phy@lists.infradead.org, devicetree@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, openbmc@lists.ozlabs.org
+Date: Mon, 23 Feb 2026 15:12:55 +0100
+X-Gm-Features: AaiRm51IoOEGcQThAZL7Wz9Wjj3_Ac4tq7Xg58f_oxy_-Jx4aKch58W-NfM592A
+Message-ID: <CAPDyKFqmO0DEnmYO4uZEYjDErk+sjH1D8S-djvc83KCETf+ooA@mail.gmail.com>
+Subject: Re: [PATCH v2] dt-bindings: mmc: rockchip-dw-mshc: Add RV1103B compatible
+To: Fabio Estevam <festevam@gmail.com>
+Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, heiko@sntech.de, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-rockchip@lists.infradead.org, Fabio Estevam <festevam@nabladev.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 6 Feb 2026 at 09:23, Tzu-Hao Wei <twei@axiado.com> wrote:
+On Sat, 7 Feb 2026 at 14:10, Fabio Estevam <festevam@gmail.com> wrote:
 >
-> Axiado AX3000 SoC eMMC controller is based on Arasan eMMC controller.
+> From: Fabio Estevam <festevam@nabladev.com>
 >
-> This series includes:
-> 1. Add bindings for AX3000 SoC eMMC controller
-> 2. Add arasan sdhci support for eMMC in Axiado AX3000
+> The RV1103B uses the DesignWare MSHC controller compatible with the
+> existing Rockchip RK3288 variant. Add the rockchip,rv1103b-dw-mshc
+> compatible string.
 >
-> For platform device tree change, we will send a different series of
-> patches.
->
-> It has been verified on AX3000 platform.
->
-> ---
-> Changes in v3:
-> - Enable SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN quirk
-> - Remove dependencies in b4
-> - Link to v2: https://lore.kernel.org/r/20260109-axiado-ax3000-add-emmc-host-driver-support-v2-0-934f1a61f7c0@axiado.com
->
-> Changes in v2:
-> - Keep host controller changes in this patchset
-> - Use pdata instead of mix compatible string
-> - Fix coding style
-> - Link to v1: https://lore.kernel.org/r/20251222-axiado-ax3000-add-emmc-host-driver-support-v1-0-5457d0ebcdb4@axiado.com
->
-> Signed-off-by: Tzu-Hao Wei <twei@axiado.com>
->
-> ---
-> SriNavmani A (2):
->       dt-bindings: mmc: arasan,sdhci: Add Axiado AX3000 SoC
->       mmc: sdhci-of-arasan: add support on Axiado AX3000 SoC
->
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml |  3 +++
->  drivers/mmc/host/sdhci-of-arasan.c                      | 15 +++++++++++++++
->  2 files changed, 18 insertions(+)
-> ---
-> base-commit: 63804fed149a6750ffd28610c5c1c98cce6bd377
-> change-id: 20251222-axiado-ax3000-add-emmc-host-driver-support-2cc84a8f889a
->
-> Best regards,
-> --
-> Tzu-Hao Wei <twei@axiado.com>
->
+> Signed-off-by: Fabio Estevam <festevam@nabladev.com>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> Changes since v1:
+> - Make commit log more concise.
+>
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> index acb9fb9a92cd..a75209bd2710 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> @@ -43,6 +43,7 @@ properties:
+>                - rockchip,rk3562-dw-mshc
+>                - rockchip,rk3568-dw-mshc
+>                - rockchip,rk3588-dw-mshc
+> +              - rockchip,rv1103b-dw-mshc
+>                - rockchip,rv1108-dw-mshc
+>                - rockchip,rv1126-dw-mshc
+>            - const: rockchip,rk3288-dw-mshc
+> --
+> 2.34.1
+>
