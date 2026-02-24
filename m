@@ -1,138 +1,90 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E1CB3B8BC3;
-	Tue, 24 Feb 2026 18:01:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7878E33A6E1;
+	Tue, 24 Feb 2026 20:30:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771956082; cv=none; b=TQK/1cpgLTD9cUzojGsMOL4Tpt4vpuJHhhylQ5YYdQpmHc3lgkNKS2nr59VF+gt8ZrdopR3n19a4BfT1ZdnoscFo8vcloaHZnSZNmN54JuVcAu/+vny0e7nlJVWQDdGEVMav7yq02es9peSXKpjwqsL+1psvkZT5Mw6k58S7eso=
+	t=1771965002; cv=none; b=H4gCc0i5uQDJicqrjzWOhX16wu9M8b9R2bmeKYFC6UHqkbZuY6GjsWZR9IVZMkK0c1tpDhAfxOB3AUxX/oc5KZG6qlhpSOZGMY4n19d7p1mkZIDm0nxNDfeAZ8CaXKtR4f24d3acGjlY0WSfKfrOom7CrMZXgJZlyDc95gsYtAs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771956082; c=relaxed/simple;
-	bh=eH4+2skd3VALylEaLIYDFMzcl1fWohpq7mxAbNYFwcc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=miFREwb4wX8/8WO5G1gtuu7PAnbcVNd8pRT2+KXks1D80SD4OSHSCpwp+/X9Th5bUqya0N9b4krpxER1rFg8W/MjcKBj6SGqmkCZMiENdMaVnito4mZJaImuGEe0oVOLuZIYsusg+geqJHngmf/tWOZL0XhOnoTyY+AhMFxVj2I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vJws2CN/; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1771965002; c=relaxed/simple;
+	bh=FWVYnHrFiSYu00+TBU/59piex8zCA4H56AvpNx3WHdg=;
+	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc; b=BLTX4Voy88m28EHzKEZyBK7hfiqkpJL7toRLHmxshc3H5tDFdOc+2xjEK9g/IDiDnqKDSH9bj8fPlcgiJv+8WirL6iXUG61xjnxKvIZNwyuvFfLGeNplbONnE2HPy1DkfBuaLS5xrnpCpOC613SWV8EinGZCO2kH4u0nIGc35GI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CEUt6gcv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vJws2CN/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71A09C2BC9E;
-	Tue, 24 Feb 2026 18:01:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CEUt6gcv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 367DCC19422;
+	Tue, 24 Feb 2026 20:30:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771956082;
-	bh=eH4+2skd3VALylEaLIYDFMzcl1fWohpq7mxAbNYFwcc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=vJws2CN/whHAVW40p5nnLCrPNbi0scnnG0IYiQZ1mGFNbyBLM6wANqstdQiKPixQY
-	 uUgkRsqYjCuzLHPuapdfGXXE2yrZ6XjeBrLNG9/sEb8XTEGR9NHlukVpXNRbpAPADp
-	 M6HkrmPqOcCnly59cKJrMhNCooFGqOr2BkCuu3DY9jt6R8IVpqSEiIGdWiOaG14IYC
-	 qleP2rxlaz6OO44ev1Tqh7dI5rXVwNrnIUZFllZoKNn5JNCGHU41wInPHAwa2KHQe+
-	 A7/Fg6aD3ap7AU2USO5pVemUbA/CRlHbAmaBcS30cpDTLvWg43dFedBWQu1kp2i3pV
-	 xBLl35TzQFXIQ==
-Date: Tue, 24 Feb 2026 18:01:17 +0000
-From: Conor Dooley <conor@kernel.org>
-To: hehuan1@eswincomputing.com
-Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-	conor+dt@kernel.org, jszhang@kernel.org, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	ningyu@eswincomputing.com, linmin@eswincomputing.com,
-	pinkesh.vaghela@einfochips.com, xuxiang@eswincomputing.com,
-	Pritesh Patel <pritesh.patel@einfochips.com>
-Subject: Re: [PATCH v3] dt-bindings: mmc: dwcmshc-sdhci: Fix resets array
- validation
-Message-ID: <20260224-thud-hydroxide-4c139d351fa6@spud>
-References: <20260224092337.312-1-hehuan1@eswincomputing.com>
+	s=k20201202; t=1771965002;
+	bh=FWVYnHrFiSYu00+TBU/59piex8zCA4H56AvpNx3WHdg=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
+	b=CEUt6gcvAPFUlr+xHssLhKRVQe38OL2rOMJGDwF+c74dWcPnwx9hCYikAT3RoVf1E
+	 T6UD3EHBj4zLQczqd4Slp5X/zDA7pb536IQ4b9Veq1SvQj+4NCjYENJwZnw/6ArEzg
+	 XDP0TMO8rArYELaqhOxT1KyARjMmOgs5k45oYZRWaA2hTe0ptwr6Fu9bDzFP5whgws
+	 3Cjk6vGtjjOkIxbRYrHXSqaPxOJv9FPYwB+CCYqOQH1Id0dEc4dAY7BjjqEbY/aw+b
+	 cROVkBoejhAzIcjfOMF3/RghVY2DIX4EsUSsEbIio3uRQAgJfVxckVuU3LFljIMLCQ
+	 K0oKsFdJ/eBAw==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 02CDE3808200;
+	Tue, 24 Feb 2026 20:30:09 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="XQINSj+G7vpgZLCh"
-Content-Disposition: inline
-In-Reply-To: <20260224092337.312-1-hehuan1@eswincomputing.com>
+Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH v2 1/8] mmc: sdio: add MediaTek MT7902 SDIO device ID
+From: patchwork-bot+bluetooth@kernel.org
+Message-Id: 
+ <177196500778.4139022.732715685642852259.git-patchwork-notify@kernel.org>
+Date: Tue, 24 Feb 2026 20:30:07 +0000
+References: <20260224061325.20189-1-sean.wang@kernel.org>
+In-Reply-To: <20260224061325.20189-1-sean.wang@kernel.org>
+To: Sean Wang <sean.wang@kernel.org>
+Cc: marcel@holtmann.org, luiz.dentz@gmail.com, ulf.hansson@linaro.org,
+ linux-bluetooth@vger.kernel.org, linux-mediatek@lists.infradead.org,
+ linux-mmc@vger.kernel.org, sean.wang@mediatek.com
+
+Hello:
+
+This series was applied to bluetooth/bluetooth-next.git (master)
+by Luiz Augusto von Dentz <luiz.von.dentz@intel.com>:
+
+On Tue, 24 Feb 2026 00:13:18 -0600 you wrote:
+> From: Sean Wang <sean.wang@mediatek.com>
+> 
+> Add SDIO device ID (0x790a) for MediaTek MT7902 to sdio_ids.h.
+> 
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Sean Wang <sean.wang@mediatek.com>
+> 
+> [...]
+
+Here is the summary with links:
+  - [v2,1/8] mmc: sdio: add MediaTek MT7902 SDIO device ID
+    https://git.kernel.org/bluetooth/bluetooth-next/c/30c211ed0440
+  - [v2,2/8] Bluetooth: btmtk: add MT7902 MCU support
+    https://git.kernel.org/bluetooth/bluetooth-next/c/ad7c85c44e42
+  - [v2,3/8] Bluetooth: btusb: Add new VID/PID 13d3/3579 for MT7902
+    https://git.kernel.org/bluetooth/bluetooth-next/c/39b32232e047
+  - [v2,4/8] Bluetooth: btusb: Add new VID/PID 13d3/3580 for MT7902
+    https://git.kernel.org/bluetooth/bluetooth-next/c/cde58a6f8d84
+  - [v2,5/8] Bluetooth: btusb: Add new VID/PID 13d3/3594 for MT7902
+    https://git.kernel.org/bluetooth/bluetooth-next/c/71fa9af03199
+  - [v2,6/8] Bluetooth: btusb: Add new VID/PID 13d3/3596 for MT7902
+    https://git.kernel.org/bluetooth/bluetooth-next/c/2dbd6783e368
+  - [v2,7/8] Bluetooth: btusb: Add new VID/PID 0e8d/1ede for MT7902
+    https://git.kernel.org/bluetooth/bluetooth-next/c/df6be153d1bb
+  - [v2,8/8] Bluetooth: btmtk: add MT7902 SDIO support
+    https://git.kernel.org/bluetooth/bluetooth-next/c/287f90321f25
+
+You are awesome, thank you!
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
 
 
---XQINSj+G7vpgZLCh
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Feb 24, 2026 at 05:23:37PM +0800, hehuan1@eswincomputing.com wrote:
-> From: Huan He <hehuan1@eswincomputing.com>
->=20
-> The binding defines tuple-style reset-names items for some
-> compatibles, which implicitly enforces a fixed array length
-> via JSON Schema.
->=20
-> Defining global maxItems for resets and reset-names causes these
-> constraints to be intersected via allOf, resulting in an effective
-> minItems equal to the global maxItems. This leads to dtbs_check
-> failures reporting reset arrays as too short, even when the DTS
-> provides the correct number of entries.
->=20
-> Fixes: 30009a21f257 ("dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin EIC77=
-00")
-> Signed-off-by: Pritesh Patel <pritesh.patel@einfochips.com>
-> Signed-off-by: Huan He <hehuan1@eswincomputing.com>
-
-Signoff chain looks wrong. You're author and submitter, what did
-Pritesh do?
-Content looks okay to me.
-
->=20
-> ---
-> Changes in v3:
->   - Add minItems: 5 in 'else' branch for non-eswin,eic7700-dwcmshc
->     compatibles
->=20
-> Changes in v2:
->   - Keep the global maxItems constraints and add minItems: 4 for both
->     resets and reset-names properties
->   - Update commit message
->=20
-> - Link to v1: https://lore.kernel.org/all/20260211094736.88-1-hehuan1@esw=
-incomputing.com/
-> ---
->  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 3 +++
->  1 file changed, 3 insertions(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yam=
-l b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index 7e7c55dc2440..5cebe5eb1efb 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -50,9 +50,11 @@ properties:
->      maxItems: 1
-> =20
->    resets:
-> +    minItems: 4
->      maxItems: 5
-> =20
->    reset-names:
-> +    minItems: 4
->      maxItems: 5
-> =20
->    rockchip,txclk-tapnum:
-> @@ -146,6 +148,7 @@ allOf:
->      else:
->        properties:
->          resets:
-> +          minItems: 5
->            maxItems: 5
->          reset-names:
->            items:
-> --=20
-> 2.25.1
->=20
-
---XQINSj+G7vpgZLCh
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaZ3nbQAKCRB4tDGHoIJi
-0uKBAQDIrqcK04VZM2IvY/RnESJb30TntkHjLyN0Z0prl3RkTQEA5vpbrQDwrYEu
-6+r7qH/I8oudKasJEbcHhXwNOvWqtwc=
-=0L8m
------END PGP SIGNATURE-----
-
---XQINSj+G7vpgZLCh--
