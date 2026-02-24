@@ -1,171 +1,119 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.15])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 062852BD58A;
-	Tue, 24 Feb 2026 09:12:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.15
+Received: from zg8tmtyylji0my4xnjeumjiw.icoremail.net (zg8tmtyylji0my4xnjeumjiw.icoremail.net [162.243.161.220])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id BE63A274B43;
+	Tue, 24 Feb 2026 09:23:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=162.243.161.220
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771924358; cv=none; b=Da1BbYqToPVGJ6oYRmQU3VJeycTgPPT9MrRU9Hn/m0Sk2kkzFhrK4uvKYr6Q+UsEMjvVHuYvK+KGgxSWqGgBA653iOFBF/uLy4X8XNbGlKL2Wv1Q35jHi//DVENfQiwAduYeFjA2kq1PhJral3Bh/b2ouDfRqnI21aqjYHlvY4M=
+	t=1771925018; cv=none; b=EYy2PDoFMWqBP3VJixb1EFET1XgiSeCQuJAypbuUZ9Lg6oSmADDkx0GkKAFEqmjGuzbVyT9JvH8NpXq5+0Juhgy8hQDDwslGt73IRMWZHe6qGX9VHFQ7u/w2T1YuAPjDIg3qRNZpUYrNNc+u/UJQarB28sTA9i5QQUf9UbtDxzI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771924358; c=relaxed/simple;
-	bh=sllJU41EvNnfq6cfH0Cm3WpH9/CrTwdLF2yCyQc6C20=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=E/gAMpgHSZ1SRP7q4jSbxH6lKlJB0RkbVOgj2Ou31ACwVTXselEnNkatNS1c7f0mLJigu1lzQrCqdYVii9Ul292BC+YJHzV1Oj1PyQBwaa3v/0QKk9qQDF9FNohkXy3pDeIhilETSKGPTrbqLFXvohvzHrDQDQabwYX7h+iyuwM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=pass smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=AbGlTJ0Y; arc=none smtp.client-ip=192.198.163.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="AbGlTJ0Y"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1771924357; x=1803460357;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=sllJU41EvNnfq6cfH0Cm3WpH9/CrTwdLF2yCyQc6C20=;
-  b=AbGlTJ0YkokTsxQHaqiXwXrINmz91wb1ZioaSAF+CsR+O56xETJkqY5S
-   8RdcSWqpL/MIaJAwKcVfwiX6frQgP6fjGdYpiL3PSETbSWDksFYjApTdQ
-   IuaSY1vp1e2RlL10rItHevyWNK7rf8mNnjALd+jy211Jc9xdEreTZ32yv
-   FBijpVAAGR3yg5b+TV7b7gPC7qUjtwVehNpqTc58PQPMfj5gqhXtEg+xK
-   gZoH6SwtfJeO86zDyORjTJxLMsaeBBs40t/GNKo6JHFyTpuZPbpbrYpnc
-   Bl9a+Ogeax8CUXgHTMri8ECjaQ3Nc7KDR/Il3Fju0vuAsXM14vxaySz47
-   A==;
-X-CSE-ConnectionGUID: 1nHSjMqyQwuBAY0+m+QfCQ==
-X-CSE-MsgGUID: sq0LcavZRq+p34ZMSVo+Rw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11710"; a="73039913"
-X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
-   d="scan'208";a="73039913"
-Received: from orviesa003.jf.intel.com ([10.64.159.143])
-  by fmvoesa109.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 01:12:35 -0800
-X-CSE-ConnectionGUID: v4GiDQV6T1ycBQRHOBv6QA==
-X-CSE-MsgGUID: yR3Uba70Qr6uzGgc8QUkgw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.21,308,1763452800"; 
-   d="scan'208";a="219937945"
-Received: from egrumbac-mobl6.ger.corp.intel.com (HELO localhost) ([10.245.244.146])
-  by ORVIESA003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Feb 2026 01:12:17 -0800
-Date: Tue, 24 Feb 2026 11:12:15 +0200
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: phasta@kernel.org
-Cc: Simon Richter <Simon.Richter@hogyros.de>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	"Vaibhaav Ram T . L" <vaibhaavram.tl@microchip.com>,
-	Kumaravel Thiagarajan <kumaravel.thiagarajan@microchip.com>,
-	Even Xu <even.xu@intel.com>, Xinpeng Sun <xinpeng.sun@intel.com>,
-	Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-	Jiri Kosina <jikos@kernel.org>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Zhou Wang <wangzhou1@hisilicon.com>,
-	Longfang Liu <liulongfang@huawei.com>,
-	Vinod Koul <vkoul@kernel.org>, Lee Jones <lee@kernel.org>,
-	Jijie Shao <shaojijie@huawei.com>,
-	Jian Shen <shenjian15@huawei.com>,
-	Sunil Goutham <sgoutham@marvell.com>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	"David S . Miller" <davem@davemloft.net>,
-	Jeff Hugo <jeff.hugo@oss.qualcomm.com>,
-	Oded Gabbay <ogabbay@kernel.org>,
-	Maciej Falkowski <maciej.falkowski@linux.intel.com>,
-	Karol Wachowski <karol.wachowski@linux.intel.com>,
-	Min Ma <mamin506@gmail.com>, Lizhi Hou <lizhi.hou@amd.com>,
-	Andreas Noever <andreas.noever@gmail.com>,
-	Mika Westerberg <westeri@kernel.org>,
-	Tomasz Jeznach <tjeznach@rivosinc.com>,
-	Will Deacon <will@kernel.org>,
-	Xinliang Liu <xinliang.liu@linaro.org>,
-	Tian Tao <tiantao6@hisilicon.com>,
-	Davidlohr Bueso <dave@stgolabs.net>,
-	Jonathan Cameron <jonathan.cameron@huawei.com>,
-	Srujana Challa <schalla@marvell.com>,
-	Bharat Bhushan <bbhushan2@marvell.com>,
-	Antoine Tenart <atenart@kernel.org>,
-	Herbert Xu <herbert@gondor.apana.org.au>,
-	Raag Jadav <raag.jadav@intel.com>, Hans de Goede <hansg@kernel.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Jiri Slaby <jirislaby@kernel.org>,
-	Andy Shevchenko <andy@kernel.org>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Mika Westerberg <mika.westerberg@linux.intel.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	Robert Richter <rric@kernel.org>, Mark Brown <broonie@kernel.org>,
-	Nirmal Patel <nirmal.patel@linux.intel.com>,
-	Kurt Schwemmer <kurt.schwemmer@microsemi.com>,
-	Logan Gunthorpe <logang@deltatee.com>,
-	Linus Walleij <linusw@kernel.org>,
-	Bartosz Golaszewski <brgl@kernel.org>,
-	Sakari Ailus <sakari.ailus@linux.intel.com>,
-	Bingbu Cao <bingbu.cao@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>,
-	Benjamin Tissoires <bentiss@kernel.org>,
-	linux-input@vger.kernel.org, linux-i3c@lists.infradead.org,
-	dmaengine@vger.kernel.org, netdev@vger.kernel.org,
-	nic_swsd@realtek.com, linux-arm-msm@vger.kernel.org,
-	dri-devel@lists.freedesktop.org, linux-usb@vger.kernel.org,
-	iommu@lists.linux.dev, linux-riscv@lists.infradead.org,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	linux-cxl@vger.kernel.org, linux-crypto@vger.kernel.org,
-	platform-driver-x86@vger.kernel.org, linux-serial@vger.kernel.org,
-	mhi@lists.linux.dev, Jan Dabros <jsd@semihalf.com>,
-	linux-i2c@vger.kernel.org, Daniel Mack <daniel@zonque.org>,
-	Haojian Zhuang <haojian.zhuang@gmail.com>,
-	linux-spi@vger.kernel.org,
-	Jonathan Derrick <jonathan.derrick@linux.dev>,
-	linux-pci@vger.kernel.org, linux-gpio@vger.kernel.org,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	linux-media@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 0/37] PCI/MSI: Enforce explicit IRQ vector management by
- removing devres auto-free
-Message-ID: <aZ1rb8zoqmQmakDP@smile.fi.intel.com>
-References: <1771860581-82092-1-git-send-email-shawn.lin@rock-chips.com>
- <6223f3cb-693f-42e7-9147-30f659f08563@hogyros.de>
- <7ca512d133f7a3bcfe00e9b0b2af5fe5f147ad77.camel@mailbox.org>
+	s=arc-20240116; t=1771925018; c=relaxed/simple;
+	bh=0RFfTAFGFD6Q0UES21xSuXBPo1gV4o0MexiWJ052qGU=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=JSOiGE81z8QyvA7LjIrHPMmOv7HcifykZoenAgLXvM41+j6eMBxSJ9KuKspG02s7fw/bBgbslEt1DI58z+hjWrSZflYaqg3q58ku6FuJXkwjms1GOSmC5R+g/077/Bq5JPRspQgmVbNJMfQvGb0Sx8pIQAadP1jNqz125xR9hhY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=162.243.161.220
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
+Received: from E0005182LT.eswin.cn (unknown [10.12.96.155])
+	by app2 (Coremail) with SMTP id TQJkCgB3jaAJbp1pdBoDAA--.16789S2;
+	Tue, 24 Feb 2026 17:23:23 +0800 (CST)
+From: hehuan1@eswincomputing.com
+To: ulf.hansson@linaro.org,
+	robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	jszhang@kernel.org,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: ningyu@eswincomputing.com,
+	linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com,
+	xuxiang@eswincomputing.com,
+	Huan He <hehuan1@eswincomputing.com>,
+	Pritesh Patel <pritesh.patel@einfochips.com>
+Subject: [PATCH v3] dt-bindings: mmc: dwcmshc-sdhci: Fix resets array validation
+Date: Tue, 24 Feb 2026 17:23:37 +0800
+Message-Id: <20260224092337.312-1-hehuan1@eswincomputing.com>
+X-Mailer: git-send-email 2.31.1.windows.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <7ca512d133f7a3bcfe00e9b0b2af5fe5f147ad77.camel@mailbox.org>
-Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
- krs, Bertel Jungin Aukio 5, 02600 Espoo
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:TQJkCgB3jaAJbp1pdBoDAA--.16789S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7uF13urWfuFy3Jw4kWr45ZFb_yoW8Aw1UpF
+	Z3Ary7t3s3AFy3Ww40y3Wvy3W7XwnIkF17Kr17tFn2ga1DZF1jgrW3Kwn0qFy3XFWIqaya
+	qaya9r13Aa42vr7anT9S1TB71UUUUUDqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUBv14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26F1j6w1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4U
+	JVWxJr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gc
+	CE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
+	2Ix0cI8IcVAFwI0_JrI_JrylYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJV
+	W8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lFIxGxcIEc7CjxVA2
+	Y2ka0xkIwI1lw4CEc2x0rVAKj4xxMxkF7I0En4kS14v26r4a6rW5MxkIecxEwVCm-wCF04
+	k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r18
+	MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr4
+	1lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr0_Cr1l
+	IxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4
+	A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x0pRMCJQUUUUU=
+X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/
 
-On Tue, Feb 24, 2026 at 08:39:43AM +0100, Philipp Stanner wrote:
-> On Tue, 2026-02-24 at 13:14 +0900, Simon Richter wrote:
-> > On 2/24/26 12:29 AM, Shawn Lin wrote:
+From: Huan He <hehuan1@eswincomputing.com>
 
-> > > When such a driver also uses `pcim_enable_device()`, the devres framework may
-> > > attempt to free the IRQ vectors a second time upon device release, leading to
-> > > a double-free. Analysis of the tree shows this hazardous pattern exists widely,
-> > > while 35 other drivers correctly rely solely on the implicit cleanup.
-> > 
-> > Would it make sense to have a function pcim_free_irq_vectors(), to allow 
-> > explicit freeing even if the device is otherwise managed, analogous to 
-> > pcim_iounmap()?
-> 
-> We used to add those. In part because it is easier to port old users.
-> 
-> Nowadays I tend to think that those APIs were more on the too-complex
-> than too-simple side for a long time. As an expert or as the API
-> designer you wouldn't expect it, but there are actually far too many
-> users who came to believe they always have to use pcim_iounmap() and
-> counter parts.
-> 
-> If I could design it from scratch I would probably try to tell users to
-> use the unmanaged versions instead of revoking the devres consequence.
+The binding defines tuple-style reset-names items for some
+compatibles, which implicitly enforces a fixed array length
+via JSON Schema.
 
-+many.
+Defining global maxItems for resets and reset-names causes these
+constraints to be intersected via allOf, resulting in an effective
+minItems equal to the global maxItems. This leads to dtbs_check
+failures reporting reset arrays as too short, even when the DTS
+provides the correct number of entries.
 
-> Devres is actually about your consequence always happening whenever the
-> driver unloads, for whatever reason.
+Fixes: 30009a21f257 ("dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin EIC7700")
+Signed-off-by: Pritesh Patel <pritesh.patel@einfochips.com>
+Signed-off-by: Huan He <hehuan1@eswincomputing.com>
 
-I believe you meant "unbinds". The device<-->driver link can be broken
-without unloading the driver.
+---
+Changes in v3:
+  - Add minItems: 5 in 'else' branch for non-eswin,eic7700-dwcmshc
+    compatibles
 
+Changes in v2:
+  - Keep the global maxItems constraints and add minItems: 4 for both
+    resets and reset-names properties
+  - Update commit message
+
+- Link to v1: https://lore.kernel.org/all/20260211094736.88-1-hehuan1@eswincomputing.com/
+---
+ Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index 7e7c55dc2440..5cebe5eb1efb 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -50,9 +50,11 @@ properties:
+     maxItems: 1
+ 
+   resets:
++    minItems: 4
+     maxItems: 5
+ 
+   reset-names:
++    minItems: 4
+     maxItems: 5
+ 
+   rockchip,txclk-tapnum:
+@@ -146,6 +148,7 @@ allOf:
+     else:
+       properties:
+         resets:
++          minItems: 5
+           maxItems: 5
+         reset-names:
+           items:
 -- 
-With Best Regards,
-Andy Shevchenko
-
+2.25.1
 
