@@ -1,108 +1,120 @@
-Received: from psionic.psi5.com (psionic.psi5.com [185.187.169.70])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 336F31386DA;
-	Tue, 24 Feb 2026 04:14:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.187.169.70
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8081233EC;
+	Tue, 24 Feb 2026 04:46:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771906490; cv=none; b=sWN6caF4NV+0Ls11x3wxYqvmOYUVwGPAfpDgvVHi7/PnHRtEK9Ko93bNdGWraBq20+y/OecHVXlf9haTGcEH1bVEoDgfz9/w+wC3EE27hVjG3uZGI5h/ZLoU/yxRnJPN3/hrsw/us8V5BKM29sR+udwdC0wOR8ENDTTTqaAJ6h0=
+	t=1771908393; cv=none; b=UJWGx++ccsmcrvO9rxl6FNiBrezOEpCEmMxZBLFFPaw97I/ovf+a2ReCYo5meF+MLqG7k3smzywlmEZBu4vwmGCgYeFeoBB/CG17Ne+enfTTjDwEeqHjL+KTGtewD4h1X0fBPRMXCpwBkzhVBdRrcQwTlCxte/agd+pofcS5cuw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771906490; c=relaxed/simple;
-	bh=ydgvftYaDThj8fv69O/pWh5vUQf7eSpE2/BTruWjukY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=G/FoReRP1dKgXvYsw7UlbseWsUPEyPepMqkv96Ix/3ZnI2c+DcDE8WsWatbgk7O5RKuJUfJ5Ugygd6WX4zAoqbizVOmKff/1y+40BW/oQJHX9aOMK3l2AAPdEXUBtk3JLW55NP9jYbNPXoIrTbmSKcFaDDJ+b8aiijC97+YL6tU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hogyros.de; spf=pass smtp.mailfrom=hogyros.de; arc=none smtp.client-ip=185.187.169.70
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hogyros.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hogyros.de
-Received: from [IPV6:2400:2410:b120:f200:a1f3:73da:3a04:160d] (unknown [IPv6:2400:2410:b120:f200:a1f3:73da:3a04:160d])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(Client did not present a certificate)
-	by psionic.psi5.com (Postfix) with ESMTPSA id 583C83F01D;
-	Tue, 24 Feb 2026 05:14:19 +0100 (CET)
-Message-ID: <6223f3cb-693f-42e7-9147-30f659f08563@hogyros.de>
-Date: Tue, 24 Feb 2026 13:14:16 +0900
+	s=arc-20240116; t=1771908393; c=relaxed/simple;
+	bh=LxuIlz3HZc/RntD/QzDM0Oh/00bVByZlpuigNwz+R3Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=HFDj1JIioc3d8Fa6Cy+FOJgJqEfD86ke9740KPohhLtkZqzDLjZioMF0oz+WNIEWtgUVYBKZC7D2kqe2BH/dZ8dHtec94unITVXcNxK2XVnswEpKH5ahXoZfdC3f7C2I5YT6kxZ2SWL8MQp9nnXopjL8GmFWzU8qVLvD8ox0C3M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iwQhHsdP; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iwQhHsdP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7F45FC116D0;
+	Tue, 24 Feb 2026 04:46:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1771908393;
+	bh=LxuIlz3HZc/RntD/QzDM0Oh/00bVByZlpuigNwz+R3Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=iwQhHsdP3BJXMWiqNuLzvRrGBmueJ7HrnoW/nLnlModqWiCBQ/Z5t/7UibxamrjzY
+	 7sFLmp0HPVQywSarne+hZ6jiYWeFNmLi5USEH9y7D9zAGjBUW+e1Ma1CO7wTTJb39I
+	 PDRMGJLwddlbjz8mWEx8vvYPQl1yXPouIBavj+CxItKc6SfTj5XLKqgoOcG++Z7/7k
+	 KgPvkYDcdOwnownk+XX+dRLBt3EBIFcd3x9A4JeR7So9PArFDPfDlZZXcodZBKZRgy
+	 XnWP6YwKiOBt94f0mEOh8QBbOJfjxJtYRj+pI88ooT+64y/16i2KWrHT95PWQ/03Kb
+	 gThV3bg5gGUjw==
+Date: Tue, 24 Feb 2026 10:16:24 +0530
+From: Manivannan Sadhasivam <mani@kernel.org>
+To: Bjorn Andersson <andersson@kernel.org>, 
+	Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Cc: manivannan.sadhasivam@oss.qualcomm.com, 
+	Konrad Dybcio <konradybcio@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
+	"Martin K. Petersen" <martin.petersen@oracle.com>, Abel Vesa <abelvesa@kernel.org>, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	Sumit Garg <sumit.garg@oss.qualcomm.com>, stable@vger.kernel.org
+Subject: Re: [PATCH v3 1/4] soc: qcom: ice: Fix race between qcom_ice_probe()
+ and of_qcom_ice_get()
+Message-ID: <lrhali5ukotcmxqp4yb2g2jvbrhlanpqc67cpvluex4l63skne@ln3j4xn6qfvx>
+References: <20260223-qcom-ice-fix-v3-0-6ca5846329f7@oss.qualcomm.com>
+ <20260223-qcom-ice-fix-v3-1-6ca5846329f7@oss.qualcomm.com>
+ <h2uhrsjlvovjcj7k2ckpkgrhpuwm6biun4ueq7kyzcm4hqcsjr@y3iiqx2vo6s2>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/37] PCI/MSI: Enforce explicit IRQ vector management by
- removing devres auto-free
-To: Shawn Lin <shawn.lin@rock-chips.com>, Bjorn Helgaas
- <bhelgaas@google.com>, "Vaibhaav Ram T . L" <vaibhaavram.tl@microchip.com>,
- Kumaravel Thiagarajan <kumaravel.thiagarajan@microchip.com>,
- Even Xu <even.xu@intel.com>, Xinpeng Sun <xinpeng.sun@intel.com>,
- Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
- Jiri Kosina <jikos@kernel.org>,
- Alexandre Belloni <alexandre.belloni@bootlin.com>,
- Zhou Wang <wangzhou1@hisilicon.com>, Longfang Liu <liulongfang@huawei.com>,
- Vinod Koul <vkoul@kernel.org>, Lee Jones <lee@kernel.org>,
- Jijie Shao <shaojijie@huawei.com>, Jian Shen <shenjian15@huawei.com>,
- Sunil Goutham <sgoutham@marvell.com>, Andrew Lunn <andrew+netdev@lunn.ch>,
- Heiner Kallweit <hkallweit1@gmail.com>,
- "David S . Miller" <davem@davemloft.net>,
- Jeff Hugo <jeff.hugo@oss.qualcomm.com>, Oded Gabbay <ogabbay@kernel.org>,
- Maciej Falkowski <maciej.falkowski@linux.intel.com>,
- Karol Wachowski <karol.wachowski@linux.intel.com>,
- Min Ma <mamin506@gmail.com>, Lizhi Hou <lizhi.hou@amd.com>,
- Andreas Noever <andreas.noever@gmail.com>,
- Mika Westerberg <westeri@kernel.org>, Tomasz Jeznach
- <tjeznach@rivosinc.com>, Will Deacon <will@kernel.org>,
- Xinliang Liu <xinliang.liu@linaro.org>, Tian Tao <tiantao6@hisilicon.com>,
- Davidlohr Bueso <dave@stgolabs.net>,
- Jonathan Cameron <jonathan.cameron@huawei.com>,
- Srujana Challa <schalla@marvell.com>, Bharat Bhushan
- <bbhushan2@marvell.com>, Antoine Tenart <atenart@kernel.org>,
- Herbert Xu <herbert@gondor.apana.org.au>, Raag Jadav <raag.jadav@intel.com>,
- Hans de Goede <hansg@kernel.org>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Jiri Slaby <jirislaby@kernel.org>, Andy Shevchenko <andy@kernel.org>,
- Manivannan Sadhasivam <mani@kernel.org>,
- Mika Westerberg <mika.westerberg@linux.intel.com>,
- Andi Shyti <andi.shyti@kernel.org>, Robert Richter <rric@kernel.org>,
- Mark Brown <broonie@kernel.org>, Nirmal Patel
- <nirmal.patel@linux.intel.com>, Kurt Schwemmer
- <kurt.schwemmer@microsemi.com>, Logan Gunthorpe <logang@deltatee.com>,
- Linus Walleij <linusw@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>,
- Sakari Ailus <sakari.ailus@linux.intel.com>,
- Bingbu Cao <bingbu.cao@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Benjamin Tissoires <bentiss@kernel.org>,
- linux-input@vger.kernel.org, linux-i3c@lists.infradead.org,
- dmaengine@vger.kernel.org, Philipp Stanner <phasta@kernel.org>,
- netdev@vger.kernel.org, nic_swsd@realtek.com, linux-arm-msm@vger.kernel.org,
- dri-devel@lists.freedesktop.org, linux-usb@vger.kernel.org,
- iommu@lists.linux.dev, linux-riscv@lists.infradead.org,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- linux-cxl@vger.kernel.org, linux-crypto@vger.kernel.org,
- platform-driver-x86@vger.kernel.org, linux-serial@vger.kernel.org,
- mhi@lists.linux.dev, Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
- Jan Dabros <jsd@semihalf.com>, linux-i2c@vger.kernel.org,
- Daniel Mack <daniel@zonque.org>, Haojian Zhuang <haojian.zhuang@gmail.com>,
- linux-spi@vger.kernel.org, Jonathan Derrick <jonathan.derrick@linux.dev>,
- linux-pci@vger.kernel.org, linux-gpio@vger.kernel.org,
- Mauro Carvalho Chehab <mchehab@kernel.org>, linux-media@vger.kernel.org,
- linux-mmc@vger.kernel.org
-References: <1771860581-82092-1-git-send-email-shawn.lin@rock-chips.com>
-Content-Language: en-US
-From: Simon Richter <Simon.Richter@hogyros.de>
-In-Reply-To: <1771860581-82092-1-git-send-email-shawn.lin@rock-chips.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <h2uhrsjlvovjcj7k2ckpkgrhpuwm6biun4ueq7kyzcm4hqcsjr@y3iiqx2vo6s2>
 
-Hi,
++ Neeraj
 
-On 2/24/26 12:29 AM, Shawn Lin wrote:
+On Mon, Feb 23, 2026 at 02:35:04PM -0600, Bjorn Andersson wrote:
+> On Mon, Feb 23, 2026 at 01:32:52PM +0530, Manivannan Sadhasivam via B4 Relay wrote:
+> > From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+> > 
+> > The current platform driver design causes probe ordering races with
+> > consumers (UFS, eMMC) due to ICE's dependency on SCM firmware calls. If ICE
+> > probe fails (missing ICE SCM or DT registers), devm_of_qcom_ice_get() loops
+> > with -EPROBE_DEFER, leaving consumers non-functional even when ICE should
+> > be gracefully disabled. devm_of_qcom_ice_get() doesn't know if the ICE
+> > driver probe has failed due to above reasons or it is waiting for the SCM
+> > driver.
+> > 
+> > Moreover, there is no devlink dependency between ICE and consumer drivers
+> > as 'qcom,ice' is not considered as a DT 'supplier'. So the consumer drivers
+> > have no idea of when the ICE driver is going to probe.
+> > 
+> > To address these issues, introduce a global ice_handle to store the valid
+> > ICE handle pointer, and set during successful ICE driver probe. On probe
+> > failure, set it to an error pointer and propagate the error from
+> > of_qcom_ice_get().
+> > 
+> > Additionally, add a global ice_mutex to synchronize qcom_ice_probe() and
+> > of_qcom_ice_get().
+> > 
+> > Note that this change only fixes the standalone ICE DT node bindings and
+> > not the ones with 'ice' range embedded in the consumer nodes, where there
+> > is no issue.
+> > 
+> > Cc: <stable@vger.kernel.org> # 6.4
+> > Fixes: 2afbf43a4aec ("soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver")
+> > Reported-by: Sumit Garg <sumit.garg@oss.qualcomm.com>
+> > Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+> > ---
+> >  drivers/soc/qcom/ice.c | 44 +++++++++++++++++++++++++++-----------------
+> >  1 file changed, 27 insertions(+), 17 deletions(-)
+> > 
+> > diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> > index b203bc685cad..3c3c189e24f9 100644
+> > --- a/drivers/soc/qcom/ice.c
+> > +++ b/drivers/soc/qcom/ice.c
+> > @@ -113,6 +113,9 @@ struct qcom_ice {
+> >  	u8 hwkm_version;
+> >  };
+> >  
+> > +static DEFINE_MUTEX(ice_mutex);
+> > +static struct qcom_ice *ice_handle;
+> 
+> Did we get confirmation that in the UFS + SDCC case, there's only a
+> single ICE instance per SoC?
+> 
 
-> When such a driver also uses `pcim_enable_device()`, the devres framework may
-> attempt to free the IRQ vectors a second time upon device release, leading to
-> a double-free. Analysis of the tree shows this hazardous pattern exists widely,
-> while 35 other drivers correctly rely solely on the implicit cleanup.
+Right now there is only a single instance per SoC. But Neeraj told me that
+upcoming SoCs are going to have multiple instances. But I don't want to spend
+too much time on *upcoming* support, but rather fix the current
+implementations.
 
-Would it make sense to have a function pcim_free_irq_vectors(), to allow 
-explicit freeing even if the device is otherwise managed, analogous to 
-pcim_iounmap()?
+Extending this to multiple instances would just require storing the ice_handle
+with node name/address pair in xarray or in some other data structures.
 
-    Simon
+- Mani
+
+-- 
+மணிவண்ணன் சதாசிவம்
