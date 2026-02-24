@@ -1,120 +1,95 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f44.google.com (mail-oo1-f44.google.com [209.85.161.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8081233EC;
-	Tue, 24 Feb 2026 04:46:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9121227587D
+	for <linux-mmc@vger.kernel.org>; Tue, 24 Feb 2026 06:13:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1771908393; cv=none; b=UJWGx++ccsmcrvO9rxl6FNiBrezOEpCEmMxZBLFFPaw97I/ovf+a2ReCYo5meF+MLqG7k3smzywlmEZBu4vwmGCgYeFeoBB/CG17Ne+enfTTjDwEeqHjL+KTGtewD4h1X0fBPRMXCpwBkzhVBdRrcQwTlCxte/agd+pofcS5cuw=
+	t=1771913627; cv=none; b=XtzKTygHl2v9ai5PAXO+AKMbWRDOlJkxXGAH2ZhsOKcysoNV8bj47D05udfQWsnBp327rEeigdEnsneTOSzCY1TIeCvtw140mguVhDeqzl2TOmyJ2pTh8tUiw1mGVumSJd4y1qbJgZtP8qfIg17JKQyvDHXGc0Lda3xxHxagphE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1771908393; c=relaxed/simple;
-	bh=LxuIlz3HZc/RntD/QzDM0Oh/00bVByZlpuigNwz+R3Y=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HFDj1JIioc3d8Fa6Cy+FOJgJqEfD86ke9740KPohhLtkZqzDLjZioMF0oz+WNIEWtgUVYBKZC7D2kqe2BH/dZ8dHtec94unITVXcNxK2XVnswEpKH5ahXoZfdC3f7C2I5YT6kxZ2SWL8MQp9nnXopjL8GmFWzU8qVLvD8ox0C3M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iwQhHsdP; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iwQhHsdP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7F45FC116D0;
-	Tue, 24 Feb 2026 04:46:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1771908393;
-	bh=LxuIlz3HZc/RntD/QzDM0Oh/00bVByZlpuigNwz+R3Y=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=iwQhHsdP3BJXMWiqNuLzvRrGBmueJ7HrnoW/nLnlModqWiCBQ/Z5t/7UibxamrjzY
-	 7sFLmp0HPVQywSarne+hZ6jiYWeFNmLi5USEH9y7D9zAGjBUW+e1Ma1CO7wTTJb39I
-	 PDRMGJLwddlbjz8mWEx8vvYPQl1yXPouIBavj+CxItKc6SfTj5XLKqgoOcG++Z7/7k
-	 KgPvkYDcdOwnownk+XX+dRLBt3EBIFcd3x9A4JeR7So9PArFDPfDlZZXcodZBKZRgy
-	 XnWP6YwKiOBt94f0mEOh8QBbOJfjxJtYRj+pI88ooT+64y/16i2KWrHT95PWQ/03Kb
-	 gThV3bg5gGUjw==
-Date: Tue, 24 Feb 2026 10:16:24 +0530
-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Bjorn Andersson <andersson@kernel.org>, 
-	Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Cc: manivannan.sadhasivam@oss.qualcomm.com, 
-	Konrad Dybcio <konradybcio@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, Abel Vesa <abelvesa@kernel.org>, linux-arm-msm@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	Sumit Garg <sumit.garg@oss.qualcomm.com>, stable@vger.kernel.org
-Subject: Re: [PATCH v3 1/4] soc: qcom: ice: Fix race between qcom_ice_probe()
- and of_qcom_ice_get()
-Message-ID: <lrhali5ukotcmxqp4yb2g2jvbrhlanpqc67cpvluex4l63skne@ln3j4xn6qfvx>
-References: <20260223-qcom-ice-fix-v3-0-6ca5846329f7@oss.qualcomm.com>
- <20260223-qcom-ice-fix-v3-1-6ca5846329f7@oss.qualcomm.com>
- <h2uhrsjlvovjcj7k2ckpkgrhpuwm6biun4ueq7kyzcm4hqcsjr@y3iiqx2vo6s2>
+	s=arc-20240116; t=1771913627; c=relaxed/simple;
+	bh=UP66ZAAJa6BHp/aVMJvzMBc3hktO+sAwJ59yXee9e+Q=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fPPa8K+MyPq5n+6A978AM+j4Y0t3s/lhEauCTezCvFweTpPW2UIJFOlLbJ5xtiRVf0ilFUpGillMslrBTZSVKmKyfAy3oZGhh2Fm8rKPywtv3zC0R8IGt5lrr1mx0ObWCEpQaWtpQ7Y2Elw8O3okUyuRN7PSUkCtxBqICfLU+ms=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.161.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-oo1-f44.google.com with SMTP id 006d021491bc7-6780761b665so2963107eaf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Feb 2026 22:13:46 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1771913625; x=1772518425;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=AfopHsfGlEfdUUn+Z5Ob2uv5rH6VmacISxBMgn7zNc4=;
+        b=h4b6szw2kRZSq3tMOQDdHYeyBfr6fLPo52fCoZ8GAjpZYmTOCz2hzGM0W6gLN59wYE
+         3xcP51mThReZThCDp6Xaq+gT3DinKAMhrzTT/uzjVkvxVCVPgQJY2fSgmJK/I64+6xiJ
+         I236YQRV6QTro8O5LBNPoNf8WVv6rOpy1ZXqQ/pYpVRI1D/4w4Nh9UGQh+CbxwK42Ekz
+         AVd9y2XqW0SsUy/JY3x7mI+irFb1EAU+72xzKvRI4j/UWxMb04j5gZ8FlvqXsniKmmis
+         6zog90/RYXN8dFRiHjO1swpVfHcrJtsaCOynz09geZnXqpfT8pD8UISyoRGzO9ULqPY9
+         V30A==
+X-Forwarded-Encrypted: i=1; AJvYcCWw/s22xj3TbDa+GZYN1sL03Q5sshuhtnWeMZuvFDN5PANX69zu8R45o5dWKGAOG0ziRo7ellkV5kY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx3IoVPb6U1ZaFB2bpZ0N0FQanyQJn0A5Qlkqg38gjagiaD7hHF
+	kr3pmQ4S+vBbOCfynz6fItrY2hc6iR3+iOG3kY4x2/+fY2A3/SKYH7po
+X-Gm-Gg: AZuq6aIALX9KFSIEsTFu/z+g+aO4ZhNWlp4HHKM4KBJBNoAlKZNjm5cwrOtdIDP7UM6
+	Tygb/nSChdBDMUX5uCd3cKDwd8DaTKAFrLBx2+UsPR2gbYULnGBHfePEenF8L6n5jaRyZ76pMHC
+	7C4d050Ct00HZjr0Moguls9tzMjxzy+bC3XnVX0Gk8SFuwqKOpVe3NanebQaGxErmwGnAbVp+gP
+	iWWdwC5XnlBB0rpnrJaCONnXovnUZcL1pl/UdC6Gi1aUsm2v0KNLxYaiEhcBiqNor/X8lGjrm3p
+	ux72uA7aiGNXX6TAIfA3iLY0Ary/nnQFJjemyLYLIiY5TjRi4kX3Vh7FHpWthPgXuiy4fnLBKWa
+	Ja0bn5cI/d7wNBpbNGh5Av7zkwVsZfgMadDAVAp5h6EV4nftAq/tNG9LgsKH6GWbBvBbosSC1bJ
+	9yOwJsT87ghBJ9RWR8xmSV478MG40TNimxhnrHRx/RM6TrzjcRukjE8ZIqrv32jeo=
+X-Received: by 2002:a05:6820:61d:b0:679:95da:9752 with SMTP id 006d021491bc7-679c464670dmr6311208eaf.11.1771913625371;
+        Mon, 23 Feb 2026 22:13:45 -0800 (PST)
+Received: from sean-HP-EliteBook-830-G6.attlocal.net ([2600:1702:5083:7610:8ac2:4fdd:a742:61b8])
+        by smtp.gmail.com with ESMTPSA id 006d021491bc7-679c56dbde9sm7895306eaf.11.2026.02.23.22.13.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Feb 2026 22:13:43 -0800 (PST)
+From: Sean Wang <sean.wang@kernel.org>
+To: marcel@holtmann.org,
+	luiz.dentz@gmail.com,
+	ulf.hansson@linaro.org
+Cc: linux-bluetooth@vger.kernel.org,
+	linux-mediatek@lists.infradead.org,
+	linux-mmc@vger.kernel.org,
+	Sean Wang <sean.wang@mediatek.com>
+Subject: [PATCH v2 1/8] mmc: sdio: add MediaTek MT7902 SDIO device ID
+Date: Tue, 24 Feb 2026 00:13:18 -0600
+Message-ID: <20260224061325.20189-1-sean.wang@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <h2uhrsjlvovjcj7k2ckpkgrhpuwm6biun4ueq7kyzcm4hqcsjr@y3iiqx2vo6s2>
 
-+ Neeraj
+From: Sean Wang <sean.wang@mediatek.com>
 
-On Mon, Feb 23, 2026 at 02:35:04PM -0600, Bjorn Andersson wrote:
-> On Mon, Feb 23, 2026 at 01:32:52PM +0530, Manivannan Sadhasivam via B4 Relay wrote:
-> > From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-> > 
-> > The current platform driver design causes probe ordering races with
-> > consumers (UFS, eMMC) due to ICE's dependency on SCM firmware calls. If ICE
-> > probe fails (missing ICE SCM or DT registers), devm_of_qcom_ice_get() loops
-> > with -EPROBE_DEFER, leaving consumers non-functional even when ICE should
-> > be gracefully disabled. devm_of_qcom_ice_get() doesn't know if the ICE
-> > driver probe has failed due to above reasons or it is waiting for the SCM
-> > driver.
-> > 
-> > Moreover, there is no devlink dependency between ICE and consumer drivers
-> > as 'qcom,ice' is not considered as a DT 'supplier'. So the consumer drivers
-> > have no idea of when the ICE driver is going to probe.
-> > 
-> > To address these issues, introduce a global ice_handle to store the valid
-> > ICE handle pointer, and set during successful ICE driver probe. On probe
-> > failure, set it to an error pointer and propagate the error from
-> > of_qcom_ice_get().
-> > 
-> > Additionally, add a global ice_mutex to synchronize qcom_ice_probe() and
-> > of_qcom_ice_get().
-> > 
-> > Note that this change only fixes the standalone ICE DT node bindings and
-> > not the ones with 'ice' range embedded in the consumer nodes, where there
-> > is no issue.
-> > 
-> > Cc: <stable@vger.kernel.org> # 6.4
-> > Fixes: 2afbf43a4aec ("soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver")
-> > Reported-by: Sumit Garg <sumit.garg@oss.qualcomm.com>
-> > Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-> > ---
-> >  drivers/soc/qcom/ice.c | 44 +++++++++++++++++++++++++++-----------------
-> >  1 file changed, 27 insertions(+), 17 deletions(-)
-> > 
-> > diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
-> > index b203bc685cad..3c3c189e24f9 100644
-> > --- a/drivers/soc/qcom/ice.c
-> > +++ b/drivers/soc/qcom/ice.c
-> > @@ -113,6 +113,9 @@ struct qcom_ice {
-> >  	u8 hwkm_version;
-> >  };
-> >  
-> > +static DEFINE_MUTEX(ice_mutex);
-> > +static struct qcom_ice *ice_handle;
-> 
-> Did we get confirmation that in the UFS + SDCC case, there's only a
-> single ICE instance per SoC?
-> 
+Add SDIO device ID (0x790a) for MediaTek MT7902 to sdio_ids.h.
 
-Right now there is only a single instance per SoC. But Neeraj told me that
-upcoming SoCs are going to have multiple instances. But I don't want to spend
-too much time on *upcoming* support, but rather fix the current
-implementations.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sean Wang <sean.wang@mediatek.com>
+---
+v2:
+1. Sort the MT7902 SDIO ID definitions.
+2. Add Acked-by from Ulf. Ulf mentioned this should go along with the other
+patches, so Ulf not picking this via the mmc tree.
+---
+ include/linux/mmc/sdio_ids.h | 1 +
+ 1 file changed, 1 insertion(+)
 
-Extending this to multiple instances would just require storing the ice_handle
-with node name/address pair in xarray or in some other data structures.
-
-- Mani
-
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index 673cbdf43453..dce89c110691 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -111,6 +111,7 @@
+ #define SDIO_VENDOR_ID_MEDIATEK			0x037a
+ #define SDIO_DEVICE_ID_MEDIATEK_MT7663		0x7663
+ #define SDIO_DEVICE_ID_MEDIATEK_MT7668		0x7668
++#define SDIO_DEVICE_ID_MEDIATEK_MT7902		0x790a
+ #define SDIO_DEVICE_ID_MEDIATEK_MT7961		0x7961
+ 
+ #define SDIO_VENDOR_ID_MICROCHIP_WILC		0x0296
 -- 
-மணிவண்ணன் சதாசிவம்
+2.43.0
+
