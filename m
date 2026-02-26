@@ -1,60 +1,38 @@
-Received: from mailout2.samsung.com (mailout2.samsung.com [203.254.224.25])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58CCB30596F
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2026 09:13:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.25
+Received: from azure-sdnproxy.icoremail.net (azure-sdnproxy.icoremail.net [52.237.72.81])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 7C2BB3A0E9F;
+	Thu, 26 Feb 2026 09:26:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=52.237.72.81
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772097223; cv=none; b=MiGKsFrwiNddzlCAIkIYbE7GfS/G0T948EP5w6/Y/pa6e2vwRD0d5KzG7ayz0MY5U6WIxYJasQgO33XYgQwONEW+eMn/qIKEBCynxgPR4lZDPHbwMKdzXDLMUoTc08IQmkIljAyZ5sHSobTXZm/+5dSN0/H9t2b1tfjKgjcUkL4=
+	t=1772097999; cv=none; b=ORlrZrlMSVbl1R8cGtVuJeB6yhWxYU2/aG2roR4frEbHvENA5rnKva5qCQ68+ML/fz84EIj0lEPWspe0E+INVuhrK9CSm4+3ALCYCHnjXQdTHA8tPQ68NljIlDFSr26XA8Qw3jIWbLq4Z6dE6vwapM8JXimJxb5N7etUWHt7tt4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772097223; c=relaxed/simple;
-	bh=Ll1C/k6us6VNV4G+XvSuQrT3k/czbVvKdxB4yjiF6jE=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:MIME-Version:
-	 Content-Type:References; b=MRe2qLaUMyaROCkJm66boo54UmNUh8r/oC1PsGS2Z0+ZHG0Ya63vCN78dB1ChRSoNzpV/9xq5mzbcmAbEpJEjH7C87iqJeJL37yUKVqii5S1aQ6H8gotOjsxssyi79Y4nlIS3XF/ljIv7w1fdXZjQsW+OQo5tgH4pRwb/tXV0VQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=ftHDagL2; arc=none smtp.client-ip=203.254.224.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="ftHDagL2"
-Received: from epcas5p2.samsung.com (unknown [182.195.41.40])
-	by mailout2.samsung.com (KnoxPortal) with ESMTP id 20260226090505epoutp02b665c088ce1930275a807017370ca881~XwJCdxixk0198601986epoutp02H
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2026 09:05:05 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20260226090505epoutp02b665c088ce1930275a807017370ca881~XwJCdxixk0198601986epoutp02H
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1772096705;
-	bh=PZeSZWFesAgEfOfY1Eam39aeSIQJZPf2ZiqvMOXv1vc=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ftHDagL2pNZ07RVKrxfZTZoS/4kGwdLYW4PfNKKvzEtsV+X0NRh8kVgGKs7hmteWT
-	 VaDhb5wUQ0s7VyP1QpWL8XNu8PQ3KjnfYUh4SyLx0tE4hyvFYFZB+8yN529xAg0BYV
-	 UWaj4uXmmMA0iLqxJdWZsO4zw2/WoMdL8lEnyuPE=
-Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
-	epcas5p1.samsung.com (KnoxPortal) with ESMTPS id
-	20260226090505epcas5p1d8fd7593316a7567deff72615749a3eb~XwJCGLO1C0280902809epcas5p18;
-	Thu, 26 Feb 2026 09:05:05 +0000 (GMT)
-Received: from epcas5p4.samsung.com (unknown [182.195.41.42]) by
-	epsnrtp01.localdomain (Postfix) with ESMTP id 4fM5Bn2Hlmz6B9mF; Thu, 26 Feb
-	2026 09:05:05 +0000 (GMT)
-Received: from epsmtip1.samsung.com (unknown [182.195.34.30]) by
-	epcas5p2.samsung.com (KnoxPortal) with ESMTPA id
-	20260226090505epcas5p2c4f159fa29187685275dd950dd69f5cd~XwJB71Xtg1465714657epcas5p23;
-	Thu, 26 Feb 2026 09:05:05 +0000 (GMT)
-Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip1.samsung.com
-	(KnoxPortal) with ESMTPA id
-	20260226090504epsmtip15c749afc4ee9ee5c3a5b0c944563d3a8~XwJBPGh3f0295402954epsmtip1B;
-	Thu, 26 Feb 2026 09:05:04 +0000 (GMT)
-From: "ping.gao" <ping.gao@samsung.com>
-To: shawn.lin@rock-chips.com, ulf.hansson@linaro.org,
-	jh80.chung@samsung.com, krzk+dt@kernel.org, conor+dt@kernel.org,
-	robh@kernel.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	devicetree@vger.kernel.org, hy50.seo@samsung.com, kwangwon.min@samsung.com,
-	ping.gao@samsung.com
-Subject: [PATCH v3 1/3] mmc: dw_mmc-k3: before set biu_clk rate, check
- biu_clk available or not
-Date: Thu, 26 Feb 2026 17:09:58 +0800
-Message-ID: <20260226090958.300440-1-ping.gao@samsung.com>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
+	s=arc-20240116; t=1772097999; c=relaxed/simple;
+	bh=SvrvibyOoFIVw35MXLQXXfyABImjf/FBqdJ2/V42bb8=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=FHswv5tV3csyUG7cHzHCdCzwjG6vnMRrmHYL9n32V/tlDVDRAcWXm7JBFjuKMfBWrnLF5X16UgyGEcPTz3rubLvPEQp2dXWBtQ+eYnO19OUqV/FKRkLU9M/a0iZHhcODzM2gcnQ7Ku1yUREawJj8GV+2rifkA6wADaege0dqc7w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=52.237.72.81
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
+Received: from E0005182LT.eswin.cn (unknown [10.12.96.155])
+	by app2 (Coremail) with SMTP id TQJkCgD3DaG5EaBpxb0DAA--.20239S2;
+	Thu, 26 Feb 2026 17:26:18 +0800 (CST)
+From: hehuan1@eswincomputing.com
+To: ulf.hansson@linaro.org,
+	robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	jszhang@kernel.org,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: ningyu@eswincomputing.com,
+	linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com,
+	xuxiang@eswincomputing.com,
+	Huan He <hehuan1@eswincomputing.com>,
+	Pritesh Patel <pritesh.patel@einfochips.com>
+Subject: [PATCH v4] dt-bindings: mmc: dwcmshc-sdhci: Fix resets array validation
+Date: Thu, 26 Feb 2026 17:26:14 +0800
+Message-Id: <20260226092614.435-1-hehuan1@eswincomputing.com>
+X-Mailer: git-send-email 2.31.1.windows.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,37 +40,83 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CMS-MailID: 20260226090505epcas5p2c4f159fa29187685275dd950dd69f5cd
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-X-CMS-RootMailID: 20260123085150epcas5p42f2cc04843ae7657380b2968261246cb
-References: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
+X-CM-TRANSID:TQJkCgD3DaG5EaBpxb0DAA--.20239S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7uF13urWfuFy3Jw4kAr4fZrb_yoW8CFyfpF
+	Z3JryUtwn3Ary3Gw40y3WkA3ZrXwnIy3W2gr12qrn2ga1DZFWjgrW3Kwn0qFy3XFWxtaya
+	qa1a9r13A342vr7anT9S1TB71UUUUUDqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUBv14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26w1j6s0DM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4U
+	JVWxJr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gc
+	CE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
+	2Ix0cI8IcVAFwI0_JrI_JrylYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJV
+	W8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lFIxGxcIEc7CjxVA2
+	Y2ka0xkIwI1lw4CEc2x0rVAKj4xxMxkF7I0En4kS14v26r4a6rW5MxkIecxEwVCm-wCF04
+	k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r18
+	MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr4
+	1lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr0_Cr1l
+	IxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4
+	A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x0pRMCJQUUUUU=
+X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/
 
-If biu_clk is not available, no need to try to set and get
-rate of it, just bail out and print a warning
+From: Huan He <hehuan1@eswincomputing.com>
 
-Signed-off-by: ping.gao <ping.gao@samsung.com>
+The binding defines tuple-style reset-names items for some
+compatibles, which implicitly enforces a fixed array length
+via JSON Schema.
+
+Defining global maxItems for resets and reset-names causes these
+constraints to be intersected via allOf, resulting in an effective
+minItems equal to the global maxItems. This leads to dtbs_check
+failures reporting reset arrays as too short, even when the DTS
+provides the correct number of entries.
+
+Fixes: 30009a21f257 ("dt-bindings: mmc: sdhci-of-dwcmshc: Add Eswin EIC7700")
+Co-developed-by: Pritesh Patel <pritesh.patel@einfochips.com>
+Signed-off-by: Pritesh Patel <pritesh.patel@einfochips.com>
+Signed-off-by: Huan He <hehuan1@eswincomputing.com>
+
 ---
- drivers/mmc/host/dw_mmc-k3.c | 5 +++++
- 1 file changed, 5 insertions(+)
+Changes in v4:
+  - Add Co-developed-by tag for Pritesh Patel
 
-diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-index ad6aa1aea549..ccb6bfe3e0ce 100644
---- a/drivers/mmc/host/dw_mmc-k3.c
-+++ b/drivers/mmc/host/dw_mmc-k3.c
-@@ -190,6 +190,11 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	int ret;
- 	unsigned int clock;
+Changes in v3:
+  - Add minItems: 5 in 'else' branch for non-Eswin devices
+
+Changes in v2:
+  - Keep the global maxItems constraints and add minItems: 4 for both
+    resets and reset-names properties
+  - Update commit message
+
+- Link to v1: https://lore.kernel.org/all/20260211094736.88-1-hehuan1@eswincomputing.com/
+---
+ Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index 7e7c55dc2440..5cebe5eb1efb 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -50,9 +50,11 @@ properties:
+     maxItems: 1
  
-+	if (IS_ERR_OR_NULL(host->biu_clk)) {
-+		dev_err(host->dev, "biu_clk not available\n");
-+		return;
-+	}
-+
- 	clock = (ios->clock <= 25000000) ? 25000000 : ios->clock;
+   resets:
++    minItems: 4
+     maxItems: 5
  
- 	ret = clk_set_rate(host->biu_clk, clock);
+   reset-names:
++    minItems: 4
+     maxItems: 5
+ 
+   rockchip,txclk-tapnum:
+@@ -146,6 +148,7 @@ allOf:
+     else:
+       properties:
+         resets:
++          minItems: 5
+           maxItems: 5
+         reset-names:
+           items:
 -- 
-2.50.1
+2.25.1
 
