@@ -1,703 +1,497 @@
-Received: from mail-dl1-f50.google.com (mail-dl1-f50.google.com [74.125.82.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from DUZPR83CU001.outbound.protection.outlook.com (mail-northeuropeazon11022100.outbound.protection.outlook.com [52.101.66.100])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D9342749E6
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2026 10:09:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.82.50
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772100549; cv=pass; b=ot7N5QWHiTaqDAiEH37PrYrjJA0rzC73KwZ2zFw8IjBt3rdAJO+ZFaNwkvdGjPesMYkPgu+WQeYml3d/26ov6dWXvtuZ+EaKFJBOua8/XSRQNEIKwgErfTF0njNPyz06GojQISfRAOMEynvuoZICIb43R+4uJJ2JA75toTCubyI=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772100549; c=relaxed/simple;
-	bh=EQ9Zv3knqnt6ZZnEFeatyYweXaGIe5Cyr76dZiofxB4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PxJR4Npylss6HQV2tWhcMKu+1EpgLQjMoNtEgNQkgocmC0fU1wNUuUAhkDgPWW4aFVzBJK0X42XJm1BkbaiOb+WBNVSghuI6RBA8Asb47jCcpJHL3/09IGOau6AAXt7m5EQjOUWVzvgsFubUNSXGqhihq4pby+vBuQyIZWqLK+4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kaLwqaMa; arc=pass smtp.client-ip=74.125.82.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9ABC3218AC4;
+	Thu, 26 Feb 2026 10:46:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.66.100
+ARC-Seal:i=3; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772102817; cv=fail; b=qclXkbHVWmbfXI6Erux1rtf5oesNFtry6bSt0h4WlCEJbHhBUEGgyv4kInlUOp53MhkhlHQTHjaVQ8QoQSv6mvVKlZc8adgaPJuAwg7AXmYllEtklflzqB/w/auviicfvijrYi2cbmHfZb1QBuOR6Q8rvUsyrZLEB2CDMZIApkE=
+ARC-Message-Signature:i=3; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772102817; c=relaxed/simple;
+	bh=0pwG+159oC52uyGuGHgk3fpaLAmroqVjBj/1NuxMjTE=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=JFZV1IhLR46oWlxg7kPTt+YfhfjVEJqTcSVE0J3ug5nKoaTDnmM8Z/ypDT9+V7VxxryrorPNoTA92FhJRcMMtnm9q0y0dNDOHQ03hQ4F7WFvjV78VX9FdCejHXC05inmTnm3r5em8DDmwzoyAPA4evz0jw+qIdjGtXyYrCRjS74=
+ARC-Authentication-Results:i=3; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=solid-run.com; spf=pass smtp.mailfrom=solid-run.com; dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b=bYU3G+Z5; dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b=bYU3G+Z5; arc=fail smtp.client-ip=52.101.66.100
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=solid-run.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=solid-run.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kaLwqaMa"
-Received: by mail-dl1-f50.google.com with SMTP id a92af1059eb24-1277d379936so768525c88.1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Feb 2026 02:09:07 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772100547; cv=none;
-        d=google.com; s=arc-20240605;
-        b=H4SMHJnLWtiUpbikzn46vYdaVuJ5DlgtWF6wwLMh2Adi9McyMu4tk8C3MQOXU6/KCI
-         o5yKkDBew8aICL0tGd4odgFWjv85H22i+sWAEMu8lUgOO1CdRGkKiI9D90tmvhIY4LoV
-         oQ+y9HC0bI87iXqJKKAKHk10xaXfJ0zedm4YpsHaA7KacT0DpOu1JjrVCnaHMFlYSDFM
-         D0uzUQfQZWrKeZ6TJSVSOj3hFWJ7YuFZTnedo09zkCVNk+FVLybCbTDUXM4z3B+TwpJi
-         W+zzBF9FnDUvY9ujy7/O8ptSAr/ua9ge8dyELYvvCjK/zx5IiS+NRLNZeREItxM0lNJh
-         QzGQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=+pi8udncsL2BoITAHNdx69OrjXUQmhVzhrxoQ/FaM6Q=;
-        fh=Id5kIwi3j355aBykCFg2NfLqVWKv3BYnAXaopmOIhU0=;
-        b=OBJ+uz0Ds0VpXP+A6fJS5/Qgfk/eUHYVwlomrFAQky4EM0A4Wu+uCxDQM/83Ba8SpI
-         32fRovYmou/OR0Lb9ffOd2/yiGmXXyTkXmxofn30XBII9FWbrfQCYZfCvQAUABG14dJQ
-         duiM84fZbMp7AxOvO0dSbpRfdOBxy7VzFikXNoXBKh57B59uv5J1sSEnP+aVHyd2+WHn
-         rKTNmduVgeaNy5lceLdiWGi7mm8jMIquSpYQyfFikII2mQT4VcrBmwFUHbaFzPn9a7s9
-         dbeDh+iTlgWr1K6rb/lSaiTRv187zjjlRf1w6yDm1Uu+PB4EFelzXrkVa94Kju+4Ud/9
-         nLxg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b="bYU3G+Z5";
+	dkim=pass (1024-bit key) header.d=solidrn.onmicrosoft.com header.i=@solidrn.onmicrosoft.com header.b="bYU3G+Z5"
+ARC-Seal: i=2; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=pass;
+ b=SqbAerMzGznv9nKQBP9pa9YA0+5DRQhjEX0eTaGORR8+zO3YUbvqRcZfuovQYZCo4r1NPPFw5ov+O4tWpQfB39HPFPaZ8nze6JixTSxSrAe+nKEIgpvUsqygS/IIDO1AYlOH/tYxcbhDTriXdfnYtAq4Ab7OM4wU1zvu3zhWKn5yj3Eg2LSZMgsxOZ1JEwlNL2lzycVHZsNA7g86BFtL+wbostuYepEPWdr6dQjZqNsLISTIeTJGIMgs5kkVj44tbBI2xZ5klUWkT6HeioZtjNnabO/+fxdeAFGtnLXR5QohZFHcrsVItNJeQ33nrOjxxQXIdxAiCN0+luydKo9E/Q==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=0pwG+159oC52uyGuGHgk3fpaLAmroqVjBj/1NuxMjTE=;
+ b=LWT+o4bqV493GU5yoxDyn+gFAYS6+pdfF3wv0rqfvOM1dENq44+ZoMV5tGYaIZfONauuWHTP/4nftBXMOSyXd1NRI/K/uy51CZ9NEm/AJy4WHr8HuNdcf03TNYPavx6sE7nTfu3uyGjzKK5kzKHe/Iv3xvQLMHdQq3/RPZR7UaQNHK1U7WtL8sV+5r1H+B+BXYWkSm87JM7KpO1BY5MD/1DdxhJj4vV71jyIay+fAfBuO7jkAT2wxL8EGz/KVYpaLZJEjSr1+eqghyCkA0dzvIJtEs6vOS7/QjWEszFd09qsZzu/dsiWMcaCYV7m1sfhmt3bDT6V6i3F6gNJUfxPEw==
+ARC-Authentication-Results: i=2; mx.microsoft.com 1; spf=softfail (sender ip
+ is 52.17.62.50) smtp.rcpttodomain=atomide.com smtp.mailfrom=solid-run.com;
+ dmarc=fail (p=none sp=none pct=100) action=none header.from=solid-run.com;
+ dkim=pass (signature was verified) header.d=solidrn.onmicrosoft.com; arc=pass
+ (0 oda=1 ltdi=1 spf=[1,1,smtp.mailfrom=solid-run.com]
+ dkim=[1,1,header.d=solid-run.com] dmarc=[1,1,header.from=solid-run.com])
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772100547; x=1772705347; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+pi8udncsL2BoITAHNdx69OrjXUQmhVzhrxoQ/FaM6Q=;
-        b=kaLwqaMayTLPp0Mo5ePANPDObEL0+mIapFBnlQrkU+W+BAvuTLLwAgf4btQAcoktHV
-         qo1xuikWqbzTbCHWl8duqxOVgiWa3Dh2fBnmj4+rITsEnv+B4yI1h99P0YuImT0k/bX1
-         5KeaLSYbXh8GCT4UpoL0m8PXK4YqPaVZS2ofICrEYprV/3qlms4/+T95AOQScPLka6b4
-         1XSfEk6Mm1igJov3bjxjG3D4O0hBt3SChlmmWEn/MES9ky8igL38GZbxOoO/Pbf8+jWu
-         w55UDlh5ze9JMD+jNQrltFaQSwnAl0/0aOaXZ2hAhjikDdSr/yFU/1wRUAVRw1Fmo4Nt
-         XQ1g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772100547; x=1772705347;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=+pi8udncsL2BoITAHNdx69OrjXUQmhVzhrxoQ/FaM6Q=;
-        b=dy8zVGGvPIxqaiN3AmYrSrgzxaQaB5lNvpJ5MN9UBtYDkSZppSdi0+p70n2mBeGO+Z
-         WsGhjxaPnuKpNkeo1voDa98tQs2z/YKWOLVvueFf0tIgg7ni64MHgtk5n+iQM9/f8A3I
-         G4xqMs/dUz5VVKEIv4J2BeIwaXpnW4LXNK4RBzs+2egiSrxKbF9YuEEx2wzvzRWIkmLb
-         Ea4lm4KQMKgZqXj/pR2evm+TMeb/pRot9/tDjexre8OjlnnfqDCLMQVXfrkzr+Z6Ms7n
-         A18MAaB1DdmHFIIcE0J6b9I5CgaDnFp29fmwp/7oemUB+MdkTHnPsM9hFgtKLlnSkpPw
-         JN3A==
-X-Forwarded-Encrypted: i=1; AJvYcCVWWKVjwdH/gWjznCX94q9RMaxPvwTrdUfX6ucX2k8WHjiVlmJpLvx+K+zNXvHBv27NC9Y0+o+G8hg=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyax4RZCq2ehUvwJYV7Wy7VQpFbqetX1AQgfbdNIwMdJRIZcOqv
-	5D/wHW1+I4XpYq1tqLTmffokfG+3wgT49zFe6RrQ2qw5gDzacJWWpZ1qn7UIBq6aQheYg0NmUBx
-	Pymxir/WAUChQuRAakSNINyx1Dk6nI0E=
-X-Gm-Gg: ATEYQzxnSVz936dFAv8TNKGA3w8hrg4Hf/SgVp1NtruJVjNr6DUOnfCv3yhxp2YK79I
-	SxlHWyxLUWcul0a/BeomBC55nA4R01chtlaah5IuqK+48/RN5MDiqGlaKHTgOYi0URztyioWMP3
-	uEnf2W+TBGc2BMM9QG1Vhs8LI0V3UXiClJ/oZtAQo+A/r23PfKly39kA3gYkLiqhXS+RibCXoSz
-	eOX8c+COpV4TsJ8hqv8b2unEnozoC+xivEAWMZn0gfNaS7t1g7OPHlkPSdQjITLrhMamM8oWfx1
-	/Wa23vh9uBetbwtcfNBfnDJJMwiF38gwXydFsBidEg==
-X-Received: by 2002:a05:7300:e810:b0:2ba:72c3:53c0 with SMTP id
- 5a478bee46e88-2bdcbdfe38fmr1530092eec.0.1772100546418; Thu, 26 Feb 2026
- 02:09:06 -0800 (PST)
+ d=solidrn.onmicrosoft.com; s=selector1-solidrn-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=0pwG+159oC52uyGuGHgk3fpaLAmroqVjBj/1NuxMjTE=;
+ b=bYU3G+Z5xP3xoWMduw8agPDFkB2rDrMtjecWxTSNTtFA3cvBC5g64eQPb3PzQANJ95ED4SwB/fWFkie4UhVpnNoug2stnkCO0F7GhjJG1eN7/acoqmWXUWRK792UXUA1dLVByFOym2cbS1ExdvObn54bglMCBjYI8ybWr4qQMWA=
+Received: from AS9PR06CA0630.eurprd06.prod.outlook.com (2603:10a6:20b:46e::22)
+ by DU4PR04MB11385.eurprd04.prod.outlook.com (2603:10a6:10:5d8::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.13; Thu, 26 Feb
+ 2026 10:46:53 +0000
+Received: from AMS0EPF0000019B.eurprd05.prod.outlook.com
+ (2603:10a6:20b:46e:cafe::87) by AS9PR06CA0630.outlook.office365.com
+ (2603:10a6:20b:46e::22) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9632.25 via Frontend Transport; Thu,
+ 26 Feb 2026 10:46:44 +0000
+X-MS-Exchange-Authentication-Results: spf=softfail (sender IP is 52.17.62.50)
+ smtp.mailfrom=solid-run.com; dkim=pass (signature was verified)
+ header.d=solidrn.onmicrosoft.com;dmarc=fail action=none
+ header.from=solid-run.com;
+Received-SPF: SoftFail (protection.outlook.com: domain of transitioning
+ solid-run.com discourages use of 52.17.62.50 as permitted sender)
+Received: from eu-dlp.cloud-sec-av.com (52.17.62.50) by
+ AMS0EPF0000019B.mail.protection.outlook.com (10.167.16.247) with Microsoft
+ SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.9632.12
+ via Frontend Transport; Thu, 26 Feb 2026 10:46:52 +0000
+Received: from emails-4974866-12-mt-prod-cp-eu-2.checkpointcloudsec.com (ip-10-20-5-107.eu-west-1.compute.internal [10.20.5.107])
+	by mta-outgoing-dlp-141-mt-prod-cp-eu-2.checkpointcloudsec.com (Postfix) with ESMTPS id 4F3C38076C;
+	Thu, 26 Feb 2026 10:46:52 +0000 (UTC)
+X-Mailbox-Line: From b'josua@solid-run.com' Thu Feb 26 10:46:44 2026
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=HdYo0ZHlVe6HkxBwSar1wpS7l/oB9GKO1MGzx06p2jpKoo7woHLrLPPfAQQQzl8EKex/5VMjdJWwH5sh6VRMqlWHV0g64q79FhZAa4SKClwDQVzusRDo8/lz5kgEh89r+XSXQC6iD3gzUr41f7Cs0J0O9eiSrFfPrEMRLcPN+NpRuiuLoXSc+Qk0Q/ot766mcH6GtZI06L26q0SO8zAXxhz06bvfqULA/JV/sKPBc3XOBYKRFdznJWvGEgEF2hykUZRs5ZGoBT7QZUoggTO+WEsVdQ5+xLiGE9XIRTHGHU7BHxq6I1CLR/81ZphOwxYVMx3dYR1KcVxEzYr41EIrgg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=0pwG+159oC52uyGuGHgk3fpaLAmroqVjBj/1NuxMjTE=;
+ b=P9iwuFsEKNP/rtgqfNWvXM0pag0CVEQwMgWm47h//w188QApqwZlvUgLCHu/nQUh2lioK2zkyn0gQjhmAQFPDpdfKOEa1cLkUfxfni8KS2QOG91qBHhDhLjeVioO1MEjmLqaH3g3qr6330s8SUpmdkT0CJJUr+OEkVPxO6bt1aPL41ffsZrQqVmwMeDPeNCN1i+RANMe2tiQKv2Nfmd1rBnGnYffyfCTgWzuaaMfCbwfwifop2XFmACgXEBveQ7dgo91Ie2zs2hW0o2rAKm0MCQy3R56uYHnMWnnC4wXmjr4KOMSOut+AG06UkyehvPOfODx41bu/2Q/tOaA25gVrA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=solid-run.com; dmarc=pass action=none
+ header.from=solid-run.com; dkim=pass header.d=solid-run.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=solidrn.onmicrosoft.com; s=selector1-solidrn-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=0pwG+159oC52uyGuGHgk3fpaLAmroqVjBj/1NuxMjTE=;
+ b=bYU3G+Z5xP3xoWMduw8agPDFkB2rDrMtjecWxTSNTtFA3cvBC5g64eQPb3PzQANJ95ED4SwB/fWFkie4UhVpnNoug2stnkCO0F7GhjJG1eN7/acoqmWXUWRK792UXUA1dLVByFOym2cbS1ExdvObn54bglMCBjYI8ybWr4qQMWA=
+Received: from AM9PR04MB8747.eurprd04.prod.outlook.com (2603:10a6:20b:408::11)
+ by VI2PR04MB10740.eurprd04.prod.outlook.com (2603:10a6:800:27a::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9654.13; Thu, 26 Feb
+ 2026 10:46:38 +0000
+Received: from AM9PR04MB8747.eurprd04.prod.outlook.com
+ ([fe80::a0c7:9bd0:56e1:576a]) by AM9PR04MB8747.eurprd04.prod.outlook.com
+ ([fe80::a0c7:9bd0:56e1:576a%4]) with mapi id 15.20.9654.014; Thu, 26 Feb 2026
+ 10:46:38 +0000
+From: Josua Mayer <josua@solid-run.com>
+To: Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol
+	<mailhol@kernel.org>, Vinod Koul <vkoul@kernel.org>, Neil Armstrong
+	<neil.armstrong@linaro.org>, Peter Rosin <peda@axentia.se>, Aaro Koskinen
+	<aaro.koskinen@iki.fi>, Andreas Kemnade <andreas@kemnade.info>, Kevin Hilman
+	<khilman@baylibre.com>, Roger Quadros <rogerq@kernel.org>, Tony Lindgren
+	<tony@atomide.com>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Vignesh R
+	<vigneshr@ti.com>, Andi Shyti <andi.shyti@kernel.org>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, Krzysztof Kozlowski
+	<krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Geert Uytterhoeven
+	<geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang
+	<wsa+renesas@sang-engineering.com>, Yoshihiro Shimoda
+	<yoshihiro.shimoda.uh@renesas.com>
+CC: Yazan Shhady <yazan.shhady@solid-run.com>, Jon Nettleton
+	<jon@solid-run.com>, Vladimir Oltean <olteanv@gmail.com>, Mikhail Anikin
+	<mikhail.anikin@solid-run.com>, "linux-can@vger.kernel.org"
+	<linux-can@vger.kernel.org>, "linux-phy@lists.infradead.org"
+	<linux-phy@lists.infradead.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, "linux-omap@vger.kernel.org"
+	<linux-omap@vger.kernel.org>, "linux-i2c@vger.kernel.org"
+	<linux-i2c@vger.kernel.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org"
+	<devicetree@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
+	<linux-renesas-soc@vger.kernel.org>
+Subject: Re: [PATCH v10 3/9] mux: Add helper functions for getting optional
+ and selected mux-state
+Thread-Topic: [PATCH v10 3/9] mux: Add helper functions for getting optional
+ and selected mux-state
+Thread-Index: AQHcpkq4hCmln3ECsUqvD0K18X6bQrWUzcgA
+Date: Thu, 26 Feb 2026 10:46:38 +0000
+Message-ID: <ffbb6089-5608-4af8-b318-72fcf3af0224@solid-run.com>
+References: <20260225-rz-sdio-mux-v10-0-1ee44f2ea112@solid-run.com>
+ <20260225-rz-sdio-mux-v10-3-1ee44f2ea112@solid-run.com>
+In-Reply-To: <20260225-rz-sdio-mux-v10-3-1ee44f2ea112@solid-run.com>
+Accept-Language: de-DE, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+Authentication-Results-Original: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=solid-run.com;
+x-ms-traffictypediagnostic:
+	AM9PR04MB8747:EE_|VI2PR04MB10740:EE_|AMS0EPF0000019B:EE_|DU4PR04MB11385:EE_
+X-MS-Office365-Filtering-Correlation-Id: 05804191-3f11-4594-93c3-08de75245a48
+x-cloud-sec-av-info: solidrun,office365_emails,sent,inline
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam-Untrusted:
+ BCL:0;ARA:13230040|366016|1800799024|376014|7416014|921020|38070700021;
+X-Microsoft-Antispam-Message-Info-Original:
+ OrGt1h74HsfHn80kcPd7+Gw1xKSCX82u0W2pY3OK1DoZq6ICedNaPhGQisCFc/vJH4jxedxEsbHb4xKoV4ZysuYWc4hg1Q5N4RWvISOID6bp+PsZQrtjki9Ph4sO6SrSE6bP1xLHDER1rHHzHLPhXhpIqkW9AwFNl3Aegd+ZvANBX4w6F4m3fCSABNRDfa3UCDakh55Ntl6mQmquoeARNZAhIXtNNFZ95fVSSxCBxCKE3Y+9F/HBJqPO2co8qkdbsuJwwTJmlf36wWq+o9y2OuQpfQqjOl6D2lucOcmnJ9NEvFlQzzpyictNw7WiesxMcHwZjTgKeTzd+etD8Q461/mUGasQMbQ2F9LIUWflZnnB+etfV4LWd9PxgH1kPBsjFuKihk5yH+UhWZ1AkEiV7eOWZCnRG3BuOIGkGhdD4fr+oCoPCL+EqZpI2ozuvoa9Rr3lD0wHvXpSQRVQ+BOVvcjg9FzHXylaZ8PRBlhGX3quPf7qi61ZbGtF34a21wkiCTMZ6XSix7LCf7zmWq+ZIHZRx7+9H/71NZI+bAmk8Jht+MNjZT3RbOCip10vpxrDpROK4MMKD99neqZsF6PTzUt9ui1eqZlf4KPKF3Id6Fxx5GtERWtcPEAsc953BoPUUOt2py4/MUdupoxxt0J9KB/FIG4Pyv+WlsvkU0nhvqZz0u6wO25oQYF7Ag+799ucxVuLlORRcuLPO7RoAguuL8PhexE3nNs7LJiQuwDqep/eQDUs57ofaz23oGXsKhU+hHZqFbT8RKXvNBTS3nRLJ/5kR+RsH+IEup0b0wRnb54AOina4ehmn+mrjAIapAMa
+X-Forefront-Antispam-Report-Untrusted:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM9PR04MB8747.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(7416014)(921020)(38070700021);DIR:OUT;SFP:1102;
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <051977E1BB07534BBE208BD2DA57AF35@eurprd04.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260117234800.931664-1-matthew.schwartz@linux.dev>
- <8efb0406-b9ce-46ec-bd8d-4763c12298e1@intel.com> <TYZPR01MB426077A7AB8CE602ECA2CAF4D766A@TYZPR01MB4260.apcprd01.prod.exchangelabs.com>
- <655ee663-b331-4dcb-bf85-0e40c1b5191b@linux.dev>
-In-Reply-To: <655ee663-b331-4dcb-bf85-0e40c1b5191b@linux.dev>
-From: Ben Chuang <benchuanggli@gmail.com>
-Date: Thu, 26 Feb 2026 18:09:05 +0800
-X-Gm-Features: AaiRm53662tABZ22Cv5jQ-VS3K13-AFpF667BitAEIwLtu4QW4Wjyl_0BwB_ozw
-Message-ID: <CACT4zj8dJAD5CM3HtEhWP1hEnAp=MygFg8Uhx7UJxFFPbd-dxg@mail.gmail.com>
-Subject: Re: [RFC PATCH] mmc: sdhci-pci-gli: fix GL9750 DMA write corruption
-To: Matthew Schwartz <matthew.schwartz@linux.dev>
-Cc: =?UTF-8?B?QmVuQ2h1YW5nW+iOiuaZuumHj10=?= <Ben.Chuang@genesyslogic.com.tw>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI2PR04MB10740
+X-CLOUD-SEC-AV-INT-Relay: sent<mta-outgoing-dlp-mt-prod-cp-eu-2.checkpointcloudsec.com>
+X-CLOUD-SEC-AV-UUID: 84b16bd1fce9464cbe213e63e99c02ec:solidrun,office365_emails,sent,inline:8989a1a0ef2b960aa6fa7fc0ff0ec37f
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Transport-CrossTenantHeadersStripped:
+ AMS0EPF0000019B.eurprd05.prod.outlook.com
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id-Prvs:
+	497f1bce-ae39-40c2-77ec-08de752451f0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|35042699022|376014|82310400026|7416014|36860700013|14060799003|921020;
+X-Microsoft-Antispam-Message-Info:
+	kJofBDsFjHjrT7u1O1iTxlyi1yL/jovuZk6ssEiReCKjNE3S7BGcPGBN2e1BGco3W7I9r9rR3xq4hnQWw6ooHPaDDMwQyDgdeAyNh/snyetzqEGq2qL7ywPq4cb/7wHGCVsU6Syk7t/Nl3ggewpk8BO0mrQYs0OCbWQ2gUU9X4pMUnblxpkomVc+WhIOz4PFpweG/0xsd4nTqV/XgrJq/maiy+qcYLJg45G2/5NyKsA3UJhUCNElv55xXEsm9i9jLBfKZVsGwEsmrlsrV/7NqLOuLqLKyzMyfjtRSHudmrMtRQ0rfKjpjEUr9Afl/85uvvNwPXKzsL410TTR1NGrGYHrZsPqVr5smt6xCo5yGRd1APOqpN4leYcFAVC2hGna7BxNc4fDBdd4fleSzgdsHQZofUmAh5ufPD22Dtc6RAyZTpyCdCUc4c4jkYwNe/RBy13PhEKXX5xKhgz4/mnccODjBGlTqzuiuIQDihUUVMvxbIAqu6TQWxBubjaiNBw5DdIRUYm+iwYNEYMwcDCs2oMttL6v8Bw5vdBncMHeFp3szRYKi482VnVYzlAZhOPLDqHXN5NqMcLoLprOk4OLEMZpZBLkt5wPmhgqJAIEEGerwcngfQa/kaFi8Rmu6+ZI2MuMkjP92uZl+FeA3m6A6a3ks59FAZ7zjMYCEm5SiIyaIe+g5g/7HPo5HDkm2tZoW8pIn1ZvyQiP22e++2xP6HfYCoREDN7GU2bPvboVuJYsPFq07p4bYnDpcLTtyf2FY3dVimZ63Q2/fVOcwCvXZ64WlpxZQ2sE6Jgx3zPjYyb1CsOEEK458lUxhqrSTm0lYLjSZDaCe8IXyw+KKjdnANdS6dbgc5P90Y4E2jJ09JA=
+X-Forefront-Antispam-Report:
+	CIP:52.17.62.50;CTRY:IE;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:eu-dlp.cloud-sec-av.com;PTR:eu-dlp.cloud-sec-av.com;CAT:NONE;SFS:(13230040)(1800799024)(35042699022)(376014)(82310400026)(7416014)(36860700013)(14060799003)(921020);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	0Av8l1KPhRsK79xywBzxgZPymXGh1MPwWA04sU4YFTg5uysWYNduGQX1jsPsUdBb0HtfLK/Zv/wpwpNHNEqFxPgyzpZdOIb/O8nFToXynkHF3MuaYbvy850Mu/UDYydRAYl78ilyohJn7hESltvM/DZIXgg6ugr9M9RDnBikLQCIZ7u78a64NmE9SGccI1u2RTEpP2TZ0SjqAtEcBGgWM3nQCjQS5D+26udeNFk9SAC5/isMwRyrOEILCpvlASHaFZnf5KcaJmYdYu6ooe+QcR5R2zye9NXsouNSwu9KmuwWBVVGwPtNCWDOWhlTgA94WzhuJDxZTZkwHIxr/TRGnDg0zXt2ypTQGVcE2aP6/L5IcOClqINWHR66V/kanO/iAy8zUvz9YQ4+csngC55Gx9hm2Eq2Yk5dhmbaYijr1EdkhN6znCsXrnzVzohaDrkt
+X-OriginatorOrg: solid-run.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Feb 2026 10:46:52.6136
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 05804191-3f11-4594-93c3-08de75245a48
+X-MS-Exchange-CrossTenant-Id: a4a8aaf3-fd27-4e27-add2-604707ce5b82
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=a4a8aaf3-fd27-4e27-add2-604707ce5b82;Ip=[52.17.62.50];Helo=[eu-dlp.cloud-sec-av.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	AMS0EPF0000019B.eurprd05.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DU4PR04MB11385
 
-On Thu, Feb 26, 2026 at 6:00=E2=80=AFAM Matthew Schwartz
-<matthew.schwartz@linux.dev> wrote:
->
-> On 2/6/26 12:05 AM, BenChuang[=E8=8E=8A=E6=99=BA=E9=87=8F] wrote:
-> >> -----Original Message-----
-> >> From: Adrian Hunter <adrian.hunter@intel.com>
-> >> Sent: Friday, January 30, 2026 6:53 PM
-> >> To: Matthew Schwartz <matthew.schwartz@linux.dev>; Ulf Hansson <ulf.ha=
-nsson@linaro.org>; BenChuang[=E8=8E=8A=E6=99=BA=E9=87=8F]
-> >> <Ben.Chuang@genesyslogic.com.tw>; Victor Shih <victor.shih@genesyslogi=
-c.com.tw>
-> >> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-> >> Subject: Re: [RFC PATCH] mmc: sdhci-pci-gli: fix GL9750 DMA write corr=
-uption
-> >>
-> >> Genesys folks : Any comment on this?
-> >
-> > Hi Matthew,
-> >
-> > Could you share the 510h register value on your computer under Windows,
-> > and the 510h register value under Linux when the f3 test is normal and =
-abnormal?
->
-
-Hi Matthew,
-
-> Hi Ben,
->
-> Apologies for the late reply, I was taking some time off. For reference, =
-the device in question is a Lenovo Legion Go S which is a handheld gaming P=
-C, and it has an AMD Z2 Go APU.
-
-This is a performance-oriented gaming device.
-Thank you for sharing this information.
-
->
-> Under Windows - I used RWEverything, unsure if there's a better tool as i=
-otools only seems available on Linux:
->
-> Type:Memory   Address 00000000B0AFF510
-> Width:01
-> 00=3D0F 01=3D00 02=3D00 03=3D00 04=3D00 05=3D00 06=3D00 07=3D00
-
-R_OSRC_Lmt (bit 16-17) is zero.
-
-> 08=3D00 09=3D00 0A=3D00 0B=3D00 0C=3D00 0D=3D00 0E=3D00 0F=3D00
-> 10=3D00 11=3D00 12=3D80 13=3D0F 14=3D00 15=3D2A 16=3D00 17=3D00
-> 18=3D00 19=3D00 1A=3D00 1B=3D00 1C=3D0C 1D=3D00 1E=3D00 1F=3D00
-> 20=3D00 21=3D00 22=3D00 23=3D00 24=3D00 25=3D00 26=3D00 27=3D00
-> 28=3D00 29=3D00 2A=3D00 2B=3D00 2C=3D00 2D=3D00 2E=3D00 2F=3D00
-> 30=3D00 31=3D00 32=3D11 33=3D01 34=3D07 35=3D00 36=3D00 37=3D00
-> 38=3D00 39=3D00 3A=3D00 3B=3D00 3C=3D00 3D=3D00 3E=3D00 3F=3D00
-> 40=3D00 41=3D00 42=3D00 43=3D00 44=3D00 45=3D00 46=3D00 47=3D00
-> 48=3D00 49=3D00 4A=3D00 4B=3D00 4C=3D00 4D=3D00 4E=3D00 4F=3D00
-> 50=3D00 51=3D00 52=3D00 53=3D00 54=3D00 55=3D00 56=3D00 57=3D00
-> 58=3D00 59=3D00 5A=3D00 5B=3D00 5C=3D00 5D=3D00 5E=3D00 5F=3D00
-> 60=3D00 61=3D00 62=3D00 63=3D00 64=3D00 65=3D00 66=3D00 67=3D00
-> 68=3D00 69=3D00 6A=3D00 6B=3D00 6C=3D00 6D=3D00 6E=3D00 6F=3D00
-> 70=3D00 71=3D00 72=3D00 73=3D00 74=3D00 75=3D00 76=3D00 77=3D00
-> 78=3D00 79=3D00 7A=3D00 7B=3D00 7C=3D00 7D=3D00 7E=3D00 7F=3D00
-> 80=3D00 81=3D00 82=3D00 83=3D00 84=3D00 85=3D00 86=3D00 87=3D00
-> 88=3D00 89=3D00 8A=3D00 8B=3D00 8C=3D00 8D=3D00 8E=3D00 8F=3D00
-> 90=3D00 91=3D00 92=3D00 93=3D00 94=3D00 95=3D00 96=3D00 97=3D00
-> 98=3D00 99=3D00 9A=3D00 9B=3D00 9C=3D00 9D=3D00 9E=3D00 9F=3D00
-> A0=3D00 A1=3D00 A2=3D00 A3=3D00 A4=3D00 A5=3D00 A6=3D00 A7=3D00
-> A8=3D00 A9=3D00 AA=3D00 AB=3D00 AC=3D00 AD=3D00 AE=3D00 AF=3D00
-> B0=3D00 B1=3D00 B2=3D00 B3=3D00 B4=3D00 B5=3D00 B6=3D00 B7=3D00
-> B8=3D00 B9=3D00 BA=3D00 BB=3D00 BC=3D00 BD=3D00 BE=3D00 BF=3D00
-> C0=3D00 C1=3D00 C2=3D00 C3=3D00 C4=3D00 C5=3D00 C6=3D00 C7=3D00
-> C8=3D00 C9=3D00 CA=3D00 CB=3D00 CC=3D00 CD=3D00 CE=3D00 CF=3D00
-> D0=3D00 D1=3D00 D2=3D00 D3=3D00 D4=3D00 D5=3D00 D6=3D00 D7=3D00
-> D8=3D00 D9=3D00 DA=3D00 DB=3D00 DC=3D00 DD=3D00 DE=3D00 DF=3D00
-> E0=3D00 E1=3D00 E2=3D00 E3=3D00 E4=3D00 E5=3D00 E6=3D00 E7=3D00
-> E8=3D00 E9=3D00 EA=3D00 EB=3D00 EC=3D00 ED=3D00 EE=3D00 EF=3D00
-> F0=3D00 F1=3D00 F2=3D00 F3=3D00 F4=3D00 F5=3D00 F6=3D00 F7=3D00
-> F8=3D00 F9=3D00 FA=3D00 FB=3D00 FC=3D00 FD=3D00 FE=3D00 FF=3D00
->
-> Under Linux with abnormal test:
->
-> deck@steamdeck ~> sudo iotools mmio_read32 0xb0a00510
-> 0x0303000f
->
-> Under Linux with normal test (i.e. with kernel patch):
-> deck@steamdeck ~> sudo iotools mmio_read32 0xb0a00510
-> 0x0300000f
->
-> >
-> > These two bits 510h[17:16] (R_OSRC_Lmt) on GL9750, are likely used to l=
-imit requests.
-> > Additionally, 510h[25:24] are similar but marked as W_OSRC_Lmt.
-> >
-> > I tested the demo board I had on hand with an Intel PC, and I didn't re=
-produce the issue.
-> > The test information is as follows.
-> >
-> > --
-> > $ sudo f3write -e 3 /run/media/gli/sdsamsung/ && sudo f3read /run/media=
-/gli/sdsamsung/
-> > F3 write 9.0
-> > Copyright (C) 2010 Digirati Internet LTDA.
-> > This is free software; see the source for copying conditions.
-> >
-> > Free space: 29.00 GB
-> > Creating file 1.h2w ... OK!
-> > Creating file 2.h2w ... OK!
-> > Creating file 3.h2w ... OK!
-> > Free space: 26.00 GB
-> > Average writing speed: 21.17 MB/s
-> > F3 read 9.0
-> > Copyright (C) 2010 Digirati Internet LTDA.
-> > This is free software; see the source for copying conditions.
-> >
-> >                   SECTORS      ok/corrupted/changed/overwritten
-> > Validating file 1.h2w ... 2097152/        0/      0/      0
-> > Validating file 2.h2w ... 2097152/        0/      0/      0
-> > Validating file 3.h2w ... 2097152/        0/      0/      0
-> >
-> >   Data OK: 3.00 GB (6291456 sectors)
-> > Data LOST: 0.00 Byte (0 sectors)
-> >                Corrupted: 0.00 Byte (0 sectors)
-> >         Slightly changed: 0.00 Byte (0 sectors)
-> >              Overwritten: 0.00 Byte (0 sectors)
-> > Average reading speed: 70.75 MB/s
-> > $ sudo f3write -e 3 /run/media/gli/sdsamsung/ && sudo f3read /run/media=
-/gli/sdsamsung/
-> > F3 write 9.0
-> > Copyright (C) 2010 Digirati Internet LTDA.
-> > This is free software; see the source for copying conditions.
-> >
-> > Removing old file 1.h2w ...
-> > Removing old file 2.h2w ...
-> > Removing old file 3.h2w ...
-> > Free space: 29.00 GB
-> > Creating file 1.h2w ... OK!
-> > Creating file 2.h2w ... OK!
-> > Creating file 3.h2w ... OK!
-> > Free space: 26.00 GB
-> > Average writing speed: 20.90 MB/s
-> > F3 read 9.0
-> > Copyright (C) 2010 Digirati Internet LTDA.
-> > This is free software; see the source for copying conditions.
-> >
-> >                   SECTORS      ok/corrupted/changed/overwritten
-> > Validating file 1.h2w ... 2097152/        0/      0/      0
-> > Validating file 2.h2w ... 2097152/        0/      0/      0
-> > Validating file 3.h2w ... 2097152/        0/      0/      0
-> >
-> >   Data OK: 3.00 GB (6291456 sectors)
-> > Data LOST: 0.00 Byte (0 sectors)
-> >                Corrupted: 0.00 Byte (0 sectors)
-> >         Slightly changed: 0.00 Byte (0 sectors)
-> >              Overwritten: 0.00 Byte (0 sectors)
-> > Average reading speed: 71.18 MB/s
-> > $ sudo f3write -e 3 /run/media/gli/sdsamsung/ && sudo f3read /run/media=
-/gli/sdsamsung/
-> > F3 write 9.0
-> > Copyright (C) 2010 Digirati Internet LTDA.
-> > This is free software; see the source for copying conditions.
-> >
-> > Removing old file 1.h2w ...
-> > Removing old file 2.h2w ...
-> > Removing old file 3.h2w ...
-> > Free space: 29.00 GB
-> > Creating file 1.h2w ... OK!
-> > Creating file 2.h2w ... OK!
-> > Creating file 3.h2w ... OK!
-> > Free space: 26.00 GB
-> > Average writing speed: 20.48 MB/s
-> > F3 read 9.0
-> > Copyright (C) 2010 Digirati Internet LTDA.
-> > This is free software; see the source for copying conditions.
-> >
-> >                   SECTORS      ok/corrupted/changed/overwritten
-> > Validating file 1.h2w ... 2097152/        0/      0/      0
-> > Validating file 2.h2w ... 2097152/        0/      0/      0
-> > Validating file 3.h2w ... 2097152/        0/      0/      0
-> >
-> >   Data OK: 3.00 GB (6291456 sectors)
-> > Data LOST: 0.00 Byte (0 sectors)
-> >                Corrupted: 0.00 Byte (0 sectors)
-> >         Slightly changed: 0.00 Byte (0 sectors)
-> >              Overwritten: 0.00 Byte (0 sectors)
-> > Average reading speed: 71.22 MB/s
->
-> deck@steamdeck ~> sudo f3write -e 5 /run/media/deck/SR02T/ && sudo f3read=
- /run/media/deck/SR02T/
-> [sudo] password for deck:
-> F3 write 8.0
-> Copyright (C) 2010 Digirati Internet LTDA.
-> This is free software; see the source for copying conditions.
->
-> Removing old file 1.h2w ...
-> Removing old file 2.h2w ...
-> Removing old file 3.h2w ...
-> Removing old file 4.h2w ...
-> Removing old file 5.h2w ...
-> Free space: 378.34 GB
-> Creating file 1.h2w ... OK!
-> Creating file 2.h2w ... OK!
-> Creating file 3.h2w ... OK!
-> Creating file 4.h2w ... OK!
-> Creating file 5.h2w ... OK!
-> Free space: 372.60 GB
-> Average writing speed: 62.56 MB/s
-
-Based on the test results (write speed: 62.56 MB/s), the issue seems
-to occur during fast writing to the SD card.
-R_OSRC_Lmt is zero means that read requests (DMA receive data from
-system memory) are limited to the smallest unit.
-So I think your patch setting R_OSRC_Lmt to zero is reasonable.
-
-Best regards,
-Ben Chuang
-
-
-> F3 read 8.0
-> Copyright (C) 2010 Digirati Internet LTDA.
-> This is free software; see the source for copying conditions.
->
->                   SECTORS      ok/corrupted/changed/overwritten
-> Validating file 1.h2w ... 2097150/        2/      0/      0
-> Validating file 2.h2w ... 2097152/        0/      0/      0
-> Validating file 3.h2w ... 2097150/        2/      0/      0
-> Validating file 4.h2w ... 2097147/        5/      0/      0
-> Validating file 5.h2w ... 2097150/        2/      0/      0
->
->   Data OK: 5.00 GB (10485749 sectors)
-> Data LOST: 5.50 KB (11 sectors)
->                Corrupted: 5.50 KB (11 sectors)
->         Slightly changed: 0.00 Byte (0 sectors)
->              Overwritten: 0.00 Byte (0 sectors)
-> Average reading speed: 85.93 MB/s
->
->
-> > $
-> > $ uname -a
-> > Linux arch-pc 6.18.7-arch1-1 #1 SMP PREEMPT_DYNAMIC Sat, 24 Jan 2026 00=
-:47:39 +0000 x86_64 GNU/Linux
->
-> Linux steamdeck 7.0.0-rc1-1-git #1 SMP PREEMPT_DYNAMIC Wed, 25 Feb 2026 1=
-8:53:27 +0000 x86_64 GNU/Linux
->
-> > $ lsblk /dev/mmcblk1
-> > NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-> > mmcblk1     179:0    0 29.8G  0 disk
-> > =E2=94=94=E2=94=80mmcblk1p1 179:1    0 29.8G  0 part /run/media/gli/sds=
-amsung
->
-> deck@steamdeck ~ [32]> lsblk /dev/mmcblk0p1
-> NAME      MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-> mmcblk0p1 179:1    0  1.9T  0 part /run/media/deck/SR02T
->
-> > $ sudo dmesg | grep mmc1
-> > [    1.557901] mmc1: SDHCI controller on PCI [0000:06:00.0] using ADMA
-> > [  272.440507] mmc1: new UHS-I speed SDR104 SDHC card at address 0001
-> > [  272.468419] mmcblk1: mmc1:0001 EB1QT 29.8 GiB
->
-> deck@steamdeck ~ [0|1]> sudo dmesg | grep mmc
-> [    1.034894] mmc0: SDHCI controller on PCI [0000:02:00.0] using ADMA
-> [    1.557246] mmc0: new UHS-I speed SDR104 SDXC card at address d555
-> [    1.567765] mmcblk0: mmc0:d555 SR02T 1.86 TiB
-> [    1.580830]  mmcblk0: p1
-> [    6.507652] EXT4-fs (mmcblk0p1): Using encoding defined by superblock:=
- utf8-12.1.0 with flags 0x0
-> [    6.765191] EXT4-fs (mmcblk0p1): mounted filesystem 4d6b24bb-833f-4859=
--a85a-13e1d1dbd3d8 r/w with ordered data mode. Quota mode: none.
->
-> > $ sudo lspci -d 17a0:9750 -vvv
-> > 06:00.0 SD Host controller: Genesys Logic, Inc GL9750 SD Host Controlle=
-r (rev 01) (prog-if 01)
-> >         Subsystem: Genesys Logic, Inc GL9750 SD Host Controller
-> >         Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- Par=
-Err- Stepping- SERR- FastB2B- DisINTx+
-> >         Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=3Dfast >TAbort=
-- <TAbort- <MAbort- >SERR- <PERR- INTx-
-> >         Latency: 0, Cache Line Size: 64 bytes
-> >         Interrupt: pin A routed to IRQ 205
-> >         Region 0: Memory at 84000000 (32-bit, non-prefetchable) [size=
-=3D4K]
-> >         Capabilities: [80] Express (v2) Endpoint, IntMsgNum 0
-> >                 DevCap: MaxPayload 128 bytes, PhantFunc 0, Latency L0s =
-<4us, L1 unlimited
-> >                         ExtTag+ AttnBtn- AttnInd- PwrInd- RBE+ FLReset-=
- SlotPowerLimit 10W TEE-IO-
-> >                 DevCtl: CorrErr+ NonFatalErr+ FatalErr+ UnsupReq+
-> >                         RlxdOrd+ ExtTag+ PhantFunc- AuxPwr- NoSnoop+
-> >                         MaxPayload 128 bytes, MaxReadReq 512 bytes
-> >                 DevSta: CorrErr+ NonFatalErr- FatalErr- UnsupReq- AuxPw=
-r+ TransPend-
-> >                 LnkCap: Port #80, Speed 2.5GT/s, Width x1, ASPM L0s L1,=
- Exit Latency L0s <4us, L1 unlimited
-> >                         ClockPM+ Surprise- LLActRep- BwNot- ASPMOptComp=
-+
-> >                 LnkCtl: ASPM L1 Enabled; RCB 64 bytes, LnkDisable- Comm=
-Clk+
-> >                         ExtSynch- ClockPM+ AutWidDis- BWInt- AutBWInt- =
-FltModeDis-
-> >                 LnkSta: Speed 2.5GT/s, Width x1
-> >                         TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgm=
-t-
-> >                 DevCap2: Completion Timeout: Range ABCD, TimeoutDis+ NR=
-OPrPrP- LTR+
-> >                          10BitTagComp- 10BitTagReq- OBFF Via message/WA=
-KE#, ExtFmt- EETLPPrefix-
-> >                          EmergencyPowerReduction Not Supported, Emergen=
-cyPowerReductionInit-
-> >                          FRS- TPHComp- ExtTPHComp-
-> >                          AtomicOpsCap: 32bit- 64bit- 128bitCAS-
-> >                 DevCtl2: Completion Timeout: 50us to 50ms, TimeoutDis-
-> >                          AtomicOpsCtl: ReqEn-
-> >                          IDOReq- IDOCompl- LTR+ EmergencyPowerReduction=
-Req-
-> >                          10BitTagReq- OBFF Disabled, EETLPPrefixBlk-
-> >                 LnkCap2: Supported Link Speeds: 2.5GT/s, Crosslink- Ret=
-imer- 2Retimers- DRS-
-> >                 LnkCtl2: Target Link Speed: 2.5GT/s, EnterCompliance- S=
-peedDis-
-> >                          Transmit Margin: Normal Operating Range, Enter=
-ModifiedCompliance- ComplianceSOS-
-> >                          Compliance Preset/De-emphasis: -6dB de-emphasi=
-s, 0dB preshoot
-> >                 LnkSta2: Current De-emphasis Level: -6dB, EqualizationC=
-omplete- EqualizationPhase1-
-> >                          EqualizationPhase2- EqualizationPhase3- LinkEq=
-ualizationRequest-
-> >                          Retimer- 2Retimers- CrosslinkRes: unsupported,=
- FltMode-
-> >         Capabilities: [e0] MSI: Enable+ Count=3D1/1 Maskable- 64bit+
-> >                 Address: 00000000fee00d58  Data: 0000
-> >         Capabilities: [f8] Power Management version 3
-> >                 Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=3D375mA PME(D0-,=
-D1+,D2+,D3hot+,D3cold+)
-> >                 Status: D0 NoSoftRst+ PME-Enable- DSel=3D0 DScale=3D0 P=
-ME+
-> >         Capabilities: [100 v1] Vendor Specific Information: ID=3D17a0 R=
-ev=3D1 Len=3D008 <?>
-> >         Capabilities: [108 v1] Latency Tolerance Reporting
-> >                 Max snoop latency: 3145728ns
-> >                 Max no snoop latency: 3145728ns
-> >         Capabilities: [110 v1] L1 PM Substates
-> >                 L1SubCap: PCI-PM_L1.2+ PCI-PM_L1.1+ ASPM_L1.2+ ASPM_L1.=
-1+ L1_PM_Substates+
-> >                           PortCommonModeRestoreTime=3D255us PortTPowerO=
-nTime=3D3100us
-> >                 L1SubCtl1: PCI-PM_L1.2+ PCI-PM_L1.1+ ASPM_L1.2+ ASPM_L1=
-.1+
-> >                            T_CommonMode=3D0us LTR1.2_Threshold=3D337510=
-4ns
-> >                 L1SubCtl2: T_PwrOn=3D3100us
-> >         Capabilities: [200 v1] Advanced Error Reporting
-> >                 UESta:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmp=
-lt- RxOF- MalfTLP-
-> >                         ECRC- UnsupReq- ACSViol- UncorrIntErr- BlockedT=
-LP- AtomicOpBlocked- TLPBlockedErr-
-> >                         PoisonTLPBlocked- DMWrReqBlocked- IDECheck- Mis=
-IDETLP- PCRC_CHECK- TLPXlatBlocked-
-> >                 UEMsk:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmp=
-lt- RxOF- MalfTLP-
-> >                         ECRC- UnsupReq- ACSViol- UncorrIntErr- BlockedT=
-LP- AtomicOpBlocked- TLPBlockedErr-
-> >                         PoisonTLPBlocked- DMWrReqBlocked- IDECheck- Mis=
-IDETLP- PCRC_CHECK- TLPXlatBlocked-
-> >                 UESvrt: DLP+ SDES+ TLP- FCP+ CmpltTO- CmpltAbrt- UnxCmp=
-lt- RxOF+ MalfTLP+
-> >                         ECRC- UnsupReq- ACSViol- UncorrIntErr- BlockedT=
-LP- AtomicOpBlocked- TLPBlockedErr-
-> >                         PoisonTLPBlocked- DMWrReqBlocked- IDECheck- Mis=
-IDETLP- PCRC_CHECK- TLPXlatBlocked-
-> >                 CESta:  RxErr- BadTLP- BadDLLP- Rollover- Timeout+ AdvN=
-onFatalErr- CorrIntErr- HeaderOF-
-> >                 CEMsk:  RxErr- BadTLP- BadDLLP- Rollover- Timeout+ AdvN=
-onFatalErr+ CorrIntErr- HeaderOF-
-> >                 AERCap: First Error Pointer: 00, ECRCGenCap- ECRCGenEn-=
- ECRCChkCap- ECRCChkEn-
-> >                         MultHdrRecCap- MultHdrRecEn- TLPPfxPres- HdrLog=
-Cap-
-> >                 HeaderLog: 00000000 00000000 00000000 00000000
-> >         Kernel driver in use: sdhci-pci
-> >         Kernel modules: sdhci_pci
->
-> deck@legion-go-s ~> sudo lspci -d 17a0:9750 -vvv
-> 02:00.0 SD Host controller: Genesys Logic, Inc GL9750 SD Host Controller =
-(rev 01) (prog-if 01)
->         Subsystem: Genesys Logic, Inc GL9750 SD Host Controller
->         Physical Slot: 0
->         Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParEr=
-r- Stepping- SERR- FastB2B- DisINTx+
->         Status: Cap+ 66MHz- UDF- FastB2B- ParErr- DEVSEL=3Dfast >TAbort- =
-<TAbort- <MAbort- >SERR- <PERR- INTx-
->         Latency: 0, Cache Line Size: 64 bytes
->         Interrupt: pin A routed to IRQ 63
->         Region 0: Memory at b0a00000 (32-bit, non-prefetchable) [size=3D4=
-K]
->         Capabilities: [80] Express (v2) Endpoint, IntMsgNum 0
->                 DevCap: MaxPayload 128 bytes, PhantFunc 0, Latency L0s <4=
-us, L1 <64us
->                         ExtTag+ AttnBtn- AttnInd- PwrInd- RBE+ FLReset- S=
-lotPowerLimit 75W TEE-IO-
->                 DevCtl: CorrErr- NonFatalErr- FatalErr- UnsupReq-
->                         RlxdOrd+ ExtTag+ PhantFunc- AuxPwr- NoSnoop+
->                         MaxPayload 128 bytes, MaxReadReq 512 bytes
->                 DevSta: CorrErr- NonFatalErr- FatalErr- UnsupReq- AuxPwr+=
- TransPend-
->                 LnkCap: Port #80, Speed 2.5GT/s, Width x1, ASPM L1, Exit =
-Latency L1 <64us
->                         ClockPM+ Surprise- LLActRep- BwNot- ASPMOptComp+
->                 LnkCtl: ASPM L1 Enabled; RCB 64 bytes, LnkDisable- CommCl=
-k+
->                         ExtSynch- ClockPM+ AutWidDis- BWInt- AutBWInt- Fl=
-tModeDis-
->                 LnkSta: Speed 2.5GT/s, Width x1
->                         TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
->                 DevCap2: Completion Timeout: Range ABCD, TimeoutDis+ NROP=
-rPrP- LTR+
->                          10BitTagComp- 10BitTagReq- OBFF Via message/WAKE=
-#, ExtFmt- EETLPPrefix-
->                          EmergencyPowerReduction Not Supported, Emergency=
-PowerReductionInit-
->                          FRS- TPHComp- ExtTPHComp-
->                          AtomicOpsCap: 32bit- 64bit- 128bitCAS-
->                 DevCtl2: Completion Timeout: 50us to 50ms, TimeoutDis-
->                          AtomicOpsCtl: ReqEn-
->                          IDOReq- IDOCompl- LTR+ EmergencyPowerReductionRe=
-q-
->                          10BitTagReq- OBFF Disabled, EETLPPrefixBlk-
->                 LnkCap2: Supported Link Speeds: 2.5GT/s, Crosslink- Retim=
-er- 2Retimers- DRS-
->                 LnkCtl2: Target Link Speed: 2.5GT/s, EnterCompliance- Spe=
-edDis-
->                          Transmit Margin: Normal Operating Range, EnterMo=
-difiedCompliance- ComplianceSOS-
->                          Compliance Preset/De-emphasis: -6dB de-emphasis,=
- 0dB preshoot
->                 LnkSta2: Current De-emphasis Level: -6dB, EqualizationCom=
-plete- EqualizationPhase1-
->                          EqualizationPhase2- EqualizationPhase3- LinkEqua=
-lizationRequest-
->                          Retimer- 2Retimers- CrosslinkRes: unsupported, F=
-ltMode-
->         Capabilities: [e0] MSI: Enable+ Count=3D1/1 Maskable- 64bit+
->                 Address: 00000000fee04000  Data: 0023
->         Capabilities: [f8] Power Management version 3
->                 Flags: PMEClk- DSI- D1+ D2+ AuxCurrent=3D375mA PME(D0-,D1=
-+,D2+,D3hot+,D3cold+)
->                 Status: D0 NoSoftRst+ PME-Enable- DSel=3D0 DScale=3D0 PME=
--
->         Capabilities: [100 v1] Vendor Specific Information: ID=3D17a0 Rev=
-=3D1 Len=3D008 <?>
->         Capabilities: [108 v1] Latency Tolerance Reporting
->                 Max snoop latency: 1048576ns
->                 Max no snoop latency: 1048576ns
->         Capabilities: [110 v1] L1 PM Substates
->                 L1SubCap: PCI-PM_L1.2+ PCI-PM_L1.1+ ASPM_L1.2+ ASPM_L1.1+=
- L1_PM_Substates+
->                           PortCommonModeRestoreTime=3D20us PortTPowerOnTi=
-me=3D4us
->                 L1SubCtl1: PCI-PM_L1.2+ PCI-PM_L1.1+ ASPM_L1.2+ ASPM_L1.1=
-+
->                            T_CommonMode=3D0us LTR1.2_Threshold=3D176128ns
->                 L1SubCtl2: T_PwrOn=3D150us
->         Capabilities: [200 v1] Advanced Error Reporting
->                 UESta:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt=
-- RxOF- MalfTLP-
->                         ECRC- UnsupReq- ACSViol- UncorrIntErr- BlockedTLP=
-- AtomicOpBlocked- TLPBlockedErr-
->                         PoisonTLPBlocked- DMWrReqBlocked- IDECheck- MisID=
-ETLP- PCRC_CHECK- TLPXlatBlocked-
->                 UEMsk:  DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt- UnxCmplt=
-- RxOF- MalfTLP-
->                         ECRC- UnsupReq- ACSViol- UncorrIntErr- BlockedTLP=
-- AtomicOpBlocked- TLPBlockedErr-
->                         PoisonTLPBlocked- DMWrReqBlocked- IDECheck- MisID=
-ETLP- PCRC_CHECK- TLPXlatBlocked-
->                 UESvrt: DLP+ SDES+ TLP- FCP+ CmpltTO- CmpltAbrt- UnxCmplt=
-- RxOF+ MalfTLP+
->                         ECRC- UnsupReq- ACSViol- UncorrIntErr- BlockedTLP=
-- AtomicOpBlocked- TLPBlockedErr-
->                         PoisonTLPBlocked- DMWrReqBlocked- IDECheck- MisID=
-ETLP- PCRC_CHECK- TLPXlatBlocked-
->                 CESta:  RxErr- BadTLP- BadDLLP- Rollover- Timeout- AdvNon=
-FatalErr- CorrIntErr- HeaderOF-
->                 CEMsk:  RxErr- BadTLP- BadDLLP- Rollover- Timeout+ AdvNon=
-FatalErr+ CorrIntErr- HeaderOF-
->                 AERCap: First Error Pointer: 00, ECRCGenCap- ECRCGenEn- E=
-CRCChkCap- ECRCChkEn-
->                         MultHdrRecCap- MultHdrRecEn- TLPPfxPres- HdrLogCa=
-p-
->                 HeaderLog: 00000000 00000000 00000000 00000000
->         Kernel driver in use: sdhci-pci
->         Kernel modules: sdhci_pci
->
->
-> > $ sudo iotools mmio_read32 0x84000510
-> > 0x0303000f
-> > $
-> > --
-> > Best regards,
-> > Ben Chuang
-> >
-> >>
-> >> On 18/01/2026 01:48, Matthew Schwartz wrote:
-> >>> The GL9750 SD host controller has intermittent data corruption during
-> >>> DMA write operations, which has been traced to an incorrect burst
-> >>> configuration. This was discovered by comparing initialization sequen=
-ces
-> >>> between the working GL9767 controller and GL9750 and seeing that the
-> >>> GM_BURST register was handled differently.
-> >>>
-> >>> Clearing bits 16-17 eliminates the corruption with f3write/f3read tes=
-ts
-> >>> while maintaining full DMA write/read performance.
-> >>>
-> >>> Fixes: e51df6ce668a ("mmc: host: sdhci-pci: Add Genesys Logic GL975x =
-support")
-> >>> Closes:
-> >> https://lore.kernel.org/linux-mmc/33d12807-5c72-41c
-> >> e-8679-57aa11831fad%40linux.dev%2F&data=3D05%7C02%7Cben.chuang%40genes=
-yslogic.com.tw%7C2361bfc18a574c93ddc
-> >> 308de5fedb708%7C4e753840bf6b40a19645185818deeb52%7C0%7C0%7C63905367179=
-0416204%7CUnknown%7CTWFpbG
-> >> Zsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFO=
-IjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7
-> >> C%7C%7C&sdata=3DAzJ5iXlS1yxTdGDFK64jJxRkOAty%2FzNAGMHM%2FItQDfA%3D&res=
-erved=3D0
-> >>> Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
-> >>> ---
-> >>>
-> >>> Hi all,
-> >>>
-> >>> I arrived at this after a whole bunch of guesswork based on the other
-> >>> Genesys card readers in the kernel that do work, like GL9767. I lande=
-d on
-> >>> register 0x510 which appears to be "GM_BURST_SIZE" and ended up going
-> >>> through each bit and either setting it or masking it. Eventually, I
-> >>> arrived at masking bits 16-17 which seemed to stabilize writes comple=
-tely.
-> >>>
-> >>> Could someone at Genesys confirm what this register is for on GL9750,=
- and
-> >>> what those bits are? At least locally, I have been able to run 50GB o=
-f
-> >>> f3write/f3read without any corruption while before even 1GB would cor=
-rupt.
-> >>> This also maintains the same read/write speed as before this change. =
-I
-> >>> tried searching online but was unable to find any relevant docs, and =
-I'd
-> >>> like to confirm the purpose of those bits before sending this out as =
-v1.
-> >>>
-> >>> Thanks,
-> >>> Matt
-> >>>
-> >>> ---
-> >>>  drivers/mmc/host/sdhci-pci-gli.c | 8 ++++++++
-> >>>  1 file changed, 8 insertions(+)
-> >>>
-> >>> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhc=
-i-pci-gli.c
-> >>> index b0f91cc9e40e4..a06b0cf11f12d 100644
-> >>> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> >>> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> >>> @@ -26,6 +26,9 @@
-> >>>  #define   GLI_9750_WT_EN_ON            0x1
-> >>>  #define   GLI_9750_WT_EN_OFF           0x0
-> >>>
-> >>> +#define SDHCI_GLI_9750_GM_BURST_SIZE                 0x510
-> >>> +#define   SDHCI_GLI_9750_GM_BURST_SIZE_MASK            GENMASK(17, 1=
-6)
-> >>> +
-> >>>  #define SDHCI_GLI_9750_CFG2          0x848
-> >>>  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
-> >>>  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
-> >>> @@ -629,6 +632,11 @@ static void gl9750_hw_setting(struct sdhci_host =
-*host)
-> >>>
-> >>>     gl9750_wt_on(host);
-> >>>
-> >>> +   /* clear GM_BURST bits to avoid corruption with DMA writes */
-> >>> +   value =3D sdhci_readl(host, SDHCI_GLI_9750_GM_BURST_SIZE);
-> >>> +   value &=3D ~SDHCI_GLI_9750_GM_BURST_SIZE_MASK;
-> >>> +   sdhci_writel(host, value, SDHCI_GLI_9750_GM_BURST_SIZE);
-> >>> +
-> >>>     value =3D sdhci_readl(host, SDHCI_GLI_9750_CFG2);
-> >>>     value &=3D ~SDHCI_GLI_9750_CFG2_L1DLY;
-> >>>     /* set ASPM L1 entry delay to 7.9us */
-> >
-> > ________________________________
-> >
-> > Genesys Logic Email Confidentiality Notice:
-> > This mail and any attachments may contain information that is confident=
-ial, proprietary, privileged or otherwise protected by law. The mail is int=
-ended solely for the named addressee (or a person responsible for deliverin=
-g it to the addressee). If you are not the intended recipient of this mail,=
- you are not authorized to read, print, copy or disseminate this mail.
-> >
-> > If you have received this email in error, please notify us immediately =
-by reply email and immediately delete this message and any attachments from=
- your system. Please be noted that any unauthorized use, dissemination, dis=
-tribution or copying of this email is strictly prohibited.
-> > ________________________________
->
+DQpBbSAyNS4wMi4yNiB1bSAxMjozNCBzY2hyaWViIEpvc3VhIE1heWVyOg0KPiBJbi10cmVlIHBo
+eS1jYW4tdHJhbnNjZWl2ZXIgYW5kIHBoeV9yY2FyX2dlbjNfdXNiMiBoYXZlIGFscmVhZHkNCj4g
+aW1wbGVtZW50ZWQgbG9jYWwgdmVyc2lvbnMgb2YgZGV2bV9tdXhfc3RhdGVfZ2V0X29wdGlvbmFs
+Lg0KPg0KPiBUaGUgb21hcC1pMmMgZHJpdmVyIGdldHMgYW5kIHNlbGVjdHMgYW4gb3B0aW9uYWwg
+bXV4IGluIGl0cyBwcm9iZQ0KPiBmdW5jdGlvbiB3aXRob3V0IHVzaW5nIGFueSBoZWxwZXIuDQo+
+DQo+IEFkZCBuZXcgaGVscGVyIGZ1bmN0aW9ucyBjb3ZlcmluZyBib3RoIGFmb3JlbWVudGlvbmVk
+IHVzZS1jYXNlczoNCj4NCj4gLSBtdXhfY29udHJvbF9nZXRfb3B0aW9uYWw6DQo+ICAgR2V0IGEg
+bXV4LWNvbnRyb2wgaWYgc3BlY2lmaWVkIGluIGR0LCByZXR1cm4gTlVMTCBvdGhlcndpc2UuDQo+
+IC0gZGV2bV9tdXhfc3RhdGVfZ2V0X29wdGlvbmFsOg0KPiAgIEdldCBhIG11eC1zdGF0ZSBpZiBz
+cGVjaWZpZWQgaW4gZHQsIHJldHVybiBOVUxMIG90aGVyd2lzZS4NCj4gLSBkZXZtX211eF9zdGF0
+ZV9nZXRfc2VsZWN0ZWQ6DQo+ICAgR2V0IGFuZCBzZWxlY3QgYSBtdXgtc3RhdGUgc3BlY2lmaWVk
+IGluIGR0LCByZXR1cm4gZXJyb3Igb3RoZXJ3aXNlLg0KPiAtIGRldm1fbXV4X3N0YXRlX2dldF9v
+cHRpb25hbF9zZWxlY3RlZDoNCj4gICBHZXQgYW5kIHNlbGVjdCBhIG11eC1zdGF0ZSBpZiBzcGVj
+aWZpZWQgaW4gZHQsIHJldHVybiBlcnJvciBvciBOVUxMLg0KPg0KPiBFeGlzdGluZyBtdXhfZ2V0
+IGhlbHBlciBmdW5jdGlvbiBpcyBjaGFuZ2VkIHRvIHRha2UgYW4gZXh0cmEgYXJndW1lbnQNCj4g
+aW5kaWNhdGluZyB3aGV0aGVyIHRoZSBtdXggaXMgb3B0aW9uYWwuDQo+IEluIHRoaXMgY2FzZSBu
+byBlcnJvciBpcyBwcmludGVkLCBhbmQgTlVMTCByZXR1cm5lZCBpbiBjYXNlIG9mIEVOT0VOVC4N
+Cj4NCj4gQ2FsbGluZyBjb2RlIGlzIGFkYXB0ZWQgdG8gaGFuZGxlIE5VTEwgcmV0dXJuIGNhc2Us
+IGFuZCB0byBwYXNzIG9wdGlvbmFsDQo+IGFyZ3VtZW50IGFzIHJlcXVpcmVkLg0KPg0KPiBUbyBz
+dXBwb3J0IGF1dG9tYXRpYyBkZXNlbGVjdCBmb3IgX3NlbGVjdGVkIGhlbHBlciwgYSBuZXcgc3Ry
+dWN0dXJlIGlzDQo+IGNyZWF0ZWQgc3RvcmluZyBhbiBleGl0IHBvaW50ZXIgc2ltaWxhciB0byBj
+bG9jayBjb3JlIHdoaWNoIGlzIGNhbGxlZCBvbg0KPiByZWxlYXNlLg0KPg0KPiBUbyBmYWNpbGl0
+YXRlIGNvZGUgc2hhcmluZyBiZXR3ZWVuIG9wdGlvbmFsL21hbmRhdG9yeS9zZWxlY3RlZCBoZWxw
+ZXJzLA0KPiBhIG5ldyBpbnRlcm5hbCBoZWxwZXIgZnVuY3Rpb24gaXMgYWRkZWQgdG8gaGFuZGxl
+IHF1aWV0IChvcHRpb25hbCkgYW5kDQo+IHZlcmJvc2UgKG1hbmRhdG9yeSkgZXJyb3JzLCBhcyB3
+ZWxsIGFzIHN0b3JpbmcgdGhlIGNvcnJlY3QgY2FsbGJhY2sgZm9yDQo+IGRldm0gcmVsZWFzZTog
+X19kZXZtX211eF9zdGF0ZV9nZXQNCj4NCj4gRHVlIHRvIHRoaXMgc3RydWN0dXJlIGRldm1fbXV4
+X3N0YXRlX2dldF8qX3NlbGVjdGVkIGNhbiBubyBsb25nZXIgcHJpbnQNCj4gYSB1c2VmdWwgZXJy
+b3IgbWVzc2FnZSB3aGVuIHNlbGVjdCBmYWlscy4gSW5zdGVhZCBjYWxsZXJzIHNob3VsZCBwcmlu
+dA0KPiBlcnJvcnMgd2hlcmUgbmVlZGVkLg0KPg0KPiBDb21taXQgZTE1M2ZkZWE5ZGIwNCAoInBo
+eTogY2FuLXRyYW5zY2VpdmVyOiBSZS1pbnN0YXRlICJtdXgtc3RhdGVzIg0KPiBwcm9wZXJ0eSBw
+cmVzZW5jZSBjaGVjayIpIG5vdGVkIHRoYXQgIm11eF9nZXQoKSBhbHdheXMgcHJpbnRzIGFuIGVy
+cm9yDQo+IG1lc3NhZ2UgaW4gY2FzZSBvZiBhbiBlcnJvciwgaW5jbHVkaW5nIHdoZW4gdGhlIHBy
+b3BlcnR5IGlzIG5vdCBwcmVzZW50LA0KPiBjb25mdXNpbmcgdGhlIHVzZXIuIg0KPg0KPiBUaGUg
+Zmlyc3QgZXJyb3IgbWVzc2FnZSBjb3ZlcnMgdGhlIGNhc2UgdGhhdCBhIG11eCBuYW1lIGlzIG5v
+dCBtYXRjaGVkDQo+IGluIGR0LiBUaGUgc2Vjb25kIGVycm9yIG1lc3NhZ2UgaXMgYmFzZWQgb24g
+b2ZfcGFyc2VfcGhhbmRsZV93aXRoX2FyZ3MNCj4gcmV0dXJuIHZhbHVlLg0KPg0KPiBJbiBvcHRp
+b25hbCBjYXNlIG5vIGVycm9yIGlzIHByaW50ZWQgYW5kIE5VTEwgaXMgcmV0dXJuZWQuDQo+IFRo
+aXMgZW5zdXJlcyB0aGF0IHRoZSBuZXcgaGVscGVyIGZ1bmN0aW9ucyB3aWxsIG5vdCBjb25mdXNl
+IHRoZSB1c2VyDQo+IGVpdGhlci4NCj4NCj4gV2l0aCB0aGUgYWRkaXRpb24gb2Ygb3B0aW9uYWwg
+aGVscGVyIGZ1bmN0aW9ucyBpdCBiZWNhbWUgY2xlYXIgdGhhdA0KPiBkcml2ZXJzIHNob3VsZCBj
+b21waWxlIGFuZCBsaW5rIGV2ZW4gaWYgQ09ORklHX01VTFRJUExFWEVSIHdhcyBub3QgZW5hYmxl
+ZC4NCj4gQWRkIHN0dWJzIGZvciBhbGwgc3ltYm9scyBleHBvcnRlZCBieSBtdXggY29yZS4NCj4N
+Cj4gQWNrZWQtYnk6IFdvbGZyYW0gU2FuZyA8d3NhK3JlbmVzYXNAc2FuZy1lbmdpbmVlcmluZy5j
+b20+DQo+IFNpZ25lZC1vZmYtYnk6IEpvc3VhIE1heWVyIDxqb3N1YUBzb2xpZC1ydW4uY29tPg0K
+PiAtLS0NCj4gIGRyaXZlcnMvbXV4L2NvcmUuYyAgICAgICAgICAgfCAyMDYgKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrLS0tLS0tLQ0KPiAgaW5jbHVkZS9saW51eC9tdXgvY29u
+c3VtZXIuaCB8IDEwOCArKysrKysrKysrKysrKysrKysrKysrLQ0KPiAgMiBmaWxlcyBjaGFuZ2Vk
+LCAyNzkgaW5zZXJ0aW9ucygrKSwgMzUgZGVsZXRpb25zKC0pDQo+DQo+IGRpZmYgLS1naXQgYS9k
+cml2ZXJzL211eC9jb3JlLmMgYi9kcml2ZXJzL211eC9jb3JlLmMNCj4gaW5kZXggZjA5ZWU4Nzgy
+ZTNkLi42MDMzZGEwYTllMTcgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbXV4L2NvcmUuYw0KPiAr
+KysgYi9kcml2ZXJzL211eC9jb3JlLmMNCj4gQEAgLTQ2LDYgKzQ2LDE2IEBAIHN0YXRpYyBjb25z
+dCBzdHJ1Y3QgY2xhc3MgbXV4X2NsYXNzID0gew0KPiAgCS5uYW1lID0gIm11eCIsDQo+ICB9Ow0K
+PiAgDQo+ICsvKioNCj4gKyAqIHN0cnVjdCBkZXZtX211eF9zdGF0ZV9zdGF0ZSAtCVRyYWNrcyBt
+YW5hZ2VkIHJlc291cmNlcyBmb3IgbXV4LXN0YXRlIG9iamVjdHMuDQo+ICsgKiBAbXN0YXRlOgkJ
+CQlQb2ludGVyIHRvIGEgbXV4IHN0YXRlLg0KPiArICogQGV4aXQ6CQkJCUFuIG9wdGlvbmFsIGNh
+bGxiYWNrIHRvIGV4ZWN1dGUgYmVmb3JlIGZyZWUuDQo+ICsgKi8NCj4gK3N0cnVjdCBkZXZtX211
+eF9zdGF0ZV9zdGF0ZSB7DQo+ICsJc3RydWN0IG11eF9zdGF0ZSAqbXN0YXRlOw0KPiArCWludCAo
+KmV4aXQpKHN0cnVjdCBtdXhfc3RhdGUgKm1zdGF0ZSk7DQo+ICt9Ow0KPiArDQo+ICBzdGF0aWMg
+REVGSU5FX0lEQShtdXhfaWRhKTsNCj4gIA0KPiAgc3RhdGljIGludCBfX2luaXQgbXV4X2luaXQo
+dm9pZCkNCj4gQEAgLTUxNiwxNyArNTI2LDE5IEBAIHN0YXRpYyBzdHJ1Y3QgbXV4X2NoaXAgKm9m
+X2ZpbmRfbXV4X2NoaXBfYnlfbm9kZShzdHJ1Y3QgZGV2aWNlX25vZGUgKm5wKQ0KPiAgCXJldHVy
+biBkZXYgPyB0b19tdXhfY2hpcChkZXYpIDogTlVMTDsNCj4gIH0NCj4gIA0KPiAtLyoNCj4gKy8q
+Kg0KPiAgICogbXV4X2dldCgpIC0gR2V0IHRoZSBtdXgtY29udHJvbCBmb3IgYSBkZXZpY2UuDQo+
+ICAgKiBAZGV2OiBUaGUgZGV2aWNlIHRoYXQgbmVlZHMgYSBtdXgtY29udHJvbC4NCj4gICAqIEBt
+dXhfbmFtZTogVGhlIG5hbWUgaWRlbnRpZnlpbmcgdGhlIG11eC1jb250cm9sLg0KPiAgICogQHN0
+YXRlOiBQb2ludGVyIHRvIHdoZXJlIHRoZSByZXF1ZXN0ZWQgc3RhdGUgaXMgcmV0dXJuZWQsIG9y
+IE5VTEwgd2hlbg0KPiAgICogICAgICAgICB0aGUgcmVxdWlyZWQgbXVsdGlwbGV4ZXIgc3RhdGVz
+IGFyZSBoYW5kbGVkIGJ5IG90aGVyIG1lYW5zLg0KPiArICogQG9wdGlvbmFsOiBXaGV0aGVyIHRv
+IHJldHVybiBOVUxMIGFuZCBzaWxlbmNlIGVycm9ycyB3aGVuIG11eCBkb2Vzbid0IGV4aXN0Lg0K
+PiAgICoNCj4gLSAqIFJldHVybjogQSBwb2ludGVyIHRvIHRoZSBtdXgtY29udHJvbCwgb3IgYW4g
+RVJSX1BUUiB3aXRoIGEgbmVnYXRpdmUgZXJybm8uDQo+ICsgKiBSZXR1cm46IFBvaW50ZXIgdG8g
+dGhlIG11eC1jb250cm9sIG9uIHN1Y2Nlc3MsIGFuIEVSUl9QVFIgd2l0aCBhIG5lZ2F0aXZlIGVy
+cm5vIG9uIGVycm9yLA0KPiArICogb3IgTlVMTCBpZiBvcHRpb25hbCBpcyB0cnVlIGFuZCBtdXgg
+ZG9lc24ndCBleGlzdC4NCj4gICAqLw0KPiAgc3RhdGljIHN0cnVjdCBtdXhfY29udHJvbCAqbXV4
+X2dldChzdHJ1Y3QgZGV2aWNlICpkZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1lLA0KPiAtCQkJCSAg
+IHVuc2lnbmVkIGludCAqc3RhdGUpDQo+ICsJCQkJICAgdW5zaWduZWQgaW50ICpzdGF0ZSwgYm9v
+bCBvcHRpb25hbCkNCj4gIHsNCj4gIAlzdHJ1Y3QgZGV2aWNlX25vZGUgKm5wID0gZGV2LT5vZl9u
+b2RlOw0KPiAgCXN0cnVjdCBvZl9waGFuZGxlX2FyZ3MgYXJnczsNCj4gQEAgLTU0Miw3ICs1NTQs
+OSBAQCBzdGF0aWMgc3RydWN0IG11eF9jb250cm9sICptdXhfZ2V0KHN0cnVjdCBkZXZpY2UgKmRl
+diwgY29uc3QgY2hhciAqbXV4X25hbWUsDQo+ICAJCWVsc2UNCj4gIAkJCWluZGV4ID0gb2ZfcHJv
+cGVydHlfbWF0Y2hfc3RyaW5nKG5wLCAibXV4LWNvbnRyb2wtbmFtZXMiLA0KPiAgCQkJCQkJCSBt
+dXhfbmFtZSk7DQo+IC0JCWlmIChpbmRleCA8IDApIHsNCj4gKwkJaWYgKGluZGV4IDwgMCAmJiBv
+cHRpb25hbCkgew0KPiArCQkJcmV0dXJuIE5VTEw7DQo+ICsJCX0gZWxzZSBpZiAoaW5kZXggPCAw
+KSB7DQo+ICAJCQlkZXZfZXJyKGRldiwgIm11eCBjb250cm9sbGVyICclcycgbm90IGZvdW5kXG4i
+LA0KPiAgCQkJCW11eF9uYW1lKTsNCj4gIAkJCXJldHVybiBFUlJfUFRSKGluZGV4KTsNCj4gQEAg
+LTU1OCw4ICs1NzIsMTIgQEAgc3RhdGljIHN0cnVjdCBtdXhfY29udHJvbCAqbXV4X2dldChzdHJ1
+Y3QgZGV2aWNlICpkZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1lLA0KPiAgCQkJCQkJICJtdXgtY29u
+dHJvbHMiLCAiI211eC1jb250cm9sLWNlbGxzIiwNCj4gIAkJCQkJCSBpbmRleCwgJmFyZ3MpOw0K
+PiAgCWlmIChyZXQpIHsNCj4gKwkJaWYgKG9wdGlvbmFsICYmIHJldCA9PSAtRU5PRU5UKQ0KPiAr
+CQkJcmV0dXJuIE5VTEw7DQo+ICsNCj4gIAkJZGV2X2VycihkZXYsICIlcE9GOiBmYWlsZWQgdG8g
+Z2V0IG11eC0lcyAlcyglaSlcbiIsDQo+IC0JCQlucCwgc3RhdGUgPyAic3RhdGUiIDogImNvbnRy
+b2wiLCBtdXhfbmFtZSA/OiAiIiwgaW5kZXgpOw0KPiArCQkJbnAsIHN0YXRlID8gInN0YXRlIiA6
+ICJjb250cm9sIiwNCj4gKwkJCW11eF9uYW1lID86ICIiLCBpbmRleCk7DQo+ICAJCXJldHVybiBF
+UlJfUFRSKHJldCk7DQo+ICAJfQ0KPiAgDQo+IEBAIC02MTcsMTAgKzYzNSwyOSBAQCBzdGF0aWMg
+c3RydWN0IG11eF9jb250cm9sICptdXhfZ2V0KHN0cnVjdCBkZXZpY2UgKmRldiwgY29uc3QgY2hh
+ciAqbXV4X25hbWUsDQo+ICAgKi8NCj4gIHN0cnVjdCBtdXhfY29udHJvbCAqbXV4X2NvbnRyb2xf
+Z2V0KHN0cnVjdCBkZXZpY2UgKmRldiwgY29uc3QgY2hhciAqbXV4X25hbWUpDQo+ICB7DQo+IC0J
+cmV0dXJuIG11eF9nZXQoZGV2LCBtdXhfbmFtZSwgTlVMTCk7DQo+ICsJc3RydWN0IG11eF9jb250
+cm9sICptdXggPSBtdXhfZ2V0KGRldiwgbXV4X25hbWUsIE5VTEwsIGZhbHNlKTsNCj4gKw0KPiAr
+CWlmICghbXV4KQ0KPiArCQlyZXR1cm4gRVJSX1BUUigtRU5PRU5UKTsNCj4gKw0KPiArCXJldHVy
+biBtdXg7DQo+ICB9DQo+ICBFWFBPUlRfU1lNQk9MX0dQTChtdXhfY29udHJvbF9nZXQpOw0KPiAg
+DQo+ICsvKioNCj4gKyAqIG11eF9jb250cm9sX2dldF9vcHRpb25hbCgpIC0gR2V0IHRoZSBvcHRp
+b25hbCBtdXgtY29udHJvbCBmb3IgYSBkZXZpY2UuDQo+ICsgKiBAZGV2OiBUaGUgZGV2aWNlIHRo
+YXQgbmVlZHMgYSBtdXgtY29udHJvbC4NCj4gKyAqIEBtdXhfbmFtZTogVGhlIG5hbWUgaWRlbnRp
+ZnlpbmcgdGhlIG11eC1jb250cm9sLg0KPiArICoNCj4gKyAqIFJldHVybjogUG9pbnRlciB0byB0
+aGUgbXV4LXN0YXRlIG9uIHN1Y2Nlc3MsIGFuIEVSUl9QVFIgd2l0aCBhIG5lZ2F0aXZlIGVycm5v
+IG9uIGVycm9yLA0KPiArICogb3IgTlVMTCBpZiBtdXggZG9lc24ndCBleGlzdC4NCj4gKyAqLw0K
+PiArc3RydWN0IG11eF9jb250cm9sICptdXhfY29udHJvbF9nZXRfb3B0aW9uYWwoc3RydWN0IGRl
+dmljZSAqZGV2LCBjb25zdCBjaGFyICptdXhfbmFtZSkNCj4gK3sNCj4gKwlyZXR1cm4gbXV4X2dl
+dChkZXYsIG11eF9uYW1lLCBOVUxMLCB0cnVlKTsNCj4gK30NCj4gK0VYUE9SVF9TWU1CT0xfR1BM
+KG11eF9jb250cm9sX2dldF9vcHRpb25hbCk7DQo+ICsNCj4gIC8qKg0KPiAgICogbXV4X2NvbnRy
+b2xfcHV0KCkgLSBQdXQgYXdheSB0aGUgbXV4LWNvbnRyb2wgZm9yIGdvb2QuDQo+ICAgKiBAbXV4
+OiBUaGUgbXV4LWNvbnRyb2wgdG8gcHV0IGF3YXkuDQo+IEBAIC02NTcsMTAgKzY5NCwxMyBAQCBz
+dHJ1Y3QgbXV4X2NvbnRyb2wgKmRldm1fbXV4X2NvbnRyb2xfZ2V0KHN0cnVjdCBkZXZpY2UgKmRl
+diwNCj4gIAlpZiAoIXB0cikNCj4gIAkJcmV0dXJuIEVSUl9QVFIoLUVOT01FTSk7DQo+ICANCj4g
+LQltdXggPSBtdXhfY29udHJvbF9nZXQoZGV2LCBtdXhfbmFtZSk7DQo+ICsJbXV4ID0gbXV4X2dl
+dChkZXYsIG11eF9uYW1lLCBOVUxMLCBmYWxzZSk7DQo+ICAJaWYgKElTX0VSUihtdXgpKSB7DQo+
+ICAJCWRldnJlc19mcmVlKHB0cik7DQo+ICAJCXJldHVybiBtdXg7DQo+ICsJfSBlbHNlIGlmICgh
+bXV4KSB7DQo+ICsJCWRldnJlc19mcmVlKHB0cik7DQo+ICsJCXJldHVybiBFUlJfUFRSKC1FTk9F
+TlQpOw0KPiAgCX0NCj4gIA0KPiAgCSpwdHIgPSBtdXg7DQo+IEBAIC02NzAsMTQgKzcxMCwxNiBA
+QCBzdHJ1Y3QgbXV4X2NvbnRyb2wgKmRldm1fbXV4X2NvbnRyb2xfZ2V0KHN0cnVjdCBkZXZpY2Ug
+KmRldiwNCj4gIH0NCj4gIEVYUE9SVF9TWU1CT0xfR1BMKGRldm1fbXV4X2NvbnRyb2xfZ2V0KTsN
+Cj4gIA0KPiAtLyoNCj4gKy8qKg0KPiAgICogbXV4X3N0YXRlX2dldCgpIC0gR2V0IHRoZSBtdXgt
+c3RhdGUgZm9yIGEgZGV2aWNlLg0KPiAgICogQGRldjogVGhlIGRldmljZSB0aGF0IG5lZWRzIGEg
+bXV4LXN0YXRlLg0KPiAgICogQG11eF9uYW1lOiBUaGUgbmFtZSBpZGVudGlmeWluZyB0aGUgbXV4
+LXN0YXRlLg0KPiArICogQG9wdGlvbmFsOiBXaGV0aGVyIHRvIHJldHVybiBOVUxMIGFuZCBzaWxl
+bmNlIGVycm9ycyB3aGVuIG11eCBkb2Vzbid0IGV4aXN0Lg0KPiAgICoNCj4gLSAqIFJldHVybjog
+QSBwb2ludGVyIHRvIHRoZSBtdXgtc3RhdGUsIG9yIGFuIEVSUl9QVFIgd2l0aCBhIG5lZ2F0aXZl
+IGVycm5vLg0KPiArICogUmV0dXJuOiBQb2ludGVyIHRvIHRoZSBtdXgtc3RhdGUgb24gc3VjY2Vz
+cywgYW4gRVJSX1BUUiB3aXRoIGEgbmVnYXRpdmUgZXJybm8gb24gZXJyb3IsDQo+ICsgKiBvciBO
+VUxMIGlmIG9wdGlvbmFsIGlzIHRydWUgYW5kIG11eCBkb2Vzbid0IGV4aXN0Lg0KPiAgICovDQo+
+IC1zdGF0aWMgc3RydWN0IG11eF9zdGF0ZSAqbXV4X3N0YXRlX2dldChzdHJ1Y3QgZGV2aWNlICpk
+ZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1lKQ0KPiArc3RhdGljIHN0cnVjdCBtdXhfc3RhdGUgKm11
+eF9zdGF0ZV9nZXQoc3RydWN0IGRldmljZSAqZGV2LCBjb25zdCBjaGFyICptdXhfbmFtZSwgYm9v
+bCBvcHRpb25hbCkNCj4gIHsNCj4gIAlzdHJ1Y3QgbXV4X3N0YXRlICptc3RhdGU7DQo+ICANCj4g
+QEAgLTY4NSwxMiArNzI3LDE2IEBAIHN0YXRpYyBzdHJ1Y3QgbXV4X3N0YXRlICptdXhfc3RhdGVf
+Z2V0KHN0cnVjdCBkZXZpY2UgKmRldiwgY29uc3QgY2hhciAqbXV4X25hbWUpDQo+ICAJaWYgKCFt
+c3RhdGUpDQo+ICAJCXJldHVybiBFUlJfUFRSKC1FTk9NRU0pOw0KPiAgDQo+IC0JbXN0YXRlLT5t
+dXggPSBtdXhfZ2V0KGRldiwgbXV4X25hbWUsICZtc3RhdGUtPnN0YXRlKTsNCj4gKwltc3RhdGUt
+Pm11eCA9IG11eF9nZXQoZGV2LCBtdXhfbmFtZSwgJm1zdGF0ZS0+c3RhdGUsIG9wdGlvbmFsKTsN
+Cj4gIAlpZiAoSVNfRVJSKG1zdGF0ZS0+bXV4KSkgew0KPiAtCQlpbnQgZXJyID0gUFRSX0VSUiht
+c3RhdGUtPm11eCk7DQo+IC0NCj4gIAkJa2ZyZWUobXN0YXRlKTsNCj4gLQkJcmV0dXJuIEVSUl9Q
+VFIoZXJyKTsNCj4gKwkJcmV0dXJuIEVSUl9DQVNUKG1zdGF0ZS0+bXV4KTsNCmtlcm5lbCByb2Jv
+dCBmb3VuZCBhIHVzZS1hZnRlci1mcmVlIGhlcmUgd2hpY2ggSSB3aWxsIHJlc29sdmUgZm9yIHYx
+MS4NCj4gKwl9IGVsc2UgaWYgKG9wdGlvbmFsICYmICFtc3RhdGUtPm11eCkgew0KPiArCQlrZnJl
+ZShtc3RhdGUpOw0KPiArCQlyZXR1cm4gTlVMTDsNCj4gKwl9IGVsc2UgaWYgKCFtc3RhdGUtPm11
+eCkgew0KPiArCQlrZnJlZShtc3RhdGUpOw0KPiArCQlyZXR1cm4gRVJSX1BUUigtRU5PRU5UKTsN
+Cj4gIAl9DQo+ICANCj4gIAlyZXR1cm4gbXN0YXRlOw0KPiBAQCAtNzEwLDkgKzc1Niw2NiBAQCBz
+dGF0aWMgdm9pZCBtdXhfc3RhdGVfcHV0KHN0cnVjdCBtdXhfc3RhdGUgKm1zdGF0ZSkNCj4gIA0K
+PiAgc3RhdGljIHZvaWQgZGV2bV9tdXhfc3RhdGVfcmVsZWFzZShzdHJ1Y3QgZGV2aWNlICpkZXYs
+IHZvaWQgKnJlcykNCj4gIHsNCj4gLQlzdHJ1Y3QgbXV4X3N0YXRlICptc3RhdGUgPSAqKHN0cnVj
+dCBtdXhfc3RhdGUgKiopcmVzOw0KPiArCXN0cnVjdCBkZXZtX211eF9zdGF0ZV9zdGF0ZSAqZGV2
+bV9zdGF0ZSA9IHJlczsNCj4gIA0KPiArCWlmIChkZXZtX3N0YXRlLT5leGl0KQ0KPiArCQlkZXZt
+X3N0YXRlLT5leGl0KGRldm1fc3RhdGUtPm1zdGF0ZSk7DQo+ICsNCj4gKwltdXhfc3RhdGVfcHV0
+KGRldm1fc3RhdGUtPm1zdGF0ZSk7DQo+ICt9DQo+ICsNCj4gKy8qKg0KPiArICogX19kZXZtX211
+eF9zdGF0ZV9nZXQoKSAtIEdldCB0aGUgb3B0aW9uYWwgbXV4LXN0YXRlIGZvciBhIGRldmljZSwN
+Cj4gKyAqCQkJICAgIHdpdGggcmVzb3VyY2UgbWFuYWdlbWVudC4NCj4gKyAqIEBkZXY6IFRoZSBk
+ZXZpY2UgdGhhdCBuZWVkcyBhIG11eC1zdGF0ZS4NCj4gKyAqIEBtdXhfbmFtZTogVGhlIG5hbWUg
+aWRlbnRpZnlpbmcgdGhlIG11eC1zdGF0ZS4NCj4gKyAqIEBvcHRpb25hbDogV2hldGhlciB0byBy
+ZXR1cm4gTlVMTCBhbmQgc2lsZW5jZSBlcnJvcnMgd2hlbiBtdXggZG9lc24ndCBleGlzdC4NCj4g
+KyAqIEBpbml0OiBPcHRpb25hbCBmdW5jdGlvbiBwb2ludGVyIGZvciBtdXgtc3RhdGUgb2JqZWN0
+IGluaXRpYWxpc2F0aW9uLg0KPiArICogQGV4aXQ6IE9wdGlvbmFsIGZ1bmN0aW9uIHBvaW50ZXIg
+Zm9yIG11eC1zdGF0ZSBvYmplY3QgY2xlYW51cCBvbiByZWxlYXNlLg0KPiArICoNCj4gKyAqIFJl
+dHVybjogUG9pbnRlciB0byB0aGUgbXV4LXN0YXRlIG9uIHN1Y2Nlc3MsIGFuIEVSUl9QVFIgd2l0
+aCBhIG5lZ2F0aXZlIGVycm5vIG9uIGVycm9yLA0KPiArICogb3IgTlVMTCBpZiBvcHRpb25hbCBp
+cyB0cnVlIGFuZCBtdXggZG9lc24ndCBleGlzdC4NCj4gKyAqLw0KPiArc3RhdGljIHN0cnVjdCBt
+dXhfc3RhdGUgKl9fZGV2bV9tdXhfc3RhdGVfZ2V0KHN0cnVjdCBkZXZpY2UgKmRldiwgY29uc3Qg
+Y2hhciAqbXV4X25hbWUsDQo+ICsJCQkJCSAgICAgIGJvb2wgb3B0aW9uYWwsDQo+ICsJCQkJCSAg
+ICAgIGludCAoKmluaXQpKHN0cnVjdCBtdXhfc3RhdGUgKm1zdGF0ZSksDQo+ICsJCQkJCSAgICAg
+IGludCAoKmV4aXQpKHN0cnVjdCBtdXhfc3RhdGUgKm1zdGF0ZSkpDQo+ICt7DQo+ICsJc3RydWN0
+IGRldm1fbXV4X3N0YXRlX3N0YXRlICpkZXZtX3N0YXRlOw0KPiArCXN0cnVjdCBtdXhfc3RhdGUg
+Km1zdGF0ZTsNCj4gKwlpbnQgcmV0Ow0KPiArDQo+ICsJbXN0YXRlID0gbXV4X3N0YXRlX2dldChk
+ZXYsIG11eF9uYW1lLCBvcHRpb25hbCk7DQo+ICsJaWYgKElTX0VSUihtc3RhdGUpKQ0KPiArCQly
+ZXR1cm4gRVJSX0NBU1QobXN0YXRlKTsNCj4gKwllbHNlIGlmIChvcHRpb25hbCAmJiAhbXN0YXRl
+KQ0KPiArCQlyZXR1cm4gTlVMTDsNCj4gKwllbHNlIGlmICghbXN0YXRlKQ0KPiArCQlyZXR1cm4g
+RVJSX1BUUigtRU5PRU5UKTsNCj4gKw0KPiArCWRldm1fc3RhdGUgPSBkZXZyZXNfYWxsb2MoZGV2
+bV9tdXhfc3RhdGVfcmVsZWFzZSwgc2l6ZW9mKCpkZXZtX3N0YXRlKSwgR0ZQX0tFUk5FTCk7DQo+
+ICsJaWYgKCFkZXZtX3N0YXRlKSB7DQo+ICsJCXJldCA9IC1FTk9NRU07DQo+ICsJCWdvdG8gZXJy
+X2RldnJlc19hbGxvYzsNCj4gKwl9DQo+ICsNCj4gKwlpZiAoaW5pdCkgew0KPiArCQlyZXQgPSBp
+bml0KG1zdGF0ZSk7DQo+ICsJCWlmIChyZXQpDQo+ICsJCQlnb3RvIGVycl9tdXhfc3RhdGVfaW5p
+dDsNCj4gKwl9DQo+ICsNCj4gKwlkZXZtX3N0YXRlLT5tc3RhdGUgPSBtc3RhdGU7DQo+ICsJZGV2
+bV9zdGF0ZS0+ZXhpdCA9IGV4aXQ7DQo+ICsJZGV2cmVzX2FkZChkZXYsIGRldm1fc3RhdGUpOw0K
+PiArDQo+ICsJcmV0dXJuIG1zdGF0ZTsNCj4gKw0KPiArZXJyX211eF9zdGF0ZV9pbml0Og0KPiAr
+CWRldnJlc19mcmVlKGRldm1fc3RhdGUpOw0KPiArZXJyX2RldnJlc19hbGxvYzoNCj4gIAltdXhf
+c3RhdGVfcHV0KG1zdGF0ZSk7DQo+ICsJcmV0dXJuIEVSUl9QVFIocmV0KTsNCj4gIH0NCj4gIA0K
+PiAgLyoqDQo+IEBAIC03MjIsMjggKzgyNSw2OSBAQCBzdGF0aWMgdm9pZCBkZXZtX211eF9zdGF0
+ZV9yZWxlYXNlKHN0cnVjdCBkZXZpY2UgKmRldiwgdm9pZCAqcmVzKQ0KPiAgICogQG11eF9uYW1l
+OiBUaGUgbmFtZSBpZGVudGlmeWluZyB0aGUgbXV4LWNvbnRyb2wuDQo+ICAgKg0KPiAgICogUmV0
+dXJuOiBQb2ludGVyIHRvIHRoZSBtdXgtc3RhdGUsIG9yIGFuIEVSUl9QVFIgd2l0aCBhIG5lZ2F0
+aXZlIGVycm5vLg0KPiArICoNCj4gKyAqIFRoZSBtdXgtc3RhdGUgd2lsbCBhdXRvbWF0aWNhbGx5
+IGJlIGZyZWVkIG9uIHJlbGVhc2UuDQo+ICAgKi8NCj4gLXN0cnVjdCBtdXhfc3RhdGUgKmRldm1f
+bXV4X3N0YXRlX2dldChzdHJ1Y3QgZGV2aWNlICpkZXYsDQo+IC0JCQkJICAgICBjb25zdCBjaGFy
+ICptdXhfbmFtZSkNCj4gK3N0cnVjdCBtdXhfc3RhdGUgKmRldm1fbXV4X3N0YXRlX2dldChzdHJ1
+Y3QgZGV2aWNlICpkZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1lKQ0KPiAgew0KPiAtCXN0cnVjdCBt
+dXhfc3RhdGUgKipwdHIsICptc3RhdGU7DQo+IC0NCj4gLQlwdHIgPSBkZXZyZXNfYWxsb2MoZGV2
+bV9tdXhfc3RhdGVfcmVsZWFzZSwgc2l6ZW9mKCpwdHIpLCBHRlBfS0VSTkVMKTsNCj4gLQlpZiAo
+IXB0cikNCj4gLQkJcmV0dXJuIEVSUl9QVFIoLUVOT01FTSk7DQo+ICsJcmV0dXJuIF9fZGV2bV9t
+dXhfc3RhdGVfZ2V0KGRldiwgbXV4X25hbWUsIGZhbHNlLCBOVUxMLCBOVUxMKTsNCj4gK30NCj4g
+K0VYUE9SVF9TWU1CT0xfR1BMKGRldm1fbXV4X3N0YXRlX2dldCk7DQo+ICANCj4gLQltc3RhdGUg
+PSBtdXhfc3RhdGVfZ2V0KGRldiwgbXV4X25hbWUpOw0KPiAtCWlmIChJU19FUlIobXN0YXRlKSkg
+ew0KPiAtCQlkZXZyZXNfZnJlZShwdHIpOw0KPiAtCQlyZXR1cm4gbXN0YXRlOw0KPiAtCX0NCj4g
+Ky8qKg0KPiArICogZGV2bV9tdXhfc3RhdGVfZ2V0X29wdGlvbmFsKCkgLSBHZXQgdGhlIG9wdGlv
+bmFsIG11eC1zdGF0ZSBmb3IgYSBkZXZpY2UsDQo+ICsgKgkJCQkgICB3aXRoIHJlc291cmNlIG1h
+bmFnZW1lbnQuDQo+ICsgKiBAZGV2OiBUaGUgZGV2aWNlIHRoYXQgbmVlZHMgYSBtdXgtc3RhdGUu
+DQo+ICsgKiBAbXV4X25hbWU6IFRoZSBuYW1lIGlkZW50aWZ5aW5nIHRoZSBtdXgtc3RhdGUuDQo+
+ICsgKg0KPiArICogUmV0dXJuOiBQb2ludGVyIHRvIHRoZSBtdXgtc3RhdGUgb24gc3VjY2Vzcywg
+YW4gRVJSX1BUUiB3aXRoIGEgbmVnYXRpdmUgZXJybm8gb24gZXJyb3IsDQo+ICsgKiBvciBOVUxM
+IGlmIG11eCBkb2Vzbid0IGV4aXN0Lg0KPiArICoNCj4gKyAqIFRoZSBtdXgtc3RhdGUgd2lsbCBh
+dXRvbWF0aWNhbGx5IGJlIGZyZWVkIG9uIHJlbGVhc2UuDQo+ICsgKi8NCj4gK3N0cnVjdCBtdXhf
+c3RhdGUgKmRldm1fbXV4X3N0YXRlX2dldF9vcHRpb25hbChzdHJ1Y3QgZGV2aWNlICpkZXYsIGNv
+bnN0IGNoYXIgKm11eF9uYW1lKQ0KPiArew0KPiArCXJldHVybiBfX2Rldm1fbXV4X3N0YXRlX2dl
+dChkZXYsIG11eF9uYW1lLCB0cnVlLCBOVUxMLCBOVUxMKTsNCj4gK30NCj4gK0VYUE9SVF9TWU1C
+T0xfR1BMKGRldm1fbXV4X3N0YXRlX2dldF9vcHRpb25hbCk7DQo+ICANCj4gLQkqcHRyID0gbXN0
+YXRlOw0KPiAtCWRldnJlc19hZGQoZGV2LCBwdHIpOw0KPiArLyoqDQo+ICsgKiBkZXZtX211eF9z
+dGF0ZV9nZXRfc2VsZWN0ZWQoKSAtIEdldCB0aGUgbXV4LXN0YXRlIGZvciBhIGRldmljZSwgd2l0
+aA0KPiArICoJCQkJICAgcmVzb3VyY2UgbWFuYWdlbWVudC4NCj4gKyAqIEBkZXY6IFRoZSBkZXZp
+Y2UgdGhhdCBuZWVkcyBhIG11eC1zdGF0ZS4NCj4gKyAqIEBtdXhfbmFtZTogVGhlIG5hbWUgaWRl
+bnRpZnlpbmcgdGhlIG11eC1zdGF0ZS4NCj4gKyAqDQo+ICsgKiBSZXR1cm46IFBvaW50ZXIgdG8g
+dGhlIG11eC1zdGF0ZSwgb3IgYW4gRVJSX1BUUiB3aXRoIGEgbmVnYXRpdmUgZXJybm8uDQo+ICsg
+Kg0KPiArICogVGhlIHJldHVybmVkIG11eC1zdGF0ZSAoaWYgdmFsaWQpIGlzIGFscmVhZHkgc2Vs
+ZWN0ZWQuDQo+ICsgKg0KPiArICogVGhlIG11eC1zdGF0ZSB3aWxsIGF1dG9tYXRpY2FsbHkgYmUg
+ZGVzZWxlY3RlZCBhbmQgZnJlZWQgb24gcmVsZWFzZS4NCj4gKyAqLw0KPiArc3RydWN0IG11eF9z
+dGF0ZSAqZGV2bV9tdXhfc3RhdGVfZ2V0X3NlbGVjdGVkKHN0cnVjdCBkZXZpY2UgKmRldiwgY29u
+c3QgY2hhciAqbXV4X25hbWUpDQo+ICt7DQo+ICsJcmV0dXJuIF9fZGV2bV9tdXhfc3RhdGVfZ2V0
+KGRldiwgbXV4X25hbWUsIGZhbHNlLCBtdXhfc3RhdGVfc2VsZWN0LCBtdXhfc3RhdGVfZGVzZWxl
+Y3QpOw0KPiArfQ0KPiArRVhQT1JUX1NZTUJPTF9HUEwoZGV2bV9tdXhfc3RhdGVfZ2V0X3NlbGVj
+dGVkKTsNCj4gIA0KPiAtCXJldHVybiBtc3RhdGU7DQo+ICsvKioNCj4gKyAqIGRldm1fbXV4X3N0
+YXRlX2dldF9vcHRpb25hbF9zZWxlY3RlZCgpIC0gR2V0IHRoZSBvcHRpb25hbCBtdXgtc3RhdGUg
+Zm9yDQo+ICsgKgkJCQkJICAgIGEgZGV2aWNlLCB3aXRoIHJlc291cmNlIG1hbmFnZW1lbnQuDQo+
+ICsgKiBAZGV2OiBUaGUgZGV2aWNlIHRoYXQgbmVlZHMgYSBtdXgtc3RhdGUuDQo+ICsgKiBAbXV4
+X25hbWU6IFRoZSBuYW1lIGlkZW50aWZ5aW5nIHRoZSBtdXgtc3RhdGUuDQo+ICsgKg0KPiArICog
+UmV0dXJuOiBQb2ludGVyIHRvIHRoZSBtdXgtc3RhdGUgb24gc3VjY2VzcywgYW4gRVJSX1BUUiB3
+aXRoIGEgbmVnYXRpdmUgZXJybm8gb24gZXJyb3IsDQo+ICsgKiBvciBOVUxMIGlmIG11eCBkb2Vz
+bid0IGV4aXN0Lg0KPiArICoNCj4gKyAqIFRoZSByZXR1cm5lZCBtdXgtc3RhdGUgKGlmIHZhbGlk
+KSBpcyBhbHJlYWR5IHNlbGVjdGVkLg0KPiArICoNCj4gKyAqIFRoZSBtdXgtc3RhdGUgd2lsbCBh
+dXRvbWF0aWNhbGx5IGJlIGRlc2VsZWN0ZWQgYW5kIGZyZWVkIG9uIHJlbGVhc2UuDQo+ICsgKi8N
+Cj4gK3N0cnVjdCBtdXhfc3RhdGUgKmRldm1fbXV4X3N0YXRlX2dldF9vcHRpb25hbF9zZWxlY3Rl
+ZChzdHJ1Y3QgZGV2aWNlICpkZXYsDQo+ICsJCQkJCQkgICAgICAgY29uc3QgY2hhciAqbXV4X25h
+bWUpDQo+ICt7DQo+ICsJcmV0dXJuIF9fZGV2bV9tdXhfc3RhdGVfZ2V0KGRldiwgbXV4X25hbWUs
+IHRydWUsIG11eF9zdGF0ZV9zZWxlY3QsIG11eF9zdGF0ZV9kZXNlbGVjdCk7DQo+ICB9DQo+IC1F
+WFBPUlRfU1lNQk9MX0dQTChkZXZtX211eF9zdGF0ZV9nZXQpOw0KPiArRVhQT1JUX1NZTUJPTF9H
+UEwoZGV2bV9tdXhfc3RhdGVfZ2V0X29wdGlvbmFsX3NlbGVjdGVkKTsNCj4gIA0KPiAgLyoNCj4g
+ICAqIFVzaW5nIHN1YnN5c19pbml0Y2FsbCBpbnN0ZWFkIG9mIG1vZHVsZV9pbml0IGhlcmUgdG8g
+dHJ5IHRvIGVuc3VyZSAtIGZvcg0KPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9tdXgvY29u
+c3VtZXIuaCBiL2luY2x1ZGUvbGludXgvbXV4L2NvbnN1bWVyLmgNCj4gaW5kZXggMmUyNWM4Mzhm
+ODMxLi5hOTYxODYxYTUwM2IgMTAwNjQ0DQo+IC0tLSBhL2luY2x1ZGUvbGludXgvbXV4L2NvbnN1
+bWVyLmgNCj4gKysrIGIvaW5jbHVkZS9saW51eC9tdXgvY29uc3VtZXIuaA0KPiBAQCAtMTYsNiAr
+MTYsOCBAQCBzdHJ1Y3QgZGV2aWNlOw0KPiAgc3RydWN0IG11eF9jb250cm9sOw0KPiAgc3RydWN0
+IG11eF9zdGF0ZTsNCj4gIA0KPiArI2lmIElTX0VOQUJMRUQoQ09ORklHX01VTFRJUExFWEVSKQ0K
+PiArDQo+ICB1bnNpZ25lZCBpbnQgbXV4X2NvbnRyb2xfc3RhdGVzKHN0cnVjdCBtdXhfY29udHJv
+bCAqbXV4KTsNCj4gIGludCBfX211c3RfY2hlY2sgbXV4X2NvbnRyb2xfc2VsZWN0X2RlbGF5KHN0
+cnVjdCBtdXhfY29udHJvbCAqbXV4LA0KPiAgCQkJCQkgIHVuc2lnbmVkIGludCBzdGF0ZSwNCj4g
+QEAgLTU0LDExICs1NiwxMDkgQEAgaW50IG11eF9jb250cm9sX2Rlc2VsZWN0KHN0cnVjdCBtdXhf
+Y29udHJvbCAqbXV4KTsNCj4gIGludCBtdXhfc3RhdGVfZGVzZWxlY3Qoc3RydWN0IG11eF9zdGF0
+ZSAqbXN0YXRlKTsNCj4gIA0KPiAgc3RydWN0IG11eF9jb250cm9sICptdXhfY29udHJvbF9nZXQo
+c3RydWN0IGRldmljZSAqZGV2LCBjb25zdCBjaGFyICptdXhfbmFtZSk7DQo+ICtzdHJ1Y3QgbXV4
+X2NvbnRyb2wgKm11eF9jb250cm9sX2dldF9vcHRpb25hbChzdHJ1Y3QgZGV2aWNlICpkZXYsIGNv
+bnN0IGNoYXIgKm11eF9uYW1lKTsNCj4gIHZvaWQgbXV4X2NvbnRyb2xfcHV0KHN0cnVjdCBtdXhf
+Y29udHJvbCAqbXV4KTsNCj4gIA0KPiAtc3RydWN0IG11eF9jb250cm9sICpkZXZtX211eF9jb250
+cm9sX2dldChzdHJ1Y3QgZGV2aWNlICpkZXYsDQo+IC0JCQkJCSBjb25zdCBjaGFyICptdXhfbmFt
+ZSk7DQo+IC1zdHJ1Y3QgbXV4X3N0YXRlICpkZXZtX211eF9zdGF0ZV9nZXQoc3RydWN0IGRldmlj
+ZSAqZGV2LA0KPiAtCQkJCSAgICAgY29uc3QgY2hhciAqbXV4X25hbWUpOw0KPiArc3RydWN0IG11
+eF9jb250cm9sICpkZXZtX211eF9jb250cm9sX2dldChzdHJ1Y3QgZGV2aWNlICpkZXYsIGNvbnN0
+IGNoYXIgKm11eF9uYW1lKTsNCj4gK3N0cnVjdCBtdXhfc3RhdGUgKmRldm1fbXV4X3N0YXRlX2dl
+dChzdHJ1Y3QgZGV2aWNlICpkZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1lKTsNCj4gK3N0cnVjdCBt
+dXhfc3RhdGUgKmRldm1fbXV4X3N0YXRlX2dldF9vcHRpb25hbChzdHJ1Y3QgZGV2aWNlICpkZXYs
+IGNvbnN0IGNoYXIgKm11eF9uYW1lKTsNCj4gK3N0cnVjdCBtdXhfc3RhdGUgKmRldm1fbXV4X3N0
+YXRlX2dldF9zZWxlY3RlZChzdHJ1Y3QgZGV2aWNlICpkZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1l
+KTsNCj4gK3N0cnVjdCBtdXhfc3RhdGUgKmRldm1fbXV4X3N0YXRlX2dldF9vcHRpb25hbF9zZWxl
+Y3RlZChzdHJ1Y3QgZGV2aWNlICpkZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1lKTsNCj4gKw0KPiAr
+I2Vsc2UNCj4gKw0KPiArc3RhdGljIGlubGluZSB1bnNpZ25lZCBpbnQgbXV4X2NvbnRyb2xfc3Rh
+dGVzKHN0cnVjdCBtdXhfY29udHJvbCAqbXV4KQ0KPiArew0KPiArCXJldHVybiAwOw0KPiArfQ0K
+PiArc3RhdGljIGlubGluZSBpbnQgX19tdXN0X2NoZWNrIG11eF9jb250cm9sX3NlbGVjdF9kZWxh
+eShzdHJ1Y3QgbXV4X2NvbnRyb2wgKm11eCwNCj4gKwkJCQkJCQl1bnNpZ25lZCBpbnQgc3RhdGUs
+IHVuc2lnbmVkIGludCBkZWxheV91cykNCj4gK3sNCj4gKwlyZXR1cm4gLUVPUE5PVFNVUFA7DQo+
+ICt9DQo+ICtzdGF0aWMgaW5saW5lIGludCBfX211c3RfY2hlY2sgbXV4X3N0YXRlX3NlbGVjdF9k
+ZWxheShzdHJ1Y3QgbXV4X3N0YXRlICptc3RhdGUsDQo+ICsJCQkJCQkgICAgICB1bnNpZ25lZCBp
+bnQgZGVsYXlfdXMpDQo+ICt7DQo+ICsJcmV0dXJuIC1FT1BOT1RTVVBQOw0KPiArfQ0KPiArc3Rh
+dGljIGlubGluZSBpbnQgX19tdXN0X2NoZWNrIG11eF9jb250cm9sX3RyeV9zZWxlY3RfZGVsYXko
+c3RydWN0IG11eF9jb250cm9sICptdXgsDQo+ICsJCQkJCQkJICAgIHVuc2lnbmVkIGludCBzdGF0
+ZSwNCj4gKwkJCQkJCQkgICAgdW5zaWduZWQgaW50IGRlbGF5X3VzKQ0KPiArew0KPiArCXJldHVy
+biAtRU9QTk9UU1VQUDsNCj4gK30NCj4gK3N0YXRpYyBpbmxpbmUgaW50IF9fbXVzdF9jaGVjayBt
+dXhfc3RhdGVfdHJ5X3NlbGVjdF9kZWxheShzdHJ1Y3QgbXV4X3N0YXRlICptc3RhdGUsDQo+ICsJ
+CQkJCQkJICB1bnNpZ25lZCBpbnQgZGVsYXlfdXMpDQo+ICt7DQo+ICsJcmV0dXJuIC1FT1BOT1RT
+VVBQOw0KPiArfQ0KPiArDQo+ICtzdGF0aWMgaW5saW5lIGludCBfX211c3RfY2hlY2sgbXV4X2Nv
+bnRyb2xfc2VsZWN0KHN0cnVjdCBtdXhfY29udHJvbCAqbXV4LA0KPiArCQkJCQkJICB1bnNpZ25l
+ZCBpbnQgc3RhdGUpDQo+ICt7DQo+ICsJcmV0dXJuIC1FT1BOT1RTVVBQOw0KPiArfQ0KPiArDQo+
+ICtzdGF0aWMgaW5saW5lIGludCBfX211c3RfY2hlY2sgbXV4X3N0YXRlX3NlbGVjdChzdHJ1Y3Qg
+bXV4X3N0YXRlICptc3RhdGUpDQo+ICt7DQo+ICsJcmV0dXJuIC1FT1BOT1RTVVBQOw0KPiArfQ0K
+PiArDQo+ICtzdGF0aWMgaW5saW5lIGludCBfX211c3RfY2hlY2sgbXV4X2NvbnRyb2xfdHJ5X3Nl
+bGVjdChzdHJ1Y3QgbXV4X2NvbnRyb2wgKm11eCwNCj4gKwkJCQkJCSAgICAgIHVuc2lnbmVkIGlu
+dCBzdGF0ZSkNCj4gK3sNCj4gKwlyZXR1cm4gLUVPUE5PVFNVUFA7DQo+ICt9DQo+ICsNCj4gK3N0
+YXRpYyBpbmxpbmUgaW50IF9fbXVzdF9jaGVjayBtdXhfc3RhdGVfdHJ5X3NlbGVjdChzdHJ1Y3Qg
+bXV4X3N0YXRlICptc3RhdGUpDQo+ICt7DQo+ICsJcmV0dXJuIC1FT1BOT1RTVVBQOw0KPiArfQ0K
+PiArDQo+ICtzdGF0aWMgaW5saW5lIGludCBtdXhfY29udHJvbF9kZXNlbGVjdChzdHJ1Y3QgbXV4
+X2NvbnRyb2wgKm11eCkNCj4gK3sNCj4gKwlyZXR1cm4gLUVPUE5PVFNVUFA7DQo+ICt9DQo+ICtz
+dGF0aWMgaW5saW5lIGludCBtdXhfc3RhdGVfZGVzZWxlY3Qoc3RydWN0IG11eF9zdGF0ZSAqbXN0
+YXRlKQ0KPiArew0KPiArCXJldHVybiAtRU9QTk9UU1VQUDsNCj4gK30NCj4gKw0KPiArc3RhdGlj
+IGlubGluZSBzdHJ1Y3QgbXV4X2NvbnRyb2wgKm11eF9jb250cm9sX2dldChzdHJ1Y3QgZGV2aWNl
+ICpkZXYsIGNvbnN0IGNoYXIgKm11eF9uYW1lKQ0KPiArew0KPiArCXJldHVybiBFUlJfUFRSKC1F
+T1BOT1RTVVBQKTsNCj4gK30NCj4gK3N0YXRpYyBpbmxpbmUgc3RydWN0IG11eF9jb250cm9sICpt
+dXhfY29udHJvbF9nZXRfb3B0aW9uYWwoc3RydWN0IGRldmljZSAqZGV2LA0KPiArCQkJCQkJCSAg
+IGNvbnN0IGNoYXIgKm11eF9uYW1lKQ0KPiArew0KPiArCXJldHVybiBOVUxMOw0KPiArfQ0KPiAr
+c3RhdGljIGlubGluZSB2b2lkIG11eF9jb250cm9sX3B1dChzdHJ1Y3QgbXV4X2NvbnRyb2wgKm11
+eCkge30NCj4gKw0KPiArc3RhdGljIGlubGluZSBzdHJ1Y3QgbXV4X2NvbnRyb2wgKmRldm1fbXV4
+X2NvbnRyb2xfZ2V0KHN0cnVjdCBkZXZpY2UgKmRldiwgY29uc3QgY2hhciAqbXV4X25hbWUpDQo+
+ICt7DQo+ICsJcmV0dXJuIEVSUl9QVFIoLUVPUE5PVFNVUFApOw0KPiArfQ0KPiArc3RhdGljIGlu
+bGluZSBzdHJ1Y3QgbXV4X3N0YXRlICpkZXZtX211eF9zdGF0ZV9nZXQoc3RydWN0IGRldmljZSAq
+ZGV2LCBjb25zdCBjaGFyICptdXhfbmFtZSkNCj4gK3sNCj4gKwlyZXR1cm4gRVJSX1BUUigtRU9Q
+Tk9UU1VQUCk7DQo+ICt9DQo+ICtzdGF0aWMgaW5saW5lIHN0cnVjdCBtdXhfc3RhdGUgKmRldm1f
+bXV4X3N0YXRlX2dldF9vcHRpb25hbChzdHJ1Y3QgZGV2aWNlICpkZXYsDQo+ICsJCQkJCQkJICAg
+IGNvbnN0IGNoYXIgKm11eF9uYW1lKQ0KPiArew0KPiArCXJldHVybiBOVUxMOw0KPiArfQ0KPiAr
+c3RhdGljIGlubGluZSBzdHJ1Y3QgbXV4X3N0YXRlICpkZXZtX211eF9zdGF0ZV9nZXRfc2VsZWN0
+ZWQoc3RydWN0IGRldmljZSAqZGV2LA0KPiArCQkJCQkJCSAgICBjb25zdCBjaGFyICptdXhfbmFt
+ZSkNCj4gK3sNCj4gKwlyZXR1cm4gRVJSX1BUUigtRU9QTk9UU1VQUCk7DQo+ICt9DQo+ICtzdGF0
+aWMgaW5saW5lIHN0cnVjdCBtdXhfc3RhdGUgKmRldm1fbXV4X3N0YXRlX2dldF9vcHRpb25hbF9z
+ZWxlY3RlZChzdHJ1Y3QgZGV2aWNlICpkZXYsDQo+ICsJCQkJCQkJCSAgICAgY29uc3QgY2hhciAq
+bXV4X25hbWUpDQo+ICt7DQo+ICsJcmV0dXJuIE5VTEw7DQo+ICt9DQo+ICsNCj4gKyNlbmRpZiAv
+KiBDT05GSUdfTVVMVElQTEVYRVIgKi8NCj4gIA0KPiAgI2VuZGlmIC8qIF9MSU5VWF9NVVhfQ09O
+U1VNRVJfSCAqLw0KPg==
