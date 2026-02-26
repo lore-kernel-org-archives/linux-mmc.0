@@ -1,45 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7DE82BCF45;
-	Thu, 26 Feb 2026 18:30:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3F85B665;
+	Thu, 26 Feb 2026 18:45:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772130642; cv=none; b=SACnwMR6JAW5wSRPnqCwg7MzVDV0F7Y5UtTezN6YeqrabHHXbWmWtmdm28LD+drhYO984+rebfT/FVpnWx5CqrzkFAt7UmwCjoqNmJ+LqbUpZtn7RmBtL1+glya3/NBAdrhaVzcPvOmrWMP87Cr+iKeqVDlFVgqIv+aUo+6sumA=
+	t=1772131545; cv=none; b=sevv5dBwzXl42XgSjCD7qCyy2caCBWk3rIhRGRC+WzIJX+0aWE7+JwzdWF1gUEQ2eAHfN5Ih8Z2ybijeFyu+HsoMUKKh/ODJrCjpJ8CjO/j5FWlAUpxyLkGPYwMsMvUZSPvf1p+IrR1HuR1/rXwtej+Yjeb1XeKdN/I4iE7+OzA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772130642; c=relaxed/simple;
-	bh=ooQ6613FOxl28UBORsVNyo3Q4mu19qXN8bOmyNjNBtA=;
+	s=arc-20240116; t=1772131545; c=relaxed/simple;
+	bh=+XmMDl7uCbRKR3318DO8mEx+wybNcT9pkDfZRO/1ZEk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uxnOEm/Qf0ML64SRSMrSkFqhJhwz8cRtsBodD2GF+eH94CpVITeas2vf4FrZ9hHDXJEWWpr/2UokhrGh7S/n23Y7kl2DesfGcsZV2CnjY/kvbeMGrQXTfYIal+t/EVyWpT4csJNo1tv8BLn980zwTyEwT84SyMejGjI3DzZyKEY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BXonYp9b; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=PniicSrr0FrLUwpJRrLKt+nymvR142Wi7seazXxwtNFaIuSicbpJxHpvjgzZL4mVgPXWYcVBbf9ems6EX3iB/5Xu/aqo/i4o6GWpA73NuUb8+sY51SdblNFsvI2SYAMAzpE+YfiMAN9qdbWGkIETR98xEl8KqX7dbFMNZDm8i6c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lWY1MReC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BXonYp9b"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49DA8C116C6;
-	Thu, 26 Feb 2026 18:30:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lWY1MReC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C27B9C116C6;
+	Thu, 26 Feb 2026 18:45:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772130642;
-	bh=ooQ6613FOxl28UBORsVNyo3Q4mu19qXN8bOmyNjNBtA=;
+	s=k20201202; t=1772131544;
+	bh=+XmMDl7uCbRKR3318DO8mEx+wybNcT9pkDfZRO/1ZEk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=BXonYp9b+kbGFH+NmnmOE5Biw0/YZo8IsUqZjZ7NA9+Bdwc1oQvRscPdyewfD/iuP
-	 +evHJeHw+77HI7cE03eyEsNNYQPo3MubFW7mgsyqgOZeZVAV/Kph7CsKtz4jSMAaiZ
-	 IURjP1qMjEnBkG5uAJU+Ba6TiA+YQ0JR41iLWnKvznYW6NWrmOGob9O/OYy3wr3K1W
-	 LJyTP2WwkMtExQghTG4rE5WjdbvIjD8kOdjn+/gttTtKvI7Z7xHtBY+/k2SuL0PuWp
-	 8Doe6Qeceb11kQGFFM2ruBgQRtZEUCreTF7O23YUof6RYVsGVfrM7nxa9XDLUgrYgs
-	 EIhKIy6fkHwAg==
-Date: Thu, 26 Feb 2026 18:30:37 +0000
+	b=lWY1MReCHxFvBWfsFxu+426MyT6Hr3QNQIa6cHjgVIciTEmfZSKN0EEdTXu+tu+38
+	 0tYvLxm66fH4LQPHVR3Ua396uUAXU1CIJVV0AKwTLZmuto6kLw1lECC4b1RB3IUeRI
+	 DJVXVEHt3aUZ4JoBl8kEkoau2HLCYlkrrZqd2NCVjLgbpXu3CjL5WB5kmgJ0wcHZwm
+	 trBDsQCYrFqVRv8ZLgtXuw4744JOvsFEvFcsN5lQuBW8RF5tgyKiP8SiXkLzf7Eihg
+	 4A6mpN10bTf88GPJRMuXgld7LW7l8mvAvPmRACE8D2qrqC28+Oflh9M6dFdN4GSe7L
+	 MgaNlhee/H8xQ==
+Date: Thu, 26 Feb 2026 18:45:39 +0000
 From: Conor Dooley <conor@kernel.org>
-To: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
-Cc: krzk@kernel.org, ulf.hansson@linaro.org, adrian.hunter@intel.com,
-	robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
-	pjw@kernel.org, palmer@dabbelt.com, aou@eecs.berkeley.edu,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
-	gaohan@iscas.ac.cn, me@ziyao.cc
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: Add sdhci support for Canaan
- k230
-Message-ID: <20260226-compress-numeric-8de6b177ab30@spud>
-References: <20260226115923.75670-1-jiayu.riscv@isrc.iscas.ac.cn>
- <20260226115923.75670-2-jiayu.riscv@isrc.iscas.ac.cn>
+To: hehuan1@eswincomputing.com
+Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+	conor+dt@kernel.org, jszhang@kernel.org, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	ningyu@eswincomputing.com, linmin@eswincomputing.com,
+	pinkesh.vaghela@einfochips.com, xuxiang@eswincomputing.com,
+	Pritesh Patel <pritesh.patel@einfochips.com>
+Subject: Re: [PATCH v4] dt-bindings: mmc: dwcmshc-sdhci: Fix resets array
+ validation
+Message-ID: <20260226-overhaul-perennial-f1c6f88f1a20@spud>
+References: <20260226092614.435-1-hehuan1@eswincomputing.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,55 +46,27 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="PTB97KGCvVHNpIBd"
+	protocol="application/pgp-signature"; boundary="yfEZskxdjFDqFRNx"
 Content-Disposition: inline
-In-Reply-To: <20260226115923.75670-2-jiayu.riscv@isrc.iscas.ac.cn>
+In-Reply-To: <20260226092614.435-1-hehuan1@eswincomputing.com>
 
 
---PTB97KGCvVHNpIBd
+--yfEZskxdjFDqFRNx
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, Feb 26, 2026 at 07:59:21PM +0800, Jiayu Du wrote:
-
-> +    then:
-> +      properties:
-> +        clocks:
-> +          minItems: 5
-
-> +          maxItems: 5
-
-This maxItems is not needed, as 5 is already the max. Drop it if you respin.
-Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
 pw-bot: not-applicable
 
-> +        clock-names:
-> +          items:
-> +            - const: core
-> +            - const: bus
-> +            - const: axi
-> +            - const: block
-> +            - const: timer
-> +      required:
-> +        - canaan,usb-phy
-> +
->    - if:
->        properties:
->          compatible:
-> --=20
-> 2.53.0
->=20
-
---PTB97KGCvVHNpIBd
+--yfEZskxdjFDqFRNx
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaaCRTQAKCRB4tDGHoIJi
-0jmzAQCXtTuc+dTvEFmME0odNPOCKTG7oRRm9zp/zJWTjD4HyAD/ZEMA+g6KeEMY
-G32ztbqM/Vz1NbVdTlcr4NC9mRkY0gI=
-=Mp5e
+iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCaaCU0wAKCRB4tDGHoIJi
+0qIsAQCIPZEqAcM41f1Fw9sLs+n2QDukfsUwM+1gpnzWLJaQKQD8CBNfViWDMyXl
+t/43WcZsD/JRcRErKeuapiyF+mUzGwM=
+=I5MG
 -----END PGP SIGNATURE-----
 
---PTB97KGCvVHNpIBd--
+--yfEZskxdjFDqFRNx--
