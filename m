@@ -1,59 +1,78 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 09257246766;
-	Fri, 27 Feb 2026 10:49:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7D90239E7E;
+	Fri, 27 Feb 2026 13:52:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772189400; cv=none; b=T7WdEOUO27M7WTQhnaQxWlvr9+bVejZJxs0SHtjR2nEW3OFJK1z17CNnfdovl43QVNLA+hM/twcqVQriSMfKcUXdMmdeDbhNi3m26N3LCTcIIA0rcL3elvn1S+chesE5qdA2BO/AreHodyxo/5e9wzbytPVaI/7zR4KZA4AKw9c=
+	t=1772200354; cv=none; b=cUaJOZ9+BJXJe4zob6UY7ikXFv0Tn0ciF++iYnKHmGNTJ97/IGn9FB+FR/rWuK2yI1ph+X6jrylmfqdK53M3Wh3jcSzc6YVwSVZ4aq4+WSYaPCBXagpMaYLSMTTpyZyO8Gz+UujhWPsuVoe+257YBu4uIFpGpM2JWSRMfQ9yf3g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772189400; c=relaxed/simple;
-	bh=UsxUuuLQrAAcjsMa8muaF1eF1Co1Z4nZbKN7JE/Zafs=;
+	s=arc-20240116; t=1772200354; c=relaxed/simple;
+	bh=1aioRZsT/x015BhRflc0NizKTzba3nmZZdRjXLysTLY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=px0ayut3AH2zvE/HLIRvuY9x1UBxmn8Kz6qsxPEJp5Wua67WfG7iU9c+VzjgZvvIrwqZ8M2zxvtcIEFTSnoPolwx09Dh3LFM2B0C72N0eqUqMIDPgoaP1kJnjkIANS80RVEiquLsArEtBAzbB+1Xn6MfLj/IkXPByBxAJQEpvVc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V0pWASns; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=DeaIhWh2PaCukL7i5iZbGMuNm/9NFXgXwo68x70SUsCuJRGXmEE+Jj9af6RJJqjHg/G3NfbbOqPEVn3B24AIxgCSEvscMkeP6y92bryKX/TnkT1tjOQr8zJOeIESZ+plguHTL0Uic+G+cBZNhzkkA1wNzguaqeQ/ZwkZkpLcQiY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZKTp/tLu; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V0pWASns"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4A8DBC116C6;
-	Fri, 27 Feb 2026 10:49:59 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZKTp/tLu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C076BC19423;
+	Fri, 27 Feb 2026 13:52:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772189399;
-	bh=UsxUuuLQrAAcjsMa8muaF1eF1Co1Z4nZbKN7JE/Zafs=;
+	s=k20201202; t=1772200354;
+	bh=1aioRZsT/x015BhRflc0NizKTzba3nmZZdRjXLysTLY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=V0pWASnsxcrjyMo82n0h/bjBPpNEvwA+nYb29qVxOYDAgqsbaNGwFSJ5sHCl6gS9t
-	 0z7NXHh3uTVZFkROWp3ygvmMwdSszs9zaYLpm5Ir8ySQtJQMeTlK+b3ADnLdsN44W8
-	 mMW+kVjpp/2weRWdYnDxy810v/1r1MitmclrZvJRNTc+P8Sefz3x4pjsanfc82utPj
-	 vX/St0sk4bdTNHMt7JRKglezKBfq+zSGKuWRwbSpaGfqsQ/OB2gGs5wfchC3UeKHEf
-	 pk5b5rGJM9qvaGzIcxvHdgHIr5KmmwC0iZlMGzVjxuPQeHTzapId0r7CcOGhSt9pfA
-	 PoSNJN1HSEyTw==
-Date: Fri, 27 Feb 2026 11:49:57 +0100
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Lachlan Hodges <lachlan.hodges@morsemicro.com>
-Cc: johannes@sipsolutions.net, Ulf Hansson <ulf.hansson@linaro.org>, 
-	arien.judge@morsemicro.com, dan.callaghan@morsemicro.com, ayman.grais@morsemicro.com, 
-	linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH wireless-next 33/35] mmc: sdio: add Morse Micro vendor ids
-Message-ID: <20260227-boisterous-bobcat-of-pride-ae0af2@quoll>
-References: <20260227041108.66508-1-lachlan.hodges@morsemicro.com>
- <20260227041108.66508-34-lachlan.hodges@morsemicro.com>
+	b=ZKTp/tLu+wqzSPRuDSsgiiAj+iG35J5v43Y0sjKtzn3ByCpGg6WGzAZh10dKcs94N
+	 SScd4MzCSMOaib46Rj80zqtgiPVuKuIA0ZXF92yxf/r8I8/udV/xItmlrxR1FsHR0q
+	 //5CEUy5kcR5lE9mod7Z2ov6Ey/1mcganvINJK6o7UvSCs8QCwHXylRP1zxrwaJ4Im
+	 9YRKhj429gJ11KkgSp6oV7+GGJLcmuPTqgZMGYRBShWSIKG0EUrrgnx5z/O+DOgBAh
+	 m5CBn36upkSlQh52p+FTi/q/CnGLw89qSiKJL7YVAmHovGT8wA7X1LGCA9yiOtFLRP
+	 20cNtPCl9A9tA==
+Date: Fri, 27 Feb 2026 19:22:31 +0530
+From: Vinod Koul <vkoul@kernel.org>
+To: Josua Mayer <josua@solid-run.com>
+Cc: Marc Kleine-Budde <mkl@pengutronix.de>,
+	Vincent Mailhol <mailhol@kernel.org>,
+	Neil Armstrong <neil.armstrong@linaro.org>,
+	Peter Rosin <peda@axentia.se>, Aaro Koskinen <aaro.koskinen@iki.fi>,
+	Andreas Kemnade <andreas@kemnade.info>,
+	Kevin Hilman <khilman@baylibre.com>,
+	Roger Quadros <rogerq@kernel.org>, Tony Lindgren <tony@atomide.com>,
+	Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+	Vignesh R <vigneshr@ti.com>, Andi Shyti <andi.shyti@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	Yazan Shhady <yazan.shhady@solid-run.com>,
+	Jon Nettleton <jon@solid-run.com>,
+	Vladimir Oltean <olteanv@gmail.com>,
+	Mikhail Anikin <mikhail.anikin@solid-run.com>,
+	linux-can@vger.kernel.org, linux-phy@lists.infradead.org,
+	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org,
+	linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH v11 1/9] phy: can-transceiver: rename temporary helper
+ function to avoid conflict
+Message-ID: <aaGhn_vBoruYDqji@vaman>
+References: <20260226-rz-sdio-mux-v11-0-c2a350f9bbd3@solid-run.com>
+ <20260226-rz-sdio-mux-v11-1-c2a350f9bbd3@solid-run.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260227041108.66508-34-lachlan.hodges@morsemicro.com>
+In-Reply-To: <20260226-rz-sdio-mux-v11-1-c2a350f9bbd3@solid-run.com>
 
-On Fri, Feb 27, 2026 at 03:10:43PM +1100, Lachlan Hodges wrote:
-> Add the Morse Micro mm81x series vendor ids.
+On 26-02-26, 15:21, Josua Mayer wrote:
+> Rename the temporary devm_mux_state_get_optional function to avoid
+> conflict with upcoming implementation in multiplexer subsystem.
 
-Without any user this is pointless commit. Organize your work in logical
-chunks. Define alone is completely pointless and redundant. After
-applying this patch we should immediately revert it, because you added
-defines which are unused, so just bloat.
+Acked-by: Vinod Koul <vkoul@kernel.org>
 
-Best regards,
-Krzysztof
-
+-- 
+~Vinod
