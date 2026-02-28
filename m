@@ -1,115 +1,81 @@
-Received: from out-180.mta1.migadu.com (out-180.mta1.migadu.com [95.215.58.180])
+Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62E4E2E542A
-	for <linux-mmc@vger.kernel.org>; Sat, 28 Feb 2026 01:26:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 459541E9919
+	for <linux-mmc@vger.kernel.org>; Sat, 28 Feb 2026 03:09:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772242014; cv=none; b=vBHUJE75DHr6H9JQP3N0dk/ZS9mQzqyCIztscfjZ14auj6bELf2pCIL/MbukpTsYA5hfWc0E3lz8VFxZUXZ1196K1rpnwkkDGF6Y/QhZvp/86IjdbXlfvS0JTl7QgzsmvYDc6tQ+loQ4+3cQbfIpPdNqjr2fXzttQTq6Y/HqqZQ=
+	t=1772248149; cv=none; b=nQlcWPQyTG9NrpvO0w7aWzIBUzbJRGf62d4B6sIU/dBzfXIhFj75oBE2dFzajvZR0GhiFNVanlXI95kpdSnlXWhHGGAFJwTjmH/ozK2IeUWbDypRT/SGY9GiPwhDkJVw1IKn+BytGA4fz0qEFvIAtgDHGBikNw55c/oXyNz6nQ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772242014; c=relaxed/simple;
-	bh=lXLhSRRA5YZbKIl0t5NVBWC6lTnl8DyEsTVmuMSzBUE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=W7VaoxD072JmlM9Biem157koj2X3lpYp9H0JKnhlGCdRMlWwSMPhaM4THft+e9TkqkRPKmnwIi64MbcdwI92AoDizaAivGK8SGXHsmcgfA23Yxo507/aOQ2v/zAadvg788cB9AQRG6dYd942T7BKKq67CDJHIu9i6C2UAfHkEjQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=rtckxnbD; arc=none smtp.client-ip=95.215.58.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1772248149; c=relaxed/simple;
+	bh=vF/M05bf2pJzD8Qmsp+h8o7tmLpGmketD+QQvZJn0BQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:MIME-Version:
+	 Content-Type:References; b=Gp9is0HyDYezPvrUL7YvdIM8zd4GBFhWglZqoa/l7tiG6+lo7SuGlX0vp/Io6rjb8OuU/zpteYYscyLKXtaey3odKRT/dtyu9EO1m+7/RqoK+2mV1AEfeSwEKwSR+ddAXHOzpRJJRc3jwS+xKezxiegSNKV+PDeHeVCn+UzNhRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=oh2CS4+b; arc=none smtp.client-ip=203.254.224.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="rtckxnbD"
-Message-ID: <752b26fc-45e2-4c4b-aa9b-48a1112b837a@linux.dev>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1772242001;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JzPgLVkG9dTK690PZGw5C90SAV1zSq/w4UZoKr/PnZ0=;
-	b=rtckxnbD06OPnnA2KbUoSAgL9X/HDUWLHffqnR6ug1sq4qBVMPV27aYvqvSdjOFeIElAej
-	gC3gexolxrW+wB8bFCfkfmy1xAjw032/yYz/XcD2g5Rf3j/6x1TX5nDFMrF/L0//RivDl5
-	HehNZ5e7ryhId9oDosn1G6bU07A9JQE=
-Date: Fri, 27 Feb 2026 17:26:33 -0800
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="oh2CS4+b"
+Received: from epcas5p3.samsung.com (unknown [182.195.41.41])
+	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20260228030904epoutp047f8fc7feff5d89dc85bf616075252198~YSkxLBxJ20858708587epoutp04N
+	for <linux-mmc@vger.kernel.org>; Sat, 28 Feb 2026 03:09:04 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20260228030904epoutp047f8fc7feff5d89dc85bf616075252198~YSkxLBxJ20858708587epoutp04N
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1772248144;
+	bh=vF/M05bf2pJzD8Qmsp+h8o7tmLpGmketD+QQvZJn0BQ=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=oh2CS4+bOC4keOEEPYbn7c77/v0tvNkDHWVyIZA50v+KZq8uQjcli5JdrZvFX7+hz
+	 nwZPQFSDKa2k/m69CY4VPiEkIvY7/yDQ9Z+ATH6hnnJqS2iCRfeXvhf1GDn486SlC1
+	 lLqND0HK6BQeADi67/W3XMB32VyfK27tpzynnHjo=
+Received: from epsnrtp01.localdomain (unknown [182.195.42.153]) by
+	epcas5p1.samsung.com (KnoxPortal) with ESMTPS id
+	20260228030904epcas5p1ddfdf408ba89d6a6eb4f5ec69e5c960e~YSkwaydj43111731117epcas5p1y;
+	Sat, 28 Feb 2026 03:09:04 +0000 (GMT)
+Received: from epcas5p4.samsung.com (unknown [182.195.41.42]) by
+	epsnrtp01.localdomain (Postfix) with ESMTP id 4fN9C40T9xz6B9m4; Sat, 28 Feb
+	2026 03:09:04 +0000 (GMT)
+Received: from epsmtip1.samsung.com (unknown [182.195.34.30]) by
+	epcas5p1.samsung.com (KnoxPortal) with ESMTPA id
+	20260228030903epcas5p10097b2037bdedbfbbd186ec64c9fa60d~YSkvaATG73111731117epcas5p1x;
+	Sat, 28 Feb 2026 03:09:03 +0000 (GMT)
+Received: from hzsscr.. (unknown [109.120.22.104]) by epsmtip1.samsung.com
+	(KnoxPortal) with ESMTPA id
+	20260228030902epsmtip12312448e74d15f27dcef8a4d8ce4fe51~YSkunxU1L2552525525epsmtip1r;
+	Sat, 28 Feb 2026 03:09:02 +0000 (GMT)
+From: "ping.gao" <ping.gao@samsung.com>
+To: krzk@kernel.org
+Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, krzk+dt@kernel.org,
+	conor+dt@kernel.org, robh@kernel.org, jh80.chung@samsung.com,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	devicetree@vger.kernel.org, hy50.seo@samsung.com, kwangwon.min@samsung.com,
+	ping.gao@samsung.com
+Subject: Re: [PATCH v3 3/3] dt-bindings: mmc: synopsys-dw-mshc: No need to
+ enforce setting two clocks
+Date: Sat, 28 Feb 2026 11:13:50 +0800
+Message-ID: <20260228031350.3209721-1-ping.gao@samsung.com>
+X-Mailer: git-send-email 2.49.0
+In-Reply-To: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: fix GL9750 DMA write corruption
-To: Adrian Hunter <adrian.hunter@intel.com>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- stable@vger.kernel.org
-References: <20260227075909.3860183-1-matthew.schwartz@linux.dev>
- <1e71a22b-48d5-4a5f-87d5-860a6cb9a04d@intel.com>
-Content-Language: en-US
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Matthew Schwartz <matthew.schwartz@linux.dev>
-In-Reply-To: <1e71a22b-48d5-4a5f-87d5-860a6cb9a04d@intel.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Migadu-Flow: FLOW_OUT
+Content-Transfer-Encoding: 8bit
+X-CMS-MailID: 20260228030903epcas5p10097b2037bdedbfbbd186ec64c9fa60d
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 105P
+X-CMS-RootMailID: 20260123085150epcas5p42f2cc04843ae7657380b2968261246cb
+References: <CGME20260123085150epcas5p42f2cc04843ae7657380b2968261246cb@epcas5p4.samsung.com>
 
-On 2/27/26 1:16 AM, Adrian Hunter wrote:
-> On 27/02/2026 09:59, Matthew Schwartz wrote:
->> The GL9750 SD host controller has intermittent data corruption during
->> DMA write operations. The GM_BURST register's R_OSRC_Lmt field
->> (bits 17:16), which limits outstanding DMA read requests from system
->> memory, is not being cleared during initialization. The Windows driver
->> sets R_OSRC_Lmt to zero, limiting requests to the smallest unit.
->>
->> Clear R_OSRC_Lmt to match the Windows driver behavior. This eliminates
->> write corruption verified with f3write/f3read tests while maintaining
->> DMA performance.
->>
->> Cc: stable@vger.kernel.org
->> Fixes: e51df6ce668a ("mmc: host: sdhci-pci: Add Genesys Logic GL975x support")
->> Closes: https://lore.kernel.org/linux-mmc/33d12807-5c72-41ce-8679-57aa11831fad@linux.dev/
->> Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
-> 
-> Ben wrote "So I think your patch setting R_OSRC_Lmt to zero is reasonable."
-> Can be have a Reviewed-by tag also?
+Hi Krzysztof,
 
-Wasn't sure about the etiquette of adding a Reviewed-by without an explicit tag in an email,
-but happy to re-spin a v2 and add that if it's wanted.
+My apologies for the messy threading and duplicate postings. I had a
+misconfiguration in my mail client settings.
 
-> 
-> Nevertheless:
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
->> ---
->> Link to RFC: https://lore.kernel.org/all/20260117234800.931664-1-matthew.schwartz@linux.dev/
->> Changes from RFC -> v1: use the proper name for the register field 
->> ---
->>  drivers/mmc/host/sdhci-pci-gli.c | 8 ++++++++
->>  1 file changed, 8 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
->> index b0f91cc9e40e4..7a7be3f7bee6b 100644
->> --- a/drivers/mmc/host/sdhci-pci-gli.c
->> +++ b/drivers/mmc/host/sdhci-pci-gli.c
->> @@ -26,6 +26,9 @@
->>  #define   GLI_9750_WT_EN_ON	    0x1
->>  #define   GLI_9750_WT_EN_OFF	    0x0
->>  
->> +#define SDHCI_GLI_9750_GM_BURST_SIZE		  0x510
->> +#define   SDHCI_GLI_9750_GM_BURST_SIZE_R_OSRC_LMT	    GENMASK(17, 16)
->> +
->>  #define SDHCI_GLI_9750_CFG2          0x848
->>  #define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
->>  #define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
->> @@ -629,6 +632,11 @@ static void gl9750_hw_setting(struct sdhci_host *host)
->>  
->>  	gl9750_wt_on(host);
->>  
->> +	/* clear R_OSRC_Lmt to avoid DMA write corruption */
->> +	value = sdhci_readl(host, SDHCI_GLI_9750_GM_BURST_SIZE);
->> +	value &= ~SDHCI_GLI_9750_GM_BURST_SIZE_R_OSRC_LMT;
->> +	sdhci_writel(host, value, SDHCI_GLI_9750_GM_BURST_SIZE);
->> +
->>  	value = sdhci_readl(host, SDHCI_GLI_9750_CFG2);
->>  	value &= ~SDHCI_GLI_9750_CFG2_L1DLY;
->>  	/* set ASPM L1 entry delay to 7.9us */
-> 
+I will slow down, re-evaluate the hardware requirements, fix the YAML
+schema synchronization, and send a clean v4 as a brand-new thread.
 
+Best regards,
+Ping Gao
