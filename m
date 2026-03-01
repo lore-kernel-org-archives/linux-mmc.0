@@ -1,128 +1,126 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83D9C823DD
-	for <linux-mmc@vger.kernel.org>; Sun,  1 Mar 2026 07:53:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B033D32548C;
+	Sun,  1 Mar 2026 13:12:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772351615; cv=none; b=nPpc/zZiGbBfvBfTgGDRw43Qx7/gwDbVy3spCBu7MVSZkSKwE9ta95izu8qOlG5bkLjwD6tjecM3VSJPfnxZv0NAijY2JL0Q4Oo0fpAYHxKtDk/dNeXvMzPEnkBSwZh3Biq67jwDQhjX/dceijFHjyodAbwivhYnnf3KUvO7LgI=
+	t=1772370728; cv=none; b=dZRrIaN2anLXurPz1v050433eVlMWXfP8W7y20ZDdPFNoaD9ahchB0mQu7yelULY9w78AWPRZo0rf+NrabAn2jg6un8Wb0vHrn73Egj6k/YFzwlPrx5bXglJYJN0TJRIG9uCryt2UUl4tQtj2ak0CKnAHT5zynvpxTBd0qRwDQc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772351615; c=relaxed/simple;
-	bh=GLqdJ8P4hnRg5xWVxei1kADlcf95wZLXVGRFECegirs=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=Mcg+NTE6QEbEuMjFr1RGlO+GZRBACP4tkaQXY0OGfNVwJfslisvXB/rEGeSDcYYawDjac3p37GaIBGrE651FcTkAxxvsAIC8NmR+D4GGaXvBDijNIGtX0RJl16H7kRwtPEDmcDUI1icVgKvFZpY3VLfnA4j6DtDN9ac74xio+FQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TsemnX/x; arc=none smtp.client-ip=209.85.214.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1772370728; c=relaxed/simple;
+	bh=QxpYqEriI/iMqXBW19wHPzJAIDNmx2/LIrcdUt374O8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=BbObrk4qELR5XgqxPXoh3WRWhyH9VCz7Sfg1M5zkJoDmgf0tR+cG23bsWo70VRgRrvO7JArmVw1NR5/eMU9yQP0eNt+CyJ/xoLzq5OA2jrTe6bT9s66B2S9n2rUn9FOxI8EbWqP03poP4pmv0nGz0+M6r4Bu7Bcd3MtFqTL2gNQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MXKMp+tR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TsemnX/x"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-2aadc18f230so23445995ad.3
-        for <linux-mmc@vger.kernel.org>; Sat, 28 Feb 2026 23:53:34 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772351614; x=1772956414; darn=vger.kernel.org;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=1y12jkKvqEPCOLPo3R+Q3mFyBRLHL7GmyTtHyjpWdEc=;
-        b=TsemnX/xPvSvqb3GuWFPfBPdpQpPTGHZfOV4vDhZP/TaZ9Zhf+AkTb1a5hTEvCUBkQ
-         Yxpg0XP3M2kwhSAWs7uMhbF/rtXpNQmLCb13Uy5/Kv8n/3qEzu9lV7cPrgSgLWdhAaGc
-         rvy08hUj4B3J9YsDo+kG/1TrvruEI7iyjKh0qb4+H7IZIx3FRFyGSTtk1djOlnaa6AaB
-         4n4WNCxlJ9+BsD2UY1NSvZJB+M0aLvK3QToJyg2THkKhMK+IN45VxSgvGikVZQAXKeom
-         KsJmD658i3Ljbf6LaWPfdkI29zljnG5fbV1r6+EVbxYQrsqcdtP7ixLonfXMwIed9f22
-         PfIw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772351614; x=1772956414;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1y12jkKvqEPCOLPo3R+Q3mFyBRLHL7GmyTtHyjpWdEc=;
-        b=EJoLxRdutLX6FiRkNC85WkGAlX2wxEVRqWH+Rv5N2K5NtHi4W57F+fX4mbhkjrlfGl
-         c7gVESu4PSK72YVdAPeRbp9nkYs4EJSOU/d44VdnFGGXKuepOOQw/PF+2o69pYQ8mSei
-         +J+nwnnLmx9Qx7EPYBUKp9rYgM95COxs9fpi8linIqVgtTYthOs7Osw2CoWc2l5rM6CD
-         j4BX4vZqRdh56nBKBqfb1PnBaPDwGZYTLV5gxYdyCjS+bBalWfM10HChxgymyxYc2P4y
-         in3kDSkZz5iiq6g1XBlyiVXEisAbr/qqb77Krm4oDUhQ60OA5gA7PbF4MynnsR9nXhzu
-         jaBQ==
-X-Forwarded-Encrypted: i=1; AJvYcCW2ywYtAYfIolmhipdxTvIJqhgEBgNc/vgUZMG0AZXjmUJnePiWZopSb1uw6g1MmQPZuY2etHtQ9X0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxKRvTrcqnFoP71mo+wFvwhCC2PmcNW6Qw5u+1S+Mguf4ySfSKQ
-	dK4gdq4QE1cWwTq/5WIIgH2koeoFVKOdGwwokqE71XP7k6qDsdlbo1vT
-X-Gm-Gg: ATEYQzxSAabTN+w6gHpj/oUOIdILteqL3Cbkds+QVaeOJHRLkNA2SeIYOH+vhgKGKxk
-	7aJCiKbo+C/Nq9bdxIw4FMEfAKN0qqidjwFkULiP/TuoptvD8HOUBwg6xts7cMJGurR41iWc/fC
-	XgGmYG0RVrW64eUgQxDme+SRGmuCzF4XNjIF0kRcKDppxlOm5s3hWlsm/hfgLs/egKtgTlHZKEu
-	UJsmbSv3A11wGpW+WvEriitFEGlhSgrL1mEWdYk7jbMxSdXZJQfDp2vpYv8UjggVovTdWlJ4l5l
-	2yk5JFu51tItO9/gMSuPqkiqhw1PU5LfNrw5/f/nYFP8bkSXSrbPytkjGofzWrco3cYc8oMNRRc
-	GGbil8RuhYkF9QTczWAOBugTeVwjb5vB9/un90aR0jngus1WxWcxFXApxXj3iD5Acp4ODLg7otw
-	2tYeJHXV+9H5/5CjjGfc2BP5n+15KPNbtY3IpA
-X-Received: by 2002:a17:902:da8f:b0:2a9:3396:738 with SMTP id d9443c01a7336-2ae2e4bb21emr91976115ad.44.1772351613828;
-        Sat, 28 Feb 2026 23:53:33 -0800 (PST)
-Received: from junjungu-PC.localdomain ([2408:820c:9009:3f2:fcc8:844a:f21c:8d7f])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2ae4802645bsm13880405ad.12.2026.02.28.23.53.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 28 Feb 2026 23:53:33 -0800 (PST)
-From: Felix Gu <ustc.gu@gmail.com>
-Date: Sun, 01 Mar 2026 15:53:30 +0800
-Subject: [PATCH] mmc: sdhci-of-bst: Fix memory leak in
- sdhci_bst_alloc_bounce_buffer()
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MXKMp+tR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B3D03C116C6;
+	Sun,  1 Mar 2026 13:12:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772370728;
+	bh=QxpYqEriI/iMqXBW19wHPzJAIDNmx2/LIrcdUt374O8=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=MXKMp+tRWJ4JwvJkO3xT4co71sY4DEl7Zwy/x+7C3qhl8nrZfi/EiuRY6ShNCagEE
+	 yGzQxYT1tiwBo95UoqMv389S+HzEnC8YHPJkMaCleASZKhx84N5nuwBp8ZUGpp49Tn
+	 te4uhTuj2CdXW77UwxuZuQVvB/6PtarL6d4OvlVBDNIBQCPqPfd9A6ujSLxdLch1PH
+	 pUBLzUU6OoNvSJqdL+cLt/mu3kfSQNbDx9eJgLJYwE93dfKz0tISwltiGruj33C9wI
+	 8ZWbJYCg27pLTSyLyuSnofuluEcmVfXc8j3sA+lC+DFq0PgNL74l/9kPA5gvvmHJDP
+	 XGadXlDcKd0Mw==
+Message-ID: <12058c14-67c7-4b43-bbbc-ef0ccb813e61@kernel.org>
+Date: Sun, 1 Mar 2026 14:12:03 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v6 0/2] arm64: dts/defconfig: enable BST C1200 eMMC
+To: Albert Yang <yangzh0906@thundersoft.com>, arnd@arndb.de, soc@kernel.org
+Cc: krzk+dt@kernel.org, robh@kernel.org, conor+dt@kernel.org,
+ gordon.ge@bst.ai, bst-upstream@bstai.top,
+ linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20260225100613.3791261-1-yangzh0906@thundersoft.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <20260225100613.3791261-1-yangzh0906@thundersoft.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260301-bst-v1-1-ddbc22ec3ed9@gmail.com>
-X-B4-Tracking: v=1; b=H4sIAHnwo2kC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
- vPSU3UzU4B8JSMDIzMDYwND3aTiEl1zs6Qk82SzFHNLY0MloMqCotS0zAqwKdGxtbUAngFKnFU
- AAAA=
-X-Change-ID: 20260301-bst-76bb7c6d7931
-To: Adrian Hunter <adrian.hunter@intel.com>, Ge Gordon <gordon.ge@bst.ai>, 
- BST Linux Kernel Upstream Group <bst-upstream@bstai.top>, 
- Ulf Hansson <ulf.hansson@linaro.org>, 
- Albert Yang <yangzh0906@thundersoft.com>, Arnd Bergmann <arnd@arndb.de>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
- linux-kernel@vger.kernel.org, Felix Gu <ustc.gu@gmail.com>
-X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1772351611; l=1293;
- i=ustc.gu@gmail.com; h=from:subject:message-id;
- bh=GLqdJ8P4hnRg5xWVxei1kADlcf95wZLXVGRFECegirs=;
- b=nI+wepdJSqBs2819GnK68eBfJYYFxHgaxoTIcEXYEiaBLm88VbliuCG45Uer5NNESZdCpZr1v
- 0BjLo7aGC7ADEyjGCLkyl1oGy8Lhmz8eMKT/wU6M6HbMOaCWIV9SlZw
-X-Developer-Key: i=ustc.gu@gmail.com; a=ed25519;
- pk=fjUXwmjchVN7Ja6KGP55IXOzFeCl9edaHoQIEUA+/hw=
 
-In sdhci_bst_alloc_bounce_buffer(), if dma_alloc_coherent() fails, the
-function immediately returns -ENOMEM without releasing the reserved
-memory, which results in a memory leak.
+On 25/02/2026 11:06, Albert Yang wrote:
+> This series adds DTS and defconfig support for the eMMC controller
+> on Black Sesame Technologies C1200 SoC, split from the v5 MMC series [1].
+> 
+> The MMC driver patches (dt-bindings, sdhci bounce buffer, BST SDHCI driver,
+> and MAINTAINERS update) have been applied to mmc-next by Ulf Hansson [2].
+> These remaining DTS and defconfig patches are submitted to the SoC tree.
+> 
+> Changes since v5:
+> - Patch 2 (defconfig): fix CONFIG_MMC_SDHCI_BST ordering to match Kconfig
+>   position (between CONFIG_MMC_SDHCI_TEGRA and CONFIG_MMC_SDHCI_F_SDH30),
+>   as pointed out by Krzysztof Kozlowski. Confirmed via savedefconfig.
+> 
 
-Add the missing of_reserved_mem_device_release() call before returning
--ENOMEM to properly clean up the reserved memory.
+Please do not send patches to soc@ for review. It is explicitly
+documented - read:
 
-Fixes: 695824f45629 ("mmc: sdhci: add Black Sesame Technologies BST C1200 controller driver")
-Signed-off-by: Felix Gu <ustc.gu@gmail.com>
----
- drivers/mmc/host/sdhci-of-bst.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+"The main SoC maintainers can be reached via the alias soc@kernel.org
+only in following cases:
 
-diff --git a/drivers/mmc/host/sdhci-of-bst.c b/drivers/mmc/host/sdhci-of-bst.c
-index c124990a64f4..79c945f4858e 100644
---- a/drivers/mmc/host/sdhci-of-bst.c
-+++ b/drivers/mmc/host/sdhci-of-bst.c
-@@ -425,8 +425,10 @@ static int sdhci_bst_alloc_bounce_buffer(struct sdhci_host *host)
- 
- 	host->bounce_buffer = dma_alloc_coherent(mmc_dev(mmc), bounce_size,
- 						 &host->bounce_addr, GFP_KERNEL);
--	if (!host->bounce_buffer)
-+	if (!host->bounce_buffer) {
-+		of_reserved_mem_device_release(mmc_dev(host->mmc));
- 		return -ENOMEM;
-+	}
- 
- 	host->bounce_buffer_size = bounce_size;
- 
+1. There are no platform-specific maintainers."
 
----
-base-commit: 3fa5e5702a82d259897bd7e209469bc06368bf31
-change-id: 20260301-bst-76bb7c6d7931
+So are you claiming now that BST is unmaintained? Because if so, we will
+mark it for removal.
+
+First you send patches for review to the mailing lists. Only then,
+AFTER THE REVIEW, you send them to soc@ list.
+
+Please read maintainer soc profile.
 
 Best regards,
--- 
-Felix Gu <ustc.gu@gmail.com>
+Krzysztof
 
