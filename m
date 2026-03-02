@@ -1,109 +1,153 @@
-Received: from out-180.mta1.migadu.com (out-180.mta1.migadu.com [95.215.58.180])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29E2E3A3303
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Mar 2026 21:08:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 326C731F9B6;
+	Mon,  2 Mar 2026 22:38:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772485694; cv=none; b=oaxn62qIcT5BzX11v6+ZqDirm+QJSou0iawP5g6nCyEo8bw1LvZE0DjxqQR29PjafqFY3RJDzcg4nc0YtsFy8RaItvZzT7cYqpF0zEwTr109UO+4GznhjVZrnQOlekSeER1pTYTaLyumA9i/5jQb9v1SAaQcgt9BjVbmV2EIus4=
+	t=1772491086; cv=none; b=u+w20StNohNQ0fYZxoOCCyjyXVtlC2Syw1oPYFbTe1QvvoFeG4LP75tHgFWce3r9Ud5Uzr+tEMGb81IcWVN2uiMTJ+bcx8hwhGx1mJJf4U2UGBGPdvYOD5II6HZRK93+2T96FuyZD9E24E3dAZDpmppN4Sp537uihs1ulv+aqSg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772485694; c=relaxed/simple;
-	bh=sdOwzxAPm5pwxrA5gG4pL0j7k+FvzYlobT6NNsTosaU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ACrnyx1c3Srf8PBUOmybvo7kHOmdcMyFYZ6gYsG3cKkLUrsXjhkxTxoxmogAPkkYFmXWxcc0PBUGfw4v9Dvgo2BWQGClYiBGJLRP4Of2/DDXTinsJ9goxTRERU6gTsItIbEq4KC8zfixpzwPp4JfWgrdWc9Ry+jZldS7f8k4BsU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=vh2nBt+3; arc=none smtp.client-ip=95.215.58.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1772491086; c=relaxed/simple;
+	bh=68t5OIEMxY77Fq28mnKG3kcyRPmRItOFd7ujtleGQZk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=bdr0gV3njuJbAOu9Hr7q95jXUZzkkdZMFFl338MJJpKE4jSIfDME17B0svUB+HM6iTynF4vQN5tORdmFHbSsyoCjtjBjirvyJJhGLOJabqnGwo8QQVFQ00j/7The223or38ccV31bnNiBJiLVh2jlXmIWNT/NVa3YDS8iAE7WMk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BZkucZxD; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="vh2nBt+3"
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1772485691;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=H2Cir8PjWMNKOAoAekYskevFXQhEA9TnJGz6taHG0ys=;
-	b=vh2nBt+3A+Mr8CKxAum9hBKcSRfHzbir4dCXtTZt6RRSMbsUhV93o22EiqnDcixB7RFojP
-	qAmnxy7s9NLrIYG6/oTs/Hh3wBINLNO3sUZ8YTro1efK9bonsVufXfD9VuaPD1hGIJKY5N
-	aLDEiZD6rVfHhCDGr/CWRUz6lGn9G84=
-From: Matthew Schwartz <matthew.schwartz@linux.dev>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Matthew Schwartz <matthew.schwartz@linux.dev>,
-	stable@vger.kernel.org
-Subject: [PATCH v2] mmc: sdhci-pci-gli: fix GL9750 DMA write corruption
-Date: Mon,  2 Mar 2026 13:07:17 -0800
-Message-ID: <20260302210717.1159159-1-matthew.schwartz@linux.dev>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BZkucZxD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 34E90C19423;
+	Mon,  2 Mar 2026 22:38:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772491085;
+	bh=68t5OIEMxY77Fq28mnKG3kcyRPmRItOFd7ujtleGQZk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=BZkucZxDNFGuPU9SCSuMLEfMlasncGepkmMVtmm88jjrbeMmhAiSAJngM4Pj0BFjx
+	 7Od15qYYNB8XvtJflCF5sZjR+KTRIdB5kQj0ixEHyfKnE80E9rprTH+VbOw2qRAMor
+	 x/yoGexhoGOKfeYep9uzc2KgaQ7rDZwvdapTkYndfwCaGihKgSn0M9E8gxkiH3O96s
+	 VR4Qr+Uwska92y39hcooTewslioUa0EMxgoJ43xZswbYxFA18rVJsooZpwGju1vx5y
+	 99J6uU/pbA4hwveulHsIG1eSKkjmilviFrL4lyPnnV0u111z2jVNwfyXwvHAbjeGas
+	 MM7UNvvPHbm+Q==
+Date: Tue, 3 Mar 2026 06:38:03 +0800
+From: Yixun Lan <dlan@kernel.org>
+To: Conor Dooley <conor@kernel.org>
+Cc: Iker Pedrosa <ikerpedrosam@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>, Yixun Lan <dlan@gentoo.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+	Javier Martinez Canillas <javierm@redhat.com>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 01/10] dt-bindings: mmc: spacemit,sdhci: add AIB voltage
+ switching registers
+Message-ID: <20260302223803-GKB289813@kernel.org>
+References: <20260302-orangepi-sd-card-uhs-v1-0-89c219973c0c@gmail.com>
+ <20260302-orangepi-sd-card-uhs-v1-1-89c219973c0c@gmail.com>
+ <20260302-crewman-faster-9fd00b62e30c@spud>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260302-crewman-faster-9fd00b62e30c@spud>
 
-The GL9750 SD host controller has intermittent data corruption during
-DMA write operations. The GM_BURST register's R_OSRC_Lmt field
-(bits 17:16), which limits outstanding DMA read requests from system
-memory, is not being cleared during initialization. The Windows driver
-sets R_OSRC_Lmt to zero, limiting requests to the smallest unit.
+Hi Iker, Conor,
 
-Clear R_OSRC_Lmt to match the Windows driver behavior. This eliminates
-write corruption verified with f3write/f3read tests while maintaining
-DMA performance.
+On 18:25 Mon 02 Mar     , Conor Dooley wrote:
+> On Mon, Mar 02, 2026 at 04:13:22PM +0100, Iker Pedrosa wrote:
+> > Add SpacemiT K1 AIB register properties for UHS voltage switching
+> > support:
+> > 
+> > - spacemit,aib-mmc1-io-reg: AIB MMC1 IO register address for voltage
+> >   switching
+> > - spacemit,apbc-asfar-reg: APBC ASFAR register address for AIB access
+> > - spacemit,apbc-assar-reg: APBC ASSAR register address for AIB access
+> > 
+> > These properties enable the driver to perform voltage switching between
+> > 3.3V and 1.8V required for UHS SD card modes.
+> > 
+> > Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml | 15 +++++++++++++++
+> >  1 file changed, 15 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+> > index 13d9382058fbc1c12be1024d1c550f04a825673c..4d6590aa8262009b6e5697a04b45cf3736c0fa42 100644
+> > --- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+> > @@ -32,6 +32,18 @@ properties:
+> >        - const: core
+> >        - const: io
+> >  
+> > +  spacemit,aib-mmc1-io-reg:
+> > +    $ref: /schemas/types.yaml#/definitions/uint32
+> > +    description: AIB MMC1 IO register address for voltage switching
+> > +
+> > +  spacemit,apbc-asfar-reg:
+> > +    $ref: /schemas/types.yaml#/definitions/uint32
+> > +    description: APBC ASFAR register address for AIB access
+> > +
+> > +  spacemit,apbc-assar-reg:
+> > +    $ref: /schemas/types.yaml#/definitions/uint32
+> > +    description: APBC ASSAR register address for AIB access
+> > +
+> >  required:
+> >    - compatible
+> >    - reg
+> > @@ -50,4 +62,7 @@ examples:
+> >        interrupt-parent = <&plic>;
+> >        clocks = <&clk_apmu 10>, <&clk_apmu 13>;
+> >        clock-names = "core", "io";
+> > +      spacemit,aib-mmc1-io-reg = <0xd401e81c>;
+> 
+> This looks very very wrong to me. This is part of the pinctrl
+> reservation:
+> 		pinctrl: pinctrl@d401e000 {
+> 			compatible = "spacemit,k1-pinctrl";
+> 			reg = <0x0 0xd401e000 0x0 0x1000>;
+> 			clocks = <&syscon_apbc CLK_AIB>,
+> 				 <&syscon_apbc CLK_AIB_BUS>;
+> 			clock-names = "func", "bus";
+> 			spacemit,apbc = <&syscon_apbc>;
+> 		};
+> so if you need to change something here, you need to do it via pinctrl.
+> 
+> > +      spacemit,apbc-asfar-reg = <0xd4015050>;
+> > +      spacemit,apbc-assar-reg = <0xd4015054>;
+> 
+> These two are the apbc syscon:
+> 		syscon_apbc: system-controller@d4015000 {
+> 			compatible = "spacemit,k1-syscon-apbc";
+> 			reg = <0x0 0xd4015000 0x0 0x1000>;
+> 			clocks = <&osc_32k>, <&vctcxo_1m>, <&vctcxo_3m>,
+> 				 <&vctcxo_24m>;
+> 			clock-names = "osc", "vctcxo_1m", "vctcxo_3m",
+> 				      "vctcxo_24m";
+> 			#clock-cells = <1>;
+> 			#reset-cells = <1>;
+> 		};
+> so add a phandle to the syscon (like the pinctrl currently has) and
+> access these via its regmap. What you've got here is a non-runner,
+> sorry.
 
-Cc: stable@vger.kernel.org
-Fixes: e51df6ce668a ("mmc: host: sdhci-pci: Add Genesys Logic GL975x support")
-Closes: https://lore.kernel.org/linux-mmc/33d12807-5c72-41ce-8679-57aa11831fad@linux.dev/
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Matthew Schwartz <matthew.schwartz@linux.dev>
----
-Changes in v2:
-- Move GM_BURST register defines
-- Clear R_OSRC_Lmt in gli_set_9750 instead of gl9750_hw_setting to survive resets
-- Link to v1: https://lore.kernel.org/linux-mmc/20260227075909.3860183-1-matthew.schwartz@linux.dev/
+We've gained this support in pinctrl which already accepted in mainline,
+it's done as Conor suggested here, so you can drop these properties along
+with the patch [5/10], see 
 
-Changes in v1:
-- Use the proper name for the register field
-- Link to RFC: https://lore.kernel.org/linux-mmc/20260117234800.931664-1-matthew.schwartz@linux.dev/
----
- drivers/mmc/host/sdhci-pci-gli.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+https://lore.kernel.org/all/20260108-kx-pinctrl-aib-io-pwr-domain-v2-0-6bcb46146e53@linux.spacemit.com/
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index b0f91cc9e40e4..6e4084407662a 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -68,6 +68,9 @@
- #define   GLI_9750_MISC_TX1_DLY_VALUE    0x5
- #define   SDHCI_GLI_9750_MISC_SSC_OFF    BIT(26)
- 
-+#define SDHCI_GLI_9750_GM_BURST_SIZE		  0x510
-+#define   SDHCI_GLI_9750_GM_BURST_SIZE_R_OSRC_LMT  GENMASK(17, 16)
-+
- #define SDHCI_GLI_9750_TUNING_CONTROL	          0x540
- #define   SDHCI_GLI_9750_TUNING_CONTROL_EN          BIT(4)
- #define   GLI_9750_TUNING_CONTROL_EN_ON             0x1
-@@ -345,10 +348,16 @@ static void gli_set_9750(struct sdhci_host *host)
- 	u32 misc_value;
- 	u32 parameter_value;
- 	u32 control_value;
-+	u32 burst_value;
- 	u16 ctrl2;
- 
- 	gl9750_wt_on(host);
- 
-+	/* clear R_OSRC_Lmt to avoid DMA write corruption */
-+	burst_value = sdhci_readl(host, SDHCI_GLI_9750_GM_BURST_SIZE);
-+	burst_value &= ~SDHCI_GLI_9750_GM_BURST_SIZE_R_OSRC_LMT;
-+	sdhci_writel(host, burst_value, SDHCI_GLI_9750_GM_BURST_SIZE);
-+
- 	driving_value = sdhci_readl(host, SDHCI_GLI_9750_DRIVING);
- 	pll_value = sdhci_readl(host, SDHCI_GLI_9750_PLL);
- 	sw_ctrl_value = sdhci_readl(host, SDHCI_GLI_9750_SW_CTRL);
+> pw-bot: changes-requested
+> 
+> Thanks,
+> Conor.
+
+
+
 -- 
-2.53.0
-
+Yixun Lan (dlan)
