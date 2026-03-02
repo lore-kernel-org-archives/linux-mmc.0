@@ -1,66 +1,67 @@
-Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com [209.85.128.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35C7841323D
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Mar 2026 15:14:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07EFC41324D
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Mar 2026 15:14:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772464445; cv=none; b=eo2MxykNzgwr1cN/HhjJoBklbRTT8cfuhzG5HThKcSHjq68JmRvcL64+bAQTl+UdX4KOvzUlQX0Ks3W18GHcSYApwIhpXAtBgoFJlzPrVyCCPMCGc4IkD9CLPjHK+hQYJ7/HhDNHrv3TelLPVzFeHfbVPW8oSOwp0mMBjAOBo1U=
+	t=1772464447; cv=none; b=hOyihGiOtcd7wA4iONIu0F/s+DZ8LDY/krb7C0i25KvnYwwKNSAR4LmdyU8aNAH9bXps5WL3FZW5ur6HFPz6m/0ItAW+1Vo0+oQpvETqI4o7wQpPbbKL3xp9ay6cIh2z2uRWHXjDYvSWMNrEsfAA76K55cpwJ0C32jx1xKclnZE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772464445; c=relaxed/simple;
-	bh=GcZr61TwOvUtUfWMRCxXjJRa5feWxGnGJ1rS2AAyvgg=;
+	s=arc-20240116; t=1772464447; c=relaxed/simple;
+	bh=YGXsqqioq9kkrCwc3vs62N/3x0ZWHVLmrt+qJu2Nu9E=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=TJXjHV6Q+Z9BghWThrES/1i0AtsT6HSxRvohnTSx7ulxexTVp1dI6Bsb01VfDGZ7EQ1/Ns8wUCA2ah4u6aFyiP5ViEhwBV3X2O3u66M9DnKI+Gdg1db99aCT7UcXiOOayupVNQ6EWb9+G8SDqHHzylrTLYrzFC4YGaLNPRBCWKM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=INDXboOY; arc=none smtp.client-ip=209.85.128.41
+	 In-Reply-To:To:Cc; b=GJNydPHJPbm/YFdJUORBq5PMBBT4Y2HkcJZ8PCwTBwoN29Uaan91jcqi+eqgkWMQHpAAEgZcF0FuPGaHrvx4Gj3IpTyt6D88uI/8904lQJfkgKr5pc2InIxfA9Z58L27YjOnyyrrvwiBEZaG3c5r6Yyos7QZ3ziz8V/H+PesObw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RsiwEpRY; arc=none smtp.client-ip=209.85.128.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="INDXboOY"
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4838c15e3cbso41207255e9.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Mar 2026 07:14:00 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RsiwEpRY"
+Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-4806cc07ce7so51810485e9.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Mar 2026 07:14:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772464439; x=1773069239; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1772464441; x=1773069241; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=sI0ZXWmHjNvtD6IpJHMeOdxd2SjR4noe2NBQlRy+ENQ=;
-        b=INDXboOYioJXolxrreFaV52fmM4iqoD0lk6Pwlx3bt+UeLg14GZOhxbQf3X9907AY4
-         MonQk9crJxNYC/3qlrNsxFmqOluYwgcZrLpOmCy51Jx5Dx7osYcM3t1+QM+uX/os3Sas
-         eSizHUyVo9q93Cg6UIxis01g0NTn1TI3mFVvnqIkUB1EMu/1pR7a7VyyVGZquDysh2E5
-         o7u5WzCJiS1rQyD8d78w7dQAtn14aF36T7Ia61ayjYz707h/1fTHyBdgbF+AP/hk0Cvf
-         8uKAvFrq3h6htsX9FBUzYkRhHo1linFuYDaMWannWkN873vgLp250fd/90NQ3P+TNUHc
-         Cc5A==
+        bh=AeFtmpd0OzFDMpfzIzFKTIa4npbmPiXE0EW+dCwlXrY=;
+        b=RsiwEpRYuSuZwwAXyeYKliD2lDwFSc9NQ23+R1G73w8qLEDGb/6falpRDJvY9Kd6jC
+         2xteP1Hjt0GB6zkfRKHAkI4I4lUYIy9P3nLJKqcuGGF7dVlWP0U+lBlAUoufGd0tr8uj
+         4ImNc976Sw9LL/XwPom4W09q5Eo65ug1cDWdB6w62D5g6joeI6bOsGmD76zq0XjvZVGT
+         qXb/9YcNfU9v9p5wMBw5idtneS9astO4sK+s028C/PE8i8xZrHYK4agEkLc0Ct+EIjQX
+         McDZw96Z4JHoHp0/oOoKXq1ywbl1/Mn3Ib3insCD9X8Qf539BLVbPujUGCnXCD3f7LpE
+         CjYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772464439; x=1773069239;
+        d=1e100.net; s=20230601; t=1772464441; x=1773069241;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=sI0ZXWmHjNvtD6IpJHMeOdxd2SjR4noe2NBQlRy+ENQ=;
-        b=u8MLjTlHXfesWjmLOtuGvI87O5+pE9RzHdwylWEMq7KDmVLupKZiCWhPjQ1blEK1xn
-         HSb1+ELcjk7Cle2K7GgxfdN1DdWFsK7ySVuvaHyjh1Ku9XKukCPN7O2/vxbpqdH3zGeb
-         GStBB+Mdgfn2ICQ7g/IxbZR2riFKHtD+StXiO867Go4hGYMog0f1KCetfAFU7fL4KcwN
-         afWYjtC//m2lFVmUaAwT32CgQ+XY2VYz2+N3VqqpDoI4M/zTbnXqrvV/uB7QPZSYZZ6n
-         +zY78pbIXsMhrh3Oy/1Ho07yfa+WTkHy7mapI8HRv+aRfrkIdsByXl8H8+iZwMsU6VLa
-         SbDw==
-X-Forwarded-Encrypted: i=1; AJvYcCXx9RydHlS7SwmKfQiuIGP79M3ZXNx7xtrNPyYIgb6YkhtrspDh4A4dV3ij4etuuIqBQ5Vk9MpEKAY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyMX7BWQynrHBW54lM3JWsJtTXVMunNAFCa9vQ7UsyCXWtk8uxl
-	/7ei/xmH9OjiyStSAiGHfAJzYxd4kzo4y35siaK/ZKGI6/L8mL8sYb93
-X-Gm-Gg: ATEYQzwVDpeSUD3KlaTy+foKfbUCIuXP9zE/dPWlCDNDv6HtsciZd5dBM6+I6M83W0f
-	w37P+S5haCIqSuTgFIWIkZY/pFS/2rPpQGPweTAGm229/DgB+1RQL3Gn0N//Ksmn696wLQwDJmQ
-	6TUoWvSfiK8WL+JkHeaxq4b1xPtXWkpCFoxceWzJ36SodFC2LOkGsyYOd7ol2P3O008/y7ryxR+
-	ZZbg1U+8SZWfO5uip3XVp7NWLu6sz18pTI05Bg4XBQIueyWe/+kOg1G/4pS6cPXUN9Fw9tL7WzF
-	kS3MZypCcunWFidJeByTxZEDMXbQtOoPFsjZmVaateLUQTMwI1gLRmh17Y69Wy39K4qNdIsGCPR
-	TSHYCv3Ekc4/jVkt8fhAET8sNNWdelBr0nY+7in+k6rEoHQAcIlvHiVqF7R6JPQNQaD5wfiGiFY
-	M3Y9rGpKt8SMV8LLUdxh4TgHfkWXYKIQlVdffvuZKZMt3wZaORTqu/OorjGbNLPtNPow==
-X-Received: by 2002:a05:600c:5395:b0:483:709e:f22d with SMTP id 5b1f17b1804b1-483c9c24797mr190414855e9.27.1772464439170;
-        Mon, 02 Mar 2026 07:13:59 -0800 (PST)
+        bh=AeFtmpd0OzFDMpfzIzFKTIa4npbmPiXE0EW+dCwlXrY=;
+        b=ndYLqhxIiCP49EU5SNOukUDT4WqhBuoENH5QeE+bgMToOUEgWpHk2Ss+o5XKErK2rz
+         GnjU/JnEpHUxQwgEMtmcuoEiE5KmI4XNBqXcVAgmkTEip+c+xDC+U5BY9Jo0a/PqD6hX
+         lLjVz99I5SkyABHheadORLapvM+DlCS9t4a9StGk++n0mehxI5FYZx0px0aGLfzxujcr
+         UtTGNa19JilXpQlZxoo1c4JPS1jimtWDtXGKyiaa7O9jNfAQOD+8dJIEqgUPRkUVIVYl
+         Kvn37a1CuezZRLYzt/oEcScqxxuTMyip6OPtAyDAbpDQKWycfNxgh8RevLZGy/fCtjX3
+         bi5A==
+X-Forwarded-Encrypted: i=1; AJvYcCVaqRJIqnKa8D/b4lvxNxRXlOzYEZDLR3iqS4bcCFcanCjBpOJjVGAvAsphogx0um5kvm5uhFj/B+c=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwlPKaXpA5UaAk3p362OnZJDacBVfHEDXyraBXfYkt+MeGswN0p
+	n0ZeOEFDcCXZlTb6/si5M3dOCkAXNb/IA2rPClsDycAoT9SHuZMdHA9N
+X-Gm-Gg: ATEYQzyYiM9v4UZ9q4cwkRwKFxGTzv0ojDaiyiA+ZTmPThvUgdsafrNuS2mQT7TaHbV
+	XGlDg97rdF0RHC9BCDa8YgR1TLNsihfJlx0hmIqlQ1krVw+uIN4jPH/FuaNQTBvGrZsbgNCPqSu
+	QyWsQEH730hA3HdktV7SeTkZMgThcYeKS9G98tGEvEhBVFErwDDX8wsHKydefn+F81IWkYgMtGY
+	X1AC2mAy/L+lVSVRixq1jzfu7ke99HP0g6quKvJZxw73IyAoBsdyd5cUIcSP+4YaVxItva9Azxr
+	qbB/fh+tGpdS1ESLSo/X2twLqEpSqQgwAg1VlEkYxSCESure8+FP4MaHzUWjj7P04jvi4n6EfiW
+	pDtz0UiJyeN48PALbAuTSPTlEdl5J3zz4qts4lhxA6Ej0rvH09eaKSKiNqzB2QNmUgjbTafN747
+	nW97tLgoi0lgahKHMCMTjB/oOK5Hqw7igf7P9y+yo5uDy7YFZRkUHyQZ4duS+hRa4TUg==
+X-Received: by 2002:a05:600c:3550:b0:482:eec4:76d with SMTP id 5b1f17b1804b1-483c9bedad1mr235668315e9.17.1772464441044;
+        Mon, 02 Mar 2026 07:14:01 -0800 (PST)
 Received: from ipedrosa-thinkpadx1carbongen12.rmtes.csb ([67.218.235.131])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-483bd70e692sm437240265e9.7.2026.03.02.07.13.57
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-483bd70e692sm437240265e9.7.2026.03.02.07.13.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 02 Mar 2026 07:13:58 -0800 (PST)
+        Mon, 02 Mar 2026 07:14:00 -0800 (PST)
 From: Iker Pedrosa <ikerpedrosam@gmail.com>
-Date: Mon, 02 Mar 2026 16:13:27 +0100
-Subject: [PATCH 06/10] mmc: sdhci-of-k1: add SDR tuning infrastructure
+Date: Mon, 02 Mar 2026 16:13:28 +0100
+Subject: [PATCH 07/10] mmc: sdhci-of-k1: add comprehensive SDR tuning
+ support
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,8 +69,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260302-orangepi-sd-card-uhs-v1-6-89c219973c0c@gmail.com>
+Content-Transfer-Encoding: 8bit
+Message-Id: <20260302-orangepi-sd-card-uhs-v1-7-89c219973c0c@gmail.com>
 References: <20260302-orangepi-sd-card-uhs-v1-0-89c219973c0c@gmail.com>
 In-Reply-To: <20260302-orangepi-sd-card-uhs-v1-0-89c219973c0c@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
@@ -85,108 +86,163 @@ Cc: Michael Opdenacker <michael.opdenacker@rootcommit.com>,
  Iker Pedrosa <ikerpedrosam@gmail.com>
 X-Mailer: b4 0.14.2
 
-Add register definitions and delay line control functions to prepare for
-SDR50/SDR104 tuning support:
+Implement software tuning algorithm to enable UHS-I SDR modes for SD
+card operation. This adds both TX and RX delay line tuning based on the
+SpacemiT K1 controller capabilities.
 
-- Add tuning register definitions (RX_CFG, DLINE_CTRL, DLINE_CFG)
-- Add delay line control helper functions
-- Add tuning preparation function
-
-This infrastructure prepares for implementing the SDR tuning algorithm
-while maintaining all existing functionality.
+Key features:
+- Conditional tuning: only tune when SD card is present and for
+  high-speed modes (≥100MHz)
+- TX tuning: configure transmit delay line with default values
+  (dline_reg=0, delaycode=127) to ensure optimal signal output timing
+- RX tuning: test full delay range (0-255) with window detection
+  algorithm to find optimal receive timing
+- Retry mechanism: multiple fallback delays within optimal window for
+  improved reliability
+- Complete register support: add delay line control and configuration
+  register definitions for fine-grained timing control
 
 Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
 ---
- drivers/mmc/host/sdhci-of-k1.c | 62 ++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 62 insertions(+)
+ drivers/mmc/host/sdhci-of-k1.c | 118 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 118 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
-index 9425bde6a72541bd628997e91f957072a6266c25..34a1b9c359193be7dd5f07d1f3d6565b5f40e7ff 100644
+index 34a1b9c359193be7dd5f07d1f3d6565b5f40e7ff..95b016bfb5598acea4166257d12af54d945a0c13 100644
 --- a/drivers/mmc/host/sdhci-of-k1.c
 +++ b/drivers/mmc/host/sdhci-of-k1.c
-@@ -72,6 +72,23 @@
- #define  AKEY_ASFAR			0xBABA
- #define  AKEY_ASSAR			0xEB10
+@@ -88,6 +88,12 @@
+ #define  SDHC_TX_DLINE_REG_MASK         GENMASK(23, 16)
  
-+#define SPACEMIT_SDHC_RX_CFG_REG        0x118
-+#define  SDHC_RX_SDCLK_SEL0_MASK        GENMASK(1, 0)
-+#define  SDHC_RX_SDCLK_SEL1_MASK        GENMASK(3, 2)
-+#define  SDHC_RX_SDCLK_SEL1             FIELD_PREP(SDHC_RX_SDCLK_SEL1_MASK, 1)
+ #define SPACEMIT_RX_DLINE_REG		9
++#define SPACEMIT_RX_TUNE_DELAY_MIN	0x0
++#define SPACEMIT_RX_TUNE_DELAY_MAX	0xFF
++#define SPACEMIT_RX_TUNE_DELAY_STEP	0x1
 +
-+#define SPACEMIT_SDHC_DLINE_CTRL_REG    0x130
-+#define  SDHC_DLINE_PU                  BIT(0)
-+#define  SDHC_RX_DLINE_CODE_MASK        GENMASK(23, 16)
-+#define  SDHC_TX_DLINE_CODE_MASK        GENMASK(31, 24)
-+
-+#define SPACEMIT_SDHC_DLINE_CFG_REG     0x134
-+#define  SDHC_RX_DLINE_REG_MASK         GENMASK(7, 0)
-+#define  SDHC_RX_DLINE_GAIN             BIT(8)
-+#define  SDHC_TX_DLINE_REG_MASK         GENMASK(23, 16)
-+
-+#define SPACEMIT_RX_DLINE_REG		9
-+
++#define SPACEMIT_TX_TUNING_DLINE_REG	0x00
++#define SPACEMIT_TX_TUNING_DELAYCODE	127
+ 
  struct spacemit_sdhci_host {
  	struct clk *clk_core;
- 	struct clk *clk_io;
-@@ -102,6 +119,50 @@ static inline void spacemit_sdhci_clrsetbits(struct sdhci_host *host, u32 clr, u
- 	sdhci_writel(host, val, reg);
+@@ -256,6 +262,118 @@ static unsigned int spacemit_sdhci_clk_get_max_clock(struct sdhci_host *host)
+ 	return clk_get_rate(pltfm_host->clk);
  }
  
-+static void spacemit_sdhci_set_rx_delay(struct sdhci_host *host, u8 delay)
++static int spacemit_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
 +{
-+	spacemit_sdhci_clrsetbits(host, SDHC_RX_DLINE_CODE_MASK,
-+				  FIELD_PREP(SDHC_RX_DLINE_CODE_MASK, delay),
-+				  SPACEMIT_SDHC_DLINE_CTRL_REG);
++	int ret = 0;
++	int i;
++	bool pass_window[SPACEMIT_RX_TUNE_DELAY_MAX + 1] = {false};
++	int pass_len = 0, pass_start = 0, max_pass_len = 0, max_pass_start = 0;
++	u8 final_delay;
++	struct mmc_host *mmc = host->mmc;
++	struct mmc_ios ios = mmc->ios;
++
++	/*
++	 * Tuning is required for SDR50/SDR104, HS200/HS400 cards and
++	 * if clock frequency is greater than 100MHz in these modes.
++	 */
++	if (host->clock < 100 * 1000 * 1000 ||
++	    !(ios.timing == MMC_TIMING_MMC_HS200 ||
++	      ios.timing == MMC_TIMING_UHS_SDR50 ||
++	      ios.timing == MMC_TIMING_UHS_SDR104))
++		return 0;
++
++	if (!(mmc->caps2 & MMC_CAP2_NO_SD) && !mmc->ops->get_cd(mmc))
++		return 0;
++
++	if (mmc->caps2 & MMC_CAP2_NO_MMC) {
++		spacemit_sdhci_set_tx_dline_reg(host, SPACEMIT_TX_TUNING_DLINE_REG);
++		spacemit_sdhci_set_tx_delay(host, SPACEMIT_TX_TUNING_DELAYCODE);
++		spacemit_sdhci_tx_tuning_prepare(host);
++
++		dev_dbg(mmc_dev(host->mmc), "TX tuning: dline_reg=%d, delaycode=%d\n",
++			SPACEMIT_TX_TUNING_DLINE_REG, SPACEMIT_TX_TUNING_DELAYCODE);
++	}
++
++	spacemit_sdhci_prepare_tuning(host);
++
++	for (i = SPACEMIT_RX_TUNE_DELAY_MIN; i <= SPACEMIT_RX_TUNE_DELAY_MAX;
++	     i += SPACEMIT_RX_TUNE_DELAY_STEP) {
++		spacemit_sdhci_set_rx_delay(host, i);
++
++		ret = mmc_send_tuning(host->mmc, opcode, NULL);
++		pass_window[i] = (ret == 0);
++
++		dev_dbg(mmc_dev(host->mmc), "RX delay %d: %s\n",
++			i, pass_window[i] ? "pass" : "fail");
++	}
++
++	for (i = SPACEMIT_RX_TUNE_DELAY_MIN; i <= SPACEMIT_RX_TUNE_DELAY_MAX;
++	     i += SPACEMIT_RX_TUNE_DELAY_STEP) {
++		if (pass_window[i]) {
++			if (pass_len == 0)
++				pass_start = i;
++			pass_len++;
++		} else {
++			if (pass_len > max_pass_len) {
++				max_pass_len = pass_len;
++				max_pass_start = pass_start;
++			}
++			pass_len = 0;
++		}
++	}
++
++	if (pass_len > max_pass_len) {
++		max_pass_len = pass_len;
++		max_pass_start = pass_start;
++	}
++
++	if (max_pass_len < 3) {
++		dev_err(mmc_dev(host->mmc), "Tuning failed: no stable window found\n");
++		return -EIO;
++	}
++
++	final_delay = max_pass_start + max_pass_len / 2;
++	spacemit_sdhci_set_rx_delay(host, final_delay);
++	ret = mmc_send_tuning(host->mmc, opcode, NULL);
++	if (ret) {
++		u8 retry_delays[] = {
++			max_pass_start + max_pass_len / 4,
++			max_pass_start + (3 * max_pass_len) / 4,
++			max_pass_start,
++			max_pass_start + max_pass_len - 1
++		};
++		int retry_count = ARRAY_SIZE(retry_delays);
++
++		dev_warn(mmc_dev(mmc), "Primary delay %d failed, trying alternatives\n",
++			 final_delay);
++
++		for (i = 0; i < retry_count; i++) {
++			if (retry_delays[i] >= SPACEMIT_RX_TUNE_DELAY_MIN &&
++			    retry_delays[i] <= SPACEMIT_RX_TUNE_DELAY_MAX) {
++				spacemit_sdhci_set_rx_delay(host, retry_delays[i]);
++				ret = mmc_send_tuning(host->mmc, opcode, NULL);
++				if (!ret) {
++					final_delay = retry_delays[i];
++					dev_info(mmc_dev(mmc), "Retry successful with delay %d\n",
++						 final_delay);
++					break;
++				}
++			}
++		}
++
++		if (ret) {
++			dev_err(mmc_dev(mmc), "All retry attempts failed\n");
++			return -EIO;
++		}
++	}
++
++	dev_dbg(mmc_dev(host->mmc),
++		"Tuning successful: window %d-%d, using delay %d\n",
++		max_pass_start, max_pass_start + max_pass_len - 1, final_delay);
++
++	return 0;
 +}
 +
-+static void spacemit_sdhci_set_tx_delay(struct sdhci_host *host, u8 delay)
-+{
-+	spacemit_sdhci_clrsetbits(host, SDHC_TX_DLINE_CODE_MASK,
-+				  FIELD_PREP(SDHC_TX_DLINE_CODE_MASK, delay),
-+				  SPACEMIT_SDHC_DLINE_CTRL_REG);
-+}
-+
-+static void spacemit_sdhci_set_tx_dline_reg(struct sdhci_host *host, u8 dline_reg)
-+{
-+	spacemit_sdhci_clrsetbits(host, SDHC_TX_DLINE_REG_MASK,
-+				  FIELD_PREP(SDHC_TX_DLINE_REG_MASK, dline_reg),
-+				  SPACEMIT_SDHC_DLINE_CFG_REG);
-+}
-+
-+static void spacemit_sdhci_tx_tuning_prepare(struct sdhci_host *host)
-+{
-+	spacemit_sdhci_setbits(host, SDHC_TX_MUX_SEL, SPACEMIT_SDHC_TX_CFG_REG);
-+	spacemit_sdhci_setbits(host, SDHC_DLINE_PU, SPACEMIT_SDHC_DLINE_CTRL_REG);
-+	udelay(5);
-+}
-+
-+static void spacemit_sdhci_prepare_tuning(struct sdhci_host *host)
-+{
-+	spacemit_sdhci_clrsetbits(host, SDHC_RX_DLINE_REG_MASK,
-+				  FIELD_PREP(SDHC_RX_DLINE_REG_MASK, SPACEMIT_RX_DLINE_REG),
-+				  SPACEMIT_SDHC_DLINE_CFG_REG);
-+
-+	spacemit_sdhci_setbits(host, SDHC_DLINE_PU, SPACEMIT_SDHC_DLINE_CTRL_REG);
-+	udelay(5);
-+
-+	spacemit_sdhci_clrsetbits(host, SDHC_RX_SDCLK_SEL1_MASK, SDHC_RX_SDCLK_SEL1,
-+				  SPACEMIT_SDHC_RX_CFG_REG);
-+
-+	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200)
-+		spacemit_sdhci_setbits(host, SDHC_HS200_USE_RFIFO, SPACEMIT_SDHC_PHY_FUNC_REG);
-+}
-+
- static void spacemit_sdhci_reset(struct sdhci_host *host, u8 mask)
+ static int spacemit_sdhci_pre_select_hs400(struct mmc_host *mmc)
  {
- 	sdhci_reset(host, mask);
-@@ -335,6 +396,7 @@ static const struct sdhci_ops spacemit_sdhci_ops = {
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.set_clock		= spacemit_sdhci_set_clock,
- 	.set_uhs_signaling	= spacemit_sdhci_set_uhs_signaling,
-+	.platform_execute_tuning = spacemit_sdhci_execute_tuning,
- };
- 
- static const struct sdhci_pltfm_data spacemit_sdhci_k1_pdata = {
+ 	struct sdhci_host *host = mmc_priv(mmc);
 
 -- 
 2.53.0
