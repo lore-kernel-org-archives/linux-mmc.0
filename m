@@ -1,202 +1,105 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f180.google.com (mail-pg1-f180.google.com [209.85.215.180])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25A4836EA97;
-	Mon,  2 Mar 2026 13:02:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772456566; cv=none; b=riKIwqc0D84/cgpoYA+yN7mjWXXOp3OXtVm+g0Krj88b/vmylp7x6qojs85pD6+q+py228g/uct16cpVJF83Ja0zMNE1Y3vpytvYrbruFWgT4CJbxh9xCEDA4v4Tlh8xCIfCT6oMg8ByFMCdWwaxq4AqqTKsB1zfrSQnKzHgNxE=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772456566; c=relaxed/simple;
-	bh=tvQbPWh9zBD8AmK6ovLnwO1ZZ2dYVs2CTC8gfkbuoP0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hVg3sXUCYTDdUBZFTUiENq1zT24tDZ0KBbvH4NIB8b6InRpq92Z+g0zx18uUturhsMvaxesxqEVHNMab2mTkIC9b3dbHIeHHqoOcOLEwc5paXXAI9fB63nobdX/05rzXJNfi9tWaKAiMATallyB+R6uGChuIt/i2D4ej84eOdbY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P34GWGZM; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 620E93EDAB3
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Mar 2026 13:26:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.215.180
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772458027; cv=pass; b=WiQRg6Z69zC3L+3MpC3ykmKQ45ebLM49+TCu0Oyh4g6hDu+HGWoiVNZX6OP6C7wgspeeS4ZV4G9cMFJ65+6n4qc8jOl15HtCTkgk24RRt3Y7Ar5kYeyTG0lv7h8KXoMZLvOIc81u3QwJYOHlG461eSb9EchdgTf/T6DNW+otJ6o=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772458027; c=relaxed/simple;
+	bh=D56P8UfBC6muFJ2DiCU/NOHe2w+/5CdDZNfPlxqtIl4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=pE+brCZJGYXkT3R+/vB2oR9LGzEI0UVbku2lQ/WbMVN1ky3TTSRz4I1m2v2NO9Rz1cXm5iMKX+Gb2DFpx4AiKQIE44o5dyWgJBLfjGgpa+OLAJjk2j+5Wjp4yN/CqFmnjc8BaCD2vLq9bPKJB7YK/0XZrg5PAE2hzHai+dHiimA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fPa3HaKR; arc=pass smtp.client-ip=209.85.215.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P34GWGZM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 18D56C19423;
-	Mon,  2 Mar 2026 13:02:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772456565;
-	bh=tvQbPWh9zBD8AmK6ovLnwO1ZZ2dYVs2CTC8gfkbuoP0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=P34GWGZM5JlkPygmke9K4O46YU16DBi5pIlrUBDSoNn9iYWsoXGx4j1sd2SlgAgUg
-	 mwPIxF1Wid7RIVJRJOQaB11Mk4kDdM72uJjMT8hE1OYVoMLcK7odUEGQ6XKGnRul8r
-	 BPLCJHUvqsBJ4yqaFbH/RBc5VolCEwETirMLf+zde2PQKa3MLQP65BkBFfmEZAFGoM
-	 ubNcTq0O1BXzC7PqJtZupuLWTqgsTi/ol9n3f+Bk9YXpJ/Aydkd0FOmteLNSwekWQC
-	 dzHGbN8DCgHkPgpShpHUeQD2eLrtU52GLTvHSmRocO3Wv5SLOpW7Maj2QX0pdcOiQH
-	 WQiSyS3tSMfzw==
-Date: Mon, 2 Mar 2026 18:32:31 +0530
-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Cc: manivannan.sadhasivam@oss.qualcomm.com, 
-	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, 
-	Abel Vesa <abelvesa@kernel.org>, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	Sumit Garg <sumit.garg@oss.qualcomm.com>, stable@vger.kernel.org
-Subject: Re: [PATCH v3 1/4] soc: qcom: ice: Fix race between qcom_ice_probe()
- and of_qcom_ice_get()
-Message-ID: <tbmsoi5the4y2gbocwbqecictrbrpwxx4grugaimc24bu5oacu@4yucsbmyhv5d>
-References: <20260223-qcom-ice-fix-v3-0-6ca5846329f7@oss.qualcomm.com>
- <20260223-qcom-ice-fix-v3-1-6ca5846329f7@oss.qualcomm.com>
- <5e9a399a-074b-4b41-2e10-f2ed654eafcf@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fPa3HaKR"
+Received: by mail-pg1-f180.google.com with SMTP id 41be03b00d2f7-c7103601c8cso1982915a12.2
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Mar 2026 05:26:58 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1772458017; cv=none;
+        d=google.com; s=arc-20240605;
+        b=VF0w4VbhxylT5qkw1iEXQQMW5wx1exBT98rYANvdOq0oawVQ9Ef9pKQElkfhhx8O15
+         +hnhDPePdx94HR3IK8eP7uVu5wSV4Fvvrdm8Z5KM/hiQv32p+ez/YBJuCriD+vuB/Byl
+         R3+HMsLmunBJyld4T5SLyQWLaaes9Pvp86VOv5G+Qx2PuYwNUQqeVC5sUWS1b4tTanDJ
+         g8EPZWBWGpdcHk7CbqpLmhJ/8Pq7/Io038mTj6g0oc08w3S2XxaoGMIQZzlQHdACmH7V
+         Ax4Y2ykn/gtFr4tdjDKsD8qFR0e6bN9iXk9xWvIPVCPmyek3LowSdTi2ExGVqU/6kwie
+         UhgA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=D56P8UfBC6muFJ2DiCU/NOHe2w+/5CdDZNfPlxqtIl4=;
+        fh=b40G5L4PYN9lS0nMMu+wkvYK0qwB/Os5ws8sH9Bi6vk=;
+        b=D4q/VYkYpB8KuhI7fE6UrFDlekmrRPJ/8gyEJRUT7k5iqfbJs9TOVu9tv5GC+6g8Py
+         2zDlxaL/87jVWiSP78NzbrqtW6XXuVEpuR9pq6+ViVjnEi+d9w5cjZvHnED+BCML2ZgH
+         j/ay5bLW92ImDhHM64oCO8v/9QbLb/D+v19TK+N1ig+9ZxFTBLCFvGPoEur70THs1ZlP
+         odR7Ry1HWkUVwSMatonx4WC+j/C3uPEZvUyvubBuN23jzXaK9azvBoLsCNALsYKgfYGI
+         QEtmz/aJTvFwi3Kx7LcTKoUgLEfVilmqBtvVPjtTG0dXKfz9s2tMyHY2xYE4UBr8Ziya
+         zZnQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1772458017; x=1773062817; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=D56P8UfBC6muFJ2DiCU/NOHe2w+/5CdDZNfPlxqtIl4=;
+        b=fPa3HaKRvPqfBbAWHgZ/8rFn9R+S9cZ4L+H5Xe+Cqp6trk0oHbeZjNOqFup+Bf68Z/
+         V3kTCqJzZu+6T0N0SJAJoAUUyrk8rOHSy5+fRFN90IQaSGIUG5YvGKHD3nriQ7iBa76P
+         nOkzvvuTzhVo8DBpPg3jHGSK4EV9O+mtULGHddSwUAkI64qrcG5FtnB1k53J/z+rnzVf
+         L3+sqcbW4+qPyVrsH+IPWAh7Kep02ajOod9/tixIsjVJUz73z8Art090jByA+5/Zo9dN
+         L/x/uMiBgzhWK4xHVbd8S3z0b6fOzODBU2wNkOAZOT2V3v0vOgAyzlChWXhf0hMKHUSe
+         LEiw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772458017; x=1773062817;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=D56P8UfBC6muFJ2DiCU/NOHe2w+/5CdDZNfPlxqtIl4=;
+        b=jCL7SkZQHuT/ciSL7BDcWlwh0baBjbNezLkPno0FpPsAn8DkP9QhIJu8wjZ6G04t7e
+         D6LBcgLiEE8LWvfNHAJDIvFjhywCqVH+Ydb7o3yn0J49U2NzxzlVGv7XvVQnfnSugs59
+         Wrn0OZSgLJQx8ha6dDKsKW/AhxmjBs0VYu8tY5zqwPjCtD4IyC0g8Z9GZOO3aMliVc7T
+         2WwbjXykyxynZeqDnNEPNoCDddcYcIcoGQusJotjJ+YM3zyWkr0aWCNqprJTW1N7yIYc
+         vI9Xky2TuIEG/y4ep7eWcw2/F5FBH5z9wxK/Q+SMGsMrSAW5sYcCOAHPCYCqJYGJSUIN
+         5Trw==
+X-Forwarded-Encrypted: i=1; AJvYcCXlzyXNsra3NhdN3bPZRfe6iAOXNFfQeNMjI4EggwVv5tOziMON1H+p+qbtfmHLLIdgktQPSbhbC1E=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzu4F917pZZ+1QtgpKlZaVk1jtbpeVw0ktcLgQxVZmrn/SqIXW+
+	7R9no0wvFbtkz64JYzHaQaA/7ujbs+EkCYBYGbje8Htc42nyllZ4U9dcpHLCqYuA7fwqn58gwh0
+	IeoScVigRuQrBorDeQ5K73qqu++Vt8t4=
+X-Gm-Gg: ATEYQzzpL1nnEqlmoDL2vs20MYa3N+/3y7FL/WYQfDIDJ70LpI1Qq3YCBTGpfOJYGj6
+	iK1VGXwzQ0PrBqRGVjDD7q2D8u7elCjZIF7hh30rk8GE5pfDyGwRNv3tr+5e6S5PxBEqBg4O3y5
+	Uhh6PFS9y7HK1yHZvebqI5tTbVDpwWdBjuIk1BF/E2wDdUlLtCdKFeboyAxFZUXZneql/PVNkDd
+	u6OtIVDX8F294LvizUY37xVU9FJMOvlLLa2ikrsY6dttYdoH//2cirVKTEifpVC/71ve4JYB5aK
+	gIJ2W3OA3CFLnL4FRsE=
+X-Received: by 2002:a17:90b:574f:b0:356:7b41:d355 with SMTP id
+ 98e67ed59e1d1-35965c382f1mr8489218a91.1.1772458017387; Mon, 02 Mar 2026
+ 05:26:57 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <5e9a399a-074b-4b41-2e10-f2ed654eafcf@oss.qualcomm.com>
+References: <20260301-bst-v1-1-ddbc22ec3ed9@gmail.com> <6e0e650b-d349-4a9a-9dbd-8244fb050b9e@intel.com>
+In-Reply-To: <6e0e650b-d349-4a9a-9dbd-8244fb050b9e@intel.com>
+From: Felix Gu <ustc.gu@gmail.com>
+Date: Mon, 2 Mar 2026 21:26:45 +0800
+X-Gm-Features: AaiRm53wTBdB7vaC1WD5csl0WHPtUXSPNTJOwfTvcFo3DJQfO2VVg7CWZIHSlUY
+Message-ID: <CAN4SLj32y-4BcaAvDhi1VO3ZyrFjezxYfqAn8_DQ2Q1gtzHziA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-bst: Fix memory leak in sdhci_bst_alloc_bounce_buffer()
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ge Gordon <gordon.ge@bst.ai>, 
+	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Albert Yang <yangzh0906@thundersoft.com>, Arnd Bergmann <arnd@arndb.de>, 
+	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, Mar 02, 2026 at 03:41:54PM +0530, Neeraj Soni wrote:
-> 
-> 
-> On 2/23/2026 1:32 PM, Manivannan Sadhasivam via B4 Relay wrote:
-> > From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-> > 
-> > The current platform driver design causes probe ordering races with
-> > consumers (UFS, eMMC) due to ICE's dependency on SCM firmware calls. If ICE
-> > probe fails (missing ICE SCM or DT registers), devm_of_qcom_ice_get() loops
-> > with -EPROBE_DEFER, leaving consumers non-functional even when ICE should
-> > be gracefully disabled. devm_of_qcom_ice_get() doesn't know if the ICE
-> > driver probe has failed due to above reasons or it is waiting for the SCM
-> > driver.
-> > 
-> > Moreover, there is no devlink dependency between ICE and consumer drivers
-> > as 'qcom,ice' is not considered as a DT 'supplier'. So the consumer drivers
-> > have no idea of when the ICE driver is going to probe.
-> > 
-> > To address these issues, introduce a global ice_handle to store the valid
-> > ICE handle pointer, and set during successful ICE driver probe. On probe
-> > failure, set it to an error pointer and propagate the error from
-> > of_qcom_ice_get().
-> > 
-> > Additionally, add a global ice_mutex to synchronize qcom_ice_probe() and
-> > of_qcom_ice_get().
-> > 
-> > Note that this change only fixes the standalone ICE DT node bindings and
-> > not the ones with 'ice' range embedded in the consumer nodes, where there
-> > is no issue.
-> > 
-> > Cc: <stable@vger.kernel.org> # 6.4
-> > Fixes: 2afbf43a4aec ("soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver")
-> > Reported-by: Sumit Garg <sumit.garg@oss.qualcomm.com>
-> > Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
-> > ---
-> >  drivers/soc/qcom/ice.c | 44 +++++++++++++++++++++++++++-----------------
-> >  1 file changed, 27 insertions(+), 17 deletions(-)
-> > 
-> > diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
-> > index b203bc685cad..3c3c189e24f9 100644
-> > --- a/drivers/soc/qcom/ice.c
-> > +++ b/drivers/soc/qcom/ice.c
-> > @@ -113,6 +113,9 @@ struct qcom_ice {
-> >  	u8 hwkm_version;
-> >  };
-> >  
-> > +static DEFINE_MUTEX(ice_mutex);
-> > +static struct qcom_ice *ice_handle;
-> > +
-> >  static bool qcom_ice_check_supported(struct qcom_ice *ice)
-> >  {
-> >  	u32 regval = qcom_ice_readl(ice, QCOM_ICE_REG_VERSION);
-> > @@ -608,7 +611,6 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
-> >  static struct qcom_ice *of_qcom_ice_get(struct device *dev)
-> >  {
-> >  	struct platform_device *pdev = to_platform_device(dev);
-> > -	struct qcom_ice *ice;
-> >  	struct resource *res;
-> >  	void __iomem *base;
-> >  	struct device_link *link;
-> > @@ -631,6 +633,22 @@ static struct qcom_ice *of_qcom_ice_get(struct device *dev)
-> >  		return qcom_ice_create(&pdev->dev, base);
-> >  	}
-> >  
-> > +	guard(mutex)(&ice_mutex);
-> > +
-> > +	/*
-> > +	 * If ice_handle is NULL, then it means the ICE driver is not probed
-> > +	 * yet. So return -EPROBE_DEFER to let the client try later.
-> > +	 */
-> > +	if (!ice_handle)
-> > +		return ERR_PTR(-EPROBE_DEFER);
-> > +
-> > +	/*
-> > +	 * If ice_handle has error code, then it means the ICE driver has probe
-> > +	 * failed. So return the handle for the client to digest it.
-> > +	 */
-> > +	if (IS_ERR(ice_handle))
-> > +		return ice_handle;
-> > +
-> >  	/*
-> >  	 * If the consumer node does not provider an 'ice' reg range
-> >  	 * (legacy DT binding), then it must at least provide a phandle
-> > @@ -647,24 +665,16 @@ static struct qcom_ice *of_qcom_ice_get(struct device *dev)
-> >  		return ERR_PTR(-EPROBE_DEFER);
-> >  	}
-> >  
-> > -	ice = platform_get_drvdata(pdev);
-> > -	if (!ice) {
-> > -		dev_err(dev, "Cannot get ice instance from %s\n",
-> > -			dev_name(&pdev->dev));
-> > -		platform_device_put(pdev);
-> > -		return ERR_PTR(-EPROBE_DEFER);
-> > -	}
-> > -
-> >  	link = device_link_add(dev, &pdev->dev, DL_FLAG_AUTOREMOVE_SUPPLIER);
-> >  	if (!link) {
-> >  		dev_err(&pdev->dev,
-> >  			"Failed to create device link to consumer %s\n",
-> >  			dev_name(dev));
-> >  		platform_device_put(pdev);
-> > -		ice = ERR_PTR(-EINVAL);
-> > +		return ERR_PTR(-EINVAL);
-> >  	}
-> >  
-> > -	return ice;
-> > +	return ice_handle;
-> >  }
-> >  
-> >  static void qcom_ice_put(const struct qcom_ice *ice)
-> > @@ -716,20 +726,20 @@ EXPORT_SYMBOL_GPL(devm_of_qcom_ice_get);
-> >  
-> >  static int qcom_ice_probe(struct platform_device *pdev)
-> >  {
-> > -	struct qcom_ice *engine;
-> >  	void __iomem *base;
-> >  
-> > +	guard(mutex)(&ice_mutex);
-> > +
-> >  	base = devm_platform_ioremap_resource(pdev, 0);
-> >  	if (IS_ERR(base)) {
-> >  		dev_warn(&pdev->dev, "ICE registers not found\n");
-> > +		ice_handle = base;
-> >  		return PTR_ERR(base);
-> >  	}
-> >  
-> > -	engine = qcom_ice_create(&pdev->dev, base);
-> > -	if (IS_ERR(engine))
-> > -		return PTR_ERR(engine);
-> > -
-> > -	platform_set_drvdata(pdev, engine);
-> 
-> This allows the driver to set the data per ICE device instance which allows
-> the addition of multiple ICE platform devices. For example this patch:
-> https://lore.kernel.org/all/20260217052526.2335759-1-neeraj.soni@oss.qualcomm.com/
-> utilizes this capability. I think it doesen't harm to keep this support. 
-> Moreover, the issue which your patch intends to address do not need this to be removed.
-> 
+> Please use the same expression for the device as the rest of the
+> function i.e. change "mmc_dev(host->mmc)" to "mmc_dev(mmc)"
+>
+Hi Adrian,
+I will update it in V2.
 
-Hmm, ok. I figured out that if we store the err ptr in drvdata, we can fix the
-race and also allow multiple ice instances in a SoC. So sent v4 incorporating
-this change.
-
-- Mani
-
--- 
-மணிவண்ணன் சதாசிவம்
+Best regards,
+Felix
