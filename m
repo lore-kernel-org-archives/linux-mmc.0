@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id D9B9C48034E;
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 2F57447ECED;
 	Tue,  3 Mar 2026 11:27:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772537278; cv=none; b=aiQvFTlRQpU81MwhHfJUtNyoXkREm8dcFA32JnLxoqePwJse4GDUMZy0dJSHRvnagxxzvI+4gUowxVWMj1PW11lStHU7WRp177TDhSt6wj5j57QBaS0m4UMiGR84tcFODFazgpCwpzYUK82QKBSe5hxYTtqI3OkgcvAMekuEXvc=
+	t=1772537278; cv=none; b=ByqH7Ba8z2Ey8ERP0nZrewJNF3EKveDhK+ww1OnodO7QHKsSXEkDrGpr/zEH5p03HcwDt57Odz0FCXDIixVJPnBlrWmNoeGQ+V92XQN/mr9WDqaK+aUYaGjIctBrhFtz+Mff+jPksURb8plmTEoxpRlQxoPQkJsTrYrHDACA1g8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1772537278; c=relaxed/simple;
-	bh=kL4tlGbtwiu/jMCxEvjcPEd63SqyIdSUBrMtTgoSenQ=;
+	bh=JDpJSaBCMI72i1+dB+6tSJPdQTSoAzpCTjBKUnWXPNM=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=fwLg4zcN7vmoBCOoHk63PTepyuq0A5bV53OnYfZCdEp5OqsXaX1sGJ4fZ6bqHs9q6JcCiAHglm/M4aiedgxt/a3L1OfhIZV57woyurGI5ewuYVvtr5uqAcrM+DEt3zUrRdqKD1HqCBhA/oHT+LENmpnaZB6C8S2m74vPAzxQaR8=
+	 MIME-Version; b=Pffonc/nC46BwoNUhNp2dV5anZIrBLRnwaW6Jr1wOXj94MwwgipPsSAD7shCE7VxerEZ6adE34neFxTOiFABlFXHaXDnUIrlgu09UWD7XkYsf7tJK5fcF02WIx6StBiDTApyxunGKo4Nh86HUJLYrdZFZUo4kwxg/rD6LOaPD78=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.68.227])
-	by gateway (Coremail) with SMTP id _____8BxnsO4xaZpTgEXAA--.4285S3;
+	by gateway (Coremail) with SMTP id _____8DxPMO4xaZpSAEXAA--.3512S3;
 	Tue, 03 Mar 2026 19:27:52 +0800 (CST)
 Received: from kernelserver (unknown [223.64.68.227])
-	by front1 (Coremail) with SMTP id qMiowJAxHMKzxaZpM59NAA--.14456S4;
-	Tue, 03 Mar 2026 19:27:51 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowJAxHMKzxaZpM59NAA--.14456S3;
+	Tue, 03 Mar 2026 19:27:50 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -31,9 +31,9 @@ Cc: Huacai Chen <chenhuacai@kernel.org>,
 	devicetree@vger.kernel.org,
 	linux-mmc@vger.kernel.org,
 	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH 2/3] mmc: loongson2: Gathering all SoCs private data together
-Date: Tue,  3 Mar 2026 19:27:39 +0800
-Message-ID: <9af14e15f1cd9b8826f10e15ceb0bbfcbf9d2833.1772529875.git.zhoubinbin@loongson.cn>
+Subject: [PATCH 1/3] dt-bindings: mmc: loongson,ls2k0500-mmc: Add compatible for Loongson-2K0300
+Date: Tue,  3 Mar 2026 19:27:38 +0800
+Message-ID: <5fd555050c62d1bd7dc4f7fc15f93dd48a8a40c3.1772529875.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.52.0
 In-Reply-To: <cover.1772529875.git.zhoubinbin@loongson.cn>
 References: <cover.1772529875.git.zhoubinbin@loongson.cn>
@@ -44,93 +44,49 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowJAxHMKzxaZpM59NAA--.14456S4
-X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/1tbiAgEPCGmmeCEI-gAAsk
-X-Coremail-Antispam: 1Uk129KBj93XoWxJw4rJFyfXFyfGr18Gr1xZwc_yoW5WryDpF
-	9xA3yUKr48tr4YvF98X3yUZr1rZryaqFn2gF47Ww1F93Z8tryj9F1UJFyS9F40kFW3GF17
-	WFs5W392k3WkCrgCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
-	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUUBIb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r126r13M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
-	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Gr0_Xr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVW8Jr0_Cr1UM28EF7xvwVC2z280aVCY1x0267AK
-	xVW8Jr0_Cr1UM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07
-	AIYIkI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWU
-	tVWrXwAv7VC2z280aVAFwI0_Gr0_Cr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7V
-	AKI48JMxkF7I0En4kS14v26r126r1DMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY
-	6r1j6r4UMxCIbckI1I0E14v26r1Y6r17MI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7
-	xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI42IY6xII
-	jxv20xvE14v26r4j6ryUMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42IY6xAIw2
-	0EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Gr0_Cr1lIxAIcVC2z280aVCY1x02
-	67AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7IU8EoGPUUUUU==
+X-CM-TRANSID:qMiowJAxHMKzxaZpM59NAA--.14456S3
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/1tbiAQEPCGmmeEEIjAAAs1
+X-Coremail-Antispam: 1Uk129KBj9xXoWrtFWfArW5Kw47tw4kXw1UArc_yoWDArc_W3
+	WIq3WkGrsxAFyag34UZr47Kry3X3s2k3W0k3WUJF18A3y0v345tFykGr98CFyxurs8uF13
+	XFs7WryfZ347GosvyTuYvTs0mTUanT9S1TB71UUUUUJqnTZGkaVYY2UrUUUUj1kv1TuYvT
+	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
+	cSsGvfJTRUUUbSxYFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
+	vaj40_Wr0E3s1l1IIY67AEw4v_Jrv_JF1l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
+	w2x7M28EF7xvwVC0I7IYx2IY67AKxVW8JVW5JwA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxV
+	W8JVWxJwA2z4x0Y4vEx4A2jsIE14v26r4UJVWxJr1l84ACjcxK6I8E87Iv6xkF7I0E14v2
+	6r4UJVWxJr1ln4kS14v26r1Y6r17M2AIxVAIcxkEcVAq07x20xvEncxIr21l57IF6xkI12
+	xvs2x26I8E6xACxx1l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1q
+	6rW5McIj6I8E87Iv67AKxVW8JVWxJwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64
+	vIr41lc7CjxVAaw2AFwI0_JF0_Jw1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_
+	Jr0_Gr1l4IxYO2xFxVAFwI0_Jrv_JF1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8Gjc
+	xK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0
+	cI8IcVAFwI0_JFI_Gr1lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8V
+	AvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVW8JVWxJwCI42IY6I8E87Iv6xkF7I0E
+	14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjxUxhiSDUUUU
 
-More Loongson SoCs will be added, gathering all SoC private data
-(`loongson2_mmc_pdata`) together to make the code clearer.
+Add "loongson,ls2k0300-mmc" dedicated compatible to represent the
+eMMC/SD/SDIO controller interface of the Loongson-2K0300 chip.
 
-No functional change intended.
+Its hardware design is similar to that of the Loongson-2K2000, but it
+suffers from hardware defects such as missing CMD48 interrupts.
 
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/loongson2-mmc.c | 32 ++++++++++++++++----------------
- 1 file changed, 16 insertions(+), 16 deletions(-)
+ Documentation/devicetree/bindings/mmc/loongson,ls2k0500-mmc.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
-index 026cbd80f114..333bed60df3b 100644
---- a/drivers/mmc/host/loongson2-mmc.c
-+++ b/drivers/mmc/host/loongson2-mmc.c
-@@ -703,14 +703,6 @@ static int ls2k0500_mmc_set_external_dma(struct loongson2_mmc_host *host,
- 	return 0;
- }
- 
--static struct loongson2_mmc_pdata ls2k0500_mmc_pdata = {
--	.regmap_config		= &ls2k0500_mmc_regmap_config,
--	.reorder_cmd_data	= ls2k0500_mmc_reorder_cmd_data,
--	.setting_dma		= ls2k0500_mmc_set_external_dma,
--	.prepare_dma		= loongson2_mmc_prepare_external_dma,
--	.release_dma		= loongson2_mmc_release_external_dma,
--};
--
- static int ls2k1000_mmc_set_external_dma(struct loongson2_mmc_host *host,
- 					 struct platform_device *pdev)
- {
-@@ -735,14 +727,6 @@ static int ls2k1000_mmc_set_external_dma(struct loongson2_mmc_host *host,
- 	return 0;
- }
- 
--static struct loongson2_mmc_pdata ls2k1000_mmc_pdata = {
--	.regmap_config		= &ls2k0500_mmc_regmap_config,
--	.reorder_cmd_data	= ls2k0500_mmc_reorder_cmd_data,
--	.setting_dma		= ls2k1000_mmc_set_external_dma,
--	.prepare_dma		= loongson2_mmc_prepare_external_dma,
--	.release_dma		= loongson2_mmc_release_external_dma,
--};
--
- static const struct regmap_config ls2k2000_mmc_regmap_config = {
- 	.reg_bits = 32,
- 	.val_bits = 32,
-@@ -855,6 +839,22 @@ static void loongson2_mmc_release_internal_dma(struct loongson2_mmc_host *host,
- 	dma_free_coherent(dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
- }
- 
-+static struct loongson2_mmc_pdata ls2k0500_mmc_pdata = {
-+	.regmap_config		= &ls2k0500_mmc_regmap_config,
-+	.reorder_cmd_data	= ls2k0500_mmc_reorder_cmd_data,
-+	.setting_dma		= ls2k0500_mmc_set_external_dma,
-+	.prepare_dma		= loongson2_mmc_prepare_external_dma,
-+	.release_dma		= loongson2_mmc_release_external_dma,
-+};
-+
-+static struct loongson2_mmc_pdata ls2k1000_mmc_pdata = {
-+	.regmap_config		= &ls2k0500_mmc_regmap_config,
-+	.reorder_cmd_data	= ls2k0500_mmc_reorder_cmd_data,
-+	.setting_dma		= ls2k1000_mmc_set_external_dma,
-+	.prepare_dma		= loongson2_mmc_prepare_external_dma,
-+	.release_dma		= loongson2_mmc_release_external_dma,
-+};
-+
- static struct loongson2_mmc_pdata ls2k2000_mmc_pdata = {
- 	.regmap_config		= &ls2k2000_mmc_regmap_config,
- 	.reorder_cmd_data	= ls2k2000_mmc_reorder_cmd_data,
+diff --git a/Documentation/devicetree/bindings/mmc/loongson,ls2k0500-mmc.yaml b/Documentation/devicetree/bindings/mmc/loongson,ls2k0500-mmc.yaml
+index c142421bc723..b3e8d3f13592 100644
+--- a/Documentation/devicetree/bindings/mmc/loongson,ls2k0500-mmc.yaml
++++ b/Documentation/devicetree/bindings/mmc/loongson,ls2k0500-mmc.yaml
+@@ -22,6 +22,7 @@ allOf:
+ properties:
+   compatible:
+     enum:
++      - loongson,ls2k0300-mmc
+       - loongson,ls2k0500-mmc
+       - loongson,ls2k1000-mmc
+       - loongson,ls2k2000-mmc
 -- 
 2.52.0
 
