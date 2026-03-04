@@ -1,150 +1,138 @@
-Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
+Received: from mail-lj1-f176.google.com (mail-lj1-f176.google.com [209.85.208.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17D1735F5FC
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:26:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D391366DB0
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:30:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.176
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772641564; cv=pass; b=olM3NmwP+JkzJDLgB8kuDDFEk+apj8+PZ+PKEWB/9OjtGgECXWwyH4gAd+7aOeY85vndjX6Q2HjrCv41M9Ak1SRVtJ6Gw4x5Hzg0xydcTYv8QEDq4QyiP5vrmjw9VLbsx7rZ4Z4W1vNMPrdgVaW4pzYtBBvaTg3o0ReE7BDBDwk=
+	t=1772641802; cv=pass; b=flNiGgkfATm9c6lS5VNgjdalPSTWteB/dF1Uzz7mwi5uQYEHWEsoEt6PxVVin9MvGHMMSP01l3ppEKOyO7GWS2hpCQxQKmTe23k+1yo6UrZQeRK93KHYkjuUVDRDYhQDlBuixAI6GIBM5rMlBiFm5PRV1S0mhViBo1rO6tprNhE=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772641564; c=relaxed/simple;
-	bh=I+CUmlWECLu/6NQx/jToONdpLxSF6c+SC/8SH/fkdFw=;
+	s=arc-20240116; t=1772641802; c=relaxed/simple;
+	bh=A5Zg8v+SxGPdKUukR5Ep71P/YNiK8JRT/WDGh3Up14U=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LC3hFWG7VFqdpD5UdeAB/M+dpI0TYDWbCvRZTGFlEiygP7LTRikOwVQIJ5e81LKRWffG1DxCuI/wT5EB3hYCjyV6XD3zQ8de4oxeiK2QPplqaWefGWmDrExiyzeYr4UbTCQTBCo0MQf2YoRglO0t3q1rMvxQ/8jIoSFskHO4wC0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bInXv+iD; arc=pass smtp.client-ip=209.85.208.169
+	 To:Cc:Content-Type; b=SxfLKt74nJ5nwdV7vA+2BMs0L4U9DZFks8nSej7KhvcoXVv/fqIP4soiA48bzBVDCO4s9l1ItxNdH7g23Yipa23CafxH8/C6CrBTS850vpsvBSl8eO4rUmnlWCxYdUq1Wsd157VsDwz/p6dNo1YS2BPh2TAdjM9JzraqMKJrGQA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=axGUh5VR; arc=pass smtp.client-ip=209.85.208.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bInXv+iD"
-Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-38706f96202so96705741fa.3
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 08:26:02 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772641561; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="axGUh5VR"
+Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-38a1eb8b560so35335091fa.2
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 08:30:00 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1772641799; cv=none;
         d=google.com; s=arc-20240605;
-        b=Ddo5/KIZws6gxrN5noPQzEDcHnsjzRKxkZsZduJ5TLVh7OYN7OzhQyUs2i+8ASKxFl
-         h1R6m+nALB9B1S9DtaeZdWx3bNnq1KX9bOZaE+ERjr4iZUVqaXY6BjCgLKbj0rNXxvL0
-         Rn0KZhDuj1kVf2Ocw+uig0tH1J+AKyyG9XDb9GvRe3qYPzv3qOzNWqo+XIo7gHo38E7E
-         DxzIha+u0PqDlA7XFknc8njaIaHKHp3/zOgHGorlGkn1qtw85RF3GV/TQR+pKS+3gPxB
-         PE+zlsJwOai0mIhbo3ShVuPW0cl4vT+Gd2DH/mSZSp6bAgFuCblrXPri4heF8m8XmDJP
-         bYAw==
+        b=VtbLaoV1W27Ll6wzfLaYeq1w/24aPDKdj2eo8iLVTCrWzPG5ylZkAQ5hS5WwC+AvFQ
+         Y6Y9mvhUxSv+wVWMYHvBYPtSNLRgOeB0oueqjdQpVLGgX0Tl08HngltkUN0Hv9axfcTW
+         Ii6cVpyNGUVhsecTFkaYQuUUjuaV7dnUmdxA6irDTTTHroEZCrLlJ7zYSVHjfuUWk5So
+         B/oMdq74ej/R0hyM+q0ydJ/naTEipgbyrZFz9zm9FVuju9JcnjW2Oklcf+ZEMwxZT+cw
+         b4DT3vGZAyFjrix8L1LMDdRoz2P1RiP1mZ9MMqLdIqw0+SXbGQFoDeq5kVJOMyOePHbP
+         dmVw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=XwbLgJvTsi2U6kJq+Lpy4iD/7/onsilvoss+jDdGd/4=;
+        bh=VXKDrX13quy/p/N23+q1GGdp9yeqWrBE+MhtA8NmE8Q=;
         fh=dmy6u3WrvBWEcPkBRsBgpFWRLw/uWrPePJRBnVXnh7s=;
-        b=M+XTpK4czToC7phKZe6dCJjlP1mLMDAZMRPjo7w8LlHRirQyi62AVvA/Cg652mO6oC
-         96tyjTkBNcuezTWHveus85xXTjjgfDpH2d9GMISRmz51Pms403hRRFFsXXx1XpnUCphl
-         +hgS72W5d+7dvA7NXW78blZBO32/QvB65D3JDWxYoAvbGPZCLVINVWS5dMpJ3uYN0iy/
-         ou1w3co5GfwNRIVFMeqeS9OEp0w4rycg0A/GZ7nkiaWUaBwJqVzXB9Q83l2Z0GOheeFG
-         VcQQBjW2JQZari1A6oNR9lmB/yg35RuucUfN6U70iWzAt10iVpPDdNfx8hQVRyZ5p+DE
-         GQfw==;
+        b=DCv0RjjD39/CqXiCjbKLZ7hVy8GmlkJQU6kQYHnPGGaYz17YdcAOVMn9IIIum44Vnc
+         863xMD5cCUvRCLbjkR9heCetQROdben2l0+IgLYtCL8ZeLIzcnYAeHPH+wWm9tVItfWc
+         j22qnrC2W4b4Wp3o7mpJQtTU0TX1+tm5R4lySIXhQdcG9FI95ulD6n7YkElnoEOlHxXo
+         rugyRIJxVIVqMKuOPb3oPloaKvye7QibTXUgvUNXAy6AVAsCMv8cw8P9gGN97Fp5IGh/
+         bj6Q0FtG/kWi2ElUzVCSS4wBV76wSaQGPe8+8d4a4JY55SrFhvNF/6vmyw6U/LIvAd66
+         I65Q==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1772641561; x=1773246361; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1772641799; x=1773246599; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=XwbLgJvTsi2U6kJq+Lpy4iD/7/onsilvoss+jDdGd/4=;
-        b=bInXv+iDQ25dipS1UVjSmmdS0mFN94KGIBmOqOq5NTFfkQ+HF7GtT4xgZfVCbqT5j0
-         c0KFCCs7NuHcWcmyrap84a7at6Ju7Cts79E1LSELeLW6rFiqUeNnwvNAIiEbwS93I5of
-         RcYH0sfdK41NFsbDhJlAfPC4vN6rE9cKt33s8aYt0E5PNS2IByKvzcHxI0ORch4NSZ74
-         f3mU4VxNqgM0Dn2m712yPVZRkPakWnFwcN4HM3OWXBziNMZ2hXH2JcYj4rDhAGZlqdqJ
-         JJPYWMcOVNLB4biuk5hv2xZ60DB4OOE2VJD+QCWIAyzIrePNFCZjljP39z4+0esKtY0I
-         +DrQ==
+        bh=VXKDrX13quy/p/N23+q1GGdp9yeqWrBE+MhtA8NmE8Q=;
+        b=axGUh5VRmTYQD/FpPTGloMeebaI0tIq6K8OED5XBN4czIPcf//hxLkY+oJg8+SQ1jU
+         91/hOMvlG0lpZkpO/NqwhQGi4TvaBxxXG3ziybi9lFv8xzMwwgSm6fczKftZ/TPV6H4n
+         dG/roxXaul/lo6oCizc0BeeYieIWd3n5lN009uvXcMBG0M1Mfv/QL+s99+lsIZKOWSY3
+         mHq7br7P17XgcWHviw083IoUBdkXT2EIs9TpXc03Kl80S6C7YEltWm6UMlEbXQd0UJFK
+         BEGw7RIvu1Jer/ih37PmzKSpfHqWBt+pqa50EnXPRTqHEx0YMtlvbxnTkCY7prLq7XZO
+         cZLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772641561; x=1773246361;
+        d=1e100.net; s=20230601; t=1772641799; x=1773246599;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=XwbLgJvTsi2U6kJq+Lpy4iD/7/onsilvoss+jDdGd/4=;
-        b=LMhqJFxe339BMBxrpCn+x+I4qMlz+XNXg/sQw9PV4+fXOQGvQ7A/t37EH2YSaEbDq5
-         PjkfUa+MkLODks8Euhf9uhDUeBrK4wGeUOnrPlxIilpmf8kAioxvC/JDImpOqrectIIB
-         nE3H8Ral2YNgZobf0WHFgwoCYDBcyqxK6yt+o5MQVEFkd3c0Xpd39Z/WahIbITtPJBvB
-         HJ9MmRXn+dHQ2i1Tlh+t6iIVF0BB8ULuNl6xY8t6vZp1AGVLj0O892jeZ1qv0ZIUP2t8
-         NV3zUh/T98G0UahE2eMb5Mow/gWOefmP4WN9Oz31FGAukNni3+nSL++95V9zriqNawXg
-         14oA==
-X-Gm-Message-State: AOJu0YwTFP4gy8QZwC1y/NoePUgzw83mTCHg2gvlxla0r//f98EViFs2
-	UF4hEjFjgIFY6Enbcwt77SSriqRB9QMiglfip9TzbTRbA7w9qnps31hkJcTYfJeutWw45JsfqdT
-	0ZWd62Vo4b+4i48FATFD+L1fw7M0lMTxkhMNHCt61AA==
-X-Gm-Gg: ATEYQzw+0Y69H5twHOY0rlGZGoVHg1p5OwTIZnx+2EDhH/1Rkl5Gxxbd9GwtWzehTWx
-	73lQkpL8uZYYWGv9qM7hEiNEAh7fLjzYB0eT7ASl0QE0g6gsN2myAb6qZzXGofL+7LPurNsoGui
-	VV5G/QPIuzhZCMmYlB1RjcGbU59mHxUZubWhxxTENtrvbWbrNWo2HxAX2xDRJxgxgmI2k/xEoLw
-	9Qt7PjLnLPL5zNvGmH2ph5xfK+K+N4Jem+jL2PK8+Ipu/OAnSYh7iO/5BEPVGVS96BE3qIaMMKg
-	9rkmATNj
-X-Received: by 2002:a2e:3210:0:b0:385:d6b2:f4cc with SMTP id
- 38308e7fff4ca-38a2c7b197bmr15368291fa.19.1772641561056; Wed, 04 Mar 2026
- 08:26:01 -0800 (PST)
+        bh=VXKDrX13quy/p/N23+q1GGdp9yeqWrBE+MhtA8NmE8Q=;
+        b=Pxb0i48UT5CilQRLIAGA2xlADyY6JL1NXBHoDVXycWJSUIWsK+Fr093MBgixr6/h7A
+         Svlg+oyScS1ifAvV37OVJPhq+v0PTmplZU4eNZupGMmgvws+Q8A7hRiDA2hYfD16+Hig
+         Gag9pD1RfhVuN+1AvOfkf2UkxjgOqzRu/jDdoWvkhMD+uMBFCPAY1RKUJSN2uuFr8915
+         e96mcCAWUthonEwxbbOTdM9Z0/EX4uDxe2U+Pn4S23PzcqVL7h1gEKSvmLUCxwS50raL
+         QgU9p48niwA+FM7HMUZ6ZOO1K93kJ7GzBOGJCaBoUiC8t0PpoG5I6oGN2N1ayveHOnfv
+         U5jQ==
+X-Gm-Message-State: AOJu0Yzcn1cDGCbELPyZJfHyr/QJS4KUOSXeCW6CCWLp0MlDfiKAjyDa
+	sDwCJ8wMn3ebkC/Qj+4FMIcOwGC3QZtIljvEAQT+o8lDCP8j44CsqZIohCL81tGFf2KhdbXV8Wf
+	mkXEl7BHnJ76ZiugNeW4ZytIIdVkiVBa91fGDV5YCzA==
+X-Gm-Gg: ATEYQzwigGQY7gDIy80L5NhZsxmK7agIm98acIn7zpG8T0kDFnv5aW8Yzv1DUmLLb6g
+	HY0wYD/2oR/00HfBGuGKnvPDuc/yIlx8BDG/c8Ps67GeudL/dlTP8e1I70crs9Ihyix0WxjtGJ1
+	QOwunO3t7+kGdre4AHTOot7DdpDTDN32XTy0bkzYs6joWz2mAawR8BpIwv5JdT06nYTt5+2LFcH
+	yQ4p3+Mdadf+bOXmMvsNVqJjAEkyRZ0KC+xFzAg2OYufSooVzQCOZXJCYewUAg+1ABWvKVtl3ze
+	5CfV4njY
+X-Received: by 2002:a05:651c:f06:b0:383:1704:2207 with SMTP id
+ 38308e7fff4ca-38a2c5b6bfamr18826661fa.20.1772641799182; Wed, 04 Mar 2026
+ 08:29:59 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <2026022351-badness-custody-28ad@gregkh>
-In-Reply-To: <2026022351-badness-custody-28ad@gregkh>
+References: <2026022313-cling-pastime-4551@gregkh>
+In-Reply-To: <2026022313-cling-pastime-4551@gregkh>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 4 Mar 2026 17:25:25 +0100
-X-Gm-Features: AaiRm53J-AoiBR1L1TyoKeF-eRWGW0Itxwr6bBBRzughSniz5Gi46MmhSvRONQQ
-Message-ID: <CAPDyKFp=9qL2XROcTXDsv106FdoFwzziFU6YpBCB85aQ5ZFZRA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: moxart: fix potential use-after-free on remove path.
+Date: Wed, 4 Mar 2026 17:29:23 +0100
+X-Gm-Features: AaiRm51WZYqsFzdO1wbfT71UNzMYFnf6hz57TYB8yL1F-s555EeKI6JYhgdtRFc
+Message-ID: <CAPDyKFqDfh7Nwy5513wSAbebUSQLMaFGRV-aNSeW7Ev6bi-5kg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: fix potential use-after-free on remove path.
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
 	stable <stable@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 23 Feb 2026 at 14:48, Greg Kroah-Hartman
+On Mon, 23 Feb 2026 at 14:49, Greg Kroah-Hartman
 <gregkh@linuxfoundation.org> wrote:
 >
 > Just like in commit bd2db32e7c3e ("moxart: fix potential use-after-free
 > on remove path"), we should wait until after we are finished writing to
 > the mmc host device before removing it, otherwise it could have been
 > already freed.
-
-mmc_remove_host() doesn't actually free the host, but it reverses what
-mmc_add_host() did during probe.
-
-Since the moxart driver uses devm_mmc_alloc_host() the last reference
-to the host will be dropped after ->remove() completes, leading to
-mmc_free_host() to be called for it.
-
-However, improvements can still be made in the ->remove() callback. See below.
-
 >
 > Cc: Ulf Hansson <ulf.hansson@linaro.org>
 > Cc: stable <stable@kernel.org>
 > Assisted-by: gkh_clanker_2000
-
-What's this?
-
 > Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 > ---
->  drivers/mmc/host/moxart-mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/meson-gx-mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-> index 3dd8f232052f..256e16390ef3 100644
-> --- a/drivers/mmc/host/moxart-mmc.c
-> +++ b/drivers/mmc/host/moxart-mmc.c
-> @@ -690,12 +690,12 @@ static void moxart_remove(struct platform_device *pdev)
->                 dma_release_channel(host->dma_chan_tx);
->         if (!IS_ERR_OR_NULL(host->dma_chan_rx))
->                 dma_release_channel(host->dma_chan_rx);
-> -       mmc_remove_host(mmc);
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 694bb443d5f3..9557f6816af3 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -1297,13 +1297,13 @@ static void meson_mmc_remove(struct platform_device *pdev)
+>  {
+>         struct meson_host *host = dev_get_drvdata(&pdev->dev);
 >
->         writel(0, host->base + REG_INTERRUPT_MASK);
->         writel(0, host->base + REG_POWER_CONTROL);
->         writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
->                host->base + REG_CLOCK_CONTROL);
-> +       mmc_remove_host(mmc);
+> -       mmc_remove_host(host->mmc);
+> -
 
-Rather than moving this to the bottom of the function, it would be
-more correct to move it to the beginning.
+No, this is actually correct.
 
-This way, we ensure things have been closed down properly before
-releasing the dma channels.
+My reply for the other patch to the moxart driver explains why.
 
+
+>         /* disable interrupts */
+>         writel(0, host->regs + SD_EMMC_IRQ_EN);
+>         free_irq(host->irq, host);
+>
+>         clk_disable_unprepare(host->mmc_clk);
+> +
+> +       mmc_remove_host(host->mmc);
 >  }
 >
->  static const struct of_device_id moxart_mmc_match[] = {
+>  static const struct meson_mmc_data meson_gx_data = {
 > --
 > 2.53.0
 >
