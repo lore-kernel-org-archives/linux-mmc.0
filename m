@@ -1,141 +1,157 @@
-Received: from mail-lj1-f176.google.com (mail-lj1-f176.google.com [209.85.208.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D391366DB0
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:30:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.176
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772641802; cv=pass; b=flNiGgkfATm9c6lS5VNgjdalPSTWteB/dF1Uzz7mwi5uQYEHWEsoEt6PxVVin9MvGHMMSP01l3ppEKOyO7GWS2hpCQxQKmTe23k+1yo6UrZQeRK93KHYkjuUVDRDYhQDlBuixAI6GIBM5rMlBiFm5PRV1S0mhViBo1rO6tprNhE=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772641802; c=relaxed/simple;
-	bh=A5Zg8v+SxGPdKUukR5Ep71P/YNiK8JRT/WDGh3Up14U=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=SxfLKt74nJ5nwdV7vA+2BMs0L4U9DZFks8nSej7KhvcoXVv/fqIP4soiA48bzBVDCO4s9l1ItxNdH7g23Yipa23CafxH8/C6CrBTS850vpsvBSl8eO4rUmnlWCxYdUq1Wsd157VsDwz/p6dNo1YS2BPh2TAdjM9JzraqMKJrGQA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=axGUh5VR; arc=pass smtp.client-ip=209.85.208.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3FAF1EE7B7
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:41:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772642472; cv=none; b=cd1jycpMRwiO7HFiBhu3QirrAEfF/cFeUgMccsgecopwF565kFweB983dvJnUO46q8EKW9yajqOhDWjMOUWGOwX4GJjqYEnoYBkxE01jTPW9v6AEuvpinyyVPONtn0gyL4rQnw1fxBg0bdfL3kjDea7tenzVhsziy5UzEobLX+s=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772642472; c=relaxed/simple;
+	bh=SM/Q4LQ/H8j6XmOswwrFxXe2Uog5f2j4sOGjUkxwQCM=;
+	h=From:In-Reply-To:MIME-Version:References:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=dIk2dENsfzQLkFZPN6baFMmC5IAUSq/Cp3amPe3tMBkGrVQyv9C2LXqtZ3vDErWPlDwxOeXX+m6N8Ib0uM5ZaCcu4yNtyKkoom03amuI9t0qDGNu37IuNFO1RJDW6mI4JMlEGpgBx2HXVrro37m3WPJhuI4uxylyRcE1EOAt+Ew=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FindB/f9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="axGUh5VR"
-Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-38a1eb8b560so35335091fa.2
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 08:30:00 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772641799; cv=none;
-        d=google.com; s=arc-20240605;
-        b=VtbLaoV1W27Ll6wzfLaYeq1w/24aPDKdj2eo8iLVTCrWzPG5ylZkAQ5hS5WwC+AvFQ
-         Y6Y9mvhUxSv+wVWMYHvBYPtSNLRgOeB0oueqjdQpVLGgX0Tl08HngltkUN0Hv9axfcTW
-         Ii6cVpyNGUVhsecTFkaYQuUUjuaV7dnUmdxA6irDTTTHroEZCrLlJ7zYSVHjfuUWk5So
-         B/oMdq74ej/R0hyM+q0ydJ/naTEipgbyrZFz9zm9FVuju9JcnjW2Oklcf+ZEMwxZT+cw
-         b4DT3vGZAyFjrix8L1LMDdRoz2P1RiP1mZ9MMqLdIqw0+SXbGQFoDeq5kVJOMyOePHbP
-         dmVw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=VXKDrX13quy/p/N23+q1GGdp9yeqWrBE+MhtA8NmE8Q=;
-        fh=dmy6u3WrvBWEcPkBRsBgpFWRLw/uWrPePJRBnVXnh7s=;
-        b=DCv0RjjD39/CqXiCjbKLZ7hVy8GmlkJQU6kQYHnPGGaYz17YdcAOVMn9IIIum44Vnc
-         863xMD5cCUvRCLbjkR9heCetQROdben2l0+IgLYtCL8ZeLIzcnYAeHPH+wWm9tVItfWc
-         j22qnrC2W4b4Wp3o7mpJQtTU0TX1+tm5R4lySIXhQdcG9FI95ulD6n7YkElnoEOlHxXo
-         rugyRIJxVIVqMKuOPb3oPloaKvye7QibTXUgvUNXAy6AVAsCMv8cw8P9gGN97Fp5IGh/
-         bj6Q0FtG/kWi2ElUzVCSS4wBV76wSaQGPe8+8d4a4JY55SrFhvNF/6vmyw6U/LIvAd66
-         I65Q==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1772641799; x=1773246599; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=VXKDrX13quy/p/N23+q1GGdp9yeqWrBE+MhtA8NmE8Q=;
-        b=axGUh5VRmTYQD/FpPTGloMeebaI0tIq6K8OED5XBN4czIPcf//hxLkY+oJg8+SQ1jU
-         91/hOMvlG0lpZkpO/NqwhQGi4TvaBxxXG3ziybi9lFv8xzMwwgSm6fczKftZ/TPV6H4n
-         dG/roxXaul/lo6oCizc0BeeYieIWd3n5lN009uvXcMBG0M1Mfv/QL+s99+lsIZKOWSY3
-         mHq7br7P17XgcWHviw083IoUBdkXT2EIs9TpXc03Kl80S6C7YEltWm6UMlEbXQd0UJFK
-         BEGw7RIvu1Jer/ih37PmzKSpfHqWBt+pqa50EnXPRTqHEx0YMtlvbxnTkCY7prLq7XZO
-         cZLQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772641799; x=1773246599;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=VXKDrX13quy/p/N23+q1GGdp9yeqWrBE+MhtA8NmE8Q=;
-        b=Pxb0i48UT5CilQRLIAGA2xlADyY6JL1NXBHoDVXycWJSUIWsK+Fr093MBgixr6/h7A
-         Svlg+oyScS1ifAvV37OVJPhq+v0PTmplZU4eNZupGMmgvws+Q8A7hRiDA2hYfD16+Hig
-         Gag9pD1RfhVuN+1AvOfkf2UkxjgOqzRu/jDdoWvkhMD+uMBFCPAY1RKUJSN2uuFr8915
-         e96mcCAWUthonEwxbbOTdM9Z0/EX4uDxe2U+Pn4S23PzcqVL7h1gEKSvmLUCxwS50raL
-         QgU9p48niwA+FM7HMUZ6ZOO1K93kJ7GzBOGJCaBoUiC8t0PpoG5I6oGN2N1ayveHOnfv
-         U5jQ==
-X-Gm-Message-State: AOJu0Yzcn1cDGCbELPyZJfHyr/QJS4KUOSXeCW6CCWLp0MlDfiKAjyDa
-	sDwCJ8wMn3ebkC/Qj+4FMIcOwGC3QZtIljvEAQT+o8lDCP8j44CsqZIohCL81tGFf2KhdbXV8Wf
-	mkXEl7BHnJ76ZiugNeW4ZytIIdVkiVBa91fGDV5YCzA==
-X-Gm-Gg: ATEYQzwigGQY7gDIy80L5NhZsxmK7agIm98acIn7zpG8T0kDFnv5aW8Yzv1DUmLLb6g
-	HY0wYD/2oR/00HfBGuGKnvPDuc/yIlx8BDG/c8Ps67GeudL/dlTP8e1I70crs9Ihyix0WxjtGJ1
-	QOwunO3t7+kGdre4AHTOot7DdpDTDN32XTy0bkzYs6joWz2mAawR8BpIwv5JdT06nYTt5+2LFcH
-	yQ4p3+Mdadf+bOXmMvsNVqJjAEkyRZ0KC+xFzAg2OYufSooVzQCOZXJCYewUAg+1ABWvKVtl3ze
-	5CfV4njY
-X-Received: by 2002:a05:651c:f06:b0:383:1704:2207 with SMTP id
- 38308e7fff4ca-38a2c5b6bfamr18826661fa.20.1772641799182; Wed, 04 Mar 2026
- 08:29:59 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FindB/f9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A732EC4AF09
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:41:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1772642472;
+	bh=SM/Q4LQ/H8j6XmOswwrFxXe2Uog5f2j4sOGjUkxwQCM=;
+	h=From:In-Reply-To:References:Date:Subject:To:Cc:From;
+	b=FindB/f91BXOuPQeKfShozKPm0I0nww2VKQal7bZSAPXWGWtdY6vA4sk8di8whmlZ
+	 RV1MA6I9H3+gWP7oUcVzKM6ZQhDzH2M8nbcIJz0K8FH6rYjfGtRJk0jFqp2FPuu3mU
+	 tXXmtNADsEXQPhsBt7dviC3eic9ZfOTt9VhN/v1M6Vv3hclKHTaJQb+2oyf1yHDl0x
+	 PJaP7xJiVMGzUp3zdkYzjL5RjtCMLBOk2JRJT0+abQkXx6wPg0CJlWBNlIWTh6jbqS
+	 VwpFO/CXQ//cLV8VKpPAszhpnF9kmnhSyLmN/Duy2LAmK7mNOAIWjrQLbJAjqmKOT0
+	 PIS14F+JduUxA==
+Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-38a33a542aeso237211fa.3
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 08:41:12 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCXMkhtSLDB96fjrwyK8CbwDipwjomjtb6QePq7X/Nlp0VR3ZlPdItQv6bFyFXk4VpyOPCiCoV028IE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzFhYkM0XgYagZIO77JVkwpe1l2PA2rY9SmIF0kAhi2jAIfP7lX
+	YKg5cVKj91kk5NMfxcEfIIrXUtPQYr2h+7vePmx7NQpea3CZSlPYJDywEHl4og1PJEvnw+l279d
+	HZz8iG678k5ZxY+BKeK/hqyA8WMSt0n6voBX68EXMTA==
+X-Received: by 2002:a05:651c:e17:b0:37b:970f:d33b with SMTP id
+ 38308e7fff4ca-38a2c58d8a7mr23564001fa.3.1772642471248; Wed, 04 Mar 2026
+ 08:41:11 -0800 (PST)
+Received: from 969154062570 named unknown by gmailapi.google.com with
+ HTTPREST; Wed, 4 Mar 2026 08:41:09 -0800
+Received: from 969154062570 named unknown by gmailapi.google.com with
+ HTTPREST; Wed, 4 Mar 2026 08:41:09 -0800
+From: Bartosz Golaszewski <brgl@kernel.org>
+In-Reply-To: <20260220194725.1341281-1-sergey.suloev@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <2026022313-cling-pastime-4551@gregkh>
-In-Reply-To: <2026022313-cling-pastime-4551@gregkh>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 4 Mar 2026 17:29:23 +0100
-X-Gm-Features: AaiRm51WZYqsFzdO1wbfT71UNzMYFnf6hz57TYB8yL1F-s555EeKI6JYhgdtRFc
-Message-ID: <CAPDyKFqDfh7Nwy5513wSAbebUSQLMaFGRV-aNSeW7Ev6bi-5kg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: fix potential use-after-free on remove path.
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable <stable@kernel.org>
+References: <20260220194725.1341281-1-sergey.suloev@gmail.com>
+Date: Wed, 4 Mar 2026 08:41:09 -0800
+X-Gmail-Original-Message-ID: <CAMRc=McNXzDE48zX=eH_bfg+KBN=2-yeW6bjL1L=hCmHu6xv8w@mail.gmail.com>
+X-Gm-Features: AaiRm52m3UMVyoSw5MtewEHGQ8Nw8pxDB6TbcL60L1_Zsndcu_PLovKnHNNp9Ls
+Message-ID: <CAMRc=McNXzDE48zX=eH_bfg+KBN=2-yeW6bjL1L=hCmHu6xv8w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: pwrseq_simple: fix probe failure when
+ CONFIG_RESET_GPIO is enabled
+To: Sergey Suloev <sergey.suloev@gmail.com>
+Cc: ulf.hansson@linaro.org, catalin.popescu@leica-geosystems.com, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Krzysztof Kozlowski <krzk@kernel.org>, Philipp Zabel <p.zabel@pengutronix.de>, 
+	Linus Walleij <linusw@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 23 Feb 2026 at 14:49, Greg Kroah-Hartman
-<gregkh@linuxfoundation.org> wrote:
+On Fri, 20 Feb 2026 20:47:25 +0100, Sergey Suloev
+<sergey.suloev@gmail.com> said:
+> The driver uses a heuristic =E2=80=94 checking if exactly one entry exist=
+s in
+> 'reset-gpios' =E2=80=94 to decide whether to attempt reset controller API=
+ usage
+> via devm_reset_control_get_optional_shared(). This is semantically
+> incorrect and causes a permanent probe failure when CONFIG_RESET_GPIO
+> is enabled.
 >
-> Just like in commit bd2db32e7c3e ("moxart: fix potential use-after-free
-> on remove path"), we should wait until after we are finished writing to
-> the mmc host device before removing it, otherwise it could have been
-> already freed.
+> When CONFIG_RESET_GPIO=3Dy, __of_reset_control_get() intercepts the
+> 'reset-gpios' DT property and attempts to register the GPIO as a reset
+> controller via __reset_add_reset_gpio_device(). If the GPIO controller
+> is not yet fully initialized at probe time, this returns -ENOENT instead
+> of -EPROBE_DEFER, and the error path does not respect the 'optional'
+
+If this is what's happening, then it is not the expected behavior[1].
+
+> flag, causing pwrseq_simple to fail permanently rather than defer.
+> This prevents mmc1 from probing on boards that use 'reset-gpios' for
+> WiFi power sequencing, such as BananaPi M2 Magic with AP6212/BCM43430
+> on Allwinner R16.
 >
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: stable <stable@kernel.org>
-> Assisted-by: gkh_clanker_2000
-> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> The correct indicator of reset controller intent is the explicit presence
+> of a 'resets' property in the device tree node, not the count of
+> 'reset-gpios' entries. A single 'reset-gpios' entry is just as likely
+> to be a plain GPIO as multiple entries.
+>
+
+Am I getting it right? You have a node that has both the "resets" property
+as well as "reset-gpios" with more than one entry? If that's the case then
+it should be fixed in reset core, not in a user because there'll surely be
+another one in no time.
+
+> Replace the ngpio =3D=3D 1 heuristic with an explicit check for the 'rese=
+ts'
+> DT property, making the behavior unambiguous and immune to
+> CONFIG_RESET_GPIO interference.
+>
+> Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset contr=
+ol")
+> Signed-off-by: Sergey Suloev <sergey.suloev@gmail.com>
 > ---
->  drivers/mmc/host/meson-gx-mmc.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/pwrseq_simple.c | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 694bb443d5f3..9557f6816af3 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -1297,13 +1297,13 @@ static void meson_mmc_remove(struct platform_device *pdev)
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_s=
+imple.c
+> index 4b47e6c3b04b..780c8818a273 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -124,7 +124,6 @@ static int mmc_pwrseq_simple_probe(struct platform_de=
+vice *pdev)
 >  {
->         struct meson_host *host = dev_get_drvdata(&pdev->dev);
+>  	struct mmc_pwrseq_simple *pwrseq;
+>  	struct device *dev =3D &pdev->dev;
+> -	int ngpio;
 >
-> -       mmc_remove_host(host->mmc);
-> -
-
-No, this is actually correct.
-
-My reply for the other patch to the moxart driver explains why.
-
-
->         /* disable interrupts */
->         writel(0, host->regs + SD_EMMC_IRQ_EN);
->         free_irq(host->irq, host);
+>  	pwrseq =3D devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
+>  	if (!pwrseq)
+> @@ -134,8 +133,7 @@ static int mmc_pwrseq_simple_probe(struct platform_de=
+vice *pdev)
+>  	if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) !=3D -ENOENT)
+>  		return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock no=
+t ready\n");
 >
->         clk_disable_unprepare(host->mmc_clk);
-> +
-> +       mmc_remove_host(host->mmc);
->  }
->
->  static const struct meson_mmc_data meson_gx_data = {
+> -	ngpio =3D of_count_phandle_with_args(dev->of_node, "reset-gpios", "#gpi=
+o-cells");
+> -	if (ngpio =3D=3D 1) {
+> +	if (device_property_present(dev, "resets")) {
+>  		pwrseq->reset_ctrl =3D devm_reset_control_get_optional_shared(dev, NUL=
+L);
+>  		if (IS_ERR(pwrseq->reset_ctrl))
+>  			return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
 > --
-> 2.53.0
+> 2.43.0
+>
+>
 >
 
-Kind regards
-Uffe
+I think reset core should check if the client node has both "reset" and
+"reset-gpios". If so - it should assume the client wants to resolve "resets=
+"
+and only fall-back to "reset-gpios" if there's no "resets" and number of GP=
+IOs
+is 1.
+
+Philipp, Krzysztof: what do you think?
+
+Bart
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree=
+/drivers/reset/core.c#n910
