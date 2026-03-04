@@ -1,138 +1,77 @@
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0280A38F254
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 08:10:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.179
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772611854; cv=pass; b=qJ/4/XOrnX4bNhF/BIFpSrY4NNl4e/Wb9ltJC0X+vRIX2mGE7pk6AIbQBOUYWoR3/kNOSzvX+84WcLo7Csv3y3gfixLp/Y1rLzyY7Zqfyq8tYnp/ANfg4fKDeIv5QLJZmK96+QrD/D4KPkgXQ66Q512VdslSYSjYgpW3/S5UYKk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772611854; c=relaxed/simple;
-	bh=pZPELEAX/XvgCd+EHGG39RWeEAKi/FXGHUEcYZlbyg4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=MBzMaWb59ShS/85Tx0iW0oLW+oRbjzr42mU+95QjwaQVY+VM5TACIu+Px3U6ULm1DGIu9BxYSTOmH0SyG6r9jKYO54hIJcxK4pOjVaP2VRChxd3S+EegIoV1kX8qOj0Lcg6Klzd3stAS6aGZr8a/cj/vQcU6HMbVdOP42awM9i8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NpuPmtk6; arc=pass smtp.client-ip=209.85.128.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NpuPmtk6"
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-79800183233so90599197b3.1
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 00:10:51 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772611851; cv=none;
-        d=google.com; s=arc-20240605;
-        b=GeqkxU0sscywwoBsGm851r2cf99l29GkXH3ajEJjCbfLQ369ZnzrNLNINYg4qJqYfx
-         1JYifAxuPQqKInkV1evgd/jHn7e0T8b/tKcJBbLBm31paxxIiDq3LefHD1YLoHVOcoMC
-         oq17iIArxBu7uNtd5zgfKNBFiaib9tDmHK34mXjGzP77ClEMv/rMNOIs/1Yl+oB2Zu+R
-         w2gYCTcIF/s8jcGOsw7imXrOMPOaBAIql/XysN7OiXIUmWtYHTkTvHj+6D4iOmEy+EH3
-         /K1gFOrXXBIYNoadCpVWMcvmyfHxFB0tTK3xkXnqsbZ5gQu9GyehljInubPSPyX3bs9m
-         m+0A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=xGLcah51hQA85jyOrvUCy/8RViW2Ks3it80HDo6IDSc=;
-        fh=Ay3J+FA5zg2no5rI1gPqIzzZnMSzRBUhgjkPIlh0zig=;
-        b=T9lon6r0abvyyHSKlk107Gko0jj04XaTf3cBmcGRuZqjLE2WLXU/p12Ty8jwHZ+MsJ
-         jJf9/QvSPKzw7N0h2wjFfWdFMAPH3N3pRU9zbmLRWxHNoNZjNgze2nqvSsLy32oXcYVo
-         3eRSKsRGS6zPod467B5B9/ITa4UF4ly08MP7Cg0yIcjNqDOp+ExgT0KFtzPEtETUH66N
-         Qw9OtnkeaMajO0CWXnKyM1B//3C1mQZfaZnNlPn8FMqWS9m+DPDZp5HhIjk/n5igABws
-         wVvRpBQbnM8aUFigNIdl8j+DJGJdO5TNn4WJkIx5denpyG1i0NpRHD6SBZEFbC5EdZou
-         JfDw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772611851; x=1773216651; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=xGLcah51hQA85jyOrvUCy/8RViW2Ks3it80HDo6IDSc=;
-        b=NpuPmtk6wEdmvluOha/MzcnzH4IL+AygfFIRyYpfl2UlFst4GqCsxnve70c9j33qBP
-         IJdEYt0IJqsQFhXqqTxHa/dQp6MuLWjxYz1wEJfx1tCvKxo9ZEQamZjLCJ5WOz/Bsvb8
-         mG38euPngSbfnX8bERTqVSEly8VaQuIiu/8Y4dSX2G14EiHBs99T9UGzWPbViT2qwB/x
-         kH2OySJBD0dMgG0oTTZKcn0WAriknXmt/RtLbi/VFKIaCSFoo2jNN8gdJtdtbazZ+fMZ
-         jvS5ky7pFJNo8fpwZE0Njq3J76/Rihm2xpCwVif4W2RFoDTUUEfcD294zM0W+ce0a9Ps
-         Vr7A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772611851; x=1773216651;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=xGLcah51hQA85jyOrvUCy/8RViW2Ks3it80HDo6IDSc=;
-        b=VQTQlbK5WKcqIj8g9qTOHcQcZvp1psmduEST8tez89njCDIztlBKppKYPbjKyjTOKh
-         IiWUL5bKlsjbCP0ze7Q4ZmOitpsrwZt5rgsP8SC+Vn73mg+0AWfNhRORRMOdnyA7uhf9
-         1icODUsKU17zqtrveOxhHZvYj657OYuo52bJ0qOpKvXgfJC6ivBqIWp4IEqGXth46ndU
-         hcBMn2ww/Gojs4sayzfw0Df8VocR7QqrKOUfPNEwRYqDOnp12ekW8n1aOJz6PH6r8Sx/
-         kHG5FhTKVcIYDenraeS04/MJmXrU95rUdHHmSxHnBSdESVPxx6yarTZAqjJB9fCQFe8Z
-         7gKw==
-X-Forwarded-Encrypted: i=1; AJvYcCWLRxtFsUvTPTebO4ZU+qswsBMhVjXg0rj//8BNmM9xnOGuGh7J0GozUEW2iBsEB04MRfex0D5daqo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwN9PIYfvQygsRSMbV9hw7eaeBSIEGdfMYm5MPU/0I70KF8CXAf
-	iF7HgboZOLIxN51akIl+EkuNB0C1cXuKspUB9zgwBjKmDwob+pwAwc2YroZ6GH+ILSxGINz2CpV
-	fqdxMZa+6tda/MrcV8kEp3uzKzXKPCrM=
-X-Gm-Gg: ATEYQzx+6ds9l3Bs+MDE+kJo51ckqc7JcZE8Pl/z//PiEn7YDzEtAjYPbdwpquFKWIj
-	TUzuAZbwox2FVhFmUredsArLsrJEmbbTY/CQMT83/+2436NP1MWmjbCyf3s+oNEES0wAdip3ofJ
-	8hKwdmJSKOphgA1fNjpXV8xWk50eJgrZfj7h7mGRGICzNMvr2AQ1AwlDcWsyy2M00EYyp73UpZd
-	U7thJ/JQKkS/uikb4o3jf6reiUHmicTkFJjENfOab8Hj9pWP4q8km/qmS9Swa3LrCs4AoUOEEuD
-	MG1YShZR
-X-Received: by 2002:a05:690c:9a90:b0:794:c283:5fb8 with SMTP id
- 00721157ae682-798bb44f72cmr33135687b3.25.1772611850798; Wed, 04 Mar 2026
- 00:10:50 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E70E317169;
+	Wed,  4 Mar 2026 09:25:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.21
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772616363; cv=none; b=OBhlgswQq6/pNLpsdYiU1PB6S0/FlX3kdFDSBWBYuys2liX0fwc/z3oSTDxU4xlA5O/guV5o6WV3k9v89LOYoGuzoJ6r50G0YHT1C9SC7Ivpj0T3NzkOMqWnNig3QnNRm1HTmw9zbHUZCVHCYWdkF7pi9etNUVqNJI9gQmDptVU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772616363; c=relaxed/simple;
+	bh=kWQBtW2quuiRoMTQT432SXtjJ45E7mGQgNrn294P25A=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DRUkgani/HOUZmouu23sSvTyvp1EAEbzZ3dRR2x5e/rNGdK7xBIOH/fSDiJk2PZwcVv1KpVDrNknIwLD2LhCbMeuE6AzedwilrsPjR3yIb+TNNNofUjL5OJrIqMJnsC5fpwH3CgWwvdI2hl2ZNTZwUZu6yRPE/fpCak+MY5kANs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn; spf=pass smtp.mailfrom=isrc.iscas.ac.cn; arc=none smtp.client-ip=159.226.251.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isrc.iscas.ac.cn
+Received: from duge-virtual-machine (unknown [183.192.221.67])
+	by APP-01 (Coremail) with SMTP id qwCowAAHsm2V+qdpyDQ6CQ--.5966S2;
+	Wed, 04 Mar 2026 17:25:42 +0800 (CST)
+Date: Wed, 4 Mar 2026 17:25:40 +0800
+From: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+To: ulf.hansson@linaro.org
+Cc: pjw@kernel.org, krzk@kernel.org, palmer@dabbelt.com,
+	aou@eecs.berkeley.edu, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
+	linux-kernel@vger.kernel.org, gaohan@iscas.ac.cn, me@ziyao.cc
+Subject: Re: [PATCH v2 2/3] mmc: sdhci-dwcmshc: Add Canaan K230 DWCMSHC
+ controller support
+Message-ID: <aaf6lBLUP+5J7hcU@duge-virtual-machine>
+References: <20260226115923.75670-1-jiayu.riscv@isrc.iscas.ac.cn>
+ <20260226115923.75670-3-jiayu.riscv@isrc.iscas.ac.cn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260302-orangepi-sd-card-uhs-v1-0-89c219973c0c@gmail.com>
- <20260302-orangepi-sd-card-uhs-v1-1-89c219973c0c@gmail.com>
- <20260302-crewman-faster-9fd00b62e30c@spud> <20260302223803-GKB289813@kernel.org>
- <CABdCQ=Nd9ZW6OBnAiuki=2+DhVraW19bh_m8=LLQGUKN8TkEdQ@mail.gmail.com> <20260303222800-GKC289813@kernel.org>
-In-Reply-To: <20260303222800-GKC289813@kernel.org>
-From: Iker Pedrosa <ikerpedrosam@gmail.com>
-Date: Wed, 4 Mar 2026 09:10:39 +0100
-X-Gm-Features: AaiRm53WZ82ezbm0-nMVrOL-p2i2zBrqno2q7oSRqZHnhzqczyjmu4JOpaAlYaQ
-Message-ID: <CABdCQ=OxA4RM+3Kqjim9QPUQD3xBkAjUTD+ObC5Cmux1Mx1UpQ@mail.gmail.com>
-Subject: Re: [PATCH 01/10] dt-bindings: mmc: spacemit,sdhci: add AIB voltage
- switching registers
-To: Yixun Lan <dlan@kernel.org>
-Cc: Conor Dooley <conor@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Yixun Lan <dlan@gentoo.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
-	Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260226115923.75670-3-jiayu.riscv@isrc.iscas.ac.cn>
+X-CM-TRANSID:qwCowAAHsm2V+qdpyDQ6CQ--.5966S2
+X-Coremail-Antispam: 1UD129KBjvdXoWruF4DGw1ftFyrJw1rXFy3CFg_yoWxurX_Ca
+	43Wa4fGa47CFWv9a47tr1Sy34YyFs0g3WDWFyYg3y3Wa1UZr1DXa1Ivrn8Xr4Dur4UCFZr
+	Jr98JrWxJFnFkjkaLaAFLSUrUUUUjb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
+	9fnUUIcSsGvfJTRUUUbsxYjsxI4VWkCwAYFVCjjxCrM7AC8VAFwI0_Gr0_Xr1l1xkIjI8I
+	6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AEw4v_Jr0_Jr4l8cAvFVAK0II2c7xJM2
+	8CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2IY67AKxVWUJVWUCwA2z4x0Y4vE2Ix0
+	cI8IcVCY1x0267AKxVW8JVWxJwA2z4x0Y4vEx4A2jsIE14v26r1j6r4UM28EF7xvwVC2z2
+	80aVCY1x0267AKxVW8JVW8Jr1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IE
+	w4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jr0_Jr4lYx0Ex4A2jsIE14v26r1j6r4UMc
+	vjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvEwIxGrwACI402YVCY1x02628vn2kIc2xKxwCY
+	1x0262kKe7AKxVWUtVW8ZwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8Jw
+	C20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAF
+	wI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjx
+	v20xvEc7CjxVAFwI0_Gr0_Cr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2
+	jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0x
+	ZFpf9x07j0fOwUUUUU=
+X-CM-SenderInfo: 5mld534oul2uny6l223fol2u1dvotugofq/
 
-El mar, 3 mar 2026 a las 23:28, Yixun Lan (<dlan@kernel.org>) escribi=C3=B3=
-:
->
-> Hi Iker,
->
-> On 14:51 Tue 03 Mar     , Iker Pedrosa wrote:
-> > El lun, 2 mar 2026 a las 23:38, Yixun Lan (<dlan@kernel.org>) escribi=
-=C3=B3:
-> >
-> > Thanks for the pointer! I missed that these had already landed in
-> > mainline. I'll rebase the series, drop the redundant properties and
-> > patch [5/10], and send a v2 shortly.
-> >
-> Please wait a little bit longer before sending next version, give me or
-> other people more time for reviewing, as a quick test, this series will
-> break emmc driver as tested on bananapi-f3 board, I suspect it's probably
-> duo to clock related issue, but want to confirm later..
+On Thu, Feb 26, 2026 at 07:59:22PM +0800, Jiayu Du wrote:
+> Add SDHCI controller driver for Canaan k230 SoC. Implement custom
+> sdhci_ops for set_clock, phy init, init and reset.
+> 
+> Signed-off-by: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 288 ++++++++++++++++++++++++++++
+>  1 file changed, 288 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 2b75a36c096b..21c77e908d77 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+Hi ulf, could you please take a look at this patch? Thank you!
 
-Thanks for the heads-up. I'll wait for your further review and the
-results of your clock tests on the bananapi-f3.
+Regards,
+Jiayu Du
 
->
-> Btw, I was also preparing sd part driver, mainly target K3 SoC, but since
-> they are mostly same IP, the driver can be shared..
-
-I'm also interested in the K3 SoC integration. Since it's the same IP,
-it makes sense to have a unified driver. Please let me know your
-thoughts on the best way to coordinate our efforts.
-
->
-> --
-> Yixun Lan (dlan)
