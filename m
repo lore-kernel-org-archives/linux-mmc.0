@@ -1,187 +1,180 @@
-Received: from iguana.tulip.relay.mailchannels.net (iguana.tulip.relay.mailchannels.net [23.83.218.253])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f171.google.com (mail-lj1-f171.google.com [209.85.208.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A512E3B7B8E;
-	Wed,  4 Mar 2026 14:06:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=23.83.218.253
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDE3B20E6E2
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:04:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.171
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772633181; cv=pass; b=MxhBnjwczUQ+6e0VJare0VoeyS3bNKM/TbW4x/c7Nz/65oESMWckHc3hLcCKWVtTdf2LrZRMRjJhHpUlZhDs0Y/j7EqX3VaskWsOzAd1foSkxfMoSx9f3IhJYjAdBIl0oya1QVgACcC6pBLKUoO7XpjPLniOcV/RvZrzoWUyaFM=
+	t=1772640272; cv=pass; b=YyPQaw1lfzMUlTUTK5y6FkKA21Mmw2v+5fvCSASxFMh9Em6X0T1QsA+xW+giaCVhj25LENuF70cAlBFOs7aJCHfM6ktHCZCqsR3cWhkl6mxQrNVURGrNUobjQQBsYQ1JTGs1rx1pxvnOVcbacSjdp7KUgC8zmNi0dQjzJUeApN0=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772633181; c=relaxed/simple;
-	bh=zcIFJDa9JAhohTuTt+/oRm4dvGZDfDCRROXzldJeiWs=;
-	h=Message-ID:MIME-Version:Cc:Subject:To:References:From:In-Reply-To:
-	 Content-Type:Date; b=hO49+5Q3dGXbLa5tbIbYhqKHZRzrKkn6LOrsTkmebCiq3C0daY4sfVnYPJ3X5/MQzU3KvvXC10U09x/TJXD/RL3+g5U/1zl11+HBJwbTf6CpaZoaSFWOAyEkX7VoVGE/0NvhI49ocRV0ARPF2IyFnGyFCDdrNavSvKY3bOje6lw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rootcommit.com; spf=pass smtp.mailfrom=rootcommit.com; dkim=pass (2048-bit key) header.d=rootcommit.com header.i=@rootcommit.com header.b=nAHTaata; arc=pass smtp.client-ip=23.83.218.253
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rootcommit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rootcommit.com
+	s=arc-20240116; t=1772640272; c=relaxed/simple;
+	bh=pU+3H5KjTIjCf3g3yU3tSGtSdSzvq1D4OWRpNq//49U=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=PwCBGka0XFKAs1J+mp4sgOeHhLfBEEX4YhBBhU3ST1w83+1jqZeHn8LwsBh8EEG2Calwj4p9W/BJoFp3jCYTLtIbkXFj2Gj1F3ePil4AWrPZ57dmePV1u8V4SQiYrO+8ny5exrHuHoirXOx5brnBeSU5vp0HmYJSfBAsywgRRtk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LKfZ2vwy; arc=pass smtp.client-ip=209.85.208.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=rootcommit.com header.i=@rootcommit.com header.b="nAHTaata"
-X-Sender-Id: hostingeremail|x-authuser|michael.opdenacker@rootcommit.com
-Received: from relay.mailchannels.net (localhost [127.0.0.1])
-	by relay.mailchannels.net (Postfix) with ESMTP id 471C978201E;
-	Wed, 04 Mar 2026 14:06:12 +0000 (UTC)
-Received: from fr-int-smtpout12.hostinger.io (100-106-44-163.trex-nlb.outbound.svc.cluster.local [100.106.44.163])
-	(Authenticated sender: hostingeremail)
-	by relay.mailchannels.net (Postfix) with ESMTPA id 81AD1781F91;
-	Wed, 04 Mar 2026 14:06:07 +0000 (UTC)
-ARC-Seal: i=1; a=rsa-sha256; d=mailchannels.net; s=arc-2022; cv=none;
-	t=1772633170;
-	b=E4rGt2pgwYi/X5pIzdEVhmdJ1dS1zbJVj+g1R3dILHEficinZ7lPweJIsUMRKffzfX+xY0
-	9V+yJQLFSHcVVga/yfW1nQ3VF6Djuj+AiJOluZ9ZQSoaR2DFECdlmkpjcd2hqvIJfxFfCI
-	mQCPfKT2b/WhsTgCYYtGeH8V6S1gWt7NWwdRvw5BkgdyiSGIfGc+kHjpuJzR+mxPsTx4gB
-	6UwfLlIT43b2pcYXjnH6SxGHBXIKP+XiOKh7HzsrNA0tRZ/QufFf1tSc7mlp7z17t2XOWh
-	DcGHhfpDGitbfACOQrkidPvmHvB+CezybwZu1c36fN9KoFRCl7W2teSgnHSrsw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed;
- d=mailchannels.net;
-	s=arc-2022; t=1772633170;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:dkim-signature;
-	bh=6ZcnJ/j/bBqCLcJYERyzEEBssHFy6AjpJje4wPeAnUc=;
-	b=N6uHgBEV8Fc1PqdiXjPDjztuTG1jrKsrEn0ME7iOKPlXkmsXdjbVAZq1Y4N7LmL1yJmteZ
-	cofrX9J23Kntyt5xRft0uUwSUBm6eKZF4v11mjZioHxRqssz3RYYpfBRJAenmA5cbQTblK
-	AmJz7KGqwN/n9lUMXScP8YKV9MMZtnmbCHuMOr2iMQAq4FIE0hvQ6Argy8JBgsHAFJjiiS
-	YL0Bi0v4ezyVR94tTpJ1PkwNuDR7UMsxe6ktcl9kq+mtVtvv6Xulnx2bwcHzVPMdjTYA/6
-	mJiKr0RbhuZYf/usExEFm09bz4caQkAsQfcCPNKRqCjK+MKv0nXjA/wcfrvAMg==
-ARC-Authentication-Results: i=1;
-	rspamd-7f65b64645-78922;
-	auth=pass smtp.auth=hostingeremail
- smtp.mailfrom=michael.opdenacker@rootcommit.com
-X-Sender-Id: hostingeremail|x-authuser|michael.opdenacker@rootcommit.com
-X-MC-Relay: Neutral
-X-MailChannels-SenderId:
- hostingeremail|x-authuser|michael.opdenacker@rootcommit.com
-X-MailChannels-Auth-Id: hostingeremail
-X-Bitter-Stop: 54be4d3e301d048f_1772633170763_1578999821
-X-MC-Loop-Signature: 1772633170763:2420406471
-X-MC-Ingress-Time: 1772633170763
-Received: from fr-int-smtpout12.hostinger.io (fr-int-smtpout12.hostinger.io
- [148.222.54.46])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384)
-	by 100.106.44.163 (trex/7.1.3);
-	Wed, 04 Mar 2026 14:06:10 +0000
-Received: from [IPV6:2001:861:4450:d360:f268:4cb6:92c5:22a0] (unknown [IPv6:2001:861:4450:d360:f268:4cb6:92c5:22a0])
-	(Authenticated sender: michael.opdenacker@rootcommit.com)
-	by smtp.hostinger.com (smtp.hostinger.com) with ESMTPSA id 4fQvbJ62FTz1xmF;
-	Wed,  4 Mar 2026 14:06:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=rootcommit.com;
-	s=hostingermail-a; t=1772633165;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=6ZcnJ/j/bBqCLcJYERyzEEBssHFy6AjpJje4wPeAnUc=;
-	b=nAHTaatahqRW98jaGeLTZEnk5Rc+NxOllPE1H9Z9B6ckPb3hbPnf0pb8pGRjuSufoNZNHz
-	XBvE1V4M2HRB/NofQCgcEE/i0PBFK6vIxllZOyfWoWYg3EpkquetP2RG8iW79ZftFbRVC3
-	Kjpey6oaRnMX+8pygcHmPTDbrIinl83ztpz6yBjpymMrFjWO0XhBcn08WTMDjR2ql0WG+k
-	2okX7pZkKvSO37tBAhvEVVB0oVTq9tjDB3Zd8L0wfwJ2elmEm6HZVGjqyRE1g1GJJGn0z1
-	TfyW6JnrJ3sLYCmJKIGqAHoQ62C1IZI9L4J68T0IMVR+J3d7/0kAlkgWDGuElg==
-Message-ID: <e6aa3c65-171e-4bab-b552-5e8cf4bf35ec@rootcommit.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LKfZ2vwy"
+Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-389e139ee5eso122307721fa.0
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 08:04:29 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1772640268; cv=none;
+        d=google.com; s=arc-20240605;
+        b=CC+wZbtM1HbMsqeIIjcXZo5ZSk0kF5IWdGmGgK7P37keIv6WJonklxQN26k9qBe2V1
+         xPV6u+h6kEBSL96v5tttQ/vBRSRlMc2NQuasuE9YCKpnz6gNvE/4XDjwnHDtZ9cagmfq
+         ayAMLNfdSLkhoQoHRT0Ma0SZeg1UjG4Ug6l/jJSeeIxc9j/mgnO5CqboekZ/9xbJ69O8
+         oeNUpGkwDX60qjDpr+PN28+M7x8XAPyF9SflZ50zp48XGGEvcP8W2xuRpdPv6oHIQgB4
+         Ok3Fg3mNdWIQAO2mjP77MhqLgvuUANUUsFQYOV8Q4COh5TlDv9crpBkOLmqQsqQc+Urt
+         nhmQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=X6VV//0BbRdnMvTRMP5NWmCJkEE3JMIsqRqxcg2IjNQ=;
+        fh=fRpMHzkAenhrm7Oo7xVws8SWpB5GO9agDU1+lpS3DIg=;
+        b=WvQwWACkfBN/4nUe3WBdervjDCZqTvviDX53m+ejskowwptGJSfPbi8eFmQnrUAkSV
+         PMwSeghJtHxZ+EvBxYpjgFDDXd1AVhHCpuoiS2J3XEG6T7bBRYOyEmUdKHiIGjyouuZq
+         Czu4amzqFBAb+y7JBRLo3dQcS4tSKBt9O/XZbNMgLv/iQmwrBhnbLqACmBt9g8qBqj6s
+         TuYHdo8HtXLJ1eIGIq58DBTXpClPoXy9Fmh146iUwoSYOzkLuoNwmpF7Yx2Kaea7i+e1
+         l1ANFVKwLgniP17fUNQRV/B2IlTwhyTy6QYnY+3suhE0op7PWnyJKozeDgDF0ZzDGR4Y
+         GStQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1772640268; x=1773245068; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=X6VV//0BbRdnMvTRMP5NWmCJkEE3JMIsqRqxcg2IjNQ=;
+        b=LKfZ2vwy2SOjS61NzlkAHEVESnvG8UMH6ZhTa80Lf4H43FyA7Hk5lGtUtfL+/r23u3
+         2E1otTQPNuP0x6zgvhbo5odTErI+KT3Yhnzavbu/Tr0tvhF9YM6vQUMPRp0EDrMqpIOC
+         ubSCyUDKJf/LpkdCIAscQ5Eh8s5Q1PLTcNdgU16i6kY1nKQhlBc0rNlU5uILh5NNhmBi
+         wn+u88EgXxb4A9DVntN2odMOBTvGWFaI1HiNz5GRqiZAlYDOsVE1VRGs3iZ4pv8Iey4x
+         yihRVkbOPNsj/jEZ/IIMD5jzWjSFCkrEYgNN0kqNgpi4AcJwE6OUBNGDdrIsfpoJoOaR
+         cOMQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772640268; x=1773245068;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=X6VV//0BbRdnMvTRMP5NWmCJkEE3JMIsqRqxcg2IjNQ=;
+        b=QiAPg4vYYRsTrcETclBByLW1/TXlHiKIsDLp2hkQhpH8Cn7ZuaMbvh0n96KA0XrH0P
+         PwJ95kjGWvHSvEHpIEHqGXhLa0kHjQbcAX5n3lcqg4cYNpkfR9bt2kfdNMVWoru6CzXw
+         ruyXgc1EimTs9cVCk6tWE835JzXpqf8AgRvVfWLOdtpl582FL0h2sST4wHNdtqOTpAjO
+         UggxpjA+ynUbnTfjfOP4cCI+zbgpg0I2ugrzdgzMSl8ijE8lV6oCyQUUnbycZLvbfqPp
+         kdPrJDjNK6zV12X104HfWDZ1hD232g+/E84l9Pp0qrJyptv+uCbajw9omz42KoeK/wOU
+         hVxg==
+X-Forwarded-Encrypted: i=1; AJvYcCXyI0nU2nE17C2sRNS6RnVYpSNmXMLCJq3hZFq8gTlXyVKR4JfW1tQksqXwC73L/pfD36M/qZdWn4Q=@vger.kernel.org
+X-Gm-Message-State: AOJu0YztToFB6QsM95dxLUhgA0c88Wy9s75klVWpLA0x1MI4jhssBYq4
+	Ze8z1SM3gAufpNRfJYrZhVp3kesAQ6g8ok8XwDHmevUgArWmWU3IzLgoeMSU3bY0O2lI2K+OHot
+	GCs3BkLQhVZ9yRNFdf692sj82y1Sp1vhBKwwinMpm7Q==
+X-Gm-Gg: ATEYQzzZvzm0sp5fEs8WLbGo6bIaDaHHTDylv8swPtRysv/dlPh/VdIvYdljL/VzPW4
+	6u8wFqSKmpqKCZYha3RrIfob6N1ptJmnZUds7+i8k8IDEdAjW1u2S282j4Rrzf1qNpCb4YtHTar
+	ZypYZHcgN3CB1L3HXZrzgX6u4AAnsogN5XWv7s6pq4Kfv6JxoQFiUap8uZpCOa5N8ni8vkzpgQ2
+	7a6YI1bjtg/ugW0l79gqv43M+I8U0aBUHVA3DXqayxZs2jQGA6K0Fbr8vYt1IdubHIY6Rxo1kO5
+	lBUuiED6
+X-Received: by 2002:a05:651c:1510:b0:37f:af92:1c03 with SMTP id
+ 38308e7fff4ca-38a2c5972f1mr25096681fa.12.1772640267747; Wed, 04 Mar 2026
+ 08:04:27 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: michael.opdenacker@rootcommit.com,
- Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
- spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 00/10] riscv: spacemit: enable SD card support with UHS
- modes for OrangePi RV2
-To: Iker Pedrosa <ikerpedrosam@gmail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Yixun Lan <dlan@gentoo.org>,
- Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>,
- Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>,
- Alexandre Ghiti <alex@ghiti.fr>
-References: <20260302-orangepi-sd-card-uhs-v1-0-89c219973c0c@gmail.com>
-Content-Language: en-US
-From: Michael Opdenacker <michael.opdenacker@rootcommit.com>
-In-Reply-To: <20260302-orangepi-sd-card-uhs-v1-0-89c219973c0c@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Date: Wed,  4 Mar 2026 14:06:04 +0000 (UTC)
-X-CM-Envelope: MS4xfJGaqNo8HVHkf0pbSl1l5Xlg3h6UW8oWB0/I0QhOtT7T7ozYBKTdXa/YX9tbFiOy7N8pc8qFLLntzfRP9vONMIOpdRrtMUyu/P6uOvhuNDEF/XUmY8uJ qQ8y7/aBbQqnbimRVUHV5I99ZkiDtoCtRWoxNDBCh8Ykv10/cIppgBu+54Yqkf2KfNdqcntVX7cmAAh7Grtz5fP64N3D5+JA4u+v0B36DHHd2r1cwHdSMKtr vLmMAf6K6X+YBvYw6z9dfhsdRkAF/QhMKu6tAWMVUCeFYM9HXO5bzVGXtdb1EWURGvov4kGL2NlK9vwOaJsXhoCZVYgHQX45/8iGmsqVtxd6efr56av0snJ0 4Ys5XdrQOWLD7SwWhZniXk/LvvwXX9McjKzJQOJOaIUmOggdfr47F6RqxJzY4hUJicPclfIvYGrRhEglqk9DUpT7XBt5cYlrFiHxKVPM6xu0LcgZ6oUtEyEl IGrtBdDW9Ell6D7IR6jj8HpSNxvDR5GMNeoH21ZVMCYMU89ZPqbdbqLj9N7JsXTOnlcIlR/n7wJex41AiCyk611OueupQ1avamMaLvOM+Xa3qSbLRS7E6dIw 1br6Q1W59xQOrPvNzZH8swxVm5ifwpkUM4RaDgFFozkl6dSmWi22awNJOIXNi8CbJplJHnPhULRAUBHC/5/JMk3cUFv4jZGLVSfgo6+BVNZObRbB0tQkgF3I urYQIXKOPin67XicBSZotg3HnIy8TaJUYrW01C0EUH1xcOzUNhpa6PTM52oceANLA7UPP3IN1g+wlzHZ9QeyJExg4qY1p2Dpx5lDwOmt7DrNdtfKh+WiY8PG s95nhWsEZuO0SRN+cyhDrcRMUo4zXRD56j0R47t3Qs7Y9ciNDRXcVrAMubgwlQ==
-X-CM-Analysis: v=2.4 cv=GMJaEfNK c=1 sm=1 tr=0 ts=69a83c4d a=eDks/dr2Th2ytqR7xoOTkg==:617 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10 a=d70CFdQeAAAA:8 a=pGLkceISAAAA:8 a=cywHqOp7CWn13ELKgeMA:9 a=QEXdDO2ut3YA:10 a=NcxpMcIZDGm-g932nG_k:22
-X-AuthUser: michael.opdenacker@rootcommit.com
+References: <20260220194725.1341281-1-sergey.suloev@gmail.com>
+In-Reply-To: <20260220194725.1341281-1-sergey.suloev@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 4 Mar 2026 17:03:51 +0100
+X-Gm-Features: AaiRm53hGnZxwAIpUL8zLlSc8DF4TSmVCIL_21d4iT3X7bNxfCCFnO_A3djKlrI
+Message-ID: <CAPDyKFpktWMvA=wQK_Am_8dJNT+_WFQ-6=gQrq4462rG5G4w4Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: pwrseq_simple: fix probe failure when
+ CONFIG_RESET_GPIO is enabled
+To: Sergey Suloev <sergey.suloev@gmail.com>, Philipp Zabel <p.zabel@pengutronix.de>, 
+	Linus Walleij <linusw@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>
+Cc: catalin.popescu@leica-geosystems.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Iker,
++ gpio and reset maintainers
 
-Thanks a lot for these patches!
-
-On 3/2/26 4:13 PM, Iker Pedrosa wrote:
-> This series enables complete SD card support for the Spacemit K1-based
-> OrangePi RV2 board, including UHS (Ultra High Speed) modes for
-> high-performance SD card operation.
+On Fri, 20 Feb 2026 at 20:47, Sergey Suloev <sergey.suloev@gmail.com> wrote=
+:
 >
-> Background
+> The driver uses a heuristic =E2=80=94 checking if exactly one entry exist=
+s in
+> 'reset-gpios' =E2=80=94 to decide whether to attempt reset controller API=
+ usage
+> via devm_reset_control_get_optional_shared(). This is semantically
+> incorrect and causes a permanent probe failure when CONFIG_RESET_GPIO
+> is enabled.
 >
-> The Spacemit K1 SoC includes an SDHCI controller capable of supporting
-> SD cards up to UHS-I speeds (SDR104 at 208MHz). However, mainline
-> currently lacks basic SD controller configuration, SDHCI driver
-> enhancements for voltage switching and tuning, and power management
-> infrastructure.
+> When CONFIG_RESET_GPIO=3Dy, __of_reset_control_get() intercepts the
+> 'reset-gpios' DT property and attempts to register the GPIO as a reset
+> controller via __reset_add_reset_gpio_device(). If the GPIO controller
+> is not yet fully initialized at probe time, this returns -ENOENT instead
+> of -EPROBE_DEFER, and the error path does not respect the 'optional'
+> flag, causing pwrseq_simple to fail permanently rather than defer.
+> This prevents mmc1 from probing on boards that use 'reset-gpios' for
+> WiFi power sequencing, such as BananaPi M2 Magic with AP6212/BCM43430
+> on Allwinner R16.
 >
-> Implementation
+> The correct indicator of reset controller intent is the explicit presence
+> of a 'resets' property in the device tree node, not the count of
+> 'reset-gpios' entries. A single 'reset-gpios' entry is just as likely
+> to be a plain GPIO as multiple entries.
 >
-> The series enables SD card support through coordinated layers:
+> Replace the ngpio =3D=3D 1 heuristic with an explicit check for the 'rese=
+ts'
+> DT property, making the behavior unambiguous and immune to
+> CONFIG_RESET_GPIO interference.
 >
-> - Hardware infrastructure (patches 1-2): Device tree bindings for voltage
-> switching hardware and essential clock infrastructure.
-> - SDHCI driver enhancements (patches 3-7): Regulator framework
-> integration, pinctrl state switching for voltage domains, AIB register
-> programming, and comprehensive SDR tuning support for reliable UHS
-> operation.
-> - SoC and board integration (patches 8-10): Complete K1 SoC controller
-> definitions, PMIC power infrastructure, and OrangePi RV2 board enablement
-> with full UHS support.
->
-> This transforms the OrangePi RV2 from having no SD card support to full
-> UHS-I capability, enabling high-performance storage up to 208MHz.
->
-> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+> Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset contr=
+ol")
+> Signed-off-by: Sergey Suloev <sergey.suloev@gmail.com>
 > ---
-> Iker Pedrosa (10):
->        dt-bindings: mmc: spacemit,sdhci: add AIB voltage switching registers
->        mmc: sdhci-of-k1: enable essential clock infrastructure for SD operation
->        mmc: sdhci-of-k1: add regulator framework support
->        mmc: sdhci-of-k1: add pinctrl state switching for voltage changes
->        mmc: sdhci-of-k1: add AIB register support for voltage switching
->        mmc: sdhci-of-k1: add SDR tuning infrastructure
->        mmc: sdhci-of-k1: add comprehensive SDR tuning support
->        riscv: dts: spacemit: k1: add SD card controller and pinctrl support
->        riscv: dts: spacemit: k1-orangepi-rv2: add PMIC and power infrastructure
->        riscv: dts: spacemit: k1-orangepi-rv2: add SD card support with UHS modes
+>  drivers/mmc/core/pwrseq_simple.c | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
 >
->   .../devicetree/bindings/mmc/spacemit,sdhci.yaml    |  15 +
->   arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts   |  69 +++++
->   arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi       |  40 +++
->   arch/riscv/boot/dts/spacemit/k1.dtsi               |  13 +
->   drivers/mmc/host/sdhci-of-k1.c                     | 320 +++++++++++++++++++++
->   5 files changed, 457 insertions(+)
-> ---
-> base-commit: 5f499bb7a07fcdcf8877acaa8f413a5dc1fcfacc
-> change-id: 20260226-orangepi-sd-card-uhs-0ecb05839b0c
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_s=
+imple.c
+> index 4b47e6c3b04b..780c8818a273 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -124,7 +124,6 @@ static int mmc_pwrseq_simple_probe(struct platform_de=
+vice *pdev)
+>  {
+>         struct mmc_pwrseq_simple *pwrseq;
+>         struct device *dev =3D &pdev->dev;
+> -       int ngpio;
 >
-> Best regards,
+>         pwrseq =3D devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
+>         if (!pwrseq)
+> @@ -134,8 +133,7 @@ static int mmc_pwrseq_simple_probe(struct platform_de=
+vice *pdev)
+>         if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) !=3D -ENO=
+ENT)
+>                 return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "exte=
+rnal clock not ready\n");
+>
+> -       ngpio =3D of_count_phandle_with_args(dev->of_node, "reset-gpios",=
+ "#gpio-cells");
+> -       if (ngpio =3D=3D 1) {
+> +       if (device_property_present(dev, "resets")) {
+>                 pwrseq->reset_ctrl =3D devm_reset_control_get_optional_sh=
+ared(dev, NULL);
+>                 if (IS_ERR(pwrseq->reset_ctrl))
+>                         return dev_err_probe(dev, PTR_ERR(pwrseq->reset_c=
+trl),
 
-Things look all right according to my first tests. First time I'm able 
-to boot a Yocto build root filesystem from SD card with the mainline 
-kernel on the OrangePi RV2 board!
-Tomorrow, I should have time to run tests on BananaPi PF3 too. Fingers 
-crossed for eMMC support...
+Indeed the existing code looks a bit weird, but checking for the
+"resets" property here should also require an update to the DT docs
+[1].
 
-I'll be happy to test your further iterations. That would be awesone to 
-have SD support merged in 7.1 :)
-Thanks again
-Michael.
+I have looped in the gpio/reset maintainers to get their opinion on this to=
+o.
 
--- 
-Root Commit
-Embedded Linux Training and Consulting
-https://rootcommit.com
+Kind regards
+Uffe
 
+[1] Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
