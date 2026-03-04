@@ -1,180 +1,153 @@
-Received: from mail-lj1-f171.google.com (mail-lj1-f171.google.com [209.85.208.171])
+Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDE3B20E6E2
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:04:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17D1735F5FC
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Mar 2026 16:26:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.169
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772640272; cv=pass; b=YyPQaw1lfzMUlTUTK5y6FkKA21Mmw2v+5fvCSASxFMh9Em6X0T1QsA+xW+giaCVhj25LENuF70cAlBFOs7aJCHfM6ktHCZCqsR3cWhkl6mxQrNVURGrNUobjQQBsYQ1JTGs1rx1pxvnOVcbacSjdp7KUgC8zmNi0dQjzJUeApN0=
+	t=1772641564; cv=pass; b=olM3NmwP+JkzJDLgB8kuDDFEk+apj8+PZ+PKEWB/9OjtGgECXWwyH4gAd+7aOeY85vndjX6Q2HjrCv41M9Ak1SRVtJ6Gw4x5Hzg0xydcTYv8QEDq4QyiP5vrmjw9VLbsx7rZ4Z4W1vNMPrdgVaW4pzYtBBvaTg3o0ReE7BDBDwk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772640272; c=relaxed/simple;
-	bh=pU+3H5KjTIjCf3g3yU3tSGtSdSzvq1D4OWRpNq//49U=;
+	s=arc-20240116; t=1772641564; c=relaxed/simple;
+	bh=I+CUmlWECLu/6NQx/jToONdpLxSF6c+SC/8SH/fkdFw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PwCBGka0XFKAs1J+mp4sgOeHhLfBEEX4YhBBhU3ST1w83+1jqZeHn8LwsBh8EEG2Calwj4p9W/BJoFp3jCYTLtIbkXFj2Gj1F3ePil4AWrPZ57dmePV1u8V4SQiYrO+8ny5exrHuHoirXOx5brnBeSU5vp0HmYJSfBAsywgRRtk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LKfZ2vwy; arc=pass smtp.client-ip=209.85.208.171
+	 To:Cc:Content-Type; b=LC3hFWG7VFqdpD5UdeAB/M+dpI0TYDWbCvRZTGFlEiygP7LTRikOwVQIJ5e81LKRWffG1DxCuI/wT5EB3hYCjyV6XD3zQ8de4oxeiK2QPplqaWefGWmDrExiyzeYr4UbTCQTBCo0MQf2YoRglO0t3q1rMvxQ/8jIoSFskHO4wC0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bInXv+iD; arc=pass smtp.client-ip=209.85.208.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LKfZ2vwy"
-Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-389e139ee5eso122307721fa.0
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 08:04:29 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772640268; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bInXv+iD"
+Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-38706f96202so96705741fa.3
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Mar 2026 08:26:02 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1772641561; cv=none;
         d=google.com; s=arc-20240605;
-        b=CC+wZbtM1HbMsqeIIjcXZo5ZSk0kF5IWdGmGgK7P37keIv6WJonklxQN26k9qBe2V1
-         xPV6u+h6kEBSL96v5tttQ/vBRSRlMc2NQuasuE9YCKpnz6gNvE/4XDjwnHDtZ9cagmfq
-         ayAMLNfdSLkhoQoHRT0Ma0SZeg1UjG4Ug6l/jJSeeIxc9j/mgnO5CqboekZ/9xbJ69O8
-         oeNUpGkwDX60qjDpr+PN28+M7x8XAPyF9SflZ50zp48XGGEvcP8W2xuRpdPv6oHIQgB4
-         Ok3Fg3mNdWIQAO2mjP77MhqLgvuUANUUsFQYOV8Q4COh5TlDv9crpBkOLmqQsqQc+Urt
-         nhmQ==
+        b=Ddo5/KIZws6gxrN5noPQzEDcHnsjzRKxkZsZduJ5TLVh7OYN7OzhQyUs2i+8ASKxFl
+         h1R6m+nALB9B1S9DtaeZdWx3bNnq1KX9bOZaE+ERjr4iZUVqaXY6BjCgLKbj0rNXxvL0
+         Rn0KZhDuj1kVf2Ocw+uig0tH1J+AKyyG9XDb9GvRe3qYPzv3qOzNWqo+XIo7gHo38E7E
+         DxzIha+u0PqDlA7XFknc8njaIaHKHp3/zOgHGorlGkn1qtw85RF3GV/TQR+pKS+3gPxB
+         PE+zlsJwOai0mIhbo3ShVuPW0cl4vT+Gd2DH/mSZSp6bAgFuCblrXPri4heF8m8XmDJP
+         bYAw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=X6VV//0BbRdnMvTRMP5NWmCJkEE3JMIsqRqxcg2IjNQ=;
-        fh=fRpMHzkAenhrm7Oo7xVws8SWpB5GO9agDU1+lpS3DIg=;
-        b=WvQwWACkfBN/4nUe3WBdervjDCZqTvviDX53m+ejskowwptGJSfPbi8eFmQnrUAkSV
-         PMwSeghJtHxZ+EvBxYpjgFDDXd1AVhHCpuoiS2J3XEG6T7bBRYOyEmUdKHiIGjyouuZq
-         Czu4amzqFBAb+y7JBRLo3dQcS4tSKBt9O/XZbNMgLv/iQmwrBhnbLqACmBt9g8qBqj6s
-         TuYHdo8HtXLJ1eIGIq58DBTXpClPoXy9Fmh146iUwoSYOzkLuoNwmpF7Yx2Kaea7i+e1
-         l1ANFVKwLgniP17fUNQRV/B2IlTwhyTy6QYnY+3suhE0op7PWnyJKozeDgDF0ZzDGR4Y
-         GStQ==;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=XwbLgJvTsi2U6kJq+Lpy4iD/7/onsilvoss+jDdGd/4=;
+        fh=dmy6u3WrvBWEcPkBRsBgpFWRLw/uWrPePJRBnVXnh7s=;
+        b=M+XTpK4czToC7phKZe6dCJjlP1mLMDAZMRPjo7w8LlHRirQyi62AVvA/Cg652mO6oC
+         96tyjTkBNcuezTWHveus85xXTjjgfDpH2d9GMISRmz51Pms403hRRFFsXXx1XpnUCphl
+         +hgS72W5d+7dvA7NXW78blZBO32/QvB65D3JDWxYoAvbGPZCLVINVWS5dMpJ3uYN0iy/
+         ou1w3co5GfwNRIVFMeqeS9OEp0w4rycg0A/GZ7nkiaWUaBwJqVzXB9Q83l2Z0GOheeFG
+         VcQQBjW2JQZari1A6oNR9lmB/yg35RuucUfN6U70iWzAt10iVpPDdNfx8hQVRyZ5p+DE
+         GQfw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1772640268; x=1773245068; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=X6VV//0BbRdnMvTRMP5NWmCJkEE3JMIsqRqxcg2IjNQ=;
-        b=LKfZ2vwy2SOjS61NzlkAHEVESnvG8UMH6ZhTa80Lf4H43FyA7Hk5lGtUtfL+/r23u3
-         2E1otTQPNuP0x6zgvhbo5odTErI+KT3Yhnzavbu/Tr0tvhF9YM6vQUMPRp0EDrMqpIOC
-         ubSCyUDKJf/LpkdCIAscQ5Eh8s5Q1PLTcNdgU16i6kY1nKQhlBc0rNlU5uILh5NNhmBi
-         wn+u88EgXxb4A9DVntN2odMOBTvGWFaI1HiNz5GRqiZAlYDOsVE1VRGs3iZ4pv8Iey4x
-         yihRVkbOPNsj/jEZ/IIMD5jzWjSFCkrEYgNN0kqNgpi4AcJwE6OUBNGDdrIsfpoJoOaR
-         cOMQ==
+        d=linaro.org; s=google; t=1772641561; x=1773246361; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=XwbLgJvTsi2U6kJq+Lpy4iD/7/onsilvoss+jDdGd/4=;
+        b=bInXv+iDQ25dipS1UVjSmmdS0mFN94KGIBmOqOq5NTFfkQ+HF7GtT4xgZfVCbqT5j0
+         c0KFCCs7NuHcWcmyrap84a7at6Ju7Cts79E1LSELeLW6rFiqUeNnwvNAIiEbwS93I5of
+         RcYH0sfdK41NFsbDhJlAfPC4vN6rE9cKt33s8aYt0E5PNS2IByKvzcHxI0ORch4NSZ74
+         f3mU4VxNqgM0Dn2m712yPVZRkPakWnFwcN4HM3OWXBziNMZ2hXH2JcYj4rDhAGZlqdqJ
+         JJPYWMcOVNLB4biuk5hv2xZ60DB4OOE2VJD+QCWIAyzIrePNFCZjljP39z4+0esKtY0I
+         +DrQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772640268; x=1773245068;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=X6VV//0BbRdnMvTRMP5NWmCJkEE3JMIsqRqxcg2IjNQ=;
-        b=QiAPg4vYYRsTrcETclBByLW1/TXlHiKIsDLp2hkQhpH8Cn7ZuaMbvh0n96KA0XrH0P
-         PwJ95kjGWvHSvEHpIEHqGXhLa0kHjQbcAX5n3lcqg4cYNpkfR9bt2kfdNMVWoru6CzXw
-         ruyXgc1EimTs9cVCk6tWE835JzXpqf8AgRvVfWLOdtpl582FL0h2sST4wHNdtqOTpAjO
-         UggxpjA+ynUbnTfjfOP4cCI+zbgpg0I2ugrzdgzMSl8ijE8lV6oCyQUUnbycZLvbfqPp
-         kdPrJDjNK6zV12X104HfWDZ1hD232g+/E84l9Pp0qrJyptv+uCbajw9omz42KoeK/wOU
-         hVxg==
-X-Forwarded-Encrypted: i=1; AJvYcCXyI0nU2nE17C2sRNS6RnVYpSNmXMLCJq3hZFq8gTlXyVKR4JfW1tQksqXwC73L/pfD36M/qZdWn4Q=@vger.kernel.org
-X-Gm-Message-State: AOJu0YztToFB6QsM95dxLUhgA0c88Wy9s75klVWpLA0x1MI4jhssBYq4
-	Ze8z1SM3gAufpNRfJYrZhVp3kesAQ6g8ok8XwDHmevUgArWmWU3IzLgoeMSU3bY0O2lI2K+OHot
-	GCs3BkLQhVZ9yRNFdf692sj82y1Sp1vhBKwwinMpm7Q==
-X-Gm-Gg: ATEYQzzZvzm0sp5fEs8WLbGo6bIaDaHHTDylv8swPtRysv/dlPh/VdIvYdljL/VzPW4
-	6u8wFqSKmpqKCZYha3RrIfob6N1ptJmnZUds7+i8k8IDEdAjW1u2S282j4Rrzf1qNpCb4YtHTar
-	ZypYZHcgN3CB1L3HXZrzgX6u4AAnsogN5XWv7s6pq4Kfv6JxoQFiUap8uZpCOa5N8ni8vkzpgQ2
-	7a6YI1bjtg/ugW0l79gqv43M+I8U0aBUHVA3DXqayxZs2jQGA6K0Fbr8vYt1IdubHIY6Rxo1kO5
-	lBUuiED6
-X-Received: by 2002:a05:651c:1510:b0:37f:af92:1c03 with SMTP id
- 38308e7fff4ca-38a2c5972f1mr25096681fa.12.1772640267747; Wed, 04 Mar 2026
- 08:04:27 -0800 (PST)
+        d=1e100.net; s=20230601; t=1772641561; x=1773246361;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=XwbLgJvTsi2U6kJq+Lpy4iD/7/onsilvoss+jDdGd/4=;
+        b=LMhqJFxe339BMBxrpCn+x+I4qMlz+XNXg/sQw9PV4+fXOQGvQ7A/t37EH2YSaEbDq5
+         PjkfUa+MkLODks8Euhf9uhDUeBrK4wGeUOnrPlxIilpmf8kAioxvC/JDImpOqrectIIB
+         nE3H8Ral2YNgZobf0WHFgwoCYDBcyqxK6yt+o5MQVEFkd3c0Xpd39Z/WahIbITtPJBvB
+         HJ9MmRXn+dHQ2i1Tlh+t6iIVF0BB8ULuNl6xY8t6vZp1AGVLj0O892jeZ1qv0ZIUP2t8
+         NV3zUh/T98G0UahE2eMb5Mow/gWOefmP4WN9Oz31FGAukNni3+nSL++95V9zriqNawXg
+         14oA==
+X-Gm-Message-State: AOJu0YwTFP4gy8QZwC1y/NoePUgzw83mTCHg2gvlxla0r//f98EViFs2
+	UF4hEjFjgIFY6Enbcwt77SSriqRB9QMiglfip9TzbTRbA7w9qnps31hkJcTYfJeutWw45JsfqdT
+	0ZWd62Vo4b+4i48FATFD+L1fw7M0lMTxkhMNHCt61AA==
+X-Gm-Gg: ATEYQzw+0Y69H5twHOY0rlGZGoVHg1p5OwTIZnx+2EDhH/1Rkl5Gxxbd9GwtWzehTWx
+	73lQkpL8uZYYWGv9qM7hEiNEAh7fLjzYB0eT7ASl0QE0g6gsN2myAb6qZzXGofL+7LPurNsoGui
+	VV5G/QPIuzhZCMmYlB1RjcGbU59mHxUZubWhxxTENtrvbWbrNWo2HxAX2xDRJxgxgmI2k/xEoLw
+	9Qt7PjLnLPL5zNvGmH2ph5xfK+K+N4Jem+jL2PK8+Ipu/OAnSYh7iO/5BEPVGVS96BE3qIaMMKg
+	9rkmATNj
+X-Received: by 2002:a2e:3210:0:b0:385:d6b2:f4cc with SMTP id
+ 38308e7fff4ca-38a2c7b197bmr15368291fa.19.1772641561056; Wed, 04 Mar 2026
+ 08:26:01 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260220194725.1341281-1-sergey.suloev@gmail.com>
-In-Reply-To: <20260220194725.1341281-1-sergey.suloev@gmail.com>
+References: <2026022351-badness-custody-28ad@gregkh>
+In-Reply-To: <2026022351-badness-custody-28ad@gregkh>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 4 Mar 2026 17:03:51 +0100
-X-Gm-Features: AaiRm53hGnZxwAIpUL8zLlSc8DF4TSmVCIL_21d4iT3X7bNxfCCFnO_A3djKlrI
-Message-ID: <CAPDyKFpktWMvA=wQK_Am_8dJNT+_WFQ-6=gQrq4462rG5G4w4Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: pwrseq_simple: fix probe failure when
- CONFIG_RESET_GPIO is enabled
-To: Sergey Suloev <sergey.suloev@gmail.com>, Philipp Zabel <p.zabel@pengutronix.de>, 
-	Linus Walleij <linusw@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>
-Cc: catalin.popescu@leica-geosystems.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Wed, 4 Mar 2026 17:25:25 +0100
+X-Gm-Features: AaiRm53J-AoiBR1L1TyoKeF-eRWGW0Itxwr6bBBRzughSniz5Gi46MmhSvRONQQ
+Message-ID: <CAPDyKFp=9qL2XROcTXDsv106FdoFwzziFU6YpBCB85aQ5ZFZRA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: moxart: fix potential use-after-free on remove path.
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	stable <stable@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-+ gpio and reset maintainers
+On Mon, 23 Feb 2026 at 14:48, Greg Kroah-Hartman
+<gregkh@linuxfoundation.org> wrote:
+>
+> Just like in commit bd2db32e7c3e ("moxart: fix potential use-after-free
+> on remove path"), we should wait until after we are finished writing to
+> the mmc host device before removing it, otherwise it could have been
+> already freed.
 
-On Fri, 20 Feb 2026 at 20:47, Sergey Suloev <sergey.suloev@gmail.com> wrote=
-:
+mmc_remove_host() doesn't actually free the host, but it reverses what
+mmc_add_host() did during probe.
+
+Since the moxart driver uses devm_mmc_alloc_host() the last reference
+to the host will be dropped after ->remove() completes, leading to
+mmc_free_host() to be called for it.
+
+However, improvements can still be made in the ->remove() callback. See below.
+
 >
-> The driver uses a heuristic =E2=80=94 checking if exactly one entry exist=
-s in
-> 'reset-gpios' =E2=80=94 to decide whether to attempt reset controller API=
- usage
-> via devm_reset_control_get_optional_shared(). This is semantically
-> incorrect and causes a permanent probe failure when CONFIG_RESET_GPIO
-> is enabled.
->
-> When CONFIG_RESET_GPIO=3Dy, __of_reset_control_get() intercepts the
-> 'reset-gpios' DT property and attempts to register the GPIO as a reset
-> controller via __reset_add_reset_gpio_device(). If the GPIO controller
-> is not yet fully initialized at probe time, this returns -ENOENT instead
-> of -EPROBE_DEFER, and the error path does not respect the 'optional'
-> flag, causing pwrseq_simple to fail permanently rather than defer.
-> This prevents mmc1 from probing on boards that use 'reset-gpios' for
-> WiFi power sequencing, such as BananaPi M2 Magic with AP6212/BCM43430
-> on Allwinner R16.
->
-> The correct indicator of reset controller intent is the explicit presence
-> of a 'resets' property in the device tree node, not the count of
-> 'reset-gpios' entries. A single 'reset-gpios' entry is just as likely
-> to be a plain GPIO as multiple entries.
->
-> Replace the ngpio =3D=3D 1 heuristic with an explicit check for the 'rese=
-ts'
-> DT property, making the behavior unambiguous and immune to
-> CONFIG_RESET_GPIO interference.
->
-> Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset contr=
-ol")
-> Signed-off-by: Sergey Suloev <sergey.suloev@gmail.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: stable <stable@kernel.org>
+> Assisted-by: gkh_clanker_2000
+
+What's this?
+
+> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 > ---
->  drivers/mmc/core/pwrseq_simple.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
+>  drivers/mmc/host/moxart-mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_s=
-imple.c
-> index 4b47e6c3b04b..780c8818a273 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -124,7 +124,6 @@ static int mmc_pwrseq_simple_probe(struct platform_de=
-vice *pdev)
->  {
->         struct mmc_pwrseq_simple *pwrseq;
->         struct device *dev =3D &pdev->dev;
-> -       int ngpio;
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index 3dd8f232052f..256e16390ef3 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -690,12 +690,12 @@ static void moxart_remove(struct platform_device *pdev)
+>                 dma_release_channel(host->dma_chan_tx);
+>         if (!IS_ERR_OR_NULL(host->dma_chan_rx))
+>                 dma_release_channel(host->dma_chan_rx);
+> -       mmc_remove_host(mmc);
 >
->         pwrseq =3D devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
->         if (!pwrseq)
-> @@ -134,8 +133,7 @@ static int mmc_pwrseq_simple_probe(struct platform_de=
-vice *pdev)
->         if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) !=3D -ENO=
-ENT)
->                 return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "exte=
-rnal clock not ready\n");
->
-> -       ngpio =3D of_count_phandle_with_args(dev->of_node, "reset-gpios",=
- "#gpio-cells");
-> -       if (ngpio =3D=3D 1) {
-> +       if (device_property_present(dev, "resets")) {
->                 pwrseq->reset_ctrl =3D devm_reset_control_get_optional_sh=
-ared(dev, NULL);
->                 if (IS_ERR(pwrseq->reset_ctrl))
->                         return dev_err_probe(dev, PTR_ERR(pwrseq->reset_c=
-trl),
+>         writel(0, host->base + REG_INTERRUPT_MASK);
+>         writel(0, host->base + REG_POWER_CONTROL);
+>         writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
+>                host->base + REG_CLOCK_CONTROL);
+> +       mmc_remove_host(mmc);
 
-Indeed the existing code looks a bit weird, but checking for the
-"resets" property here should also require an update to the DT docs
-[1].
+Rather than moving this to the bottom of the function, it would be
+more correct to move it to the beginning.
 
-I have looped in the gpio/reset maintainers to get their opinion on this to=
-o.
+This way, we ensure things have been closed down properly before
+releasing the dma channels.
+
+>  }
+>
+>  static const struct of_device_id moxart_mmc_match[] = {
+> --
+> 2.53.0
+>
 
 Kind regards
 Uffe
-
-[1] Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
