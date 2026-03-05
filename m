@@ -1,163 +1,338 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 329F239E17A
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Mar 2026 16:19:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772727596; cv=pass; b=RGvduaGGR2YIdxFTINoE+tjaKrjGd4JT6ls6EQmsNjOgPslqXBHIwCYnQlmbtzp/jGYECyDCNBAKoSRWXD6xtysGarEHWJ4jcjHSmIpm8Cy8oc6/T0JYUSUMU7C+0VOw1JDtJaqnh8VZgaTPHlISb+LQ6MEtqpq+o12VayAFS3Y=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772727596; c=relaxed/simple;
-	bh=4+VpwCYiZ/k0oS5DZgX7u4wiQTYlbC6gsA/O1CRuO+8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QBGy36dJ/8MYPHAxx1nEvZmqvm6S8dn7N0o4lcOv4o5kKBFvFFE5yGUMFHwlgpKdSRPdaXsAmuwX3OaZv6+s3BnQySCdRuU+nPSW4YlpM89fASSi9Hn30FKbq6BdnCTy/rWEENR+qYAxf5NgOnfuyNekusNSKaewIojL2R7inmI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=q1rxxZ+R; arc=pass smtp.client-ip=209.85.167.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 063C72F5A36
+	for <linux-mmc@vger.kernel.org>; Thu,  5 Mar 2026 19:40:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1772739658; cv=none; b=MOotwf5jlK/a/0eUiZ+G3eUPKFGJ0ZkFMvuwoR1ukOQhzTA2quCKQc1R/DX1QpiXyVPryvFknBC2dzancXEjHR/cwjWKCnmb7nehPwSwiDxddDIYY7ptLhW+/Cp4/SPjhLWYcGqFRqJXKE/FH895pedXT7glDi4HWPUVyesFKhk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1772739658; c=relaxed/simple;
+	bh=q7K+v3piZJcrosJPTRdRPWUfVCCMq202FgtLyEjDs48=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=XVvu1m+4Y3ZyKlYMYqL+L6+L8mgWmYSkN+IVHY2ghEnsvd5Xv24/2MCHb12xUE7irJ0aSeQ1jPzZcxNh0v5IbqLjPEEyZwp6tVWXXZPJD/evhs+wkshrxdbLKgI5nx6g+OOqQcRMXqBmdLXQu571ByQ/3aI3oT0ksr2e3tR8hq4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b=pfhiXIq3; arc=none smtp.client-ip=209.85.128.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="q1rxxZ+R"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5a12cc20e71so935743e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2026 08:19:54 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; t=1772727592; cv=none;
-        d=google.com; s=arc-20240605;
-        b=JHgDIQtpKl1hiioS95OoTptDXoafYNzx/IOfBw/DAEWW3OBw+i8Uglt6/arCfGIhPJ
-         QErfqkXRfJXxhVkt63rX/gMQTEWl0XWlbDoyUb3zuHe7UM+6ZnJZsd5BRwOvX1F3krw2
-         9GcGrVuRSWLJYOhjNdTp7+gJeXbdC1XuLrunvF30/RU8y3UTRkw1UDtyfD/Ri5WIj85M
-         T3a6mJKCNgLScvpHT7z6/opGzqwjRoSMhc97DpTJpjhRZYbleKDcezXBdL4fta72EH5B
-         UDDCm+yoFkV5DPsRYDXpJ+veDtqtYSBIwjBD+aGsQBPKZuQqKuXZaVRK1l5nlScPJx6z
-         fBKg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=ClrW0+oPx++TxWQN/hIjl8TEzU24ahyY2M6DFRgObAo=;
-        fh=oph+LwwSKueOKDgTqh7hJ5E6mURNMHebjGPjN+dvTLc=;
-        b=lGYpQ9QBW2sgrJmIEC+T6hAeaFb0KPwj8bCcgfKiDtuZh6HeS2yHBNLJoZYAdDiz5y
-         ODsYYupIv5aKAzhoYJxIalrX5vmvRjUHMzC+1RexXn+6usT/8M4vkHS/vYckbmjIgJ1B
-         ZrrM4TxqrDEpk62HH0GDj92OidbMiI9MHw6VbNk3ue7jVvSvFF2Kot5I+6UFVaR5XssB
-         WMcbROxkQ0iFCr9eK4LRL/d32IFBiV28H9mjyWb3JNuyUaIbATNjrs4ExnDNKN1CPWJ8
-         4CsikXbnWGanDxZ6a/AxECUSyN8iakhjJFVz0fiQSNHukOzfyyIZHrSOUcHfXfI8NjRI
-         zvgA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b="pfhiXIq3"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-48371119eacso99834805e9.2
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2026 11:40:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1772727592; x=1773332392; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ClrW0+oPx++TxWQN/hIjl8TEzU24ahyY2M6DFRgObAo=;
-        b=q1rxxZ+R/c00OLVd9zKREVlXnhXnf6dPnJHoQd9Fv3gM1E3n78TlIvVbGLmf/H6rhN
-         QCLaLoqK0Hzum5zfvQ5aGdm869aGH0kiv9vsCJjgeRf+kTE0OCbV/OR06HMNqe/lYz/h
-         JI0iEmSqBYk18AeQlvwx5ODpYlKfMNze4jVK/TgBdwpIFFNlZ923Pf63pIjP3SaiwJBO
-         h2oRjXurKMaxZIVyQvNcK046OMfRSabM9VrTrrulW9zYWTBJaDImY1lKqSjkBeGgfp6I
-         IUegtysfkxBHDj6KnahmtbocAUBZocYgHQHNhJdde5aFLEtXsBmlxeOO9vRDWmULvEfA
-         442w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772727592; x=1773332392;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=starlabs-systems.20230601.gappssmtp.com; s=20230601; t=1772739655; x=1773344455; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ClrW0+oPx++TxWQN/hIjl8TEzU24ahyY2M6DFRgObAo=;
-        b=gox3UvX7ZY8wmVFxiXAJLy2sN9mbmR1iFBwlACg40p2AgVj0hWPzZ30R5rw/PDoqrk
-         cgX9VOFT08RxLx5zcMqnLB0gsHwR2A9EZpXeEsQApa7dhjocC1TRVMBPu95MSaHHv2Gc
-         Mjrah71ZEuCetlWQGsWo+lkQKcz2eeBCb9msWHLloPIuwAa29rChaRvh1S2kdUeuwPYO
-         5mQ650fWiqXkTwSzr5nI2jL3MccbnZeWb1xLfdDS0sOetLSfrcHo3SdoourxmuUdi1Is
-         lz4OLNlfeKzKRT7uTD+s/JrLQer8eMwBIc0YVXDAg2xKd7NNuPowWl6fgA/krVmAw6NJ
-         Kd2Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXJk11ExQKEihlQe6l2lCqeOHz6z0MjBDBhLAI+TyaqlpgQJ9Y+XLbmiCJbUQe0tMnadfryhdQ2sKk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxIQ8+nBTYx/W4/tA4tCorr4gO/HJiD8XyUUa0jwRfl66aM772f
-	Gx2iv40o7t0oiLIogfOxNw7wjEe4tnrLQY3wBzrMHoZr7l9Eysiu1zdWkDNdiDlrks2/69wCrNT
-	TZ2i6NlSvXzofvPI7GuiAxyYuMkNIm/md3cVIb7dRIg==
-X-Gm-Gg: ATEYQzxce8Bo7Wob74hbTozmthrUxtbhNx5r7v2b4dIUtDCsiANk0VMPUXQO90usivQ
-	e1/6AxZvtjuo+Afv9Y+BNWYE83WKKPr3VHcdOA3qU4eVk+pB3QTqdRiguBAG7ILeIRJj4TRIuPR
-	oNXwkakkjU+HOv1kihVIwsZj3tVv78KBJBSnWPDx1scyNdwtKf+jP/G6EmF8ZstwzKoYYowisPu
-	aQ8WaCXiH5ar4gON3X5gMhAAH6W+COyyRV+lpz1IPFd2h6WHsUx/q24GXba//vPtfi/E/7JrHXs
-	qlW7D3qh
-X-Received: by 2002:a05:6512:1288:b0:5a0:fe69:af2c with SMTP id
- 2adb3069b0e04-5a12c339474mr1173761e87.33.1772727592278; Thu, 05 Mar 2026
- 08:19:52 -0800 (PST)
+        bh=dpvL5W3u/QtSEFCecru0A3tqQQejPltz3A2r1FTtM90=;
+        b=pfhiXIq3nAWzGUbYE3clcn08V6DXlp25FuGdXfFAA61qibpPF3K6MsB7G9JdxJlabR
+         2TsJIFJFDOi5BnaZNRwSnMGadvwrm4ZAaR/AoC97OkQWzdnCf9ZuMZim3sNuFOCClAwO
+         +KlwlsNsztvoFbs8UBdH4YZtCNVhm3bVTf6X7Z4sbrAh1Iq/IB30HpJSRvQm5NiMJ5qf
+         uzggkG/w6gXKoTobLK5nlAWz4/CYVGcA5vFgneGK66WRkgus6sHB8PCqeALjavVWkNTu
+         wPk1p3CTd9767WAh6aOLv/89H/bCaujAqi9UoAJcgO776y55Al8lBUUA7dEsHnFPEqEs
+         cTLw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772739655; x=1773344455;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=dpvL5W3u/QtSEFCecru0A3tqQQejPltz3A2r1FTtM90=;
+        b=Z+UIRcx3/RFB+CshFK54ueozmFjZGHHMJQeUeNJNDH1cOQAPQ0sg8wFdAvaolhidps
+         /F1yezUTkRbvacu062bHdvax5SFTZhhmP24yvFG59leYoxwcNRWPJF7LVOrHIBAreHgi
+         Cx9eBj/M5Jv6xJ8eNC73vjxMh9loQz9Td5z+xIUhLJ8OioFU17y/exKPv8QAJT6tdxjJ
+         kRBhDxABJ3PY9HLJWHkebzvNF2Bw4bUoPK+UHOrKuq677zPPX3kM6MQhh/sdSoJfbb3v
+         9oyz4txRn4OoMs3lLIVxRA5ZwEmNwllXLXyHGCfKqpzepKqBplw+WT/3VUiu9Gjgs7c+
+         bzdw==
+X-Gm-Message-State: AOJu0YzLWStEnyNXcNYiELdfNfrsE+ufxcEmIsW+8u45WC3G2vx8d/Bh
+	JvpV9I6zi87i2q9j9ZP3jN93HPDoZNBwYiO8gNdIli+TvxSSmaJAsPTSEPJFe0e5Cy/tv/WdWCz
+	7T/R1uA==
+X-Gm-Gg: ATEYQzwvLV3ddBGHXRpvWHk0VUfpEEkS9dFAgZmtXGgRARl+hjb8uKWgVKxd5MGIPDv
+	YVLD+kOqQNfVUXQdtgndw6LG6MYZSZzeHDpN5sHAujT+FRrqQ2IEbGX2i/tvdZu3ReEn0uu7Mcb
+	0UabQQv1X9PkVE+rLJNuf3RGJDL4AkX9/gU97M8P0sqkdtCGXxPEDXKyNifta6tUabkRmZJ/pf7
+	YovOWPjYyDyTQw9Tnot79EY+42vSU+YE5r9xtVMpbQIKY2fWen+0XaGVavBfel7feDvk6lOh5zx
+	RT8LgJz+Pz2Xfwf7l4VUjx2U2eJooeNLfXFyQCTUKMldtIP+4uE3I3SGSyiq4jV6e7Om5pXAVa7
+	MSIF2Sq3S8L3KZptxtFQ9260A8IFtaFlZkNs9wAkc3EH2qCZNS7yk0cyPXAsphbzdNXBAfq+vau
+	xLTsGWYKJklNIdykE4ajSKHVEFq5QZ0aJ8ThsHxgliJ3Ig9xgntSkcZm1T/NCNBg==
+X-Received: by 2002:a05:600c:5490:b0:480:4a90:1af2 with SMTP id 5b1f17b1804b1-48523610816mr9841645e9.35.1772739655147;
+        Thu, 05 Mar 2026 11:40:55 -0800 (PST)
+Received: from starbook ([217.155.46.38])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-485246fd127sm3265e9.6.2026.03.05.11.40.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 05 Mar 2026 11:40:54 -0800 (PST)
+From: Sean Rhodes <sean@starlabs.systems>
+To: linux-mmc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ricky Wu <ricky_wu@realtek.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Dan Carpenter <dan.carpenter@linaro.org>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Huacai Chen <chenhuacai@kernel.org>,
+	Ingo Molnar <mingo@kernel.org>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 1/6] mmc: rtsx_usb_sdmmc: avoid false card-detect on tray readers
+Date: Thu,  5 Mar 2026 19:40:47 +0000
+Message-ID: <20260305194052.5120-2-sean@starlabs.systems>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260305194052.5120-1-sean@starlabs.systems>
+References: <1ca7b488a11e03b3f107f1829a40cf2c92c7d5fd.1771533586.git.sean@starlabs.systems>
+ <20260305194052.5120-1-sean@starlabs.systems>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260226-rz-sdio-mux-v11-0-c2a350f9bbd3@solid-run.com>
-In-Reply-To: <20260226-rz-sdio-mux-v11-0-c2a350f9bbd3@solid-run.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 5 Mar 2026 17:19:16 +0100
-X-Gm-Features: AaiRm52HLUuRfxFPVPVExv-76gWZPV1pu-J_tp-8KI24bnstuTqUB205NGBVxZk
-Message-ID: <CAPDyKFr5NZKEKpV2+GXGnzH9pyyj_TLmMCc3rac8h248srX_dw@mail.gmail.com>
-Subject: Re: [PATCH v11 0/9] mmc: host: renesas_sdhi_core: support configuring
- an optional sdio mux
-To: Josua Mayer <josua@solid-run.com>, Peter Rosin <peda@axentia.se>
-Cc: Marc Kleine-Budde <mkl@pengutronix.de>, Vincent Mailhol <mailhol@kernel.org>, 
-	Vinod Koul <vkoul@kernel.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
-	Aaro Koskinen <aaro.koskinen@iki.fi>, Andreas Kemnade <andreas@kemnade.info>, 
-	Kevin Hilman <khilman@baylibre.com>, Roger Quadros <rogerq@kernel.org>, 
-	Tony Lindgren <tony@atomide.com>, Janusz Krzysztofik <jmkrzyszt@gmail.com>, Vignesh R <vigneshr@ti.com>, 
-	Andi Shyti <andi.shyti@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, 
-	Yazan Shhady <yazan.shhady@solid-run.com>, Jon Nettleton <jon@solid-run.com>, 
-	Vladimir Oltean <olteanv@gmail.com>, Mikhail Anikin <mikhail.anikin@solid-run.com>, 
-	linux-can@vger.kernel.org, linux-phy@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, 
-	linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Thu, 26 Feb 2026 at 14:21, Josua Mayer <josua@solid-run.com> wrote:
->
-> This series has evolved over time from adding generic mux support for
-> renesas sdhi driver, to partial rewrite of the mux framework.
->
-> Several drivers have started implementing driver-local managed and
-> unmanaged helper functions for getting and selecting a mux-state object.
->
-> mmc maintainers have requested that new code shall intreoduce and use
-> generic helper functions that can be shared by all drivers, avoiding
-> code duplication.
->
-> This series is structured in 5 parts, each of which is self-sufficient
-> depending only on the previous patches. This shall allow the first N
-> patches to be applied even if the last ones need further discussion.
->
-> 1. Rename driver-local helper functions to avoid name collision with
->    global version to be introduced later.
->
-> 2. Implement generic device-managed helper functions in mux core.
->
-> 3. Convert driver local code from similar patterns to use the newly
->    added global helpers.
->
-> 4. Change mux-core Kconfig so that it can be enabled through menuconfig,
->    without an explicit "select" dependency from other drivers.
->
-> 5. add dt bindings and driver support for mux in renesas sdhi driver.
->
-> Signed-off-by: Josua Mayer <josua@solid-run.com>
-> ---
-> Changes in v11:
-> - changed approach to Kconfig making MULTIPLEXER a bool, and adding a
->   user-visible wrapper for menuconfig.
->   (Reported-by: Ulf Hansson <ulf.hansson@linaro.org>)
-> - dropped the "default m if COMPILE_TEST".
->   (Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>)
-> - improved kerneldoc line wrapping.
-> - removed unnecessary changes to original devm_mux_control-get.
-> - fix "reference preceded by free" in mux_state_get function
-> - Link to v10: https://lore.kernel.org/r/20260225-rz-sdio-mux-v10-0-1ee44f2ea112@solid-run.com
->
+Some Realtek USB SD readers with a tray can assert SD_CD even when no
+card is present. This can make the MMC core believe a card exists and
+trigger unnecessary initialization and suspend/shutdown failures.
 
-[...]
+Debounce the CD signal and validate a newly detected card by probing for
+a response (CMD0 + CMD8/CMD55/CMD1) before reporting it present. Also
+treat SD_INT as a removal indication even if SD_CD stays asserted.
 
-To me, this looks ready for a new try. Unless I hear some objections,
-I intend to apply this as material for v7.1 via my mmc tree on Monday.
+Tested: Realtek RTS5129 (0bda:0129), tray inserted, no card (2026-02-24)
+Tested: Realtek RTS5129 (0bda:0129), tray + SDXC card, mmcblk0 (2026-02-24)
 
-The complete series will be available on an immutable branch, for
-other subsystem maintainers to pull in if that turns out to be needed.
-I let you know of more details on Monday.
+Signed-off-by: Sean Rhodes <sean@starlabs.systems>
+---
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 156 ++++++++++++++++++++++++++++--
+ 1 file changed, 148 insertions(+), 8 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index 84674659a84d..ec3eeea78e95 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -19,6 +19,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
++#include <linux/jiffies.h>
+ 
+ #include <linux/rtsx_usb.h>
+ #include <linux/unaligned.h>
+@@ -30,6 +31,9 @@
+ #define RTSX_USB_USE_LEDS_CLASS
+ #endif
+ 
++#define RTSX_USB_SD_CD_DEBOUNCE_CNT	2
++#define RTSX_USB_SD_INSERT_RETRY_MS	1000
++
+ struct rtsx_usb_sdmmc {
+ 	struct platform_device	*pdev;
+ 	struct rtsx_ucr	*ucr;
+@@ -46,6 +50,8 @@ struct rtsx_usb_sdmmc {
+ 	bool			card_exist;
+ 	bool			initial_mode;
+ 	bool			ddr_mode;
++	u8			cd_debounce;
++	unsigned long		next_insert_check;
+ 
+ 	unsigned char		power_mode;
+ 	u16			ocp_stat;
+@@ -72,6 +78,13 @@ static inline void sd_clear_error(struct rtsx_usb_sdmmc *host)
+ 	rtsx_usb_clear_fsm_err(ucr);
+ }
+ 
++static int sd_set_bus_width(struct rtsx_usb_sdmmc *host,
++			    unsigned char bus_width);
++static int sd_set_timing(struct rtsx_usb_sdmmc *host,
++			 unsigned char timing, bool *ddr_mode);
++static int sd_power_on(struct rtsx_usb_sdmmc *host);
++static int sd_power_off(struct rtsx_usb_sdmmc *host);
++
+ #ifdef DEBUG
+ static void sd_print_debug_regs(struct rtsx_usb_sdmmc *host)
+ {
+@@ -768,12 +781,94 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
+ 	return 0;
+ }
+ 
++static bool sdmmc_validate_insert_locked(struct rtsx_usb_sdmmc *host)
++{
++	struct rtsx_ucr *ucr = host->ucr;
++	struct mmc_command cmd = { };
++	int err = 0;
++	bool probe_powered = false;
++	bool ddr_mode = false;
++
++	/*
++	 * Some readers with a tray assert the mechanical SD_CD pin even when no
++	 * card is present. Only report a card present when it responds to a
++	 * minimal reset/probe sequence, similar to the old rts5139 behavior.
++	 *
++	 * Must be called with ucr->dev_mutex held.
++	 */
++	if (host->power_mode == MMC_POWER_OFF) {
++		err = sd_power_on(host);
++		if (err)
++			return false;
++		probe_powered = true;
++
++		/* Issue clock signals to card for at least 74 clocks. */
++		rtsx_usb_write_register(ucr, SD_BUS_STAT,
++					SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
++		usleep_range(200, 400);
++		rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
++	}
++
++	/*
++	 * Ensure the interface is in a safe, legacy / initial-clock mode before
++	 * probing for a response. The MMC core may not have configured ios yet.
++	 */
++	err = sd_set_bus_width(host, MMC_BUS_WIDTH_1);
++	if (err)
++		goto out;
++
++	err = sd_set_timing(host, MMC_TIMING_LEGACY, &ddr_mode);
++	if (err)
++		goto out;
++
++	ucr->cur_clk = 0;
++	err = rtsx_usb_switch_clock(ucr, 400000, SSC_DEPTH_512K,
++				    true, true, false);
++	if (err)
++		goto out;
++
++	cmd.opcode = MMC_GO_IDLE_STATE;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_NONE | MMC_CMD_BC;
++	sd_send_cmd_get_rsp(host, &cmd);
++
++	/* SD v2.0+: CMD8 */
++	cmd.opcode = SD_SEND_IF_COND;
++	cmd.arg = 0x1aa;
++	cmd.flags = MMC_RSP_R7 | MMC_CMD_BCR;
++	sd_send_cmd_get_rsp(host, &cmd);
++	if (!cmd.error)
++		goto out;
++
++	/* SD v1.x: CMD55 */
++	cmd.opcode = MMC_APP_CMD;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
++	sd_send_cmd_get_rsp(host, &cmd);
++	if (!cmd.error)
++		goto out;
++
++	/* MMC: CMD1 */
++	cmd.opcode = MMC_SEND_OP_COND;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R3 | MMC_CMD_BCR;
++	sd_send_cmd_get_rsp(host, &cmd);
++
++out:
++	if (probe_powered)
++		sd_power_off(host);
++	return !err && !cmd.error;
++}
++
+ static int sdmmc_get_cd(struct mmc_host *mmc)
+ {
+ 	struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_ucr *ucr = host->ucr;
+ 	int err;
+ 	u16 val;
++	u8 pend;
++	bool sd_int = false;
++	bool cd_raw = false;
+ 
+ 	if (host->host_removal)
+ 		return -ENOMEDIUM;
+@@ -782,28 +877,71 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+ 
+ 	/* Check SD card detect */
+ 	err = rtsx_usb_get_card_status(ucr, &val);
+-
+-	mutex_unlock(&ucr->dev_mutex);
+-
+-	/* Treat failed detection as non-exist */
+ 	if (err)
+-		goto no_card;
++		goto no_card_unlock;
+ 
+ 	/* get OCP status */
+ 	host->ocp_stat = (val >> 4) & 0x03;
+ 
+-	if (val & SD_CD) {
+-		host->card_exist = true;
++	cd_raw = !!(val & SD_CD);
++
++	/* Use SD_INT as a reliable removal indication on some tray readers. */
++	err = rtsx_usb_read_register(ucr, CARD_INT_PEND, &pend);
++	if (!err) {
++		sd_int = !!(pend & SD_INT);
++		if (sd_int)
++			rtsx_usb_write_register(ucr, CARD_INT_PEND,
++						SD_INT, SD_INT);
++	}
++
++	if (!cd_raw) {
++		host->cd_debounce = 0;
++		host->next_insert_check = 0;
++		goto no_card_unlock;
++	}
++
++	/*
++	 * rts5139-style: when a card is already known present, treat SD_INT as
++	 * a removal event even if SD_CD stays high (e.g. tray-based readers).
++	 */
++	if (host->card_exist) {
++		if (sd_int) {
++			host->cd_debounce = 0;
++			host->next_insert_check = 0;
++			goto no_card_unlock;
++		}
++		mutex_unlock(&ucr->dev_mutex);
+ 		return 1;
+ 	}
+ 
+-no_card:
++	/* Debounce mechanical CD before probing for a response. */
++	if (host->cd_debounce < RTSX_USB_SD_CD_DEBOUNCE_CNT) {
++		host->cd_debounce++;
++		goto no_card_unlock;
++	}
++
++	/* Avoid pounding the bus with probes if CD is stuck asserted. */
++	if (time_before(jiffies, host->next_insert_check))
++		goto no_card_unlock;
++
++	if (!sdmmc_validate_insert_locked(host)) {
++		host->next_insert_check = jiffies +
++			msecs_to_jiffies(RTSX_USB_SD_INSERT_RETRY_MS);
++		goto no_card_unlock;
++	}
++
++	host->card_exist = true;
++	mutex_unlock(&ucr->dev_mutex);
++	return 1;
++
++no_card_unlock:
+ 	/* clear OCP status */
+ 	if (host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)) {
+ 		rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
+ 		host->ocp_stat = 0;
+ 	}
+ 	host->card_exist = false;
++	mutex_unlock(&ucr->dev_mutex);
+ 	return 0;
+ }
+ 
+@@ -1359,6 +1497,8 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
+ 
+ 	host->power_mode = MMC_POWER_OFF;
+ 	host->ocp_stat = 0;
++	host->cd_debounce = 0;
++	host->next_insert_check = 0;
+ }
+ 
+ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
+-- 
+2.51.0
+
