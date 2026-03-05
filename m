@@ -1,208 +1,130 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74ABB374191
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Mar 2026 10:04:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E85BA2222AC;
+	Thu,  5 Mar 2026 10:46:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772705081; cv=none; b=IprjvlL7H2UmQIz3s1HfbR7ozrzuKAbchW//akZ2c7Gqm8gam8uwceo7tFLuWwgPChJchHs9Sr2ndgR8RabU78g/bUxhE5GwrgieBzzerTXrqMGicMyBi7YdYjVTM0eoedKjgD3luh/5AkjG4DkxvVZKnnNPEsevJiAO1fyaarc=
+	t=1772707605; cv=none; b=l2ccoTaP7LhMg9wpf6uL3JwGUm2ryD12PLJms7QgYFHFOA7eGEgrZUuxhejxYub0cbhY+YlcPU7bj3wLfQkeKttlvJMKlFfwSKiOtGZJWU2Li0HYEVeYbvOvuctOmP0x3jVkf/jhGc/lesgsLSCAQVmoAGzDpgbJ+7LJ7VQbbjM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772705081; c=relaxed/simple;
-	bh=0d2hmGJkzrPu0JbqS7/7e0eBjh8hrdRKF9PZP3WEdWw=;
-	h=From:In-Reply-To:MIME-Version:References:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IhU2js8r/YTMwjW1FdMoKicUtrASh/Rp4Sc2z2m7abXKKvxBCuYxLh/0F6stsNPX2uAE119ZH6VRJb9PjU94mGk9aNds0VRANZH0m6Uy+CGgbrCEnR4j7HQpS07XKimCg1hhjCUIJh2NoN2nZlqAY/OB6JOakX13qxnzWxvD1kU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O/+AS9bf; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772707605; c=relaxed/simple;
+	bh=1lEbzZR//+Yc7K5TUFwZ97IJ+ukRCAnqOXR6JFDQSz8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=rhGnNJNvPZ4Ff2mD5TY6xUL1hJSMxseoDUVkD/ag+YBHh+7R3qR2E+yrdTdnlc67UPzKEv7zVa3kmImJJF84MMwwN5phJnG8vsz3HugvVFWbdaWnmU3KsgiKA2bP5jojjd9Uchm5kXloNKkOzVgJhDHQIeW9Bz/N2nFTFZOdSKQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WJr3xQBD; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O/+AS9bf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2DB0EC19425
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Mar 2026 10:04:41 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WJr3xQBD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CCF16C116C6;
+	Thu,  5 Mar 2026 10:46:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772705081;
-	bh=0d2hmGJkzrPu0JbqS7/7e0eBjh8hrdRKF9PZP3WEdWw=;
-	h=From:In-Reply-To:References:Date:Subject:To:Cc:From;
-	b=O/+AS9bfLCH7x1I1U46bO2A86IkXlNB/FNkRUg1FJO7E3jRV3EQ4zWoN8bGqwRTvV
-	 EmXFE2Y6WrKPJoyrmcv8h4wxXB1ThiBCfgEpMD1G9AjYLGVVk1sjiyT6VCw1kjOZdJ
-	 ntsEhuSn9/Jc5y/8jmXiHJlgZ84JlLT4GCOR0CmOGvVjF9JoT/+c/5R+rPKcOoIp2R
-	 v94NtxtcO4v1BrPT/kwIpWk7VPu85pV5i6WCoDXRJ/cF+HtinUAjNh1XK3wMHhZyX/
-	 tStj924Y1O2zuG7q2Kx7CjXg4tVVYCU6PKfdksP3c0v5C2pthN2QugbL0mljeUZ6e4
-	 qYD0CO5zJvd9Q==
-Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-38a2f196cbaso20345941fa.1
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Mar 2026 02:04:41 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWA3ysP+t3CkPd5vDdPvLXhEL3gwiNcl8ft/+IUjmkwxkhCCviyXadiaUyxdv+ReS55ARd0sR6yn+Q=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxXHWcF9n8WsuryINj2SmVHLyPjreG6LFCRXiu/rfmKTK4LLVja
-	5WpE+6GEB12ORDwpjbUsnbcRz9IL/+I6W45uYnv8abdsii+Oq7FhuhRDf7jGxk8kImUwTDz90lT
-	jubTIqW7kb6uZdWNrjpiDMbbwYQlT5myot19J84HdbQ==
-X-Received: by 2002:a2e:a98c:0:b0:38a:1a50:d843 with SMTP id
- 38308e7fff4ca-38a2c7bd73bmr32104591fa.36.1772705079815; Thu, 05 Mar 2026
- 02:04:39 -0800 (PST)
-Received: from 969154062570 named unknown by gmailapi.google.com with
- HTTPREST; Thu, 5 Mar 2026 05:04:38 -0500
-Received: from 969154062570 named unknown by gmailapi.google.com with
- HTTPREST; Thu, 5 Mar 2026 05:04:38 -0500
-From: Bartosz Golaszewski <brgl@kernel.org>
-In-Reply-To: <923d35430a633af4064d671f1cac1d47780cd14f.camel@pengutronix.de>
+	s=k20201202; t=1772707604;
+	bh=1lEbzZR//+Yc7K5TUFwZ97IJ+ukRCAnqOXR6JFDQSz8=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=WJr3xQBDAxaMYTCCGl2Xbz20BXRD6QC+6s6ohVgHv/LcHsWM2PiFV8WKvYkXErAgh
+	 /6Z0VzJVi3XLYRbUIXMIvT3/pn9p3eguvUQi24ogjaTEuNh0d9Jo5y3FzNhCFI9DhE
+	 CLdg3fF8TnnlJup63/KKl2eCrCMVugrV9Dn/uTKZcYToPTZNTdSHDPStx3z0bL/mD9
+	 3/bLws5REUCiXxgb1Q+KJDNye62w7b0KdvtNAnNWWGLq0JFuSLMXKN7D3gcGwnEaJV
+	 vq60lyySCrhNmrAswIJrNg8y/Hnbv4KD8q+gsODmMFa7PgEOeQPtqHsvZ8VEIh0V7s
+	 rMCs0AOPuJPkQ==
+Message-ID: <8d991c0f-3244-4c0a-af4a-8d7aeb8ca35b@kernel.org>
+Date: Thu, 5 Mar 2026 11:46:40 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260220194725.1341281-1-sergey.suloev@gmail.com>
-	 <CAMRc=McNXzDE48zX=eH_bfg+KBN=2-yeW6bjL1L=hCmHu6xv8w@mail.gmail.com> <923d35430a633af4064d671f1cac1d47780cd14f.camel@pengutronix.de>
-Date: Thu, 5 Mar 2026 05:04:38 -0500
-X-Gmail-Original-Message-ID: <CAMRc=MdAp9fgp2zoU0AXow2avejqB=ZjiKanVgFVxokcmFAvuQ@mail.gmail.com>
-X-Gm-Features: AaiRm515nCAy7JdlLp-3C1vI8S45CKXCdjxvF6QLRhc-uJL5pXi7PbN_GW-1SFY
-Message-ID: <CAMRc=MdAp9fgp2zoU0AXow2avejqB=ZjiKanVgFVxokcmFAvuQ@mail.gmail.com>
+User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH] mmc: pwrseq_simple: fix probe failure when
  CONFIG_RESET_GPIO is enabled
-To: Philipp Zabel <p.zabel@pengutronix.de>
-Cc: Bartosz Golaszewski <brgl@kernel.org>, Sergey Suloev <sergey.suloev@gmail.com>, ulf.hansson@linaro.org, 
-	catalin.popescu@leica-geosystems.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Krzysztof Kozlowski <krzk@kernel.org>, 
-	Linus Walleij <linusw@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+To: Bartosz Golaszewski <brgl@kernel.org>,
+ Philipp Zabel <p.zabel@pengutronix.de>
+Cc: Sergey Suloev <sergey.suloev@gmail.com>, ulf.hansson@linaro.org,
+ catalin.popescu@leica-geosystems.com, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, Linus Walleij <linusw@kernel.org>
+References: <20260220194725.1341281-1-sergey.suloev@gmail.com>
+ <CAMRc=McNXzDE48zX=eH_bfg+KBN=2-yeW6bjL1L=hCmHu6xv8w@mail.gmail.com>
+ <923d35430a633af4064d671f1cac1d47780cd14f.camel@pengutronix.de>
+ <CAMRc=MdAp9fgp2zoU0AXow2avejqB=ZjiKanVgFVxokcmFAvuQ@mail.gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <CAMRc=MdAp9fgp2zoU0AXow2avejqB=ZjiKanVgFVxokcmFAvuQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu, 5 Mar 2026 10:43:54 +0100, Philipp Zabel <p.zabel@pengutronix.de> s=
-aid:
-> On Mi, 2026-03-04 at 08:41 -0800, Bartosz Golaszewski wrote:
->> On Fri, 20 Feb 2026 20:47:25 +0100, Sergey Suloev
->> <sergey.suloev@gmail.com> said:
->> > The driver uses a heuristic =E2=80=94 checking if exactly one entry ex=
-ists in
->> > 'reset-gpios' =E2=80=94 to decide whether to attempt reset controller =
-API usage
->> > via devm_reset_control_get_optional_shared(). This is semantically
->> > incorrect and causes a permanent probe failure when CONFIG_RESET_GPIO
->> > is enabled.
->> >
->> > When CONFIG_RESET_GPIO=3Dy, __of_reset_control_get() intercepts the
->> > 'reset-gpios' DT property and attempts to register the GPIO as a reset
->> > controller via __reset_add_reset_gpio_device(). If the GPIO controller
->> > is not yet fully initialized at probe time, this returns -ENOENT inste=
-ad
->> > of -EPROBE_DEFER, and the error path does not respect the 'optional'
+On 05/03/2026 11:04, Bartosz Golaszewski wrote:
+> 
+>>> Philipp, Krzysztof: what do you think?
 >>
->> If this is what's happening, then it is not the expected behavior[1].
->
-> Is this -ENOENT returned because of #gpio-cells !=3D 2 [1]?
->
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tr=
-ee/drivers/reset/core.c#n883
->
-> It looks like it [2].
->
-> [2] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tr=
-ee/arch/arm/boot/dts/allwinner/sunxi-bananapi-m2-plus.dtsi#n103
->
->> > flag, causing pwrseq_simple to fail permanently rather than defer.
->> > This prevents mmc1 from probing on boards that use 'reset-gpios' for
->> > WiFi power sequencing, such as BananaPi M2 Magic with AP6212/BCM43430
->> > on Allwinner R16.
->> >
->> > The correct indicator of reset controller intent is the explicit prese=
-nce
->> > of a 'resets' property in the device tree node, not the count of
->> > 'reset-gpios' entries. A single 'reset-gpios' entry is just as likely
->> > to be a plain GPIO as multiple entries.
->> >
+>> I think this is a missing feature in reset-gpio.
+>> This driver could fall back to to devm_gpiod_get_array() also if
+>> devm_reset_control_get_optional_shared() returns -ENOENT instead of
+>> erroring out (maybe -ENOTSUPP would be a better return code for [1]?).
 >>
->> Am I getting it right? You have a node that has both the "resets" proper=
-ty
->> as well as "reset-gpios" with more than one entry?
->
-> According to the mmc-pwrseq-simple binding doc, a "resets" property is
-> not valid at all. Apparently, this is just a "reset-gpios" property
-> with a single GPIO with three cells.
->
->> If that's the case then it should be fixed in reset core, not in a user
->> because there'll surely be another one in no time.
->>
->> > Replace the ngpio =3D=3D 1 heuristic with an explicit check for the 'r=
-esets'
->> > DT property, making the behavior unambiguous and immune to
->> > CONFIG_RESET_GPIO interference.
->> >
->> > Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset co=
-ntrol")
->> > Signed-off-by: Sergey Suloev <sergey.suloev@gmail.com>
->> > ---
->> >  drivers/mmc/core/pwrseq_simple.c | 4 +---
->> >  1 file changed, 1 insertion(+), 3 deletions(-)
->> >
->> > diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrse=
-q_simple.c
->> > index 4b47e6c3b04b..780c8818a273 100644
->> > --- a/drivers/mmc/core/pwrseq_simple.c
->> > +++ b/drivers/mmc/core/pwrseq_simple.c
->> > @@ -124,7 +124,6 @@ static int mmc_pwrseq_simple_probe(struct platform=
-_device *pdev)
->> >  {
->> >  	struct mmc_pwrseq_simple *pwrseq;
->> >  	struct device *dev =3D &pdev->dev;
->> > -	int ngpio;
->> >
->> >  	pwrseq =3D devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
->> >  	if (!pwrseq)
->> > @@ -134,8 +133,7 @@ static int mmc_pwrseq_simple_probe(struct platform=
-_device *pdev)
->> >  	if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) !=3D -ENOENT=
-)
->> >  		return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock=
- not ready\n");
->> >
->> > -	ngpio =3D of_count_phandle_with_args(dev->of_node, "reset-gpios", "#=
-gpio-cells");
->> > -	if (ngpio =3D=3D 1) {
->> > +	if (device_property_present(dev, "resets")) {
->
-> This effectively turns the following into dead code because the binding
-> does not allow a "resets" property.
->
->> >  		pwrseq->reset_ctrl =3D devm_reset_control_get_optional_shared(dev, =
-NULL);
->> >  		if (IS_ERR(pwrseq->reset_ctrl))
->> >  			return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
->> > --
->> > 2.43.0
->> >
->> >
->> >
->>
->> I think reset core should check if the client node has both "reset" and
->> "reset-gpios".
->
-> Why check both? If the "resets" property exists, we use it [3].
-> "reset-gpios" is only checked as a fallback if the "resets" property is
-> not present [4].
->
-> [3] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tr=
-ee/drivers/reset/core.c#n1019
-> [4] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tr=
-ee/drivers/reset/core.c#n1031
->
->> If so - it should assume the client wants to resolve "resets"
->> and only fall-back to "reset-gpios" if there's no "resets" and number of=
- GPIOs
->> is 1.
->
-> That is exactly what happens right now.
->
+> 
+> I did not write the initial version but Krzysztof: is there any reason we only
+> support a single, two-cell GPIO? Would it be problematic to support any kind of
+> reset GPIO setup?
 
-Right.
+It was only due to limitation of my initial solution - see even a TODO
+note in reset/core.c. I think the problem I had is that GPIO specifier
+without flags (so cells=1) would mess with GPIO_LOOKUP(). And if we have
+cells=3, where do the flags are? If you assume flags are last argument,
+that's an implied ABI encoded in the reset core.
 
->> Philipp, Krzysztof: what do you think?
->
-> I think this is a missing feature in reset-gpio.
-> This driver could fall back to to devm_gpiod_get_array() also if
-> devm_reset_control_get_optional_shared() returns -ENOENT instead of
-> erroring out (maybe -ENOTSUPP would be a better return code for [1]?).
->
+Well, heh, implied ABI that 2nd argument are flags is already there, so
+the code is partially hacky, I agree.
 
-I did not write the initial version but Krzysztof: is there any reason we o=
-nly
-support a single, two-cell GPIO? Would it be problematic to support any kin=
-d of
-reset GPIO setup?
+So honestly I believe that GPIO core should handle all this mapping of
+original reset-gpios property into platform data to reset-gpio driver.
+That's the answer for your question "would it be problematic".
 
-Bartosz
+
+For reference, original patch:
+https://lore.kernel.org/all/20240129115216.96479-5-krzysztof.kozlowski@linaro.org/
+
+Best regards,
+Krzysztof
