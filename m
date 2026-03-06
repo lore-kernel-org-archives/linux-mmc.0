@@ -1,130 +1,168 @@
-Received: from cstnet.cn (smtp25.cstnet.cn [159.226.251.25])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33BA5273D8F;
-	Fri,  6 Mar 2026 09:00:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.25
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB88E344DB6
+	for <linux-mmc@vger.kernel.org>; Fri,  6 Mar 2026 09:33:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772787645; cv=none; b=kmbf7F/EXl+2IerXAOX+B1JNN6Bc8iy6iCRKNl8nPtd2nUh0TH2QMqDfAy1A9/jmgYdnVoQoqF/K2zqgzpf9YE2u7Lj2pqfPKjdwJmWm9vXeT7qvy20cbk2K4lQAeCNqo1zkM9G8Xri75pAK+OmjX7MxKr8HT8T44vHwONmhWEA=
+	t=1772789621; cv=none; b=sUayiQPsMOpJPBy0v1ESnGql8Uxt7MAe+qzq+XFMlYKmYX3UxgaDzhFTU3YngEBb7e4bF5Fc0jJZIr4zGn8QgBUJ/Hcb7UCGTERM3ZJRBrkMHh+ILhV5pMPuSc4fiwFRBF93118vfGDvl1fVX8GuAhy6tBe/emRdwHx8DJZziQQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772787645; c=relaxed/simple;
-	bh=r5WbhW7BWGrMH/5ijE23YqHk4pSOchr8zr8N1ZQkDME=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Qc58mJ0wbbQn4gJLSQqhvDULzw28i/UmNY/PI9auNLibEch68arkJ0haF/lw67RyZSoJ7Kk6G0WMjoCU5pn3m2tNm+j+LkWXycZjs74qeaTD+OoIeWvYwhVoQl9EL7S7SEDp6o4ZRu0dDi3/pY4Y5kBCd4Y6rS+jDWWrthrmbLA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn; spf=pass smtp.mailfrom=isrc.iscas.ac.cn; arc=none smtp.client-ip=159.226.251.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isrc.iscas.ac.cn
-Received: from duge-virtual-machine (unknown [183.192.221.67])
-	by APP-05 (Coremail) with SMTP id zQCowADXaQ2ol6ppQLO+CQ--.47488S2;
-	Fri, 06 Mar 2026 17:00:26 +0800 (CST)
-Date: Fri, 6 Mar 2026 17:00:23 +0800
-From: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: krzk@kernel.org, adrian.hunter@intel.com, robh@kernel.org,
-	krzk+dt@kernel.org, conor+dt@kernel.org, pjw@kernel.org,
-	palmer@dabbelt.com, aou@eecs.berkeley.edu,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
-	gaohan@iscas.ac.cn, me@ziyao.cc
-Subject: Re: [PATCH v2 2/3] mmc: sdhci-dwcmshc: Add Canaan K230 DWCMSHC
- controller support
-Message-ID: <aaqXpzEPeKfSYF41@duge-virtual-machine>
-References: <20260226115923.75670-1-jiayu.riscv@isrc.iscas.ac.cn>
- <20260226115923.75670-3-jiayu.riscv@isrc.iscas.ac.cn>
- <CAPDyKFrxJ0oWuMWoUEYGO0t-WOYU+G7p5eFw8cUY7xyPaREB5Q@mail.gmail.com>
+	s=arc-20240116; t=1772789621; c=relaxed/simple;
+	bh=tHi2a8QE8KKwNz5asvYMfGoRfMO8gx2jo+W2jzVkLWk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=UaxHdJgIy0XlCkoFYTwcj/gGEUUSi2mRlWwi3viJC/ifzneMbRGHvfBX7dNauBHXr7Su0mQdAPIJCP2L3gX/iBtwnfmeu8tXqULysbr8SAhJten7W2sLegWwhDSajTnlsDm8vuvWamETsomKpB+AX/Zpifb1kxiCPmtnjf5NEmE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=QYYyDliv; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=cInA46VN; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="QYYyDliv";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="cInA46VN"
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62654Tii4193546
+	for <linux-mmc@vger.kernel.org>; Fri, 6 Mar 2026 09:33:40 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=HdK/+DyIPdjo8vnqeEhYuvYJ5G6b5jLU/xm
+	ncGgF7IA=; b=QYYyDliviaKNV/BNNBMA3+IBDO5yTlsFOhkvWy7jYmmIa/YpgQT
+	87zvz7LSU29bHfPZa8dIvzQ0UZkDro3EmY+2wM/lPyueqn0bcpJHIjLI+onr9lW1
+	YODQyDk6CeIctl9YqaxalUzIkcDKLIGjyQ6Ly7IyywzHdk1Cfaw08p4D/s+UH435
+	2o/GVx+hq25JSY7E3iJlwxY8h0Oe3uUKxq0bt9ZTR+ZUzbFhUTsezyElSYSZlgQe
+	8ppJjBLxmKkYGVoyp5igZpRsWBMKe2kp2SH7bp8wChUKabRErOhyTrk9c3+mnZ35
+	nks8S/Sj/nD0HmmQ2DvmVpuABZomm1aLWXw==
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4cqrf5rvbq-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2026 09:33:39 +0000 (GMT)
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-35641c14663so9464101a91.2
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2026 01:33:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1772789618; x=1773394418; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=HdK/+DyIPdjo8vnqeEhYuvYJ5G6b5jLU/xmncGgF7IA=;
+        b=cInA46VNNcDaLzUTOK2dohckdeEtq5qEEsop+eOLHh2TAZk2ePYcYMogdJxRqTTh/t
+         3tBElsd8E4Zwc9HjLFcNHWnC+A4YQwr3URzi0pREH7ivzJCAfCZTD2jdKoYmz4wJFQJT
+         kqTpIYLAGB4YYRA4czxiZUM2sqg4JQRds6jaXavwTRF5wblLl0PqfmHuqPNQvAeS2Jgp
+         v5X15g5QmQWwNrvgdk8N3rVB1OYFev/d6W7F9LVKTqUppuX+brePetnYSLeWuRR+BoDi
+         VW+jJmCYffiWNN/N2ep6audKLKAP5qOhzn6bQG4Eclwg/Uthkp7K/aWV4e/qO5g9kRqz
+         jUHQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1772789618; x=1773394418;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=HdK/+DyIPdjo8vnqeEhYuvYJ5G6b5jLU/xmncGgF7IA=;
+        b=fJztHiNnFGeuTuLrqRyQoEgsXCyk/P5YDrN6VXSpllVZOsArGp6LWzoKIefYFK9q6H
+         IeEn6gOzfYYxYzxpdZB4oRIi2wGo2sYf5D+la34LP+6j4zAJ529FPz5rbWVb3sJluABX
+         SDyffIiriZSl+0tL28WU8/UgmmGDd6N7/raS8vmeUeGJ/rWd1W1Q/WAfEI+eglVKYnYR
+         VzhrPZjqLl8zd6LY7MvwLMEU+2adr+g+ZrOofZzbD6qqPaCUkxB7axEZUMxUoSp7lx2b
+         Jc9J+/KxOxoEOxsuoti3pbPn1seOyH4/K1FkWZDU4Wj6JjbjqDLntP+4QlSQsov61Oox
+         5DHw==
+X-Gm-Message-State: AOJu0YyK8pNJLiqvp4w+YNWqLTCfWE6faFlOh6n0XM6XbV9j18v5wA/b
+	OvTNMLMyVpnWFyIn70vSYpgK2gEsSqmqqRE4iJBg4Q1OIu14do0hj+i2UYdpje8BhweGrx7Jw9J
+	ydPCQ/RLukFZRaHGIroSm2DRtAyujSFJluiY7JGbF1Ii3sEDWlql3Mg1Q7NlTqOtzXa6z3Ks=
+X-Gm-Gg: ATEYQzxf/I3nFLIl+jG/yMC89x7LgJLwbHcTLxOJD1vOyNlSqLSAK8ZFWBDwPEndQWL
+	Agem7ki3k4eqqigOXk0cbuKbHhiR0BoT0hUQQGKoXAAzeELzYchfqIlm3GZ5rTNMBQapcYZfXM/
+	nkt1nBtoWLRgNZZcA1aZOkM9aFiSDFtywnFpuUYuoqg57rtu0AnhsAmbibtFjlTnTWl51tO9Dsg
+	SfpPBl3kUQ9GGXRR0hsT35VuPZ5Iv9W/QXNNOPcj8LmzIdPs3aMToHkY3s2KIJtQAxG3HU9Zwg2
+	xq9WsJqd+KIHYAKbd6qZvVHDEPO1HDfAXyi87ZOncO+/UhcsAKaWJNv3OzjYTIy0pnuxLBtZRGr
+	Ss6HMfHZGJMU+fqK/PE8tKtdgAUMgSyzQ2C36WcVYa8TcMsLQSgds
+X-Received: by 2002:a17:90b:17d1:b0:359:8d23:af5f with SMTP id 98e67ed59e1d1-359be384d2fmr1336185a91.35.1772789618433;
+        Fri, 06 Mar 2026 01:33:38 -0800 (PST)
+X-Received: by 2002:a17:90b:17d1:b0:359:8d23:af5f with SMTP id 98e67ed59e1d1-359be384d2fmr1336172a91.35.1772789617960;
+        Fri, 06 Mar 2026 01:33:37 -0800 (PST)
+Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-359bbcacf06sm647549a91.4.2026.03.06.01.33.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 06 Mar 2026 01:33:37 -0800 (PST)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+        conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
+Subject: [PATCH v5 0/3] Enable Inline crypto engine for kodiak and monaco
+Date: Fri,  6 Mar 2026 15:03:29 +0530
+Message-Id: <20260306093332.4193993-1-neeraj.soni@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrxJ0oWuMWoUEYGO0t-WOYU+G7p5eFw8cUY7xyPaREB5Q@mail.gmail.com>
-X-CM-TRANSID:zQCowADXaQ2ol6ppQLO+CQ--.47488S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7KFW7GF1kAw1kJw4rXrWUJwb_yoW8KF1fpa
-	yDXrnIkrWUJF4Sgwnxuw1Duas0qw4Sk3sxtFy3Gw1xZrZ2kF1jqry8Ka4093ZaqrWrGF1j
-	vr1jqr95urnIyaDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUvvb7Iv0xC_KF4lb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I2
-	0VC2zVCF04k26cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rw
-	A2F7IY1VAKz4vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xII
-	jxv20xvEc7CjxVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWUJVW8JwA2z4x0Y4vEx4
-	A2jsIEc7CjxVAFwI0_Gr0_Gr1UM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI
-	64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8Jw
-	Am72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lFIxGxcIEc7CjxVA2Y2ka0xkIwI1l
-	c7CjxVAaw2AFwI0_Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr
-	1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE
-	14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7
-	IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E
-	87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73Uj
-	IFyTuYvjxU2VbyDUUUU
-X-CM-SenderInfo: 5mld534oul2uny6l223fol2u1dvotugofq/
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: IGERSl-esCdd_tKuLEVi_EkEHK9GhtJx
+X-Proofpoint-GUID: IGERSl-esCdd_tKuLEVi_EkEHK9GhtJx
+X-Authority-Analysis: v=2.4 cv=L+oQguT8 c=1 sm=1 tr=0 ts=69aa9f73 cx=c_pps
+ a=UNFcQwm+pnOIJct1K4W+Mw==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=Yq5XynenixoA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=u7WPNUs3qKkmUXheDGA7:22 a=gowsoOTTUOVcmtlkKump:22 a=OaewepulewRRD3_FMPAA:9
+ a=uKXjsCUrEbL0IQVhDsJ9:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzA2MDA5MCBTYWx0ZWRfXzCrLObWz3PtU
+ Y+wpSaJdFWb0ITyl2WEv7dfMYB/Cwm34IsaCceuf6vZwALppRFg+Kis+qc87dDHqPoYhUDnLMQi
+ pTalWvYkGcccZGnVWQaSa7Ymzm0TO1w3W5+4nmZoswnq18N7MqUZ5f2ToJzQP24U7lkWO6/1UJU
+ 146iIdJr/IZhNS1caAWnU3LjlNhO8Qbnc/8qCJhfnVHQY1HHsoU/GWpFUAWq9q+0NRfq0EVwNSz
+ JvFvcZHm+TpU2XCqmcjBcdmbGsUAIZPu/1Vp7K7N5FH62cMapu1DAEloYOfNFUgAPz9HMBEUC9/
+ Rsfr/pS6yxbnFyqmcgTEdvqvYZrPT75uRjsbREwWCFEF5Or/+uf/hxJlli8deqPxNA84AxLlrIr
+ 1MzmBlEEmVG7Sj6d20xU2J2HUbShmCMFJny1TSmBTD7MbiLwF04KU+vdpRKrsSX8pJbpLTTtANd
+ oeIcSQcvFK0n4AYXx8g==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-03-06_03,2026-03-04_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 suspectscore=0 adultscore=0 bulkscore=0 priorityscore=1501
+ phishscore=0 impostorscore=0 lowpriorityscore=0 spamscore=0 malwarescore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2602130000 definitions=main-2603060090
 
-On Thu, Mar 05, 2026 at 12:48:29PM +0100, Ulf Hansson wrote:
-> On Thu, 26 Feb 2026 at 12:59, Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn> wrote:
-> >
-> > Add SDHCI controller driver for Canaan k230 SoC. Implement custom
-> > sdhci_ops for set_clock, phy init, init and reset.
-> >
-> > Signed-off-by: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
-> > ---
-> >  drivers/mmc/host/sdhci-of-dwcmshc.c | 288 ++++++++++++++++++++++++++++
-> >  1 file changed, 288 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > index 2b75a36c096b..21c77e908d77 100644
-> > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-...
-> >  struct dwcmshc_pltfm_data {
-> > +       const void *match_data;
-> 
-> This makes sense to me!
-> 
-> Although, I realized that dwcmshc_rk35xx_init() could also move its
-> assignment of "devtype" into this match_data.
-> 
-> Can you please create a follow-up patch to fixup this and to avoid
-> storing this type of data in two different ways?
-> 
-...
-> > +static int dwcmshc_k230_init(struct device *dev, struct sdhci_host *host,
-> > +                            struct dwcmshc_priv *dwc_priv)
-> > +{
-> > +       static const char * const clk_ids[] = {"block", "timer", "axi"};
-> > +       const struct dwcmshc_k230_match_data *match_data;
-> > +       const struct dwcmshc_pltfm_data *pltfm_data;
-> > +       struct device_node *usb_phy_node;
-> > +       struct k230_priv *k230_priv;
-> > +       u32 data;
-> > +       int ret;
-> > +
-> > +       pltfm_data = device_get_match_data(dev);
-> > +
-> > +       if (!pltfm_data || !pltfm_data->match_data) {
-> > +               dev_err(dev, "No vendor data found for K230\n");
-> > +               return -EINVAL;
-> > +       }
-> > +       match_data = pltfm_data->match_data;
-> 
-> I don't think this should be specific to dwcmshc_k230_init().
-> 
-> Instead I suggest adding a "const void *match_data" to the "struct
-> dwcmshc_priv" - and copy the pointer in the common dwcmshc_probe()
-> instead. In this way, all variants will be able to use it.
+Document Inline Crypto Engine (ICE) handle for SDHC and add its device-tree
+node to enable it for kodiak and monaco.
 
-Your suggestions make perfect sense. I'll prepare a new version to add
-the "const void *match_data" to "struct dwcmshc_priv", assign it in
-"dwcmshc_probe()", and adjust the K230 init accordingly.
+How this patch was tested:
+- export ARCH=arm64
+- export CROSS_COMPILE=aarch64-linux-gnu-
+- make menuconfig
+- make defconifg
+- make DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/sdhci-msm.yaml dt_binding_check
+- make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CHECK_DTBS=y dtbs
 
-I'll also migrate the rk35xx devtype assignment to match_data for
-consistency. Once ready, I'll post the link as a reply to this k230 mmc
-series.
+---
+Changes in v5:
+- Updated the constraint for SDHCI 'v4' vs rest to reflect the 'qcom,ice'
+  constraint.
 
-Best regards,
-Jiayu Du
+Changes in v4:
+- Added a new patch (3/3) for device tree changes for Monaco SoC.
+- Updated commit subject of cover letter to reflect "monaco".
+- Removed the text description of constraints from "description:" for "qcom,ice" and
+  wrapped the code.
+- Corrected the schema code to reflect the constraint of "qcom,ice" usage properly.
 
-> 
-> Kind regards
-> Uffe
+Changes in v3:
+- Described the purpose for phandle in "description:" for "qcom,ice".
+- Re-added the "if: required:" description for "qcom,ice" with proper
+  encoding.
+- Corrected the uppercase for base address and reg address space for ICE DT node.
+
+Changes in v2:
+- Removed the "if: required:" description for "qcom,ice" dt-binding
+  as the ICE node is optional.
+- Corrected the ICE dt node entry according to the dt-binding description.
+- Added test details.
+
+Changes in v1:
+- Updated the dt-binding for ICE node.
+- Added the dt node for ICE for kodiak.
+
+Neeraj Soni (3):
+  dt-bindings: mmc: sdhci-msm: Add ICE phandle
+  arm64: dts: qcom: kodiak: enable the inline crypto engine for SDHC
+  arm64: dts: qcom: monaco: enable the inline crypto engine for SDHC
+
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    | 95 +++++++++++++------
+ arch/arm64/boot/dts/qcom/kodiak.dtsi          |  9 ++
+ arch/arm64/boot/dts/qcom/monaco.dtsi          |  9 ++
+ 3 files changed, 85 insertions(+), 28 deletions(-)
+
+--
+2.34.1
 
