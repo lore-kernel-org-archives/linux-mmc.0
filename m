@@ -1,140 +1,143 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A71524E016;
-	Fri,  6 Mar 2026 13:08:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B34D33A9603;
+	Fri,  6 Mar 2026 14:34:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772802496; cv=none; b=mUUOr/l08MLJYEwh19wYGirwMxyKUP10vSVziBlg/dQfs4aljPznjZ+xlV6uteTW3ZrIstEG09E5N0wWdlSwufrqDSkuB4juIfWx7Lmr6zalyTsGDi2pM2GyeZ6nGI3TTL/p9uAVNkliB2Q+csvu2mWB9bf3hF3YIP1QZeA3fSM=
+	t=1772807664; cv=none; b=A0aAa9RRNlygXYjcrgOFNZ+XE2UbRoW7kaHCASY8u3X/J4Mx0q36A7GYIdcHt/xab2QAyTAO4Ohe9wrwvFQz23Iq8Q8Xu+sF6Tphw9Vil2K/vtf28UZ0+63xgc6lxwGSJI4vDyR6hu4trpk2ezW416UyV0jhS29VRkDhMQDwx2w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772802496; c=relaxed/simple;
-	bh=X33DmcoobMWBjEwpsJyBbUD2aCD20Mj1tSw9gJzI7Jw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=lDczkMc04DDhRV5OGdxMnYfsnmQ0SI195EF2FWZmPTX/OKw7duwwnQSru9dSFWSi0wdJbcukiyXp6UPWCfFQ50Rfz0HGwoC0TxFf52uaPa0GOUPdpTtyR2byTGY8/Ozw30hBKQBYiO3hfWsJ5bBTrnHZiZymHS2sI2j06CKBgSw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dOgoep/+; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1772807664; c=relaxed/simple;
+	bh=KN/c1puIwrPuySCS9Z5SJ0m0+sc0zU7fO0fXfozJE2c=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hVpFMAjId8FtY/jYLpF0OfkaAWOwh/dP3u0SyVn3m+c/w9myJ9K4b11k0d1kYZaWylrNrsGpTUkXjWP1C8Ax+93jAhVq9A7KBRYepZ1m2p+LW2uWK4kAQKjr1ixtWFB/rvBkbPoePXX/mBXVYb4JlPdZlUg9cFF+NnLyXskXMpM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ql4OxffO; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dOgoep/+"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CFCB6C4CEF7;
-	Fri,  6 Mar 2026 13:08:13 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ql4OxffO"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E2E7EC4CEF7;
+	Fri,  6 Mar 2026 14:34:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772802495;
-	bh=X33DmcoobMWBjEwpsJyBbUD2aCD20Mj1tSw9gJzI7Jw=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=dOgoep/+4phJj0umQVQUS86utVKKBhD/Y2RplvBXHJHFlIntcP7F3VFoLhSCurnsx
-	 JfgreDgqnixgEzRJYJBad4SWt8L/Rtfp7/dLqRh2JjsZAQ56dgvR/OTYzOFvQaT49w
-	 aBmj08fG84p5R9/Slzy50lj4rp22jkqnA4ukRSmOeaxyvyhI5/PtHl4W/yFO6R7ls3
-	 4byowxRgWlzwNWGbUH0gQBTL9K+H9hXaSCsfwrdjRAMYbFrg0CjBJmszGT1O8T76yd
-	 46NPFnHF/TBtWt5qxEwlsephriCRW0oBYSBUPewrPGehsQenO6y3B5YcmRS6wj/WT8
-	 wsVGN7cSGcgdw==
-Message-ID: <aa85df27-ebbb-472a-a300-f8ae87080ee3@kernel.org>
-Date: Fri, 6 Mar 2026 14:08:11 +0100
+	s=k20201202; t=1772807664;
+	bh=KN/c1puIwrPuySCS9Z5SJ0m0+sc0zU7fO0fXfozJE2c=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Ql4OxffOxzNST2q2yixG+i2mgbirVumzzOwCko6Mu67EnRA63AlqdZio7X/ixEOLa
+	 6faKXKSdAldXY0+Lu3dr+2dkIOtZz0d/HS5j/iVqVFJ91yLlrPVG91DqpRRzx/vMTc
+	 qRQJe36egHo7+eexun6jtNfvmjw2XqHAjFUBlkCgKz9415JxPzsahUpfpLLKz79+7m
+	 pqPpDB2Hyqg6Wz4e0h22C9qyQmMm/AGsn+t+4qPWKfSfUQc0YdtvpwsO13Ciy1rHDy
+	 3l6q2Udi3bki6lqtgOn59jTykTM6p1Atn9h4gJq73VXmOySnF5ZF8hqxCnM4bYTzOR
+	 hpO4EcPpN21uw==
+Date: Fri, 6 Mar 2026 20:04:11 +0530
+From: Manivannan Sadhasivam <mani@kernel.org>
+To: Sumit Garg <sumit.garg@oss.qualcomm.com>
+Cc: manivannan.sadhasivam@oss.qualcomm.com, 
+	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, 
+	Abel Vesa <abelvesa@kernel.org>, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	Neeraj Soni <neeraj.soni@oss.qualcomm.com>, Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Subject: Re: [PATCH v4 3/5] soc: qcom: ice: Return proper error codes from
+ devm_of_qcom_ice_get() instead of NULL
+Message-ID: <k3pswjaxnptwbqgtrs7j3bsf7il6cxtfgc3sccrotb4tfjwi3q@d47blzsosoob>
+References: <20260302-qcom-ice-fix-v4-0-0e65740a5dcc@oss.qualcomm.com>
+ <20260302-qcom-ice-fix-v4-3-0e65740a5dcc@oss.qualcomm.com>
+ <CAGptzHN=uiYoDC-LwmWcGc=bO6gYWmnr6DNiS+o0M_BS80QftQ@mail.gmail.com>
+ <CAGptzHO+cXBib_cpD+GvM8riKVSKMF_1Y3DUJO6KL7HcM__mJg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: samsung,exynos-dw-mshc: Make both
- clocks required
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org,
- Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, Ping Gao <ping.gao@samsung.com>
-References: <20260306112742.64235-1-ulf.hansson@linaro.org>
- <3eb61c4b-2902-4a62-8246-4bed683fe326@kernel.org>
- <CAPDyKFosu5=gAb0QzhkACO6RhXkOFNiKKOSdwrDsezT-bx4U2w@mail.gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <CAPDyKFosu5=gAb0QzhkACO6RhXkOFNiKKOSdwrDsezT-bx4U2w@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAGptzHO+cXBib_cpD+GvM8riKVSKMF_1Y3DUJO6KL7HcM__mJg@mail.gmail.com>
 
-On 06/03/2026 13:55, Ulf Hansson wrote:
-> On Fri, 6 Mar 2026 at 12:50, Krzysztof Kozlowski <krzk@kernel.org> wrote:
->>
->> On 06/03/2026 12:27, Ulf Hansson wrote:
->>> The current binding allows one or two clocks to be specified, which is
->>
->> It allows only 2 clocks, unless you meant that referenced dw-mshc schema
->> allows one clock. I don't see it there, so I am a bit confused.
->>
->>> wrong, as both clocks are needed. This is also confirmed by looking at the
->>> exiting upstream DTS files. Let's update the binding to fix this.
->>>
->>> Cc: Ping Gao <ping.gao@samsung.com>
->>> Reported-by: Krzysztof Kozlowski <krzk@kernel.org>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>> ---
->>>  .../devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml          | 1 +
->>>  1 file changed, 1 insertion(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
->>> index 27c4060f2f91..3e560dde714e 100644
->>> --- a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
->>> @@ -42,6 +42,7 @@ properties:
->>>      maxItems: 1
->>>
->>>    clocks:
->>> +    minItems: 2
->>
->> That's redundant, 2 clocks are already implied.
+On Fri, Mar 06, 2026 at 02:30:02PM +0530, Sumit Garg wrote:
+> On Fri, Mar 6, 2026 at 2:17 PM Sumit Garg <sumit.garg@oss.qualcomm.com> wrote:
+> >
+> > Hey Mani,
+> >
+> > On Mon, Mar 2, 2026 at 6:30 PM Manivannan Sadhasivam via B4 Relay
+> > <devnull+manivannan.sadhasivam.oss.qualcomm.com@kernel.org> wrote:
+> > >
+> > > From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+> > >
+> > > devm_of_qcom_ice_get() currently returns NULL if ICE SCM is not available
+> > > or "qcom,ice" property is not found in DT. But this confuses the clients
+> > > since NULL doesn't convey the reason for failure. So return proper error
+> > > codes instead of NULL.
+> > >
+> > > Reported-by: Sumit Garg <sumit.garg@oss.qualcomm.com>
+> > > Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+> > > Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+> > > ---
+> > >  drivers/soc/qcom/ice.c | 9 ++++-----
+> > >  1 file changed, 4 insertions(+), 5 deletions(-)
+> > >
+> > > diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> > > index 833d23dc7b06..d1efc676b63c 100644
+> > > --- a/drivers/soc/qcom/ice.c
+> > > +++ b/drivers/soc/qcom/ice.c
+> > > @@ -561,7 +561,7 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
+> > >
+> > >         if (!qcom_scm_ice_available()) {
+> > >                 dev_warn(dev, "ICE SCM interface not found\n");
+> > > -               return NULL;
+> > > +               return ERR_PTR(-EOPNOTSUPP);
+> > >         }
+> >
+> > With this patch-set on top of v7.0-rc2, I still see UFS probe failing
+> > when ICE isn't supported with OP-TEE as follows:
+> >
+> > [    5.401558] qcom-ice 1d88000.crypto: ICE SCM interface not found
+> > [    5.419482] qcom-ice 1d88000.crypto: probe with driver qcom-ice
+> > failed with error -95
+> > <snip>
+> > [   18.662977] ufshcd-qcom 1d84000.ufshc: freq-table-hz property not specified
+> > [   18.670193] ufshcd-qcom 1d84000.ufshc: ufshcd_populate_vreg: Unable
+> > to find vdd-hba-supply regulator, assuming enabled
+> > [   18.737665] platform 1d84000.ufshc: deferred probe pending:
+> > ufshcd-qcom: ufshcd_pltfrm_init() failed
+> > [   18.747141] platform 3370000.codec: deferred probe pending:
+> > platform: wait for supplier /soc@0/pinctrl@33c0000/dmic23-data-state
+> >
+> > Maybe it's the "qcom-ice" driver failure leading to this deferred
+> > probe problem again.
+> >
+
+Urgh... I completely forgot that the driver core removes the drvdata during
+probe error >.<
+
 > 
-> Doesn't maxItems mean the maximum number of clocks? And since clocks
-> are required, it means that it's perfectly fine to only have one?
+> Following diff on top of your patchset allows the UFS driver to probe
+> successfully without ICE support. I suppose just setting the drvdata
+> should be sufficient.
 > 
-> My points is, we seems to be requiring *exactly* two clocks, no?
+> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> index d1efc676b63c..a86980647097 100644
+> --- a/drivers/soc/qcom/ice.c
+> +++ b/drivers/soc/qcom/ice.c
+> @@ -734,12 +734,6 @@ static int qcom_ice_probe(struct platform_device *pdev)
+>         }
+> 
+>         engine = qcom_ice_create(&pdev->dev, base);
+> -       if (IS_ERR(engine)) {
+> -               /* Store the error pointer for devm_of_qcom_ice_get() */
+> -               platform_set_drvdata(pdev, engine);
+> -               return PTR_ERR(engine);
+> -       }
+> -
 
-minItems is already (implied) at 2, so I don't see what is different
-here. You can open any other binding and see exactly same pattern
-everywhere, so that's why it would be good to see here explanation why
-this binding is different than others. IOW, what set here the number of
-items to 1?
+No, this will indicate probe success which we do not want and is not safe all
+the time. Like what if qcom_ice_create() returned -EPROBE_DEFER.
 
-Best regards,
-Krzysztof
+Let me just store the ice_handle in a global xarray with key based on node
+phandle instead of drvdata. This will ensure that the pointer stays till the
+driver is loaded.
+
+- Mani
+
+-- 
+மணிவண்ணன் சதாசிவம்
