@@ -1,82 +1,76 @@
-Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB16B385521
-	for <linux-mmc@vger.kernel.org>; Fri,  6 Mar 2026 11:07:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F03D8382361
+	for <linux-mmc@vger.kernel.org>; Fri,  6 Mar 2026 11:27:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772795242; cv=none; b=UtTOeqY+yZLsmY+AN9v03eUolT1YQgbe5OL+UIYTOuOXsycotNLZoShJ9xagMEfvJiPluNE/k5jlgrOXH9Tx6kZVaj3mMnJHDuTZ6ZVxl+x58vPrXUSbBSZyofhGqdAwKjxijk5SSA7+9xiMEX0LhzS1+o+0EDJNZ8tKqKRHblU=
+	t=1772796474; cv=none; b=X6rZylizsyqcOBP9cRR0S2Qt1PvQ/XFGzB4NQ8ElwGN5YXnOzDTI6LbFerFcrAocaQjvjbLmW/uoO2qKLG5Ta1319r8y6i3RrKjWG0CTtRLEHwDwL3TZWBoGzqUpINmCfbcu7OwwS+Q1tWjFd2B1faSPOlWkrh9iRdY2JCX/yHY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772795242; c=relaxed/simple;
-	bh=FSIP3SM84dQdhjEo4jc4DMMlhDQi8z47WoQbZCoDWLc=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=BOIySmH4NSEfWpgsPPOgFCfV/EmT+E/oRcUrnHEBRcSQ9IX/bhXMKn3+yS00g39QhxeUGd6ZUY/YWNzGL4qlQhtHwblbKMs+o3Ipe/sltGUASThxAsCcuV+y4Z2/FjOTItVbihL6nTScHE8CGtLs06lBGDFjo+SbTdrs2l8whm0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JWcsCK20; arc=none smtp.client-ip=209.85.210.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1772796474; c=relaxed/simple;
+	bh=9itS1QAWuLe0vXvae6oudDfy9qSr8VqquzUD9/4XR5Q=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fpZVKKQEqSVnFlTnOFMvrbSb1HlIk9lb8H3Z6ruGLYAyosnancy5P3xl7X8YWdTNh6bWbRGSP3kLScZ7VfvW0dIG4UELPXGGZE9Nl/lAZM7vWLTUMJTH2zvoezI3B7gHR4eTGGHRv6YE31E1LtFiLWxbuk4QhaVRGQiTqbLRMUo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=zae6I18X; arc=none smtp.client-ip=209.85.208.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JWcsCK20"
-Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-829a9c03780so227254b3a.1
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2026 03:07:19 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zae6I18X"
+Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-38a2f196cbaso28855301fa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Mar 2026 03:27:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1772795239; x=1773400039; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LkZRQN19x7mFcsCOofw3+jxcPy1oc8gx31GqMlFvfgk=;
-        b=JWcsCK204wvRcUmpZXjnfDLoZsRcUseoY/HgqISRjwES9SByQm8Y1fRcd9cWDXPMTb
-         crwCvFziEpz/6w2Yo3RWHa5ARGREubngZCQpx4QF+uuTM8RDtqgl8rC+PnLT6R2XqwXB
-         6u515Ty1gTk1EMAZEz1tNCm3U5/MuStYcH1W+OHU3AXyUJH4lIqehgfLAh40p392xMQo
-         k4dVXxfu4BH5NZu3N35AjmHqZDpWgICc3D3IwnZPOhjx3HwixDqtRCCU5N19dLAzytF7
-         /1yFv+K6fst/AwUpT09TO9WytjoM96ELxvKoFatDGEstgFxOCQcaBn5Yqwb4jmOPJNpX
-         AkMQ==
+        d=linaro.org; s=google; t=1772796471; x=1773401271; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=wyGXUYpQQ6zvxD4ZVeCoFbT7LecnKQgnIoon7pbvFWU=;
+        b=zae6I18XFyGzkepqwVU/O8CoN+jVi9elAV4krWohgXHCefrs82MhxZ4GkWxq8zEJIe
+         Cn1p4sd9jspq+C6Tz8WZNyidv8uEPL2KLdI9XTst5FbqHbmomU0MQwb7GdZlD0JC+2K5
+         9zFKwUrpCyxWZMUcqhxd3oN2nLvA+oX9mzqVNaeKJxaS4w5BdPmUzf9rCrc9H61vw1fm
+         ZfKh5zwxHE60Dtk0/5KaFR49vbxEs6Zgls0Poh4ozZhGAdunmT3YTRF8k7V6VWrsX+MM
+         6nPwEUabgE8zKWmlJO84mUPgdBJIH3bBmxT1aXRJE+2WUrePaxGW1ktRxUyEuKUB3DAx
+         Zfyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1772795239; x=1773400039;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=LkZRQN19x7mFcsCOofw3+jxcPy1oc8gx31GqMlFvfgk=;
-        b=FA+CUPPUbXSX/Inz51LSA5Hurqe4N53dhjTd3emQJwnNTY9zvQgjo3wxsJLia4u8cU
-         c+OI3DkI9J1sE/lPOCf0BXciNBfYAxmbFF4ezB4pzPy9nnaOZceAXBqdteb3+prh2FnO
-         MkByDoIS3QsXFgNKuYF1X/fq5EGlHfjA6aOrVaU8dDUIjLqmszjTytJ3PuG1mf1r56TV
-         KEIQ/GEPow9gqlcCQTdtr1VZoGxWzF74Pyhvec+VNgMoreOJOTWoOacTPBr9uNGRPboV
-         9zpzQRA+vMFHeelba087cN5mN0sJSZSgky1Cy5snKxFs8j7MJJrPPISRUHEeV/FhIiQT
-         ddkA==
-X-Forwarded-Encrypted: i=1; AJvYcCUPKBhHxyZHY7/RpsrV1zUUeGslynjyf4gIvMWyuIMSIX2qb/TanIiBSzDH4QOG/ZSYo68Y/h1qaq8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxU0CcpEGpffimQZ4PO3gNfuXmk1qgZOxj+h4ho5nbVeT4ojbvT
-	SXbPpiMq6N//ILwc7x6I1vxvfW3swubbs8Tm1XY+C5Btq3VccU1gROhaVwpUOfVH
-X-Gm-Gg: ATEYQzwbq0uUgJY/hyv0dn2BG1G7WgSVPkj7nPhys0Wrad0CsyHYpeLLBwOl1lx+kHL
-	BCH+3J6ya7k1EVy/ibGQWJjcZuy9kP3fg7ngf3wgA8VdGPgd3tWydhqLL2O15457jboOsAGsJUb
-	G9mLADXQxLb0NxNLQTXHP3WWUNVz2a7tlJsyrf6hKHL6KiEFJLLCI5NORapZqnRRmiQywXCMa/n
-	cEQxmhefnOpG1aHXmOc6PrfMJFm5bILr0a3UGE1GR3NFHis3biLhf0MJnHQK9VFKcWe3XA6jp8x
-	DVHwOtpUHPWXvr83cTMz2ujiOMwAJD3ObCBL2S39hIUlNRTuCJhWOH6sXQheFHX22/vmRkUDNM4
-	LwiAQyxnCKd8vSKq0+qihjD4N66eErTXb92JvtUmqe5hhz73QwH32AqDm0nQ9keyONLYbqInDWo
-	ajmfLJJZcWT2ju0RTi3nkSRMPOcxmLTK4=
-X-Received: by 2002:a05:6a00:1a0e:b0:829:8e91:eff with SMTP id d2e1a72fcca58-829a2f1429fmr1340770b3a.30.1772795239104;
-        Fri, 06 Mar 2026 03:07:19 -0800 (PST)
-Received: from localhost.localdomain ([58.29.79.238])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-829a48d6985sm1428631b3a.63.2026.03.06.03.07.16
+        d=1e100.net; s=20230601; t=1772796471; x=1773401271;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wyGXUYpQQ6zvxD4ZVeCoFbT7LecnKQgnIoon7pbvFWU=;
+        b=hKhR+lyPmOKVqPBqEYlV854AnUKJriI90Pwc1r0xxrICoFBWU0fvW0GZnQZdQyo4H5
+         rnqtmSREwidugzcoCsiDnz/L72ANVMjdb+cil999AT13FJaQCrffu06s+9ojOV7Tg2Ol
+         PrwtCtRFeaLpp9OubByxLlXagN8+Ujm17QxxpNTA/b8URe7hjy7vkKQZg+0o7zdjAUZn
+         yEr/GL2EYUBXYhnKQ426VfcFt4ZYoY5ThR6lUTKJ6HyY49p5ORyKlU8I6xF9kynkwDz9
+         TA3muU9ZBtGAQUUaC2nzFQ/VMQMUoGUzPN9LQsCTghx2zq8tOpWXoQdqoca3nIFzUAAz
+         NBiw==
+X-Forwarded-Encrypted: i=1; AJvYcCUknPynyYhBLRnsiZdeyynoYHtiyvqyETLhZvO64QA8/3V1sIDUTpmU8EIiqANNOcu5s0jycIsztPs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzgnUkhzCVyHNWyS6sVDAFCESQxnfRrtKNtSftIf13UUdfm+KlY
+	P2mv37+h1K8H7mZMG4ar3Q/U57PQvGrmAVQeAXy3eCjVeccOo2kaGwfkWMcHmVyeMEI=
+X-Gm-Gg: ATEYQzwMhnVu/HgkHt6Znckex9UXLRqMMWIBmOVX5QS+DOh9hJ1oDKVq33mnSPXIIwz
+	QecZI1zc9I0+WqGbBsWEu/8ayNiF8YGp7cudpWNxLbxLXBBCnu1J3h22PXu+WYJAms7BNg3JtE4
+	Qq4Es733WVNJYIl1odUUo8nvfx8HdI11uASLr5fizNNyLorwkOjTJTrrawc/sCxkUfKUt//vjB7
+	7kJOJx45l59HzSlnVelMvyrtYCURrPsTW6nbMMutr1Vr++qIJdp/Ie3KOcwOiyb2XKrj4fOPXoa
+	QwlEs/j2983TME/4WKVAcnMcnUh8hguetiN9X+FSJJ+f/4bDDX6IYYH257eQ3Daz1VjV2XXUANz
+	HYSWc79YOclOm2yiGKx67Dko2ff/DrNQet2zguxXJFYmjjUZW627/g0OjI2RNscjoFkd4Oq+0nE
+	wrtY9cIqFFrNvy6i3OyMizsNag4F/EinOFDLk8cVo7zoCl7oq5woHYryfMU8/w0kufPObQug9k
+X-Received: by 2002:a05:651c:1c7:b0:383:16e7:9c3 with SMTP id 38308e7fff4ca-38a40b5db59mr6384291fa.3.1772796471064;
+        Fri, 06 Mar 2026 03:27:51 -0800 (PST)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-38a41f9907fsm1891311fa.4.2026.03.06.03.27.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 Mar 2026 03:07:18 -0800 (PST)
-From: Lee Yongjun <jun85566@gmail.com>
-To: krzk+dt@kernel.org
-Cc: robh@kernel.org,
-	rjui@broadcom.com,
-	florian.fainelli@broadcom.com,
-	sbranden@broadcom.com,
-	bcm-kernel-feedback-list@broadcom.com,
-	nsaenz@kernel.org,
-	ulf.hansson@linaro.org,
+        Fri, 06 Mar 2026 03:27:50 -0800 (PST)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	devicetree@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>,
 	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: brcm,iproc-sdhci: allow dma-coherent property
-Date: Fri,  6 Mar 2026 20:06:53 +0900
-Message-Id: <20260306110653.3519-1-jun85566@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260305234703.38490-1-jun85566@gmail.com>
-References: <20260305234703.38490-1-jun85566@gmail.com>
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-kernel@vger.kernel.org,
+	Ping Gao <ping.gao@samsung.com>,
+	Krzysztof Kozlowski <krzk@kernel.org>
+Subject: [PATCH] dt-bindings: mmc: samsung,exynos-dw-mshc: Make both clocks required
+Date: Fri,  6 Mar 2026 12:27:42 +0100
+Message-ID: <20260306112742.64235-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -85,12 +79,29 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Dear Krzysztof, Rob, and Ray,
+The current binding allows one or two clocks to be specified, which is
+wrong, as both clocks are needed. This is also confirmed by looking at the
+exiting upstream DTS files. Let's update the binding to fix this.
 
-Thank you for the feedback. I've checked the linux-next tree and confirmed 
-that Rob Herring's patch (commit acb52756e90c) already addresses this issue.
+Cc: Ping Gao <ping.gao@samsung.com>
+Reported-by: Krzysztof Kozlowski <krzk@kernel.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ .../devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml          | 1 +
+ 1 file changed, 1 insertion(+)
 
-I apologize for the redundant submission. Please disregard this patch.
+diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+index 27c4060f2f91..3e560dde714e 100644
+--- a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
++++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+@@ -42,6 +42,7 @@ properties:
+     maxItems: 1
+ 
+   clocks:
++    minItems: 2
+     maxItems: 2
+     description:
+       Handle to "biu" and "ciu" clocks for the
+-- 
+2.43.0
 
-Best regards,
-Lee Yongjun
