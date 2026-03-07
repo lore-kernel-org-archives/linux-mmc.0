@@ -1,42 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57090258CD7;
-	Sat,  7 Mar 2026 10:36:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FD133876B8;
+	Sat,  7 Mar 2026 10:37:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1772879815; cv=none; b=SyZPuJT62kPDB376MJpDbFlzrzupxVnVxoej5YYUn/+G84MFK+KtVlrpCcwx3wXIRc2Sgop5oKYMQ6AN3oji3Zhv8+JimF0ePOWl85afpiX6VlytUvnei5tfYL8Or71QZIGzaXVoLp390IaX2a1fMoD5sFpkmlDxJqhgNUcnITM=
+	t=1772879854; cv=none; b=pCffgw5JPnS0Heml0v8H/Mc6F7iEjisIPl94KSBnse0YBoQTDBoPJPPqNapc80nbxKQNlDv7BgD/+riXAK/VwWANiGdrRZBQ3ekn1qOxoaaShlIEVqTSt2eu+M+B8IsVAnpA/zeYvnn4cfo3s87xSw3owA2ZV0kdPTZoOIx/bGc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1772879815; c=relaxed/simple;
-	bh=U8ypS7Lz2A3tC5dEZwAsW+AZ1FoNqxvk8Ah5X7QXGVg=;
+	s=arc-20240116; t=1772879854; c=relaxed/simple;
+	bh=wm4LIblvgKJNnIqDKjw21/GaoeWI2mGHymyPdxwm3do=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gAZesJGN8qYp2PAaBXJfvvFJmYaxq2kX4j6Q7NTb+57UdEdExFpqR7Q7ULJO3VJjFPQrgv/TyFisBFPkOW1XjQlntn82m+YusU3tKc3MBU41URdeQ6bcu8WGPlsxk3q9B7uL5mXDdG9FceknG/X+L+tdfK5zx6/uY9XXrlTscwI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tmbOJfBU; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=s984T+kYZoVMcoDz5TcET/RtHohjYYskmyME6PIDcPn0S4gQTzxQdylCiU7LlS7yJbU21qfDg2W9Qj/wKUVz2JEboAiyoV0jmKAODLwCxDfSb+c9XRzQ5euhS6DrZ/TqzzCWiygqlmG5cg83Hxy574Vi0jE2p1GvoR0JO2jWEIA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ka5PRuuw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tmbOJfBU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A6F02C19422;
-	Sat,  7 Mar 2026 10:36:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ka5PRuuw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CA082C2BC86;
+	Sat,  7 Mar 2026 10:37:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1772879815;
-	bh=U8ypS7Lz2A3tC5dEZwAsW+AZ1FoNqxvk8Ah5X7QXGVg=;
+	s=k20201202; t=1772879854;
+	bh=wm4LIblvgKJNnIqDKjw21/GaoeWI2mGHymyPdxwm3do=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=tmbOJfBUCPobD89sGRuwbCFuAj69GbfCmEKPRfp5Zn3/YpRF9tc3uQqVhMmOkFvMr
-	 QLwvggTACy1acK3NT3DDN/Qodf5BBlKdKncfWOZ8c/9p887t4SodPSRq6j0G6b92rP
-	 H5oW5BYGdry4S2XdBiZXu2RIGw8neIY6GQ56B5yTX+VfkzwUTMZgY36uHKVPt57sqc
-	 Ava69VALn6JyS+68PAy6tDfKRNfcTyrezvRKCTZgByTJyKsbXC8UfrKEPH5YzNG8jJ
-	 lHpNXCT3zS92zxUTmcoDpwBFzVGFNxWEmcn1cJ/vg+B0pJBKoQQzQcSxTEqxRY2PE6
-	 dMCzai/0xUKNQ==
-Date: Sat, 7 Mar 2026 11:36:52 +0100
+	b=Ka5PRuuwTQNLtkGb5Y3yHPYIv7wprDa/pdjgaaDZwiB8vJ1f3rg7Kx4cg5Df6YL+h
+	 BOvyvWKZAYXv2/JkVXTbFS39FStwW3+Ecumagub8BmyOvlsKQ0GnP2ojHKgCFf24iS
+	 GHrHYWdsROF8SA2rvMCLxapunsuFoZQ4ypolHHUSQwjNEMSQv6lzmjAB7jMP338eJa
+	 EuZSzZjaenXSnZCk2Wwb78tZJDd7Ye22mm5YdyXJxmbx2mWT8zsTb77q2lbY+JnCV+
+	 9PA7U0ruzYQz+sPIHAXKYC9xRtSVoOH8ex+BmyxJu6LO66KAPwndFLbHlFBzDwT6Ia
+	 uh/y8GfpyfnVg==
+Date: Sat, 7 Mar 2026 11:37:31 +0100
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
 Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org, 
 	conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Abel Vesa <abel.vesa@linaro.org>, Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-Subject: Re: [PATCH v5 1/3] dt-bindings: mmc: sdhci-msm: Add ICE phandle
-Message-ID: <20260307-llama-of-massive-downpour-2e512a@quoll>
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v5 3/3] arm64: dts: qcom: monaco: enable the inline
+ crypto engine for SDHC
+Message-ID: <20260307-wonderful-vehement-macaw-33b6fd@quoll>
 References: <20260306093332.4193993-1-neeraj.soni@oss.qualcomm.com>
- <20260306093332.4193993-2-neeraj.soni@oss.qualcomm.com>
+ <20260306093332.4193993-4-neeraj.soni@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -45,27 +45,15 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260306093332.4193993-2-neeraj.soni@oss.qualcomm.com>
+In-Reply-To: <20260306093332.4193993-4-neeraj.soni@oss.qualcomm.com>
 
-On Fri, Mar 06, 2026 at 03:03:30PM +0530, Neeraj Soni wrote:
-> Starting with sc7280(kodiak), the ICE will have its own device-tree node.
-> So add the qcom,ice property to reference it.
-> 
-> To avoid double-modeling, when qcom,ice is present, disallow an embedded ICE
+On Fri, Mar 06, 2026 at 03:03:32PM +0530, Neeraj Soni wrote:
+> Add an ICE node to monaco SoC description and enable it by adding a
+> phandle to the SDHC node.
 
-Can you finally fix checkpatch warning? I have impression you ignore
-checkpatch in each posting.
+No SoB, broken/missing DCO.
 
-Please wrap commit message according to Linux coding style / submission
-process (neither too early nor over the limit):
-https://elixir.bootlin.com/linux/v6.4-rc1/source/Documentation/process/submitting-patches.rst#L597
-
-> register region in the SDHCI node. Older SoCs without ICE remain valid as
-> no additional requirement is imposed.
-
-With this fixed
-
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+checkpatch also would tell you that.
 
 Best regards,
 Krzysztof
