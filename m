@@ -1,129 +1,186 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E2E42472A5
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:07:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFF563D75C6
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:07:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773068841; cv=pass; b=J/qJ1/Naxmv1aSWgAUMUlAI/d9tUQgw+0/e/frDvEfawRcSuCWs+QwEX+woV0tp/BQX9J8lUITXHnOF17sslsSoAQQhUNEnITTEHEs65kDpvPFlnJkKuOxNyZ3JW6Y0qqwWaXMjUvlveYXx0goKjbG/y1HoYUR1cpS2nWeNhkIg=
+	t=1773068849; cv=pass; b=ZRnMVTkl5IMjdt75xlzI8MLl+zvAx8r/pgRtXNBOP/2IHuoP0wKLDhufcer33aBjlcJEuAkZaVMmsWVjGtjSFRWalxPIgqgZH1zjyK03qBcqWT+6F35chtlu1yMgMVbQz2afiqpdVEO4H4wJgfUCtabqjBLqNM2bcGL9yap9cxs=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773068841; c=relaxed/simple;
-	bh=Cxs2ERZHjQZ+6p6FMjxOsQss6Dg8cHnefP+oNerE8mY=;
+	s=arc-20240116; t=1773068849; c=relaxed/simple;
+	bh=cmRiodC9r+mRuSIKrsDa+1SgJTeHck5hhqgmz3f7sjQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=E2e7CgbdeSkXv6+XlCwJI12KqYrAcs/J72NyRfSwAB5D6alk8ExrIpUJvS+Rhb+S9lc2dd7ymdMVKmuNtGh7U1cKzx6UXMhhNIAajY6VBnJEO6FlalAsG46EvgmGBN2p/9t5aiy1yvQ1Kkwert0JOUGzGNNA1RYhDJnGBRAQvIs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TI41UZQI; arc=pass smtp.client-ip=209.85.167.53
+	 To:Cc:Content-Type; b=Vh/ZUoqR1OJ+2okxTP0mc8wFmcPG6jyDXXUkYqOmgRl05sMZ3X4Fs4jq/TAfg9t7DY9a0wt0fJJ5mOtBJw1k5/vlMBC7gWkIFAJpZi52XIXT29RwZjfqbRFi1a4i69SGAdXC/Dx+Vu0NzcIqLkxEG6mVeh3wEzZz232eJBfcqeA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=twWyb9QQ; arc=pass smtp.client-ip=209.85.167.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TI41UZQI"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-59e4989dacdso6180036e87.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:07:20 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773068839; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="twWyb9QQ"
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-59e5aa4ca41so4823523e87.2
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:07:27 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773068846; cv=none;
         d=google.com; s=arc-20240605;
-        b=LHwRW1YSNZnvzdrWXzUgh9MzRM4G1pNqs90LebcBuRTU69RsQhq9RAoKO0006H5K4F
-         Mjrgy8A8tRtEv0Rv4+fZvSTub5y3Tp+VPKAmtB4jvsSV+PJmD4owkLZo6yr6ozg6fKMJ
-         wuNgKU9/zSkOw/us/U4MzuT5UnaFBzYW/ZTfDCpMIxs4uGnIv/VtCD0Vno4x20fhR7sI
-         WoJ4XsGcXGgcG95bpAZqN5+tnI0viOrDpOYIlQAAQdaFdNLXfw/qiavliWG4FvNYk8e1
-         ylE1mFmKHD/DlUQhSI55uWlADECfXVjrtZak/Um2d6murBngjnC9vpKqA6t7UoSuFypU
-         RTeg==
+        b=fcyAa56hSaWzYtoS0U1hEYJbKfC7svH9ZVhHyBRpcHDKUg1XpkvDccK0bE+FJEKKIT
+         LtSN526UPfpyHnGmP10hUeM+pTHYwhLd4XNZ2ucKEr4+uyo6DWpdENxNt/C5cdfB3jM0
+         hUuQVIAQ+O9e0hY0WU2RoN74cUq3eNZOCXUjYMzKWfW9A2Ffr4hCsaz+18CxXwo4FjAW
+         0GkMWvRb+N57FDhPj5MXqF/kOWD3k7xd/Ro1WKDoSUrv+V8EGnoA/C3o67L7tMtk5xCG
+         avtPn2jJWwQqHxO2ybx8wDMD5r4+W7sPKkM2EvqEJS98rsyH2pzLL/R3/t/5VZQ1s964
+         cFAA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=Ae+1/K9vPqwJidE+KQQvfxmzOSzLAYF6suEiPjDrjR0=;
-        fh=HjGsyp5BsslZt7rI031Jn4VcyyCwswDWQhaZ9KIDixY=;
-        b=RYsGIxTZSGwHkHEfS6RO42dH9PKlHPGj0q7eYsqHFxhb+c+IIUDxU0+ZTf+n/zkoIB
-         1TS8OKJgWFaCtxtZaQxpT8sjdY+fztadZDkfYem5kp2QuDeqW419gx+Peb8qa6fh6/Hy
-         8IilkgnMZHI74qbp66JHDtyKhBL1fiCF9W3VHh//7M3NVSGmDncfHaLLBgN6BI3XvCl1
-         t4ha/qIVhXOvQCCrWZFb6r1+uhNPmXu1Qr/KVhZvrhrBmEcU4NDRO6RlvhKA9t0gttGC
-         mNTv3+yEYVf4vtwmQMavR1aXWyFGLQ3EL1T7HAhgd+Z7ewMslIkjihMlt6QfZ3xSJcaq
-         K6vg==;
+        bh=TdH8bvkNIpDog/K3q0ZzGRX8OtZ/OKv1fjCXdvgPWAI=;
+        fh=BtkvOOGxORJ9VhpDEOOaRuxESM86MK7ps45F0J8Zv1g=;
+        b=bM9pV0+uxSAA22ADp/0wIYWT0CEKAMOqqIRcr/X37PgDRUDsln9SwYcenpG267pNSp
+         jOdZZ1+POiD8xuqpXHf+KC7wKsA9gPxyzjp8u+KeKbQgo4nqmkDDiNV5Drd58H4ygGSz
+         8FOX0TpQR1oOHHNAmGbqhAAGgFFPIGWGShuROaS4HUVaSgovTDxUzzrSbjUmLhCrDOoB
+         KWrJhBqRmGb3A4vJQc7ECzsoUMtoWcu7dx1O+MEd+5mr4Z7k3R1hM9vMYqORi5sBG0Yd
+         RaWLCuUhMEBmSENW29UwGD8xtBuFSQKxjonsUaNQWxCDTHsjrNwHO4W0cSwJlLDiLBF+
+         XIzQ==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1773068839; x=1773673639; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1773068846; x=1773673646; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ae+1/K9vPqwJidE+KQQvfxmzOSzLAYF6suEiPjDrjR0=;
-        b=TI41UZQI88u3o8BCLWWsikwxjFQuTTPEhUd2lCQ+rDwAqXVL6yO1PdkAKCcKOaOu5G
-         gQjfnpO9yfwwFlfs7389NquK4gqieXQLQDJuKTwMURQlQ9zPDOZxnVD9T0cSCJOqpspc
-         ahvx8ywFY+v+AjtwHvT9dYoTUfR4o5kMzmznxKg9+zUmIrkg5RfoNUIhyj9PlwSA6Zq7
-         igktHG7IBrdtwB+tQr0rfgLVjdMQVuT7YW469l2nZUtP2E6/L8crwWJCM2hpIPz0ZBB9
-         PniX6+G+CkDsWdHmHsKUm431x5uo+juHg/+fzcAO1MvUfNOsmP6rDGe2EbFZw04vG2Q6
-         NA3g==
+        bh=TdH8bvkNIpDog/K3q0ZzGRX8OtZ/OKv1fjCXdvgPWAI=;
+        b=twWyb9QQ3QGMDsZuo33MY5G6XgRoCUvxskutOd8Jh2lMLypdjfnHm1p4yXGblJyv+S
+         op0rrxngeG2SEZ7/ahCnZNIL2qnTrpg/xS7iol0vWHijZ752ByGH/7YBuxho6PD8K2/b
+         KVa4hm4UAL0ukjZZlHcVZxFcicHsmwmnPP9coGkj6Yecoip5rnLhVuMr2vCdxKshwQib
+         KXAg0TX2R8At0O4zRmyegS4Uv87xX4N7y4rYAS0Q/q7jqE7nJlsLPMaAhsyoIv6tyraL
+         X9Bj5VhiFVhUvKvyqkeHRQLlOhJX0v183MqMbQ2o5izso9Yef25gzlaP4e/WD9SOeCga
+         q5EQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773068839; x=1773673639;
+        d=1e100.net; s=20230601; t=1773068846; x=1773673646;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Ae+1/K9vPqwJidE+KQQvfxmzOSzLAYF6suEiPjDrjR0=;
-        b=EF4uIzE9CHGfoVYc573m32+lNTm3fhvF/tz+9nL1muvQ11QXrVEBzE0uJczsE1lIX5
-         Ky+qBiGbK2GRpswKNBGN2ZpH2QJIUzkjSdRZNfph7/IUEo9+4b/PO4UIeKGVw0u8d7j4
-         0wG8OcPDBADgdbJog5aLZjdX2FM/WJZQWe557eKuHkLhXHf0tTGR5eQjkdK8oI8K90gF
-         ked7kGt1GD+weGj4XI1KRH8IHx5h3wkGUaL/JvYDNvMTo9YHuB4Vwldmgxcng1joYhlr
-         /+FoRiacl5pw1arW6YusfP+4Mw7PStP2Hu6M9NOK92/buiURL5CfYSFL3rNYV2LlSb+c
-         PG8g==
-X-Forwarded-Encrypted: i=1; AJvYcCVC2Cr0CdkFi3Vfgqf3H5hpbo926ernFDoVSsrATGRdEE4fn98u30bi0UAE04rXOuBKSbjHdwLC46I=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyjwGeVWSfB2t8dvvhwqy6ubCXGMKcuz5Ovu92UElLC1xSXh78m
-	hviQVFgTEzUe0UCdcqWB+FOUvTCPk3EVxJXaGVfX6P6zJg7Ra/U2g/D6ga56dAMKsGRZzArHyJq
-	QSXcdK3CuPVQUslOlvUCs/b0LN7yC85HnJL5KpUtRYafRKNP8yA6Y/B0=
-X-Gm-Gg: ATEYQzybRhN/KzdqFAPfZDvQd4tS6HXHOKoMoZBT6hhiryhgbEATo/BO3gQSVG4uTzS
-	Es7+++emso2aWVd8eE5KrMyvl0pdSLjXarwjj4kfqXd8uY72BkCqsFA0lqjSYL963+YyXlel9TQ
-	iAMuq4iAWZdT6zb4vrygFEiYTTTnwcNQBD3QDofC4ptTi+MNEmpj3ze0npokfRsIvZUMylx4C1E
-	2GFhmvcWYn14/NL2oLNcGNnGRi6oCbYXA0YWWYVZcdcqdCB4dTqRMA7Asui0VeuFbkNrrRQIb3/
-	JFIMSUq4
-X-Received: by 2002:a05:6512:64ab:b0:5a1:29e5:3069 with SMTP id
- 2adb3069b0e04-5a13cceb995mr4081032e87.27.1773068838558; Mon, 09 Mar 2026
- 08:07:18 -0700 (PDT)
+        bh=TdH8bvkNIpDog/K3q0ZzGRX8OtZ/OKv1fjCXdvgPWAI=;
+        b=mv/YA78Z8cQ4NvMx7ToWlXBHU/leQTjOO0IbgL2mCcArqgGuoxhhFE4u4FLjyjOvhc
+         MV99t+PqoUMZH0KOV7PiUzOOChcWb2RrKs5kMXeU8uk3BS7h6bH6bMnuZc7hiVADoRxQ
+         R8eOB4FQHKMjjL0iKQomgVQ14jVzA+X1BwdxTrDypDJuSCWh4GL5rQQGU+m2yt+ifmDe
+         vIq8kINFoqL8ug1RxO99hGjz8GTh9un9QHOd8Mt7OMg7FOlqXXKRG442s1YSe3Xheec7
+         spHkOqk0LwP31/9ayYp1x+6dfZ54mD1cnUMKVCLnu8PIb3nH/h24d78pm/Rcjfv8JVDj
+         Zyng==
+X-Forwarded-Encrypted: i=1; AJvYcCWjCeHulw5wyMFFeGG+Dt151VZ6Ea1xwf6Z8bU7U/vc1hhkQVc6DDmiroW2RxSQws9AA+jSUH7serE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzZR5kz2IQehwJ7Sc8XteYDPAOmb+NIQAKpir7HYFJrTzggeNAV
+	e7ldY6zKbL1LlO+CS8ba+owacQn9V8iagmx5qj1iMvT3DyO2OyRJxrzS6cfztP87h/fV/SZDCnn
+	5jp9yzumy2BuuUAY4YXtF4m56vEclfigO3MhzdfzvRw==
+X-Gm-Gg: ATEYQzzpdEPhl4aVdeRb8VptY3pZ9fHIVQNw1XZsfBbPAwUjwIV6g+dncME6ja/YJHY
+	Feugtk2bZAXiTOljcMseVJUOmtS/8L8DSw043q4Hz/BcL6Hy8PydnJoqACTLJ0St8cRl+PP8UbW
+	1E9M7Re2dyZPE4VYpvfwtRefi7v4GVQvM0TK/WhYyg3h4vdbRXRsGhgR6f++MOu62LL81aFc8ws
+	+bQyRkNX5jk5QtFaEJvDekeSiQCoNJWgRDi3FHRiqrIMs0P9T8tCTOaMk1UnmOiEc3DMhAJcMI7
+	4S6ug1AH
+X-Received: by 2002:a05:6512:3409:b0:5a1:2a71:cc3b with SMTP id
+ 2adb3069b0e04-5a13ccb1aeemr3618408e87.18.1773068845876; Mon, 09 Mar 2026
+ 08:07:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260305122553.249058-1-thorsten.blum@linux.dev> <20260305122553.249058-2-thorsten.blum@linux.dev>
-In-Reply-To: <20260305122553.249058-2-thorsten.blum@linux.dev>
+References: <20260309143411.8231-1-ciprianmarian.costea@oss.nxp.com>
+In-Reply-To: <20260309143411.8231-1-ciprianmarian.costea@oss.nxp.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 9 Mar 2026 16:06:42 +0100
-X-Gm-Features: AaiRm51wk1QVoAZ9aC_vK1bUUhZ3HHVXUsipfP7h35hPIBfHdk4ai9oFGyXOZ1A
-Message-ID: <CAPDyKFpeH_=gLKkr0UFuGtR8BLBw8yRv3avrys4075yS29WoEA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: tifm_sd: Use min3() to simplify tifm_sd_transfer_data()
-To: Thorsten Blum <thorsten.blum@linux.dev>
-Cc: Alex Dubov <oakad@yahoo.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 9 Mar 2026 16:06:49 +0100
+X-Gm-Features: AaiRm53zSNZD-rgavB1hXZqnC71GE3J4BBqG9ZBYLAtj9oAS6JeEy0pPrIt0G5A
+Message-ID: <CAPDyKFof23uOBe7duOLuFJ=qd8bv8f6ryFWbrPcTFB-Jg4ZQTA@mail.gmail.com>
+Subject: Re: [PATCH v5 0/7] arm64: Add initial support for NXP S32N79 SoC
+To: Ciprian Costea <ciprianmarian.costea@oss.nxp.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Thomas Gleixner <tglx@kernel.org>, Frank Li <Frank.Li@nxp.com>, 
+	Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, 
+	Haibo Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Shawn Guo <shawnguo@kernel.org>, Lucas Stach <l.stach@pengutronix.de>, 
+	Pengutronix Kernel Team <kernel@pengutronix.de>, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, imx@lists.linux.dev, 
+	linux-arm-kernel@lists.infradead.org, s32@nxp.com, 
+	Christophe Lizzi <clizzi@redhat.com>, Alberto Ruiz <aruizrui@redhat.com>, 
+	Enric Balletbo <eballetb@redhat.com>, Eric Chanudet <echanude@redhat.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 5 Mar 2026 at 13:26, Thorsten Blum <thorsten.blum@linux.dev> wrote:
+On Mon, 9 Mar 2026 at 15:34, Ciprian Costea
+<ciprianmarian.costea@oss.nxp.com> wrote:
 >
-> Use min3() to simplify tifm_sd_transfer_data().
+> From: Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>
 >
-> Signed-off-by: Thorsten Blum <thorsten.blum@linux.dev>
+> This series introduces initial device tree support for the NXP S32N79
+> automotive SoC and its Reference Design Board (RDB).
+>
+> The S32N79 is an automotive-grade system-on-chip featuring eight Arm
+> Cortex-A78AE cores organized in four dual-core clusters. It is designed
+> for high-performance networking and gateway applications vehicle
+> architectures [1]
+>
+> Hardware features included in this initial support:
+> - 8x Arm Cortex-A78AE cores (4 clusters of 2 cores each)
+> - 32GB DRAM Memory. 28GB are usable and 4GB are reserved for ECC logic
+> - Three-level cache hierarchy (L1/L2 per core, L3 per cluster)
+> - GICv3 interrupt controller with ITS
+> - SMMUv3 for IOMMU support
+> - Generic Timer
+> - IRQ steering controller
+> - PL011 UART controllers
+> - uSDHC controller
+>
+> This series also includes the necessary driver updates:
+> - sdhci-esdhc-imx: Add S32N79 uSDHC controller support
+> - irq-imx-irqsteer: Add S32N79 IRQ steering support
+> - irqchip Kconfig: Add ARCH_S32 dependency for IMX_IRQSTEER
+>
+> Future patches will add support for additional peripherals such as
+> networking controllers, PCIe, and other IP blocks.
+>
+> [1] https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32n-vehicle-super-integration-processors:S32N
+>
+> v5 -> v4
+> - Squashed irqsteer 'Kconfig' changes with the actual driver updates.
+> - Fixed tabular layout in the irq-imx-irqsteer driver
+> - Added received 'Reviewed-by' and 'Acked-by' tags from V4.
+>
+> v4 -> v3
+> - Added missing Signed-of-by's from one commit removed in v3 by mistake
+>
+> v3 -> v2
+> - Split S32N79 SoC dtsi into separate standalone commit
+> - Renamed a memory node in the S32N79 board dts
+> - Fixed IRQ STEER DT-Bindings support for S32N79 addition
+> - Updated S32N79 usdhc driver support commit message
+>
+> v2 -> v1
+> - added driver changes required for S32N79 uSDHC support
+> - added driver changes required for S32N79 IRQ_STEER support
+> - updated commit message for uSDHC dt-bindings
+> - implemented fixes for 'dt-format' tool findings on newly added S32N79 dts files
+>
+> Ciprian Marian Costea (7):
+>   dt-bindings: interrupt-controller: fsl,irqsteer: add S32N79 support
+>   dt-bindings: mmc: fsl-imx-esdhc: add S32N79 support
+>   dt-bindings: arm: fsl: Add NXP S32N79 SoC and RDB board
+>   mmc: sdhci-esdhc-imx: add NXP S32N79 support
+>   irqchip/imx-irqsteer: add NXP S32N79 support
+>   arm64: dts: freescale: Add NXP S32N79 SoC support
+>   arm64: dts: freescale: Add NXP S32N79-RDB board support
+>
+>  .../devicetree/bindings/arm/fsl.yaml          |   6 +
+>  .../interrupt-controller/fsl,irqsteer.yaml    |   4 +-
+>  .../bindings/mmc/fsl-imx-esdhc.yaml           |   1 +
+>  arch/arm64/boot/dts/freescale/Makefile        |   1 +
+>  arch/arm64/boot/dts/freescale/s32n79-rdb.dts  |  70 ++++
+>  arch/arm64/boot/dts/freescale/s32n79.dtsi     | 362 ++++++++++++++++++
+>  drivers/irqchip/Kconfig                       |   6 +-
+>  drivers/irqchip/irq-imx-irqsteer.c            |  55 ++-
+>  drivers/mmc/host/sdhci-esdhc-imx.c            |   9 +
+>  9 files changed, 497 insertions(+), 17 deletions(-)
+>  create mode 100644 arch/arm64/boot/dts/freescale/s32n79-rdb.dts
+>  create mode 100644 arch/arm64/boot/dts/freescale/s32n79.dtsi
+>
+> --
+> 2.43.0
+>
 
-Applied for next, thanks!
+Patch2 and patch4 applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/tifm_sd.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
-> index 2cd69c9e9571..c1f7d5b37911 100644
-> --- a/drivers/mmc/host/tifm_sd.c
-> +++ b/drivers/mmc/host/tifm_sd.c
-> @@ -193,9 +193,7 @@ static void tifm_sd_transfer_data(struct tifm_sd *host)
->
->                 pg = sg_page(&sg[host->sg_pos]) + (off >> PAGE_SHIFT);
->                 p_off = offset_in_page(off);
-> -               p_cnt = PAGE_SIZE - p_off;
-> -               p_cnt = min(p_cnt, cnt);
-> -               p_cnt = min(p_cnt, t_size);
-> +               p_cnt = min3(PAGE_SIZE - p_off, cnt, t_size);
->
->                 if (r_data->flags & MMC_DATA_READ)
->                         tifm_sd_read_fifo(host, pg, p_off, p_cnt);
-> --
-> Thorsten Blum <thorsten.blum@linux.dev>
-> GPG: 1D60 735E 8AEF 3BE4 73B6  9D84 7336 78FD 8DFE EAD4
->
