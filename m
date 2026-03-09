@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F394D361664;
-	Mon,  9 Mar 2026 09:23:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66B04256C84;
+	Mon,  9 Mar 2026 09:27:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773048215; cv=none; b=P85i06L0iygibaqPT/fgZ6HtrEzB0r1FOQPVHfDm4z5uEB4OX8hd8TCL/6FJX+8Zfd0GWAil/dTo8kjSZyKuZIAvMSuiJjdLU0xJF/F3s928108gkgvpx6SAlHqfFDbysTfuXkDGxPbftk+M5PHQ/EezNaEN6+PulD0aqL7R7Bg=
+	t=1773048474; cv=none; b=pvDghBaTcHiK7vMrNRlBGR59CQlUTbA084BL1KTVaG5poQCZJQMOrYnylGwOvruSMbGKL6E146A2Px8PtrFXzvh6+hE8kYnTGRvrjur8VT8V7m6yf5aM68LUoOh7a1CgbgHW7/ufGZtkCM3VN4fAwrpYY2zf7B0BaTzyWxbls04=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773048215; c=relaxed/simple;
-	bh=HdpYv+AK/YGT3wtX9pT1P3XlHW6w2YeAT+IqCsoGv0s=;
+	s=arc-20240116; t=1773048474; c=relaxed/simple;
+	bh=vAyN1hj0U3Oa8JbuK8YxYaCody3qygBNDhbFwrsgF+c=;
 	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=jxhjeZLhkJnno7x0LZTAnOopmEjI6ExDTm7BdXSu+QgCNfUsfmK9icocHMpJ7I2X919u8oinOYUtg5PElruKICjIc42kbAxInjlWRzMIlfCuF9X+F12I9xOH9l8YT0limSHiOX9BXLTkYe9YPoGlm+TJJb05gj7spAHGW2zITzU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hVoNSA6V; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version:Content-Type; b=tQ8zgjKR6KoWac991AA/6iqqoVUtmMtV/dRMxbHFonzWn9cKeFmoNHKA7HMfIBl/4QB3gztr3ncUNcKCn204icLkcfWvzldX6bRsimEYr7CN0579I950hykhkAAn4eeSndXMUT3t6TVQF+XCsC0HCDgNmnSeg7Pn6zNfSbAfq3I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PdN77l2H; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hVoNSA6V"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC431C4CEF7;
-	Mon,  9 Mar 2026 09:23:33 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PdN77l2H"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D684C4CEF7;
+	Mon,  9 Mar 2026 09:27:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773048214;
-	bh=HdpYv+AK/YGT3wtX9pT1P3XlHW6w2YeAT+IqCsoGv0s=;
+	s=k20201202; t=1773048473;
+	bh=vAyN1hj0U3Oa8JbuK8YxYaCody3qygBNDhbFwrsgF+c=;
 	h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
-	b=hVoNSA6VbeUuOvEG/YRgGoQiIZ14lpU77V6B1mvJhk/nFVFKx9hcsVlGxBF2N/gwf
-	 xc2YpBcFA0BeItIW0YP1PQano5iDKE84YGZ8/Ki+izwCfu98+Pnqrolkv4SjPKT15v
-	 mXIv6Nf4GrhBbpMA/3JHI81W+mDbkShlX0ApQaoI+i1P/QpU4W3JwzBVToVDPOb5Cd
-	 CrF1FcH3OGqlAleb8yIczwiMoM8y9nDA05Si4T9Qz65xRwWIVe6E+k1itqqzUm+KEZ
-	 tychkPaNiQlcquXMPOY0uANFx5DKElbbLnh92GcRPqy98Dr/rZhkzK+E2j1javF4Ry
-	 w+UNDjKzdUAfg==
+	b=PdN77l2HC78giLy4naVWy4l7pSbJ3kswsoXn1F3iFmq1OOE+aFxy8+9tgJmnzBzUF
+	 3J7PsFzbuPa9CYNftnaqQaMIiIgFuASprrS76B+tfo2tXSYpUxCEp3s1FlVL8cAkOq
+	 mf/wAKvIm8tznWxSAGeQdCANsNAC0XstEXZLYU3jrpzR9o8cicqI6hz5pk9bJ6Dekh
+	 VGAUdWcYb3FhTj8jpVGpUenFrYkIrH64f1ROjaCIJwiIoTYXwVXgGmgNX3zQnipSUN
+	 qW3yfiS4APQsaJ4gjduYxnmc2JDoHHGNIapfrBM56e/WPiIE646XQepfLZbeorRFUg
+	 Esi3Nss/7o/Mg==
 From: Thomas Gleixner <tglx@kernel.org>
 To: Ciprian Costea <ciprianmarian.costea@oss.nxp.com>, Rob Herring
  <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
@@ -40,14 +40,13 @@ Cc: Pengutronix Kernel Team <kernel@pengutronix.de>,
  linux-arm-kernel@lists.infradead.org, s32@nxp.com, Christophe Lizzi
  <clizzi@redhat.com>, Alberto Ruiz <aruizrui@redhat.com>, Enric Balletbo
  <eballetb@redhat.com>, Eric Chanudet <echanude@redhat.com>, Ciprian Marian
- Costea <ciprianmarian.costea@oss.nxp.com>, Larisa Grigore
- <larisa.grigore@nxp.com>
-Subject: Re: [PATCH v4 5/8] irqchip/imx-irqsteer: add NXP S32N79 support
-In-Reply-To: <20260306161555.9000-6-ciprianmarian.costea@oss.nxp.com>
+ Costea <ciprianmarian.costea@oss.nxp.com>
+Subject: Re: [PATCH v4 6/8] irqchip: add ARCH_S32 dependency to Kconfig
+In-Reply-To: <20260306161555.9000-7-ciprianmarian.costea@oss.nxp.com>
 References: <20260306161555.9000-1-ciprianmarian.costea@oss.nxp.com>
- <20260306161555.9000-6-ciprianmarian.costea@oss.nxp.com>
-Date: Mon, 09 Mar 2026 10:23:31 +0100
-Message-ID: <87jyvls6ek.ffs@tglx>
+ <20260306161555.9000-7-ciprianmarian.costea@oss.nxp.com>
+Date: Mon, 09 Mar 2026 10:27:50 +0100
+Message-ID: <87h5qps67d.ffs@tglx>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,63 +56,14 @@ MIME-Version: 1.0
 Content-Type: text/plain
 
 On Fri, Mar 06 2026 at 17:15, Ciprian Costea wrote:
-> +/* SoC does not implement the CHANCTRL register */
-> +#define IRQSTEER_QUIRK_NO_CHANCTRL	BIT(0)
-> +
-> +struct irqsteer_devtype_data {
-> +	u32 quirks;
-> +};
-> +
->  struct irqsteer_data {
->  	void __iomem		*regs;
->  	struct clk		*ipg_clk;
-> @@ -37,8 +44,22 @@ struct irqsteer_data {
->  	struct irq_domain	*domain;
->  	u32			*saved_reg;
->  	struct device		*dev;
-> +	const struct irqsteer_devtype_data *devtype_data;
 
-The struct was perfectly tabular formatted before....
+That subject line is useless. It says that it adds a random dependency
+to Kconfig, which tells nothing. Subject lines have to be descriptive
+and useful on their own w/o the need to decode them through the actual
+change log.
 
-https://www.kernel.org/doc/html/latest/process/maintainer-tip.html#struct-declarations-and-initializers
-
->  };
->  
-> +static const struct irqsteer_devtype_data imx_data = {
-> +	.quirks = 0,
-> +};
-> +
-> +static const struct irqsteer_devtype_data s32n79_data = {
-> +	.quirks = IRQSTEER_QUIRK_NO_CHANCTRL,
-> +};
-> +
-> +static bool irqsteer_has_chanctrl(const struct irqsteer_devtype_data *data)
-> +{
-> +	return !(data->quirks & IRQSTEER_QUIRK_NO_CHANCTRL);
-> +}
-> +
->  static int imx_irqsteer_get_reg_index(struct irqsteer_data *data,
->  				      unsigned long irqnum)
->  {
-> @@ -188,6 +209,10 @@ static int imx_irqsteer_probe(struct platform_device *pdev)
->  	if (ret)
->  		return ret;
->  
-> +	data->devtype_data = device_get_match_data(&pdev->dev);
-> +	if (!data->devtype_data)
-> +		return dev_err_probe(&pdev->dev, -ENODEV,
-> +				"failed to match device data\n");
-
-No point for this line break. You have 100 characters. If you have the
-line break, then this needs curly brackets. See the bracket rules in the
-above linked document.
-
->  static const struct of_device_id imx_irqsteer_dt_ids[] = {
-> -	{ .compatible = "fsl,imx-irqsteer", },
-> +	{ .compatible = "fsl,imx-irqsteer", .data = &imx_data },
-> +	{ .compatible = "nxp,s32n79-irqsteer", .data = &s32n79_data },
-
-Tabular layout please for readability sake.
+Just fold this change into the previous patch which adds the ARCH_S32
+support into the driver.
 
 Thanks,
 
