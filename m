@@ -1,152 +1,177 @@
-Received: from AM0PR02CU008.outbound.protection.outlook.com (mail-westeuropeazon11013071.outbound.protection.outlook.com [52.101.72.71])
+Received: from mx0a-002e3701.pphosted.com (mx0a-002e3701.pphosted.com [148.163.147.86])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13A62413221;
-	Mon,  9 Mar 2026 19:57:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.72.71
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773086233; cv=fail; b=f1wPrEtbk8xbgl5StVmo1niyDQXh8bOZhG3dVreHqSBt+fh1wUtHNgOs/saffUx0ZUgeLoLiQyD3M8VTkcx9HkfmH6i5kHBwIIhbogtNqvPftJzqW29YUb1eXEwcZFhraEPXGOS16kPAx7mqn6j04aTl98/QLINGwOhxVzoiuvE=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773086233; c=relaxed/simple;
-	bh=FmqkxP6mFV2I8ZzZsA9zwIuE/dELiqLT8aU7WnYY77E=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=A8JChqsnHzZaQb+Y922N41VPNLYCenZA9u5jICDCbrTGZ83p/WYo/YjO2J8uIV0uEbvC6ybt7LrIT7CKPQpjAeZwSHcleshtRCfYMw8YFPPpuw9FiBwQog4DSr34i6JPMNyZNMOOBNguDhUMTufxli/D+W7Q37PxBjcYyYZSFD8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=bspwCETX; arc=fail smtp.client-ip=52.101.72.71
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74B4536CDE0;
+	Mon,  9 Mar 2026 21:13:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.147.86
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773090841; cv=none; b=tGfpz4vlgNQfrlgBtnqPksEXzajX1PAyvBs/pggNkNYHk4Bn3XparkSoYkefVvnnIWYRVPjZtvn3V44WiyhLAw7bOTtgO/QJe1wID2RxGevzm4/rQeNR5dOuYRuKJkTuk9FDD/ku++ccccL2X2GvgFk5pFudXq7ibLmRX1KDyMY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773090841; c=relaxed/simple;
+	bh=P3TLGOTYmW2JWy5h+bBw/1GVqpV341A6sawleCSd0Y4=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=osVANDoHi2OYZf1VYWh7rs1A7J0/lY7w/1t3X9tjMy4ZJ6Ns+pQOTsUrFi+qvgSCarJL7rgh7qXcZNrLj/DQYJZMIPtGRjku2AV0kTasvQvapjrITkomfoI39AxKN2hO/2SrQ0oOOVeZJSt99eQq17CXcJvfS3ROsFcVS4vo3Hw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=hpe.com; spf=pass smtp.mailfrom=hpe.com; dkim=pass (2048-bit key) header.d=hpe.com header.i=@hpe.com header.b=keM5vd6I; arc=none smtp.client-ip=148.163.147.86
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=hpe.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hpe.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="bspwCETX"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=XBu59i2ojHUWGh8v6meTz3slS2GIfFTLeQ6nW8mOEVBHakYYwb42bI1x2BJ5HRlRfJRtbl7r3atX5ZW0WyYDHwWkRy3wXlhSg1lRpYyhwtJGz5YA80aGAp2smIbYrtWCWStW8Mo2xZ0mVjPUfcKJxzDNs9/yL13Hv7Q0w0gAKexMkWvoGdKXem/mw45TqGIGHgkGzBci9mKVnOA04PuUSH2t5NL+gtBjHTah/52TvlaroAIF/M0p1qil5oMoFV25ECpCFktL36xMQiX3OAAUEa7Wox10ksU4oTAi8mY+UMa0qVyx5uq6rPtFQ3bNrsGhgTwAHvYKrOoIjZhDG/9Djg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=SM3hDsC/HpSJnNbpk5Nv32df6R4cP/2QTwYx47DhWGY=;
- b=aop17+VOwTKe0iGCG1md/AShitsSQFMyuQSP4At5xzUJgXwKbYYRXsT9+58eZcAZK6gEO11NN4Hgqw9uYgDLEJJD7G4elBrlfT6tDeRG+RyTJ8IZD/k660h7WIRVimFQljJEWoppIN3fSNu2RNtrsOGwj8yLHlIO8N09fiIJg82kqdTvMo5dIR5ZPHVgF2SHea+cWrYsskUsVKUmrQnmfMoZUML92hXdbf/6ZD43z0Qfhri4rQr5F71wLAOSSVkJQtwk2Vj6H+eNagW7M+q7ScQEzdbFm/rZzLt76gxK6qMYgdIVveVg78svrFxl2vIRJJx76mTsver/MRILMgFHjw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=SM3hDsC/HpSJnNbpk5Nv32df6R4cP/2QTwYx47DhWGY=;
- b=bspwCETX+11L8VFEi+Vo8sDIHZ45tOS/eUBRwUaojKuqKOeYGENH1POlMsT2uu1W+VlSzlCmozgaksY+wDxjEB5kg923lI6vXq6ULFerunpVGAdNe2qodjIfFDN4+Pto0AB2w2OrhO82nNKRet6ZYMhSTaNBELQnUn4b/FtpIHvmEqSUnoyFfT2PPb6ogQrMpOiHUMzZoIdvWTMKeKtCPHAR/pz76ZFAMVNZhSYdVXGcIQ8RrVNEgp8xVq9HAEYIolZhSRd+/wNx/MVqnlKJkZkwTFGiPzOqVZQ70/EorIYZouijm2F45P4IiEoL0pvzxorQkXB2Vzl/tezS7fo9WQ==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from DU0PR04MB9372.eurprd04.prod.outlook.com (2603:10a6:10:35b::7)
- by AS4PR04MB9289.eurprd04.prod.outlook.com (2603:10a6:20b:4e4::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9678.25; Mon, 9 Mar
- 2026 19:57:09 +0000
-Received: from DU0PR04MB9372.eurprd04.prod.outlook.com
- ([fe80::4f6:1e57:c3b9:62b4]) by DU0PR04MB9372.eurprd04.prod.outlook.com
- ([fe80::4f6:1e57:c3b9:62b4%4]) with mapi id 15.20.9678.020; Mon, 9 Mar 2026
- 19:57:05 +0000
-From: Frank Li <Frank.Li@nxp.com>
-To: Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Thomas Gleixner <tglx@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Frank Li <Frank.Li@nxp.com>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>,
-	Haibo Chen <haibo.chen@nxp.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Lucas Stach <l.stach@pengutronix.de>
-Cc: Frank Li <frank.li@nxp.com>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	imx@lists.linux.dev,
-	linux-arm-kernel@lists.infradead.org,
-	s32@nxp.com,
-	Christophe Lizzi <clizzi@redhat.com>,
-	Alberto Ruiz <aruizrui@redhat.com>,
-	Enric Balletbo <eballetb@redhat.com>,
-	Eric Chanudet <echanude@redhat.com>,
-	Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>,
-	Larisa Grigore <larisa.grigore@nxp.com>
-Subject: Re: [PATCH v5 5/7] irqchip/imx-irqsteer: add NXP S32N79 support
-Date: Mon,  9 Mar 2026 15:56:50 -0400
-Message-ID: <20260309195652.1788190-1-Frank.Li@nxp.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260309143411.8231-6-ciprianmarian.costea@oss.nxp.com>
-References: <20260309143411.8231-6-ciprianmarian.costea@oss.nxp.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: PH5P220CA0004.NAMP220.PROD.OUTLOOK.COM
- (2603:10b6:510:34a::16) To DU0PR04MB9372.eurprd04.prod.outlook.com
- (2603:10a6:10:35b::7)
+	dkim=pass (2048-bit key) header.d=hpe.com header.i=@hpe.com header.b="keM5vd6I"
+Received: from pps.filterd (m0148663.ppops.net [127.0.0.1])
+	by mx0a-002e3701.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 629HGXAS3656380;
+	Mon, 9 Mar 2026 21:13:43 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=hpe.com; h=cc
+	:content-transfer-encoding:date:from:in-reply-to:message-id
+	:mime-version:references:subject:to; s=pps0720; bh=Bg+SDkhmklFob
+	2w/fKY+k4wXENGM05jE2fQKluTUW1s=; b=keM5vd6I2HAf9bI64il46ipn6SqPI
+	zJaagKk7y4gmz0ZcUuP0ZZDftNn9PbXFrBGAMyFPafKnA5EjCVtL3nkPh/UJhZ8O
+	I8K1vpW5KFYyOkVMeNSajjQVBTnzJBY1pzPm6XULTg6PL4ZEyb3zpoULae2rhxJ1
+	ldKiAmK/JsBLwm5E2Umd7yLomR+jEeCLiA6zNM70KmQb/KNWURT7saY80nCL3X+5
+	bP8dSniN1QzGR/r4o5DhMHaO+qIoxxVJsWoKXwnRKurGDnRf7Mvp9W+zwHX9xtB6
+	VhthqesGTLNUnyoi/p0EYuJAM+RXySWGD6avCWfFKsP1lYa7Qp+DD06EA==
+Received: from p1lg14881.it.hpe.com (p1lg14881.it.hpe.com [16.230.97.202])
+	by mx0a-002e3701.pphosted.com (PPS) with ESMTPS id 4ct2eyjmuu-1
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
+	Mon, 09 Mar 2026 21:13:43 +0000 (GMT)
+Received: from p1lg14885.dc01.its.hpecorp.net (unknown [10.119.18.236])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by p1lg14881.it.hpe.com (Postfix) with ESMTPS id BB887808073;
+	Mon,  9 Mar 2026 21:13:42 +0000 (UTC)
+Received: from hpe.com (unknown [16.231.227.36])
+	by p1lg14885.dc01.its.hpecorp.net (Postfix) with ESMTP id 507AC805E91;
+	Mon,  9 Mar 2026 21:13:42 +0000 (UTC)
+From: nick.hawkins@hpe.com
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, robh@kernel.org,
+        krzk+dt@kernel.org, conor+dt@kernel.org
+Cc: jszhang@kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Nick Hawkins <nick.hawkins@hpe.com>
+Subject: [PATCH v2 1/2] dt-bindings: mmc: snps,dwcmshc-sdhci: add HPE GSC dwcmshc compatible
+Date: Mon,  9 Mar 2026 16:13:32 -0500
+Message-Id: <20260309211333.977919-2-nick.hawkins@hpe.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260309211333.977919-1-nick.hawkins@hpe.com>
+References: <20260309211333.977919-1-nick.hawkins@hpe.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DU0PR04MB9372:EE_|AS4PR04MB9289:EE_
-X-MS-Office365-Filtering-Correlation-Id: f0fddb9e-eba2-4deb-d25c-08de7e1609d1
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|52116014|7416014|376014|19092799006|1800799024|921020|38350700014;
-X-Microsoft-Antispam-Message-Info:
-	2Ep1UlH6op/LgZ2MWQKytL9V7y4q8mSaXMUwjl6oYKJAN71m7KhGhJEWRz5JXCzqaUL7DM2TGMrEkYIc3iNewWCLs7WPLuLvGigcHZZFkXCRB18ae4U9DNvTPM9CGD0s2QKiCYlWa5Jw54vdK11HYOCRX7eRUOjCx3c8loxCNDq5mnS/HVSwa2wCKpPH7rgf/5qV+cGlqhxg1XbrBIJ3O7He69lEcM41yO3D+Znj8+Lb9Ue1gmZb5QKlGdar3nkvpGOyp+Dew+B1ZhayrZJCAXPveZbtNR9QBAX8jGZMq9NwHgccGp3RnkO35HCxGdfcf3AIBtU7KTxlvAF94OoYgKZlU3V/ZDOk1hPQ+9ZgNVLaYJduV6rcy/wddQKkmLHaj3TO3PazJ50rHwnQ/oeyrcR5SRi8O5uu6/idI8K3VMic5gkdLpeb6yWl6G2C0CiQoqcumO7uzqtAw0AEzb8ZkP0Zgr2A/z90E0oPI5df2IALCVHUD+sJvY50rNsbKKdOYANy3re7quXKRtZ6eWZ11RiNYTIkZT2Fyqmz0zKhCNUo/C0cwqYcRyfboX56Bl79b6sMSKfW2uPl+RkUWcmx3ZuGY43DqlmrBQxxjaBmHxBW1GwBh6sdUzXdXVpldXr5/7JSsLz+dH4WJHga7jCoIFHOXg2Zu9Z22I0ZBjD+2kDsR8wuIbyfT2eyskzXNyCAu5HMBoZnN2myIkEu0LgvPC/mLrrLCy4O+k+nZPgMl7CFJ6RS5Zgfzczoq/3seri6HxqPeG8c45bXPV5UnhxkJRD/Ym5uHAjSWyuCoInXHwaw168uLk7ylEzhpqph2o7i
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU0PR04MB9372.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(52116014)(7416014)(376014)(19092799006)(1800799024)(921020)(38350700014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?JBEYvJ+l1x01sxTggqy3DI8F03L4ERiiptb+Y8+GpEwQ4hZiah9DjNMyvWCc?=
- =?us-ascii?Q?WU5SjXcyO+d7Mk/LfeZ1VCfvokQLjtrsH/jdt3dG4YOqAuNQCKZgi3UOfXyc?=
- =?us-ascii?Q?i8IgaTdfGWiOWS4g/XmwhfQyv/mhTItBcTveg+m2N4hATjyxrA0s9m4Luquo?=
- =?us-ascii?Q?ukM+uydMF6FWzUrX5jILmhev851YF17gU5F/FzrCae2JlcVGQGAHb02m5UMM?=
- =?us-ascii?Q?1Yg24lG2ACPJeTuCJgJeoqUqvAhIye4pYlFgoa0PCcJbdROOYJw8ShIt1lc2?=
- =?us-ascii?Q?1WbraCvsXbg7vFNbbFy2+tMynk4ywMimNPY04FaB6GpymzPVdq6l+8oZcRcS?=
- =?us-ascii?Q?3puACCpktLs3ztYTKxleaR/ukWqqgMXfFeasi2uwpZkML3OiQc73PzM3dOTc?=
- =?us-ascii?Q?HlXLtLJhp6NwfiEDCQHep1DnzUAC/fcrM/gKxE1PBUwn+LAfyf+oMPN4Ne0v?=
- =?us-ascii?Q?jm3lIYjVrNOEFHbfJ3GPDnyn1mEHJDDY1gn2eZcgIYVfevvUtGpWcEmC78wW?=
- =?us-ascii?Q?IxSc1nX76GYWWhLb6iP8TnR0RS0nv5brUThoqp18c+oAy+yMFkYOnpfUuTdN?=
- =?us-ascii?Q?Wjg6JlXWYnxPBVsYKKpZAYJhkl5rl3pcAy6sYbYSaJMM3x7PjHx40iBU7p16?=
- =?us-ascii?Q?BwqQCHnNDdN7Htm+eqtar7n+d3rcDx5h5m8uwnDqhB8Q4FotKpFP3ccDpayg?=
- =?us-ascii?Q?P4ML7jgz4txm0t5vvr96HYYAozDhF30rGNVmRWPpjqYz//fNyld9KpsIYpiw?=
- =?us-ascii?Q?drY87hrEzbcR55YKPIvdnZE1mzDzjmlvLWMX8+HHfwpTRPQs15GHqDOKuEx3?=
- =?us-ascii?Q?0SHH5tCIMt4NHtyNvg053AIagbCFAtco2QqcGDb5QSfDeSoDZ/NuftRPe70M?=
- =?us-ascii?Q?TnzX9CrI4gQOVMZHCc0R9SHHOM+K00OQ5QSOvSsscJjt0QLQVJjvacBvtAkb?=
- =?us-ascii?Q?il2pQd4opN/+YOenc1dDHiELskhnLtonbriqRDse0g3441IYM3fj1zhelesO?=
- =?us-ascii?Q?3Ivy/P53miHjWw8dodReof1fm59SQjRgGqWLdosj0GB31199YKw0AoHriAUy?=
- =?us-ascii?Q?TnvwjQaSCVMHCxMKPzjRyzf6idq3VhnKug/vX8FRT0AlTa4Ip+pkvMjaKfUO?=
- =?us-ascii?Q?2lXudHD+h2fnNfYROYEOns7MZcb4JDif5R+xvapHOJJc526tKTMXQwD1DroS?=
- =?us-ascii?Q?7AjGEzLqP9/ELuLg8r0RH1ByBglqskG2HlhbqUGe6TbkICnTWgOefeMiMwNp?=
- =?us-ascii?Q?yXUyxWPbjxtHV+YN/dIQl4IF+UWbhIWkm17DMoRv6wVEYUM/gqmpmw2tgPj3?=
- =?us-ascii?Q?0vVdm1II3w+ZHmuDJE1OibPS6nVpUFIy8tVPM3t4lRptvDwJ7MVcWkviz0Ov?=
- =?us-ascii?Q?ty19z3u+0DqHc14XiQ89b1A3f6XUgHpeQEHb46e5bnc/UCu7GlBdP1SEIM7Q?=
- =?us-ascii?Q?coyk+KUcL3PMPB1J5VW/mdfFNouoDbmbF2qBAzA5sTzl7jKkhUAPlmKsmeal?=
- =?us-ascii?Q?TmxQAzbBcZZx3OW5zEmBwPC921xxJ2ENC/4RGxZ3Lcf3f7BZiRuuNiIz6dJY?=
- =?us-ascii?Q?w2o0dm7eQMDVYs97ZxhYF2Pywwk6FyoS77rbxt4DnMnlNaUarNmR5q1V61P4?=
- =?us-ascii?Q?AnwFUlNtF1lvc+kEi41FWiaCUUJdfCDWt1fGVt8jNVlSbpUZXSDan8GHcXf1?=
- =?us-ascii?Q?CtdYhDvOrZ9RmmedCU9M/woSvk7jESK1EULSlsQnrNmmAVsApm19mFVycuSs?=
- =?us-ascii?Q?yNJJpi6G8g=3D=3D?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f0fddb9e-eba2-4deb-d25c-08de7e1609d1
-X-MS-Exchange-CrossTenant-AuthSource: DU0PR04MB9372.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Mar 2026 19:57:05.5232
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: YjmQog/QNOr8C1aSlyMA35zI9Shx9NlJx9j3nHxUL3LARFFQ+Jyo3gpHjGvYPNUAN1kFCfLtEmI0vJQRYozSkw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS4PR04MB9289
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-GUID: ZXNMQ6A2SZFSxMCog8hZZ75ZLL8DQhXF
+X-Proofpoint-ORIG-GUID: ZXNMQ6A2SZFSxMCog8hZZ75ZLL8DQhXF
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzA5MDE4OCBTYWx0ZWRfXzLr3OImS9XQB
+ 9dQorw5gJNF7auJ0hWeKgc+8Rg1ukLn5bJf1AyUB/qaDuOmQvPv9CE5uexJ4PCci5MO83Piufug
+ GML71FBdu7zfknzQhOqKxvhfhDUFxIObDqUCx1Y+4vGI7FkNqVjketRpPy0LLKkK+E7mMBsiVYH
+ mgnqs9umV/55hzZ7NZIDypWHxC47kbeRglo2pPrmJ5gqpEld/ZubBAaN25I/CSBNMk70/cNkuq5
+ naU4T3kNSgQV3IDXrt89bTX9XZmpB6FK6ZSukWkB0LcjgG4+lDQufbTHYF8l6zhBsNDbF7WOfBg
+ /xxKXCZRDL342Z4WaRKLqo5NmTB0LzsxKEB9oMAzGELOZKpusI3kfiOXw2LTJxeUjrRWXxCDjBn
+ 6UJT/ZLqYBdoj/thJsiRRb5bsK4G2BxbrM+sICtCVwLYbksPR1fqaflpeIIyAhfIjKXr+/5wIpx
+ VSnlfXt3/ODy9Xy3P6w==
+X-Authority-Analysis: v=2.4 cv=RO2+3oi+ c=1 sm=1 tr=0 ts=69af3807 cx=c_pps
+ a=FAnPgvRYq/vnBSvlTDCQOQ==:117 a=FAnPgvRYq/vnBSvlTDCQOQ==:17
+ a=Yq5XynenixoA:10 a=VkNPw1HP01LnGYTKEx00:22 a=gQcMVamqm3wCPoSYhaRC:22
+ a=6_mrDcixewTG61oOsKN3:22 a=MvuuwTCpAAAA:8 a=Un5EUvwKq7LZpnUfPCQA:9
+X-HPE-SCL: -1
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-03-09_06,2026-03-09_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ adultscore=0 clxscore=1015 lowpriorityscore=0 spamscore=0 bulkscore=0
+ malwarescore=0 impostorscore=0 suspectscore=0 priorityscore=1501 phishscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2602130000 definitions=main-2603090188
 
-From: Frank Li (AI-BOT) <frank.li@nxp.com>
+From: Nick Hawkins <nick.hawkins@hpe.com>
 
-> +static const struct irqsteer_devtype_data imx_data = {
-> +	.quirks = 0,
-> +};
+Add the 'hpe,gsc-dwcmshc' compatible string for the HPE GSC (ARM64
+Cortex-A53) BMC SoC eMMC controller.
 
-AI: Unnecessary to explicitly set `.quirks = 0` in imx_data; struct will be
-zero-initialized. Remove for brevity.
+The HPE GSC requires access to the MSHCCS register in the SoC system
+register block to configure SCG sync disable (bit 18) for HS200 RX
+delay-line phase selection.  The existing 'hpe,gxp-sysreg' syscon
+phandle is required for this compatible to access MSHCCS via regmap.
 
-Frank
+The HPE GSC eMMC interface only exposes a single 'core' clock (no
+bus clock), so clocks/clock-names are constrained to maxItems: 1.
+
+Add an example node with the hpe,gxp-sysreg syscon reference.
+
+Signed-off-by: Nick Hawkins <nick.hawkins@hpe.com>
+---
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 38 +++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index 7e7c55dc2440..2998cc98085f 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -23,6 +23,7 @@ properties:
+           - const: sophgo,sg2044-dwcmshc
+           - const: sophgo,sg2042-dwcmshc
+       - enum:
++          - hpe,gsc-dwcmshc
+           - rockchip,rk3568-dwcmshc
+           - rockchip,rk3588-dwcmshc
+           - snps,dwcmshc-sdhci
+@@ -77,6 +78,13 @@ properties:
+     description: Specifies the drive impedance in Ohm.
+     enum: [33, 40, 50, 66, 100]
+ 
++  hpe,gxp-sysreg:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description:
++      Phandle to the HPE GXP SoC system register block (syscon).
++      The driver accesses the MSHCCS register at offset 0x110 within
++      this block to configure clock synchronisation for HS200 tuning.
++
+ required:
+   - compatible
+   - reg
+@@ -87,6 +95,25 @@ required:
+ allOf:
+   - $ref: mmc-controller.yaml#
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: hpe,gsc-dwcmshc
++
++    then:
++      properties:
++        clocks:
++          maxItems: 1
++          items:
++            - description: core clock
++        clock-names:
++          maxItems: 1
++          items:
++            - const: core
++      required:
++        - hpe,gxp-sysreg
++
+   - if:
+       properties:
+         compatible:
+@@ -190,5 +217,16 @@ examples:
+       #address-cells = <1>;
+       #size-cells = <0>;
+     };
++  - |
++    mmc@c0100000 {
++      compatible = "hpe,gsc-dwcmshc";
++      reg = <0xc0100000 0x1000>;
++      interrupts = <0 17 0x4>;
++      clocks = <&emmcclk>;
++      clock-names = "core";
++      hpe,gxp-sysreg = <&soc_ctrl>;
++      bus-width = <8>;
++      non-removable;
++    };
+ 
+ ...
+-- 
+2.34.1
+
