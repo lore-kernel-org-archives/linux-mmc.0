@@ -1,186 +1,481 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+Received: from mail-ot1-f45.google.com (mail-ot1-f45.google.com [209.85.210.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFF563D75C6
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:07:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E50623D75A8
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:31:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.210.45
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773068849; cv=pass; b=ZRnMVTkl5IMjdt75xlzI8MLl+zvAx8r/pgRtXNBOP/2IHuoP0wKLDhufcer33aBjlcJEuAkZaVMmsWVjGtjSFRWalxPIgqgZH1zjyK03qBcqWT+6F35chtlu1yMgMVbQz2afiqpdVEO4H4wJgfUCtabqjBLqNM2bcGL9yap9cxs=
+	t=1773070302; cv=pass; b=nbcookS6bQxS+PQi5wEFGL7cV4RCZt+l4+yasJ1pWL0vvWWGx+3ZYT/5p0rgtvq1fyr/69Yd+w5xaa+y+5BSOWb3ATxvt7PfTZbyI+2VAMGwguHqql0u8Qg9qY8JiBqHyJ4bPAY3Rk5g9PE2kpgDDhBeZfki6QxtpXGwUCYbD4g=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773068849; c=relaxed/simple;
-	bh=cmRiodC9r+mRuSIKrsDa+1SgJTeHck5hhqgmz3f7sjQ=;
+	s=arc-20240116; t=1773070302; c=relaxed/simple;
+	bh=IAhun4C5RUHet00HwD7ul+JrFNPWw1T6eUv63nRkCNU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Vh/ZUoqR1OJ+2okxTP0mc8wFmcPG6jyDXXUkYqOmgRl05sMZ3X4Fs4jq/TAfg9t7DY9a0wt0fJJ5mOtBJw1k5/vlMBC7gWkIFAJpZi52XIXT29RwZjfqbRFi1a4i69SGAdXC/Dx+Vu0NzcIqLkxEG6mVeh3wEzZz232eJBfcqeA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=twWyb9QQ; arc=pass smtp.client-ip=209.85.167.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=YlO1AhYJCLUfkBq+o5ILJILXfRxt4zWgGKw2Z3fQ6fT9A2lDPc5Td3czS1yYc0yYf/AJhA+n4dWsMFBwElmfF08jlLERHKRa90ZUO4Q39CTtR1DS34Vu2He6LuQgphECunJFso7GJLoTqGEc1WpMlSse6qDXIky7gglY9u3cIrs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=purestorage.com; spf=fail smtp.mailfrom=purestorage.com; dkim=pass (2048-bit key) header.d=purestorage.com header.i=@purestorage.com header.b=PqFA5YcF; arc=pass smtp.client-ip=209.85.210.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=purestorage.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=purestorage.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="twWyb9QQ"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-59e5aa4ca41so4823523e87.2
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:07:27 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773068846; cv=none;
+	dkim=pass (2048-bit key) header.d=purestorage.com header.i=@purestorage.com header.b="PqFA5YcF"
+Received: by mail-ot1-f45.google.com with SMTP id 46e09a7af769-7d74872c5b1so40657a34.2
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:31:40 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773070300; cv=none;
         d=google.com; s=arc-20240605;
-        b=fcyAa56hSaWzYtoS0U1hEYJbKfC7svH9ZVhHyBRpcHDKUg1XpkvDccK0bE+FJEKKIT
-         LtSN526UPfpyHnGmP10hUeM+pTHYwhLd4XNZ2ucKEr4+uyo6DWpdENxNt/C5cdfB3jM0
-         hUuQVIAQ+O9e0hY0WU2RoN74cUq3eNZOCXUjYMzKWfW9A2Ffr4hCsaz+18CxXwo4FjAW
-         0GkMWvRb+N57FDhPj5MXqF/kOWD3k7xd/Ro1WKDoSUrv+V8EGnoA/C3o67L7tMtk5xCG
-         avtPn2jJWwQqHxO2ybx8wDMD5r4+W7sPKkM2EvqEJS98rsyH2pzLL/R3/t/5VZQ1s964
-         cFAA==
+        b=CW9s4DXzVbfdaVyIygo2+5aYvUy2SJQOHK99umx8cp9ApCTbIHrPIk/2UXec720yuq
+         IiE7Bk777tVhZ3FJECuHiJm+nQY00NzyEvkJhm3FIDtViyWwDlojCOS7wh+fWTi2Pp+1
+         q0YngT6B2WCXhb9ZMwn0F2/e2G+F9RA9/xFQ9DYAMzoSroOusaI/AHyNT9rUxpB3xXls
+         TSij810M0UiajjhsO/KHp6d7M4v6GS1rGEcETzL1+241Xevn7cU0pdYPpfqFBoWfkA+u
+         Xs1iuS4AiL6ZVCjKYmXlBH//FKp+jz4vuxYD2j0bOcZHa7Q+q2LJsdg+fEqpwg9CPrln
+         Ix5w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=TdH8bvkNIpDog/K3q0ZzGRX8OtZ/OKv1fjCXdvgPWAI=;
-        fh=BtkvOOGxORJ9VhpDEOOaRuxESM86MK7ps45F0J8Zv1g=;
-        b=bM9pV0+uxSAA22ADp/0wIYWT0CEKAMOqqIRcr/X37PgDRUDsln9SwYcenpG267pNSp
-         jOdZZ1+POiD8xuqpXHf+KC7wKsA9gPxyzjp8u+KeKbQgo4nqmkDDiNV5Drd58H4ygGSz
-         8FOX0TpQR1oOHHNAmGbqhAAGgFFPIGWGShuROaS4HUVaSgovTDxUzzrSbjUmLhCrDOoB
-         KWrJhBqRmGb3A4vJQc7ECzsoUMtoWcu7dx1O+MEd+5mr4Z7k3R1hM9vMYqORi5sBG0Yd
-         RaWLCuUhMEBmSENW29UwGD8xtBuFSQKxjonsUaNQWxCDTHsjrNwHO4W0cSwJlLDiLBF+
-         XIzQ==;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=6+r9RgPpLrGiXVfQx056rbYEWCZcszUA9kQtErD1KEc=;
+        fh=2/zEZfJOqGYoJOP3bbfA1RtJNtygRMts6+qhnfOEiQ8=;
+        b=IairW5Ydzw0PgbF6O/PKwdMeYVYXjfs6XGWjO7ngZ/EDvpt6n0LjHt/uxQ7k3y+LDO
+         Djf4QPWsUQVOhboUKPhXtW0WfVeGNr/Um03HIJbW0tY6g5NvDiXrujDdab8OXP2lDYVB
+         EQtzsJ/KyTEPahe/rtHBcnIi1mLwO+tWfP08/RCNrI/rvSxixJoUPkwPRvYYod0RT4Pa
+         jpwI+EkkaALUvWBI+DkKSZk/1w+a8MCPEHAKu/SsGVk4R1ZZ8ryfbAQ58mjAKucuj4F1
+         SkT74ZGMoO1eNMjkynpkkHGLmQq20fPjbd2StbCl+gthR+Z9zC4goXbNAWwCDzrzziCO
+         tZHw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1773068846; x=1773673646; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=TdH8bvkNIpDog/K3q0ZzGRX8OtZ/OKv1fjCXdvgPWAI=;
-        b=twWyb9QQ3QGMDsZuo33MY5G6XgRoCUvxskutOd8Jh2lMLypdjfnHm1p4yXGblJyv+S
-         op0rrxngeG2SEZ7/ahCnZNIL2qnTrpg/xS7iol0vWHijZ752ByGH/7YBuxho6PD8K2/b
-         KVa4hm4UAL0ukjZZlHcVZxFcicHsmwmnPP9coGkj6Yecoip5rnLhVuMr2vCdxKshwQib
-         KXAg0TX2R8At0O4zRmyegS4Uv87xX4N7y4rYAS0Q/q7jqE7nJlsLPMaAhsyoIv6tyraL
-         X9Bj5VhiFVhUvKvyqkeHRQLlOhJX0v183MqMbQ2o5izso9Yef25gzlaP4e/WD9SOeCga
-         q5EQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773068846; x=1773673646;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=purestorage.com; s=google2022; t=1773070300; x=1773675100; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=TdH8bvkNIpDog/K3q0ZzGRX8OtZ/OKv1fjCXdvgPWAI=;
-        b=mv/YA78Z8cQ4NvMx7ToWlXBHU/leQTjOO0IbgL2mCcArqgGuoxhhFE4u4FLjyjOvhc
-         MV99t+PqoUMZH0KOV7PiUzOOChcWb2RrKs5kMXeU8uk3BS7h6bH6bMnuZc7hiVADoRxQ
-         R8eOB4FQHKMjjL0iKQomgVQ14jVzA+X1BwdxTrDypDJuSCWh4GL5rQQGU+m2yt+ifmDe
-         vIq8kINFoqL8ug1RxO99hGjz8GTh9un9QHOd8Mt7OMg7FOlqXXKRG442s1YSe3Xheec7
-         spHkOqk0LwP31/9ayYp1x+6dfZ54mD1cnUMKVCLnu8PIb3nH/h24d78pm/Rcjfv8JVDj
-         Zyng==
-X-Forwarded-Encrypted: i=1; AJvYcCWjCeHulw5wyMFFeGG+Dt151VZ6Ea1xwf6Z8bU7U/vc1hhkQVc6DDmiroW2RxSQws9AA+jSUH7serE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzZR5kz2IQehwJ7Sc8XteYDPAOmb+NIQAKpir7HYFJrTzggeNAV
-	e7ldY6zKbL1LlO+CS8ba+owacQn9V8iagmx5qj1iMvT3DyO2OyRJxrzS6cfztP87h/fV/SZDCnn
-	5jp9yzumy2BuuUAY4YXtF4m56vEclfigO3MhzdfzvRw==
-X-Gm-Gg: ATEYQzzpdEPhl4aVdeRb8VptY3pZ9fHIVQNw1XZsfBbPAwUjwIV6g+dncME6ja/YJHY
-	Feugtk2bZAXiTOljcMseVJUOmtS/8L8DSw043q4Hz/BcL6Hy8PydnJoqACTLJ0St8cRl+PP8UbW
-	1E9M7Re2dyZPE4VYpvfwtRefi7v4GVQvM0TK/WhYyg3h4vdbRXRsGhgR6f++MOu62LL81aFc8ws
-	+bQyRkNX5jk5QtFaEJvDekeSiQCoNJWgRDi3FHRiqrIMs0P9T8tCTOaMk1UnmOiEc3DMhAJcMI7
-	4S6ug1AH
-X-Received: by 2002:a05:6512:3409:b0:5a1:2a71:cc3b with SMTP id
- 2adb3069b0e04-5a13ccb1aeemr3618408e87.18.1773068845876; Mon, 09 Mar 2026
- 08:07:25 -0700 (PDT)
+        bh=6+r9RgPpLrGiXVfQx056rbYEWCZcszUA9kQtErD1KEc=;
+        b=PqFA5YcFnKVkNGYXYu/zjEoz5CoL7xNnxWEUUjsrVreoUECANOFMpdhSPDT3a/sgL6
+         qy4/58lvq1tYnBuNh9ITTY2gZvwtG2GdAxBMWhLm6iPQajc/axdnYPY1PcJm+Jt3FwO4
+         UPq4HCUtTEzvK7AqgW6OwPbRxh3tv+3cuMz/C7Kanzv6RuohWEsGsDNOWxlpepfQvlE5
+         QXJR8AEnBG0uMYoEJ2pW1gslnIr/yEdowxKkuLPPg2dyaxvZf4z3mfMIj/jvhDGovvcE
+         +Y7CGBU5jKvdrIdHlNIPReTkr6E04odkkJ3lbz+zZ1tJCE9IUQ2S3kYtIyoztQ10N3I7
+         9iLg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1773070300; x=1773675100;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=6+r9RgPpLrGiXVfQx056rbYEWCZcszUA9kQtErD1KEc=;
+        b=Fmc+Ku/wk4wzQbcbEBqvlF3A81+zy0h976s21jG5e5ik5RqKbDsw9WUri7g2rknSPA
+         iui6uMbzuAqyld42bfEKhEuCiSijCsoUZemXdo+NmRdndYXHc6XUI0J6N25DO95aHlUv
+         N7n88QLcDXhlfenZTTT1sRNjqQ0TW115o5aMEUktGIjzTpGkRqtVIa178XpKSPCDBpqr
+         PdIH7myrNxcflXfDtL+aKlhtxFcKecHKUBX5KSciRgrFzD79l8yhpK8CG5eFlmiMHE5j
+         NA8g0add1A4q4OxOSAwNvtBVhNPszlNJelUZQuCq8JzH0wxp3BOuDQYP912UvayzBVwZ
+         k1PQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVrP3ff9GsICjZMtvtXcnLodUUol4TAPhPjNFzkZxBrjEpZns1xZBA8TWfYoom6opwSBMUOwVm7/KM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyEOQ0soawt9br5LaVI+XvkMr+Q1XnRZ9PWot/0yIGj2WkI59mh
+	p8A3OlXGtsesGNrj8nre/3KefUAF6c7kOzreoIeuIJpko05/dlqyWyy3a9/SZCqpdnPBSsukIJm
+	ibVIA1mGuczwFex5nQewmCOF73DC49Nr2wrPsLRszUg==
+X-Gm-Gg: ATEYQzzrk1uYxcXbWfb+uUQIZ5VAcUy0/+TA4hHSHB1G5MgSq+1xFJO9us7/9+vTp+5
+	SsgX3RBzos0oEC/p+PuU3+2D90aImZh8MrjWs417Y7lAV2omQhoR/RhBj9Du/AMlcQbdExxALEG
+	mgqNcF8uRKgG+jwYK9R7443O4iMVHNPmriHVdEazxfCxsvCQRxR0Lrd1D+U3wK0S3joLbB2Iggd
+	yKSY4vnp9dzVYmfSR3PSfSCoImTkfh313r69tcXrvh8SO8xo8My24zjLtnC/ssa9wTPYP77UCK/
+	6d15Bis=
+X-Received: by 2002:a05:6830:3495:b0:7d7:40e7:9536 with SMTP id
+ 46e09a7af769-7d740e79670mr3723400a34.0.1773070299522; Mon, 09 Mar 2026
+ 08:31:39 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260309143411.8231-1-ciprianmarian.costea@oss.nxp.com>
-In-Reply-To: <20260309143411.8231-1-ciprianmarian.costea@oss.nxp.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 9 Mar 2026 16:06:49 +0100
-X-Gm-Features: AaiRm53zSNZD-rgavB1hXZqnC71GE3J4BBqG9ZBYLAtj9oAS6JeEy0pPrIt0G5A
-Message-ID: <CAPDyKFof23uOBe7duOLuFJ=qd8bv8f6ryFWbrPcTFB-Jg4ZQTA@mail.gmail.com>
-Subject: Re: [PATCH v5 0/7] arm64: Add initial support for NXP S32N79 SoC
-To: Ciprian Costea <ciprianmarian.costea@oss.nxp.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Thomas Gleixner <tglx@kernel.org>, Frank Li <Frank.Li@nxp.com>, 
-	Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, 
-	Haibo Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Shawn Guo <shawnguo@kernel.org>, Lucas Stach <l.stach@pengutronix.de>, 
-	Pengutronix Kernel Team <kernel@pengutronix.de>, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, imx@lists.linux.dev, 
-	linux-arm-kernel@lists.infradead.org, s32@nxp.com, 
-	Christophe Lizzi <clizzi@redhat.com>, Alberto Ruiz <aruizrui@redhat.com>, 
-	Enric Balletbo <eballetb@redhat.com>, Eric Chanudet <echanude@redhat.com>
+References: <20260309062840.2937858-2-iam@sung-woo.kim>
+In-Reply-To: <20260309062840.2937858-2-iam@sung-woo.kim>
+From: Caleb Sander Mateos <csander@purestorage.com>
+Date: Mon, 9 Mar 2026 08:31:27 -0700
+X-Gm-Features: AaiRm50lVynE24y1iGtUrsPblHqAJTvTl9abhpAYnSu85cy3kb3SYItst0KXwYA
+Message-ID: <CADUfDZorSQCVtQyfjBuaziwG2Jo28yZiiqLKbp9PkFFw-9VgfQ@mail.gmail.com>
+Subject: Re: [PATCH] blk-mq: nvme: Fix general protection fault in nvme_setup_descriptor_pools()
+To: Sungwoo Kim <iam@sung-woo.kim>
+Cc: Jens Axboe <axboe@kernel.dk>, Josef Bacik <josef@toxicpanda.com>, 
+	Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>, 
+	Mikulas Patocka <mpatocka@redhat.com>, dm-devel@lists.linux.dev, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Richard Weinberger <richard@nod.at>, 
+	Miquel Raynal <miquel.raynal@bootlin.com>, Vignesh Raghavendra <vigneshr@ti.com>, 
+	Hector Martin <marcan@marcan.st>, Sven Peter <sven@svenpeter.dev>, 
+	Alyssa Rosenzweig <alyssa@rosenzweig.io>, Keith Busch <kbusch@kernel.org>, Christoph Hellwig <hch@lst.de>, 
+	Sagi Grimberg <sagi@grimberg.me>, James Smart <james.smart@broadcom.com>, 
+	Chaitanya Kulkarni <kch@nvidia.com>, "James E.J. Bottomley" <jejb@linux.ibm.com>, 
+	"Martin K. Petersen" <martin.petersen@oracle.com>, Chao Shi <cshi008@fiu.edu>, 
+	Weidong Zhu <weizhu@fiu.edu>, Dave Tian <daveti@purdue.edu>, linux-block@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, nbd@other.debian.org, linux-mmc@vger.kernel.org, 
+	linux-mtd@lists.infradead.org, asahi@lists.linux.dev, 
+	linux-arm-kernel@lists.infradead.org, linux-nvme@lists.infradead.org, 
+	linux-scsi@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 9 Mar 2026 at 15:34, Ciprian Costea
-<ciprianmarian.costea@oss.nxp.com> wrote:
+On Sun, Mar 8, 2026 at 11:30=E2=80=AFPM Sungwoo Kim <iam@sung-woo.kim> wrot=
+e:
 >
-> From: Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>
+> The numa_node can be < 0 since NUMA_NO_NODE =3D -1. However,
+> struct blk_mq_hw_ctx{} defines numa_node as unsigned int. As a result,
+> numa_node is set to UINT_MAX for NUMA_NO_NODE in blk_mq_alloc_hctx().
+
+The node argument to blk_mq_alloc_hctx() comes from
+blk_mq_alloc_and_init_hctx(), which is called by
+blk_mq_alloc_and_init_hctx() with int node =3D blk_mq_get_hctx_node(set,
+i). node =3D NUMA_NO_NODE would suggest that blk_mq_hw_queue_to_node()
+doesn't find any CPU affinitized to the queue. Is that even possible?
+
 >
-> This series introduces initial device tree support for the NXP S32N79
-> automotive SoC and its Reference Design Board (RDB).
+> Later, nvme_setup_descriptor_pools() accesses
+> descriptor_pools[numa_node]. Due to the above, it tries to access
+> descriptor_pools[UINT_MAX]. The address is garbage but accessible
+> because it is canonical and still within the slab memory range.
+> Therefore, no page fault occurs, and KASAN cannot detect this since it
+> is beyond the redzones.
 >
-> The S32N79 is an automotive-grade system-on-chip featuring eight Arm
-> Cortex-A78AE cores organized in four dual-core clusters. It is designed
-> for high-performance networking and gateway applications vehicle
-> architectures [1]
+> Subsequently, normal I/O calls dma_pool_alloc() with the garbage pool
+> address. pool->next_block contains a wild pointer, causing a general
+> protection fault (GPF).
 >
-> Hardware features included in this initial support:
-> - 8x Arm Cortex-A78AE cores (4 clusters of 2 cores each)
-> - 32GB DRAM Memory. 28GB are usable and 4GB are reserved for ECC logic
-> - Three-level cache hierarchy (L1/L2 per core, L3 per cluster)
-> - GICv3 interrupt controller with ITS
-> - SMMUv3 for IOMMU support
-> - Generic Timer
-> - IRQ steering controller
-> - PL011 UART controllers
-> - uSDHC controller
+> To fix this, this patch changes the type of numa_node to int and adds
+> a check for NUMA_NO_NODE.
 >
-> This series also includes the necessary driver updates:
-> - sdhci-esdhc-imx: Add S32N79 uSDHC controller support
-> - irq-imx-irqsteer: Add S32N79 IRQ steering support
-> - irqchip Kconfig: Add ARCH_S32 dependency for IMX_IRQSTEER
+> Log:
 >
-> Future patches will add support for additional peripherals such as
-> networking controllers, PCIe, and other IP blocks.
+> Oops: general protection fault, probably for non-canonical address 0xe980=
+3b040854d02c: 0000 [#1] SMP KASAN PTI
+> KASAN: maybe wild-memory-access in range [0x4c01f82042a68160-0x4c01f82042=
+a68167][FEMU] Err: I/O cmd failed: opcode=3D0x2 status=3D0x4002
+> CPU: 0 UID: 0 PID: 112363 Comm: systemd-udevd Not tainted 6.19.0-dirty #1=
+0 PREEMPT(voluntary)
+> Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS rel-1.16.3-0-=
+ga6ed6b701f0a-prebuilt.qemu.org 04/01/2014
+> RIP: 0010:pool_block_pop mm/dmapool.c:187 [inline]
+> RIP: 0010:dma_pool_alloc+0x110/0x990 mm/dmapool.c:417
+> Code: 00 0f 85 a4 07 00 00 4c 8b 63 58 4d 85 e4 0f 84 12 01 00 00 e8 41 1=
+d 93 ff 4c 89 e2 48 b8 00 00 00 00 00 fc ff df 48 c1 ea 03 <80> 3c 02 00 0f=
+ 85 a7 07 00 00 49 8b 04 24 48 8d 7b 68 48 89 fa 48
+> RSP: 0018:ffffc90002b9efd0 EFLAGS: 00010003
+> RAX: dffffc0000000000 RBX: ffff888005466800 RCX: ffffffff94faab7f
+> RDX: 09803f040854d02c RSI: 6c9b26c9b26c9b27 RDI: ffff88800c725ea0
+> RBP: ffffc90002b9f060 R08: 0000000000000001 R09: 0000000000000001
+> R10: 0000000000000003 R11: 0000000000000000 R12: 4c01f82042a68164
+> R13: ffff888005466800 R14: 0000000000000820 R15: ffff888007b29000
+> FS:  00007f2abc4ff8c0(0000) GS:ffff8880d1ff7000(0000) knlGS:0000000000000=
+000
+> CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> CR2: 000056360eb89000 CR3: 000000000a480000 CR4: 00000000000006f0
+> Call Trace:
+>  <TASK>
+>  nvme_pci_setup_data_prp drivers/nvme/host/pci.c:906 [inline]
+>  nvme_map_data drivers/nvme/host/pci.c:1114 [inline]
+>  nvme_prep_rq.part.0+0x17d3/0x3c90 drivers/nvme/host/pci.c:1243
+>  nvme_prep_rq drivers/nvme/host/pci.c:1239 [inline]
+>  nvme_prep_rq_batch drivers/nvme/host/pci.c:1321 [inline]
+>  nvme_queue_rqs+0x37b/0x8a0 drivers/nvme/host/pci.c:1336
+>  __blk_mq_flush_list block/blk-mq.c:2848 [inline]
+>  __blk_mq_flush_list+0xaa/0xe0 block/blk-mq.c:2844
+>  blk_mq_dispatch_queue_requests+0x4f5/0x990 block/blk-mq.c:2893
+>  blk_mq_flush_plug_list+0x232/0x650 block/blk-mq.c:2981
+>  __blk_flush_plug+0x2c3/0x510 block/blk-core.c:1225
+>  blk_finish_plug block/blk-core.c:1252 [inline]
+>  blk_finish_plug+0x64/0xc0 block/blk-core.c:1249
+>  read_pages+0x6bd/0x9d0 mm/readahead.c:176
+>  page_cache_ra_unbounded+0x659/0x950 mm/readahead.c:269
+>  do_page_cache_ra mm/readahead.c:332 [inline]
+>  force_page_cache_ra+0x282/0x3a0 mm/readahead.c:361
+>  page_cache_sync_ra+0x201/0xbf0 mm/readahead.c:579
+>  filemap_get_pages+0x3be/0x1990 mm/filemap.c:2690
+>  filemap_read+0x3ea/0xdf0 mm/filemap.c:2800
+>  blkdev_read_iter+0x1b8/0x520 block/fops.c:856
+>  new_sync_read fs/read_write.c:491 [inline]
+>  vfs_read+0x90f/0xd80 fs/read_write.c:572
+>  ksys_read+0x14e/0x280 fs/read_write.c:715
+>  __do_sys_read fs/read_write.c:724 [inline]
+>  __se_sys_read fs/read_write.c:722 [inline]
+>  __x64_sys_read+0x7b/0xc0 fs/read_write.c:722
+>  x64_sys_call+0x17ec/0x21b0 arch/x86/include/generated/asm/syscalls_64.h:=
+1
+>  do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+>  do_syscall_64+0x8b/0x1200 arch/x86/entry/syscall_64.c:94
+>  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+> RIP: 0033:0x7f2abc7b204e
+> Code: 0f 1f 40 00 48 8b 15 79 af 00 00 f7 d8 64 89 02 48 c7 c0 ff ff ff f=
+f eb ba 0f 1f 00 64 8b 04 25 18 00 00 00 85 c0 75 14 0f 05 <48> 3d 00 f0 ff=
+ ff 77 5a c3 66 0f 1f 84 00 00 00 00 00 48 83 ec 28
+> RSP: 002b:00007fff07113cb8 EFLAGS: 00000246 ORIG_RAX: 0000000000000000
+> RAX: ffffffffffffffda RBX: 000056360eb6a528 RCX: 00007f2abc7b204e
+> RDX: 0000000000040000 RSI: 000056360eb6a538 RDI: 000000000000000f
+> RBP: 000056360e8d23d0 R08: 000056360eb6a510 R09: 00007f2abc79abe0
+> R10: 0000000000040050 R11: 0000000000000246 R12: 000000003ff80000
+> R13: 0000000000040000 R14: 000056360eb6a510 R15: 000056360e8d2420
+>  </TASK>
+> Modules linked in:
 >
-> [1] https://www.nxp.com/products/processors-and-microcontrollers/s32-automotive-platform/s32n-vehicle-super-integration-processors:S32N
+> Fixes: 320ae51feed5 ("blk-mq: new multi-queue block IO queueing mechanism=
+")
+> Fixes: d977506f8863 ("nvme-pci: make PRP list DMA pools per-NUMA-node")
+> Acked-by: Chao Shi <cshi008@fiu.edu>
+> Acked-by: Weidong Zhu <weizhu@fiu.edu>
+> Acked-by: Dave Tian <daveti@purdue.edu>
+> Signed-off-by: Sungwoo Kim <iam@sung-woo.kim>
+> ---
+>  block/bsg-lib.c                   |  2 +-
+>  drivers/block/mtip32xx/mtip32xx.c |  2 +-
+>  drivers/block/nbd.c               |  2 +-
+>  drivers/md/dm-rq.c                |  2 +-
+>  drivers/mmc/core/queue.c          |  2 +-
+>  drivers/mtd/ubi/block.c           |  2 +-
+>  drivers/nvme/host/apple.c         |  2 +-
+>  drivers/nvme/host/fc.c            |  2 +-
+>  drivers/nvme/host/pci.c           | 11 ++++++++---
+>  drivers/nvme/host/rdma.c          |  2 +-
+>  drivers/nvme/host/tcp.c           |  2 +-
+>  drivers/nvme/target/loop.c        |  2 +-
+>  drivers/scsi/scsi_lib.c           |  2 +-
+>  include/linux/blk-mq.h            |  4 ++--
+>  14 files changed, 22 insertions(+), 17 deletions(-)
 >
-> v5 -> v4
-> - Squashed irqsteer 'Kconfig' changes with the actual driver updates.
-> - Fixed tabular layout in the irq-imx-irqsteer driver
-> - Added received 'Reviewed-by' and 'Acked-by' tags from V4.
+> diff --git a/block/bsg-lib.c b/block/bsg-lib.c
+> index 9ceb5d0832f5..e93b1018a346 100644
+> --- a/block/bsg-lib.c
+> +++ b/block/bsg-lib.c
+> @@ -299,7 +299,7 @@ static blk_status_t bsg_queue_rq(struct blk_mq_hw_ctx=
+ *hctx,
 >
-> v4 -> v3
-> - Added missing Signed-of-by's from one commit removed in v3 by mistake
+>  /* called right after the request is allocated for the request_queue */
+>  static int bsg_init_rq(struct blk_mq_tag_set *set, struct request *req,
+> -                      unsigned int hctx_idx, unsigned int numa_node)
+> +                      unsigned int hctx_idx, int numa_node)
+>  {
+>         struct bsg_job *job =3D blk_mq_rq_to_pdu(req);
 >
-> v3 -> v2
-> - Split S32N79 SoC dtsi into separate standalone commit
-> - Renamed a memory node in the S32N79 board dts
-> - Fixed IRQ STEER DT-Bindings support for S32N79 addition
-> - Updated S32N79 usdhc driver support commit message
+> diff --git a/drivers/block/mtip32xx/mtip32xx.c b/drivers/block/mtip32xx/m=
+tip32xx.c
+> index 567192e371a8..8aedba9b5690 100644
+> --- a/drivers/block/mtip32xx/mtip32xx.c
+> +++ b/drivers/block/mtip32xx/mtip32xx.c
+> @@ -3340,7 +3340,7 @@ static void mtip_free_cmd(struct blk_mq_tag_set *se=
+t, struct request *rq,
+>  }
 >
-> v2 -> v1
-> - added driver changes required for S32N79 uSDHC support
-> - added driver changes required for S32N79 IRQ_STEER support
-> - updated commit message for uSDHC dt-bindings
-> - implemented fixes for 'dt-format' tool findings on newly added S32N79 dts files
+>  static int mtip_init_cmd(struct blk_mq_tag_set *set, struct request *rq,
+> -                        unsigned int hctx_idx, unsigned int numa_node)
+> +                        unsigned int hctx_idx, int numa_node)
+>  {
+>         struct driver_data *dd =3D set->driver_data;
+>         struct mtip_cmd *cmd =3D blk_mq_rq_to_pdu(rq);
+> diff --git a/drivers/block/nbd.c b/drivers/block/nbd.c
+> index f6c33b21f69e..e1fac1c0c4cd 100644
+> --- a/drivers/block/nbd.c
+> +++ b/drivers/block/nbd.c
+> @@ -1888,7 +1888,7 @@ static void nbd_dbg_close(void)
+>  #endif
 >
-> Ciprian Marian Costea (7):
->   dt-bindings: interrupt-controller: fsl,irqsteer: add S32N79 support
->   dt-bindings: mmc: fsl-imx-esdhc: add S32N79 support
->   dt-bindings: arm: fsl: Add NXP S32N79 SoC and RDB board
->   mmc: sdhci-esdhc-imx: add NXP S32N79 support
->   irqchip/imx-irqsteer: add NXP S32N79 support
->   arm64: dts: freescale: Add NXP S32N79 SoC support
->   arm64: dts: freescale: Add NXP S32N79-RDB board support
+>  static int nbd_init_request(struct blk_mq_tag_set *set, struct request *=
+rq,
+> -                           unsigned int hctx_idx, unsigned int numa_node=
+)
+> +                           unsigned int hctx_idx, int numa_node)
+>  {
+>         struct nbd_cmd *cmd =3D blk_mq_rq_to_pdu(rq);
+>         cmd->nbd =3D set->driver_data;
+> diff --git a/drivers/md/dm-rq.c b/drivers/md/dm-rq.c
+> index a6ca92049c10..b687a209256b 100644
+> --- a/drivers/md/dm-rq.c
+> +++ b/drivers/md/dm-rq.c
+> @@ -455,7 +455,7 @@ static void dm_start_request(struct mapped_device *md=
+, struct request *orig)
+>  }
 >
->  .../devicetree/bindings/arm/fsl.yaml          |   6 +
->  .../interrupt-controller/fsl,irqsteer.yaml    |   4 +-
->  .../bindings/mmc/fsl-imx-esdhc.yaml           |   1 +
->  arch/arm64/boot/dts/freescale/Makefile        |   1 +
->  arch/arm64/boot/dts/freescale/s32n79-rdb.dts  |  70 ++++
->  arch/arm64/boot/dts/freescale/s32n79.dtsi     | 362 ++++++++++++++++++
->  drivers/irqchip/Kconfig                       |   6 +-
->  drivers/irqchip/irq-imx-irqsteer.c            |  55 ++-
->  drivers/mmc/host/sdhci-esdhc-imx.c            |   9 +
->  9 files changed, 497 insertions(+), 17 deletions(-)
->  create mode 100644 arch/arm64/boot/dts/freescale/s32n79-rdb.dts
->  create mode 100644 arch/arm64/boot/dts/freescale/s32n79.dtsi
+>  static int dm_mq_init_request(struct blk_mq_tag_set *set, struct request=
+ *rq,
+> -                             unsigned int hctx_idx, unsigned int numa_no=
+de)
+> +                             unsigned int hctx_idx, int numa_node)
+>  {
+>         struct mapped_device *md =3D set->driver_data;
+>         struct dm_rq_target_io *tio =3D blk_mq_rq_to_pdu(rq);
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 284856c8f655..06cb29190a88 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -203,7 +203,7 @@ static unsigned short mmc_get_max_segments(struct mmc=
+_host *host)
+>  }
 >
+>  static int mmc_mq_init_request(struct blk_mq_tag_set *set, struct reques=
+t *req,
+> -                              unsigned int hctx_idx, unsigned int numa_n=
+ode)
+> +                              unsigned int hctx_idx, int numa_node)
+>  {
+>         struct mmc_queue_req *mq_rq =3D req_to_mmc_queue_req(req);
+>         struct mmc_queue *mq =3D set->driver_data;
+> diff --git a/drivers/mtd/ubi/block.c b/drivers/mtd/ubi/block.c
+> index b53fd147fa65..1c0bd2b36637 100644
+> --- a/drivers/mtd/ubi/block.c
+> +++ b/drivers/mtd/ubi/block.c
+> @@ -312,7 +312,7 @@ static blk_status_t ubiblock_queue_rq(struct blk_mq_h=
+w_ctx *hctx,
+>
+>  static int ubiblock_init_request(struct blk_mq_tag_set *set,
+>                 struct request *req, unsigned int hctx_idx,
+> -               unsigned int numa_node)
+> +               int numa_node)
+>  {
+>         struct ubiblock_pdu *pdu =3D blk_mq_rq_to_pdu(req);
+>
+> diff --git a/drivers/nvme/host/apple.c b/drivers/nvme/host/apple.c
+> index ed61b97fde59..50ff5e9a168d 100644
+> --- a/drivers/nvme/host/apple.c
+> +++ b/drivers/nvme/host/apple.c
+> @@ -819,7 +819,7 @@ static int apple_nvme_init_hctx(struct blk_mq_hw_ctx =
+*hctx, void *data,
+>
+>  static int apple_nvme_init_request(struct blk_mq_tag_set *set,
+>                                    struct request *req, unsigned int hctx=
+_idx,
+> -                                  unsigned int numa_node)
+> +                                  int numa_node)
+>  {
+>         struct apple_nvme_queue *q =3D set->driver_data;
+>         struct apple_nvme *anv =3D queue_to_apple_nvme(q);
+> diff --git a/drivers/nvme/host/fc.c b/drivers/nvme/host/fc.c
+> index 6948de3f438a..64d0c5d7613a 100644
+> --- a/drivers/nvme/host/fc.c
+> +++ b/drivers/nvme/host/fc.c
+> @@ -2109,7 +2109,7 @@ __nvme_fc_init_request(struct nvme_fc_ctrl *ctrl,
+>
+>  static int
+>  nvme_fc_init_request(struct blk_mq_tag_set *set, struct request *rq,
+> -               unsigned int hctx_idx, unsigned int numa_node)
+> +               unsigned int hctx_idx, int numa_node)
+>  {
+>         struct nvme_fc_ctrl *ctrl =3D to_fc_ctrl(set->driver_data);
+>         struct nvme_fcp_op_w_sgl *op =3D blk_mq_rq_to_pdu(rq);
+> diff --git a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
+> index 3c83076a57e5..a5f12fc7655d 100644
+> --- a/drivers/nvme/host/pci.c
+> +++ b/drivers/nvme/host/pci.c
+> @@ -443,11 +443,16 @@ static bool nvme_dbbuf_update_and_check_event(u16 v=
+alue, __le32 *dbbuf_db,
+>  }
+>
+>  static struct nvme_descriptor_pools *
+> -nvme_setup_descriptor_pools(struct nvme_dev *dev, unsigned numa_node)
+> +nvme_setup_descriptor_pools(struct nvme_dev *dev, int numa_node)
+>  {
+> -       struct nvme_descriptor_pools *pools =3D &dev->descriptor_pools[nu=
+ma_node];
+> +       struct nvme_descriptor_pools *pools;
+>         size_t small_align =3D NVME_SMALL_POOL_SIZE;
+>
+> +       if (numa_node =3D=3D NUMA_NO_NODE)
+> +               pools =3D &dev->descriptor_pools[numa_node_id()];
+> +       else
+> +               pools =3D &dev->descriptor_pools[numa_node];
+
+Simpler: if (numa_node =3D=3D NUMA_NO_NODE) numa_node =3D numa_node_id();
+
+> +
+>         if (pools->small)
+>                 return pools; /* already initialized */
+>
+> @@ -516,7 +521,7 @@ static int nvme_init_hctx(struct blk_mq_hw_ctx *hctx,=
+ void *data,
+>
+>  static int nvme_pci_init_request(struct blk_mq_tag_set *set,
+>                 struct request *req, unsigned int hctx_idx,
+> -               unsigned int numa_node)
+> +               int numa_node)
+>  {
+>         struct nvme_iod *iod =3D blk_mq_rq_to_pdu(req);
+>
+> diff --git a/drivers/nvme/host/rdma.c b/drivers/nvme/host/rdma.c
+> index 35c0822edb2d..c2514ef94028 100644
+> --- a/drivers/nvme/host/rdma.c
+> +++ b/drivers/nvme/host/rdma.c
+> @@ -292,7 +292,7 @@ static void nvme_rdma_exit_request(struct blk_mq_tag_=
+set *set,
+>
+>  static int nvme_rdma_init_request(struct blk_mq_tag_set *set,
+>                 struct request *rq, unsigned int hctx_idx,
+> -               unsigned int numa_node)
+> +               int numa_node)
+>  {
+>         struct nvme_rdma_ctrl *ctrl =3D to_rdma_ctrl(set->driver_data);
+>         struct nvme_rdma_request *req =3D blk_mq_rq_to_pdu(rq);
+> diff --git a/drivers/nvme/host/tcp.c b/drivers/nvme/host/tcp.c
+> index 69cb04406b47..385eef98081b 100644
+> --- a/drivers/nvme/host/tcp.c
+> +++ b/drivers/nvme/host/tcp.c
+> @@ -547,7 +547,7 @@ static void nvme_tcp_exit_request(struct blk_mq_tag_s=
+et *set,
+>
+>  static int nvme_tcp_init_request(struct blk_mq_tag_set *set,
+>                 struct request *rq, unsigned int hctx_idx,
+> -               unsigned int numa_node)
+> +               int numa_node)
+>  {
+>         struct nvme_tcp_ctrl *ctrl =3D to_tcp_ctrl(set->driver_data);
+>         struct nvme_tcp_request *req =3D blk_mq_rq_to_pdu(rq);
+> diff --git a/drivers/nvme/target/loop.c b/drivers/nvme/target/loop.c
+> index fc8e7c9ad858..72a8ea70eae7 100644
+> --- a/drivers/nvme/target/loop.c
+> +++ b/drivers/nvme/target/loop.c
+> @@ -202,7 +202,7 @@ static int nvme_loop_init_iod(struct nvme_loop_ctrl *=
+ctrl,
+>
+>  static int nvme_loop_init_request(struct blk_mq_tag_set *set,
+>                 struct request *req, unsigned int hctx_idx,
+> -               unsigned int numa_node)
+> +               int numa_node)
+>  {
+>         struct nvme_loop_ctrl *ctrl =3D to_loop_ctrl(set->driver_data);
+>         struct nvme_loop_iod *iod =3D blk_mq_rq_to_pdu(req);
+> diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+> index 4a902c9dfd8b..8958ad31ed2a 100644
+> --- a/drivers/scsi/scsi_lib.c
+> +++ b/drivers/scsi/scsi_lib.c
+> @@ -1948,7 +1948,7 @@ static blk_status_t scsi_queue_rq(struct blk_mq_hw_=
+ctx *hctx,
+>  }
+>
+>  static int scsi_mq_init_request(struct blk_mq_tag_set *set, struct reque=
+st *rq,
+> -                               unsigned int hctx_idx, unsigned int numa_=
+node)
+> +                               unsigned int hctx_idx, int numa_node)
+>  {
+>         struct Scsi_Host *shost =3D set->driver_data;
+>         struct scsi_cmnd *cmd =3D blk_mq_rq_to_pdu(rq);
+> diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
+> index cae9e857aea4..1a5a3786522c 100644
+> --- a/include/linux/blk-mq.h
+> +++ b/include/linux/blk-mq.h
+> @@ -426,7 +426,7 @@ struct blk_mq_hw_ctx {
+>         struct blk_mq_tags      *sched_tags;
+>
+>         /** @numa_node: NUMA node the storage adapter has been connected =
+to. */
+> -       unsigned int            numa_node;
+> +       int             numa_node;
+>         /** @queue_num: Index of this hardware queue. */
+>         unsigned int            queue_num;
+>
+> @@ -651,7 +651,7 @@ struct blk_mq_ops {
+>          * flush request.
+>          */
+>         int (*init_request)(struct blk_mq_tag_set *set, struct request *,
+> -                           unsigned int, unsigned int);
+> +                           unsigned int, int);
+
+Pre-existing, but naming these integer arguments would be helpful for
+documentation.
+
+Best,
+Caleb
+
+>         /**
+>          * @exit_request: Ditto for exit/teardown.
+>          */
 > --
-> 2.43.0
+> 2.47.3
 >
-
-Patch2 and patch4 applied for next, thanks!
-
-Kind regards
-Uffe
+>
