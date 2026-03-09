@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F4217175A9D;
-	Mon,  9 Mar 2026 06:58:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 098D22EA754;
+	Mon,  9 Mar 2026 06:58:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773039521; cv=none; b=QWmB1Mg6QvcEKah3tZ7EUu4qySeg2EV+EtuLJKan3BXRcfPFlz690/uxPH7XX47Luh5NggpN79hZDkcREXqEW4aWR2tSTR76CH0TRHIaRuHFt35SPBn5IP1ZbTkoHNMFmynvgXnC+h/UsWvyMO0f2fxNMhg2s/aBDwuNnwJukp4=
+	t=1773039521; cv=none; b=L0Lg0FCPn0snrq8il5nH/LpbeNePnUe0zDiePoGudUiQ9zQBmc6UNPvqK2b+GUM2itgRLrE3WWpRFM17dHo/HHeAt6tc/XHwbWJ6uSmq0eF3iv9VOlPM4j3pwl421cXXFgfeifpV1R+FF7i3PrxGYkSrowdO9hJOrt9ctxuAOMw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1773039521; c=relaxed/simple;
-	bh=M0JnE2zVWyq3BaqHe/T8AEXaCJiLsWkL/MZcIaPrNNQ=;
+	bh=fIjVtLv2PApm9p7zByR7Rq2/I5Linm9JuIiBx8Q7GZw=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=r2H3ekeh4sY5w3d5JZ7taoW1z0Yhfzb6xDQXIsFserknly2eCIBdXIjKBDGhlLtNWfoNKlPh0al7/DF1atkNP7oebhtcytE8Eh9HIlGNZ/6S1FozcbaVOkVgIW45CJRM4BfUNX0lsLoSpzGYSx6lMwEaOaAfpYMAkwDDEP31zGg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e+1dwaVS; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=braVnpRtp0cd0IMmxAj+aFpOrx1ZjV76HG3j7y9xW9uhx1BZaICT0JqJb6IeIrHJ5VvRRzmtzJubdJQRqaQ/rpnpqd3DyoKCABY3tr8uKOr8fQ82j0T8Fx7OhUncJRDSi28nM+5YYmjitXE/sYhng91BJzj8i3aPXtYXF8jzQus=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fxq+GFGV; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e+1dwaVS"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id B51E7C19423;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fxq+GFGV"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id C81BEC2BCB7;
 	Mon,  9 Mar 2026 06:58:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1773039520;
-	bh=M0JnE2zVWyq3BaqHe/T8AEXaCJiLsWkL/MZcIaPrNNQ=;
+	bh=fIjVtLv2PApm9p7zByR7Rq2/I5Linm9JuIiBx8Q7GZw=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=e+1dwaVSxLg6RhadzxL+dSIl5Q7fHKJMdtuMlNZsNQbBRuWSEzOzee2deluXBQhsd
-	 ECYDJdsrW3h4RzMl7AllaDcU5XUBy083ZiRdTw0hSKGkAftX78YWE9ovV/YoaZSPkA
-	 Faej7UIRN8MELvzEEU49ry7SsIg1uvogYxTh4UifR13ccY7LTp+rZgxMs5UwhrCrCB
-	 lgFVGxc2YrxFNc/u1cU0/G/Hffzcg3/hQB91/sGpF9VWUmd60m2C/OZFxnb8IerFPa
-	 utMx44kwMn7GH+a8qPjWDsriuivPoL5mY1Htjc1NQTI0wvdVs6Ny+3y0ThVvyu5HsP
-	 u7zavvvmMYyrA==
+	b=fxq+GFGVMf5HzkaoM6WBQPw9A6Weqxek13CcQz9iIB8rNEzEzup1CUcQJwv1QQQXH
+	 cMJnoD0xEMNUsM4Kh9+S8wlZBmn1+nZBmEFv3Ng8C/n/jw/if+mB1d+6MtM2HQ2/3J
+	 a2xGCFSFcgtqYtxMcvndVpdozLyyh1A/jkn6tSudCC93gkVb0zNSfDljUa1tdHNbdT
+	 Zpy2vgL6kLP6NzI95ZFKBld2iT5r8x14e2y7BFGMhvLyBLOnqM7Qm2fa05lPZpS845
+	 Wnw0T2wr1xnjKI5S20S/5jF7X2uH5kIRWYOYBtEpyLHhac+B/tyadH7MLVYAhRXNuC
+	 e8MFKlfwG913w==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F2D3EF36E8;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCC9DEF36EC;
 	Mon,  9 Mar 2026 06:58:40 +0000 (UTC)
 From: Manivannan Sadhasivam via B4 Relay <devnull+manivannan.sadhasivam.oss.qualcomm.com@kernel.org>
-Date: Mon, 09 Mar 2026 12:28:32 +0530
-Subject: [PATCH v6 2/5] soc: qcom: ice: Return -ENODEV if the ICE platform
- device is not found
+Date: Mon, 09 Mar 2026 12:28:34 +0530
+Subject: [PATCH v6 4/5] mmc: sdhci-msm: Remove NULL check from
+ devm_of_qcom_ice_get()
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -41,7 +41,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260309-qcom-ice-fix-v6-2-4dd3347df530@oss.qualcomm.com>
+Message-Id: <20260309-qcom-ice-fix-v6-4-4dd3347df530@oss.qualcomm.com>
 References: <20260309-qcom-ice-fix-v6-0-4dd3347df530@oss.qualcomm.com>
 In-Reply-To: <20260309-qcom-ice-fix-v6-0-4dd3347df530@oss.qualcomm.com>
 To: Bjorn Andersson <andersson@kernel.org>, 
@@ -56,18 +56,19 @@ Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
  Sumit Garg <sumit.garg@oss.qualcomm.com>, mani@kernel.org, 
  Neeraj Soni <neeraj.soni@oss.qualcomm.com>, 
- Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+ Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>, 
+ Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1019;
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1276;
  i=manivannan.sadhasivam@oss.qualcomm.com; h=from:subject:message-id;
- bh=Z6kPE7wcV6uVt9Ccu9/dsfl6jqa0/scCxiM0VLuRRl0=;
- b=owEBbQGS/pANAwAKAVWfEeb+kc71AcsmYgBprm+cnHWz0z5dHAGXNzAyDdwrnxQf37rMPX6Hh
- mT/TRFzX2uJATMEAAEKAB0WIQRnpUMqgUjL2KRYJ5dVnxHm/pHO9QUCaa5vnAAKCRBVnxHm/pHO
- 9XoxB/4ywdRYmhB2NdRmHi1PHoVIbrgpsUzmeFPsz8ndKJxyyKBe9+E7zRkGtWraPw6pWwAM0Ip
- neniFBKEF+tucxCHP4/EqCD/It0z3E3rMAOeFZLOnjtU/cfpNCODJ5ZUgNOcKiCIdoonRXpzkOz
- 5hi51H1LROdzqD7ZBtFt6fkT+IeKd8qkRkJmIM9iUoZC5Kozkb4YJ/+BHZ/6r6gSxebz3Su9wc6
- pyv32Jf85qZEG6mWjy27/OwJYTRDhsm1oJdaQi9AWk3ohgQo+ymrPt0AFrezP3kmYKTOzFWVX/i
- LlrD6Su1flZnbteOzWv8Ua3JnZwDMnuMeGxBYmQZQa7tzDe0
+ bh=+5SkLtRpHTnkAQ9yZWBecUdG7TMHCu1aRwm2dHYl1LQ=;
+ b=owEBbQGS/pANAwAKAVWfEeb+kc71AcsmYgBprm+cxSFJKAT3tpQEkmozGp9einIfyo8LyYDAp
+ EL94vuno0qJATMEAAEKAB0WIQRnpUMqgUjL2KRYJ5dVnxHm/pHO9QUCaa5vnAAKCRBVnxHm/pHO
+ 9dVmB/9xzkZqg3JdQqo0aNv68bGvjpIh88CokEd8juqUVKVwgy6z1x7gfWjhDfg0M/oPchQctac
+ +juVr87XtrLLM3rrJAAvhxncqQQXMj3VtLSCZ3v9Uc9FUVNPB+uEK4xcVDJotL9JyYBPBN606sK
+ vMJFOBZv69AiLs867NHlbgV3ivxQngHKWaGkygZ7DRjVmuBVNCzItYksNrLC6/DeAu6BzQFU8uM
+ ck++vUu+Nsy5l61b6s+1nvNON9/Gg4Xtl1tlvrH3NoyC7WzInYlpex7Xn7R1wChev9y9T/++XAz
+ ACPF+Ue0g+fMTpZ/mYcPmTGXJ6mTbHo8ukgyiKk9AedREbny
 X-Developer-Key: i=manivannan.sadhasivam@oss.qualcomm.com; a=openpgp;
  fpr=C668AEC3C3188E4C611465E7488550E901166008
 X-Endpoint-Received: by B4 Relay for
@@ -77,32 +78,41 @@ Reply-To: manivannan.sadhasivam@oss.qualcomm.com
 
 From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
 
-By the time the consumer driver calls devm_of_qcom_ice_get(), all the
-platform devices for ICE nodes would've been created by
-of_platform_default_populate().
+Now since the devm_of_qcom_ice_get() API never returns NULL, remove the
+NULL check and also simplify the error handling.
 
-So for the absence of any platform device, -ENODEV should not returned, not
--EPROBE_DEFER.
-
-Fixes: 2afbf43a4aec ("soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver")
+Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
 ---
- drivers/soc/qcom/ice.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-msm.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
-index 91991864b4a3..85deb9ea4a68 100644
---- a/drivers/soc/qcom/ice.c
-+++ b/drivers/soc/qcom/ice.c
-@@ -650,7 +650,7 @@ static struct qcom_ice *of_qcom_ice_get(struct device *dev)
- 	pdev = of_find_device_by_node(node);
- 	if (!pdev) {
- 		dev_err(dev, "Cannot find device node %s\n", node->name);
--		return ERR_PTR(-EPROBE_DEFER);
-+		return ERR_PTR(-ENODEV);
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 3b85233131b3..8d862079cf17 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1906,14 +1906,14 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+ 		return 0;
+ 
+ 	ice = devm_of_qcom_ice_get(dev);
+-	if (ice == ERR_PTR(-EOPNOTSUPP)) {
++	if (IS_ERR(ice)) {
++		if (ice != ERR_PTR(-EOPNOTSUPP))
++			return PTR_ERR(ice);
++
+ 		dev_warn(dev, "Disabling inline encryption support\n");
+-		ice = NULL;
++		return 0;
  	}
  
- 	ice = xa_load(&ice_handles, pdev->dev.of_node->phandle);
+-	if (IS_ERR_OR_NULL(ice))
+-		return PTR_ERR_OR_ZERO(ice);
+-
+ 	if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
+ 		dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
+ 		return 0;
 
 -- 
 2.51.0
