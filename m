@@ -1,140 +1,120 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9AFC2C027E;
-	Mon,  9 Mar 2026 08:41:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F394D361664;
+	Mon,  9 Mar 2026 09:23:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773045699; cv=none; b=lM4H81G5eXm+9MFyFuKilkeEoVEc9PlKKe4BbTLcJSzK0VygvERr94vX8zn701jJ7bGt3QTuZM7NnmxT4+dCw98HN80wpjH/zjeeqH/TSS/bUuUIuF1OptSOjhaOp9xsuYr9SSspHlezA1NupXSG1gM7rikiR9eP3XW1jTZWDdc=
+	t=1773048215; cv=none; b=P85i06L0iygibaqPT/fgZ6HtrEzB0r1FOQPVHfDm4z5uEB4OX8hd8TCL/6FJX+8Zfd0GWAil/dTo8kjSZyKuZIAvMSuiJjdLU0xJF/F3s928108gkgvpx6SAlHqfFDbysTfuXkDGxPbftk+M5PHQ/EezNaEN6+PulD0aqL7R7Bg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773045699; c=relaxed/simple;
-	bh=JBpXZptTSUunAq5dyKc9na25R/vc1bFHXrI3d81DJiI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Q+s5NxUptYvamgPzrgOR+iRwF82Osv8WGGdHdQyDwXzxx7Nb0iwbWc4QUH/PBPV7wG/HX+tuIbwtfFGwyivbfnMLt48s+gSHg6mbPVH6Kmk4kxomyZq/co2tfQfTWCX1O7GheAHik7YS50KGUtw/LfB9VBe+0YsewelbEogiX0M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=DEzokvNv; arc=none smtp.client-ip=192.198.163.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1773048215; c=relaxed/simple;
+	bh=HdpYv+AK/YGT3wtX9pT1P3XlHW6w2YeAT+IqCsoGv0s=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=jxhjeZLhkJnno7x0LZTAnOopmEjI6ExDTm7BdXSu+QgCNfUsfmK9icocHMpJ7I2X919u8oinOYUtg5PElruKICjIc42kbAxInjlWRzMIlfCuF9X+F12I9xOH9l8YT0limSHiOX9BXLTkYe9YPoGlm+TJJb05gj7spAHGW2zITzU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hVoNSA6V; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="DEzokvNv"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1773045697; x=1804581697;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=JBpXZptTSUunAq5dyKc9na25R/vc1bFHXrI3d81DJiI=;
-  b=DEzokvNvsTs1SbPjydXPbhUzcBv+RNfFujeGoTkb67ifT+Zca+Gu9RUF
-   9OFNwNNYvFsfTuczujDf8217kONKP/2xZrvRbUrYjb1rP3IwpdPyRDXIk
-   loTTx0PXn9I7Al8qJdsT1d8Rc5mh3vgpFm/nJdMPzM9LlL5BP4+cYKh2F
-   eALmUm1Ee4gfSmvto8JW3scyEV8A94weSL27U3cfAbzVu2yeF0/3myxMY
-   4g6WcDx/CMBE2nwqmK6d2FzNvMC5OTCG8RTHRMYQsn8R+qE1wILpZrxrp
-   pzDpaPzZNVSXwibsxtWOm3vu9v8SUxpkQRv62bxwu0BIeQ6Ou5g1c/btx
-   Q==;
-X-CSE-ConnectionGUID: 9oYZ4/ueTpO25QzVLWHT7A==
-X-CSE-MsgGUID: yhZZydyKQoe18MU7gOSwlQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11723"; a="74141549"
-X-IronPort-AV: E=Sophos;i="6.23,109,1770624000"; 
-   d="scan'208";a="74141549"
-Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Mar 2026 01:41:35 -0700
-X-CSE-ConnectionGUID: QnlBDgkcTaOqYfPdIBMwrg==
-X-CSE-MsgGUID: As52cKYSQV+Zc4xb5wE3Qw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,109,1770624000"; 
-   d="scan'208";a="219661399"
-Received: from igk-lkp-server01.igk.intel.com (HELO 9958d990ccf2) ([10.211.93.152])
-  by orviesa008.jf.intel.com with ESMTP; 09 Mar 2026 01:41:27 -0700
-Received: from kbuild by 9958d990ccf2 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1vzWB3-000000002pl-2K7j;
-	Mon, 09 Mar 2026 08:41:25 +0000
-Date: Mon, 9 Mar 2026 09:40:41 +0100
-From: kernel test robot <lkp@intel.com>
-To: Sungwoo Kim <iam@sung-woo.kim>, Jens Axboe <axboe@kernel.dk>,
-	Josef Bacik <josef@toxicpanda.com>,
-	Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, dm-devel@lists.linux.dev,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Richard Weinberger <richard@nod.at>,
-	Miquel Raynal <miquel.raynal@bootlin.com>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Hector Martin <marcan@marcan.st>, Sven Peter <sven@svenpeter.dev>,
-	Alyssa Rosenzweig <alyssa@rosenzweig.io>,
-	Keith Busch <kbusch@kernel.org>, Christoph Hellwig <hch@lst.de>,
-	Sagi Grimberg <sagi@grimberg.me>,
-	James Smart <james.smart@broadcom.com>,
-	Chaitanya Kulkarni <kch@nvidia.com>,
-	"James E.J. Bottomley" <jejb@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>
-Cc: oe-kbuild-all@lists.linux.dev, Sungwoo Kim <iam@sung-woo.kim>,
-	Chao Shi <cshi008@fiu.edu>, Weidong Zhu <weizhu@fiu.edu>,
-	Dave Tian <daveti@purdue.edu>, linux-block@vger.kernel.org,
-	linux-kernel@vger.kernel.org, nbd@other.debian.org,
-	linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-	asahi@lists.linux.dev
-Subject: Re: [PATCH] blk-mq: nvme: Fix general protection fault in
- nvme_setup_descriptor_pools()
-Message-ID: <202603090911.0DdOwjTR-lkp@intel.com>
-References: <20260309062840.2937858-2-iam@sung-woo.kim>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hVoNSA6V"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC431C4CEF7;
+	Mon,  9 Mar 2026 09:23:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1773048214;
+	bh=HdpYv+AK/YGT3wtX9pT1P3XlHW6w2YeAT+IqCsoGv0s=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
+	b=hVoNSA6VbeUuOvEG/YRgGoQiIZ14lpU77V6B1mvJhk/nFVFKx9hcsVlGxBF2N/gwf
+	 xc2YpBcFA0BeItIW0YP1PQano5iDKE84YGZ8/Ki+izwCfu98+Pnqrolkv4SjPKT15v
+	 mXIv6Nf4GrhBbpMA/3JHI81W+mDbkShlX0ApQaoI+i1P/QpU4W3JwzBVToVDPOb5Cd
+	 CrF1FcH3OGqlAleb8yIczwiMoM8y9nDA05Si4T9Qz65xRwWIVe6E+k1itqqzUm+KEZ
+	 tychkPaNiQlcquXMPOY0uANFx5DKElbbLnh92GcRPqy98Dr/rZhkzK+E2j1javF4Ry
+	 w+UNDjKzdUAfg==
+From: Thomas Gleixner <tglx@kernel.org>
+To: Ciprian Costea <ciprianmarian.costea@oss.nxp.com>, Rob Herring
+ <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Frank Li
+ <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>, Fabio Estevam
+ <festevam@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Adrian Hunter
+ <adrian.hunter@intel.com>, Shawn Guo <shawnguo@kernel.org>, Lucas Stach
+ <l.stach@pengutronix.de>
+Cc: Pengutronix Kernel Team <kernel@pengutronix.de>,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, imx@lists.linux.dev,
+ linux-arm-kernel@lists.infradead.org, s32@nxp.com, Christophe Lizzi
+ <clizzi@redhat.com>, Alberto Ruiz <aruizrui@redhat.com>, Enric Balletbo
+ <eballetb@redhat.com>, Eric Chanudet <echanude@redhat.com>, Ciprian Marian
+ Costea <ciprianmarian.costea@oss.nxp.com>, Larisa Grigore
+ <larisa.grigore@nxp.com>
+Subject: Re: [PATCH v4 5/8] irqchip/imx-irqsteer: add NXP S32N79 support
+In-Reply-To: <20260306161555.9000-6-ciprianmarian.costea@oss.nxp.com>
+References: <20260306161555.9000-1-ciprianmarian.costea@oss.nxp.com>
+ <20260306161555.9000-6-ciprianmarian.costea@oss.nxp.com>
+Date: Mon, 09 Mar 2026 10:23:31 +0100
+Message-ID: <87jyvls6ek.ffs@tglx>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260309062840.2937858-2-iam@sung-woo.kim>
+Content-Type: text/plain
 
-Hi Sungwoo,
+On Fri, Mar 06 2026 at 17:15, Ciprian Costea wrote:
+> +/* SoC does not implement the CHANCTRL register */
+> +#define IRQSTEER_QUIRK_NO_CHANCTRL	BIT(0)
+> +
+> +struct irqsteer_devtype_data {
+> +	u32 quirks;
+> +};
+> +
+>  struct irqsteer_data {
+>  	void __iomem		*regs;
+>  	struct clk		*ipg_clk;
+> @@ -37,8 +44,22 @@ struct irqsteer_data {
+>  	struct irq_domain	*domain;
+>  	u32			*saved_reg;
+>  	struct device		*dev;
+> +	const struct irqsteer_devtype_data *devtype_data;
 
-kernel test robot noticed the following build errors:
+The struct was perfectly tabular formatted before....
 
-[auto build test ERROR on axboe/for-next]
-[also build test ERROR on device-mapper-dm/for-next linus/master v6.16-rc1 next-20260306]
-[cannot apply to linux-nvme/for-next]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+https://www.kernel.org/doc/html/latest/process/maintainer-tip.html#struct-declarations-and-initializers
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Sungwoo-Kim/blk-mq-nvme-Fix-general-protection-fault-in-nvme_setup_descriptor_pools/20260309-143107
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/axboe/linux.git for-next
-patch link:    https://lore.kernel.org/r/20260309062840.2937858-2-iam%40sung-woo.kim
-patch subject: [PATCH] blk-mq: nvme: Fix general protection fault in nvme_setup_descriptor_pools()
-config: x86_64-rhel-9.4-rust (https://download.01.org/0day-ci/archive/20260309/202603090911.0DdOwjTR-lkp@intel.com/config)
-compiler: clang version 20.1.8 (https://github.com/llvm/llvm-project 87f0227cb60147a26a1eeb4fb06e3b505e9c7261)
-rustc: rustc 1.88.0 (6b00bc388 2025-06-23)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260309/202603090911.0DdOwjTR-lkp@intel.com/reproduce)
+>  };
+>  
+> +static const struct irqsteer_devtype_data imx_data = {
+> +	.quirks = 0,
+> +};
+> +
+> +static const struct irqsteer_devtype_data s32n79_data = {
+> +	.quirks = IRQSTEER_QUIRK_NO_CHANCTRL,
+> +};
+> +
+> +static bool irqsteer_has_chanctrl(const struct irqsteer_devtype_data *data)
+> +{
+> +	return !(data->quirks & IRQSTEER_QUIRK_NO_CHANCTRL);
+> +}
+> +
+>  static int imx_irqsteer_get_reg_index(struct irqsteer_data *data,
+>  				      unsigned long irqnum)
+>  {
+> @@ -188,6 +209,10 @@ static int imx_irqsteer_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		return ret;
+>  
+> +	data->devtype_data = device_get_match_data(&pdev->dev);
+> +	if (!data->devtype_data)
+> +		return dev_err_probe(&pdev->dev, -ENODEV,
+> +				"failed to match device data\n");
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202603090911.0DdOwjTR-lkp@intel.com/
+No point for this line break. You have 100 characters. If you have the
+line break, then this needs curly brackets. See the bracket rules in the
+above linked document.
 
-All errors (new ones prefixed by >>):
+>  static const struct of_device_id imx_irqsteer_dt_ids[] = {
+> -	{ .compatible = "fsl,imx-irqsteer", },
+> +	{ .compatible = "fsl,imx-irqsteer", .data = &imx_data },
+> +	{ .compatible = "nxp,s32n79-irqsteer", .data = &s32n79_data },
 
->> error[E0308]: mismatched types
-   --> rust/kernel/block/mq/operations.rs:274:28
-   |
-   274 |         init_request: Some(Self::init_request_callback),
-   |                       ---- ^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected fn pointer, found fn item
-   |                       |
-   |                       arguments to this enum variant are incorrect
-   |
-   = note: expected fn pointer `unsafe extern "C" fn(_, _, _, i32) -> _`
-   found fn item `unsafe extern "C" fn(_, _, _, u32) -> _ {block::mq::operations::OperationsVTable::<T>::init_request_callback}`
-   help: the type constructed contains `unsafe extern "C" fn(*mut bindings::blk_mq_tag_set, *mut bindings::request, u32, u32) -> i32 {block::mq::operations::OperationsVTable::<T>::init_request_callback}` due to the type of the argument passed
-   --> rust/kernel/block/mq/operations.rs:274:23
-   |
-   274 |         init_request: Some(Self::init_request_callback),
-   |                       ^^^^^---------------------------^
-   |                            |
-   |                            this argument influences the type of `Some`
-   note: tuple variant defined here
-   --> /opt/cross/rustc-1.88.0-bindgen-0.72.1/rustup/toolchains/1.88.0-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/option.rs:597:5
-   |
-   597 |     Some(#[stable(feature = "rust1", since = "1.0.0")] T),
-   |     ^^^^
+Tabular layout please for readability sake.
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Thanks,
+
+        tglx
