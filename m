@@ -1,130 +1,144 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05E013D75B7
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:07:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0B8E3D75B8
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:07:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773068826; cv=pass; b=tVQRMyVjDlAn6Q4Y9RRyY6i8i+z4FNLIvNAzbKII57Fd0798q44Y1/MkS/A6qluVVnpgfeE3NrBmXfFauR3WSy3EmoLZVHEOrpCKhHmHQ0WpkQ88zYZOumqxKYAMVzQmROmeKgoI7jogTRT1mMV2rxSqGVzpsebvYieZMa/k4Qk=
+	t=1773068831; cv=pass; b=bHZtVPk6UA3yIIiqRkBLGjzLMB7XoxoMg+NPKO6JobyFVYmEkLry5i/NMUn2YS7Zw/v7OeNnAjXrFVAi+yi+sFsbrruVQ4oddTTa3yLhsYiuMeSVxNViQnxidZMAj35IInM21bbynQfvhrOCV86Ll3mNnNJqdXtHsH7dL9OSjes=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773068826; c=relaxed/simple;
-	bh=qFM6CNejT4/x2PsTY7g3d31KNjCWnVMll1bNFh52yVs=;
+	s=arc-20240116; t=1773068831; c=relaxed/simple;
+	bh=esAbUIkFlHla0v0stivh1D9fNdDowuTHXrGsgEy9vs0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ksX5i7gctv404eX0SnNA2AgNOhLFGOEyb/KglCgAC5CaD9RtJ7jBwIeQENA0XRtC2UkrrhwFVL6GaFplwxaNDl2LtJqa3sp+/WMSzluMXTpf3y3hEeKSvRyeCzkAdR3ZIXKnOtxGx+PHTykWDkkBRlNHd2xScDRX8FS3GisAO0w=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=EW7GAu0g; arc=pass smtp.client-ip=209.85.167.45
+	 To:Cc:Content-Type; b=WZlDAOQ9w+GuSaXUVOWGGLZA4Rk78YFjBDqENKskLJsb6ZMm4IPxr3NGq0Ly/Q0vjHiyZRkpYuyqkmyMoosv5J1DlZ3Ermsb2mMDsYgB2AfvfiNXz0s7c854w1D2qBBjvFp8u1mkVyIFpWlFVgtbNhWHMbGlk6XH4D4Etp5SHOU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SXZj1J7d; arc=pass smtp.client-ip=209.85.167.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EW7GAu0g"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5a13f6bcbf4so3457976e87.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:07:04 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773068823; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SXZj1J7d"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5a1443780c4so2019198e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:07:09 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773068828; cv=none;
         d=google.com; s=arc-20240605;
-        b=Q3kqAePNHj18D1jauNE0IrjJ71R3sBd6j0gUpPAjIaT/Hq+s3MDb0rwj1RyPVSWZqj
-         9ttdHMsJpq1185TyXRr81eqrUAGK0bg1T4MzWDBJtmTnBNOMmcHyEnV9hlPcSqQBzV+b
-         I4mjRbjkvNVDcjmDxvaFy2me7u/U3h8wPrDYBNl9k2UtVjeQKngWvkubjfbdCkswy8VQ
-         oHQEWvdJi7nS0rDJT7hZA2dZZvb4fnWBexniR8slsyjvScENGMCswp6uPjpi/E9rvLTA
-         ho0BkvC6vxJRwZbEn2lsbZXbwHckuSO55STa/3NllSM9fRASseXLQM0jmodT6KSAiRU+
-         oiKA==
+        b=QEDnPGjJatz+tLNpAXkTvXekBiPe5vFv/VvT+mKK2C3vGZGWT30m2kE5kzuukiGfxz
+         DC+qG1wYgRj/JWWeCwRClS/P9tawKCOqgYMMZ43dVa9POr0IliP0FYId3Qr/A8fC2Tae
+         Jp5/yok03A8zNHNAM9/j4GCUQ8GFq7mO84ScKcuxouzOyBV8FhmkHUwnua7IeL/xjKaK
+         7TkoiuhFsOIK02dQkSQpQ8hAl9xSYusuEiQ/RskTnaF1uK78OV4UmYgjcB8ibintTJLg
+         v66R7ICQmVNkXdHg0i3gIqa2NErhGp40gRHRr36qAvws2BHE0zTrBveTejCAZA1IhTMU
+         JgPw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=537JRIZC/LSxbuaPx2Afp8DiB6T1dTDgqpkX2JrxqlU=;
-        fh=0mKH/IbysHiooRlxgS+lLsiZ+Xg4+451JTcsDrHySnc=;
-        b=lLna3l5tgb/+s5A5FjIm/ZlJQEnwE6Fu7QUhrx/TH/bkyJ0+AcyV0X7qW1ndZvsxsN
-         F3EEoxkgSQ85yw/e6xMLwrzgc68XefdL5C8WZJLjsxHobI55hBqqGNHzxlBNJjvYZgtg
-         jrCogUHDRBS2izvrCgY5EuOTQQzbXSS+sNljf939TgBUYTStP3QCPnf9nenNi3eHcbJM
-         ARMogIfU0A8acQtd3ZQFVFI57DpWGcPjwcFJsIu3GgYzVmfpFjJhopuBFFEP7t3jq8pB
-         gyrVxTRh/fcItEqy77S9C1F5jdVinCwxpPvSqt34oQnjeY/gRp2ttJpTEMbiszYcBV2F
-         8rqw==;
+        bh=pFl2mL9rWXv78CsIkv+Buf2pk8K49GTmcLThRUwuW3c=;
+        fh=jRn96mpLS2bSc3Y5a0kR0NwGimz0czXdcfnHts/+tyU=;
+        b=Om3N7pOyTwvLVmRLubEKU7P+rbeqJDsewjaEtZcIsOHgrmI2DrkXdFF3qkTEqvDTzC
+         NTwkEF7RmFRcSqTKtKLOE0kmKNOsBCyFpHmtmsDzSAYARyMG6WjedGSDeBB62Au62aMM
+         YtEIzRgltmH7F+KsykHEcBQI/Enld6JG9TOHyXo3kh5/pJiASiCBe8f/I+A4VsEJs+yN
+         P5ZupeauMgxR4UDC6Uryk/1eOcHCAA3Ve4kbGrInbLKW7XWSZL6iiLZGzgywvoeAxby+
+         aCVaYqOqI5SnmLAcOPuwSJYrbnBOFgQr3BxWofmYQfDMH5d2375ch1l4QbcrVb2batdO
+         J1VA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1773068823; x=1773673623; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1773068828; x=1773673628; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=537JRIZC/LSxbuaPx2Afp8DiB6T1dTDgqpkX2JrxqlU=;
-        b=EW7GAu0gb8gRnZtPCQzz4ZqYyjyhH3+SJs4WXmlIUz2cW3gEEDUuqcM6MqhYFa9Q7S
-         tMpGvQKfb7JxKlB6YolG2pMXgh8QMFrvO2rGgvcEugBV8UNWkW77p8Eab79UZdDzJBAF
-         NB3j5n5aaeh0X1sPfEvIgj/fbhbSWN1q1ehM5VT1KnUOpRvSbfOkQY+QK9p/bPdg3e9o
-         tN86gJ1E2mK7wFEXBs9p7Sh1qs3To3+5E5slr8HJa1RqZ8AKxla7OXVsy9i+msGeJUbi
-         HGe3V7ApvSTZ5SE4V/Pm63OXSZceRRb6RoGQov8724D1t5mPpBqO8GCdzjx8UXB7/H07
-         Harw==
+        bh=pFl2mL9rWXv78CsIkv+Buf2pk8K49GTmcLThRUwuW3c=;
+        b=SXZj1J7dVMBOmAo2tCAp4rI2IeJKgDp+QRPPCa7pmAQuodJ7H/QJpoZrj9zDCNy//z
+         PZ1DOCib3bQVmJG2+vc319IokvxeQEmiQFiaB3u8v7+5LhEAwpbWEeypJfbG8Pp1mYtI
+         q3wm8xehKYdYYp1I9pukygoaRHlHR8tQC4+8ACf2cmY/LVJpYaM0Z5W9pFZlXx0CnO69
+         HNvQJhYOuAP/MFLGjMEAH3g8o6PDx96V1yM28ZKNZU8BpJA3IDRUAsJYr2Yv+nNxyehO
+         4gyTTfNeHypJBDM6SwvdMk4Vla8UHtmgdax2sDv3u1S3jegXDXHU6LT0896CcNn6Q1MY
+         JkZw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773068823; x=1773673623;
+        d=1e100.net; s=20230601; t=1773068828; x=1773673628;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=537JRIZC/LSxbuaPx2Afp8DiB6T1dTDgqpkX2JrxqlU=;
-        b=ZJrqYH4FurFKYxR/PNnjzZWpMiwpQpDMs5n5GiGDZOT+JlLJoVLFgWTWjHKLviJnvR
-         CdomLzMsXnHamXYyNAu6S1z+HIXDqwjN/jPRxgnfBk7rPzLy6xPBtXUg7gJs46nqnSQT
-         QIQ96Fzxki82e0TxoBfUn/mMGog1pHJJ4f7fB80ZVgQTKG2rnzMi/9/w8/M//auTHShP
-         nxysiQDfJjROtGJkENFUYut69yxGb/AsUK8FwOoifUOZd+kVgiM+BbsQl2bNobKtxnrD
-         U2yPiiY2DYhzMwr4BGMEB18ZHInOeIN/uuPCJaMXFHtUnN+vOyKMEnBJMGv2wSIBCwBh
-         Sfcw==
-X-Forwarded-Encrypted: i=1; AJvYcCUARBEKnMQxiKvcB8zb4szRa7/VZxjDQN0lv+qgzZzKrg00ziotBcVaKMfAgorowtkXY1X3lJmZtuQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwreJUhT1KFo83TGnVI7KZ45CPM49kByxDSDCDOoNTF9AFR03o6
-	csjsZcizE5EYOF8v4W7xBWPlV//MwB8mLPUXjMHzEDlEfoAmG9QwFVrCbEhDMSGEZ13FnXytM7A
-	rSLoIOm62k/V0S6lUlLvpLkaXKyIFtfjcyGizhSxv0g==
-X-Gm-Gg: ATEYQzwawvCKSO9mKxt81W+LCwyHFAcx753bxxPEW9/VybinWs2XVkGShUfZf8kr1Tj
-	brAfiF3Uq4a9QDkth6c+ozCU0JaA8Thqq0AqmPw5T2hD891rlkO6AufRd1Qcx4nL6FQF7MQf44k
-	zQbGHSHIVAReTdzf52HvUfoPR5SFG9CrjJNK1dTy825akJlaQa7Qy5PzefLq4Om0xUbXstnTcKO
-	7M5EYo8femt9Lz1ANCkzhFdGd+fzdXdHr+ukXDZOET7XbZ/MCY9KjNVEPUCXBmdXi0Su/d4qRnK
-	XTNYFhvD
-X-Received: by 2002:a05:6512:1050:b0:5a1:427d:93cb with SMTP id
- 2adb3069b0e04-5a1427d98a9mr2810827e87.3.1773068822670; Mon, 09 Mar 2026
- 08:07:02 -0700 (PDT)
+        bh=pFl2mL9rWXv78CsIkv+Buf2pk8K49GTmcLThRUwuW3c=;
+        b=HeVIm9oiAOG4khcoMUsYMe9GRrTmZZqnId8P6o4IGf9z7KbjVMTue82uVKE1kr6WwH
+         FzgScBWMFpbBPPie0mepCVIqKrSxY5vogGxmINIroj5W2zkmP3y+jyWsABzagstVDfe/
+         6MkGiDgGhHCEHj3FxLvEfPex/B9KTIB3n0USK/ySKDWZYlqoBBwSbddd4hNDlNhUqxfN
+         jVHOb+BKUM8xyKQk6eQdi4LhE1O52oKKMOED8SxjJE0/fM6536kZGjEZGvHfDIh1BZa+
+         qLzZKUVT2wKmbns9hXUxt9U04rxI+FFxLDoIF9+BVzGhARpw3vL9nNw3h+t1jARJ11rw
+         ZudQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVdz+t7vH2BW9CVf31oJAcReAkCWfzVWsP8BdD72CFjRC0VwsHFxQ8kV5ETeu19mc9PjhOp/Bqsb28=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwvPcjYPjFMJDNmgKETyKHq8XidJ+znZKR5Pagbqci0Hq5767jy
+	2QoCUOC4tXRtfNmxyylULhc+nqr+IjbMY0TfX6ovhBxvi4s0yyaBif3yvm6jA/8dje03cucqT74
+	zcRsoi84ULSAY66mBquxrBb0Juob/Kxd/q/cjzdebMw==
+X-Gm-Gg: ATEYQzwZIwNuvxeA0qLUc0R/OjUMu64HUhvk62LNqZfZsAYlwqM6BdUK4WE9raLxyrO
+	v5LbcLhBIeFRg2zwR5QIwOC54CTuoX/9Qgpxx+OdDtpMsN1Hpw0folZpHrm73K6+3px45r4It5m
+	CNGT4QyZYWMr0u8KaJ9U2gJPoDkfpTvLazU3zscd05PoxUjTyim1j94JmMLO0CSa3m+SMBFC0cQ
+	OmlATYr9FGr4SqsQlYLIlJOONLr707iZt+6CV8qduMxdDKKfZSUzMnqck7qxligEos1cX0AxNgk
+	udgzqqjl
+X-Received: by 2002:a05:6512:3d9e:b0:5a1:18a7:e149 with SMTP id
+ 2adb3069b0e04-5a13c952547mr4753098e87.24.1773068827673; Mon, 09 Mar 2026
+ 08:07:07 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1772529875.git.zhoubinbin@loongson.cn>
-In-Reply-To: <cover.1772529875.git.zhoubinbin@loongson.cn>
+References: <a72e532c7364cd64b5cb4fc63c94b2af6b22ad8b.1772701528.git.geert+renesas@glider.be>
+In-Reply-To: <a72e532c7364cd64b5cb4fc63c94b2af6b22ad8b.1772701528.git.geert+renesas@glider.be>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 9 Mar 2026 16:06:26 +0100
-X-Gm-Features: AaiRm500LV8TdcWOE41CkNJVMFJZsV23MQAFkPUmS9M5shGF6D8S5Byz54gpLEA
-Message-ID: <CAPDyKFqi_p0YDDebvjhAeC8fiq0KidE_pmbvBcvGDiUEStWvrA@mail.gmail.com>
-Subject: Re: [PATCH 0/3] mmc: Add Loongson-2K0300 SD/SDIO/eMMC controller support
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Huacai Chen <chenhuacai@kernel.org>, Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, 
-	devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Date: Mon, 9 Mar 2026 16:06:31 +0100
+X-Gm-Features: AaiRm52T8KFr-HTXEr-PkPGvgwN3Xf2zDZhhHyOAQZlnEOOFWEyg9Brrq9M5di8
+Message-ID: <CAPDyKFoU4nCCikE2NA=Tghm9hOPwcPykKcVkB_jsEq+81t+bKQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi_sys_dmac: Convert to DEFINE_RUNTIME_DEV_PM_OPS()
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 3 Mar 2026 at 12:27, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+On Thu, 5 Mar 2026 at 10:08, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
 >
-> Hi all:
+> Convert the Renesas SDHI SD/SDIO controller driver using SYS-DMAC from
+> an open-coded dev_pm_ops structure to DEFINE_RUNTIME_DEV_PM_OPS() and
+> pm_ptr().  This simplifies the code, and reduces kernel size in case
+> CONFIG_PM is disabled.
 >
-> The patchset describes two MMC controllers of the Loongson-2K0300 SoC,
-> one providing an eMMC interface and the other exporting an SD/SDIO
-> interface.
->
-> Its hardware design is similar to that of the Loongson-2K2000, but it
-> suffers from hardware defects such as missing CMD48 interrupts.
->
-> Thanks.
-> Binbin
->
-> Binbin Zhou (3):
->   dt-bindings: mmc: loongson,ls2k0500-mmc: Add compatible for
->     Loongson-2K0300
->   mmc: loongson2: Gathering all SoCs private data together
->   mmc: loongson2: Add Loongson-2K0300 SD/SDIO/eMMC controller driver
->
->  .../bindings/mmc/loongson,ls2k0500-mmc.yaml   |  1 +
->  drivers/mmc/host/loongson2-mmc.c              | 59 ++++++++++++++-----
->  2 files changed, 44 insertions(+), 16 deletions(-)
->
->
-> base-commit: 6a4a4c1cc0012590b8bebf6c95d51687d39b420c
-> --
-> 2.52.0
->
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-The series applied for next, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/renesas_sdhi_sys_dmac.c | 12 ++++--------
+>  1 file changed, 4 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> index 543ad1d0ed1cff95..9215600f03a2340e 100644
+> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> @@ -456,19 +456,15 @@ static int renesas_sdhi_sys_dmac_probe(struct platform_device *pdev)
+>                                   of_device_get_match_data(&pdev->dev), NULL);
+>  }
+>
+> -static const struct dev_pm_ops renesas_sdhi_sys_dmac_dev_pm_ops = {
+> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> -                               pm_runtime_force_resume)
+> -       SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
+> -                          tmio_mmc_host_runtime_resume,
+> -                          NULL)
+> -};
+> +static DEFINE_RUNTIME_DEV_PM_OPS(renesas_sdhi_sys_dmac_dev_pm_ops,
+> +                                tmio_mmc_host_runtime_suspend,
+> +                                tmio_mmc_host_runtime_resume, NULL);
+>
+>  static struct platform_driver renesas_sys_dmac_sdhi_driver = {
+>         .driver         = {
+>                 .name   = "sh_mobile_sdhi",
+>                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+> -               .pm     = &renesas_sdhi_sys_dmac_dev_pm_ops,
+> +               .pm     = pm_ptr(&renesas_sdhi_sys_dmac_dev_pm_ops),
+>                 .of_match_table = renesas_sdhi_sys_dmac_of_match,
+>         },
+>         .probe          = renesas_sdhi_sys_dmac_probe,
+> --
+> 2.43.0
+>
