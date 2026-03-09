@@ -1,105 +1,100 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0B8E3D75B8
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:07:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F7B23D412B
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Mar 2026 15:07:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.46
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773068831; cv=pass; b=bHZtVPk6UA3yIIiqRkBLGjzLMB7XoxoMg+NPKO6JobyFVYmEkLry5i/NMUn2YS7Zw/v7OeNnAjXrFVAi+yi+sFsbrruVQ4oddTTa3yLhsYiuMeSVxNViQnxidZMAj35IInM21bbynQfvhrOCV86Ll3mNnNJqdXtHsH7dL9OSjes=
+	t=1773068838; cv=pass; b=b1cO/KPH4ZhBU2T54r6gKLXrhwLyyjqcxdUgNoKfOJUzKA/5TsclZ2j0eLdxxoRhIwn1U8x/BuceS+Y/Ap9WxgYRwvVFl8zlN4d4NRTUqhf0THXxfsphw/Ljr9JSVR2SubV44YLbacReKfkC586peRPPwrCPVfoAnfT5/0V5s4s=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773068831; c=relaxed/simple;
-	bh=esAbUIkFlHla0v0stivh1D9fNdDowuTHXrGsgEy9vs0=;
+	s=arc-20240116; t=1773068838; c=relaxed/simple;
+	bh=E8fOhczjcDEc6pDKMEHpZEmzHvRPAmqH5sHxz4F2AZ8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WZlDAOQ9w+GuSaXUVOWGGLZA4Rk78YFjBDqENKskLJsb6ZMm4IPxr3NGq0Ly/Q0vjHiyZRkpYuyqkmyMoosv5J1DlZ3Ermsb2mMDsYgB2AfvfiNXz0s7c854w1D2qBBjvFp8u1mkVyIFpWlFVgtbNhWHMbGlk6XH4D4Etp5SHOU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SXZj1J7d; arc=pass smtp.client-ip=209.85.167.49
+	 To:Cc:Content-Type; b=qrq7NQUFts/XjDMiBGVudGl51/jsWhX0S405OvsXziqhl13CgT1d5emP9KB7oj9Y/ampiBIns1An3pK6219GCVsRp8dqC/US01Td37Dg1JbvYBVnhNTdFixatZW4h8or9ZTqklzh0gdqWPoGdxT603sbzKDCSwTh9L84adZPOLc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=zv0STtJz; arc=pass smtp.client-ip=209.85.167.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SXZj1J7d"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5a1443780c4so2019198e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:07:09 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773068828; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zv0STtJz"
+Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-5a12c310e8aso4766835e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Mar 2026 08:07:17 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773068835; cv=none;
         d=google.com; s=arc-20240605;
-        b=QEDnPGjJatz+tLNpAXkTvXekBiPe5vFv/VvT+mKK2C3vGZGWT30m2kE5kzuukiGfxz
-         DC+qG1wYgRj/JWWeCwRClS/P9tawKCOqgYMMZ43dVa9POr0IliP0FYId3Qr/A8fC2Tae
-         Jp5/yok03A8zNHNAM9/j4GCUQ8GFq7mO84ScKcuxouzOyBV8FhmkHUwnua7IeL/xjKaK
-         7TkoiuhFsOIK02dQkSQpQ8hAl9xSYusuEiQ/RskTnaF1uK78OV4UmYgjcB8ibintTJLg
-         v66R7ICQmVNkXdHg0i3gIqa2NErhGp40gRHRr36qAvws2BHE0zTrBveTejCAZA1IhTMU
-         JgPw==
+        b=WG1zwvOgVF8uvkBBJDx77u4LrJXQk6A7rH5wS7Ha40GyhWZNfkN5xHq/I0NMlxpuoR
+         ym7QUzJB1RbOzVWyawZZlzPOILwN1I06Fh69ntqti5swh6ikHEyzqpx3lbdjgqOWXWjm
+         gMwMjhCx1xt3vKqE0kPOX+dfa5+e0Ft5aFWvga2i/BeUZAPQRjb4JoHlZBUUUoXUbxiz
+         m9KA8cY1EBBwooLBGqlKqJm7x0CsZX9cddI2j1TRQQZmAd+5fp9RgvLLni81SZ0eeWGj
+         KHxrwWjncBhhJTpLDSthH/VYnpulpX0lBp1Tjz8F2TEcCKqCq96vOXsr7wLuEwZTKoYt
+         iUaw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=pFl2mL9rWXv78CsIkv+Buf2pk8K49GTmcLThRUwuW3c=;
-        fh=jRn96mpLS2bSc3Y5a0kR0NwGimz0czXdcfnHts/+tyU=;
-        b=Om3N7pOyTwvLVmRLubEKU7P+rbeqJDsewjaEtZcIsOHgrmI2DrkXdFF3qkTEqvDTzC
-         NTwkEF7RmFRcSqTKtKLOE0kmKNOsBCyFpHmtmsDzSAYARyMG6WjedGSDeBB62Au62aMM
-         YtEIzRgltmH7F+KsykHEcBQI/Enld6JG9TOHyXo3kh5/pJiASiCBe8f/I+A4VsEJs+yN
-         P5ZupeauMgxR4UDC6Uryk/1eOcHCAA3Ve4kbGrInbLKW7XWSZL6iiLZGzgywvoeAxby+
-         aCVaYqOqI5SnmLAcOPuwSJYrbnBOFgQr3BxWofmYQfDMH5d2375ch1l4QbcrVb2batdO
-         J1VA==;
+        bh=Ocw4AeDQ/grbadC3KhV6pClV5YbZ8X7UNOCrRS9r2UA=;
+        fh=nTasNSw2WVu4ik6FdcKcAOQmhecFUgaDUB6oE6iLIlE=;
+        b=fGsaxkXquRKCeyk3zg+eyVdaQce59/uyQAoTQkkkfQMhct10j8VE77zIINtFZXEOYe
+         jvzpbG8u4Zvh3gl9plYjyQXWNKYA8JAnuRQr0eu/dSp8sR6ny6ohStOJ3W2jvn2UoWuv
+         hZW3lADOmYzV0Ankd6tM2qvQIrr5YGS7lHFS/EdCvL5Xdh9pIP5G29MfCVYse0FiIsO8
+         3L5k0gmi5N+NPcCxOJZFRzruCP7lhN39czvszIGNxMWG6RefASH5wWsgC0rU8FTUwF+r
+         ZpL3E1nakejhk3qIiSRX3C9hufYMhyubdaLmPE4kY0OCYidXCHAI3ZsJWkz/mqiFhGXF
+         5Ztw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1773068828; x=1773673628; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1773068835; x=1773673635; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=pFl2mL9rWXv78CsIkv+Buf2pk8K49GTmcLThRUwuW3c=;
-        b=SXZj1J7dVMBOmAo2tCAp4rI2IeJKgDp+QRPPCa7pmAQuodJ7H/QJpoZrj9zDCNy//z
-         PZ1DOCib3bQVmJG2+vc319IokvxeQEmiQFiaB3u8v7+5LhEAwpbWEeypJfbG8Pp1mYtI
-         q3wm8xehKYdYYp1I9pukygoaRHlHR8tQC4+8ACf2cmY/LVJpYaM0Z5W9pFZlXx0CnO69
-         HNvQJhYOuAP/MFLGjMEAH3g8o6PDx96V1yM28ZKNZU8BpJA3IDRUAsJYr2Yv+nNxyehO
-         4gyTTfNeHypJBDM6SwvdMk4Vla8UHtmgdax2sDv3u1S3jegXDXHU6LT0896CcNn6Q1MY
-         JkZw==
+        bh=Ocw4AeDQ/grbadC3KhV6pClV5YbZ8X7UNOCrRS9r2UA=;
+        b=zv0STtJzbqk2PjSCvnwUoQbWfkOdHF3d0KYyOriqOf8TxJEHWnsLvXz7nWYTn0TBQx
+         oFyrykQuDC5Xx2S1kszGS7nEX6MZtJfzFNA6J93gSijq2UUgBM3BVuNp3xBRUxvh5Y7D
+         zOyLug+AJYJKkdOZQmrl2B46hBxas2mCBQkgSuoNj74GPCZRCMa4bKscCLS4a1lQKxiY
+         ODU4f/DOEjJXXK9VREH4rfMfQvXDg69Urb3WyzZAVAsVKiQfdBXyvSaVlSLEdIy4Yr30
+         yShUSBh/r/IIwV92IpMrvcPTgGdWWgkY0VSJvAkun+Uw//ACeuI2yusT2vtNBDsoYARF
+         Cr5g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773068828; x=1773673628;
+        d=1e100.net; s=20230601; t=1773068835; x=1773673635;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=pFl2mL9rWXv78CsIkv+Buf2pk8K49GTmcLThRUwuW3c=;
-        b=HeVIm9oiAOG4khcoMUsYMe9GRrTmZZqnId8P6o4IGf9z7KbjVMTue82uVKE1kr6WwH
-         FzgScBWMFpbBPPie0mepCVIqKrSxY5vogGxmINIroj5W2zkmP3y+jyWsABzagstVDfe/
-         6MkGiDgGhHCEHj3FxLvEfPex/B9KTIB3n0USK/ySKDWZYlqoBBwSbddd4hNDlNhUqxfN
-         jVHOb+BKUM8xyKQk6eQdi4LhE1O52oKKMOED8SxjJE0/fM6536kZGjEZGvHfDIh1BZa+
-         qLzZKUVT2wKmbns9hXUxt9U04rxI+FFxLDoIF9+BVzGhARpw3vL9nNw3h+t1jARJ11rw
-         ZudQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVdz+t7vH2BW9CVf31oJAcReAkCWfzVWsP8BdD72CFjRC0VwsHFxQ8kV5ETeu19mc9PjhOp/Bqsb28=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwvPcjYPjFMJDNmgKETyKHq8XidJ+znZKR5Pagbqci0Hq5767jy
-	2QoCUOC4tXRtfNmxyylULhc+nqr+IjbMY0TfX6ovhBxvi4s0yyaBif3yvm6jA/8dje03cucqT74
-	zcRsoi84ULSAY66mBquxrBb0Juob/Kxd/q/cjzdebMw==
-X-Gm-Gg: ATEYQzwZIwNuvxeA0qLUc0R/OjUMu64HUhvk62LNqZfZsAYlwqM6BdUK4WE9raLxyrO
-	v5LbcLhBIeFRg2zwR5QIwOC54CTuoX/9Qgpxx+OdDtpMsN1Hpw0folZpHrm73K6+3px45r4It5m
-	CNGT4QyZYWMr0u8KaJ9U2gJPoDkfpTvLazU3zscd05PoxUjTyim1j94JmMLO0CSa3m+SMBFC0cQ
-	OmlATYr9FGr4SqsQlYLIlJOONLr707iZt+6CV8qduMxdDKKfZSUzMnqck7qxligEos1cX0AxNgk
-	udgzqqjl
-X-Received: by 2002:a05:6512:3d9e:b0:5a1:18a7:e149 with SMTP id
- 2adb3069b0e04-5a13c952547mr4753098e87.24.1773068827673; Mon, 09 Mar 2026
- 08:07:07 -0700 (PDT)
+        bh=Ocw4AeDQ/grbadC3KhV6pClV5YbZ8X7UNOCrRS9r2UA=;
+        b=UyV1Bz70RI+OX3Wl3AZCXwdtOgLClHESj+38FUrZoq0Q+GoRzsusSswZAfg75bKYqN
+         4IKRnKky1AJk1+IjbG5Z0YqY3WPdoN665PZlas9NxdfPha3dXm9j5ZqcYu/5sNy9V6Ig
+         fHKCdfwg3ISVO8F2zJlY0aL2UpYF37q8bAt/q9qE1ODr50Y6+++Khvy/NEStT3MHWy3b
+         hczLrriUGZkw91bi2dYGWOAeqd1Aj2vSrIz7W2sONukWbZPaClENyFG4VVtA0PAiXRCP
+         zSb1yghZcDn/GH0MKBNGbQuvDU65lslTBWA0KppAU6EE9+ooPHcdHLBdSA79r5hvD3nj
+         0ZVQ==
+X-Gm-Message-State: AOJu0YzcuCSDt4+FbJvwx1nXsnRf1FbLTdn+YttZ4fHuMy3Qp8YmqUa2
+	v0wfYQAYZIV3WHdQ5l4EryMUl1KziFz/tSrbrik8d7OV7Fo5c5MOtKNFR/OmzTEZhrDFwqyZYHt
+	wUr4KXYL5pPCjtdvvZ/zaviUtx+tLesyLxBH8inNFENk4USeN4RpIJHg=
+X-Gm-Gg: ATEYQzya2DGvP37gS01vTg/ayWcV0YGy0IwedjeY2RJNfSv9vIxTTWDYuipuTcpwRjD
+	zlk4EYajWtq2X3pMAn7fOkEczE+ympK4yY7ZZldjkUXpPQXO3OpqUHuV7ZbIZ0P25GRsY/+qRKD
+	EAcudM383Lloa758dd+nAAdYWJ+lurDM0tykSmKHieqCxyY7LQWDikBCRhmHESek4M6ul7pbfw1
+	0LxONTnZgKC68Rk0Srl1M11lPvPuomzaZL5QGf13PEn9YD6qfavEZwQ0q3TNMfezos9AHp6Hs9b
+	VxMHqjPt
+X-Received: by 2002:ac2:4bc1:0:b0:5a1:2c41:d28d with SMTP id
+ 2adb3069b0e04-5a13cac1afbmr3993245e87.19.1773068835177; Mon, 09 Mar 2026
+ 08:07:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <a72e532c7364cd64b5cb4fc63c94b2af6b22ad8b.1772701528.git.geert+renesas@glider.be>
-In-Reply-To: <a72e532c7364cd64b5cb4fc63c94b2af6b22ad8b.1772701528.git.geert+renesas@glider.be>
+References: <20260305122553.249058-1-thorsten.blum@linux.dev>
+In-Reply-To: <20260305122553.249058-1-thorsten.blum@linux.dev>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 9 Mar 2026 16:06:31 +0100
-X-Gm-Features: AaiRm52T8KFr-HTXEr-PkPGvgwN3Xf2zDZhhHyOAQZlnEOOFWEyg9Brrq9M5di8
-Message-ID: <CAPDyKFoU4nCCikE2NA=Tghm9hOPwcPykKcVkB_jsEq+81t+bKQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi_sys_dmac: Convert to DEFINE_RUNTIME_DEV_PM_OPS()
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org
+Date: Mon, 9 Mar 2026 16:06:38 +0100
+X-Gm-Features: AaiRm530CZGyyZZ74foNNjArYIu-IAISVY3eiCqDKsW3d9GEgoFzoGNxiQDCFrc
+Message-ID: <CAPDyKFqQuO-GRhqtVJ+V1GuQ3XHkvjp9wnDXPhThG2fMjqpt=Q@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdio: Use min3() to simplify sdio_set_block_size()
+To: Thorsten Blum <thorsten.blum@linux.dev>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 5 Mar 2026 at 10:08, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
+On Thu, 5 Mar 2026 at 13:26, Thorsten Blum <thorsten.blum@linux.dev> wrote:
 >
-> Convert the Renesas SDHI SD/SDIO controller driver using SYS-DMAC from
-> an open-coded dev_pm_ops structure to DEFINE_RUNTIME_DEV_PM_OPS() and
-> pm_ptr().  This simplifies the code, and reduces kernel size in case
-> CONFIG_PM is disabled.
+> Use min3() to simplify sdio_set_block_size().
 >
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Thorsten Blum <thorsten.blum@linux.dev>
 
 Applied for next, thanks!
 
@@ -108,37 +103,27 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c | 12 ++++--------
->  1 file changed, 4 insertions(+), 8 deletions(-)
+>  drivers/mmc/core/sdio_io.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> index 543ad1d0ed1cff95..9215600f03a2340e 100644
-> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> @@ -456,19 +456,15 @@ static int renesas_sdhi_sys_dmac_probe(struct platform_device *pdev)
->                                   of_device_get_match_data(&pdev->dev), NULL);
->  }
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index b774bf51981d..12716ec0e35d 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -163,10 +163,8 @@ int sdio_set_block_size(struct sdio_func *func, unsigned blksz)
+>         if (blksz > func->card->host->max_blk_size)
+>                 return -EINVAL;
 >
-> -static const struct dev_pm_ops renesas_sdhi_sys_dmac_dev_pm_ops = {
-> -       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> -                               pm_runtime_force_resume)
-> -       SET_RUNTIME_PM_OPS(tmio_mmc_host_runtime_suspend,
-> -                          tmio_mmc_host_runtime_resume,
-> -                          NULL)
-> -};
-> +static DEFINE_RUNTIME_DEV_PM_OPS(renesas_sdhi_sys_dmac_dev_pm_ops,
-> +                                tmio_mmc_host_runtime_suspend,
-> +                                tmio_mmc_host_runtime_resume, NULL);
+> -       if (blksz == 0) {
+> -               blksz = min(func->max_blksize, func->card->host->max_blk_size);
+> -               blksz = min(blksz, 512u);
+> -       }
+> +       if (blksz == 0)
+> +               blksz = min3(func->max_blksize, func->card->host->max_blk_size, 512u);
 >
->  static struct platform_driver renesas_sys_dmac_sdhi_driver = {
->         .driver         = {
->                 .name   = "sh_mobile_sdhi",
->                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
-> -               .pm     = &renesas_sdhi_sys_dmac_dev_pm_ops,
-> +               .pm     = pm_ptr(&renesas_sdhi_sys_dmac_dev_pm_ops),
->                 .of_match_table = renesas_sdhi_sys_dmac_of_match,
->         },
->         .probe          = renesas_sdhi_sys_dmac_probe,
+>         ret = mmc_io_rw_direct(func->card, 1, 0,
+>                 SDIO_FBR_BASE(func->num) + SDIO_FBR_BLKSIZE,
 > --
-> 2.43.0
+> Thorsten Blum <thorsten.blum@linux.dev>
+> GPG: 1D60 735E 8AEF 3BE4 73B6  9D84 7336 78FD 8DFE EAD4
 >
