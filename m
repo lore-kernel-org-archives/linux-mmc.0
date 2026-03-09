@@ -1,41 +1,50 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCD073BE170;
-	Mon,  9 Mar 2026 12:51:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF4023A6EE4;
+	Mon,  9 Mar 2026 13:22:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773060713; cv=none; b=by10WjDKQilF+nUKvsV3UA0O8LOyLO/h/FuvAl7q2Ssd6pYAjiqcarsCUbYSKQQnnrSc17grlufaepcNOmbnhjYp/0eCDywIn7P4XvY2o+lCC0fJbVSkPkakTfQqWW1spIa6bEMoUuycxL3tmLaKaPo0JsBXILBmHNPpJPIDPPk=
+	t=1773062542; cv=none; b=Y+X2ME8Lj0M8Y5Keu8I8CVz0RGEU1YJ/8nCBqXNUldcvhxBiCH2LBQ3fXtULwxiZXzTHV1pG8raTld+fsNzMg2JIRsazQNqff9bHFysP4a0Xw/O60kaYHGdHmmb09AtyL9XxxIVTS15HfUtFiuUb1MHRmFvBydEL80Lbzvk35Bk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773060713; c=relaxed/simple;
-	bh=2SL+bSBvyoZORh5fKRFHNTcHMnPdbDMMWuTr/TVHYpw=;
+	s=arc-20240116; t=1773062542; c=relaxed/simple;
+	bh=d5MLBrQ/18Asiku/cVf2NDC2Dc4/7wsqetgjS+f9zfw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=CHuKP+B+uvicvnwgxnT2nafZtlO1+TVvFIkqYr/d/32nxV9cPThMTrNpkv3o6LrgHOxlSodeN53xMDMdgsur9jn98sljrJmujIm57QcRc1jCgL1zbcZM2sCsbsDHoPWH3O/sCMe4Rtwid2hQDQUJduyykHhMdXIUsEaPmuzT4cI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=bQDzHzYK; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=QgmyHQBRGtUlmOx//nqta75C5z8njmSeCPHwZta8W8QHCbgkgppLGsAg0wYNBV3Ym7R8RkEvCc4DD3Ws9IAPJGU3aFppbtRiRL6FCw18TA7Z4hfYIC9+7DVxizNRObZ67Kk+bZbK/h1yHuOudXtKlXgaUc/gg//+Q7YoPYKLZRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DIpq8FKk; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="bQDzHzYK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1E2C2C4CEF7;
-	Mon,  9 Mar 2026 12:51:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1773060712;
-	bh=2SL+bSBvyoZORh5fKRFHNTcHMnPdbDMMWuTr/TVHYpw=;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DIpq8FKk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C3FCC4CEF7;
+	Mon,  9 Mar 2026 13:22:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1773062541;
+	bh=d5MLBrQ/18Asiku/cVf2NDC2Dc4/7wsqetgjS+f9zfw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=bQDzHzYKnWwH+MJ4ziqIHQigb4ufHH6grzwlGLe2Cis2ghT541J7n5tS6k0Q3kh2a
-	 ERUeU2zrJ7JfCfjtKh6z0s1x82+vwtiPoC+h0b4VgN5RQuKblqnKQjweFx3GD81y4d
-	 3LArWwCpjOucgYpMyp/WAO3zNpN6aeoKv46oyUDM=
-Date: Mon, 9 Mar 2026 13:51:49 +0100
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	stable <stable@kernel.org>
-Subject: Re: [PATCH] mmc: moxart: fix potential use-after-free on remove path.
-Message-ID: <2026030917-imitation-kindle-975f@gregkh>
-References: <2026022351-badness-custody-28ad@gregkh>
- <CAPDyKFp=9qL2XROcTXDsv106FdoFwzziFU6YpBCB85aQ5ZFZRA@mail.gmail.com>
- <2026030816-womb-recollect-bdb4@gregkh>
- <CAPDyKFptyTf6HJbUf0eRXiutP=hLTjoxmRQb2ut1w4Z7RbvkSQ@mail.gmail.com>
- <2026030953-overrate-saddlebag-9cef@gregkh>
- <CAPDyKFpbKzMn_1nnN3pkx803a88SBphJ9mWz7x2+88E=FWiT4Q@mail.gmail.com>
+	b=DIpq8FKkp8gZe5TXhH+XWS6+eZZq3rrI20iVYUZPh7qAhdi/+gfhB7yVXBbU3QWCl
+	 jbfq3r+nc0SvI/WEjbo0harlbVe5UVB6j82MfAmwC3kr2omqwF/tzGil/1IdPQOnxN
+	 BMlm90MXkgxGi0xu3m1yGUY7OxzYunldqBcwSNJYdml75Jru/lHipdourq3OkgKLAg
+	 zwaagSUvrIyJVXuSGmXSLp/n9M4VlvLgtoX6+82xEKOo84PEj2G8DYakk5oyo0N4yH
+	 BofV2f9P7AevI5Nw8re7Mwql7zoP89UoaNaXpzPmErMOlinlIuhoE61RuEuO2QfPjj
+	 FG5Qda63Vw3gw==
+Date: Mon, 9 Mar 2026 21:22:19 +0800
+From: Yixun Lan <dlan@kernel.org>
+To: Iker Pedrosa <ikerpedrosam@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+	Javier Martinez Canillas <javierm@redhat.com>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 2/7] mmc: sdhci-of-k1: add regulator and pinctrl
+ voltage switching support
+Message-ID: <20260309132219-GKE302167@kernel.org>
+References: <20260309-orangepi-sd-card-uhs-v2-0-5bb2b574df5d@gmail.com>
+ <20260309-orangepi-sd-card-uhs-v2-2-5bb2b574df5d@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -44,56 +53,141 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFpbKzMn_1nnN3pkx803a88SBphJ9mWz7x2+88E=FWiT4Q@mail.gmail.com>
+In-Reply-To: <20260309-orangepi-sd-card-uhs-v2-2-5bb2b574df5d@gmail.com>
 
-On Mon, Mar 09, 2026 at 01:29:24PM +0100, Ulf Hansson wrote:
-> On Mon, 9 Mar 2026 at 13:24, Greg Kroah-Hartman
-> <gregkh@linuxfoundation.org> wrote:
-> >
-> > On Mon, Mar 09, 2026 at 12:42:53PM +0100, Ulf Hansson wrote:
-> > > On Sun, 8 Mar 2026 at 19:03, Greg Kroah-Hartman
-> > > <gregkh@linuxfoundation.org> wrote:
-> > > >
-> > > > On Wed, Mar 04, 2026 at 05:25:25PM +0100, Ulf Hansson wrote:
-> > > > > On Mon, 23 Feb 2026 at 14:48, Greg Kroah-Hartman
-> > > > > <gregkh@linuxfoundation.org> wrote:
-> > > > > >
-> > > > > > Just like in commit bd2db32e7c3e ("moxart: fix potential use-after-free
-> > > > > > on remove path"), we should wait until after we are finished writing to
-> > > > > > the mmc host device before removing it, otherwise it could have been
-> > > > > > already freed.
-> > > > >
-> > > > > mmc_remove_host() doesn't actually free the host, but it reverses what
-> > > > > mmc_add_host() did during probe.
-> > > > >
-> > > > > Since the moxart driver uses devm_mmc_alloc_host() the last reference
-> > > > > to the host will be dropped after ->remove() completes, leading to
-> > > > > mmc_free_host() to be called for it.
-> > > >
-> > > > Then how did commit bd2db32e7c3e ("moxart: fix potential use-after-free
-> > > > on remove path") do anything?  It really wasn't needed either?  And so
-> > > > the CVE related to it should be rejected?
-> > >
-> > > No, commit bd2db32e7c3e is perfectly okay and solves the intended problem.
-> > >
-> > > Before the moxart driver was converted to use devm_mmc_alloc_host() in
-> > > commit 973aa22b9f1a, it used mmc_alloc_host() during probe.
-> >
-> > Ah, that makes more sense, thanks, I was confused.
-> >
-> > > Calling mmc_free_host() is needed in these cases, but it should
-> > > typically be the final thing a ->remove() callback does, in order to
-> > > clean up correctly and prevent use-after-free bugs.
-> >
-> > I moved the call to be the "final thing" in these patches, so they are
-> > ok?
+Hi Iker,
+
+On 12:40 Mon 09 Mar     , Iker Pedrosa wrote:
+> Add voltage switching infrastructure for UHS-I modes by integrating both
+> regulator framework (for supply voltage control) and pinctrl state
+> switching (for pin drive strength optimization).
 > 
-> No, mmc_free_host() should be in the end (unless the devm* variant is
-> used in probe), while mmc_remove_host() should be in the beginning.
+> - Add regulator supply parsing and voltage switching callback
+> - Add optional pinctrl state switching between "default" (3.3V) and
+>   "state_uhs" (1.8V) configurations
+> - Enable coordinated voltage and pin configuration changes for UHS modes
+> 
+> This provides complete voltage switching support while maintaining
+> backward compatibility when pinctrl states are not defined.
+> 
+> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-of-k1.c | 59 ++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 59 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
+> index 585c7eca6ebf253aac466dd37cef029deb63f692..8af117a8e271c04a80d8dc7bb5ce12075652dd7a 100644
+> --- a/drivers/mmc/host/sdhci-of-k1.c
+> +++ b/drivers/mmc/host/sdhci-of-k1.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> +#include <linux/pinctrl/consumer.h>
+>  #include <linux/platform_device.h>
+>  
+>  #include "sdhci.h"
+> @@ -70,6 +71,9 @@
+>  struct spacemit_sdhci_host {
+>  	struct clk *clk_core;
+>  	struct clk *clk_io;
+> +	struct pinctrl *pinctrl;
+> +	struct pinctrl_state *pinctrl_default;
+> +	struct pinctrl_state *pinctrl_uhs;
+>  };
+>  
+>  /* All helper functions will update clr/set while preserve rest bits */
+> @@ -218,6 +222,42 @@ static void spacemit_sdhci_pre_hs400_to_hs200(struct mmc_host *mmc)
+>  			       SPACEMIT_SDHC_PHY_CTRL_REG);
+>  }
+>  
+> +static void spacemit_sdhci_voltage_switch(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct spacemit_sdhci_host *sdhst = sdhci_pltfm_priv(pltfm_host);
+> +	struct mmc_ios *ios = &host->mmc->ios;
+> +	struct pinctrl_state *state;
+> +	int ret;
+> +
+> +	/* Select appropriate pinctrl state based on signal voltage */
+> +	if (sdhst->pinctrl) {
+do a sanity check, then abort it early, the advantage is that you can get rid of
+one indetation for next code..
 
-Ok, I think I understand.  I'll respin these two patches based on that
-when I get a chance later this week.
+	if (!sdhst->pinctrl)
+		return;
 
-thanks for your patience,
 
-greg k-h
+> +		switch (ios->signal_voltage) {
+> +		case MMC_SIGNAL_VOLTAGE_330:
+> +			state = sdhst->pinctrl_default;
+> +			break;
+> +		case MMC_SIGNAL_VOLTAGE_180:
+> +			state = sdhst->pinctrl_uhs;
+> +			break;
+> +		default:
+> +			dev_warn(mmc_dev(host->mmc), "unsupported voltage %d\n",
+> +				 ios->signal_voltage);
+> +			return;
+> +		}
+> +
+> +		if (state) {
+> +			ret = pinctrl_select_state(sdhst->pinctrl, state);
+> +			if (ret) {
+> +				dev_warn(mmc_dev(host->mmc),
+> +					 "failed to select pinctrl state: %d\n", ret);
+> +				return;
+> +			}
+> +			dev_dbg(mmc_dev(host->mmc), "switched to %s pinctrl state\n",
+> +				ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180 ? "UHS" : "default");
+> +		}
+> +	}
+> +}
+> +
+>  static inline int spacemit_sdhci_get_clocks(struct device *dev,
+>  					    struct sdhci_pltfm_host *pltfm_host)
+>  {
+> @@ -242,6 +282,7 @@ static const struct sdhci_ops spacemit_sdhci_ops = {
+>  	.set_bus_width		= sdhci_set_bus_width,
+>  	.set_clock		= spacemit_sdhci_set_clock,
+>  	.set_uhs_signaling	= spacemit_sdhci_set_uhs_signaling,
+> +	.voltage_switch         = spacemit_sdhci_voltage_switch,
+>  };
+>  
+>  static const struct sdhci_pltfm_data spacemit_sdhci_k1_pdata = {
+> @@ -293,6 +334,24 @@ static int spacemit_sdhci_probe(struct platform_device *pdev)
+>  
+>  	host->mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
+>  
+> +	sdhst = sdhci_pltfm_priv(pltfm_host);
+..
+> +	sdhst->pinctrl = devm_pinctrl_get(dev);
+> +	if (!IS_ERR(sdhst->pinctrl)) {
+> +		sdhst->pinctrl_default = pinctrl_lookup_state(sdhst->pinctrl, "default");
+> +		if (IS_ERR(sdhst->pinctrl_default))
+> +			sdhst->pinctrl_default = NULL;
+> +
+> +		sdhst->pinctrl_uhs = pinctrl_lookup_state(sdhst->pinctrl, "state_uhs");
+> +		if (IS_ERR(sdhst->pinctrl_uhs))
+> +			sdhst->pinctrl_uhs = NULL;
+> +
+> +		dev_dbg(dev, "pinctrl setup: default=%p, uhs=%p\n",
+> +			sdhst->pinctrl_default, sdhst->pinctrl_uhs);
+> +	} else {
+> +		sdhst->pinctrl = NULL;
+> +		dev_dbg(dev, "pinctrl not available, voltage switching will work without it\n");
+> +	}
+> +
+how about creating a function spacemit_sdhci_get_pins()? similar as get
+resource for clock, will more readable.
+
+>  	ret = spacemit_sdhci_get_clocks(dev, pltfm_host);
+>  	if (ret)
+>  		goto err_pltfm;
+> 
+> -- 
+> 2.53.0
+> 
+
+-- 
+Yixun Lan (dlan)
