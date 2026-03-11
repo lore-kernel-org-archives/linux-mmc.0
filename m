@@ -1,55 +1,58 @@
 Received: from mx0a-002e3701.pphosted.com (mx0a-002e3701.pphosted.com [148.163.147.86])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 513943E275D;
-	Wed, 11 Mar 2026 18:11:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0046D3E275D;
+	Wed, 11 Mar 2026 18:11:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.147.86
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773252691; cv=none; b=VYGCbheK1eSO0W/OkGYIvdvohDKQrx6aCu+3yvVpEm9IS7S+blka6q8DV+LnCOm4fB82jEXTTlNHTqfWQeSgxMqp8DJjIFzjpGwl/MhSJE+/M6UBxEPb0WGkg2kLOLZ9TJ1O0OkUgLpdjEsCAaE9pjt/Oxxm+YMZBJbPfmUdBeU=
+	t=1773252696; cv=none; b=rmV6J8L8NtvaDyHtMLsc0mEJ6w9Kr5e16NOIR9lYWUymCacHUxofe7ryHMfrR9vkeUAqWInLC5PipUZrW8sBnQk4qnYQB0Ros9wIK07DZVNepwk9akAd6VGDImrss+CRkXWbc94HMuZc74kZiPCjTCq7D93AHjdV+uk5uBzgV5I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773252691; c=relaxed/simple;
-	bh=druWuJbSgrmlCK8p5SzMlVpcTpNEmDhIG1NdFo3BAnE=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=NRTslE1QeI5t5+3eQqWnu4wdsU0nL0OgVx7xHWuoMwmc2FRIhHpM/8RXWrR7wVtkrbDiQjkVUr+J8PKs9E8zMk+FZNc3Px5gGCyFPLGGznUau3w8Hza+Bjj7ndjjlB0jaM6raoTQigNP8CMvzPQXR6osGqYUnuQaHy9ZD2WqoZU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=hpe.com; spf=pass smtp.mailfrom=hpe.com; dkim=pass (2048-bit key) header.d=hpe.com header.i=@hpe.com header.b=Owx6ISEY; arc=none smtp.client-ip=148.163.147.86
+	s=arc-20240116; t=1773252696; c=relaxed/simple;
+	bh=ZFCWkDjShmTxzAzuf3WMqjgbe0E+1RhwHyjyZvmng5U=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=bdZAgxA/EiQzcB+b4xBnx+jbVtJ+HDkngHAhh4K2t5n+waGCPWEajhLJthgT3C+kDUZr1piRGzwiAJBlpKH+WVtKDZRZzmBtcW0xOPvgIYu8Hn91TurXkYuuJUYAKXNWqAi1O8/7q148/M0Xv7cvfb98BhNvY8voCIuaZ9gccBw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=hpe.com; spf=pass smtp.mailfrom=hpe.com; dkim=pass (2048-bit key) header.d=hpe.com header.i=@hpe.com header.b=ethFetFX; arc=none smtp.client-ip=148.163.147.86
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=hpe.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hpe.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hpe.com header.i=@hpe.com header.b="Owx6ISEY"
+	dkim=pass (2048-bit key) header.d=hpe.com header.i=@hpe.com header.b="ethFetFX"
 Received: from pps.filterd (m0148663.ppops.net [127.0.0.1])
-	by mx0a-002e3701.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62BDpGME2696904;
-	Wed, 11 Mar 2026 18:11:19 GMT
+	by mx0a-002e3701.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62BGWG5Q3181922;
+	Wed, 11 Mar 2026 18:11:24 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=hpe.com; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=pps0720; bh=VTRXI3mz6jIXOjfNPa6YKzNS9GwFRfykMnAF2
-	k/Q13s=; b=Owx6ISEYMCf82iKIXQ1t4J40UvdovWyPrzSBumBLOgKCkp4YVnkku
-	sBAUZJsq+/g07uGqmWHr3p4HKj2VFO0R+ZZ1DJv/xU52A42BPVWpgNd8qg6YtgSt
-	hjoRjIpqRQ/Q5syMAO1oOMnvjfIBs+2bKDX6U9+gaQKkTp1o2OJdfGi3ZlbeQXiX
-	QBlK2+/kN/Sn1A4JP0T+KihO3h8AXZu75xwe7alnck8oe3UefpWLtX9zQw8r0djD
-	MZv2EAqwhNMLNgelU6Ze+kWMFeJ35cimr8B3IX3f0KX4vHIrMaQejCyYl1w2Ttmx
-	pDStA+wTR/OEITOYDt5j5XIfILl0taHvQ==
-Received: from p1lg14880.it.hpe.com (p1lg14880.it.hpe.com [16.230.97.201])
-	by mx0a-002e3701.pphosted.com (PPS) with ESMTPS id 4cu8ercx5j-1
+	:content-transfer-encoding:date:from:in-reply-to:message-id
+	:mime-version:references:subject:to; s=pps0720; bh=trtzqw01eHYaX
+	fdnc8eseJw+VgcB7uZ9iXgGEnqQSWY=; b=ethFetFXh2y4ek9vZalB52yvDwhxx
+	ptIn6m86+lC5f5dO+VEaqw1zoKJhDuvgS5R9Y+ydCom10+IetPlltB+80bHZ+CCY
+	TmY7LsbX3KadsDTPhwvfXvXoIokGnGkDhfxi6RRcYgxLWQ54dhfmNzEnyfjhHTR4
+	68gCXIExN+Rk4CX3MFRzzk3BsC3K4L4rD5cCx4aHWpmA7jdVPpDPPGfqdW4fXomR
+	oHUt5oIVBB78ukIULLzVzbKEzlGb3XdCJ6euz6iCtIEF6XzfM33fDZa6gfzO5akj
+	pPRT0u2TuNaJHnQrgN9U5Xg9lQ3QhF+sUZiX5bAWYWJU7V0Q14g4Gsi+A==
+Received: from p1lg14879.it.hpe.com (p1lg14879.it.hpe.com [16.230.97.200])
+	by mx0a-002e3701.pphosted.com (PPS) with ESMTPS id 4cu8ercx6m-1
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Wed, 11 Mar 2026 18:11:19 +0000 (GMT)
+	Wed, 11 Mar 2026 18:11:24 +0000 (GMT)
 Received: from p1lg14886.dc01.its.hpecorp.net (unknown [10.119.18.237])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by p1lg14880.it.hpe.com (Postfix) with ESMTPS id BCEF1801620;
-	Wed, 11 Mar 2026 18:11:18 +0000 (UTC)
+	by p1lg14879.it.hpe.com (Postfix) with ESMTPS id 184A1D28A;
+	Wed, 11 Mar 2026 18:11:24 +0000 (UTC)
 Received: from hpe.com (unknown [16.231.227.36])
-	by p1lg14886.dc01.its.hpecorp.net (Postfix) with ESMTP id 1C8ED811A4E;
-	Wed, 11 Mar 2026 18:11:18 +0000 (UTC)
+	by p1lg14886.dc01.its.hpecorp.net (Postfix) with ESMTP id A3A4A8118FF;
+	Wed, 11 Mar 2026 18:11:23 +0000 (UTC)
 From: nick.hawkins@hpe.com
 To: ulf.hansson@linaro.org, adrian.hunter@intel.com, jszhang@kernel.org
 Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
         shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         Nick Hawkins <nick.hawkins@hpe.com>
-Subject: [PATCH v3 0/2] mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
-Date: Wed, 11 Mar 2026 13:11:10 -0500
-Message-Id: <20260311181112.1700667-1-nick.hawkins@hpe.com>
+Subject: [PATCH v3 1/2] dt-bindings: mmc: snps,dwcmshc-sdhci: add HPE GSC dwcmshc compatible
+Date: Wed, 11 Mar 2026 13:11:11 -0500
+Message-Id: <20260311181112.1700667-2-nick.hawkins@hpe.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260311181112.1700667-1-nick.hawkins@hpe.com>
+References: <20260311181112.1700667-1-nick.hawkins@hpe.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,20 +60,20 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Proofpoint-ORIG-GUID: HD8DTFXXYhuEixiFSslx6ag1Hz0puev2
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzExMDE1MyBTYWx0ZWRfX4HL/38SqjArt
- EWTogNuaI4Kb0A/8qWMbxfZAkRMJ5I1AC+hY6qqJMfKLjoNc5iQD233LLbVzbbZKFcSj28Pxt/Y
- abuhI5elGnaPEQQR8gZ0RPntjV77X+TuJ+VyEe/4eGZbs+TTf8EbJnGCJJ2WEmRP7KDdfptteqY
- NpHKT8e5LXfMld+KKplheE2i7SVtAJIlP66jlwmS2IpfsLRm/gUCTZ1YUJqWu7scaa06PLwlQwY
- H81o42lBlhcfTFefER1CbSY75+95DW9A+Esssr6+w7SA0dfzrjYVK3lZVpIhPgpSr3DJBgSurVy
- 9SwW2ljcwwAYHgmxM2o81h8eZOnz2tJfAGmBZKRnTbBVz7r3DbCb8ZA2ExxQfeCf255CY8/g+sQ
- qlxDeWW+gsxSN9BLcghMgWo5o2jqw33j6XmlB02KwZAiFP0cfmjSqvMZxpFsUSrfLfnHoztUg21
- JJE9+3DuBHcorRjnprg==
-X-Authority-Analysis: v=2.4 cv=bdlmkePB c=1 sm=1 tr=0 ts=69b1b047 cx=c_pps
- a=A+SOMQ4XYIH4HgQ50p3F5Q==:117 a=A+SOMQ4XYIH4HgQ50p3F5Q==:17
+X-Proofpoint-ORIG-GUID: LaCIwzSuRPniJTNpCRQtcU7Ul6GWf_Ub
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzExMDE1MyBTYWx0ZWRfX1HAceFIx1oN7
+ c4qtI6dhzm/JOIX8Jh9UUMLE7tP2p+fvPvDQEt29X2qOLdhbwtZFEfjYu1SscPo3Cm8Caarx4CH
+ jfDlf+nVBeUbnd+xnObDJklZQ1mxdp9Wbotnb8pagOFG/WaM/l0ozth4MMjgp011zHdimFwrWsF
+ EM/iwicVN7+lfm7j+a3TqmbkinrTpUXO6wJn5UaYymruu6KAkT9dCWX2NiF/Vd9OzpJS7lL4uFE
+ EvzuttBfoFhEd8zLWelUd5/tT1pt0wQ50Lhg7VY81/FU70bwGi2TgV+4b6ceM81u2wjPH4bAEgO
+ psQfbxs3NCAHFm55kW22ACrnwzelT0vRrGjju3FG/m6Q/roFMgJTuj0C3VgBuWsv8pHuIfqTahu
+ arPocTWyOqLPU3V3ac2AIoMPgGbBwJ+qV55jKnMG8tu6K/Hi3Nek/iTPAYWngtJuQQD0T0xX7hm
+ ehwnHm1toS5xtMjGSLQ==
+X-Authority-Analysis: v=2.4 cv=bdlmkePB c=1 sm=1 tr=0 ts=69b1b04c cx=c_pps
+ a=5jkVtQsCUlC8zk5UhkBgHg==:117 a=5jkVtQsCUlC8zk5UhkBgHg==:17
  a=Yq5XynenixoA:10 a=VkNPw1HP01LnGYTKEx00:22 a=gQcMVamqm3wCPoSYhaRC:22
- a=6_mrDcixewTG61oOsKN3:22 a=MvuuwTCpAAAA:8 a=XbkwoOjMWocvkfcq9GYA:9
-X-Proofpoint-GUID: HD8DTFXXYhuEixiFSslx6ag1Hz0puev2
+ a=6_mrDcixewTG61oOsKN3:22 a=MvuuwTCpAAAA:8 a=Un5EUvwKq7LZpnUfPCQA:9
+X-Proofpoint-GUID: LaCIwzSuRPniJTNpCRQtcU7Ul6GWf_Ub
 X-HPE-SCL: -1
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
@@ -84,79 +87,91 @@ X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
 
 From: Nick Hawkins <nick.hawkins@hpe.com>
 
-The HPE GSC is an ARM64 (Cortex-A53) BMC SoC used on HPE ProLiant
-servers.  Its eMMC controller is based on the DesignWare Cores MSHC IP
-(snps,dwcmshc) but requires a small set of platform-specific quirks
-that cannot be expressed through the existing generic dwcmshc code
-paths.
+Add the 'hpe,gsc-dwcmshc' compatible string for the HPE GSC (ARM64
+Cortex-A53) BMC SoC eMMC controller.
 
-This series adds support for the 'hpe,gsc-dwcmshc' compatible:
+The HPE GSC requires access to the MSHCCS register in the SoC system
+register block to configure SCG sync disable (bit 18) for HS200 RX
+delay-line phase selection.  The existing 'hpe,gxp-sysreg' syscon
+phandle is required for this compatible to access MSHCCS via regmap.
 
-Patch 1 extends the snps,dwcmshc-sdhci.yaml binding to document the
-new compatible and the mandatory 'hpe,gxp-sysreg' syscon phandle for
-MSHCCS register access.  The HPE GSC exposes only a single 'core'
-clock, so the clocks/clock-names properties are constrained to a
-single item for this compatible.
+The HPE GSC eMMC interface only exposes a single 'core' clock (no
+bus clock), so clocks/clock-names are constrained to a single item.
 
-Patch 2 adds the HPE-specific driver code in sdhci-of-dwcmshc.c:
+Add an example node with the hpe,gxp-sysreg syscon reference.
 
-  * dwcmshc_hpe_set_clock(): SDHCI_CLOCK_CONTROL.freq_sel is wired to
-    a clock mux on the GSC SoC, not a divider.  When running at
-    200 MHz (HS200) freq_sel must be forced to 1 to select the correct
-    high-frequency source.
+Signed-off-by: Nick Hawkins <nick.hawkins@hpe.com>
+---
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 36 +++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
-  * dwcmshc_hpe_vendor_specific(): disables the command-conflict check
-    and programs ATCTRL using existing AT_CTRL_* macros for reliable
-    HS200 signal integrity on the GSC board topology.
-
-  * dwcmshc_hpe_reset(): calls sdhci_reset(), re-applies vendor config,
-    and unconditionally re-sets CARD_IS_EMMC.  The controller clears this
-    bit on every reset; leaving it clear causes card-detect
-    misidentification on the eMMC-only slot.
-
-  * dwcmshc_hpe_set_uhs_signaling(): wraps dwcmshc_set_uhs_signaling()
-    and unconditionally sets CARD_IS_EMMC for all timing modes.
-
-  * dwcmshc_hpe_gsc_init(): obtains the SoC register block via the
-    'hpe,gxp-sysreg' syscon phandle and sets SCGSyncDis (BIT(18)) in
-    MSHCCS (offset 0x110) to allow the HS200 RX delay lines to settle
-    while the card clock is stopped.  Enables SDHCI v4 mode.
-
-  * sdhci_dwcmshc_hpe_gsc_pdata sets SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
-    (base clock not in capabilities) and SDHCI_QUIRK2_PRESET_VALUE_BROKEN
-    (preset-value registers not populated in GSC ROM).
-
-All new symbols are exclusively selected by the 'hpe,gsc-dwcmshc' OF
-match entry.  No existing platform (Rockchip, T-Head, sg2042, Sophgo,
-etc.) has any code path change.
-
-Note: the DTS node for 'hpe,gsc-dwcmshc' will be submitted separately
-as part of the HPE GSC base platform series (arch/arm64/boot/dts/hpe/).
-
-Changes since v2:
-  - Replaced raw ATCTRL magic value 0x021f0005 with existing AT_CTRL_*
-    macros and FIELD_PREP(), as suggested by Shawn Lin.
-  - Refactored dwcmshc_hpe_set_uhs_signaling() to wrap
-    dwcmshc_set_uhs_signaling() instead of duplicating the body,
-    as suggested by Shawn Lin.
-  - Dropped redundant 'maxItems: 1' from clocks and clock-names in the
-    dt-binding conditional block; the items list already implies the
-    count (reported by dt-review-ci / dtschema).
-
-Changes since v1:
-  - Replaced the second reg entry for MSHCCS with an 'hpe,gxp-sysreg'
-    syscon phandle + regmap access, as suggested by Conor Dooley.
-  - Driver now uses syscon_regmap_lookup_by_phandle() and
-    regmap_update_bits() instead of devm_platform_ioremap_resource().
-
-Nick Hawkins (2):
-  dt-bindings: mmc: snps,dwcmshc-sdhci: add HPE GSC dwcmshc compatible
-  mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
-
- .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  36 +++++
- drivers/mmc/host/sdhci-of-dwcmshc.c           | 149 ++++++++++++++++++
- 2 files changed, 185 insertions(+)
-
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index 7e7c55dc2440..74734d46c70d 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -23,6 +23,7 @@ properties:
+           - const: sophgo,sg2044-dwcmshc
+           - const: sophgo,sg2042-dwcmshc
+       - enum:
++          - hpe,gsc-dwcmshc
+           - rockchip,rk3568-dwcmshc
+           - rockchip,rk3588-dwcmshc
+           - snps,dwcmshc-sdhci
+@@ -77,6 +78,13 @@ properties:
+     description: Specifies the drive impedance in Ohm.
+     enum: [33, 40, 50, 66, 100]
+ 
++  hpe,gxp-sysreg:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description:
++      Phandle to the HPE GXP SoC system register block (syscon).
++      The driver accesses the MSHCCS register at offset 0x110 within
++      this block to configure clock synchronisation for HS200 tuning.
++
+ required:
+   - compatible
+   - reg
+@@ -87,6 +95,23 @@ required:
+ allOf:
+   - $ref: mmc-controller.yaml#
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: hpe,gsc-dwcmshc
++
++    then:
++      properties:
++        clocks:
++          items:
++            - description: core clock
++        clock-names:
++          items:
++            - const: core
++      required:
++        - hpe,gxp-sysreg
++
+   - if:
+       properties:
+         compatible:
+@@ -190,5 +215,16 @@ examples:
+       #address-cells = <1>;
+       #size-cells = <0>;
+     };
++  - |
++    mmc@c0100000 {
++      compatible = "hpe,gsc-dwcmshc";
++      reg = <0xc0100000 0x1000>;
++      interrupts = <0 17 0x4>;
++      clocks = <&emmcclk>;
++      clock-names = "core";
++      hpe,gxp-sysreg = <&soc_ctrl>;
++      bus-width = <8>;
++      non-removable;
++    };
+ 
+ ...
 -- 
 2.34.1
 
