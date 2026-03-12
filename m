@@ -1,158 +1,134 @@
-Received: from mail-wr1-f43.google.com (mail-wr1-f43.google.com [209.85.221.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A79C2F5A29
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2026 12:16:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAB7A5D8F0;
+	Thu, 12 Mar 2026 12:40:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773317776; cv=none; b=LZJY1cnYWW/SU+FuLVPHmxAKeOT9chOiWvCTgr4ioVqmb/8CWoeJXC5cGYb2wdsunT0ZkDhOYTeL4CqmHCHLJlryYbv8WENYRMjTgUIWKgv8IPzlOlLpW1V9rcjE7idXTCUssvDeBRMjUsxWz4NVr9ViJOGRt0Zh/Rqj6tuCSEE=
+	t=1773319213; cv=none; b=R6nF7W6d+aj0O7RvdZKCzlDf5rMowFiWXsxw28+bikS79pOs4rhcHTeMzXifIeLsfgU4Bqu31+snwZqrGimabnqf7vr8t7J01NnJzSxRthMnRwy+BADX3e+NFBETXFUdIe4zlVr0tQAzwFfSF+xtOUzkuA1yaz8DIe8lmHPMncM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773317776; c=relaxed/simple;
-	bh=QfcpGq77fLYNDCobaNjjIeOj2imphrNCAcezXXgBA2U=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=LqO8pdvWTVXBIGnNLHEQXuzMQ8Ng+arH2yXupznijDDfOSCsP+J9aiD/9QntnORTE5mO1EOwKMtvsyM8lB3gu5zxVB4e12CQsjR+cq083/QkdsJ+mroKY7UHbfQYJHJRm/N5liC7WDkzq3UBHwzd57ot2cMYdliRljhIbFtPJNQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b=0iNdwIYV; arc=none smtp.client-ip=209.85.221.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b="0iNdwIYV"
-Received: by mail-wr1-f43.google.com with SMTP id ffacd0b85a97d-439cd6b09f8so816526f8f.3
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2026 05:16:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=starlabs-systems.20230601.gappssmtp.com; s=20230601; t=1773317770; x=1773922570; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fdIy1fm/RRHFyWbC0yhnY1690tyzx/03AbGybTnU4TE=;
-        b=0iNdwIYVXvXfMxMJzQRUstDg5kFYHo1FwHmc+PVHPpPrfVprih9s2DIavYhGHAqnDi
-         Wm37Kubvh5rAbD5g1EwKGQ/Dkxvomc2L0to7a6amviBk0yEk2aRuWi2BWx7kI6gATAwM
-         KXswJrT0dkh/MYeHlmyfeZfJoWQkW1/cZ//BN3WsFrixvqSnmz945wpEQXER4Zvh3yZz
-         gmYXHtymP8Jr/xq4AXviII8EYM26I3tZgtl7GSLbMTgc5h9b00GB8jliiq6SzFyFoxm5
-         hYDiruFFLntm+07V1joYSH7UjQjhzu+XKxRHWVmgPWAxCczInolTKCFQcos/8pGR+Ri/
-         ihLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773317770; x=1773922570;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=fdIy1fm/RRHFyWbC0yhnY1690tyzx/03AbGybTnU4TE=;
-        b=iRefkipKQgxGtJDnC4WTfMUR8d08RJ3vyEkN43djtLMYt0Ejy/P6HgwB/01v53x6+C
-         FrSG4REQsMoWKqemhGOq6iGYJsOog+CaCHXO8XfIyi9LKB9gfyMFF0iaoO88KrfJ1qAy
-         08z9j9+35D0Zaiw+7BYUX7hdSZyElx8xsDLwHCLqf8OCUUWN2iPtXr/UCZzF+PN8WQ+Z
-         hTasOdR7uGsegZP+k2tW8i8jsXzEWKwniBQzuHexHKG/Sscxok5ptNbHQsFUZN/0Kk1O
-         E1oY10aB/sk2gfRxvZFu7PciRFHK14H0GqBb8ddZyXPJiYMLSKhL625Wy/x6DYoNVTrL
-         PaNA==
-X-Gm-Message-State: AOJu0YxIm98LH/WuThv0IxxdBT2ngBARNIJNfLuMUDfqQvdZtopLblcc
-	v8kYI49rsxmWv06OMQJ3dKWxyBG1w8l8Jcnx8EumcWhgHFUqlyc57SKI4qEWY+fX7sOy7ffsVK5
-	3Nj2B3w==
-X-Gm-Gg: ATEYQzznn9bHDylLaR0WD0Fqh1lHuH4V2wouzudknpI6ZuoTTRMxzg7c9sc9F0f7Jyn
-	QbielE86tNntkzB4G3eTClmRVc/qSfC6wIyR/g6sN5IQ10Ljl/qQYLXlEoUn3H5dG5z8s7JR073
-	67xLXWxEBQ6v/aKAFaku/k+wN7//5OY2wqKsvxH9qimvRc9Hw+SQugFe6d92bYRf8yxw8dErKug
-	uq1yjSMtgQUXlfFX6mwJW9cwOGZHmb8VEIZUvFi4lWKjC7CPC8rKBgn/8oJAIF1bPKxlM7ATPbE
-	o/KLhCzIpwQMWCODP2Yb5E6u9fEsu264cv0UaMD8x2H/w2bu6Dhjd1oDS1cS5smMBxvgYb/d32f
-	XSqCp4L3sDo7O066p/a+gO5pTJ81BLV3++MsjsIdOcU+sbkS7DcxbYYNInPOQx6OE139jXOVM+w
-	Kg/4qr7aEMP7H7bvHluZ+bw368gdGvtGOMAsVGAkqDOb4J0LhvMiZlAfn/yBsi4Ev+dnrlSw==
-X-Received: by 2002:a05:6000:250a:b0:439:be3b:ddb6 with SMTP id ffacd0b85a97d-439f8441487mr11829204f8f.59.1773317770061;
-        Thu, 12 Mar 2026 05:16:10 -0700 (PDT)
-Received: from starbook.localdomain ([212.105.129.204])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-439fe20c473sm8139874f8f.24.2026.03.12.05.16.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 12 Mar 2026 05:16:09 -0700 (PDT)
-From: Sean Rhodes <sean@starlabs.systems>
-To: linux-mmc@vger.kernel.org,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Ricky Wu <ricky_wu@realtek.com>,
-	Avri Altman <avri.altman@sandisk.com>,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Dan Carpenter <dan.carpenter@linaro.org>,
-	Jisheng Zhang <jszhang@kernel.org>,
-	Nathan Chancellor <nathan@kernel.org>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Huacai Chen <chenhuacai@kernel.org>,
-	Ingo Molnar <mingo@kernel.org>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 RESEND 6/6] rtsx_usb: avoid USB I/O in runtime autosuspend
-Date: Thu, 12 Mar 2026 12:15:59 +0000
-Message-ID: <20260312121559.19197-7-sean@starlabs.systems>
-X-Mailer: git-send-email 2.51.0
-In-Reply-To: <20260312121559.19197-1-sean@starlabs.systems>
-References: <20260305194052.5120-1-sean@starlabs.systems>
- <20260312121559.19197-1-sean@starlabs.systems>
+	s=arc-20240116; t=1773319213; c=relaxed/simple;
+	bh=jFknFDs06drQLMOcs82SgjUgKEQ8TNjLJ0epu2yuIWU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=H57yLyg7CQUGqQLIFtqKRGcIecmArtyiXw2ZdGLHnQx+ubX+9RsMIXYuZ6BZbuw3e6m+UvD/7U6Ts1wGwE1Ht29sWoKcY5pXGwtW5XxAl56Fcw3lHUqTPH5Ol/oLbAyF2Af5zyjSpPa/rivsh1GpyFIl4cDimlQDotL8ti06kXU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn; spf=pass smtp.mailfrom=isrc.iscas.ac.cn; arc=none smtp.client-ip=159.226.251.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=isrc.iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=isrc.iscas.ac.cn
+Received: from duge-virtual-machine (unknown [183.192.221.67])
+	by APP-01 (Coremail) with SMTP id qwCowACnT2sVtLJp+kDbCQ--.49377S2;
+	Thu, 12 Mar 2026 20:39:51 +0800 (CST)
+Date: Thu, 12 Mar 2026 20:39:49 +0800
+From: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+To: Junhui Liu <junhui.liu@pigmoral.tech>, krzk@kernel.org,
+	ulf.hansson@linaro.org, adrian.hunter@intel.com, robh@kernel.org,
+	krzk+dt@kernel.org, conor+dt@kernel.org
+Cc: pjw@kernel.org, palmer@dabbelt.com, aou@eecs.berkeley.edu,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+	gaohan@iscas.ac.cn, me@ziyao.cc,
+	linux-riscv <linux-riscv-bounces@lists.infradead.org>
+Subject: Re: [PATCH v3 0/3] Add SDHCI support for Canaan K230 SoC
+Message-ID: <abK0FcDHrQsDKBnl@duge-virtual-machine>
+References: <20260310064513.140093-1-jiayu.riscv@isrc.iscas.ac.cn>
+ <DGZT8U7OMGG3.WS9SPLJF9Y4Q@pigmoral.tech>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <DGZT8U7OMGG3.WS9SPLJF9Y4Q@pigmoral.tech>
+X-CM-TRANSID:qwCowACnT2sVtLJp+kDbCQ--.49377S2
+X-Coremail-Antispam: 1UD129KBjvJXoWxAw1xAF4DAF1fWF1UAF1kXwb_yoW5ur4kpF
+	WDCFZIka9rKFyIyFs29w4kua15Ars5Jr4UGr1ag34DX3909FWYqr1xKa1Yqa4DJF1fCw1I
+	yw45XryfW398ZFJanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUvvb7Iv0xC_KF4lb4IE77IF4wAFF20E14v26ryj6rWUM7CY07I2
+	0VC2zVCF04k26cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rw
+	A2F7IY1VAKz4vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xII
+	jxv20xvEc7CjxVAFwI0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWUJVW8JwA2z4x0Y4vEx4
+	A2jsIEc7CjxVAFwI0_Gr0_Gr1UM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI
+	64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8Jw
+	Am72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lFIxGxcIEc7CjxVA2Y2ka0xkIwI1l
+	c7CjxVAaw2AFwI0_GFv_Wryl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr
+	1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE
+	14v26r4a6rW5MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7
+	IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E
+	87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73Uj
+	IFyTuYvjxU3wIDUUUUU
+X-CM-SenderInfo: 5mld534oul2uny6l223fol2u1dvotugofq/
 
-The runtime autosuspend callback currently queries card status and clears
-OCP via USB register accesses.
+On Wed, Mar 11, 2026 at 04:29:48PM +0800, Junhui Liu wrote:
+> Hi Jiayu,
+> Thanks for your work.
+> 
+> On Tue Mar 10, 2026 at 2:45 PM CST, Jiayu Du wrote:
+> > This series is based on the k230 usbphy series[1].
+> >
+> > This patch series adds SDHCI support for the Canaan K230 SoC,
+> > which uses Synopsys DWCMSHC SDHCI controllers, include MMC0 and MMC1.
+> > The hardware designs of these two controllers are different.
+> > The MMC0 supports eMMC, while MMC1 only supports SDIO. Detailed
+> > information can be found in the vendor's manual[2].
+> >
+> > From the vendor's K230 manual:
+> >  - MMC0 supports eMMC5.0 and SDIO3.0, usually for eMMC chips.
+> >  - MMC1 only does SDIO3.0 in 4/1-bit mode up to SDR104, and the manual
+> >    clearly says it can't handle eMMC because of pin count and limits.
+> >
+> > Therefore, there are two separate compatibles and the driver treats them
+> > differently.
+> >
+> > Link: https://lore.kernel.org/all/20260121145526.14672-1-jiayu.riscv@isrc.iscas.ac.cn/ [1]
+> > Link: https://github.com/kendryte/k230_docs/blob/main/en/00_hardware/K230_Hardware_Design_Guide.md#mmc-circuit [2]
+> >
+> > Changes in v3:
+> > - Drop the clock maxItems.
+> > - Add a const void *match_data to the struct dwcmshc_priv
+> > - Copy the match_data pointer to dwcmshc_priv in the common dwcmshc_probe
+> > - Link to v2: https://lore.kernel.org/all/20260226115923.75670-1-jiayu.riscv@isrc.iscas.ac.cn/
+> >
+> > Changes in v2:
+> > - Change the clock minItems to 5.
+> > - Add comments to explain the reason for setting SDHCI_PROG_CLOCK_MODE.
+> > - Write the power selection logic in the phy init cleaner.
+> > - Replace manual delay loop with read_poll_timeout.
+> > - Drop unnecessarily braces where a single statement will do.
+> > - Add the match_data pointer to dwcmshc_pltfm_data.
+> > - Add dwcmshc_k230_match_data struct to separate eMMC/SDIO config data
+> > - Split K230 into individual emmc/sdio platform data instances instead of
+> >   sharing one.
+> > - Remove redundant have_phy member in k230_priv.
+> > - Replace of_find_compatible_node with of_parse_phandle to get USB PHY
+> >   from DT phandle.
+> > - Link to v1: https://lore.kernel.org/all/20260204082908.27501-1-jiayu.riscv@isrc.iscas.ac.cn/
+> >
+> > Jiayu Du (3):
+> >   dt-bindings: mmc: Add sdhci support for Canaan k230
+> >   mmc: sdhci-dwcmshc: Add Canaan K230 DWCMSHC controller support
+> >   riscv: dts: canaan: Add mmc nodes for K230
+> >
+> >  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  28 ++
+> >  .../boot/dts/canaan/k230-canmv-dshanpi.dts    |  56 ++++
+> >  .../dts/canaan/k230-canmv-module-dshanpi.dtsi |   7 +
+> >  arch/riscv/boot/dts/canaan/k230.dtsi          |  28 ++
+> >  drivers/mmc/host/sdhci-of-dwcmshc.c           | 287 ++++++++++++++++++
+> >  5 files changed, 406 insertions(+)
+> 
+> Tested-by: Junhui Liu <junhui.liu@pigmoral.tech>
+> 
+> Tested ok on CanMV-K230-V1.1 (k230-canmv.dts) with AP6212 (BCM43430)
+> SDIO WiFi module on MMC0 and MicroSD card on MMC1.
+> 
+> To be noted, a "broken-cd" property is needed to support SD card insert
+> and remove detect on CanMV board because the CD pin is not connected. I
+> am not sure if this is also needed on DShanPi as I don't have its
+> schematic.
 
-On some systems this can deadlock runtime PM and leave the USB device
-stuck in the "suspending" state.
+Thank you for your test and reminder. I have checked the schematic and
+I will add "broken-cd" in the next version.
 
-Avoid issuing USB commands from the runtime autosuspend callback.
-Instead, use the last cached card status (updated on successful status
-reads) and conservatively assume a card may be present until status is
-known.
+Best regards,
+Jiayu Du
 
-Signed-off-by: Sean Rhodes <sean@starlabs.systems>
----
- drivers/misc/cardreader/rtsx_usb.c | 11 +++++++----
- include/linux/rtsx_usb.h           |  3 +++
- 2 files changed, 10 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/misc/cardreader/rtsx_usb.c b/drivers/misc/cardreader/rtsx_usb.c
-index 5d818b632788..63751797ee2b 100644
---- a/drivers/misc/cardreader/rtsx_usb.c
-+++ b/drivers/misc/cardreader/rtsx_usb.c
-@@ -336,6 +336,9 @@ int rtsx_usb_get_card_status(struct rtsx_ucr *ucr, u16 *status)
- 	if (ret < 0)
- 		return ret;
- 
-+	ucr->card_status_cache = *status;
-+	ucr->card_status_valid = true;
-+
- 	return 0;
- }
- EXPORT_SYMBOL_GPL(rtsx_usb_get_card_status);
-@@ -743,16 +746,16 @@ static int rtsx_usb_suspend(struct usb_interface *intf, pm_message_t message)
- 
- 	if (PMSG_IS_AUTO(message)) {
- 		if (mutex_trylock(&ucr->dev_mutex)) {
--			rtsx_usb_get_card_status(ucr, &val);
-+			if (ucr->card_status_valid)
-+				val = ucr->card_status_cache;
-+			else
-+				val = SD_CD | MS_CD;
- 			mutex_unlock(&ucr->dev_mutex);
- 
- 			/* Defer the autosuspend if card exists */
- 			if (val & (SD_CD | MS_CD)) {
- 				device_for_each_child(&intf->dev, NULL, rtsx_usb_resume_child);
- 				return -EAGAIN;
--			} else {
--				/* if the card does not exists, clear OCP status */
--				rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
- 			}
- 		} else {
- 			/* There is an ongoing operation*/
-diff --git a/include/linux/rtsx_usb.h b/include/linux/rtsx_usb.h
-index 276b509c03e3..3188f6616729 100644
---- a/include/linux/rtsx_usb.h
-+++ b/include/linux/rtsx_usb.h
-@@ -59,6 +59,9 @@ struct rtsx_ucr {
- 	struct usb_interface	*pusb_intf;
- 	struct usb_sg_request	current_sg;
- 
-+	u16			card_status_cache;
-+	bool			card_status_valid;
-+
- 	struct timer_list	sg_timer;
- 	struct mutex		dev_mutex;
- };
--- 
-2.51.0
