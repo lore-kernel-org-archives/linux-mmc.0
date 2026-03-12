@@ -1,269 +1,143 @@
-Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
+Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50FF32868AB
-	for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2026 09:39:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.171
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773308341; cv=pass; b=nQve+H3AkVbqV0kqvReTV1woPI8WgqWk2R/aQCjQrPDmO/ml+LmJ+lJMtq553aJT7z4yWFYAQvw8Guf/iOOkyeg6U+I9LLxdchtdwkOG4hJs2SYc89G4/DpyrPJtQklID1+oBQ0hkZmZsdPlnExScDYV/awlMMGNzB1P67nbTeM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773308341; c=relaxed/simple;
-	bh=anD1VyMEVEgbX5EIAi4s0UBnKZ1U9xE2QUYdli0kx3A=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=redJbbfmXhcLv1hxAJgOx9sKX/wpJQl3ulOIlYcB1aHRkATu0o927wqBMMdN2fWoh9Pn0YwkpDsn+SMVZWZ/wjcPQNkGn5nhJ+ie27/EZuCmbBRq3NHfXjL1xqJRoPJTdqWgQijZUN62RoIQmBsbDAtw4il2yAovaUl9cyj/0KM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PRhkGwo7; arc=pass smtp.client-ip=209.85.128.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BF0427A123
+	for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2026 12:16:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773317768; cv=none; b=qaXhSSAs4/zmM9Yg3uBmY4X3ONTlVo2S3KpikNQ/u0GW1T2iHrs7XSX5xnX0cuHpBYzCLghq+3magNPRzUOq0hpFPzHq7zqC9/Qc6DGt0QySEugoHGgjijgjudCWq4mCRRKlc1ejff7He+juHZEYBGVMJtFfX5zcEMsqwIhIJqc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773317768; c=relaxed/simple;
+	bh=LBfQ3rOqSm5WGZv43CLh3v/nMRxEwVLYWWtHD73TqMs=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=EOfSe9QHkvhBG7IPXhvkXzIotVPSRbsYtGt6+2M13l1MRD1pjjbNBXmKKGp386ycYr7aSuDXD/1zzHurOkbINnQ7+0ma7cKCC8brRNGG6GBIaX90K+iUrrKu0KSx/g2tdR6AGgfJI85hr0AYun4N5PS552vh1aQWE6QVxEzPnh4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b=vslEtMlh; arc=none smtp.client-ip=209.85.128.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PRhkGwo7"
-Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-79885f4a8ffso7266177b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2026 02:39:00 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773308339; cv=none;
-        d=google.com; s=arc-20240605;
-        b=SNHEdg8nkqfSSI+k38LQOHuQ3F+G1/KwHtftbAIQVnE4hScyYWLPIDeDRW+xr66+vw
-         HezUuxgqNso5Mq8dolsIppoSIiOST5taf+GmdO61eSKp2OnkEErpdsvRghXb84Jw3EOd
-         M7pzX7DFniolz/gDXE4yuJ8qTVPbpm4VC0D/kbm3777RzAPYQUT19W+eJRwFxlbxpocx
-         KX6KsY4n2qO8a9eB9ahqDvDT13zG+fQJBmVnViBWTtIyrINS1tFiJV2E3KubVjLIunm4
-         i/DCRobrrEwH0Ss19N5A99vmlKKWq5G72lJFGqq2cXHCrJurZDWgxmoQXFligZZcNQxO
-         4uig==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=d645qq1RHXY2ZEXrCIAd8Z57nQOQnqeihh5RHWfjYUk=;
-        fh=bIU4i6CUZeMhRzSw7yE5tEyqAPOkrTX0U9WRR/hGbjA=;
-        b=MRrPTp3MIbz2WpYpeYgqkSwvQA5HsMYQh4kELh8aSTGqJW0nX+xe71zOxqRELNF0+n
-         4IJgVaFCcmnbNm6ewaHiNQbJSbrVkqDQXzbRRQlm8XQ3d95tJiRxeXIJD4UUi23vSpIk
-         Y+6l7paCeJR1PTYS2bDDlnvgGmSy8rHrakjaE2MB2ikIRc8Z+g5f5ekohw5SqNnnz7tt
-         RAg/e/EBgzejeAXtqftir+3IzwzQ67S78AU7EO6u4IyDNPS2DGfW7lC8iFHWDg7S8f6X
-         NXF5lRPWmLu2DxrK4vrnHpo0ThSehDoXWcL3hx6ARENsNjsqveaStcMZmCaXAuEaZOdD
-         0oNA==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b="vslEtMlh"
+Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-4852f73d0a3so8773665e9.3
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Mar 2026 05:16:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773308339; x=1773913139; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=starlabs-systems.20230601.gappssmtp.com; s=20230601; t=1773317762; x=1773922562; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=d645qq1RHXY2ZEXrCIAd8Z57nQOQnqeihh5RHWfjYUk=;
-        b=PRhkGwo7GWPjBr9vitNuynWQF8r/kY/5aYYMGQZEls7s5EbCqHflLdTlkgeAeWtRd0
-         62a9rYheh63mPOpJQn09CqfR7g44Qsn1BODxGQ6V0O5APzbIhQnRKzJOJ+p9Con3So1c
-         Lb88vjXwCAlLobOzIrakiTP/t6hCseXCpB41WatfaSoXsrDfINAoS9zEL9iV6vph5+nl
-         OMKB2nwOMhjNmIl8o6iGJCT9lySZ/3p+3e6z0hoE040YWM+2NkZu57qhGRANVezOgyT4
-         SV700xPei1KXTtoeLUC/FYz+RZy8dHr32Mf/1fzQQey22CeVR6vZ8TziP7d1Qkw5lL3G
-         7ExA==
+        bh=jN6i/2lcvLmUr7kNhiSyLJxtx49LqD6S5w5FXgrMNOU=;
+        b=vslEtMlhXHTZLPJTN98dGjGQkw1XE76DmudQk6XiMPVDmtMAIli/Lg5jMxb9TiTvY1
+         7mokZqkqvZdV/o6TkFIqC3PAw90GxmjHq0YX/VNuv4f46cnzbK86SVzQ/0IDzG83tOC+
+         DfzTCwqakDwzIdHj7J1isYQ8L1X3hJbEWQfmkNU7vkoHKIKzBelbxYrJjlQFMGvgRXdo
+         opH8htowySHTLeRqLgv2GPy2XITfkro5jRoHkxXMb3uUNRbOMc5b2lCZW6rty784Ds/c
+         vHdn1odM9CSLJDfkXmaGGgn+HEuTvIAK1jqdxb2wJry6NSWjwYCTA/p9wmZhmH3VR8m1
+         41vA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1773308339; x=1773913139;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+        d=1e100.net; s=20230601; t=1773317762; x=1773922562;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=d645qq1RHXY2ZEXrCIAd8Z57nQOQnqeihh5RHWfjYUk=;
-        b=dv0CL6pGM7GIF4EQk1J8JLEyM2zrZ87XTUqKUbsF133riTUFSggf1VfDrLU0uUwqBH
-         7pHtJFu76LggFHOujG03yzVAXoPWowuijgKBBAAGZGMk6WrUaE9DP632kUIpZjcgNboW
-         b6NJ43IvePTfP3t9h7Q+gKWIE4uAQ8gct4LXP6WWTEDObyiRRsiq5vPGapwbz7vKbay/
-         ZQzn2jkaNF9m0mZ6KhFiFI62VdeY1h2QxLp1d+cLpdHnBK3s9mQj7L75IsYnaon/hB5v
-         9A3Mpg5klFgsk20BCNIqLMUq+q5+ZX4wCqaIU0uVpE6kvgVS/M5OL3rzcyezzKFw7WQG
-         kq7w==
-X-Forwarded-Encrypted: i=1; AJvYcCWjGZnfy/MY0Qk/RcbOKnqU9i+imaLMiTsSIyIWPo4dJE4DBItID/icn2DAR+zfLqn3OQP4xImBiaM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwIUHAfmu6GLAXTML3QiwJpKg3XITYLajFvxR52ahXU1mr7smUz
-	Mrg5/HIcG6KaW5S7caIj87rX0l/fw+6rSOhobpyerUlmudQeweRbjwkz0NIpXamc6kaegkLZsai
-	R5J9xOKw1L3VUrf5n7XnX/tXMnf4KAYg=
-X-Gm-Gg: ATEYQzx2WdCJmVZ1NASX1PSEVlsMqaqJpp9NjLhUXiQqa0F/SOBP9VF36wgGWXJL3LZ
-	p1Vh48TIns6XGF6cODNyc9znurQiCX29XZbIHuaih4+QW6niTb1c7+nINEIRvfwPELOR99YXCgM
-	0QgObjrr+mcFJDtUi5wyHrRMCsaMJKElr/6bIrFp4TTMf9suh9fK3AmO9K7DumKc8TyfkoOGpTh
-	WikhDVMcsA4p+xPHvMPJ+bDOCdu/R78iyc8zvNKLGaLbnfZoK49ITez9crkq4iN0E7+TBD7qgbf
-	GK8Srqg=
-X-Received: by 2002:a05:690c:6d82:b0:799:1af1:6c69 with SMTP id
- 00721157ae682-7991af16fbamr45243437b3.26.1773308339300; Thu, 12 Mar 2026
- 02:38:59 -0700 (PDT)
+        bh=jN6i/2lcvLmUr7kNhiSyLJxtx49LqD6S5w5FXgrMNOU=;
+        b=RDVlWm3lJGsxWwEy4/pv/aF2dqyemt6n/vlrItsvyFlSIHrNYQmAzaxgnmc6TZROg1
+         qPzWB+mwyPFfwZT0cRhEUZYPDZ4HhwDaVYTpg/mM+lV+qiB5aa3ZrCgLl8ztSDowluD8
+         9+W+jcO9b9i2lYQ22dFaVG1txhDnOPrXSEiJAJnQZ+DqDHQsyXNIsJSQ+AbGnP/v2KMx
+         64MJmxXN2RGcaIYtZYCrChR16L9qR6WBcp6ndI5CoJIcnPNsFFPMKUl/g4t1OXhpk+je
+         zJsNEY1xF2D1/UezeAjAm5TPNSass0c7YVojxH7IyqaCYUfSJU0zI1ZSXMEzpOHEdAs/
+         RfuQ==
+X-Gm-Message-State: AOJu0YwSwvy02cPL+D6OEXkHoFOw8y0RG6KttdyqJHdtyTfhYTwzChMC
+	z/hzVrmQoMB6JbjhgloxHqvHnjlxxkOVmCJPeASfQjo1gcq99eLs9iXtWpZslkjaszsUtXKvdHz
+	lYvyPEg==
+X-Gm-Gg: ATEYQzzPfZhPnU8J1XiPdiG9x+LGf2+pSNhUH6JvUQqn3nLDOZ+ppILoJ0wZJq2LG90
+	4srgOS5WSQpeBjgDdvlek3ow4sH0WqhpmFV7oYh2v0edfWgrMSwGxHdpQx1SljAOjjJnMTajOev
+	Gj3jV9dlRDXmWIO0qpSYiKYHlsLdBkHAE7ia/QU/U/UXXXMCTWzh77C6wjl/9xmZCzHFzbyhgAD
+	EDDyvRF0s90kZQcAa+Jy6nuEN3bS9NB7V9QODumTeSfqjRDYk6dc3rvQwmVfGBG21p5WoaikvVP
+	9qPvOE8jXW0BGP1EaD97aD0ELBMcuLrJrBjdSiGBXSSilHbTayEUDxgNDTVWDrcY+yj8tg3+JTD
+	2YS0wn9KbyKB9Lt00jQzvaLCBJ87GZCAzRbRFfu+Qvm9ItwP9RzJSLeuDQwYwhewDdbSNpFqi3+
+	Fw4y65N2T57gjVAJ6gbj0pb1xSS5LYPf0j7Mtqd3llhb/QED9ILTO9dLW2ZxSYzpBvmp0WZQ==
+X-Received: by 2002:a05:600c:45cb:b0:483:703e:4ad5 with SMTP id 5b1f17b1804b1-4854b109d3fmr97388325e9.22.1773317762052;
+        Thu, 12 Mar 2026 05:16:02 -0700 (PDT)
+Received: from starbook.localdomain ([212.105.129.204])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-439fe20c473sm8139874f8f.24.2026.03.12.05.16.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Mar 2026 05:16:01 -0700 (PDT)
+From: Sean Rhodes <sean@starlabs.systems>
+To: linux-mmc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ricky Wu <ricky_wu@realtek.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Dan Carpenter <dan.carpenter@linaro.org>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Huacai Chen <chenhuacai@kernel.org>,
+	Ingo Molnar <mingo@kernel.org>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 RESEND 0/6] rtsx_usb_sdmmc: tray CD fix + UHS + runtime PM
+Date: Thu, 12 Mar 2026 12:15:53 +0000
+Message-ID: <20260312121559.19197-1-sean@starlabs.systems>
+X-Mailer: git-send-email 2.51.0
+In-Reply-To: <20260305194052.5120-1-sean@starlabs.systems>
+References: <20260305194052.5120-1-sean@starlabs.systems>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260309-orangepi-sd-card-uhs-v2-0-5bb2b574df5d@gmail.com>
- <20260309-orangepi-sd-card-uhs-v2-2-5bb2b574df5d@gmail.com> <20260309132219-GKE302167@kernel.org>
-In-Reply-To: <20260309132219-GKE302167@kernel.org>
-From: Iker Pedrosa <ikerpedrosam@gmail.com>
-Date: Thu, 12 Mar 2026 10:38:48 +0100
-X-Gm-Features: AaiRm52BiCFPbC8nIFwrdrDzkLisJX7YfgLkKCTQywgdqQlIVQj3SZM1LgN_fKc
-Message-ID: <CABdCQ=PpA4u+pY-pZgggHPNnDMJUVmgqofMf7O6YMrB+2aDkww@mail.gmail.com>
-Subject: Re: [PATCH v2 2/7] mmc: sdhci-of-k1: add regulator and pinctrl
- voltage switching support
-To: Yixun Lan <dlan@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>, 
-	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
-	Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-El lun, 9 mar 2026 a las 14:22, Yixun Lan (<dlan@kernel.org>) escribi=C3=B3=
-:
->
-> Hi Iker,
->
-> On 12:40 Mon 09 Mar     , Iker Pedrosa wrote:
-> > Add voltage switching infrastructure for UHS-I modes by integrating bot=
-h
-> > regulator framework (for supply voltage control) and pinctrl state
-> > switching (for pin drive strength optimization).
-> >
-> > - Add regulator supply parsing and voltage switching callback
-> > - Add optional pinctrl state switching between "default" (3.3V) and
-> >   "state_uhs" (1.8V) configurations
-> > - Enable coordinated voltage and pin configuration changes for UHS mode=
-s
-> >
-> > This provides complete voltage switching support while maintaining
-> > backward compatibility when pinctrl states are not defined.
-> >
-> > Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
-> > ---
-> >  drivers/mmc/host/sdhci-of-k1.c | 59 ++++++++++++++++++++++++++++++++++=
-++++++++
-> >  1 file changed, 59 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of=
--k1.c
-> > index 585c7eca6ebf253aac466dd37cef029deb63f692..8af117a8e271c04a80d8dc7=
-bb5ce12075652dd7a 100644
-> > --- a/drivers/mmc/host/sdhci-of-k1.c
-> > +++ b/drivers/mmc/host/sdhci-of-k1.c
-> > @@ -15,6 +15,7 @@
-> >  #include <linux/module.h>
-> >  #include <linux/of.h>
-> >  #include <linux/of_device.h>
-> > +#include <linux/pinctrl/consumer.h>
-> >  #include <linux/platform_device.h>
-> >
-> >  #include "sdhci.h"
-> > @@ -70,6 +71,9 @@
-> >  struct spacemit_sdhci_host {
-> >       struct clk *clk_core;
-> >       struct clk *clk_io;
-> > +     struct pinctrl *pinctrl;
-> > +     struct pinctrl_state *pinctrl_default;
-> > +     struct pinctrl_state *pinctrl_uhs;
-> >  };
-> >
-> >  /* All helper functions will update clr/set while preserve rest bits *=
-/
-> > @@ -218,6 +222,42 @@ static void spacemit_sdhci_pre_hs400_to_hs200(stru=
-ct mmc_host *mmc)
-> >                              SPACEMIT_SDHC_PHY_CTRL_REG);
-> >  }
-> >
-> > +static void spacemit_sdhci_voltage_switch(struct sdhci_host *host)
-> > +{
-> > +     struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> > +     struct spacemit_sdhci_host *sdhst =3D sdhci_pltfm_priv(pltfm_host=
-);
-> > +     struct mmc_ios *ios =3D &host->mmc->ios;
-> > +     struct pinctrl_state *state;
-> > +     int ret;
-> > +
-> > +     /* Select appropriate pinctrl state based on signal voltage */
-> > +     if (sdhst->pinctrl) {
-> do a sanity check, then abort it early, the advantage is that you can get=
- rid of
-> one indetation for next code..
->
->         if (!sdhst->pinctrl)
->                 return;
->
+Hi,
 
-Makes sense. I'll get it ready for the next version.
+Some Realtek USB SD readers with a tray can assert SD_CD when only the
+tray is inserted. This can lead to false card-detect, unnecessary card
+initialization, and in the worst case suspend/shutdown failures when the
+MMC core waits for a non-existent card.
 
->
-> > +             switch (ios->signal_voltage) {
-> > +             case MMC_SIGNAL_VOLTAGE_330:
-> > +                     state =3D sdhst->pinctrl_default;
-> > +                     break;
-> > +             case MMC_SIGNAL_VOLTAGE_180:
-> > +                     state =3D sdhst->pinctrl_uhs;
-> > +                     break;
-> > +             default:
-> > +                     dev_warn(mmc_dev(host->mmc), "unsupported voltage=
- %d\n",
-> > +                              ios->signal_voltage);
-> > +                     return;
-> > +             }
-> > +
-> > +             if (state) {
-> > +                     ret =3D pinctrl_select_state(sdhst->pinctrl, stat=
-e);
-> > +                     if (ret) {
-> > +                             dev_warn(mmc_dev(host->mmc),
-> > +                                      "failed to select pinctrl state:=
- %d\n", ret);
-> > +                             return;
-> > +                     }
-> > +                     dev_dbg(mmc_dev(host->mmc), "switched to %s pinct=
-rl state\n",
-> > +                             ios->signal_voltage =3D=3D MMC_SIGNAL_VOL=
-TAGE_180 ? "UHS" : "default");
-> > +             }
-> > +     }
-> > +}
-> > +
-> >  static inline int spacemit_sdhci_get_clocks(struct device *dev,
-> >                                           struct sdhci_pltfm_host *pltf=
-m_host)
-> >  {
-> > @@ -242,6 +282,7 @@ static const struct sdhci_ops spacemit_sdhci_ops =
-=3D {
-> >       .set_bus_width          =3D sdhci_set_bus_width,
-> >       .set_clock              =3D spacemit_sdhci_set_clock,
-> >       .set_uhs_signaling      =3D spacemit_sdhci_set_uhs_signaling,
-> > +     .voltage_switch         =3D spacemit_sdhci_voltage_switch,
-> >  };
-> >
-> >  static const struct sdhci_pltfm_data spacemit_sdhci_k1_pdata =3D {
-> > @@ -293,6 +334,24 @@ static int spacemit_sdhci_probe(struct platform_de=
-vice *pdev)
-> >
-> >       host->mmc->caps |=3D MMC_CAP_NEED_RSP_BUSY;
-> >
-> > +     sdhst =3D sdhci_pltfm_priv(pltfm_host);
-> ..
-> > +     sdhst->pinctrl =3D devm_pinctrl_get(dev);
-> > +     if (!IS_ERR(sdhst->pinctrl)) {
-> > +             sdhst->pinctrl_default =3D pinctrl_lookup_state(sdhst->pi=
-nctrl, "default");
-> > +             if (IS_ERR(sdhst->pinctrl_default))
-> > +                     sdhst->pinctrl_default =3D NULL;
-> > +
-> > +             sdhst->pinctrl_uhs =3D pinctrl_lookup_state(sdhst->pinctr=
-l, "state_uhs");
-> > +             if (IS_ERR(sdhst->pinctrl_uhs))
-> > +                     sdhst->pinctrl_uhs =3D NULL;
-> > +
-> > +             dev_dbg(dev, "pinctrl setup: default=3D%p, uhs=3D%p\n",
-> > +                     sdhst->pinctrl_default, sdhst->pinctrl_uhs);
-> > +     } else {
-> > +             sdhst->pinctrl =3D NULL;
-> > +             dev_dbg(dev, "pinctrl not available, voltage switching wi=
-ll work without it\n");
-> > +     }
-> > +
-> how about creating a function spacemit_sdhci_get_pins()? similar as get
-> resource for clock, will more readable.
+This series hardens card detection by debouncing SD_CD and validating a
+new insertion by probing for card responses before reporting it present.
+It then brings rtsx_usb_sdmmc closer to the previously shipped Realtek
+behaviour (excluding xD/CPRM) for power-up and UHS signalling, and fixes
+runtime PM corner cases around USB transfers.
 
-Yes, I'll do that. Thank you for the feedback.
+The insertion validation approach is intentionally conservative and is
+aligned with the older Realtek rts5139 staging driver (drivers/staging/
+rts5139), which was removed in:
+  00d8521dcd236d1b8f664f54a0309e96bfdcb4f9
+  ("staging: remove rts5139 driver code", 2014-05-23)
 
->
-> >       ret =3D spacemit_sdhci_get_clocks(dev, pltfm_host);
-> >       if (ret)
-> >               goto err_pltfm;
-> >
-> > --
-> > 2.53.0
-> >
->
-> --
-> Yixun Lan (dlan)
+This is a resend as v2; the original standalone submission of patch 1
+was sent on 2026-02-19 with Message-ID:
+  <1ca7b488a11e03b3f107f1829a40cf2c92c7d5fd.1771533586.git.sean@starlabs.systems>
+
+No changes since v2. Resending for visibility.
+
+Testing (v6.18-rc4 based):
+- Readers: Realtek RTS5129, Realtek RTS5170, Realtek
+  RTS51379
+- Tests (all readers): cold-boot detection (card present at power-on),
+  hotplug insert/remove, and suspend pm_test=devices
+- Tray behaviour (tray readers): tray inserted/no card does not create a
+  phantom mmc device; insert/remove transitions are reported correctly
+- Card modes/speeds: UHS-I SDXC cards negotiate UHS SDR104 (1.8V,
+  208MHz) where supported by the reader/card; non-UHS cards fall back to
+  SD High Speed (50MHz)
+
+Thanks,
+Sean Rhodes
+
+Sean Rhodes (6):
+  mmc: rtsx_usb_sdmmc: avoid false card-detect on tray readers
+  mmc: rtsx_usb_sdmmc: start card power-up at 3.3V
+  mmc: rtsx_usb_sdmmc: advertise UHS SDR104 and DDR50
+  mmc: rtsx_usb_sdmmc: program SD30 mode for UHS SDR12/SDR25
+  rtsx_usb: hold runtime PM during transfers
+  rtsx_usb: avoid USB I/O in runtime autosuspend
+
+ drivers/misc/cardreader/rtsx_usb.c |  49 +++++++--
+ drivers/mmc/host/rtsx_usb_sdmmc.c  | 167 +++++++++++++++++++++++++++--
+ include/linux/rtsx_usb.h           |   3 +
+ 3 files changed, 199 insertions(+), 20 deletions(-)
+
+-- 
+2.51.0
