@@ -1,181 +1,97 @@
-Received: from mail-yx1-f42.google.com (mail-yx1-f42.google.com [74.125.224.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC3B93AA512
-	for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2026 15:07:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773414425; cv=pass; b=NPdsCaWlCi66sika+GT22xFLuFStwz1/ETBLjS3MntWsblJFef4UzaOht+WP26tcEqTB+fgInlL8KeDzpf0cDVdx9UXsscDlOkZ3MYRG4TiUvSSHDnuj+dI0PhTusb8F5UrnO1rwFDQefRzN89AwtzZKAk3yDj4n+eiDB9hGA3c=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773414425; c=relaxed/simple;
-	bh=oGY2ctpj9ghSA/kNXN45JoI3buaXV929HHTybkJA4UA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=t+2o6qU5LppAZvphFTKHSalXAH6lpDraenq1oFfxWyHvfXUZ0h6Dwp2oP1upu5EZ9RQWdc2rRcvKgtfPjoVrjlrVS4sh/td0/OM11sTJYC2LkVPDQ7TwjipREbT628naeI2WZYwzfjUiEdGlRhWejXowsgS2EcLSMunQSQfUv0Y=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aB26FPsk; arc=pass smtp.client-ip=74.125.224.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FBE5392C50;
+	Fri, 13 Mar 2026 15:25:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773415544; cv=none; b=n1BL6Rsr7kdd+EqR0eUO2nQetgP2L+O1oNOXNUvFXYKLxPlixIQVYsoXuWlvt3Pl/qgU4PEQOtVbOMh0rJIOVIT1CBPpK77YRB7qPvKCi7aGxxr7pET1/fX7ZhINu6IFYjFm/PM1EqIdJX2cBEddiWwiLj4dL8HpcAHHIcE2EdU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773415544; c=relaxed/simple;
+	bh=wusj2LTn7DPfUgzGzuSVUPLY6Qqm/Ben5xslJSr3GW8=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=DQR+wo/KubTVsqIHOM7FwkHd5RJvL153lekSbq+lhDDKWGEhqBmIp79RdtUsXg1venNCinZto3aFtwhRQNerCXcDI43+LIX9hklXI362xOxb7yKS0yqA+8gndSyGtqA+vkAU3FtDyF1QpZZXtrUVV+ZlDptUx9nrNSp/tei9nT8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=siZ3hLr/; arc=none smtp.client-ip=185.11.138.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aB26FPsk"
-Received: by mail-yx1-f42.google.com with SMTP id 956f58d0204a3-64ae222d87dso2293494d50.2
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2026 08:07:02 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773414421; cv=none;
-        d=google.com; s=arc-20240605;
-        b=cp9LgfGmUcQAX0Upe2bgyC1EFjJVMlg5k2RzlDVFX92av6XQOd/BBIkY9uD8SVm2Ef
-         APYdV5hZNh89z/gGMkV9HCEF6n1cCLTaZi8dt4luZ5eFKwueP2vgUcsNuLr9bmAfKUtF
-         Wfrw6BHFDpjkJm2KkLy8vUrjadagVUpk+MNwtlvq30o0T06FxFmyFP/Ab/3LBzv6+xbD
-         ZetjF8CbYc3oHdJVrvO+6Bsv52vYz3ogni5TSPn/F57Q9yBr/gDy63dEiSwh1KOlnC2t
-         t/1sdu+RPpusY1+OiaCRx5ahhFPuwAhUZvxBRDiJrztLr2p+xjEq7fo3vEIQ9zkqo7i4
-         0eEw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=Bwl3bu6QXSYK5p9OS9Lki1nNQiVBfsiIDBhWlq7lhck=;
-        fh=R1XXbQcE7nVsPecLqknv2adfeRfYB3N3CxfosPlAXrM=;
-        b=gpkqFKzf1NICfA+n0DNRhNDKwqVkWcK3LbfTEpWCNMSV0VjKpGvgqr8/U2r8X6hBaJ
-         8r2Xg/f3PHNJ7IBvF+JzLmiCXLRDh/DTqGbuLG7TOJkSd8PzqVW4ngGB4SGD/iYzoUlN
-         XhlmaN2cVuaWEguYQNCJqbx6QGleYcg2mO9f0xZAHvJfNcTriig4HwLl/DIFBIdBbWyA
-         ii42bCZ7uFUMRr1a05N+pyoUOWJMggO4CX3+gxH8XILl4EjR7uz78JfvY6fh/hVOoUbE
-         jcx56ljNf7x0XSVRJZCtXGBvniS6X8ncTmtYxfbGszLhhNTv24Y/wEmvztD3mwEuDh11
-         6hpw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773414421; x=1774019221; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Bwl3bu6QXSYK5p9OS9Lki1nNQiVBfsiIDBhWlq7lhck=;
-        b=aB26FPskOwIQv1FT7RlgtqMMkfJGmqJ82J02Z3oi0K4iynQCWGcrmZ+7KrdJZCx2LF
-         KOu98LRw0bCghMlu58EM0O2h+6p0nrahvzIJHDI2Mf1D+hVVlSisEBFhh1NaY4szpqi4
-         YmAFrVNUMOalRXT5d3D3D8TvPlftk5wjQrCclqRkqJWiwf4mUt+Qa/xcLhEWC7xWGLuw
-         InWZAyz4BgKS1LCnY0v8pkEZ85M47VhjyQNpxZZJF+X4A3rYJfxF8/RtJYGt2JcVB0AL
-         TGXnmNblyMZk5N0UaRDbBkC4Te6hfQ/rR88R4LPlunpG1P0yHCAs/CCDi/+N3El8j+pu
-         Rf3A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773414421; x=1774019221;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=Bwl3bu6QXSYK5p9OS9Lki1nNQiVBfsiIDBhWlq7lhck=;
-        b=eOOqvnvgpVBtZE5T2atfAqvvG5aYlKdcNtkKqpISJ34UZPdsYlkZQFsshHMl1bQn6f
-         6K/ZC3Z81HgYSoIYQzEUDqqfQyIeAvLXvaclWDCPshZiguMPAP6O8R+q37lwKN1GFbkw
-         Ioiizt2YKbVaIhDMTTbvCjxACDEc9tSJvY2cirIdn/7p5MVB5K/fMGRo4zzHZ3kmDvmk
-         yjOUdVueS3HkA1C+OIAv/7CrZqTa1/A+k0fSwUERwm127SIySTIbBbsJw39UhAUJl0j3
-         OrHfodI19TPAt0OrqRn5QMncbhudRW+5CLXgGFM8Jn6xaUgJ+/VONf/yJsZyoqfvERh8
-         KhEQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVf32C13M/00EKfEH1pQ+A09Jn0YExGAZnfsPCEFOls1Ulfg26ditsyX1qZANlpD2CPMjT9gwyMayM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyWqoCI3JEEY7jgqhV6sn/l7/jaRSklx5ZXzDNr0gzkNDv0waSP
-	FHnK/YUr+DVkJOoe4UG1xgKQefha92SDDm9Xw61yenZPckiRsYjzb2AVnudKlw66ASF+7OfPY86
-	LeNj072hjdny5oAfNv1h9VLmBWnQMidg=
-X-Gm-Gg: ATEYQzzSDcn3AGq8CzXpPzDKIEtlej2a37eHDGGH887hzyx09NO1hi1YrrrhRumNlxQ
-	XMsj2WFsRm+3Ocn9pdS91EbyUrW4wbJxC+g0KnmMvjcKp/5WDbmdnGE0n69l9z8z9hNcv5Eus0m
-	qTbQqrSdy/oTQzRHG5/3CI2ojA0EfXXlhpcK7CV+LE/VQYfFk17hMrnphnybjFCuAwI8OYOf0PN
-	peM+r8OutO8XOvjn3Rv8h6ZZMDybit45lsnOrkSSylfWzw97FppEvbj2KXTAma2KqSz1HHGfcSV
-	uo+j78NRvY1NlfjLiQ==
-X-Received: by 2002:a05:690c:4a08:b0:798:7322:b676 with SMTP id
- 00721157ae682-79a1c0cf4d8mr40164837b3.20.1773414421451; Fri, 13 Mar 2026
- 08:07:01 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="siZ3hLr/"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Reply-To;
+	bh=FBGeKWKKKMA/GYKVdnALvhIQ+8mrBUlUzmRZ9SlygL8=; b=siZ3hLr/RBuaALUlg0nh7FZcY7
+	lWf5bv5S/xfRiWZ7Kz/z2JTrBN3OdMkK4ZjW9DJWtdfXn3BiamcMdU31fI5nlqK48075qsDryk5NH
+	gMPGOKk/7zQbpuhCsELAjcw2ffuRfNmj/bRb/3yCjIAgf3VGvPr8YLOiGyT4QVagg/qo5NXKdtFyN
+	hQVidV3y9NX/XujTtkD5r+6ixUjpWNGCb3nX7jc28er9fN7xsVcXIoqvIFC+OeZgn6UW20Ch0J/kX
+	Nd0GrGT+Jf7HZDJJi2VpQbCE4WWBJs9KF7xvbTEYEhFJCaPJ+bhRaMz1yrZC93UrHH7tK2jxby+xw
+	CNQ9m07Q==;
+From: Heiko Stuebner <heiko@sntech.de>
+To: ulf.hansson@linaro.org, Fabio Estevam <festevam@gmail.com>
+Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+ Fabio Estevam <festevam@nabladev.com>
+Subject:
+ Re: [PATCH] dt-bindings: mmc: rockchip-dw-mshc: Fix the RV1103B compatible
+Date: Fri, 13 Mar 2026 16:25:30 +0100
+Message-ID: <12853156.O9o76ZdvQC@phil>
+In-Reply-To: <20260313130835.708066-1-festevam@gmail.com>
+References: <20260313130835.708066-1-festevam@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260309-orangepi-sd-card-uhs-v2-0-5bb2b574df5d@gmail.com>
- <20260309-orangepi-sd-card-uhs-v2-6-5bb2b574df5d@gmail.com>
- <8e91c86d-ea41-4535-a7cd-5b602c546cb7@baylibre.com> <20260313001940-GKA407679@kernel.org>
- <CABdCQ=Mv-3X8KE1WOWKVTmq+POgJczsL-qFdAyp5qzM6=0s28A@mail.gmail.com> <20260313111108-GKM302167@kernel.org>
-In-Reply-To: <20260313111108-GKM302167@kernel.org>
-From: Iker Pedrosa <ikerpedrosam@gmail.com>
-Date: Fri, 13 Mar 2026 16:06:49 +0100
-X-Gm-Features: AaiRm52ZDS_Bl9kTuuFRUA2s_aJbBWslNAWTIUfq3zQrzhaCgdDVn7wblDGcbW8
-Message-ID: <CABdCQ=O9PEXWrPnofK56tGc_KT64PF3QtFGNr-r2Kx_-3Zzi0A@mail.gmail.com>
-Subject: Re: [PATCH v2 6/7] riscv: dts: spacemit: k1-orangepi-rv2: add PMIC
- and power infrastructure
-To: Yixun Lan <dlan@kernel.org>
-Cc: Trevor Gamblin <tgamblin@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>, 
-	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
-	Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-El vie, 13 mar 2026 a las 12:11, Yixun Lan (<dlan@kernel.org>) escribi=C3=
-=B3:
->
-> Hi Iker,
->
-> On 10:42 Fri 13 Mar     , Iker Pedrosa wrote:
-> > El vie, 13 mar 2026 a las 1:19, Yixun Lan (<dlan@kernel.org>) escribi=
-=C3=B3:
-> > >
-> > > Hi Trevor, Iker,
-> > >
-> > > On 14:27 Wed 11 Mar     , Trevor Gamblin wrote:
-> > > > Hi,
-> > > >
-> > > > On 2026-03-09 07:40, Iker Pedrosa wrote:
-> > > > > Add Spacemit P1 PMIC configuration and board power infrastructure=
- for
-> > > > > voltage regulation support.
-> > > > >
-> > > > > - Add board power regulators (12V input, 4V rail)
-> > > > > - Enable I2C8 for PMIC communication
-> > > > > - Configure PMIC with buck4 (vmmc) and aldo1 (vqmmc) regulators
-> > > > > - Set up regulator constraints for SD card operation
-> > > > >
-> > > > > Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
-> > > > > ---
-> > > > >   arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts | 48 +++++++++=
-+++++++++++++++
-> > > > >   1 file changed, 48 insertions(+)
-> > > > >
-> > > > > diff --git a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts b/a=
-rch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
-> > > > > index 7b7331cb3c726f11d597f81917f3a3f5fc21e1b9..414b03f5e6480f05f=
-5d7eeaaa0afb4e86425ae36 100644
-> > > > > --- a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
-> > > > > +++ b/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
-> > > > > @@ -19,6 +19,25 @@ aliases {
-> > > > >             ethernet1 =3D &eth1;
-> > > > >     };
-> > > > >
-> > > > > +   reg_dc_in: dc-in-12v {
-> > > > > +           compatible =3D "regulator-fixed";
-> > > > > +           regulator-name =3D "dc_in_12v";
-> > > > > +           regulator-min-microvolt =3D <12000000>;
-> > > > > +           regulator-max-microvolt =3D <12000000>;
-> > > > > +           regulator-boot-on;
-> > > > > +           regulator-always-on;
-> > > > > +   };
-> > > > > +
-> > > > Is this the correct voltage? I don't see a 12V rail in the RV2's
-> > > > datasheet, and the board's specifications only indicate a 5V USB-C =
-input.
-> > >
-> > > Right, this should be fixed. Please note Han submitted one version of=
- basic DT for rv2
-> > > which I think that series will go in first
-> > >
-> > > https://lore.kernel.org/r/20260310161853.3900605-1-gaohan@iscas.ac.cn
-> > >
-> >
-> > I'm fine with that. Do we have an estimate of when these changes will
-> > land? I'm fine with rebasing once those are merged, but I'd like to
-> > continue with the review for the remaining changes in this patch
-> > series and I'm unsure on how to proceed.
-> >
-> For that changes, likely will target v7.1 merge window
->
-> You can continue with current version, once that happen, you can rebase .=
-.
+Am Freitag, 13. M=C3=A4rz 2026, 14:08:35 Mitteleurop=C3=A4ische Normalzeit =
+schrieb Fabio Estevam:
+> From: Fabio Estevam <festevam@nabladev.com>
+>=20
+> RV1103B uses the same DesignWare MSHC controller IP version as RK3576.
+>=20
+> They have no "ciu-drive" nor "ciu-sample" clocks and use the phase
+> tuning inside the controller.
+>=20
+> Fix it accordingly.
+>=20
+> Fixes: 517b1e3c9455 ("dt-bindings: mmc: rockchip-dw-mshc: Add RV1103B com=
+patible")
+> Suggested-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Signed-off-by: Fabio Estevam <festevam@nabladev.com>
 
-Ok, that sounds good to me
+Reviewed-by: Heiko Stuebner <heiko@sntech.de>
 
->
-> --
-> Yixun Lan (dlan)
+> ---
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml =
+b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> index a75209bd2710..4965bb518c54 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> @@ -43,11 +43,14 @@ properties:
+>                - rockchip,rk3562-dw-mshc
+>                - rockchip,rk3568-dw-mshc
+>                - rockchip,rk3588-dw-mshc
+> -              - rockchip,rv1103b-dw-mshc
+>                - rockchip,rv1108-dw-mshc
+>                - rockchip,rv1126-dw-mshc
+>            - const: rockchip,rk3288-dw-mshc
+>        # for Rockchip RK3576 with phase tuning inside the controller
+> +      - items:
+> +          - enum:
+> +              - rockchip,rv1103b-dw-mshc
+> +          - const: rockchip,rk3576-dw-mshc
+>        - const: rockchip,rk3576-dw-mshc
+> =20
+>    reg:
+>=20
+
+
+
+
