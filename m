@@ -1,223 +1,240 @@
-Received: from sender4-op-o15.zoho.com (sender4-op-o15.zoho.com [136.143.188.15])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f51.google.com (mail-qv1-f51.google.com [209.85.219.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9C22219301;
-	Fri, 13 Mar 2026 14:15:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4EEAF3A6408
+	for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2026 14:42:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.219.51
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773411359; cv=pass; b=Hg/NBkIdl2FKoVRwWuCiqR9jV4bDkfnUBspR998k/JFtYnJAxq98Uyf716TQeCOWrgL92+qP7nAphsv23gQdwEgbzMSxCUp9Liubovj5w7j+yqv5r/B/ePaXga5Go2A7AsEgbW0BrB2EIdmzla/HGlCFCOrBLyfsJRSL2MRDpYM=
+	t=1773412943; cv=pass; b=ekswZk9SPPG98K95Ldns+CGsS/tTo7poY/ImAn2URHrVxtMFlO/3z9ZuOYI70QvApI/XKZBk4De5sbRoqeVJ+4FKm6guppwv/3V9BCYXK7Kas5AKQ+KgHW6bw106hGdNPszIF9mFDaTFtjmhEW6AvuuU3H91xky1LRUQ4T8KVlY=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773411359; c=relaxed/simple;
-	bh=BMYkIJzGNQB9BqQChyeP4jCteSWxKiciV5+aVqAqd4Q=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=diwhuc4ne7abQ/OQTZVQX1L7g1aNu0PFuO/69C2gv3rvM2zJCUWD7i88CmRNq3ZlSEtGlKuKRlO2Y9bvkrZlYB9zoMBwu4xT96bZe2rMxHdsEoVcjf8S4oLEJacl6dJPcpqiPHN+qHgrLa8rI61IeSkOBMpDoAJPJHRRpcqUaYE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ziyao.cc; spf=pass smtp.mailfrom=ziyao.cc; dkim=pass (1024-bit key) header.d=ziyao.cc header.i=me@ziyao.cc header.b=Q1t8PKGP; arc=pass smtp.client-ip=136.143.188.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ziyao.cc
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ziyao.cc
+	s=arc-20240116; t=1773412943; c=relaxed/simple;
+	bh=MV/eXRShZGoChKIqTWx3xRDJY4D5p1GfCWHVtdLntcU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=TkbcP5EhKs8oxr+99KgfvzBVczYirGEwKtkJLnaQyf1pBHcLaAwxgRnETTPCMx0960rZxGrBGxWAOeF7zwhzNYnGR1rT0ynPDjfxzNZA98JSjKb5shRgIV/NAfGG5Awhf84P1rr7H3QgKKFtjja25W2hWFJ/Ex/EJDHpT7FPCJw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GGFSMfaB; arc=pass smtp.client-ip=209.85.219.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ziyao.cc header.i=me@ziyao.cc header.b="Q1t8PKGP"
-ARC-Seal: i=1; a=rsa-sha256; t=1773411339; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=iFEA9eJzcAmnXms33ePjSGqMxaL+zBVtJIHp5wTUqGcKOK/vQCZc9LRLYf3ptCfO0LRjJxNhs2fS593oDD8gT0P4nhnfTauaqFDGV/aum6sQh7Zh6L69Hzi3Rr4XhYDZpR9jC3AkQvIKGfwRD91H1DtO79+zGk5uvv6Mqfimoyc=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1773411339; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=4yyd8XotYjZZYwF11KV/R0g/vISzO4FDRU2zkUZnLvI=; 
-	b=EcitN7t3/g9tEqt9dilvFyN2RE2BieCKIUtrN41+2pT53dpsXQ0sDA6o728iupzIAcUMjyYdQxZ1FbvRdL6sLjOGSx5hVvkZnkFsinCb+tK8y2MWaE2cTvQn/ekxNPv77D89vr2qESmnkGD1VORZe4eEbjPXVRHCUumSe7UF6BE=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=ziyao.cc;
-	spf=pass  smtp.mailfrom=me@ziyao.cc;
-	dmarc=pass header.from=<me@ziyao.cc>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1773411339;
-	s=zmail; d=ziyao.cc; i=me@ziyao.cc;
-	h=Date:Date:From:From:To:To:Cc:Cc:Subject:Subject:Message-ID:References:MIME-Version:Content-Type:Content-Transfer-Encoding:In-Reply-To:Message-Id:Reply-To;
-	bh=4yyd8XotYjZZYwF11KV/R0g/vISzO4FDRU2zkUZnLvI=;
-	b=Q1t8PKGPX7yPTCBA5zsq9dyX3ZFA0WTh6X92KgdUQzZVpWU92R3u3cpG/0AGjPJB
-	JF9sGc0Xm0rAw46Fr4aHcxIFxS/m6IUsk/R8NDiXpCKWKw/YfuvlZ8rdX1sUH+apGVz
-	Vc7H7Yc9sXVvE3Pd6A8rLH+qCRsmd7ko2v1irjak=
-Received: by mx.zohomail.com with SMTPS id 1773411336146483.83149193111865;
-	Fri, 13 Mar 2026 07:15:36 -0700 (PDT)
-Date: Fri, 13 Mar 2026 14:15:23 +0000
-From: Yao Zi <me@ziyao.cc>
-To: Iker Pedrosa <ikerpedrosam@gmail.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Yixun Lan <dlan@kernel.org>
-Cc: Michael Opdenacker <michael.opdenacker@rootcommit.com>,
-	Javier Martinez Canillas <javierm@redhat.com>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 4/7] mmc: sdhci-of-k1: add comprehensive SDR tuning
- support
-Message-ID: <abQb-wU4S1NrBPXk@pie>
-References: <20260309-orangepi-sd-card-uhs-v2-0-5bb2b574df5d@gmail.com>
- <20260309-orangepi-sd-card-uhs-v2-4-5bb2b574df5d@gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GGFSMfaB"
+Received: by mail-qv1-f51.google.com with SMTP id 6a1803df08f44-89a1c6dd788so22870166d6.0
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2026 07:42:22 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773412941; cv=none;
+        d=google.com; s=arc-20240605;
+        b=CS5Gx7fXma4sRC1Oj67sDQZQ2EtJpTBXO5VqRafKfjqv6qOw7bC1OmKWrODkeXLGC/
+         LSGRHBvRFLLF5OhDTQSf3CD3/AImMnniiMJiELoG4MshWTvwMXmUQNV7oV9AyCDqXQiN
+         Jcbs7Wn0Glh9BuhaFlYUTwoGU/9z+kAme9XlYH3AaI3ZygK9SB5Z9cO+10szJz/Shhds
+         GPvb+wkip0ZeP76R4bKEZJpVq3vJJ/7nbeuB2PoSdOpwrcG5Tc937M3rZfmBP0LW6fP5
+         LJrUb/+e1KIQIlZ0oFGdqwR8KDvTwaFU+9tkrHdN2hAM6AvP6LDGOIYwICyxBP/KFs2R
+         vMAw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=Qc+mZxTV+FdzmhrCNMAZNBcHZoz8P43EP82OiNbVxfA=;
+        fh=tSU/+wyHnKVHa+sMq7nbdyNU0+/K1sAsn1v6FDqd6sk=;
+        b=d9T+yaj562jU0QxA0can7kEnADQMNlk4jIqn76Cb2+pA4MjPpRlaaQ9rMr5qOFrs8Q
+         jmLDtHDq4aqUbTATpUy6GjXpMqLMEhQsbr4xRwmlRJLL5EAYdEiRhG3KizGMkK+UxODp
+         4yRa+zft9IK61Ng4N1S+YME35o85djSG3HVERmg5qapH6JuieHsPhI9+4LexqSKWKXxt
+         ufIikdsC9JtJ7L21AIkpUE5mO0VXq1ktSUoGR74o84JsgwxJakENj1i7mRlvz5pWXY1w
+         pZQN4F8dT55MWOJByZNBvABgC8bh2V0gIM8SfAeQfM3pn+VkzuGOPjYk2S7Mei4Xcnf5
+         Ydrg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1773412941; x=1774017741; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Qc+mZxTV+FdzmhrCNMAZNBcHZoz8P43EP82OiNbVxfA=;
+        b=GGFSMfaBlV/JxTe/0jFPTsEVWBYVyhH1nm+RUwZcTHAVGEbe4fWdeKRBQ7kTeOdTHa
+         xgP1Z0XaudAMPir7uZgUFxxeKtIf0AL+Jlf0uzdpdg157snS0oDxN+VNYUfFYrsTDahn
+         iYBZ7Y9l5lBEC9n2Ds18tvp0x9qgoH/fUBUM9lvlPyO1xSqsNv1dpO2NuQXzX2zhJKjI
+         DBGUO9N4bNPfLL6IEq4FwGNMCpLCvyKM+vWJ/tr+YXtCZ3Zb6HxXV1zhzKI7ux30QGAA
+         Vjlsh4vlYCyJ+9zAPxt/lP/e5SrZrxsxYv6rpQp6WADiNCpuOVDFuVpk6gsOOAVIYCuF
+         nH4g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773412941; x=1774017741;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=Qc+mZxTV+FdzmhrCNMAZNBcHZoz8P43EP82OiNbVxfA=;
+        b=PCgWa0JGNvw9Cj63LyKySlXiT9xLeImvXE3xGIH+jXWKBmowq3bv/ztWlh1uArrLVQ
+         O7hUfacXUHpcn52EsutmGoUpiMb+LzWhK/JZ6ZM2C6i+2MiO0uw+fzbfAKJsZ4DrEUhA
+         lpNF9VB0HLqimwS9wTYVzFFhEtcYWzpi7OUv4RBZe9XaXBf28VDGyvz23+HlLJj9Btia
+         JmI/cFeQWqs/BefCOtenE9R1h1vr/RoKr07A9NLuJG+qo3ebMfsHhCHjNqFR082z6FsX
+         22KyRL/vaYBSUNouFckW8Ik6ytmUZANfcvLfaTNSqiPcWsuN1WWay5x5ScyKwjSonJub
+         zjgg==
+X-Forwarded-Encrypted: i=1; AJvYcCXQafYaDbQa4tYyvga0+qKYwSWxjy3anLA2kT16im46Rorpuzn4zBTgCybrwBXcps35jFB+AcsfQNY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxRCYtCSa9AN65sxkjRkau6EDmmMKopVxZmcu74U5nElWWFvr+X
+	qgCAU6u6mpv89GSnyL73HIsYCMBCLdF46zEHQ/jFUeCKgFnHGUTtfsR/2rZGUZ99+qDrQL7Seok
+	E4DZdJd3ws6lkw0ctKVMcw/R4ilhL0q0=
+X-Gm-Gg: ATEYQzzmnBZyigcDEjdrbiSuVnehMelCzTlg/4qoEttvHQdF+FNSEQ4lOXGTBHy1lHe
+	njHg/nxII7TifY8/1w1B8Z1EI4XOzboCJJKbwDmAhlajDjLmiCz8kgc82MnJ14xUH4rXC3dEJjX
+	nhqPvWEumtvEzyRrsaOawc0iidKUHgAK9S2hyQP0rgRTwVTvxMm9ggUtAf3aMEA+teYFRNzI3Uo
+	pcmPC/nVt6molADiiCQzwjMpgGthYJ5a53TVJaAJdpwn+N/sT1110JQSVITmjklizx3/8MquZ5i
+	qyKh3w==
+X-Received: by 2002:a05:622a:1a8c:b0:503:4251:6597 with SMTP id
+ d75a77b69052e-50957cc6720mr50149121cf.29.1773412941102; Fri, 13 Mar 2026
+ 07:42:21 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260309-orangepi-sd-card-uhs-v2-4-5bb2b574df5d@gmail.com>
-X-ZohoMailClient: External
+References: <20260309-orangepi-sd-card-uhs-v2-0-5bb2b574df5d@gmail.com>
+ <20260309-orangepi-sd-card-uhs-v2-7-5bb2b574df5d@gmail.com> <f2eeddcb-712f-4a67-9687-e217f46f9ea8@baylibre.com>
+In-Reply-To: <f2eeddcb-712f-4a67-9687-e217f46f9ea8@baylibre.com>
+From: Anand Moon <linux.amoon@gmail.com>
+Date: Fri, 13 Mar 2026 20:12:02 +0530
+X-Gm-Features: AaiRm51P57qcJuyAf0DEi9SoGi5rXwcJCFXanh2EQoeiyawGvbU2ynSwbZwPkSA
+Message-ID: <CANAwSgSjsn46p13LokjYZBLdOrUBTFsmDNf80TG=nvkqHWNkfQ@mail.gmail.com>
+Subject: Re: [PATCH v2 7/7] riscv: dts: spacemit: k1-orangepi-rv2: add SD card
+ support with UHS modes
+To: Trevor Gamblin <tgamblin@baylibre.com>
+Cc: Iker Pedrosa <ikerpedrosam@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>, 
+	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
+	Alexandre Ghiti <alex@ghiti.fr>, Yixun Lan <dlan@kernel.org>, 
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
+	Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Mar 09, 2026 at 12:40:14PM +0100, Iker Pedrosa wrote:
-> Implement software tuning algorithm to enable UHS-I SDR modes for SD
-> card operation. This adds both TX and RX delay line tuning based on the
-> SpacemiT K1 controller capabilities.
-> 
-> Key features:
-> - Conditional tuning: only tune when SD card is present and for
->   high-speed modes (≥100MHz)
-> - TX tuning: configure transmit delay line with default values
->   (dline_reg=0, delaycode=127) to ensure optimal signal output timing
-> - RX tuning: test full delay range (0-255) with window detection
->   algorithm to find optimal receive timing
-> - Retry mechanism: multiple fallback delays within optimal window for
->   improved reliability
-> - Complete register support: add delay line control and configuration
->   register definitions for fine-grained timing control
-> 
-> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+Hi Trevor,
 
-Sorry for raising this late: I think PATCH 3 and PATCH 4 (this one)
-should also be squashed together to form a complete functionality, I
-also doubt otherwise whether compilers complain about unused static
-functions with only PATCH 3 applied.
+On Fri, 13 Mar 2026 at 19:26, Trevor Gamblin <tgamblin@baylibre.com> wrote:
+>
+>
+> On 2026-03-09 07:40, Iker Pedrosa wrote:
+> > Add complete SD card controller support with UHS high-speed modes.
+> >
+> > - Enable sdhci0 controller with 4-bit bus width
+> > - Configure card detect GPIO with inversion
+> > - Connect vmmc-supply to buck4 for 3.3V card power
+> > - Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
+> > - Add dual pinctrl states for voltage-dependent pin configuration
+> > - Support UHS-I SDR25, SDR50, and SDR104 modes
+> >
+> > This enables full SD card functionality including high-speed UHS modes
+> > for improved performance.
+> >
+> > Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+> > ---
+> >   arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts | 19 +++++++++++++++=
+++++
+> >   1 file changed, 19 insertions(+)
+> >
+> > diff --git a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts b/arch/ri=
+scv/boot/dts/spacemit/k1-orangepi-rv2.dts
+> > index 414b03f5e6480f05f5d7eeaaa0afb4e86425ae36..361135269801f436703b6f1=
+d768c91325a52f07f 100644
+> > --- a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
+> > +++ b/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
+> > @@ -140,3 +140,22 @@ sd_vqmmc: aldo1 {
+> >               };
+> >       };
+> >   };
+> > +
+> > +&sdhci0 {
+> > +     pinctrl-names =3D "default", "state_uhs";
+> > +     pinctrl-0 =3D <&mmc1_cfg>;
+> > +     pinctrl-1 =3D <&mmc1_uhs_cfg>;
+> > +     bus-width =3D <4>;
+> > +     cd-gpios =3D <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
+> > +     cd-inverted;
+> > +     no-mmc;
+> > +     no-sdio;
+> > +     disable-wp;
+> > +     cap-sd-highspeed;
+> > +     vmmc-supply =3D <&sd_vmmc>;
+> > +     vqmmc-supply =3D <&sd_vqmmc>;
+> > +     sd-uhs-sdr25;
+> > +     sd-uhs-sdr50;
+> > +     sd-uhs-sdr104;
+> > +     status =3D "okay";
+> > +};
+> >
+> Hello again,
+>
+> Thanks for doing this work. My colleagues and I have been testing this
+> on an OrangePi RV2, and also a Muse Pi Pro board (making a similar tweak
+> to this patch in k1-musepi-pro.dts). To do the testing on my end, I'm
+> applying the patch series on top of 6.19 in a Yocto BSP.
+>
+> I've been finding that I see issues with the UHS support on my side
+> (this log comes from an image built and flashed to an SD card):
+>
+>
+> [ 1.072417] sdhci-spacemit d4280000.mmc: Got CD GPIO
+> [ 1.109741] mmc0: SDHCI controller on d4280000.mmc [d4280000.mmc] using
+> ADMA
+> [ 1.114589] clk: Disabling unused clocks
+> [ 1.118421] PM: genpd: Disabling unused power domains
+> [ 1.123249] ALSA device list:
+> [ 1.126[ 1.129949] check access for rdinit=3D/init failed: -2, ignoring
+> [ 1.133284] Waiting for root device
+> PARTUUID=3De94bfdd7-a36f-4315-a480-476e2a12403d...
+> [ 1.176569] mmc0: new UHS-I speed DDR50 SDHC card at address aaaa
+> [ 1.180732] mmcblk0: mmc0:aaaa SS16G 14.8 GiB
+> [ 1.276268] mmcblk0: recovery failed!
+> [ 1.277351] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags
+> 0x800000 phys_seg 1 prio class 2
+> [ 1.286346] Buffer I/O error on dev mmcblk0, logical block 0, async page
+> read
+> [ 1.293891] mmcblk0: recovery failed!
+> [ 1.297289] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags
+> 0x800000 phys_seg 1 prio class 2
+> [ 1.306269] Buffer I/O error on dev mmcblk0, logical block 0, async page
+> read
+> [ 1.313522] mmcblk0: unable to read partition table
+>
+>
+> At first I wondered if maybe there was an issue with the card itself,
+> but by changing the sdhci0 section to this, I'm able to read the SD just
+> fine:
+>
+I used the same example on the K1-OrangePi-RV2 DTS,
+But it=E2=80=99s slightly different from the one you=E2=80=99re working wit=
+h.
+I tested on the latest  7.0-rc3.
 
-> ---
->  drivers/mmc/host/sdhci-of-k1.c | 119 +++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 119 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-k1.c b/drivers/mmc/host/sdhci-of-k1.c
-> index 79cb7c8d0b6d9c4206bf01721651c8efe8a173c9..d903851b9be0e1d21a2b30636f5e63a52cad0dc2 100644
-> --- a/drivers/mmc/host/sdhci-of-k1.c
-> +++ b/drivers/mmc/host/sdhci-of-k1.c
-> @@ -84,6 +84,12 @@
->  #define  SDHC_TX_DLINE_REG_MASK         GENMASK(23, 16)
->  
->  #define SPACEMIT_RX_DLINE_REG		9
-> +#define SPACEMIT_RX_TUNE_DELAY_MIN	0x0
-> +#define SPACEMIT_RX_TUNE_DELAY_MAX	0xFF
-> +#define SPACEMIT_RX_TUNE_DELAY_STEP	0x1
+> &sdhci0 {
+>           pinctrl-names =3D "default";
+>           pinctrl-0 =3D <&mmc1_cfg>;
+>           bus-width =3D <4>;
+>           cd-gpios =3D <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
+>           cd-inverted;
+>           no-mmc;
+>           no-sdio;
+>           disable-wp;
+>           vmmc-supply =3D <&sd_vmmc>;
+>           vqmmc-supply =3D <&sd_vqmmc>;
+>           no-1-8-v;
+>           status =3D "okay";
+> };
+>
++
++&sdhci0 {
++       pinctrl-names =3D "default", "state_uhs";
++       pinctrl-0 =3D <&mmc1_cfg>;
++       pinctrl-1 =3D <&mmc1_uhs_cfg>;
++       bus-width =3D <4>;
++       cd-gpios =3D <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
++       cd-inverted;
++       no-mmc;
++       no-sdio;
++       disable-wp;
++       cap-sd-highspeed;
++       vmmc-supply =3D <&sd_vmmc>;
++       vqmmc-supply =3D <&sd_vqmmc>;
++       sd-uhs-sdr25;
++       sd-uhs-sdr50;
++       sd-uhs-sdr104;
++       status =3D "okay";
++};
 
-I think the STEP constant isn't very helpful, to me its purpose is
-quite obvious in spacemit_sdhci_execute_tuning(), and you could simplify
-the tuning function without adding confusing magic numbers -- since the
-constant is literally one.
-
-> +#define SPACEMIT_TX_TUNING_DLINE_REG	0x00
-> +#define SPACEMIT_TX_TUNING_DELAYCODE	127
-
-...
-
-> +static int spacemit_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +	int ret = 0;
-> +	int i;
-> +	bool pass_window[SPACEMIT_RX_TUNE_DELAY_MAX + 1] = {false};
-> +	int pass_len = 0, pass_start = 0, max_pass_len = 0, max_pass_start = 0;
-> +	u8 final_delay;
-> +	struct mmc_host *mmc = host->mmc;
-> +	struct mmc_ios ios = mmc->ios;
-> +
-> +	/*
-> +	 * Tuning is required for SDR50/SDR104, HS200/HS400 cards and
-> +	 * if clock frequency is greater than 100MHz in these modes.
-> +	 */
-> +	if (host->clock < 100 * 1000 * 1000 ||
-> +	    !(ios.timing == MMC_TIMING_MMC_HS200 ||
-> +	      ios.timing == MMC_TIMING_UHS_SDR50 ||
-> +	      ios.timing == MMC_TIMING_UHS_SDR104))
-> +		return 0;
-> +
-> +	if (!(mmc->caps2 & MMC_CAP2_NO_SD) && !mmc->ops->get_cd(mmc))
-> +		return 0;
-
-Is this check really necessary? Shouldn't this be handled in MMC core
-instead?
-
-> +	if (mmc->caps2 & MMC_CAP2_NO_MMC) {
-> +		spacemit_sdhci_set_tx_dline_reg(host, SPACEMIT_TX_TUNING_DLINE_REG);
-> +		spacemit_sdhci_set_tx_delay(host, SPACEMIT_TX_TUNING_DELAYCODE);
-> +		spacemit_sdhci_tx_tuning_prepare(host);
-> +
-> +		dev_dbg(mmc_dev(host->mmc), "TX tuning: dline_reg=%d, delaycode=%d\n",
-> +			SPACEMIT_TX_TUNING_DLINE_REG, SPACEMIT_TX_TUNING_DELAYCODE);
-> +	}
-> +
-> +	spacemit_sdhci_prepare_tuning(host);
-> +
-> +	for (i = SPACEMIT_RX_TUNE_DELAY_MIN; i <= SPACEMIT_RX_TUNE_DELAY_MAX;
-> +	     i += SPACEMIT_RX_TUNE_DELAY_STEP) {
-
-The last expression could be simply i++ if you drop
-SPACEMIT_RX_TUNE_DELAY_STEP, this is still quite readable. Same for the
-loop below.
-
-> +		spacemit_sdhci_set_rx_delay(host, i);
-> +
-> +		ret = mmc_send_tuning(host->mmc, opcode, NULL);
-> +		pass_window[i] = (ret == 0);
-> +
-> +		dev_dbg(mmc_dev(host->mmc), "RX delay %d: %s\n",
-> +			i, pass_window[i] ? "pass" : "fail");
-> +	}
-> +
-> +	for (i = SPACEMIT_RX_TUNE_DELAY_MIN; i <= SPACEMIT_RX_TUNE_DELAY_MAX;
-> +	     i += SPACEMIT_RX_TUNE_DELAY_STEP) {
-> +		if (pass_window[i]) {
-> +			if (pass_len == 0)
-> +				pass_start = i;
-> +			pass_len++;
-> +		} else {
-> +			if (pass_len > max_pass_len) {
-> +				max_pass_len = pass_len;
-> +				max_pass_start = pass_start;
-> +			}
-> +			pass_len = 0;
-> +		}
-> +	}
-
-It seems pass_window is only used once in the later loop, why not
-calculate and maintain the best window and its size on the fly? Then you
-could get avoid of the pass_window buffer, and refactor a loop away.
-Something like,
-
-	int current_size, max_window, max_size;
-
-	current_size = 0;
-	max_size = 0;
-	for (i = SPACEMIT_RX_TUNE_DELAY_MIN; i < SPACEMIT_RX_TUNE_DELAY_MAX;
-	     i++) {
-		ret = /* try tuning ... */
-
-		if (ret) {
-			if (max_size < current_size) {
-				max_window = i - current_size;
-				max_size = current_size;
-			}
-
-			current_size = 0;
-		} else {
-			current_size++;
-		}
-	}
-
-	if (current_size > max_size) {
-		max_window = i - current_size;
-		max_size = current_size;
-		current_size = 0;
-	}
-
-should work, too, and is simpler.
-
-Regards,
-Yao Zi
+Thanks
+-Anand
