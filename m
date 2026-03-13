@@ -1,127 +1,77 @@
-Received: from out-185.mta0.migadu.com (out-185.mta0.migadu.com [91.218.175.185])
+Received: from TWMBX01.aspeed.com (mail.aspeedtech.com [211.20.114.72])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0CAE033D6EF
-	for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2026 02:11:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.185
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F84C2D8393;
+	Fri, 13 Mar 2026 05:28:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.20.114.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773367882; cv=none; b=mXP4RFAApMqTwfKXB0HyNZX6nC5FawYjt+JYEcnOekYnxdY7f2rCAs21AzANUGxYeR5KL0u7zcKjeF5YN+NlSeH11vzsKivDFDiIbjXkEZuUv6oOR4eb7KPWiHR3uuWBrU3oz87GyTxbPScBu9xTY76oNzqz34WI9J4gJ3PprNg=
+	t=1773379688; cv=none; b=jWkBf1KJxtuK4Pubr8hrSN781cX2bhYGXev7lB7y8zLywzr60ewkqXuHRBsdlfz4IffAdlOvSrAW9s7OcMRmemcLSgwWkVSBWZbFeK+2SuJP3xVtQdZppJnejX7dtidpmqpmuCF03udaz024SoEk9lYXv6qxP1iEtdncw0h0i90=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773367882; c=relaxed/simple;
-	bh=RSpI5mgb1yoUxUO+9x3NR4eORKKeMfGrKutMKIfftTY=;
-	h=Cc:Subject:To:References:From:Message-ID:Date:MIME-Version:
-	 In-Reply-To:Content-Type; b=Z4zBEa0Jozl9pABJmo+4qaAymx8oWti4czbGrwttYYH1O/8PCDWTd52gpYhcZ/QlvmUOOnfCeizlHcWV36LdGPjgQpyNIue/O+tUU9PrA3iEl2BDYQfPedm+6Om/IyaLeMv7nI1IQsaPZ7dE33tfIaFV0qq0u0ZkVA1Yx2nBpzs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=NqNZ/fYv; arc=none smtp.client-ip=91.218.175.185
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="NqNZ/fYv"
-Cc: shawn.lin@linux.dev, "robh@kernel.org" <robh@kernel.org>,
- "krzk+dt@kernel.org" <krzk+dt@kernel.org>,
- "conor+dt@kernel.org" <conor+dt@kernel.org>,
- "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1773367868;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=HuEhyZFpP+9EK3OXp1onxc8W2xg/K2y8UAgguHKPX0E=;
-	b=NqNZ/fYv+xvZT/gjAl6Ka4iEzhJZ8tDjSJEtC872cedyGjDQmPxwzYbOnqgvD7fVogaJDl
-	B04jVkwM+f3SsNXmyd1YDqEChXcbDRuuJ1y7y+USCgicrTvOJZ+hSk8BLfbBJ/ab5PiYdO
-	AUGJqoY/8KqBUPTv95IMbM28VcfjHsA=
-Subject: Re: [PATCH v3 2/2] mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
-To: "Hawkins, Nick" <nick.hawkins@hpe.com>,
- "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
- "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
- "jszhang@kernel.org" <jszhang@kernel.org>
-References: <20260311181112.1700667-1-nick.hawkins@hpe.com>
- <20260311181112.1700667-3-nick.hawkins@hpe.com>
- <c4271da0-87c9-d7c2-db46-e7ed7f5e4fdf@linux.dev>
- <DM4PR84MB19274AAA6B344A850A1824958844A@DM4PR84MB1927.NAMPRD84.PROD.OUTLOOK.COM>
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: Shawn Lin <shawn.lin@linux.dev>
-Message-ID: <76c61887-8e75-15cd-73f7-bbe3ea859472@linux.dev>
-Date: Fri, 13 Mar 2026 10:10:53 +0800
+	s=arc-20240116; t=1773379688; c=relaxed/simple;
+	bh=SB7CAsVDuvC/UzUyKBRMDViK4RWtIuE3C0YGThbJYq0=;
+	h=From:Subject:Date:Message-ID:MIME-Version:Content-Type:To:CC; b=IoVaA8k/3cpuoK4zVrm2w9ni2AB6S+bL5Ko7dQa5n6gAKW1ANLBp3uoHl8zR8lYjtAXK11uwr1kh6pFb+dDRF/0QvMvGPNy62WQ4AjMXRBDvWSUTxQUKc0gQw4Zl/QL5H2fzLG5nCJTDcrBSoVEuXUk0gX36QGMjuFWKVN8RdjA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com; spf=pass smtp.mailfrom=aspeedtech.com; arc=none smtp.client-ip=211.20.114.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aspeedtech.com
+Received: from TWMBX01.aspeed.com (192.168.0.62) by TWMBX01.aspeed.com
+ (192.168.0.62) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Fri, 13 Mar
+ 2026 13:27:57 +0800
+Received: from [127.0.1.1] (192.168.10.13) by TWMBX01.aspeed.com
+ (192.168.0.62) with Microsoft SMTP Server id 15.2.1748.10 via Frontend
+ Transport; Fri, 13 Mar 2026 13:27:57 +0800
+From: Ryan Chen <ryan_chen@aspeedtech.com>
+Subject: [PATCH 0/2] Add AST2700 support for aspeed sdhci
+Date: Fri, 13 Mar 2026 13:27:55 +0800
+Message-ID: <20260313-sdhci-v1-0-91cea19c8a67@aspeedtech.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <DM4PR84MB19274AAA6B344A850A1824958844A@DM4PR84MB1927.NAMPRD84.PROD.OUTLOOK.COM>
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAFugs2kC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDIzMDY0Nj3eKUjORMXSMzyxRjQ8u0lKSUVCWg2oKi1LTMCrA50bG1tQDY/8O
+ hVwAAAA==
+X-Change-ID: 20260313-sdhci-269d319fdbde
+To: Andrew Jeffery <andrew@codeconstruct.com.au>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, Krzysztof Kozlowski
+	<krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Joel Stanley
+	<joel@jms.id.au>, Ryan Chen <ryanchen.aspeed@gmail.com>, Adrian Hunter
+	<adrian.hunter@intel.com>, Philipp Zabel <p.zabel@pengutronix.de>
+CC: Andrew Jeffery <andrew@aj.id.au>, <linux-aspeed@lists.ozlabs.org>,
+	<openbmc@lists.ozlabs.org>, <linux-mmc@vger.kernel.org>,
+	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+	<linux-kernel@vger.kernel.org>, Ryan Chen <ryan_chen@aspeedtech.com>
+X-Mailer: b4 0.14.3
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1773379677; l=705;
+ i=ryan_chen@aspeedtech.com; s=20251126; h=from:subject:message-id;
+ bh=SB7CAsVDuvC/UzUyKBRMDViK4RWtIuE3C0YGThbJYq0=;
+ b=Sz8w6I60BX3Vi3i6P7kBBwzTQn0pfRzJThSD8zp37uZ+jJVimsrLjFNIOak0m2xEst+vT2F/N
+ 95Y8AtIXkKEDQuF/Bwnobj6YtdVzMRtuzaTwuVCBBZe58KT3vWTrK/H
+X-Developer-Key: i=ryan_chen@aspeedtech.com; a=ed25519;
+ pk=Xe73xY6tcnkuRjjbVAB/oU30KdB3FvG4nuJuILj7ZVc=
 
-在 2026/03/13 星期五 3:25, Hawkins, Nick 写道:
-> Hi Shawn, thank you for your input.
-> 
-> See below:
-> 
->> -----Original Message-----
->> From: Shawn Lin <shawn.lin@linux.dev>
->> Sent: Thursday, March 12, 2026 3:25 AM
->> To: Hawkins, Nick <nick.hawkins@hpe.com>; ulf.hansson@linaro.org; adrian.hunter@intel.com; jszhang@kernel.org
->> Cc: shawn.lin@linux.dev; robh@kernel.org; krzk+dt@kernel.org; conor+dt@kernel.org; shawn.lin@rock-chips.com; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-kernel@vger.kernel.org
->> Subject: Re: [PATCH v3 2/2] mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
-> 
-> 
->>> +static int dwcmshc_hpe_gsc_init(struct device *dev, struct sdhci_host *host,
->>> +				struct dwcmshc_priv *dwc_priv)
->>> +{
->>> +	struct regmap *soc_ctrl;
->>> +	int ret;
->>> +
->>> +	/* Disable cmd conflict check and configure auto-tuning */
->>> +	dwcmshc_hpe_vendor_specific(host);
->>> +
->>> +	/* Look up the GXP sysreg syscon for MSHCCS access */
->>> +	soc_ctrl = syscon_regmap_lookup_by_phandle(dev->of_node, "hpe,gxp-sysreg");
->>> +	if (IS_ERR(soc_ctrl)) {
->>> +		dev_err(dev, "failed to get hpe,gxp-sysreg syscon\n");
->>> +		return PTR_ERR(soc_ctrl);
->>> +	}
->>> +
->>> +	/* Set SCGSyncDis (bit 18) to disable sync on HS200 RX delay lines */
->>> +	ret = regmap_update_bits(soc_ctrl, HPE_GSC_MSHCCS_OFFSET,
->>> +				HPE_GSC_MSHCCS_SCGSYNCDIS,
->>> +				HPE_GSC_MSHCCS_SCGSYNCDIS);
->>> +	if (ret) {
->>> +		dev_err(dev, "failed to set SCGSyncDis in MSHCCS\n");
->>> +		return ret;
->>> +	}
->>> +
->>> +	sdhci_enable_v4_mode(host);
-> 
->> Sorry, I overlooked this part when in v2. But we enable it in
->> dwcmshc_probe() based on the capabilities, isn't it? Unless your
->> hardware didn't set SDHCI_CAN_64BIT_V4 but actually it does support
->> it? Then it perhaps should be a quirk, although we in general would like
->> to avoid more quirks... It depends on Adrian.
-> 
->> Btw, unlated to your patch, but th1520 did it the same way... Hmm
-> 
-> The GSC's IP is configured with a 32-bit DMA AXI
-> interface, so SDHCI_CAN_64BIT_V4 (caps bit 27) is not set by the
-> hardware. However, the controller still requires Host V4 mode
-> (HOST_CTRL2_R bit 12) to be enabled. Since dwcmshc_probe()
-> only calls sdhci_enable_v4_mode() when SDHCI_CAN_64BIT_V4
-> is set, the explicit call in dwcmshc_hpe_gsc_init() is necessary.
+This series add aspeed sdhci support for AST2700. The AST2700 sdhci
+requires an reset. This series updates the binding and driver to
+support reset requirements.
 
-Okay, this aligns with previous assumption. So, we should either handle 
-it via a quirk in the probe function and remove the call here, or simply 
-add a comment to explain the context. This depends on Adrian's 
-preference. I have no further questions. Thanks
+Signed-off-by: Ryan Chen <ryan_chen@aspeedtech.com>
+---
+Ryan Chen (2):
+      dt-bindings: mmc: sdhci-of-aspeed : Add ast2700 support
+      mmc: sdhci-of-aspeed: Add ast2700 support
 
-> 
-> Thanks,
-> 
-> -Nick H
-> 
-> 
->   
-> 
+ Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml | 16 ++++++++++++++++
+ drivers/mmc/host/sdhci-of-aspeed.c                      | 11 +++++++++++
+ 2 files changed, 27 insertions(+)
+---
+base-commit: 6de23f81a5e08be8fbf5e8d7e9febc72a5b5f27f
+change-id: 20260313-sdhci-269d319fdbde
+
+Best regards,
+-- 
+Ryan Chen <ryan_chen@aspeedtech.com>
+
