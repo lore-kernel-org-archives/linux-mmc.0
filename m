@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 932403BB40;
-	Fri, 13 Mar 2026 13:19:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 64A7130C63A;
+	Fri, 13 Mar 2026 13:19:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773407953; cv=none; b=uQ/a3IaB3Qm9hw7T1BWNKesw37OTjLYeSSfWlpaeZEIaRKyL36GTwbrZzk1fzzpYf/1qetdfsoyMUITp/OpCcPUPi0d1AxIBFil+vT4M/8MirKdydalZd897lLAiEnEAnWIYt84bSKMmEL93KT+3+jHgm1drFgp/XgqVGPExgRM=
+	t=1773407978; cv=none; b=m2mgZjHVIuzUhknqa4NGNAW2BqVx0YrmMe9z80NstFOqkcj+5MLxxjUPsp2irHuEPDmevR31zVLt4QjmTATaHOVItyllE/kMhKlhi6HXqgFoE9ysUeHoRwBgSMPQQNgh1/Xm45mlIX3v5mFRqNiEEkJ+2K21LMCgi+CthoJqt7Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773407953; c=relaxed/simple;
-	bh=eOxdydwzMCWwKW+m6Pjcr2i9St6pdp+5lfwnBN75Ue0=;
+	s=arc-20240116; t=1773407978; c=relaxed/simple;
+	bh=sczW/ndVy0XXEZbOfpH504SGT34YR4CVDjtStoYvlvg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JXy0gsO9bdwW/2QX+mgakVUOn+WDTNwBzqfWDXFpEKpAakMLt8f8DB7XnUvL9dIBrZR3wEYNGE1lEB8whW+Ass0JaqXnBJPhKTpdRa+i8tnYQaSPObudO3loHfU+wSrvfaHAkGFKkVC1Epcn0pB7YQahblyTDHi8sjF06MqfMBc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qidgDliL; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=SdDS3zDPJT2jX5asp/8eVTnO4dirfp+6sq3Evgvjq57QT3LVL1PZMiao5tcrqIUvPVPMl3cFbHj5Br/FD/kBRPQq86Jbly3h5x8c6Z0CKEqsOmLkK+TDygXq8kqh3F7oT3mH8PWuRGSYKFDC2nNCL6teQWhok7C5zl961fNvT58=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=csFwMpzt; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qidgDliL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9CB2CC19421;
-	Fri, 13 Mar 2026 13:19:12 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="csFwMpzt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73910C2BC86;
+	Fri, 13 Mar 2026 13:19:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1773407953;
-	bh=eOxdydwzMCWwKW+m6Pjcr2i9St6pdp+5lfwnBN75Ue0=;
+	s=k20201202; t=1773407978;
+	bh=sczW/ndVy0XXEZbOfpH504SGT34YR4CVDjtStoYvlvg=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=qidgDliLWV56T+pWIRaAYqwiYRmbvN5sjvoHdLrM/q1rbu+3FBqgvZueFtjn86tS8
-	 BSzHMQ9WwieAssNxkKIoHMRI0n0lLIwk1M5f1M4WvA7cmEgtLCKizTofKTmJsCzA3n
-	 r5/9EAV8ZX1/aoZHPgO3y452D2/vL0N7gdh0h1C8ECPIWU7B0R7CZiHBg5BNVQqU0I
-	 886Jbui0v/eCK1Y64UR0Y+X0mx40UagSSWvo2azwcNjdFwkHYuxyLKIivY4PJlsVqL
-	 KI2zMfiXvPFU36gQVor2aPc1JRsNQTt7RkVmqS6cyz37SqBARX6mpxqdKu0ZK81MYx
-	 0BBJNafgbaZ3g==
-Date: Fri, 13 Mar 2026 14:19:10 +0100
+	b=csFwMpztGgTndFg9Nef8LYBKzb/ufR6SN9xrd4z6xGAe+Kg2HZ+eAiG+84T0NvbWa
+	 Xuqb30Qu2q3sfwda3eqUlsZEBM80zQAZUBiZpXPU3Moae0l8kLOKlWq4iT2UZXa0+U
+	 uKpngo33N7zd8YXOg3UMQur7N4idJrwT3MqYRkyxLo02Jk1jxPbAwqvHzQajqN+44M
+	 f62I4ycpMoObSMU3MEATvhMgUpl1JnVqOitZA/gzcv/CYGmojgAvwmTDEHHef++9Ys
+	 SZs9v4s7sgS/ucVAcuSH2LCyOF7ZfBfLgmkj90b/YZTqltyinQZpihxQ3PHCakpCB5
+	 zF8eFAsohsRfA==
+Date: Fri, 13 Mar 2026 14:19:35 +0100
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
 Cc: Bjorn Andersson <andersson@kernel.org>, 
@@ -37,10 +37,10 @@ Cc: Bjorn Andersson <andersson@kernel.org>,
 	Robert Marko <robimarko@gmail.com>, Guru Das Srinagesh <linux@gurudas.dev>, 
 	linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org, devicetree@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 7/9] dt-bindings: firmware: qcom,scm: Document ipq5210 SCM
-Message-ID: <20260313-glorious-daffy-kangaroo-f6dad6@quoll>
+Subject: Re: [PATCH 9/9] arm64: defconfig: enable IPQ5210 RDP504 base configs
+Message-ID: <20260313-llama-of-absolute-champagne-4934a4@quoll>
 References: <20260311-ipq5210_boot_to_shell-v1-0-fe857d68d698@oss.qualcomm.com>
- <20260311-ipq5210_boot_to_shell-v1-7-fe857d68d698@oss.qualcomm.com>
+ <20260311-ipq5210_boot_to_shell-v1-9-fe857d68d698@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,15 +49,16 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260311-ipq5210_boot_to_shell-v1-7-fe857d68d698@oss.qualcomm.com>
+In-Reply-To: <20260311-ipq5210_boot_to_shell-v1-9-fe857d68d698@oss.qualcomm.com>
 
-On Wed, Mar 11, 2026 at 03:15:49PM +0530, Kathiravan Thirumoorthy wrote:
-> Document the scm compatible for ipq5210 SoC.
+On Wed, Mar 11, 2026 at 03:15:51PM +0530, Kathiravan Thirumoorthy wrote:
+> Enable GCC, Pinctrl for Qualcomm's IPQ5210 SoC which is required to boot
+> ipq5210-rdp504 board to a console shell.
 > 
 > Signed-off-by: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
 > ---
->  Documentation/devicetree/bindings/firmware/qcom,scm.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  arch/arm64/configs/defconfig | 2 ++
+>  1 file changed, 2 insertions(+)
 
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
