@@ -1,248 +1,187 @@
-Received: from mail-qk1-f181.google.com (mail-qk1-f181.google.com [209.85.222.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from TYDPR03CU002.outbound.protection.outlook.com (mail-japaneastazon11023098.outbound.protection.outlook.com [52.101.127.98])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 809A4395D80
-	for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2026 17:08:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.181
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773421717; cv=none; b=VnEnNvUFf5VpS0jQecHVzhCLytYUk+M/LTr6M8QjcCOIGQ4KdUwDnHWbK/unvrDIZus0qmUJ2H+txndQoNDoiQEfOjoIWRY87LPIQB577CL4nnA2G8xYMjwVCrxz6FgvIHNDmOKr9JUNAPACMrXFolVsiNHhg880ZN98p71KVbc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773421717; c=relaxed/simple;
-	bh=na5aIQmd51a6vTVSTeVTzISuG98aQ2mjt0ZNjgjSa4M=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=lf56dNbQY+koiQkrfhIzSYalvI1HckpU/oWtHspA+gzehaSpg/tA2L082fdu5KjUeBj9Y8SAl+zdEsPQoINAvUJ/qqk71cxK651mOZRHyiA5uKHZTbsQAh6oZhnFt86L8XhNHvBn1ff5aFa1wzEMV9PmGritv+kfjuqQcpZuZCU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=WzdSk1mR; arc=none smtp.client-ip=209.85.222.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3466184540;
+	Sat, 14 Mar 2026 01:21:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.127.98
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773451273; cv=fail; b=N+Mfoyg+h91a2i/q2rVPxRhW7Hs5sE0KIzUJ0AhVF4H4k0nS4ansx6/WzJ9xQ5KCoXuJ4g1T9X0NVhFyQx+OmyVlh1nkX8cWvQaUX9jngI5A2mzCz0dOeStSj/SRpcSWCuZGmTxt00IjWEmC3Q26Ndx8Qh0jTCL/TnU1QPC13+0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773451273; c=relaxed/simple;
+	bh=HcO5BKX2erjNi6lNFw2a1MlsJGwhA/PDPL8ufBl0Hlc=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=AxKKLFZNK3/IyeFCBdKG7oArrt15t4XpPZIkeD7IliQ3UMNHzEjaUlch/VCb6DqgpE/6TMeZqNUB4Y22H0yNrGQ9dvd+OyRJeh91EqsxYesRP+/otdvvM6RNm4jHJqw9vTqssGekyV2jKE9uU1cMrFC0fYrbo4T9lpDwSY+gOdA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com; spf=pass smtp.mailfrom=aspeedtech.com; dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b=meTdi7ay; arc=fail smtp.client-ip=52.101.127.98
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aspeedtech.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="WzdSk1mR"
-Received: by mail-qk1-f181.google.com with SMTP id af79cd13be357-8cd8347d9fdso313977285a.1
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Mar 2026 10:08:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1773421712; x=1774026512; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:subject:from:user-agent:mime-version:date:message-id:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=q2wUEHO95agDl9HgpTnHWh4fawNLMxRmnfJlPuyaoJY=;
-        b=WzdSk1mRSe4L1cDGWT8I7i8ZnAHVbDgiDCtkOsUbizgieDi/uHO8Dyb1XIdczqlaJg
-         m0pD9LIJ4Zg9onbtQdH49fv5Y4WLgre/e7Z9xU9rLPwkUUY3XpDD9h1f4sOWcCbBoV7V
-         V3wJTLCW5Xy7Yc3LACf8lDYXmvtDIcXVfk4OvW2+LNH9QKssMWW1th1FnXqUILQu3M8+
-         ZrqWpwN1XLxtJ/e8a5WgZzYcJJBFgfV+haZG2FLckxGStVisoZ7Sw5vDpkfO4pd2yIv9
-         Tntnw347t7xwzaIxArnuKbFn0nBZxV6YIp+Voxsl1OoiYepJhCN9yGHwPeRWgO93mZDB
-         TDNA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773421712; x=1774026512;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:subject:from:user-agent:mime-version:date:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=q2wUEHO95agDl9HgpTnHWh4fawNLMxRmnfJlPuyaoJY=;
-        b=FapJEtjdjhceJjwHS9CDtIJvpDOuuUZon5qnVEb+bctRXgP8sjstOqdQLnNqon9ehE
-         jGGNtzMFV7ZWLu/Mdnxfr4fNkkp6He+/DoT+3LnS/9YgSXLYecy6qHkfks1FB/yvBYNz
-         BaRiKPfCW1bab48gDcw8P9XEE9BblVp0bEFqCqedDAahgvScOIFqPMXSsB47jbSp6wmj
-         ZP2rIyCCeuNDPIYZC+pUxY07mvsxylkwLaU3FIz6wnxFpbbhfBml3YB3RSPLC9ThEyiF
-         /FWVB9EmuPu41PdF7UagNGWbLS7QM9aFE+llhNx8Gpbqx+ozSc9LO7AdWzfSjf1Pbt58
-         IA7Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUjDgW3CqUCAqJLUtzyNGIJeuiRiXk+8Jq6RRjkkUE26SGtBvV/6J2jqd0Fwg+DqgjBdex+EnRva5s=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywhl9QueRJHAsDU/ckSVg6FQBSZtBG4HKcu+eYzyyYBDfUPtL7g
-	hAMiJi8CdoYTKbmLWulBqk3CP9qaYG8FpPUBWPvnn+BaEB+ue073ng2XPTgu4nnhbXM=
-X-Gm-Gg: ATEYQzw439ZjaN9WOg26nwJldOlq5oTci9ZxuZNppHAzWTYJXwlxcxVhU8Lffiix0N1
-	2qcP+oRDITYwr47xDL/ymU7M4Cw2ORz48rk540OAJv+QdI9MbLk0E4ei2oj64fW4JNY2GU9wMcG
-	zYdZmulZb8kMsSNOKzJBiQ/aQOBZ8/mIp4aF9VNZSRWSMdcw8tDclIbaYdp23fyRswsmPYoRspV
-	x0FYePSRFyY4O1kkewC+WB842fTw0JijodbEch7BntBvnPjEyOGHCxZBBuymC1rAbnpJuFD2wTy
-	F8Rw3m83BaOoTLyCESLIgIu3cqouHbCthzx6kJf8VGatk1lNOgjThBkh46ueJUz5dYCn1ZPj9Dc
-	21/Y+1VsDhnnidKGp8o8WFnrn6i9rNfHvBNvyF76m+vGnux6t9N6CS+2uE64D8Uv6oVWbKqMFRb
-	4w1OFIpYdh8Zk1fQnnQF6+RejpbEgZAMR+HzVsA1IBE14Dg3jFG3FlpyLgXh1YcIPdVLVo2THt5
-	0+1
-X-Received: by 2002:a05:620a:1a19:b0:8cd:90d5:92c with SMTP id af79cd13be357-8cdb59fe41amr594805385a.12.1773421712407;
-        Fri, 13 Mar 2026 10:08:32 -0700 (PDT)
-Received: from ?IPV6:2001:1970:3847:e000:4c82:63a9:39e9:5c17? ([2001:1970:3847:e000:4c82:63a9:39e9:5c17])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-8cda1fda2c6sm583719685a.13.2026.03.13.10.08.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 13 Mar 2026 10:08:31 -0700 (PDT)
-Message-ID: <b3fa0aef-8efc-4c5a-8c9e-ee319b3cb0e2@baylibre.com>
-Date: Fri, 13 Mar 2026 13:08:29 -0400
+	dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b="meTdi7ay"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=cfe96FypEgW/NZfa4KOzswHruES9LUjw1sUlZeblioHW4FgqxqMHEyqK8z8bqYadPsxSdTOaMZb4NGEFPZ1o+e3QEsuOXyEk3Hw0RadlmALeoKHhCsroLpxz+1YLtTd2+a7G4/wwx5d72jsN0YRlgOPbklT8WnmSRfemZo4UlyCN124816WqRl3N5zpvg0yhY96VOw5lzVEmNsgPHy7kcz3EuZ2llLlD9IQpyH4bHC4qza2xtIMw1TXoRnHXMBPEG1FyNKvEIGwLPdwLY28h7THUVTevxLaN3tVelqvk0/Mw8gvlO9v7oC1rKQAAV2IS0A/OFAfeprFC8ngREiIYnA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=HcO5BKX2erjNi6lNFw2a1MlsJGwhA/PDPL8ufBl0Hlc=;
+ b=MFItin9wq7aO/0of2xGbwYu2Oryd+IXPjKuwkdxJDvvqHOtnK/Fmml1R2TwWi0Il5zXwzU+aYcfwT2wHQuYFCO3GA+MNSMug7afDFItlflnxxaZvXlN1uW1+Vhu2cOBlhx2TSCbTSXDgQ/Yrf3vMDiCaYYVG4YoUqicADiBnOzhpQKsLBJIMVOeYY6w6Rxh/mnl54hNLrrM0gxzaDMnkbuXhQjEL6BYI8IwRMJo+YwDKaRq94a/DpW2zx3wUEjkRce0oly3hi2JqjxeNh4oxKN4F7KIioqmCBFXzQniMZJUbLZAVqZTxeQbQnnCmwzvw9QKhxWtD/mlbE2YgXQ84RA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=aspeedtech.com; dmarc=pass action=none
+ header.from=aspeedtech.com; dkim=pass header.d=aspeedtech.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aspeedtech.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=HcO5BKX2erjNi6lNFw2a1MlsJGwhA/PDPL8ufBl0Hlc=;
+ b=meTdi7ayywZmIJYgxELOr83EL9MWwr8R+cg+qMqB8cH5D64NxKety+7cRL0VcvGOq/ZgJI3Phuh75jcbvK7CuqfgTAWj/JuFStgS2PErb/E9UFJtB3YFBo6R4PyxKCGQZcski21ISToqluIKaT0XG0hGUyyBXYa26+IglFpnJHEOXPnOB/en6zUEERhN1lww6P76kJQE3LhnuLzhgiB+6USbopVx/VAFvr1vuFdSJ496YjseFNyAVoNzKoimiS7wl8qE91/CqmfHT3j+YiVr9bsTCrx7JIC+Oq9jJQJiFKJG7WJEvdufZlT+tq171/lalQtHCvBnO5/Hytou4EhmcA==
+Received: from TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com (2603:1096:408::791)
+ by KUZPR06MB7962.apcprd06.prod.outlook.com (2603:1096:d10:2c::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9700.18; Sat, 14 Mar
+ 2026 01:21:03 +0000
+Received: from TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com
+ ([fe80::8c70:cb01:78fb:d9c0]) by TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com
+ ([fe80::8c70:cb01:78fb:d9c0%6]) with mapi id 15.20.9700.013; Sat, 14 Mar 2026
+ 01:21:03 +0000
+From: Ryan Chen <ryan_chen@aspeedtech.com>
+To: Ryan Chen <ryan_chen@aspeedtech.com>, Philipp Zabel
+	<p.zabel@pengutronix.de>, Andrew Jeffery <andrew@codeconstruct.com.au>, Ulf
+ Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, Krzysztof
+ Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Joel
+ Stanley <joel@jms.id.au>, Ryan Chen <ryanchen.aspeed@gmail.com>, Adrian
+ Hunter <adrian.hunter@intel.com>
+CC: Andrew Jeffery <andrew@aj.id.au>, "linux-aspeed@lists.ozlabs.org"
+	<linux-aspeed@lists.ozlabs.org>, "openbmc@lists.ozlabs.org"
+	<openbmc@lists.ozlabs.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org"
+	<devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH 2/2] mmc: sdhci-of-aspeed: Add ast2700 support
+Thread-Topic: [PATCH 2/2] mmc: sdhci-of-aspeed: Add ast2700 support
+Thread-Index: AQHcsqoqa/wkH2eIMUucFBg3jcknirWsIJ8AgAAB8kCAARlecA==
+Date: Sat, 14 Mar 2026 01:21:03 +0000
+Message-ID:
+ <TY2PPF5CB9A1BE6CFB3FA0165159C68D3F0F242A@TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com>
+References: <20260313-sdhci-v1-0-91cea19c8a67@aspeedtech.com>
+	 <20260313-sdhci-v1-2-91cea19c8a67@aspeedtech.com>
+ <352a522b5325e9db80c880dd7a3a052516f3b673.camel@pengutronix.de>
+ <TY2PPF5CB9A1BE6C2F2EFFA36CD917C623CF245A@TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com>
+In-Reply-To:
+ <TY2PPF5CB9A1BE6C2F2EFFA36CD917C623CF245A@TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=aspeedtech.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: TY2PPF5CB9A1BE6:EE_|KUZPR06MB7962:EE_
+x-ms-office365-filtering-correlation-id: 9665f8a6-bade-4a53-7580-08de8167f5a7
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|366016|376014|7416014|38070700021|22082099003|18002099003|56012099003|921020;
+x-microsoft-antispam-message-info:
+ BXvN+LV61/OqtP+p4uwM/3VZzbPTiBvKEFtxs9YLhaFtPXWypx5ZEPI0gS8whhhzFVXIOcIJ0tD9gZ8nVeb1TFqzmZC74SDbyOVBmEOaUxIV3XYzot7ygpSxjGcvUuyY/Aizn55PUpW4N5Zg+zx/FGZ2R3DlQByXfDVjGWPxvcOTriOoWAUEheOtlP3NcFtSuXt0+4ATQBDQJOQdE0nH24NTWMOkahOFnZLMR0K1SFxOJRXTc5OUXBjO8+W4ioB1/NKUfwpBY8Va3SUcVB92W7iZ/4RQPWtRS9nYhN2uFdcS7QjZYmRyt2Fqq/c19sln78iHRCsQ3TUwa475QGaeFJ2jwV+YlWUu7oVR6MjQlwfePrlWk7QUxDIsFZEBw7ClPgrhP2RZ0JotDga/n7d6QRTfmJfw25aGFpT7gOb5IcsPcRgqOfldNdWsoK2a7abVQ1krL7uZA+za6+ZFPfZAaZgLRc7pDM2EEVWxfN2UATZOc7rkOeNnV0vE0i1tRp2RG37KJVyv48C0DvbZOLh+2boLlkIrrNhXNkm8j5o6CCP+Jbv8VY4uTCWqnCF7t8LYoHrT2Z41czGfmc1Rl1J0o3oSICl8uQL3rrX8Byi7SlONFRfejfZzhfekIJ2eWSZJ/Hwu5Pnx/pembsTCf1m2GFLdt7lNUZe3ykYNPDebEvKfAApAH17ZsDGMZSet4dKq3jWMQ2fzdg/LfphXhaLJraB/pRRcTFZBneqDes2pV9TzgNPzghj/0Vp6KXkk+x/IhpwvlvPqEt7SMuoz219SG3OsPjLMWuOj3AMjggfolR38eotPRPAC66vs2LkyfeM8
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:zh-tw;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(7416014)(38070700021)(22082099003)(18002099003)(56012099003)(921020);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?dEErNnZPUG1Jb1JyRFdOTmVxeFdMQnpHdjR4eGpNUnkzcnNLNTN0TDlzVVB2?=
+ =?utf-8?B?a0JUb3FRTlp6V0ZuaW9MNVpwaEsxNC83MEF5RFUvcFNDaWJ6Yzc2TVl1cm5W?=
+ =?utf-8?B?UlNYUS9ZOFJ2QUEwOHZJWm9XTXYvZlB0d1dCZTFUWGFrYnNnSmQzUXZtSmV6?=
+ =?utf-8?B?Sy9vMDJyOTFCWnRqR2N5TlRzUW5lZ2kyRTVhaFFoc0NHQ2Fza2txZSsrQ0tS?=
+ =?utf-8?B?SWdKZzlNdHk2YTJ2a095NUJLSDlxcjc0TGVaeVpQT3U4S0RMU2NwWVRhRW96?=
+ =?utf-8?B?ZEo3RnN1QlQ2dFNKUC9jSm9xTGRUOEFUN3dXY2xBNnpTNHJRT09LMExIMUVu?=
+ =?utf-8?B?ZzVQSmpETU01bTVxaFRRekNlQkh4bE5HN3RNUHNsWkp3RDV4V0lkaVNtdG5v?=
+ =?utf-8?B?d2JkUGV4dzdmQUF6aUtqQ0NHZnJKUjZiWUdvTzhqMEVnMnBZNGhPL2RxN1hj?=
+ =?utf-8?B?eFpnR3VNNlZMb1FtL3EzZmpIQU1WUU1WTjBoL1ZCTFYyVnl4K3dHckNBTWVo?=
+ =?utf-8?B?MW0yanFNdkVVTHEzcHY3NHNncmVYV2I2bGNCYUdxbkwxWGRKR0hpWHh2NkRz?=
+ =?utf-8?B?UDNianBUSzRsT00xZm5XZ1ZuSUJqOVU3Vk44bVlRcDhlSnBta1B2N3hiZzVG?=
+ =?utf-8?B?WjY4LzhFRDZ3R2M2OUVhMlFYZjd1ejhRWGN1NW9WRjRWQUFwdzAwUSt3NU1q?=
+ =?utf-8?B?R1Q1UkxsbzVHWDkwdi91WUxIbWk5azc5YmtNcFFLZmFra3hQeGVmRW81ZDRl?=
+ =?utf-8?B?VFhqWnJqVDFyOWJSNmFMelNlZHlUTzVSMit0RmhsWWJPbGVqREt3V3pWemJr?=
+ =?utf-8?B?N2RkMnVmTDBNTWIrb2VqWG8rYmFMQjJBc0lIRWhLTU05SWE2VHFKUndMKzdw?=
+ =?utf-8?B?UDJSV2p5RU1Ebm5yYkxBZGVMOEdjRzNYSmZTbmUyTm8vM0l6YzhtNmZYcjZZ?=
+ =?utf-8?B?MFVLWFFBYUVmbm1UejM1WlRrSnJramk1QS9PZDV2eCtWS0MvdHE5a2M5dWZ6?=
+ =?utf-8?B?T2JJeGhZYklEK29pU2I2WmVJRFpIQ0VLUUFZMzJZcU5tVWZjT0ZGdGF1cG5w?=
+ =?utf-8?B?WVdRMGtacHArSnRwcHJROExGMUgrSHhwZ0VROGRKcExYRHppejhIa2tLZGdT?=
+ =?utf-8?B?Z0kzS3pSZVBBSVlMRS92QWhad21WVWlQUXVBYStvTEFWRDRKV3lnek1ldkcv?=
+ =?utf-8?B?Q24xQnlSQ1BrUGo1Tm9EQ0lURkE3bjhNVWFua2dodE9aTkR6eEZUMlY5YzFC?=
+ =?utf-8?B?T1lHRFk1cTZoK3gzVzQ4d01TWGRLaEJ6anB1U1M4dE5hNDBXMXdDZ0REbXF1?=
+ =?utf-8?B?MEFYN1p1WjF5Ti9YY3k0eVB3dlgrc2ltZG5qKzJQZjlETVFRVWMzUzZMaVlO?=
+ =?utf-8?B?cUcvajZwTzFOSzEydmNleGRweFpXUWlVUDJZQTlaemJhU3hScEhZTGhEdnVp?=
+ =?utf-8?B?bjhPeUVscXRlQXNsM25Gdko3MmFuNGphTGJPOHZNek9LN1JpREhnMTJqUXJn?=
+ =?utf-8?B?bVNhcnJ2Y2REa1lySEVtUzBWMndZNFVITk9NYllrOEhjSGNQN0U2Y0RzekVJ?=
+ =?utf-8?B?eU5LMVRFS2lMZ3hFWXdxNVVXN0x0bXBOYXNoS21rcS9pYUw0Q1J6alV1REdr?=
+ =?utf-8?B?eTBZYVcvZkdiQTZwbXBMQjdPNEVtUGpSZUNnM2dsNjZvRXowRzhITmR5ZExL?=
+ =?utf-8?B?cHlHMFNiSzJPbFlGZi9vODVSVGdObHJCazNocnZENWJucTl1T2hIU1Yzd0Y3?=
+ =?utf-8?B?OURKOXhRd2l4d2tSQWZiV2hYUmd3UHRWSCtkb214ZHpQT2RnT3pSaGhiOVF0?=
+ =?utf-8?B?cS8yRHRwanpKeHVhWVA4VmE1SmxLdjVMa002cXVrS1Ywa1VIN1Q2dU0wbjR4?=
+ =?utf-8?B?TFlkMVBtMXVLUk5HMFB4SE45bUsvMzBzLzBNTkV5Rm1mZHJCZEUyNlNDOUlR?=
+ =?utf-8?B?OVVjUmtrc1ExWFpCbW9xZ2xINHBNU3Q2cStFdGl2QTVGTEpsV29LRTZSR3Rk?=
+ =?utf-8?B?Um1OTFZpR3FyNkV3K0pQWjBtN3dBK1pGbkV4Y29ZVUl2MXpsRmlqQU5sV3hX?=
+ =?utf-8?B?Q3g1bWJCKy9TeUZyLzVZYk5iTGRCZnJpYkxtOWRMTEJMbDRLVFA2YmxMOWcz?=
+ =?utf-8?B?eTU4bzIzRVlUQ3Q0WmwvS0IvSVpjUmZGem1mRXIzL3lKTE1hUGlpeFMzUkVX?=
+ =?utf-8?B?MDIwRU1URk9CMEFJN3VlNmpGVVRPUkRVa3RIZ0VEeTBhQTFPWERRdjgyZit4?=
+ =?utf-8?B?c2lmSW8rU2YyK2hPK1pLNnBrU2RFWFMvSWdWMHpSUUdEOWZDOEcrM1J0b2Jv?=
+ =?utf-8?B?SGxyMjNiVXNCOUd3ZWNTRFVlbExkbFNqQmlSeEtQdXlaRUlBU0hYUT09?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Trevor Gamblin <tgamblin@baylibre.com>
-Subject: Re: [PATCH v2 7/7] riscv: dts: spacemit: k1-orangepi-rv2: add SD card
- support with UHS modes
-To: Anand Moon <linux.amoon@gmail.com>
-Cc: Iker Pedrosa <ikerpedrosam@gmail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
- Yixun Lan <dlan@kernel.org>,
- Michael Opdenacker <michael.opdenacker@rootcommit.com>,
- Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
- spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-References: <20260309-orangepi-sd-card-uhs-v2-0-5bb2b574df5d@gmail.com>
- <20260309-orangepi-sd-card-uhs-v2-7-5bb2b574df5d@gmail.com>
- <f2eeddcb-712f-4a67-9687-e217f46f9ea8@baylibre.com>
- <CANAwSgSjsn46p13LokjYZBLdOrUBTFsmDNf80TG=nvkqHWNkfQ@mail.gmail.com>
-Content-Language: en-US
-In-Reply-To: <CANAwSgSjsn46p13LokjYZBLdOrUBTFsmDNf80TG=nvkqHWNkfQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+X-Exchange-RoutingPolicyChecked:
+	LYzzGBBFgsOWuMynY95qDyHEx4qg7ZC0pE8YV7pyeS7OkQbk5eJT+ye3f2Sz7KIZksn960Tf4xp2inmMMKPYcQqlyP5trYUS84OQu9lVA7q7Hem8SECr84lGk66W9NOE0GxtldtVrNWnK5cgYoA7ktxu0IQlOOjwUz7trrJdtzI3K9sm0r0aeKomBiRk/9u4hVHHoE5iZ4IvwAyOdTimAvipTZKH/FErohXttrRpvrEL6UoNd34rvm5hgMtvz1vtS+e7qkGL4dITt2gP1wvBLBY4rWzr63ZRDECKjd99gaGgupFK4NOfyuooX46uQeE2SLrUR8gz5yH85o2O4Oua/A==
+X-OriginatorOrg: aspeedtech.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PPF5CB9A1BE6.apcprd06.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9665f8a6-bade-4a53-7580-08de8167f5a7
+X-MS-Exchange-CrossTenant-originalarrivaltime: 14 Mar 2026 01:21:03.5972
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 43d4aa98-e35b-4575-8939-080e90d5a249
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: ulY70yIkftYy+4hfZ3z921/3Hn7BRGKrUJ6svBugE010p00eQ8v0B1TJ/Tw0xPlFx+MWvheyBH/sXsNHevXA85DywLH3R/aHlVmpmXjCzxc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: KUZPR06MB7962
 
-
-On 2026-03-13 10:42, Anand Moon wrote:
-> Hi Trevor,
->
-> On Fri, 13 Mar 2026 at 19:26, Trevor Gamblin<tgamblin@baylibre.com> wrote:
->> On 2026-03-09 07:40, Iker Pedrosa wrote:
->>> Add complete SD card controller support with UHS high-speed modes.
->>>
->>> - Enable sdhci0 controller with 4-bit bus width
->>> - Configure card detect GPIO with inversion
->>> - Connect vmmc-supply to buck4 for 3.3V card power
->>> - Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
->>> - Add dual pinctrl states for voltage-dependent pin configuration
->>> - Support UHS-I SDR25, SDR50, and SDR104 modes
->>>
->>> This enables full SD card functionality including high-speed UHS modes
->>> for improved performance.
->>>
->>> Signed-off-by: Iker Pedrosa<ikerpedrosam@gmail.com>
->>> ---
->>>    arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts | 19 +++++++++++++++++++
->>>    1 file changed, 19 insertions(+)
->>>
->>> diff --git a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts b/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
->>> index 414b03f5e6480f05f5d7eeaaa0afb4e86425ae36..361135269801f436703b6f1d768c91325a52f07f 100644
->>> --- a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
->>> +++ b/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
->>> @@ -140,3 +140,22 @@ sd_vqmmc: aldo1 {
->>>                };
->>>        };
->>>    };
->>> +
->>> +&sdhci0 {
->>> +     pinctrl-names = "default", "state_uhs";
->>> +     pinctrl-0 = <&mmc1_cfg>;
->>> +     pinctrl-1 = <&mmc1_uhs_cfg>;
->>> +     bus-width = <4>;
->>> +     cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
->>> +     cd-inverted;
->>> +     no-mmc;
->>> +     no-sdio;
->>> +     disable-wp;
->>> +     cap-sd-highspeed;
->>> +     vmmc-supply = <&sd_vmmc>;
->>> +     vqmmc-supply = <&sd_vqmmc>;
->>> +     sd-uhs-sdr25;
->>> +     sd-uhs-sdr50;
->>> +     sd-uhs-sdr104;
->>> +     status = "okay";
->>> +};
->>>
->> Hello again,
->>
->> Thanks for doing this work. My colleagues and I have been testing this
->> on an OrangePi RV2, and also a Muse Pi Pro board (making a similar tweak
->> to this patch in k1-musepi-pro.dts). To do the testing on my end, I'm
->> applying the patch series on top of 6.19 in a Yocto BSP.
->>
->> I've been finding that I see issues with the UHS support on my side
->> (this log comes from an image built and flashed to an SD card):
->>
->>
->> [ 1.072417] sdhci-spacemit d4280000.mmc: Got CD GPIO
->> [ 1.109741] mmc0: SDHCI controller on d4280000.mmc [d4280000.mmc] using
->> ADMA
->> [ 1.114589] clk: Disabling unused clocks
->> [ 1.118421] PM: genpd: Disabling unused power domains
->> [ 1.123249] ALSA device list:
->> [ 1.126[ 1.129949] check access for rdinit=/init failed: -2, ignoring
->> [ 1.133284] Waiting for root device
->> PARTUUID=e94bfdd7-a36f-4315-a480-476e2a12403d...
->> [ 1.176569] mmc0: new UHS-I speed DDR50 SDHC card at address aaaa
->> [ 1.180732] mmcblk0: mmc0:aaaa SS16G 14.8 GiB
->> [ 1.276268] mmcblk0: recovery failed!
->> [ 1.277351] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags
->> 0x800000 phys_seg 1 prio class 2
->> [ 1.286346] Buffer I/O error on dev mmcblk0, logical block 0, async page
->> read
->> [ 1.293891] mmcblk0: recovery failed!
->> [ 1.297289] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags
->> 0x800000 phys_seg 1 prio class 2
->> [ 1.306269] Buffer I/O error on dev mmcblk0, logical block 0, async page
->> read
->> [ 1.313522] mmcblk0: unable to read partition table
->>
->>
->> At first I wondered if maybe there was an issue with the card itself,
->> but by changing the sdhci0 section to this, I'm able to read the SD just
->> fine:
->>
-> I used the same example on the K1-OrangePi-RV2 DTS,
-> But it’s slightly different from the one you’re working with.
-> I tested on the latest  7.0-rc3.
->
->> &sdhci0 {
->>            pinctrl-names = "default";
->>            pinctrl-0 = <&mmc1_cfg>;
->>            bus-width = <4>;
->>            cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
->>            cd-inverted;
->>            no-mmc;
->>            no-sdio;
->>            disable-wp;
->>            vmmc-supply = <&sd_vmmc>;
->>            vqmmc-supply = <&sd_vqmmc>;
->>            no-1-8-v;
->>            status = "okay";
->> };
->>
-> +
-> +&sdhci0 {
-> +       pinctrl-names = "default", "state_uhs";
-> +       pinctrl-0 = <&mmc1_cfg>;
-> +       pinctrl-1 = <&mmc1_uhs_cfg>;
-> +       bus-width = <4>;
-> +       cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
-> +       cd-inverted;
-> +       no-mmc;
-> +       no-sdio;
-> +       disable-wp;
-> +       cap-sd-highspeed;
-> +       vmmc-supply = <&sd_vmmc>;
-> +       vqmmc-supply = <&sd_vqmmc>;
-> +       sd-uhs-sdr25;
-> +       sd-uhs-sdr50;
-> +       sd-uhs-sdr104;
-> +       status = "okay";
-> +};
->
-> Thanks
-> -Anand
-Yes, my mistake - with 7.0-rc3 it works for me:
-
-[    1.071767] sdhci-spacemit d4280000.mmc: Got CD GPIO
-[    1.110368] mmc0: SDHCI controller on d4280000.mmc [d4280000.mmc] using ADMA
-[    1.115231] clk: Disabling unused clocks
-[    1.119072] PM: genpd: Disabling unused power domains
-[    1.123875] ALSA device list:
-[    1.1268[    1.130718] Waiting for root device PARTUUID=e94bfdd7-a36f-4315-a480-476e2a12403d...
-[    1.181158] mmc0: new UHS-I speed DDR50 SDHC card at address aaaa
-[    1.185341] mmcblk0: mmc0:aaaa SS16G 14.8 GiB
-[    1.198009] GPT:Primary header thinks Alt. header is not at the end of the disk.
-[    1.202874] GPT:1134331 != 31116287
-[    1.206388] GPT:Alternate GPT header not at the end of the disk.
-[    1.212468] GPT:1134331 != 31116287
-[    1.215993] GPT: Use GNU Parted to correct GPT errors.
-[    1.221230]  mmcblk0: p1 p2 p3
-[    1.529978] EXT4-fs (mmcblk0p3): mounted filesystem dbc76877-092e-4f8a-9f06-bf286309d8de r/w with ordered data mode. Quota mode: disabled.
-[    1.540069] VFS: Mounted root (ext4 filesystem) on device 179:3.
-
-
-In which case:
-
-Tested-by: Trevor Gamblin <tgamblin@baylibre.com>
+PiBTdWJqZWN0OiBSRTogW1BBVENIIDIvMl0gbW1jOiBzZGhjaS1vZi1hc3BlZWQ6IEFkZCBhc3Qy
+NzAwIHN1cHBvcnQNCj4gDQo+ID4gU3ViamVjdDogUmU6IFtQQVRDSCAyLzJdIG1tYzogc2RoY2kt
+b2YtYXNwZWVkOiBBZGQgYXN0MjcwMCBzdXBwb3J0DQo+ID4NCj4gPiBPbiBGciwgMjAyNi0wMy0x
+MyBhdCAxMzoyNyArMDgwMCwgUnlhbiBDaGVuIHdyb3RlOg0KPiA+ID4gQWRkIHN1cHBvcnQgZm9y
+IHRoZSBBU1QyNzAwIFNPQyBpbiB0aGUgc2QgY29udHJvbGxlciBkcml2ZXIuIEFTVDI3MDANCj4g
+PiA+IHNkIGNvbnRyb2xsZXIgcmVxdWlyZXMgYW4gcmVzZXQgbGluZSwgc28gaG9vayB1cCB0aGUg
+b3B0aW9uYWwgcmVzZXQNCj4gPiA+IGNvbnRyb2wgYW5kIGRlYXNzZXJ0IGl0IGR1cmluZyBwcm9i
+ZS4NCj4gPiA+DQo+ID4gPiBTaWduZWQtb2ZmLWJ5OiBSeWFuIENoZW4gPHJ5YW5fY2hlbkBhc3Bl
+ZWR0ZWNoLmNvbT4NCj4gPiA+IC0tLQ0KPiA+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2Yt
+YXNwZWVkLmMgfCAxMSArKysrKysrKysrKw0KPiA+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxMSBpbnNl
+cnRpb25zKCspDQo+ID4gPg0KPiA+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2Ro
+Y2ktb2YtYXNwZWVkLmMNCj4gPiA+IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hc3BlZWQu
+Yw0KPiA+ID4gaW5kZXggY2E5N2IwMTk5NmIxLi45MWMzNjI0NWU1MDYgMTAwNjQ0DQo+ID4gPiAt
+LS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFzcGVlZC5jDQo+ID4gPiArKysgYi9kcml2
+ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFzcGVlZC5jDQo+ID4gPiBAQCAtNTIwLDYgKzUyMCw3IEBA
+IHN0YXRpYyBpbnQgYXNwZWVkX3NkY19wcm9iZShzdHJ1Y3QNCj4gPiA+IHBsYXRmb3JtX2Rldmlj
+ZQ0KPiA+ID4gKnBkZXYpDQo+ID4gPg0KPiA+ID4gIHsNCj4gPiA+ICAJc3RydWN0IGRldmljZV9u
+b2RlICpwYXJlbnQsICpjaGlsZDsNCj4gPiA+ICsJc3RydWN0IHJlc2V0X2NvbnRyb2wgKnJlc2V0
+Ow0KPiA+ID4gIAlzdHJ1Y3QgYXNwZWVkX3NkYyAqc2RjOw0KPiA+ID4gIAlpbnQgcmV0Ow0KPiA+
+ID4NCj4gPiA+IEBAIC01MjksNiArNTMwLDE1IEBAIHN0YXRpYyBpbnQgYXNwZWVkX3NkY19wcm9i
+ZShzdHJ1Y3QNCj4gPiA+IHBsYXRmb3JtX2RldmljZSAqcGRldikNCj4gPiA+DQo+ID4gPiAgCXNw
+aW5fbG9ja19pbml0KCZzZGMtPmxvY2spOw0KPiA+ID4NCj4gPiA+ICsJcmVzZXQgPSByZXNldF9j
+b250cm9sX2dldF9vcHRpb25hbF9leGNsdXNpdmUoJnBkZXYtPmRldiwgTlVMTCk7DQo+ID4NCj4g
+PiBUaGlzIGlzIG1pc3NpbmcgYSByZXNldF9jb250cm9sX3B1dCgpIGluIGFzcGVlZF9zZGNfcmVt
+b3ZlKCkuIE9yIHVzZQ0KPiA+IGRldm1fcmVzZXRfY29udHJvbF9nZXRfb3B0aW9uYWxfZXhjbHVz
+aXZlKCkuDQo+ID4NCj4gPiBJcyBpdCBvayB0byBhc3NlcnQgdGhpcyByZXNldCBjb250cm9sIGlu
+IF9yZW1vdmUoKT8gSWYgc28sIHlvdSBjb3VsZA0KPiA+IHVzZSBkZXZtX3Jlc2V0X2NvbnRyb2xf
+Z2V0X29wdGlvbmFsX2V4Y2x1c2l2ZV9kZWFzc2VydGVkKCkuDQo+ID4NCj4gVGhhbmtzIHRoZSBn
+dWlkYW5jZS4NCj4gSSB3aWxsIHVwZGF0ZSB1c2UNCj4gc2RjLT5yc3QgPSBkZXZtX3Jlc2V0X2Nv
+bnRyb2xfZ2V0X29wdGlvbmFsX2V4Y2x1c2l2ZSgmcGRldi0+ZGV2LCBOVUxMKTsNCj4gaWYgKElT
+X0VSUihzZGMtPnJzdCkpDQo+IAlyZXR1cm4gZGV2X2Vycl9wcm9iZSgmcGRldi0+ZGV2LCBQVFJf
+RVJSKHNkYy0+cnN0KSwNCj4gCQkJICAgICAidW5hYmxlIHRvIGFjcXVpcmUgcmVzZXRcbiIpOw0K
+PiANClNvcnJ5LCBJIHJldmlldyB0aGUgZGV2bV9yZXNldF9jb250cm9sX2dldF9vcHRpb25hbF9l
+eGNsdXNpdmVfZGVhc3NlcnRlZA0KSSB3aWxsIG1vZGlmeSB3aXRoIGZvbGxvd2luZyBpbiBwcm9i
+ZS4NCg0KCXNkYy0+cnN0ID0gZGV2bV9yZXNldF9jb250cm9sX2dldF9vcHRpb25hbF9leGNsdXNp
+dmVfZGVhc3NlcnRlZCgmcGRldi0+ZGV2LA0KCQkJCQkJCQkJTlVMTCk7DQoJaWYgKElTX0VSUihz
+ZGMtPnJzdCkpDQoJCXJldHVybiBkZXZfZXJyX3Byb2JlKCZwZGV2LT5kZXYsIFBUUl9FUlIoc2Rj
+LT5yc3QpLA0KCQkJCSAgICAgInVuYWJsZSB0byBhY3F1aXJlIHJlc2V0XG4iKTsNCg0KQW5kIGFk
+ZCByZXNldF9jb250cm9sX2Fzc2VydChzZGMtPnJzdCk7IGluIHJlbW92ZS4NCg0KDQo=
