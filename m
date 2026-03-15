@@ -1,63 +1,63 @@
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F8F7377561
-	for <linux-mmc@vger.kernel.org>; Sun, 15 Mar 2026 17:27:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2DC7376BC2
+	for <linux-mmc@vger.kernel.org>; Sun, 15 Mar 2026 17:27:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773595678; cv=none; b=R//xXhejj90a+mJe9PTintp99pZysARG85PAfo+94gSiFYxEH1MTkR4NXiyxNDwlssRjx/XJ99Xov99fyXlIJxk40yKOnH62Pq8NNpIIr/fBDmaAH9AuaU9mNNNSRQIzeNpeP06/qKoLiwDE/fHpF80uu8ISK13cclLXqRtsMCw=
+	t=1773595681; cv=none; b=rKWEP0s4ThMcT58wMxEJWe0iSHCvBOvXcSUATpUXLl7pIUmMsLgR1TvzctYSmmAzhZLbdSSPD3Akg4IHLorlKp6jo7D5PHDxDPztBiuvGPYdZj+MPIVIKpWnzy/sSlKHn2VqBod9GGNFSsiyI2wp/8orl2JswZ+aePGnyv7ZcbI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773595678; c=relaxed/simple;
-	bh=3xFqNDbANLuxYwJZCL+0J4Zy2U0siwNrORG2I8A78Nw=;
+	s=arc-20240116; t=1773595681; c=relaxed/simple;
+	bh=y8Mtr9pcqnP0vzscG2RNUti3BiDjvt7BhqDCfc6+Xhk=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Lr6QGrLagv8TEeRu+HjVwFjuznnne0pItrXRA+ZOaVv4WOP5u/nHn74B4GwpsY4aQFhJ1ZcmcCAGT32OqVUBsbsE2TvN4bRv04F9nKY+rhO4tR+oL1bELC6W303WkPclUfxeGVgqJB4wp3lGK8MyzJi2d9U4FLg7SYUtr00uTJU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ARu4y2Gm; arc=none smtp.client-ip=209.85.128.47
+	 MIME-Version:Content-Type; b=qYXHs1OqmYE39v3Cv0xNUonoCDFNynhqcBsxN7GdncFXhc4iND35HLvxsv5TC47jfQXpdM4uW2luvP1Q3Jo9zBrrBbM9x58MaYBZGiYDmcIdqY8r0J2YYQtGiZcOSeGkLyDI3boqr7qSHCBsRawI1NrmGsYQX4DdzxPb8AW7X94=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=B7IjVq2h; arc=none smtp.client-ip=209.85.128.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ARu4y2Gm"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4852b81c73aso33628905e9.3
-        for <linux-mmc@vger.kernel.org>; Sun, 15 Mar 2026 10:27:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="B7IjVq2h"
+Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-48535a0ef86so31637725e9.1
+        for <linux-mmc@vger.kernel.org>; Sun, 15 Mar 2026 10:27:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773595675; x=1774200475; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1773595678; x=1774200478; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=QBtR9VKnPKJgjfwnbtGvinYVj4EmpVw+ixE7+VzQpDU=;
-        b=ARu4y2GmG8QpEa86w6wV6HozJ+IePGtzrgO8f2Cyo5k5GRcYQNuJPtlF+s3R/QjVs9
-         qq0h8HIz8Hl+kKZG8q+UVAOAiggVhGAA56fT5Lxcvg8RTWszZcEBVFYEawgyy3bAtCCW
-         kLVh0XwZ+N6z7U7yhUF/UQ0qzDiUl5QUnmeWgqdTtjIgppV9nxyVZUpb5T//OR2mUFvG
-         xQJvpDXPsIyJCejURnU2cAiDA7Sddfh40zilghcy4OZJ1GovOXbu7NHo6l9Q4P3XIAGD
-         ZGfmG/xfhA0hde6hAXbQq8wlI2kWPxDudCEaO5Up1Ahfc9QgsgUHjsLmCjC4sfg/LnhG
-         JFtQ==
+        bh=5dhH5M5FJNqVSup5S7MKNqMM3K7FwdoGd3zPkVDPQec=;
+        b=B7IjVq2he/R/gxoyzIozDS4TOhCTh7tA/GbsLWYGRrUopXDRznIt7PMswdCUQaWC8T
+         7Zav6qEKDiIrmBGDD6LV1VCs+MZo2OWSsvEz4uZsmUkPVZWyLJRI9dube/GW7qWVrBII
+         OQRvgGYKtlzb/JfbDB70hRrP6WkNmAGhwXSV2G/DfK+RPXDD1gqcOxgUMDQf7ClGk65T
+         v6SnNpJviw7xWXAdzNX2a1J8R7qTLVQGDdDrs4f9uKP7wL7m+0sgxEf/PnRCgqtVRWHb
+         MZA82adK5DHXIq1KCmVWTxw5FYZ1Ar+Y8QziwfQPIaoX6dpa3UL2Ai2gMbhes6/MisG5
+         3yEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773595675; x=1774200475;
+        d=1e100.net; s=20251104; t=1773595678; x=1774200478;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=QBtR9VKnPKJgjfwnbtGvinYVj4EmpVw+ixE7+VzQpDU=;
-        b=eD/UPyLmcLDpv0pkkv53wzUqOdT3aDCXymQ9ikK4FwnCvaf0fcmaTY5wrG7FJmizgn
-         1SCzCv6+NpZ+7O62IN6KD1wzBltUfASSJ+EW5V1N8J8/Dbm4qUg1BDKU+djIaZ21EQ9C
-         NwR6PUmtmmOy5w0rxcUSZL4yWiq+tFQMmk9LZF3kQ9Iz1KLzpOqbb/6K2AdW+3Ww3pLm
-         dpX1boCRBmJ0CrRfKxrhpH8s9dO3cxz55SZ2MtRWPCH7o6++tA2sScVL9DZgqDkZygMR
-         U5rhw9uX4rDesPuuacOucG0TNS6PR7HuLOUyoUW8RvkwGktGYzUKfh1y0EWKD2vLMeRZ
-         22SA==
-X-Forwarded-Encrypted: i=1; AJvYcCUM39vmlrQDCBRkbFyl3Ay9qFDy8vAHIC5NBJjoP8i/eUJ1fJcV4mQV5CNkiWSswPjEcdGGiZI9TWw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywdc9EkDx9rZ56njQwfxDbJxnPiwLfR65rWarFjb5Gf9peO2Lie
-	LOkRpDqSKfVjLAVJJBBYHvmWdv6Wi3oJAXEFd3VYTSLaYrm6jVajl+aB
-X-Gm-Gg: ATEYQzzZyXUIHb3YPzABOq+NyXLrbCFTDRgtA/m/qB4q8DzmWUncCqxsAZbX2eop/dm
-	INXMCnGqYtQaurLxfgowR9Ij2zDJCR0nIFZ841JbR1pCSXWK7fwtnTSDBz6w6+3TGD/tejejNiv
-	nvkt6Qe5Z1LnOdR9cDxgS3xOyXIS1KGT5y3qq7Wr3L+KjEQH+kzD0iyoHJuURXBBFWGuRzrBIcC
-	UvS7KFhuffrqbzqF6guzR68xhz15X+5+FsEMrgMwUsFXQ+lRjPR7yGdLZ7QUqCANft4eTEpqU9M
-	5J49DDdIqcegjtJb33S7/UixRbYHrkh385EKUG5vrDUU/hyOk+SNqUpM4nIxrdxL1C5MRlSsmFF
-	er6PPljfNvHarVXIYWuQzYQZdFo9lzyFzBFWQObNGIWK/fYWiNp11Rrpjxnep9SwDgNCjX8TNw9
-	QBwEic9oPW6asTmbqHvJXd7FYQy4r29L5wErY=
-X-Received: by 2002:a05:600c:1395:b0:480:1c85:88bf with SMTP id 5b1f17b1804b1-4855670b72fmr170714095e9.27.1773595675367;
-        Sun, 15 Mar 2026 10:27:55 -0700 (PDT)
+        bh=5dhH5M5FJNqVSup5S7MKNqMM3K7FwdoGd3zPkVDPQec=;
+        b=k1pTrGQSMeJG6zEGd1ZiCn1wCOZn26HdMosC8bWFq1PMsS2vCR3Wo7WjM1BPXDLOce
+         MK96mQqYLn4TCewSNJaCU0Gji8dn+1GUOsHfeX/du5w8ODMzorxfugSrXRMUCVwhe5HV
+         tzyVEZctfIrpskNOPp/vqO6kU3k1F1HiHDIi+4qtqLJACQBC8IiXHVB8LBRF3dKdk5uZ
+         GEsj4cZBHp4qZN3NHNRidj2W+M9GgHMKA+CVAr536P5a2Yf3PpgfZKVH+iDxp5Hg8Ueg
+         LwAtA4PfQgvwbcWYxcsvq3++CNbZCSm6uJrzvf6kjo3gqp5W77Fhwl5RU/qvTiWO/9ka
+         vLGw==
+X-Forwarded-Encrypted: i=1; AJvYcCX0s8qd/dUqNUi/taezY6oAbpbcoAYV3uV9YP70tVqVunc6+YutGtVkclZfbw3mxOUHcBLKC0tB1xY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxJejFcoPuqob2SkGub2vaWINIGWDLZSp2JjwZK+HN87eOynj8a
+	pYEWDYX/VZrLcufNMBAgkA4RUFe3gBRLl9XmUjpnRKKngjLTIa50cyE0
+X-Gm-Gg: ATEYQzwo2oBpVd9RtT6kf12fSXTftbDY/bToGYFSKn5vyUMBG2DcYW+yySXVS/xbQNp
+	ZwIKvoGztx8ebp3r93nqR32BsWCyhpJkTR/bmzeBUor8VFsT+YcMyrrN5jYN68P63sTDzqR8g1b
+	bUGXeYuyVZ3T9neOg1fPJ1pu6tr7anrbR3/8jeq/rGVs6kTT2lzf4LhJekqv2qvfXhYwq0b6bp+
+	AxCFKkkA25Kuh59lc6cMOM3EzM1Cnj3w6nw8jby8zqdwubRRnwSAXUxKZam2fp70JNvMZqeA9q1
+	Z42kmeTa19pZcKU7Rp2vNNOIJ4/nbsTbWF6L66/iK0joA1e/g6D5SMoo6raeQ3n6MNo8XazrJH/
+	eb9QFlVpiQ+WTmqipC//NuTyxcgkpjcLLx9Kl3f2fpw2E+R+FRAmiexZxpDt8OGxVxrAlNeErfP
+	uDsSbnPADtXyGDxOJUFdaq7HQGhBVSy2rZxGw=
+X-Received: by 2002:a05:600c:c162:b0:485:3fd1:992c with SMTP id 5b1f17b1804b1-485566d2fe7mr159704575e9.1.1773595677669;
+        Sun, 15 Mar 2026 10:27:57 -0700 (PDT)
 Received: from debian.lan ([171.22.84.130])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48557c6586csm73644905e9.20.2026.03.15.10.27.52
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48557c6586csm73644905e9.20.2026.03.15.10.27.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 15 Mar 2026 10:27:54 -0700 (PDT)
+        Sun, 15 Mar 2026 10:27:56 -0700 (PDT)
 From: =?UTF-8?q?Adri=C3=A1n=20Garc=C3=ADa=20Casado?= <adriangarciacasado42@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Adrian Hunter <adrian.hunter@intel.com>,
@@ -78,9 +78,9 @@ Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
 	linux-kernel@vger.kernel.org,
 	=?UTF-8?q?Adri=C3=A1n=20Garc=C3=ADa=20Casado?= <adriangarciacasado42@gmail.com>,
 	=?UTF-8?q?Adri=C3=A1n=20Garc=C3=ADa=20Casado?= <adriangarciacicuelo@gmail.com>
-Subject: [PATCH v2 1/3] wifi: iwlwifi: pcie: optimize MSI-X interrupt affinity
-Date: Sun, 15 Mar 2026 18:26:38 +0100
-Message-ID: <20260315172746.270734-2-adriangarciacasado42@gmail.com>
+Subject: [PATCH v2 2/3] rust: block: rnull: update to Pin<KBox<QueueData>> for PinInit
+Date: Sun, 15 Mar 2026 18:26:39 +0100
+Message-ID: <20260315172746.270734-3-adriangarciacasado42@gmail.com>
 X-Mailer: git-send-email 2.47.3
 In-Reply-To: <20260315172746.270734-1-adriangarciacasado42@gmail.com>
 References: <20260315172746.270734-1-adriangarciacasado42@gmail.com>
@@ -93,38 +93,62 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Implement a balanced RSS queue distribution by skipping CPU0 for
-high-rate MSI-X interrupts when multiple CPUs are online. This reduces
-contention with system housekeeping tasks on the boot core and improves
-overall throughput.
+Update the Rust rnull driver to use Pin<KBox<QueueData>> for queue data
+allocation. This aligns the driver with the latest PinInit zero-copy
+initialization abstractions in kernel 7.0 and fixes a type mismatch
+with GenDiskBuilder::build().
 
 Signed-off-by: Adrián García Casado <adriangarciacicuelo@gmail.com>
 ---
- drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/trans.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/block/rnull/rnull.rs | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/trans.c b/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/trans.c
-index 4560d92d7..87149f29e 100644
---- a/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/trans.c
-+++ b/drivers/net/wireless/intel/iwlwifi/pcie/gen1_2/trans.c
-@@ -1683,7 +1683,17 @@ static void iwl_pcie_irq_set_affinity(struct iwl_trans *trans,
- 		 * Get the cpu prior to the place to search
- 		 * (i.e. return will be > i - 1).
- 		 */
-+		/*
-+		 * Balanced distribution: skip CPU0 for high-rate RSS queues
-+		 * to avoid contention with system housekeeping.
-+		 */
- 		cpu = cpumask_next(i - offset, cpu_online_mask);
-+		if (cpu >= nr_cpu_ids)
-+			cpu = cpumask_first(cpu_online_mask);
-+
-+		if (cpu == 0 && num_online_cpus() > 1)
-+			cpu = cpumask_next(0, cpu_online_mask);
-+
- 		cpumask_set_cpu(cpu, &trans_pcie->affinity_mask[i]);
- 		ret = irq_set_affinity_hint(trans_pcie->msix_entries[i].vector,
- 					    &trans_pcie->affinity_mask[i]);
+diff --git a/drivers/block/rnull/rnull.rs b/drivers/block/rnull/rnull.rs
+index 0ca8715fe..23df23936 100644
+--- a/drivers/block/rnull/rnull.rs
++++ b/drivers/block/rnull/rnull.rs
+@@ -54,7 +54,7 @@ fn new(
+     ) -> Result<GenDisk<Self>> {
+         let tagset = Arc::pin_init(TagSet::new(1, 256, 1), GFP_KERNEL)?;
+ 
+-        let queue_data = Box::new(QueueData { irq_mode }, GFP_KERNEL)?;
++        let queue_data = Box::pin_init(QueueData { irq_mode }, GFP_KERNEL)?;
+ 
+         gen_disk::GenDiskBuilder::new()
+             .capacity_sectors(capacity_mib << (20 - block::SECTOR_SHIFT))
+@@ -65,16 +65,21 @@ fn new(
+     }
+ }
+ 
++#[pin_data]
+ struct QueueData {
+     irq_mode: IRQMode,
+ }
+ 
+ #[vtable]
+ impl Operations for NullBlkDevice {
+-    type QueueData = KBox<QueueData>;
++    type QueueData = Pin<KBox<QueueData>>;
+ 
+     #[inline(always)]
+-    fn queue_rq(queue_data: &QueueData, rq: ARef<mq::Request<Self>>, _is_last: bool) -> Result {
++    fn queue_rq(
++        queue_data: Pin<&QueueData>,
++        rq: ARef<mq::Request<Self>>,
++        _is_last: bool,
++    ) -> Result {
+         match queue_data.irq_mode {
+             IRQMode::None => mq::Request::end_ok(rq)
+                 .map_err(|_e| kernel::error::code::EIO)
+@@ -87,7 +92,7 @@ fn queue_rq(queue_data: &QueueData, rq: ARef<mq::Request<Self>>, _is_last: bool)
+         Ok(())
+     }
+ 
+-    fn commit_rqs(_queue_data: &QueueData) {}
++    fn commit_rqs(_queue_data: Pin<&QueueData>) {}
+ 
+     fn complete(rq: ARef<mq::Request<Self>>) {
+         mq::Request::end_ok(rq)
 -- 
 2.47.3
 
