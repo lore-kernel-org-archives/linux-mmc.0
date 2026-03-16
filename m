@@ -1,126 +1,134 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 485B13A1D14
-	for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 15:15:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C650B3A2562
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 15:16:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.175
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773674160; cv=pass; b=OZXM58x0g4sNyL/mTc5FVlfPDU977MQsfSOKfnReRDY49Ypw+nvofbyB0PlqwgPY6HhgLKa3DVE+xF/aeq4ntiMZ7g8Yu5hTWosE+QQZzVA74DHb0M/Ru/spBhtOSbxERz2iil7dPMZwxNEv8SDMXD9JPo6O62unFiQEv37mD18=
+	t=1773674165; cv=pass; b=atcPE/Uw0smitdfec0004Ft+DSgZPQO2SS1Qg9wIL5GvEVuIATrtv0iYMIE/7E5XhxvZRgvq90EjBfOAhjCGChnvYKtGTk2mNvL9ny6arMeyNFHq8inyJIRNzlruRuL+cpuD1k8yDJLOrkFCKpeHtZj6SDrX7u9FYjrXYGYE9Pg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773674160; c=relaxed/simple;
-	bh=tlbBAU2x6jiKpjqtYKusaJnoykXmh9IJaWw/fuzG+5A=;
+	s=arc-20240116; t=1773674165; c=relaxed/simple;
+	bh=SGrKOh6DxyjU+GV0XnOjtJnq9uPykPDANTIFfa61QH4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=eBOhiQXihRy4JYLmJHKhI/IWjuzP6xbgP1h7HnpDssThgC0Cs6wygo7DyPPRk0sYojwRkqxduCSX7CeNtmhE7dQyTXTw/owTmFxaXW3wI++xEKS2Co2R7eFndE47NIOP2bcUvcHQ0v3PldjQi6TSsItLgLadHCn39SvM+vGsgmw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ArQChw3j; arc=pass smtp.client-ip=209.85.167.53
+	 To:Cc:Content-Type; b=mFGhyFm/uAwgtxxvEP99K5D16RYucnieuFNxHPSKd1xuYzxQN8o4OD5KvGM4QQje609dVqIYs+15puN+0SunLG1Igm5Ig0F0Pi07/HiMZl58xSFuNWBqNugOxNo4K+q/IzbU8xHS+jwzHedAFVpYyOl9vsjZRDg04KDIaNXpZLA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jtsz07GN; arc=pass smtp.client-ip=209.85.208.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ArQChw3j"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5a1307438ddso4692232e87.1
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 08:15:57 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773674156; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jtsz07GN"
+Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-38a23dd61c1so43777821fa.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 08:16:03 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773674162; cv=none;
         d=google.com; s=arc-20240605;
-        b=f3m+BTorSVf1GcnpX7YpUHn3YharZH1BaT9LjETrnredmXF7VnLohCoWG7ZQRmQYsv
-         N4fH3KOvd3NhK9J580fqIwHo0Gwp2HHgwYpbFYdd4RRzXIf2DkY2o4AGxq5kwaJo1Uje
-         kAIl2lHEbw96O3Wc0AF0qsIkH4xIS5hLb/D/UU+cgSz9kXBMOteilYKGuMt/GN7x8wAQ
-         QTTXgpwv61zleKEFjWcNMwdqCoJddEDsd3fjYThEGbcsdZeXCEaH0iZEAPM2T/8Nqp4r
-         iD6MkrYil4GtR4KFFwiVlr4Nx6G6kyPZ2YosySDFvuV53FiDdgTNkQz4qKwaBaUwGvWQ
-         ITsQ==
+        b=iPAihWb/p3Wk0fTwDHyHkPod5Zim2RED8qHQqALTb0l06slZR1LGGH5b+8ZVWQ5Nk2
+         cAJEBbBqy6Hu/CkMyjYwKcrslkIA6aCiOU4byPkI6D83jScDW0EfQUCQ+QI4SY+nF2hx
+         F/xwgOvTsBffNm1isYUMtz3gjff4KzXo7ZWax05IEtrGUVrSgoIxwYRM00j6r7m5gXm+
+         NT9Yh06aPhBbFJNGePML6E+1y2s5IU/BMYJFP1u53y3mVGyX8FuHHPFsh4kHBtcxKJIT
+         41WzVDJvTIuk7/umMrOYdI0Uo3YDkmMKMIQQLcmls4O8p16lEu8+H3VYEk2J0tilvnqX
+         9ftQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=/+FbqSYTir9YBMeFUKx06b7z4pIcCSnNdQI0qzzp0T8=;
-        fh=3yEk/uZ+QB9N/Dx3MqreW9In3SUu24aH0SQz+wQec/g=;
-        b=hubexDWBP8L5h/+Lo9jIlZMthY2WojU1tzicUtEeOoWJm3/ZYvojWFI7qNqvCqQgZe
-         cDPb8w550BjuxUuBBmrNYv4NYdRPvpYEksHBbXxYv6+MuoMTsmByzwRxXXw1bQtO+7Et
-         MFAP36rGNvqgM1PJ4JVhcn5cGOtJM4Ea/S0lwS411IecnJ58yvuHZqmRg2LhYkYBbcWP
-         mecksWTwyKsgcACyP2+3muoKpVCybfzuEMLntUfbiQP9FlZbSxi7GjAbDD/M++3bmdFS
-         0PytokHAOpbZbRoti1IO0BeZ9P/XIFmsXuYX5A6G+Xed6q5bFoh+vlnOPXmz461TRSfP
-         XtCg==;
+        bh=aWwOA9SQqzmxmd74/y4xRp+f9Kw/OsZUX40Voc8OPk4=;
+        fh=Ev6uPZQOt+6UchYsvymBiOSqg11pFUUDEYAq49lLh4I=;
+        b=a/BPmtp7AvLd8d567yOAjeoAZXr9SnltsMWpFb2vco/oldAhInQ9RmjMxXFQNWm6pG
+         V7pp1v9AFOgLJ8tqIJRTccg9cqrJ4UycsD2hU+aZCxKvzNiqcGg4qRvcdnc/S/7OVnhu
+         +Y0XK8ABBEgFrh9w+k2LaxyTV2WXohBjBlmassOs+OrWT7Wk5UMytvAL8FitWlsUFVLU
+         JnypCsIVULCEbErTRLDKJV8BSDNI9xct7HQoFJ4A9UsABvbRJ4H/mbbRAtaX6DLZIsfY
+         EfrLkdRhWmKi2hRxER/sKDhzIp9Q+TXTWdV0gJLefL8A7R4oG4k4TgrBLHXGKrqipYo4
+         MI3g==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1773674156; x=1774278956; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1773674162; x=1774278962; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=/+FbqSYTir9YBMeFUKx06b7z4pIcCSnNdQI0qzzp0T8=;
-        b=ArQChw3jSqlJUYXJDshZ2Pk9A3bSQ6bMpuMiH4HzcdPtQWlMu0G1oK6nqcBI9DE9u8
-         /LRXbnYBPIBuV7c0wrKlOcgI992DEnbD634e0J/JwHO+pni0BRKaw1ANvUmiZI3tIUko
-         DnDb7jcFcP0XRGbyGFo61ZiqC4OXAf1NimY/nsthElHsUP0jW8vqHznPAGR/RL7hBmp8
-         EgbjvB5t4Goh1Bs/RgHGAKQ2UaWvrlVGrbguGStRH1jOI5hYseKvQbH1JXPXmo59Q59k
-         iHhAoJiMnaUVDjWdL9ZahbP1TKcigb74pf0dVGfMOmWHkSDdjUNe6TsaTQOQP6lxGbkj
-         5yZQ==
+        bh=aWwOA9SQqzmxmd74/y4xRp+f9Kw/OsZUX40Voc8OPk4=;
+        b=jtsz07GNFeAEXMC6uCu//Kl6N+FETjCtKU3pYIQGECDs/OEavmObeUfyyeV4xJYGAa
+         JP3KQ/hR2fIxtUIi4vLy/zrESlImC2KgV8N2BWbuXtqq+lodc+6T3NnuRqHg/36XtRM8
+         2jyu9oHE6oP6NpGRlGITsvzGunnEG6OnlOq+XQ97omXL/cGdtiRTfj4Xkypi8XBHzq4g
+         hi+9JLBr+Fek8NouPQwdUQ8u72u5DpSMoK9DWQbPZASR7aZOntoPxVGjLJ92dI9D9ZDU
+         2sTvLFOCqHr/zBXOFcAZpEH5e95dpF787Uv5voUdcW0ozL5K2Y8iC6mjSxDMc65Hf/5j
+         RUfA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773674156; x=1774278956;
+        d=1e100.net; s=20251104; t=1773674162; x=1774278962;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=/+FbqSYTir9YBMeFUKx06b7z4pIcCSnNdQI0qzzp0T8=;
-        b=pfGs7VDcMfrT7eW7u5Wa/fMxnHYwj+eWycNENQZIyBrXYvbM13Xa7xJ4d1SY91Nt0o
-         B29uIv8+Tm5D/Xt7DiEzv6oLqa33yI73dpTV3bdPmsARQbR6s8ooh8O/sGqOVhn2VWli
-         m9pDis6sr4GbEplxRuORwv9Ks3wfShaYvI1s7KxkHXVbrCuuLr3lkai4MmjFdWTnCXqI
-         uDyHLfNTKIsqXZ4ALb4gLZQldJQmPt9tlLFo++3DPMpYSBim1X+9zH1Dth79iSgg4Z4z
-         fy+s8draRtgj2faPAl9BOh8bYx3esU6+6SKF4F8bVN+uw6QWuc32R1LJKHYUxiS3bC2M
-         tWog==
-X-Gm-Message-State: AOJu0YxWFWlkJzNjwpkUrYm12cH1FCPQTyi1/DgxTs5o8F1Y3Vzd+F9c
-	4kSSMtZ2yxlftAo10FSm/yvCZ6h9ig6OnN4Tblmmu4OtREWPwo0lWAfcPyoo71oWKPUOKf8P+zE
-	KyE51NgO4/IH5qZ4V7DXrrBgSm75IG3ebsW8YM8Po6VUlrpl+9v7EDHg=
-X-Gm-Gg: ATEYQzwWk3OTA9A0D01jSGI3gSTH8L3s4FFs8IMFe6aAVCHV0ARoM/8C4aCSsxIpE84
-	swCIL4l6n646e+dYK9oIuvqscSPyK7muuHaCmLx00UcPZ+8vffFJtoH8tjbSlxNh2HP7Ee9xN0Z
-	OjgW41WcGiOAP89p9o8WTFU7uO5ihw3YR+9U9e0eelrHzQeNnx9r9rwgzhr5B/uo7Tnw2IIFjtR
-	mrJLBVs2bX3Dem9PA6p6FntgdMXJ6A3VTIfwAKsJoVpxCzpGqWF6DRfQYAlq643JP9NJpOsXIQF
-	m3DtfxzQ
-X-Received: by 2002:ac2:515e:0:b0:5a1:39dd:e85c with SMTP id
- 2adb3069b0e04-5a162b0a2f9mr3333239e87.24.1773674156262; Mon, 16 Mar 2026
- 08:15:56 -0700 (PDT)
+        bh=aWwOA9SQqzmxmd74/y4xRp+f9Kw/OsZUX40Voc8OPk4=;
+        b=LLE7UYsQwi+e7715vQWDdo2lwbR71gRk2Ps9k2MN3Pz1gpUhQIwiQO8uBtDWAsl5Eb
+         Kc3952Ij4nVbedWYCGmCAije21BxLDb7THQ3One9z+yOR4v1RvBFUmcXcm1IXJ7u06SH
+         VUuWHq4L1E3V1BgSM62e09t5i5zkfhqF7Aq8ZzU6vuJGYO9PRkNl35Wskaek7t51UdSe
+         5Og1xOFlt0NP4Rh4QpEiRiPYfyZvEJWdJBvjL8b4nz5Qa2x+XCGFMTME7mfw1gQcpz3u
+         jOUw0t5nZESKysch/+mXo5OsD14vxQst3mUkOrCFrJ8rL5prkWbMAZApIXPGckr3U6Uh
+         lZLw==
+X-Forwarded-Encrypted: i=1; AJvYcCUSLHzdZjw8gI0cFXrlKs2fwEyGpr/sjmuAReSdt9BO3TyJkm2v9Xr4oZStgOWHeLxprscby8dpFxM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxMe6jHqjoIg0N23SlBVmhOCmnmQLKvFbig+IwkXzeQyo+NU8u3
+	3hMLsGwqGtoIybAzTgK9/r7wG6IisvkXmmjCnzJFfK/s35b7JeEQ58Np11j4LkTwx5ToJa2s8aM
+	TFlwv/YPEYsBJTmmWEmCSuCjhNrEQk4bHwJ3yM7fPOw==
+X-Gm-Gg: ATEYQzwn6F5R66vpx4Bt2SziqkB0km3TzUcXDz+5G0smM7eiHQUWAXC3KWw9VwLwSIY
+	fRwpI/MjHyUw9d4U1MF5G34+u6wSkxmvyHIx6Nq486AwafMseqqJvlig6/ihVixeXazIc+120QI
+	gg6S29cYwPbSdMnJi4i9XrYu5RURWFlZCsUaC7/re1ReXG3p4eAnMbIXk4qCyY/LsGSEh9nPP/5
+	JYN2ZZbWQLQq5iHYewxSynK4rRckKROH1Wv76/lmqStiZZ0c+GPikXIa6MwPZMcBdKuTuC4hRyc
+	FVRzOm3e
+X-Received: by 2002:a05:651c:b1f:b0:386:7e61:5de1 with SMTP id
+ 38308e7fff4ca-38a8930e573mr42245921fa.0.1773674161832; Mon, 16 Mar 2026
+ 08:16:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260310013553.29332-1-shawn.lin@linux.dev>
-In-Reply-To: <20260310013553.29332-1-shawn.lin@linux.dev>
+References: <20260311-ipq5210_boot_to_shell-v1-0-fe857d68d698@oss.qualcomm.com>
+ <20260311-ipq5210_boot_to_shell-v1-6-fe857d68d698@oss.qualcomm.com>
+In-Reply-To: <20260311-ipq5210_boot_to_shell-v1-6-fe857d68d698@oss.qualcomm.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 16 Mar 2026 16:15:20 +0100
-X-Gm-Features: AaiRm5164HrxYnwGOPCM8LTvkAFHKdLqm0jySbj65uTcjvkpn6YBj7i7s6bnbao
-Message-ID: <CAPDyKFosfUB6YyYYWmUY9wfxg9JNW2+7g5N5c31i42-foKg8wA@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] Validate and clean up UHS/DDR/HS200 timing checks
-To: Shawn Lin <shawn.lin@linux.dev>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Shawn Lin <shawn.lin@rock-chips.com>
+Date: Mon, 16 Mar 2026 16:15:24 +0100
+X-Gm-Features: AaiRm5153tShsk2TIyyE8TGCBjpaUzTwpROv6h6ltabxhtejv3_1C_1EaRy8Em0
+Message-ID: <CAPDyKFq-pyTffu_D_eZAZQo3e=vkO3uhQ_hAjS-s2DY4TmXoXw@mail.gmail.com>
+Subject: Re: [PATCH 6/9] dt-bindings: mmc: sdhci-msm: add IPQ5210 compatible
+To: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+Cc: Bjorn Andersson <andersson@kernel.org>, Michael Turquette <mturquette@baylibre.com>, 
+	Stephen Boyd <sboyd@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Philipp Zabel <p.zabel@pengutronix.de>, Linus Walleij <linusw@kernel.org>, 
+	Konrad Dybcio <konradybcio@kernel.org>, Robert Marko <robimarko@gmail.com>, 
+	Guru Das Srinagesh <linux@gurudas.dev>, linux-arm-msm@vger.kernel.org, 
+	linux-clk@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 10 Mar 2026 at 02:36, Shawn Lin <shawn.lin@linux.dev> wrote:
+On Wed, 11 Mar 2026 at 10:46, Kathiravan Thirumoorthy
+<kathiravan.thirumoorthy@oss.qualcomm.com> wrote:
 >
-> From: Shawn Lin <shawn.lin@rock-chips.com>
+> The IPQ5210 supports eMMC with an SDHCI controller. Add the appropriate
+> compatible to the documentation.
 >
+> Signed-off-by: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> This series adds validation for UHS/DDR/HS200 timing modes when the host
-> only supports 1-bit bus width which also fixes a real performance drop issue
-> due to incorrect hs200 mode switch code. And then cleans up the check in
-> mmc_host_can_uhs().
->
->
-> Changes in v2:
-> - updating the temporary variables in the middle and update host's caps(2)
->   in the final. (Ulf)
->
-> Luke Wang (1):
->   mmc: core: Validate UHS/DDR/HS200 timing selection for 1-bit bus width
->
-> Shawn Lin (1):
->   mmc: core: Remove checking MMC_CAP_4_BIT_DATA from mmc_host_can_uhs()
->
->  drivers/mmc/core/host.c | 14 +++++++++++++-
->  drivers/mmc/core/host.h |  6 +-----
->  2 files changed, 14 insertions(+), 6 deletions(-)
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index 938be8228d668c87f0be95c63d4d951ebbadd4e4..fd1d5b04e7556903daffe86e455fde11be0dbd9f 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -38,6 +38,7 @@ properties:
+>        - items:
+>            - enum:
+>                - qcom,ipq5018-sdhci
+> +              - qcom,ipq5210-sdhci
+>                - qcom,ipq5332-sdhci
+>                - qcom,ipq5424-sdhci
+>                - qcom,ipq6018-sdhci
 >
 > --
-> 2.7.4
+> 2.34.1
 >
 
-The series applied for next, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
