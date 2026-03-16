@@ -1,254 +1,121 @@
-Received: from CH5PR02CU005.outbound.protection.outlook.com (mail-northcentralusazon11012047.outbound.protection.outlook.com [40.107.200.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B13E3246F8;
-	Mon, 16 Mar 2026 16:23:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.200.47
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773678192; cv=fail; b=JbpNm1ICenVFRiWlOdnfOfcTN9TGmaS51GtCloF6JmUz9dyjUNIc+mABQtAsoO0VfK77N66rzmXXWmBh+gAgyRyYdqCjMU8lFCkuENvYbFa76+Vlo57yTWGpA0lmYti/htXV2EkLgK5c40y7sk+Nl3GNoYbs9lw3FHdSgsm6NFE=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773678192; c=relaxed/simple;
-	bh=bCYRNfoa+bMUlQNjKs3hZMdoWBh30VPdKtLmxt/3MKo=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JQFKcXInZlb6g+xyrCGmWuIv5457n6sxcmpOk4fDEomw3e2VeuIX7CbZFwXEjg6rKQcNRxH5V2jAd+9CR1wtZbck7wwFlmTQlCx3oWxMoUPMGsCmSUxqyjeNbyFMJ98BFxLKo+dWeJ+fWY+i5HmYi5GkKQ+oN6TIuKW5uvQEnrQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=u0hWMZRE; arc=fail smtp.client-ip=40.107.200.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37C03363C4B
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 21:23:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773696209; cv=none; b=Z8gOy7D6Dprs/+F6W5/4QU42K0LP+3zsqFb6yLgGhWrlhTCR72yc9bV3dvzHE2IpUGeAP94iUTntaAmEMKH4rz+xSXvxtiTVcVAsqocHtcVTZH9gSip4hyJo6aMyQXc7KVnSKEDMFd/eLRHQYaz6MyqKyH9KBE5X8CAhK/URPg8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773696209; c=relaxed/simple;
+	bh=BubXRIrH9jXWU7pnIeIHWLpVgty8H56G7a4Ji70u71I=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=BVKCJNWWN8sjoRIVXIcWMKnxpT9sSmeNVhm74tx8mXSon/2Xb6LQyTpgpHxb4OyIvIVGyYar+dJPGsn8m3eWiV/Vz+JkT6cMLfXVs+EPMA9dvH13/77BbUlkWUbtWtsW9oPR4kAnK9bi0XWKQQp6T5Sc5t1eET1yVaqpPCYv1Js=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=h4sGYr2w; arc=none smtp.client-ip=209.85.128.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="u0hWMZRE"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=hMbjPw6w88njRKXKKkCGU254TNjqy9Je6z+gDL5zJ0wWZoWDYJo2rZ7tyE3d3ox4oBxkLXVYczpIMEEn29yCzMY///WKdHbM1ePVf8jizQsIaJNxbDlib6PJ8bH0pLm9ikuZEwTr4eTWM1Lrt5YQxoI8Gsbkoyod3jI2fSzpI4prV1aYLlZFyZm/zYzCveInn8flVCDObekxFIWP6sjAq6Qwuh4Cs1BVDp7rEnuuylSj9pc2P1JR++JgGvpF39bCGEcLHPQJSh2Sral5TyzWnTaz98rM2+LbEuhrdGb9sg8cdDAqq0HhCFcURsuxXnQCw29r+Img2ZjuCTRUTjaCYA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=7Lit4y01UNtDWTJZDnU3i/cRZKcooqqhaET5CFD2Deg=;
- b=GpLTrdPYhf/PHNiOmLNyk0q90WKVeNRdHuvjJJcxU9RzMxrYSZoQkJq9EBKc7S7r4lQkciUAIyb15UpZqclO2KaVXKOOQNW8zIaPeQIULtMZ80qwGWHicgUs1NziLGg+9rM3oxcvUf0r3A3bhsR0FmqtVfsK87RIXgfOYYaaWaeJnGZj0EA3II8WD66cElPFt2b/8NyQ9DbjBJWlj4GhEAI7VWLuBLDkkHdq6VNPvt97+p8mJa30ZlhGUWDYc0SAsKmcouvlFQWHDGCcf1xXhnKkGFrKIXfJEKqujWAsT633j+JVfMGf8NqXgoZZP+Q8yhawDcBScKRlnohLMT/Rcw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 198.47.21.195) smtp.rcpttodomain=kernel.dk smtp.mailfrom=ti.com; dmarc=pass
- (p=quarantine sp=none pct=100) action=none header.from=ti.com; dkim=none
- (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=7Lit4y01UNtDWTJZDnU3i/cRZKcooqqhaET5CFD2Deg=;
- b=u0hWMZREEDBGXHC46kHxnK1tcY85wZCRBmwx2d7ud16YoksHk9PQ82hmp5fBXiZgB1uCDw/7LJJriVMAhTKAnOCZD0mOpzUv4Q8fZKHFFbdVKleqXqn4R+aNY67W+q98h9DumuxlIy6plyu/mEYbJApxdHZJhkyogNnEbODnNlY=
-Received: from CH2PR17CA0026.namprd17.prod.outlook.com (2603:10b6:610:53::36)
- by DS4PPFF0E76365E.namprd10.prod.outlook.com (2603:10b6:f:fc00::d57) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9700.24; Mon, 16 Mar
- 2026 16:23:08 +0000
-Received: from CH1PEPF0000AD77.namprd04.prod.outlook.com
- (2603:10b6:610:53:cafe::c1) by CH2PR17CA0026.outlook.office365.com
- (2603:10b6:610:53::36) with Microsoft SMTP Server (version=TLS1_3,
- cipher=TLS_AES_256_GCM_SHA384) id 15.20.9700.25 via Frontend Transport; Mon,
- 16 Mar 2026 16:22:51 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 198.47.21.195)
- smtp.mailfrom=ti.com; dkim=none (message not signed) header.d=none;dmarc=pass
- action=none header.from=ti.com;
-Received-SPF: Pass (protection.outlook.com: domain of ti.com designates
- 198.47.21.195 as permitted sender) receiver=protection.outlook.com;
- client-ip=198.47.21.195; helo=flwvzet201.ext.ti.com; pr=C
-Received: from flwvzet201.ext.ti.com (198.47.21.195) by
- CH1PEPF0000AD77.mail.protection.outlook.com (10.167.244.55) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.9700.17 via Frontend Transport; Mon, 16 Mar 2026 16:23:07 +0000
-Received: from DFLE205.ent.ti.com (10.64.6.63) by flwvzet201.ext.ti.com
- (10.248.192.32) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Mon, 16 Mar
- 2026 11:22:41 -0500
-Received: from DFLE212.ent.ti.com (10.64.6.70) by DFLE205.ent.ti.com
- (10.64.6.63) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Mon, 16 Mar
- 2026 11:22:41 -0500
-Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DFLE212.ent.ti.com
- (10.64.6.70) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
- Transport; Mon, 16 Mar 2026 11:22:41 -0500
-Received: from localhost (uda0271908.dhcp.ti.com [128.247.77.70])
-	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 62GGMfp41109000;
-	Mon, 16 Mar 2026 11:22:41 -0500
-Date: Mon, 16 Mar 2026 11:22:41 -0500
-From: Bin Liu <b-liu@ti.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: <linux-block@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-	<axboe@kernel.dk>
-Subject: Re: [PATCH] mmc: block: use single block write in retry
-Message-ID: <20260316162241.2zry4hjmufiwphmg@iaqt7>
-References: <20260310160408.3976760-1-b-liu@ti.com>
- <CAPDyKFrM92eAxCxU9E1eDNfXMdOC4JvAOXYgY=HcmFG2YfrQEg@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h4sGYr2w"
+Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-79a46260385so16294917b3.3
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 14:23:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1773696207; x=1774301007; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=sjvzmQgy/8Ckk75vbFaJNAzoVMYK5jct8StBarmT1mw=;
+        b=h4sGYr2wcVNvbH973CTgrvbt/x23GHY8qrDHjndjpF3kSrf2Z5Avgqh8CPSmhhfXK4
+         tMnJEDmsgDQyCpoxZHHSuy/nGj+F8Hrpvy7fd4/6S+daHJUh5o+Ehukl5wBSCDMCy8dw
+         Zmt+iiKKv+rpbIaBxfCxAb6wTycUZlpp/xFAZhsoWcQR5yqi+5bevk5urO2acqGi2z+Q
+         bU8pJWJYTp8Q6iUjjH2+Fpt40GnqkbNnMaO+EGbCQaADfjyLERJX78a+Sloy1O5TfSYG
+         aFSrOt4wSNUV16mPxFfN0FCF7TfAp+Z7lYjPISBA2EWSBcq5qrU8B+4mC+kVba9bf/2Q
+         r3Tw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773696207; x=1774301007;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=sjvzmQgy/8Ckk75vbFaJNAzoVMYK5jct8StBarmT1mw=;
+        b=Q54M53chqy/OqWiEHZiGPmxl22iNVMu6ZrLciDi7U5Wu3mlnmwO7RRg6x4voNY508C
+         Q2urvHSf3X2ZJYE9sECcZlUW/IC9PZvuXme+k0OpAnYci7BLNeMyliOmBWY8QOsHEsid
+         JDq65SixTGI7rXztIyzZPn+MN1n9yGB49J6Bt6HjMM4xcXZ2h1G9nTWrrimeMwRvPtjz
+         ZlNPE0KaOCx+3/PtGIzRaqDhQNt1irmAtmbIGISy6ZyeBf8pPBeXoJP8c4gwDaFxDqgK
+         ZgDuaoIlsvGkTp5RYwemzYuvqruvUX6wykvwkgFTdopt7oSXm+sVw7MZdM8KLnnDcxYH
+         2ibg==
+X-Gm-Message-State: AOJu0YxP9RysFcgzGef20rlz/+qnAvAp4Ck6QqQbiuqetZ8XgeSEGWzk
+	jJGQnmIGtGqCvv9Tdbr4L54iFjPukup/ScMtf2BiIABhf1x3ja3S8N6H8Zk0Uzsc
+X-Gm-Gg: ATEYQzxjjx2uUE1mlhF18FBCfak3BCOMxxR5efXnCv20p2NovxtWwNi88fUd9jd+FFv
+	LvNAyAZKT6/ff9K/DhBAVGeRnd9+cJb/LhAGLKXgO+8tEgubE3zGQM8d3tNYArZkXoIlyCDtKBC
+	pqkOLmg0H8dko8rCWyAac2PUYwtqBBfLCPWeD5YVDCUuE0GTcFwkeQsnRO+mPGGPMu7nVAK3L9P
+	aIEBShHQkjGnfRth1kc1cAWe5OMiK9GXZhHqrrcYuBAH6y3z6eZjxu7kgh9KK1pTrRjHKiMrMZC
+	JQvhFPPwM0CYNb8kGJks1XwZOgrgtXEdmPK5FVu+Ld0V0lYc5l6ab028321ZOjOKes4fDbwtZka
+	9W6907QwHI0w0rhsKN/RKJ3gF3B6BD2An5Ouc3qFGeAYP6o7YHLFci6lRYEViM4TN5uTUZYubCC
+	1VFhyiekaWyoP8YE07A7EFxZ7nFdYb7dcrZq0FYwA=
+X-Received: by 2002:a05:690c:3:b0:799:266:83a6 with SMTP id 00721157ae682-79a1c1bfb0dmr142394277b3.46.1773696206775;
+        Mon, 16 Mar 2026 14:23:26 -0700 (PDT)
+Received: from Starblazer007.localdomain ([12.206.154.114])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-79a5e1ae50asm8180437b3.2.2026.03.16.14.23.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Mar 2026 14:23:26 -0700 (PDT)
+From: Nelson Johnson <nzjfr547@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org,
+	linux-kernel@vger.kernel.org,
+	Nelson Johnson <nzjfr547@gmail.com>
+Subject: [PATCH 0/3] mmc: Lenovo N22 Braswell SD slot fixes
+Date: Mon, 16 Mar 2026 16:23:22 -0500
+Message-ID: <20260316212325.4207-1-nzjfr547@gmail.com>
+X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrM92eAxCxU9E1eDNfXMdOC4JvAOXYgY=HcmFG2YfrQEg@mail.gmail.com>
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CH1PEPF0000AD77:EE_|DS4PPFF0E76365E:EE_
-X-MS-Office365-Filtering-Correlation-Id: fc0d4a18-9b28-4b66-1c7a-08de83784ea6
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|1800799024|82310400026|36860700016|56012099003|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	KRYHgwsdjEU9VIXQPWzWvHNHriSddFN+24QDpAwa/cQcLFdBCVjgFmETiyKpzc4dvN1ySHAFmphgYZjo9IsPmbE+HhO3bDIFVjdOnYUL56ltlDleG3iuSknian2cAJSIFUGa2JuALS/QaAxSDe5oMlhreuoxY3J/jOCPSKocygHf2tygM+4kVPz5VE9lJ64vB8fs1ZjlQOA9tpHHq/KTXRmznPpIrO3eTkKoTz+ZMfXRnQqB0K22+5TsuOa9hvGWiHb/3tQF1Z211hopq46F1c2tOXH7AL6oq+NW38yIj/5/nJQh5sHt09eQvivcsKQGwILPD3hEhpY+Yya4l0WEhB+deqUjTRysbdgOgfQKU71/iY0Lj9Qu2zOYSADFftpSWaa2kWxyU6g1d+MZXNGv8A9j4Cppq4YVggtSNENXt8eCoMwIsHfGlLgqwAyyv68BMMO0XGtVhGvv8zBdQlkHO88DSYoe4hD5jubsMlnnMmxkIl6GUnT9OO5HgOiE7BKL2EA3S872hEfbYE6V21jdIfPfEINAXxbh4VmiU8a44uZmgXAmHm+Kg9isPMk5Twpn/VILcEiEV2e7v7D/q2dPqzrn91wBLDJUjUF3gI8fK9xiUFAbVUKAUlXTJpRYNJx1KZYmWGkRmXN+q1mmEuDf586EGn6eh9Qiq5lOHU6ClxWCSnzuGnqZoVcJpDlemRjKBW4pCAUOdL6sa6pnQNSSTQ1oHcMOUoL9MUhLFnuGxohx8/Lu7yjy+lJ1rp0tYVAwJ8wQStd7E+165whPigRmfg==
-X-Forefront-Antispam-Report:
-	CIP:198.47.21.195;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:flwvzet201.ext.ti.com;PTR:ErrorRetry;CAT:NONE;SFS:(13230040)(376014)(1800799024)(82310400026)(36860700016)(56012099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	cdyCHgJxFnt0OOMYXff9NU5ctvqKUw+yLXn2URnBmhXpvvlRt/LSC10SlIB/tLUByDvw6cZEFoKaFnTwRSTsF0VwM8lJmBF2HT/JUqWBozl5QPQhOW8I8ZvKBYDPoLyfDa4wuY6EwNbUppuVoN7J7JtxlcgJItAvP21zYEHAsu6RVT1Pg/nVHryO+RDyAlqqeAjoJy/ooE/2OaJdSbozfBaEFuBmQ7xStTrRbh/WJe5yw4oaH92Fcqr1j8zr1hn0V/eBIMmYSVLssVrQCwBnswBTn40pDyuY0LwHSXNXZLGWjrh4UK2/C0YduyCM0u1mObXNMPv9PzPFf+6NUcKs1jFB1ByGHXG348WK6jlGAoeLDnfLhwC1jplfSrceARbAHUMwu4/yTq6etqhYnJOx1Qtfc4aVUzpFrQKIeg+DSo8y4MTJPnZcxwUwDaEb+XEB
-X-OriginatorOrg: ti.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 16 Mar 2026 16:23:07.0941
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: fc0d4a18-9b28-4b66-1c7a-08de83784ea6
-X-MS-Exchange-CrossTenant-Id: e5b49634-450b-4709-8abb-1e2b19b982b7
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=e5b49634-450b-4709-8abb-1e2b19b982b7;Ip=[198.47.21.195];Helo=[flwvzet201.ext.ti.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	CH1PEPF0000AD77.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS4PPFF0E76365E
+Content-Transfer-Encoding: 8bit
 
-Hi Ulf,
+This series fixes the long-broken SD slot on the Lenovo N22
+(Model 80S6 / MTM 80S60001US) with Intel Celeron N3050 Braswell
+hardware running Debian 13 and Linux 6.19.6.
 
-On Mon, Mar 16, 2026 at 04:01:38PM +0100, Ulf Hansson wrote:
-> On Tue, 10 Mar 2026 at 17:04, Bin Liu <b-liu@ti.com> wrote:
-> >
-> > Due to errata i2493[0], multi-block write would still fail in retries.
-> >
-> > This patch reuses recovery_mode flag, and switches to single-block
-> > write in retry when multi-block write fails. It covers both CQE and
-> > non-CQE cases.
-> >
-> > [0] https://www.ti.com/lit/pdf/sprz582
-> 
-> It's great that a link like the above can be provided, still it would
-> be nice to explain a bit more about the problem in the commit message
-> too. Can you please do that?
+The regression goes back to kernel 4.14. The Braswell SD controller
+(PCI ID 8086:2296) is exposed by firmware through both PCI
+0000:00:12.0 and ACPI INT33BB:00 at \_SB_.PCI0.SDHB.
 
-Sure I will add the errata details in the commit message in v2.
+On this machine the newer runtime PM and card-detect handling no
+longer works reliably, and the ACPI path permanently defers because
+its dependency never becomes available. That leaves the slot unusable
+unless the controller is forced back onto the working PCI path with
+machine-specific quirks.
 
-> 
-> > Signed-off-by: Bin Liu <b-liu@ti.com>
-> > ---
-> >  block/blk-mq-debugfs.c   |  1 +
-> >  drivers/mmc/core/block.c | 12 ++++++++++--
-> >  include/linux/blk-mq.h   |  3 +++
-> >  3 files changed, 14 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/block/blk-mq-debugfs.c b/block/blk-mq-debugfs.c
-> > index 28167c9baa55..5f97d07fa3c8 100644
-> > --- a/block/blk-mq-debugfs.c
-> > +++ b/block/blk-mq-debugfs.c
-> > @@ -243,6 +243,7 @@ static const char *const rqf_name[] = {
-> >         RQF_NAME(ZONE_WRITE_PLUGGING),
-> >         RQF_NAME(TIMED_OUT),
-> >         RQF_NAME(RESV),
-> > +       RQF_NAME(XFER_SINGLE_BLK),
-> >  };
-> >  #undef RQF_NAME
-> >
-> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> > index 05ee76cb0a08..00016584d70d 100644
-> > --- a/drivers/mmc/core/block.c
-> > +++ b/drivers/mmc/core/block.c
-> > @@ -1401,6 +1401,9 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
-> >                     rq_data_dir(req) == WRITE &&
-> >                     (md->flags & MMC_BLK_REL_WR);
-> >
-> > +       if (req->rq_flags & RQF_XFER_SINGLE_BLK)
-> > +               recovery_mode = 1;
-> > +
-> 
-> I don't get this, sorry.
+This series does three things, all scoped to the Lenovo N22 DMI
+match:
 
-No worries, the logic of this solution is not that obvious.
+1. Disable the aggressive runtime PM/card-detect wake path for the
+   Braswell PCI SD controller.
+2. Bypass the broken firmware card-detect GPIO path and use polling
+   for card insertion detection.
+3. Prevent the competing ACPI INT33BB:00 node from binding on this
+   machine so the PCI SDHCI driver can own the controller.
 
-In summary of this patch, in both CQE-enabled and non-CQE cases, in
-*_complete_rq(), flag RQF_XFER_SINGLE_BLK is set in req->rq_flags when
-WRITE request fails. This is to mark that single-block write, according
-to errata i2493, should be used in retrying this WRITE request. 
+With these changes applied, the SD slot binds through sdhci-pci and
+detects and mounts SD cards again on the Lenovo N22.
 
-In retrying, mmc_blk_data_prep() is called again with
-RQF_XFER_SINGLE_BLK set, this makes recovery_mode to be forced to 1,
+Tested on:
+  Lenovo N22 Model 80S6 / MTM 80S60001US
+  Intel Celeron N3050 (Braswell)
+  Debian 13
+  Linux 6.19.6
 
-then a few lines down in mmc_blk_data_prep():
+Nelson Johnson (3):
+  mmc: sdhci-pci: disable aggressive runtime PM for Braswell SD on
+    Lenovo N22
+  mmc: sdhci-pci: force polling card detect for Braswell SD on Lenovo
+    N22
+  mmc: sdhci-acpi: exclude INT33BB:00 from ACPI binding on Lenovo N22
 
-	if (recovery_mode)
-		brq->data.blocks = queue_physical_block_size(mq->queue) >> 9;
+ drivers/mmc/host/sdhci-acpi.c     | 10 ++++++++++
+ drivers/mmc/host/sdhci-pci-core.c | 33 ++++++++++++++++++++++++++-----
+ 2 files changed, 38 insertions(+), 5 deletions(-)
 
-The req block size is set to 1 to use single block write.
-
-Please let me know if this explains the logic of this patch.
-
-> 
-> Under what circumstances do we need to fall back to using "single
-> block"? Or is this just for debugging?
-
-When multiple block write fails, use single block write. This is
-the software workaround documented in the errata i2493.
-
-This is not for debugging. When multiple block write fails, switching
-to single block write will sccuseed.
-
--Bin.
-
-> 
-> >         memset(brq, 0, sizeof(struct mmc_blk_request));
-> >
-> >         mmc_crypto_prepare_req(mqrq);
-> > @@ -1540,10 +1543,13 @@ static void mmc_blk_cqe_complete_rq(struct mmc_queue *mq, struct request *req)
-> >                 err = 0;
-> >
-> >         if (err) {
-> > -               if (mqrq->retries++ < MMC_CQE_RETRIES)
-> > +               if (mqrq->retries++ < MMC_CQE_RETRIES) {
-> > +                       if (rq_data_dir(req) == WRITE)
-> > +                               req->rq_flags |= RQF_XFER_SINGLE_BLK;
-> >                         blk_mq_requeue_request(req, true);
-> > -               else
-> > +               } else {
-> >                         blk_mq_end_request(req, BLK_STS_IOERR);
-> > +               }
-> >         } else if (mrq->data) {
-> >                 if (blk_update_request(req, BLK_STS_OK, mrq->data->bytes_xfered))
-> >                         blk_mq_requeue_request(req, true);
-> > @@ -2085,6 +2091,8 @@ static void mmc_blk_mq_complete_rq(struct mmc_queue *mq, struct request *req)
-> >         } else if (!blk_rq_bytes(req)) {
-> >                 __blk_mq_end_request(req, BLK_STS_IOERR);
-> >         } else if (mqrq->retries++ < MMC_MAX_RETRIES) {
-> > +               if (rq_data_dir(req) == WRITE)
-> > +                       req->rq_flags |= RQF_XFER_SINGLE_BLK;
-> >                 blk_mq_requeue_request(req, true);
-> >         } else {
-> >                 if (mmc_card_removed(mq->card))
-> > diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
-> > index 18a2388ba581..06b6e1c4fca3 100644
-> > --- a/include/linux/blk-mq.h
-> > +++ b/include/linux/blk-mq.h
-> > @@ -64,6 +64,7 @@ enum rqf_flags {
-> >         /* ->timeout has been called, don't expire again */
-> >         __RQF_TIMED_OUT,
-> >         __RQF_RESV,
-> > +       __RQF_XFER_SINGLE_BLK,
-> >         __RQF_BITS
-> >  };
-> >
-> > @@ -85,6 +86,8 @@ enum rqf_flags {
-> >                         ((__force req_flags_t)(1 << __RQF_ZONE_WRITE_PLUGGING))
-> >  #define RQF_TIMED_OUT          ((__force req_flags_t)(1 << __RQF_TIMED_OUT))
-> >  #define RQF_RESV               ((__force req_flags_t)(1 << __RQF_RESV))
-> > +#define RQF_XFER_SINGLE_BLK    \
-> > +                       ((__force req_flags_t)(1 << __RQF_XFER_SINGLE_BLK))
-> >
-> >  /* flags that prevent us from merging requests: */
-> >  #define RQF_NOMERGE_FLAGS \
-> > --
-> > 2.34.1
-> >
-> 
-> Kind regards
-> Uffe
+-- 
+2.47.3
