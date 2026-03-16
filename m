@@ -1,134 +1,146 @@
-Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C650B3A2562
-	for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 15:16:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33F523A3E9B
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 15:16:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773674165; cv=pass; b=atcPE/Uw0smitdfec0004Ft+DSgZPQO2SS1Qg9wIL5GvEVuIATrtv0iYMIE/7E5XhxvZRgvq90EjBfOAhjCGChnvYKtGTk2mNvL9ny6arMeyNFHq8inyJIRNzlruRuL+cpuD1k8yDJLOrkFCKpeHtZj6SDrX7u9FYjrXYGYE9Pg=
+	t=1773674168; cv=pass; b=EhOI1CVWtSUjsUNDfz7Vesm2l4/E4yLwjiAL2UVF7zapAe0nRypUoVKyTWsDBDF+Eo5mnhCyf2NNvyB2JdgUrT3lPivl+AgqvtSpE6SGJ00tN0Vl3+gH20/XLPhrpzs/ijBU7rIaeWfCJp27iHZdLpmg/ia41/zRUPv33H/TO5E=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773674165; c=relaxed/simple;
-	bh=SGrKOh6DxyjU+GV0XnOjtJnq9uPykPDANTIFfa61QH4=;
+	s=arc-20240116; t=1773674168; c=relaxed/simple;
+	bh=MlbPjgkbDjZzy97rL4tyaIWnLS+hi31RbU0SxYxTQpo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mFGhyFm/uAwgtxxvEP99K5D16RYucnieuFNxHPSKd1xuYzxQN8o4OD5KvGM4QQje609dVqIYs+15puN+0SunLG1Igm5Ig0F0Pi07/HiMZl58xSFuNWBqNugOxNo4K+q/IzbU8xHS+jwzHedAFVpYyOl9vsjZRDg04KDIaNXpZLA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jtsz07GN; arc=pass smtp.client-ip=209.85.208.175
+	 To:Cc:Content-Type; b=SjSoawNz1HvSLlg4lqCKqCPJsaWmidAOfsL6C89pKlHmK0Trrk3zqsw8LTRC3/jkpuynhmiv8tu6tD5MEc1fV/vYo2tKS4YZXfdqeRWazawlVFnrYBwOCCw7ZU66q9PsYRmQOHBugm15Z8GK7HVt/W7+KzxrpjGKUq4g9TXlVmk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tdjRcFbl; arc=pass smtp.client-ip=209.85.167.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jtsz07GN"
-Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-38a23dd61c1so43777821fa.1
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 08:16:03 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1773674162; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tdjRcFbl"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5a0ff30b240so5599935e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Mar 2026 08:16:06 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773674165; cv=none;
         d=google.com; s=arc-20240605;
-        b=iPAihWb/p3Wk0fTwDHyHkPod5Zim2RED8qHQqALTb0l06slZR1LGGH5b+8ZVWQ5Nk2
-         cAJEBbBqy6Hu/CkMyjYwKcrslkIA6aCiOU4byPkI6D83jScDW0EfQUCQ+QI4SY+nF2hx
-         F/xwgOvTsBffNm1isYUMtz3gjff4KzXo7ZWax05IEtrGUVrSgoIxwYRM00j6r7m5gXm+
-         NT9Yh06aPhBbFJNGePML6E+1y2s5IU/BMYJFP1u53y3mVGyX8FuHHPFsh4kHBtcxKJIT
-         41WzVDJvTIuk7/umMrOYdI0Uo3YDkmMKMIQQLcmls4O8p16lEu8+H3VYEk2J0tilvnqX
-         9ftQ==
+        b=AbJ21oIiXLUMwsdLJFoj8BfbKPW7rABqqT0IZdJgXF5nUXKV5K7rpCkVsqWsy4yD/J
+         Sbya06t9x6G2oma/CgBn9I8UbvUwFsqSnS3af5tqTY8oGsn/XECPKm1wIc8Vq6Mz5xqB
+         3nI7DoyMWSGoGgUeZGdJkmwjmN/h3FFwNsO3b4FQ3aRCyZMOAbsve/I4T2vr3h0bcYeu
+         zjxY+U0Hf80DrcHibxpBoNw6HhO4H8m1fOBlMvKtl29ldE1utq7GzTJSmqFvumoGy4sW
+         HlBJNPMPjwdtt4ke/Z5FNtBDi78h9lBBpKpqFk0OEc4SO9sXtpgbVgmUD/aOpOANUFne
+         XUoA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=aWwOA9SQqzmxmd74/y4xRp+f9Kw/OsZUX40Voc8OPk4=;
-        fh=Ev6uPZQOt+6UchYsvymBiOSqg11pFUUDEYAq49lLh4I=;
-        b=a/BPmtp7AvLd8d567yOAjeoAZXr9SnltsMWpFb2vco/oldAhInQ9RmjMxXFQNWm6pG
-         V7pp1v9AFOgLJ8tqIJRTccg9cqrJ4UycsD2hU+aZCxKvzNiqcGg4qRvcdnc/S/7OVnhu
-         +Y0XK8ABBEgFrh9w+k2LaxyTV2WXohBjBlmassOs+OrWT7Wk5UMytvAL8FitWlsUFVLU
-         JnypCsIVULCEbErTRLDKJV8BSDNI9xct7HQoFJ4A9UsABvbRJ4H/mbbRAtaX6DLZIsfY
-         EfrLkdRhWmKi2hRxER/sKDhzIp9Q+TXTWdV0gJLefL8A7R4oG4k4TgrBLHXGKrqipYo4
-         MI3g==;
+        bh=KlM6cFVmM/SaOx6burFPACi9y9V71qm4hfXUPER/Krk=;
+        fh=9YxUi6yA2y+v5fAUjCYYNgPcsaFiOqE3TB3KWnXRoN8=;
+        b=ANfLj8Dpn5ujZJESJQCh2wRVQcQoOW0JeP544ypc4qz4+veDXBOYvVrwcsn+sT2HdC
+         PrvxmOaAURA3pJCgsPtHzyQIrqdJcXZgGb6Uo3mrILg1+/9Z+l5/J2XEwSdTsJOMj+x7
+         JW85arKpPtYSj8JipI3phW7QGW9IBUVPaIo0hVps3+oy09Zk5c22+camfFON13oBXZhz
+         grXGi99AwWQt9CcNjy6d70yMJ+yWVRYSiFcEI+aXMxTgj0jvZEqbyBV3MAPaDmW1CcVn
+         SEjgZwji768VBaTkoOei4TzBxXLT5Nu4Cdw6CaP3NzNuxOryNlGeymOvRSZBGpcDaSH2
+         XVbQ==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1773674162; x=1774278962; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1773674165; x=1774278965; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=aWwOA9SQqzmxmd74/y4xRp+f9Kw/OsZUX40Voc8OPk4=;
-        b=jtsz07GNFeAEXMC6uCu//Kl6N+FETjCtKU3pYIQGECDs/OEavmObeUfyyeV4xJYGAa
-         JP3KQ/hR2fIxtUIi4vLy/zrESlImC2KgV8N2BWbuXtqq+lodc+6T3NnuRqHg/36XtRM8
-         2jyu9oHE6oP6NpGRlGITsvzGunnEG6OnlOq+XQ97omXL/cGdtiRTfj4Xkypi8XBHzq4g
-         hi+9JLBr+Fek8NouPQwdUQ8u72u5DpSMoK9DWQbPZASR7aZOntoPxVGjLJ92dI9D9ZDU
-         2sTvLFOCqHr/zBXOFcAZpEH5e95dpF787Uv5voUdcW0ozL5K2Y8iC6mjSxDMc65Hf/5j
-         RUfA==
+        bh=KlM6cFVmM/SaOx6burFPACi9y9V71qm4hfXUPER/Krk=;
+        b=tdjRcFblISYQRCijuCe0IYt+OcdGWF6n7IKthgKcgcl2wXbThgha3UUGe4UJRplvso
+         SarN6t0TBn2iyyioETzpcS6TM4QYTdNOFj6VzNufBDCTfHFTkk9Pc1ugVePzKrieZreu
+         C5qg3RviOY5kHyR756gysKRO9pzbF6pzZJM5M+F6O+GgxTzErMI1Jrd2kdtXEM8m6uWH
+         To4Nl72cz6SVtLSyc/9s3rTJksExk1XmkMvkMsUVKK9CL9xJEYk5ZApef1WYqR4epieU
+         m4Sn33WAvfjcoYf+BBAbuWwPaJEjVyYR5RN2GMIBcSbt4C7z2I2jo0wdjfGU3nXqULEk
+         mmsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773674162; x=1774278962;
+        d=1e100.net; s=20251104; t=1773674165; x=1774278965;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=aWwOA9SQqzmxmd74/y4xRp+f9Kw/OsZUX40Voc8OPk4=;
-        b=LLE7UYsQwi+e7715vQWDdo2lwbR71gRk2Ps9k2MN3Pz1gpUhQIwiQO8uBtDWAsl5Eb
-         Kc3952Ij4nVbedWYCGmCAije21BxLDb7THQ3One9z+yOR4v1RvBFUmcXcm1IXJ7u06SH
-         VUuWHq4L1E3V1BgSM62e09t5i5zkfhqF7Aq8ZzU6vuJGYO9PRkNl35Wskaek7t51UdSe
-         5Og1xOFlt0NP4Rh4QpEiRiPYfyZvEJWdJBvjL8b4nz5Qa2x+XCGFMTME7mfw1gQcpz3u
-         jOUw0t5nZESKysch/+mXo5OsD14vxQst3mUkOrCFrJ8rL5prkWbMAZApIXPGckr3U6Uh
-         lZLw==
-X-Forwarded-Encrypted: i=1; AJvYcCUSLHzdZjw8gI0cFXrlKs2fwEyGpr/sjmuAReSdt9BO3TyJkm2v9Xr4oZStgOWHeLxprscby8dpFxM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxMe6jHqjoIg0N23SlBVmhOCmnmQLKvFbig+IwkXzeQyo+NU8u3
-	3hMLsGwqGtoIybAzTgK9/r7wG6IisvkXmmjCnzJFfK/s35b7JeEQ58Np11j4LkTwx5ToJa2s8aM
-	TFlwv/YPEYsBJTmmWEmCSuCjhNrEQk4bHwJ3yM7fPOw==
-X-Gm-Gg: ATEYQzwn6F5R66vpx4Bt2SziqkB0km3TzUcXDz+5G0smM7eiHQUWAXC3KWw9VwLwSIY
-	fRwpI/MjHyUw9d4U1MF5G34+u6wSkxmvyHIx6Nq486AwafMseqqJvlig6/ihVixeXazIc+120QI
-	gg6S29cYwPbSdMnJi4i9XrYu5RURWFlZCsUaC7/re1ReXG3p4eAnMbIXk4qCyY/LsGSEh9nPP/5
-	JYN2ZZbWQLQq5iHYewxSynK4rRckKROH1Wv76/lmqStiZZ0c+GPikXIa6MwPZMcBdKuTuC4hRyc
-	FVRzOm3e
-X-Received: by 2002:a05:651c:b1f:b0:386:7e61:5de1 with SMTP id
- 38308e7fff4ca-38a8930e573mr42245921fa.0.1773674161832; Mon, 16 Mar 2026
- 08:16:01 -0700 (PDT)
+        bh=KlM6cFVmM/SaOx6burFPACi9y9V71qm4hfXUPER/Krk=;
+        b=PiXQC+zbsJJ20CHdIG2KqgFq1LUXxIIoOlwKrK6RkqoYSBe9xcxwRfowgLIBMdosmZ
+         3pFNtV/tPZWTzzDp6agmYz2bATQ/hnoeAhWN7Oyu+5Jl1cuwvyaTri1CcIhtuN4CN7aU
+         R6GfK1E6viiK48BjT92268y2WrQUoENGg6MckGjqZBBlVNW7S0gL2kS4J/QO19MedQQ/
+         iUtNuU60veLZuocJGRa3HK44S6Bj+2Y19bztJGBZF7fgraIgusQGwknNwooDCfnmrkCW
+         68mWrJOxVyccH15vT2SYoZst7pXBfkP5IsYwiBal8TJSUXsiXmct4yIA3aMBmBqSH6YM
+         Yj4w==
+X-Forwarded-Encrypted: i=1; AJvYcCXJhtJ/FYv6+Y4Dzh4p24j3kVPKwujNhEo5LqSXdW8xR5VseSYvdcEGdSW6qGqLcNcHMvLuagAEDPg=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy/y9s8Zg3W6vZ6kGuBJLA8jeMl7yoexqjc4eOvgX102u5JSK6Y
+	mEqmrWlyeoZos1IyHo7LIuYwELp9/EWcCWB6GKW/AZowTh78WEJMGQCY5HbUYpJF0D08TqvYhQ0
+	iiBKGsL4yqC6OfOaoTiFNq0lUOfw8gFAayYcz/rIFwQ==
+X-Gm-Gg: ATEYQzw3SGLpa44DT3UhgsjaDb0EXabNfHpNRF4A+p8k1r4xIcyBFbSFy7HFzTR2TId
+	T7t+7/PdcsF/wfeAd7NO+fLdvJnT+fhAxBVqFE9ZMjtlqrcIUh21BDntmoudgYtee6YyiU6U4Ql
+	eZV1M9aliXz/Viyt3PrUNcxQ+jrzIVZHhKsgZkB1ggUqn71+pNOnsRZiaE2ZRmTM25y2fz+pRpJ
+	QWVGg9p4TyOmPrqIT4JUedcSDwsqPddzKcCpMK0G4X+oknGf8xCQZwkEKo2wzo1RNst3ni1a+0H
+	viNWz8fL
+X-Received: by 2002:a05:6512:1558:b0:5a1:448b:317b with SMTP id
+ 2adb3069b0e04-5a162b08ea8mr3109007e87.42.1773674165204; Mon, 16 Mar 2026
+ 08:16:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260311-ipq5210_boot_to_shell-v1-0-fe857d68d698@oss.qualcomm.com>
- <20260311-ipq5210_boot_to_shell-v1-6-fe857d68d698@oss.qualcomm.com>
-In-Reply-To: <20260311-ipq5210_boot_to_shell-v1-6-fe857d68d698@oss.qualcomm.com>
+References: <20260311095009.1254556-1-ziniu.wang_1@nxp.com> <20260311095009.1254556-2-ziniu.wang_1@nxp.com>
+In-Reply-To: <20260311095009.1254556-2-ziniu.wang_1@nxp.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 16 Mar 2026 16:15:24 +0100
-X-Gm-Features: AaiRm5153tShsk2TIyyE8TGCBjpaUzTwpROv6h6ltabxhtejv3_1C_1EaRy8Em0
-Message-ID: <CAPDyKFq-pyTffu_D_eZAZQo3e=vkO3uhQ_hAjS-s2DY4TmXoXw@mail.gmail.com>
-Subject: Re: [PATCH 6/9] dt-bindings: mmc: sdhci-msm: add IPQ5210 compatible
-To: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>, Michael Turquette <mturquette@baylibre.com>, 
-	Stephen Boyd <sboyd@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Philipp Zabel <p.zabel@pengutronix.de>, Linus Walleij <linusw@kernel.org>, 
-	Konrad Dybcio <konradybcio@kernel.org>, Robert Marko <robimarko@gmail.com>, 
-	Guru Das Srinagesh <linux@gurudas.dev>, linux-arm-msm@vger.kernel.org, 
-	linux-clk@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	linux-mmc@vger.kernel.org
+Date: Mon, 16 Mar 2026 16:15:29 +0100
+X-Gm-Features: AaiRm50g4ixBgJVGHgml85tjVL8FL6K6omKlK_jwEmgNVXMLTx5qLAygbxIzv3g
+Message-ID: <CAPDyKFqbNj0vxNNRoZQ=xSijASA1eWCHfZVabPznQqJ-vrBUYw@mail.gmail.com>
+Subject: Re: [PATCH v3 1/4] mmc: sdhci: fix timing selection for 1-bit bus width
+To: ziniu.wang_1@nxp.com
+Cc: adrian.hunter@intel.com, haibo.chen@nxp.com, Frank.Li@nxp.com, 
+	s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com, 
+	imx@lists.linux.dev, linux-mmc@vger.kernel.org, s32@nxp.com, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 11 Mar 2026 at 10:46, Kathiravan Thirumoorthy
-<kathiravan.thirumoorthy@oss.qualcomm.com> wrote:
+On Wed, 11 Mar 2026 at 10:48, <ziniu.wang_1@nxp.com> wrote:
 >
-> The IPQ5210 supports eMMC with an SDHCI controller. Add the appropriate
-> compatible to the documentation.
+> From: Luke Wang <ziniu.wang_1@nxp.com>
 >
-> Signed-off-by: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
+> When 1-bit bus width is used with HS200/HS400 capabilities set,
+> mmc_select_hs200() returns 0 without actually switching. This
+> causes mmc_select_timing() to skip mmc_select_hs(), leaving eMMC
+> in legacy mode (26MHz) instead of High Speed SDR (52MHz).
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 938be8228d668c87f0be95c63d4d951ebbadd4e4..fd1d5b04e7556903daffe86e455fde11be0dbd9f 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -38,6 +38,7 @@ properties:
->        - items:
->            - enum:
->                - qcom,ipq5018-sdhci
-> +              - qcom,ipq5210-sdhci
->                - qcom,ipq5332-sdhci
->                - qcom,ipq5424-sdhci
->                - qcom,ipq6018-sdhci
+> Per JEDEC eMMC spec section 5.3.2, 1-bit mode supports High Speed
+> SDR. Drop incompatible HS200/HS400/UHS/DDR caps early so timing
+> selection falls through to mmc_select_hs() correctly.
 >
-> --
-> 2.34.1
->
+> Fixes: f2119df6b7646 ("mmc: sd: add support for signal voltage switch procedure")
+> Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci.c | 9 ++++++++-
+>  1 file changed, 8 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index b1a3cd574c84..605be55f8d2d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -4539,8 +4539,15 @@ int sdhci_setup_host(struct sdhci_host *host)
+>          * their platform code before calling sdhci_add_host(), and we
+>          * won't assume 8-bit width for hosts without that CAP.
+>          */
+> -       if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
+> +       if (host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA) {
+> +               host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
+> +               if (host->quirks2 & SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400)
+> +                       host->caps1 &= ~SDHCI_SUPPORT_HS400;
+> +               mmc->caps2 &= ~(MMC_CAP2_HS200 | MMC_CAP2_HS400 | MMC_CAP2_HS400_ES);
+> +               mmc->caps &= ~(MMC_CAP_DDR | MMC_CAP_UHS);
+> +       } else {
+>                 mmc->caps |= MMC_CAP_4_BIT_DATA;
+> +       }
+>
+>         if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
+>                 mmc->caps &= ~MMC_CAP_CMD23;
+> --
+> 2.34.1
+>
