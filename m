@@ -1,70 +1,75 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14D2F342177
-	for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2026 19:33:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5686C343D80
+	for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2026 19:33:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773775992; cv=none; b=cmgvhcAUx3BcDH7WkCjnQ++gHJuwIPw/Sjx+VUX4R6CXSt90RQsT8h+qig0/XWeWijkGf1qB+aCJsGWNSyyffSg4Pi5sp6r97+DS0lvE0ahb49prIXCOBYKpxFJPUDmxInwsWVAtlf1erIU5xubHayiIqIaFC6pC6QvyKIXYWEM=
+	t=1773775997; cv=none; b=QVMQhbuLYc96+UDHFgNr+jUOp80dTkrQXPyYhfi2Rd4CsPJ9WPUeJ5pPs1Mx0PNHm61ryGQCF4GuSj2mz0teqxJYFinEt+dr4ds890ECqn20w7dlCFQ9k9VspXX7WpfavtqQxWE1RjWrrOwcXCjc024IK5Q3zfNyAXm0oA+cfcQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773775992; c=relaxed/simple;
-	bh=YC9IEDm4P+XCFI8cekWPlwUxTufi+lPvC35nRVPRi8w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=sdQnl+XBXnVwxqSXP8Q0RR8uJYaHBX0AE/CgeEX9CDo2dZWp+66B3FkNjNNvkCxhUubcS3KefybUUJoghlSDQ6oHjaBnjfwKWUYqVuFYhVM1ZdlqiPwvAa5X6nSjVPCwF2vIZEOtRe14kAGmDs8gQTDIAw3OHGPfu/Q/ofuOjDc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MZNORol7; arc=none smtp.client-ip=209.85.128.43
+	s=arc-20240116; t=1773775997; c=relaxed/simple;
+	bh=0wrffe2ePvR9snVbGOn1yuDOZd87ewk/mhSsA9xTEEY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Bu9IsF5uo0+JvoenNCVCaLNGUyJ9UhfU/EicI8GigY2K1z1WuIu8/NHK++UB1J3gKzMCcQ120AcRIQCglmRjkozFoP8BqXNQ+Ssm+6TupDosx+p67ptYKJb3m5i1GobqllSAVF9moc9XvsG1gLJJ+1NpF4HZHGbAUjO+xNIk57s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZvaANm33; arc=none smtp.client-ip=209.85.128.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MZNORol7"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4852fdb36a8so71611085e9.2
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2026 12:33:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZvaANm33"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-48628ce9ab5so14988185e9.2
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Mar 2026 12:33:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1773775989; x=1774380789; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1773775995; x=1774380795; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=0NlxR5Tgrx776rhivqN5ADbhhNsF2/lblG4PiOUD3Eg=;
-        b=MZNORol7E8hs5QlC+/CvIrJZ7pZhpecthh1hTmjop/xVdZsPjI4T8L/m2jIR7+6HxW
-         1FlLSuU2S3F1X5cCMcvaYHH/PxNCJyrvlpJvFCMRJ/wYRnTYu57W0wJnE2c/3WUB9pxI
-         5UWE+cyoFYMlBEOTXbHDRc/BfhFeD9NvcWbP2jfP9KArWZ6GG1BvqHToxsGWSBi1CrVH
-         P6mr1vdahJSf66SxcOMRsn5DgXj/6qNfePeNqpOQ4QDpSigM1ByMO86GvPk8ohIF+iEK
-         TPOEiCysUO5znQZQHbEXM7T1mSqaH4QwNBN97TmXF6kttOvYAz0aarTxay/gmfYUiQrK
-         Qq8Q==
+        bh=utwObQp63pBMb8wBU24YfUsTgXDwwHCc0NNvyQURJJU=;
+        b=ZvaANm33ItXdE4JaFEYHY+0mzt3UNgonmKHoCDZ92YQgeRcvuGNb5v9uXsZt1RmUM/
+         1h2osNga3H3n7oQTpPgtGP6vWwA2gFpjsLilg5wcZIp9Y+V5Uihq0/GE+TKETc3pbA/s
+         HJgkSxb5H66gTq0vqdHDX7vuafEqnDgSUv4/Csf5zVVuk2BnIONrp/9OqPlvB/0jAZb9
+         EXg/krddBmJ6QW8wqfP76JAhpESTXoYK1ZrWU7dW0LHMZvNMrRHvoBD6ocXp2K7yDdGX
+         0lXUOT3WiUm/lAw05vh+Wq9WLYQl2FGSnOyVVvBJkVbCFbQZ0jdXVbp3Cjui/HGnmYpm
+         Jbzg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773775989; x=1774380789;
+        d=1e100.net; s=20251104; t=1773775995; x=1774380795;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=0NlxR5Tgrx776rhivqN5ADbhhNsF2/lblG4PiOUD3Eg=;
-        b=Dmxd16a0S2Y+8cLDE58/GOlbsJWRv+y9hNMmeP7ZKaYC1E1uAad8wvpPog7PPwHVc+
-         KfY9Qhs+SVHk91MUHCO8kFc+W3ubGru0qfIKLJ8X3EnIALyhIJcycMcqJBWKJFYMCl3v
-         7NNCVbJ0cEjsun/xo7iPfamzdoi9CB3ypvbyz28VMQNcrlQCcldXMQyAdNjhaZaFxhUX
-         fZCuG6I9hie8cUPIQTr3lih8wF/SSXR1tEROLiDy2RQhrwKqZ9IfwyAkdpcVK6vKHEBH
-         a/TBLn/H0MFt3ofcoaJTjDlih36oUstTls6WSFIwxzkGaeq0tUBAL9lpsNlwmFSLJujV
-         dP2A==
-X-Gm-Message-State: AOJu0Yzb000uxf47sSttLKR+vAeyK/RsDhiWbXa68pDdM4upv3BGMU1n
-	9J9OcBLyWABu4PtdLaN6RM9AIFCkzWZJOJoVTWKze6Tejr49S4LrZPTK
-X-Gm-Gg: ATEYQzzPxpI0JNyOYspqJlqRlm7m7RddRRAx2CSEkWn7tIpALx1bDAvFDWNDe9AzqZ7
-	Dg+qNqX1jvj/6/tM0RBdUIQvoCusyyVMj91pwnPqOLaoAeIO1xf1WCDeL41y/1kffXmtmAsbcjv
-	jz5fyZtoPsnWUr7dSfxLChv2U4dWVVethM/hqUFKC6STZHLqXIEEXgqbkBafJj6X8w1EnapGs8M
-	45v+jixjTE8EQjjRaRNLdhFLz0bZpyB/TpGhN7ZsKPikYsXhGp3MFabtifdMasFnhUXtbBd7F8A
-	W03eXBw7PY3hVHI6lTeNxgw2E/K2zNzu95IMYVN7M2DAoZax2GWzCXP5cq5DKPZ9/Ye6p+6CwHm
-	nxMVUCcHqsjMyEIHGXzLS0oQxzYlf/jfChur/sEXom+4ItGFDAqVdV6LR5YyaVCCu8cmx6qxcl/
-	mEX8D2oL6pw7YgDPPQzyO3yHZLnfcASjQTzCs0Gy8apvqW
-X-Received: by 2002:a05:600c:1f93:b0:483:2c98:4368 with SMTP id 5b1f17b1804b1-486f446b009mr12557155e9.18.1773775989293;
-        Tue, 17 Mar 2026 12:33:09 -0700 (PDT)
+        bh=utwObQp63pBMb8wBU24YfUsTgXDwwHCc0NNvyQURJJU=;
+        b=RX2NSsOxGomMbHXwCnNrL0+/pPN3hj2PXdeqCmT5JKqAvEoYyQ5YtldKJ1iFcQqpek
+         vDsDa+kcdfmA87mGCXVauZiM8WTuLIM8FeFJWPjZBa2SwO3ytcQEPtUU4xOoViWbUMnQ
+         6zM7hKYkzJn6BNrukUnLeWKmXygHJRa4yUWKMN8cQo3jCjh6DvaCk3oQOEMs8nac6P2P
+         vSrhunzcWxeTHFkyKW2y+9RlHwd5b4PJzGJcx30SLTkc7R5pNc9ftWxdz9XDNIo1gcuz
+         5n+jhyKtepxTgC5Vhy9K57DbbRWw6OsiVOxt5OBcQyF4gDvVnTgt3WdfpgHKHGfxSinI
+         Jnyw==
+X-Forwarded-Encrypted: i=1; AJvYcCU9DZLkLgp32lGig6kwjOIig4YAUok6QvIU/eICokpi9c2lXxGPOygXMniq9h7RCYUomOXw7x8Gz0w=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxBx4VAbPK7Cg4myqUjPWpuNXhl963jAUvYdjHXwtjDsC5x7vOJ
+	VBTSY7lczcbEFfJovahBcjZ4rDE2MDQ3KiGzqzohOdtHsDydVDu/iuDE
+X-Gm-Gg: ATEYQzxfZkN6dyjXDquaJIWVzNSneHLpsYanhW7pnphainjreu4qjRwvF9jeFGxydrU
+	h3VF3MI78g1Cw7jHQshHRJl/URokV0wF6vsbs7NdnUDaTy6s+Rlqh/TLgtIb70jcToqYGRzADXh
+	56o8YVJRz4OYeLVyJWLE3Y1yCA0dF1XISvfMbwXpNjl8P7nIOFUMrmLhgkPPaDduvoeKin1Fxyg
+	StIG44ENr6XCsujYWqUmiczvq8K9w/r5LLoKLIeJYy2u4Q1coDMJAeiKBCoBUhT1HoJYTXArXp6
+	dbyKVmZCwQpP3ml8okE4+gqoqF6ggU7oWqMDERa/t0Xtc4/VRloGyyQjjGHT9NS7nbaV4xah/Jz
+	s04I9Iq7X/yPF1es7GUK9whBDL+sxCLvfb+/tNM1UlPtqfQF4vFOOPccpOVsqstHDIL2THG0s1S
+	HV2/cZ3SGnj2WWpjqV3b31a1COeCK3GLNZ5vhp/LZYvxX4
+X-Received: by 2002:a05:600c:314c:b0:485:7f02:afd5 with SMTP id 5b1f17b1804b1-486f443845dmr15339245e9.13.1773775994499;
+        Tue, 17 Mar 2026 12:33:14 -0700 (PDT)
 Received: from debian.lan ([171.22.84.130])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-486f442d5b6sm20657885e9.11.2026.03.17.12.33.06
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-486f41d0c5bsm16762645e9.0.2026.03.17.12.33.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 Mar 2026 12:33:07 -0700 (PDT)
+        Tue, 17 Mar 2026 12:33:14 -0700 (PDT)
 From: =?UTF-8?q?Adri=C3=A1n=20Garc=C3=ADa=20Casado?= <adriangarciacasado42@gmail.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org,
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Haibo Chen <haibo.chen@nxp.com>,
+	Frank Li <Frank.Li@nxp.com>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	linux-mmc@vger.kernel.org,
+	imx@lists.linux.dev,
+	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
 	Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
 	=?UTF-8?q?Adri=C3=A1n=20Garc=C3=ADa=20Casado?= <adriangarciacasado42@gmail.com>
-Subject: [PATCH v4] mmc: core: add Kingston CID to quirks
-Date: Tue, 17 Mar 2026 20:33:03 +0100
-Message-ID: <20260317193303.14000-1-adriangarciacasado42@gmail.com>
+Subject: [PATCH v4] mmc: sdhci-esdhc-imx: consolidate imx25/35 data
+Date: Tue, 17 Mar 2026 20:33:09 +0100
+Message-ID: <20260317193309.14091-1-adriangarciacasado42@gmail.com>
 X-Mailer: git-send-email 2.47.3
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -75,28 +80,50 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Add the CID_MANFID_KINGSTON definition for centralized management of microSD cards. This allows identifying Kingston cards that require specific workarounds.
+Consolidate esdhc_imx25 and esdhc_imx35 soc data into a single shared struct since they share the same flags. This reduces redundancy and simplifies data management for i.MX25 and i.MX35 SoCs.
 
 Signed-off-by: Adrián García Casado <adriangarciacasado42@gmail.com>
 ---
- drivers/mmc/core/quirks.h | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 12 ++++--------
+ 1 file changed, 4 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index c417ed34c..d736bb4be 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -15,6 +15,10 @@
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index a7a5df673..9cfa26722 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -256,11 +256,7 @@ struct esdhc_soc_data {
+ 	u32 quirks;
+ };
  
- #include "card.h"
+-static const struct esdhc_soc_data esdhc_imx25_data = {
+-	.flags = ESDHC_FLAG_ERR004536,
+-};
+-
+-static const struct esdhc_soc_data esdhc_imx35_data = {
++static const struct esdhc_soc_data esdhc_imx25_35_data = {
+ 	.flags = ESDHC_FLAG_ERR004536,
+ };
  
-+#ifndef CID_MANFID_KINGSTON
-+#define CID_MANFID_KINGSTON	0x70
-+#endif
-+
- static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
- 	/*
- 	 * Kingston Canvas Go! Plus microSD cards never finish SD cache flush.
+@@ -391,8 +387,8 @@ struct pltfm_imx_data {
+ };
+ 
+ static const struct of_device_id imx_esdhc_dt_ids[] = {
+-	{ .compatible = "fsl,imx25-esdhc", .data = &esdhc_imx25_data, },
+-	{ .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
++	{ .compatible = "fsl,imx25-esdhc", .data = &esdhc_imx25_35_data, },
++	{ .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx25_35_data, },
+ 	{ .compatible = "fsl,imx51-esdhc", .data = &esdhc_imx51_data, },
+ 	{ .compatible = "fsl,imx53-esdhc", .data = &esdhc_imx53_data, },
+ 	{ .compatible = "fsl,imx6sx-usdhc", .data = &usdhc_imx6sx_data, },
+@@ -414,7 +410,7 @@ MODULE_DEVICE_TABLE(of, imx_esdhc_dt_ids);
+ 
+ static inline int is_imx25_esdhc(struct pltfm_imx_data *data)
+ {
+-	return data->socdata == &esdhc_imx25_data;
++	return data->socdata == &esdhc_imx25_35_data;
+ }
+ 
+ static inline int is_imx53_esdhc(struct pltfm_imx_data *data)
 -- 
 2.47.3
 
