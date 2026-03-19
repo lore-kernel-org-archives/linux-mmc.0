@@ -1,141 +1,114 @@
-Received: from mail-oo1-f53.google.com (mail-oo1-f53.google.com [209.85.161.53])
+Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 607E3336EF1
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Mar 2026 20:37:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.53
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773952623; cv=none; b=P1MjkqbNxr3Uu9lVJ1xyD0JT9Y4CPySRyOKZyK6Y/ShGrXZrJERi3ZcMWRlRwBFeC1Yp2U9TG+cZfYKbZoF10SX+fyk7tl6ppuEaijXB2oInk6rYudOekfenKGs64W868gdhp3tmdJmqIsQVue6eONGtBlFOickk58d4F6ZW1bc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773952623; c=relaxed/simple;
-	bh=5skePx64WNITX84S4NyRGOGsgVrQRd/nLA8489wbHmQ=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=XjbClQfI1u65Ay4WC8EAFDJjFqyj3pOtM//b3wnpcnJmxTV7MCA7p8yLlSvIVYZJ76bosRatAaX8aiFkTysrPjKoiMM1xcNiX2c+OjO7RBQFw65ls1O8Yrwoe+III4PsIlWyt6fvBTh/uUN1MThUv2xLqvFrviMtI5HfiBeEfNs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=KBeBMIE2; arc=none smtp.client-ip=209.85.161.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD5203F787A
+	for <linux-mmc@vger.kernel.org>; Thu, 19 Mar 2026 20:37:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.175
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1773952640; cv=pass; b=FU9VmCydfOgQqD4B0X512fyYQ5d3yxlHmgrd5f/eJcmbCLwY+KJegJ0+5ixPZYOkFKwP5fc4SWoebKzQ/20bUXRs4BkLPgCF9QIS8k1wlLVXky1LI5e3A73xuzDMN76ZMouFyJy1z9DElG/rNImSYrR1CxNZw5axbxqev9GLbPA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1773952640; c=relaxed/simple;
+	bh=OKcQF1kpAs1PMLQtJxV4BxsdutnEF0dS5maqemA1Tzk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=R65stGdN6nIv04R3MRMW9e4j71b3wM6/OqTYAlRhTz3IFncxTwHjtEdS8QA60le17aaD76wWeXb7hr6lQ1rUmREhLT5RoocH6fPeXtfSsT68ozIzjMPWsr54q8lLTMGhDkc5XTOgy3AbCkSMIlYyHYOfw/0ln29OwXsE6X8hoM0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ETh7kP8X; arc=pass smtp.client-ip=209.85.208.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="KBeBMIE2"
-Received: by mail-oo1-f53.google.com with SMTP id 006d021491bc7-67bac077116so628077eaf.1
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Mar 2026 13:37:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ETh7kP8X"
+Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-38a4118c4f7so10617591fa.2
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Mar 2026 13:37:17 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1773952636; cv=none;
+        d=google.com; s=arc-20240605;
+        b=WwN9vmRfSbuBL8nmf6w8IQux+qoAKVUHiYp2STje62m8IOHX49xQpgCclvorjHlspT
+         gbtvlPPEciDQz/nca5NdoYrCSGTuAGtRbDVj/sEfFdOtXCL+jh7AzzhY/vycpl9nyFEN
+         by7DxYwkgZxtRZ7d1/D5J5KhuVCdZLKGXxhMxAj3BA/GESQjp5CS3nOCGtmLpnUb3zoe
+         ZaAuXTVRIaUkcfl8x1BRmoDfesjn6fWdtkeLuItXcs9Xo2+AYdTq07ORAmwPcyRZ8EpV
+         yNP8BDZl9RynuBzPJD1a2pFm74IqlT245JStyd6as+Ybgm2gQ8h4yY7AqERVrmaUopqp
+         ppiA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=4jm2MmqwJpQn+S058TYQTUmQvMQC9Tb/3vBRI4X0gPQ=;
+        fh=oqhe7HduweOzhxpiVtAZCWKFr9jNG6gxCoiBaE67cwY=;
+        b=NNlrWBzEyXaNrO87KibXbO4o4NAI72V5Sbcx/+s9ynX+LinHtRXqiIx0rjzVfqIcu/
+         IDO2kvXL7bodRROJqAskpJEaXU+w8Tf1j1Cw3tVoOn8HJF31lJh6Liqvj0jAKVyXoMrj
+         0WESKpD9lGOdCT3DtUUmIOsahivo8B3s9dtflPhz/cCoITl/D19ivxwd97ekQLei8yv7
+         NQJFR6/KZk2GvOc61BWmJCVSDDosCbWtjfNU2hSFTk7hHsvWMGGwqxp68J7aDrhfZ4Bu
+         Csxtz+FoBUComAehRDWIoYyWw1C5gVYai3+ihQKYMgSpSrdSEmRtLo/Vj8nNOFxQ0fLR
+         jbCA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1773952619; x=1774557419; darn=vger.kernel.org;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=EvqUQZCqF37oJV9dJzcVxfSOLY81NlMRRK2XtKQH9vE=;
-        b=KBeBMIE2I6yLaVAiKOMOw7MMnsyAYshrIJkk8STe3Jknc2NbHyzX9C+DszaP0oR8O0
-         JpQYY5/iC5HpQZ0eaRSpn7l1Zg8cn/z84MSDWz9OG9j2hj7kI2wChvXzcEwuNSIEFkwg
-         KbQ62ZGdjeoXZEqxhMXxZo5/OT4RjTOu6R8iVRvwmICODg+WrNORlg2MJo0pDs809ARM
-         zh6Z1SdVnKw1ML9ydnNnA1+COHXfZPRifNHd4kmFebpjNDDJQWznoIpW2pFDas7ZcwUI
-         hMGruZmZIqcZL6Nrvkjj2la6pi7VkjKkY/8FIDDO/akl4u8WN77b8I6u8kCh9iV1Wy1n
-         V4uw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1773952619; x=1774557419;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1773952636; x=1774557436; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=EvqUQZCqF37oJV9dJzcVxfSOLY81NlMRRK2XtKQH9vE=;
-        b=Y9lGSNXQ9OgL+0VB/ElWDcq3JRvli9NuEPCupSKKkcHUsruW1lJRzrtriIr9yJp7go
-         9KOBpfYMWFDgcC+OkS/VZtA/TXrLXjAOKpw9RV8lMJbln4qqUCIPkUz6oMbevsiJt0je
-         DPhAiMaikTw4CILiCRrDabTddaTy9BLgLBJ118bGRSZhq6S5rb7DPx9MTpqIsUT8sQPF
-         ozpsl/IfdCrc+i+fOXxRTFn31x7sT8HzS5tIkITB5Fq7X91nVNnxI57ZEk5JhfDc9Eq9
-         oC3ssteu4/bSJoKBuOhACM9HJitbdJCTmKnxdCVqPAA/CRn38a/hFI5zq2L9Ai2qSRm1
-         PXBg==
-X-Forwarded-Encrypted: i=1; AJvYcCUA45+UwQKybHMGxUENjWG6+A1ht/sQpUxTS8FUhXhSbOZLW33Rl8AlKc6MaXWzafT+OuHS2O0iNd0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxxhKqH9lhaUp7z4GOJd3TVQiTxIO7wfk5VwQ4pG0ienZ+a1/vK
-	OofBAUamP/ReRxo8Dhzkiu713DS4lv3BOaMORxGL/xi3/HZsSSj3KM3aGO+BOiZ1u8I=
-X-Gm-Gg: ATEYQzwxnvme77uu6p0RCZNELLL7PFCf7rSxoQJjEZgPyUqe3ACFNMJ3TCgY1Fis1M3
-	abascVSBHrdCQqTyQU13BeqaV0wSOL9lFNi6DEfZx1FfRzsDlUqyT1VBYLzG8IEW3uxkCTqRxWC
-	8cJPaw/J63DjtVnQtU9MMZK+CnnkLr1akh4Nshq//ID75lS26WPrd1sVBl2aQKDHNmPL4MYI/Vy
-	rvDobEH9A0VCKtLhe3tFbxnUzRmr/zP4ZpfnsW5GVo57++Glbua541QkN6aIq3RgTv8rjwXsmbs
-	tRqbs2+7VdYIBqHBkSNXsMEp7oysERELeGkJdsnSNWKQD2o7jxV48y7OxY5OPcEvSxg4sktnRpz
-	DOGBiOj816nU1+UOMwWrbv1CiRe6+Wcyw0IH7zzUlCKikKVc70znanNIlUAO43WyNdNBy3615Wk
-	Gf7joCDrq1c/NaNQ+nxcu8+AUFBygr
-X-Received: by 2002:a05:6820:1349:b0:67c:1deb:4f69 with SMTP id 006d021491bc7-67c22bb5697mr599850eaf.14.1773952619310;
-        Thu, 19 Mar 2026 13:36:59 -0700 (PDT)
-Received: from [127.0.1.1] ([2600:8803:e7e4:500:244c:fc8c:8216:1344])
-        by smtp.gmail.com with ESMTPSA id 006d021491bc7-67c252acd32sm52512eaf.3.2026.03.19.13.36.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Mar 2026 13:36:58 -0700 (PDT)
-From: David Lechner <dlechner@baylibre.com>
-Date: Thu, 19 Mar 2026 15:36:49 -0500
-Subject: [PATCH] dt-bindings: mmc: mtk-sd: add mediatek,mt8183-mmc fallback
- to mediatek,mt8189-mmc
+        bh=4jm2MmqwJpQn+S058TYQTUmQvMQC9Tb/3vBRI4X0gPQ=;
+        b=ETh7kP8X+27TvzMqy/eHisKhzvYw2ZjLW+Ov7EXkrkAAyMfvueQnapF5ckjoIbZVW+
+         cfMoGbpB3USxxBvJAlvJVZy8fPZz+nOO68til0z+M6b7B8M0XNHule0bqDMM9FL5nrXx
+         XjHrhemV/rkNlfLMrSee8xpInBuriNfzppV1HF6asSLDSIIBOp/naJvE/TmMnMFRxNkt
+         XmSnQUhOIBIK+yRzDZ0RK11MgN4RaEPC4z1+5DOtvtNU53FFcXZokiFF9wlFsiHO1UZ9
+         iWX9Swk9yWL6t3C75iR6rK9ldvvQu4t3HJQT8oRgl083yLrrZe0ffOkT1p1A6DfZaEMM
+         8dYA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1773952636; x=1774557436;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=4jm2MmqwJpQn+S058TYQTUmQvMQC9Tb/3vBRI4X0gPQ=;
+        b=rbKEnPJiqIRbRu7fxS8qbMLI4zP/naST0+PtHZfoL1q1YS+yeEnZYjLxR5riDVxGfD
+         lK+lVRzsNSa9wiuS383yTHEcqwObdcC7e4+8wso+xD4eiD/ybs8he8v/VcvC1vSpYU8B
+         p4FH2MUoIZ7+op+4JIf1T2SQW68VeSVu/gnmhkhURWxBIvktRwatlAj79pDVpvAWBu+z
+         AyzRH65cE1DjkR42QtVqvucXpXQ/ym5XDbEpqQ7NhcUrTOs0ie9uhHrNart/PLu82wMb
+         SB5vBUFcJqWUUv9qf2Mlj5ze9znxU+8rPORaYDGh6DQrjHYsBVqIHXhy3lIRBuNvO8jE
+         UHVg==
+X-Forwarded-Encrypted: i=1; AJvYcCX7lbRuB6KgTahz0tk+3xA5Fxo5WQXDrqAD1402p8PNGnQsjljZvr662y/5SQLVL61Od6DXDXXDuSs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YycO+n74tohkvcp18QrfW6nb3mYwM1lWV8iiDfecrvzAgH6dVcA
+	Lf/aw0rkgI+q+1f6eGeVes2ohULLYCBJoGpRuk0UFEugMUYwQfqIVtUmzg1dXwwNt4pMGhouJaY
+	1GRSRCBDUd8xOT+VzisJtWjfRJ0fEhpU=
+X-Gm-Gg: ATEYQzwXmZj+fIUgKkxJBsl8Kxl6nEAkYZAPUYTK/XQDSAj5D5HL6I36KymKn9r52rs
+	BYkC9xyJggMxC/OnAs1DJ5dzVynd2t6zp7GY9zwG4TOxwm+aQUmS2qlGV0Whq0Dv+p1wUSvY1yV
+	0lZNjNqUe9xtZ8imH9a3yU0LyUZh+eqxsaIp9Up2GOE0WA6JsPO1i+KjAD8cJeZT5giMlIrZsJz
+	bHFjaA2zOLlbcH4/lryOxoQzAZ7VIkX+zN3chWVYtFVaU/DqiFx+3sGGAkzNc4H957DP+nk81Do
+	W0YdHfub4GHCZB/9HubMoGbaiiD37jF5A5c4vQ9J8KCikxnLr1BcI+hjWM3hYFsrbn6UMT5R
+X-Received: by 2002:a2e:3215:0:b0:383:18fb:fdf0 with SMTP id
+ 38308e7fff4ca-38bf96ee31amr2254101fa.22.1773952635602; Thu, 19 Mar 2026
+ 13:37:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260319-mtk-mmc-mt8189-compatible-v1-1-fb7ef2186c92@baylibre.com>
-X-B4-Tracking: v=1; b=H4sIAAAAAAAC/yXMywqDMBCF4VeRWXfARLz1VYqLOBl12kYliaUgv
- rtpXR2+xfl3COyFA9yzHTx/JMgyJ6hbBjSZeWQUmww611VeqBZdfKFzlLZRTYu0uNVE6d+MptL
- W1FRaWzOk/+p5kO+//eguh61/MsVfEI7jBFHNVOd9AAAA
-X-Change-ID: 20260319-mtk-mmc-mt8189-compatible-a62da7c5dd7e
-To: Chaotian Jing <chaotian.jing@mediatek.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, 
- Matthias Brugger <matthias.bgg@gmail.com>, 
- AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, 
- Wenbin Mei <wenbin.mei@mediatek.com>
-Cc: Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>, 
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- linux-mediatek@lists.infradead.org, David Lechner <dlechner@baylibre.com>
-X-Mailer: b4 0.15-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1519; i=dlechner@baylibre.com;
- h=from:subject:message-id; bh=5skePx64WNITX84S4NyRGOGsgVrQRd/nLA8489wbHmQ=;
- b=owEBbQGS/pANAwAKAcLMIAH/AY/AAcsmYgBpvF5i18RSPpFlTkJhXKuRHU1GKiogcHWVUfImk
- AchlfWq8pSJATMEAAEKAB0WIQTsGNmeYg6D1pzYaJjCzCAB/wGPwAUCabxeYgAKCRDCzCAB/wGP
- wNTrB/wJp0iLTjLMrEAxu7kkALAuENcVqHfsvkgUSrsHT0Wy0MeoXaG9Cp3UIlJ9gNCXOEoAXUR
- 3u/C1no4zCoDG0WMepZn6cHej94IB24DQZVNYdeDOl0OFtEDIuz902EinxNow8JfnAmLwX4w4aU
- RDSkC9kLidPbkFS7CsE4fLWlpRW0eY0OzpN55PuNEq+4jfPIYI+z5k3Qr99oTU+HCCCFVTC9j5d
- YdK7+xKXOz1AGfNSztdM7/NFqDtZPmR/8+baKRZQ01ZnuP85PSnqL5zO5rZ6OVqnVNcCv4ourPM
- WopQsPZ8TelzX2HGxM04ez5i53jSAozyu6LUB+V8ya9GVijk
-X-Developer-Key: i=dlechner@baylibre.com; a=openpgp;
- fpr=8A73D82A6A1F509907F373881F8AF88C82F77C03
+References: <20260319200945.23333-1-adriangarciacasado42@gmail.com>
+In-Reply-To: <20260319200945.23333-1-adriangarciacasado42@gmail.com>
+From: Fabio Estevam <festevam@gmail.com>
+Date: Thu, 19 Mar 2026 17:37:04 -0300
+X-Gm-Features: AaiRm50-FVCrW5uqx_caj9h1BrDi-gvkU_nz1UeamW4uIfef2gzzYIjKPKykSOA
+Message-ID: <CAOMZO5DcaucpKj2=gO5kP3vd=f==ydzB+3FbGB4Jwg19Vi8fpg@mail.gmail.com>
+Subject: Re: [PATCH v8 3/3] mmc: sdhci-esdhc-imx: remove redundant mx25
+ handling and consolidate soc data
+To: =?UTF-8?Q?Adri=C3=A1n_Garc=C3=ADa_Casado?= <adriangarciacasado42@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Haibo Chen <haibo.chen@nxp.com>, 
+	Frank Li <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, 
+	imx@lists.linux.dev, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Change mediatek,mt8189-mmc to include mediatek,mt8183-mmc as a fallback
-compatible.
+On Thu, Mar 19, 2026 at 5:10=E2=80=AFPM Adri=C3=A1n Garc=C3=ADa Casado
+<adriangarciacasado42@gmail.com> wrote:
 
-This has been tested using U-Boot and the MMC is still working using the
-mediatek,mt8183-mmc fallback compatible, so they seem to be compatible
-enough. And there are no upstream users of mediatek,mt8189-mmc yet, so
-this should not be a breaking change.
+> @@ -873,11 +865,8 @@ static void esdhc_writeb_le(struct sdhci_host *host,=
+ u8 val, int reg)
+>                 new_val =3D val & SDHCI_CTRL_LED;
+>                 /* ensure the endianness */
+>                 new_val |=3D ESDHC_HOST_CONTROL_LE;
+> -               /* bits 8&9 are reserved on mx25 */
+> -               if (!is_imx25_esdhc(imx_data)) {
+> -                       /* DMA mode bits are shifted */
+> -                       new_val |=3D (val & SDHCI_CTRL_DMA_MASK) << 5;
+> -               }
 
-Signed-off-by: David Lechner <dlechner@baylibre.com>
----
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index eb3755bdfdf7..9160e449aeb9 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -25,7 +25,6 @@ properties:
-           - mediatek,mt8135-mmc
-           - mediatek,mt8173-mmc
-           - mediatek,mt8183-mmc
--          - mediatek,mt8189-mmc
-           - mediatek,mt8196-mmc
-           - mediatek,mt8516-mmc
-       - items:
-@@ -36,6 +35,7 @@ properties:
-               - mediatek,mt6893-mmc
-               - mediatek,mt8186-mmc
-               - mediatek,mt8188-mmc
-+              - mediatek,mt8189-mmc
-               - mediatek,mt8192-mmc
-               - mediatek,mt8195-mmc
-               - mediatek,mt8365-mmc
-
----
-base-commit: b84a0ebe421ca56995ff78b66307667b62b3a900
-change-id: 20260319-mtk-mmc-mt8189-compatible-a62da7c5dd7e
-
-Best regards,
---  
-David Lechner <dlechner@baylibre.com>
-
+This removal of the i.MX25 check does not look correct.
