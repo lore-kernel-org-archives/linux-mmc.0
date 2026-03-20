@@ -1,226 +1,335 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2833C346E43;
-	Fri, 20 Mar 2026 13:27:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.12
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774013255; cv=fail; b=hiufoGD6RGEgU8fzC1oJA4eHjofqhOi4f2Szay2nbUYOjLC183r8uaprtONu6vdibhIOTQydLEhk7BMC1yOOFAghDR1QObdpzGx+sxEpXpbVtIviCDMMOHf5yPdLqCmQSovoMbX6P8WaREOAT0AalDh5XNajzjsSiG4lQ42okvg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774013255; c=relaxed/simple;
-	bh=R89SxNG7wHgm2dcjSKpj/8uti3GLURJPoA5IFv115/g=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=lThjY2gDxi9tcT+RIbhNyioakh4cQVzaZSTka+sK6OehlQbx+t/grNCyWZMsnXzhnakJHVWK3ewzy1DE7AP3QFMJ5XCR204gW7s9m7Rj+RXxtFj0Ihwu3q138uLzXcwlLzsZmy4JwY0JE6hvMpFgfo2qMYuR2GnxM2k2L0TGzyU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dZsbLvWz; arc=fail smtp.client-ip=192.198.163.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15F7436AB7B;
+	Fri, 20 Mar 2026 15:18:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774019904; cv=none; b=u3rK0a8Pp1bf5/FtbDxN0mMSJgYCZgJVGu3FUH5JGOtgBmlDcvS0Y/99B4EzayvVVthHBy1Tg3A97hK74G5P70O7YLbKsHqE/m0t7S2oumOJyIrsItQ8p455Fzi1I8tLXGQfcsXPfJRqT/Jl7gizq/cQQ37Yf3pyY9+Jsjwv1L8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774019904; c=relaxed/simple;
+	bh=OVANX3vovge/OQuA6IUu9M7SaaFm5vfvJli/2PKs4Jo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=XkfefFOMGvSTWhCiAgOJYjunIB4E9+e5I0K3FyVn+xNwvdDpGJuDyevlruThAFWVM9U4w5rnRe2yx983qSrHrq8h/v7PWh5tcCrNxr77aT3pu3vq4mReYo9CRxQvPgflQhF57sxzgCdidEXEPcuZV4qZVNov2wo1wWDwmsQlVZM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=cfrXRmTe; arc=none smtp.client-ip=198.175.65.14
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dZsbLvWz"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="cfrXRmTe"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1774013254; x=1805549254;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=R89SxNG7wHgm2dcjSKpj/8uti3GLURJPoA5IFv115/g=;
-  b=dZsbLvWzh9t8wc9H0GfTBIc9QNRyAKHHXevYI1fZnXAS0UcLg0MH8rk4
-   ueHmN8VcGF7F2qtUja97qIny2ozo2ZHPQZCHICIO8EAOnAjEOKHrtAXgM
-   zN4TPuz1E+ySKJaJJProdQskl13t1c0RJHf4H/vfmn9hJHWolhtS8H49j
-   wu/COecz52cd79eQMKTtQ97BLc6oMct+AGyqfsSSXuAm+Y+Yh3C5Qu/BS
-   U/e111JhRVH5jOIW5DVyx52cw6e+pNP0mgByAjsJzAxQRWjsQ4EnZmsUT
-   6oalCHwokAWdNYlkECwejP/Q/yvJ+JCzWy1a57ypr+4uMCBphgBzDzj/U
+  t=1774019903; x=1805555903;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=OVANX3vovge/OQuA6IUu9M7SaaFm5vfvJli/2PKs4Jo=;
+  b=cfrXRmTeKcxLc8J8IN0fuIjFp0f7l0WgXY4jtSaqEnb90ncD+ZQg8T3x
+   wcarZHub6csjlLoVkTJDsdSjdATDy3WesJhdD4kEZxaU9859dt++wUxmc
+   unEDImjSLO4QP3wHcXrBVmzVn3H5LskMk0s6/3QGrLJlUh4LLDSFEz8q4
+   RPI4QxqHnLjQ+alab/REvb6uPd+1JMmvjO7EBiTM1aC/zkeYClJVZ2xJa
+   K7kgd9GMMZvJLbNrI0pFYJlnJ5g0zTBVMNr4+BQugSM1TAbjxf7ynJSQi
+   n4RQSork4ElvBkTwkYvQQ5y+T5uOm57FlN7wzC5QcaxQGICgPJs2b3GB+
    g==;
-X-CSE-ConnectionGUID: YV8KWLocR72wz7+idHfwEA==
-X-CSE-MsgGUID: hwXQr/CcSTOcnRDjTUSCJw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11735"; a="79002510"
+X-CSE-ConnectionGUID: +bZNxWnRQpiaKdbtsd1Vfg==
+X-CSE-MsgGUID: JLo1uuAHSJ2KMhMeiw58eQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11735"; a="78963384"
 X-IronPort-AV: E=Sophos;i="6.23,130,1770624000"; 
-   d="scan'208";a="79002510"
-Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Mar 2026 06:27:34 -0700
-X-CSE-ConnectionGUID: yc4ZZ+/xS62pp4e5vEylXA==
-X-CSE-MsgGUID: t3bAn9WXTCWbaxLx+zIcHA==
+   d="scan'208";a="78963384"
+Received: from orviesa001.jf.intel.com ([10.64.159.141])
+  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Mar 2026 08:18:22 -0700
+X-CSE-ConnectionGUID: Dcj3aANiRcKg8sWNMKb4wQ==
+X-CSE-MsgGUID: zk0gZN5ITW+8R7Vk9Cdc5g==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.23,130,1770624000"; 
-   d="scan'208";a="246315527"
-Received: from fmsmsx903.amr.corp.intel.com ([10.18.126.92])
-  by fmviesa002.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Mar 2026 06:27:33 -0700
-Received: from FMSMSX902.amr.corp.intel.com (10.18.126.91) by
- fmsmsx903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Fri, 20 Mar 2026 06:27:33 -0700
-Received: from fmsedg903.ED.cps.intel.com (10.1.192.145) by
- FMSMSX902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37 via Frontend Transport; Fri, 20 Mar 2026 06:27:33 -0700
-Received: from PH0PR06CU001.outbound.protection.outlook.com (40.107.208.7) by
- edgegateway.intel.com (192.55.55.83) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Fri, 20 Mar 2026 06:27:32 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=ccebZFe5fWCutVfMMb/KGdLFsQQL+Mu8AircfislzAb1WuXZUsrsIch/RbULVf8Lw3Dbf1SWF/WayBrJ+bRuFzzcCTxX1NLTBbBSSxLxcZR3IefX1rZZo67MCXVrVoucz8fHgL5zvpQaDBGj+y7xTZtpL6np6H7TLelpuF7IRPrBsviyAa8SyFmqiUANg713oMh7EcewbtpG8SXd9WEpahMjRzf5J8us/8iZkdYoBZbEKQ0kQt620niSciqdA13pBk+bm9QOJXtauoxitZYDL+ERbeiDVTp3APpoUK7uQRNkfzcEJEfIp6PltDIG0dyFTgqJ0nJ8eO+5GH7n81quOw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=wnluL1kt7Q3D405j0nt4AzmYOa6ouCv1rFVzMmcLUZE=;
- b=R5sWiQul6Fv3y7dFjbAQLwfFRBc3bUbBuAytfFHD8GCTs0KmnDWGff05CE3fsh95buSWyztQgcY5gIzOzu7DfXBWAv2Ju38iIG0OZnzJNXc8i49WU1W4t8a6BVOXQURKIQKL6atuBu5HtcA+z8okWXG2wuYcKxY/iDve/bKxNvefpIY4UP5tNvgQIZ/x2mbHVq3KUV2c9yBQLY2wTVbNg2/v7f4Z3Q/2ffSQrxXhkj2lFCNWO3R3BQe4C73ODGeLALxONZXCLdFf68jI/ssYFgqib6n3AhxHGiqyYv0QbXL7O2AHAr3Rwya804YCQS4as42D3IBystcs/PRqpRellQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by PH0PR11MB5158.namprd11.prod.outlook.com (2603:10b6:510:3b::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.14; Fri, 20 Mar
- 2026 13:27:30 +0000
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456%6]) with mapi id 15.20.9745.007; Fri, 20 Mar 2026
- 13:27:30 +0000
-Message-ID: <2cb3de9f-2c07-48c6-a3e7-63d34b49ca32@intel.com>
-Date: Fri, 20 Mar 2026 15:27:25 +0200
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/3] mmc: Lenovo N22 Braswell SD slot fixes
-To: Nelson Johnson <nzjfr547@gmail.com>
-CC: <ulf.hansson@linaro.org>, <linux-kernel@vger.kernel.org>,
-	<linux-mmc@vger.kernel.org>, "Shevchenko, Andriy"
-	<andriy.shevchenko@intel.com>
-References: <20260316212325.4207-1-nzjfr547@gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
- 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
- 4, Domiciled in Helsinki
-In-Reply-To: <20260316212325.4207-1-nzjfr547@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DB9PR06CA0002.eurprd06.prod.outlook.com
- (2603:10a6:10:1db::7) To IA1PR11MB7198.namprd11.prod.outlook.com
- (2603:10b6:208:419::15)
+   d="scan'208";a="261219111"
+Received: from lkp-server01.sh.intel.com (HELO ba623fe84fe1) ([10.239.97.150])
+  by orviesa001.jf.intel.com with ESMTP; 20 Mar 2026 08:18:19 -0700
+Received: from kbuild by ba623fe84fe1 with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1w3bc7-00000000013-3NVb;
+	Fri, 20 Mar 2026 15:18:15 +0000
+Date: Fri, 20 Mar 2026 23:17:26 +0800
+From: kernel test robot <lkp@intel.com>
+To: Kamal Dasu <kamal.dasu@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kees Cook <kees@kernel.org>
+Cc: oe-kbuild-all@lists.linux.dev, Tony Luck <tony.luck@intel.com>,
+	"Guilherme G . Piccoli" <gpiccoli@igalia.com>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Arend van Spriel <arend.vanspriel@broadcom.com>,
+	William Zhang <william.zhang@broadcom.com>,
+	bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, Kamal Dasu <kamal.dasu@broadcom.com>
+Subject: Re: [PATCH v3 4/4] mmc: core: Add MMC pstore backend driver
+Message-ID: <202603202338.OYFgRuuU-lkp@intel.com>
+References: <20260319185705.1516950-5-kamal.dasu@broadcom.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|PH0PR11MB5158:EE_
-X-MS-Office365-Filtering-Correlation-Id: ed41451f-1cdf-482a-ebcd-08de86846f6a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014|56012099003|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info: FkLl5FTgpgpc37Vo89nA95cGMmLgfLsmkEceXHFGukNZhzXtNUpcTnUE2U7+UHDC8c80n3zIV3ScGRALEnzGRQRUeIWhFVqa20zXKY46wryT0olQMRvS8hSKQlurc9RxYoOCZ+hz3LUhFi/hpXekCtkTl50gRz39gnVkM4aA8zU9FtArIYclxjhP5l9cASouRm0PLfxBbnfYuKffAddO+3FpXVExWREvynXgBYiaQVc1Ixj+WWQaTj0r8SdVs60BxSqR5AgAhXii4gGREE1flg1iLoLxzOwzQNUh4ixo92goKpkiPPXAPdX6WmXqWhqjQxgnAsHx5XOlLZd7Fdyi1ugBF/gMC59tQ+Kc8vpSUeSLpR7bVEo1X5IXuUAYGJissWi4nXB+sDoS9fM4WhW+bEI/1zdKNvQbXDrmt1SfKGQ+an1Lx7bOwceoXIDyOiyHclQQY7zdugmATvjHfs0+LrFbAwioUhE94yNOaB8FpSu6otq2BfOoPsRY+Pk0EGr4tGgUqePRLGDG875Hry0FvN27pmoIsbzhGFyE8XnR1K8K9xnFtc0uSQiCm8l/IsHaJeOXwPkSserHlVb+HbD3r67vdSwVLR9a8lw4qYooJ1Pk9xCvd5ln/F3DUuCAwK6TzNb39sl2KwYk0OzyVBhhp/IoJmtVblTQd/iD4hfbBdvxcFvl46Usx445YSlnClMvI5aJrY9MgaZjaZiVYZB1ZfaO7/3HHVFVpFdNeCh4MhI=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(56012099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?ckNBQ0t1Tk9UZVVBV3VnZTdpZnVXbnJCRm1KYk45VmRwbHU3VSsrajVqdG1L?=
- =?utf-8?B?ekdsQ3JuOFYrU2lnWlNwTnZteUhqT0QraVZKUUY3dUFIZ1ZlazV3WXZtSHln?=
- =?utf-8?B?MXFCeDByTEY2S21hNnVWWDFQYk5ZemdLTzdNdXd3cTZvVGtST21RejY2eVEr?=
- =?utf-8?B?MjhxZ1V1MGdPaThlM1BVaWtoZkd0QXpENFJoZ1dSTGo3NTM0NHQvZHpxRktk?=
- =?utf-8?B?RktwNGg5cXdKSHhIY3N5N1dkSlNib1hBaXc2dGgyRjdabXlFS1VmTFB3Ky91?=
- =?utf-8?B?L1FQK0x0bDNuL3FpUTkrUzhVcjM2Mms5RlB5ZnoyWm5MWGVlOExwM3Nuc2M1?=
- =?utf-8?B?MW9GOVJObFI4M2JiaHZLcnVRKzhWRzEzcEIxNmYwRVlCekhhVk15Y0p6WE94?=
- =?utf-8?B?TWF5RjFBTEhraFp0b0ZDOEpsbXlUTFVrY0M3NnlaL3pLVlBIZldCNGFZa3FD?=
- =?utf-8?B?ZitSZm54TjU5bnNwMG8zay9adEsxWlltcUFJczFSSG5yUmczQjdqTlpmSXFl?=
- =?utf-8?B?VmRmblZKMDVkc2ZndllhKzRENzUySWhYQW5rWk5TdGZqQ3VnMnlwZG5HWG1Z?=
- =?utf-8?B?eWFsL0NMdXBETXpsWmNlV21UUTc2T3Y1aDZiajYyb25NbjR1aWlxZ2FNV0d5?=
- =?utf-8?B?V3V6Q3pQK2owZjczN0RVdFFUTHVjZWNQajdmaGkxOURMMkE1Mm1uKy9wRUpv?=
- =?utf-8?B?ZmlmWXo5TWluTEQ0T0FOSWxwTVduMmpBaDdPUDBYMm50MjBuWlAyTnFUSzRD?=
- =?utf-8?B?c1FNa0w3TGJDVFVFREYwZ3JXMER1bFdhZm04bW95cWRzeUpvanRMb1ZFQWJJ?=
- =?utf-8?B?THJSWTArNVNqQXVhcEhyalQ0aVhLc0lqVENFL1QwMS9IL2lweUF5SW94T1Fq?=
- =?utf-8?B?d1daeGl6YTZhWEZFUHR4WGtFWWFXMW16clRFRlEycHVYb1NTb0ZRR2FmU0VH?=
- =?utf-8?B?K3VRaC9TVHdmTUpRbGRoUS9BQW5IQm1GNU5XMU5xMmlYQ3FNcGFIS0dhQ0Rj?=
- =?utf-8?B?SUpPY2ovVnFYUzdFQlRyU1gyTGxFR29VRFlaam40NFpzTWxkYTQ5Q3NQTXlW?=
- =?utf-8?B?WFVmZGZidXhjWG9NMnRHdlZObVNpRG1waWFBK0RuT2QwQUNIdmdXcTdQSkx6?=
- =?utf-8?B?U0RnVzdxSHkxS3lXRmo0YktJamxqTGluQ0Y5WVNaenVsTWdWWUVKOGhLMnNj?=
- =?utf-8?B?RjFlRFI2dnk3WEgxZzUzWHVjbWpudElvdDJ3MzY3UDN6QWVnREc0M2p2c0Zx?=
- =?utf-8?B?RTJmeXQ3N0oyTlhaWlFDVGNScFExUVE3NENvRFR0dHV6NFhlekVwNC9RZzNV?=
- =?utf-8?B?SE5rZUZvazF2TXRhcE11ZlZYbmNpT1RYc1ZOZU8rR3I5LzlWVnpwKy9Ya2M3?=
- =?utf-8?B?NXp2aEhQRFJ3U2p1QzBURENoSkUrbWg5SENXN213ZEVRdjY0M0dGa21Jd2Y5?=
- =?utf-8?B?b1RZaloxeFE4SS9iTEd4dVoyYWtTYm9nbWFMUDVDUFhJRjd3QVdicW5LQXBC?=
- =?utf-8?B?Mk9Va0t3bXBTUmhjVEplSnhKOEFDdW9maEFwNmxYQmZ4dWVNd0lrb280Z25U?=
- =?utf-8?B?M095TU42UVNwQlVwWjFRR3Rqa01pYVAvMEp2OWF0Sm4yOHdKTTVNK0czMjAr?=
- =?utf-8?B?dnNnTjFzdEs5NndTbEtJMU10eWxkd0IvVWhXaTFHM0duLzl0emZ1bzJkRWg0?=
- =?utf-8?B?KzI1WDRBVmo1TC9QTjN2TEpzUFQ2YXBLa0dZbGZQNFVSd3JCSjI2aURiMXlm?=
- =?utf-8?B?TnUvQ1I2MTRicEo0S3F6czBGZUdHb2lzVitLZ3dvSm1scThXUWpnQUJJbzRN?=
- =?utf-8?B?Z1QrVDdVR3Bqd3FoN2pUUEJUZVdEL3JYUjRzTEZIMTFwajlpL1JQZTRUaGNm?=
- =?utf-8?B?YVBxUjR3TUhLZm96TzVwTnZaTHg4WGt6aTM1dSs4T21Ea2Q2dWFTRDBkN0Ux?=
- =?utf-8?B?UkNDL0FDZHg3Rndaa1I3anh5RU9oZVRRRXRNYTgwUE1seEJ5VEx1dWVaK2pi?=
- =?utf-8?B?NU1yYVdKUk1QSWQyWDVWRDN0cTlISlJmVHhKcklGRHZram81SVJVa2twSDho?=
- =?utf-8?B?RUM1WDlWaDk3anBvbENORE1FZDg1RnpMcnh4SGE1akw5VlhGckdCaDRDWjVw?=
- =?utf-8?B?b1RDT1dHeHNGSEhxNjlmQW5Vc3NQeitRTWhhaFBzMDVNVWxxT1QySlN5Y3Vv?=
- =?utf-8?B?OFdWZnVHM2FyenZSUTJId3p4eHA3TEt6T1dGTlJLODZERmFQWWp1VXRsUXV0?=
- =?utf-8?B?am9TYnZMZ294dlVvVFhWT1gyQSt0ZnRYeCttTFpZZ1Q0ZzBJcFhMN2Z3TVZ1?=
- =?utf-8?B?dDFlM2pxTnJYaWxhRTlhdCtGT1RGQVFIZTlnc05QZFlaVUhzZVZOcG1mVWpJ?=
- =?utf-8?Q?4qu+uRJTPz6YjcMg=3D?=
-X-Exchange-RoutingPolicyChecked: AA13/dmRcXUW+AnWzN9bn4QYU54OI8If0nEo9in9GZndz9jt6CnF0um1JfV5Kz+A496Xwcl0mjfZEfMaOkvt+hn5B/0bA+9iKyGvcDtr523yEDFknUrJw4V+sY9+Gh/Gx1qH3o4P79E21A4IVtI5hW/LPO8fd/r7mllHpC3W7bdv2SHh81HrFkzmsZCWjj/jcyMqX80bVSOthppaXYH82OuqEcJmifttbLo08BgAoMryBgadx9uv8qN+BWbrj0U18lEQp/7eqNkBJyak6yeUtxjadeK3xY+A3aLxElvrRe4z4IU5UC/WjwKQwxMhh3u3qjkZzvTWbqgsSD9UcGwTwg==
-X-MS-Exchange-CrossTenant-Network-Message-Id: ed41451f-1cdf-482a-ebcd-08de86846f6a
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Mar 2026 13:27:30.0821
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: N3iL5nc4VAEvU2G9KCYJj+MXbCvQBR4uX79zxeBC8BM79vMJUsEOm9595+6OhMjBzOEHj11XCeJWBvCFo68AcQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR11MB5158
-X-OriginatorOrg: intel.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260319185705.1516950-5-kamal.dasu@broadcom.com>
 
-On 16/03/2026 23:23, Nelson Johnson wrote:
-> This series fixes the long-broken SD slot on the Lenovo N22
-> (Model 80S6 / MTM 80S60001US) with Intel Celeron N3050 Braswell
-> hardware running Debian 13 and Linux 6.19.6.
-> 
-> The regression goes back to kernel 4.14. The Braswell SD controller
-> (PCI ID 8086:2296) is exposed by firmware through both PCI
-> 0000:00:12.0 and ACPI INT33BB:00 at \_SB_.PCI0.SDHB.
-> 
-> On this machine the newer runtime PM and card-detect handling no
-> longer works reliably, and the ACPI path permanently defers because
-> its dependency never becomes available. That leaves the slot unusable
-> unless the controller is forced back onto the working PCI path with
-> machine-specific quirks.
-> 
-> This series does three things, all scoped to the Lenovo N22 DMI
-> match:
-> 
-> 1. Disable the aggressive runtime PM/card-detect wake path for the
->    Braswell PCI SD controller.
-> 2. Bypass the broken firmware card-detect GPIO path and use polling
->    for card insertion detection.
-> 3. Prevent the competing ACPI INT33BB:00 node from binding on this
->    machine so the PCI SDHCI driver can own the controller.
+Hi Kamal,
 
-These changes seem more like they work around the problem rather
-than fix the problem, but you say it worked OK in v4.14?  I see also
-mention of v4.9 in patch 1?  When it was working, was it using the ACPI
-driver or the PCI driver?
+kernel test robot noticed the following build warnings:
 
-In patch 3, you say the SDHCI APCI driver repeatedly defers.  Is that
-because it is waiting for the GPIO driver for the Card Detect GPIO?
+[auto build test WARNING on linus/master]
+[also build test WARNING on v7.0-rc4 next-20260319]
+[cannot apply to ulf-hansson-mmc-mirror/next]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-Note Lenovo N22 seems to date back to 2017.  Is it really worth
-spending time on something that old, especially as no one seems
-to have worried about it before?
+url:    https://github.com/intel-lab-lkp/linux/commits/Kamal-Dasu/mmc-core-Add-panic-context-host-operations-for-pstore-backends/20260320-064639
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20260319185705.1516950-5-kamal.dasu%40broadcom.com
+patch subject: [PATCH v3 4/4] mmc: core: Add MMC pstore backend driver
+config: m68k-allyesconfig (https://download.01.org/0day-ci/archive/20260320/202603202338.OYFgRuuU-lkp@intel.com/config)
+compiler: m68k-linux-gcc (GCC) 15.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260320/202603202338.OYFgRuuU-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202603202338.OYFgRuuU-lkp@intel.com/
+
+All warnings (new ones prefixed by >>):
+
+   drivers/mmc/core/mmcpstore.c: In function 'mmcpstore_register_for_card':
+>> drivers/mmc/core/mmcpstore.c:1016:23: warning: variable 'offset_bytes' set but not used [-Wunused-but-set-variable]
+    1016 |         unsigned long offset_bytes;
+         |                       ^~~~~~~~~~~~
+--
+>> Warning: drivers/mmc/core/mmcpstore.c:250 function parameter 'sect_offset' not described in 'mmcpstore_do_request_internal'
+>> Warning: drivers/mmc/core/mmcpstore.c:573 expecting prototype for mmcpstore_read(). Prototype was for mmcpstore_read_zone() instead
+>> Warning: drivers/mmc/core/mmcpstore.c:1248 function parameter 'disk' not described in 'mmcpstore_card_add'
+>> Warning: drivers/mmc/core/mmcpstore.c:250 function parameter 'sect_offset' not described in 'mmcpstore_do_request_internal'
+>> Warning: drivers/mmc/core/mmcpstore.c:1248 function parameter 'disk' not described in 'mmcpstore_card_add'
 
 
-> 
-> With these changes applied, the SD slot binds through sdhci-pci and
-> detects and mounts SD cards again on the Lenovo N22.
-> 
-> Tested on:
->   Lenovo N22 Model 80S6 / MTM 80S60001US
->   Intel Celeron N3050 (Braswell)
->   Debian 13
->   Linux 6.19.6
-> 
-> Nelson Johnson (3):
->   mmc: sdhci-pci: disable aggressive runtime PM for Braswell SD on
->     Lenovo N22
->   mmc: sdhci-pci: force polling card detect for Braswell SD on Lenovo
->     N22
->   mmc: sdhci-acpi: exclude INT33BB:00 from ACPI binding on Lenovo N22
-> 
->  drivers/mmc/host/sdhci-acpi.c     | 10 ++++++++++
->  drivers/mmc/host/sdhci-pci-core.c | 33 ++++++++++++++++++++++++++-----
->  2 files changed, 38 insertions(+), 5 deletions(-)
-> 
+vim +/offset_bytes +1016 drivers/mmc/core/mmcpstore.c
 
+   998	
+   999	/**
+  1000	 * mmcpstore_register_for_card - Register pstore for specific MMC card
+  1001	 * @card: MMC card to register pstore for
+  1002	 * @dev_name_param: Device path (e.g., "/dev/mmcblk1p5")
+  1003	 * @disk: gendisk for the card (non-NULL for builtin path, NULL for module)
+  1004	 *
+  1005	 * Returns: 0 on success, negative error on failure
+  1006	 */
+  1007	static int mmcpstore_register_for_card(struct mmc_card *card,
+  1008					       const char *dev_name_param,
+  1009					       struct gendisk *disk)
+  1010	{
+  1011		struct mmcpstore_context *cxt;
+  1012		struct pstore_blk_config conf;
+  1013		struct file *bdev_file;
+  1014		struct block_device *bdev;
+  1015		sector_t partition_sectors;
+> 1016		unsigned long offset_bytes;
+  1017		unsigned long required_size;
+  1018		unsigned long kmsg_records;
+  1019		int ret;
+  1020	
+  1021		/*
+  1022		 * Open the block device to get partition start sector and size.
+  1023		 * When called from mmc_blk_probe() (builtin path), /dev/ may not
+  1024		 * be mounted yet, so use the gendisk + partition number to look
+  1025		 * up the dev_t directly.
+  1026		 */
+  1027		if (disk) {
+  1028			int partno = mmcpstore_extract_partno(dev_name_param);
+  1029			dev_t devt;
+  1030	
+  1031			if (partno < 0) {
+  1032				pr_warn("Cannot parse partition from %s\n",
+  1033					dev_name_param);
+  1034				return -EINVAL;
+  1035			}
+  1036			devt = part_devt(disk, partno);
+  1037			if (!devt) {
+  1038				pr_warn("Partition %d not found on %s\n",
+  1039					partno, disk->disk_name);
+  1040				return -ENODEV;
+  1041			}
+  1042			bdev_file = bdev_file_open_by_dev(devt, BLK_OPEN_READ,
+  1043							  NULL, NULL);
+  1044		} else {
+  1045			bdev_file = bdev_file_open_by_path(dev_name_param,
+  1046							   BLK_OPEN_READ, NULL, NULL);
+  1047		}
+  1048		if (IS_ERR(bdev_file)) {
+  1049			ret = PTR_ERR(bdev_file);
+  1050			pr_warn("Failed to open device %s: %d\n", dev_name_param, ret);
+  1051			return ret;
+  1052		}
+  1053		bdev = file_bdev(bdev_file);
+  1054	
+  1055		cxt = mmcpstore_ctx;
+  1056		if (!cxt) {
+  1057			pr_err("No context available\n");
+  1058			fput(bdev_file);
+  1059			return -ENODEV;
+  1060		}
+  1061	
+  1062		/* pre-allocated buffer for alignment handling */
+  1063		cxt->buffer_size = MMC_PSTORE_MAX_BUFFER_SIZE;
+  1064		cxt->buffer = kmalloc(cxt->buffer_size, GFP_KERNEL);
+  1065		if (!cxt->buffer) {
+  1066			pr_err("Failed to allocate %zu bytes for pstore buffer\n",
+  1067			       cxt->buffer_size);
+  1068			fput(bdev_file);
+  1069			return -ENOMEM;
+  1070		}
+  1071	
+  1072		if (!(card->host->caps & MMC_CAP_NONREMOVABLE)) {
+  1073			dev_err(&card->dev, "MMC pstore only supports non-removable cards (eMMC)\n");
+  1074			dev_err(&card->dev, "This card is removable and not suitable for pstore\n");
+  1075			ret = -EOPNOTSUPP;
+  1076			goto err_free;
+  1077		}
+  1078	
+  1079		/* Initialize context */
+  1080		cxt->card = card;
+  1081		strscpy(cxt->card_name, dev_name_param, sizeof(cxt->card_name));
+  1082		cxt->start_sect = bdev->bd_start_sect;
+  1083		cxt->size = bdev_nr_bytes(bdev);
+  1084	
+  1085		/* Apply user-specified sector offset and count within the partition */
+  1086		if (part_sect_ofs > 0 || part_sect_cnt > 0) {
+  1087			if ((part_sect_ofs > 0 && part_sect_cnt == 0) ||
+  1088			    (part_sect_ofs == 0 && part_sect_cnt > 0)) {
+  1089				dev_err(&card->dev, "sector_offset and sector_count must be specified\n");
+  1090				ret = -EINVAL;
+  1091				goto err_free;
+  1092			}
+  1093	
+  1094			/* Validate offset and count */
+  1095			partition_sectors = cxt->size >> 9;
+  1096			offset_bytes = part_sect_ofs * MMC_PSTORE_SECTOR_SIZE;
+  1097	
+  1098			if (part_sect_ofs >= partition_sectors) {
+  1099				dev_err(&card->dev, "Sector offset %lu >= partition size %llu sectors\n",
+  1100					part_sect_ofs, partition_sectors);
+  1101				ret = -EINVAL;
+  1102				goto err_free;
+  1103			}
+  1104	
+  1105			if (part_sect_ofs + part_sect_cnt > partition_sectors) {
+  1106				dev_err(&card->dev, "Sector range %lu-%lu exceeds partition size %llu sectors\n",
+  1107					part_sect_ofs,
+  1108					part_sect_ofs + part_sect_cnt - 1,
+  1109					partition_sectors);
+  1110				ret = -EINVAL;
+  1111				goto err_free;
+  1112			}
+  1113	
+  1114			cxt->start_sect += part_sect_ofs;
+  1115			cxt->size = part_sect_cnt * MMC_PSTORE_SECTOR_SIZE;
+  1116	
+  1117			pr_info("Pstore will use: sectors %lu-%lu (%llu bytes total)\n",
+  1118				part_sect_ofs, part_sect_ofs + part_sect_cnt - 1,
+  1119				cxt->size);
+  1120		}
+  1121	
+  1122		fput(bdev_file);
+  1123	
+  1124		/* Configure pstore */
+  1125		memset(&conf, 0, sizeof(conf));
+  1126		strscpy(conf.device, dev_name_param, sizeof(conf.device));
+  1127		conf.max_reason = KMSG_DUMP_PANIC;
+  1128	
+  1129		/* Fetch pstore configuration including sizes from module parameters */
+  1130		ret = pstore_blk_get_config(&conf);
+  1131		if (ret != 0) {
+  1132			pr_err("Failed to get pstore block config: %d\n", ret);
+  1133			goto err_free;
+  1134		}
+  1135	
+  1136		/* Validate size requirements */
+  1137		ret = mmcpstore_calculate_sizes(cxt, &conf, &required_size,
+  1138						&kmsg_records);
+  1139		if (ret)
+  1140			goto err_free;
+  1141	
+  1142		pr_debug("Pstore requirements: kmsg=%lu KB, pmsg=%lu KB, console=%lu KB, ftrace=%lu KB\n",
+  1143			MMC_PSTORE_BYTES_TO_KB(conf.kmsg_size),
+  1144			MMC_PSTORE_BYTES_TO_KB(conf.pmsg_size),
+  1145			MMC_PSTORE_BYTES_TO_KB(conf.console_size),
+  1146			MMC_PSTORE_BYTES_TO_KB(conf.ftrace_size));
+  1147		pr_debug("Pstore capacity: ~%lu kmsg records possible (%lu KB each, varies with compression)\n",
+  1148			kmsg_records, MMC_PSTORE_BYTES_TO_KB(conf.kmsg_size));
+  1149	
+  1150		/* Set up pstore device info */
+  1151		cxt->dev.flags = 0; /* Support all backends */
+  1152		if (conf.kmsg_size > 0)
+  1153			cxt->dev.flags |= PSTORE_FLAGS_DMESG;
+  1154		if (conf.pmsg_size > 0)
+  1155			cxt->dev.flags |= PSTORE_FLAGS_PMSG;
+  1156		if (conf.console_size > 0)
+  1157			cxt->dev.flags |= PSTORE_FLAGS_CONSOLE;
+  1158		if (conf.ftrace_size > 0)
+  1159			cxt->dev.flags |= PSTORE_FLAGS_FTRACE;
+  1160	
+  1161		/* Set up zone structure for pstore/zone API */
+  1162		cxt->dev.zone.read = mmcpstore_read_zone;
+  1163		cxt->dev.zone.write = mmcpstore_write;
+  1164		cxt->dev.zone.panic_write = mmcpstore_panic_write;
+  1165		cxt->dev.zone.total_size = cxt->size;
+  1166		cxt->dev.zone.kmsg_size = conf.kmsg_size;
+  1167		cxt->dev.zone.pmsg_size = conf.pmsg_size;
+  1168		cxt->dev.zone.console_size = conf.console_size;
+  1169		cxt->dev.zone.ftrace_size = conf.ftrace_size;
+  1170		cxt->dev.zone.max_reason = conf.max_reason;
+  1171		cxt->dev.zone.name = "mmcpstore";
+  1172		cxt->dev.zone.owner = THIS_MODULE;
+  1173	
+  1174		mutex_init(&cxt->lock);
+  1175	
+  1176		/*
+  1177		 * Set state to READY before registration because register_pstore_device()
+  1178		 * triggers pstore_zone recovery which calls our read callback, and the
+  1179		 * read callback requires state == READY to proceed.
+  1180		 */
+  1181		mutex_lock(&mmcpstore_global_lock);
+  1182		cxt->state = MMCPSTORE_STATE_READY;
+  1183		mutex_unlock(&mmcpstore_global_lock);
+  1184	
+  1185		ret = register_pstore_device(&cxt->dev);
+  1186		if (ret) {
+  1187			dev_err(&card->dev, "Failed to register pstore device: %d\n",
+  1188				ret);
+  1189			mutex_lock(&mmcpstore_global_lock);
+  1190			cxt->state = MMCPSTORE_STATE_UNINITIALIZED;
+  1191			mutex_unlock(&mmcpstore_global_lock);
+  1192			goto err_free;
+  1193		}
+  1194	
+  1195		dev_info(&card->dev, "MMC pstore backend registered successfully\n");
+  1196		dev_info(&card->dev, "Device: %s, Size: %llu bytes (%llu KB)\n",
+  1197			 dev_name_param, cxt->size, MMC_PSTORE_BYTES_TO_KB(cxt->size));
+  1198		dev_info(&card->dev, "Start sector: %llu, Sector count: %llu\n",
+  1199			 cxt->start_sect, cxt->size / MMC_PSTORE_SECTOR_SIZE);
+  1200		dev_info(&card->dev, "Pstore components: kmsg=%lu KB, pmsg=%lu KB, console=%lu KB, ftrace=%lu KB\n",
+  1201			 MMC_PSTORE_BYTES_TO_KB(conf.kmsg_size),
+  1202			 MMC_PSTORE_BYTES_TO_KB(conf.pmsg_size),
+  1203			 MMC_PSTORE_BYTES_TO_KB(conf.console_size),
+  1204			 MMC_PSTORE_BYTES_TO_KB(conf.ftrace_size));
+  1205	
+  1206		return 0;
+  1207	
+  1208	err_free:
+  1209		kfree(cxt->buffer);
+  1210		/* Don't free cxt here - it's the global context */
+  1211		return ret;
+  1212	}
+  1213	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
