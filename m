@@ -1,116 +1,137 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.19])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DDD33CFF64;
-	Fri, 20 Mar 2026 16:23:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 541403CEBAC
+	for <linux-mmc@vger.kernel.org>; Fri, 20 Mar 2026 16:47:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774023833; cv=none; b=P0txKU0s3hgvBNA4uhmSDCnWMukGTSxxs87k6pRZ55MSVjF7SYH2vUyljQEXeHRZlG1J2lP5HYk1ldUSZcIGTIk+Kfd9a8wpZ16Td8Ougw3EKlVL5fp5XFm7EAHBT4GWi0llafJ2edYIo1S/8CPG2qUfZKfBbBtPld0PstxVR08=
+	t=1774025279; cv=none; b=gsDAPBDmp1vQ/TYScM0uGHLgJ127DULf+303DPU1RRTNPjAf98DX0981LqhLnbkH30BiceFkK1Ff2i5vjD8qJpzBjXL/QSykFi7p4zdOQUQ75QtdrDXmmtf+Dz0MkspYoRasfcTZN2m4emX0dLjSfb2wT5DasP9yBHrfR9Fm0aM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774023833; c=relaxed/simple;
-	bh=+Hct0wSWlEvIEqzBBlIjUJTEHlHgLpPL++WA8LriHAs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=CTDNvjvSBGnbxI7V3lAHBoZ45EaGWDzTxVPengpd+ntXzhQBAZNL3eHUuI1RHFS6/F74EGUbpEbVqqNHcgsw4UE0sQI8qvcgM/+UwkBpI4OQNwj+zqGg7jkBXfGlZwwqUp0KgYnA0e3RCvg/WmHW8aEDCK9nqFnzd8ljErqo6YQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Cz1QXChM; arc=none smtp.client-ip=198.175.65.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1774025279; c=relaxed/simple;
+	bh=W1GOM04l1mi8I+C4Bl31veWLfmy/KBGCNzBCVbPDDHQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=oxPw3HRORjdX3fXzoU+Pi1fIEzf+JWe3CHhjWruWJy97+bDI3WacqpXAu7gJ72L8viZRf9nTkCbOtrboW0MTTOobCIhsnqQKUB9SzObtd6J3IX0jD72MzB59oxL/tafCCKH9twHvQ2oOZuFchtvYLFCTiZ03324OQH8ZwTF5ChQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Nf2/3JKo; arc=none smtp.client-ip=209.85.128.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Cz1QXChM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1774023831; x=1805559831;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=+Hct0wSWlEvIEqzBBlIjUJTEHlHgLpPL++WA8LriHAs=;
-  b=Cz1QXChM5i7rwe73YNH+T9mxyDDMeNX1fDEODDCS1/XYnri22BHmDuHQ
-   xkC0Q6l9/pChGRqBXRhQu/4FlIPj7dkqenHNpBFExW/uUincx1yAwkL+X
-   OUtsboUb3bqJqV8aZKnC52EFwG2Zn8rBzWvDw2FzhdZqccnMZ8+ZGtblI
-   QJb6l2bTEGbFJg/trBTUFiocTY+caBrAc3ouk5A8RmTEJSnPh50+EIx22
-   2kHtHym072cSzIyNx1mu8Jsok4FqwEUlF8hlyXuM/PbXx/uQmuEKADQ9A
-   JNVxR57R0Rxhw391pAYl0DnfgQoivAo8Yq07vHumxfrDiLgzleSGINjcw
-   g==;
-X-CSE-ConnectionGUID: gz8kqaqkRZO4DLDDMRrErw==
-X-CSE-MsgGUID: +sala6otSAGpFEE3Q6I7ng==
-X-IronPort-AV: E=McAfee;i="6800,10657,11735"; a="74996885"
-X-IronPort-AV: E=Sophos;i="6.23,130,1770624000"; 
-   d="scan'208";a="74996885"
-Received: from orviesa007.jf.intel.com ([10.64.159.147])
-  by orvoesa111.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Mar 2026 09:23:50 -0700
-X-CSE-ConnectionGUID: fSoM1sc1Se6T+9nFulmVug==
-X-CSE-MsgGUID: L+rjlPnzRK2GE6qe/qbFCA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,130,1770624000"; 
-   d="scan'208";a="223550846"
-Received: from lkp-server01.sh.intel.com (HELO ba623fe84fe1) ([10.239.97.150])
-  by orviesa007.jf.intel.com with ESMTP; 20 Mar 2026 09:23:46 -0700
-Received: from kbuild by ba623fe84fe1 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1w3cdS-0000000007x-44v7;
-	Fri, 20 Mar 2026 16:23:42 +0000
-Date: Sat, 21 Mar 2026 00:22:58 +0800
-From: kernel test robot <lkp@intel.com>
-To: Kamal Dasu <kamal.dasu@broadcom.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kees Cook <kees@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, Tony Luck <tony.luck@intel.com>,
-	"Guilherme G . Piccoli" <gpiccoli@igalia.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Arend van Spriel <arend.vanspriel@broadcom.com>,
-	William Zhang <william.zhang@broadcom.com>,
-	bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, Kamal Dasu <kamal.dasu@broadcom.com>
-Subject: Re: [PATCH v3 2/4] mmc: sdhci: Implement panic-context write support
-Message-ID: <202603202324.GqXKHqZB-lkp@intel.com>
-References: <20260319185705.1516950-3-kamal.dasu@broadcom.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Nf2/3JKo"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-79800183233so27932207b3.1
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Mar 2026 09:47:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1774025277; x=1774630077; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=dEsLt4UseGRWoaPSn0cyl2B9W2M3YJu0Bn9/HhQjwcI=;
+        b=Nf2/3JKoS63kewGMfsEdkppXSwltn/aktyzkG7LNLjPQb8XToOoM+Acauxzwwt8GHN
+         k2UcyAa2YqrkR2q/XuL8D3Ki2B5jIUg3rg8nf9/iMIfe/MquspAotEDaIesLmpFv0QXa
+         oBIRPW4EEUr7a6PUelO5dt2VhzfPS3GeAYP4VrLJVJV+gEq1bNnP9PLkh+5SdMk9nt9H
+         sVuTyjRGRyD597tYD/VdRRZjLiik9z22xErpfSRl6iehIGRJNfrhZasDE7F7E1iaLyW2
+         iwUoTPCVqfUQoIlKCo4ciO6jeWDZQvojQx7YgsNMP/TVNTmF15il/hiIwqN3gXTZcf0i
+         NSaA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774025277; x=1774630077;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=dEsLt4UseGRWoaPSn0cyl2B9W2M3YJu0Bn9/HhQjwcI=;
+        b=W/wQB6UWGJhrrU0tkaqWbKdDMH7HeU9G9ZPeUTvEGinJ2i4MjjU118YJgbWOYmu4Tf
+         E2zo6mbDl7f94Lw2FMznL00Hp/6MHz4J2T9Y2cZEM9RwulbkPCtmrXKLCmwT6QXYRjMO
+         wVdNx2tWhYVjN/mVwOuej+EwNSl3cAMuecUz/x5v5WiHkVuFWApsd5Sr/Ry/TB/PQsbF
+         pWmvUkBJk8yJbHyPBOkHoj/CEJ/4xzyZZRY/poL5rrFwsRLIU4s5mMQgCGmGesg2q0un
+         vc9HBkLbzvlSrYc+hAvePjyqjmB0xbkAl995k9DObc+AGtmE/NBdk2Iyl3SVGnkowmrZ
+         09vA==
+X-Forwarded-Encrypted: i=1; AJvYcCVJVypCIPvY6cPVZwIxk2VdRTWOm/Mh/P//vPU8z9K4TGBtvTzLpZLP7u29kkd69kRQlkauQcMj1CI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxSmZJk5ZSMDqfMAo4pvpbT/tauaKEwnL6qF+qkyLylAj3hQQTb
+	M4E1IH/CX6PvWN4vbKXcmwcZ8HTEIgB0MOor+FK3o1Rszmb7BFLe31gu
+X-Gm-Gg: ATEYQzx1xrv16IwsTGK7qxI4ev0bHGNji1n/SicopUqWDCMJ9EGmrVHgGIdDfPxJdgW
+	fS5hfgn2rkg2yeUqotXVi9agGgrnPPxzCtZ5KarLZqHJDYMmc+08AraNtXi0ZmM8ejBuMyIAdx6
+	SYJH42VmKg12ax8tktblJOhoqpFIS8+tOpQzXVX8TH2W23juHRkepZlMclip9hma1AV7G4857qO
+	Hbd2fa5X1g0nM2zpoFjDYnE2zGd1sPOIXWjeMt0ulbfyeJsaIFwWOw8wN1/hqb4abZBFo8NCmO/
+	MEL3NBbgkaT66/8/6/IKxBrgwn5Hb+1IeaP7CIasfZctrvtEZhSCmuYL5K5iXPasiW2pZ9oUIOR
+	tn/4/pXGq+27UrlHgHzx7JMOpioFLH6HiSUZfPIxRrDpRTlEYs1Hs8sUJGvZqxIxyuLguFPz6xX
+	tNCfVWYeob0sChAr2rZmsUKRyMcORwFidwPjc26tY=
+X-Received: by 2002:a05:690c:91:b0:794:c02e:f617 with SMTP id 00721157ae682-79a81a9018emr77614877b3.12.1774025277259;
+        Fri, 20 Mar 2026 09:47:57 -0700 (PDT)
+Received: from Starblazer007.localdomain ([12.206.154.114])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-79a9057b4ecsm18839507b3.35.2026.03.20.09.47.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Mar 2026 09:47:56 -0700 (PDT)
+From: Nelson Johnson <nzjfr547@gmail.com>
+To: adrian.hunter@intel.com
+Cc: ulf.hansson@linaro.org,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	andriy.shevchenko@intel.com
+Subject: Re: [PATCH 0/3] mmc: Lenovo N22 Braswell SD slot fixes
+Date: Fri, 20 Mar 2026 11:47:53 -0500
+Message-ID: <20260320164753.536-1-nzjfr547@gmail.com>
+X-Mailer: git-send-email 2.47.3
+In-Reply-To: <2cb3de9f-2c07-48c6-a3e7-63d34b49ca32@intel.com>
+References: <2cb3de9f-2c07-48c6-a3e7-63d34b49ca32@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260319185705.1516950-3-kamal.dasu@broadcom.com>
+Content-Transfer-Encoding: 8bit
 
-Hi Kamal,
+On Fri, Mar 20, 2026 at 8:27 AM Adrian Hunter wrote:
+> These changes seem more like they work around the problem rather
+> than fix the problem, but you say it worked OK in v4.14? I see also
+> mention of v4.9 in patch 1? When it was working, was it using the ACPI
+> driver or the PCI driver?
 
-kernel test robot noticed the following build warnings:
+You are right that this series is a workaround for a firmware-specific
+problem rather than a generic root-cause fix.
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on v7.0-rc4 next-20260319]
-[cannot apply to ulf-hansson-mmc-mirror/next]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+My confirmed working baseline is v4.9, and on that kernel the
+controller was owned by sdhci-pci, not sdhci-acpi. The INT33BB:00
+ACPI node was present in firmware but did not prevent the PCI path
+from working. I should have been more precise in the cover letter.
+What I can state from testing is:
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Kamal-Dasu/mmc-core-Add-panic-context-host-operations-for-pstore-backends/20260320-064639
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20260319185705.1516950-3-kamal.dasu%40broadcom.com
-patch subject: [PATCH v3 2/4] mmc: sdhci: Implement panic-context write support
-config: i386-randconfig-r134-20260320 (https://download.01.org/0day-ci/archive/20260320/202603202324.GqXKHqZB-lkp@intel.com/config)
-compiler: gcc-13 (Debian 13.3.0-16) 13.3.0
-sparse: v0.6.5-rc1
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260320/202603202324.GqXKHqZB-lkp@intel.com/reproduce)
+  - v4.9: slot works via sdhci-pci
+  - current kernels: slot is unusable
+  - current kernels with this series applied: slot works again via sdhci-pci
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202603202324.GqXKHqZB-lkp@intel.com/
+> In patch 3, you say the SDHCI ACPI driver repeatedly defers. Is that
+> because it is waiting for the GPIO driver for the Card Detect GPIO?
 
-All warnings (new ones prefixed by >>):
+Yes. On this machine INT33BB:00 defers waiting for the card-detect
+GPIO dependency, and that dependency never becomes available. In the
+broken state the ACPI path does not successfully probe and the slot
+remains unusable. Excluding INT33BB:00 on this DMI match allows
+sdhci-pci to own 0000:00:12.0 and restores card detection.
 
->> Warning: drivers/mmc/host/sdhci.c:3104 function parameter 'mmc' not described in 'sdhci_panic_prepare'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mmc' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mrq' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mmc' not described in 'sdhci_panic_complete'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mrq' not described in 'sdhci_panic_complete'
->> Warning: drivers/mmc/host/sdhci.c:3104 function parameter 'mmc' not described in 'sdhci_panic_prepare'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mmc' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mrq' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mmc' not described in 'sdhci_panic_complete'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mrq' not described in 'sdhci_panic_complete'
+I am not aware of an existing generic ownership-arbitration mechanism
+between sdhci-acpi and sdhci-pci for this dual-enumerated firmware
+layout, so I chose the narrowest fix available: a DMI-scoped exclusion
+on the affected machine only. That approach is consistent with how the
+subsystem has handled similar firmware defects elsewhere. sdhci-acpi.c
+already carries a maintained quirk table covering the Lenovo Miix 320,
+Acer Aspire Switch 10, Lenovo Yoga Tablet 2 Pro, Toshiba Encore 2, and
+ASUS T100TA, all firmware defects fixed with DMI scope and accepted
+with stable tags. sdhci-pci-core.c follows the same pattern, as
+jsl_broken_hs400es() immediately above the new helper demonstrates.
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+> Note Lenovo N22 seems to date back to 2017. Is it really worth
+> spending time on something that old, especially as no one seems
+> to have worried about it before?
+
+My argument for upstream is mainly that the quirk is small and
+low-risk, and that PCI ID 8086:2296 is part of the wider Braswell SD
+controller family rather than unique to this one machine. Although the
+Lenovo N22 is an older platform, Braswell systems remain in active
+secondary use. The Lenovo IdeaPad 100S-14IBR carries the same
+controller and has a documented bug report showing sdhci-pci not
+binding on kernel 4.10 after working on 4.8, the same symptom pattern.
+The commit documents the failure mode, the correct driver ownership
+decision, and the workaround approach in a place where anyone dealing
+with a similar Braswell platform can find and reference it.
+
+That said, I defer to your judgment on whether this serves value to
+the wider community. I am happy to carry it as a local patch if you
+feel it does not belong upstream.
