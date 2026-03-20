@@ -1,114 +1,121 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
+Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52F5D2D5C71;
-	Fri, 20 Mar 2026 03:41:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFB1D318EF6;
+	Fri, 20 Mar 2026 08:27:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1773978092; cv=none; b=THAbpT8QHFy2ByYxgaxiwbvaVk/sGeBIIIamNzinhqOzyP6PfRQOes8n9CClKKfSsDuA3Ag5AHEM2r1QRdaLRs8UEHWMpGOSe34avHk3hdXclgqK/xfQMw3xurGZQpjfeMEB9jgVA2JQTa6vZAzaEJOkEMEWjOz5pGic83RdHlY=
+	t=1773995268; cv=none; b=B/MsHENnxGsx/jD8A4pUeNRFLCxCcztvMnEG5mZRiCi04OniNiZh8ko7EUqCXrliipCllarTF9mjW4dDTrGAl/LFCWFm75JUgHOok5eYTPFPUZnwo1innrymeONZXS/we7uO5T14ziagsBL0uacNc9AZRlO4brhszx7B7Nw37A0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1773978092; c=relaxed/simple;
-	bh=B793okv8J9P9yN5aP1gb+mw5+fk7GK3Q0xVoa4v3W+Q=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=U1K++M9vhU5kBoUk5Ijs4mSraZ7GHNiiNMTJ0CeShyJcbiYthDC4ZJyL+l/qhn0DufofnNpLHxR4iVscNR6Esp1yRqaYMSbym4ftNCg9GWqT91FBtXYQR3sDxDI2Z7/FiaKCPreMjeNEVD3sdj/zdnUCMt2GwTdsRWoWJO0O3+o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=GDGobM1w; arc=none smtp.client-ip=198.175.65.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1773995268; c=relaxed/simple;
+	bh=jzXGL4RFxsipEaOfoGH4eaQWYGkAqlUCFQ+ktI+lCQY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ax1sMINo9EZ0HnsBZ2GZjTrzeZNT2l6taB/KbVqn5r+d7gWB0ggMFDZZW0k0Yil4FGcXtEOUtSxL3Zq57mFao4Nt8aKWMuJ3fdR7EG4EXXlT1BzSA8uWKjmpjcRpLF9v4kv8Xr51AKixcgIUArXAlTMXtpExCW1L//H703carI0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=nDhEa0G6; arc=none smtp.client-ip=148.251.105.195
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GDGobM1w"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1773978090; x=1805514090;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=B793okv8J9P9yN5aP1gb+mw5+fk7GK3Q0xVoa4v3W+Q=;
-  b=GDGobM1w8eEP5BXYaDX6ntF7BuvsyjxjDG/VG30EMqf3Y/cLwLOQ+9J0
-   uOvAvrVtJdg+oXfJm53zGsgS6AZPHpEuajJwI9oPmuYkRrDY1KCu+OH6E
-   WbPU7ZXQkFq6DV5E3QAg0rqBDk4HN77lmhxYrD4rkkqHyC4DTwibkA3J3
-   Qv77qoR8aQ3WwEwWfyMY54oKrhdCtVeEkggHwhAcafApXtSLLKDoYe/g4
-   cqra7A4/fNF4wjDz8sTL9vMlhgl0oHD07e+0r5CaIBT59OKKeJIFOqy1+
-   T65CNafuFTB1CZcMhSdSuf1CzlGAf7R3ZkDPqVsl32cm6OaeFDMX84759
-   Q==;
-X-CSE-ConnectionGUID: 5RnG/32qTw+anZRTTXmLyw==
-X-CSE-MsgGUID: gIZv/+xHRYu9gVvvPS92dg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11734"; a="78666617"
-X-IronPort-AV: E=Sophos;i="6.23,130,1770624000"; 
-   d="scan'208";a="78666617"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Mar 2026 20:41:30 -0700
-X-CSE-ConnectionGUID: 9aQVccFZTBiwnwy9+rM8nQ==
-X-CSE-MsgGUID: FDinyjp+SGi9zNnm6y53Zw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,130,1770624000"; 
-   d="scan'208";a="228101729"
-Received: from igk-lkp-server01.igk.intel.com (HELO 9958d990ccf2) ([10.211.93.152])
-  by orviesa005.jf.intel.com with ESMTP; 19 Mar 2026 20:41:27 -0700
-Received: from kbuild by 9958d990ccf2 with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1w3Qjk-000000004xR-30a6;
-	Fri, 20 Mar 2026 03:41:24 +0000
-Date: Fri, 20 Mar 2026 04:40:56 +0100
-From: kernel test robot <lkp@intel.com>
-To: Kamal Dasu <kamal.dasu@broadcom.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kees Cook <kees@kernel.org>
-Cc: oe-kbuild-all@lists.linux.dev, Tony Luck <tony.luck@intel.com>,
-	"Guilherme G . Piccoli" <gpiccoli@igalia.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Arend van Spriel <arend.vanspriel@broadcom.com>,
-	William Zhang <william.zhang@broadcom.com>,
-	bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, Kamal Dasu <kamal.dasu@broadcom.com>
-Subject: Re: [PATCH v3 2/4] mmc: sdhci: Implement panic-context write support
-Message-ID: <202603200422.mPPKA7F3-lkp@intel.com>
-References: <20260319185705.1516950-3-kamal.dasu@broadcom.com>
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="nDhEa0G6"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+	s=mail; t=1773995264;
+	bh=jzXGL4RFxsipEaOfoGH4eaQWYGkAqlUCFQ+ktI+lCQY=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=nDhEa0G6i1GHYmuNE+Pr+aYMGbgbyL/5Oo8oC7K80jjluZX+jQvf/6snlTggWU2Ib
+	 SlXeSDrxv7BvfwW5HB/iV4DnEYWrTz9xGh6ELhN7f57+oz2/FlL2m+hSOGkm5Bv9Fj
+	 AzgyRkVgVm0oN3PdaFIWZvMY3Dg7EtAJdHBugx6OlrGUgslqtvete5/NMmwwNHW+vp
+	 NIIDGxlAXbG8cxiaRoqVoW0Z1jGTuO0pRPlwLIWQ3Z1KrfQM10As/H0SnCGP+hYrA6
+	 UrH5khIMTFnYxt+mJUoLUD6JqV3fROp07rUVtaPszPBX7X4/vP+xojJ3U17qT7Zq7Q
+	 hx24mj1aOhmZg==
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: kholk11)
+	by bali.collaboradmins.com (Postfix) with ESMTPSA id 5818117E0EF1;
+	Fri, 20 Mar 2026 09:27:44 +0100 (CET)
+Message-ID: <fa4d8347-e662-485b-b2b7-278a469176e8@collabora.com>
+Date: Fri, 20 Mar 2026 09:27:43 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260319185705.1516950-3-kamal.dasu@broadcom.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] dt-bindings: mmc: mtk-sd: add mediatek,mt8183-mmc
+ fallback to mediatek,mt8189-mmc
+To: David Lechner <dlechner@baylibre.com>,
+ Chaotian Jing <chaotian.jing@mediatek.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
+ Wenbin Mei <wenbin.mei@mediatek.com>
+Cc: Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-mediatek@lists.infradead.org
+References: <20260319-mtk-mmc-mt8189-compatible-v1-1-fb7ef2186c92@baylibre.com>
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Content-Language: en-US
+In-Reply-To: <20260319-mtk-mmc-mt8189-compatible-v1-1-fb7ef2186c92@baylibre.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-Hi Kamal,
+Il 19/03/26 21:36, David Lechner ha scritto:
+> Change mediatek,mt8189-mmc to include mediatek,mt8183-mmc as a fallback
+> compatible.
+> 
+> This has been tested using U-Boot and the MMC is still working using the
+> mediatek,mt8183-mmc fallback compatible, so they seem to be compatible
+> enough. And there are no upstream users of mediatek,mt8189-mmc yet, so
+> this should not be a breaking change.
 
-kernel test robot noticed the following build warnings:
+Devicetree describes hardware. This hardware IP is *not* compatible with the one
+found in MT8183, as it is a different revision.
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on v7.0-rc4 next-20260319]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Luck wants that there weren't too many breaking changes, and that whatever does
+change may need some more bits to activate before breaking, but describing this
+as compatible with MT8183 is wrong, because ... it's not.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Kamal-Dasu/mmc-core-Add-panic-context-host-operations-for-pstore-backends/20260320-064639
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20260319185705.1516950-3-kamal.dasu%40broadcom.com
-patch subject: [PATCH v3 2/4] mmc: sdhci: Implement panic-context write support
-config: x86_64-rhel-9.4 (https://download.01.org/0day-ci/archive/20260320/202603200422.mPPKA7F3-lkp@intel.com/config)
-compiler: gcc-14 (Debian 14.2.0-19) 14.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260320/202603200422.mPPKA7F3-lkp@intel.com/reproduce)
+Sorry, but... NACK.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202603200422.mPPKA7F3-lkp@intel.com/
+Regards,
+Angelo
 
-All warnings (new ones prefixed by >>):
+> 
+> Signed-off-by: David Lechner <dlechner@baylibre.com>
+> ---
+>   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index eb3755bdfdf7..9160e449aeb9 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -25,7 +25,6 @@ properties:
+>             - mediatek,mt8135-mmc
+>             - mediatek,mt8173-mmc
+>             - mediatek,mt8183-mmc
+> -          - mediatek,mt8189-mmc
+>             - mediatek,mt8196-mmc
+>             - mediatek,mt8516-mmc
+>         - items:
+> @@ -36,6 +35,7 @@ properties:
+>                 - mediatek,mt6893-mmc
+>                 - mediatek,mt8186-mmc
+>                 - mediatek,mt8188-mmc
+> +              - mediatek,mt8189-mmc
+>                 - mediatek,mt8192-mmc
+>                 - mediatek,mt8195-mmc
+>                 - mediatek,mt8365-mmc
+> 
+> ---
+> base-commit: b84a0ebe421ca56995ff78b66307667b62b3a900
+> change-id: 20260319-mtk-mmc-mt8189-compatible-a62da7c5dd7e
+> 
+> Best regards,
+> --
+> David Lechner <dlechner@baylibre.com>
+> 
 
->> Warning: drivers/mmc/host/sdhci.c:3104 function parameter 'mmc' not described in 'sdhci_panic_prepare'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mmc' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mrq' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mmc' not described in 'sdhci_panic_complete'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mrq' not described in 'sdhci_panic_complete'
->> Warning: drivers/mmc/host/sdhci.c:3104 function parameter 'mmc' not described in 'sdhci_panic_prepare'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mmc' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3154 function parameter 'mrq' not described in 'sdhci_panic_poll_completion'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mmc' not described in 'sdhci_panic_complete'
->> Warning: drivers/mmc/host/sdhci.c:3211 function parameter 'mrq' not described in 'sdhci_panic_complete'
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
