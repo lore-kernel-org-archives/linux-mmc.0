@@ -1,143 +1,107 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44ADD27EFEE
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 15:16:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50A4B3B47DB
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 15:19:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.50
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774279007; cv=pass; b=W2e1/bFAayTFmtIgAUPZvXIVlwBeW7U48ZaQOY7OwfsRdCvuG0fboXXqvIPTfPcwJrM8t84DEMm4WQZC4MuR9J5/Q4BU7xTA8y4UCPneFz9I4rwBDT7wrc647PqhSSIjgdWmM/lTultpsnA0CJ7Jz8cHAjMQieRfhUcPYP8lVWM=
+	t=1774279192; cv=pass; b=Zffw723tKRK49nJkxT9Ce3GfC9TZglf6MkIHpLpBS0u/zIQztn7IlV+iBBmFoi1YZX37/tcuTYoV8U9zGHCHwS8lQWdoPwvYR/ga109sf43RoSENOFalns36UWWI7Gd+o9KxS98ahBQQX2nOv0eiQciKct1Ik6A327faeQER6xk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774279007; c=relaxed/simple;
-	bh=836gBfI+o/qQj9Wm80ZiXK2Z8hCWuoDNwqZBhWEi0ko=;
+	s=arc-20240116; t=1774279192; c=relaxed/simple;
+	bh=tgu/M7O1nOMEON1H+IpryrZnkOPrCgyKpyi37gYQC8k=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JX6M3zEN0dFcXGZsNkt/xugOeN6bgSenr1VwhZ8yg5u1PITDqwKWNJd4w7ZBkiMLEiUR3U/32M6NUx/bv8DVrkeXEeZczhSprkaeZOh8uRR55FXHIDGv2xKMODEIAZyE5bRic7tmbsFgJSZhaSqyVZarS+aD9Lld6GQiG3ahiuU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xUign3uQ; arc=pass smtp.client-ip=209.85.167.49
+	 To:Cc:Content-Type; b=tPH5+2I/3jJGU3Dc2/0DDla7iXZ6FG3wrpZ/bw7bWZdoBuuPF40K6n4j6dj9mXXboLk3QgLGc+hVV4b0tyD4owWK3RiusZipxwa6kzGAR7lIXElBQ88PEJ6J/rBprfFjhqgGbdv+wZqKxdDWOvm1Rt67SM3MLfGcFSGs2PzujcA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tvwqGls7; arc=pass smtp.client-ip=209.85.167.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xUign3uQ"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5a27c329e98so3737747e87.3
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 08:16:45 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774279003; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tvwqGls7"
+Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-5a27bfadca9so5245541e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 08:19:51 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774279189; cv=none;
         d=google.com; s=arc-20240605;
-        b=atmaSifA4sSIDJZtX91O3kWXijKI1MFOfLzCvjdbqo0VcLfPrCC76LhmQcsqxS3I8b
-         hNc8G5ksQthNKCwo5+9pzpMgPWQlotGV83TWZnq3X8PXhbIywvWfR0sS9/C7j1etizoG
-         REpbHyBAr+ECXWG1ATU7cQWYDY5UFmCB96iJfa4aswGDFB5W7avlLaku0mMfTsSz+Ru/
-         xTJrtv5+qxBzri40DZvvGOsanLZKKui8tmkR1PFyR51y5SujRJ3PEtVeeCLLMwVflzJz
-         /Hfi9QI4C8U0Z2ZxFl7oPFRzSC0QesBm1aWFm6obVGVKSvth9Y5i7MXUFxl8+mmM8FWZ
-         72wA==
+        b=jT+FLnbSMtxpHhrwoRXZ1Q7p/WhgsSf8m+wmYBtuD8Hs/5M4PL4dcvAkCZ17RurwMQ
+         wTF3GsJZiguXaAUyUsHe83IDAY5TyoLG4uwV+hkX20jZ9N7sfqRZNseeAkager9IU1Le
+         Wb249EajA+1CW2KjWPDJH5Gm9+acljTLJfjUAPzkBzNlk9f1UfdoILympNSbXNpCyD12
+         Ho1LDmICZtj7F81TU/FUxsivS7eMeCd+3D0E6u5wX2DeG8mYGAVnEEYg308HlCDtgZQI
+         8jkroi8W2uGyfDJG4yfzuw1rc3Y0OVCrKl0/7WnCXNCz6Pu51hbOfZrJB+3iQ+z64djr
+         2BHA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=PiJLdQFlhIlU3UWbgyoh9CEcw5ImMs6weAHGhpFVB4g=;
-        fh=cz0WRVeOi49Bx9Fze+pvhjNsjggm3HY5LXoodu6MtlI=;
-        b=GQci+T9SGx4uQcCiVIlh0YO9fg4StnsdfVFSI3L7TP8qIzLE7Vf/1AiT8itmhm31+d
-         URblw7spHAQbXlsboVEaUpg9O91U8pAK9vahOlHi0oOyts3oNCshNe5m6lU57fHFXYZC
-         hLWk7Vco5R2nPBd6z7mP03sj6mcyb9sTWV7ZKlod1zK1pyyJtr+AjW+O4FmKiU43oq1I
-         O7F9jnAegGv0STGQq/HKzZ7KZ6fS7svGrfn7kf/Hp261UF5BKiHF2oWS2685eE2Il0B1
-         irlfwWhIrcI9K0byUODK4YP+ah0/8ClIFQ1ni7OWDHtH/yeI6wjMpWzk0LtW4iam+03d
-         q8ew==;
+        bh=XFch42FbhwwFdZVr6Uym9f4ktf0sE9Nb8AZvP/Q1Bv4=;
+        fh=e7a82Ygn2Dr3kTF5mQ04c/qcazpsvU137DtWthSb0rY=;
+        b=WVlfHlOaAMwP27jjSNVJPuuxnVflIhlWvJFJoJetwQaFFxW0khQcEHGZS45qxXiN66
+         dUmQ2n6K2R9b/Z9oYjrro0zbn58UiHVrgUetSoxzY4yBvPTjsfgVP27sG1SuptTZauDH
+         jXB0Cwn5UzmHaz8OTf3p28HdvcsSRR6ztZxwcYmRIVy0khrbTgRVfGSkuy/4adO7yl7U
+         efynsnpQ8GKuMhniPjTCPyYuXpi3b5p7ojdO4HoHZ6Niy75RPg3a6Hht5chXRAKEJRYm
+         wi5D82KNnoGqjXT4FxBH7jd4MDrRViv/7lfyR1kdg5ynOGqy1pOzZM354p2Ny2bISA/k
+         i7ig==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774279003; x=1774883803; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774279189; x=1774883989; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=PiJLdQFlhIlU3UWbgyoh9CEcw5ImMs6weAHGhpFVB4g=;
-        b=xUign3uQsneJLCtbdzdUiskjnLzlZTifP2G+Mg+7uM9suvKQBVU6Z8F9LP5htvB6aC
-         LuujxyVSazHHp7EHcfaWXnJw87iKEFrOZR8Cb988nWgtVJnSWBB8Ta3xnUWNG9kXdSmn
-         nKDzJ6p4DgfgrsZ5GJvri8HONqexZsSrkvwNgm9R7eNI24DG8a0wzjbM4vVBp1TAM10P
-         viUxhwJaO4TRS3kxYrI9b19CHFmf7eKBhc8iuReIyTr5HoDfg7AgM4mMn5jxzY92LM5z
-         ZMl61wiBWcVXwYco4HlAmxDDPz8bvG14aaz1KzfczEVL0ZExkdAF1m/B/ntnHDXepJ3c
-         3HXw==
+        bh=XFch42FbhwwFdZVr6Uym9f4ktf0sE9Nb8AZvP/Q1Bv4=;
+        b=tvwqGls7eH2fUHbCVx3Kvc5iyN5s93UbG7Q60xwnSqYPxJX35yodqj1vSij3/NHTs5
+         7tPi4Jj6WBbJZOZqIuwhqc0Po2rvkMGodSjdTCkijs5ONC4eBWuYwnxThQeE/sFTZaFC
+         +btXGjrhTz11vq9gN5gipKKRHlPJd1X9SoN/TGwxDAzbBt08JgEEweCVPFe7ZGqtdK0n
+         MWeNueHDT63Hmr2qSWbOo3X6JyvaHHlDp7sIKgpqj9KeXssk7QjRbJTDBHAMAyN6B1k6
+         NPJvaJYEMIJqwqGaUdYjDS3M8aljGTAI4vNwnecdYrJ09lHPeX3B/ZTmCjdtWr4LUM9K
+         J0FA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774279003; x=1774883803;
+        d=1e100.net; s=20251104; t=1774279189; x=1774883989;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=PiJLdQFlhIlU3UWbgyoh9CEcw5ImMs6weAHGhpFVB4g=;
-        b=bDcums6p/sl49R8gT6f+BKDYqQ6yfR1GTDoUCRkzCS7KtXLm+V8JnCGgEXjgSv8YSH
-         Y7t3TeRz6ZvrVX+UAhQEh0vpzBU5FsGXfKk0CtSu8nfcmcQblASWqk0dWav3RdSwR3jo
-         bBTxRdqvFYEBCKGt1mT5lwuxsi02S2sUvnVMczbmjnnm4QnP2uEgZOrSd9+V17E/NdwL
-         QuGDyoQ3jm2fFfjgdaUi7xqommW4asD4/hXoRe7gtFeMUs5jQpYUUyXaslE1FjPv5/al
-         auBhhSJsTHvQ7Ret6QS+G7doSXpjJ3cLLPUd50CMc7xTCLA4Qq5v6vwqLEK7IotMhmRO
-         npwA==
-X-Forwarded-Encrypted: i=1; AJvYcCW2+iTTj5D2ij3a2waPtar02OaLF8lM0XdID/HAC+aa1hNa5EshsJw37khSNBKPaS/jCA5IklCdTQY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YykgHc7BIgFz/IPbftZOeyNQ4WrawMQluhEfkNytcknErFmuelf
-	aSxrcNG3z7vW7y31FMvBBchd1sQfyLYzXdze8jXpcSy1hT3krEDF9pyMkYfuaTqMLT34POaV2yE
-	cz/PURZmNgrV7AFzuI1wKJGcqPC1wPWkniLpynlGW0w==
-X-Gm-Gg: ATEYQzyg45QAP3jsiONsDLVGRPfxE/ugnzvzDi3MJm+iyYuaTV8S6AEWKoWm3ljhbaA
-	7O8nMjlSk2grGaFmI4uy2pANTfS50T9xDwfrXVPkZsCMs65y6s1aupzQLD2HfKa5iefE0UThGrF
-	JXwLXC+ysrBUKWMwJUnHtidQoNv4i7xEIux3eNagZR9G+0PSnFduibrvuq/Nk/aC5XSnEQ4KDat
-	5IiIUDwqtiqwqoo19yHtzpBCqYSC7kAeHI9DPAgpEX4GN4H4R4P7/VS5t9qKWC3jkTloYOPYYrs
-	Af1J9NY2sPno4bPCTdE=
-X-Received: by 2002:a05:6512:1388:b0:5a2:8513:8a98 with SMTP id
- 2adb3069b0e04-5a285b03660mr3907173e87.5.1774279003114; Mon, 23 Mar 2026
- 08:16:43 -0700 (PDT)
+        bh=XFch42FbhwwFdZVr6Uym9f4ktf0sE9Nb8AZvP/Q1Bv4=;
+        b=khsQIbyGEYx+pfgQxuqpIQbKgwuqheKi2Px8keC2vuGmKU4znoNdb/AFxM6J5tFFK2
+         s+AFjRx0PoBsEEiqBbxhjY2a+gal94cMT1NGjw5SuojX6ErWt9CImOr3jNwapINZ4UYh
+         udxa/59nRXSmOW64t7ME1RqXfXdT2SdA49YNln3spplvBVzeL9Us6NaN+MdUuNlf7kIj
+         lWfat3ky4oxjQV53qWmfjymnkFDiPHnAGzRUwuG6UGchpLZ7/Lg+HsqeVASdmL1MvX2J
+         FBlH6qnBPEDxZvLmy/m3qaJUupTy5u/xRV1sMrqBnu6vfJRT5/gxYIKfdu7H0yLCY1i2
+         iNfw==
+X-Forwarded-Encrypted: i=1; AJvYcCVXX6TBCYHz1CBVnlU5aNxyXXqDa/hKW5PghqhyuUvh34it5s8BR3EwMYdObGQ+rMFVTlR77hydUUg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwftFaAQn0qv44b///ZMLV0eLNKEiroLv3UZy9Hk9/SL8QeT3Jt
+	f1lJPSdnHbWlmzoYYsFBqz4GS+FBH5VNuUgGoQeZGpVXMs8YH3IT9Kc9Tu2CpFXzLrol5bFwFSu
+	QGSl8qa6Sh5n0UM8LtPvnPU/akftI+lQlJByz65b4BQ==
+X-Gm-Gg: ATEYQzxHsxsHA2wXy0gxdDlHkJRS61LHiMjmFlVBoVXqy8YfN8s4cgm8/HB9R41AFPF
+	gSq4kbuNtFo8V51+f5h895bx4cvPNClCKdD4p2xN5bxyoH2IscU8oBX5Kflpgqz4KDo39D7Jfew
+	UZj0eQD+HZpDJBuVslejA4Fm/s4ebyR0m5sA3SCmx1zbKHVQFCouvlzrDhTAAzSadSldwDFtx0i
+	JZpqanws5gbi4/14i/999bJDnYZRBB2q8NpR3yny3OfSadHC9/9brOfVurkVrJcPOl6PUjwbo1n
+	GGGPmmL9
+X-Received: by 2002:a05:6512:10cc:b0:5a1:2c0b:bd7 with SMTP id
+ 2adb3069b0e04-5a285b5a663mr4593198e87.35.1774279189376; Mon, 23 Mar 2026
+ 08:19:49 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260313081548.3556577-1-neeraj.soni@oss.qualcomm.com>
-In-Reply-To: <20260313081548.3556577-1-neeraj.soni@oss.qualcomm.com>
+References: <1773713692-117311-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1773713692-117311-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Mar 2026 16:16:07 +0100
-X-Gm-Features: AQROBzBFsi259UlzFHDI-rrUpPXTS-yTjb65_nNw5jK2htXtPesNWqWkUT8UrHA
-Message-ID: <CAPDyKFqRG1_1aYavfrA0Ss85B0kcTnjVBeqLgq8PUJUcSx5LUg@mail.gmail.com>
-Subject: Re: [PATCH v5] mmc: host: sdhci-msm: Add support for wrapped keys
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Cc: adrian.hunter@intel.com, ebiggers@kernel.org, abel.vesa@linaro.org, 
-	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, wenjia.zhang@oss.qualcomm.com
+Date: Mon, 23 Mar 2026 16:19:12 +0100
+X-Gm-Features: AQROBzC8_l1bTIZkGh6ivSp_mZ9dDFd8gqNWhLg2deGs6COk4J4Y5KSwHptOT7I
+Message-ID: <CAPDyKFoHu7xZEwnvrgXDS2D9AOU29RZ4hZ5NsWaVaK5n4dYk9w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc-pltfm: Use phase_map for SoCFPGA clock phase configuration
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 13 Mar 2026 at 09:15, Neeraj Soni <neeraj.soni@oss.qualcomm.com> wrote:
+On Tue, 17 Mar 2026 at 03:15, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> Add the wrapped key support for sdhci-msm by implementing the needed
-> methods in struct blk_crypto_ll_ops and setting the appropriate flag in
-> blk_crypto_profile::key_types_supported.
+> This change aligns the SoCFPGA driver with the current dw_mmc core,
+> which now manages clock phases through host->phase_map. The phase values
+> are still scaled by SOCFPGA_DW_MMC_CLK_PHASE_STEP before being written
+> to the system manager registers.
 >
-> Tested on SC7280 eMMC variant.
+> No functional changes intended.
 >
-> How to test:
->
-> Use the "v1.3.0" tag from https://github.com/google/fscryptctl and build
-> fscryptctl that supports generating wrapped keys.
->
-> Enable the following config options:
-> CONFIG_BLK_INLINE_ENCRYPTION=y
-> CONFIG_QCOM_INLINE_CRYPTO_ENGINE=y
-> CONFIG_FS_ENCRYPTION_INLINE_CRYPT=y
-> CONFIG_MMC_CRYPTO=y
->
-> Enable "qcom_ice.use_wrapped_keys" via kernel command line.
->
-> $ mkfs.ext4 -F -O encrypt,stable_inodes /dev/disk/by-partlabel/vm-data
-> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
-> $ fscryptctl generate_hw_wrapped_key /dev/disk/by-partlabel/vm-data > /mnt/key.longterm
-> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
-> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
-> $ rm -rf /mnt/dir
-> $ mkdir /mnt/dir
-> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
-> $ dmesg > /mnt/dir/test.txt
-> $ sync
->
-> Reboot the board
->
-> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
-> $ ls /mnt/dir # File should be encrypted
-> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
-> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
-> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
-> $ cat /mnt/dir/test.txt # File should now be decrypted
->
-> Tested-by: Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
-> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> Reviewed-by: Eric Biggers <ebiggers@kernel.org>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 Applied for next, thanks!
 
@@ -145,102 +109,49 @@ Kind regards
 Uffe
 
 
->
+
 > ---
-> This is a reworked version of the patchset
-> https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
-> that was sent by Seshu Madhavi Puppala.
 >
-> My changes rebase it to use the custom crypto profile support.
+>  drivers/mmc/host/dw_mmc-pltfm.c | 15 ++++++++-------
+>  1 file changed, 8 insertions(+), 7 deletions(-)
 >
-> Changes in v5:
-> - Rebased on mmc-next.
->
-> Changes in v4:
-> - Updated the link for fscryptctl tool in commit message to "https://github.com/google/fscryptctl".
-> - Aligned the indentation at few places.
-> - Unwrapped few lines of code.
->
-> Changes in v3:
-> - Updated commit message with test details and moved "Signed-off-by" above the
->   scissors line.
->
-> Changes in v2:
-> - Updated commit message for clarity.
->
-> Changes in v1:
-> - Added initial support for wrapped keys.
-> ---
->  drivers/mmc/host/sdhci-msm.c | 42 +++++++++++++++++++++++++++++++++++-
->  1 file changed, 41 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index da356627d9de..b4131b12df56 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1944,7 +1944,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->
->         profile->ll_ops = sdhci_msm_crypto_ops;
->         profile->max_dun_bytes_supported = 4;
-> -       profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
-> +       profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
->         profile->dev = dev;
->
->         /*
-> @@ -2024,6 +2024,42 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
->         return qcom_ice_evict_key(msm_host->ice, slot);
->  }
->
-> +static int sdhci_msm_ice_derive_sw_secret(struct blk_crypto_profile *profile,
-> +                                         const u8 *eph_key, size_t eph_key_size,
-> +                                         u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_derive_sw_secret(msm_host->ice, eph_key, eph_key_size,
-> +                                        sw_secret);
-> +}
-> +
-> +static int sdhci_msm_ice_import_key(struct blk_crypto_profile *profile,
-> +                                   const u8 *raw_key, size_t raw_key_size,
-> +                                   u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_import_key(msm_host->ice, raw_key, raw_key_size, lt_key);
-> +}
-> +
-> +static int sdhci_msm_ice_generate_key(struct blk_crypto_profile *profile,
-> +                                     u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_generate_key(msm_host->ice, lt_key);
-> +}
-> +
-> +static int sdhci_msm_ice_prepare_key(struct blk_crypto_profile *profile,
-> +                                    const u8 *lt_key, size_t lt_key_size,
-> +                                    u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-> +{
-> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
-> +
-> +       return qcom_ice_prepare_key(msm_host->ice, lt_key, lt_key_size, eph_key);
-> +}
-> +
->  static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index 68770aa..cf38bb1 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -59,12 +59,13 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_register);
+>  static int dw_mci_socfpga_priv_init(struct dw_mci *host)
 >  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -2089,6 +2125,10 @@ static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
->         .keyslot_program        = sdhci_msm_ice_keyslot_program,
->         .keyslot_evict          = sdhci_msm_ice_keyslot_evict,
-> +       .derive_sw_secret       = sdhci_msm_ice_derive_sw_secret,
-> +       .import_key             = sdhci_msm_ice_import_key,
-> +       .generate_key           = sdhci_msm_ice_generate_key,
-> +       .prepare_key            = sdhci_msm_ice_prepare_key,
->  };
+>         struct device_node *np = host->dev->of_node;
+> +       struct mmc_clk_phase phase;
+>         struct regmap *sys_mgr_base_addr;
+> -       u32 clk_phase[2] = {0}, reg_offset, reg_shift;
+> -       int i, rc, hs_timing;
+> +       u32 reg_offset, reg_shift;
+> +       int hs_timing;
 >
->  #else /* CONFIG_MMC_CRYPTO */
+> -       rc = of_property_read_variable_u32_array(np, "clk-phase-sd-hs", &clk_phase[0], 2, 0);
+> -       if (rc < 0)
+> +       phase = host->phase_map.phase[MMC_TIMING_SD_HS];
+> +       if (!phase.valid)
+>                 return 0;
+>
+>         sys_mgr_base_addr = altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
+> @@ -76,10 +77,10 @@ static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+>         of_property_read_u32_index(np, "altr,sysmgr-syscon", 1, &reg_offset);
+>         of_property_read_u32_index(np, "altr,sysmgr-syscon", 2, &reg_shift);
+>
+> -       for (i = 0; i < ARRAY_SIZE(clk_phase); i++)
+> -               clk_phase[i] /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
+> +       phase.in_deg /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
+> +       phase.out_deg /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
+>
+> -       hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1], reg_shift);
+> +       hs_timing = SYSMGR_SDMMC_CTRL_SET(phase.in_deg, phase.out_deg, reg_shift);
+>         regmap_write(sys_mgr_base_addr, reg_offset, hs_timing);
+>
+>         return 0;
 > --
-> 2.34.1
+> 2.7.4
+>
 >
