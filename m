@@ -1,190 +1,246 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50E032D9ECB;
-	Mon, 23 Mar 2026 14:39:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44ADD27EFEE
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 15:16:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.49
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774276778; cv=fail; b=uNMejxhs/qEWyS5Foe+RC+XASvgSlbW6yFxI2JDZSpdWUbS+Iyr3bMiw79rENoKwjt9z/vIyVFwiVFWtKZFzK+LK9+07eqP/ZimqHU8m6AxCubKeRAIuWPPaFlfbD5XVukaxc+Us7OoZAY4r5suhvA6l8kRd8Hsww+BJW1PTZjU=
+	t=1774279007; cv=pass; b=W2e1/bFAayTFmtIgAUPZvXIVlwBeW7U48ZaQOY7OwfsRdCvuG0fboXXqvIPTfPcwJrM8t84DEMm4WQZC4MuR9J5/Q4BU7xTA8y4UCPneFz9I4rwBDT7wrc647PqhSSIjgdWmM/lTultpsnA0CJ7Jz8cHAjMQieRfhUcPYP8lVWM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774276778; c=relaxed/simple;
-	bh=4GLm8addlzrS56qRv1OSxIZjqdkqSZ2v/aEZK7lrz9w=;
-	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=TEg0s02OLSa9GFZQivRENGkQ/Alzo9EbMmhP/v73IFLVG/ZDn2S5ctCt4E/YaHNYV9TqunStaR7pdMaZYpvU1X5Xdsjty1bGiyC5M8XsBZ9gS6LLDJiCPSEAmWMmdfrBnzKUsh1J8W6BiT3Frn5g2I/iprTbzd31p6ihm0FJAN4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=KpCfUd7j; arc=fail smtp.client-ip=198.175.65.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1774279007; c=relaxed/simple;
+	bh=836gBfI+o/qQj9Wm80ZiXK2Z8hCWuoDNwqZBhWEi0ko=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=JX6M3zEN0dFcXGZsNkt/xugOeN6bgSenr1VwhZ8yg5u1PITDqwKWNJd4w7ZBkiMLEiUR3U/32M6NUx/bv8DVrkeXEeZczhSprkaeZOh8uRR55FXHIDGv2xKMODEIAZyE5bRic7tmbsFgJSZhaSqyVZarS+aD9Lld6GQiG3ahiuU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xUign3uQ; arc=pass smtp.client-ip=209.85.167.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="KpCfUd7j"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1774276776; x=1805812776;
-  h=message-id:date:subject:to:references:from:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=4GLm8addlzrS56qRv1OSxIZjqdkqSZ2v/aEZK7lrz9w=;
-  b=KpCfUd7jp4KSEhCX8l7YayKbYPrqzntv94c4jmOnxfkbwZK6+PQ7qtxy
-   V81gMeNTLSxKUYfh/4yzX78lrdd/6X/BRkF0FmMAqNYndQcYmLc5bwRXt
-   lqfyNPx3rDKmzkjAchjn4zyrcQtULFSEzXR22d7jLu2zsTj4Sb3iGqVwR
-   j2yEXoLoqCvtlcK9wWKYUi/tnA+RQDc1xTqikFT8M0/qikc/1nTsRhskd
-   vIEuKolEn13M+fAsMUUU/2YANDoykDFFyddxPFPRndpGOLishGaAZiDYj
-   kYz1tvFQVQW62yrEiB2DEo8L306e/IAXkK72F2fuCuCNiEdEhmRdW0llK
-   A==;
-X-CSE-ConnectionGUID: FJtKcMY+SciTHgT8KXsdLA==
-X-CSE-MsgGUID: cliMHCboQKGV/jT6WF+tRQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11738"; a="86349341"
-X-IronPort-AV: E=Sophos;i="6.23,137,1770624000"; 
-   d="scan'208";a="86349341"
-Received: from orviesa003.jf.intel.com ([10.64.159.143])
-  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2026 07:39:36 -0700
-X-CSE-ConnectionGUID: 6nX+ovJJRy6eaOVmF67Vkw==
-X-CSE-MsgGUID: ErmpkWtySte3R9YUvLhHuA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,137,1770624000"; 
-   d="scan'208";a="228121036"
-Received: from fmsmsx903.amr.corp.intel.com ([10.18.126.92])
-  by orviesa003.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2026 07:39:35 -0700
-Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
- fmsmsx903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Mon, 23 Mar 2026 07:39:34 -0700
-Received: from fmsedg902.ED.cps.intel.com (10.1.192.144) by
- FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37 via Frontend Transport; Mon, 23 Mar 2026 07:39:34 -0700
-Received: from BL2PR02CU003.outbound.protection.outlook.com (52.101.52.60) by
- edgegateway.intel.com (192.55.55.82) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Mon, 23 Mar 2026 07:39:33 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=WL0+RRMJFxi2M8XHTjK8Y0p41ZZXDUFOcrhF6YuPTiBmrOoxXBldBhcJXfZPBWxw2/p750wym7P6xvLPeEKuuaYiFE3EyRa3GrV6zNH+Tn5mpSnD2WYhLL6wz8WweY8dQRf9Io5xgYInAZjavKO/Od54oR3PR9upugG8kqmu1BiMGkF+4sOxFeZ/qOstjalOkIe7fzYzYdD/k13maALsyrr2xuhF9JOeJPzBV1ir8OVhiorVFO03sin4FW8bUuzFs33Blp0KpN3emvpNrcBbit0gZCIyorlDCfjYxDBnVk4ykc40skqb6ySlHngRHQLUpnKYwwh3UtboEuxQKZ+pVg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=zJbuAp0djyMIibe4xpSNH2o/GFdBM/9vzXlR+2jBVp8=;
- b=mHzfW1DN4NDBZayfBQbn9U1acQnqcvr0l32L+FwLvfbPl8yZ1JrN0RO8h3KvyXAC7UYhSVr3CGLUqCK51+l12PDEaEx9AHJux7DNdRqV/ZVrJ0AdzpgVLVBb89SzzJ7XB/ABjKJMzzwcDRTdqoN4quireMQTiXHsEV4/K8GMTAI5vCwBCaemWZiyW9MDN5h6HYF7bIq32Y+jNJCtwjPRoo+Fuq6hVQYvJfjVZR+3j8xGiOL1DBqhUy7Mq+Dcp59gWB5RP0JepRiKGaMPkNQAuru3CtzV7pLVLKcHBcBTakbV/abgZv9epGo3jXrFHUDelbsGBdU2rP6OX3TVrVUAAA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by SA0PR11MB4767.namprd11.prod.outlook.com (2603:10b6:806:97::9) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Mon, 23 Mar
- 2026 14:39:30 +0000
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456%6]) with mapi id 15.20.9745.019; Mon, 23 Mar 2026
- 14:39:30 +0000
-Message-ID: <80f95b2b-b0fa-4cb3-9b37-c947610a4d4b@intel.com>
-Date: Mon, 23 Mar 2026 16:39:26 +0200
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-pci: Drop unused include
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>
-References: <20260320220221.3236937-1-andriy.shevchenko@linux.intel.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
- 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
- 4, Domiciled in Helsinki
-In-Reply-To: <20260320220221.3236937-1-andriy.shevchenko@linux.intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DU7PR01CA0038.eurprd01.prod.exchangelabs.com
- (2603:10a6:10:50e::20) To IA1PR11MB7198.namprd11.prod.outlook.com
- (2603:10b6:208:419::15)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xUign3uQ"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5a27c329e98so3737747e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 08:16:45 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774279003; cv=none;
+        d=google.com; s=arc-20240605;
+        b=atmaSifA4sSIDJZtX91O3kWXijKI1MFOfLzCvjdbqo0VcLfPrCC76LhmQcsqxS3I8b
+         hNc8G5ksQthNKCwo5+9pzpMgPWQlotGV83TWZnq3X8PXhbIywvWfR0sS9/C7j1etizoG
+         REpbHyBAr+ECXWG1ATU7cQWYDY5UFmCB96iJfa4aswGDFB5W7avlLaku0mMfTsSz+Ru/
+         xTJrtv5+qxBzri40DZvvGOsanLZKKui8tmkR1PFyR51y5SujRJ3PEtVeeCLLMwVflzJz
+         /Hfi9QI4C8U0Z2ZxFl7oPFRzSC0QesBm1aWFm6obVGVKSvth9Y5i7MXUFxl8+mmM8FWZ
+         72wA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=PiJLdQFlhIlU3UWbgyoh9CEcw5ImMs6weAHGhpFVB4g=;
+        fh=cz0WRVeOi49Bx9Fze+pvhjNsjggm3HY5LXoodu6MtlI=;
+        b=GQci+T9SGx4uQcCiVIlh0YO9fg4StnsdfVFSI3L7TP8qIzLE7Vf/1AiT8itmhm31+d
+         URblw7spHAQbXlsboVEaUpg9O91U8pAK9vahOlHi0oOyts3oNCshNe5m6lU57fHFXYZC
+         hLWk7Vco5R2nPBd6z7mP03sj6mcyb9sTWV7ZKlod1zK1pyyJtr+AjW+O4FmKiU43oq1I
+         O7F9jnAegGv0STGQq/HKzZ7KZ6fS7svGrfn7kf/Hp261UF5BKiHF2oWS2685eE2Il0B1
+         irlfwWhIrcI9K0byUODK4YP+ah0/8ClIFQ1ni7OWDHtH/yeI6wjMpWzk0LtW4iam+03d
+         q8ew==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1774279003; x=1774883803; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=PiJLdQFlhIlU3UWbgyoh9CEcw5ImMs6weAHGhpFVB4g=;
+        b=xUign3uQsneJLCtbdzdUiskjnLzlZTifP2G+Mg+7uM9suvKQBVU6Z8F9LP5htvB6aC
+         LuujxyVSazHHp7EHcfaWXnJw87iKEFrOZR8Cb988nWgtVJnSWBB8Ta3xnUWNG9kXdSmn
+         nKDzJ6p4DgfgrsZ5GJvri8HONqexZsSrkvwNgm9R7eNI24DG8a0wzjbM4vVBp1TAM10P
+         viUxhwJaO4TRS3kxYrI9b19CHFmf7eKBhc8iuReIyTr5HoDfg7AgM4mMn5jxzY92LM5z
+         ZMl61wiBWcVXwYco4HlAmxDDPz8bvG14aaz1KzfczEVL0ZExkdAF1m/B/ntnHDXepJ3c
+         3HXw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774279003; x=1774883803;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PiJLdQFlhIlU3UWbgyoh9CEcw5ImMs6weAHGhpFVB4g=;
+        b=bDcums6p/sl49R8gT6f+BKDYqQ6yfR1GTDoUCRkzCS7KtXLm+V8JnCGgEXjgSv8YSH
+         Y7t3TeRz6ZvrVX+UAhQEh0vpzBU5FsGXfKk0CtSu8nfcmcQblASWqk0dWav3RdSwR3jo
+         bBTxRdqvFYEBCKGt1mT5lwuxsi02S2sUvnVMczbmjnnm4QnP2uEgZOrSd9+V17E/NdwL
+         QuGDyoQ3jm2fFfjgdaUi7xqommW4asD4/hXoRe7gtFeMUs5jQpYUUyXaslE1FjPv5/al
+         auBhhSJsTHvQ7Ret6QS+G7doSXpjJ3cLLPUd50CMc7xTCLA4Qq5v6vwqLEK7IotMhmRO
+         npwA==
+X-Forwarded-Encrypted: i=1; AJvYcCW2+iTTj5D2ij3a2waPtar02OaLF8lM0XdID/HAC+aa1hNa5EshsJw37khSNBKPaS/jCA5IklCdTQY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YykgHc7BIgFz/IPbftZOeyNQ4WrawMQluhEfkNytcknErFmuelf
+	aSxrcNG3z7vW7y31FMvBBchd1sQfyLYzXdze8jXpcSy1hT3krEDF9pyMkYfuaTqMLT34POaV2yE
+	cz/PURZmNgrV7AFzuI1wKJGcqPC1wPWkniLpynlGW0w==
+X-Gm-Gg: ATEYQzyg45QAP3jsiONsDLVGRPfxE/ugnzvzDi3MJm+iyYuaTV8S6AEWKoWm3ljhbaA
+	7O8nMjlSk2grGaFmI4uy2pANTfS50T9xDwfrXVPkZsCMs65y6s1aupzQLD2HfKa5iefE0UThGrF
+	JXwLXC+ysrBUKWMwJUnHtidQoNv4i7xEIux3eNagZR9G+0PSnFduibrvuq/Nk/aC5XSnEQ4KDat
+	5IiIUDwqtiqwqoo19yHtzpBCqYSC7kAeHI9DPAgpEX4GN4H4R4P7/VS5t9qKWC3jkTloYOPYYrs
+	Af1J9NY2sPno4bPCTdE=
+X-Received: by 2002:a05:6512:1388:b0:5a2:8513:8a98 with SMTP id
+ 2adb3069b0e04-5a285b03660mr3907173e87.5.1774279003114; Mon, 23 Mar 2026
+ 08:16:43 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SA0PR11MB4767:EE_
-X-MS-Office365-Filtering-Correlation-Id: ce30ecc5-3b0f-4efd-7e6f-08de88e9fda9
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014|18002099003|22082099003|56012099003|7053199007;
-X-Microsoft-Antispam-Message-Info: 9sGeDPPkQ0vV1wgAbO7R7LE1buKDYF03Zl6yikEOZHXGVG9RD2cZag+VqYP4M5I1gRu1jUdrrRyj8tdf8MetuhcPGulIM9gstP6V+v8oEbktjJNqKAm2gSD5AnQylHzoVil+qs0cW0kVNiLzsWC8eV0KuCH7+sTslb+ZDJeAQV/QKNMoZpwtgxbMocQgMMOV1aoTmUvhP9bqSazbIaKP+aOwtEjyru+HflSCwb0CDlOBcUcq0nLotlQatonePtp39QpmwIbYYABE9aRO8awgtb7LR4JnNWWWzVTCZyogmd9SNhfsKFEgficjfe1TvDdY4uXdHXuyp8iJ/PZzY3RMm1F+TEGCYRmRVs4T1H8Mq5Ym6ZVMFKnUo7145sfCpLCwA088nFBSOIxYXv9bgowjVg9svGnI3xXH1Zw37GsBES4C0bOBYpGvDhZG4RhgFhAo+myyR+F/INZ/bWN5w08OnNfEASzJt8ojXJYaPYOvuN/BCV0BaHbMaQwgI2nr7nD7b5IAUXUeU7Tu7IhpVRf02DpGpRASl4Kc58a3ls0wF0DBErMvPwk8+nV7Dtym89UABY+UuanXfkqKZxM8UjHgM2VwITXY3BH07FWa9qRMW05d6zjj/uTCWlqx8HNUSj5Ll7TzjW9NpXGzh4r+f2VdN0q/fCHJO6AKodCf+c8a7DcqwKvQnYblnkgQ9NI0oTqQUo/1PhD11eYdEbKA/A76SiXp7P+B1qHO1JCpB+vPIzE=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(18002099003)(22082099003)(56012099003)(7053199007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?dmhWTzZTcjhPSk0rS0hkYnpvS3NKRjlzclp5b29raDd6bWh5WDJBOHAxVFF4?=
- =?utf-8?B?K2ZJdTZNQnF0dlNRTGdaNzhRSk5wNUl0WTV2Z3ZmS0hEaVZteFJBRVhZLzdk?=
- =?utf-8?B?dXh4cU80TG1hTml2YTR2OTVOUDM1a2hrTkl4a1FOZXhhMHdBV2dydXRNaHBn?=
- =?utf-8?B?QXUrUGtDcUprVVJQbS9GckJZaUY0ZVluOVV0UC8wUThFajc3Qml3Nk1yWGd4?=
- =?utf-8?B?RElNNU1EbTU0dmhacjVuTk1xemZla0xLdnJYaXNaLzdiU28vZDZqVm1NR1Fn?=
- =?utf-8?B?VzlsRmVaMHNkaUdSSk9SdWtJVFRTL1o1UXBpdDgxMWxiQ0pnTEQyckVLRnJi?=
- =?utf-8?B?RzdMU25tcEVVR3kwQ0pJNktXbFROR1Q3TWVTWmNZdmNZTmxSZzhpRUhYcEh6?=
- =?utf-8?B?NzdVTEtEbWR2Um54RktKblRESUF0NjdDaTZsWEkxUFpPcytLNTJwbEJjaXk5?=
- =?utf-8?B?Nlg1enE4SHBwZStLWlRRZDBOd2Z1WmU5eTNBRWhXOUJTa25ya1hBMlZsaXFN?=
- =?utf-8?B?bUVhNXpDV1RYTTRlV2w0bzU5SjFBcjhBSG9IYkRheDcxSzQ4cERVL2JkMUxK?=
- =?utf-8?B?RTZISVlZME5POGtIN0hPOGRHL1NHQmF6ZHQxenV1bnFHZm96cE5zV2h3TW1C?=
- =?utf-8?B?MFJGREFqcC9tSVVuSG8xOUZqWlVOUmZPbnozS2VtVGRGTTh6SHh6RXV5K0Jh?=
- =?utf-8?B?QTE4MFQyeGRCVXVsWmRsVVRKU1JOVXFFRmFoeUd1NFMxc09qYThFN0pWWUdV?=
- =?utf-8?B?YXVnRXNnQWl2TzFPL21UeEkwMlgvREw5dko4dTZkcVN0ZytzYXE4MkdHZWY1?=
- =?utf-8?B?RXA1OWdNYWx2SEJJYmtZUStjejR3SkxNbEJaTDMzQ0w5clZTZVZnekxYL0gr?=
- =?utf-8?B?QUhiOVRMbnJ6V1NtTHMwRG44aXd0ZVRNVGhzZ0J3YklLV0JmcGVsdWtzOGg2?=
- =?utf-8?B?QVVQTWIwVmIvZVF2RzN3L1RWWGR2SWZ0RjZOV2JBbDF6eWZySmsxcW5oR0FX?=
- =?utf-8?B?WndoeDBueU9RdXdNRXJxYWh4T1Z6T3F1ZGd3QmlCWS9oaHhGQ0JTYnc3aXdn?=
- =?utf-8?B?VEYrTllRSkIrLzhzeHphSXI4dnFjeEdKZkh1cHdNWW0zY2syakNiSWZ1emI2?=
- =?utf-8?B?eElyRlY2ZUJFOUVmcml1SGpIODlYWFE4SUVZSkE5U210V0RBak5GWkM3S2ZM?=
- =?utf-8?B?UDloeFRSRHEwLzBmczlqNnhwblZNOGQrZGtRMVhYckRLM2ovMFBzSXM5U1RV?=
- =?utf-8?B?c2U1Y0E4NnI1R3ppdmYxV2pOY2FoaTZGdHNtUWttNm1lckZyYkt6NUVHb1lK?=
- =?utf-8?B?TkJnSlhSbUNLTTBUTjRPWVZkLzlrdW5DdWNlYXg1MTJvQUpTRmNOSTc3M1lT?=
- =?utf-8?B?MlFQRGxxb2NQTjdwMkVaQkw4NGgveHdUTmxMOG8rK0FCL1cvR1NiMk0ybGFI?=
- =?utf-8?B?b1JEbm05ZUMrZDZYb1J6b3BkbFJvOGZUUWRlNEhCeTh5bElFdTVUVFFsenlC?=
- =?utf-8?B?a1VxREdDTEFJN0EwS3M3Q29YVGhuZE9YQU1Eb09rR3huYnczMWJXQWdPbCtn?=
- =?utf-8?B?MHRNaGtBWC81WjNCT0FrbHlhL1Mrb0RVUmJ5dlFpbzRHQmpNdlV0aEtRRmNQ?=
- =?utf-8?B?R1AvT2RsZzU1QmJSUGw0cW1leWJCV1ZNSXVxNlVqOE9hWWxPa3AyTzIwNG03?=
- =?utf-8?B?SmprVUw4NkVIdFRvZzhZV1V1bTRUbXNnL0VEanZTWUJYWFpmb29pN3UzYWtj?=
- =?utf-8?B?TTQzY245SW5tRUE0d2Q4V3RGaTZZVlB0VUF3ZGQ1S3lKb0MxRExxamtNdWVm?=
- =?utf-8?B?NmpITFFZOVU3UklsSlNRL29BSWIwR085dEFqdkIweE10YWp0TmsrNTMvbEt6?=
- =?utf-8?B?SEU3QmxON21sTzNNSGkzV2U0U2lPOEdyQ3R0aFprU2hwa0Znd3k2b0pGYmtL?=
- =?utf-8?B?dkYzWEJxdnRKeEF0Ym9VVVZmQnM2YVhzbE1DRCtZWTRLRmFhS25rN0UrTlNs?=
- =?utf-8?B?d05ZaEE0STFKUTBHSXNpaFRYVjBjbXRxZC83aWJyQWtOaW9zOWFhdGdQZldP?=
- =?utf-8?B?VWFJNTFZb0V0YnRKbTRxdGZrcjNSdGlrNUdwMTdvREpJVW5aTjFvQkFWSHI0?=
- =?utf-8?B?cEE1SjBaZlhVUkNkNmxPc2pzV3RPN042bS93SWh1bVRHaDVhUzhJUHBGem0r?=
- =?utf-8?B?UmtrZ1ZIbkI0d0VQRUNlQ3MxTU9hRUhUN1NYRTJsMEd2T21ON1dmWXhjQ1lF?=
- =?utf-8?B?VDFmbDBDOUpmdUZ1R3JzMmdFWDhlSE5kaUg3Ly9iUkRFcG1hdEg5Mm1EWmhw?=
- =?utf-8?B?UWg0S0hjZTlMdzdGa3NIbjQwSkFWeHIrY1RXVlRGZFNteUd5aEJKb3UwdFFL?=
- =?utf-8?Q?jYaqaJfXQWeC02Do=3D?=
-X-Exchange-RoutingPolicyChecked: ETfy9WQJSeNTZHtWBGpJygMj3JGYdcnQYfyoS+GMMJ00c17MFUmcbY6KfBf7P0oLFg8Fl7Yv+3BBSUVER6jerdyShqTRwkDg4vTKduOaXNmztUM9ugqiiHoFwy5z0bfzqNLjmXMpBNot++Kwh8JWDcSAJg2oKCI/qGQNSUMJYj/xjH7b3KwVfKPhrAVzUZ7Rq2b/aqPJYaBD8l9U1q8FXVqTBAoC8pG6It+Fob6AZC/15pG8Wm/2BKt7n19pcyN0EKaJi148XIs6rcBcDtChlGCnMryPSBMjCg7mLyL2gxkLrqnikREmCyl1d523+dqEGopihpHwg0p9383mrqe+8Q==
-X-MS-Exchange-CrossTenant-Network-Message-Id: ce30ecc5-3b0f-4efd-7e6f-08de88e9fda9
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Mar 2026 14:39:30.7168
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Wn0uF+Pi7SbiLWLijgCHJ6QRcY9bf/dYgEFfzXKCvbVmhM074Q/vlWE7iUZKAOomLhnwHXKFo+w0LrzxWVMHjg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR11MB4767
-X-OriginatorOrg: intel.com
+References: <20260313081548.3556577-1-neeraj.soni@oss.qualcomm.com>
+In-Reply-To: <20260313081548.3556577-1-neeraj.soni@oss.qualcomm.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 23 Mar 2026 16:16:07 +0100
+X-Gm-Features: AQROBzBFsi259UlzFHDI-rrUpPXTS-yTjb65_nNw5jK2htXtPesNWqWkUT8UrHA
+Message-ID: <CAPDyKFqRG1_1aYavfrA0Ss85B0kcTnjVBeqLgq8PUJUcSx5LUg@mail.gmail.com>
+Subject: Re: [PATCH v5] mmc: host: sdhci-msm: Add support for wrapped keys
+To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Cc: adrian.hunter@intel.com, ebiggers@kernel.org, abel.vesa@linaro.org, 
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, wenjia.zhang@oss.qualcomm.com
+Content-Type: text/plain; charset="UTF-8"
 
-On 21/03/2026 00:02, Andy Shevchenko wrote:
-> This driver includes the legacy header <linux/gpio.h> but does
-> not use any symbols from it. Drop the inclusion.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+On Fri, 13 Mar 2026 at 09:15, Neeraj Soni <neeraj.soni@oss.qualcomm.com> wrote:
+>
+> Add the wrapped key support for sdhci-msm by implementing the needed
+> methods in struct blk_crypto_ll_ops and setting the appropriate flag in
+> blk_crypto_profile::key_types_supported.
+>
+> Tested on SC7280 eMMC variant.
+>
+> How to test:
+>
+> Use the "v1.3.0" tag from https://github.com/google/fscryptctl and build
+> fscryptctl that supports generating wrapped keys.
+>
+> Enable the following config options:
+> CONFIG_BLK_INLINE_ENCRYPTION=y
+> CONFIG_QCOM_INLINE_CRYPTO_ENGINE=y
+> CONFIG_FS_ENCRYPTION_INLINE_CRYPT=y
+> CONFIG_MMC_CRYPTO=y
+>
+> Enable "qcom_ice.use_wrapped_keys" via kernel command line.
+>
+> $ mkfs.ext4 -F -O encrypt,stable_inodes /dev/disk/by-partlabel/vm-data
+> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
+> $ fscryptctl generate_hw_wrapped_key /dev/disk/by-partlabel/vm-data > /mnt/key.longterm
+> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
+> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
+> $ rm -rf /mnt/dir
+> $ mkdir /mnt/dir
+> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
+> $ dmesg > /mnt/dir/test.txt
+> $ sync
+>
+> Reboot the board
+>
+> $ mount /dev/disk/by-partlabel/vm-data -o inlinecrypt /mnt
+> $ ls /mnt/dir # File should be encrypted
+> $ fscryptctl prepare_hw_wrapped_key /dev/disk/by-partlabel/vm-data < /mnt/key.longterm > /tmp/key.ephemeral
+> $ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
+> $ fscryptctl set_policy --iv-ino-lblk-32 "$KEYID" /mnt/dir
+> $ cat /mnt/dir/test.txt # File should now be decrypted
+>
+> Tested-by: Wenjia Zhang <wenjia.zhang@oss.qualcomm.com>
+> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Reviewed-by: Eric Biggers <ebiggers@kernel.org>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Applied for next, thanks!
 
+Kind regards
+Uffe
+
+
+>
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 47a0a738862b..c347fac24515 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -20,7 +20,6 @@
->  #include <linux/scatterlist.h>
->  #include <linux/io.h>
->  #include <linux/iopoll.h>
-> -#include <linux/gpio.h>
->  #include <linux/gpio/machine.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/pm_qos.h>
-
+> This is a reworked version of the patchset
+> https://lore.kernel.org/all/20241101031539.13285-1-quic_spuppala@quicinc.com/
+> that was sent by Seshu Madhavi Puppala.
+>
+> My changes rebase it to use the custom crypto profile support.
+>
+> Changes in v5:
+> - Rebased on mmc-next.
+>
+> Changes in v4:
+> - Updated the link for fscryptctl tool in commit message to "https://github.com/google/fscryptctl".
+> - Aligned the indentation at few places.
+> - Unwrapped few lines of code.
+>
+> Changes in v3:
+> - Updated commit message with test details and moved "Signed-off-by" above the
+>   scissors line.
+>
+> Changes in v2:
+> - Updated commit message for clarity.
+>
+> Changes in v1:
+> - Added initial support for wrapped keys.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 42 +++++++++++++++++++++++++++++++++++-
+>  1 file changed, 41 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index da356627d9de..b4131b12df56 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1944,7 +1944,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>
+>         profile->ll_ops = sdhci_msm_crypto_ops;
+>         profile->max_dun_bytes_supported = 4;
+> -       profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
+> +       profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
+>         profile->dev = dev;
+>
+>         /*
+> @@ -2024,6 +2024,42 @@ static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
+>         return qcom_ice_evict_key(msm_host->ice, slot);
+>  }
+>
+> +static int sdhci_msm_ice_derive_sw_secret(struct blk_crypto_profile *profile,
+> +                                         const u8 *eph_key, size_t eph_key_size,
+> +                                         u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
+> +{
+> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
+> +
+> +       return qcom_ice_derive_sw_secret(msm_host->ice, eph_key, eph_key_size,
+> +                                        sw_secret);
+> +}
+> +
+> +static int sdhci_msm_ice_import_key(struct blk_crypto_profile *profile,
+> +                                   const u8 *raw_key, size_t raw_key_size,
+> +                                   u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
+> +{
+> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
+> +
+> +       return qcom_ice_import_key(msm_host->ice, raw_key, raw_key_size, lt_key);
+> +}
+> +
+> +static int sdhci_msm_ice_generate_key(struct blk_crypto_profile *profile,
+> +                                     u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
+> +{
+> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
+> +
+> +       return qcom_ice_generate_key(msm_host->ice, lt_key);
+> +}
+> +
+> +static int sdhci_msm_ice_prepare_key(struct blk_crypto_profile *profile,
+> +                                    const u8 *lt_key, size_t lt_key_size,
+> +                                    u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
+> +{
+> +       struct sdhci_msm_host *msm_host = sdhci_msm_host_from_crypto_profile(profile);
+> +
+> +       return qcom_ice_prepare_key(msm_host->ice, lt_key, lt_key_size, eph_key);
+> +}
+> +
+>  static void sdhci_msm_non_cqe_ice_init(struct sdhci_host *host)
+>  {
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -2089,6 +2125,10 @@ static void sdhci_msm_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops = {
+>         .keyslot_program        = sdhci_msm_ice_keyslot_program,
+>         .keyslot_evict          = sdhci_msm_ice_keyslot_evict,
+> +       .derive_sw_secret       = sdhci_msm_ice_derive_sw_secret,
+> +       .import_key             = sdhci_msm_ice_import_key,
+> +       .generate_key           = sdhci_msm_ice_generate_key,
+> +       .prepare_key            = sdhci_msm_ice_prepare_key,
+>  };
+>
+>  #else /* CONFIG_MMC_CRYPTO */
+> --
+> 2.34.1
+>
