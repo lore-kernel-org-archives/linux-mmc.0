@@ -1,146 +1,212 @@
-Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
+Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF68A3BC691
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 15:19:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF9DC3BD232
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 15:20:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.42
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774279198; cv=pass; b=A8R5LHLwR98mmQ3yIRzL519dZQAYZbrpouBxhupiA2jEsqnm8lkji+VQ4BcEtG1c3GAoOteSRV0bNqXyBQAZmKjUNBvbOtrEz05WmYS9YUWKxtc1R1IQZmx23OWsbk26+sir14RANpBAUFHiBYhuSL/bhPqgLKA9dMyUBY04I5U=
+	t=1774279203; cv=pass; b=szXNAe+p4D0RnLX1D+Ssf8her6yUZQdaF/9tTNkvDQHFBDVUk6Gax7kLnNoiHd0Mn75+a9JrFYLslfOo8ohs3DuCe8sDcxeYdQuAHx38VwNeUoanhyDPXZ2jAq6ALypT+vR0Vb/BRqms/AsYZ8kX+6eFAqQGVyZwYZctP/N59Uc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774279198; c=relaxed/simple;
-	bh=3bLBwlvoKV9D8FRW2lSY998rKGPTuAzsW91tz//soKM=;
+	s=arc-20240116; t=1774279203; c=relaxed/simple;
+	bh=Q3KPzKgZ9Grk59sKH1CK1xnfLjbkJABEjK8piuj/nrE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GFhVQHPaDKT3skJAQKZOaNNsjHdFUuAFeHKOJ14yPEfBsICWyx0/tHR4jFh9YRyQJWwM17oOZkf7bPRN7PLF2kLsn2YHhsFbiKOZc9CkyWPxl5L8wlxL1pwHAwVahdFFH2u9dhzrvBjvE++oW9wQpXOGCrmNlv5vP5rPM6ElXXs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=pnLGxyyG; arc=pass smtp.client-ip=209.85.208.169
+	 To:Cc:Content-Type; b=gYjqmkn6dfesGo9FCvzecip94eY+IjJVROsU10b7HT4vG1BrCcb3CCtbxClcgnWKTcFNNPXFe4sxRqFUdvryLZKtP8JgAt5dlnk7Lz6CjxO1e06D8T0yt/72AQinRBFvK5gnTZ7ZYrjge87IfkS7MHQWQmYcHkPWsk190OF4LqM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bKp4tV5D; arc=pass smtp.client-ip=209.85.167.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pnLGxyyG"
-Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-38aef9cc451so21060931fa.0
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 08:19:56 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774279195; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bKp4tV5D"
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-5a133b686f7so265458e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 08:20:01 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774279200; cv=none;
         d=google.com; s=arc-20240605;
-        b=H4OD6kMajjYU3PJsaH5Pqmvx95Z78hJFw87rzVH7xyfnGXIqEUQPp/RAwzGBlzxot0
-         L/xP72Z0UPaLFnQRX791Ta0RRMaxhFgVtoKVpo68FrhBiiTSbha/R86JuWyOmoT1Oe8C
-         aTUH4l+mXvcdgQJqFVAAhuDhDkFwjUXjLBoyxX2sKn/3pl6FhfaKnOdeVuJGZ8nW/xH3
-         czwvdK1Xb6VQgAmzpu1YO05xpdHvZr4p7AaLbXPOhM1bi2rGGbr8lhstQ8Ng/BkuQFFA
-         Ywr30B/jar9k5SY3IXGxIaxTS8oQt80Oq8F6YJ2LC6K9vjpjYDwz+qsGzUkqmJnqvWes
-         oGoQ==
+        b=CGUxW8psqPR0pUnvp1ymujCjVvoUrXQI9qUQ9qmgqf+07W1DWmo089ju+kc4v8+OIy
+         CKHMrpssKvEDn4ZV41yIJQEaHGRzGzbk/+Ssi499Psj4i8Iz6NLV5HymooNNNnKE0Dg6
+         v8Jje1yNpM/fKuhtKx6QYI9hDs+fMaw31dgdFUW6a89hcJWowTUv2RAB2hvKsT55y3SW
+         NOELS6Nw7rcAvgCEcx3z+SsKFQxq4DXMXBYkNZ+Cdat2Xu/X+L089XcJluYAtnCu+OLE
+         3mTqPZ45mbXV26EB3nsa3uhtsvGN1ZKkZIjPjKyx+E27/rSAAK+KktkXOfnCBO6nKPep
+         Jotw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=e9m6IagqbiMUTJX23Qe4eCI6DILlg9PmVieqm1cjUqY=;
-        fh=Q8G8rSLrI6ABc0fm+YCBWAA9mcPkYXmxmDYzCsZ9KO8=;
-        b=P/8hXOhDuQ7euZEWPDEDFIbUh8HXxxb06QgWA3R49ZsrBGKABBlMhgjEG5SORcO3aI
-         r3DQWEPcxZGFXeYh1DcP7RDkICogLQky9LjSBJgcZo2LsGYVWDBM/Ux3Mtiby8wYq0TO
-         JevMYAVZ5sPi71TyRfBBHbEu227jz5ssqB8pMX+EH4MRTBqP0OPT0d+WrbDrYfz0v0EA
-         At4Lk+VGGoBxZdRFp4repNXev7bN1fv64nJZA0AQyGKEQgSkvqRzMiXKCgF0O1zXFAnv
-         vu/ykunFIZhbaOl2GfNqJY+AUDofPuK/7W5JJb9HyZtTkC2nmkwkqXmj7kXC1OLw97Ok
-         0JKQ==;
+        bh=kXHNCd3mq7JHVp9hqKQG0KlxehC/Az8dh/4A8PeABAs=;
+        fh=3PKU+7wld2AvFtUa9JYlyw+Xpmt5sxZDjiJNFUYjyhE=;
+        b=lEEGkXURDA5WBDALTWT2jNJZJwq4tOum0xPeJVFKT3iPUOuubpefa0/P+jum/2zXWo
+         1cycRTc3FhgwDsvLM8QmO/TvaOlKyoqBLGOdTZNmAocBVNgmCPQrpZK2nPM2AQe/M0Hg
+         /BaH4IlgESREEGl1jMgaBi1OLwHk1U2VROVA4xrH33f62NKcomUcqRTvvjwtBx6lMSmd
+         0v5Rrrupc4AbxE0a7ybIDiWeR8ZlHPCba6pd2conVfCiictb0WRJ8N8pac/cARdFiee2
+         /qVPjDvtsHky/KGVdG55JSGxwkgOUCVizglAZJO1QzUpgGHsJdukgr/Wq7DM5gNb9ylK
+         THhg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774279195; x=1774883995; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774279200; x=1774884000; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=e9m6IagqbiMUTJX23Qe4eCI6DILlg9PmVieqm1cjUqY=;
-        b=pnLGxyyG9Io3AllDIScxlNB1SCwtiwFzwclnAaJrSmvd5bBU2QNxpQJ3noaoXVAVbL
-         ajzCEBnNOHOV7/K/n4yEEzr1CahODRrJ4ADQvL57Aaf01dbdj+LrHUawtTSNfP9t742v
-         TVjBfUWdlLeqWR6ywwV5q8OZiX4H5sExzEM+5JhqFz+7ifLsGuW2ZpM1i5S7SS3AQhzf
-         4WM183V6gW3sk/xhm/Eq/aueCtnPPfgEQoSYAKl2D8a0wntHIHad0voDc07ltyjNyl/M
-         X2PsaPhwi69rtrri00gO521fv5SbWXJZIdW4vq8xpfAjBV3DzKNwusVcBeSvqMunoR/u
-         3Uxw==
+        bh=kXHNCd3mq7JHVp9hqKQG0KlxehC/Az8dh/4A8PeABAs=;
+        b=bKp4tV5D/OhsUUU5nTEQsU3lb0UPg5KABe9AfDc6qEIXakLNzAB3O33l03aN4/iyIp
+         DUfB1krkbdVkq4Zi6BKe1eOYkdWPf9QBQoxSPGL6mi8K5C9P4xxSm2VnKxoEHgbmMCjM
+         0JZx8yvoNfLeQpIdfqS37L1OaS7K82tztS7UUwaZ2TV59mXkfpaDWAich1a2QIM50vzq
+         YUGsBhjhYz8W8alVKcTEYrB7a7KUerSTleFPiaxUlWfhzI4GBvqmYkMX6zF7UJm4M/dU
+         cdNYvSqmhqFuzd0OCADdAuYovPKfKirQKu7DrofiDpLAq3NUAJ3K7CsViABi2BfXEOxX
+         cLWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774279195; x=1774883995;
+        d=1e100.net; s=20251104; t=1774279200; x=1774884000;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=e9m6IagqbiMUTJX23Qe4eCI6DILlg9PmVieqm1cjUqY=;
-        b=E69qQkO2X6RALlZ7Sm0PGboAuZIlgr2fuoNMKV8Qjzd/DhbRXvLOLGH7zeeTqRlXFY
-         mf6x6F5suY3WW2AYethnxDOI19jOLohzTm0+Fp0P2T/mAsAr6UbpXg+3uHxfVrXH0A7N
-         ioK64KsV76BPk3IFoEiv5Zv9n1PrQ0lUfnZTJXX3lRAXgDSXMAml9WUDHQ0Ud9/JkjgH
-         tXl+WiENCPtHjUrUzStUi+Fb1/E9U4fwM5sEksqTsnmU3XJBWVVpWY13ZCkVJZSxx1jd
-         x5CMUwycr74Es5oFB+bFHPEKzPeooqQYzwmm4gDjQun7be4m1JKgwdqgtZcnz2eX/Dr0
-         jdow==
-X-Forwarded-Encrypted: i=1; AJvYcCVaNq6Q2MmiyHyLZuVozBExdUedXb/N61zV1op1vfETEwZf5av5EXTnZQbQ95k7Bhv6XKIYwr3dMk4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyEvqpd7BRLSLqGVr9t+i1ix7lz+intGhVSD7ia+13zZ0/OZUn/
-	riN2kAlqj3jo4eTFH1oL5UqFFGTRMoQcTqN069rkJNf1NeLVBjxnrPzvPbTI2Ywa5Ey+lKNRD+p
-	Hq8Aa1x2B+gyqnvTsTFgsezS4PM8bT7RiR5wMBiQEFHVN/s95ZJVs/ls=
-X-Gm-Gg: ATEYQzy4NqJke2g99pu+1CfyWHF5hlReYXEscznjVmk+SyaBevCEhYX9PmjAEhbjTHd
-	RD8N1qOAf9kp/Eyo5kudDzR95lfdiGHKU4fdHzM3UqnHMEw54s7+aaxwIUS8cw59SOcBMhIgElM
-	75eaJwMoNWpimjL5O8QQ2+blprWsWQz8DhxB6OQyYnJvZ68WEVBuUufbYbZE2HRhZWYYaD4xOg5
-	QvcgZ190LkEui4R25ezkCEEeTe1LW3X/FZlwckgjLAnp0nxq8IzlCoP39lJvAEJC5PYu6gCPBqW
-	LpAwgX8A
-X-Received: by 2002:a05:6512:1288:b0:5a1:4017:18d1 with SMTP id
- 2adb3069b0e04-5a285b54ea6mr4675867e87.37.1774279195001; Mon, 23 Mar 2026
- 08:19:55 -0700 (PDT)
+        bh=kXHNCd3mq7JHVp9hqKQG0KlxehC/Az8dh/4A8PeABAs=;
+        b=eMGhMOiYaW3N+gnCL6R97uVqCV2jCBmV1SuRQJ4hZz8nOJ+iQn9lMbD343Am8YEyZ2
+         oLee9xA+phy0aLFLfK3KsNpEudA0vTyihfPPohJM+AXJ7eRwbY4bK2FtB9aDOVA7+lvG
+         suwWxP0ZaTZ0TAK7RllulmH+GDnN6AgB5JCQHbvwy5V9gdZVnnpP34FmD1Ceohlv9jHt
+         EtMt6yRZqKldJp+66pcYUUHN/qx4Q0IKmV07EyRf4ZqqF2BpzG3ROJl3St6MIGcIb9o8
+         iYgkIW4d/m+goSAsQ2uqjpNnrD9avFhV6KKmZq98Ah4u5CL6wDct0Z6iSev+SzygnZEE
+         T+4Q==
+X-Forwarded-Encrypted: i=1; AJvYcCWqPlo6hVcFffvbkEa989Nm7T9khh1voPS50HnSmLPj/DJR3Fl60ZodV04yu0Zq9EBrWMedSgwo9l0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywt1aST7AZtUEahW9XOSnfNbo9LDepxbn5bkPWlWucB7Ay973PY
+	CHb53zuwK5Zf2NnhWftPDZIKYJfNspmLPWD8GtOuDIU8R5cG4q8GGrSDdzGPAXUUoObhMdK0Vo0
+	0mDR54HV1TcSqvcqYvKtLYlmOaeV/bKl8lOIgrdZc+Q==
+X-Gm-Gg: ATEYQzxCl26B7Vu4V5hgNxxKFrHBIBToCWzglgvvhWzay30jXogHyIl/AJmfmW20AkI
+	prl8s36grHDHp+ITSgnuManMMorQlBN/FF8/phBtikZIddEsIZJqELi+qcO6hwpx7k98YQpUa9L
+	T4emrHauURQpVpqd6Fwl32kIf/QiPx6Rp7fCy9EvnlHHiCs3siNVckzyOwp71MiL3+QgBzYqiq5
+	KgLsSjLAs96VQaR+DbrRBK/l4ivBD4H4b0/gIS7IZV0gNADDN0co3WF8VNekSPvzbMkF4kPEpZr
+	4o0QQFqB
+X-Received: by 2002:a05:6512:138a:b0:5a2:7a31:9193 with SMTP id
+ 2adb3069b0e04-5a285af99aamr4357366e87.18.1774279200004; Mon, 23 Mar 2026
+ 08:20:00 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260313130835.708066-1-festevam@gmail.com>
-In-Reply-To: <20260313130835.708066-1-festevam@gmail.com>
+References: <20260316150115.2616827-1-nick.hawkins@hpe.com>
+In-Reply-To: <20260316150115.2616827-1-nick.hawkins@hpe.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Mar 2026 16:19:18 +0100
-X-Gm-Features: AQROBzCNP8s-Y9NKf75E5i7SXfCEWFK3Iny8BNioMSMMiWmWo13eeXGEDAPT9OU
-Message-ID: <CAPDyKFpGo6aHh3qjT-cTT3SbLF8F1Y6voKEmj3aT-KqK3yHYQA@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: rockchip-dw-mshc: Fix the RV1103B compatible
-To: Fabio Estevam <festevam@gmail.com>
-Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, heiko@sntech.de, 
-	shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	Fabio Estevam <festevam@nabladev.com>
+Date: Mon, 23 Mar 2026 16:19:23 +0100
+X-Gm-Features: AQROBzDM94t1dRDg1HXz3MnrFynSOVSeJFZTzd-JR0yHAFKYOA0-zc43Q_VAvxs
+Message-ID: <CAPDyKFqqjL7PhzvGsBLXTUrTmQuEiPZCPd+LYhE2uy9zyoSPEQ@mail.gmail.com>
+Subject: Re: [PATCH v4 0/2] mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
+To: nick.hawkins@hpe.com
+Cc: adrian.hunter@intel.com, jszhang@kernel.org, robh@kernel.org, 
+	krzk+dt@kernel.org, conor+dt@kernel.org, shawn.lin@rock-chips.com, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 13 Mar 2026 at 14:08, Fabio Estevam <festevam@gmail.com> wrote:
+On Mon, 16 Mar 2026 at 16:01, <nick.hawkins@hpe.com> wrote:
 >
-> From: Fabio Estevam <festevam@nabladev.com>
+> From: Nick Hawkins <nick.hawkins@hpe.com>
 >
-> RV1103B uses the same DesignWare MSHC controller IP version as RK3576.
+> The HPE GSC is an ARM64 (Cortex-A53) BMC SoC used on HPE ProLiant
+> servers.  Its eMMC controller is based on the DesignWare Cores MSHC IP
+> (snps,dwcmshc) but requires a small set of platform-specific quirks
+> that cannot be expressed through the existing generic dwcmshc code
+> paths.
 >
-> They have no "ciu-drive" nor "ciu-sample" clocks and use the phase
-> tuning inside the controller.
+> This series adds support for the 'hpe,gsc-dwcmshc' compatible:
 >
-> Fix it accordingly.
+> Patch 1 extends the snps,dwcmshc-sdhci.yaml binding to document the
+> new compatible and the mandatory 'hpe,gxp-sysreg' syscon phandle
+> (with register offset argument) for MSHCCS register access.  The HPE
+> GSC exposes only a single 'core' clock, so the clocks/clock-names
+> properties are constrained to a single item for this compatible.
 >
-> Fixes: 517b1e3c9455 ("dt-bindings: mmc: rockchip-dw-mshc: Add RV1103B compatible")
-> Suggested-by: Shawn Lin <shawn.lin@rock-chips.com>
-> Signed-off-by: Fabio Estevam <festevam@nabladev.com>
+> Patch 2 adds the HPE-specific driver code in sdhci-of-dwcmshc.c:
+>
+>   * dwcmshc_hpe_set_clock(): SDHCI_CLOCK_CONTROL.freq_sel is wired to
+>     a clock mux on the GSC SoC, not a divider.  When running at
+>     200 MHz (HS200) freq_sel must be forced to 1 to select the correct
+>     high-frequency source.
+>
+>   * dwcmshc_hpe_vendor_specific(): disables the command-conflict check
+>     and programs ATCTRL using existing AT_CTRL_* macros for reliable
+>     HS200 signal integrity on the GSC board topology.
+>
+>   * dwcmshc_hpe_set_emmc(): helper that unconditionally sets
+>     DWCMSHC_CARD_IS_EMMC.  Called from both the reset and
+>     UHS-signaling paths.
+>
+>   * dwcmshc_hpe_reset(): calls dwcmshc_reset(), re-applies vendor
+>     config, and calls dwcmshc_hpe_set_emmc().  The controller clears
+>     this bit on every reset; leaving it clear causes card-detect
+>     misidentification on the eMMC-only slot.
+>
+>   * dwcmshc_hpe_set_uhs_signaling(): wraps dwcmshc_set_uhs_signaling()
+>     and calls dwcmshc_hpe_set_emmc() for all timing modes.
+>
+>   * dwcmshc_hpe_gsc_init(): obtains the SoC register block and MSHCCS
+>     offset via the 'hpe,gxp-sysreg' syscon phandle argument and sets
+>     SCGSyncDis (BIT(18)) in MSHCCS to allow the HS200 RX delay lines
+>     to settle while the card clock is stopped.  Enables SDHCI v4 mode.
+>
+>   * sdhci_dwcmshc_hpe_gsc_pdata sets SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
+>     (base clock not in capabilities) and SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+>     (preset-value registers not populated in GSC ROM).
+>
+> All new symbols are exclusively selected by the 'hpe,gsc-dwcmshc' OF
+> match entry.  No existing platform (Rockchip, T-Head, sg2042, Sophgo,
+> etc.) has any code path change.
+>
+> Note: the DTS node for 'hpe,gsc-dwcmshc' will be submitted separately
+> as part of the HPE GSC base platform series (arch/arm64/boot/dts/hpe/).
+>
+> Changes since v3:
+>   - dt-binding: Changed 'hpe,gxp-sysreg' from a bare phandle to a
+>     phandle-array with register offset argument, as suggested by
+>     Krzysztof Kozlowski.
+>   - dt-binding: Added else clause to disallow 'hpe,gxp-sysreg' for
+>     non-HPE compatibles, as suggested by Krzysztof Kozlowski.
+>   - dt-binding: Dropped the third example node; two are sufficient,
+>     as noted by Krzysztof Kozlowski.
+>   - Driver: Fixed multi-line comment to use the standard block comment
+>     style used in this file (opening '/*' on its own line), as noted
+>     by Adrian Hunter.
+>   - Driver: Added DWCMSHC_HOST_CTRL3_CMD_CONFLICT define for the
+>     previously bare BIT(0), as suggested by Adrian Hunter.
+>   - Driver: Extracted the CARD_IS_EMMC read-modify-write into a
+>     dwcmshc_hpe_set_emmc() helper, called from both
+>     dwcmshc_hpe_reset() and dwcmshc_hpe_set_uhs_signaling(), as
+>     suggested by Adrian Hunter.
+>   - Driver: Fixed regmap_update_bits() argument alignment, as noted
+>     by Adrian Hunter.
+>   - Driver: Moved HPE_GSC_MSHCCS_SCGSYNCDIS macro to the top-level
+>     defines section, as suggested by Shawn Lin.
+>   - Driver: Switched from syscon_regmap_lookup_by_phandle() with
+>     hardcoded offset to syscon_regmap_lookup_by_phandle_args() to
+>     read the MSHCCS offset from the DT phandle argument.
+>
+> Changes since v2:
+>   - Replaced raw ATCTRL magic value 0x021f0005 with existing AT_CTRL_*
+>     macros and FIELD_PREP(), as suggested by Shawn Lin.
+>   - Refactored dwcmshc_hpe_set_uhs_signaling() to wrap
+>     dwcmshc_set_uhs_signaling() instead of duplicating the body,
+>     as suggested by Shawn Lin.
+>   - Dropped redundant 'maxItems: 1' from clocks and clock-names in the
+>     dt-binding conditional block; the items list already implies the
+>     count (reported by dt-review-ci / dtschema).
+>
+> Changes since v1:
+>   - Replaced the second reg entry for MSHCCS with an 'hpe,gxp-sysreg'
+>     syscon phandle + regmap access, as suggested by Conor Dooley.
+>   - Driver now uses syscon_regmap_lookup_by_phandle() and
+>     regmap_update_bits() instead of devm_platform_ioremap_resource().
+>
+> Nick Hawkins (2):
+>   dt-bindings: mmc: snps,dwcmshc-sdhci: add HPE GSC dwcmshc compatible
+>   mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
+>
+>  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  32 ++++
+>  drivers/mmc/host/sdhci-of-dwcmshc.c           | 147 ++++++++++++++++++
+>  2 files changed, 179 insertions(+)
+>
+> --
+> 2.34.1
+>
 
-Applied for next, thanks!
+The series applied for next, thanks!
+
+Note that, I amended patch2 according to Adrian's comment.
 
 Kind regards
 Uffe
-
-
-
-> ---
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index a75209bd2710..4965bb518c54 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -43,11 +43,14 @@ properties:
->                - rockchip,rk3562-dw-mshc
->                - rockchip,rk3568-dw-mshc
->                - rockchip,rk3588-dw-mshc
-> -              - rockchip,rv1103b-dw-mshc
->                - rockchip,rv1108-dw-mshc
->                - rockchip,rv1126-dw-mshc
->            - const: rockchip,rk3288-dw-mshc
->        # for Rockchip RK3576 with phase tuning inside the controller
-> +      - items:
-> +          - enum:
-> +              - rockchip,rv1103b-dw-mshc
-> +          - const: rockchip,rk3576-dw-mshc
->        - const: rockchip,rk3576-dw-mshc
->
->    reg:
-> --
-> 2.43.0
->
