@@ -1,294 +1,233 @@
-Received: from CO1PR03CU002.outbound.protection.outlook.com (mail-westus2azon11010011.outbound.protection.outlook.com [52.101.46.11])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F9EB1DF980;
-	Mon, 23 Mar 2026 13:05:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.46.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D334B3ACA77;
+	Mon, 23 Mar 2026 13:33:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.17
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774271149; cv=fail; b=MVmHR3/i4qQKLS0SldPM4ctEHNrNqRO9AKG1SNdTwa1EnYjVkM9lo1X5t2He+pKzWqiskwUzPFSN8r2Wmwv6cxUHnajZydak/mNCCETug3/+cQuHaZNnd3axhhG0tFQm4WkvkheS9bCFEq2hdFxbNdeBp4SWIqqEHNRjDfnkga8=
+	t=1774272839; cv=fail; b=d0sODmW8b+MuE5NYXAsRb6tZGSoEkrLC81JKOHzii79dyBBulibS4D2stDWrTImRNhUQGeswH24UHs0tGFHmF78g+tnOlmbbM/ElJZyS3Q1owILFj9YrW3DmHoPxkfHz6etd8k9vgrCspeniisxWg1lAr1BVCp3ZN94TivO/tyM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774271149; c=relaxed/simple;
-	bh=427wGycL5ey6to/S8jN+keboAslm4lg2qnwIQLysVLM=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TO7xMcyShG3uCsObHKKh+OMtamGzEfOkJQad4U6wu/2Ztuwvh5uQUnA8RTghjBJ0YoDhN1rpKYc73XRv904BmS3iUR6PUL4bXI9o59oqWOkppohwaUHzNLu/CT3LBNrxdR3KQFjLICHg/CJHBNZJ9Eo0CBu9jYn4O3ads8+DX1E=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=caUeKO53; arc=fail smtp.client-ip=52.101.46.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1774272839; c=relaxed/simple;
+	bh=ygRXMPNI7Rjp3g8hLEoIc33cuV98oJZB2ImcFVnVV0A=;
+	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=JN5Aq9OpTQ3BwhbbhQuFXkzz0w4n6zYLCQ8gfbX5Zioh5T+0K+GoPxFKWoZq5hL8wVWdfoYikzmvL2c8Dz9DsVKxLcCJc/6vAEJ6eefxQzE1yIVOls0deDjVRXe7t3a44UB7/sr74ECoTuPPLsGaGxkVb8TktlbQnEmg0bYOxKA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=BgyrNHXC; arc=fail smtp.client-ip=198.175.65.17
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="caUeKO53"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="BgyrNHXC"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1774272838; x=1805808838;
+  h=message-id:date:subject:to:cc:references:from:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=ygRXMPNI7Rjp3g8hLEoIc33cuV98oJZB2ImcFVnVV0A=;
+  b=BgyrNHXC28dFqbcmQvO6WaKPt+lEmF8A/JvwDt86zfvT7zlOqFpusIFW
+   4gNFqzLD5S7+O96Gl8STRKJ5MNmdJeWaoygVbMybixzqOF2RsI4lZHXNr
+   uf5szQOo13LJ9Re+2lkHqYvpvFiKRxBgzp1MX+Tst/xQtOy3VZxXVmFhp
+   ehQijems+mBkFDm9u+p0BvmoYuR6F/JOBY6itJsaa5/tkb3d11PmrHOl8
+   2e9+9CF63PLc9Pqb9pX0IoyVJe7f5pBHb/nspJ/op0XM9niIFbgbQiuYo
+   KJYe/O4hsqiuv1GMEvz4F9OD1hvdBkVsaODomvfjeKv7myYukz/l7t85Q
+   w==;
+X-CSE-ConnectionGUID: ksdrtdDoTGWCjxGplEVtuQ==
+X-CSE-MsgGUID: vUUU9WuwTLq+qXVZqf6D/A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11737"; a="75240236"
+X-IronPort-AV: E=Sophos;i="6.23,137,1770624000"; 
+   d="scan'208";a="75240236"
+Received: from orviesa007.jf.intel.com ([10.64.159.147])
+  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2026 06:33:57 -0700
+X-CSE-ConnectionGUID: xGZWNajCTrGzT46QpDaEZQ==
+X-CSE-MsgGUID: 4EEBf3KeRZyCHvjTC2djJw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.23,137,1770624000"; 
+   d="scan'208";a="224243220"
+Received: from orsmsx901.amr.corp.intel.com ([10.22.229.23])
+  by orviesa007.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Mar 2026 06:33:58 -0700
+Received: from ORSMSX903.amr.corp.intel.com (10.22.229.25) by
+ ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.37; Mon, 23 Mar 2026 06:33:56 -0700
+Received: from ORSEDG901.ED.cps.intel.com (10.7.248.11) by
+ ORSMSX903.amr.corp.intel.com (10.22.229.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.37 via Frontend Transport; Mon, 23 Mar 2026 06:33:56 -0700
+Received: from BN8PR05CU002.outbound.protection.outlook.com (52.101.57.22) by
+ edgegateway.intel.com (134.134.137.111) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.37; Mon, 23 Mar 2026 06:33:55 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=NSJRMI5l51OOUzP5L9zGtLqj553sdAVcSNwaM5PcPXC6dptCX2bE95vZZ1albEOn4Hhb0MNE0h7BtpXC8Ugg20s+Rqesc4NsLLA7l8KUytYugvwwebkzVoOu8cfb3V/kn0BEcBwDNOrpp8Nw2OxrSObhU+/OoQ4Hww8HDJ/vt6CuZzV6TMEJp/BPANGWaY7LVc+7b510b177hJ/0gkg+E0k8jYQI2n8TfHb6BjsiyjC7vfYFTjDB2DgXR9kZanPoGLWyTUyUICECbOj9GXkezqIZcJrEvCSMrnCJ/j/c3C8UsvIiAOMggD5P4VbmqdfrNWhiunGJ2vta95ucG7c1WQ==
+ b=KANjVXkeg78sCXkXtXQ03Y7UzVrriLx2XW/1Ww8bgxlDbx6Mu6JNnMe+++nokgV66sXejJ689AT8NoTSu/Y3iRp1ERNM4a23cNMMqUknMH8zd/AWgrlI6xdYwTybgoxzKyyjmz4Owqi2UEdCz7qXL/YSnujbkdioZxd+w/65a860UEVnanVnOnH6PzZB7ik5sYiMoR1ReLos00A0153lcAgpq4jwAE3dCPIourSChPmxqaSnXGsH63Js40YnEDxvh0J++bCE14wn13zuoWAV1V+OV0O52u4zYp/y1VGWdZoUuKpGeUhO1rBxAMEksG+mSET1OYhCmh05OUJM0JghBA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=/SIfnfly2JQwu1daxw4aXVtV96O2QvSorFOik2q52DA=;
- b=u1NlRMSzSK4x270l4IBzfZoJPq8Nl6Kbu4AZ4XNYQuRY9yu26kxq1df5gko6XJMJXvVs+rsZVgB9epHLgq6F/w0B4oagCxe/aIVqweznl7k3CjzTHldUtyUW4efS6D9gzw05H3I/F/JWEpB0+D3QgYqczy0RQiYmpO84SNVAhFBm3MlavcnlIu3KT4gL4bl29mZvV/3mvWfBy+RDeTNBtRB25mFrpao6a2RxdNDUS6fidM/lvodFNf31e5hDeaslKzqBWP/AnESips+K6dm1qMoLs0hCke/ynX6NCj4cGATt/+VrZQVxcfGZXdldNmsdgK4lHIg+8MTvLOMJWJcrVg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 198.47.21.195) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=ti.com;
- dmarc=pass (p=quarantine sp=none pct=100) action=none header.from=ti.com;
- dkim=none (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=/SIfnfly2JQwu1daxw4aXVtV96O2QvSorFOik2q52DA=;
- b=caUeKO53FUyeJtHPS1QBTE9t+7RmrvxsOAkCMiGE+aUNtcWnd7mgpH1lLCsaukA+5bKKsXmLC60VGgaT+YhF8vQbLJFDb9T4eNvrNGQ+3PBRYst5zfRlEvuY6AVrFWrOAy/euWpyE0AqsDhYPHw153Ju9DKoNtlaRn8U8ummtTA=
-Received: from MW4PR04CA0333.namprd04.prod.outlook.com (2603:10b6:303:8a::8)
- by DS0PR10MB997650.namprd10.prod.outlook.com (2603:10b6:8:313::5) with
+ bh=YiFNqkbATrvOYmK6fhb4vVLx2Sf9B9YrcUlITHTmDS4=;
+ b=hCmi3ZCUMCFGH/OBsR/tm8aV9WWmYwXFYhnvbcJ81jibfB+Rv+Og6pcLiN3sXZt8q9MIHzrCOqTrZ2ieCsaEzmT3AJA5VYkFCwU9ICSJmgg3wZpL2Lv+mIvy4lveDevFOISHStzwG7A4eXaaEiRjSQlOme7xk0MiZDkiIKQWl61s2QB2fK4P8MAJYir9EJOd1pFQVuZgZ99kz4cwKrOFxPUTYaNg+vrnBAo+dGftHajBFEBjaI0iezHNZjT7qkYN/Iz2gOhhvO+OdJ4zEtCvEFBQyYbiHYqLeMXPDS1X6zBOamPt0GR0tDTX86O6VFjcpTgltMyB1/BRjaFyF18Scw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=intel.com;
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
+ by MW4PR11MB7008.namprd11.prod.outlook.com (2603:10b6:303:227::7) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.31; Mon, 23 Mar
- 2026 13:05:45 +0000
-Received: from MWH0EPF000C618B.namprd02.prod.outlook.com
- (2603:10b6:303:8a:cafe::b5) by MW4PR04CA0333.outlook.office365.com
- (2603:10b6:303:8a::8) with Microsoft SMTP Server (version=TLS1_3,
- cipher=TLS_AES_256_GCM_SHA384) id 15.20.9723.25 via Frontend Transport; Mon,
- 23 Mar 2026 13:05:37 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 198.47.21.195)
- smtp.mailfrom=ti.com; dkim=none (message not signed) header.d=none;dmarc=pass
- action=none header.from=ti.com;
-Received-SPF: Pass (protection.outlook.com: domain of ti.com designates
- 198.47.21.195 as permitted sender) receiver=protection.outlook.com;
- client-ip=198.47.21.195; helo=flwvzet201.ext.ti.com; pr=C
-Received: from flwvzet201.ext.ti.com (198.47.21.195) by
- MWH0EPF000C618B.mail.protection.outlook.com (10.167.249.123) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.9723.19 via Frontend Transport; Mon, 23 Mar 2026 13:05:43 +0000
-Received: from DFLE207.ent.ti.com (10.64.6.65) by flwvzet201.ext.ti.com
- (10.248.192.32) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Mon, 23 Mar
- 2026 08:05:34 -0500
-Received: from DFLE205.ent.ti.com (10.64.6.63) by DFLE207.ent.ti.com
- (10.64.6.65) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Mon, 23 Mar
- 2026 08:05:34 -0500
-Received: from lelvem-mr05.itg.ti.com (10.180.75.9) by DFLE205.ent.ti.com
- (10.64.6.63) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
- Transport; Mon, 23 Mar 2026 08:05:34 -0500
-Received: from localhost (uda0271908.dhcp.ti.com [128.247.77.70])
-	by lelvem-mr05.itg.ti.com (8.18.1/8.18.1) with ESMTP id 62ND5XvW791610;
-	Mon, 23 Mar 2026 08:05:34 -0500
-Date: Mon, 23 Mar 2026 08:05:33 -0500
-From: Bin Liu <b-liu@ti.com>
-To: Shawn Lin <shawn.lin@linux.dev>
-CC: <ulf.hansson@linaro.org>, <axboe@kernel.dk>,
-	<linux-block@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH] mmc: block: use single block write in retry
-Message-ID: <20260323130533.y7byr3atch32stn5@iaqt7>
-References: <20260310160408.3976760-1-b-liu@ti.com>
- <301ff663-7f18-ae12-f0f8-88c4e4375114@linux.dev>
- <20260317132454.b6i7wp763yj36d3v@iaqt7>
- <1806373b-d402-5655-94d4-5cf7142e1382@linux.dev>
- <20260318151735.ffjhbzz4x32n5i7h@iaqt7>
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.19; Mon, 23 Mar
+ 2026 13:33:52 +0000
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456%6]) with mapi id 15.20.9745.019; Mon, 23 Mar 2026
+ 13:33:51 +0000
+Message-ID: <3be1a7b7-751d-4c75-828d-62dd0c2bd180@intel.com>
+Date: Mon, 23 Mar 2026 15:33:45 +0200
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 2/2] mmc: sdhci-of-aspeed: Handle optional controller
+ reset
+To: Ryan Chen <ryan_chen@aspeedtech.com>, Andrew Jeffery
+	<andrew@codeconstruct.com.au>, Ulf Hansson <ulf.hansson@linaro.org>, "Rob
+ Herring" <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, "Conor
+ Dooley" <conor+dt@kernel.org>, Joel Stanley <joel@jms.id.au>, Ryan Chen
+	<ryanchen.aspeed@gmail.com>, Philipp Zabel <p.zabel@pengutronix.de>
+CC: Andrew Jeffery <andrew@aj.id.au>, <linux-aspeed@lists.ozlabs.org>,
+	<openbmc@lists.ozlabs.org>, <linux-mmc@vger.kernel.org>,
+	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+	<linux-kernel@vger.kernel.org>
+References: <20260323-sdhci-v3-0-93555b8f6411@aspeedtech.com>
+ <20260323-sdhci-v3-2-93555b8f6411@aspeedtech.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
+ 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
+ 4, Domiciled in Helsinki
+In-Reply-To: <20260323-sdhci-v3-2-93555b8f6411@aspeedtech.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: DU7P194CA0008.EURP194.PROD.OUTLOOK.COM
+ (2603:10a6:10:553::25) To IA1PR11MB7198.namprd11.prod.outlook.com
+ (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260318151735.ffjhbzz4x32n5i7h@iaqt7>
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
-X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: MWH0EPF000C618B:EE_|DS0PR10MB997650:EE_
-X-MS-Office365-Filtering-Correlation-Id: 69a1bf14-b63f-4046-dcdd-08de88dce471
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|MW4PR11MB7008:EE_
+X-MS-Office365-Filtering-Correlation-Id: bd5d96b7-7cbe-4af4-6bde-08de88e0d19a
+X-LD-Processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|82310400026|1800799024|36860700016|376014|22082099003|56012099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	yM+ttbfff6+cdafz5fL/hEPU/MFZ1N8CR3ppWmBhHfbWCo+U8FPYhIqBE+lYd6c6r4cr35oc5QOJqFzHF8N/LWIdrajDY3sBErvk4rCPVBxwf25PGcQlUQ/UZfqGM3mpw48M0j8vqNvcSDy0+67Po+KzBrSChDIXDbuJvGkCOmjqsP+I6qECVr/rjb6F2vyAgjudewFaYb3GVZlEkoYpB/G0qmKP/pRuMTIRuXGUfIqGhSfoJYiibz1c/h6/J2X8H/uinPHFqzb2q/IKlF6pveag2ehy0N6Yk8djX2JospFWhkO9lO1NCYdEUVbHECWU5jBVoa10UIxZym6R//kVVxhbb77b0itjQHw7eU5yrOjSOluh7GdcTl9SoFhu0xvub98Dwzq5SsI9QlaqoWYmJj9wJmgxliXHaRKwHxVaZUjY76I9IgXrlvFsVDK8Mgp2hvXZqUAaNbfON0/mY3A6BGPEnwP7W5WZyI0j7k80n5ZwBw6Yf7EJny/gVHOWMwiAnJy332hBC8VO5sEbiZgwqLjy0Kc3N66w3+Vggz3/VlhJK/JugjRNHf2A+OToqBRA0ofBimduhK9GQla9HvJEjGuEtPUUwd2psJyDN/wKmDcWhAXbCPpvLzMt6+NQEBH4+bvy21q+4vb0BALAUJiiZb0i6g/KV0XnpKXrRKAxbEN0hXXR9B7LT3eE/TJ5NICGcy/IJvT/2T6VoJhcgNuvZUnpsBNwjltoGhidYJzBVbmNrOebx6zIE0rEmXQ1QTjhUfZsvWFn4wAvVU3WuPYNcA==
-X-Forefront-Antispam-Report:
-	CIP:198.47.21.195;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:flwvzet201.ext.ti.com;PTR:ErrorRetry;CAT:NONE;SFS:(13230040)(82310400026)(1800799024)(36860700016)(376014)(22082099003)(56012099003)(18002099003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|376014|1800799024|7416014|56012099003|7053199007|22082099003|18002099003;
+X-Microsoft-Antispam-Message-Info: fRdTnAP7+45Z56FRHip/kGCbvn9i+9xh47G+3Vuy4BYKshHIoY82JhXtLfuMqgTzw0ciQcR78JOjb2dS4bhOiIRxzc2dUbAYTX3hfNoD7oTtV0kTPzxWJt0qiEXN0BW9qjOkK5UDlZwM3Scn7L8a9+bjbo3TUPf9NCFQvhCO56TFG8uPnWe1vtjvzeIihinZy/SlOB1DaILp0swZfUAPgMX1R7ycWTih2q5UMZgsShYAJNkhXhGHhpvuZbd50kQItIR8fDzuR/wuJhFicylIhfSajRhXFh8EfP02Wf+iOXA5ZFrZT7u2kBKdjfD+nTgT+Qgs+77GfbhnF2bXFFT+T4tr6NaBqqtCWJNUt5Y0XY2fF8SxgaYI4KvIZJlHlqu1T04CWod7r9aKQ5wfocy3SjyOKCbE5QSoAzm8tlVbXaR0wBL3xHN4LLNtQWTrK/8nzCQCWcelnOpNXougxUBCtRGDB0yOOQcJtgRDpFebVWsCYfV0x39BtXiOkKIR57h6nzkJ3fRTgyUwPqCrRIvEtEkYdppeOp0iZYFPrtXu17B3WUzVv6sVAGS1q6Kz7sGvuIeZlWgODnftbhupO5FjBmY7q4NnEVPEyN0T9MkgdxiLka20uqlvNo06DR1IWkr+No/BiOfCMpOUtdT/LmqdVToXoOQKuhE/RBXbSGTBkL34/OAbhaeeIqr6bE0ojlFeUj4RGI3p1ZgsXEebvVxiSvIVPR+V3D2636aAJ7guxvI=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(7416014)(56012099003)(7053199007)(22082099003)(18002099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	VhD1afiIunvoKrv7fCuiIxWYV8fsL5x1NNx5l5s4ZAK6Wpzu04inaJRloVd44MkJ9E3SZ0RYeH1LiDDM+pO8qgxMPa1u0wQYFulYgDpSHbBKpEP2qavZyWu8N9qJBuJx5jNW6fGwZu0dtvdB23V746D6MPLJfnYYDk4+vE1EmuDO6I8k9ipjc99pP/08MaQz1TPInV2Fh2NjxGb80dFk9Z3unC0ASj3SRzhhmBUpp76DAcc9m7yu+1eQq8hbdr13EAbCKULrdnYjRo1r8W0zjiSPETmzIQ5GoVVeXTr4Cqp0U5dje2LwqV6wYlpFrzkD69E0as5hVn16rA8tJKDwf2/AgEH+5Vl+vZPfzKfGvhBvqOWcD0ELBks3+Y3slzQnlvUn8zI41sNxicXvLA6JKhcss8QSmtqzyD7vFGkUi1RWrJwdraygRrSLVthFFfgs
-X-OriginatorOrg: ti.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Mar 2026 13:05:43.8759
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?eHlNOWxJOUlLOG1QU2pGMzN3QVdvNE4rRCsxck92OFlWM3JXTkx5b2RZWTlq?=
+ =?utf-8?B?ZHBYaGNJQkJZVkRnQUQ2dldFRDltRTFoSXlMajEvOVhJbFV4QzRPb21kK0hk?=
+ =?utf-8?B?OVRBZHFXaXYrR1hZcjNQKzdidlV6Q0ttYUYvQU50L1RuSkl4ZUFQc0tnTHUx?=
+ =?utf-8?B?SWtNLzZCcGhHUjJGbiswZjZZOUxaWlozeWtMTll2WXdZTUJ6ZDZvSVllR1Ja?=
+ =?utf-8?B?cnF0OVpVMGZaM25DRlhSRDRWa0k3aFRQRTl3WmVaSDcvdjdGWkE1alBvS1FV?=
+ =?utf-8?B?Rm1Bc2J4eGxkcUNNbXExUE1nRzVpaVljdFBwVDdGYWNva09QM281NlppS1FT?=
+ =?utf-8?B?YjVKdGpuQml3TGZ5NVhXR0NKUEV2WTAwdTlhb3p3KzR5QUVaT05rY3pPVVNo?=
+ =?utf-8?B?aXlGVXZuMjdqKzhXaUxhb21iMDExMUNSeG9vcWRhR3VtSWZROXhOL1RCTzY5?=
+ =?utf-8?B?ZUxiU2krbjVOU3QvRWF0NFhMUmdPd1hybDdncWpYM1lLdWdIRTBKU0Z1dGtH?=
+ =?utf-8?B?U3IySXhXVmdIRmNqS0tvZzVtaW9NTStlVkxuUVNkQmV3TEVQTitidVpiSG5V?=
+ =?utf-8?B?cktkY29tVElESG9vMWNnZHI4VStaQkdJQ3NvVFQzbWZ1MDBpcEFjRG9qT2Nx?=
+ =?utf-8?B?SmE1V1Bwbmx0USt3czZsc3ZESFpoaXB2RDZEZUwrbzQxZ0JIa0p0U2VIMlVP?=
+ =?utf-8?B?d0hqcDdzd2Yrd1F1Rzh3SHpTUmxncjYrZmwzNjhoY3pIWllLWWdvQUsvYmd4?=
+ =?utf-8?B?Z1JTNTBhc0RnOWZiUURHMlB0VDlaaGE2eThzVWhwNEhnL0YxdThiVWlTNlRC?=
+ =?utf-8?B?bWlqeEhMclhuVHFKNW4rYVIxMnpkdllrZGN1ZHFzd3lycSsrRlpONitQUEMv?=
+ =?utf-8?B?OUV1ZG9rY2xtZjlGaEhmVlJwT3NDYlhyRVNtZGkvOS9xWFQvRk9ZcEFjY012?=
+ =?utf-8?B?VURKcyt2TVF0VVdJb2o3L01jU2FCOWlZdUE1S3ZkT05jNjRvbFZvMHlXMmJh?=
+ =?utf-8?B?NEtidlFaVGk0Ujl5NzdMZkp1N29KTFc0VFNaR0hhRm92L1lmZ0VPaG5yT0dN?=
+ =?utf-8?B?ZVAxSjZUazBYSnJNdHFQem9sekVnYWpRT3BPM1puaExsb21mTElVTW95K2hD?=
+ =?utf-8?B?K2ZVNVhBTC9GTEdQNkNXTUNFWlpKbjhZdjhhUVdWRWJqdXBCMXJxaGdBRFRy?=
+ =?utf-8?B?MWdaZmhPRXpqUDFvQmtMQlk0RFBlU0dhWnRQbUFGMnQxbHgzcjZtY3FnZFZO?=
+ =?utf-8?B?S05KSlFTVWdIU3hjcTJCd1FKWWNIWitLcnNOeFd0ZWM0Zzk1cjBBeTRPeHlO?=
+ =?utf-8?B?b29tSnlwcHNEU2hPTFRuMzVra0NabUxHbHZzQy9VbkVCK09HUXpiVDVYL08r?=
+ =?utf-8?B?aXB6b0tSYnVWcy9oYnJSdHF5dmtDOE5rUDB4OUxIcWhHUXRGeTVnbW90N3p5?=
+ =?utf-8?B?SUVUQmxDejc5dzA0bXZvbGNzTUUzaVdITk5NYU9UdmwwcEduUDNiTHZUVjNo?=
+ =?utf-8?B?eVhLSDIvay9TcXZueGFlUVpzbHU1ZEE2UjlhME9LbmZyTmpoV3NvZTNWaS9l?=
+ =?utf-8?B?ZlRSTGt1QVZOUGdEbXBnWUp3em56WGE2TDJHakE2TzR3cEZMRVkzUlhDNjV1?=
+ =?utf-8?B?bzRqSHY0cnFmSEl3ZVIzaWt1R0x6bHRHYjRGYnExNnJQUjJqQzZxRzJKWjBR?=
+ =?utf-8?B?VUVWY2J1eElNNzliRkdlMUs2dzhKdjY2eWZNN1Y0QnVwRGUzWmNielFEUWtU?=
+ =?utf-8?B?S29BY3ZFZ3U3cGxHZkRWL0JFSUVEWkFyTnVPa2RKUmRqS3kxbzFVY3ZqcmpU?=
+ =?utf-8?B?RkJPMGwvcWQ1cHhqWHQ3VGxIVkU1czUrZWQzdFliR05Ka2E0ckFWYzFZaURi?=
+ =?utf-8?B?aEtCcDc4OXlQcy92Zm85eTBkNHg4bnIxbENzYTRnd0ZZU0xpa2Y0VFZYWkVw?=
+ =?utf-8?B?UlIzMUhmRGRKbCtIeFk5cmRlUG1OVXpIN3pFNkVoeW9OWXp1dTBnWXlTdzJt?=
+ =?utf-8?B?M0tpTHBpSGl0WWJrTE9QU0tRTnExOUtCTjZadnJMclAwQ25JVDV2L1ZZRjM3?=
+ =?utf-8?B?ekZmaDBoUDdUU0ZPeHUvRFFyVXVhUU1YK3JKbDlwNk5MWjgrRWlvV3Y1bVVO?=
+ =?utf-8?B?TnZnMXVyVnFZbDVNcHZQWWxsTEFhdUZlUE0xbWMyTEFEUDU5UFhhN0FEMkMw?=
+ =?utf-8?B?dk5OT0Q1d3JxZmFTYTRIelZpdzFxWFlXU2lMbzlsRFhkS0kvR1Zod3N2MWU2?=
+ =?utf-8?B?OWoza3RTN2dDai8zdFdwUFU3NytkdzZSQUc3SDNtSmxYSzVuT3NrdldjR3cy?=
+ =?utf-8?B?bVhhNjZCOTI2cG9HN3dPUDJFTVdqYmZ3bUFOdHlKWFRYLzRIbjRWUjlUNS82?=
+ =?utf-8?Q?LGlZYmVTnRS3aOho=3D?=
+X-Exchange-RoutingPolicyChecked: DGMp9MP9bASr472y19GSpXozbpn7gUds1cYMad0pd6zgDqY/573/CnDl7PF6QGaHv/09qRbLPZeF+tMr8pFJNsvp3cksXnyERcc0ka1sbuf0IuUzbP8Lucp8GW6nxHiaQk5WPltJmFNeZJ6cQ47FLSBrXWPJUoxRZIaOERdZsVg9h/9MQhziwUrvnJ3r7g9mwwlrOnY232AgwpmxVd6uri457g3TrFEDc48qVWnTQDs0h417/KzuqkN9U4AZDWOHiWua0KaUfQFCFkWmx9iEdb41LMjKejWWiN8st9BmGh4DTFIQIpFCsN3xj/r6jsTHysFmk0Wl82WLnMdLCGWr7g==
+X-MS-Exchange-CrossTenant-Network-Message-Id: bd5d96b7-7cbe-4af4-6bde-08de88e0d19a
+X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Mar 2026 13:33:50.6740
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 69a1bf14-b63f-4046-dcdd-08de88dce471
-X-MS-Exchange-CrossTenant-Id: e5b49634-450b-4709-8abb-1e2b19b982b7
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=e5b49634-450b-4709-8abb-1e2b19b982b7;Ip=[198.47.21.195];Helo=[flwvzet201.ext.ti.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	MWH0EPF000C618B.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR10MB997650
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 0bVMXG9vQ0kwKWSKtZvrfc/a3dPR858A8mgXWusQ1Ezxd7d1hNDPUlQ2SVT0nsUjB4wa0OFE+SVlN7iciSJ6NA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW4PR11MB7008
+X-OriginatorOrg: intel.com
 
-Hi,
-
-On Wed, Mar 18, 2026 at 10:17:35AM -0500, Bin Liu wrote:
-> Hi Shawn,
+On 23/03/2026 04:07, Ryan Chen wrote:
+> Get the optional reset line for the ASPEED SD controller during probe by
+> using devm_reset_control_get_optional_exclusive_deasserted().
 > 
-> On Wed, Mar 18, 2026 at 09:43:10AM +0800, Shawn Lin wrote:
-> > 在 2026/03/17 星期二 21:24, Bin Liu 写道:
-> > > Hi Shawn,
-> > > 
-> > > On Tue, Mar 17, 2026 at 08:46:40PM +0800, Shawn Lin wrote:
-> > > > 在 2026/03/11 星期三 0:04, Bin Liu 写道:
-> > > > > Due to errata i2493[0], multi-block write would still fail in retries.
-> > > > > 
-> > > > > This patch reuses recovery_mode flag, and switches to single-block
-> > > > > write in retry when multi-block write fails. It covers both CQE and
-> > > > > non-CQE cases.
-> > > > 
-> > > > MMC core natively retries single for multi block read. So I assume
-> > > > what you are trying to do is make it the same for write path. We didn't
-> > > 
-> > > Yes I am trying something similar for writ path, but
-> > > 
-> > > > resort to upper block layer for help for read case in the past, so  I
-> > > > think you could still achieve that within the scope of MMC core.
-> > > 
-> > > unlike the read path solution, I didn't solve the issue within the scope
-> > > of MMC core, becaure it would intruduce more code than this patch does,
-> > > especially the CQE and non-CQE cases have different failure path. (I
-> > > didn't try to figure out how the single block read retry covers both
-> > > failure cases...)
-> > > 
-> > > I feel the solution in this patch is more clever with less code
-> > > introduced.
-> > > 
-> > > > 
-> > > > More importantly, what is the failure rate of this issue? If it occurs
-> > > 
-> > > Very rare. For example, on the EVM, the issue can only be triggered by
-> > > writing 3 or more blocks of data pattern 0xFF00.
-> > 
-> > I manually modified cqhci and sdhci to inject errors for multi-block
-> > writes under both CQE and non-CQE modes. The following patch appears to
-> > work by testing. Could you please test it?
-> > 
-> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> > index 05ee76cb0a08..ca60991a3305 100644
-> > --- a/drivers/mmc/core/block.c
-> > +++ b/drivers/mmc/core/block.c
-> > @@ -1642,13 +1642,13 @@ static int mmc_blk_cqe_issue_flush(struct mmc_queue
-> > *mq, struct request *req)
-> >  	return mmc_blk_cqe_start_req(mq->card->host, mrq);
-> >  }
-> > 
-> > -static int mmc_blk_hsq_issue_rw_rq(struct mmc_queue *mq, struct request
-> > *req)
-> > +static int mmc_blk_hsq_issue_rw_rq(struct mmc_queue *mq, struct request
-> > *req, int recovery_mode)
-> >  {
-> >  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> >  	struct mmc_host *host = mq->card->host;
-> >  	int err;
-> > 
-> > -	mmc_blk_rw_rq_prep(mqrq, mq->card, 0, mq);
-> > +	mmc_blk_rw_rq_prep(mqrq, mq->card, recovery_mode, mq);
-> >  	mqrq->brq.mrq.done = mmc_blk_hsq_req_done;
-> >  	mmc_pre_req(host, &mqrq->brq.mrq);
-> > 
-> > @@ -1663,13 +1663,23 @@ static int mmc_blk_cqe_issue_rw_rq(struct mmc_queue
-> > *mq, struct request *req)
-> >  {
-> >  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> >  	struct mmc_host *host = mq->card->host;
-> > +	int err;
-> > 
-> > -	if (host->hsq_enabled)
-> > -		return mmc_blk_hsq_issue_rw_rq(mq, req);
-> > +	if (host->hsq_enabled) {
-> > +		err = mmc_blk_hsq_issue_rw_rq(mq, req, 0);
-> > +		if (err)
-> > +			return mmc_blk_hsq_issue_rw_rq(mq, req, 1);
-> > +	}
-> > 
-> >  	mmc_blk_data_prep(mq, mqrq, 0, NULL, NULL);
-> > 
-> > -	return mmc_blk_cqe_start_req(mq->card->host, &mqrq->brq.mrq);
-> > +	err = mmc_blk_cqe_start_req(mq->card->host, &mqrq->brq.mrq);
-> > +	if (err) {
+> This allows platforms such as AST2700, which require the SD controller
+> to be taken out of reset before use, to work with the existing driver.
 > 
-> In the CQE case, when the problem happens due to the errata, this
-> function won't return error. The MMC write error is reported in
-> mmc_blk_cqe_complete_rq() if you see my original patch.
+> Signed-off-by: Ryan Chen <ryan_chen@aspeedtech.com>
 
-Which route should we go forward, continue to refine this patch or any
-more comments to my original patch?
+No longer applies to 'next' branch of:
 
-Thanks,
--Bin.
+	git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
 
+Fix that and add:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+> Changes in v2:
+> - use devm_reset_control_get_optional_exclusive_deasserted replace
+>   reset_control_get_optional_exclusive.
+> - add include reset.h
+> ---
+>  drivers/mmc/host/sdhci-of-aspeed.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
 > 
-> -Bin.
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> index ca97b01996b1..8f638ffb55ae 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -13,6 +13,7 @@
+>  #include <linux/of.h>
+>  #include <linux/of_platform.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/reset.h>
+>  #include <linux/spinlock.h>
+>  
+>  #include "sdhci-pltfm.h"
+> @@ -520,6 +521,7 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
+>  
+>  {
+>  	struct device_node *parent, *child;
+> +	struct reset_control *reset;
+>  	struct aspeed_sdc *sdc;
+>  	int ret;
+>  
+> @@ -529,6 +531,10 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
+>  
+>  	spin_lock_init(&sdc->lock);
+>  
+> +	reset = devm_reset_control_get_optional_exclusive_deasserted(&pdev->dev, NULL);
+> +	if (IS_ERR(reset))
+> +		return dev_err_probe(&pdev->dev, PTR_ERR(reset), "unable to acquire reset\n");
+> +
+>  	sdc->clk = devm_clk_get(&pdev->dev, NULL);
+>  	if (IS_ERR(sdc->clk))
+>  		return PTR_ERR(sdc->clk);
 > 
-> > +		mmc_blk_data_prep(mq, mqrq, 1, NULL, NULL);
-> > +		return mmc_blk_cqe_start_req(mq->card->host, &mqrq->brq.mrq);
-> > +	}
-> > +
-> > +	return 0;
-> >  }
-> > 
-> >  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
-> > @@ -1776,24 +1786,26 @@ static int mmc_blk_fix_state(struct mmc_card *card,
-> > struct request *req)
-> >  	return err;
-> >  }
-> > 
-> > -#define MMC_READ_SINGLE_RETRIES	2
-> > +#define MMC_RW_SINGLE_RETRIES	2
-> > 
-> > -/* Single (native) sector read during recovery */
-> > -static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
-> > +/* Single (native) sector read or write during recovery */
-> > +static void mmc_blk_rw_single(struct mmc_queue *mq, struct request *req)
-> >  {
-> >  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> >  	struct mmc_request *mrq = &mqrq->brq.mrq;
-> >  	struct mmc_card *card = mq->card;
-> >  	struct mmc_host *host = card->host;
-> >  	blk_status_t error = BLK_STS_OK;
-> > -	size_t bytes_per_read = queue_physical_block_size(mq->queue);
-> > +	size_t bytes_per_rw = queue_physical_block_size(mq->queue);
-> > +
-> > 
-> >  	do {
-> >  		u32 status;
-> >  		int err;
-> >  		int retries = 0;
-> > 
-> > -		while (retries++ <= MMC_READ_SINGLE_RETRIES) {
-> > +		while (retries++ <= MMC_RW_SINGLE_RETRIES) {
-> >  			mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
-> > 
-> >  			mmc_wait_for_req(host, mrq);
-> > @@ -1821,13 +1833,13 @@ static void mmc_blk_read_single(struct mmc_queue
-> > *mq, struct request *req)
-> >  		else
-> >  			error = BLK_STS_OK;
-> > 
-> > -	} while (blk_update_request(req, error, bytes_per_read));
-> > +	} while (blk_update_request(req, error, bytes_per_rw));
-> > 
-> >  	return;
-> > 
-> >  error_exit:
-> >  	mrq->data->bytes_xfered = 0;
-> > -	blk_update_request(req, BLK_STS_IOERR, bytes_per_read);
-> > +	blk_update_request(req, BLK_STS_IOERR, bytes_per_rw);
-> >  	/* Let it try the remaining request again */
-> >  	if (mqrq->retries > MMC_MAX_RETRIES - 1)
-> >  		mqrq->retries = MMC_MAX_RETRIES - 1;
-> > @@ -1969,12 +1981,9 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue
-> > *mq, struct request *req)
-> >  		return;
-> >  	}
-> > 
-> > -	if (rq_data_dir(req) == READ && brq->data.blocks >
-> > -			queue_physical_block_size(mq->queue) >> 9) {
-> > -		/* Read one (native) sector at a time */
-> > -		mmc_blk_read_single(mq, req);
-> > -		return;
-> > -	}
-> > +	/* Perform one (native) sector at a time */
-> > +	if (brq->data.blocks > queue_physical_block_size(mq->queue) >> 9)
-> > +		mmc_blk_rw_single(mq, req);
-> >  }
-> > 
-> >  static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
-> > 
+
