@@ -1,15 +1,16 @@
 Received: from TWMBX01.aspeed.com (mail.aspeedtech.com [211.20.114.72])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3055472621;
-	Mon, 23 Mar 2026 02:07:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15AA5212542;
+	Mon, 23 Mar 2026 02:07:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.20.114.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774231638; cv=none; b=Z2RSYNgxiJD1JtVXJ3wDB2vVY99dNAodKS6AJWbEuZhPThHFQ41sC7hUuehtFhKTR5tL4mqRUa3ikyrz4FUfqjgX3dEs2f3nBGy+hmyIjQciqqCGIghPqxV7kzK7Xk/E5FNVvtD/fgnZRwbdoUz612bpj6jeZE8oyiOlOptAZNk=
+	t=1774231641; cv=none; b=lIRH+kQcxro/2KpVtcPkUhdNBZSPE4jTSPkZgV62pjXrnBE0sA94+5fRilO/gpq0C1aXGm8ijSthxpJ8Z3Lghs+o4CCh5OiPtTqMRz5mYpnbxgRIQxOu0R8LoWMoP4ADCmTVI491b8eRvIGjaossBq+xwFDS09x27V2oqnpYHmI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774231638; c=relaxed/simple;
-	bh=uo2bg2NUBtc2eG09kK4x0w8IEuMmJWwOMwtRMs1f0gw=;
-	h=From:Subject:Date:Message-ID:MIME-Version:Content-Type:To:CC; b=arvbpnacvVNKeREVfXKQ/VUdUSRDQAKVGdgIDmJjNBQpdULP3yQQsu0sIA8atm9m4obpPn3B0izxZk2maIZbQhSKvphliWo1wqJFYsEizm+zbYffRGaJuoHoOU96KTgI/2++5HhjXU5XPas/bZf1DEvmhblxVgEGYsyJUKC5/Gw=
+	s=arc-20240116; t=1774231641; c=relaxed/simple;
+	bh=jdzbRuodmDOa4Rz8PKWhhJ6GdFCSrpEzLrR1LcRWhN8=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:References:
+	 In-Reply-To:To:CC; b=tHV1KS+FTqV0RSS79ByjTnC/GE5Wfi+jXo8ZM8lMXqR4xC9+O5zjDbH467MBFG7sjbjgpsYd+Qd2dNnBYwRJhCU44WaV/kDbWngp2DGhCftbcGUQs++AAizjx8Y2o8WbQwqJZCMAoelf0uMSF3r6u9dlgWT+bFA3wCVeiqx/iOQ=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com; spf=pass smtp.mailfrom=aspeedtech.com; arc=none smtp.client-ip=211.20.114.72
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aspeedtech.com
@@ -21,9 +22,9 @@ Received: from [127.0.1.1] (192.168.10.13) by TWMBX01.aspeed.com
  (192.168.0.62) with Microsoft SMTP Server id 15.2.1748.10 via Frontend
  Transport; Mon, 23 Mar 2026 10:07:07 +0800
 From: Ryan Chen <ryan_chen@aspeedtech.com>
-Subject: [PATCH v3 0/2] Add AST2700 support for aspeed sdhci
-Date: Mon, 23 Mar 2026 10:07:06 +0800
-Message-ID: <20260323-sdhci-v3-0-93555b8f6411@aspeedtech.com>
+Date: Mon, 23 Mar 2026 10:07:07 +0800
+Subject: [PATCH v3 1/2] dt-bindings: mmc: sdhci-of-aspeed: Add AST2700
+ compatible
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -32,11 +33,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAEqgwGkC/2WMQQrCMBBFr1JmbSSTQGpceQ9xkSZTMwvbkpSgl
- N7dtCCILt/nv7dApsSU4dwskKhw5nGooA8N+OiGOwkOlUFJZaRGLXKInoUyNmi0fegCQf1OiXp
- +7p3rrXLkPI/ptWcLbutvoaCQwqInh9afnGkvLk9EYSYfj358wJYp6lttP6qqqrYd9tJoabD7U
- 9d1fQPxWzSv2gAAAA==
-X-Change-ID: 20260313-sdhci-269d319fdbde
+Message-ID: <20260323-sdhci-v3-1-93555b8f6411@aspeedtech.com>
+References: <20260323-sdhci-v3-0-93555b8f6411@aspeedtech.com>
+In-Reply-To: <20260323-sdhci-v3-0-93555b8f6411@aspeedtech.com>
 To: Andrew Jeffery <andrew@codeconstruct.com.au>, Ulf Hansson
 	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, Krzysztof Kozlowski
 	<krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Joel Stanley
@@ -47,44 +46,105 @@ CC: Andrew Jeffery <andrew@aj.id.au>, <linux-aspeed@lists.ozlabs.org>,
 	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
 	<linux-kernel@vger.kernel.org>, Ryan Chen <ryan_chen@aspeedtech.com>
 X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1774231627; l=1190;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1774231627; l=2522;
  i=ryan_chen@aspeedtech.com; s=20251126; h=from:subject:message-id;
- bh=uo2bg2NUBtc2eG09kK4x0w8IEuMmJWwOMwtRMs1f0gw=;
- b=DOxpUJhUWPvZiZnyDHwvUlKbEHWZ0XJsLkgoCaw4ZSon8wUAM+MOZJN6bpCF2VGLLUD6Fo0EB
- 1PAoHFwvhWfC00P66r4r+mBQXAlOCRsZE8HrwDEFMHSi2939qpxPv4e
+ bh=jdzbRuodmDOa4Rz8PKWhhJ6GdFCSrpEzLrR1LcRWhN8=;
+ b=4EdN1Pbm/olA1ehS/4Wg9tcediCzCAre0wopiJ6/Evw3ha8JJDuq5b3h4PViy9ycjeuR6a3Vz
+ GsYzhSmUJOODuCKoj/UEitmcX4oEa5jTgoMztAoRXA5HFR6FJnNk5zz
 X-Developer-Key: i=ryan_chen@aspeedtech.com; a=ed25519;
  pk=Xe73xY6tcnkuRjjbVAB/oU30KdB3FvG4nuJuILj7ZVc=
 
-This series add aspeed sdhci support for AST2700. The AST2700 sdhci
-requires an reset. This series updates the binding and driver to
-support reset requirements.
+AST2700 SDHCI controller is fully compatible with AST2600.
+
+However, it is necessary to take the AST2700 SD controller out of
+reset, so require the 'resets' property.
 
 Signed-off-by: Ryan Chen <ryan_chen@aspeedtech.com>
 ---
 Changes in v3:
-- 1/2 Add items list const for ast2700 ast2600 compatible
-- 1/2 Move if/then/else block after required: (per example-schema)
-- Link to v2: https://lore.kernel.org/r/20260317-sdhci-v2-0-39b1f063061b@aspeedtech.com
-
+- Add items list const for ast2700 ast2600 compatible
+- Move if/then/else block after required: (per example-schema)
 Changes in v2:
-- 1/2 use items for ast2700 compatible.
-- 2/2 use devm_reset_control_get_optional_exclusive_deasserted for
-  reset.
-- Link to v1: https://lore.kernel.org/r/20260313-sdhci-v1-0-91cea19c8a67@aspeedtech.com
-
+- add missing blank line
+- modify ast2700 compatible items const
 ---
-Ryan Chen (2):
-      dt-bindings: mmc: sdhci-of-aspeed: Add AST2700 compatible
-      mmc: sdhci-of-aspeed: Handle optional controller reset
-
  .../devicetree/bindings/mmc/aspeed,sdhci.yaml      | 41 +++++++++++++++++-----
- drivers/mmc/host/sdhci-of-aspeed.c                 |  6 ++++
- 2 files changed, 39 insertions(+), 8 deletions(-)
----
-base-commit: 6de23f81a5e08be8fbf5e8d7e9febc72a5b5f27f
-change-id: 20260313-sdhci-269d319fdbde
+ 1 file changed, 33 insertions(+), 8 deletions(-)
 
-Best regards,
+diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+index d24950ccea95..e4a9c2810893 100644
+--- a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+@@ -22,10 +22,15 @@ description: |+
+ 
+ properties:
+   compatible:
+-    enum:
+-      - aspeed,ast2400-sd-controller
+-      - aspeed,ast2500-sd-controller
+-      - aspeed,ast2600-sd-controller
++    oneOf:
++      - enum:
++          - aspeed,ast2400-sd-controller
++          - aspeed,ast2500-sd-controller
++          - aspeed,ast2600-sd-controller
++      - items:
++          - const: aspeed,ast2700-sd-controller
++          - const: aspeed,ast2600-sd-controller
++
+   reg:
+     maxItems: 1
+     description: Common configuration registers
+@@ -38,6 +43,9 @@ properties:
+     maxItems: 1
+     description: The SD/SDIO controller clock gate
+ 
++  resets:
++    maxItems: 1
++
+ patternProperties:
+   "^sdhci@[0-9a-f]+$":
+     type: object
+@@ -46,10 +54,15 @@ patternProperties:
+ 
+     properties:
+       compatible:
+-        enum:
+-          - aspeed,ast2400-sdhci
+-          - aspeed,ast2500-sdhci
+-          - aspeed,ast2600-sdhci
++        oneOf:
++          - enum:
++              - aspeed,ast2400-sdhci
++              - aspeed,ast2500-sdhci
++              - aspeed,ast2600-sdhci
++          - items:
++              - const: aspeed,ast2700-sdhci
++              - const: aspeed,ast2600-sdhci
++
+       reg:
+         maxItems: 1
+         description: The SDHCI registers
+@@ -78,6 +91,18 @@ required:
+   - ranges
+   - clocks
+ 
++if:
++  properties:
++    compatible:
++      contains:
++        const: aspeed,ast2700-sd-controller
++then:
++  required:
++    - resets
++else:
++  properties:
++    resets: false
++
+ examples:
+   - |
+     #include <dt-bindings/clock/aspeed-clock.h>
+
 -- 
-Ryan Chen <ryan_chen@aspeedtech.com>
+2.34.1
 
