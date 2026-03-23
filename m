@@ -1,67 +1,83 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from CO1PR03CU002.outbound.protection.outlook.com (mail-westus2azon11010011.outbound.protection.outlook.com [52.101.46.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89D9138C2A9
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 10:19:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774261189; cv=none; b=S5+doTHgwhzeXKhfJwBCpplOhIC8+R9ONDNO5tFCgYCQAODUOW1FJ9o22hF9LKsLwcnmTL3zPxYE056lImVRlpLN74NgpZPTrXT6LuULdrws8IYnKaZdPmA0MHC3OB4oYfn6QU6kXWLiAPyD4sqJxvZW5yvb5UAozK8uJBDkA/U=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774261189; c=relaxed/simple;
-	bh=/XgektwUTyrRiqcljig24LQcihgwiimxLKBfjjRqYQ8=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=enV7qiXYu/Cefvf6USAyvUgsMezl4SddZ+rat0cEcVxp6hGXr58T0EVoA4y1EW1cc7fYek13u2rc/EwIyK7CngNJDMbPEb5PaQoyRKz6u4KZbqCMoLBkEDxF0H604Wzw9E5v+4Bzkvle8/PFgd7j3SxsmhjgD4Lpgz3Uz/QDQ2M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OjyfM1n3; arc=none smtp.client-ip=209.85.128.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F9EB1DF980;
+	Mon, 23 Mar 2026 13:05:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.46.11
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774271149; cv=fail; b=MVmHR3/i4qQKLS0SldPM4ctEHNrNqRO9AKG1SNdTwa1EnYjVkM9lo1X5t2He+pKzWqiskwUzPFSN8r2Wmwv6cxUHnajZydak/mNCCETug3/+cQuHaZNnd3axhhG0tFQm4WkvkheS9bCFEq2hdFxbNdeBp4SWIqqEHNRjDfnkga8=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774271149; c=relaxed/simple;
+	bh=427wGycL5ey6to/S8jN+keboAslm4lg2qnwIQLysVLM=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=TO7xMcyShG3uCsObHKKh+OMtamGzEfOkJQad4U6wu/2Ztuwvh5uQUnA8RTghjBJ0YoDhN1rpKYc73XRv904BmS3iUR6PUL4bXI9o59oqWOkppohwaUHzNLu/CT3LBNrxdR3KQFjLICHg/CJHBNZJ9Eo0CBu9jYn4O3ads8+DX1E=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=caUeKO53; arc=fail smtp.client-ip=52.101.46.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OjyfM1n3"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-48704db565eso16547015e9.1
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 03:19:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1774261186; x=1774865986; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=s2b3A5VlJa4lpM7E2GeEDRbbHgTsaHKFUASwgrv7Rf4=;
-        b=OjyfM1n381+bRIfGnSEEbH15/JpjKQ4GDiXPlPCDKuRy+9m88P2+7EsfWG+7YHFpgB
-         Js6UgJ63gf8LvWaPEcniqIEupqSulDILCz6SFnxuknswhXpIoFFeDrjeTJ8WQVGaxWkz
-         99gqM5NcUX/yCOS5J2xMivHTHVC0tny+Hd9gk593QHu4A2gRHol4a3OjOjKsw7dSS18v
-         F3LQLq7guNABhlxNmUhNvL1cjBlRwEGCqwt8fkfqprHWwJNNi3QhMY2LzI0DSUA7s/ZK
-         76eH7SP6Eua9gk1KJlkS2LVJ5wbAFXLLjZCBTpIqiS6Cv7eikZLlgXxPnxEOkjSst/kj
-         nxYQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774261186; x=1774865986;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=s2b3A5VlJa4lpM7E2GeEDRbbHgTsaHKFUASwgrv7Rf4=;
-        b=XYWH/WtV9oYI5x6R7BbX9PjbIAFiqlTOuAIHnT4Tt5W4u0IC4b7LIhPNBt0whGnBXo
-         X3gslULC1XIXW4lwBnpQGGrjbQaIi0CB+heiQxwAiXSUcCTi0UnTk2k0gUaPRW87cRFz
-         kHReXrm+L2di9r2hUyr52x/LJXu44+VpufD5a45Vd1CLHg3bYcWHxakNCRiC8CgrycaV
-         uTTnOMBj0ap2OYQZXqWO4LlSy4mgepjk6c/k68sFC82wVJebKSYSId7hrVBp3PLv73QU
-         RhXr7utzjS0PtGppFb7KMVqvqAHIQFK5/lIDcLK/em/YPx4QbaSBpAHY7GUwOi5zsaXa
-         CkZg==
-X-Forwarded-Encrypted: i=1; AJvYcCVGtJXr0mTJKcoRTgwv22euTFV8+qPR6b9xqfxs7krxf8TeoidTPyj83cQo2V4cYh8Nm56AA5iG3KM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzm/Cyp/ZLPirdE5qSchC9Ky2BgAvUQmPrHr9TlQYhiWS8gm+Py
-	ryLEXHZNsBYt2/7WycRIWyvs/zD8j2aOx7eOUQugQpRK1BGBE3x0n5AI
-X-Gm-Gg: ATEYQzwPmDWooYJsmPZ7V5dtVvc+kvdpCneIC9HDBZtj4Kvt+9QUYHsnT3TkbOfBk7S
-	ofqNG6lSja5C8+twFai+KCQ0fN4yPZxDGqmIyZ7s4TWNTCCG9I/iJ2yp0uuLuiaNag3044edby+
-	DRinQ6DBJdmja2vNKOk5xGmNxHpWJyVmI3ZREz8nyy8U7Z43SRKeIhOhmDT7i1dkLxMCOn6H06M
-	8RZ29TMDBVX7YXe0cF47GCga1m0QUZC3QXv1RK6J+bbhCsEvNvuHJZDnyaSgfOP3lBLr9G/6DWS
-	Dnbbh2GHKmhIsTs+ISpxN+KLUjyMgppmmAbLseR1WlgB2iTZlncKQESza+NABtM0ccHk8cwweKU
-	jcVcDrjM3sPgmXW9qQx8k+sfxzqfyKfimLwNAF4Ql20bR6Eiz81CyUPFXTsRfr7fxgVun3IY423
-	t5t7ulQNiEn0kU2kSkN/dGURX0q9NamsqfhQiLuwjfgWXTb/SfYOLmCY4iMP8hyAur
-X-Received: by 2002:a05:600c:530f:b0:485:2ce2:4c87 with SMTP id 5b1f17b1804b1-486febb455dmr171394665e9.4.1774261185644;
-        Mon, 23 Mar 2026 03:19:45 -0700 (PDT)
-Received: from ipedrosa-thinkpadx1carbongen12.rmtes.csb ([67.218.232.54])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-486fe86acb0sm78755445e9.6.2026.03.23.03.19.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Mar 2026 03:19:44 -0700 (PDT)
-From: Iker Pedrosa <ikerpedrosam@gmail.com>
-Date: Mon, 23 Mar 2026 11:19:11 +0100
-Subject: [PATCH v4 8/8] riscv: dts: spacemit: k1-musepi-pro: add SD card
- support with UHS modes
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="caUeKO53"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=NSJRMI5l51OOUzP5L9zGtLqj553sdAVcSNwaM5PcPXC6dptCX2bE95vZZ1albEOn4Hhb0MNE0h7BtpXC8Ugg20s+Rqesc4NsLLA7l8KUytYugvwwebkzVoOu8cfb3V/kn0BEcBwDNOrpp8Nw2OxrSObhU+/OoQ4Hww8HDJ/vt6CuZzV6TMEJp/BPANGWaY7LVc+7b510b177hJ/0gkg+E0k8jYQI2n8TfHb6BjsiyjC7vfYFTjDB2DgXR9kZanPoGLWyTUyUICECbOj9GXkezqIZcJrEvCSMrnCJ/j/c3C8UsvIiAOMggD5P4VbmqdfrNWhiunGJ2vta95ucG7c1WQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=/SIfnfly2JQwu1daxw4aXVtV96O2QvSorFOik2q52DA=;
+ b=u1NlRMSzSK4x270l4IBzfZoJPq8Nl6Kbu4AZ4XNYQuRY9yu26kxq1df5gko6XJMJXvVs+rsZVgB9epHLgq6F/w0B4oagCxe/aIVqweznl7k3CjzTHldUtyUW4efS6D9gzw05H3I/F/JWEpB0+D3QgYqczy0RQiYmpO84SNVAhFBm3MlavcnlIu3KT4gL4bl29mZvV/3mvWfBy+RDeTNBtRB25mFrpao6a2RxdNDUS6fidM/lvodFNf31e5hDeaslKzqBWP/AnESips+K6dm1qMoLs0hCke/ynX6NCj4cGATt/+VrZQVxcfGZXdldNmsdgK4lHIg+8MTvLOMJWJcrVg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 198.47.21.195) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=ti.com;
+ dmarc=pass (p=quarantine sp=none pct=100) action=none header.from=ti.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=/SIfnfly2JQwu1daxw4aXVtV96O2QvSorFOik2q52DA=;
+ b=caUeKO53FUyeJtHPS1QBTE9t+7RmrvxsOAkCMiGE+aUNtcWnd7mgpH1lLCsaukA+5bKKsXmLC60VGgaT+YhF8vQbLJFDb9T4eNvrNGQ+3PBRYst5zfRlEvuY6AVrFWrOAy/euWpyE0AqsDhYPHw153Ju9DKoNtlaRn8U8ummtTA=
+Received: from MW4PR04CA0333.namprd04.prod.outlook.com (2603:10b6:303:8a::8)
+ by DS0PR10MB997650.namprd10.prod.outlook.com (2603:10b6:8:313::5) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.31; Mon, 23 Mar
+ 2026 13:05:45 +0000
+Received: from MWH0EPF000C618B.namprd02.prod.outlook.com
+ (2603:10b6:303:8a:cafe::b5) by MW4PR04CA0333.outlook.office365.com
+ (2603:10b6:303:8a::8) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9723.25 via Frontend Transport; Mon,
+ 23 Mar 2026 13:05:37 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 198.47.21.195)
+ smtp.mailfrom=ti.com; dkim=none (message not signed) header.d=none;dmarc=pass
+ action=none header.from=ti.com;
+Received-SPF: Pass (protection.outlook.com: domain of ti.com designates
+ 198.47.21.195 as permitted sender) receiver=protection.outlook.com;
+ client-ip=198.47.21.195; helo=flwvzet201.ext.ti.com; pr=C
+Received: from flwvzet201.ext.ti.com (198.47.21.195) by
+ MWH0EPF000C618B.mail.protection.outlook.com (10.167.249.123) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.9723.19 via Frontend Transport; Mon, 23 Mar 2026 13:05:43 +0000
+Received: from DFLE207.ent.ti.com (10.64.6.65) by flwvzet201.ext.ti.com
+ (10.248.192.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Mon, 23 Mar
+ 2026 08:05:34 -0500
+Received: from DFLE205.ent.ti.com (10.64.6.63) by DFLE207.ent.ti.com
+ (10.64.6.65) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Mon, 23 Mar
+ 2026 08:05:34 -0500
+Received: from lelvem-mr05.itg.ti.com (10.180.75.9) by DFLE205.ent.ti.com
+ (10.64.6.63) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
+ Transport; Mon, 23 Mar 2026 08:05:34 -0500
+Received: from localhost (uda0271908.dhcp.ti.com [128.247.77.70])
+	by lelvem-mr05.itg.ti.com (8.18.1/8.18.1) with ESMTP id 62ND5XvW791610;
+	Mon, 23 Mar 2026 08:05:34 -0500
+Date: Mon, 23 Mar 2026 08:05:33 -0500
+From: Bin Liu <b-liu@ti.com>
+To: Shawn Lin <shawn.lin@linux.dev>
+CC: <ulf.hansson@linaro.org>, <axboe@kernel.dk>,
+	<linux-block@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] mmc: block: use single block write in retry
+Message-ID: <20260323130533.y7byr3atch32stn5@iaqt7>
+References: <20260310160408.3976760-1-b-liu@ti.com>
+ <301ff663-7f18-ae12-f0f8-88c4e4375114@linux.dev>
+ <20260317132454.b6i7wp763yj36d3v@iaqt7>
+ <1806373b-d402-5655-94d4-5cf7142e1382@linux.dev>
+ <20260318151735.ffjhbzz4x32n5i7h@iaqt7>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,126 +85,210 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260323-orangepi-sd-card-uhs-v4-8-567c9775fd0e@gmail.com>
-References: <20260323-orangepi-sd-card-uhs-v4-0-567c9775fd0e@gmail.com>
-In-Reply-To: <20260323-orangepi-sd-card-uhs-v4-0-567c9775fd0e@gmail.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
- Yixun Lan <dlan@kernel.org>, Yixun Lan <dlan@kernel.org>
-Cc: Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
- Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, 
- devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
- spacemit@lists.linux.dev, linux-kernel@vger.kernel.org, 
- Iker Pedrosa <ikerpedrosam@gmail.com>, 
- Trevor Gamblin <tgamblin@baylibre.com>
-X-Mailer: b4 0.14.2
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20260318151735.ffjhbzz4x32n5i7h@iaqt7>
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MWH0EPF000C618B:EE_|DS0PR10MB997650:EE_
+X-MS-Office365-Filtering-Correlation-Id: 69a1bf14-b63f-4046-dcdd-08de88dce471
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|82310400026|1800799024|36860700016|376014|22082099003|56012099003|18002099003;
+X-Microsoft-Antispam-Message-Info:
+	yM+ttbfff6+cdafz5fL/hEPU/MFZ1N8CR3ppWmBhHfbWCo+U8FPYhIqBE+lYd6c6r4cr35oc5QOJqFzHF8N/LWIdrajDY3sBErvk4rCPVBxwf25PGcQlUQ/UZfqGM3mpw48M0j8vqNvcSDy0+67Po+KzBrSChDIXDbuJvGkCOmjqsP+I6qECVr/rjb6F2vyAgjudewFaYb3GVZlEkoYpB/G0qmKP/pRuMTIRuXGUfIqGhSfoJYiibz1c/h6/J2X8H/uinPHFqzb2q/IKlF6pveag2ehy0N6Yk8djX2JospFWhkO9lO1NCYdEUVbHECWU5jBVoa10UIxZym6R//kVVxhbb77b0itjQHw7eU5yrOjSOluh7GdcTl9SoFhu0xvub98Dwzq5SsI9QlaqoWYmJj9wJmgxliXHaRKwHxVaZUjY76I9IgXrlvFsVDK8Mgp2hvXZqUAaNbfON0/mY3A6BGPEnwP7W5WZyI0j7k80n5ZwBw6Yf7EJny/gVHOWMwiAnJy332hBC8VO5sEbiZgwqLjy0Kc3N66w3+Vggz3/VlhJK/JugjRNHf2A+OToqBRA0ofBimduhK9GQla9HvJEjGuEtPUUwd2psJyDN/wKmDcWhAXbCPpvLzMt6+NQEBH4+bvy21q+4vb0BALAUJiiZb0i6g/KV0XnpKXrRKAxbEN0hXXR9B7LT3eE/TJ5NICGcy/IJvT/2T6VoJhcgNuvZUnpsBNwjltoGhidYJzBVbmNrOebx6zIE0rEmXQ1QTjhUfZsvWFn4wAvVU3WuPYNcA==
+X-Forefront-Antispam-Report:
+	CIP:198.47.21.195;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:flwvzet201.ext.ti.com;PTR:ErrorRetry;CAT:NONE;SFS:(13230040)(82310400026)(1800799024)(36860700016)(376014)(22082099003)(56012099003)(18002099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	VhD1afiIunvoKrv7fCuiIxWYV8fsL5x1NNx5l5s4ZAK6Wpzu04inaJRloVd44MkJ9E3SZ0RYeH1LiDDM+pO8qgxMPa1u0wQYFulYgDpSHbBKpEP2qavZyWu8N9qJBuJx5jNW6fGwZu0dtvdB23V746D6MPLJfnYYDk4+vE1EmuDO6I8k9ipjc99pP/08MaQz1TPInV2Fh2NjxGb80dFk9Z3unC0ASj3SRzhhmBUpp76DAcc9m7yu+1eQq8hbdr13EAbCKULrdnYjRo1r8W0zjiSPETmzIQ5GoVVeXTr4Cqp0U5dje2LwqV6wYlpFrzkD69E0as5hVn16rA8tJKDwf2/AgEH+5Vl+vZPfzKfGvhBvqOWcD0ELBks3+Y3slzQnlvUn8zI41sNxicXvLA6JKhcss8QSmtqzyD7vFGkUi1RWrJwdraygRrSLVthFFfgs
+X-OriginatorOrg: ti.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Mar 2026 13:05:43.8759
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 69a1bf14-b63f-4046-dcdd-08de88dce471
+X-MS-Exchange-CrossTenant-Id: e5b49634-450b-4709-8abb-1e2b19b982b7
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=e5b49634-450b-4709-8abb-1e2b19b982b7;Ip=[198.47.21.195];Helo=[flwvzet201.ext.ti.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	MWH0EPF000C618B.namprd02.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR10MB997650
 
-From: Trevor Gamblin <tgamblin@baylibre.com>
+Hi,
 
-Update the Muse Pi Pro devicetree with SD card support to match what
-was done for the OrangePi RV2 in [1]. More precisely:
+On Wed, Mar 18, 2026 at 10:17:35AM -0500, Bin Liu wrote:
+> Hi Shawn,
+> 
+> On Wed, Mar 18, 2026 at 09:43:10AM +0800, Shawn Lin wrote:
+> > 在 2026/03/17 星期二 21:24, Bin Liu 写道:
+> > > Hi Shawn,
+> > > 
+> > > On Tue, Mar 17, 2026 at 08:46:40PM +0800, Shawn Lin wrote:
+> > > > 在 2026/03/11 星期三 0:04, Bin Liu 写道:
+> > > > > Due to errata i2493[0], multi-block write would still fail in retries.
+> > > > > 
+> > > > > This patch reuses recovery_mode flag, and switches to single-block
+> > > > > write in retry when multi-block write fails. It covers both CQE and
+> > > > > non-CQE cases.
+> > > > 
+> > > > MMC core natively retries single for multi block read. So I assume
+> > > > what you are trying to do is make it the same for write path. We didn't
+> > > 
+> > > Yes I am trying something similar for writ path, but
+> > > 
+> > > > resort to upper block layer for help for read case in the past, so  I
+> > > > think you could still achieve that within the scope of MMC core.
+> > > 
+> > > unlike the read path solution, I didn't solve the issue within the scope
+> > > of MMC core, becaure it would intruduce more code than this patch does,
+> > > especially the CQE and non-CQE cases have different failure path. (I
+> > > didn't try to figure out how the single block read retry covers both
+> > > failure cases...)
+> > > 
+> > > I feel the solution in this patch is more clever with less code
+> > > introduced.
+> > > 
+> > > > 
+> > > > More importantly, what is the failure rate of this issue? If it occurs
+> > > 
+> > > Very rare. For example, on the EVM, the issue can only be triggered by
+> > > writing 3 or more blocks of data pattern 0xFF00.
+> > 
+> > I manually modified cqhci and sdhci to inject errors for multi-block
+> > writes under both CQE and non-CQE modes. The following patch appears to
+> > work by testing. Could you please test it?
+> > 
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index 05ee76cb0a08..ca60991a3305 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -1642,13 +1642,13 @@ static int mmc_blk_cqe_issue_flush(struct mmc_queue
+> > *mq, struct request *req)
+> >  	return mmc_blk_cqe_start_req(mq->card->host, mrq);
+> >  }
+> > 
+> > -static int mmc_blk_hsq_issue_rw_rq(struct mmc_queue *mq, struct request
+> > *req)
+> > +static int mmc_blk_hsq_issue_rw_rq(struct mmc_queue *mq, struct request
+> > *req, int recovery_mode)
+> >  {
+> >  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> >  	struct mmc_host *host = mq->card->host;
+> >  	int err;
+> > 
+> > -	mmc_blk_rw_rq_prep(mqrq, mq->card, 0, mq);
+> > +	mmc_blk_rw_rq_prep(mqrq, mq->card, recovery_mode, mq);
+> >  	mqrq->brq.mrq.done = mmc_blk_hsq_req_done;
+> >  	mmc_pre_req(host, &mqrq->brq.mrq);
+> > 
+> > @@ -1663,13 +1663,23 @@ static int mmc_blk_cqe_issue_rw_rq(struct mmc_queue
+> > *mq, struct request *req)
+> >  {
+> >  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> >  	struct mmc_host *host = mq->card->host;
+> > +	int err;
+> > 
+> > -	if (host->hsq_enabled)
+> > -		return mmc_blk_hsq_issue_rw_rq(mq, req);
+> > +	if (host->hsq_enabled) {
+> > +		err = mmc_blk_hsq_issue_rw_rq(mq, req, 0);
+> > +		if (err)
+> > +			return mmc_blk_hsq_issue_rw_rq(mq, req, 1);
+> > +	}
+> > 
+> >  	mmc_blk_data_prep(mq, mqrq, 0, NULL, NULL);
+> > 
+> > -	return mmc_blk_cqe_start_req(mq->card->host, &mqrq->brq.mrq);
+> > +	err = mmc_blk_cqe_start_req(mq->card->host, &mqrq->brq.mrq);
+> > +	if (err) {
+> 
+> In the CQE case, when the problem happens due to the errata, this
+> function won't return error. The MMC write error is reported in
+> mmc_blk_cqe_complete_rq() if you see my original patch.
 
-- Enable sdhci0 controller with 4-bit bus width
-- Configure card detect GPIO with inversion
-- Connect vmmc-supply to buck4 for 3.3V card power
-- Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
-- Add dual pinctrl states for voltage-dependent pin configuration
-- Support UHS-I SDR25, SDR50, and SDR104 modes
+Which route should we go forward, continue to refine this patch or any
+more comments to my original patch?
 
-[1] https://lore.kernel.org/linux-riscv/20260316-orangepi-sd-card-uhs-v3-0-aefd3b7832df@gmail.com/T/#
+Thanks,
+-Bin.
 
-Signed-off-by: Trevor Gamblin <tgamblin@baylibre.com>
-Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
----
- arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts | 66 ++++++++++++++++++++++++++
- 1 file changed, 66 insertions(+)
-
-diff --git a/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts b/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-index 29e333b670cf0a5c4ed852668460db475b9c44cb..b63723978a4b5317c506c6df6ad410d23b0f0ea0 100644
---- a/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-+++ b/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-@@ -18,6 +18,24 @@ aliases {
- 		ethernet0 = &eth0;
- 		serial0 = &uart0;
- 	};
-+	reg_dc_in: dc-in-5v {
-+		compatible = "regulator-fixed";
-+		regulator-name = "dc_in_5v";
-+		regulator-min-microvolt = <5000000>;
-+		regulator-max-microvolt = <5000000>;
-+		regulator-boot-on;
-+		regulator-always-on;
-+	};
-+
-+	reg_vcc_4v: vcc-4v {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc_4v";
-+		regulator-min-microvolt = <4000000>;
-+		regulator-max-microvolt = <4000000>;
-+		regulator-boot-on;
-+		regulator-always-on;
-+	};
-+
- 
- 	chosen {
- 		stdout-path = "serial0";
-@@ -77,3 +95,51 @@ &uart0 {
- 	pinctrl-names = "default";
- 	status = "okay";
- };
-+
-+&i2c8 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&i2c8_cfg>;
-+	status = "okay";
-+
-+	pmic@41 {
-+		compatible = "spacemit,p1";
-+		reg = <0x41>;
-+		interrupts = <64>;
-+		vin-supply = <&reg_vcc_4v>;
-+
-+		regulators {
-+			buck4: buck4 {
-+				regulator-min-microvolt = <500000>;
-+				regulator-max-microvolt = <3300000>;
-+				regulator-ramp-delay = <5000>;
-+				regulator-always-on;
-+			};
-+
-+			aldo1: aldo1 {
-+				regulator-min-microvolt = <500000>;
-+				regulator-max-microvolt = <3400000>;
-+				regulator-boot-on;
-+				regulator-always-on;
-+			};
-+		};
-+	};
-+};
-+
-+&sdhci0 {
-+	pinctrl-names = "default", "state_uhs";
-+	pinctrl-0 = <&mmc1_cfg>;
-+	pinctrl-1 = <&mmc1_uhs_cfg>;
-+	bus-width = <4>;
-+	cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
-+	cd-inverted;
-+	no-mmc;
-+	no-sdio;
-+	disable-wp;
-+	cap-sd-highspeed;
-+	vmmc-supply = <&buck4>;
-+	vqmmc-supply = <&aldo1>;
-+	sd-uhs-sdr25;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
-+	status = "okay";
-+};
-
--- 
-2.53.0
-
+> 
+> -Bin.
+> 
+> > +		mmc_blk_data_prep(mq, mqrq, 1, NULL, NULL);
+> > +		return mmc_blk_cqe_start_req(mq->card->host, &mqrq->brq.mrq);
+> > +	}
+> > +
+> > +	return 0;
+> >  }
+> > 
+> >  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+> > @@ -1776,24 +1786,26 @@ static int mmc_blk_fix_state(struct mmc_card *card,
+> > struct request *req)
+> >  	return err;
+> >  }
+> > 
+> > -#define MMC_READ_SINGLE_RETRIES	2
+> > +#define MMC_RW_SINGLE_RETRIES	2
+> > 
+> > -/* Single (native) sector read during recovery */
+> > -static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+> > +/* Single (native) sector read or write during recovery */
+> > +static void mmc_blk_rw_single(struct mmc_queue *mq, struct request *req)
+> >  {
+> >  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> >  	struct mmc_request *mrq = &mqrq->brq.mrq;
+> >  	struct mmc_card *card = mq->card;
+> >  	struct mmc_host *host = card->host;
+> >  	blk_status_t error = BLK_STS_OK;
+> > -	size_t bytes_per_read = queue_physical_block_size(mq->queue);
+> > +	size_t bytes_per_rw = queue_physical_block_size(mq->queue);
+> > +
+> > 
+> >  	do {
+> >  		u32 status;
+> >  		int err;
+> >  		int retries = 0;
+> > 
+> > -		while (retries++ <= MMC_READ_SINGLE_RETRIES) {
+> > +		while (retries++ <= MMC_RW_SINGLE_RETRIES) {
+> >  			mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
+> > 
+> >  			mmc_wait_for_req(host, mrq);
+> > @@ -1821,13 +1833,13 @@ static void mmc_blk_read_single(struct mmc_queue
+> > *mq, struct request *req)
+> >  		else
+> >  			error = BLK_STS_OK;
+> > 
+> > -	} while (blk_update_request(req, error, bytes_per_read));
+> > +	} while (blk_update_request(req, error, bytes_per_rw));
+> > 
+> >  	return;
+> > 
+> >  error_exit:
+> >  	mrq->data->bytes_xfered = 0;
+> > -	blk_update_request(req, BLK_STS_IOERR, bytes_per_read);
+> > +	blk_update_request(req, BLK_STS_IOERR, bytes_per_rw);
+> >  	/* Let it try the remaining request again */
+> >  	if (mqrq->retries > MMC_MAX_RETRIES - 1)
+> >  		mqrq->retries = MMC_MAX_RETRIES - 1;
+> > @@ -1969,12 +1981,9 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue
+> > *mq, struct request *req)
+> >  		return;
+> >  	}
+> > 
+> > -	if (rq_data_dir(req) == READ && brq->data.blocks >
+> > -			queue_physical_block_size(mq->queue) >> 9) {
+> > -		/* Read one (native) sector at a time */
+> > -		mmc_blk_read_single(mq, req);
+> > -		return;
+> > -	}
+> > +	/* Perform one (native) sector at a time */
+> > +	if (brq->data.blocks > queue_physical_block_size(mq->queue) >> 9)
+> > +		mmc_blk_rw_single(mq, req);
+> >  }
+> > 
+> >  static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
+> > 
