@@ -1,212 +1,132 @@
-Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
+Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com [209.85.208.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF9DC3BD232
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 15:20:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C65E3BD245
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 15:20:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.182
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774279203; cv=pass; b=szXNAe+p4D0RnLX1D+Ssf8her6yUZQdaF/9tTNkvDQHFBDVUk6Gax7kLnNoiHd0Mn75+a9JrFYLslfOo8ohs3DuCe8sDcxeYdQuAHx38VwNeUoanhyDPXZ2jAq6ALypT+vR0Vb/BRqms/AsYZ8kX+6eFAqQGVyZwYZctP/N59Uc=
+	t=1774279210; cv=pass; b=qukHBEDom8se7hbWweAQCTSGK39vcK6rWCnc/vpsD6L9fV4p8evker4yASGlXuuFtbiKVRWeJDxDDU9dNPG/5UhlgjZlz2P1myVLPLmS+LX0bXaDHs3yMqIDAFeokWoF6rU+9jTMlimPzVYpvu3AzfhhI7UTFu1aweXR7qDKW7A=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774279203; c=relaxed/simple;
-	bh=Q3KPzKgZ9Grk59sKH1CK1xnfLjbkJABEjK8piuj/nrE=;
+	s=arc-20240116; t=1774279210; c=relaxed/simple;
+	bh=WTGNsJXJENGSXqHyqYqrSL+FmpM4f+NO/Gh4/YenkBc=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=gYjqmkn6dfesGo9FCvzecip94eY+IjJVROsU10b7HT4vG1BrCcb3CCtbxClcgnWKTcFNNPXFe4sxRqFUdvryLZKtP8JgAt5dlnk7Lz6CjxO1e06D8T0yt/72AQinRBFvK5gnTZ7ZYrjge87IfkS7MHQWQmYcHkPWsk190OF4LqM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bKp4tV5D; arc=pass smtp.client-ip=209.85.167.42
+	 To:Cc:Content-Type; b=XQLzMuTT80e0K4B2BtElkaScJMSZKzyfx66FjI2X6FRAEy9zkR8i5YYBIWhe/cNbr0ad9ich4JpzIu6GK6P78do/lYlrke4ysrLzFT1OxlFeibVeiJ9eME8QA7be53KqCgMyYNXEUIKNIGUPb8K/lI9sNjD1ue55i2V73e8A3SI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=MrBwZVRp; arc=pass smtp.client-ip=209.85.208.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bKp4tV5D"
-Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-5a133b686f7so265458e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 08:20:01 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774279200; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MrBwZVRp"
+Received: by mail-lj1-f182.google.com with SMTP id 38308e7fff4ca-38be66a9fc0so29122331fa.1
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Mar 2026 08:20:07 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774279206; cv=none;
         d=google.com; s=arc-20240605;
-        b=CGUxW8psqPR0pUnvp1ymujCjVvoUrXQI9qUQ9qmgqf+07W1DWmo089ju+kc4v8+OIy
-         CKHMrpssKvEDn4ZV41yIJQEaHGRzGzbk/+Ssi499Psj4i8Iz6NLV5HymooNNNnKE0Dg6
-         v8Jje1yNpM/fKuhtKx6QYI9hDs+fMaw31dgdFUW6a89hcJWowTUv2RAB2hvKsT55y3SW
-         NOELS6Nw7rcAvgCEcx3z+SsKFQxq4DXMXBYkNZ+Cdat2Xu/X+L089XcJluYAtnCu+OLE
-         3mTqPZ45mbXV26EB3nsa3uhtsvGN1ZKkZIjPjKyx+E27/rSAAK+KktkXOfnCBO6nKPep
-         Jotw==
+        b=kyZahrHXrABKECqtY/JCixKmbz/kx/vKHpUqIiIwlOb4R+8hRCYP3fz5cz1VmaAv1z
+         Qi8b5bdKhFLlbn86gOeBrWRH27Z/HhOhS3dYgUXariBWFJzSTh1uwg6zfcXtVk24ajXe
+         Uwh7tluF58D7cMqhE3hFEVyi2C5nvoHhfZhwxhBbyjVaC7+R9v3RVUgysz9BmgQPEvoK
+         W7Zj7ueuKFVMiF4xCJo517zLCmn/deI5Wx44wKNlLXrOSyvPvpVl7GJ92gDGimod+rd/
+         +EjAbhvQs+rRN1oKDb/JGKUkCUNnRylHlCllNmLFCtU5+2uD51oiHh19tGz3rQI5uBEA
+         Q89w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=kXHNCd3mq7JHVp9hqKQG0KlxehC/Az8dh/4A8PeABAs=;
-        fh=3PKU+7wld2AvFtUa9JYlyw+Xpmt5sxZDjiJNFUYjyhE=;
-        b=lEEGkXURDA5WBDALTWT2jNJZJwq4tOum0xPeJVFKT3iPUOuubpefa0/P+jum/2zXWo
-         1cycRTc3FhgwDsvLM8QmO/TvaOlKyoqBLGOdTZNmAocBVNgmCPQrpZK2nPM2AQe/M0Hg
-         /BaH4IlgESREEGl1jMgaBi1OLwHk1U2VROVA4xrH33f62NKcomUcqRTvvjwtBx6lMSmd
-         0v5Rrrupc4AbxE0a7ybIDiWeR8ZlHPCba6pd2conVfCiictb0WRJ8N8pac/cARdFiee2
-         /qVPjDvtsHky/KGVdG55JSGxwkgOUCVizglAZJO1QzUpgGHsJdukgr/Wq7DM5gNb9ylK
-         THhg==;
+        bh=CFEoClYNIUTw25SNi2mfbHdMYgsaJ4yJesVezbduu2c=;
+        fh=LeJN+jhGL8bh98KphiSFTSkReg98d4Cs5k6FoGtwhl4=;
+        b=DxaZekng60Cg2LDLVp+hlxg2vo8z8NPWKXW5hxi6K0G99VZBQczXmlbDLWWHH9Vc/G
+         964VHw7jbhtQwJjnnn/7jKORP1nS5PWo09NwDJ+N5wFVbWP01DAcoOxtRQM2YFlVeC3O
+         Yk1YVWbTqRtw3Pthsdu7eecWyGTQ9Yis8+I1L7Zn3fU8+QeB5mIPW0l/+SNMeV0O6JBj
+         jmRHC7WBO7ASMRK8J47A35tN8xPxYHdhCVJmZVA36IozcRNKjyBTsnOkPguD30Cw2lOw
+         6884VIJrW2au5pw9l8EgcZQRuFKm64lvnbiFVbEY2OB+3EK01eRP864WWZFQ6eVbIgt0
+         YrCw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774279200; x=1774884000; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774279206; x=1774884006; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=kXHNCd3mq7JHVp9hqKQG0KlxehC/Az8dh/4A8PeABAs=;
-        b=bKp4tV5D/OhsUUU5nTEQsU3lb0UPg5KABe9AfDc6qEIXakLNzAB3O33l03aN4/iyIp
-         DUfB1krkbdVkq4Zi6BKe1eOYkdWPf9QBQoxSPGL6mi8K5C9P4xxSm2VnKxoEHgbmMCjM
-         0JZx8yvoNfLeQpIdfqS37L1OaS7K82tztS7UUwaZ2TV59mXkfpaDWAich1a2QIM50vzq
-         YUGsBhjhYz8W8alVKcTEYrB7a7KUerSTleFPiaxUlWfhzI4GBvqmYkMX6zF7UJm4M/dU
-         cdNYvSqmhqFuzd0OCADdAuYovPKfKirQKu7DrofiDpLAq3NUAJ3K7CsViABi2BfXEOxX
-         cLWw==
+        bh=CFEoClYNIUTw25SNi2mfbHdMYgsaJ4yJesVezbduu2c=;
+        b=MrBwZVRpM993zSzLfLmViuNx5BiLjjHznWg0sfKNlhIKGW6Gm7B+kyp9Fx4OrPXWth
+         joY8Y6KHNCIJgkdmTohQxY5wKgFTPT+CyslZmVlK88+7WrgSTyHoYLJgdlfo1l8GAplp
+         UOwpnC6g03Li6xyEGZBWKcwgHxu1d6yKgbY/Ki7OuAh8sMhFz2i4qt8Ahb6T/uT7MNmu
+         NKUNf1OraeRqi9bPvVoXhpB64cQzPmJJu7z8iSZ8/o49G92ZLstI52UHUuaQPrlh+nB3
+         +blbQr510/JNiMmTie3m3nwvc+idzeQ8l3xoxB0OWC0RbhtY8MJWbWrXWvOfwX9+lP/9
+         T0aQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774279200; x=1774884000;
+        d=1e100.net; s=20251104; t=1774279206; x=1774884006;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kXHNCd3mq7JHVp9hqKQG0KlxehC/Az8dh/4A8PeABAs=;
-        b=eMGhMOiYaW3N+gnCL6R97uVqCV2jCBmV1SuRQJ4hZz8nOJ+iQn9lMbD343Am8YEyZ2
-         oLee9xA+phy0aLFLfK3KsNpEudA0vTyihfPPohJM+AXJ7eRwbY4bK2FtB9aDOVA7+lvG
-         suwWxP0ZaTZ0TAK7RllulmH+GDnN6AgB5JCQHbvwy5V9gdZVnnpP34FmD1Ceohlv9jHt
-         EtMt6yRZqKldJp+66pcYUUHN/qx4Q0IKmV07EyRf4ZqqF2BpzG3ROJl3St6MIGcIb9o8
-         iYgkIW4d/m+goSAsQ2uqjpNnrD9avFhV6KKmZq98Ah4u5CL6wDct0Z6iSev+SzygnZEE
-         T+4Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWqPlo6hVcFffvbkEa989Nm7T9khh1voPS50HnSmLPj/DJR3Fl60ZodV04yu0Zq9EBrWMedSgwo9l0=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywt1aST7AZtUEahW9XOSnfNbo9LDepxbn5bkPWlWucB7Ay973PY
-	CHb53zuwK5Zf2NnhWftPDZIKYJfNspmLPWD8GtOuDIU8R5cG4q8GGrSDdzGPAXUUoObhMdK0Vo0
-	0mDR54HV1TcSqvcqYvKtLYlmOaeV/bKl8lOIgrdZc+Q==
-X-Gm-Gg: ATEYQzxCl26B7Vu4V5hgNxxKFrHBIBToCWzglgvvhWzay30jXogHyIl/AJmfmW20AkI
-	prl8s36grHDHp+ITSgnuManMMorQlBN/FF8/phBtikZIddEsIZJqELi+qcO6hwpx7k98YQpUa9L
-	T4emrHauURQpVpqd6Fwl32kIf/QiPx6Rp7fCy9EvnlHHiCs3siNVckzyOwp71MiL3+QgBzYqiq5
-	KgLsSjLAs96VQaR+DbrRBK/l4ivBD4H4b0/gIS7IZV0gNADDN0co3WF8VNekSPvzbMkF4kPEpZr
-	4o0QQFqB
-X-Received: by 2002:a05:6512:138a:b0:5a2:7a31:9193 with SMTP id
- 2adb3069b0e04-5a285af99aamr4357366e87.18.1774279200004; Mon, 23 Mar 2026
- 08:20:00 -0700 (PDT)
+        bh=CFEoClYNIUTw25SNi2mfbHdMYgsaJ4yJesVezbduu2c=;
+        b=VQbolfgrAQIPbF1ttcgnME/WLbF5D3f/X0Q0SR/jL/gqCwI21w3CSMymPi4yT1qgo3
+         hV9naqOCl9bNedGlKOtMNSNrzLPU/M2Q/uXH62N8RU9P6brPDRAzjOafQxnBypvy5Fl1
+         eOsyE1bp36v2rcQmEhyFI9B9xwRJBRBmyCZz18pd84Tt+3SkSNlD6Te6fbe6GkbrC1Bl
+         iWZSjjLWFeX6q72TMubqeSWl66WunLWPUZZUwMvxAJyguKBBC2tes8UBMIehvvHkEGSs
+         xqFEsPq4yYPpY5wiiy86l8bW4pPxBEMapiqyl0UY55RJ3DwBG4bfrJ1hna0aBCDlDcEM
+         49xA==
+X-Forwarded-Encrypted: i=1; AJvYcCWe1B8dqWn2oB32MCvD0NYUG2CjC4+aOl0/mF44mUll9E60+VehPGDA8yorq1mB4MUwGz4wBbYxvzc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YynBoIPIA3SHaYXtmF0G1H8H9Dkz+sgUepGZLW92dD3ETZuPcCq
+	YbZDOdxm1ZjMNvoQgFiC9CqiSyLrYuGMdZjkAw4KifzF9d6GJBTu8oyGpPD/OlFd50Larf2ytIr
+	PqaFykg9haJE3bENLNuL08T5/V0YLqqDQx/D2jclzxw==
+X-Gm-Gg: ATEYQzx530rH+IaM7gYtn3zHXs0Y0aD5CInINbaHjDdtQe4VYwsAPhjvzhW5sCZFTgn
+	N3Z/ZNdW0+pWjI8zDQOLxQ62ZcVRZoQ2Zv4YPyAlX1tSJef5nKCQRNdT0K2cH5mfmj+L8HZOU/8
+	1CDSitS4KeF8YOOwJs93vp61O/oh6UDsWPihDlGbUSOv20/I98qyM4NELRNTVJ50aQacB9JPi0/
+	LjAZgd4F7sbFJa6+z4ECg9tsNwclfddFCSUlprOdHLDYpzvLkWdoeP6hnzgXrVBPbgjciuJS2bN
+	OWVpYCEn
+X-Received: by 2002:a05:6512:318f:b0:5a2:844b:d47e with SMTP id
+ 2adb3069b0e04-5a285aef82amr3653607e87.1.1774279205615; Mon, 23 Mar 2026
+ 08:20:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260316150115.2616827-1-nick.hawkins@hpe.com>
-In-Reply-To: <20260316150115.2616827-1-nick.hawkins@hpe.com>
+References: <20260319140705.123502-1-jiayu.riscv@isrc.iscas.ac.cn>
+In-Reply-To: <20260319140705.123502-1-jiayu.riscv@isrc.iscas.ac.cn>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Mar 2026 16:19:23 +0100
-X-Gm-Features: AQROBzDM94t1dRDg1HXz3MnrFynSOVSeJFZTzd-JR0yHAFKYOA0-zc43Q_VAvxs
-Message-ID: <CAPDyKFqqjL7PhzvGsBLXTUrTmQuEiPZCPd+LYhE2uy9zyoSPEQ@mail.gmail.com>
-Subject: Re: [PATCH v4 0/2] mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
-To: nick.hawkins@hpe.com
-Cc: adrian.hunter@intel.com, jszhang@kernel.org, robh@kernel.org, 
-	krzk+dt@kernel.org, conor+dt@kernel.org, shawn.lin@rock-chips.com, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 23 Mar 2026 16:19:29 +0100
+X-Gm-Features: AQROBzCxqxYpN265mvRUOBDK4WaVcKkSk3vYCZgRowThX_rFJS728bgruXKnriM
+Message-ID: <CAPDyKFpBRjfS3QuUhLxwBAJfwg1dyraPpR6+L2RDOKj554Ytgw@mail.gmail.com>
+Subject: Re: [PATCH v5 0/3] Add SDHCI support for Canaan K230 SoC
+To: Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn>
+Cc: krzk@kernel.org, adrian.hunter@intel.com, robh@kernel.org, 
+	krzk+dt@kernel.org, conor+dt@kernel.org, pjw@kernel.org, palmer@dabbelt.com, 
+	aou@eecs.berkeley.edu, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	gaohan@iscas.ac.cn, me@ziyao.cc
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 16 Mar 2026 at 16:01, <nick.hawkins@hpe.com> wrote:
+On Thu, 19 Mar 2026 at 15:07, Jiayu Du <jiayu.riscv@isrc.iscas.ac.cn> wrote:
 >
-> From: Nick Hawkins <nick.hawkins@hpe.com>
+> This series is based on the k230 usbphy series[1].
 >
-> The HPE GSC is an ARM64 (Cortex-A53) BMC SoC used on HPE ProLiant
-> servers.  Its eMMC controller is based on the DesignWare Cores MSHC IP
-> (snps,dwcmshc) but requires a small set of platform-specific quirks
-> that cannot be expressed through the existing generic dwcmshc code
-> paths.
+> This patch series adds SDHCI support for the Canaan K230 SoC,
+> which uses Synopsys DWCMSHC SDHCI controllers, include MMC0 and MMC1.
+> The hardware designs of these two controllers are different.
+> The MMC0 supports eMMC, while MMC1 only supports SDIO. Detailed
+> information can be found in the vendor's manual[2].
 >
-> This series adds support for the 'hpe,gsc-dwcmshc' compatible:
+> From the vendor's K230 manual:
+>  - MMC0 supports eMMC5.0 and SDIO3.0, usually for eMMC chips.
+>  - MMC1 only does SDIO3.0 in 4/1-bit mode up to SDR104, and the manual
+>    clearly says it can't handle eMMC because of pin count and limits.
 >
-> Patch 1 extends the snps,dwcmshc-sdhci.yaml binding to document the
-> new compatible and the mandatory 'hpe,gxp-sysreg' syscon phandle
-> (with register offset argument) for MSHCCS register access.  The HPE
-> GSC exposes only a single 'core' clock, so the clocks/clock-names
-> properties are constrained to a single item for this compatible.
+> Therefore, there are two separate compatibles and the driver treats them
+> differently.
 >
-> Patch 2 adds the HPE-specific driver code in sdhci-of-dwcmshc.c:
+> Link: https://lore.kernel.org/all/20260121145526.14672-1-jiayu.riscv@isrc.iscas.ac.cn/ [1]
+> Link: https://github.com/kendryte/k230_docs/blob/main/en/00_hardware/K230_Hardware_Design_Guide.md#mmc-circuit [2]
 >
->   * dwcmshc_hpe_set_clock(): SDHCI_CLOCK_CONTROL.freq_sel is wired to
->     a clock mux on the GSC SoC, not a divider.  When running at
->     200 MHz (HS200) freq_sel must be forced to 1 to select the correct
->     high-frequency source.
->
->   * dwcmshc_hpe_vendor_specific(): disables the command-conflict check
->     and programs ATCTRL using existing AT_CTRL_* macros for reliable
->     HS200 signal integrity on the GSC board topology.
->
->   * dwcmshc_hpe_set_emmc(): helper that unconditionally sets
->     DWCMSHC_CARD_IS_EMMC.  Called from both the reset and
->     UHS-signaling paths.
->
->   * dwcmshc_hpe_reset(): calls dwcmshc_reset(), re-applies vendor
->     config, and calls dwcmshc_hpe_set_emmc().  The controller clears
->     this bit on every reset; leaving it clear causes card-detect
->     misidentification on the eMMC-only slot.
->
->   * dwcmshc_hpe_set_uhs_signaling(): wraps dwcmshc_set_uhs_signaling()
->     and calls dwcmshc_hpe_set_emmc() for all timing modes.
->
->   * dwcmshc_hpe_gsc_init(): obtains the SoC register block and MSHCCS
->     offset via the 'hpe,gxp-sysreg' syscon phandle argument and sets
->     SCGSyncDis (BIT(18)) in MSHCCS to allow the HS200 RX delay lines
->     to settle while the card clock is stopped.  Enables SDHCI v4 mode.
->
->   * sdhci_dwcmshc_hpe_gsc_pdata sets SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
->     (base clock not in capabilities) and SDHCI_QUIRK2_PRESET_VALUE_BROKEN
->     (preset-value registers not populated in GSC ROM).
->
-> All new symbols are exclusively selected by the 'hpe,gsc-dwcmshc' OF
-> match entry.  No existing platform (Rockchip, T-Head, sg2042, Sophgo,
-> etc.) has any code path change.
->
-> Note: the DTS node for 'hpe,gsc-dwcmshc' will be submitted separately
-> as part of the HPE GSC base platform series (arch/arm64/boot/dts/hpe/).
->
-> Changes since v3:
->   - dt-binding: Changed 'hpe,gxp-sysreg' from a bare phandle to a
->     phandle-array with register offset argument, as suggested by
->     Krzysztof Kozlowski.
->   - dt-binding: Added else clause to disallow 'hpe,gxp-sysreg' for
->     non-HPE compatibles, as suggested by Krzysztof Kozlowski.
->   - dt-binding: Dropped the third example node; two are sufficient,
->     as noted by Krzysztof Kozlowski.
->   - Driver: Fixed multi-line comment to use the standard block comment
->     style used in this file (opening '/*' on its own line), as noted
->     by Adrian Hunter.
->   - Driver: Added DWCMSHC_HOST_CTRL3_CMD_CONFLICT define for the
->     previously bare BIT(0), as suggested by Adrian Hunter.
->   - Driver: Extracted the CARD_IS_EMMC read-modify-write into a
->     dwcmshc_hpe_set_emmc() helper, called from both
->     dwcmshc_hpe_reset() and dwcmshc_hpe_set_uhs_signaling(), as
->     suggested by Adrian Hunter.
->   - Driver: Fixed regmap_update_bits() argument alignment, as noted
->     by Adrian Hunter.
->   - Driver: Moved HPE_GSC_MSHCCS_SCGSYNCDIS macro to the top-level
->     defines section, as suggested by Shawn Lin.
->   - Driver: Switched from syscon_regmap_lookup_by_phandle() with
->     hardcoded offset to syscon_regmap_lookup_by_phandle_args() to
->     read the MSHCCS offset from the DT phandle argument.
->
-> Changes since v2:
->   - Replaced raw ATCTRL magic value 0x021f0005 with existing AT_CTRL_*
->     macros and FIELD_PREP(), as suggested by Shawn Lin.
->   - Refactored dwcmshc_hpe_set_uhs_signaling() to wrap
->     dwcmshc_set_uhs_signaling() instead of duplicating the body,
->     as suggested by Shawn Lin.
->   - Dropped redundant 'maxItems: 1' from clocks and clock-names in the
->     dt-binding conditional block; the items list already implies the
->     count (reported by dt-review-ci / dtschema).
->
-> Changes since v1:
->   - Replaced the second reg entry for MSHCCS with an 'hpe,gxp-sysreg'
->     syscon phandle + regmap access, as suggested by Conor Dooley.
->   - Driver now uses syscon_regmap_lookup_by_phandle() and
->     regmap_update_bits() instead of devm_platform_ioremap_resource().
->
-> Nick Hawkins (2):
->   dt-bindings: mmc: snps,dwcmshc-sdhci: add HPE GSC dwcmshc compatible
->   mmc: sdhci-of-dwcmshc: Add HPE GSC eMMC support
->
->  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  32 ++++
->  drivers/mmc/host/sdhci-of-dwcmshc.c           | 147 ++++++++++++++++++
->  2 files changed, 179 insertions(+)
->
-> --
-> 2.34.1
+> Changes in v5:
+> - Drop the unnecessary line wrapping.
+> - Drop k230_priv->k230_pdata.
+> - Make a macro to uses container_of for pointer type conversion.
+> - Add the tested-by tag.
+> - Link to v4: https://lore.kernel.org/all/20260315054426.18383-1-jiayu.riscv@isrc.iscas.ac.cn/
 >
 
-The series applied for next, thanks!
+Patch 1 and patch2 applied for next, thanks!
 
-Note that, I amended patch2 according to Adrian's comment.
+[...]
 
 Kind regards
 Uffe
