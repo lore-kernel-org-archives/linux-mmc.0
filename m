@@ -1,79 +1,78 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yx1-f41.google.com (mail-yx1-f41.google.com [74.125.224.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88B0F3E63AF
-	for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 11:59:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA8503F54DD
+	for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 12:02:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.41
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774353580; cv=pass; b=LodDPswnTEWdDRF2dhE90qtGcWBuB5BagoxINpVnQE9+fN9/8wfCvsB92FrSpQM23bIK6jHwAJZYquEs05ICGLSRSWwhlHxjLjVvJmMwYj4rVvVHc4R2ViKwv7+POd087jKdzzovP/EBKUSw3EeVXHGliyMQlzPmB1tbFSFdGu4=
+	t=1774353755; cv=pass; b=QlP7kQQUC8xfUsV0+oQtYu/5QdVt3bA6ILwov8taTWVeHs7l2ZyPawgfU3KNhcK8leBAtgKwJrdUiIkJLY1WzyOHXqzQ7ymEWGcDSOgJGcqwdpCgHFCbN2JgH7221V8My34+flcKkuBRpqKWqNyG7uudh2206E41oSqvcMnSKeA=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774353580; c=relaxed/simple;
-	bh=TwyGYxCeCrqU49q7U6WQE3A9PiZJMj+lKUEL9TuCDrw=;
+	s=arc-20240116; t=1774353755; c=relaxed/simple;
+	bh=LOGgZmI1ov6loe+55SBWQv/R43MCeNoOZaMA2U7SzKA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=dNSxibbLRS1GV5QUugVhvO3b/tcyTQ6S0BdrFboPFivC+opO7ZBQC5y5pFWyq0YlfNvi7yRXO3bl5qESSxwrVlhRMDP4ZgpxZ6a8rLUIfP1ln7Ge6fTke7/BgSRHcwVruu6/YXKsTNLDUOH2qB4iocV5oeGnld9yyxDM3C9kH6U=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b=a2jaBNYN; arc=pass smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=lAxaqwj5QeIW+91m1jZzyt2q7O707p0U0xSgJzROyNfYiBgPZIX88MYJiBslL1JB9TJuqGAg08JhyT8YgJnd5YR93KDAzVjX7biJ30weOO5W6T4EjvmNs7CiwilxfwUJkPsG2cQ7bJtDbzI4rjQO7uWyx8xaNMP5CDExMSvxHN8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b=Kb7/1zfS; arc=pass smtp.client-ip=74.125.224.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b="a2jaBNYN"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-79ac5de41d8so5061367b3.3
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 04:59:38 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774353577; cv=none;
+	dkim=pass (2048-bit key) header.d=starlabs-systems.20230601.gappssmtp.com header.i=@starlabs-systems.20230601.gappssmtp.com header.b="Kb7/1zfS"
+Received: by mail-yx1-f41.google.com with SMTP id 956f58d0204a3-64ad019bbd4so4649501d50.0
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 05:02:31 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774353750; cv=none;
         d=google.com; s=arc-20240605;
-        b=Xx1A0utnJsUjQr0K4wxIWoLM3x4R3Mygrtqsi/guXm13XbvURgjEUUgDGJBHxSIBkE
-         xup22G46oBlRff/7BteumissqFthYynp5E8K5QefSNQW5rt0JF3RePuSs46SIHMD3kMq
-         sW1hOBz1YUUwF7lYMZ8SGVXY98lOHv1WBgvUPRSjkA4+xS+CiwgNQmUtbPFHItrt7Ak9
-         uxYQXutxDTn7ZujsnUX7x4DfpGc79hExLpaPjbwF6X1eGLajApDE/Z0s03Iq0FkPXxxH
-         3MmaW9P+A8OZU47yDLp7pGeBR/7vsRAmBT3YCqkHKf563wQBMWflavsHsh6iHGWOjrdt
-         tLtA==
+        b=ZIv48lctmXRgai6aQaiP/T5y2x+6BW0weMCQyC9RdZ+iyar2hHaXrdGBuxSYIPSExr
+         UWj6y1PFzMCeQl9gF7BC/u05nABbBKfV1ENpDZ7fp51DSq+/ZXOjrTpBbTIwW1+AG6bc
+         cZfJVqNXUkBEJv0S9M+T2GYZHkyvqV842lYkejmjv2RIr0jD84BDzwI6xbXuImdP0+AH
+         /QHctYwzR9wT5CPeJc/InV93EMw0aPSomb6eq5/V3CfMqpccc/zTekPdiew6+FvU6u0v
+         jGac77qpCqoQAQt88xoKv+rEhFxMMapSihvsutWbgn5ow6AQOEsye0Z4U5UD8luu1t+6
+         vxZQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=rwrkAeRmIKG5gR5nurvO7SBRY6CV+kf2/58FkRLS2x0=;
-        fh=0YJMrUyBmGK/zepQEpyEcG/AdZDB7EUzLRXyetjD3eQ=;
-        b=V/g9O2rpsD+4Ff+iFzPgwAuvxBZujdVqvgnfWv9YzS1ZT/izt5g5FYwn/uTE4NOBpq
-         7sLU+15EnoAbJVjLPQkOh2ZyG1QcYIFGGWybJwu0jSU7veBOZplN11eUPy+sB+xTe/2j
-         YnAjnmiqXlUFsl4XMw63/8JzamZJ56RWlUlkzY00NTpZIFQfL/axhV4MV7vRGg5rD2DX
-         SqxC8bqPqmszTcRLNKKvN2R2NGtVf9y2tDKKIi9J9YygqoUnkvns7APKX+g/sHb8quxb
-         3QOCXYKsWJGc46D2XWtM/6yyXqX4eWzwcQw7eCtTxIeJ1URj65TNnN5JBJ/8KZhYG/84
-         cPZg==;
+        bh=ksYiyDzdlQupkrf35BeyKrzRYwt997BQdwJudbMaAAU=;
+        fh=/5amye+Zlb1QuO9OmzmBNuN/2D90NxjgnBz88VZGhas=;
+        b=iBpa92ZYbmW+8ya21Ra6+g+dLIacNt8jsUpBl8lxsrOLzEFtKZOE56JrC+Iu1hgesb
+         hx1fr5rhiOnBNv2gtD7KtkMYJ5j9g4JHXtbLx/5UYS84oYg2HWbVHpjiFZlchLrfAHGf
+         DmehFGvHYroRPDoDaXg8zh7XKjnj1AEbdbZj6KJ9BPM0KB+i7WU6/MrCd5Jtr7PTAoiI
+         254yulrLXRl8IaiP2ix+88QEhbsauEvwRhVv0BUWI6f7KYAuw+8gt9VuBLv8Ov6gXkVW
+         a6yS+6IjDMsNWvQlCHZyQpHknmRtYOjnX2SHTVXPJ/+k/UBwulrJOE/N+9xuhLiWGW5r
+         N9WA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=starlabs-systems.20230601.gappssmtp.com; s=20230601; t=1774353577; x=1774958377; darn=vger.kernel.org;
+        d=starlabs-systems.20230601.gappssmtp.com; s=20230601; t=1774353750; x=1774958550; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=rwrkAeRmIKG5gR5nurvO7SBRY6CV+kf2/58FkRLS2x0=;
-        b=a2jaBNYNHelUpuQ3Rtj3QhILqBBJG1Pzvujof4lBjODBgJPP1kBDk9p1B2o0NT/j+J
-         4ryNLObPgZswEkqXLN7hPH9/1Y8OkWKokHLLgeUoO41qwscZsRvpytwPYKIUojXyHre1
-         9jmBJabyRKfh0+6b/M0BVffXDF03O3WqrY3yKO9ug0C1h4ZNiPWJ5Ek68tUzSxX3txk8
-         2eM4Zolf4f5wX5Wb0Gid7KQ4UJsaOny2MEnplGosEwGGR4M+OZyko7uZDu2AAAjGZySl
-         j+PccS1r644EgLNXUmSC+bw7GftJ2Yia5qsw+Nz0cLicXAEYTuocn6T036pU/FuxqA3B
-         7qjg==
+        bh=ksYiyDzdlQupkrf35BeyKrzRYwt997BQdwJudbMaAAU=;
+        b=Kb7/1zfSTJ4VUoXL1ebJ0TZTLh+Jp8E0CDV/VM2XuOWfuafkVYhb9OnhRZFBqySGNF
+         i4mPXNUVlB3rco9c3UF/ct83gJtbeW6BWuJFhLqdWFMKjQmLagyPr02UFO8iCXhrSzEH
+         WS5akmXBUl75OJDpD5rxOPS/PVOROEsVvZpNKxhuJyeABb02qxqcCAeKeJ1I62WcTWsj
+         f+54VMyExNCEIpfOGgDGhEVM6jzy6cjNgfEL+ZH3uAQMoDJZfqdL/lLY8coCplnfOXvO
+         R0MsU6KiAgBdW/pMTLU8bW1eSsTDyWmkXTH57249BRLC44OUF2AmdFqQbOCDFCOhRy+W
+         8mhg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774353577; x=1774958377;
+        d=1e100.net; s=20251104; t=1774353750; x=1774958550;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=rwrkAeRmIKG5gR5nurvO7SBRY6CV+kf2/58FkRLS2x0=;
-        b=MU33/Lxx6uPxp15dDc6nZMzWT1CPtuVfn+A+krg9xp03eqMYE7wEHcqgqyQcGEjpx2
-         GtvEXqFDuBFYMkC01WFJnsUdmX0MB0zFtzFwDeapug83Hw3u+hlx2Iz1hSoGNo/TZojD
-         XiEW4d8Kq/Oh8Ixrdq7Z+68TBOZZQmOxFDgkUXkMTEuJ4cB6NSiJGgchG9SiNKukXBBr
-         XYquOoDQYiqyu8nsJyUbx0uxtF7OSMJ+UYV7HKkzCo7/j/qF7n7jhGHJHB6DSHyE1lg9
-         b4FW+DOkMLkIxD2U09IXMeroZDfVuNk6d26kWBg89P5xRWpfPEAG7xboQfWfMACy0En8
-         fEfw==
-X-Forwarded-Encrypted: i=1; AJvYcCV1FWEqwdiA2qFqjyh/o6tJvS1BiiY374RDnO618PDQoGl/FXi9zDt4xrWBm1X6vdmUwgA87GHQHuM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzkwTcL/cDTwwu+6cshTbJyQ+zaZi1cIUqEU2PjFxud6PubU77c
-	tn+TXGyRdNu8eYgbzvw0LV90Xx5bHoV9xzc3hbsYHEVNZFw432jOZWtrheP8Dm31Y/bLMFOgocG
-	dlpyptc+TN130f6R6lGpUNdJpCAXrhS43kQIwmrTY
-X-Gm-Gg: ATEYQzzduFAj712sKkmn8H/+PaWwdkabYhxqIaIVz4tu+p2jvD2Cr9IauyQrV7Wuc/c
-	0y0s/KaZtUx/aH6fagXYL1ndKv7rbV419qiSn1cKo9s7WQIJIwNNIvIV6ddW6LSJxOSi93pyRty
-	1vWDV1QIDhXRA43vbRzOvNK49/cr4efZp3+bLJAMXyuyzFYKWBdcsDaYR6jKamGsO+D97jh/42r
-	VxzgfTa51bl2bjWGEi9owyTOuSfUyO55JOyLLaDtNDjEcxxolN+hyke65k8ZokvXO0kUjR0TiFU
-	9mcSbuSRHQeSg7vUf6SRDNYliZG9UMPzn4tzyZ9S
-X-Received: by 2002:a05:690c:2605:b0:79a:7157:879 with SMTP id
- 00721157ae682-79a90bf0fc3mr159866277b3.50.1774353577243; Tue, 24 Mar 2026
- 04:59:37 -0700 (PDT)
+        bh=ksYiyDzdlQupkrf35BeyKrzRYwt997BQdwJudbMaAAU=;
+        b=Ww5broIvXkPCEDn98EoKD1XxH54QsDtMiE8Fb9SQWyX2FnVkJURhDGpRHL4EfFmAVj
+         ZoBuM8ryQRb4MuCMocZra0Cd7HpAv7ZzxNWpVjl3V+kv+VCmBA4hqfR6bAShJwIDF2+m
+         3a+qWVpQt4Cwr2EA1DMb449Juy3y4KARwWz9nC01VtJJf58FmqvQ2SwwYjBKBAWnfv1u
+         /UPB6qDu6BOY8qz1Hpf4lkxpPFDZcSSs3nQqXP5vP7kqryk7ClQvrViVyGX7WyT1kJJ+
+         pPMDs6AsLAF6Qnbv4dnD1RUEFyXTBKpRFfSrARP/2tL5lhz1CWK17XNNFYEkpZbWQjD+
+         TvKQ==
+X-Gm-Message-State: AOJu0YxUHSXhj0ka3PW+itLa4y/u7TVgOkJERReHUXQRRnUzINySjJ/N
+	W7G4AWV0ZzZgGxXnoVx6gCt4lx5AO4Vo7j+4k9CxZTsjEBiHpEEH+Swt61wZJQMaZQj2QZoxdCh
+	Or3TaHiqoB5RclcKkd32QBv+q4SlCyNjv6cfH3EVV
+X-Gm-Gg: ATEYQzylriefFITV3zWy1JyesAn7/8aa40RLvdqlhulvbiSwlguRp6RNbP5q5k7QdUb
+	G4oO/O4pQm4Sx9iEmx6X8gCsXzJmd909fCUj/u51VdD6gLHJlq5yWAXIKovBADkP1A7Kn0le1Ho
+	OKWI2QyE5hIkrjBIeSM9LB9Q7MCiUM2TDJDGk42Hs8V/V6iXe/FTjRZXyYP34XtHQvJF7NLmnbr
+	eNlgw+fa5AHRACaRaqq2VoAXE0abpdXTM1Fmg+Ar9fED0OZl6nJXoHsydXhZ/WJkrbPP/zydfxw
+	aGvL3QXKMNpNk7u6Gt5Pcq/3QRQYf25yHokIWwEe
+X-Received: by 2002:a53:b54f:0:b0:64a:ea66:bb53 with SMTP id
+ 956f58d0204a3-64eaa6bff0amr12193936d50.23.1774353749491; Tue, 24 Mar 2026
+ 05:02:29 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -81,318 +80,74 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20260305194052.5120-1-sean@starlabs.systems> <20260312121559.19197-1-sean@starlabs.systems>
- <20260312121559.19197-2-sean@starlabs.systems> <CAPDyKFpueaHyaOGn5Fn_JdnD4kPeBsDcGx8ykgnuyJ=CFPyxyQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFpueaHyaOGn5Fn_JdnD4kPeBsDcGx8ykgnuyJ=CFPyxyQ@mail.gmail.com>
+ <20260312121559.19197-3-sean@starlabs.systems> <CAPDyKFq35KvzVSNJwY=JsjWKXFTt6dX4hSdMMF6QkWAW1TkSdA@mail.gmail.com>
+In-Reply-To: <CAPDyKFq35KvzVSNJwY=JsjWKXFTt6dX4hSdMMF6QkWAW1TkSdA@mail.gmail.com>
 From: Sean Rhodes <sean@starlabs.systems>
-Date: Tue, 24 Mar 2026 11:59:26 +0000
-X-Gm-Features: AQROBzBKrF0tUR8r4RqTniPvzB5wt5HOZXKTpirhOOqqUDLPYcPDNb3VQl3-kuE
-Message-ID: <CABtds-26cuCMZbRhAaioOOCcX=w6J_mpCxgxahjwz7QJEZqe5Q@mail.gmail.com>
-Subject: Re: [PATCH v2 RESEND 1/6] mmc: rtsx_usb_sdmmc: avoid false
- card-detect on tray readers
+Date: Tue, 24 Mar 2026 12:02:18 +0000
+X-Gm-Features: AQROBzAych8fNRxIQ3wjB1qUzSf4YetqOyW2DX4sGrldKMM8GH6lUPaqBBiV_0c
+Message-ID: <CABtds-13f_AM4zZ=+o_gVeYeXVDAPh1NcTJ1zqOut29K-PoBQg@mail.gmail.com>
+Subject: Re: [PATCH v2 RESEND 2/6] mmc: rtsx_usb_sdmmc: start card power-up at 3.3V
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ricky Wu <ricky_wu@realtek.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+	Ricky Wu <ricky_wu@realtek.com>, Avri Altman <avri.altman@sandisk.com>, 
+	Binbin Zhou <zhoubinbin@loongson.cn>, Dan Carpenter <dan.carpenter@linaro.org>, 
+	Jisheng Zhang <jszhang@kernel.org>, Nathan Chancellor <nathan@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Huacai Chen <chenhuacai@kernel.org>, Ingo Molnar <mingo@kernel.org>, 
+	Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-Hi Uffe
+> Right?
 
-Thanks for the feedback - to answer your questions:
+Yes, that's right
 
-> Would you mind elaborating on this so I can better understand the problem?
 
-SD_CD is used for presence, but that's asserted by trays or blanking cards.
-
-> What prevents the MMC core from handling this correctly?
->
-> Don't some of the commands time out, eventually causing mmc_rescan() to bail out?
-
-It does bail out, but SD_CD is still asserted, so it tries again. The
-main thing this breaks is S3 entry - it's either slow (like 100
-seconds), or never gets there.
-
-> I guess one key piece of information I'm missing is what happens when the mmc_recsan() work tries to send commands to initialize a card, when there is no card inserted?
-
-They fail, and we use that result.
-On Tue, 24 Mar 2026 at 11:26, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> + Matthew Schwartz
+On Tue, 24 Mar 2026 at 11:42, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
 > On Thu, 12 Mar 2026 at 13:16, Sean Rhodes <sean@starlabs.systems> wrote:
 > >
-> > Some Realtek USB SD readers with a tray can assert SD_CD even when no
-> > card is present. This can make the MMC core believe a card exists and
-> > trigger unnecessary initialization and suspend/shutdown failures.
->
-> Would you mind elaborating on this so I can better understand the problem?
->
+> > Some tray-based readers keep SD_CD asserted even without a card. The
+> > rtsx_usb_sdmmc driver now validates insertion with a minimal probe
+> > sequence. That probe must start with the SD pads in 3.3V mode.
 > >
-> > Debounce the CD signal and validate a newly detected card by probing for
-> > a response (CMD0 + CMD8/CMD55/CMD1) before reporting it present. Also
-> > treat SD_INT as a removal indication even if SD_CD stays asserted.
->
-> What prevents the MMC core from handling this correctly?
->
-> Don't some of the commands time out, eventually causing mmc_rescan()
-> to bail out?
->
+> > Like the old rts5139 driver (sd_init_power()), force the SD pads to
+> > 3.3V and tune the SD18 regulator to 3.3V before powering up the card.
+> > This avoids spurious probe timeouts when the reader is left in 1.8V
+> > from a previous UHS session.
 > >
-> > Tested: Realtek RTS5129 (0bda:0129), tray inserted, no card (2026-02-24)
-> > Tested: Realtek RTS5129 (0bda:0129), tray + SDXC card, mmcblk0 (2026-02-24)
-> >
+> > Tested: Realtek RTS5129 (0bda:0129) + tray + Lexar 2TB SDXC
+> > Tested: cold boot detects mmcblk0 (2026-02-24)
+> > Tested: hotplug insert enumerates mmcblk0 (2026-02-23)
 > > Signed-off-by: Sean Rhodes <sean@starlabs.systems>
->
-> I have looped in Matthew who recently worked on some similar problems
-> for the PCI variant [1] of the driver. Perhaps he and Ricky have some
-> input on this series too.
->
-> [1]
-> https://lore.kernel.org/all/20260105060236.400366-1-matthew.schwartz@linux.dev/
->
-> Please see a few more comments below.
->
 > > ---
-> >  drivers/mmc/host/rtsx_usb_sdmmc.c | 156 ++++++++++++++++++++++++++++--
-> >  1 file changed, 148 insertions(+), 8 deletions(-)
+> >  drivers/mmc/host/rtsx_usb_sdmmc.c | 5 +++++
+> >  1 file changed, 5 insertions(+)
 > >
 > > diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> > index 84674659a84d..ec3eeea78e95 100644
+> > index ec3eeea78e95..6be98926387d 100644
 > > --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
 > > +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> > @@ -19,6 +19,7 @@
-> >  #include <linux/scatterlist.h>
-> >  #include <linux/pm.h>
-> >  #include <linux/pm_runtime.h>
-> > +#include <linux/jiffies.h>
-> >
-> >  #include <linux/rtsx_usb.h>
-> >  #include <linux/unaligned.h>
-> > @@ -30,6 +31,9 @@
-> >  #define RTSX_USB_USE_LEDS_CLASS
-> >  #endif
-> >
-> > +#define RTSX_USB_SD_CD_DEBOUNCE_CNT    2
-> > +#define RTSX_USB_SD_INSERT_RETRY_MS    1000
-> > +
-> >  struct rtsx_usb_sdmmc {
-> >         struct platform_device  *pdev;
-> >         struct rtsx_ucr *ucr;
-> > @@ -46,6 +50,8 @@ struct rtsx_usb_sdmmc {
-> >         bool                    card_exist;
-> >         bool                    initial_mode;
-> >         bool                    ddr_mode;
-> > +       u8                      cd_debounce;
-> > +       unsigned long           next_insert_check;
-> >
-> >         unsigned char           power_mode;
-> >         u16                     ocp_stat;
-> > @@ -72,6 +78,13 @@ static inline void sd_clear_error(struct rtsx_usb_sdmmc *host)
-> >         rtsx_usb_clear_fsm_err(ucr);
-> >  }
-> >
-> > +static int sd_set_bus_width(struct rtsx_usb_sdmmc *host,
-> > +                           unsigned char bus_width);
-> > +static int sd_set_timing(struct rtsx_usb_sdmmc *host,
-> > +                        unsigned char timing, bool *ddr_mode);
-> > +static int sd_power_on(struct rtsx_usb_sdmmc *host);
-> > +static int sd_power_off(struct rtsx_usb_sdmmc *host);
-> > +
-> >  #ifdef DEBUG
-> >  static void sd_print_debug_regs(struct rtsx_usb_sdmmc *host)
-> >  {
-> > @@ -768,12 +781,94 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
-> >         return 0;
-> >  }
-> >
-> > +static bool sdmmc_validate_insert_locked(struct rtsx_usb_sdmmc *host)
-> > +{
-> > +       struct rtsx_ucr *ucr = host->ucr;
-> > +       struct mmc_command cmd = { };
-> > +       int err = 0;
-> > +       bool probe_powered = false;
-> > +       bool ddr_mode = false;
-> > +
-> > +       /*
-> > +        * Some readers with a tray assert the mechanical SD_CD pin even when no
-> > +        * card is present. Only report a card present when it responds to a
-> > +        * minimal reset/probe sequence, similar to the old rts5139 behavior.
-> > +        *
-> > +        * Must be called with ucr->dev_mutex held.
-> > +        */
-> > +       if (host->power_mode == MMC_POWER_OFF) {
-> > +               err = sd_power_on(host);
-> > +               if (err)
-> > +                       return false;
-> > +               probe_powered = true;
-> > +
-> > +               /* Issue clock signals to card for at least 74 clocks. */
-> > +               rtsx_usb_write_register(ucr, SD_BUS_STAT,
-> > +                                       SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
-> > +               usleep_range(200, 400);
-> > +               rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
-> > +       }
-> > +
-> > +       /*
-> > +        * Ensure the interface is in a safe, legacy / initial-clock mode before
-> > +        * probing for a response. The MMC core may not have configured ios yet.
-> > +        */
-> > +       err = sd_set_bus_width(host, MMC_BUS_WIDTH_1);
-> > +       if (err)
-> > +               goto out;
-> > +
-> > +       err = sd_set_timing(host, MMC_TIMING_LEGACY, &ddr_mode);
-> > +       if (err)
-> > +               goto out;
-> > +
-> > +       ucr->cur_clk = 0;
-> > +       err = rtsx_usb_switch_clock(ucr, 400000, SSC_DEPTH_512K,
-> > +                                   true, true, false);
-> > +       if (err)
-> > +               goto out;
-> > +
-> > +       cmd.opcode = MMC_GO_IDLE_STATE;
-> > +       cmd.arg = 0;
-> > +       cmd.flags = MMC_RSP_NONE | MMC_CMD_BC;
-> > +       sd_send_cmd_get_rsp(host, &cmd);
-> > +
-> > +       /* SD v2.0+: CMD8 */
-> > +       cmd.opcode = SD_SEND_IF_COND;
-> > +       cmd.arg = 0x1aa;
-> > +       cmd.flags = MMC_RSP_R7 | MMC_CMD_BCR;
-> > +       sd_send_cmd_get_rsp(host, &cmd);
-> > +       if (!cmd.error)
-> > +               goto out;
-> > +
-> > +       /* SD v1.x: CMD55 */
-> > +       cmd.opcode = MMC_APP_CMD;
-> > +       cmd.arg = 0;
-> > +       cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-> > +       sd_send_cmd_get_rsp(host, &cmd);
-> > +       if (!cmd.error)
-> > +               goto out;
-> > +
-> > +       /* MMC: CMD1 */
-> > +       cmd.opcode = MMC_SEND_OP_COND;
-> > +       cmd.arg = 0;
-> > +       cmd.flags = MMC_RSP_R3 | MMC_CMD_BCR;
-> > +       sd_send_cmd_get_rsp(host, &cmd);
-> > +
-> > +out:
-> > +       if (probe_powered)
-> > +               sd_power_off(host);
-> > +       return !err && !cmd.error;
-> > +}
->
-> No, the above code doesn't belong in an MMC host driver.
->
-> I will try to guide you toward a better solution, but first I need to
-> understand the problem better.
->
-> I guess one key piece of information I'm missing is what happens when
-> the mmc_recsan() work tries to send commands to initialize a card,
-> when there is no card inserted?
->
-> > +
-> >  static int sdmmc_get_cd(struct mmc_host *mmc)
-> >  {
-> >         struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
-> >         struct rtsx_ucr *ucr = host->ucr;
-> >         int err;
-> >         u16 val;
-> > +       u8 pend;
-> > +       bool sd_int = false;
-> > +       bool cd_raw = false;
-> >
-> >         if (host->host_removal)
-> >                 return -ENOMEDIUM;
-> > @@ -782,28 +877,71 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
-> >
-> >         /* Check SD card detect */
-> >         err = rtsx_usb_get_card_status(ucr, &val);
-> > -
-> > -       mutex_unlock(&ucr->dev_mutex);
-> > -
-> > -       /* Treat failed detection as non-exist */
-> >         if (err)
-> > -               goto no_card;
-> > +               goto no_card_unlock;
-> >
-> >         /* get OCP status */
-> >         host->ocp_stat = (val >> 4) & 0x03;
-> >
-> > -       if (val & SD_CD) {
-> > -               host->card_exist = true;
-> > +       cd_raw = !!(val & SD_CD);
-> > +
-> > +       /* Use SD_INT as a reliable removal indication on some tray readers. */
-> > +       err = rtsx_usb_read_register(ucr, CARD_INT_PEND, &pend);
-> > +       if (!err) {
-> > +               sd_int = !!(pend & SD_INT);
-> > +               if (sd_int)
-> > +                       rtsx_usb_write_register(ucr, CARD_INT_PEND,
-> > +                                               SD_INT, SD_INT);
-> > +       }
-> > +
-> > +       if (!cd_raw) {
-> > +               host->cd_debounce = 0;
-> > +               host->next_insert_check = 0;
-> > +               goto no_card_unlock;
-> > +       }
-> > +
-> > +       /*
-> > +        * rts5139-style: when a card is already known present, treat SD_INT as
-> > +        * a removal event even if SD_CD stays high (e.g. tray-based readers).
-> > +        */
-> > +       if (host->card_exist) {
-> > +               if (sd_int) {
-> > +                       host->cd_debounce = 0;
-> > +                       host->next_insert_check = 0;
-> > +                       goto no_card_unlock;
-> > +               }
-> > +               mutex_unlock(&ucr->dev_mutex);
-> >                 return 1;
+> > @@ -1108,6 +1108,11 @@ static int sd_power_on(struct rtsx_usb_sdmmc *host)
 > >         }
-> >
-> > -no_card:
-> > +       /* Debounce mechanical CD before probing for a response. */
-> > +       if (host->cd_debounce < RTSX_USB_SD_CD_DEBOUNCE_CNT) {
-> > +               host->cd_debounce++;
-> > +               goto no_card_unlock;
-> > +       }
-> > +
-> > +       /* Avoid pounding the bus with probes if CD is stuck asserted. */
-> > +       if (time_before(jiffies, host->next_insert_check))
-> > +               goto no_card_unlock;
-> > +
-> > +       if (!sdmmc_validate_insert_locked(host)) {
-> > +               host->next_insert_check = jiffies +
-> > +                       msecs_to_jiffies(RTSX_USB_SD_INSERT_RETRY_MS);
-> > +               goto no_card_unlock;
-> > +       }
-> > +
-> > +       host->card_exist = true;
-> > +       mutex_unlock(&ucr->dev_mutex);
-> > +       return 1;
-> > +
-> > +no_card_unlock:
-> >         /* clear OCP status */
-> >         if (host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)) {
-> >                 rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
-> >                 host->ocp_stat = 0;
-> >         }
-> >         host->card_exist = false;
-> > +       mutex_unlock(&ucr->dev_mutex);
-> >         return 0;
-> >  }
-> >
-> > @@ -1359,6 +1497,8 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
-> >
-> >         host->power_mode = MMC_POWER_OFF;
-> >         host->ocp_stat = 0;
-> > +       host->cd_debounce = 0;
-> > +       host->next_insert_check = 0;
-> >  }
-> >
-> >  static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
+> >         dev_dbg(sdmmc_dev(host), "%s\n", __func__);
+> >         rtsx_usb_init_cmd(ucr);
+> > +       /* Start SD init at 3.3V, like the old rts5139 driver. */
+> > +       rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, SD_PAD_CTL,
+> > +                        SD_IO_USING_1V8, SD_IO_USING_3V3);
+> > +       rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, LDO_POWER_CFG,
+> > +                        TUNE_SD18_MASK, TUNE_SD18_3V3);
+>
+> Ideally this should be managed by the ->start_signal_voltage_switch()
+> callback that is set to sdmmc_switch_voltage().
+>
+> However, I understand that you may need this because of patch1, and
+> because mmc_power_up() first calls mmc_set_initial_state() before it
+> calls mmc_set_initial_signal_voltage().
+>
+> Right?
+>
+> >         rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SEL);
+> >         rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SHARE_MODE,
+> >                         CARD_SHARE_MASK, CARD_SHARE_SD);
 > > --
 > > 2.51.0
 >
