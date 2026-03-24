@@ -1,78 +1,79 @@
-Received: from mail-yx1-f51.google.com (mail-yx1-f51.google.com [74.125.224.51])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D7AD3F076E
-	for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 12:10:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFF1C3F7A86
+	for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 12:23:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774354243; cv=pass; b=lLBcQtIkJ45srJIxqLqdARLUEVLTpVdPsZBiYApswI5lT2jM31m5KYVAUmc4MtoydhE4GQig2Y+GSjE+N4tk5KZAakZF+77L4m/DiYIlNfAK5kYzCwsUJT75D19VgyQeEJW4N/e0d4lAdQZ06qIiWOxXsqZPQSk72KNhDx1oubo=
+	t=1774355043; cv=pass; b=iJFcXgtuSXjT5olMJlBeYTimP9hKxsRZXzyDs3Ri+LAsSPxqeJ41Np1NCfI42IGrxx38NocueNlsg0wV9qqrlswp/H+7vaBycWWLIeM0xDSjFxrxS5trfXz9rYL52yxAWLucQHNF55/o34vsK4dWdpIKj2Ecj71bg5Td9qU7LF8=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774354243; c=relaxed/simple;
-	bh=ME8y0XpwUNq4qr+0EtqCuTDiJ69UNmzYwocZMg5TGdw=;
+	s=arc-20240116; t=1774355043; c=relaxed/simple;
+	bh=ieyc8omX4/gg8yYj46gen2DdgnL8uKB6zkD2F+pOxsM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DFByW6wcjzyrEzzfw3qu7BSruYhvr41zqmIb2IhFrZIVi79gGLMILmpULBWzC1eowheiUklAF1aeBn68u2rgX4O/o+46SZU5eT/1qjwNDPZFPR1lyEe39y6OWdzKr+zRQWgIPd8+KMfDZwexVBMp4g3NbBGhMPXQsXxmk9oVZYg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=J5Q2A3yF; arc=pass smtp.client-ip=74.125.224.51
+	 To:Cc:Content-Type; b=U15Zl/8uoZI91yEf0Crle7s+limDadbnfNoWq38WC29LhWg8d26er7rzOAUYxkP5l7oPZCE65q8amiplkyrHxH17rm9rTjCX08T/DhjOcAKy5C1TBPn0sJIBzA87reFBZ/aP1ZrD+qF3PDdAOzWf42b2tESMQi7MzGEk9BZYIc4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nzFV9Upg; arc=pass smtp.client-ip=209.85.167.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="J5Q2A3yF"
-Received: by mail-yx1-f51.google.com with SMTP id 956f58d0204a3-64aedd812baso1210557d50.3
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 05:10:39 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774354239; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nzFV9Upg"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5a27dddecb0so7276916e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 05:23:59 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774355038; cv=none;
         d=google.com; s=arc-20240605;
-        b=hNjY9xp4XYWRhP7KE4RcTuHfYSGOWkQrC+K+udcvmYb5I+Hv+DNNIIsKMcTqxVbKUH
-         vcupWhv8NpK7s8RDRWk9rNwHtBLRf9eVYA/+4bqeueuIKNkmFFk8m9ZaRxeeCB502kWL
-         NvyLcSCQJoEXUpmw3n0g2HR0p23n+6UGj9qdsPr6AdbpImFk5Rekm/vsoWvsP6kDQkKn
-         Dm4UYKmrxdnNzdqTZ9wcAeKKAzAlzzL/TZ8WIA8ojJpiDeg0ZWUUaDbaV3jptIqciGzY
-         uBSaDqxeg5vPOIQ6DSUTXDY4qISM6d1ON09DVLRbbHiGE8TWRlb2JBRpNvl8LHMT1+SJ
-         +nNw==
+        b=KB5sIdgnTAxD6GWwkfzdn0qMOvrYoAiZcOsElwynSq55/sbxTHW1/BTluXpyzhlIK2
+         viTvz/ltDI8J72cfcT5fy7j8bW1Ha2ppMWxBYzkJNbt4RvW/YQJaipbziidYyAw7AuHp
+         BC582bdinQ2bA2YYF1fP8Kv0BDKMX8nfgyQeBBJBLRlhSuSMk7uM8pcdcJGC+Jb9XSyn
+         kXJ6jcOY2Ea6JEJl+d69g5nZi4nKthQBUxND/JyKgnEJZSDGnG3no/aNBYQM4uoG1WMj
+         0u1disEpZgV88iwEYnkEGfSokD3RcdYWZ2QRygMKP7ZhuHuq3nmIKo/44o+VKRpOaTMw
+         obug==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=ZSEKLTV9z4Z4c0Sy4oh4vQKScIehcuUk97kkvZj9O7c=;
-        fh=JW/9lrIuGXtAVA4oR++eJbBbIoz0rcDBUdH8X/gQbIY=;
-        b=I5plChlDJCpNxVInhG/lIlz6hV8oMz0oZSATmqm+kK6uwx0jejk+fXWMMxxbKc2CLA
-         XLW8NH3YYDKYXn5MIz3cERa9cu3PnCR6yOOpAegcJYJBeZilQpmr2qwrX0nGz5ROzvm4
-         6BgSSNWS8o+mNAoYDpZaxsCpHzYkST+G8I9znSOalSCGF/Xz1uLcXNYOIilm0yIuJdjK
-         n5hJTvwZ6A2H2EspnU/erGTpTZgwJx7eXMsLY8fVSoNZuTmziykJR08MHxJfuEVFt1JY
-         grFmPywyHf5nmVK7SDuBV42e2yQyXDLKW/SMP5BT+SkiB7DO4i5eg6tx3V1GjJ8bweVe
-         PWJw==;
+        bh=ieyc8omX4/gg8yYj46gen2DdgnL8uKB6zkD2F+pOxsM=;
+        fh=RqjU+aKg6d7FDMxf/RHt/YgElujEarGODhVhCSGPBhU=;
+        b=gvs+q9bE/zyCcGcQ3lPKw33K0GTNmEwYs141vI3fPvkLox+gkYauQlR2sLr3nQ2eZP
+         hAKYdEIsRiC+whoE3hmTQz6/8/+jbjNqX0f26Qh8VEEsm8O1349MRCSclaYRnZ51P+I1
+         vpIeijrtuuTfQvIkS70t++9qjcuRsQCfp3AXiJY/wl7gb7l2s5zS5biAU8AyW5XS8pRK
+         sKmcfp8LQ80ALiTxtHr6AyC0kXSXnsh5i/uESt/2MHyVqF1u5lbjWlwKMgjvVjyzxKgE
+         xqM1lvEuHtHvXXPD7KFXUsBERCnDv37P9dQN1f2tWCtLT5rMz8OmZ+lAsJPdg5wK6ruI
+         zOPg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774354239; x=1774959039; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774355038; x=1774959838; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZSEKLTV9z4Z4c0Sy4oh4vQKScIehcuUk97kkvZj9O7c=;
-        b=J5Q2A3yFzjOubI38Ynoql5olbAyiEmuOdqpUFUA9CnmAEKYBFBLDxCNqkogoyErT7h
-         bSM5E+edDyKxkwM1WD6GnmVcFgyc5F0jHmLu2r1hq77OxgsFPlxRSPfVZ68PHMnTATxW
-         PwYXuMGeZWvfRqe917V4D8xZli+dUfY9jgCG/LGReDr+D75bDF5EhHMN880xkRvSFhAL
-         pMYZzxImBJ4zHMnUtDCsT6MSKfKtU+X179ss3TK5wsJfzaME7wDhvYDFgJggjdGTVSVJ
-         sxOjvWi1LvTCIdWRx1HzX5RifOIjJrMzcif2AoDFfRPvysxjUR9cncUjnokezOhr3OM6
-         pMqQ==
+        bh=ieyc8omX4/gg8yYj46gen2DdgnL8uKB6zkD2F+pOxsM=;
+        b=nzFV9Upgu3yNgqQ7eyTH57i4SBqG7MYbxytmQ+xyDA+CNM9EOXvHe8z0UQpdvaG5eZ
+         uizc5Dd0MQXdmj+z76sANCeL5o32BZNVOhUgsfTn5ZvBHM2FM8g8LkKQlQEgPObZcJP8
+         nhrObpISUHdulyVPTUpTPu6Vy+ztcE2VV0G08AqMGw/koMKfE4wUsYmaYiqm/Me9tPaE
+         gsyeWYxUeVGy+JOaeJ9wBAt8wzSlUxhHUxvHihBqpSU6NVAmF5XuHjpxkEKYz4JsS7ug
+         SGWv/iyVeTZJyh8C1tFGRy2pFjhWAZMR0GQT2TO4uSpPHcKIWZpj98tJ8dlLstXSa/me
+         bgWg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774354239; x=1774959039;
+        d=1e100.net; s=20251104; t=1774355038; x=1774959838;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ZSEKLTV9z4Z4c0Sy4oh4vQKScIehcuUk97kkvZj9O7c=;
-        b=kJnX+Cpp0mCJ5gD11Uv4Q074dPJAclBPayJZQp4OVCkpZ8rvta68CQ4RcI1jaBm0DK
-         dIYcQDam9ycinopFTCpJ+IFiZkq7aWystKe8WkPZUGLQQ0ZgZOLBgoBV1diZvZY94+SB
-         oFOPv8dIYqVJbpPA248aQJD0ckB5zMRZr2iqXuUs+T9C2Ar/xIIMdZn7aa/4+QlbEUS/
-         iTWh/GxaKJnBzf7RanFossw7zOaXEuX5dxvD2YgpOddmJzeCi+JwmuMgnucOL30S+Q0N
-         kcJMY/0UJNGqQdRGkpEVT2CMzoK11tiCmqXnH1Esee0R3NTVJRZ5zxMarEOmHJlQAZaP
-         kyWQ==
-X-Gm-Message-State: AOJu0YymWakdUCyd8X04pV1C2rIF4LlDeP9IncXlTjimsqWzKLBf/ILJ
-	06QG4+CbiL/pjpPn00yRdrM/pMrU8KYgLrwyda1AiI39lNXFUihyYksiHyx5Mfxv5hXgarFYQHr
-	ZUPuikB9Tuxnf4om9DhlWFbeqPNhU3QDPXon8Kc2eKQ==
-X-Gm-Gg: ATEYQzyLfbkwgbYdc6fTToaXbky2zRf7a5Bjc5qaQzWdCWTVlxRTpYteKziZTvVQ5F2
-	5Mn7WmkC3cFQt76tXoNa5Eysw7cfZniz1htQNaB87ciSy4KxNzLHuhK36YiISZjc647PjEL7BDa
-	sKjlpnMd5CENbv/+2tYQGpVfDFaxS9qypATU0UJpaWJxH70mZT8BxCl8uXmPSwffKunHSeO8rHr
-	bYwpeNMl1PQJcSMpuRDCyqKXbu6gch2UD2ELPld2AhylV0wpAVwdHnH+dK+VNnDQQBvLWnxIQgZ
-	Xgo5c4A5
-X-Received: by 2002:a53:e198:0:b0:64c:a0cb:83a1 with SMTP id
- 956f58d0204a3-64eaa6cceb4mr12884224d50.26.1774354238442; Tue, 24 Mar 2026
- 05:10:38 -0700 (PDT)
+        bh=ieyc8omX4/gg8yYj46gen2DdgnL8uKB6zkD2F+pOxsM=;
+        b=I+qrNFIIlMFLGawFA4bY4GskR/D6zCy/lTByPjoGqzMSd+Tp9pCfNrqtaIiAmeG3T8
+         m5jfaSctQLdnhCAcFscDTIbVfEc4pbFFfxv7BDHJA0T5UuxbGqwTwfSq5CkqiiXOwXZy
+         VuGXpBQnaCeOIKA0QyLYVZd2gh/09LXW5RYCxrEmDnve98ukkPuZj+NoNVdrOYUTDAvj
+         FispiLFBRNITwtcsklbqCMToQPAf/RHbU6Mu4aKZ+dQJi2NOLRY62EFfgj3227fXhoZF
+         7dfKSobCs7z4iSJPHUI0ihgxDnWOMq3wSIuQtt/3USsuqfNxVSU04mxq8Mkdl1QnodNi
+         c+tw==
+X-Forwarded-Encrypted: i=1; AJvYcCUK0mag9tVQDeflLLgFv/PVQJnhpTZNtuTZazaVbZk0047AoMvy7S7z27mnd2UqQX7KbJEbTaQd4L4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwIyFkrpBrlcIC4v2rW3XmTdVFNB9eRqQD/h4v3KPLyZSdGlZF5
+	vBAaNUHskIlSoYm4KPYm1fY/lBJGqJLWkTr+OQmy9ACjbqweyZGNctaCVS+w64Ar36VNUikT2jA
+	H6ok8NKmwVz8c/P80wQh9rNIH0Qtmq7ZNeVCWZlHBFQ==
+X-Gm-Gg: ATEYQzyVZi8YsKyJQbXiDYY/at4qEM2W5n2lojjrZ7TRUvlLnQlQ8zmWLTkEavFI/ks
+	q0/x5QoS3zArr39t7v2SmsoSA8uLFXOLJEetSIGVwWIsn2woaxPT7F+bOW4pLDyHj1dGlhH5dMJ
+	f5FW3aT83C2zvInFyMr8Ho9goDRZFIGxWIi3++YDEkasOyW6Xplr5Ve5Va8I/6HVmCIpbqrjGJD
+	ol2aAvgrlfHFDyBmDeWZrhiFKpfxavfjfEH4yXMONeDN+04iUy6laLQOTS3QMs0LpPOCrz4vzNI
+	LKsqy7vR
+X-Received: by 2002:a05:6512:158b:b0:5a1:22c7:b667 with SMTP id
+ 2adb3069b0e04-5a285b67f4fmr5744670e87.45.1774355037520; Tue, 24 Mar 2026
+ 05:23:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -80,110 +81,89 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20260305194052.5120-1-sean@starlabs.systems> <20260312121559.19197-1-sean@starlabs.systems>
- <20260312121559.19197-6-sean@starlabs.systems>
-In-Reply-To: <20260312121559.19197-6-sean@starlabs.systems>
+ <20260312121559.19197-2-sean@starlabs.systems> <CAPDyKFpueaHyaOGn5Fn_JdnD4kPeBsDcGx8ykgnuyJ=CFPyxyQ@mail.gmail.com>
+ <CABtds-26cuCMZbRhAaioOOCcX=w6J_mpCxgxahjwz7QJEZqe5Q@mail.gmail.com>
+In-Reply-To: <CABtds-26cuCMZbRhAaioOOCcX=w6J_mpCxgxahjwz7QJEZqe5Q@mail.gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 24 Mar 2026 13:10:00 +0100
-X-Gm-Features: AQROBzAnscYa8la8cWUxd5zXVJ2M7wbuDFLlmR25wPLcmDYWEmUTaez8dagKFA4
-Message-ID: <CAPDyKFqdr3cwqxykESQ47ednC_RAsvLSjesTkt-XhsUPR6XJpg@mail.gmail.com>
-Subject: Re: [PATCH v2 RESEND 5/6] rtsx_usb: hold runtime PM during transfers
+Date: Tue, 24 Mar 2026 13:23:21 +0100
+X-Gm-Features: AQROBzA1ufZV_pwSc0w8MoBrbbgIFMDMzADi6QwT3YhT3LLcK5KLLsi5gYVS1vg
+Message-ID: <CAPDyKFrjhNj38dvvf5AGjCxSKkX02C-B6h4+dX0iOxyOc+Hruw@mail.gmail.com>
+Subject: Re: [PATCH v2 RESEND 1/6] mmc: rtsx_usb_sdmmc: avoid false
+ card-detect on tray readers
 To: Sean Rhodes <sean@starlabs.systems>
-Cc: linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Ricky Wu <ricky_wu@realtek.com>, Arnd Bergmann <arnd@arndb.de>, Ingo Molnar <mingo@kernel.org>, 
-	linux-kernel@vger.kernel.org, Matthew Schwartz <matthew.schwartz@linux.dev>
+Cc: Ricky Wu <ricky_wu@realtek.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-+ Matthew
+On Tue, 24 Mar 2026 at 12:59, Sean Rhodes <sean@starlabs.systems> wrote:
+>
+> Hi Uffe
+>
+> Thanks for the feedback - to answer your questions:
+>
+> > Would you mind elaborating on this so I can better understand the problem?
+>
+> SD_CD is used for presence, but that's asserted by trays or blanking cards.
+>
+> > What prevents the MMC core from handling this correctly?
+> >
+> > Don't some of the commands time out, eventually causing mmc_rescan() to bail out?
+>
+> It does bail out, but SD_CD is still asserted, so it tries again. The
+> main thing this breaks is S3 entry - it's either slow (like 100
+> seconds), or never gets there.
 
-On Thu, 12 Mar 2026 at 13:16, Sean Rhodes <sean@starlabs.systems> wrote:
->
-> Hold a runtime-PM reference across bulk transfers, and mark the device
-> busy afterwards.
->
-> When runtime PM is already in progress (e.g. from rtsx_usb_suspend()),
-> avoid forcing a runtime resume from within the PM path by using
-> usb_autopm_get_interface_no_resume() unless the interface is already
-> runtime-suspended.
+First, please don't top post, but reply in-line below so we can follow
+the discussion.
 
-Can you please clarify the problem further? It's unclear to me what
-you mean by "runtime PM is already in progress."
+It's the mmc driver's ->runtime_resume() callback that calls
+mmc_detect_change(host->mmc, 0).
+
+It's sounds to me like the mmc host is being runtime resumed/suspended
+over and over again, hence we end up calling mmc_detect_change() many
+times when it's not really needed. Right?
 
 >
-> Signed-off-by: Sean Rhodes <sean@starlabs.systems>
-> ---
->  drivers/misc/cardreader/rtsx_usb.c | 38 ++++++++++++++++++++++++------
->  1 file changed, 31 insertions(+), 7 deletions(-)
+> > I guess one key piece of information I'm missing is what happens when the mmc_recsan() work tries to send commands to initialize a card, when there is no card inserted?
 >
-> diff --git a/drivers/misc/cardreader/rtsx_usb.c b/drivers/misc/cardreader/rtsx_usb.c
-> index 1830e9ed2521..5d818b632788 100644
-> --- a/drivers/misc/cardreader/rtsx_usb.c
-> +++ b/drivers/misc/cardreader/rtsx_usb.c
-> @@ -12,6 +12,7 @@
->  #include <linux/usb.h>
->  #include <linux/platform_device.h>
->  #include <linux/mfd/core.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/rtsx_usb.h>
->
->  static int polling_pipe = 1;
-> @@ -65,19 +66,42 @@ static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr,
->  }
->
->  int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe,
-> -                             void *buf, unsigned int len, int num_sg,
-> -                             unsigned int *act_len, int timeout)
-> +                                     void *buf, unsigned int len, int num_sg,
-> +                                     unsigned int *act_len, int timeout)
->  {
-> +       int ret;
-> +       struct device *dev = &ucr->pusb_intf->dev;
-> +
->         if (timeout < 600)
->                 timeout = 600;
->
-> +       /*
-> +        * During runtime suspend/resume callbacks, avoid forcing a runtime resume
-> +        * from within the PM path. The device is still active when
-> +        * rtsx_usb_suspend() runs, but usb_autopm_get_interface() can block when
-> +        * runtime PM is already in progress.
-> +        */
+> They fail, and we use that result.
+> On Tue, 24 Mar 2026 at 11:26, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > + Matthew Schwartz
+> >
+> > On Thu, 12 Mar 2026 at 13:16, Sean Rhodes <sean@starlabs.systems> wrote:
+> > >
+> > > Some Realtek USB SD readers with a tray can assert SD_CD even when no
+> > > card is present. This can make the MMC core believe a card exists and
+> > > trigger unnecessary initialization and suspend/shutdown failures.
+> >
+> > Would you mind elaborating on this so I can better understand the problem?
+> >
+> > >
+> > > Debounce the CD signal and validate a newly detected card by probing for
+> > > a response (CMD0 + CMD8/CMD55/CMD1) before reporting it present. Also
+> > > treat SD_INT as a removal indication even if SD_CD stays asserted.
+> >
+> > What prevents the MMC core from handling this correctly?
+> >
+> > Don't some of the commands time out, eventually causing mmc_rescan()
+> > to bail out?
+> >
+> > >
+> > > Tested: Realtek RTS5129 (0bda:0129), tray inserted, no card (2026-02-24)
+> > > Tested: Realtek RTS5129 (0bda:0129), tray + SDXC card, mmcblk0 (2026-02-24)
+> > >
+> > > Signed-off-by: Sean Rhodes <sean@starlabs.systems>
+> >
+> > I have looped in Matthew who recently worked on some similar problems
+> > for the PCI variant [1] of the driver. Perhaps he and Ricky have some
+> > input on this series too.
+> >
+> > [1]
+> > https://lore.kernel.org/all/20260105060236.400366-1-matthew.schwartz@linux.dev/
+> >
 
-Thanks for adding a comment here! Yet it's unfortunately not clear
-enough to me what is happening.
-
-Can you please elaborate a bit more?
-
-> +       if (pm_runtime_status_suspended(dev)) {
-> +               ret = usb_autopm_get_interface(ucr->pusb_intf);
-> +       } else {
-> +               usb_autopm_get_interface_no_resume(ucr->pusb_intf);
-> +               ret = 0;
-> +       }
-> +       if (ret)
-> +               return ret;
-> +
->         if (num_sg)
-> -               return rtsx_usb_bulk_transfer_sglist(ucr, pipe,
-> -                               (struct scatterlist *)buf, num_sg, len, act_len,
-> -                               timeout);
-> +               ret = rtsx_usb_bulk_transfer_sglist(ucr, pipe,
-> +                                                   (struct scatterlist *)buf,
-> +                                                   num_sg, len, act_len,
-> +                                                   timeout);
->         else
-> -               return usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_len,
-> -                               timeout);
-> +               ret = usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_len,
-> +                                  timeout);
-> +
-> +       usb_mark_last_busy(ucr->pusb_dev);
-> +       usb_autopm_put_interface(ucr->pusb_intf);
-> +       return ret;
->  }
->  EXPORT_SYMBOL_GPL(rtsx_usb_transfer_data);
->
-> --
-> 2.51.0
+[...]
 
 Kind regards
 Uffe
