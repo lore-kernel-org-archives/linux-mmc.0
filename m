@@ -1,215 +1,379 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52B263DEFFC;
-	Tue, 24 Mar 2026 09:49:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774345747; cv=none; b=cAFjmWoB2mtqnMCnrDgXrZ+wO9fN81CmddRdv8CKLHvZZIW+cm2BD7Yu8c/jieeSLkfGCCOxf64IA5Z9BzFrCYX+IFdiRGZ3WAOXU5+WCZXTLTt3ij+kqMd+co53W8SeDcVte90PZnzs2fDxYK8v+nrYnrqQMllvMcnN8zLfjfE=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774345747; c=relaxed/simple;
-	bh=wqBVHdCXtWzfBnU2Ip9rh+UgFZGNkji1nlFJ5xyqp6o=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VmtrVwPkL1voWQbn+wQ0qLGboza3A37rmA2bvERztjDL5MhV52y+ywwDxfGRtnisLmbygM4epqMW5UfYY5UX8NINTfet1WbfZ5iyLlbOeBYu2GI0S9R9jZFcSpLHvHh5G4ahHiXZMHxYvAkfKW335Qxh2c8E67VAAVwk9EeZdsk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BZ3xBzO4; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 690F23E557B
+	for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 11:26:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.50
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774351619; cv=pass; b=ISsqoy2Lr8yoG93/qyU0rfvymE9ZDFsR2HTZpMr1TfOfTcaEq9iAE9V8cBXlAO/wzKyf/nqfXscmrKH+UWfIti2uHJHYeW5wjM6vH7Dyqce+PkzrAzWUKNP05DR5TZzwHqC5h210BEEpZIME6I8/t0Pr/vTMczAI9Wf8tM/X2vI=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774351619; c=relaxed/simple;
+	bh=dsSAS+4luK32a3XXe/6EzxGdBYJhxA4ndW2fFSOPp3o=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=RZbiSJIOMxI2jWRobjb3HBwUDEa787ss426Uc1tXYmqsj27kj20e905jkimHcYiwNgK/uwWw/n09ev53x71LJ8JDpw+jWFM9lnwcX7kfUSB5PbkaW6jSz5+MJDPY8HimjIQz7XsSrSx2mMCVx/HlaxNDB2iAxFgVRusim8ZbmJc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YAUPyw6P; arc=pass smtp.client-ip=209.85.167.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BZ3xBzO4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37586C2BCB7;
-	Tue, 24 Mar 2026 09:49:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774345746;
-	bh=wqBVHdCXtWzfBnU2Ip9rh+UgFZGNkji1nlFJ5xyqp6o=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=BZ3xBzO4RfhCj2+KM1Ojven0alrz99P7lAYDHHM+aaqhVdzUf/TMKLgSkZ96/Bkfg
-	 K+MVON3vcyFQDag1xm52Loqc9+FLjmtFxhPp7MhY4mfkZShIkMwhgvYNENBqYfDYen
-	 v8dE6CB5T3hOaaDlDVSqnhpkCToYk0KSR1LAf48uzRRuHJPB3SNLkclK/FgyU+K46S
-	 MVQBF/ykK1EXaXyTR+8EQ0/YrQ9sHZm18+4tgcch6e5Geo3p1LtrRTa7qlo/0HB/US
-	 mGJKyOETQAkrea2EzA/khYHF9W8ZSxBKDzpdPpvcsxMAPWAE2C5BxzFavBCMUJ4jRj
-	 rW8kI3Ztct5NQ==
-Date: Tue, 24 Mar 2026 10:49:04 +0100
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Bhargav Joshi <rougueprince47@gmail.com>
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	xuwei5@hisilicon.com, robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
-	ulf.hansson@linaro.org, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, 
-	daniel.baluta@nxp.com, simona.toaca@nxp.com, d-gole@ti.com, m-chawdhry@ti.com
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: hisilicon,hi3660-dw-mshc: Convert
- to DT schema
-Message-ID: <20260324-wild-knowing-ant-ce3c2c@quoll>
-References: <20260323194400.22886-1-rougueprince47@gmail.com>
- <20260323194400.22886-2-rougueprince47@gmail.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YAUPyw6P"
+Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-5a279ce9475so5177645e87.1
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 04:26:56 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774351615; cv=none;
+        d=google.com; s=arc-20240605;
+        b=eaLtyncUOO/37DZA6VEBGTKImDgxpnbBm9mTTdau69l1uShse2fNkmk8ISIokI6oa/
+         GeCSq1U95fWMuV/uLG5Ei104ZFEVdwJqUEE623HBKcVoA1RYUT6tFp8FQmr7tnTza5dg
+         yW0/6YPU11xLiJsdVXHnWUttR5XTjR3+0xrPeGFMT23tKQerCAOmTbvVX9qTkK58X64F
+         cVvw+QWGcq6wXQezmKzv6wBvEmF8u8XmI+7R87hcFNWj20PFvJ/uLoScbFRfTe9/sVau
+         yhhGx17UmSyVT2WYk63qOHZjWtqv0ub4HtSC/trDZcFGt2xku3U/LRqKdXamiHkH60uc
+         ToxQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=y+SchkN7o51EdvxQAveeLWkl2WKUDaJuclYpM8IY9R8=;
+        fh=Gjju5xHnCbty6kv0HDwjmPeqIgfNtmX3DQL/DxlZ0dA=;
+        b=eXmWa8EyaqsdESGFgCRQ6TG7n63HanomqrCo/F42FTSBUa9DTqGv9Sg8SKryiTjeq1
+         SXrrL29XbwY2q1hG1l6iXQONsJIfN43UbVtucSY0iOf9PcDsfzpnfnVolxceXXaD3dw2
+         rD7LP9RNPhhKioPjQ41X2lUXuKWpYzGshZ7c3TjAk/A9iYQQ4RVN5aBERepoM9NGKWAP
+         totkaaD2LoNQsbPuPLhHwu8ASRUUQh0Qb9KhC7ZrLrj0ROLaECpPZoRlY78gZwyzFKqd
+         57X9k2f8Rph9BQ3a5tWyrb3dyPHJDOFyF22U+elqGFogklT7i+3cQcqHkVP3Cc7kV46i
+         PYGw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1774351615; x=1774956415; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=y+SchkN7o51EdvxQAveeLWkl2WKUDaJuclYpM8IY9R8=;
+        b=YAUPyw6PE/PxMGWxQYZTc37hUxajLhrMh8w287ZGWEiD73E9rxWylg3fkEyGnwAOnL
+         kcNM+koYuybHgYPC7E88E1laUm8rDsc/vtd4Ahg1WyH/qE9j0mQaYaF6tAFeI1pZZ1EQ
+         +oPNoM0P07Pa0f0r1fi6KgIwJn+38oVfcchMdJy8HjU4THhkkSp5rng2G98cPeVDD5yh
+         ZBRof5q1YgG4nf/PDpiDovxYPbFDKAl0/J6Y+mFZnNSjuDvdHZQumX56497OFDsrQsFJ
+         CnIhIgNh1IIZ73xpwndpILRJYSfE6LESCtMVUXR6MEzC+XpnrHt3HEQ6O43GoQSeQqPh
+         jr6g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774351615; x=1774956415;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=y+SchkN7o51EdvxQAveeLWkl2WKUDaJuclYpM8IY9R8=;
+        b=n1h1WZWo4FjDk9IHlsQFGN0QNiPnHOsgEqtRX/h0ijDn7BeN5HHBfpGxmHrSUR05bj
+         HNggJq5LcemV2Hl2+RX81k7FAubM/yW2ojO0BVNMi0APsrSIcjb0cG5oeBehtj8M/yA/
+         Ht1DNiXFi9K/GP5l8cKrPEfsw8hjsZCYimIMKCvRc33E3U0yn9RxK0xKw5APX6VLlCKL
+         4+wFOef+e2LKj7hxtEugSEpYgl3z3rK9qr2jBMM5iBtxgEWkcMe9JtMMihs/Fu1MjP/C
+         Iqu1o62LCDibBNx+z4iBzo4GkNbKP8aM76fbgdqgU5780xnkph2khCz8wLvs6A6or4Qm
+         fP4A==
+X-Forwarded-Encrypted: i=1; AJvYcCVKU0gFyk1rxjvCQg510Mgcj7rtLLauALYBPCYFZxO1ZqJ4wep9a/euknYEvn8kj4l51AhEJ9Q0eX0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzxoSwot4kHW97J7afSVUcTANHJNQn8Cl8q0ABr0NT/GRUmtxOR
+	unMvmjIdLpPoBx5n2LLXijr8L7NlUPjIwO3DiLf3DpCOMeHHQhNgfDaAt3b8y3UMV/+6c2vH/Pq
+	os6BVHHV3WTL/hKfe/O9OhDIrHNnnfL27y+yKFF91qUz2SZMS5giUlPzZyA==
+X-Gm-Gg: ATEYQzzX/ELMkFBzMj0vwvk7nsvCbIg9c6rfTSiz5zM5T3VbtyoYtK+Td69sWJ/hM8q
+	L07xtVVdEsp31jo9BtJtRCbTq9MOt2uICtf9iOo4IDXI9z3HoseHjUepSoTLp3fECKjFphJtR1o
+	sxuPfAp2iFPx1M/U0wYg9b1HU/1bmV0eyX7mc3KxLxXT7T0KqBzyNtPecfIxMquhtqMvDd1lyGZ
+	Ls1n9LmNPZgAsWddI2bnN1SrEYsp4Z6ukOFKuK1krxVmppcn+jX17VPPdKYCZOLN5uqmorguiVC
+	aJ9//hAf
+X-Received: by 2002:a05:6512:220f:b0:5a1:742d:277f with SMTP id
+ 2adb3069b0e04-5a2961ffafdmr1081786e87.11.1774351614392; Tue, 24 Mar 2026
+ 04:26:54 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20260323194400.22886-2-rougueprince47@gmail.com>
+References: <20260305194052.5120-1-sean@starlabs.systems> <20260312121559.19197-1-sean@starlabs.systems>
+ <20260312121559.19197-2-sean@starlabs.systems>
+In-Reply-To: <20260312121559.19197-2-sean@starlabs.systems>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 24 Mar 2026 12:26:18 +0100
+X-Gm-Features: AQROBzCLlT0ssScoUIT3MKqeU25zR69LveWYILymSjFtU4Zk_Ykt9qF1lihy88U
+Message-ID: <CAPDyKFpueaHyaOGn5Fn_JdnD4kPeBsDcGx8ykgnuyJ=CFPyxyQ@mail.gmail.com>
+Subject: Re: [PATCH v2 RESEND 1/6] mmc: rtsx_usb_sdmmc: avoid false
+ card-detect on tray readers
+To: Sean Rhodes <sean@starlabs.systems>
+Cc: Ricky Wu <ricky_wu@realtek.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Tue, Mar 24, 2026 at 01:13:59AM +0530, Bhargav Joshi wrote:
-> Convert the Hisilicon DesignWare Mobile Storage Host Controller
-> (dw-mshc) bindings from text format to DT schema.
-> 
-> As part of this conversion, the binding file is renamed from
-> k3-dw-mshc.txt to hisilicon,hi3660-dw-mshc.yaml to align with compatible
-> string naming conventions.
++ Matthew Schwartz
 
-Old Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt binding
-was saying clocks are biu+ciu, you have here reversed, so this needs
-explanation in commit msg why (to match existing in-kernel DTS).
+On Thu, 12 Mar 2026 at 13:16, Sean Rhodes <sean@starlabs.systems> wrote:
+>
+> Some Realtek USB SD readers with a tray can assert SD_CD even when no
+> card is present. This can make the MMC core believe a card exists and
+> trigger unnecessary initialization and suspend/shutdown failures.
 
-> 
-> Examples have been updated to pass schema validation.
-> 
-> Signed-off-by: Bhargav Joshi <rougueprince47@gmail.com>
+Would you mind elaborating on this so I can better understand the problem?
+
+>
+> Debounce the CD signal and validate a newly detected card by probing for
+> a response (CMD0 + CMD8/CMD55/CMD1) before reporting it present. Also
+> treat SD_INT as a removal indication even if SD_CD stays asserted.
+
+What prevents the MMC core from handling this correctly?
+
+Don't some of the commands time out, eventually causing mmc_rescan()
+to bail out?
+
+>
+> Tested: Realtek RTS5129 (0bda:0129), tray inserted, no card (2026-02-24)
+> Tested: Realtek RTS5129 (0bda:0129), tray + SDXC card, mmcblk0 (2026-02-24)
+>
+> Signed-off-by: Sean Rhodes <sean@starlabs.systems>
+
+I have looped in Matthew who recently worked on some similar problems
+for the PCI variant [1] of the driver. Perhaps he and Ricky have some
+input on this series too.
+
+[1]
+https://lore.kernel.org/all/20260105060236.400366-1-matthew.schwartz@linux.dev/
+
+Please see a few more comments below.
+
 > ---
->  .../mmc/hisilicon,hi3660-dw-mshc.yaml         | 111 ++++++++++++++++++
->  .../devicetree/bindings/mmc/k3-dw-mshc.txt    |  73 ------------
->  2 files changed, 111 insertions(+), 73 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
->  delete mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
-> new file mode 100644
-> index 000000000000..6ba1a42a27ac
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
-> @@ -0,0 +1,111 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/hisilicon,hi3660-dw-mshc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>  drivers/mmc/host/rtsx_usb_sdmmc.c | 156 ++++++++++++++++++++++++++++--
+>  1 file changed, 148 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> index 84674659a84d..ec3eeea78e95 100644
+> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+> @@ -19,6 +19,7 @@
+>  #include <linux/scatterlist.h>
+>  #include <linux/pm.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/jiffies.h>
+>
+>  #include <linux/rtsx_usb.h>
+>  #include <linux/unaligned.h>
+> @@ -30,6 +31,9 @@
+>  #define RTSX_USB_USE_LEDS_CLASS
+>  #endif
+>
+> +#define RTSX_USB_SD_CD_DEBOUNCE_CNT    2
+> +#define RTSX_USB_SD_INSERT_RETRY_MS    1000
 > +
-> +title: Hisilicon specific extensions to the Synopsys Designware Mobile Storage Host Controller
+>  struct rtsx_usb_sdmmc {
+>         struct platform_device  *pdev;
+>         struct rtsx_ucr *ucr;
+> @@ -46,6 +50,8 @@ struct rtsx_usb_sdmmc {
+>         bool                    card_exist;
+>         bool                    initial_mode;
+>         bool                    ddr_mode;
+> +       u8                      cd_debounce;
+> +       unsigned long           next_insert_check;
+>
+>         unsigned char           power_mode;
+>         u16                     ocp_stat;
+> @@ -72,6 +78,13 @@ static inline void sd_clear_error(struct rtsx_usb_sdmmc *host)
+>         rtsx_usb_clear_fsm_err(ucr);
+>  }
+>
+> +static int sd_set_bus_width(struct rtsx_usb_sdmmc *host,
+> +                           unsigned char bus_width);
+> +static int sd_set_timing(struct rtsx_usb_sdmmc *host,
+> +                        unsigned char timing, bool *ddr_mode);
+> +static int sd_power_on(struct rtsx_usb_sdmmc *host);
+> +static int sd_power_off(struct rtsx_usb_sdmmc *host);
 > +
-> +maintainers:
-> +  - Zhangfei Gao <zhangfei.gao@linaro.org>
+>  #ifdef DEBUG
+>  static void sd_print_debug_regs(struct rtsx_usb_sdmmc *host)
+>  {
+> @@ -768,12 +781,94 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
+>         return 0;
+>  }
+>
+> +static bool sdmmc_validate_insert_locked(struct rtsx_usb_sdmmc *host)
+> +{
+> +       struct rtsx_ucr *ucr = host->ucr;
+> +       struct mmc_command cmd = { };
+> +       int err = 0;
+> +       bool probe_powered = false;
+> +       bool ddr_mode = false;
 > +
-> +description:
-> +  The Synopsys designware mobile storage host controller is used to interface
-> +  a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> +  differences between the core Synopsys dw mshc controller properties described
-> +  by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
-> +  extensions to the Synopsys Designware Mobile Storage Host Controller.
+> +       /*
+> +        * Some readers with a tray assert the mechanical SD_CD pin even when no
+> +        * card is present. Only report a card present when it responds to a
+> +        * minimal reset/probe sequence, similar to the old rts5139 behavior.
+> +        *
+> +        * Must be called with ucr->dev_mutex held.
+> +        */
+> +       if (host->power_mode == MMC_POWER_OFF) {
+> +               err = sd_power_on(host);
+> +               if (err)
+> +                       return false;
+> +               probe_powered = true;
 > +
-> +allOf:
-> +  - $ref: /schemas/mmc/synopsys-dw-mshc-common.yaml#
+> +               /* Issue clock signals to card for at least 74 clocks. */
+> +               rtsx_usb_write_register(ucr, SD_BUS_STAT,
+> +                                       SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
+> +               usleep_range(200, 400);
+> +               rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
+> +       }
 > +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - const: hisilicon,hi3660-dw-mshc
-
-This and last two entries should be one enum here.
-
-> +      - items:
-> +          - const: hisilicon,hi3670-dw-mshc
-> +          - const: hisilicon,hi3660-dw-mshc
-> +      - const: hisilicon,hi4511-dw-mshc
-> +      - const: hisilicon,hi6220-dw-mshc
-
-Blank line
-
-> +  reg:
-> +    maxItems: 1
+> +       /*
+> +        * Ensure the interface is in a safe, legacy / initial-clock mode before
+> +        * probing for a response. The MMC core may not have configured ios yet.
+> +        */
+> +       err = sd_set_bus_width(host, MMC_BUS_WIDTH_1);
+> +       if (err)
+> +               goto out;
 > +
-> +  interrupts:
-> +    maxItems: 1
+> +       err = sd_set_timing(host, MMC_TIMING_LEGACY, &ddr_mode);
+> +       if (err)
+> +               goto out;
 > +
-> +  clocks:
-> +    items:
-> +      - description: card interface unit clock
-> +      - description: bus interface unit clock
+> +       ucr->cur_clk = 0;
+> +       err = rtsx_usb_switch_clock(ucr, 400000, SSC_DEPTH_512K,
+> +                                   true, true, false);
+> +       if (err)
+> +               goto out;
 > +
-> +  clock-names:
-> +    items:
-> +      - const: ciu
-> +      - const: biu
+> +       cmd.opcode = MMC_GO_IDLE_STATE;
+> +       cmd.arg = 0;
+> +       cmd.flags = MMC_RSP_NONE | MMC_CMD_BC;
+> +       sd_send_cmd_get_rsp(host, &cmd);
 > +
-> +  hisilicon,peripheral-syscon:
-> +    $ref: /schemas/types.yaml#/definitions/phandle
-> +    description: phandle of syscon used to control peripheral.
+> +       /* SD v2.0+: CMD8 */
+> +       cmd.opcode = SD_SEND_IF_COND;
+> +       cmd.arg = 0x1aa;
+> +       cmd.flags = MMC_RSP_R7 | MMC_CMD_BCR;
+> +       sd_send_cmd_get_rsp(host, &cmd);
+> +       if (!cmd.error)
+> +               goto out;
 > +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
+> +       /* SD v1.x: CMD55 */
+> +       cmd.opcode = MMC_APP_CMD;
+> +       cmd.arg = 0;
+> +       cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+> +       sd_send_cmd_get_rsp(host, &cmd);
+> +       if (!cmd.error)
+> +               goto out;
 > +
-> +unevaluatedProperties: false
+> +       /* MMC: CMD1 */
+> +       cmd.opcode = MMC_SEND_OP_COND;
+> +       cmd.arg = 0;
+> +       cmd.flags = MMC_RSP_R3 | MMC_CMD_BCR;
+> +       sd_send_cmd_get_rsp(host, &cmd);
 > +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/clock/hi3620-clock.h>
+> +out:
+> +       if (probe_powered)
+> +               sd_power_off(host);
+> +       return !err && !cmd.error;
+> +}
+
+No, the above code doesn't belong in an MMC host driver.
+
+I will try to guide you toward a better solution, but first I need to
+understand the problem better.
+
+I guess one key piece of information I'm missing is what happens when
+the mmc_recsan() work tries to send commands to initialize a card,
+when there is no card inserted?
+
 > +
-> +    mmc@fcd03000 {
-> +        compatible = "hisilicon,hi4511-dw-mshc";
-> +        reg = <0xfcd03000 0x1000>;
-> +        interrupts = <0 16 4>;
-
-Use proper flags (GIC, trigger level).
-
-> +        #address-cells = <1>;
-> +        #size-cells = <0>;
-> +        clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
-> +        clock-names = "ciu", "biu";
-> +        vmmc-supply = <&ldo12>;
-> +        fifo-depth = <0x100>;
-> +        pinctrl-names = "default";
-> +        pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-> +        bus-width = <4>;
-> +        disable-wp;
-> +        cd-gpios = <&gpio10 3 0>;
-
-Same here
-
-> +        cap-mmc-highspeed;
-> +        cap-sd-highspeed;
-> +    };
+>  static int sdmmc_get_cd(struct mmc_host *mmc)
+>  {
+>         struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
+>         struct rtsx_ucr *ucr = host->ucr;
+>         int err;
+>         u16 val;
+> +       u8 pend;
+> +       bool sd_int = false;
+> +       bool cd_raw = false;
+>
+>         if (host->host_removal)
+>                 return -ENOMEDIUM;
+> @@ -782,28 +877,71 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+>
+>         /* Check SD card detect */
+>         err = rtsx_usb_get_card_status(ucr, &val);
+> -
+> -       mutex_unlock(&ucr->dev_mutex);
+> -
+> -       /* Treat failed detection as non-exist */
+>         if (err)
+> -               goto no_card;
+> +               goto no_card_unlock;
+>
+>         /* get OCP status */
+>         host->ocp_stat = (val >> 4) & 0x03;
+>
+> -       if (val & SD_CD) {
+> -               host->card_exist = true;
+> +       cd_raw = !!(val & SD_CD);
 > +
-> +  - |
-> +    #include <dt-bindings/clock/hi6220-clock.h>
+> +       /* Use SD_INT as a reliable removal indication on some tray readers. */
+> +       err = rtsx_usb_read_register(ucr, CARD_INT_PEND, &pend);
+> +       if (!err) {
+> +               sd_int = !!(pend & SD_INT);
+> +               if (sd_int)
+> +                       rtsx_usb_write_register(ucr, CARD_INT_PEND,
+> +                                               SD_INT, SD_INT);
+> +       }
 > +
-> +    soc {
-> +      #address-cells = <2>;
-> +      #size-cells = <2>;
+> +       if (!cd_raw) {
+> +               host->cd_debounce = 0;
+> +               host->next_insert_check = 0;
+> +               goto no_card_unlock;
+> +       }
 > +
-> +      mmc@f723e000 {
-> +          compatible = "hisilicon,hi6220-dw-mshc";
+> +       /*
+> +        * rts5139-style: when a card is already known present, treat SD_INT as
+> +        * a removal event even if SD_CD stays high (e.g. tray-based readers).
+> +        */
+> +       if (host->card_exist) {
+> +               if (sd_int) {
+> +                       host->cd_debounce = 0;
+> +                       host->next_insert_check = 0;
+> +                       goto no_card_unlock;
+> +               }
+> +               mutex_unlock(&ucr->dev_mutex);
+>                 return 1;
+>         }
+>
+> -no_card:
+> +       /* Debounce mechanical CD before probing for a response. */
+> +       if (host->cd_debounce < RTSX_USB_SD_CD_DEBOUNCE_CNT) {
+> +               host->cd_debounce++;
+> +               goto no_card_unlock;
+> +       }
+> +
+> +       /* Avoid pounding the bus with probes if CD is stuck asserted. */
+> +       if (time_before(jiffies, host->next_insert_check))
+> +               goto no_card_unlock;
+> +
+> +       if (!sdmmc_validate_insert_locked(host)) {
+> +               host->next_insert_check = jiffies +
+> +                       msecs_to_jiffies(RTSX_USB_SD_INSERT_RETRY_MS);
+> +               goto no_card_unlock;
+> +       }
+> +
+> +       host->card_exist = true;
+> +       mutex_unlock(&ucr->dev_mutex);
+> +       return 1;
+> +
+> +no_card_unlock:
+>         /* clear OCP status */
+>         if (host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)) {
+>                 rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
+>                 host->ocp_stat = 0;
+>         }
+>         host->card_exist = false;
+> +       mutex_unlock(&ucr->dev_mutex);
+>         return 0;
+>  }
+>
+> @@ -1359,6 +1497,8 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
+>
+>         host->power_mode = MMC_POWER_OFF;
+>         host->ocp_stat = 0;
+> +       host->cd_debounce = 0;
+> +       host->next_insert_check = 0;
+>  }
+>
+>  static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
+> --
+> 2.51.0
 
-"reg" goes here
-
-> +          bus-width = <0x4>;
-
-That's not hex
-
-> +          disable-wp;
-> +          cap-sd-highspeed;
-> +          sd-uhs-sdr12;
-> +          sd-uhs-sdr25;
-> +          card-detect-delay = <200>;
-> +          hisilicon,peripheral-syscon = <&ao_ctrl>;
-> +          reg = <0x0 0xf723e000 0x0 0x1000>;
-> +          interrupts = <0x0 0x49 0x4>;
-
-These are not supposed to be hex...
-
-
-> +          clocks = <&clock_sys HI6220_MMC1_CIUCLK>,
-> +                   <&clock_sys HI6220_MMC1_CLK>;
-> +          clock-names = "ciu", "biu";
-> +          cd-gpios = <&gpio1 0 1>;
-> +          pinctrl-names = "default", "idle";
-> +          pinctrl-0 = <&sd_pmx_func &sd_clk_cfg_func &sd_cfg_func>;
-> +          pinctrl-1 = <&sd_pmx_idle &sd_clk_cfg_idle &sd_cfg_idle>;
-> +          vqmmc-supply = <&ldo7>;
-> +          vmmc-supply = <&ldo10>;
-> +      };
-
-Best regards,
-Krzysztof
-
+Kind regards
+Uffe
