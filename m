@@ -1,166 +1,181 @@
-Received: from mail-yx1-f41.google.com (mail-yx1-f41.google.com [74.125.224.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from DM1PR04CU001.outbound.protection.outlook.com (mail-centralusazon11010054.outbound.protection.outlook.com [52.101.61.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A15B3FBEA5
-	for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 13:35:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C622221F06;
+	Tue, 24 Mar 2026 14:34:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.61.54
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774359337; cv=pass; b=kUazXop04axqZ2+26ea5vHJZDX4F2jZKegB3yxQmxprlqYFFBnEVjfM2pK1QogiaY4GwdS1+ZIgNWQlu3UPv82A+zz9nnKYvWov7NoaB9hgpcRIw4yhTJTcHfMlhzCSl2u+yabOI/yR5Zcav5ctYL3kYT4dLRNyXYghtMjAQLt4=
+	t=1774362893; cv=fail; b=RBCChyXYZBjePMNX9PpA5zRoRjBlw/ndg1UhuIIfCktzPnvc25MthzbZ7FV4psNaXDCmivpaQ0pBrY3ibM83M/SG4WOPCsTM/PVKmu0iDqLaom6KG2a2K3ibMKReqnDbBsKcSFkLB2TGNH60zGS6bwVRDQyo76dx9cAsewDFDS8=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774359337; c=relaxed/simple;
-	bh=gtXm3EEFVzQNA6/1bMSZpfoVvZUrGL4slNdIVBnFMLI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=g70oO+cPoFnaks2iSw3iHQhPGa2TteUImOZj8dXZzjv24h8nYiWqCBx1s41eaVsIXj8ymYyQfF9RziizOWKKD4lZ2/Ej2cRGFOrE1CWLkm8AL+lubUQRDyaOx9c5xEgy5myDBPgJqhnPfMfa71p14I/qrPLyahNaZw0o5pdzNJE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=NSVR6v80; arc=pass smtp.client-ip=74.125.224.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1774362893; c=relaxed/simple;
+	bh=ffyZsuWsPL8yO4xfM8WiA/h1OegZauqKr6GCLz9iqWM=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=bOPE4b/uDcJego0nzD1l4h3gReCy2h6bNjx2HrGuMAou2SO4xX/PDzIKy2dji9i136Y/z+in4aDxHkgpk0Qr1tHQpYOGK5YbmBboMtfJFXvoZgMBRpMzUdYpbitLGMv7clRsP6TlT4H9WufugeHDKUM7R2ZhNVtUZwiQ7xIo7Wg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=bmW1POql; arc=fail smtp.client-ip=52.101.61.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NSVR6v80"
-Received: by mail-yx1-f41.google.com with SMTP id 956f58d0204a3-64ae2ce2fe1so1363243d50.1
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Mar 2026 06:35:36 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774359335; cv=none;
-        d=google.com; s=arc-20240605;
-        b=AnKF8qcVgtIXMfOQPvt/vU4vz8UhVZVLnRfZ3KSyVswZnbbuqzBgjMANIQ5P06E6UL
-         PlmwizzaLhabB/fuZw4N3epXQJnCq7DrvGdwHFCEbpjA1raayZ/ueTWIMBA5JAHbp6v8
-         eVLEENhabdasr7wQb6b/71pHkFjs00jzLhqv09JrzjXa15fZ8MoYa4jKN3rDVkmjamHz
-         FvaPvTF4GaNYboT+8yqrZ8vSlu/dyZ0UWZDve73JHWxDL9HywpExsk9IltTlubVn99WX
-         CUklb9vCm9yVFRSsaf+6uyXcbYhDfwKMvIRdR88oipgNVGDksf45wCRfRQkIHqi8AK8a
-         MttQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=gtXm3EEFVzQNA6/1bMSZpfoVvZUrGL4slNdIVBnFMLI=;
-        fh=MBnPHCoxHwlmOypQJbBDLONdp/SI3Z/MXb3FKXIC9HY=;
-        b=A4/yGuiL3YaovtvmKg1psTXDLjZkBLGQFmxeRaDwnw0S6Ap3v9bRkDltLk73rZDnyE
-         6tDEynrXJ12MIbyLhg/Rk78jFAPVTDVH142rESJMMonOzVI7EUcO5vqolOKDhLuSpQzA
-         I73ayct7qstOrKaYSsnswTd338nOoT4nu0d1i9l6Mo8CUTdVN/+Kbh1GSVFIUqERsQsy
-         oPJMR+bs/NWMmk9AnR6X9+qdOlibGqKVnRiriZr6r7N8wt2RNGFtjF9rlpr3Eh2OCM2h
-         +0c6+7HJSxY+Rk9m10qUYlWgyDMKtq4ViZsoNrexyErKBF5f1xdtIJTS1aZJHAlzr4cW
-         h8SQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774359335; x=1774964135; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=gtXm3EEFVzQNA6/1bMSZpfoVvZUrGL4slNdIVBnFMLI=;
-        b=NSVR6v80wl2tPV8BFpE/eZ4foAEX3kbjlT9rqn5bXs96E1Ms9RePFO2gNoGqTmVRrW
-         66jWyrnaiF9IlE4UcUfckAoCH0qNiaMkkSQFBCXHx9ZTXAhe7EDSlMg5OyMBDVvBYA6h
-         w0LJ4FylSgCR0NtyFWlFAXEy4+ktb0XPjOZMxMk46jf9PSmCdGUtuV+O5NrSE4GjWYgW
-         vPxpkWJ5tY1XEjvBJpc9OoIVJAP2QGvNzGXTSKG3el49WzxMWP/hyTyKM0kWtf+9tUlU
-         cgHuXY++L4/IFwtPONNLZZaUukn4w1YRDmqxB2Bpjr4vhVHnywQKSifH3r2Zs8EeHYdN
-         S7CA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774359335; x=1774964135;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=gtXm3EEFVzQNA6/1bMSZpfoVvZUrGL4slNdIVBnFMLI=;
-        b=oUFI5bQ2KIe/oSTgtJV/9GV2hvW2UecXHnvjkK7efokZ2oejSmJMj+bql1W5MHVCQF
-         R4haye42RabUgLibRi8jNJNKWnbZFo0dkoH2S0zyNouNNXYfJW5lzHRHp27b3MPzLnnS
-         NiWkfPgcUMd8BzZ4vIusoknZaGbiKK33icac1iX+ogrT3+633E/9q4wx4NmoysbmCOXh
-         kd3wZJvTpoMf/TM+JKlVbAAm48A97WX6nvZVGXW0xFgymGJDJBNKdITeu/ktLTT+j1Vj
-         Ci7txNhsfEYJ9O8FE5jFL+6TU0FrfKmK2WC+ocG4fEo4+Mif1zsIvOlMVfatFg5BrrrE
-         AVeQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUKXou/7bedEFl67w+eP9kNMQ3hRCaLI+qfiB2Lqj2u/tIMFAQXcfMgyiU4nEenp9+seR3esHFJHoE=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw1RTrPN4XhLffPzv981bhKxDOuNSX3TAaX1sUcG7tY7X/s333N
-	qAF0ykOoMVAY8RQDI3VAiJvaxQbx0jSrkYnzhjGPPPmUvGTVDOpicD5gKDjxMr6NYF9I26ROZF8
-	TwN5Q4GVKaAoa3jy9dbu8NYjFVSxVt5/NXECu5SVd803TDU3gQ07k7Bo=
-X-Gm-Gg: ATEYQzxusqPmLUBV92Ot/trdfuaUkgoPSxb+MYOBVrp15UZox2i1q0L/ysGl4k2h7uP
-	1WLQzYS/PIcLLsS6dn+eSrCfr3EWMo5TJ4VQr7jCHVKZ58sSIipI8k+Hw+60od0sUcOPT5IdpTe
-	xx9D4120GluIZv7oq53gQLIs7xF4KHS4nPGD8+6Ufcg2zftx+9sQvqV0WnlEpJoCu2dUmMgeehI
-	g7uPCVQgcYU2rqBfmV+yh2c1cBDySmg7J3oqpdqsAa+PrqySfPHgXn26ExxVVEJ8QictrVnHFHy
-	Twk2kQ/h
-X-Received: by 2002:a05:690e:1188:b0:64d:29a3:ebbf with SMTP id
- 956f58d0204a3-64eaa698267mr15292741d50.16.1774359334760; Tue, 24 Mar 2026
- 06:35:34 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="bmW1POql"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=lkr351YqQORy76h5jdh+BLKmsCf4k82qbrcbNyHu7vnoL89csBymV7m+/7OdaghM4e8qmj88znuPaV1XpcOHAuq7cM9YWGHVzEIZ2u+NLfCYqVyrGbPhuyJu0HIgt2w6r8szkWU6RINiWxjGOBWgG/I5JgHVdocWRbyURLIqxvxknX9rYofKjeq7nixrt9PVg5T4Lif10cULsJiKdvpVVsENkHxcH/QGoGETWq+G3gE2kaf6o5XzDvw245X8tK7kl5Ajz0I4KdK45dk5CnBXcLiGBc+bik/Hv5IEXFHI9IgOIj1jWJCBynuM6jHeu/VX8ej8UAjzufODljEVfE/Cfg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=fDcDXFOTHtQRGF846DmjUxcgBqQBDOpEWM9CufSwYDE=;
+ b=HkRKeBoGN0RUkAAwJ+xpWv5ZE7bkYzBgMiMz7M6zPQKFgVCTbdJo1qKs3pQRWhz/HX7lvHrAU+UNWRA4hMHq0/A4tPG01YMtpr54eYdKmnBRPSE5hlmZxqxfQTk3NIAHReTZPE8zCC/SU6vvLOQ90fWT6tOagv7v6RHP1inJRQJGWLH4iQAWHhLwPQciDvsVb4bk7CDcTGXFPvxhKpGHkDdASaz05bUj+DBFQShxU8GZoKJfrHGFdDeyKjU7Uv4kJy/obShnwR29vGS6aFrJJVlaw4bZpPL7kCqoapAc9N55O6bgShb/9ScVfSRd9RDKbvGxYO8p+/+W6gMQlZbfLw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 198.47.23.194) smtp.rcpttodomain=linux.dev smtp.mailfrom=ti.com; dmarc=pass
+ (p=quarantine sp=none pct=100) action=none header.from=ti.com; dkim=none
+ (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=fDcDXFOTHtQRGF846DmjUxcgBqQBDOpEWM9CufSwYDE=;
+ b=bmW1POqlvCoaslR8nQ/DYSvaJUmJvRQKpzkOV92m52iqHQ4FmfeUlxXIoqypIcQzxU2vX9tWXznDecdscZ6OQ4eLxwGCPNFhOsEqNuGG3xez6C8CikH6MdoGflDrI61ixjshyJ/BcvHRZ9sDwANwwoj5j1d2UnnbldKOddkx+qk=
+Received: from BN9PR03CA0277.namprd03.prod.outlook.com (2603:10b6:408:f5::12)
+ by SA6PR10MB8086.namprd10.prod.outlook.com (2603:10b6:806:446::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.25; Tue, 24 Mar
+ 2026 14:34:50 +0000
+Received: from MN1PEPF0000ECD4.namprd02.prod.outlook.com
+ (2603:10b6:408:f5:cafe::a6) by BN9PR03CA0277.outlook.office365.com
+ (2603:10b6:408:f5::12) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.9723.31 via Frontend Transport; Tue,
+ 24 Mar 2026 14:34:49 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 198.47.23.194)
+ smtp.mailfrom=ti.com; dkim=none (message not signed) header.d=none;dmarc=pass
+ action=none header.from=ti.com;
+Received-SPF: Pass (protection.outlook.com: domain of ti.com designates
+ 198.47.23.194 as permitted sender) receiver=protection.outlook.com;
+ client-ip=198.47.23.194; helo=lewvzet200.ext.ti.com; pr=C
+Received: from lewvzet200.ext.ti.com (198.47.23.194) by
+ MN1PEPF0000ECD4.mail.protection.outlook.com (10.167.242.132) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.9723.19 via Frontend Transport; Tue, 24 Mar 2026 14:34:49 +0000
+Received: from DLEE206.ent.ti.com (157.170.170.90) by lewvzet200.ext.ti.com
+ (10.4.14.103) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Tue, 24 Mar
+ 2026 09:34:48 -0500
+Received: from DLEE215.ent.ti.com (157.170.170.118) by DLEE206.ent.ti.com
+ (157.170.170.90) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Tue, 24 Mar
+ 2026 09:34:47 -0500
+Received: from lelvem-mr05.itg.ti.com (10.180.75.9) by DLEE215.ent.ti.com
+ (157.170.170.118) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
+ Transport; Tue, 24 Mar 2026 09:34:48 -0500
+Received: from uda0271908.dhcp.ti.com (uda0271908.dhcp.ti.com [128.247.77.70])
+	by lelvem-mr05.itg.ti.com (8.18.1/8.18.1) with ESMTP id 62OEYmfc2786579;
+	Tue, 24 Mar 2026 09:34:48 -0500
+From: Bin Liu <b-liu@ti.com>
+To: <linux-block@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+CC: <ulf.hansson@linaro.org>, <axboe@kernel.dk>, <shawn.lin@linux.dev>, "Bin
+ Liu" <b-liu@ti.com>
+Subject: [PATCH v2 2/2] mmc: block: use single block write in retry
+Date: Tue, 24 Mar 2026 09:34:48 -0500
+Message-ID: <20260324143448.2631888-3-b-liu@ti.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20260324143448.2631888-1-b-liu@ti.com>
+References: <20260310160408.3976760-1-b-liu@ti.com>
+ <20260324143448.2631888-1-b-liu@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260305194052.5120-1-sean@starlabs.systems> <20260312121559.19197-1-sean@starlabs.systems>
- <20260312121559.19197-2-sean@starlabs.systems> <CAPDyKFpueaHyaOGn5Fn_JdnD4kPeBsDcGx8ykgnuyJ=CFPyxyQ@mail.gmail.com>
- <CABtds-26cuCMZbRhAaioOOCcX=w6J_mpCxgxahjwz7QJEZqe5Q@mail.gmail.com>
- <CAPDyKFrjhNj38dvvf5AGjCxSKkX02C-B6h4+dX0iOxyOc+Hruw@mail.gmail.com>
- <CABtds-2DjtJ=8GzNdi0ZOLPdBfGWdfeXX790o_gvNVE=d9+=Pw@mail.gmail.com>
- <CAPDyKFqi_Ayc3kffNHvhTmNSxjMhSAa7wr4rQuP6060ifH3y=g@mail.gmail.com> <CABtds-3oovV9jP8uaQ7_=T4_BA7oEpkfT-tbDW18MEs0eLygzg@mail.gmail.com>
-In-Reply-To: <CABtds-3oovV9jP8uaQ7_=T4_BA7oEpkfT-tbDW18MEs0eLygzg@mail.gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 24 Mar 2026 14:34:54 +0100
-X-Gm-Features: AQROBzD2a_FHN9MjVu-g1ewrOJhKICIAzy1jUvJv2zNlImfcKhbsji3sxOpNUn0
-Message-ID: <CAPDyKFpb_6LtCMQv2LzW5W9ib=3KoVJ3XLiRCGPAcPKv_unnfQ@mail.gmail.com>
-Subject: Re: [PATCH v2 RESEND 1/6] mmc: rtsx_usb_sdmmc: avoid false
- card-detect on tray readers
-To: Sean Rhodes <sean@starlabs.systems>
-Cc: Ricky Wu <ricky_wu@realtek.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MN1PEPF0000ECD4:EE_|SA6PR10MB8086:EE_
+X-MS-Office365-Filtering-Correlation-Id: a669752a-70bb-464c-15b4-08de89b28125
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|82310400026|376014|36860700016|1800799024|56012099003|18002099003|22082099003;
+X-Microsoft-Antispam-Message-Info:
+	9+Ung5bVHI+k8v07L8kLxZpGu01XUAK+460jZgn+WjE66uaIxeV9Nt5+AeJdP2U/GLxPIDRFBHCprhvf5T8KFOGOVOx0lpb+3rXyTRDYGz/SKaHuIvlnYK840SrwTSqyRnxefj4s2Ep5qDMpEFrgV8WC+/T/ANlOreXnyR3mKovycpiyaeClFYqiJ5k2nfoT/TJytAfu6Qm+HIBffwiADQZ+s92YvD/1+H99Ymh/l4jfa909SMVVYlk3JCC8f//EBx7OTaVt/H0qlafxuvA2NAcrGZWTiEIFLNwj7dzZignNzyX0AbtqMueqSmAV0K6TFuq9OCRAdGpvP7tnBKR4tH6+84PV0yawbaFQgHQg51GVTzZs1I65UKFSsdeRFub5547eIP3GO6Jii8E9RTJgD7ku8lLWhSl4xfELoTBoe2OMAG+6atZMXNDfCxwOTKPW8LvJq3Q59X/s0qcHQnPWArCIUnjfdICUR7r1kGky1uM4bRCqUg3QXCW2q9Vb1zXg6EJdtvBw/s7Xw5Q+Xd/Kav0/9+8LzkUSkqheUm0SSPuepgL+9RaOmFBbmky4BZRJdPpL3UG/U562DLZuKsm+PAMZYgNGYhyqbBooIsMyK6BYoulpVn7GSJVNAkjcivI8pyBcujlIw9+eUucCq0zU2ZG+MrrfRCpB8aRKEAjaJKitSQwPgUH2pr/5V9G5uwtAxjUdQOC5qCsYGcrIPTU11cpslvMK7tfZgBmGLj8N4VpbJ5O8c2kD7eb6co5/3OqmJUUBlmNiA2w6W33Q9aXOOA==
+X-Forefront-Antispam-Report:
+	CIP:198.47.23.194;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:lewvzet200.ext.ti.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(82310400026)(376014)(36860700016)(1800799024)(56012099003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	4F/2F6TxopDMExClBDl/Atq6n6ZidMcLPav3LAFPYl2oFPDqZ3oAvNONXLyLFjszGmaM5LzSoXlm5N+uAAWpYtLzWTWO5I2RAmHJ8UkbavQTJMQwEDs5BJurRQTRAwa7JFEEyfR4FSWrEBa9rzxdoZyh6v+t3chwppOy0ub3bU7AJw/or4IYYk0skKqfaKBX3muPBRlp6Z+vkC/MpIQFVq9i5jxVCuRjosuKpYIhKFCDTSmPp/nvtqHlBdNhqZkR/PUQrlinErbbxJ7l22QTAuMstvU9jnZqSL2OgFlI6b2Xo6kC2YMYRH4AOzzLLX/XoKhH7uOsSjc2zJKA9CWan/xoiyVpAAgFl1Wt2EWn/WBDB3nHG110STkZ6mF8Nnkd89G6osogK6gMlZMSOO64YHdVnM8iQXfhCFj68C3C6atEaedGNY4phObYLmrHKyeq
+X-OriginatorOrg: ti.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Mar 2026 14:34:49.5900
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: a669752a-70bb-464c-15b4-08de89b28125
+X-MS-Exchange-CrossTenant-Id: e5b49634-450b-4709-8abb-1e2b19b982b7
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=e5b49634-450b-4709-8abb-1e2b19b982b7;Ip=[198.47.23.194];Helo=[lewvzet200.ext.ti.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	MN1PEPF0000ECD4.namprd02.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA6PR10MB8086
 
-On Tue, 24 Mar 2026 at 14:14, Sean Rhodes <sean@starlabs.systems> wrote:
->
-> On Tue, 24 Mar 2026 at 12:58, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > On Tue, 24 Mar 2026 at 13:30, Sean Rhodes <sean@starlabs.systems> wrote:
-> > >
-> > > On Tue, 24 Mar 2026 at 12:23, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > > >
-> > > > On Tue, 24 Mar 2026 at 12:59, Sean Rhodes <sean@starlabs.systems> wrote:
-> > > > >
-> > > > > Hi Uffe
-> > > > >
-> > > > > Thanks for the feedback - to answer your questions:
-> > > > >
-> > > > > > Would you mind elaborating on this so I can better understand the problem?
-> > > > >
-> > > > > SD_CD is used for presence, but that's asserted by trays or blanking cards.
-> > > > >
-> > > > > > What prevents the MMC core from handling this correctly?
-> > > > > >
-> > > > > > Don't some of the commands time out, eventually causing mmc_rescan() to bail out?
-> > > > >
-> > > > > It does bail out, but SD_CD is still asserted, so it tries again. The
-> > > > > main thing this breaks is S3 entry - it's either slow (like 100
-> > > > > seconds), or never gets there.
-> > > >
-> > > > First, please don't top post, but reply in-line below so we can follow
-> > > > the discussion.
-> > > >
-> > > > It's the mmc driver's ->runtime_resume() callback that calls
-> > > > mmc_detect_change(host->mmc, 0).
-> > > >
-> > > > It's sounds to me like the mmc host is being runtime resumed/suspended
-> > > > over and over again, hence we end up calling mmc_detect_change() many
-> > > > times when it's not really needed. Right?
-> > > >
-> > >
-> > > Correct
-> >
-> > So why does the rtsx usb card driver do that?
->
-> I don't know; I'd assume it was just a shortcut or done by people who
-> didn't have the hardware when moving the driver out of staging (see
-> 00d8521dcd236d1b8f664f54a0309e96bfdcb4f9 which works flawlessly)
->
-> >
-> > Could it keep the mmc host runtime resumed for a while and then we
-> > could add a debounce period to the call to mmc_detect_change()?
->
-> I might be missing something, but wouldn't that just make symptoms
-> less obvious? We have bad detection - why not fix that?
->
+Due to errata i2493[0], multi-block write would still fail in retries.
 
-I don't think so. Assuming the host gets runtime resumed at some point
-again, after we failed to detect a card. Not sure if this solves the
-problem, but should just make things less noisy, I think.
+With i2493, the MMC interface has the potential of write failures when
+issuing multi-block writes operating in HS200 mode with excessive IO
+supply noise.
 
-Anyway, you may very well be right, but I don't know how to fix this
-properly on the usb side.
+While the errata provides guidance in hardware design and layout to
+minimize the IO supply noise, in theory the write failure cannot be
+resolved in hardware. The software solution to ensure the data integrity
+is to add minimum 5us delay between block writes. Single-block write is
+the practical way to introduce the delay.
 
-That said, we might need input from the usb maintainers on how to
-proceed. Perhaps if you make a new submission (RFC), by describing the
-problem in more detail and ask for guidance from the usb folkz?
+This patch reuses recovery_mode flag, and switches to single-block
+write in retry when multi-block write fails. It covers both CQE and
+non-CQE cases.
 
-Kind regards
-Uffe
+[0] https://www.ti.com/lit/pdf/sprz582
+Signed-off-by: Bin Liu <b-liu@ti.com>
+---
+v2: add errata details in the commit message.
+
+ drivers/mmc/core/block.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 05ee76cb0a08..00016584d70d 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1401,6 +1401,9 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+ 		    rq_data_dir(req) == WRITE &&
+ 		    (md->flags & MMC_BLK_REL_WR);
+ 
++	if (req->rq_flags & RQF_XFER_SINGLE_BLK)
++		recovery_mode = 1;
++
+ 	memset(brq, 0, sizeof(struct mmc_blk_request));
+ 
+ 	mmc_crypto_prepare_req(mqrq);
+@@ -1540,10 +1543,13 @@ static void mmc_blk_cqe_complete_rq(struct mmc_queue *mq, struct request *req)
+ 		err = 0;
+ 
+ 	if (err) {
+-		if (mqrq->retries++ < MMC_CQE_RETRIES)
++		if (mqrq->retries++ < MMC_CQE_RETRIES) {
++			if (rq_data_dir(req) == WRITE)
++				req->rq_flags |= RQF_XFER_SINGLE_BLK;
+ 			blk_mq_requeue_request(req, true);
+-		else
++		} else {
+ 			blk_mq_end_request(req, BLK_STS_IOERR);
++		}
+ 	} else if (mrq->data) {
+ 		if (blk_update_request(req, BLK_STS_OK, mrq->data->bytes_xfered))
+ 			blk_mq_requeue_request(req, true);
+@@ -2085,6 +2091,8 @@ static void mmc_blk_mq_complete_rq(struct mmc_queue *mq, struct request *req)
+ 	} else if (!blk_rq_bytes(req)) {
+ 		__blk_mq_end_request(req, BLK_STS_IOERR);
+ 	} else if (mqrq->retries++ < MMC_MAX_RETRIES) {
++		if (rq_data_dir(req) == WRITE)
++			req->rq_flags |= RQF_XFER_SINGLE_BLK;
+ 		blk_mq_requeue_request(req, true);
+ 	} else {
+ 		if (mmc_card_removed(mq->card))
+-- 
+2.34.1
+
