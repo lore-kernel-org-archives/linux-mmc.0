@@ -1,311 +1,163 @@
-Received: from SJ2PR03CU001.outbound.protection.outlook.com (mail-westusazon11012029.outbound.protection.outlook.com [52.101.43.29])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3094A3BC67E;
-	Wed, 25 Mar 2026 10:41:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.43.29
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774435293; cv=fail; b=bJF83xsG4asUq1N1hLlxvpqE4RIB26KQP09vmwTHWOm5uuZh9Nvvae2zgPdj8Vhsk6W4oiPGyB4tlOpJykklA6/FEIhsEcXeggwhssdU1YmniqSJfiuwuveCnwpnUfRL7RRIKgvZyDRQNzIiHbngXgcHYmjgEhPdfdNXhvryCn8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774435293; c=relaxed/simple;
-	bh=5Jm+ESKJun0etaD5UvzfwjvyYXcqsk2zJiUKDIQ7DX0=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=JfssVJMnpAGQysvu3LpBiyCSLVvoy9tembKp69vyki9qvbp5TbsahWITAmStsOWkIpNoWsrDVgRteaYwMaWCsU7+s3WrJcoDuPUOQYoxjjyJZ1bivXukDmnJKZhtx+ckDx118Y3NsguD6dU2I5FI1oL2/6bjPCkGE5V+RjPULn4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=E2faberv; arc=fail smtp.client-ip=52.101.43.29
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 095CE3CEB85
+	for <linux-mmc@vger.kernel.org>; Wed, 25 Mar 2026 11:40:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774438848; cv=none; b=QU+3mRd8Da31k1/Gr010pUmtGXs3RFxn03CRsZAxMbA/lA80vmxi7Q44e9rfNLLo8/+bfeds3a8U1Ag1ETcCtzuBB6S9vUi9Ed2V8RwitLq5AkAaNGuaK3sCT9lXMF3Ty3sWrUfUFpn6hzDcFcW5SFI/a1vKoICsXJGnsDaWTuA=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774438848; c=relaxed/simple;
+	bh=tDnZXplE3iDQjEdVi5mh8rCE3rI5eA9AbuO90Vkh88Y=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=CQXB06BTqoI0CLrPcrTosCYj2ggcC27C2LEihCMj8nyH39n0iv6r1AuDnNe4IVL0SAPPUBgT47pQtTqG3wtMKeTjHpJ0T72XrLwQJDHrkiiXdQSGeS490lgc3Fs66mOCT1Bk1Liu+ckM/wwdPTe99Egx3hxF0Qxqr31JhFWCzN8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=jtGx3SKb; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=VpjqaaMG; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="E2faberv"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=ySUtnyGYeT2Sj5MPFjj+SBxZCU8zCP13Z4Eumq24XaWX3PrsFfWAzq7btv6nAojpDJIFsQQTIo3wcFeAlC6m12UfXGtiDE3xzaVQvh17w9+EWfmCyecdzaFm98sFMxJ7mYeDzvrLFdDDUOqOd+hiSc79AMVUsENlQd8nrwvLjmYE/HQWVrTB0AobT8DebAOzmlIcExhQyQnkOi6/lecEG4YjlZzVlUkdOv/0ifpoOvj3MGpZBVjEXw8PYfPd+ocBXFT8TjEzmKR/3bQf4dQc14Sib0w2CmgAeozjCXRjpZVPT27275ep3jIQ7v6nvO5hxzVGOTd/CN5g/RAJeFlFqA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=yM5YnSTNaJaDLLiESBUjgCSQKvYIh5/Eeu5Jsf4d0ys=;
- b=sXU7rJbrFO4epEn1hw+NgHIAtvYxbl0zgKAO8CFxuhkRLsLo0LBTo2Yi7G3zu9fK1iwda/uPX3EbyCsewHmIyfD44rJ4q6VEY42jERafVs3/Hrl8EWo8JMj4VEOGDO4Pho0nW217lOA14WP/GwOLy3Mzr2H+rJV75fHDihykDbQudOFQm79y8MZ7LSk798ArzPDhZy7RoSJ32jca+pbkPJHQ4mB/7ml4L4S1LldhwSxDt+2n63UZ7r4J0qKwauk9s1gt+ox03qQ80tvEDAhHu3Q/Mn4eYctW5bYa76PU1d/7lSW2hukOC4bOaUY7aTVaWIZOzoQSu0CHZhO7nkXSIA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
- header.d=amd.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=yM5YnSTNaJaDLLiESBUjgCSQKvYIh5/Eeu5Jsf4d0ys=;
- b=E2fabervEFf89TkxkTJ6LIinFzpitfQZ7ZDD04vsGhR8Y301Iz0api4x4k6EH5rkS96rr1+mjHmgdSUQBshS7XheZo/PvQzJfgqJ3yPDMM8wVvpRCeUVo0e4SJVNkYBqF2N+SvnrAbsRMazD0y3qF5fTqqS4tSjVkBwdCezliz8=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=amd.com;
-Received: from SJ2PR12MB8690.namprd12.prod.outlook.com (2603:10b6:a03:540::10)
- by DS0PR12MB6463.namprd12.prod.outlook.com (2603:10b6:8:c5::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Wed, 25 Mar
- 2026 10:41:29 +0000
-Received: from SJ2PR12MB8690.namprd12.prod.outlook.com
- ([fe80::18c4:be41:febf:7e45]) by SJ2PR12MB8690.namprd12.prod.outlook.com
- ([fe80::18c4:be41:febf:7e45%6]) with mapi id 15.20.9745.019; Wed, 25 Mar 2026
- 10:41:29 +0000
-Message-ID: <5be09eae-0287-4746-a2cf-4050fa719f64@amd.com>
-Date: Wed, 25 Mar 2026 16:11:23 +0530
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: Use standard mmc_clk_phase_map
- infrastructure
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- Adrian Hunter <adrian.hunter@intel.com>, "Simek, Michal"
- <michal.simek@amd.com>,
- "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <1774341736-229127-1-git-send-email-shawn.lin@rock-chips.com>
-Content-Language: en-US
-From: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
-In-Reply-To: <1774341736-229127-1-git-send-email-shawn.lin@rock-chips.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: PN2PR01CA0066.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:c01:23::11) To SJ2PR12MB8690.namprd12.prod.outlook.com
- (2603:10b6:a03:540::10)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="jtGx3SKb";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="VpjqaaMG"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 62PBGdk6724452
+	for <linux-mmc@vger.kernel.org>; Wed, 25 Mar 2026 11:40:46 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=lvn2/MLsCdGEHg4sHbrFe+
+	u4djRgQ5wPJNB5j5dFaYQ=; b=jtGx3SKbPuJzWTYVToM8Lkkl3zcxp+jQLk03fP
+	n1LxJNn4wI2xSpw/+tZ7uvMXq1OdUFoPXZWTOsohvDqueSFbhkq7t+M3VnMs2Y4s
+	Od2WuOsAeWJTHGIWzhHUYWvkjtAbJqkCbeUinP0Mt9VLH4/5kaimg+dcEnAnMpPm
+	WM5ek28pLgMGsPXVZ3F5UvVtky5diN6Pp5DRA5eJMNCkS0qhDKj85FIVt0ccmqgY
+	sZT4YnvbdoMlBnJXaS4uS6uTVu7poC1fcBwGw2EGrXcNfXQ4AN7gFrwd+RdpS0Fk
+	09P1rqELm1uzofh+uEK+RoxfDRMJCREnNq2508VgNQ9+NNbA==
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com [209.85.214.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4d4dm2rb6u-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 25 Mar 2026 11:40:46 +0000 (GMT)
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-2b06b68783dso41012275ad.3
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Mar 2026 04:40:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1774438846; x=1775043646; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=lvn2/MLsCdGEHg4sHbrFe+u4djRgQ5wPJNB5j5dFaYQ=;
+        b=VpjqaaMGucZDAxD12AnaMNEL3kXKZO93BmcmPe5S+G9vSR8TTYb2RI5eso/XgTzioC
+         0A9WLbu/s9XxMCtGCA1+hfClJXIbsi8ICBx+lLaC6+T/dFXJEmsTnl74gJRkRDMCVF2q
+         79Q7Mqunu0Q4G+SHtjSbRzl+EOFe8ZvJDfKs1cQVdZCnu9ZnfpSwzbggcqkBOVlqYs7e
+         tS8Wgs1GZPaOPpt3gxmjM7a7y27wcRkugcQ3sVHkV71LvLw5KUCeJ41rdNHPK1HgTzx+
+         2cR3dZrYc+4DkzgbZYWNPmnauRt2V43Rgzpa6T1o7Jijz/SSh4k721gc9YrGHn6JCayA
+         mKoA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774438846; x=1775043646;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lvn2/MLsCdGEHg4sHbrFe+u4djRgQ5wPJNB5j5dFaYQ=;
+        b=GIvuJ3C5bIIj87003s9d7VGzLGUK7GyhlKG+4wi0yk66H3Lxlgd5CM8LTX3P7W8RWX
+         BO400VOn6bFiZlWGdUJgGcP1PV+2MKOw2WtqF4XHvAtBdkZOVWt/ObvhGUuEknhqdXts
+         +WqbbwEat0YJo4TlSuHE80Szs37eCeRrpR5UjCEJ/eKK+nh/ccCkgqZAZq7uHWKFyEcj
+         JkVHudnlLNZSWHB4MtOKFkWkJhni8iEg2pxmnyX5zpueENYqU5aI3e6h0Tckjd7Q+Yc6
+         AbQh0i4n5ATROONyCdFA0r0fuwoJy+E3DNPqSsSP9fCPFxtBvb2kZwlHcxc9eQV3TgDx
+         zbtg==
+X-Gm-Message-State: AOJu0YxInlXrKrWDaiN/qJ3oIZXpNS35mVgj0iRPz8UmaDrMj7CChD2p
+	wBCqlVAWAgw3w63rJyULgl1XtDpJbeD0ydTIiE64WfOOZoJGE6f0j1iK7a5L6YdmcQZsSsYdXnP
+	1B7XiJMr0H38CAbx9OofRUH8IgCkoDijRJw3El2q1U6oI2EUmr5GRudKURJyj3fg=
+X-Gm-Gg: ATEYQzzGuBhvoU2Ooxe3bemVdrvnzkHiCVt7nfiaE+oGbRU/LoEODL1QuAeUVJ896lr
+	YbMAU7sV9y5gwvGlVKtCL61V9HAsPfianDr5JJWe/kaYUX2L0gAtW6k0WNqos63FGU3k52v36Bb
+	LqYqs1HqwHNphaqcozx2oo1VEmpdzP2JrFB5DxuFRAOhC7y755aEN/hUewcCWGBSkwQtWufY3cA
+	fKZccxVJuo0AIWnasIG7wgJcA34Y7fguDO5SDBwBkeS4GLwZpKWLcaLjSDotA5rGFhrvlZl7M2u
+	FLQAZ/b9+Alh7KenR6muYdqRQxd23jXEyzAKdh6sQq8FT1wlCXybHrJParNqCHZfRYM1xNgi8wl
+	C4l+iBvQd8+kSGRX/E9CBokJDwMx3E6C642z5zD8tZeuJarzRNPbpHEdM7x3iBTElOT40kSkqB7
+	1j3kMP3TAnx4bAvMoUmj2FhbLx7Mx67Z2+4soa7ZOIGu+hHcDq2C2CILTl
+X-Received: by 2002:a17:903:1b10:b0:2b0:673a:7c90 with SMTP id d9443c01a7336-2b0b0aad881mr36758815ad.28.1774438845761;
+        Wed, 25 Mar 2026 04:40:45 -0700 (PDT)
+X-Received: by 2002:a17:903:1b10:b0:2b0:673a:7c90 with SMTP id d9443c01a7336-2b0b0aad881mr36758365ad.28.1774438845295;
+        Wed, 25 Mar 2026 04:40:45 -0700 (PDT)
+Received: from hu-kathirav-blr.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com. [103.229.18.19])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b083698929sm221714495ad.73.2026.03.25.04.40.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Mar 2026 04:40:44 -0700 (PDT)
+From: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+Date: Wed, 25 Mar 2026 17:10:19 +0530
+Subject: [PATCH] dt-bindings: mmc: sdhci-msm: add IPQ9650 compatible
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SJ2PR12MB8690:EE_|DS0PR12MB6463:EE_
-X-MS-Office365-Filtering-Correlation-Id: 3426756a-b887-4a3a-caff-08de8a5b1253
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|376014|18002099003|7053199007|56012099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	REbLKrFu2Eplt4ZcfDbtaIfQYLRONUq3FqfRBRi717iWjwbMVH6hbfOyNZRd+gPNm7ShJnl/3M8ybxJERf3j+9oPppz41HaLdMuAea1zKvPXNtEwNVJctslpzZSdAPIFgHHN7t9Bk/GQVJ1LHRDLsdFkAqgH36Mev7Qj960LIva9hZ3wfPSC6iR8iYP146EllKLBk+jwAnjRruU5GZg7mALruRggJrIyw2qTZ5GvaMvWYeYipvTOnOXb1ON2cghJqE+BXTxOAdLq0xosbaGaQw54NcV7f+cMEI7tPXXVajAcoeOBA/K/iQAAeFdS+2V6TsLEf3DP2ANekR0miV8J4JjiyatLEVOwZSym1QU3/qZx5t7Q1YemDV9hqHCkeXdLFe/57dBFbKAcgyRZiJsoAGzz2xLRdJ0+t7VgsVK/c1sMJsuO/Ib5cYaX7yS1jdQ14iEehO2lM2zPF6VmGkBavKX//IPUFiBoMmmDg2Xm0rMfNmjYkTwGWUkHXM4jHOO2O2OZhOd7IHjViHZJTkmWHa6RDidSiJOTGFn+ttzRdX9N9h5rfRUiHISNJEVLQ8p6qowe6vAtcvMb+q1RlELSkvsqYSpGiQ729yssO9fbkwOWdj7y8+lF1J3MBA1MLEqgDmzGEaehN0+mnFwCTOSeRR2LL39bSeRI3g1TsjbSKM9r5z1XV6ZJ1f3Rs4OXbSCYt4jWmdirC9amRq9abn2ZLLeMsdyU1UK0pdas8N5z6dA=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ2PR12MB8690.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(18002099003)(7053199007)(56012099003)(22082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?MDRxdE1WdGJjWTI3M0ZQQnR4QnBGVVhGNHRGcUlPWXBXUUdsTmpRRVNDNG9s?=
- =?utf-8?B?M0JnQjZXUVBDR0JUTy9XTlVQN2dxdlFwTVVFT3E5aXd1Z2Z2SXc4NVpaYW5K?=
- =?utf-8?B?a3RiNTI2WmNKbkswbWwyNEFmcDNoZnVTZlNOUTBYeWlZZWlYNlVDNkpDQjJh?=
- =?utf-8?B?YkZtSjRBeEZ5M2lhazBBaTFEbXVYRWFLY25KU0FKaCszUVBLRmNPNzRBSXZk?=
- =?utf-8?B?K1dOQmxCQzl6M0srYlFpcENScy8wNTBlZnJSVzFxRXdiMmtrVnV0TnZranNl?=
- =?utf-8?B?TkF3TzdidHlVNzZscEd4S1ZsdXVBM2M4SnNHTE5TcWEzdmVHdVpqTWJpSTZ5?=
- =?utf-8?B?aldZODdhL3Azb1dRV1hxMitUZkpUTjk0dXQwNnR3elNHMGJ0aFgwd1JLSDVN?=
- =?utf-8?B?cXpSNmJHL2RJb0d5bHZ1NCtINndiT2ZHaEo3dkFHVjQwOXF4ZGFCTjFyNWdo?=
- =?utf-8?B?NW9qSHQzeW16SEpQTHhnNDJwbVEzc21VUWtxNTBDc3EybjRjY1Q1MW95cW90?=
- =?utf-8?B?RWxGcDc4Z3R1WTE2c0xVTTNWNXBBdFhBV3JHTDRJMFRaMVovSHd3L3J0S0Jo?=
- =?utf-8?B?ZER4eGY3UnUvby9COVZXUEpIOTE2MGl3ZGdKanhBemJFVU90YnNrenFxYktW?=
- =?utf-8?B?Qkg1Qm5UcUZDS0VRVFBVNWduNEN0TW1Tb253VVVzNDlZMTB0NmFGY1pMQ0Nn?=
- =?utf-8?B?WFpnTGUvUmhmaW5OUGdFbWlKSDVmd3cvWWN1M2NwaVdFMlBmUjdkUWdMTTJl?=
- =?utf-8?B?L3VxZHU3SStsUktvS1RWZHVmVmpxM2grWGpqUEZwTHJ1eE5mcWsrM25hOHo5?=
- =?utf-8?B?ckxKbXgxZjArckoxaUNmSUtZS1Fnc3EySVpBNll4UG5Jck41WW9ZMGJ0SG4x?=
- =?utf-8?B?a3VSNWxwNk52SzFXVGlFeTVFMWdjbUhkTkVEa21TTFpweHJOVDRTNkhyVlBX?=
- =?utf-8?B?ODlPdUt0ZXZYSXhYL1VYZkxNb2hKMnhNdVEwTzhaM2lzQ1lEWkV5S2NrNVNT?=
- =?utf-8?B?cWpNL0xZdkh0QUpzVWtteGtkZUdqQ1RqTUdqUHJzTWJjN0ZTdFBSaUxaZ2lC?=
- =?utf-8?B?aTEraDUwL28zOWczWldwRDdHUTNMTlhINU8zSDJ0a2tBSFBjdGhkYnMzb3V0?=
- =?utf-8?B?UXFCQk1zMHFZQXBkRFdrZDdiakYxZ0lCN2taVndjT25Ydm95bUdYTlJIZE5y?=
- =?utf-8?B?Y3k3VjBBd3BmTC8rbjV1cjhQUFg3ZE01MmM2U0hQSktRcnJRRWV2VSsrM0Er?=
- =?utf-8?B?T3V6WEdjaG5GbVVqMHFDc0FrbUFBL2NLc3Q1NVJaSWJUekZEaDFOWDdLZDRT?=
- =?utf-8?B?TVI2UnYybzZ3Qm9tYkdTLzV0bUxWeXdPaEJ4eFZVTmFXeCtGbHUwMVJTTW40?=
- =?utf-8?B?ODJwY3FUSlliWVliUUxUMU0xMzd0Vzh2UDVKaXZZSTJVMXMrRGpwbnRYNXFj?=
- =?utf-8?B?dDRpeGVnK21VK2tLR2k3cy9OTTdzV3pFR2dVbWNNZzhaUkxmdGlPM1JmWU5E?=
- =?utf-8?B?WUJpdnNLOU02UkRVZmJMYk0yektHS3RsTzhHZ21raGFsbEFTbk9MK1p6MTE0?=
- =?utf-8?B?RVRmQzRzSWE2V1k3clU2ZUJLc2VoREdDNjgvc1o3WUdzc0ZFVjV2OU9VTkVE?=
- =?utf-8?B?bjBTTVhOQmJmelpOT1c4dUxuS3hkeisrMTRsMWdkampSTVM2SXlUdUVEaE9s?=
- =?utf-8?B?WU13cDhaUEV2YThzTVV2UHRXeE0zTFpGUGZVNHRFTDJpVDJVOFBUWkFHYi8v?=
- =?utf-8?B?TWQyblRSQ3lPc2sxYlM1MFVOR2g5TmJRV3gzUVJtdGF2U1pDbmROSGF0NFda?=
- =?utf-8?B?ZXllc0tQV0paKzNZTDlJVFNJcjQzUDY1RHMyZ3Y3NVVWUExpdkNXNy81NlFq?=
- =?utf-8?B?eGZwdTlWZG9UUTQzOWpLREh3TmRYelUreDZLMFE4TXhCUUdncEltR0s4dWFS?=
- =?utf-8?B?bXFIMVFiZzZPL2NjSGI5dGh3eEltNGhVc0YvYklqOGJWLy9BWjVIKzY0akJB?=
- =?utf-8?B?ZGRsdFVDVXJvazBHNmltdFFiOHJQc0VZOGV6Rm1nYklGVkhvUmxLeGdKc05p?=
- =?utf-8?B?YU9RbEN0L2RIWEp6OFZMSkcvSVVqenJSU2M4aTN1ZThQSHNlL2g3bmk2RGZa?=
- =?utf-8?B?SXVzQWNwdE9jSklpeE55L3VvMWtmbjBXd0U2cXI4anUycitVS3VkM1dWTm5j?=
- =?utf-8?B?U25YK0ZVQWh4T3hkYkEzUGwwOGVSS0dIVmFjNzVPTHRveFFQM25Cc0xEWlpv?=
- =?utf-8?B?cGFrUStReVZQM0ZCdy9PUEVzNC8wMGFkQ2tCcklzQi9ObEd3N0NScjNudlBQ?=
- =?utf-8?B?ZTNrQnVEakttNGwwbmZtMjhESnkyRkh2dkJHS2dSU0puYnplVkw4Zz09?=
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3426756a-b887-4a3a-caff-08de8a5b1253
-X-MS-Exchange-CrossTenant-AuthSource: SJ2PR12MB8690.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Mar 2026 10:41:29.0846
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: FCcDEOXaTzTqHBnru9rXBJqpQy6k9yLBb9TVniTll2cfuI/TLOSqOBKdf5lo3joIFLjqQaZrRplZVzDgB2nNhA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR12MB6463
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260325-ipq9650_sdhc-v1-1-53cf7ba11087@oss.qualcomm.com>
+X-B4-Tracking: v=1; b=H4sIAKLJw2kC/yXMQQqDMBBG4avIrBtII1HiVUoRTX51XFibUSmId
+ 2/U5bd4bydBZAhV2U4RGwt/poTnIyM/NFMPxSGZjDaFzo1VPH9dYXUtYfDKtaUFHIL1DaVkjuj
+ 4d+1e79uytiP8cj7oOP609SgvcAAAAA==
+X-Change-ID: 20260325-ipq9650_sdhc-9b75ee9ed5ca
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+X-Mailer: b4 0.15.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1774438841; l=1066;
+ i=kathiravan.thirumoorthy@oss.qualcomm.com; s=20230906;
+ h=from:subject:message-id; bh=tDnZXplE3iDQjEdVi5mh8rCE3rI5eA9AbuO90Vkh88Y=;
+ b=qW7QtCLL8S3cYAi27HSR2yzlgCrJOl0a98NzeK3JFxjraPQ4onRS4mMH+TXGrSS7rm06SuHPx
+ w7Sxcu4HN3mAj5+IudQkjsEtkHiRPSXx+wV2FWVUOPlNKz/ZDHdAN0y
+X-Developer-Key: i=kathiravan.thirumoorthy@oss.qualcomm.com; a=ed25519;
+ pk=xWsR7pL6ch+vdZ9MoFGEaP61JUaRf0XaZYWztbQsIiM=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwMzI1MDA4MyBTYWx0ZWRfXxOIhXu7Cu9IP
+ OvcJSh01z7eEoWOM4MIahc+cs15CNPgLgXMsn5BdwYOOtl27U6Z2QhOL36nC/D4NAv1V8ek6Cuz
+ PJCgK+FxftxCzxR6s0r72nLc4Tsb+595+Cv0qe9iqxkkXoVn8JT8Oqva45A7w6/05RLWZwzA3i7
+ AOfFCFpnzPNPYbU6THAEvw0YzFHwhc5hMoD4VJT1Om3u/nb+3v00b9arMsOoLtbRGByIwX85Lbh
+ f7vW9IQNn/JS5O4mtYdp3CfEqHIoI3PpldGDjUfZKDG/GXHOeGXiQo3Fu3tHIGqt6sX/b3m22JX
+ 5ty6UtyrLTYr30kqwtET7B5XLfpkd0tL1wBKlH/sCyse8JHsgLp3+VOuSujUZJ45m25/PEB2wKW
+ X+6/co78tJ91Igno2dZzi4LNHjYzOVOeukcZJuWtSkK+Y7Mkcl/+22vxHL/uYWhlwpbDhL6nbXI
+ xMa5KcYeL8/AIxvILjQ==
+X-Proofpoint-GUID: rI5boDyCn2dbisOmYoBUkjij4-ImLlM6
+X-Authority-Analysis: v=2.4 cv=Fo0IPmrq c=1 sm=1 tr=0 ts=69c3c9be cx=c_pps
+ a=JL+w9abYAAE89/QcEU+0QA==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
+ a=IkcTkHD0fZMA:10 a=Yq5XynenixoA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=Um2Pa8k9VHT-vaBCBUpS:22
+ a=EUspDBNiAAAA:8 a=NU5nQSpfrVhKxuQ884cA:9 a=QEXdDO2ut3YA:10
+ a=324X-CrmTo6CU4MGRt3R:22
+X-Proofpoint-ORIG-GUID: rI5boDyCn2dbisOmYoBUkjij4-ImLlM6
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-03-25_04,2026-03-24_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ lowpriorityscore=0 adultscore=0 malwarescore=0 clxscore=1015 spamscore=0
+ bulkscore=0 phishscore=0 priorityscore=1501 suspectscore=0 impostorscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2603050001 definitions=main-2603250083
 
+The IPQ9650 supports eMMC with an SDHCI controller. Add the appropriate
+compatible to the documentation.
 
+Signed-off-by: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-> -----Original Message-----
-> From: Shawn Lin <shawn.lin@rock-chips.com>
-> Sent: Tuesday, March 24, 2026 2:12 PM
-> To: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org; Adrian Hunter <adrian.hunter@intel.com>;
-> Simek, Michal <michal.simek@amd.com>; linux-kernel@vger.kernel.org;
-> Potthuri, Sai Krishna <sai.krishna.potthuri@amd.com>; Shawn Lin
-> <shawn.lin@rock-chips.com>
-> Subject: [PATCH v2] mmc: sdhci-of-arasan: Use standard
-> mmc_clk_phase_map infrastructure
-> 
-> Convert the Arasan SDHCI driver to use the mainline standard
-> mmc_clk_phase_map infrastructure instead of custom clk_phase_in/out
-> arrays as well as arasan_dt_read_clk_phase().
-> 
-> The phase values for ZynqMP, Versal, and Versal-NET platforms are still
-> initialized from the predefined tables.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+index fd1d5b04e755..695a95e8f35d 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+@@ -43,6 +43,7 @@ properties:
+               - qcom,ipq5424-sdhci
+               - qcom,ipq6018-sdhci
+               - qcom,ipq9574-sdhci
++              - qcom,ipq9650-sdhci
+               - qcom,kaanapali-sdhci
+               - qcom,milos-sdhci
+               - qcom,qcm2290-sdhci
 
-Reviewed-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+---
+base-commit: 85964cdcad0fac9a0eb7b87a0f9d88cc074b854c
+change-id: 20260325-ipq9650_sdhc-9b75ee9ed5ca
 
-Regards
-Sai Krishna
-
-> ---
-> 
-> Changes in v2:
-> - remove check in sdhci_arasan_set_clk_delays() (Sai Krishna Potthuri)
-> 
->  drivers/mmc/host/sdhci-of-arasan.c | 73 +++++++-------------------------------
->  1 file changed, 12 insertions(+), 61 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-
-> arasan.c
-> index caf9723..785d3ac 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -152,8 +152,7 @@ struct sdhci_arasan_clk_ops {
->   * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
->   * @sampleclk_hw:	Struct for the clock we might provide to a PHY.
->   * @sampleclk:		Pointer to normal 'struct clock' for sampleclk_hw.
-> - * @clk_phase_in:	Array of Input Clock Phase Delays for all speed modes
-> - * @clk_phase_out:	Array of Output Clock Phase Delays for all speed
-> modes
-> + * @phase_map:		Struct for mmc_clk_phase_map provided.
->   * @set_clk_delays:	Function pointer for setting Clock Delays
->   * @clk_of_data:	Platform specific runtime clock data storage pointer
->   */
-> @@ -162,8 +161,7 @@ struct sdhci_arasan_clk_data {
->  	struct clk      *sdcardclk;
->  	struct clk_hw	sampleclk_hw;
->  	struct clk      *sampleclk;
-> -	int		clk_phase_in[MMC_TIMING_MMC_HS400 + 1];
-> -	int		clk_phase_out[MMC_TIMING_MMC_HS400 + 1];
-> +	struct mmc_clk_phase_map phase_map;
->  	void		(*set_clk_delays)(struct sdhci_host *host);
->  	void		*clk_of_data;
->  };
-> @@ -1249,36 +1247,9 @@ static void sdhci_arasan_set_clk_delays(struct
-> sdhci_host *host)
->  	struct sdhci_arasan_clk_data *clk_data = &sdhci_arasan->clk_data;
-> 
->  	clk_set_phase(clk_data->sampleclk,
-> -		      clk_data->clk_phase_in[host->timing]);
-> +		      clk_data->phase_map.phase[host->timing].in_deg);
->  	clk_set_phase(clk_data->sdcardclk,
-> -		      clk_data->clk_phase_out[host->timing]);
-> -}
-> -
-> -static void arasan_dt_read_clk_phase(struct device *dev,
-> -				     struct sdhci_arasan_clk_data *clk_data,
-> -				     unsigned int timing, const char *prop)
-> -{
-> -	struct device_node *np = dev->of_node;
-> -
-> -	u32 clk_phase[2] = {0};
-> -	int ret;
-> -
-> -	/*
-> -	 * Read Tap Delay values from DT, if the DT does not contain the
-> -	 * Tap Values then use the pre-defined values.
-> -	 */
-> -	ret = of_property_read_variable_u32_array(np, prop, &clk_phase[0],
-> -						  2, 0);
-> -	if (ret < 0) {
-> -		dev_dbg(dev, "Using predefined clock phase for %s = %d
-> %d\n",
-> -			prop, clk_data->clk_phase_in[timing],
-> -			clk_data->clk_phase_out[timing]);
-> -		return;
-> -	}
-> -
-> -	/* The values read are Input and Output Clock Delays in order */
-> -	clk_data->clk_phase_in[timing] = clk_phase[0];
-> -	clk_data->clk_phase_out[timing] = clk_phase[1];
-> +		      clk_data->phase_map.phase[host->timing].out_deg);
->  }
-> 
->  /**
-> @@ -1315,8 +1286,8 @@ static void arasan_dt_parse_clk_phases(struct
-> device *dev,
->  		}
-> 
->  		for (i = 0; i <= MMC_TIMING_MMC_HS400; i++) {
-> -			clk_data->clk_phase_in[i] = zynqmp_iclk_phase[i];
-> -			clk_data->clk_phase_out[i] = zynqmp_oclk_phase[i];
-> +			clk_data->phase_map.phase[i].in_deg =
-> zynqmp_iclk_phase[i];
-> +			clk_data->phase_map.phase[i].out_deg =
-> zynqmp_oclk_phase[i];
->  		}
->  	}
-> 
-> @@ -1327,8 +1298,8 @@ static void arasan_dt_parse_clk_phases(struct
-> device *dev,
->  			VERSAL_OCLK_PHASE;
-> 
->  		for (i = 0; i <= MMC_TIMING_MMC_HS400; i++) {
-> -			clk_data->clk_phase_in[i] = versal_iclk_phase[i];
-> -			clk_data->clk_phase_out[i] = versal_oclk_phase[i];
-> +			clk_data->phase_map.phase[i].in_deg =
-> versal_iclk_phase[i];
-> +			clk_data->phase_map.phase[i].out_deg =
-> versal_oclk_phase[i];
->  		}
->  	}
->  	if (of_device_is_compatible(dev->of_node, "xlnx,versal-net-emmc")) {
-> @@ -1338,32 +1309,12 @@ static void arasan_dt_parse_clk_phases(struct
-> device *dev,
->  			VERSAL_NET_EMMC_OCLK_PHASE;
-> 
->  		for (i = 0; i <= MMC_TIMING_MMC_HS400; i++) {
-> -			clk_data->clk_phase_in[i] = versal_net_iclk_phase[i];
-> -			clk_data->clk_phase_out[i] =
-> versal_net_oclk_phase[i];
-> +			clk_data->phase_map.phase[i].in_deg =
-> versal_net_iclk_phase[i];
-> +			clk_data->phase_map.phase[i].out_deg =
-> versal_net_oclk_phase[i];
->  		}
->  	}
-> -	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_LEGACY,
-> -				 "clk-phase-legacy");
-> -	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS,
-> -				 "clk-phase-mmc-hs");
-> -	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_SD_HS,
-> -				 "clk-phase-sd-hs");
-> -	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR12,
-> -				 "clk-phase-uhs-sdr12");
-> -	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR25,
-> -				 "clk-phase-uhs-sdr25");
-> -	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_UHS_SDR50,
-> -				 "clk-phase-uhs-sdr50");
-> -	arasan_dt_read_clk_phase(dev, clk_data,
-> MMC_TIMING_UHS_SDR104,
-> -				 "clk-phase-uhs-sdr104");
-> -	arasan_dt_read_clk_phase(dev, clk_data,
-> MMC_TIMING_UHS_DDR50,
-> -				 "clk-phase-uhs-ddr50");
-> -	arasan_dt_read_clk_phase(dev, clk_data,
-> MMC_TIMING_MMC_DDR52,
-> -				 "clk-phase-mmc-ddr52");
-> -	arasan_dt_read_clk_phase(dev, clk_data,
-> MMC_TIMING_MMC_HS200,
-> -				 "clk-phase-mmc-hs200");
-> -	arasan_dt_read_clk_phase(dev, clk_data,
-> MMC_TIMING_MMC_HS400,
-> -				 "clk-phase-mmc-hs400");
-> +
-> +	mmc_of_parse_clk_phase(dev, &clk_data->phase_map);
->  }
-> 
->  static const struct sdhci_pltfm_data sdhci_arasan_pdata = {
-> --
-> 2.7.4
+Best regards,
+--  
+Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
 
