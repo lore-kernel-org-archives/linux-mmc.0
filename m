@@ -1,52 +1,51 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE7EB401A09;
-	Wed, 25 Mar 2026 17:09:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D162C377EC5;
+	Wed, 25 Mar 2026 22:08:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774458565; cv=none; b=sLzl6MUEbe5wkKfjT8LSa7fJHsJxSas7CZded5TUhz366+Hyl3ExTqa/YZlmxkShqRxPA0AKgp+WbA//TvgQBX9PMOHzxP9LWPfbj7z9aumGqsIU6gdEedGwoL2T5CmoCWeoKMALzY7Oy7TK43z6qRzftySC8wGLX6iqMteXdsg=
+	t=1774476533; cv=none; b=YBV6USzHeRRLnzC8QeTjc2T6djsJunr2tR9EutBnfI0jB9d0gxTwL0zByT0FF9keHrDVadgaRz29xKJ8qC62FAUubJrTJsQOgNCz1D29EeVTgubRd/TFgHsP6nbU5Nc5zbsmnuIeiYcwJXiGMeG+hGIlgPE5Ree9xD8V9OFmddA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774458565; c=relaxed/simple;
-	bh=JRXYE/U8JS2O1cvWaeN5bQL5zUw+3JhAHGNHnw+1HNI=;
+	s=arc-20240116; t=1774476533; c=relaxed/simple;
+	bh=0SMSGojWeEuTf6IRTzrQ3Ja6RfzXsvEFtgDkgRMiJQU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Xn4nsfDJfRHKWwEFGMIKAbkz4u72s4xqojniGqeg3F3xbY3twkP8grIljdf19TR7T6gsrVjH+YkwKH3OjwtEeHIyXRPiVZXLcVNYxRhbVF/0KAwZgkTh6zLEXbH8LIib556NsBrdu+nBekbympdyNZ8QwxpG1uh47WlrgM248I8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZAMXUhuN; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=DlUQem+G6mc5N3GFvfRWI2ofh0pku6+MfvDMh1DcC+nMmgklx9nai/k0s+p7PscmBGlZ1g7ZUR7SjvMTJS7QLcIx9G2t1hSMSTr42MFecONtCEomy7qR70y3AZq4n64kXBsNguk0nb4Jh3jYahjHGYxKMddiQCnO+TCyBOhH1kE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UuFJlqT+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZAMXUhuN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F3420C4CEF7;
-	Wed, 25 Mar 2026 17:09:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UuFJlqT+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 77100C4CEF7;
+	Wed, 25 Mar 2026 22:08:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774458564;
-	bh=JRXYE/U8JS2O1cvWaeN5bQL5zUw+3JhAHGNHnw+1HNI=;
+	s=k20201202; t=1774476533;
+	bh=0SMSGojWeEuTf6IRTzrQ3Ja6RfzXsvEFtgDkgRMiJQU=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ZAMXUhuNT66mvS0iWK53vTyXWWeQZT7xKEsQ/XK3vAjbzkwr9WbLA6P6x/N3I0EaG
-	 skOFZtbj62dBviBdA7KGsK0nW6Gr5c55tGh6L/Q8AWxoAkyxZfZDriY7+2nt51ZMUd
-	 HobEbQSyQ/k2jAoMZT60WQEcCZMB08HZbt8YxKPj8pzSsSiFimuLDPpuWS/+R1Eg7c
-	 AKWwpggTDn5i6NIqddsyY/L3khFaMYvki0+HIMCyZm4+foHa6IBbwKsUOOqEZILTqo
-	 aC99G0vWquyOnPHf/MJlwEtPsYlotnVoC2DtNg4zTECuE0wYG77oVeRJSC+hK3sXio
-	 riWqfCxaKPoLw==
-Date: Wed, 25 Mar 2026 12:09:22 -0500
-From: Rob Herring <robh@kernel.org>
+	b=UuFJlqT+amWQ9X9bdFAzekPp6vT+mLRWg+bh7t8mm5kUwFOyK+XoJanIpT16W8hc/
+	 eINb0ExdNWpmeWKVYgWEFLcdqJ9PTSM6IAM04cf26CAblCfJJb6SMW/x/7lMtwOpxr
+	 hirz9grYILPtqgoi7QIU35kWfS2QOpYkoCCwSnJfhQRZbPuR6C+ZD8glMMFWUlHuFM
+	 66cEa/nH3RxQG1PwgXNS3UL/6m+RnNpqaDpTQ8N8bS0pU3/CLZ/CokfqWf9Oomrba4
+	 rbEh1uENRqFLyISAdL7O+6rQRGyrhg6kxFJ4bEGzmQ5JUYbGUtKdNdWA+z3ObT8tH2
+	 yLECRj2cMozoQ==
+Date: Wed, 25 Mar 2026 17:08:52 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
 To: Ronald Claveau <linux-kernel-dev@aliel.fr>
-Cc: Neil Armstrong <neil.armstrong@linaro.org>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Jerome Brunet <jbrunet@baylibre.com>,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Johannes Berg <johannes@sipsolutions.net>,
-	van Spriel <arend@broadcom.com>,
+Cc: devicetree@vger.kernel.org, Kevin Hilman <khilman@baylibre.com>,
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Neil Armstrong <neil.armstrong@linaro.org>,
 	linux-arm-kernel@lists.infradead.org,
-	linux-amlogic@lists.infradead.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-wireless@vger.kernel.org
-Subject: Re: [PATCH v4 8/9] dt-bindings: net: wireless: brcm: Add compatible
- for bcm43752
-Message-ID: <20260325170922.GA3822305-robh@kernel.org>
+	Jerome Brunet <jbrunet@baylibre.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Johannes Berg <johannes@sipsolutions.net>,
+	van Spriel <arend@broadcom.com>, linux-wireless@vger.kernel.org
+Subject: Re: [PATCH v4 2/9] dt-bindings: mmc: amlogic: Add compatible for T7
+ mmc
+Message-ID: <177447653149.51426.16186779467459325045.robh@kernel.org>
 References: <20260325-add-emmc-t7-vim4-v4-0-44c7b4a5e459@aliel.fr>
- <20260325-add-emmc-t7-vim4-v4-8-44c7b4a5e459@aliel.fr>
+ <20260325-add-emmc-t7-vim4-v4-2-44c7b4a5e459@aliel.fr>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -55,32 +54,18 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260325-add-emmc-t7-vim4-v4-8-44c7b4a5e459@aliel.fr>
+In-Reply-To: <20260325-add-emmc-t7-vim4-v4-2-44c7b4a5e459@aliel.fr>
 
-On Wed, Mar 25, 2026 at 10:15:26AM +0100, Ronald Claveau wrote:
-> Add bcm43752 compatible with its bcm4329 compatible fallback.
+
+On Wed, 25 Mar 2026 10:15:20 +0100, Ronald Claveau wrote:
+> Add amlogic,t7-mmc compatible string, falling back to amlogic,meson-axg-mmc
+> as the T7 MMC controller is compatible with the AXG implementation.
 > 
 > Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
-
-Missing Conor's ack.
-
 > ---
->  Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml b/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
-> index 3be7576787644..81fd3e37452a6 100644
-> --- a/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
-> +++ b/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
-> @@ -42,6 +42,7 @@ properties:
->                - brcm,bcm4356-fmac
->                - brcm,bcm4359-fmac
->                - brcm,bcm4366-fmac
-> +              - brcm,bcm43752-fmac
->                - cypress,cyw4373-fmac
->                - cypress,cyw43012-fmac
->                - infineon,cyw43439-fmac
-> 
-> -- 
-> 2.49.0
-> 
+
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
+
