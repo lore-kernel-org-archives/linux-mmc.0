@@ -1,154 +1,176 @@
-Received: from BL2PR02CU003.outbound.protection.outlook.com (mail-eastusazon11011030.outbound.protection.outlook.com [52.101.52.30])
+Received: from SEYPR02CU001.outbound.protection.outlook.com (mail-koreacentralazon11023140.outbound.protection.outlook.com [40.107.44.140])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF8B42ED84C;
-	Tue, 24 Mar 2026 20:42:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.52.30
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4344C2853E0;
+	Wed, 25 Mar 2026 02:38:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.44.140
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774384923; cv=fail; b=UL9bGspEWw6Y0kJO1+hOA+A3TG1C3JwA9WhI4Tzx7SWgaByfgsySJ9cAFffz+Qg4MO9s5YaajkT1Wg/UneDgROdO1OxC7UP21V8/laWcNXteZV7Zflr6w9c0rGqWDKbU4I0Yw0ZKK6iQaXQbcRm0kKwEgS2bAZYrij4fyJCYy1Y=
+	t=1774406327; cv=fail; b=jVjL8T5zCruD18tTV/BOsgu/RwLlZrfKg63Zkx4nHMRGQE37BL2M45u7LCe8kAp5rdoVhhsen89VKpPRXF5XjGiDzWCSEVG+pzy6Sax1YvXA+4hTpzgEpIRwOfsYRm3yV8cNVcy74XChTEeoVHIRzr7vnXuSVsTsZIKkGTx32gg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774384923; c=relaxed/simple;
-	bh=4UpAm8yR94aA1E3vXgYT41RWKiaGZvtaoG6+lvB8IlE=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=esCgDEITlQHKT/YQpVNUbotkwOlzKETcJdIa3ao/sRwkQaLWK4yhl3X2erYjDo56XFq5HUwZZd+oI875a3k9eRZlIDjM32l5eDX2mlUai1Tcgorup1hP4izbMh1HToOlOow7dSiwxwEtPJQp5Hk8gB2rHGWTCznJEaUuTpFW1Io=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=DIIQioVh; arc=fail smtp.client-ip=52.101.52.30
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1774406327; c=relaxed/simple;
+	bh=koTXvJjJdNXTFUkc/gmXNQvk12il5vjmF6V1iWu6XOQ=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=OUlYqTqg9UajhGdg/Nig/FblC1H6vX73g407AIVaTvjavUul0Pau/tCgto/N++YK4rkmdL0ult7/Ot027uQaszJfKO6/W77TnVnw0jW1CftSRkkXSS6kmB+AN8nnTmMGy5lIr/gnaZx9JYZ8bOUzmqa9iSbUbMYBYTmCHjpDVZ0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amlogic.com; spf=pass smtp.mailfrom=amlogic.com; dkim=pass (2048-bit key) header.d=amlogic.com header.i=@amlogic.com header.b=aqg8/lHr; arc=fail smtp.client-ip=40.107.44.140
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amlogic.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amlogic.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="DIIQioVh"
+	dkim=pass (2048-bit key) header.d=amlogic.com header.i=@amlogic.com header.b="aqg8/lHr"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=gvdf+2YL85pAaK4PBKhaVabRfSVJSuotKFNxny8OkQ1xqQEVLFAZvw+mIvj7apu0gqERt8wFdqPwVEwfEjCtRYNdi8JNt/AG9fSIL5JfuRrDI+E1FUMEyiMqqxr7rAu9bO3Nxqdm04n/LUdW1u4+C+m/ax+LaBXmuM7dhKPXm3Uh0q235cRBVrTlSKDwMy5Q7bsOBaiLS48YxUvkiD0wnnsXBABoO6UggjQuL3PsJfuhXs913Z28Wc5/6u5H229Brdqc1uACkLsQCgQy2Zo7looSwYHmJLB0P08/w+bpsWnZHwqzq5oWc+2grYNubrNZDVbaD6GXtfC3IenuO3AyWQ==
+ b=KyIrij5yRghDvyw5j63ceXkhvxX64TVQffC9hQB6OsP/k2vSUj8gz2gDWDIky7ClL9zWpFSt+o59F15R7YnZj0NJTwlVyPCCqhQbQkeMPh8O0Eb2pzXz2fcOYe27a/6l2wGes4r3//I4enjU2Pkmmw0FTfTcnSLaRkLgCO9/8Ih+dfMrXQoZ2xXUrCmuTqf/mEGcF5mrJQXpCyBhv6yddqEG5YO0GUwspGimaVpVKtZVv4rwiNX7IfZXcZWId/Rzwy1lRTHrkp3Hhvy0ZmU+EvtMx7lqj3DRlBa+KLiGokkOvHCV6W+F7HnZNB+ukfZbOaPy+n9gYHqMk5S8JHd+TA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=qOip9xjd1QIfaQz9gxUrDT3o7YNDLt4xn+CVe+waKYM=;
- b=eJGGNLvgFv+8RtxsxrWgIzLhg6hCVVlHA48OiSTXaVIUjnNdEuOuoVkl74/OxWI0lVwVU3Odf4UB/qPEZ3/CJUxgt0J9Aw1PCi6KeKa15XGe5ee1XQgF9wTBNVjypJqsaFD2RwQ8gBT1TleeJduw7g8aXDk4LGmvduqBXKKDQxwBPnQ7ugImVSE5kqiiZzIYtoC9hOxUv6kbFvE8KWjuqjjIKaKXvU4JgK65Gc/L4Hhcok2Jsxy4mRmfd6SXsQkrqBhD71Y4mP20AicifAJ8CgFjs7mUMEr7bsqQQa539BrpfgFfUGuuOQeg50CA891+SzNze0uGursD/ePD/lt04A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 198.47.21.194) smtp.rcpttodomain=linux.dev smtp.mailfrom=ti.com; dmarc=pass
- (p=quarantine sp=none pct=100) action=none header.from=ti.com; dkim=none
- (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com; s=selector1;
+ bh=vpn0rDnjnzvJpU4z7dVI9Q7oYxtRFijK8aIwg4LQNwY=;
+ b=E6QidK5PY3F43sw7pcN3KICl8LBc9tGsPoq6Ta0weldLyM5/4a7ENfnKm6ZkvufUKqRMFYrueBDCzJ/PFapqpO9aqUjCyRPpsdbshsUW8az3kfrETx7+JUv3mIwaNWepihh1uOSI8kirDzksPtumaiSa+8nKhF1/iHuTJfajcEMsSQDYV1DA6aqSbAXRlMKZTlC6jp3s//4Vk1/ZfjEM6zsYJItZTMAmwFUUY2uTSwM1wPTkYLIWPHpXUT6fQbE5gggQaqTtCWT/TiAen1PgM4Mz/R38sGv+WUx1XVLm5LZPEb+PTAOg4hgBm6AbeJgJjVw+Xt0P0O7hpGF+u4VuIA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=amlogic.com; dmarc=pass action=none header.from=amlogic.com;
+ dkim=pass header.d=amlogic.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amlogic.com;
+ s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=qOip9xjd1QIfaQz9gxUrDT3o7YNDLt4xn+CVe+waKYM=;
- b=DIIQioVhdtD2+nXIhKzWnS4TGc3L+szfryvsUlDPYDhlzSlutkqlrYtb9Dwa6hFFTdDOuzLbjP5lSl732IYmMPKXLaesidsueJpB/+y9/BxR28QeB8a9A1edyCYzBn08V8ng63gytSR4DKg9wJPHaugmrPILnEAhqIfDDToodaY=
-Received: from BN0PR08CA0011.namprd08.prod.outlook.com (2603:10b6:408:142::33)
- by DS7PR10MB5165.namprd10.prod.outlook.com (2603:10b6:5:297::19) with
+ bh=vpn0rDnjnzvJpU4z7dVI9Q7oYxtRFijK8aIwg4LQNwY=;
+ b=aqg8/lHrgdgEIUiIIwot9gJyra6zV4/YrTy97y9Iv+XzNp6DTtfkugCZCcZZnde5+uj8ciRgAkrkd9EKQj7vWfaOO2Usvs3MeSVACD61gG6RQ74ZYyrTDi9IAP+b1GkZRJpfEwzlNi7P9p3BXXBOxCoAz2Lids6+K1pxqbhRGYj13GHMO/j1+fRoOIuuVvzvXxUV5M4N6wM5j2SydE00prHt1TMrBUc1uHNL47kPfKZoBMCtzwySHsMjuetlZS51ClSqIVKnv8bL3r1LPhqlRDw4uUpIAJXIvYxzyIlRVH8yaZUd1RABSLM5cpwAalOOdR5RclHg+YiiUfccou48iw==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=amlogic.com;
+Received: from TYZPR03MB6896.apcprd03.prod.outlook.com (2603:1096:400:289::14)
+ by KL1PR03MB7259.apcprd03.prod.outlook.com (2603:1096:820:bf::12) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9723.31; Tue, 24 Mar
- 2026 20:41:57 +0000
-Received: from BL02EPF0002992C.namprd02.prod.outlook.com
- (2603:10b6:408:142:cafe::f1) by BN0PR08CA0011.outlook.office365.com
- (2603:10b6:408:142::33) with Microsoft SMTP Server (version=TLS1_3,
- cipher=TLS_AES_256_GCM_SHA384) id 15.20.9723.31 via Frontend Transport; Tue,
- 24 Mar 2026 20:41:55 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 198.47.21.194)
- smtp.mailfrom=ti.com; dkim=none (message not signed) header.d=none;dmarc=pass
- action=none header.from=ti.com;
-Received-SPF: Pass (protection.outlook.com: domain of ti.com designates
- 198.47.21.194 as permitted sender) receiver=protection.outlook.com;
- client-ip=198.47.21.194; helo=flwvzet200.ext.ti.com; pr=C
-Received: from flwvzet200.ext.ti.com (198.47.21.194) by
- BL02EPF0002992C.mail.protection.outlook.com (10.167.249.57) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.9723.19 via Frontend Transport; Tue, 24 Mar 2026 20:41:56 +0000
-Received: from DFLE204.ent.ti.com (10.64.6.62) by flwvzet200.ext.ti.com
- (10.248.192.31) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Tue, 24 Mar
- 2026 15:41:53 -0500
-Received: from DFLE211.ent.ti.com (10.64.6.69) by DFLE204.ent.ti.com
- (10.64.6.62) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Tue, 24 Mar
- 2026 15:41:53 -0500
-Received: from lelvem-mr05.itg.ti.com (10.180.75.9) by DFLE211.ent.ti.com
- (10.64.6.69) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
- Transport; Tue, 24 Mar 2026 15:41:53 -0500
-Received: from localhost (uda0271908.dhcp.ti.com [128.247.77.70])
-	by lelvem-mr05.itg.ti.com (8.18.1/8.18.1) with ESMTP id 62OKfrvA3261696;
-	Tue, 24 Mar 2026 15:41:53 -0500
-Date: Tue, 24 Mar 2026 15:41:53 -0500
-From: Bin Liu <b-liu@ti.com>
-To: Jens Axboe <axboe@kernel.dk>
-CC: <linux-block@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-	<ulf.hansson@linaro.org>, <shawn.lin@linux.dev>
-Subject: Re: [PATCH v2 1/2] block: define new rqf_flags RQF_XFER_SINGLE_BLK
-Message-ID: <20260324204153.a77cieh5kti7ydla@iaqt7>
-References: <20260310160408.3976760-1-b-liu@ti.com>
- <20260324143448.2631888-1-b-liu@ti.com>
- <20260324143448.2631888-2-b-liu@ti.com>
- <5c12f6f8-5962-4d66-8414-8f5185438ecb@kernel.dk>
- <20260324191126.kfhwuw4njinh2vrw@iaqt7>
- <33177597-8df5-4494-830e-6e287bb8188a@kernel.dk>
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9745.20; Wed, 25 Mar
+ 2026 02:38:41 +0000
+Received: from TYZPR03MB6896.apcprd03.prod.outlook.com
+ ([fe80::78d4:9dee:2e32:d1e4]) by TYZPR03MB6896.apcprd03.prod.outlook.com
+ ([fe80::78d4:9dee:2e32:d1e4%3]) with mapi id 15.20.9723.030; Wed, 25 Mar 2026
+ 02:38:41 +0000
+Message-ID: <c01c4e7e-1c0c-4bbf-b126-831160c8e32b@amlogic.com>
+Date: Wed, 25 Mar 2026 10:38:37 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 2/9] dt-bindings: mmc: amlogic: Add compatible for T7
+ mmc
+Content-Language: en-US
+To: Ronald Claveau <linux-kernel-dev@aliel.fr>,
+ Neil Armstrong <neil.armstrong@linaro.org>,
+ Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
+References: <20260323-add-emmc-t7-vim4-v3-0-5159d90a984c@aliel.fr>
+ <20260323-add-emmc-t7-vim4-v3-2-5159d90a984c@aliel.fr>
+From: Xianwei Zhao <xianwei.zhao@amlogic.com>
+In-Reply-To: <20260323-add-emmc-t7-vim4-v3-2-5159d90a984c@aliel.fr>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SE2P216CA0135.KORP216.PROD.OUTLOOK.COM
+ (2603:1096:101:2c7::12) To TYZPR03MB6896.apcprd03.prod.outlook.com
+ (2603:1096:400:289::14)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <33177597-8df5-4494-830e-6e287bb8188a@kernel.dk>
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
-X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BL02EPF0002992C:EE_|DS7PR10MB5165:EE_
-X-MS-Office365-Filtering-Correlation-Id: 416887ac-2866-4b93-b97f-08de89e5ca37
+X-MS-TrafficTypeDiagnostic: TYZPR03MB6896:EE_|KL1PR03MB7259:EE_
+X-MS-Office365-Filtering-Correlation-Id: d3903e1e-fdd2-41b1-89a9-08de8a17a0a8
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|82310400026|1800799024|376014|36860700016|56012099003|18002099003|22082099003;
+	BCL:0;ARA:13230040|366016|376014|7416014|1800799024|7053199007|18002099003|22082099003|56012099003|921020;
 X-Microsoft-Antispam-Message-Info:
-	i3xOXpiJHFF1eWrHPJH3VpbSEcRvb16jiB++ojUppFpdB7HxcWgrv7tKRps1hBQsbVzGffKRkaojXsTGBLYzo6FBkLxee+ZK1izzzgeioUZHml3FJfw3MEMFCzVVuWhx+kQfcR/eTXcYj4cjQoz5gYzDK88yiCPQDI3rJ99oJ1oRiVENDBQhhvVlS7dIR0XpOYc2f6r9ggX4i44haZgTTDYVG8EptU5vnfasXjJsw+1GHda+HgJDT3JC00dyCXJcLio72uuRCSw8eevSxvWCgF1kKRcgMM3TPIJ5/32v/Rde2NCeHDcoEbKS1hAyfc8ceKpacLhoiLEjPIa/5gNLnMeIVulSjyFnCwu2g7sDoMrt/wHBVwUtNHj0fJ4f22vWbuumiZ8jEFhd8GLTN+gopB/wJBBcNMuPw5LC0t9pFJk8/yEuwL9yURSePTbDm4RWwJyMc2+/ueFQKfE1pUPCeplKrmLskGbC8fcI8762fyvq4YJnYXan7tLZhsm/Uv81Gc2vcuOdgrfq5MhrkSxaI77/UVvMpoZwG77jCchDPbZ2NhlDoGcyyzXlpl5FUHzkmN2oLFQpD+3kvKGzme6BLT1ngnA+76KS8qhdhsS8HbSFbxnlqBl+onm5FmD/Yt7WNMqUza3qeSkSItgwmOWzOGv/NlFn+IlhinIEjkduZHm7S+E3A4dcLrQjLnRfRZmCOTxil0HbSHNP/68d4cY0B8L/cfUnhp5sKCHw3IIhJa/BNK8eYmoi9KXPpEzQ2loe6GY0ukFjvBqDT9Cr4m5jsQ==
+	kdmP+dAVnRtW2hUN6P+eQ2/qp2YpsLmJxqXXKnoNUKG3cRdAoHqfWpb0Ls/GEIRfPCnnBPQUzzfJMkLogmcSkgH+4NKCSWH4NjcIbaAajsMDL12mtgfgQ+vftruQD8GpXp1Nk3cvIti30liuuK8n/rBnWzbb0Cvb6jDGk3DLau/DOlL6m78cFw/EgTAAutAhF3KoXILkGf41+xRfjdIqP0BT476ws9FkiK31s8+aCT9NAq/4fFMOm4MY/3P+sG7g59HlEUaMbLnMVJsrz53wYA+JQDkxL9fLkU1+IZdpiOMFILQoIrqF+fFIxgsAZVyji1yWcegppeHOzN/OqsrIB3WyrbziNdyy4dEaiKA8F9eem33E/XKeQsyszRGILNj8hRVyYyR+1YcRKOYO1PUXcpb60xCT7XKGkqxeoqR0C10ZloBf7MWJ2VCIGyfneGj4VTdzzDuITgTQ5fTPlE70Uag8draFHdODWqIRAmVYBfDl8OFOpQe08ZbvSU3DtD/taIgnUHY4QfhPFymmZsczN3/0ET3/GrpAaiYRghwn3Iup3xCP3qi3x+cR+03REwAua7F46YyvkZp/QXJxP20P2/4cSL86nZCOOf8smGVQHlayRiVX5XbVq3a+05jNONexNAM/7crcbUDpQKDB31MIWGPMA4FmPxXRRvUDOHU42AWlrwGjOMDZSFpmXYSt3BPV8DMbr5SLzAjAInZ67np2lDIZPllu4s+PvlgtArGWBg7ms3mH/10TbHagrjqGhfy3PlBhDmr/BFNZiYeDZ3DtZA==
 X-Forefront-Antispam-Report:
-	CIP:198.47.21.194;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:flwvzet200.ext.ti.com;PTR:ErrorRetry;CAT:NONE;SFS:(13230040)(82310400026)(1800799024)(376014)(36860700016)(56012099003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TYZPR03MB6896.apcprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(7416014)(1800799024)(7053199007)(18002099003)(22082099003)(56012099003)(921020);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	p6C8hawromMHGK13Oi0/EHb8QqfQOw+QeUVIQHQBygGhkOQWJjNk2O5i3Cb6gazZWnqKL8Jlfrt14wEaajZvkkH//LpkHvh3QlQrHd/LQrueIHks/RUdTUbAH2ZRIYq/cT4oY6a/qRgCNSf/AJ0PdvyX97ZElNYmqHNwDQm8HniNKszM6psRvr0UZKoXCevu9fI0u+jmRBlamvKD/BoyayJ5Hua+AaPLknKdB77G9qkKe49f4bFYLEZrZK9dGOJJ657rmS+zqMeNxDAhZAvXgcDRw3VJ8ix15hYNRRWANpPeLeerG2knFdttkeZGpw+jXms+jN4hhwmFaynF9df1oj5Of0OkhtMXiKbZ3fRdeVGDyjKlNFbRuPBMmjpiBWNsWOPBVAR6INl4Aks9Tk7lwGrlH6nkVvonlClLSfWT4zTfwF2qWKk8E7UjxcfWMZw5
-X-OriginatorOrg: ti.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Mar 2026 20:41:56.5167
+	=?utf-8?B?SGRrS1prdysyYzVXVmtPYnNOQXZuY2pvRGFnaWt2RkdXeG5ZTjlveEF3MEtN?=
+ =?utf-8?B?bGhINFlEdFFaaHBhdHBTbFA4NG5QK3pPYWh3VUlsN0h3QTFhVlZwQzlhdTFa?=
+ =?utf-8?B?WXhWd1VzMHViZ2ZyY3gzdU9Rb2VMeXM1TUhKSVJDbXV0cDFUU0UvQ2Q4YU95?=
+ =?utf-8?B?NkNrbjFrL0JxN2Vld2lsdUF0NXc1SE1KSWZtTkQybUxHdi9QSkhRYk85cHQx?=
+ =?utf-8?B?bEUvUU5rcGZRMUNrMVpWMkRvMXc0d1I2WkdtNE01cmhQcHhCQW5yVjQ3c0Q0?=
+ =?utf-8?B?K2RoeGU0anRUUlZuODQ0YUt2U0lwTVVLdTZkMU5wSUp3TnU2b1hGT0pMMm03?=
+ =?utf-8?B?bEZVWFI3R1dqeUlrbEpUcW1SUjVnMGJKdE85cXh0eWF4QjhUZTZNMUQ0cHJm?=
+ =?utf-8?B?bWNaRzd3ZWZlRlYwMkRoeWhxdmYyS0VxbmVPNnRSS0h1TVcya1dUWGU0SElX?=
+ =?utf-8?B?WXhiZUVKRXRZbG4vVWZxdks2Q3lVbWRhU3dZaTUxcW9JbnJkYkFDOTlFZXJO?=
+ =?utf-8?B?QmJnTnppZXVrTU9zYUxOd0ppMmJwRVBPVGJudmJmMGNNaXBtR3ZsdE9ndm1D?=
+ =?utf-8?B?ek5iNHJpWEl1WldobTNqZ3RtVmNNaVhwQUdTTzJmSW9tYkUyVmtzQzhqZXhz?=
+ =?utf-8?B?bXByU0hIVWx1bnhOYXNINHFTWTlUMERKQVRKUUhLMSsyMUsyMHJkTTRHYndZ?=
+ =?utf-8?B?RHFuUWprTXUvQ2N0aE5zSkRpWnp0VDRodFE3YW9sZ2s0VlpRZXM3NWxLQWpm?=
+ =?utf-8?B?TnNqemFKejZYOEh2YnFVUGdTRjNMbSt1RWhKSG04ajUwV0o3aDB3MnJ5QU5l?=
+ =?utf-8?B?T2NYdG9LTjV5bU1tN0lReXpBQWt6SnhsUG5EOGM3WWhzbjZ1ZmJqTEsvMTJ5?=
+ =?utf-8?B?bkpjeW1OSndoMEkyU2lERUQrTVIzU2tWMWM0SlgxM2pzNjNGcmJFSWdBdnVO?=
+ =?utf-8?B?MWRLU3BJVzYwUWhkVXpXWm1FZEo5WnZ2RVBNUG51SWFuSXozeFhNd1VTdHRs?=
+ =?utf-8?B?TUkzNm9ublV3Y3NjR1lyNEZ3L0lndHd3WXlxODJjRUJ0MXZ3UzgwQ2M1ZkFp?=
+ =?utf-8?B?R01wNkJtSDY2WU5XRW9sdy9BT0g4aytnQXd5YjZFaTd2OHJqempIQ3V0dXI1?=
+ =?utf-8?B?WlNDc3JrZml5ZjB5aEkvNHRrdkY1aU8yM2JDRWV2dDRkTU1lanF0ekc4WGFq?=
+ =?utf-8?B?dTVuRzZweUdETWtMbEVpa3NXTDNlMXpEdDBGRGZuZ3hrdXd0VEJ4S3lQdERu?=
+ =?utf-8?B?eXU1YmJ1RDRBU0RuU0x5TnJWU3YybGZhYWtoeXRsUVNMaVFuNWNRdHFybW1h?=
+ =?utf-8?B?dFhXcWR3bE9QTS85eVFHajlYRG5Qem1BU1grK2tYQ1RTL21PVG5vdDJzOWU5?=
+ =?utf-8?B?RnN6NGlVL01SckE4SDVsOWJodjNmMzRaODV6UGlvby9wVUxST0lvSisvYUZp?=
+ =?utf-8?B?TVBLOWl1SHJmYW1NSXR5NSs0SS93QnlqRkxtdGlZNEFXY2RjWENUMldQV1V6?=
+ =?utf-8?B?WlJiTUpYMk1QdEd3dUY2MzN2STN3ZXBYTzNmcmVSQVM3ZTNjSGJRbC9GNjlN?=
+ =?utf-8?B?RHdxWUhXejVtVVpCbmhXS2lZc3N3d1ErL2ZqMmRkSExkYzZlWFRUR3lxTmVR?=
+ =?utf-8?B?MFpKMGFXcWhSTE92UUFLSTIwU0N3N1J0KzJuYjVRNjhHVkVKMk1BR0FzVE0z?=
+ =?utf-8?B?ZERONTk1NHBiN0FkY2o2QlFTenRhY1RNV1QvYmxkanVnVUw2WG9YVStqSjFs?=
+ =?utf-8?B?TkU1bFM1YmpuWklFSGlGcG4yZjlab250bkxwSnVNV0tFSzBYb0FmbnlhaUF1?=
+ =?utf-8?B?TXN0aWswYzk3UHhTT0hHOUJOT0JUTXRkTkNxcmNqZE5KTzZmTCtHVTlmelhm?=
+ =?utf-8?B?L0Y2YUk3enlsazR0bG80ZWVlQjAya3Q1ZnhzNTgvOE1uYmIzUHNXY2ZjYnJG?=
+ =?utf-8?B?dFRCSkJYR0lMKzc4elZTQ3NFKzVNenBxWUFseGtIUC9WVTZETFlnT2tRWkhU?=
+ =?utf-8?B?QzVsbWpoSTFUOVdSL0Z2WnJsaFFydHV0ZDlhNWpERlR3bjJYRUwvSWYxS2t3?=
+ =?utf-8?B?c3pKaitLYURib3lhSVhybndXQ0VzSTIrVll6ZXdYZVU3WDdVWXdsZVRCVkpX?=
+ =?utf-8?B?all5bmN0SW1MT2FaTUNHUHVIdGdmbVEyMXg4Mmc2bjJwL0VJY0ZUMWpGeDZF?=
+ =?utf-8?B?dFdJRzFhakt6K25tNWVnMVJ0QTMwZURRY1pzNHlRZ1JBajF3L2N1SHlmUnJJ?=
+ =?utf-8?B?dGsvTHQ1WDJvMzFlclZXUjZ4N3Q2bUgwZmdSRzVYUW0zQ3VxQkhPMUVvd0RB?=
+ =?utf-8?B?ZDd4RmJtZmtNaHVFNXl2YTdjT3FrYk5EK2hEU0lXeXU1TEdrbURpQT09?=
+X-OriginatorOrg: amlogic.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d3903e1e-fdd2-41b1-89a9-08de8a17a0a8
+X-MS-Exchange-CrossTenant-AuthSource: TYZPR03MB6896.apcprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Mar 2026 02:38:41.9083
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 416887ac-2866-4b93-b97f-08de89e5ca37
-X-MS-Exchange-CrossTenant-Id: e5b49634-450b-4709-8abb-1e2b19b982b7
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=e5b49634-450b-4709-8abb-1e2b19b982b7;Ip=[198.47.21.194];Helo=[flwvzet200.ext.ti.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	BL02EPF0002992C.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB5165
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 0df2add9-25ca-4b3a-acb4-c99ddf0b1114
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: +iHsRORJ1tXV6MzHMybFtUt3IHkH/J8ki9G1UAyIiyiBbIgX5UPZ9WkxI8poLVA6X02e17BeGWDuOVhZQg92dEptp+CwjVv5Ju5hk1RzKAQ=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: KL1PR03MB7259
 
-Hi Jens,
+Hi Ronald,
 
-On Tue, Mar 24, 2026 at 01:16:34PM -0600, Jens Axboe wrote:
-> On 3/24/26 1:11 PM, Bin Liu wrote:
-> > Hi Jens,
-> > 
-> > On Tue, Mar 24, 2026 at 12:48:11PM -0600, Jens Axboe wrote:
-> >> On 3/24/26 8:34 AM, Bin Liu wrote:
-> >>> This new flag will be used to handle multi-block transfer failure, in
-> >>> which case single-block transfer will be used.
-> >>
-> >> Maybe I missed this in previous discussions, but why can't this flag go
-> >> into struct mmc_queue_req?
-> > 
-> > You didn't miss anything. We didn't discuss about it until now.
-> > 
-> > I added the flag in struct request because it already has rq_flags to
-> > host all the flag bits. But I don't see struct mmc_queue_req has any
-> > member for this flag purpose. Do you mean we should add a new flag
-> > member into struct mmc_queue_req?
+On 2026/3/23 17:55, Ronald Claveau wrote:
+> Add amlogic,t7-mmc compatible string, falling back to amlogic,meson-axg-mmc
+> as the T7 MMC controller is compatible with the AXG implementation.
 > 
-> It's a bad idea to add driver specific flag to the core flags,
-> particularly when you already have per-rq data associated with the
-> driver. Then it should surely go there. The block layer doesn't care
-> about RQF_XFER_SINGLE_BLK, that's strictly a device property. Hence it
-> should go in the driver, NOT in the block layer.
+> Signed-off-by: Ronald Claveau<linux-kernel-dev@aliel.fr>
+> ---
+>   Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml | 5
+> ++++-
+>   1 file changed, 4 insertions(+), 1 deletion(-)
 > 
-> So yes, add a bool or flags or whatever you need on the driver side.
+> diff --git
+> a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> index 57646575a13f8..40dccf9715781 100644
+> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> @@ -19,7 +19,10 @@ allOf:
+>   properties:
+>     compatible:
+>       oneOf:
+> -      - const: amlogic,meson-axg-mmc
+> +      - items:
+> +          - enum:
+> +              - amlogic,t7-mmc
+> +          - const: amlogic,meson-axg-mmc
 
-Sure I will add a variable in struct mmc_queue_req to carry this flag.
-Thank you for the comments.
+It seems that break API here.
+One item should be added here instead of being replaced.
 
--Bin.
+>         - items:
+>             - const: amlogic,meson-gx-mmc
+>             - const: amlogic,meson-gxbb-mmc
 > 
-> -- 
-> Jens Axboe
+> --
+> 2.49.0
