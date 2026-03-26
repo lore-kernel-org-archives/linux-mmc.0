@@ -1,86 +1,63 @@
-Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F5EA38D6B6
-	for <linux-mmc@vger.kernel.org>; Wed, 25 Mar 2026 22:55:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAEC72E401;
+	Thu, 26 Mar 2026 03:08:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=60.244.123.138
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774479328; cv=none; b=Tk8z0aJ4OmHHG490FxtvR8IbgYXgNY/uBX6RsA/289cohCjGvmjgo8KCOmMpQuuBf1W6x3rdCQq8U9YxTFhYneEQ4kKOaVbXmZlilmSUh/WJ1SOW34QjH3Ft/oUlGpqOjWm4Z4kbWLWG3gm7jL8QG05BLnPQwVp4xTsp66++jf8=
+	t=1774494537; cv=none; b=TKDdnIe6n88uIjAYeakhL8mSpXQPYQJhpUsgIAMfbG5/oZhp5oj0RehEM2GXUp4H8z3Jr2X17kBtyfPEt+faLJx2Y5vgUWRL8gx15/7PqhwR69P3YaLaSTXUA4YdJ17lcEjmnkMP0815+Ee650V1TKP4yxNPBm7xurU8cqFiuTk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774479328; c=relaxed/simple;
-	bh=yKRao8wed652hxeWQjA+R1P3kTbcNGO6m9lKM7GnMQQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=akgJCmqXGAjyXOI9WrDfmtqYt/Hll/BWmwsAVFPT8kpWXlPOTfK2lZ5gFM731Igu4V7ZGfF8fl56dDm822myeJvIUGQcqxlmAIjfL7CCWCsPtTTYSRlQyk1CEtklTEjkPnYgTbiCO76cqDw+MTdEG4L3yOzgEYmKwjWZLMiO1Zk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=pbVdLKQL; arc=none smtp.client-ip=209.85.216.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1774494537; c=relaxed/simple;
+	bh=83YvLfMANW2ji64rgtXjIkJg/JIR7LORLHkgw7KfigU=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=A9gCqJk0ambLVIKvWtVqstcZj+J+CBe6zxIaxpxLRU5nT0hJUrXNeeuSzt0JLw4pKqFstV2tbsgzeAOoZ7NErWXk5jlnfP8RvU2VTC/g0pQeSsjASYccEELNnY/ooBi68Wov3Kx4L6uwmJN1VP3FuL/dxSx7AazDyZBU/vNlc8Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=gmKO2qkA; arc=none smtp.client-ip=60.244.123.138
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="pbVdLKQL"
-Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-35c16db1b53so211681a91.1
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Mar 2026 15:55:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1774479327; x=1775084127; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=CdqH9GF/jHNSyWBdrNC7S/eoQNumPq7J4tkoPlO6e90=;
-        b=pbVdLKQLZ8Sz9tKzOIb/riZazptz3NYKsipr1yu8VEUbuXE0zv8srkW5sSKZHeDnaT
-         M8cHUwQN16LvN+rtLmR0J9Zl+NNg/ACuxdcwZTUspjLaGeHk7vP49BE2Af8Uv8LWkkCc
-         XkIBtj7z5WjXuuqFY0h9FNH1lScG5BeFhzPnBRp0FM7G80qQnWYJxlJCecN4kgNfsHC+
-         sFH9ax0l+d7CetzJjDg9ZSpOrdxDEFzw3zgcAmaCRuPtkX+CI+5PfF8IGrkqYIfKD2RB
-         hyxvwhVwD6lWPFibdL+v28uBU3mnGjiBnFcbhmSynM73/17MVPebTMKFO8H+lLP4q0SZ
-         oReg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774479327; x=1775084127;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=CdqH9GF/jHNSyWBdrNC7S/eoQNumPq7J4tkoPlO6e90=;
-        b=e6GUxp+XLALFjLlFsrK1SgfKBGk/bw3qXTj38ZM4V9fijHpH1IG1LNJZ/nELAcQLT1
-         bS0lt5N/Xgzbd0vP3JuUK/2EMXcwrbWY0xHnH/mNRv+Vb+rF956G1g518gsxH1jI+Q+L
-         adtAtBvx/DwPxChpmsuzPAax23KzclHm9e/v50egywp4WGPIr6z/DIEGAArPx7M00Fci
-         cw6cBd6dtv8LMv+eOSbEURfITRBGRLVEwBPdwoLilMkbKAtUmNzuZ7o294mi2wDCZAkm
-         HNSOpfXxUOMpbw/SvonYEmNT8/6o2JRgDl0yi1S5BLvcvOPThO+BxIGSO6ViNRmD513X
-         M8kQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWq+U3WW//9Fp/SQfhrDHJOfCkMG80ONSnph6uaIxnfSTXr1qirbeZPG99Xtx2Gz4VCMml3ShM+Z68=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxIriz9n52siY4FEc2TzY1P5gU289wvlzPaC9OdWRqv9SbU6Ez8
-	5BdIzv7rVKlgcBNEH1Nt01128laF6XOJgKPS+PUixbzkxSgDyTKdgl7S
-X-Gm-Gg: ATEYQzz+DXvEH88WJMO8XWX/wc6AKSeFLxX1lY5yoNHixUWX8WqrfUFxRJlS9Q44YJE
-	MtrIubgXP2hJbwVMd8UHABML5BroILjfhl2KKXaS0gmuphljSTPowC/qjbqHIh0aWEhhiOXeGUU
-	Pn5JIu3UDDG4a95YL78+5x8MwrpAqnKw+h4x/4GbpOkMUcYYYFj3CbIvUIJnAFEp4OXMuh4jrNP
-	1YjjJBbNVw8emiD9Kgd1HKkDgxngdPcv08qYHlLJnY7dV8KXE9mayLn9fOto3xD23OwJjig3PjQ
-	FJgJjMhYfOwC+uA59e7AX0h/YU8NP/GupjCCSy52mRtz08J4Roo0XR8oIw6GstWOs/dKBU5hrIi
-	jcYfeHfE8hE2Hppp8IsMOABHmamJM93FIQOoU2wYU+lBJOJahcHetpB0UMUC/8tl0xsbO/hXbec
-	8mNfcNWN1SbvwqR5HxJYhvlnAA
-X-Received: by 2002:a17:90a:e7d1:b0:359:ff8a:ee4c with SMTP id 98e67ed59e1d1-35c0dd11280mr4584019a91.11.1774479326857;
-        Wed, 25 Mar 2026 15:55:26 -0700 (PDT)
-Received: from arch ([2409:40c2:5018:3ab3:ebcf:9aee:dece:80da])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-35c1e1a64absm84066a91.2.2026.03.25.15.55.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Mar 2026 15:55:26 -0700 (PDT)
-From: Bhargav Joshi <rougueprince47@gmail.com>
-To: devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	xuwei5@hisilicon.com,
-	robh@kernel.org,
-	krzk+dt@kernel.org,
-	conor+dt@kernel.org,
-	ulf.hansson@linaro.org,
-	zhangfei.gao@linaro.org,
-	linux-mmc@vger.kernel.org
-Cc: daniel.baluta@nxp.com,
-	simona.toaca@nxp.com,
-	d-gole@ti.com,
-	m-chawdhry@ti.com,
-	rougueprince47@gmail.com,
-	linux-kernel@vger.kernel.org,
-	Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
-Subject: [PATCH v2 2/2] arm64: dts: hisilicon: Rename dwmmc nodes to mmc
-Date: Thu, 26 Mar 2026 04:24:39 +0530
-Message-ID: <20260325225439.68161-3-rougueprince47@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260325225439.68161-1-rougueprince47@gmail.com>
-References: <20260325225439.68161-1-rougueprince47@gmail.com>
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="gmKO2qkA"
+X-UUID: 1bf569d028c111f1a02d4725871ece0b-20260326
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=gc1Cfkcgv/5lPuvFF53M/UC0jd9eXEdjF+510NK63+E=;
+	b=gmKO2qkAAxrmjzTqBw4aLC8P41r4tut1eZ8bTxm1h4+9Aw4KefYdSR3vJGbGSqSV0IwbO4QIMP93huCuG9cxPuxly9hiqXZV35/h2BqMt/2kBybsQemuqqOC21Yv+7bxsDHpHM1l5Gy+eBcmLRJsxM7VEcos1a01PH7/FznFfqQ=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.12,REQID:05713f7b-68cd-4266-8aa1-5a87b7f92221,IP:0,U
+	RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+	:release,TS:-5
+X-CID-META: VersionHash:e7bac3a,CLOUDID:5ab124d5-060f-4ecc-9ee0-121eeeb4a682,B
+	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102|836|888|898,TC:-5,Content:0|15|5
+	0,EDM:-3,IP:nil,URL:0,File:130,RT:0,Bulk:nil,QS:nil,BEC:-1,COL:0,OSI:0,OSA
+	:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: 1bf569d028c111f1a02d4725871ece0b-20260326
+Received: from mtkmbs09n2.mediatek.inc [(172.21.101.94)] by mailgw01.mediatek.com
+	(envelope-from <ot_cathy.xu@mediatek.com>)
+	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+	with ESMTP id 2012159227; Thu, 26 Mar 2026 11:08:48 +0800
+Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.29; Thu, 26 Mar 2026 11:08:47 +0800
+Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
+ mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.2562.29 via Frontend Transport; Thu, 26 Mar 2026 11:08:46 +0800
+From: Cathy Xu <ot_cathy.xu@mediatek.com>
+To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+	Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-mediatek@lists.infradead.org>,
+	Mengqi Zhang <Mengqi.Zhang@mediatek.com>, Wenbin Mei
+	<Wenbin.Mei@mediatek.com>, Andy-ld Lu <Andy-ld.Lu@mediatek.com>, Axe Yang
+	<Axe.Yang@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Cathy Xu
+	<ot_cathy.xu@mediatek.com>, <stable@vger.kernel.org>
+Subject: [PATCH RESEND] mmc: mtk-sd: disable new_tx/rx and modify related settings for mt8189
+Date: Thu, 26 Mar 2026 11:05:16 +0800
+Message-ID: <20260326030759.8107-1-ot_cathy.xu@mediatek.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -88,106 +65,46 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-The core mmc devicetree schema expects mmc controller nodes to be named
-using '^mmc(@.*)?$' pattern.
+Disable new_tx/rx to avoid data transmission instability, and adjust
+.data_tune, .stop_dly_sel, and .pop_en_cnt to fit the overall
+configuration after disabling new_tx/rx, making it more compatible
+with mt8189.
 
-The legacy Hisilicon SoC files (hi3660, hi3670, and hi6220) previously
-used the 'dwmmc' prefix for their nodes. This caused warnings during
-dtbs_check.
-
-Rename the 'dwmmc' nodes to 'mmc' to comply with the standard schema and
-dtbs_check warnings. The legacy phandle labels are kept intact.
-
-Signed-off-by: Bhargav Joshi <rougueprince47@gmail.com>
-Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Fixes: 846a3a2fdff5 ("mmc: mtk-sd: add support for MT8189 SoC")
+Cc: stable@vger.kernel.org
+Tested-by: Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
+Signed-off-by: Cathy Xu <ot_cathy.xu@mediatek.com>
 ---
-Changes in v2:
-    - No code changes.
-    - Collected Acked-by and Reviewed-by tags.
+ drivers/mmc/host/mtk-sd.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 302ac8529c4f..b2680cc054bd 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -682,15 +682,15 @@ static const struct mtk_mmc_compatible mt8189_compat = {
+ 	.needs_top_base = true,
+ 	.pad_tune_reg = MSDC_PAD_TUNE0,
+ 	.async_fifo = true,
+-	.data_tune = true,
++	.data_tune = false,
+ 	.busy_check = true,
+ 	.stop_clk_fix = true,
+-	.stop_dly_sel = 1,
+-	.pop_en_cnt = 2,
++	.stop_dly_sel = 3,
++	.pop_en_cnt = 8,
+ 	.enhance_rx = true,
+ 	.support_64g = true,
+-	.support_new_tx = true,
+-	.support_new_rx = true,
++	.support_new_tx = false,
++	.support_new_rx = false,
+ 	.support_spm_res_release = true,
+ };
  
- arch/arm64/boot/dts/hisilicon/hi3660.dtsi | 4 ++--
- arch/arm64/boot/dts/hisilicon/hi3670.dtsi | 4 ++--
- arch/arm64/boot/dts/hisilicon/hi6220.dtsi | 6 +++---
- 3 files changed, 7 insertions(+), 7 deletions(-)
-
-diff --git a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-index 957a1b41f19b..374aa173bec6 100644
---- a/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-+++ b/arch/arm64/boot/dts/hisilicon/hi3660.dtsi
-@@ -1057,7 +1057,7 @@ ufs: ufs@ff3b0000 {
- 		};
- 
- 		/* SD */
--		dwmmc1: dwmmc1@ff37f000 {
-+		dwmmc1: mmc@ff37f000 {
- 			compatible = "hisilicon,hi3660-dw-mshc";
- 			reg = <0x0 0xff37f000 0x0 0x1000>;
- 			#address-cells = <1>;
-@@ -1075,7 +1075,7 @@ dwmmc1: dwmmc1@ff37f000 {
- 		};
- 
- 		/* SDIO */
--		dwmmc2: dwmmc2@ff3ff000 {
-+		dwmmc2: mmc@ff3ff000 {
- 			compatible = "hisilicon,hi3660-dw-mshc";
- 			reg = <0x0 0xff3ff000 0x0 0x1000>;
- 			#address-cells = <0x1>;
-diff --git a/arch/arm64/boot/dts/hisilicon/hi3670.dtsi b/arch/arm64/boot/dts/hisilicon/hi3670.dtsi
-index 886b93c5893a..0db1849a2878 100644
---- a/arch/arm64/boot/dts/hisilicon/hi3670.dtsi
-+++ b/arch/arm64/boot/dts/hisilicon/hi3670.dtsi
-@@ -679,7 +679,7 @@ ufs: ufs@ff3c0000 {
- 		};
- 
- 		/* SD */
--		dwmmc1: dwmmc1@ff37f000 {
-+		dwmmc1: mmc@ff37f000 {
- 			compatible = "hisilicon,hi3670-dw-mshc",
- 				     "hisilicon,hi3660-dw-mshc";
- 			reg = <0x0 0xff37f000 0x0 0x1000>;
-@@ -698,7 +698,7 @@ dwmmc1: dwmmc1@ff37f000 {
- 		};
- 
- 		/* SDIO */
--		dwmmc2: dwmmc2@fc183000 {
-+		dwmmc2: mmc@fc183000 {
- 			compatible = "hisilicon,hi3670-dw-mshc",
- 				     "hisilicon,hi3660-dw-mshc";
- 			reg = <0x0 0xfc183000 0x0 0x1000>;
-diff --git a/arch/arm64/boot/dts/hisilicon/hi6220.dtsi b/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
-index f8b56d443850..61eaa7f8c1c9 100644
---- a/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
-+++ b/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
-@@ -799,7 +799,7 @@ mailbox: mailbox@f7510000 {
- 			#mbox-cells = <3>;
- 		};
- 
--		dwmmc_0: dwmmc0@f723d000 {
-+		dwmmc_0: mmc@f723d000 {
- 			compatible = "hisilicon,hi6220-dw-mshc";
- 			reg = <0x0 0xf723d000 0x0 0x1000>;
- 			interrupts = <0x0 0x48 0x4>;
-@@ -812,7 +812,7 @@ dwmmc_0: dwmmc0@f723d000 {
- 				     &emmc_cfg_func &emmc_rst_cfg_func>;
- 		};
- 
--		dwmmc_1: dwmmc1@f723e000 {
-+		dwmmc_1: mmc@f723e000 {
- 			compatible = "hisilicon,hi6220-dw-mshc";
- 			hisilicon,peripheral-syscon = <&ao_ctrl>;
- 			reg = <0x0 0xf723e000 0x0 0x1000>;
-@@ -828,7 +828,7 @@ dwmmc_1: dwmmc1@f723e000 {
- 			pinctrl-1 = <&sd_pmx_idle &sd_clk_cfg_idle &sd_cfg_idle>;
- 		};
- 
--		dwmmc_2: dwmmc2@f723f000 {
-+		dwmmc_2: mmc@f723f000 {
- 			compatible = "hisilicon,hi6220-dw-mshc";
- 			reg = <0x0 0xf723f000 0x0 0x1000>;
- 			interrupts = <0x0 0x4a 0x4>;
 -- 
-2.53.0
+2.45.2
 
