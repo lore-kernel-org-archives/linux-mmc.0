@@ -1,143 +1,245 @@
-Received: from canpmsgout10.his.huawei.com (canpmsgout10.his.huawei.com [113.46.200.225])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B81225A357;
-	Thu, 26 Mar 2026 12:53:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.225
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5FD5C298CAF
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 12:53:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774529622; cv=none; b=LyPbAnRa4uolJom1HX2CYmshzx1krYPAYVZMqJM6z5lX/TFOOL0nhcMsuzkiKs6ikSYqnPQCnPhbbrwH2VXmNcqxl1G+/kmBjr/a40cr6yK30Fe7FAZQ601rj1xY1/3kiQzB20L4JKKmy2XFHc3OoRw2VlZSVxPN+GLrw3a77Gk=
+	t=1774529626; cv=none; b=QildlcVr9aN/ySgnn2COElQSRUHa+k8GSpVtJu94GF2NeTOLHV1347RHrs2zaZdEq289u3XWZjandwQ0boa9EC1mAsnH1vxmqKARDX+o2QskARBsreCSaH3Bdoh/6sauL0GigkaighRZN108fqkR3K+8hhkqjfEAFybQLZ2JIKk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774529622; c=relaxed/simple;
-	bh=Q0nmFsxr4p9N2+JQyG7ZUpExeR9GG19RsZcJvYw9ToQ=;
-	h=Message-ID:Date:From:MIME-Version:To:CC:Subject:References:
-	 In-Reply-To:Content-Type; b=FJiFqcbQAj0Lx1PtOCFCUWKygbB4/gxsnU/KL/NKo+n88vLLdkzstdASu226/yNvSEwg8exfbtwzzDNnG+vEU/YoG1Wvz65/cWaUobJc7A4Ps54jIAO6nQbFzo9e2An0xXXgOn4W8n1cqLTghKxezL9+B1XRJ8n9UnQQl026qpU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=hisilicon.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=2Nmqg6ZT; arc=none smtp.client-ip=113.46.200.225
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=hisilicon.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+	s=arc-20240116; t=1774529626; c=relaxed/simple;
+	bh=K7REFKxf3ZmDqskE93hAofwp3IRmFswPn4QHXZyGQOE=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=ocziuozBzUSf6nhUk9Y3fQ89A/i50kDGEaU42XGRbmIvyALAM3eVZjoFkYp86ACr0+G5FfVNAnGCf0WSxuJYiRGfQJhggzjWIfYGg4PdMn40ngzPpHspqIkwG5CARhTyhrdRnQpykDvjMUD4n7xVXgoVlKdrNURF1rAFjtYk/gg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iFnTq4zk; arc=none smtp.client-ip=209.85.128.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="2Nmqg6ZT"
-dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
-	c=relaxed/relaxed; q=dns/txt;
-	h=From;
-	bh=JwogkyK17K7R1DHebXs4/gznNtvqRuSbgYVa8bTbTWw=;
-	b=2Nmqg6ZTsKKjro7kmOWyBVibO0nBQkaqUnm9ilMsy0af15aRRP+pa13Cux862kZSbGNSDpaHN
-	x4UFKzd7OsgjItBbcJ7p5JXaPGpyo4/05nsIAqAOy2xSITbopiMvo+msJNSHtBtqx249Z7bHfjQ
-	0qlx3xHW4hpnSk/QztlJAFk=
-Received: from mail.maildlp.com (unknown [172.19.163.200])
-	by canpmsgout10.his.huawei.com (SkyGuard) with ESMTPS id 4fhNpN6Hkzz1K9Cc;
-	Thu, 26 Mar 2026 20:47:24 +0800 (CST)
-Received: from dggemv705-chm.china.huawei.com (unknown [10.3.19.32])
-	by mail.maildlp.com (Postfix) with ESMTPS id D6C0140563;
-	Thu, 26 Mar 2026 20:53:28 +0800 (CST)
-Received: from kwepemq100003.china.huawei.com (7.202.195.72) by
- dggemv705-chm.china.huawei.com (10.3.19.32) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.11; Thu, 26 Mar 2026 20:53:28 +0800
-Received: from [10.67.113.213] (10.67.113.213) by
- kwepemq100003.china.huawei.com (7.202.195.72) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.11; Thu, 26 Mar 2026 20:53:28 +0800
-Message-ID: <69C52C47.2030001@hisilicon.com>
-Date: Thu, 26 Mar 2026 20:53:27 +0800
-From: Wei Xu <xuwei5@hisilicon.com>
-User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:24.0) Gecko/20100101 Thunderbird/24.2.0
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iFnTq4zk"
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-4852e9ca034so9540585e9.2
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 05:53:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1774529622; x=1775134422; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ovqx3H1R8dcVYTy4TlcGAentVJA1WLMQBInCAVMEjmQ=;
+        b=iFnTq4zkWf9yJQmTvAUCTngWJhxf3Bsoyux1cR8XZGbFgyYid2pZUwkw2oOyXH3Whg
+         4oUPkc0xK2/s8Tq+porYrScGaSVIte2b6P5hEG2Ekkb9DFkcydBlRqs/z6VKkwJZBxwn
+         rykgA7cPuIHt6WTwxrV4Y9pSyVBqQYbGdHaBlWjsNKYe4m/o1XiO2WxHMUVKxJVIyxcd
+         bwwZeKIBNscYTd4D2cbJRKok+tZUI5NBEx2FbD4Bqc1H8/WMHkDzPegeF5gNDlCj57DB
+         FGpy6RUMY53GgMIhuU+NzLmqo/63Jgm6tWdWhcU2y1CKtM7DHOYLnzUO8GeeW8rQSLmF
+         W7OA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774529622; x=1775134422;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ovqx3H1R8dcVYTy4TlcGAentVJA1WLMQBInCAVMEjmQ=;
+        b=Oq6f/YrRFspg1ATeVEBlIYVQeryNBa6NdRxY4Fbk5Dk/1T6oGGMHDvI1Q1VW4p+TXp
+         1hOAEt21grwBhuWC9FXAU6ya+M3J1b91HCSewD7ZD2NgfPkvdsbmYXkCvoyzxz2XkY9O
+         1rb7EBnzK/uCqCdJ0EUIHTmNk1JyyeZirLlkkmU0qbWV9r/yRl2CWq6yGDFKvxoYlqUx
+         Kqi9+EKJlGn44iFHe71SkKgkw4DHuJWmNisdEusuAjBTxdMf89OXc/0iu39zkULNvdYP
+         ZH6JguKOO5lzxlca7xauobXJnlOJPtrbEdLjB5qpKiNr0QxwqE0pVkQ+aBKnT+omOP+B
+         rAVw==
+X-Forwarded-Encrypted: i=1; AJvYcCVH4JGi7icNFCKIVqBOiPi8PCLYs2Ne+UF1uVHUGvOIf5w2CeuYZfWIp0WU6PqN68VT/Vvn74K1Q8Q=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwLw1noOF7ViMVYH4vcuX1CXMsXAqk20G1Tdir9IarVI4ko8M0X
+	43QkdWTqpiyPU8Pti+pCsYcIGzor/9OChGhhtayjyl3KZ/gRv27dfeaEz8ckXY3VnZM=
+X-Gm-Gg: ATEYQzw5uQLaexxRSzUaPf0RogWpFfCDigKrDb4MEzTGS0FITipkznIqsPvWf/ziSf+
+	RtlwV9swB4CYhTL4s70Ux63jrKb852seTv8tJDUUnp4MgMCoAQgdHIgxxpK0DsrjJ5dfZI7z3x3
+	Rwae7/XbzrQjrtpqVbSgCFK5QbAw5gAkBDwuTHag8ozLIm0j0vJenkmE3g2bYaVh294XJfgQ2ev
+	5qjrs4L5xdP94rp/UDN8KyK5dVsnyxQfV+bND9VqkDw9WmZVj1gW/DfPuKWkkB6zJdeTmid6W/w
+	vlf0NQzHupTEyP5RvB4DODa397kHN1o6Q60QKreA1NsdkM+zFI2J656JrLuu1rXYDz/7rdu+TG2
+	ZdFuSEwU8MI5LbO477mnHg227GcrisTj6jAs+SjXNrevlTE6KRpLXBBKsuWTHQemKPliq9IV6pM
+	7rBXzBbUANkiS1oFExFJA9hXWIoXs61V4BxJ4s/WeVIqtRQMgiJmlbbw+zp5bOgITXgPS5pLguL
+	VfXLoM=
+X-Received: by 2002:a05:600c:3b16:b0:485:45fb:3472 with SMTP id 5b1f17b1804b1-48715fc3a88mr110847475e9.7.1774529621762;
+        Thu, 26 Mar 2026 05:53:41 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:106d:1080:8431:f88b:714d:f78d? ([2a01:e0a:106d:1080:8431:f88b:714d:f78d])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48722c65dc4sm30763025e9.3.2026.03.26.05.53.40
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 26 Mar 2026 05:53:41 -0700 (PDT)
+Message-ID: <c03db144-539e-4c39-94f8-14b112783077@linaro.org>
+Date: Thu, 26 Mar 2026 13:53:40 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Bhargav Joshi <rougueprince47@gmail.com>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <robh@kernel.org>,
-	<krzk+dt@kernel.org>, <conor+dt@kernel.org>, <zhangfei.gao@linaro.org>,
-	<linux-mmc@vger.kernel.org>, <daniel.baluta@nxp.com>, <simona.toaca@nxp.com>,
-	<d-gole@ti.com>, <m-chawdhry@ti.com>, <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v2 0/2] mmc: hisilicon: Convert dw-mshc bindings and fix
- dtbs
-References: <20260325225439.68161-1-rougueprince47@gmail.com>	<69C51640.8070408@hisilicon.com> <CAPDyKFq6F3PZgqTtHXZPQPPBvdPhsQPtUVHiZV6X-QXvS42+CA@mail.gmail.com>
-In-Reply-To: <CAPDyKFq6F3PZgqTtHXZPQPPBvdPhsQPtUVHiZV6X-QXvS42+CA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
+Subject: Re: [PATCH v5 1/9] arm64: dts: amlogic: t7: Add eMMC, SD card and
+ SDIO pinctrl nodes
+To: Ronald Claveau <linux-kernel-dev@aliel.fr>,
+ Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
+References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
+ <20260326-add-emmc-t7-vim4-v5-1-d3f182b48e9d@aliel.fr>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20260326-add-emmc-t7-vim4-v5-1-d3f182b48e9d@aliel.fr>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: kwepems100001.china.huawei.com (7.221.188.238) To
- kwepemq100003.china.huawei.com (7.202.195.72)
 
-Hi Uffe,
-
-On 2026/3/26 20:39, Ulf Hansson wrote:
-> On Thu, 26 Mar 2026 at 12:19, Wei Xu <xuwei5@hisilicon.com> wrote:
->>
->> Hi Bhargav,
->>
->> On 2026/3/26 6:54, Bhargav Joshi wrote:
->>> This series converts the Hisilicon dw-mshc text bindings to DT schema
->>> format and cleans up legacy node names in Hisilicon board files.
->>>
->>> While testing the new YAML schema, dtbs_check flagged the hi3660,
->>> hi3670, and hi6220 SoC files for using the non-standard 'dwmmc' node
->>> name prefix. resulting in warnings.
->>>
->>> Patch 1 Convert to DT schema
->>> Patch 2 updates the Hisilicon dtsi files to use standard 'mmc'
->>> node name.
->>>
->>> Changes in v2:
->>>  - Patch 1:
->>>     - Grouped compatible strings into an enum.
->>>     - Replaced raw numbers with proper flags.
->>>     - Fixed property order and removed invalid hex values.
->>>     - Added explanation for clock order change in commit message.
->>>     - Collected Acked-by tag.
->>>  - Patch 2:
->>>     - No code changes.
->>>     - Collected Acked-by and Reviewed-by tags.
->>>
->>> Signed-off-by: Bhargav Joshi <rougueprince47@gmail.com>
->>> ---
->>> Note: this patch is part of the process for applying to GSoC device
->>> tree bindings conversion project #
->>> https://github.com/LinuxFoundationGSoC/ProjectIdeas/wiki/GSoC-2026-Device-Tree-Bindings
->>>
->>> - The file is enabled by arm64 defconfig (CONFIG_MMC_DW_K3=y)
->>> - It is used in following
->>>     /arch/arm64/boot/dts/hisilicon/hi3660.dtsi
->>>     -included by /arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
->>>     /arch/arm64/boot/dts/hisilicon/hi3670.dtsi
->>>     -included by /arch/arm64/boot/dts/hisilicon/hi3670-hikey970.dts
->>>
->>> Bhargav Joshi (2):
->>>   dt-bindings: mmc: hisilicon,hi3660-dw-mshc: Convert to DT schema
->>>   arm64: dts: hisilicon: Rename dwmmc nodes to mmc
->>>
->>>  .../mmc/hisilicon,hi3660-dw-mshc.yaml         | 117 ++++++++++++++++++
->>>  .../devicetree/bindings/mmc/k3-dw-mshc.txt    |  73 -----------
->>>  arch/arm64/boot/dts/hisilicon/hi3660.dtsi     |   4 +-
->>>  arch/arm64/boot/dts/hisilicon/hi3670.dtsi     |   4 +-
->>>  arch/arm64/boot/dts/hisilicon/hi6220.dtsi     |   6 +-
->>>  5 files changed, 124 insertions(+), 80 deletions(-)
->>>  create mode 100644 Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
->>>  delete mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
->>>
->>
->> Series applied to the HiSilicon arm64 dt tree.
->> Thanks!
->>
->> Best Regards,
->> Wei
+On 3/26/26 10:59, Ronald Claveau wrote:
+> These pinctrl nodes are required by the eMMC, SD card and SDIO drivers
+> to configure pin muxing at runtime.
 > 
-> Usually I pick DT bindings (patch1/2) for mmc via my mmc tree and I
-> also just did. Would it be possible for you to drop patch1/2 from your
-> tree?
-
-So I will drop them.
-Thanks!
-
-Best Regards,
-Wei 
-
+> - eMMC: control, 4-bit/8-bit data, data strobe and clock gate pins
+> - SD card: data, clock, command and clock gate pins
+> - SDIO: data, clock, command and clock gate pins
 > 
-> Kind regards
-> Uffe
+> Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
+> ---
+>   arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi | 98 +++++++++++++++++++++++++++++
+>   1 file changed, 98 insertions(+)
 > 
-> .
+> diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+> index 6510068bcff92..36d13371f56ba 100644
+> --- a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+> +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+> @@ -250,6 +250,104 @@ gpio: bank@4000 {
+>   					#gpio-cells = <2>;
+>   					gpio-ranges = <&periphs_pinctrl 0 0 157>;
+>   				};
+> +
+> +				emmc_ctrl_pins: emmc-ctrl {
+> +					mux-0 {
+> +						groups = "emmc_cmd";
+> +						function = "emmc";
+> +						bias-pull-up;
+> +					};
+> +
+> +					mux-1 {
+> +						groups = "emmc_clk";
+> +						function = "emmc";
+> +						bias-disable;
+> +					};
+> +				};
+> +
+> +				emmc_data_4b_pins: emmc-data-4b {
+> +					mux {
+> +						groups = "emmc_nand_d0",
+> +							 "emmc_nand_d1",
+> +							 "emmc_nand_d2",
+> +							 "emmc_nand_d3";
+> +						function = "emmc";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				emmc_data_8b_pins: emmc-data-8b {
+> +					mux {
+> +						groups = "emmc_nand_d0",
+> +							 "emmc_nand_d1",
+> +							 "emmc_nand_d2",
+> +							 "emmc_nand_d3",
+> +							 "emmc_nand_d4",
+> +							 "emmc_nand_d5",
+> +							 "emmc_nand_d6",
+> +							 "emmc_nand_d7";
+> +						function = "emmc";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				emmc_ds_pins: emmc-ds {
+> +					mux {
+> +						groups = "emmc_nand_ds";
+> +						function = "emmc";
+> +						bias-pull-down;
+> +					};
+> +				};
+> +
+> +				emmc_clk_gate_pins: emmc-clk-gate {
+> +					mux {
+> +						groups = "GPIOB_8";
+> +						function = "gpio_periphs";
+> +						bias-pull-down;
+> +					};
+> +				};
+> +
+> +				sdcard_pins: sdcard {
+> +					mux {
+> +						groups = "sdcard_d0",
+> +							 "sdcard_d1",
+> +							 "sdcard_d2",
+> +							 "sdcard_d3",
+> +							 "sdcard_clk",
+> +							 "sdcard_cmd";
+> +						function = "sdcard";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				sdcard_clk_gate_pins: sdcard-clk-gate {
+> +					mux {
+> +						groups = "GPIOC_4";
+> +						function = "gpio_periphs";
+> +						bias-pull-down;
+> +					};
+> +				};
+> +
+> +				sdio_pins: sdio {
+> +					mux {
+> +						groups = "sdio_d0",
+> +							 "sdio_d1",
+> +							 "sdio_d2",
+> +							 "sdio_d3",
+> +							 "sdio_clk",
+> +							 "sdio_cmd";
+> +						function = "sdio";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				sdio_clk_gate_pins: sdio-clk-gate {
+> +					mux {
+> +						groups = "GPIOX_4";
+> +						function = "gpio_periphs";
+> +						bias-pull-up;
+> +					};
+> +				};
+>   			};
+>   
+>   			gpio_intc: interrupt-controller@4080 {
 > 
+
+Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
+
+Thanks,
+Neil
