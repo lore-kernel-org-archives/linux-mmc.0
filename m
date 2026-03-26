@@ -1,120 +1,117 @@
-Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
+Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13D1139526B
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 12:34:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6687738B121
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 12:34:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.42
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774528489; cv=pass; b=WvQQry2LOoGhyvVtlkRC/sBY5Dwy0p8dIVRP3ArG+yp5nEBtdSNC7AsBJ5DmYrgGKJZf134O0z1cdMUgWiNe8TkY/sHlGkd9f9fW1PObvLI4t8vtR8xW7D3zZy15mzAhNl5f4fygurStPy1JN37YH66fafOov39ZWHmL/51ra2o=
+	t=1774528496; cv=pass; b=RLtyx19s3O2T6uKeL9OdFv8HhZUBTfwL+MC15j+KeXAwfTRFrOfneVgNHYLlmT4jbnJx/i24lvX42HjUOyY7zkEqIXZ8vT3G5SOVx5tzjGZSdrszt2bo11I/LHQ0w1urMlRAIQ9CrryilvJTDdLOeMvT33WtfwQLkzj27lAaXEM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774528489; c=relaxed/simple;
-	bh=Kh8C2yd0QW5E5Nn2o1qDw2Ib5nSTc8p+g0FkjkfPiDI=;
+	s=arc-20240116; t=1774528496; c=relaxed/simple;
+	bh=p+oFtCDEdez9suBe9pe1fZYHjfKOx23fi/EG0H17aGQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=pnCtkG3lboTYvTXqehPBDj+j8A7DpiC4nlvupyJqkB73BCQpXRB0t3iXUeuGwgh7TGCH8CXk9R9CVU8H4mUcoD8CfXBTBoVtVBL9EQr4HGaK6kjSF7o1ibHL3YHRSmsIvVwAhu6JOgqCq0R40dJR8GAjMApwOiCzetCSl58sviY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=F4DP+qOp; arc=pass smtp.client-ip=209.85.208.179
+	 To:Cc:Content-Type; b=qFkEruigKp3QQzYr1KpBVcO98xKdy5gYqDa9DMT76sAUKH7+GPCDea+merdmt5jQmog84SxiPZ4/TERfJngo6zyWt9MMT8TXMv+13JfY1ukLFD3Q6thJQuA6bOZj0e0KwXpg/VPI3Y/v9BWdvCb+Rle6FWGWzbfnl6m3Jl7pJ2A=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=hZZYgoI3; arc=pass smtp.client-ip=209.85.167.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="F4DP+qOp"
-Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-38bf1561215so7356581fa.2
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 05:34:46 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774528485; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hZZYgoI3"
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-5a27b5ad832so1048279e87.2
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 05:34:55 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774528494; cv=none;
         d=google.com; s=arc-20240605;
-        b=esOMNCgSZ01k56xYwVEqGW99t35cub+XbFba5wOlTFBJ5rc/8zr3wgO8+EjducCGDA
-         Ug44T/If+DhtZfVr6+AL4EgLt05BcGpTlXmhEaAlxhZTzUqU5Eo3bEhj8eEyUBWXlFUg
-         KmvHMvKI9XlyqmsQqGsyWvO+6Lar9m/Z75VpwsNWo3Vf/qtVoinDLd23/AQhsS1WLLXt
-         nquiJ1Kn8FLOEyK9p2UFXiO39JXGQXCMI1dlFcixF8e8CkGPHmNNyU0pZVBfWIYumHQw
-         tXD0k2A15AtmMtVo5nAXvs1HC1q04ZSkgThHPTWha39yKin/52S0Gn20J8xWm3Wr/32E
-         A+eA==
+        b=CEHSoIAEucWsBArSOoN2MCm1BfLTaw2JN2CVjxUbZxVz/aLUMgAr/v4fAQNn+HHQrq
+         heUwKIXDe/GVnyGKWpkYy+LYT792bqQzpjjgfxIwI6KcwCVdnuFAvWVEwYR1oO4h+zbZ
+         eybATWEcyosPBoV3aDsciWb7Y1erPsdWvj6j0e5cXI/L50UdkF2e+s2MjndIQmZmo/PL
+         +1H/dpJzjliqCli929hR/dHrxw8ludRUSJ7QjqcvlDShBh/MdaIePvPElykqmwHgIf9A
+         O5/LJiEuqJf1Xr9D3zZ9ZSc+y2CBa6YcmmEQChmVzjOnRucwt3wTCdxVShSX1xicSXYy
+         vlDg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=w8arL5aX7YsSdvIL2KLEa2SjWw/0ygcrFGAOAqfvGZA=;
-        fh=pfJTipbhpAm8zoRCJDdorF50MR7FGNIn5Z62+pX7UVI=;
-        b=DgnGatVBEdSG+lOmOTSrUNhzDmbFEknJ1faJ5GaWQXRaFbzHexP650bsI8oX2uvD4C
-         Ts7cm8emziYLb0riN8p2Vg+8/PYc+5oHLrx+7mmrAcX+v0Mf2DwmrUmCgpPUzJGi+ub1
-         2DKxHKrdKu5+S+wjBTYjLJMW4BMhghQ/Lk69azhfmhQvBgZDNiX+hU/870bSujpoFCqC
-         OQcV7EsJpjWAjagGIPnnijBVZaDOJ9nCqVrmKuaXxnBqGFfANAPGu1SjcdmZLZOJOo0z
-         2i72pQ3JXdIkmkbp7qV+QpvXA44+AxxxDkne2k/PckOhzYMNPopx5Vl1Ra7HhbQlkfoN
-         rwmA==;
+        bh=fMtjTcJq5eIA2qihI+2nGicxmL8Td67ZjB3pSoQD8ho=;
+        fh=LJUC49DbYv35aR0rdP6MssAN7iNYv+GJZ5BARiQ/aY8=;
+        b=dR/Bf0YdoYyToYLqv34tqnp03TWzg1OiFWht//2+IR7YDhwyFW21/UtFHrB5b3yFik
+         VKvu1rClnTVzqnTorBmWV8Aa3gG/QltHpvLbmBpeI3QBR2k9GfWylx5/8toBhzIx7XsY
+         WKxbw8Tt6KhVEYr96Fht6RL7BEQbqpIzq98jt+lIO3CnHUOggWC7b/GtTRE08Fol7Kip
+         CvEET/0mdDSbpaNVIg3cEsCkKikZpao4nj3Le2lgDZHCgvcBeDLIcxtCkXjdDVhu/meh
+         g+c9NVaPwOdaZDiSK/OWMyI4E+6u7Cel96qGma9tYs1KQQY1R0t6lgLhW9lfSD/AoEn0
+         IA5A==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774528485; x=1775133285; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774528494; x=1775133294; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=w8arL5aX7YsSdvIL2KLEa2SjWw/0ygcrFGAOAqfvGZA=;
-        b=F4DP+qOpaxvrrK3Kivb5yaJXpL6HP+GptmnIQorhZDKTToxrIelX5EkYMbUqcdqnUW
-         IFmDvt1uymzvURo/j1v+LjAgjcBrgCRuBlyo0AI+r8jhsob+qm94uzw6UKetrTtampbm
-         q560eZCcWJ0pZTuhxJ/lc/K59LVOTARsBQMypRZWwzTae/repluOig6+X4MpRUXSZqAF
-         BLM/HgKnU+yT1Mx0ntNYdOK6Vgq1Lr+M9pDLxt6BFbURyfaOylfAv4DGx8I9v6xQMZWX
-         r8kCShwEd2/rGj9N5MUfqWe49PnWlGTWOOoDPXscDUSzc8+hhebaAkce/ebr+9J+v+Q4
-         AXAw==
+        bh=fMtjTcJq5eIA2qihI+2nGicxmL8Td67ZjB3pSoQD8ho=;
+        b=hZZYgoI3hZE5jscwY/qgSvmSORNBapT/tnNUPeOYH6nSseyEGXl7xg043KwGvyQ5XQ
+         39qBu0hUvs+id894K45MXjjb6hRr2s9+KV0jHYz905AFh/zJF7tkMXcKUwMOQMSe/sZ9
+         c+AvYiJN5f/KXuqWaYijmCA3iFUUPDMvQ1WW59A6rMVtqtRnUHyxfrkQmJ7tt/emBdMo
+         aEOs1SlkXT0z8GwwZeXG/0zvlgrHD69dX8QVk5naCNB7QHExGd4Gi9ZNpyQO9a4WAwCJ
+         Aa+kPaoFIfonDIoOk41YCP5QqlQgOfSyl4n46heEFQtmzQF+gXSFC/nGnPWaiBJK/cul
+         gZyA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774528485; x=1775133285;
+        d=1e100.net; s=20251104; t=1774528494; x=1775133294;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=w8arL5aX7YsSdvIL2KLEa2SjWw/0ygcrFGAOAqfvGZA=;
-        b=gLZOb7/n01M92lqjh06wJMAf7HJ+5mLlIrK1Vj4+InaojSjXx70Ao1n/7acsTOqjUi
-         bn87xVrh88NlOHv5axKwAYwGatxethfFZ5SxYCGnQMtJrXZo/nB+VUB3HH2028X3wgto
-         IQYw9Dli/yblVyRxTCA3EQERawidGGPmFIGAOOMjnd55ElrChoNNdytBZz1pWM3Mk0bL
-         l44oLy/gnILDywPxa1UHO4lqs9/ppqt2JW9oYF+IdKJQFljbfdN+dv5UWX33Kdn5L9pw
-         e7Wv0HztyTq3TMMhNr410uSSV5coqDMt9aWrtmlmGZVRi+elP00ISn9bRPF9Ti2mg1OA
-         7leA==
-X-Forwarded-Encrypted: i=1; AJvYcCUWH3o9uSXdtpZtcZyDUch5CeZLFaJ061p7VqeeZRG127bM2zmyWHGi6l78u4vq6/aONuQe2LaHuRs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxhdSNDT1yaUBiYS3tAALYtPGO/jzGv+if0p1FHWPiog57A6x6b
-	M+3WvwjcHF5YZyLl7HJiIIQ7PDJsQcTCB1QGt2SePRMkrAOgJUTKQndZ0YbE38VwH+gaCvjXfMp
-	Vvt0oS/5JAV4T85mnBjX7U2m7SwFoHp5bYNKDcBxUZA==
-X-Gm-Gg: ATEYQzw9VrdQ2wa+a7pPp96H5CRhJKwO8vPXxaAYXLNr4NReTgWHnoJcp6uKJnJ/OHA
-	MNr54fZYl6qxRHSzYokBsLvlLOTXbWvCqygjG0OX9v5BU6jyXeAL2NtGharqQw6TFavMzkOOw7o
-	6Q1/kn+iIksf6Cow3rzK8YDkXttVDis38xuyPybKT9WOgheF7pqSSKHV27wZcBoueghQc3Wbm8v
-	Pz1pFTTDNIjOmBhc7MkXwRFog04c5lMqWrsqGYruTIG+bkbj1zpe6rgY3AvVyBiL0+81wKkVYX2
-	KDopwFo=
-X-Received: by 2002:a05:6512:3503:b0:5a2:787a:fa54 with SMTP id
- 2adb3069b0e04-5a29b984575mr3819487e87.18.1774528485146; Thu, 26 Mar 2026
- 05:34:45 -0700 (PDT)
+        bh=fMtjTcJq5eIA2qihI+2nGicxmL8Td67ZjB3pSoQD8ho=;
+        b=caSFoxfnk3oNYdoVDLKEWdI0i5XvewXWrIfdOW40qqeNLNZYbeWiEkoGDQMhPAEZLn
+         5UIafR+jb/NgpfcvolB+I0M9WX3X7OzN2WgaKy485jOnrvpw4JTPzjauqhrFYXxK35J7
+         Gl/rxQbHYpPh8tBJ+DmdnplmExJrZhRbe3u/tkMHa35KRskX/3t+o3UVgcg11jQdjqJW
+         3GS0WxeFXlsVUz4W2HmleNdBsExT9HPD/5da9X9wFwe5JFpZpFf2IQ6hB5N+PHrPP4/J
+         rBNhS3WFNVp9jaq2KQP2ZG+DBOHgeqhnWwgvGy+JxHlK2x69u1SFCe6wSenf5hzKEftU
+         kQHA==
+X-Forwarded-Encrypted: i=1; AJvYcCUIioWJXqfIL1DQQWJgGTnmOwAFwpsyRpDNkXILEM4Q9YNzbXDdjzRn7fMJN6WzGNSZLgRUF/sAtZo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwwKbzteZPLOEXjT4CDn6t7XU7efHTYHL0pxdW/HsgiSTaBg7VQ
+	WGXCK5baf24YjjUNo80ZM62UzmHQTPpdzGIBZ0g7KZqSW3yZHyKPnBvLBby7kD6EkZ6Fa13mHXg
+	nJqS7Eb16RewZZVwcd+YGaNvKNs8ZcNZfp5lOFZ7qmA==
+X-Gm-Gg: ATEYQzzVuMoe4ujTwWCPTcyydC/wYVrxZgbFAuJhY1T+TkwkdMSW/NFhqxkFfwzVUBZ
+	lMcxszP1M8uMRX9kLTigzmZecRKzqIgMdFdmO2uu1nNBeCrZZLrzMvias6pNMAonnt2p1AWrfaT
+	7ionGjREFwkTanJX/Iax3UU3N7T4Oyd1jVektUBljmqiKLX8iXMy8gQvKXAtmuP5cHul0ihRsX/
+	jEdqLO+Zu+IzBvcFLKr4vd2NdN5SAOK1lW7To6KT1imkI/TraJi2hDG5bnZFlrk+0AqvIWaRCJg
+	ni0qi7A=
+X-Received: by 2002:a05:6512:3e0c:b0:5a1:43f3:764a with SMTP id
+ 2adb3069b0e04-5a29b979b0amr2997503e87.5.1774528493504; Thu, 26 Mar 2026
+ 05:34:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260325225439.68161-1-rougueprince47@gmail.com> <20260325225439.68161-2-rougueprince47@gmail.com>
-In-Reply-To: <20260325225439.68161-2-rougueprince47@gmail.com>
+References: <20260326030759.8107-1-ot_cathy.xu@mediatek.com>
+In-Reply-To: <20260326030759.8107-1-ot_cathy.xu@mediatek.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 26 Mar 2026 13:34:08 +0100
-X-Gm-Features: AQROBzA9ouu9GctOeENUqpjJUJQ5Hy-gzMk2QIkjrS5DYDZYZfDgFBRbTuNSliw
-Message-ID: <CAPDyKFo29rgaf7OtvbkP85w96Y3nRJZORO_Sog70hdoxzYVzSw@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: hisilicon,hi3660-dw-mshc:
- Convert to DT schema
-To: Bhargav Joshi <rougueprince47@gmail.com>
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	xuwei5@hisilicon.com, robh@kernel.org, krzk+dt@kernel.org, 
-	conor+dt@kernel.org, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, 
-	daniel.baluta@nxp.com, simona.toaca@nxp.com, d-gole@ti.com, m-chawdhry@ti.com, 
-	linux-kernel@vger.kernel.org
+Date: Thu, 26 Mar 2026 13:34:16 +0100
+X-Gm-Features: AQROBzAUMJTYzzyeSawXUe9OdLfBc-C70N5GR1BByMjzhb7eLn_1dlJggBGZnww
+Message-ID: <CAPDyKFoemi7Ss8706XVUCu6L64CUgcdGQNe9jBFSxaOPp2umEQ@mail.gmail.com>
+Subject: Re: [PATCH RESEND] mmc: mtk-sd: disable new_tx/rx and modify related
+ settings for mt8189
+To: Cathy Xu <ot_cathy.xu@mediatek.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, 
+	Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-mediatek@lists.infradead.org, Mengqi Zhang <Mengqi.Zhang@mediatek.com>, 
+	Wenbin Mei <Wenbin.Mei@mediatek.com>, Andy-ld Lu <Andy-ld.Lu@mediatek.com>, 
+	Axe Yang <Axe.Yang@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 25 Mar 2026 at 23:55, Bhargav Joshi <rougueprince47@gmail.com> wrote:
+On Thu, 26 Mar 2026 at 04:08, Cathy Xu <ot_cathy.xu@mediatek.com> wrote:
 >
-> Convert the Hisilicon DesignWare Mobile Storage Host Controller
-> (dw-mshc) bindings from text format to DT schema.
+> Disable new_tx/rx to avoid data transmission instability, and adjust
+> .data_tune, .stop_dly_sel, and .pop_en_cnt to fit the overall
+> configuration after disabling new_tx/rx, making it more compatible
+> with mt8189.
 >
-> As part of this conversion, the binding file is renamed from
-> k3-dw-mshc.txt to hisilicon,hi3660-dw-mshc.yaml to align with compatible
-> string naming conventions. Examples have been updated to pass schema
-> validation.
->
-> Note: synopsys-dw-mshc binding specifies clock names as "biu" followed
-> by "ciu". However, this Hisilicon binding reverses the order to 'ciu'
-> then 'biu' to match both the legacy text binding and in-kernel Hisilicon
-> DTS board files.
->
-> Signed-off-by: Bhargav Joshi <rougueprince47@gmail.com>
-> Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> Fixes: 846a3a2fdff5 ("mmc: mtk-sd: add support for MT8189 SoC")
+> Cc: stable@vger.kernel.org
+> Tested-by: Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
+> Signed-off-by: Cathy Xu <ot_cathy.xu@mediatek.com>
 
-Applied for next, thanks!
+Applied for fixes and by dropping the stable-tag as it's superfluous
+in this case. Thanks!
 
 Kind regards
 Uffe
@@ -122,221 +119,34 @@ Uffe
 
 
 > ---
-> Changes in v2:
->     - Grouped compatible strings into an enum.
->     - Replaced raw numbers with proper flags.
->     - Fixed property order and removed invalid hex values.
->     - Added explanation for clock order change in commit message.
->     - Collected Acked-by tag.
+>  drivers/mmc/host/mtk-sd.c | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
 >
->  .../mmc/hisilicon,hi3660-dw-mshc.yaml         | 117 ++++++++++++++++++
->  .../devicetree/bindings/mmc/k3-dw-mshc.txt    |  73 -----------
->  2 files changed, 117 insertions(+), 73 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
->  delete mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 302ac8529c4f..b2680cc054bd 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -682,15 +682,15 @@ static const struct mtk_mmc_compatible mt8189_compat = {
+>         .needs_top_base = true,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> -       .data_tune = true,
+> +       .data_tune = false,
+>         .busy_check = true,
+>         .stop_clk_fix = true,
+> -       .stop_dly_sel = 1,
+> -       .pop_en_cnt = 2,
+> +       .stop_dly_sel = 3,
+> +       .pop_en_cnt = 8,
+>         .enhance_rx = true,
+>         .support_64g = true,
+> -       .support_new_tx = true,
+> -       .support_new_rx = true,
+> +       .support_new_tx = false,
+> +       .support_new_rx = false,
+>         .support_spm_res_release = true,
+>  };
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
-> new file mode 100644
-> index 000000000000..296bd776488e
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
-> @@ -0,0 +1,117 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/hisilicon,hi3660-dw-mshc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Hisilicon specific extensions to the Synopsys Designware Mobile Storage Host Controller
-> +
-> +maintainers:
-> +  - Zhangfei Gao <zhangfei.gao@linaro.org>
-> +
-> +description:
-> +  The Synopsys designware mobile storage host controller is used to interface
-> +  a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> +  differences between the core Synopsys dw mshc controller properties described
-> +  by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
-> +  extensions to the Synopsys Designware Mobile Storage Host Controller.
-> +
-> +allOf:
-> +  - $ref: /schemas/mmc/synopsys-dw-mshc-common.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - enum:
-> +          - hisilicon,hi3660-dw-mshc
-> +          - hisilicon,hi4511-dw-mshc
-> +          - hisilicon,hi6220-dw-mshc
-> +      - items:
-> +          - const: hisilicon,hi3670-dw-mshc
-> +          - const: hisilicon,hi3660-dw-mshc
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    items:
-> +      - description: card interface unit clock
-> +      - description: bus interface unit clock
-> +
-> +  clock-names:
-> +    items:
-> +      - const: ciu
-> +      - const: biu
-> +
-> +  hisilicon,peripheral-syscon:
-> +    $ref: /schemas/types.yaml#/definitions/phandle
-> +    description: phandle of syscon used to control peripheral.
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/clock/hi3620-clock.h>
-> +    #include <dt-bindings/gpio/gpio.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +
-> +    mmc@fcd03000 {
-> +        compatible = "hisilicon,hi4511-dw-mshc";
-> +        reg = <0xfcd03000 0x1000>;
-> +        interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
-> +        #address-cells = <1>;
-> +        #size-cells = <0>;
-> +        clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
-> +        clock-names = "ciu", "biu";
-> +        vmmc-supply = <&ldo12>;
-> +        fifo-depth = <0x100>;
-> +        pinctrl-names = "default";
-> +        pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-> +        bus-width = <4>;
-> +        disable-wp;
-> +        cd-gpios = <&gpio10 3 GPIO_ACTIVE_HIGH>;
-> +        cap-mmc-highspeed;
-> +        cap-sd-highspeed;
-> +    };
-> +
-> +  - |
-> +    #include <dt-bindings/clock/hi6220-clock.h>
-> +    #include <dt-bindings/gpio/gpio.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +
-> +    soc {
-> +      #address-cells = <2>;
-> +      #size-cells = <2>;
-> +
-> +      mmc@f723e000 {
-> +          compatible = "hisilicon,hi6220-dw-mshc";
-> +          reg = <0x0 0xf723e000 0x0 0x1000>;
-> +          interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
-> +          clocks = <&clock_sys HI6220_MMC1_CIUCLK>,
-> +                   <&clock_sys HI6220_MMC1_CLK>;
-> +          clock-names = "ciu", "biu";
-> +          bus-width = <4>;
-> +          disable-wp;
-> +          cap-sd-highspeed;
-> +          sd-uhs-sdr12;
-> +          sd-uhs-sdr25;
-> +          card-detect-delay = <200>;
-> +          hisilicon,peripheral-syscon = <&ao_ctrl>;
-> +          cd-gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
-> +          pinctrl-names = "default", "idle";
-> +          pinctrl-0 = <&sd_pmx_func &sd_clk_cfg_func &sd_cfg_func>;
-> +          pinctrl-1 = <&sd_pmx_idle &sd_clk_cfg_idle &sd_cfg_idle>;
-> +          vqmmc-supply = <&ldo7>;
-> +          vmmc-supply = <&ldo10>;
-> +      };
-> +    };
-> diff --git a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> deleted file mode 100644
-> index 36c4bea675d5..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
-> +++ /dev/null
-> @@ -1,73 +0,0 @@
-> -* Hisilicon specific extensions to the Synopsys Designware Mobile
-> -  Storage Host Controller
-> -
-> -Read synopsys-dw-mshc.txt for more details
-> -
-> -The Synopsys designware mobile storage host controller is used to interface
-> -a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-> -differences between the core Synopsys dw mshc controller properties described
-> -by synopsys-dw-mshc.txt and the properties used by the Hisilicon specific
-> -extensions to the Synopsys Designware Mobile Storage Host Controller.
-> -
-> -Required Properties:
-> -
-> -* compatible: should be one of the following.
-> -  - "hisilicon,hi3660-dw-mshc": for controllers with hi3660 specific extensions.
-> -  - "hisilicon,hi3670-dw-mshc", "hisilicon,hi3660-dw-mshc": for controllers
-> -     with hi3670 specific extensions.
-> -  - "hisilicon,hi4511-dw-mshc": for controllers with hi4511 specific extensions.
-> -  - "hisilicon,hi6220-dw-mshc": for controllers with hi6220 specific extensions.
-> -
-> -Optional Properties:
-> -- hisilicon,peripheral-syscon: phandle of syscon used to control peripheral.
-> -
-> -Example:
-> -
-> -       /* for Hi3620 */
-> -
-> -       /* SoC portion */
-> -       dwmmc_0: dwmmc0@fcd03000 {
-> -               compatible = "hisilicon,hi4511-dw-mshc";
-> -               reg = <0xfcd03000 0x1000>;
-> -               interrupts = <0 16 4>;
-> -               #address-cells = <1>;
-> -               #size-cells = <0>;
-> -               clocks = <&mmc_clock HI3620_SD_CIUCLK>, <&clock HI3620_DDRC_PER_CLK>;
-> -               clock-names = "ciu", "biu";
-> -       };
-> -
-> -       /* Board portion */
-> -       dwmmc0@fcd03000 {
-> -               vmmc-supply = <&ldo12>;
-> -               fifo-depth = <0x100>;
-> -               pinctrl-names = "default";
-> -               pinctrl-0 = <&sd_pmx_pins &sd_cfg_func1 &sd_cfg_func2>;
-> -               bus-width = <4>;
-> -               disable-wp;
-> -               cd-gpios = <&gpio10 3 0>;
-> -               cap-mmc-highspeed;
-> -               cap-sd-highspeed;
-> -       };
-> -
-> -       /* for Hi6220 */
-> -
-> -       dwmmc_1: dwmmc1@f723e000 {
-> -               compatible = "hisilicon,hi6220-dw-mshc";
-> -               bus-width = <0x4>;
-> -               disable-wp;
-> -               cap-sd-highspeed;
-> -               sd-uhs-sdr12;
-> -               sd-uhs-sdr25;
-> -               card-detect-delay = <200>;
-> -               hisilicon,peripheral-syscon = <&ao_ctrl>;
-> -               reg = <0x0 0xf723e000 0x0 0x1000>;
-> -               interrupts = <0x0 0x49 0x4>;
-> -               clocks = <&clock_sys HI6220_MMC1_CIUCLK>, <&clock_sys HI6220_MMC1_CLK>;
-> -               clock-names = "ciu", "biu";
-> -               cd-gpios = <&gpio1 0 1>;
-> -               pinctrl-names = "default", "idle";
-> -               pinctrl-0 = <&sd_pmx_func &sd_clk_cfg_func &sd_cfg_func>;
-> -               pinctrl-1 = <&sd_pmx_idle &sd_clk_cfg_idle &sd_cfg_idle>;
-> -               vqmmc-supply = <&ldo7>;
-> -               vmmc-supply = <&ldo10>;
-> -       };
 > --
-> 2.53.0
+> 2.45.2
 >
