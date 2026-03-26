@@ -1,205 +1,135 @@
-Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
+Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com [209.85.167.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3BF951A6832
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 12:34:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA1B8399352
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 12:34:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.44
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774528478; cv=pass; b=cuh1DOmh/+sSgLxaj4x1IJtvP4oMMfzpaRqkn+VdSv1U4RMTcAkKLwlKTrYvxvFiHGf7HAJAWTfWt/Txg6hAkURTV34VPjCgsc4sZLjwRWYCZn5bu1MiPTxjthJfN33OeuWQWO8myY5wAdbjqm7y/87EfwzgeQJH+/JiNG7n5Ds=
+	t=1774528481; cv=pass; b=hFTVmdeWEkt+fCVB2zMY9SBOQoyfVeXeJ0Lv72C/6qv0I9OR9IVnS6wUXZnt6VsjH81tXQoh/UgoaqCw+R40DxwTmeNSw5UmVNDkbAHk/+W32Ko3NhkficgK/QR1QdUxZlGtJa1vptnC7onCXXhoxMOYZ4TTAAusHgYMfQVloP4=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774528478; c=relaxed/simple;
-	bh=vKbutdKkB7cYgg8PtWY4GjrFMft+n09kmPg3iA2nEv4=;
+	s=arc-20240116; t=1774528481; c=relaxed/simple;
+	bh=L+4+cBfFgjRVu3c6cuK68SoH4vuUvAH87VW8dhUcjhw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jMpGGNqHJOPlzgfmLceHnNIEX1SZE1Cxp6S2g9pnIQhJhjA0qa5z4ZaH+7fqw96iOJcuoVeavnjNvUBiV36Od4l3gtToNqyWulPh9QjlnHHDLbJyyQGwhEhJs2hFQqCDDPxGbuYRpEUrAeNUULLyfF61oMCUu74R8+Py5xl0eTU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JL7Oa7vc; arc=pass smtp.client-ip=209.85.167.48
+	 To:Cc:Content-Type; b=WmCVfldHjDI7Pf0UgTGThaCcbLS9gIaH+KwKPyaPRt5MmmLrlnW+700aUtcHEVfqpfW+zvMUI2qLRfjL8otKPhWpCMt2ZDbUIwQDXqxihvSEFk1lEQ/d0znB57j8tJ2lXjJG0VNQxlq6aAut516hw9pJ2Hm5iS7kz2DtJaLqqPI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=CYD/O+9j; arc=pass smtp.client-ip=209.85.167.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JL7Oa7vc"
-Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-59dea72099eso1090502e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 05:34:37 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774528475; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CYD/O+9j"
+Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-59dea72099eso1090543e87.0
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 05:34:39 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774528478; cv=none;
         d=google.com; s=arc-20240605;
-        b=NWZrWOLnAJFgI8nRxlEB4508tp5YSOHJQ1OyT4bYRZPrpZqrFTyaNbEayULbkjCncD
-         1QCp0Kzl6mDMlY/j0H+V/NMtwbSgMhcYw/zglzLNM18AqpX3tEK+mglQmARuGe1nMu50
-         MkEml2leXhEiZGp24BS6RFncU/0xXu0umz2G2h7dU+ByIA5FN15vVg/QJFeoFHl78OO4
-         SshY/W+A2zCaUj05HPDQboziDCHaUXTcXgvEd38kGgHMkQ2/J0FgJX33kQEEC1o0e87b
-         HpglZeth722klZCT1WRApw2LfX+FiQs4mhtDv7WivoCi79mAXU4IFpaBa4Ic5eSyNE28
-         KwPg==
+        b=O35J1B+UvwLVshOVQxZmHV4cjFxPoEnOHmv6ar8xcCS234dElx8Czh+sUEPnDbJrf2
+         Vs8DsEzErNpRtI5lYRsFMcviD68OfbgYc6JALkBIAlf0vYqXmyhWxTtW1ZjYyDVWhgK7
+         F2OtJX56tY3seSojFJikgvTBymwbuKV5yFiukrzXtuVhrzC8eXspR+QwVdLU1v+EF4EQ
+         iyaPmlT2FFLL4nqpayND9pWt2L/3I8zHpaWPe2FJclUR3b2pODivQFzkkCbns+WBX7JT
+         sTihO1sGj981zeMqyPNgN/+Eyg64iYR7a6EwutiRiKwXVDXS1MTa8QbMEAFlDk8gB1Iy
+         6C1w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=DKfBZ3nUfK2TfojoC1M4yQGHYMzoN7cQZr4Vt9bR1fc=;
-        fh=l1I0WuCJ2piltHeIYbY+Nc/RCsq1tTb2uAouZe6TLfo=;
-        b=bWIKR66dEVrXVm0tRL+FsxK8EGcO+IfcjjAdzvdxQhNAtdONXbASZBQdupd94EFsJi
-         PsVJZPzRegvAJraXQroqxSUXGnwT0SY7yFROB5gZCFUcpsGdx13r1Pnjw6vl3wd8Oooa
-         F+FvpMQRm4z95LcCx1QJakBLWOUtv4h0/42CkBSjHwbObrl4effFPCEl9ePpgSgTtDWn
-         J5Ns284YsoCk1neJdZYmtE8+KkOJ8vTHo+Qpsn1WURkI58XYif8npRlgAA3dCBP8UNQT
-         LN98MvXA4I5tB0gQGs24xt226K/j86KrCg9E9W8JQr/0TZsPNyczHikwuifn0aM+UNTr
-         jmGA==;
+        bh=whbb87R02VpuWnrdM86dwQGbuC6f1dMRJ8XJxXPbpSk=;
+        fh=+7i1L6B6HSf5D5swOpbbocfhWIv7bpzSD+VPkqZh1Ws=;
+        b=VbNGVh8THXAyRumpRpTTpQBBfewFZtBv3aE/EE0BbfJjRpjaPTQyH18jxB8fAljOfc
+         ycFPRJZ9tLJwJ9bD5WuBWeHOByBAmJIkoLTyD/US9IeCqQczVcQszJOTHGR5uww+HjlK
+         +5n7P/6w4baHIRGhNK/NB6989D7RlUcIR4WNvXmJG9SfF3QAdz/s4dP0Qg0gRWceQHn9
+         LaFCVuNuuBdnQeMPPdWj85uvsNOxmhb65jO32KQC2JWXxHPElIZmnfaK6OCFkNOSGNrc
+         DHt6OAHxJicGJ2BMPZYVh4Oj1dz9EnS2z4zqnszjB2Yk7LF8IPEMHJFUOZ3wDh32gFZH
+         phMQ==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774528475; x=1775133275; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774528478; x=1775133278; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=DKfBZ3nUfK2TfojoC1M4yQGHYMzoN7cQZr4Vt9bR1fc=;
-        b=JL7Oa7vc0gQP3LaU9EmY7l/Sc3kiXzVV2l4mvNsVkgnVDbpk6z3rcFSzBF+p6PLsaK
-         xIqZlN/lFJO7ucuknZRX6IPGOVvrIS4sw27tR6yQ3o6EkNlbAE3NNC3davrhEXrHDF/K
-         D/IGxuhh7kk0SEGtzkRneSgc6WGxXt+FkySAtdsdtZNysDglGBmg/7PVXKcReIu9pt/d
-         e6dLSCw88Ct9Bjr2rRc0o+SAf2YLlfa6EzL1nTRXgLWVoqx0cnxuZugvr/kmqe9315rc
-         jBpk4uJDAzLKDSvC3ps55265Y/EY7/3IYdyEJAuNmWRogs59r5VwtTPRAqipBit+zJcm
-         xKYw==
+        bh=whbb87R02VpuWnrdM86dwQGbuC6f1dMRJ8XJxXPbpSk=;
+        b=CYD/O+9j3q3h0pAFEM9o3a5mk51M6+0GVZEEeJ52Usbq42iXsEY/sLSKyrrvOPuoJe
+         8T5vzjEy8CeioOqyOVxCTrnHcxbVvfB9a69XVmv3fh+Eo06wWAOge9YjVq3Cu0craXjU
+         Nk9RNoJQU1DpRBwA/CJRfX+Px6gRz/MFHWM+RQ/d/yL5dpTC9UsARnsRPYNEBWPJ7Abg
+         XDda7/uHEuxBbnqq7SSxc193N2kA5tDCijFWQowpEWyGCmTW7IpVNlJOqv5wfq240rOX
+         KbRWyAMO6dqSHWheji+RSKuSJg2or/EuW/nj0OKqbhYIC3CCdRHwIIqZJjhq/Xtab8JB
+         evOA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774528475; x=1775133275;
+        d=1e100.net; s=20251104; t=1774528478; x=1775133278;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=DKfBZ3nUfK2TfojoC1M4yQGHYMzoN7cQZr4Vt9bR1fc=;
-        b=lEudTvTmfK70uLHoJv0/NGErjfqeghEHEV4cw/65euA987SWgpcEhdgQTJHn6VOc2N
-         /au/6NhzvIS9TSOGixcRazyh8XcruV0fCSqyT0iiLpKqXNmxgRnf0qIVe1YOPPppzr6R
-         2lru1SaqltjrikFf9M6XRjpn0BJiPUdSlxHlNYkn5C6hHcBMGhbCCsXJKCIxvgfFepVH
-         BzVgURzbRYoSt964H+aE++jgtsQOwwJSIQ+DMkQ4rVYydIS2Ys2wu6XZ8ISajrgOOnf9
-         vT2GgMcSKWqPPN4w1rhTo5p3hCmFNuXhyBfkzt9lP8tZ0z04db1xdV/fuiJolnhXn5Un
-         qQxA==
-X-Forwarded-Encrypted: i=1; AJvYcCUvfEViVh/5iG/NwdeBC8W1/u469sS78rPYOugcluPR/wwtwQqq1V4KIec2x32kgss0IxRIh+aKkbA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxNqk6+xBjyqNR8/pfBTAvuqmFj6JvfyAR8H3ACXgtwZyVUn9i8
-	z28tEHO5+nUJ/lPhq4h5YjLl3v/oXsYHUwk/AT/qDfU/o4wXJrMSRLZ/iYfnyOKjl3djUwnuuYG
-	imsCLjaxo8WXjsw9zVq46qbBCo+W/crIA6xX/e04g8w==
-X-Gm-Gg: ATEYQzwadwZxuvH/2G+sBcxUqBUnrRCAwkfyL1OEBBRBpJFy9ZxislJwUZzJGEq/AOp
-	AdBnyzzWG+eGSEuHDHwCjW7ElAnMbGREsxyRf3xBmshc5rD0vfPRj7XRUIo0Lq6+T8D3ZEsze21
-	7BxTHhr+N/hIpwHSfTHfhNe8NwPCD8xzJfie4H0SL03cIKma1u0ozl1EHgYfb8hS1frJzx1Rrvo
-	VMxSaXkA1AIw2LXy1ihyNeOWpKXxit4eHh81OaCEN0V5RFySc5DjfLY2Id3wZGq3RtDzgZO9UYs
-	SF6sMhU=
-X-Received: by 2002:a05:6512:3ca1:b0:5a2:8636:6150 with SMTP id
- 2adb3069b0e04-5a29b977f5cmr3510136e87.10.1774528474999; Thu, 26 Mar 2026
- 05:34:34 -0700 (PDT)
+        bh=whbb87R02VpuWnrdM86dwQGbuC6f1dMRJ8XJxXPbpSk=;
+        b=BZHdnYscAWkjh9nW5x+a+BDw1js+8tjo5a/p6J8owLxLrcU0JNvOOiO0XPxPELwODJ
+         9cla39klcWjS1p8EwF/ika0BBQGwRLbYQ36qMOAqnX3qBvLTBP25fG0rIGMEWaq/UDVR
+         1Qsm3li9hQu+p8WLzjqdMZetsiSAtFlROHt7VMV91Ih1kXaJprAaESwN+ZZYpS/36sh/
+         aPig8Ms8nVuYodA4YglxMmFvKE/TSiyXvlnaAg80shKv8jM/Oe7x58YvDaXss6Xmn7DI
+         Z0euQxb9wh1S27PQ8S3fMHYpMfoRopv932u7P05s+LkDr62Rt1hbFqFwym5M/PVgDdhJ
+         oqjQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUrFJ7IhCXURkbgLxpO7lGZjD3D09x0bXgD6BmtWTVL7B3JiS8JaX2Gfr4q+3+H7mg1i5pmQQOOQXU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxlY+LEvzCu11sslL/8+bWCptumsUNqzp+RbQgctReuYfvNK5Wz
+	N7QIJFxfGRM+/ROtVtzmE3oUvE8MirlgPFTja4t+qc00sQ2wvAiZD5LYKtB0f88QgfMAxkGHnKe
+	JbXm+m8cL3xW2Hhl9mn4xBCxtyuuWNyF1EgH1qracIw==
+X-Gm-Gg: ATEYQzyuuhOtTNqI0SQGXHY+rO+Qsk7HX/We8eUsXRl4PiwaE0JZUrliQdNEZiw6Ko9
+	QxZfHNG9xrxmo9NAVQ2mhx6E7kIkjk3ZJQ7hpeauYXnvoTmb6/VzCv2jDsXwOnLUvPAvshcgptz
+	zLARfdX6E8ZCQrA5R19GObwpkncVY/sQEjYEXV6+oV/p4DohNGfGQn1p+M/FyQHK7YqPoNNsyP4
+	Cce5naspD+P2Rpbx5oCPWcf5uZW47htkUCmGatV/wpZMyX15Qj0wdIOKgOL6a3vVNwsUz4ZzMO4
+	laxI/Hw=
+X-Received: by 2002:a05:6512:224c:b0:5a2:a568:65dc with SMTP id
+ 2adb3069b0e04-5a2a5686674mr633975e87.29.1774528478029; Thu, 26 Mar 2026
+ 05:34:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260324143448.2631888-1-b-liu@ti.com> <20260325134947.2799552-1-b-liu@ti.com>
-In-Reply-To: <20260325134947.2799552-1-b-liu@ti.com>
+References: <20260325-ipq9650_sdhc-v1-1-53cf7ba11087@oss.qualcomm.com>
+In-Reply-To: <20260325-ipq9650_sdhc-v1-1-53cf7ba11087@oss.qualcomm.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 26 Mar 2026 13:33:58 +0100
-X-Gm-Features: AQROBzDsSu0isFOTp7LFpErPbIIJz9mwTZMH7T_NJkSfkIxfgjxejHieQax_j2k
-Message-ID: <CAPDyKFq42GDC6V4WZpax_tFM69JPafB9_UOAsfkJN1ZxAP7LeQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: block: use single block write in retry
-To: Bin Liu <b-liu@ti.com>
-Cc: linux-block@vger.kernel.org, linux-mmc@vger.kernel.org, axboe@kernel.dk, 
-	shawn.lin@linux.dev
+Date: Thu, 26 Mar 2026 13:34:02 +0100
+X-Gm-Features: AQROBzARZ36FCtAuNnlkbnt6Q97KUANYiNkFWS4I0NgJYn-2Ep_TtXNHwsftZn8
+Message-ID: <CAPDyKFpRqE43N8S5ndpv4EG+hpvLCPrnC_i41TATTGnTYTjpOA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: sdhci-msm: add IPQ9650 compatible
+To: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>, 
+	Konrad Dybcio <konradybcio@kernel.org>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 25 Mar 2026 at 14:49, Bin Liu <b-liu@ti.com> wrote:
+On Wed, 25 Mar 2026 at 12:40, Kathiravan Thirumoorthy
+<kathiravan.thirumoorthy@oss.qualcomm.com> wrote:
 >
-> Due to errata i2493[0], multi-block write would still fail in retries.
+> The IPQ9650 supports eMMC with an SDHCI controller. Add the appropriate
+> compatible to the documentation.
 >
-> With i2493, the MMC interface has the potential of write failures when
-> issuing multi-block writes operating in HS200 mode with excessive IO
-> supply noise.
->
-> While the errata provides guidance in hardware design and layout to
-> minimize the IO supply noise, in theory the write failure cannot be
-> resolved in hardware. The software solution to ensure the data integrity
-> is to add minimum 5us delay between block writes. Single-block write is
-> the practical way to introduce the delay.
->
-> This patch reuses recovery_mode flag, and switches to single-block
-> write in retry when multi-block write fails. It covers both CQE and
-> non-CQE cases.
->
-> [0] https://www.ti.com/lit/pdf/sprz582
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Bin Liu <b-liu@ti.com>
+> Signed-off-by: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
 
-Applied for next and by adding a suggested-by tag from Jens, thanks!
-
-Please consider sending a patch on top, that decreases the data size
-of struct mmc_queue_req.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
-
 > ---
-> v3: move the flag to struct mmc_queue_req to reduce the scope
->     cc stable@
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> v2: add errata details in the commit message.
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index fd1d5b04e755..695a95e8f35d 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -43,6 +43,7 @@ properties:
+>                - qcom,ipq5424-sdhci
+>                - qcom,ipq6018-sdhci
+>                - qcom,ipq9574-sdhci
+> +              - qcom,ipq9650-sdhci
+>                - qcom,kaanapali-sdhci
+>                - qcom,milos-sdhci
+>                - qcom,qcm2290-sdhci
 >
-> link to v2:
->     https://lore.kernel.org/linux-mmc/20260310160408.3976760-1-b-liu@ti.com/T/#mb201075c9c466a78b58dbb0bf1f39139f0928591
+> ---
+> base-commit: 85964cdcad0fac9a0eb7b87a0f9d88cc074b854c
+> change-id: 20260325-ipq9650_sdhc-9b75ee9ed5ca
 >
-> link to v1:
->     https://lore.kernel.org/linux-mmc/20260310160408.3976760-1-b-liu@ti.com/T/#u
->
->  drivers/mmc/core/block.c | 12 ++++++++++--
->  drivers/mmc/core/queue.h |  3 +++
->  2 files changed, 13 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 05ee76cb0a08..db8c99c73a61 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1401,6 +1401,9 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
->                     rq_data_dir(req) == WRITE &&
->                     (md->flags & MMC_BLK_REL_WR);
->
-> +       if (mqrq->flags & MQRQ_XFER_SINGLE_BLOCK)
-> +               recovery_mode = 1;
-> +
->         memset(brq, 0, sizeof(struct mmc_blk_request));
->
->         mmc_crypto_prepare_req(mqrq);
-> @@ -1540,10 +1543,13 @@ static void mmc_blk_cqe_complete_rq(struct mmc_queue *mq, struct request *req)
->                 err = 0;
->
->         if (err) {
-> -               if (mqrq->retries++ < MMC_CQE_RETRIES)
-> +               if (mqrq->retries++ < MMC_CQE_RETRIES) {
-> +                       if (rq_data_dir(req) == WRITE)
-> +                               mqrq->flags |= MQRQ_XFER_SINGLE_BLOCK;
->                         blk_mq_requeue_request(req, true);
-> -               else
-> +               } else {
->                         blk_mq_end_request(req, BLK_STS_IOERR);
-> +               }
->         } else if (mrq->data) {
->                 if (blk_update_request(req, BLK_STS_OK, mrq->data->bytes_xfered))
->                         blk_mq_requeue_request(req, true);
-> @@ -2085,6 +2091,8 @@ static void mmc_blk_mq_complete_rq(struct mmc_queue *mq, struct request *req)
->         } else if (!blk_rq_bytes(req)) {
->                 __blk_mq_end_request(req, BLK_STS_IOERR);
->         } else if (mqrq->retries++ < MMC_MAX_RETRIES) {
-> +               if (rq_data_dir(req) == WRITE)
-> +                       mqrq->flags |= MQRQ_XFER_SINGLE_BLOCK;
->                 blk_mq_requeue_request(req, true);
->         } else {
->                 if (mmc_card_removed(mq->card))
-> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-> index 1498840a4ea0..c254e6580afd 100644
-> --- a/drivers/mmc/core/queue.h
-> +++ b/drivers/mmc/core/queue.h
-> @@ -61,6 +61,8 @@ enum mmc_drv_op {
->         MMC_DRV_OP_GET_EXT_CSD,
->  };
->
-> +#define        MQRQ_XFER_SINGLE_BLOCK          BIT(0)
-> +
->  struct mmc_queue_req {
->         struct mmc_blk_request  brq;
->         struct scatterlist      *sg;
-> @@ -69,6 +71,7 @@ struct mmc_queue_req {
->         void                    *drv_op_data;
->         unsigned int            ioc_count;
->         int                     retries;
-> +       u32                     flags;
->  };
->
->  struct mmc_queue {
+> Best regards,
 > --
-> 2.34.1
+> Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
 >
