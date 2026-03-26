@@ -1,247 +1,73 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21FB8283FEA
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 08:54:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD93D186E58;
+	Thu, 26 Mar 2026 09:17:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774515298; cv=none; b=ppFuiC5LxFIviAkBzIlhISGNwIb/taDWI1WIPwgCV/aa3W51pzvNAGJ5EJJK+hqiPVUiY0kMWc9uS0NgcXUBUcwmm2Y6Imbf4nX8N1KStbPPjSPY0g3P/cUokZUQWNjNRXCt2+Ja5j/dw8AZc7ppO5lBpzd6kGNc3/6fynQGys8=
+	t=1774516634; cv=none; b=ZWmSqBh7Z1COgQhhz/xD7xI8CFJFYepYD4CypUJGF7C8Lp9YcUCw10mJOQ4Opqhkc3gTkrxqU+HiVSG8Qc66I6Qamzip25OLvATn4d5VJhFkEJ+GuGY37odO6+z+30U9NJbRwgDfexLkzT9hEDNQgQX94NqJBRlf+xqOU7qUd/w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774515298; c=relaxed/simple;
-	bh=sDMEuZ5NbvWpRTjfdc6QeJE8QGjyvgn4ez8QF19VQ0I=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=Z+JHUKrH3lK6fhr78fnLy/UH5xkppU42AcsTET8jFT7wAQ3VWFukVBs/LSVGtUU+YcFNkjIjvKCnF7oFc9eMnvf63VgGqFdgVsWEyIeXoruur2D9I+HuRAAtXDzmaN3K1i59//bTacZvRR6GY5Tzck51jaGFG2tQpR4pCJ/vr2k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=o0z1S6+a; arc=none smtp.client-ip=209.85.128.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1774516634; c=relaxed/simple;
+	bh=G84K/2M3CxqOxKC7wFqRvw5LwHGm2WI3SpgTvoWdTSo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Kwj9l4oI+oe+BkT5gL3eFBsl/f2HiEUtREI4i1u+f9BiFQg1z+m1Zlqe9wSt5zMweD7nm/z4O5Q4qa172mMxAWte17NpglR9+16h4935G/oYVzM24mniIn6rDhbALFfOyvb1SPFZv2LMIw7uCCjBAh7QrjOsZ9t11Rb5OqWKyaQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jXbBplnW; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="o0z1S6+a"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-486fd3a577eso5529425e9.1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 01:54:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774515295; x=1775120095; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=NPOq+t0BPIjTXIy85z0pLZNyx1Sqnvxn5kHxjGZM2Uw=;
-        b=o0z1S6+aU93OlkOzo7sM3NMZSGxiJPty9c6uVfGVerbwntDWAYebxSBkmpLFLWMiw0
-         mwCcud2XkX0Qg6vp6ndNzPT/P+wcUe/jxNZsnxRXIpd7Siezh6TxU7oEwh9VaueEFh0H
-         2D1hIXgW1V3YfrEbS4zcmb5uD3VxENuhFD2aEhv9lti8iN3RkVV+OHhdyzkKwip3sB7b
-         uQFQCd1a6Ujgd4biVNtE7BHKkqu8ElvOtbcNHEDGFALH8cDv//LYTyu+g187TVw91qHg
-         Yn88dudTl3SOOJS2tAyXI+6qKuUz75zsgQO+9f7ua2x7hS/WflKKMKcWysJXqLy/l4Ph
-         JqzQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774515295; x=1775120095;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NPOq+t0BPIjTXIy85z0pLZNyx1Sqnvxn5kHxjGZM2Uw=;
-        b=k6sUDUlM9OdsZIC7GqKdiktlLCVSeaH28+tbLcVkvFACdIv3OkkWceqz8nUDjFdUGl
-         NJAghvmy1Vezm9i9vM/UkC3Mp64pSmxDBv3iNEy+/9sNsXBqj+w+f7w/v5uD4n8dqbE6
-         +qc1j+ufteGnxNAw/SOqoGDJUTLMrFHXS9vXC1MncXAIAyb1VmS5+xUrHsRo9mVojBjw
-         glJMtKsRY8E5VRMm5ZsihLxAr9DkJrAQ9s1m8CRJczIBfts1V2/Zuo4Pw2qNQs0zlvRu
-         0mZC3v5uy80aalfMOnQGO84dvCoTGYDOj4EsqRFyQ7jHRAPurIaivKO+nXZfxCkVD0ar
-         49Gw==
-X-Forwarded-Encrypted: i=1; AJvYcCVC+7NbPMVN98AY5Z7i/OJfux23+AglIHwOXHHggWJ9z6br0kB2q+YscG1hcRY3F4OF5R14XK3Bba8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwFxc6IHEALsErtDuRwcqDifuQj8bRWcEQsvYig0nPLbVIfM7Kr
-	c+HgOGPEcJXdQiR4EJ+3MWk22fXGjSHjOVANtXA/IRSjVKZr1AoTzP7yokjzhS0qTlQ=
-X-Gm-Gg: ATEYQzyjTKyTEJCf0CeLx3Wdaqoen46CHyA0yqzq5N9s/pcTQG70JA3+YCF3F7MZ186
-	J4s47wzPqCbBPne7ot+xCplwqzm3IzTesoLdxNlzZn2dF93TQG4S438NAt6zri/5iY1hkQrAjGB
-	T2rfyImoPbP6/S6/f+KoFX02POVrh5HnaoefdWxQZSFc1mAxtlDuTr/80qNB6l1rbdMTU/3hV0h
-	76ZAxqeyvQMhbcuoSZyQGLgCRGRsaByjkX+5UvAisVAtuMIIO5sgCE/CbeHzz8tcvTCESDt+8xu
-	PQncKsqbnC4Pjvg7QqEqA/yPhuRBxDybJKZcW7ccJtg45CKXgrLMLvFD1mtyPMguvF41h2xfec6
-	Gldjv9p5jdXaQydA9GwVJTxOKbWlJFGuLyKjWcbAfr0sFRX3K68+kEBuGmSbAp8Y8P60uXrIGVo
-	T2NsddV1yYHWTgxJhm01eH3BYj8RQgDV1L+YFdnD1MqW0wA8vGy0OXrt89O69vVqTk2NwutzcMz
-	jLR7UI=
-X-Received: by 2002:a05:600c:3e1a:b0:486:af22:4a2a with SMTP id 5b1f17b1804b1-48715fbabedmr88067005e9.7.1774515295443;
-        Thu, 26 Mar 2026 01:54:55 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:106d:1080:8431:f88b:714d:f78d? ([2a01:e0a:106d:1080:8431:f88b:714d:f78d])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48720901b90sm10376515e9.17.2026.03.26.01.54.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 26 Mar 2026 01:54:55 -0700 (PDT)
-Message-ID: <512d95b5-5348-4c7c-961c-b6ca1431cee4@linaro.org>
-Date: Thu, 26 Mar 2026 09:54:54 +0100
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jXbBplnW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D2DC8C19423;
+	Thu, 26 Mar 2026 09:17:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1774516634;
+	bh=G84K/2M3CxqOxKC7wFqRvw5LwHGm2WI3SpgTvoWdTSo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=jXbBplnWaJ1/yqn6Q5pwHu63DJmf1A/wrAAGtBTZmoUNjsALP6A9ugvbzRMPO983W
+	 QKVmbMTufJ8DEIXN0q/ofqgO0avz8haV+KlYnD+tOEAtLcpEraKR+P1FE4ouX2zAY4
+	 6ll3Qck3faqm7e2ImgHmYMTOyvVLbqbCyoWNOqVc2wEO+4dOaB1N7NhXWDDJo442eY
+	 LPw5fydYLQNf9UELoGZ+K1RM5bz6EnXxjpC/dgOjhipx0sGrIb0p1yp60eX+CK4/jW
+	 4WpzAECLTQspALtlhFGToqkNNoLodEDdkYqbh5BfGRBfXl0LwgzqyHtZIs9nZf8S82
+	 Nm00FCmfAmiuA==
+Date: Thu, 26 Mar 2026 10:17:12 +0100
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Bhargav Joshi <rougueprince47@gmail.com>
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	xuwei5@hisilicon.com, robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
+	ulf.hansson@linaro.org, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, 
+	daniel.baluta@nxp.com, simona.toaca@nxp.com, d-gole@ti.com, m-chawdhry@ti.com, 
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: hisilicon,hi3660-dw-mshc:
+ Convert to DT schema
+Message-ID: <20260326-overjoyed-chocolate-bobcat-6c41e6@quoll>
+References: <20260325225439.68161-1-rougueprince47@gmail.com>
+ <20260325225439.68161-2-rougueprince47@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH v4 9/9] arm64: dts: amlogic: t7: khadas-vim4: Add MMC
- nodes
-To: Ronald Claveau <linux-kernel-dev@aliel.fr>,
- Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
-References: <20260325-add-emmc-t7-vim4-v4-0-44c7b4a5e459@aliel.fr>
- <20260325-add-emmc-t7-vim4-v4-9-44c7b4a5e459@aliel.fr>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <20260325-add-emmc-t7-vim4-v4-9-44c7b4a5e459@aliel.fr>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260325225439.68161-2-rougueprince47@gmail.com>
 
-On 3/25/26 10:15, Ronald Claveau wrote:
-> Enable and configure the three MMC controllers for the Khadas VIM4 board:
-> - sd_emmc_a: SDIO interface for the BCM43752 Wi-Fi module
-> - sd_emmc_b: SD card slot
-> - sd_emmc_c: eMMC storage
+On Thu, Mar 26, 2026 at 04:24:38AM +0530, Bhargav Joshi wrote:
+> Convert the Hisilicon DesignWare Mobile Storage Host Controller
+> (dw-mshc) bindings from text format to DT schema.
 > 
-> Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
-> ---
->   .../dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts  | 90 +++++++++++++++++++++-
->   1 file changed, 89 insertions(+), 1 deletion(-)
+> As part of this conversion, the binding file is renamed from
+> k3-dw-mshc.txt to hisilicon,hi3660-dw-mshc.yaml to align with compatible
+> string naming conventions. Examples have been updated to pass schema
+> validation.
 > 
-> diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> index 770f06b0b16c7..5a73ae081036c 100644
-> --- a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> @@ -14,7 +14,10 @@ / {
->   	compatible = "khadas,vim4", "amlogic,a311d2", "amlogic,t7";
->   
->   	aliases {
-> -		serial0 = &uart_a;
-> +		serial0	= &uart_a;
-
-Spurious change
-
-> +		mmc0	= &sd_emmc_c;
-> +		mmc1	= &sd_emmc_b;
-> +		mmc2	= &sd_emmc_a;
->   	};
->   
->   	memory@0 {
-> @@ -159,6 +162,91 @@ &pwm_ab {
->   	pinctrl-names = "default";
->   };
->   
-> +/* SDIO */
-> +&sd_emmc_a {
-> +	status = "okay";
-> +	pinctrl-0 = <&sdio_pins>;
-> +	pinctrl-1 = <&sdio_clk_gate_pins>;
-> +	pinctrl-names = "default", "clk-gate";
-> +	#address-cells = <1>;
-> +	#size-cells = <0>;
-> +
-> +	bus-width = <4>;
-> +	cap-sd-highspeed;
-> +	sd-uhs-sdr12;
-> +	sd-uhs-sdr25;
-> +	sd-uhs-sdr50;
-> +	sd-uhs-sdr104;
-> +	cap-sdio-irq;
-> +	max-frequency = <200000000>;
-> +	non-removable;
-> +	disable-wp;
-> +	no-mmc;
-> +	no-sd;
-> +
-> +	power-domains = <&pwrc PWRC_T7_SDIO_A_ID>;
-> +
-> +	keep-power-in-suspend;
-> +
-> +	mmc-pwrseq = <&sdio_pwrseq>;
-> +
-> +	vmmc-supply = <&vddao_3v3>;
-> +	vqmmc-supply = <&vddao_1v8>;
-> +
-> +	brcmf: wifi@1 {
-> +		reg = <1>;
-> +		compatible = "brcm,bcm43752-fmac", "brcm,bcm4329-fmac";
-> +	};
-> +};
-> +
-> +/* SD card */
-> +&sd_emmc_b {
-> +	status = "okay";
-> +	pinctrl-0 = <&sdcard_pins>;
-> +	pinctrl-1 = <&sdcard_clk_gate_pins>;
-> +	pinctrl-names = "default", "clk-gate";
-> +
-> +	bus-width = <4>;
-> +	cap-sd-highspeed;
-> +	sd-uhs-sdr12;
-> +	sd-uhs-sdr25;
-> +	sd-uhs-sdr50;
-> +	sd-uhs-sdr104;
-> +	max-frequency = <200000000>;
-> +	disable-wp;
-> +	no-sdio;
-> +	no-mmc;
-> +
-> +	power-domains = <&pwrc PWRC_T7_SDIO_B_ID>;
-> +
-> +	cd-gpios = <&gpio GPIOC_6 GPIO_ACTIVE_LOW>;
-> +	vmmc-supply = <&sd_3v3>;
-> +	vqmmc-supply = <&vddio_c>;
-> +};
-> +
-> +/* eMMC */
-> +&sd_emmc_c {
-> +	status = "okay";
-> +	pinctrl-0 = <&emmc_ctrl_pins>, <&emmc_data_8b_pins>, <&emmc_ds_pins>;
-> +	pinctrl-1 = <&emmc_clk_gate_pins>;
-> +	pinctrl-names = "default", "clk-gate";
-> +
-> +	bus-width = <8>;
-> +	cap-mmc-highspeed;
-> +	mmc-ddr-1_8v;
-> +	mmc-hs200-1_8v;
-> +	max-frequency = <200000000>;
-> +	disable-wp;
-> +	non-removable;
-> +	no-sdio;
-> +	no-sd;
-> +
-> +	power-domains = <&pwrc PWRC_T7_EMMC_ID>;
-> +
-> +	vmmc-supply = <&vddio_3v3>;
-> +	vqmmc-supply = <&vddio_1v8>;
-> +};
-> +
->   &uart_a {
->   	status = "okay";
->   	clocks = <&xtal>, <&xtal>, <&xtal>;
+> Note: synopsys-dw-mshc binding specifies clock names as "biu" followed
+> by "ciu". However, this Hisilicon binding reverses the order to 'ciu'
+> then 'biu' to match both the legacy text binding and in-kernel Hisilicon
+> DTS board files.
 > 
+> Signed-off-by: Bhargav Joshi <rougueprince47@gmail.com>
+> Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
 
-With that:
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
+Best regards,
+Krzysztof
 
-Thanks,
-Neil
