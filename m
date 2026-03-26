@@ -1,68 +1,68 @@
-Received: from mail-wr1-f50.google.com (mail-wr1-f50.google.com [209.85.221.50])
+Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45F303630BB
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 08:53:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21FB8283FEA
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 08:54:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774515227; cv=none; b=qiwW/tW2pSpFEC0GgX5bdbq5eWqoM4mKvntUG4d7ZKIua37HFg46o3TTly0jagKKf0PLjXaRhbt/V1SVkYFSocEKLbE5cbVmEF7meSpNoO5NLaseq4/GXekpdbinlAwn8o23B5khgOptMV5ABBaEBxWiF2hdw+sqrlRCQRWunK4=
+	t=1774515298; cv=none; b=ppFuiC5LxFIviAkBzIlhISGNwIb/taDWI1WIPwgCV/aa3W51pzvNAGJ5EJJK+hqiPVUiY0kMWc9uS0NgcXUBUcwmm2Y6Imbf4nX8N1KStbPPjSPY0g3P/cUokZUQWNjNRXCt2+Ja5j/dw8AZc7ppO5lBpzd6kGNc3/6fynQGys8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774515227; c=relaxed/simple;
-	bh=zX48RSGJchyr54fW+7YtsUrM88RsAle7VV0Koiwb6Zw=;
+	s=arc-20240116; t=1774515298; c=relaxed/simple;
+	bh=sDMEuZ5NbvWpRTjfdc6QeJE8QGjyvgn4ez8QF19VQ0I=;
 	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=BLpYyWpeL8ZQj8rsrRg93iWwk3PCBk+Rp7qMhSVmDVF5ZZ02A6QEbmr6HtILXVzeDX0FZkCA+sCQkSJUOvwkjwPC8f0IBB7OO0PLWXBzmC3z0aO310lt9IQMXicqlAseFnyMaPrCu6ZnFG2kQNBriRXLYpduiYrodtaPg6bmZtY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tq0a9wEM; arc=none smtp.client-ip=209.85.221.50
+	 In-Reply-To:Content-Type; b=Z+JHUKrH3lK6fhr78fnLy/UH5xkppU42AcsTET8jFT7wAQ3VWFukVBs/LSVGtUU+YcFNkjIjvKCnF7oFc9eMnvf63VgGqFdgVsWEyIeXoruur2D9I+HuRAAtXDzmaN3K1i59//bTacZvRR6GY5Tzck51jaGFG2tQpR4pCJ/vr2k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=o0z1S6+a; arc=none smtp.client-ip=209.85.128.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tq0a9wEM"
-Received: by mail-wr1-f50.google.com with SMTP id ffacd0b85a97d-439b6d9c981so388811f8f.1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 01:53:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="o0z1S6+a"
+Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-486fd3a577eso5529425e9.1
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 01:54:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774515225; x=1775120025; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774515295; x=1775120095; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:organization:autocrypt
          :content-language:references:cc:to:subject:reply-to:from:user-agent
          :mime-version:date:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=hGIQJBrR4L4A7hNhZYj5yBcsB/y/dygFw0rKvJs4Xdw=;
-        b=tq0a9wEMAv5nASRpaUFKOoMcuMS1Ek/Ex8jSqGsKK7H0aHU0WTjoY2yO2b3GGwE8sN
-         iWTQDt+pSRRPmwMnb0XI82A+GyXx2Ux8SKKQdPttUvu4aEO5/Mjs9tFT6HtVwW5yQnwy
-         /d2SZHv6940VxCzXYYkunFYuE2NQmka3ryxLpmuYy5Vm06Bzuzq+FhMfhOzBV7xQ5g8v
-         BGfjZ5LOc250IJu99tRDrPzdMKbiBPPGU8zg2liPIDkGfERmV+jzVLAQh+UuLyJ+G76+
-         HMtlkq+iLyhPXMBtSZw/bib9wvVnSJ1h/RaWDFfZQKiaLdpY6In6fPipJA0Pf/EagSr3
-         U4+Q==
+        bh=NPOq+t0BPIjTXIy85z0pLZNyx1Sqnvxn5kHxjGZM2Uw=;
+        b=o0z1S6+aU93OlkOzo7sM3NMZSGxiJPty9c6uVfGVerbwntDWAYebxSBkmpLFLWMiw0
+         mwCcud2XkX0Qg6vp6ndNzPT/P+wcUe/jxNZsnxRXIpd7Siezh6TxU7oEwh9VaueEFh0H
+         2D1hIXgW1V3YfrEbS4zcmb5uD3VxENuhFD2aEhv9lti8iN3RkVV+OHhdyzkKwip3sB7b
+         uQFQCd1a6Ujgd4biVNtE7BHKkqu8ElvOtbcNHEDGFALH8cDv//LYTyu+g187TVw91qHg
+         Yn88dudTl3SOOJS2tAyXI+6qKuUz75zsgQO+9f7ua2x7hS/WflKKMKcWysJXqLy/l4Ph
+         JqzQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774515225; x=1775120025;
+        d=1e100.net; s=20251104; t=1774515295; x=1775120095;
         h=content-transfer-encoding:in-reply-to:organization:autocrypt
          :content-language:references:cc:to:subject:reply-to:from:user-agent
          :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=hGIQJBrR4L4A7hNhZYj5yBcsB/y/dygFw0rKvJs4Xdw=;
-        b=aP2LMb2UePSTAvJ3/jpOSQXHwVl1+MjK3YBVDhp7i4lvlVocCBqOjnYfQkglEA7EQW
-         uYXV4Qbo8BrIwECMd1n5UJKFiotl/Jy/S67/43+3LvHR9FeO3u6QVk2/jZYebvtiACWH
-         T8oW6Nqw6xwfbxcKuuJjyr8/TZgd5qZrEdwZFIHXELs/ZV33Ynnlrv8D0x4nP0hSm55x
-         FSzhVBrFDEeB5Rl8041IKyvPO/A12/MRhzXh10mazcjbMzSkP6jJWWeStCIqBkwhDvM+
-         sM+Wrjq1kcz/k8mKPj5oCk46LRA/bsLSm61ATcHS3mUeDYYZa1ksO6oXZEvGto7ZBUEu
-         0uYg==
-X-Forwarded-Encrypted: i=1; AJvYcCWViprYV7tSuPBjmGdlZyJwP+CK7ElS8UXanOLTLMbsnuhNb4m5WIe7gFNpzENLgCKWMA46zA3Nq/Y=@vger.kernel.org
-X-Gm-Message-State: AOJu0YweriiN3Mh4Jqd1n2Ug5wbBoUwM0qHVxWO5j/RYHqnda3h/9CXK
-	b9yQAuwBySSX2AV2VguuakngyDTE6eb/TzQuBJ/aO/RTc8VgUU9uUaAs2XUNw7pziFk=
-X-Gm-Gg: ATEYQzxNMRYwLflq8smAELUr14uTlHCyFRJquNx4F1KXuCd+/BiXVtgWoK1ALcCFYIo
-	0uLoHmGE6pMM/GQVq0urerfNtKqzn+mGu//jYV5554SbsJD7jVfkJzslBvo/n/TWp4YJ0UCIPHN
-	1eMN4e3HuDRg68ZQyVKpWyMHMrBCQzSz4CO7B/bMduEoq698nrPUHi5vNjWf6U7DpPMvQSscPA8
-	vwiCE+FqKY36cD7TKZaUmEbBQLIbWOv2tCHgXwcgGhLcVkONA1h5TASfetofYb1JyB38Y+BveKw
-	xlhxod7+r2YPZAbMcg+Ri2WMkwlNslcV4DSDz+lczOgOzChl6+Logc8h8Qs+53tdLSzkoT8+HLR
-	ZKv/4QHACZ1z54FlZqRaCeE8KBTWtJquaMlOz+hdzW+xHJ99ewcSwSfa472Bd3EZh+uJY8X9kgy
-	rzv3KrQsBMm9H71WjD0j2jOTIu/CBOz1WoKATMDIjkHBdNKM+yMjeF6SQTSgXgRJDcGOcJe7fnR
-	mxcd5w=
-X-Received: by 2002:a05:6000:208a:b0:439:c153:ae3d with SMTP id ffacd0b85a97d-43b979fbc99mr1451530f8f.6.1774515224588;
-        Thu, 26 Mar 2026 01:53:44 -0700 (PDT)
+        bh=NPOq+t0BPIjTXIy85z0pLZNyx1Sqnvxn5kHxjGZM2Uw=;
+        b=k6sUDUlM9OdsZIC7GqKdiktlLCVSeaH28+tbLcVkvFACdIv3OkkWceqz8nUDjFdUGl
+         NJAghvmy1Vezm9i9vM/UkC3Mp64pSmxDBv3iNEy+/9sNsXBqj+w+f7w/v5uD4n8dqbE6
+         +qc1j+ufteGnxNAw/SOqoGDJUTLMrFHXS9vXC1MncXAIAyb1VmS5+xUrHsRo9mVojBjw
+         glJMtKsRY8E5VRMm5ZsihLxAr9DkJrAQ9s1m8CRJczIBfts1V2/Zuo4Pw2qNQs0zlvRu
+         0mZC3v5uy80aalfMOnQGO84dvCoTGYDOj4EsqRFyQ7jHRAPurIaivKO+nXZfxCkVD0ar
+         49Gw==
+X-Forwarded-Encrypted: i=1; AJvYcCVC+7NbPMVN98AY5Z7i/OJfux23+AglIHwOXHHggWJ9z6br0kB2q+YscG1hcRY3F4OF5R14XK3Bba8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwFxc6IHEALsErtDuRwcqDifuQj8bRWcEQsvYig0nPLbVIfM7Kr
+	c+HgOGPEcJXdQiR4EJ+3MWk22fXGjSHjOVANtXA/IRSjVKZr1AoTzP7yokjzhS0qTlQ=
+X-Gm-Gg: ATEYQzyjTKyTEJCf0CeLx3Wdaqoen46CHyA0yqzq5N9s/pcTQG70JA3+YCF3F7MZ186
+	J4s47wzPqCbBPne7ot+xCplwqzm3IzTesoLdxNlzZn2dF93TQG4S438NAt6zri/5iY1hkQrAjGB
+	T2rfyImoPbP6/S6/f+KoFX02POVrh5HnaoefdWxQZSFc1mAxtlDuTr/80qNB6l1rbdMTU/3hV0h
+	76ZAxqeyvQMhbcuoSZyQGLgCRGRsaByjkX+5UvAisVAtuMIIO5sgCE/CbeHzz8tcvTCESDt+8xu
+	PQncKsqbnC4Pjvg7QqEqA/yPhuRBxDybJKZcW7ccJtg45CKXgrLMLvFD1mtyPMguvF41h2xfec6
+	Gldjv9p5jdXaQydA9GwVJTxOKbWlJFGuLyKjWcbAfr0sFRX3K68+kEBuGmSbAp8Y8P60uXrIGVo
+	T2NsddV1yYHWTgxJhm01eH3BYj8RQgDV1L+YFdnD1MqW0wA8vGy0OXrt89O69vVqTk2NwutzcMz
+	jLR7UI=
+X-Received: by 2002:a05:600c:3e1a:b0:486:af22:4a2a with SMTP id 5b1f17b1804b1-48715fbabedmr88067005e9.7.1774515295443;
+        Thu, 26 Mar 2026 01:54:55 -0700 (PDT)
 Received: from ?IPV6:2a01:e0a:106d:1080:8431:f88b:714d:f78d? ([2a01:e0a:106d:1080:8431:f88b:714d:f78d])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43b9192e35esm6035382f8f.6.2026.03.26.01.53.43
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48720901b90sm10376515e9.17.2026.03.26.01.54.54
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 26 Mar 2026 01:53:44 -0700 (PDT)
-Message-ID: <f3bcc782-2bb7-44e6-ba40-92a36648d3f7@linaro.org>
-Date: Thu, 26 Mar 2026 09:53:43 +0100
+        Thu, 26 Mar 2026 01:54:55 -0700 (PDT)
+Message-ID: <512d95b5-5348-4c7c-961c-b6ca1431cee4@linaro.org>
+Date: Thu, 26 Mar 2026 09:54:54 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -72,8 +72,8 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 From: Neil Armstrong <neil.armstrong@linaro.org>
 Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH v4 7/9] arm64: dts: amlogic: t7: khadas-vim4: Add SDIO
- power sequence and WiFi clock
+Subject: Re: [PATCH v4 9/9] arm64: dts: amlogic: t7: khadas-vim4: Add MMC
+ nodes
 To: Ronald Claveau <linux-kernel-dev@aliel.fr>,
  Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
  Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
@@ -84,7 +84,7 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
 References: <20260325-add-emmc-t7-vim4-v4-0-44c7b4a5e459@aliel.fr>
- <20260325-add-emmc-t7-vim4-v4-7-44c7b4a5e459@aliel.fr>
+ <20260325-add-emmc-t7-vim4-v4-9-44c7b4a5e459@aliel.fr>
 Content-Language: en-US, fr
 Autocrypt: addr=neil.armstrong@linaro.org; keydata=
  xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
@@ -111,60 +111,135 @@ Autocrypt: addr=neil.armstrong@linaro.org; keydata=
  4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
  QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
 Organization: Linaro
-In-Reply-To: <20260325-add-emmc-t7-vim4-v4-7-44c7b4a5e459@aliel.fr>
+In-Reply-To: <20260325-add-emmc-t7-vim4-v4-9-44c7b4a5e459@aliel.fr>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
 On 3/25/26 10:15, Ronald Claveau wrote:
-> Add the SDIO power sequence node using mmc-pwrseq-simple and a
-> 32.768kHz PWM-based clock required by the Wi-Fi module.
+> Enable and configure the three MMC controllers for the Khadas VIM4 board:
+> - sd_emmc_a: SDIO interface for the BCM43752 Wi-Fi module
+> - sd_emmc_b: SD card slot
+> - sd_emmc_c: eMMC storage
 > 
 > Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
 > ---
->   .../dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts  | 22 ++++++++++++++++++++++
->   1 file changed, 22 insertions(+)
+>   .../dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts  | 90 +++++++++++++++++++++-
+>   1 file changed, 89 insertions(+), 1 deletion(-)
 > 
 > diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> index 2450084d37642..770f06b0b16c7 100644
+> index 770f06b0b16c7..5a73ae081036c 100644
 > --- a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
 > +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> @@ -67,6 +67,15 @@ sd_3v3: regulator-sdcard-3v3 {
->   		regulator-always-on;
+> @@ -14,7 +14,10 @@ / {
+>   	compatible = "khadas,vim4", "amlogic,a311d2", "amlogic,t7";
+>   
+>   	aliases {
+> -		serial0 = &uart_a;
+> +		serial0	= &uart_a;
+
+Spurious change
+
+> +		mmc0	= &sd_emmc_c;
+> +		mmc1	= &sd_emmc_b;
+> +		mmc2	= &sd_emmc_a;
 >   	};
 >   
-> +	sdio_pwrseq: sdio-pwrseq {
-> +		compatible = "mmc-pwrseq-simple";
-> +		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
-> +		post-power-on-delay-ms = <500>;
-> +		power-off-delay-us = <200000>;
-> +		clocks = <&wifi32k>;
-> +		clock-names = "ext_clock";
-> +	};
+>   	memory@0 {
+> @@ -159,6 +162,91 @@ &pwm_ab {
+>   	pinctrl-names = "default";
+>   };
+>   
+> +/* SDIO */
+> +&sd_emmc_a {
+> +	status = "okay";
+> +	pinctrl-0 = <&sdio_pins>;
+> +	pinctrl-1 = <&sdio_clk_gate_pins>;
+> +	pinctrl-names = "default", "clk-gate";
+> +	#address-cells = <1>;
+> +	#size-cells = <0>;
 > +
->   	vcc5v: regulator-vcc-5v {
->   		compatible = "regulator-fixed";
->   		regulator-name = "VCC5V";
-> @@ -135,6 +144,19 @@ vddio_c: regulator-gpio-c {
->   		states = <1800000 1
->   			  3300000 0>;
->   	};
+> +	bus-width = <4>;
+> +	cap-sd-highspeed;
+> +	sd-uhs-sdr12;
+> +	sd-uhs-sdr25;
+> +	sd-uhs-sdr50;
+> +	sd-uhs-sdr104;
+> +	cap-sdio-irq;
+> +	max-frequency = <200000000>;
+> +	non-removable;
+> +	disable-wp;
+> +	no-mmc;
+> +	no-sd;
 > +
-> +	wifi32k: wifi32k {
-> +		compatible = "pwm-clock";
-> +		#clock-cells = <0>;
-> +		clock-frequency = <32768>;
-> +			pwms = <&pwm_ab 0 30518 0>;
+> +	power-domains = <&pwrc PWRC_T7_SDIO_A_ID>;
+> +
+> +	keep-power-in-suspend;
+> +
+> +	mmc-pwrseq = <&sdio_pwrseq>;
+> +
+> +	vmmc-supply = <&vddao_3v3>;
+> +	vqmmc-supply = <&vddao_1v8>;
+> +
+> +	brcmf: wifi@1 {
+> +		reg = <1>;
+> +		compatible = "brcm,bcm43752-fmac", "brcm,bcm4329-fmac";
 > +	};
 > +};
 > +
-> +&pwm_ab {
+> +/* SD card */
+> +&sd_emmc_b {
 > +	status = "okay";
-> +	pinctrl-0 = <&pwm_a_pins>;
-> +	pinctrl-names = "default";
->   };
->   
+> +	pinctrl-0 = <&sdcard_pins>;
+> +	pinctrl-1 = <&sdcard_clk_gate_pins>;
+> +	pinctrl-names = "default", "clk-gate";
+> +
+> +	bus-width = <4>;
+> +	cap-sd-highspeed;
+> +	sd-uhs-sdr12;
+> +	sd-uhs-sdr25;
+> +	sd-uhs-sdr50;
+> +	sd-uhs-sdr104;
+> +	max-frequency = <200000000>;
+> +	disable-wp;
+> +	no-sdio;
+> +	no-mmc;
+> +
+> +	power-domains = <&pwrc PWRC_T7_SDIO_B_ID>;
+> +
+> +	cd-gpios = <&gpio GPIOC_6 GPIO_ACTIVE_LOW>;
+> +	vmmc-supply = <&sd_3v3>;
+> +	vqmmc-supply = <&vddio_c>;
+> +};
+> +
+> +/* eMMC */
+> +&sd_emmc_c {
+> +	status = "okay";
+> +	pinctrl-0 = <&emmc_ctrl_pins>, <&emmc_data_8b_pins>, <&emmc_ds_pins>;
+> +	pinctrl-1 = <&emmc_clk_gate_pins>;
+> +	pinctrl-names = "default", "clk-gate";
+> +
+> +	bus-width = <8>;
+> +	cap-mmc-highspeed;
+> +	mmc-ddr-1_8v;
+> +	mmc-hs200-1_8v;
+> +	max-frequency = <200000000>;
+> +	disable-wp;
+> +	non-removable;
+> +	no-sdio;
+> +	no-sd;
+> +
+> +	power-domains = <&pwrc PWRC_T7_EMMC_ID>;
+> +
+> +	vmmc-supply = <&vddio_3v3>;
+> +	vqmmc-supply = <&vddio_1v8>;
+> +};
+> +
 >   &uart_a {
+>   	status = "okay";
+>   	clocks = <&xtal>, <&xtal>, <&xtal>;
 > 
+
+With that:
 
 Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
 
