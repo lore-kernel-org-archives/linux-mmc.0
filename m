@@ -1,183 +1,140 @@
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97FCB271A7C
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 12:56:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB6A32C21C0
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 13:08:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774529769; cv=none; b=lgCsxYmccwIlRo40HBLxDaR5e5cAMvMp/CoN2M8AsNM8+0ttdm9rJ6xQH9YkiccyVD+NX6E0JebK5Ktd2qVRyneEUK6Xkes2s+/Znc9dDD8DQTyBVEJjDashS9s1Q3fSxgQct5UyCvUTIJ3XLL/kTT8NIC0n0KvWbrJbz3wtUpw=
+	t=1774530490; cv=none; b=u0zqigclT3SjhIOjIKCMOOBKMY2EAQAsyMgFSPxZiY37d8UZn8o4z7EJxchUJKHD+1XiCu/gkKwozRwKm2HSTZ2J9Rei/n/OtnVPWxj1JAy+JD/AUWo/7Z65ouD4afGYolak7ZbjQ0PscPquw1+KcJjZCgTRZmDVFmXOmAtHk1I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774529769; c=relaxed/simple;
-	bh=f5JciFCLHuQRid8O58UfBpq58kWGNO3IgcP/oZDy9Qk=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=MJ473gmxXmQ/cyQdXOiwKqyK4MrRg9ejeO09DnLJb6yJ6xzTWG5c0EIHTPCmFCXAvlKdkL1z2BwV+RZqOj4gMWppFWf+0fbA2A9HkxCP5ilMuSCqwa/owwmYz6RiYDcvlMw7gq9dcyMC7y3Nr2oqdoNko5KQitgQI2Z8KbZqAXk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lBBeooUG; arc=none smtp.client-ip=209.85.128.54
+	s=arc-20240116; t=1774530490; c=relaxed/simple;
+	bh=Ar6pFA6cG6LoKz6FgL+C3IYDb9ssZhhPm3Mk+YrDRNA=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=W0aCkqxGPXiSDKYQslNHByrP4z4IIhR2VnvKvrPY9UJVacNEB8yUmt6XqW9FmCI/bw0b3PSZ/YEQ7UXlm/x0AaCKrzagCyndwbsC49rhJY5bIEl/QaZpLI72DrSthTRcIds4a3g1uIw+URaE9tXO/16yBdIDacJfAStR6tLRMw4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=dX9TUo+T; arc=none smtp.client-ip=209.85.128.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lBBeooUG"
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-4852c9b4158so7876365e9.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 05:56:07 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dX9TUo+T"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-486b9675d36so9044575e9.0
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 06:08:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774529766; x=1775134566; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Yx9U8ru1kAXiSx+zB+95J2U/zt+/QpX2ZNGpavJgFb0=;
-        b=lBBeooUGTcVMGUmYIIsgsZSVPt+kb0NROOP2ua1CkbSAunz0UEWFqciKka5DHiJm3R
-         O/uzQE+2V/GBKfZlgYTJwXLN3QEA1F/sWZ1LPsbY4SyJY0hVIcNYk5BRGmUyS5Pyrjmd
-         g2yuP13BsIAJX02ezQqRVbGy0JIlywtB9n22uD4qWJCF2ENXPz8ALbzF8IepY9i1H0m2
-         mIhC240MsYDabE7I9q1surjkDbVFzXNu1p2jEymBLadwWLGo6ZnF8fzQOw++HrmMxd0F
-         Arl3XPWdqHHKLy1bJr8sNSQi1DU4L2taVsB2dlcifqU5w9O0DT+4noNKv2hSfwqKRR0r
-         SGuw==
+        d=linaro.org; s=google; t=1774530485; x=1775135285; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:date:message-id:subject
+         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vL9P/jR/0HIsuH+Bu1d67p3utwY7viGhc92J5P9lo50=;
+        b=dX9TUo+TXSkf9e1PaMiB3O2jnSvaGs5/adP1rZZ1G0tGtCuxRz1h6XVF0QdnYhKWhg
+         xqjnDjJm8SQj98BzCE5SlTpqgAojH/s7Dcmf8crGgMAzsSc9fDhxEi95ObiLPk8L7jAE
+         a2rYc3OgV1Qkkeinkf++cwLAFRgqGDMkakLoMDw7j8foqNErCqE/F/qT1nxDOZ4jVsQ8
+         PkfmdADO1ukuG0FCscaHLLqdiL3n+/SxreOPD2yRiZV3f31VqnWRiEMqVtXNTIBnkkIy
+         4/O9JNLRtNx95N3B4Itv27uNnoMfelRYmwS+vYF5fjRYrxk45WruOrUgE9DkCbz7PKcO
+         /beQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774529766; x=1775134566;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Yx9U8ru1kAXiSx+zB+95J2U/zt+/QpX2ZNGpavJgFb0=;
-        b=osp7AiVAqBUOExidvaz8K02ftmz4/Ogk8FqidYy0hT+qXRxo4gbXt8TbsJacn//jW0
-         nfPwZyiddP0bdAfmon1er+btrfDWlScpfEF0U6iOqjhcrcUo+xGCPrnggwv9P/iDDnVQ
-         EmFfAp67J7YlpmQipx+Vz44W/C7WPMpK/O/NhGm/iy6TeaIRE6wyteA8ocDh39v+EaH1
-         v25VEzKa4qt++IX27HlRPSJF933/u3qRBzLYNPoTxZB3NBx1jQM74bzO5xrn+yvlYy0c
-         w4A/FKFwDzitBv8nBAjHwoWnNeSwSEP22cML3MuZOZL+eQdeXdTDcT5c3erGnU4/TA9Y
-         58/g==
-X-Forwarded-Encrypted: i=1; AJvYcCXnCMkSA97Agn8bBB6eT2xjpE50paUTAq0Lv6UExNfLRv58PghfJSOuUuuk1CFm1VGpb8LmKRHx8K4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyaDsVZQRtz9Zpr6C2GXgYSs0mxYpDNQOyLt0aFWndL5biDaPaL
-	uUAmf/zNUa6raEjORVEZqBXWgoxsdjKudD4V0vCJjAJQt+wOlfobzrQGk0RfyMbjb0g=
-X-Gm-Gg: ATEYQzwFEN6gPafjmlQ24g6wB1G+vpvWHNVg3ywh1lXrrZF1dPfZH9T407nnaD6AAZs
-	RnlBsRBGOjdgs6OnuNHl86Ueu+u7f5Pxw30NUykjItL9Aq2nfh075i3KVm8b7ITTQmVBrtYBOPj
-	fet6AuHaWMyAv9o3CEJVqW7CP2qqlhzRo+Tb6mO1oy2TXWcJf5X2kLwVmJv025LV49c8rKmED7O
-	zf+BI7QaiSUXNQEPD+oo2FdIPJ5S6tE4DPYtQfZA9an0/Yze3LjppmBLXkn8/iKwcgpy0o/nP2Q
-	JUiwqm4yLEfRV1bQYtBSBQ1fCDK/knmlIGTC6QBze/wMMT2PwXsYOWeZaPTHVNYW204tisbgTdR
-	ur1AQ+/bo2m/8jgmQ6esUqriGEBLlhshJLO8jpEHHWONGEEqX0y1jYzS8/orDuyqgPasUFngIhG
-	HAyZMmRK/0pN5WO2kUIzD7wYVcIeB7LFy/m6ZtGt3IZqtjadk9fsQGFJxHtbwjb5/5acDkK0myz
-	rb7Sjs=
-X-Received: by 2002:a05:600c:45d4:b0:485:2c61:9457 with SMTP id 5b1f17b1804b1-48715fd5277mr105962645e9.10.1774529765762;
-        Thu, 26 Mar 2026 05:56:05 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:106d:1080:8431:f88b:714d:f78d? ([2a01:e0a:106d:1080:8431:f88b:714d:f78d])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43b919dfb54sm8088573f8f.31.2026.03.26.05.56.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 26 Mar 2026 05:56:05 -0700 (PDT)
-Message-ID: <9dcb5e67-6a30-4ca3-b324-a57faee7d767@linaro.org>
-Date: Thu, 26 Mar 2026 13:56:04 +0100
+        d=1e100.net; s=20251104; t=1774530485; x=1775135285;
+        h=content-transfer-encoding:mime-version:date:message-id:subject
+         :references:in-reply-to:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=vL9P/jR/0HIsuH+Bu1d67p3utwY7viGhc92J5P9lo50=;
+        b=sYCYOhgVuog7X+hWfj+xTjK/r8P1k53BaopgxzC8WOby6xjPywI24kzK9YtDMK4QHx
+         l8gl1/B1lodSg+BXDjTMY06/shBPrY8nGUtnE7xj3MPI4cUvkX64Gc6AkJDXuZ82eTHT
+         XOJ0AnZtQVSlRNtJ5DzGZMdg4rHqK9GmtbDAP+exHNwruTtONrbpjQ0ZqW81r0VZjGwN
+         7r14YdFcu/mkFC4kB6VJ3jxUvoESE0Xgmz5NuN6a2PrfqHLfMGXbLtGRWqplRPK/fiQp
+         0D8AvOz9QbY7hu6pF7oHDAalMXjJHkHVCzedDHMhkTTjotkPKp1tY9fnyK6shukXvVWC
+         bSEg==
+X-Forwarded-Encrypted: i=1; AJvYcCXCtMQTL0vJUwZ0m05UGDH2WFvK2yNlbycPjDfLcOhpfKYotTPXDLlDrklyI5OPw5FRnCKpAMBOLgI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwvcTDMMEae+026KXxMaZDbUneRPvGlsuEVzHIaMdMEBOkRmlZH
+	gOSGesupnOM96XcdAsWzS+lJKuvpXsD2QCElIRJHEfv1Rp0yhJ0HF6R4J5UqbtQb77SfyhqHHSx
+	jbw/i
+X-Gm-Gg: ATEYQzyUShQzA6HlKWBdaYO5rmqo0vIvzqxiT1KPv6wDgl0HohQ3OVi0FZE0WP5gX0R
+	dGolLtnIo70L2ranZuMuOwCMgwT6diqKl6Ut6Pb0A8Ug3CrXPqZADaSnY82bhwHMrQEiSnQ8KQW
+	H11irHSLtLosjyqa0zMM06FXX0m4dLxLCz2H6Lcf4DAmDgc1zMHYu6XX2FCgG1yQBqsiAX/7Iyh
+	PQzdx5EdHD4ndSCMCF8A6CjMYW/AmZ14y+6QKsMpqJ0+/Z+Bf+0W3PUpHNGTrXZpIgZpPupwYjs
+	yPwn5XF4GDw1jXRG3LBkbbGQIxNMTr0wWo8FF+TtWNiZjo4WqjaEFZQL8spy3wHhhdhWNO0T5uG
+	T6gSK1BgjsFyJ7lwGXE5AdxLFLC1ABEv2SEz1R1EhhNVatGG1sUPHg2X3E3d30ZcrCCXGj2V6ZQ
+	H7lbWA8Rws/vUI72U5xmX2aXAcUR8de9IsRAnMUfpxwcP0
+X-Received: by 2002:a05:600c:4b89:b0:487:219e:42d with SMTP id 5b1f17b1804b1-487219e05a4mr17195675e9.11.1774530484483;
+        Thu, 26 Mar 2026 06:08:04 -0700 (PDT)
+Received: from arrakeen.starnux.net ([2a01:e0a:106d:1080:8261:5fff:fe11:bdda])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43b919cf2c8sm7580472f8f.20.2026.03.26.06.08.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 26 Mar 2026 06:08:04 -0700 (PDT)
+From: Neil Armstrong <neil.armstrong@linaro.org>
+To: Kevin Hilman <khilman@baylibre.com>, 
+ Jerome Brunet <jbrunet@baylibre.com>, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+ Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>, 
+ Ronald Claveau <linux-kernel-dev@aliel.fr>
+Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, 
+ Conor Dooley <conor.dooley@microchip.com>, 
+ Xianwei Zhao <xianwei.zhao@amlogic.com>, Nick Xie <nick@khadas.com>
+In-Reply-To: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
+References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
+Subject: Re: (subset) [PATCH v5 0/9] arm64: dts: amlogic: Add MMC/SD/SDIO
+ support for Khadas VIM4 (Amlogic T7)
+Message-Id: <177453048347.439230.1647215482099213609.b4-ty@linaro.org>
+Date: Thu, 26 Mar 2026 14:08:03 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH v5 3/9] arm64: dts: amlogic: t7: Add MMC controller nodes
-To: Ronald Claveau <linux-kernel-dev@aliel.fr>,
- Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
-References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
- <20260326-add-emmc-t7-vim4-v5-3-d3f182b48e9d@aliel.fr>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <20260326-add-emmc-t7-vim4-v5-3-d3f182b48e9d@aliel.fr>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.14.3
 
-On 3/26/26 10:59, Ronald Claveau wrote:
-> Add device tree nodes for the three MMC controllers available
-> on the Amlogic T7 SoC, using amlogic,meson-axg-mmc as fallback compatible.
-> All nodes are disabled by default and should be
-> enabled in the board-specific DTS file.
-> 
-> Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
-> ---
->   arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi | 39 +++++++++++++++++++++++++++++
->   1 file changed, 39 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
-> index 36d13371f56ba..fe1ced0a58967 100644
-> --- a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
-> +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
-> @@ -374,6 +374,45 @@ sec_ao: ao-secure@10220 {
->   				reg = <0x0 0x10220 0x0 0x140>;
->   				amlogic,has-chip-id;
->   			};
-> +
-> +			sd_emmc_a: mmc@88000 {
-> +				compatible = "amlogic,t7-mmc", "amlogic,meson-axg-mmc";
-> +				reg = <0x0 0x88000 0x0 0x800>;
-> +				interrupts = <GIC_SPI 176 IRQ_TYPE_LEVEL_HIGH>;
-> +				clocks = <&clkc_periphs CLKID_SYS_SD_EMMC_A>,
-> +					 <&clkc_periphs CLKID_SD_EMMC_A>,
-> +					 <&scmi_clk CLKID_FCLK_DIV2>;
-> +				clock-names = "core", "clkin0", "clkin1";
-> +				assigned-clocks = <&clkc_periphs CLKID_SD_EMMC_A_SEL>;
-> +				assigned-clock-parents = <&xtal>;
-> +				status = "disabled";
-> +			};
-> +
-> +			sd_emmc_b: mmc@8a000 {
-> +				compatible = "amlogic,t7-mmc", "amlogic,meson-axg-mmc";
-> +				reg = <0x0 0x8a000 0x0 0x800>;
-> +				interrupts = <GIC_SPI 177 IRQ_TYPE_EDGE_RISING>;
-> +				clocks = <&clkc_periphs CLKID_SYS_SD_EMMC_B>,
-> +					 <&clkc_periphs CLKID_SD_EMMC_B>,
-> +					 <&scmi_clk CLKID_FCLK_DIV2>;
-> +				clock-names = "core", "clkin0", "clkin1";
-> +				assigned-clocks = <&clkc_periphs CLKID_SD_EMMC_B_SEL>;
-> +				assigned-clock-parents = <&xtal>;
-> +				status = "disabled";
-> +			};
-> +
-> +			sd_emmc_c: mmc@8c000 {
-> +				compatible = "amlogic,t7-mmc", "amlogic,meson-axg-mmc";
-> +				reg = <0x0 0x8c000 0x0 0x800>;
-> +				interrupts = <GIC_SPI 178 IRQ_TYPE_EDGE_RISING>;
-> +				clocks = <&clkc_periphs CLKID_SYS_SD_EMMC_C>,
-> +					 <&clkc_periphs CLKID_SD_EMMC_C>,
-> +					 <&scmi_clk CLKID_FCLK_DIV2>;
-> +				clock-names = "core", "clkin0", "clkin1";
-> +				assigned-clocks = <&clkc_periphs CLKID_SD_EMMC_C_SEL>;
-> +				assigned-clock-parents = <&xtal>;
-> +				status = "disabled";
-> +			};
->   		};
->   
->   	};
-> 
+Hi,
 
-Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
+On Thu, 26 Mar 2026 10:59:11 +0100, Ronald Claveau wrote:
+> This patch series depends on Jian's SCMI clock patches yet to merge
+> https://lore.kernel.org/all/20260313070022.700437-1-jian.hu@amlogic.com/
+> 
+> This series adds device tree support for the MMC, SD card and SDIO
+> interfaces on the Amlogic T7 SoC and the Khadas VIM4 board.
+> 
+> The first patches add the necessary building blocks in the T7 SoC
+> DTSI: pinctrl nodes for pin muxing, PWM controller nodes, and MMC
+> controller nodes. The amlogic,t7-mmc and amlogic,t7-pwm compatible
+> strings are introduced with fallbacks to existing drivers, avoiding
+> the need for new driver code.
+> 
+> [...]
 
-Thanks,
+Thanks, Applied to https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git (v7.1/arm64-dt)
+
+[1/9] arm64: dts: amlogic: t7: Add eMMC, SD card and SDIO pinctrl nodes
+      https://git.kernel.org/amlogic/c/fb69fa2cabc68da247bcc0bc99a14dc857b16842
+[4/9] arm64: dts: amlogic: t7: Add PWM pinctrl nodes
+      https://git.kernel.org/amlogic/c/b1e49f6c1ac15b2c947bdb1d22a82b823de22d27
+[6/9] arm64: dts: amlogic: t7: khadas-vim4: Add power regulators
+      https://git.kernel.org/amlogic/c/60eff75ac67bbf5445bdbd2842b0109ac591441c
+
+These changes has been applied on the intermediate git tree [1].
+
+The v7.1/arm64-dt branch will then be sent via a formal Pull Request to the Linux SoC maintainers
+for inclusion in their intermediate git branches in order to be sent to Linus during
+the next merge window, or sooner if it's a set of fixes.
+
+In the cases of fixes, those will be merged in the current release candidate
+kernel and as soon they appear on the Linux master branch they will be
+backported to the previous Stable and Long-Stable kernels [2].
+
+The intermediate git branches are merged daily in the linux-next tree [3],
+people are encouraged testing these pre-release kernels and report issues on the
+relevant mailing-lists.
+
+If problems are discovered on those changes, please submit a signed-off-by revert
+patch followed by a corrective changeset.
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+[3] https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+
+-- 
 Neil
+
