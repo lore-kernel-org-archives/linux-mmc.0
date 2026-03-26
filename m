@@ -1,73 +1,197 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from courrier.aliel.fr (pouet.aliel.fr [65.21.61.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD93D186E58;
-	Thu, 26 Mar 2026 09:17:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF58B23BCE3;
+	Thu, 26 Mar 2026 09:21:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=65.21.61.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774516634; cv=none; b=ZWmSqBh7Z1COgQhhz/xD7xI8CFJFYepYD4CypUJGF7C8Lp9YcUCw10mJOQ4Opqhkc3gTkrxqU+HiVSG8Qc66I6Qamzip25OLvATn4d5VJhFkEJ+GuGY37odO6+z+30U9NJbRwgDfexLkzT9hEDNQgQX94NqJBRlf+xqOU7qUd/w=
+	t=1774516895; cv=none; b=CpvGsglUZKLvJVDAYylN53JWrjHPCXg63FQcBtD/QHUI56GjYTWu+LTg39PFoZct6NopmJonvr5vfdZ6UXRyzM9T7egLyfFMO9LwCzoGWqhpel7WWR9IxoJSiNALLNoAWUCcY7bN+N8NyRsHUTCBZTBH7P5J+JabaaW0IxP6BRY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774516634; c=relaxed/simple;
-	bh=G84K/2M3CxqOxKC7wFqRvw5LwHGm2WI3SpgTvoWdTSo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Kwj9l4oI+oe+BkT5gL3eFBsl/f2HiEUtREI4i1u+f9BiFQg1z+m1Zlqe9wSt5zMweD7nm/z4O5Q4qa172mMxAWte17NpglR9+16h4935G/oYVzM24mniIn6rDhbALFfOyvb1SPFZv2LMIw7uCCjBAh7QrjOsZ9t11Rb5OqWKyaQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jXbBplnW; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1774516895; c=relaxed/simple;
+	bh=2YaYUbMMIxfIM/eW1LcT+WvPOTT5iE3ZIsUBYpytHd8=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=jifmSf8zp9P0Fyh+7l46rgXvPbS4yVQBjYHSFDGFOJ7/IVdn+o6gkVzN9fI6yfiddddYDyPhGiUiIyPcSORgWrIsIMaUUjYqwHenr1TbPXHJ770S4Nrww2gaR7qzWRkeUgh/OkW/R41RYTEyGyCkiRGfEMEE6CP93cmRt+b9ZUg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aliel.fr; spf=pass smtp.mailfrom=aliel.fr; dkim=pass (1024-bit key) header.d=aliel.fr header.i=@aliel.fr header.b=DLHP6k5b; arc=none smtp.client-ip=65.21.61.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aliel.fr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aliel.fr
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jXbBplnW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D2DC8C19423;
-	Thu, 26 Mar 2026 09:17:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774516634;
-	bh=G84K/2M3CxqOxKC7wFqRvw5LwHGm2WI3SpgTvoWdTSo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=jXbBplnWaJ1/yqn6Q5pwHu63DJmf1A/wrAAGtBTZmoUNjsALP6A9ugvbzRMPO983W
-	 QKVmbMTufJ8DEIXN0q/ofqgO0avz8haV+KlYnD+tOEAtLcpEraKR+P1FE4ouX2zAY4
-	 6ll3Qck3faqm7e2ImgHmYMTOyvVLbqbCyoWNOqVc2wEO+4dOaB1N7NhXWDDJo442eY
-	 LPw5fydYLQNf9UELoGZ+K1RM5bz6EnXxjpC/dgOjhipx0sGrIb0p1yp60eX+CK4/jW
-	 4WpzAECLTQspALtlhFGToqkNNoLodEDdkYqbh5BfGRBfXl0LwgzqyHtZIs9nZf8S82
-	 Nm00FCmfAmiuA==
-Date: Thu, 26 Mar 2026 10:17:12 +0100
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Bhargav Joshi <rougueprince47@gmail.com>
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	xuwei5@hisilicon.com, robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
-	ulf.hansson@linaro.org, zhangfei.gao@linaro.org, linux-mmc@vger.kernel.org, 
-	daniel.baluta@nxp.com, simona.toaca@nxp.com, d-gole@ti.com, m-chawdhry@ti.com, 
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: hisilicon,hi3660-dw-mshc:
- Convert to DT schema
-Message-ID: <20260326-overjoyed-chocolate-bobcat-6c41e6@quoll>
-References: <20260325225439.68161-1-rougueprince47@gmail.com>
- <20260325225439.68161-2-rougueprince47@gmail.com>
+	dkim=pass (1024-bit key) header.d=aliel.fr header.i=@aliel.fr header.b="DLHP6k5b"
+Message-ID: <3e99df2d-b569-4542-bae7-6da69077c6f4@aliel.fr>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aliel.fr;
+	s=courrier-s1; t=1774516881;
+	bh=2YaYUbMMIxfIM/eW1LcT+WvPOTT5iE3ZIsUBYpytHd8=;
+	h=Date:From:Subject:To:Cc:References:In-Reply-To;
+	b=DLHP6k5baF5AyGc4dYc8Fd+av78eTCJt05sovXqCIPmDP8TRST1BZFzhtR8b8QH1o
+	 icdEuVQR/9j+v4+H9yNfIEHN1IAodzWshk6d+jPCCu437OaOwtVC6yxFqJpaNS4SwR
+	 GFvN7gMBxi0oGa0Sf7JWcw6HfOy93flNX4bkIcaA=
+Date: Thu, 26 Mar 2026 10:21:20 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20260325225439.68161-2-rougueprince47@gmail.com>
+User-Agent: Mozilla Thunderbird Beta
+From: Ronald Claveau <linux-kernel-dev@aliel.fr>
+Subject: Re: [PATCH v4 1/9] arm64: dts: amlogic: t7: Add eMMC, SD card and
+ SDIO pinctrl nodes
+To: Neil Armstrong <neil.armstrong@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org,
+ Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
+References: <20260325-add-emmc-t7-vim4-v4-0-44c7b4a5e459@aliel.fr>
+ <20260325-add-emmc-t7-vim4-v4-1-44c7b4a5e459@aliel.fr>
+ <5298e691-99ba-48fc-874b-c9af308664ee@linaro.org>
+Content-Language: en-US
+In-Reply-To: <5298e691-99ba-48fc-874b-c9af308664ee@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Thu, Mar 26, 2026 at 04:24:38AM +0530, Bhargav Joshi wrote:
-> Convert the Hisilicon DesignWare Mobile Storage Host Controller
-> (dw-mshc) bindings from text format to DT schema.
+On 3/26/26 9:52 AM, Neil Armstrong wrote:
+> On 3/25/26 10:15, Ronald Claveau wrote:
+>> These pinctrl nodes are required by the eMMC, SD card and SDIO drivers
+>> to configure pin muxing at runtime.
+>>
+>> - eMMC: control, 4-bit/8-bit data, data strobe and clock gate pins
+>> - SD card: data, clock, command and clock gate pins
+>> - SDIO: data, clock, command and clock gate pins
+>>
+>> Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
+>> ---
+>>   arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi | 98 +++++++++++++++++++
+>> ++++++++++
+>>   1 file changed, 98 insertions(+)
+>>
+>> diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi b/arch/arm64/
+>> boot/dts/amlogic/amlogic-t7.dtsi
+>> index 6510068bcff92..016b5429c8d1b 100644
+>> --- a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+>> +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+>> @@ -250,6 +250,104 @@ gpio: bank@4000 {
+>>                       #gpio-cells = <2>;
+>>                       gpio-ranges = <&periphs_pinctrl 0 0 157>;
+>>                   };
+>> +
+>> +                emmc_ctrl_pins: emmc-ctrl {
+>> +                    mux-0 {
+>> +                        groups = "emmc_cmd";
+>> +                        function = "emmc";
+>> +                        bias-pull-up;
+>> +                    };
+>> +
+>> +                    mux-1 {
+>> +                        groups = "emmc_clk";
+>> +                        function = "emmc";
+>> +                        bias-disable;
+>> +                    };
+>> +                };
+>> +
+>> +                emmc_data_4b_pins: emmc-data-4b {
+>> +                    mux-0 {
 > 
-> As part of this conversion, the binding file is renamed from
-> k3-dw-mshc.txt to hisilicon,hi3660-dw-mshc.yaml to align with compatible
-> string naming conventions. Examples have been updated to pass schema
-> validation.
+> No need for "-0"
 > 
-> Note: synopsys-dw-mshc binding specifies clock names as "biu" followed
-> by "ciu". However, this Hisilicon binding reverses the order to 'ciu'
-> then 'biu' to match both the legacy text binding and in-kernel Hisilicon
-> DTS board files.
-> 
-> Signed-off-by: Bhargav Joshi <rougueprince47@gmail.com>
-> Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Thanks I will change that for the three nodes.
 
+>> +                        groups = "emmc_nand_d0",
+>> +                             "emmc_nand_d1",
+>> +                             "emmc_nand_d2",
+>> +                             "emmc_nand_d3";
+>> +                        function = "emmc";
+>> +                        bias-pull-up;
+>> +                    };
+>> +                };
+>> +
+>> +                emmc_data_8b_pins: emmc-data-8b {
+>> +                    mux-0 {
+> 
+> No need for "-0"
+> 
+>> +                        groups = "emmc_nand_d0",
+>> +                             "emmc_nand_d1",
+>> +                             "emmc_nand_d2",
+>> +                             "emmc_nand_d3",
+>> +                             "emmc_nand_d4",
+>> +                             "emmc_nand_d5",
+>> +                             "emmc_nand_d6",
+>> +                             "emmc_nand_d7";
+>> +                        function = "emmc";
+>> +                        bias-pull-up;
+>> +                    };
+>> +                };
+>> +
+>> +                emmc_ds_pins: emmc-ds {
+>> +                    mux {
+>> +                        groups = "emmc_nand_ds";
+>> +                        function = "emmc";
+>> +                        bias-pull-down;
+>> +                    };
+>> +                };
+>> +
+>> +                emmc_clk_gate_pins: emmc-clk-gate {
+>> +                    mux {
+>> +                        groups = "GPIOB_8";
+>> +                        function = "gpio_periphs";
+>> +                        bias-pull-down;
+>> +                    };
+>> +                };
+>> +
+>> +                sdcard_pins: sdcard {
+>> +                    mux {
+>> +                        groups = "sdcard_d0",
+>> +                             "sdcard_d1",
+>> +                             "sdcard_d2",
+>> +                             "sdcard_d3",
+>> +                             "sdcard_clk",
+>> +                             "sdcard_cmd";
+>> +                        function = "sdcard";
+>> +                        bias-pull-up;
+>> +                    };
+>> +                };
+>> +
+>> +                sdcard_clk_gate_pins: sdcard-clk-gate {
+>> +                    mux {
+>> +                        groups = "GPIOC_4";
+>> +                        function = "gpio_periphs";
+>> +                        bias-pull-down;
+>> +                    };
+>> +                };
+>> +
+>> +                sdio_pins: sdio {
+>> +                    mux-0 {
+> 
+> No need for "-0"
+> 
+>> +                        groups = "sdio_d0",
+>> +                             "sdio_d1",
+>> +                             "sdio_d2",
+>> +                             "sdio_d3",
+>> +                             "sdio_clk",
+>> +                             "sdio_cmd";
+>> +                        function = "sdio";
+>> +                        bias-pull-up;
+>> +                    };
+>> +                };
+>> +
+>> +                sdio_clk_gate_pins: sdio-clk-gate {
+>> +                    mux {
+>> +                        groups = "GPIOX_4";
+>> +                        function = "gpio_periphs";
+>> +                        bias-pull-up;
+>> +                    };
+>> +                };
+>>               };
+>>                 gpio_intc: interrupt-controller@4080 {
+>>
+> 
+
+
+-- 
 Best regards,
-Krzysztof
-
+Ronald
