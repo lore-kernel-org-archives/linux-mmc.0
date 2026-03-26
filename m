@@ -1,181 +1,62 @@
-Received: from courrier.aliel.fr (pouet.aliel.fr [65.21.61.41])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A0903E7158;
-	Thu, 26 Mar 2026 10:02:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=65.21.61.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D491036DA06;
+	Thu, 26 Mar 2026 10:13:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774519325; cv=none; b=E9dOhfrwTiu+5uP56tpEvG0zrYnV9Q4nkLkBg5SqssjkmFVqFrsKa188R7tzoYYlaLT6YkqsNCapiAuv0yX7mrAE3ODnirjvmDdct1/RjpXY34/2FZmiSBOhYgOqXNaUsNX8Ji/iFX4kOznwkohAT9iAyYNTcRgd4Gn6b+/lXUU=
+	t=1774520019; cv=none; b=k9h7WCb1gW4Nyworf+9FGyzoA4UWd6aeKTQ4EZS7yUAa3loCjEHU3dl/gBLvzYRacn5qwqAzpD1HH3W9mQTlckzEQawzxPyEbLb6O3ljgm0h6g0Xq9+iQyQbro/ZUZMoRR5XkpFTa6loffbfi8OEgqvGsHd4zpuw73S5EOI7CnQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774519325; c=relaxed/simple;
-	bh=SN3GcE+7DDqwPEJFK+/S2nmtpKZI7ca2JpiaH3/MPVc=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=El8ZK50cDYLRXT/bzdjz2QSWcCpSf6kDGxjbatIF2NrhPGSqsv3bt4BpVEpWS2CIOH4dsuSGcezNNIrCibaHBd8rZNRljeh33wKDIGlw8YJwaqdB5fOHElACTpBZkH+n5nDVLjPFuzN4Dvjc5rLIs7d+HtmD2IeG5qW6/NK3qxU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aliel.fr; spf=pass smtp.mailfrom=aliel.fr; dkim=pass (1024-bit key) header.d=aliel.fr header.i=@aliel.fr header.b=b7LdDrWD; arc=none smtp.client-ip=65.21.61.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aliel.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aliel.fr
+	s=arc-20240116; t=1774520019; c=relaxed/simple;
+	bh=cV1UWVYgX95/a2/Q2aPKcG34dkwNFo71mKottAeXiKw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=G/7tDM7yF/iErkM3n4xrS/yTHavqB0Fpb/p3QTv48szy7nua3T2Z788ByMKWAH6zRxrJPSBaXxu6kwvOdHE/oVXym+bsUgguLMOXW4D1Gfc1wgWJQmfMXJrwi9yxeIZI2/ZLjL8zCJs3PoZJ77eZlsvdK3JRSWKaVH4B70eRMOg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kQwS/ni7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=aliel.fr header.i=@aliel.fr header.b="b7LdDrWD"
-From: Ronald Claveau <linux-kernel-dev@aliel.fr>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aliel.fr;
-	s=courrier-s1; t=1774519322;
-	bh=SN3GcE+7DDqwPEJFK+/S2nmtpKZI7ca2JpiaH3/MPVc=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=b7LdDrWDyx3sV7ysP86zr31s+Lae8ND39IOosLxANVvreWUc88tWAvBORI0QyaRU2
-	 X28awifUf9K4zQZtgHtIwhZwESD5RhNnmWOQuMLjN0yjm57t1uSMqdAD8pbuglerwP
-	 aHG1iywn7Bg6Ew7SKExSsAQoFtdF9wzi99XWawSU=
-Date: Thu, 26 Mar 2026 10:59:20 +0100
-Subject: [PATCH v5 9/9] arm64: dts: amlogic: t7: khadas-vim4: Add MMC nodes
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kQwS/ni7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0CD16C2BC87;
+	Thu, 26 Mar 2026 10:13:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1774520018;
+	bh=cV1UWVYgX95/a2/Q2aPKcG34dkwNFo71mKottAeXiKw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=kQwS/ni7QVXLaFYsqYDC/Z9BlGLvJmh5xMNbVs6knGSDFz4zXKaXhVv0Vq/UAY/SU
+	 ytrh8jRmdVinrZK/zLFT9XIhlpav7bseVNbv6jo857nz+YOMXlQTt2okCUSE8AzVSh
+	 +XsVp19yQ1KTOi1S5IdD2PUmWvEGjfKeeXcF0ZjdyUdhX9NU2WP4/bU1RduCEEcByO
+	 9U9tQxQFkHwTT0A+MLjEF3LWep4pkANFD+1C0tkpMjeBxJHEB4Hjlwsvz0yAqBHc4+
+	 Jv0heSow9fWtmDnBRNzee2eKfCCKuTALuDzpsilU4KkzonpjQQ2sP05Kq4GXZaALjG
+	 ABQmNBhPJ5DIQ==
+Date: Thu, 26 Mar 2026 11:13:36 +0100
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: sdhci-msm: add IPQ9650 compatible
+Message-ID: <20260326-bipedal-organic-hyena-0aeea7@quoll>
+References: <20260325-ipq9650_sdhc-v1-1-53cf7ba11087@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260326-add-emmc-t7-vim4-v5-9-d3f182b48e9d@aliel.fr>
-References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
-In-Reply-To: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
-To: Neil Armstrong <neil.armstrong@linaro.org>, 
- Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, 
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
- Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, 
- Ronald Claveau <linux-kernel-dev@aliel.fr>
-X-Mailer: b4 0.14.3
-X-Developer-Signature: v=1; a=openssh-sha256; t=1774519313; l=2772;
- i=linux-kernel-dev@aliel.fr; s=id_ed25519; h=from:subject:message-id;
- bh=SN3GcE+7DDqwPEJFK+/S2nmtpKZI7ca2JpiaH3/MPVc=;
- b=U1NIU0lHAAAAAQAAADMAAAALc3NoLWVkMjU1MTkAAAAgMGec55oxeeisqykQiUedekMYyOnR9
- BG9E/7rDWyqdNoAAAAGcGF0YXR0AAAAAAAAAAZzaGE1MTIAAABTAAAAC3NzaC1lZDI1NTE5AAAA
- QJIX22fPeHgunMEWRlgpEd9pdcy2wktjVrQCxvP0exgrJ7aGyj0z6OP8zhC/6IS6fn0k1HmyPGt
- iO9SRy0vMrgk=
-X-Developer-Key: i=linux-kernel-dev@aliel.fr; a=openssh;
- fpr=SHA256:kch4osYZ6A1BrPps5AUs6KnfdE2wm4ocMtyTc8TmZMs
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260325-ipq9650_sdhc-v1-1-53cf7ba11087@oss.qualcomm.com>
 
-Enable and configure the three MMC controllers for the Khadas VIM4 board:
-- sd_emmc_a: SDIO interface for the BCM43752 Wi-Fi module
-- sd_emmc_b: SD card slot
-- sd_emmc_c: eMMC storage
+On Wed, Mar 25, 2026 at 05:10:19PM +0530, Kathiravan Thirumoorthy wrote:
+> The IPQ9650 supports eMMC with an SDHCI controller. Add the appropriate
+> compatible to the documentation.
+> 
+> Signed-off-by: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+>  1 file changed, 1 insertion(+)
 
-Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
-Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
----
- .../dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts  | 88 ++++++++++++++++++++++
- 1 file changed, 88 insertions(+)
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-index 770f06b0b16c7..78d02370553cd 100644
---- a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-+++ b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-@@ -15,6 +15,9 @@ / {
- 
- 	aliases {
- 		serial0 = &uart_a;
-+		mmc0 = &sd_emmc_c;
-+		mmc1 = &sd_emmc_b;
-+		mmc2 = &sd_emmc_a;
- 	};
- 
- 	memory@0 {
-@@ -159,6 +162,91 @@ &pwm_ab {
- 	pinctrl-names = "default";
- };
- 
-+/* SDIO */
-+&sd_emmc_a {
-+	status = "okay";
-+	pinctrl-0 = <&sdio_pins>;
-+	pinctrl-1 = <&sdio_clk_gate_pins>;
-+	pinctrl-names = "default", "clk-gate";
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+
-+	bus-width = <4>;
-+	cap-sd-highspeed;
-+	sd-uhs-sdr12;
-+	sd-uhs-sdr25;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
-+	cap-sdio-irq;
-+	max-frequency = <200000000>;
-+	non-removable;
-+	disable-wp;
-+	no-mmc;
-+	no-sd;
-+
-+	power-domains = <&pwrc PWRC_T7_SDIO_A_ID>;
-+
-+	keep-power-in-suspend;
-+
-+	mmc-pwrseq = <&sdio_pwrseq>;
-+
-+	vmmc-supply = <&vddao_3v3>;
-+	vqmmc-supply = <&vddao_1v8>;
-+
-+	brcmf: wifi@1 {
-+		reg = <1>;
-+		compatible = "brcm,bcm43752-fmac", "brcm,bcm4329-fmac";
-+	};
-+};
-+
-+/* SD card */
-+&sd_emmc_b {
-+	status = "okay";
-+	pinctrl-0 = <&sdcard_pins>;
-+	pinctrl-1 = <&sdcard_clk_gate_pins>;
-+	pinctrl-names = "default", "clk-gate";
-+
-+	bus-width = <4>;
-+	cap-sd-highspeed;
-+	sd-uhs-sdr12;
-+	sd-uhs-sdr25;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
-+	max-frequency = <200000000>;
-+	disable-wp;
-+	no-sdio;
-+	no-mmc;
-+
-+	power-domains = <&pwrc PWRC_T7_SDIO_B_ID>;
-+
-+	cd-gpios = <&gpio GPIOC_6 GPIO_ACTIVE_LOW>;
-+	vmmc-supply = <&sd_3v3>;
-+	vqmmc-supply = <&vddio_c>;
-+};
-+
-+/* eMMC */
-+&sd_emmc_c {
-+	status = "okay";
-+	pinctrl-0 = <&emmc_ctrl_pins>, <&emmc_data_8b_pins>, <&emmc_ds_pins>;
-+	pinctrl-1 = <&emmc_clk_gate_pins>;
-+	pinctrl-names = "default", "clk-gate";
-+
-+	bus-width = <8>;
-+	cap-mmc-highspeed;
-+	mmc-ddr-1_8v;
-+	mmc-hs200-1_8v;
-+	max-frequency = <200000000>;
-+	disable-wp;
-+	non-removable;
-+	no-sdio;
-+	no-sd;
-+
-+	power-domains = <&pwrc PWRC_T7_EMMC_ID>;
-+
-+	vmmc-supply = <&vddio_3v3>;
-+	vqmmc-supply = <&vddio_1v8>;
-+};
-+
- &uart_a {
- 	status = "okay";
- 	clocks = <&xtal>, <&xtal>, <&xtal>;
-
--- 
-2.49.0
+Best regards,
+Krzysztof
 
