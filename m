@@ -1,62 +1,121 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from canpmsgout05.his.huawei.com (canpmsgout05.his.huawei.com [113.46.200.220])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D491036DA06;
-	Thu, 26 Mar 2026 10:13:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A32CE38C430;
+	Thu, 26 Mar 2026 11:19:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=113.46.200.220
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774520019; cv=none; b=k9h7WCb1gW4Nyworf+9FGyzoA4UWd6aeKTQ4EZS7yUAa3loCjEHU3dl/gBLvzYRacn5qwqAzpD1HH3W9mQTlckzEQawzxPyEbLb6O3ljgm0h6g0Xq9+iQyQbro/ZUZMoRR5XkpFTa6loffbfi8OEgqvGsHd4zpuw73S5EOI7CnQ=
+	t=1774523984; cv=none; b=TOhLqhtSns7yEJ6lLJ2RZmxW4uMRSeIZHVYso2SwBX/tLlHR7NLpVLvSFmF80y0/i1inXYNSvEmZJ4QjNDot25e78t/8z7EdYNE+WFXPY2MrAkKbM7eW04PasMGpMU53XFmGoMExqCPui5QOMSwIfqnJIJqsu7YbvpeUJg+4fNw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774520019; c=relaxed/simple;
-	bh=cV1UWVYgX95/a2/Q2aPKcG34dkwNFo71mKottAeXiKw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=G/7tDM7yF/iErkM3n4xrS/yTHavqB0Fpb/p3QTv48szy7nua3T2Z788ByMKWAH6zRxrJPSBaXxu6kwvOdHE/oVXym+bsUgguLMOXW4D1Gfc1wgWJQmfMXJrwi9yxeIZI2/ZLjL8zCJs3PoZJ77eZlsvdK3JRSWKaVH4B70eRMOg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kQwS/ni7; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1774523984; c=relaxed/simple;
+	bh=5zWpjUiosTsBLXN9TPN/TysyeBthI/0455XUGFFlDcc=;
+	h=Message-ID:Date:From:MIME-Version:To:CC:Subject:References:
+	 In-Reply-To:Content-Type; b=tp1KnaMpWTo5fyQkZuj0osO+D76KBzx5tpiUyEkHJEpu3hmm7T0jGfJIKgGZONS3/aM3nvq3DrVWW4AzG+Y8zqRmmjOLAqVtYS7eOsd+pXB/uEjX77ONOL+PlKO15gy8sL3ksIXHDmn0jWyErvQvgdwHJx1tzl3XVwRT+danms4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=hisilicon.com; spf=pass smtp.mailfrom=huawei.com; dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b=PqfD5wy9; arc=none smtp.client-ip=113.46.200.220
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=hisilicon.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kQwS/ni7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0CD16C2BC87;
-	Thu, 26 Mar 2026 10:13:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1774520018;
-	bh=cV1UWVYgX95/a2/Q2aPKcG34dkwNFo71mKottAeXiKw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=kQwS/ni7QVXLaFYsqYDC/Z9BlGLvJmh5xMNbVs6knGSDFz4zXKaXhVv0Vq/UAY/SU
-	 ytrh8jRmdVinrZK/zLFT9XIhlpav7bseVNbv6jo857nz+YOMXlQTt2okCUSE8AzVSh
-	 +XsVp19yQ1KTOi1S5IdD2PUmWvEGjfKeeXcF0ZjdyUdhX9NU2WP4/bU1RduCEEcByO
-	 9U9tQxQFkHwTT0A+MLjEF3LWep4pkANFD+1C0tkpMjeBxJHEB4Hjlwsvz0yAqBHc4+
-	 Jv0heSow9fWtmDnBRNzee2eKfCCKuTALuDzpsilU4KkzonpjQQ2sP05Kq4GXZaALjG
-	 ABQmNBhPJ5DIQ==
-Date: Thu, 26 Mar 2026 11:13:36 +0100
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-msm: add IPQ9650 compatible
-Message-ID: <20260326-bipedal-organic-hyena-0aeea7@quoll>
-References: <20260325-ipq9650_sdhc-v1-1-53cf7ba11087@oss.qualcomm.com>
+	dkim=pass (1024-bit key) header.d=huawei.com header.i=@huawei.com header.b="PqfD5wy9"
+dkim-signature: v=1; a=rsa-sha256; d=huawei.com; s=dkim;
+	c=relaxed/relaxed; q=dns/txt;
+	h=From;
+	bh=4eUbyrBQrZeyw3b/k/SDrTACodn8YBSMmYKpGCCfH9E=;
+	b=PqfD5wy934jLNLeuXyaaOLg1+NyOaHiHgYF2LSoav3XafE3peWSUj2uOnPF8hsW/eYKyKuIHB
+	5/KMAFgPcTmA6XJp+T7F8S82XOXNdfs6CQzyraZDnhcdH+dqpo7V67PYgw8rXtt9iqY99o2hes/
+	oZm+auom9IW5mWJazjO8v/8=
+Received: from mail.maildlp.com (unknown [172.19.162.140])
+	by canpmsgout05.his.huawei.com (SkyGuard) with ESMTPS id 4fhLkf6WRjz12LGC;
+	Thu, 26 Mar 2026 19:14:02 +0800 (CST)
+Received: from dggemv706-chm.china.huawei.com (unknown [10.3.19.33])
+	by mail.maildlp.com (Postfix) with ESMTPS id A396C2025E;
+	Thu, 26 Mar 2026 19:19:29 +0800 (CST)
+Received: from kwepemq100003.china.huawei.com (7.202.195.72) by
+ dggemv706-chm.china.huawei.com (10.3.19.33) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.11; Thu, 26 Mar 2026 19:19:29 +0800
+Received: from [10.67.113.213] (10.67.113.213) by
+ kwepemq100003.china.huawei.com (7.202.195.72) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.11; Thu, 26 Mar 2026 19:19:28 +0800
+Message-ID: <69C51640.8070408@hisilicon.com>
+Date: Thu, 26 Mar 2026 19:19:28 +0800
+From: Wei Xu <xuwei5@hisilicon.com>
+User-Agent: Mozilla/5.0 (Windows NT 6.3; WOW64; rv:24.0) Gecko/20100101 Thunderbird/24.2.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20260325-ipq9650_sdhc-v1-1-53cf7ba11087@oss.qualcomm.com>
+To: Bhargav Joshi <rougueprince47@gmail.com>, <devicetree@vger.kernel.org>,
+	<linux-arm-kernel@lists.infradead.org>, <robh@kernel.org>,
+	<krzk+dt@kernel.org>, <conor+dt@kernel.org>, <ulf.hansson@linaro.org>,
+	<zhangfei.gao@linaro.org>, <linux-mmc@vger.kernel.org>
+CC: <daniel.baluta@nxp.com>, <simona.toaca@nxp.com>, <d-gole@ti.com>,
+	<m-chawdhry@ti.com>, <linux-kernel@vger.kernel.org>, <xuwei5@hisilicon.com>
+Subject: Re: [PATCH v2 0/2] mmc: hisilicon: Convert dw-mshc bindings and fix
+ dtbs
+References: <20260325225439.68161-1-rougueprince47@gmail.com>
+In-Reply-To: <20260325225439.68161-1-rougueprince47@gmail.com>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: kwepems100002.china.huawei.com (7.221.188.206) To
+ kwepemq100003.china.huawei.com (7.202.195.72)
 
-On Wed, Mar 25, 2026 at 05:10:19PM +0530, Kathiravan Thirumoorthy wrote:
-> The IPQ9650 supports eMMC with an SDHCI controller. Add the appropriate
-> compatible to the documentation.
+Hi Bhargav,
+
+On 2026/3/26 6:54, Bhargav Joshi wrote:
+> This series converts the Hisilicon dw-mshc text bindings to DT schema
+> format and cleans up legacy node names in Hisilicon board files.
 > 
-> Signed-off-by: Kathiravan Thirumoorthy <kathiravan.thirumoorthy@oss.qualcomm.com>
+> While testing the new YAML schema, dtbs_check flagged the hi3660, 
+> hi3670, and hi6220 SoC files for using the non-standard 'dwmmc' node 
+> name prefix. resulting in warnings.
+> 
+> Patch 1 Convert to DT schema
+> Patch 2 updates the Hisilicon dtsi files to use standard 'mmc' 
+> node name.
+> 
+> Changes in v2:
+>  - Patch 1: 
+>     - Grouped compatible strings into an enum.
+>     - Replaced raw numbers with proper flags.
+>     - Fixed property order and removed invalid hex values.
+>     - Added explanation for clock order change in commit message.
+>     - Collected Acked-by tag.
+>  - Patch 2: 
+>     - No code changes.
+>     - Collected Acked-by and Reviewed-by tags.
+> 
+> Signed-off-by: Bhargav Joshi <rougueprince47@gmail.com>
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
+> Note: this patch is part of the process for applying to GSoC device
+> tree bindings conversion project #
+> https://github.com/LinuxFoundationGSoC/ProjectIdeas/wiki/GSoC-2026-Device-Tree-Bindings
+> 
+> - The file is enabled by arm64 defconfig (CONFIG_MMC_DW_K3=y)
+> - It is used in following
+>     /arch/arm64/boot/dts/hisilicon/hi3660.dtsi
+>     -included by /arch/arm64/boot/dts/hisilicon/hi3660-hikey960.dts
+>     /arch/arm64/boot/dts/hisilicon/hi3670.dtsi
+>     -included by /arch/arm64/boot/dts/hisilicon/hi3670-hikey970.dts
+> 
+> Bhargav Joshi (2):
+>   dt-bindings: mmc: hisilicon,hi3660-dw-mshc: Convert to DT schema
+>   arm64: dts: hisilicon: Rename dwmmc nodes to mmc
+> 
+>  .../mmc/hisilicon,hi3660-dw-mshc.yaml         | 117 ++++++++++++++++++
+>  .../devicetree/bindings/mmc/k3-dw-mshc.txt    |  73 -----------
+>  arch/arm64/boot/dts/hisilicon/hi3660.dtsi     |   4 +-
+>  arch/arm64/boot/dts/hisilicon/hi3670.dtsi     |   4 +-
+>  arch/arm64/boot/dts/hisilicon/hi6220.dtsi     |   6 +-
+>  5 files changed, 124 insertions(+), 80 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/hisilicon,hi3660-dw-mshc.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/k3-dw-mshc.txt
+> 
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Series applied to the HiSilicon arm64 dt tree.
+Thanks!
 
-Best regards,
-Krzysztof
-
+Best Regards,
+Wei
