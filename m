@@ -1,110 +1,250 @@
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAEC72E401;
-	Thu, 26 Mar 2026 03:08:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=60.244.123.138
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55622242D62
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 08:52:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774494537; cv=none; b=TKDdnIe6n88uIjAYeakhL8mSpXQPYQJhpUsgIAMfbG5/oZhp5oj0RehEM2GXUp4H8z3Jr2X17kBtyfPEt+faLJx2Y5vgUWRL8gx15/7PqhwR69P3YaLaSTXUA4YdJ17lcEjmnkMP0815+Ee650V1TKP4yxNPBm7xurU8cqFiuTk=
+	t=1774515127; cv=none; b=lNIDzJ2UwjASQdg2wI91jMOStzl8TeFxDSYyyLItdu5tCKTLd824nZFHCJBu4cznkO2ftgRp2vmaL1G1p64LjPWb3uNqz95acrQuvFF5reBwIrob4TJSeWUpbMNC4DwBxFTpgish1C365U8v3pbgr+XWABYAQGnvdK3czFcJjDo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774494537; c=relaxed/simple;
-	bh=83YvLfMANW2ji64rgtXjIkJg/JIR7LORLHkgw7KfigU=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=A9gCqJk0ambLVIKvWtVqstcZj+J+CBe6zxIaxpxLRU5nT0hJUrXNeeuSzt0JLw4pKqFstV2tbsgzeAOoZ7NErWXk5jlnfP8RvU2VTC/g0pQeSsjASYccEELNnY/ooBi68Wov3Kx4L6uwmJN1VP3FuL/dxSx7AazDyZBU/vNlc8Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=gmKO2qkA; arc=none smtp.client-ip=60.244.123.138
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
+	s=arc-20240116; t=1774515127; c=relaxed/simple;
+	bh=VSiA801w/9hEVKBasLtS7uUMFQfqf1PgJgxXUEq+J6g=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=eRMkAUMwCZl76+mPjhlJopZ3Z+SzFZ6LpEfhoUlZ5f9K1Tx+CuUK2eZl+nb3pJyFgj3Mqut1zdeKEE1p/pQOZmx7nvwfTgohOUGpqRwtvr78k64yi4cPIBEEy4cXHqcsX/7AY5yn4XUnrib9JC+DJ3s9pkrv6kWRLB991+XOgKA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vrVh5olG; arc=none smtp.client-ip=209.85.221.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="gmKO2qkA"
-X-UUID: 1bf569d028c111f1a02d4725871ece0b-20260326
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=gc1Cfkcgv/5lPuvFF53M/UC0jd9eXEdjF+510NK63+E=;
-	b=gmKO2qkAAxrmjzTqBw4aLC8P41r4tut1eZ8bTxm1h4+9Aw4KefYdSR3vJGbGSqSV0IwbO4QIMP93huCuG9cxPuxly9hiqXZV35/h2BqMt/2kBybsQemuqqOC21Yv+7bxsDHpHM1l5Gy+eBcmLRJsxM7VEcos1a01PH7/FznFfqQ=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.3.12,REQID:05713f7b-68cd-4266-8aa1-5a87b7f92221,IP:0,U
-	RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
-	:release,TS:-5
-X-CID-META: VersionHash:e7bac3a,CLOUDID:5ab124d5-060f-4ecc-9ee0-121eeeb4a682,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102|836|888|898,TC:-5,Content:0|15|5
-	0,EDM:-3,IP:nil,URL:0,File:130,RT:0,Bulk:nil,QS:nil,BEC:-1,COL:0,OSI:0,OSA
-	:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 2,SSN|SDN
-X-CID-BAS: 2,SSN|SDN,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
-X-UUID: 1bf569d028c111f1a02d4725871ece0b-20260326
-Received: from mtkmbs09n2.mediatek.inc [(172.21.101.94)] by mailgw01.mediatek.com
-	(envelope-from <ot_cathy.xu@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 2012159227; Thu, 26 Mar 2026 11:08:48 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.29; Thu, 26 Mar 2026 11:08:47 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.2562.29 via Frontend Transport; Thu, 26 Mar 2026 11:08:46 +0800
-From: Cathy Xu <ot_cathy.xu@mediatek.com>
-To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-mediatek@lists.infradead.org>,
-	Mengqi Zhang <Mengqi.Zhang@mediatek.com>, Wenbin Mei
-	<Wenbin.Mei@mediatek.com>, Andy-ld Lu <Andy-ld.Lu@mediatek.com>, Axe Yang
-	<Axe.Yang@mediatek.com>, Yong Mao <yong.mao@mediatek.com>, Cathy Xu
-	<ot_cathy.xu@mediatek.com>, <stable@vger.kernel.org>
-Subject: [PATCH RESEND] mmc: mtk-sd: disable new_tx/rx and modify related settings for mt8189
-Date: Thu, 26 Mar 2026 11:05:16 +0800
-Message-ID: <20260326030759.8107-1-ot_cathy.xu@mediatek.com>
-X-Mailer: git-send-email 2.46.0
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vrVh5olG"
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-439b7c2788dso393172f8f.1
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 01:52:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1774515125; x=1775119925; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=smOP6x0To5MeFMWDp/WtjMB68J+cu7J59H9CXktE27U=;
+        b=vrVh5olGaClsjbxGeMpKdU2ESV1IjeoQNayXHC6EFuCxgiKS7u3d/6FuwiOEIoa7xu
+         9Ni0K4NLlmhhbHxdF9OU+ad31iIkDaCS9EQR3Jtlt3vcz6Bx7ixsfYsTXTQUEmTi8VG6
+         DxhhQmccoZSQeRY+jD5UwqA1w8K/+IgUYP1Phvi023BRkjAcROD0NwBcBbyz72eJ3+xz
+         qt9nFWpLKGiPRpeimJ8Jx4lJPiYRTUHaX3lqdhqWjs2uPtidYBK3MLXGo5LPzmcJ5/NQ
+         DkPAcKBcxN4HJ+GbfH3ktU0qhbpOxKsfxf7kqhPujeFr/QmKJyKq7oZI7or4QlPI2cLI
+         FuzQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774515125; x=1775119925;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=smOP6x0To5MeFMWDp/WtjMB68J+cu7J59H9CXktE27U=;
+        b=s2/oESuSj6eVyEvngbLEB/0V+BqY5yFtvNEnYQIrweSAu2U1r+zE4b8jIfLlZuup4m
+         pe+HjPoYIktAG0d4ZTWuF9TzMgENBKv7C/7uoig6OSKeFj7Wz4qLkSOeqHMRG/j2bHju
+         E6VRJ5r6ulpgY+KQv9noFiSwYhHFIlmHQV6u0b6ATJ19Kwf4aBU/Fna2Eu5JiknktxAx
+         IB2A5B9oO4xtqPS6uReKBzhsq7LChfVbEjz3mY8tP9nFt3n5xD5uUg1BXQaLF9XqxMbq
+         kF41kCfYG398hgj3EizAoHt9nMI9bioRtHHfUp7D5VmIUfcYwJs5HbTPCu6Y9kSAMYWS
+         ez1A==
+X-Forwarded-Encrypted: i=1; AJvYcCUI63UAmRceKwvJW1MPwY9Gb0Q2KCQgIo+6JNMJAoYRa9xrosPUm6oDwILxcGHJS5FQN+MntkYkZQU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwwRfrjPS+QcQQ5ocOVUq5260XtbZPoMjnlie6LgwXqbSRvHUP5
+	WtkwThIkVkariy+RB0ZpF8wP23EC4StsEnim9JAGiBuf7O+RrX1TOIfN2z2WOr9YLHE=
+X-Gm-Gg: ATEYQzyUvxWJ1YFaHx5AecWMMMJTmArrFBE72iSKx0QCn+1x6WJ+WR5iJ6OFFK3ic+z
+	rvusdGGp0qldJBL0nrI0yTWK1YLa5Y3bqUADeyHhpqLaFKqgRYLYVXJYUuxxv+gxl6sR6QNUFoP
+	yokKnKKIJ3e8w7MqO0gihJWv1gE9ct3EQsG0JwAIBrm4V+PjMBGq0RlOqyVqxV+V4F1zGb3cMNP
+	WuF6aO1LOEQX702AtSujeBgLFD4BckLdyCrQW4CHUK68taouZVWbK/ujAPk8YO/4wSphy7o3g7n
+	P869OhL24X0QQx+sB1uB1Sr5ETh7m1wDVvzopnHGF1YMez0Jj1oNuznWzdbdx8rnBn4OReo5HQT
+	CJxPElaTxbEdAOjGB7z1ouTUmQaDVS9DT90kMj39zTl7wGmW5/XfPe16eGmh1f4UTNaEPjJFM0c
+	pIMXBYRmMFX5jvD7dbbOpRWAIdSvTLtzQRi+aAL/GjN4Xh3AFarN1IeEESoBIGzyE03dfZBYtJm
+	uP/K4A=
+X-Received: by 2002:a05:6000:400b:b0:43b:4ef0:e13 with SMTP id ffacd0b85a97d-43b889a49eemr10222108f8f.12.1774515124429;
+        Thu, 26 Mar 2026 01:52:04 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:106d:1080:8431:f88b:714d:f78d? ([2a01:e0a:106d:1080:8431:f88b:714d:f78d])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43b919cf2c8sm6326074f8f.20.2026.03.26.01.52.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 26 Mar 2026 01:52:03 -0700 (PDT)
+Message-ID: <5298e691-99ba-48fc-874b-c9af308664ee@linaro.org>
+Date: Thu, 26 Mar 2026 09:52:03 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+User-Agent: Mozilla Thunderbird
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
+Subject: Re: [PATCH v4 1/9] arm64: dts: amlogic: t7: Add eMMC, SD card and
+ SDIO pinctrl nodes
+To: Ronald Claveau <linux-kernel-dev@aliel.fr>,
+ Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
+Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
+References: <20260325-add-emmc-t7-vim4-v4-0-44c7b4a5e459@aliel.fr>
+ <20260325-add-emmc-t7-vim4-v4-1-44c7b4a5e459@aliel.fr>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20260325-add-emmc-t7-vim4-v4-1-44c7b4a5e459@aliel.fr>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-Disable new_tx/rx to avoid data transmission instability, and adjust
-.data_tune, .stop_dly_sel, and .pop_en_cnt to fit the overall
-configuration after disabling new_tx/rx, making it more compatible
-with mt8189.
+On 3/25/26 10:15, Ronald Claveau wrote:
+> These pinctrl nodes are required by the eMMC, SD card and SDIO drivers
+> to configure pin muxing at runtime.
+> 
+> - eMMC: control, 4-bit/8-bit data, data strobe and clock gate pins
+> - SD card: data, clock, command and clock gate pins
+> - SDIO: data, clock, command and clock gate pins
+> 
+> Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
+> ---
+>   arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi | 98 +++++++++++++++++++++++++++++
+>   1 file changed, 98 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+> index 6510068bcff92..016b5429c8d1b 100644
+> --- a/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+> +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7.dtsi
+> @@ -250,6 +250,104 @@ gpio: bank@4000 {
+>   					#gpio-cells = <2>;
+>   					gpio-ranges = <&periphs_pinctrl 0 0 157>;
+>   				};
+> +
+> +				emmc_ctrl_pins: emmc-ctrl {
+> +					mux-0 {
+> +						groups = "emmc_cmd";
+> +						function = "emmc";
+> +						bias-pull-up;
+> +					};
+> +
+> +					mux-1 {
+> +						groups = "emmc_clk";
+> +						function = "emmc";
+> +						bias-disable;
+> +					};
+> +				};
+> +
+> +				emmc_data_4b_pins: emmc-data-4b {
+> +					mux-0 {
 
-Fixes: 846a3a2fdff5 ("mmc: mtk-sd: add support for MT8189 SoC")
-Cc: stable@vger.kernel.org
-Tested-by: Louis-Alexis Eyraud <louisalexis.eyraud@collabora.com>
-Signed-off-by: Cathy Xu <ot_cathy.xu@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+No need for "-0"
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 302ac8529c4f..b2680cc054bd 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -682,15 +682,15 @@ static const struct mtk_mmc_compatible mt8189_compat = {
- 	.needs_top_base = true,
- 	.pad_tune_reg = MSDC_PAD_TUNE0,
- 	.async_fifo = true,
--	.data_tune = true,
-+	.data_tune = false,
- 	.busy_check = true,
- 	.stop_clk_fix = true,
--	.stop_dly_sel = 1,
--	.pop_en_cnt = 2,
-+	.stop_dly_sel = 3,
-+	.pop_en_cnt = 8,
- 	.enhance_rx = true,
- 	.support_64g = true,
--	.support_new_tx = true,
--	.support_new_rx = true,
-+	.support_new_tx = false,
-+	.support_new_rx = false,
- 	.support_spm_res_release = true,
- };
- 
--- 
-2.45.2
+> +						groups = "emmc_nand_d0",
+> +							 "emmc_nand_d1",
+> +							 "emmc_nand_d2",
+> +							 "emmc_nand_d3";
+> +						function = "emmc";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				emmc_data_8b_pins: emmc-data-8b {
+> +					mux-0 {
+
+No need for "-0"
+
+> +						groups = "emmc_nand_d0",
+> +							 "emmc_nand_d1",
+> +							 "emmc_nand_d2",
+> +							 "emmc_nand_d3",
+> +							 "emmc_nand_d4",
+> +							 "emmc_nand_d5",
+> +							 "emmc_nand_d6",
+> +							 "emmc_nand_d7";
+> +						function = "emmc";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				emmc_ds_pins: emmc-ds {
+> +					mux {
+> +						groups = "emmc_nand_ds";
+> +						function = "emmc";
+> +						bias-pull-down;
+> +					};
+> +				};
+> +
+> +				emmc_clk_gate_pins: emmc-clk-gate {
+> +					mux {
+> +						groups = "GPIOB_8";
+> +						function = "gpio_periphs";
+> +						bias-pull-down;
+> +					};
+> +				};
+> +
+> +				sdcard_pins: sdcard {
+> +					mux {
+> +						groups = "sdcard_d0",
+> +							 "sdcard_d1",
+> +							 "sdcard_d2",
+> +							 "sdcard_d3",
+> +							 "sdcard_clk",
+> +							 "sdcard_cmd";
+> +						function = "sdcard";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				sdcard_clk_gate_pins: sdcard-clk-gate {
+> +					mux {
+> +						groups = "GPIOC_4";
+> +						function = "gpio_periphs";
+> +						bias-pull-down;
+> +					};
+> +				};
+> +
+> +				sdio_pins: sdio {
+> +					mux-0 {
+
+No need for "-0"
+
+> +						groups = "sdio_d0",
+> +							 "sdio_d1",
+> +							 "sdio_d2",
+> +							 "sdio_d3",
+> +							 "sdio_clk",
+> +							 "sdio_cmd";
+> +						function = "sdio";
+> +						bias-pull-up;
+> +					};
+> +				};
+> +
+> +				sdio_clk_gate_pins: sdio-clk-gate {
+> +					mux {
+> +						groups = "GPIOX_4";
+> +						function = "gpio_periphs";
+> +						bias-pull-up;
+> +					};
+> +				};
+>   			};
+>   
+>   			gpio_intc: interrupt-controller@4080 {
+> 
 
