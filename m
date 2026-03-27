@@ -1,106 +1,106 @@
-Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com [209.85.167.44])
+Received: from mail-lj1-f170.google.com (mail-lj1-f170.google.com [209.85.208.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D04A036AB46
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2026 09:36:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 327193CE497
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2026 09:36:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.170
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774604210; cv=pass; b=PONuuhiC8Z4mKj1ybQbQQYgn70Oqy7CXVSVK9zr5weahpZUNdX3HZOFV5GXGt/EwrxaWXbHQGHAM7CnDqYsYPsaSCtv3/TlRGQ1yMf50t9i2/b21zfYJhrefdgIuVnC/t38dPMMu8+U88fwrzGlPB3e4GjWXvlWP2dMlsw2MtKM=
+	t=1774604216; cv=pass; b=gtbB4gfXPEZr+fHcf9jiWzDThGj5Cgf4aUa1BtIEhX0XbB+1grjSl0EaPMwbqlmfMcPTeoDcBZC0Fs8YJQc0e7lXH1x2DxfGzBSD+rxsxGaG3j5NZbeX+plUrHp9jT4IRcnZcyrnkh7mIS2kJWbWoWzKmeOZ1phJ2V9JEmvVnrs=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774604210; c=relaxed/simple;
-	bh=Ke/OXFwuARyPCCa6DSz76nELinx4xlFUrxOXTYo46As=;
+	s=arc-20240116; t=1774604216; c=relaxed/simple;
+	bh=8Jaamk/JUprispzc5CuGrhCZ1Vvmop6kJ+uQ9arHFqM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WcvaRtJ5ULBQmFWI1P+JShOCFXvlgFyguY0zDdS40EbjuBK/kUwnL/T4zwzfJQey6R2xbQ0QYrNXudjxQ19vL4zlOW5hLTToP+JJ5SCatCa5/VBHCrwaZwB1ITnX5VtLIQuDJEjU8kt9/QZV8d1aVEM35q8C/UFi99u8d33W0JQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=MRchHse6; arc=pass smtp.client-ip=209.85.167.44
+	 To:Cc:Content-Type; b=Db8QBlFT69h7H0eFlCB99p+9Y5oz44dZ4kTn+LjHwbMYh3HNrxa9fRynfeibM3XRF2CHWZIBvdlKSaZ1JQ2P0TGQbKOJCqROBcsXOwWA7BKmOXWbWwkfW3yAfKz9Hwtj3oL95siXaGQPwgf/Px0cHKzIh/+WRlXe4YrXeByIuXg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tWcTCA0E; arc=pass smtp.client-ip=209.85.208.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MRchHse6"
-Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-5a12cd0bcd8so413051e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2026 02:36:48 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774604207; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tWcTCA0E"
+Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-38c551f2497so16811981fa.2
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2026 02:36:53 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774604212; cv=none;
         d=google.com; s=arc-20240605;
-        b=Vg+3IqVeGrWZRsa5vRKESyer+w7T5ILvx7BP8i8DBhie200ywVvL7tb0CsdvUN3/m1
-         ij3UOw8PZ103o1txW0hJzoMMbILZJ+TWQNUHv955r0IFsEKxY8bGC0Mo6+2DFWl4DTVf
-         HPg6q0Uxl2Sg7B+D4RDNU7aoEKUsClshvXlvuEYTcEWYV4oUhKqmyIHQYy2hqB5SNsfZ
-         s8XjwyFBbrfXSHThDIMX881cMiMAWRYGIQVwlovOiUfiGvKrrpPLyiarau2QthqESBEw
-         DN6Jb7IUGYj25C4fBMXErLrrOF9Xy7D5dHH9I0DrB6fdO5pBvsE8w1+irFSuvmdLwr3l
-         caNw==
+        b=aw4UJfjW/5BxC75cswWZ8iuPX9z4xvtdSn2fi9ZKygyPNXg/mQH/EVurHIuC0T8YhE
+         HWioOozINBI4ObVipAuxIvEUNYL1wMtnAjc+FGnzJLzIrAxTIR5iApYSDPIkzMdfGM1w
+         kNAEcuczo6GgsarYXZTlLnIB3/Yw2diB/wE+kr3zLX5NLdN2uOhbBhpJC/a0iGEvFHPs
+         U1SN5/5pnfvcEMhLsHmQS9zWMvdZ9bQ63uboBVn/x3MIxcFcN0AJs0RrBTlrRCIlBARZ
+         pmVvbhNZYKx+XNw6PLNlucujdeu3F6AJG9y1hiBGQBTuzKl3HmCAjf1WnvtQvY3uT46l
+         XX7g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=vQ3mg9eu23z1aT+oHgo+d+ZbECCe93Eys36nWJxEE5Y=;
-        fh=ZAt5dYEk0RvEVVNjyNgwiCnyB3I3XO8SBztRftYnIYE=;
-        b=HDz9dHYv2q6hkgxwy130WtpbOy/H1JRIPcnfXt3R1pHCQHebAdAyRuA8o+uRy1kQTE
-         iIpLiqmB1NWlelOaTziAPBBJ4XFYDJf/MCdrbjlKVQqgDyDYgT9QdMu90/ipJrz61js4
-         wFC9kR0KHYC9/RG+iUZTI9FOgFrLkEHr8qj9MonplwCrhhGnQyy4rXvjuo8Y1+AOgvPW
-         pM2kNdLrTQWkNbBZs4OX5+kmq2LDXlndAYk7/1Eu632LupONeiUxY3Tgo9OTM2dbyqxl
-         Xg0jUwCBWBFVXGrlWbg53zV/7nPay920sCIim9PCHvcnyLhYg7hcTd5qNyjxBHZvtCtj
-         vluQ==;
+        bh=XOZEOcfpw3m9rcu3ZVGKiqfOqODaKLVWBUZGiHWTa+o=;
+        fh=F09gXjuBfAinjRGqtSdI7PBlpEv7aCugp05ZKB1d0tc=;
+        b=EP/suS7uCBtNJs/y/Vj9uY7L78D6bkCGUYoGVc2vG4RAaSmbEdU5zuRleepgmLbHL9
+         kTinFGAX2wcGAmtJX6pmiTAv1Nr0CM2nVWv/7feYscd38ZqwcO13qOxhXKJiilxM5Urv
+         P/C06e+vGY64+NVIRY6sv+2P+ORxIJnv8fcjvQsiXTpoNwJrC0twVwCUd6lKb/SzZLgQ
+         ZnjaiNrwddtKJca8Fz0lFIJADa1vnyNGFAl58MGnd+rNNwsbtNgOezjtsKXjZpfTLk90
+         vz8NC8ukTepP370eswtdjQOBuIxGMFluBZEwwp2pU57TQHzfCJq009rUO8A5dGPTdK2z
+         kE4g==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774604207; x=1775209007; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774604212; x=1775209012; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=vQ3mg9eu23z1aT+oHgo+d+ZbECCe93Eys36nWJxEE5Y=;
-        b=MRchHse6t8enn0+9qPpBgQCeZg1xtEhgCF8Gb3ll3ymkWi4DsRlPP2JkRJQWEWggSq
-         vPIgxsJ8AOyG6VuhpCsl+jqWrDgdBxhm7fmVtWmbYdViF8k/YLnGzXU9FCjjOYnvEI+V
-         esyfLUfQm2F0oK5Yu4eEjftmUDtSi85h3VrAJYrs2EJF5kpoaGMg7KT5F6wxcvC1d35u
-         XQFZL8Ym6NSc9Z7aqX7ycThueUOV6YAsQ9c0gbyIxeKeqKYOfTEoJtUg4GoX7u3f16PB
-         vS19p10Zmqm+aukdOrf6+10P/SGBfV2/SDZoiSw8hnmknm+qRuMlOXvINa72AGFdV9cz
-         2BRA==
+        bh=XOZEOcfpw3m9rcu3ZVGKiqfOqODaKLVWBUZGiHWTa+o=;
+        b=tWcTCA0E2ScScujkN21oQHgJ8Phs9+z0EBx5bsgOxCvizhJgCdO2kMIRGC7EgKQ7A0
+         ze58nSV5qnM5c8mNrRJZXLEF+oKKqkbYmgEoOIT9yt6QeMshcAh5xkRKI4sETuKTS5+5
+         lYIyiU+9lFRuxaMgOP4JkGK5Dqw1QyU4WJd28DY2+wC4buV3AqANqVY3CJygdUA4mFwL
+         vV31ZCA00u3tdjiX9Ep1oBf3X5zrVcYA011Vhvs0x3dg2q2c6rQpqiZMq3j1z42yU975
+         2uxu1dK56atQcw3pAFKZZkPBqnwvIU5e87uA+64lGAotqQB4MzCC/9sxpmNBzEIHiBe8
+         V/eg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774604207; x=1775209007;
+        d=1e100.net; s=20251104; t=1774604212; x=1775209012;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=vQ3mg9eu23z1aT+oHgo+d+ZbECCe93Eys36nWJxEE5Y=;
-        b=KI4S9U0x6KEUAcOMHksBD4NbtmxahIJAcQACG71FZDhA49qhaonfdm4gcGdc7cAwzu
-         /LUbhNEeCJq1v111JIQx75bMuaoTwil8VxzVCL59cy/jr3ALzE7WC9iWlNK5XqZKq4iy
-         5gWo+akeYYbQWle+aVSCxvCvVExx14r474M0+XyQEIKthkjM7IgV4T9ye7fQqUMf3Pli
-         AOHd/kPJJQf5VqjKN4Aotz8eRUkZWN1cFsCVUMUVe5FOs4X4PqklRIoGtGpBrtDUYMu1
-         mceMlvUJ8fNCo8nNxQYZJjKl/I8fr9+D+WMwjd3vihEmpq32EDo3+Qqe9fMRg0VIcnPz
-         AOxg==
-X-Gm-Message-State: AOJu0Yw/DCspcCRzYJS+/1g1IvYnjF8B7HmgJyKeiR12GyN3C6kkrsdD
-	oUX9c9M49yoEkICUMAD0S//Ti4XU9D3gX+jFeJuTQEECVS3y0WvPgVZL9xTOo6lvrkS3L0v7eky
-	aKXlsaU4G/Me5b9U8w1LSQWRrsjY9mvjZAhg37xsKxA==
-X-Gm-Gg: ATEYQzxmxo4v7vte7iOJ+obl/mQMQCHCcgVeFgVYKqH64lc/BZCJEPzLWe5e1ETJBUY
-	XJLv/6MKJdyWGk2QoaGMii01yJ+p/mZ6zePDzQ+HRx3Ekj9QiSUM68xSHfr5hx7aQjIm8zX9K7K
-	OfVz/EAA2cTvYZ9SxmR0cVmo37KwwRyzj1QxvHOOiI6/PKxHYokZsUmlIjuOcBPdB2YQD+c47A3
-	ZcEXGgsicpno3woS+IPJoCV+qIw74LIaJIIqTjTYUaRVr3nqLHsrE4sWuChy150YG4RpGB8SpVr
-	5U0vIJeU
-X-Received: by 2002:a05:6512:33c3:b0:5a1:2a8:ced7 with SMTP id
- 2adb3069b0e04-5a2ab92f464mr620473e87.36.1774604206860; Fri, 27 Mar 2026
- 02:36:46 -0700 (PDT)
+        bh=XOZEOcfpw3m9rcu3ZVGKiqfOqODaKLVWBUZGiHWTa+o=;
+        b=MfYHk/gMT4aJ9TN6PRvtYl4ytBNAYo/+qv/2Cm9BHT3jAD5Eao8SnAM1UwnDOEgZup
+         IY9ZLzF1fk959cINCP9EwtUdpvO/ZlyoJbJsZIvGcsAXLxmhduUmZ9ynLrblsr3blWYa
+         V8mPR/PEofFe8Ii/InLe5XhvWqgcQRCs0jiJn/kFYchRF6YY+iJexsRs4/rny3MEg5ij
+         V8i4A6U+EyeghVH0bWZVjwJw/ipVbSNf/FDSPKsarW7HbleZBXeRjFZpGr/9F+aypnQ6
+         RTwG04oTp+H2edMxSSGYB696J/jtYorJwy+iFpAT/+f1ZxNPE2AKnotr3X4JS+m34PG8
+         8lsQ==
+X-Gm-Message-State: AOJu0YzuCdFOj2z9VX3BpfpbykS7RgXzo8WuIjbmSXwFUSM+HlQCRF2S
+	0XnpM8DCIZGdMKWEff49/cIhiY1rDNA66A3d+KJovEjPSlwOZtA5R2XqPyNSXxjWMM/0vzOT+ts
+	oN8A12FdD1GKftRNz+fiU9qyrS0CRvcUeHNrlRZZWJQ==
+X-Gm-Gg: ATEYQzy/VWksMxPSvUcxqPReOct3gYaiOMp7/lR4+9IJKeAjOJjgJB54XSg4pDDANJ5
+	AtMjCTweZe/3SboBPF12th8mqkIC7H8k7pB0czAx0Xg000XvZf1MglqO39BwfQ+JszyUPJTnw0P
+	/A22gi+uDGknc25iXqgMqc7ZaKuYzZOO9fTfnHE7P/MIaLJpMu0vvSxVKLwDEFgY+nErJIm/RoV
+	HPTQDRpGzQHeFHgM+ZcbIvoxDnegywgykRcz/3JP1M+Ld66f+mrSNtoIRebTQ1rqcva2mbLXNvq
+	FiRRfVGD
+X-Received: by 2002:a05:6512:3d0f:b0:5a1:17db:aaea with SMTP id
+ 2adb3069b0e04-5a2ab920f8amr779072e87.24.1774604212257; Fri, 27 Mar 2026
+ 02:36:52 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260327025849.8085-1-rosenp@gmail.com>
-In-Reply-To: <20260327025849.8085-1-rosenp@gmail.com>
+References: <1774584449-130249-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1774584449-130249-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 27 Mar 2026 10:36:10 +0100
-X-Gm-Features: AQROBzAg20uCmE0k4Nr0ejPhImIl4mAHsa7ydC91HvIBv7u_kbncgPzg9lHjDjM
-Message-ID: <CAPDyKFr1SdB_geQD_QmOSpHBfgY1SjMgyfgR_H07iqxN6=WBJA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmc_test: use kzalloc_flex
-To: Rosen Penev <rosenp@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Kees Cook <kees@kernel.org>, 
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>, open list <linux-kernel@vger.kernel.org>, 
-	"open list:KERNEL HARDENING (not covered by other areas):Keyword:b__counted_by(_le|_be)?b" <linux-hardening@vger.kernel.org>
+Date: Fri, 27 Mar 2026 10:36:15 +0100
+X-Gm-Features: AQROBzB1dmTFH38ZaZPyemv2mYtRf2Yklh9o8CclVKnpHd23PpuWwngo-Pgwxak
+Message-ID: <CAPDyKFpgnpFj4ZQ_wmRGQ1Eu+6ngfNs+cw=iEiwozrEbqsV5PQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Remove legacy 'enable-sdio-wakeup' DT property support
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 27 Mar 2026 at 03:59, Rosen Penev <rosenp@gmail.com> wrote:
+On Fri, 27 Mar 2026 at 05:07, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> Simplifies allocations by using a flexible array member in these structs.
+> The 'enable-sdio-wakeup' device tree property was marked as legacy and
+> superseded by the standard 'wakeup-source' property in commit 71a0151c5c82
+> ("Documentation: devicetree: fix reference to legacy wakeup properties")
+> back in 2015.
 >
-> Add __counted_by to get extra runtime analysis.
+> Since it has been a decade and the migration to the standard property
+> has long been completed, remove this obsolete legacy support.
 >
-> Signed-off-by: Rosen Penev <rosenp@gmail.com>
-
-Nice!
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 Applied for next, thanks!
 
@@ -109,115 +109,24 @@ Uffe
 
 
 > ---
->  drivers/mmc/core/mmc_test.c | 28 ++++++++++------------------
->  1 file changed, 10 insertions(+), 18 deletions(-)
 >
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 43fdb67d5407..f5c542855037 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -51,12 +51,12 @@ struct mmc_test_pages {
+>  drivers/mmc/core/host.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 >
->  /**
->   * struct mmc_test_mem - allocated memory.
-> - * @arr: array of allocations
->   * @cnt: number of allocations
-> + * @arr: array of allocations
->   */
->  struct mmc_test_mem {
-> -       struct mmc_test_pages *arr;
->         unsigned int cnt;
-> +       struct mmc_test_pages arr[] __counted_by(cnt);
->  };
->
->  /**
-> @@ -135,21 +135,22 @@ struct mmc_test_dbgfs_file {
->   * struct mmc_test_card - test information.
->   * @card: card under test
->   * @scratch: transfer buffer
-> - * @buffer: transfer buffer
->   * @highmem: buffer for highmem tests
->   * @area: information for performance tests
->   * @gr: pointer to results of current testcase
-> + * @buffer: transfer buffer
->   */
->  struct mmc_test_card {
->         struct mmc_card *card;
->
->         u8              scratch[BUFFER_SIZE];
-> -       u8              *buffer;
->  #ifdef CONFIG_HIGHMEM
->         struct page     *highmem;
->  #endif
->         struct mmc_test_area            area;
->         struct mmc_test_general_result  *gr;
-> +
-> +       u8              buffer[];
->  };
->
->  enum mmc_test_prep_media {
-> @@ -315,7 +316,6 @@ static void mmc_test_free_mem(struct mmc_test_mem *mem)
->         while (mem->cnt--)
->                 __free_pages(mem->arr[mem->cnt].page,
->                              mem->arr[mem->cnt].order);
-> -       kfree(mem->arr);
->         kfree(mem);
->  }
->
-> @@ -348,14 +348,10 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
->         if (max_segs > max_page_cnt)
->                 max_segs = max_page_cnt;
->
-> -       mem = kzalloc_obj(*mem);
-> +       mem = kzalloc_flex(*mem, arr, max_segs);
->         if (!mem)
->                 return NULL;
->
-> -       mem->arr = kzalloc_objs(*mem->arr, max_segs);
-> -       if (!mem->arr)
-> -               goto out_free;
-> -
->         while (max_page_cnt) {
->                 struct page *page;
->                 unsigned int order;
-> @@ -3099,7 +3095,7 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
->         if (ret)
->                 return ret;
->
-> -       test = kzalloc_obj(*test);
-> +       test = kzalloc_flex(*test, buffer, BUFFER_SIZE);
->         if (!test)
->                 return -ENOMEM;
->
-> @@ -3111,7 +3107,6 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
->
->         test->card = card;
->
-> -       test->buffer = kzalloc(BUFFER_SIZE, GFP_KERNEL);
->  #ifdef CONFIG_HIGHMEM
->         test->highmem = alloc_pages(GFP_KERNEL | __GFP_HIGHMEM, BUFFER_ORDER);
->         if (!test->highmem) {
-> @@ -3120,17 +3115,14 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
->         }
->  #endif
->
-> -       if (test->buffer) {
-> -               mutex_lock(&mmc_test_lock);
-> -               mmc_test_run(test, testcase);
-> -               mutex_unlock(&mmc_test_lock);
-> -       }
-> +       mutex_lock(&mmc_test_lock);
-> +       mmc_test_run(test, testcase);
-> +       mutex_unlock(&mmc_test_lock);
->
->  #ifdef CONFIG_HIGHMEM
->         __free_pages(test->highmem, BUFFER_ORDER);
->  free_test_buffer:
->  #endif
-> -       kfree(test->buffer);
->         kfree(test);
->
->         return count;
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index a457c88..4e1514b 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -379,8 +379,7 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND;
+>         if (device_property_read_bool(dev, "keep-power-in-suspend"))
+>                 host->pm_caps |= MMC_PM_KEEP_POWER;
+> -       if (device_property_read_bool(dev, "wakeup-source") ||
+> -           device_property_read_bool(dev, "enable-sdio-wakeup")) /* legacy */
+> +       if (device_property_read_bool(dev, "wakeup-source"))
+>                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+>         if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
+>                 host->caps |= MMC_CAP_3_3V_DDR;
 > --
-> 2.53.0
+> 2.7.4
 >
