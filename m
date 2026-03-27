@@ -1,194 +1,76 @@
-Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail-m32109.qiye.163.com (mail-m32109.qiye.163.com [220.197.32.109])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8830A34104B
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Mar 2026 02:59:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF89123D2AB;
+	Fri, 27 Mar 2026 04:23:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.109
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774580349; cv=none; b=fxpniuI3ltec285vtLBj02aPhxHBM9SqI3XadjJxW4Sg354DqAxOTEASoOoEq9eUGgf3jt0flU2nbDdNvRAn6FX5d7bGud8szaIPUBI6aMSCDr5y2BK7Sbx+J0GaHqqDOmNCWj8oK4fhoDRzK0hnUr1xkpE+5uT3vlGp4xpIuwY=
+	t=1774585387; cv=none; b=lqzEu2eUyANo48dKFYN1fpFCg7O3JkZKlJDl99uJCxB66KsvqSaWH5lU4XV2nnUy8Iu4E64HWUZ5NMohkCbfVZ4gu7FKCHJJfAbO/Oj02zsZd4yxuqIuUiTpRODlmbl17V+9f/7UjUAiQuKO9Y/4ko4DyncoGnmn8CAri+dBuvc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774580349; c=relaxed/simple;
-	bh=NaKCyVm1WYHg1WscLfFbkDQ6k04fmBF8uk6h/mVsmHA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=XoUNMUDRH6kyX+e/O6FX3q1owB6ymRUqLm3Uu3Kwr4BTFr/q/pr6a242Ro7Q6lTXIqWr1iIIYQavI9ELmWo/qWnVd3wPsaNNvcmI5m7GnYXVyXutvrobR4E/djwWKIT2YScmpO58o0uR2OUF6Tkj334cfozvMKREEIxXp4FHb3c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=asbumraR; arc=none smtp.client-ip=209.85.210.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1774585387; c=relaxed/simple;
+	bh=mQg9AkXeSmLd0X1ieOYcBc3B1YsjdT0vVcM3QzjwKwM=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=poUbhUvcyKb2PIsuRtE6W3n9qI1gAjwKa+Bu+3IURQvSL2NfjSkYJziUJOQ53Mu2jnFRbYrMOl0NsaARXXwTMl4oWSjSs6PtLfIhWExgAWj8iZRETohAngptDiliCOAPEpLceNlGMLjLS8KIV/GFwWorjI/QMoBcKxwEuusaJYs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=OzAt1qBt; arc=none smtp.client-ip=220.197.32.109
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="asbumraR"
-Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-82a655cfab5so1553484b3a.1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Mar 2026 19:59:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1774580347; x=1775185147; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=nlhO9dnDtgKKk75FhfoMSHhoMn3ErPiErmZ+IolhpDg=;
-        b=asbumraRodVOLML5oYt7ovjc4hBOEtAHO294uevxdUMmgbl7u61eBrVtw2+D+CKjRh
-         coe3Lhumbeqsish+XbxkRMJ2qGK34oBHC8wwwTp5dk1B68DvRSqIV/vyLebfvL02sp1Z
-         PsLy2oSw1xqRfOE8DWx3JeoRe91qAccRKRqJ3XcNZb9x7WFJk8pf27IfhIEyDdiv8h3c
-         DSJNHWu+ov8YXeD5uiA6hnkHYXiK1RlM7GrLrZJBiqjrriznr9fdGvnoAmkPOb6lj4tf
-         nnjdxg7e6vOLzoBVddO0MzryuyfAqwPYhgYAlPb5DJsWe+vrjxxsoIa7VgnZowNwqKqb
-         gyGA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774580347; x=1775185147;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nlhO9dnDtgKKk75FhfoMSHhoMn3ErPiErmZ+IolhpDg=;
-        b=d0BBYHApTBHkMrWEIyYzQgY1lDpqC2RPM0cDJFrJta+CVJSHvs4lUOz6ivBmbv+baH
-         Afg9CLRPbSs92G3R+P3cLyAFmoIGGnUyZ++hYDm3hAEjnrBNlsHME3WgolIx6+ZZRUz1
-         4rYEbptHSm6k11LCy9RQyGx1lFK33uh5anpwUlT502m5cpyCDaKYSzCrMrZGjalzUKFi
-         /R1+3yToHVJ2A4jAepjyJmyrzkOUUfK57vJRULQ/Fm8U52PWm/+0VcZgRra306HQzUxT
-         CmpkOhPdpIzFD72/of/W7WsD5aPSunhqd3x4xJD9jCzilB0AnYfh9UKMKX5Tv+wa/38Y
-         fKsA==
-X-Gm-Message-State: AOJu0YxYht8vXsV3Nls2KhseAMa/a9Ct7qCC8sT9No9U5X47CR0JnZq3
-	aWgq9mmezaNhGb5cEJ1mG6mgT+Snza8QurLZstM7+1CVaKhww5yqeRq0s9gE7ZRg
-X-Gm-Gg: ATEYQzwBEfd/oyCqGblFmwa0P/Bcx8WHK8yiSRellAf7q79+hzcmPRUPrMnLrmaoUMn
-	xmAGtMu0jtjlrLtaheW4JxeyQC1ygCQJnhvksxf2kroFKtX93GL5HjMaBR0tPDtFPWcylNRznRC
-	Mxp3kACZOyyPg2tgtPS/uLt9W2wVWKktjTvmfr+UJWbI9V1CHRgC97O0xFGTsgR5Z6ZNcezr5rN
-	ddiJdA8YmzFq2GyiffCZ0jjbgSIxAO6eL9zNuNoMtd5CuC6l8/LbSIySAlbkeWi6W8zcynh5PuA
-	YAA2j/ZB63NUrsBSLJVZKXC8fJvq4mgGcXGJmCcFVRiRjq7r5q+HCajDSWg2KfDUBx7xj+Z4M7v
-	xJ8xaHE4REEF4MQX5O6Hp/VQWnhHxgJkZHsAYfHghYZRntHDMX9duvbPkqS/OW0Wl0CYjhtolbG
-	rvBePdmpvYh5wMgBN/FkBsRk1k0Ts681kCJ2jj5pWevEHam9aX2Yiwz6s=
-X-Received: by 2002:a05:6a00:170b:b0:82c:21b8:4a1f with SMTP id d2e1a72fcca58-82c95c19881mr773878b3a.5.1774580347440;
-        Thu, 26 Mar 2026 19:59:07 -0700 (PDT)
-Received: from ryzen ([2601:644:8000:5b5d::8bd])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-82c7d23c7a4sm3969059b3a.27.2026.03.26.19.59.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Mar 2026 19:59:06 -0700 (PDT)
-From: Rosen Penev <rosenp@gmail.com>
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	Kees Cook <kees@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-kernel@vger.kernel.org (open list),
-	linux-hardening@vger.kernel.org (open list:KERNEL HARDENING (not covered by other areas):Keyword:\b__counted_by(_le|_be)?\b)
-Subject: [PATCH] mmc: mmc_test: use kzalloc_flex
-Date: Thu, 26 Mar 2026 19:58:49 -0700
-Message-ID: <20260327025849.8085-1-rosenp@gmail.com>
-X-Mailer: git-send-email 2.53.0
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="OzAt1qBt"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 388109537;
+	Fri, 27 Mar 2026 12:07:36 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: core: Remove legacy 'enable-sdio-wakeup' DT property support
+Date: Fri, 27 Mar 2026 12:07:29 +0800
+Message-Id: <1774584449-130249-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+X-HM-Tid: 0a9d2d79e4fe09cckunm94b891b6c3f3e0
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGkpJQ1YZQ0oaGR4fSx9NHUtWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=OzAt1qBtI1/ZtXdf4QBpHa25xcCGvL4UhkNQpM6zhJDHOkDn/QF33xR3qSCKv3jmEcqGvmVHS3i+CGTGpy/LuYXC5OZlfMeXl289Pt/2rovkjhFDcXw366RkD9o6Fpkp5ZMVk/3a2U5ZAnoP+mcO7DHgvWY4lY+VaxeTMQjWMK0=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=3DzG4lF3Tl7aSSQGUW7ynT1WpZYD13cWytT2vU2dqiM=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-Simplifies allocations by using a flexible array member in these structs.
+The 'enable-sdio-wakeup' device tree property was marked as legacy and
+superseded by the standard 'wakeup-source' property in commit 71a0151c5c82
+("Documentation: devicetree: fix reference to legacy wakeup properties")
+back in 2015.
 
-Add __counted_by to get extra runtime analysis.
+Since it has been a decade and the migration to the standard property
+has long been completed, remove this obsolete legacy support.
 
-Signed-off-by: Rosen Penev <rosenp@gmail.com>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
- drivers/mmc/core/mmc_test.c | 28 ++++++++++------------------
- 1 file changed, 10 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index 43fdb67d5407..f5c542855037 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -51,12 +51,12 @@ struct mmc_test_pages {
- 
- /**
-  * struct mmc_test_mem - allocated memory.
-- * @arr: array of allocations
-  * @cnt: number of allocations
-+ * @arr: array of allocations
-  */
- struct mmc_test_mem {
--	struct mmc_test_pages *arr;
- 	unsigned int cnt;
-+	struct mmc_test_pages arr[] __counted_by(cnt);
- };
- 
- /**
-@@ -135,21 +135,22 @@ struct mmc_test_dbgfs_file {
-  * struct mmc_test_card - test information.
-  * @card: card under test
-  * @scratch: transfer buffer
-- * @buffer: transfer buffer
-  * @highmem: buffer for highmem tests
-  * @area: information for performance tests
-  * @gr: pointer to results of current testcase
-+ * @buffer: transfer buffer
-  */
- struct mmc_test_card {
- 	struct mmc_card	*card;
- 
- 	u8		scratch[BUFFER_SIZE];
--	u8		*buffer;
- #ifdef CONFIG_HIGHMEM
- 	struct page	*highmem;
- #endif
- 	struct mmc_test_area		area;
- 	struct mmc_test_general_result	*gr;
-+
-+	u8		buffer[];
- };
- 
- enum mmc_test_prep_media {
-@@ -315,7 +316,6 @@ static void mmc_test_free_mem(struct mmc_test_mem *mem)
- 	while (mem->cnt--)
- 		__free_pages(mem->arr[mem->cnt].page,
- 			     mem->arr[mem->cnt].order);
--	kfree(mem->arr);
- 	kfree(mem);
- }
- 
-@@ -348,14 +348,10 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
- 	if (max_segs > max_page_cnt)
- 		max_segs = max_page_cnt;
- 
--	mem = kzalloc_obj(*mem);
-+	mem = kzalloc_flex(*mem, arr, max_segs);
- 	if (!mem)
- 		return NULL;
- 
--	mem->arr = kzalloc_objs(*mem->arr, max_segs);
--	if (!mem->arr)
--		goto out_free;
--
- 	while (max_page_cnt) {
- 		struct page *page;
- 		unsigned int order;
-@@ -3099,7 +3095,7 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
- 	if (ret)
- 		return ret;
- 
--	test = kzalloc_obj(*test);
-+	test = kzalloc_flex(*test, buffer, BUFFER_SIZE);
- 	if (!test)
- 		return -ENOMEM;
- 
-@@ -3111,7 +3107,6 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
- 
- 	test->card = card;
- 
--	test->buffer = kzalloc(BUFFER_SIZE, GFP_KERNEL);
- #ifdef CONFIG_HIGHMEM
- 	test->highmem = alloc_pages(GFP_KERNEL | __GFP_HIGHMEM, BUFFER_ORDER);
- 	if (!test->highmem) {
-@@ -3120,17 +3115,14 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
- 	}
- #endif
- 
--	if (test->buffer) {
--		mutex_lock(&mmc_test_lock);
--		mmc_test_run(test, testcase);
--		mutex_unlock(&mmc_test_lock);
--	}
-+	mutex_lock(&mmc_test_lock);
-+	mmc_test_run(test, testcase);
-+	mutex_unlock(&mmc_test_lock);
- 
- #ifdef CONFIG_HIGHMEM
- 	__free_pages(test->highmem, BUFFER_ORDER);
- free_test_buffer:
- #endif
--	kfree(test->buffer);
- 	kfree(test);
- 
- 	return count;
+ drivers/mmc/core/host.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index a457c88..4e1514b 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -379,8 +379,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND;
+ 	if (device_property_read_bool(dev, "keep-power-in-suspend"))
+ 		host->pm_caps |= MMC_PM_KEEP_POWER;
+-	if (device_property_read_bool(dev, "wakeup-source") ||
+-	    device_property_read_bool(dev, "enable-sdio-wakeup")) /* legacy */
++	if (device_property_read_bool(dev, "wakeup-source"))
+ 		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+ 	if (device_property_read_bool(dev, "mmc-ddr-3_3v"))
+ 		host->caps |= MMC_CAP_3_3V_DDR;
 -- 
-2.53.0
+2.7.4
 
