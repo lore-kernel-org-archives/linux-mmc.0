@@ -1,32 +1,35 @@
-Received: from mail-m83211.xmail.ntesmail.com (mail-m83211.xmail.ntesmail.com [156.224.83.211])
+Received: from mail-m19731105.qiye.163.com (mail-m19731105.qiye.163.com [220.197.31.105])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F41B4C81;
-	Mon, 30 Mar 2026 04:04:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=156.224.83.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFA0E390C90;
+	Mon, 30 Mar 2026 04:44:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.105
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774843461; cv=none; b=ccYRDXQanhmyCe4SfUS2aXwZWa4cPIQo0zEQd5jElnI0LGbtSbebQ2F1NhwrsT2tqnbRZgOHcrCQeTmX0PiO9F5muwjBGDxCHcQ0eG5+lq/1pX6EeOCRFZkbdd4QPLF9C/M5u0h+hylu2W1QluQJexRIxslEjSUw1Mt+QHtEiN8=
+	t=1774845872; cv=none; b=cuL8K778LddixkbR5FffJUHl7JFGpXaBHiVPlL6xQmcirMlHRqOFFXLUqIxoiXrcWdf0cGKYt+txgtyevdkh5zCAn9Sov6FSr3xL6PLREFbzGfpv08FadMCPnRAg7eVuRWuDq6YK+YtvKdRRmHdDizgaVF4oQ6MGC9IIDzBcNpE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774843461; c=relaxed/simple;
-	bh=l+jWKWf+97RksQf/Mq3dw1zwlqdbGi4+fW23666T5jE=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=l/nMO7/LBRCF+AwQXnn8H4DYnhSRhOgVXs+go2O7FndxSs0n4TfJw0v0d4jv8Gzhh3WPUi/a5hMkkZsstgpI91Tfi+BtGCVEQnKDdLKbALn/Whyochn/KRdwsxaO9ZXVNunbsEZXf4dfO41LWLpPHKRuG5SXOwoOF54NcK/R0bo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=c8QuYSrV; arc=none smtp.client-ip=156.224.83.211
+	s=arc-20240116; t=1774845872; c=relaxed/simple;
+	bh=pFYeMsTf81Cl+Psok6PkYmttP6d07XXweNreOdZbpS8=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=VXeamE+Hb/C4KGFmJQMQ9M3Ai8jEiUJd8vdiPcwlJtrMDRswCjXFuLJ/m/Uo9Nzqbp15Dwhds5abhwI8Fy5IIHmLtxmeFYchVVIH1wM1L1h8DzkPicjjqmNOJ1J8sjvIhPH4Srejb/LR6ur46JHTWWPNLYzh73rnBwdQjNECxxA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=dQe/l5CS; arc=none smtp.client-ip=220.197.31.105
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="c8QuYSrV"
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="dQe/l5CS"
 Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 38c2332aa;
-	Mon, 30 Mar 2026 11:28:41 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 38c2332df;
+	Mon, 30 Mar 2026 11:28:51 +0800 (GMT+08:00)
 From: Shawn Lin <shawn.lin@rock-chips.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 0/4] Extend MQRQ_XFER_SINGLE_BLOCK to Support Multi-Block Read Failures
-Date: Mon, 30 Mar 2026 11:28:28 +0800
-Message-Id: <1774841312-92409-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 4/4] mmc: block: Use MQRQ_XFER_SINGLE_BLOCK for both read and write recovery
+Date: Mon, 30 Mar 2026 11:28:32 +0800
+Message-Id: <1774841312-92409-5-git-send-email-shawn.lin@rock-chips.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1774841312-92409-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1774841312-92409-1-git-send-email-shawn.lin@rock-chips.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,142 +38,135 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9d3cc957cf09cckunmd82a3513dfee19
+X-HM-Tid: 0a9d3cc9802f09cckunmd82a3513dfee94
 X-HM-MType: 1
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0tPHlZJGBlPQkxDHU1OTR5WFRQJFh
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGksZSFYdTkIfTUpKTU9LHUxWFRQJFh
 	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
 	hVSktLVUpCS0tZBg++
 DKIM-Signature: a=rsa-sha256;
-	b=c8QuYSrVhfNJEXBxQNVVSM8r5sCixEjawnxUvLmnfAJlI3/xfmR0wX1xGNvFdqccgwJDo+yHxxPgUAZklM/TmED9ps2Lte5fF6BGt2KdvYWWJSo19fYkpxgiVDdfAdsT99I0iwnxlQ8OGwg3xPuI5vV+UMY54eoetvjXPq9+FT4=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=543AEDv1jjXTZSF9qnokcObUsdlLBEkcKJVget/Oghc=;
+	b=dQe/l5CSKwnCIEGcAfXfWCnLENKT/QypsrG1kJTfBByUPxXhhazjIdLwTQKVzMIWa21SAZwmlkk64j4baSe//qO+U/575Dk5mQOkDUrSRepKNlI4J9K30u98cgFUFrlVXqOR+cB1uyoo/XFkVDy8iOj19aWewPTp0IFIY2gw6Vs=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=sCFuKJdZv28jAe2p5V34BEQSKdzuv40qyLTQNeXzpMY=;
 	h=date:mime-version:subject:message-id:from;
 
+Currently, the code uses the MQRQ_XFER_SINGLE_BLOCK flag to handle write
+failures by retrying with single-block transfers. However, read failures
+bypass this mechanism and instead use a dedicated legacy path mmc_blk_read_single()
+that performs sector-by-sector retries.
 
-Background and patchset description:
-Currently, the MMC driver handles multi-block read/write failures through
-two separate mechanisms:
-1.  For read failures, the native retry mechanism is triggered internally
-    within the MMC core.
-2.  For write failures, the corresponding request is re-queued with the
-    MQRQ_XFER_SINGLE_BLOCK flag for single-block recovery. This separation
-    creates inconsistency in error handling.
+Extend the MQRQ_XFER_SINGLE_BLOCK logic to cover multi-block read failures
+as well. By doing so, we can remove the redundant and complex mmc_blk_read_single()
+function, unifying the retry logic for both read and write operations under
+a single, consistent, easier-to-maintain mechanism.
 
-To improve code uniformity and reliability, this patch series consolidates
-both read and write failure paths into a unified recovery model by enabling
-the use of MQRQ_XFER_SINGLE_BLOCK for handling multi-block read failures as
-well. Patch 1-3 are small improvement while reading the code. Patch 4
-implements the conversion of multi-block read failures to MQRQ_XFER_SINGLE_BLOCK
-mode.
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-Testing Details:
-1. Platforms: Tested on RK3576 with both CQE and non-CQE modes.
-2. Methodology:
-- Background dd test continuously reading from eMMC.
-- Physically interrupting the eMMC data line during tests to simulate CRC errors.
+ drivers/mmc/core/block.c | 70 ++----------------------------------------------
+ 1 file changed, 2 insertions(+), 68 deletions(-)
 
-Testing Result:
-On CEQ mode, CRC error triggered on slot 4 (blkaddr 734208). It successfully
-transitioned to single-block retries using tags 25, 27, 24, 25, 26, etc.
-(see logs below):
-mmc0: starting CQE transfer for tag 4 blkaddr 734208
-mmc0: CQE transfer done tag 9
-mmc0: blksz 512 blocks 1024 flags 00000200 tsac 150 ms nsac 1000
-mmc0: 524288 bytes transferred: 0
-mmc0: starting CQE transfer for tag 5 blkaddr 735232
-mmc0: blksz 512 blocks 1024 flags 00000200 tsac 150 ms nsac 1000
-mmc0: running CQE recovery
-mmc0: starting CMD12 arg 00000000 flags 00000019
-mmc0: req failed (CMD12): -110, retrying...
-mmc0: req failed (CMD12): -110, retrying...
-mmc0: req failed (CMD12): -110, retrying...
-mmc0: req done (CMD12): -110: 00000000 00000000 00000000 00000000
-mmc0: starting CMD13 arg 00010000 flags 00000195
-mmc0: req done (CMD13): 0: 00400900 00000000 00000000 00000000
-mmc0: starting CMD48 arg 00000001 flags 00000019
-mmc0: req done (CMD48): 0: 00000900 00000000 00000000 00000000
-mmc0: CQE transfer done tag 4
-mmc0: 0 bytes transferred: -84
-mmc0: CQE transfer done tag 5
-mmc0: 0 bytes transferred: 0
-mmc0: starting CQE transfer for tag 25 blkaddr 734208
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: starting CQE transfer for tag 26 blkaddr 735232
-mmc0: CQE transfer done tag 25
-mmc0: 512 bytes transferred: 0
-mmc0: blksz 512 blocks 1024 flags 00000200 tsac 150 ms nsac 1000
-mmc0: starting CQE transfer for tag 27 blkaddr 734209
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: CQE transfer done tag 26
-mmc0: 524288 bytes transferred: 0
-mmc0: CQE transfer done tag 27
-mmc0: 512 bytes transferred: 0
-mmc0: starting CQE transfer for tag 24 blkaddr 734210
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: CQE transfer done tag 24
-mmc0: 512 bytes transferred: 0
-mmc0: starting CQE transfer for tag 25 blkaddr 734211
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: CQE transfer done tag 25
-mmc0: 512 bytes transferred: 0
-mmc0: starting CQE transfer for tag 26 blkaddr 734212
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: CQE transfer done tag 26
-mmc0: 512 bytes transferred: 0
-
-On non-CQE mode, a CRC error occurs during a multi-block read
-operation (CMD18) targeting sector 0x0002d000. Subsequently,
-mmc core initiates a single-block retry using CMD17, starting
-from the same sector 0x0002d000(see logs below):
-mmc0: starting CMD18 arg 0002d000 flags 000000b5
-mmc0: blksz 512 blocks 1024 flags 00000200 tsac 150 ms nsac 1000
-mmc0: CMD12 arg 00000000 flags 00000095
-mmc0: req done : 0: 00000000 00000000 00000000 00000000
-mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-mmc0: 0 bytes transferred: -84
-mmc0: (CMD12): 0: 00000b00 00000000 00000000 00000000
-mmc0: starting CMD13 arg 00010000 flags 00000195
-mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-mmc0: <starting CMD23 arg 00000400 flags 00000015>
-mmc0: starting CMD18 arg 0002d400 flags 000000b5
-mmc0: blksz 512 blocks 1024 flags 00000200 tsac 150 ms nsac 1000
-mmc0: CMD12 arg 00000000 flags 00000095
-mmc0: req done : 0: 00000000 00000000 00000000 00000000
-mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-mmc0: 524288 bytes transferred: 0
-mmc0: (CMD12): 0: 00000000 00000000 00000000 00000000
-mmc0: starting CMD17 arg 0002d000 flags 000000b5
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-mmc0: 512 bytes transferred: 0
-mmc0: starting CMD17 arg 0002d001 flags 000000b5
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-mmc0: 512 bytes transferred: 0
-mmc0: starting CMD17 arg 0002d002 flags 000000b5
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-mmc0: 512 bytes transferred: 0
-mmc0: starting CMD17 arg 0002d003 flags 000000b5
-mmc0: blksz 512 blocks 1 flags 00000200 tsac 150 ms nsac 1000
-mmc0: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-mmc0: 512 bytes transferred: 0
-
-
-
-Shawn Lin (4):
-  mmc: core: Replace the hard-coded shift value 9 with SECTOR_SHIFT
-  mmc: block: Convert to use DEFINE_SIMPLE_DEV_PM_OPS()
-  mmc: mmc_test: Replace hard-coded values with macros and consolidate
-    test parameters
-  mmc: block: Use MQRQ_XFER_SINGLE_BLOCK for both read and write
-    recovery
-
- drivers/mmc/core/block.c    | 82 ++++----------------------------------------
- drivers/mmc/core/core.c     |  3 +-
- drivers/mmc/core/mmc_test.c | 83 ++++++++++++++++++++-------------------------
- 3 files changed, 45 insertions(+), 123 deletions(-)
-
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 53c1b04..0274e8d 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1544,8 +1544,7 @@ static void mmc_blk_cqe_complete_rq(struct mmc_queue *mq, struct request *req)
+ 
+ 	if (err) {
+ 		if (mqrq->retries++ < MMC_CQE_RETRIES) {
+-			if (rq_data_dir(req) == WRITE)
+-				mqrq->flags |= MQRQ_XFER_SINGLE_BLOCK;
++			mqrq->flags |= MQRQ_XFER_SINGLE_BLOCK;
+ 			blk_mq_requeue_request(req, true);
+ 		} else {
+ 			blk_mq_end_request(req, BLK_STS_IOERR);
+@@ -1782,63 +1781,6 @@ static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
+ 	return err;
+ }
+ 
+-#define MMC_READ_SINGLE_RETRIES	2
+-
+-/* Single (native) sector read during recovery */
+-static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+-{
+-	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+-	struct mmc_request *mrq = &mqrq->brq.mrq;
+-	struct mmc_card *card = mq->card;
+-	struct mmc_host *host = card->host;
+-	blk_status_t error = BLK_STS_OK;
+-	size_t bytes_per_read = queue_physical_block_size(mq->queue);
+-
+-	do {
+-		u32 status;
+-		int err;
+-		int retries = 0;
+-
+-		while (retries++ <= MMC_READ_SINGLE_RETRIES) {
+-			mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
+-
+-			mmc_wait_for_req(host, mrq);
+-
+-			err = mmc_send_status(card, &status);
+-			if (err)
+-				goto error_exit;
+-
+-			if (!mmc_host_is_spi(host) &&
+-			    !mmc_ready_for_data(status)) {
+-				err = mmc_blk_fix_state(card, req);
+-				if (err)
+-					goto error_exit;
+-			}
+-
+-			if (!mrq->cmd->error)
+-				break;
+-		}
+-
+-		if (mrq->cmd->error ||
+-		    mrq->data->error ||
+-		    (!mmc_host_is_spi(host) &&
+-		     (mrq->cmd->resp[0] & CMD_ERRORS || status & CMD_ERRORS)))
+-			error = BLK_STS_IOERR;
+-		else
+-			error = BLK_STS_OK;
+-
+-	} while (blk_update_request(req, error, bytes_per_read));
+-
+-	return;
+-
+-error_exit:
+-	mrq->data->bytes_xfered = 0;
+-	blk_update_request(req, BLK_STS_IOERR, bytes_per_read);
+-	/* Let it try the remaining request again */
+-	if (mqrq->retries > MMC_MAX_RETRIES - 1)
+-		mqrq->retries = MMC_MAX_RETRIES - 1;
+-}
+-
+ static inline bool mmc_blk_oor_valid(struct mmc_blk_request *brq)
+ {
+ 	return !!brq->mrq.sbc;
+@@ -1974,13 +1916,6 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
+ 		mqrq->retries = MMC_MAX_RETRIES - MMC_DATA_RETRIES;
+ 		return;
+ 	}
+-
+-	if (rq_data_dir(req) == READ && brq->data.blocks >
+-			queue_physical_block_size(mq->queue) >> SECTOR_SHIFT) {
+-		/* Read one (native) sector at a time */
+-		mmc_blk_read_single(mq, req);
+-		return;
+-	}
+ }
+ 
+ static inline bool mmc_blk_rq_error(struct mmc_blk_request *brq)
+@@ -2091,8 +2026,7 @@ static void mmc_blk_mq_complete_rq(struct mmc_queue *mq, struct request *req)
+ 	} else if (!blk_rq_bytes(req)) {
+ 		__blk_mq_end_request(req, BLK_STS_IOERR);
+ 	} else if (mqrq->retries++ < MMC_MAX_RETRIES) {
+-		if (rq_data_dir(req) == WRITE)
+-			mqrq->flags |= MQRQ_XFER_SINGLE_BLOCK;
++		mqrq->flags |= MQRQ_XFER_SINGLE_BLOCK;
+ 		blk_mq_requeue_request(req, true);
+ 	} else {
+ 		if (mmc_card_removed(mq->card))
 -- 
 2.7.4
 
