@@ -1,169 +1,141 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C66E3A8747
-	for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2026 07:55:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B8833ACEEB
+	for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2026 08:38:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774857333; cv=none; b=s+gGBYfHxyrz2ICLlD8WbydlDUv/A07/afQjdYWEpxT7GMMhj7Iy0oUNeMcmNoJ4Bl4vCzt0ftDDfvNWviAvb3ENhqqnnYTP+pBkknwiqds+/l7h0/qgGo/6G9E1BClO9zZW+i4EwFMj6fVgP7XBGCz+oG/AXejVyezw2lhlqwg=
+	t=1774859907; cv=none; b=kE+0gmqABMaWRkJKIRnVsEOWkTqb9pHCWGIKI8i+dUYjz6svFT05h1LobSdGPIVd+YTIprwHhkoctDELifNRip+581z+OG/DvYsfaUwEIUCZeQKRtdJtCiBJ8qL09SyvYWlLzMgeAw2m6Xzb3QI2Hx1TBaS3Z7xFRiApceoBJoQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774857333; c=relaxed/simple;
-	bh=MPDWBPm36fsWmva00EjlRjN2FTdNLYptQaxhTf+7Fg8=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=luj0ywW5rZLfWwU1IfrL44Iinz/ZlUpEdmdhbcslDs7rYISr2gTr9cLeaY6qSL+mwiOhascXc868c38gSA6OY03EszPjoiPJ9NW81mr7AHs6ObFkE1nORiRTbB/GBXjgxkCusj/mPR1G2MQMRVUb0aCtHeSiZGlt5WeQJ+HxfcQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=D7D0YxSi; arc=none smtp.client-ip=209.85.128.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1774859907; c=relaxed/simple;
+	bh=ukJEaVdX4VDSTNRrPu2xDDLoME5kyYmNbMApJbbiz48=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=tbC7TlLW5WPWysN3Xu4jxxiANUY/qxt7Y+MGf7QHdP/R84++6wTN6KEaRWa9VJXNyTrgxG4z9hhUip4O8wR6sUj9+Y7xfEHRQNyYcFrFmLOjtTXe34RiXZmljohjA+eiHoZmrk+Yriz2HGmgVeEQfVp64t/XK/esv2tgPQ4XDXc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C9jnTNVe; arc=none smtp.client-ip=209.85.128.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D7D0YxSi"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-486fba7ce4cso41267475e9.3
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2026 00:55:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C9jnTNVe"
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-487035181a7so27430535e9.2
+        for <linux-mmc@vger.kernel.org>; Mon, 30 Mar 2026 01:38:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774857330; x=1775462130; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+        d=gmail.com; s=20251104; t=1774859905; x=1775464705; darn=vger.kernel.org;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=AUItjZv34EZ10kX4LACTE3wjNz+JATlDo11i94BXg48=;
-        b=D7D0YxSio7A4uSaBe30ZDn2zK9/eMSYJn+lo+a1N32wH0m0Tc3AG0xavE23lwL+sXo
-         SktKSKq6PdxQz8dnJ2QZG7e9b4uZaMTvDtgk4dLzW3aJeHsWd7wVtEzKlyvHhOY8Alrc
-         TZgJksYCX50uVaJ34GzXmi8+VHo+o9m8EI4hu/tD6ctmvsgpPCMo1JkHoZlhcYaC0WNO
-         eWmHojJd8TMP+3+5+32WAMSHxHs1Ew3oLFdbaHg2Pz0vXxdgCv/j07oU08V9x+m9WbQh
-         JSc7myNEoq3kPyKfp+TCGs49uNJYLYPPyHIANwryONs+d9RGqq+zKYMijnFWlgb1vPgH
-         wx5Q==
+        bh=Bk1htAS4wrCqLvV0lbmjJX9VFRd6P5+nEK7bdtMsxTU=;
+        b=C9jnTNVe+Lg+UKddtyIKxQuamj6gb1InuX2HHDWv/3auu5iEWXxqoAsCz0GwWG2Z2F
+         WQmdxhRdOD1lj4IuHoz+5y0O4ZR/iG3S2NKq3vBSMFuZUcR50QLvpoEEGmdeamjK5E89
+         KsL69CDNl4lISxWNLDm3fRRh4He/QLJJs+XWnR5BaH8Sl07d8zhH/wEeQjCeekTjsI22
+         zhcU5kBt1g6bpoxCPz7rHqKuMZ7umg1adcDniBZa8iKPWp7HdtDTkg3zOyhmQUCn9uLS
+         eRhxfwkO/O7sQyYyVvhq3sAYLdntTMGhHlt0vjgWY7JdXvWw2JVvjSCuvV4HkSETxA5L
+         US7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774857330; x=1775462130;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=AUItjZv34EZ10kX4LACTE3wjNz+JATlDo11i94BXg48=;
-        b=Li+6rMrzzt9s7Zf2LsD4MmNtMHapXMfpbpE72S4bRjppTspfzkcnt8Ht3cxoHW5VZc
-         z2pXqIUh+5mHzQrjBAAztDQtNOHT8EF9fYqxS+O03k3/nNNcwCfPxczTIDXzWdAoFmOr
-         9saUUFcg9/W+Xt5tN6Lg8MMvmbQokCxtKz36KiO4jz6UOj/2ljYmxPXukBD/CQ3yIiy0
-         9ImfTti02uHD+9AI+SUkZwU9jQgoSpT3DRC9CAzndv3hw8de+z5wAwrFW877CNVw2Pty
-         P1CFlBmx7warMeBgr90MMYcamTMTMYCngrig4Ll9g1eOrFK7acamJmqMomMnYk63RX6G
-         Igjw==
-X-Forwarded-Encrypted: i=1; AJvYcCXxFdgMxoFOEll+sJXn5hQm7XKnxiqh5efU+5VXJjxFms5O+I+capNJHSIkm2OFMkHmgo9f7FXvJXE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyDBokLK+QvxAN9TXdDT7Ar0Wv/29FZeiu3YoaB/AE9t1EmG3zE
-	WhJkzuO11iKdolfmvlzH2x/9rghpBrPYIdgXaoALYmxRAIQFFnnbI7kUlSG4FOheoH4=
-X-Gm-Gg: ATEYQzyMRPW+atDEcf+52j7ZZDN5eKTZgk0SFRJicJVdABVJY+2rZp9418Jtd48fYks
-	lCF7vWCgp4pBU9vpTy/fqdyghNtnUtsfMHtWxje/pRXF4C5llTUHoWv8kChNP4CaVj87TqBgiUu
-	ORJtI2nzGz1oVg+k5K7+4yYpQIBhY/abfGz1DFIBHunCspD1eiPE6HkQVzEV3U48acKpsq5/dpd
-	4NrRvklx5PAcUGy7sZ/YXcumvt7+E4t73bZhUtOHObOmP7DLZL+cDFf3Hh8XcZODTZdN0MVeekU
-	ydThfSO5SRvjlpvvb5LPok35eEkaGBPggXiJg7Z1Mj4oXmugEZseNocAlD/uFV4fEJkJl3uZLId
-	7Np7SDr6XQHdpH3d32o7qRpVzpUIyjZ/Zz22nddug3I5NxzAp52Ql97F4fh7P2IhvTgjzNHr8FO
-	EDkXw9mg/hyTDWO8eRDZubTkKY4vcHYm+X59akRKWiwJw2F3zIUp/uaa09NdrD9w2GACFobMO6/
-	aZ5uTk=
-X-Received: by 2002:a05:600c:4f91:b0:485:3f30:6250 with SMTP id 5b1f17b1804b1-48727eda62emr178938295e9.20.1774857330208;
-        Mon, 30 Mar 2026 00:55:30 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:106d:1080:cb3c:d0d2:870b:6ad0? ([2a01:e0a:106d:1080:cb3c:d0d2:870b:6ad0])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48735faac9dsm60393575e9.0.2026.03.30.00.55.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 30 Mar 2026 00:55:29 -0700 (PDT)
-Message-ID: <416d42a6-8d99-421c-91aa-e705f23576e2@linaro.org>
-Date: Mon, 30 Mar 2026 09:55:28 +0200
+        d=1e100.net; s=20251104; t=1774859905; x=1775464705;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=Bk1htAS4wrCqLvV0lbmjJX9VFRd6P5+nEK7bdtMsxTU=;
+        b=GKIsK/KiI09U2AyS807uVuVOkhwFtbGkOun1Xa7F4meUgTmXD9FI19LnHp2s5OpdcF
+         CNQpAAkpp6GFlq+XzeWqWr+KiBbcXmrpXwBOHJErXxGZu8NDsC3yz+0QNW0bjK/97aWX
+         DfLFpW6HaZbzPLimmJdSCBDcFczyZ4zg3/k3rplfaUcaTynR8nSaT4Mh3M1wkStFH9FI
+         kJCKdmlBFXZyXQxFJhWRw738uHEOljMixd29mzS6hPWkayNdgD1tXeR5D3rTqF3h/E2B
+         Zot5QYotJfu6lBccboZGQ4WbkWy8sA6yY4IhY1cuqUFKR7xLETz18oqjJZ4tYfDeMovy
+         KFbg==
+X-Forwarded-Encrypted: i=1; AJvYcCUpLBzbLx9awP/aluwqrlrOEleSkumqejXtmw2DGJIrzA9OgxKo2ysouKahIZjGdRM+ehR3Twn0qcM=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyn2HPp78xdlzAk0WHTZMkoOImE4LfJDWxwVWEwR0itNIbG5+rE
+	eLk657pb8synZlLvTuz5UbkQMIEk9fxwyfAEZXwV4+7bb0idTh+Q+8Mn
+X-Gm-Gg: ATEYQzy2z77YnhMWTVCAvhJZeO7OaPVNGFhgq2U1RM+T6KhQ165iDes67i8Go20vFqu
+	NlMmb6HGN6mAHfFWwQ0TWhMpqwAdDAHArL9TZY+fQothFoyVqgc4aFmzh8iqzu77F5jS6oe+oCy
+	7AgI1q2MQoLt9xM0m0EuM4M0/EiCAcV83+Hgx9LujWVIQ35FSOhx67uulfFt9QTuRgaMsFE44fh
+	PTHZOOSAxi9PVY0I5/y/iE8JKLtP6ywAsGXp7LVoIJ7UZC6K1hbb0HwP4keiyXFnQ09qVW1qJ2l
+	pDfYQD4rFTpdnHzhmoxfUK7kBBQgnW1CYTY7EcNWgt7xlCsstkHtd/LKLL9siaMcKd9J4lYe47g
+	rDXP2oC7XUCvGmQ+BtFFVcwnCOp2ZhVE435pkZBVt1f85U9Qznu1aczBCz3xe5CqaruafnBKSqg
+	RhhSknKGnrCJJcIg1PwRfTQ1b5+RafiF3BxrPp+5jbm8X6VxIJ7HvtoI4nLyGWLFCe
+X-Received: by 2002:a05:600c:46c5:b0:485:39d1:b4dd with SMTP id 5b1f17b1804b1-48727ef0bcemr204913105e9.10.1774859904599;
+        Mon, 30 Mar 2026 01:38:24 -0700 (PDT)
+Received: from ipedrosa-thinkpadx1carbongen12.rmtes.csb ([67.218.232.54])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4872712c236sm74063315e9.14.2026.03.30.01.38.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 30 Mar 2026 01:38:24 -0700 (PDT)
+From: Iker Pedrosa <ikerpedrosam@gmail.com>
+Date: Mon, 30 Mar 2026 10:38:02 +0200
+Subject: [PATCH v5 1/9] dt-bindings: mmc: spacemit,sdhci: add pinctrl
+ support for voltage switching
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH v5 6/9] arm64: dts: amlogic: t7: khadas-vim4: Add power
- regulators
-To: Ronald Claveau <linux-kernel-dev@aliel.fr>,
- Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
-Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org
-References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
- <20260326-add-emmc-t7-vim4-v5-6-d3f182b48e9d@aliel.fr>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <20260326-add-emmc-t7-vim4-v5-6-d3f182b48e9d@aliel.fr>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+Message-Id: <20260330-orangepi-sd-card-uhs-v5-1-bd853604322d@gmail.com>
+References: <20260330-orangepi-sd-card-uhs-v5-0-bd853604322d@gmail.com>
+In-Reply-To: <20260330-orangepi-sd-card-uhs-v5-0-bd853604322d@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>, 
+ Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
+ Yixun Lan <dlan@kernel.org>, Yixun Lan <dlan@kernel.org>
+Cc: Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
+ Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, 
+ devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
+ spacemit@lists.linux.dev, linux-kernel@vger.kernel.org, 
+ Iker Pedrosa <ikerpedrosam@gmail.com>
+X-Mailer: b4 0.14.2
 
-On 3/26/26 10:59, Ronald Claveau wrote:
-> Add voltage regulator nodes describing the VIM4 power tree,
-> required by peripheral nodes such as the SD card controller.
-> 
-> Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
-> Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
-> ---
->   .../dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts  | 90 ++++++++++++++++++++++
->   1 file changed, 90 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> index fffdab96b12eb..2450084d37642 100644
-> --- a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
-> @@ -6,6 +6,8 @@
->   /dts-v1/;
->   
->   #include "amlogic-t7.dtsi"
-> +#include <dt-bindings/gpio/amlogic,t7-periphs-pinctrl.h>
-> +#include <dt-bindings/gpio/gpio.h>
->   
->   / {
->   	model = "Khadas vim4";
-> @@ -45,6 +47,94 @@ xtal: xtal-clk {
->   		#clock-cells = <0>;
->   	};
->   
-> +	dc_in: regulator-dc-in {
-> +		compatible = "regulator-fixed";
-> +		regulator-name = "DC_IN";
-> +		regulator-min-microvolt = <5000000>;
-> +		regulator-max-microvolt = <5000000>;
-> +		regulator-always-on;
-> +	};
-> +
-> +	sd_3v3: regulator-sdcard-3v3 {
-> +		compatible = "regulator-fixed";
-> +		regulator-name = "SD_3V3";
-> +		regulator-min-microvolt = <3300000>;
-> +		regulator-max-microvolt = <3300000>;
-> +		vin-supply = <&vddao_3v3>;
-> +		gpio = <&gpio GPIOD_11 GPIO_ACTIVE_LOW>;
-> +		regulator-boot-on;
+Document pinctrl properties to support voltage-dependent pin
+configuration switching for UHS-I SD card modes.
 
-> +		enable-active-low;
+Add optional pinctrl-names property with two states:
+- "default": For 3.3V operation with standard drive strength
+- "state_uhs": For 1.8V operation with optimized drive strength
 
-This properly is invalid, please send follow up patch removing this,
+These pinctrl states allow the SDHCI driver to coordinate voltage
+switching with pin configuration changes, ensuring proper signal
+integrity during UHS-I mode transitions.
 
-Thanks,
-Neil
+Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+---
+ .../devicetree/bindings/mmc/spacemit,sdhci.yaml         | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
-<snip>
+diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+index 9a055d963a7f0cdba4741c1e3e7269688dcd5f45..201ab97f0e88376a4680dcca7917e8b3172bd84a 100644
+--- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+@@ -44,6 +44,20 @@ properties:
+       - const: axi
+       - const: sdh
+ 
++  pinctrl-names:
++    minItems: 1
++    maxItems: 2
++    items:
++      enum:
++        - default
++        - state_uhs
++
++  pinctrl-0:
++    description: Default pinctrl state for 3.3V operation
++
++  pinctrl-1:
++    description: Optional pinctrl state for 1.8V UHS operation
++
+ required:
+   - compatible
+   - reg
+@@ -62,4 +76,7 @@ examples:
+       interrupt-parent = <&plic>;
+       clocks = <&clk_apmu 10>, <&clk_apmu 13>;
+       clock-names = "core", "io";
++      pinctrl-names = "default", "state_uhs";
++      pinctrl-0 = <&sdhci_default_cfg>;
++      pinctrl-1 = <&sdhci_uhs_cfg>;
+     };
+
+-- 
+2.53.0
+
