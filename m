@@ -1,113 +1,101 @@
-Received: from courrier.aliel.fr (pouet.aliel.fr [65.21.61.41])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6E1433BED58;
-	Mon, 30 Mar 2026 10:18:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=65.21.61.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 680E0377016;
+	Tue, 31 Mar 2026 06:48:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774865908; cv=none; b=Gb663D3KgLwoz+ionJmpJkTm2w1yygN7RWIaswx4PZ0ltts3e3i3d7bmwJTDtQxDNvYPevGPLEAqwj1Qox+qktEtexDh/KgClyNAlJ2OcWc9mqmmQ8++Cfem7DJ8TcvvkES17ANZu+N+YD0F7EIftf3gMXaiugak2lTZkE0rKiE=
+	t=1774939713; cv=none; b=sal+o0oYYtR6WGfRozavBMiIACFbiMj6WdZ/rdI542kifWsCVqzVsJx/NIM3K6MA82E4hd0OjpYycToaBNphnhYgNCAGJXOqN7Aij5wcWLZQH1WV4lxrJs8d9vJzYgOm5y7i03ZDzrx8Q7MZFrJs5Hua+5kKYUuh38ML8LOhW7M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774865908; c=relaxed/simple;
-	bh=+C/m07xrnjqPCMatJ2aXNKiqXleyo1ulSGuLaHUMa18=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=NuTofwXw0hJiU4e3kHr5mZnx7kTyXndHfq5gPzVerZPiQSsmBBaL/GLBIyCKAysTtO+ATq/ivbWxKVTT5PeMC/ZVf/I9LqhkIWNTzxH1KSI8V8b5gn2j8ZRrAomtFiQwXTjIK/BSTFrnV47faVAnZ9gJJXLpA4vif6k4ticz/Vo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aliel.fr; spf=pass smtp.mailfrom=aliel.fr; dkim=pass (1024-bit key) header.d=aliel.fr header.i=@aliel.fr header.b=BMYiAxLU; arc=none smtp.client-ip=65.21.61.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=aliel.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aliel.fr
+	s=arc-20240116; t=1774939713; c=relaxed/simple;
+	bh=ezx0Ms8en0l0JsWpz/LL91KCza1vVnbzIyBSo3p3zko=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=q2PrArnLuNgAEWCzIYufF6htPshprN/PGBHvXg11DRoqPugXfbiFmabGjuPIWlcTbkQNc+n/qz5UNDRJ4uz1ESWnRWtAl4YOAPMwQDPhVUSHWpVKsVhPNjuPbTbLa7MKKbLA3VRP6+mx9lEHbxtJegd40YcV9BtpoWqYeBZpQvI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nanm4Y+t; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=aliel.fr header.i=@aliel.fr header.b="BMYiAxLU"
-Message-ID: <44c0a75e-6e72-49e8-9b15-cb504a494feb@aliel.fr>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aliel.fr;
-	s=courrier-s1; t=1774865896;
-	bh=+C/m07xrnjqPCMatJ2aXNKiqXleyo1ulSGuLaHUMa18=;
-	h=Date:From:Subject:To:Cc:References:In-Reply-To;
-	b=BMYiAxLUiIGumw6RyS1KKt0wBhxLSX1O3Csb/1uoGMCYsItSebXTqRhbwuss2xqiY
-	 Lf6zuLY+ynwlncarwYnDhywMDyJJsTUKBIUz5TQ2owsrsf9ss1z+R1pH6FkZKrAOKf
-	 SJnRJqZ6RA+vHV/OsAAqhEKUQUhJmXJeRi+EqyPQ=
-Date: Mon, 30 Mar 2026 12:18:15 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nanm4Y+t"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F775C19423;
+	Tue, 31 Mar 2026 06:48:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1774939712;
+	bh=ezx0Ms8en0l0JsWpz/LL91KCza1vVnbzIyBSo3p3zko=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=nanm4Y+tHZI+aNy/m8diIfcWEKD1SNww+kmlfWUy+EvoLpNJOD/FaCCkOikoZfwb7
+	 /YEm9fGDl3Z4LUmzzqIEu8uOE0/bcMhvvgJ41ZkBZrx/lphkm+Wj2XLyWnISA+uFqG
+	 KnV7bA1jAThzKrhZmmSpxh14e5kI8Kwjaj4jA9zYt4aFKJ/TYw8t1/FxCECcty1Dyw
+	 wKfd3x2k7iXGiMrDOluruC0i4R2p9qx2ahmIABWwal6qer7rsmQPQiBBsVna3sVc9e
+	 QRQSHUhNt1cQcOx5cFIam2PPCsedULcRxeofALjCtNDqcXl9WmIboUCf5Dmnksc1QJ
+	 h5DI5gX/ef/rg==
+Date: Tue, 31 Mar 2026 08:48:30 +0200
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Iker Pedrosa <ikerpedrosam@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>, 
+	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
+	Alexandre Ghiti <alex@ghiti.fr>, Yixun Lan <dlan@kernel.org>, 
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>, Javier Martinez Canillas <javierm@redhat.com>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-riscv@lists.infradead.org, 
+	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v5 1/9] dt-bindings: mmc: spacemit,sdhci: add pinctrl
+ support for voltage switching
+Message-ID: <20260331-eager-kind-civet-62f60a@quoll>
+References: <20260330-orangepi-sd-card-uhs-v5-0-bd853604322d@gmail.com>
+ <20260330-orangepi-sd-card-uhs-v5-1-bd853604322d@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird Beta
-From: Ronald Claveau <linux-kernel-dev@aliel.fr>
-Subject: Re: [PATCH v5 6/9] arm64: dts: amlogic: t7: khadas-vim4: Add power
- regulators
-To: Neil Armstrong <neil.armstrong@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org,
- Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>
-References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
- <20260326-add-emmc-t7-vim4-v5-6-d3f182b48e9d@aliel.fr>
- <416d42a6-8d99-421c-91aa-e705f23576e2@linaro.org>
-Content-Language: en-US
-In-Reply-To: <416d42a6-8d99-421c-91aa-e705f23576e2@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260330-orangepi-sd-card-uhs-v5-1-bd853604322d@gmail.com>
 
-On 3/30/26 9:55 AM, Neil Armstrong wrote:
-> On 3/26/26 10:59, Ronald Claveau wrote:
->> Add voltage regulator nodes describing the VIM4 power tree,
->> required by peripheral nodes such as the SD card controller.
->>
->> Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
->> Signed-off-by: Ronald Claveau <linux-kernel-dev@aliel.fr>
->> ---
->>   .../dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts  | 90 ++++++++++++
->> ++++++++++
->>   1 file changed, 90 insertions(+)
->>
->> diff --git a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-
->> vim4.dts b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
->> index fffdab96b12eb..2450084d37642 100644
->> --- a/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
->> +++ b/arch/arm64/boot/dts/amlogic/amlogic-t7-a311d2-khadas-vim4.dts
->> @@ -6,6 +6,8 @@
->>   /dts-v1/;
->>     #include "amlogic-t7.dtsi"
->> +#include <dt-bindings/gpio/amlogic,t7-periphs-pinctrl.h>
->> +#include <dt-bindings/gpio/gpio.h>
->>     / {
->>       model = "Khadas vim4";
->> @@ -45,6 +47,94 @@ xtal: xtal-clk {
->>           #clock-cells = <0>;
->>       };
->>   +    dc_in: regulator-dc-in {
->> +        compatible = "regulator-fixed";
->> +        regulator-name = "DC_IN";
->> +        regulator-min-microvolt = <5000000>;
->> +        regulator-max-microvolt = <5000000>;
->> +        regulator-always-on;
->> +    };
->> +
->> +    sd_3v3: regulator-sdcard-3v3 {
->> +        compatible = "regulator-fixed";
->> +        regulator-name = "SD_3V3";
->> +        regulator-min-microvolt = <3300000>;
->> +        regulator-max-microvolt = <3300000>;
->> +        vin-supply = <&vddao_3v3>;
->> +        gpio = <&gpio GPIOD_11 GPIO_ACTIVE_LOW>;
->> +        regulator-boot-on;
+On Mon, Mar 30, 2026 at 10:38:02AM +0200, Iker Pedrosa wrote:
+> Document pinctrl properties to support voltage-dependent pin
+> configuration switching for UHS-I SD card modes.
 > 
->> +        enable-active-low;
+> Add optional pinctrl-names property with two states:
+> - "default": For 3.3V operation with standard drive strength
+> - "state_uhs": For 1.8V operation with optimized drive strength
 > 
-> This properly is invalid, please send follow up patch removing this,
+> These pinctrl states allow the SDHCI driver to coordinate voltage
+> switching with pin configuration changes, ensuring proper signal
+> integrity during UHS-I mode transitions.
 > 
-> Thanks,
-> Neil
+> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+> ---
+>  .../devicetree/bindings/mmc/spacemit,sdhci.yaml         | 17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
 > 
-> <snip>
+> diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+> index 9a055d963a7f0cdba4741c1e3e7269688dcd5f45..201ab97f0e88376a4680dcca7917e8b3172bd84a 100644
+> --- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+> @@ -44,6 +44,20 @@ properties:
+>        - const: axi
+>        - const: sdh
+>  
+> +  pinctrl-names:
+> +    minItems: 1
+> +    maxItems: 2
+> +    items:
+> +      enum:
 
-Sure. I am on it.
+No, that's not enum but list. Look here:
 
-Thanks,
--- 
+> +        - default
+> +        - state_uhs
+
+Instead: uhs
+
+> +
+> +  pinctrl-0:
+> +    description: Default pinctrl state for 3.3V operation
+
+So first item must be default, not uhs
+
 Best regards,
-Ronald
+Krzysztof
+
