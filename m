@@ -1,135 +1,210 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15BF63A6B93
-	for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 10:14:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A49623EDAC6
+	for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 10:25:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.48
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774952061; cv=pass; b=TBFcYW4wppTV2Vb3dYOfIjIyXE1VApCJYMjTXJfWpln+xwz/tiBUvZqoxRu54OGxVm3VXyWq3F8/HGzKjiL4K71POLV2b1gdmBxz7QKlrEqCyTJ218GOFQhcZ1hRq6z09cr5y1ezKkk7JaTRtxu+mAV29WxmgnOWYZdy8kdwZNU=
+	t=1774952729; cv=pass; b=VAczQGYMQCV24rDkaewLWfcmwCIhfIRJymS/d9x9nZoPKYs5X1EhsFNMJl75dsfBFnk8X1kLTjijGN6nX00RT8QMTvVx3uHI6o5gKQDNGmm0PQ9YPRRBTlHow8MpS/7lwrUdgy5mIy4bBNYkJWk7AHAZo7wPhKU2DtsBHUwgdxs=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774952061; c=relaxed/simple;
-	bh=x+hWUIPclyR7BqlGWjp+2Cw6RFCkNpm6eMx7G4FvPDA=;
+	s=arc-20240116; t=1774952729; c=relaxed/simple;
+	bh=0xZ65aEgS6XS5mPxZxPz+I09u2lkDz0qU/QCr6kni98=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BpdiqXJCAMf4vCg6P8dhAbIZzkOQULJP45AvTxAt7ubkEeH9ssMyteMDCWyKC4Ch4C8mCqVhz6EWPP/s/jmumV+HrqvWySJowwifxnWAKd1AkufcM6TBRPzLPdfXo/syKXwMwuI2RIzSZhHSCopiItS030WEIWTSi8f20DARBj8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=yBADqEWy; arc=pass smtp.client-ip=209.85.167.45
+	 To:Cc:Content-Type; b=UUvPvujoeM+iWeWo5iI7juIw9u6pbCVb8aIs8zKkWziKkZ4t9EfrrvKE5n/2mItQXZKlZSjlM5yc4N8GrWJFloS9Rw+UgO5CII5cGnMZHYgEg9ZKqodjnesr+OQZl0r5gVJDLq8wNLmX30/NJiWN2w45+Q2otbBXeoR1BPela98=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=I0q7can2; arc=pass smtp.client-ip=209.85.167.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yBADqEWy"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5a12cd0bd79so6505707e87.2
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 03:14:19 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774952058; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="I0q7can2"
+Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-5a2b5ea59a1so2028954e87.1
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 03:25:27 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774952726; cv=none;
         d=google.com; s=arc-20240605;
-        b=TO390l7DGKGIvAWzTyKx218nb4fQ/qanZHFBwWdmZO/jiRBS5vxec+8Opv5bk3X1sV
-         6dBaWhbSy7NiOBFu7HmzbHxFd00gatl/uGRFYRLuDxKCmyiHgtSv5K5edQf+AGOP5WjO
-         9lJcRfyOIUMYs5QH+9hM0ujlsPQsGmNfPKF6/uispcvRE5jRRvDpeZ9bSPCLgTU9fgLH
-         HZ6dA9UX5PB8U07J3U1zEk4yzt5x40r1DCINWaLBnFARodCQ65z1hiQF26voIOVpf7hN
-         RxfBWQiPTBlOIcRQvk65FM7IF4p20hNDHEq4gl0ClgkMGRk0/3ZTcjLhZjVU5vb/KM+K
-         eNOQ==
+        b=BGPIIqnW/uGKSCSmhfuq6n+RvdPTycV9YEU4b2eo/KT7DnlM+y0B2jkctVq80GJlI4
+         xrRtQZZUQ7I+YaHi5flXn86UHZ03pa6jSQwaJn/BNzcvXewTMpqv+rij0OqyX4ebOOgM
+         JtNewyZt68b2sSVjErZFi/oUP09FwO7fyU3KigwDFjQZ4LiCcZHceuuHBjjYFCiENfI3
+         RLWYVS9tw+aulbShXiwBS0D2X1oWjZ54keG4dzqI0qjlMMn5KFkfVegFRowjYkUR1zCU
+         Nj+tL1ieZkH0mwJF5Sh4J4RKyBoJyq9esMMMDg/hAwtsWVlNGIxjRXFfuEwZtPy896s8
+         85CA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=mx/+M5uRKYIghnrRmqlR7yaaW+6rwphedvm5LQykdMQ=;
-        fh=6V54VY1pZjU7PwX0NVbw8/vH/OQCIyL/CxCqsAkH/+0=;
-        b=CQbR/7/YzcylfPaH1CCjjjhvFQDkzieMimCub7ySX/B5Jdqv4897fVrtA1e7dEKWG7
-         eHYL9E6COvEIw9N3B21CTy6Coc8TJ+V4XYHq4+yh967wWFPCV0MCB3jKoIXYK5lRhfnd
-         FZs0VMH9RVcbHMzIi9Ynn/Um9+4LRLMVs3L72Z3LDfWHMq8cDmxNdvpgY4hSXalLqP8Q
-         z5cyB/4lGIfSImf/tpvMI3n+kvTMFsCGMyfBVgDIDmH+WzfJTgR3q3oqifDegplK2bpv
-         UP9Po0WPgxdo3atQ9EVuRq3K0SN56e2KgZqQ7+QbVUH4SJ6jYvE5jSKmaV34GSs9cYhl
-         G6ug==;
+        bh=XBIXQ1IvymanQZCLCIrI88ZGl5hQ8LVN5jZWed3Qpaw=;
+        fh=c7vdrdk1dHX5jbw9IzLE07koVLHt3qPOhiXTF22KYyQ=;
+        b=JIpJIzjMRBYXK9RjR1tMEjaYMDT9/9bCTVjp83Cyjp7nseXXDbEeW4h/LNwjbaS2j8
+         jYehm2ZmCHOe6xwY9dzQ57yHMKEeSsCPJFrTab85X4GfNTMfTRbOcs0T3texKzTb9EKh
+         0em7nhTKnLpsiSQR4T/Pjlvw6NGVqxkx4bFjvxr/CTDdFWBgG+44rpy+snsf5yFIQ2S6
+         HRWCmhCOyXMLK/bJHzI3lD2XZNe3u2ydq7KkyrRQoUORHucGi3a0S3s9WP7bjUBvjZ50
+         Os4NYOpiOXLOkrXXZYVoxLAc3easa8uDrBZQe3aHWZOm9OqISSCBoNc+2kFLLqSHOgBK
+         KsIg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774952058; x=1775556858; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774952726; x=1775557526; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mx/+M5uRKYIghnrRmqlR7yaaW+6rwphedvm5LQykdMQ=;
-        b=yBADqEWyvu6kWKxswsWYb4rfsjbY9TnaWI9Rftfd0FZVeZl2VnLuhFojT9kGyuOF2Z
-         dZYeUw/TbFiUqemUlcymIg+XYRL8nQxcIRw4w6fSRPG8k7mU3g2xq/eyWLLvmq1LoZqP
-         j/H6bNTRHAiTFjxiUi1hexz7MA18GXakHTIxOhUIF1THoA6WJ3fsw3uZs5oEALk4ktmx
-         yo1Y7yqgKgnUkoGOEdsUNnD0j3THyyKkLmeFQcEsAsPEtlJKHAI3Sgst72xDU5oSaDoo
-         pAPazmapPAcvNk1Vxu4th5Qzu3uEEc489clOoqMzAFA2BQX0LpMHIjEyEaM00RXzzhMw
-         764w==
+        bh=XBIXQ1IvymanQZCLCIrI88ZGl5hQ8LVN5jZWed3Qpaw=;
+        b=I0q7can2Er4GEjaTvJcJoio3e/OmMeWUqIdoJ2zalmOBjgyyr1Qn+28PoA6y5hfm7d
+         jVJcYYs/03x6TAehpH7NM4oW/TKbbp3PFT9n1YMHLI0B1VizQkXqMw6benc3GfwcRL+7
+         pePqKE0FNEuPSi/g/3G2amM++JB+IOyt1m6UNpuDoG/bPyAcDWJHZBACdMxvBMan0cmF
+         pzm85rfYBfTTbs06VktZPolPG7owQe5Qeovb9RXODjLKrLZmsUHCC3MQ44CkGtYxbinI
+         1766JtsyqQWKrq5JrhEpP9ELr9jMmTdZtE8MsyQineuOnyaYQAjdD+ISE+AyouSZEWqC
+         KYuw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774952058; x=1775556858;
+        d=1e100.net; s=20251104; t=1774952726; x=1775557526;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=mx/+M5uRKYIghnrRmqlR7yaaW+6rwphedvm5LQykdMQ=;
-        b=tZEiG1mdJ8NGTIQ1v+y1nTg7Bji7BTZU/ttsdLs8K7A8xblB7MI/cE1caxHzCWoat8
-         G+9anab+wM1hBqX2nB6ytFYQH3+MzHd4LJOVC2gu4TMcGOBWUrugscZNgUKzmH7B7ccS
-         hH2OAnNJd3eENnEqpXQsEzBMgCaFpgADs6U9nQZADQO7cUYlLg8uYyX3DLFb+07vVLq3
-         5gEZhfwvqHkSCogXhqZUdeRsblifqg+kxhTNKJT5/KS3W63YRa4etiGV7447ikkgeJkN
-         5SHRb3VGONFU8kX8W0Cv2vM74Ws+SVUr90O6kqdRrjz3VLvuniGOdPCTJnEtFhFf2i3l
-         aF+Q==
-X-Gm-Message-State: AOJu0YxRgt9O/If69S5ijaaLO6jEkQgUgXtW2OoMz1wMgW7wmKJqEBK9
-	acHM1xOpHOtWQRL1a6zlfw4PWQe4TPdGGrp/Vz5C9Okrlie8gxAVAKTrvB50z/bIFOVjve3BcXF
-	38iO7OpPKji1fYwyzhtuz4RYC8XOu5o5U+xcWDWJwHw==
-X-Gm-Gg: ATEYQzwRxbIRSGlZVYY+S48JVWdokZUZyo870TrXtpa866hH2gKLCxHUfIwrYQR/InW
-	iTueBCAHXB0dvWb/cKDgeyxp2HDaL8toE7MdMhwzljb67HYUAZUXvm4qjhZCkRvXn2rLCjLa6by
-	1dDhLBUppV/f3pxax1nZuhZg7clkSYKoqK4rXs/xEKxBVIcQTvtO5fNDVcfpQxyXSR1/eWl79bv
-	oLRMhel3QCjxpyRRLWv6ah9/VAIxdvTnj0HMWb1N2bD5yb6MY9fyeoNV5jSF/xzjvDudUXEEmjc
-	/1zJFA5I
-X-Received: by 2002:ac2:4307:0:b0:5a2:c05c:1199 with SMTP id
- 2adb3069b0e04-5a2c05c141fmr148052e87.15.1774952058111; Tue, 31 Mar 2026
- 03:14:18 -0700 (PDT)
+        bh=XBIXQ1IvymanQZCLCIrI88ZGl5hQ8LVN5jZWed3Qpaw=;
+        b=nb6AQwBLWWY5MqYasgUFkshfQ0AMEyN0J9+4plazuMZR20zBCPioCv6D5upeSQ5QqK
+         4H0p6u48OCjNMmq5E6Am+MH5jqlMDORDJo7ek5p9aPNaikirpsWE+JzwJ+jYL76WpEQg
+         7+XFB+5VnT1/vGStFsTHdLW6Wy32XiuToPzk1K0CgbhyfysCkvSA3UdARXOLgXR5ACnc
+         PkX62Vz9qQyjfWjmRb3lkyDSKHgomfImNP1K3RLE3w8wMRAeqKDhZvjiIjx0KwZ/LwHi
+         hxMkxK6UtpR/eb+WIxPTIwwB1Qa7cM5jTlmdA2XuUOwo8T8LJ46z9jXB3ieGP2IpaRAh
+         9zLw==
+X-Gm-Message-State: AOJu0YxjBwaGK3sYGHMzALxkgkQ1By1nRMRPuFDJKP8VFPc7FGYXd+5W
+	YuE1p7Lr/EV0Mbdk7ukGmgAbPQzcFUwBlgWeZeNTdUERdX1MlsOWGtRaTy9v9JW1dDbDnaRJPTm
+	VykJ+IT2Rht/8nsUZNY+IdEHTyf88wgk6/S2bsuQ7mA==
+X-Gm-Gg: ATEYQzxp4qRWWck6DvL6uLu8SW8k98elh2GlNduZQCDx5yYm8vFTZBq1oo3G3JHKuLv
+	jgIpP2ZGxh13tIWbhx8gfarD8LywGui8bMuNcazByQGausyu1XABGHZpV6WDMfE6mqQmkBh/T9+
+	mji9auoxE9yOsaMLoFzg4XUtzDApsMAVwIwvx/jQA+1OCRg+MzzY8dooTTm4VmD/9J8PRotUKTm
+	oMfQHVnPfMTB6teAGM5WB/nuzLkFH1FVGT+ked5HxTPjJJYudWSgV6ZEYfu2hiBDymEVM+3wDgK
+	WCbebJkp
+X-Received: by 2002:a05:6512:1108:b0:5a1:1e44:8682 with SMTP id
+ 2adb3069b0e04-5a2ab9294a9mr4892116e87.34.1774952725626; Tue, 31 Mar 2026
+ 03:25:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260327105208.1310739-1-johan@kernel.org> <20260327105208.1310739-2-johan@kernel.org>
-In-Reply-To: <20260327105208.1310739-2-johan@kernel.org>
+References: <20260327105208.1310739-1-johan@kernel.org> <20260327105208.1310739-3-johan@kernel.org>
+In-Reply-To: <20260327105208.1310739-3-johan@kernel.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 31 Mar 2026 12:13:41 +0200
-X-Gm-Features: AQROBzCGShN7LcmS5ZDY0r5zMcz3ndnLqxaBtBqvP89b7e8uYTHkjABOijCfaBI
-Message-ID: <CAPDyKFp1DbRufpro86fXi9xXnJGbWW=NrD3Q0NFQ+aHxhxogLg@mail.gmail.com>
-Subject: Re: [PATCH 1/4] mmc: vub300: fix NULL-deref on disconnect
+Date: Tue, 31 Mar 2026 12:24:49 +0200
+X-Gm-Features: AQROBzAIIF4vqFpK44CPUhY9m2k50H9Tt7zGx_VCKe9Z30Qp-B8l6-4bTcnNwJE
+Message-ID: <CAPDyKFrX2Bw_Ari-6kvSbSd=VsDh4bpxn5UbZV+eFChCsBE1kQ@mail.gmail.com>
+Subject: Re: [PATCH 2/4] mmc: vub300: fix use-after-free on disconnect
 To: Johan Hovold <johan@kernel.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org, Tony Olech <tony.olech@elandigitalsystems.com>
+	stable@vger.kernel.org, Binbin Zhou <zhoubinbin@loongson.cn>
 Content-Type: text/plain; charset="UTF-8"
 
 On Fri, 27 Mar 2026 at 11:52, Johan Hovold <johan@kernel.org> wrote:
 >
-> Make sure to deregister the controller before dropping the reference to
-> the driver data on disconnect to avoid NULL-pointer dereferences or
-> use-after-free.
+> The vub300 driver maintains an explicit reference count for the
+> controller and its driver data and the last reference can in theory be
+> dropped after the driver has been unbound.
 >
-> Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
-> Cc: stable@vger.kernel.org      # 3.0
-> Cc: Tony Olech <tony.olech@elandigitalsystems.com>
-> Signed-off-by: Johan Hovold <johan@kernel.org>
-> ---
->  drivers/mmc/host/vub300.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> This specifically means that the controller allocation must not be
+> device managed as that can lead to use-after-free.
 >
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index ff49d0770506..f173c7cf4e1a 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2365,8 +2365,8 @@ static void vub300_disconnect(struct usb_interface *interface)
->                         usb_set_intfdata(interface, NULL);
->                         /* prevent more I/O from starting */
->                         vub300->interface = NULL;
-> -                       kref_put(&vub300->kref, vub300_delete);
->                         mmc_remove_host(mmc);
-> +                       kref_put(&vub300->kref, vub300_delete);
-
-While this seems like a step in the right direction, I don't see why
-calling usb_set_intfdata(interface, NULL) and assigning
-vub300->interface = NULL is safe.
-
-For example, some of the workqueues might be running a work that uses
-the vub300->interface, isn't that a problem too?
-
->                         pr_info("USB vub300 remote SDIO host controller[%d]"
->                                 " now disconnected", ifnum);
->                         return;
-> --
-> 2.52.0
+> Note that the lifetime is currently also incorrectly tied the parent USB
+> device rather than interface, which can lead to memory leaks if the
+> driver is unbound without its device being physically disconnected (e.g.
+> on probe deferral).
 >
+> Fix both issues by reverting to non-managed allocation of the controller.
+
+Huh, sounds like a real mess, but thanks for the detailed description.
+
+I will defer applying until we finalize the discussion on patch1, but
+otherwise this looks good to me.
 
 Kind regards
 Uffe
+
+>
+> Fixes: dcfdd698dc52 ("mmc: vub300: Use devm_mmc_alloc_host() helper")
+> Cc: stable@vger.kernel.org      # 6.17
+> Cc: Binbin Zhou <zhoubinbin@loongson.cn>
+> Signed-off-by: Johan Hovold <johan@kernel.org>
+> ---
+>  drivers/mmc/host/vub300.c | 17 +++++++++++------
+>  1 file changed, 11 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> index f173c7cf4e1a..3c9df27f9fa7 100644
+> --- a/drivers/mmc/host/vub300.c
+> +++ b/drivers/mmc/host/vub300.c
+> @@ -369,11 +369,14 @@ struct vub300_mmc_host {
+>  static void vub300_delete(struct kref *kref)
+>  {                              /* kref callback - softirq */
+>         struct vub300_mmc_host *vub300 = kref_to_vub300_mmc_host(kref);
+> +       struct mmc_host *mmc = vub300->mmc;
+> +
+>         usb_free_urb(vub300->command_out_urb);
+>         vub300->command_out_urb = NULL;
+>         usb_free_urb(vub300->command_res_urb);
+>         vub300->command_res_urb = NULL;
+>         usb_put_dev(vub300->udev);
+> +       mmc_free_host(mmc);
+>         /*
+>          * and hence also frees vub300
+>          * which is contained at the end of struct mmc
+> @@ -2112,7 +2115,7 @@ static int vub300_probe(struct usb_interface *interface,
+>                 goto error1;
+>         }
+>         /* this also allocates memory for our VUB300 mmc host device */
+> -       mmc = devm_mmc_alloc_host(&udev->dev, sizeof(*vub300));
+> +       mmc = mmc_alloc_host(sizeof(*vub300), &udev->dev);
+>         if (!mmc) {
+>                 retval = -ENOMEM;
+>                 dev_err(&udev->dev, "not enough memory for the mmc_host\n");
+> @@ -2269,7 +2272,7 @@ static int vub300_probe(struct usb_interface *interface,
+>                 dev_err(&vub300->udev->dev,
+>                     "Could not find two sets of bulk-in/out endpoint pairs\n");
+>                 retval = -EINVAL;
+> -               goto error4;
+> +               goto err_free_host;
+>         }
+>         retval =
+>                 usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
+> @@ -2278,14 +2281,14 @@ static int vub300_probe(struct usb_interface *interface,
+>                                 0x0000, 0x0000, &vub300->hc_info,
+>                                 sizeof(vub300->hc_info), 1000);
+>         if (retval < 0)
+> -               goto error4;
+> +               goto err_free_host;
+>         retval =
+>                 usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+>                                 SET_ROM_WAIT_STATES,
+>                                 USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+>                                 firmware_rom_wait_states, 0x0000, NULL, 0, 1000);
+>         if (retval < 0)
+> -               goto error4;
+> +               goto err_free_host;
+>         dev_info(&vub300->udev->dev,
+>                  "operating_mode = %s %s %d MHz %s %d byte USB packets\n",
+>                  (mmc->caps & MMC_CAP_SDIO_IRQ) ? "IRQs" : "POLL",
+> @@ -2300,7 +2303,7 @@ static int vub300_probe(struct usb_interface *interface,
+>                                 0x0000, 0x0000, &vub300->system_port_status,
+>                                 sizeof(vub300->system_port_status), 1000);
+>         if (retval < 0) {
+> -               goto error4;
+> +               goto err_free_host;
+>         } else if (sizeof(vub300->system_port_status) == retval) {
+>                 vub300->card_present =
+>                         (0x0001 & vub300->system_port_status.port_flags) ? 1 : 0;
+> @@ -2308,7 +2311,7 @@ static int vub300_probe(struct usb_interface *interface,
+>                         (0x0010 & vub300->system_port_status.port_flags) ? 1 : 0;
+>         } else {
+>                 retval = -EINVAL;
+> -               goto error4;
+> +               goto err_free_host;
+>         }
+>         usb_set_intfdata(interface, vub300);
+>         INIT_DELAYED_WORK(&vub300->pollwork, vub300_pollwork_thread);
+> @@ -2338,6 +2341,8 @@ static int vub300_probe(struct usb_interface *interface,
+>         return 0;
+>  error6:
+>         timer_delete_sync(&vub300->inactivity_timer);
+> +err_free_host:
+> +       mmc_free_host(mmc);
+>         /*
+>          * and hence also frees vub300
+>          * which is contained at the end of struct mmc
+> --
+> 2.52.0
+>
