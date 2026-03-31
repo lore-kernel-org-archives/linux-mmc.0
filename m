@@ -1,117 +1,135 @@
-Received: from mail-m3285.qiye.163.com (mail-m3285.qiye.163.com [220.197.32.85])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B9283E023F;
-	Tue, 31 Mar 2026 08:30:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.85
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774945837; cv=none; b=aluY+YXTKlJ+Sqt8xUky2LjuSm23v7i/lIk7iz+FgSI7/En4tInZKZAMSkyjquuZ+25Sp3KEaXAjc/ES5PfFq2MVE3DsrnOXJN9D+ZxYJ3VNDr9jD0Gl6EZ1y3U6ox3dvdphafgVDcZFBC9lssOT6ZVfkjEFsUoq/tEmQx8Y8dk=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774945837; c=relaxed/simple;
-	bh=PtnLQHHFJps2Ogy+qGrNTHD9/lKagFEeBG3vN96pMN8=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=Kktq1H2jc6qtGa3TUzIXR2zT7uaGXxFrOBM0o4OjBKM45j4zvZZSBK/8A6QvLefC7NIjd1hGWY5PS+rAoYZeYpl2V2sDkgMiERFfYMAIkciutaBaJSw/rDy0dkOAtKmifUKCBCy133aG0yQdkXIoK4iyJgXCS8SAkHslf9txCyU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=PdsAwRPn; arc=none smtp.client-ip=220.197.32.85
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15BF63A6B93
+	for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 10:14:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774952061; cv=pass; b=TBFcYW4wppTV2Vb3dYOfIjIyXE1VApCJYMjTXJfWpln+xwz/tiBUvZqoxRu54OGxVm3VXyWq3F8/HGzKjiL4K71POLV2b1gdmBxz7QKlrEqCyTJ218GOFQhcZ1hRq6z09cr5y1ezKkk7JaTRtxu+mAV29WxmgnOWYZdy8kdwZNU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774952061; c=relaxed/simple;
+	bh=x+hWUIPclyR7BqlGWjp+2Cw6RFCkNpm6eMx7G4FvPDA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=BpdiqXJCAMf4vCg6P8dhAbIZzkOQULJP45AvTxAt7ubkEeH9ssMyteMDCWyKC4Ch4C8mCqVhz6EWPP/s/jmumV+HrqvWySJowwifxnWAKd1AkufcM6TBRPzLPdfXo/syKXwMwuI2RIzSZhHSCopiItS030WEIWTSi8f20DARBj8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=yBADqEWy; arc=pass smtp.client-ip=209.85.167.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="PdsAwRPn"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 38f5d4c09;
-	Tue, 31 Mar 2026 15:54:58 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 2/2] mmc: dw_mmc: Remove dw_mci_start_request wrapper and rename core function
-Date: Tue, 31 Mar 2026 15:54:50 +0800
-Message-Id: <1774943690-219754-3-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1774943690-219754-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1774943690-219754-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9d42e37f7709cckunmd4b3018ef138ba
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0xCS1ZDHkoZHk4YHxhNShhWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=PdsAwRPnJNwxIWAIdoanOX20/doBJktP5JzHPys/6WFWsHZZnHAf31n0YGRQlQcfzR+j5FErqVbxWKBwQKm9oUS2IvVrlrHUEf5VKYu2vpwFST5iMFWBNdZ52e/mYDNUpzBCvF7BUSnabGc2uSvnAgvPNeIKa1bPEVlTiz18wd0=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=ZAEMBAwd88qEJBJL7jXJ75RWiPa3Tw+dBgESQ2qZUqs=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yBADqEWy"
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5a12cd0bd79so6505707e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 03:14:19 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774952058; cv=none;
+        d=google.com; s=arc-20240605;
+        b=TO390l7DGKGIvAWzTyKx218nb4fQ/qanZHFBwWdmZO/jiRBS5vxec+8Opv5bk3X1sV
+         6dBaWhbSy7NiOBFu7HmzbHxFd00gatl/uGRFYRLuDxKCmyiHgtSv5K5edQf+AGOP5WjO
+         9lJcRfyOIUMYs5QH+9hM0ujlsPQsGmNfPKF6/uispcvRE5jRRvDpeZ9bSPCLgTU9fgLH
+         HZ6dA9UX5PB8U07J3U1zEk4yzt5x40r1DCINWaLBnFARodCQ65z1hiQF26voIOVpf7hN
+         RxfBWQiPTBlOIcRQvk65FM7IF4p20hNDHEq4gl0ClgkMGRk0/3ZTcjLhZjVU5vb/KM+K
+         eNOQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=mx/+M5uRKYIghnrRmqlR7yaaW+6rwphedvm5LQykdMQ=;
+        fh=6V54VY1pZjU7PwX0NVbw8/vH/OQCIyL/CxCqsAkH/+0=;
+        b=CQbR/7/YzcylfPaH1CCjjjhvFQDkzieMimCub7ySX/B5Jdqv4897fVrtA1e7dEKWG7
+         eHYL9E6COvEIw9N3B21CTy6Coc8TJ+V4XYHq4+yh967wWFPCV0MCB3jKoIXYK5lRhfnd
+         FZs0VMH9RVcbHMzIi9Ynn/Um9+4LRLMVs3L72Z3LDfWHMq8cDmxNdvpgY4hSXalLqP8Q
+         z5cyB/4lGIfSImf/tpvMI3n+kvTMFsCGMyfBVgDIDmH+WzfJTgR3q3oqifDegplK2bpv
+         UP9Po0WPgxdo3atQ9EVuRq3K0SN56e2KgZqQ7+QbVUH4SJ6jYvE5jSKmaV34GSs9cYhl
+         G6ug==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1774952058; x=1775556858; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=mx/+M5uRKYIghnrRmqlR7yaaW+6rwphedvm5LQykdMQ=;
+        b=yBADqEWyvu6kWKxswsWYb4rfsjbY9TnaWI9Rftfd0FZVeZl2VnLuhFojT9kGyuOF2Z
+         dZYeUw/TbFiUqemUlcymIg+XYRL8nQxcIRw4w6fSRPG8k7mU3g2xq/eyWLLvmq1LoZqP
+         j/H6bNTRHAiTFjxiUi1hexz7MA18GXakHTIxOhUIF1THoA6WJ3fsw3uZs5oEALk4ktmx
+         yo1Y7yqgKgnUkoGOEdsUNnD0j3THyyKkLmeFQcEsAsPEtlJKHAI3Sgst72xDU5oSaDoo
+         pAPazmapPAcvNk1Vxu4th5Qzu3uEEc489clOoqMzAFA2BQX0LpMHIjEyEaM00RXzzhMw
+         764w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1774952058; x=1775556858;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mx/+M5uRKYIghnrRmqlR7yaaW+6rwphedvm5LQykdMQ=;
+        b=tZEiG1mdJ8NGTIQ1v+y1nTg7Bji7BTZU/ttsdLs8K7A8xblB7MI/cE1caxHzCWoat8
+         G+9anab+wM1hBqX2nB6ytFYQH3+MzHd4LJOVC2gu4TMcGOBWUrugscZNgUKzmH7B7ccS
+         hH2OAnNJd3eENnEqpXQsEzBMgCaFpgADs6U9nQZADQO7cUYlLg8uYyX3DLFb+07vVLq3
+         5gEZhfwvqHkSCogXhqZUdeRsblifqg+kxhTNKJT5/KS3W63YRa4etiGV7447ikkgeJkN
+         5SHRb3VGONFU8kX8W0Cv2vM74Ws+SVUr90O6kqdRrjz3VLvuniGOdPCTJnEtFhFf2i3l
+         aF+Q==
+X-Gm-Message-State: AOJu0YxRgt9O/If69S5ijaaLO6jEkQgUgXtW2OoMz1wMgW7wmKJqEBK9
+	acHM1xOpHOtWQRL1a6zlfw4PWQe4TPdGGrp/Vz5C9Okrlie8gxAVAKTrvB50z/bIFOVjve3BcXF
+	38iO7OpPKji1fYwyzhtuz4RYC8XOu5o5U+xcWDWJwHw==
+X-Gm-Gg: ATEYQzwRxbIRSGlZVYY+S48JVWdokZUZyo870TrXtpa866hH2gKLCxHUfIwrYQR/InW
+	iTueBCAHXB0dvWb/cKDgeyxp2HDaL8toE7MdMhwzljb67HYUAZUXvm4qjhZCkRvXn2rLCjLa6by
+	1dDhLBUppV/f3pxax1nZuhZg7clkSYKoqK4rXs/xEKxBVIcQTvtO5fNDVcfpQxyXSR1/eWl79bv
+	oLRMhel3QCjxpyRRLWv6ah9/VAIxdvTnj0HMWb1N2bD5yb6MY9fyeoNV5jSF/xzjvDudUXEEmjc
+	/1zJFA5I
+X-Received: by 2002:ac2:4307:0:b0:5a2:c05c:1199 with SMTP id
+ 2adb3069b0e04-5a2c05c141fmr148052e87.15.1774952058111; Tue, 31 Mar 2026
+ 03:14:18 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+References: <20260327105208.1310739-1-johan@kernel.org> <20260327105208.1310739-2-johan@kernel.org>
+In-Reply-To: <20260327105208.1310739-2-johan@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 31 Mar 2026 12:13:41 +0200
+X-Gm-Features: AQROBzCGShN7LcmS5ZDY0r5zMcz3ndnLqxaBtBqvP89b7e8uYTHkjABOijCfaBI
+Message-ID: <CAPDyKFp1DbRufpro86fXi9xXnJGbWW=NrD3Q0NFQ+aHxhxogLg@mail.gmail.com>
+Subject: Re: [PATCH 1/4] mmc: vub300: fix NULL-deref on disconnect
+To: Johan Hovold <johan@kernel.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	stable@vger.kernel.org, Tony Olech <tony.olech@elandigitalsystems.com>
+Content-Type: text/plain; charset="UTF-8"
 
-The function dw_mci_start_request() was just a thin wrapper around
-__dw_mci_start_request(). Since it serves almost no functional purpose,
-remove the wrapper to simplify the code flow.
+On Fri, 27 Mar 2026 at 11:52, Johan Hovold <johan@kernel.org> wrote:
+>
+> Make sure to deregister the controller before dropping the reference to
+> the driver data on disconnect to avoid NULL-pointer dereferences or
+> use-after-free.
+>
+> Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
+> Cc: stable@vger.kernel.org      # 3.0
+> Cc: Tony Olech <tony.olech@elandigitalsystems.com>
+> Signed-off-by: Johan Hovold <johan@kernel.org>
+> ---
+>  drivers/mmc/host/vub300.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> index ff49d0770506..f173c7cf4e1a 100644
+> --- a/drivers/mmc/host/vub300.c
+> +++ b/drivers/mmc/host/vub300.c
+> @@ -2365,8 +2365,8 @@ static void vub300_disconnect(struct usb_interface *interface)
+>                         usb_set_intfdata(interface, NULL);
+>                         /* prevent more I/O from starting */
+>                         vub300->interface = NULL;
+> -                       kref_put(&vub300->kref, vub300_delete);
+>                         mmc_remove_host(mmc);
+> +                       kref_put(&vub300->kref, vub300_delete);
 
-Consequently, rename __dw_mci_start_request() to dw_mci_start_request()
-so that the core implementation uses the primary name.
+While this seems like a step in the right direction, I don't see why
+calling usb_set_intfdata(interface, NULL) and assigning
+vub300->interface = NULL is safe.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+For example, some of the workqueues might be running a work that uses
+the vub300->interface, isn't that a problem too?
 
- drivers/mmc/host/dw_mmc.c | 18 +++++-------------
- 1 file changed, 5 insertions(+), 13 deletions(-)
+>                         pr_info("USB vub300 remote SDIO host controller[%d]"
+>                                 " now disconnected", ifnum);
+>                         return;
+> --
+> 2.52.0
+>
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 8e78faf..20193ee 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1224,8 +1224,7 @@ static void dw_mci_set_data_timeout(struct dw_mci *host,
- 		timeout_ns, tmout >> 8);
- }
- 
--static void __dw_mci_start_request(struct dw_mci *host,
--				   struct mmc_command *cmd)
-+static void dw_mci_start_request(struct dw_mci *host, struct mmc_command *cmd)
- {
- 	struct mmc_request *mrq;
- 	struct mmc_data	*data;
-@@ -1284,18 +1283,10 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 	host->stop_cmdr = dw_mci_prep_stop_abort(host, cmd);
- }
- 
--static void dw_mci_start_request(struct dw_mci *host)
--{
--	struct mmc_request *mrq = host->mrq;
--	struct mmc_command *cmd;
--
--	cmd = mrq->sbc ? mrq->sbc : mrq->cmd;
--	__dw_mci_start_request(host, cmd);
--}
--
- static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct dw_mci *host = mmc_priv(mmc);
-+	struct mmc_command *cmd;
- 
- 	WARN_ON(host->mrq);
- 
-@@ -1329,7 +1320,8 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	if (host->state == STATE_IDLE) {
- 		host->state = STATE_SENDING_CMD;
--		dw_mci_start_request(host);
-+		cmd = mrq->sbc ? mrq->sbc : mrq->cmd;
-+		dw_mci_start_request(host, cmd);
- 	}
- 
- 	spin_unlock_bh(&host->lock);
-@@ -1949,7 +1941,7 @@ static void dw_mci_work_func(struct work_struct *t)
- 			set_bit(EVENT_CMD_COMPLETE, &host->completed_events);
- 			err = dw_mci_command_complete(host, cmd);
- 			if (cmd == mrq->sbc && !err) {
--				__dw_mci_start_request(host, mrq->cmd);
-+				dw_mci_start_request(host, mrq->cmd);
- 				goto unlock;
- 			}
- 
--- 
-2.7.4
-
+Kind regards
+Uffe
