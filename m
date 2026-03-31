@@ -1,147 +1,131 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE3443AA502
-	for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 11:04:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.45
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774955059; cv=pass; b=ifPjxaCcbe4nTZqu2buve9SkAZ2/y1YOKkMqZpQfIy0TPXwQjoYtrvbpMbITmgP16XH1+JfDpdbZlEj1AqUJg1uqzQYlMvjR4qaVH6nwhVuT3Ia8d2FthO/mHfWLYk+v1NUFdXzm6Z60cH6qggdeIdWdPFhVpI9iqeRw+uW6JgM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774955059; c=relaxed/simple;
-	bh=+q0hBdBFS9L+ZjH5fY/IXXzHbz9h9o01OcmnbZ0EUCw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ENpSDN+VfgdcNQLXfCbLoDl1tX9ZyZwO4+yGA5Utn7o1dYYgD3Iz/Ui22O12UQtNfa7VyyYRzU3lKAvMCC92ukboZipTsBnYiwEaX5dJvj55AcjcUIfeuLvonUqGCxzAYh/H4ZYQJRteYL1Mpjns6s5nr0kxem9RACZyBZzLU5k=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=VyGtxGJE; arc=pass smtp.client-ip=209.85.167.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9FF23A7829;
+	Tue, 31 Mar 2026 11:11:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1774955518; cv=none; b=L/7uqvNKfUmPKimyHJHhijWH5OxA5bGo78qUlscKRTOhRLAc/cKkqNia7VbwPRJ+uKzAFtZSZSkTw/6G3ilREKGGuNkLqJ/WfWBiMGLT9w2EZCzqMvWi8VYh7NocS/QDADo6Cl0E7oIDgWUJdZbOtEe7cmE3ACsY2DwHXvicIQw=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1774955518; c=relaxed/simple;
+	bh=CC18HRDt6LXZNZI+Ou4OaN37WS8eTGfvpmEcbr7V9dE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=e23kto4pmxWAQyzx1qZ8kzWjexZ206XnhuaAKwaQMaCk7mSG+Usy3ZrwGTS4BqVlCT5z9Gb+EOo7RCZoZyyw9K6a88+SjhyW/A+Z9fIQWVHsWLJtnyBZ3pyJiEFIB4GKbOYVOLflQYD42GFwNFjfa588yj4nVmjgu3gV/SmSfos=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SBSm912j; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VyGtxGJE"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5a133b686f7so6441754e87.0
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 04:04:16 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774955055; cv=none;
-        d=google.com; s=arc-20240605;
-        b=lLjkNg7BlRnGiQO4KFZi+nYgJGO8omRdmYcDUqVr8Av6kfkKtTwogKdt6Sagx/SAAQ
-         yrRBCdlQX7Px9G5/ymYKlahHloWM+d3hRiqBMuElVZk+O2z8sQJ6JVfXvqY3PCTDvRV8
-         R9EiVz011udA2/iIUuGS5mZINtlEW7RWFfpOpbWInFqOJ+hfrhSYikzx9Z9yMFBixkW4
-         Nvi+pvD/rUggeGsPbl/3VQGn/+q8Nk0J8ka+xkBg/tWRkjquPwwQO3/hUvWs1GpNZD+6
-         Jp+qCDU87PkM0tEaH++lpGpOlvPmE+FdA5O9d5o7mffoS55XVCHL3PalgrW7B3QetcnZ
-         QlfA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=vYyC5Bmz8Oh01Vq9Hljyc6MoUHIUJ6A6aUIDWO1eZxI=;
-        fh=6V54VY1pZjU7PwX0NVbw8/vH/OQCIyL/CxCqsAkH/+0=;
-        b=KgC0VEsdj+6qQPOsKN+svV/0Bw4xHwfc8vlBX4uWt7pBnMjkP7t5+Qmav2mOm3/msk
-         bGGosHEnilYV3utAA8t+n/J0+ENR9HcRK7UqNUTcC6R/T4ELu0nNHGPn7zPeTa2rx4sC
-         5ZM0jOiM1Pj+rCDpxrxw3b8MI0kIQLUrdvybNVDMDmRMgjdAKdehP9KIVTMNpoiVh1/c
-         Sqg0SDKw0T2kJlgBXdPVr0z5alyeBL/tL4hLR2qMRMv+2c4udfF1FRLnuCqfGLcu72xk
-         apxFaJgklIb0P/siasRy6bCnkUCXfXabDmsfklH/eiKdy5AfSBEZQRTdpOGT94YYpzHm
-         G3hg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774955055; x=1775559855; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=vYyC5Bmz8Oh01Vq9Hljyc6MoUHIUJ6A6aUIDWO1eZxI=;
-        b=VyGtxGJE62HiYHuY7u5eNhF/MSGRhy2cuMIpz+sSVNMhgf+4W0XIDAIqOxwMLV5jl9
-         ZxKEC9yq6bVp9mBtsvZ1CMbkfFLbuPSU9CwEtitZuAl2dS0E5mdlXmdWH74pX7PGKxEa
-         IFBvith4UoEHepcHbJlja7jkJbnemI/umoWeQnlb7+ma6OaZW65JyPa3uVYX8LGSrG77
-         200rNJvn0hp6KufARQw9XBeKFxGzSI3GqYZ7NNB8OM28Jt1iENge6qG/dRncIE5wgWxt
-         zqOKXzFhclbYZPM0/LMEOdEmx+rObGq6KBSmr30fzOQvTxxVa2H2GRM7/quwVVzp41fX
-         ZJcw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774955055; x=1775559855;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=vYyC5Bmz8Oh01Vq9Hljyc6MoUHIUJ6A6aUIDWO1eZxI=;
-        b=fvhenxlF7ktpU7fYKj86Bsc+/XVdvNhuWhSFF4tYU888GTdvqZs6rOzd6Zd0qsr06w
-         GhNCjTK04Ud7lIOgFuX6838kUHmCSmzTZpZmVvKdRhGaLNs5dkYqgnzB5VKOtq8bbiCs
-         SrsKnp6HZjXAPMWEhXnEmuJqoiCkdg5TXt8G5kY6ckDvc2bvZ5h6XCKJzc0G/3aINFw0
-         +vX7V/ppePuhsIHmcS/bIEsJ59RAiVNNWnNrrxJ4OCQ+G6MMu2gEE94qoPj1xOCq5A6A
-         F/11UWdKzyItKeWpntZFEBPKcB+yUihKKqXbtUwJZNU9AwewWTEM6IbT3/SXtg3kZtlR
-         Haqw==
-X-Gm-Message-State: AOJu0YwM6bWm4L5L62319/EljO8heaMvpG4u/YRAULcDNqco+KEgayzd
-	WH317tobXs0uvVmTd6PmbAHmLSgsDC1p7fMGfXcjW04bxtVKUUaKXXhbHJfzLr1aP/PmAt38hr0
-	DzEec52nUGDFwlpCV6i+I0GagInCn/LVORydGL1JaRQ==
-X-Gm-Gg: ATEYQzwwkIJ0BSum85JKc87zDBbU6J9ZllhXA04A0zTbVbPca1dicJz/qW5qFD6wM+m
-	Lus/syjMkGP0oXdR5gCs54tJYx3FMUTX1rJBvsQas2NH04xeDrSBO/uk0MN3sJJo2aR9rBmyCS8
-	C26m5narapCOMCd7Rc/xZxyU5wO/6j2LohIBTxPhoAyOubbbuFOYI31SeET8WfuJTf0B5viCzHO
-	CmOL9Xj3c99w1Gq8BdufTuRBgqjVtDZCz+3BareEpmkyuIquG1VZFEupK/QqkeEj4ZBF1KAzlmL
-	2kunlarnBL9IjQdqgn4=
-X-Received: by 2002:a05:6512:3d9f:b0:5a1:1d29:e749 with SMTP id
- 2adb3069b0e04-5a2ab7eba2bmr7270864e87.12.1774955054900; Tue, 31 Mar 2026
- 04:04:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SBSm912j"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B2CAC19423;
+	Tue, 31 Mar 2026 11:11:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1774955518;
+	bh=CC18HRDt6LXZNZI+Ou4OaN37WS8eTGfvpmEcbr7V9dE=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=SBSm912jlQ9CeXMqTN/1xdHMDhFt6cCk6SmAPsezrNVuTfxIW6xslMbkxndVtl713
+	 Y/nFNujORCX8OVASGKLUnt8q6ANzjBTHfGadDGrCQO4RTTDik0RVThbNhv8nxaIvSH
+	 bktOx964x6oMtUafNGHbocFpE92YstGJcQBnMMwqOtE8TxWXdU9kBZly282zv01dRW
+	 +nZiCZ9pbXrweJ6cGvf+QrXWm39INZgxPI/C15veT6ntiOTDiYYxQG65yOBs9jNYOF
+	 6k/cs8BvNhUI7Qcb39VQAw+LpXX1g7Nc1K9+k0xxEEBaEwCBTfnEUHJQlbpYjQDAYd
+	 P3kkzlX9//yJw==
+Message-ID: <1c1b12f2-b305-4341-8269-788fb9e11cdc@kernel.org>
+Date: Tue, 31 Mar 2026 13:11:52 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260327105208.1310739-1-johan@kernel.org> <20260327105208.1310739-2-johan@kernel.org>
- <CAPDyKFp1DbRufpro86fXi9xXnJGbWW=NrD3Q0NFQ+aHxhxogLg@mail.gmail.com> <acuiz2y0pIdEwlB4@hovoldconsulting.com>
-In-Reply-To: <acuiz2y0pIdEwlB4@hovoldconsulting.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 31 Mar 2026 13:03:39 +0200
-X-Gm-Features: AQROBzDA3rOKmAK4zrEQAayE6915y47sO72Sc-zBqp7MVFgwop6L7ntgv2j6BvY
-Message-ID: <CAPDyKFpbcn3SJrZP1SE5VPw4nxk7ct=B80=nD9k2gBdEo6EBCw@mail.gmail.com>
-Subject: Re: [PATCH 1/4] mmc: vub300: fix NULL-deref on disconnect
-To: Johan Hovold <johan@kernel.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	stable@vger.kernel.org, Tony Olech <tony.olech@elandigitalsystems.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 1/9] dt-bindings: mmc: spacemit,sdhci: add pinctrl
+ support for voltage switching
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Iker Pedrosa <ikerpedrosam@gmail.com>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+ Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+ Yixun Lan <dlan@kernel.org>,
+ Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+ Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
+ spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
+References: <20260330-orangepi-sd-card-uhs-v5-0-bd853604322d@gmail.com>
+ <20260330-orangepi-sd-card-uhs-v5-1-bd853604322d@gmail.com>
+ <20260331-eager-kind-civet-62f60a@quoll>
+ <CAPDyKFrafqhNbetL5kOzAFO526yUrJWa6mS_FPX-cw9bj2Mg4Q@mail.gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <CAPDyKFrafqhNbetL5kOzAFO526yUrJWa6mS_FPX-cw9bj2Mg4Q@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Tue, 31 Mar 2026 at 12:32, Johan Hovold <johan@kernel.org> wrote:
->
-> On Tue, Mar 31, 2026 at 12:13:41PM +0200, Ulf Hansson wrote:
-> > On Fri, 27 Mar 2026 at 11:52, Johan Hovold <johan@kernel.org> wrote:
-> > >
-> > > Make sure to deregister the controller before dropping the reference to
-> > > the driver data on disconnect to avoid NULL-pointer dereferences or
-> > > use-after-free.
-> > >
-> > > Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
-> > > Cc: stable@vger.kernel.org      # 3.0
-> > > Cc: Tony Olech <tony.olech@elandigitalsystems.com>
-> > > Signed-off-by: Johan Hovold <johan@kernel.org>
-> > > ---
-> > >  drivers/mmc/host/vub300.c | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > >
-> > > diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> > > index ff49d0770506..f173c7cf4e1a 100644
-> > > --- a/drivers/mmc/host/vub300.c
-> > > +++ b/drivers/mmc/host/vub300.c
-> > > @@ -2365,8 +2365,8 @@ static void vub300_disconnect(struct usb_interface *interface)
-> > >                         usb_set_intfdata(interface, NULL);
-> > >                         /* prevent more I/O from starting */
-> > >                         vub300->interface = NULL;
-> > > -                       kref_put(&vub300->kref, vub300_delete);
-> > >                         mmc_remove_host(mmc);
-> > > +                       kref_put(&vub300->kref, vub300_delete);
-> >
-> > While this seems like a step in the right direction, I don't see why
-> > calling usb_set_intfdata(interface, NULL)
->
-> The interface data is only used in the USB bus callbacks and is not
-> needed after disconnect().
->
-> > and assigning
-> > vub300->interface = NULL is safe.
-> >
-> > For example, some of the workqueues might be running a work that uses
-> > the vub300->interface, isn't that a problem too?
->
-> The driver uses this pointer to indicate that the device has been
-> disconnected. That doesn't mean that the implementation is correct (e.g.
-> the check in vub300_pollwork_thread() should use some locking) but that
-> would be pre-existing issues.
+On 31/03/2026 12:58, Ulf Hansson wrote:
+>>> +        - default
+>>> +        - state_uhs
+>>
+>> Instead: uhs
+> 
+> While I agree that "uhs" would be better, we have tried to stick with
+> "state_uhs" for legacy and consistency reasons with other mmc
+> controllers.
+> 
+> No strong opinion though, what do you think?
+> 
 
-Right, that was my thinking as well.
+I missed that it is already present in other places. Is the name coming
+from any other referenced schema like mmc-controller? Does the existing
+common driver code expect state_uhs?
 
-Out of curiosity, are you planning on fixing these issues too or is
-that left for later?
+If yes, then go with state_uhs, if not then let's switch to new name.
+Old conventions in the bindings can be changed, we already do many
+things differently than 10 years ago (e.g. no underscores in node and
+property names).
 
-Kind regards
-Uffe
+But followup question - the binding is called sdhci, so maybe sdhci
+common schema should be referenced?
+
+
+Best regards,
+Krzysztof
