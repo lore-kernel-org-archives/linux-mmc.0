@@ -1,134 +1,121 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 349B03BED14
-	for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 11:15:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32F213AA1B3
+	for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 11:15:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.54
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1774955727; cv=pass; b=JpBQB4HqD0Z0HYbTqndS64sesqwwO/bY85yhpO97zVPQz8wMVYZ2tbJfNI0ftT5Ch9zjZPoyDbuFw68Jd7vndc4pQl5psSOryN6MWKaMdSDXyJe1xMeeJz7hKInigKZwbgy2my1HpN3mboSgKTBcO/lMikNJjol0AWeSX4N0a0g=
+	t=1774955736; cv=pass; b=eo8hx9wo+NBznAmDvIK2Iw9xGvpGFBuQ3x9FN+lZYZvljDPxclWM6wjdSqbLuFrvTvJksyQgY/lHHkAARr0EOw3T3HjQKaZ3l7DkmFXLzRqyrRmB+yoVVq7UgMuU3ZlFTGZDw4M420zs6hUsj24fSEn9hEkevSggXcSnUqbNyfE=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1774955727; c=relaxed/simple;
-	bh=aBr9y4Yclg2KK6Io24k2AFPzMAYc7/7Xw00u+S6daV0=;
+	s=arc-20240116; t=1774955736; c=relaxed/simple;
+	bh=GopF16/z5G8zNbMombGRfMDcN1FFx6IVv7WLuVmZ+h4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=k7ohXEKX9ZaUrZMejlh0Z9dSH4Jhb6gmaeIXo5NrTDacVbh7NLjBylL+R5AWW0jqUSKlfWtjVt89JYLtt0gb63C1t+Dt76u1HziPTWtOLr5OkITelr5po2l+dzI9dKccmZR3kbgBMobadnWaOfcFRjCNGJj/WNN9uNQUv4KXTPA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=x4kwMh8y; arc=pass smtp.client-ip=209.85.167.53
+	 To:Cc:Content-Type; b=UKjUWon5AAS2NHm8BQfFqYeYJTJT+QJePK/W4X9ob2SjqEb1Xk2wus2kr4wp0EJEjd2pj89101qsbCnwriRJceFhJwseo/xRkNVPSp00K4RubP0+SrcUxZaNq1/gCfKdk0g8QcJQl5NTLfLAdDHKUbmKdOvCaFgRLtBweZfcoOc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XRGBVMzW; arc=pass smtp.client-ip=209.85.167.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="x4kwMh8y"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5a2a70bb69eso6004988e87.2
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 04:15:25 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1774955724; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XRGBVMzW"
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-5a2a70bb69eso6005148e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Mar 2026 04:15:33 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1774955732; cv=none;
         d=google.com; s=arc-20240605;
-        b=Ool3vdaOKNt6l+Rf3ozyHGBTp1kFCVLGcJwejl1DEC8Z5C1j2aZ1ct5sDqUbT3Xi4i
-         1kPDyY6Ke+mjrlhii21r0J6kXV7RpSMjB6d9AVqcagiUV91L35mpl39yVnxFne6yX1sT
-         1Qr6T73vAtju904NFHahMeL5tGuYOfDAkSy2saKmBT97YrckSBPi/UrJX2/ra74BwoT/
-         qj7Tqa4i3JjmOyo9JSgDPVy6Yz7T6q63tOZ+cyELTiFsUULp83Il4ExdDgBSuhFqc+0F
-         9lZPgbQc2IV3NmLcj6UTWUm4w/4QSLFyqZSSx4ElgxZo+thoYeT4a6ARYsp+JM9XmGaV
-         DltA==
+        b=ivXPc11XRjhGHegE7ogslmdn6CbBY6eQLKLTJyht3CVBj9cR/kIK1jlkOkdVNupPAO
+         jp+CTyBdG+owTecVznJbIiujaR53+JoPrDYxkcWuTfo6zmes+T1U0Tn2F7vyypJz1YTK
+         +pGGfx10DSu9sJyeB5SfHTQ63WlG0o+GtAX1Burx4s26Stls7rIkTD4XpYyGKMt3S/GK
+         s9FHjDRM0c9HqxzwuLTM7EFE144wWxOEXplGn7HFg70ulGe5jiU2wJ7ZInU9rzyMsn7G
+         UCud+HdT77ivDLeqzL/fm6pG14fGYPjOREl7gDu9eCMJPA7oIN1ue4oEUB8AIh17i6td
+         owpA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=IfQ/OSSTMgqJfiqd4OnNXe/xsCCAnq3e1TuoBoN+DI0=;
-        fh=pz+VZPVyusagsOFCkdMkqcuxJg3JRPJSNX+YKQTVcYc=;
-        b=EeY/2I8tF+3lQ+RqSyQXPS2Exo+yRGdO0/nlaR3WP8RE1jH+UbewQBSicqDRr8ZMBK
-         3YwYDerih7hhWeJrUGw9oScrptc5YRCBwraXjiFDoWH7W39lWZ4fLmXKAZ0iXoCWzDKR
-         q32eXTuSR2OrVYFTxZntckGL7W9ghrBjYziAxI+DHrYiTgiXq0wBn3Zswax8DEI3Sbfh
-         APBh7T4FONniEvaRazwNFGJ2jsnBk/JYCGUV0xW8iaA+yzo+5SUOvlfwQvNS8QJegwlh
-         J1Gcm5fV4q/ZRGzA3jivkDxc7soeErcQL6SgXyWYNgzQo28K/5C+Po1CmOrPTSWvCbDA
-         dRtQ==;
+        bh=gCDefte7tXHdky36Cv2hCqMPGKdB19SojrVcm46qsnI=;
+        fh=jx5w+ARVd26zsqYuTU3R0VBkTOV1wxiIqABs4QYqcRk=;
+        b=B6oGgMc45nDR+6k4Z8Wdk/lSAa0XanGmARSvOt1Jx0j2MWSGlvHt0qxq2bgb/y7c4s
+         grgALjsvugDWsVqplIGNLLeWcxmdD1UiEu3F+Xht8W4Mx3pFcFhkMRi5WeJkt0qmGvGz
+         dsTvSIyrJpyvyPJUNhWnHPrGbfMKyT7mH7Se0FtfC72woDm4meXu62LnZDf9Z71dQdJA
+         j4NcF9be6FRHCmUVJi4YM7eOqyMn/HKHpPIMFDAmUuHTtBhBGZuooaVj0GqPuNH1Q/oK
+         wCeOstgXwxZS5v8/BPaFitgJ989HHkOLSMxl/PWWmXoCW8lnS0e4LpHnev2joCfQR/8J
+         h0RA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1774955724; x=1775560524; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1774955732; x=1775560532; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=IfQ/OSSTMgqJfiqd4OnNXe/xsCCAnq3e1TuoBoN+DI0=;
-        b=x4kwMh8yGI1LVNgwv5/y+A4HI42Xr8Ohtt1bNTUYOxeP7B8CsKZ0CAuNLd4KReTsK+
-         geX1MFXY7vAl0/GOaeqhvsucjhgx/1N0KzV//ovuolvT8wmOZuCBREh0Pv+A+WJH++vC
-         8UB2hSgJ6oZEhafAaI+K/A0S6aYFAXu+NNwd+YvSfp0vZ49K9NEBwylTWcmtw2cz12uT
-         U6E7R8OOpr/NQGEdZdE4Z3c9aeFwPTJV3XLbEV60gzlbjBJ4LB7IjiBhv2ljSvhqtwcc
-         MLknrmC9AhQmGnvUEuB/tdBkIJLPeSx1TfG8BX0v+BfBd6D3S+NamFsoTChWZOirpcZw
-         MXTQ==
+        bh=gCDefte7tXHdky36Cv2hCqMPGKdB19SojrVcm46qsnI=;
+        b=XRGBVMzW4p+br6SSRcpisClkAEjK2DyEHqowYUZdZruowOiVEnEEnZ7KgXC/dn7H0E
+         bAEKktZc74vpetu94m8q1Hg5/qmBzT+TYGEi+1etxE68Kb9XKdemIDn590WL37TZ1Icr
+         g4GKUiufDA2QN6eIxfh8UilgF3EIm40ZD+Fuc4DLvcsiP+T5/sUcZF2sqCLsQAfLQEDd
+         SygikCdVkyMwBso3TMlxdu5WuTGTvUqIVKWtGhVIjqrK7d7QIIQ+xUdXfXQr75tS6HTd
+         FBBE007+81bYNCZD+YRazuH0WiM2GlGYKSy1zRkHUl994KUtiq3x5YkOMQyiPJka3KjJ
+         bqyA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1774955724; x=1775560524;
+        d=1e100.net; s=20251104; t=1774955732; x=1775560532;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=IfQ/OSSTMgqJfiqd4OnNXe/xsCCAnq3e1TuoBoN+DI0=;
-        b=BVKKI6DAqezUExqn8VrfzVyFuJ2fN1N3jQ5VEYme+LKC+gW8tWDrPO6jPJra7Yu0LX
-         T9LST8oesZv9SZBrOXD78SfYi6ykvB17j0HgHvswTiLYQ0kkwzNBvpsqrrIynDIIan/w
-         qlceJtPkKN7V+EIVxOlObMVNxZeY2cB9pKSHuVWBNa98QOt8qjXudTb/7lxrKTGb1ia7
-         U0vJuOuzyQbuEDjugPmAXubMDc9FGwt+KMQ4WkO5C34cpLtj+ZEXnpCcUD9CiHz5ogq1
-         QgREeHWkG7Lxj+eb5CdsVJUI7sDPze5+zHv9qj2XhLWM6yANO1N4Z3Nq3MQpTHym1iaT
-         QzLw==
-X-Forwarded-Encrypted: i=1; AJvYcCXIfxHv+n1B8Bhj/aBA5wf5k3aSVuYKgjQS45qeGGQ4MUFuC6I+uZN6lmlq9TxfrrLlzRwZWO66uJk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyJZUUtUTv3FARV21iJDm/YVpw9zNViH16loBklSOZ4UGwiY7l3
-	r0vkL0CPGYw+HlZ/TmVdQJMcNYZ/bDfJcB/aZlDXaWWFzI8iM5YGQfhrKeicQfiJQ6153GEmQah
-	oZUZ1D2NwQv2bI9cBPQLwVJBsnK5el+3Ho5JthHxCGg==
-X-Gm-Gg: ATEYQzy1KmplgWppjF8kxxB6ERp2d98CVtRvLf4wRc4a9k4V5Bx33fVuv7OaJKY80XY
-	QFQDHqQxsFXz13SgymLlp79pEgVvFDzdZTL+e2P907JRkyN4rmeDfrFCEkdnWhEUUE23tqBLMRO
-	WYE45bCSnmL5JESd7SMUTX+H/EKBPMi3AWw7c8rBDNJMkbPIegsEe+/GpBRHaf1elxf+LFHPs0b
-	iix08S35gJ1+FjlV0ZyJqfN7uOeVa27MYAgWzwmpiPCXfMljHR8GFHi9EMhtXWhDT+ROekD5nRK
-	EEoQk5mwhbJE2gUf3po=
-X-Received: by 2002:a05:6512:3d1c:b0:5a2:b842:6850 with SMTP id
- 2adb3069b0e04-5a2b842695cmr2179137e87.15.1774955724119; Tue, 31 Mar 2026
- 04:15:24 -0700 (PDT)
+        bh=gCDefte7tXHdky36Cv2hCqMPGKdB19SojrVcm46qsnI=;
+        b=jpG3F6fJFA5uDP3igdw+D/SHRBEtKP4HRdkbg33WLQEYYcXQT+NdTFV9cZdXrKYNTI
+         rqfR+8REQU1yGzeUM3vNckmwXOuFrTzwGheXKUu4XoOWjv/Dn2UtUM0ZTCKE/L4qpm5r
+         U+yinkej4QRTzApR9az08tL8rMqt9J0PVMggRAWxnCy9AnkuBlwK24fvmYwdEy0IuVF/
+         i8HcXnktR65Sk050D7z58TY+5c0WA80/18ErFG1ysGd3IENbf0JbnUGVXKN6h6fJoqxd
+         xrTqwDx6FSK+pE7qPUvngSOveKuqkxx6Lmf9kVJMxK5sTogz2cQPVA4UeYet6FxYHMDn
+         dk0Q==
+X-Gm-Message-State: AOJu0YzO5RolFePUb+dz52og7izD3AJ4azcVXx6oxYclDwUGIKoaEM2q
+	0L9eYAjnW+pRjqw0LdxR7UAiwoy7of3NnYNrnSesdDGV1rb6PJei+002YP3d1URc1pLdctIVg/K
+	BBOuwdvIh0eSoiRncVvShUPFBBom2epjlrA/ZinvgfA==
+X-Gm-Gg: ATEYQzycXPmGGc+Xg//9JVg6UNAYthk/jWa446NYl1NlBK0GUoxf1I2wLD+1bNCRV5W
+	1lS99D40lGCHhrMkoTz5CFcCnXUux/6lJR7u6UIb/FOkvQprYZM4XIcFhFI4JFhtbvaMViZiN+R
+	Qpv5/XmERYrAzb25JCo90EK1MM3qxokDGD5B3mIIvLpe+Jr0VupmaFqHJKzdWCGIpSZlctwYsuk
+	XliE/n4Rg1ubsSS+fwHEkxvSYWMlIkHfXdLte7moTwhDeD0i6Dy/CgITx7j7SkraDjgtZbPk12f
+	KVC9LS3+
+X-Received: by 2002:a05:6512:3d05:b0:5a2:7cd6:d5eb with SMTP id
+ 2adb3069b0e04-5a2ab92614cmr7016114e87.27.1774955732039; Tue, 31 Mar 2026
+ 04:15:32 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1774943690-219754-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1774943690-219754-1-git-send-email-shawn.lin@rock-chips.com>
+References: <20260327105208.1310739-1-johan@kernel.org>
+In-Reply-To: <20260327105208.1310739-1-johan@kernel.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 31 Mar 2026 13:14:48 +0200
-X-Gm-Features: AQROBzBNB9YTMIfag9Ke_wYWFHf2ISwEz1rpq1ASvrM3l06A8kjB4yA1WF4mtPQ
-Message-ID: <CAPDyKFo3QHTpPv=UZfz9MdGO-Qru9eVE_rNfhkgmxJ0J4Hj6Vw@mail.gmail.com>
-Subject: Re: [PATCH 0/2] Improve request handling code flow and clarify
- function naming for dw_mmc
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Tue, 31 Mar 2026 13:14:55 +0200
+X-Gm-Features: AQROBzD0yBQiBTClmOkzWg73Q-KiS4v_3InnW1vFFShezN0TRysVka36_J_7rLo
+Message-ID: <CAPDyKFpHD+kPq__C+gvxwRt5CSVxf6E0aTW9jrChQWa3Vvc4NQ@mail.gmail.com>
+Subject: Re: [PATCH 0/4] mmc: vub300: fix NULL-deref and UAF on disconnect
+To: Johan Hovold <johan@kernel.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 31 Mar 2026 at 09:54, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Fri, 27 Mar 2026 at 11:52, Johan Hovold <johan@kernel.org> wrote:
 >
->
-> This patch series aims to simplify the request handling logic and enhance
-> code readability in the dw_mmc driver by addressing suboptimal function
-> naming and unnecessary abstraction layers.
->
-> The dw_mmc's request handling routines currently include multiple functions
-> with confusing names and redundant responsibilities:
-> - dw_mci_request() serves as the mmc_host_ops entry point.
-> - dw_mci_queue_request() was used for queuing requests, but with the removal of
->   multi-slot support, it no longer performs any meaningful queuing operations.
-> - dw_mci_start_request() acts as a thin wrapper around __dw_mci_start_request(),
->   adding unnecessary indirection.
-> - __dw_mci_start_request() contains the actual core implementation.
->
-> This naming hierarchy not only obscures the true function roles but also creates
-> a misleading impression of queuing behavior, which no longer exists. Simplifying
-> this flow and aligning names with actual functionality significantly improves
-> code clarity and maintainability.
->
->
->
-> Shawn Lin (2):
->   mmc: dw_mmc: Inline dw_mci_queue_request() into dw_mci_request()
->   mmc: dw_mmc: Remove dw_mci_start_request wrapper and rename core
->     function
->
->  drivers/mmc/host/dw_mmc.c | 58 +++++++++++++++++------------------------------
->  1 file changed, 21 insertions(+), 37 deletions(-)
->
-> --
-> 2.7.4
->
+> This series fixes lifetime issues that can lead to NULL pointer
+> dereferences and use-after-free.
 
-The series applied for next, thanks!
+Patch1 and 2 applied for fixes and patch3 and 4 for next, thanks!
 
 Kind regards
 Uffe
+
+
+>
+> Included are also two related cleanups.
+>
+> Johan
+>
+>
+> Johan Hovold (4):
+>   mmc: vub300: fix NULL-deref on disconnect
+>   mmc: vub300: fix use-after-free on disconnect
+>   mmc: vub300: rename probe error labels
+>   mmc: vub300: clean up module init
+>
+>  drivers/mmc/host/vub300.c | 70 +++++++++++++++++++++------------------
+>  1 file changed, 38 insertions(+), 32 deletions(-)
+>
+> --
+> 2.52.0
+>
