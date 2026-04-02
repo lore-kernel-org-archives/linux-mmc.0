@@ -1,167 +1,157 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from smtpbguseast3.qq.com (smtpbguseast3.qq.com [54.243.244.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D931036495A
-	for <linux-mmc@vger.kernel.org>; Thu,  2 Apr 2026 09:07:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECCBC3D6461;
+	Thu,  2 Apr 2026 11:24:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=54.243.244.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775120859; cv=none; b=LxtaWCWXpTdSXRoZBodF98UziVXOdpT8cFQytpE38q1TeT1fqlE6uvCVQDbdkhL0BdaM7XNtLx3sG7N1WG34T0ibtTHdxCE2bUryUShWTOMN04KO0V4UDTilth/MO++/xU5GK/j/oRTQraQxYqM0O3Q7N9Jr9DLAP1J3QTda4Do=
+	t=1775129102; cv=none; b=XxO6OuOYEerVvqnz8IVj3/lxhZ8yhNAvOEnmDVIpkldvh1UYbSN+/3kvVMfXrR5CXLZpEBQGl8cbU4KXB28xQsPmkhzSDwcDa4wEnkJk9JPVtgRPiNCbJq1Aw+ofzuB3FF4DrYKmvX7f+Fwev+cVTWX0p1lObLg4apotIPVWxrY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775120859; c=relaxed/simple;
-	bh=Up3MNq8a8YgpJydhUUpKFvy7IhhdCuy0+sVystVoO9o=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=naHtekWZGyfMr5Ys2xEYUa2egHfBjxAVQQa3dg2b9QXWA+xBANlt1wWQCpFPFmtQ4+Bc3Z0GBeCV9u+KKHwKt7sSOTyOUpwVytpuf9iJyvyNVXQlF+Vtlw1WyTV95fFEFO9jZauIVygPDKnhN02hf+aCHI8RJtm1YcQFkd8hYoo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=FS/gI+D7; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=Q3B+MVp5; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="FS/gI+D7";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="Q3B+MVp5"
-Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 63273CZ61129024
-	for <linux-mmc@vger.kernel.org>; Thu, 2 Apr 2026 09:07:36 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	jNL23KRNx3VBPsO3Bq3eEcdp1pYh7Ktco7ToNFPO8S0=; b=FS/gI+D7PaVgJH+I
-	ZP74fJfkkxV/y8tNJmP8nn8+DgHOw2phnsu69oIr9nECcob6/zuDhEcZo9yzdUcv
-	87wS6kKIF720D2e8FufsYZ9JxucdqlxQvkqTtKG186YOS7Ez5nQvz0UcNtcUMW7L
-	PUU0XT2PrYAVSMLD8jbP4xSYMCZYidjJ0UdBgme3eLYzbgkxMfj9uN8ChIjOybyH
-	KHIrAKfDT0x4vNf9XKssASy0x+XPL3+DA9RqViZG32byTy/JuMe3mLCLAWboqo4x
-	UdebWmsIyuchhZa3/c1AYufQ5gyekjEDh/tPV7rPIWXwpornIrvwRqYAk4dCJv5U
-	AGpDfA==
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com [209.85.210.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4d96k9b8qm-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 02 Apr 2026 09:07:36 +0000 (GMT)
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-82a6906e35fso1782445b3a.0
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Apr 2026 02:07:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1775120856; x=1775725656; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=jNL23KRNx3VBPsO3Bq3eEcdp1pYh7Ktco7ToNFPO8S0=;
-        b=Q3B+MVp5buTncqpaNh/1sgQwK0UtfRsMAfK6Wbp6ITf8ddhFQ9h1xYmGOXNnyByUAL
-         WfPUAovzqXpH5r7WJurljFvBiBpVW+MkNOkmdVnnB9A8cQtEML3nUgk8p3vC4MkJqAmk
-         vHM5+FurawDN6/cg25rOeA7DY/9rxcxUYPNlAmygUhGVhnm+3z4ODMyzRCSYqjgKpB6g
-         cPT0+2FvyohAZ2QfnGSk6L2WwNu6NbpQLpMjP3G7h5I6sMI3UlE5IEPfOZ8bo5bjXdpo
-         40YIIb8i0jyRw9QBqwE4TGG3t4K9maXBFYw4Zb+dEvwZJf9gxFIJ3+7CktUuM+vSUAMD
-         a5Bg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775120856; x=1775725656;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=jNL23KRNx3VBPsO3Bq3eEcdp1pYh7Ktco7ToNFPO8S0=;
-        b=eM2FK+p+bYTcfmVt2AEfXelJ3DuqTVzsid4cDl6X9f2OOwzRf0X8piTJDaJYcDhxMP
-         VlHmQH+djPL8h3rUz5DS200SpMk+guHjnlRlfFG2+1anPsH+VSfdVv7aPB6me7zTsSob
-         xeji9sY8Bu9dYB6TmgeXehVb+/y3k1Hu11MU1aBk2dJHNJ1wpqm0axqJFUUu3EcMf6I9
-         NaO/95p0kym4t3yeH/i0sdMfwvUcQFy1b53y0UwjM/ZGpqnK18bCk/as5EUhv9T7iuDw
-         tGAdurTU0xPOEb5Z865IXKvOa3CRBEca9rN597TlZfQWI3x/QfdZ3ZJRS6OVfYPCRUux
-         c0nQ==
-X-Gm-Message-State: AOJu0YxXfu57Ku8wTdSOq7KFDNcoL9Nn1SzE5oL9qa4KkL+VtuNwto1k
-	DhF34+ROt10FWjN5idl12bQlXDpiib/EZje/wPUX/KcVU5rnSrdvkytUCoZwc8xu9CFgksYNvtU
-	5mKzIqE8lAbXGliXm70N01DmPkSvYHg82EzboWjwSOh9lv0ca4cvCBNjVi7fNgKA=
-X-Gm-Gg: ATEYQzzxesC5u97BxsUw0Vf5OrqT5N11MF8GmjbYysKh0hbvvcdsUuIDXd2GsNBWN6R
-	XMfaAoGZBNrK6JlUGPidu5b3Mx0vpLgRU6XLJzgAmHDUtP9UciJ2KVBs2YDt+vAYkR3LsTG3Jrf
-	z+EKaPZEJ1vyyihZrqWOCRUmbhcNp7ea470qEpEGHr+VDqKhP0VzMWV+wvm+ED9482sMoHDnKiI
-	YbfRvPyvmkDp2v4thWZAw/ywlzZ26XH58eUwQNlRHhAup1EKHGtAH+tNyMIwIGVN+WQnxGXaa/3
-	8qHgfGALEAl918LO5OEjic8NI3XyrfKdPsEfS3pBiVIJ5h7KsZA0DPnanhHeWnBRyUabFFliIdx
-	LF430LcHwEr6ZVoRp5gfwf6YVBmXnJe/4sKLUN47DOcT/zDydMMbe
-X-Received: by 2002:a05:6a00:c8b:b0:827:32dd:59c5 with SMTP id d2e1a72fcca58-82d0038878bmr1984194b3a.28.1775120855743;
-        Thu, 02 Apr 2026 02:07:35 -0700 (PDT)
-X-Received: by 2002:a05:6a00:c8b:b0:827:32dd:59c5 with SMTP id d2e1a72fcca58-82d0038878bmr1984156b3a.28.1775120855310;
-        Thu, 02 Apr 2026 02:07:35 -0700 (PDT)
-Received: from [10.218.44.178] ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-82cf9b272bdsm2480282b3a.12.2026.04.02.02.07.31
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Apr 2026 02:07:34 -0700 (PDT)
-Message-ID: <0b8a2c10-c74b-4126-bd44-b36f85db1aa8@oss.qualcomm.com>
-Date: Thu, 2 Apr 2026 14:37:30 +0530
+	s=arc-20240116; t=1775129102; c=relaxed/simple;
+	bh=RcX9LDtuyetHVfHjlsGuK7xjHia6Sb6Hr4bV/1hbpVg=;
+	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
+	 References:In-Reply-To; b=neynAUTjeeNMFzL/f61Y088mRf0WEg57gHWpsBW48SEkZxAmw4YFh0h3TkFHuVtyzlurlNpktCIVI893iExVgEsg0ym9knu5unCt5u71SQKLd7WqftnW2R6xfSCr8FAa65Ldnp6/aa9rgv2VcMLIL8BpnPFxvhgws4LEZE+2sdY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.dev; spf=none smtp.mailfrom=linux.spacemit.com; arc=none smtp.client-ip=54.243.244.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.spacemit.com
+X-QQ-mid: esmtpgz11t1775128897tbf21170d
+X-QQ-Originating-IP: kxlUxpWpaYTKTqzcSIXGMtW5WoW7m1TS67JGq45OFYc=
+Received: from = ( [120.237.158.181])
+	by bizesmtp.qq.com (ESMTP) with 
+	id ; Thu, 02 Apr 2026 19:21:35 +0800 (CST)
+X-QQ-SSF: 0000000000000000000000000000000
+X-QQ-GoodBg: 0
+X-BIZMAIL-ID: 4623887784994959119
+X-QQ-CSender: troy.mitchell@linux.spacemit.com
+Sender: troy.mitchell@linux.spacemit.com
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 3/3] arm64: dts: qcom: monaco: enable the inline crypto
- engine for SDHC
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>, ulf.hansson@linaro.org,
-        robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
-        andersson@kernel.org, konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20260310113557.348502-1-neeraj.soni@oss.qualcomm.com>
- <20260310113557.348502-4-neeraj.soni@oss.qualcomm.com>
-Content-Language: en-US
-From: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
-In-Reply-To: <20260310113557.348502-4-neeraj.soni@oss.qualcomm.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=doLWylg4 c=1 sm=1 tr=0 ts=69ce31d8 cx=c_pps
- a=mDZGXZTwRPZaeRUbqKGCBw==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=IkcTkHD0fZMA:10 a=A5OVakUREuEA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=_glEPmIy2e8OvE2BGh3C:22
- a=EUspDBNiAAAA:8 a=QNBTSuZnymOEHSKAjgQA:9 a=QEXdDO2ut3YA:10
- a=zc0IvFSfCIW2DFIPzwfm:22
-X-Proofpoint-ORIG-GUID: 0asxZ3xev9szkkQfU4-erp9F13FUmS5S
-X-Proofpoint-GUID: 0asxZ3xev9szkkQfU4-erp9F13FUmS5S
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDAyMDA4MSBTYWx0ZWRfXzjbozjFBE8YU
- j2b8YMZUABG2YsLOwR/enIkB8xEeOLK4H8Wbj1PNnYC2IfbAf9bGnIqHVbaJDKGb/ns3LlaHeSd
- GbbN7KOs95YfCDxlpFldugC4pkHTBklUkkvgu88K66+qGsGTckcPUZyS7ad48cmEFhMadIXg2/a
- 7JPbkfY2RulyJefkYYFPSjLfisqmv/WS5qeW0J3GEo5wSyRumxlQpUY01qSjkIWMMvndqpam/1n
- 36lUkLsuFmKeaoC9FtPlxUwkjcv723j+J5gqpQDzKx6uR8TRXuqb1BiHyO5DoD9cpB90PwNvi1F
- j+AXBZRbs83rd+SWfBKgT95a/SaWzDToVfIzoViDLjB/5RDHuYk7zFmfIESzs+Vz6WGCsFW0ez6
- LVRkMNCVuRf4bf6WWGb6LUxSzZ50BwypDGnjydSA0G5SPQZtthUqAK6JONCTFiHHum8pIjiBf6Q
- YwlwkzIOC4NtslzJp0A==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-04-02_01,2026-04-02_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 bulkscore=0 impostorscore=0 spamscore=0 suspectscore=0
- clxscore=1015 lowpriorityscore=0 malwarescore=0 priorityscore=1501
- adultscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2603050001
- definitions=main-2604020081
+Date: Thu, 02 Apr 2026 19:21:34 +0800
+Message-Id: <DHIMOCFZSFXX.2XZEQBRXLISKN@linux.dev>
+Cc: "Ulf Hansson" <ulf.hansson@linaro.org>, "Rob Herring" <robh@kernel.org>,
+ "Krzysztof Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley"
+ <conor+dt@kernel.org>, "Adrian Hunter" <adrian.hunter@intel.com>, "Paul
+ Walmsley" <pjw@kernel.org>, "Palmer Dabbelt" <palmer@dabbelt.com>, "Albert
+ Ou" <aou@eecs.berkeley.edu>, "Alexandre Ghiti" <alex@ghiti.fr>, "Yixun Lan"
+ <dlan@kernel.org>, "Michael Opdenacker"
+ <michael.opdenacker@rootcommit.com>, "Javier Martinez Canillas"
+ <javierm@redhat.com>, <linux-mmc@vger.kernel.org>,
+ <devicetree@vger.kernel.org>, <linux-riscv@lists.infradead.org>,
+ <spacemit@lists.linux.dev>, <linux-kernel@vger.kernel.org>, "Anand Moon"
+ <linux.amoon@gmail.com>, "Trevor Gamblin" <tgamblin@baylibre.com>
+Subject: Re: [PATCH v5 5/9] riscv: dts: spacemit: k1: add SD card controller
+ and pinctrl support
+From: "Troy Mitchell" <troy.mitchell@linux.dev>
+To: "Iker Pedrosa" <ikerpedrosam@gmail.com>, "Troy Mitchell"
+ <troy.mitchell@linux.dev>
+X-Mailer: aerc 0.21.0-0-g5549850facc2
+References: <20260330-orangepi-sd-card-uhs-v5-0-bd853604322d@gmail.com>
+ <20260330-orangepi-sd-card-uhs-v5-5-bd853604322d@gmail.com>
+ <aco9oLumPh4OZtIo@kernel.org>
+ <CABdCQ=MFcDPnzcYUEkbQyu_0qZt=aDD04p1kyxCMuVt7Av_P1Q@mail.gmail.com>
+In-Reply-To: <CABdCQ=MFcDPnzcYUEkbQyu_0qZt=aDD04p1kyxCMuVt7Av_P1Q@mail.gmail.com>
+X-QQ-SENDSIZE: 520
+Feedback-ID: esmtpgz:linux.spacemit.com:qybglogicsvrgz:qybglogicsvrgz3a-0
+X-QQ-XMAILINFO: M+A7tMXGEwPSuXkIce/o+QKPNansc3JhWXzsUMoIhDgXQl3SK17gCqau
+	pnpSt9lg4jJlQtkKtjVehs1IgjWZymBdu9gc5iaAe4b0D6XEEHV/01Wv8Ihje955Co/Dtxu
+	UQu1QLsmCP7cdkg/Gu/z/xroTk2ZKKbKA+LZmbgtjcSYM5uNEtqwHhoNsjZr/43EjcbJqQV
+	JMAB6A8/4CxHGKtekR2o68AGRBuIF8F6VP8Qd89v4pgrBVLh5Xi/4PJ68N/eoPoMtiXbVKH
+	0NM5mu3R8Plcdl3FeEahz0LzYXRdt9RhbVWTlK1TTlVDfnBtYB2KyXgmUl+kmyijh+Fqri0
+	gCKonIcu/TXS3HFmuohxXSsphcg0NP+/vtcp93fVfrI0rOJ7/0lgxdK854TdY4DdTyuvEQB
+	8noyApRZfeaUZ6PXh20JFaeyn3O8PVKFvjjFd4EI6XBsxCfWN5mcaLIEsUCfk9cL8KTJFu7
+	wAn72VX7uQkL3wMHFO468KeddkFRToLgAlNkiFw5/uSaO0P6GSAF7J+QjJjwtTnPa/JHFtT
+	HDW9uKTk4XqWcfowQKelvLTrMA7bHoaWB3+doHRWT7BljxyCpSqsGoGg/cnNi2ejnmrsUMN
+	DgC3/DUttJGpwgaEDuBJqK9rc30jZ0TzKnPwLFgmU2N4uEJERoyy/jHCEKRjzNG0+9iErnL
+	KpvQTa0xxvnSszqDzm8dSnSKY9FPHaDDSOR5AEn7SOz7No9J7+XXA54zXMCfzGrypIfrPIv
+	huIn4vr8wp77/IJJH8sGuEjsiXN/JOIuTJezIXVEzucnvYupfEcm3m30PhHja+/bFxwx9NR
+	PaNggiK+0CURcPn4ulQWzKOWwxv4gdI3xMen5SxlE8D2o46IpNw9KKdB7lD1PQQqb9141LU
+	VG/XlDOtrhh+ioPXPDPLjY1GkQIT4tD7wdDqT7bCNvSgnB+cRpuweJqdDhrLASLV1TsFPzl
+	NayLtqDbv8I0vPIZOhPIW+3hAPfL2Y2tLXgFvd6xFn+oRRunTZ4pzQV0DHSgPfAz6/3tgPH
+	vdvzJJDm9saTqoNfPEhKPr+CsK1DRajGjsojcfpGmbla5K/HDSKf8BlocsAEw=
+X-QQ-XMRINFO: MSVp+SPm3vtSI1QTLgDHQqIV1w2oNKDqfg==
+X-QQ-RECHKSPAM: 0
 
-On 3/10/2026 5:05 PM, Neeraj Soni wrote:
-> Add an ICE node to monaco SoC description and enable it by adding a
-> phandle to the SDHC node.
-> 
-> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-> ---
->  arch/arm64/boot/dts/qcom/monaco.dtsi | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/qcom/monaco.dtsi b/arch/arm64/boot/dts/qcom/monaco.dtsi
-> index 816fa2af8a9a..365af78b01ae 100644
-> --- a/arch/arm64/boot/dts/qcom/monaco.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/monaco.dtsi
-> @@ -4202,6 +4202,8 @@ &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
->  			supports-cqe;
->  			dma-coherent;
->  
-> +			qcom,ice = <&sdhc_ice>;
-> +
->  			status = "disabled";
->  
->  			sdhc1_opp_table: opp-table {
-> @@ -4229,6 +4231,13 @@ opp-384000000 {
->  			};
->  		};
->  
-> +		sdhc_ice: crypto@87c8000 {
-> +			compatible = "qcom,qcs8300-inline-crypto-engine",
-> +				     "qcom,inline-crypto-engine";
+On Wed Apr 1, 2026 at 4:53 PM CST, Iker Pedrosa wrote:
+> El lun, 30 mar 2026 a las 11:08, Troy Mitchell
+> (<troy.mitchell@linux.dev>) escribi=C3=B3:
+>>
+>> On Mon, Mar 30, 2026 at 16:38:06 CST, Iker Pedrosa wrote:
+>> > Add SD card controller infrastructure for SpacemiT K1 SoC with complet=
+e
+>> > pinctrl support for both standard and UHS modes.
+>> >
+>> > - Add sdhci0 controller definition with clocks, resets and interrupts
+>> > - Add mmc1_cfg pinctrl for 3.3V standard SD operation
+>> > - Add mmc1_uhs_cfg pinctrl for 1.8V UHS high-speed operation
+>> > - Configure appropriate drive strength and power-source properties
+>> >
+>> > This provides complete SD card infrastructure that K1-based boards can
+>> > enable.
+>> >
+>> > Tested-by: Anand Moon <linux.amoon@gmail.com>
+>> > Tested-by: Trevor Gamblin <tgamblin@baylibre.com>
+>> > Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+>> > ---
+>> >  arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi | 40 +++++++++++++++++++=
++++++++++
+>> >  arch/riscv/boot/dts/spacemit/k1.dtsi         | 13 +++++++++
+>> >  2 files changed, 53 insertions(+)
+>> >
+>> > diff --git a/arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi b/arch/riscv=
+/boot/dts/spacemit/k1-pinctrl.dtsi
+>> > index b13dcb10f4d66022d27307de73a6ea3287e97441..8d82011f1af666fb78c282=
+a2abcc0cb88f962053 100644
+>> > --- a/arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi
+>> > +++ b/arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi
+>> > @@ -570,4 +570,44 @@ pwm14-1-pins {
+>> >                       drive-strength =3D <32>;
+>> >               };
+>> >       };
+>> > +
+>> > +     mmc1_cfg: mmc1-cfg {
+>> > +             mmc1-data-cmd-pins {
+>> > +                     pinmux =3D <K1_PADCONF(104, 0)>,   /* mmc1_d3 */
+>> > +                              <K1_PADCONF(105, 0)>,   /* mmc1_d2 */
+>> > +                              <K1_PADCONF(106, 0)>,   /* mmc1_d1 */
+>> > +                              <K1_PADCONF(107, 0)>,   /* mmc1_d0 */
+>> > +                              <K1_PADCONF(108, 0)>;   /* mmc1_cmd */
+>> > +                     bias-pull-up =3D <1>;
+>> > +                     drive-strength =3D <7>;
+>> I'm a bit concerned about this value. Looking at the downstream 6.6 code=
+, 3.3V uses DS4,
+>> which equals 13mA. Since 7mA maps to DS0, what's the reasoning for using=
+ it here?
+                ^^^^ wrong current
+>> Do we have any documentation or measurement to back this up?
+>
+> Thank you for catching this! You're absolutely right to question these
+> drive strength values.
+>
+> Looking back at my development process, I remember hitting signal
+> integrity issues in the early stages of this driver development. As a
+> quick solution, I lowered the drive strength values, which seemed to
+> resolve the immediate problems, and I moved on without revisiting the
+> electrical characteristics.
+>
+> After your feedback, I investigated this properly by comparing with
+> the vendor kernel. It uses:
+> - 3.3V mode: PAD_3V_DS4 (19mA)
+> - 1.8V UHS mode: PAD_1V8_DS3 (42mA)
+>
+> My original values were indeed backwards from both electrical theory
+> and proven vendor implementation. Testing with the corrected values
+> (19mA/42mA) confirms SD card is working.
+>
+> I'll send v6 with the corrected drive strength values: drive-strength
+> =3D <19> for 3.3V and drive-strength =3D <42> for 1.8V UHS modes.
+Yes, 19mA for 3.3V and 42mA for 1.8V are correct.
+I realized I cited an incorrect value in my previous message (the 13mA).
+Please CC me when you send v6.
 
-Same comment as patch 2/3.
-
-Reviewed-by: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
-
--- 
-Regards
-Kuldeep
-
+                                    - Troy
