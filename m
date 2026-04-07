@@ -1,124 +1,171 @@
-Received: from mail-qk1-f181.google.com (mail-qk1-f181.google.com [209.85.222.181])
+Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com [209.85.167.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37A643B27C4
-	for <linux-mmc@vger.kernel.org>; Tue,  7 Apr 2026 11:56:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D95CD397E9F
+	for <linux-mmc@vger.kernel.org>; Tue,  7 Apr 2026 12:15:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775563007; cv=none; b=U5lZ8tFYjvmK055G62SBMDf+dhcrITPvHaa36fdyVmWyIEvqMZ+szIgIG/wLuNG1n1UJEWC/yERlK7l05sgUytTGZ3OBPyvmfAsDmssq3XfOASCzKeM0IRl09V3Tr+9cZpqtNb++eUVMAgpWU2YKbfygBom5z8lBow/v1OyRk34=
+	t=1775564150; cv=none; b=KwZF7sACm6A8B+AJOCb9ELc+/spI/ldy9LGW4kvUAWU5UBDluykGvdHs9orl3sJrKkxW8PnB+7bSx1EPm7y/u5r2M3wxOy5jUdF28vYOJw+oP/0WI/7LSE9pVPP9/LqT08SdMjjAKRslAvj8DYsqNogn9a7/8nBZgotVPUJEEKU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775563007; c=relaxed/simple;
-	bh=q36f3RLxu1TQVd3NN+p51ezMRv7VpdfvBQ4n2zcWzq0=;
-	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=QijGyFttKuNJGYNUiw+/8cnbigpNqD4HDFSTXqkALkj3ZqODrNRLDC+/qroo42GKu+dKytHmdArzcHjMBd8DRqM2HVK/+7bd8t+qG4wEv1HD23A1CSUSdNNswth4xR+egf+tHWv/j2CJDEZo7VmXc0+O7sUREw7zphLS4PKgLr4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VrcBNRsH; arc=none smtp.client-ip=209.85.222.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1775564150; c=relaxed/simple;
+	bh=duNC7fAgfP+/WtJJ2whf9/kofDBWeD1leV6uWxOseYA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=cnHOX1xeFK0ISAIVIWBOL1lA/5e9sb+kj9oRIxu9VBrT2NnN+NxTBdUcuGswJNRRl0okDazCECQLhzBSVx3eIp6xxmoR4WvjGztLMQYzX6PXmAEN388GeE2rulL3bunXSZbe6dMgHbBt/niMfqVMnMPF6kiLl5071MjuJEWB4xg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=V7nJUwal; arc=none smtp.client-ip=209.85.167.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VrcBNRsH"
-Received: by mail-qk1-f181.google.com with SMTP id af79cd13be357-8c6f21c2d81so439881985a.2
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Apr 2026 04:56:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="V7nJUwal"
+Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-5a2beddab48so4885746e87.1
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Apr 2026 05:15:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1775563005; x=1776167805; darn=vger.kernel.org;
-        h=content-transfer-encoding:subject:from:cc:to:content-language
-         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=aHsPO7VkkkmF+LzDzouz7Fz5iyV2CQc/HSeILC33tdo=;
-        b=VrcBNRsHgBUSNm9xQ1uVq7KAlQvKXxNuY3yEsZYVh09EUSL8AEDp4wdG33drJ60msr
-         107O1tHxbU+jDOjyuEDBTMQDDLHLfajhC/YzohZc111bxAon8M3Lefqg7+PD/xV2EGt5
-         PXtDegyD9BtNH6C1XZMKpcQ6Yc8dvSEzmLn9rGPf3uyyJvoOqY88xfnrP9d2WlDwawm7
-         jAZPpbFcnFIxnTg5Aq9pdc2tbBGDzlnSw4akU6IwoIu1+LtQB6L6YrTxTtz0ZyjHHfEr
-         WKPLyrTYt8CZiIj92HsBydvLEIhDOo3KC1SFdgsIbW2OPyTiqIFldtCrGJljUzXjSzSj
-         3mrA==
+        d=linaro.org; s=google; t=1775564146; x=1776168946; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=I+WojEMYC6/0fW7pAb7QL78xV/89mZ067SHdrUCnECw=;
+        b=V7nJUwalXWGJmrQDcjs4i4+al/K/wo3o/6zz7HHVTXtCuotEV/BatJvQ2yzNd5eoUD
+         vEGj5wTT9T59/M/8A/YKspayGYl8hLT973hvVdyfrk9AYy5LFeK5mHjWwbiYgb1OJMSp
+         n80usi2sz1mr+E2QPIxTnWZ6pwY3Ab+fEKMByeJR5Ixuxez+V8fXyZKBrP2uJXV9hvcx
+         vpxCQxRbnX9N9VFu5IAbqNYtDOeuMs9YwoDyPxfh1P4MnUD3yhgdQvAVS4++y3R0W4Fl
+         +5nPcW6j0X+bzzgEwY69vV7MeV9yC6bg8UKSs0sd1Rx+su0pV8E1jqKzLUwr65DeuVUg
+         3VRA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775563005; x=1776167805;
-        h=content-transfer-encoding:subject:from:cc:to:content-language
-         :user-agent:mime-version:date:message-id:x-gm-gg:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=aHsPO7VkkkmF+LzDzouz7Fz5iyV2CQc/HSeILC33tdo=;
-        b=Ly8GINANQkKhc3ch5S2SgQxkAw03VUWqgcImizvjMMvptbuBLjOR9jTkYLm0HgnTer
-         CiVvF5YqFERTemqizFCS8o9kE0U6EmjbAPEZ/mQgPbLHNSKkycf8GpFWMOsYt0/n4q8Z
-         Dhuo2ULFYjqmq89s4C7u/n+DLWfgrOeIQ3/tInrw3bHOwzYnpqoO/c8nzZIAr9AgGNdn
-         1XCU5/KN+x7mNx3Ne+y027JjgsqLUWLVQqsWvMXUUxCLyyvHGVitGCGnDC3vvajyRHVZ
-         oZdEzWq3O0O6kRIBztpf+ObAT27VFJswejhAhmSEVDV2KlDIudSYFhbz64f6F9v4PS27
-         8Gyg==
-X-Gm-Message-State: AOJu0YzG17KoaPMfE2BYLH9I8JSaw3Cy9TmxiEIRktlAt7reZOuzUOGq
-	owtw/3R9DsZXhKPA8ltxOLh/QZGJY81Dt7dkalv6i9dix04Nx4YSqzxLMtfcxOnhl9c=
-X-Gm-Gg: AeBDiesMpHy+R3U2wIAAfs+JXeFY+4ERIJkGVprrhVw1TsM/TYoxvo+ABw5ZWLX+hVV
-	Zdbo6ul1WPvA6bmDn05IcdtKE1AWHNXWBJaGRJsq9t2VoVz9WzWrMCHVZwFe0IbdUeVRICwJ4s3
-	6qmy0x98xvdjgc5bU5oziRvAavHqZJOwIcS5U3ZwyVwsMafVgMoi9k92QGkuwPv67O986iD/Kxq
-	F7/rOqcwsxcjSyfV5wPbNFQEX8Scj7trOlpmIhbsWgGblCvKBK/Sx+gRNED/0V1qCCnwOEZ69cq
-	T1mBTx7Pg/yOkXQ7oeU3VOYdhbZjA1QC3UHRjohLteg2bJgGcCAZWIBigRRYtx3627tOyTTVbxR
-	udyKOYnYSzQK+AhyU97OuRxCCgB+S5tJFPNkznSCfM2eJHLVdMsS75tvs3vSshtop5spwxV1IlG
-	0I+CwYWbn52rBOeZSkSCR7
-X-Received: by 2002:a05:6214:1d07:b0:89c:d424:aceb with SMTP id 6a1803df08f44-8a7043ee093mr281400346d6.31.1775563005076;
-        Tue, 07 Apr 2026 04:56:45 -0700 (PDT)
-Received: from [10.10.10.1] ([157.245.8.14])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8ab9acde805sm34223276d6.2.2026.04.07.04.56.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 07 Apr 2026 04:56:44 -0700 (PDT)
-Message-ID: <964d54a3-90ce-475e-952f-342bb383f878@gmail.com>
-Date: Tue, 7 Apr 2026 14:56:39 +0300
+        d=1e100.net; s=20251104; t=1775564146; x=1776168946;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=I+WojEMYC6/0fW7pAb7QL78xV/89mZ067SHdrUCnECw=;
+        b=NDclh4BxaNvpVFcfo6H7d1fp+F7/GFX/r++I+I/hxKfVWvogw0f8y15RgeO61h+peE
+         zqmRQPoCqPHtZkfzdFjUa8A6Y1ifmoV10EhjkJW6yGjF/BAEvuqnLqwfryAb52wZKzLR
+         IIwZySflefmPteb7tE68RfcJSwN/sOs5lhN4k1qevIEA6F1CtulinIsvozSl83F0AT7a
+         /bWF+HmxcYFjAtJvY3QIDjud5MKfV5XsbMsg7/s6qS+1HCRe2eRrDfNxwn9vzcAB5aJv
+         yOrByhjrLgBxW8nx4e6h2vHyCF2gpVX4UEYoK24Ar4K5IhD8VXlTZ4k8sSLRZyPMiEM6
+         ruZQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUHUJc6g2xxDxPOEQUXCLHSqxM8PfCpzGcufAs8cE0Uuf37iv5ojucG687XQxscnCxd08ceJF0Cpos=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywhp+MbGCiHOHqtl3FwU2SEvUsVny7AR5MUdNoDWas6vPRptjtu
+	UsR7z3hgjrynnevoqqKNIzq/sAQLRuaeFZ0xuBDx+d3IQ9pPOkBl0mFU6a85lUD7vqd6hWYUJ1N
+	P0kS4
+X-Gm-Gg: AeBDieuE7IgPDQ0yHwPJMabXXVfdSHDbsygyy9F9Q6XO54wXE0F+NFbw0zT2p8vpUiJ
+	rdhFPvDZOzbNc55N03KZNtAR1GBtfhYt5y2PQr72R4IbTx+eTJ7X1SlCNbeG7OFBLJeEO5UkTzJ
+	7CAR1u4hjAOaGrMUZrAoasv8Uf23i/2tN6V+LltEj61zymyH0UayCsGU4cpcbbIx00B8TQc2hra
+	c5t3F9ULqaFkdVUq6NkxUX2xpB8Df7azx8jdqNRZ6OYtLojSRib6F5D9OSev6Om80hUIWZSkkL3
+	naGL6KcHeGZxHOoKHE6/celBzCv6Me1i0jz9ohd4RWLlt4ocQCBbqimCZZyJ04W1xVVxYHVANb9
+	Pmlt0DgoDYdZuO+WvnPbi/Rt8CCokni+7fL54k4tfQL9vY+JgjU7/Uw0hJ5rBqawiZHvFyehi/I
+	NypfbLeqdUF29UkbleMcQDjAoX9Q/X2xplXoZD6PvF7W891G6gaEpcxhGiR3kCTcuQ4dytqB8QW
+	GV6+w7U6mE=
+X-Received: by 2002:a05:6512:1088:b0:5a2:c199:45a7 with SMTP id 2adb3069b0e04-5a337552810mr6556311e87.5.1775564145863;
+        Tue, 07 Apr 2026 05:15:45 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5a2c6cccd2dsm4025361e87.67.2026.04.07.05.15.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Apr 2026 05:15:45 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-pm@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] MAINTAINERS, mailmap: Change Ulf Hansson's email
+Date: Tue,  7 Apr 2026 14:14:53 +0200
+Message-ID: <20260407121458.252451-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Content-Language: en-US
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- rogerable@realtek.com
-From: Greg S <grigoryya@gmail.com>
-Subject: [PATCH] misc: rtsx_usb: reset chip on resume to restore card
- detection
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-After S3 suspend the Realtek RTS5129 USB card reader loses its internal
-state, but rtsx_usb_resume() does not reinitialize it — it only wakes up
-child devices.  As a result, the first command sent to the chip after
-resume times out with -ETIMEDOUT and the mmc subsystem never re-detects
-the card.  The SD card (mmcblk0) disappears and does not come back until
-the next full reboot.
+Change my email in MAINTAINERS and add a few entries in mailmap to start
+using ulfh@kernel.org.
 
-rtsx_usb_reset_resume() already handles this correctly by calling
-rtsx_usb_reset_chip() before waking children.  Apply the same logic to
-the regular resume path.
-
-Tested on a laptop with an RTS5129 (0x0bda:0x0129) built-in card reader
-and a 128 GB SDXC card.  Before the patch, mmcblk0 was lost after every
-S3 cycle; after the patch, the card is reliably re-detected on resume.
-
-Signed-off-by: Greg S <grigoryya@gmail.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
-  drivers/misc/cardreader/rtsx_usb.c | 12 ++++++++++++
-  1 file changed, 12 insertions(+)
+ .mailmap    |  2 ++
+ MAINTAINERS | 14 +++++++-------
+ 2 files changed, 9 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/misc/cardreader/rtsx_usb.c 
-b/drivers/misc/cardreader/rtsx_usb.c
-index 2b3ae2914ec8..f1a3b5c7e912 100644
---- a/drivers/misc/cardreader/rtsx_usb.c
-+++ b/drivers/misc/cardreader/rtsx_usb.c
-@@ -732,6 +732,18 @@ static int rtsx_usb_resume_child(struct device 
-*dev, void *data)
-
-  static int rtsx_usb_resume(struct usb_interface *intf)
-  {
-+    struct rtsx_ucr *ucr =
-+        (struct rtsx_ucr *)usb_get_intfdata(intf);
-+
-+    /* After S3 suspend the chip loses its internal state and needs a full
-+     * reset, identical to what reset_resume already does.  Without this
-+     * the first command sent to the chip after resume times out
-+     * (-ETIMEDOUT) and the mmc subsystem never re-detects the card
-+     * (mmcblk0 disappears until the next reboot).
-+     *
-+     * Affected: at least RTS5129 on several laptop models.
-+     */
-+    rtsx_usb_reset_chip(ucr);
-      device_for_each_child(&intf->dev, NULL, rtsx_usb_resume_child);
-      return 0;
-  }
---
+diff --git a/.mailmap b/.mailmap
+index 2d04aeba68b4..22c5ab1c5d55 100644
+--- a/.mailmap
++++ b/.mailmap
+@@ -849,6 +849,8 @@ Tvrtko Ursulin <tursulin@ursulin.net> <tvrtko.ursulin@onelan.co.uk>
+ Tvrtko Ursulin <tursulin@ursulin.net> <tvrtko@ursulin.net>
+ Tycho Andersen <tycho@tycho.pizza> <tycho@tycho.ws>
+ Tzung-Bi Shih <tzungbi@kernel.org> <tzungbi@google.com>
++Ulf Hansson <ulfh@kernel.org> <ulf.hansson@linaro.org>
++Ulf Hansson <ulfh@kernel.org> <ulf.hansson@stericsson.com>
+ Umang Jain <uajain@igalia.com> <umang.jain@ideasonboard.com>
+ Uwe Kleine-König <ukleinek@informatik.uni-freiburg.de>
+ Uwe Kleine-König <u.kleine-koenig@baylibre.com> <ukleinek@baylibre.com>
+diff --git a/MAINTAINERS b/MAINTAINERS
+index c3fe46d7c4bc..7167dcea737d 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -6716,7 +6716,7 @@ F:	include/linux/platform_data/cpuidle-exynos.h
+ CPUIDLE DRIVER - ARM PSCI
+ M:	Lorenzo Pieralisi <lpieralisi@kernel.org>
+ M:	Sudeep Holla <sudeep.holla@kernel.org>
+-M:	Ulf Hansson <ulf.hansson@linaro.org>
++M:	Ulf Hansson <ulfh@kernel.org>
+ L:	linux-pm@vger.kernel.org
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
+ S:	Supported
+@@ -6724,7 +6724,7 @@ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/linux-pm.git
+ F:	drivers/cpuidle/cpuidle-psci.c
+ 
+ CPUIDLE DRIVER - ARM PSCI PM DOMAIN
+-M:	Ulf Hansson <ulf.hansson@linaro.org>
++M:	Ulf Hansson <ulfh@kernel.org>
+ L:	linux-pm@vger.kernel.org
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
+ S:	Supported
+@@ -6733,7 +6733,7 @@ F:	drivers/cpuidle/cpuidle-psci-domain.c
+ F:	drivers/cpuidle/cpuidle-psci.h
+ 
+ CPUIDLE DRIVER - DT IDLE PM DOMAIN
+-M:	Ulf Hansson <ulf.hansson@linaro.org>
++M:	Ulf Hansson <ulfh@kernel.org>
+ L:	linux-pm@vger.kernel.org
+ S:	Supported
+ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/linux-pm.git
+@@ -10729,7 +10729,7 @@ F:	Documentation/devicetree/bindings/i2c/i2c-demux-pinctrl.yaml
+ F:	drivers/i2c/muxes/i2c-demux-pinctrl.c
+ 
+ GENERIC PM DOMAINS
+-M:	Ulf Hansson <ulf.hansson@linaro.org>
++M:	Ulf Hansson <ulfh@kernel.org>
+ L:	linux-pm@vger.kernel.org
+ S:	Supported
+ F:	Documentation/devicetree/bindings/power/power?domain*
+@@ -18089,7 +18089,7 @@ F:	drivers/mmc/host/mmc_spi.c
+ F:	include/linux/spi/mmc_spi.h
+ 
+ MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM
+-M:	Ulf Hansson <ulf.hansson@linaro.org>
++M:	Ulf Hansson <ulfh@kernel.org>
+ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
+ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+@@ -24696,7 +24696,7 @@ F:	drivers/media/i2c/imx415.c
+ SONY MEMORYSTICK SUBSYSTEM
+ M:	Maxim Levitsky <maximlevitsky@gmail.com>
+ M:	Alex Dubov <oakad@yahoo.com>
+-M:	Ulf Hansson <ulf.hansson@linaro.org>
++M:	Ulf Hansson <ulfh@kernel.org>
+ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
+ T:	git git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
+@@ -27615,7 +27615,7 @@ F:	Documentation/fb/uvesafb.rst
+ F:	drivers/video/fbdev/uvesafb.*
+ 
+ Ux500 CLOCK DRIVERS
+-M:	Ulf Hansson <ulf.hansson@linaro.org>
++M:	Ulf Hansson <ulfh@kernel.org>
+ L:	linux-clk@vger.kernel.org
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
+ S:	Maintained
+-- 
 2.43.0
+
