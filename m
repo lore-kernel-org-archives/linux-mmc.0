@@ -1,168 +1,265 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6A5C3019BA
-	for <linux-mmc@vger.kernel.org>; Wed,  8 Apr 2026 04:24:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775622250; cv=none; b=S2o9DNdkudO/qGQg4qvuyXu1JBp04h26qRTknb36zi92qZB51baixwH6Loc3G+84rkouI5lHlt3rZo5xXGUsHM/B6gm6xfFLl2lqP2vYgEMPnuw/d9H8Ux324e+Odg+Vn6Lkd9rhHj3RD8WkV1BZ7uF0Kox7c2WQapJuvEMtY3k=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775622250; c=relaxed/simple;
-	bh=IJOgYgOKLfzsduMNOuNRKBK2CZadWAfXKCim+jSb6Mw=;
-	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
-	 In-Reply-To:Content-Type; b=aoQgOdxBwf0JGCR4rxdLmztGg3oHqaJ+vlF2Uet6nVl5xgBFVbQIMnKdoNq4oYXfwfG8PUCENPtDZSaaWuROzgS/Ezid0oB9TN1CgeAHp4x8+fjs1VrMNThg4VKAVV3pC9rIjiwBAu3RVU/QWV3OPuP2qX2zrjVqs1qoYhjLRbw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=KWJ1oFDv; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=dj/acHfi; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB14434EF03;
+	Wed,  8 Apr 2026 05:06:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.9
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1775624797; cv=fail; b=EW5pGwryZLBXXDnOEnD2aaE8DrqEPHi7r80rUwX5uUSQVnjed6kADeXYfCIZWGzp/kIv4HvSRbF0GnBEz0aioPYyJQJE41NY5e6eZ7nRqrJrLGQGo8lI7AgWljVidC8ceKFMflYl/kysZfKXse5/5jKw187DYC/uN0dT0tFNiuA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1775624797; c=relaxed/simple;
+	bh=UDF+ZSu3wWOQ/sIS13oW5JePTdYGjxdwNT98lQkDPig=;
+	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=uebC4LkF2jFwVfoUGWc4r58TVi8jYYM2XPQeDAnq8t0nCIKi9keYM8BlH/0dvSe7BxLwge7io4jC3fAub+wgNiItETvBvyrdwMLV+TtYsAGeUGq63+Hxjmp6XA5AYMUoUCVSigC/3YX1dn9gWd+1ny+5YfTVr51a4B/JJBxfypU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=bvZr+7AH; arc=fail smtp.client-ip=192.198.163.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="KWJ1oFDv";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="dj/acHfi"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 637M4PTN2860735
-	for <linux-mmc@vger.kernel.org>; Wed, 8 Apr 2026 04:24:08 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	PbbVj97jX5V7I3ImftwwIPW7XZwhvJYdUHnJ5ygLavk=; b=KWJ1oFDvBOEaTnhR
-	BWmB1yLCX5RwdWjYBaEOGjFZFIDqkb8Oz6GLfMN9BBOC7FtR7ZspZqfxiOnvWH59
-	/iQc6FMDBeRamRknp7VJNNWfBbpIe5DkQme18WyLa0w4CqSWky1+2XwXCKiKslK1
-	bI2MES2PDg4Fyt5eUyL0/kHWzX3f+F0XLL2pqCC2idhRAaih8DbE2F0uanY76TRp
-	4aVH8X0lQC9OtcLB9I5KcXHTdYRsZk8JaWBr5OS34Iy/9wAXQWq0GocGPFq9HBSm
-	G9TivZd/0fZXx75KMp13yMT4C88mGY9ZyBXuuXOqiSRsp6WEjfp1KoPrRWqGVSlI
-	VvET6Q==
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com [209.85.215.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ddad8rx6x-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2026 04:24:07 +0000 (GMT)
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-c76c2bb3149so349543a12.1
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Apr 2026 21:24:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1775622247; x=1776227047; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-language:in-reply-to:mime-version
-         :user-agent:date:message-id:from:references:cc:to:subject:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=PbbVj97jX5V7I3ImftwwIPW7XZwhvJYdUHnJ5ygLavk=;
-        b=dj/acHfiAJNkPMNOt28IUVg/46tuwCEJy2tFE54ThTD2nQBnvjYYtSWEKZWpDC+Ksp
-         /dk1h/0PxqfQiCtoaVzBhjrG7els0cHWw4VZ/NJLgifpFcHQH0ai5Aj0+faOASz1aPrz
-         p7rMVDo4UlYRVb4khP1hP6Wd1pgnZEjwz9lvYQRG36KNkGwl1serWXc8tGems3Hv+nv9
-         L08Z5vZvWfaWEVeG8A1A/1zEmWVJnH4POLhNgZn2KjjxsbSHVxMZ//AVRwZBtqW7cLLK
-         MQ7EEraesKTGHRylKqGcbu1dekMlS0MDVfioViE+JXIrTbwe5P0Cqu2+pJVBSqg6NIgX
-         2WXQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775622247; x=1776227047;
-        h=content-transfer-encoding:content-language:in-reply-to:mime-version
-         :user-agent:date:message-id:from:references:cc:to:subject:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=PbbVj97jX5V7I3ImftwwIPW7XZwhvJYdUHnJ5ygLavk=;
-        b=DnAB4h4Dl3P5ODaBwQmV9RWByBfXb6fuqs36hWAW7zgSPecWh5uiQxV5aa/sTKVZNt
-         u8xDCEObWpjmCJPePAqFY9YlXR9OM/hIf1Y+E6tsC/eHKAZHVEq1Ggt3bxnzXC5v2bHM
-         LOoYaxmu12dKOz0WTKzsM+ISRRuo7JPld215xi3URCO5rOEjC+aALJsRhkenYr+dsQI0
-         XChKaNSYTWzlUC7VGLyPApGBkcORK5ZlN75NKcPJCjAFIg1eBSZCUSUcafutLdj1ySu5
-         SPV9QMFT/3BvpFzJSRwKKRUr29eRyx4aLfLk2TY7l1qourM+FNy9aOlpQMHqeCLMUXLX
-         UjjQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUV+30t8YZmzWbJnngxez4OTJXY3AoHurPXUE2Crfav4eCcewCreIpvRPQMeHAd1NdcTP0m6Gi2uoQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwlJPFBZLNVVjX457Pz5YRJWvk8JQ0HwivQi4gAHTxeYD0xq8M2
-	B5ykE1rNKEMlKobkR8lYPX2G+lUlVEpW8WGupJChr/l8oBS2yK8Rqe1bRoNgpoqYMQ6sEMa3vYk
-	P5MIr7twOlLPgved2+1Ii0gqbnqVPDUEWB2RKnq6IbtlE+fUpv1d88BRBoyQkQ24=
-X-Gm-Gg: AeBDies0911y9l9vCAOnSW57RwNZDec2jgvMtVxzi2sQ8vKE/TJPfsw1pTZwq7TxgRg
-	XRC0KCS1rLy8Y2U1XZS/VTgB6MRPuB6MIDh2r6XoM+oAhK/35sLDecXOrBFSDp5BhJm230505w0
-	qey9wXpbkBzJd8hKp7GKsU5i6aokS3Hxk/FrsUkRRo8zdH91nn+NzNMzQzwoewxi9aU2PIkiGHB
-	wyoyjMdPBV+rU7h2ex/P7wbZLC3CygmJ1tQ28/UHfwFxPkcDzyNWJHqncUSBCSOljsIGaWYb9Gn
-	C3/dGSa+bhDyBpt0WgWab5kNN9Bntwpu53mDk6F65ZxDMBEQVriyZyIfst83DxUREZeNzA9tI3W
-	zXDzf0ELaWbC1I2k3XncudyAvX4RVnrGwcia0KYJsD/YmHoKRUA==
-X-Received: by 2002:a05:6a20:a109:b0:39b:897c:6f8d with SMTP id adf61e73a8af0-39f2d9e7529mr18743270637.16.1775622246693;
-        Tue, 07 Apr 2026 21:24:06 -0700 (PDT)
-X-Received: by 2002:a05:6a20:a109:b0:39b:897c:6f8d with SMTP id adf61e73a8af0-39f2d9e7529mr18743247637.16.1775622246199;
-        Tue, 07 Apr 2026 21:24:06 -0700 (PDT)
-Received: from [10.217.222.63] ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c76c6563597sm20655477a12.16.2026.04.07.21.24.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 07 Apr 2026 21:24:05 -0700 (PDT)
-Subject: Re: [PATCH] mmc: host: sdhci-msm: Fix the wrapped key handling
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-        adrian.hunter@intel.com, ebiggers@kernel.org, abel.vesa@linaro.org,
-        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20260403105949.1007447-1-neeraj.soni@oss.qualcomm.com>
- <x2mmttyg5t5qjo2tyrwqbynqylqqlulu7fhoyxl7vd54geubqx@qna6vzzr765y>
- <dd2c0522-91bf-5375-f5b6-7c9ff5304fe7@oss.qualcomm.com>
- <CAPDyKFpXRPx2Z8Ro3f3BU3ApEn3rHtXhkO09-qjGjHwSEH5dmg@mail.gmail.com>
-From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Message-ID: <f87029b9-eebc-a947-dfb5-1ab27d9b54ac@oss.qualcomm.com>
-Date: Wed, 8 Apr 2026 09:54:01 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.1
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="bvZr+7AH"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1775624796; x=1807160796;
+  h=message-id:date:subject:to:cc:references:from:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=UDF+ZSu3wWOQ/sIS13oW5JePTdYGjxdwNT98lQkDPig=;
+  b=bvZr+7AHsXzZaFTuSmiywgwBaux1e+BVz/1s4ZUCcOwk0AUJCOKU+0Gg
+   lfxfcuxXVGuiHB/eHbnSYATz8GUb95bLILQM3N7h1SKTS0WpibWJ3IH9e
+   MWx1PiBGp5h9dP4F/AscwTpph4fjIrVkz0qgYvEL4NWG1FwUCeLjiaMSo
+   /dOCr92cSunHhiQAfJprh3ljeayGDfxlS+LQ56rYmqvyNQS9qCxDqPE2m
+   2koppzvG58zpdtVDe4zscxM0jruhINtdIoKG32QXPvTICFkyiDC6iJtmp
+   qq8j4+4IBAWm53FdOosW+Uj8pbouypDeJmDTGobIDk+3uBZr0cwzYexr7
+   g==;
+X-CSE-ConnectionGUID: b8PbC019TyqXBlzDnbbscw==
+X-CSE-MsgGUID: HHQ0wvHjS4OQeHf6OBYoJQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11752"; a="87296648"
+X-IronPort-AV: E=Sophos;i="6.23,167,1770624000"; 
+   d="scan'208";a="87296648"
+Received: from orviesa010.jf.intel.com ([10.64.159.150])
+  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Apr 2026 22:06:35 -0700
+X-CSE-ConnectionGUID: 2JtG/FE3QMmw0oHaydmj5Q==
+X-CSE-MsgGUID: 7vAFbn10TOOs5cU+oeGw/w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.23,167,1770624000"; 
+   d="scan'208";a="227529216"
+Received: from fmsmsx903.amr.corp.intel.com ([10.18.126.92])
+  by orviesa010.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Apr 2026 22:06:35 -0700
+Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
+ fmsmsx903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.37; Tue, 7 Apr 2026 22:06:34 -0700
+Received: from fmsedg902.ED.cps.intel.com (10.1.192.144) by
+ FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.37 via Frontend Transport; Tue, 7 Apr 2026 22:06:34 -0700
+Received: from MW6PR02CU001.outbound.protection.outlook.com (52.101.48.29) by
+ edgegateway.intel.com (192.55.55.82) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.37; Tue, 7 Apr 2026 22:06:34 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=TqminqEF9dvF2KRyml0yBxCM31wSKTnkBN2FnSBCOFyOGiK9XHvKVCk2AavDikNf0pHOzg+PCnY9ewO6clIV/VPZVLr7ulKuEN7adVUBUQWprY2ra/EkazSJ/FvlXB7fEwbIajVD9ZXYJsK3R1gOH2E72Yq1DxhuFnhcDF+zT80x0ehnc1WP888ROIAKZt3EZwX07pwe2oYm1b9Ap3bOZH8EZL8zi2uo7OeuGCPPRI5dPnBO6+0HupfESmmd5P0j8IGt4P7V1HRwC+IyTip4Qf5CstCFrXzzCS8ycM+fv3iiAehb/tuqmShgC964wPj5bj8LH/cgYojoTJYhiPAQ8w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=HqfMg8nO0ssuhgkf80Vec1maSncTfMskPd6dMhOy2tI=;
+ b=KMK9qMh4w8G3S+e/gStYNfL4nOqzUwnNk6xCHBn06oQV+AJ8efgMO6Psr+EOB44klxm2zPn+Q9bSnhuA2g4zfX7sG3M/zeEF/AqDQz5Nr3riuqeB2y2+Hg00xOmWozP5kIrIf3lR1+yYfygcFJZF1MwRH9/AIBaTy9NhqUGYQXYlPL3rZeBBuzLtPsvyis+xNEuEwI7DHMyKjlGlwX0ssTZxYvE7n0Ubb0mBkj+FTY89tIt+jK3Ppa0GbtaQdyrQZjjPfRY3oif198kxWLV7ykOXA1VfyZitfiJY9a3Y0wtBfgMQRHq8Kon/GAYHt21eSRuTNekielzKJVtVt9yqOg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=intel.com;
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
+ by LV8PR11MB8486.namprd11.prod.outlook.com (2603:10b6:408:1e8::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9769.17; Wed, 8 Apr
+ 2026 05:06:32 +0000
+Received: from IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
+ ([fe80::2c4e:e92a:4fa:a456%6]) with mapi id 15.20.9769.015; Wed, 8 Apr 2026
+ 05:06:32 +0000
+Message-ID: <e443c467-0d10-41e3-9195-793ad8d34662@intel.com>
+Date: Wed, 8 Apr 2026 08:06:28 +0300
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Disable clock before DLL
+ configuration
+To: Shawn Lin <shawn.lin@rock-chips.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-rockchip@lists.infradead.org>,
+	<Stable@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+References: <1775014742-233407-1-git-send-email-shawn.lin@rock-chips.com>
+ <da3b1b9c-fb92-4408-bb5a-485c050f7c60@intel.com>
+ <a9c5d50f-b09d-2aa6-56e8-788675a7a8d6@rock-chips.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
+ 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
+ 4, Domiciled in Helsinki
+In-Reply-To: <a9c5d50f-b09d-2aa6-56e8-788675a7a8d6@rock-chips.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: DUZPR01CA0004.eurprd01.prod.exchangelabs.com
+ (2603:10a6:10:3c3::20) To IA1PR11MB7198.namprd11.prod.outlook.com
+ (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFpXRPx2Z8Ro3f3BU3ApEn3rHtXhkO09-qjGjHwSEH5dmg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-ORIG-GUID: TWxZd81mV5-TwcO7_9P7GjGTQNIvU0xb
-X-Proofpoint-GUID: TWxZd81mV5-TwcO7_9P7GjGTQNIvU0xb
-X-Authority-Analysis: v=2.4 cv=EoDiaycA c=1 sm=1 tr=0 ts=69d5d867 cx=c_pps
- a=Qgeoaf8Lrialg5Z894R3/Q==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=IkcTkHD0fZMA:10 a=A5OVakUREuEA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=ZpdpYltYx_vBUK5n70dp:22
- a=VwQbUJbxAAAA:8 a=EUspDBNiAAAA:8 a=asX3J4iNEGbadXDLWWsA:9 a=QEXdDO2ut3YA:10
- a=x9snwWr2DeNwDh03kgHS:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDA4MDAzNiBTYWx0ZWRfX0tlZ7GQ7MwBK
- 0iztxtyHL+0ni6WYzVIKlIm2Rs+gEIZlmPzi0+gtGmRYR90XdQBG+lmgfVmQEj7ieZ+B4Zn22gZ
- q71KhvD+fp3UFawvuklR3/418nHFPxc4+ydKIa0pr0sBavgWFn/l/RI/wEbuZs0V/lLgh8CJF3E
- Ix0OStlwThFt5awm6VfA5NAXM+PHBq5zaf68uA6+s72Y/AWEwbjn3LLtHU+MA7d015mS4EBsbR1
- BuXhj9zzOoCtPnF5K1HLmupYGNUAI5ohIpJYd5Q64PI1VJUmvAU+6eXis8K9PsdNYty0ftzGcK6
- ZwtSDB3EwgcfEijyhf0l+vHuPI6oRoV03Bd27cEGxgAYvPJ1uEUXV+23+YVgaS95K8pGESnNM8v
- XSP9SiRgZ6gaGrRbyLFw0vSj3i65LujKQx6paTcQQte0RVyx3KmVwHHxdPTgdj9R/8BHkcJMCZv
- atLEkBrh2MkQ7VdlAiA==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-04-08_02,2026-04-07_05,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 priorityscore=1501 spamscore=0 clxscore=1015 bulkscore=0
- malwarescore=0 impostorscore=0 suspectscore=0 phishscore=0 lowpriorityscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2604010000 definitions=main-2604080036
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|LV8PR11MB8486:EE_
+X-MS-Office365-Filtering-Correlation-Id: 9dc87dfd-1ef6-4631-04c8-08de952c99d4
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|1800799024|366016|18002099003|22082099003|56012099003;
+X-Microsoft-Antispam-Message-Info: Xkl3e9QuLGje7C7iSxOHgXuuSSmka8U+yrhXveeg2ZqCtBafNUK9p5jsrB8GlHlhSs3uSsSd4D0i+jJKUsxrpuAI9Oh38HrhS9YVtX08HNgGS7qFHE+pNY3aIsjgdBSaZgJ5C+vJlkXenziBOl9aUhq6PHJZr4+Y5I9GFu4K6pPwGWiRNSu5nA8vlPayU/IYonJz74gptsO0wvyH1QdpSYM5ZFdBOH8bGhAdUmGDVbPOuQZk/myfi8xdYkNXxpudlVEfFmfqeCm6JcWN9M63WmweCDfp5lphsZw0QpQgijt6HbNaLIMinwtmaD1Zn+iyNrkO33n7IJqenXz1+zBMLLI3fS0mAEYMm7kjmKwv15NCwqRnjqPWORLUaNuLENM6l0UlgoNRS7vyKJJ0cl+gT2Gj3ViHrzd6VOF6IhsoiQ8X6l863AiEqu6e1V4VBdlKx+77VhWXfdJzyDwD/aZ86kpJ85caSqU1/JjSQUACpFkORwz5nz/XKPWSDnZiF3LgO3ItFMWUg94RENWjvSmJWrMLY8kmD+lRh7WZ4RuOYg4tbH586nICr0EQNSxZjMQxgdeoNTfFWQqBYcd8g2353LfgB7bGpvcTVZpPgkucAc0BmGGRP2sCB6+KsHPCc0yLr+nmLjnSFooYIx5TUh4gWePrlMaiPcycxgsvHBQwsImp8oJV4RSsSHC2xm/d/WWvuAE2Q6wZetpfNq3bYa2OvZgjCSS39XYwGcEgfvQQwws=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(18002099003)(22082099003)(56012099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?M2VPQ29lcTFmUXl1d1dLcWljd0NWMmludFlTMCtTS0VnRkdDaStYekVrQ3h1?=
+ =?utf-8?B?L3UvNzVvZ3pHekZIdENGTFcvR2lkdmlYbmhvVFcxNWlyWmJxWUdwRWdtaVpB?=
+ =?utf-8?B?RFd1TzhMUXdTRGwyR2tnTGdqWk4veVJrdXZ5VUZZVlhWTkJpNHE1eU9IQ2RN?=
+ =?utf-8?B?TkZlSUkrUWJ0dXBQSGpMbVdxMEYvUC9TR1p4TnBSNktpYktPYVM5WERLTUR0?=
+ =?utf-8?B?emNGTkwwMklndXlseDZkdVR1TkQ5cnpFY0xZZ1lnSEI3RVJ2Z1hrTDVYVlFj?=
+ =?utf-8?B?cHY5TWQ4ZDZmUDM4djJlMy9MVkFZMHNVNmtFYTUrR3lLMFdpeUpPdjE3cWNX?=
+ =?utf-8?B?WTRHWW9kbUE1Y2NUcUd3RjR3TGEvd3hzMHAybll0RndZb3E1eVVHRVgzZ2F5?=
+ =?utf-8?B?aEZyR1VlOTd3SGVqclRLVklFcjB2dWJ0ZjZxaWZ5RFpraDlLWlhoaDhNQVl3?=
+ =?utf-8?B?Z2NJelhvTkk0bE8weU9BN1RUdTRVWEhRMGtpQUZuUS9tbm9YR3hDb3hscnFT?=
+ =?utf-8?B?MVQ2QjB4RldhTi9uQUlxbXdsS2htL1UvbVRZQnJodkNwdktDUVRLYjlObGEz?=
+ =?utf-8?B?Y3g2YzJaTjQvaHFhQ1MyQzFZQjkvVWVGOXM5MURoTERYRGdOcEY5Q2ViMVVq?=
+ =?utf-8?B?MFpzNUVsOTg3RDJSSWV4dHd1eEZERDRTWmhWOEpCNmY4Z3I0RE94Z0dzVm9x?=
+ =?utf-8?B?NlZPcktYUWxZVlQ2L1FVbU0rVVVmbkEvQ2VrZUpHTnc4dkloUGNBMGFMWnI1?=
+ =?utf-8?B?cCtyQmx2VVF0cG1XWlNmd1lnbE1NN0NnRVFiMElKcmc5b0F5YXN5dkhSWGdn?=
+ =?utf-8?B?d1VORDIvUHI5Qk04M2lUL2hMWXdLb2JUZHltU3FPeU1HeDgycXk0N09nVzdK?=
+ =?utf-8?B?dzdOdGpBa2RRV0ZiekZTOEcyVkVDU1JpL0FGOEprRW8rWkJwMURUcWMwNlk0?=
+ =?utf-8?B?amRkb3FvajQrdTA1Si9vSzdjRmFKSCtWT01tN0JDdHpsZlEvbDYvWk9uVmR0?=
+ =?utf-8?B?eFVnb1hGRElUZHVyVVFhUFdRTVlwTFk4eXdNNy9EVUErbWtlKzZKWDIvZXgz?=
+ =?utf-8?B?UVp2RzMrbE9Cd1EwQm03RlpoVVZUc2dCRklYQm9GdHNzd3JPcWdmU2hXZ0FW?=
+ =?utf-8?B?TFZqeUZ4L2ZZTjNDeC9kZmx3aXhkYmljbFFFcEhHVmlJd0FSMU54M3dpdmhh?=
+ =?utf-8?B?VDlqYldQMGtuY21mWTBQZVNNTkJ5WlpUeUN3RjI5UlJPVTc4K2M0Y29NTGxX?=
+ =?utf-8?B?Q0JibWx0czhoRzQ1SFdJb2NrSWR6YmNCTUFxbi9tQXI1amhUOTRyZjIyRVJm?=
+ =?utf-8?B?dlZ4Sk1paGpoaEhnSmlKdmJEM0dIcHRtVjhDdlpqYUZvU2FNT0d1S3NxaE9v?=
+ =?utf-8?B?a0NNNWVEQjcydTM3N0dCb0JWOEw3anNrTFRndEZTVmR0L0tVSGd2UkQ1aTll?=
+ =?utf-8?B?QVFKMXlWRVJYb2pPUi9kOVlhakpsUll3VFd1NnNsV2ZQNnNrSHd0UDZQTnA4?=
+ =?utf-8?B?enFPRCtCRzJyMUk3MFBOcGcwUHlrNEZ3eFlrWnNZbEFXUURCanVRSlJ6V0ll?=
+ =?utf-8?B?aVN0aFh6L1dpWGt3TVFzVFVTMzh2cStZSUpSS0xmeElMSGNmNnU2dHpGQm9y?=
+ =?utf-8?B?UmNzVGIwVVF4UHM2ZlJhYlJOTDFUaTZra3FVQml0cWhaRGplV0RTcEt4eUE4?=
+ =?utf-8?B?RitTMXpqcjNwOHJNZjRjV3huQVA1Nk1tMjFhZTA3TVFEYkpRWUEyaVVsdU5m?=
+ =?utf-8?B?UVMvZFhFZmlCV1pSUXZNdVVKQW9NRG1sSWR5UkRnQ1VSbTRSdmNwWXNFRWxW?=
+ =?utf-8?B?SXZiaml6NDZRR2FRdm9NMWgvMWZIWDM0cDRMV240bFNKVkg0K2M3V0luQVlD?=
+ =?utf-8?B?TVRreTErVmFUQzkxVUVCL01IODRnMWtjcW9DM1g2KytQbHVDWDlPbjhXckEx?=
+ =?utf-8?B?aFdXczNuaURYN0RTbjIybTR3UU9pS25ZcHNBdjZUcVg2Zm80OUREbXQ3VS9v?=
+ =?utf-8?B?cEpSU2RtdWJrT0N0TGUxenM2akIrTVQwQ2Ntand0U3FRY3FlU2R5b2RnclJV?=
+ =?utf-8?B?OWtyUmRsblZIUDJGUmIrbzZiYnBYM1VPa0ZWZmtRUkNHdmFOTUZmSzYrMUNQ?=
+ =?utf-8?B?anQrcnQ4QzYvVU85UlBxeGc1OHMrbmdaOWVycE5nRFBiS1QydnRTaEptWWdH?=
+ =?utf-8?B?dUdRRzBQQTRRZFhLUm5qSGZMbUZMWGEwK2tuZzNUS2d4bkFabGU4UmRzSzdw?=
+ =?utf-8?B?VUk0Qlk3S2VSWDdDR1M2TkZkY2MzbWZ1WTVGL3lpTzBnR1lCQm5haG92Q3VV?=
+ =?utf-8?B?aHZHSUFHSy9rVmE3clF4UjNjWWVrcTFON0IvWkI0MHlHaHd2Q3ZUbFBlYnM5?=
+ =?utf-8?Q?j7IlM0iaOoBzlhtI=3D?=
+X-Exchange-RoutingPolicyChecked: Z92HDS41sbrKstmrTLP5lP3SvMAiaesHFuTln+AyO2P39LJ+768g+iv9uhFR/ObzIp3h521EYqtEdgG4HPBLcL4oh+uJkgptESo1f2IcZfTkRYKlDFXbnrqPPcV9YBSecPTELSIHJyAaY3qlnLWN1ia4Xuj9AYREQo18S2+UrtbKiUFli0Z4AxBOYYiRGNoAB29+WrXP/3EwhJiAs5fouVKcUlF5AJKcnHDYot/Khz5OnM9hawCZCCVQJPIbnW1MaOPYY6/FsieAZNyMwxizJUXv+p2z4QnaPMRpbTaaII1B/VG+wNj/A/RsaXyEI4sTHOslCKlTl+oQBb/UOpk8Xg==
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9dc87dfd-1ef6-4631-04c8-08de952c99d4
+X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Apr 2026 05:06:32.7586
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: YVtYBAvmKfvA9NywBIITM3ze00zlhU5X1flOIwn3GWpBHrnelGc2VUvRKyfk2vBoIW8vyQ72HvVhcyDNtYbHug==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV8PR11MB8486
+X-OriginatorOrg: intel.com
 
-
-
-On 4/6/2026 7:17 PM, Ulf Hansson wrote:
-> On Mon, 6 Apr 2026 at 09:29, Neeraj Soni <neeraj.soni@oss.qualcomm.com> wrote:
->>
->>
->>
->> On 4/4/2026 1:30 AM, Dmitry Baryshkov wrote:
->>> On Fri, Apr 03, 2026 at 04:29:49PM +0530, Neeraj Soni wrote:
->>>> This change was originally intended to land with the patch series:
->>>> "mmc: host: sdhci-msm: Add support for wrapped keys". The fix was present
->>>> till v4 but was accidentally dropped in v5 while rebasing.
+On 08/04/2026 05:18, Shawn Lin wrote:
+> 在 2026/04/07 星期二 14:38, Adrian Hunter 写道:
+>> On 01/04/2026 06:39, Shawn Lin wrote:
+>>> According to the ASIC design recommendations, the clock must be
+>>> disabled before operating the DLL to prevent glitches that could
+>>> affect the internal digital logic. In extreme cases, failing to
+>>> do so may cause the controller to malfunction completely.
 >>>
->>> Don't describe what is being changed or what was intended. Please
->>> describe, why you are performing the change. I.e. what is broken.
+>>> Adds a step to disable the clock before DLL configuration and
+>>> re-enables it at the end.
 >>>
->> Ack.
+>>> Fixes: 08f3dff799d4 ("mmc: sdhci-of-dwcmshc: add rockchip platform support")
+>>> Cc: <Stable@vger.kernel.org>
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>> ---
+>>> This is bascially a code sync with the downstream vendor kernel which was been
+>>> done this way and tested for some years to confirm it could fix the issues in
+>>> all corner cases.
+>>>
+>>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 12 +++++++++---
+>>>   1 file changed, 9 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> index 6139516..e3ae334 100644
+>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>> @@ -783,12 +783,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>>>       extra |= BIT(4);
+>>>       sdhci_writel(host, extra, reg);
+>>>   +    /* Disable clock while config DLL */
+>>> +    sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>>> +
+>>>       if (clock <= 52000000) {
+>>>           if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
+>>>               host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
+>>>               dev_err(mmc_dev(host->mmc),
+>>>                   "Can't reduce the clock below 52MHz in HS200/HS400 mode");
+>>> -            return;
+>>> +            goto enable_clk;
+>>>           }
+>>>             /*
+>>> @@ -808,7 +811,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>>>               DLL_STRBIN_DELAY_NUM_SEL |
+>>>               DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
+>>>           sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
+>>> -        return;
+>>> +        goto enable_clk;
+>>>       }
+>>>         /* Reset DLL */
+>>> @@ -835,7 +838,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>>>                    500 * USEC_PER_MSEC);
+>>>       if (err) {
+>>>           dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
+>>> -        return;
+>>> +        goto enable_clk;
+>>>       }
+>>>         extra = 0x1 << 16 | /* tune clock stop en */
+>>> @@ -868,6 +871,9 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>>>           DLL_STRBIN_TAPNUM_DEFAULT |
+>>>           DLL_STRBIN_TAPNUM_FROM_SW;
+>>>       sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
+>>> +
+>>> +enable_clk:
+>>> +    sdhci_enable_clk(host, 0);
 >>
->>> Also, likely you missed the Fixes tag.
->>>
->> The SHA-1 ID for "mmc: host: sdhci-msm: Add support for wrapped keys"
->> is not yet available in tree so i did not add the "Fixes:" tag:
->> https://www.kernel.org/doc/html/latest/process/submitting-patches.html#describe-changes
+>> Should this be 0?  If so, needs some explanation.
 > 
-> The commit should be available on the next branch in my mmc tree
-> git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+> Yes, passing 0 is intentional for the Rockchip platform.
+> This controller on Rockchip has SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
+> set, indicating that the base clock capability reporting is unreliable.
+> More importantly, the sdclk frequency select bits in the
+> SDHCI_CLOCK_CONTROL register are actually non-functional on this hardware. The sdclk frequency is instead set via clk_set_rate()for all
+> modes. From this point, all of the sdhci_set_clock() calls and in
+> dwcmshc_rk3568_set_clock() are also served as enabling and disabling
+> clk only.
 > 
-> commit fd78e2b582a0 ("mmc: sdhci-msm: Add support for wrapped keys")
+> Therefore, sdhci_enable_clk(host, 0) is simply re-enabling the
+> clock without modifying the frequency selection bits, which aligns with
+> the hardware's actual behavior.
 > 
-Ack. I will post v2 with "Fixes:" updated.
+> Technically speaking, we could save the previously calculated sdclk
+> value and pass it to sdhci_enable_clk(). However, since the frequency
+> select bits are ignored by the hardware, passing 0 is safe and
+> functionally equivalent. I could add a comment for just this line change
 
-> [...]
+Yes please
+
+> or would you like me to add a comment for the whole sdclk stuff in
+> dwcmshc_rk3568_set_clock()?
 > 
-> Kind regards
-> Uffe
 > 
-Regards
-Neeraj
+>>
+>>>   }
+>>>     static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+>>
+>>
+
