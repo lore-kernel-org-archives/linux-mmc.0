@@ -1,87 +1,130 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m15589.qiye.163.com (mail-m15589.qiye.163.com [101.71.155.89])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A37EE2D0614;
-	Wed,  8 Apr 2026 06:49:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5017E376BD7;
+	Wed,  8 Apr 2026 07:19:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.89
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775630996; cv=none; b=W2KlKCTIttHEcCNVxvgLdnL3RAAxROas3sphtlKT8JGfbBe8c35f9R5iOD/FW9PK/SVhbBiEROhb3GFb5jcEnx6G+ltz1h9bqPrYnOQG5w4y/4PinxGB/Tlcgcw0OlkyjWT5rTFdlP0UtWGrYarcISuo8HJKl3Bi6zW2YpWV7sw=
+	t=1775632780; cv=none; b=L6MAXiBKS34PVq52HCRS0h67Z+Uu9niEQMdYhRQJROF+Zax8Mk0O/+oOxRTaG7Lsh2z2Ib5V1TJVZ+vx6USXErcnzbOI3j5420/tY1B7hpLHbRm/tiLcjG5+CeLGSRl34sKJWjCbAkc0gNJQmJj1x7Hb+GKr5savv4giMnxNo6g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775630996; c=relaxed/simple;
-	bh=OJinugmxk3U59o8Evz03tGU+ZiGJ5IC9Tl/JyCwJolQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bcysq7uQnPr/tL6y70QiFFm2Q9CjbrYP/KRTAxpTpimdsWiPaUm1XBNzhyae+feXxce4gB3MK988TJmXC6Qw4sl8T1oOo3a6daDpKfEYti4N5F/r3yBIyBMoj9ZryddklYbGNg0OYk4bYNbheJkAIhfBD4/vYIFciTeG5siooio=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jefaGRsh; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1775632780; c=relaxed/simple;
+	bh=7d10MvpBn3uw3421odWrnrah1F+dm8qdAsjh3Lx3eHk=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=BW+8oxwkPD91URjw9Xr/tDe8VkgTd3gKTeoSeljNn99/5taSns8w0b1XAmE3qIcJ92fVw5oIFvIY2YJSw/O90MtALCWAQNCAcs9+yL5hQDMaGIWMlP2JQEHJpvYgLya63NtbzyBkK20r97GAt1EjSRoLrU/fM4BSs6kzq6uO9aE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=HwpJFewe; arc=none smtp.client-ip=101.71.155.89
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jefaGRsh"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 06413C19424;
-	Wed,  8 Apr 2026 06:49:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1775630996;
-	bh=OJinugmxk3U59o8Evz03tGU+ZiGJ5IC9Tl/JyCwJolQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=jefaGRshR9m/AZQS3dwk2dgYtMI7pdtGh7qqqUMcmxKabsrErngqg0ZVO44OaYXzE
-	 +QzXMZkBySSPouG04gvWI9a9iu02cWlGTekQeOuY84SgC0OJls3bBqXl5ccxu+lS6C
-	 gUMqCH3Ip3a7YKnV2THDOiT3OftuWa5rC/dg4Zn8EyCREDJpmAYEgEVkgtx8FxoCGU
-	 F5rZlAikJpGmcH4U2J4M3Z028Dh93XHh9GnbHZ+q9GiXkN8wnhjm7M+ICgM2pi/1J+
-	 pFDsNOEf91T0DV2W6iDagsJYMfFZCMsust1EcrKamzaEFqSAFFzOMvhLzVgSUM2Run
-	 gOVYtaqJ93Z7w==
-Date: Wed, 8 Apr 2026 08:49:54 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Iker Pedrosa <ikerpedrosam@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>, 
-	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Yixun Lan <dlan@kernel.org>, 
-	Troy Mitchell <troy.mitchell@linux.dev>, Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
-	Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v6 1/9] dt-bindings: mmc: spacemit,sdhci: add pinctrl
- support for voltage switching
-Message-ID: <20260408-nocturnal-talented-dinosaur-cbb9c0@quoll>
-References: <20260407-orangepi-sd-card-uhs-v6-0-b5b8a1b2bfc8@gmail.com>
- <20260407-orangepi-sd-card-uhs-v6-1-b5b8a1b2bfc8@gmail.com>
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="HwpJFewe"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 39ebf7966;
+	Wed, 8 Apr 2026 15:18:55 +0800 (GMT+08:00)
+From: Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-rockchip@lists.infradead.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Stable@vger.kernel.org
+Subject: [PATCH v3] mmc: sdhci-of-dwcmshc: Disable clock before DLL configuration
+Date: Wed,  8 Apr 2026 15:18:49 +0800
+Message-Id: <1775632729-22841-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+X-HM-Tid: 0a9d6bf55ae309cckunme35ea9d83d4adc
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUlOHlYaSB1PGENMQh9NSElWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=HwpJFeweu3R5NIP4dXGV70nmUH6gUix0s6DYkSoeUwkjebi60Nyr/pFRGzVcUq9tJ3urwxVFtcqYYZdY2HhGy4WkcySq1k6WMFmqVJrcijROnNa0wDP1JldRZ0R5tdNssXpBI8SwAw2raMY2odgnw6UQeTkhe4dFOVHbBtb53KE=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=tmO77fZlhTlVEPb/mMV3UB77aYxemzSiw2yLGeo3C7c=;
+	h=date:mime-version:subject:message-id:from;
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20260407-orangepi-sd-card-uhs-v6-1-b5b8a1b2bfc8@gmail.com>
 
-On Tue, Apr 07, 2026 at 10:25:21AM +0200, Iker Pedrosa wrote:
-> Document pinctrl properties to support voltage-dependent pin
-> configuration switching for UHS-I SD card modes.
-> 
-> Add optional pinctrl-names property with two states:
-> - "default": For 3.3V operation with standard drive strength
-> - "state_uhs": For 1.8V operation with optimized drive strength
-> 
-> These pinctrl states allow the SDHCI driver to coordinate voltage
-> switching with pin configuration changes, ensuring proper signal
-> integrity during UHS-I mode transitions.
-> 
-> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
-> ---
->  .../devicetree/bindings/mmc/spacemit,sdhci.yaml          | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> index 9a055d963a7f0cdba4741c1e3e7269688dcd5f45..932fccc609bf8dbaf3ecfe09d9e610852ac7afa0 100644
-> --- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
-> @@ -11,6 +11,7 @@ maintainers:
->  
->  allOf:
->    - $ref: mmc-controller.yaml#
+According to the ASIC design recommendations, the clock must be
+disabled before operating the DLL to prevent glitches that could
+affect the internal digital logic. In extreme cases, failing to
+do so may cause the controller to malfunction completely.
 
-Drop
+Adds a step to disable the clock before DLL configuration and
+re-enables it at the end.
 
-> +  - $ref: sdhci-common.yaml#
+Fixes: 08f3dff799d4 ("mmc: sdhci-of-dwcmshc: add rockchip platform support")
+Cc: <Stable@vger.kernel.org>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
 
-Best regards,
-Krzysztof
+Changes in v3:
+- Fix compile error while amending the patch file by mistake
+- Add Adrian's tag
+
+Changes in v2:
+- Add a comment about why passing zero to sdhci_enable_clk()
+
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 6139516..0b2158a 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -783,12 +783,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 	extra |= BIT(4);
+ 	sdhci_writel(host, extra, reg);
+ 
++	/* Disable clock while config DLL */
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++
+ 	if (clock <= 52000000) {
+ 		if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
+ 		    host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
+ 			dev_err(mmc_dev(host->mmc),
+ 				"Can't reduce the clock below 52MHz in HS200/HS400 mode");
+-			return;
++			goto enable_clk;
+ 		}
+ 
+ 		/*
+@@ -808,7 +811,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 			DLL_STRBIN_DELAY_NUM_SEL |
+ 			DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
+ 		sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
+-		return;
++		goto enable_clk;
+ 	}
+ 
+ 	/* Reset DLL */
+@@ -835,7 +838,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 				 500 * USEC_PER_MSEC);
+ 	if (err) {
+ 		dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
+-		return;
++		goto enable_clk;
+ 	}
+ 
+ 	extra = 0x1 << 16 | /* tune clock stop en */
+@@ -868,6 +871,16 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 		DLL_STRBIN_TAPNUM_DEFAULT |
+ 		DLL_STRBIN_TAPNUM_FROM_SW;
+ 	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
++
++enable_clk:
++	/*
++	 * The sdclk frequency select bits in SDHCI_CLOCK_CONTROL are not functional
++	 * on Rockchip's SDHCI implementation. Instead, the clock frequency is fully
++	 * controlled via external clk provider by calling clk_set_rate(). Consequently,
++	 * passing 0 to sdhci_enable_clk() only re-enables the already-configured clock,
++	 * which matches the hardware's actual behavior.
++	 */
++	sdhci_enable_clk(host, 0);
+ }
+ 
+ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+-- 
+2.7.4
 
