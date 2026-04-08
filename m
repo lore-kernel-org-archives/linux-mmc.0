@@ -1,130 +1,141 @@
-Received: from mail-m15589.qiye.163.com (mail-m15589.qiye.163.com [101.71.155.89])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5017E376BD7;
-	Wed,  8 Apr 2026 07:19:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.89
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9CD23AE70A
+	for <linux-mmc@vger.kernel.org>; Wed,  8 Apr 2026 09:10:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775632780; cv=none; b=L6MAXiBKS34PVq52HCRS0h67Z+Uu9niEQMdYhRQJROF+Zax8Mk0O/+oOxRTaG7Lsh2z2Ib5V1TJVZ+vx6USXErcnzbOI3j5420/tY1B7hpLHbRm/tiLcjG5+CeLGSRl34sKJWjCbAkc0gNJQmJj1x7Hb+GKr5savv4giMnxNo6g=
+	t=1775639450; cv=none; b=pWUsGqMTuEDfhaRJv1vAeIxbw9FVwQyXSZsLwCztAEtsmgMoe6Hi2YyTMUprmOaSPy7R4xgdEWBKuOBm+uxyaG2OSNaBVIq7aApW/Vk6dqxbFU8eplT1HtgwrlALgC0lStiA9o+6LaaWIgUdQUHgmJE0IwdkqN6eMv6KHvitMcM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775632780; c=relaxed/simple;
-	bh=7d10MvpBn3uw3421odWrnrah1F+dm8qdAsjh3Lx3eHk=;
-	h=From:To:Cc:Subject:Date:Message-Id; b=BW+8oxwkPD91URjw9Xr/tDe8VkgTd3gKTeoSeljNn99/5taSns8w0b1XAmE3qIcJ92fVw5oIFvIY2YJSw/O90MtALCWAQNCAcs9+yL5hQDMaGIWMlP2JQEHJpvYgLya63NtbzyBkK20r97GAt1EjSRoLrU/fM4BSs6kzq6uO9aE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=HwpJFewe; arc=none smtp.client-ip=101.71.155.89
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1775639450; c=relaxed/simple;
+	bh=UKcN9ahvuxPCNeD+PTO7LIE/r0odGE954SbEzEwIjL0=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=lTqWxvFDPwUblJCnWSsRbzzLehl0GaiJwVrVyKu1rmwhmpM9b0KtxFFzqLoeXVb18B+CJQytkO2Xfbo5LIoQWWHpjOQrx8vDRT1XmQSpSR3gS1LqdKx5OBAD9yo/qOjmg8ggqAGmQJON72ukOIkYznGB5Me8h/ros6YmI8DYASg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=X1qajidf; arc=none smtp.client-ip=209.85.221.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="HwpJFewe"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 39ebf7966;
-	Wed, 8 Apr 2026 15:18:55 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-rockchip@lists.infradead.org,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
-	Stable@vger.kernel.org
-Subject: [PATCH v3] mmc: sdhci-of-dwcmshc: Disable clock before DLL configuration
-Date: Wed,  8 Apr 2026 15:18:49 +0800
-Message-Id: <1775632729-22841-1-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-X-HM-Tid: 0a9d6bf55ae309cckunme35ea9d83d4adc
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUlOHlYaSB1PGENMQh9NSElWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=HwpJFeweu3R5NIP4dXGV70nmUH6gUix0s6DYkSoeUwkjebi60Nyr/pFRGzVcUq9tJ3urwxVFtcqYYZdY2HhGy4WkcySq1k6WMFmqVJrcijROnNa0wDP1JldRZ0R5tdNssXpBI8SwAw2raMY2odgnw6UQeTkhe4dFOVHbBtb53KE=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=tmO77fZlhTlVEPb/mMV3UB77aYxemzSiw2yLGeo3C7c=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X1qajidf"
+Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-43cfa33a983so3709650f8f.1
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2026 02:10:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1775639447; x=1776244247; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:date:message-id:subject
+         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KO8uch6J2EQbXvmvGcDK9cYBs1vvLxeqc/7RnVBrTR4=;
+        b=X1qajidfSOYL/k/AMUZSaEuNQyujfFjCd2Ks+oc8ser4RgC4UK+rnXkrv8UWWHWZY2
+         NUlRn0SJq6Kwa8vIN+u9CQ82CZ6xj3IlQD7lzrUhwwTXT07Zv3WZ4x3mbI9gYN/TWrya
+         IuoxRJCekyVT4/ZT4tIogn85ayQRsMD9ewKq4yXfuYf4WG1VVSKvxiLLF3kgyhIH/DSF
+         D3CpVcr6iI4khfL1yCQTkp6GpcWW3DZ2OsKmHY0b2/BaL71Wj7aD6ADf9oVdGNROfu3u
+         bHJwRTaOptBY87OfeKNXAg6Kra66sf1jTUaaffHRVXTR2k3PeEU3NoOP0+GIslVavTDr
+         95Dg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1775639447; x=1776244247;
+        h=content-transfer-encoding:mime-version:date:message-id:subject
+         :references:in-reply-to:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=KO8uch6J2EQbXvmvGcDK9cYBs1vvLxeqc/7RnVBrTR4=;
+        b=Q6SfIRhWgb5ua+Ld11oIpYZ8GEIZsSjZnmNcGrQsF3b1VXZyV4P9SMoWefQ3AcxC36
+         JxHljgUoi3+1lZolqWMODyGABaeh05Lt0+Lr6k50+sO3DHPU3/Oxwr3cmqMLU6oh+SXW
+         Elalx7WQBFT0V3tlswtMKVgUzQGFXEqnEbOhSkczKN+RLlnsZojH2NHG4cNAkaiPhFkg
+         ecZ5x4twgS6eHkN9Zk8rS7Qw6gvRUlPUW4D495KIAeiF2RDL0YK9fguPYllY0ysGrI5F
+         Uj30+nK3/cD0cpbcv9rj2qtpCD93xmkT4aODD+fMdsrPEW3Yc+iR+x8dlW/jyjUiOcBz
+         KT3g==
+X-Forwarded-Encrypted: i=1; AJvYcCVEOiHUtg+wahRgnv+E36bkYlbp1/tyTYHypXKV6hUP7zaTtDuaoX4/ct1+v0cMMIwVVeanZQjcsJM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxxObrjHFqUmsOc/mLyzb+1z44nHFN0grHB1LaP/Yxvxby9oqi2
+	GMvKB1+0MeqFYOILxCcXjvRHWl84Mb2FsUxI9VjdgoYF2Y35hYV4HtHRL61eMVY5ML0=
+X-Gm-Gg: AeBDieuPN2C5sJc60fvE8DYp0jbIIZxr2re8VMBhBysM27+pYthWaZ+dLk7YuBTzDy/
+	EMh1lKex+yi3KEItelzKoIxuRzOBiPTzgExzgNT0o6Sa34Z+bCmZgDzdPxLwuQK8b2P0dVL+ljf
+	PMWiVqNey7m6pnZ6pV0wo4/PBITXaRRlM7l7dC7lBHirHsWlfYjBrNkc6fko8Dv8HeGnyWfRKrE
+	Q0GZUibnX74rX0YhtsQqOKN1oztEQpcwxd5hinYQT9APTiFtBphp6KbPB3Q82pvRiik5CWvCcvz
+	LnoOQPqS5Li0f2F4Pf8sayrD3Nmtiv/vhjHcPeSi998m6X5Ja67z3DJ19rduXVRJTZwTKtwH8c3
+	Eg7KVRBusJpbC6Pjik4RAwqgXxBTDGfpq7OpmSR3S37/BtHSjEP7XnJNT9Q296cLQ9VWPHly/Dg
+	gG7CigmnYVvJa8mWf0AziqModWi/y7VaxQUwNCggLsFHp5
+X-Received: by 2002:a5d:64e4:0:b0:43b:8fa4:194d with SMTP id ffacd0b85a97d-43d292855famr28409560f8f.6.1775639447019;
+        Wed, 08 Apr 2026 02:10:47 -0700 (PDT)
+Received: from arrakeen.starnux.net ([2a01:e0a:106d:1080:52eb:f6ff:feb3:451a])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43d1e4d289asm55901179f8f.19.2026.04.08.02.10.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Apr 2026 02:10:46 -0700 (PDT)
+From: Neil Armstrong <neil.armstrong@linaro.org>
+To: Kevin Hilman <khilman@baylibre.com>, 
+ Jerome Brunet <jbrunet@baylibre.com>, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+ Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>, 
+ Ronald Claveau <linux-kernel-dev@aliel.fr>
+Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, 
+ Conor Dooley <conor.dooley@microchip.com>, 
+ Xianwei Zhao <xianwei.zhao@amlogic.com>, Nick Xie <nick@khadas.com>
+In-Reply-To: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
+References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
+Subject: Re: (subset) [PATCH v5 0/9] arm64: dts: amlogic: Add MMC/SD/SDIO
+ support for Khadas VIM4 (Amlogic T7)
+Message-Id: <177563944623.3409047.5512295931189701100.b4-ty@linaro.org>
+Date: Wed, 08 Apr 2026 11:10:46 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.14.3
 
-According to the ASIC design recommendations, the clock must be
-disabled before operating the DLL to prevent glitches that could
-affect the internal digital logic. In extreme cases, failing to
-do so may cause the controller to malfunction completely.
+Hi,
 
-Adds a step to disable the clock before DLL configuration and
-re-enables it at the end.
+On Thu, 26 Mar 2026 10:59:11 +0100, Ronald Claveau wrote:
+> This patch series depends on Jian's SCMI clock patches yet to merge
+> https://lore.kernel.org/all/20260313070022.700437-1-jian.hu@amlogic.com/
+> 
+> This series adds device tree support for the MMC, SD card and SDIO
+> interfaces on the Amlogic T7 SoC and the Khadas VIM4 board.
+> 
+> The first patches add the necessary building blocks in the T7 SoC
+> DTSI: pinctrl nodes for pin muxing, PWM controller nodes, and MMC
+> controller nodes. The amlogic,t7-mmc and amlogic,t7-pwm compatible
+> strings are introduced with fallbacks to existing drivers, avoiding
+> the need for new driver code.
+> 
+> [...]
 
-Fixes: 08f3dff799d4 ("mmc: sdhci-of-dwcmshc: add rockchip platform support")
-Cc: <Stable@vger.kernel.org>
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
+Thanks, Applied to https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git (v7.1/arm64-dt)
 
-Changes in v3:
-- Fix compile error while amending the patch file by mistake
-- Add Adrian's tag
+[3/9] arm64: dts: amlogic: t7: Add MMC controller nodes
+      https://git.kernel.org/amlogic/c/759613b88fbf051c8a977a5e5b046b28a18ed5c7
+[5/9] arm64: dts: amlogic: t7: Add PWM controller nodes
+      https://git.kernel.org/amlogic/c/596e3c1bfa7869cf15079e5c6e586575013b2fc3
+[7/9] arm64: dts: amlogic: t7: khadas-vim4: Add SDIO power sequence and WiFi clock
+      https://git.kernel.org/amlogic/c/647228c014ddbd336a97e74bde81cbb2f7cbd927
+[9/9] arm64: dts: amlogic: t7: khadas-vim4: Add MMC nodes
+      https://git.kernel.org/amlogic/c/00cca65deacb29947ef32011827ff88fd59dab55
 
-Changes in v2:
-- Add a comment about why passing zero to sdhci_enable_clk()
+These changes has been applied on the intermediate git tree [1].
 
- drivers/mmc/host/sdhci-of-dwcmshc.c | 19 ++++++++++++++++---
- 1 file changed, 16 insertions(+), 3 deletions(-)
+The v7.1/arm64-dt branch will then be sent via a formal Pull Request to the Linux SoC maintainers
+for inclusion in their intermediate git branches in order to be sent to Linus during
+the next merge window, or sooner if it's a set of fixes.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 6139516..0b2158a 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -783,12 +783,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
- 	extra |= BIT(4);
- 	sdhci_writel(host, extra, reg);
- 
-+	/* Disable clock while config DLL */
-+	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-+
- 	if (clock <= 52000000) {
- 		if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
- 		    host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
- 			dev_err(mmc_dev(host->mmc),
- 				"Can't reduce the clock below 52MHz in HS200/HS400 mode");
--			return;
-+			goto enable_clk;
- 		}
- 
- 		/*
-@@ -808,7 +811,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
- 			DLL_STRBIN_DELAY_NUM_SEL |
- 			DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
- 		sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
--		return;
-+		goto enable_clk;
- 	}
- 
- 	/* Reset DLL */
-@@ -835,7 +838,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
- 				 500 * USEC_PER_MSEC);
- 	if (err) {
- 		dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
--		return;
-+		goto enable_clk;
- 	}
- 
- 	extra = 0x1 << 16 | /* tune clock stop en */
-@@ -868,6 +871,16 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
- 		DLL_STRBIN_TAPNUM_DEFAULT |
- 		DLL_STRBIN_TAPNUM_FROM_SW;
- 	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
-+
-+enable_clk:
-+	/*
-+	 * The sdclk frequency select bits in SDHCI_CLOCK_CONTROL are not functional
-+	 * on Rockchip's SDHCI implementation. Instead, the clock frequency is fully
-+	 * controlled via external clk provider by calling clk_set_rate(). Consequently,
-+	 * passing 0 to sdhci_enable_clk() only re-enables the already-configured clock,
-+	 * which matches the hardware's actual behavior.
-+	 */
-+	sdhci_enable_clk(host, 0);
- }
- 
- static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+In the cases of fixes, those will be merged in the current release candidate
+kernel and as soon they appear on the Linux master branch they will be
+backported to the previous Stable and Long-Stable kernels [2].
+
+The intermediate git branches are merged daily in the linux-next tree [3],
+people are encouraged testing these pre-release kernels and report issues on the
+relevant mailing-lists.
+
+If problems are discovered on those changes, please submit a signed-off-by revert
+patch followed by a corrective changeset.
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+[3] https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+
 -- 
-2.7.4
+Neil
 
