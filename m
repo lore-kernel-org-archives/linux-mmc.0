@@ -1,152 +1,88 @@
-Received: from mail-m155115.qiye.163.com (mail-m155115.qiye.163.com [101.71.155.115])
+Received: from out-177.mta0.migadu.com (out-177.mta0.migadu.com [91.218.175.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6BB71D5174;
-	Wed,  8 Apr 2026 02:33:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.115
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE620347FE1
+	for <linux-mmc@vger.kernel.org>; Wed,  8 Apr 2026 02:44:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.218.175.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775615634; cv=none; b=fo+Su366m/KboGGYPz3cbFtv9hXepYbPnuo7irB1CdB5qim+Ff+03t0LQf1YPbHOFmzTYs8pSsQ9M8ccumRaNYRU2BIGqqabdGSuKFHXtpIhiO5PrPXhqdGB//8M89vAfHFZ22vnz5SwOxFJy6W4QBx97/3CKC6mNK8fawwrZxU=
+	t=1775616249; cv=none; b=Cw/3AoHAz0zR63z1ZrpWAZlq3HsOdafAhEq+Jj5Tc8rMjiYzOCYXuaaPZ/XDy/erCezJfLVQopY2DwRJCCAD3ccKt7AS+o/iE0Jrw93sb1G0z8Egy89yZeG1Q8t9nE98jsD7coII8Asj0L419C+DmwJjO0KT6qoL8NDJC1j+C0I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775615634; c=relaxed/simple;
-	bh=1T2VQPhRrwq3pZS7Xarc9rX/f3Yh7tEc/Nkc4KciLSU=;
+	s=arc-20240116; t=1775616249; c=relaxed/simple;
+	bh=VcM5fLHD7TrCBeF0O85OmJSI7q00mW8caga5IBh8usI=;
 	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=s0rT9/dbg/rd9lSgv54gxxZ7s5L0wnFN4BZlniiuSgVxA/B6tOc+3lOxVrorecCXj8b4l1LVF4HkvCUQ+diTyGRoAXG/aHpN9/tuTHXdm5UcbyuHBrpWD+NO9ymudMSoLAgyTTP6SCqeYDs/i1AZk3xvhFm2Xl8X/q//PKcv33w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=FKsyqy/6; arc=none smtp.client-ip=101.71.155.115
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	 In-Reply-To:Content-Type; b=Otn5Afx3GXCPHhmkamMEJAdU4PuEb3wEwxHrHPV6PryzDYvzycOlFcDLKKlLHP19s3wqjrnKpkMEkKSIUgNY6RKqv9TCd4RwptwC182M6xPFu0vKM/FBc9Q1yD7ukbvtUHnoM4SKxCbzzGYoNb1JhMUKccsBoUJEkbO4E8q+9sg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=hXT6GQUg; arc=none smtp.client-ip=91.218.175.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="FKsyqy/6"
-Received: from [172.16.12.17] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 39e07af53;
-	Wed, 8 Apr 2026 10:18:22 +0800 (GMT+08:00)
-Message-ID: <a9c5d50f-b09d-2aa6-56e8-788675a7a8d6@rock-chips.com>
-Date: Wed, 8 Apr 2026 10:18:21 +0800
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="hXT6GQUg"
+Message-ID: <3c81c802-ecdc-85e5-fcdf-aecf295f90b7@linux.dev>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1775616245;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=1FsEC0/7UqJuLluM8xnbTXU3i4yZl9YDCKBnR8P7Fdg=;
+	b=hXT6GQUgc0WaxU2OfgPpF5zhLz6OWWco0+J+6h2cNMMY0ZBRdy2WUxuJ144+BLto5xrrC5
+	m2y+T6gcgHJLhBoxBV6mEW6/OxKf6R57R4TjD/yHJRZ6mI/yy6mIUhCbGBYPoiPPjDlDXV
+	Nt0LzgqAtWsULHAQUs+/yo0/zBgpAMo=
+Date: Wed, 8 Apr 2026 10:43:58 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.13.1
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
- linux-rockchip@lists.infradead.org, Stable@vger.kernel.org,
- Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Disable clock before DLL
- configuration
-To: Adrian Hunter <adrian.hunter@intel.com>
-References: <1775014742-233407-1-git-send-email-shawn.lin@rock-chips.com>
- <da3b1b9c-fb92-4408-bb5a-485c050f7c60@intel.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <da3b1b9c-fb92-4408-bb5a-485c050f7c60@intel.com>
+Cc: shawn.lin@linux.dev, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, ulf.hansson@linaro.org
+Subject: Re: [PATCH] mmc: Simplify with scoped for each OF child loop
+To: Hans Zhang <18255117159@163.com>
+References: <20260407014033.1305033-1-18255117159@163.com>
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Shawn Lin <shawn.lin@linux.dev>
+In-Reply-To: <20260407014033.1305033-1-18255117159@163.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9d6ae233bd09cckunm716af1033867a7
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ0wYTlYaH0xOSRgaGR4aGU5WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=FKsyqy/62+sHoo2FL0sSgh8xxj55P4Ewb4Y+von8U2CRsa+A9Uh1KSkdbjBulBb7sF9hSlWtZSewAtlyT9MXzNoRliKWu3vTMayDYrDZMkpo+goKEeJ0CpTQlGJC9ZoY16p9MmowWcqX21rgE5qCLuczqBBwq6U5gORdKiV41w0=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=bbP7HTNju4eJzMipoRDaCHo6KbSQ6RtCL471+qLrxWk=;
-	h=date:mime-version:subject:message-id:from;
+X-Migadu-Flow: FLOW_OUT
 
-在 2026/04/07 星期二 14:38, Adrian Hunter 写道:
-> On 01/04/2026 06:39, Shawn Lin wrote:
->> According to the ASIC design recommendations, the clock must be
->> disabled before operating the DLL to prevent glitches that could
->> affect the internal digital logic. In extreme cases, failing to
->> do so may cause the controller to malfunction completely.
->>
->> Adds a step to disable the clock before DLL configuration and
->> re-enables it at the end.
->>
->> Fixes: 08f3dff799d4 ("mmc: sdhci-of-dwcmshc: add rockchip platform support")
->> Cc: <Stable@vger.kernel.org>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->> This is bascially a code sync with the downstream vendor kernel which was been
->> done this way and tested for some years to confirm it could fix the issues in
->> all corner cases.
->>
->>   drivers/mmc/host/sdhci-of-dwcmshc.c | 12 +++++++++---
->>   1 file changed, 9 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
->> index 6139516..e3ae334 100644
->> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
->> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
->> @@ -783,12 +783,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->>   	extra |= BIT(4);
->>   	sdhci_writel(host, extra, reg);
->>   
->> +	/* Disable clock while config DLL */
->> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
->> +
->>   	if (clock <= 52000000) {
->>   		if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
->>   		    host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
->>   			dev_err(mmc_dev(host->mmc),
->>   				"Can't reduce the clock below 52MHz in HS200/HS400 mode");
->> -			return;
->> +			goto enable_clk;
->>   		}
->>   
->>   		/*
->> @@ -808,7 +811,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->>   			DLL_STRBIN_DELAY_NUM_SEL |
->>   			DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
->>   		sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
->> -		return;
->> +		goto enable_clk;
->>   	}
->>   
->>   	/* Reset DLL */
->> @@ -835,7 +838,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->>   				 500 * USEC_PER_MSEC);
->>   	if (err) {
->>   		dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
->> -		return;
->> +		goto enable_clk;
->>   	}
->>   
->>   	extra = 0x1 << 16 | /* tune clock stop en */
->> @@ -868,6 +871,9 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->>   		DLL_STRBIN_TAPNUM_DEFAULT |
->>   		DLL_STRBIN_TAPNUM_FROM_SW;
->>   	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
->> +
->> +enable_clk:
->> +	sdhci_enable_clk(host, 0);
+在 2026/04/07 星期二 9:40, Hans Zhang 写道:
+> Use scoped for-each loop when iterating over device nodes to make code a
+> bit simpler.
 > 
-> Should this be 0?  If so, needs some explanation.
 
-Yes, passing 0 is intentional for the Rockchip platform.
-This controller on Rockchip has SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
-set, indicating that the base clock capability reporting is unreliable.
-More importantly, the sdclk frequency select bits in the
-SDHCI_CLOCK_CONTROL register are actually non-functional on this 
-hardware. The sdclk frequency is instead set via clk_set_rate()for all
-modes. From this point, all of the sdhci_set_clock() calls and in
-dwcmshc_rk3568_set_clock() are also served as enabling and disabling
-clk only.
+I think the key point to use scoped version is to ensure the
+device node reference is automatically released when the loop scope
+ends. It'd be better if you could highlight this in the commit msg.
 
-Therefore, sdhci_enable_clk(host, 0) is simply re-enabling the
-clock without modifying the frequency selection bits, which aligns with
-the hardware's actual behavior.
+Reviewed-by: Shawn Lin <shawn.lin@linux.dev>
 
-Technically speaking, we could save the previously calculated sdclk
-value and pass it to sdhci_enable_clk(). However, since the frequency
-select bits are ignored by the hardware, passing 0 is safe and
-functionally equivalent. I could add a comment for just this line change
-or would you like me to add a comment for the whole sdclk stuff in
-dwcmshc_rk3568_set_clock()?
-
-
+> Signed-off-by: Hans Zhang <18255117159@163.com>
+> ---
+>   drivers/mmc/core/quirks.h | 9 ++-------
+>   1 file changed, 2 insertions(+), 7 deletions(-)
 > 
->>   }
->>   
->>   static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index c417ed34c057..93bf79d79cec 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -213,14 +213,9 @@ static const struct mmc_fixup __maybe_unused sdio_card_init_methods[] = {
+>   static inline bool mmc_fixup_of_compatible_match(struct mmc_card *card,
+>   						 const char *compatible)
+>   {
+> -	struct device_node *np;
+> -
+> -	for_each_child_of_node(mmc_dev(card->host)->of_node, np) {
+> -		if (of_device_is_compatible(np, compatible)) {
+> -			of_node_put(np);
+> +	for_each_child_of_node_scoped(mmc_dev(card->host)->of_node, np)
+> +		if (of_device_is_compatible(np, compatible))
+>   			return true;
+> -		}
+> -	}
+>   
+>   	return false;
+>   }
 > 
-> 
+> base-commit: 591cd656a1bf5ea94a222af5ef2ee76df029c1d2
+> prerequisite-patch-id: fcb16f319f35ddb88e1668bbe7a8811d88235672
