@@ -1,186 +1,145 @@
-Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com [209.85.167.44])
+Received: from mail-qv1-f44.google.com (mail-qv1-f44.google.com [209.85.219.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C7EC313523
-	for <linux-mmc@vger.kernel.org>; Thu,  9 Apr 2026 15:53:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.44
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775750027; cv=pass; b=HftnSIqzzV28yTnIqhbzPeVqf5TYlWW8CwR+Njyd2Z2Z1cLPcbEca+c/UIL/FVprD1rjP6Wa4xNe2+JRBwsEIJx2dNDYDhLUcHrHhjFBgaJ/eYMG0MvWfds+u4St7cSSykeKXhiw9wuq/EKgS1eZuu2X8Dd9KxHVf8dRONe302s=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775750027; c=relaxed/simple;
-	bh=wk+hqJ0iUTT+wwqkPfh8Q7mvsmKh/oz7GCJX6dFdqD4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=O0EHUgu9tdSDQwqKq3jJ4ytBV9oU4hepZhf/4TAOS1XNm6lCOGILV0UJ1jXREulN6vk8pYSaezL0hexfpHK6OFnmi0kFt0fAlCUFJoGMA/f1uTAxn1uiBMazgFEzM4InlliUlqSR+RUmD+ut++37YeoaBuGzV7A1vSuUBmBkCTM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=M6PdEhvo; arc=pass smtp.client-ip=209.85.167.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BB1D2FD1D0
+	for <linux-mmc@vger.kernel.org>; Thu,  9 Apr 2026 19:42:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.44
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1775763726; cv=none; b=dR8AXFldvQgmbdizWjT/5L8JZlfpsjxrqIasLORL47wOj72KKxe/ps42SXZNDbNS7d/nwwQ4Mf3Z/3MmK6l6+7IR8uGT7jobbp+IiMjF5E6qyO4mt0TRkPtH8sfdC+TqJRDcBmAfpWo3EstBUHZcNYcKSiUJ3GSyL10d+Z9cR3k=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1775763726; c=relaxed/simple;
+	bh=qOoW4aRym6b3AX+bWSrl2d084ZPhq8jJErEaGtwMluo=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=liqb8hZLmeoMm+5bACLCJ1TpNzXdYq2RMXf3xWyskrDN2NLGoVy0Ksk0NoQCi2EM9PmrkFTp206YK6bwAFus7CMcPx1KIAWbU7Xqc6Ba87yzTuwiQLTz/A/ALnrJ3hgrobHgQ4lcLpWvZZdzWtiR5ONAuCxeDDlb+IKq9mVnQNI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bUSHZZ6j; arc=none smtp.client-ip=209.85.219.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="M6PdEhvo"
-Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-5a3d1561e38so882834e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Apr 2026 08:53:45 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1775750024; cv=none;
-        d=google.com; s=arc-20240605;
-        b=aGat9mz4cF+Sz6s5/WL5CX4RsxMvSsq/eEB/c5vkvnbLvYFDEvc0MFBAix9/lYPHFA
-         gEwqPzzSpi4YthaWikuSQwrs5dQvGthH+Regd9fK509rtFcpVp5PAGWnSfWmjzlsfAfN
-         w0sisCT9bHfDk1VmYw4VnIY0XfW0CzS3cjZUkDCl9cBP/Tszuq7qLCGSa3D/DpYNZGH+
-         SphpomSB2R/NjE/Tv9xitvHDzniaFiXTux2N32lN8PGx6DBZcY/hcmVuZ9CF9jYwcHDX
-         20re6DhRzwQ+x3aHo3H5Remsyoa5QlzL0hWX1SJSooKDZYYtE8MFpEYWE4UbjlnEDuyU
-         vgOg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:dkim-signature;
-        bh=Dv4qdWsse2g6Hs6kPBq8xuq0aEEIapLlZcENiVgDIrA=;
-        fh=XUTH3/pakn0EbziEwKPiNj3dOek/KFAb2cz/QfFMQQ8=;
-        b=WDE8YS0ySlPmGhCluaP6Bp9O24HPWX8r0fomKZvodOMb2ASOsyzvb2cmxwYvGVlj2P
-         I7kqnPrdBANDPrvTe3991NeFYV0uLG3fz8/xESGfB3/3O1PRr+IvQAg1J+V6X5pYSJxC
-         iqhAaXIVyIAhzX4GcrQpdkXDgwTMw31Qul5Yiyg8mLcZtfD5rl8ctXOGW3UXFI1MEM/P
-         u8MMqv84hyqtsIm5uxaf3Y8KMTbpJDS7xTqvc58tJwLFPzchnxCwPfnLc7SKn+GzRvRa
-         eq33Ed91DOcEgPfJChSjLVCzJuezlrVtQOivh/UYb5WBOEnmOhBhTUVanyI2gSUNmNnR
-         SZxg==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bUSHZZ6j"
+Received: by mail-qv1-f44.google.com with SMTP id 6a1803df08f44-89fc349b5ceso19953046d6.3
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Apr 2026 12:42:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1775750024; x=1776354824; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Dv4qdWsse2g6Hs6kPBq8xuq0aEEIapLlZcENiVgDIrA=;
-        b=M6PdEhvo4f8MXyR+Pv4ed9jICMJFpxnHbhAWH7PosHK/C35QLr+4syZfBWvGw9Z3bO
-         Glt+1sHAOASw5U6YMoOwoea7pLb9WqYAdlcy8z9yrvNYXY7JAi7OK5jm4o74zWo4sR/A
-         WP12HiuCt63nrl1pfPBcuAAL8poTOhum6OvZrDPj6xxWO3/VPbBlm4iX7yMvvBC6g3f8
-         axBjPpqQkEqvNBnvgEf8C08CtVyuqf31ZuA4xJNuogvc7nHeuQZ1nKBL529xLzk25UaT
-         8+KQloLUU5l/IiNOcr4qq1jnDxl6H4O+tWVhQ74N18OMiOm7YiOgvLhbQL5zJAi1Jv3n
-         OxIg==
+        d=gmail.com; s=20251104; t=1775763723; x=1776368523; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=GjKxBtkjDt3We9EjyJ1v8TRnifRaBnbhRAoyO7TLFsQ=;
+        b=bUSHZZ6jptNH9uBja6J/nTdn4tQjknpvQ1p4DvUfayssHGXXD3v4ZYZM/lKRf/0+wE
+         BacUqcjGP9jDOmXuefKNaZbcwZWRMfYewsDe/KXAQHMtIwAKzGJTmS+35gXHKnkTKp1l
+         dF0uDHPrVuIHbolMmiG/EkYmJjq2+t374gq8wPJKwfrlD3l/Vcpwi7YMSPt0ZPyaWyx3
+         4iSfvuJfBRj7BW9DL3uxmjqvOeQTTFH4YEsU60K+wnxCqsDnIbW/Qu1yv2GCDRmombwx
+         UJF3txuVadNvWC+lzmTYAilWWvuQ/P0fm1wWj6AL0HMF+PoDirkZ1/i4Rl5+LvL1aXBT
+         ppow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775750024; x=1776354824;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Dv4qdWsse2g6Hs6kPBq8xuq0aEEIapLlZcENiVgDIrA=;
-        b=XVlIlDVbvz9E2IP05yrVWgDOB9tpzKURmz2ACacJj1fau46E09TxynXtrmnJFgjtFN
-         D8anF+SroQg2oI/Yzdw6pzZpdkWXjh0TGn9dsHJjSHnaEYIThrtPQHC5JMD+YszCOjTJ
-         bcGN1tYYiOJBa3dFWJCEKVuZentoG9xTXhpw1jLS0D25ffhQA2QmEWePThvkyRlXCMtz
-         mfV9OeASTNuHriV/sK83N+3CWBTgEbKgRhzEprt+LAlPjIQhvxvARxe1TxOc2JzwNnv+
-         vDmMGF19hm9FZWbhtwqT3X1UR3JeDureGJ50rEIOLCYJpYo5f8/f1kFRcVmBN29yJZJE
-         o9dw==
-X-Gm-Message-State: AOJu0Yz7/C3U+w/LfSaQMHAXhRIw5iSqos9Jxv2yrtA30FfOWiSphOA2
-	pcGLqtz7quoCiPgJVj5xiOcx1mgzhAKokMiqg/Im57dk82yO7VdCSOjQaVP1uEdFfsVspjGz5W1
-	WJdse9TuimXyurmGjI/iJMUHMc80aiumZj3yAROQgrw==
-X-Gm-Gg: AeBDiev1GhUfVPoh1UU1+XxJWBXVj7EJqNoD990YfPDu/l49CeuRtlutIgoZDpZD2RU
-	4U65SLeeQiKnHXN51yPfK4eAcpylZbDACWh6yq8IfmS439GsBupRlNaxElWpBTGsdPw18cS78eh
-	1VUUdBtKeCQnSaYBeHv+Lyto/6wZxvKf4NukiT0OR4XlhTgNygv8vYuevu9ljYXKCvLR4x02mp4
-	tC3sbMfPrhOXIaH6aS+0N4dzSvXKJC58Zg8cAJMYpJT1T0rR+yQzWMOIlHQzyGOo+akcYKP9b0E
-	J5gBOzJH
-X-Received: by 2002:a05:6512:3b20:b0:5a1:381b:fae1 with SMTP id
- 2adb3069b0e04-5a33755cd01mr8745197e87.10.1775750023584; Thu, 09 Apr 2026
- 08:53:43 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1775763723; x=1776368523;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=GjKxBtkjDt3We9EjyJ1v8TRnifRaBnbhRAoyO7TLFsQ=;
+        b=DhlR/kInpG0ww8DUCTKTtrs1g2dg8Itpr71Z7FdKEM6ITOTlwhv7cBzbFoq5nR5WAQ
+         Sp3qWHllEEXGni/um0XB9PLYrjPHSeehwwsJMysPxbTqpivr6u5I9HnsLAdAKQyGtnn9
+         Xco1JKeAN5fdgjveeCVkwTZUO/ku8YI20QwpRJ2DSAg22E7W8RhFX1ROfzuNj6Jswmh6
+         AQVn6O8fRqFCYBhM8gwzg0QfLuRaOT8dFXIm8wcdTADwwYbq7JUfrOAfhyMjcivtfKxE
+         luggNNNjtX71Pv94zPXLVijQkWQVrtCh7tpIIxRmTTjnKX+dU53aSi/hm9dfNTve7bry
+         BNrg==
+X-Gm-Message-State: AOJu0YzmwyaAhTWvXsLFCEax4GiGSmqshRT6slTF7dhFV9albrnE+Z+O
+	+SiQYvvZxr63jW+s6BUh3+G+LBsybtvAQbLBVH0DSGZAkUWemDxQEIai
+X-Gm-Gg: AeBDiesMenJXJROuf2IB6kfFZG6wSKm7GNkMghf7Cknvuq5g41s6WgkYReTixjELfx9
+	wnq4fBEPkDp0+oJ2awV34jAJbDQcUmfxJ5c5RyojkcG2k/Rei6MxLdnhHtgSVke8dNynnieE4nq
+	ahgqwEa6B89I8RTe6SV9Nvc4oyhviARBdV4VHLGd/lk/RxHqbjjcAGD2R+iI+VM5Qn2Ia0aNlGs
+	/O/+/q7BCE8WkmUrOoCU8AabKtdCfBfCNdhLB64lWceH23ayodARrLPLqJ/NDPdsx7S2HEq/Dxd
+	xd37l66IsTwDaG7ZKY9Go1k8qN0JpI1iwkZemqI+suh+1l39VSNawbiKht/2ShU8G5Sjo4BnCsw
+	QhCB6A5haCol9qE2zhkIVruqcJxHHchBXfO9c4RtWExRqmy56O87ohUZ8INHWR7pmNDZb81BYt+
+	kuJsKxCawJ8UUrzEkKc9Qe
+X-Received: by 2002:ad4:5f88:0:b0:89a:1069:d229 with SMTP id 6a1803df08f44-8ac86322208mr1316236d6.55.1775763723142;
+        Thu, 09 Apr 2026 12:42:03 -0700 (PDT)
+Received: from [10.10.10.1] ([157.245.8.14])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8ac8449e664sm4160336d6.0.2026.04.09.12.42.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 09 Apr 2026 12:42:02 -0700 (PDT)
+Message-ID: <9e52c51d-c358-47ad-a2b1-763a348f6c7d@gmail.com>
+Date: Thu, 9 Apr 2026 22:41:58 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1775632729-22841-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1775632729-22841-1-git-send-email-shawn.lin@rock-chips.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 9 Apr 2026 17:53:07 +0200
-X-Gm-Features: AQROBzDtN6BuSpifx1kELMTA0xEfm1HADbBZ4h8KffOIIm2mDqIQjdmC0mk4g-w
-Message-ID: <CAPDyKFobhyGx6yCX6GEA5sCxXnsaB4_5JQN-K6wghOXU=Q502w@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: Disable clock before DLL configuration
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org, 
-	Adrian Hunter <adrian.hunter@intel.com>, Stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: [PATCH v2] misc: rtsx_usb: reset chip on resume to re-detect card
+ after S3
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ rogerable@realtek.com, Ricky Wu <ricky_wu@realtek.com>,
+ Sean Rhodes <sean@starlabs.systems>
+References: <964d54a3-90ce-475e-952f-342bb383f878@gmail.com>
+ <CAPDyKFoPjwBeaQKMDf7zrW8hQDZjD89=ChJ_TPf51BG4yonz6w@mail.gmail.com>
+Content-Language: en-US
+From: Greg S <grigoryya@gmail.com>
+In-Reply-To: <CAPDyKFoPjwBeaQKMDf7zrW8hQDZjD89=ChJ_TPf51BG4yonz6w@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Wed, 8 Apr 2026 at 09:19, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
-> According to the ASIC design recommendations, the clock must be
-> disabled before operating the DLL to prevent glitches that could
-> affect the internal digital logic. In extreme cases, failing to
-> do so may cause the controller to malfunction completely.
->
-> Adds a step to disable the clock before DLL configuration and
-> re-enables it at the end.
->
-> Fixes: 08f3dff799d4 ("mmc: sdhci-of-dwcmshc: add rockchip platform support")
-> Cc: <Stable@vger.kernel.org>
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On Tue, 7 Apr 2026 at XX:XX, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+ > The patch looks reasonable to me, but perhaps we also need a fixes tag?
 
-It's getting too late for fixes (unless we get an rc8), so I decided
-to apply this for next instead, thanks!
+Good point, thanks. Here is v2 with the Fixes tag added.
 
-Kind regards
-Uffe
+---
+
+[PATCH v2] misc: rtsx_usb: reset chip on resume to re-detect card after S3
+
+After S3 suspend the Realtek RTS5129 USB card reader loses its internal
+state, but rtsx_usb_resume() does not reinitialize it — it only wakes up
+child devices.  As a result, the first command sent to the chip after
+resume times out with -ETIMEDOUT and the mmc subsystem never re-detects
+the card.  The SD card (mmcblk0) disappears and does not come back until
+the next full reboot.
+
+rtsx_usb_reset_resume() already handles this correctly by calling
+rtsx_usb_reset_chip() before waking children.  Apply the same logic to
+the regular resume path.
+
+Tested on a laptop with an RTS5129 (0x0bda:0x0129) built-in card reader
+and a 128 GB SDXC card.  Before the patch, mmcblk0 was lost after every
+S3 cycle; after the patch, the card is reliably re-detected on resume.
+
+Fixes: 730876be2566 ("mfd: Add realtek USB card reader driver")
+Signed-off-by: Greg S <grigoryya@gmail.com>
+---
+Changes in v2:
+  - Added Fixes tag (Ulf Hansson)
+
+  drivers/misc/cardreader/rtsx_usb.c | 12 ++++++++++++
+  1 file changed, 12 insertions(+)
 
 
-> ---
->
-> Changes in v3:
-> - Fix compile error while amending the patch file by mistake
-> - Add Adrian's tag
->
-> Changes in v2:
-> - Add a comment about why passing zero to sdhci_enable_clk()
->
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 19 ++++++++++++++++---
->  1 file changed, 16 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 6139516..0b2158a 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -783,12 +783,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->         extra |= BIT(4);
->         sdhci_writel(host, extra, reg);
->
-> +       /* Disable clock while config DLL */
-> +       sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> +
->         if (clock <= 52000000) {
->                 if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
->                     host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
->                         dev_err(mmc_dev(host->mmc),
->                                 "Can't reduce the clock below 52MHz in HS200/HS400 mode");
-> -                       return;
-> +                       goto enable_clk;
->                 }
->
->                 /*
-> @@ -808,7 +811,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->                         DLL_STRBIN_DELAY_NUM_SEL |
->                         DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
->                 sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
-> -               return;
-> +               goto enable_clk;
->         }
->
->         /* Reset DLL */
-> @@ -835,7 +838,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->                                  500 * USEC_PER_MSEC);
->         if (err) {
->                 dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
-> -               return;
-> +               goto enable_clk;
->         }
->
->         extra = 0x1 << 16 | /* tune clock stop en */
-> @@ -868,6 +871,16 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->                 DLL_STRBIN_TAPNUM_DEFAULT |
->                 DLL_STRBIN_TAPNUM_FROM_SW;
->         sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
-> +
-> +enable_clk:
-> +       /*
-> +        * The sdclk frequency select bits in SDHCI_CLOCK_CONTROL are not functional
-> +        * on Rockchip's SDHCI implementation. Instead, the clock frequency is fully
-> +        * controlled via external clk provider by calling clk_set_rate(). Consequently,
-> +        * passing 0 to sdhci_enable_clk() only re-enables the already-configured clock,
-> +        * which matches the hardware's actual behavior.
-> +        */
-> +       sdhci_enable_clk(host, 0);
->  }
->
->  static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
-> --
-> 2.7.4
->
+diff --git a/drivers/misc/cardreader/rtsx_usb.c 
+b/drivers/misc/cardreader/rtsx_usb.c
+index 2b3ae2914ec8..f1a3b5c7e912 100644
+--- a/drivers/misc/cardreader/rtsx_usb.c
++++ b/drivers/misc/cardreader/rtsx_usb.c
+@@ -732,6 +732,18 @@ static int rtsx_usb_resume_child(struct device 
+*dev, void *data)
+
+  static int rtsx_usb_resume(struct usb_interface *intf)
+  {
++    struct rtsx_ucr *ucr =
++        (struct rtsx_ucr *)usb_get_intfdata(intf);
++
++    /* After S3 suspend the chip loses its internal state and needs a full
++     * reset, identical to what reset_resume already does. Without this
++     * the first command sent to the chip after resume times out
++     * (-ETIMEDOUT) and the mmc subsystem never re-detects the card
++     * (mmcblk0 disappears until the next reboot).
++     *
++     * Affected: at least RTS5129 on several laptop models.
++     */
++    rtsx_usb_reset_chip(ucr);
+      device_for_each_child(&intf->dev, NULL, rtsx_usb_resume_child);
+      return 0;
+  }
+--
+2.43.0
+
