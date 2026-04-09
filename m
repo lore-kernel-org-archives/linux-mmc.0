@@ -1,141 +1,93 @@
-Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtpbgbr2.qq.com (smtpbgbr2.qq.com [54.207.22.56])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9CD23AE70A
-	for <linux-mmc@vger.kernel.org>; Wed,  8 Apr 2026 09:10:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A10C034C81E;
+	Thu,  9 Apr 2026 07:19:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=54.207.22.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775639450; cv=none; b=pWUsGqMTuEDfhaRJv1vAeIxbw9FVwQyXSZsLwCztAEtsmgMoe6Hi2YyTMUprmOaSPy7R4xgdEWBKuOBm+uxyaG2OSNaBVIq7aApW/Vk6dqxbFU8eplT1HtgwrlALgC0lStiA9o+6LaaWIgUdQUHgmJE0IwdkqN6eMv6KHvitMcM=
+	t=1775719170; cv=none; b=kN00Bwueb6SoVP+5d3cNQSUZf8F/RIeZ3P2LAyOHiFaubTkxktWv6bXaBJZjlK7jYKUPeJl/vTOC/esV8LF+4a8q9XdW90DePcKBhqhe3wka8KpO3Ymp0mGmmCnqqUOpPuBMJatJLAWfAFuuATytAO0TX6tfCV46kj5zW4nw4/0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775639450; c=relaxed/simple;
-	bh=UKcN9ahvuxPCNeD+PTO7LIE/r0odGE954SbEzEwIjL0=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=lTqWxvFDPwUblJCnWSsRbzzLehl0GaiJwVrVyKu1rmwhmpM9b0KtxFFzqLoeXVb18B+CJQytkO2Xfbo5LIoQWWHpjOQrx8vDRT1XmQSpSR3gS1LqdKx5OBAD9yo/qOjmg8ggqAGmQJON72ukOIkYznGB5Me8h/ros6YmI8DYASg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=X1qajidf; arc=none smtp.client-ip=209.85.221.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X1qajidf"
-Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-43cfa33a983so3709650f8f.1
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Apr 2026 02:10:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1775639447; x=1776244247; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KO8uch6J2EQbXvmvGcDK9cYBs1vvLxeqc/7RnVBrTR4=;
-        b=X1qajidfSOYL/k/AMUZSaEuNQyujfFjCd2Ks+oc8ser4RgC4UK+rnXkrv8UWWHWZY2
-         NUlRn0SJq6Kwa8vIN+u9CQ82CZ6xj3IlQD7lzrUhwwTXT07Zv3WZ4x3mbI9gYN/TWrya
-         IuoxRJCekyVT4/ZT4tIogn85ayQRsMD9ewKq4yXfuYf4WG1VVSKvxiLLF3kgyhIH/DSF
-         D3CpVcr6iI4khfL1yCQTkp6GpcWW3DZ2OsKmHY0b2/BaL71Wj7aD6ADf9oVdGNROfu3u
-         bHJwRTaOptBY87OfeKNXAg6Kra66sf1jTUaaffHRVXTR2k3PeEU3NoOP0+GIslVavTDr
-         95Dg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1775639447; x=1776244247;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=KO8uch6J2EQbXvmvGcDK9cYBs1vvLxeqc/7RnVBrTR4=;
-        b=Q6SfIRhWgb5ua+Ld11oIpYZ8GEIZsSjZnmNcGrQsF3b1VXZyV4P9SMoWefQ3AcxC36
-         JxHljgUoi3+1lZolqWMODyGABaeh05Lt0+Lr6k50+sO3DHPU3/Oxwr3cmqMLU6oh+SXW
-         Elalx7WQBFT0V3tlswtMKVgUzQGFXEqnEbOhSkczKN+RLlnsZojH2NHG4cNAkaiPhFkg
-         ecZ5x4twgS6eHkN9Zk8rS7Qw6gvRUlPUW4D495KIAeiF2RDL0YK9fguPYllY0ysGrI5F
-         Uj30+nK3/cD0cpbcv9rj2qtpCD93xmkT4aODD+fMdsrPEW3Yc+iR+x8dlW/jyjUiOcBz
-         KT3g==
-X-Forwarded-Encrypted: i=1; AJvYcCVEOiHUtg+wahRgnv+E36bkYlbp1/tyTYHypXKV6hUP7zaTtDuaoX4/ct1+v0cMMIwVVeanZQjcsJM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxxObrjHFqUmsOc/mLyzb+1z44nHFN0grHB1LaP/Yxvxby9oqi2
-	GMvKB1+0MeqFYOILxCcXjvRHWl84Mb2FsUxI9VjdgoYF2Y35hYV4HtHRL61eMVY5ML0=
-X-Gm-Gg: AeBDieuPN2C5sJc60fvE8DYp0jbIIZxr2re8VMBhBysM27+pYthWaZ+dLk7YuBTzDy/
-	EMh1lKex+yi3KEItelzKoIxuRzOBiPTzgExzgNT0o6Sa34Z+bCmZgDzdPxLwuQK8b2P0dVL+ljf
-	PMWiVqNey7m6pnZ6pV0wo4/PBITXaRRlM7l7dC7lBHirHsWlfYjBrNkc6fko8Dv8HeGnyWfRKrE
-	Q0GZUibnX74rX0YhtsQqOKN1oztEQpcwxd5hinYQT9APTiFtBphp6KbPB3Q82pvRiik5CWvCcvz
-	LnoOQPqS5Li0f2F4Pf8sayrD3Nmtiv/vhjHcPeSi998m6X5Ja67z3DJ19rduXVRJTZwTKtwH8c3
-	Eg7KVRBusJpbC6Pjik4RAwqgXxBTDGfpq7OpmSR3S37/BtHSjEP7XnJNT9Q296cLQ9VWPHly/Dg
-	gG7CigmnYVvJa8mWf0AziqModWi/y7VaxQUwNCggLsFHp5
-X-Received: by 2002:a5d:64e4:0:b0:43b:8fa4:194d with SMTP id ffacd0b85a97d-43d292855famr28409560f8f.6.1775639447019;
-        Wed, 08 Apr 2026 02:10:47 -0700 (PDT)
-Received: from arrakeen.starnux.net ([2a01:e0a:106d:1080:52eb:f6ff:feb3:451a])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43d1e4d289asm55901179f8f.19.2026.04.08.02.10.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Apr 2026 02:10:46 -0700 (PDT)
-From: Neil Armstrong <neil.armstrong@linaro.org>
-To: Kevin Hilman <khilman@baylibre.com>, 
- Jerome Brunet <jbrunet@baylibre.com>, 
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
- Johannes Berg <johannes@sipsolutions.net>, van Spriel <arend@broadcom.com>, 
- Ronald Claveau <linux-kernel-dev@aliel.fr>
-Cc: linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org, 
- Conor Dooley <conor.dooley@microchip.com>, 
- Xianwei Zhao <xianwei.zhao@amlogic.com>, Nick Xie <nick@khadas.com>
-In-Reply-To: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
-References: <20260326-add-emmc-t7-vim4-v5-0-d3f182b48e9d@aliel.fr>
-Subject: Re: (subset) [PATCH v5 0/9] arm64: dts: amlogic: Add MMC/SD/SDIO
- support for Khadas VIM4 (Amlogic T7)
-Message-Id: <177563944623.3409047.5512295931189701100.b4-ty@linaro.org>
-Date: Wed, 08 Apr 2026 11:10:46 +0200
+	s=arc-20240116; t=1775719170; c=relaxed/simple;
+	bh=EFGUv70ITPjDkPlE6l39I6DKElpPeVcUYVP/gjkeVxY=;
+	h=Mime-Version:Content-Type:Date:Message-Id:Subject:From:To:Cc:
+	 References:In-Reply-To; b=qyb0/ZrL1VVfHZWYRxw3tp1E+Nj92XX4LcD4JFHm79+K8bxxg1iAH7yVqsICfSVOFpDIeS+Bk8TWwAzrhujQyfWfVkzGT+n8pUNCnkSn0bxdEDUXYRUGeYmm3d4zEf8O6XQQoQh24V0q7YfbZGL9AoQyA2Oe/Cjo2ZI/E7LBX6s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.dev; spf=none smtp.mailfrom=linux.spacemit.com; arc=none smtp.client-ip=54.207.22.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.spacemit.com
+X-QQ-mid: zesmtpgz7t1775719054tbf8afb00
+X-QQ-Originating-IP: 6bD4fn6zlzoRNsyvWerVgSjVIcx6UZ4MsVvp6bysC1Q=
+Received: from = ( [120.237.158.181])
+	by bizesmtp.qq.com (ESMTP) with 
+	id ; Thu, 09 Apr 2026 15:17:32 +0800 (CST)
+X-QQ-SSF: 0000000000000000000000000000000
+X-QQ-GoodBg: 0
+X-BIZMAIL-ID: 6790880675297523126
+X-QQ-CSender: troy.mitchell@linux.spacemit.com
+Sender: troy.mitchell@linux.spacemit.com
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.14.3
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Date: Thu, 09 Apr 2026 15:17:32 +0800
+Message-Id: <DHOFVAYOFU7X.3J8VHC8FFYXD9@linux.dev>
+Subject: Re: [PATCH v6 5/9] riscv: dts: spacemit: k1: add SD card controller
+ and pinctrl support
+From: "Troy Mitchell" <troy.mitchell@linux.dev>
+To: "Iker Pedrosa" <ikerpedrosam@gmail.com>, "Ulf Hansson"
+ <ulf.hansson@linaro.org>, "Rob Herring" <robh@kernel.org>, "Krzysztof
+ Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>,
+ "Adrian Hunter" <adrian.hunter@intel.com>, "Paul Walmsley"
+ <pjw@kernel.org>, "Palmer Dabbelt" <palmer@dabbelt.com>, "Albert Ou"
+ <aou@eecs.berkeley.edu>, "Alexandre Ghiti" <alex@ghiti.fr>, "Yixun Lan"
+ <dlan@kernel.org>
+Cc: "Troy Mitchell" <troy.mitchell@linux.dev>, "Michael Opdenacker"
+ <michael.opdenacker@rootcommit.com>, "Javier Martinez Canillas"
+ <javierm@redhat.com>, <linux-mmc@vger.kernel.org>,
+ <devicetree@vger.kernel.org>, <linux-riscv@lists.infradead.org>,
+ <spacemit@lists.linux.dev>, <linux-kernel@vger.kernel.org>, "Anand Moon"
+ <linux.amoon@gmail.com>, "Trevor Gamblin" <tgamblin@baylibre.com>
+X-Mailer: aerc 0.21.0-0-g5549850facc2
+References: <20260407-orangepi-sd-card-uhs-v6-0-b5b8a1b2bfc8@gmail.com>
+ <20260407-orangepi-sd-card-uhs-v6-5-b5b8a1b2bfc8@gmail.com>
+In-Reply-To: <20260407-orangepi-sd-card-uhs-v6-5-b5b8a1b2bfc8@gmail.com>
+X-QQ-SENDSIZE: 520
+Feedback-ID: zesmtpgz:linux.spacemit.com:qybglogicsvrgz:qybglogicsvrgz3a-0
+X-QQ-XMAILINFO: NhdiEwnVOUqEtK9rx+pHVF8kFsreCVp/RwxLRClWLSneN9acdashbOyA
+	KwEvA1AH7fxFCwvYhmMogt9mXaolPQMHBNkbBzGuUq3jj8Va6/ZmcAJhjTLI1Gj8HPjU2Io
+	UImhl6D11VOZkP221TQk/r4aZIsoukUftWCjMvLMzDNbwvPzsZHV9NdCsEBnOzVc5JH8VUS
+	2dKoiWiC9Mf6TAxB0L5DAS0sDvjPICRD20eGCYAwQFmg+RbPfQFAgNV3FUGsFm2XSVLozCt
+	J1/JfRPQGk/Hfcm+DtNj2n07Xk2gcLWJGCzO7T4qVUsGlvzVWhgde90ZUaEyngak/XLNxL8
+	RwHI+3l1ek68SLPbob8j3gnkMKmBGjv0fKCRS/JWuqRFx1JkQuLtZoOGRQ59kNqm+f8dWjt
+	8gpdNH2I+NYQe1syMrdgdok8BFyyt3qi8RZ/jMLGaq3Kcyz4aHzuUgyi6LVqDNSP78GmFAf
+	eRXii+mF1OPFh0y12M43Z+c9zF7IZROPdKQIx7hvkwqCg50fO8hOWd8f2UgUPVZ7fdsy4gm
+	RgpuUJsMG9P+W+q1owS6hQSsbTiklDIbKWSzwKnNS/QRyvdV1Vq7hACSLgn7Odz5WNac0k2
+	kqU92aU01CkzBF22meT86vemIjOY2wXnv1lUkqvzZbU3p/yY5AoIMfA63zp6Fd3lMDJzcCB
+	AFpbV2VCutkXoa7FlmbMGdOfnCG4QRY4ZoRXRwiJUxoWUsX2dYsstnNxG2tGiOLaXQLv115
+	u9S6yCh6SODHQEqAUN5o6idaNga/JOBqEPomgDxsMi0agBicte8llCMQCFTGSzEf9mhk1i5
+	szxwcyXqJRDxlrfwUMWnu8yfwMShbm838kchrQccpLaA3Z2wG1iSrWzwdEk9Xu+XN4Y4Tg4
+	hzVOYfa0RcHihCc5FlNEOatVaJ23+ot9XdQWJhaISOXch/nSpW32vtCD2OVWOulawK992w0
+	ZtEEqrVZTXCiLbNum+Emw59vHgjjgxcb3Km9xfMCgwceO704MBCF1rs3J4dHDVCAunEkbk7
+	0dSiuzejC9VYAb9CZiTKmBuWrvmqrUIKb4LfO5oA==
+X-QQ-XMRINFO: MSVp+SPm3vtSI1QTLgDHQqIV1w2oNKDqfg==
+X-QQ-RECHKSPAM: 0
 
-Hi,
-
-On Thu, 26 Mar 2026 10:59:11 +0100, Ronald Claveau wrote:
-> This patch series depends on Jian's SCMI clock patches yet to merge
-> https://lore.kernel.org/all/20260313070022.700437-1-jian.hu@amlogic.com/
-> 
-> This series adds device tree support for the MMC, SD card and SDIO
-> interfaces on the Amlogic T7 SoC and the Khadas VIM4 board.
-> 
-> The first patches add the necessary building blocks in the T7 SoC
-> DTSI: pinctrl nodes for pin muxing, PWM controller nodes, and MMC
-> controller nodes. The amlogic,t7-mmc and amlogic,t7-pwm compatible
-> strings are introduced with fallbacks to existing drivers, avoiding
-> the need for new driver code.
-> 
-> [...]
-
-Thanks, Applied to https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git (v7.1/arm64-dt)
-
-[3/9] arm64: dts: amlogic: t7: Add MMC controller nodes
-      https://git.kernel.org/amlogic/c/759613b88fbf051c8a977a5e5b046b28a18ed5c7
-[5/9] arm64: dts: amlogic: t7: Add PWM controller nodes
-      https://git.kernel.org/amlogic/c/596e3c1bfa7869cf15079e5c6e586575013b2fc3
-[7/9] arm64: dts: amlogic: t7: khadas-vim4: Add SDIO power sequence and WiFi clock
-      https://git.kernel.org/amlogic/c/647228c014ddbd336a97e74bde81cbb2f7cbd927
-[9/9] arm64: dts: amlogic: t7: khadas-vim4: Add MMC nodes
-      https://git.kernel.org/amlogic/c/00cca65deacb29947ef32011827ff88fd59dab55
-
-These changes has been applied on the intermediate git tree [1].
-
-The v7.1/arm64-dt branch will then be sent via a formal Pull Request to the Linux SoC maintainers
-for inclusion in their intermediate git branches in order to be sent to Linus during
-the next merge window, or sooner if it's a set of fixes.
-
-In the cases of fixes, those will be merged in the current release candidate
-kernel and as soon they appear on the Linux master branch they will be
-backported to the previous Stable and Long-Stable kernels [2].
-
-The intermediate git branches are merged daily in the linux-next tree [3],
-people are encouraged testing these pre-release kernels and report issues on the
-relevant mailing-lists.
-
-If problems are discovered on those changes, please submit a signed-off-by revert
-patch followed by a corrective changeset.
-
-[1] https://git.kernel.org/pub/scm/linux/kernel/git/amlogic/linux.git
-[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-[3] https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-
--- 
-Neil
-
+On Tue Apr 7, 2026 at 4:25 PM CST, Iker Pedrosa wrote:
+> Add SD card controller infrastructure for SpacemiT K1 SoC with complete
+> pinctrl support for both standard and UHS modes.
+>
+> - Add sdhci0 controller definition with clocks, resets and interrupts
+> - Add mmc1_cfg pinctrl for 3.3V standard SD operation
+> - Add mmc1_uhs_cfg pinctrl for 1.8V UHS high-speed operation
+> - Configure appropriate drive strength and power-source properties
+>
+> This provides complete SD card infrastructure that K1-based boards can
+> enable.
+>
+> Tested-by: Anand Moon <linux.amoon@gmail.com>
+> Tested-by: Trevor Gamblin <tgamblin@baylibre.com>
+> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+Reviewed-by: Troy Mitchell <troy.mitchell@linux.dev>
