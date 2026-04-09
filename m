@@ -1,145 +1,131 @@
-Received: from mail-m49195.qiye.163.com (mail-m49195.qiye.163.com [45.254.49.195])
+Received: from mail-05.mail-europe.com (mail-05.mail-europe.com [85.9.206.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08F62382399;
-	Thu,  9 Apr 2026 07:53:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0419534B194
+	for <linux-mmc@vger.kernel.org>; Thu,  9 Apr 2026 10:13:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=85.9.206.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775721238; cv=none; b=KwpqgEteGNXpxqHyjR+H0wMocvDh+onx3HkrUhTobmYJc+Pt4ysTuC4SIF8Z0qsTU/+mawuxKeh/BHwo538Gsw2v/SOeO+vEERoSh2L6C6eO5VFgI/+GDg6XUQ49nIPj1ckyjLTLEofx7hFph2b05n04hRKWAe5lUGfKxtTefOw=
+	t=1775729614; cv=none; b=iQNCVmrsp4NBaq6mDfLL1TfJ0NfVN1WJ54sOQtLtDE9Zi0xQYsPeTaAcPPgt0CHFjoFMneoz589TlPVEMrWyxPsZ/mrjSiomZDXYQayHQtjomNGUWc96+yUGzJMcCvSECgDFoAn6BAnBhD33XPq7BkSvNhbVBZrcPPZ5Z+/J82E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775721238; c=relaxed/simple;
-	bh=OxZO01IRFxToakVWxoOCTbVjJGde2fF0FaSVlhPAgqs=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=m1rbwO4TqcgHNppwm1FKPmADB698JFSA/r8THfDyXxVZ9BQVg6NskR+qrnQ/KxH4WXW1z0Fo2hoXIkzb88xJkXIILU6BtPQw1Mb48tRsiaKNu7UE+IM4p+CBkBqJWMlByHCK9FeLuZHdMoIg39UON45c206Av83ZvTh878fZ2Zo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=FS3omU6W; arc=none smtp.client-ip=45.254.49.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1775729614; c=relaxed/simple;
+	bh=XSReWibU4/SeW+tgoH+nnF7ubkE74AtdlhTbebdj/pU=;
+	h=Date:To:From:Cc:Subject:Message-ID:MIME-Version:Content-Type; b=MivdWy0+4i0abp7laEKpeOvQk9296Tg3r1JHp4Yg2o01kM4wTYWdfOWyav946hDnr6amPOKUoCElHuyQwdmoqW/U5+dXp0WKuWfn0r/1v4npcxxm0t5OBDTZMsj8/tyoTNVdnBhLGDkk0WN0rET5otbHIyLxE/VhSEOBFktfipo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=protonmail.com; spf=pass smtp.mailfrom=protonmail.com; dkim=pass (2048-bit key) header.d=protonmail.com header.i=@protonmail.com header.b=i5ZZyK3d; arc=none smtp.client-ip=85.9.206.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=protonmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=protonmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="FS3omU6W"
-Received: from localhost.localdomain (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 3a14149f9;
-	Thu, 9 Apr 2026 15:48:43 +0800 (GMT+08:00)
-From: Shawn Lin <shawn.lin@rock-chips.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 3/4] mmc: dw_mmc: Add desc_num field for clarity
-Date: Thu,  9 Apr 2026 15:48:13 +0800
-Message-Id: <1775720894-97901-4-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1775720894-97901-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1775720894-97901-1-git-send-email-shawn.lin@rock-chips.com>
-X-HM-Tid: 0a9d713702a909cckunm41b60ef14ae58b
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGk0ZS1ZJGR8ZGh9KGBpNSklWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=FS3omU6WhJAAzUETJ3QO+n/WoKcHcZhFdODxmc+LPitPPOr4EJCnsL083PCU1n1PJDzLu5uCf7IiOLHlyz1J1Eicmi5o6MduXztS/mHvXzfd9ay1H3BdSiV2qnwAGv7YCWz083fvgx+AvtUOuANx7Hx9oHeN+MW7IzGGqxdpX74=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=8vLa5zAi/MK4RjjIAGtsBGisnHM+C9uxsWt3aNA78BI=;
-	h=date:mime-version:subject:message-id:from;
+	dkim=pass (2048-bit key) header.d=protonmail.com header.i=@protonmail.com header.b="i5ZZyK3d"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=protonmail.com;
+	s=protonmail3; t=1775729596; x=1775988796;
+	bh=XSReWibU4/SeW+tgoH+nnF7ubkE74AtdlhTbebdj/pU=;
+	h=Date:To:From:Cc:Subject:Message-ID:Feedback-ID:From:To:Cc:Date:
+	 Subject:Reply-To:Feedback-ID:Message-ID:BIMI-Selector;
+	b=i5ZZyK3dX1Ijv5Chazbv0q3QlZxpsCpcbn5UZlJX2NuuvFTgUjGVWCDE56o+MHnxk
+	 wqduAnEhHW+MCamm3dEwVvna72PLTjX0TAIfCqYCMUYafc2jb7zT0fegHpA21/DSvP
+	 hOeHarejCD4R+6KDNn3OwJyrijzRIs5w1SibODxpWNLAqeLRA0Yc5OpIZrZ4Nv+Hkz
+	 vMmcl3WA2vG9mMpvcX8UW/2CooIAcmmJ0Vph1rXnH+FXoVQup8iFr2Rx+m5IcOiFLN
+	 mEGEmwjnwGKFzfuh4980FQgPCoh9+2d3yi6cucG26WfbkYzMwo1SvdJAM0cGzqWEVY
+	 TolZ+sJK/qJ5Q==
+Date: Thu, 09 Apr 2026 10:13:12 +0000
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+From: Turritopsis Dohrnii Teo En Ming <teo.en.ming@protonmail.com>
+Cc: "ceo@teo-en-ming-corp.com" <ceo@teo-en-ming-corp.com>
+Subject: Notes on using dd to clone Debian 13.4.0 KDE Plasma installation on my Edxis Chromebook model LI9
+Message-ID: <tfcJ0dgWfa_aVegkJ4Et4mzX0ma1NUVjeuQfLBTMZcVDLXnp_sgZtnSiOCJ9_JJlxqvxnGQjl-BNnf8-8n3l0NpZ3_X9OgbVaDxMPXkzsKo=@protonmail.com>
+Feedback-ID: 39510961:user:proton
+X-Pm-Message-ID: 0f486fe5da709a012802f19dee1420fb8e0eaa2e
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-The ring_size field in struct dw_mci is misleadingly named.
-Despite its name, it does not represent the size of the descriptor
-ring buffer in bytes, but rather the number of descriptors allocated
-within the fixed-size ring buffer.
+Subject: Notes on using dd to clone Debian 13.4.0 KDE Plasma installation o=
+n my Edxis Chromebook model LI9
 
-The actual ring buffer size is fixed at PAGE_SIZE (or DESC_RING_BUF_SZ,
-which equals PAGE_SIZE). Within this buffer, we allocate either
-struct idmac_desc or struct idmac_desc_64addr descriptors, and
-ring_size stores the count of these descriptors.
+Good day from Singapore,
 
-This naming has caused confusion, as it's also used to set
-mmc->max_segs (the maximum number of scatter-gather segments),
-which logically corresponds to the number of descriptors, not a
-size in bytes.
+Detailed steps as shown below.
 
-No functional change is introduced by this naming-only patch.
+1. Prepare USB thumb drive with System Rescue 13.00 for amd64. This is a 1.=
+22 GB ISO file download.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+2. Boot up Edxis Chromebook or your laptop or your desktop computer or your=
+ server with System Rescue 13.00 USB thumb drive.
 
- drivers/mmc/host/dw_mmc.c | 16 ++++++++--------
- drivers/mmc/host/dw_mmc.h |  2 ++
- 2 files changed, 10 insertions(+), 8 deletions(-)
+3. Connect a portable USB external harddisk to the Edxis Chromebook using a=
+ USB 3.0 Hub.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 20193ee..df6daa6 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -491,12 +491,12 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 
- 	if (host->dma_64bit_address == 1) {
- 		struct idmac_desc_64addr *p;
--		/* Number of descriptors in the ring buffer */
--		host->ring_size =
-+
-+		host->desc_num =
- 			DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
- 
- 		/* Forward link the descriptor list */
--		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
-+		for (i = 0, p = host->sg_cpu; i < host->desc_num - 1;
- 								i++, p++) {
- 			p->des6 = (host->sg_dma +
- 					(sizeof(struct idmac_desc_64addr) *
-@@ -519,13 +519,13 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 
- 	} else {
- 		struct idmac_desc *p;
--		/* Number of descriptors in the ring buffer */
--		host->ring_size =
-+
-+		host->desc_num =
- 			DESC_RING_BUF_SZ / sizeof(struct idmac_desc);
- 
- 		/* Forward link the descriptor list */
- 		for (i = 0, p = host->sg_cpu;
--		     i < host->ring_size - 1;
-+		     i < host->desc_num - 1;
- 		     i++, p++) {
- 			p->des3 = cpu_to_le32(host->sg_dma +
- 					(sizeof(struct idmac_desc) * (i + 1)));
-@@ -2858,10 +2858,10 @@ static int dw_mci_init_host(struct dw_mci *host)
- 
- 	/* Useful defaults if platform data is unset. */
- 	if (host->use_dma == TRANS_MODE_IDMAC) {
--		mmc->max_segs = host->ring_size;
-+		mmc->max_segs = host->desc_num;
- 		mmc->max_blk_size = 65535;
- 		mmc->max_seg_size = 0x1000;
--		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
-+		mmc->max_req_size = mmc->max_seg_size * host->desc_num;
- 		mmc->max_blk_count = mmc->max_req_size / 512;
- 	} else if (host->use_dma == TRANS_MODE_EDMAC) {
- 		mmc->max_segs = 64;
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 14fb2b3..a05100c 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -80,6 +80,7 @@ struct dw_mci_dma_slave {
-  * @cmd_status: Snapshot of SR taken upon completion of the current
-  *	command. Only valid when EVENT_CMD_COMPLETE is pending.
-  * @ring_size: Buffer size for idma descriptors.
-+ * @desc_num: Number of idmac descriptors available.
-  * @dms: structure of slave-dma private data.
-  * @phy_regs: physical address of controller's register map
-  * @data_status: Snapshot of SR taken upon completion of the current
-@@ -185,6 +186,7 @@ struct dw_mci {
- 	const struct dw_mci_dma_ops	*dma_ops;
- 	/* For idmac */
- 	unsigned int		ring_size;
-+	unsigned short		desc_num;
- 
- 	/* For edmac */
- 	struct dw_mci_dma_slave *dms;
--- 
-2.7.4
+4. Use the following Linux commands:
+
+# mkdir /backup
+
+Assuming your portable USB external harddisk is /dev/sdb1
+
+# mount /dev/sdb1 /backup
+
+# dd if=3D/dev/mmcblk0 bs=3D4M status=3Dprogress | gzip -1 > /backup/emmc.i=
+mg.gz
+
+=F0=9F=94=8D Explanation
+
+bs=3D4M =E2=86=92 good speed for eMMC
+status=3Dprogress =E2=86=92 shows progress
+conv=3Dfsync =E2=86=92 ensures proper flushing (safer image)
+gzip -1 =E2=86=92 fast compression (important for you)
+
+=F0=9F=91=89 -1 is key:
+
+Much faster than default (-6)
+Slightly larger file, but saves a lot of time
+
+The filesize of my emmc.img.gz is 4.71 GB.
+
+The cloning process using dd took 916.149 seconds, which is about 15 minute=
+s.
+
+Taking about 15 minutes to clone Debian 13.4.0 KDE Plasma installation on E=
+dxis Chromebook is relatively fast.
+
+Restoring from the backup image file
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+
+# gunzip -c emmc.img.gz | dd of=3D/dev/mmcblk0 bs=3D4M status=3Dprogress co=
+nv=3Dfsync
+
+Once dd finishes:
+
+# sync
+
+Then reboot:
+
+# reboot
+
+=F0=9F=94=8D What this does
+
+gunzip -c emmc.img.gz =E2=86=92 decompress image to stdout
+| =E2=86=92 pipe into dd
+dd of=3D/dev/mmcblk0 =E2=86=92 writes directly to your eMMC
+bs=3D4M =E2=86=92 good performance
+status=3Dprogress =E2=86=92 shows progress
+conv=3Dfsync =E2=86=92 ensures all data is flushed to disk (important on re=
+store)
+
+I don't think I will be using Acronis True Image, Clonezilla, Rescuezilla, =
+or fsarchiver any more since using dd is very fast. About 15 minutes only. =
+And it resulted in only 1 backup image file which is what I have always wan=
+ted.
+1 backup image file is easier to manage.
+
+Regards,
+
+Mr. Turritopsis Dohrnii Teo En Ming
+Extremely Democratic People's Republic of Singapore
+9 Apr 2026 Thursday 5.29 pm Singapore Time
+
+
 
