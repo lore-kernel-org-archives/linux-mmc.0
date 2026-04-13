@@ -1,121 +1,147 @@
-Received: from mail-m32117.qiye.163.com (mail-m32117.qiye.163.com [220.197.32.117])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4D843264CA;
-	Sun, 12 Apr 2026 11:51:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.117
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 29E5C3932E4
+	for <linux-mmc@vger.kernel.org>; Mon, 13 Apr 2026 07:25:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1775994705; cv=none; b=eiZtJEdKV0+NPrjAYh6uERNVvTh4YmKZp3ad9UUbYE4YjPw3ZQKGf+1BDdZlJXCnNTnak0bOtPSfE1bXpY/GzzqxTfsm9r/d+iJxWVs7N0y1eXu4zQNOQxLkN1ZpJxByBs1tdgLy9SlHVxmFMV1arC23igmZBbZN9a3M2JWbGQc=
+	t=1776065123; cv=none; b=XqMQ01hWqtw4pwtKIgpUeUu6EWh4HLDVz2SaecbHcQ4nEZCkuWkykl+rPwIN5rjjC++FljCCjCZ4ruan+U6++pIqD2H/XXdGGeBo9XtawR599/eYoSjuw5DjYH4E/xSQAVTMHzCkyUk5H2nzAzFmGeVKHoa17IlsdjWn3oovkVQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1775994705; c=relaxed/simple;
-	bh=bbNNDxywwudPYLTI00IG7ejPCt7R5ePvNWXHZdSoULY=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=PjAuc0U7+3XZHbax0lPjsjFm7xMQaFzbSQomgtGKYNG09oPDS+GWwt07VptO/cvbe2ExOft8xRaAXFMzfdaDW7oWs4VhfF6VG5hQDLl8QBEPetxHTdrtC/lUFkFApZhlNbEzKHyWBtC+vsKdzhYgSgpEmBauvtbkDBYTTZcbH7A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=jwXqD5B8; arc=none smtp.client-ip=220.197.32.117
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1776065123; c=relaxed/simple;
+	bh=VLqXlHYEYj6QD9rr227aPs6s/WneA13bYBUQMaGOG6g=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=JLijeuWzINDFa439pNdj5H9uriAW2Hx27Vb/ndK/D5DhtyuuTYowo9rdGdLzCjLAKXdAIGCwqKIGSrERzs1XcWW/vvyJdZ8l/ibJXTfz4ydF/9T2A7pP/chZfEAsjge/ycpn03p+ZSedWPa3vFAm9NfAGRH/MRBL/4gUnQCSXrM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=qUZWHaNz; arc=none smtp.client-ip=209.85.221.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="jwXqD5B8"
-Received: from [172.16.12.17] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 3a65754ba;
-	Sun, 12 Apr 2026 19:16:02 +0800 (GMT+08:00)
-Message-ID: <c5b299e2-63e1-fd06-6688-6403d6c513e2@rock-chips.com>
-Date: Sun, 12 Apr 2026 19:15:55 +0800
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qUZWHaNz"
+Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-43cfbd17589so2701527f8f.0
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Apr 2026 00:25:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1776065120; x=1776669920; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=luHrHS8xuRmiKOe/fYmQbUMhMu1rL/RwOqTb1rEgANA=;
+        b=qUZWHaNzOYCo9S3gJJOnPw1JKkCD10LMnQwp20dAy9KClNv9LqKw4kyAg+MQKrlFnd
+         gxiEmXLuM9CnLTXwCmJECf6Etu5+YV7zbqIRqB+f7BOjPl9zuv+71Ec8x/nsaUuvU6jg
+         WT/7YfemV/GfmCKqhWFFwofM3C0ZzwX+sD7fVBM5M6NGfmH0XvPpczi95KNSMBcf7KRE
+         Z038rZ7ymo3s5ddLCQQ1h3n0z5wWQ1v/VloVgTS9wCsK29PYXBJbiqddzA9euKX19y6F
+         d0Co/qWqmGsbYu457XRlSSlg8+bxPNwgXdLcSBtkjBz223u9X7OBOoRgobugLrQ4/S7u
+         08KA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776065120; x=1776669920;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=luHrHS8xuRmiKOe/fYmQbUMhMu1rL/RwOqTb1rEgANA=;
+        b=ipDtbm2E5WdHwWeDypFfeU66NBcHrq8I99KR//gQAJxtAHrSBtkpk1zvpoIjkqwdFe
+         W01N2apCps6hzuT342EhjomEcAVUlhtazp3ChaTboX8J+5Vok6P9SxFu/8C5otaecqvY
+         Wp9nU2k62WLi+grDZZpeAMG4f2DVn7YEY7V9AbTm43nFgKMABvP/D6Y3aALp7c52IVXY
+         DHtCTATrqk1Dzvg1TJKpdGLeDx9SklcKOS4hCUFVHyelV61QtN23IO7LANmh03psfdll
+         Zr+d6U6FY1SFg3uQ84CF5wEQ8AwyDD+hcrVyieoblQje7Y03IQytqoJWKDU1KhW4g+li
+         Ksrw==
+X-Forwarded-Encrypted: i=1; AFNElJ+8AEhHsVvD6zzU5lLxtFGHaDue+nQ1p3SAU+7fCv6VqQ9x+lKKrC34qBjaMl/JvWkoD0ho2seyQY0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YytV0haPCLAGwlUAZZnLrV0cfbfOyakV6iplqEX1d2rGWoPzyyV
+	+OgPhTUdb/gr2Tqet+037x2QjaFv3tPWyfhF6TXaexT8sHIxKt0e3PI8
+X-Gm-Gg: AeBDiesXp4h/j3qBQBe+BE38O7+VaJioXwzLzo7RaAEnF+sUTSEsyw2T1bCFp+XJJT8
+	Q9Fbcg/o7kh6ByKH+YmvRLqiri5f+icVgoI62ynlQsvlgGwtpNCFZXOugoCyQgD9TVGd2WYklLq
+	WF0Am9rMutweM7N33p7dUMehlFjr22mfiS0vDAkOfQEgPctll0l80gXtsZSa7SxoevslT4jC35V
+	fae2Y53di0nkcW3EEKiewy7g3Z4tZuOkgWs+6lNQDRTg1Xtcl20GSB5ZRQv6Ht2toaNOBj7yUpU
+	Fk/3ELbjtBtnlieDTL8jlfKVRz6vVRoJhZ71UA2rrmLTuw4zLT3Nkv+bNI3ysblSP8HYbzp08MC
+	zU1HBjNXAZ/AXPcdIQPt4aPnBhKT43mOFFl3wWY90XgHkvPwjsZrZpXekkVL1vlG2rwUt3KyuzX
+	ktCDh/T30krfZXwVfnAFo00cXYmOfhSF620v4U0b3EOllCm703YsCSDxbzcKpa64vw
+X-Received: by 2002:a05:6000:24c3:b0:43d:762e:76c6 with SMTP id ffacd0b85a97d-43d762e7865mr5391556f8f.7.1776065120340;
+        Mon, 13 Apr 2026 00:25:20 -0700 (PDT)
+Received: from ipedrosa-thinkpadx1carbongen12.rmtes.csb ([67.218.239.37])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-43d7d5812dcsm330441f8f.32.2026.04.13.00.25.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 13 Apr 2026 00:25:19 -0700 (PDT)
+From: Iker Pedrosa <ikerpedrosam@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Paul Walmsley <pjw@kernel.org>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>,
+	Alexandre Ghiti <alex@ghiti.fr>,
+	Yixun Lan <dlan@kernel.org>
+Cc: Iker Pedrosa <ikerpedrosam@gmail.com>,
+	Troy Mitchell <troy.mitchell@linux.dev>,
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+	Javier Martinez Canillas <javierm@redhat.com>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	spacemit@lists.linux.dev,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v7 1/9] dt-bindings: mmc: spacemit,sdhci: add pinctrl support for voltage switching
+Date: Mon, 13 Apr 2026 09:24:43 +0200
+Message-ID: <20260413-orangepi-sd-card-uhs-v7-1-16650f49c022@gmail.com>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260413-orangepi-sd-card-uhs-v7-0-16650f49c022@gmail.com>
+References: <20260413-orangepi-sd-card-uhs-v7-0-16650f49c022@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.13.1
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: implement option for configuring DMA
- threshold
-To: Kaustabh Chakraborty <kauschluss@disroot.org>,
- Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
-References: <20260412-dwmmc-dma-thr-v1-0-75a2f658eee3@disroot.org>
- <20260412-dwmmc-dma-thr-v1-2-75a2f658eee3@disroot.org>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20260412-dwmmc-dma-thr-v1-2-75a2f658eee3@disroot.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
+X-Mailer: b4 0.14.3
 Content-Transfer-Encoding: 8bit
-X-HM-Tid: 0a9d8167e22c09cckunm2beba7a66dbc77
-X-HM-MType: 1
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQ01LHlZMSUpNGk1LH08YTBhWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-DKIM-Signature: a=rsa-sha256;
-	b=jwXqD5B8pGZJlEBERB3ADy6afbsSzyqI+RpFSyX90n17LafdxMVm53qtVk2/iP2ZA6RyhGAILonqSUpi/4qQqlGT0AYS1S7tWfmqm9Vy+N07nBMeHnrpYzaWB2+L8YaCpky973O7cAR0aVxtMyFa3r9yJu4TyL3Zw8UiyjG+/KI=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=RJ9td/PsGU8X4Vc5N0lfmNUCEHzbnQRcQ44jdnBQanA=;
-	h=date:mime-version:subject:message-id:from;
 
-Hi Kaustabh
+Document pinctrl properties to support voltage-dependent pin
+configuration switching for UHS-I SD card modes.
 
-在 2026/04/12 星期日 3:43, Kaustabh Chakraborty 写道:
-> Some controllers, such as certain Exynos SDIO ones, are unable to
-> perform DMA transfers of small amount of bytes properly. Following the
-> device tree schema, implement the property to define the DMA transfer
-> threshold (from a hard coded value of 16 bytes) so that lesser number of
-> bytes can be transferred safely skipping DMA in such controllers. The
-> value of 16 bytes stays as the default for controllers which do not
-> define it.
-> 
-> Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
-> ---
->   drivers/mmc/host/dw_mmc.c | 6 ++++--
->   drivers/mmc/host/dw_mmc.h | 1 +
->   2 files changed, 5 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 20193ee7b73eb..0c0d269b5e033 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -40,7 +40,6 @@
->   				 SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
->   #define DW_MCI_ERROR_FLAGS	(DW_MCI_DATA_ERROR_FLAGS | \
->   				 DW_MCI_CMD_ERROR_FLAGS)
-> -#define DW_MCI_DMA_THRESHOLD	16
->   
->   #define DW_MCI_FREQ_MAX	200000000	/* unit: HZ */
->   #define DW_MCI_FREQ_MIN	100000		/* unit: HZ */
-> @@ -821,7 +820,7 @@ static int dw_mci_pre_dma_transfer(struct dw_mci *host,
->   	 * non-word-aligned buffers or lengths. Also, we don't bother
->   	 * with all the DMA setup overhead for short transfers.
->   	 */
-> -	if (data->blocks * data->blksz < DW_MCI_DMA_THRESHOLD)
-> +	if (data->blocks * data->blksz < host->dma_threshold)
->   		return -EINVAL;
->   
->   	if (data->blksz & 3)
-> @@ -3137,6 +3136,9 @@ static int dw_mci_parse_dt(struct dw_mci *host)
->   	if (!host->data_addr_override)
->   		device_property_read_u32(dev, "data-addr", &host->data_addr_override);
->   
-> +	if (device_property_read_u32(dev, "dma-threshold-bytes", &host->dma_threshold) < 0)
-> +		host->dma_threshold = 16;
-> +
->   	if (device_property_present(dev, "fifo-watermark-aligned"))
->   		host->wm_aligned = true;
->   
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 42e58be74ce09..5cdd342d01b68 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -163,6 +163,7 @@ struct dw_mci {
->   	void __iomem		*regs;
->   	void __iomem		*fifo_reg;
->   	u32			data_addr_override;
-> +	u32			dma_threshold;
+Add optional pinctrl-names property with two states:
+- "default": For 3.3V operation with standard drive strength
+- "state_uhs": For 1.8V operation with optimized drive strength
 
-In addition to fixing the issue mentioned in patch 1, please add a 
-comment for this new member.
+These pinctrl states allow the SDHCI driver to coordinate voltage
+switching with pin configuration changes, ensuring proper signal
+integrity during UHS-I mode transitions.
 
->   	bool			wm_aligned;
->   
->   	struct scatterlist	*sg;
-> 
+Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+---
+ Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+index 9a055d963a7f..34d202af909f 100644
+--- a/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/spacemit,sdhci.yaml
+@@ -44,6 +44,18 @@ properties:
+       - const: axi
+       - const: sdh
+ 
++  pinctrl-names:
++    minItems: 1
++    items:
++      - const: default
++      - const: uhs
++
++  pinctrl-0:
++    description: Default pinctrl state for 3.3V operation
++
++  pinctrl-1:
++    description: Optional pinctrl state for 1.8V UHS operation with "uhs" name
++
+ required:
+   - compatible
+   - reg
+@@ -62,4 +74,7 @@ examples:
+       interrupt-parent = <&plic>;
+       clocks = <&clk_apmu 10>, <&clk_apmu 13>;
+       clock-names = "core", "io";
++      pinctrl-names = "default", "uhs";
++      pinctrl-0 = <&sdhci_default_cfg>;
++      pinctrl-1 = <&sdhci_uhs_cfg>;
+     };
+
+-- 
+2.53.0
+
