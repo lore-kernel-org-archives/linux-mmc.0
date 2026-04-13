@@ -1,95 +1,129 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2FBF33BBC0;
-	Mon, 13 Apr 2026 15:43:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 68A2B280CFB
+	for <linux-mmc@vger.kernel.org>; Mon, 13 Apr 2026 17:38:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776094991; cv=none; b=P4ROzgr3VZRDVpsM//sEKU9sv7aY1jaQ2kWubFbOlIY9/WeEcNUAjUTNveVPkaK62mT06zI7gnXOdplsJ7WRl5FKeJinBeX+vw57Vo8CQpOv9aCNwXGNI/RYiVP/wPwgFy6BvVxrgLQhQqB7DkWmGVeriTKSS8J3q1J9FZ8UZFU=
+	t=1776101898; cv=none; b=AMjAe8Wl2r4Dx7iSWttgGrYcjp0YmpmoRZNFwRjYo9w5m51qNd8U/P6VId0h+lRj2G9q+CfNNMGWAR9tDMycC4O65yDxFU00pIRl4d/SGH47Lq2yzjjN92ZI/5Fg7Hauw0ldu/ZoJjXkd8VUdzAsTWE+8OYoFq1CURcbwzQNFP4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776094991; c=relaxed/simple;
-	bh=J6M91WN4wCbUaBUzpCxhjIP7l+s0mcfpvXiabrHgDQg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=E2jjhWJvkDrI2mdUhbn9rRdEmsaz82nnjG1MoqVKtOhgyAXi8riwlCp259dYEnwtW3yaxpk3XmnqxcuvBkTLNW4YUemb+WDX9NcqUdEkE9kUFJiHvNwHN6SH+pqgqE8j5AGxPyCqsgvi6f5ifbxbqa/8CLWfr9JCtcMMZHVOmhQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=R7aCrpwn; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1776101898; c=relaxed/simple;
+	bh=Kl8lRLm9vqLihtKru0h03pGYWOyeGTEVUdW4thdRAzg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=B1lPMSduBHDQJGMfspcgkXwUZ53jX2XQQ4gYMx61e0ld9zD+Upv6laTndYpI9LcAgi0dy0wE1bq5arZj6CUOb0iUGMh4RWdf+TRrv7+HQ8pcwTISdCP89nVlsWvqPSTErk7nw66tsmDkDfc3aq4iJ/VPmnmdlLyd0WTnnCyjBuI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=eRSUm6dV; arc=none smtp.client-ip=13.77.154.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="R7aCrpwn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E1F3DC2BCAF;
-	Mon, 13 Apr 2026 15:43:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776094991;
-	bh=J6M91WN4wCbUaBUzpCxhjIP7l+s0mcfpvXiabrHgDQg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=R7aCrpwnUb1R4a7GvWyujsiZt0jFDb4IG44cdICeSBu1WJQFlZtg0a0j1TpFphJUb
-	 Slk8vaaxDFtZkR5y5YPSrGJkaLiY9TPl/ZIGdFMst2FTguMDqptzOZK3oeSJBJCUc0
-	 n89V1Py4jWWoBOtqQuGQus+dzpWOhcx1FAW0ZyWSo0++CjSF85bGb0bM5qWEFOj4uG
-	 LhvbjkH7a8RxkExHNkdqQuFZ26aceoy99TGXuC5DkXe1dWTPeIcjzAj1zarEvDXGpr
-	 V+35PZ9B53Mlt7widHkX0lvULY0b4b5cdR+nplnqCAk/McSkHyANcqNOlE+FijOZOC
-	 Ut8t4eO1IOKpQ==
-Date: Mon, 13 Apr 2026 16:43:05 +0100
-From: Conor Dooley <conor@kernel.org>
-To: Iker Pedrosa <ikerpedrosam@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Yixun Lan <dlan@kernel.org>,
-	Troy Mitchell <troy.mitchell@linux.dev>,
-	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
-	Javier Martinez Canillas <javierm@redhat.com>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v7 1/9] dt-bindings: mmc: spacemit,sdhci: add pinctrl
- support for voltage switching
-Message-ID: <20260413-marry-discover-e8357e12cf50@spud>
-References: <20260413-orangepi-sd-card-uhs-v7-0-16650f49c022@gmail.com>
- <20260413-orangepi-sd-card-uhs-v7-1-16650f49c022@gmail.com>
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="eRSUm6dV"
+Received: from [100.65.225.115] (unknown [20.236.11.42])
+	by linux.microsoft.com (Postfix) with ESMTPSA id E478220B6F01;
+	Mon, 13 Apr 2026 10:38:16 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com E478220B6F01
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+	s=default; t=1776101897;
+	bh=mP903dU9E33eepcYpUl+fojnP5DkqKJS4SIH6D9VG4A=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=eRSUm6dVxDM8+l8UZbS6bfvl5PP7E8vnXwL/BnbzJu+GC+gVIwbb7jojj9gJc9YcA
+	 TbDemA4ZnDah8mZwqG9nUnu8SygKTWbWrjGgqSZedKmpQfnip2XoVpblI1/uJ+EHqk
+	 aCJxjR91NYSzdnIe2aXfCcJ0lvYm3ozBEbKOfl30=
+Message-ID: <3305684d-8517-47dd-8852-2e34d40fc712@linux.microsoft.com>
+Date: Mon, 13 Apr 2026 10:38:15 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="url34NB/arvIj4F7"
-Content-Disposition: inline
-In-Reply-To: <20260413-orangepi-sd-card-uhs-v7-1-16650f49c022@gmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH] mmc: host: sdhci-iproc: implement the .hw_reset
+ callback
+To: rjui@broadcom.com
+Cc: sbranden@broadcom.com, linux-arm-kernel@lists.infradead.org,
+ tgopinath@linux.microsoft.com, adrian.hunter@intel.com,
+ linux-mmc@vger.kernel.org
+References: <20260327222150.2108111-1-meaganlloyd@linux.microsoft.com>
+Content-Language: en-US
+From: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
+In-Reply-To: <20260327222150.2108111-1-meaganlloyd@linux.microsoft.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 
---url34NB/arvIj4F7
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 3/27/2026 3:21 PM, Meagan Lloyd wrote:
+> Implement the .hw_reset callback so that the eMMC can be reset as needed
+> given cap-mmc-hw-reset is set in the devicetree and the functionality is
+> enabled on the eMMC.
+>
+> Signed-off-by: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
+> ---
+>
+> SDHCI_POWER_CONTROL[4] (SD Host Controller Standard) has been repurposed
+> on my Broadcomm processor to be eMMC hardware reset
+> (SDIO*_eMMCSDXC_CTRL[12], HRESET).
+>
+> Can you confirm this repurposed bit is consistent across the Broadcomm
+> iProc processors and thus the .hw_reset callback can be uniformly
+> applied in this driver?
 
-On Mon, Apr 13, 2026 at 09:24:43AM +0200, Iker Pedrosa wrote:
-> Document pinctrl properties to support voltage-dependent pin
-> configuration switching for UHS-I SD card modes.
->=20
-> Add optional pinctrl-names property with two states:
-> - "default": For 3.3V operation with standard drive strength
-> - "state_uhs": For 1.8V operation with optimized drive strength
->=20
-> These pinctrl states allow the SDHCI driver to coordinate voltage
-> switching with pin configuration changes, ensuring proper signal
-> integrity during UHS-I mode transitions.
->=20
-> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+Hi Ray & Scott,
 
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
-pw-bot: not-applicable
+I hope you're doing well. This bit looks to have been repurposed from
+the SD Host Controller Standard's VDD2 Power Control to being used for
+toggling the hardware reset signal to eMMCs. Can you verify that it
+applies across the iProc processors so that I may finalize this patch?
 
---url34NB/arvIj4F7
-Content-Type: application/pgp-signature; name="signature.asc"
+Thank you,
 
------BEGIN PGP SIGNATURE-----
+Meagan
 
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCad0PCQAKCRB4tDGHoIJi
-0ju+AP4tcscdxvK3w0q7a3EslP/B5N38OkukMtHg6HhJxJm+UgD/aSGhGAavzlZG
-/mHJ2SrhK59zNN/4YPhq1XaISVMRzww=
-=Mk/L
------END PGP SIGNATURE-----
-
---url34NB/arvIj4F7--
+>
+> ---
+>  drivers/mmc/host/sdhci-iproc.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index 35ef5c5f51467..9018ed7fe2e66 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -181,12 +181,26 @@ static unsigned int sdhci_iproc_bcm2711_get_min_clock(struct sdhci_host *host)
+>  	return 200000;
+>  }
+>  
+> +static void sdhci_iproc_hw_reset(struct sdhci_host *host)
+> +{
+> +	u8 val = sdhci_readb(host, SDHCI_POWER_CONTROL);
+> +
+> +	/* Trigger reset and hold for at least 1us (eMMC spec requirement) */
+> +	sdhci_writeb(host, val | BIT(4), SDHCI_POWER_CONTROL);
+> +	usleep_range(2, 10);
+> +
+> +	/* Release from reset and wait for at least 200us (eMMC spec requirement) */
+> +	sdhci_writeb(host, val & ~BIT(4), SDHCI_POWER_CONTROL);
+> +	usleep_range(250, 300);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_iproc_ops = {
+>  	.set_clock = sdhci_set_clock,
+>  	.get_max_clock = sdhci_iproc_get_max_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.reset = sdhci_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +	.hw_reset = sdhci_iproc_hw_reset,
+>  };
+>  
+>  static const struct sdhci_ops sdhci_iproc_32only_ops = {
+> @@ -201,6 +215,7 @@ static const struct sdhci_ops sdhci_iproc_32only_ops = {
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.reset = sdhci_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +	.hw_reset = sdhci_iproc_hw_reset,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_iproc_cygnus_pltfm_data = {
+> @@ -283,6 +298,7 @@ static const struct sdhci_ops sdhci_iproc_bcm2711_ops = {
+>  	.set_bus_width = sdhci_set_bus_width,
+>  	.reset = sdhci_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +	.hw_reset = sdhci_iproc_hw_reset,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_bcm2711_pltfm_data = {
