@@ -1,86 +1,86 @@
-Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9562D3A6F1E;
-	Wed, 15 Apr 2026 15:03:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id D8B3E3195E4
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2026 18:08:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776265400; cv=none; b=CmpftZ5kFwV89Qtr+rYK/PeI2Vy6YXfNukkTu5piu6hZIl3z0jycPToshkWsVdwr9C0DOVkcEZt0y2yGMM+SrI70izc2Qz8XF2yznZ5fffO5zPOguWv+sU+YLMH/BxBI0ewSyrzmuCeFdPcmr3DNa9Q1PcbLTnScJfhxL8NIePA=
+	t=1776276490; cv=none; b=GxVzZ1CZU/K0gsq32fBuH8eviuemHEsxBaD98fTvC4k0mrrXu1g0bZxdVjj1EAy8cef+sEornihKiw/KKUci426nR9MD0N2OOuZX9sEDN7ejopnF7rByn0q1xiT46RFsII4G8xCJWLMTwEwLH9XsBsPkOI4OfKu1WMsHfcjsWeA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776265400; c=relaxed/simple;
-	bh=L84JWopRw4FxKWz9AQYxbsooFwv6BpfQMhWnSZT5k/o=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=izlxXeeflgfjaby4HxmKXK7PnvZ1HcfstXZL3qgZ89N4MalpAJwWbsAauXH5Zvyzg8HPLG0bJnNf2b8N/QRyu+kosYU+ENspJg9sdywhhGIsT08UKsKPENU1unjJ7ceLdzT9+FrXyHI0zm5C0fB80pPRbfaU+zwFKGflbYYhyrY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=dT3QtYJ2; arc=none smtp.client-ip=178.21.23.139
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
+	s=arc-20240116; t=1776276490; c=relaxed/simple;
+	bh=TCV4VIJmWx9k667IW/rOciXHIeyHQuU5WisubSOrurc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=dscK9XSHdgaaQG2GvhmI7U6doZAHeciIcYOayHL++QXLqAsdgqd95Geqp006uccjzLLEgK/yo/D1j9kjB9JyZbxHK5x6IMubUaGe82T9heSuqen3w1ARkPO/0zFG/0nsoNH0oZcUGD3qncC+BCBm3A2z18HK4/E8QwJZNc/kXmQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=qxkXAeh6; arc=none smtp.client-ip=13.77.154.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="dT3QtYJ2"
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id 101EC27157;
-	Wed, 15 Apr 2026 17:03:18 +0200 (CEST)
-X-Virus-Scanned: SPAM Filter at disroot.org
-Received: from layka.disroot.org ([127.0.0.1])
- by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id W6gzkfQ_kabV; Wed, 15 Apr 2026 17:03:17 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1776265397; bh=L84JWopRw4FxKWz9AQYxbsooFwv6BpfQMhWnSZT5k/o=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc;
-	b=dT3QtYJ2ZkmGSWY2R69mfOtu0cshVPJL3NgQuD6eN14GcsgvCFccoc+1XlY7r1J9P
-	 iV35LO9Lj9X1QZsqfXAvQsrc3HZBpMRr8P8CxJFp75ya/I/fzY2Rj9U96vf9eat0x4
-	 XGMMFcmgO7cPALyzF9wbBVlVli0mXlXZhYzwa2M6KnO/cLjMY6dX0h+3dDt8BA84VT
-	 4Nxo7tB/gixyr0vbhRn19iIb8+2x4lvnD+2BLYHDYqARtiWNedH7XKQTDhar2bc5/4
-	 +G3raNE1oOQaY3TXxJ2T/MOu17Y5x4nSqHKCtxyN1S/VDEJqpNUMDXlbsJJYHwmvF6
-	 GRrci01HcN7+w==
-From: Kaustabh Chakraborty <kauschluss@disroot.org>
-Date: Wed, 15 Apr 2026 20:32:09 +0530
-Subject: [PATCH v3 2/2] mmc: dw_mmc: exynos: increase DMA threshold value
- for exynos7870
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="qxkXAeh6"
+Received: from [10.17.149.54] (unknown [131.107.1.246])
+	by linux.microsoft.com (Postfix) with ESMTPSA id A347B20B7128;
+	Wed, 15 Apr 2026 11:08:01 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com A347B20B7128
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+	s=default; t=1776276481;
+	bh=TCV4VIJmWx9k667IW/rOciXHIeyHQuU5WisubSOrurc=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=qxkXAeh6A57FRAaZ6ImQ5cMOifokZ9e36rM6iGTU6eCB5uKHnYNosUIR4ZGv/erTZ
+	 p72khgsnBaQnzG9kW1IItvlE5219X6GHUaq5gtA7T4ilxEcvk5/HJdBqILP5WpcLCK
+	 te89vK2aF1HQKdncjhPLcMK1ZqESt7hS29WWfGkA=
+Message-ID: <448010ef-278c-4711-a244-447a2b1a22c1@linux.microsoft.com>
+Date: Wed, 15 Apr 2026 11:07:59 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260415-dwmmc-dma-thr-v3-2-31014d36b6ee@disroot.org>
-References: <20260415-dwmmc-dma-thr-v3-0-31014d36b6ee@disroot.org>
-In-Reply-To: <20260415-dwmmc-dma-thr-v3-0-31014d36b6ee@disroot.org>
-To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
- Shawn Lin <shawn.lin@rock-chips.com>, Krzysztof Kozlowski <krzk@kernel.org>, 
- Alim Akhtar <alim.akhtar@samsung.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- linux-samsung-soc@vger.kernel.org, 
- Kaustabh Chakraborty <kauschluss@disroot.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH] mmc: host: sdhci-iproc: implement the .hw_reset
+ callback
+To: Florian Fainelli <florian.fainelli@broadcom.com>, rjui@broadcom.com
+Cc: sbranden@broadcom.com, linux-arm-kernel@lists.infradead.org,
+ tgopinath@linux.microsoft.com, adrian.hunter@intel.com,
+ linux-mmc@vger.kernel.org
+References: <20260327222150.2108111-1-meaganlloyd@linux.microsoft.com>
+ <3305684d-8517-47dd-8852-2e34d40fc712@linux.microsoft.com>
+ <702c52e4-b0b3-4e1e-a40d-29e136e46d7d@broadcom.com>
+Content-Language: en-US
+From: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
+In-Reply-To: <702c52e4-b0b3-4e1e-a40d-29e136e46d7d@broadcom.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Exynos 7870 compatible controllers, such as SDIO ones are not able to
-perform DMA transfers for small sizes of data (~16 to ~512 bytes),
-resulting in cache issues in subsequent transfers. Increase the DMA
-transfer threshold to 512 to allow the shorter transfers to take place,
-bypassing DMA.
 
-Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
----
- drivers/mmc/host/dw_mmc-exynos.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 261344d3a8cfe..4b76b997ddc15 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -141,6 +141,7 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
- 		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7870_SMU) {
- 		/* Quirk needed for certain Exynos SoCs */
- 		host->quirks |= DW_MMC_QUIRK_FIFO64_32;
-+		host->dma_threshold = 512;
- 	}
- 
- 	if (priv->ctrl_type == DW_MCI_TYPE_ARTPEC8) {
-
--- 
-2.53.0
-
+On 4/13/2026 10:43 AM, Florian Fainelli wrote:
+> On 4/13/26 10:38, Meagan Lloyd wrote:
+>>
+>> On 3/27/2026 3:21 PM, Meagan Lloyd wrote:
+>>> Implement the .hw_reset callback so that the eMMC can be reset as
+>>> needed
+>>> given cap-mmc-hw-reset is set in the devicetree and the
+>>> functionality is
+>>> enabled on the eMMC.
+>>>
+>>> Signed-off-by: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
+>>> ---
+>>>
+>>> SDHCI_POWER_CONTROL[4] (SD Host Controller Standard) has been
+>>> repurposed
+>>> on my Broadcomm processor to be eMMC hardware reset
+>>> (SDIO*_eMMCSDXC_CTRL[12], HRESET).
+>>>
+>>> Can you confirm this repurposed bit is consistent across the Broadcomm
+>>> iProc processors and thus the .hw_reset callback can be uniformly
+>>> applied in this driver?
+>>
+>> Hi Ray & Scott,
+>>
+>> I hope you're doing well. This bit looks to have been repurposed from
+>> the SD Host Controller Standard's VDD2 Power Control to being used for
+>> toggling the hardware reset signal to eMMCs. Can you verify that it
+>> applies across the iProc processors so that I may finalize this patch?
+>
+> Which iProc process are you using? If you are not sure this applies
+> broadly, can you at least make it specific to the SoC you are using? 
+Yes, if it comes to that I can. I think it's overkill to roll a new
+compat string/associated structures over this small change, hence
+checking with Broadcomm iProc maintainers on this thread.
