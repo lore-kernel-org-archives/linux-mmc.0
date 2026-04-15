@@ -1,139 +1,199 @@
-Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
+Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DDD33D6698;
-	Tue, 14 Apr 2026 10:50:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776163809; cv=none; b=iall4SSJuDiCtS84Wk/64l88FEReiHZjG2jvaZ0e14Eemk/xlmwF0OPwP/uNBw+2ImBcezhBxb3AJbJc2bP7mQy7vNSTYbPL8Pf4PvQwcCJnhtXL/VRJF6+qeqWPelq1zuZxemouNd/546qvBYeSMaZMvQt4aifSZRvr09cnC3E=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776163809; c=relaxed/simple;
-	bh=ATR7jPCiqFhUJZWvipHfB9fQLlfRKaC77BcEuJfekz4=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Subject:From:To:Cc:
-	 References:In-Reply-To; b=aDa7rCwAYPQvxbZPwXYlyNrvJCJeWUsF0eMGAhN5p5ZNYlv421rJONeaTi2vyRfj6dzbgS+AZAGcau5sk8ivlZ7dFuYPh1vTM+uQfWBBTNDpjP5pZnDJI9wxgL1OgUQxwAoqQ4WQg8ClbxcCOHYKJvUVBo7OgmW3ciDqj+hJnII=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=bU5WOgvD; arc=none smtp.client-ip=178.21.23.139
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C40C33A702
+	for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2026 09:30:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.51
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776245460; cv=pass; b=Iut0MneaF5bXR/DWLMiQjG2cKz2ZQ8XGj23wVq5PSnBq4lYm148iZ2A7hYWfdst10lpAjqTIc8amhDnJfNfN07IUWH73kZHdk/TR0GfvLlV1DexxxIo/Vi/3rwMhDbeg6iWfcqXLi2u9pxtpMOCTlvKsnUK2mXVNtwPd+WY7SYg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776245460; c=relaxed/simple;
+	bh=/u3zVaCUOi1leLGIXQJ3yEy5YFCbysx4+Z9LqXEjesI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=E8vb1yFJbRfLsSKKqGmPQWbt8xfi4wuSm9ea7/dEXcRWVFZENJdZ5XqCTKP1JyrgIc1sei3GW6LDkFdP97VcPupRJDIuUnEOxBetSspz5KN9XMCuSJB4EzMKBEkWJoUc7REAdtvmTSMAr1ozvt+SkDT864cFe3iGERLHDU/UMfI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LOD1Pj+n; arc=pass smtp.client-ip=209.85.167.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="bU5WOgvD"
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id A11F32673A;
-	Tue, 14 Apr 2026 12:50:02 +0200 (CEST)
-X-Virus-Scanned: SPAM Filter at disroot.org
-Received: from layka.disroot.org ([127.0.0.1])
- by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id ah9wOf_RKuH4; Tue, 14 Apr 2026 12:50:01 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1776163801; bh=ATR7jPCiqFhUJZWvipHfB9fQLlfRKaC77BcEuJfekz4=;
-	h=Date:Subject:From:To:Cc:References:In-Reply-To;
-	b=bU5WOgvDZTzvFknUo05leQFShBt352kJl6xDKxA//wTjNOpFR0BsbGj2lmpW4LxFo
-	 /6L+yP5O/Q+XDIAZSaQ7wgjFsc30YZYUbEFOgj6mPt03OLnnpJ6uw4nxzK5+9+obwp
-	 2ZqbjkPEtZPrbqRAjxdGO5HqbXCNboQhy2WrgyE2WVNOx8hc116sj/bfJ3XtOW4wmE
-	 PXNkMieYy1iXmiell9tTjrk1extFxAcOjyQhEguYEQCEfkf77jgyPsLxZb9f0mQCs/
-	 b1p+jWbCMMKNvyGas1o/maZmXZBOJ6M5E/jzMtoQfhwUhZHtb06n5AOKCXBUnDcEMf
-	 XXhykpnNkkWlA==
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LOD1Pj+n"
+Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-5a283c44478so10191253e87.3
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Apr 2026 02:30:57 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776245456; cv=none;
+        d=google.com; s=arc-20240605;
+        b=OvhyTq3NvNsHjLZY2r2RRWy7MIse1LsDMvFICd1k+4Iue4ARUsKKz0bLwp7PNkQqeZ
+         YuL0V6/FxEnemWPUfExRgwTL+JDK+WCZ5v4cdf1f2jLCbfvCLy2llG4QZpf7DJ1gdkfk
+         pFZT0UX4hWGvwHsFNXD2cuPwfvOopruHCuN8FOoaIDG4LdPL2hJb6cKwwCY53yyyxp/Z
+         Fo7z9CCStYNhHkaCD6bODiF6S9oFH2BNxAwoFcOHNJ5Rdunux19dvoM/NUWE5cbLCZW4
+         LZ7nQ5rp5C3FD3WVPFy8+dfiK4eyGYN1VF8XLlVJVvLfV0AJo/SPAkNM7aH5Oe7idtVQ
+         GbbQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=asoGm5k2b/W+D3bbPPi1yaiAJFNCI1hMG2WOSwnM4dM=;
+        fh=yOZZ5IWy1I6yHQAg7AxzcJmj03h8np4vJCHDPn0LbcY=;
+        b=aEcNYA01mdYyUh+cwsFzJUalReMakfFHYK1/FztdK7V7ofhoLxqAHljjKS4DU4RAUU
+         jg4BNMuu1p7m5UF1Lvz6tpivmcN6E0/yQEism77hfvC48bISpCjysxawRkCXFw6jzi0P
+         LDOsXPZ1wVD8UtnpTClkj5kWDqemcGS9Z+TYj0HnF8UVyDWQEWlHbTZLpOM8sACEKwkz
+         lJCNusS71FDIGZB7CSc3mKyGdRoU+MPk3OJPW7v62shUsne+a+a9P95SUE3w38jx0lfV
+         Oh6NAUFXzJIs8OM9UoXGJ223V0RBHmf5FJnm4qdgAQ5X3V2rxq2W0i5MtdXF9cyRHMPu
+         kt7Q==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1776245456; x=1776850256; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=asoGm5k2b/W+D3bbPPi1yaiAJFNCI1hMG2WOSwnM4dM=;
+        b=LOD1Pj+nKhgtpF9KzWymULpbCcYNTX+fbqaoaWCbO7WRWjYfBUdR1gWgppffNUC7M+
+         0AKsTwvH3osVEYL7+zrwcdWHLVviGl/4217qIe9mWyPbRD1RO1jvpULWt6b0QF51oZeY
+         bU5TIYMIP/5N7aKoKVvVx5VVLutMeLyoAzDUiCjaG6TghNK/KvvnjVpkkcUAgTLiZxak
+         zQgzo9WQATYm1BOPo6YPhDJJcSIM7SAIGoyzTBJaL0PkgqR7KalL/jBUP3T/H8nx+cHy
+         JQgKbQP0FIpnJpyqW94Y7g8fbw3mwjyXxTrKj9uMbpH6Y+a83kuF+t9jrCC5EXbFv2OG
+         1EIg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776245456; x=1776850256;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=asoGm5k2b/W+D3bbPPi1yaiAJFNCI1hMG2WOSwnM4dM=;
+        b=tIYaYEOlkwUW0gmkh/HG1uJP1QefSpIq0IhWDB5uEcIOmPhodGP91WqOdv7aZtQ5bP
+         +5WSqykRXPAejPLVGKHk+rTt4KsoY8qivzuWK5no3XUGn5teL6Oi0yNpM0h3/DwJYkjX
+         sKVbYTBKiXPin/pGa1Sh6Q+MnG595cs8q7wL1UXISlePv6iXZNQi+eWx7hqfMHh5rEVi
+         5BbBjadPscXbJTLE/HViJACnTMW0AFnr62Lw8yl2AwRb6YB6hjcxPGAiMdj91es0wnvL
+         lg6Jr6fj4FoR+5IoKYfVSW136jlwngrZOwzXhVAiGZWnQrtBJHna4vI6MBBpLX0hJBBG
+         ePuA==
+X-Forwarded-Encrypted: i=1; AFNElJ+4Avxiku+MRl6slh50z++3TI6ryZ1h3V2Um4Khkh5PlypajYyULxqKs/v/mQuF48ByMdtx/UG1/Ek=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyAeoMhblV/JDlSZBdM53dXEblAvKmFy7YymBzUE7PwlI/y+JmE
+	0v32zdnFUrsrTVA+DjXEoIHQA8uGEQe2/t2NVbteAlNqWhewBn2ItbFbxTOEMwND0zGhhbUHtjM
+	tIFB8lDdWugR5pUQCP31kYgnmu9GQwIabbRPW+nMvew==
+X-Gm-Gg: AeBDietQOLxHPINhlnjiwgWp5ISe0MmQe9v9R1OaJz+EK44Mzij1sqWsUd8EZflHrvg
+	DvablZ6dC/9MCNK9S82S9L9g5s+QdCO2HSVZ/RtUJ+C8vkyNx5m5AxTFYZYrbva1fCs20jPXFcW
+	3ShrWC8kcL5e1wv11hZkAcMypQTqOSZGDXAqETg0K3iJWXalf7Uq/MIWyrQrMgTtmzORYsRCxJc
+	K+hvv84yeKKJSyxIhKWeb5D67+0SlJcH7Fzjceu2bT8kp4P6tZBZpv8kFCurVHYtuHDkfpzNK+O
+	Ku0YHVBx9Ua/bVbP03I=
+X-Received: by 2002:a05:6512:3d0f:b0:5a2:7bc2:a385 with SMTP id
+ 2adb3069b0e04-5a3efb59485mr6720922e87.38.1776245455495; Wed, 15 Apr 2026
+ 02:30:55 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Tue, 14 Apr 2026 16:19:52 +0530
-Message-Id: <DHSTILN3EP1X.1KGAMPFVIKXJC@disroot.org>
-Subject: Re: [PATCH v2 1/2] mmc: dw_mmc: implement option for configuring
- DMA threshold
-From: "Kaustabh Chakraborty" <kauschluss@disroot.org>
-To: "Shawn Lin" <shawn.lin@rock-chips.com>, "Kaustabh Chakraborty"
- <kauschluss@disroot.org>, "Ulf Hansson" <ulfh@kernel.org>, "Rob Herring"
- <robh@kernel.org>, "Krzysztof Kozlowski" <krzk+dt@kernel.org>, "Conor
- Dooley" <conor+dt@kernel.org>, "Jaehoon Chung" <jh80.chung@samsung.com>,
- "Krzysztof Kozlowski" <krzk@kernel.org>, "Alim Akhtar"
- <alim.akhtar@samsung.com>
-Cc: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
- <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
- <linux-samsung-soc@vger.kernel.org>
-References: <20260414-dwmmc-dma-thr-v2-0-4058078f5361@disroot.org>
- <20260414-dwmmc-dma-thr-v2-1-4058078f5361@disroot.org>
- <cec99f99-5ac4-7f0d-8e2a-947edfef8930@rock-chips.com>
-In-Reply-To: <cec99f99-5ac4-7f0d-8e2a-947edfef8930@rock-chips.com>
+MIME-Version: 1.0
+References: <20260320203249.1965044-1-kamal.dasu@broadcom.com> <20260320203249.1965044-2-kamal.dasu@broadcom.com>
+In-Reply-To: <20260320203249.1965044-2-kamal.dasu@broadcom.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 15 Apr 2026 11:30:18 +0200
+X-Gm-Features: AQROBzBOthnLox9m6ZSYs81w-N5rCn_yi2Nlq-wjOxJAb8f3I9FXVnuOvR94YUA
+Message-ID: <CAPDyKFrZLWg0KAa9DW-R2RAYvP70_T-DtosCpYRf3kMtprb7DQ@mail.gmail.com>
+Subject: Re: [PATCH v4 1/4] mmc: core: Add panic-context host operations for
+ pstore backends
+To: Kamal Dasu <kamal.dasu@broadcom.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Kees Cook <kees@kernel.org>, 
+	Tony Luck <tony.luck@intel.com>, "Guilherme G . Piccoli" <gpiccoli@igalia.com>, 
+	Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Arend van Spriel <arend.vanspriel@broadcom.com>, William Zhang <william.zhang@broadcom.com>, 
+	bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 2026-04-14 16:50 +08:00, Shawn Lin wrote:
-> =E5=9C=A8 2026/04/14 =E6=98=9F=E6=9C=9F=E4=BA=8C 16:36, Kaustabh Chakrabo=
-rty =E5=86=99=E9=81=93:
->> Some controllers, such as certain Exynos SDIO ones, are unable to
->> perform DMA transfers of small amount of bytes properly. Following the
->> device tree schema, implement the property to define the DMA transfer
->> threshold (from a hard coded value of 16 bytes) so that lesser number of
->> bytes can be transferred safely skipping DMA in such controllers. The
->> value of 16 bytes stays as the default for controllers which do not
->> define it. This value can be overridden by implementation-specific init
->> sequences.
->>=20
->> Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
->> ---
->>   drivers/mmc/host/dw_mmc.c | 5 +++--
->>   drivers/mmc/host/dw_mmc.h | 2 ++
->>   2 files changed, 5 insertions(+), 2 deletions(-)
->>=20
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 20193ee7b73eb..9dd9fed4ccf49 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -40,7 +40,6 @@
->>   				 SDMMC_INT_RESP_ERR | SDMMC_INT_HLE)
->>   #define DW_MCI_ERROR_FLAGS	(DW_MCI_DATA_ERROR_FLAGS | \
->>   				 DW_MCI_CMD_ERROR_FLAGS)
->> -#define DW_MCI_DMA_THRESHOLD	16
->>  =20
->>   #define DW_MCI_FREQ_MAX	200000000	/* unit: HZ */
->>   #define DW_MCI_FREQ_MIN	100000		/* unit: HZ */
->> @@ -821,7 +820,7 @@ static int dw_mci_pre_dma_transfer(struct dw_mci *ho=
-st,
->>   	 * non-word-aligned buffers or lengths. Also, we don't bother
->>   	 * with all the DMA setup overhead for short transfers.
->>   	 */
->> -	if (data->blocks * data->blksz < DW_MCI_DMA_THRESHOLD)
->> +	if (data->blocks * data->blksz < host->dma_threshold)
->>   		return -EINVAL;
->>  =20
->>   	if (data->blksz & 3)
->> @@ -3245,6 +3244,8 @@ int dw_mci_probe(struct dw_mci *host)
->>   		goto err_clk_ciu;
->>   	}
->>  =20
->> +	host->dma_threshold =3D 16;
+On Fri, 20 Mar 2026 at 21:33, Kamal Dasu <kamal.dasu@broadcom.com> wrote:
 >
-> I'd prefer to set it in dw_mci_alloc_host() instead of picking up
-> a random place to put it, for better code management.
-
-Okay, that function is in -next I see.
-
+> Add three new optional callbacks to struct mmc_host_ops for panic-safe
+> MMC I/O:
 >
->> +
->>   	if (host->rstc) {
->>   		reset_control_assert(host->rstc);
->>   		usleep_range(10, 50);
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index 42e58be74ce09..fc7601fba849f 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -164,6 +164,8 @@ struct dw_mci {
->>   	void __iomem		*fifo_reg;
->>   	u32			data_addr_override;
->>   	bool			wm_aligned;
->> +	/* Configurable data byte threshold value for DMA transfer. */
+>   - panic_prepare: drain in-flight requests and prepare for polled I/O
+>   - panic_poll_completion: poll for request completion without interrupts
+>   - panic_complete: restore normal host state after panic I/O
 >
-> No here, there is a long section of comment before struct dw_mci{ } that
-> describes each member of it, please add it there.
-
-Ah, you mean the documenting comment. Shouldn't have missed in either
-way.
-
+> Add mmc_panic_claim_host() which uses WRITE_ONCE() to claim the host
+> without taking the spin lock, since during panic other CPUs are stopped
+> and may hold the lock.
 >
->> +	u32			dma_threshold;
->>  =20
->>   	struct scatterlist	*sg;
->>   	struct sg_mapping_iter	sg_miter;
->>=20
+> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+> ---
+>  drivers/mmc/core/core.c  | 23 +++++++++++++++++++++++
+>  include/linux/mmc/host.h | 12 ++++++++++++
+>  2 files changed, 35 insertions(+)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 860378bea557..5326b246b4f2 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -860,6 +860,29 @@ void mmc_release_host(struct mmc_host *host)
+>  }
+>  EXPORT_SYMBOL(mmc_release_host);
+>
+> +/**
+> + *     mmc_panic_claim_host - force-claim a host in panic context
+> + *     @host: mmc host to claim
+> + *
+> + *     Force-claims the MMC host without locking. During kernel panic
+> + *     other CPUs are stopped and may be holding mmc_host->lock (e.g.
+> + *     inside __mmc_claim_host or mmc_release_host). Unlike sdhci_host->lock
+> + *     which is freed by the hardware drain+reset, mmc_host->lock has no
+> + *     hardware counterpart, so we must bypass it with WRITE_ONCE.
+> + */
+> +void mmc_panic_claim_host(struct mmc_host *host)
+> +{
+> +       if (!host)
+> +               return;
+> +
+> +       WRITE_ONCE(host->claimed, 1);
+> +       host->claimer = &host->default_ctx;
+> +       host->claimer->task = current;
+> +       WRITE_ONCE(host->claim_cnt, 1);
+> +       WRITE_ONCE(host->ongoing_mrq, NULL);
+> +}
+> +EXPORT_SYMBOL(mmc_panic_claim_host);
+
+The above doesn't account for whether someone else has already claimed
+the host. I believe we should check that to better understand our
+current state.
+
+If the host is claimed, it's probably due to ongoing read/write I/O.
+Then, how do we gracefully terminate those requests?
+
+If the host isn't claimed, the mmc host (and mmc card) may have been
+runtime PM suspended. We should take that into account, because
+runtime resuming the host in atomic context is most likely not going
+to work.
+
+> +
+>  /*
+>   * This is a helper function, which fetches a runtime pm reference for the
+>   * card device and also claims the host.
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index ba84f02c2a10..cd44b62d29cb 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -272,6 +272,16 @@ struct mmc_host_ops {
+>          * negative errno in case of a failure or zero for success.
+>          */
+>         int     (*uhs2_control)(struct mmc_host *host, enum sd_uhs2_operation op);
+> +
+> +       /*
+> +        * Optional panic-context ops for pstore backends that write to MMC
+> +        * during kernel panic with interrupts disabled.
+> +        */
+> +       int     (*panic_prepare)(struct mmc_host *host);
+> +       bool    (*panic_poll_completion)(struct mmc_host *host,
+> +                                        struct mmc_request *mrq);
+> +       void    (*panic_complete)(struct mmc_host *host,
+> +                                 struct mmc_request *mrq);
+>  };
+>
+>  struct mmc_cqe_ops {
+> @@ -758,4 +768,6 @@ int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
+>  int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+>  int mmc_read_tuning(struct mmc_host *host, unsigned int blksz, unsigned int blocks);
+>
+> +void mmc_panic_claim_host(struct mmc_host *host);
+> +
+>  #endif /* LINUX_MMC_HOST_H */
+> --
+> 2.34.1
+>
+
+Kind regards
+Uffe
