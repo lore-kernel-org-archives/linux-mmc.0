@@ -1,143 +1,107 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA3F737649E;
-	Wed, 15 Apr 2026 14:51:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87CF818DB26;
+	Wed, 15 Apr 2026 15:03:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776264721; cv=none; b=sUijsaizwebqE4Iuexg8QAGcxQWFil3SPJ+PgiFYFMuuCGYnTDJ8h8/98rlfGTvGQbG7MtfEY3gZb24wNHzRYCA6lp3AEeeeEf9lNAWA2FpiQFBDNNHllYEtr82eF36ExStTZbvaybhJmSc2AH0WZfxCRa5waKPdbE+/Gsai6VQ=
+	t=1776265383; cv=none; b=KtPP3u0wCg4tO8764VAqnpGMS68V1hWo1YIRLmTJ6IorPX9jdFtAGBMzG8N6+tkdluInqq+UWdOJSlsK/YW84yEUfbIzrEgnKByA31VUxBUr5PSiZ3qmZ9MxTx8rX5EmvHRYK8iJaggFbqhFYtXucnU+LCGy3VKO+QAOcVqsWkY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776264721; c=relaxed/simple;
-	bh=HggK1B0z9LDqrpUWBaxTvrXS4T07TEvhJ+nJMdpve6Q=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SFmQRJQj+Pz26wJzs2kKDq25L7oTe0TTHoCrfg1QAi7kfw73lp4XHinXW7mJ0BwzKWJb3b/fDhkIuivMCSERVlfIrsHhMsuosaJyhmVSK+MCpGfFInvg0mp1RfSFkChhsj5S1vsPY0FW4BOXulliLF0uAJ0n27GZTT6kLoZbj5U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=YfKTQ3o2; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1776265383; c=relaxed/simple;
+	bh=7l+7KA0YkOWUGWnQB3bKnDxRm1f18ienYQMvCsVbkTY=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=G63y45Zm6ykoMKzlg+OQ1+ffvPteEP14Cz0vZi5UXTgmb7Z7889nlsSPuQ0ZC32jVvqqSyJ+jw1fkiX71OH94Tk+oH5cGvV7A1mbNcWUh0ny0hM+2/0ebEz7oieYxtRYmRaLhOOQ+WiOUV4sgzFw5VKitE8UqfvfPIRbdFpTUak=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=KFwB1BjT; arc=none smtp.client-ip=178.21.23.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="YfKTQ3o2"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1776264720; x=1807800720;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=HggK1B0z9LDqrpUWBaxTvrXS4T07TEvhJ+nJMdpve6Q=;
-  b=YfKTQ3o2S97ykaHskXgpyPljaCyZRpoL/Jz+VHn/BKR+6Uj2WdGOsHeY
-   LzuF/h3U7Mjm2xGrYGeEGwkRJh4TE5ZFHiZzcjGOFux/JFb9xbDjpkgm8
-   7/nbYybEQtoyd0ND7x8Unvvxb5olnlhITBbivt8ITRRnoHIaU65aXZ6Zy
-   kC52z2cAt+yPi1Ha1SkZry7pg0zi7xe9bca85wEKdPwjg+qd29GUFF30E
-   btNRjAlMD4kPE+HALnX/HzMbtZFNAyoS+Ev5G8rASvL/dbdxL2AMVFYeU
-   CfSN2nSFLCyo3FgEt3jMo4y2nW2vcQZR6e2t1AzDv9Iw542ye0BxUuVPq
-   w==;
-X-CSE-ConnectionGUID: IWhzps7zSVW4W5xwSCa47g==
-X-CSE-MsgGUID: ZcKRl9YpQXKEJHrsjP97FQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11760"; a="77218751"
-X-IronPort-AV: E=Sophos;i="6.23,179,1770624000"; 
-   d="scan'208";a="77218751"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2026 07:51:59 -0700
-X-CSE-ConnectionGUID: IlxtgxlfQQic8MYP2GxAKQ==
-X-CSE-MsgGUID: gccNdDrlRG68wWrRCHPJ8w==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,179,1770624000"; 
-   d="scan'208";a="260865359"
-Received: from rvuia-mobl.ger.corp.intel.com (HELO localhost) ([10.245.244.34])
-  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Apr 2026 07:51:57 -0700
-Date: Wed, 15 Apr 2026 17:51:54 +0300
-From: Andy Shevchenko <andriy.shevchenko@intel.com>
-To: Artem Shimko <a.shimko.dev@gmail.com>
-Cc: Jisheng.Zhang@synaptics.com, hehuan1@eswincomputing.com,
-	yifeng.zhao@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Philipp Zabel <p.zabel@pengutronix.de>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: add reset control support in
- suspend/resume
-Message-ID: <ad-mCsvOWWgqt-rc@ashevche-desk.local>
-References: <20260415123411.437450-1-a.shimko.dev@gmail.com>
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="KFwB1BjT"
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+	by disroot.org (Postfix) with ESMTP id 141FF261AB;
+	Wed, 15 Apr 2026 17:03:01 +0200 (CEST)
+X-Virus-Scanned: SPAM Filter at disroot.org
+Received: from layka.disroot.org ([127.0.0.1])
+ by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
+ id 9RnjOkgDaXLw; Wed, 15 Apr 2026 17:03:00 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
+	t=1776265380; bh=7l+7KA0YkOWUGWnQB3bKnDxRm1f18ienYQMvCsVbkTY=;
+	h=From:Subject:Date:To:Cc;
+	b=KFwB1BjTcU2tLmwV6/OYe6i8h7KaNi/unLzcXPVrK4kgxjh+H77du6cYZr++ImDNL
+	 UTY20IDagJ7efbxHXCKRdBQ+lPrWS1GDyFSYUR4hx0/Nku6Oo7Z4Kq1Iio9Pp/J5f4
+	 s7/VoRcTTIUAoFdL+c5OgNM2fraQcOTU9tenLLbmndtVsAOHRh74q917xy3NYF4YC8
+	 a+9sfy1w5dTDT5D+k+4ELfhaCTcZ2z/JZlxwHGGJZxzeIfSPm8QD+g73fNKAhka6b4
+	 akFCd7yc+oTu1e4LmtnlTxC+V8v5idPfpjib6CZ3EU7hAcElR+XUsLyHt85XHlfTup
+	 1uodu+ZnugBOA==
+From: Kaustabh Chakraborty <kauschluss@disroot.org>
+Subject: [PATCH v3 0/2] Configuring DMA threshold value for DW-MMC
+ controllers
+Date: Wed, 15 Apr 2026 20:32:07 +0530
+Message-Id: <20260415-dwmmc-dma-thr-v3-0-31014d36b6ee@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260415123411.437450-1-a.shimko.dev@gmail.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - c/o Alberga Business Park, 6
- krs, Bertel Jungin Aukio 5, 02600 Espoo
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAG+o32kC/3XMQQ6CMBCF4auQWVszLRSqK+9hXDR0gC6gZkqqh
+ nB3Cys1cfle8v0LRGJPEc7FAkzJRx+mPMpDAe1gp56Ed3mDQlVjJZVwj3FshRutmAcWEk/ojDK
+ abAPZ3Jk6/9x711veg49z4NeeT3J7/5WSFCgabVVXa0NE5cX5yCHMx8A9bK2kPn3161X2FWqDj
+ el0Wctvv67rGxkP6qfsAAAA
+X-Change-ID: 20260412-dwmmc-dma-thr-1090d8285ea7
+To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
+ Shawn Lin <shawn.lin@rock-chips.com>, Krzysztof Kozlowski <krzk@kernel.org>, 
+ Alim Akhtar <alim.akhtar@samsung.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-samsung-soc@vger.kernel.org, 
+ Kaustabh Chakraborty <kauschluss@disroot.org>
 
-On Wed, Apr 15, 2026 at 03:34:10PM +0300, Artem Shimko wrote:
-> The driver currently handles reset control only during initializations,
-> but does not manage the controller reset signal during system
-> suspend/resume. This can leave the hardware in an undefined state
-> after resume. Additionally, the reset control is stored in vendor
-> structs making it inaccessible for power management operations.
-> 
-> Move the reset control to dwcmshc_priv structure and add proper
-> assertion during suspend and deassertion during resume. This ensures the
-> controller is properly reset before entering low power state and correctly
-> reinitialized upon wake.
+In Samsung Exynos 7870 devices with Broadcom Wi-Fi, it has been observed
+that small sized DMA transfers are unreliable and are not written
+properly, which renders the cache incoherent.
 
-...
+Experimental observations say that DMA transfer sizes of somewhere
+around 64 to 512 are intolerable. We must thus implement a mechanism to
+fall back to PIO transfer in this case. One such approach, which this
+series implements is allowing the DMA transfer threshold, which is
+already defined in the driver, to be configurable.
 
-> ---
-> 
-> Hello maintainers and reviewers,
+Note that this patch is likely to be labelled as a workaround. These
+smaller transfers seem to be successful from downstream kernels,
+however efforts to figure out how so went in vain. It is also very
+possible that the downstream Broadcom Wi-Fi SDIO driver uses PIO
+transfers as well.
 
-No need to repeat the commit message in the comments. It does not add any value.
+Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
+---
+Changes in v3:
+- Move host->dma_threshold default to dw_mci_alloc_host() (Shawn Lin)
+- Move comment to document struct dw_mci::dma_threshold (Shawn Lin)
+- Link to v2: https://lore.kernel.org/r/20260414-dwmmc-dma-thr-v2-0-4058078f5361@disroot.org
 
-> This patch adds reset control support for the MMC controller
-> during system suspend/resume.
-> 
-> Currently, the reset control is only handled during initialization and
-> is stored in vendor-specific private structures. This makes it
-> inaccessible to the common power management code and leaves the
-> controller in an undefined state after resume.
-> 
-> The changes move the reset control to the generic dwcmshc_priv structure,
-> update all platform-specific users (Rockchip, EIC7700), and add proper
-> reset assertion/deassertion in dwcmshc_suspend/resume.
+Changes in v2:
+- Remove dt-binding to set DMA threshold (Krzysztof Kozlowski)
+- Add comment to describe struct dw_mci::dma_threshold (Shawn Lin)
+- Set DMA threshold in Exynos 7870 DW-MMC driver (Krzysztof Kozlowski)
+- Link to v1: https://lore.kernel.org/r/20260412-dwmmc-dma-thr-v1-0-75a2f658eee3@disroot.org
 
-This is serious behaviour change (might not be, one needs to understand what it
-does in comparison to no reset (and in accordance with datasheet).
+---
+Kaustabh Chakraborty (2):
+      mmc: dw_mmc: implement option for configuring DMA threshold
+      mmc: dw_mmc: exynos: increase DMA threshold value for exynos7870
 
-Do you have any HW to test?
+ drivers/mmc/host/dw_mmc-exynos.c | 1 +
+ drivers/mmc/host/dw_mmc.c        | 4 ++--
+ drivers/mmc/host/dw_mmc.h        | 2 ++
+ 3 files changed, 5 insertions(+), 2 deletions(-)
+---
+base-commit: 1c7cc4904160c6fc6377564140062d68a3dc93a0
+change-id: 20260412-dwmmc-dma-thr-1090d8285ea7
 
-...
-
->  	clk_disable_unprepare(pltfm_host->clk);
->  	if (!IS_ERR(priv->bus_clk))
->  		clk_disable_unprepare(priv->bus_clk);
-
-The driver seems can be refactored a lot (with no functional changes) by:
-- replacing *sleep() with fsleep() API
-- dropping unneeded checks like above, clk_disable_unprepare() is error
-pointer-aware IIRC (or it can be made so it is either NULL or valid one)
-- using 'return dev_err_probe()'
-
-This is just a side note in case you are interested.
-
->  	if (ret)
->  		goto disable_bus_clk;
-
-...
-
-> -	ret = sdhci_resume_host(host);
-> +	ret = reset_control_deassert(priv->reset);
->  	if (ret)
->  		goto disable_other_clks;
->  
-> +
-
-No need to add an extra blank line.
-
-> +	ret = sdhci_resume_host(host);
-> +	if (ret)
-> +		goto assert_reset;
-
+Best regards,
 -- 
-With Best Regards,
-Andy Shevchenko
-
+Kaustabh Chakraborty <kauschluss@disroot.org>
 
