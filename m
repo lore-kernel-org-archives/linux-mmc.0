@@ -1,64 +1,62 @@
-Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A62C397680
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:11:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3098735FF58
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:11:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776431488; cv=none; b=Zy4eKZBWOKEfkrwCt3ow5Y4QkoBCISsiv/1O2Tx7S+UxLAzyf+Dw62LOXWMsYkOuoaRs16LFRY164HLZbEYI6tp3Qoj8jbxmZt7phWMSRbbZ7SaqZz0o0us0U8HpOA5BqyZs7SkHAMhsDNo2nGcwBm0ysApxVJeqbV3YLYEdqXY=
+	t=1776431489; cv=none; b=c++LPYQ9A0DWQTASbfngyfevyCLstxMXi8toyNxaAA2+Rv0xZBCqCH/mlu0cV2szJvo8gCeBaENusgKVdsoarM6/XD71gtXmKBcH9N1CT/vk+3MiJGRxQ5nu8qzuEneIv+WKAC/6Jl1NaNw3+pT3xeMrpZeFYikIJdfB/FjFH7E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776431488; c=relaxed/simple;
-	bh=Klkglyq/jaqn07LVoY+DygFKlFSeY4mf3uyDS+66nUI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=UzUoc2JVECNhWCKfjDvP3UuKsN9Py/lEnhhht1MwnH/I1G62gurXuPe2LxMO4WfGzalTIvlH7LwB4BC/fpo2gknErVS5RBhoG9S4WHgg0q1BgPdTcyXm34Dsv78r5sABuNKxrA/L5Rp+lZ14fPm5vhCJx2znUXuA+C6XwYLA7M0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b=kgat+i2O; arc=none smtp.client-ip=209.85.221.49
+	s=arc-20240116; t=1776431489; c=relaxed/simple;
+	bh=gRLZDYjP8rAyYDu/dxhxXrW55dQHWBhhz4Mp7s9yll4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=HdoBGLNam/ubF4rWwKqM7Shh19VxFT/CHKXQg387bDK/wtN+H8MEes5JnYQMo9jz5Fjycf5HglXHZDwKFORaBYY17AWagGh9oqFtTjkcFk1H6VLYc8vkmYzuXY/KRvWnWfgwbT4XFjDHc3RLniJDHOmju4czoBoZNB3ovIZe3hg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b=VvArZr1y; arc=none smtp.client-ip=209.85.221.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b="kgat+i2O"
-Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-43d73422431so500098f8f.2
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 06:11:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b="VvArZr1y"
+Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-43fe608cb92so363976f8f.2
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 06:11:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20251104.gappssmtp.com; s=20251104; t=1776431486; x=1777036286; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yLBJQur6L6abrgINbvpQqXST9x1YXfxN6XkkI5ZCGzQ=;
-        b=kgat+i2Oa6Wy9zEOI65gHK3Zn9aMLrxwt/mf7bc7zAHG2PcE2wWKWhs+3MjkbcCAuz
-         sd9N3EZ9kSFwUmKa20GXjKUvoKsXqum9lZAHIMOR+mVXLGphlnSmAjNKK776hHo3meip
-         EXzDLnetciMhyrijIbsYGXjGhtibipFdHPOOjbaNzwu7LYQpF9lH8Jwt5JK3mGczK6Bw
-         6NMX4UmX0cqrdoitSk2b/Bn/QR89mLBjpoLJKkTwMKYlKX9gXxl5GQJ6mBjICKg6OsGp
-         mbr1S5TM5yOF0ZQyapKPlZJnpvZnFqeGo+JZAE9NUYV0WczLVAnuxj7fFSOYRgbknC+a
-         IGdA==
+        d=baylibre-com.20251104.gappssmtp.com; s=20251104; t=1776431484; x=1777036284; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=KCc9El91v2tJeTyCQTpkqW7vYe/zKOnr7R5NXhlhOxk=;
+        b=VvArZr1y+esjXP9Fkt1hwUdDRTxtksIGaH9R6ylZc+w3tKLPxsKo4koXmB3ViLSx7J
+         pDgMuL5mdZGpicySRMr4Rtc7gEjES2CCcEENqzVf20iUq/gK8GJhG6q0uYR1yslK+gMC
+         norEuIU8GkMmsZLGvKtJE1IxuckNnapfE6FiZqnpphtszWJUzRgLpQPBWGUk/spJxm+K
+         bpyGeGSuLjPDhwfGajRuUT0rtRkzILhja3fO4Tl8kXzMnsGugCV3IExsETfD4pd3Ik+T
+         CVS8oV4b6aLRUoTRoDmHS7+/X7yKUdRPv3gGC9lTk9/hCS0uVZVF2uRF5v5OWtRefNw8
+         KfUA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776431486; x=1777036286;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=yLBJQur6L6abrgINbvpQqXST9x1YXfxN6XkkI5ZCGzQ=;
-        b=dNWtZKEk7F/y2aWdS+/WXwCfx2j9gr/EbT7Ug96HmvWj7qSJHrnxNTgZehahcxU5V5
-         Wll3MkuE1G/sexRNzoVio5DNiYdAVxxUU7BG3PY/5cwHWy8n9mJV23zMOgCldWWD3ZN1
-         9Bm5L+sxt7hOeFaKY2uWyxWZmA41OIFzQib//UK0ZwKGw5g3sJD8r16WJu3b0DI7nhSU
-         q3yvcz2D3qe5f1xj4SA7YXJkwbM7vIIxeRBvWUZAetFKMxznLRSe0nZ28f8UPxslGy+A
-         T0XxukTex5iuGFHqsVgtWJ3Qgk4LIK+DQ52sdN0CdqwEIyGKtfNq1u+y0JeYQRblm5Ow
-         GQpQ==
-X-Forwarded-Encrypted: i=1; AFNElJ++zG2zxB4JMXpHmDj51qi0KtdDoZKXiFV6JFyfZOV7r8A4bIM3ArXUY+tucqjNGvaVgT3zvtcAL5k=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxZ435ovXHpp06qdGlUFV79R+Z4XqmoRy4zyssHPz77PfE+QFOR
-	I26Ezw7jHbdPRNq9p2k/2lJkNKHwR+5KSM5LGYTDfd+BX53kgvgZRcn7Ch8v6NQSXYE=
-X-Gm-Gg: AeBDiev6YUBW6R4aIIV/aw4rLyAhsn8/g5a6jaXqFjQi/rtJXRh3K0jXPTEeQGmBN9r
-	N6kZTQL5r6cw04VPXIyXmhbeWnaY2SffxC2rJlrjOOx0hPz5mutKztcM3M07T41K4Ph5aGMljXP
-	DUfohJpFOqN9/RNTZdO0PJEgWkpUKovzFtOXgZwxCyVEni8kZdQkzwhzu5G/ev0KjCAR9cH8Cr+
-	WmYFF2zR9eyVB/V/HPHfR5XIwS2kFWGGhobagRP5WjpiYPgcthmG6l2Slesx6WOc3u81ekCwvfk
-	1WIM1p7//eTN5nE+P7dOhWv2GbuWtNBr83Xz+EqhB2pLC97cR36gHIGykag2KG6Kvdsf09/j7Qn
-	1iia4aIWKJvYxapo5bYvO8eKS+HY41+NLk+Nh/3wc2WVw2pcuB45UBGbAZiJv9/i2CoT6eflqY6
-	ST40tJVIFWdesQfCZwrfje+gmEJjUAaLbynVXCiPtm37jXEuIznS0TDyWOVz7x7YNCKZnpx97c6
-	xUCgeydSBO8voFSHu8ZIt+x
-X-Received: by 2002:a05:6000:420a:b0:43e:a69b:d813 with SMTP id ffacd0b85a97d-43fe3e0d459mr4571980f8f.25.1776431485775;
-        Fri, 17 Apr 2026 06:11:25 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1776431484; x=1777036284;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KCc9El91v2tJeTyCQTpkqW7vYe/zKOnr7R5NXhlhOxk=;
+        b=E9BK4lDkpm6xsm5cyk16bitQb1LwACHi7Aru3RrRQfuDXiYvhQP0HCPBUweQfmBk+6
+         Y8xJ7YW/wZwZSBOKPHPvfeyWNSOPY4Ye8eMk0FXn8pZbjz5/+1IBfvz25Y4ypysWvOws
+         ZfMEaT6zjfk6gahh3WTNOG2MC41F5v663BABUuVkXjIoZtRB3ThbT3GOCH0CqhUK/Q+g
+         djeOYAuROA6tZ+NkgKP+7XeB71tTuGhni3ymY8MzIO5Fiz2d4ANzN3xmu8gbU+8D4hK7
+         4N/kkY2y2DxaOhVtt2Lr0ot44011EZPKLo4FtW0124ZQDR3HVIfVC0rlNm8mSnp4db+b
+         HnAQ==
+X-Forwarded-Encrypted: i=1; AFNElJ9iZSNMZoEDG8kWWbEDp2rh4TQbBNQZJrope9qUt0UuJih/5yLJhZsXqzyoc0xS8pV6cbA+trdUvik=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwmblPVgsduiyXol+mlxTY8c2WUVGfltnbTXcsBqYEs0a+vq01u
+	vVQu0SUf2PjmpfYS86EbUx5fWkS0H1hjQQXOy8jiy21SAAaz5KKMtewYeCoVFcMx0zw=
+X-Gm-Gg: AeBDietv6KSOzbPFjgjlg3rVQtswWoqXEXYhXRdoLugpxpFRHOO7Rv9LKFoxJcTCYgI
+	r6b8Dxkz3D4POYXV2O/7MNzyy1+E1icc+Y/W3ius42rvU9P/pffD1HBLyrg+LgDkp7xeH1HGxl7
+	JFxcH2P4IN/iFxB8S3ijusKk9T5UN1I5KBN0FVMrXw0u/CnLa+FDF03g7MPKxs6/sepHPq+naN8
+	2ZsupxKxIHc/uHNB4ec4T1nYqcQTCSL5zIImT6cQSBB9TEsIGJBEgTYbW6YXDCBGsO5iw/bfuJy
+	rAjspb71nIieIdMdeFPmtMAQew9fcWA01YNuRK4wMvRiVmFLfR1qE+nptJdwnsIBo6Ji53V2lAK
+	2iLSYCtevYCmuybweq/SR7shku0z6Ufakld/JYpTwZEiH05Y7yWAx4RgrOIWhzDC/6AE0PLVZcK
+	3PwhEY0xJbSAZjJkUNkiv3jBi+ePYcrRYGry6V7h93tyi03y2QIx1hRRk0JvMRDYAe9Dv9JUbpx
+	OKySoqatkcB7+LpVEM41JFo
+X-Received: by 2002:a05:6000:2005:b0:43d:77a8:3ba7 with SMTP id ffacd0b85a97d-43fe3e12484mr4104740f8f.44.1776431484359;
+        Fri, 17 Apr 2026 06:11:24 -0700 (PDT)
 Received: from localhost (p200300f65f20eb08db61cfc60d8aa232.dip0.t-ipconnect.de. [2003:f6:5f20:eb08:db61:cfc6:d8a:a232])
-        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-43fe4e4daf2sm4238766f8f.33.2026.04.17.06.11.25
+        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-43fe4e3a7b4sm4356620f8f.22.2026.04.17.06.11.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Apr 2026 06:11:25 -0700 (PDT)
+        Fri, 17 Apr 2026 06:11:23 -0700 (PDT)
 From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig=20=28The=20Capable=20Hub=29?= <u.kleine-koenig@baylibre.com>
 To: Ulf Hansson <ulfh@kernel.org>
 Cc: "Christian A. Ehrhardt" <christian.ehrhardt@codasip.com>,
@@ -82,12 +80,10 @@ Cc: "Christian A. Ehrhardt" <christian.ehrhardt@codasip.com>,
 	Brian Norris <briannorris@chromium.org>,
 	Francesco Dolcini <francesco@dolcini.it>,
 	Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1 1/6] sdio: Add syntactic sugar to store a pointer in sdio_driver_id
-Date: Fri, 17 Apr 2026 15:10:47 +0200
-Message-ID:  <c830049dcfcd99f005e2ff6742aace9341c61f13.1776429984.git.u.kleine-koenig@baylibre.com>
+Subject: [PATCH v1 0/6] sdio: About pointers in sdio_device_id::driver_data
+Date: Fri, 17 Apr 2026 15:10:46 +0200
+Message-ID: <cover.1776429984.git.u.kleine-koenig@baylibre.com>
 X-Mailer: git-send-email 2.47.3
-In-Reply-To: <cover.1776429984.git.u.kleine-koenig@baylibre.com>
-References: <cover.1776429984.git.u.kleine-koenig@baylibre.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -95,47 +91,94 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1594; i=u.kleine-koenig@baylibre.com; h=from:subject:message-id; bh=Klkglyq/jaqn07LVoY+DygFKlFSeY4mf3uyDS+66nUI=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBp4jFZkxQbj+KYt4Q9fEkJxuokeQF4k0Z8QVO3Q 7wAQaupW5KJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCaeIxWQAKCRCPgPtYfRL+ TtZtB/0YGCqVt5rVpLrWqCD44F5LfNFUgv/+TGPxayzQfsH7zoCBqE9UgsVpBkFZprUwAzLBPWG MPbj74nUaxJfky/T/6x/bsJ20CXFl14Aky5oeSqWXwpx/STsvR1t7BH1meFZ1chEsexFTdIwswa 8F2lrrBsAe+eGHk4UdYwOcEBLke8MRKu7X9WInf8735NDYlo6VkX6TwaQTxpOcTlNIDfwZlA6ON nlrxK4GTkQYXCmaFZYylJBpOTDYLdH8GJZthPQhYPW5w9D8jVeVUIanYYaSikHt0R/zyWaylAij O7+GqKklrjT08jMFR3/4DzejRKFhjlyBUA+HrbH74dCapvBS
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3816; i=u.kleine-koenig@baylibre.com; h=from:subject:message-id; bh=gRLZDYjP8rAyYDu/dxhxXrW55dQHWBhhz4Mp7s9yll4=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBp4jFWdaRCcbA6UCRSVtfbncEwOSti40CoPsvF+ vdIuFxTidWJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCaeIxVgAKCRCPgPtYfRL+ Ts32B/9u8msCou5BwhNaY0DlL45F+7qpQKpSsQuRk2gI42hvAESq9kyeVN/MZWif44tjir6LK2z uIl/GDbOQMK01aikDbfuVOtkDDghRBSTEB7Jka+OjfPnDumnNigRsaaBGNvsAFjIJkLhEy6qJDP Tn8woM7fN22cukUBpxin+S+kcXgM00Q8TjTUzEfguVA/yR/5l3z2E6JOyddLE7skD3BcWZth7gw bSohFR1HxMGAwUA7mKVNzLdYdPXW7y8rKtYwlVFZUsZmtrNFbfl9Br+UBebFAMyx3Rll6Um30xM RwO7mqAqqwH8Ox2CRHpiyR61s3V9bmt+/v2tLxnaw2vhp3PI
 X-Developer-Key: i=u.kleine-koenig@baylibre.com; a=openpgp; fpr=0D2511F322BFAB1C1580266BE2DCDD9132669BD6
 Content-Transfer-Encoding: 8bit
 
-On all current Linux architectures sizeof(long) == sizeof(void *) and
-this is used a lot through the kernel. For example it enables the usual
-practice to store pointers in sdio_driver_id's .driver_data member.
+<linux/mod_devicetable.h> contains several device_id structs for various
+device types.
 
-This works fine, but involves casting and thus isn't type-safe.
-Additionally with the CHERI architecture extension there are machines
-with sizeof(void *) > sizeof(long) for with the traditional approach of
-storing a pointer in .driver_data doesn't work.
+Most of them have one of:
 
-By replacing the plain unsigned long .driver_data by an anonymous union,
-most of the casting can be dropped and it yields a working solution for
-CHERI.
+ - kernel_ulong_t driver_data (sometimes called "driver_info")
+ - unsigned long driver_data
+ - const void *data (sometimes called "driver_data" or "context", sometimes not const)
 
-All users of struct sdio_driver_id are initialized in a way that is
-compatible with the new definition, so no adaptions are needed there.
+Taking sdio_device_id as an arbitrary[1] example (which has
+kernel_ulong_t driver_data), there are drivers that store integer values
+in it (e.g.  drivers/media/mmc/siano/smssdio.c) and others use pointers
+(e.g.  drivers/net/wireless/realtek/rtw88/rtw8723ds.c). The latter
+involves explicit casting, both for initialisation and for usage.
 
-Signed-off-by: Uwe Kleine-König (The Capable Hub) <u.kleine-koenig@baylibre.com>
----
- include/linux/mod_devicetable.h | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+In the past I tried to address this using i2c as discussion case[2].
+Back then the motivation was just to get rid of the ugly casts. Today
+I'm working on CHERI which is an architecture extension (currently for
+arm and riscv) that uses 128 bit pointers to store additional
+information, implementing e.g. read-only pointers and preventing out of
+bounds access on the hardware level.
 
-diff --git a/include/linux/mod_devicetable.h b/include/linux/mod_devicetable.h
-index 5b1725fe9707..0eb5d196f5b5 100644
---- a/include/linux/mod_devicetable.h
-+++ b/include/linux/mod_devicetable.h
-@@ -414,7 +414,10 @@ struct sdio_device_id {
- 	__u8	class;			/* Standard interface or SDIO_ANY_ID */
- 	__u16	vendor;			/* Vendor or SDIO_ANY_ID */
- 	__u16	device;			/* Device ID or SDIO_ANY_ID */
--	kernel_ulong_t driver_data;	/* Data private to the driver */
-+	union {				/* Data private to the driver */
-+		kernel_ulong_t driver_data;
-+		const void *driver_data_ptr;
-+	};
- };
- 
- /* SSB core, see drivers/ssb/ */
+The complication here is that a kernel_ulong_t (which is still 64 bit with
+CHERI) cannot store a pointer.
+
+The obvious way to fix that is to replace the kernel_ulong_t by an anonymous
+union that contains the original unsigned long and a pointer. This doesn't 
+change the size (or layout) of the device id struct for archs where 
+sizeof(long) >= sizeof(void *) [3] and gets rid of the casting. On CHERI archs 
+this is an ABI change, but as a new architecture changing ABI isn't an
+issue there.
+
+I was surprised that changing struct sdio_device_id didn't require
+preparation in the various drivers as they all already use named
+initializers.
+
+So the first patch expands struct sdio_device_id and the 5 following
+patches implement cleanups that can be done then.
+
+Patches 2 to 6 all depend on the first patch (only). This is not urgent
+and thus merge window material. I guess merging of this series has to
+happen in 3 steps:
+
+ 1) patch #1 via mmc
+ 2) patches #2 and #3 via bluetooth
+ 3) patches #4 - #6 via wireless
+
+(where 2) and 3) are independent).
+
+The series was build tested on arm64.
+
+[1] well, one that isn't used as much as spi_device_id or i2c_device_id to have  get a manageable POC.
+[2] https://lore.kernel.org/lkml/20240426213832.915485-2-u.kleine-koenig@pengutronix.de
+[3] As of now this is true on all architectures running Linux even with s/>=/==/
+
+
+Uwe Kleine-König (The Capable Hub) (6):
+  sdio: Add syntactic sugar to store a pointer in sdio_driver_id
+  Bluetooth: btmrvl_sdio: Make use of driver data pointer in
+    sdio_device_id
+  Bluetooth: btmtksdio: Make use of driver data pointer in
+    sdio_device_id
+  wifi: rtw88: Benefit from sdio_device_id::driver_data_ptr
+  wifi: mt76: mt7921-sdio: Make use of driver data pointer in
+    sdio_device_id
+  wifi: mwifiex: Make use of driver data pointer in sdio_device_id
+
+ drivers/bluetooth/btmrvl_sdio.c               | 22 ++++++++---------
+ drivers/bluetooth/btmtksdio.c                 |  8 +++----
+ drivers/net/wireless/marvell/mwifiex/sdio.c   | 24 +++++++++----------
+ .../net/wireless/mediatek/mt76/mt7921/sdio.c  |  4 ++--
+ drivers/net/wireless/mediatek/mt76/mt792x.h   |  2 +-
+ .../net/wireless/mediatek/mt76/mt792x_core.c  |  2 +-
+ .../net/wireless/realtek/rtw88/rtw8723cs.c    |  2 +-
+ .../net/wireless/realtek/rtw88/rtw8723ds.c    |  4 ++--
+ .../net/wireless/realtek/rtw88/rtw8821cs.c    |  2 +-
+ .../net/wireless/realtek/rtw88/rtw8822bs.c    |  2 +-
+ .../net/wireless/realtek/rtw88/rtw8822cs.c    |  2 +-
+ drivers/net/wireless/realtek/rtw88/sdio.c     |  2 +-
+ include/linux/mod_devicetable.h               |  5 +++-
+ 13 files changed, 42 insertions(+), 39 deletions(-)
+
+
+base-commit: 028ef9c96e96197026887c0f092424679298aae8
 -- 
 2.47.3
 
