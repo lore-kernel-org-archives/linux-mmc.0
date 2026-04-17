@@ -1,167 +1,135 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f226.google.com (mail-pl1-f226.google.com [209.85.214.226])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD9D335F607
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:32:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1032F1E1DF0
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 21:02:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.226
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776432730; cv=none; b=cPdME9FMqrpTwPO+ecMTq47QiY3zebJmW3DAU/Hkz2hX7gnp0EP6gMVmUCRcjozpqRtaG05k8JI21Eq1IioIxDdoBejkoGHJ2mrYxn76VdgfYUymnJL6GIzJezPgvz48wokZ+XsAvdYBVkarzEvRdBcimUHD7ehtqe/WjBDrDqE=
+	t=1776459756; cv=none; b=Sbg0+vS/gN/If3XA3YFUQvY1OV8AnG4+YWdgjVZrXp0q2XBXvz7mBAYR0csNWe9SFxcHbAYuygzgh0sBkfswTpKy4XtIT6+MKNGHNtOxwbHzhFrWRGGBJoTREkfKk/4qowuKLhMLEWV1S6rYTLSLF3v6LC+gmCqW3U97K43KZ+E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776432730; c=relaxed/simple;
-	bh=RFvWEcHs09Ac7BQ/P1ahsX/rY3bcE0CJB0jwJ6qDepU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DWRo14GlkMYAdy0AV6zhuqb18tqDN/CgFX9NZufvqQLz4HOJySyDS15yX2Ww4PuszFXZvSmY+PHNDnNjNWYF3YNgleyAsdRKEBym/MSpudgZkudyLpuOxuXAdy1Ac+g6wZjw2f+/0PPlzUIUqJN9iLao2mYqZ/pHZm5vkBuZG98=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=d37InmBs; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=E603tFxi; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1776459756; c=relaxed/simple;
+	bh=n/dAZp2QEWFwelLKkJvUuH9OdyDrpa0B0cYnhOlrASM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=JROIrEiUM2gcU71kmCW3fd23w2xEa6BT38A181qhA06egRzo4SY7VH/8HAYLmE5KZb+9i8ea/a2jHjtnUEtKIjIehIE1nkz65GCbw0DH94yXJoLkOEBX2bbOann+nqFTkInruXf3EMjG2YCHssEyfuTWf3iUBxcurBzEMKqJeAo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=TFMTaKyK; arc=none smtp.client-ip=209.85.214.226
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="d37InmBs";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="E603tFxi"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 63H9kdFX1042269
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:32:09 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	/evtMQvA7PUd4sSb8YH73FDCN+57LuBUVGM3HCz06NI=; b=d37InmBsPomDCzSM
-	ZYZXfMvHTOTytDN1t+lwSMuU99e3aSTq1U7Ay0qJETDRPlEZXEhivd9f05Bflkn9
-	EotbJBH60D7i6u+VIoWu/404y7iDQLdR+KKoEu62CDw2XwKdVE1lKC3anMlSsY16
-	D8gy+UJwaTRNAzss0UdEg3zYdKIUuY1vP9Dqyisiiuc1xt0LJD866Y5eQtWPFiFC
-	RNcDJiw7Y321zOTskc9TukPKqRCIbEzrA0yewDLqp14ADJfdlsUYHjajXIKXlWfk
-	gJjw5pYRemmKQ2dAjJ6HOm+ERi7TkkOlfxKMWRfYyyAMpE4IT+T4bLx4ooPofYy9
-	pP7Y5w==
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4dkjhdrs6y-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:32:09 +0000 (GMT)
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-82f6b0a7164so1102127b3a.0
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 06:32:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1776432728; x=1777037528; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=/evtMQvA7PUd4sSb8YH73FDCN+57LuBUVGM3HCz06NI=;
-        b=E603tFxikMSp9hnNnl5YMGR1ua428BD3FQM7M9J292C6jp68jlx9JoRG8uPcffR1Pz
-         UizhG/HVoyBU+tmGzjs1OGp5v8h9+WMoMucL225R8vbu0LAj9Y4YGT8Pr0IqBw1ZoKYE
-         XznV/CGRmsS6dM4MXQTNxMVVeLb+W2fxMt1P8IgCPqqQj8BVgpQNii0tzXotz1nwtLja
-         dZcrVzKCAwoxwAeZcBHhPvbkvjuy2vbyjlFdDVzFQVUyeEkw7lP3zMaDDZ0UmW5p1y2h
-         JsgcNBAvMutVrpxP2iMD0pUEUOH24sL5CYE/gHVLymKb22SgAA2YZRqsDXBYxXgM4yT9
-         cg/g==
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="TFMTaKyK"
+Received: by mail-pl1-f226.google.com with SMTP id d9443c01a7336-2b23fcf90b2so10980435ad.3
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 14:02:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776432728; x=1777037528;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=/evtMQvA7PUd4sSb8YH73FDCN+57LuBUVGM3HCz06NI=;
-        b=PQGVdhDBVYCHubr1cdaD0NP3tUgND9NnEC7ENnjq/RehlootBhgdABM2TBhSJ8o21V
-         ft+FOJ17nX3q5eZFSmEKbK5bLbkerKwp7X73RwKixsIyvs55tRXD2yYjjFdFVCC7+ApS
-         nu8zqWlpqb7DyPbrq3vYFxBKKhzC8quRnCXmGhfSgJbczyr3xPkt0x3P6pKiRMKNzT/V
-         N72kud2/nfiNaUtEkpQjLuUFX6H8gW5KXMvB1DOZLZtrjAjiKRaYT+y18FFeffIRJsAH
-         oRw5RBN+TiJk+qS1KMJnCAIEzp3ctZzzNZv9THWqWPY9JLy6vz09uxrDZa3dm0SC+hTh
-         Bukg==
-X-Forwarded-Encrypted: i=1; AFNElJ8JcUsctrGels9nQwR6VA8BEVNtFgwJOCLIvcLC5U3ckRt1Om03mrdb5Eip6ULbESmk7fK2MyNRHOI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzkTAv6+ExMPMwuiUPSH02cmXLxWbxQMGuxMo2U8UqcaVI1MTMM
-	EiulvhP2ebkLZro75nLzum0A7OX3cASb/yUv5Xbss0ccRBUADrZ4RN2TxntEObFJ69ikEJr3JRX
-	sjmhYouZH9pJW5z5T+btOphkulhf1sumL2JER4g65g5YS0zeA9+bB+D7299WqPg0=
-X-Gm-Gg: AeBDieumBUu3arbbc/2bwMIejuOzkQ8uc2XsWuaCvocLSh5dfU5ZPxSyml07vAZGyHk
-	11muKWuLSsMueo7BHC4QnOOwWWNJD2sOUHQUrkoDGVvEec+WGaCBd1wEhMo3eIvtznJWVsGw/Or
-	98pke51zh20eVaZQqpJXg6yoIhKWX9HTB3xLcZ+HnAeTtci4AcQvA3Yc0bsg4tm1ZMQeXK//qPa
-	p0PAnvlQBN34bKXWFZD8aUD6mg3WSeUghaLFFfV40vyqveeC0OI1K299Ys/PCoLUo4xhV3FPCk+
-	KViftrrgbhpgR0L8WnqNWkvdFmox1su2MWwtrBQyrFRMXR0A4DQ/Gr0CRzW0+vMj0RC2ZJxVvxg
-	C3BpitkY3p9m8WFT6WJWTivvyrw8avJyN65L26GVAaym4nQDpVua5GxgWJBcIUg==
-X-Received: by 2002:a05:6a00:3498:b0:82c:20be:57e6 with SMTP id d2e1a72fcca58-82f8c81273emr3064747b3a.11.1776432728101;
-        Fri, 17 Apr 2026 06:32:08 -0700 (PDT)
-X-Received: by 2002:a05:6a00:3498:b0:82c:20be:57e6 with SMTP id d2e1a72fcca58-82f8c81273emr3064679b3a.11.1776432727437;
-        Fri, 17 Apr 2026 06:32:07 -0700 (PDT)
-Received: from [10.217.223.121] ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-82f8e984f20sm2306640b3a.8.2026.04.17.06.32.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 17 Apr 2026 06:32:06 -0700 (PDT)
-Message-ID: <a2f1112b-86c3-46ac-9520-bf49a399a98c@oss.qualcomm.com>
-Date: Fri, 17 Apr 2026 19:02:00 +0530
+        d=1e100.net; s=20251104; t=1776459754; x=1777064554;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:dkim-signature:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=4IlWUqFFMsgdGDEhE7tusFb33eRjEXTf5yDuw4u6ujk=;
+        b=lB5GU+roUZPTJqYdnq0aeLTsPdqz6zUDW2wr2LNF9BK6/uUHGQ8GD5eYPnOC5EFSKS
+         bxmkjKVmpu5wQdV8ITQzslZuSuP+ALLqyCVAWuhszcskq0+AmApUvpctAGT0fHu2Dzue
+         KkwvhwGfo3dY+vCqniFfJsffx0qp+sUarpAlvgpyiWmsv0M6nYy5G1rz/LYG50wFr+eC
+         ssb1ei6XA08SoaA3IevrH7VTpXu40qdExz301fEXNMyLlFZS90pS31zMH6nBmk7YcxaZ
+         GzQUzbKbR/He5bWUIcFHYSbRt4KWy4iA0y+lZskaOIQDzSoL/0sc9pMtNHHW0+cs4Rig
+         9RRg==
+X-Forwarded-Encrypted: i=1; AFNElJ++gcNT1CDQlubgia2Y3Io6Fn+iK9Xhg8TXx9qCqaDeXEYEwDrQhf82Qo9MFP5K7ZT9Q8jX4PAebd8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyeIZLYFtv7Wtjuo4jFuzViOKcLjwqzJCzLMhcWbxURZBDCvVc5
+	taTCCorEihc0PcOqGinJcs/wm4ULj0X3KZGbSLGW6oa+g7FXwTMsE00XysEZV76tBg6hrr0KDEJ
+	EeoODDxDo518fgg23zsGpV3gqKd106fgFPL+3MWKG3DLsI8z0getyDzWE19YpuoBsl9ajAHBoVh
+	bRoBOmQRmY7NwkPPcCYdWIXFID3R6OYT54NmkF113eG+shwuBO5WXAqHJ99ilMZStScL27AfAoW
+	VVHTuuOggUx
+X-Gm-Gg: AeBDietKRiWz241Ntmp04VKSKHe/wbfvuF0B4gWLMVO3oO/EDbkQNnEMkxFOOMgisJs
+	HaisLSXbB1S8OmXu5EOWmANU5M1ELxFHKkcZu1hWaATUKZX12iCAvglyEUj/XQO9k2u1LeFpCN2
+	agzuFFMGmfyl68sRnMRnfi42cT3bl/yBqsXrFJ2zsLR4akQKImAKAxeHHiX/Xqa3VnSiXSgm0C9
+	Jbzu4M/y3u0Ydj12SImFK5cpt/s7y36H+4i5zKum3n80kj4FrD2bODHOJHKznHxmgLvGKafDo8P
+	RXpTovii5oQzfkJF0Yow5VhyW31ebCeYE+kM1BIzTHubD/9cK5socylFG774aXL+pP5h8SzmnvZ
+	ztMEnjugQ7JBiqcrC+4OOC6zLKuBOxgCUVyTGP866mDuEnmBdiVOhPgMG+spFm9gNl+MZgoIZbG
+	ab7VeY3JoC2nLJWnrg4eAYfNViRSC8IkD/WNQ3o+/7BNTjm9v9i55vl5E0QMq00ots
+X-Received: by 2002:a17:902:e195:b0:2b0:67a7:5c4b with SMTP id d9443c01a7336-2b5f9f402b2mr27378825ad.28.1776459754189;
+        Fri, 17 Apr 2026 14:02:34 -0700 (PDT)
+Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-90.dlp.protect.broadcom.com. [144.49.247.90])
+        by smtp-relay.gmail.com with ESMTPS id d9443c01a7336-2b5faae2744sm2041845ad.30.2026.04.17.14.02.33
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 17 Apr 2026 14:02:34 -0700 (PDT)
+X-Relaying-Domain: broadcom.com
+X-CFilter-Loop: Reflected
+Received: by mail-dy1-f197.google.com with SMTP id 5a478bee46e88-2dd1c74508cso2227065eec.0
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 14:02:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1776459753; x=1777064553; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=4IlWUqFFMsgdGDEhE7tusFb33eRjEXTf5yDuw4u6ujk=;
+        b=TFMTaKyK2Ep8C0fkaDswcIYB3Y1b0yzA5hz6yF+4CqdUtWNoA2KKLpq6ggIiVHJChS
+         RuSMlMa5dmaAP0wfdx8/tP/CL7K752tq2ZA4VOM53cCKMCEDZqQGH4MTQERCYWVowxbf
+         j2MxmC+hgrysK+8wSUIpwq5z4AS7s7EGhWTI0=
+X-Forwarded-Encrypted: i=1; AFNElJ/+opA9N6N9nnE95W3ipIEn6b1tYzdPVQqXhV3bflK1iCoYrRp/OXFVbdOvQdiy/i+ro+YaG472ORc=@vger.kernel.org
+X-Received: by 2002:a05:7022:90a:b0:127:33e0:ea40 with SMTP id a92af1059eb24-12c73f7fbaamr1852107c88.15.1776459752594;
+        Fri, 17 Apr 2026 14:02:32 -0700 (PDT)
+X-Received: by 2002:a05:7022:90a:b0:127:33e0:ea40 with SMTP id a92af1059eb24-12c73f7fbaamr1852085c88.15.1776459751948;
+        Fri, 17 Apr 2026 14:02:31 -0700 (PDT)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-2e539fa5c86sm4617161eec.1.2026.04.17.14.02.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 17 Apr 2026 14:02:30 -0700 (PDT)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	bcm-kernel-feedback-list@broadcom.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Kamal Dasu <kamal.dasu@broadcom.com>
+Subject: [PATCH] mmc: core: fix host controller programming for fixed driver type
+Date: Fri, 17 Apr 2026 17:02:25 -0400
+Message-Id: <20260417210225.3101961-1-kamal.dasu@broadcom.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v8 2/5] ufs: host: Add ICE clock scaling during UFS clock
- changes
-To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
- <ulf.hansson@linaro.org>,
-        Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
-        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>,
-        Rob Herring
- <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>
-Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org
-References: <20260409-enable-ice-clock-scaling-v8-0-ca1129798606@oss.qualcomm.com>
- <20260409-enable-ice-clock-scaling-v8-2-ca1129798606@oss.qualcomm.com>
-Content-Language: en-US
-From: Harshal Dev <harshal.dev@oss.qualcomm.com>
-In-Reply-To: <20260409-enable-ice-clock-scaling-v8-2-ca1129798606@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-GUID: zMDiK-dJCUVhSdm46qtjjYJ2FLRt0UaU
-X-Authority-Analysis: v=2.4 cv=YpQ/gYYX c=1 sm=1 tr=0 ts=69e23659 cx=c_pps
- a=rEQLjTOiSrHUhVqRoksmgQ==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=IkcTkHD0fZMA:10 a=A5OVakUREuEA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=eoimf2acIAo5FJnRuUoq:22
- a=VwQbUJbxAAAA:8 a=EUspDBNiAAAA:8 a=moC-RjrLiBHrLYWkWSAA:9 a=QEXdDO2ut3YA:10
- a=2VI0MkxyNR6bbpdq8BZq:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDE3MDEzNiBTYWx0ZWRfX5HoAqRiLSQI5
- 0ImgqssV8LUZLsR3i6nRcAvJysc2DvCdLEXTzGyH33DT1VaB8gQHwnEhF8s5+TX5M8m0DQucyYH
- em7Sr0pWOeFgI+8ix6X28V+qMAu7sH74S9i+dSL6EEhF1kdiWVxIsszgkPLotjYnvdJxeiqVhBD
- SwndeJGzdDhff3NcCoFAh1etsoeYh1if4FSsdBMF3lYm1CCvUPv1dQr59dzwCKH3rX8781afrsJ
- lCk9sFE6wAhqCKaS5qVc0nX0adoB8YFoIAQJATW2PctFkB4UEiz4cZybTWrtJkN89jhRS2moCuP
- q9agBr86iekK679wT20twBypTuP+4ZW/A2bMZCvpt25c16SsGen/id72j9HtWmiEvRL11sC1J6e
- Kw7sMvkYhxJDjO7pMd5BMiIKdxUuxzEuwHmMDoUQdlQDXEFJTjItLqtoGY4R3k6GDRmKbnyHDNg
- eolNk9dqujN7sFoxe9g==
-X-Proofpoint-ORIG-GUID: zMDiK-dJCUVhSdm46qtjjYJ2FLRt0UaU
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-04-17_01,2026-04-17_04,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 adultscore=0 malwarescore=0 lowpriorityscore=0
- phishscore=0 spamscore=0 suspectscore=0 clxscore=1015 impostorscore=0
- bulkscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
- adjust=0 reason=mlx scancount=1 engine=8.22.0-2604070000
- definitions=main-2604170136
+Content-Transfer-Encoding: 8bit
+X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
+When using the fixed-emmc-driver-type device tree property, the MMC core
+correctly selects the driver strength for the card but fails to program
+the host controller accordingly. This causes a mismatch where the card
+uses the specified driver type while the host controller defaults to
+Type B (since ios->drv_type remains zero).
 
+Split the driver type programming logic to handle both fixed and dynamic
+driver type selection paths. For fixed driver types, program the host
+controller with the selected drive_strength value. For dynamic selection,
+use the existing drv_type as before.
 
-On 4/9/2026 5:14 PM, Abhinaba Rakshit wrote:
-> Implement ICE (Inline Crypto Engine) clock scaling in sync with
-> UFS controller clock scaling. This ensures that the ICE operates at
-> an appropriate frequency when the UFS clocks are scaled up or down,
-> improving performance and maintaining stability for crypto operations.
-> 
-> For scale_up operation ensure to pass ~round_ceil (round_floor)
-> and vice-versa for scale_down operations.
-> 
-> Incase of OPP scaling is not supported by ICE, ensure to not prevent
-> devfreq for UFS, as ICE OPP-table is optional.
-> 
-> Acked-by: Manivannan Sadhasivam <mani@kernel.org>
-> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-> ---
-Whoops, I mistakenly replied to v7 of this patch with a Reviewed-by, please
-ignore that one.
+This ensures both the eMMC device and host controller use matching driver
+strengths, preventing potential signal integrity issues.
 
-Reviewed-by: Harshal Dev <harshal.dev@oss.qualcomm.com>
+Fixes: 6186d06c519e ("mmc: parse new binding for eMMC fixed driver type")
+Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+---
+ drivers/mmc/core/mmc.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-Regards,
-Harshal
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 8846550a8892..3507a8d8610a 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1371,8 +1371,12 @@ static void mmc_select_driver_type(struct mmc_card *card)
+ 
+ 	card->drive_strength = drive_strength;
+ 
+-	if (drv_type)
++	if (fixed_drv_type >= 0) {
++		if (drive_strength)
++			mmc_set_driver_type(card->host, drive_strength);
++	} else if (drv_type) {
+ 		mmc_set_driver_type(card->host, drv_type);
++	}
+ }
+ 
+ static int mmc_select_hs400es(struct mmc_card *card)
+-- 
+2.34.1
+
