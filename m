@@ -1,184 +1,254 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3098735FF58
-	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:11:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53128399002
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:25:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776431489; cv=none; b=c++LPYQ9A0DWQTASbfngyfevyCLstxMXi8toyNxaAA2+Rv0xZBCqCH/mlu0cV2szJvo8gCeBaENusgKVdsoarM6/XD71gtXmKBcH9N1CT/vk+3MiJGRxQ5nu8qzuEneIv+WKAC/6Jl1NaNw3+pT3xeMrpZeFYikIJdfB/FjFH7E=
+	t=1776432325; cv=none; b=erh/y9sgFwE8VU+KvF1Jw3jqqkFfNPZ5vgVe8NGoVI8moUcaO8eTtsqNhqerS1bZyUH+CVWMt4M3mXIYHOECJa2YBBs0J1m9A5NyX8U6YZKC0R63kJxzFxi+GnEFAUd7VsDuA8+szic9gVaQBRoiGouzp1ZBx9vzofIjR6nz0wo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776431489; c=relaxed/simple;
-	bh=gRLZDYjP8rAyYDu/dxhxXrW55dQHWBhhz4Mp7s9yll4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=HdoBGLNam/ubF4rWwKqM7Shh19VxFT/CHKXQg387bDK/wtN+H8MEes5JnYQMo9jz5Fjycf5HglXHZDwKFORaBYY17AWagGh9oqFtTjkcFk1H6VLYc8vkmYzuXY/KRvWnWfgwbT4XFjDHc3RLniJDHOmju4czoBoZNB3ovIZe3hg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b=VvArZr1y; arc=none smtp.client-ip=209.85.221.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1776432325; c=relaxed/simple;
+	bh=TPOcdSfpvISq6EQEhPEC4xrtwJHgRxM3d5dvRWfQGo8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=PfRncjn7r33nor2SQul/9JAVln+7aHwNFKTM9htaXSMxXUx2fU5i28b9tsiGNq6YBTuF8HdHQS59yscfvcDT2I5zg7MxYVezL+yXRe9YEuPyht+lpoBf0pqW/VtO5H8UWxIeqm1JJn4oPYRYO4c29R5PHQtAhO3STd18TAkRHmU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=b5tBxD8L; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=CY+pb+2e; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b="VvArZr1y"
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-43fe608cb92so363976f8f.2
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 06:11:25 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="b5tBxD8L";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="CY+pb+2e"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 63H82DIQ1981946
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:25:23 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	QNcL6sT7C05P+AcSNna5P+PTt/SHMOgeqU5I2FLTS5I=; b=b5tBxD8LR4NpO9UZ
+	U4kjwCG2N7sqGI087ah5J7rZ9O/7R4fiTv2oDl6QV5xZOPxfAUKWNfAZGiVBgVs7
+	WYGOWzmTaPkellHGTTiekWA/qB3/sFBbbNOYoHJa8OL76GM5OKBjay1UvVIYB0M0
+	Td4sB7FFE/SSd5cwfKImD14VwqAx9YhbJ0wd/QT6c2R2irUeei0iddAaK00yIDmB
+	8NHecEpvqDF1Pxc1Zhi59iJUpOnpJMfuTd3kX4+NkRBs8gWHxDv1JQ4zPnN5qnoK
+	wFR9pT2flM/7FUd0IQDbZc7lHHX7kk6nPWPh6XbKsfBm8ymyUaHYVs5ok9v+jvDp
+	AAevFw==
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4dk52jkgba-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 13:25:23 +0000 (GMT)
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2b258636d16so7172175ad.2
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Apr 2026 06:25:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20251104.gappssmtp.com; s=20251104; t=1776431484; x=1777036284; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=KCc9El91v2tJeTyCQTpkqW7vYe/zKOnr7R5NXhlhOxk=;
-        b=VvArZr1y+esjXP9Fkt1hwUdDRTxtksIGaH9R6ylZc+w3tKLPxsKo4koXmB3ViLSx7J
-         pDgMuL5mdZGpicySRMr4Rtc7gEjES2CCcEENqzVf20iUq/gK8GJhG6q0uYR1yslK+gMC
-         norEuIU8GkMmsZLGvKtJE1IxuckNnapfE6FiZqnpphtszWJUzRgLpQPBWGUk/spJxm+K
-         bpyGeGSuLjPDhwfGajRuUT0rtRkzILhja3fO4Tl8kXzMnsGugCV3IExsETfD4pd3Ik+T
-         CVS8oV4b6aLRUoTRoDmHS7+/X7yKUdRPv3gGC9lTk9/hCS0uVZVF2uRF5v5OWtRefNw8
-         KfUA==
+        d=oss.qualcomm.com; s=google; t=1776432323; x=1777037123; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=QNcL6sT7C05P+AcSNna5P+PTt/SHMOgeqU5I2FLTS5I=;
+        b=CY+pb+2ebkBYSqgYfKRUd9O5z0MiWtY5cbLYyzfKcDnVvCAHKno5SsgO0tpwftXYqu
+         7aJPiGIGwY+ssvT2YA0uLYE51uY5ZpjJaDocMitX+L7NPqbY8S4ISJVOCn/fz1u58PDe
+         Sngj3eE0UKXO63oX+VxNywhmOLh+UQxljKcqin6fk3cy4h43QOI0QxAC/uOLbMjjIeBb
+         SB4rrqGjvcXpi/BKIL72/V/NHusYWqO98rmjoDln+B03Bonw/wEt7/S34QLbrMQvD7Ea
+         rbpvsGgpVFFEmqW/aGxYL7tlPhViCXQ4rMTByHCpS/WdU3RAMBUu+yHYVJRak58LCevd
+         iBFA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776431484; x=1777036284;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KCc9El91v2tJeTyCQTpkqW7vYe/zKOnr7R5NXhlhOxk=;
-        b=E9BK4lDkpm6xsm5cyk16bitQb1LwACHi7Aru3RrRQfuDXiYvhQP0HCPBUweQfmBk+6
-         Y8xJ7YW/wZwZSBOKPHPvfeyWNSOPY4Ye8eMk0FXn8pZbjz5/+1IBfvz25Y4ypysWvOws
-         ZfMEaT6zjfk6gahh3WTNOG2MC41F5v663BABUuVkXjIoZtRB3ThbT3GOCH0CqhUK/Q+g
-         djeOYAuROA6tZ+NkgKP+7XeB71tTuGhni3ymY8MzIO5Fiz2d4ANzN3xmu8gbU+8D4hK7
-         4N/kkY2y2DxaOhVtt2Lr0ot44011EZPKLo4FtW0124ZQDR3HVIfVC0rlNm8mSnp4db+b
-         HnAQ==
-X-Forwarded-Encrypted: i=1; AFNElJ9iZSNMZoEDG8kWWbEDp2rh4TQbBNQZJrope9qUt0UuJih/5yLJhZsXqzyoc0xS8pV6cbA+trdUvik=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwmblPVgsduiyXol+mlxTY8c2WUVGfltnbTXcsBqYEs0a+vq01u
-	vVQu0SUf2PjmpfYS86EbUx5fWkS0H1hjQQXOy8jiy21SAAaz5KKMtewYeCoVFcMx0zw=
-X-Gm-Gg: AeBDietv6KSOzbPFjgjlg3rVQtswWoqXEXYhXRdoLugpxpFRHOO7Rv9LKFoxJcTCYgI
-	r6b8Dxkz3D4POYXV2O/7MNzyy1+E1icc+Y/W3ius42rvU9P/pffD1HBLyrg+LgDkp7xeH1HGxl7
-	JFxcH2P4IN/iFxB8S3ijusKk9T5UN1I5KBN0FVMrXw0u/CnLa+FDF03g7MPKxs6/sepHPq+naN8
-	2ZsupxKxIHc/uHNB4ec4T1nYqcQTCSL5zIImT6cQSBB9TEsIGJBEgTYbW6YXDCBGsO5iw/bfuJy
-	rAjspb71nIieIdMdeFPmtMAQew9fcWA01YNuRK4wMvRiVmFLfR1qE+nptJdwnsIBo6Ji53V2lAK
-	2iLSYCtevYCmuybweq/SR7shku0z6Ufakld/JYpTwZEiH05Y7yWAx4RgrOIWhzDC/6AE0PLVZcK
-	3PwhEY0xJbSAZjJkUNkiv3jBi+ePYcrRYGry6V7h93tyi03y2QIx1hRRk0JvMRDYAe9Dv9JUbpx
-	OKySoqatkcB7+LpVEM41JFo
-X-Received: by 2002:a05:6000:2005:b0:43d:77a8:3ba7 with SMTP id ffacd0b85a97d-43fe3e12484mr4104740f8f.44.1776431484359;
-        Fri, 17 Apr 2026 06:11:24 -0700 (PDT)
-Received: from localhost (p200300f65f20eb08db61cfc60d8aa232.dip0.t-ipconnect.de. [2003:f6:5f20:eb08:db61:cfc6:d8a:a232])
-        by smtp.gmail.com with UTF8SMTPSA id ffacd0b85a97d-43fe4e3a7b4sm4356620f8f.22.2026.04.17.06.11.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Apr 2026 06:11:23 -0700 (PDT)
-From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig=20=28The=20Capable=20Hub=29?= <u.kleine-koenig@baylibre.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: "Christian A. Ehrhardt" <christian.ehrhardt@codasip.com>,
-	linux-mmc@vger.kernel.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	linux-kernel@vger.kernel.org,
-	Marcel Holtmann <marcel@holtmann.org>,
-	Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-	linux-bluetooth@vger.kernel.org,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	linux-mediatek@lists.infradead.org,
-	Ping-Ke Shih <pkshih@realtek.com>,
-	linux-wireless@vger.kernel.org,
-	Felix Fietkau <nbd@nbd.name>,
-	Lorenzo Bianconi <lorenzo@kernel.org>,
-	Ryder Lee <ryder.lee@mediatek.com>,
-	Shayne Chen <shayne.chen@mediatek.com>,
-	Sean Wang <sean.wang@mediatek.com>,
-	Brian Norris <briannorris@chromium.org>,
-	Francesco Dolcini <francesco@dolcini.it>,
-	Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1 0/6] sdio: About pointers in sdio_device_id::driver_data
-Date: Fri, 17 Apr 2026 15:10:46 +0200
-Message-ID: <cover.1776429984.git.u.kleine-koenig@baylibre.com>
-X-Mailer: git-send-email 2.47.3
+        d=1e100.net; s=20251104; t=1776432323; x=1777037123;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=QNcL6sT7C05P+AcSNna5P+PTt/SHMOgeqU5I2FLTS5I=;
+        b=QdEQ5YlOqtZKa6LYm8haNfLw23HVbZ6EnvZTKIb/89jV7ubVuLMz4AeX9qm7ey8ahU
+         NBts7yze+t+Qa1Lsn/xI3y3DcBl9i6EcsR3E90Ti9eWPychqaqRxLlocUC8tl19srIP8
+         iEP5IEu4q2eolHyFo+YVKX4K29+5XfckM/GV8xZBSOuXAX0UsEv6M/AutmeQPiYXjEHh
+         NWBcDe6Z7ZC3vepjBxNgtpnwFFIr+BiLYpGossNdaKMvHfcG4GT/cecpZ6C3NsW2tGMw
+         RBapzPqkF0IIlg6rnU5m0ena+f1UYrJJo/Wvg3G6J9Hz1d1cFfxWpw2BQL3VKwiP/O/p
+         95Aw==
+X-Forwarded-Encrypted: i=1; AFNElJ9vG/9YFYWCUpZAmw3VwJ3KftokDt/q1itjEtIHW/blHhGOYy34rQnU5kCbHpV7Y4XnnxAcZZz2ZfQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyL4S5TovPZ1wghcvX5tgTHkIa+55ShsHQtMtfxeEQdNWWf5JZz
+	eZPoO7Be9d7gJw22ZbAvhBwIYP7rsygXc3GmdHSqRbEXQCCZWNsrwB88STId+HnHtYZtMyPGYcH
+	Cd1H4HQpiE0WWeW2YUl60Q9jQ/zCpm58dCn2iN5cAu6B+VsKpOF5S+Shb2WGaxWs=
+X-Gm-Gg: AeBDieuykkAmnlE5kXVhgTh4aMxoiH/x43D7Awm+5ekbJDeLFVICW1mtjjC+LKOfFSg
+	vy42aBmWtIH9Wz6CY0zdWPGb59kifyGobkFRit5zWcBXl2SOFUr/CZdOgh6aUPt8zuiTXzporBC
+	K7HZvHyZnS0HSuuSE5jtRNZ7+IhU4LfVhIL1UDZOzITQrgH4PNGHliLHbEriqBzZvFOJrbW4OUC
+	oRxU6tPfbWELDgAymOVB1Ts0Rj12e9ulha1qwKQjAHd1a+CkuW5mZT4UA6wLs32+TxL8vV4JAZv
+	DpqjZAxwZaIfVAtvOkeKu+IIpcwdKnm7PIfllTPB/o8q9Ru1qG1IdcHWm+/b+M9WjKshXtf89zo
+	40MIOHWrWPJJa7yrEKi2o4ny3hTbjwhAR5cO6LBIIBfMsw35WOL0IVqcmEQGMLw==
+X-Received: by 2002:a17:902:b693:b0:2b2:ec4f:7074 with SMTP id d9443c01a7336-2b5fa032a50mr22722065ad.38.1776432322028;
+        Fri, 17 Apr 2026 06:25:22 -0700 (PDT)
+X-Received: by 2002:a17:902:b693:b0:2b2:ec4f:7074 with SMTP id d9443c01a7336-2b5fa032a50mr22721745ad.38.1776432321486;
+        Fri, 17 Apr 2026 06:25:21 -0700 (PDT)
+Received: from [10.217.223.121] ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2b5faa32ad8sm22769075ad.31.2026.04.17.06.25.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 17 Apr 2026 06:25:20 -0700 (PDT)
+Message-ID: <4528374d-8175-4a1c-859f-23ddf2bbef52@oss.qualcomm.com>
+Date: Fri, 17 Apr 2026 18:55:14 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v8 1/5] soc: qcom: ice: Add OPP-based clock scaling
+ support for ICE
+To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+ <ulf.hansson@linaro.org>,
+        Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
+        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>,
+        Rob Herring
+ <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>
+Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org
+References: <20260409-enable-ice-clock-scaling-v8-0-ca1129798606@oss.qualcomm.com>
+ <20260409-enable-ice-clock-scaling-v8-1-ca1129798606@oss.qualcomm.com>
+Content-Language: en-US
+From: Harshal Dev <harshal.dev@oss.qualcomm.com>
+In-Reply-To: <20260409-enable-ice-clock-scaling-v8-1-ca1129798606@oss.qualcomm.com>
 Content-Type: text/plain; charset=UTF-8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3816; i=u.kleine-koenig@baylibre.com; h=from:subject:message-id; bh=gRLZDYjP8rAyYDu/dxhxXrW55dQHWBhhz4Mp7s9yll4=; b=owEBbQGS/pANAwAKAY+A+1h9Ev5OAcsmYgBp4jFWdaRCcbA6UCRSVtfbncEwOSti40CoPsvF+ vdIuFxTidWJATMEAAEKAB0WIQQ/gaxpOnoeWYmt/tOPgPtYfRL+TgUCaeIxVgAKCRCPgPtYfRL+ Ts32B/9u8msCou5BwhNaY0DlL45F+7qpQKpSsQuRk2gI42hvAESq9kyeVN/MZWif44tjir6LK2z uIl/GDbOQMK01aikDbfuVOtkDDghRBSTEB7Jka+OjfPnDumnNigRsaaBGNvsAFjIJkLhEy6qJDP Tn8woM7fN22cukUBpxin+S+kcXgM00Q8TjTUzEfguVA/yR/5l3z2E6JOyddLE7skD3BcWZth7gw bSohFR1HxMGAwUA7mKVNzLdYdPXW7y8rKtYwlVFZUsZmtrNFbfl9Br+UBebFAMyx3Rll6Um30xM RwO7mqAqqwH8Ox2CRHpiyR61s3V9bmt+/v2tLxnaw2vhp3PI
-X-Developer-Key: i=u.kleine-koenig@baylibre.com; a=openpgp; fpr=0D2511F322BFAB1C1580266BE2DCDD9132669BD6
-Content-Transfer-Encoding: 8bit
-
-<linux/mod_devicetable.h> contains several device_id structs for various
-device types.
-
-Most of them have one of:
-
- - kernel_ulong_t driver_data (sometimes called "driver_info")
- - unsigned long driver_data
- - const void *data (sometimes called "driver_data" or "context", sometimes not const)
-
-Taking sdio_device_id as an arbitrary[1] example (which has
-kernel_ulong_t driver_data), there are drivers that store integer values
-in it (e.g.  drivers/media/mmc/siano/smssdio.c) and others use pointers
-(e.g.  drivers/net/wireless/realtek/rtw88/rtw8723ds.c). The latter
-involves explicit casting, both for initialisation and for usage.
-
-In the past I tried to address this using i2c as discussion case[2].
-Back then the motivation was just to get rid of the ugly casts. Today
-I'm working on CHERI which is an architecture extension (currently for
-arm and riscv) that uses 128 bit pointers to store additional
-information, implementing e.g. read-only pointers and preventing out of
-bounds access on the hardware level.
-
-The complication here is that a kernel_ulong_t (which is still 64 bit with
-CHERI) cannot store a pointer.
-
-The obvious way to fix that is to replace the kernel_ulong_t by an anonymous
-union that contains the original unsigned long and a pointer. This doesn't 
-change the size (or layout) of the device id struct for archs where 
-sizeof(long) >= sizeof(void *) [3] and gets rid of the casting. On CHERI archs 
-this is an ABI change, but as a new architecture changing ABI isn't an
-issue there.
-
-I was surprised that changing struct sdio_device_id didn't require
-preparation in the various drivers as they all already use named
-initializers.
-
-So the first patch expands struct sdio_device_id and the 5 following
-patches implement cleanups that can be done then.
-
-Patches 2 to 6 all depend on the first patch (only). This is not urgent
-and thus merge window material. I guess merging of this series has to
-happen in 3 steps:
-
- 1) patch #1 via mmc
- 2) patches #2 and #3 via bluetooth
- 3) patches #4 - #6 via wireless
-
-(where 2) and 3) are independent).
-
-The series was build tested on arm64.
-
-[1] well, one that isn't used as much as spi_device_id or i2c_device_id to have  get a manageable POC.
-[2] https://lore.kernel.org/lkml/20240426213832.915485-2-u.kleine-koenig@pengutronix.de
-[3] As of now this is true on all architectures running Linux even with s/>=/==/
+Content-Transfer-Encoding: 7bit
+X-Authority-Analysis: v=2.4 cv=buR8wkai c=1 sm=1 tr=0 ts=69e234c3 cx=c_pps
+ a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=IkcTkHD0fZMA:10 a=A5OVakUREuEA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=_K5XuSEh1TEqbUxoQ0s3:22
+ a=EUspDBNiAAAA:8 a=Y1tIbI0nCN1IA7hYjVgA:9 a=QEXdDO2ut3YA:10
+ a=GvdueXVYPmCkWapjIL-Q:22
+X-Proofpoint-GUID: N2s6QSmhh2EldtksRXnrnGh8a5RwmHwK
+X-Proofpoint-ORIG-GUID: N2s6QSmhh2EldtksRXnrnGh8a5RwmHwK
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDE3MDEzNCBTYWx0ZWRfX6+PVD3QrTBsy
+ Blz9UJskWcwvffQba/ARSOulHFpErWSlHFnrS08ge+RGrl4aDfAKM6z/fb4W7rFHTNzyYDOqbuA
+ 0Dz9fT36CslNK1k0HEdXCRud046RF+Vi+HWXJckNGGfIZ+f6ZILLWFnwRj15fauUGGSUldPE09V
+ LG88nufHSKzBKE/J3UwFMMWewyArYlGvk+0h1Qsr8gtbuKHUTnZUZnvBjm8JYusZ6Au4PTkcao4
+ MEicuAjQOWRbRXX1KQuwnATbfzsZfSp6NXrSxan/OHivdo701PsOoWsyw5HbNFyDGwik+euIBGn
+ DS5X58IwVOYhZcPCRSPcqgJNghNpe1Xqpx5vbGSRtFibgkaHJLeMK3g754KD2aWXL4Y+DdrI6jp
+ 1iYZuQq2OZgpp7WlA+QOn6zclO6JWJ5csie5uNTNzYo6PdCnxvmFUBvXbtdvvUWW2Hpyzo2nkAi
+ jgB53b287W7wDe0Rn5A==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-04-17_01,2026-04-17_04,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 adultscore=0 lowpriorityscore=0 suspectscore=0 bulkscore=0
+ priorityscore=1501 spamscore=0 malwarescore=0 phishscore=0 clxscore=1011
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2604070000 definitions=main-2604170134
 
 
-Uwe Kleine-König (The Capable Hub) (6):
-  sdio: Add syntactic sugar to store a pointer in sdio_driver_id
-  Bluetooth: btmrvl_sdio: Make use of driver data pointer in
-    sdio_device_id
-  Bluetooth: btmtksdio: Make use of driver data pointer in
-    sdio_device_id
-  wifi: rtw88: Benefit from sdio_device_id::driver_data_ptr
-  wifi: mt76: mt7921-sdio: Make use of driver data pointer in
-    sdio_device_id
-  wifi: mwifiex: Make use of driver data pointer in sdio_device_id
 
- drivers/bluetooth/btmrvl_sdio.c               | 22 ++++++++---------
- drivers/bluetooth/btmtksdio.c                 |  8 +++----
- drivers/net/wireless/marvell/mwifiex/sdio.c   | 24 +++++++++----------
- .../net/wireless/mediatek/mt76/mt7921/sdio.c  |  4 ++--
- drivers/net/wireless/mediatek/mt76/mt792x.h   |  2 +-
- .../net/wireless/mediatek/mt76/mt792x_core.c  |  2 +-
- .../net/wireless/realtek/rtw88/rtw8723cs.c    |  2 +-
- .../net/wireless/realtek/rtw88/rtw8723ds.c    |  4 ++--
- .../net/wireless/realtek/rtw88/rtw8821cs.c    |  2 +-
- .../net/wireless/realtek/rtw88/rtw8822bs.c    |  2 +-
- .../net/wireless/realtek/rtw88/rtw8822cs.c    |  2 +-
- drivers/net/wireless/realtek/rtw88/sdio.c     |  2 +-
- include/linux/mod_devicetable.h               |  5 +++-
- 13 files changed, 42 insertions(+), 39 deletions(-)
+On 4/9/2026 5:14 PM, Abhinaba Rakshit wrote:
+> Register optional operation-points-v2 table for ICE device
+> during device probe. Attach the OPP-table with only the ICE
+> core clock. Since, dtbinding is on a trasition phase to include
+> iface clock and clock-names, attaching the opp-table to core clock
+> remains options such that it does not cause probe failures.
+> 
+> Introduce clock scaling API qcom_ice_scale_clk which scale ICE
+> core clock based on the target frequency provided and if a valid
+> OPP-table is registered. Use round_ceil passed to decide on the
+> rounding of the clock freq against OPP-table. Clock scaling is
+> disabled when a valid OPP-table is not registered.
+> 
+> This ensures when an ICE-device specific OPP table is available,
+> use the PM OPP framework to manage frequency scaling and maintain
+> proper power-domain constraints.
+> 
+> Also, ensure to drop the votes in suspend to prevent power/thermal
+> retention. Subsequently restore the frequency in resume from
+> core_clk_freq which stores the last ICE core clock operating frequency.
+> 
+> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
+> ---
+>  drivers/soc/qcom/ice.c | 92 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  include/soc/qcom/ice.h |  2 ++
+>  2 files changed, 94 insertions(+)
+> 
+> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> index bf4ab2d9e5c0360d8fe6135cc35f93b6b09e7a0e..9e869e6abc6300c7608b4d9a18e7f3e80c93f5e7 100644
+> --- a/drivers/soc/qcom/ice.c
+> +++ b/drivers/soc/qcom/ice.c
+> @@ -16,6 +16,7 @@
+
+[..]
+
+> @@ -742,6 +800,40 @@ static int qcom_ice_probe(struct platform_device *pdev)
+>  	if (IS_ERR(engine))
+>  		return PTR_ERR(engine);
+>  
+> +	/* qcom_ice_create() may return NULL if scm calls are not available */
+> +	if (!engine)
+> +		return -EOPNOTSUPP;
+> +
+> +	err = devm_pm_opp_set_clkname(&pdev->dev, "core");
+> +	if (err && err != -ENOENT) {
+> +		dev_err(&pdev->dev, "Unable to set core clkname to OPP-table\n");
+> +		return err;
+> +	}
+> +
+> +	/* OPP table is optional */
+> +	err = devm_pm_opp_of_add_table(&pdev->dev);
+> +	if (err && err != -ENODEV) {
+> +		dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
+> +		return err;
+> +	}
+> +
+> +	/*
+> +	 * The OPP table is optional. devm_pm_opp_of_add_table() returns
+> +	 * -ENODEV when no OPP table is present in DT, which is not treated
+> +	 * as an error. Therefore, track successful OPP registration only
+> +	 * when the return value is 0.
+> +	 */
+> +	engine->has_opp = (err == 0);
+> +	if (!engine->has_opp)
+> +		dev_info(&pdev->dev, "ICE OPP table is not registered, please update your DT\n");
+> +
+> +	/*
+> +	 * Store the core clock rate for suspend resume cycles,
+> +	 * against OPP aware DVFS operations. core_clk_freq will
+> +	 * have a valid value only for non-legacy bindings.
+> +	 */
+> +	engine->core_clk_freq = clk_get_rate(engine->core_clk);
+> +
+
+When you are calling 4-5 functions in a function, it's probably time to define another
+function to keep things simple. Maybe qcom_ice_attach_opp_table().
+
+Also, I still have issues with engine->has_opp = (err == 0), mostly because I don't
+see this style used at other placed in the kernel. I would still suggest that you
+make it simpler, but I won't hard-request it.
+
+/* The same explanatory comment as before */
+if (err == -ENODEV)
+	engine->has_opp = false;
+        dev_info(...);
+else
+	engine->has_opp = true;
+
+With these optional suggestions, feel free to add:
+
+Reviewed-by: Harshal Dev <harshal.dev@oss.qualcomm.com>
 
 
-base-commit: 028ef9c96e96197026887c0f092424679298aae8
--- 
-2.47.3
+>  	platform_set_drvdata(pdev, engine);
+>  
+>  	return 0;
+> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+> index 4bee553f0a59d86ec6ce20f7c7b4bce28a706415..4eb58a264d416e71228ed4b13e7f53c549261fdc 100644
+> --- a/include/soc/qcom/ice.h
+> +++ b/include/soc/qcom/ice.h
+> @@ -30,5 +30,7 @@ int qcom_ice_import_key(struct qcom_ice *ice,
+>  			const u8 *raw_key, size_t raw_key_size,
+>  			u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE]);
+>  struct qcom_ice *devm_of_qcom_ice_get(struct device *dev);
+> +int qcom_ice_scale_clk(struct qcom_ice *ice, unsigned long target_freq,
+> +		       bool round_ceil);
+>  
+>  #endif /* __QCOM_ICE_H__ */
+> 
 
