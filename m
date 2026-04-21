@@ -1,145 +1,138 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 513E03D9DDA;
-	Tue, 21 Apr 2026 20:00:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B8DF2F4A05;
+	Tue, 21 Apr 2026 21:33:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776801617; cv=none; b=rh9tp3DjZdP3oDA3sa4lxMJEgpMU0OkdPqhQgu9nHbsFPe8JNk4NlGznUXZc43K9GsLR8qwzS2YQAK/100lQcftDISxPQgHH7lOU066Omjtjx3YgoEw8CXWwgfOhqPpHsPIXP5a1fLDilyPW5k5+3EolkPBLMNeeIixx4VErQJo=
+	t=1776807212; cv=none; b=Zej1RspqZqcTNA2mbdXSbX5f34XMtajp+x1dAESkweSDIGZiBvs2GJwRm5dygFUMNHxG2JuA3WS/mas+1SnM28kMDbcevNWU61qR5LymuziDZs1YlZ0VrYYGpTtG4oHwlQhteRVSL9vp2banEGXKRf2jbvDaLzD+P1epPWnlAAc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776801617; c=relaxed/simple;
-	bh=Zlc1xvs7V1MA2mbAbpURS34qCSlGhYRGswgZIBC4UrY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=l7s0wRpKAUaRlTYNweTQaSxXgHpVC+TQoOf8xJjGmK4DfcO3cqS7QSLgdu6QKqE4jKZC7j//X4Qpdpu4onodJ3m9mdjgH55Zz1Pc5qvFuxim0UxMGF4mC82ODfPgqQ0x1zeSgosQ1CPRzUK/l3tijUsZTwLE6KyDMzG3uzgtGRk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q3Ls/D6b; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1776807212; c=relaxed/simple;
+	bh=vatupuq4WrABpSuEUMYUtujivXgVDiHk3e1MmNVxM+Q=;
+	h=Date:Content-Type:MIME-Version:From:Cc:To:In-Reply-To:References:
+	 Message-Id:Subject; b=e1kkqojvvb7JKiyHcSlbBsam7OTIMBBZQS6ktaBp07FzxRJ+3rBhtw0Dv8FXXsQBEUiwlwc2CLnacNUxdPuAJ5Ocy8zyq/z+XSHghqguR+xsIvSi1ug384x3X+rnZ5AWH85zkZtAcmQlrZes8q6xS7T0aJ1i6xB0cPa0OZWuDlo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RfEYijh7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q3Ls/D6b"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0F1E0C2BCB0;
-	Tue, 21 Apr 2026 20:00:08 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RfEYijh7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D1D63C2BCB0;
+	Tue, 21 Apr 2026 21:33:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776801617;
-	bh=Zlc1xvs7V1MA2mbAbpURS34qCSlGhYRGswgZIBC4UrY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Q3Ls/D6bQyexm8rodqpy6NEtHra1oMoMVRLg3U9JMkuJrvmpKemOoLsPg8viOmxAA
-	 oqbL97hhSfvKpFblHAkaTwKXjjjZLWkOveAAbzSfAq6JcamM1T1fjT2bPzUSogslAK
-	 +zvD75CC72k7pSEbCjzlxRdWV5d56eR8iYLCZ//CrhVjnarDFCciD4iZ3S+xX53yHk
-	 JTeIP7kLtxMiNbsa1tHstJOkS9fk+Nvrwwvv0ksP1PkgiT2k6Bx4ENQF1dlHWnOOKe
-	 HidJJmzeMoiBAw/SATUP6S23FVd3QT8sw7/HfUkMqBjCCQnnLWyBosurg75kP4c4BR
-	 TJbjwsrX4yqUA==
-Date: Tue, 21 Apr 2026 21:00:06 +0100
-From: Mark Brown <broonie@kernel.org>
-To: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Stephan Gerhold <stephan@gerhold.net>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Johannes Berg <johannes@sipsolutions.net>,
-	Jeff Johnson <jjohnson@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Lorenzo Pieralisi <lpieralisi@kernel.org>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Mathieu Poirier <mathieu.poirier@linaro.org>,
-	Sylwester Nawrocki <s.nawrocki@samsung.com>,
-	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Yang Xiwen <forbidden405@outlook.com>,
-	Alex Elder <elder@kernel.org>,
-	Chaitanya Chundru <krishna.chundru@oss.qualcomm.com>,
-	Sibi Sankar <sibi.sankar@oss.qualcomm.com>,
-	Rao Mandadapu <quic_srivasam@quicinc.com>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Xu Yang <xu.yang_2@nxp.com>, Peng Fan <peng.fan@nxp.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, netdev@vger.kernel.org,
-	linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
-	ath11k@lists.infradead.org, linux-pci@vger.kernel.org,
-	linux-remoteproc@vger.kernel.org, linux-sound@vger.kernel.org,
-	linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Fix phandle-array constraints, again
-Message-ID: <ddeb29fc-1292-4191-8963-8ba817410740@sirena.org.uk>
-Mail-Followup-To: "Rob Herring (Arm)" <robh@kernel.org>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Stephan Gerhold <stephan@gerhold.net>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Johannes Berg <johannes@sipsolutions.net>,
-	Jeff Johnson <jjohnson@kernel.org>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	Lorenzo Pieralisi <lpieralisi@kernel.org>,
-	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Mathieu Poirier <mathieu.poirier@linaro.org>,
-	Sylwester Nawrocki <s.nawrocki@samsung.com>,
-	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Yang Xiwen <forbidden405@outlook.com>,
-	Alex Elder <elder@kernel.org>,
-	Chaitanya Chundru <krishna.chundru@oss.qualcomm.com>,
-	Sibi Sankar <sibi.sankar@oss.qualcomm.com>,
-	Rao Mandadapu <quic_srivasam@quicinc.com>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Xu Yang <xu.yang_2@nxp.com>, Peng Fan <peng.fan@nxp.com>,
-	Thomas Zimmermann <tzimmermann@suse.de>, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, netdev@vger.kernel.org,
-	linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
-	ath11k@lists.infradead.org, linux-pci@vger.kernel.org,
-	linux-remoteproc@vger.kernel.org, linux-sound@vger.kernel.org,
-	linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
-References: <20260421195836.1547469-1-robh@kernel.org>
+	s=k20201202; t=1776807212;
+	bh=vatupuq4WrABpSuEUMYUtujivXgVDiHk3e1MmNVxM+Q=;
+	h=Date:From:Cc:To:In-Reply-To:References:Subject:From;
+	b=RfEYijh7XhOIIxtCBiZK1gn5IXNLv5qcn5amQw5CqC2XQ0mRjsWMy0SwC/jKxN8Ha
+	 +lGNHgaycbYUVz/8qUQTAV87+keU8WY1I1fe4qL/Cubm0CmcRljTFyT4oCGT3XsCWG
+	 21JAOI+XCTuLyqtAQ0JY89PQj9ztU0bsVRSzsv4sAV4REIQeaAk9EIXe86axCL8Lcv
+	 P49oQppEQE3W5ysKk35W1yekjIPJzFLIHvqS9YHqLVNNeeeAs1gWZnOJuQHTbQ76Mo
+	 fn4ArOBoMvEaOR/5jHbzodnC5RnVkOGNRxUq58/UbFZ0QTUKrwlb9kjzN5QiQ3GPHQ
+	 wuq7UQCA8GLiQ==
+Date: Tue, 21 Apr 2026 16:33:30 -0500
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="SlEK5XXQLOw6MldA"
-Content-Disposition: inline
+From: "Rob Herring (Arm)" <robh@kernel.org>
+Cc: Sylwester Nawrocki <s.nawrocki@samsung.com>, ath11k@lists.infradead.org, 
+ devicetree@vger.kernel.org, linux-pci@vger.kernel.org, 
+ Mathieu Poirier <mathieu.poirier@linaro.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Xu Yang <xu.yang_2@nxp.com>, 
+ Lorenzo Pieralisi <lpieralisi@kernel.org>, 
+ Andrew Lunn <andrew+netdev@lunn.ch>, linux-spi@vger.kernel.org, 
+ Patrice Chotard <patrice.chotard@foss.st.com>, 
+ Rao Mandadapu <quic_srivasam@quicinc.com>, Mark Brown <broonie@kernel.org>, 
+ linux-sound@vger.kernel.org, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Bjorn Andersson <andersson@kernel.org>, linux-remoteproc@vger.kernel.org, 
+ Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
+ Thomas Zimmermann <tzimmermann@suse.de>, 
+ Sibi Sankar <sibi.sankar@oss.qualcomm.com>, linux-wireless@vger.kernel.org, 
+ Johannes Berg <johannes@sipsolutions.net>, 
+ Yang Xiwen <forbidden405@outlook.com>, 
+ Chaitanya Chundru <krishna.chundru@oss.qualcomm.com>, 
+ Alex Elder <elder@kernel.org>, Manivannan Sadhasivam <mani@kernel.org>, 
+ Ulf Hansson <ulf.hansson@linaro.org>, Stephan Gerhold <stephan@gerhold.net>, 
+ linux-kernel@vger.kernel.org, Eric Dumazet <edumazet@google.com>, 
+ Paolo Abeni <pabeni@redhat.com>, Jakub Kicinski <kuba@kernel.org>, 
+ linux-arm-msm@vger.kernel.org, linux-usb@vger.kernel.org, 
+ Bjorn Helgaas <bhelgaas@google.com>, Jeff Johnson <jjohnson@kernel.org>, 
+ linux-mmc@vger.kernel.org, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Peng Fan <peng.fan@nxp.com>, 
+ "David S. Miller" <davem@davemloft.net>, 
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>, ath10k@lists.infradead.org, 
+ netdev@vger.kernel.org, Maxime Ripard <mripard@kernel.org>
+To: "Rob Herring (Arm)" <robh@kernel.org>
 In-Reply-To: <20260421195836.1547469-1-robh@kernel.org>
-X-Cookie: Jenkinson's Law:
+References: <20260421195836.1547469-1-robh@kernel.org>
+Message-Id: <177680720998.183058.5012840252939438533.robh@kernel.org>
+Subject: Re: [PATCH] dt-bindings: Fix phandle-array constraints, again
 
 
---SlEK5XXQLOw6MldA
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Tue, Apr 21, 2026 at 02:55:25PM -0500, Rob Herring (Arm) wrote:
+On Tue, 21 Apr 2026 14:55:25 -0500, Rob Herring (Arm) wrote:
 > The unfortunately named 'phandle-array' property type is really a matrix
 > with phandle and fixed arg cells entries. A matrix property should have 2
 > levels of items constraints.
+> 
+> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+> ---
+> Can someone from QCom provide some descriptions for 'qcom,smem-states'
+> properties.
+> ---
+>  .../display/rockchip/rockchip,rk3399-cdn-dp.yaml         | 2 ++
+>  .../bindings/mmc/hisilicon,hi3798cv200-dw-mshc.yaml      | 7 ++++---
+>  Documentation/devicetree/bindings/net/qcom,bam-dmux.yaml | 6 ++++++
+>  Documentation/devicetree/bindings/net/qcom,ipa.yaml      | 6 ++++++
+>  .../devicetree/bindings/net/wireless/qcom,ath10k.yaml    | 5 ++++-
+>  .../devicetree/bindings/net/wireless/qcom,ath11k.yaml    | 5 ++++-
+>  .../bindings/net/wireless/qcom,ipq5332-wifi.yaml         | 9 +++++++++
+>  .../devicetree/bindings/pci/toshiba,tc9563.yaml          | 5 +++--
+>  .../bindings/remoteproc/qcom,msm8916-mss-pil.yaml        | 3 +++
+>  .../bindings/remoteproc/qcom,msm8996-mss-pil.yaml        | 3 +++
+>  .../devicetree/bindings/remoteproc/qcom,pas-common.yaml  | 4 ++++
+>  .../bindings/remoteproc/qcom,qcs404-cdsp-pil.yaml        | 4 ++++
+>  .../bindings/remoteproc/qcom,sc7180-mss-pil.yaml         | 3 +++
+>  .../bindings/remoteproc/qcom,sc7280-adsp-pil.yaml        | 3 +++
+>  .../bindings/remoteproc/qcom,sc7280-mss-pil.yaml         | 3 +++
+>  .../bindings/remoteproc/qcom,sc7280-wpss-pil.yaml        | 3 +++
+>  .../bindings/remoteproc/qcom,sdm845-adsp-pil.yaml        | 3 +++
+>  .../devicetree/bindings/remoteproc/qcom,wcnss-pil.yaml   | 3 +++
+>  Documentation/devicetree/bindings/sound/samsung,tm2.yaml | 2 ++
+>  .../devicetree/bindings/spi/st,stm32mp25-ospi.yaml       | 5 +++--
+>  .../devicetree/bindings/usb/chipidea,usb2-common.yaml    | 2 ++
+>  Documentation/devicetree/bindings/usb/ci-hdrc-usb2.yaml  | 7 ++++---
+>  22 files changed, 81 insertions(+), 12 deletions(-)
+> 
 
-Acked-by: Mark Brown <broonie@kernel.org>
+My bot found errors running 'make dt_binding_check' on your patch:
 
---SlEK5XXQLOw6MldA
-Content-Type: application/pgp-signature; name="signature.asc"
+yamllint warnings/errors:
+./Documentation/devicetree/bindings/remoteproc/qcom,qcs404-cdsp-pil.yaml:99:1: [warning] too many blank lines (2 > 1) (empty-lines)
+./Documentation/devicetree/bindings/remoteproc/qcom,pas-common.yaml:67:1: [warning] too many blank lines (2 > 1) (empty-lines)
 
------BEGIN PGP SIGNATURE-----
+dtschema/dtc warnings/errors:
+/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/i2c/i2c-demux-pinctrl.example.dtb: i2c-mux3 (i2c-demux-pinctrl): i2c-parent:0: [2, 3, 4] is too long
+	from schema $id: http://devicetree.org/schemas/i2c/i2c-demux-pinctrl.yaml
+/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/sound/samsung,tm2.example.dtb: sound (samsung,tm2-audio): i2s-controller: [[4294967295], [0], [4294967295], [0]] is too long
+	from schema $id: http://devicetree.org/schemas/sound/samsung,tm2.yaml
 
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmnn10UACgkQJNaLcl1U
-h9C8Vgf/TIh3jOwQkzaSh+ITMEgUCeXAFPb4VUUhIGQS66939JxKIGlaCr8kVeam
-fIS+iyN8BAflGToJHouS473TERLm3pmQaKv4FHy2m/XW3E7aNKl/WZ6nuPJbZzLH
-jN5jU8h19JcMriiidDPn73PPnDdSLZHsxuegwuYvWjjutnanS7pzFFJnvB5FqglH
-DmQVRssnzzYzUBCLII2ARQtKPwTAkv1thWPjVRwXU0AxPSrEWA2+9xpNDedbe86f
-gZJyKDlrKgAXce/tnTDNOJYTUAUwUf66KgGMWLOjfRI+tbwsRV/Z1s6TbSIGgVif
-0AXVOMGUdqpfkYJFeGJGk/8tGGdtZw==
-=Hh8L
------END PGP SIGNATURE-----
+doc reference errors (make refcheckdocs):
 
---SlEK5XXQLOw6MldA--
+See https://patchwork.kernel.org/project/devicetree/patch/20260421195836.1547469-1-robh@kernel.org
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
+
