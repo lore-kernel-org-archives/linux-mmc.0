@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 960D03C1969;
-	Wed, 22 Apr 2026 09:20:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 689BA32A3FD;
+	Wed, 22 Apr 2026 10:22:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776849602; cv=none; b=WyNpMy504uiK3+Le6KnCIqS5uHNKVruvSxUSqffE3uMnYScu28aFm3AlqBDarkD6NmW+rk15YEw3aQTBOsq7AMSwfRarfFcdTCGl/ZtdTL/6He+SlHkH1Pncu91KNbzPAEPyaH9+hzck3QpvrUzFaDHXbkNlkoUJ2de5rayVmRo=
+	t=1776853329; cv=none; b=Fpg6hG4PCwxjxmQM0fA15FxDrxW9wccz/gLaT372rZqb/2qU4sZEUZogp8s7BTpPy5Kk754yCT+t+bE/vtRa66+lL9itu8ppavZl+r5qcgKNTJrBtARJb/7BFShvRP8kmOb4JteT0/WuOoTX17UY2zFa3kG+6/HJwfVlu4llMbc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776849602; c=relaxed/simple;
-	bh=DpOEJWEbgy2EUIdAGmq2P4VnzdGsa4AlW6mJFjN6PwA=;
+	s=arc-20240116; t=1776853329; c=relaxed/simple;
+	bh=OPAbtCeUFu5JQU7TB2Kk6V+iYdS0gEp+U2RDLrMxNU4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dzBenPZvoa5nLard1Eyep2XtEbzl2/gzLblJv8G113VSr84Nthny73V9RoWjVrtV5q0xlbrqIS61nEKvugll52Mz9pl7Zcz2G2kScRGHAGPIaFE0oj/AJy98L/9jJH68Fm9dGF6ZHacfYu0Q+plkMWlp5FzsI4yk+Y+GGT6mSN4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UuyrWoo/; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=got8GBTqay52EsPxWSpCrnn62c+s4kQ4+kXnGqCi/KFnRVDz6Pfpidiv32xL78UkmV8r6DqcASxe56aiRaQqnPMxu3r5tG5ZSo7+ffsNFMfWEJqh3nsrV8h0b1O87+3Zj1pSTJH0gmpjiT/3iPgd9U4BQ3t7FEiZCliosMjPobE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ISHZRTRA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UuyrWoo/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC7EDC19425;
-	Wed, 22 Apr 2026 09:20:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ISHZRTRA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 83F42C19425;
+	Wed, 22 Apr 2026 10:22:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776849602;
-	bh=DpOEJWEbgy2EUIdAGmq2P4VnzdGsa4AlW6mJFjN6PwA=;
+	s=k20201202; t=1776853329;
+	bh=OPAbtCeUFu5JQU7TB2Kk6V+iYdS0gEp+U2RDLrMxNU4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=UuyrWoo/xf5nGazq35hR0q2RXtNpo6PANgA5dj5aWydhM6d4MmJNPyu0pUxwQbwgT
-	 +5ghBBHRsFi4BEGsP0unkz75GUvQQl7VVh4rsxyLO+9uu5J9+AkoX07iAWXyRu0vGw
-	 7zrU/imsnECPWBVYwYOM7vf4xXvQxduqIGOdPDPM2BcYUb6mA4PkQmJyRni8LWNaJF
-	 ApkZaCEQaauIQaxFdfDLF3zx4OhX+SDgN8fplrR2xs5bVBYc0EwmagTVSThAkS3ypr
-	 K7ty1GBMArtRgQROxzYgMHbhsvMHInLf+OCq5Hjg+Y/qYSAPlFuzX58VOcka23aD6q
-	 zfKZLUg1Qw/uQ==
-Date: Wed, 22 Apr 2026 11:19:59 +0200
+	b=ISHZRTRAUYJFeJR/cUWU0CBCQXfQw0RozDpWLUic3YUtoO9VlWqIk8NUOTGRQ0dTE
+	 /oQxzoWYcTaQZuJF77gP0B61fvks1hoCvpyZ+66ezYOgllbvO62vuIN2bwxrnqO67b
+	 RJoGnM7tiICpF4IgqQ+9Fjko4m9aFnObl/Zj6JJcs3Y38Jeko8QYgDu18V8wk3dNN8
+	 3VubBO+riGP0xCjaU+LNgxt32MbYM1a1cZTjTnk6muBifbpFzz7k5EYnGI7RQ2OB3X
+	 2eln2Le6dSfccx4GyyIIPtxB2Mpbeu4bl9bShgWH+sdP+Mv3GkkvtL2BeQuV5W7Nma
+	 lK5iblz9HoOJg==
+Date: Wed, 22 Apr 2026 12:22:06 +0200
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: "Rob Herring (Arm)" <robh@kernel.org>
 Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
@@ -51,7 +51,7 @@ Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
 	linux-pci@vger.kernel.org, linux-remoteproc@vger.kernel.org, linux-sound@vger.kernel.org, 
 	linux-spi@vger.kernel.org, linux-usb@vger.kernel.org
 Subject: Re: [PATCH] dt-bindings: Fix phandle-array constraints, again
-Message-ID: <20260422-proud-quartz-mastodon-fafb9e@quoll>
+Message-ID: <20260422-spectral-caped-albatross-9debf2@quoll>
 References: <20260421195836.1547469-1-robh@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -64,16 +64,54 @@ Content-Disposition: inline
 In-Reply-To: <20260421195836.1547469-1-robh@kernel.org>
 
 On Tue, Apr 21, 2026 at 02:55:25PM -0500, Rob Herring (Arm) wrote:
-> The unfortunately named 'phandle-array' property type is really a matrix
-> with phandle and fixed arg cells entries. A matrix property should have 2
-> levels of items constraints.
-> 
-> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
-> ---
-> Can someone from QCom provide some descriptions for 'qcom,smem-states'
-> properties.
+> diff --git a/Documentation/devicetree/bindings/net/qcom,bam-dmux.yaml b/Documentation/devicetree/bindings/net/qcom,bam-dmux.yaml
+> index b30544410d09..e47e1e09300a 100644
+> --- a/Documentation/devicetree/bindings/net/qcom,bam-dmux.yaml
+> +++ b/Documentation/devicetree/bindings/net/qcom,bam-dmux.yaml
+> @@ -42,7 +42,13 @@ properties:
+>      description: State bits used by the AP to signal the modem.
+>      items:
+>        - description: Power control
+> +        items:
+> +          - description: Phandle to ???
+> +          - description: ???
+>        - description: Power control acknowledgment
+> +        items:
+> +          - description: Phandle to ???
+> +          - description: ???
+>  
 
-Working on it...
+Here and in all cases except qcom,msm8916-mss-pil:
+
+ - description: Phandle to the Shared Memory Point 2 Point device
+     handling the communication with a remote processor
+
+ - description: Single bit index to toggle in the value sent to
+     the remote processor
+   maximum: 32
+
+...
+
+> diff --git a/Documentation/devicetree/bindings/remoteproc/qcom,msm8916-mss-pil.yaml b/Documentation/devicetree/bindings/remoteproc/qcom,msm8916-mss-pil.yaml
+> index c179b560572b..3c614cb7ce88 100644
+> --- a/Documentation/devicetree/bindings/remoteproc/qcom,msm8916-mss-pil.yaml
+> +++ b/Documentation/devicetree/bindings/remoteproc/qcom,msm8916-mss-pil.yaml
+> @@ -104,6 +104,9 @@ properties:
+>      description: States used by the AP to signal the Hexagon core
+>      items:
+>        - description: Stop modem
+> +        items:
+> +          - description: Phandle to ???
+> +          - description: ???
+
+ - description: Phandle to the Shared Memory Point 2 Point or Shared
+     Memory Manager device handling the communication with a remote
+     processor
+
+ - description: Single bit index to toggle in the value sent to
+     the remote processor
+   maximum: 32
+
 
 Best regards,
 Krzysztof
