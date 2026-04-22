@@ -1,77 +1,77 @@
-Received: from mail-dy1-f227.google.com (mail-dy1-f227.google.com [74.125.82.227])
+Received: from mail-qv1-f98.google.com (mail-qv1-f98.google.com [209.85.219.98])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF885333730
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2026 20:51:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.227
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3BCA2E06EA
+	for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2026 20:51:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.98
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776891095; cv=none; b=TlCggzSRQ0+v14O8bYm5m3EZ7yS4dHQp+sEuAmGhy7CupWJbZyLC4Rh+herNkVBg0k9vftgm9Lr8uuknzY/KZYIMUR4sbEGLp1H3WomaGhYWGybNUgyScVHCY9bkSH1KEwiZRI9KjBxkHXdxrCn49SB/vXbq/VhE74w+VlDdhGI=
+	t=1776891101; cv=none; b=qmUcfMIFwRC825jNyGTMEGy4EUHBZueEwee/8ffzyE+HIDvXFHFJjGI17zCaBJhlNwL52KB6l0mD4busxIMIeuhqROp5krFGdKubs96ypWPGtNmv6Xs900eXBZGnEJ6jr/q/WNMBuYYg0raVLTHD2NdGgyvJGJ/vkc5DlIhE0oc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776891095; c=relaxed/simple;
-	bh=lZgUmf+snJtgn2iqyKzz2f7jkJ/tF6tuXosxy/AYwQI=;
+	s=arc-20240116; t=1776891101; c=relaxed/simple;
+	bh=Pw1nom+hf3TcoV20hCuOOTw1KW67HhhOv/VDC2F+mf4=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=l1R6Odl5UAA/TzYQ8IE9puc6n1bYhPIBZEHkLCh4wATdDgcMS4pCdKhszlumYZrnqteimi+AeR+jT0/c2FEzgOcCahLZ8vfb/zD7rqVuFD6XkdtOaP8nrzXIiAfqlBzmEvfWLPseYV8n7AY9ZnfymXe6SVYh+fIeIkWDxdvqVNo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=QI7PqKzL; arc=none smtp.client-ip=74.125.82.227
+	 MIME-Version; b=ge0jZ1od5DqR0smXm4nqdxv5w9Q/qi0KriEany1WT1nxJ/U475a0g3HhDv2koxxRIN7J+GJcVAUTpYyQztUnJZ2Y9e2vWAA0hX8dp+utemk1dPCThXvAYVAUIKZP57RANXbsd/4LV3JHeBiSRdHd8sbjALLsrTtZ0/KM2mWXuMs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=VHrZY2Ok; arc=none smtp.client-ip=209.85.219.98
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="QI7PqKzL"
-Received: by mail-dy1-f227.google.com with SMTP id 5a478bee46e88-2ba9c484e5eso6292798eec.1
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2026 13:51:33 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="VHrZY2Ok"
+Received: by mail-qv1-f98.google.com with SMTP id 6a1803df08f44-8a016799d2cso67236096d6.1
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2026 13:51:39 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1776891093; x=1777495893;
+        d=1e100.net; s=20251104; t=1776891099; x=1777495899;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:dkim-signature:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=vduSvXKe+L7+c8UihFrzYyBr/PDlgqMu0Lyao+9fcwg=;
-        b=AQ0QdOzHNOpuHwEVMXC9q5Wdau4PI6DnAAnMoefHe70plZHD23hwelSix7OIdelFNj
-         63bJr149n/lEnz6w5rNavqxC+osMsKFJirp7nRjagXe+LLkfSulBwbyQmO4CFtGbQr+l
-         FtjGY70pVlh159Ba1XQOxfda4VDNsCovNJXJUQ5zg3eVelZDEI2++30Pj/swsnP6j5nx
-         o0tbFDOfkYNKYg9IGq4dqjknmnHnGtFhSWSrgBIgH19d4bNb6q3LC6K8IcIj3FvWWzCt
-         zQw1YZTVnKzyln0dX3R06hbf0ShrbyFcJveOpYNxusAdu7D05J8HtaBBHf4t44yZ4jiD
-         bhrw==
-X-Forwarded-Encrypted: i=1; AFNElJ8gXwuc75h4WplpMLRVzQUgxI5daOccNfdaWl8lK1rHXrnpVnVScy31APFGYXxCstE5qSOswckavZs=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyim1K4VlfEKytDdkSYXLif2g7J24w0CLALTznWmKGbwGkABodd
-	H3YuG1oOtBrux3LubUGqT0bibuRMvWHzpyNBL95xdF6bis2t3RxeSxknk2R41/IcadXdBMlD+8h
-	riVZuvhTvTWa5IfRB1ZZxDYOxNxjaIMQp+gofdsrYxAKm0KLXaq7MuwPfSKi88MaOFvKTjcZ0Zl
-	2wjbb3ubK2WUIDpnm3h6HtcumiF2uOchcyzNSquts8BAnaOAvViVwzn3c3aTissIIaWB330kFW/
-	JYn0xCBbvp/
-X-Gm-Gg: AeBDievDPy2nWP6gs3KrLAKuFmILdEFvaix8MUygb+I8ygHpYJhUZN3pkiYSYEI8XIJ
-	6hQyIS+E/eqGv5ZAwiGc59Cju9mUtmWn5r8zqCFwHP3zqMn5QMBk7lIq2sJKDP+heL44ipk9l2X
-	OkbGzsZBmgNX6e48cHfxI7FYJZJdFerCxGJUE1kFf89cDoRM9ymDvRxzBedYww0a0GBz7WZ3FgR
-	TK6XEnkBVFsFNeDFLanYbLgU/bRsADd298X1S0a2DNrf5pmBG4kbvviNdLYBevSt2RN7m4cybQc
-	bDp3IlSFKmB9NxqKNkURgtxiSCkYWZCbE1Ccxso7GbyFUiBPIgzWQe/lbyhEyzP9i7yIkKzEczP
-	wBWlqkpsJdyYYDwjqfVW+emja2jVsK/VT/MKGst5sGmHk4z4jFbd8coKs6Fz+Uu93QWJu+VDFzr
-	QjF3xTMY+V/Q39
-X-Received: by 2002:a05:7300:3252:b0:2c4:ec89:bc7 with SMTP id 5a478bee46e88-2e464dacc71mr13907849eec.10.1776891092913;
-        Wed, 22 Apr 2026 13:51:32 -0700 (PDT)
-Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com ([144.49.247.127])
-        by smtp-relay.gmail.com with ESMTPS id 5a478bee46e88-2e53a3abe72sm1263449eec.7.2026.04.22.13.51.32
+        bh=utyKBbsMHkrf1RLZ9+YGSbMi4REas0kUOyTQWzOet08=;
+        b=Bxj2X3AY6bN3QdCFI92mY/Bmwy5VIqWtuz33yjjwnqPXMLr8DqRz3Kp8pGMbcsyGIk
+         EnbKU7brmsljdilDO8sOpK4qxdOSrJPTGu/thOoDPWcg2XLKFuaYG+Myea7E+FArSqWZ
+         VscCZPPpiWF8dO9bia33OFeWkmA1HTKvCVs9MrV4CBWwfBmhjoJJSH/LUINgHMOwhj1K
+         tMLHWZMXpNH7DJVPHEd39Zr3+i7cEBBM7jBwYveNP4Z/ayUQJ8VRh88QeQS8pdRNbATl
+         6PBYmrZIDZs97Bj8z+c4/HnjQRrgxgpeQLucSxTBhX2R28rYkY2otygJrGZ7j+FLVa0S
+         jyFA==
+X-Forwarded-Encrypted: i=1; AFNElJ8mhtNmo2gb9gAyszXWGzm4/HXWwtnLYe00iNLWwUh4+BReD9/NEoxhPgonf4giusGzcAlV8JbqbAs=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy86sNjxu/kRLU1oqDewG+HGMzZYyRhN54ydH5Nl1ocgrptZ0Bj
+	4cOXJayvcU2TltHrzMvVbr1M5YPH1mpDLRO1stxT2IGYp5yGAuCuhdagmgoWnH8PNHjiiMVdLml
+	0WyksWlFhE5EsMZKHY8NSVTpG6LngjgnhvfFBTAc55QOOw0QGRFAs+sOV5fCdk06H401yQpqOo9
+	vgQ2axKRUbQUhWJ9XBo/8ov1gu25Re0hnNGnavL1zqm2tVRNf8oKTQ+Bc9xxo8cFbU+72OndsUV
+	5l1PW9ZjXO/
+X-Gm-Gg: AeBDievd/C/SFWAyjYK6dn/QSOL8D52oYpve8Ki16+hXuSdDEzWzPPwFsl/rH6YCleB
+	XI2sNcXcJh2rs5dQchUM+BeD72KSc6jz8tQAryYnFOwnSfDa14BKQ57An3vEoCOAnr2sR5SBVur
+	wbChDZ4i3ttph49biYu03QJUmzWxjHxsPB0UjBt+e5xqcBmWk3oIeqIzBiDESIpI+qPJmkhP6LV
+	4R7TIcJQP7kJ4LJLKRlg/gabBwch30p3jomZcOIEHLx4kn97olcR1kqeTmvJzwevhUvIcD32XIw
+	AGi7qsug0HrYnDNKg9EutccbOOMs4BtOQLRt8Eba7Y269PK6BkSfVHkN0NAVCsFpwZsoV/OrlZw
+	x5X1z4hIbYfO3wACe0UpyEA3X5zyh3Ha629S87/KLlXIX1ukB3CjMpcz9dKsPrF6giBetY6+nM+
+	1vhQukGEPe9MaCR9sRivXr3fvc43mliaM6HeYwZ2qL9wzkw1uv0WlEiJcDiAbnke4ozRI=
+X-Received: by 2002:ad4:5f0f:0:b0:89c:e38f:6b6c with SMTP id 6a1803df08f44-8b027ff8fe6mr380921026d6.3.1776891098686;
+        Wed, 22 Apr 2026 13:51:38 -0700 (PDT)
+Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-119.dlp.protect.broadcom.com. [144.49.247.119])
+        by smtp-relay.gmail.com with ESMTPS id 6a1803df08f44-8b1fef8d44dsm3135936d6.26.2026.04.22.13.51.38
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 22 Apr 2026 13:51:32 -0700 (PDT)
+        Wed, 22 Apr 2026 13:51:38 -0700 (PDT)
 X-Relaying-Domain: broadcom.com
 X-CFilter-Loop: Reflected
-Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-8acd145817dso74979996d6.3
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2026 13:51:32 -0700 (PDT)
+Received: by mail-qv1-f69.google.com with SMTP id 6a1803df08f44-8a16036c90eso151136456d6.2
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Apr 2026 13:51:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1776891092; x=1777495892; darn=vger.kernel.org;
+        d=broadcom.com; s=google; t=1776891098; x=1777495898; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=vduSvXKe+L7+c8UihFrzYyBr/PDlgqMu0Lyao+9fcwg=;
-        b=QI7PqKzLWzAuNkIfzZJiec0NHheMU8OjtfQAjgiobcJBMl2qYP8y69mELAJGE/R2uN
-         Fqszy0FMxhewwMmPgjrEjNPBHqBuu/wuzI9YU/upPQcPCxzyFD8xijBB2OSXWx1TTnr1
-         mDs+qFopodb2x+9cTnuXXJuJEIW7pLvV6fsq8=
-X-Forwarded-Encrypted: i=1; AFNElJ/xHR+ke1EI+NuedS3GcrUUGf076BtQbxNk0GDpFXbvkDvhSzEqtFDUaZiUKI87rfrRDanmwFHFyZY=@vger.kernel.org
-X-Received: by 2002:a05:6214:478c:b0:8ac:b402:9af1 with SMTP id 6a1803df08f44-8b02814c824mr349683036d6.47.1776891091672;
-        Wed, 22 Apr 2026 13:51:31 -0700 (PDT)
-X-Received: by 2002:a05:6214:478c:b0:8ac:b402:9af1 with SMTP id 6a1803df08f44-8b02814c824mr349682806d6.47.1776891091255;
-        Wed, 22 Apr 2026 13:51:31 -0700 (PDT)
+        bh=utyKBbsMHkrf1RLZ9+YGSbMi4REas0kUOyTQWzOet08=;
+        b=VHrZY2OkEFN4ohwqyDnk9NRckI5HsxVQ+yATP7f7fyT/VU5fhSkAB/Ldc8OQARTtCP
+         w/5QDshKBK5bSOmhC+Cs1oKtg9f/htsGQUUHLngyt5nirNIhhNIn7sF+8DFmIPiV9s0N
+         dFZkf9WmPcyHOcd7lNAqkcqMssIGDy8+sJN9A=
+X-Forwarded-Encrypted: i=1; AFNElJ/umB1uWwTbEv6qSfrInsPWQuKqy811vXzJghgN9xYfLj+ZzhOce0PjfGOudObf7KdYLOwp1B1B4SU=@vger.kernel.org
+X-Received: by 2002:ad4:5de9:0:b0:89a:f0b:60e9 with SMTP id 6a1803df08f44-8b0280476c8mr357553516d6.13.1776891097824;
+        Wed, 22 Apr 2026 13:51:37 -0700 (PDT)
+X-Received: by 2002:ad4:5de9:0:b0:89a:f0b:60e9 with SMTP id 6a1803df08f44-8b0280476c8mr357553046d6.13.1776891097161;
+        Wed, 22 Apr 2026 13:51:37 -0700 (PDT)
 Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8b02ae88d5fsm171453486d6.39.2026.04.22.13.51.30
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8b02ae88d5fsm171453486d6.39.2026.04.22.13.51.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Apr 2026 13:51:30 -0700 (PDT)
+        Wed, 22 Apr 2026 13:51:36 -0700 (PDT)
 From: Kamal Dasu <kamal.dasu@broadcom.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Adrian Hunter <adrian.hunter@intel.com>,
@@ -85,9 +85,9 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>,
 	linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Kamal Dasu <kamal.dasu@broadcom.com>
-Subject: [PATCH v5 1/4] mmc: core: Add panic-context host operations for pstore backends
-Date: Wed, 22 Apr 2026 16:50:50 -0400
-Message-Id: <20260422205053.3392395-2-kamal.dasu@broadcom.com>
+Subject: [PATCH v5 2/4] mmc: sdhci: Implement panic-context write support
+Date: Wed, 22 Apr 2026 16:50:51 -0400
+Message-Id: <20260422205053.3392395-3-kamal.dasu@broadcom.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20260422205053.3392395-1-kamal.dasu@broadcom.com>
 References: <20260422205053.3392395-1-kamal.dasu@broadcom.com>
@@ -100,116 +100,282 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
-Add three new optional callbacks to struct mmc_host_ops for panic-safe
-MMC I/O:
+Implement the panic-context host operations for SDHCI controllers:
 
-  - panic_prepare: drain in-flight requests and prepare for polled I/O
-  - panic_poll_completion: poll for request completion without interrupts
-  - panic_complete: restore normal host state after panic I/O
+  sdhci_panic_prepare(): Reset the controller, drain any pending
+  requests by polling Present State, and clear interrupt status to
+  start from a known-good state.
 
-Add mmc_panic_claim_host() which uses WRITE_ONCE() to claim the host
-without taking the spin lock, since during panic other CPUs are stopped
-and may hold the lock.
+  sdhci_panic_poll_completion(): Poll for command and data completion
+  using register reads instead of waiting for interrupts.
+
+  sdhci_panic_complete(): Clear interrupt status and restore the
+  host to normal operation after panic I/O.
+
+Make sdhci_send_command_retry() panic-safe by using mdelay() instead
+of usleep_range() when oops_in_progress is set, and suppress WARN
+output during panic.
+
+Add oops_in_progress guards to sdhci_timeout_timer() and
+sdhci_timeout_data_timer() to prevent spurious timeout handling
+during panic writes.
 
 Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
 ---
- drivers/mmc/core/core.c  | 54 ++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h | 12 +++++++++
- 2 files changed, 66 insertions(+)
+ drivers/mmc/host/sdhci.c | 173 ++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.h |   6 ++
+ 2 files changed, 175 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 29e80e5f928e..076bd4eb2878 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -861,6 +861,60 @@ void mmc_release_host(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_release_host);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 605be55f8d2d..b5e6cc9d150a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -15,6 +15,7 @@
+ #include <linux/ktime.h>
+ #include <linux/highmem.h>
+ #include <linux/io.h>
++#include <linux/iopoll.h>
+ #include <linux/module.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/slab.h>
+@@ -1765,17 +1766,22 @@ static bool sdhci_send_command_retry(struct sdhci_host *host,
  
-+/**
-+ *	mmc_panic_claim_host - force-claim a host in panic context
-+ *	@host: mmc host to claim
-+ *
-+ *	Force-claims the MMC host without locking during kernel panic. Other CPUs
-+ *	are stopped and may be holding mmc_host->lock (e.g. inside __mmc_claim_host
-+ *	or mmc_release_host). Unlike sdhci_host->lock which is freed by the hardware
-+ *	drain+reset, mmc_host->lock has no hardware counterpart, so we must bypass
-+ *	it with WRITE_ONCE.
-+ *
-+ *	This function first checks the current host state (claimed/suspended/ongoing),
-+ *	then calls panic_prepare() to let the controller driver safely drain any
-+ *	in-flight hardware requests and handle runtime PM suspend state. After
-+ *	panic_prepare() returns, the host is forcefully claimed for panic I/O.
+ 	while (!sdhci_send_command(host, cmd)) {
+ 		if (!timeout--) {
+-			pr_err("%s: Controller never released inhibit bit(s).\n",
+-			       mmc_hostname(host->mmc));
++			if (!oops_in_progress) {
++				pr_err("%s: Controller never released inhibit bit(s).\n",
++				       mmc_hostname(host->mmc));
++				sdhci_dumpregs(host);
++			}
+ 			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
+-			sdhci_dumpregs(host);
+ 			cmd->error = -EIO;
+ 			return false;
+ 		}
+ 
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 
+-		usleep_range(1000, 1250);
++		if (unlikely(oops_in_progress))
++			mdelay(1);
++		else
++			usleep_range(1000, 1250);
+ 
+ 		present = host->mmc->ops->get_cd(host->mmc);
+ 
+@@ -3076,6 +3082,156 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ }
+ 
++/*
++ * Panic-context operations for pstore backends.
++ * These run with interrupts disabled and other CPUs stopped.
 + */
-+void mmc_panic_claim_host(struct mmc_host *host)
++
++#define SDHCI_PANIC_POLL_ITERATIONS	2000
++#define SDHCI_PANIC_POLL_DELAY_US	500
++#define SDHCI_PANIC_MIN_POLL_COUNT	300
++#define SDHCI_PANIC_RESET_TIMEOUT_US	500000
++#define SDHCI_PANIC_DRAIN_TIMEOUT_US	500000
++
++/**
++ * sdhci_panic_prepare - Prepare SDHCI controller for panic-context I/O
++ * @mmc: MMC host structure
++ *
++ * Called during kernel panic. Drains any in-flight request, resets the
++ * CMD and DATA lines, then clears software state under spinlock.
++ * The drain + reset ensures no stopped CPU is still inside sdhci_irq
++ * holding host->lock by the time we take it.
++ *
++ * Return: 0 on success, -ETIMEDOUT if hardware reset timed out.
++ */
++int sdhci_panic_prepare(struct mmc_host *mmc)
 +{
-+	bool claimed;
-+	bool suspended;
-+	struct mmc_request *ongoing;
-+
-+	if (!host)
-+		return;
-+
-+	/* Check current state for visibility into what we're dealing with */
-+	claimed = READ_ONCE(host->claimed);
-+	suspended = pm_runtime_suspended(&host->class_dev);
-+	ongoing = READ_ONCE(host->ongoing_mrq);
-+
-+	if (claimed || suspended || ongoing) {
-+		pr_info("mmc_panic_claim: host state: claimed=%d suspended=%d ongoing_mrq=%p\n",
-+			claimed, suspended, ongoing);
-+	}
-+
-+	/* Always call panic_prepare to drain/reset hardware, regardless of claimed state.
-+	 * This ensures the controller is in a safe state for panic I/O even if the
-+	 * host was already claimed (which shouldn't happen, but we handle it safely).
-+	 */
-+	if (host->ops && host->ops->panic_prepare) {
-+		int ret = host->ops->panic_prepare(host);
-+
-+		if (ret)
-+			pr_warn("mmc_panic_claim: panic_prepare failed: %d\n", ret);
-+	}
-+
-+	/* Force-claim the host. Safe because all other CPUs are stopped. */
-+	WRITE_ONCE(host->claimed, 1);
-+	host->claimer = &host->default_ctx;
-+	host->claimer->task = current;
-+	WRITE_ONCE(host->claim_cnt, 1);
-+	WRITE_ONCE(host->ongoing_mrq, NULL);
-+}
-+EXPORT_SYMBOL(mmc_panic_claim_host);
-+
- /*
-  * This is a helper function, which fetches a runtime pm reference for the
-  * card device and also claims the host.
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ba84f02c2a10..cd44b62d29cb 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -272,6 +272,16 @@ struct mmc_host_ops {
- 	 * negative errno in case of a failure or zero for success.
- 	 */
- 	int	(*uhs2_control)(struct mmc_host *host, enum sd_uhs2_operation op);
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++	u32 present;
++	u8 val;
++	int ret;
 +
 +	/*
-+	 * Optional panic-context ops for pstore backends that write to MMC
-+	 * during kernel panic with interrupts disabled.
++	 * If the controller has a request in flight, give it a short
++	 * bounded time to finish. The CMD/DATA reset below will
++	 * force-abort anything that doesn't complete in time.
 +	 */
-+	int	(*panic_prepare)(struct mmc_host *host);
-+	bool	(*panic_poll_completion)(struct mmc_host *host,
-+					 struct mmc_request *mrq);
-+	void	(*panic_complete)(struct mmc_host *host,
-+				  struct mmc_request *mrq);
++	present = sdhci_readl(host, SDHCI_PRESENT_STATE);
++	if (present & (SDHCI_CMD_INHIBIT | SDHCI_DATA_INHIBIT)) {
++		readl_poll_timeout_atomic(host->ioaddr + SDHCI_PRESENT_STATE,
++					  present,
++					  !(present & (SDHCI_CMD_INHIBIT |
++						       SDHCI_DATA_INHIBIT)),
++					  10, SDHCI_PANIC_DRAIN_TIMEOUT_US);
++	}
++
++	sdhci_writeb(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA,
++		     SDHCI_SOFTWARE_RESET);
++
++	ret = readb_poll_timeout_atomic(host->ioaddr + SDHCI_SOFTWARE_RESET,
++					val, !(val & (SDHCI_RESET_CMD | SDHCI_RESET_DATA)),
++					10, SDHCI_PANIC_RESET_TIMEOUT_US);
++
++	spin_lock_irqsave(&host->lock, flags);
++	host->cmd = NULL;
++	host->data = NULL;
++	host->data_cmd = NULL;
++	host->mrqs_done[0] = NULL;
++	host->mrqs_done[1] = NULL;
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	if (host->ops && host->ops->panic_prepare)
++		host->ops->panic_prepare(host);
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(sdhci_panic_prepare);
++
++/**
++ * sdhci_panic_poll_completion - Poll SDHCI registers for request completion
++ * @mmc: MMC host structure
++ * @mrq: MMC request being polled for completion
++ *
++ * Checks interrupt status and present state registers to determine if a
++ * request has completed. Used during panic when interrupts are disabled.
++ *
++ * Return: true if request has completed (with or without error), false if still in progress.
++ */
++bool sdhci_panic_poll_completion(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned int poll_count;
++	u32 int_status, present;
++
++	for (poll_count = 0; poll_count < SDHCI_PANIC_POLL_ITERATIONS;
++	     poll_count++) {
++		cpu_relax();
++		udelay(SDHCI_PANIC_POLL_DELAY_US);
++
++		int_status = sdhci_readl(host, SDHCI_INT_STATUS);
++
++		if (int_status & SDHCI_INT_ERROR) {
++			if (mrq->cmd)
++				mrq->cmd->error = -EIO;
++			if (mrq->data)
++				mrq->data->error = -EIO;
++			sdhci_writel(host, int_status, SDHCI_INT_STATUS);
++			return true;
++		}
++
++		if (int_status & SDHCI_INT_RESPONSE)
++			sdhci_writel(host, SDHCI_INT_RESPONSE,
++				     SDHCI_INT_STATUS);
++
++		if (int_status & SDHCI_INT_DATA_END)
++			sdhci_writel(host, SDHCI_INT_DATA_END,
++				     SDHCI_INT_STATUS);
++
++		/*
++		 * Use the same completion heuristic as the working v5
++		 * implementation: after a minimum number of poll
++		 * iterations, treat the request as complete when the
++		 * DATA_INHIBIT bit clears (controller is idle).
++		 */
++		if (poll_count >= SDHCI_PANIC_MIN_POLL_COUNT) {
++			present = sdhci_readl(host, SDHCI_PRESENT_STATE);
++			if (!(present & SDHCI_DATA_INHIBIT))
++				return true;
++		}
++	}
++
++	if (mrq->cmd)
++		mrq->cmd->error = -ETIMEDOUT;
++	if (mrq->data)
++		mrq->data->error = -ETIMEDOUT;
++	return false;
++}
++EXPORT_SYMBOL_GPL(sdhci_panic_poll_completion);
++
++/**
++ * sdhci_panic_complete - Clean up SDHCI state after a panic-context request
++ * @mmc: MMC host structure
++ * @mrq: MMC request that has completed
++ *
++ * Clears host software state under spinlock so the next panic request
++ * starts clean.
++ */
++void sdhci_panic_complete(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++	host->cmd = NULL;
++	host->data = NULL;
++	host->data_cmd = NULL;
++	host->mrqs_done[0] = NULL;
++	host->mrqs_done[1] = NULL;
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++EXPORT_SYMBOL_GPL(sdhci_panic_complete);
++
+ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.post_req	= sdhci_post_req,
+@@ -3091,6 +3247,9 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.execute_tuning			= sdhci_execute_tuning,
+ 	.card_event			= sdhci_card_event,
+ 	.card_busy	= sdhci_card_busy,
++	.panic_prepare			= sdhci_panic_prepare,
++	.panic_poll_completion		= sdhci_panic_poll_completion,
++	.panic_complete			= sdhci_panic_complete,
  };
  
- struct mmc_cqe_ops {
-@@ -758,4 +768,6 @@ int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
- int mmc_read_tuning(struct mmc_host *host, unsigned int blksz, unsigned int blocks);
+ /*****************************************************************************\
+@@ -3242,6 +3401,9 @@ static void sdhci_timeout_timer(struct timer_list *t)
  
-+void mmc_panic_claim_host(struct mmc_host *host);
+ 	host = timer_container_of(host, t, timer);
+ 
++	if (oops_in_progress)
++		return;
 +
- #endif /* LINUX_MMC_HOST_H */
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
+@@ -3264,6 +3426,9 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
+ 
+ 	host = timer_container_of(host, t, data_timer);
+ 
++	if (oops_in_progress)
++		return;
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+ 	if (host->data || host->data_cmd ||
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index b6a571d866fa..396eca56439f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -724,6 +724,7 @@ struct sdhci_ops {
+ 	void    (*dump_vendor_regs)(struct sdhci_host *host);
+ 	void	(*dump_uhs2_regs)(struct sdhci_host *host);
+ 	void    (*uhs2_pre_detect_init)(struct sdhci_host *host);
++	void	(*panic_prepare)(struct sdhci_host *host);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+@@ -906,6 +907,11 @@ void sdhci_switch_external_dma(struct sdhci_host *host, bool en);
+ void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable);
+ void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
+ 
++int sdhci_panic_prepare(struct mmc_host *mmc);
++bool sdhci_panic_poll_completion(struct mmc_host *mmc,
++				 struct mmc_request *mrq);
++void sdhci_panic_complete(struct mmc_host *mmc, struct mmc_request *mrq);
++
+ #if defined(CONFIG_DYNAMIC_DEBUG) || \
+ 	(defined(CONFIG_DYNAMIC_DEBUG_CORE) && defined(DYNAMIC_DEBUG_MODULE))
+ #define SDHCI_DBG_ANYWAY 0
 -- 
 2.34.1
 
