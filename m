@@ -1,187 +1,266 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76A673E3D9F;
-	Thu, 23 Apr 2026 09:44:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776937488; cv=none; b=ILAIgPxmnS9idv6WlXlfmMZ9LIzujV49uhCC5a8820wtYZroFVp0FUy0WK6+o78TAQ2zQA/OAGvP5df2lDWt2/7doO+aVoS0J4BDgXWWimsTjP3mIlgWU+AaezuJrYccEToESvO0H10kntsWrckLhPTcSVjtM5W26jrJN0DdXSQ=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776937488; c=relaxed/simple;
-	bh=UV9jQ9XvPw0/PwdWna/NVSWez2dG6UsrgOwaXbivd94=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=tP1qx8byWe2X2qj2+Ar2oFdQvshil2a1XhVVydCx2C9sLlVo+Pgx1bdoJo6kr3RAOrUjCYDWM+MjtRddo9oT6qDgxuABbB7YHAk4t40ZCEPettR+HQjLO8FnzCCmQmOGJ70c5QYoLOKuwXkX9Sc8ULHDRg8WdjiasKj2PYWMZNg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=b8fqnLTl; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 370ED3EDAAF
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2026 12:42:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.218.45
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1776948155; cv=pass; b=VG5NDrgnYsgJSU35wIVZKXExnmR15eyzlX4KxACNAk0onvzSW0o88/3+bFoZ+GjkAvIEJTgN0rmrCD0iqdrG2WcgUDntJS6XMSfXfwiZvaXeoGn9wDEd1y3qHItCc3E+aYHuLw0ve/S+2ffrjfXmRq4dewa0oqpCTlz5Bhf7FjI=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1776948155; c=relaxed/simple;
+	bh=v+VGR/iK5jA4ejAKficHqezigv0RSfnswFIGn1ixQEA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=kCd657U73N/jlR0Hs7b7Gz00eGkc33UP9MS2sqcEJZ9E3b+vIafgMg90rkOwTWGDIpP8UN0H58QIWPHY/pma8zopvHiBYOsWtY8Z95nhIvv7uIkGMj9eAeaYdmWNWbDC/XngACdAasxe9tFBgi3DcjiwwSy03P0bPsxxNqyVEN0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=oTaiHZKi; arc=pass smtp.client-ip=209.85.218.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="b8fqnLTl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 50C79C2BCAF;
-	Thu, 23 Apr 2026 09:44:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776937488;
-	bh=UV9jQ9XvPw0/PwdWna/NVSWez2dG6UsrgOwaXbivd94=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=b8fqnLTle6qiUny9GLiB66mYAvo5pBUfGKBD9j/SahanJ30PqBLowxW5CMXWn6bcB
-	 /9KKEDA4+3JjPVlO8reAQWz3gbHKJHh6CjB0/r0QC1XDIRFmwXmNjdzG5kNEXNX4i7
-	 ZreC1J8OXDRgUYm2lq6drbBN35SKwmpclgU8Lj30YaGYBidek7X8ob6HkWEHe90Im1
-	 SerDAq+lK3VQnHz9bka8lfRCLgXkZqiZ13bXwAKg2i7/a4khm2umdT52rkMkCQfZlM
-	 PAqGOSCIsL90EjYGlCqI3uxbscyr3PsSgAvwt86DBFzgHFg+U0nL2MiJ6ID7r0lSxm
-	 wNVlQgxv8w7kw==
-Message-ID: <be916c95-1c31-4a98-8fdf-06538e693911@kernel.org>
-Date: Thu, 23 Apr 2026 11:44:41 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oTaiHZKi"
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-ba7a1cc0380so941778266b.2
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2026 05:42:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1776948152; cv=none;
+        d=google.com; s=arc-20240605;
+        b=N+BZk+RQY88VMIEW5oBL2/qPqFQBRbv4D7vMmNBbL6BXTjLNB6ZwDS5JA9+zuMk7ZX
+         1YDezDUDyGPv+9wU2aTffPkO6OH1J3ZljcHeXeeHq0jf8Fbnjv+TlG+4/mxwMyz+dpm8
+         sif+kRqpap2euq7CwB+G+7VuK/F5hE0pLm0I0PRXAlHpnI8ou+huG62VYyzxxzi41dp3
+         AJRHQwT1H/kJVUgSL/jdXWjBZaJfY9O4ny55A476GJLM8ozWxUoq1i5m02LUzewGL4nt
+         Lv7XkJoZUElWt6JfRd3RNhs21UTSx2mw1PpNUJ6a3r3S3ZajRb5nTRCWXmmUQwLdODsH
+         fRug==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=8zSRHjean7w9zY7KbU/JVuqpAg0+41GC7JxwHHVZ1ls=;
+        fh=vLofs1cyBbo84T2Pz5Bz6meYuB4h2WGGY7IPkji5bCU=;
+        b=jFgFqZk5IIXyo+v7IvS1Ighkrmy+4EuPnWoQPiKnii/cYMiOoeP03k1vukynciHUQr
+         kYGeWhdXKQzjASqWFd0ct+mwNLOm1UMEEv7mIolWuxxRqzXpIQeZ45Hb12AunWnNhFOq
+         jSWuwOT8VPpgE9rQ9+cpxR7dBWabLWF9DF9PUuVIfhHXHES/T86kcHqNjwaiqBhQz3OR
+         rREnS/wKQYKjbn9g++e2R/ZhHU5/92gWRu1HNThyG0XUc1H01E9N294RyhxjTsNEE61e
+         LRmBbsnJu0zAmZFUr0PDwFKrqk0LFOMGZp88srrWt9O1WewhQOWKeyqPsSouYXh3u+s0
+         WbZw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1776948152; x=1777552952; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=8zSRHjean7w9zY7KbU/JVuqpAg0+41GC7JxwHHVZ1ls=;
+        b=oTaiHZKiKZULUfwmcQVYwJwM9j/VBospE8sj5zd4WaInqW4dXJkpwg6VmoVsTghZae
+         dwWEHf+k+Xsc5hKhv6ja74mM26fEN0qluy27eEOKyeHlVDM7zS8KTfqL6OArOVBBrqiW
+         sn4T7iHH30W8IPMi9qZakCRF/cyrlbyuL8ZeGUXMXYBBnLOrqU+/EL/WVd74hl23C84+
+         BeI/QSJIUi4fNHW3AzjZFbJfy8CS1ZkpB6VseDeutfQPm/2BGWrDlNye2HAbyPTJvV8/
+         XTc97dK5WoTlj1Tjp5zdTcwoipa1fqcEiSQfMowVFfodOX1WlRMOM2i6bRhhFrp3YOur
+         KIEA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776948152; x=1777552952;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=8zSRHjean7w9zY7KbU/JVuqpAg0+41GC7JxwHHVZ1ls=;
+        b=MQvX1EN69nS43VyFcWB+NfYt9mjvz35Tno/UI5EnHOdMAEpKI3Jdw7EBuSB0YPBCeK
+         jDxSYghaPRrG1H7xHcxZr8I+cmqDEePRd9CvzDQRSIVaysI09WeC0tMna1XFc3QGXl1L
+         hks38ekD98ejuW8XixGct1ggui4xv2oyNNYKbSbQSmCav7RLB1P/VvnequaY3UEJ5+GC
+         pk+HMrrHdPoKOymLN6Q4fS8GqDLHAIY3FPP8ot9/C4igiUQffxBmd8aHvWBvacWgdGLA
+         vqI1ikJsjCkfcRi2X98upmXRXIuMZqQg4CYyUflwO9cOjkQFUhwAxhJ/R2yfoTaExCBY
+         Nd1A==
+X-Forwarded-Encrypted: i=1; AFNElJ+w5dJ7bOWsZ41oqUaCDUd9FDkCOtgBGJsG4YxSGrBrGjf0vQH9B0Q7I7ZPlg+QnkZtDtknPcGdtNM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzTXEibIoqKOsUmG4TJWOx1ytN/HliP7PiXprfJy+D0G8nLHZfK
+	mM4gk5Axl/HqegljIpRb0OMbTHnn7gcN3EOvDk9Azh9SkXgzLImtoRsABkF8QrdHARlA+BBPUt4
+	ZLM/B8oLkcssROMQjxgGp9tAMeNqV5NE=
+X-Gm-Gg: AeBDiev0NEgRWBiSzpYAC08m1Ok54rzNIZA2mw+frdqabDJK41UsQ78unmUrXXEVyf4
+	JZG+BC5f3D3MTlS2/y616iikayrvcxnU0ZoaZ9kB7ucJuYh+IJ/Eh6B8zmiDnmCmRzuS0m7beq/
+	vm4JB/0FqklACVu5pwqiAVzSJYXxWxDZBafXxyxCTyzihCKLuGIIRAraCfmfFQLQR8NK1R8XuAT
+	4Z+tZWhC+dcz4M4yMVht6NkzDa47OJtR7419s17RnKyxwUVw3K3fdmJh7MQUoahxOOrK9RKO78b
+	EqYY6fi1TFULIpc=
+X-Received: by 2002:a17:907:d87:b0:ba6:cb4c:bd3 with SMTP id
+ a640c23a62f3a-ba6cb4c0f80mr1032293366b.11.1776948152083; Thu, 23 Apr 2026
+ 05:42:32 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
+References: <20260413-orangepi-sd-card-uhs-v8-0-c21c40ec16d0@gmail.com>
+In-Reply-To: <20260413-orangepi-sd-card-uhs-v8-0-c21c40ec16d0@gmail.com>
+From: Anand Moon <linux.amoon@gmail.com>
+Date: Thu, 23 Apr 2026 18:12:13 +0530
+X-Gm-Features: AQROBzCyFMNMbhu9CwDqInG8KR7Q7ZUH7V-_WWXTlBN010HAPlnlXUXgzpznGME
+Message-ID: <CANAwSgRNrs4C4B2o5KBpr29QWowTzpqVcQktAbFigiagxaFZAA@mail.gmail.com>
 Subject: Re: [PATCH v8 0/9] riscv: spacemit: enable SD card support with UHS
  modes for OrangePi RV2
-To: Iker Pedrosa <ikerpedrosam@gmail.com>,
- Troy Mitchell <troy.mitchell@linux.dev>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
- Yixun Lan <dlan@kernel.org>,
- Michael Opdenacker <michael.opdenacker@rootcommit.com>,
- Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
- spacemit@lists.linux.dev, linux-kernel@vger.kernel.org,
- Anand Moon <linux.amoon@gmail.com>, Trevor Gamblin <tgamblin@baylibre.com>,
- Vincent Legoll <legoll@online.fr>
-References: <20260413-orangepi-sd-card-uhs-v8-0-c21c40ec16d0@gmail.com>
- <f58ec12c-3957-4d44-b823-6a1ae1a1dd94@kernel.org>
- <CABdCQ=NhTkGJUh_fKnZoQMzdpyO-UbV5zrSfiNVUC7bkSBifTA@mail.gmail.com>
- <DHSQ6VG82QYX.1EVAYV9JTBCL7@linux.dev>
- <CABdCQ=Oata1oXds6pV-RipwZjcztM0xk_J=Rk8Of2w2RqegbHA@mail.gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <CABdCQ=Oata1oXds6pV-RipwZjcztM0xk_J=Rk8Of2w2RqegbHA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+To: Iker Pedrosa <ikerpedrosam@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>, 
+	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
+	Alexandre Ghiti <alex@ghiti.fr>, Yixun Lan <dlan@kernel.org>, Troy Mitchell <troy.mitchell@linux.dev>, 
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
+	Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev, 
+	linux-kernel@vger.kernel.org, Trevor Gamblin <tgamblin@baylibre.com>, 
+	Vincent Legoll <legoll@online.fr>
+Content-Type: text/plain; charset="UTF-8"
 
-On 16/04/2026 10:18, Iker Pedrosa wrote:
-> El mar, 14 abr 2026 a las 10:16, Troy Mitchell
-> (<troy.mitchell@linux.dev>) escribió:
->>
->> On Tue Apr 14, 2026 at 3:12 PM CST, Iker Pedrosa wrote:
->>> El lun, 13 abr 2026 a las 10:07, Krzysztof Kozlowski
->>> (<krzk@kernel.org>) escribió:
->>>>
->>>> On 13/04/2026 10:02, Iker Pedrosa wrote:
->>>>> This series enables complete SD card support for the Spacemit K1-based
->>>>> OrangePi RV2 board, including UHS (Ultra High Speed) modes for
->>>>> high-performance SD card operation.
->>>>>
->>>>> Background
->>>>>
->>>>> The Spacemit K1 SoC includes an SDHCI controller capable of supporting
->>>>> SD cards up to UHS-I speeds (SDR104 at 208MHz). However, mainline
->>>>> currently lacks basic SD controller configuration, SDHCI driver
->>>>> enhancements for voltage switching and tuning, and power management
->>>>> infrastructure.
->>>>>
->>>>> Implementation
->>>>>
->>>>> The series enables SD card support through coordinated layers:
->>>>>
->>>>> - Hardware infrastructure (patches 1-2): Device tree bindings for voltage
->>>>> switching hardware and essential clock infrastructure.
->>>>> - SDHCI driver enhancements (patches 3-7): Regulator framework
->>>>> integration, pinctrl state switching for voltage domains, AIB register
->>>>> programming, and comprehensive SDR tuning support for reliable UHS
->>>>> operation.
->>>>> - SoC and board integration (patches 8-10): Complete K1 SoC controller
->>>>> definitions, PMIC power infrastructure, and OrangePi RV2 board enablement
->>>>> with full UHS support.
->>>>>
->>>>> This transforms the OrangePi RV2 from having no SD card support to full
->>>>> UHS-I capability, enabling high-performance storage up to 208MHz.
->>>>>
->>>>> Tested-by: Michael Opdenacker <michael.opdenacker@rootcommit.com>
->>>>> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
->>>>> ---
->>>>> Changes in v8:
->>>>> - Resending the series as v8. The v7 submission failed due to an SMTP
->>>>>   error during transit, which resulted in a broken thread on the mailing
->>>>>   list.
->>>>
->>>> Hm? Everything is here:
->>>> https://lore.kernel.org/all/20260413-orangepi-sd-card-uhs-v7-1-16650f49c022@gmail.com/
->>>>
->>>> You can send individual patches to fix up threading, use --in-reply-to.
->>>
->>> My apologies for the noise and the rapid resend.
->>>
->>> The reason for v8 was that the v7 cover letter (0/9) failed to reach
->>> the mailing list due to an SMTP error on my end. This left the v7
->>> thread "headless" in the archives without the changelog or the full
->>> context of the series. I was attempting to fix the threading
->>> immediately so that reviewers would have a complete set of patches to
->>> look at, but I realize now that resending the entire series on the
->>> same day was premature.
->> So that's why Krzysztof said you should send individual patch with --in-reply-to.
-> 
-> I see, thanks for the clarification. Just to clarify for my future
-> workflow: is it acceptable for a series to be 'headless' (starting
-> with Patch 1) if the cover letter is lost, or is the cover letter
-> (Patch 0) strictly required as the thread root?
-> 
-> In such cases, would it be better to just send the missing cover
-> letter as a reply to Patch 1 afterward to complete the thread without
-> resending the whole series?
+Hi All,
 
-Replacing missed cover letter is tricky. If you patches have in-reply-to
-with ID to a missing posting, but you could do that with a bit mangling
-- you would need to send the cover letter with that exactly MessageID.
+On Mon, 13 Apr 2026 at 13:32, Iker Pedrosa <ikerpedrosam@gmail.com> wrote:
+>
+> This series enables complete SD card support for the Spacemit K1-based
+> OrangePi RV2 board, including UHS (Ultra High Speed) modes for
+> high-performance SD card operation.
+>
+> Background
+>
+> The Spacemit K1 SoC includes an SDHCI controller capable of supporting
+> SD cards up to UHS-I speeds (SDR104 at 208MHz). However, mainline
+> currently lacks basic SD controller configuration, SDHCI driver
+> enhancements for voltage switching and tuning, and power management
+> infrastructure.
+>
+> Implementation
+>
+> The series enables SD card support through coordinated layers:
+>
+> - Hardware infrastructure (patches 1-2): Device tree bindings for voltage
+> switching hardware and essential clock infrastructure.
+> - SDHCI driver enhancements (patches 3-7): Regulator framework
+> integration, pinctrl state switching for voltage domains, AIB register
+> programming, and comprehensive SDR tuning support for reliable UHS
+> operation.
+> - SoC and board integration (patches 8-10): Complete K1 SoC controller
+> definitions, PMIC power infrastructure, and OrangePi RV2 board enablement
+> with full UHS support.
+>
+> This transforms the OrangePi RV2 from having no SD card support to full
+> UHS-I capability, enabling high-performance storage up to 208MHz.
+>
+> Tested-by: Michael Opdenacker <michael.opdenacker@rootcommit.com>
+> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
 
-If patches do not have in-reply-too, then you can send cover letter as
-reply to patch #1.
+I'm just checking the status of this series. Since it hasn't been
+applied to linux-next,
+Will it be included in the next kernel release cycle?
 
-Best regards,
-Krzysztof
+Thanks
+-Anand
+> ---
+> Changes in v8:
+> - Resending the series as v8. The v7 submission failed due to an SMTP
+>   error during transit, which resulted in a broken thread on the mailing
+>   list.
+> - No functional changes from v7.
+> - Link to v7: https://lore.kernel.org/r/20260413-orangepi-sd-card-uhs-v7-1-16650f49c022@gmail.com
+>
+> Changes in v7:
+> - Remove sdhci-common.yaml reference from DT binding.
+> - Link to v6: https://lore.kernel.org/r/20260407-orangepi-sd-card-uhs-v6-0-b5b8a1b2bfc8@gmail.com
+>
+> Changes in v6:
+> - Add pinctrl support for voltage switching. Document optional
+>   pinctrl-names property supporting "default" and "uhs" pinctrl states
+>   for coordinating pin configuration changes during UHS-I voltage
+>   switching.
+> - Update pinctrl state naming from "state_uhs" to "uhs" to match DT
+>   binding naming convention.
+> - Fix MMC drive strength values based on vendor kernel investigation.
+>   Correct 3.3V operation from 7mA to 19mA and 1.8V UHS operation from
+>   13mA to 42mA to match proven vendor implementation.
+> - Link to v5: https://lore.kernel.org/r/20260330-orangepi-sd-card-uhs-v5-0-bd853604322d@gmail.com
+>
+> Changes in v5:
+> - Document optional pinctrl-names property supporting "default" and
+>   "state_uhs" pinctrl states for coordinating pin configuration changes
+>   during UHS-I voltage switching.
+> - Link to v4: https://lore.kernel.org/r/20260323-orangepi-sd-card-uhs-v4-0-567c9775fd0e@gmail.com
+>
+> Changes in v4:
+> - Revert to start_signal_voltage_switch() approach for bidirectional
+>   voltage switching: replace voltage_switch() callback with
+>   start_signal_voltage_switch() to properly handle both 3.3V and 1.8V
+>   signal voltage directions.
+> - Fix DC input voltage specification: corrected the main power supply
+>   from 12V to 5V to match the OrangePi RV2 board specifications. The
+>   board uses a 5V USB-C input connector, not a 12V rail as previously
+>   specified in the device tree.
+> - k1-bananapi-f3.dts: add `broken-cd` property to work around card
+>   detection. Using `broken-cd` disables hotplug detection but keeps SD
+>   card functionality working without additional dependencies.
+> - Add SD card support for Muse Pi Pro board (contributed by Trevor
+>   Gamblin): enable SD card support with UHS-I capabilities following the
+>   same pattern as OrangePi RV2, including dual pinctrl states, PMIC
+>   power supplies, and card detection.
+> - Link to v3: https://lore.kernel.org/r/20260316-orangepi-sd-card-uhs-v3-0-aefd3b7832df@gmail.com
+>
+> Changes in v3:
+> - Rebase on mmc.git/next to resolve conflicts with "mmc: sdhci-of-k1:
+>   add reset support" patch.
+> - Squash tuning infrastructure and implementation patches (3 and 4)
+>   together to form complete functionality and avoid unused function
+>   warnings.
+> - Reduce code nesting: implemented an early return sanity check in
+>   spacemit_sdhci_voltage_switch() to reduce indentation and improve
+>   logic flow.
+> - Refactor pinctrl initialization: moved pinctrl resource acquisition
+>   and state lookup into a dedicated helper function,
+>   spacemit_sdhci_get_pins().
+> - Use generic regulator node names (buck4, aldo1) instead of
+>   device-specific aliases (sd_vmmc, sd_vqmmc) to better reflect that
+>   these PMIC outputs serve multiple devices.
+> - Remove dead code handling 3.3V voltage switching from
+>   spacemit_sdhci_voltage_switch().
+> - Optimize tuning algorithm to use single-pass window detection instead
+>   of storing results in array, reducing memory usage and complexity.
+> - Remove unnecessary card detect check in execute_tuning() - rely on MMC
+>   core.
+> - Clarify commit message to mention both SD (UHS-I) and eMMC (HS200)
+>   tuning support.
+> - Add SD card support for Banana Pi BPI-F3 board with UHS-I capabilities
+>   following the same pattern as OrangePi RV2.
+> - Link to v2: https://lore.kernel.org/r/20260309-orangepi-sd-card-uhs-v2-0-5bb2b574df5d@gmail.com
+>
+> Changes in v2:
+> - Removed custom AIB voltage switching code per maintainer feedback. The
+>   existing pinctrl driver already handles AIB voltage switching
+>   automatically via power-source property changes during UHS mode
+>   transitions. This eliminates code duplication.
+> - Squashed regulator and pinctrl commits into single voltage switching
+>   implementation.
+> - Moved voltage switching callback from dynamic probe assignment to
+>   static sdhci_ops declaration. Removed redundant SDHCI core call since
+>   the framework handles standard voltage switching automatically.
+> - Made clock override (SDHC_OVRRD_CLK_OEN | SDHC_FORCE_CLK_ON)
+>   conditional for SD/SDIO cards only. This follows vendor driver pattern
+>   of differentiating SD and eMMC card handling.
+> - Include no-mmc property for SD card.
+> - Link to v1: https://lore.kernel.org/r/20260302-orangepi-sd-card-uhs-v1-0-89c219973c0c@gmail.com
+>
+> ---
+> Iker Pedrosa (8):
+>       dt-bindings: mmc: spacemit,sdhci: add pinctrl support for voltage switching
+>       mmc: sdhci-of-k1: enable essential clock infrastructure for SD operation
+>       mmc: sdhci-of-k1: add regulator and pinctrl voltage switching support
+>       mmc: sdhci-of-k1: add comprehensive SDR tuning support
+>       riscv: dts: spacemit: k1: add SD card controller and pinctrl support
+>       riscv: dts: spacemit: k1-orangepi-rv2: add PMIC and power infrastructure
+>       riscv: dts: spacemit: k1-orangepi-rv2: add SD card support with UHS modes
+>       riscv: dts: spacemit: k1-bananapi-f3: add SD card support with UHS modes
+>
+> Trevor Gamblin (1):
+>       riscv: dts: spacemit: k1-musepi-pro: add SD card support with UHS modes
+>
+>  .../devicetree/bindings/mmc/spacemit,sdhci.yaml    |  15 ++
+>  arch/riscv/boot/dts/spacemit/k1-bananapi-f3.dts    |  24 +-
+>  arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts     |  66 ++++++
+>  arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts   |  67 ++++++
+>  arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi       |  40 ++++
+>  arch/riscv/boot/dts/spacemit/k1.dtsi               |  13 ++
+>  drivers/mmc/host/sdhci-of-k1.c                     | 257 +++++++++++++++++++++
+>  7 files changed, 480 insertions(+), 2 deletions(-)
+> ---
+> base-commit: 4c3b07bf68391122266dfb01126484daf352cf70
+> change-id: 20260226-orangepi-sd-card-uhs-0ecb05839b0c
+>
+> Best regards,
+> --
+> Iker Pedrosa <ikerpedrosam@gmail.com>
+>
