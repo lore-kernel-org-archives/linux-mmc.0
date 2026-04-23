@@ -1,121 +1,134 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vs1-f98.google.com (mail-vs1-f98.google.com [209.85.217.98])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3ADB3A6405;
-	Thu, 23 Apr 2026 17:23:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE1DA48CFC
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2026 19:21:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.98
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1776965019; cv=none; b=jfEBxBTzWLgRZc5qlI5R6SrQ9puYUIExPgcNkvU4fYOUtF+0RDpa/RsukyVPnaPoqfN+U9fh17lEdNyUlGsA612pVDEqoHOYt/Uknei102l1wcX44Y1O056uIsTlVvreUajHFrxq+2r20F21uKCye8G24S7UltB4+Z50f8J0Z78=
+	t=1776972071; cv=none; b=TmLIlP1S1yqi+My2bmsFfNAgKQZvHg2LcD+IoeuKS96eE748qm6tyj3xKFhjOEssG6ALuuF2OvsPrwdFhRdNSfhHgXPq2GrDX5NPuj6qVrN7wwdR8kwC1IMkbWR67U67mU10P5paVQCEFsJrPJZh97GOiu3eYMwW8eGeKN6l7eA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1776965019; c=relaxed/simple;
-	bh=6qiTCFBekbEukx9JfkfSWRidIG3l0Sf4ObiHCmgi/Kg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=d6RE9atuCvGVpomHgdHFOM6q/iDpNykZewcGxBCrCJI30JZYAl7NpfCYYjZeq/I0uC9W0fyk+GrF3aoXqQ6No8CSEZKn9cAqDbhn3Z1014HRcy3Ri5xNI1Gnc3n9yaHkjYAYs8Qw7GDh4QbSb9lXdjifOQfxmv4xUcQ2HzOjJQ0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bSgVVBco; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1776972071; c=relaxed/simple;
+	bh=PClqCK07Ka0R4xHcNh3toinjUIw4MEIfybat0KZ60dE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=TZLrU0o2pVJD7+4fwFJaAx8Te/o5111VEQ1KK86rXDntP9h1uTCmT0Bh0WjvKvegx71w6srumu/okYZMHSkNvtkNooMhzzAzz1pB1FjmW7IuePdbNGEYBeoynvEBKRhA7l5MUjIbOc3G1LD7MCrJJ5WLVpVTdZCVPG/om0xgTfE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=RBlztS1T; arc=none smtp.client-ip=209.85.217.98
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bSgVVBco"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C46CC2BCAF;
-	Thu, 23 Apr 2026 17:23:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1776965019;
-	bh=6qiTCFBekbEukx9JfkfSWRidIG3l0Sf4ObiHCmgi/Kg=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=bSgVVBcoSjGfQWdoQGUgNVRmbEtszAJdVo8yA9r8LNJeE/ofyC5Gnsz79m4V0lX46
-	 pa/y5gsB3zlZluABRrjxKSOwbYMXUHO+MotXEazWDiQOCe1yTrqWRHPV4zMj0LwjKQ
-	 5M2y1kvileHCF6iwNABYr27e4apDnYbkN1V0/UhpKmDTgze2Qlp8vEJPOpipM0hdaF
-	 5vFAbX7aYCuF/Kn3hy0r1zpktd5e0OEoDF9glBkGw9wkYyEXY2EG6qnrIoxwq1IeDv
-	 4km4kfenW5XJsDNbsAvN0gM7swo4NnRXLNKgjHVyLL2FI7yo+t36QrFeotbRrVVc+5
-	 swQ532De8vksQ==
-Message-ID: <fe8a9d66-99d9-4e2f-9ddc-d1e1dbbaa10a@kernel.org>
-Date: Thu, 23 Apr 2026 19:23:35 +0200
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="RBlztS1T"
+Received: by mail-vs1-f98.google.com with SMTP id ada2fe7eead31-60fce51aa55so2094784137.3
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2026 12:21:09 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1776972069; x=1777576869;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:dkim-signature:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=PML/WCuMNBActDXtR6UnIdfaKpFVfv955aq7RWvn5cI=;
+        b=nweDK18VhbW3Gx8k89zRTHi/ZoWzkg/UeUnm3foj+Vo2tS+z6+5tbJ7g3uixEzl9ol
+         602RVh6GuLIovdOGR4Xp9mYtovNwHFm6Z9xvcbHiWkkh1RjRfGFUbtf4fHUuO1Yc2ngA
+         9jKD8wXobLaj1AN+V++zKLt+V9Ewp7nRgrPUfMm/7JStzTv+e8CjTbt24a2OPVIRbT2o
+         lP9W/IUABZTNHAlNmmxIkxBkWL/CAWvFPhw2o+j8aFMt4+01x5rNaQk0bxMbC0V5BDBZ
+         92DPA+5dOpBck7QdKpU7gdwCrIdfly5ixCyJzQcAxjkgRD0D34W134WjOm9kob+1/qLh
+         cG/w==
+X-Forwarded-Encrypted: i=1; AFNElJ8Jml0HshQcyBWznVgetlYdeAtHI7l402Wr8dPAu0Gv1CpuOYLTbLf8l+xEXNp7qe8MQmJG6YDuTcE=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx+ZVNAw4lpgHQLCRb/wapJms5TZiWfHlOVHquXIV9umRFx49v0
+	X3n5Q7rzAZGaQCgFl7BDdawL6tpeVbtMewjpllveQ67EbGIOSXXdV7So8tZOhfgK1V59zotTltL
+	gE+F3R6/L1Hg3P2/4GCo9y/DPNA1JJqx5CpL3TEZGv+4uGDfSI95HXZAx0DBiLA1dqAegl5Srcl
+	YnHLmSKZeWv40sdeq7lopJTs7bFW1fjMlV4L7HdVDaqT8a4Wiy4Qx5gM2e2Z7aUwSzXthujs4sT
+	SRGXrxSuY2E
+X-Gm-Gg: AeBDiesXDOsgiTtHZGoOeNdIsHg05COjgcY+5LI3U+zKvIQmwOM8Nsb737m/COfd5Ks
+	PG8dF2LIO59IpSP4CtytwuHQTTQ9JP4ITBN/CUSchfpX8HafpBcJ7AQwL+vMa8Kp7EHeKRQ74HN
+	j0ehbzyrO3i/qqNaK31r0RX+N6GnQABKFq5b8z9pqvXUvehXj2niD6LP2O/OUzy5sO9TGOcRVRN
+	6dQMhv9J2IR2Pfb2y5KGENf91bhUxyJ0fY4CUwC8UYF1YFAsJLTHStyc9Scwrsa8xiBg2KMfDg5
+	inJUGz7LCvvWrkKZ2j5koJwqQLws8BQvzqXkUPLH8Z9GU4wXxSB6UCMRBdlvNXtDLAu8Ja51ps2
+	4lIE7cKOg3U3+xYQt7wMkNgbZw369mUp2xoPvLbNhRlCNU6SWoBeRcG5Mel4D3Z4RjMzKs5a2Zs
+	b2CVorGpC3dgMZDfuM23WzWfGlLVHj9J6Bok160T7JS54/SxJmy2X7ajUPvO9AEtKx
+X-Received: by 2002:a05:6102:38cb:b0:608:a01d:f7e3 with SMTP id ada2fe7eead31-616f7c60edamr15483311137.31.1776972068796;
+        Thu, 23 Apr 2026 12:21:08 -0700 (PDT)
+Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-16.dlp.protect.broadcom.com. [144.49.247.16])
+        by smtp-relay.gmail.com with ESMTPS id ada2fe7eead31-61745c9d35dsm1631814137.12.2026.04.23.12.21.08
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 23 Apr 2026 12:21:08 -0700 (PDT)
+X-Relaying-Domain: broadcom.com
+X-CFilter-Loop: Reflected
+Received: by mail-qv1-f69.google.com with SMTP id 6a1803df08f44-8b02af4345fso237189226d6.1
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Apr 2026 12:21:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1776972068; x=1777576868; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=PML/WCuMNBActDXtR6UnIdfaKpFVfv955aq7RWvn5cI=;
+        b=RBlztS1TxiQJ+hqZ4dYNAXyQwkXdr/4f+6LJgtIvlqIaxH1zyvV6JsrwAV2/vwmTHK
+         JuMfIwiW4QWOnIrs2Cvxlyiqb39jG9DgPSGTVBUob8SUdycyKebCI3bmL1pPPtHOE/s5
+         HqeV97Vrp1+fWm5kI+iD9VT1wEqzE1qHjNtEs=
+X-Forwarded-Encrypted: i=1; AFNElJ/6k54+jW0THmRogr4JM0LmDkv/MCdM4ItEyKT4wpi3ilLl7+vvKfPw1iymhx/V4sF3QmfwFiSzAlM=@vger.kernel.org
+X-Received: by 2002:a05:6214:2f07:b0:8a4:58ff:f0f7 with SMTP id 6a1803df08f44-8b03addd7a4mr366513196d6.44.1776972067898;
+        Thu, 23 Apr 2026 12:21:07 -0700 (PDT)
+X-Received: by 2002:a05:6214:2f07:b0:8a4:58ff:f0f7 with SMTP id 6a1803df08f44-8b03addd7a4mr366512406d6.44.1776972067326;
+        Thu, 23 Apr 2026 12:21:07 -0700 (PDT)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8b02aa4f1f9sm163260006d6.0.2026.04.23.12.21.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 23 Apr 2026 12:21:06 -0700 (PDT)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	bcm-kernel-feedback-list@broadcom.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Kamal Dasu <kamal.dasu@broadcom.com>
+Subject: [PATCH v2] mmc: core: fix host controller programming for fixed driver type
+Date: Thu, 23 Apr 2026 15:18:55 -0400
+Message-Id: <20260423191853.1053936-1-kamal.dasu@broadcom.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: st,sdhci: convert to DT schema
-To: Charan Pedumuru <charan.pedumuru@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Peter Griffin <peter.griffin@linaro.org>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20260409-st-mmc-v1-1-4c54321c3535@gmail.com>
- <20260416-merciful-bug-of-fantasy-f08d00@quoll>
- <4cbda428-ba64-434a-836d-9356980326ea@gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
- cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
- JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
- gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
- J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
- NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
- BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
- vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
- Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
- TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
- S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
- FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJoF1BKBQkWlnSaAAoJEBuTQ307
- QWKbHukP/3t4tRp/bvDnxJfmNdNVn0gv9ep3L39IntPalBFwRKytqeQkzAju0whYWg+R/rwp
- +r2I1Fzwt7+PTjsnMFlh1AZxGDmP5MFkzVsMnfX1lGiXhYSOMP97XL6R1QSXxaWOpGNCDaUl
- ajorB0lJDcC0q3xAdwzRConxYVhlgmTrRiD8oLlSCD5baEAt5Zw17UTNDnDGmZQKR0fqLpWy
- 786Lm5OScb7DjEgcA2PRm17st4UQ1kF0rQHokVaotxRM74PPDB8bCsunlghJl1DRK9s1aSuN
- hL1Pv9VD8b4dFNvCo7b4hfAANPU67W40AaaGZ3UAfmw+1MYyo4QuAZGKzaP2ukbdCD/DYnqi
- tJy88XqWtyb4UQWKNoQqGKzlYXdKsldYqrLHGoMvj1UN9XcRtXHST/IaLn72o7j7/h/Ac5EL
- 8lSUVIG4TYn59NyxxAXa07Wi6zjVL1U11fTnFmE29ALYQEXKBI3KUO1A3p4sQWzU7uRmbuxn
- naUmm8RbpMcOfa9JjlXCLmQ5IP7Rr5tYZUCkZz08LIfF8UMXwH7OOEX87Y++EkAB+pzKZNNd
- hwoXulTAgjSy+OiaLtuCys9VdXLZ3Zy314azaCU3BoWgaMV0eAW/+gprWMXQM1lrlzvwlD/k
- whyy9wGf0AEPpLssLVt9VVxNjo6BIkt6d1pMg6mHsUEVzsFNBFVDXDQBEADNkrQYSREUL4D3
- Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
- MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
- OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
- GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
- 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
- YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
- 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
- BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
- JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
- 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
- YpsFAmgXUF8FCRaWWyoACgkQG5NDfTtBYptO0w//dlXJs5/42hAXKsk+PDg3wyEFb4NpyA1v
- qmx7SfAzk9Hf6lWwU1O6AbqNMbh6PjEwadKUk1m04S7EjdQLsj/MBSgoQtCT3MDmWUUtHZd5
- RYIPnPq3WVB47GtuO6/u375tsxhtf7vt95QSYJwCB+ZUgo4T+FV4hquZ4AsRkbgavtIzQisg
- Dgv76tnEv3YHV8Jn9mi/Bu0FURF+5kpdMfgo1sq6RXNQ//TVf8yFgRtTUdXxW/qHjlYURrm2
- H4kutobVEIxiyu6m05q3e9eZB/TaMMNVORx+1kM3j7f0rwtEYUFzY1ygQfpcMDPl7pRYoJjB
- dSsm0ZuzDaCwaxg2t8hqQJBzJCezTOIkjHUsWAK+tEbU4Z4SnNpCyM3fBqsgYdJxjyC/tWVT
- AQ18NRLtPw7tK1rdcwCl0GFQHwSwk5pDpz1NH40e6lU+NcXSeiqkDDRkHlftKPV/dV+lQXiu
- jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
- zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
- XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <4cbda428-ba64-434a-836d-9356980326ea@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
-On 23/04/2026 17:26, Charan Pedumuru wrote:
-> 
-> 
-> On 16-04-2026 14:48, Krzysztof Kozlowski wrote:
->> On Thu, Apr 09, 2026 at 07:43:16AM +0000, Charan Pedumuru wrote:
->>> +properties:
->>> +  compatible:
->>> +    oneOf:
->>> +      - const: st,sdhci
->>> +      - items:
->>> +          - const: st,sdhci-stih407
->>> +          - const: st,sdhci
->>> +
->>> +  reg:
->>> +    minItems: 1
->>> +    maxItems: 2
->>
->> replace maxItems with a list with description
-> 
-> maxItems is required, dt_check fails without it and I can add the description.
+When using the fixed-emmc-driver-type device tree property, the MMC core
+correctly selects the driver strength for the card but fails to program
+the host controller accordingly. This causes a mismatch where the card
+uses the specified driver type while the host controller defaults to
+Type B (since ios->drv_type remains zero).
 
-No, constraints are required and list with items provides such.
+Split the driver type programming logic to handle both fixed and dynamic
+driver type selection paths. For fixed driver types, program the host
+controller with the selected drive_strength value. For dynamic selection,
+use the existing drv_type as before.
 
-Best regards,
-Krzysztof
+This ensures both the eMMC device and host controller use matching driver
+strengths, preventing potential signal integrity issues.
+
+Fixes: 6186d06c519e ("mmc: parse new binding for eMMC fixed driver type")
+Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+ drivers/mmc/core/mmc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 8846550a8892..05444ecf3909 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1371,7 +1371,9 @@ static void mmc_select_driver_type(struct mmc_card *card)
+ 
+ 	card->drive_strength = drive_strength;
+ 
+-	if (drv_type)
++	if (fixed_drv_type >= 0 && drive_strength)
++		mmc_set_driver_type(card->host, drive_strength);
++	else if (drv_type)
+ 		mmc_set_driver_type(card->host, drv_type);
+ }
+ 
+-- 
+2.34.1
+
