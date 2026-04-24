@@ -1,223 +1,165 @@
-Received: from zg8tmja2lje4os4yms4ymjma.icoremail.net (zg8tmja2lje4os4yms4ymjma.icoremail.net [206.189.21.223])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 91A1A2FFF8D;
-	Fri, 24 Apr 2026 07:09:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=206.189.21.223
+Received: from mail-ot1-f50.google.com (mail-ot1-f50.google.com [209.85.210.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4C483E123F
+	for <linux-mmc@vger.kernel.org>; Fri, 24 Apr 2026 15:12:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777014563; cv=none; b=SMwhMopGd7H7gWhi7bJgFdKWR302ifaH6vIsutfhq+8b3TaMIVvb/gLVG1YUuyWRepKparyatus2l+OHtSHNBOgKJ88iYONTF2yvJ8/I42162PV+0KYtrR+pdKcd4C5Bv1Gz8xLA97q2GfNawxfq3n4CI5fpIDx4JhrZWw1drl8=
+	t=1777043546; cv=none; b=Gw4vIajL7UcaUPG2Av2AFfQrq6bfc46BNTZV3+OjSyY/qvep+7ZvqM2Jn5/RBoQi8kFgFiBBwSwN7ro5dcF5Y1ZhT/ccMs6Ht/jBvcB7DZjl20tvfOVvCqJYA3Mlrp4uxmq3jT2yGciw4IzFKBMtXOeuNNrYfDV5nEGEV4Us+3U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777014563; c=relaxed/simple;
-	bh=WO/wfk0Son2FQmaJqoMSE4SQR5dXtqHSMo/L20p/Fds=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=aGJaOZiXCc6lS0q1PvGK4/yK4hgacvANPrmJ57hlXZND6vWB5MmyOHKKjFTD1OPL1HF0Ukx5O8F+EXM49+wWIp5Iwbx+EOHZ1KYPurzO2nZjoTvPCLuAmeRKvC9v/xUiFt/oycuJu68B0pQa7GcM1eimz81USY6pMwq8Ec9in0g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com; spf=pass smtp.mailfrom=eswincomputing.com; arc=none smtp.client-ip=206.189.21.223
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=eswincomputing.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=eswincomputing.com
-Received: from E0005152DT.eswin.cn (unknown [10.12.96.41])
-	by app1 (Coremail) with SMTP id TAJkCgDXbHEXF+tpIU8UAA--.15002S2;
-	Fri, 24 Apr 2026 15:09:12 +0800 (CST)
-From: hehuan1@eswincomputing.com
-To: adrian.hunter@intel.com,
-	ulfh@kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: ningyu@eswincomputing.com,
-	linmin@eswincomputing.com,
-	pinkesh.vaghela@einfochips.com,
-	xuxiang@eswincomputing.com,
-	hehuan1@eswincomputing.com
-Subject: [PATCH v1] mmc: sdhci-of-dwcmshc: Fix SDIO support for Eswin EIC7700
-Date: Fri, 24 Apr 2026 15:09:07 +0800
-Message-Id: <20260424070907.1422-1-hehuan1@eswincomputing.com>
-X-Mailer: git-send-email 2.31.1.windows.1
+	s=arc-20240116; t=1777043546; c=relaxed/simple;
+	bh=erJdZLIXjpiFj3N8atWnldU0PKLgYpyHE6leKr8+BQc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OttbwOFkWkKgQ0u7vnq2iHcTsFtf788teTJtvkDTwjfTa2GnLF0sUKx2db1MnzXBahRi6G/aDrpETPbzGhRpo+XUnHJoUOqwCyH3JQ1V9sFpQgebEl1RU1+4uoWV0153bMYquZ91ktW69grx6LZFITRNjb1FIgPk1Sbu7N1qYgQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JlfGqdFu; arc=none smtp.client-ip=209.85.210.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JlfGqdFu"
+Received: by mail-ot1-f50.google.com with SMTP id 46e09a7af769-7de4e6c5a30so1260695a34.0
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Apr 2026 08:12:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1777043544; x=1777648344; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=Jjw6HWmliluIPaGVVPTQRMT/dS3mcAJIKstHR/uFT7o=;
+        b=JlfGqdFuSpFMXK09AW1vZE22vUQm++p1sXBfB+VRkM6RfwXKE0OgI0+OziulMldc47
+         meEIBpPOz8h1tAsaGo7gktBbudN/6gmfCViohKGRIJQJM65ULeUkn5LtJ3/wHlMcYJNN
+         xgK31zgplJ3u0FnDF+/SPyqnN/PKN6uc/7SQg0E+cRNbFWrsebACMCVy2y3wvyXnNjWq
+         ETHU/K2aXhiTL+4wkN1gJzlB231caObPIPkQ8bhO8/EVq1dDPdoU28YF9Drx1wJ7jpOj
+         E/iJiHn3u0nV+JXWUSgQhKfMORlKZBR7uGSzsQI770qH3D7Qb86h9ptQgTyeJ1kgFNmG
+         srzQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777043544; x=1777648344;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Jjw6HWmliluIPaGVVPTQRMT/dS3mcAJIKstHR/uFT7o=;
+        b=LvEh5NFP/bk0cRHPKJky94WLkbjWvJRVBZv2s1NTk02gFuEVhoZpEXs7df2E7we5v7
+         KoHbRg7j7prIie085DTf4ugNyBSoGpU01rXE6U5NBBFWM8/wPBOA6JzXvhunwhmclt0b
+         nMdTvwFrwZqkLehu1ReNhxH5reVpj14r3FxXKk+a+HYKZ/qG44pYlh+60e+18Ar7AHdJ
+         NmTIRlC31eS7Y2xscbyvtIjSWOUqrla+pFQ57qWIB8N2vtPhntUzq599i1j/sSAU2H2D
+         LarMLTjYIyRBzydYMy6wVzc09OD8NFw0kd1ksjwe8J4UljdUgmJx2veBlb6nTvmBtf7C
+         C1OQ==
+X-Forwarded-Encrypted: i=1; AFNElJ+jInf/7ioR7O3mpnl+XHrvjmMgKoEt4bxDF1GtaN7SU71V7Mrgr0ineRV/CX1c4ZEap6li9W2eeLs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwOK3IVSedtY4CQlyCajZDpifWomT7Hj1eumT6hOZkc0Ha12Oa8
+	za1QJLNf64Z9FrRbjh0yLzeKo3AlybM4K3jz08W219sAj0dBgrHSbLxV
+X-Gm-Gg: AeBDieuaYfk+m5iiv6y2MEdIlar9pUAIs3GfjQ02O0epguCjw2Lq1SHjAzl+wL2oTPR
+	xg37seORHVoPDpyJ+CnnqJDTyDf23OTs4SDmoTJuKDUTvtRONtvKRJeFHFsbcMDE7faYZalAQQ1
+	lY4wuGuyZJJ88+dKxyOCanOWrj3nIfn5nwpM4EUCIH+1oD1KP+CGOY+BY4ZRhjoHR88+bOVor5c
+	AfyenTuF6KDtCiKzDYbhm04mVrcam+VQU/KFFhrlYjSsikAlBaohBv+ewHQqvMTJ3v8SU0j2vHb
+	gAQ28MeL5gG0F37L1pfOv0Tb/ARtRk6NussZ4FofxwXUOvjGtJAJgB/G6GMkjgEivOzQbL4FtBi
+	rLOJwWEWk7aqA0LwAey9zTrl2bP88UcDCXYD1lEw+PWdFipJoSLcHYv0TAsA9SuZGOF9aGLcU1Z
+	y2UQyccep1oTCMfVQyIrZxT+KhC6Pw+OpzE1vOhMlXn/UNCf1bXgbxiXmhih979IV1L0dbvk3zJ
+	Tv0dP04SjCl
+X-Received: by 2002:a05:6820:16ab:b0:694:9b71:3745 with SMTP id 006d021491bc7-6949b713b91mr9212220eaf.57.1777043543632;
+        Fri, 24 Apr 2026 08:12:23 -0700 (PDT)
+Received: from errol.ini.cmu.edu (pool-108-17-68-229.pitbpa.fios.verizon.net. [108.17.68.229])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-50e392c7994sm200838951cf.4.2026.04.24.08.12.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 Apr 2026 08:12:23 -0700 (PDT)
+Date: Fri, 24 Apr 2026 11:12:21 -0400
+From: "Gabriel L. Somlo" <gsomlo@gmail.com>
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+	Karol Gugala <kgugala@antmicro.com>,
+	Mateusz Holenko <mholenko@antmicro.com>,
+	Joel Stanley <joel@jms.id.au>,
+	Kamil Rakoczy <krakoczy@antmicro.com>,
+	Paul Mackerras <paulus@ozlabs.org>,
+	Andy Shevchenko <andy.shevchenko@gmail.com>,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Yixun Lan <dlan@gentoo.org>, Longbin Li <looong.bin@gmail.com>
+Subject: Re: [PATCH v2] mmc: litex_mmc: Set mandatory idle clocks before CMD0
+Message-ID: <aeuIVeIGV2Wc9sY2@errol.ini.cmu.edu>
+References: <20260424013615.470325-1-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:TAJkCgDXbHEXF+tpIU8UAA--.15002S2
-X-Coremail-Antispam: 1UD129KBjvJXoW3WrWUJw15XF1kJFW5uw48JFb_yoWxGw4fpF
-	4rCryfKFWUtF45CrZ7AayDAw1Iqa1SgFZrKF93K3WftanFyryjqasrCa4UtFWDJry8G3yY
-	ga1UXrn8Cr9rAaDanT9S1TB71UUUUUDqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUU9F14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-	1l84ACjcxK6xIIjxv20xvE14v26F1j6w1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4U
-	JVWxJr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gc
-	CE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
-	2Ix0cI8IcVAFwI0_JrI_JrylYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJV
-	W8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lw4CEc2x0rVAKj4xx
-	MxkF7I0En4kS14v26r1q6r43MxkIecxEwVCm-wCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4
-	IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1r
-	MI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJV
-	WUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Jr0_Gr1lIxAIcVCF04k26cxKx2IYs7xG6r1j
-	6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Jr0_GrUvcS
-	sGvfC2KfnxnUUI43ZEXa7VU1oUDtUUUUU==
-X-CM-SenderInfo: 5khk3tzqr6v25zlqu0xpsx3x1qjou0bp/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260424013615.470325-1-inochiama@gmail.com>
+X-Clacks-Overhead: GNU Terry Pratchett
 
-From: Huan He <hehuan1@eswincomputing.com>
+Hi,
 
-The EIC7700 code in sdhci-of-dwcmshc uses host->mmc->caps2 to select
-different configuration paths for different card types. The current logic
-distinguishes eMMC and SD, but does not handle SDIO separately.
+Thanks for the patch!
 
-Update the EIC7700 card-type checks so that eMMC, SD and SDIO are
-distinguished explicitly.
+On Fri, Apr 24, 2026 at 09:36:14AM +0800, Inochi Amaoto wrote:
+> The litex_mmc driver assumes the card is already probed in the BIOS
+> and skip the phy initialization. This will cause the command fail
+> like the following when the old card is unplugged and then insert
+> a new card:
+> 
+> [   62.923593] litex-mmc f0004000.mmc: Command (cmd 8) error, status -110
+> [   62.949717] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   62.976606] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   63.002516] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   63.028442] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> 
+> Add required clock settings and initialization for the CMD 0, so it can
+> probe the new card.
+> 
+> Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
+> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
+> ---
+> Change from v1:
+> - https://lore.kernel.org/linux-mmc/20260421025052.755471-1-inochiama@gmail.com/
+> 1. use fsleep to replace udelay
+> ---
+>  drivers/mmc/host/litex_mmc.c | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
+> index d2f19c2dc673..ac0b47604c02 100644
+> --- a/drivers/mmc/host/litex_mmc.c
+> +++ b/drivers/mmc/host/litex_mmc.c
+> @@ -68,6 +68,9 @@
+>  #define SD_SLEEP_US       5
+>  #define SD_TIMEOUT_US 20000
+> 
+> +#define SD_INIT_DELAY_US  1000
+> +#define SD_INIT_CLK_HZ    400000
+> +
+>  #define SDIRQ_CARD_DETECT    1
+>  #define SDIRQ_SD_TO_MEM_DONE 2
+>  #define SDIRQ_MEM_TO_SD_DONE 4
+> @@ -99,6 +102,8 @@ struct litex_mmc_host {
+>  	bool app_cmd;
+>  };
+> 
+> +static void litex_mmc_setclk(struct litex_mmc_host *host, unsigned int freq);
+> +
 
-Switch the reset path to dwcmshc_reset() so that pending interrupt state
-is cleared consistently, and use sdhci_enable_clk() so the clock enable
-sequence follows the standard SDHCI flow.
+Instead of the forward reference, can you simply move the entire
+`litex_mmc_setclk` function definition to this location in the file?
+(i.e., add a separate, "cosmetic" patch simply cut'n'pasting the
+function body from one place to another, with a commit blurb stating
+that it's in preparation for the idle-clock fix, and that it contains
+only cosmetic, no functional changes)?
 
-Fixes: 32b2633219d3 ("mmc: sdhci-of-dwcmshc: Add support for Eswin EIC7700")
-Signed-off-by: Huan He <hehuan1@eswincomputing.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 45 +++++++++++++++--------------
- 1 file changed, 23 insertions(+), 22 deletions(-)
+The idle-clock fix patch can then contain nothing but the
+"#define SD_INIT_*" lines and the hunk below:
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 0b2158a7e409..0c1b39d48502 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -277,6 +277,7 @@
- #define PHY_DELAY_CODE_MAX		0x7f
- #define PHY_DELAY_CODE_EMMC		0x17
- #define PHY_DELAY_CODE_SD		0x55
-+#define PHY_DELAY_CODE_SDIO		0x29
- 
- struct rk35xx_priv {
- 	struct reset_control *reset;
-@@ -1433,10 +1434,7 @@ static void sdhci_eic7700_set_clock(struct sdhci_host *host, unsigned int clock)
- 	clk_set_rate(pltfm_host->clk, clock);
- 
- 	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
--	clk |= SDHCI_CLOCK_INT_EN;
--	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
--
--	dwcmshc_enable_card_clk(host);
-+	sdhci_enable_clk(host, clk);
- }
- 
- static void sdhci_eic7700_config_phy_delay(struct sdhci_host *host, int delay)
-@@ -1497,7 +1495,7 @@ static void sdhci_eic7700_config_phy(struct sdhci_host *host)
- 
- static void sdhci_eic7700_reset(struct sdhci_host *host, u8 mask)
- {
--	sdhci_reset(host, mask);
-+	dwcmshc_reset(host, mask);
- 
- 	/* after reset all, the phy's config will be clear */
- 	if (mask == SDHCI_RESET_ALL)
-@@ -1594,18 +1592,18 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
--	u32 sd_caps = MMC_CAP2_NO_MMC | MMC_CAP2_NO_SDIO;
-+	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
- 	int phase_code = -1;
- 	int code_range = -1;
--	bool is_sd = false;
-+	bool is_non_emmc = false;
- 	int code_min = -1;
- 	int code_max = -1;
- 	int cmd_error = 0;
- 	int ret = 0;
- 	int i = 0;
- 
--	if ((host->mmc->caps2 & sd_caps) == sd_caps)
--		is_sd = true;
-+	if ((host->mmc->caps2 & emmc_caps) != emmc_caps)
-+		is_non_emmc = true;
- 
- 	for (i = 0; i <= MAX_PHASE_CODE; i++) {
- 		/* Centered Phase code */
-@@ -1614,8 +1612,8 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
- 		host->ops->reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
- 
- 		if (ret) {
--			/* SD specific range tracking */
--			if (is_sd && code_min != -1 && code_max != -1) {
-+			/* SD/SDIO specific range tracking */
-+			if (is_non_emmc && code_min != -1 && code_max != -1) {
- 				if (code_max - code_min > code_range) {
- 					code_range = code_max - code_min;
- 					phase_code = (code_min + code_max) / 2;
-@@ -1626,17 +1624,17 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
- 				code_max = -1;
- 			}
- 			/* EMMC breaks after first valid range */
--			if (!is_sd && code_min != -1 && code_max != -1)
-+			if (!is_non_emmc && code_min != -1 && code_max != -1)
- 				break;
- 		} else {
- 			/* Track valid phase code range */
- 			if (code_min == -1) {
- 				code_min = i;
--				if (!is_sd)
-+				if (!is_non_emmc)
- 					continue;
- 			}
- 			code_max = i;
--			if (is_sd && i == MAX_PHASE_CODE) {
-+			if (is_non_emmc && i == MAX_PHASE_CODE) {
- 				if (code_max - code_min > code_range) {
- 					code_range = code_max - code_min;
- 					phase_code = (code_min + code_max) / 2;
-@@ -1646,19 +1644,19 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
- 	}
- 
- 	/* Handle tuning failure case */
--	if ((is_sd && phase_code == -1) ||
--	    (!is_sd && code_min == -1 && code_max == -1)) {
-+	if ((is_non_emmc && phase_code == -1) ||
-+	    (!is_non_emmc && code_min == -1 && code_max == -1)) {
- 		pr_err("%s: phase code tuning failed!\n", mmc_hostname(host->mmc));
- 		sdhci_writew(host, 0, priv->vendor_specific_area1 + DWCMSHC_AT_STAT);
- 		return -EIO;
- 	}
--	if (!is_sd)
-+	if (!is_non_emmc)
- 		phase_code = (code_min + code_max) / 2;
- 
- 	sdhci_writew(host, phase_code, priv->vendor_specific_area1 + DWCMSHC_AT_STAT);
- 
--	/* SD specific final verification */
--	if (is_sd) {
-+	/* SD/SDIO specific final verification */
-+	if (is_non_emmc) {
- 		ret = mmc_send_tuning(host->mmc, opcode, &cmd_error);
- 		host->ops->reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
- 		if (ret) {
-@@ -1756,9 +1754,9 @@ static void sdhci_eic7700_set_uhs_signaling(struct sdhci_host *host, unsigned in
- 
- static void sdhci_eic7700_set_uhs_wrapper(struct sdhci_host *host, unsigned int timing)
- {
--	u32 sd_caps = MMC_CAP2_NO_MMC | MMC_CAP2_NO_SDIO;
-+	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
- 
--	if ((host->mmc->caps2 & sd_caps) == sd_caps)
-+	if ((host->mmc->caps2 & emmc_caps) != emmc_caps)
- 		sdhci_set_uhs_signaling(host, timing);
- 	else
- 		sdhci_eic7700_set_uhs_signaling(host, timing);
-@@ -1767,6 +1765,7 @@ static void sdhci_eic7700_set_uhs_wrapper(struct sdhci_host *host, unsigned int
- static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
- {
- 	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
-+	u32 sd_caps = MMC_CAP2_NO_MMC | MMC_CAP2_NO_SDIO;
- 	unsigned int val, hsp_int_status, hsp_pwr_ctrl;
- 	static const char * const clk_ids[] = {"axi"};
- 	struct of_phandle_args args;
-@@ -1821,8 +1820,10 @@ static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcm
- 
- 	if ((host->mmc->caps2 & emmc_caps) == emmc_caps)
- 		dwc_priv->delay_line = PHY_DELAY_CODE_EMMC;
--	else
-+	else if ((host->mmc->caps2 & sd_caps) == sd_caps)
- 		dwc_priv->delay_line = PHY_DELAY_CODE_SD;
-+	else
-+		dwc_priv->delay_line = PHY_DELAY_CODE_SDIO;
- 
- 	if (!of_property_read_u32(dev->of_node, "eswin,drive-impedance-ohms", &val))
- 		priv->drive_impedance = eic7700_convert_drive_impedance_ohm(dev, val);
--- 
-2.34.1
+>  static int litex_mmc_sdcard_wait_done(void __iomem *reg, struct device *dev)
+>  {
+>  	u8 evt;
+> @@ -128,6 +133,12 @@ static int litex_mmc_send_cmd(struct litex_mmc_host *host,
+>  	int ret;
+>  	u8 evt;
+> 
+> +	if (cmd == MMC_GO_IDLE_STATE) {
+> +		litex_mmc_setclk(host, SD_INIT_CLK_HZ);
+> +		litex_write8(host->sdphy + LITEX_PHY_INITIALIZE, 1);
+> +		fsleep(SD_INIT_DELAY_US);
+> +	}
+> +
+>  	litex_write32(host->sdcore + LITEX_CORE_CMDARG, arg);
+>  	litex_write32(host->sdcore + LITEX_CORE_CMDCMD,
+>  		      cmd << 8 | transfer << 5 | response_len);
 
+Thanks much,
+--Gabriel
