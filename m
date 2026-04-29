@@ -1,158 +1,114 @@
-Received: from mail-dl1-f48.google.com (mail-dl1-f48.google.com [74.125.82.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7E88410D19
-	for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2026 17:16:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.48
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id EF2F8349B15
+	for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2026 17:46:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777482962; cv=none; b=oYFooUU9OyiC4QLdvVq3Nd0gpXKQ3Mwj51v+vIZCnOH9KB7Zuzqk3m4wkGOWB0kY7NZR8iYFhJShbl1Xi1mzc9ZiIuAkLLHk5bbhavv9nVp9OCnictxNBtO2cQn1Bad2YlWFikuZ4ZpQmK3s4U246R1KSyplM9PRQ3I5up+T5VA=
+	t=1777484813; cv=none; b=sePfChl1hT/FcD3kaexIYbXPwlvy3RuQIKxB4Qtcp3Na1/YgB0AmJ1kOFwXiiWR8oJSUkS0xIQlLAV6T1Euz8LcmZ3T3Ffp67KwpKqKjr2efPZZj1zb2vRy70vDUOVN7BvejWLUH3+sSu4SSlefwnoyjArReD9s0vJAcXuq+UhQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777482962; c=relaxed/simple;
-	bh=b8BmgDQogRwggORM8K4eREtWvgZJXefpsvQX1y50FaI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=aLdeD09iu5kFBHSgdDH17l1mjKgPLegtjlxULl7Bzolh1aTTrePKh9y14b3igLKZlwXshqfoExyKjHpQ/4Wz1OMiDqIBUzB7WOqeCEDYlwazICK8OAIUvQ1X/4dSuvJQzo8kp6j8ZACKNcB87MPxK6fFFH+zVLZcH3kPIov5ZsU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org; spf=pass smtp.mailfrom=chromium.org; dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b=Cj2kWvNP; arc=none smtp.client-ip=74.125.82.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chromium.org
+	s=arc-20240116; t=1777484813; c=relaxed/simple;
+	bh=B64kXSw1VRkVbpc37YjjVMbTpZI0DBB3ajJGXrHMlLQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=F/ZQluOx1XdSa6TntTaNT9ma7FRhZ3qBVDisQveXb/9kCGvgihHqHLvUZfq9uhydiO8tKd2mSlcFR02aPP7BBCNFXqMCl/nUCf44HxURVxwGUsZdqrrjsSzmkrzYIZD1fXt+YsAjTnuPO3gvCgNTK650AoD7VFINzEg2qQLGQ1o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=IxOXQ0UW; arc=none smtp.client-ip=13.77.154.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="Cj2kWvNP"
-Received: by mail-dl1-f48.google.com with SMTP id a92af1059eb24-12dbd0f7ecaso5323872c88.0
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2026 10:16:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1777482960; x=1778087760; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=0rzy3HW8rz3SXfIkHgjI2UdkxSDPn+w/155JMT4UN7g=;
-        b=Cj2kWvNPSZ8mFDgOVB9IQEtQHM1eqS27Yp//bGwnOK4bEjekHtTi+lUngWTFwqciYe
-         9HD3EuMMV4lgNLYbuZeJ1k4stTstVnGZpcDBxxuUhBjRnbdoy7TTx0LCRivEnS8oH4jV
-         bbcuYLe8HiPyalDNy7zruBgWoLbUCw3sMSvl8=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777482960; x=1778087760;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=0rzy3HW8rz3SXfIkHgjI2UdkxSDPn+w/155JMT4UN7g=;
-        b=EGQ4qAjYnfGSzJi13pi0U762MZ3AB3NhFTFT0BGOvfeRdhyf2Kmj9MtTC47OQHRo2A
-         oLPzcC40RPhov5czG6kOwKH2qD4xpeSR1wGXgtNt+GmW2WddH3u2B6/Ws2fAlVAevutn
-         IuGnehwS6lqIyX5WSyBvMwT/hEG86aY2HyEPofLkzoK+VIF5E/N1ANAue2sd+Ma1RMy9
-         lXiO7k0onabWZdu6vjcQnsPL545tHo474bLH/zjZBSQ3zGLqMIlO+gcEOPefiANZvM6p
-         AXfSE9wNZikm48vCKCD4XbG2t7qCPEQ7LgPbI9VdJmsSEvqfNo7aBhRZEYhY3cqmjE5k
-         iR7Q==
-X-Forwarded-Encrypted: i=1; AFNElJ+x7aLdf1w2NBSEEsoCw0WSu6bupbgmwHSQeG8ii24DobydWCvO8u1Jlv4qzF6XveMONHf5qrJx4Ak=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxUQ2enQjnI/p5XkioRCvwjVmFa2NJ8IkIsi3IXAH4gZbaomTRH
-	G1ndozRP69Gfmx41lA9R2JTgpCZxo5eqJFEA5tnjuf4uw3/ngtuhON9nDOzHFnJDew==
-X-Gm-Gg: AeBDiet3MLc/eFFCJFEQ9Vaitqs+N0sR79XnV2Xk4o9jPiB32fUX2fai8dKXUYQ3Ek8
-	JjqB4VprMUD67F1pdLlvNs1qtvXPObQ0yZlcaubeskXxV7WfkCUn43fUg87x3A4UicMg9W/BL9v
-	wMerry4RXxzdDG0yp1L70/1YabIGf+iV7M59pagXfnSIVpkXUQlDQw9gfJMxo9usUHo+O47Sg8o
-	DZqblcepN7Ohow/Ity1wCnNZrQegIdX3F+YtzPNdbn3fc3pwgU5n0Ay3EiNADcDcNmsp2lsYpX5
-	h3v9IR8rtYjSXwQOWJzYQcd090DXEg9ge+upOGSe9AgpdaLnUJrMlrYNU5LHUA3gLjCNWuucxqT
-	+KgZtDO1UHNyugGyz700aJ5UQYHMIk1U5ekugWTfRcBdcal0L7QQ2vVyq6hbt4C3MW63x9i+Ojc
-	u2hFoa+5Y7jhuwWZ6Cz86Yzb9IdIQr0wGcU3OZc1wMRNlUnpIa2/RdO2zJs+0BBJUzM7FxjMIR
-X-Received: by 2002:a05:7022:f8c:b0:12a:b39a:339f with SMTP id a92af1059eb24-12de2a546bamr2101891c88.21.1777482959913;
-        Wed, 29 Apr 2026 10:15:59 -0700 (PDT)
-Received: from localhost ([2a00:79e0:2e7c:8:b8df:3c88:ad8d:d3d4])
-        by smtp.gmail.com with UTF8SMTPSA id a92af1059eb24-12de32178cbsm2889982c88.6.2026.04.29.10.15.57
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 29 Apr 2026 10:15:58 -0700 (PDT)
-Date: Wed, 29 Apr 2026 10:15:55 -0700
-From: Brian Norris <briannorris@chromium.org>
-To: Karel Balej <balejk@matfyz.cz>
-Cc: Francesco Dolcini <francesco@dolcini.it>,
-	Johannes Berg <johannes@sipsolutions.net>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Duje =?utf-8?Q?Mihanovi=C4=87?= <duje@dujemihanovic.xyz>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Gregory Clement <gregory.clement@bootlin.com>,
-	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Frank Li <Frank.Li@nxp.com>,
-	linux-wireless@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
-	phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
-	Peng Fan <peng.fan@nxp.com>, david@ixit.cz
-Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
- samsung,coreprimevelte
-Message-ID: <afI8y70U7wFT_07h@google.com>
-References: <20251026182602.26464-1-balejk@matfyz.cz>
- <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
- <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
- <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz>
+	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="IxOXQ0UW"
+Received: from [100.64.233.91] (unknown [20.29.225.195])
+	by linux.microsoft.com (Postfix) with ESMTPSA id 7983C20B716C;
+	Wed, 29 Apr 2026 10:46:51 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 7983C20B716C
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+	s=default; t=1777484811;
+	bh=B64kXSw1VRkVbpc37YjjVMbTpZI0DBB3ajJGXrHMlLQ=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=IxOXQ0UWyFstL5EzgyE0UuiAtNV+swseROLC4yGHkttAxbg5MH50+AlPYgfVkgjgA
+	 kmTjOiNuumGrCdz+1ize65eWTuZBkaA5HWNqR8DHQMG1zLD7Hhe3MDZyXIfgJ5T0qq
+	 nvrPKrykYfqYiFHWs6xnzgKgAOKN9dEuKhbXrnII=
+Message-ID: <97e4b94c-b91b-468c-9021-2a3784c7b901@linux.microsoft.com>
+Date: Wed, 29 Apr 2026 10:46:50 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH] mmc: host: sdhci-iproc: implement the .hw_reset
+ callback
+To: Florian Fainelli <florian.fainelli@broadcom.com>,
+ Scott Branden <scott.branden@broadcom.com>
+Cc: rjui@broadcom.com, sbranden@broadcom.com,
+ linux-arm-kernel@lists.infradead.org, tgopinath@linux.microsoft.com,
+ adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+ kernel-list@raspberrypi.com
+References: <20260327222150.2108111-1-meaganlloyd@linux.microsoft.com>
+ <3305684d-8517-47dd-8852-2e34d40fc712@linux.microsoft.com>
+ <702c52e4-b0b3-4e1e-a40d-29e136e46d7d@broadcom.com>
+ <448010ef-278c-4711-a244-447a2b1a22c1@linux.microsoft.com>
+ <CA+Jzhd+_CKn1X0YDsoh9-OFeCG9sc2Q0OFfphkRaXpEA647xyQ@mail.gmail.com>
+ <58294850-4ed4-4fb4-8f46-186063b76a2f@linux.microsoft.com>
+ <e1ba9b6d-0ad8-4336-a5f9-ad4777ef54e0@broadcom.com>
+Content-Language: en-US
+From: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
+In-Reply-To: <e1ba9b6d-0ad8-4336-a5f9-ad4777ef54e0@broadcom.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Hi,
 
-On Wed, Apr 29, 2026 at 12:55:23PM +0200, Karel Balej wrote:
-> Francesco Dolcini, 2025-11-28T18:05:37+01:00:
-> > On Thu, Nov 27, 2025 at 04:29:12PM +0100, Karel Balej wrote:
-> >> To reiterate, the firmware is generally available but is not part of
-> >> linux-firmware and the entire process of upstreaming the chipset support is
-> >> stuck on that.
-> >
-> > I'll try to see if any of my contact in NXP Wi-Fi group is able to help. Give
-> > me a few days.
-> 
-> so I was in a long conversation over the past months with Jeff from NXP
-> who was very helpful and tried to arrange for the upstreaming of the
-> firmware. Unfortunately however, his efforts were ultimately rejected by
-> the internal management.
-
-:(
-
-> We were directed to try to reach out to NXP via the customer support
-> page which yielded nothing. The current situation is thus the same as a
-> few months ago, summarized in my quote above.
-> 
-> Brian, what are the options here now? Would it be possible to make an
-> exception and accept the patches without the firmware being in
-> linux-firmware? This is an old device with no mainstream audience so I
-> expect everyone who will want to use it will be able to supply the
-> firmware themselves
-
-I'm not really in the business of writing rules here nor their
-exceptions. I was just pointing you at the existing rules, and how this
-seemed to violate them. Since the websites have moved around a bit since
-the last time, here's the page I referenced:
-
-https://wireless.docs.kernel.org/en/latest/en/developers/documentation/submittingpatches.html#new-driver
-
-I suppose maybe those rules are there so that we don't get drivers with
-*no* legally-usable firmware, since it's about "New Drivers". This is
-not a New Driver, so maybe that part doesn't have to apply.
-
-I suppose I'll leave it up to Johannes on this part, and may be willing
-to retract my NAK [1].
-
-> and it would be great to not have to keep the
-> patches in a fork, especially when trying to build on top of them
-> further (such as to fix the driver-firmware incompatibilities discussed
-> in one of the patches of this series).
-
-Patch 3 is a different story. At the moment, it's definitely not
-acceptable. But I tried to provide hints about how you can write proper
-FW compatibility logic. I'm still not optimistic that'll be easy and
-maintainable, and we still reserve the right to reject patches if they
-make things unmaintainable.
-
-(Marvell clearly didn't do any real work here on maintaining good FW
-compatibility.)
-
-Brian
-
-> Francesco, would you perhaps still be able to help in any way?
-> 
-> Thank you, kind regards,
-> K. B.
-
-[1] I think you're referring to this:
-    https://lore.kernel.org/all/ZUQN4Ua8byy-Fsy8@google.com/
-    Re: [PATCH 0/2] net: mwifiex: add support for the SD8777 chipset
+On 4/15/2026 1:44 PM, Florian Fainelli wrote:
+> On 4/15/26 13:43, Meagan Lloyd wrote:
+>>
+>> On 4/15/2026 1:23 PM, Scott Branden wrote:
+>>> Hi Meagan,
+>>>
+>>> On Wed, Apr 15, 2026 at 11:08 AM Meagan Lloyd <
+>>> meaganlloyd@linux.microsoft.com> wrote:
+>>>
+>>>> On 4/13/2026 10:43 AM, Florian Fainelli wrote:
+>>>>> On 4/13/26 10:38, Meagan Lloyd wrote:
+>>>>>> On 3/27/2026 3:21 PM, Meagan Lloyd wrote:
+>>>>>>> Implement the .hw_reset callback so that the eMMC can be reset as
+>>>>>>> needed
+>>>>>>> given cap-mmc-hw-reset is set in the devicetree and the
+>>>>>>> functionality is
+>>>>>>> enabled on the eMMC.
+>>>>>>>
+>>>>>>> Signed-off-by: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
+>>>>>>> ---
+>>>>>>>
+>>>>>>> SDHCI_POWER_CONTROL[4] (SD Host Controller Standard) has been
+>>>>>>> repurposed
+>>>>>>> on my Broadcomm processor to be eMMC hardware reset
+>>>>>>> (SDIO*_eMMCSDXC_CTRL[12], HRESET).
+>>>>>>>
+>>>>>>> Can you confirm this repurposed bit is consistent across the
+>>>>>>> Broadcomm
+>>>>>>> iProc processors and thus the .hw_reset callback can be uniformly
+>>>>>>> applied in this driver?
+>>>>>> Hi Ray & Scott,
+>>>>>>
+>>>>>> I hope you're doing well. This bit looks to have been repurposed
+>>>>>> from
+>>>>>> the SD Host Controller Standard's VDD2 Power Control to being
+>>>>>> used for
+>>>>>> toggling the hardware reset signal to eMMCs. Can you verify that it
+>>>>>> applies across the iProc processors so that I may finalize this
+>>>>>> patch?
+>>>>> Which iProc process are you using? If you are not sure this applies
+>>>>> broadly, can you at least make it specific to the SoC you are using?
+>>>> Yes, if it comes to that I can. I think it's overkill to roll a new
+>>>> compat string/associated structures over this small change, hence
+>>>> checking with Broadcomm iProc maintainers on this thread.
+>>>>
+>>> Which iProc processor are you using?  You will have to check with
+>>> RaspberryPI as I think they use this driver as well.
+>>> If that family also supports it then you probably don't need a
+>>> compatibility string.
+>>
+>> The processor I am using is the BCM58732. Can you help direct me to
+>> someone who could comment from the RaspberryPi side?
+>>
+>
+> I will take care of that. 
+Thanks, Florian. Let me know what you find out :)
