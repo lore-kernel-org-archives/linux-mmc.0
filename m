@@ -1,87 +1,100 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from vps0.lunn.ch (vps0.lunn.ch [156.67.10.101])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C01E7175A81;
-	Wed, 29 Apr 2026 11:22:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FD7D3C8731;
+	Wed, 29 Apr 2026 13:16:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=156.67.10.101
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777461760; cv=none; b=ehGHuSWMM3CFYDm71iV25c2EVZEuFgGiRwFOziAz63MiZf9TxjcfMJpB+/+TN1nDpVj/3zf78Ti5jnAYLoX12SGQHGq+HoHTaK3DpFWr/Gf2blQK988rNddFpTfSlhsDXTmcfpPm/2XC1DvByGfdg2Cfba++S8VoCNOZbo3My1Y=
+	t=1777468568; cv=none; b=AWAYuFTx3tf0l7htUbPKun2e5KXv+YsxaoZxAeEnVPDrAmYgIyy6M9v6GetEVnMjSOQz5N9tHwCr8FsW9V1U6T+J6q77C3mJKHaA6N33pQ83r/UD0nEsGxnC6qsVc+eCAocUcJ6disl78XqLmjt13TXMhm7xe7HlOSCivcJD7AA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777461760; c=relaxed/simple;
-	bh=nM00K1yCTGWbLJ67CLFAJLSKUSfe1ahbLuQbeMdnPGg=;
+	s=arc-20240116; t=1777468568; c=relaxed/simple;
+	bh=bQN4HvhkFbObokdtlU0dNRRj8LRd1IT4TuaGdxzdS1Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZpP5nS0MyMDWwmiexFNGAPdIAyIkGgoFIHKztNe6XqiIHmeqLEocerF7oZWigsS053/lRJpYRoIqzUAjZ/Q9o0eAYg0sw2vNQtPmGNzPtS7SF+u25vLRXBuy171twthZ+wXHC0g1qnam6D05tr2ihQXfEi6oJcFqB4bbhegsED4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=wvEc/G6m; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
+	 Content-Type:Content-Disposition:In-Reply-To; b=TBUQYLCZXW+iU73wefYmFO4j29hSU5WtBJKLojigwwo1vJSNExxPNKmOKq8GbVvLmpyJktezB9ahgNKujHMSOdHotzykhRy0q7c+YMs4CY63svFBCopysLeJmK+2NJWJp/6IKc+toZGGQc24bvOXC7VhCz0rITLhPDkUZ5PJ5ZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lunn.ch; spf=pass smtp.mailfrom=lunn.ch; dkim=pass (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b=nyhjsUce; arc=none smtp.client-ip=156.67.10.101
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lunn.ch
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lunn.ch
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="wvEc/G6m"
-Received: from francesco-nb (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
-	by mail11.truemail.it (Postfix) with ESMTPA id 6607C22850;
-	Wed, 29 Apr 2026 13:22:33 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1777461754;
-	bh=nM00K1yCTGWbLJ67CLFAJLSKUSfe1ahbLuQbeMdnPGg=; h=From:To:Subject;
-	b=wvEc/G6mjBE0GxM4bzoHZxQsbtrNL6QfVqrpNXiJgj2hb4jmIBOjrMSDhj60KFiyx
-	 B12XCyED6SS4fMNsRpXPB5tMRVDX92AngCp8liFagKw35mNqFJiemKeJK+ZMBeLGwZ
-	 X4u7CVL3qsNsThc1gr6U7bC3+gYI5dk3yJ/0hwgXCz+6+Srjfu5l/r89DAl1mE0QeI
-	 REAYWN5VZH3QzxUnIx24Bstqhc/FLR8MBs+0rYBMAY9znW8lPQ7B5bnQTEvoTK3bWQ
-	 b/3XkBTlpQq3tvVtsUOFt0rcHjSp+N6n3kkb9k932QfMll9U9D2BqNP8sAezcnpV2g
-	 FAr2AjoEa2Zmw==
-Date: Wed, 29 Apr 2026 13:22:32 +0200
-From: Francesco Dolcini <francesco@dolcini.it>
-To: Karel Balej <balejk@matfyz.cz>
-Cc: Brian Norris <briannorris@chromium.org>,
-	Francesco Dolcini <francesco@dolcini.it>,
-	Johannes Berg <johannes@sipsolutions.net>,
-	Rob Herring <robh@kernel.org>,
+	dkim=pass (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="nyhjsUce"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
+	s=20171124; h=In-Reply-To:Content-Transfer-Encoding:Content-Disposition:
+	Content-Type:MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:From:
+	Sender:Reply-To:Subject:Date:Message-ID:To:Cc:MIME-Version:Content-Type:
+	Content-Transfer-Encoding:Content-ID:Content-Description:Content-Disposition:
+	In-Reply-To:References; bh=00CFuie/XpWwEcDph5j08NpwMgP7MNQHVTxW7dFgKvc=; b=ny
+	hjsUcehLWZHWmuH2QESULtjCVCzsB1GVU/3RY7G8eO0LlZxg2TwHfvVGmvv68h2hOgOqaMx5j3zMi
+	ZWKXOP8J7vwKYMWMmgN0+IHllH8GYfSvIlBNQPz8hcfTPChEK7Rq6H+eqMH7z5vy7LUOO6ooCm6Qn
+	PGTItSJjEk8NOks=;
+Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
+	(envelope-from <andrew@lunn.ch>)
+	id 1wI4lK-000XF0-0n; Wed, 29 Apr 2026 15:15:34 +0200
+Date: Wed, 29 Apr 2026 15:15:34 +0200
+From: Andrew Lunn <andrew@lunn.ch>
+To: Bartosz Golaszewski <brgl@kernel.org>
+Cc: Loic Poulain <loic.poulain@oss.qualcomm.com>,
+	Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Duje =?utf-8?Q?Mihanovi=C4=87?= <duje@dujemihanovic.xyz>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Gregory Clement <gregory.clement@bootlin.com>,
-	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Frank Li <Frank.Li@nxp.com>,
-	linux-wireless@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
-	phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
-	Peng Fan <peng.fan@nxp.com>, david@ixit.cz
-Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
- samsung,coreprimevelte
-Message-ID: <20260429112232.GD17033@francesco-nb>
-References: <20251026182602.26464-1-balejk@matfyz.cz>
- <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
- <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
- <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz>
+	Bjorn Andersson <andersson@kernel.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Jens Axboe <axboe@kernel.dk>,
+	Johannes Berg <johannes@sipsolutions.net>,
+	Jeff Johnson <jjohnson@kernel.org>,
+	Marcel Holtmann <marcel@holtmann.org>,
+	Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+	Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
+	Rocky Liao <quic_rjliao@quicinc.com>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+	Simon Horman <horms@kernel.org>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-arm-msm@vger.kernel.org, linux-block@vger.kernel.org,
+	linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
+	linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org,
+	daniel@makrotopia.org
+Subject: Re: [PATCH 7/9] Bluetooth: hci_sync: Add NVMEM-backed BD address
+ retrieval
+Message-ID: <e0adaf64-10d7-4e28-8403-769e3070ec30@lunn.ch>
+References: <20260428-block-as-nvmem-v1-0-6ad23e75190a@oss.qualcomm.com>
+ <20260428-block-as-nvmem-v1-7-6ad23e75190a@oss.qualcomm.com>
+ <CAMRc=Me9G9vd06a39vi_UrXCTkUtJQRogm2MqgnwLS_r3Thyzg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAMRc=Me9G9vd06a39vi_UrXCTkUtJQRogm2MqgnwLS_r3Thyzg@mail.gmail.com>
 
-Hello Karel,
+On Wed, Apr 29, 2026 at 10:53:13AM +0200, Bartosz Golaszewski wrote:
+> On Tue, Apr 28, 2026 at 4:23 PM Loic Poulain
+> <loic.poulain@oss.qualcomm.com> wrote:
+> >
+> > Some devices store the Bluetooth BD address in non-volatile
+> > memory, which can be accessed through the NVMEM framework.
+> > Similar to Ethernet or WiFi MAC addresses, add support for
+> > reading the BD address from a 'local-bd-address' NVMEM cell.
+> >
+> > As with the device-tree provided BD address, add a quirk to
+> > indicate whether a device or platform should attempt to read
+> > the address from NVMEM when no valid in-chip address is present.
+> > Also add a quirk to indicate if the address is stored in
+> > big-endian byte order.
+> >
+> > Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
+> > ---
+> 
+> Is there any reason why we can't extend the existing
+> of_get_mac_address() with another property name and use it here? It
+> already has support for mac addresses from nvmem.
 
-On Wed, Apr 29, 2026 at 12:55:23PM +0200, Karel Balej wrote:
-> without the firmware being in linux-firmware?
+Does it even need to be a different property name? Is a bluetooth MAC
+address somehow different to an Ethernet MAC address? Isn't it just a
+EUI-48, independent of it being Ethernet, Bluetooth, wifi, fddi, token
+ring, homing pigeon?
 
-What's the license of this firmware? Am I wrong saying that if
-the license allows it, you could just send a patch to have it integrated
-to the linux-firmware repository? Is there any history or documentation
-on the topic (please apologize if this is a well known topic, just
-answer RTFM if this is the case).
-
-I read a couple of days ago that for example the firmwares for the
-various Apple arm64 laptop cannot be redistributed and every single
-individual that wants to use those needs to extract those from their
-system.
-
-All of that seems just a legal matter, and IANAL ...
-
-Francesco
-
-
+      Andrew
