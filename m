@@ -1,98 +1,94 @@
-Received: from vinatta.cz (vinatta.cz [37.205.8.231])
+Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39AE83FBEC2;
-	Wed, 29 Apr 2026 13:20:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F2FD3FE667;
+	Wed, 29 Apr 2026 13:40:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777468866; cv=none; b=d0hKgX3Iv80FDr3i0E6TF4AnRlNvy4y9EtCMKy/2/Uj7GqzqzEdeSjMLugddMbrjHPgiVeZtm9svRAkXnwBSnAKWVlWudoyWQiaI8J1bJfo60QelXB6w2XHP+LAJbGE27nSj9um2dW0MgyYjR1ZFI2njbvFGbdOUfaLnbDMyYCk=
+	t=1777470023; cv=none; b=I66kcZfELtPISjrnu9Trpi4K+uX7/thNHrBliglmgEwZgzbBSe56Oa6pO1DuSv6+S4KNvxIjCQfDeINqn32S2rYyaM7wC+vLVAJ3+D8aj8TNPd28N1D0RHUUwzHLFLCWHdy3gAEjTY9RJGzJvHon9LzVrTT3Qnm5a9ThcZJ3fSI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777468866; c=relaxed/simple;
-	bh=xqRqdqb9cql00b3xqlZ9Qf54W2TCp7JZjtSRq3okoys=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:To:From:
-	 References:In-Reply-To; b=l1t8UcFwRIgWJP9/HjfE1rUWx+3HZBlHFONSca6gCkj92EEutu8TrXvKVhsF2aHyS6N4kuM6LNsJBkQW1mW58KvhrNAMb1kBV1KtJwS0pdQ5gvxgjSGso1p5vEhizqdO+v2A1rHwqYb/pGuHJ+FUd5Ez27Dz+0hOactjYwjnrco=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=vinatta.cz; dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b=IyM+Dn02; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vinatta.cz
+	s=arc-20240116; t=1777470023; c=relaxed/simple;
+	bh=ubA9OYFNJvf2zxEAbK0cumXlbYJQl0x/+LIO+/dpBqo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=tu2vbRj7CxB2UXQldfbnV1tRJqdElUr+chJQNRsDKxqZMBpWnyA2FRNVaPOB209dKRu/2VKLHKbwX95MQjwLlDPfKQwhBxzI+geIVfD18GKZCglqEperrGX1y4X+2sOTsgolOz9a/YNimnf2u6CLjOBDQE18BnTghuOU8veYIYU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=tAezjJF2; arc=none smtp.client-ip=217.194.8.81
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b="IyM+Dn02"
-DKIM-Signature: a=rsa-sha256; bh=xqRqdqb9cql00b3xqlZ9Qf54W2TCp7JZjtSRq3okoys=;
- c=relaxed/relaxed; d=vinatta.cz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@vinatta.cz; s=default; t=1777468828; v=1; x=1777900828;
- b=IyM+Dn02OPnovfHH7qNxVHpRW3lq/vYVi8gIZcW4AH7D2xne9s+wetiIl+wxpJE6OZFyTOkm
- RguW5ARTHy3psH4xEHq1wSvuu9pVbbBnDs7WkbnysjUgPn2Zn3tjG/vwTwPw6Jzk8QNkZajEwln
- bEnKo/NHeCiP3dxeqdMa/VD2iYAHYg6eNe9oGnLxh+poF0IoDqoQFGNVA00lFNXMxn6Ic/jt0CK
- fy6UDDHUSrkQHQ1sajzCK6X3Ek3xAf3QWRyeapcFtUvNGmSxGuNDfAOtcZFgdBCEUkHi/u1pIh5
- 7MIEt8s/hY14nWI79pi1zTXz57/0aOCSnp6eLVR7s/6cQ==
-Received: by vinatta.cz (envelope-sender <karel@vinatta.cz>) with ESMTPS id
- 2b91500b; Wed, 29 Apr 2026 15:20:28 +0200
-Precedence: bulk
-X-Mailing-List: linux-mmc@vger.kernel.org
-List-Id: <linux-mmc.vger.kernel.org>
-List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
-List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Wed, 29 Apr 2026 15:20:28 +0200
-Message-Id: <DI5O432AFZVX.3VGKJP31AZX97@matfyz.cz>
-Cc: "Brian Norris" <briannorris@chromium.org>, "Johannes Berg"
- <johannes@sipsolutions.net>, "Rob Herring" <robh@kernel.org>, "Krzysztof
- Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>,
- =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>, "Andrew Lunn"
- <andrew@lunn.ch>, "Gregory Clement" <gregory.clement@bootlin.com>,
- "Sebastian Hesselbarth" <sebastian.hesselbarth@gmail.com>, "Ulf Hansson"
- <ulf.hansson@linaro.org>, "Frank Li" <Frank.Li@nxp.com>,
- <linux-wireless@vger.kernel.org>, <devicetree@vger.kernel.org>,
- <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
- <linux-mmc@vger.kernel.org>, <~postmarketos/upstreaming@lists.sr.ht>,
- <phone-devel@vger.kernel.org>, "Jeff Chen" <jeff.chen_1@nxp.com>, "Peng
- Fan" <peng.fan@nxp.com>, <david@ixit.cz>
+	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="tAezjJF2"
+Received: from francesco-nb (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
+	by mail11.truemail.it (Postfix) with ESMTPA id A054F22BA3;
+	Wed, 29 Apr 2026 15:40:14 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
+	s=default; t=1777470015;
+	bh=wbdghP89407ki72C54bZEEXFY2jq+D9w1Aq8ZiLnoZw=; h=From:To:Subject;
+	b=tAezjJF24BF4hg11VMQFul5zOsbu6N1rm0cj6pHYem2jSptlxX6CHhVV9lTNJvnU5
+	 /0C9M5TyXuezBAZPtd6OYF5NgcNCmoQIimB5W6oVTanbpzAPfcdOVlMrad5D02Eokv
+	 eZ3rBhmRnqJLrbtrHLD0hXoVM5Eto+AlnIFVQxLNevkxhfz1B2edLbzo2kKwvPSqXv
+	 A4/Jf+0gf1vYElZBZy9E9m5PgcNIxEOIBluMP6SZFV44Rq/pHbj1ljvZcddF7Pf44J
+	 jNzTpLh0RlzHjl+IO8nhiJ/HcUEqAaO+ZgwVB2y8ezTL8whQ8S7ieVkksU+zQYfJUC
+	 gpTf7+FWWcnrg==
+Date: Wed, 29 Apr 2026 15:40:11 +0200
+From: Francesco Dolcini <francesco@dolcini.it>
+To: Karel Balej <balejk@matfyz.cz>
+Cc: Francesco Dolcini <francesco@dolcini.it>,
+	Brian Norris <briannorris@chromium.org>,
+	Johannes Berg <johannes@sipsolutions.net>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Duje =?utf-8?Q?Mihanovi=C4=87?= <duje@dujemihanovic.xyz>,
+	Andrew Lunn <andrew@lunn.ch>,
+	Gregory Clement <gregory.clement@bootlin.com>,
+	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Frank Li <Frank.Li@nxp.com>,
+	linux-wireless@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-mmc@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
+	phone-devel@vger.kernel.org, Jeff Chen <jeff.chen_1@nxp.com>,
+	Peng Fan <peng.fan@nxp.com>, david@ixit.cz
 Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
  samsung,coreprimevelte
-To: "Francesco Dolcini" <francesco@dolcini.it>
-From: "Karel Balej" <balejk@matfyz.cz>
+Message-ID: <20260429134011.GA73482@francesco-nb>
 References: <20251026182602.26464-1-balejk@matfyz.cz>
  <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
  <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
  <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz>
  <20260429112232.GD17033@francesco-nb>
-In-Reply-To: <20260429112232.GD17033@francesco-nb>
+ <DI5O432AFZVX.3VGKJP31AZX97@matfyz.cz>
+Precedence: bulk
+X-Mailing-List: linux-mmc@vger.kernel.org
+List-Id: <linux-mmc.vger.kernel.org>
+List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
+List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <DI5O432AFZVX.3VGKJP31AZX97@matfyz.cz>
 
-Hello, Francesco,
+On Wed, Apr 29, 2026 at 03:20:28PM +0200, Karel Balej wrote:
+> Francesco Dolcini, 2026-04-29T13:22:32+02:00:
+> > On Wed, Apr 29, 2026 at 12:55:23PM +0200, Karel Balej wrote:
+> >> without the firmware being in linux-firmware?
+> >
+> > What's the license of this firmware? Am I wrong saying that if
+> > the license allows it, you could just send a patch to have it integrated
+> > to the linux-firmware repository? Is there any history or documentation
+> > on the topic (please apologize if this is a well known topic, just
+> > answer RTFM if this is the case).
+> 
+> that's one of the issues, the license is not specified explicitly
+> anywhere as far as I know.
+That's enough to be blocked.
 
-Francesco Dolcini, 2026-04-29T13:22:32+02:00:
-> On Wed, Apr 29, 2026 at 12:55:23PM +0200, Karel Balej wrote:
->> without the firmware being in linux-firmware?
->
-> What's the license of this firmware? Am I wrong saying that if
-> the license allows it, you could just send a patch to have it integrated
-> to the linux-firmware repository? Is there any history or documentation
-> on the topic (please apologize if this is a well known topic, just
-> answer RTFM if this is the case).
+> As far as I know, even if I was to submit the firmware myself, it would
+> still require a sign-off from someone from NXP [1].
 
-that's one of the issues, the license is not specified explicitly
-anywhere as far as I know. Likely it is the same as the other Marvell
-blobs already in linux-firmware (the mrvl directory), but we don't know
-for sure.
+And this is clearly there to avoid situation that are problematic from
+a legal point of view.
 
-As far as I know, even if I was to submit the firmware myself, it would
-still require a sign-off from someone from NXP [1].
+I do not see any way forward without NXP.
 
-> I read a couple of days ago that for example the firmwares for the
-> various Apple arm64 laptop cannot be redistributed and every single
-> individual that wants to use those needs to extract those from their
-> system.
+Francesco
 
-Are those blobs loaded by the mainline kernel? If so, it would be the
-same situation as I'm proposing here I believe.
-
-> All of that seems just a legal matter, and IANAL ...
-
-It is.
-
-[1] https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware=
-.git/about/#signed-off-by-requirement
-
-Karel
+> [1] https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/about/#signed-off-by-requirement
