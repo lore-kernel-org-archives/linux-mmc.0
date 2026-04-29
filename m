@@ -1,114 +1,82 @@
-Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id EF2F8349B15
-	for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2026 17:46:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=13.77.154.182
+Received: from vinatta.cz (vinatta.cz [37.205.8.231])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8104137E2F8;
+	Wed, 29 Apr 2026 18:36:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777484813; cv=none; b=sePfChl1hT/FcD3kaexIYbXPwlvy3RuQIKxB4Qtcp3Na1/YgB0AmJ1kOFwXiiWR8oJSUkS0xIQlLAV6T1Euz8LcmZ3T3Ffp67KwpKqKjr2efPZZj1zb2vRy70vDUOVN7BvejWLUH3+sSu4SSlefwnoyjArReD9s0vJAcXuq+UhQ=
+	t=1777487812; cv=none; b=NAKup9Tr1WhfPoTM+J4IDNtj4Pvrwp8HPSL3W50wkdmhECra7njczNTr0PKIV5ClZ48zvRA55914dIXoB+NsH3eWCihjyJKTuioNmuqHfXXd2bNi3psOmMAYyhf087rP0rfr0dQBS7Ib9xLEnU2LOLRr5cCgoj8X5CdhDmeolec=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777484813; c=relaxed/simple;
-	bh=B64kXSw1VRkVbpc37YjjVMbTpZI0DBB3ajJGXrHMlLQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=F/ZQluOx1XdSa6TntTaNT9ma7FRhZ3qBVDisQveXb/9kCGvgihHqHLvUZfq9uhydiO8tKd2mSlcFR02aPP7BBCNFXqMCl/nUCf44HxURVxwGUsZdqrrjsSzmkrzYIZD1fXt+YsAjTnuPO3gvCgNTK650AoD7VFINzEg2qQLGQ1o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com; spf=pass smtp.mailfrom=linux.microsoft.com; dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b=IxOXQ0UW; arc=none smtp.client-ip=13.77.154.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.microsoft.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.microsoft.com
+	s=arc-20240116; t=1777487812; c=relaxed/simple;
+	bh=UaKL1VITGxGKAwtbx/cCauZTVexmzreqjwsha7+HCvw=;
+	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:To:From:
+	 References:In-Reply-To; b=tfDIKL3wMtI5JN+xScEb+P7OlMwoCQkCc0KPrPkF1O7X5Hbx3il6mEGgyU85h3wMC5zHNRbcHHxE1JmELTY/LkvH3BzJ62ag81I9rXs15s2HkfzZ6RbXDQyDHE7r2RZIzTwNuOvgLaSxkBajyKX89TkqMEPPQIHdoSxbMv3an1w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=vinatta.cz; dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b=sjExcYGf; arc=none smtp.client-ip=37.205.8.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vinatta.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="IxOXQ0UW"
-Received: from [100.64.233.91] (unknown [20.29.225.195])
-	by linux.microsoft.com (Postfix) with ESMTPSA id 7983C20B716C;
-	Wed, 29 Apr 2026 10:46:51 -0700 (PDT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 7983C20B716C
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-	s=default; t=1777484811;
-	bh=B64kXSw1VRkVbpc37YjjVMbTpZI0DBB3ajJGXrHMlLQ=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=IxOXQ0UWyFstL5EzgyE0UuiAtNV+swseROLC4yGHkttAxbg5MH50+AlPYgfVkgjgA
-	 kmTjOiNuumGrCdz+1ize65eWTuZBkaA5HWNqR8DHQMG1zLD7Hhe3MDZyXIfgJ5T0qq
-	 nvrPKrykYfqYiFHWs6xnzgKgAOKN9dEuKhbXrnII=
-Message-ID: <97e4b94c-b91b-468c-9021-2a3784c7b901@linux.microsoft.com>
-Date: Wed, 29 Apr 2026 10:46:50 -0700
+	dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b="sjExcYGf"
+DKIM-Signature: a=rsa-sha256; bh=UaKL1VITGxGKAwtbx/cCauZTVexmzreqjwsha7+HCvw=;
+ c=relaxed/relaxed; d=vinatta.cz;
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
+ i=@vinatta.cz; s=default; t=1777487786; v=1; x=1777919786;
+ b=sjExcYGfSBa/pQLBcc/Y8CfPVNF1lRhd4ybKJ1qIB2T+LFZQR6E0kXI/k07g9Bdc6mKf0tVp
+ Vu6SQxAbaZxOjrbujqb5MYda9E+oVkecOARdLpMfRX0ItiRfKoHSLwYNCpkVNIBF5urXUt5ISyd
+ WxtKxwG6zIboC430MwLQp4oSmR+Jun1vL6mfiiFhWN1DTEt9JcEWPXnKA92Lg9Fb1k1jopDPNV9
+ n7ROIzxHCXcDSLkdEPQDsDs+3f7ohcbMijRpsF5OngqzFtdXX6JESgJ9fC53NUyNyC9CL5HvHsF
+ eAJs9FaBOw2pvSImfkK6oicWWkljST0nba1KWwY7tNP1w==
+Received: by vinatta.cz (envelope-sender <karel@vinatta.cz>) with ESMTPS id
+ 9f7750af; Wed, 29 Apr 2026 20:36:26 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH] mmc: host: sdhci-iproc: implement the .hw_reset
- callback
-To: Florian Fainelli <florian.fainelli@broadcom.com>,
- Scott Branden <scott.branden@broadcom.com>
-Cc: rjui@broadcom.com, sbranden@broadcom.com,
- linux-arm-kernel@lists.infradead.org, tgopinath@linux.microsoft.com,
- adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
- kernel-list@raspberrypi.com
-References: <20260327222150.2108111-1-meaganlloyd@linux.microsoft.com>
- <3305684d-8517-47dd-8852-2e34d40fc712@linux.microsoft.com>
- <702c52e4-b0b3-4e1e-a40d-29e136e46d7d@broadcom.com>
- <448010ef-278c-4711-a244-447a2b1a22c1@linux.microsoft.com>
- <CA+Jzhd+_CKn1X0YDsoh9-OFeCG9sc2Q0OFfphkRaXpEA647xyQ@mail.gmail.com>
- <58294850-4ed4-4fb4-8f46-186063b76a2f@linux.microsoft.com>
- <e1ba9b6d-0ad8-4336-a5f9-ad4777ef54e0@broadcom.com>
-Content-Language: en-US
-From: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
-In-Reply-To: <e1ba9b6d-0ad8-4336-a5f9-ad4777ef54e0@broadcom.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Date: Wed, 29 Apr 2026 20:36:26 +0200
+Message-Id: <DI5UU03J2IU3.61E7OU85TZJH@matfyz.cz>
+Cc: "Francesco Dolcini" <francesco@dolcini.it>, "Johannes Berg"
+ <johannes@sipsolutions.net>, "Rob Herring" <robh@kernel.org>, "Krzysztof
+ Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>,
+ =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>, "Andrew Lunn"
+ <andrew@lunn.ch>, "Gregory Clement" <gregory.clement@bootlin.com>,
+ "Sebastian Hesselbarth" <sebastian.hesselbarth@gmail.com>, "Ulf Hansson"
+ <ulf.hansson@linaro.org>, "Frank Li" <Frank.Li@nxp.com>,
+ <linux-wireless@vger.kernel.org>, <devicetree@vger.kernel.org>,
+ <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+ <linux-mmc@vger.kernel.org>, <~postmarketos/upstreaming@lists.sr.ht>,
+ <phone-devel@vger.kernel.org>, "Jeff Chen" <jeff.chen_1@nxp.com>, "Peng
+ Fan" <peng.fan@nxp.com>, <david@ixit.cz>
+Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
+ samsung,coreprimevelte
+To: "Brian Norris" <briannorris@chromium.org>
+From: "Karel Balej" <balejk@matfyz.cz>
+References: <20251026182602.26464-1-balejk@matfyz.cz>
+ <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
+ <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
+ <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz> <afI8y70U7wFT_07h@google.com>
+In-Reply-To: <afI8y70U7wFT_07h@google.com>
 
-
-On 4/15/2026 1:44 PM, Florian Fainelli wrote:
-> On 4/15/26 13:43, Meagan Lloyd wrote:
->>
->> On 4/15/2026 1:23 PM, Scott Branden wrote:
->>> Hi Meagan,
->>>
->>> On Wed, Apr 15, 2026 at 11:08 AM Meagan Lloyd <
->>> meaganlloyd@linux.microsoft.com> wrote:
->>>
->>>> On 4/13/2026 10:43 AM, Florian Fainelli wrote:
->>>>> On 4/13/26 10:38, Meagan Lloyd wrote:
->>>>>> On 3/27/2026 3:21 PM, Meagan Lloyd wrote:
->>>>>>> Implement the .hw_reset callback so that the eMMC can be reset as
->>>>>>> needed
->>>>>>> given cap-mmc-hw-reset is set in the devicetree and the
->>>>>>> functionality is
->>>>>>> enabled on the eMMC.
->>>>>>>
->>>>>>> Signed-off-by: Meagan Lloyd <meaganlloyd@linux.microsoft.com>
->>>>>>> ---
->>>>>>>
->>>>>>> SDHCI_POWER_CONTROL[4] (SD Host Controller Standard) has been
->>>>>>> repurposed
->>>>>>> on my Broadcomm processor to be eMMC hardware reset
->>>>>>> (SDIO*_eMMCSDXC_CTRL[12], HRESET).
->>>>>>>
->>>>>>> Can you confirm this repurposed bit is consistent across the
->>>>>>> Broadcomm
->>>>>>> iProc processors and thus the .hw_reset callback can be uniformly
->>>>>>> applied in this driver?
->>>>>> Hi Ray & Scott,
->>>>>>
->>>>>> I hope you're doing well. This bit looks to have been repurposed
->>>>>> from
->>>>>> the SD Host Controller Standard's VDD2 Power Control to being
->>>>>> used for
->>>>>> toggling the hardware reset signal to eMMCs. Can you verify that it
->>>>>> applies across the iProc processors so that I may finalize this
->>>>>> patch?
->>>>> Which iProc process are you using? If you are not sure this applies
->>>>> broadly, can you at least make it specific to the SoC you are using?
->>>> Yes, if it comes to that I can. I think it's overkill to roll a new
->>>> compat string/associated structures over this small change, hence
->>>> checking with Broadcomm iProc maintainers on this thread.
->>>>
->>> Which iProc processor are you using?  You will have to check with
->>> RaspberryPI as I think they use this driver as well.
->>> If that family also supports it then you probably don't need a
->>> compatibility string.
->>
->> The processor I am using is the BCM58732. Can you help direct me to
->> someone who could comment from the RaspberryPi side?
->>
+Brian Norris, 2026-04-29T10:15:55-07:00:
+>> and it would be great to not have to keep the
+>> patches in a fork, especially when trying to build on top of them
+>> further (such as to fix the driver-firmware incompatibilities discussed
+>> in one of the patches of this series).
 >
-> I will take care of that. 
-Thanks, Florian. Let me know what you find out :)
+> Patch 3 is a different story. At the moment, it's definitely not
+> acceptable. But I tried to provide hints about how you can write proper
+> FW compatibility logic. I'm still not optimistic that'll be easy and
+> maintainable, and we still reserve the right to reject patches if they
+> make things unmaintainable.
+
+I was referring to the original patches here, I would of course modify
+the compability patch according to your feedback, I just didn't want to
+invest the effort into that when it wasn't and still isn't clear if it
+will ever be possible to upstream it.
+
+I'm curious to hear from Johannes now then.
+
+Thank you for the information,
+Karel
