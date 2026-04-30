@@ -1,129 +1,127 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1BDC12CDA5;
-	Thu, 30 Apr 2026 01:00:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 144AB374728
+	for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2026 04:58:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777510823; cv=none; b=Pe8JhVEmnnOWPgX/28PcpSHNhDHBPiSCXzxffIVvXlMyperfP8Je3c36oCWfq/HjbRktuwu7b/9S63jLVo40loem/wI2lc4IF73POpfQ4anOQ5dyvz7aBAk4XYu6FagbwcQ1NjTm0nZS9N2ylJ2anYp9m/V83675W2yu+ClFTzc=
+	t=1777525107; cv=none; b=INvrbDeZG8k/GKlSgEEVW6b4zz6AB51xSDbiWgXQ+tbKrwkKzNtX856RefLyRBne5VuaM7uRrHxoDVk5lCvUhHnuXHaW23v3uhM2Cosc3YcwgUPeAspnLYb8Qaz8nekJng8m519xSgxswRdNgku9UHG6Y6QsyrGkladLbG8rqLk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777510823; c=relaxed/simple;
-	bh=zfkmByrLFAHEKVJWVl0s1IDqCNxIr7Q7yGaKuyRTUag=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pT4Slrw4gcXhQw63hFOgKTGitP/PcNSJANS/XLeD75Ig/kPinWq/VVEOzKPx6W6fvHvJEZnwX/7OxmBRcu53Q3vhSeOVjh0+Inz5PkWIuCTDjmq2dI1cGTUGrnDDbYfwvjWGT/9WHQpFe27pMY/GCeA6FXt4z7X5tE0ESl6afHM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=IKiMY6hz; arc=none smtp.client-ip=198.175.65.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1777525107; c=relaxed/simple;
+	bh=oCc7gcXJeu51Lta7mt7R5GL/+eB6xIUqhxFp3xd2m34=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=fAAs+y6Ie1v3LMFvaZlORKiB0iMbiImVSwlAlCXiPCSJulCralJn9njpFODRHu7fEkBZzcibuVnPadV+VNCJj3GmIL8ZMLCB874GDhsDlZcdMdYnfGV0uV+UKY36HrxJuJ2ROhTkmm1hveHkSV3O9baSyQ1lPISRVoJM6yg2vZs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=morsemicro.com; spf=pass smtp.mailfrom=morsemicro.com; dkim=pass (2048-bit key) header.d=morsemicro-com.20251104.gappssmtp.com header.i=@morsemicro-com.20251104.gappssmtp.com header.b=zPkTQ+bX; arc=none smtp.client-ip=209.85.210.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=morsemicro.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=morsemicro.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="IKiMY6hz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1777510822; x=1809046822;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=zfkmByrLFAHEKVJWVl0s1IDqCNxIr7Q7yGaKuyRTUag=;
-  b=IKiMY6hzYvuGjJZ726TmJJMOUmRjX1PlTgeq5e327xWc91/515BycoWK
-   bXQHiWIOWjn/Uf6jc9vZyTGDq6XqqwBa6uKZA93qZs71kPCzRyx4rVuwj
-   ToqcIYZgbKzdv6H8qQzCCIAJ77bRCn+YNwkgCovQv4i910mUrkO/dt1fx
-   uoDgqpy/MjfFtdEdbM7rtXSloK1ZL4E2GaV9/hY2eAy6/2z6AMKxqns/I
-   Bs98kTsNwI1ECPl6PeZLEzpKvS9gSR5Ch5uVoKnB8FHuc+DXGn3i4l5UO
-   SNSl40jj7QgjZmvjBf4QucoyCVVn0rvlMBUAsLts1Lu/psqbTmYHTZs7A
-   Q==;
-X-CSE-ConnectionGUID: IP11a3dsQsWlDy+ti5tVSA==
-X-CSE-MsgGUID: nH5cbiWeQBu6OgTBD8dmEw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11771"; a="88765228"
-X-IronPort-AV: E=Sophos;i="6.23,207,1770624000"; 
-   d="scan'208";a="88765228"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Apr 2026 18:00:22 -0700
-X-CSE-ConnectionGUID: vGEOVgUIQtiCWTwJKfbZKQ==
-X-CSE-MsgGUID: rWWdLMylRaWrqFLsB6Bs0g==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,207,1770624000"; 
-   d="scan'208";a="239452397"
-Received: from lkp-server01.sh.intel.com (HELO aa799cca880d) ([10.239.97.150])
-  by orviesa005.jf.intel.com with ESMTP; 29 Apr 2026 18:00:20 -0700
-Received: from kbuild by aa799cca880d with local (Exim 4.98.2)
-	(envelope-from <lkp@intel.com>)
-	id 1wIFlI-00000000BkG-3VXr;
-	Thu, 30 Apr 2026 01:00:16 +0000
-Date: Thu, 30 Apr 2026 08:59:54 +0800
-From: kernel test robot <lkp@intel.com>
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulfh@kernel.org>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: Switch to use pm_ptr() for bus.c
-Message-ID: <202604300815.ATCbIpPU-lkp@intel.com>
-References: <1776739053-120472-1-git-send-email-shawn.lin@rock-chips.com>
+	dkim=pass (2048-bit key) header.d=morsemicro-com.20251104.gappssmtp.com header.i=@morsemicro-com.20251104.gappssmtp.com header.b="zPkTQ+bX"
+Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-82735a41920so197485b3a.2
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Apr 2026 21:58:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=morsemicro-com.20251104.gappssmtp.com; s=20251104; t=1777525105; x=1778129905; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=XP095ZhYw2b8rtfTp1Te2wsBKkizx72gLLNn2a1UW1A=;
+        b=zPkTQ+bX/bbSzyFDp04IDLbdEMDQoIg6B/4YFAyvhHasCL7x6UVsxDgRcv0SFU6iFw
+         4ZMFP8udO85YbnluzmRF7r2Tzh3R5pgmbc/H6vpH2v+iltK5FiKvlQ64HCHKB2P1qYbP
+         eR58EiPhE3bZUeQ0buTIuyyc7hZPaTZvIocyLr6p/vZJhYLf2OJGgSiciroQoczxg17b
+         5zHk94U+dstDYvVZUGRaB7LMmCjpmeIFgXSDUBLY7opXF7p4C4TvaYdH8k6FkHEp5pVh
+         T4BT6MRFTB5zu8IVKOZjHq/2GyrrGcZaK0E3gwsdKWdxwAb9tFj+ebQeAKpjXLJX+c2T
+         Lj4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777525105; x=1778129905;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=XP095ZhYw2b8rtfTp1Te2wsBKkizx72gLLNn2a1UW1A=;
+        b=f7V/9Bbue4NJFm1fGNssKCSqpp4pqvQyBnWG50DKT9KMQGHKIRQ9nEKFM0SgDpWIpg
+         INQTcv6ovndH+mvnC+avJEUGDvc/aOPKQ8zvR8aCBOqZ8UOGncK5N0WrCMuSxLFvdSMh
+         sS0E5u+ueVMlk0wBO2/Qxa1qXkNsCJZ58tS1QEVszRHw0OvP0b+0ap7aN1dFhzWWiMRE
+         qte2jsH4/HAa82gRY1KFxsAO70py9UAZNQEaUJrO0se/+b7tqPvKMM2bdsADgqHzt/6D
+         ZT7GH0jGC17MEHeNimfAQgLALhftGEN2r2S//ZhrT1dGmC1J07DQqRV2osIwTvGL5Fdp
+         Ieww==
+X-Forwarded-Encrypted: i=1; AFNElJ+rSTRv3toB5BnLyvxEPI/TpI/zXoSwgwuItoiokfZUXO7dOkdNSae896ad/bCWJ7DB8IajjHE3U5E=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzMleCGqe1DejvHWAV7ojH+2toPfhsqvoKvJF43GdWA0RMKioE/
+	Ks+bTuZAXwoyPPZ84FGj41MTpvfrn/JrSJ+5/JwKvMTJQWNinyKPFlHcege6q2wQqKM=
+X-Gm-Gg: AeBDiettwpxgNVTvhJoX2wYQBxeFL4oStdNeDPOQ90bJU3DTxJ7WXfOmR5gpMoKJG4P
+	IgET64iE2A47qVZJstJft3rGhNCQlLglOB9lGR/V+qIied+40ViIrrqeyYsKts33YDMM94QnnKA
+	hZJ+q346FnqXyXojW3XWpQVM/iCvxtEKmFIKa/aVekRHzPex4JNh5t5Vo/bFYxuWGFpoqsORsey
+	ncbtvJwzzJR8+d/CFCyTqzrv0eGRQ9qsXg7XmB34U39m6UsyqC0OqCDhX5IRWrQXXtliGAR9AaR
+	L7Os9Hf4PZk7jtnUZAjyRz9GKRkdptzAaPLUs3oijh0xYbgRpuUxlqd9mb63oUiGNiiJ/orrzfK
+	DKzK7+YhSbbwdeX1nApT/c0CeQCDJv/sm+eUdWcWDtAsHPrDzrkAJPYQo1M17KDWV1J2RMo+oOf
+	cvnOSiE8h/8xTCXBDiE94DcL/PYi9tuLZ1B7xIxf3FSv4qhdwWauDWHrulho+mjFBzpHnrxVt8a
+	OJdUmZKExaOeNT232uHzZgBrvzXaJPo3qirKrUZfw==
+X-Received: by 2002:a05:6a00:b605:b0:82f:453e:3863 with SMTP id d2e1a72fcca58-834fdbaca42mr1653172b3a.22.1777525105512;
+        Wed, 29 Apr 2026 21:58:25 -0700 (PDT)
+Received: from mma-H9MHD44.lan (60-242-93-14.static.tpgi.com.au. [60.242.93.14])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-834ed80df96sm3595073b3a.54.2026.04.29.21.58.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 29 Apr 2026 21:58:25 -0700 (PDT)
+From: Lachlan Hodges <lachlan.hodges@morsemicro.com>
+To: johannes@sipsolutions.net,
+	Ulf Hansson <ulfh@kernel.org>
+Cc: arien.judge@morsemicro.com,
+	dan.callaghan@morsemicro.com,
+	ayman.grais@morsemicro.com,
+	linux-wireless@vger.kernel.org,
+	Lachlan Hodges <lachlan.hodges@morsemicro.com>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH wireless-next v2 21/31] mmc: sdio: add Morse Micro vendor ids
+Date: Thu, 30 Apr 2026 14:55:47 +1000
+Message-ID: <20260430045615.334669-22-lachlan.hodges@morsemicro.com>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20260430045615.334669-1-lachlan.hodges@morsemicro.com>
+References: <20260430045615.334669-1-lachlan.hodges@morsemicro.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1776739053-120472-1-git-send-email-shawn.lin@rock-chips.com>
+Content-Transfer-Encoding: 8bit
 
-Hi Shawn,
+Add the Morse Micro mm81x series vendor ids.
 
-kernel test robot noticed the following build errors:
+Signed-off-by: Lachlan Hodges <lachlan.hodges@morsemicro.com>
+---
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on ulf-hansson-mmc-mirror/next v7.1-rc1 next-20260429]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+v1 -> v2:
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Shawn-Lin/mmc-core-Switch-to-use-pm_ptr-for-bus-c/20260424-085747
-base:   linus/master
-patch link:    https://lore.kernel.org/r/1776739053-120472-1-git-send-email-shawn.lin%40rock-chips.com
-patch subject: [PATCH] mmc: core: Switch to use pm_ptr() for bus.c
-config: arm64-randconfig-004-20260430 (https://download.01.org/0day-ci/archive/20260430/202604300815.ATCbIpPU-lkp@intel.com/config)
-compiler: clang version 23.0.0git (https://github.com/llvm/llvm-project 5bac06718f502014fade905512f1d26d578a18f3)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260430/202604300815.ATCbIpPU-lkp@intel.com/reproduce)
+- Use a single VENDOR_ID
+- Drop B2 chip which is not needed
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202604300815.ATCbIpPU-lkp@intel.com/
+Ulf, a mistake was made in v1 [1] listing multiple vendor IDs instead
+of a single vendor ID and the subsequent device IDs. As for why
+the series is structured as a series of singular patches is due to
+how wireless driver submissions are as per [2] to simplify review
+due to the size. The final submission will be sent as a pull request
+with all driver files as a single commit and this SDIO commit
+beforehand going through the wireless tree once you have acked.
 
-All errors (new ones prefixed by >>):
+[1] https://lore.kernel.org/linux-wireless/CAPDyKFp6dhmpkMCs=ejYTpR9oNbNz0urtFD2HTvRwOp2Y7H3DA@mail.gmail.com/
+[2] https://wireless.docs.kernel.org/en/latest/en/developers/documentation/submittingpatches.html#new-driver
 
->> drivers/mmc/core/bus.c:169:26: error: called object type 'void *' is not a function or function pointer
-     169 |         ret = pm_generic_suspend(dev);
-         |               ~~~~~~~~~~~~~~~~~~^
-   drivers/mmc/core/bus.c:175:20: error: called object type 'void *' is not a function or function pointer
-     175 |                 pm_generic_resume(dev);
-         |                 ~~~~~~~~~~~~~~~~~^
-   drivers/mmc/core/bus.c:191:25: error: called object type 'void *' is not a function or function pointer
-     191 |         ret = pm_generic_resume(dev);
-         |               ~~~~~~~~~~~~~~~~~^
-   3 errors generated.
+---
+ include/linux/mmc/sdio_ids.h | 3 +++
+ 1 file changed, 3 insertions(+)
 
-
-vim +169 drivers/mmc/core/bus.c
-
-7628774851751e Ulf Hansson     2013-06-10  162  
-32d317c60e56c2 Chuanxiao Dong  2012-04-11  163  static int mmc_bus_suspend(struct device *dev)
-4101c16a910b15 Pierre Ossman   2007-05-19  164  {
-265cdc900ce93c Andy Shevchenko 2010-09-17  165  	struct mmc_card *card = mmc_dev_to_card(dev);
-986892ca78eedd Ulf Hansson     2013-06-10  166  	struct mmc_host *host = card->host;
-986892ca78eedd Ulf Hansson     2013-06-10  167  	int ret;
-4101c16a910b15 Pierre Ossman   2007-05-19  168  
-0967edc6ef5c3c Ulf Hansson     2014-10-06 @169  	ret = pm_generic_suspend(dev);
-986892ca78eedd Ulf Hansson     2013-06-10  170  	if (ret)
-986892ca78eedd Ulf Hansson     2013-06-10  171  		return ret;
-986892ca78eedd Ulf Hansson     2013-06-10  172  
-986892ca78eedd Ulf Hansson     2013-06-10  173  	ret = host->bus_ops->suspend(host);
-ebe7dd45cf49e3 Adrian Hunter   2017-11-21  174  	if (ret)
-ebe7dd45cf49e3 Adrian Hunter   2017-11-21  175  		pm_generic_resume(dev);
-ebe7dd45cf49e3 Adrian Hunter   2017-11-21  176  
-4101c16a910b15 Pierre Ossman   2007-05-19  177  	return ret;
-4101c16a910b15 Pierre Ossman   2007-05-19  178  }
-4101c16a910b15 Pierre Ossman   2007-05-19  179  
-
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index 0685dd717e85..111cb1758830 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -117,6 +117,9 @@
+ #define SDIO_VENDOR_ID_MICROCHIP_WILC		0x0296
+ #define SDIO_DEVICE_ID_MICROCHIP_WILC1000	0x5347
+ 
++#define SDIO_VENDOR_ID_MORSEMICRO		0x325b
++#define SDIO_DEVICE_ID_MORSEMICRO_MM81XB2	0x0809
++
+ #define SDIO_VENDOR_ID_NXP			0x0471
+ #define SDIO_DEVICE_ID_NXP_IW61X		0x0205
+ 
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.43.0
+
