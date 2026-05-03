@@ -1,65 +1,66 @@
-Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
+Received: from mail-pf1-f178.google.com (mail-pf1-f178.google.com [209.85.210.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6B0C38239C
-	for <linux-mmc@vger.kernel.org>; Sun,  3 May 2026 08:35:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E157C381AE7
+	for <linux-mmc@vger.kernel.org>; Sun,  3 May 2026 08:35:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777797339; cv=none; b=UtnGWnCdK+Hkwui19vOudh7qpVZ5sdH8nfWYC+GKWzgeYZy/3taAxuvcN2yU4wTVPIvx2cNYtl/okpLbaSWcFUn9YAOVyHJ25XqN9Wa5EQOGJ/+/D0+Utjowhp45l178ggxA8s8at0yy8Xlq08WNFy/WXwGiUlfx8frw19TMWBE=
+	t=1777797342; cv=none; b=kTUCgv/d/r8ZNYfoH3Uzs2phD1+d0kfSdhVvICHR5nzItN/UZ2qd+9gq57EheeCcwK7OKVqG89CcL3K/6Gc5shJ2IhYOSOYZs3nKMHqwKqP2M8+uzVTvKDPc71sDU2gpLHWsvcCXFnLEzbYB4UfJRYTU/gjWQqH9rH0LiG2x0uw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777797339; c=relaxed/simple;
-	bh=rfeXZdm07QpfRxa1YAJWSQ8/hfqZ6m8JWTZdMmcfNHc=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=BtjJpUGtqjQPCoQwDaf0BOqnpuaVzkjmL4pPI79SHtVqQfaIYvay1f+R+hDD0QbfLdEZnQj4lG0Gk3zaOrPsBg1FswHzjNIMa3EvJrrIgxJHOqyUyrayxuN9Q2m3k8OrqQsjCmG5B2++J65Et+W/rQdfngDCTKoIFE7xJiXqniw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BG2giRhO; arc=none smtp.client-ip=209.85.210.170
+	s=arc-20240116; t=1777797342; c=relaxed/simple;
+	bh=ER0AC/Xnj+ibEkD0vpGT/fnWFxVKVDSlU3bLlFczBTE=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=lp1AEzXgVXDGQrdTeIosAG8uDTmvo8J8iBGqIHlPQOF+hQSptsp7FRHwRI+mF0gx5TetO6ofXGVZWvCBHFiqIkpRXIS9DyynNIFiK4AMgg/3zcO/irzZOqZzmGTNRIkegQxKFXt0HzaIImuRsFydYH3OAXx+sdJ62R7OuO7W+5E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=c557duyU; arc=none smtp.client-ip=209.85.210.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BG2giRhO"
-Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-824c9da9928so1350080b3a.3
-        for <linux-mmc@vger.kernel.org>; Sun, 03 May 2026 01:35:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="c557duyU"
+Received: by mail-pf1-f178.google.com with SMTP id d2e1a72fcca58-83537a80ab6so356186b3a.1
+        for <linux-mmc@vger.kernel.org>; Sun, 03 May 2026 01:35:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1777797336; x=1778402136; darn=vger.kernel.org;
-        h=cc:to:content-transfer-encoding:mime-version:message-id:date
-         :subject:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=/6FZTn1uDz0N1c7PIwvbk3rD0JkNh6yzne9kAdOtgfI=;
-        b=BG2giRhOI3d4fnebS+sP7Jo8TbzTvdlrECrfQMacmrJL1VtR2E1tZ4KAzVxSsTzp48
-         n9HvHooY+3cir2hlxWZm3in2kps56FwvjDqc7kjsXdjeK9hTnudSKx9p0QFYfbu+MzuS
-         aY1TDZhD5LA/G3+RTMZUVzxuN9MjsGCTv4nP+18h7iOL+5Hgq0Vuub6K/wDWsnruKmpa
-         oPcQA3EylIDEg+UqsUebtuFChAD+DEoR7JgyOPHZr/exS4cGllgqWpoaWbhTgpr0DVMy
-         pFYC/QIYk7qqAjvJjXo889DEbrkXs8i/J8mMWt4TnA7W5s3DUdXW9oVzvD6kHCuoMkgH
-         pxWg==
+        d=gmail.com; s=20251104; t=1777797340; x=1778402140; darn=vger.kernel.org;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=vAyKAjmkX6PvmXkxrw5YnaLQ/4sPrlWKfDdfdwHLY1Y=;
+        b=c557duyUE3KM8aRDLMOnfvDKZnxBC6cIPOAch9v+W2os7tDz+Ut7OYp3NVNTmyfbeP
+         oS9HnfsXwxvfKOE0A5OgF3Yg71iixjyWms809NhP8Z5u9erIQ8u/fHAm8NBpe7FQ001S
+         Y4BI+I7+QGqdeC99of6LfXOqJmLVbkUgPrZC3hF5UHG08hL4gJ8f7X428Nt0xlKDIRgc
+         HUF2DfS3nPCdgbv+i+yFBc+gkg5o5e+Gmb00aennBreDcaqMn/GCOhmqG1uhpIpz+xdE
+         XWMT9kvSrjVMtPQ/tXvpH2dPCfwiIAuh9gklNQl0iNA6sOWS5r2nO4TmWZLELYsq1i6d
+         3lNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777797336; x=1778402136;
-        h=cc:to:content-transfer-encoding:mime-version:message-id:date
-         :subject:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/6FZTn1uDz0N1c7PIwvbk3rD0JkNh6yzne9kAdOtgfI=;
-        b=h01swtaeGsWOCzMoa5IDb4OGaJZ/gbbf9jAONRIEKmRkzwlzQgu/m/b0Fomq1NCn7K
-         ink76KtOVwR5beioVfieVGdgkmVnkXhn7VL3CkqdwjL8TsY9ZsB+l+5NBtf3QkAkYe5p
-         vSPAkoI5DiU6z0hsLfjDCfigSNHZq93tQVimPEWeUt+5nvdV1/WwLu+tvLDDCgI8+R6T
-         C0h3Zguemz/nsWbYzpk7ATtUdsRQY4J0CDudECGqyNMBqKDcv1BmG13z9PZCr7dSXx1B
-         SWwGw0mqk6inaVI2q0BYfGAbez/UQxB0W9tKn0VplgM3dSG08OXb6QQDLt6ZDw4sUv/Q
-         hUhw==
-X-Gm-Message-State: AOJu0YyTgPDEUTrYAWQHcVL2uJF5p9f2oQsZD5vRFwAJTn9Hxwt7jU40
-	18kJXmXue6U+QFywPtq/jR8GQfTFTWkMHjbMOTDqAFf6gbozu49PxfmI
-X-Gm-Gg: AeBDievp0MRLGJgnjpr7V7nvS555m7IPPtXRm1N8TnzB3c0OXWkLRlZeHvepxiJse/T
-	6nAzT7cE+KMINoKlzblnsl0ECTmSYyDQdYsa+/4YWcxkAr50AfBvRSSD1uhfdWCFmtViaJLST2P
-	87aJHiGi9RKwd0ONG4wOO6/h8rK10hRVD+RFHQPcoFKMuWoVi1UIGxE5isUUPOlLa3R7fV6Wiqh
-	ieG7jtuIKCKO2SUp7uoUORbSznSgbODLbmAkSC4g6jm/U5cjVJFg1KkJM9hCWYnx2Edy7WKtfWF
-	+6/75siDlq0npbJupwyT5NYq5FWCW6JySw1YfOFng2zhcd6qfyUwspoV3jemMHCETIAwDDtnlUx
-	DjtjBPmD3lki1wPX2cV76WMQUII23N8AhTtj1N8f13aS2NhIzpcQouRyoL0afce4hZjteF7Fc1P
-	orH2O1fqXn1dOF9D8vMxda5HPgNi7r9Kd/lCZxbtvKrxrH1QXIgl5PlZ0=
-X-Received: by 2002:a05:6a00:a88e:b0:82d:556b:7a01 with SMTP id d2e1a72fcca58-8352d164430mr5171642b3a.16.1777797336292;
-        Sun, 03 May 2026 01:35:36 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1777797340; x=1778402140;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=vAyKAjmkX6PvmXkxrw5YnaLQ/4sPrlWKfDdfdwHLY1Y=;
+        b=eMxoIvRywq162IVzGM9Vr40lOROqSf4cpwfqLN4guzBr5bhmNbMW+cZ2YcD9P+VaTY
+         epiTCqsjprQVnJvyrvrKRiMCcrSFTjdmoyc8M+vOohWk/mt6/TEG15SMEkt64u1Q2pRw
+         4nC0g3i70eTXfSv3pkeXwjeAcl4LpHSppLZaXGr68d1I+cCoYUtdIpwsN38tRX3vAz5e
+         uBGVGB8y+VsUfIxmbMAN0ahMDKuYdxyqI5tbicPCvNXvuGrTP4ySt3IhC2qvGYSPOwq1
+         H/5JvyjzHVPsGxmLqfYbdz93NHAmyAZ9lsRuFfH6iKd7IGTAxcy14zvfF3YN28nFec/w
+         oaig==
+X-Gm-Message-State: AOJu0YxaxAovxM5YssE5LujlqpkfoffKBf1o6JI3nZ4mTkxlOwzUIvK8
+	PPm07z1LPPn0tT4zae+cZlMWJPnU07Yn0xS5NqSdoDUPXWPexEmRbUs1
+X-Gm-Gg: AeBDiesLECZzNdEnDSYDpPcnVXmS9VrGbyf0CyRGghjGnVg8Dk8MHmv5kbbb/NdWh+E
+	evdRhtmnnXbnChfHnvRB7CxorGDoh+uocs7o314RWp7W3LQDxvsToGozii7F07Lz0gPLU3Xy1yi
+	neXus8RrvSgJNcqnMI7nZe1ryLhuK+xO5cYwbtekOC/ZDGGNJPPstbMh5mX4VeiPUEW4AiHAzs6
+	w8r4X21oyUcEqdq3kdEbKm6ClCpCTKqFotn79llgYWFPdN4ZzzKkLT90P581qtl8SZJNq+0w85b
+	BVlnx8VN2IpPHjfQxa/NH9CA3jn166Hc3vgY/gvwr6r/jL7Ed14zmxWg0Ib9S/+S5fkI/uudSLi
+	tt14GblE2o0Yzm1YkvP8jyq7ER7DkCwZ7ZFZDq7DJLmE50/kv1xELWeRvTRQKR6dBs3ZXRmYR8d
+	sILvd2Hko9CNL5J9NMHjB0z8PGniQ++huCQ8Ax5BgbvsZSUj2nvtNYToc=
+X-Received: by 2002:a05:6a00:14ca:b0:82f:721f:10ea with SMTP id d2e1a72fcca58-8352d1bf331mr5683330b3a.18.1777797340207;
+        Sun, 03 May 2026 01:35:40 -0700 (PDT)
 Received: from Black-Pearl.localdomain ([60.243.224.75])
-        by smtp.googlemail.com with ESMTPSA id d2e1a72fcca58-835446b1b0asm1578142b3a.8.2026.05.03.01.35.32
+        by smtp.googlemail.com with ESMTPSA id d2e1a72fcca58-835446b1b0asm1578142b3a.8.2026.05.03.01.35.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 03 May 2026 01:35:35 -0700 (PDT)
+        Sun, 03 May 2026 01:35:39 -0700 (PDT)
 From: Charan Pedumuru <charan.pedumuru@gmail.com>
-Subject: [PATCH v2 0/2] dt-bindings: mmc: st,sdhci: convert
- STMicroelectronics SDHCI-ST MMC/SD Controller controller binding to YAML
-Date: Sun, 03 May 2026 08:35:28 +0000
-Message-Id: <20260503-st-mmc-v2-0-11ae3216d2ce@gmail.com>
+Date: Sun, 03 May 2026 08:35:29 +0000
+Subject: [PATCH v2 1/2] arm: dts: st: align node patterns with established
+ convention
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,10 +69,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIANAI92kC/zXMSw7CIBSF4a00dyyGZxVH7sN0QCi0N5HSQEM0D
- XsXaxz+JyffDtkldBlu3Q7JFcwYlxb81IGdzTI5gmNr4JT3VPALyRsJwRKraW9Grby/CmjnNTm
- PrwN6DK1nzFtM78Mt7Lv+CEn1nyiMMCKtkoIzK5RQ9ykYfJ5tDDDUWj93hWQOnAAAAA==
-X-Change-ID: 20260327-st-mmc-c906ad95ff83
+Message-Id: <20260503-st-mmc-v2-1-11ae3216d2ce@gmail.com>
+References: <20260503-st-mmc-v2-0-11ae3216d2ce@gmail.com>
+In-Reply-To: <20260503-st-mmc-v2-0-11ae3216d2ce@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
  Krzysztof Kozlowski <krzk+dt@kernel.org>, 
  Conor Dooley <conor+dt@kernel.org>, 
@@ -82,38 +82,36 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  Charan Pedumuru <charan.pedumuru@gmail.com>
 X-Mailer: b4 0.15.2
 
-This patch series converts the legacy text-based Device Tree binding for
-STMicroelectronics SDHCI-ST MMC/SD controller to DT schema (YAML) format.
-
-Note:
-The patch "dt-bindings: mmc: st,sdhci: convert to DT schema"
-depends on the patch "arm: dts: st: align node patterns with established
-convention". If the DT schema patch is applied before the DTS
-cleanup patch, `dtbs_check` will fail due to the presence of the removed
-properties in the existing DTS.
+Update ST MMC DTS node patterns to match established convention.
 
 Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
 ---
-Changes in v2:
-- Fix node name in DTS for the MMC to match with the estableshed convention.
-- st,sdhci: drop unnecessary properties, modify "reg", "reg-names" and
-  "clock-names" properties, include an allOf with $ref to mmc-controller.
-- Link to v1: https://patch.msgid.link/20260409-st-mmc-v1-1-4c54321c3535@gmail.com
+ arch/arm/boot/dts/st/stih407-family.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
----
-Charan Pedumuru (2):
-      arm: dts: st: align node patterns with established convention
-      dt-bindings: mmc: st,sdhci: convert to DT schema
+diff --git a/arch/arm/boot/dts/st/stih407-family.dtsi b/arch/arm/boot/dts/st/stih407-family.dtsi
+index 3e6a0542e3ae..08acba209c56 100644
+--- a/arch/arm/boot/dts/st/stih407-family.dtsi
++++ b/arch/arm/boot/dts/st/stih407-family.dtsi
+@@ -596,7 +596,7 @@ spi@9542000 {
+ 			status = "disabled";
+ 		};
+ 
+-		mmc0: sdhci@9060000 {
++		mmc0: mmc@9060000 {
+ 			compatible = "st,sdhci-stih407", "st,sdhci";
+ 			status = "disabled";
+ 			reg = <0x09060000 0x7ff>, <0x9061008 0x20>;
+@@ -611,7 +611,7 @@ mmc0: sdhci@9060000 {
+ 			bus-width = <8>;
+ 		};
+ 
+-		mmc1: sdhci@9080000 {
++		mmc1: mmc@9080000 {
+ 			compatible = "st,sdhci-stih407", "st,sdhci";
+ 			status = "disabled";
+ 			reg = <0x09080000 0x7ff>;
 
- Documentation/devicetree/bindings/mmc/sdhci-st.txt | 110 ---------------------
- .../devicetree/bindings/mmc/st,sdhci.yaml          |  93 +++++++++++++++++
- arch/arm/boot/dts/st/stih407-family.dtsi           |   4 +-
- 3 files changed, 95 insertions(+), 112 deletions(-)
----
-base-commit: cf2cd8efd046c561191b8541d32a8bfe845bf06b
-change-id: 20260327-st-mmc-c906ad95ff83
-
-Best regards,
---  
-Charan Pedumuru <charan.pedumuru@gmail.com>
+-- 
+2.54.0
 
