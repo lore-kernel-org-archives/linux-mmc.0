@@ -1,197 +1,119 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59DD941B35F
-	for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2026 13:13:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777554810; cv=pass; b=AU1P/f7DQY6DB4t8oW13gMNuogCFrSfnWY5L49h54e1m5Th3tbh3YWNOYhxhNCOdgkoWfuVQ6G8GhyPEwq28QLBqmEVzvS7dyRIo+zoKUb2TRmON5xeln7nMcM+oxYj3Yzsih3TOKNfPo1BROGDqk7DC5UbdKJ+Xg73if83eCsw=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777554810; c=relaxed/simple;
-	bh=uOBwc+Vl17MdUv77w9tKQsD4/qPdD6T614WQexS4A50=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ny5mZHmrFv09t7UlGQVdIDz0m8my2SQrLvCe3SzKZdMMaJNPONM6H4DlvlZ7COjF8AyNsB32awv/2CLL/mL/Q/6jbqfk46MUtMmcqm5C5iVHDZBSNTedWJjeEpsx5PLVZIH7T2G/nOOKP8/sPtOkuWgLlZNeEmLetJ6k1PYzCQE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Wv4+57bH; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=FwcyrArf; arc=pass smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6B0C38239C
+	for <linux-mmc@vger.kernel.org>; Sun,  3 May 2026 08:35:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777797339; cv=none; b=UtnGWnCdK+Hkwui19vOudh7qpVZ5sdH8nfWYC+GKWzgeYZy/3taAxuvcN2yU4wTVPIvx2cNYtl/okpLbaSWcFUn9YAOVyHJ25XqN9Wa5EQOGJ/+/D0+Utjowhp45l178ggxA8s8at0yy8Xlq08WNFy/WXwGiUlfx8frw19TMWBE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777797339; c=relaxed/simple;
+	bh=rfeXZdm07QpfRxa1YAJWSQ8/hfqZ6m8JWTZdMmcfNHc=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=BtjJpUGtqjQPCoQwDaf0BOqnpuaVzkjmL4pPI79SHtVqQfaIYvay1f+R+hDD0QbfLdEZnQj4lG0Gk3zaOrPsBg1FswHzjNIMa3EvJrrIgxJHOqyUyrayxuN9Q2m3k8OrqQsjCmG5B2++J65Et+W/rQdfngDCTKoIFE7xJiXqniw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BG2giRhO; arc=none smtp.client-ip=209.85.210.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Wv4+57bH";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="FwcyrArf"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 63UAN7311276563
-	for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2026 13:13:27 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	TouSduUFbw2zfEHACuqETKI0j08FgYQyPnYjBVsGXhs=; b=Wv4+57bHKS59t2pn
-	l788D+Bh3SNVywmZLGOHfFpV5gix7UmN+Hbdo/rkaV907faoB34D6MoaRtws6I/F
-	v30P+s1u0dEaN27jtCCPCVVP+r7L4EEy0FvbN7cRN35CSHU9XxqTb32ZATl5T86t
-	UrmjKIcb1J8hNdRzni/k+tZLpRqGXhoJRr92bkpFOWRdgTmqxOYvkyjH1cO6GXnx
-	iRe4KV/oP4i6FXY0oe260zuknkGUSwIURJlJbrNK3gxPYKc7iPfxfqQqhZFkUzNG
-	0yB8b1v+rCFij5Gpwopcwf+oxHOaJvlbverrXg4+0dPQ0rN+GBwkFpQ3zascOloc
-	t7rLFA==
-Received: from mail-yw1-f200.google.com (mail-yw1-f200.google.com [209.85.128.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4dv2cq1jd5-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2026 13:13:27 +0000 (GMT)
-Received: by mail-yw1-f200.google.com with SMTP id 00721157ae682-7bd5c42192aso4964947b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Apr 2026 06:13:27 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1777554807; cv=none;
-        d=google.com; s=arc-20240605;
-        b=iTPzIx0Vwrebq4lctLvND4tnHqgl4Hraa9+Dwc/Z9ak2BCHEzTGnMGTAgB/8zGQJnp
-         SRXLU2Mxorm+XhBlu2KeXhEhzK2KgRWSBeIJQGNd9/FJBlXPhaXn9qRr1YUPivbd7MhY
-         wRpIlsQ/7DS8QAvav7Xoj4SgGpMMALgBxyFPqImwg75ePrkuPdIQQiP1DnSFiXO6M2RS
-         wuCnTRiVlbIB9bsiVRctO2vs2h3df7pNEDZ40tH1xOTsq6SaBOAnRXdGt4U+pZWgGLzE
-         /zivpwp+MFV2CcjWnDuHfaDgr730mlcQxAXA2rRwQEuuDwr0GcQzf6fXX2FKWaZbjIne
-         QRBg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=TouSduUFbw2zfEHACuqETKI0j08FgYQyPnYjBVsGXhs=;
-        fh=1vCm0dW2QvwfqcalPWstSJ20Ka76sjq9ot61Xac84CE=;
-        b=H8b2aNufLr/gu3DL+No/dRUdRrRCWdv7aFOh8LqWclFuY9/c7n5dvcrIf9ee4oa+GL
-         fcPKrrYF6BxaY/cesqnsoTeFTzeVmY+dPyx5d//bBVdtQwTKOZ5AIwVSxf+aJnysrvDk
-         M3QUd8VzBLBd5O9EtcbIA0H77ljko99i6bLU9A4xNUhgJsPpWC4QRHc+8WYGic9cWHKH
-         iJ4QQLGHF7SPFjSv/7kLP1zOu/gLJC/Qrz/G2Apr9icMynmoddXDwenN8e9qysKdzY+F
-         5mjDXQAFMyh1iIlba4HIwVsvYLcT1P7t8shSCpkd9Ea8o+TNhUm5gnqBTMSEcwvve0LT
-         16WQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BG2giRhO"
+Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-824c9da9928so1350080b3a.3
+        for <linux-mmc@vger.kernel.org>; Sun, 03 May 2026 01:35:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1777554807; x=1778159607; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=TouSduUFbw2zfEHACuqETKI0j08FgYQyPnYjBVsGXhs=;
-        b=FwcyrArfxVUEmUhB3u8Cd1zaLyprWFV/8QsAGr64S3i1OKV1YWT5ge6d65LkrBgQtj
-         i7VvtXz4aCnaUNAKiQA9yIRIXzjfEDIZTvDcxoq+VaoSJx7Z0sngsyGGBstj8Zvk3Feh
-         kPWTRxJ3uWdlF7uGPCQIIJ9C1SFAWMCMuvsid+MwkkbpU6eefPGaUbvLCRJjnsjgxu0x
-         3lLI9mQiZy3HPWt8t6c/kcOEehIRou+EqkUsyxNXO1QEQ+p+8pLFv4Pyjak72Qz8q/d0
-         VkOwBvmM06nD8NE6SpVnDntC1KIyiiFErPPHhQmuZfcxGiVvQiTSqraGm/aAFjVkqurK
-         oXhQ==
+        d=gmail.com; s=20251104; t=1777797336; x=1778402136; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=/6FZTn1uDz0N1c7PIwvbk3rD0JkNh6yzne9kAdOtgfI=;
+        b=BG2giRhOI3d4fnebS+sP7Jo8TbzTvdlrECrfQMacmrJL1VtR2E1tZ4KAzVxSsTzp48
+         n9HvHooY+3cir2hlxWZm3in2kps56FwvjDqc7kjsXdjeK9hTnudSKx9p0QFYfbu+MzuS
+         aY1TDZhD5LA/G3+RTMZUVzxuN9MjsGCTv4nP+18h7iOL+5Hgq0Vuub6K/wDWsnruKmpa
+         oPcQA3EylIDEg+UqsUebtuFChAD+DEoR7JgyOPHZr/exS4cGllgqWpoaWbhTgpr0DVMy
+         pFYC/QIYk7qqAjvJjXo889DEbrkXs8i/J8mMWt4TnA7W5s3DUdXW9oVzvD6kHCuoMkgH
+         pxWg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1777554807; x=1778159607;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=TouSduUFbw2zfEHACuqETKI0j08FgYQyPnYjBVsGXhs=;
-        b=MAO5IJZTnhs0gVreCTRT/5FmI/EmEpMgt7YqU+rNUf2RGd6kQwSvI0f0kOTr6tfmu2
-         em2/sETYJAfH8ETPhZVErDaVpFA9xYKyH76gS1GmuJVdocIJIg2dSnqVFGxy97ksx7TJ
-         e5ikHQOf8wEtWwTy0jTjtJHrAi37+MVIiKfiHDg9uvB70fv9WROr3hv5NV2diPpPr4y0
-         3v8s6/OaDhz/uh9Nud0b1YHaR0BI+kABYRuvnqLm/kqBCSTSpQfVkOBziWd3ORIBIUPj
-         V05RWQFC9UfvGPnaWT/6ocIC3fGCwbIZdHDBDNvGQ2ZpOqkZBLyiuXyJbz00cJBdFOyl
-         MV9Q==
-X-Forwarded-Encrypted: i=1; AFNElJ/hwr7OW+/sQOLPr5eXNfPNpvVOAOjAN1JOzngbdPXm0Koh5GAbSohRV6gTnIH5/dN1xp2UIkPYwxY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw3jyWRiQvGmOzZ8Eg3myq6kgFfRXWMTs6jPLaJd9RUJQgtyflK
-	J3uXN1uaIu3YD0+PTL6KNxxDVRcCYq1MQyAz7qovAmxguIkeWkXp5c7Ytmoz7dbSkIZf8l1REoA
-	CEu4W8JaE5cncJFTBIsez0Z0oFIln1o97OjGQTeRfUJF65TnvhUiSG4Kj97KNPXMrajTKiyWIlh
-	eq8VnFn7HM5pq20Ztlpze13oB7IciGweBkk6ge5g==
-X-Gm-Gg: AeBDiesco2np6g/pK7PErLCbtehKbM+6I5ksdSjb/D4PyFrXK0uWE2ATAzGyLKh3toN
-	4E4VJ9NmCmQaYb4V9wPaeTNlfZzXxnt1SXnKFvp1Juam14cQSxipdi5qyMSMZRLgsk93Wtbv1vl
-	O5a81xNeO6q02LXBb9hhCnm07lAA5WKcAUq3sJFtuVAB3AgEcykTDzcjwxdg5DeAsg/QUoIl67k
-	9M2M/2If1FTiRIm+K05XJccV09hErw1BKPWgNRkP9sqEAhOqjA=
-X-Received: by 2002:a05:690e:4299:10b0:650:ece:89fd with SMTP id 956f58d0204a3-65c1b0a4185mr1181533d50.27.1777554806677;
-        Thu, 30 Apr 2026 06:13:26 -0700 (PDT)
-X-Received: by 2002:a05:690e:4299:10b0:650:ece:89fd with SMTP id
- 956f58d0204a3-65c1b0a4185mr1181471d50.27.1777554806063; Thu, 30 Apr 2026
- 06:13:26 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1777797336; x=1778402136;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/6FZTn1uDz0N1c7PIwvbk3rD0JkNh6yzne9kAdOtgfI=;
+        b=h01swtaeGsWOCzMoa5IDb4OGaJZ/gbbf9jAONRIEKmRkzwlzQgu/m/b0Fomq1NCn7K
+         ink76KtOVwR5beioVfieVGdgkmVnkXhn7VL3CkqdwjL8TsY9ZsB+l+5NBtf3QkAkYe5p
+         vSPAkoI5DiU6z0hsLfjDCfigSNHZq93tQVimPEWeUt+5nvdV1/WwLu+tvLDDCgI8+R6T
+         C0h3Zguemz/nsWbYzpk7ATtUdsRQY4J0CDudECGqyNMBqKDcv1BmG13z9PZCr7dSXx1B
+         SWwGw0mqk6inaVI2q0BYfGAbez/UQxB0W9tKn0VplgM3dSG08OXb6QQDLt6ZDw4sUv/Q
+         hUhw==
+X-Gm-Message-State: AOJu0YyTgPDEUTrYAWQHcVL2uJF5p9f2oQsZD5vRFwAJTn9Hxwt7jU40
+	18kJXmXue6U+QFywPtq/jR8GQfTFTWkMHjbMOTDqAFf6gbozu49PxfmI
+X-Gm-Gg: AeBDievp0MRLGJgnjpr7V7nvS555m7IPPtXRm1N8TnzB3c0OXWkLRlZeHvepxiJse/T
+	6nAzT7cE+KMINoKlzblnsl0ECTmSYyDQdYsa+/4YWcxkAr50AfBvRSSD1uhfdWCFmtViaJLST2P
+	87aJHiGi9RKwd0ONG4wOO6/h8rK10hRVD+RFHQPcoFKMuWoVi1UIGxE5isUUPOlLa3R7fV6Wiqh
+	ieG7jtuIKCKO2SUp7uoUORbSznSgbODLbmAkSC4g6jm/U5cjVJFg1KkJM9hCWYnx2Edy7WKtfWF
+	+6/75siDlq0npbJupwyT5NYq5FWCW6JySw1YfOFng2zhcd6qfyUwspoV3jemMHCETIAwDDtnlUx
+	DjtjBPmD3lki1wPX2cV76WMQUII23N8AhTtj1N8f13aS2NhIzpcQouRyoL0afce4hZjteF7Fc1P
+	orH2O1fqXn1dOF9D8vMxda5HPgNi7r9Kd/lCZxbtvKrxrH1QXIgl5PlZ0=
+X-Received: by 2002:a05:6a00:a88e:b0:82d:556b:7a01 with SMTP id d2e1a72fcca58-8352d164430mr5171642b3a.16.1777797336292;
+        Sun, 03 May 2026 01:35:36 -0700 (PDT)
+Received: from Black-Pearl.localdomain ([60.243.224.75])
+        by smtp.googlemail.com with ESMTPSA id d2e1a72fcca58-835446b1b0asm1578142b3a.8.2026.05.03.01.35.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 03 May 2026 01:35:35 -0700 (PDT)
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+Subject: [PATCH v2 0/2] dt-bindings: mmc: st,sdhci: convert
+ STMicroelectronics SDHCI-ST MMC/SD Controller controller binding to YAML
+Date: Sun, 03 May 2026 08:35:28 +0000
+Message-Id: <20260503-st-mmc-v2-0-11ae3216d2ce@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260428-block-as-nvmem-v1-0-6ad23e75190a@oss.qualcomm.com>
- <20260428-block-as-nvmem-v1-1-6ad23e75190a@oss.qualcomm.com> <20260430-bird-of-sheer-ampleness-744e7f@quoll>
-In-Reply-To: <20260430-bird-of-sheer-ampleness-744e7f@quoll>
-From: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Date: Thu, 30 Apr 2026 15:13:15 +0200
-X-Gm-Features: AVHnY4I6bR6fdSxJnXBrJdTY4FKOp8Nu9g27U_d0aw_5w0XdML8zMEtBVrvqIXA
-Message-ID: <CAFEp6-25Xad_LT8L-HPpOpXf7j1S=Vew=iSgxEmAHd_on+jkcA@mail.gmail.com>
-Subject: Re: [PATCH 1/9] dt-bindings: mmc: Document support for nvmem-layout
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>, Jens Axboe <axboe@kernel.dk>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jeff Johnson <jjohnson@kernel.org>,
-        Bartosz Golaszewski <brgl@kernel.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
-        Rocky Liao <quic_rjliao@quicinc.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>, Simon Horman <horms@kernel.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-wireless@vger.kernel.org,
-        ath10k@lists.infradead.org, linux-bluetooth@vger.kernel.org,
-        netdev@vger.kernel.org, daniel@makrotopia.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: FfppdP_tdvUt9QeqjRb1gXLSbUs1QQXE
-X-Authority-Analysis: v=2.4 cv=aYRRWxot c=1 sm=1 tr=0 ts=69f35577 cx=c_pps
- a=NMvoxGxYzVyQPkMeJjVPKg==:117 a=IkcTkHD0fZMA:10 a=A5OVakUREuEA:10
- a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=ZpdpYltYx_vBUK5n70dp:22 a=VwQbUJbxAAAA:8 a=Q8QnmAOcOvJ-T5SqZIoA:9
- a=QEXdDO2ut3YA:10 a=kLokIza1BN8a-hAJ3hfR:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNDMwMDEzNSBTYWx0ZWRfX3HZMaSWd6Wkk
- GvCxdkqEfP/wREvDkGg7r10uS7O8vGBSb10S7xI1qXdbkFbzkCoaq9005k3ElxOIx+unW84IiE/
- I8fajdA796roFUiw8uUpW7MSU4TsBQ1ARnULkVOaYDnRVZwrZyeeflsvh6b5axscp8BR+J4lUxv
- fBeT26yOGgIO2qLlVjcQepiuaVjWYNTgsaev1Vqs2TCCxOFS9kKsDhcDrCmqZX1BIHmjfq7F0fC
- c+I3HbTb7RkW8uA01UEmaAcwexai4HsWtY7usfBH0h6b4szjD+J9qU2hMzk14KVYzaDGVS6BU3E
- A5lQjoQ1EBDevLGikMwRdMKF344Su5y8zLINZw2QyW09jDZ2Ob+ZktFT3hJIWRSWUILc/evEr75
- yYLb0aiJIiiKKloJExdJjZNhQUe7HCFG8l34++FbMLOC9ud0XZl5b5j3JFZlBuJbyxlZafdCdri
- jA0vtNPymwaMyvcWwGQ==
-X-Proofpoint-ORIG-GUID: FfppdP_tdvUt9QeqjRb1gXLSbUs1QQXE
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-04-30_04,2026-04-30_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 malwarescore=0 clxscore=1015 phishscore=0 spamscore=0
- priorityscore=1501 lowpriorityscore=0 suspectscore=0 impostorscore=0
- adultscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2604200000
- definitions=main-2604300135
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIANAI92kC/zXMSw7CIBSF4a00dyyGZxVH7sN0QCi0N5HSQEM0D
+ XsXaxz+JyffDtkldBlu3Q7JFcwYlxb81IGdzTI5gmNr4JT3VPALyRsJwRKraW9Grby/CmjnNTm
+ PrwN6DK1nzFtM78Mt7Lv+CEn1nyiMMCKtkoIzK5RQ9ykYfJ5tDDDUWj93hWQOnAAAAA==
+X-Change-ID: 20260327-st-mmc-c906ad95ff83
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, 
+ Peter Griffin <peter.griffin@linaro.org>, 
+ Patrice Chotard <patrice.chotard@foss.st.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ Charan Pedumuru <charan.pedumuru@gmail.com>
+X-Mailer: b4 0.15.2
 
-Hi Krzysztof,
+This patch series converts the legacy text-based Device Tree binding for
+STMicroelectronics SDHCI-ST MMC/SD controller to DT schema (YAML) format.
 
-On Thu, Apr 30, 2026 at 11:59=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.o=
-rg> wrote:
->
-> On Tue, Apr 28, 2026 at 04:23:06PM +0200, Loic Poulain wrote:
->
-> > +                    compatible =3D "fixed-layout";
-> > +
-> > +                    #address-cells =3D <1>;
-> > +                    #size-cells =3D <1>;
-> > +
-> > +                    mac-addr@4400 {
-> > +                        reg =3D <0x4400 0x6>;
->
-> This looks incomplete. Why isn't this mac-base type of entry? And how do
-> you address it from NVMEM consumer?
+Note:
+The patch "dt-bindings: mmc: st,sdhci: convert to DT schema"
+depends on the patch "arm: dts: st: align node patterns with established
+convention". If the DT schema patch is applied before the DTS
+cleanup patch, `dtbs_check` will fail due to the presence of the removed
+properties in the existing DTS.
 
-This indeed falls under the fixed-cell/mac-base type, thanks for
-pointing that out.
-NVMEM consumers reference these entries using the nvmem-cells
-property, via the corresponding label/phandle.
+Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+---
+Changes in v2:
+- Fix node name in DTS for the MMC to match with the estableshed convention.
+- st,sdhci: drop unnecessary properties, modify "reg", "reg-names" and
+  "clock-names" properties, include an allOf with $ref to mmc-controller.
+- Link to v1: https://patch.msgid.link/20260409-st-mmc-v1-1-4c54321c3535@gmail.com
 
->
-> > +                    };
-> > +
-> > +                    bd-addr@5400 {
-> > +                        reg =3D <0x5400 0x6>;
-> > +                    };
-> > +                };
-> > +            };
-> >          };
-> >      };
-> >
-> >
-> > --
-> > 2.34.1
-> >
+---
+Charan Pedumuru (2):
+      arm: dts: st: align node patterns with established convention
+      dt-bindings: mmc: st,sdhci: convert to DT schema
+
+ Documentation/devicetree/bindings/mmc/sdhci-st.txt | 110 ---------------------
+ .../devicetree/bindings/mmc/st,sdhci.yaml          |  93 +++++++++++++++++
+ arch/arm/boot/dts/st/stih407-family.dtsi           |   4 +-
+ 3 files changed, 95 insertions(+), 112 deletions(-)
+---
+base-commit: cf2cd8efd046c561191b8541d32a8bfe845bf06b
+change-id: 20260327-st-mmc-c906ad95ff83
+
+Best regards,
+--  
+Charan Pedumuru <charan.pedumuru@gmail.com>
+
