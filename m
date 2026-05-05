@@ -1,86 +1,85 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.10])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48C6130F7F3;
-	Tue,  5 May 2026 10:01:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C255D3AD51F;
+	Tue,  5 May 2026 10:06:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.16
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777975271; cv=fail; b=oVKEBz+aSydw2jRliA7eXQiJMvxl3Y/Q/bsiNBWd0xiWamiZEErhGGinvt0ZtjhWMkpVUNx+kTvW8p3oyw5FPCXym9qqC5NzJe6vAW0O+KTu/lAOVgJES61uNi/u5A6vUKynUxAus2fQQOW+MqFSs4m5xPfVd+/mNl/KyASkk6c=
+	t=1777975566; cv=fail; b=EodxA8Tt0ZFeQq9SzYhRPTQYDxapaW2q7XhqWI9kOPF4GZ5Sd/Zm3K01KlFTApyXKj3g2mA4iQ/ccUJLzRgaK/HR9jjV+zw25P9bug3N2ztWfMRg2VFHREbQHk5psz6HqzsytbkY/f691DUdE3yUWvNkCEjOzjLygc60jz+DpsY=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777975271; c=relaxed/simple;
-	bh=KOv2YvgYcI9Mc7LqDJnAC5/stTu4kVkBrvxKcz2X/kg=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=KggPSBx67xfIhd5ewDG5qnrtyAoZJFo+hbTBOfnPoMThqalpVYhnAl0JAYeV6n3ItDkZcDvlZUC/NF4w9KHCG/Oi7zuscSVB9+8n00HICTG/4ndas9a4gCGQCDl+YIX/lq2qWVMUeX74NTqfyt+ESQm1z8lRsiXIZddPLIE4f4s=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=GiGBLZQq; arc=fail smtp.client-ip=192.198.163.10
+	s=arc-20240116; t=1777975566; c=relaxed/simple;
+	bh=W6GTsAIFlDpzJ0tF0E60g+0oezCQYYJxsv2/K2x1Im0=;
+	h=Message-ID:Date:Subject:From:To:CC:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=hQrg8pUwtJICqdjBfdJfMEw2pVheiEFTCTAT3yUYGj9JDTmDzNdoen48A9yo9wB6KY/pCRpWWsDjOppvKtXVQKAMudqh+4u3H1j/Z9Ef7OJ1/DT14qbCCXzX5ESBkYy3aoAaGnENK/LcYw0t/t8QdtHPHMjDah1k5kk+fwuVKGE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=jmLXrMPD; arc=fail smtp.client-ip=198.175.65.16
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GiGBLZQq"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jmLXrMPD"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1777975270; x=1809511270;
-  h=message-id:date:subject:to:cc:references:from:
+  t=1777975564; x=1809511564;
+  h=message-id:date:subject:from:to:cc:references:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=KOv2YvgYcI9Mc7LqDJnAC5/stTu4kVkBrvxKcz2X/kg=;
-  b=GiGBLZQqxx1vVAY+CaM7zuKcMEAVfxnIyRpO0rnWlYsb3W2mIpHhDNUp
-   zSTT0Pifbxy1HGFDgVdCZb/D6a4trGcRsYJs/H0vDFLWNMU7bg8ES3rbw
-   j2VUfNMINdeTkR3g1cQQagN0TeABtIGEKc3daxpSma0WXmup8MGYmPdPU
-   c0SfHL2IM8iksN2N5QUvUgIDmSGkPCAXGDoYQPgEE0k4l57yPEeXMu7r9
-   hWTMR6/tGFd2YyTTJ1BXHSrUFOov5PHFYQZrNiu+cBXApkP5/EH8XKDox
-   mMH7n1Lfh66wS9lTHuvrO79APBnL4zHYAGltiXRHoyYYGRXUpKna/dNeU
-   w==;
-X-CSE-ConnectionGUID: vxhH7q2jTl+9ejX9Bks3+A==
-X-CSE-MsgGUID: 8EYkf8L2Ro2evEK35BlBWQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11776"; a="90214168"
+  bh=W6GTsAIFlDpzJ0tF0E60g+0oezCQYYJxsv2/K2x1Im0=;
+  b=jmLXrMPD4pa44ABL6eu/mvvZoqnspVdcETYxGs3skjHrDaidIi3usOrn
+   +7jaZEgmVgvbF99tdiTuUs65v5umv4KpW0fFz9pGwKFmCNUbqDHdoZR4r
+   1udYe9HyJhIJcwr2CYiO/qxRgurepcGeZ5hz2HuleAhdsulyFriQ8Qxkx
+   1W4RkaDYOrSCxEet27cNIY7a9lxz8kzTC1V4edQiEAulHyVCtmmt/AwB2
+   avEjdU86YVQICC2q38qgBGeTLffDgFoHoay4N0F2GvCqUiO8YkFpGjECg
+   g3vJCVN1JOvq1Ep1EHRgXNMV6OOpXDMa11o+eIUyFX0Zbvik1a4JkPsdF
+   Q==;
+X-CSE-ConnectionGUID: PTjbLDCrSmK0NORCnMfduQ==
+X-CSE-MsgGUID: mTX10RvDTMKPtlDJEXZWzw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11776"; a="79030946"
 X-IronPort-AV: E=Sophos;i="6.23,217,1770624000"; 
-   d="scan'208";a="90214168"
-Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by fmvoesa104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 May 2026 03:01:09 -0700
-X-CSE-ConnectionGUID: GRWkMiJMRYWigWtoDETDCw==
-X-CSE-MsgGUID: defuzKYoSHuD8rqzg1HHpw==
+   d="scan'208";a="79030946"
+Received: from fmviesa003.fm.intel.com ([10.60.135.143])
+  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 May 2026 03:06:04 -0700
+X-CSE-ConnectionGUID: 1pbByNl0TdS4fmxjBpEJ0w==
+X-CSE-MsgGUID: BOxLr4LQSDqdzH75buTqyg==
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,217,1770624000"; 
-   d="scan'208";a="259122588"
-Received: from fmsmsx902.amr.corp.intel.com ([10.18.126.91])
-  by fmviesa002.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 May 2026 03:01:09 -0700
-Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
- fmsmsx902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
+Received: from orsmsx902.amr.corp.intel.com ([10.22.229.24])
+  by fmviesa003.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 May 2026 03:06:02 -0700
+Received: from ORSMSX901.amr.corp.intel.com (10.22.229.23) by
+ ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Tue, 5 May 2026 03:01:09 -0700
-Received: from fmsedg902.ED.cps.intel.com (10.1.192.144) by
- FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+ 15.2.2562.37; Tue, 5 May 2026 03:06:02 -0700
+Received: from ORSEDG902.ED.cps.intel.com (10.7.248.12) by
+ ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37 via Frontend Transport; Tue, 5 May 2026 03:01:09 -0700
-Received: from CY7PR03CU001.outbound.protection.outlook.com (40.93.198.52) by
- edgegateway.intel.com (192.55.55.82) with Microsoft SMTP Server
+ 15.2.2562.37 via Frontend Transport; Tue, 5 May 2026 03:06:02 -0700
+Received: from CY3PR05CU001.outbound.protection.outlook.com (40.93.201.5) by
+ edgegateway.intel.com (134.134.137.112) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Tue, 5 May 2026 03:01:08 -0700
+ 15.2.2562.37; Tue, 5 May 2026 03:06:02 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=k25Eed8EJZgXPES9a5gracXOumGSPlOWtuFSc15J2amoe1WovEmvJlXnp69kU+iXsEtFF+STrsDIfHDNrnJ1cVELJR1Llq2tpFKisarkErMMWoMWfzMoyCg89dO1pKK2DyvqYd1IbE8rcvCnSnEU1QQk7h8xl77XTi2A+qevkDKoNe8cIAHF4h8cF6gvDFrlR2lINkYn+sBowktbGkSIp3+ZJy8ly3GeoT75juTaFXfAz1XEjNOGyu2f8L4J99EXKsmV8ptOmbJ5nNE6m0opw1NpqQFiVFhUUSC0mBz/DiO+hwsKK854rut//Ei5Khqaqz5XzGSNGL/BRlQUBVZ57g==
+ b=JbNzP/EJUDCXF9i5vG1B8F7dOXg2g5IcoNpdl+YRAJnQswZGpRslluv4NKASq4ley7pSWZKO/xgrI31fjQMUlBM5dTV3oCrthvbmMf9joWBTfxLfCfqH/YqIERxOce3GFNqLvoxXKNG2ZNBqRmsM17j7o0+B4O5iHEYJlggUQShfho23FC/jf5H+MDvT/gXVQL+HHDgAIqYt60jPSa4+Fjok8LXX0MnBpKEm1uvS6/R4FtTicLodm4qCVE2/anLtfR3IzfDVviLXHdKb1rS4yPSNGJeP47Y259pdDDU/lS/hUmecA1H1ffAecfHEBG608ksmKPAJZum7USXVWQzqcw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F6fbvhqup9wMLUEhSN4UsM8lPEyFM+Z4Hp5jXuVDtSA=;
- b=KbDBhrpE2mqMZwI8yL1xdhgcPLUH/CRWNe3Lwlmz3xBM8SkNxuXvpHxQjwrGuFsZx5PqCPhdTKlexJtbw3JC1rGi3ef8HNLijmaBrWMCZ2A/LFlhF2XaFajG/hrpuiPbRAaZDs66bWB5dtA3G9niKRf0EzRp2b7u4yOKd0nksahhjJWjD4NfBDK1xykerTL+KHFbcdp8PfAf41UMXiQeBlE2N93hpmrkuEBkfmL3XrTWPLJaI+mzdCYTQNqBmk2MfS8AOEIIvb6yjZCEo1wZFkDTGpA+Z3XdamfBrF/Fz3TWVQuDg0G6aFmZxCSQdWcoItVhWviLvzSsYshBoXVSkQ==
+ bh=miIRr8IAH6HlqaZZSE3NrkeCpysA5RVi37vQ3maz8jY=;
+ b=gWFtO+PUZtA8be4rk3jmc1LuF1fxeH3nqpkNI3AfoHw0Wolt2g4gzUb1J0A6x/RJp0UlP4mkVKQburyLgO2sRYRkw4ayQj0Dsl8b/+vakdCuM8lAUQj5b7f9f0x7kS8shaoIJ6MC463R3EmjfvrT37RigzCfb8K+/DrmxouPJXTDuoT08FqbWIpDi2bvvOhsc/3C5Si/a8KBaFvSGR8TOaQh6y/beRCqqxSu5SKNGJeOewvsvnXf2fjMXaDV9SZWWa2Hcmjub5IegamoUKvtePba52N57A6FIv45wZj03frkhWjMmg3rOVUSV4psGXoH5HR/5UXZ3IxkO4WAxrEa0A==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by SA0PR11MB4559.namprd11.prod.outlook.com (2603:10b6:806:9a::19) with
+ by SN7PR11MB8041.namprd11.prod.outlook.com (2603:10b6:806:2ec::22) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9870.25; Tue, 5 May
- 2026 10:01:05 +0000
+ 2026 10:05:59 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.20.9870.023; Tue, 5 May 2026
- 10:01:05 +0000
-Message-ID: <5ebaeea1-215b-415b-9333-02705ac305f5@intel.com>
-Date: Tue, 5 May 2026 13:00:58 +0300
+ 10:05:59 +0000
+Message-ID: <e0a93b90-5e9e-4856-bc4a-60547282420b@intel.com>
+Date: Tue, 5 May 2026 13:05:51 +0300
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH v8 3/5] mmc: sdhci-msm: Set ICE clk to TURBO at sdhci ICE
  init
+From: Adrian Hunter <adrian.hunter@intel.com>
 To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>, Bjorn Andersson
 	<andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, "Manivannan
  Sadhasivam" <mani@kernel.org>, "James E.J. Bottomley"
@@ -95,16 +94,16 @@ CC: <linux-arm-msm@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
 	<devicetree@vger.kernel.org>, Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
 References: <20260409-enable-ice-clock-scaling-v8-0-ca1129798606@oss.qualcomm.com>
  <20260409-enable-ice-clock-scaling-v8-3-ca1129798606@oss.qualcomm.com>
+ <5ebaeea1-215b-415b-9333-02705ac305f5@intel.com>
 Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <20260409-enable-ice-clock-scaling-v8-3-ca1129798606@oss.qualcomm.com>
+In-Reply-To: <5ebaeea1-215b-415b-9333-02705ac305f5@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DB9PR06CA0017.eurprd06.prod.outlook.com
- (2603:10a6:10:1db::22) To IA1PR11MB7198.namprd11.prod.outlook.com
+X-ClientProxiedBy: DUZPR01CA0001.eurprd01.prod.exchangelabs.com
+ (2603:10a6:10:3c3::10) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -113,146 +112,153 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SA0PR11MB4559:EE_
-X-MS-Office365-Filtering-Correlation-Id: ccc1900e-837a-441b-aea3-08deaa8d38eb
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SN7PR11MB8041:EE_
+X-MS-Office365-Filtering-Correlation-Id: 412bab10-63bd-4e77-7b06-08deaa8de773
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014|7416014|921020|18092099006|56012099003|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info: IBA7ci91O9oTibuJMVWQ5d7iI/JtaHs89DpJe+BwWUbqwbpeXzya/2eityunqTVF7VTslyrBNoToHRPI+7fy1Dqcumcosj7VE9IyGm07nj8icZe94QnF5WmoFuqB62fVHFtmWYGPr/IsKP3ybRGKx2ylufdts/KvtRC9WL3+AIjm8nXBADZ3goj6wdwEQG030oZkoY5yrYiykowVY7+wHHrVVrAgVTBuKVIOfgWNxpWfaQZprl00c76KaEIjb2IX4iH1Lg568GCsavRPqFRUKATH00g49bXnxAV03Ftcz1/W3SsplvX+8gAi3WDdXfCEgffy8AKkDIJbuXyxIwLhIJ8xsYEa7f6Z92qR8wsHLLZAsxJeQmtmx0n9gwhJ5017nm3HVlDM9D86H6z5+2Ey4PfNVi3Fi5hAUWvuvqidyo1ftukfJbe/JnJSDq3GAkorwjpzK6wltjONls5XrVYpm06+v1L301Lz8TmctJu/MU/hI1Ck1EaIqeSqGep37gFjGbh1GHdmgFP5qi07BrZkMZQepg4tNui5SJspGxduuKD3nawy5FTvC1PezEikpZixvkvBLpGvlfOErsNT4kYrcBsfnZkKKzHWjqhkdYv6URv4a73+enJhDGzxJorDFdBeHjsSojFFEvzvbKENNXTSjXWsytWJZGILkBjIdelxEyhCAR+ZQsN82b8W+1Sx4AF9CvmHsoXiai9YMSiS5wT0ab7WF0fldKYf7IE39WkCy4Y=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(7416014)(921020)(18092099006)(56012099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|7416014|376014|366016|921020|56012099003|18092099006|22082099003|18002099003;
+X-Microsoft-Antispam-Message-Info: 6ZDEsLhEtEwAU25k8x2ArHr4Bg66NY98xlKc1NvaH7z+ln+r+fWjPFfJnDhBR0J/3QMD6vHMgqgpb357uWHFOy1zKK9iZg08joNKgyUdvGf6JYyGEXXi+TN7UmLiYHjiPCMbwk3duAVzyOy7oPbs/Psx6l1EVJN86QJHQ4ZYgp7VUJGc81ce94Tc4pa0wdsCOoz/hHS9FkSUWOTXMCY7IcWpFp1RqI5I30JRVH9/5OI1f9jgdItGy2QC0A6YDt7lz/gh6vGEa5teAg99+dvsSr89ORSqekkuTEQSrLMubvBh1rLysAViXFVAuTX/2B3qCiXvMYu2wDCkD7NpMNpDtShyEv+GWfKWTNi629Xl4xxzrH9CfXbRb9xP96HC+KrcSCw5vERpgsd1wtxGuodcLybt3ms+9xin/cvcTvFScnBEaVgS0z37RVQnLMQTSAJwMWullzq8Oajd1B9Rr+pIUJ2YZ0380u6qHDRxsc3maBpF3Zp0UbO76+EgwI9Pm+vVnIC+p0tC0e5u5289zIrE3HsllgoZsHROLyPA1LnoltSb6D/qeEhpm783WSD/iuweYTW5wHH/GOhW9ZgFxksn2Rd+mF19nGwNwYdQoA3nFoc+EFkqR23w7axl9E2bZUI1np6PrfPqiOe/WqBGlXeEzJu+9IHs93anXCA2qTb9k4EmA50ncwAM/QsyQX5/EEfiYmN38LZoZJKmkz+NuhYOkNoD19gssJjULXlkfryDtsM=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(7416014)(376014)(366016)(921020)(56012099003)(18092099006)(22082099003)(18002099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?OEdsZWtLekpOZEp4N3F3WHF1MDhBb0g1T0ZpbWNmREhWbTBSYTg4MlRjci80?=
- =?utf-8?B?YWVIbFRybVAyb2h5cHBGWFE5eHN4bzIrNEd2UkF6TzR6akh3TnZ4eUlORjZO?=
- =?utf-8?B?bldQc0FzYWw1cDRDTzJJT1l2WDZ6dWlJUkFkV0dnMDE1aXZGRjczTEd4UitW?=
- =?utf-8?B?dC95TXUyMHlZYWhFSmNyS1BtWXVZZ1IxdEFQSTJCVitXN2R5QkVhbFpPMzBW?=
- =?utf-8?B?VlZIWTFZbktsVG52Q096ZkczaXU3aFA5VUhCVWtmb1p3b3dubmFlMHRPVWcx?=
- =?utf-8?B?ejRMN1hTNVJEUDN1NjFFSHR4cWJxdkxJbEdCdXFLTFNTYThsaThYWVNaa1NV?=
- =?utf-8?B?eGU2SEpCeDZ4cEQ2S3A5b2Joa0c4SC85VThrQWs5R2hFQU9QNVFHMFFFUkNr?=
- =?utf-8?B?OHZSNmFMZ0VvOXo3a0RWeHRNR2pDVE1iRTBsQmxPUUdiMzNwZVIzMTJGdVVn?=
- =?utf-8?B?YzJraUdYaUc1OTJEclN1WlYxaUxBQUdsbktMUFVFbldnVDcxOFZ0M2lBUzN6?=
- =?utf-8?B?QVlJTnc5TEZTZ2pwZmdBZXN4RUV4VERmYkhNNDBrT09hL3pQV1ZNVlIxcGdH?=
- =?utf-8?B?Y3p1Tjc4Zks3bm05ZWVVU1dkdDl6SVVkNy8rcEhyQm1oMmJRdFNPWGdDbVlo?=
- =?utf-8?B?SmRvQ09jZ2dQeXZMRnBadlJQMnV2ajk1d0tOMnFvMEpxT1YyYTVNWlM1L1l0?=
- =?utf-8?B?Rjh3WlRHanhkc0xCRVBUdUdNdW1sdEVZWnhJcGJnL2hoNld4Ykl2WDlOSTlH?=
- =?utf-8?B?MXFHZGtJanlBaHRVK25FR0h6dmxxWXdHcCsyT1dZcG9qL0c3QlhaY3gxWHZJ?=
- =?utf-8?B?SzA2WGRqdGdoUWFkZEIzZlQ2NFNYcE9QMXBIRE9MR0FYeExMcHhiNlVCWTRG?=
- =?utf-8?B?U1RiWDdJUnZsT2tjTUZZM0tQMnF1T2gzc21FdzltbFZFam5YRGdXZ0RyUTVz?=
- =?utf-8?B?ZFI1VWpYQ2JGMHAxdVEwSGtqcElkZWlWQStTUUM0TGs0cklvUm9WTnc3ajds?=
- =?utf-8?B?VTBIUW1rUVlJdW5NeWh1REdBMXB2Y1NOY1JrUmNndDh3L2hJQXc4R25LSDBq?=
- =?utf-8?B?TW1EcXkvZDZDUWswV0FCMkdxSno3eWplOVlQdDV6OXRDSDBlQTVkU0J4RnZU?=
- =?utf-8?B?d01PRkVuSWI3aE1wUHhwcWdZa3FQb2s5OVRlL1ZRTzNEbXBvWXpVUEtOVGlH?=
- =?utf-8?B?S2xjcWJWZ0k5RWZiUkhONUlRbG1HbEhnbkgvUkVvY3hCTE5VNUpZQUI5bEtj?=
- =?utf-8?B?UEttN1BEdUlJTDZJOHdNR3YrMkVBK2VMbzU2a3c1RWtLSHJSMm9uVXB4WHJp?=
- =?utf-8?B?V250ZVlnOGZpa3hLUXBXaExWd3pDWC9ERm9Sb1NONU1RRC84NlNYV0hLK3hw?=
- =?utf-8?B?cFFCeVFGdk5TMjQ0WDdSVU1pVW1UaUtFOHVqc3krUVpHa2hBMHh3RWFpRXU3?=
- =?utf-8?B?V1RCQ2loZllab3FhMlNmYWFPT2c0V3NRaFY0SlhWWHZzemZSR0RHZDg2cGJy?=
- =?utf-8?B?ckpUM1d0VWlhMjIxRjNIWTdHMkhlUi8yOU1uc2FGOHBNRlE4UXZHY1BEc1Bu?=
- =?utf-8?B?V1l3ejZaenh0UWRKU3pUR2Zla2NjMUdnTU94MytZVUM2eEtNc1pZbkdFczNB?=
- =?utf-8?B?NmwyT2FFVTU1VjZKbHZidnQ4MzUzMTU4TFFSOHp3RHNUM2JrYUg3WUpQcFp0?=
- =?utf-8?B?a1NueEVVN0R6Zm1BU1VCWU4vQjBhU1gwTExYQUI4UkJJb1Z5ZVRoK2RhSXpI?=
- =?utf-8?B?ZHVSRk9xbzhRc0xRNEZMS0hhMEVuYlkvbEJGYnFRZHFOTEd5U0NKT1VTRytW?=
- =?utf-8?B?YkZHbGFqSmMvUEovcm9WUllYRCt1TjlrVEl6WlRmM0RycCttTndQS1ZiMjl1?=
- =?utf-8?B?cUdCUXJOSTlubmNNWkEvTDVSdEoyaHpOWUpKMW1oOStYU2h4WGVrUFJSdGov?=
- =?utf-8?B?N29GcW1JZktsWUdDZWNpSnRxL24xZVFOc2VzcjdUQVg4VmllNWQwb3hkeUFa?=
- =?utf-8?B?UnVzeXAyODczMW9DL0RmZGgzN0ExdXZoWkhDbHFsdER4S2RHUkxudnoxdHVG?=
- =?utf-8?B?bmdWcmI3RVplRy8xMk1HQnpNL0UwZXV1TGxQTGtlNGpKYk4vajB3OWhHbnUv?=
- =?utf-8?B?dXJnYVJGZVFyOFpUTmxCaFMwZk01RlRXN0QxODNuYllrN3ljN3VUN2pLZDFr?=
- =?utf-8?B?SmNBQTZLQVNwZ01Eczg3eFc2UWVTaHRNaHdsTzNEUit2UXFPRmk3SXRkbDMw?=
- =?utf-8?B?a2FKM3lNQ1hvNnJDZDBOYUJzejZpTmZENU5oV0xYdFRpZEZzZE0yV01SL054?=
- =?utf-8?B?S3NLaTJ6Qk9jY2NZNmJQZXRZR0RXTVVrRVVUTVVIZ3V1R2RMaktsY3MzbjhQ?=
- =?utf-8?Q?LVFV8zP4OcsGmJls=3D?=
-X-Exchange-RoutingPolicyChecked: eI5xV0tC/3hpDIGjY8j7OJJrxc7U59JKnIaojsDzUUW7lD2CpN/sp+WAwQnO/wUNra85uj47FGrzJDyNnVjQZz2Y2zF5syv5mPKCERqum0wMMnAdlT6i2tMIPqZuDFGLFQWKeUMCoCZxIO3CewZNc8tJ/R7ne3fRIUlnyfI1KBE/rniyjQQKucLGA5FQDUGum8T65ItvU9YiCSOjmHaDpAea77NN26m0Nhv2+QW7cCoy5XdTa+B401fViy7+ArUzkzagdz6o1zpt798lAumRB7CpsI0HVsxd/YmL5Tpv/uIaQIN5aZJ2TK8KoGZlyIG6Z2pGc0xB1mk28q2yAafD6w==
-X-MS-Exchange-CrossTenant-Network-Message-Id: ccc1900e-837a-441b-aea3-08deaa8d38eb
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?Z2F5V2JHZk1xeTc5MFdkMTBaTDlJWHZaKzF6Zy9hdkxObkdqOS96OU9ta25q?=
+ =?utf-8?B?Y2c5cGUyYkpqL282RzZMTHN3QVhIcHVUUEtkRkJMc0lKYzk0VHRPdlhWTDNZ?=
+ =?utf-8?B?T0RNTGdodWhzWUZYZTdhbUNXT2JrNk9mWW90cHZycHBkR0ZBM2o2cjc4cFNo?=
+ =?utf-8?B?VDJDVENPZE1LWlRRbDNNZy9LNFdoOWFZY2NZdjlMSFVDazV6YU9QNGMrZHN0?=
+ =?utf-8?B?TWRWZVVBc2RqM3Q0emk1QTcwVHpybUNLckY3c1kxWjJ6M3l1alFRRTRuMTMw?=
+ =?utf-8?B?M0ZoVks5RUFmaDhwcXZMSWNxN1ZyM3N6WUhRQ2FuNUlpek11WUZjL0lsdjlo?=
+ =?utf-8?B?b1Q4Uk9ObVhhSjZIYUVpaUFKd3Nxc3RjaDRKYmRZOUtpcU5OWTlBWjFtc0pM?=
+ =?utf-8?B?MUhhOW9FalhFL2lGbTFiZ0pDWUFYNGxXNkVsQ3YvUUJGZ1NHbjhtcFRLVUJz?=
+ =?utf-8?B?OXB4OWlKOEZ2SnlXQ3kxZktnSktWRVRuSmhSejZiR0tOdmVCbUdOWG1HYzRH?=
+ =?utf-8?B?aE4wZFN1S1MzTENMNklkcHdIVmNOc2xOOTFjNmdWdTF4MENOUHE4TmNxV0Qv?=
+ =?utf-8?B?ZU8wOVJRankzMGVwK25wTzlGM1BGUWowanZ3ZjNJUmhaaHNKblppS2pHMnl0?=
+ =?utf-8?B?eFplWmFSZ2g2TXFWaFhsb3NRNkhEWEhVQ09veVprdEpYdHB5aWFYOFhUN2Nz?=
+ =?utf-8?B?eDYzb3hndUptWG8xeUhqa2xEUldVT0dKUzJhYkdQOUFEV0VRVzNQVzNPN2Vj?=
+ =?utf-8?B?QUlORHZRbm9sNVhGaXl0aE4yK2tBQlFsTGZNWVBNMGg4ZDllaU5YWlZnVVdT?=
+ =?utf-8?B?VDBEUmpGekVKVWxMZ1Fkb1paVGZLSVpocnZ4SERYY3pJNUUxVGRTNmNTWk5r?=
+ =?utf-8?B?anZ6VXZ0di9YcVhCZVE1YnE0cFdjVTRSczFSOGoxR1dKNDFGSHFwODJJUzdq?=
+ =?utf-8?B?K1BYU1hHMjkwT1hsczhmUWRjRlE4aG5qNkxkU3NMMUErKzN4N2gxTVVadHJJ?=
+ =?utf-8?B?cnlJYUR5eEN4QWM2YWRIYjlZV3Z1L1BMeTNSMEZGTEJZN0ZETmpmV0lZc2kz?=
+ =?utf-8?B?ODY2bWIrVGw5dEJ3UUhDOFcyTjVtQXUyamp1QkYvcUJaNjIyWE5UNzBkaE5X?=
+ =?utf-8?B?NTFaOTFva2N4WjBOUURFbXhoTjlyYWExN3pkOHlCdlFDemZhKzRjS1AxUlVJ?=
+ =?utf-8?B?SVlOdFp0TExPVXFpSlhoTjRKMnE1SWpGdDVnbVFGQ214eGFXOWlOWVZBNW9C?=
+ =?utf-8?B?MFoveDJWcDAzMlZqK29yenFEVlBYc2lJOUhpajNvV29oL3BtM1hnYWpicE8z?=
+ =?utf-8?B?UnBIZ1gxTitTb05lZFBDa2lRSmpzb2N3eHlWN2liT3BrV3V6VEt6OHhjZWlV?=
+ =?utf-8?B?R2psaGpXME0vTW1yZEphS1NJVVFFY1dLbVdrd2FkQWZyS1Q5akczZTI3d3E3?=
+ =?utf-8?B?UVJvYzdCS0hFTjQxbVhTNkkzK0F2SGxsZTl3NmE3NFJJcSsrVGRsN3VmRDIw?=
+ =?utf-8?B?QXloTlh1OWRvenRTdTJ5UEZaR0JPa3NjSTNpNDhOVlRjbkpiV280bGxVRVB1?=
+ =?utf-8?B?Q1U1Z2JiazJNdVNqL09oT2FVNmt4a2l3THF0VExjcnhJT3ZKcFFGS0ZDSU4z?=
+ =?utf-8?B?V2JCU1pkaGR3aTE2aEkwWDdLbThaOVpSWGhERnlIV0hVd1pmRnpTSGNhS29I?=
+ =?utf-8?B?VEQxOUN4RllGSDg4dWNJNlMxUGRkWXVjYW14UGRoYURtZXl0MmVRNU1kQnBI?=
+ =?utf-8?B?WEFnTERoS3EzbE84Q2xxbFFPTVNUcnhEcWoxSTI2SlFqa1dSakswRG9INURW?=
+ =?utf-8?B?dHM0eE9HTzdycFpnTGVKUFd6NEFNUmZtSXppMDRCVlJFNE1mRSsxOFNNL1Q0?=
+ =?utf-8?B?SlBsWEVLN3E1WGN2TmoybWd1S2k1S1VEem1SYW1OWDdUZ0FPVnhSazNpQy9i?=
+ =?utf-8?B?MXF3TGF5TGlMMC9rQ1J6U2tFR21GcGF4YURTeWVaWHNSNXVxNkRtZVdCY2xl?=
+ =?utf-8?B?UTJuTDNRWFJoY1lFc2psQWpSZUYvNVRpNllXUE94RUVRTWdSNmZEVnUvSjFl?=
+ =?utf-8?B?V29ZbGt1a3ZlOHR1WnFGbFFGSHRBOUw1eFZOS0JmSUJRT3NKbi9jNG1hWGVs?=
+ =?utf-8?B?NmFIaG1rUEtOa0xVWnJoN1djUzRpQjROTlRtaFhPdUtoOU1XOG1rMFcrdDRq?=
+ =?utf-8?B?dWFjR3NtQTBvaFBCaWFRTHB0eVFpK1VBbDkxUGNYOFljdEg5eVdJMTFiaGFP?=
+ =?utf-8?B?aWlreVFFVVNLTVoyYW5pL1FrK2VzbllvRzg0RENpRng4TjlTT25WZG9DSU8x?=
+ =?utf-8?B?bjZ0RlhnSDlWOUgwRlluM3I3Q2Y4cWlScjA4NTJ1TFBqcWRicytDbkJVTDFt?=
+ =?utf-8?Q?GKn29gjKXk4kdh84=3D?=
+X-Exchange-RoutingPolicyChecked: uolWXyrSDqrcIfE1z+TDWMcQTe2tUtbmFUsqEwIdeWKzuo9NmAHAGNMW/BnxuDodUmcNYRpV7ee+B14j0sN6ktBAM/hqRmJa3Hp8NgCM0nU5K6SqjJqtsUA32HTD0exi5IqPkrZa4yjJad8Wu1fCpemi4P8guhi7LncQCWmA2GeBPUTqtat8VnLRyyse6XWE/ZobNmRIxdEwlastPT+I7fpZzaqWEeBqCIFyfRyTfCe+VSfRoE5A3xSGEDxyMxo5af5HrDhITjVevmCzB+GheCdlhX4iZMtApA3rklpxRy0tL19GkaQIEgbHXOR/xzvxBpncaGLr60wCTEz0y9DBxg==
+X-MS-Exchange-CrossTenant-Network-Message-Id: 412bab10-63bd-4e77-7b06-08deaa8de773
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 May 2026 10:01:05.7461
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 May 2026 10:05:58.5142
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: ZqcyC1h6K3B+VCp9piCI/J3Rf/dQkxn0E33/BH0O/+eb/LKH3B+JqeUbiOdkdUAgcSZaObz4+ZKwn2FIy1SLfw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR11MB4559
+X-MS-Exchange-CrossTenant-UserPrincipalName: U0X3mtqxpLcSjTUA0Vem9/v7P0V2asxznymotR62P4bI2r9FyPSA3GdFcCvklh+iOk8DCdAe6YFVdC70RIHu7g==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN7PR11MB8041
 X-OriginatorOrg: intel.com
 
-On 09/04/2026 14:44, Abhinaba Rakshit wrote:
-> MMC controller lacks a clock scaling mechanism, unlike the UFS
-> controller. By default, the MMC controller is set to TURBO mode
-> during probe, but the ICE clock remains at XO frequency,
-> leading to read/write performance degradation on eMMC.
+On 05/05/2026 13:00, Adrian Hunter wrote:
+> On 09/04/2026 14:44, Abhinaba Rakshit wrote:
+>> MMC controller lacks a clock scaling mechanism, unlike the UFS
+>> controller. By default, the MMC controller is set to TURBO mode
+>> during probe, but the ICE clock remains at XO frequency,
+>> leading to read/write performance degradation on eMMC.
+>>
+>> To address this, set the ICE clock to TURBO during sdhci_msm_ice_init
+>> to align it with the controller clock. This ensures consistent
+>> performance and avoids mismatches between the controller
+>> and ICE clock frequencies.
+>>
+>> For platforms where ICE is represented as a separate device,
+>> use the OPP framework to vote for TURBO mode, maintaining
+>> proper voltage and power domain constraints.
+>>
+>> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+>> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
 > 
-> To address this, set the ICE clock to TURBO during sdhci_msm_ice_init
-> to align it with the controller clock. This ensures consistent
-> performance and avoids mismatches between the controller
-> and ICE clock frequencies.
-> 
-> For platforms where ICE is represented as a separate device,
-> use the OPP framework to vote for TURBO mode, maintaining
-> proper voltage and power domain constraints.
-> 
-> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
+> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+Or rather:
 
-> ---
->  drivers/mmc/host/sdhci-msm.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index da356627d9de6a11ed5779bf057fa8eb23c38bc0..32e3f37fe425f66c00290a373e06e8ab6257824e 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1901,6 +1901,8 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->  #ifdef CONFIG_MMC_CRYPTO
->  
->  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
-> +static int sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host, unsigned long target_freq,
-> +				   bool round_ceil); /* forward decl */
->  
->  static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->  			      struct cqhci_host *cq_host)
-> @@ -1964,6 +1966,11 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->  	}
->  
->  	mmc->caps2 |= MMC_CAP2_CRYPTO;
-> +
-> +	err = sdhci_msm_ice_scale_clk(msm_host, INT_MAX, false);
-> +	if (err && err != -EOPNOTSUPP)
-> +		dev_warn(dev, "Unable to boost ICE clock to TURBO\n");
-> +
->  	return 0;
->  }
->  
-> @@ -1989,6 +1996,16 @@ static int sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
->  	return 0;
->  }
->  
-> +static int sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host,
-> +				   unsigned long target_freq,
-> +				   bool round_ceil)
-> +{
-> +	if (msm_host->mmc->caps2 & MMC_CAP2_CRYPTO)
-> +		return qcom_ice_scale_clk(msm_host->ice, target_freq, round_ceil);
-> +
-> +	return 0;
-> +}
-> +
->  static inline struct sdhci_msm_host *
->  sdhci_msm_host_from_crypto_profile(struct blk_crypto_profile *profile)
->  {
-> @@ -2114,6 +2131,13 @@ sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
->  {
->  	return 0;
->  }
-> +
-> +static inline int
-> +sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host, unsigned long target_freq,
-> +			bool round_ceil)
-> +{
-> +	return 0;
-> +}
->  #endif /* !CONFIG_MMC_CRYPTO */
->  
->  /*****************************************************************************\
+>> ---
+>>  drivers/mmc/host/sdhci-msm.c | 24 ++++++++++++++++++++++++
+>>  1 file changed, 24 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index da356627d9de6a11ed5779bf057fa8eb23c38bc0..32e3f37fe425f66c00290a373e06e8ab6257824e 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -1901,6 +1901,8 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>>  #ifdef CONFIG_MMC_CRYPTO
+>>  
+>>  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
+>> +static int sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host, unsigned long target_freq,
+>> +				   bool round_ceil); /* forward decl */
+>>  
+>>  static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>>  			      struct cqhci_host *cq_host)
+>> @@ -1964,6 +1966,11 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>>  	}
+>>  
+>>  	mmc->caps2 |= MMC_CAP2_CRYPTO;
+>> +
+>> +	err = sdhci_msm_ice_scale_clk(msm_host, INT_MAX, false);
+>> +	if (err && err != -EOPNOTSUPP)
+>> +		dev_warn(dev, "Unable to boost ICE clock to TURBO\n");
+>> +
+>>  	return 0;
+>>  }
+>>  
+>> @@ -1989,6 +1996,16 @@ static int sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
+>>  	return 0;
+>>  }
+>>  
+>> +static int sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host,
+>> +				   unsigned long target_freq,
+>> +				   bool round_ceil)
+>> +{
+>> +	if (msm_host->mmc->caps2 & MMC_CAP2_CRYPTO)
+>> +		return qcom_ice_scale_clk(msm_host->ice, target_freq, round_ceil);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>>  static inline struct sdhci_msm_host *
+>>  sdhci_msm_host_from_crypto_profile(struct blk_crypto_profile *profile)
+>>  {
+>> @@ -2114,6 +2131,13 @@ sdhci_msm_ice_suspend(struct sdhci_msm_host *msm_host)
+>>  {
+>>  	return 0;
+>>  }
+>> +
+>> +static inline int
+>> +sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host, unsigned long target_freq,
+>> +			bool round_ceil)
+>> +{
+>> +	return 0;
+>> +}
+>>  #endif /* !CONFIG_MMC_CRYPTO */
+>>  
+>>  /*****************************************************************************\
+>>
 > 
 
