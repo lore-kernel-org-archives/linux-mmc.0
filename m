@@ -1,345 +1,266 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C084935B631;
-	Tue,  5 May 2026 12:55:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.11
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777985727; cv=fail; b=IR8MMTp4awju43MYNKqRfpGSthAWbukhTOTiuQE42vudLDfyWeRDUSKcTSjJeBnX9+mnUkEYwjO0cJkBf6uRjB0R0lvs7SVCLFJuAKT8MBbNSp4yH5wxYneipOAcE5IFROcVDSwDw/oW2PE0Q3sAvBlBkEqNXcZvo6m05li8MZY=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777985727; c=relaxed/simple;
-	bh=xWvyBUEOAuC619Fn7wsgzEUc0V/IlM22Yl49rt0IFTo=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=eukbuowDu1qepruhSyHSFKqgR3ixb+wL2m1d6OydqcMmUHumagHM6aFwC8iwc0Ct2IHzhUAVtnzSzA9zd25tJZXY72BOE696IRbVedkWBNDn9c7BPOhg0d8m1hc9Udze5htX1IpJflmVFhOLHXhP9iGsw/r1OCHwEvu8ckvYBew=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=jSGjNTZT; arc=fail smtp.client-ip=192.198.163.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6284314D13
+	for <linux-mmc@vger.kernel.org>; Tue,  5 May 2026 13:37:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1777988263; cv=none; b=s+Ulnvw724omNw1yVG1i+I99BnYEZ/cipfFg44EPHhm+rj8XqFxqu43A/rYwmJvMK+GD7ewQoC8EKmiOOG24DjdTihuxBdBHNvSz0cf5Ns9za3syKtAdWsPCcY6CjSrjHA+7dd0V8FkZaS+TJvu9ayCDDEoRH6DZzOUQozpKiaQ=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1777988263; c=relaxed/simple;
+	bh=9w4dkmpnUTPgPef44NQpN+loUArr+6ep1thmIbJGQtI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=aN6+2a60fN2xecPo753hx0tAZjLMm5u2/IxMb6Vxj0o6sBS330obG9YQZ4PgRfiwN/RBds43wZF5IESwXbpPESnU6Kw4TJHXPq5lAZMpDnrMsNj2l4ckzYvtFwLx8nEtvWPSJPbaWXab0qzTpo2UB6HLf3atOwoplwRX2+BJ7wY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=XYVIUGMJ; arc=none smtp.client-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jSGjNTZT"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1777985726; x=1809521726;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=xWvyBUEOAuC619Fn7wsgzEUc0V/IlM22Yl49rt0IFTo=;
-  b=jSGjNTZThBp5u54GsB1cg+JxOxjJdyHPs6C3XU50oF844KqoQNFrLSH1
-   u7YqzCEz7l7vAduxGWo53Vh9EPIAvyP75pnFoT7Tgx+ClUwyNa+Z5H4cp
-   3GDLFKIIcj33DeGN+eFCC1ngK5g9IuJqY8Xzgm8vNrXqFRk0r15yQOBeH
-   8f5c/8VnsGCxOes/Wb8/GpZemW3tFAOTrG0hXtJVpg2KpM3Qdxfg8R5SQ
-   kJTLLEP3SkkNOzsE8VRlaYnTBTVg8gAyBfHL+TWAZQkmh4D5+scyBKOvM
-   2HEjJEFNVPef41elKiNCa/qVSWp/HKmq6cMBoFxYJJREUh6pakxj/aaEM
-   g==;
-X-CSE-ConnectionGUID: wwch5qGzS5eZZvlJCxMAlA==
-X-CSE-MsgGUID: jmA422uIRgymhTO+a/Ni/w==
-X-IronPort-AV: E=McAfee;i="6800,10657,11777"; a="89447042"
-X-IronPort-AV: E=Sophos;i="6.23,217,1770624000"; 
-   d="scan'208";a="89447042"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 May 2026 05:55:25 -0700
-X-CSE-ConnectionGUID: Gv8dAgLQRr6qbeaJo/1qhw==
-X-CSE-MsgGUID: 1BZZHqSXRQiJRxJiLQoozw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.23,217,1770624000"; 
-   d="scan'208";a="266145006"
-Received: from fmsmsx902.amr.corp.intel.com ([10.18.126.91])
-  by orviesa002.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 May 2026 05:55:25 -0700
-Received: from FMSMSX902.amr.corp.intel.com (10.18.126.91) by
- fmsmsx902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Tue, 5 May 2026 05:55:24 -0700
-Received: from fmsedg902.ED.cps.intel.com (10.1.192.144) by
- FMSMSX902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37 via Frontend Transport; Tue, 5 May 2026 05:55:24 -0700
-Received: from SJ2PR03CU001.outbound.protection.outlook.com (52.101.43.62) by
- edgegateway.intel.com (192.55.55.82) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.37; Tue, 5 May 2026 05:55:24 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=MA57xthrmErjW+3lX4DT9SKs9pdloJ3HY+1LIDBCiCBf2j8uhOIKMYHE0nChYHzROxrqLUdDhP9r+7P5kUthbv7DYJQpVu7GSNDudEtIisrJUMfQTDHUKa1BdEjybGHIBcOzaDuUUQXUKTubGmFt+akIMuMIVRENzWeIJ+ISMqUxhhV2qILepVNdcolnSZWnnful4PNilEXcWzDx3Bx9tDwpIbxGUufyFb7Iz5zb3y3BnShKySmYV1yMyW97A8jgGXi4rYI+jUqUIw7LxA7RxkG+TnZo4pS2ozhsdtLQPTUBBLr+6Z+Rn62cHtj/JUCUEAHcjS9r2yUdPdX6lU/CVQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=mLbjCq2M3SPXBQpGl9QqIb1guGFD4q8EktL27GWqqMg=;
- b=gWEh/m+eJmLapOCIlAIkBuWB1F0HjV5TJXg8zGYA35Y+V6KGUM6mj2MInjSLr4vMbI0hmexWuK3ISCnEma6C5JbziQqCAFIEAsr1+5pOX2Ni40yns86HH2cELwNcLgzNJl77qk1/eQg0AGTxPsvl3zv7pTIKaC7vKn+bPzSPj1kzwwea2xjZbywJ6zreQkmV5OYRF08yVwf9d0j56O1qW1VaP55IRAKl7W2/TjX6jnTG0S+4VfiIdBRjq6qmRmb2yoEE0ayouN/wBVyiqCYoyGtDL3laBRboGsqAxIEAvYN8kQaheNW96wPZacjgUPOaR4xwxKh19OBmukrXqJekQg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by IA4PR11MB9394.namprd11.prod.outlook.com (2603:10b6:208:563::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9870.25; Tue, 5 May
- 2026 12:55:21 +0000
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.20.9870.023; Tue, 5 May 2026
- 12:55:21 +0000
-Message-ID: <1c3acc06-e9ff-4728-a4d7-2639e5dc4793@intel.com>
-Date: Tue, 5 May 2026 15:55:16 +0300
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1] mmc: sdhci-of-dwcmshc: Fix SDIO support for Eswin
- EIC7700
-To: <hehuan1@eswincomputing.com>, <ulfh@kernel.org>,
-	<linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-CC: <ningyu@eswincomputing.com>, <linmin@eswincomputing.com>,
-	<pinkesh.vaghela@einfochips.com>, <xuxiang@eswincomputing.com>
-References: <20260424070907.1422-1-hehuan1@eswincomputing.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
- 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
- 4, Domiciled in Helsinki
-In-Reply-To: <20260424070907.1422-1-hehuan1@eswincomputing.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DUZP191CA0040.EURP191.PROD.OUTLOOK.COM
- (2603:10a6:10:4f8::18) To IA1PR11MB7198.namprd11.prod.outlook.com
- (2603:10b6:208:419::15)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XYVIUGMJ"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4891d7164ddso28001535e9.3
+        for <linux-mmc@vger.kernel.org>; Tue, 05 May 2026 06:37:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1777988259; x=1778593059; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=UOXS6al4LhNZR5XdmgsqkE6gRGeNvrPx5pbBclC1clU=;
+        b=XYVIUGMJu/prLPHL22/gjadrq9k4BDypwfFuqpBNmt/4qM4xBXOJ7qlWA1SjTEddci
+         wtBnBBNLppZdeMvhVGAY10rrPqeOJKkEfYn/b9URQHvNdQAjwRUOQ873TKZ0WEZIzVmn
+         2cwKuxRpmfI4VobTONNptYPSrQwMv2IN4GxIXXe/M637ykRMyuRa/dnGhps0mDKTv97t
+         vcVU1u6kMAUdueSXbzl0EcUWxeevuZMMMG4qB4LvQ6xSIIRIO/0Om2FdMywpdMZt+Xcx
+         Sgq0RcoZh6TS21gjHX3bQkerlv0W8xgMK0UgHorrRZhxcCk7CWMladJqLrAkzu51M5Ih
+         rUfA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1777988259; x=1778593059;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=UOXS6al4LhNZR5XdmgsqkE6gRGeNvrPx5pbBclC1clU=;
+        b=avauogqDUjsOvPsPrT9DtpOx5yrFu3OfS2G3Q53+ogsZV5sKLiZ9+tyUXiE8aYuubv
+         KIKSekC6YCSLG8dkiiYNLgVRtCueRV/px6qF2SASR8v2JsZYZDki2txoAqY4xlNcxxZ5
+         Pn7xjR8wfQYHT0mJZxoIedjwQ5zc8zOIErldExVfm3opO0KT4CVqSyCSm4RveEYYuaq6
+         /Np470KuqZ1+hC/XK0lnjZmgljaNw2MJ/bk6KQcBBXIihpNYvDwiz8B1v6Ey04vuTC/U
+         J9Nfutw6LkU5VwPEVLZR4k/MZ0QpOrhpO7/4edUjA/fI74DFZ2yUaMK6FABscmWu9f3D
+         SD/g==
+X-Forwarded-Encrypted: i=1; AFNElJ9o6vs66siUL8Y5atD4hd0KTM+qDYegSs3gubAfUqdMCAAheg/dalrlpv0T3/Ki83poYbYdsyoTLIU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwVNJX9MlI0f6i/FE9LOJSp9i6e/vRyvo610ANCYDOUm+MZXjcZ
+	q22vDFHm15ZhV0AfzeenrqB69ywhMulY8AVzEV/cRYYNh8F+ppxTwao8
+X-Gm-Gg: AeBDietIO4nzISuJNXOKNd3mClFWz+YYsG7qO8KRVHBuQmZMcfb/BNaXVY4NeL4ZvdW
+	+sy7jH4gTd82h7zDtOW64J2uHRtPEFNZlVyuT5/hP6L33xeuEgAsXedtjyV0AE6UUxcPdou1NPB
+	94SD1RLreHnbP3MKukyD0W9ilODf39038bRLC3c7lvytKor8ic4SWRL+IwzGBQyoR6mgxxhI8ik
+	L5uemTs2jBnhA5e96lfIHFYdT/V94/xNrCvNrWgetEzh5R13RutOYFdZOhhI97Los37OuyXyd3g
+	uyiFtyL0WGsrykh6BgVFOr2O6ZKFljhWR5cFAdQwvO9PxJBV5bb2jvY2QM2i04AcmGIVs9cy1GR
+	Vu/pa81XU4a4jawQq/pvTyZ3fBpJScC8Z16Ila6mHYYuUz0HzBOjadvKwugs7CDvhQLuROq/2dv
+	X47uJQ1pPSkeBi6OJDRBOaqOTpMyvp3GBANA==
+X-Received: by 2002:a05:600c:a412:b0:48a:7965:b92a with SMTP id 5b1f17b1804b1-48a988ccc9fmr179745355e9.26.1777988259098;
+        Tue, 05 May 2026 06:37:39 -0700 (PDT)
+Received: from NB-6746.. ([91.132.132.238])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48a8eba865fsm316281635e9.10.2026.05.05.06.37.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 05 May 2026 06:37:38 -0700 (PDT)
+From: Artem Shimko <a.shimko.dev@gmail.com>
+To: Jisheng.Zhang@synaptics.com,
+	hehuan1@eswincomputing.com,
+	andriy.shevchenko@intel.com,
+	yifeng.zhao@rock-chips.com,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	Philipp Zabel <p.zabel@pengutronix.de>
+Cc: Artem Shimko <a.shimko.dev@gmail.com>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: sdhci-of-dwcmshc: add reset control support in suspend/resume
+Date: Tue,  5 May 2026 16:37:29 +0300
+Message-ID: <20260505133731.383544-1-a.shimko.dev@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|IA4PR11MB9394:EE_
-X-MS-Office365-Filtering-Correlation-Id: 52fc14e0-fe02-444b-5731-08deaaa5912c
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|376014|1800799024|18002099003|22082099003|56012099003;
-X-Microsoft-Antispam-Message-Info: JTywg/xjy6n1rRC2dW3x1REJosXg8GQD20OIo28wG18B1G65CpWYbSk3Kywtn7SrCi846C/PufQI1hwz/ptcbE+9FCD+UR7O9im40aqgTJ2Q2GuVsKYVgUenWFhXTTFLlBWZe4g26XqKuE47CSDod/HSN6yV4TTkmfSiqz2pFUG4/QyzC39Pvjm1ldgBFKL8ZRW8Y5LWqnSSDzfWlauYB5Cj49mY62reyIKJrk+81OV0o01xVqqDsZ4XmLI/gToSx/v/BoPhiqfJ6gabkD+ByS/XYUp6z9Mj96Cms+CvcTP8lRm5KIa0Ibq6yp14nG27B/IMHn3zY7aWzX4nZ8/rYPQm4KSwetXjwt60K/PM+UE1b5nkBv7wTWr2Cvsbu8reHqwGJ3OuFjdH3FPvq7xt6Wbxl0hxdhDmy7okT1l21dWLOm2pIHiz6PHtw2qZgEa9dx3BELCkoAD02byqGvUII3vJxWUYnRQX7YQja4WSMpfB0OKq2rgz2BZLEJKLH723yvp0tUsXSImoGz/QEUEY+RG8DTeQ9fj7jonruFTZFdsPw2ruiDo//8OuRJ0c+1cQjkKbCkcbjlbPmFMaq4G3+vqu4xQA83PZA5YIYx1FeAQawnuoC1G8JLoAlgD211e41daPK/7bsy6u9WM7lFv7F81THreBX7QdkejzDi0OuHodYBVBaiyEcsIEPzdHlqlb
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(18002099003)(22082099003)(56012099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?TjF2cmFGZVRlTFcwTmlIY24rdXBibzVTWElPR09ZQzhIQlB6TStKSXF0YmFv?=
- =?utf-8?B?TFZLTHlZblBTSVd3ZnhZZkp0SHk3SFBmc1dmK1BrbkpNMlpCNFlJMEd6SXlP?=
- =?utf-8?B?aVVQV3QzQzF0V3oxWkgzRFA3aXdZMjd6MHJsU1FPeVYzL3lCNFA5aUROS1lJ?=
- =?utf-8?B?MERxWXpUQTZUV0JPQmEwWHR5b0hTUC9ydkVqRHZoQWRyUjV0QXd3bnhxZi9R?=
- =?utf-8?B?eEV1SWsyc2JUSGlrQjRSYm81b25nZERvbllXc0pjb2dMY2pCY2pMTTB4cm9N?=
- =?utf-8?B?azJEdHN5SWJOOXlyUzljZzZXUzM0N3ZTSmgxWWx3eXo1WTZ1RHpwcDdENzNh?=
- =?utf-8?B?Z0NQWUREdmZlb28rTy85SmtRZnBOOVNxNkxqZTZGSDFNQitYT1NCaUFNOTV4?=
- =?utf-8?B?c2NXN1liRm43Z3hkUm11OWV2UHI1dFZVbnVZcFdWNnBRVzhQSFkzZ2VxNVR6?=
- =?utf-8?B?bHJuMDZWbmNSVHNwVzJVWHZnb3dHSWEraTlNUmhSQlNuTldwSnpxdnowMnY5?=
- =?utf-8?B?WFRjeU9SNjdDRWpsTmIwbW9GQkpIeHhnTTZURCtKSkkyZEdLMzNkQm5HU29z?=
- =?utf-8?B?V0RuaUQwNUFNVW5sN3VJSkU3UG8rRlJlTlBHU1E1dFNDNmxIR3JuSGxDaWk3?=
- =?utf-8?B?NFJLUCtKOGd6aWVNQkM1UE4xWVlQNDJWMDlBMEhSSHBRVUdXR21hYWNKWEFw?=
- =?utf-8?B?MHJhdC82NzhZWUhmbWRhTm91a1R1anFzZFludHJkalViZElaU1pWUGhBa25R?=
- =?utf-8?B?aVRjUk1WV2I2Ym1mQkNQUkxPb3g3TC96d1AweE9Hd1RySFhHQm8zeTRWYS8x?=
- =?utf-8?B?MlF2eDh4cjhrelQ0cFo2bDJobFRMYWt4bzVBQjlkUm9lK1VmV0k1SENWOS8r?=
- =?utf-8?B?OVVUY3dYaWRFT09mT2x6bklFVmRyclBEMCtONVVaSXZSSmM2RndSanNjem4w?=
- =?utf-8?B?WEV2U3NWcFRNbTc1SmNWN3FJcjZXRm1tT0JuL051UE9meHdWSVdQSzV2TmdS?=
- =?utf-8?B?UlFuM1crWmxCTmdhakVMNHAxNGZOQ3JWQ2JVOHNGOTlmMEZqdDUyN1FpNFg3?=
- =?utf-8?B?cVlFTlhYMzFGbWkrOHdMWm52aGs3YzlzL0NieTdxd3o5aW1Xa2tVc2FDR1hv?=
- =?utf-8?B?anA5SUhwYXdGT1BLQlNIQzY2QlR5dFkrcWxiRFBwWS9zYmlqNWZhb0tBdEdk?=
- =?utf-8?B?YU5lT0d5ZEtXUkxRTDhBT0ljWkRCNTZaL0RUWUZLZERVZFFDeTNTMTFKeGRy?=
- =?utf-8?B?MXcxT3hEc1NxQjQrOGhpWVhETmhwcEN0NUg0THA3MGg1WVpqeWw5WXEzcnRh?=
- =?utf-8?B?QlpiWGs0UVJQZTBFd0hTc1Z0bi9INTZod2lnR0FGTXZ1aVBkL3kwY2tRbC9t?=
- =?utf-8?B?RmdSMmlXZ0IrRTVoOFE5cStudU50eTBxdFNyNW9nZEdaeXR4dE1KRnFaaEh0?=
- =?utf-8?B?ZHJCUE12ZFNHTUhCL2l2TU5rellVOHBNbjV0K2lPR21aYTg0NlF2b2pTR0p3?=
- =?utf-8?B?eWJBRTQ1ckdNajdvczllUUZ0bmNEc0FleUpjZ1N2Y1kwL09HUG9XUnZ5cCtk?=
- =?utf-8?B?RzIxZlcyVjJmelRQaXNDR1NmSS9Zb0lEa25IbjVoWEhCR3gxN0VQTUNFTDdk?=
- =?utf-8?B?bTNvMXFwQStRdUNEZGJ4cWk4Z1U0RWpNK3VpWm9PN2xmOUNBRVkxNW9HOUly?=
- =?utf-8?B?SDBiU1JsKzhJcTZ5VzhsdXRIVTErWUFkRllWVzh2RExNMHczS28wVFZsNzlp?=
- =?utf-8?B?ZXliTEt1UWhvcVlFTTg0b3QzQ01WRjRqQ3NOUW53ZWZ0YXE2WGtRQUkrRjZL?=
- =?utf-8?B?UlVkRDNxcFdaSW5CS2JVOUgwWVFxOEc4Njh5N3pYV1RPRFk5WVBZUDRGUTBF?=
- =?utf-8?B?UGtFQTZKQTFmT2FYSXFaWWVTNVZUQ3krTlNGU01aYVBBTERJUzhVNXFMaDBh?=
- =?utf-8?B?ZitoRjFKQk1ZS2l0YzJXbzNUQ0EyQ3FiS1k3ZkV5L08xS0Y5dmcwb1lDSHdn?=
- =?utf-8?B?RXZlMXFGU2w1ZHdvSVRxQThXblI3OVBiaGt5STgyeWFrUVVrV0t3N2VBajJY?=
- =?utf-8?B?bStzWEI0L3R6NnhUbHgrT3ErUGZIVDQwNmZkZ01lamFnRDZXdEcrWUhETnRI?=
- =?utf-8?B?cjUyTGNsUUFqa09PVW9IaVlvRGJFOWFVbUFzY3VTSUZLMFRqYmF5S2swK2hX?=
- =?utf-8?B?UUIrdk1hemE3NWVtbTRUMGZSdDhtSjJ0K0UwZ0RycEFmcDBRT0p0MTlRQndF?=
- =?utf-8?B?K3p6VHhDZ3p6SEhlUkJ0eGVOcXJBdHJBaElsQmpvMUE1VnBGVy9makdqSnMv?=
- =?utf-8?B?aGN5eEZUMXJPSTMxSm40SlQxTnZ3WXovcjJGMGRFNFBsZGhXdEo4ajAvSGtl?=
- =?utf-8?Q?Ee03qGVD5lK6RWoc=3D?=
-X-Exchange-RoutingPolicyChecked: rncttohKTziaXD0SzbUVrVLx1neYh+TTZA4dFT1WvsLOIgycY6Z2a7AA/BJ+8N1LlJpscdAYD7tF3+pBP9C4EzzpFWw9ySOdsz8R4pNd+lamQ9TmalshHwN5eY1ZMSUAh5knnWy2nVLztMFZn5HCaBHkP7JUhprvLLz0yus+KjGjiOSxHJbKhPu9ZAjjbqX8+BRLumqaYSekCvh7N3SF57q8brijXcFO5V9yeah7FWoqNVEjZE9UoArqwQE58ve/lNxGbsV3K1nn33rHVqp+BO8PxFIgta5olbV+fUWdwvPFCan/7+jqQzdIvwWeSQzwB6LijzAze0g6I3OzocquLw==
-X-MS-Exchange-CrossTenant-Network-Message-Id: 52fc14e0-fe02-444b-5731-08deaaa5912c
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 May 2026 12:55:21.7445
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: mvcVHyn1YQeLlLs6zmJg8Wd6NZEEUuhl1XGvmZoGHuBS3O0kvDx3eoryP1KCLecViQ+UpmiWq7zA8Kc9yUwWXg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA4PR11MB9394
-X-OriginatorOrg: intel.com
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On 24/04/2026 10:09, hehuan1@eswincomputing.com wrote:
-> From: Huan He <hehuan1@eswincomputing.com>
-> 
-> The EIC7700 code in sdhci-of-dwcmshc uses host->mmc->caps2 to select
-> different configuration paths for different card types. The current logic
-> distinguishes eMMC and SD, but does not handle SDIO separately.
-> 
-> Update the EIC7700 card-type checks so that eMMC, SD and SDIO are
-> distinguished explicitly.
-> 
-> Switch the reset path to dwcmshc_reset() so that pending interrupt state
-> is cleared consistently, and use sdhci_enable_clk() so the clock enable
-> sequence follows the standard SDHCI flow.
+The driver currently handles reset control only during initializations,
+but does not manage the controller reset signal during system
+suspend/resume. This can leave the hardware in an undefined state
+after resume. Additionally, the reset control is stored in vendor
+structs making it inaccessible for power management operations.
 
-The reset and clk changes seem like they are not only for SDIO, but
-the subject only mentions SDIO.  Should the subject be more like below?
+Move the reset control to dwcmshc_priv structure and add proper
+assertion during suspend and deassertion during resume. The
+needs_reset_on_pm flag to control whether reset operations are
+performed during power management transitions, as not all platforms
+require or support reset handling in suspend/resume path. This ensures the
+controller is properly reset before entering low power state and correctly
+reinitialized upon wake.
 
-	Fix reset, clk, and SDIO support for Eswin EIC7700
+Signed-off-by: Artem Shimko <a.shimko.dev@gmail.com>
+---
 
-> 
-> Fixes: 32b2633219d3 ("mmc: sdhci-of-dwcmshc: Add support for Eswin EIC7700")
-> Signed-off-by: Huan He <hehuan1@eswincomputing.com>
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 45 +++++++++++++++--------------
->  1 file changed, 23 insertions(+), 22 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 0b2158a7e409..0c1b39d48502 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -277,6 +277,7 @@
->  #define PHY_DELAY_CODE_MAX		0x7f
->  #define PHY_DELAY_CODE_EMMC		0x17
->  #define PHY_DELAY_CODE_SD		0x55
-> +#define PHY_DELAY_CODE_SDIO		0x29
->  
->  struct rk35xx_priv {
->  	struct reset_control *reset;
-> @@ -1433,10 +1434,7 @@ static void sdhci_eic7700_set_clock(struct sdhci_host *host, unsigned int clock)
->  	clk_set_rate(pltfm_host->clk, clock);
->  
->  	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> -	clk |= SDHCI_CLOCK_INT_EN;
-> -	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> -
-> -	dwcmshc_enable_card_clk(host);
-> +	sdhci_enable_clk(host, clk);
->  }
->  
->  static void sdhci_eic7700_config_phy_delay(struct sdhci_host *host, int delay)
-> @@ -1497,7 +1495,7 @@ static void sdhci_eic7700_config_phy(struct sdhci_host *host)
->  
->  static void sdhci_eic7700_reset(struct sdhci_host *host, u8 mask)
->  {
-> -	sdhci_reset(host, mask);
-> +	dwcmshc_reset(host, mask);
->  
->  	/* after reset all, the phy's config will be clear */
->  	if (mask == SDHCI_RESET_ALL)
-> @@ -1594,18 +1592,18 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -	u32 sd_caps = MMC_CAP2_NO_MMC | MMC_CAP2_NO_SDIO;
-> +	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
->  	int phase_code = -1;
->  	int code_range = -1;
-> -	bool is_sd = false;
-> +	bool is_non_emmc = false;
+Hi,
 
-It is nicer to avoid double negatives like !is_non_emmc
-so prefer to use is_emmc
+Move reset control from vendor-specific private structures to the
+common dwcmshc_priv. Introduce a needs_reset_on_pm flag — platforms
+that require reset during suspend/resume set it to true. When the
+flag is false (the default for all existing platforms), the PM path
+behaves exactly as before, preserving full backward compatibility.
 
-	is_emmc = (host->mmc->caps2 & emmc_caps) == emmc_caps;
+Rockchip RK35xx and EIC7700 do not set the flag; their suspend/resume
+behaviour is unchanged.
 
->  	int code_min = -1;
->  	int code_max = -1;
->  	int cmd_error = 0;
->  	int ret = 0;
->  	int i = 0;
->  
-> -	if ((host->mmc->caps2 & sd_caps) == sd_caps)
-> -		is_sd = true;
-> +	if ((host->mmc->caps2 & emmc_caps) != emmc_caps)
-> +		is_non_emmc = true;
->  
->  	for (i = 0; i <= MAX_PHASE_CODE; i++) {
->  		/* Centered Phase code */
-> @@ -1614,8 +1612,8 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
->  		host->ops->reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
->  
->  		if (ret) {
-> -			/* SD specific range tracking */
-> -			if (is_sd && code_min != -1 && code_max != -1) {
-> +			/* SD/SDIO specific range tracking */
-> +			if (is_non_emmc && code_min != -1 && code_max != -1) {
->  				if (code_max - code_min > code_range) {
->  					code_range = code_max - code_min;
->  					phase_code = (code_min + code_max) / 2;
-> @@ -1626,17 +1624,17 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
->  				code_max = -1;
->  			}
->  			/* EMMC breaks after first valid range */
-> -			if (!is_sd && code_min != -1 && code_max != -1)
-> +			if (!is_non_emmc && code_min != -1 && code_max != -1)
->  				break;
->  		} else {
->  			/* Track valid phase code range */
->  			if (code_min == -1) {
->  				code_min = i;
-> -				if (!is_sd)
-> +				if (!is_non_emmc)
->  					continue;
->  			}
->  			code_max = i;
-> -			if (is_sd && i == MAX_PHASE_CODE) {
-> +			if (is_non_emmc && i == MAX_PHASE_CODE) {
->  				if (code_max - code_min > code_range) {
->  					code_range = code_max - code_min;
->  					phase_code = (code_min + code_max) / 2;
-> @@ -1646,19 +1644,19 @@ static int sdhci_eic7700_phase_code_tuning(struct sdhci_host *host, u32 opcode)
->  	}
->  
->  	/* Handle tuning failure case */
-> -	if ((is_sd && phase_code == -1) ||
-> -	    (!is_sd && code_min == -1 && code_max == -1)) {
-> +	if ((is_non_emmc && phase_code == -1) ||
-> +	    (!is_non_emmc && code_min == -1 && code_max == -1)) {
->  		pr_err("%s: phase code tuning failed!\n", mmc_hostname(host->mmc));
->  		sdhci_writew(host, 0, priv->vendor_specific_area1 + DWCMSHC_AT_STAT);
->  		return -EIO;
->  	}
-> -	if (!is_sd)
-> +	if (!is_non_emmc)
->  		phase_code = (code_min + code_max) / 2;
->  
->  	sdhci_writew(host, phase_code, priv->vendor_specific_area1 + DWCMSHC_AT_STAT);
->  
-> -	/* SD specific final verification */
-> -	if (is_sd) {
-> +	/* SD/SDIO specific final verification */
-> +	if (is_non_emmc) {
->  		ret = mmc_send_tuning(host->mmc, opcode, &cmd_error);
->  		host->ops->reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
->  		if (ret) {
-> @@ -1756,9 +1754,9 @@ static void sdhci_eic7700_set_uhs_signaling(struct sdhci_host *host, unsigned in
->  
->  static void sdhci_eic7700_set_uhs_wrapper(struct sdhci_host *host, unsigned int timing)
->  {
-> -	u32 sd_caps = MMC_CAP2_NO_MMC | MMC_CAP2_NO_SDIO;
-> +	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
->  
-> -	if ((host->mmc->caps2 & sd_caps) == sd_caps)
-> +	if ((host->mmc->caps2 & emmc_caps) != emmc_caps)
->  		sdhci_set_uhs_signaling(host, timing);
->  	else
->  		sdhci_eic7700_set_uhs_signaling(host, timing);
-> @@ -1767,6 +1765,7 @@ static void sdhci_eic7700_set_uhs_wrapper(struct sdhci_host *host, unsigned int
->  static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
->  {
->  	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
-> +	u32 sd_caps = MMC_CAP2_NO_MMC | MMC_CAP2_NO_SDIO;
->  	unsigned int val, hsp_int_status, hsp_pwr_ctrl;
->  	static const char * const clk_ids[] = {"axi"};
->  	struct of_phandle_args args;
-> @@ -1821,8 +1820,10 @@ static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcm
->  
->  	if ((host->mmc->caps2 & emmc_caps) == emmc_caps)
->  		dwc_priv->delay_line = PHY_DELAY_CODE_EMMC;
-> -	else
-> +	else if ((host->mmc->caps2 & sd_caps) == sd_caps)
->  		dwc_priv->delay_line = PHY_DELAY_CODE_SD;
-> +	else
-> +		dwc_priv->delay_line = PHY_DELAY_CODE_SDIO;
->  
->  	if (!of_property_read_u32(dev->of_node, "eswin,drive-impedance-ohms", &val))
->  		priv->drive_impedance = eic7700_convert_drive_impedance_ohm(dev, val);
+--
+Regards,
+Artem
+
+ChangeLog:
+  v1:
+    * https://lore.kernel.org/all/20260415123411.437450-1-a.shimko.dev@gmail.com/T/#u
+  v2:
+    * Added needs_reset_on_pm flag. The flag defaults to false,
+      guaranteeing no functional change for existing platforms.
+
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 47 ++++++++++++++++++-----------
+ 1 file changed, 29 insertions(+), 18 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 0b2158a7e409..cf9be59f79c5 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -279,12 +279,10 @@
+ #define PHY_DELAY_CODE_SD		0x55
+ 
+ struct rk35xx_priv {
+-	struct reset_control *reset;
+ 	u8 txclk_tapnum;
+ };
+ 
+ struct eic7700_priv {
+-	struct reset_control *reset;
+ 	unsigned int drive_impedance;
+ };
+ 
+@@ -297,6 +295,8 @@ struct k230_priv  {
+ 
+ struct dwcmshc_priv {
+ 	struct clk	*bus_clk;
++	struct reset_control *reset;
++	bool needs_reset_on_pm;
+ 	int vendor_specific_area1; /* P_VENDOR_SPECIFIC_AREA1 reg */
+ 	int vendor_specific_area2; /* P_VENDOR_SPECIFIC_AREA2 reg */
+ 
+@@ -887,16 +887,15 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
+-	struct rk35xx_priv *priv = dwc_priv->priv;
+ 	u32 extra = sdhci_readl(host, DECMSHC_EMMC_MISC_CON);
+ 
+ 	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
+ 		cqhci_deactivate(host->mmc);
+ 
+-	if (mask & SDHCI_RESET_ALL && priv->reset) {
+-		reset_control_assert(priv->reset);
++	if (mask & SDHCI_RESET_ALL && dwc_priv->reset) {
++		reset_control_assert(dwc_priv->reset);
+ 		udelay(1);
+-		reset_control_deassert(priv->reset);
++		reset_control_deassert(dwc_priv->reset);
+ 	}
+ 
+ 	sdhci_reset(host, mask);
+@@ -916,9 +915,9 @@ static int dwcmshc_rk35xx_init(struct device *dev, struct sdhci_host *host,
+ 	if (!priv)
+ 		return -ENOMEM;
+ 
+-	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
+-	if (IS_ERR(priv->reset)) {
+-		err = PTR_ERR(priv->reset);
++	dwc_priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
++	if (IS_ERR(dwc_priv->reset)) {
++		err = PTR_ERR(dwc_priv->reset);
+ 		dev_err(mmc_dev(host->mmc), "failed to get reset control %d\n", err);
+ 		return err;
+ 	}
+@@ -1504,24 +1503,24 @@ static void sdhci_eic7700_reset(struct sdhci_host *host, u8 mask)
+ 		sdhci_eic7700_config_phy(host);
+ }
+ 
+-static int sdhci_eic7700_reset_init(struct device *dev, struct eic7700_priv *priv)
++static int sdhci_eic7700_reset_init(struct device *dev, struct dwcmshc_priv *dwc_priv)
+ {
+ 	int ret;
+ 
+-	priv->reset = devm_reset_control_array_get_optional_exclusive(dev);
+-	if (IS_ERR(priv->reset)) {
+-		ret = PTR_ERR(priv->reset);
++	dwc_priv->reset = devm_reset_control_array_get_optional_exclusive(dev);
++	if (IS_ERR(dwc_priv->reset)) {
++		ret = PTR_ERR(dwc_priv->reset);
+ 		dev_err(dev, "failed to get reset control %d\n", ret);
+ 		return ret;
+ 	}
+ 
+-	ret = reset_control_assert(priv->reset);
++	ret = reset_control_assert(dwc_priv->reset);
+ 	if (ret) {
+ 		dev_err(dev, "Failed to assert reset signals: %d\n", ret);
+ 		return ret;
+ 	}
+ 	usleep_range(2000, 2100);
+-	ret = reset_control_deassert(priv->reset);
++	ret = reset_control_deassert(dwc_priv->reset);
+ 	if (ret) {
+ 		dev_err(dev, "Failed to deassert reset signals: %d\n", ret);
+ 		return ret;
+@@ -1780,7 +1779,7 @@ static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcm
+ 
+ 	dwc_priv->priv = priv;
+ 
+-	ret = sdhci_eic7700_reset_init(dev, dwc_priv->priv);
++	ret = sdhci_eic7700_reset_init(dev, dwc_priv);
+ 	if (ret) {
+ 		dev_err(dev, "failed to reset\n");
+ 		return ret;
+@@ -2563,6 +2562,9 @@ static int dwcmshc_suspend(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
++	if (priv->needs_reset_on_pm)
++		reset_control_assert(priv->reset);
++
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	if (!IS_ERR(priv->bus_clk))
+ 		clk_disable_unprepare(priv->bus_clk);
+@@ -2593,18 +2595,27 @@ static int dwcmshc_resume(struct device *dev)
+ 	if (ret)
+ 		goto disable_bus_clk;
+ 
++	if (priv->needs_reset_on_pm) {
++		ret = reset_control_deassert(priv->reset);
++		if (ret)
++			goto disable_other_clks;
++	}
++
+ 	ret = sdhci_resume_host(host);
+ 	if (ret)
+-		goto disable_other_clks;
++		goto assert_reset;
+ 
+ 	if (host->mmc->caps2 & MMC_CAP2_CQE) {
+ 		ret = cqhci_resume(host->mmc);
+ 		if (ret)
+-			goto disable_other_clks;
++			goto assert_reset;
+ 	}
+ 
+ 	return 0;
+ 
++assert_reset:
++	if (priv->needs_reset_on_pm)
++		reset_control_assert(priv->reset);
+ disable_other_clks:
+ 	clk_bulk_disable_unprepare(priv->num_other_clks, priv->other_clks);
+ disable_bus_clk:
+-- 
+2.43.0
 
