@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3F2630BF6B;
-	Wed,  6 May 2026 13:24:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E652472793;
+	Wed,  6 May 2026 13:25:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778073892; cv=none; b=R4BaZWJimp9WfhI8Vhdnc83UZ/LBRaJlCo6PUudle2j5kmo39sKrUPxMAT5GWrcYZHF3NDRMUji09+aXhenFTQs7FuoLXUFu+8a6wOe/3VGa06kDNbN+zGNd3RLpjpf21t30nSV5xYLdkzq7U8gHSc5gB+mA3WD7PS4+kSgNVaM=
+	t=1778073926; cv=none; b=VL8frEqpTxuOrqj1HhxqxTSiSiU4d0zfUcW1ek9LOhOqAyaJFhclL5RNpXpwCK11QRUTRP9mzyhzEV1Fq1z8zLeMkrMYW1qHvBkop0rMfu6xWXdNGr9Dx5rqaGHdZ9otF1jJ1NQNsadwX/d+oNH48KFLMrTRjOYeSW/9sKqgS4I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778073892; c=relaxed/simple;
-	bh=KBdPCA7WqEzlXbX6sx7AIpxIm+mcvsDlaeSMWNZqW4E=;
+	s=arc-20240116; t=1778073926; c=relaxed/simple;
+	bh=aO4mUmDBeu9ZTeluk+s1bFn9mayuhjcozPksTTumRHM=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=BHL52xz556kTzwU6ozF20gK1GrTHlKWoFfdh1q7vuPC8OtScCHgEp8VqwkPnRBdQI0XS5KJGlbPGRwLsIrkyzs/2vYKIbpeJ/LcZ+ojOBWX05dUq0cxIR5kOCdg8F72xVxbuRNhjr+QE0LZXzAmTrebCKL6K1PYD1Rw0qVMDuL0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dnhLWjdj; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=bgZ5b39suKiwTDaO1FUs79GA1jWfEpvbvjAAU3rO3CM6HFRtkjAC1zAQ2m3aDG8RWn4YgHGcV2Fz5DvMdoOi0TzRRKF4dehO52KVR56WtaYbCstct0EcrESzP4qOuFL1gFVZ33v5mhJnV+nJUSK/nh45Txdvn4zoL4AwthjRVqo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CxvBzka9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dnhLWjdj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 89500C2BCB8;
-	Wed,  6 May 2026 13:24:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CxvBzka9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01303C2BCB8;
+	Wed,  6 May 2026 13:25:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778073891;
-	bh=KBdPCA7WqEzlXbX6sx7AIpxIm+mcvsDlaeSMWNZqW4E=;
+	s=k20201202; t=1778073926;
+	bh=aO4mUmDBeu9ZTeluk+s1bFn9mayuhjcozPksTTumRHM=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=dnhLWjdjcB85BCksEOsYETDm11pnnkv3yP24sIU6FIManXsMJ7dFahkQIHbmrTcY+
-	 qIJTQTO6qq3MfuxajunDNQPFobTLiZgOo4IJk5AM248sBhgMfX4XRv4cWy54gowgbB
-	 y3jAS/QqvOJKsmh2ajHTcJjNfBUifcIrqzv8X6lbXsTX07j2+CK8YvhakjsmxFozk2
-	 Z3I3oksig/VmS2cKqZyK3CKxIwf5XVZL9W8jl3+hhNsx/IB+3Sk825a0mR/REY2JKz
-	 5VSp49IldZjboehsv8+q3cVuVo9nkYu4a3msLQXCaILnrv2n3U4yv8Ke/09SvPSkl5
-	 ds6NBUt/noKZg==
-Message-ID: <0d9b9a53-2743-4202-96dc-0b922c48f375@kernel.org>
-Date: Wed, 6 May 2026 15:24:46 +0200
+	b=CxvBzka9TjaSMbos83Sd26FdmRfI8XvkXhRGcG3SgcKECPQuTtHh65taDebhvRKgG
+	 D92dKY18i34ZewSLm5G8lssnYM6RToHNiTWtQQNgx5Xsr41YIaHEULCSsQa2BlpkGk
+	 5yNXRTnYcv/dTgGZ1meDhH8HxfU8R3F+lThozIcQhZIIDy/DFYnfhjcXaWU0Gj6LUB
+	 NcPAGNHZEcAFn3oNbIJ9exmb0FupUaJ900947fFjwHDAJwz9wqNMcnS50lQ67Zju2V
+	 2zA5x7jkvVPrPQ5drOVti9mr+MNCqINPrC1qISQM+0BsRlAG5vLVimTgJfl7YLsX5x
+	 u8QzwiGIgSgPg==
+Message-ID: <0d2c88d8-ff1d-4cf7-b13d-9b498a81843f@kernel.org>
+Date: Wed, 6 May 2026 15:25:21 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,7 +35,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: cdns,sdhci: Add CQE support
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-cadence: add CQE support
 To: rohan1sj@cadence.com, Ulf Hansson <ulfh@kernel.org>,
  Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  Conor Dooley <conor+dt@kernel.org>,
@@ -45,7 +45,7 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, mparab@cadence.com, pawell@cadence.com,
  sjakhade@cadence.com, mpillai@cadence.com
 References: <20260506-cdns_sdhci_cqe-support-v2-0-754fe4de8b65@cadence.com>
- <20260506-cdns_sdhci_cqe-support-v2-1-754fe4de8b65@cadence.com>
+ <20260506-cdns_sdhci_cqe-support-v2-2-754fe4de8b65@cadence.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -91,99 +91,18 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20260506-cdns_sdhci_cqe-support-v2-1-754fe4de8b65@cadence.com>
+In-Reply-To: <20260506-cdns_sdhci_cqe-support-v2-2-754fe4de8b65@cadence.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 06/05/2026 11:04, Rohan Joshi via B4 Relay wrote:
-> From: Rohan Joshi <rohan1sj@cadence.com>
-> 
-> Cadence host controller can support CQE. Add optional CQE
-> register space and reg-names property to cdns sdhci binding
-> 
-> Signed-off-by: Rohan Joshi <rohan1sj@cadence.com>
-> ---
->  .../devicetree/bindings/mmc/cdns,sdhci.yaml        | 41 +++++++---------------
->  1 file changed, 12 insertions(+), 29 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index 8902e7925eab..79064282fabc 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -26,7 +26,9 @@ properties:
+> @@ -450,11 +447,9 @@ static int sdhci_cdns_cqe_add_host(struct sdhci_host *host, struct platform_devi
+>  	if (ret)
+>  		goto cleanup;
 >  
->    reg-names:
+> -	dev_info(mmc_dev(host->mmc), "CQE init: success\n");
 
-There are no reg-names in this file.
-
->      minItems: 1
-> -    maxItems: 2
-> +    items:
-> +      - const: hc
-> +      - const: cqhci
->  
->    interrupts:
->      maxItems: 1
-> @@ -138,22 +140,16 @@ allOf:
->            items:
->              - description: Host controller registers
->              - description: Elba byte-lane enable register for writes
-> +        reg-names: false
-
-Why?
-
-> +      required:
-> +        - resets
-
-Why?
-
->      else:
->        properties:
->          reg:
-> -          oneOf:
-> -            - items:
-> -                - description: Host controller registers
-> -            - items:
-> -                - description: Host controller registers
-> -                - description: CQE (Command Queue Engine) registers
-> -        reg-names:
-> -          oneOf:
-> -            - items:
-> -                - const: sdhci
-> -            - items:
-> -                - const: sdhci
-> -                - const: cqhci
-> +          minItems: 1
-> +          items:
-> +            - description: Host Controller registers
-> +            - description: CQE (Command Queuing Engine) registers
-
-Why each device has CQE? If each, then why not Pensando?
-
-
-
->  
->  unevaluatedProperties: false
->  
-> @@ -161,7 +157,8 @@ examples:
->    - |
->      emmc: mmc@5a000000 {
->          compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
-> -        reg = <0x5a000000 0x400>;
-> +        reg = <0x5a000000 0x400>, <0x5a000400 0x060>;
-> +        reg-names = "hc", "cqhci";
->          interrupts = <0 78 4>;
->          clocks = <&clk 4>;
->          bus-width = <8>;
-> @@ -170,17 +167,3 @@ examples:
->          mmc-hs400-1_8v;
->          cdns,phy-dll-delay-sdclk = <0>;
->      };
-> -
-> -  - |
-
-What are you doing here?
-
+I don't think you understand how Git works. :(
 
 Best regards,
 Krzysztof
