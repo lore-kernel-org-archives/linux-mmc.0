@@ -1,33 +1,66 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f181.google.com (mail-pg1-f181.google.com [209.85.215.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E652472793;
-	Wed,  6 May 2026 13:25:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44E1147DFA7
+	for <linux-mmc@vger.kernel.org>; Wed,  6 May 2026 13:56:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778073926; cv=none; b=VL8frEqpTxuOrqj1HhxqxTSiSiU4d0zfUcW1ek9LOhOqAyaJFhclL5RNpXpwCK11QRUTRP9mzyhzEV1Fq1z8zLeMkrMYW1qHvBkop0rMfu6xWXdNGr9Dx5rqaGHdZ9otF1jJ1NQNsadwX/d+oNH48KFLMrTRjOYeSW/9sKqgS4I=
+	t=1778075762; cv=none; b=qBK6lNLzBi7nPC4gH442/gzYcJQw6f0wAY1EEBsktYhBbqYgkTtf2ftDvsiaOGWl2ogFSJa35uF9RPDFL0Tj3efrEjou4/2+eXrEkd0+ZCy5dg3BxZ+GRmlbQmBRpz0v/LWckVU468ojDYaTfRjXeMF/XYrSdzoGhaupfjlfHF8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778073926; c=relaxed/simple;
-	bh=aO4mUmDBeu9ZTeluk+s1bFn9mayuhjcozPksTTumRHM=;
+	s=arc-20240116; t=1778075762; c=relaxed/simple;
+	bh=XcLrxU6hNruep/5Mhx3tarBzPKestSx9/PV2ZEBRHHE=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=bgZ5b39suKiwTDaO1FUs79GA1jWfEpvbvjAAU3rO3CM6HFRtkjAC1zAQ2m3aDG8RWn4YgHGcV2Fz5DvMdoOi0TzRRKF4dehO52KVR56WtaYbCstct0EcrESzP4qOuFL1gFVZ33v5mhJnV+nJUSK/nh45Txdvn4zoL4AwthjRVqo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CxvBzka9; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=HQNiAAPSnJ3S8ICf6rOpY1XXdKpYO3iXeA1reUCG8qKpEnDJvUsUVvr9KAesjn6ryV2e2r1ojnfhYieOPoRRM5OOaXYUh2b7sBBbio5THy1UsOVGsSmAB3e8Ak657X/EjQcAIXu3J/R9ir+Q3Mo35c4v9WSo9e5CN5zOXiJ3PPc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WLavsInj; arc=none smtp.client-ip=209.85.215.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CxvBzka9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01303C2BCB8;
-	Wed,  6 May 2026 13:25:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778073926;
-	bh=aO4mUmDBeu9ZTeluk+s1bFn9mayuhjcozPksTTumRHM=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=CxvBzka9TjaSMbos83Sd26FdmRfI8XvkXhRGcG3SgcKECPQuTtHh65taDebhvRKgG
-	 D92dKY18i34ZewSLm5G8lssnYM6RToHNiTWtQQNgx5Xsr41YIaHEULCSsQa2BlpkGk
-	 5yNXRTnYcv/dTgGZ1meDhH8HxfU8R3F+lThozIcQhZIIDy/DFYnfhjcXaWU0Gj6LUB
-	 NcPAGNHZEcAFn3oNbIJ9exmb0FupUaJ900947fFjwHDAJwz9wqNMcnS50lQ67Zju2V
-	 2zA5x7jkvVPrPQ5drOVti9mr+MNCqINPrC1qISQM+0BsRlAG5vLVimTgJfl7YLsX5x
-	 u8QzwiGIgSgPg==
-Message-ID: <0d2c88d8-ff1d-4cf7-b13d-9b498a81843f@kernel.org>
-Date: Wed, 6 May 2026 15:25:21 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WLavsInj"
+Received: by mail-pg1-f181.google.com with SMTP id 41be03b00d2f7-c7358a7a8d1so4126434a12.3
+        for <linux-mmc@vger.kernel.org>; Wed, 06 May 2026 06:56:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1778075761; x=1778680561; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=21im18CnslCvYwXS2NJ84S3pXykaNCx3/vuExYBK0cE=;
+        b=WLavsInjlhIZmPR3Ac8Zgb15aC4S/NDZrr4OP2UnPYBjUxFiz/CJ6rZmJiqksh1yhM
+         qq6AUZ4GU10Y4OEQ3OM7sWtUeTNEs5o5UToriPlFTUCqMdHVQFMrnXKebLhw+yr49jpb
+         8titwrXNiBEk/3XLEZWTr3NaegCuVJLgFxLtBM+amf6ZICNjtGdnL0e+PAPNkRavXivs
+         LoabUPRZpYV3VFHTrMMvBVmsDD0WRIIog0l6fKRnBadrFwPB5/SCAtfWqo5Z7elqXe92
+         wpeNTRXhfJs5Sf5PHx3MCxls4O9hXtcUZyXu8XXwCo010puwLa4mndyQvpO2muQHYP0U
+         jQvQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778075761; x=1778680561;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=21im18CnslCvYwXS2NJ84S3pXykaNCx3/vuExYBK0cE=;
+        b=KxgbU2hLQkmmyGK22LTZIsJwbXdpWVgOcXjydj7m9K0BK3E5+fOkltIG3FaO3okj4U
+         YLu1nXhNqwRgP8zf1UBA8hWdzbHalCmsxKJp/yoWbFMUoYU74DD5TS/amoublRzlD7aB
+         OAqu8/fhyZGFsvH52FCkwvhXjAn0KaP5xawqS7jiBFraM+j7oNbQQntho614Flc0pG8K
+         Diu4ZYnfX/UFTUW0qEW+MZNy55LRsTZHWMA5RgGZN5VzPfcGhE3hw10XJAwW7RON0xlN
+         ZEdugTdbG7S/NZ12WzZ1c6X//PjqTJ/rIZ34t2CcS4L88fUj1rwq+MAAGzi0KKwdBxLx
+         nCGA==
+X-Forwarded-Encrypted: i=1; AFNElJ93e4vrNpN1u9XdOF+wopshzuC6kA7J3C5hUl9mw/+y8nk1ylFmHmV3lI82W6Jn+NXQ0EEUDFp69As=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwpXECG8sjKhvXXg/wnV5of0Q0V5wWkKrcfbQJC2nlpjSdDJEf8
+	xwuj8Mgh5kU4/OEHP9VtagWPqur49pQmx7+bcr0i7zNzBhfISACO+e1Q17oUow==
+X-Gm-Gg: AeBDiesG4Pc+hqMHE1xG0VR+Myhs8QRmbv3CERHVRLmabGE1IwM9UXb/3Ya95V4xpNm
+	EfRPmpF6rC1zoyzncVNdt1sQT24Drc5acMvIIO5hB2AvPjyUp+A2BWqHkmjr4vhOEbvXu7y4y5o
+	PFt/SxlpWQ8ZErMs+2NFK4C3vCV/i0Sow+JWZ6AFwdpdxvTeI2n9C230aPCdoHiCD55OrdQ2CQh
+	gI6GDIvjAwiwP0HtDPPN4rWknqLT4UgIAVcZ6s8vccyUCPeRQpsEj8ZuTIJCEqe1Yp6UKiZXmCY
+	YxP0bh0Ru6ii6KRGYb7z04Furks3Hxj3dfrEinP1T2GQnZ68gSjDLbO3woFJoBrGwZ2LG+M1MWF
+	v15O/o1x+8K+/oW8lBShq/xGK049wDjy/31hQoWKnqtFHdEWZ0q/3/I8IPDceLwAHHvkli/1GoG
+	hdjiqMbAPk904VFzRjr17zoDXWWj448XNySWH8pprDm396SzsVs7CRycYp
+X-Received: by 2002:a05:6a20:2443:b0:39b:ba95:b127 with SMTP id adf61e73a8af0-3aa5a83151bmr4200206637.4.1778075760634;
+        Wed, 06 May 2026 06:56:00 -0700 (PDT)
+Received: from [192.168.1.3] ([60.243.224.75])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c8242b811a5sm2326811a12.20.2026.05.06.06.55.56
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 06 May 2026 06:56:00 -0700 (PDT)
+Message-ID: <b386707d-944f-485b-8a06-236c1242f5ee@gmail.com>
+Date: Wed, 6 May 2026 19:25:52 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,74 +68,128 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-cadence: add CQE support
-To: rohan1sj@cadence.com, Ulf Hansson <ulfh@kernel.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>,
- Masahiro Yamada <yamada.masahiro@socionext.com>,
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, mparab@cadence.com, pawell@cadence.com,
- sjakhade@cadence.com, mpillai@cadence.com
-References: <20260506-cdns_sdhci_cqe-support-v2-0-754fe4de8b65@cadence.com>
- <20260506-cdns_sdhci_cqe-support-v2-2-754fe4de8b65@cadence.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH v2 2/2] dt-bindings: mmc: st,sdhci: convert to DT schema
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Peter Griffin <peter.griffin@linaro.org>,
+ Patrice Chotard <patrice.chotard@foss.st.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org
+References: <20260503-st-mmc-v2-0-11ae3216d2ce@gmail.com>
+ <20260503-st-mmc-v2-2-11ae3216d2ce@gmail.com>
+ <20260504-rational-gleaming-clam-aeaaff@quoll>
 Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20260506-cdns_sdhci_cqe-support-v2-2-754fe4de8b65@cadence.com>
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+In-Reply-To: <20260504-rational-gleaming-clam-aeaaff@quoll>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 06/05/2026 11:04, Rohan Joshi via B4 Relay wrote:
-> @@ -450,11 +447,9 @@ static int sdhci_cdns_cqe_add_host(struct sdhci_host *host, struct platform_devi
->  	if (ret)
->  		goto cleanup;
->  
-> -	dev_info(mmc_dev(host->mmc), "CQE init: success\n");
 
-I don't think you understand how Git works. :(
 
-Best regards,
-Krzysztof
+On 04-05-2026 13:13, Krzysztof Kozlowski wrote:
+> On Sun, May 03, 2026 at 08:35:30AM +0000, Charan Pedumuru wrote:
+>> +$id: http://devicetree.org/schemas/mmc/st,sdhci.yaml#
+>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>> +
+>> +title: STMicroelectronics SDHCI-ST MMC/SD Controller
+>> +
+>> +description:
+>> +  The STMicroelectronics SDHCI-ST MMC/SD host controller, which is
+>> +  compliant with the SD Host Controller Interface (SDHCI) specification and
+>> +  is used to interface with MMC, SD and SDIO cards. The ST SDHCI controller
+>> +  extends the standard SDHCI capabilities with platform-specific
+>> +  configurations such as additional register regions,clock inputs, and delay
+>> +  control mechanisms required for signal timing adjustments which are
+>> +  necessary to support high-speed modes and ensure reliable data transfer
+>> +  across different ST SoCs.
+>> +
+>> +allOf:
+>> +  - $ref: mmc-controller.yaml#
+>> +
+>> +maintainers:
+>> +  - Peter Griffin <peter.griffin@linaro.org>
+>> +
+>> +properties:
+>> +  compatible:
+>> +    oneOf:
+>> +      - const: st,sdhci
+>> +      - items:
+>> +          - const: st,sdhci-stih407
+>> +          - const: st,sdhci
+>> +
+>> +  reg:
+>> +    minItems: 1
+>> +    items:
+>> +      - description: Base address and size of the MMC controller registers
+> 
+> s/Base address and size of the//
+
+Okay, I will remove these words.
+
+> 
+>> +      - description: Base address and size of the MMC delay/auxiliary registers
+> 
+> Here the same
+
+Okay.
+
+> 
+>> +
+>> +  reg-names:
+>> +    oneOf:
+>> +      - items:
+>> +          - const: mmc
+> 
+> Drop three lines above
+
+Sure.
+
+> 
+>> +      - items:
+> 
+> So this is just items like you have in "reg" part. Same syntax.
+> 
+>> +          - const: mmc
+>> +          - const: top-mmc-delay
+>> +
+>> +  clocks:
+> 
+> Here and:
+
+Should I add minItems and maxItems instead of items?
+
+> 
+>> +    items:
+>> +      - description: Clock for the MMC controller
+>> +      - description: Interconnect (ICN) clock
+>> +
+>> +  clock-names:
+> 
+> here: Old binding icn is optional. You need to explain in the commit msg
+> all the changes done during conversion.
+
+Okay, I will write this change in commit message.
+
+> 
+>> +    items:
+>> +      - const: mmc
+>> +      - const: icn
+>> +
+>> +  interrupts:
+>> +    maxItems: 1
+>> +
+>> +  interrupt-names:
+>> +    const: mmcirq
+>> +
+>> +  resets:
+>> +    maxItems: 1
+> 
+> Best regards,
+> Krzysztof
+> 
+
+-- 
+Best Regards,
+Charan.
+
