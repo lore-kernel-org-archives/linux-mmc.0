@@ -1,87 +1,79 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF6C448BD27;
-	Tue,  5 May 2026 16:32:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAB8713AF2;
+	Wed,  6 May 2026 01:33:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1777998722; cv=none; b=D3TiqbyUxrB/A6pGcgUC+ru+IxataRcHMYLbdeoqT3YY32nPV8mbtbx93SKaUl7dGW2bAof1uk80gKr+V1jEGTI05GQNcOisvJgCMYELnVC6gXVOfwRD4GafOFCw3YkU2cQl4YuYOUkJOyIH46EUKfDEHRcVNmZ2OaBtAVLLc9w=
+	t=1778031227; cv=none; b=qP5SD/Ci7f2a5y4wdfZealHLYUX5KpTi3UTttihasda68R+nggYoJ492KIup94PV68D2P+DGbXsi5iHdV8kIwppft5ba3+UysICklES+TnGJqPc80w+cZQ4m4ivo5RPAeVMz8dc2ju1qesKBXTZVyd+m8CbTmJI9pasE0Qt5ZxY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1777998722; c=relaxed/simple;
-	bh=+L8m/p9IEyMYT1UnbyJiPTjD5qfi3vt0C0WteZRYkKg=;
+	s=arc-20240116; t=1778031227; c=relaxed/simple;
+	bh=DqNkGEpajtFeSQcLSJkXmxKpW6Vr9KH4V+Ji0b1S3VY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=P4lfUzc02yVeUdAbnLzQIjxU5g4qGIvaosWGciOryilFmuAUR+UvP30GfSlkpNvqYgmq+hEMF81NJ8XuCdRe/EGBxaSFfVoxBzjwIzpvhEWrngUIhAfOiJnJeu9Sh44k4gu82w30FS6dj9pIvye8Cku3iVgNKoWy5asYA6VRFeo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CGJQnsTg; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=B8yNjNYOT/Eq5wAntzdTWtJVAOnLtAR9ECW9ZbkWrqVHmq0KzypEooGjdJLv7Dx8c0APkKBrlXFtQG48yKF+m6e1SJKtUmKR+2eHS1/PL8k56R8TW70zmiMfEfwS4Gl/UQT34ZXQIMVuqHqt8hU0dNZEvAf/+A/AZV2OUCGgpFE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sz61/s/G; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CGJQnsTg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 77549C2BCB4;
-	Tue,  5 May 2026 16:31:58 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sz61/s/G"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E81D9C2BCB4;
+	Wed,  6 May 2026 01:33:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1777998721;
-	bh=+L8m/p9IEyMYT1UnbyJiPTjD5qfi3vt0C0WteZRYkKg=;
+	s=k20201202; t=1778031227;
+	bh=DqNkGEpajtFeSQcLSJkXmxKpW6Vr9KH4V+Ji0b1S3VY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=CGJQnsTgoMjZoYLgTsyP6vL6jauFF73n2pNkYTif/o2WInikA1BclPC/FkUvPq0+7
-	 wqa5s5zTc7Wj42snBK7Ums9sYe6zVqi5acuF3a9eLmXBkVMzTnVEHxpFGmh1oMNGIe
-	 HJgyx6Z91thzEihdPko6G8SYzCazJV6sDpsk0B18qgzsItM4533rWIwpfAAma9sCHy
-	 7RbeTHUeAglPUu822wZmhCSKFo8YdWjvER31vErKd3orFZMDOry8OI3zgxrVYgZEhW
-	 dLlwg0mqvwTyKTKGlA2BuxJhf2Emu5A4YL4BxEf/lUqtHAtdi2tcoOSyYbH4NSGY9V
-	 J+fGY1mlO1AOQ==
-Date: Tue, 5 May 2026 17:31:56 +0100
-From: Conor Dooley <conor@kernel.org>
-To: Marek Vasut <marek.vasut+renesas@mailbox.org>
-Cc: linux-arm-kernel@lists.infradead.org, Brian Masney <bmasney@redhat.com>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
+	b=sz61/s/GI0TkrpeVMFADYjLjsDfw5T5KWZ1GmKFoCNBt509CDAuVqYiaQnV/oTfqI
+	 /QGsrgz9nwOkQsgjlYBTkO6fcdhwJ49HQOdbgpVX3nMSAHPXqn7ZHsB9Z1IZtAHOtV
+	 Amw6WigEhhehAR0O1WJOrUJM06povIob18BjaAUx+7edqljzyC+acVIdekzAu8g/lT
+	 LC0qhGRACtvUCPhkfrQAvZKpKgplKcbxjygb3kpkj9fdylaba00dx4RLHNO+F94pjA
+	 zU905gf7D/BniueZMM76JtCoSqa75RJ7VIqF42VmTdd6ssCe1LLcv1BsZY1/5Vx40Y
+	 EhhDjmYJdvcDA==
+Date: Tue, 5 May 2026 20:33:44 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Loic Poulain <loic.poulain@oss.qualcomm.com>
+Cc: Bjorn Andersson <andersson@kernel.org>, devicetree@vger.kernel.org,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Michael Turquette <mturquette@baylibre.com>,
-	Rob Herring <robh@kernel.org>, Stephen Boyd <sboyd@kernel.org>,
-	Ulf Hansson <ulfh@kernel.org>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	devicetree@vger.kernel.org, linux-clk@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH v2 1/7] dt-bindings: mmc: renesas,sdhi: Document R-Car
- M3Le support
-Message-ID: <20260505-freebee-unclaimed-7bd3d1d5fc84@spud>
-References: <20260504144534.43745-1-marek.vasut+renesas@mailbox.org>
- <20260504144534.43745-2-marek.vasut+renesas@mailbox.org>
+	linux-arm-msm@vger.kernel.org,
+	Marcel Holtmann <marcel@holtmann.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	"David S. Miller" <davem@davemloft.net>, linux-mmc@vger.kernel.org,
+	Jens Axboe <axboe@kernel.dk>, netdev@vger.kernel.org,
+	Simon Horman <horms@kernel.org>,
+	Rocky Liao <quic_rjliao@quicinc.com>, daniel@makrotopia.org,
+	linux-wireless@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
+	Eric Dumazet <edumazet@google.com>,
+	Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
+	linux-kernel@vger.kernel.org, Bartosz Golaszewski <brgl@kernel.org>,
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+	linux-bluetooth@vger.kernel.org, Conor Dooley <conor+dt@kernel.org>,
+	Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+	Jeff Johnson <jjohnson@kernel.org>, ath10k@lists.infradead.org,
+	linux-block@vger.kernel.org,
+	Johannes Berg <johannes@sipsolutions.net>
+Subject: Re: [PATCH 6/9] dt-bindings: bluetooth: qcom: Add NVMEM BD address
+ cell
+Message-ID: <177803122421.266355.17077010002069649916.robh@kernel.org>
+References: <20260428-block-as-nvmem-v1-0-6ad23e75190a@oss.qualcomm.com>
+ <20260428-block-as-nvmem-v1-6-6ad23e75190a@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="CKnv4REyRk1oKXCq"
-Content-Disposition: inline
-In-Reply-To: <20260504144534.43745-2-marek.vasut+renesas@mailbox.org>
-
-
---CKnv4REyRk1oKXCq
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20260428-block-as-nvmem-v1-6-6ad23e75190a@oss.qualcomm.com>
 
-On Mon, May 04, 2026 at 04:43:23PM +0200, Marek Vasut wrote:
-> Document support for the SD Card/MMC Interface in the Renesas R-Car M3Le
-> (R8A779MD) SoC.
->=20
-> Signed-off-by: Marek Vasut <marek.vasut+renesas@mailbox.org>
 
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
-pw-bot: not-applicable
+On Tue, 28 Apr 2026 16:23:11 +0200, Loic Poulain wrote:
+> Add support for an NVMEM cell provider for "local-bd-address",
+> allowing the Bluetooth stack to retrieve controller's BD address
+> from non-volatile storage such as an EEPROM or an eMMC partition.
+> 
+> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
+> ---
+>  .../bindings/net/bluetooth/qcom,bluetooth-common.yaml          | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
 
---CKnv4REyRk1oKXCq
-Content-Type: application/pgp-signature; name="signature.asc"
+Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
 
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCafobfAAKCRB4tDGHoIJi
-0jQ9AQDBfT++JVm1H/VuOc28cNbFV/Q4uuX+2DRkrk6Do/lUeAD9GdaCI3FQ467T
-o9yqpxAzCpz0T6Zzl9vMwB/7kPnE1Qk=
-=9qFT
------END PGP SIGNATURE-----
-
---CKnv4REyRk1oKXCq--
