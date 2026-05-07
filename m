@@ -1,146 +1,90 @@
-Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15767175A85
-	for <linux-mmc@vger.kernel.org>; Wed,  6 May 2026 19:05:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CA87326930
+	for <linux-mmc@vger.kernel.org>; Thu,  7 May 2026 05:03:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778094349; cv=none; b=q3Xl/KhkAWJQ1xhPKo2b/2VDZTECf+xqHqsHRvj2oIyMkkTqiWHUR0TnMzyNzlehIyYzXdtBJ0sxc4G9oUMDLkNfIssQ9qpClNFJWWCZMKGMuPPJBwZgHkitB/E09gerdbsnz+W2F318GO6xxjKSU+n0iGVRoM23R1GP/J6gOJQ=
+	t=1778130226; cv=none; b=oyX/v2sGFnCVuw4fQ0cJwRIq91tQqrNxYVAsxuYbLpqcG2ljBCvNDFNwWT+IVMxVe3xIeA9/YI1NM4mLydnkMzb6CnuZ6yiDMWV+1HReL97B9FfOJ0sL3yvtwZBd6a+NxQBQ3meFge2SqGVIm/6X1i1hSVahSh5Z67zgxcYF6wc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778094349; c=relaxed/simple;
-	bh=aV7/ddYd8n/VEWp8goC8zoqNFJsPEIXQ1fyZbpIE3MU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=d5Vjl1Spz56LwRhuESrj50P+llKNO3NqWQfdvy3fKqs8ygUCDELIJQR1jfCqKRYiTEan/M+PcZrldIxE3BcDpuJ/0/5V0eOUvfcGomYjZOxJs+gRW4PZotCWtT1IKr2oJV/2VFd/JbqAcWIsYAOrLOiJLUHKMzH8hxgpqr9HZus=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gWKu5o3R; arc=none smtp.client-ip=209.85.128.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gWKu5o3R"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-488ac04e13dso39305e9.1
-        for <linux-mmc@vger.kernel.org>; Wed, 06 May 2026 12:05:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778094346; x=1778699146; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=RWaGVwrz8dpWHB2wk2T9j8VY/b7+3Y4aZTgZzUxXD1Y=;
-        b=gWKu5o3RyOAmPwD0Itg6JX/2tmc6Oyg8pNotuXzEjqnZgvJDPAwjmI430xHYDyeTv4
-         W7DmYA3UpPUYxk/XVgwhRda8X8DQ1G4eqIaMUZMXn8DrSICvSS4BbDBwxma4h4KiYjfj
-         id9VCj5qcf1pY5J8PeMZycuItc8vVaMNtEUCphPzVpZWEPstyzrK02QpBlseWIFkccbK
-         eZuuZBoI2pTcxCt2o6D48k/4gmjkfXNo/1iXYxMqY/jDq05kjmPCizFwSwBCeGJMaCxo
-         ZSE6D8hR0mB2ME1QPpmIRpOr/INtREV7sR/7cBgXRGzxKZEvPrdhnQTAmodvSIeKK801
-         HS4w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778094346; x=1778699146;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RWaGVwrz8dpWHB2wk2T9j8VY/b7+3Y4aZTgZzUxXD1Y=;
-        b=sZqka6CllxpbLqmgNByVx6oO5l49BoAiCTzxWBt60N5JJhzD0vz/FFEhADdJY0zFu/
-         7TjFOnp65DnUQkxTCZR+Hjw6Bwi7zU8LxT7hagVTFLcEGcZSPzLMc2Q6jrvWI3CrVJen
-         kfMBkjro+JYHM2EEpGFQjlKUDsfPhcQYPLRPVzoADrYZBNRa3+b6ymylSuqilpLHzbc3
-         wmThmKEb68+mNJK++xaZlNLELlMQikgQ175mR/Qyey9HbMc67i4zAef+BzKjQ7lL08FY
-         x1cAjfseTAWHesSlOoCywCxSpX6vhIf1qkQp/ATnAjk3BkAZUMxmWuEJGTbbYtSHJ4Ia
-         a70w==
-X-Forwarded-Encrypted: i=1; AFNElJ8pynjm/CBslKsR3t+Y0hntNpJqw9cMNKPpRiDSR206jhiDXuCj3g9z11esSmd6bNC7OIXw0u+Yj3o=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyFT/utDRxT2GUhonvoG7/D/SNOjrSU67hfZ65O9EN4EKU5AfHx
-	lZFPPLRav+BZorXPiC/vfM9NnfF8eWvsSD66OG2RTS72k+IV66Poc1Ob
-X-Gm-Gg: AeBDiesOgjHq5MXy8uqDuSQOLmK1rGICSEVZpY2AUT7gsWFRqlynuEP1SMg0u2btwta
-	J2eAadYFRMtKPEWP84iOWog7wDrjT/ZxC3AHZOYaCMqwqmojlmU+rZ9ic9rHJFZwjKyszNzG/sN
-	4+fmnU2JOpF8lvvH7RkNKnGc035suPlc5txI26JBdEx/4voRaPjScU/AY9hG8ayQxi7PCUVEVti
-	NA/e0TWMa4o3lDamxrrueMB5v3/PEMRyHE1nrABQVv9dCi93DUA78N13RB07iY63NvnqmWmk6Nz
-	6+PHRWURDq3EbYZxV6R1k/1fYw8CgTi/f1e9H8k7PATPHtiLdNr8c4sjNU/oPWxYxfH9p6q8h/H
-	lrgklZxFLBzqYumqS9iOwAmkiHZy74fF8WSJU2epoTp8ccwy769AS8087h1QFJNPrRaEJM2Y7gE
-	s+smwnWoZN9UTpfEx0CrtemKjm8ZHY30fbnGZVMBWXfq6EWHHitPv9
-X-Received: by 2002:a05:600c:4588:b0:48a:5302:8ed9 with SMTP id 5b1f17b1804b1-48e52f1574emr36086805e9.0.1778094346183;
-        Wed, 06 May 2026 12:05:46 -0700 (PDT)
-Received: from LAPTOP-9UC0RPH4.localdomain ([82.215.118.79])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48e530b212esm30832605e9.1.2026.05.06.12.05.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 May 2026 12:05:45 -0700 (PDT)
-From: Stepan Ionichev <sozdayvek@gmail.com>
-To: ulfh@kernel.org
-Cc: brgl@kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	Stepan Ionichev <sozdayvek@gmail.com>
-Subject: [PATCH] mmc: davinci: avoid NULL deref of host->data in IRQ handler
-Date: Thu,  7 May 2026 00:05:37 +0500
-Message-ID: <20260506190538.596-1-sozdayvek@gmail.com>
-X-Mailer: git-send-email 2.43.0
+	s=arc-20240116; t=1778130226; c=relaxed/simple;
+	bh=IiGrSdWZ6mIzmzjTlRwv7UDHKGU0V37uuRS//Bndlsw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=HwFR3hOpBKytPUhhORTTR6awytdPvRohOU0Zofw2A2JNgi1PCJ4nDDsmEhjvki0t0TcVxzWw46KdVs0m5iCB2wNYgd5sSN2ho3SVcMOo0iM7ZMpzK9YyDxav38nctDRDxxOGYNgjWw5N/p7IDZh2/LfenLasyNkeGAblvF1PbU4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <ore@pengutronix.de>)
+	id 1wKqtS-0003N9-Az; Thu, 07 May 2026 07:03:26 +0200
+Received: from pty.whiteo.stw.pengutronix.de ([2a0a:edc0:2:b01:1d::c5])
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <ore@pengutronix.de>)
+	id 1wKqtQ-000rL8-0B;
+	Thu, 07 May 2026 07:03:24 +0200
+Received: from ore by pty.whiteo.stw.pengutronix.de with local (Exim 4.98.2)
+	(envelope-from <ore@pengutronix.de>)
+	id 1wKqtQ-00000005d0x-1ZaL;
+	Thu, 07 May 2026 07:03:24 +0200
+Date: Thu, 7 May 2026 07:03:24 +0200
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+To: Florian Fainelli <florian.fainelli@broadcom.com>
+Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
+	Erick Shepherd <erick.shepherd@ni.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] mmc: core: Kioxia 016G01 does not enter boot mode after
+ SLEEP
+Message-ID: <afwdHLv4xLifaopS@pengutronix.de>
+References: <20260413180551.3683969-1-florian.fainelli@broadcom.com>
+ <737a7feb-6573-4c77-8102-08653b3ae9f4@broadcom.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <737a7feb-6573-4c77-8102-08653b3ae9f4@broadcom.com>
+X-Sent-From: Pengutronix Hildesheim
+X-URL: http://www.pengutronix.de/
+X-Accept-Language: de,en
+X-Accept-Content-Type: text/plain
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ore@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-mmc_davinci_irq() returns early only when both host->cmd and
-host->data are NULL:
+Hi Florian,
 
-  if (host->cmd == NULL && host->data == NULL) {
-          ...
-          return IRQ_NONE;
-  }
+On Wed, May 06, 2026 at 09:49:46AM -0700, Florian Fainelli wrote:
+> On 4/13/26 11:05, Florian Fainelli wrote:
+> > The Kioxia 016G01 eMMC device does not exit SLEEP mode when sending CMD0
+> > which prevents the system from properly resuming from S3 warm boot where
+> > the eMMC is necessary to pull in the boot components.
+> > 
+> > Add a quirk which prevents that specific device model from entering
+> > SLEEP mode. There are no differences in the power consumption observed.
+> > 
+> > Signed-off-by: Florian Fainelli <florian.fainelli@broadcom.com>
+> 
+> Any feedback on this?
 
-So we may legitimately reach the rest of the handler with
-host->data == NULL (and therefore data == NULL). The DATDNE branch
-already guards against this with an explicit "if (data != NULL)"
-check, but the subsequent TOUTRD ("read data timeout") and
-CRCWR/CRCRD ("data CRC error") branches dereference data
-unconditionally:
+Hm, can the sleep call be executed before mmcblk driver is loaded?
+For example by under-voltage signal? In this case the quirk will not
+be applied. May be better to put this quirk in mmc_ext_csd_fixups[]?
 
-  if (qstatus & MMCST0_TOUTRD) {
-          data->error = -ETIMEDOUT;        <-- NULL deref
-          ...
-          davinci_abort_data(host, data);
-  }
-
-  if (qstatus & (MMCST0_CRCWR | MMCST0_CRCRD)) {
-          data->error = -EILSEQ;           <-- NULL deref
-          ...
-  }
-
-If either bit is set in qstatus while host->data is NULL, the kernel
-will crash inside the IRQ handler. smatch flags this:
-
-  drivers/mmc/host/davinci_mmc.c:933 mmc_davinci_irq() error: we
-    previously assumed 'data' could be null (see line 914)
-
-Gate both branches on a non-NULL data, matching the existing pattern
-used by the DATDNE branch.
-
-No functional change for callers where data is non-NULL, which is
-the only case in which these branches did meaningful work before
-this change.
-
-Signed-off-by: Stepan Ionichev <sozdayvek@gmail.com>
----
- drivers/mmc/host/davinci_mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 42b0118a4..42ad87aa4 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -928,7 +928,7 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
- 		}
- 	}
- 
--	if (qstatus & MMCST0_TOUTRD) {
-+	if (data && (qstatus & MMCST0_TOUTRD)) {
- 		/* Read data timeout */
- 		data->error = -ETIMEDOUT;
- 		end_transfer = 1;
-@@ -940,7 +940,7 @@ static irqreturn_t mmc_davinci_irq(int irq, void *dev_id)
- 		davinci_abort_data(host, data);
- 	}
- 
--	if (qstatus & (MMCST0_CRCWR | MMCST0_CRCRD)) {
-+	if (data && (qstatus & (MMCST0_CRCWR | MMCST0_CRCRD))) {
- 		/* Data CRC error */
- 		data->error = -EILSEQ;
- 		end_transfer = 1;
+Best Regards,
+Oleksij
 -- 
-2.43.0
-
+Pengutronix e.K.                           |                             |
+Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
