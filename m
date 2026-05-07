@@ -1,108 +1,80 @@
-Received: from out-186.mta1.migadu.com (out-186.mta1.migadu.com [95.215.58.186])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 979C33264C2
-	for <linux-mmc@vger.kernel.org>; Thu,  7 May 2026 10:45:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.186
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2267A315D3B;
+	Thu,  7 May 2026 14:28:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778150756; cv=none; b=Au/VRKypATSpc1rDVcXm2VSbyISAbuB53pEvw4cnuFyadQ90wD/AyTKFq6Y1tmiOp7/AMO+mwR2K2c1tcAvPl069vRzKJ93Gyx2kcuki0mAb49xG0EqbfW5fGJQUf43vtRdBcMBZT2UA3R2OvRooQIq92XF+Dre8+dvhsQO0FE0=
+	t=1778164133; cv=none; b=gEklWjI8+EW81jyk7yZGN2o1Xyq/eMn34Gp22fMCa6y+5MesLuz3IWzICJ2wEAJ4xCv0nmb3CdubrmpsNWdgYYnjTUsmVXLSJ1+o7r6K9i7y/vqAkubSoOYIc7IPu2qAsXTJBaZ9nw/aOx7ombi/O/JAUG6fdoI9sI5KN8dJWsA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778150756; c=relaxed/simple;
-	bh=312zN6LsAnZx88D9I1aFkKivaozIPa5muYYM2DQoykI=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Subject:From:To:Cc:
-	 References:In-Reply-To; b=T/GocanPsl+L5kMyHTxoNfAHyLyR1e/U+o4kR0rWbzCkVKprtrohHOFw4phyWF5X/yEciV86opaTpcUp0Vj5W1Q/luOGN7Gcrpf7WVLff9+etF6bapaXIoWtBfeAbqdb1E90Jy+bi26R/aLMfE8GXYdjcGe2BSxxhkBZKz+4sAU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=qPQvdZZ9; arc=none smtp.client-ip=95.215.58.186
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1778164133; c=relaxed/simple;
+	bh=CEBLsdC5BhK44Ow0f/DvFi3ITfR7Y2d7VKh8V95wdMY=;
+	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
+	 References:In-Reply-To; b=hWyEmXp3B4EQbdJUdFPEhL3GZyo/Cr5ViXpV3C9CqPLOWflbD3tJEx1ARifPVhcqzmbCsWgBr9Q9noQ/ZHaP67L8l3zO2YhkwGG102k5kVYGxOj+nywO2yXv4y4vGzc62RFHOLzH46kbtRgqpZa2C9v7sb0WQUmf1bo58xT/gyk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=H9g0LH3R; arc=none smtp.client-ip=178.21.23.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="qPQvdZZ9"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="H9g0LH3R"
+Received: from mail01.disroot.lan (localhost [127.0.0.1])
+	by disroot.org (Postfix) with ESMTP id 61B2D2763F;
+	Thu,  7 May 2026 16:28:49 +0200 (CEST)
+X-Virus-Scanned: SPAM Filter at disroot.org
+Received: from layka.disroot.org ([127.0.0.1])
+ by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
+ id 0bPPlxm6rDu1; Thu,  7 May 2026 16:28:48 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
+	t=1778164128; bh=CEBLsdC5BhK44Ow0f/DvFi3ITfR7Y2d7VKh8V95wdMY=;
+	h=Date:Cc:Subject:From:To:References:In-Reply-To;
+	b=H9g0LH3RjjyzOIC1+Hk+5regrB3BjwoyxdcW1xunzecRiKfuYk1yWQWLiQ2PQYKly
+	 oezPg000Kdfk1X7f3a/XorXtnsJ8OG/IDaP/mwds/DSfjNCwKK3p6kbbesEeariTVr
+	 IdOvjfyTyTuHziMn1ex6m2E4ksdyWDzNqALxQO2TBrh+GbbYKDHEDAtfep8u39NZ7+
+	 0eOJKDiiM3WVcyepFVFi45W1DNtuaY1vfY0D9S4L2ZRbtXeMs5StXkICxJbQW/fodK
+	 vRzUOhv0LGI2zzIG7Y/rjhmV1Chq6JKTa83qJiK/KbvUg/oiGO7Gj68ZKRnxNLdf9w
+	 QCtclKZc+PvnA==
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1778150742;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=wfLuyOPRCmmDdUHD7nj8FmD30fIBLkwBsUJFvuCmkBQ=;
-	b=qPQvdZZ9NGUW5GSrDqiO42DiH/zl3tkl6A1e9fYYs1UYUXWFnjsHBfbC/scvJ2rOxMtX6M
-	OU0bhSlvZDm6kNsbvILN5h9ybLDylI6fzaRmXJZBq2/GhPeAxFGOv+TbyRXdS5hXW6KeXn
-	4b3UWDEyiFf1sYzQuWFt5cXI513OGmw=
 Content-Transfer-Encoding: quoted-printable
 Content-Type: text/plain; charset=UTF-8
-Date: Thu, 07 May 2026 18:45:07 +0800
-Message-Id: <DICDTHYTPDSP.210EBVHTQ6966@linux.dev>
-Subject: Re: [PATCH v8 8/9] riscv: dts: spacemit: k1-bananapi-f3: add SD
- card support with UHS modes
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-From: "Troy Mitchell" <troy.mitchell@linux.dev>
-To: "Iker Pedrosa" <ikerpedrosam@gmail.com>, "Margherita Milani"
- <margherita.milani@amarulasolutions.com>
-Cc: "Ulf Hansson" <ulf.hansson@linaro.org>, "Rob Herring" <robh@kernel.org>,
- "Krzysztof Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley"
- <conor+dt@kernel.org>, "Adrian Hunter" <adrian.hunter@intel.com>, "Paul
- Walmsley" <pjw@kernel.org>, "Palmer Dabbelt" <palmer@dabbelt.com>, "Albert
- Ou" <aou@eecs.berkeley.edu>, "Alexandre Ghiti" <alex@ghiti.fr>, "Yixun Lan"
- <dlan@kernel.org>, "Troy Mitchell" <troy.mitchell@linux.dev>, "Michael
- Opdenacker" <michael.opdenacker@rootcommit.com>, "Javier Martinez Canillas"
- <javierm@redhat.com>, <linux-mmc@vger.kernel.org>,
- <devicetree@vger.kernel.org>, <linux-riscv@lists.infradead.org>,
- <spacemit@lists.linux.dev>, <linux-kernel@vger.kernel.org>, "Anand Moon"
- <linux.amoon@gmail.com>
-References: <20260413-orangepi-sd-card-uhs-v8-0-c21c40ec16d0@gmail.com>
- <20260413-orangepi-sd-card-uhs-v8-8-c21c40ec16d0@gmail.com>
- <CA+Xcp4nY9GVMOmtMG-PNhY2vqP4Cc_amAMSa+M3vuDjWUkuCHw@mail.gmail.com>
- <CABdCQ=OsPva9=YPdBd=3HW1OO7=_zJtpXjvaiA0WLEDT5Scs_Q@mail.gmail.com>
-In-Reply-To: <CABdCQ=OsPva9=YPdBd=3HW1OO7=_zJtpXjvaiA0WLEDT5Scs_Q@mail.gmail.com>
-X-Migadu-Flow: FLOW_OUT
+Date: Thu, 07 May 2026 19:58:32 +0530
+Message-Id: <DICIKJZ1JOZQ.36S4SZ5G8RM5Q@disroot.org>
+Cc: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+ <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+ <linux-samsung-soc@vger.kernel.org>
+Subject: Re: [PATCH v3 0/2] Configuring DMA threshold value for DW-MMC
+ controllers
+From: "Kaustabh Chakraborty" <kauschluss@disroot.org>
+To: "Kaustabh Chakraborty" <kauschluss@disroot.org>, "Ulf Hansson"
+ <ulfh@kernel.org>, "Rob Herring" <robh@kernel.org>, "Krzysztof Kozlowski"
+ <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>, "Jaehoon Chung"
+ <jh80.chung@samsung.com>, "Shawn Lin" <shawn.lin@rock-chips.com>,
+ "Krzysztof Kozlowski" <krzk@kernel.org>, "Alim Akhtar"
+ <alim.akhtar@samsung.com>
+References: <20260415-dwmmc-dma-thr-v3-0-31014d36b6ee@disroot.org>
+In-Reply-To: <20260415-dwmmc-dma-thr-v3-0-31014d36b6ee@disroot.org>
 
-On Thu May 7, 2026 at 5:53 PM CST, Iker Pedrosa wrote:
-> Hi,
+On 2026-04-15 20:32 +05:30, Kaustabh Chakraborty wrote:
+> In Samsung Exynos 7870 devices with Broadcom Wi-Fi, it has been observed
+> that small sized DMA transfers are unreliable and are not written
+> properly, which renders the cache incoherent.
 >
-> El jue, 7 may 2026 a las 10:20, Margherita Milani
-> (<margherita.milani@amarulasolutions.com>) escribi=C3=B3:
->>
->> Good morning Iker,
->>
->> > Add complete SD card controller support with UHS high-speed modes.
->> >
->> > - Enable sdhci0 controller with 4-bit bus width
->> > - Configure card detect GPIO with inversion
->> > - Connect vmmc-supply to buck4 for 3.3V card power
->> > - Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
->> > - Add dual pinctrl states for voltage-dependent pin configuration
->> > - Support UHS-I SDR25, SDR50, and SDR104 modes
->>
->>
->> Tested-by: Margherita Milani <margherita.milani@amarulasolutions.com>
->>
->> However I noticed it only works when CONFIG_I2C_K1 is enabled.
->> Michael Opdenacker told me it's necessary to enable the regulators
->> used by the mmc controller.
->> Should we add the dependency between CONFIG_MMC_SDHCI_OF_K1 and
->> CONFIG_I2C_K1? (Unless some boards don't have these dependency?)
->> Thank you for your patchset which was really nice!
+> Experimental observations say that DMA transfer sizes of somewhere
+> around 64 to 512 are intolerable. We must thus implement a mechanism to
+> fall back to PIO transfer in this case. One such approach, which this
+> series implements is allowing the DMA transfer threshold, which is
+> already defined in the driver, to be configurable.
 >
-> Thank you for catching this! You're absolutely right about the dependency=
-.
+> Note that this patch is likely to be labelled as a workaround. These
+> smaller transfers seem to be successful from downstream kernels,
+> however efforts to figure out how so went in vain. It is also very
+> possible that the downstream Broadcom Wi-Fi SDIO driver uses PIO
+> transfers as well.
 >
-> From what I can see, all current SpacemiT K1 boards follow this design
-> pattern where the SD card power is provided by an I2C-controlled PMIC.
-> However, before adding a hard dependency, I'd like to get input from
-> the community, does anyone know of K1-based boards that provide SD
-> card power through fixed regulators or other means that don't require
-> I2C?
-if K1 needs to switch between standard and high-speed (UHS) modes,
-I believe the I2C-controlled PMIC is mandatory to handle the voltage
-switching (typically 3.3V to 1.8V).
+> Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
 
-I don't think any board would want to be stuck in standard mode permanently=
-.
-If high-speed mode is an option, why not use it? I think adding this
-dependency is a good idea, but keep in mind it also needs to depend on P1.
-
-                            - Troy
+Hi, bump! What's the status of this patch series? Both patches have been
+reviewed.
