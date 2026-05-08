@@ -1,41 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2C66388395;
-	Fri,  8 May 2026 22:27:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4507E3A5426;
+	Fri,  8 May 2026 22:53:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778279237; cv=none; b=DqFdjxkRH1C/vnIKRpxFf/xcOOCDTlHZONY29Wn72SYSJg7l9r8VAZ/gp6z3Yulmy8/P3pY8OxD4neWOXPsioDk7dtXYaNRmMuag/BpD2yK7WHufLPp/c+KcGVQEwbyB5KuAYBRMLqys21AN/R4iiUbxZBpiNCNOEJE0S67n+WQ=
+	t=1778280824; cv=none; b=XtBvAH72VbwxxMdGOB9WS5PLT0BIS9uslJnoH1/h/YZHrsd3/J8ygFyu2m4e2IjOF3/u5uFqC9Rt/5kc9Om3Ir18YQcQKjKkzG9AC/gevwm6SKP4sVcytk+oNiz314MJomK1jv8Ut8bgOZJdj1iKQmOEWKmHZ12HRjrlwO7e3zc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778279237; c=relaxed/simple;
-	bh=ARXB7IXHajXNXClhcBq3h8oAt0A8+aZDLCr3/8KxfqY=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nAKxPNjLudmXGa5rDLHKUesiewrwB83P6Ckza1GdZC8gJ0uXf7dBDlPrFES5VaW7K2L38JsOiBOvvCUOdCZPeQH8cHANBBU9Ck+2WQ/PvvDgzoCFMYQjr92S6oos1US83bEzrKE0jPfLGX4XuOJ4qGopCfAJygxw2Ly/KYrgmrs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Q14sNOL/; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1778280824; c=relaxed/simple;
+	bh=Z5WQpb+zG4G33yJj25V1N+RhuvaxlLgROCG8p0ek70k=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jdbgFCHBT3BN/UAUXwnJSdh/70NCDkoEawp1tHd5gpg3hwRl0oWagTrALuA0q4tu87jKFxftZxsWNgZG6g2GIPvO9hW5gL6LOVeVdr9QkamfF+qeWzRAnoV479zeBRz9Zvx452f3Io0K9481yGDzodjNbn+z+LXVfzB69uX/pgc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=e6rodGnX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Q14sNOL/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A7953C2BCB0;
-	Fri,  8 May 2026 22:27:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="e6rodGnX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 74681C2BCB0;
+	Fri,  8 May 2026 22:53:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778279237;
-	bh=ARXB7IXHajXNXClhcBq3h8oAt0A8+aZDLCr3/8KxfqY=;
-	h=Date:From:To:Subject:References:In-Reply-To:From;
-	b=Q14sNOL/eiPwdP3e+3zHr0JzszikuMTxc6cRHiRSPs4RiC6YNtwehVosdJWfo4gSJ
-	 NF8iCTtzbnvpTjyBeo4l2jEvTCvrJcDOVFlRkmKMDjewpV/P1FEBtfcPtXdCA3iJnW
-	 2z4MjcJC9S+Ywfwx62aiQ3O4BJnBlnVwWqoGSFc5CSTbGT52RmKzWyKhzl32msJ1pc
-	 9V5RWKv4QpiP1PPKSm6WJjsqx4dfnxQMNM/Ne2ciHLGf3DTuXzkNXXu//wFQXMFg1Y
-	 dfPgrXQfbDFd98LFcr4xQ78caV/fGPKhOHZ+kfITSv/nAE17xrpsloMLz5/N53m2cU
-	 S/BlIJbLTz8eQ==
-Date: Fri, 8 May 2026 22:27:14 +0000
+	s=k20201202; t=1778280823;
+	bh=Z5WQpb+zG4G33yJj25V1N+RhuvaxlLgROCG8p0ek70k=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=e6rodGnXzFO5fLA2F6JvLhozKTvSQAgFt5h9gxycbIS81LrClQFRAwWBva2odBhlr
+	 EUBj8Wj05n5iXvQl45xOziN5x8j5oSr0nHKbZOtq9i9R/5z1XH3HE4bbzAZFsDFPQa
+	 oqDXZwOh7B0vh6KEXpIZhS1T1/J3WZ9hLasCugGnf4ZqFWbvI6BzP8Z8EzwadcFA/7
+	 Xgl/xwGbzOzgow50cvBYxgqqqIirmEDCxBuYz7S/H1sNZx++cuCCY0mv1EULhhT3xh
+	 lwH1P1hn4UqSKsfCbqcnpDWUHJOxzi8veIwidTZ5qppZX9so2PWQf9aoV6t4ORRONw
+	 3Z6LDKIJ53AnA==
+Date: Fri, 8 May 2026 22:53:41 +0000
 From: Yixun Lan <dlan@kernel.org>
 To: Iker Pedrosa <ikerpedrosam@gmail.com>,
+	Troy Mitchell <troy.mitchell@linux.dev>
+Cc: Margherita Milani <margherita.milani@amarulasolutions.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
 	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Troy Mitchell <troy.mitchell@linux.dev>,
 	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
 	Javier Martinez Canillas <javierm@redhat.com>,
 	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
@@ -43,53 +44,83 @@ To: Iker Pedrosa <ikerpedrosam@gmail.com>,
 	linux-kernel@vger.kernel.org, Anand Moon <linux.amoon@gmail.com>
 Subject: Re: [PATCH v8 8/9] riscv: dts: spacemit: k1-bananapi-f3: add SD card
  support with UHS modes
-Message-ID: <20260508222714-GKA3590877@kernel.org>
+Message-ID: <20260508225341-GKB3590877@kernel.org>
 References: <20260413-orangepi-sd-card-uhs-v8-0-c21c40ec16d0@gmail.com>
  <20260413-orangepi-sd-card-uhs-v8-8-c21c40ec16d0@gmail.com>
- <afzZ6Fjdt4puGjZ6@aurel32.net>
+ <CA+Xcp4nY9GVMOmtMG-PNhY2vqP4Cc_amAMSa+M3vuDjWUkuCHw@mail.gmail.com>
+ <CABdCQ=OsPva9=YPdBd=3HW1OO7=_zJtpXjvaiA0WLEDT5Scs_Q@mail.gmail.com>
+ <DICDTHYTPDSP.210EBVHTQ6966@linux.dev>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <afzZ6Fjdt4puGjZ6@aurel32.net>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <DICDTHYTPDSP.210EBVHTQ6966@linux.dev>
 
-Hi Iker,  Aurelien 
+Hi Iker, Troy,
 
-On 20:28 Thu 07 May     , Aurelien Jarno wrote:
-> Hi,
-..
-> > +&sdhci0 {
-> > +	pinctrl-names = "default", "uhs";
-> > +	pinctrl-0 = <&mmc1_cfg>;
-> > +	pinctrl-1 = <&mmc1_uhs_cfg>;
-> > +	bus-width = <4>;
-> > +	cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
-> > +	cd-inverted;
-> > +	broken-cd;
+On 18:45 Thu 07 May     , Troy Mitchell wrote:
+> On Thu May 7, 2026 at 5:53 PM CST, Iker Pedrosa wrote:
+> > Hi,
+> >
+> > El jue, 7 may 2026 a las 10:20, Margherita Milani
+> > (<margherita.milani@amarulasolutions.com>) escribió:
+> >>
+> >> Good morning Iker,
+> >>
+> >> > Add complete SD card controller support with UHS high-speed modes.
+> >> >
+> >> > - Enable sdhci0 controller with 4-bit bus width
+> >> > - Configure card detect GPIO with inversion
+> >> > - Connect vmmc-supply to buck4 for 3.3V card power
+> >> > - Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
+> >> > - Add dual pinctrl states for voltage-dependent pin configuration
+> >> > - Support UHS-I SDR25, SDR50, and SDR104 modes
+> >>
+> >>
+> >> Tested-by: Margherita Milani <margherita.milani@amarulasolutions.com>
+> >>
+> >> However I noticed it only works when CONFIG_I2C_K1 is enabled.
+> >> Michael Opdenacker told me it's necessary to enable the regulators
+> >> used by the mmc controller.
+> >> Should we add the dependency between CONFIG_MMC_SDHCI_OF_K1 and
+> >> CONFIG_I2C_K1? (Unless some boards don't have these dependency?)
+> >> Thank you for your patchset which was really nice!
+> >
+> > Thank you for catching this! You're absolutely right about the dependency.
+> >
+> > From what I can see, all current SpacemiT K1 boards follow this design
+> > pattern where the SD card power is provided by an I2C-controlled PMIC.
+> > However, before adding a hard dependency, I'd like to get input from
+> > the community, does anyone know of K1-based boards that provide SD
+> > card power through fixed regulators or other means that don't require
+> > I2C?
+I would object to add CONFIG_I2C_K1 as hard dependency, the reason is
+that the spacemit sdhci driver (sdhci-of-k1.c) has no used i2c
+api/function, it's just need I2C function via an indirect requirement,
+which sdhci -> regulator(p1) -> i2c, besides, from the hardware design
+perspective, it just happens that K1 use P1(via I2C) as PMIC, it's
+totally possible(even in theory) to use other PMIC as power supply
+control which may not be I2C interface (maybe use SPI, for example)
+
+If we want to solve this more gracefully, I'm in favor to add explict
+option enabled in defconfig..
+
+> if K1 needs to switch between standard and high-speed (UHS) modes,
+> I believe the I2C-controlled PMIC is mandatory to handle the voltage
+> switching (typically 3.3V to 1.8V).
 > 
-> Card detect is marked as broken as a proper definition requires pull-up 
-> support in pinctrl. Support for that went into 7.1, so I guess it's not 
-> safe to use the proper definition. That means using the following 
-> changes on to of this patch:
+> I don't think any board would want to be stuck in standard mode permanently.
+> If high-speed mode is an option, why not use it? I think adding this
+> dependency is a good idea, but keep in mind it also needs to depend on P1.
 > 
-> --- a/arch/riscv/boot/dts/spacemit/k1-bananapi-f3.dts
-> +++ b/arch/riscv/boot/dts/spacemit/k1-bananapi-f3.dts
-> @@ -406,9 +406,7 @@ &sdhci0 {
->  	pinctrl-0 = <&mmc1_cfg>;
->  	pinctrl-1 = <&mmc1_uhs_cfg>;
->  	bus-width = <4>;
-> -	cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
-> -	cd-inverted;
-> -	broken-cd;
-> +	cd-gpios = <&gpio K1_GPIO(80) (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
-I agree, please see this patch which was merged
-
-https://lore.kernel.org/all/20260312-k1-gpio-set-config-v1-0-8c3541da16b1@pigmoral.tech/
-
+No, as above
+>                             - Troy
+> 
 
 -- 
 Yixun Lan (dlan)
