@@ -1,208 +1,191 @@
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3CD033986D
-	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 13:37:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8E013FAE04
+	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 14:05:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.177
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778506643; cv=pass; b=ipVRDM0yoXM1sjlavl2yLVAEUULpxOsM5aoIMOFLV9oiJcGMOVCiQa3+E/BR2ZuiKqgwZJ5xU01RrgVJEaJtLy8tQTgGQw1Tx7Ry7hlzt/NouRINlqmERbdzy0+fHdf2VOVDmz7mzyYNlec1NBoJWe+KwOgbinm03IIIgWOVSa4=
+	t=1778508325; cv=pass; b=eiryZwd/P/3uyPxmrSxpvMeUrEVDN0gj2MOogjPjDjgfx3yu/SKXumg2OY0YR1MssRNNsc2Hdce0wjB0jaHFFAE1b8zj/ayb//Wog803H3M8J94coj54sKxcRTy/M+bouaEMcyflCnO3E59elk7iR8mgWGTgx6IEtX9jH1VYtTo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778506643; c=relaxed/simple;
-	bh=9xN+3SdEB+VvRWpXXB+neshSI2iYDuL+rPjbXcC3DEg=;
+	s=arc-20240116; t=1778508325; c=relaxed/simple;
+	bh=FyBLSBZ7hNhVkjO/zSnSGEvlOg1Vr2+XpoAgSkY3z8U=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BMVtg6er6RwNm6C78K1S9NJNI0KwjnE4K0fdqoF/kfPE1HdWYLQf4Ydc/p2EtKVrUx2F7UHTNw9wgpjiHrDuDQKvlPTYz7To9Qwu+YE6atFmNfPmVhUUNaoxLX9ZIukjgQ6PYEum9dm2IkpZ+kSb4Dd0Dbc4sYmBmavqQD+LhN4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fc9j4arL; arc=pass smtp.client-ip=209.85.128.179
+	 To:Cc:Content-Type; b=cYpG819sxeaMg+NUSTrG7Zz4g5I2VFYcPKzun5+CXH54WQC0ZK7V9XnVd7GltcXs4Ge1jccKwary/12leAtXLrqRaS/lqg+ph1GkazgiRkMV+CF28L2NDM6yyFPXRkNc5BDwCZVY3ahP+ubRMElHQZPw+6LuZFCja2dTFiSN554=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Qd69i+O9; arc=pass smtp.client-ip=209.85.128.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fc9j4arL"
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-7b41fdf9de2so32635777b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 06:37:20 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1778506640; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Qd69i+O9"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-7bd5c773ef3so43099417b3.1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 07:05:23 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778508323; cv=none;
         d=google.com; s=arc-20240605;
-        b=HfmqptNzI1UxzAZgAoUno/J6S/bhtteB5SlDrVz61cefbY8Lnj3lRY0r1FFQw2cyfw
-         Opn4Wi27Hn5Teuvla6seGQ3j4rDlbvJYhpP6zhe/pc2miVEKh3Pu5tL0xN+C4g74Zdbg
-         batdO+84cOLyWfpiR5xTei6HRpsKW6zilrRBe5+ZMBWj6cNQsStrHMnKMXaqAYkQNiJM
-         xO/a+joPv7zrAouf4EuokEvLnpavOsJd2yGe7o9zQBs38xHkARgOUTo8wR9PRGYqnULv
-         OAUu8SJ6y7BMmbTnepptBW+xwtztRxGJJxHpo4+slwI+eE02syGzCKc7M4bM/ahFypq7
-         yZ9g==
+        b=QiNorqrQULyt0ii5gF2+We3MaA6fGTxyX4UHWwdgD+OyOwLa+4CAxRb6juCc+CgQ8z
+         vWprO8Ulsb3jslUU3RzYef9blVvFU3mNgjFumHiJwvy6PyJaGO/ZPt9FaJXJFo02+upx
+         CjnC0HG8EcQssjKyZZCnws3Ooq56EbtmTxbkmFdm1NmZO7mJlgCMcvkf7UPTU+ZC1Ttv
+         q2q/ZR+Q7Y5eJO0nmfZ7QVFMBd1Dsd29acM0gtIFmdEPSWHDSaXO2tHPU7zecBMB0RYt
+         HYAnaD+xKzCXSMEmfNNNgd2dvSqp+h0Q6vgmDDcOv6YufP9vokObKFcC4oUK2JpuEnmE
+         nsWQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=bRQH+NoTtGalk3jiWtQHJM+0X+sC7AjR4EA66f0munc=;
-        fh=ZGO/mCY3Zu+5LsmA+1r/Pzbs+Yfq8lQDOrEXm7lECeQ=;
-        b=i8p2g2xo+GCyfasX60LzmPY/ebvrnG3r7M9d2aQ2ZVlF1rN7sVqo7jlpTQtyaP1SCg
-         47LYJA5+UWqUFSTVGqT7lN9O3chQC6rtKi+90QYwhFle0pbTxLZIUvnE/hchfWdeDOGb
-         6zWOW4gBdhyUTv7j9A9wbGXxkg6zh5vJwR8TUqt6s3PnShacqzZb4GypgBf/2F8yxq/6
-         f1VadTgkjk/wLERvLcHZrc1QnlWHoUF7FiZErv2TiXaKa3hyR2L78YALqRrUBlPm0NYD
-         mSgygIUGitNI1zWhAwznLvAB3UrkgWCtb9PqxckYcozUVa5v18UZpNxXDM6068+/bYHT
-         ei2A==;
+        bh=r5NMXAS4+ZKW+xqccXrFy4JcKzWY5f2WjQmSFVnrvmE=;
+        fh=DfloEa4hRRL/NMcq+EdWLdD5gt909D3PFG2NXpghhXY=;
+        b=ke4Lbj08BtvBCTLI1fDzTDrirJQg+oEcOkK3VV7BJ7lUgHiC/rN/1SSmWdPpnTrD8I
+         c5KQwbJYy+jPELIxY6itGHIDuKtD+uLRM7Lq2zHBvmndLbEUWpewcMkL5OLEkY2EbUxM
+         lNRc9bKx0bKb/6Or6ghUgeS9HjB6H6Ut8/ADsfOCtKqjGAuLvsN17JZFxZlsov0gc5i/
+         jq5RKWJq1Ow7bss3xpODKKqf88vJN7Jhepd38jWsZehc6Ae17WdVAQweDRx65JRKHxK7
+         seKxxBF+rDuDpbZvB0lEda7ya4eW2cAHndoT7fom8HbICg7jMVhKAbf5faQpYKD7pzV3
+         s7zA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1778506640; x=1779111440; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1778508323; x=1779113123; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=bRQH+NoTtGalk3jiWtQHJM+0X+sC7AjR4EA66f0munc=;
-        b=fc9j4arLsYb2aOtSBuR3aZUiMfzXepEDUqloQ/k89zv9v4C+FgI9w8Vfme0e9XAev3
-         X6UEGiEupHzySfUuTyG+ViFnpBNqXryy35pRqpfjl1tGSnbihv4y5JeTlMn1wS+3wptc
-         xyAZ037Y3ERhKRgsAa25U1/kUV5aUu/9x/5LyFreKXrBljUjNjvccCQQJaCCEg8LcTXi
-         oV50QtkLlIliDnS8vA94D42Ou/aANhrT9ks0/+46pI2WrHCWIxEgJLy92dLkaU4HbUNm
-         Ro52xUkfIspr4gXFVKQJicUdttamRdCwJtJS0IO8RyNPOS+LMMzpH4P2Z9EQjfgFYkoh
-         jEXw==
+        bh=r5NMXAS4+ZKW+xqccXrFy4JcKzWY5f2WjQmSFVnrvmE=;
+        b=Qd69i+O9ADvp32Pxkbh+QuMdpJRyaTf3Un78PZ/s6vWgZ8ug4OhUoTWQ/Utx0c/zII
+         fND6wQzddTvdUz+6onxOWLewONrQAejB1PFF5HTJl5KObGWJnzVlmeM2Rx8IaeTuWK+M
+         wdZzZoV5OwebWsAZ2nCX9CjukmglqF4m1ntgW45RwvG/B7ey/DuYpaevV+lzHei6EJqd
+         12QOcoGtYK6Ay4Crr932oVQG0yyIjed+MnWU+g1MCiORbHtX4cEKuCy13lmCmUtlButd
+         UwB2dgXSCUBZ5u6QiCHZrytVmPryf8He4x/L79AGHBCaR1PAfmjryAzZB7bCmTfyp2ns
+         l5rg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778506640; x=1779111440;
+        d=1e100.net; s=20251104; t=1778508323; x=1779113123;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bRQH+NoTtGalk3jiWtQHJM+0X+sC7AjR4EA66f0munc=;
-        b=FP0JzKJz6spyOXF4LdFHiOsU2EGGXm9yCh6IVM0oI1P8iMD16DskuPCHsEiQGRnciU
-         JteUx5d74BCJEQKHr2jkqPWku+BOXd+GX0VWccdTglUMfY/8ulQ+KSGRlQcDwatr/IXO
-         BNqxu41q4+xc/s+upAJBnJYdY8daw2rC94/WVmCzSz9vhHVybBbIpu7yYO4zsrlMto9P
-         M8hx5v8ZXlygd9RrZVQkkjYnnKpquKP4ovxCoVfU5BKfcyRIzilQwZGh6se6ZaYn11gk
-         Fet0Q12riHufZT9r5PS7U/+RyHgflXgtAELe96IABoujaaen1Pm1bS9o6MjnVHbKxC9I
-         IBQA==
-X-Forwarded-Encrypted: i=1; AFNElJ/9rIdPgX5l/NWSgulNHu7OWTR/gVti6hC5LpkWdRI48GOy+K1+WE3SNthn7q3AAeJ3NDHgX2vRnY8=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz1FZJb5D1+fdU265dUfZZCSxLhUQ1E8N0bMoHBg5Pm+MjA3zlj
-	EPm3LyMreMffYadzXVHge1lGmNxuqd3IMtjeP+cMdP2oIyWNtQmlep2N6sybFNBJaSZSndfY6iK
-	McP1KcYQiPpQDCfNUf+97hbTzt6TfJZ/X7R8pGvGJgw==
-X-Gm-Gg: Acq92OEUDbLH6GxeyVHuH01lcAOpWgXSXN4TnRd20RE2ckqRV/rc1xj4ScOeZnpqFNI
-	ak/ow5QqVE6CnoJbQEPTzfcWcnzypFBMtKAwWCUaJB8NjaMUXac1JDMZESrqu/anUm+lPRC7vSG
-	Jf9hXLT3pYdlJM2TrQsxmEKSADh9tYbLEmv2rSb8MWgFkJUpvHArUFsd5aQVnm79Ttk1WiBpjkU
-	lFEL2t3iC+PWVhwcIMfWnkj2L0LZNqynVCT2/VJTRyBDT/vZ0auAw9CkX3IJeVIUm45wDnbnDcZ
-	rMuRPojYuuhSnemWKbg=
-X-Received: by 2002:a05:690c:97:b0:7b3:6c50:2e8f with SMTP id
- 00721157ae682-7bfb9f8eccbmr141364877b3.41.1778506639692; Mon, 11 May 2026
- 06:37:19 -0700 (PDT)
+        bh=r5NMXAS4+ZKW+xqccXrFy4JcKzWY5f2WjQmSFVnrvmE=;
+        b=nz0O9cUPfyvhMeP1bsrlntcoOYp825h00UQEatQdE0MIeL6/wbtOYbi+XNqe3tX3yv
+         Ix+BgQvVqSbmN20SGCFMF9h0kgaZ73qrO7PJQwGP/IxNsMOR4H8bKLGxz/6R5CFJCVzW
+         2o4Cjo8s5krAmN2+cvIMFm9yyCU+32+iCRV9+LGEzCbKxS67OmAtSaFMbBVBpsAfr7Fq
+         yvNwF3Zef7jxppWzuxKt/J7zc7eAdpW9GZmGNoLuqbg/BJhHwzvLIKxQogfuT0C/mi9/
+         qKBDy9jkR7YWC9Scc8N+OP/dhviNIpZfoDWtBK+SkH78bRSxUIPj7aqCif6EqYJP0IGN
+         wV3w==
+X-Forwarded-Encrypted: i=1; AFNElJ8Ak29xAqsC1q2q3KhuXUK8pBU7LAwozlj0Aig77GGM1kkdWuCOcEkEN+JwQuPPpBGCtNWzMzzjq2c=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxEXlYIi0aMbmfeP6QsqPfSp1duSMhppAvw8xLPjgeQAzjqFlRI
+	C/LLNH24YD0NTCIDD1sxq1nsbdbHt+KtULcgk2eC0Z98Tzv7TkEsILzmRnATyMHYkT3WQNm+aNC
+	xWxlK2riARP9mXmTgAeo1qeWxjJ5nH7ssDjt2cIBH7Q==
+X-Gm-Gg: Acq92OFFoBmWSvalJVdVjMsAeu7gIc9PxfjuFJSHlN/R5BT2ewGs2pXdLEiIvE8vklD
+	rMmCmv61lpANEDQvTqM2dww1o3DeYX/e4oG2V6bgIQkuspG3UXxddSeSVeUCSK9xI8EVGYtlXz/
+	F+gtLDjZWiiA1OdRRXJFOaMeorEU4EywfGGFfPzKLPYxIGn1ILMP0uC1twJtjFktpEpCOn8U5x9
+	8LpK4se+lwscbzI8TtlNRc7pgtIPcoeHpAq0wQMdGyMv0QQ1voC/FP5b3SLgYVPKMu7iDdJddrs
+	JW/wop4K9mq1e8yPmq8=
+X-Received: by 2002:a05:690c:660c:b0:7bd:6432:daa with SMTP id
+ 00721157ae682-7bdf5e9d4d7mr253386017b3.27.1778508322803; Mon, 11 May 2026
+ 07:05:22 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1775720894-97901-1-git-send-email-shawn.lin@rock-chips.com> <1775720894-97901-5-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1775720894-97901-5-git-send-email-shawn.lin@rock-chips.com>
+References: <cover.1776080528.git.sean@starlabs.systems> <95a293902585bd43c6857b79bdcdb8be692ff687.1776080528.git.sean@starlabs.systems>
+In-Reply-To: <95a293902585bd43c6857b79bdcdb8be692ff687.1776080528.git.sean@starlabs.systems>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 11 May 2026 15:36:39 +0200
-X-Gm-Features: AVHnY4IBLMqs8MQWt7ZZGqapRjXsr3Uuun2gDTfRtWUtXXb4F-tesDInSjd0TKY
-Message-ID: <CAPDyKFoihN-MiKi_Mbnojx+K6iBugg7nJb=AKMMT0e6bORwjiw@mail.gmail.com>
-Subject: Re: [PATCH 4/4] mmc: dw_mmc: Convert descriptor ring buffer to
- per-instance configurable
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 11 May 2026 16:04:45 +0200
+X-Gm-Features: AVHnY4JEFLkDhtjbzsGFfUGYFgE_s22UpVwHZIgmGXAQCxyohGxow3JwqZ-VRJs
+Message-ID: <CAPDyKFo+wJ3LZ4hFj0WqKpjfcioXkZJ94gtDO_Xbx99=Lyeujg@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/2] rtsx_usb: hold runtime PM during transfers
+To: Sean Rhodes <sean@starlabs.systems>
+Cc: linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ricky Wu <ricky_wu@realtek.com>, 
+	Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, linux-usb@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 9 Apr 2026 at 09:48, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Mon, 13 Apr 2026 at 13:42, Sean Rhodes <sean@starlabs.systems> wrote:
 >
-> Replace the hardcoded DESC_RING_BUF_SZ macro with a per-instance
-> ring_size member in struct dw_mci. This change provides greater
-> flexibility and prepares the driver for future configuration options.
->
-> Variant host controllers can now override the default ring_size via
-> the struct dw_mci_drv_data::init() callback, allowing them to tune
-> the descriptor ring buffer size for their specific use cases. This
-> is particularly beneficial for improving performance in large-block
-> sequential read/write scenarios.
+> Hold a runtime-PM reference across bulk transfers, and mark the device
+> busy afterwards.
 
-I am not sure what you mean by "use cases" here, but generally, we
-should avoid optimizing by tweaking buffer sizes at the host driver
-level.
+Why isn't it sufficient to let the mmc host device (child device) and
+its corresponding driver to manage runtime PM reference counting?
 
-Although, perhaps if you show how this is intended to work with a
-user, it becomes easier to discuss?
+As soon as the mmc host driver is requested to power-on the card via
+its ->ios() callback (set to sdmmc_set_ios() in
+drivers/mmc/host/rtsx_usb_sdmmc.c, it bumps the runtime PM usage
+count. Therefore, the usb device should be prevented from being
+runtime suspended as long as a card is inserted. Isn't that
+sufficient?
 
 >
-> Empirical testing shows that increasing ring_size can significantly
-> improve request efficiency. For example, the block count per request
-> can increase from 0x800 (1 MiB) to 0x2000 (4 MiB), as demonstrated
-> by trace data:
+> When runtime PM is already in progress (e.g. from rtsx_usb_suspend()),
+> avoid forcing a runtime resume from within the PM path by using
+> usb_autopm_get_interface_no_resume() unless the interface is already
+> runtime-suspended.
+
+Why is this needed? What problem does it solve?
+
 >
->     dd-706     [004] .....   106.017566: mmc_request_start: mmc1: start
->     struct mmc_request[0000000066f43a37]: ... sbc_arg=0x800
->
->     dd-697     [001] .....    15.227953: mmc_request_start: mmc1: start
->     struct mmc_request[00000000d82bf187]: ... sbc_arg=0x2000
->
-> While increasing the request size improves sequential I/O throughput,
-> it also introduces trade-offs: larger requests can delay other pending
-> I/O operations. Therefore, this configuration should be balanced
-> according to the specific workload and not hardcoded globally.
->
-> The default ring_size is initialized to PAGE_SIZE in dw_mci_alloc_host(),
-> preserving existing behavior. All buffer size calculations now use
-> host->ring_size instead of the hardcoded macro.
->
-> No functional changes are introduced for existing platforms.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Signed-off-by: Sean Rhodes <sean@starlabs.systems>
 
 Kind regards
 Uffe
 
->
 > ---
+>  drivers/misc/cardreader/rtsx_usb.c | 38 ++++++++++++++++++++++++------
+>  1 file changed, 31 insertions(+), 7 deletions(-)
 >
->  drivers/mmc/host/dw_mmc.c | 11 +++++------
->  1 file changed, 5 insertions(+), 6 deletions(-)
+> diff --git a/drivers/misc/cardreader/rtsx_usb.c b/drivers/misc/cardreader/rtsx_usb.c
+> index f65acf4d1164..c8badd0db87b 100644
+> --- a/drivers/misc/cardreader/rtsx_usb.c
+> +++ b/drivers/misc/cardreader/rtsx_usb.c
+> @@ -12,6 +12,7 @@
+>  #include <linux/usb.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/mfd/core.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/rtsx_usb.h>
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index df6daa6..61f10e7 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -50,8 +50,6 @@
->                                  SDMMC_IDMAC_INT_FBE | SDMMC_IDMAC_INT_RI | \
->                                  SDMMC_IDMAC_INT_TI)
->
-> -#define DESC_RING_BUF_SZ       PAGE_SIZE
-> -
->  struct idmac_desc_64addr {
->         u32             des0;   /* Control Descriptor */
->  #define IDMAC_OWN_CLR64(x) \
-> @@ -493,7 +491,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->                 struct idmac_desc_64addr *p;
->
->                 host->desc_num =
-> -                       DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
-> +                       host->ring_size / sizeof(struct idmac_desc_64addr);
->
->                 /* Forward link the descriptor list */
->                 for (i = 0, p = host->sg_cpu; i < host->desc_num - 1;
-> @@ -521,7 +519,7 @@ static int dw_mci_idmac_init(struct dw_mci *host)
->                 struct idmac_desc *p;
->
->                 host->desc_num =
-> -                       DESC_RING_BUF_SZ / sizeof(struct idmac_desc);
-> +                       host->ring_size / sizeof(struct idmac_desc);
->
->                 /* Forward link the descriptor list */
->                 for (i = 0, p = host->sg_cpu;
-> @@ -653,7 +651,7 @@ static inline int dw_mci_prepare_desc(struct dw_mci *host, struct mmc_data *data
->  err_own_bit:
->         /* restore the descriptor chain as it's polluted */
->         dev_dbg(host->dev, "descriptor is still owned by IDMAC.\n");
-> -       memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
-> +       memset(host->sg_cpu, 0, host->ring_size);
->         dw_mci_idmac_init(host);
->         return -EINVAL;
+>  static int polling_pipe = 1;
+> @@ -65,19 +66,42 @@ static int rtsx_usb_bulk_transfer_sglist(struct rtsx_ucr *ucr,
 >  }
-> @@ -2954,7 +2952,7 @@ static void dw_mci_init_dma(struct dw_mci *host)
 >
->                 /* Alloc memory for sg translation */
->                 host->sg_cpu = dmam_alloc_coherent(host->dev,
-> -                                                  DESC_RING_BUF_SZ,
-> +                                                  host->ring_size,
->                                                    &host->sg_dma, GFP_KERNEL);
->                 if (!host->sg_cpu) {
->                         dev_err(host->dev,
-> @@ -3185,6 +3183,7 @@ struct dw_mci *dw_mci_alloc_host(struct device *dev)
->         host = mmc_priv(mmc);
->         host->mmc = mmc;
->         host->dev = dev;
-> +       host->ring_size = PAGE_SIZE;
+>  int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe,
+> -                             void *buf, unsigned int len, int num_sg,
+> -                             unsigned int *act_len, int timeout)
+> +                                     void *buf, unsigned int len, int num_sg,
+> +                                     unsigned int *act_len, int timeout)
+>  {
+> +       int ret;
+> +       struct device *dev = &ucr->pusb_intf->dev;
+> +
+>         if (timeout < 600)
+>                 timeout = 600;
 >
->         return host;
+> +       /*
+> +        * During runtime suspend/resume callbacks, avoid forcing a runtime resume
+> +        * from within the PM path. The device is still active when
+> +        * rtsx_usb_suspend() runs, but usb_autopm_get_interface() can block when
+> +        * runtime PM is already in progress.
+> +        */
+> +       if (pm_runtime_status_suspended(dev)) {
+> +               ret = usb_autopm_get_interface(ucr->pusb_intf);
+> +       } else {
+> +               usb_autopm_get_interface_no_resume(ucr->pusb_intf);
+> +               ret = 0;
+> +       }
+> +       if (ret)
+> +               return ret;
+> +
+>         if (num_sg)
+> -               return rtsx_usb_bulk_transfer_sglist(ucr, pipe,
+> -                               (struct scatterlist *)buf, num_sg, len, act_len,
+> -                               timeout);
+> +               ret = rtsx_usb_bulk_transfer_sglist(ucr, pipe,
+> +                                                   (struct scatterlist *)buf,
+> +                                                   num_sg, len, act_len,
+> +                                                   timeout);
+>         else
+> -               return usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_len,
+> -                               timeout);
+> +               ret = usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_len,
+> +                                  timeout);
+> +
+> +       usb_mark_last_busy(ucr->pusb_dev);
+> +       usb_autopm_put_interface(ucr->pusb_intf);
+> +       return ret;
 >  }
-> --
-> 2.7.4
+>  EXPORT_SYMBOL_GPL(rtsx_usb_transfer_data);
 >
