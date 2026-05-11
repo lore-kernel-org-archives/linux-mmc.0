@@ -1,224 +1,199 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BF9D3750BD
-	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 11:43:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778499812; cv=none; b=lM37OlzB1nrmoEP56AahDUJD8Ww64AFyYWbV99VTSvVlN6hpA7aWQDrt2cvCl/+vdtFk/uEAZh8d0NvN6dgpG9VdDZ5uK2fLp0+wP3CzvYy2VIUwReeGXiKAoGJ0E7fSlXc4rCfrC3zFTie0KwQnYFk+74J1SM1yRMSt/iHzSdU=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778499812; c=relaxed/simple;
-	bh=z3Lm7HpwUT3CHnQ6JBExuWySXx5/0hgPmQoR7JuuetQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gnTJ0ppFBeUhEswf4ucyL2bFYp1diOB9ku0Cubu5kGsmHdxXZXIPI19w3uqZMXdGlAwCqkF58zIgZQb0LGQo94AbxywGXoCvhdvVAevxYNhuZSdBQYFIXvYn2pz/kgCOEaLpEDA2jc+rb1MXalqFkZv/B6ZufHyEXIgQk7AgeZA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OsWmOePq; arc=none smtp.client-ip=209.85.221.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89E263EC2C4
+	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 13:32:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.177
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1778506363; cv=pass; b=cZQ8smcQRLdqmnspchra+6ivYangzHy+rh4G1iyt2MFJ1EwqRL1tnFhff0/AFUE1+i/oUXiIFte5lKfkENvM2UBPJtsK7OmkxAa+aIzbyuv9b+BqdfQX0Pr75MbSmV2gq7fUMlXl51OfwQN+G6Gf6WSn9ay83je12UuMOigDqj8=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1778506363; c=relaxed/simple;
+	bh=1ByvReWqDCoFL9lfsCkhBG0/+DjY5/C+3t6uauXWYYo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=e9+2byWLI5LosxnjNzUn9fvJNg/Y9qro1Vpx71P18NskZxT5zkVQd2Yek98hGZJeR0mdzlLIv15kSmL/KmtFX2tQpBrKfiW672290aRYtwqbbqs42mGe/xCBT8n3ilDQo00ViPbMhnAb/i/UEIoQuNrfx1VMIqvF22vtSAwnb8w=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=C3oqrRAI; arc=pass smtp.client-ip=209.85.128.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OsWmOePq"
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-44c350a5b87so2545081f8f.3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 04:43:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="C3oqrRAI"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-7bf02533706so37679457b3.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 06:32:41 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778506360; cv=none;
+        d=google.com; s=arc-20240605;
+        b=YqTfacrMlv4mlXkY1vt3NbYZDw2+RhGxr4GWUqsBD0rEHUXtz7Wj7qr17gMQOfQHmf
+         1sQO5Z+VVfZcno2lLDvo12d+huqthJ9rHDSifyAKEzoyYMPNkewM4y6TKLsTKwY9Osyd
+         MlR9InVmnjGhB1CnBoHnRSdzYadCSqfoigaIJLbTzPEmUOTRArLbSg6g9c9l6uqwVrZ9
+         KXHIjtJqcihwJFdJggNzBQpHhiy2xguR0SXNqrqsv3qScpkWwXjhJR0JHFWyJU/WzJgs
+         9Z/1JjlV+FiOGLSvuyih6RMKDok2io0BaLmi7WuP4KHcWyN7pQg8X4W4dAO+Go1IyZMW
+         p6Uw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=3kNnLF+2p/vpstsJsZcDCjmueT8xbGo2MfOzM9P3fwU=;
+        fh=VjPdG3+ECMiNp50hgp1PrTqfFRcA9ODFdyc7rbBXGFY=;
+        b=Xj51Sw/eDrrfe7UrxjS8Lwg+qCatK8D/SW/2MiOG6IG+VkJ5f1llOvX0YOF6VA8Awh
+         quCax1n7F/EYgjXIry2NJav8ncHD76Elv4WPw5cyDzZHUSLy/FD20r851ehJ6WLY/lyD
+         Sf65rkVP8ZnuCOdGIqUq291r2S0LZw5XMi30VCpUnrNFAjHAlGQ/37dalAw/KJ5erfHQ
+         J8+B4MTFLEJrPzCkZB7Fe7McNt6mQIVPJnTuHHZlrQHSDa5tK+8pT2OquM/p687Sw1Z5
+         vzdpqYj0+Dve+ZenRi7eKu2ApxWqNah1Rz3CDhqjE4BjqmU4XLoIgCa0BXzJ4P9vzSIJ
+         jSFg==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778499810; x=1779104610; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=vq0OHDPrSqmT5iEr31Nrcm4QgRLDSjmnaM+8FKnpEIY=;
-        b=OsWmOePqnVEI0mCMiFo7j1sVbgbHgi8awNpMIzWfJpcqQt1HNnKv5NySE+h4edMBH+
-         PHflk/r7l7aTclhXHGn92l44h8aDanG/XWlIKOnzx5IFT5CIDgwhGj52rkKT+ZD5PyXJ
-         kXILNfFZ/X4t3jw9XS3MKywQePi1GBw9AZaQU82dihEHnCACccQjRgTaUFHH5wtp4C9I
-         pn8da1U2O6dOTmRQxz0Wj4iiXdW5RRQmDjrUnSk2HsQ3YL6gxJBwFzPwAYrgenBmrHN8
-         MUQqG3DscYRtD/IP+T2vIOyodpdFhAdXu/eCBYczegU7Oc/Ac378l7ZvF9uZuLYQELm/
-         S8tw==
+        d=linaro.org; s=google; t=1778506360; x=1779111160; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=3kNnLF+2p/vpstsJsZcDCjmueT8xbGo2MfOzM9P3fwU=;
+        b=C3oqrRAIxOjiEqXofSQ3bmbKeJPDOgmbjPa8lOzHtPA3dlBXl3DhdLT0sT5s2ltfPD
+         MjpRtZPqcm95fUrq/WLKLni1/oC3cF5ozDG7lsK0HO1T5ZWz3cj/FApgpxNi82g/oGwZ
+         zDnitx3zmJW2wBJI94H+NXOF6yiKKS7xiynHbVHv9JHiWhTSBZc8V21dFOgB+eWKw/rd
+         3Vo1WPgKeBheyjqLFVPN01dechQY13ovJ3cpItMqCMIMu0+gyO9xb6jaBbG73hxpqgdv
+         kRGseC8ymwbMi/8M5XTvAmu4F48MYab/8N502CH0HXqEGZKowDJRlH96k9Q4oTORrPsb
+         DpRg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778499810; x=1779104610;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=vq0OHDPrSqmT5iEr31Nrcm4QgRLDSjmnaM+8FKnpEIY=;
-        b=HnFDBC9Iv0TgO9IV8NDYtjlAOPZ2Zx/VAkUPOBJ1sSPcxIxQIxdKDaSUqnVOfelya3
-         nkk2Ml+ClYlODCH+KCfOPjvgkWldPf9sDBqrupcPz+vzv6QkT5t2hBG32M/gVxSSZsfp
-         5IMbpPGr4fSGvIW4h0jZXvbr6qAFLyP15iCysIxVop9+SGLkpvmvpUB6iSQbcP5zK3rj
-         UrTcLc6HgcMaVELmha3VZI6d+0qNEaYS8InN772ai1rHpPIHNntkmrc+bSOQo1csqp6x
-         RmyJyBL1CRkIT5IWMkCReX3TcmVRAG44q/xW0r3ZdT170pBYoaE+Q9H1fwocfNg7uEmI
-         N5XQ==
-X-Forwarded-Encrypted: i=1; AFNElJ+YnPNrgFfRdeUoSyKoWca8BjvNQxYsnkbjncmF5aX7/4/Kyx075kbVvOYThKJk8BeADieUBkwAxYk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywkar9+V2DXEN2h5UdptYfiOjZC1UE90sVon91zmLCk9vk91XRe
-	hIb3ErrvArq+usxPUYEurRHENqy3CcAY+GCVctYO+jysi19XXN9lFDyJ
-X-Gm-Gg: Acq92OEZLUVe/51iDACJbP0AWG8p51gFxV63Bv2mN0GynvCZMA+IsZn4zwQhZ0hh8hp
-	pjUU1djuWCAKZQaUiQXbOOo4XzHxMFa/qJuQzBjzhM3BEHv+bOF5dHfAOuXHS3InYtwFF2uvJbY
-	RdEuBCz/X2ODn1tYEcHmrZvjTAy8OJc1zuKORB6IEedG2z6czY/gsmZfa1swyoKL6IuwknUZT3p
-	MevMjXtK/RyDVC0Wgq+tQnbvIqjXlXGoGwjBfYi9J7LRcxPobyV3FVbePKH+ssPA+ZObLpiv0nV
-	8ZcPirRCg9D5PsYGZhqBB10AQXr57BrmMEF38TbCwLuFZin9jOWiYDbPaKGq9MmlmuOEtgLf8XU
-	xBGEePJTNEKoIAcPzDuN6BIm9ue6cMve/7poNUouVnq8YyYJdWhBHZYLXO/uuRqJyxyZTBbDtIl
-	YCpZ1QMEHO2D/LOput+tbMwI6pXxdmsuS0aFfhBpFb7l8jMQ+pCiEa4CFzpvIbDUQ=
-X-Received: by 2002:a5d:64c9:0:b0:43d:75ec:26f7 with SMTP id ffacd0b85a97d-4515cb3d91dmr38402992f8f.29.1778499809527;
-        Mon, 11 May 2026 04:43:29 -0700 (PDT)
-Received: from [192.168.0.40] (a89-182-129-90.net-htp.de. [89.182.129.90])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-458b3664e3esm9488989f8f.3.2026.05.11.04.43.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 May 2026 04:43:29 -0700 (PDT)
-Message-ID: <46f93cdb-e65d-4c83-9050-f8223690b0ce@gmail.com>
-Date: Mon, 11 May 2026 13:43:25 +0200
+        d=1e100.net; s=20251104; t=1778506360; x=1779111160;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3kNnLF+2p/vpstsJsZcDCjmueT8xbGo2MfOzM9P3fwU=;
+        b=SF3diPGo/tvpXf5ckCrnYctCs7Ce+pw8IP1qNNcAFPZFC5AlklrvFj61DKzZJhmwEX
+         MSp/BZqqjahQ8J4axTrfGfE6H4XPGS7Q4fmBceDYtLWs4edAilu4u0wGc5qdo4DCa/Ts
+         LNdZFDY2YTGOrHjUnOQ8dD3YX82qyM/tu4UKiv0Wd1KUNuEUM/1/H3lcS1aCgarpgPFB
+         CTMGHfUyIOVkJhMlOPQ3HzklulTXWq1IATFjxCIbnME5PTa8+xb0+iXbFgbddGTKjjzn
+         XeMmi5NHbTF6clRV6ckQXLRPiNdO1M42z+8X8PDoRhKvBMvJNGlmDnZk/SHgILki0UkM
+         E6AQ==
+X-Forwarded-Encrypted: i=1; AFNElJ/3mMuiMEEmeCRrK8/ThDeNWlY/aim/JNKqiyMB3XTe48euhnmldwldAHrevhG6zNSgMqJ7YdRGzgE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwVgp2OQevdJpQqv5WzEzz4mL1bfj7Gg+pePYpooKYwaBqPdf3+
+	oOSjBb0RZk/XjsaRfVEW/jUWAZUbhhzTMPyXc8Y6cVOhI8+QVC1yhtfE5ineNeDTwq6XRa8UFve
+	/B0adAJv+XUF1LVNwZVfOMqf3PrzABZ6ulsW9nsPJcg==
+X-Gm-Gg: Acq92OGNaJWl9MMy5Vo1Q6+bqOQKVK5jZNY6BF47SSjuyUfhv+KXyD0d9l2mXSi7i8E
+	/C236WWUeo+sJmIBROzEm9MB5wf5q6lPNCocM41l1JV+XkdJXTbsw36NblWv9McrhJzVZlmsIFq
+	QJqNHL9S/jueubl312dW+8+MYrSn/Wl+fYdyZIBS0ekceKKmf7A4tmZPldjdJpNX+qpi2Kt1OBp
+	h9QUieHN7X9UmME1uhmamiYJIVvXFNt6d7UX2ferotq5q7iyhDEaW6C6AvhsOk5vgXvX4uhT5oq
+	RJRn23U4
+X-Received: by 2002:a05:690c:6101:b0:7bd:95d1:ed51 with SMTP id
+ 00721157ae682-7bdf5e9bf09mr254580917b3.28.1778506360395; Mon, 11 May 2026
+ 06:32:40 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v9 8/8] riscv: dts: spacemit: k1-musepi-pro: add SD card
- support with UHS modes
-To: Iker Pedrosa <ikerpedrosam@gmail.com>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
- Yixun Lan <dlan@kernel.org>, Ulf Hansson <ulfh@kernel.org>
-Cc: Troy Mitchell <troy.mitchell@linux.dev>,
- Michael Opdenacker <michael.opdenacker@rootcommit.com>,
- Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
- spacemit@lists.linux.dev, linux-kernel@vger.kernel.org,
- Trevor Gamblin <tgamblin@baylibre.com>
-References: <20260511-orangepi-sd-card-uhs-v9-0-ae48c0b2b2cf@gmail.com>
- <20260511-orangepi-sd-card-uhs-v9-8-ae48c0b2b2cf@gmail.com>
-From: Andre Heider <a.heider@gmail.com>
-Content-Language: de-DE
-In-Reply-To: <20260511-orangepi-sd-card-uhs-v9-8-ae48c0b2b2cf@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <1775720894-97901-1-git-send-email-shawn.lin@rock-chips.com> <1775720894-97901-4-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1775720894-97901-4-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 11 May 2026 15:31:59 +0200
+X-Gm-Features: AVHnY4LvEXWu95Gh6wocTKdc3h3pdGiDHVq0Zvt8rmPPBiDm4Id7zGut-ogHsU4
+Message-ID: <CAPDyKFo=Yuhbsa_8vKRCvZcyN-xo0MxOQOu5XGBQP4AXwdN8DA@mail.gmail.com>
+Subject: Re: [PATCH 3/4] mmc: dw_mmc: Add desc_num field for clarity
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Iker,
-
-On 11.05.26 10:54 AM, Iker Pedrosa wrote:
-> From: Trevor Gamblin <tgamblin@baylibre.com>
-> 
-> Update the Muse Pi Pro devicetree with SD card support to match what
-> was done for the OrangePi RV2 in [1]. More precisely:
-> 
-> - Enable sdhci0 controller with 4-bit bus width
-> - Configure card detect GPIO with inversion
-> - Connect vmmc-supply to buck4 for 3.3V card power
-> - Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
-> - Add dual pinctrl states for voltage-dependent pin configuration
-> - Support UHS-I SDR25, SDR50, and SDR104 modes
-> 
-> [1] https://lore.kernel.org/linux-riscv/20260316-orangepi-sd-card-uhs-v3-0-aefd3b7832df@gmail.com/T/#
-> 
-> Signed-off-by: Trevor Gamblin <tgamblin@baylibre.com>
-> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
-
-with the cd issue mentioned below this is:
-
-Tested-by: Andre Heider <a.heider@gmail.com>
-
-
+On Thu, 9 Apr 2026 at 09:48, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>
+> The ring_size field in struct dw_mci is misleadingly named.
+> Despite its name, it does not represent the size of the descriptor
+> ring buffer in bytes, but rather the number of descriptors allocated
+> within the fixed-size ring buffer.
+>
+> The actual ring buffer size is fixed at PAGE_SIZE (or DESC_RING_BUF_SZ,
+> which equals PAGE_SIZE). Within this buffer, we allocate either
+> struct idmac_desc or struct idmac_desc_64addr descriptors, and
+> ring_size stores the count of these descriptors.
+>
+> This naming has caused confusion, as it's also used to set
+> mmc->max_segs (the maximum number of scatter-gather segments),
+> which logically corresponds to the number of descriptors, not a
+> size in bytes.
+>
+> No functional change is introduced by this naming-only patch.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > ---
->   arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts | 66 ++++++++++++++++++++++++++
->   1 file changed, 66 insertions(+)
-> 
-> diff --git a/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts b/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-> index 29e333b670cf..774a4640f065 100644
-> --- a/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-> +++ b/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-> @@ -18,6 +18,24 @@ aliases {
->   		ethernet0 = &eth0;
->   		serial0 = &uart0;
->   	};
-> +	reg_dc_in: dc-in-5v {
-> +		compatible = "regulator-fixed";
-> +		regulator-name = "dc_in_5v";
-> +		regulator-min-microvolt = <5000000>;
-> +		regulator-max-microvolt = <5000000>;
-> +		regulator-boot-on;
-> +		regulator-always-on;
-> +	};
+>
+>  drivers/mmc/host/dw_mmc.c | 16 ++++++++--------
+>  drivers/mmc/host/dw_mmc.h |  2 ++
+>  2 files changed, 10 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 20193ee..df6daa6 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -491,12 +491,12 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+>
+>         if (host->dma_64bit_address == 1) {
+>                 struct idmac_desc_64addr *p;
+> -               /* Number of descriptors in the ring buffer */
+> -               host->ring_size =
 > +
-> +	reg_vcc_4v: vcc-4v {
-> +		compatible = "regulator-fixed";
-> +		regulator-name = "vcc_4v";
-> +		regulator-min-microvolt = <4000000>;
-> +		regulator-max-microvolt = <4000000>;
-> +		regulator-boot-on;
-> +		regulator-always-on;
-> +	};
+> +               host->desc_num =
+>                         DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
+>
+>                 /* Forward link the descriptor list */
+> -               for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
+> +               for (i = 0, p = host->sg_cpu; i < host->desc_num - 1;
+>                                                                 i++, p++) {
+>                         p->des6 = (host->sg_dma +
+>                                         (sizeof(struct idmac_desc_64addr) *
+> @@ -519,13 +519,13 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+>
+>         } else {
+>                 struct idmac_desc *p;
+> -               /* Number of descriptors in the ring buffer */
+> -               host->ring_size =
 > +
->   
->   	chosen {
->   		stdout-path = "serial0";
-> @@ -77,3 +95,51 @@ &uart0 {
->   	pinctrl-names = "default";
->   	status = "okay";
->   };
-> +
-> +&i2c8 {
-> +	pinctrl-names = "default";
-> +	pinctrl-0 = <&i2c8_cfg>;
-> +	status = "okay";
-> +
-> +	pmic@41 {
-> +		compatible = "spacemit,p1";
-> +		reg = <0x41>;
-> +		interrupts = <64>;
-> +		vin-supply = <&reg_vcc_4v>;
-> +
-> +		regulators {
-> +			buck4: buck4 {
-> +				regulator-min-microvolt = <500000>;
-> +				regulator-max-microvolt = <3300000>;
-> +				regulator-ramp-delay = <5000>;
-> +				regulator-always-on;
-> +			};
-> +
-> +			aldo1: aldo1 {
-> +				regulator-min-microvolt = <500000>;
-> +				regulator-max-microvolt = <3400000>;
-> +				regulator-boot-on;
-> +				regulator-always-on;
-> +			};
-> +		};
-> +	};
-> +};
-> +
-> +&sdhci0 {
-> +	pinctrl-names = "default", "uhs";
-> +	pinctrl-0 = <&mmc1_cfg>;
-> +	pinctrl-1 = <&mmc1_uhs_cfg>;
-> +	bus-width = <4>;
-> +	cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
-> +	cd-inverted;
+> +               host->desc_num =
+>                         DESC_RING_BUF_SZ / sizeof(struct idmac_desc);
+>
+>                 /* Forward link the descriptor list */
+>                 for (i = 0, p = host->sg_cpu;
+> -                    i < host->ring_size - 1;
+> +                    i < host->desc_num - 1;
+>                      i++, p++) {
+>                         p->des3 = cpu_to_le32(host->sg_dma +
+>                                         (sizeof(struct idmac_desc) * (i + 1)));
+> @@ -2858,10 +2858,10 @@ static int dw_mci_init_host(struct dw_mci *host)
+>
+>         /* Useful defaults if platform data is unset. */
+>         if (host->use_dma == TRANS_MODE_IDMAC) {
+> -               mmc->max_segs = host->ring_size;
+> +               mmc->max_segs = host->desc_num;
+>                 mmc->max_blk_size = 65535;
+>                 mmc->max_seg_size = 0x1000;
+> -               mmc->max_req_size = mmc->max_seg_size * host->ring_size;
+> +               mmc->max_req_size = mmc->max_seg_size * host->desc_num;
+>                 mmc->max_blk_count = mmc->max_req_size / 512;
+>         } else if (host->use_dma == TRANS_MODE_EDMAC) {
+>                 mmc->max_segs = 64;
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 14fb2b3..a05100c 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -80,6 +80,7 @@ struct dw_mci_dma_slave {
+>   * @cmd_status: Snapshot of SR taken upon completion of the current
+>   *     command. Only valid when EVENT_CMD_COMPLETE is pending.
+>   * @ring_size: Buffer size for idma descriptors.
+> + * @desc_num: Number of idmac descriptors available.
+>   * @dms: structure of slave-dma private data.
+>   * @phy_regs: physical address of controller's register map
+>   * @data_status: Snapshot of SR taken upon completion of the current
+> @@ -185,6 +186,7 @@ struct dw_mci {
+>         const struct dw_mci_dma_ops     *dma_ops;
+>         /* For idmac */
+>         unsigned int            ring_size;
 
-cd doesn't work with that on my muse pi pro. This on top fixes it though:
+ring_size is no longer used beyond this, please drop it.
 
-diff --git a/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts b/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-index c3920fc708f51..ad68ded8dfd7e 100644
---- a/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-+++ b/arch/riscv/boot/dts/spacemit/k1-musepi-pro.dts
-@@ -396,8 +396,7 @@ &sdhci0 {
-     pinctrl-0 = <&mmc1_cfg>;
-     pinctrl-1 = <&mmc1_uhs_cfg>;
-     bus-width = <4>;
--   cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_HIGH>;
--   cd-inverted;
-+   cd-gpios = <&gpio K1_GPIO(80) (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
-     no-mmc;
-     no-sdio;
-     disable-wp;
+> +       unsigned short          desc_num;
+>
+>         /* For edmac */
+>         struct dw_mci_dma_slave *dms;
+> --
+> 2.7.4
+>
 
-> +	no-mmc;
-> +	no-sdio;
-> +	disable-wp;
-> +	cap-sd-highspeed;
-> +	vmmc-supply = <&buck4>;
-> +	vqmmc-supply = <&aldo1>;
-> +	sd-uhs-sdr25;
-> +	sd-uhs-sdr50;
-> +	sd-uhs-sdr104;
-> +	status = "okay";
-> +};
-> 
-
-Thanks!
-Andre
+Kind regards
+Uffe
