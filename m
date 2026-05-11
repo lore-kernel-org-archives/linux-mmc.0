@@ -1,161 +1,151 @@
-Received: from GVXPR05CU001.outbound.protection.outlook.com (mail-swedencentralazon11013071.outbound.protection.outlook.com [52.101.83.71])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yx1-f41.google.com (mail-yx1-f41.google.com [74.125.224.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67F8A135A53;
-	Mon, 11 May 2026 02:43:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.83.71
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B7C13B7B64
+	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 08:02:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.224.41
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778467424; cv=fail; b=JM3HPN/JIYDZOSCnoGEW5y7fgAY5wS0C9VTB4c6vapyg5y4PQt0bQycn7CMT5CzmKKWyWhmXoluCLtd7WD6gfYGCwSg/fTKxChEPGgkehYqBkGAT3bVRXyfNFfhh40bDMlr4s/RgvgG9ALQTgO08YarDR9Q//Gv9liZRYP7Lid4=
+	t=1778486548; cv=pass; b=nQMezvPMcR9iT4IKpUP7SgFfzI4X8I4bWhaH5Ex13Hx/ibLr4xMUG4l5wQQo6W3LN+VYePJFOrikPwWOmuOrMi+nwtqhxJa6+sRWuYAHdKMxTg0VjBcSrMBFXD0ieUHT6/cDCUqXVB2+pYtLXYRLnHgLEA4CSVj315iH+GbDj/8=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778467424; c=relaxed/simple;
-	bh=g5P6gxDb7muuZz6pD3M6A1Pld2o0dRCgQwAuztHoYIA=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=XvQJSkZYuewmo9TQFFnjsauoOKsUO12jU3Y4DCzS+YIUh5Du5SkPwmWkuDkKzd0jrYhVT7Sj0icHCfaJ+waaqcLvR3l60H/CIoI1Y+Ey54CsYI4ga1lesMfFOKh07LxXp4/VuAMu82Od3uc/98nSMgVcyvXvNjSOwC4uhyKWrRE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=BS3m/i+m; arc=fail smtp.client-ip=52.101.83.71
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+	s=arc-20240116; t=1778486548; c=relaxed/simple;
+	bh=hAvNwN3LdfvaDvVGl1LPpgogRMQ+ezfmubbeLc9ID7I=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=kjAMJpjrDFmM4E1XmVR9y466v89l3Q93WKvNPqFGH8bJUPR+U4MFc9vpLo7BV+x+cwARQGGS3BnS2bgrFtgjag5q9vLuSg7NTcH5n5PUp8KNA5qRCEv9/hnTraQ3VfUB5zY2w8EX9bGbM6xk6Vd/ojq8ULp95Pg2eULdyhw78ug=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eUkO44xe; arc=pass smtp.client-ip=74.125.224.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="BS3m/i+m"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=d8gtw2q0GOyIzh7hESeRltzHUom3lkx6oD/DcTp0C+mFKBiXQCrneUgM4hvLXXs3LHr8PHxI+uZEWSqlwZk4+aDzK08kfY+9xleyjVS0dK6KpO1IzPG+0M4ARh1gxL2oMcc2ic/RxoclWaRkkCJHVpDwjRPrc20c4aG/fmC7wyC7IA0xhkxvMEz31WJqZ98uTPAccSxH+4q+mT1JplrtRPsoIWLB9YVPpjqcl/bld0UQIZrQvISbKIUP9vCxSm1fI7r9L470pj4hRcqvXBlsiSGgPlcLUFEDeWo5m2uLRg3ysFQPnRe2bHsR7EIwXHNi+TINYeQV5CqCntKHa3vnOA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=g5P6gxDb7muuZz6pD3M6A1Pld2o0dRCgQwAuztHoYIA=;
- b=oCIxsw6Dq4SxP3Qu4AM68MTCVPGkWIHJ4qA0hy0l1P69AfLzoo52CEMGDgvnWrC01wyq6m1PZRYCLK7//t4tbVNgDG2/iRZI3bSMGyJSc9R/5aOdA5dS7YkE/eZT/Ccu9TWGsS/fh/6Cmdf2dkE3sYCv12aFZYkUT8vzBPrJekIM+Adh2oEsv/44ZyQ6awBqNYeG8J14IvWi7Oc3QyYH20u7RXCQgKE4gwpgaPT70bHjkaApW12o7/N2eGb2SFVo+o45XN7YZeIacyKBI4G+AV3sM3XGYut3Y09MB/fUrok6JZ1TV+A8LBUEFPS/d3St6U5uFSom3bHR7K50P4zYBw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=g5P6gxDb7muuZz6pD3M6A1Pld2o0dRCgQwAuztHoYIA=;
- b=BS3m/i+mUFJYnyYeDf13sL0H1LM3zuClZa8imVyIaMG2MnnYz6i4HdKKecxPKpmBxiVz/LyDRL0WLCZR8uwQw8AQwECoXiIPZsL0iPq55I8ME/kcyS5KfJ69Zv/U6xAynOYn1bFOsy8Vbow8MdT6QadsVYxLjf+4oYKq85rSMVZqlSYZAmDx9361OVnwOwajeQBkpnR7zd8lPLmE24p9Sim0JnwdxLt0Q9TJAddustK3Ffufm13zYBdO6s5YsC6BgNsrVYlXDtgOTBVNXYBBqFiv7OLp/tGxkhxDXl2bXH33k3gsgPpYmekrG+YgX1T8bPhTwhcBsjzVZG7uLP9Row==
-Received: from GV2PR04MB12272.eurprd04.prod.outlook.com
- (2603:10a6:150:328::18) by PA4PR04MB9461.eurprd04.prod.outlook.com
- (2603:10a6:102:2a9::18) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.9891.22; Mon, 11 May
- 2026 02:43:39 +0000
-Received: from GV2PR04MB12272.eurprd04.prod.outlook.com
- ([fe80::3c9e:6f28:93b5:b908]) by GV2PR04MB12272.eurprd04.prod.outlook.com
- ([fe80::3c9e:6f28:93b5:b908%7]) with mapi id 15.20.9891.021; Mon, 11 May 2026
- 02:43:39 +0000
-From: Bough Chen <haibo.chen@nxp.com>
-To: Stefan Wahren <wahrenst@gmx.net>
-CC: "imx@lists.linux.dev" <imx@lists.linux.dev>, linux-mmc
-	<linux-mmc@vger.kernel.org>, "open list:GENERIC PM DOMAINS"
-	<linux-pm@vger.kernel.org>
-Subject: RE: sdhci-esdhc-imx: How to disable runtime PM via sysfs
-Thread-Topic: sdhci-esdhc-imx: How to disable runtime PM via sysfs
-Thread-Index: AQHc37VTTPtlQKTsy02xJ8dkerZCJbYIH1Mg
-Date: Mon, 11 May 2026 02:43:39 +0000
-Message-ID:
- <GV2PR04MB1227240AE6C5199C6D031D03D90382@GV2PR04MB12272.eurprd04.prod.outlook.com>
-References: <6e863b3f-9fa6-4a5a-8ef1-08af4b1d3c33@gmx.net>
-In-Reply-To: <6e863b3f-9fa6-4a5a-8ef1-08af4b1d3c33@gmx.net>
-Accept-Language: en-US, zh-CN
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: GV2PR04MB12272:EE_|PA4PR04MB9461:EE_
-x-ms-office365-filtering-correlation-id: 72ed4bdd-d0e3-4316-99ea-08deaf071ba2
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|366016|1800799024|19092799006|18002099003|22082099003|38070700021|56012099003;
-x-microsoft-antispam-message-info:
- +ixC6OuofId70KRU3YQYIY/2OnH3HIXUArSXDBvwFbUi8gmlKUakPSUw3vMBNXsSGpbGSdWyXXrZ5v6XyAUb5cNDtVil4+ImcaIfA8K0CNbs6UntZSweXyNCTQOANXIfYPv5GNwS2jTor/PWmx1kb+ezc25xuRyB/fcoPHCWEDlSh5x/NWwGYyd6P5zuAUHbpHOjpTs13NM2yxIqCUMc69zMNn6lPuADGZqLrWP3+wjNgYm7uYlo6MZMHzVH7LKYzN+OnoLJyO0QaHud5jqccAseHjRs+cHG5GF0XmVRTZOGR+YarXyBw1xNNHR/wDtMioqKr/WEheMESIjmZs69h44C/TRhhXJevgADh53Xi9+KTztxcjgAcfbu9NxglDGpZzwHz6+utb87GFEown+82R8/J3HtPQx5qEBYOywQbwYuoTx/NBVA0wYPpnjTlTVNZZQzpyg/+5tKKsZxKgCTQkNMyFwPeX96lfFizxYa08hjOdKUG1BN1giM9Gg5WUyGtGzQhzQL0UQnIyFVKyO36t5Xqmw3YwjDG6PTplKgjGeo2AuUy5Z4AVu39k3AP4fjY11hZ9bob4F9JdlXV74ZIp42aHIYpRkowww7D686NSZjUJLAJ/GzL6LC+Fx5PnxiKjzAKq6Cl8ES+mfjCdJYCqSW8PhPADnAGsC+2P0+6CMm2uxOMmgsmH2a9vvcRrnC+uEDmUHsC0BYORqvojF8viNEhKKGF8LQrgCqIlxRaVoMcXZXRde9zls3OJVpt0g9
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB12272.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024)(19092799006)(18002099003)(22082099003)(38070700021)(56012099003);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?TnZFZ01TUlExMDMxMS90NDVZY1VFMWdxOUZaOUJuY3hmQzBRS3VCOUh1am12?=
- =?utf-8?B?UytiYS90TVZBNFVmVnEzS0VENWwrOWlsdzRrdzFhb0RXdlMrcWlONVpyMVla?=
- =?utf-8?B?dzNXaDAvSExZRlp5OWhFTEFXbURhSE94WXRxUEdvTUlCS2w3Y0M3QlZ4dWpH?=
- =?utf-8?B?RVFpMldCRy80WjdFTU4vMG9EVFNabDFJMS9kNmdWNzhlTmxaU2dRemZETzd6?=
- =?utf-8?B?MjNsT1BacjljMCtTcnI5VlVtOTI2NWIyY0VCK0JLeGRXUWMyZ0lDZFJpY2tt?=
- =?utf-8?B?ZWxac0pNdytJQnBpUlFYZStOaTNBRGJrd2NidmNIalh1VEFWd1k3OHFyMG1C?=
- =?utf-8?B?a1J5cEdJV0ZheTUzRi9ld0pTVUh0VWZYejJ5SjNZZEJrOXNOL2pqbmI4ZzNF?=
- =?utf-8?B?eDFEd0lUSXozd2tlckZFV25MV3lwRE9jMzQ2MmlYL1RkbU05RkN2TEhkcGx5?=
- =?utf-8?B?UGk3MTBvZHNuU0pxWTMzM0pkYVhmSFJnWHAvY0h4Q3dLb1ZXY3NoTFVjNHUr?=
- =?utf-8?B?NWhXcTBZV1hScTFaN3o3LzVaTTVKcU9lUTQwbFlmWEgwYnN4ZGNaaTFBT3Rh?=
- =?utf-8?B?ODU1dmZ4V2RtQ2haL0lQUVZmQ0RvRUMxVnp5R3c0aUt4Sk41NFR5WG15MStZ?=
- =?utf-8?B?Rlc2QlpNMUFtNGZhU3l5ZkJyMVpjWWx4ZGR5K2M3c0pxQi9Wb3RFN2pVb0do?=
- =?utf-8?B?ZjN1QXMzeElubC9odytxTS9BajA1UGhiblY1TERZWloybE5NK1lSOGkvb3gx?=
- =?utf-8?B?Y08vaUs4ckI1VVlEMGd4bGViZHdFYWNjQmFqckV3RzFLM3R6MTZXMjhydTdE?=
- =?utf-8?B?U1J6bmc4NktHZ3RCU2NLSnBRYWVZKy8vVTZWR1MrUTVsVXpuZTMwaVk0NGhw?=
- =?utf-8?B?ajgrc1l5eEtPM2lTOCtXRys5SGV4TU1uN2x1eVBHcURuV3RsNDRBbG5HdW9p?=
- =?utf-8?B?RUFZQ0EzNS9qR3Npclc0ODdMK1R2WllVMjViWjUzUDRkTXpVVW1nMVYvSklS?=
- =?utf-8?B?QU9qTVZKdDZUNitGcnZCYXZYelRRYnJXcFpraWlhK2dEUlg1aThyM0xFcXgy?=
- =?utf-8?B?RDVSUUsxNEczR0VLMmY4Sjh1VDdxYXI3aDVqaEZva2hTdXBKdTBQUk1hZVFz?=
- =?utf-8?B?Rm84b2pCL3RGNnFkZlJCQUdkYzhHanVMcHYwMC91Y2RqdE5rcE1mVXN2Y3gx?=
- =?utf-8?B?cTJjOTB4a3NhZFBOeHFxMFRnUGdyV0FyRTdLVVRqTFhnaCtXb0hhNThZNC8v?=
- =?utf-8?B?OE1OaTRCVnlzT1dYUzNvUG8reTFkTVdGT3VReW03U0Q3Sm9ROGYra0VXbjkz?=
- =?utf-8?B?SzRETXRHYkJEbUw2OXNwQ3FyRzNEUUNSMjJJSW1kcmEwV1BkdERPUUt5aE5X?=
- =?utf-8?B?Zzl2cHZHMk96akxFTFdZUXFCNDVrZnphOFNza2hjYy9CZkh6cGovV3dmOWla?=
- =?utf-8?B?bEFlaUZ0SjJTUXJuOFV0Z2hCRFNXQm5BdnptbG5ZR0R0TmZWSU8wV2ZNYkxu?=
- =?utf-8?B?ckYxUm1NdWw3SXpwS2hiaWkvbkdkQjZwQ1puMDYyYTFRUmFoWW8zY1NDcWhQ?=
- =?utf-8?B?WC9wK3MwVmw5cklYU0pNY3pHYlRrR2xTYWVpUXdhdnFmbnB3bmh5Z2kwTnQz?=
- =?utf-8?B?TlZHUnk3RG1YeG1TWDFWQ3VXSnRwdTZhLzVlVEowN242RHk0cGovY2UvMUNW?=
- =?utf-8?B?UjRBUThlN1lQU3ZNYVg4MTZ4Q3p2c2RDbTQ3WUZIWmZWeXJMd0I0NklDei9o?=
- =?utf-8?B?YWlPNGc1aG5vTmxWdjZYRU84RHc4cWZWUlhtditmN2FsbVhJZXJkZ2hIeHJY?=
- =?utf-8?B?Y2YycWFORDNzbUsxeWRJclpWQmxqR1R5NTRUTEdpQUM4WWFaTktISzhKcHVv?=
- =?utf-8?B?S2hIQ254Y1ZjTmtQenpHY1FEYmlNRWxFdDNYTjM1NlZFY3JESk8rYlBJTGV2?=
- =?utf-8?B?QlZNOFZRZ2xjK1dFams2cVVqV1JBTzRmd0lnSVQzWHdUR1czRmtDT3FwZEdK?=
- =?utf-8?B?M0V4NmhKRFFwNXFFbTlqZWNqbHRsaVh2R0QwbTBnVTV6QWlEbGpEcXRRSkxS?=
- =?utf-8?B?YWsxbldYZU5zUHptKytpZnI1cm5IL3p2RnZCTVUvNlVudElsSXBYQmJGcGMr?=
- =?utf-8?B?MVJpbDNmN0NoSlY4TU1EMFV5T1g5ZWl5NXc3UUVWWHprbTQ4bXhWYWpCd25v?=
- =?utf-8?B?a2U4ZDJWVHNhY1dVZmFXdE5wMWJENmxzL3UyWW9FOWpLY2QzNUt1a3BkclRG?=
- =?utf-8?B?Y0FrQU1UVTdzV2F4cm5SM1RSN1VyeGNBM3I0S1BQVTZVeU13Q3FLdklDK0FS?=
- =?utf-8?Q?+KxyEE9tXsFRxL2KBz?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eUkO44xe"
+Received: by mail-yx1-f41.google.com with SMTP id 956f58d0204a3-651b4d09141so3976905d50.1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 01:02:15 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778486530; cv=none;
+        d=google.com; s=arc-20240605;
+        b=WKlh8OEaW9K/Zts1C7kph7UgS7fAAc2JDiPqcs/oFOe6JPdHej6KJ7FrBLVZHiqhk1
+         H74h1A/CjBluEoFn5EYBRuihmSUg5qwXtIQZjM9qHEobzWVJvhtC/7dk/uiR3HckiMHF
+         TGf8w85AKvGg4lleSYYPvOuGXTX2n82HWNmJsYvt5Ish7fh1NIsKLdu9IXIIq/oDHj9D
+         0882qUHHPhmE4mdlxeMyYiZllUVBpdkrcRjPnd5rnDIU1T58TSlWCTli+QwI3/iyr1qp
+         9ohPozbyH6fHvClQ8DIszigCnxBUytmSoj2oURD2KWRbRGmf7bPOhldlCgbHLW5FpLCp
+         uhrg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=sW6azkXa80yI0rJXwT2HYG22XiYQ/sn39R3AWBjjzho=;
+        fh=zN5cxb7JLybkm0LkfT1haCDlXiYjsUlwfbvyrZrNphw=;
+        b=Q8swieK8jTABjrA9b9WN0Fp3dusMB4qe/xQQxYXcOp+1kNIfxRwyRkclHY5HLk+VQP
+         z/a02jf4x6VOKtTJyS42ELIHneN5w7R0yIIBgnMHv0t1D9hECu9fgfdoLm/cOAdkGb/m
+         jYVCJDILnFdCqJG3n3KL6lJu5Svt44MJu+3QCydLj3HdMBxQVbLAuY6g/SLpQ8PKoume
+         oBVJbZpiQHU1fdLWph+l7UXSwb3UUr7bIekR4Plp/leznOgANkD6Q3yNjTnRrNNU79qf
+         vfQ3v5Demhj9cHYrATFtn5ZCCYA4lyecN3wpp2aHCjJTCguit4B95o0xHIkwQOhfxpEW
+         3abw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1778486530; x=1779091330; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=sW6azkXa80yI0rJXwT2HYG22XiYQ/sn39R3AWBjjzho=;
+        b=eUkO44xefUFP8aEssUo9MXyWjgm1v1yHWVLPH/Zbdfqd2B/O6cCKT/4ABqCzT7xUUp
+         FO2H4Aj9CilhbibtcofkQakiQB2WgKqRXLfdeJg0JYsRaQOYHTYmvwzBjkgZC6cRNX9m
+         CAqAmzVufJkP8xBZjiRMNKsKytiCEnqOKoqzANaQo0erh1HqIj4d8hQ7HNtuEWJqQ7FU
+         rRZFBJT1dg1sLxdxRUHywmoSowkA6ibL3DH2wAjk39QEe7natmVTiMfO90Wx2OKvm1V+
+         ZEtO4T55bQ8yBw2hrM0uxHJql1DEjN/EUIsTQHTVi9avuPayKye8iES/h18ROY4CxAp/
+         oWSA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778486530; x=1779091330;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=sW6azkXa80yI0rJXwT2HYG22XiYQ/sn39R3AWBjjzho=;
+        b=dATqYMnm4Su5d5weEvkRsG2Id0UM12jPs1ZYY/A8tkjhlvrCfL10OzEhAPz8GzGqms
+         trkm16e6rWmMTObmgWN41lsh6E9JqEGV+gnAHnRphq0G9lJXtbZgepGHwp6P5Nu5ggVD
+         KP1aaZ8kPmWWf0KtK9D5hVBExnyKeaU0HkGSEEQJ+Qs5ALuZMNe5/b1YMa6tEMWbi4Kh
+         mAeyTqdstkw50K89Qx4sIOrsCioY5WbLGSRhWFqHz+d7637b1p8/3L9TKFq29JoOejft
+         sn+CGV+1VmKibXLP+55iKA9K05gH3BSJaaL/nICHxOwiRFy+gOI3A/f8feU6NKa5YRfS
+         LXng==
+X-Forwarded-Encrypted: i=1; AFNElJ+MXCZ3SN0/HZVJHOq7PbAFYJ9lF1tzj4jnbOLku0orw9vvRE5tHl0FioeXWf/63yDXNN7+sI1BdEI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwCP4OlW2n2mEFF9Y9ufrbvxlylqWRkgPmtLGUUmKuFBBKkA3eg
+	49iQOvxwIJNU+WArEUpnVPySweha3E1zo5qTDH3VEnYyZOizh27PDFNBFwrQC8tJGbh7BvWKifL
+	uqYUTOClXM6bEUTREb5TwSMnmIV38X2A=
+X-Gm-Gg: Acq92OHWRTBkU2RJy9r8+LmjS++P6rApNwSyXtoOBuVZZKb97Bh3H56hD8Gz3Xmf26K
+	RIXV0tGXGRehRjay41MBdB0qkA2sWRAuBgtZ260vZLiN5aHdiGnWQWPToJNyrSqA1hTJu29Uj90
+	6wHty2v4qKuXD96H5tzzHY0fbeqWp02FVCWhvLNeDrLxipXg7bo4Vogvfujh1sBbPX3+YZTBkcV
+	uTiZJe6nxP75rW4P5oa6vdaGhT+VOPtbjOQ78S+2js4S8W/rBlJmDWXdEMtueseiH079jt6bwIX
+	v6YZPl9y
+X-Received: by 2002:a05:690e:1905:b0:65c:6ffb:3038 with SMTP id
+ 956f58d0204a3-65d7e822e64mr13587707d50.17.1778486529994; Mon, 11 May 2026
+ 01:02:09 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB12272.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 72ed4bdd-d0e3-4316-99ea-08deaf071ba2
-X-MS-Exchange-CrossTenant-originalarrivaltime: 11 May 2026 02:43:39.6202
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: bWXjwT9itpv61wNuQvjXcWzHitOpilsv6SJyn4VxxTiY1hDIOV4A1NBvReJ/pCOFXZrp7gRVcmRiMA8RuKqNUQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB9461
+References: <20260413-orangepi-sd-card-uhs-v8-0-c21c40ec16d0@gmail.com>
+ <20260413-orangepi-sd-card-uhs-v8-8-c21c40ec16d0@gmail.com>
+ <CA+Xcp4nY9GVMOmtMG-PNhY2vqP4Cc_amAMSa+M3vuDjWUkuCHw@mail.gmail.com>
+ <CABdCQ=OsPva9=YPdBd=3HW1OO7=_zJtpXjvaiA0WLEDT5Scs_Q@mail.gmail.com>
+ <DICDTHYTPDSP.210EBVHTQ6966@linux.dev> <20260508225341-GKB3590877@kernel.org> <20260508231051-GKC3590877@kernel.org>
+In-Reply-To: <20260508231051-GKC3590877@kernel.org>
+From: Iker Pedrosa <ikerpedrosam@gmail.com>
+Date: Mon, 11 May 2026 10:01:58 +0200
+X-Gm-Features: AVHnY4Jd8hC8nSk1elUyO1V0E_fXdX8QCiSMcWMOA11otgjNrlNzYjy97ZtHNls
+Message-ID: <CABdCQ=NFuW-XBK2zrw2TUFrEg0Q1Wf3_qS28zT3v-Hfud8mkew@mail.gmail.com>
+Subject: Re: [PATCH v8 8/9] riscv: dts: spacemit: k1-bananapi-f3: add SD card
+ support with UHS modes
+To: Yixun Lan <dlan@kernel.org>
+Cc: Troy Mitchell <troy.mitchell@linux.dev>, 
+	Margherita Milani <margherita.milani@amarulasolutions.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Paul Walmsley <pjw@kernel.org>, 
+	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
+	Alexandre Ghiti <alex@ghiti.fr>, Michael Opdenacker <michael.opdenacker@rootcommit.com>, 
+	Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev, 
+	linux-kernel@vger.kernel.org, Anand Moon <linux.amoon@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTdGVmYW4gV2FocmVuIDx3YWhy
-ZW5zdEBnbXgubmV0Pg0KPiBTZW50OiAyMDI25bm0NeaciDnml6UgMjE6MTENCj4gVG86IEJvdWdo
-IENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT4NCj4gQ2M6IGlteEBsaXN0cy5saW51eC5kZXY7IGxp
-bnV4LW1tYyA8bGludXgtbW1jQHZnZXIua2VybmVsLm9yZz47IG9wZW4NCj4gbGlzdDpHRU5FUklD
-IFBNIERPTUFJTlMgPGxpbnV4LXBtQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogc2RoY2kt
-ZXNkaGMtaW14OiBIb3cgdG8gZGlzYWJsZSBydW50aW1lIFBNIHZpYSBzeXNmcw0KPiANCj4gSGks
-DQo+IEknbSBpbnZlc3RpZ2F0aW5nIGEgcGVyZm9ybWFuY2UgLyBsYXRlbmN5IGlzc3VlIG9uIG15
-IGkuTVg5MyBib2FyZCB3aXRoIGFuDQo+IGVNTUMgYW5kIHNkIGNhcmQgdXNlIExpbnV4IDcuMC4z
-LiBXaXRoIGxhdGVuY3l0b3AgSSBmb3VuZCBvdXQgdGhhdA0KPiBzZGhjaV9zdGFydF9zaWduYWxf
-dm9sdGFnZV9zd2l0Y2goKSBpcyBjYWxsZWQgZnJvbSB0aW1lIHRvIHRpbWUgKH4gNSBzZWNzKS4g
-VGhlDQo+IHJlYXNvbiBiZWhpbmQgdGhpcyBpcyB0aGUgcnVudGltZSBQTSBvZiB0aGUgYm9vdCBk
-ZXZpY2UgaXMgaGFuZGxlZCBieQ0KPiBzZGhjaS1lc2RoYy1pbXguDQo+IA0KPiBTbyBJIHRyaWVk
-IHRvIGRpc2FibGUgcnVudGltZSBQTSB2aWEgc3lzZnM6DQo+IA0KPiBTdHJhbmdlbHkgL3N5cy9j
-bGFzcy9tbWNfaG9zdC9tbWMqL3Bvd2VyIHJlcG9ydHMgdGhhdCBjaGFuZ2luZw0KPiBhdXRvc3Vz
-cGVuZF9kZWxheV9tcyBpcyBub3Qgc3VwcG9ydGVkLiBCdXQgYWNjb3JkaW5nIHRvIHRoZSBkcml2
-ZXIgY29kZSBpdA0KPiBzaG91bGQgYmUgc2V0IHRvIDUwIG1zLg0KPiANCj4gQ2hhbmdpbmcgL3N5
-cy9jbGFzcy9tbWNfaG9zdC9tbWMqL3Bvd2VyL2NvbnRyb2wgYW5kDQo+IC9zeXMvY2xhc3MvbW1j
-X2hvc3QvbW1jKi9tbWMqL3Bvd2VyL2NvbnRyb2wgdG8gIm9uIiBhbmQNCj4gc3lzL2NsYXNzL21t
-Y19ob3N0L21tYyovbW1jKi9wb3dlci9hdXRvc3VzcGVuZF9kZWxheV9tcyB0byAiLTEiDQo+IGRv
-ZXNuJ3QgZGlzYWJsZSBydW50aW1lIFBNIG9mIHNkaGNpLWVzZGhjLWlteC4gVGhlIGZ1bmN0aW9u
-DQo+IHNkaGNpX2VzZGhjX3J1bnRpbWVfcmVzdW1lIGlzIHN0aWxsIGNhbGxlZCwgSSBkb3VibGVj
-aGVja2VkIGl0IGJ5IGFkZGluZyBhDQo+IGRldl9pbmZvIGludG8gaXQuDQo+IA0KPiBJcyB0aGlz
-IGV4cGVjdGVkIG9yIGRvIEkgbWlzcyBzb21ldGhpbmc/DQoNCkhpIFN0ZWZhbiwNCg0KVGhlIGNv
-cnJlY3QgcGF0aCB0byBkaXNhYmxlIHJ1bnRpbWUgUE0gZm9yIGkuTVggVVNESEMgaXM6IC9zeXMv
-Y2xhc3MvbW1jX2hvc3QvbW1jKi9kZXZpY2UvcG93ZXIvY29udHJvbA0KWW91IGNhbiB1c2UgY29t
-bWFuZCAiZWNobyBlbmFibGVkID4gL3N5cy9jbGFzcy9tbWNfaG9zdC9tbWMwL2RldmljZS9wb3dl
-ci9jb250cm9sIiB0byBkaXNhYmxlIHVzZGhjMSdzIHJ1bnRpbWUgUE0sIHdoaWNoIGNvbm5lY3Qg
-d2l0aCBhbiBFTU1DIGNoaXAuDQoNClJlZ2FyZHMNCkhhaWJvIENoZW4NCj4gDQo+IEJlc3QgcmVn
-YXJkcw0K
+El s=C3=A1b, 9 may 2026 a las 1:10, Yixun Lan (<dlan@kernel.org>) escribi=
+=C3=B3:
+>
+>
+> On 22:53 Fri 08 May     , Yixun Lan wrote:
+> > Hi Iker, Troy,
+> >
+> ..
+> > I would object to add CONFIG_I2C_K1 as hard dependency, the reason is
+> > that the spacemit sdhci driver (sdhci-of-k1.c) has no used i2c
+> > api/function, it's just need I2C function via an indirect requirement,
+> > which sdhci -> regulator(p1) -> i2c, besides, from the hardware design
+> > perspective, it just happens that K1 use P1(via I2C) as PMIC, it's
+> > totally possible(even in theory) to use other PMIC as power supply
+> > control which may not be I2C interface (maybe use SPI, for example)
+> >
+> > If we want to solve this more gracefully, I'm in favor to add explict
+> > option enabled in defconfig..
+> >
+> or I think it's better we do this way..
+>
+> +++ b/drivers/i2c/busses/Kconfig
+> @@ -794,6 +794,7 @@ config I2C_K1
+>         tristate "SpacemiT K1 I2C adapter"
+>         depends on ARCH_SPACEMIT || COMPILE_TEST
+>         depends on OF
+> +       default ARCH_SPACEMIT
+
+Thank you all for the feedback! I agree that enabling I2C_K1 by
+default makes sense for the user experience.
+
+To keep this patchset focused and avoid cross-subsystem complexity,
+I'll send the I2C default configuration change as a separate patch to
+the I2C maintainers after this series lands.
+
+This way we can get the SD card support merged without delays while
+still solving the dependency issue properly.
+
+>
+>
+> --
+> Yixun Lan (dlan)
