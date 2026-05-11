@@ -1,158 +1,147 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1408124B28
-	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 14:53:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92AB43FF8BC
+	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 14:54:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.172
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778511183; cv=pass; b=CtoTFDbGg2rt4BcWme/cKGiN5KVaFWaWGLexAUdPGmu9Hc0v1tb9Mez5TH16BOZsAx+Fu8ILwqLdJtUDNy2f2f1i0yn8LfRMXEhdDfzgCVN7WdJMvSevZHEAp6W0P+KbjFFm26mhbffQlYfuLF/WO86FM6ReA7Zxt20ZgderhWQ=
+	t=1778511283; cv=pass; b=aOXhbGgP3b8aQDasp69NnmeQTADEI0mHTOYjaK7WHzgytMjCOPjUHBJjxDxhoY2grhjDXff1EXtkjKqWRk1ofDQ7TzJjjAG08eOGjjocAwIUpbRXgojPwQvLqPI4nt2/8i06UX0D4tyyiSGbw2RAjFmBD425lL72A40WUtB0APk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778511183; c=relaxed/simple;
-	bh=lwc+bdyrLVdBcpfzRh9VrjXVIAvxjaksZdVUH0pI5Rc=;
+	s=arc-20240116; t=1778511283; c=relaxed/simple;
+	bh=I9qo4iu/lGpI3j9s93ypUJxrsS0jGrvIFGrhc5NQn6U=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JQ+89W8/caJU24mZ8046yS1THkN0C9goqxOsD//LQCy1eO9qG7x2QzsA0seMwwf1on2vJzwUIzFRzWzcaIwyKb5NnIOxxTiC32onLe8VxGaAiNFRSmlrTjzM6roSdDwvCMRUEmp1ETqxL2QcNYt6qgJAdwYQYA4QBpc3eTxXfiM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=yafa8rIw; arc=pass smtp.client-ip=209.85.167.53
+	 To:Cc:Content-Type; b=YiGHxm8Rn1pRNr7zhKFlfj6rTNgI7pctuR1TpBWr/+st1100tjlrB0A9UM1utFmHGAGxOo4artV8Js4AZFDGsorp1nWW9zYYP9Q1RREH4ZTtnxNFbT8SnJAMDsrEsEI+wKCMpw0kZqz8Ifocq8Mp8HqJ9TqOob8U+XlsKT5Jxpw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=X+NxNDpB; arc=pass smtp.client-ip=209.85.128.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yafa8rIw"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5a8d648466bso855309e87.3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 07:53:01 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1778511180; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X+NxNDpB"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-7bd87e5d8ffso57568287b3.1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 07:54:41 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778511280; cv=none;
         d=google.com; s=arc-20240605;
-        b=d2pOX3k9XZfZt/ovi08vbfnDgVOb45p5LoB2ckyz8EnM/jxQi8faSVZ8U2a36z9RZh
-         sDOvurHSmLqeukRmdtNuqW4XRnqdzAWpufO5n3irGUWlX5vdmDi0FdLHKT41MlVz1leT
-         Qikw8jNPcL9mHek7AvVgmTm22xHK2oleyjBQKoJ9mU2w1MhiKXfZ5vWVv7P8NCT9JCuK
-         q2dJLpL4Eo70q+KAsn54ewKhh/CPWFCPlrjx8CfImr6yg9HoBY4QPdWEhcMmptdECaPo
-         /VdnXpKpjiHmOIErxPOtBkYIwfVUtXM1REIHSN3rMDw9brohUoiphIA8Fg0d7rAupCrd
-         0KvA==
+        b=Wc+T9uf0Z6W/WKMnadDn/UjeIvT0RsybGNeNJv9seQ4wbUeZZKiRbJhptaeGos6tFQ
+         VO0k6Y1V5/nCOB93HhKPqz8Pquvt0rUAzf0ESCh2euHXM2BWaFvnboPFN+gHNdiDRITX
+         18kSza4n7HyJt7r5gpe2VaH/woXID7Z+OEF7KhODAP5h8njAEhyURjBlppUvH3Zuak5t
+         Yar0VoY+de3BjZwQhYzX4IRgCdMr566yMB+wz34BNrGL5WTRGWXe+gs9TZbk6qPpL1YH
+         tGcJ0Ni0R8GfvcRZgydzuQfo/o/wMN1CLg5Wm9Yrm+kl/trqdncsK1dd6Tg7HpEiKSKx
+         8vig==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=7ziP7y+jBujxkAYIyUnUXfhVfL9cOfMmz44d3RhYR+g=;
-        fh=/HV9Uguiwv83tm1OKFZVQcFR5OohYSy7u5ZA+rRMP1o=;
-        b=V/GIAlxjOweszTfEN3ho/BH9nxX665pZSN0IdeUwieHh76dSKXOYDex6GrPh8r//7C
-         1q5TpijmiUeKsWlnIXOB+Tf7cHDfQxYqmtWfzOPztXDHtLutBXyFU12avLmrIxz3aQfx
-         e31+Qk+Ze6D6XMd53+KmCCk9fBse+amYJujlkZBFZHYT1zQ5kW5Jb32grnh7B78jOWjs
-         ZljugAf32W63Mw3ynkgSV86Zcr43bBzmpicEXhRUFuuccm89FWSxlwx4ASI6JPcl/NfO
-         z2yi5FkwJLYylk5AUYWZ34VzLmfYmflf58VisN9YZ22yTFozBVjaxHtZb9s+ECXaSFBE
-         tU0w==;
+        bh=A7NUC6AajstAM2rRNdd54pVilaJ3jXs4RoWAQN/sufw=;
+        fh=JIJm4yffd8i/cU9iAFqdBIv0hy9AsiVQ44y3wOV3KAs=;
+        b=Yr+RfOQJ29x16pR9cPwzYaNXWyzbHbdOQI230Bp10EfHe0z3VrUq8IM/IRx0aMprFC
+         IMRD89i6JxPYbXcpZOROT9vEhz6U5YMGV1CPJHiA4PdVCoTC3xck8RKJ3XoMYIYwxvF1
+         Uf4iSFURjq2IlTatU6xow5ySG/VOKZ/cpY2mswnJjoLbUS4u15MTode8lJMdOnl9XdMT
+         QrFy/QJczKaHITorsRcfI0fawwwaH2LKXivUxxYPuX6jZWV70V5zMq8pT2ufQJOQDfY9
+         Npdu0DuD6eQMTJTO1S86yGeFxgojw1MHjPsv2Sb1hOqJoKZi5QWMdqqWGSGQyZooKIeN
+         EF3Q==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1778511180; x=1779115980; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1778511280; x=1779116080; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=7ziP7y+jBujxkAYIyUnUXfhVfL9cOfMmz44d3RhYR+g=;
-        b=yafa8rIwnKWKhh56rJzPG6+0E3Je4gn/K7zxzdoIodbxdnXz/gSdYi6eGVPavURq7d
-         5V+n/23Y6d1vBSOa/v/Gse2sl7z8uDgYP/LpRd5U8atAzI8Ngp/mv/mURMJRrj48vncx
-         6mJZLkXMeaGqnfds28XS5j1minl1tIqoAPzdNnzlAG+zsLzhjYziNbvQpc8cfv9z07k/
-         mrOIyXwpVzdvpSGgWy6hacBj+03v9LfPdHkEUeGPkcWiFYvsdsLtto1t/kfbT1JABfwZ
-         A6MrNI9eFjHn1NpmF7Je+3V3hsrRagj0brP3d8gzGRQV4zw/H+hHCwTqo4nlw+704X4E
-         2O2g==
+        bh=A7NUC6AajstAM2rRNdd54pVilaJ3jXs4RoWAQN/sufw=;
+        b=X+NxNDpBP2RsE6LuXUqUhBJSVRie851XqMsW1T/tqKFmOSHlBo2qw8ISW+NPFiAOh9
+         2ZzFwUvW7fChsc05bqnBs7w9ivcY7BH4q1li7mIRvTb1vgH2lObmwdRrEMttjtfmojs2
+         6Oc9tGvkpECLd6y8Rv/4LrSeB4GVWotfHDVOJemg37RwZuPzx0LH56g30GtTr5+EEooz
+         Gtpcy5mQua7l9zOFI80HgYcTEln9R0ENcD2bIGhkvMxG/0Z1tQfWY6C4moCw63DgZq9l
+         AF7LW3Vp4tv/Apjm0fJe5iRMVTFZR7aghME8vRkaidYtA+WJyYglnhNvGtb5PYe3TP8I
+         luXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778511180; x=1779115980;
+        d=1e100.net; s=20251104; t=1778511280; x=1779116080;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=7ziP7y+jBujxkAYIyUnUXfhVfL9cOfMmz44d3RhYR+g=;
-        b=DfIYbwQxFcgQXq4pPbeXen427YbJsgGHFmmgtCbyJZGmuotERoYyffClFr+Owz3AY1
-         VHdYsik9zuxbF6RZVjNZCMVE8VoYZC/r9lXvDrCBIv4E2yLgAmvbvhEZbV6Gl5diWitE
-         p/mOl9Q/6ZaYB5juIAuzz7KovVKC3F/o0TqyyhdjNbWO2VtsxsYCF3W0cpnQeF+1+vty
-         DcaenwlNr49TukPl4bPQKg8rahf9aG4M5b++hnFBYARTH3z75bM7yPrZGqLQrdVPvSGE
-         bvNxsuykGgE+QSj1gj8RfFX6cQazLT7HkEAvdbqwtoLrEG4t276HlD6sQFsMCtLSnQnq
-         9aPg==
-X-Forwarded-Encrypted: i=1; AFNElJ9qK4FlqaEaOo6+f8Axn41wU+H44BYre4rPfCSxEvLyO8d7zDv6KB/Vfq5zF+O4G5C62qE26RRHg+I=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwuM/Ga6yavtMwaJ5qY3jtydWn51dOizmGlAklIB0Ncth/UR474
-	FQdeuxp5cEGNzHoMz6+WHTh2bhVB8gMl0pg/oKPn17ngj8la+5zppCoieSxtojRu6Obk2a/H4iY
-	3FEFVq5OBEJcIMFUhMtjTwmvZsomWkyKgpqK8tca90A==
-X-Gm-Gg: Acq92OGW28IVHpOxX441/+Ouw92J/4MudbDMVCpSVyIJQqdiMBBZ+5ybNhxRt8P+75w
-	JUzFh7xrLNLpHN4PaxyEkDtuK1LwaSYg2JfQ7veLQeKfPDpbLET4rn+EhFN79YAJOP4YsR74VDF
-	fm2n6F5Tba3NZCEVKZq2b1JlNyhxIjhLTVDypz7Fh7ygcCcNJ8MwcVZpsgshp/at+N/FHr+h/cf
-	96Rib11kI0o1qbamDgTM6vxaZ9tJzcVvLIygQmGDyjJL/+XPnnFnj/9cfnfbVznQ5LYJGDC3BFV
-	P3p3QqyJ
-X-Received: by 2002:a05:6512:3da2:b0:5a8:73c3:f27b with SMTP id
- 2adb3069b0e04-5a887ae05c3mr8163448e87.15.1778511180033; Mon, 11 May 2026
- 07:53:00 -0700 (PDT)
+        bh=A7NUC6AajstAM2rRNdd54pVilaJ3jXs4RoWAQN/sufw=;
+        b=Sx03b66L8pmoZGqSXHKBPxWjtiPZuy5gJv96XiDKhttmc/lkh2Skw/2ZnTeqSKsrmQ
+         CQgvSqw2kunNeeL0TgK0AW+g9i2aXAtVc523UEaz0UGFP17hYsB92pZKC40rawvwGerB
+         oF2QeXt50hKu66nsDRNnEVJiFUHU+Akxp+9/rXrdJfeARzauwPALHqsWcIzsEGajb2PA
+         /xsbu2HeG2Bb+EyXWSOnxS2TYVqDkQh0S69YdnPjfwVe7KjXiixPjhENuKxz+5V2lg9i
+         +HB6gIktQd22FNGBOb9ULrf+wVmYshEsMn7MGOMohmdPrA+iPBRG74UXTKZJ5gTysQZq
+         O1aA==
+X-Forwarded-Encrypted: i=1; AFNElJ+eeW7MIEWpcKjMAaBr4Mm6BHyKNpY4H/akWvcSPVDYEUZZXsV5nXwyKkHoS08JWGZNEscQAgPOJ/w=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzDvmko5J1+lX1IK9Fy3k2nUfmkRIC0w3i3vAQR84OzBqzvskLz
+	lL1gzQ2nFVX6MiSCKTH4UhLBTCh1/uUD6Cd2kCcR9IpPOt0XEvqMwHnIxMdYEzjtFD7jI86XPGh
+	tV6eVLRHf8BDw8X1d3z3QrefdgU8JBk94FoFBSjvkDw==
+X-Gm-Gg: Acq92OHpSAYL6XghaqQLAKUaXL0wThu58yBflovtgLIPj8RNsFm+DQkWlcjbPGW5tcb
+	RdnQ4Gm5Qr5AHBr2ohzm68qU3U75X5Gq4EIJCodJPXB8WQzUuWrLY/W11k6fj/0rJjgUWwPmru/
+	6Dbl4/9eDWDuSYhvELiHN8YojFihreFvqxdu9tb5BKOD0xj3mP54nL4VfLOFHhTuXBD2Q/lpQ5h
+	69TD1ef/bnkjkq41ZtqmB76VkeDlS657msMbyRtNUew/KJcZO4Dx6Py4MhDhFY/jNOtntBKspsl
+	mqWJCNmu
+X-Received: by 2002:a05:690c:f06:b0:7ba:fd82:9121 with SMTP id
+ 00721157ae682-7bf04c314ddmr148104837b3.12.1778511280347; Mon, 11 May 2026
+ 07:54:40 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260426112016.1370929-1-inochiama@gmail.com> <20260426112016.1370929-3-inochiama@gmail.com>
-In-Reply-To: <20260426112016.1370929-3-inochiama@gmail.com>
+References: <20260430045615.334669-1-lachlan.hodges@morsemicro.com> <20260430045615.334669-22-lachlan.hodges@morsemicro.com>
+In-Reply-To: <20260430045615.334669-22-lachlan.hodges@morsemicro.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 11 May 2026 16:52:21 +0200
-X-Gm-Features: AVHnY4Jp8sFXbDsFjZzZloiryDJFcLGgBYUIAOgUw8D4STj0fn7MhtU9ha3Hr3k
-Message-ID: <CAPDyKFo-0h_=a5bSS1QFiXtasjRk06ERL7H+X=-U3J1+XX9TBg@mail.gmail.com>
-Subject: Re: [PATCH v3 2/2] mmc: litex_mmc: Set mandatory idle clocks before CMD0
-To: Inochi Amaoto <inochiama@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Karol Gugala <kgugala@antmicro.com>, 
-	Mateusz Holenko <mholenko@antmicro.com>, Gabriel Somlo <gsomlo@gmail.com>, Joel Stanley <joel@jms.id.au>, 
-	Paul Mackerras <paulus@ozlabs.org>, Maciej Dudek <mdudek@internships.antmicro.com>, 
-	Andy Shevchenko <andy.shevchenko@gmail.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Yixun Lan <dlan@gentoo.org>, 
-	Longbin Li <looong.bin@gmail.com>
+Date: Mon, 11 May 2026 16:54:01 +0200
+X-Gm-Features: AVHnY4JWfsrKbkqzJ2r2MSmWzNdF30HH3zv6ON9KnU6Yl_xtARtc44QtPLgfbDU
+Message-ID: <CAPDyKFrBdFxkGjj=y2Qz6Jx5A_HQbxh=nnwWHEtWK+NrADD-uQ@mail.gmail.com>
+Subject: Re: [PATCH wireless-next v2 21/31] mmc: sdio: add Morse Micro vendor ids
+To: Lachlan Hodges <lachlan.hodges@morsemicro.com>
+Cc: johannes@sipsolutions.net, Ulf Hansson <ulfh@kernel.org>, arien.judge@morsemicro.com, 
+	dan.callaghan@morsemicro.com, ayman.grais@morsemicro.com, 
+	linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sun, 26 Apr 2026 at 13:20, Inochi Amaoto <inochiama@gmail.com> wrote:
+On Thu, 30 Apr 2026 at 06:58, Lachlan Hodges
+<lachlan.hodges@morsemicro.com> wrote:
 >
-> The litex_mmc driver assumes the card is already probed in the BIOS
-> and skip the phy initialization. This will cause the command fail
-> like the following when the old card is unplugged and then insert
-> a new card:
+> Add the Morse Micro mm81x series vendor ids.
 >
-> [   62.923593] litex-mmc f0004000.mmc: Command (cmd 8) error, status -110
-> [   62.949717] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-> [   62.976606] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-> [   63.002516] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-> [   63.028442] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
->
-> Add required clock settings and initialization for the CMD 0, so it can
-> probe the new card.
->
-> Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
-> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
-> ---
->  drivers/mmc/host/litex_mmc.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
->
-> diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
-> index a8d9c0ece16a..c984398d0803 100644
-> --- a/drivers/mmc/host/litex_mmc.c
-> +++ b/drivers/mmc/host/litex_mmc.c
-> @@ -68,6 +68,9 @@
->  #define SD_SLEEP_US       5
->  #define SD_TIMEOUT_US 20000
->
-> +#define SD_INIT_DELAY_US  1000
-> +#define SD_INIT_CLK_HZ    400000
-> +
->  #define SDIRQ_CARD_DETECT    1
->  #define SDIRQ_SD_TO_MEM_DONE 2
->  #define SDIRQ_MEM_TO_SD_DONE 4
-> @@ -142,6 +145,12 @@ static int litex_mmc_send_cmd(struct litex_mmc_host *host,
->         int ret;
->         u8 evt;
->
-> +       if (cmd == MMC_GO_IDLE_STATE) {
+> Signed-off-by: Lachlan Hodges <lachlan.hodges@morsemicro.com>
 
-Rather than doing this explicit check for each command being sent, we
-have the ->set_ios() callback where things like this belong. Please
-move it there instead.
-
-> +               litex_mmc_setclk(host, SD_INIT_CLK_HZ);
-> +               litex_write8(host->sdphy + LITEX_PHY_INITIALIZE, 1);
-> +               fsleep(SD_INIT_DELAY_US);
-> +       }
-> +
->         litex_write32(host->sdcore + LITEX_CORE_CMDARG, arg);
->         litex_write32(host->sdcore + LITEX_CORE_CMDCMD,
->                       cmd << 8 | transfer << 5 | response_len);
-> --
-> 2.54.0
->
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>
+> v1 -> v2:
+>
+> - Use a single VENDOR_ID
+> - Drop B2 chip which is not needed
+>
+> Ulf, a mistake was made in v1 [1] listing multiple vendor IDs instead
+> of a single vendor ID and the subsequent device IDs. As for why
+> the series is structured as a series of singular patches is due to
+> how wireless driver submissions are as per [2] to simplify review
+> due to the size. The final submission will be sent as a pull request
+> with all driver files as a single commit and this SDIO commit
+> beforehand going through the wireless tree once you have acked.
+>
+> [1] https://lore.kernel.org/linux-wireless/CAPDyKFp6dhmpkMCs=ejYTpR9oNbNz0urtFD2HTvRwOp2Y7H3DA@mail.gmail.com/
+> [2] https://wireless.docs.kernel.org/en/latest/en/developers/documentation/submittingpatches.html#new-driver
+>
+> ---
+>  include/linux/mmc/sdio_ids.h | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index 0685dd717e85..111cb1758830 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -117,6 +117,9 @@
+>  #define SDIO_VENDOR_ID_MICROCHIP_WILC          0x0296
+>  #define SDIO_DEVICE_ID_MICROCHIP_WILC1000      0x5347
+>
+> +#define SDIO_VENDOR_ID_MORSEMICRO              0x325b
+> +#define SDIO_DEVICE_ID_MORSEMICRO_MM81XB2      0x0809
+> +
+>  #define SDIO_VENDOR_ID_NXP                     0x0471
+>  #define SDIO_DEVICE_ID_NXP_IW61X               0x0205
+>
+> --
+> 2.43.0
+>
