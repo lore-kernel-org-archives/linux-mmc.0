@@ -1,126 +1,154 @@
-Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
+Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AC80402426
-	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 15:40:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B0B532E137
+	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 15:40:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.41
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778514025; cv=pass; b=WYL3FqtNDMlCstHI65YjD3npyKd8bdXVfqN6XWVO5EetDv8LoOMmgEL8IBaJ7R5PpAT8iFZNsA+trDpWzSCVHR3NxEWJvSD2ZHp+l6wv3GF48kOgvrNQb3UnjkN42V6Eabu28ksQJDVq0HPWhKMuUCZQyzAB1lk+GYykaBirdgc=
+	t=1778514027; cv=pass; b=l1/AsXh04oREBflTMbVmmh6qe0ctmMaVOx39fFvrJctsKPW58bDABWJIT8ZYfDQIbni3XdS3yiJhIaLZWJxNRnlESujiZwHdP8i3USXGWPUww0yynOzp/Av7bf1WzPCFJCH6H/Z9pvLc1E11B1YvRwuPqzzQDJkyXCZISSz7WdM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778514025; c=relaxed/simple;
-	bh=S8/rBkZ/4qHgBEDhTDChyj/eLk+EKq3p+KYE1hfy8qM=;
+	s=arc-20240116; t=1778514027; c=relaxed/simple;
+	bh=f3BrIm74DQVGuO3zphgLn5vVBmkdeemGJ9kbeQQE9Ck=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PBuweBbe0GisGibK7iRBFnlrqf+bjahMe8BIKjXpZxiUDsx0wbtDEj1zOvZzMTtJJNXNhOJcw8HgCXJfzWf4X19uPdy0u+xO8TM9TpIK8i20h6Tk/6oy+lwtpSmk8/Bb+Y4qG5oPv4q80zMEBQpg0zuZYUkqn29CFzFe5IlcNHM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=gyY0KYdA; arc=pass smtp.client-ip=209.85.167.50
+	 To:Cc:Content-Type; b=NpxAmY4JXq6EakrG7T0lipIUqmc28v3hXx+s6hZo1MU30tOFt+u6D9VyQtekv+Ex60qkP7UJPZRdwy2ilCJZ5Rol+VCg6lWc+wXvqB49t/FCsqB6W/3oLjcRIbPYVgdjBdppUVovvP/sPRc9DUAoZV+u8UcVSHeevJLs65iHN7M=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=mRUG5q5t; arc=pass smtp.client-ip=209.85.167.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gyY0KYdA"
-Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-5a8891febd2so5223533e87.1
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 08:40:21 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1778514020; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mRUG5q5t"
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-5a884ebba7dso4614395e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 08:40:25 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778514023; cv=none;
         d=google.com; s=arc-20240605;
-        b=JHZnJttl58tbTkkIBk2o5hdKaWdeq1+MUZ6vOLaXwnl3gE/MaJigNCfMi+3/pGGxQ6
-         Ie8jeeHAVrKX73PWMKyBLcyVI4/MTrCAvTpTDLuWgyVhEie2RqmLcF36EybIbK8mhiA6
-         HDC05e6tylD9u6w1wDCEUbNojgGQL316S1lXJpcNwakOnINqP3S66orcbOhH3Ku7oG49
-         T7/b0eAKJ+bLcX+CuqnkyWa3vDi0j4brQiFLdA+915+Jpv4F90Ddr8Q5g7iXdLa/P7fh
-         h9xVq3LCOCVvwvwmbaG63WzR/RBJDh4Lp4lD/ZWONWNYPb2KtOE7V1QwQU1zUmu6n2hF
-         JxEw==
+        b=EdiR01W4V876sxKYO1rbmaf+NrWyDuD+qrVGjnMRFwHsduWtNjp3XKijU+Gs/QNsKx
+         1Fd3C6ClzSO6yIyB+nwQ1yYHMVhOSuYFQhezBt7fteMQCXxWSINmodAsKr1Z8dPzkH8m
+         rcvABjZRSUvTm7ehooZPtwsurvEeamVPE/xR8J2SzazuUefQZbbHuJIeGW/g2aL88MLO
+         Moh8NeZRbXAdDSrXXYNVEk0fBO3UIVPpV2fA4VdNGX22ZACgouK+Iw4DqLlXrBoUYyV1
+         +XefrP7hBjT2glRAbuAfZ6BkQLapfa2ZF/QxfflYS8uFhBMgZRHUhJKUNwdrmG3JXSW4
+         +w3w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=oJDpp87U3qP1/ZdloAL0g1B0PkMAMnaCHXe9tWClupk=;
-        fh=EqW5nGHfXV+Be0mQXHHg3vz1zDJsViW5T2ltHRlRSu4=;
-        b=d2FuR5ai29RKuQvVwUIrjtwrKwWQ1g9TjejBLj5jyNJpqdOMN4xvRg8oQOTHrlE+A2
-         gUn7G2TApZ5G2o5DFiacmHZ3F/zNUTMoacoGYb97dSikS4bMvAsq5z9kCt2GV5E4TzfJ
-         wPRlvUSrTRFMUs12KeRQ02u030g6FxC1I7S0QwqrXVCMMtXaS1QDQVdlMf9vAIlyjVM6
-         xaMZ6L3H+ZcqAa+/PqRxaGd2g1FVbgGziYOjmyvAGJktMgYnV1Z902d350xTiKl5Jg5g
-         PV5DmU2v9GhXl7AvSX9rhUCFTm0DpB7Tfk7FMAHTy/V7spaDCJL1Plyr3olzEuMI/Ldr
-         93Cw==;
+        bh=PAa827a6Or7i38QsE/PyyngNqVpUBROEfK8gwXTbCIU=;
+        fh=FyUCg7f2OmgkF3POsmwvEcD6NZ9J5R2PN/ZRdjGkX7I=;
+        b=ibrnGkIGr0pmxrWAiBuIFK1nBTesVaWVYjvvaeo/EZY7VH9bb7wW0rdeJaN+A9kGOg
+         fdB12xdrJuJ7PunMk06H1BEt2abww+R45Gkt8CZJoF4zmZliAmo8k1XdAEnlehZxJxK6
+         s1FRuHJAI/NCIymUy9YLyqGUByV/M86Zu+ri9r0HpfSCArQTW8fjWNK7kXljAM7QE0gK
+         cepKtCzHg4G5814qvlL0qx9EeXdQnZrz6R97yKVqYRL0tVpeHthp8wxKKMC1Oj+02X2c
+         ZfHY7CULPAf5yxSLqDFVo+OuQa+jJpGD0eYtuhknA0QIPqLTFexKMuYNQO7nxecHYxDE
+         fqLg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1778514020; x=1779118820; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1778514023; x=1779118823; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=oJDpp87U3qP1/ZdloAL0g1B0PkMAMnaCHXe9tWClupk=;
-        b=gyY0KYdAqN219bmzjwITNSoVfLjX+50R7cJAtejXSJoFkJhqGUPPDLTRJLB7JS+nte
-         oaoWd5c6lDNUFkpE1Pb/yD8z/W0/BbpQ3poJXyMIGWtvV4LD8AIkxp7zXaCtF7KPYiuF
-         glMPLjHlz9HkiRvhVweEy06NDseUyGLGugO9fDS5PGadG4sMLIgDjF85RcWSLV9J6XRt
-         7nbCahFnvXWf9o9uB/lKnCVwRwIK4CLKVhA2Wvvm8zIKJGTtqnpdJdGnvnaIBfWjGYrc
-         KutrROy6goyxe57YaGtuMMHlQ5BZUtGTYQ2hP/nb8ySmApvjl/2EHmut0J/oFNj2uMii
-         Y8dQ==
+        bh=PAa827a6Or7i38QsE/PyyngNqVpUBROEfK8gwXTbCIU=;
+        b=mRUG5q5txhUbj0WsNzy93v2yOqJx77hwNhgOBoBkJREuYYkPAo4IUkMXAUk1Ns0xRN
+         07FuTbItsN4JEI0CGRFDb0h0tbEJTQkBqvNy22vppC/Ypqf6Mg3fmYzcA/JfJxSry9Vx
+         Kw4a8AvksVy0KXajEPgkMs70/+sGhO1GmggVneTOgv7CSDiidwSdUEDu5rDO4Xpm4qPq
+         nnGkIuw8k3c5Ipy+3km8H2h5bYPNlfblEq+u2P6zeUY/W0eWvTdbiT+oB2iJ1aBPoxCP
+         X1tW+E9ufVPSWPYocqESuPqurr9C0VCsHcrXEA8RPPkHRU9YlhxKnBMV9BnThuW2t+KZ
+         /JOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778514020; x=1779118820;
+        d=1e100.net; s=20251104; t=1778514023; x=1779118823;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=oJDpp87U3qP1/ZdloAL0g1B0PkMAMnaCHXe9tWClupk=;
-        b=G1ocec/YGIG/50+sGDnPqXeJeS4fqVKiOSpzuvrmyURb+/haTUlw3rlZt01RpTNXJX
-         sGIjY83Pzlx/RoNELDdK66z7ZMBkVMD6fVED1o0ZEdZAfT7hinY9cVLODH0FnOSQxRug
-         9XxB/PaBHdY/kvifKCVHKwSBtbtZ0B+tDy5Dv14Edc9Dle640dDphGXJhgja2V1vaAhB
-         V5r5b1dLlRfdsL/hTKNDyVGJ1oElWWS/JSg/6oPbFBevAItaNswe/fda8ZG2bdLsnDGm
-         w5Lt5i1N2zoZ1j0emUG5P7xFtJebJpsLXrF9EHlRT1ufBufrmV4W2KOtYiVTREKKEyE3
-         ToxQ==
-X-Forwarded-Encrypted: i=1; AFNElJ+Z5BE8a+bTSprIUrs5Zy6XTwQeepdYr06yhjFWGX2gM/eBaHqo01YAJxccCFtUO5Wh+z2GEHJ5oi8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxgLlDhAq1HeK65dt65oKhjWXL5eYhDUBiL8equJkc7LrGEZ1LZ
-	0tZ6xv4BDrTxjFLRjiYlWkRk6DHs/vVNisyVW8MhP1UaG0+Vl6n16QAb6pkHnnl/L1760dTxMzK
-	Ry9K/fvL+LIaHIlDYpVEttxgyFZmyDrU0nUGglSasfQ==
-X-Gm-Gg: Acq92OHsnXCW1Zem8Yit7DruZb+3n4jORsO/lToGLqYWAVigFH0Ax23cPghQHSy8Njk
-	/DlbtfvMYddHKOhpyvg8Sq6ff7dgPBy0+bdtZwQmheFjUKX2w/fmTlbM1eWm9HiKHdN4TEZ1HS7
-	QBIthOXdsoSwAODDFV3BwLRhm0Y80XMgCPWAefu01Z8U+u6IHlhRAxJ42d9iFzy4JNE94aw92Q4
-	suMUhawde65toisVgANJ9xVc3qXZABLSklBWiWhKWE8w+9uWh+r4mgFQetKntzimJRoJjBh7AOV
-	WMad5ykq
-X-Received: by 2002:a05:6512:114e:b0:5a8:9b8c:96e0 with SMTP id
- 2adb3069b0e04-5a89b8c9738mr6839780e87.25.1778514019474; Mon, 11 May 2026
- 08:40:19 -0700 (PDT)
+        bh=PAa827a6Or7i38QsE/PyyngNqVpUBROEfK8gwXTbCIU=;
+        b=lJdqenuINFv22BBNRfzhPOqZYcuA+BtuWpyStRiX2+B8pdFbUk+gICq/K/BE7lVWK+
+         hUTXQDSNJrzAF+Nxn38vcqc4G5GlvJD0i0ME9E9pbXl4s7lFsD8Dhd91rsiG8mZXyj5d
+         cBWByudeddU2SO2ElIynxk8TWSwD3czA6Nf/r+HqiD/mz5OpcRoC3YVo+TLOat6jNCG1
+         JI3B6TnqIPTR0udBoGBzGM/MwK+qXP+yODXEaatzjylbA5baZ2yJlw/7mD072X/8PubW
+         JtqvjovtHj9NugBiVxD3ohg+IOnr85kr7Q9F247spTUXS75H7PvA5aB8Lh44DghaD0OE
+         JIjg==
+X-Forwarded-Encrypted: i=1; AFNElJ/6ksUBvGsrSRAYP1QDkZ6HFlw06AUTQDFWgC25uzTJSroaZW2EHKKFKQMoHDQSsBmZXfVPYPjRde0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzfst7kzIGPcn38+Ei2YwQ+XmTEVpXeTDdSCyl70XhWs8yL5Cmq
+	HwOioi4n+1RQaZMhjziH6nEwkv/zMXs0g4MLHII+5TqgBx7x6jpOdN8BpMr2GMgW9JFW9r1+yft
+	ClD/EMxdZ64DCEUl04d1BaoplSmqPzU/Dgqf7xUSjPQ==
+X-Gm-Gg: Acq92OHlN0xk3P5ItrHNn+FdMyWAHcI+VZTD0S+ZYpWCALd6lS7vmdhalsDY2BYRTLB
+	1iDiLC0X18X8UIGddPuXq3Jo21mFE8LYwhx7gUMIu1rgqXZ2XJZjTytAvC3wmymMcmdUfN58Rde
+	p9499OoBLYg6DcxQH/DyTaQ6sS94KchUcD7yIyqW2qalZf7DxdV/0OGQNd35LKqt2OFx72YXbKD
+	kw3R1oZrrP/lPts4R8Qe26Juzu0a1ZG+/PVeLOD0E2YeGyMu2rHzgFVyU4qbh3ncuKbxFvfdUyk
+	rtyTD+To
+X-Received: by 2002:a05:6512:128d:b0:5a8:6b81:6694 with SMTP id
+ 2adb3069b0e04-5a887ce5e99mr7616406e87.30.1778514023164; Mon, 11 May 2026
+ 08:40:23 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1775720894-97901-1-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1775720894-97901-1-git-send-email-shawn.lin@rock-chips.com>
+References: <20260415-dwmmc-dma-thr-v3-0-31014d36b6ee@disroot.org>
+In-Reply-To: <20260415-dwmmc-dma-thr-v3-0-31014d36b6ee@disroot.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 11 May 2026 17:39:40 +0200
-X-Gm-Features: AVHnY4JBPCzkZwSzFDJ7ZPq0FDuUgtck_opAyj3KzG9EF6Q6lmD-f4c2EYe-ClI
-Message-ID: <CAPDyKFpvRMW=gMHqmqXk+fdT+YggqjxcRB2MS1uxT06n-PbVHA@mail.gmail.com>
-Subject: Re: [PATCH 0/4] Refactoring to support per-instance configurable max
- segments for dw_mmc
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 11 May 2026 17:39:43 +0200
+X-Gm-Features: AVHnY4LuNFcZPtz7Q0DEjkMyUey5MSZn1HyvgA05S9j4k4K79dMxvsAAv2GCHYk
+Message-ID: <CAPDyKFrKd9PouecmpLBy3NEas8dpzyVAk9qD6=pFvwbHNyg2NQ@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2] Configuring DMA threshold value for DW-MMC controllers
+To: Kaustabh Chakraborty <kauschluss@disroot.org>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, 
+	Krzysztof Kozlowski <krzk@kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 9 Apr 2026 at 09:48, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Wed, 15 Apr 2026 at 17:03, Kaustabh Chakraborty
+<kauschluss@disroot.org> wrote:
 >
+> In Samsung Exynos 7870 devices with Broadcom Wi-Fi, it has been observed
+> that small sized DMA transfers are unreliable and are not written
+> properly, which renders the cache incoherent.
 >
-> The first patch is a defensive fix that addresses a crash caused by
-> incorrect max segment numbers provided by host drivers. Patches 2
-> through 4 then perform a step-by-step refactoring of the dw_mmc
-> code to support per-instance configurable max segments, which host
-> drivers can utilize in the future.
+> Experimental observations say that DMA transfer sizes of somewhere
+> around 64 to 512 are intolerable. We must thus implement a mechanism to
+> fall back to PIO transfer in this case. One such approach, which this
+> series implements is allowing the DMA transfer threshold, which is
+> already defined in the driver, to be configurable.
 >
+> Note that this patch is likely to be labelled as a workaround. These
+> smaller transfers seem to be successful from downstream kernels,
+> however efforts to figure out how so went in vain. It is also very
+> possible that the downstream Broadcom Wi-Fi SDIO driver uses PIO
+> transfers as well.
 >
->
-> Shawn Lin (4):
->   mmc: core: mmc: core: Add validation for host-provided max_segs
->   mmc: dw_mmc: Move misplaced comment
->   mmc: dw_mmc: Add desc_num field for clarity
->   mmc: dw_mmc: Convert descriptor ring buffer to per-instance
->     configurable
->
->  drivers/mmc/core/queue.c  |  8 +++++++-
->  drivers/mmc/host/dw_mmc.c | 27 +++++++++++++--------------
->  drivers/mmc/host/dw_mmc.h |  4 +++-
->  3 files changed, 23 insertions(+), 16 deletions(-)
->
-> --
-> 2.7.4
->
+> Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
+> ---
+> Changes in v3:
+> - Move host->dma_threshold default to dw_mci_alloc_host() (Shawn Lin)
+> - Move comment to document struct dw_mci::dma_threshold (Shawn Lin)
+> - Link to v2: https://lore.kernel.org/r/20260414-dwmmc-dma-thr-v2-0-4058078f5361@disroot.org
 
-Patch 1 and 2 applied for next, thanks!
+The v3 series applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+>
+> Changes in v2:
+> - Remove dt-binding to set DMA threshold (Krzysztof Kozlowski)
+> - Add comment to describe struct dw_mci::dma_threshold (Shawn Lin)
+> - Set DMA threshold in Exynos 7870 DW-MMC driver (Krzysztof Kozlowski)
+> - Link to v1: https://lore.kernel.org/r/20260412-dwmmc-dma-thr-v1-0-75a2f658eee3@disroot.org
+>
+> ---
+> Kaustabh Chakraborty (2):
+>       mmc: dw_mmc: implement option for configuring DMA threshold
+>       mmc: dw_mmc: exynos: increase DMA threshold value for exynos7870
+>
+>  drivers/mmc/host/dw_mmc-exynos.c | 1 +
+>  drivers/mmc/host/dw_mmc.c        | 4 ++--
+>  drivers/mmc/host/dw_mmc.h        | 2 ++
+>  3 files changed, 5 insertions(+), 2 deletions(-)
+> ---
+> base-commit: 1c7cc4904160c6fc6377564140062d68a3dc93a0
+> change-id: 20260412-dwmmc-dma-thr-1090d8285ea7
+>
+> Best regards,
+> --
+> Kaustabh Chakraborty <kauschluss@disroot.org>
+>
