@@ -1,171 +1,111 @@
-Received: from mail-oo1-f97.google.com (mail-oo1-f97.google.com [209.85.161.97])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from hall.aurel32.net (hall.aurel32.net [195.154.119.183])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B1ED24BBFD
-	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 16:01:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.97
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0247C42EEB1;
+	Mon, 11 May 2026 16:56:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.154.119.183
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778515318; cv=none; b=SD4lkYMMfbqtfcf9nzRd2S6iVgwov2O6pMBGVsndEjaRukUzB2L38a10lt40PnKxzISnxJKy4LxR8p0RsezKaelRwO/06REYuoRST5RIIzGU61id764kltFK6YhBXovUtmJ3iVM6udgiIgqqi/AyUtMJBpfSjpHt0tKhqOGyqbA=
+	t=1778518572; cv=none; b=gva9ppiY4SNAXuPYxwJzduf84Om0oi9GHSzZGlov/+nHdJ/9KbKa2CPckS9UzQCUb5gCiVxKSVqoqITb4vdCg8SjQjhFWMf9O9MdbghnEJTYswyxSoSytFGvcfDbCIj3x4tzyMKKx0Evk9qezpjebTP0I+vPMM5AyRp3yVR/4ec=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778515318; c=relaxed/simple;
-	bh=+HxMmEcOgZQP48dn0Wc+enlahMcWNDwauOsjMspknFU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=HCxwYg+zb2AA4hwJgpEjwFp4xMsGtSdTeE06zhShnRWyGCG+6Mo37Ys/lGSAxz3x6zuFYTbmNwIaiMcJwxfUxJrOQpvn57ASEe+rb3nokUqGCj8iSCOQIMRYkfApJFwO4Pf1lCu4UQdfXgCCu/3Q+kq/gCBU2/rIL3PbH216Ibo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=CW1swAFl; arc=none smtp.client-ip=209.85.161.97
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	s=arc-20240116; t=1778518572; c=relaxed/simple;
+	bh=rBQpmDiJ4kzQOa1dGHDK9kSEwdy1gsaL/djBxZWUqw4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MglNztTRvqjs9OHyRQPU9W1h+MeH60Zhy7VS8uS7FIkLk4NHj6m+ue6Sid0VOvF0GOzNHg/cWz3r/tDe+Xy4uKTQnqr50qtJIw28w8z4uacHI5/4T2reijARfx9hXMUV9OWeNAaFExyrn/Ic18sA6AZf2gTgssvvEHItDj/ixUs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=aurel32.net; spf=pass smtp.mailfrom=aurel32.net; dkim=pass (2048-bit key) header.d=aurel32.net header.i=@aurel32.net header.b=mJbiTZwp; arc=none smtp.client-ip=195.154.119.183
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=aurel32.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aurel32.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="CW1swAFl"
-Received: by mail-oo1-f97.google.com with SMTP id 006d021491bc7-694932346a1so1551154eaf.3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 09:01:57 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778515316; x=1779120116;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:dkim-signature:x-gm-gg:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=wOndm98lFtabqZv2yw6rwptZXsW2XgKQeagQE1DNxZs=;
-        b=UKOV9K1mY6rY1vQDtENVEVXiuJFa5wKWpMeiD7hXgDwVe87PHWuAwvwqlOVrAgJEJe
-         cDuUbO7nHaBR/tO3lqULGN7/7TgQK8QoRdGJ7o1XPUjLAA3F8V3X8KBU92ojEi+5JJZL
-         1LeluNFkpT9bXEuwuxp9nZ9YUyiU+1/RqdZqr3XD++ewfegENlR76q1wTjVKUb896R9l
-         NIJSHTkFFUpAJsmZJeoIAOddvLS1lXxZcQDM8zLg2p4tiIcd7sZDxg+Jq00siRAAE+DY
-         KIhMZXUErR8hAeLLllg1Kz78mvxwSuM2qJmfug5i9bVYSn5px79up0gi43qFcIoMWSxB
-         0z/g==
-X-Forwarded-Encrypted: i=1; AFNElJ/ZLUVCVl3KfhKLCUvw8TxIULvIY4jkvdt1ZfioCJtE3RvVNIvzK9U12PPNpxmqJpKehMeK87yYcD4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yylwwv3gPeNNfbcDE8tSOeLibYJTuno7V0+/eL2sD9bYEZtTNYg
-	1sR7hlWm9Lx2EIa4mvLa4uJW4YoZouCZKlFxh1m9/2iqA2AzD0nC5XNSFuyRXJm2vd73HBy8PUx
-	kIlajquWc5SpqsgjVsBOeWYb+CutwgQ0LjiZXY8IA4kexzamOgoNvLj3y3YZcCDga6uPrPDNfGQ
-	+bIHcFCnDyjtuTy0gGmocDDEF21pic/gHS+MWiKmszTaOx/uw+GPDb0mWYGiK/uuVmd1Rf1JGUO
-	+VwccbqG7khf3nhh/yh
-X-Gm-Gg: Acq92OG+DN58mDHDUqws7lxF913RCr2QvvXqi4EGq5KQucEfX8vlSIiIeP26rZ7kbfY
-	QpGf/UqcTMc6Ig7KSU5ipVPhg1QTc0goHsBrLwsh4VSQzpUwZz+RfQiNjugoR7iCH2edSA4N0KL
-	mj8fC8nb3T5u5h3L7wo4x2/I3l9OA6t9/1IPr8rWHq8QF26J1TsnDZlgBvN92SOBPH/mVADmxfB
-	EaPmELjNaGCVVuFqjQwn2zAg6ySljVsCcqc4khWcziPJXVsfJv2uVEPTUl6ywDhQCZclwR6i4QZ
-	QuLFUC0r+KmwETWRXvwCGVqS0Y85OcPqcTSyUN1xTobizQIlgmj41mqEcc2W/1RPuk/+Sv3WVfW
-	HYseagMaXiQmoKAF6hcOhhttyFoDCrqW63vnJGAUx86o4XByuAAAr5S35Hm3sxKMIcLVDV8AoJ/
-	ZsFXzDwCUQpQ==
-X-Received: by 2002:a05:6820:1745:b0:67e:1be4:d8d4 with SMTP id 006d021491bc7-69998cc9cf0mr12802511eaf.21.1778515315812;
-        Mon, 11 May 2026 09:01:55 -0700 (PDT)
-Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com ([144.49.247.127])
-        by smtp-relay.gmail.com with ESMTPS id 6a1803df08f44-8bf3a153b66sm3948406d6.18.2026.05.11.09.01.55
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 11 May 2026 09:01:55 -0700 (PDT)
-X-Relaying-Domain: broadcom.com
-X-CFilter-Loop: Reflected
-Received: by mail-dy1-f198.google.com with SMTP id 5a478bee46e88-2ef62078ee7so5866295eec.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 09:01:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1778515314; x=1779120114; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=wOndm98lFtabqZv2yw6rwptZXsW2XgKQeagQE1DNxZs=;
-        b=CW1swAFlK/JfXDdvjITyDsAbRxnGDnZeetH0TBkgGVMozR1T5MMunZy6VtBHOAy5ii
-         vPQ8JUSbFCRsNABFwOxqj0R+3NnZe2AW4+O4W7kGZpX8zyAfcAvWwwzaSErCt70ggE+X
-         Np8EhA/tC3JNpWCMQFNENfWH6KZmL4a97H6bE=
-X-Forwarded-Encrypted: i=1; AFNElJ+GaKtBPRNsrUFg0y5/fUAPcmYNmkGQZjQRlRh7SRzVIBa/8JnaeAnpuVRQWPDMN38pWTXKeT/o5Ao=@vger.kernel.org
-X-Received: by 2002:a05:7300:b919:b0:2dd:c066:c02 with SMTP id 5a478bee46e88-2f54a87e845mr12698237eec.22.1778515314032;
-        Mon, 11 May 2026 09:01:54 -0700 (PDT)
-X-Received: by 2002:a05:7300:b919:b0:2dd:c066:c02 with SMTP id 5a478bee46e88-2f54a87e845mr12698160eec.22.1778515313185;
-        Mon, 11 May 2026 09:01:53 -0700 (PDT)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-2f8859eb034sm14019265eec.5.2026.05.11.09.01.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 May 2026 09:01:52 -0700 (PDT)
-Message-ID: <1d583be4-b1cd-4226-bdbe-5ebd275de9c2@broadcom.com>
-Date: Mon, 11 May 2026 09:01:50 -0700
+	dkim=pass (2048-bit key) header.d=aurel32.net header.i=@aurel32.net header.b="mJbiTZwp"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=aurel32.net
+	; s=202004.hall; h=In-Reply-To:Content-Type:MIME-Version:References:
+	Message-ID:Subject:Cc:To:From:Date:Content-Transfer-Encoding:From:Reply-To:
+	Subject:Content-ID:Content-Description:X-Debbugs-Cc;
+	bh=L78XUyfmd1N5LDsAK22uGyO5m/vZ7XFauhOa9Q1DPPA=; b=mJbiTZwpBLn1iJ9s002v6d53kF
+	7ltMVdCI3QMDRuKY7nS6SB1R1fdJNnWumYyoperh77ipD4k5J/eXJ0A5OxPDP2U+Wxu0e5W976yxn
+	Fx+6njvE/EaDADFnsK1iG2R13jjYl/2oicpHYZu46xcL0ehRB0eIsqz548jxMEfGOfjBxtCwluHQF
+	QwBu1I1AcnCkeg8V8yPf0ZuAzGXcDTJSt67J5+Nlc7qRr62Cs90MdsjGyYhWvCcOBOnEI3PXXAf7U
+	ExQCpxGrzxevFd2KUhimBfG3aaAqZwAq1dhaazcmdkkQh8O+zGYHdV571/XYWp6t7tpwqdmRhzlx/
+	rfoAAA+g==;
+Received: from authenticated user
+	by hall.aurel32.net with esmtpsa  (TLS1.3)  tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.98.2)
+	(envelope-from <aurelien@aurel32.net>)
+	id 1wMTv5-00000003ZV9-2MVR;
+	Mon, 11 May 2026 18:55:51 +0200
+Date: Mon, 11 May 2026 18:55:50 +0200
+From: Aurelien Jarno <aurelien@aurel32.net>
+To: Iker Pedrosa <ikerpedrosam@gmail.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Yixun Lan <dlan@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
+	devicetree@vger.kernel.org,
+	Margherita Milani <margherita.milani@amarulasolutions.com>,
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+	Troy Mitchell <troy.mitchell@linux.dev>, linux-mmc@vger.kernel.org,
+	Javier Martinez Canillas <javierm@redhat.com>,
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
+	spacemit@lists.linux.dev
+Subject: Re: [PATCH v9 7/8] riscv: dts: spacemit: k1-bananapi-f3: add SD card
+ support with UHS modes
+Message-ID: <agIKFnO1i9eJWXfY@aurel32.net>
+Mail-Followup-To: Iker Pedrosa <ikerpedrosam@gmail.com>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Yixun Lan <dlan@kernel.org>, Ulf Hansson <ulfh@kernel.org>,
+	devicetree@vger.kernel.org,
+	Margherita Milani <margherita.milani@amarulasolutions.com>,
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+	Troy Mitchell <troy.mitchell@linux.dev>, linux-mmc@vger.kernel.org,
+	Javier Martinez Canillas <javierm@redhat.com>,
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
+	spacemit@lists.linux.dev
+References: <20260511-orangepi-sd-card-uhs-v9-0-ae48c0b2b2cf@gmail.com>
+ <20260511-orangepi-sd-card-uhs-v9-7-ae48c0b2b2cf@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: core: Kioxia 016G01 does not enter boot mode after
- SLEEP
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
- Wolfram Sang <wsa+renesas@sang-engineering.com>,
- Oleksij Rempel <o.rempel@pengutronix.de>,
- Avri Altman <avri.altman@sandisk.com>,
- Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
- Erick Shepherd <erick.shepherd@ni.com>,
- Adrian Hunter <adrian.hunter@intel.com>,
- "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..."
- <linux-mmc@vger.kernel.org>
-References: <20260413180551.3683969-1-florian.fainelli@broadcom.com>
- <CAPDyKFooAH=Z2BEHq08Fu03uidgjuaDbwM-Y3Y3Xa8STV+ODzg@mail.gmail.com>
-Content-Language: en-US, fr-FR
-From: Florian Fainelli <florian.fainelli@broadcom.com>
-Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
- xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
- M0Txqn1tOWoIc4QUl6Ggqf5KP6FoRkCrgMMTnUAINsINYXK+3OLe7HjP10h2jDRX4Ajs4Ghs
- JrZOBru6rH0YrgAhr6O5gG7NE1jhly+EsOa2MpwOiXO4DE/YKZGuVe6Bh87WqmILs9KvnNrQ
- PcycQnYKTVpqE95d4M824M5cuRB6D1GrYovCsjA9uxo22kPdOoQRAu5gBBn3AdtALFyQj9DQ
- KQuc39/i/Kt6XLZ/RsBc6qLs+p+JnEuPJngTSfWvzGjpx0nkwCMi4yBb+xk7Hki4kEslABEB
- AAHNMEZsb3JpYW4gRmFpbmVsbGkgPGZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tPsLB
- IQQQAQgAywUCZWl41AUJI+Jo+hcKAAG/SMv+fS3xUQWa0NryPuoRGjsA3SAUAAAAAAAWAAFr
- ZXktdXNhZ2UtbWFza0BwZ3AuY29tjDAUgAAAAAAgAAdwcmVmZXJyZWQtZW1haWwtZW5jb2Rp
- bmdAcGdwLmNvbXBncG1pbWUICwkIBwMCAQoFF4AAAAAZGGxkYXA6Ly9rZXlzLmJyb2FkY29t
- Lm5ldAUbAwAAAAMWAgEFHgEAAAAEFQgJChYhBNXZKpfnkVze1+R8aIExtcQpvGagAAoJEIEx
- tcQpvGagWPEH/2l0DNr9QkTwJUxOoP9wgHfmVhqc0ZlDsBFv91I3BbhGKI5UATbipKNqG13Z
- TsBrJHcrnCqnTRS+8n9/myOF0ng2A4YT0EJnayzHugXm+hrkO5O9UEPJ8a+0553VqyoFhHqA
- zjxj8fUu1px5cbb4R9G4UAySqyeLLeqnYLCKb4+GklGSBGsLMYvLmIDNYlkhMdnnzsSUAS61
- WJYW6jjnzMwuKJ0ZHv7xZvSHyhIsFRiYiEs44kiYjbUUMcXor/uLEuTIazGrE3MahuGdjpT2
- IOjoMiTsbMc0yfhHp6G/2E769oDXMVxCCbMVpA+LUtVIQEA+8Zr6mX0Yk4nDS7OiBlvOwE0E
- U8AbwQEIAKxr71oqe+0+MYCc7WafWEcpQHFUwvYLcdBoOnmJPxDwDRpvU5LhqSPvk/yJdh9k
- 4xUDQu3rm1qIW2I9Puk5n/Jz/lZsqGw8T13DKyu8eMcvaA/irm9lX9El27DPHy/0qsxmxVmU
- pu9y9S+BmaMb2CM9IuyxMWEl9ruWFS2jAWh/R8CrdnL6+zLk60R7XGzmSJqF09vYNlJ6Bdbs
- MWDXkYWWP5Ub1ZJGNJQ4qT7g8IN0qXxzLQsmz6tbgLMEHYBGx80bBF8AkdThd6SLhreCN7Uh
- IR/5NXGqotAZao2xlDpJLuOMQtoH9WVNuuxQQZHVd8if+yp6yRJ5DAmIUt5CCPcAEQEAAcLB
- gQQYAQIBKwUCU8AbwgUbDAAAAMBdIAQZAQgABgUCU8AbwQAKCRCTYAaomC8PVQ0VCACWk3n+
- obFABEp5Rg6Qvspi9kWXcwCcfZV41OIYWhXMoc57ssjCand5noZi8bKg0bxw4qsg+9cNgZ3P
- N/DFWcNKcAT3Z2/4fTnJqdJS//YcEhlr8uGs+ZWFcqAPbteFCM4dGDRruo69IrHfyyQGx16s
- CcFlrN8vD066RKevFepb/ml7eYEdN5SRALyEdQMKeCSf3mectdoECEqdF/MWpfWIYQ1hEfdm
- C2Kztm+h3Nkt9ZQLqc3wsPJZmbD9T0c9Rphfypgw/SfTf2/CHoYVkKqwUIzI59itl5Lze+R5
- wDByhWHx2Ud2R7SudmT9XK1e0x7W7a5z11Q6vrzuED5nQvkhAAoJEIExtcQpvGagugcIAJd5
- EYe6KM6Y6RvI6TvHp+QgbU5dxvjqSiSvam0Ms3QrLidCtantcGT2Wz/2PlbZqkoJxMQc40rb
- fXa4xQSvJYj0GWpadrDJUvUu3LEsunDCxdWrmbmwGRKqZraV2oG7YEddmDqOe0Xm/NxeSobc
- MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
- 7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
- 95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
-In-Reply-To: <CAPDyKFooAH=Z2BEHq08Fu03uidgjuaDbwM-Y3Y3Xa8STV+ODzg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260511-orangepi-sd-card-uhs-v9-7-ae48c0b2b2cf@gmail.com>
+User-Agent: Mutt/2.2.13 (2024-03-09)
 
-On 5/11/26 07:18, Ulf Hansson wrote:
-> On Mon, 13 Apr 2026 at 20:06, Florian Fainelli
-> <florian.fainelli@broadcom.com> wrote:
->>
->> The Kioxia 016G01 eMMC device does not exit SLEEP mode when sending CMD0
->> which prevents the system from properly resuming from S3 warm boot where
->> the eMMC is necessary to pull in the boot components.
+On 2026-05-11 10:54, Iker Pedrosa wrote:
+> Add complete SD card controller support with UHS high-speed modes.
 > 
-> Is the bug confirmed by Kioxia?
-
-We've been going back and forth with them without much progress as far 
-as a resolution goes. Since there was no progress and I would like to 
-get this included in downstream kernels at some point, this was submitted.
-
+> - Enable sdhci0 controller with 4-bit bus width
+> - Configure card detect GPIO with inversion
+> - Connect vmmc-supply to buck4 for 3.3V card power
+> - Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
+> - Add dual pinctrl states for voltage-dependent pin configuration
+> - Support UHS-I SDR25, SDR50, and SDR104 modes
 > 
-> If not, can you explain a bit more what is actually happening during
-> system resume?
+> This enables full SD card functionality including high-speed UHS modes
+> for improved performance.
+> 
+> Suggested-by: Anand Moon <linux.amoon@gmail.com>
+> Tested-by: Anand Moon <linux.amoon@gmail.com>
+> Tested-by: Margherita Milani <margherita.milani@amarulasolutions.com>
+> Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
+> ---
+>  arch/riscv/boot/dts/spacemit/k1-bananapi-f3.dts | 22 ++++++++++++++++++++--
+>  1 file changed, 20 insertions(+), 2 deletions(-)
+> 
 
-Upon entering Suspend-to-DRAM, the eMMC will be put into sleep mode. 
-When our systems resume, one of our hardware cores driving the eMMC (HIF 
-block) in command mode will send a CMD0 command for the eMMC device to 
-exit SLEEP mode. The Kioxia 016G01 device takes 10ms rather than the 
-tSLEEP_EXIT value of 1ms which is advertised and so our HIF block does 
-not see the Boot ACK pattern in time and does not service the read 
-request from the processor that wanted to read from eMMC, we get a reset 
-of the system, rather than continue booting.
+Thanks for including the card detect change.
 
-When SLEEP is not enabled, the eMMC device responds within tSLEEP_EXIT 
-as advertised and we don't have that problem.
+Tested-by: Aurelien Jarno <aurelien@aurel32.net>
+Reviewed-by: Aurelien Jarno <aurelien@aurel32.net>
 
-So I suppose I could reformulate the commit message and give some more 
-details here if you would like?
 -- 
-Florian
+Aurelien Jarno                          GPG: 4096R/1DDD8C9B
+aurelien@aurel32.net                     http://aurel32.net
