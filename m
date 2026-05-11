@@ -1,161 +1,158 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E2CA371CFF
-	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 14:34:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1408124B28
+	for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 14:53:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.167.53
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778510074; cv=pass; b=lan33GCh2K85rkPkAFtLntJq5ykmVMmHlpS9wjBL5xOIAk4K3AV0uMvpFiF5zEBNB3rzFFDDiu0jpOkc/is3RTiAd2mJieNGhASowoFWJ+rKfG3+uEuhV5dZGOtv6THGHD8HWbhkNlhvZLdFbCbiYjc7Eg4/KkhkQMD1CTalj5w=
+	t=1778511183; cv=pass; b=CtoTFDbGg2rt4BcWme/cKGiN5KVaFWaWGLexAUdPGmu9Hc0v1tb9Mez5TH16BOZsAx+Fu8ILwqLdJtUDNy2f2f1i0yn8LfRMXEhdDfzgCVN7WdJMvSevZHEAp6W0P+KbjFFm26mhbffQlYfuLF/WO86FM6ReA7Zxt20ZgderhWQ=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778510074; c=relaxed/simple;
-	bh=vD7AonEnJis4H4yYmplk1jKeBBiHyHkWqatkz2fEvwE=;
+	s=arc-20240116; t=1778511183; c=relaxed/simple;
+	bh=lwc+bdyrLVdBcpfzRh9VrjXVIAvxjaksZdVUH0pI5Rc=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=uKPeWZ2PdWOBvWrvn0srgXzoQO8oLz4ML0lupoGbtHSM28GaVrtYD++7h+XlH2Eoflbo1y5fKaZWPgGK6OhteyxEulWecMRuSuKAEwoHcO+00juFfeAMxsCqQ349dAT0fuPDw6NFd0Bq6fFxzGCfHOgL732LttWJvSFE32gl3EQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Q5acmmuw; arc=pass smtp.client-ip=209.85.128.177
+	 To:Cc:Content-Type; b=JQ+89W8/caJU24mZ8046yS1THkN0C9goqxOsD//LQCy1eO9qG7x2QzsA0seMwwf1on2vJzwUIzFRzWzcaIwyKb5NnIOxxTiC32onLe8VxGaAiNFRSmlrTjzM6roSdDwvCMRUEmp1ETqxL2QcNYt6qgJAdwYQYA4QBpc3eTxXfiM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=yafa8rIw; arc=pass smtp.client-ip=209.85.167.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Q5acmmuw"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-799001d73bdso29877787b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 07:34:31 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1778510071; cv=none;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yafa8rIw"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5a8d648466bso855309e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 11 May 2026 07:53:01 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778511180; cv=none;
         d=google.com; s=arc-20240605;
-        b=COPw4WPBefKZtC0bjUsXlhHJnbzpCGUlleTtJ0bfHPwS1yk+hrD2WiNuXYCxN2VQik
-         MoCAicASmPfGN8Yxe8p2VFVa+exf8cdIs5Xhg55vD73H4ItN+QmLVDsq+u1hrZbyt2yI
-         Ar+93tOM4rym8rvhKjK6klIE7vmKJkJXtJgIyTPpThbL+OpmatSD7HThuLtTNhPHqr6p
-         aqN+YtCvErYGMYW0OWF8mQL1cDDoxHOAzOfzzuij0iZnJPwRe2NcLfm4LP2nul3wYblv
-         5QRVH91xb/mTogrqmeBe7EVW09CtqEfH0sxWsynSe0HXOnfEQkxcXbSnPX/yASv3yGzS
-         0TjA==
+        b=d2pOX3k9XZfZt/ovi08vbfnDgVOb45p5LoB2ckyz8EnM/jxQi8faSVZ8U2a36z9RZh
+         sDOvurHSmLqeukRmdtNuqW4XRnqdzAWpufO5n3irGUWlX5vdmDi0FdLHKT41MlVz1leT
+         Qikw8jNPcL9mHek7AvVgmTm22xHK2oleyjBQKoJ9mU2w1MhiKXfZ5vWVv7P8NCT9JCuK
+         q2dJLpL4Eo70q+KAsn54ewKhh/CPWFCPlrjx8CfImr6yg9HoBY4QPdWEhcMmptdECaPo
+         /VdnXpKpjiHmOIErxPOtBkYIwfVUtXM1REIHSN3rMDw9brohUoiphIA8Fg0d7rAupCrd
+         0KvA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=+v2ay7d5zaezO4LQdeMSaE6xJKDm17at2Vx/sGq20mw=;
-        fh=1qi49PJr5CHHA3VOdKTRT2jhTNKiLsNgmvpJGCY2gSY=;
-        b=WOroxvh9WYaPhyHTUoVFsVtHoCPZDg5wCc2kQJPaBn4pjpRiw3QjrLfZjICMuHL+1F
-         hEoL1NoNEerCU7uxJwq0F1VoSd2B5T5GLJlmiuhfNCt/gdlEh5hlzScbBGPTQl/mVgnA
-         Mgzh8Est1IT+NWG5Uz9/5Ih/a+Qg16FYxkhDY2aWpJ7BHjiy2UGuq82QzN4/Fq+ujEiQ
-         kcB0vw1x4qKeag5/RHYw/m5DUHasIlng7+pa2m0vudcw5DRzLvtXIem9Umge0qj4m0og
-         tadmAp+3ETpIMt87RsjDdW0DuHd9FIXZSfVwcavoNQe3U6UqmIOsf6gjdhrft5kuCEci
-         LQdA==;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=7ziP7y+jBujxkAYIyUnUXfhVfL9cOfMmz44d3RhYR+g=;
+        fh=/HV9Uguiwv83tm1OKFZVQcFR5OohYSy7u5ZA+rRMP1o=;
+        b=V/GIAlxjOweszTfEN3ho/BH9nxX665pZSN0IdeUwieHh76dSKXOYDex6GrPh8r//7C
+         1q5TpijmiUeKsWlnIXOB+Tf7cHDfQxYqmtWfzOPztXDHtLutBXyFU12avLmrIxz3aQfx
+         e31+Qk+Ze6D6XMd53+KmCCk9fBse+amYJujlkZBFZHYT1zQ5kW5Jb32grnh7B78jOWjs
+         ZljugAf32W63Mw3ynkgSV86Zcr43bBzmpicEXhRUFuuccm89FWSxlwx4ASI6JPcl/NfO
+         z2yi5FkwJLYylk5AUYWZ34VzLmfYmflf58VisN9YZ22yTFozBVjaxHtZb9s+ECXaSFBE
+         tU0w==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1778510071; x=1779114871; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+v2ay7d5zaezO4LQdeMSaE6xJKDm17at2Vx/sGq20mw=;
-        b=Q5acmmuw9wc8edoPdpXTRIwB3HzpMyeIudW0Ur6smFGRtCXex9lcXNCJEHQ9eBisC2
-         OJJsjyxxJeZZLTIHkqIubFD4yul2mCa/jdspskTZwxE3mNC8jZF55CIljIjFjw+66PPX
-         ufBLOrpjF2XrNpVGeRVJbp0B4y77uheUB5MKkxLRKdocVLcNMtXXLaygFrzdEM1fetxo
-         MJlfxKGffvb52b+X4RGpE8lthQex+Ey0+MEkXvCYQ+jbh0iZd/LB2qZJeggAjsnxPfVe
-         0ebDK35wE6quPfMgapxEILmsQTJC90ebkQoQTC/7wq8aY2dccrymOJXQe9egPFlTuuZv
-         hUjw==
+        d=linaro.org; s=google; t=1778511180; x=1779115980; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=7ziP7y+jBujxkAYIyUnUXfhVfL9cOfMmz44d3RhYR+g=;
+        b=yafa8rIwnKWKhh56rJzPG6+0E3Je4gn/K7zxzdoIodbxdnXz/gSdYi6eGVPavURq7d
+         5V+n/23Y6d1vBSOa/v/Gse2sl7z8uDgYP/LpRd5U8atAzI8Ngp/mv/mURMJRrj48vncx
+         6mJZLkXMeaGqnfds28XS5j1minl1tIqoAPzdNnzlAG+zsLzhjYziNbvQpc8cfv9z07k/
+         mrOIyXwpVzdvpSGgWy6hacBj+03v9LfPdHkEUeGPkcWiFYvsdsLtto1t/kfbT1JABfwZ
+         A6MrNI9eFjHn1NpmF7Je+3V3hsrRagj0brP3d8gzGRQV4zw/H+hHCwTqo4nlw+704X4E
+         2O2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778510071; x=1779114871;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=+v2ay7d5zaezO4LQdeMSaE6xJKDm17at2Vx/sGq20mw=;
-        b=E5+SQG1hgPyvj67a/NBiIKjgziu02O4boEK1DdpV+R7SU3PWBnurmRLFmVTJNJ2iNb
-         kxUZF1ywOXu3DfDmbHf95IUgrgvDuTSvFqbl/CiXT6zFsjBGaWD3aPi0SRESNvaB2wdr
-         HMiC4MT8hSq/D6H9cNP3gS0IBHonOZ8ftDnfeREDEZOnYEzQhtc7EizFjBeUm9kW5Ndf
-         qdFlIJhW/lNKnLhej5Gj5IwyRWYIYD8GvqzlisSf5ATd4M7lXZpt7KF5f4cfEAAIgPUz
-         yaT9zkP+3qSa/wR0IIAGXzeZN0Pvnc+B6VOBMJh/+tlnw/d9f64uNPGNuPZSE0al0cwa
-         C8sg==
-X-Forwarded-Encrypted: i=1; AFNElJ9S6yfZA8GJHvbYPFWjTvvOZszaHa5WvGvLeih1D2SmZiUUt6KvQ2m9fiXkLGBXg6fnj023tpOgESY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz5b9Wj91PGYyQgoW97VVHLGlhJOnkq4vEmUNK7VumDC5T3nq8V
-	1ha8ye3SE3nZcWr70b1WZPYUP0XzRTICfEdCF4uAYEVuwptyAyltUPuJPke3qOD/pY7SADaeRfZ
-	EnEKTPh3vLC2slfeP8tByZ5IjsUeLj4HAnn0rhVVUTA==
-X-Gm-Gg: Acq92OE/HCQ3ZIWVek/VnRTnfLwSX/qvnxeWwMQE396jHJd6U6tSTO1YKW75UjDtElc
-	Nt+m8pyUdvbcMZvtM8rJB2Dpp9YmBK39CWpmtpuJaBRPObiRf8Grx4i6RZLV1DlS+4n3qFCINDR
-	AEI2auIV3mDqm1W3hwyrTurPGd0MowhMSri2JOxplxs8WorHLWsafFZ0kLvoy+zPonnhuSnkpmR
-	3u8n9CaaW/5vBksqWNIl6giPt6fvmpK0pFXWLkIvp48JLk+dc95w3IkrZenQnYU2Ug3ZGQKLEAE
-	RfrRZWthG7MzydcGfX0=
-X-Received: by 2002:a05:690c:dd3:b0:7ba:d5fb:b543 with SMTP id
- 00721157ae682-7bdf5dcc7b4mr242694677b3.13.1778510070862; Mon, 11 May 2026
- 07:34:30 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1778511180; x=1779115980;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=7ziP7y+jBujxkAYIyUnUXfhVfL9cOfMmz44d3RhYR+g=;
+        b=DfIYbwQxFcgQXq4pPbeXen427YbJsgGHFmmgtCbyJZGmuotERoYyffClFr+Owz3AY1
+         VHdYsik9zuxbF6RZVjNZCMVE8VoYZC/r9lXvDrCBIv4E2yLgAmvbvhEZbV6Gl5diWitE
+         p/mOl9Q/6ZaYB5juIAuzz7KovVKC3F/o0TqyyhdjNbWO2VtsxsYCF3W0cpnQeF+1+vty
+         DcaenwlNr49TukPl4bPQKg8rahf9aG4M5b++hnFBYARTH3z75bM7yPrZGqLQrdVPvSGE
+         bvNxsuykGgE+QSj1gj8RfFX6cQazLT7HkEAvdbqwtoLrEG4t276HlD6sQFsMCtLSnQnq
+         9aPg==
+X-Forwarded-Encrypted: i=1; AFNElJ9qK4FlqaEaOo6+f8Axn41wU+H44BYre4rPfCSxEvLyO8d7zDv6KB/Vfq5zF+O4G5C62qE26RRHg+I=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwuM/Ga6yavtMwaJ5qY3jtydWn51dOizmGlAklIB0Ncth/UR474
+	FQdeuxp5cEGNzHoMz6+WHTh2bhVB8gMl0pg/oKPn17ngj8la+5zppCoieSxtojRu6Obk2a/H4iY
+	3FEFVq5OBEJcIMFUhMtjTwmvZsomWkyKgpqK8tca90A==
+X-Gm-Gg: Acq92OGW28IVHpOxX441/+Ouw92J/4MudbDMVCpSVyIJQqdiMBBZ+5ybNhxRt8P+75w
+	JUzFh7xrLNLpHN4PaxyEkDtuK1LwaSYg2JfQ7veLQeKfPDpbLET4rn+EhFN79YAJOP4YsR74VDF
+	fm2n6F5Tba3NZCEVKZq2b1JlNyhxIjhLTVDypz7Fh7ygcCcNJ8MwcVZpsgshp/at+N/FHr+h/cf
+	96Rib11kI0o1qbamDgTM6vxaZ9tJzcVvLIygQmGDyjJL/+XPnnFnj/9cfnfbVznQ5LYJGDC3BFV
+	P3p3QqyJ
+X-Received: by 2002:a05:6512:3da2:b0:5a8:73c3:f27b with SMTP id
+ 2adb3069b0e04-5a887ae05c3mr8163448e87.15.1778511180033; Mon, 11 May 2026
+ 07:53:00 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1776429984.git.u.kleine-koenig@baylibre.com> <c830049dcfcd99f005e2ff6742aace9341c61f13.1776429984.git.u.kleine-koenig@baylibre.com>
-In-Reply-To: <c830049dcfcd99f005e2ff6742aace9341c61f13.1776429984.git.u.kleine-koenig@baylibre.com>
+References: <20260426112016.1370929-1-inochiama@gmail.com> <20260426112016.1370929-3-inochiama@gmail.com>
+In-Reply-To: <20260426112016.1370929-3-inochiama@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 11 May 2026 16:33:52 +0200
-X-Gm-Features: AVHnY4Lsmc0xOoSZAdNPsitAF34xmre0WH2Fz_Ejkt7Ep8UMQ1cwv9JaIHq62oo
-Message-ID: <CAPDyKFo6nvBCnOHXUSvedaT3Rnob+oF=nZoRoic_EkgFBTxzwg@mail.gmail.com>
-Subject: Re: [PATCH v1 1/6] sdio: Add syntactic sugar to store a pointer in sdio_driver_id
-To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig_=28The_Capable_Hub=29?= <u.kleine-koenig@baylibre.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, 
-	"Christian A. Ehrhardt" <christian.ehrhardt@codasip.com>, linux-mmc@vger.kernel.org, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-kernel@vger.kernel.org, 
-	Marcel Holtmann <marcel@holtmann.org>, Luiz Augusto von Dentz <luiz.dentz@gmail.com>, 
-	linux-bluetooth@vger.kernel.org, Matthias Brugger <matthias.bgg@gmail.com>, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, 
-	linux-mediatek@lists.infradead.org, Ping-Ke Shih <pkshih@realtek.com>, 
-	linux-wireless@vger.kernel.org, Felix Fietkau <nbd@nbd.name>, 
-	Lorenzo Bianconi <lorenzo@kernel.org>, Ryder Lee <ryder.lee@mediatek.com>, 
-	Shayne Chen <shayne.chen@mediatek.com>, Sean Wang <sean.wang@mediatek.com>, 
-	Brian Norris <briannorris@chromium.org>, Francesco Dolcini <francesco@dolcini.it>, 
-	Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Date: Mon, 11 May 2026 16:52:21 +0200
+X-Gm-Features: AVHnY4Jp8sFXbDsFjZzZloiryDJFcLGgBYUIAOgUw8D4STj0fn7MhtU9ha3Hr3k
+Message-ID: <CAPDyKFo-0h_=a5bSS1QFiXtasjRk06ERL7H+X=-U3J1+XX9TBg@mail.gmail.com>
+Subject: Re: [PATCH v3 2/2] mmc: litex_mmc: Set mandatory idle clocks before CMD0
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Karol Gugala <kgugala@antmicro.com>, 
+	Mateusz Holenko <mholenko@antmicro.com>, Gabriel Somlo <gsomlo@gmail.com>, Joel Stanley <joel@jms.id.au>, 
+	Paul Mackerras <paulus@ozlabs.org>, Maciej Dudek <mdudek@internships.antmicro.com>, 
+	Andy Shevchenko <andy.shevchenko@gmail.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Yixun Lan <dlan@gentoo.org>, 
+	Longbin Li <looong.bin@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Fri, 17 Apr 2026 at 15:11, Uwe Kleine-K=C3=B6nig (The Capable Hub)
-<u.kleine-koenig@baylibre.com> wrote:
+On Sun, 26 Apr 2026 at 13:20, Inochi Amaoto <inochiama@gmail.com> wrote:
 >
-> On all current Linux architectures sizeof(long) =3D=3D sizeof(void *) and
-> this is used a lot through the kernel. For example it enables the usual
-> practice to store pointers in sdio_driver_id's .driver_data member.
+> The litex_mmc driver assumes the card is already probed in the BIOS
+> and skip the phy initialization. This will cause the command fail
+> like the following when the old card is unplugged and then insert
+> a new card:
 >
-> This works fine, but involves casting and thus isn't type-safe.
-> Additionally with the CHERI architecture extension there are machines
-> with sizeof(void *) > sizeof(long) for with the traditional approach of
-> storing a pointer in .driver_data doesn't work.
+> [   62.923593] litex-mmc f0004000.mmc: Command (cmd 8) error, status -110
+> [   62.949717] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   62.976606] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   63.002516] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   63.028442] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
 >
-> By replacing the plain unsigned long .driver_data by an anonymous union,
-> most of the casting can be dropped and it yields a working solution for
-> CHERI.
+> Add required clock settings and initialization for the CMD 0, so it can
+> probe the new card.
 >
-> All users of struct sdio_driver_id are initialized in a way that is
-> compatible with the new definition, so no adaptions are needed there.
+> Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
+> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
+> ---
+>  drivers/mmc/host/litex_mmc.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
 >
-> Signed-off-by: Uwe Kleine-K=C3=B6nig (The Capable Hub) <u.kleine-koenig@b=
-aylibre.com>
+> diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
+> index a8d9c0ece16a..c984398d0803 100644
+> --- a/drivers/mmc/host/litex_mmc.c
+> +++ b/drivers/mmc/host/litex_mmc.c
+> @@ -68,6 +68,9 @@
+>  #define SD_SLEEP_US       5
+>  #define SD_TIMEOUT_US 20000
+>
+> +#define SD_INIT_DELAY_US  1000
+> +#define SD_INIT_CLK_HZ    400000
+> +
+>  #define SDIRQ_CARD_DETECT    1
+>  #define SDIRQ_SD_TO_MEM_DONE 2
+>  #define SDIRQ_MEM_TO_SD_DONE 4
+> @@ -142,6 +145,12 @@ static int litex_mmc_send_cmd(struct litex_mmc_host *host,
+>         int ret;
+>         u8 evt;
+>
+> +       if (cmd == MMC_GO_IDLE_STATE) {
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Rather than doing this explicit check for each command being sent, we
+have the ->set_ios() callback where things like this belong. Please
+move it there instead.
 
-Feel free to take this via whatever tree makes best sense!
+> +               litex_mmc_setclk(host, SD_INIT_CLK_HZ);
+> +               litex_write8(host->sdphy + LITEX_PHY_INITIALIZE, 1);
+> +               fsleep(SD_INIT_DELAY_US);
+> +       }
+> +
+>         litex_write32(host->sdcore + LITEX_CORE_CMDARG, arg);
+>         litex_write32(host->sdcore + LITEX_CORE_CMDCMD,
+>                       cmd << 8 | transfer << 5 | response_len);
+> --
+> 2.54.0
+>
 
 Kind regards
 Uffe
-
-> ---
->  include/linux/mod_devicetable.h | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/include/linux/mod_devicetable.h b/include/linux/mod_deviceta=
-ble.h
-> index 5b1725fe9707..0eb5d196f5b5 100644
-> --- a/include/linux/mod_devicetable.h
-> +++ b/include/linux/mod_devicetable.h
-> @@ -414,7 +414,10 @@ struct sdio_device_id {
->         __u8    class;                  /* Standard interface or SDIO_ANY=
-_ID */
->         __u16   vendor;                 /* Vendor or SDIO_ANY_ID */
->         __u16   device;                 /* Device ID or SDIO_ANY_ID */
-> -       kernel_ulong_t driver_data;     /* Data private to the driver */
-> +       union {                         /* Data private to the driver */
-> +               kernel_ulong_t driver_data;
-> +               const void *driver_data_ptr;
-> +       };
->  };
->
->  /* SSB core, see drivers/ssb/ */
-> --
-> 2.47.3
->
