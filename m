@@ -1,81 +1,91 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1B403603CA;
-	Tue, 12 May 2026 17:33:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E305386C3C;
+	Tue, 12 May 2026 22:49:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778607213; cv=none; b=jM9VQM80WMmR8LI8UGPPsx1IDi9PdC148TFCqWRDQ5MLKHJHVxnESFFml11fwHlDNrRtAzRhUk0ZQelmQ8YjydNo7P38V/63ZwRvAsGcU6qkE2GhfCOsvw5Et2/EO3/oXKyHH/mNnJR6Ll6n92QlkZdGXZJ9nCqI4lPXNZVwn9o=
+	t=1778626168; cv=none; b=um4ZgwWU8AMprRajg8H1G3xbi4yHrbiqnW3g3ji0jXAD4KocDr+EF3sB7ZH3iHVpOMlSlEVxN+cpBHq0JUmrWr2Aiii/cEvsv/b8XE4iBqy89LT2C82lXjrMJN9nNbL6Lzh8FVu8XmPMEVEnKlNRbfMbfsogVsfd5RxF+xBvC2M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778607213; c=relaxed/simple;
-	bh=VRQfVzFAwkCiM35VAMe22qTXV49SrhOXjukzQSzpJos=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QdzzSEVQWhBD6yzJaeTmBcRbuJK2Om4TF6ZT28+2dM5O6pJWFHxoBqJCC30up4MPZw9AfoHgiZBTgqKaM6RGgxxvOFGIYy207RT6QzBEsfkjdtWqayYLvLECmB2PehLcPqohJtFNEMXiFPOaaBlTudoYCJMeMhWa9gDre3lsLWA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Wo/zLK2t; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1778626168; c=relaxed/simple;
+	bh=RWEoYL90bzVZvVW45ld5wXheGmJKScbYfaB+fYsV3U8=;
+	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=acpwyHj3fCqU1bl4ruy2oKEInB1wIkF1MH8So2ICVuzcZ04AU6IUyFEaOYz7qd/WyjWRCczujCE450d9ywHID0yIZotg8r64DffThE8ez9bAsPjHTYDnE6ZhVVAJZy5KcOQDjFm89/3spsovOlj8+BRzkAMyZiFLQ4IsUH7+LA0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OWEDOZEC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Wo/zLK2t"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 79E8EC2BCB0;
-	Tue, 12 May 2026 17:33:31 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OWEDOZEC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E1CFC2BCB0;
+	Tue, 12 May 2026 22:49:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778607213;
-	bh=VRQfVzFAwkCiM35VAMe22qTXV49SrhOXjukzQSzpJos=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Wo/zLK2t0d0E15aTa/xMdrS5sre5iXcVieH3Jt3MkN3hVydWUFw4QG/N++n2DNItd
-	 i2Oh/uw8v1/HZra6uRBvWsJ1nSJWmZpdRoD7VWHVcegNDryMME4gsQEmPAaQ87r2cT
-	 hCC/d+/GoGRXFQ4hwIAkXUc8Rl8iVsMaF/PBBhcYhNS6CId/eMD/ssz0j7aUxyXxKU
-	 SglcVlxP8a2Ke6zOUrtbSfEGff8zjKSRgAKq++8LDAMYoysy9pfvf2qpv+zeZm9tKU
-	 leBhB+Yxw0uQy+Jx35zIwUYcZhA7+vFyZ9c4j+N/SoBteZZsfspaHNIMDSRwpNlv4j
-	 BSGCV5FNiGaRA==
-Date: Tue, 12 May 2026 18:33:29 +0100
-From: Conor Dooley <conor@kernel.org>
-To: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
-	Philipp Zabel <p.zabel@pengutronix.de>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v1 1/9] dt-bindings: reset: altr: add COMBOPHY_RESET for
- Agilex5
-Message-ID: <20260512-avenue-tasting-e1a731a42d3b@spud>
-References: <20260511202132.5597-1-tanmay.kathpalia@altera.com>
- <20260511202132.5597-2-tanmay.kathpalia@altera.com>
+	s=k20201202; t=1778626167;
+	bh=RWEoYL90bzVZvVW45ld5wXheGmJKScbYfaB+fYsV3U8=;
+	h=Date:From:To:Subject:References:In-Reply-To:From;
+	b=OWEDOZECHVyJqPG+aU0Nm3YBqY4sRG1rPct0AmPVnHwsmmsLUMtHqMFZGMaHZMdCm
+	 y90TatDejFsBHjE7PzCQdVoXPWoiientLzj2Eg8qbOm9eaYDOtKkv2Uqw2OvaIAbqd
+	 9HcAJCtqGKjLcOIrE93b9HkzVM+E7M0ncInaZkuaOShO52CLxWMW0NYTL3N3p186wu
+	 ZDvzTLsvHRwmrD17sHCrXtxNFrbI2srDCo5eAqLDlgsUbNBsGiaA/KGPngVvaF24r7
+	 NUnRXgVMdgBrSW/Y/9EouJNuGb3tqFQoSvn3SqMosFyOPm5JgUtRXmwPRfNNX5x4ea
+	 vkfmMtK0Pz/yQ==
+Date: Tue, 12 May 2026 22:49:25 +0000
+From: Yixun Lan <dlan@kernel.org>
+To: Iker Pedrosa <ikerpedrosam@gmail.com>, Rob Herring <robh@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Albert Ou <aou@eecs.berkeley.edu>,
+	Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+	Alexandre Ghiti <alex@ghiti.fr>, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Troy Mitchell <troy.mitchell@linux.dev>, linux-mmc@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	linux-riscv@lists.infradead.org, Ulf Hansson <ulfh@kernel.org>,
+	Margherita Milani <margherita.milani@amarulasolutions.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Javier Martinez Canillas <javierm@redhat.com>,
+	Paul Walmsley <pjw@kernel.org>, spacemit@lists.linux.dev,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>
+Subject: Re: [PATCH v9 7/8] riscv: dts: spacemit: k1-bananapi-f3: add SD card
+ support with UHS modes
+Message-ID: <20260512224925-GKJ3624147@kernel.org>
+References: <20260511-orangepi-sd-card-uhs-v9-0-ae48c0b2b2cf@gmail.com>
+ <20260511-orangepi-sd-card-uhs-v9-7-ae48c0b2b2cf@gmail.com>
+ <20260512054358-GKE3624147@kernel.org>
+ <agNdTiFbwtllEw0Z@aurel32.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="jGvB1wNON2cbN4M/"
-Content-Disposition: inline
-In-Reply-To: <20260511202132.5597-2-tanmay.kathpalia@altera.com>
-
-
---jGvB1wNON2cbN4M/
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <agNdTiFbwtllEw0Z@aurel32.net>
 
-On Mon, May 11, 2026 at 01:21:23PM -0700, Tanmay Kathpalia wrote:
-> Add COMBOPHY_RESET definition at index 38 for the combo PHY reset
-> control on Altera Agilex5 SoCs. This reset is used by peripherals
-> such as the SD/eMMC controller that share the combo PHY.
->=20
-> Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+Hi Aurelien,
 
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
-pw-bot: not-applicable
+On 19:03 Tue 12 May     , Aurelien Jarno wrote:
+> Hi Yixun,
+> 
+..
+> > 
+> > So, how about let's make it convention here, first device is emmc, second
+> > is SD card, third is sdio device (haven't added yet).. We introduced emmc
+> > early before this patch, so it stays unchanged which is nice for end user
+> > 
+> > Please apply this alias idea to all boards although I only comment in this
+> > patch..
+> 
+> Having a stable naming is definitely a good idea.
+> 
+> What about boards that have no or optional emmc, like the Milk-V Jupiter 
+> board? I plan to submit a patch for it, so I wonder if we still number 
+> the SD card as mmc1 even if there is no emmc.
+Yes, please
 
---jGvB1wNON2cbN4M/
-Content-Type: application/pgp-signature; name="signature.asc"
+For Milk-V Jupiter, it has emmc slot despite plug the module in or not,
+so it make sense to name it as mmc1, in other words, the board do support
+emmc in the hardware level
 
------BEGIN PGP SIGNATURE-----
+For future board, if the board has no emmc feature design in, then I'd 
+be fine with name it as mmc0 or mmc1, shouldn't be much difference..
 
-iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCagNkaQAKCRB4tDGHoIJi
-0iEOAP9Zcji9WJLENYoxvQXwLztnLnopbThNIS+4FvzQrG+VPQD/euf95+Ud7hv6
-TuzTpaEnj3RsYOoSg2LpZoLsqLB7Dwc=
-=PCV9
------END PGP SIGNATURE-----
-
---jGvB1wNON2cbN4M/--
+-- 
+Yixun Lan (dlan)
