@@ -1,65 +1,46 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABC24184;
-	Wed, 13 May 2026 22:42:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4DE43890F7;
+	Wed, 13 May 2026 23:19:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778712140; cv=none; b=pvOVSJfqEfAJUF7rn9RtYdEnnKktbF6Kd+ldlRXHYk6x1mqByCCUHyALhPl7FC8LVrZrgakMG7J+hfYbeiwdoAs65THkzUjddU6WRt+VhNo03viG0vYwMyn0ue44Pd5uhqGRBMn13NYrakZ7moVcqhSIMaeyodFWobLlVXQu8nE=
+	t=1778714343; cv=none; b=e6Br0E7JzSvTOeZfdhMH7KIbGwwyaE8GJs2yeZB0MXFryXspKHRzZ3OI1PJ3WH4av248vjGY1OZf9T6kVh3IUw+M4JehRhi4SyBLVPXpnA/EV1oO26CNQr9kpGdcVeyxRIWyRU93JB1Jfr8xAqAXFt1ZaQVXqhVnhSOtucs9ASs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778712140; c=relaxed/simple;
-	bh=6NAHPyole2pQ/CHwKqRP4tLqoyofLvYLcq17xj38jf0=;
+	s=arc-20240116; t=1778714343; c=relaxed/simple;
+	bh=Wsi7ZEqIvwGeDqkWI7PrvzFdTNan5ipG+HHvNDMl7Y0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pYPY2YSw4Kf8rGg4AeGp7Uo+0YMVXr9JjQ2aVTLG1ovXrVitevHJ0RfhQIjWJWBRkjPsXSQo3mIipxFsHoARB/JvcTVQqE/wawV1joNGQuhdXSRWifjpawvEmjB8QnL6MdI83ac1WitkT2wo5fUsJJDvv8wmrrJiVeF2HoxmLeE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cj+fBMGp; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=t/aJxOEpWeOisAvUOHI7RSYUwVVZArZm6Y4rd37+jjYfa4xRxaM4urH2vHjJ6Us+extJ0WGQxhslGgzZqasAZkzHP15m4W4brkFazVSjx9GPMjat7sV3ekULqfTwBxEAM66/cCF2ZkiUPz+zTRP5c7CfVNexrOXvRmJUbSsJOI4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DQZTYjwZ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cj+fBMGp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3368C19425;
-	Wed, 13 May 2026 22:42:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DQZTYjwZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9588EC19425;
+	Wed, 13 May 2026 23:19:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1778712140;
-	bh=6NAHPyole2pQ/CHwKqRP4tLqoyofLvYLcq17xj38jf0=;
+	s=k20201202; t=1778714343;
+	bh=Wsi7ZEqIvwGeDqkWI7PrvzFdTNan5ipG+HHvNDMl7Y0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=cj+fBMGppCybD/58WT/pMz7uSjenugSfEv6zeje2jwicAv8xdflI3FMozNWqJ3Mrd
-	 S1y+MtXR/ZG6Ij8EEBKjrsmQWpD/dfdqEC7dggn3gt2RiBO8rYrPRu4npuKZ2xk8TZ
-	 B/v9mMzQ1xL9M+9TNKkpwABmG7TVr8iK81ZQuwYdic5bKII+TXfFbyCSGxP5n6KIJZ
-	 YuqZ3o65MTC2R4SsE/zCKg3vvmR6Lu5Oag5C7beePpd8y60zqSk5uBa1fwVcKD4NV5
-	 /eP2O0KM/LKUTciFzpwn6Fcg0qjftObhxATy7fec/9/ajSn87NLyPf4/yV/fFXVQnC
-	 IU7lUJbzS6SLw==
-Date: Wed, 13 May 2026 17:42:17 -0500
-From: Rob Herring <robh@kernel.org>
-To: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Jens Axboe <axboe@kernel.dk>,
-	Johannes Berg <johannes@sipsolutions.net>,
-	Jeff Johnson <jjohnson@kernel.org>,
-	Bartosz Golaszewski <brgl@kernel.org>,
-	Marcel Holtmann <marcel@holtmann.org>,
-	Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-	Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
-	Rocky Liao <quic_rjliao@quicinc.com>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Simon Horman <horms@kernel.org>,
-	Srinivas Kandagatla <srini@kernel.org>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	Russell King <linux@armlinux.org.uk>,
-	Saravana Kannan <saravanak@kernel.org>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, linux-block@vger.kernel.org,
-	linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
-	linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org,
-	daniel@makrotopia.org
-Subject: Re: [PATCH v2 1/8] dt-bindings: mmc: Document support for
- nvmem-layout
-Message-ID: <20260513224217.GA2190241-robh@kernel.org>
-References: <20260507-block-as-nvmem-v2-0-bf17edd5134e@oss.qualcomm.com>
- <20260507-block-as-nvmem-v2-1-bf17edd5134e@oss.qualcomm.com>
+	b=DQZTYjwZ/E1PbisaLWNnXAIsEQZrKbI4Aj+XApdUC5DlvT7nRF5NFMhx2JiB5GauQ
+	 6F7PSZVxP5+Tf2oUE1/UGIKg9xAWkmUWSyuIcp85wJBvYRli0OANRahLBUuYUrVYM4
+	 SrmisaPT6LW2qZz9+mc3XoEJ9tY0/BN7QJydpbCF/djNSd0wKXfc5o96i9jBNznpCa
+	 kpZwce0nBDVuzGopyXncy6RVj6aRWORSSVn6YJxdUPf5d7UvU5yJRPSGr7voMlSysF
+	 M76VmYHgOBuzcxCXuOgJsB04TdwGmfRLBUAGN0EAeqk6QgXm7Bj9/GZXI431M2xR/C
+	 7q7YAP8Kvd30g==
+Date: Wed, 13 May 2026 18:18:59 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Monish Chunara <monish.chunara@oss.qualcomm.com>
+Cc: Bjorn Andersson <andersson@kernel.org>,
+	Pradeep Pragallapati <pradeep.pragallapati@oss.qualcomm.com>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Komal Bajaj <komal.bajaj@oss.qualcomm.com>,
+	linux-mmc@vger.kernel.org, Conor Dooley <conor+dt@kernel.org>,
+	devicetree@vger.kernel.org, Konrad Dybcio <konradybcio@kernel.org>,
+	linux-kernel@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>,
+	Nitin Rawat <nitin.rawat@oss.qualcomm.com>
+Subject: Re: [PATCH V2] dt-bindings: mmc: sdhci-msm: Document the Shikra
+ compatible
+Message-ID: <177871433921.2289837.16381739543304518406.robh@kernel.org>
+References: <20260508101544.736317-1-monish.chunara@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,47 +49,19 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260507-block-as-nvmem-v2-1-bf17edd5134e@oss.qualcomm.com>
+In-Reply-To: <20260508101544.736317-1-monish.chunara@oss.qualcomm.com>
 
-On Thu, May 07, 2026 at 05:24:36PM +0200, Loic Poulain wrote:
-> Add support for an nvmem-layout subnode under an eMMC hardware
-> partition. This allows the partition to be exposed as an NVMEM
-> provider and its internal layout to be described. For example,
-> an eMMC boot partition can be used to store device-specific
-> information such as a WiFi MAC address.
+
+On Fri, 08 May 2026 15:45:44 +0530, Monish Chunara wrote:
+> Document the Shikra-specific SDHCI compatible in the sdhci-msm binding.
+> Use "qcom,sdhci-msm-v5" as the fallback compatible for the MSM SDHCI v5
+> controller used on Shikra.
 > 
-> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
+> Signed-off-by: Monish Chunara <monish.chunara@oss.qualcomm.com>
 > ---
->  .../devicetree/bindings/mmc/mmc-card.yaml          | 24 ++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> index a61d6c96df759102f9c1fbfd548b026a77921cae..b21426a49cf1d9aae5b4e8e447b5be11b08c96bf 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> @@ -40,6 +40,9 @@ patternProperties:
->          contains:
->            const: fixed-partitions
->  
-> +      nvmem-layout:
-> +        $ref: /schemas/nvmem/layouts/nvmem-layout.yaml
-> +
->  required:
->    - compatible
->    - reg
-> @@ -86,6 +89,27 @@ examples:
->                      read-only;
->                  };
->              };
-> +
-> +            partitions-boot2 {
 
-Shouldn't this have a 'fixed-partitions' compatible? I'm not sure if 
-it's an oversight in the schema that 'compatible' is not required here. 
-It would be odd that compatible is optional, but if it is present, it 
-must contain 'fixed-partitions' compatible. A follow-up to fix that 
-would be great.
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
 
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
-
-Rob
