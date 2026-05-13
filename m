@@ -1,171 +1,341 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com [209.85.128.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B77D338D6A9
-	for <linux-mmc@vger.kernel.org>; Wed, 13 May 2026 11:19:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF74D3FCB05
+	for <linux-mmc@vger.kernel.org>; Wed, 13 May 2026 11:40:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778671194; cv=none; b=X3bW+TdC8yTEZIgjDToUFXJKgIZEShOuLip6ExeTPuWZaa6GwXiznISczp05U4KQ+juxxND3NOIsOvn8nd1HZhU/Oe4JXejMB1u2jH5dRjWBhdk9J0eJWgFOGkX/96356pQFhFWpk7683QMJtGGo4I+AZDVr5JBXS7aChlwQjTg=
+	t=1778672421; cv=none; b=k2PpsfeJRSLltQdiUMUjag58WvZA+g7c4cWtF4vaj+cjboJaYs3chZNDKtQR8z5zLZLqbAq77F8vFca0C5s472xU37/4CxcRM1IixWS9uEtvw1zCu5GN6yQj9XyXk+gPTnRb/4NgfUblfsQnLUe0wpJOKzXCD7IAXKLVM9k9dKs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778671194; c=relaxed/simple;
-	bh=riex9Jp9gsiobhfzqRzI6SaMLT0mbjKk2HzzJZhpT3U=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=abWHJPzhMlddpIr+7Icm37eUS8hirMY8ljPARoDYLNgl6QH3Ji0m6vRY4D8PXfLB9Q+fcsyThVTmMIh3HuHHvZRWG/xzdAtaRSmllvtbj5/r7uFFrtey/lK2JZndkf3G16292ziMPDhcWebXhWao1eoErJzkaM9lJpYQMFDAPNI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=mVhikmHA; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=hrMFtvY+; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1778672421; c=relaxed/simple;
+	bh=tOdHxbBJjFZBlIf8bIV0WunkgYiFanYFWu8qQaHdxOE=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=PjHroQJLvE61ocFr77sisbkTIdsx6XSluv7PT6D+RMgN+3j8VLLymSZ6RTps2Ed207Nz75EJGWW2fad8RAOXARVDu29Wag2p+fKFqDrokb5nPs+y8jRzI4IrELODsd5ZxKtckZNEjkPHGkXf8baw3vzyZ/cS3BUxK+kXTAsLhE0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b=B65h0YkW; arc=none smtp.client-ip=209.85.128.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="mVhikmHA";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="hrMFtvY+"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64DACwkI2338782
-	for <linux-mmc@vger.kernel.org>; Wed, 13 May 2026 11:19:51 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=qcppdkim1; bh=LU5NSsY7bFPgMWDZ5uYhZ1
-	C3WMf6I+mQtjhQ+WJ/8sU=; b=mVhikmHA3/X6zgzgZ2U3G0oJjJqjnvGF/Wyj2t
-	OUJtjqAS0jFwrskapHXhJx5sXXOxEF2L+1riZTM7dQN7NnXH1pckLHad466ERj9C
-	QccYdKdqGKDcLdEYaZ1qmUqehcGBd8fl+7I7IwAkrIhhp9JHqbqXi1thVXafIoyo
-	XECOsEEYebeYGr+Wz1LNT4y5YpH95J964kdyG4AQNrZxgaLZDDSVsW7hOCezExqG
-	rqzyqK3ebi68vIkcv9Twz/zbVkbAUipTO3U7zyoTqo2PWZA0tULZEV8g3yMFNvRR
-	TsmXtM1hhtSFUPB4PbYIrZ5QRO+SNThbq4pNgS8WlawPcT9A==
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4e49vxb5g2-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 13 May 2026 11:19:51 +0000 (GMT)
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-50d5d1c2289so60304511cf.2
-        for <linux-mmc@vger.kernel.org>; Wed, 13 May 2026 04:19:51 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b="B65h0YkW"
+Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-488a9033b2cso60030575e9.2
+        for <linux-mmc@vger.kernel.org>; Wed, 13 May 2026 04:40:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1778671191; x=1779275991; darn=vger.kernel.org;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=LU5NSsY7bFPgMWDZ5uYhZ1C3WMf6I+mQtjhQ+WJ/8sU=;
-        b=hrMFtvY+DYbt6Nryr7nFOD4Hk5ypo2aVTrf37tMsNQUOzVfGd70hfS9kDZq3Y9ta+I
-         afyzu4fNzpj2A5UhiYPP85zLlqWKfhUgDous0z192y22M8vojKGikYWilY3rogGttzr0
-         5sn1+MVXYXYbeT3FMs0Wqr9eGCrEGIPZO/2AgzmzEWcESrnSOBWfgL4pmhvizWrtt9xZ
-         lldj39bMmJKeSgfRDO7YVg8xNgGnuNUIzfXUVyihpaviE2a9ogXZJZa5Y3jhO8ABW6nG
-         0qBhdh92Oc4x189b/na1d2COa1X3fC9zS9zBKs38RjpwIlRmWraBs91uDK2t0BUJdG0g
-         3NFQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778671191; x=1779275991;
-        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
-         :date:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=starlabs-systems.20251104.gappssmtp.com; s=20251104; t=1778672418; x=1779277218; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=LU5NSsY7bFPgMWDZ5uYhZ1C3WMf6I+mQtjhQ+WJ/8sU=;
-        b=WoPwA4W1OKDV4rqJ/7FtNK1z+vrYMLUWHqs84vp2EU1z0TOZ+D7VpBFwlfXz8a2ryY
-         E5jV7VD+a1Fbue/SvSHNoEHukkHce51acLgNAu162jWzmb0Z/+obDpnRy5mUZsELKeDQ
-         QIY9DvtGutIDk5AbgXqoLpxoDjmzB2PKZhQWuEpOSlM7fuLMrCNDMQD5AJIjd2PdJD+T
-         74Y4SApVAA8upHFq/GaeqU9dwM7hDa0RHcHF5g0ImB4ZeUaP6JY2LX6LbqeSsqmSUWEe
-         5EHhFvJe/5Rcbr7xmOjxMJLUqGb6sbBVp++oijIhvD7lnsyph3znBf+LSR6D/jvti0bI
-         CBug==
-X-Gm-Message-State: AOJu0YxcGmV8OTgdipyty87Z9abZB5dcmjbyLtqalAIMLRPR2CKLcyOJ
-	hKLQP/zhb9cvvuA+sofxM74oVzlFWtEGwYFOhkS0r6GrbPrz1KZkk1Lm5N9EF0hY2NmYYtvvsuY
-	TRcI7fMio4f30LWR7sJW89rcn1OoEQUa4V1QprdVA8MvpBbcYIl94L5bUfOlsjmI=
-X-Gm-Gg: Acq92OHSG+SoeeeL0JO83wgJAWNCC+qxE1inaJ72/wq546sCkVRPooQU60PBr3JAFF2
-	5dO+o1TIlxVwQlKXlzuWABDn2RRfCVsuKTeaN0xeKV6axeGiDM3jM0aNl9M2GI+oMxCMma42LBM
-	OsUaK7p9P6LvHIx1MQ87RapN/zQc2CUPDuMD3blirvBhcyRbtCrmElJFxAeBKY3FMuHZER9M5a/
-	+Mkk0e5na3RTi7SMdtIKrItZcKcQ+sPv0MWIeAAhx/uoKfZk9a1FGsZoI+KIco6tJmkjQiQIGEB
-	qO5WD5srEZbYSc9JgZNQHYtDOMnX83WIwci25fENoA0ClSC2DUGx8UzogPyWcxgxLW6ALkFoOhP
-	IHSBr0nx3lGONQ3NG/vnP811WoxMaJQ==
-X-Received: by 2002:ac8:7f03:0:b0:509:3cd:b22f with SMTP id d75a77b69052e-5162f4a36d3mr36165681cf.23.1778671190946;
-        Wed, 13 May 2026 04:19:50 -0700 (PDT)
-X-Received: by 2002:ac8:7f03:0:b0:509:3cd:b22f with SMTP id d75a77b69052e-5162f4a36d3mr36165021cf.23.1778671190420;
-        Wed, 13 May 2026 04:19:50 -0700 (PDT)
-Received: from hackbox.lan ([86.121.170.241])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48e8e5fd39asm63390735e9.2.2026.05.13.04.19.48
+        bh=WezRk8pMbMv4stSI3tk0Nplcuh6tkeeC0ibZoOc30qo=;
+        b=B65h0YkWajVu8CydezqemBANjOIdhcG57LThR4v+a9w6H4VouIECRWrjZtM/cIQ4um
+         Ju2H06xqoviGeLe53uUjWSiNFA14c8jCC9Al8l5sAcSSF1Rpe+H3YX2gADRyncvNF/r/
+         YUbvIarEudeKdXfOSvODq5M8+hh0+ulcAkrKSYnRkluAbYjEFaWBC10YuAQ6xIh3djJs
+         X+0h2gfikmsQ0qFeHCX/X2hDyDXCJ0HTzU3eJHxEcP2JY3/Dl4q0IJf+wy9rSMEhyMNw
+         NpZq9kx4vslA/aMSV3CkegHog5dVoU4W7crgG1Ck4EXrGd/mUyz7EpsZ70VXnQrNeadd
+         QXUQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778672418; x=1779277218;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=WezRk8pMbMv4stSI3tk0Nplcuh6tkeeC0ibZoOc30qo=;
+        b=EDUJkCzE3EoddTU6ckwlRqFR0eiYfaoAzeZRktpy0xbe75Q8DiIV01cBse3DuVJObg
+         oOO+cyjkNVPNvf2K1zaEGHSQX9CQNz9w9vknCtCbIv3LWltrv2Grlj/32tI63ntd5CEu
+         tncit4spWzMnSmL9D31Z1N6HWjHgHNHxL9Kojlw4kfEh1F7QB4vJSiaSPTtUiNJyVfgk
+         elRoW0xOwFzjlG9bEAJbis2H+qNx9BH9GGeA9yoUBX/KyZAzZtme92twqhhJxKruwiHC
+         SmtBFIBZVfhOuYWAzSuGBq+WjUQBkSxTlIkUfBB+BScry9p8Thcta7TUiDFBtI+I2rLe
+         DuZQ==
+X-Forwarded-Encrypted: i=1; AFNElJ+yKRen9cJKE6Cz8SpCdAOqYXtc5x+AcpDPbD9vqvtK+vrXgMW0qW55+z2znCEnhyUmvu5AQ+kHTJA=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz9bNAhpDN03FypuD9L1d7FuIMCsPXm2dZr34HnnYbZK9cYHb0Y
+	qH6W/E8m31ZSweoi8cj/WET4Jg9zNVPU4tPNXFR4e/ZudZ5Afhbp3lETvOtZrBmJ+uDr5N4CJP0
+	pvr4ksmZC
+X-Gm-Gg: Acq92OGe7IZX53t0IfUvWY2DkTKL2B+6Ne/b/gx1KXK1DOLBEOkEMDrHkZvpyhvGXqf
+	dqfU7vpUYFoJLundZZl12r3SvnUbIh/a5R9w5WNkFaeQ/S9Qsh+0ZXpxm/fZ0A69AFokGz8HpLM
+	ql/wv6MWUSO+uATy3bqFzlVtZK2nHWAGvt9vDagvVO4uZmUtCfIZaGE0+/5HEd/OvRAcvgs9J5p
+	jOuzyeevZY81Bj+H3dmEMlZvzMqcMYHrtmDCjF+TpWNHVoN/JVcjAjz+f9rFnHWFH5xHtEQSbci
+	VQz8OrUi4KoU4CtFLq6Qb6dhFb7ikypHFVUcLHfAGyl5G8lTtsGTRNQ4iuuc0wJwkxQ5EllMGLF
+	MqYKzoas6GKbVkYjY9qm8xyV4rEKUlwUQeiivmrIKOwKpuLUXWelCtGbkGnQ1bhO25iQynciuM/
+	dxnIg7GUL/FkGWvc7ujHfYWiD2bsLvNpivKtCKVOhuJjzPH1V9WqJ8Qnve8oE/44Xsd+86
+X-Received: by 2002:a05:600c:3013:b0:48f:d1c0:5cd3 with SMTP id 5b1f17b1804b1-48fd1c05f08mr14509725e9.13.1778672418216;
+        Wed, 13 May 2026 04:40:18 -0700 (PDT)
+Received: from horizon.localdomain ([212.105.128.254])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48fcdf64013sm53508475e9.2.2026.05.13.04.40.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 May 2026 04:19:49 -0700 (PDT)
-From: Abel Vesa <abel.vesa@oss.qualcomm.com>
-Date: Wed, 13 May 2026 14:19:37 +0300
-Subject: [PATCH] dt-bindings: mmc: sdhci-msm: Add Eliza compatible
+        Wed, 13 May 2026 04:40:17 -0700 (PDT)
+From: Sean Rhodes <sean@starlabs.systems>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Ricky Wu <ricky_wu@realtek.com>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Sean Rhodes <sean@starlabs.systems>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Dan Carpenter <error27@gmail.com>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	linux-mmc@vger.kernel.org,
+	Huacai Chen <chenhuacai@kernel.org>,
+	linux-kernel@vger.kernel.org,
+	linux-usb@vger.kernel.org,
+	gregkh@linuxfoundation.org,
+	arnd@arndb.de,
+	ulf.hansson@linaro.org,
+	adrian.hunter@intel.com,
+	rogerable@realtek.com,
+	matthew.schwartz@linux.dev
+Subject: [RFC PATCH 1/2] mmc: rtsx_usb_sdmmc: avoid false card-detect on tray readers
+Date: Wed, 13 May 2026 12:40:12 +0100
+Message-ID: <cad1837a6850835a922b87e21d49ec8821b5542c.1778672403.git.sean@starlabs.systems>
+X-Mailer: git-send-email 2.53.0
+In-Reply-To: <cover.1778672403.git.sean@starlabs.systems>
+References: <cover.1778672403.git.sean@starlabs.systems>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260513-eliza-bindings-sdhci-v1-1-b2cae44163c1@oss.qualcomm.com>
-X-B4-Tracking: v=1; b=H4sIAEheBGoC/yXMQQ6CMBBG4auQWTsJLSmoVzEuSjvAb0w1HTUEw
- t2tsvwW762kkiFK52qlLB8oHqnAHCoKk0+jMGIx2dq2tTMNyx2L5x4pIo3KGqcAjq4x1py8C8e
- OSvrMMmD+by/X3frubxJevxdt2xeiQw0aeAAAAA==
-X-Change-ID: 20260513-eliza-bindings-sdhci-d531219a5c87
-To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Abel Vesa <abel.vesa@oss.qualcomm.com>
-X-Mailer: b4 0.15-dev-bc6c4
-X-Developer-Signature: v=1; a=openpgp-sha256; l=989;
- i=abel.vesa@oss.qualcomm.com; h=from:subject:message-id;
- bh=riex9Jp9gsiobhfzqRzI6SaMLT0mbjKk2HzzJZhpT3U=;
- b=owEBbQKS/ZANAwAKARtfRMkAlRVWAcsmYgBqBF5T8R4qQyh4zB8syiJ6/XNs0+LS+ldULCNW+
- DPHZ07bbhqJAjMEAAEKAB0WIQRO8+4RTnqPKsqn0bgbX0TJAJUVVgUCagReUwAKCRAbX0TJAJUV
- VolTD/wN9QCJ39OboibVnWe5lBeGUAq1CkEIBtWX97hbZxw3dV/NnT8zH/V2ET1UyV0RinGnx7y
- xuvQO1R6G2b237dGYrv9vYRB/i3sivHtYU0hQNSTZjfck+Zd5bTyDvhsfi7NdkMSBj8LHnpBOr9
- wJYwyjp+obNSzjv4735w4hWTen31iQZTBMXTrBl/1tO26wHUEVUKGkMn0q6yCmbZlyIgzpAtQDA
- uH0AjSJu7W+Phvh3BG1YQQ2tVES9mqOl/u2x6jM5KzgU2BtwzBeo+1CJUaI3yjD5FZR8Ir3g3sw
- A9SdJzK1Ljhn6luWGGLA7O/Hr1eld98BQEVtr92awPaa0i7pZ/nmDdzw78vUB7zpWRDcFHEFCe0
- 0TErm3kWu8yjtt2ATynFEIs7brkbJ1kB7BfkG6Isbe9aRBFmuryHvCZjfrdVZDiU4ugbkq31nLJ
- sbkyL+1GyG9r+o07yyIlmKPXrxh9X6ZJkU0VMV6ebFav4eJnIxVmkQYMEaiWjTxzQUPPLMCRxua
- Ip5XB1mSE9YpcGTRofbWxw/dmxyfc9oLLAQ9E+S331npmiSTJn2lGa7cJTSnL+tSTroO19l3ZLa
- SgxLEZTfHZk6xzzS23HQe+z+qYH4oxZyUYK3TIezCVHF6iSNGatKjUY2pUMWgDQ3T9coaq3dpHB
- 9cB0w4DTkI3pAZw==
-X-Developer-Key: i=abel.vesa@oss.qualcomm.com; a=openpgp;
- fpr=6AFF162D57F4223A8770EF5AF7BF214136F41FAE
-X-Proofpoint-ORIG-GUID: BILgq9IU0H4WBn5MziC6FKOx4SD9UcTK
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTEzMDExOCBTYWx0ZWRfX1H7YdYJ4PPLD
- RVqBVfMn/d4Yp8ZXY/Sf1DODToSddYRZjWxudcsZumhZZgMLxBU+uj9UmUjucISRTqaZE7jIHzY
- vGR4Cep8B+vcsDny+g2Hzi222xNhZaWFVc/hpJN4YTAB2/XSdlEOM30bQAi2G7BBd3OXr/2UhLC
- qPurh6upq1gaQEPnT6TJafwE59CYo62i+L8wOVA4XOJ1MZAFmKxZJrDljT2t7S2NrJjDjUd4z3O
- fAuHYbrLDi/fcUKRBokoksHZE6YWFFf8OGqw9zL9jl1BJWx/NNFmI9lA+NHbQtPJAQ6L8UKWZCc
- LiUNj+iAbxLZX/QvHo6ECGJo4OZH3HWB7Y+9mXbEf1IfoDiyzYOD64VTp93O20KrzFQTMIygcT/
- VHv931LimVtsiuGPo2EL1aFpxP10KQrlPye6Tca0EocXW3dLsJDzKMqsHlgLCQc+32CIAZADg/B
- AKw8neCW/GdRaWsFS/A==
-X-Proofpoint-GUID: BILgq9IU0H4WBn5MziC6FKOx4SD9UcTK
-X-Authority-Analysis: v=2.4 cv=A8Fc+aWG c=1 sm=1 tr=0 ts=6a045e57 cx=c_pps
- a=EVbN6Ke/fEF3bsl7X48z0g==:117 a=NtgjAHhJo3Q0P2g9Zl9R/g==:17
- a=IkcTkHD0fZMA:10 a=NGcC8JguVDcA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=gowsoOTTUOVcmtlkKump:22
- a=EUspDBNiAAAA:8 a=67XbsYgd54THOLoG6RkA:9 a=QEXdDO2ut3YA:10
- a=a_PwQJl-kcHnX1M80qC6:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-11_05,2026-05-08_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 suspectscore=0 impostorscore=0 bulkscore=0 phishscore=0
- clxscore=1015 priorityscore=1501 spamscore=0 lowpriorityscore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2605050000 definitions=main-2605130118
+Content-Transfer-Encoding: 8bit
 
-Document the compatible string for the SDHCI controller on the
-Eliza platform.
+Some Realtek USB SD readers with a tray can assert SD_CD even when no
+card is present. This can make the MMC core believe a card exists, and
+may trigger unnecessary initialization and suspend failures.
 
-Signed-off-by: Abel Vesa <abel.vesa@oss.qualcomm.com>
+Debounce the CD signal and validate a newly detected card by probing for
+a response (CMD0 + CMD8/CMD55/CMD1) before reporting it present. Also
+treat SD_INT as a removal indication even if SD_CD stays asserted.
+
+Tested on a Realtek RTS5129 USB reader (0bda:0129):
+- Tray inserted, no card: no mmc device created (hot-plug and cold boot)
+- Tray + SDXC card: hot-plug and cold boot detect mmcblk0
+
+Tested-by: Sean Rhodes <sean@starlabs.systems>
+Signed-off-by: Sean Rhodes <sean@starlabs.systems>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 156 ++++++++++++++++++++++++++++--
+ 1 file changed, 148 insertions(+), 8 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-index 695a95e8f35d..adaed5272016 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-@@ -37,6 +37,7 @@ properties:
-           - const: qcom,sdhci-msm-v4 # for sdcc versions less than 5.0
-       - items:
-           - enum:
-+              - qcom,eliza-sdhci
-               - qcom,ipq5018-sdhci
-               - qcom,ipq5210-sdhci
-               - qcom,ipq5332-sdhci
-
----
-base-commit: e98d21c170b01ddef366f023bbfcf6b31509fa83
-change-id: 20260513-eliza-bindings-sdhci-d531219a5c87
-
-Best regards,
---  
-Abel Vesa <abel.vesa@oss.qualcomm.com>
-
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index 84674659a84d..ec3eeea78e95 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -19,6 +19,7 @@
+ #include <linux/scatterlist.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
++#include <linux/jiffies.h>
+ 
+ #include <linux/rtsx_usb.h>
+ #include <linux/unaligned.h>
+@@ -30,6 +31,9 @@
+ #define RTSX_USB_USE_LEDS_CLASS
+ #endif
+ 
++#define RTSX_USB_SD_CD_DEBOUNCE_CNT	2
++#define RTSX_USB_SD_INSERT_RETRY_MS	1000
++
+ struct rtsx_usb_sdmmc {
+ 	struct platform_device	*pdev;
+ 	struct rtsx_ucr	*ucr;
+@@ -46,6 +50,8 @@ struct rtsx_usb_sdmmc {
+ 	bool			card_exist;
+ 	bool			initial_mode;
+ 	bool			ddr_mode;
++	u8			cd_debounce;
++	unsigned long		next_insert_check;
+ 
+ 	unsigned char		power_mode;
+ 	u16			ocp_stat;
+@@ -72,6 +78,13 @@ static inline void sd_clear_error(struct rtsx_usb_sdmmc *host)
+ 	rtsx_usb_clear_fsm_err(ucr);
+ }
+ 
++static int sd_set_bus_width(struct rtsx_usb_sdmmc *host,
++			    unsigned char bus_width);
++static int sd_set_timing(struct rtsx_usb_sdmmc *host,
++			 unsigned char timing, bool *ddr_mode);
++static int sd_power_on(struct rtsx_usb_sdmmc *host);
++static int sd_power_off(struct rtsx_usb_sdmmc *host);
++
+ #ifdef DEBUG
+ static void sd_print_debug_regs(struct rtsx_usb_sdmmc *host)
+ {
+@@ -768,12 +781,94 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
+ 	return 0;
+ }
+ 
++static bool sdmmc_validate_insert_locked(struct rtsx_usb_sdmmc *host)
++{
++	struct rtsx_ucr *ucr = host->ucr;
++	struct mmc_command cmd = { };
++	int err = 0;
++	bool probe_powered = false;
++	bool ddr_mode = false;
++
++	/*
++	 * Some readers with a tray assert the mechanical SD_CD pin even when no
++	 * card is present. Only report a card present when it responds to a
++	 * minimal reset/probe sequence, similar to the old rts5139 behavior.
++	 *
++	 * Must be called with ucr->dev_mutex held.
++	 */
++	if (host->power_mode == MMC_POWER_OFF) {
++		err = sd_power_on(host);
++		if (err)
++			return false;
++		probe_powered = true;
++
++		/* Issue clock signals to card for at least 74 clocks. */
++		rtsx_usb_write_register(ucr, SD_BUS_STAT,
++					SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
++		usleep_range(200, 400);
++		rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
++	}
++
++	/*
++	 * Ensure the interface is in a safe, legacy / initial-clock mode before
++	 * probing for a response. The MMC core may not have configured ios yet.
++	 */
++	err = sd_set_bus_width(host, MMC_BUS_WIDTH_1);
++	if (err)
++		goto out;
++
++	err = sd_set_timing(host, MMC_TIMING_LEGACY, &ddr_mode);
++	if (err)
++		goto out;
++
++	ucr->cur_clk = 0;
++	err = rtsx_usb_switch_clock(ucr, 400000, SSC_DEPTH_512K,
++				    true, true, false);
++	if (err)
++		goto out;
++
++	cmd.opcode = MMC_GO_IDLE_STATE;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_NONE | MMC_CMD_BC;
++	sd_send_cmd_get_rsp(host, &cmd);
++
++	/* SD v2.0+: CMD8 */
++	cmd.opcode = SD_SEND_IF_COND;
++	cmd.arg = 0x1aa;
++	cmd.flags = MMC_RSP_R7 | MMC_CMD_BCR;
++	sd_send_cmd_get_rsp(host, &cmd);
++	if (!cmd.error)
++		goto out;
++
++	/* SD v1.x: CMD55 */
++	cmd.opcode = MMC_APP_CMD;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
++	sd_send_cmd_get_rsp(host, &cmd);
++	if (!cmd.error)
++		goto out;
++
++	/* MMC: CMD1 */
++	cmd.opcode = MMC_SEND_OP_COND;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_R3 | MMC_CMD_BCR;
++	sd_send_cmd_get_rsp(host, &cmd);
++
++out:
++	if (probe_powered)
++		sd_power_off(host);
++	return !err && !cmd.error;
++}
++
+ static int sdmmc_get_cd(struct mmc_host *mmc)
+ {
+ 	struct rtsx_usb_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_ucr *ucr = host->ucr;
+ 	int err;
+ 	u16 val;
++	u8 pend;
++	bool sd_int = false;
++	bool cd_raw = false;
+ 
+ 	if (host->host_removal)
+ 		return -ENOMEDIUM;
+@@ -782,28 +877,71 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+ 
+ 	/* Check SD card detect */
+ 	err = rtsx_usb_get_card_status(ucr, &val);
+-
+-	mutex_unlock(&ucr->dev_mutex);
+-
+-	/* Treat failed detection as non-exist */
+ 	if (err)
+-		goto no_card;
++		goto no_card_unlock;
+ 
+ 	/* get OCP status */
+ 	host->ocp_stat = (val >> 4) & 0x03;
+ 
+-	if (val & SD_CD) {
+-		host->card_exist = true;
++	cd_raw = !!(val & SD_CD);
++
++	/* Use SD_INT as a reliable removal indication on some tray readers. */
++	err = rtsx_usb_read_register(ucr, CARD_INT_PEND, &pend);
++	if (!err) {
++		sd_int = !!(pend & SD_INT);
++		if (sd_int)
++			rtsx_usb_write_register(ucr, CARD_INT_PEND,
++						SD_INT, SD_INT);
++	}
++
++	if (!cd_raw) {
++		host->cd_debounce = 0;
++		host->next_insert_check = 0;
++		goto no_card_unlock;
++	}
++
++	/*
++	 * rts5139-style: when a card is already known present, treat SD_INT as
++	 * a removal event even if SD_CD stays high (e.g. tray-based readers).
++	 */
++	if (host->card_exist) {
++		if (sd_int) {
++			host->cd_debounce = 0;
++			host->next_insert_check = 0;
++			goto no_card_unlock;
++		}
++		mutex_unlock(&ucr->dev_mutex);
+ 		return 1;
+ 	}
+ 
+-no_card:
++	/* Debounce mechanical CD before probing for a response. */
++	if (host->cd_debounce < RTSX_USB_SD_CD_DEBOUNCE_CNT) {
++		host->cd_debounce++;
++		goto no_card_unlock;
++	}
++
++	/* Avoid pounding the bus with probes if CD is stuck asserted. */
++	if (time_before(jiffies, host->next_insert_check))
++		goto no_card_unlock;
++
++	if (!sdmmc_validate_insert_locked(host)) {
++		host->next_insert_check = jiffies +
++			msecs_to_jiffies(RTSX_USB_SD_INSERT_RETRY_MS);
++		goto no_card_unlock;
++	}
++
++	host->card_exist = true;
++	mutex_unlock(&ucr->dev_mutex);
++	return 1;
++
++no_card_unlock:
+ 	/* clear OCP status */
+ 	if (host->ocp_stat & (MS_OCP_NOW | MS_OCP_EVER)) {
+ 		rtsx_usb_write_register(ucr, OCPCTL, MS_OCP_CLEAR, MS_OCP_CLEAR);
+ 		host->ocp_stat = 0;
+ 	}
+ 	host->card_exist = false;
++	mutex_unlock(&ucr->dev_mutex);
+ 	return 0;
+ }
+ 
+@@ -1359,6 +1497,8 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
+ 
+ 	host->power_mode = MMC_POWER_OFF;
+ 	host->ocp_stat = 0;
++	host->cd_debounce = 0;
++	host->next_insert_check = 0;
+ }
+ 
+ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
