@@ -1,59 +1,61 @@
-Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B8A43A452A
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C34E43AE703
 	for <linux-mmc@vger.kernel.org>; Thu, 14 May 2026 21:20:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.45
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778793630; cv=none; b=BAQqfHqh1I3R7uTAZz78nvtMNSTIVjyy0s0QOzwxIH0J8PY8lTtvKMJ75xSOuyXmQcUw/inU4fQm0VaNFzzdJPT81Bc2v+SzlwmMmxsSr0dZdDCysGt6tWpJpLSOGmgBbF4bxivx7z6q7AJbn1Odb62a0pYMW8A1dOE9uYBXqKE=
+	t=1778793631; cv=none; b=jk+7+nnop09QPvcJyTUWDp4jeYKG154wc0rWqykMIIg8iHABczQTd9XpnkEPKnTlvpKPVclqb6CQ7JTaZ5XI7GHmKBocdV7io1pm1mD9/IOaDP4yBKdeE39/SIdzwGJwcu+FTYEy5o1pSUSeamhI/+gyK0N44/DaJIjd2XmuNWE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778793630; c=relaxed/simple;
-	bh=XPrW+LN3Qu1mBubr+kS6ch2XZNoo58CFw8wcZXn4OOQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=UsG6nUHTfVruxuz4+ZzBFMARS5v5mwT0Ce6b3svy74pzaSpS60+c3RaDlzQi3tZFw6NCLpfLHGmsziDZtK7HMOTwlLitsrGemiggBRu3zJZ7vxq3rQKN6W2nMsUr9Kxno+DMPvSw98Djt00egvyrEQviTHh1gxe+y+KVZmiBXFo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=c75OmXFZ; arc=none smtp.client-ip=209.85.221.45
+	s=arc-20240116; t=1778793631; c=relaxed/simple;
+	bh=lhPMKEQU86GVpnKxpDjfM0xA4kJZxbopeeIHT2P/Xco=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=VtiYYTwhoTs4wM2Umy9yMwrPwsT5pClebP29/hmqhStugSD+vtkeL90thyDJiS9p1bv1pPhSR35TqY+uBg85giob5NRudFKT56Pdcy2ezj0qHSN4yaUrTQ9iC5SitQryFmKqFHttyYkq3eUZvQbdlTxi4ibKv91WtC3TxqCue6U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=q/vdd830; arc=none smtp.client-ip=209.85.221.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="c75OmXFZ"
-Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-44985f4ab0fso4984608f8f.0
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="q/vdd830"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-43d76dd4ee8so7825719f8f.2
         for <linux-mmc@vger.kernel.org>; Thu, 14 May 2026 14:20:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20251104; t=1778793628; x=1779398428; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=Lx+wfWkAhI1VCh8VDA1mDnreR/0Zt4DovZ/nCSUjjYs=;
-        b=c75OmXFZ3L+FOntgkkGKJRUIHLb34cVy1igs+H1oYrcDmL0ojnDWt4RcRDoieGnapG
-         uJvvHpE+PMPaoXaUudL5c3Q6JLg+tWwbZDcZcTFtrIw5oKG3VCPO0fZnxPrGnr++1Ymt
-         DEZ5iymyWAlsZbPPBEyraEXaNzLsV0dazy+QT9x8wAXd/NqQwT4KyQAGFLRmiNel1IcX
-         zgHOg66+o3u8EgLBjSOK26Fl3t5Gm+ttT7Ox7zfOKvWeLjCF4P5Ut+q/WeC7/7bWJSmz
-         B8OJD4eGPPVtGD/vMf7BNkGa5d9VSfRSAgPm4/dEu1+VPqZerZNuetF8ZsOztyFxgVyH
-         z/yQ==
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=86LPxHAuIBTZBybQT8TPj1X7ACqmLq5UiCY29MJP/cg=;
+        b=q/vdd830Ia/9roJlAYZgN6CruuBjgtbNmFxobMOhrvbjzEIkKLCxDhQT6jO4GMTzxa
+         fIwITcoqhWoXNOuVXDDABtxEgBGYVr790HtXOH+ikJ3OC0BUy5ot64QefRL8HTYeIGEb
+         sgbEEXsklbDZlB4nRjTAu+s818KkT4tFmGORFbtlOqqSSgtShnkchCfYvoxY1r8PkfRP
+         bk/1jbyS+Y+/pb9RHh6HR9ddeIv/1b5ivPvK8KE6/wG5teoUfIevyAxRYZWWL9J84HCr
+         5G6mjfE4EEFgUDzg7REXV1+x4NQLtAihKBBn4C3nyOz9m/b1nIigppixsp7MmFtN6vG8
+         /xbQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20251104; t=1778793628; x=1779398428;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Lx+wfWkAhI1VCh8VDA1mDnreR/0Zt4DovZ/nCSUjjYs=;
-        b=Qixbg4mRfwVI+dE/YRw9/sTZjNvt7FGHOFbb1m6dlTZ3sTxl7jXlY4ZPWTDGpZ+wbg
-         a2cZO2yMXaKZ/XJ7WP9ftQJOFR7oyBV64/j3bAaWdOmJq/HB+JcDXXc9V0qjt47vs7q1
-         ss6S82/Yb1CUoVAd+hZRr0b1mlfovZ6JaL+WxGEbg97cGYkcTSwWXhoak5A1+ANGUVGb
-         WsCIeq5J1q75+piKBFcCD0KS5P7e4SFdeaeF1OvSAm/rXXLa/Bo6ZPPhQtxy1pkaGqCX
-         /gU+OKGDp7AgmLEs9dvfGTiC8KqL1m7If8uV+NIn0zMly7/WZtquxXz0OkbNlbgG9kmn
-         wlqA==
-X-Gm-Message-State: AOJu0YzEu+OV87QIZV2icqixONf9K1/FcxOxgU3S6FnDn3gEFzBoTPDB
-	YewecLpExTIZkQJ2YyhEMz65q+Q5k3NtR88j/Htpp89Gmwd5dzM/F5RB
-X-Gm-Gg: Acq92OFSNQOyPrifJS/B+FuYDH27+vNc1/vGMYU4hz7JgCtL7wVngpBqc4mHhK88Hn2
-	tNkDAzkUvhlCJ7v0djkh3GqoEnDTfvJh0rJ2qfq0lQwjNeTz5vMTIGyAcbsGLOo0rPOAeJwf+SN
-	QiVWLaNnI46IAkCQxMIu3okmhIg4tR+iE5u5WhFT2mPX1QQW2tS7o/STz7b4DyVdyY3Fvg4Au1k
-	eKwE1qVI0MTG5Oq+83BkqkJLdcH/LNWHJvosNhnL6zj4QIgKcptTRoj1sWncSEWa4dxNUrPprWH
-	ZUp3hkBJHDDvQO0jc8FTHtLqCR5c6jiHAX9jyxX8PZQ9NB9Ev71FSzbG+9RMxwJzvEWWDYWEAOM
-	pipY157zk/Rp/cOIXKYylSeV3+fa2DGagWpWJt59njAB6Uqdujm6cNJgiNz24albshv436+gseP
-	oeaRS8KoFM66Nmhyhlt+dytwlosin/h91ZYY7g8H2pgxXGO3cjWdIb/fw4r1ewbNizxL/75hqCf
-	kga94d6KfDfoh2f8uXHj2Zkd+GQek8M19FlGNd3oE/2YPVo
-X-Received: by 2002:a05:6000:4021:b0:45a:c97a:905e with SMTP id ffacd0b85a97d-45e5c35db40mr973342f8f.1.1778793627421;
-        Thu, 14 May 2026 14:20:27 -0700 (PDT)
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=86LPxHAuIBTZBybQT8TPj1X7ACqmLq5UiCY29MJP/cg=;
+        b=Y23o/RT7A+I9T6ldYHTIdeKSnmIrh6zGj6E2UsJuvuC9shpvor/qHeBeowHsreMop/
+         0LIe1mgT2oNmjxtf5zpI95Tolnqn+7QpxIugRVYr91XHycn/x8w4hCyO1jdy9D88Zvmr
+         MGBGCQrjTRE6Heon5CbhWqRlVh5RyDip8iuPfqkWcNw9McI6LS4alIkJRiLW9x/OmMBa
+         787SMWY2O/ylrJwN1F277FwUcHkX3HgZIzyCXuovOii+wH3TZWBwQiXKi8hfJ8wP2UWH
+         nJJCs4oBOov0tnnkKw9B3+l8iMstSYjcBSoODGRpPiUNjtPBs0OKqQvKajsgGF71RPZa
+         Rwdg==
+X-Gm-Message-State: AOJu0Yw0QSnHo5AFfOigmqG1ZM/HA0T+bdfxQnxQufqK40+yKKyjwcze
+	ED8F2qCyNva21ZQhSGUS2XYz3wYrBKnlwfb/Wm0Dtm/GSLPn14Vn4lgT
+X-Gm-Gg: Acq92OFuCpK9rc6ghD8gmDBmm5NnYLBjYzx77Gd3O53m2pX4bPH5E1AX66G0GjOy08h
+	INyFm6HNygvzEqwSgB+iR8z9QLgTw+B/8+8GMuton3TLnnQ5xYeCz8jbJh6hmmxTddMHaD5S9pD
+	r1hdmXIV0QY2BpwzfwkTkVoJMGg6Q/lghy/dc4Yi2oen+GW9XOcKm4xcjEMKV+hIQH4shUCkZwJ
+	nOOJPCa6hMOyXJlKquwbzHNss6yqliiF+zsXR7BIZD6NAS0S6N8FLPHTg2TglM7A8TmxRDXep5q
+	AGeTY0GwYo1bWaAKrgHzc+hdi7hgBbln4butkXhobqrf5BopR46aDk6ujrYIUrH82w/CuMUffj6
+	zVXc9qzjYR7UYTLxfia/tMAFfQT2wJcNTrd5Sy0O6uW4D6QR0Q3vUtakcquB5COcE3XiWsTCxJL
+	rybR6gMb7sH4udqpQVhOCV6KJMHJN2avWa6w7HPiz7uqSCtmwFGG16uG/pXylbxjAB5RyqjwnRz
+	2SYuvfIPHZjSn3Ym9ce57NWfklp3XK7fcOaoozZFvUbgFU4
+X-Received: by 2002:a5d:5f45:0:b0:455:7e5d:9142 with SMTP id ffacd0b85a97d-45e5c5953ccmr1060884f8f.32.1778793628199;
+        Thu, 14 May 2026 14:20:28 -0700 (PDT)
 Received: from iku.Home ([2a06:5906:61b:2d00:4d56:d792:6583:2fd5])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-45da0fe13a7sm10216038f8f.29.2026.05.14.14.20.26
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-45da0fe13a7sm10216038f8f.29.2026.05.14.14.20.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Thu, 14 May 2026 14:20:27 -0700 (PDT)
 From: Prabhakar <prabhakar.csengg@gmail.com>
@@ -67,11 +69,14 @@ Cc: linux-mmc@vger.kernel.org,
 	Prabhakar <prabhakar.csengg@gmail.com>,
 	Biju Das <biju.das.jz@bp.renesas.com>,
 	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH 0/3] mmc: renesas_sdhi: Apply tuning quirks for RZ/G2H, RZ/G2N and RZ/G2E SoCs
-Date: Thu, 14 May 2026 22:20:21 +0100
-Message-ID: <20260514212024.1624517-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	stable@vger.kernel.org
+Subject: [PATCH 1/3] mmc: renesas_sdhi: Apply bad taps quirk to RZ/G2H
+Date: Thu, 14 May 2026 22:20:22 +0100
+Message-ID: <20260514212024.1624517-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
 X-Mailer: git-send-email 2.54.0
+In-Reply-To: <20260514212024.1624517-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20260514212024.1624517-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -82,43 +87,32 @@ Content-Transfer-Encoding: 8bit
 
 From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-Hi all,
+Apply the sdhi_quirks_bad_taps2367 quirk to the RZ/G2H (R8A774E1)
+SoC.
 
-This series applies existing SDHI tuning quirks to the Renesas RZ/G2 
-family (RZ/G2H, RZ/G2N, and RZ/G2E).
+RZ/G2H is identical to the R-Car H3-N (R8A77951), which already uses
+this quirk to avoid unreliable tuning tap positions. Use the same
+quirk entry for RZ/G2H to ensure consistent SDHI tuning behaviour.
 
-The RZ/G2 series SoCs are functionally equivalent to their R-Car Gen3 
-counterparts regarding the SDHI controller logic. Specifically:
-- RZ/G2H (r8a774e1) matches R-Car H3-N (r8a77951)
-- RZ/G2N (r8a774b1) matches R-Car M3-N (r8a77965)
-- RZ/G2E (r8a774c0) matches R-Car E3 (r8a77990)
+Fixes: 31941342888d ("arm64: dts: renesas: r8a774e1: Add SDHI nodes")
+Cc: stable@vger.kernel.org
+Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-By applying the relevant bad tap quirks already used by the R-Car 
-variants, we avoid unreliable tuning positions and significantly 
-improve data throughput stability and performance.
-
-The following performance improvements were observed during testing,
-on eMMC with HS400 mode, using the mmc_test module for 1000 iterations
-on each SoC:
-
-SoC      |  READ BANDWIDTH (KB/s) | WRITE BANDWIDTH (KB/s) |
-         |     Before -> After    |     Before -> After    |
-------------------------------------------------------------
-RZ/G2H   |     42500  -> 100744   |    70109 -> 72594      |
-RZ/G2N   |     46680  -> 104731   |    73393 -> 74298      |
-RZ/G2E   |     159472 -> 180781   |    126355 -> 127725    |
-
-Cheers,
-Prabhakar
-
-Lad Prabhakar (3):
-  mmc: renesas_sdhi: Apply bad taps quirk to RZ/G2H
-  mmc: renesas_sdhi: Add SDHI quirk for RZ/G2N
-  mmc: renesas_sdhi: Add SDHI quirk for RZ/G2E
-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 +++
- 1 file changed, 3 insertions(+)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index f6ebb7bc7ede..e5aae7fce1cb 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -224,6 +224,7 @@ static const struct renesas_sdhi_quirks sdhi_quirks_rzg2l = {
+  */
+ static const struct soc_device_attribute sdhi_quirks_match[]  = {
+ 	{ .soc_id = "r8a774a1", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
++	{ .soc_id = "r8a774e1", .data = &sdhi_quirks_bad_taps2367 },
+ 	{ .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
+ 	{ .soc_id = "r8a7796", .revision = "ES1.0", .data = &sdhi_quirks_4tap_nohs400_one_rx },
+ 	{ .soc_id = "r8a7796", .revision = "ES1.[12]", .data = &sdhi_quirks_4tap_nohs400 },
 -- 
 2.54.0
 
