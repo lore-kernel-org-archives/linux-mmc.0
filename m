@@ -1,215 +1,160 @@
-Received: from mail-ed1-f52.google.com (mail-ed1-f52.google.com [209.85.208.52])
+Received: from mail-pg1-f182.google.com (mail-pg1-f182.google.com [209.85.215.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E6A73ED13C
-	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 21:38:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.52
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778881101; cv=none; b=PAFdGuQfuTN2a5amIUVXg+bSqoDjaCaSAKtxd6CutpWoIPnfcvgLevn8OvbYXIcXZQnao2p7hbO8Rfo61VrlNZpp44vdRP9oXEXYMI+ZygsYAtaDu51olW9Br3E4NEfyGvgkm5ZCoTrZprZ0ikvc60aSLTRjdaCGmzm/05Q1vKo=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778881101; c=relaxed/simple;
-	bh=WXxWYuc7h4mUBsM2fwkHgiJ1nmHgMc0USb4YER0FhDI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rkkjincK4OI3ampO6DQclRonx+CSZRItkFuvdebEiLkE7gtWXNFFCoVB3fVKr1mOLJBZwOCMD/ygvj9QPUZvo7/K69zvMVTBS/wm2mPy6c/N0mZ0LlBZaE/2smA+DpfQfoa7ZWfb+tSW9SZMZQMWRPVuvJDxRDcUTZEV4lDOG9w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=imVoqtUf; arc=none smtp.client-ip=209.85.208.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4975305693
+	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 22:10:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.215.182
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1778883013; cv=pass; b=PA+K9VmiVyY11GzJjZ2uNVqVsRILdSnAw5NKl2PbYAmOGROd1y4XKeL7Yt9UztJ5WhhVWhDzQB7Kt2TXJdroR+1EUM3RwuTUO1sHKx7lZ/N7p5e3xupuIh/vKYSwy70woTm3pCKFYqNLhfsaOKxRu7qp+kMCo/xsPOnUsKBXV7k=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1778883013; c=relaxed/simple;
+	bh=/2SsPHQjThXjMTGdvvRkqJDE7fzSQCoKx1NCSA0r31E=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=CyQmiXd5cr24Ieqnk41qScq4Lh0Lh4/1HPA+qMj1x8Jw6IscHZXxw/5MztqgdHKyckd6cxoaNx7rnlN8pruhKeLc2SZUxDwMwRbVJJUSYTca5PMEGp1CKqfM7VXYdWHXLC5Cc4eWrBtiF/Z3bEyPz7ahBMSsToG1tVAt8cSEmVU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=La6sXmjN; arc=pass smtp.client-ip=209.85.215.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="imVoqtUf"
-Received: by mail-ed1-f52.google.com with SMTP id 4fb4d7f45d1cf-678adefbd26so710761a12.3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 14:38:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="La6sXmjN"
+Received: by mail-pg1-f182.google.com with SMTP id 41be03b00d2f7-c80203b9d7bso129825a12.0
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 15:10:11 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778883011; cv=none;
+        d=google.com; s=arc-20240605;
+        b=liupG5U6Dc3eIEhnkDR3eZQoKJUsnWBiH6bwdaaTor79vLuwGvLQMP7tzQwkrw5tPh
+         xU+STxMeeJrLXlZN5gid1BvMQU1Gaif6JT8kmhYZpL6nLLjDx2Lq3TJNUO+EW0Gf9WN8
+         /Z+ttqGthii2HRvI4sXNNPWjedvqdKVmjWmvljCmLGhXtNNR82TbOIfvRse/8TJ0iHry
+         RgZqi5bWz0hqhJmlPanCt+2H7RuTKGbFCMTBNEanrqBZjrzo6tX0h2yl3OEVX0NrWUNG
+         SuTIeE0/uCetOdCX3dOx/pw5pSl9BfYB3PsQfpEkNB3HWwv800sqRVB2BP/lrXsJhRVL
+         8Ncw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:dkim-signature;
+        bh=9EXY/w/9VSswFgbA75YAw1RPVxPq4B/z+cWDTOohrfI=;
+        fh=Xn5gGOD0wfvxR3QQnaA7YlzIeHMppEapma8laY3ceNU=;
+        b=ZD7evF9zoGWVJJj4Dt1JRF/p1xVf1cU/05n3RX++YXTPdGiEufBptXlb/jdfkrlM6d
+         w0fYDcJDdeRM579iPv2hqFE699AvCQchxLDyvE56S94ORXhx2IPYARKEi21r6bhgBnKu
+         7XSgMW3qOBjAJeuuqiugd+5g0s7KPFEFygISvuZ2tSrVtelU0MQpMNLnmXl51ik2HPVK
+         lrd/BVpB9L0ocEtP7Jw/nKLxSxNOXxmgl+wg7Gv1Pa6g7TcSD+xEUb8uTgHM+3alraro
+         MiNZB3XQ4HMD3CXXHR6wU5yrAYiern/iLZ+X7iXR/alK0qpeWcEQ5gMhomTElSmjJT6a
+         m2og==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778881099; x=1779485899; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=sEXnM3M8drdkTd1r4wcRZ5/ieWs20RjKb+wroDvCD14=;
-        b=imVoqtUfehLxHwdJv7zjBGGddcQ75fRevdWrs9UzEj86vlNUk4Zbuc5d9/FXHnUav/
-         44Et9w26wPQldvz30M75IHiZ6B2aLPCbqNxFtCPwxzmm6d0kYng/uw1Es7R1Uo6FH6cj
-         rB6FEDBci1tXdGHDrDAIhSuZfxpRT/uqQ0qDw5swuZGiVtujbfgEEOp+0bYD+WB6LEC/
-         SDgVUIi6K8wglnwNFXh63f+KZh6+YOlqqgCBCn+cVLiFOxRyKQHjeDAYIdTfC1Jk9KTp
-         wb5lpnaXExvTfV+jXW2/0HGg2auZuXVS7SHZG1nfnVfSX9TvUPzyKOR++chYQEhL1MV/
-         PbHw==
+        d=gmail.com; s=20251104; t=1778883011; x=1779487811; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=9EXY/w/9VSswFgbA75YAw1RPVxPq4B/z+cWDTOohrfI=;
+        b=La6sXmjN18/4C6qmSrleDcDl1W4O3DiaDAyLpal89hOHjKaIFL1KXQOFylQAKL2FUL
+         MOSZxTdecz1tD/DumZ5H2MkAY4VLF65ZidouzUIT1XkJIbi/3vZ6DFdHwixG1SlqQX0o
+         d4tn7gSr1crAbg7ixvanJps8kCcqvOV5jghBiFP6elUSptwTyTtxcrcvgw6AFF4mkjMy
+         mvx2SYQwO3CwapCQPbZ7a7gZ2ad+Nvjyi62H+FotR0XcF/tLORGhnmunE9suG4XyALCC
+         DyDp8CpXBT2Z0QQjZo6axO/Y7e++JiH1Eva0qd0KHcRFthqo/3DXaP0Zn+yiWk/pf9F2
+         FsEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778881099; x=1779485899;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=sEXnM3M8drdkTd1r4wcRZ5/ieWs20RjKb+wroDvCD14=;
-        b=hPOTbO2Ovf3ILlRxygfz2MmtBADJnVSdYEqBifo9ve3e+7e8VBTdEiBr1RUl2LgqPo
-         MDTnBshjbrzNLNqvL6h84cGPn2HefQDaWLbZIWYORr1CE42ox+6o07LU7BRyfuMf3i9E
-         wwE2I5iICeRJGSoEazU9dSE9riDEQmmjwiL7lLVub1qbS8W++xgWZr21sFKzFJSOui1p
-         WukaYfWUPNEZasdrF6Q6fAt+/VASMJ5d2zMvpiaPFmj9NAxNiwgrV0HIjdT4Ki2Eq181
-         oZF4go21jLEz8v4uHS7G1Tqh5RHhO84HrVSQH1Z2cY9JFDVbw/a0uY7OUu2msV9/a87a
-         BCqw==
-X-Gm-Message-State: AOJu0YzsnLaNl7gmkL9YuMOPmMkmCpCHmrTyivymmExKrCI7PL4Aj5Jn
-	j5XaXRICBsF0HbdnURxQgjbX7cDVATSw9MiUH1RonsqFeX+d8RPhJGPGGKtJm8bI
-X-Gm-Gg: Acq92OHcn1Xend8zvkYj0J2xo6ZTIHG5Mzra7P2JqVBarabcZWjwtHKwherHgem3UWh
-	as5gsoXyp+/u1fWUhoTCitVbRPRv4s8tOqZQOZdTiyA4tXoeYzG5vp0QCdv3wWmR/R5JPTrBXIB
-	dNOs1ljtX4WLw3aYO4hWNFlpuzGI8RQyNTNCyEL7SjZ0z0ftb17tj0XqtQ9Lmkh4eiU+uRzfcxj
-	xpma9hk3V/fF1csQWFZdmI0kpP0Bjdsn3LTlHfxBwtz654U1PZVVB/u/c5L+8SpWIXj7u9DBtTS
-	leakF6kGpVyGJsFbDtu7Jwpo0yzueiOhRu0hSOqJ/Ow83+nGRf6xxZ361bHUnEHiOGF8F7lCRFP
-	5nZyq6yaxQage2OeX0JB4CFmZTZLYPz9cHaW3XTifT9zjHyVsZCt+9jJtr/5CZci5iStTVIPusm
-	7d8UtpkTSHKterOTUjMPcozGjHVhEYpMR9Hp2dLNirkzvr4vwpqrc73wBVhw==
-X-Received: by 2002:aa7:c4e7:0:b0:670:8b38:5717 with SMTP id 4fb4d7f45d1cf-683bd581a49mr2084443a12.24.1778881098713;
-        Fri, 15 May 2026 14:38:18 -0700 (PDT)
-Received: from torstein-laptop ([2a01:799:3a1:9700:690:4aa1:581c:2e09])
-        by smtp.googlemail.com with ESMTPSA id 4fb4d7f45d1cf-68310d510fasm2484038a12.11.2026.05.15.14.38.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 14:38:17 -0700 (PDT)
-From: Torstein Eide <torsteine@gmail.com>
-X-Google-Original-From: Torstein Eide <torsteine+linux@gmail.com>
-To: linux-mmc@vger.kernel.org
-Cc: Torstein Eide <torsteine+linux@gmail.com>
-Subject: [PATCH v2 5/5] mmc-utils: Add bash completion
-Date: Fri, 15 May 2026 23:37:47 +0200
-Message-ID: <20260515213747.1452692-6-torsteine+linux@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260515213747.1452692-1-torsteine+linux@gmail.com>
-References: <20260515213747.1452692-1-torsteine+linux@gmail.com>
+        d=1e100.net; s=20251104; t=1778883011; x=1779487811;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=9EXY/w/9VSswFgbA75YAw1RPVxPq4B/z+cWDTOohrfI=;
+        b=XjjiEK0Ky5zNX7IQyuy054m1REtUK5+aVNCBXGVOhSaxDUV4Ps0SjplazccHe2bE5c
+         fWxGonrH7t7R+4EHleruGD8Hw1/CFz04mwjejYCTGtRG3VwazP1qVTG7eNu7zjx50cm6
+         /gwdbbONphHsM+3WFQnz7v9QC+XOeyePiZlg80eZ9FwghE0/V1rE51NfKbm99JNmJj2f
+         uVqfualJHqQrTHHIph+lFKgdzLEhQkSdNuCp/d7v4cC25WyrDK0UNRy7vDpZTXsTMCiT
+         6wwqbs0ayKqj3wR9wYm7/WuD4R7shRlbzx7Om/I5ABF0Nv+H5F+4zZ/VE9f6V9/2+4KR
+         2AHQ==
+X-Gm-Message-State: AOJu0YwpipUSnB+5GzeMgAIt+qj0YSscWZNypToA7qh8Sp2NTJBtFBjK
+	AVEMiyfZSsnxeVIXcGYb0qc7cmTK5gjLlpLkvpKtG2ZmgVqn4XrvIAbCcCCAZ/Ci9XhXpl1Bz+H
+	6nApkkuWrixeL3St99k0HL7NnSoKiYS0=
+X-Gm-Gg: Acq92OGrX+r6pcNXCL8TSSZUjTDUlWWfppN4tAglymzDhr7FlqbPGdM6Fv0ogVXM082
+	MJFLl6LfAyIVPHdnkqs07gUGpaw46cCS0OtrwNLDwIF+iBn73MIR5fIkMQHSlRBjC/3CX1ZF48V
+	zgMohIdYMkigkJybtE0IXwKaZsrh9zslJQX4InZKWYJPFANEJt231RoBfwyFg4QYntIN/O7rrQe
+	UC3aeKhjCYmsxR7oelUTiCO/NtIDM9JqTsS+CFxQt1jJJCBt0/ugorVoJdRdNqGEa6I+zeWIN2X
+	zM3UWBg8S1ctd7iLeX0Y5yDFxmeCedQ/pWky3dZleW9eqwW/mA==
+X-Received: by 2002:a05:6a20:9154:b0:3a2:fbf9:d823 with SMTP id
+ adf61e73a8af0-3b22e7c64b9mr6359384637.8.1778883010804; Fri, 15 May 2026
+ 15:10:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20260515083457.3690804-1-torsteine+linux@gmail.com>
+ <DS1PR16MB675343BEA9DE94B268CDE927E5042@DS1PR16MB6753.namprd16.prod.outlook.com>
+ <CAL5DHTFvJfV1DVNjBLsdCQ8FP7TmNq0SK=EpA-2wWzdo4+FsRQ@mail.gmail.com>
+ <DS1PR16MB6753295FF074D304308ADF78E5042@DS1PR16MB6753.namprd16.prod.outlook.com>
+ <CAL5DHTGjVWOV=KuvR7foMPf6vqDWwRyKU6_eVtxOPhbJ9hAvpQ@mail.gmail.com>
+In-Reply-To: <CAL5DHTGjVWOV=KuvR7foMPf6vqDWwRyKU6_eVtxOPhbJ9hAvpQ@mail.gmail.com>
+From: Torstein Eide <torsteine@gmail.com>
+Date: Sat, 16 May 2026 00:09:58 +0200
+X-Gm-Features: AVHnY4Kum_XCrhGZhaU9fECPTNN_pzl_h8gP9zjPyTpd-vOVjpZPaIMIKm4D154
+Message-ID: <CAL5DHTGba6fK447DFNgGsfFF2Rut0ho6Z=H8U+-JAVEfTbtsqw@mail.gmail.com>
+Subject: Re: [PATCH 0/4] mmc-utils: improve lsmmc usability
+To: Avri Altman <Avri.Altman@sandisk.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Torstein Eide <torsteine+linux@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 
-Add a bash completion script in completion/mmc that completes subcommands
-and /dev/mmcblkN device paths for all mmc commands.
+The current master is on https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git/
+is 5 months old. can it be a possibility that your local master is a head?
 
-The completion directory is named 'completion/' rather than
-'bash-completion/' so shell-specific scripts for other shells (zsh,
-fish, etc.) can be placed alongside it without renaming.
-
-Add bashcompletiondir variable to the Makefile (defaulting to the
-standard /usr/share/bash-completion/completions) and install the
-script as part of 'make install'. The install path can be overridden
-at build time with make bashcompletiondir=<path>.
-
-Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
----
- Makefile       |  5 +++-
- completion/mmc | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++
- docs/HOWTO.rst |  6 +++++
- 3 files changed, 72 insertions(+), 1 deletion(-)
- create mode 100644 completion/mmc
-
-diff --git a/Makefile b/Makefile
-index 11685b9..e447e54 100644
---- a/Makefile
-+++ b/Makefile
-@@ -5,6 +5,8 @@ AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2 \
- 	    -DSD_IDS_PATH=\"$(idsdir)/sdcard.ids\" \
- 	    -DMMC_IDS_PATH=\"$(idsdir)/multimediacard.ids\"
- CFLAGS ?= -g -O2
-+idsdir = /usr/share/misc
-+bashcompletiondir = /usr/share/bash-completion/completions
- objects = \
- 	mmc.o \
- 	mmc_cmds.o \
-@@ -21,7 +23,6 @@ override CFLAGS := $(CHECKFLAGS) $(AM_CFLAGS) $(CFLAGS)
- INSTALL = install
- prefix ?= /usr/local
- bindir = $(prefix)/bin
--idsdir ?= /usr/share/misc
- LIBS=
- RESTORE_LIBS=
- mandir = /usr/share/man
-@@ -61,6 +62,8 @@ install: $(progs)
- 	$(INSTALL) -m755 -d $(DESTDIR)$(idsdir)
- 	$(INSTALL) -m 644 sdcard.ids $(DESTDIR)$(idsdir)
- 	$(INSTALL) -m 644 multimediacard.ids $(DESTDIR)$(idsdir)
-+	$(INSTALL) -m755 -d $(DESTDIR)$(bashcompletiondir)
-+	$(INSTALL) -m 644 completion/mmc $(DESTDIR)$(bashcompletiondir)/mmc
- 
- -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
- 
-diff --git a/completion/mmc b/completion/mmc
-new file mode 100644
-index 0000000..c759972
---- /dev/null
-+++ b/completion/mmc
-@@ -0,0 +1,62 @@
-+_mmc_complete() {
-+	local cur prev words cword
-+	_init_completion || return
-+
-+	local devices
-+	devices=$(compgen -G "/dev/mmcblk*" 2>/dev/null | grep -E '^/dev/mmcblk[0-9]+$')
-+
-+	case $cword in
-+	1)
-+		local verbs="extcsd writeprotect disable gp enh_area \
-+			write_reliability status bootpart bootbus hwreset bkops \
-+			sanitize rpmb cache csd cid scr ffu opt_ffu1 opt_ffu2 \
-+			opt_ffu3 opt_ffu4 erase gen_cmd softreset preidle \
-+			boot_operation list"
-+		COMPREPLY=($(compgen -W "$verbs" -- "$cur"))
-+		;;
-+	2)
-+		case $prev in
-+		extcsd)
-+			COMPREPLY=($(compgen -W "read write" -- "$cur")) ;;
-+		writeprotect)
-+			COMPREPLY=($(compgen -W "boot user" -- "$cur")) ;;
-+		bootpart)
-+			COMPREPLY=($(compgen -W "enable" -- "$cur")) ;;
-+		bootbus)
-+			COMPREPLY=($(compgen -W "set" -- "$cur")) ;;
-+		hwreset)
-+			COMPREPLY=($(compgen -W "enable disable" -- "$cur")) ;;
-+		bkops)
-+			COMPREPLY=($(compgen -W "enable" -- "$cur")) ;;
-+		rpmb)
-+			COMPREPLY=($(compgen -W "read-counter read-block write-block write-key" -- "$cur")) ;;
-+		cache)
-+			COMPREPLY=($(compgen -W "enable disable" -- "$cur")) ;;
-+		csd|cid|scr)
-+			COMPREPLY=($(compgen -W "read" -- "$cur")) ;;
-+		gen_cmd)
-+			COMPREPLY=($(compgen -W "read" -- "$cur")) ;;
-+		status)
-+			COMPREPLY=($(compgen -W "get" -- "$cur")) ;;
-+		gp)
-+			COMPREPLY=($(compgen -W "create" -- "$cur")) ;;
-+		enh_area|write_reliability)
-+			COMPREPLY=($(compgen -W "set" -- "$cur")) ;;
-+		sanitize|softreset|preidle|ffu|opt_ffu1|opt_ffu2|opt_ffu3|opt_ffu4|erase|boot_operation)
-+			COMPREPLY=($(compgen -W "$devices" -- "$cur")) ;;
-+		esac
-+		;;
-+	3)
-+		case ${words[1]} in
-+		writeprotect)
-+			COMPREPLY=($(compgen -W "get set" -- "$cur")) ;;
-+		csd|cid|scr|extcsd|gen_cmd|status|bootpart|bootbus|hwreset|bkops|cache|gp|enh_area|write_reliability)
-+			COMPREPLY=($(compgen -W "$devices" -- "$cur")) ;;
-+		esac
-+		;;
-+	*)
-+		COMPREPLY=($(compgen -W "$devices" -- "$cur")) ;;
-+	esac
-+}
-+
-+complete -F _mmc_complete mmc
-diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
-index 167a153..460d016 100644
---- a/docs/HOWTO.rst
-+++ b/docs/HOWTO.rst
-@@ -2,6 +2,12 @@
- 
- Running mmc-utils
- -----------------
-+**Bash completion**
-+    Source ``completion/mmc`` to enable tab-completion for all subcommands and
-+    device paths. When installed via ``make install``, the file is placed in
-+    ``$(bashcompletiondir)`` (default: ``/usr/share/bash-completion/completions/mmc``)
-+    and loaded automatically by bash-completion.
-+
- **Name**
-     mmc - a tool for configuring MMC storage devices
- **Synopsis**
--- 
-2.53.0
-
+fre. 15. mai 2026 kl. 22:28 skrev Torstein Eide <torsteine@gmail.com>:
+>
+> fre. 15. mai 2026 kl. 18:46 skrev Avri Altman <Avri.Altman@sandisk.com>:
+> >
+> > > > > Resend the lsmmc usability updates as an ordered series after the
+> > > > > previous submission could not be applied cleanly from patchwork or b4.
+> > > > >
+> > > > Thanks.  Still having some troubles applying it cleanly.
+> > > > Please make sure you are rebasing it on recent master.
+> > > > Will review your series anyway.
+> > > >
+> > > > Thanks,
+> > > > Avri
+> > > >
+> > >
+> > > The first patch serie i modified after  `git format-patch master` and did also fail
+> > > locally,
+> > >
+> > > in the new export  i only changed the subject and description in cover letter, I let
+> > > notice it was not happy when i try to apply the cover letter, but locally to a new
+> > > branch the all apply without issue.
+> > > I am unsure what i did wrong.
+> > Your local master seems to be behind upstream. The patches conflict with
+> > the CID date-fix series that landed recently (commits 6f6b6e1..2364dc6).
+> >
+> > Please do:
+> > git fetch origin
+> > git rebase origin/master
+> >
+> > Then re-export with git format-patch.
+> >
+> > Thanks,
+> > Avri
+>
+> That makes sense that you have conflict, but not a other errors.
+> > >
+> > > > > This adds external manufacturer ID files, accepts /dev and
+> > > > > /sys/block paths for register reads, adds an mmc list command, and
+> > > > > installs bash completion for mmc- utils.
+> > > > >
+> > > > > Torstein Eide (4):
+> > > > >   mmc-utils: lsmmc: Use external .ids files for manufacturer lookup
+> > > > >   mmc-utils: lsmmc: Accept /dev and /sys/block paths for register reads
+> > > > >   mmc-utils: lsmmc: Add mmc list command
+> > > > >   mmc-utils: Add bash completion
+> > > > >
+> > > > >  Makefile           |  11 +-
+> > > > >  completion/mmc     |  62 +++++++
+> > > > >  docs/HOWTO.rst     |  77 +++++++-
+> > > > >  lsmmc.c            | 434 ++++++++++++++++++++++++++++-----------------
+> > > > >  mmc.c              |   6 +-
+> > > > >  mmc_cmds.h         |   1 +
+> > > > >  multimediacard.ids |  16 ++
+> > > > >  sdcard.ids         |  23 +++
+> > > > >  8 files changed, 452 insertions(+), 178 deletions(-)  create mode
+> > > > > 100644 completion/mmc  create mode 100644 multimediacard.ids  create
+> > > > > mode 100644 sdcard.ids
+> > > > >
+> > > > > --
+> > > > > 2.53.0
+> > > >
