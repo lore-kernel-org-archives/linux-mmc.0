@@ -1,78 +1,78 @@
-Received: from mail-pg1-f178.google.com (mail-pg1-f178.google.com [209.85.215.178])
+Received: from mail-pg1-f170.google.com (mail-pg1-f170.google.com [209.85.215.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 862453E1694
-	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 20:28:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.215.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B70B3305665
+	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 20:50:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.215.170
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778876901; cv=pass; b=BAIyhZ495ZxyHv/Mxk58zcoQ579kmOjMi7Zeg5imeAeV8/4+r2eA+eQBJRK7yJIqrkI3ncNOyYwM8wIUU1aFNbnVLqMx+8+RuyIgUrrHAgx8EPojghRCSs2AjIO01HlBsKgWbAYjJpHThUuyaTjPIk2grwq0D7SNEVaGM8iHPMs=
+	t=1778878242; cv=pass; b=F56WNNzqraXVy4EZfPy7rj3IEyFpATYrm/w6u+8nF7A6Of0Qyhp3XUrSc4D0i+V2KsT3d74Lsnp3psDBXO3Mp5C05jEJoFxC/N8ckVY21R+gTLrAGT/vuM5f68Q/HnnwmynZJuC+dX3Q/xd0nBtwOW3RCuxm9MmAA19MuwQeND8=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778876901; c=relaxed/simple;
-	bh=zf+cfDTruj3lJZwMPhwNbfZGwoMmYdUvg50BEM3Yggk=;
+	s=arc-20240116; t=1778878242; c=relaxed/simple;
+	bh=TaITGLOOhFs7rG/RhRkEn/1fhy0Ec3X55JdWvWkLkvw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=lUiMGOHVi1AgDqVAZolAT7O/SF4U3H4XjBmlI11uaqTbbo3Caq42PHn7zMqS2l0FaL/3xNQgmp495xg6vtXudSCNlVcVLjhmVJfdZpMqbUXWEuWpW7aPCje0pd4mg+XdtziqnBBeYVTqUbtk9d4yz51/sy0wfSSJgD0yDNaHIww=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=oduOYy8Z; arc=pass smtp.client-ip=209.85.215.178
+	 To:Cc:Content-Type; b=rfbm4Z+P0Lyq/af6e73VlJW5pRm8AOHuA6dMPOdV23lwmrHezPqB7/Q3uUhufDg3PhE0vKDlauYaO+u2fJUUrPqRpBMo7gtnFFejNKVUIw2hRWcm8rteRxbyTkxdAkbClPf5LTbgNod5iGq2ikFQfu5SfzsAwzTVBXZFX1sQhKY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WdbLRbrL; arc=pass smtp.client-ip=209.85.215.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oduOYy8Z"
-Received: by mail-pg1-f178.google.com with SMTP id 41be03b00d2f7-c80167f56cdso91952a12.3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 13:28:19 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1778876898; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WdbLRbrL"
+Received: by mail-pg1-f170.google.com with SMTP id 41be03b00d2f7-c70c112cb61so212401a12.0
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 13:50:40 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1778878240; cv=none;
         d=google.com; s=arc-20240605;
-        b=RF01SQbPlpi8JeupWD9WOYE6BCm+o6/jbvWB1m38Iu68sx304uhDjQKobilbjHZV+n
-         Xt+dbUdEKkHO5iSQLrqfcHG1nD41m4JI15BTkqlpvo+1KG3/WriogVFZXWZI4jFwUvxr
-         8dhg3Nsmb3IeHlV/jDHBEY0CXAON095fHuTAvhwzKkeXqOWIc5K1T36lb6dChn6WGw6K
-         xDzvwwTyo+ke35Zlo1bAnk94Q4j3+guu9KF6V9D/rL8hQTlzWKbWHSe8hojxo8296MWH
-         NM4JfeNdjeZvFoUIv+qeQceRR9aeaPoXYC11IKcEMTyP6liRP/V4FOm2BCMCk0emLwMO
-         OaEw==
+        b=ksG4g0Jk/EBZ138/YZaPk+rHBUrvm93iDGcSOoroJVfRT9ZdZlPfbldNCR3iKr5o9L
+         mq/9AIHlRLHFQ16zFxUwlnxbOg9N7WvZxCdNraVxAH1OoaBSMhivDE9Agx8PVES+K1yo
+         l82xqCHJ261gLruZHVjuCkZIbIwREQPeYGXxHgXuY9n/FXeyDnXor0Bef7oRJdVY/XMU
+         7x38o2KtbXGxQex9mbOq713gvrYS4Nx//iw9oo+MtMDoCigQf8vpEnpudgydknlST9CT
+         W2nC32CZ/KNPdcgcGbIZWxNB4lyOBEy8OKl5oGAMKw4mbSiqE9woWxuRmUAsBJKteRRB
+         vCyQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:dkim-signature;
-        bh=S2uDCT92xR1s2yLFCu6vNIqsIjjLvILLfDk2ybhhXi8=;
+        bh=nyJ72Fyu/R8/3WRGsgWwW7gPq4UgVQ0FJeSoeV2iCA4=;
         fh=Xn5gGOD0wfvxR3QQnaA7YlzIeHMppEapma8laY3ceNU=;
-        b=iF5ypc0OkAuFGVJGeZ0n9I9Wb6r7TtP0yOmtsBW//7cmaEeH5q/tL1Eu7puzRiLxz4
-         nYd6EAzx8wNmX0/zo4vRZBtcLV8PCpa534Ji5aJocpocdHRLQb0qEzjUZRix6bVFzQGe
-         c4PqG2ysbS4jiEkXFApIm2IpMT+JJBy/7736TfhPPoCpsR9AALOf7y/BlxdcCjLanKuK
-         BSWvVU2qM8c8fFt2q5w47g63Zx6BEkF5uL9Ufcg0ph/vP8wm2fC/+p7emxjbxDb05jKF
-         fhmtpyyRzvBkc3F0MBGTQtTr0APIWjZhWVTP3dpqLg6OktW77/blfHjxy+py5GvLTs6V
-         yQ4Q==;
+        b=ieYjWwkJFoCbVyHrTwV6wWE2SN8J+8pnzawyRtphiSPeaBs03J+enbQ3OQtpmURhpD
+         vVT2CSvJRh3LtPwILXMbTUb5NgmP5UvbjrdDhpJWQ71X710zYM29UzljU6u5/LVWgtOV
+         UH3G67yrIsGG5O7ypCZoEaV5ih6AotyEnppnRttqxuZcaMii48bqOXQUBXX8G/vunfwf
+         vzEH2DnJcWTeVMthYcR7vNfsJXf6QvcW7Bws0KC1RcINK9lDaFeWbajehemOtEwBBnbj
+         36TnUYHrcEguRPnJzCj3C90ffDP+d+z0ahzPTzG8wxAWtXNggL/IxDjltw94WOO0+niR
+         gLJw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778876898; x=1779481698; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1778878240; x=1779483040; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=S2uDCT92xR1s2yLFCu6vNIqsIjjLvILLfDk2ybhhXi8=;
-        b=oduOYy8ZIlF7C0ihUn96xT+W8/ruldAXhwwWci2QgIoMfluye/QotF0hGXjzkJPKKj
-         WCctkXptX3bCWvIEgu+/UACi/BZkpxfsSASfE8Og6gwhbdOcWiWDUcBeFLyHNn7BmoZj
-         LTHsZkqHcR1m1htXHu+4apPOwgRi9dn9gQwH0DjWcm2Jqx/KZjkgXespfpO8Olgimuht
-         sABRKnzpOLs7M51HIKWXnxxti5VcCYpHvXSzFKbh99KDJWcCRvLXX6OmKMA6LNk6wC2R
-         YPf7B5Yu44gBh6y51B7MjJRRh3I9lM3JPMvG3HZ/k6CHJBFnACYnj9AdTXpmfvs6Jkxx
-         SKpw==
+        bh=nyJ72Fyu/R8/3WRGsgWwW7gPq4UgVQ0FJeSoeV2iCA4=;
+        b=WdbLRbrLYWGbgOi++NIcW7YKbcY++GwOr3okWHpIlJtJecjrQ1A0tQkA8W1MfoG0fr
+         cONbYMnwvAupiyrW6TdAB0DWgEy3MImPzKl3WL2Z7+lpL0CBWEaGuZP526uEjAZEfxMl
+         zYJp4ot8ZRpZ77DWSMZ0exgXmv7oyoRBKrD58vhWkmaYF1HupJzkipJfBBMidzrKgObd
+         QJHmmpZ2YcO8lx6ZZ5t41L1HjAoXWJPy1RxO0TQ2TzS/Yb0tEtI9cd3QPwPrslvDABsR
+         80nZzm5vsK4x3AuF6vdSFj7LVEQrHp+136reP74tKgAfU3bXasCPCEcs+VuP6ZQC0/F8
+         1BPQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778876898; x=1779481698;
+        d=1e100.net; s=20251104; t=1778878240; x=1779483040;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=S2uDCT92xR1s2yLFCu6vNIqsIjjLvILLfDk2ybhhXi8=;
-        b=dXpJNgfucv9QZ9/dELyQ3F0tDSIh4TlwRD01cFPpWXMpoOOImER/dB4lgtvsbi7cgO
-         ygTmt1WC65XOs4MZjD6wBx2+R3TyfXBfWtenJA9oRHFo8Eu5So6H88OxL/NLl4/fyEpI
-         PRQxmv2DwHpgwJ0TWS+Ob0pHyBLM+S4tEDhBJlkbQbeoIswOh82/F7KB6TLPa0NmR8rJ
-         iKK9F5FM9HjcbzLSsMPabT00fHAVYX62TKhV5HT2H+ME2R6RLfayCkJepULCWNoJSVrj
-         KUYkseW8sL8XHVdFGVqozT+aCHd1jyf1iVDPgtoQOfUN0Noejs37RdH9GWHOHNEoQtYm
-         JXeQ==
-X-Gm-Message-State: AOJu0YzWo/v3tJ6LVD35wnyx4SjW5dGJe925Kj+tQyteYWC4r93b/575
-	/DKHcLT1RM9guzSTphQRCuOZR4hmiVnuZIb4IcBb51VXG5HVjtnbCDGIOQiMfGKpSBVHZufP+qG
-	lZa64DwoWk+xkDGAR2S01j8MgZZqXgMATObY1
-X-Gm-Gg: Acq92OG/MeUVhmAGYqCEob4tAaYfoE2DEE1hRfgC4ZMo93rrf8KcVR1kXP62GlUI16Q
-	vsMVWRa4S+pGmrmW2GzmvnuT/Clboxapml3ahIb/FbgetUJ5QYdWxyZne3KiGAe+ozqhG9WVlwl
-	reVL0dOb1ltKJlngYwTUD9ZdZfCZvQfzSKfQjq9C6LsOnbfZAHWsA9AHd895XS9KfKSCc+L139I
-	ciquHJqLXb+MPoEwTYoLTMFtcS7uBKBXYEi/qdtq2+wPBWxl2xPPZxuKXVqMN9Ql4x3FhOtoo2L
-	aHpEPP8Au5qHjKTrQJNEIhXZAhAonaHAwqfcfQ==
-X-Received: by 2002:a05:6a20:939d:b0:3aa:c99b:5c64 with SMTP id
- adf61e73a8af0-3b22ec58a69mr6539486637.42.1778876897819; Fri, 15 May 2026
- 13:28:17 -0700 (PDT)
+        bh=nyJ72Fyu/R8/3WRGsgWwW7gPq4UgVQ0FJeSoeV2iCA4=;
+        b=s9NQfi/q4dfTrt2X+ytnYAU0TM5kKcvc6ixMWfeVJU4PUhttVz1TZiEU8Rl8OuTY8/
+         tPKOegMa5sUdNysyC64z47kVmrVsRy6NIRxKpYZ1ZtMBZzn/pUIqVWNyrHwWCO/+47aY
+         Ii2DuG9InfBHoppVwHXIGOuM5e9CrFOfLe1/PWHHL5pHlKegXKzD06a2noyi+MsJEchL
+         r4bkohLkfT5VH/5Tm0grLlJwAlf1jELZp/09vKQy31DAgUhFSxMl4pYiXl3Xh/Je/fqB
+         UcYlEH++H9kysVgMHYl1VM7owY51hDo1pIza0tt9Nm3Wx3/iPGHmQNHH7yo7lxxGxx9/
+         p55g==
+X-Gm-Message-State: AOJu0YzlFj4ClxNn4k1/rxHmbe1LwJ8y6OW0apFK4Uwag/2qNPgAEQTA
+	42bjvjK1S8JxdtxijaSIkMB8hR8pW0HGWPTR7tzSpAotjWATYMvmPRK0M0bWqhWgGSfotN+CPn8
+	fUQgYQBYwwmtwNHTvt9CLOauzDQrlTl4=
+X-Gm-Gg: Acq92OFfSrERh+cAwjfZBDor/ymqFbJue6WZKG3ZNgQGksejQYi+VifbXOnu4dL6Ejo
+	9R6jR3GQQ6xWXXAnkiiZO9/PBHNYqUB3E+8DMTFhGxsZmROsWdyarqNWHqiW5GheGRXg/BFJBUy
+	1lTteqVvHb5FkxdLhNIcRcphWoo8HAZGrnsZSHZ51l7hALv4zFEYxXLQJJK8nd5UQroxVgV2iF0
+	FNEJoHxW3irFG/GU1OzOxCo5uClC9F3m2kKgEQi4iCwwdwAB3uOk3vCV216K/4S8fcCUPDtg/he
+	yB6/KQwWlVBiOYFAwY7xBVyh83fagwolj/vo8w==
+X-Received: by 2002:a05:6a20:12d3:b0:3a2:f14a:4275 with SMTP id
+ adf61e73a8af0-3b22e67fcf9mr6389930637.6.1778878239750; Fri, 15 May 2026
+ 13:50:39 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -80,74 +80,320 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20260515083457.3690804-1-torsteine+linux@gmail.com>
- <DS1PR16MB675343BEA9DE94B268CDE927E5042@DS1PR16MB6753.namprd16.prod.outlook.com>
- <CAL5DHTFvJfV1DVNjBLsdCQ8FP7TmNq0SK=EpA-2wWzdo4+FsRQ@mail.gmail.com> <DS1PR16MB6753295FF074D304308ADF78E5042@DS1PR16MB6753.namprd16.prod.outlook.com>
-In-Reply-To: <DS1PR16MB6753295FF074D304308ADF78E5042@DS1PR16MB6753.namprd16.prod.outlook.com>
+ <20260515083457.3690804-4-torsteine+linux@gmail.com> <DS1PR16MB67536F09AFA69FC335A2F1C4E5042@DS1PR16MB6753.namprd16.prod.outlook.com>
+In-Reply-To: <DS1PR16MB67536F09AFA69FC335A2F1C4E5042@DS1PR16MB6753.namprd16.prod.outlook.com>
 From: Torstein Eide <torsteine@gmail.com>
-Date: Fri, 15 May 2026 22:28:05 +0200
-X-Gm-Features: AVHnY4JpCtcM4nBwfd8akYRRpR9H-HQ-yPfs5FTSrsHaYLAEQ4szkegkXmimwts
-Message-ID: <CAL5DHTGjVWOV=KuvR7foMPf6vqDWwRyKU6_eVtxOPhbJ9hAvpQ@mail.gmail.com>
-Subject: Re: [PATCH 0/4] mmc-utils: improve lsmmc usability
+Date: Fri, 15 May 2026 22:50:26 +0200
+X-Gm-Features: AVHnY4Jiup8lzJOUNHEO4NJdEnfQQnQ8M9pVo2NJgdYmSIYckq3iCBf5JaLCqt8
+Message-ID: <CAL5DHTF+rP5LPxk=Rq8Wym+bZ9gW8WbrbtS5XsDMO+M=maPR-g@mail.gmail.com>
+Subject: Re: [PATCH 3/4] mmc-utils: lsmmc: Add mmc list command
 To: Avri Altman <Avri.Altman@sandisk.com>
 Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Torstein Eide <torsteine+linux@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 
-fre. 15. mai 2026 kl. 18:46 skrev Avri Altman <Avri.Altman@sandisk.com>:
+fre. 15. mai 2026 kl. 18:38 skrev Avri Altman <Avri.Altman@sandisk.com>:
 >
-> > > > Resend the lsmmc usability updates as an ordered series after the
-> > > > previous submission could not be applied cleanly from patchwork or b4.
-> > > >
-> > > Thanks.  Still having some troubles applying it cleanly.
-> > > Please make sure you are rebasing it on recent master.
-> > > Will review your series anyway.
-> > >
-> > > Thanks,
-> > > Avri
-> > >
+> > Add a 'mmc list' command that scans /sys/bus/mmc/devices/, resolves each
+> > card's sysfs path, and prints a one-line summary per device.
 > >
-> > The first patch serie i modified after  `git format-patch master` and did also fail
-> > locally,
+> > find_block_devname() maps a sysfs device path back to its mmcblkN name by
+> > scanning /sys/class/block/mmcblkN/device symlinks.
 > >
-> > in the new export  i only changed the subject and description in cover letter, I let
-> > notice it was not happy when i try to apply the cover letter, but locally to a new
-> > branch the all apply without issue.
-> > I am unsure what i did wrong.
-> Your local master seems to be behind upstream. The patches conflict with
-> the CID date-fix series that landed recently (commits 6f6b6e1..2364dc6).
+> > print_list_entry() parses the CID register and formats a fixed-width table row with
+> > device name, /dev path, bus type, manufacturer, product, revision, serial number,
+> > and manufacturing date.
+> >
+> > The header is printed once before the first result. Devices without a readable cid
+> > file are skipped silently via access() so unrelated sysfs entries do not produce
+> > spurious error messages.
+> >
+> > Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
+> > ---
+> >  docs/HOWTO.rst |  12 ++++
+> >  lsmmc.c        | 167 +++++++++++++++++++++++++++++++++++++++++++++++++
+> >  mmc.c          |   6 +-
+> >  mmc_cmds.h     |   1 +
+> >  4 files changed, 185 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst index 76214a3..167a153 100644
+> > --- a/docs/HOWTO.rst
+> > +++ b/docs/HOWTO.rst
+> > @@ -90,6 +90,18 @@ Running mmc-utils
+> >              sysfs:
+> > /sys/devices/platform/fe320000.mmc/mmc_host/mmc1/mmc1:aaaa
+> >              SCR Register: 0235800000000000
+> >
+> > +    ``list``
+> > +        List all MMC/SD devices present on the system. Output is a table with
+> > +        columns: DEVICE (sysfs name), DEV (/dev path), TYPE (MMC or SD),
+> > +        MANUFACTURER, PRODUCT, REV, SERIAL, and DATE.
+> > +
+> > +        Example::
+> > +
+> > +            $ mmc list
+> > +            DEVICE          DEV            TYPE  MANUFACTURER         PRODUCT    REV
+> > SERIAL      DATE
+> > +            mmc0:0001       /dev/mmcblk0   MMC   Samsung              MAG4FA     1.0
+> > 0x1a2b3c4d  2021-jan
+> > +            mmc1:aaaa       /dev/mmcblk1   SD    SanDisk              SP32G      8.0
+> > 0x5e6f7a8b  2020-mar
+> > +
+> >      ``ffu <image name> <device> [chunk-bytes]``
+> >        Default mode.  Run Field Firmware Update with `<image name>` on
+> > `<device>`. `[chunk-bytes]` is optional and defaults to its max - 512k. Should be in
+> > decimal bytes and sector aligned.
+> >
+> > diff --git a/lsmmc.c b/lsmmc.c
+> > index 3149409..4f378fa 100644
+> > --- a/lsmmc.c
+> > +++ b/lsmmc.c
+> > @@ -253,6 +253,38 @@ static char *resolve_dev_path(const char *path)
+> >         return resolved;
+> >  }
+> >
+> > +static char *find_block_devname(const char *sysfs_devpath) {
+> > +       DIR *d;
+> > +       struct dirent *ent;
+> > +
+> > +       d = opendir("/sys/class/block");
+> > +       if (!d)
+> > +               return NULL;
+> > +
+> > +       while ((ent = readdir(d)) != NULL) {
+> > +               char linkpath[PATH_MAX];
+> > +               char resolved[PATH_MAX];
+> > +
+> > +               if (strncmp(ent->d_name, "mmcblk", 6) != 0)
+> > +                       continue;
+> > +               if (strchr(ent->d_name + 6, 'p'))
+> > +                       continue;
+> > +
+> > +               snprintf(linkpath, sizeof(linkpath),
+> > +                        "/sys/class/block/%s/device", ent->d_name);
+> > +               if (realpath(linkpath, resolved) == NULL)
+> > +                       continue;
+> > +               if (strcmp(resolved, sysfs_devpath) == 0) {
+> > +                       closedir(d);
+> > +                       return strdup(ent->d_name);
+> > +               }
+> > +       }
+> > +
+> > +       closedir(d);
+> > +       return NULL;
+> > +}
+> > +
+> >  /* MMC/SD file parsing functions */
+> >  static char *read_file(char *name)
+> >  {
+> > @@ -2203,6 +2235,141 @@ static int do_read_reg(int argc, char **argv, enum
+> > REG_TYPE reg)
+> >         return ret;
+> >  }
+> >
+> > +static const char *month_name(unsigned int month) {
+> > +       static const char *months[] = {
+> > +               "???", "jan", "feb", "mar", "apr", "may", "jun",
+> > +               "jul", "aug", "sep", "oct", "nov", "dec",
+> > +       };
+> Maybe maintain consistency with the month's arrays in print_sd_cid()` / `print_mmc_cid()`
+
+good poiint ill fix.
 >
-> Please do:
-> git fetch origin
-> git rebase origin/master
+> > +
+> > +       if (month >= ARRAY_SIZE(months))
+> > +               return "???";
+> > +
+> > +       return months[month];
+> > +}
+> > +
+> > +static void print_list_entry(struct config *cfg, const char *devname,
+> > +                            const char *blkdev, char *cid) {
+> > +       const char *mfr;
+> > +       char devnode[32];
+> > +
+> > +       snprintf(devnode, sizeof(devnode), "/dev/%s", blkdev ? blkdev :
+> > + "?");
+> > +
+> > +       if (cfg->bus == SD) {
+> > +               unsigned int mid, prv_major, prv_minor, psn, mdt_year;
+> > +               unsigned int mdt_month, crc;
+> > +               char oid[3], pnm[6];
+> > +
+> > +               parse_bin(cid, "8u16a40a4u4u32u4r8u4u7u1r",
+> > +                         &mid, &oid[0], &pnm[0], &prv_major, &prv_minor,
+> > +                         &psn, &mdt_year, &mdt_month, &crc);
+> > +               oid[2] = '\0';
+> > +               pnm[5] = '\0';
+> > +
+> > +               mfr = get_manufacturer(cfg, mid);
+> > +               printf("%-14s %-14s SD   %-20s %-10s %u.%u  0x%08x  %u-%s\n",
+> > +                      devname, devnode, mfr ? mfr : "Unlisted", pnm,
+> > +                      prv_major, prv_minor, psn, 2000 + mdt_year,
+> > +                      month_name(mdt_month));
+> > +       } else {
+> > +               unsigned int mid, cbx, oid, prv_major, prv_minor, psn;
+> > +               unsigned int mdt_year, mdt_month, crc;
+> > +               char pnm[7];
+> > +
+> > +               parse_bin(cid, "8u6r2u8u48a4u4u32u4u4u7u1r",
+> > +                         &mid, &cbx, &oid, &pnm[0], &prv_major, &prv_minor,
+> > +                         &psn, &mdt_year, &mdt_month, &crc);
+> > +               pnm[6] = '\0';
+> > +
+> > +               mfr = get_manufacturer(cfg, mid);
+> > +               printf("%-14s %-14s MMC  %-20s %-10s %u.%u  0x%08x  %u-%s\n",
+> > +                      devname, devnode, mfr ? mfr : "Unlisted", pnm,
+> > +                      prv_major, prv_minor, psn, 1997 + mdt_year,
+> The existing `print_mmc_cid()` has logic to adjust the base year based on `ext_csd_rev` (2013 for rev > 4, 2029 for rev > 8).
+> See if you can use it as well.
 >
-> Then re-export with git format-patch.
+> > +                      month_name(mdt_month));
+> > +       }
+> > +}
+> > +
+> > +int do_list(int nargs, char **argv)
+> > +{
+> > +       const char *bus_path = "/sys/bus/mmc/devices";
+> > +       char orig_cwd[PATH_MAX];
+> > +       DIR *d;
+> > +       struct dirent *ent;
+> > +       bool header_printed = false;
+> > +
+> > +       if (!getcwd(orig_cwd, sizeof(orig_cwd))) {
+> If you decide to replace getcwd/chdir (comment in patch 1) - use here read_file_at as well...
 >
+
+Yes i will.
+
+> > +               fprintf(stderr, "Cannot get current directory.\n");
+> > +               return -1;
+> > +       }
+> > +
+> > +       d = opendir(bus_path);
+> > +       if (!d) {
+> > +               fprintf(stderr, "Cannot open %s\n", bus_path);
+> > +               return -1;
+> > +       }
+> > +
+> > +       while ((ent = readdir(d)) != NULL) {
+> > +               char devpath[PATH_MAX];
+> > +               char resolved[PATH_MAX];
+> > +               char *type, *cid, *blkdev;
+> > +               struct config cfg = {};
+> re-initializing cfg every iteration is wasteful but harmless - consider moving it out of the loop.
+>
+
+Ill move it out of loop.
+> > +
+> > +               if (!strchr(ent->d_name, ':'))
+> > +                       continue;
+> > +
+> > +               snprintf(devpath, sizeof(devpath), "%s/%s", bus_path, ent->d_name);
+> > +               if (realpath(devpath, resolved) == NULL)
+> > +                       continue;
+> > +
+> > +               if (chdir(resolved) < 0)
+> silently skip devices with no diagnostics ?
+>
+> > +                       continue;
+> > +
+> > +               if (access("cid", R_OK) != 0) {
+> Isn't `read_file()` does `fopen()` which checks the same thing as `access()`?
+>
+> > +                       if (chdir(orig_cwd) < 0)
+> > +                               break;
+> > +                       continue;
+> silently skip devices with no diagnostics ?
+>
+
+this will be removed with removal of chdir.
+
+> > +               }
+> > +
+> > +               type = read_file("type");
+> > +               if (!type) {
+> > +                       if (chdir(orig_cwd) < 0)
+> > +                               break;
+> > +                       continue;
+> > +               }
+> > +
+> > +               cid = read_file("cid");
+> > +               if (!cid) {
+> > +                       free(type);
+> > +                       if (chdir(orig_cwd) < 0)
+> > +                               break;
+> > +                       continue;
+> > +               }
+> > +
+> > +               blkdev = find_block_devname(resolved);
+> > +               cfg.bus = strcmp(type, "MMC") ? SD : MMC;
+> > +               cfg.ids_dir = orig_cwd;
+> > +
+> > +               if (!header_printed) {
+> > +                       printf("%-14s %-14s %-5s%-20s %-10s %-5s %-12s %s\n",
+> > +                              "DEVICE", "DEV", "TYPE", "MANUFACTURER", "PRODUCT",
+> > +                              "REV", "SERIAL", "DATE");
+> > +                       header_printed = true;
+> > +               }
+> > +
+> > +               print_list_entry(&cfg, ent->d_name, blkdev, cid);
+> > +
+> > +               free(blkdev);
+> > +               free(cid);
+> > +               free(type);
+> > +               if (chdir(orig_cwd) < 0)
+> We fail here but returns 0?
+>
+
 > Thanks,
 > Avri
 
-That makes sense that you have conflict, but not a other errors.
+This will also be removed.
+
+Torstein.
+> > +                       break;
+> > +       }
+> > +
+> > +       closedir(d);
+> > +       return 0;
+> > +}
+> > +
+> >  int do_read_csd(int argc, char **argv)
+> >  {
+> >         return do_read_reg(argc, argv, CSD); diff --git a/mmc.c b/mmc.c index
+> > 077e901..01ad181 100644
+> > --- a/mmc.c
+> > +++ b/mmc.c
+> > @@ -292,6 +292,11 @@ static struct Command commands[] = {
+> >           "4. The MMC will perform a soft reset, if your system cannot handle that do
+> > not use the boot operation from mmc-utils.\n",
+> >           NULL
+> >         },
+> > +       { do_list, 0,
+> > +         "list", "\n"
+> > +               "List all MMC/SD devices with their /dev path and CID info.",
+> > +         NULL
+> > +       },
+> >         { NULL, 0, NULL, NULL }
+> >  };
 > >
-> > > > This adds external manufacturer ID files, accepts /dev and
-> > > > /sys/block paths for register reads, adds an mmc list command, and
-> > > > installs bash completion for mmc- utils.
-> > > >
-> > > > Torstein Eide (4):
-> > > >   mmc-utils: lsmmc: Use external .ids files for manufacturer lookup
-> > > >   mmc-utils: lsmmc: Accept /dev and /sys/block paths for register reads
-> > > >   mmc-utils: lsmmc: Add mmc list command
-> > > >   mmc-utils: Add bash completion
-> > > >
-> > > >  Makefile           |  11 +-
-> > > >  completion/mmc     |  62 +++++++
-> > > >  docs/HOWTO.rst     |  77 +++++++-
-> > > >  lsmmc.c            | 434 ++++++++++++++++++++++++++++-----------------
-> > > >  mmc.c              |   6 +-
-> > > >  mmc_cmds.h         |   1 +
-> > > >  multimediacard.ids |  16 ++
-> > > >  sdcard.ids         |  23 +++
-> > > >  8 files changed, 452 insertions(+), 178 deletions(-)  create mode
-> > > > 100644 completion/mmc  create mode 100644 multimediacard.ids  create
-> > > > mode 100644 sdcard.ids
-> > > >
-> > > > --
-> > > > 2.53.0
-> > >
+> > @@ -567,4 +572,3 @@ int main(int ac, char **av )
+> >
+> >         exit(func(nargs, args));
+> >  }
+> > -
+> > diff --git a/mmc_cmds.h b/mmc_cmds.h
+> > index 407cbe6..508776c 100644
+> > --- a/mmc_cmds.h
+> > +++ b/mmc_cmds.h
+> > @@ -49,6 +49,7 @@ int do_opt_ffu4(int nargs, char **argv);  int do_read_scr(int
+> > argc, char **argv);  int do_read_cid(int argc, char **argv);  int do_read_csd(int
+> > argc, char **argv);
+> > +int do_list(int nargs, char **argv);
+> >  int do_erase(int nargs, char **argv);
+> >  int do_general_cmd_read(int nargs, char **argv);  int do_softreset(int nargs,
+> > char **argv);
+> > --
+> > 2.53.0
+> >
+>
