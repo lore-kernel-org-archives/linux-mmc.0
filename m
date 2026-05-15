@@ -1,68 +1,72 @@
-Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 757A23ED128
-	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 21:38:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B8EE3ED5A8
+	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 21:38:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778881088; cv=none; b=rBHk1MzG6SEOhEe+CT3O05sYaj258yxnufKk1gyT85IGs6nmr/h+Zr1f2OXw7+I2hD1O8q7ErW0zX2hGXr5kO/uGyCqZ0xH6F0GoNDEjnzKk57b2XRacOKHU8wihpHyphIxQSrfP8ZMk/NNK6bYfa82JTarRUoF3aO2dLIstTa8=
+	t=1778881091; cv=none; b=ROS9sA28uE42lCCTYug9Wu0kIw+8183KLaBy0PattfI+owqlweIZPDw+mciimJON+uxZaLC+BCcIv8YZrAUoIzJI+tgoZWlTJOgoO85dTvbdzO0tTU6MBE4Bs67P7cOaw7XCYXFMLgl69jYbf083pb7QeLrQqKmz+8Jza+/fvi8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778881088; c=relaxed/simple;
-	bh=ZLH2KqLV7aedLMy+s6QB6PMVRXTqA6HJ0UFO1TUNR5Y=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ZBvJd0J9sHb4ZKXvIrOYjIhNFFTXPUe3ePERNMunxiV/pV0xwhz5K0uzteHL3HCnOLBVioKkumclPG7skDUGYB6tjbe42ZhlLbmz2WkcwLKGi6ftWqXKXIf8tFvVQLx8i3+N6NetyKe8GyPU9RnafYQjE3gWasnibnK2jNmTIJs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=M+4gULBH; arc=none smtp.client-ip=209.85.208.45
+	s=arc-20240116; t=1778881091; c=relaxed/simple;
+	bh=XvV3gFV0PQaDMmk6l2mq7mekOaBuv/bVyFW1s4LULBM=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=OF4p4mUSzHb6MinrE5qkGLeChNnLwDXXeqDuGXrbGRoM96amOzg37AJu6ARBfw3LP3ohJmRokkj9g4EvP3akhjYIwGbN6G6NR9vTwICrxm9d2n9SRITpVBAJOsu0kL/fgGGvPrMgmQ3b9Bqu4/48J4f3Cd92s1PkXAk9JvH2dfQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MaW57IYM; arc=none smtp.client-ip=209.85.208.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M+4gULBH"
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-670ab084a39so755744a12.3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 14:38:07 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MaW57IYM"
+Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-67bc6098640so621967a12.0
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 14:38:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778881086; x=1779485886; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=zO9Ka/RcUjyDhaIpyI1tnliMrSeQFbCrFJw2cKmx/aU=;
-        b=M+4gULBH3jierlx+36p763aVWQREpJEUSKpDGsV2LcvhksLbJuzpGyOp9jG00S6BV4
-         6pX33iXlBRpGe4jFCZZc1BKCMBzrgvac+04kAWwYLwHK+0ml3xXXkqren2Odx2XehOBA
-         5WlA0dwIQQagb8TvSHn75uYJKL4ZG6jISZmXBxxdMPCCYAz9Cq3Se+si54/YM8wYbdRt
-         VOqxaPGtc7iCfYB6v0G7KYdd+1Mgic/dtteVlElq/U4OLnSCoyeXu0oms/Xp+KCgYdp4
-         e/xq8s93KK3WOudPY/E2p7dsMMQglbpbGq9xp9FQ4vZB3THqeUgfVPBX1yjKlWbY/ty0
-         EiYg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778881086; x=1779485886;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1778881088; x=1779485888; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=zO9Ka/RcUjyDhaIpyI1tnliMrSeQFbCrFJw2cKmx/aU=;
-        b=ccWjJ1kO8Wp1jfb3ZjJRWIpOg39BntyMzC2BDyc97GPfDQqvHZg8fbRjSY4xb5xREu
-         apI0Zf+E+UUWPFW/Ajc/P1xmWEv6x2MZbrFzrUmpHaBqRE/laSRnPCtwnhlIdhwxThI2
-         zuUHA4W5rv/LZn35sap3jRWEe3ZHFMNF5jgCQHIop/HzviR5rc9Oa1kHqYpybNgd3XG/
-         4cfbw3yq3XrNdm+FZqLjaVNicL7zEpEd1J2iuimbstGWJ8Tpl3sHQmWqjQTzRWxCiYRO
-         OZENVPzF4b7yf9eXRKebtZCK93Xdz2wtPuix3Ns9lEuCvVQ7gMLLBmrW5B19Cp9HDsug
-         JC0A==
-X-Gm-Message-State: AOJu0YwKRatBTF+Dpg6jSfx7JMNaHWog4nNkShe4JzRCVctYaFKFdv+V
-	+Llc/vBuDe+hRNvUCcRRrn2jdkFoqMnPdUgDtFT6KUyML+6Q2XUoQ5JnrmTmeSjx
-X-Gm-Gg: Acq92OHPIqE33nu1qlcQmzmfwY2N3B55vDLjpIML9JPZn+SGwi4ekv7trjaCo+abfBH
-	4gh5jTmBiDgb3YDHZVzDdZrbYFeZVxiA9rL0b/548rBQS2aH1j2+nUIvX/k4MyKX4RX+uwvp3fP
-	9foyfyCI/201SpPBR0N2dFQBtEgMWOUOJp1oJ1TVL8pE7CEM8eICaJNmX2x4+0yblfnmXnFoHBr
-	6wcaoeBjqtU4oSWyuvQ58PNcR3riBAKbcq8LKrtNS+2zABzSMWnDrR8kt11a/vDS9ivcJQt3xj4
-	jxwn0C2+ExhmY2XBrQDHT8L2HQoHJ/YrO5NJfNoEPe/ARmh0Kt4aNDyx8FG7yKBRkUQTmIhWSYp
-	OQ4obRRWaiWCkVUPyYWWLZsyt5s9IWj5L4iibej6wiScW/XaySVbAdPKNFkej+wRSWq3PnGYkWL
-	OwyzuXrN35SKcrtHhdTjRyWrVewtGmrNTalPia
-X-Received: by 2002:a05:6402:1f49:b0:670:8acb:e822 with SMTP id 4fb4d7f45d1cf-683bcd9e581mr2819721a12.12.1778881085695;
-        Fri, 15 May 2026 14:38:05 -0700 (PDT)
+        bh=tMFDZHn6M2vdUl4IIJ1t/sEJlCsmJ8slpG/AtcvMci8=;
+        b=MaW57IYMiYSJdlVBvKsPyIA1aysNRzIELVBEYrCK5RfcAUiXfiYZ5e4iYmtKrvzEgE
+         L2N/M7KSguQNKWvbUjRAgKU03xrYjAHlzcZFJYLceXIWyDuyC4mOX+HeLI023Um8Au9d
+         giWn3RYaiXHm5u3UDfWwCdoo11Y0l25bw0bHuAf7UoQSFdmrAzWIIvfvyoAJXuIXZy8a
+         vw1T9Bkmlg571BM98894ThQDR9wJyhIe2J+sOpF/LBZX4rwnhIDP5+asIk9Y2ET7gCz3
+         2+uYJxARD9TA51hKesdF6HY9a28eZ+8dCZUlbKPC2Cqa2ZENcBuu5xGLSoFfE361TvnS
+         AnZw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1778881088; x=1779485888;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=tMFDZHn6M2vdUl4IIJ1t/sEJlCsmJ8slpG/AtcvMci8=;
+        b=T+ax5eEPlqqB7hhwHXTSrpjivHLtWHEX6z5O5BJT7T38HvwscCFMHI12IjXMtnmLmP
+         xPwHa68CmhLDOaQkJVEs9XWwa96Ylubj7zB94W92IiNouutNh5ac2iCbSxi7NzznZfFS
+         zQcqKgnUPCzd/nHiFaKgcxey457GixxK+wPwi3VW0UivF7eU1RW0bWWu6Wi4R+4/KPaI
+         EDPzVSmqtPYCnZ5fOYBhZ3ekfQEEQmBkP5E+aOwD0LPUENZyKEqs4YtO/FHvIYYSUk/C
+         XZcPMmnhWaRS3i4bX1Kb/czvn6zGGqTR+kt70ojxdkgx42UAkvOAAwfUK1wimvlcHxhT
+         3E7g==
+X-Gm-Message-State: AOJu0YyoeZFpSH71yGdTLVaWSrz7edxRguv/RWymOa0B2Bw8UBlKCTev
+	RcRVjwTCdqh9wsWlC0wwZQPnCtKNpHleS2ImVrFZmeK9xEjY/AayHsZ6nP387rNy
+X-Gm-Gg: Acq92OHpuk1B8DGYKAMIx7DIaaS9ysdNDyPLxHMs8gSN1DEkCdRv5DCe7OM+pnnMCLv
+	0l75Av89Pepj6mRbz2ZV5Uf3K2765acUcQA43dVYGqvYCKdlu3f6r0emGLIPqHXBERy8A1GvCgg
+	4tuv0hb0SSmI0GFEMNfN814lDOD9VaDf9dbcvHCRgnApwGdlX7CD3kYBB3pMimG3yB6j0Avcwg1
+	uZU8Dq/pU4ezdE+EDAWof43lLBYH+kOhr7UfAW/Tq0lrhLqZmNTrkr0PseZIdrYVTHm4fF49/By
+	Y0jNfyO+wPRWg/J+x+mqPm6O+u2g/+ST0xL7faG+VwwiWPpns7bR5CnIM4XOhfoXHzhJXqCgiRh
+	z++G02uaupRHFkwdzUJX8FqBDSIcag/2bxqSF+reFClfk2rPf1BOWxBz8stTClEByr1ywJ+dpwl
+	1jtSSvyzlq/FJmhYt0z8eBlfrSqPH7kGpl3UPW
+X-Received: by 2002:aa7:d689:0:b0:672:f3e:1475 with SMTP id 4fb4d7f45d1cf-683bd38e5dcmr2040466a12.12.1778881087715;
+        Fri, 15 May 2026 14:38:07 -0700 (PDT)
 Received: from torstein-laptop ([2a01:799:3a1:9700:690:4aa1:581c:2e09])
-        by smtp.googlemail.com with ESMTPSA id 4fb4d7f45d1cf-68310d510fasm2484038a12.11.2026.05.15.14.38.03
+        by smtp.googlemail.com with ESMTPSA id 4fb4d7f45d1cf-68310d510fasm2484038a12.11.2026.05.15.14.38.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 14:38:04 -0700 (PDT)
+        Fri, 15 May 2026 14:38:07 -0700 (PDT)
 From: Torstein Eide <torsteine@gmail.com>
 X-Google-Original-From: Torstein Eide <torsteine+linux@gmail.com>
 To: linux-mmc@vger.kernel.org
 Cc: Torstein Eide <torsteine+linux@gmail.com>
-Subject: [PATCH v2 0/5] mmc-utils: improve lsmmc usability
-Date: Fri, 15 May 2026 23:37:42 +0200
-Message-ID: <20260515213747.1452692-1-torsteine+linux@gmail.com>
+Subject: [PATCH v2 1/5] mmc-utils: lsmmc: Refactor CID parsing into shared structs
+Date: Fri, 15 May 2026 23:37:43 +0200
+Message-ID: <20260515213747.1452692-2-torsteine+linux@gmail.com>
 X-Mailer: git-send-email 2.53.0
+In-Reply-To: <20260515213747.1452692-1-torsteine+linux@gmail.com>
+References: <20260515213747.1452692-1-torsteine+linux@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -71,52 +75,341 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This series improves lsmmc in four areas: external manufacturer ID files,
-accepting /dev and /sys/block paths for register reads, an mmc list command,
-and bash completion for mmc-utils.
+Add struct sd_cid and struct mmc_cid with parse_sd_cid() and
+parse_mmc_cid() helpers. Use them in print_sd_cid(), print_mmc_cid()
+and print_list_entry() to eliminate duplicated parse_bin() format
+strings and local variable lists.
 
-A cleanup patch is prepended to refactor CID parsing into shared structs and
-helpers used by all three print functions.
+Also fix print_list_entry() using const char * for the strdup'd
+manufacturer string without a matching free().
 
-Changes since v1 (review by Avri Altman):
-- Patch 1 (new): refactor CID parsing into struct sd_cid/mmc_cid and
-  parse_sd_cid()/parse_mmc_cid() helpers; used by print_sd_cid,
-  print_mmc_cid, and print_list_entry
-- Patch 2: get_manufacturer: fix static buffer lifetime, return strdup()
-- Patch 2: get_manufacturer: simplify fopen fallback, warn once if ids
-  files missing
-- Patch 2: replace read_file() with read_file_at(dir, name), remove all
-  chdir() calls
-- Patch 2: struct config: remove ids_dir field
-- Patch 2: print_sd_cid, print_mmc_cid: free() the manufacturer string
-- Patch 3: resolve_dev_path: use stack buffer, strip partition suffix,
-  validate device type
-- Patch 4: month_name: switch to 0-indexed 16-entry array, drop "???" sentinel
-- Patch 4: do_list: move struct config outside loop
-- Patch 4: do_list: remove redundant access() check
-- Patch 5: bash completion: accept more than 9 devices (/dev/mmcblk[0-9]
-  replaced with compgen -G + grep regex)
+Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
+---
+ lsmmc.c | 250 +++++++++++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 184 insertions(+), 66 deletions(-)
 
-Torstein Eide (5):
-  mmc-utils: lsmmc: Refactor CID parsing into shared structs
-  mmc-utils: lsmmc: Use external .ids files for manufacturer lookup
-  mmc-utils: lsmmc: Accept /dev and /sys/block paths for register reads
-  mmc-utils: lsmmc: Add mmc list command
-  mmc-utils: Add bash completion
-
- Makefile           |  11 +-
- completion/mmc     |  62 +++++
- docs/HOWTO.rst     |  77 +++++-
- lsmmc.c            | 594 ++++++++++++++++++++++++++-------------------
- mmc.c              |   6 +-
- mmc_cmds.h         |   1 +
- multimediacard.ids |  16 ++
- sdcard.ids         |  23 ++
- 8 files changed, 531 insertions(+), 259 deletions(-)
- create mode 100644 completion/mmc
- create mode 100644 multimediacard.ids
- create mode 100644 sdcard.ids
-
+diff --git a/lsmmc.c b/lsmmc.c
+index 799e1ea..8155a5c 100644
+--- a/lsmmc.c
++++ b/lsmmc.c
+@@ -509,62 +509,89 @@ static void parse_bin(char *hexstr, char *fmt, ...)
+ 	free(origstr);
+ }
+ 
+-/* MMC/SD information parsing functions */
+-static void print_sd_cid(struct config *config, char *cid)
+-{
+-	static const char *months[] = {
+-		"jan", "feb", "mar", "apr", "may", "jun",
+-		"jul", "aug", "sep", "oct", "nov", "dec",
+-		"invalid0", "invalid1", "invalid2", "invalid3",
+-	};
++struct sd_cid {
+ 	unsigned int mid;
+ 	char oid[3];
+ 	char pnm[6];
+ 	unsigned int prv_major;
+ 	unsigned int prv_minor;
+ 	unsigned int psn;
++	unsigned int mdt_year;
+ 	unsigned int mdt_month;
++	unsigned int crc;
++};
++
++struct mmc_cid {
++	unsigned int mid;
++	unsigned int cbx;
++	unsigned int oid;
++	char pnm[7];
++	unsigned int prv_major;
++	unsigned int prv_minor;
++	unsigned int psn;
+ 	unsigned int mdt_year;
++	unsigned int mdt_month;
+ 	unsigned int crc;
+-	char *manufacturer = NULL;
++};
+ 
+-	parse_bin(cid, "8u16a40a4u4u32u4r8u4u7u1r",
+-		&mid, &oid[0], &pnm[0], &prv_major, &prv_minor, &psn,
+-		&mdt_year, &mdt_month, &crc);
++static void parse_sd_cid(char *raw, struct sd_cid *c)
++{
++	parse_bin(raw, "8u16a40a4u4u32u4r8u4u7u1r",
++		  &c->mid, &c->oid[0], &c->pnm[0], &c->prv_major, &c->prv_minor,
++		  &c->psn, &c->mdt_year, &c->mdt_month, &c->crc);
++	c->oid[2] = '\0';
++	c->pnm[5] = '\0';
++}
+ 
+-	oid[2] = '\0';
+-	pnm[5] = '\0';
++static void parse_mmc_cid(char *raw, struct mmc_cid *c)
++{
++	parse_bin(raw, "8u6r2u8u48a4u4u32u4u4u7u1r",
++		  &c->mid, &c->cbx, &c->oid, &c->pnm[0], &c->prv_major,
++		  &c->prv_minor, &c->psn, &c->mdt_year, &c->mdt_month, &c->crc);
++	c->pnm[6] = '\0';
++}
++
++/* MMC/SD information parsing functions */
++static void print_sd_cid(struct config *config, char *cid)
++{
++	static const char *months[] = {
++		"jan", "feb", "mar", "apr", "may", "jun",
++		"jul", "aug", "sep", "oct", "nov", "dec",
++		"invalid0", "invalid1", "invalid2", "invalid3",
++	};
++	struct sd_cid c;
++	char *manufacturer;
+ 
+-	manufacturer = get_manufacturer(config, mid);
++	parse_sd_cid(cid, &c);
++	manufacturer = get_manufacturer(config, c.mid);
+ 
+ 	if (config->verbose) {
+ 		printf("======SD/CID======\n");
+ 
+-		printf("\tMID: 0x%02x (", mid);
++		printf("\tMID: 0x%02x (", c.mid);
+ 		if (manufacturer)
+ 			printf("%s)\n", manufacturer);
+ 		else
+ 			printf("Unlisted)\n");
+ 
+-		printf("\tOID: %s\n", oid);
+-		printf("\tPNM: %s\n", pnm);
+-		printf("\tPRV: 0x%01x%01x ", prv_major, prv_minor);
+-		printf("(%u.%u)\n", prv_major, prv_minor);
+-		printf("\tPSN: 0x%08x\n", psn);
+-		printf("\tMDT: 0x%02x%01x %u %s\n", mdt_year, mdt_month,
+-		       2000 + mdt_year, months[mdt_month]);
+-		printf("\tCRC: 0x%02x\n", crc);
++		printf("\tOID: %s\n", c.oid);
++		printf("\tPNM: %s\n", c.pnm);
++		printf("\tPRV: 0x%01x%01x ", c.prv_major, c.prv_minor);
++		printf("(%u.%u)\n", c.prv_major, c.prv_minor);
++		printf("\tPSN: 0x%08x\n", c.psn);
++		printf("\tMDT: 0x%02x%01x %u %s\n", c.mdt_year, c.mdt_month,
++		       2000 + c.mdt_year, months[c.mdt_month]);
++		printf("\tCRC: 0x%02x\n", c.crc);
+ 	} else {
+ 		if (manufacturer)
+-			printf("manufacturer: '%s' '%s'\n",
+-			       manufacturer, oid);
++			printf("manufacturer: '%s' '%s'\n", manufacturer, c.oid);
+ 		else
+-			printf("manufacturer: 'Unlisted' '%s'\n", oid);
++			printf("manufacturer: 'Unlisted' '%s'\n", c.oid);
+ 
+-		printf("product: '%s' %u.%u\n", pnm, prv_major, prv_minor);
+-		printf("serial: 0x%08x\n", psn);
+-		printf("manufacturing date: %u %s\n", 2000 + mdt_year,
+-		       months[mdt_month]);
++		printf("product: '%s' %u.%u\n", c.pnm, c.prv_major, c.prv_minor);
++		printf("serial: 0x%08x\n", c.psn);
++		printf("manufacturing date: %u %s\n", 2000 + c.mdt_year,
++		       months[c.mdt_month]);
+ 	}
+ }
+ 
+@@ -575,37 +602,23 @@ static void print_mmc_cid(struct config *config, char *cid)
+ 		"jul", "aug", "sep", "oct", "nov", "dec",
+ 		"invalid0", "invalid1", "invalid2", "invalid3",
+ 	};
+-	unsigned int mid;
+-	unsigned int cbx;
+-	unsigned int oid;
+-	char pnm[7];
+-	unsigned int prv_major;
+-	unsigned int prv_minor;
+-	unsigned int psn;
+-	unsigned int mdt_month;
+-	unsigned int mdt_year;
+-	unsigned int crc;
+-	char *manufacturer = NULL;
+-
+-	parse_bin(cid, "8u6r2u8u48a4u4u32u4u4u7u1r",
+-		&mid, &cbx, &oid, &pnm[0], &prv_major, &prv_minor, &psn,
+-		&mdt_year, &mdt_month, &crc);
+-
+-	pnm[6] = '\0';
++	struct mmc_cid c;
++	char *manufacturer;
+ 
+-	manufacturer = get_manufacturer(config, mid);
++	parse_mmc_cid(cid, &c);
++	manufacturer = get_manufacturer(config, c.mid);
+ 
+ 	if (config->verbose) {
+ 		printf("======MMC/CID======\n");
+ 
+-		printf("\tMID: 0x%02x (", mid);
++		printf("\tMID: 0x%02x (", c.mid);
+ 		if (manufacturer)
+ 			printf("%s)\n", manufacturer);
+ 		else
+ 			printf("Unlisted)\n");
+ 
+-		printf("\tCBX: 0x%01x (", cbx);
+-		switch (cbx) {
++		printf("\tCBX: 0x%01x (", c.cbx);
++		switch (c.cbx) {
+ 		case 0:
+ 			printf("card)\n");
+ 			break;
+@@ -620,25 +633,26 @@ static void print_mmc_cid(struct config *config, char *cid)
+ 			break;
+ 		}
+ 
+-		printf("\tOID: 0x%01x\n", oid);
+-		printf("\tPNM: %s\n", pnm);
+-		printf("\tPRV: 0x%01x%01x ", prv_major, prv_minor);
+-		printf("(%u.%u)\n", prv_major, prv_minor);
+-		printf("\tPSN: 0x%08x\n", psn);
+-		printf("\tMDT: 0x%01x%01x %u %s\n", mdt_month, mdt_year,
+-		       1997 + mdt_year, months[mdt_month]);
+-		printf("\tCRC: 0x%02x\n", crc);
++		printf("\tOID: 0x%01x\n", c.oid);
++		printf("\tPNM: %s\n", c.pnm);
++		printf("\tPRV: 0x%01x%01x ", c.prv_major, c.prv_minor);
++		printf("(%u.%u)\n", c.prv_major, c.prv_minor);
++		printf("\tPSN: 0x%08x\n", c.psn);
++		printf("\tMDT: 0x%01x%01x %u %s\n", c.mdt_month, c.mdt_year,
++		       1997 + c.mdt_year, months[c.mdt_month]);
++		printf("\tCRC: 0x%02x\n", c.crc);
+ 	} else {
+ 		if (manufacturer)
+ 			printf("manufacturer: 0x%02x (%s) oid: 0x%01x\n",
+-			       mid, manufacturer, oid);
++			       c.mid, manufacturer, c.oid);
+ 		else
+-			printf("manufacturer: 0x%02x (Unlisted) oid: 0x%01x\n", mid, oid);
++			printf("manufacturer: 0x%02x (Unlisted) oid: 0x%01x\n",
++			       c.mid, c.oid);
+ 
+-		printf("product: '%s' %u.%u\n", pnm, prv_major, prv_minor);
+-		printf("serial: 0x%08x\n", psn);
+-		printf("manufacturing date: %u %s\n", 1997 + mdt_year,
+-		       months[mdt_month]);
++		printf("product: '%s' %u.%u\n", c.pnm, c.prv_major, c.prv_minor);
++		printf("serial: 0x%08x\n", c.psn);
++		printf("manufacturing date: %u %s\n", 1997 + c.mdt_year,
++		       months[c.mdt_month]);
+ 	}
+ }
+ 
+@@ -2270,6 +2284,110 @@ static int do_read_reg(int argc, char **argv, enum REG_TYPE reg)
+ 	return ret;
+ }
+ 
++static const char *month_name(unsigned int month)
++{
++	static const char *months[] = {
++		"jan", "feb", "mar", "apr", "may", "jun",
++		"jul", "aug", "sep", "oct", "nov", "dec",
++		"invalid0", "invalid1", "invalid2", "invalid3",
++	};
++
++	if (month >= ARRAY_SIZE(months))
++		return "invalid";
++
++	return months[month];
++}
++
++static void print_list_entry(struct config *cfg, const char *devname,
++			     const char *blkdev, char *cid)
++{
++	char *mfr;
++	char devnode[32];
++
++	snprintf(devnode, sizeof(devnode), "/dev/%s", blkdev ? blkdev : "?");
++
++	if (cfg->bus == SD) {
++		struct sd_cid c;
++
++		parse_sd_cid(cid, &c);
++		mfr = get_manufacturer(cfg, c.mid);
++		printf("%-14s %-14s SD   %-20s %-10s %u.%u  0x%08x  %u-%s\n",
++		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
++		       c.prv_major, c.prv_minor, c.psn, 2000 + c.mdt_year,
++		       month_name(c.mdt_month));
++	} else {
++		struct mmc_cid c;
++
++		parse_mmc_cid(cid, &c);
++		mfr = get_manufacturer(cfg, c.mid);
++		printf("%-14s %-14s MMC  %-20s %-10s %u.%u  0x%08x  %u-%s\n",
++		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
++		       c.prv_major, c.prv_minor, c.psn, 1997 + c.mdt_year,
++		       month_name(c.mdt_month));
++	}
++
++	free(mfr);
++}
++
++int do_list(int nargs, char **argv)
++{
++	const char *bus_path = "/sys/bus/mmc/devices";
++	DIR *d;
++	struct dirent *ent;
++	bool header_printed = false;
++
++	d = opendir(bus_path);
++	if (!d) {
++		fprintf(stderr, "Cannot open %s\n", bus_path);
++		return -1;
++	}
++
++	struct config cfg = {};
++
++	while ((ent = readdir(d)) != NULL) {
++		char devpath[PATH_MAX];
++		char resolved[PATH_MAX];
++		char *type, *cid, *blkdev;
++
++		if (!strchr(ent->d_name, ':'))
++			continue;
++
++		snprintf(devpath, sizeof(devpath), "%s/%s", bus_path, ent->d_name);
++		if (realpath(devpath, resolved) == NULL)
++			continue;
++
++		type = read_file_at(resolved, "type");
++		if (!type)
++			continue;
++
++		cid = read_file_at(resolved, "cid");
++		if (!cid) {
++			free(type);
++			continue;
++		}
++
++		blkdev = find_block_devname(resolved);
++		cfg.bus = strcmp(type, "MMC") ? SD : MMC;
++
++		if (!header_printed) {
++			printf("%-14s %-14s %-5s%-20s %-10s %-5s %-12s %s\n",
++			       "DEVICE", "DEV", "TYPE", "MANUFACTURER", "PRODUCT",
++			       "REV", "SERIAL", "DATE");
++			header_printed = true;
++		}
++
++		print_list_entry(&cfg, ent->d_name, blkdev, cid);
++
++		free(blkdev);
++		free(cid);
++		free(type);
++	}
++
++	closedir(d);
++	return 0;
++}
++
++
+ int do_read_csd(int argc, char **argv)
+ {
+ 	return do_read_reg(argc, argv, CSD);
 -- 
 2.53.0
 
