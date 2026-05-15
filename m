@@ -1,215 +1,97 @@
-Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45EED40756E
-	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 08:35:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4191737BE92;
+	Fri, 15 May 2026 08:37:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778834136; cv=none; b=Bf9TVIVjWGIHRChse4L0/6qxDQY/9e84ASF+17jFJizyHg14HDYAPl55T2LsQcCg0SbmE4LuIShiHE4NhVBGN40FqBpDQhyD8De9LFDixvqrk+S2LpM8PHRBniuAHe+a+7AigK2L+CelFz6RMnAwPbjgdQj1uz2njsJrJ99dYow=
+	t=1778834257; cv=none; b=SNAIhIZcPQq8vh0oI/rfTMESwXTH2ktwRxrY7KOVchHkSmnkmmeXSNo7nGz47AzEiiOSqaEB7hBD/v1VYaLEYzM4BSTLP7mJohgRrxOC7UvLCe+Z+ot6//Fhr+S+EhbbYbOkqb8lu+5nNt5Uez7MC1GPZANG9juhObgFr3yzPA0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778834136; c=relaxed/simple;
-	bh=96mNJw9f1BgqS8uU5GhJPZZf1KnnwThecQBZUYxu46s=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CJyjLIdXwl86wcDKQq7UtP+nYzI++N3X9dSBojlm5XeKuHi08WbYnoSpYlRs0CCIPg/drzJTqGwz9zDKqL7MvzfbC1w+fohWw/YJleHfgIjK/tHFKKoARCIR+CO2+qHqC91SxqK1mKhF5E5+KOtGSyh1Qc8lGn0n9p+qrYfnp5I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YgA1aavO; arc=none smtp.client-ip=209.85.208.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1778834257; c=relaxed/simple;
+	bh=Xb3/rFZm8quAdmfCBcVLcrTPXxcmnubz0zWi4H3oHa0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=V+GUf/eg9dsStz41A/yciNoSD50aNtAEoTWBJ515+EM2Wz/yeKKfk1BIXdLA25iDc+4/Clv/TF9DPWtmAJRuHa5wcUVCgPO0V2PEne6gUFd33cRrH4Afmm30gWNQ8Zw2ZfvSw4Olkusj8SK5KFiFda7YT9h0TCmx/R+aqwrMUMo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PYZQrY2h; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YgA1aavO"
-Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-67c2d57a5ceso15227999a12.3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 01:35:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778834134; x=1779438934; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LBeJSKAWF7Gtl5mZlo2O/+2W9wWBVsqONsnUlmKaMr8=;
-        b=YgA1aavOShuWxnqjqVmWkltb5jrt3a+Lvre+sSWLcTdEvuiRHLX4/ijuWyDyUBilcb
-         YIKhna2hQreLC6Xl7Cg+pKYqOiAdQeVxwNWTLNFrtvEJ0Vm8H1LV++F3SX8u0GaZrDtx
-         bTxYGJJ3XmUh85TWiMD9NJ6HAH5dMJ48Mo2EAsyV6xTD5TaFhA26a/JMa9ubX58HtJM/
-         +YRUF5bAv4LlI08aYW1Wmcf8u7UMDUGLX72uTwcf6IFsXj+VTJKXbYUQDndbQlXzwPcI
-         w3AoDA4vWTwZO8MimuqshNbnPpDB0S95D94jUQ5Y96iSr6J/bHg5msmlZIkys0PiiIcf
-         lz/Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778834134; x=1779438934;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=LBeJSKAWF7Gtl5mZlo2O/+2W9wWBVsqONsnUlmKaMr8=;
-        b=OKVffYzKRRFnWiR0w9HuaiJp4LRJkLwBgctLbGrzLNYoL4io2OsHzZXKj3uokrzLFW
-         hubwkTxf7LGOpYXPbZvHxtN1f8ZS5LYxKDbuqVrRGCP/RYUaPWJ5ROhpw1rZSCEdPBbV
-         1HdRZdISMjV7dCqdPHvZlhFjjgpxgkNImmWp2VzbOyNw2zqS5zH/WC8Hqk37vBaR7yCC
-         +wz1hH8ThKfdZwj3toWctfxnPHfZiv6MvdsQj6K4hGtDS3CBjq1iQW/h52EmMl5X7jgS
-         WtRPMOO6osmlqUqYHptceciuxiwiYGCV+8e9i+lTrXsjO5eLEp5ytOkOnFpucHLKAmma
-         PWzQ==
-X-Gm-Message-State: AOJu0YyNxg/vrR8TMInIMAJSdu6SA7NIW47VdN9BXfrqaITYNeBxAcWs
-	XYOeP/ku9CGnRnh41d2mtfGdihgtCMlHclsWJRHpQcKxGqlV7Z+8gYuxf96Pcls3
-X-Gm-Gg: Acq92OE/vWjVdENRK/1oji9OV6iahyNgdSWgHAm1habnx7IPfzoAlBADcpLHaKoZXKe
-	6ffzZURy45L6r9IHab+5MwjZ7z/+BuZV4GOY3O6cFWRosRKnvoPQJ5me4cq2IDbFENuxQl+mgJR
-	uv8gaGQDDd2WP3omiV8WfEo5Fa+HB8b7L+R3UcRKrXhNh4CMzGCh9LYF9TBPnCM0VI7xmcZP3RK
-	AMOKEleGMCvXaNoYN28foKeTVtUB/6sZR3uKmQJ92YUu2t6h4cy3ZV2BEO2Wy0ev8NpAUnWBLA1
-	VVhdVfHyp2EKT5v1bxHMZE37lNlAqOA4b7cgztqFt7aCsGha2+XwQNlE4Q7gUl6PVwkpCGbqe51
-	l7DqglNqZNXIhXcxs8fEOPcubNntTsX/v2ExP/D/FNrvp25550HJ/A866TixZHvfzW5NJ06kMml
-	7pYmtHV2gocavnMqfCB1cVFJu1pXjCilEa2HGr
-X-Received: by 2002:a17:907:1b1c:b0:bd2:387:6bd with SMTP id a640c23a62f3a-bd5177afa91mr144363166b.4.1778834133580;
-        Fri, 15 May 2026 01:35:33 -0700 (PDT)
-Received: from torstein-laptop ([2a01:799:3a1:9700:a66:143b:cd2f:c4ae])
-        by smtp.googlemail.com with ESMTPSA id a640c23a62f3a-bd4f4dec7d1sm189493566b.32.2026.05.15.01.35.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 01:35:33 -0700 (PDT)
-From: Torstein Eide <torsteine@gmail.com>
-X-Google-Original-From: Torstein Eide <torsteine+linux@gmail.com>
-To: linux-mmc@vger.kernel.org
-Cc: Torstein Eide <torsteine+linux@gmail.com>
-Subject: [PATCH 4/4] mmc-utils: Add bash completion
-Date: Fri, 15 May 2026 10:34:57 +0200
-Message-ID: <20260515083457.3690804-5-torsteine+linux@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260515083457.3690804-1-torsteine+linux@gmail.com>
-References: <20260515083457.3690804-1-torsteine+linux@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PYZQrY2h"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52DBFC2BCB0;
+	Fri, 15 May 2026 08:37:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1778834256;
+	bh=Xb3/rFZm8quAdmfCBcVLcrTPXxcmnubz0zWi4H3oHa0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=PYZQrY2hmBlGh7hUrYA083VdIAS+tbri/UypZ4iyfJ65Dm1zYMnepL0aju+c7pnQc
+	 dtCcISvdk75P4x++gvcMQsxNecKRNU84tnI0fCmxYtLgmplorGdWS89v9tlSwhqZyB
+	 35B5G109LGPPoERxHlmJtNo1//EYTVTpK3YoY3kMmPXpXyKhWmtjaLyyCIH7s2h7EO
+	 gBQA9cq37sgllV6WniN+22zO/H6PE+/S5shgUfHCQbG1cx68ElB5krgN0YcqqvEJFr
+	 BfIYu6zTZlNqe6qSlMAJcM/7ciU0Qzhu7AfcIhaURDtmxuSGBucUuY8iZOsx1OuRKX
+	 CDFiRRc2Jw/eg==
+Date: Fri, 15 May 2026 10:37:34 +0200
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, 
+	Dinh Nguyen <dinguyen@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v1 5/9] arm64: dts: agilex5: add SOCDK eMMC daughter
+ board support
+Message-ID: <20260515-grinning-inescapable-butterfly-eba39d@quoll>
+References: <20260511202132.5597-1-tanmay.kathpalia@altera.com>
+ <20260511202132.5597-6-tanmay.kathpalia@altera.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20260511202132.5597-6-tanmay.kathpalia@altera.com>
 
-Add a bash completion script in completion/mmc that completes subcommands
-and /dev/mmcblkN device paths for all mmc commands.
+On Mon, May 11, 2026 at 01:21:27PM -0700, Tanmay Kathpalia wrote:
+> Add device tree support for the Agilex5 SOCDK board variant with
+> eMMC daughter card.
+> 
+> Update the SoC dtsi with a fixed 1.8V regulator for eMMC I/O voltage.
+> 
+> Add socfpga_agilex5_socdk_emmc.dts with eMMC controller configured for:
+> - 8-bit bus width
+> - Non-removable eMMC device
+> - High-speed, HS200, and HS400 modes at 1.8V
+> - 200MHz maximum frequency with SDHCI clock base capability override
+> 
+> Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+> ---
+>  arch/arm64/boot/dts/intel/Makefile            |   1 +
+>  .../arm64/boot/dts/intel/socfpga_agilex5.dtsi |   8 ++
+>  .../dts/intel/socfpga_agilex5_socdk_emmc.dts  | 111 ++++++++++++++++++
+>  3 files changed, 120 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts
+> 
+> diff --git a/arch/arm64/boot/dts/intel/Makefile b/arch/arm64/boot/dts/intel/Makefile
+> index 33fcc55d0cb9..5bbbcfda1f48 100644
+> --- a/arch/arm64/boot/dts/intel/Makefile
+> +++ b/arch/arm64/boot/dts/intel/Makefile
+> @@ -8,5 +8,6 @@ dtb-$(CONFIG_ARCH_INTEL_SOCFPGA) += socfpga_agilex_n6000.dtb \
+>  				socfpga_agilex5_socdk_013b.dtb \
+>  				socfpga_agilex5_socdk_modular.dtb \
+>  				socfpga_agilex5_socdk_nand.dtb \
+> +				socfpga_agilex5_socdk_emmc.dtb \
+>  				socfpga_n5x_socdk.dtb
+>  dtb-$(CONFIG_ARCH_KEEMBAY) += keembay-evm.dtb
+> diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+> index 7e080f13166f..feb4ccb317a7 100644
+> --- a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+> +++ b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+> @@ -317,6 +317,14 @@ sd_io_1v8_reg: regulator-1p8v {
+>  					<3300000 0x0>;
+>  		};
+>  
+> +		emmc_io_1v8_reg: regulator-fixed-1p8v {
 
-The completion directory is named 'completion/' rather than
-'bash-completion/' so shell-specific scripts for other shells (zsh,
-fish, etc.) can be placed alongside it without renaming.
+How is this property of a SoC? How SoC itself has a fixed regulator for
+EMMC? Really?
 
-Add bashcompletiondir variable to the Makefile (defaulting to the
-standard /usr/share/bash-completion/completions) and install the
-script as part of 'make install'. The install path can be overridden
-at build time with make bashcompletiondir=<path>.
-
-Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
----
- Makefile       |  5 +++-
- completion/mmc | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++
- docs/HOWTO.rst |  6 +++++
- 3 files changed, 72 insertions(+), 1 deletion(-)
- create mode 100644 completion/mmc
-
-diff --git a/Makefile b/Makefile
-index 11685b9..e447e54 100644
---- a/Makefile
-+++ b/Makefile
-@@ -5,6 +5,8 @@ AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2 \
- 	    -DSD_IDS_PATH=\"$(idsdir)/sdcard.ids\" \
- 	    -DMMC_IDS_PATH=\"$(idsdir)/multimediacard.ids\"
- CFLAGS ?= -g -O2
-+idsdir = /usr/share/misc
-+bashcompletiondir = /usr/share/bash-completion/completions
- objects = \
- 	mmc.o \
- 	mmc_cmds.o \
-@@ -21,7 +23,6 @@ override CFLAGS := $(CHECKFLAGS) $(AM_CFLAGS) $(CFLAGS)
- INSTALL = install
- prefix ?= /usr/local
- bindir = $(prefix)/bin
--idsdir ?= /usr/share/misc
- LIBS=
- RESTORE_LIBS=
- mandir = /usr/share/man
-@@ -61,6 +62,8 @@ install: $(progs)
- 	$(INSTALL) -m755 -d $(DESTDIR)$(idsdir)
- 	$(INSTALL) -m 644 sdcard.ids $(DESTDIR)$(idsdir)
- 	$(INSTALL) -m 644 multimediacard.ids $(DESTDIR)$(idsdir)
-+	$(INSTALL) -m755 -d $(DESTDIR)$(bashcompletiondir)
-+	$(INSTALL) -m 644 completion/mmc $(DESTDIR)$(bashcompletiondir)/mmc
- 
- -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
- 
-diff --git a/completion/mmc b/completion/mmc
-new file mode 100644
-index 0000000..07e4c25
---- /dev/null
-+++ b/completion/mmc
-@@ -0,0 +1,62 @@
-+_mmc_complete() {
-+	local cur prev words cword
-+	_init_completion || return
-+
-+	local devices
-+	devices=$(compgen -G "/dev/mmcblk[0-9]" 2>/dev/null)
-+
-+	case $cword in
-+	1)
-+		local verbs="extcsd writeprotect disable gp enh_area \
-+			write_reliability status bootpart bootbus hwreset bkops \
-+			sanitize rpmb cache csd cid scr ffu opt_ffu1 opt_ffu2 \
-+			opt_ffu3 opt_ffu4 erase gen_cmd softreset preidle \
-+			boot_operation list"
-+		COMPREPLY=($(compgen -W "$verbs" -- "$cur"))
-+		;;
-+	2)
-+		case $prev in
-+		extcsd)
-+			COMPREPLY=($(compgen -W "read write" -- "$cur")) ;;
-+		writeprotect)
-+			COMPREPLY=($(compgen -W "boot user" -- "$cur")) ;;
-+		bootpart)
-+			COMPREPLY=($(compgen -W "enable" -- "$cur")) ;;
-+		bootbus)
-+			COMPREPLY=($(compgen -W "set" -- "$cur")) ;;
-+		hwreset)
-+			COMPREPLY=($(compgen -W "enable disable" -- "$cur")) ;;
-+		bkops)
-+			COMPREPLY=($(compgen -W "enable" -- "$cur")) ;;
-+		rpmb)
-+			COMPREPLY=($(compgen -W "read-counter read-block write-block write-key" -- "$cur")) ;;
-+		cache)
-+			COMPREPLY=($(compgen -W "enable disable" -- "$cur")) ;;
-+		csd|cid|scr)
-+			COMPREPLY=($(compgen -W "read" -- "$cur")) ;;
-+		gen_cmd)
-+			COMPREPLY=($(compgen -W "read" -- "$cur")) ;;
-+		status)
-+			COMPREPLY=($(compgen -W "get" -- "$cur")) ;;
-+		gp)
-+			COMPREPLY=($(compgen -W "create" -- "$cur")) ;;
-+		enh_area|write_reliability)
-+			COMPREPLY=($(compgen -W "set" -- "$cur")) ;;
-+		sanitize|softreset|preidle|ffu|opt_ffu1|opt_ffu2|opt_ffu3|opt_ffu4|erase|boot_operation)
-+			COMPREPLY=($(compgen -W "$devices" -- "$cur")) ;;
-+		esac
-+		;;
-+	3)
-+		case ${words[1]} in
-+		writeprotect)
-+			COMPREPLY=($(compgen -W "get set" -- "$cur")) ;;
-+		csd|cid|scr|extcsd|gen_cmd|status|bootpart|bootbus|hwreset|bkops|cache|gp|enh_area|write_reliability)
-+			COMPREPLY=($(compgen -W "$devices" -- "$cur")) ;;
-+		esac
-+		;;
-+	*)
-+		COMPREPLY=($(compgen -W "$devices" -- "$cur")) ;;
-+	esac
-+}
-+
-+complete -F _mmc_complete mmc
-diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
-index 167a153..460d016 100644
---- a/docs/HOWTO.rst
-+++ b/docs/HOWTO.rst
-@@ -2,6 +2,12 @@
- 
- Running mmc-utils
- -----------------
-+**Bash completion**
-+    Source ``completion/mmc`` to enable tab-completion for all subcommands and
-+    device paths. When installed via ``make install``, the file is placed in
-+    ``$(bashcompletiondir)`` (default: ``/usr/share/bash-completion/completions/mmc``)
-+    and loaded automatically by bash-completion.
-+
- **Name**
-     mmc - a tool for configuring MMC storage devices
- **Synopsis**
--- 
-2.53.0
+Best regards,
+Krzysztof
 
