@@ -1,69 +1,69 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96F4431A56C
-	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 08:35:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BDB131A56C
+	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 08:35:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778834130; cv=none; b=Dop71mYkTyETpgxgHZZt7sXzoQvRaGHqMsW7Q4OOOgwqt4yFTIGOVsgJy5YHvdwbTHtiPuwNgtmciZb3KaZsLWmdEEMPhEGG3Nc64oQnIZ3fTobuk1aPE1dixS1/mPumfi58nFiUJ0UWHTSz/LyLkKZIvhvJKQPconmSZXzzj0E=
+	t=1778834135; cv=none; b=tnu1qieDtQc0UtJYxpFJFdzuFQZHmRCMda7wq1AikRjAGVuJ2anUAyIDCkhRnIzlagusZMbCQvE3JpiRF6xDx0kf7uBFwJQlW3LMjHuxfWuoaRsB3hOdS3dyZTRTe7O6JWIuyNnNMZmv5DFLR/FzFe1/n9/v4tR8V0zU2Ynf2Dg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778834130; c=relaxed/simple;
-	bh=JRA3CwODzyRcK7pqPuQHOPBxC8Dwi/FeD01Xd+9KoDQ=;
+	s=arc-20240116; t=1778834135; c=relaxed/simple;
+	bh=OAwSy6dJiwW+lrXO1WtrAVzpqZKpvPxZgYNcyIl/928=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=RwjhmuRQAdrIPJGT+SYBzxfeYvYkamzXdBjJtETG3Db14/5BuUOPzMdc7ewZ4BPmFEXg2bRnqD4D5gdOtzS3nyEXpGGbJjSyjydWQAYcW5B+jIUbCexQPgZWb8WP/rTzeeBwMX2/mN/tmleicuFEkFNbH+0nHRJH9aEcHz9+NcQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=o7ckgkzV; arc=none smtp.client-ip=209.85.218.47
+	 MIME-Version; b=u4UIIYbZM6DIH2Ix7a7r7l9opC6iog1Q7vcvRJaCj9u6q0i7rdTb9ztzng4vsJMCswfRlzb3IpyKhyxzF7BXKqOcTLDEiXTGEv283VECy8m+et2XvFupMIfSsdYbYeWSppWyhWsF+Pm6XTi7X9M3Me6winOaJU7ECgRKQRbrIjA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cNsmIJGD; arc=none smtp.client-ip=209.85.208.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="o7ckgkzV"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-bd01481e592so725485166b.2
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 01:35:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cNsmIJGD"
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-67b8d9c26bbso16367033a12.2
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 01:35:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778834127; x=1779438927; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1778834132; x=1779438932; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=nmrimgkUCCYnZGRY6cNPLMElksw9kJSWZkHq9HWtDCo=;
-        b=o7ckgkzVtsORZTcYwSdieeiJdUDhIoUlrrSV4Mw6CV0tAD67tqIxB5HBQRXl1oQpDS
-         CEIoe/fTJRto8oS+YEDZtRSAuHxe0sM5HPjldxEikA73sdUJgHtfn2VJkU5XbqxlI/YF
-         E8ViDzrHrh1Qx0PFi72XIdw97wS5nzGboXD3mDaeDV5+pYyZOwrSmszeTsKrfSFmTXJz
-         wZib90vv26P7zXxwXrFYTrS7IFDbe1qggdDUrBHBLgaQ9lvhMdK5loYAyTdYvbvB7HbA
-         wHTp5thtCDnBMiPtKXWyJVBX3rMhhLcbZyiv6CWG3jHJ4Rt196pieNwyz9Blqi/WT+A6
-         19ZA==
+        bh=8FIOBN70JAHq7mJX0IHUVI7XK9eVgrBwCWRBLMqS+Rs=;
+        b=cNsmIJGDtXfBvVdwuxh+g/ty0uj+cBf6NTkeBIc8mTXDlngloSqWbXRVftkC+8RSlk
+         HAfw2PxNR1nB5so6y9RWhDX+k6MH3nOwP6jwgxmeXDU8lVhT+O/QTJuq1LS29oXA+7ZK
+         nr5jA92qpoefJor47RC7WkibwOmcInL1Sz78mi7SPmkLdMVpRiQOiljhwzVzJlMY+Yix
+         tn3npaFLjlqQuJRZrR1X6VP+7xNBWupjUNJGOd0pln/KmzYWMW7yLogkZS8lSD5c6TuB
+         KqqflIF7utQfbiFgPdIyNVHWkxHqHy8QnJewsz/hLrU0SMCuvyyOvusoNBxj+1uQjJd3
+         uePw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778834127; x=1779438927;
+        d=1e100.net; s=20251104; t=1778834132; x=1779438932;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=nmrimgkUCCYnZGRY6cNPLMElksw9kJSWZkHq9HWtDCo=;
-        b=jZiroQFWra/b/8CuyYrMPnwIorcNIbg/AEVqsXtLSjWVeUwMtkSxAbP6v4GxX6rNUR
-         WuWq6DwNa7ZqiNOdWkJyJWTxGhHNXske6jkPcPkyP0iWp2WXa4je3CMgWQT7M5WckHQA
-         BJjh9UL2eq1+x5hOwUjo0EH+PFIKkNL5jbnYIJmDhDMzGVmg7mPBOgVQa5V8a4APJXM3
-         1MYSXKdaRr5OthhlirThdLGTAyqNPUMf0CfUmz8hjkPPQEhLFUUCBkqV8zhKW5zjDtXk
-         e+AeamgXZmjUAEXjwKDencOYpDJBNJyOwqGDGyL9ic5veI+XMg2TrZVxke8vdTcixDOB
-         YArg==
-X-Gm-Message-State: AOJu0YwGa1cEPkS1DHSAk8WjZpuTEdQgP8DTT6DIV42oPeOpbJxCHjVY
-	uQz3AmuDP8Z6UgnJcWEpL6l9IxUvKtxdX/BQcEyGjXkG5BRIVI7hZzYL3Srj6JJO
-X-Gm-Gg: Acq92OFos7sQOJcm3MfK9wMEwynimexCqGf578eMGX4Z3KKeILv3WXuOStSRHhP5BD/
-	JOsEcBdg6nuhd2c2OoI07/IL/xCfwsjuJYiDSKmeca9W2/MYSoVc4o8jL6DmWQT69EnG4InFduv
-	BE4I3wmfx9AG8+VfssbZ9ur6l3bmxZZ9Ic+LYujE/+sTIhVCTBkCTsUaH2L4eGgZmf9J0yqzJlJ
-	jd9oRxpfoulIwnsmHuBH1L3N37KnojTGa1eaFPU0coDtWh2FjRQ6c3e3xEOm07GCynLVw+5YQ2+
-	CES2omalQWLUWXT0db3hC4vMoERoK7E3to5tbWAK0/1TjJktLCq4l43LUSAopUZxdj7LqUchJZu
-	a9zrJRTda+V3wCJqCRPF3VTXR89ZlsoDKsxIMRY7CsVzAeY04GNGV24WLNzGlPZMP4kEWYPZ2D5
-	FoH2xhMH4N0I9lQipRHR3MeGkN6siUqHi1vIVW
-X-Received: by 2002:a17:907:3cc1:b0:bd5:7c3:69d with SMTP id a640c23a62f3a-bd517abc6d7mr143457166b.48.1778834126734;
-        Fri, 15 May 2026 01:35:26 -0700 (PDT)
+        bh=8FIOBN70JAHq7mJX0IHUVI7XK9eVgrBwCWRBLMqS+Rs=;
+        b=IEw+xWs9/9ezFPBq/pkm0MRPxN1EMZYM95LMN1oL0P8fLRm4gDF91TmJ2cIdg7wsni
+         TGclZEdC87JSnnXPL2DS3KCgVgTakhRq+40AtspLr3v6LQcbYTGDFwf/1pX7P9lw9fK0
+         TZNaLBFq+OPeyr66Nf+jiJ8jNWtyYNPhBUJBEGUBZ6YXv4TLz03Ix0SY6sP8BD5iNDG6
+         mHFN1FBXQ/+JEvDsckcpwpDQ2FcwySuA1t+F/JUQHIVxl0wGQGpQ6UwnNUGbodJMNwrQ
+         wsIwq2xLK6pCHI+7OryLyTXgT5VHYBAensqVKxhJTcG6UmBpTKMbZlIcLnJThf/ggtfM
+         T8JA==
+X-Gm-Message-State: AOJu0YzuWZgkl0m7wnVAekybG3r6rYN1BDGy+nGuBmOte3OPwusZ2NNN
+	9yJWdEJS+YcB2KcfT2PeVKSfdj9taMG2j2ngK8byHQW6hzWBCtmnI+xUSe0lJZlt
+X-Gm-Gg: Acq92OG9H6t9Ark4sn5PKf+3gvnJBGmE0OeWT4cJb7qjSRVOZcfgIXmy9hiTS4B1CbG
+	Q5EzSN9lyO9gOoEeX6CgKL9b4BSO0FDOGJrhZegQ01OznV931wYsDVyZq+gtO09u0Z3M9p9TEPR
+	NtilxKbgcBzBl2xyQl1MjGAqxhH2JjUiK9+mOQY/uhiV8kkFrY4RefH2azuIg9MQOLqIRzzNO1q
+	yQHWhDu/KoLO1e2Bmtr5i0/d9qWgxCfTPag3ayr3U3YxwuzPJj69UtF0TXVKHfm7f2Tw4OL/pKh
+	oosDctUwo483JA07EET10kvOjmxH0u/Dq4zhwZndf452Xy+K4Mgu0hkjx248CPA/M2pljX2KU50
+	wmYbzyEUxfnmvzhQveQ8U1qnpNlmj339iWve78CA+xJWvlECqOFWfob4zKzUm/pejJ7p+Gwz8qs
+	+R8opz2Aq+MMBwlQJPxqUXVfA0NmpjChAkKvtz
+X-Received: by 2002:a17:907:97ce:b0:bd4:f7f0:bbc7 with SMTP id a640c23a62f3a-bd5178f96admr149563866b.32.1778834131418;
+        Fri, 15 May 2026 01:35:31 -0700 (PDT)
 Received: from torstein-laptop ([2a01:799:3a1:9700:a66:143b:cd2f:c4ae])
-        by smtp.googlemail.com with ESMTPSA id a640c23a62f3a-bd4f4dec7d1sm189493566b.32.2026.05.15.01.35.25
+        by smtp.googlemail.com with ESMTPSA id a640c23a62f3a-bd4f4dec7d1sm189493566b.32.2026.05.15.01.35.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 01:35:26 -0700 (PDT)
+        Fri, 15 May 2026 01:35:29 -0700 (PDT)
 From: Torstein Eide <torsteine@gmail.com>
 X-Google-Original-From: Torstein Eide <torsteine+linux@gmail.com>
 To: linux-mmc@vger.kernel.org
 Cc: Torstein Eide <torsteine+linux@gmail.com>
-Subject: [PATCH 1/4] mmc-utils: lsmmc: Use external .ids files for manufacturer lookup
-Date: Fri, 15 May 2026 10:34:54 +0200
-Message-ID: <20260515083457.3690804-2-torsteine+linux@gmail.com>
+Subject: [PATCH 2/4] mmc-utils: lsmmc: Accept /dev and /sys/block paths for register reads
+Date: Fri, 15 May 2026 10:34:55 +0200
+Message-ID: <20260515083457.3690804-3-torsteine+linux@gmail.com>
 X-Mailer: git-send-email 2.53.0
 In-Reply-To: <20260515083457.3690804-1-torsteine+linux@gmail.com>
 References: <20260515083457.3690804-1-torsteine+linux@gmail.com>
@@ -75,414 +75,156 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Similar to pci.ids and usb.ids, move the statically defined manufacturer
-ID arrays out of the source and into external sdcard.ids and
-multimediacard.ids files. This allows other programs to use the same
-database without an API, ABI, or cmd interface.
+Commands like 'cid read' previously required a raw sysfs device path
+such as /sys/bus/mmc/devices/mmc0:0001/. Most users know their block
+device as /dev/mmcblk0 or /sys/block/mmcblk0.
 
-Make the program able to read from the base directory to test without
-installing.
-
-Make it possible from the Makefile to change the install directory of
-the database.
+Add resolve_dev_path() which follows /sys/class/block/<dev>/device via
+realpath() to reach the canonical sysfs device directory. Paths that
+start with /dev/ or /sys/block/ are resolved automatically in
+do_read_reg() before processing, and the resolved sysfs path is printed
+so the caller can see which device was matched.
 
 Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
 ---
- Makefile           |   8 +-
- lsmmc.c            | 225 ++++++++++++---------------------------------
- multimediacard.ids |  16 ++++
- sdcard.ids         |  23 +++++
- 4 files changed, 104 insertions(+), 168 deletions(-)
- create mode 100644 multimediacard.ids
- create mode 100644 sdcard.ids
+ docs/HOWTO.rst | 59 ++++++++++++++++++++++++++++++++++++++++++--------
+ lsmmc.c        | 42 +++++++++++++++++++++++++++++++++++
+ 2 files changed, 92 insertions(+), 9 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index c0284bb..11685b9 100644
---- a/Makefile
-+++ b/Makefile
-@@ -1,7 +1,9 @@
- CC ?= gcc
- GIT_VERSION := "$(shell git describe --abbrev=6 --always --tags)"
- AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2 \
--	    -DVERSION=\"$(GIT_VERSION)\"
-+	    -DVERSION=\"$(GIT_VERSION)\" \
-+	    -DSD_IDS_PATH=\"$(idsdir)/sdcard.ids\" \
-+	    -DMMC_IDS_PATH=\"$(idsdir)/multimediacard.ids\"
- CFLAGS ?= -g -O2
- objects = \
- 	mmc.o \
-@@ -19,6 +21,7 @@ override CFLAGS := $(CHECKFLAGS) $(AM_CFLAGS) $(CFLAGS)
- INSTALL = install
- prefix ?= /usr/local
- bindir = $(prefix)/bin
-+idsdir ?= /usr/share/misc
- LIBS=
- RESTORE_LIBS=
- mandir = /usr/share/man
-@@ -55,6 +58,9 @@ install: $(progs)
- 	$(INSTALL) $(progs) $(DESTDIR)$(bindir)
- 	$(INSTALL) -m755 -d $(DESTDIR)$(mandir)/man1
- 	$(INSTALL) -m 644 mmc.1 $(DESTDIR)$(mandir)/man1
-+	$(INSTALL) -m755 -d $(DESTDIR)$(idsdir)
-+	$(INSTALL) -m 644 sdcard.ids $(DESTDIR)$(idsdir)
-+	$(INSTALL) -m 644 multimediacard.ids $(DESTDIR)$(idsdir)
+diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
+index 7a27a50..76214a3 100644
+--- a/docs/HOWTO.rst
++++ b/docs/HOWTO.rst
+@@ -35,19 +35,60 @@ Running mmc-utils
+         Set user area write protection.
  
- -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
+     ``csd read  [-h] [-v] [-b bus_type] [-r register]  <device path>``
+-        Print CSD data from <device path>. The device path should specify the csd sysfs file directory.
+-        if [bus_type] is passed (mmc or sd) the [register] content must be passed as well, and no need for device path.
+-        it is useful for cases we are getting the register value without having the actual platform.
++        Print CSD data from <device path>. The device path may be one of the following:
++          - sysfs device directory  (/sys/devices/platform/fe310000.mmc/mmc_host/mmc0/mmc0:0001)
++          - device node (/dev/mmcblkN)
++          - sysfs block device entry (/sys/block/mmcblkN)
++        /dev/ and /sys/block/ paths are resolved to the sysfs device
++        directory automatically and the resolved path is printed.
++        If [-b bus_type] is passed (mmc or sd) the [-r register] content must
++        be passed as well, and no device path is required. Useful when the
++        register value is known without access to the actual hardware.
++
++        Example::
++
++            $ mmc csd read /dev/mmcblk0
++            sysfs: /sys/devices/platform/fe310000.mmc/mmc_host/mmc0/mmc0:0001
++            CSD Register: 00000000...
  
+     ``cid read <device path>``
+-        Print CID data from <device path>. The device path should specify the cid sysfs file directory.
+-        if [bus_type] is passed (mmc or sd) the [register] content must be passed as well, and no need for device path.
+-        it is useful for cases we are getting the register value without having the actual platform.
++        Print CID data from <device path>. The device path may be one of the following:
++          - sysfs device directory  (/sys/devices/platform/fe310000.mmc/mmc_host/mmc0/mmc0:0001)
++          - device node (/dev/mmcblkN)
++          - sysfs block device entry (/sys/block/mmcblkN)
++        /dev/ and /sys/block/ paths are resolved to the sysfs device
++        directory automatically and the resolved path is printed.
++        If [-b bus_type] is passed (mmc or sd) the [-r register] content must
++        be passed as well, and no device path is required. Useful when the
++        register value is known without access to the actual hardware.
++
++        Example::
++
++            $ mmc cid read /dev/mmcblk0
++            sysfs: /sys/devices/platform/fe310000.mmc/mmc_host/mmc0/mmc0:0001
++            Manufacturer ID: 0x15
++            OEM ID: 0x0100
++            Product name: MAG4FA
++            Product revision: 1.0
++            Serial number: 0x1a2b3c4d
++            Manufacturing date: 01/2021
+ 
+     ``scr read <device path>``
+-        Print SCR data from <device path>. The device path should specify the scr sysfs file directory.
+-        if [bus_type] is passed (mmc or sd) the [register] content must be passed as well, and no need for device path.
+-        it is useful for cases we are getting the register value without having the actual platform.
++        Print SCR data from <device path>. The device path may be one of the following:
++          - sysfs device directory  (/sys/devices/platform/fe320000.mmc/mmc_host/mmc1/mmc1:aaaa)
++          - device node (/dev/mmcblkN)
++          - sysfs block device entry (/sys/block/mmcblkN)
++        /dev/ and /sys/block/ paths are resolved to the sysfs device
++        directory automatically and the resolved path is printed.
++        If [-b bus_type] is passed (mmc or sd) the [-r register] content must
++        be passed as well, and no device path is required. Useful when the
++        register value is known without access to the actual hardware.
++
++        Example::
++
++            $ mmc scr read /dev/mmcblk1
++            sysfs: /sys/devices/platform/fe320000.mmc/mmc_host/mmc1/mmc1:aaaa
++            SCR Register: 0235800000000000
+ 
+     ``ffu <image name> <device> [chunk-bytes]``
+       Default mode.  Run Field Firmware Update with `<image name>` on `<device>`. `[chunk-bytes]` is optional and defaults to its max - 512k. Should be in decimal bytes and sector aligned.
 diff --git a/lsmmc.c b/lsmmc.c
-index 799e1ea..113f371 100644
+index 113f371..3149409 100644
 --- a/lsmmc.c
 +++ b/lsmmc.c
-@@ -56,6 +56,13 @@
- #define IDS_MAX			256
- #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
- 
-+#ifndef SD_IDS_PATH
-+#define SD_IDS_PATH "/usr/share/misc/sdcard.ids"
-+#endif
-+#ifndef MMC_IDS_PATH
-+#define MMC_IDS_PATH "/usr/share/misc/multimediacard.ids"
-+#endif
-+
- enum bus_type {
- 	MMC = 1,
- 	SD,
-@@ -63,6 +70,7 @@ enum bus_type {
- 
- struct config {
- 	char *dir;
-+	char *ids_dir;
- 	bool verbose;
- 
- 	enum bus_type bus;
-@@ -75,157 +83,6 @@ enum REG_TYPE {
- 	SCR,
- };
- 
--struct ids_database {
--	int id;
--	char *manufacturer;
--};
--
--static struct ids_database sd_database[] = {
--	{
--		.id = 0x01,
--		.manufacturer = "Panasonic",
--	},
--	{
--		.id = 0x02,
--		.manufacturer = "Toshiba/Kingston/Viking",
--	},
--	{
--		.id = 0x03,
--		.manufacturer = "SanDisk",
--	},
--	{
--		.id = 0x08,
--		.manufacturer = "Silicon Power",
--	},
--	{
--		.id = 0x18,
--		.manufacturer = "Infineon",
--	},
--	{
--		.id = 0x1b,
--		.manufacturer = "Transcend/Samsung",
--	},
--	{
--		.id = 0x1c,
--		.manufacturer = "Transcend",
--	},
--	{
--		.id = 0x1d,
--		.manufacturer = "Corsair/AData",
--	},
--	{
--		.id = 0x1e,
--		.manufacturer = "Transcend",
--	},
--	{
--		.id = 0x1f,
--		.manufacturer = "Kingston",
--	},
--	{
--		.id = 0x27,
--		.manufacturer = "Delkin/Phison",
--	},
--	{
--		.id = 0x28,
--		.manufacturer = "Lexar",
--	},
--	{
--		.id = 0x30,
--		.manufacturer = "SanDisk",
--	},
--	{
--		.id = 0x31,
--		.manufacturer = "Silicon Power",
--	},
--	{
--		.id = 0x33,
--		.manufacturer = "STMicroelectronics",
--	},
--	{
--		.id = 0x41,
--		.manufacturer = "Kingston",
--	},
--	{
--		.id = 0x6f,
--		.manufacturer = "STMicroelectronics",
--	},
--	{
--		.id = 0x74,
--		.manufacturer = "Transcend",
--	},
--	{
--		.id = 0x76,
--		.manufacturer = "Patriot",
--	},
--	{
--		.id = 0x82,
--		.manufacturer = "Gobe/Sony",
--	},
--	{
--		.id = 0x89,
--		.manufacturer = "Unknown",
--	},
--};
--
--static struct ids_database mmc_database[] = {
--	{
--		.id = 0x00,
--		.manufacturer = "SanDisk",
--	},
--	{
--		.id = 0x02,
--		.manufacturer = "Kingston/SanDisk",
--	},
--	{
--		.id = 0x03,
--		.manufacturer = "Toshiba",
--	},
--	{
--		.id = 0x05,
--		.manufacturer = "Unknown",
--	},
--	{
--		.id = 0x06,
--		.manufacturer = "Unknown",
--	},
--	{
--		.id = 0x11,
--		.manufacturer = "Toshiba",
--	},
--	{
--		.id = 0x13,
--		.manufacturer = "Micron",
--	},
--	{
--		.id = 0x15,
--		.manufacturer = "Samsung/SanDisk/LG",
--	},
--	{
--		.id = 0x37,
--		.manufacturer = "KingMax",
--	},
--	{
--		.id = 0x44,
--		.manufacturer = "ATP",
--	},
--	{
--		.id = 0x45,
--		.manufacturer = "SanDisk Corporation",
--	},
--	{
--		.id = 0x2c,
--		.manufacturer = "Kingston",
--	},
--	{
--		.id = 0x70,
--		.manufacturer = "Kingston",
--	},
--	{
--		.id = 0xfe,
--		.manufacturer = "Micron",
--	},
--};
--
- /* Command line parsing functions */
- static void usage(char *progname)
- {
-@@ -319,25 +176,53 @@ static int parse_opts(int argc, char **argv, struct config *config)
- 	return 0;
- }
- 
--static char *get_manufacturer(struct config *config, unsigned int manid)
-+static const char *get_manufacturer(struct config *config, unsigned int manid)
- {
--	struct ids_database *db;
--	unsigned int ids_cnt;
-+	const char *paths[] = {NULL, NULL};
-+	char local_path[PATH_MAX];
- 	int i;
-+	FILE *f;
-+	static char name[256];
-+	char line[256];
-+	const char *local_name;
-+
-+	local_name = (config->bus == MMC) ? "multimediacard.ids" : "sdcard.ids";
-+	/* check local directory first, then fall back to system path */
-+	if (config->ids_dir)
-+		snprintf(local_path, sizeof(local_path), "%s/%s", config->ids_dir, local_name);
-+	else
-+		snprintf(local_path, sizeof(local_path), "%s", local_name);
-+	paths[0] = local_path;
-+	paths[1] = (config->bus == MMC) ? MMC_IDS_PATH : SD_IDS_PATH;
- 
--	if (config->bus == MMC) {
--		db = mmc_database;
--		ids_cnt = ARRAY_SIZE(mmc_database);
--	} else {
--		db = sd_database;
--		ids_cnt = ARRAY_SIZE(sd_database);
-+	for (i = 0; i < 2; i++) {
-+		f = fopen(paths[i], "r");
-+		if (f)
-+			break;
- 	}
-+	if (!f)
-+		return NULL;
- 
--	for (i = 0; i < ids_cnt; i++) {
--		if (db[i].id == manid)
--			return db[i].manufacturer;
-+	while (fgets(line, sizeof(line), f)) {
-+		unsigned int id;
-+		char *nl;
-+
-+		nl = strchr(line, '\n');
-+		if (nl)
-+			*nl = '\0';
-+
-+		if (line[0] == '#' || line[0] == '\0')
-+			continue;
-+
-+		if (sscanf(line, "0x%x %255[^\n]", &id, name) == 2) {
-+			if (id == manid) {
-+				fclose(f);
-+				return name;
-+			}
-+		}
- 	}
- 
-+	fclose(f);
+@@ -226,6 +226,33 @@ static const char *get_manufacturer(struct config *config, unsigned int manid)
  	return NULL;
  }
  
-@@ -526,7 +411,7 @@ static void print_sd_cid(struct config *config, char *cid)
- 	unsigned int mdt_month;
- 	unsigned int mdt_year;
- 	unsigned int crc;
--	char *manufacturer = NULL;
-+	const char *manufacturer = NULL;
- 
- 	parse_bin(cid, "8u16a40a4u4u32u4r8u4u7u1r",
- 		&mid, &oid[0], &pnm[0], &prv_major, &prv_minor, &psn,
-@@ -585,7 +470,7 @@ static void print_mmc_cid(struct config *config, char *cid)
- 	unsigned int mdt_month;
- 	unsigned int mdt_year;
- 	unsigned int crc;
--	char *manufacturer = NULL;
-+	const char *manufacturer = NULL;
- 
- 	parse_bin(cid, "8u6r2u8u48a4u4u32u4u4u7u1r",
- 		&mid, &cbx, &oid, &pnm[0], &prv_major, &prv_minor, &psn,
-@@ -2220,11 +2105,14 @@ static int process_dir(struct config *config, enum REG_TYPE reg)
- 	char *type = NULL;
- 	int ret = 0;
- 
-+	config->ids_dir = getcwd(NULL, 0);
++static char *resolve_dev_path(const char *path)
++{
++	const char *devname = strrchr(path, '/');
++	char syspath[PATH_MAX];
++	char *resolved;
 +
- 	if (chdir(config->dir) < 0) {
- 		fprintf(stderr,
- 			"MMC/SD information directory '%s' does not exist.\n",
- 			config->dir);
--		return -1;
-+		ret = -1;
-+		goto err;
- 	}
++	devname = devname ? devname + 1 : path;
++	if (*devname == '\0')
++		return NULL;
++
++	if (snprintf(syspath, sizeof(syspath), "/sys/class/block/%s/device",
++		     devname) >= PATH_MAX)
++		return NULL;
++
++	resolved = malloc(PATH_MAX);
++	if (!resolved)
++		return NULL;
++
++	if (realpath(syspath, resolved) == NULL) {
++		fprintf(stderr, "Cannot resolve '%s': %s\n", path, strerror(errno));
++		free(resolved);
++		return NULL;
++	}
++
++	return resolved;
++}
++
+ /* MMC/SD file parsing functions */
+ static char *read_file(char *name)
+ {
+@@ -2151,6 +2178,21 @@ static int do_read_reg(int argc, char **argv, enum REG_TYPE reg)
+ 	if (ret)
+ 		return ret;
  
- 	type = read_file("type");
-@@ -2232,7 +2120,8 @@ static int process_dir(struct config *config, enum REG_TYPE reg)
- 		fprintf(stderr,
- 			"Could not read card interface type in directory '%s'.\n",
- 			config->dir);
--		return -1;
-+		ret = -1;
-+		goto err;
- 	}
- 
- 	if (strcmp(type, "MMC") && strcmp(type, "SD")) {
-@@ -2247,6 +2136,8 @@ static int process_dir(struct config *config, enum REG_TYPE reg)
- 
- err:
- 	free(type);
-+	free(config->ids_dir);
-+	config->ids_dir = NULL;
- 
- 	return ret;
- }
-diff --git a/multimediacard.ids b/multimediacard.ids
-new file mode 100644
-index 0000000..0c91118
---- /dev/null
-+++ b/multimediacard.ids
-@@ -0,0 +1,16 @@
-+# MMC manufacturer IDs
-+# This file is maintained at: https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
-+0x00 SanDisk
-+0x02 Kingston/SanDisk
-+0x03 Toshiba
-+0x05 Unknown
-+0x06 Unknown
-+0x11 Toshiba
-+0x13 Micron
-+0x15 Samsung/SanDisk/LG
-+0x37 KingMax
-+0x44 ATP
-+0x45 SanDisk Corporation
-+0x2c Kingston
-+0x70 Kingston
-+0xfe Micron
-diff --git a/sdcard.ids b/sdcard.ids
-new file mode 100644
-index 0000000..cbddcae
---- /dev/null
-+++ b/sdcard.ids
-@@ -0,0 +1,23 @@
-+# SD card (secure digital) manufacturer IDs
-+# This file is maintained at: https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
-+0x01 Panasonic
-+0x02 Toshiba/Kingston/Viking
-+0x03 SanDisk
-+0x08 Silicon Power
-+0x18 Infineon
-+0x1b Transcend/Samsung
-+0x1c Transcend
-+0x1d Corsair/AData
-+0x1e Transcend
-+0x1f Kingston
-+0x27 Delkin/Phison
-+0x28 Lexar
-+0x30 SanDisk
-+0x31 Silicon Power
-+0x33 STMicroelectronics
-+0x41 Kingston
-+0x6f STMicroelectronics
-+0x74 Transcend
-+0x76 Patriot
-+0x82 Gobe/Sony
-+0x89 Unknown
++	if (cfg.dir &&
++	    (strncmp(cfg.dir, "/dev/", 5) == 0 ||
++	     strncmp(cfg.dir, "/sys/block/", 11) == 0)) {
++		char *sysfs = resolve_dev_path(cfg.dir);
++
++		if (!sysfs) {
++			free(cfg.dir);
++			return -1;
++		}
++
++		free(cfg.dir);
++		cfg.dir = sysfs;
++		printf("sysfs: %s\n", cfg.dir);
++	}
++
+ 	if (cfg.dir) {
+ 		ret = process_dir(&cfg, reg);
+ 		free(cfg.dir);
 -- 
 2.53.0
 
