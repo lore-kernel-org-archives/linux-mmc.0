@@ -1,67 +1,68 @@
-Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BA55472795
-	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 10:49:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 224A447798E
+	for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 10:49:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1778842159; cv=none; b=KkZ0Oo3yCOhN9t4BBKBtAzwX7gKGlTeaGR8m2qu3vw0AYv9liAge8uW7MhuCQRzqVFUt0JbDxKyplfvGjsrWI1iLEBTg7+1M1AC1C1tQ8fIf8aj58Duahfr4eDDndBH9ISffjqJ29ZAqNWZGj23xnmgImSHLp3nbGze9UVZeAnM=
+	t=1778842161; cv=none; b=OQ9ZCKrTBiROo4iLmOh+fVTUjdJwpniuC79kFSzTNvViRRFvJ0jYNY8x7+W6bW6KNSSQBQ6fNfFoDW19QluyfNlnT0Bqd0sruqe1/SLV0QA3c9/33UvzG1NxAXn8HyW7k6tT0Kj6vMZtBf11/S0/sKWMuIdv4Qj9c6dHYpE+XSs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1778842159; c=relaxed/simple;
-	bh=3aSvx4Io/6wXnKYqIdHAgAeK+8aI7Ki0w9r0gL1YGe0=;
+	s=arc-20240116; t=1778842161; c=relaxed/simple;
+	bh=AE9piC3ZJIVgnZZvOh4UzzLQvqXylhoIUDIYukgk3Ic=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=MQTuJaAawLKvIlXuKVevIGHG5iuuiY0AayDsgAdMx3UDVZEWBC+H24hgLok2Giuxv6czBHVsN2Qb8ehwXjZCzN2PD9unc4UGl5qpisoPxBiA61WrjrwfsofMQwVKRemk605eg1JZLq6pI1SDar2ALxgf9NpBaxor6w4UdAtsnlk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=pj0AFU5C; arc=none smtp.client-ip=209.85.221.46
+	 In-Reply-To:To:Cc; b=oede4lqGGU68MdXmQuKGcXDLgQelCZMkBF3vebvFznFjgwTKLdNkl+xcrG5Yk+wh9VgshO0sV/wxYDUtfgq5qtoRI33SibwOoRPN1EkoA9ct83EGEzBm1W3UoJG4ZYdhum55cdfku0//TpYqyBGi83eCCEtYHsBunNJJvwT1WUM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kUUolopT; arc=none smtp.client-ip=209.85.221.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="pj0AFU5C"
-Received: by mail-wr1-f46.google.com with SMTP id ffacd0b85a97d-444826c16ffso7506993f8f.1
-        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 03:49:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kUUolopT"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-43d77f6092eso5636999f8f.2
+        for <linux-mmc@vger.kernel.org>; Fri, 15 May 2026 03:49:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1778842155; x=1779446955; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1778842157; x=1779446957; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=AWgPUQvxpgR7326ne226FMqTKp2lrFwP9NQdMcyNV50=;
-        b=pj0AFU5CAAWmpo84yypyC+6BIWQL3q+PbrdSliU8juXM3rnrGUZN7D13nc34keKXUm
-         ITQCfslo1KsYjSuGezfoy3Kb0w9lbJm2DwwN45MOpIHuT/o5pkXdwzgzM0JG1IoDe6Ez
-         edE/VR+igPmBDZ7IrjhfwjvYa5oBYkKSEK5oxHqDFD7wQihSyzGnAW3M0p/XdM/BgAsQ
-         DQNUEHpuKUtER4zQJQxdWeD6n3ObKNs2UdzQxrbprhpTtLYG5ihaIOS0MObvobHnfsMT
-         3l5rfUuj2InASfZBS3RUQcrNFF7JYE+N952dSy4pwUo9huTygQy2oFbZ5jB+NRJwOt6r
-         hKhw==
+        bh=Gj+gGcawYCc+wqAPbdfgxnVj/lSmz4s1J3fKvDtI2Ic=;
+        b=kUUolopT9xsGxxplp2VXQOi1IVUEFxzVppzxo8mllLj+Ze5BtSitl8aPJRXIWaVhWH
+         XEWDN7KG+CCdTOsOlIiMZ8HjFtdCjtXVlWeyL/WJQ5nvUNjvb+FwZxXTkhxJPqDANwRJ
+         FZh5fqnGPQEpz5GvKcoTOFmOcBrywmIHgNtVNxilfF/b4uHwZeAhrsGZqXqCpPMczL9O
+         /D5882D1cWairbXuo5wS8sWZ96LTyWY0q21nf4vMMaCQwPoX/DaecshakvLRW4Swpw+N
+         3RMs4yQqAtC5NP6wwzXsSSUuvFO4ndTU8Dmsjt0Tany5rgz6pbfuPgC8iYylAu1cVxpN
+         8V3g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1778842155; x=1779446955;
+        d=1e100.net; s=20251104; t=1778842157; x=1779446957;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=AWgPUQvxpgR7326ne226FMqTKp2lrFwP9NQdMcyNV50=;
-        b=FS9f3dhtYZq/3PCwVbrZxTCWKjTwHpMBTdLHSJIJ11tmS5QmNH8Wl7sU7mkEwWbWbT
-         7d2ZnNnkDPIKa9bQhdFHG/npHjReRVXQjQnET//Gdn9k7mYjJ7caOw7ROCMLBewmDH+k
-         n9Be9siFOVz9rkhDjZsRQixDTzK7zsXMIgYh7F0NX3MfBesUHr3Udb37nW0NKBgLE8iG
-         COsuhXzsziP3TaKrah18eMY3T5m2+KBWI13HSIHIxs5hwCkdfmbz/r1ZWNeIIS5BJ8Bg
-         h7NYi76sATVxJuB2q+DfrXqXumjhAO41M42CIhGRO9Yx7OyJjiGsOkLnt/FnYrH8gmwJ
-         lyUA==
-X-Forwarded-Encrypted: i=1; AFNElJ/N+SqaAzjguaXiCvDOrZPZktSyBpIUw2/av94BM6CthZ9nKxWj8fUqHKMHKNpbBUeyeu8jrXVwcVc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxf7zrZ44UNmAXMSIP54NtmUAGrtToUiEi1w6V4T3R+csZkbyNk
-	jz14Hg9966+W+n1TiCAVWrE6WPvvQzSnPZQeTU3uGeq5kVVQlZRefw/0kLnkzg==
-X-Gm-Gg: Acq92OHjpdveOBns2lr71tdbI7f+Nd4PGjUeD5l8S3/p9UoGiU5bIbHVJMbh61VsIFs
-	PffewcwWD/hJwUaeg/JrPeuREQ7oHsmqfH0vnR0h28B82WipD13ktjecVITbisZzoD9KTxBHCFQ
-	Bg6T0+IfAvB45Z2qn3emO0YCuGx9M3DmGZWMFWAw7VqSQZgLZ9Fjmmhjs0cW1TiRc2eTDiULNpx
-	hA/aPAxHOQraEcAKACsMqtlA4tb9ArBeCE3W6E6wGlebXuvp1y2xsUTqRZA94XVKyKCA6NEY0u9
-	Y1bjMMQO7eZRHJZ0BYIXuwfexuyokYQFv7ALoUcfbVvSJwvekxRkihSO5MTvKw98gQmI1VfexsU
-	bZ3psVzLDtMSDW1nlHnAAScyrsdzKGqcBPwGHmUBhteCLN6OGVkA//fIKXRY4ORCpZu6FsAxwO8
-	0cdtSe3h1viWV2PCZCBNAw+8EieangBgSRK6MJPHZ7K0qM1ZlSHP22TXN8Uf9yBSfiNQ==
-X-Received: by 2002:a05:6000:220b:b0:45d:d092:ac9c with SMTP id ffacd0b85a97d-45e5c59f691mr4788790f8f.33.1778842155465;
-        Fri, 15 May 2026 03:49:15 -0700 (PDT)
+        bh=Gj+gGcawYCc+wqAPbdfgxnVj/lSmz4s1J3fKvDtI2Ic=;
+        b=PI0RDr1zYgy9lQPUrurmRL1imZE/6cNuY+5J3b6dSfR3xBZkr+t2n0xSt8yMRwsoTT
+         cxZ8RIOoRAB1/X51pwSkK2eHlSwTWPmeB2sW3W+8Ba4wDvWUMI+stYaHzwxT6nt3ZBZL
+         IcmTi6R4BfKuYp4vfGTRiQRswVjAPqAKiTKGgRejm9AfWvF66UESIn4YgMq7vGlBDMl6
+         Dmy58qZd7T22jnCQu+pOYI5ZUTMXEvgmlh/rOMiey0SgxxtzLyx6544k5Hi4auNcOkwR
+         Wkas3enzaeC915a19pV9K/ahZHeCHk5b+HQ9i4e3Xr7Pq9vSrs3rqKi0P8aYOsfSYdkY
+         Y5Xg==
+X-Forwarded-Encrypted: i=1; AFNElJ/cYTm6N1BN7tJBmb4oQN4svzI3qSarXzEQYPdu2Wq5R0xl4GbfaC9VQ5cZeuWVHcVP0fyra8chRyI=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyc2St52IboMj2vmGURqz6VOAUb3vbs43tv4V+kfr0JFmkS/Jj8
+	4pA5vMAFAi2woO2BfPhE+2KrKmu8iDQiJ1ssyyO8lHG94pzQGkCYdxliVXUpSQ==
+X-Gm-Gg: Acq92OG7+hwJwEeyeGh1hV66Ufr8FHCzHoPKOZXeObQpPChZlN/+fPlTHoLx8Xs4gcE
+	+OlcHpGx3GFuIuTcsXyfmq6ySUjtlaJuloq4x3f8wdUmkZbl8tSnJDtgyMwrSeN2izKNh4b5J/N
+	+aOMPgFxOpfXQBd8U7F85n9vmOpYJp4WcPUnx2Ttvwsn9jJS0NXWWlKZKTv/iSQjvNkFsWG/AJs
+	RbmQ6ABztH7N+dSgIuU2iak6M4DZt45c19UkdBTQ26n5leNT/9kZ7IU15VU1MuaR2LJtkwqFpKh
+	2twDRuhRCCJQlmPoDyhaJz3DzRO85mmc49SE4nrbFIKfU+6lPd1o/lyKMnNJWGszEEdhVlpJ5NA
+	9VmyvpfY7N81p+wBqJDUTOzl98gEPFzqu9O3LdZxruqNlCOlfXjfw9Mr3oR11Iiupng0mJuziFY
+	j/h0CMumB3pCmq5ixSfvye8reBGpvPTEYhvmxQuob72RQFTT8vLt4qgU9mxWbA9GGggtWfTMmag
+	cKW
+X-Received: by 2002:a05:600c:34cf:b0:48e:5990:9698 with SMTP id 5b1f17b1804b1-48fe651588fmr49447535e9.24.1778842157464;
+        Fri, 15 May 2026 03:49:17 -0700 (PDT)
 Received: from ipedrosa-thinkpadx1carbongen12.rmtes.csb ([67.218.235.183])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-45d9ec3ac86sm13975602f8f.14.2026.05.15.03.49.13
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-45d9ec3ac86sm13975602f8f.14.2026.05.15.03.49.15
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 May 2026 03:49:15 -0700 (PDT)
+        Fri, 15 May 2026 03:49:17 -0700 (PDT)
 From: Iker Pedrosa <ikerpedrosam@gmail.com>
-Date: Fri, 15 May 2026 12:48:59 +0200
-Subject: [PATCH v10 1/4] riscv: dts: spacemit: k1: add SD card controller
- and pinctrl support
+Date: Fri, 15 May 2026 12:49:00 +0200
+Subject: [PATCH v10 2/4] riscv: dts: spacemit: k1-orangepi-rv2: add SD card
+ support with UHS modes
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -70,7 +71,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260515-orangepi-sd-card-uhs-v10-1-094af27e310d@gmail.com>
+Message-Id: <20260515-orangepi-sd-card-uhs-v10-2-094af27e310d@gmail.com>
 References: <20260515-orangepi-sd-card-uhs-v10-0-094af27e310d@gmail.com>
 In-Reply-To: <20260515-orangepi-sd-card-uhs-v10-0-094af27e310d@gmail.com>
 To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
@@ -88,100 +89,72 @@ Cc: Troy Mitchell <troy.mitchell@linux.dev>,
  Trevor Gamblin <tgamblin@baylibre.com>, Vincent Legoll <legoll@online.fr>
 X-Mailer: b4 0.14.3
 
-Add SD card controller infrastructure for SpacemiT K1 SoC with complete
-pinctrl support for both standard and UHS modes.
+Add complete SD card controller support with UHS high-speed modes.
 
-- Add sdhci0 controller definition with clocks, resets and interrupts
-- Add mmc1_cfg pinctrl for 3.3V standard SD operation
-- Add mmc1_uhs_cfg pinctrl for 1.8V UHS high-speed operation
-- Configure appropriate drive strength and power-source properties
+- Enable sdhci0 controller with 4-bit bus width
+- Configure card detect GPIO with GPIO_ACTIVE_LOW logic
+- Connect vmmc-supply to buck4 for 3.3V card power
+- Connect vqmmc-supply to aldo1 for 1.8V/3.3V I/O switching
+- Add dual pinctrl states for voltage-dependent pin configuration
+- Support UHS-I SDR25, SDR50, and SDR104 modes
+- Add stable MMC device aliases (mmc0 = eMMC, mmc1 = SD card)
 
-This provides complete SD card infrastructure that K1-based boards can
-enable.
+This enables full SD card functionality including high-speed UHS modes
+for improved performance.
 
 Tested-by: Anand Moon <linux.amoon@gmail.com>
 Tested-by: Trevor Gamblin <tgamblin@baylibre.com>
+Tested-by: Michael Opdenacker <michael.opdenacker@rootcommit.com>
 Tested-by: Vincent Legoll <legoll@online.fr>
-Reviewed-by: Troy Mitchell <troy.mitchell@linux.dev>
 Signed-off-by: Iker Pedrosa <ikerpedrosam@gmail.com>
 ---
- arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi | 40 ++++++++++++++++++++++++++++
- arch/riscv/boot/dts/spacemit/k1.dtsi         | 13 +++++++++
- 2 files changed, 53 insertions(+)
+ arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts | 22 +++++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
 
-diff --git a/arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi b/arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi
-index 34d88334e95e..4e9a62d0e85b 100644
---- a/arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi
-+++ b/arch/riscv/boot/dts/spacemit/k1-pinctrl.dtsi
-@@ -590,4 +590,44 @@ ssp3-0-frm-pins {
- 			power-source = <3300>;
- 		};
+diff --git a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts b/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
+index c95ca38e3d4a..bd40bc9011e2 100644
+--- a/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
++++ b/arch/riscv/boot/dts/spacemit/k1-orangepi-rv2.dts
+@@ -17,6 +17,8 @@ aliases {
+ 		serial0 = &uart0;
+ 		ethernet0 = &eth0;
+ 		ethernet1 = &eth1;
++		mmc0 = &emmc;
++		mmc1 = &sdhci0;
  	};
-+
-+	mmc1_cfg: mmc1-cfg {
-+		mmc1-data-cmd-pins {
-+			pinmux = <K1_PADCONF(104, 0)>,   /* mmc1_d3 */
-+				 <K1_PADCONF(105, 0)>,   /* mmc1_d2 */
-+				 <K1_PADCONF(106, 0)>,   /* mmc1_d1 */
-+				 <K1_PADCONF(107, 0)>,   /* mmc1_d0 */
-+				 <K1_PADCONF(108, 0)>;   /* mmc1_cmd */
-+			bias-pull-up = <1>;
-+			drive-strength = <19>;
-+			power-source = <3300>;
-+		};
-+
-+		mmc1-clk-pins {
-+			pinmux = <K1_PADCONF(109, 0)>;   /* mmc1_clk */
-+			bias-pull-down = <1>;
-+			drive-strength = <19>;
-+			power-source = <3300>;
-+		};
-+	};
-+
-+	mmc1_uhs_cfg: mmc1-uhs-cfg {
-+		mmc1-data-cmd-pins {
-+			pinmux = <K1_PADCONF(104, 0)>,   /* mmc1_d3 */
-+				 <K1_PADCONF(105, 0)>,   /* mmc1_d2 */
-+				 <K1_PADCONF(106, 0)>,   /* mmc1_d1 */
-+				 <K1_PADCONF(107, 0)>,   /* mmc1_d0 */
-+				 <K1_PADCONF(108, 0)>;   /* mmc1_cmd */
-+			bias-pull-up = <1>;
-+			drive-strength = <42>;
-+			power-source = <1800>;
-+		};
-+
-+		mmc1-clk-pins {
-+			pinmux = <K1_PADCONF(109, 0)>;   /* mmc1_clk */
-+			bias-pull-down = <1>;
-+			drive-strength = <42>;
-+			power-source = <1800>;
-+		};
-+	};
- };
-diff --git a/arch/riscv/boot/dts/spacemit/k1.dtsi b/arch/riscv/boot/dts/spacemit/k1.dtsi
-index 24becab4c959..06469c364eef 100644
---- a/arch/riscv/boot/dts/spacemit/k1.dtsi
-+++ b/arch/riscv/boot/dts/spacemit/k1.dtsi
-@@ -1214,6 +1214,19 @@ usb_dwc3: usb@c0a00000 {
- 				status = "disabled";
+ 
+ 	chosen {
+@@ -202,7 +204,7 @@ buck6 {
+ 				regulator-always-on;
  			};
  
-+			sdhci0: mmc@d4280000 {
-+				compatible = "spacemit,k1-sdhci";
-+				reg = <0x0 0xd4280000 0x0 0x200>;
-+				clocks = <&syscon_apmu CLK_SDH_AXI>,
-+					 <&syscon_apmu CLK_SDH0>;
-+				clock-names = "core", "io";
-+				resets = <&syscon_apmu RESET_SDH_AXI>,
-+					 <&syscon_apmu RESET_SDH0>;
-+				reset-names = "axi", "sdh";
-+				interrupts = <99>;
-+				status = "disabled";
-+			};
+-			aldo1 {
++			aldo1: aldo1 {
+ 				regulator-min-microvolt = <500000>;
+ 				regulator-max-microvolt = <3400000>;
+ 				regulator-boot-on;
+@@ -319,3 +321,21 @@ hub_3_0: hub@2 {
+ 		vdd-supply = <&vcc_5v0>;
+ 	};
+ };
 +
- 			emmc: mmc@d4281000 {
- 				compatible = "spacemit,k1-sdhci";
- 				reg = <0x0 0xd4281000 0x0 0x200>;
++&sdhci0 {
++	pinctrl-names = "default", "uhs";
++	pinctrl-0 = <&mmc1_cfg>;
++	pinctrl-1 = <&mmc1_uhs_cfg>;
++	bus-width = <4>;
++	cd-gpios = <&gpio K1_GPIO(80) GPIO_ACTIVE_LOW>;
++	no-mmc;
++	no-sdio;
++	disable-wp;
++	cap-sd-highspeed;
++	vmmc-supply = <&buck4_3v3>;
++	vqmmc-supply = <&aldo1>;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
++	status = "okay";
++};
 
 -- 
 2.54.0
