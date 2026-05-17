@@ -1,178 +1,245 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com [209.85.208.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 922A43C3452
-	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 18:25:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779042348; cv=none; b=o2OetnZphY5tl/21WcM3JPKkS5UO57y36nUg1iuUMjz0rumVXjuvwXHdytpA8FL6XaETp5ZhKDt/L2NgmgUtAa301U7dExQqEPh8KstSqw7/8JFTklGWHhNxwiHEDQvDWhLAGGahqmy+Zu4JxZI/+4/Yl95JdivyFASqF52LpBg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779042348; c=relaxed/simple;
-	bh=C5/4AuL6dHCuR+PvSd4Li62LFYfLWCvoVixDNatHrQw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=u3oFHUigcAEIMGlWdRfbsWU+ZoLlQWYBM4sezHZXXZaq9ejD2B9du4Ayv4gzB9heN2zCZC3n9HCsJzR/fiabs75/ppVYtcGZEvjnqW9MjunsL3sdKVZLtV+glYytll3QWrqIw68hvGkS8zqUc+FJ/sCGlou87BqPQIaOop6Vrxg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=mAmwSLz8; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=GbVIfd7U; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A759405F7
+	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 19:00:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.46
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779044440; cv=pass; b=ANfPopbxIPEZsntsfkKcLqCQaw/J7AUibrdF+CHB5aLAb8sndvF1bmRsEjtKDtwonKfU1ybD9mhCURjq6NQFJ7hAT2QPIx0gpPIOVnA4efN4MnR//50SSgzokyQB2NNXcaegPlS5DT0y0MyVwjWKxFzCBaZUlge0wH2LoNc5laI=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779044440; c=relaxed/simple;
+	bh=6Pu8ZFw5nRrpXUt8iauCXEouB2tgpYnUpfnYcSMw3nM=;
+	h=From:References:MIME-Version:In-Reply-To:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ToVf8EbJBpi6RD81omtDA8wtguR5PmplIFUh5tPECiw9F6yx4FutmQ9vimD1AlvlSL411Su/wSvnZCOYgdQi4fmw1AMnRpOjCrtgSTUh5Mg8QF1klKZYorigOvPe0PBIOS3IUpAokHhC5cpvAtUZVnXJX662TAtfeSKbAwgtewU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b=pPPgz4Z+; arc=pass smtp.client-ip=209.85.208.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="mAmwSLz8";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="GbVIfd7U"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64HCS3X73512430
-	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 18:25:38 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	0hIgd5emPImxsCYoDNvc3nRtQaDZundm1lfilHY8CfE=; b=mAmwSLz8eHCshU3L
-	eVkVOLIP4k8QCd64PSX3UV2BqIP/+5RGoRu4VpWbR4zqiZFT4utbPSj31iqzKLDG
-	rQOYJkV9fv3zZSOz6DLJcG67gLeulTtC4TegOYSv06GcGxTAmyxkqSYnySHzNbO0
-	np5Dcu5glYGjMQCeiWoWdQt1JSp44ZPmqnEMQq7a2IEDlMv55M8UH2t+IMKVSUkF
-	58M+j9wtnu/8fpsHUvOauNw68pNLVGZwgcjl5OMkM0LU1c+HETUZwGZ99nNo2wD4
-	0hyT6fFxAn5gBagZ1npAsWXPeGzg5k0tije10qv21chQXHYn6MszILHrIrHV5Q1d
-	FPobaA==
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4e6gx6ub91-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 18:25:38 +0000 (GMT)
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-36781927b4dso3174283a91.0
-        for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 11:25:38 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b="pPPgz4Z+"
+Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-67cd93d8affso2033619a12.2
+        for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 12:00:38 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1779044437; cv=none;
+        d=google.com; s=arc-20240605;
+        b=aIDYxDSidgDBuyA5xVCZLNI1AFEMZzn4+h8Q7Qp5aS+bKFZPS2NMyb/O6/cwXcQ1uk
+         Lssmd0s49RT8E04shEy0N3p3o+0kfug7YkZN243hjsyEOCWY1NbjeOo3Xb5wV0Su+iaR
+         wnTVf+rHp+QhymhKd5qJMsHdjdTLaHD7u9R/xVUqjbZKy2y6e+9xYdqzVZ6NM2Qj24fq
+         56tNmbrWBqEGgrdMoIHc7sOdUM7gDHbxGFVkeAqFFBBTd50IWD6bigwWg4TVkrGEgDdF
+         NyBdd4iGFmj4zoVUAB5xo1AhO/7AoSi9iu+wEU6Dc/pCw+Jkrr2Ef36bsL7u9mLHSkNk
+         x6fQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=cc:to:subject:message-id:date:in-reply-to:mime-version:references
+         :from:dkim-signature;
+        bh=1JphhE5f2R3RqqlFjJRdSApyosT8RlyHaJ2EQJNTHbI=;
+        fh=j7ocOvIlrcwSuADXjBbbMjjt+RePUzY2fOsaUf1iagQ=;
+        b=JTrxMzW7aRV9+sqA8HFtPL4sGCF+cx1m4W/7NueM3fLomxIWni7ejWBA22ryl9Rn/s
+         16z3StMKY6QQlTSIT751Vr4056TPCNyC7mooZj83W9f/uTWYWgfeHN9i1jpWh0Y15z3M
+         x35CP9r5s3l9YfyM07J00nCOZ3Bu/UC29hWVXxBAWa5soQ8fN3ZtKqZ2CAARgWjXXUf+
+         mlpAdV/I1ZSyT5J3JYY94g6UPSv4Qq8MwIj3jZXiZRnzrJLehtlm59sxuMTCfkwtApbg
+         BGRNfExipe7L1z41EzWwqnAFQr1aURud75TZwGUvq+QLiw+r28+OYBAoqy4T+ovgewqk
+         kKnQ==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1779042338; x=1779647138; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=0hIgd5emPImxsCYoDNvc3nRtQaDZundm1lfilHY8CfE=;
-        b=GbVIfd7URe/MPK2mdspM8c2XzfNfS3esaSilyc9rbYmR4+MBBXU83d3ulo2qSIygPN
-         0GoPJv93ILZh9uyE0DNpn5zbcWxoXKquVakZnGF2u5b5srHHvb2rS8WWjnmIRt10LfVE
-         tn3FlyMHWNbpi8QtbKeMKMojX/oDP95jr0HAf6NORYKMiBhm8SrJP/oaUf3xfEHN24ZK
-         fht6JZn5I4DlkdMbkKv+srRkxmdZgX25jHkOUA5tEZZZ3EDGb1bUGCZ20zI2rKxCSq1s
-         BqgIOQCYewAMVyVbG+2Ht2m+WMutO1+ddggl09vHxLwRdiccmcqNubHoxLCySqAlc8qj
-         Su3Q==
+        d=baylibre-com.20251104.gappssmtp.com; s=20251104; t=1779044437; x=1779649237; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:in-reply-to:mime-version:references
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=1JphhE5f2R3RqqlFjJRdSApyosT8RlyHaJ2EQJNTHbI=;
+        b=pPPgz4Z+xn+jWVyeCOYNOJ1yhFTSklxinnR/S3/9XR4aKOzuvx/6+n3IVnOm+eq0Cz
+         Of/q8FDC8n9tqVAAICKONzaxFa/iqWFSSPv9EVDsFqPRJoXrCfb3KawDt5+IgKgALT17
+         2UXNVpPzpRN3QOgZZWHqIzafQP+jPfUwW4nblO92TnpAhk0vZ3SjVcdH1pR38PhpoBpp
+         0v0yHgps/7yqR2SPOneN9qVf4RiAGryIeBegm3ehDcjWHOYAOhlo7mQnwzQzTH4qgPcj
+         U4ksTVJhl4s1GsYzEm+w2PwWcAzbmO/tfmEr7r1t6MKtKCmbjIy6preAUXJBVKNBRm6A
+         HmVQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779042338; x=1779647138;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20251104; t=1779044437; x=1779649237;
+        h=cc:to:subject:message-id:date:in-reply-to:mime-version:references
+         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=0hIgd5emPImxsCYoDNvc3nRtQaDZundm1lfilHY8CfE=;
-        b=EPsq819AHndScyMdcsgx0TeNQeUDbNoRvQNtVNZ4hHyv3H4Iu8rMEJKOwQyqwU5Jm+
-         2dMgysCKcKg5QcJZwbMXNk9RD0enieqKbYHlkCJ2dmE40tLPt8ZMXmiek2TyK5oMXIXq
-         gXAGTO4DGFArPua7fr5IlBqsWKpMSKMbQzz0k6Ij+MLM2kbTbdkPw9aZ1p1EN6zDzILx
-         lXxQSOdCm/GqCb55kZKcobt8n6bbGiUal8PntiQgTydJNYxhuxa6NC/b670ClMip2PPM
-         0KQLuG/Z8dLdM6ISEln7hT912Efwvcos+C1y0UXENyB24svUznWji9NpkSa5Aj3R9bNQ
-         G2Vg==
-X-Forwarded-Encrypted: i=1; AFNElJ9YWnOVq+bOrDbTJ/lGOTx/aaUSVUMWObtOq2lzRBXXcvxAf5aHsVhDAdRLRwS7/zB6g6KzOpgGGBk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxi0/e4HpuUFSdAdouaILORVSRBBYE5qETXGABwBtiqw6PFA/rH
-	ToIJHbeZQOnWnqb1B1s0EYXTh/3wPuREIR0S5NiW6E6ltBWCdUYJA7n+vnluKhUWMA4ERY9Y6Qk
-	DEIQF/sYS7NBLTbpn4M5/u39+wtM48wT3OoCkwdP7+ZntHu9eGeMmpdGBmRqbZhI=
-X-Gm-Gg: Acq92OGF8RSgVCKoV2BXDd4u5/1gXzOG4I/OTgcTGMEPwbBuReJdfoAs4lvN/y2iTRT
-	5KbHbB5JBc6J2Uz9CCQHc8zonmVT6EtWEnKYgSPYwZod5lNjVdNstLLcaD9e8GYhRlU2h2sRw3a
-	+MU/bAZzrszuB4ZE8HfUKynRPxRUKIJx2qXEwaxOeTC2zwVANRu2PHYFhGjHlu71LCynoG6yGkM
-	jzPsy0vERJnG74gaHRJ+9o92/eF+ySfF2sDSFyzRd0xoJt2stIQWtcGZ8YJTzKqIewQ8IZu9Bik
-	9tTjjyFDlkwE3E3As++2typVq+zTEhTQv7oV92FFWyt5oacRDZTwNmrQ4PVmf7b2ys/yyWIRtix
-	FNZeaoHFaIa6OAgLHOMPNMINhVBh9bKr3gy0WboTLTNRH7PXmWjE=
-X-Received: by 2002:a17:90b:57c7:b0:365:7e4d:bcb8 with SMTP id 98e67ed59e1d1-369519cdb59mr11841965a91.1.1779042338041;
-        Sun, 17 May 2026 11:25:38 -0700 (PDT)
-X-Received: by 2002:a17:90b:57c7:b0:365:7e4d:bcb8 with SMTP id 98e67ed59e1d1-369519cdb59mr11841940a91.1.1779042337545;
-        Sun, 17 May 2026 11:25:37 -0700 (PDT)
-Received: from [192.168.29.166] ([49.43.235.85])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-36951278e7fsm8478759a91.8.2026.05.17.11.25.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 17 May 2026 11:25:36 -0700 (PDT)
-Message-ID: <68dc84ac-794d-49e5-a834-e7a582753b07@oss.qualcomm.com>
-Date: Sun, 17 May 2026 23:55:25 +0530
+        bh=1JphhE5f2R3RqqlFjJRdSApyosT8RlyHaJ2EQJNTHbI=;
+        b=nyYlsgKBXkdfjwbXG8v7dY5+GJDYY23H+8osqRJ+GJ8UPS8li8DsKrdd1L3mY0ViPW
+         qgHdtD5O2SLmso2Z2qKyNdOroBA5oomLbkhq0nZ3szF+xcWCvgGwWDmPGUW3p+ccHANU
+         GeUZtuWaNm/wumcz3efX8A1MzMjTZlRXVedu1AGXQ8rzGsvFEpe+M9lacva48wmW/Sf1
+         XrTLpyBuQEdoQHQfN4yszmcGAE4PvK6gMReE6eG6aZgu3UJ1KgFR7nhILWW8bJIZYCvP
+         EAKTOM9Li10CQbe3n9vQrR4UWHbpA6+Xdozr7JbpXqnuxSTAC0WD/HkLoMbXkEQ8JLhu
+         HgPQ==
+X-Forwarded-Encrypted: i=1; AFNElJ/fdQVdE1zwKhCx7+t6gCR5exc8j7pEQKCMpqGaL2yU44Mjd9NGlcUAf0E9kcPt8s19Mn2WPmeUiec=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx/zuvYVf6YO9M6emj3mEW8/JTZ4eU06QJp/oIDE2YXeRpy5f35
+	K59sw24lrjb9WZ4FVbzALdKpFTV4Nhg7GVrCLf8SsYgX+Z4P3AJwd5wxaTb1Em5+sGh0drpBZ2w
+	Rpw9wOzJ/iWp+UqKlxz7pUj6zO+n24j6YC3lag7TCmg==
+X-Gm-Gg: Acq92OGA+bnJ6jri70Xx/EfRLbBUzSw1TusCbMiswxnFqk07/nJwtJEm6htWDYNpK5T
+	tb1tEX3JK1VwUBFAVsbp3s/FIAI0YkGbGsASEuzV8laGPx2SyMc0i4y3RWea1pBINdvnZkNBcPC
+	T3ZFMq8UJHzt3oBpO0XKOFCl/5n3F8orSUrtEoMtaWAtj9YBw4EIILZeuGh0HiDXHFtrUfoKujQ
+	kAlYx+TLxLumSVRCLo9SUg+gUVTErVYPjkrVlYf7n3kVa4S6ut9OZ/QN2Qkk+WXDX08yZxf1rUe
+	E2eP38Qca1A0lUDNRqk6JOKOGVhjgfdrZpYp
+X-Received: by 2002:a17:907:2da1:b0:bd5:b26:52d6 with SMTP id
+ a640c23a62f3a-bd5177d78c9mr654774966b.5.1779044436258; Sun, 17 May 2026
+ 12:00:36 -0700 (PDT)
+Received: from 753933720722 named unknown by gmailapi.google.com with
+ HTTPREST; Sun, 17 May 2026 12:00:35 -0700
+Received: from 753933720722 named unknown by gmailapi.google.com with
+ HTTPREST; Sun, 17 May 2026 12:00:35 -0700
+From: Angelo Dureghello <adureghello@baylibre.com>
+References: <20260506142644.3234270-2-gerg@kernel.org> <20260506142644.3234270-6-gerg@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/4] arm64: dts: qcom: Introduce Shikra SoC base dtsi
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
- <conor+dt@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Wesley Cheng <quic_wcheng@quicinc.com>, Ulf Hansson <ulfh@kernel.org>
-Cc: linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-mmc@vger.kernel.org, Imran Shaik <imran.shaik@oss.qualcomm.com>,
-        Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>,
-        Monish Chunara <quic_mchunara@quicinc.com>,
-        Rakesh Kota <rakesh.kota@oss.qualcomm.com>,
-        Raviteja Laggyshetty <raviteja.laggyshetty@oss.qualcomm.com>,
-        Sneh Mankad <sneh.mankad@oss.qualcomm.com>,
-        Vishnu Santhosh <vishnu.santhosh@oss.qualcomm.com>,
-        Xueyao An <xueyao.an@oss.qualcomm.com>
-References: <20260512-shikra-dt-v1-0-716438330dd0@oss.qualcomm.com>
- <20260512-shikra-dt-v1-2-716438330dd0@oss.qualcomm.com>
- <ced00124-9ba2-49ca-9200-62abd6ac3340@oss.qualcomm.com>
-Content-Language: en-US
-From: Komal Bajaj <komal.bajaj@oss.qualcomm.com>
-In-Reply-To: <ced00124-9ba2-49ca-9200-62abd6ac3340@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-ORIG-GUID: 6oE9FZKi8RqNzdm8H9dpJwafJF0tBO1s
-X-Authority-Analysis: v=2.4 cv=f614wuyM c=1 sm=1 tr=0 ts=6a0a0822 cx=c_pps
- a=RP+M6JBNLl+fLTcSJhASfg==:117 a=g4/7f0GlZvY0MGcqtTB0Sw==:17
- a=IkcTkHD0fZMA:10 a=NGcC8JguVDcA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=eoimf2acIAo5FJnRuUoq:22
- a=EUspDBNiAAAA:8 a=91D59dQ6MEgKE8FQPpwA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=iS9zxrgQBfv6-_F4QbHw:22
-X-Proofpoint-GUID: 6oE9FZKi8RqNzdm8H9dpJwafJF0tBO1s
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTE3MDE5OCBTYWx0ZWRfX68jqEfO8vSmA
- zB7TwHPMyIxJpDFohB1KdP6CoWJu/GgNLsNBXgHyDzvDjrQXOSfgJlkuuphx5rLRRfEBq0RsxNn
- hHXc7OtD9pVMPZDBirQn2NSjiOd//Ob0Nfq034E/CIxo46iHg75Ah5p/cXHIcSxf49s35qhy//N
- LDRGieML8P/dMFx17oVATY7hmfl5pyBKqwBLdBY/GmlgXbmZdWdGNhkcTLey9vkHPi34RHPGbGh
- m1b/EeKRk9MnILxuKSq1w0AnYqk+35G4F1kIXL6wKOPzGoJ2t+MtteYTcmdJIfPTtWXqGO66/Zi
- 5AdPm8SOxwcW77YEOAYd6iMfBcrna2bNhIiW4cVoLo29n7W8LxSSblNNKro8URhj47gFpS4CD6q
- JLn0cPGHtfoOmYYl7tQYAuVrq+03ZPNvZYyARHqfCrSTbDVLQ7p4OzQEWz6d36nfFeODDlf0Fbc
- N+Uej0a//0SgnfhJ+/g==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-17_04,2026-05-15_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 adultscore=0 bulkscore=0 clxscore=1015 malwarescore=0
- spamscore=0 suspectscore=0 impostorscore=0 phishscore=0 priorityscore=1501
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2605130000 definitions=main-2605170198
+In-Reply-To: <20260506142644.3234270-6-gerg@kernel.org>
+Date: Sun, 17 May 2026 12:00:35 -0700
+X-Gm-Features: AVHnY4JWE7dTwHmdk1WFCo-5y5V_ABFrYGVfcGaUQK_jNNfZ8FP0HbytljKloS0
+Message-ID: <CALSJ-wDuXfMzV=Ydic-2S=2v+jbe034gqmy+wr-R1d14LBxuFQ@mail.gmail.com>
+Subject: Re: [RFC 3/4] mmc: sdhci-esdhc-mcf: do not use readl()/writel() on ColdFire
+To: Greg Ungerer <gerg@kernel.org>
+Cc: linux-m68k@lists.linux-m68k.org, linux-kernel@vger.kernel.org, 
+	arnd@kernel.org, Greg Ungerer <gerg@linux-m68k.org>, adureghello@baylibre.com, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 5/15/2026 4:07 PM, Konrad Dybcio wrote:
-> On 5/12/26 6:08 AM, Komal Bajaj wrote:
->> Add initial device tree support for the Qualcomm Shikra SoC,
->> an IoT-focused platform built around a heterogeneous CPU cluster
->> (Cortex-A55 + Cortex-A78C) with RPM-based power and clock management.
-> [...]
+Hi Greg,
+
+On Thu, May 07, 2026 at 12:26:46AM +1000, Greg Ungerer wrote:
+> From: Greg Ungerer <gerg@linux-m68k.org>
 >
->> +	pmu {
->> +		compatible = "arm,armv8-pmuv3";
->> +		interrupts = <GIC_PPI 5 IRQ_TYPE_LEVEL_HIGH>;
-> Considering there's 2 core types, you may need something like:
+> The implementation of the readX() and writeX() family of IO access
+> functions is non-standard on ColdFire platforms. They check the supplied
+> IO address and will return either big or little endian results based on
+> that check. This is non-standard, they are expected to always return
+> little-endian byte ordered data. Unfortunately this behavior also means
+> that ioreadX()/iowroteX() and their big-endian counter parts
+> ioreadXbe()/iowriteXbe() are wrong. This is now in the process of being
+> cleaned up and fixed.
 >
-> 9ce52e908bd5 ("arm64: dts: qcom: sm8650: switch to interrupt-cells 4 to add PPI partitions")
-> 2c06e0797c32 ("arm64: dts: qcom: sm8650: add PPI interrupt partitions for the ARM PMUs")
-
-Thanks for the pointer. I’ll update this to add the required PPI 
-partitions, following the SM8650 approach.
-
+> Change the use of the readX() and writeX() access functions in this driver
+> to use the recently defined specific ColdFire internal SoC hardware IO
+> access functions mcf_read8()/mcf_read16()/mcf_read32() and
+> mcf_write8()/mcf_write16()/mcf_write32().
 >
->> +	};
->> +
->> +	psci: psci {
-> Unused label, please drop
-
-Sure, will drop it in next instance.
-
-Thanks
-Komal
-
+> There is no functional change to the driver. Though it does have the
+> effect of making the IO access slightly more efficient, since there is
+> no longer a need to do the address check at every register access.
 >
-> otherwise:
+> Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-mcf.c | 24 ++++++++++++------------
+>  1 file changed, 12 insertions(+), 12 deletions(-)
 >
-> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+> Note that the patches to introduce mcf_readX() and mcf_writeX functions
+> are not in mainline yet. They are currently in the m68knommu git tree
+> for-next branch, and so should also be in linux-next.
 >
-> Konrad
+> diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
+> index 375fce5639d7..6853521e8b2c 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-mcf.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
+> @@ -55,7 +55,7 @@ static inline void esdhc_clrset_be(struct sdhci_host *host,
+>  	if (reg == SDHCI_HOST_CONTROL)
+>  		val |= ESDHC_PROCTL_D3CD;
+>
+> -	writel((readl(base) & ~mask) | val, base);
+> +	mcf_write32((mcf_read32(base) & ~mask) | val, base);
+>  }
+>
+>  /*
+> @@ -71,7 +71,7 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
+>  	if (reg == SDHCI_HOST_CONTROL) {
+>  		u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
+>  		u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
+> -		u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
+> +		u8 tmp = mcf_read8(host->ioaddr + SDHCI_HOST_CONTROL + 1);
+>
+>  		tmp &= ~0x03;
+>  		tmp |= dma_bits;
+> @@ -82,12 +82,12 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
+>  		 */
+>  		host_ctrl |= val;
+>  		host_ctrl |= (dma_bits << 8);
+> -		writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+> +		mcf_write32(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+>
+>  		return;
+>  	}
+>
+> -	writel((readl(base) & mask) | (val << shift), base);
+> +	mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
+>  }
+>
+>  static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
+> @@ -110,24 +110,24 @@ static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
+>  		 * As for the fsl driver,
+>  		 * we have to set the mode in a single write here.
+>  		 */
+> -		writel(val << 16 | mcf_data->aside,
+> +		mcf_write32(val << 16 | mcf_data->aside,
+>  		       host->ioaddr + SDHCI_TRANSFER_MODE);
+>  		return;
+>  	}
+>
+> -	writel((readl(base) & mask) | (val << shift), base);
+> +	mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
+>  }
+>
+>  static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
+>  {
+> -	writel(val, host->ioaddr + reg);
+> +	mcf_write32(val, host->ioaddr + reg);
+>  }
+>
+>  static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
+>  {
+>  	if (reg == SDHCI_HOST_CONTROL) {
+>  		u8 __iomem *base = host->ioaddr + (reg & ~3);
+> -		u16 val = readw(base + 2);
+> +		u16 val = mcf_read16(base + 2);
+>  		u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
+>  		u8 host_ctrl = val & 0xff;
+>
+> @@ -137,7 +137,7 @@ static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
+>  		return host_ctrl;
+>  	}
+>
+> -	return readb(host->ioaddr + (reg ^ 0x3));
+> +	return mcf_read8(host->ioaddr + (reg ^ 0x3));
+>  }
+>
+>  static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
+> @@ -149,14 +149,14 @@ static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
+>  	if (reg == SDHCI_HOST_VERSION)
+>  		reg -= 2;
+>
+> -	return readw(host->ioaddr + (reg ^ 0x2));
+> +	return mcf_read16(host->ioaddr + (reg ^ 0x2));
+>  }
+>
+>  static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
+>  {
+>  	u32 val;
+>
+> -	val = readl(host->ioaddr + reg);
+> +	val = mcf_read32(host->ioaddr + reg);
+>
+>  	/*
+>  	 * RM (25.3.9) sd pin clock must never exceed 25Mhz.
+> @@ -245,7 +245,7 @@ static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
+>  	 * fvco = fsys * outdvi1 + 1
+>  	 * fshdc = fvco / outdiv3 + 1
+>  	 */
+> -	temp = readl(pll_dr);
+> +	temp = mcf_read32(pll_dr);
+>  	fsys = pltfm_host->clock;
+>  	fvco = fsys * ((temp & 0x1f) + 1);
+>  	fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);
+> --
+> 2.54.0
+>
 
+Tested this now on stmark2, sdcard mount/umount/read/write/erase works
+as usual. Thanks.
+
+Acked-by: Angelo Dureghello <adureghello@baylibre.com>
+Tested-by: Angelo Dureghello <adureghello@baylibre.com>
+
+
+reagrds,
+angelo
