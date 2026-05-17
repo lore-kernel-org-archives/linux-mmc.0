@@ -1,245 +1,372 @@
-Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com [209.85.208.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A759405F7
-	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 19:00:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.208.46
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779044440; cv=pass; b=ANfPopbxIPEZsntsfkKcLqCQaw/J7AUibrdF+CHB5aLAb8sndvF1bmRsEjtKDtwonKfU1ybD9mhCURjq6NQFJ7hAT2QPIx0gpPIOVnA4efN4MnR//50SSgzokyQB2NNXcaegPlS5DT0y0MyVwjWKxFzCBaZUlge0wH2LoNc5laI=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779044440; c=relaxed/simple;
-	bh=6Pu8ZFw5nRrpXUt8iauCXEouB2tgpYnUpfnYcSMw3nM=;
-	h=From:References:MIME-Version:In-Reply-To:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ToVf8EbJBpi6RD81omtDA8wtguR5PmplIFUh5tPECiw9F6yx4FutmQ9vimD1AlvlSL411Su/wSvnZCOYgdQi4fmw1AMnRpOjCrtgSTUh5Mg8QF1klKZYorigOvPe0PBIOS3IUpAokHhC5cpvAtUZVnXJX662TAtfeSKbAwgtewU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b=pPPgz4Z+; arc=pass smtp.client-ip=209.85.208.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C90B2F7EE9
+	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 19:06:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779044779; cv=none; b=grlsrWL8R1MC5sMXh3e10m3o4aJcfyxIEIYP+iLtYSP/8Tgyx/z05Lb8PXDkFEWYJwZ+I0iboPH57LiXy6Y2GUYi0BVtvzCdNjhgkalOA0Rup5DFkFH96MVhCm3BOorzGtH4opHpVyQcn85bXASr/8Fn8W1nSAaS/0C1oGo3qmM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779044779; c=relaxed/simple;
+	bh=/x9LxNzmS5J8ypNDdwjQsG84LV/SknFWY/zG7E8fPZE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=odDGVyLS1sWQFnEuaEnwXVx/yq0jQlyUpyrwDYm/fU9x68B9rG7BUhODavQrIFXe64Bu0dyhkqZsE5WBaCO+Qul3ekSlGjTYGFobX49BImnbvbbm5cKY7Dmgv1rwC3dxvUyB3CSM5ESIqVCGyClQTzuFXsvWVagc4OyfyM9GihE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ACmHOvnp; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=R3mzC2R/; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20251104.gappssmtp.com header.i=@baylibre-com.20251104.gappssmtp.com header.b="pPPgz4Z+"
-Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-67cd93d8affso2033619a12.2
-        for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 12:00:38 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1779044437; cv=none;
-        d=google.com; s=arc-20240605;
-        b=aIDYxDSidgDBuyA5xVCZLNI1AFEMZzn4+h8Q7Qp5aS+bKFZPS2NMyb/O6/cwXcQ1uk
-         Lssmd0s49RT8E04shEy0N3p3o+0kfug7YkZN243hjsyEOCWY1NbjeOo3Xb5wV0Su+iaR
-         wnTVf+rHp+QhymhKd5qJMsHdjdTLaHD7u9R/xVUqjbZKy2y6e+9xYdqzVZ6NM2Qj24fq
-         56tNmbrWBqEGgrdMoIHc7sOdUM7gDHbxGFVkeAqFFBBTd50IWD6bigwWg4TVkrGEgDdF
-         NyBdd4iGFmj4zoVUAB5xo1AhO/7AoSi9iu+wEU6Dc/pCw+Jkrr2Ef36bsL7u9mLHSkNk
-         x6fQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=cc:to:subject:message-id:date:in-reply-to:mime-version:references
-         :from:dkim-signature;
-        bh=1JphhE5f2R3RqqlFjJRdSApyosT8RlyHaJ2EQJNTHbI=;
-        fh=j7ocOvIlrcwSuADXjBbbMjjt+RePUzY2fOsaUf1iagQ=;
-        b=JTrxMzW7aRV9+sqA8HFtPL4sGCF+cx1m4W/7NueM3fLomxIWni7ejWBA22ryl9Rn/s
-         16z3StMKY6QQlTSIT751Vr4056TPCNyC7mooZj83W9f/uTWYWgfeHN9i1jpWh0Y15z3M
-         x35CP9r5s3l9YfyM07J00nCOZ3Bu/UC29hWVXxBAWa5soQ8fN3ZtKqZ2CAARgWjXXUf+
-         mlpAdV/I1ZSyT5J3JYY94g6UPSv4Qq8MwIj3jZXiZRnzrJLehtlm59sxuMTCfkwtApbg
-         BGRNfExipe7L1z41EzWwqnAFQr1aURud75TZwGUvq+QLiw+r28+OYBAoqy4T+ovgewqk
-         kKnQ==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ACmHOvnp";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="R3mzC2R/"
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64H9e9og1800255
+	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 19:06:17 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	5CTp7WWFll3OVumVrIQDCRGiPwlHUxMe6Ct4Tld7Hi4=; b=ACmHOvnpQPi5Zhuq
+	lHPwg6xZ3Q33aOjHXKqG/xofPsZZ8QovFsSbr//uC5cOusHZ6sr5oqFroOqLyWza
+	iKBnfaK9D50elFGiFSk5cQiVYElWN3BgbHU60Uw5Zse2NmOI9KyGmGw9k6j+GR7g
+	OSX/YWQHVcHniwHZZAe3ll+H3XxPw244PCzigUubsBI0lGEFRZJgkp/eaLXDfouj
+	KSQ1/i/Iz9U6ZHh2i2tYjQCax+Vr6mxJSNB8JYAvTdD1JPR4sI+LPyt//hLXUgMy
+	sWvFkoRX0EMPOzzghp35RCXkFof3OOy9vExE9bJ9qZRwGxsy6y+jdVoxU4tx7WD4
+	osi7ig==
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com [209.85.210.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4e6gwmbeht-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 19:06:17 +0000 (GMT)
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-82f7bec24fdso697294b3a.2
+        for <linux-mmc@vger.kernel.org>; Sun, 17 May 2026 12:06:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20251104.gappssmtp.com; s=20251104; t=1779044437; x=1779649237; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:in-reply-to:mime-version:references
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=1JphhE5f2R3RqqlFjJRdSApyosT8RlyHaJ2EQJNTHbI=;
-        b=pPPgz4Z+xn+jWVyeCOYNOJ1yhFTSklxinnR/S3/9XR4aKOzuvx/6+n3IVnOm+eq0Cz
-         Of/q8FDC8n9tqVAAICKONzaxFa/iqWFSSPv9EVDsFqPRJoXrCfb3KawDt5+IgKgALT17
-         2UXNVpPzpRN3QOgZZWHqIzafQP+jPfUwW4nblO92TnpAhk0vZ3SjVcdH1pR38PhpoBpp
-         0v0yHgps/7yqR2SPOneN9qVf4RiAGryIeBegm3ehDcjWHOYAOhlo7mQnwzQzTH4qgPcj
-         U4ksTVJhl4s1GsYzEm+w2PwWcAzbmO/tfmEr7r1t6MKtKCmbjIy6preAUXJBVKNBRm6A
-         HmVQ==
+        d=oss.qualcomm.com; s=google; t=1779044776; x=1779649576; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=5CTp7WWFll3OVumVrIQDCRGiPwlHUxMe6Ct4Tld7Hi4=;
+        b=R3mzC2R/SCrcLQNns2mVOstqal+9xMmEkWLZT876DFAw0gXVo+K84jYb5+X7fTzO3w
+         uCNDXM8t0E6UEeP+/QyDR91cv/RnEzg3KgnRtv4y81vJJNa9lygtZVPeTPsOFk/CKkJt
+         FPYde4AsiECjbsKrBM/tXzXG11wJ4XlTLJPy+F99YteSAg+QI1IsY9+dkBSq9t+HG7Yh
+         nO6qZW+kf2B6hquEjakVKVq+NUVyJCbBIoegz1s35+mfzAy1+5lybnESWYp+fnYWVbNd
+         D+iGflPJIL4cK7w3H/qmXu71wOPgIBYu3lIny0cDUhIdbB17Y041wzzOzYHlSk7O0xr5
+         vKwA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779044437; x=1779649237;
-        h=cc:to:subject:message-id:date:in-reply-to:mime-version:references
-         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20251104; t=1779044776; x=1779649576;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=1JphhE5f2R3RqqlFjJRdSApyosT8RlyHaJ2EQJNTHbI=;
-        b=nyYlsgKBXkdfjwbXG8v7dY5+GJDYY23H+8osqRJ+GJ8UPS8li8DsKrdd1L3mY0ViPW
-         qgHdtD5O2SLmso2Z2qKyNdOroBA5oomLbkhq0nZ3szF+xcWCvgGwWDmPGUW3p+ccHANU
-         GeUZtuWaNm/wumcz3efX8A1MzMjTZlRXVedu1AGXQ8rzGsvFEpe+M9lacva48wmW/Sf1
-         XrTLpyBuQEdoQHQfN4yszmcGAE4PvK6gMReE6eG6aZgu3UJ1KgFR7nhILWW8bJIZYCvP
-         EAKTOM9Li10CQbe3n9vQrR4UWHbpA6+Xdozr7JbpXqnuxSTAC0WD/HkLoMbXkEQ8JLhu
-         HgPQ==
-X-Forwarded-Encrypted: i=1; AFNElJ/fdQVdE1zwKhCx7+t6gCR5exc8j7pEQKCMpqGaL2yU44Mjd9NGlcUAf0E9kcPt8s19Mn2WPmeUiec=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx/zuvYVf6YO9M6emj3mEW8/JTZ4eU06QJp/oIDE2YXeRpy5f35
-	K59sw24lrjb9WZ4FVbzALdKpFTV4Nhg7GVrCLf8SsYgX+Z4P3AJwd5wxaTb1Em5+sGh0drpBZ2w
-	Rpw9wOzJ/iWp+UqKlxz7pUj6zO+n24j6YC3lag7TCmg==
-X-Gm-Gg: Acq92OGA+bnJ6jri70Xx/EfRLbBUzSw1TusCbMiswxnFqk07/nJwtJEm6htWDYNpK5T
-	tb1tEX3JK1VwUBFAVsbp3s/FIAI0YkGbGsASEuzV8laGPx2SyMc0i4y3RWea1pBINdvnZkNBcPC
-	T3ZFMq8UJHzt3oBpO0XKOFCl/5n3F8orSUrtEoMtaWAtj9YBw4EIILZeuGh0HiDXHFtrUfoKujQ
-	kAlYx+TLxLumSVRCLo9SUg+gUVTErVYPjkrVlYf7n3kVa4S6ut9OZ/QN2Qkk+WXDX08yZxf1rUe
-	E2eP38Qca1A0lUDNRqk6JOKOGVhjgfdrZpYp
-X-Received: by 2002:a17:907:2da1:b0:bd5:b26:52d6 with SMTP id
- a640c23a62f3a-bd5177d78c9mr654774966b.5.1779044436258; Sun, 17 May 2026
- 12:00:36 -0700 (PDT)
-Received: from 753933720722 named unknown by gmailapi.google.com with
- HTTPREST; Sun, 17 May 2026 12:00:35 -0700
-Received: from 753933720722 named unknown by gmailapi.google.com with
- HTTPREST; Sun, 17 May 2026 12:00:35 -0700
-From: Angelo Dureghello <adureghello@baylibre.com>
-References: <20260506142644.3234270-2-gerg@kernel.org> <20260506142644.3234270-6-gerg@kernel.org>
+        bh=5CTp7WWFll3OVumVrIQDCRGiPwlHUxMe6Ct4Tld7Hi4=;
+        b=YigEqnfsL7gGgk9V7c8zlnAaehmHKhJyv1TmhDIY/ue8+GenvasCNdjauC2Sr3+w7i
+         FmmxWUiL1l4/aov0B1kBxMqb9hkZbNqkVHtqfx1DmnndagcS86eFThMLQuouO8TRx6Jj
+         33tE010XBUVUg6T6rJHP8S4rINymehdysXzcIgdFX2ggxxM2cm4Flr/aTWNRJPWN2c2Q
+         SZdlEEtCNxLV+wDWjY7x3Qs4QZ16wkq4xZX3tpNhxac2OmDkyqE+bkJodfXv3K9HGG2k
+         eOoVG64Kng3VvFqhOtbLa8E2TkYVQPcg9zjBKojzjNRTtzNDPsmS9XFobKJEINOulrtp
+         M03w==
+X-Forwarded-Encrypted: i=1; AFNElJ+QbP4EI+YIiFG0ZBmpuhhWJ9Ug2lP6mGv+w1IW+76i57EYlsELKdv3zfj8CwfnffsPfptC6z8DgSY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwBpytIvHHZKYKjMPcuCF3vy9eiY+++JbZFbXAKTHFymU2VrTUa
+	3dD1xQJzmMneNA+rgCqLAfmOucCoI3VSfk/t40S1GOZf9m2RXNb/buxJXQ138crAbBkiEZJpkiZ
+	Twxg1kvGe88VV7rO/l11RLB6jdhdcMI1AwKjsNsmIYXx2nAWH2LzdGWh4rjNy4Mo=
+X-Gm-Gg: Acq92OFLmPUfNoBn7eVLW6+Ymg5mB0Va40vcEKJefHGIPTG43yV+TpkST5UHcqjN+jw
+	DJzKbkjbRGD5zuSb3o7qwsNdMu3KLua4tKIaH+QMU5zg9ImIDvSzciAyE1MLQ0nBM1jWEymL6NL
+	h2hfb68w7+QxEIFspj7DKP494Ja2LaT9RkL+ycX3qXRAv7cEqv3WqPNnCY0+u7UIhgcOMUgbM6g
+	uVqoL1oB+AljJjzMEzw0zYGIbgwDBO5l04NKVdLZS/5qwVfTRBlhx9el3rxDBNY3O7sMFlbqRby
+	10hpgPTXi98AcWleAlt+ZoNoNCUI/YT82OEOVYUxA1fpIYSXX9Ditd8eoRZYysvq15jA7TsNjZO
+	9irEqQPp91kTovomd69ZnfDVjMbaSfyfiKsD8dUcAQbUySbqifY4=
+X-Received: by 2002:a05:6a00:4fc8:b0:82f:84c6:6510 with SMTP id d2e1a72fcca58-83f33c961c7mr12510764b3a.11.1779044776089;
+        Sun, 17 May 2026 12:06:16 -0700 (PDT)
+X-Received: by 2002:a05:6a00:4fc8:b0:82f:84c6:6510 with SMTP id d2e1a72fcca58-83f33c961c7mr12510718b3a.11.1779044775544;
+        Sun, 17 May 2026 12:06:15 -0700 (PDT)
+Received: from [192.168.29.166] ([49.43.235.85])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-83f19f8b8b3sm11579843b3a.59.2026.05.17.12.06.06
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 17 May 2026 12:06:15 -0700 (PDT)
+Message-ID: <6df56ddd-3cc2-414b-882d-641277ce1a66@oss.qualcomm.com>
+Date: Mon, 18 May 2026 00:36:04 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20260506142644.3234270-6-gerg@kernel.org>
-Date: Sun, 17 May 2026 12:00:35 -0700
-X-Gm-Features: AVHnY4JWE7dTwHmdk1WFCo-5y5V_ABFrYGVfcGaUQK_jNNfZ8FP0HbytljKloS0
-Message-ID: <CALSJ-wDuXfMzV=Ydic-2S=2v+jbe034gqmy+wr-R1d14LBxuFQ@mail.gmail.com>
-Subject: Re: [RFC 3/4] mmc: sdhci-esdhc-mcf: do not use readl()/writel() on ColdFire
-To: Greg Ungerer <gerg@kernel.org>
-Cc: linux-m68k@lists.linux-m68k.org, linux-kernel@vger.kernel.org, 
-	arnd@kernel.org, Greg Ungerer <gerg@linux-m68k.org>, adureghello@baylibre.com, 
-	linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 4/4] arm64: dts: qcom: Add Shikra CQM and CQS EVK boards
+To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
+Cc: Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>, Vinod Koul <vkoul@kernel.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Wesley Cheng <quic_wcheng@quicinc.com>, Ulf Hansson <ulfh@kernel.org>,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-mmc@vger.kernel.org, Imran Shaik <imran.shaik@oss.qualcomm.com>,
+        Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>,
+        Monish Chunara <quic_mchunara@quicinc.com>,
+        Rakesh Kota <rakesh.kota@oss.qualcomm.com>,
+        Raviteja Laggyshetty <raviteja.laggyshetty@oss.qualcomm.com>,
+        Sneh Mankad <sneh.mankad@oss.qualcomm.com>,
+        Vishnu Santhosh <vishnu.santhosh@oss.qualcomm.com>,
+        Xueyao An <xueyao.an@oss.qualcomm.com>
+References: <20260512-shikra-dt-v1-0-716438330dd0@oss.qualcomm.com>
+ <20260512-shikra-dt-v1-4-716438330dd0@oss.qualcomm.com>
+ <mw2ipu5z26ubmrg6qe2v36cp6ktkqtbpfe3hmr434qdgm66nz4@pu6yy7hw4n3t>
+Content-Language: en-US
+From: Komal Bajaj <komal.bajaj@oss.qualcomm.com>
+In-Reply-To: <mw2ipu5z26ubmrg6qe2v36cp6ktkqtbpfe3hmr434qdgm66nz4@pu6yy7hw4n3t>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: qvgxKepxFXZ6TQ5BrPviBl1QSkb5CqD5
+X-Proofpoint-GUID: qvgxKepxFXZ6TQ5BrPviBl1QSkb5CqD5
+X-Authority-Analysis: v=2.4 cv=W/AIkxWk c=1 sm=1 tr=0 ts=6a0a11a9 cx=c_pps
+ a=rEQLjTOiSrHUhVqRoksmgQ==:117 a=g4/7f0GlZvY0MGcqtTB0Sw==:17
+ a=IkcTkHD0fZMA:10 a=NGcC8JguVDcA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=_glEPmIy2e8OvE2BGh3C:22
+ a=EUspDBNiAAAA:8 a=COk6AnOGAAAA:8 a=4NbkJTruBT-5dyiUZdQA:9 a=3ZKOabzyN94A:10
+ a=QEXdDO2ut3YA:10 a=2VI0MkxyNR6bbpdq8BZq:22 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTE3MDIwNCBTYWx0ZWRfX00gCaTj2GCz4
+ yEJYflPhC0IPrYRUsX2NsNr4nK7fpNulxknGoO4g/nVzCvx0vFB10atNhKlNU9OO3syQcT8DrXi
+ sXQBBl24ynIP8WyGxUR5S27XfKvuuHiMjkloikpAZ5C2c93zc3p9JTH5aJ2YnuAec/+/p8UgqJ3
+ 4eTa272MYJjzRheMTo3ipKyT/tV2Ca57paLkOukvfKepHibNZQ4ufniMBkY98gKIGN2wSJ6QilF
+ 11YkP0MIaGqebDUHwizioJ0d0TRCmexq7Qd/pvrbPE+0BJEzrjZ1bxkIiZ0vGFiD6LBfKUx12Hy
+ SOBZvkxZjjGghhABLFCvNpCInSAu83GtRn4RUx08+w3TAI5MlIHgqlJNd2zgsSlFVfx+14/oyc4
+ ozcjG5O85gmkeBHlVct+vdhnTB12WEHDo5MK6sta+UM5T/pAG8FWQ/Xep6wkbZyEr12+KZVBdyZ
+ XidurLMhqxAeUq2VKJA==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
+ definitions=2026-05-17_04,2026-05-15_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0
+ impostorscore=0 priorityscore=1501 adultscore=0 clxscore=1015
+ lowpriorityscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2605130000
+ definitions=main-2605170204
 
-Hi Greg,
+On 5/13/2026 5:34 PM, Dmitry Baryshkov wrote:
+> On Tue, May 12, 2026 at 09:38:07AM +0530, Komal Bajaj wrote:
+>> Add device trees for the Shikra EVK platform, which combines the CQM
+>> SoM variant with a common carrier board.
+>>
+>> Two EVK boards are introduced:
+>>    - shikra-cqm-evk.dts: pairs with CQM SoM (retail, with modem)
+>>    - shikra-cqs-evk.dts: pairs with CQM SoM (retail, board has no modem
+> CQS
 
-On Thu, May 07, 2026 at 12:26:46AM +1000, Greg Ungerer wrote:
-> From: Greg Ungerer <gerg@linux-m68k.org>
->
-> The implementation of the readX() and writeX() family of IO access
-> functions is non-standard on ColdFire platforms. They check the supplied
-> IO address and will return either big or little endian results based on
-> that check. This is non-standard, they are expected to always return
-> little-endian byte ordered data. Unfortunately this behavior also means
-> that ioreadX()/iowroteX() and their big-endian counter parts
-> ioreadXbe()/iowriteXbe() are wrong. This is now in the process of being
-> cleaned up and fixed.
->
-> Change the use of the readX() and writeX() access functions in this driver
-> to use the recently defined specific ColdFire internal SoC hardware IO
-> access functions mcf_read8()/mcf_read16()/mcf_read32() and
-> mcf_write8()/mcf_write16()/mcf_write32().
->
-> There is no functional change to the driver. Though it does have the
-> effect of making the IO access slightly more efficient, since there is
-> no longer a need to do the address check at every register access.
->
-> Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
-> ---
->  drivers/mmc/host/sdhci-esdhc-mcf.c | 24 ++++++++++++------------
->  1 file changed, 12 insertions(+), 12 deletions(-)
->
-> Note that the patches to introduce mcf_readX() and mcf_writeX functions
-> are not in mainline yet. They are currently in the m68knommu git tree
-> for-next branch, and so should also be in linux-next.
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
-> index 375fce5639d7..6853521e8b2c 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-mcf.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
-> @@ -55,7 +55,7 @@ static inline void esdhc_clrset_be(struct sdhci_host *host,
->  	if (reg == SDHCI_HOST_CONTROL)
->  		val |= ESDHC_PROCTL_D3CD;
->
-> -	writel((readl(base) & ~mask) | val, base);
-> +	mcf_write32((mcf_read32(base) & ~mask) | val, base);
->  }
->
->  /*
-> @@ -71,7 +71,7 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
->  	if (reg == SDHCI_HOST_CONTROL) {
->  		u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
->  		u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
-> -		u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
-> +		u8 tmp = mcf_read8(host->ioaddr + SDHCI_HOST_CONTROL + 1);
->
->  		tmp &= ~0x03;
->  		tmp |= dma_bits;
-> @@ -82,12 +82,12 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
->  		 */
->  		host_ctrl |= val;
->  		host_ctrl |= (dma_bits << 8);
-> -		writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
-> +		mcf_write32(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
->
->  		return;
->  	}
->
-> -	writel((readl(base) & mask) | (val << shift), base);
-> +	mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
->  }
->
->  static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
-> @@ -110,24 +110,24 @@ static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
->  		 * As for the fsl driver,
->  		 * we have to set the mode in a single write here.
->  		 */
-> -		writel(val << 16 | mcf_data->aside,
-> +		mcf_write32(val << 16 | mcf_data->aside,
->  		       host->ioaddr + SDHCI_TRANSFER_MODE);
->  		return;
->  	}
->
-> -	writel((readl(base) & mask) | (val << shift), base);
-> +	mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
->  }
->
->  static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
->  {
-> -	writel(val, host->ioaddr + reg);
-> +	mcf_write32(val, host->ioaddr + reg);
->  }
->
->  static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
->  {
->  	if (reg == SDHCI_HOST_CONTROL) {
->  		u8 __iomem *base = host->ioaddr + (reg & ~3);
-> -		u16 val = readw(base + 2);
-> +		u16 val = mcf_read16(base + 2);
->  		u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
->  		u8 host_ctrl = val & 0xff;
->
-> @@ -137,7 +137,7 @@ static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
->  		return host_ctrl;
->  	}
->
-> -	return readb(host->ioaddr + (reg ^ 0x3));
-> +	return mcf_read8(host->ioaddr + (reg ^ 0x3));
->  }
->
->  static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
-> @@ -149,14 +149,14 @@ static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
->  	if (reg == SDHCI_HOST_VERSION)
->  		reg -= 2;
->
-> -	return readw(host->ioaddr + (reg ^ 0x2));
-> +	return mcf_read16(host->ioaddr + (reg ^ 0x2));
->  }
->
->  static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
->  {
->  	u32 val;
->
-> -	val = readl(host->ioaddr + reg);
-> +	val = mcf_read32(host->ioaddr + reg);
->
->  	/*
->  	 * RM (25.3.9) sd pin clock must never exceed 25Mhz.
-> @@ -245,7 +245,7 @@ static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
->  	 * fvco = fsys * outdvi1 + 1
->  	 * fshdc = fvco / outdiv3 + 1
->  	 */
-> -	temp = readl(pll_dr);
-> +	temp = mcf_read32(pll_dr);
->  	fsys = pltfm_host->clock;
->  	fvco = fsys * ((temp & 0x1f) + 1);
->  	fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);
-> --
-> 2.54.0
->
+ACK
 
-Tested this now on stmark2, sdcard mount/umount/read/write/erase works
-as usual. Thanks.
+>
+>>      support)
+>>
+>> Also add shikra-evk.dtsi common across both EVK boards.
+> What is the split between shikra-cq[ms]-evk.dts and shikra-evk.dtsi?
 
-Acked-by: Angelo Dureghello <adureghello@baylibre.com>
-Tested-by: Angelo Dureghello <adureghello@baylibre.com>
+shikra-evk.dtsi represents the common carrier‑board and daughter‑card 
+configuration shared across all Shikra EVK variants, including CQM, CQS, 
+and the upcoming IQS board. It currently enables the debug UART, eMMC, 
+and USB along with the required PMIC regulator supplies.
+In follow‑up series, this file will be extended to cover the remaining 
+common daughter‑card peripherals, such as MIC, display, camera, sensor, 
+and NFC daughter cards.
 
+Thanks
+Komal
 
-reagrds,
-angelo
+>
+>> Each board DTS enables USB (peripheral mode) with the appropriate PMIC
+>> regulator supplies for the QUSB2 and QMP PHYs, and eMMC with the
+>> correct vmmc/vqmmc supplies for the CQM SoM's PMIC.
+>>
+>> Co-developed-by: Imran Shaik <imran.shaik@oss.qualcomm.com>
+>> Signed-off-by: Imran Shaik <imran.shaik@oss.qualcomm.com>
+>> Co-developed-by: Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>
+>> Signed-off-by: Krishna Kurapati <krishna.kurapati@oss.qualcomm.com>
+>> Co-developed-by: Monish Chunara <quic_mchunara@quicinc.com>
+>> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
+>> Co-developed-by: Rakesh Kota <rakesh.kota@oss.qualcomm.com>
+>> Signed-off-by: Rakesh Kota <rakesh.kota@oss.qualcomm.com>
+>> Co-developed-by: Raviteja Laggyshetty <raviteja.laggyshetty@oss.qualcomm.com>
+>> Signed-off-by: Raviteja Laggyshetty <raviteja.laggyshetty@oss.qualcomm.com>
+>> Co-developed-by: Sneh Mankad <sneh.mankad@oss.qualcomm.com>
+>> Signed-off-by: Sneh Mankad <sneh.mankad@oss.qualcomm.com>
+>> Co-developed-by: Vishnu Santhosh <vishnu.santhosh@oss.qualcomm.com>
+>> Signed-off-by: Vishnu Santhosh <vishnu.santhosh@oss.qualcomm.com>
+>> Co-developed-by: Xueyao An <xueyao.an@oss.qualcomm.com>
+>> Signed-off-by: Xueyao An <xueyao.an@oss.qualcomm.com>
+>> Signed-off-by: Komal Bajaj <komal.bajaj@oss.qualcomm.com>
+>> ---
+>>   arch/arm64/boot/dts/qcom/Makefile           |  2 +
+>>   arch/arm64/boot/dts/qcom/shikra-cqm-evk.dts | 61 +++++++++++++++++++++++++++++
+>>   arch/arm64/boot/dts/qcom/shikra-cqs-evk.dts | 61 +++++++++++++++++++++++++++++
+>>   arch/arm64/boot/dts/qcom/shikra-evk.dtsi    | 13 ++++++
+>>   4 files changed, 137 insertions(+)
+>>
+>> diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
+>> index cc42829f92eb..6de783bcd133 100644
+>> --- a/arch/arm64/boot/dts/qcom/Makefile
+>> +++ b/arch/arm64/boot/dts/qcom/Makefile
+>> @@ -328,6 +328,8 @@ dtb-$(CONFIG_ARCH_QCOM)	+= sdm850-huawei-matebook-e-2019.dtb
+>>   dtb-$(CONFIG_ARCH_QCOM)	+= sdm850-lenovo-yoga-c630.dtb
+>>   dtb-$(CONFIG_ARCH_QCOM)	+= sdm850-samsung-w737.dtb
+>>   dtb-$(CONFIG_ARCH_QCOM)	+= sdx75-idp.dtb
+>> +dtb-$(CONFIG_ARCH_QCOM)	+= shikra-cqm-evk.dtb
+>> +dtb-$(CONFIG_ARCH_QCOM)	+= shikra-cqs-evk.dtb
+>>   dtb-$(CONFIG_ARCH_QCOM)	+= sm4250-oneplus-billie2.dtb
+>>   dtb-$(CONFIG_ARCH_QCOM)	+= sm4450-qrd.dtb
+>>   dtb-$(CONFIG_ARCH_QCOM)	+= sm6115-fxtec-pro1x.dtb
+>> diff --git a/arch/arm64/boot/dts/qcom/shikra-cqm-evk.dts b/arch/arm64/boot/dts/qcom/shikra-cqm-evk.dts
+>> new file mode 100644
+>> index 000000000000..12eeca84832c
+>> --- /dev/null
+>> +++ b/arch/arm64/boot/dts/qcom/shikra-cqm-evk.dts
+>> @@ -0,0 +1,61 @@
+>> +// SPDX-License-Identifier: BSD-3-Clause
+>> +/*
+>> + * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+>> + */
+>> +
+>> +/dts-v1/;
+>> +
+>> +#include "shikra-cqm-som.dtsi"
+>> +#include "shikra-evk.dtsi"
+>> +
+>> +/ {
+>> +	model = "Qualcomm Technologies, Inc. Shikra CQM EVK";
+>> +	compatible = "qcom,shikra-cqm-evk", "qcom,shikra-cqm-som", "qcom,shikra";
+>> +	chassis-type = "embedded";
+>> +
+>> +	aliases {
+>> +		mmc0 = &sdhc_1;
+>> +		serial0 = &uart0;
+>> +	};
+>> +
+>> +	chosen {
+>> +		stdout-path = "serial0:115200n8";
+>> +	};
+>> +};
+>> +
+>> +&sdhc_1 {
+>> +	vmmc-supply = <&pm4125_l20>;
+>> +	vqmmc-supply = <&pm4125_l14>;
+>> +
+>> +	pinctrl-0 = <&sdc1_state_on>;
+>> +	pinctrl-1 = <&sdc1_state_off>;
+>> +	pinctrl-names = "default", "sleep";
+>> +
+>> +	non-removable;
+>> +	supports-cqe;
+>> +	no-sdio;
+>> +	no-sd;
+>> +
+>> +	status = "okay";
+>> +};
+>> +
+>> +&usb_1 {
+>> +	dr_mode = "peripheral";
+>> +
+>> +	status = "okay";
+>> +};
+>> +
+>> +&usb_1_hsphy {
+>> +	vdd-supply = <&pm4125_l12>;
+>> +	vdda-pll-supply = <&pm4125_l13>;
+>> +	vdda-phy-dpdm-supply = <&pm4125_l21>;
+>> +
+>> +	status = "okay";
+>> +};
+>> +
+>> +&usb_qmpphy {
+>> +	vdda-phy-supply = <&pm4125_l8>;
+>> +	vdda-pll-supply = <&pm4125_l13>;
+>> +
+>> +	status = "okay";
+>> +};
+>> diff --git a/arch/arm64/boot/dts/qcom/shikra-cqs-evk.dts b/arch/arm64/boot/dts/qcom/shikra-cqs-evk.dts
+>> new file mode 100644
+>> index 000000000000..bc93282f64cf
+>> --- /dev/null
+>> +++ b/arch/arm64/boot/dts/qcom/shikra-cqs-evk.dts
+>> @@ -0,0 +1,61 @@
+>> +// SPDX-License-Identifier: BSD-3-Clause
+>> +/*
+>> + * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+>> + */
+>> +
+>> +/dts-v1/;
+>> +
+>> +#include "shikra-cqm-som.dtsi"
+>> +#include "shikra-evk.dtsi"
+>> +
+>> +/ {
+>> +	model = "Qualcomm Technologies, Inc. Shikra CQS EVK";
+>> +	compatible = "qcom,shikra-cqs-evk", "qcom,shikra-cqm-som", "qcom,shikra";
+>> +	chassis-type = "embedded";
+>> +
+>> +	aliases {
+>> +		mmc0 = &sdhc_1;
+>> +		serial0 = &uart0;
+>> +	};
+>> +
+>> +	chosen {
+>> +		stdout-path = "serial0:115200n8";
+>> +	};
+>> +};
+>> +
+>> +&sdhc_1 {
+>> +	vmmc-supply = <&pm4125_l20>;
+>> +	vqmmc-supply = <&pm4125_l14>;
+>> +
+>> +	pinctrl-0 = <&sdc1_state_on>;
+>> +	pinctrl-1 = <&sdc1_state_off>;
+>> +	pinctrl-names = "default", "sleep";
+>> +
+>> +	non-removable;
+>> +	supports-cqe;
+>> +	no-sdio;
+>> +	no-sd;
+>> +
+>> +	status = "okay";
+>> +};
+>> +
+>> +&usb_1 {
+>> +	dr_mode = "peripheral";
+>> +
+>> +	status = "okay";
+>> +};
+>> +
+>> +&usb_1_hsphy {
+>> +	vdd-supply = <&pm4125_l12>;
+>> +	vdda-pll-supply = <&pm4125_l13>;
+>> +	vdda-phy-dpdm-supply = <&pm4125_l21>;
+>> +
+>> +	status = "okay";
+>> +};
+>> +
+>> +&usb_qmpphy {
+>> +	vdda-phy-supply = <&pm4125_l8>;
+>> +	vdda-pll-supply = <&pm4125_l13>;
+>> +
+>> +	status = "okay";
+>> +};
+>> diff --git a/arch/arm64/boot/dts/qcom/shikra-evk.dtsi b/arch/arm64/boot/dts/qcom/shikra-evk.dtsi
+>> new file mode 100644
+>> index 000000000000..fae8c75b68b3
+>> --- /dev/null
+>> +++ b/arch/arm64/boot/dts/qcom/shikra-evk.dtsi
+>> @@ -0,0 +1,13 @@
+>> +// SPDX-License-Identifier: BSD-3-Clause
+>> +/*
+>> + * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+>> + */
+>> +
+>> +&qupv3_0 {
+>> +	firmware-name = "qcom/shikra/qupv3fw.elf";
+>> +	status = "okay";
+>> +};
+>> +
+>> +&uart0 {
+>> +	status = "okay";
+>> +};
+>>
+>> -- 
+>> 2.34.1
+>>
+
