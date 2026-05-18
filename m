@@ -1,75 +1,78 @@
-Received: from mail-pf1-f177.google.com (mail-pf1-f177.google.com [209.85.210.177])
+Received: from mail-qt1-f180.google.com (mail-qt1-f180.google.com [209.85.160.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 925922F7EF5
-	for <linux-mmc@vger.kernel.org>; Mon, 18 May 2026 22:24:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32D99289340
+	for <linux-mmc@vger.kernel.org>; Mon, 18 May 2026 22:45:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779143096; cv=none; b=lYcu+WvmMFMtbP+vcPrvzrrlJrXLmhPPVNQS3njVgX743yWhr5ikeKOBJ22xdxZ/pHBedFSs5njPcm3gAAnmepvNJQZbyVTKj/mMpkvDRnQ9kosa0yXcuhbZfUoNR//qb94bjZjxExRl7XkRSWv0bvVx+XgJUkQchJ0Zim1KFq4=
+	t=1779144331; cv=none; b=OeTdThdXA1rxRVBfoDIHHDalZ6clgPLHGh/qraIe6/2A7Wp+apLoLLnunikmn0DV8ikhh/Bs/dLLOnWY3BoFWM0+4qlt+6/7AnmLiishESq9+lHgOl07FqhP39FGYrvOVzlXgMOrUMqw8SNOY7TPW74JoQSS15ztCb7gQCKnhPs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779143096; c=relaxed/simple;
-	bh=cPFqibzt05U7+9OKSx2BqYF0uQt/jBSuHJMI1cCiTy8=;
+	s=arc-20240116; t=1779144331; c=relaxed/simple;
+	bh=pifblWiQ1TLHefG1Q0nop1imYuvqSMxnWw1DlyKUUPw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fR27FbgQlWuACT3fBg7LwB6rIvxr0I0EQqoSnfwjhzjCTpc5U/onsUm9K9x2JlZIvKpm8VV6KA7b9vy7f78uKkBSVXMU/RuvAhUjv2IV7c1yRfI+XPe5jWzDh1kbyzzrAUWcyXdd/IbzjH7b0XYxfyYNTB8OzZFXA3kOjajP4ho=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=J7niZGEm; arc=none smtp.client-ip=209.85.210.177
+	 Content-Type:Content-Disposition:In-Reply-To; b=dJqeqa8ogNu3ECXQBNBMARiPGkXXBiJ2H+stz6Y6LEWFPeVBta+hUVWdB16IVTsy4mCeyvmGqwjHeBkvghCwjcC0PPOLsJDT6zFNQXBMgCVzDdGxoFcA60fQ2tAky8kEGxyJh3BkR8Qf6/vd/uDFICHjAL2vl9uGAhWZArknc3c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Z7L7sLFt; arc=none smtp.client-ip=209.85.160.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J7niZGEm"
-Received: by mail-pf1-f177.google.com with SMTP id d2e1a72fcca58-836ed29d1e5so1151663b3a.2
-        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2026 15:24:55 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Z7L7sLFt"
+Received: by mail-qt1-f180.google.com with SMTP id d75a77b69052e-50e97863425so33237711cf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 18 May 2026 15:45:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779143095; x=1779747895; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1779144329; x=1779749129; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=Q7/YzMatW7mhE2BJtzNdI6oIt+QsL1Oe6mroM0UQHvQ=;
-        b=J7niZGEmCg03fsxKJeg48nCrrvZUfvpswtv6fQz/Wec9bh8a0xRMR94ZaUZo8R3lLR
-         MADpJBcORi9TNnN8Pupq6w3n5mgzN+qLh724J+S9YP5Y3E8cNTD4jx+GtnSoSv/26D/Q
-         G886NvJx1bBPacZjq0wF3SPgyN/7ct1XHl7yijqCjXPOb9pds/XOi1s1pX7/0aN2rB0y
-         oPG+vA+kDFsnhwnF0xTuVrfvlZ8QaspXBN15lj9AXewawdH2qFEJXEauSfhGZEkHsCDo
-         muXAJGHfCiCausxqTXufrXfY9AqG/T58b4s0Z9E1EBaMP255pEitCVW0e4jHeeEOFLKz
-         oVCA==
+        bh=YY12qmAw/YvXItWxKFuE6zrhQE3wG3PQZuik94qWjms=;
+        b=Z7L7sLFtp5kF702DQsJawmyR6vr9g2yOhaju5S+IQepqIjECreeKoPdMo6AVSK+XH/
+         CfZoneznLEx65QEAzXSNGnhXXQcjqGFunERKEgU93qXARGW2uGQ69nF3RXKMlzL2rEJ7
+         N4TzUOIbRMt1nDTelCBZGFvQUu/iyIkGqnYfT706/Pr8PWrdU0vU072KZZTslZz4zgt5
+         Rs0Q1pv7abcP/dowDctud8hHK2CDvSGlP0pbyoqDHFOebldQay+g1mub4cJYDIYMLlpM
+         QBPSsBGG6lzK+g5KBEwQdZY320Axf09oFcmfan5uEX2VNkfV93nc7Vq8Wxf0ZMICHwj8
+         RxeA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779143095; x=1779747895;
+        d=1e100.net; s=20251104; t=1779144329; x=1779749129;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Q7/YzMatW7mhE2BJtzNdI6oIt+QsL1Oe6mroM0UQHvQ=;
-        b=Vl/xUqbifCv7EZebXTPlWbRd4tOO3w0EORs43NnI6tn2cBCAcbk7ek6nmSUSDGhVe0
-         1L7mZKHlQICpsgGGxsRlnBEexdPL0eiA5IzjX8eqNWCL7r/lZFbDt3D61wsFRrWLuzgs
-         eBPQveHK/YNfb+ip6FovvS7GW3gKfXcCCq8HRuaSJ+3ge05B4PHi+R4bweheBA7iLNX5
-         qmurNxNnuas6majvBQmUiGS1Lsln9sp0JofRB+EbwrSnqYGJ9ixmH7XyAoRL9PtD7uK5
-         zlKbBkQ0Rp0q1H2a7QzRR9tGQhJh1PljdfMSq9yZmznLtEr2Kl2DKGNWb3rorXu0TJ4R
-         ytcw==
-X-Forwarded-Encrypted: i=1; AFNElJ+uLDg6+4Yb7BmO/qZbjb+LLZ+5zn0/ld3laAhOrQHkFTM4B+0RniiOlOdloDZ0CeLBycfajD4u7zY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx0tvlN7iRARcn8pJnHIML3uzyv/bFij6BxN5I3rrsye3r2RXvR
-	3vTCANnUvJzkzBvGDS+4lbcBlu5bRg8wMvHjwoKZaA31gcF/Jh3JuiAe
-X-Gm-Gg: Acq92OFLhlRGVB2WDlbe74A2QB2yZOsCMioYn8/pyKUrQAa9166dOd2WSvdAo6dXZFs
-	kdeJnb10LUkjLCZ+Kq8ZZmHXIV0ahHiyAZiAyGQe5oUXV5DhVOHTDeyQZ3XbgW208Aarsv4ZhEB
-	z9UDO+0ueTWuqRDQu09UgL22g3ZXFxQETWPLr9blktdEQbKYzZKEt1C0/XuZVdM9QK2FeFkMvaD
-	ZWbAhgkmF7D181uO9ZJHZihp8NfZ9L2M1lFoRCknekbawhb3gKWwlAdVHSMG+l77W+SoDBMLZ36
-	wu1yRy5yQxKyy2h6Sh0fuvC9eCJHFAn874ScfHW+//aeO/AIie7ERcaoi4jhwKGj1gNCGEoCtvd
-	BST3i/JUWj/z9rHhK+Dythxwtt4icJy7VdJgnvBealARmj1GsUxMeD57CVWrDaAYCuX0gy65Lyr
-	e+i6NDbjVBM4ogL9QurJ6Gr78=
-X-Received: by 2002:a05:6a20:a12b:b0:3aa:f9cb:d435 with SMTP id adf61e73a8af0-3b22e67fceemr18950707637.11.1779143094823;
-        Mon, 18 May 2026 15:24:54 -0700 (PDT)
-Received: from localhost ([2001:19f0:8001:1b2d:5400:5ff:fefa:a95d])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-c82da93df0dsm7926182a12.19.2026.05.18.15.24.53
+        bh=YY12qmAw/YvXItWxKFuE6zrhQE3wG3PQZuik94qWjms=;
+        b=q8ja4T4Tksc6Ci0VojjoRBCMb7EsjrHChqljlgrHFw9YTQZJhqfTWUtYb5+ic8zcy2
+         VgurDatNIuosQgSlCLiP0BxdOR0kBcZIBbeavEpsIaXPKdHvYCdgvFXdBTMSqI9J1lgl
+         2lLjtffvt7H5U0MDPh3gj1ic/U5veiekTe4DtBu9h+FOMhUYcKA2JoGFRg5mInpf4z9d
+         AeYX0cnXIM5rWQMAqNA9xRd/stk9WGGp4v6kMzBCM2XWzfdMKpqPKejhLGt5zvb8/Y16
+         UI3nnnTnboaFmBl7jj/MPbkl7qKgTz6SgC5cvZ95zdTRDXoulYWkzzC+BjZcY0ytiZSu
+         YXcw==
+X-Forwarded-Encrypted: i=1; AFNElJ+xeOPKcrNMgl78pEDKKo9Nfc3TJa4l+mF9RqPnvz7BBba3mXXhP0fN2Fhd97k4Xyfi2iWlyUHmz/0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyoDP6sXZd7gNJg+aK82gA4jjUX54gSXT8d6gD8HIplh+iRvly9
+	//y5D5lQmbNTiqpSuZmQDN7q7m1rj7H0U5uZqDZ6cXkjOs9ACcM5DqnL
+X-Gm-Gg: Acq92OEEf8Wy00Nw3J12OoP5Jmgs81srooWrzM0j5/eSZXXVjSajJZ3cfAqlGSdYeNi
+	ZYHyFc6I89vpSxUMZ/ztb/dkzNHVf7unmBy5S4wX+fPvhn2lUUKVcm+Vw/46DmkTTC7YYOpxSKH
+	1fLsbPQuCEcgJ3t1xK+6F+NwzdRnhNPu+LhpiuQM6dzV7p4MOGKO/FhOFhu9m+j6Rhiuu/2RJUp
+	V8QFa3NWi6AqRI/KDT95yEPd9LkbaXqATKWjg+7jLy6LQiloyADgCDec5CMbenlwRkM+uDe1nu7
+	T1vvjoSyjywSthakVuG5t2JCHQe8+VSBBZCBJLe/tr/m3/T/AzakQtqM7xui/qSSf7A8VL3W90K
+	cwF3CzlITrAa41ImDH7mbwDQ6mSelBsSlpdkgF3iDK9DvejSQXZaNaOYhqLg/cJl+Qu44GWRQbc
+	r/s7HY1qHlUl1tM4xO8xwXtBTz3JnyO/+RZkJusEeGP5PnU+fvHZvughudlyDCOJ9esUZLW8+/z
+	axTwasnwVm5
+X-Received: by 2002:a05:622a:6201:b0:50f:ade2:2d3 with SMTP id d75a77b69052e-5165a1ec441mr227885641cf.42.1779144329153;
+        Mon, 18 May 2026 15:45:29 -0700 (PDT)
+Received: from errol.ini.cmu.edu (pool-108-17-68-229.pitbpa.fios.verizon.net. [108.17.68.229])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-516460cda02sm149069961cf.18.2026.05.18.15.45.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 May 2026 15:24:54 -0700 (PDT)
-Date: Tue, 19 May 2026 06:24:19 +0800
-From: Inochi Amaoto <inochiama@gmail.com>
-To: "Gabriel L. Somlo" <gsomlo@gmail.com>, 
-	Inochi Amaoto <inochiama@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Karol Gugala <kgugala@antmicro.com>, 
-	Mateusz Holenko <mholenko@antmicro.com>, Joel Stanley <joel@jms.id.au>, 
-	Kamil Rakoczy <krakoczy@antmicro.com>, Andy Shevchenko <andy.shevchenko@gmail.com>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Yixun Lan <dlan@gentoo.org>, 
-	Longbin Li <looong.bin@gmail.com>
+        Mon, 18 May 2026 15:45:28 -0700 (PDT)
+Date: Mon, 18 May 2026 18:45:26 -0400
+From: "Gabriel L. Somlo" <gsomlo@gmail.com>
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Karol Gugala <kgugala@antmicro.com>,
+	Mateusz Holenko <mholenko@antmicro.com>,
+	Joel Stanley <joel@jms.id.au>,
+	Kamil Rakoczy <krakoczy@antmicro.com>,
+	Andy Shevchenko <andy.shevchenko@gmail.com>,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Yixun Lan <dlan@gentoo.org>, Longbin Li <looong.bin@gmail.com>
 Subject: Re: [PATCH v4] mmc: litex_mmc: Set mandatory idle clocks before CMD0
-Message-ID: <aguRU9Ces7ruBbRY@inochi.infowork>
+Message-ID: <aguWhuNsV1KKxMeQ@errol.ini.cmu.edu>
 References: <20260517015323.264179-1-inochiama@gmail.com>
  <aguQwccX_ujIoARX@errol.ini.cmu.edu>
+ <aguRU9Ces7ruBbRY@inochi.infowork>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -78,105 +81,134 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aguQwccX_ujIoARX@errol.ini.cmu.edu>
+In-Reply-To: <aguRU9Ces7ruBbRY@inochi.infowork>
+X-Clacks-Overhead: GNU Terry Pratchett
 
-On Mon, May 18, 2026 at 06:20:49PM -0400, Gabriel L. Somlo wrote:
-> with this patch on top of today's latest (4d3a2a466b8d), I get
-> (on 64-bit rocketchip with Litex):
+On Tue, May 19, 2026 at 06:24:19AM +0800, Inochi Amaoto wrote:
+> On Mon, May 18, 2026 at 06:20:49PM -0400, Gabriel L. Somlo wrote:
+> > with this patch on top of today's latest (4d3a2a466b8d), I get
+> > (on 64-bit rocketchip with Litex):
+> > 
+> > [    6.475114] mmc0: invalid bus width
+> > [    6.477870] mmc0: error -22 whilst initialising SD card
+> > 
+> > Thanks,
+> > --Gabriel
+> > 
 > 
-> [    6.475114] mmc0: invalid bus width
-> [    6.477870] mmc0: error -22 whilst initialising SD card
+> Hi, Gabriel,
 > 
-> Thanks,
-> --Gabriel
+> Could you share the board link and build commands? I think I need to
+> take a look for why this occurs.
 > 
+> Regards,
+> Inochi
 
-Hi, Gabriel,
+Hi Inochi,
 
-Could you share the board link and build commands? I think I need to
-take a look for why this occurs.
+it's the digilent nexys-video board; the command line to build the
+bitstream is:
 
-Regards,
-Inochi
+litex-boards/litex_boards/targets/digilent_nexys_video.py --build \
+  --cpu-type rocket --cpu-variant linux --cpu-num-cores 4 --cpu-mem-width 2 \
+  --sys-clk-freq 50e6 --with-ethernet --with-sdcard --with-sata --sata-gen 1
 
-> On Sun, May 17, 2026 at 09:53:23AM +0800, Inochi Amaoto wrote:
-> > The litex_mmc driver assumes the card is already probed in the BIOS
-> > and skip the phy initialization. This will cause the command fail
-> > like the following when the old card is unplugged and then insert
-> > a new card:
-> > 
-> > [   62.923593] litex-mmc f0004000.mmc: Command (cmd 8) error, status -110
-> > [   62.949717] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-> > [   62.976606] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-> > [   63.002516] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-> > [   63.028442] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-> > 
-> > Add required clock settings and initialization for the CMD 0, so it can
-> > probe the new card.
-> > 
-> > Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
-> > Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
-> > ---
-> > Changed from v3:
-> > - https://lore.kernel.org/linux-mmc/20260426112016.1370929-1-inochiama@gmail.com/
-> > 1. Remove patch 1: mmc: litex_mmc: Move litex_mmc_setclk() to bottom for reuse
-> > 2. Use set_ios() callback to apply the clock change.
-> > 
-> > Changed from v2:
-> > - https://lore.kernel.org/linux-mmc/20260424013615.470325-1-inochiama@gmail.com/
-> > 1. Remove the added function forward reference and add a new patch
-> >    for moving litex_mmc_setclk() function
-> > 
-> > Change from v1:
-> > - https://lore.kernel.org/linux-mmc/20260421025052.755471-1-inochiama@gmail.com/
-> > 1. use fsleep to replace udelay
-> > 
-> > Inochi Amaoto (2):
-> >   mmc: litex_mmc: Move litex_mmc_setclk() to bottom for reuse
-> >   mmc: litex_mmc: Set mandatory idle clocks before CMD0
-> > 
-> >  drivers/mmc/host/litex_mmc.c | 37 ++++++++++++++++++++++--------------
-> >  1 file changed, 23 insertions(+), 14 deletions(-)
-> > ---
-> >  drivers/mmc/host/litex_mmc.c | 11 +++++++++++
-> >  1 file changed, 11 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
-> > index d2f19c2dc673..65d5c728f536 100644
-> > --- a/drivers/mmc/host/litex_mmc.c
-> > +++ b/drivers/mmc/host/litex_mmc.c
-> > @@ -68,6 +68,9 @@
-> >  #define SD_SLEEP_US       5
-> >  #define SD_TIMEOUT_US 20000
-> > 
-> > +#define SD_INIT_DELAY_US  1000
-> > +#define SD_INIT_CLK_HZ    400000
-> > +
-> >  #define SDIRQ_CARD_DETECT    1
-> >  #define SDIRQ_SD_TO_MEM_DONE 2
-> >  #define SDIRQ_MEM_TO_SD_DONE 4
-> > @@ -449,6 +452,9 @@ static void litex_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  {
-> >  	struct litex_mmc_host *host = mmc_priv(mmc);
-> > 
-> > +	if (ios->chip_select == MMC_CS_HIGH)
-> > +		ios->clock = SD_INIT_CLK_HZ;
-> > +
-> >  	/*
-> >  	 * NOTE: Ignore any ios->bus_width updates; they occur right after
-> >  	 * the mmc core sends its own acmd6 bus-width change notification,
-> > @@ -459,6 +465,11 @@ static void litex_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  	/* Update sd_clk */
-> >  	if (ios->clock != host->sd_clk)
-> >  		litex_mmc_setclk(host, ios->clock);
-> > +
-> > +	if (ios->chip_select == MMC_CS_HIGH) {
-> > +		litex_write8(host->sdphy + LITEX_PHY_INITIALIZE, 1);
-> > +		fsleep(SD_INIT_DELAY_US);
-> > +	}
-> >  }
-> > 
-> >  static const struct mmc_host_ops litex_mmc_ops = {
-> > --
-> > 2.54.0
-> > 
+(for more details see https://github.com/litex-hub/linux-on-litex-rocket)
+
+I've added your patch on top of the LiteX kernel tree at
+https://github.com/litex-hub/linux/tree/litex-rebase
+
+and compiled it with:
+
+make clean
+make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu- litex_rocket_defconfig
+make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-
+
+FWIW, your previous versions of the patch did work, and did fix the
+issue you were trying to address (which I did notice being a problem
+on my configuration :)
+
+Thanks,
+--Gabriel
+ 
+> > On Sun, May 17, 2026 at 09:53:23AM +0800, Inochi Amaoto wrote:
+> > > The litex_mmc driver assumes the card is already probed in the BIOS
+> > > and skip the phy initialization. This will cause the command fail
+> > > like the following when the old card is unplugged and then insert
+> > > a new card:
+> > > 
+> > > [   62.923593] litex-mmc f0004000.mmc: Command (cmd 8) error, status -110
+> > > [   62.949717] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> > > [   62.976606] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> > > [   63.002516] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> > > [   63.028442] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> > > 
+> > > Add required clock settings and initialization for the CMD 0, so it can
+> > > probe the new card.
+> > > 
+> > > Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
+> > > Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
+> > > ---
+> > > Changed from v3:
+> > > - https://lore.kernel.org/linux-mmc/20260426112016.1370929-1-inochiama@gmail.com/
+> > > 1. Remove patch 1: mmc: litex_mmc: Move litex_mmc_setclk() to bottom for reuse
+> > > 2. Use set_ios() callback to apply the clock change.
+> > > 
+> > > Changed from v2:
+> > > - https://lore.kernel.org/linux-mmc/20260424013615.470325-1-inochiama@gmail.com/
+> > > 1. Remove the added function forward reference and add a new patch
+> > >    for moving litex_mmc_setclk() function
+> > > 
+> > > Change from v1:
+> > > - https://lore.kernel.org/linux-mmc/20260421025052.755471-1-inochiama@gmail.com/
+> > > 1. use fsleep to replace udelay
+> > > 
+> > > Inochi Amaoto (2):
+> > >   mmc: litex_mmc: Move litex_mmc_setclk() to bottom for reuse
+> > >   mmc: litex_mmc: Set mandatory idle clocks before CMD0
+> > > 
+> > >  drivers/mmc/host/litex_mmc.c | 37 ++++++++++++++++++++++--------------
+> > >  1 file changed, 23 insertions(+), 14 deletions(-)
+> > > ---
+> > >  drivers/mmc/host/litex_mmc.c | 11 +++++++++++
+> > >  1 file changed, 11 insertions(+)
+> > > 
+> > > diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
+> > > index d2f19c2dc673..65d5c728f536 100644
+> > > --- a/drivers/mmc/host/litex_mmc.c
+> > > +++ b/drivers/mmc/host/litex_mmc.c
+> > > @@ -68,6 +68,9 @@
+> > >  #define SD_SLEEP_US       5
+> > >  #define SD_TIMEOUT_US 20000
+> > > 
+> > > +#define SD_INIT_DELAY_US  1000
+> > > +#define SD_INIT_CLK_HZ    400000
+> > > +
+> > >  #define SDIRQ_CARD_DETECT    1
+> > >  #define SDIRQ_SD_TO_MEM_DONE 2
+> > >  #define SDIRQ_MEM_TO_SD_DONE 4
+> > > @@ -449,6 +452,9 @@ static void litex_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > >  {
+> > >  	struct litex_mmc_host *host = mmc_priv(mmc);
+> > > 
+> > > +	if (ios->chip_select == MMC_CS_HIGH)
+> > > +		ios->clock = SD_INIT_CLK_HZ;
+> > > +
+> > >  	/*
+> > >  	 * NOTE: Ignore any ios->bus_width updates; they occur right after
+> > >  	 * the mmc core sends its own acmd6 bus-width change notification,
+> > > @@ -459,6 +465,11 @@ static void litex_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > >  	/* Update sd_clk */
+> > >  	if (ios->clock != host->sd_clk)
+> > >  		litex_mmc_setclk(host, ios->clock);
+> > > +
+> > > +	if (ios->chip_select == MMC_CS_HIGH) {
+> > > +		litex_write8(host->sdphy + LITEX_PHY_INITIALIZE, 1);
+> > > +		fsleep(SD_INIT_DELAY_US);
+> > > +	}
+> > >  }
+> > > 
+> > >  static const struct mmc_host_ops litex_mmc_ops = {
+> > > --
+> > > 2.54.0
+> > > 
