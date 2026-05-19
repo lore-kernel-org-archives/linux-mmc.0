@@ -1,198 +1,114 @@
-Received: from omta040.useast.a.cloudfilter.net (omta040.useast.a.cloudfilter.net [44.202.169.39])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f179.google.com (mail-qk1-f179.google.com [209.85.222.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8890436BCCC
-	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 18:44:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=44.202.169.39
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0B023A1695
+	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 23:48:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779216273; cv=none; b=lemo01NMAUgk/9yWpHYC8ImXIj1lYMQiRuyy+NS343duB5Z8BEOaKr45F/19nEWJaC1qOwcMHD5X0yM6hB3qrHtt4HtEdBuyr6mgjaNZ6+snOCbrjfR9SJpuzWcGmO59tlqDuoUJOpU/GD7Y8gvyewWLvgCOJL4lLPHJKrvre2M=
+	t=1779234500; cv=none; b=lraoK/xAgvrbcayC/4bvfkYZZQuD/oL+oepLXFElb3jvkiwHkVCjqdVIgjwVH5BUCp2lhXg4/jUCZ8hvlr5Q+bdkZJ+/YEtRIqob5z/fOKDdMfZtReqMEwGaomMkNDBPcK1nPDs865PDSHIXAtsv4fHqx90TBIPQVCiJBKMViog=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779216273; c=relaxed/simple;
-	bh=uz+vemUhmNNro/rp3qqtv3qctKFkHF52DqRroFw7jbM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=qOrg1fy/Dm3YMsIn4WBr9gqpGS1JRDvlOLfRx//b+VkHGWL2BdW1I7Oq3W7eBxdcr+O4brCtzzEWTXs9jO/7//UP3SHRCJhpKW6XruPXiomhSqd8dVr0cgsujdds6WSda6cHnZ3XjW3t8zWNQwvRuA5+2a2wEeHbweqddXCSdW4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=embeddedor.com; spf=pass smtp.mailfrom=embeddedor.com; dkim=pass (2048-bit key) header.d=embeddedor.com header.i=@embeddedor.com header.b=Ur8iPei0; arc=none smtp.client-ip=44.202.169.39
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=embeddedor.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=embeddedor.com
+	s=arc-20240116; t=1779234500; c=relaxed/simple;
+	bh=nK0DU3MeJuxGLlbEPZuVHXpO7Oe8fCVlyNAcJlYiKqM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ulNuo3XAp7dVy96sACn+VmDkUVC5Xk16F54Vt4l8aBIwgTfiTCHTy+jNGrSowJzEgjZJjL2gewWEBznArDO30s2JCquhX4cUMTwNDbympFPyCWHgMnw8fdeqrDL3Tk2CzZtQ6SThyCV96WTW7WTKT6J8hDG2ElZGdcuMZPKiZJg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=qlcL8UDR; arc=none smtp.client-ip=209.85.222.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=embeddedor.com header.i=@embeddedor.com header.b="Ur8iPei0"
-Received: from eig-obgw-6005b.ext.cloudfilter.net ([10.0.30.162])
-	by cmsmtp with ESMTPS
-	id PK3HwZMwq4RkpPPQcwLtmo; Tue, 19 May 2026 18:44:30 +0000
-Received: from gator4166.hostgator.com ([108.167.190.91])
-	by cmsmtp with ESMTPS
-	id PPQTwyet6D6ICPPQTwai9H; Tue, 19 May 2026 18:44:22 +0000
-X-Authority-Analysis: v=2.4 cv=DcUXqutW c=1 sm=1 tr=0 ts=6a0caf8e
- a=vY9Mjuda9oMEc2E4Cx1x2A==:117 a=vY9Mjuda9oMEc2E4Cx1x2A==:17
- a=IkcTkHD0fZMA:10 a=NGcC8JguVDcA:10 a=7T7KSl7uo7wA:10 a=VwQbUJbxAAAA:8
- a=_Wotqz80AAAA:8 a=tBb2bbeoAAAA:8 a=pGLkceISAAAA:8 a=yC-0_ovQAAAA:8
- a=XdmyuPCCfbVxxrREcIQA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=buJP51TR1BpY-zbLSsyS:22 a=Oj-tNtZlA1e06AYgeCfH:22 a=2aFnImwKRvkU0tJ3nQRT:22
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=embeddedor.com; s=default; h=Content-Transfer-Encoding:Content-Type:
-	In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender
-	:Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
-	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
-	List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=WJd2PSagXT/7Zk3zROcElqGPnYAcaGo0Um1SeTGkppo=; b=Ur8iPei0kv4osbB1//cJPVZD0a
-	vlWslvxBezPVYFTlw0OwRKbNe6KfLO1A7n5D1Mpcx8nuRZHWdD5FinrdA+tZCRm3FlynC/ywWqH+2
-	uAtqZ8WYuOe4w0LUx6IWoRf/x/f5gcJohOJf37G14zkApHSvSgwOw4sFFh9iVOikGqZOvHYLvCyim
-	v88TdbBOfc072zfC/ulTT/uJY0W9pHiwK332xVMVAuER7cwxzharnrrXGQtzkEOePmmetOzRRfaKx
-	v8HkQ3NwrnYsqkJbdAxpGKzb1Fdo1OV0WUDcz4CXcyRblP3OeR+va8zRfY/dmk8FGrH4tkNrQxL8t
-	Yd9HP+jQ==;
-Received: from [177.238.17.117] (port=33822 helo=[192.168.0.11])
-	by gator4166.hostgator.com with esmtpsa  (TLS1.3) tls TLS_AES_128_GCM_SHA256
-	(Exim 4.99.2)
-	(envelope-from <gustavo@embeddedor.com>)
-	id 1wPPQR-0000000210K-3gpT;
-	Tue, 19 May 2026 13:44:20 -0500
-Message-ID: <18c41409-e1d1-4877-87a6-1c3156f943aa@embeddedor.com>
-Date: Tue, 19 May 2026 12:44:07 -0600
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qlcL8UDR"
+Received: by mail-qk1-f179.google.com with SMTP id af79cd13be357-912475287a5so460027585a.2
+        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 16:48:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1779234498; x=1779839298; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=FwP0HqBvQS3H4GOf9mcFliGMej6PKLk/wYq89RJjKaw=;
+        b=qlcL8UDRa0+iwt0ztq+lFd8JfHRh5E0T7tJ/8/MihRJjL3R0nlAz7VpiQ4lJUzhnNB
+         MBCUC2f126TSfrBUMZtfJlFT34/FfhdDYRyL7Yn6EvC5aY1Y5aF5LvZR16x6m5eNbZQG
+         Llc1RyRLbWkN8V2hjXGetyZ2VlIkKbWjaklOerg/wYEqBDxwDDOGon8yGfgBCzKWOzJN
+         h2Fe66zXK0N3PFugg5VLPyjP5Wa4NZAerMlRJ3oRD1lnSb2A+BOSFW50CQuVwYENciJG
+         nWBZQ+LsITnm6V55xC2vb/Z3WH6CW96vzqX8uyRAIF7NrPkzs81sTpWMZ/pKE9PIpFLs
+         h6Ig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1779234498; x=1779839298;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=FwP0HqBvQS3H4GOf9mcFliGMej6PKLk/wYq89RJjKaw=;
+        b=ULfSlId3Lvu9EpMVjfxDEvdwSobqCdPZAerYGZ2HH3nGWfcrT8894OGDfFXh7ONbB/
+         Gr/HFQtRvQ/yYLlbEBzANKDqLwpmvDARDNuchCUXbtzA0GzyMYoz0C2fL7jzTuEGgT07
+         Px2J6DcUpZTgmCxJ5PwLs4tl9H2TfMEJo4wv5IGqKTXDAyhhmnbm85leG0+tTDqSpYxW
+         CT5RDRkGBt1YszgEvEHJE3KAnVyYJ2GBpXmE8EnKe7AUqvJYHQE3Sw81ONAgl/TJTOOL
+         VA5Q2tO+gvEMvIitz0Qp41Se7WgPXncYhw6FI2vhPLhDLhQjQf8YvbRgZA8ybqcKn5aw
+         yHYw==
+X-Forwarded-Encrypted: i=1; AFNElJ+AIfGzo8fgKx5gKElGeZkt9FZDCFUOjgjpIC51ia5cLspaJSPsfLjBMbnDDr80sRejuUGquRJsikk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxEqQFNzdqOfCM7d76cUL3QnVlpQdF4DXY0KPvuRJ2MiNwEZHGx
+	IhqELmgrWuxpPyHLUM+Osrr6TpZTITNpX1S5UlRcBsFVz4XzzDxq/9yv
+X-Gm-Gg: Acq92OEfdxOOjhtrZ/z0M5jOBqYkWIj3MO84P9r8rbxba0+A81kE70MI+kqo/YRx66W
+	DfT0DwIiReTmPouuFBQaeNkr1zesWA33Ktav06J69zajZ3ZK6ehZgqU7bE/vBMZoOS6oCJl/fLb
+	TW4XzCeMCLbUjilZ0pk3yrUA7UwWUHvtkGWcrcrkp1pPWMw46E8Wn+n+zwI57VQLLVnMSTOgGXH
+	LMBhjRFc6kL3LAI3axMgIbOeyHdlDRhp36CUHtPtS5eHebplQMrfr7twvQvmDVeAQU0dfil1wUf
+	IlwsKdKQj3HbsvKpNQP9xvjAGDhsc3DLGeyexGCySr5wSeXocJD5yP1Z7BvAUMdwrBprMPlxGfw
+	p4mxODr/P5vXFfk012Zo/zFu3VfH2pewjJOy1/er7QuFAMoT7s1znK7GbD5XUVf6ShEy1fYKdaM
+	ej95qRWWKoPEnOdeMMsjgsRM21RCH6ViNnAhGV5H9XKy2CRwt/4smXQexD9xTQgba8ZjCgjBTuK
+	6K3obDsLxUc7IULULeaNJ4=
+X-Received: by 2002:a05:620a:a2dc:20b0:912:f763:f2b4 with SMTP id af79cd13be357-912f763f2ffmr1784376285a.11.1779234497830;
+        Tue, 19 May 2026 16:48:17 -0700 (PDT)
+Received: from errol.ini.cmu.edu (pool-108-17-68-229.pitbpa.fios.verizon.net. [108.17.68.229])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-910ba36e68csm1993285485a.10.2026.05.19.16.48.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 19 May 2026 16:48:17 -0700 (PDT)
+Date: Tue, 19 May 2026 19:48:15 -0400
+From: "Gabriel L. Somlo" <gsomlo@gmail.com>
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Inochi Amaoto <inochiama@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
+	Karol Gugala <kgugala@antmicro.com>,
+	Mateusz Holenko <mholenko@antmicro.com>,
+	Joel Stanley <joel@jms.id.au>,
+	Kamil Rakoczy <krakoczy@antmicro.com>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
+	Longbin Li <looong.bin@gmail.com>
+Subject: Re: [PATCH v4] mmc: litex_mmc: Set mandatory idle clocks before CMD0
+Message-ID: <agz2v0EHaffzoXxB@errol.ini.cmu.edu>
+References: <20260517015323.264179-1-inochiama@gmail.com>
+ <aguQwccX_ujIoARX@errol.ini.cmu.edu>
+ <aguRU9Ces7ruBbRY@inochi.infowork>
+ <aguWhuNsV1KKxMeQ@errol.ini.cmu.edu>
+ <agvN86UYsdU7Ixun@inochi.infowork>
+ <CAHp75VfruMEp++65kFtMt=Em-bF2d1jMUywT-6ropx6cTHFygw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: mmc_test: Fix counter tracking in
- mmc_test_alloc_mem()
-To: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>,
- Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Ulf Hansson <ulfh@kernel.org>, Kees Cook <kees@kernel.org>,
- "Gustavo A. R. Silva" <gustavoars@kernel.org>,
- Wolfram Sang <wsa+renesas@sang-engineering.com>,
- Geert Uytterhoeven <geert+renesas@glider.be>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org,
- linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>,
- Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
- Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-References: <20260519133025.618255-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <CAMuHMdVKOdzThVMOcQ1K9crUkyDutvuZsP2-5v5++SVFHkgtOA@mail.gmail.com>
- <CA+V-a8sFNjp9euEEfBf3BoscjU8W3isRT_pnzd7J4QsuiN6qfg@mail.gmail.com>
-Content-Language: en-US
-From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-In-Reply-To: <CA+V-a8sFNjp9euEEfBf3BoscjU8W3isRT_pnzd7J4QsuiN6qfg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - gator4166.hostgator.com
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - embeddedor.com
-X-BWhitelist: no
-X-Source-IP: 177.238.17.117
-X-Source-L: No
-X-Exim-ID: 1wPPQR-0000000210K-3gpT
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-Source-Sender: ([192.168.0.11]) [177.238.17.117]:33822
-X-Source-Auth: gustavo@embeddedor.com
-X-Email-Count: 7
-X-Org: HG=hgshared;ORG=hostgator;
-X-Source-Cap: Z3V6aWRpbmU7Z3V6aWRpbmU7Z2F0b3I0MTY2Lmhvc3RnYXRvci5jb20=
-X-Local-Domain: yes
-X-CMAE-Envelope: MS4xfHi8l6sAZjDlf5o8qw4OnyhjNAhXvr6ECN97nUPFK3IBnXZr3XkDa1aA82oYLV3YzdOedXkgjIjvOxZWfXakel1FVbtAaMicpxuRmW2pDPfT+PS1iYlj
- OhVR3tdxOhaf9yt+LFUBbkPTk6ITCgG4LX3WrZ6ON4E/ZDXH1+Lb25xQ7VS2ToVHEpYHzFb2Dh9yfK0NDHayDbT3WjApBMr716g=
+In-Reply-To: <CAHp75VfruMEp++65kFtMt=Em-bF2d1jMUywT-6ropx6cTHFygw@mail.gmail.com>
+X-Clacks-Overhead: GNU Terry Pratchett
 
-
-
-On 5/19/26 07:44, Lad, Prabhakar wrote:
-> Hi Geert,
+On Tue, May 19, 2026 at 10:52:10AM +0300, Andy Shevchenko wrote:
+> On Tue, May 19, 2026 at 5:51 AM Inochi Amaoto <inochiama@gmail.com> wrote:
+> > On Mon, May 18, 2026 at 06:45:26PM -0400, Gabriel L. Somlo wrote:
 > 
-> Thank you for the review.
+> ...
 > 
-> On Tue, May 19, 2026 at 2:34 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
->>
->> Hi Prabhakar,
->>
->> On Tue, 19 May 2026 at 15:30, Prabhakar <prabhakar.csengg@gmail.com> wrote:
->>> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
->>>
->>> Fix an counter tracking in mmc_test_alloc_mem() that causes a kernel panic
->>> during error unwinding.
->>>
->>> The `struct mmc_test_mem` uses the `__counted_by(cnt)` annotation on its
->>> flexible array member `arr`. While kzalloc_flex() initially sets the
->>> counter field (`cnt`) to `max_segs`, the allocation loop needs to track
->>> how many elements have actually been populated.
->>>
->>> Previously, leaving `mem->cnt` at `max_segs` meant that if the loop failed
->>> midway (e.g., "Failed to map sg list"), the error unwinding path in
->>> mmc_test_free_mem() would attempt to clean up uninitialized trailing
->>> array slots. This resulted in passing NULL pointers to __free_pages(),
->>> triggering a kernel panic:
->>>
->>>    [   66.172845] mmc0: Failed to map sg list
->>>    [   66.176722] Unable to handle kernel NULL pointer dereference at virtual address 0000000000000000
->>>    ...
->>>    [   66.432747] Call trace:
->>>    [   66.435191]  ___free_pages+0x1c/0xc4 (P)
->>>    [   66.439119]  __free_pages+0x14/0x20
->>>    [   66.442608]  mmc_test_area_cleanup+0x58/0x84 [mmc_test]
->>>
->>> Fix this by explicitly resetting `mem->cnt` to 0 immediately after
->>> allocation. Then, move the existing `mem->cnt` increment so that it occurs
->>> prior to populating each array slot, using `mem->cnt - 1` for the actual
->>> assignment index. This guarantees that the counter accurately tracks
->>> initialized entries for safe error cleanup, while dynamically expanding
->>> the `__counted_by` validation boundary ahead of each flexible array write.
->>>
->>> Additionally, rewrite the cleanup loop in mmc_test_free_mem() to use a
->>> standard forward for-loop. This addresses the unsafe post-decrement logic
->>> in the original `while (mem->cnt--)` loop which evaluated and decremented
->>> the counter field before indexing the array, and avoids a potential integer
->>> underflow/wrap-around of the counter field if the cleanup path is invoked
->>> when `mem->cnt` is 0.
->>>
->>> Fixes: c3126dccfd7b ("mmc: mmc_test: use kzalloc_flex")
->>> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
->>> ---
->>> v1->v2:
->>> - Started with cnt = 0 and incremented before assignment to ensure
->>>    accurate tracking of initialized entries in mmc_test_alloc_mem().
->>> - In mmc_test_free_mem(), replaced the while loop with a forward for-loop to
->>>    safely iterate over initialized entries without risking underflow.
->>> - Updated commit message to clarify the issue and the fix.
->>
->> Thanks for your patch!
->>
->>> --- a/drivers/mmc/core/mmc_test.c
->>> +++ b/drivers/mmc/core/mmc_test.c
->>> @@ -318,9 +318,8 @@ static void mmc_test_free_mem(struct mmc_test_mem *mem)
->>>   {
->>>          if (!mem)
->>>                  return;
->>> -       while (mem->cnt--)
->>> -               __free_pages(mem->arr[mem->cnt].page,
->>> -                            mem->arr[mem->cnt].order);
->>> +       for (unsigned int i = 0; i < mem->cnt; i++)
->>> +               __free_pages(mem->arr[i].page, mem->arr[i].order);
->>>          kfree(mem);
->>>   }
->>>
->>> @@ -356,6 +355,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
->>>          mem = kzalloc_flex(*mem, arr, max_segs);
->>>          if (!mem)
->>>                  return NULL;
->>> +       mem->cnt = 0;
->>
->> This is not needed, as it is set to zero by kzalloc_flex().
->>
-> Actually, kzalloc_flex() automatically sets mem->cnt to max_segs
-> because cnt is annotated with __counted_by. Because of that implicit
-> initialization, we need this explicit reset to get it back to zero.
+> >         /* Update sd_clk */
+> > -       if (ios->clock != host->sd_clk)
+> > +       if (ios->clock != host->sd_clk) {
+> >                 litex_mmc_setclk(host, ios->clock);
+> > +       }
+> 
+> FWIW, it's a stray change.
 
-An auxiliary variable could be used to avoid having to update the
-counter too early[1][2].
+and I'm still getting:
 
-I think it'll eventually become best practice to defer updating the
-counter until after the flexible array has been fully initialized, or
-after every major update that requires changing its boundaries.
+[    6.508084] mmc0: invalid bus width
+[    6.510652] mmc0: error -22 whilst initialising SD card
 
--Gustavo
+when booting with this change on 64-bit litex/rocket.
 
-[1] https://git.kernel.org/linus/ea9e148c803b24eb
-[2] https://embeddedor.com/blog/2024/06/18/how-to-use-the-new-counted_by-attribute-in-c-and-linux/
-(I'm in the process of updating this blogpost with some *alloc_flex() examples and more.)
+Thanks,
+--Gabriel
