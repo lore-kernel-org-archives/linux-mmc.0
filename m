@@ -1,100 +1,101 @@
-Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9BBFF348C7F
-	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 13:37:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE0053ED3A2
+	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 13:44:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.52
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779197867; cv=pass; b=u1mUZug28Dth7lsvuquRDWQtYvvumYgy3hFJ2ijJuAG3enbTSKeQ7N77BDobmOBbrmA80GZgHnfjEmIPRVaSqW64bFV73v+X7Ti6T+HJF6iYNAL9s7hzS/TybOopFmtD73Xv9FhcTO6qJvBURTETWm370egfW9K+YQzgiSKrSsM=
+	t=1779198276; cv=pass; b=SjKa6tTpN7rPU/dLxXzaEqESnC4chMw60WCTPGaxBZmBEKodR8EpQfDiaRYiBR5n4RJJCiMYsIp74KT4JuvoPxz7N0mmrltw662ilozoqeaJ4tJywaracMypETPORLKZg3YBMLj3crO6y/xgZrQ3q4jSfBrHDdfthRFf6HP+QOo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779197867; c=relaxed/simple;
-	bh=a+6vVJmOZ3ZG/v6p+ChaawK/jURoxlUIsJFp9JcF6Eo=;
+	s=arc-20240116; t=1779198276; c=relaxed/simple;
+	bh=opOVFODQci9HR/5dFhKBBRniDOSVqW6FnIkz8KfOIxc=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UnqNzdc+RKjbPoqrUuWgFXKpbj7komN3PEVYwH/c8qaB6HLNtDXH/kYQ0HLLAJqKas32nE8CNeMUWiSughCuleJf3rA6W98GN1njxMiBy265tm5rzYXq0WCdkL0g9sstgyqS87tXvUENo5orLtF98NuHZ2V4EdAi/INAEbP9vbs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eBUMJ0D5; arc=pass smtp.client-ip=209.85.221.54
+	 To:Cc:Content-Type; b=RzpE9rzcTlTDTASVKJTnKdyVUjZ091z4CjpdtNl4Rb3bjxAWTLiNf2QHdZwcVeLkM6kVoj8aUVJV9STpXyfmaVwGva7flhj7TwJgtxukgVVnznnyCqRp5Pk2MDebUmdj52gaciz9Dvw+X+xMPHsY78r7YcoUOpYaOSKHDTZqJbA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=UeY/hFnH; arc=pass smtp.client-ip=209.85.221.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eBUMJ0D5"
-Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-449d6c68ed8so907278f8f.0
-        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 06:37:44 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1779197862; cv=none;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UeY/hFnH"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-44509921fbcso2207684f8f.3
+        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 06:44:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1779198273; cv=none;
         d=google.com; s=arc-20240605;
-        b=FaW95urGlPX3NX+o1Wo+08iE4u76IABJoI5HZZGxsaJ5JVAYdEparzdJX2FCGtQhWo
-         CM0PKKg1LqNYtD4Yv0oIrPzaYKWXuxgQqGsShjO+iIUaOV8sA9LkpImotVPExebd27Gl
-         hALVD9xqHzhJGJ8nElW8M+2yYg1LG82IJ27SXWiv0rzgk8t8z/iVdxrpGhJMShAP1oxW
-         AwQm7XrJtAFcbJqQR04aIGjmbBX7+5taJ1i2NZgnU2M9NdHpZbAlGuMQ9/ljw/usoZDi
-         z8MKtQOypL+K71KTSVXaUeG89KRY7vGuIcPP/7HhPXIvr0df+ZhXtT+O2D5j7D+NjuCP
-         Zjeg==
+        b=MranliriGUGg3eRN4n0Rqb8zz7YGfSsFJ00IC5wMQdM5QGkOtI9PT35cxo+EL4Nzkf
+         RMhVEAA2KQokEMegVO/FlIoDlPgvxyTD1HszDvA/SejV3u2aWLPlJRc2/YUNnW2y6kup
+         AViLUsjshBcg5+ZVoHwwaYZY3uL8pOGav6Vo89HB3H2IMX2ID9SMX5C7gVnL8L0XEKji
+         Hqo2Il679la23kUDGu+KzKkbncZaTmOcXuTvWpROrPKMmIleyoR78pmsE2FouFQ6ZyFc
+         XY6p0ghYxhTLSNW22rOPz75uDu9CpZh2XahWnW4G+21nJ1MKV01TV0dQQlSx0qmmAJVM
+         v4BQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=+/ja8jc+FHQMYyLaMU5qKpBDmFJx8YQVV0WGsvU+fWE=;
-        fh=svdG7fXFJKcrabPOpdwqys2PtrUnVht3Dfj+PGli2Es=;
-        b=g+piL0Y8E364FwSNgHgGCrN+v4LewiBdKHm/lwM9Ki18RhPopMSgBDqpyzLcVyjUpt
-         I4zpMP2iS/JJ914i/x+q10adiehCzs6YrCdFXBTvzPlCqN7c/KjRnYWfqfv01jbahB4h
-         cmaac7BMOSbiZL4O5AvniU7d5BoCJHI1UbWiRqx4m8GDCHI/4F4+2TM2Y/s2+J8REjh7
-         +p/FUaMQDwTJ08c2/LrcfyMLJaEkMxgbVVxKUy+OL+qtqdHLlMP5gue2udpL8pCTDKYW
-         /knj8+7RPOQw9ODW8qcY4JjKTQm7XZExhJ6KKQr2Mqr0LWCyBn/oHxoe2KQZ++lGP2+r
-         Mi5A==;
+        bh=O+YkZX+39OPcemnQqAhpYtGbTbuu0be2yB+wxTeVaUo=;
+        fh=ucczlT/j/EBij98qyeA/tHgTpHqjMbTZh1YqvIoyBkA=;
+        b=CjfCAsPVnu6fWCYEwINugYoQEn8aleb/sz4upr9m5jrKADGCZjb28MD9Y45oOYgPlZ
+         To0a9TI9ZDMaQPfqBlyuB8zIt4fPMIa84Br/Bdxa02t4Bq4zMSOx/rnKho6WA/Nd9/u7
+         7yhkC/Z7BgEpAvqpXvmKSLpm1RQzM5Yn1ejjGazG0hRL63p6P8sTKIwtg4km+eYIpPPN
+         xVc3zEmF0QjVE7ptyJLJYb40zM0jAag5dezt0P/EgbiLTbLEo6HzkwJEZyXq7mH32Y80
+         Ja5H+ajuUrnWcKnxITHJiKt2FTQWg8m1jkTGqwQYaZxKUgKFG5Q1ACzsZlFvbVXCfcap
+         uJtA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779197862; x=1779802662; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1779198273; x=1779803073; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=+/ja8jc+FHQMYyLaMU5qKpBDmFJx8YQVV0WGsvU+fWE=;
-        b=eBUMJ0D5qz5yuUY2vA1ejwq6sp99nSXgj5qOPe57Pxoy/dgBM41o2zA3YFlbLk5lS0
-         3KO0USOyZnalnhnkLaAJtpU6W0BAR3DF1vnl59RNsypd82qmIQ5VV/wPUKP8ZP/PF3Nk
-         QTV7fbSicD61E+ehBaU5uoVgLLWYz10/NPkFtJ7KRIcymmZLGuf30WqmKR0nGf5Er3z6
-         Px2QCL6bl+DfbsJQrUJ8vYj8vHt1t8lABrQyJ75Tl3h3I1I2g59IQN3JokcOsVSwpC/S
-         Gi0hEV/UqtbVUr8IeB0kS4Q4YTr3LBU03fI/YbY8I6naR8OdX7jOvf4fZbppA+AYP2kQ
-         /pgQ==
+        bh=O+YkZX+39OPcemnQqAhpYtGbTbuu0be2yB+wxTeVaUo=;
+        b=UeY/hFnH5Fm3/Z+luDGQ6LJAttiECk9Esn624YcdJOtKUQe3FRzSTGJb3SWq1z9YHB
+         cKTX+NwXMnzqbTGHg+hy4HP3wFndSIoYngLayx6hOifGmoxj8nKTBHBoe5AgyWznb/Y4
+         jxNOr0Jg+3mh0exey/zr0wg4bQyli6qCXgeq2gHWm7MBU9NpTEbvzBS0XcYTeTQdn/sS
+         /WJtHojhyd+VHFYNVvgDY4RZ8Hm2ay4QVxTBEf28g5uy02b7IOm5h/5JMIuxIbAYwbq/
+         7VC6qV08pikIu53Wy3H0XpYJ1QuASddZAZZPd/lv/2prxgrm1CtSA0wBFQAs0NDq+5Wc
+         wTQw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779197862; x=1779802662;
+        d=1e100.net; s=20251104; t=1779198273; x=1779803073;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=+/ja8jc+FHQMYyLaMU5qKpBDmFJx8YQVV0WGsvU+fWE=;
-        b=GRCJtKDOo4pnGG6s+ybvtsorSdH6kmRkM68IRvH0ifT09AiwujMHWB3ghM8iZJZ6E8
-         hu13UEKnPkCEdPtGMl6FXJbue6ItJtxDJrtC5lN+gUBA1FHYfHyFxrcDk69Fm/ZxqBA2
-         91chxf8kMqIYJ2hrDnKX7KccRBZTAAoqGPnTMjTxbZbG/pg1341cNA7wwyRgDghAxGed
-         DVGbjMJIqc2GZIzcvNN1mW9VgNNdNU9wOYutZ5C24Jc6lhYA75iZdYKuu1tURmKNZFKI
-         Quswwm+EWIA7UBIcaHipL1thnyUhQ4O76WoX2d2GD+LJ8y9hXxLkTjyrbTilMoLdpc9B
-         Z8Cg==
-X-Forwarded-Encrypted: i=1; AFNElJ9YT2PtmMP84DzYRRcjhA3csyxCY8yRYpwDS0OPLQapUD+5tVkVa0y0l7nH9v7XhdLoGwNk9fdqdgg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzcWBrVLnu36E+mm5iCFJm6WYYqFjZpywINQ64vZSjJk6Z6stNn
-	uGcBDn/DZCEDOipps1ZzVvYf7jHXuKXsFoggXIstmP9OnVQGv3E9xSxtHkRAUzND4nOc/I9uNLG
-	Ik20pRwcBSLmmxGVkLIvjoyZbuqpowvg=
-X-Gm-Gg: Acq92OHLCe1XNaNpzWTDXAjIJ90Zhm7Tm1HNqqbKYsaMB02GUfarMaXlGs8aQoYxRaw
-	/KqeyOYNd20FK60Qr2FyIQzxt6kpg9DkiPDB4wSpKHjT/ibPoi4+ocxMHeraV8M8Pn4WM3+UZHZ
-	AZtUFK03EC2wXnNk4MahJT/NGFLF2CHJj7NFeYu/ZrwIR2VEs0bRvJYmbbYdP6XT7s0X4ePdelY
-	5qWBtAuH3p3tu7MMxFKTQqS2A2ZzppJMFDPx1VvbmP6Zcg94xUUNi9fFBkk0HEN7lrCUJQ/Svj4
-	Sh59BcS707b7xG525zZAsp/PHOfX2mQkl9ov4fozLHXtXx6Rd7e5VEf4JHzsfRI//7am
-X-Received: by 2002:a05:6000:1ace:b0:43b:3b80:6776 with SMTP id
- ffacd0b85a97d-45e5c594c2cmr30428288f8f.30.1779197862459; Tue, 19 May 2026
- 06:37:42 -0700 (PDT)
+        bh=O+YkZX+39OPcemnQqAhpYtGbTbuu0be2yB+wxTeVaUo=;
+        b=tTG/4TC8Gv53xgLKr7pnuUtnYgBX+Qf4MG1cXgHVg3JTb/ykhC0Bfd7NrA5rzO1ABB
+         ZBWjbIbQBy4iYxhstLfUcjTYdY9WDpow1VqlemzVc14D0AVGF+4NVzpNzSxVQOEqHfSO
+         HBUv28h7+vO3FvcPZtAxQBLaJPnbyfK6LVpoKmVFoozXfDX7+yMp3KICeTs0JIHhSeN5
+         ghkA1B7X5KGaasiDODmjP3tvcxpJJiGANX9M6g37p1V/yMHbjfJjrxyVq4yUC5dcssCU
+         ycgUSSeW4400jhBB6iCmUBOmIqxbSSLAsadc42ug//BpCZS1D0WLw783PYPLRpE3iFaM
+         lBfQ==
+X-Forwarded-Encrypted: i=1; AFNElJ8heIp2cL+0L5aV+zMY4/8QXZmPab2jnyYvhuz7MkTlG0md39d3+o+MbMTOWrnXRx2NpukleiI8VH8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzF7p0ZmgwnjEiGpjEdEinbf5VLUqu8NedynG8eLy3K2rn1SNDB
+	cW5ftiggn3FV0aWECmnfTNITpvu/DgBNB1WszacnS6Ajca2TKtctoz7MSUudZqgJFc199aPGU95
+	hJL2KexOO3kruz1+WJDr1ckcNOa1RIRo=
+X-Gm-Gg: Acq92OFK0MCToUqDi7PUGDNFV6TepJNQvx/7Sc28GQrGDW3FMHtMeMMRiKqitKmaBdV
+	xKGXUpl9H+p/Uf46G++nZrQNKNHCXsCth9Y8xB7NZO7yjJo2HtPBpRyXcey4QyvyRn+VyrgOCWt
+	AJ7F7CNYgzSP+eNWiT5/fbdCWUR6VrY8urGkpxhDds8Ut51F0DoOn5oaecNzh3Jj8EgoENdaYyc
+	lqZIngYMte1ZzuVt9YvV2/U+fPOnXSIXNZSZR1oC5F77/yUSPpZsTiGcPWB7nLwfQBtxcu4fo1D
+	Hgc6Lo77BLIIf/VxQjXFnYrYQy0FB3J7VwHRLYCHlWl5k1T52ZcGKOHQsPEIYIIZZ2jZ
+X-Received: by 2002:a05:6000:25c7:b0:452:79c0:f7f1 with SMTP id
+ ffacd0b85a97d-45e5c349e9amr32067188f8f.0.1779198273012; Tue, 19 May 2026
+ 06:44:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260514212024.1624517-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20260514212024.1624517-2-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAMuHMdXDAJjWGRLQb6jfvzUPAWymmTC3yE89UPyiydykHN4u6w@mail.gmail.com>
-In-Reply-To: <CAMuHMdXDAJjWGRLQb6jfvzUPAWymmTC3yE89UPyiydykHN4u6w@mail.gmail.com>
+References: <20260519133025.618255-1-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAMuHMdVKOdzThVMOcQ1K9crUkyDutvuZsP2-5v5++SVFHkgtOA@mail.gmail.com>
+In-Reply-To: <CAMuHMdVKOdzThVMOcQ1K9crUkyDutvuZsP2-5v5++SVFHkgtOA@mail.gmail.com>
 From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Tue, 19 May 2026 14:37:16 +0100
-X-Gm-Features: AVHnY4I3urEZt5J-xjsCBTxOrtCMrr3KZW2teP8VKCgNB9fs0VDzkYcmhM5yTss
-Message-ID: <CA+V-a8uTXh2ieeBRCQC8Gzg_hCSFVFCOv0S_V+6MoGdX0F4VNA@mail.gmail.com>
-Subject: Re: [PATCH 1/3] mmc: renesas_sdhi: Apply bad taps quirk to RZ/G2H
+Date: Tue, 19 May 2026 14:44:05 +0100
+X-Gm-Features: AVHnY4K_DFHUucHBZroz2WyX0_7Z_w5XdSocDRcWygqdYSVku2G-sqkFB5JtEaE
+Message-ID: <CA+V-a8sFNjp9euEEfBf3BoscjU8W3isRT_pnzd7J4QsuiN6qfg@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: mmc_test: Fix counter tracking in mmc_test_alloc_mem()
 To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulfh@kernel.org>, 
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>, 
+Cc: Ulf Hansson <ulfh@kernel.org>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>, 
 	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, stable@vger.kernel.org
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -102,51 +103,102 @@ Hi Geert,
 
 Thank you for the review.
 
-On Mon, May 18, 2026 at 2:07=E2=80=AFPM Geert Uytterhoeven <geert@linux-m68=
+On Tue, May 19, 2026 at 2:34=E2=80=AFPM Geert Uytterhoeven <geert@linux-m68=
 k.org> wrote:
 >
 > Hi Prabhakar,
 >
-> On Thu, 14 May 2026 at 23:20, Prabhakar <prabhakar.csengg@gmail.com> wrot=
+> On Tue, 19 May 2026 at 15:30, Prabhakar <prabhakar.csengg@gmail.com> wrot=
 e:
 > > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 > >
-> > Apply the sdhi_quirks_bad_taps2367 quirk to the RZ/G2H (R8A774E1)
-> > SoC.
+> > Fix an counter tracking in mmc_test_alloc_mem() that causes a kernel pa=
+nic
+> > during error unwinding.
 > >
-> > RZ/G2H is identical to the R-Car H3-N (R8A77951), which already uses
-> > this quirk to avoid unreliable tuning tap positions. Use the same
-> > quirk entry for RZ/G2H to ensure consistent SDHI tuning behaviour.
+> > The `struct mmc_test_mem` uses the `__counted_by(cnt)` annotation on it=
+s
+> > flexible array member `arr`. While kzalloc_flex() initially sets the
+> > counter field (`cnt`) to `max_segs`, the allocation loop needs to track
+> > how many elements have actually been populated.
 > >
-> > Fixes: 31941342888d ("arm64: dts: renesas: r8a774e1: Add SDHI nodes")
-> > Cc: stable@vger.kernel.org
+> > Previously, leaving `mem->cnt` at `max_segs` meant that if the loop fai=
+led
+> > midway (e.g., "Failed to map sg list"), the error unwinding path in
+> > mmc_test_free_mem() would attempt to clean up uninitialized trailing
+> > array slots. This resulted in passing NULL pointers to __free_pages(),
+> > triggering a kernel panic:
+> >
+> >   [   66.172845] mmc0: Failed to map sg list
+> >   [   66.176722] Unable to handle kernel NULL pointer dereference at vi=
+rtual address 0000000000000000
+> >   ...
+> >   [   66.432747] Call trace:
+> >   [   66.435191]  ___free_pages+0x1c/0xc4 (P)
+> >   [   66.439119]  __free_pages+0x14/0x20
+> >   [   66.442608]  mmc_test_area_cleanup+0x58/0x84 [mmc_test]
+> >
+> > Fix this by explicitly resetting `mem->cnt` to 0 immediately after
+> > allocation. Then, move the existing `mem->cnt` increment so that it occ=
+urs
+> > prior to populating each array slot, using `mem->cnt - 1` for the actua=
+l
+> > assignment index. This guarantees that the counter accurately tracks
+> > initialized entries for safe error cleanup, while dynamically expanding
+> > the `__counted_by` validation boundary ahead of each flexible array wri=
+te.
+> >
+> > Additionally, rewrite the cleanup loop in mmc_test_free_mem() to use a
+> > standard forward for-loop. This addresses the unsafe post-decrement log=
+ic
+> > in the original `while (mem->cnt--)` loop which evaluated and decrement=
+ed
+> > the counter field before indexing the array, and avoids a potential int=
+eger
+> > underflow/wrap-around of the counter field if the cleanup path is invok=
+ed
+> > when `mem->cnt` is 0.
+> >
+> > Fixes: c3126dccfd7b ("mmc: mmc_test: use kzalloc_flex")
 > > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > ---
+> > v1->v2:
+> > - Started with cnt =3D 0 and incremented before assignment to ensure
+> >   accurate tracking of initialized entries in mmc_test_alloc_mem().
+> > - In mmc_test_free_mem(), replaced the while loop with a forward for-lo=
+op to
+> >   safely iterate over initialized entries without risking underflow.
+> > - Updated commit message to clarify the issue and the fix.
 >
 > Thanks for your patch!
 >
-> > --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> > +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> > @@ -224,6 +224,7 @@ static const struct renesas_sdhi_quirks sdhi_quirks=
-_rzg2l =3D {
-> >   */
-> >  static const struct soc_device_attribute sdhi_quirks_match[]  =3D {
+> > --- a/drivers/mmc/core/mmc_test.c
+> > +++ b/drivers/mmc/core/mmc_test.c
+> > @@ -318,9 +318,8 @@ static void mmc_test_free_mem(struct mmc_test_mem *=
+mem)
+> >  {
+> >         if (!mem)
+> >                 return;
+> > -       while (mem->cnt--)
+> > -               __free_pages(mem->arr[mem->cnt].page,
+> > -                            mem->arr[mem->cnt].order);
+> > +       for (unsigned int i =3D 0; i < mem->cnt; i++)
+> > +               __free_pages(mem->arr[i].page, mem->arr[i].order);
+> >         kfree(mem);
+> >  }
+> >
+> > @@ -356,6 +355,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsi=
+gned long min_sz,
+> >         mem =3D kzalloc_flex(*mem, arr, max_segs);
+> >         if (!mem)
+> >                 return NULL;
+> > +       mem->cnt =3D 0;
 >
-> This array is meant for quirks, i.e. to address issues on specific
-> SoC variants that cannot just be identified by the compatible value.
+> This is not needed, as it is set to zero by kzalloc_flex().
 >
-Ok, I will drop it from the quirks list.
-
-> >         { .soc_id =3D "r8a774a1", .revision =3D "ES1.[012]", .data =3D =
-&sdhi_quirks_4tap_nohs400 },
-> > +       { .soc_id =3D "r8a774e1", .data =3D &sdhi_quirks_bad_taps2367 }=
-,
->
-> Hence I think this should be RZ/G2H should be added to
-> renesas_sdhi_internal_dmac_of_match[] instead, referring to
-> of_r8a7795_compatible.
->
-Ok I will add an entry in  renesas_sdhi_internal_dmac_of_match[] (same
-for patches 2 and 3).
+Actually, kzalloc_flex() automatically sets mem->cnt to max_segs
+because cnt is annotated with __counted_by. Because of that implicit
+initialization, we need this explicit reset to get it back to zero.
 
 Cheers,
 Prabhakar
