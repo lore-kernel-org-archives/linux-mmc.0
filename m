@@ -1,141 +1,223 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37F01352020
-	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 11:51:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779191504; cv=none; b=s/ImgTn+qG5KtVj0OZpuxCgUdMHniRYuHbr4+RBfhohxUr9406xtoQRuD68j+x53HJta2JFcztzv6AKAyXPSGJ1fp2ShrM3d/RgcztDMDcGLx2dSGp7W9JMAKZmemiFm0wsXs0osR+ESr6bMD2vzM1p/XcvoFf42apA4mbR+EmI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779191504; c=relaxed/simple;
-	bh=8886y9OK7rLNEr2zlaE8SlacINuysTCFqKQRD3SXm8g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=eFnQOS9WPqHXpJbxZxCFJzybgnGzAqT0wFxWi/v7/xyyWK1QKEIqxscs31PlrA4hdJ08UjrivU3KaHKA2Ksa66hzWkOf47zzrjQzBIgbuZYEnM8JsVzHUQBHynVMiyhP+ydJadzcGMi5q07fPOTCF9J0Gthoy1IL0rEDGVnmXM4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=KQ6smCqC; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=T0yHjBsA; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA7E04DBD83
+	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 12:49:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.221.41
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1779194953; cv=pass; b=GPv7W0L1XlKRHoE6hHdK2ZrJI8ML45OUx0eYaDCfdyowuMAWShvQuf+lFAMeXeCUjuGEQP6PAQPRXgfsxChY9R0rDwPDn9TeOcQ42yB0AWrJB1ddPQuKvP8HyPzqoiNthyr3Yz6R7YTmP7MzUqDfxi45ndcNLJ7zVXlRJCRqRp4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1779194953; c=relaxed/simple;
+	bh=z5bbYmTfV3f1fUZkdMtjKau2veIkDy6z1gsrRWGyj8Y=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=mey5Xc0YmfLa0svMMoV+nbefFu9U6jBx8r42ey1/BAj7FmmwCPA25YJ2YVjdWHt1Dc+2xKCMdaJIUBtvNtl3DUcT5h7TfW6bdW1SRZSVLVx714wE7t9pmlQXQp968kx9JK8cuTl45KPIh8KVTIiUDJjOdQwjY2Mvnu8ox6jqSf0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g4OLNhkS; arc=pass smtp.client-ip=209.85.221.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="KQ6smCqC";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="T0yHjBsA"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64J9lCF41258570
-	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 11:51:42 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	8886y9OK7rLNEr2zlaE8SlacINuysTCFqKQRD3SXm8g=; b=KQ6smCqCRl3S4GLo
-	oL+Guj+g0A7gNDWly4GVS3iiDLztIRrXwGpR+txIWbKYvVgXy3j5MJU36QgqkYdG
-	Dvtge95w5RUfAKhT/t/mkGJf5f4X/We4YVBhPZUtl4xT3Gs+r3RcmX8gKrZN+DZz
-	3lnZK1ytX4FYhoK3dvJUHiwr1MQsMhVDDEovCmzohqmca1Hz7xkAd4yMLyYUoIUD
-	0m71A7WMIpAvYeYHarzElfnmr34YXwePzqEtAoC4ySz5O/nP5hpFT4GjnwaNMHJ4
-	7AmMa9mqBJ/ciqFpEWwfWKnuLfX1nK27d1UQCmN9a1/WFIM1ecmadUDv0YSOmcx+
-	5e7AHg==
-Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com [209.85.222.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4e8nhj8etg-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 11:51:42 +0000 (GMT)
-Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-910552aaff2so46890385a.2
-        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 04:51:42 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g4OLNhkS"
+Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-43d76dd4ee8so778115f8f.2
+        for <linux-mmc@vger.kernel.org>; Tue, 19 May 2026 05:49:11 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1779194950; cv=none;
+        d=google.com; s=arc-20240605;
+        b=KXv378/HZzlAaQ36b+i52QD/5XqYLLBlpMkn7R1KCSYmkC1hlIFlUh/l1x9zSXUnax
+         T7Fer4pd7X7dRcpwNxZalOkt0/5rL7H25aWDofjYSTR2YcM+qFi2KRJ57aL2noaqinnr
+         ykteEBnA8we1A8R8YYFTM9AgBeIKpbo1CJj8+eBnexZFhdZY5ffdxcLIb5W1JmBPGVYj
+         Ody4A4P79F0SxNv4fmkLm1JGIzLQx4qAxFbOsSkL4DM3ynYo1JJ5+ouwKbIMkw5Vda9w
+         NdEFl/QH+1o0g+joL7jhGeLIrL7hhKB6Et37Jkplsn5U+S3CuiuZXAiGDP3884DYsFii
+         c5NA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=gxnCZT3YkTibvlG6nqfkBDd0n82IagINu/+G6406bZ8=;
+        fh=ddxXnoIvuKExGlAaG6Tbjal9uN5K1aU6HmglNQ5Nj6s=;
+        b=BM0vW+6JhtmaBKfnzVUYRiN1G+wSHPwxa/XEGt1rZtADvM4cYgHljG4Js/HqI0tSv3
+         PjQBHn+axDLIvo3SOVCzx5qv3hnuCl42JONDbuJ4FR7KSxbxLuKQCc/MpjaTJrAX4kLo
+         pK5H8HwUTYvlxJ+T9i/8Qvz+L7E1uFqM7d7ox/xo2rWF1t6x6TZPc4ZJTkBfm1u3Hp4z
+         qyi0pEfhWAj7ySsotqJddBtJnRFmNLKpu5gKHVQuGONWVWD54+FWNhbadXY4oQFUoz6N
+         AIwL0n54DRWX8NCkL02kfBVVC3TF/s9BBQ7siUqNR6V0xYbRZdl2z4cxnIQlhmVxC9q4
+         f/Fw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1779191501; x=1779796301; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=8886y9OK7rLNEr2zlaE8SlacINuysTCFqKQRD3SXm8g=;
-        b=T0yHjBsAOyXp07WDqjSiZAQ2bwmIsHsaY/rAdVpJKYKD/hSmFnbiQJtUy6owDTyoLj
-         kOFgKUqsOfz6Zng04jzj8NBaaDqeulfuUlsh7z7pwIMejJ8UKPJlA0iEy6ornogBGHwZ
-         yS2qcQaK3hPpmjiqd8yP5chSV9uokM9XM50GRJAUHBM9XEBUjwjVEF5LrjXSObqgGfvz
-         t9UbcKV7QDgI8vIkC2Ju0XqNLJe/nTpOh87YIj0MeoK0dMzsKL/TfMnvy/9j84+8X4F8
-         8Tg70izsg1WqpooPGuHiVcrxA/L/67m+Ce5hVSPmXE+DbziMeIXeLJhG3PmpsMmze8Fx
-         Xklg==
+        d=gmail.com; s=20251104; t=1779194950; x=1779799750; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=gxnCZT3YkTibvlG6nqfkBDd0n82IagINu/+G6406bZ8=;
+        b=g4OLNhkS8VablrP1HElVY7Q/0N0Y+TcJ74gDDNB7zG9gYb1ehYT9sIU+KZ7a5M9bX4
+         wCoE3/1cJCBkYYGS0NtGXqM30ShwsML9Ot1uPlF6oWSJBvFIEkkvkbO4ypoxzK3k/V8i
+         4QneTYESYwotGCD10AQ6Zt56S7RVAmscKXitKaPlFw3dkx/R2WWRaVi1RXLfcZ3itc5R
+         DS6/J/mj7ojC3nQda0sSeH17LR9uUgVkR1gr0dcCMt4NG29dDwiag3MWuo19povkzUwZ
+         pdPCbdF2OcoW0hMg8YjRNfISBGN8xAdXrteJesITVcpvw0hg0YFD17d3c85HnmBVezam
+         UWng==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779191501; x=1779796301;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=8886y9OK7rLNEr2zlaE8SlacINuysTCFqKQRD3SXm8g=;
-        b=RIuqOd8tzXZlcmylaAL3kNDPZYHFtsHHU/6XSR/pUOgYcRALNc6zMbtzYUmDEwTdeQ
-         a/4Ae0SA1/IckrgezIz7bY6/hKdwA1nviGe28Vzbx3jmzAVObgGTtpPTP/Q6xwwmEZwp
-         wx5Nz2XC8LL63afGV+yfStDIkzda9ium5jSUn2Fpf7PTPy3FFOg3Qz30yCOD0FqbK8iq
-         GB1adshFPSnR0WxhPpvKjKINyCoJBKEqHZqs2Xeaine15j51nGRI7Rpu95K4KfTHxGSF
-         bbEb+UiuS+e4fkiJvhuzKHoyYHqU8/PWgqAchZHqsubw/XNvEeVynP8iAZb30uKFbC8U
-         rpng==
-X-Forwarded-Encrypted: i=1; AFNElJ/a07jELWdslhDOcXpSQQ5l2jmOxfe29J1yhlPxGTuFj5xKZlcCdWJxhM0KRT/3TcL/TdtLiZmSDLc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxkTGmUfR7Z9zGJ2b3tRwdDN8QS+j1BIqjTb1kU4MfBCwN/7lic
-	Jej6Z0crZ3JFBygk+oyCeP5EC5W9ikPmvG2dZzDEzDm7JLRD6Nl1jcPelpqEAAHP4wzfhL1eQuX
-	01cUvl8bgL/ROl22D5jHq8Ab4x6vppB3pKY7VeGT5Qyb9tPqZhkrwDDTad6KDVQc=
-X-Gm-Gg: Acq92OHnnTH/tD4nyvKYAg4dtmqoPiq7iSmUoSWUqBLeGTdftZqqAy8qtGTIa+9N6Zh
-	swAkBYAyR18cd4J1mcVccSQe3Po0fBTVssBPkin7i4hl2WlqowYTbJOFwY3m08PXiSIOnJ3C4Vv
-	DiWYddnRQ/S6Tk8CxCN41YooEm0KJr3M9OC7Sf70+OJBvGRIbIBOPUhVJDOrwKfSKglj1hiGNRW
-	VeyRMY+3daxhjEVILdxnTIr39Qmki21mzZLC3QRRYFzFxMTamxpS2KyEv7s6i9ruTs+gQVJ5m8e
-	sNrXaiuqVwuJ94MRCIn4F3kkSxFKTFYrcD2O28ecxoNfl21JgOsTYvF9syhlPgjeZq5OByxrvie
-	sffRIlRu9DP9Gwq7oaQEhy9Q4SwJkdGd6qvI/u/QbKqU31JAWEebNzLNguAXf0QnvKp2dlgOEcb
-	az0l7o85r8l1UvAg==
-X-Received: by 2002:a05:620a:1996:b0:8ee:7878:af34 with SMTP id af79cd13be357-911cda511e2mr1962910085a.1.1779191501622;
-        Tue, 19 May 2026 04:51:41 -0700 (PDT)
-X-Received: by 2002:a05:620a:1996:b0:8ee:7878:af34 with SMTP id af79cd13be357-911cda511e2mr1962907685a.1.1779191501253;
-        Tue, 19 May 2026 04:51:41 -0700 (PDT)
-Received: from [192.168.119.254] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-68310d58df1sm6536454a12.13.2026.05.19.04.51.37
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 19 May 2026 04:51:39 -0700 (PDT)
-Message-ID: <0b1c66ba-d841-460c-b702-8b4530d56f73@oss.qualcomm.com>
-Date: Tue, 19 May 2026 13:51:36 +0200
+        d=1e100.net; s=20251104; t=1779194950; x=1779799750;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to;
+        bh=gxnCZT3YkTibvlG6nqfkBDd0n82IagINu/+G6406bZ8=;
+        b=jqwvV01COjPCdlTwX9kpuFCkhqah/f2UFAmTeP+NiUAM8rqWe/kEmJRR2KdOFfGuI8
+         d1L4DZjr7nWfElif5Bvf9jv3B/HdNtF6bt6i13RjOuwvcYJon0obw3J45ahqPXT3lkj1
+         ywtWb5Pmp7WlyRuTmTyCqP0lmg1mWrmUZ7UoySoU8MhW5bT8+6E12zjQuFy5gLXMXyBa
+         jeqR86yvqSur0cIcXSdH9TFSokdowOg9wcA+c1CYtVzfNYdt3X5+cqstp9i/DntP/sy2
+         EaaWTvZ2Xbmbr15o1U19kp8RYtp6krZlHJ74ZEgHezTaVqPb9Z9jaO2jh9dB4vQxPjSc
+         vEBg==
+X-Forwarded-Encrypted: i=1; AFNElJ9vgNfOPlyM6WmZEITitS8he47x9EXPiRzg23Vzd7+ZLW+tiFgcvssL9Dy8vGfy+KShp4zE2H3aBPs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzhldTI8nZaJZw9i4ndTbEoNE6SUFFP3enwC5KVj7EvhZvF8ph/
+	KLNRto4bpfGKKIY59f+U1EDi+SAV1JE14uCnXzFO+8Uz+wFBBNC3rUVtJLA0Dri9HC2WjWKy7Ep
+	e7CEVo8qtkj72qeki3t5oeEyFldhkkFE=
+X-Gm-Gg: Acq92OE2JWBh8B+NTm5nqV1WbtSCKiFyrimoUIhim46ZfWjZNaBSASEBbClmxEJB0U8
+	96G1O1tEo1gjHH0T/PAujvk/N7FbtAo1wLBypCw+YeCa8FZjm1z6DwY+GgO8xWvc31ALwpMhRPa
+	k2qRSOYGC2lCTLZ8TmWgvqJmA/v+fvGgU3BcaZZ+0Y0dHHwFhoDVy64mlACONrIkt7SEdjRdZOJ
+	wc8lN3+pX/jmsqEmPT+Gnub3y1rYdfotm1ucE5R1rOsarhpyOH7M47KgMcrpGZ6CwfIL8FiXUrn
+	0Kc3cM19pYu75/q0VLeEKgMKtUaEW4eLSzeDTsOfcRC+2xZzdCZg/xAZLB+v3FdzVk4j
+X-Received: by 2002:a5d:5d10:0:b0:44e:1984:5f3e with SMTP id
+ ffacd0b85a97d-45e5c5951f9mr30114071f8f.31.1779194950039; Tue, 19 May 2026
+ 05:49:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 3/5] arm64: dts: qcom: Add Shikra CQ7790M SoM platform
-To: Komal Bajaj <komal.bajaj@oss.qualcomm.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
- <conor+dt@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Wesley Cheng <quic_wcheng@quicinc.com>, Ulf Hansson <ulfh@kernel.org>
-Cc: linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-mmc@vger.kernel.org, monish.chunara@oss.qualcomm.com,
-        Rakesh Kota <rakesh.kota@oss.qualcomm.com>
-References: <20260519-shikra-dt-v2-0-c01b90fb4395@oss.qualcomm.com>
- <20260519-shikra-dt-v2-3-c01b90fb4395@oss.qualcomm.com>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <20260519-shikra-dt-v2-3-c01b90fb4395@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-GUID: LCy_D0VrdKWLoRSBzaNBq_KM22pcTwDj
-X-Proofpoint-ORIG-GUID: LCy_D0VrdKWLoRSBzaNBq_KM22pcTwDj
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTE5MDExNiBTYWx0ZWRfXyc0mV/mkziZ6
- CZ9HK6BmQtnBQ390IjZETypPqKHgBOZtR9ESvjExStj3DFK1TPwppLAWULUYfuUrSkkH/UKDECI
- 8WELRiriUOis1P3M9eWt1fhZYqdNONhh6eRrsTFnuORLrgicpcMYlUq5SmclTZIu1Sm077j+Wcr
- eBP87DqlBcFeo6mKSa5viEoM5SnKDPTICd8cOYrbf1MmTmvlBGy9aW23xLDt7Xo7bvUX2Va0+CU
- iBIQdQA56N7Waj5atjvKpOO0K0JG7YGIxrtnjPZd2FnCtcJ6WuyThuTj4jzYpd57owqKtQjPrOS
- pr3bvp6HbBV1stEgUqg2rcAPu1eeQ/suWf+kEAG7gNHeI6Q+SLZpxtwVK1KK1SAuRCx8lnGzEto
- onGzHDf/M8cw1p7kkfePQ1rmQQVrw8f7B9MCKvMmAejoq/bKatBkiIwvgOzfQ70PzQv8i7vuy25
- 5XUa0SguXw0XRPFrvJg==
-X-Authority-Analysis: v=2.4 cv=ToTWQjXh c=1 sm=1 tr=0 ts=6a0c4ece cx=c_pps
- a=hnmNkyzTK/kJ09Xio7VxxA==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
- a=IkcTkHD0fZMA:10 a=NGcC8JguVDcA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=ZpdpYltYx_vBUK5n70dp:22
- a=INWPgVgdgEZSfrFqjaAA:9 a=QEXdDO2ut3YA:10 a=PEH46H7Ffwr30OY-TuGO:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-19_03,2026-05-18_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 adultscore=0 phishscore=0 impostorscore=0 spamscore=0
- clxscore=1015 suspectscore=0 malwarescore=0 bulkscore=0 lowpriorityscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2605130000 definitions=main-2605190116
+References: <20260513201315.3186621-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <CAMuHMdV0BybWdKsPgB5TGg61U+E5u71Fu5KgXpj1sUuq-QcRQA@mail.gmail.com>
+ <CA+V-a8t5NZP5QamrdH2-ViMcShcYh3czLsZ+0kkD_kjUodjTyw@mail.gmail.com> <CAMuHMdUZkD0VTdSc4VChuaLvEAZ1j=5_69u8Ef0tO+dwMi6JDw@mail.gmail.com>
+In-Reply-To: <CAMuHMdUZkD0VTdSc4VChuaLvEAZ1j=5_69u8Ef0tO+dwMi6JDw@mail.gmail.com>
+From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date: Tue, 19 May 2026 13:48:43 +0100
+X-Gm-Features: AVHnY4I4917oez7RJMmKkLZjNlvjOWucXuN2H1DDq2uw9OwQGkIDoCLJP4CbJH0
+Message-ID: <CA+V-a8uT+dkhKL7vAdFqAEX409keehC7RPOhKBTsL_dtEzMK_w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmc_test: Fix __counted_by handling after
+ kzalloc_flex() conversion
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Ulf Hansson <ulfh@kernel.org>, Kees Cook <kees@kernel.org>, 
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-hardening@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	Biju Das <biju.das.jz@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 5/19/26 1:21 PM, Komal Bajaj wrote:
-> Add device tree include for the CQ7790M variant of the Shikra
+Hi Geert,
 
-I don't think CQ7790M is Shikra
+On Tue, May 19, 2026 at 11:09=E2=80=AFAM Geert Uytterhoeven
+<geert@linux-m68k.org> wrote:
+>
+> Hi Prabhakar,
+>
+> On Tue, 19 May 2026 at 12:05, Lad, Prabhakar <prabhakar.csengg@gmail.com>=
+ wrote:
+> > On Mon, May 18, 2026 at 12:08=E2=80=AFPM Geert Uytterhoeven
+> > <geert@linux-m68k.org> wrote:
+> > > On Wed, 13 May 2026 at 22:13, Prabhakar <prabhakar.csengg@gmail.com> =
+wrote:
+> > > > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > > >
+> > > > Fix logic issues introduced by the kzalloc_flex() conversion in
+> > > > mmc_test_alloc_mem() due to interaction with the __counted_by
+> > > > annotation on the flexible array.
+> > > >
+> > > > Bounds-checking sanitizers rely on the counter field reflecting the
+> > > > allocated array size before any array access occurs. However, use
+> > > > mem->cnt both as the allocation size and as the runtime insertion
+> > > > index, causing incorrect indexing and potentially invalid bounds
+> > > > tracking.
+> > > >
+> > > > Initialize mem->cnt to the maximum allocated number of segments
+> > > > immediately after kzalloc_flex(), then use a separate local index
+> > > > variable to track successfully allocated entries. Update mem->cnt t=
+o
+> > > > the actual number of initialized elements before returning or enter=
+ing
+> > > > the cleanup path.
+> > > >
+> > > > Also rewrite mmc_test_free_mem() to use a forward for-loop, improvi=
+ng
+> > > > readability and ensuring only initialized entries are freed.
+> > > >
+> > > > Fixes: c3126dccfd7b ("mmc: mmc_test: use kzalloc_flex")
+> > > > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.c=
+om>
+>
+> > > > --- a/drivers/mmc/core/mmc_test.c
+> > > > +++ b/drivers/mmc/core/mmc_test.c
+> > > > @@ -316,11 +316,13 @@ static int mmc_test_buffer_transfer(struct mm=
+c_test_card *test,
+> > > >
+> > > >  static void mmc_test_free_mem(struct mmc_test_mem *mem)
+> > > >  {
+> > > > +       unsigned int idx;
+> > > > +
+> > > >         if (!mem)
+> > > >                 return;
+> > > > -       while (mem->cnt--)
+> > > > -               __free_pages(mem->arr[mem->cnt].page,
+> > > > -                            mem->arr[mem->cnt].order);
+> > > > +       for (idx =3D 0; idx < mem->cnt; idx++)
+> > >
+> > > for (unsigned int i; ...)?
+> > >
+> > Ok.
+> >
+> > > > +               __free_pages(mem->arr[idx].page,
+> > > > +                            mem->arr[idx].order);
+> > > >         kfree(mem);
+> > > >  }
+> > > >
+> > > > @@ -341,6 +343,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(=
+unsigned long min_sz,
+> > > >         unsigned long page_cnt =3D 0;
+> > > >         unsigned long limit =3D nr_free_buffer_pages() >> 4;
+> > > >         struct mmc_test_mem *mem;
+> > > > +       unsigned int idx =3D 0;
+> > > >
+> > > >         if (max_page_cnt > limit)
+> > > >                 max_page_cnt =3D limit;
+> > > > @@ -356,6 +359,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(=
+unsigned long min_sz,
+> > > >         mem =3D kzalloc_flex(*mem, arr, max_segs);
+> > > >         if (!mem)
+> > > >                 return NULL;
+> > > > +       mem->cnt =3D max_segs;
+> > > >
+> > > >         while (max_page_cnt) {
+> > > >                 struct page *page;
+> > > > @@ -375,23 +379,26 @@ static struct mmc_test_mem *mmc_test_alloc_me=
+m(unsigned long min_sz,
+> > > >                                 goto out_free;
+> > > >                         break;
+> > > >                 }
+> > > > -               mem->arr[mem->cnt].page =3D page;
+> > > > -               mem->arr[mem->cnt].order =3D order;
+> > > > -               mem->cnt +=3D 1;
+> > > > +               mem->arr[idx].page =3D page;
+> > > > +               mem->arr[idx].order =3D order;
+> > > > +               idx +=3D 1;
+> > >
+> > > While looking rather ugly, I think starting with mem->cnt at zero,
+> > > and updating it in each step like
+> > >
+> > >     mem->cnt++;
+> > >     mem->arr[mem->cnt - 1].page =3D page;
+> > >     mem->arr[mem->cnt - 1].order =3D order;
+> > >
+> > > would still be better, as it makes the dependency between mem->cnt an=
+d
+> > > the size of mem->arr[] clearer (located closer to each other), and ..=
+.
+> > >
+> > >
+> > Ok, I will start with mem->cnt at zero; with this I can drop changes
+> > in mmc_test_free_mem().
+>
+> I don't think you can drop these changes, as mmc_test_free_mem()
+> does mem->cnt-- _before_ accessing mem->arr[mem->cnt].
+>
+Ack.
 
-Konrad
+Cheers,
+Prabhakar
