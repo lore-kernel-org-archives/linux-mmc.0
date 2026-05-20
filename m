@@ -1,229 +1,148 @@
-Received: from mail-ua1-f54.google.com (mail-ua1-f54.google.com [209.85.222.54])
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 364D9374E47
-	for <linux-mmc@vger.kernel.org>; Wed, 20 May 2026 07:41:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AC952DB789
+	for <linux-mmc@vger.kernel.org>; Wed, 20 May 2026 07:53:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779262887; cv=none; b=sgc9h12GGN0ZcvixhPcuYzxRK59KnbqIlZKlPQRv7spktDo1vCplDuM99jvW9CsLJbVBHgg3U7oclD2/X3D1hoPoe5+PcuRgjV90VXYjHOiPI7uBfwVBjP9HqutpW+iZ/6Fkc+CJdc+fHnv1cLZqTXLLulgDQizd4g95zZgn6E8=
+	t=1779263635; cv=none; b=jS7i/MVosXzSfUQdWXNx8GobihY++yd71srvVOp9KxIUy7L8xNwBqBsyQPi9yGp4zFuFxdMjLEBglSNT2aCM8fpQ1ingjjtEBAdNeBoTEnZ+x6wys9pbtGnEoxowJ5nX8b5HBcG4aL/vqab7wG/xM/r5tiHebcqu4WOOAHwNdq0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779262887; c=relaxed/simple;
-	bh=GGC3bFBP/3ByVZ/MY3UquCkN0tW0C4a1P7AtWMjyi9A=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=CNnKg+6mvtjCYtyBdcci08iulUl//gg6yJuk3sp2l8oSaBLOTCdM2HMO0E2DpX1OzGgKnAMUUEMXmZjfuZWNHhe/FF6fBWzq7MzAu8I/Z3nMXcXSBh5OvvyLTe9XI7UBofuDvsAotGDVmFD/n/Dufx/rQaRHBv1vl86vgyiPzco=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+	s=arc-20240116; t=1779263635; c=relaxed/simple;
+	bh=hWRBU29dNFkhPABz8wMZX5qI45LPRwRDkloljDEwgiY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Sc++gXTTanzqN/wrTaukm7VVtlqq+pybVvjwe0PnDkfZYpgJOVxjpkjXXMCx+Gf7y/CLxO26E5ahDPDITYxLOodkjjE4ZZ21qPx40mvMhQoJODodueEhWbWvbhD50qX5koh7M4M04k2Pp+VV8/umD55nUYpPVqY1e2xl5d1k/Pk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dWpDVy6A; arc=none smtp.client-ip=209.85.128.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ua1-f54.google.com with SMTP id a1e0cc1a2514c-95f6b47b309so809565241.0
-        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2026 00:41:26 -0700 (PDT)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dWpDVy6A"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-488ab2db91aso47931755e9.3
+        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2026 00:53:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1779263631; x=1779868431; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:content-language:from
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=sLZA4hvW9xs9FgysnR1c1k6UhOsTdTrM6VQ3/eZLexk=;
+        b=dWpDVy6AmfAhrxStW6mbQVcxb4p0KD5F5GbZqISVTMhfn/jY2+4RnhbVu/GYx4QXjM
+         s9ZTbRf+P59cbLyf+dSt7uaQYVumuKdBjzu+bNak6RVXI7yJx0bSQgBA6L6UBHsDifWF
+         9hQ4Og+EiDAk2orVNTG42eFyhj+BG3yExPk38IhBu5kb0xml12tekPU6MYAQDDLONKC3
+         NCQCWeQlSu6ivJyQG9OQwOzaqAfu+vEuccK2QsF+NnNf1P876oGAETp6/U8V0QqlACtu
+         5CbGacZf4EHScp9x+l64FY6rO5k9Y+vxW8VdHJkcUd7LDxDvXx+tXU8JOHdFWmB3eZWa
+         DI9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779262885; x=1779867685;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=UZhaROgHXzu5fMLFg999WSqpULkYuqJChVRCQj6qLHE=;
-        b=lfM+H+6mOZIuaFrhbZzXxEd+YyYbA0bDwvOvwxTGMxC9hqrhxojtLUHc6D1gyxTA5b
-         PDHaEng1ztnJbNUQQTJJ/sQnSUhiS+We393ynMmMvwKeiBJrxs8ibvGJw4sLawAHIP2D
-         rgfuZFNW2hD5T9ycBq5Le0bWRla0aGMcxigPuGlnboijVgaesgHClCRaMSdgZJqFvNEa
-         WbJhyfVaHvJGFhwjfLoSvacUOsk3TH84qye3yT0l9qdg5KVGuMY2WdxqbewTusA0SKw9
-         Qk+meLrC40L2GSxcSulQc+fngSrT6igX7nPexDtBZO9sofPgPsw/aV3b7hBcfW+fDM9B
-         yGFg==
-X-Forwarded-Encrypted: i=1; AFNElJ+dM0bxQqd29iikODpAYtNCtHSn0YNj+y+PgsgeBQ223KeRvzMuWjSJ7HLbJ+n9iFIy7j/+etUUO6o=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwtvimYIfiFEcMw9h072eLMpfRyFTVw+eJuScaLe2wjnDZ43iWW
-	yonxP2V90SvEGO23LmqtQM5FGHu0OV5RIGd67cAYVNVXRvU7XzfM69gwS6h3xDsSj30=
-X-Gm-Gg: Acq92OHs26Vxvp33n+3j7c9rXz4TMaYzB1WwW6FezyOxqnTz90LfLoj9iuqmpG2LuP7
-	HjNuhuB6gl2Ym2p8OO6xqq4bL/c8vS8kVWrmMybb2tvsXhY+FsFMAosN25pRaPMtw2Lg5ldSv35
-	QXHDpNMKR8o4sve753cJjBOmaorUNo72DgpNgxClzT1Rk3eJDb9GLUd1RyZBKeJjBoac2OuPkfh
-	A2WUxJo1YAVOKdUyPUp6hxWC7Kt5HlUB1W+VlE0XLTvELEmG9IZU3JCHO3K+F2efWzJUtHD9bgU
-	vfw1aZfPbtt3pAkOAqHh0Md5uPMaSQSqGA/LAfLxXlimc1bxQcv1Z1e4wcWOZRviubj8Y1KrcXs
-	iZYJfXYLEWYCpt5WM8nDf+SLUz5hr+j7IKuivwGj7kk5CEpez824lWYq1MyY/T4ASCAn0ycJwc2
-	uutyBltk92LwwIH4y2B+BkYl/nQ9bqvvoGpwd3zo7DOixxdpZLla9WkGYg1MH29OIwckQmNGOad
-	7C+j/jPyA==
-X-Received: by 2002:a05:6102:956:b0:612:21f8:5afd with SMTP id ada2fe7eead31-63a3d94e0ebmr11108045137.12.1779262885056;
-        Wed, 20 May 2026 00:41:25 -0700 (PDT)
-Received: from mail-ua1-f48.google.com (mail-ua1-f48.google.com. [209.85.222.48])
-        by smtp.gmail.com with ESMTPSA id a1e0cc1a2514c-95fc2c9a4f8sm7861981241.2.2026.05.20.00.41.23
-        for <linux-mmc@vger.kernel.org>
+        d=1e100.net; s=20251104; t=1779263631; x=1779868431;
+        h=content-transfer-encoding:in-reply-to:content-language:from
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=sLZA4hvW9xs9FgysnR1c1k6UhOsTdTrM6VQ3/eZLexk=;
+        b=sX1V10PrGIrnjwpJcXr2p41Q1Mz06jcTovDxSEtuVskqxlugvhUwo4caZ+M1xx5NYX
+         Kf3XkzwGGkFPSYemB5AdbkzAXxtxq/ic+9bP7wZ+j8yRbNc99F8EB55HpYFjwdIkVo3S
+         BHP+3ng+GDTTHLrrDcRWr+rcw1kQ/gYALZg6B7wlpJHT1KNXSzvMtrJi7kcNO1wNeKK/
+         7DMASbiY3epo7ZJMKddkdMKv+k3/6vozfyMiKQZWUY2HfcGqPLyhjXgbrYGHxKZlyyaR
+         sHI4TEx+k9qzvh855gRkoRVHILxFvZf3tR02XWyYrQ8KOyz+awcPLsjArVJy3RQt5m7q
+         T4lA==
+X-Forwarded-Encrypted: i=1; AFNElJ+LFPNnZIg6LXU4ZMqIqtT7MEoeZAutI+Cjx7+y9IFtjQbemMXV3AdQHMt9nKPJSRm/KtXhrzUQY7M=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzG60oZscYZBU6kN6t88XQOMeyD89MIRQV+EGt7G1blyZV1t+74
+	3xgXf6iiCu75SsgAwJZvHM5l1jqGoWuj/psP8M35nGFL5uy7mDZL+59e
+X-Gm-Gg: Acq92OHOm13X4WQVxgx79ao+ehCTYYCDdgWIzABsWqgTvm3WC2Tk2kQ6BrOo3vTXZbJ
+	TaCpuXBSPkEF38koCo02Pwg1nS5fseuGK3+Otk6sHQ9yd69xfQxpUIE0ZP9mUc8k8PeENt2Rozf
+	b+l0oSJHaCOhyWYL/F02Ux33L3U/cMmv/kGIhW7e81LJkaj8S8RYZBe90wava3y94+7V/7a/Fnv
+	3QTue1KhzG1H6PcidZT2gkY8SgiL6Hic5j5u11K9iEtWB61Q4jioZohDBMBd2Nsru0XOl8OFziT
+	H5qDRJ/hhn9ApNEzIx/njhvJilItqq6meETZVqxW6NAAJNe0RHxRg5tLwbM+tvpQDclUlUH93LJ
+	KtIo9jeL0nsXit1d922InMObfcS495OGTKhz9DeAerfoDpLHzjKEtTzpigWKGBLzEziJXK/7LZ1
+	JFwohIcqeFoj5pRtXi4IYlDpLQKfrd0aFqiOUdqfw2gFwSakxrVfZYyPmT7fQq/lATUGbiDEwmG
+	1Mt
+X-Received: by 2002:a05:600c:a309:b0:486:fba7:b150 with SMTP id 5b1f17b1804b1-48fe61f20a7mr291977335e9.15.1779263630727;
+        Wed, 20 May 2026 00:53:50 -0700 (PDT)
+Received: from [192.168.0.40] (a89-182-137-241.net-htp.de. [89.182.137.241])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-48ffed60c8esm91723435e9.10.2026.05.20.00.53.49
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 20 May 2026 00:41:24 -0700 (PDT)
-Received: by mail-ua1-f48.google.com with SMTP id a1e0cc1a2514c-95f6b47b309so809560241.0
-        for <linux-mmc@vger.kernel.org>; Wed, 20 May 2026 00:41:23 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AFNElJ8aAqtbiKTgs/4cyDczHaLOorIemRoP5ohHRLvkRcYHFOSuoZzAj6nZ9cck74FaEhAgNxbyY36MNXE=@vger.kernel.org
-X-Received: by 2002:a05:6102:f85:b0:631:4d87:ba5f with SMTP id
- ada2fe7eead31-63a3d0182e9mr12079127137.3.1779262883651; Wed, 20 May 2026
- 00:41:23 -0700 (PDT)
+        Wed, 20 May 2026 00:53:50 -0700 (PDT)
+Message-ID: <6b945153-5a7b-415e-904a-1c350b7d52ee@gmail.com>
+Date: Wed, 20 May 2026 09:53:48 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260519133025.618255-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <CAMuHMdVKOdzThVMOcQ1K9crUkyDutvuZsP2-5v5++SVFHkgtOA@mail.gmail.com>
- <CA+V-a8sFNjp9euEEfBf3BoscjU8W3isRT_pnzd7J4QsuiN6qfg@mail.gmail.com> <18c41409-e1d1-4877-87a6-1c3156f943aa@embeddedor.com>
-In-Reply-To: <18c41409-e1d1-4877-87a6-1c3156f943aa@embeddedor.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Wed, 20 May 2026 09:41:11 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdVznvSLr+ap3QwawZdu8fc4dZjpkWi7wgUA815KRfCgEQ@mail.gmail.com>
-X-Gm-Features: AVHnY4IbN4gvBXfEdCbvoV1Bz24wCmRs3C2Yr4J_UWX62ZxMsTA07ZYlhMORYx0
-Message-ID: <CAMuHMdVznvSLr+ap3QwawZdu8fc4dZjpkWi7wgUA815KRfCgEQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: mmc_test: Fix counter tracking in mmc_test_alloc_mem()
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>, Ulf Hansson <ulfh@kernel.org>, 
-	Kees Cook <kees@kernel.org>, "Gustavo A. R. Silva" <gustavoars@kernel.org>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: (subset) [PATCH v10 0/4] riscv: spacemit: enable SD card support
+ with UHS modes for OrangePi RV2
+To: Trevor Gamblin <tgamblin@baylibre.com>, Yixun Lan <dlan@kernel.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
+ Paul Walmsley <pjw@kernel.org>, Palmer Dabbelt <palmer@dabbelt.com>,
+ Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+ Ulf Hansson <ulfh@kernel.org>, Iker Pedrosa <ikerpedrosam@gmail.com>
+Cc: Troy Mitchell <troy.mitchell@linux.dev>,
+ Michael Opdenacker <michael.opdenacker@rootcommit.com>,
+ Javier Martinez Canillas <javierm@redhat.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
+ spacemit@lists.linux.dev, linux-kernel@vger.kernel.org,
+ Anand Moon <linux.amoon@gmail.com>, Vincent Legoll <legoll@online.fr>,
+ Margherita Milani <margherita.milani@amarulasolutions.com>,
+ Aurelien Jarno <aurelien@aurel32.net>
+References: <20260515-orangepi-sd-card-uhs-v10-0-094af27e310d@gmail.com>
+ <177889984452.2298656.1074391459031404894.b4-ty@b4>
+ <7e68e745-0d70-46db-9475-38d3dd5b9cf4@baylibre.com>
+From: Andre Heider <a.heider@gmail.com>
+Content-Language: de-DE
+In-Reply-To: <7e68e745-0d70-46db-9475-38d3dd5b9cf4@baylibre.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Hi Gustavo,
+Hi Trevor,
 
-On Tue, 19 May 2026 at 20:44, Gustavo A. R. Silva
-<gustavo@embeddedor.com> wrote:
-> On 5/19/26 07:44, Lad, Prabhakar wrote:
-> > On Tue, May 19, 2026 at 2:34=E2=80=AFPM Geert Uytterhoeven <geert@linux=
--m68k.org> wrote:
-> >> On Tue, 19 May 2026 at 15:30, Prabhakar <prabhakar.csengg@gmail.com> w=
-rote:
-> >>> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> >>>
-> >>> Fix an counter tracking in mmc_test_alloc_mem() that causes a kernel =
-panic
-> >>> during error unwinding.
-> >>>
-> >>> The `struct mmc_test_mem` uses the `__counted_by(cnt)` annotation on =
-its
-> >>> flexible array member `arr`. While kzalloc_flex() initially sets the
-> >>> counter field (`cnt`) to `max_segs`, the allocation loop needs to tra=
-ck
-> >>> how many elements have actually been populated.
-> >>>
-> >>> Previously, leaving `mem->cnt` at `max_segs` meant that if the loop f=
-ailed
-> >>> midway (e.g., "Failed to map sg list"), the error unwinding path in
-> >>> mmc_test_free_mem() would attempt to clean up uninitialized trailing
-> >>> array slots. This resulted in passing NULL pointers to __free_pages()=
-,
-> >>> triggering a kernel panic:
-> >>>
-> >>>    [   66.172845] mmc0: Failed to map sg list
-> >>>    [   66.176722] Unable to handle kernel NULL pointer dereference at=
- virtual address 0000000000000000
-> >>>    ...
-> >>>    [   66.432747] Call trace:
-> >>>    [   66.435191]  ___free_pages+0x1c/0xc4 (P)
-> >>>    [   66.439119]  __free_pages+0x14/0x20
-> >>>    [   66.442608]  mmc_test_area_cleanup+0x58/0x84 [mmc_test]
-> >>>
-> >>> Fix this by explicitly resetting `mem->cnt` to 0 immediately after
-> >>> allocation. Then, move the existing `mem->cnt` increment so that it o=
-ccurs
-> >>> prior to populating each array slot, using `mem->cnt - 1` for the act=
-ual
-> >>> assignment index. This guarantees that the counter accurately tracks
-> >>> initialized entries for safe error cleanup, while dynamically expandi=
-ng
-> >>> the `__counted_by` validation boundary ahead of each flexible array w=
-rite.
-> >>>
-> >>> Additionally, rewrite the cleanup loop in mmc_test_free_mem() to use =
-a
-> >>> standard forward for-loop. This addresses the unsafe post-decrement l=
-ogic
-> >>> in the original `while (mem->cnt--)` loop which evaluated and decreme=
-nted
-> >>> the counter field before indexing the array, and avoids a potential i=
-nteger
-> >>> underflow/wrap-around of the counter field if the cleanup path is inv=
-oked
-> >>> when `mem->cnt` is 0.
-> >>>
-> >>> Fixes: c3126dccfd7b ("mmc: mmc_test: use kzalloc_flex")
-> >>> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com=
->
-> >>> ---
-> >>> v1->v2:
-> >>> - Started with cnt =3D 0 and incremented before assignment to ensure
-> >>>    accurate tracking of initialized entries in mmc_test_alloc_mem().
-> >>> - In mmc_test_free_mem(), replaced the while loop with a forward for-=
-loop to
-> >>>    safely iterate over initialized entries without risking underflow.
-> >>> - Updated commit message to clarify the issue and the fix.
-> >>
-> >> Thanks for your patch!
-> >>
-> >>> --- a/drivers/mmc/core/mmc_test.c
-> >>> +++ b/drivers/mmc/core/mmc_test.c
-> >>> @@ -318,9 +318,8 @@ static void mmc_test_free_mem(struct mmc_test_mem=
- *mem)
-> >>>   {
-> >>>          if (!mem)
-> >>>                  return;
-> >>> -       while (mem->cnt--)
-> >>> -               __free_pages(mem->arr[mem->cnt].page,
-> >>> -                            mem->arr[mem->cnt].order);
-> >>> +       for (unsigned int i =3D 0; i < mem->cnt; i++)
-> >>> +               __free_pages(mem->arr[i].page, mem->arr[i].order);
-> >>>          kfree(mem);
-> >>>   }
-> >>>
-> >>> @@ -356,6 +355,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(un=
-signed long min_sz,
-> >>>          mem =3D kzalloc_flex(*mem, arr, max_segs);
-> >>>          if (!mem)
-> >>>                  return NULL;
-> >>> +       mem->cnt =3D 0;
-> >>
-> >> This is not needed, as it is set to zero by kzalloc_flex().
-> >>
-> > Actually, kzalloc_flex() automatically sets mem->cnt to max_segs
-> > because cnt is annotated with __counted_by. Because of that implicit
-> > initialization, we need this explicit reset to get it back to zero.
->
-> An auxiliary variable could be used to avoid having to update the
-> counter too early[1][2].
+On 16.05.26 2:35 PM, Trevor Gamblin wrote:
+> 
+> On 2026-05-15 22:57, Yixun Lan wrote:
+>> On Fri, 15 May 2026 12:48:58 +0200, Iker Pedrosa wrote:
+>>> This series enables complete SD card support for the Spacemit K1-based
+>>> OrangePi RV2 board, including UHS (Ultra High Speed) modes for
+>>> high-performance SD card operation.
+>>>
+>>> Background
+>>>
+>>> The Spacemit K1 SoC includes an SDHCI controller capable of supporting
+>>> SD cards up to UHS-I speeds (SDR104 at 208MHz). However, mainline
+>>> currently lacks basic SD controller configuration, SDHCI driver
+>>> enhancements for voltage switching and tuning, and power management
+>>> infrastructure.
+>>>
+>>> [...]
+>> Hi Iker,
+>> I've picked patch 1-3, for [4/4] I think it should be merged after
+>> https://lore.kernel.org/all/20260513071958.29574-1-a.heider@gmail.com/
+> 
+> Hi Yixun,
+> 
+> That makes sense. In response to your earlier feedback I had drafted a more
+> complete dts after another schematic comparison, but Iker and I discussed it
+> and opted to avoid changing scope too much. Andre's series includes the bits I
+> wanted to add and more, so that works out.
 
-Thank you!
-In light of this, Prabhakar's v1[3] is the better solution.
-But perhaps that the addition of "mem->cnt =3D max_segs;" after the
-kzalloc_flex() should be dropped, as it is done automatically by
-compilers that support __counted_by, but is irrelevant for compilers
-that do not support it (the correct value is set at the end anyway).
+I have 4/4 rebased on my series anyway, do you want me to send it?
 
-Gustavo, what do you think?
+Thanks,
+Andre
 
-> I think it'll eventually become best practice to defer updating the
-> counter until after the flexible array has been fully initialized, or
-> after every major update that requires changing its boundaries.
+> 
+> Thanks!
+> 
+> Trevor
+> 
+>>
+>> Applied, thanks!
+>>
+>> [1/4] riscv: dts: spacemit: k1: add SD card controller and pinctrl support
+>>        https://github.com/spacemit-com/linux/commit/2d77e577109967ef65f269c1fc1d6a659d4260fb
+>> [2/4] riscv: dts: spacemit: k1-orangepi-rv2: add SD card support with UHS modes
+>>        https://github.com/spacemit-com/linux/commit/2585c60ce2f977b13f14a67d1e3ed9c73fd7f381
+>> [3/4] riscv: dts: spacemit: k1-bananapi-f3: add SD card support with UHS modes
+>>        https://github.com/spacemit-com/linux/commit/c76e2f058cbcab84e4a703f26857a58bdf6a0042
+>>
+>> Best regards,
 
-In case the update is a _decrease_.
-If the update is an _increase_, it must be done first?
-
-> [1] https://git.kernel.org/linus/ea9e148c803b24eb
-> [2] https://embeddedor.com/blog/2024/06/18/how-to-use-the-new-counted_by-=
-attribute-in-c-and-linux/
-> (I'm in the process of updating this blogpost with some *alloc_flex() exa=
-mples and more.)
-
-[3] "[PATCH] mmc: mmc_test: Fix __counted_by handling after
-kzalloc_flex() conversion"
-    https://lore.kernel.org/20260513201315.3186621-1-prabhakar.mahadev-lad.=
-rj@bp.renesas.com
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
