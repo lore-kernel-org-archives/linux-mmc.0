@@ -1,82 +1,152 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BC703DE439;
-	Wed, 20 May 2026 13:57:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30E422F8EA5;
+	Wed, 20 May 2026 15:59:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779285424; cv=none; b=lhmWSl/FMKEoeUxfNs3OetDinQ6r7cWqKCLcf7idE0tUWbOFvPEXbr2gpj1aR8Cc226iSYwr1WlvNMdQuQbc0euZAM+yzWqZAgZdL0BA7Gpu6IeIo7kOogf0u6Ob+ID06a77CrgVX8Recpj7HLLUzh4d+wsPG5K6HBXyqfdEhZs=
+	t=1779292754; cv=none; b=RZpK2ur3sdKfdwzzpuv8xWVavysxA+YMgxeavR1QI/dF+SeF+p+jfP14P/rkqGu+GJkLl3vpWawdo7OSQ6z0w8SjafsOpvgjPDEIGS9aXr6zwa8bHA/e2KBYwqRiVtrF2Rym4lwZwa/pEdQQVLZSGzbtp0Hlobpnt4gzFA72yUE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779285424; c=relaxed/simple;
-	bh=PGq13c8Yl3aImdEFJHzlZFqlDS4HaVJrXaW/Q+x2eII=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=eAJvO1e3koGKsSxC4iUvsnkFESCT9mZX1EOyj4ZN07qxEZNq9wAmYjewSdi0LcyYK/9W9/aXR3EedVjtNyp0DIhQIapPmaRe0tbrqOHI4tt6F3veEt1e1ajxzB56vL+EIqYIJbiqRN4ULESl61ZNTSvkPkJDwjhZMI4g4UoOpE4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MVMeuY3r; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1779292754; c=relaxed/simple;
+	bh=2wsxsWgHYT5xJRV0UmOOLFUhM8ySvl59t/cDFVkdCQs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=YPkjn+5Ec9O4JPv1fjejSh1YqkGIRcpmTPkEW9h4MMPG4H+nINGPqQPp6CcdYsx5owzgJqJWX/kR8TQfspzoB3ji+EnLtubiF17AuUV3ew3aymqCarZtoOWnIGPfJWBk1UypM+Wx/0ApP1kYo5kaVjwU91sMARkfHETOTThS4to=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=on3k07kn; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MVMeuY3r"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4D1A81F00896;
-	Wed, 20 May 2026 13:57:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="on3k07kn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71F281F000E9;
+	Wed, 20 May 2026 15:59:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1779285422;
-	bh=1zVI7Ke8HHxHGHvIU3WSnSi7BZCnbi1ujVzV4vxzPb0=;
-	h=From:To:Cc:Subject:Date;
-	b=MVMeuY3rmThvzAsH0cQfyPLVNZSJGAnlX1EYiPybuMMN6MQKoIDV5nNKukYAZkrix
-	 LxqC8Pv59ndTpu30N5ViXm5NQVFAs1HbKJ5O2tJSBpYRBnDF+sBQXoooh9XWxC4pui
-	 wiis8zxf5L1NPOBee5OrAIrtPbDUbKOeIORQmG6YchIWGbOXbRvJFS2SVc3Wk8BuoF
-	 wWBEljbJ5t+rUl/IfZnmz/5OHQ943fdAs1HNd0IJpLa2KN8EcqcqLgtON5L/teTXkZ
-	 bP1OFEiI0MAbBITcXJrpfzp3eQZKueJpzdE8wJnjxTGB5Y3NkcZCIaMsM5v0ev3O+Z
-	 MITd6+9dc4ooA==
-From: Jisheng Zhang <jszhang@kernel.org>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci: add signal voltage switch in sdhci_resume_host
-Date: Wed, 20 May 2026 21:37:58 +0800
-Message-ID: <20260520133758.14427-1-jszhang@kernel.org>
-X-Mailer: git-send-email 2.51.0
+	s=k20260515; t=1779292752;
+	bh=xxNEuOzh0HknREoocyLObcTcBnYkGVJ+mx+LdnVcPWo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=on3k07knhz66o/a5W6evhRpZ6LLYPkmOLkT3Liy+aNpcfK9dbIXJ4TPqPdhjpZ3YA
+	 ddaW3p+BWlPPFTrionrZehhIB0eXswuzG0fZStr/iCgUtTqe9sclQzL63yG3Nr3JBc
+	 5cL31Q9Xta9mD/EVGhzP0aTDKX5HdHQLnxBrQEJbbDRMVwFqy+l+M2fGy1uzmm/1td
+	 TaA3dbTfAgkv686UTYHbPm/7n/d45Ix0ybiOUlrKmAEZyG1oXMBbolmu2TMzVRWGII
+	 fPSOdsm0NPtKUIR0dumP1EitusOxl/l+skZtI65GjOyVIpgnGnJYxBEMP+VgZxoTLa
+	 pHC2iMrTTHuAw==
+Date: Wed, 20 May 2026 21:28:53 +0530
+From: Manivannan Sadhasivam <mani@kernel.org>
+To: Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: manivannan.sadhasivam@oss.qualcomm.com, 
+	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Abel Vesa <abelvesa@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Ulf Hansson <ulfh@kernel.org>, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
+	"Martin K. Petersen" <martin.petersen@oracle.com>, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	Sumit Garg <sumit.garg@oss.qualcomm.com>, Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Subject: Re: [PATCH v7 3/5] soc: qcom: ice: Return proper error codes from
+ devm_of_qcom_ice_get() instead of NULL
+Message-ID: <o4goffqn5deyp2vta5xqqqzjkjdryl7dbhvnp5keijdihvhro4@damymrxz6zac>
+References: <20260518-qcom-ice-fix-v7-0-2a595382185b@oss.qualcomm.com>
+ <20260518-qcom-ice-fix-v7-3-2a595382185b@oss.qualcomm.com>
+ <CGME20260519182807eucas1p11ec910d88283c3ebb2fa7e7bcbe3cbe2@eucas1p1.samsung.com>
+ <8bac0358-9da0-4cbb-98ee-333b85ba4908@samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <8bac0358-9da0-4cbb-98ee-333b85ba4908@samsung.com>
 
-I met one suspend/resume issue with sdr104 capable sdio wifi card (with
-"keep-power-in-suspend" set in DT property):
-After resuming from suspend to ram, the sdio wifi card stops working.
-Further debug shows that although ios shows the sdio card is at sdr104
-mode, the voltage is still at 3V3. This is due to missing the calling
-of ->start_signal_voltage_switch() in sdhci_resume_host().
+On Tue, May 19, 2026 at 08:28:04PM +0200, Marek Szyprowski wrote:
+> On 18.05.2026 15:52, Manivannan Sadhasivam via B4 Relay wrote:
+> > From: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+> >
+> > devm_of_qcom_ice_get() currently returns NULL if ICE SCM is not available
+> > or "qcom,ice" property is not found in DT. But this confuses the clients
+> > since NULL doesn't convey the reason for failure. So return proper error
+> > codes instead of NULL.
+> >
+> > Reported-by: Sumit Garg <sumit.garg@oss.qualcomm.com>
+> > Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+> > Tested-by: Sumit Garg <sumit.garg@oss.qualcomm.com> # OP-TEE as TZ
+> > Acked-by: Sumit Garg <sumit.garg@oss.qualcomm.com>
+> > Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
+> This patch landed in today's linux-next as commit b9ab7217dd7d ("soc: qcom: ice:
+> Return proper error codes from devm_of_qcom_ice_get() instead of NULL"). In my
+> tests I found that it breaks booting from the UFS storage on the RB5 board:
+> 
 
-Fix this issue by adding ->start_signal_voltage_switch() in
-sdhci_resume_host(). This also matches what we do for
-sdhci_runtime_resume_host().
+Thanks for the report! I didn't consider the case where both 'ice' reg entry and
+'qcom,ice' property are absent in DT. Sent the fix now:
+https://lore.kernel.org/linux-arm-msm/20260520155704.130803-1-manivannan.sadhasivam@oss.qualcomm.com/
 
-Then the question is: why this issue hasn't reported and fixed for so
-long time. IMHO, several reasons: Some host controllers just kicks off
-the runtime resume for system resume, so it benefits from the well
-supported runtime pm code; Some platforms just use the old sdio wifi
-card which doesn't need signal voltage switch at all, the default
-voltage is 3v3 after resuming.
+- Mani
 
-Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
----
- drivers/mmc/host/sdhci.c | 1 +
- 1 file changed, 1 insertion(+)
+> ufshcd-qcom 1d84000.ufshc: freq-table-hz property not specified
+> ufshcd-qcom 1d84000.ufshc: ufshcd_populate_vreg: Unable to find vdd-hba-supply regulator, assuming enabled
+> ufshcd-qcom 1d84000.ufshc: freq-table-hz property not specified
+> ufshcd-qcom 1d84000.ufshc: ufshcd_populate_vreg: Unable to find vdd-hba-supply regulator, assuming enabled
+> ufshcd-qcom 1d84000.ufshc: error -ENODEV: ufshcd_variant_hba_init: variant qcom init failed with err -19
+> ufshcd-qcom 1d84000.ufshc: error -ENODEV: Initialization failed with error -19
+> ufshcd-qcom 1d84000.ufshc: error -ENODEV: ufshcd_pltfrm_init() failed
+> /dev/root: Can't open blockdev
+> VFS: Cannot open root device "/dev/sda8" or unknown-block(0,0): error -6
+> 
+> ...
+> 
+> Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+> CPU: 7 UID: 0 PID: 1 Comm: swapper/0 Not tainted 7.1.0-rc1+ #12707 PREEMPT
+> Hardware name: Qualcomm Technologies, Inc. Robotics RB5 (DT)
+> 
+> 
+> > ---
+> >  drivers/soc/qcom/ice.c | 9 ++++-----
+> >  1 file changed, 4 insertions(+), 5 deletions(-)
+> >
+> > diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> > index 85deb9ea4a68..2b592aa42941 100644
+> > --- a/drivers/soc/qcom/ice.c
+> > +++ b/drivers/soc/qcom/ice.c
+> > @@ -563,7 +563,7 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
+> >  
+> >  	if (!qcom_scm_ice_available()) {
+> >  		dev_warn(dev, "ICE SCM interface not found\n");
+> > -		return NULL;
+> > +		return ERR_PTR(-EOPNOTSUPP);
+> >  	}
+> >  
+> >  	engine = devm_kzalloc(dev, sizeof(*engine), GFP_KERNEL);
+> > @@ -645,7 +645,7 @@ static struct qcom_ice *of_qcom_ice_get(struct device *dev)
+> >  	struct device_node *node __free(device_node) = of_parse_phandle(dev->of_node,
+> >  									"qcom,ice", 0);
+> >  	if (!node)
+> > -		return NULL;
+> > +		return ERR_PTR(-ENODEV);
+> >  
+> >  	pdev = of_find_device_by_node(node);
+> >  	if (!pdev) {
+> > @@ -698,8 +698,7 @@ static void devm_of_qcom_ice_put(struct device *dev, void *res)
+> >   * phandle via 'qcom,ice' property to an ICE DT, the ICE instance will already
+> >   * be created and so this function will return that instead.
+> >   *
+> > - * Return: ICE pointer on success, NULL if there is no ICE data provided by the
+> > - * consumer or ERR_PTR() on error.
+> > + * Return: ICE pointer on success, ERR_PTR() on error.
+> >   */
+> >  struct qcom_ice *devm_of_qcom_ice_get(struct device *dev)
+> >  {
+> > @@ -710,7 +709,7 @@ struct qcom_ice *devm_of_qcom_ice_get(struct device *dev)
+> >  		return ERR_PTR(-ENOMEM);
+> >  
+> >  	ice = of_qcom_ice_get(dev);
+> > -	if (!IS_ERR_OR_NULL(ice)) {
+> > +	if (!IS_ERR(ice)) {
+> >  		*dr = ice;
+> >  		devres_add(dev, dr);
+> >  	} else {
+> >
+> Best regards
+> -- 
+> Marek Szyprowski, PhD
+> Samsung R&D Institute Poland
+> 
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 605be55f8d2d..e3bf901b10aa 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3836,6 +3836,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- 		host->pwr = 0;
- 		host->clock = 0;
- 		host->reinit_uhs = true;
-+		mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
- 		mmc->ops->set_ios(mmc, &mmc->ios);
- 	} else {
- 		sdhci_init(host, (mmc->pm_flags & MMC_PM_KEEP_POWER));
 -- 
-2.53.0
-
+மணிவண்ணன் சதாசிவம்
