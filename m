@@ -1,164 +1,155 @@
-Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
+Received: from mail-qv1-f46.google.com (mail-qv1-f46.google.com [209.85.219.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F4313812F0
-	for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 08:35:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8D3D3ECBF3
+	for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 14:39:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779352540; cv=none; b=T/EUXPJ9vVRY/+gvcD32vpXQItkLk/mGnKGb5crKpejobPzwY8S72Q3mpIm2VA2GJqqf+9chfrwuh/Os0tUxJE26/2NhsX+9Sd55NrB6d3QMiqQZYzg0SIkAczMZRU9r6b4H3PsGSBaqt3BDCyB1zdvTyEDdPbEBThlff18QcOY=
+	t=1779374363; cv=none; b=ANku+xTJRAHE5dx6cyje1rsHRp5RBqHm+2aFFuy3sDq9HEPuqfA53PiW8xwPnW2ytmNAGahoAv8Yvy6SxXAZ8pC2brrMSoNWtSTbECmpSZ4lqtg7i6mKV3yCNO0f9aN73TbTA/dmSDuCaPiDpnijZeRr3TdjlLTVvxH9U86wjVA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779352540; c=relaxed/simple;
-	bh=ZIBqVu48Sz4Y6VXLaWmf1G3Q9+5Gz36/KsTgbXSfNNs=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=kh6ROFhTCJJ58FKqa7mptMGkQYfMNv/r4AQzwrUm0yeIHQJ8j5vU99b8ERBO2gLWXWR+0A25iwuvwsbMRr+nGHW4SBI3lvrPwbW17LPA78FMZoRVCiuj2wI5bi68T0COd2Hjo7hPfmIZfwK2zQC7UrYx2U2D8TMez9LGiD34ml4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bVGesbne; arc=none smtp.client-ip=209.85.208.181
+	s=arc-20240116; t=1779374363; c=relaxed/simple;
+	bh=gc2c+KKlTReJahaT44nICjR03THjsFcQdduzS5vCeAM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=cJcyH7zfIBTXLuBPdS1fqV0v2YoATC0d8jmGQUrkFmI3ct5brd3XciSwZk6Rkn8u6IKGmHsz0W+pgKWXNuQeT9rONxzzAVBdU22/L1gAmFy9mvNtV/q4difooRurf4eEm5dS41MseFwTGS8xDSD1wFrIye7LxPd4nle18xluFiU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OQyHjVML; arc=none smtp.client-ip=209.85.219.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bVGesbne"
-Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-38e7b0903cdso47766281fa.3
-        for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 01:35:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OQyHjVML"
+Received: by mail-qv1-f46.google.com with SMTP id 6a1803df08f44-8b5cda2dab9so70243306d6.0
+        for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 07:39:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779352530; x=1779957330; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=eDHRIt+Xzwup3rn7oBseYJ+pZthdkwsUcMhMoWoBRnE=;
-        b=bVGesbneaOdkI+UVYx9Yv2xeftS6grryu9Mz0Tj8yiQFB3BbpJsxBS7irSZVxKdnM/
-         FIVt4lMhns0yAVISleT2dpoLk94LSDvj7QY3pKFzbTo4VDsVWWI35VJbTDznh3sM41BX
-         QNvA0L8mor51ZlDgcJkvo7C6F0lhyc3ltd/JT5ziMVAg9nkSsaBYncAWK7+GBABDGIh9
-         GyQgANd3NDeoGpxiGcM6Im2l6tmZE4hmoeB7UyYy60xRP4hNFjbprQH9CWD7e+f52QNL
-         A/7AGr0yqIyEIrAcJdudqO2KNTXFlfC8vuGluCdm+rVp0iuqWfKRf+8FWKwcldZfUQsz
-         gbDA==
+        d=gmail.com; s=20251104; t=1779374361; x=1779979161; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=gTr8u/snY8J1atN0wkQzIVSY3v3e30g1Wn+GFVhT/Zc=;
+        b=OQyHjVML1UnhVpnyliO9Kq6LJkD/88/CnjsU82VMp90UBHth5ple+AjU+1DmgnicHr
+         2P7glTRsbIyLkO6ujfS5AAJkWko0rUdLFLSbEKW92tsLY2VjesWUEbLwnEdIMgeoshBw
+         B9ZfNElNVjtPrWq7a/NQE2gKGrjLEvKPEX5teF3kaqyX0IVlb/mAXKd70gh/A4MmMs67
+         6k0TaVRFJKFp/G8fGWe7UCfZpjevNfx84tSc9p0ghyuU56b6nj+djWMAb03UawY9QLHF
+         zxnOxnuZqJ5xm3BlGldobg0VtIsELPrwgRBtliiU705gzOXuk+0z0cactFzYB4NOmDHG
+         Warw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779352530; x=1779957330;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=eDHRIt+Xzwup3rn7oBseYJ+pZthdkwsUcMhMoWoBRnE=;
-        b=NGzMcCD3HbJiptxZYF+Z+qBDdidLEzXqvOneRlhPLF/Akki6Qyb73z5Kh3TRqhtAqH
-         FFf9DGxhRg8SF77I4d2VCRWGetq5PGzWZGCFIhlUNsb3rfJAhkzdKNqkq75BzsJ4Kie6
-         YifOqC3t/i33YtVZlrZd2yIFOdNTiLu7+2eyyYiLxkNacmfvBLF3uGo0BstA2y9ufDcX
-         1zpq5OLxBHhwFz6qP2adQ1EkyCRR8UFmnoTnLJJfb8oGf/PoI/9SzrffNl6qWFNcONvs
-         EiVcBCSGWxdHzd82yu/eR7sN8AQetOrNMkuV8SyssWn+y654iBFiTz9phPrKYVDBg8KH
-         aH1w==
-X-Forwarded-Encrypted: i=1; AFNElJ/iUZL/8HyWi/2YDtWhApmKmSAvbMfU/1Sx8M1N9wvNlEvKXTqBCU4EGwWn0s2Ra43VB+iuSPGBeaU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxGAaNyTprfX4w6rpYdas9jVsUlj6pFR2QNsyTfGyKDGNh188ui
-	9KqhIfMNpn0WQvmztuOjMuoVUmPlnE7Qen46pfRKR1jRuHLcB9NI2ERv
-X-Gm-Gg: Acq92OEFBPWTLq9D3yxE0zoMCld5A6GGK09MgnwPko2qd6BYoXvO7yqSCuQktIaEinV
-	rggJ7ZuT/L/tld/16nYG/hxC1x5WbQtYCaIzGiO/tA/+zujp/0jgnsN5M1U+7UPdxiirb1pYlWp
-	eyP78ZOZk3fx+inSgiN4F9RomqEtQz8ha9sjUNgKaHzzf/n7rNubOi5uE/yP7qWPEoTHeTLSi8M
-	cLCnNpkICZFc9CBHlJq9K0lqrklGegVil+NKB7Lbdb/R/K5Bi2nGKczY8Ola5HD2XGxUpzyWmAO
-	vvArmqmgke9fIWeonRsRkvQxm9JNTGgG/gli1OlsjCJiERgcNJSu+qDgZULZhej2qniurk6ygLp
-	HJqEfazYVU4x39WNhlqnf1fiK3e4ljUUwDBq2nATguFKv/qaTKr21MnMd3XrHNskooc3lHhnBpK
-	2S1Zp/qntXBPjf73wH1ImdlsMIx3DkqfmcOX+dqkrl3ptqjHkRfPQ=
-X-Received: by 2002:a05:651c:98b:b0:393:6480:8924 with SMTP id 38308e7fff4ca-395ca4ee2edmr7756061fa.1.1779352529733;
-        Thu, 21 May 2026 01:35:29 -0700 (PDT)
-Received: from NB-6746.corp.yadro.com ([91.132.132.206])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-395d0b68afcsm917611fa.32.2026.05.21.01.35.26
+        d=1e100.net; s=20251104; t=1779374361; x=1779979161;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-gg:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=gTr8u/snY8J1atN0wkQzIVSY3v3e30g1Wn+GFVhT/Zc=;
+        b=YOh7IZvMDVVDrH+eVixvtTkEF/SozgPyJbWAQQ93wqFWleEWSGyYs42AWVBQWuqHKj
+         sSDfQVbCoS4TDZ9ubrzBP6crLo1E81LAyrEnAll/cUTNiqJx1UOBXv1RR8YfiJXCIRQO
+         llfuStG701kmTu7q/LLDVZkRoRYf0HWn8MdpYUx5kCGTcW3CL1Zs7P+M9WGoGke7Wn9h
+         80VjK3pT6P+ArZgP7ck6XcHfZMIlRYD3NuDlAVdDdga75JqFq2Wu2X/PHzz4yNNxVmhv
+         DiseEU9bht76AJ+YBTW7eJn3NmRGJlGDMLyUvxJ1ztY9mbQEFv2nI7SjZvxNcupYUL6E
+         O/vA==
+X-Forwarded-Encrypted: i=1; AFNElJ8hMTmJb7YH+DN1t582ymcTgdyEZM0Ga2ugoF6IecXVpCUzI2AfxGP+dXLu07FDdymN7ws5Hg7MMtA=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx3CI/cnuNB2PHUF7B6DW3AniPMzMR8/u3JUkyI4RwDBXksuGp+
+	RB8uWzjpUACetGlVdIGS0QNvUw6Kcj+o/IyjMvCX7kxx0T9ejFaUFuoQXDlwOP03
+X-Gm-Gg: Acq92OEC6zfRCqvlZqKFBOXpondJASEnaB5iuO9F8WDMf2jNswEo0yOG1kQ6G2pjUAS
+	XaSglEJ9CP+J2zgVzFFncqgii+KEa6oK97XH4W9+GMZV10mGnexc9szPOZ/DoOxfTePlz7RChx8
+	Wm1/SrfUOPOqtxQbiovc7rJDfI8X6ocv/j55eZUf0BCaZG+IooAPO42kNxkgJUrAT7m7w1pyHgF
+	qccSrSA1OKakdxX42Jv7MXBqMW3wY4wacDOAAv/Dtxcm9sXiBiu6CYLOCEan30E01jATbOLUAYn
+	OlpsUcmiQFr0R3CgO2CgyT9EQy+kOQc4xVQLytSUJfcUeLt0/2bXvATutP7ICpJ2YjCMvweU12C
+	PfmrEh/5sU5cMTRsijBJNnQRsn7l9BuRyFW2wM/aUMooGG1Xup74YYUxLc+7HWknVYXJaxFvd5b
+	T2fJ9svsACPGA1tMFPcsqjEBSXZOJUMo3fWgs3y3vFov9uyVuP5kydiLGBWRv8KIOmBH3HLIhGb
+	2nGQ7+L4sNq
+X-Received: by 2002:a05:6214:e42:b0:89c:da2b:d137 with SMTP id 6a1803df08f44-8cc6e6f2dcdmr37444316d6.33.1779374360572;
+        Thu, 21 May 2026 07:39:20 -0700 (PDT)
+Received: from errol.ini.cmu.edu (pool-108-17-68-229.pitbpa.fios.verizon.net. [108.17.68.229])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-8cc768d4ea4sm6451956d6.13.2026.05.21.07.39.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 May 2026 01:35:28 -0700 (PDT)
-From: Artem Shimko <a.shimko.dev@gmail.com>
-To: andriy.shevchenko@intel.com,
-	adrian.hunter@intel.com,
-	ulfh@kernel.org,
-	p.zabel@pengutronix.de
-Cc: Artem Shimko <a.shimko.dev@gmail.com>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 3/3] mmc: sdhci-of-dwcmshc: use dev_err_probe() to simplify error paths
-Date: Thu, 21 May 2026 11:35:04 +0300
-Message-ID: <20260521083506.356422-4-a.shimko.dev@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260521083506.356422-1-a.shimko.dev@gmail.com>
-References: <20260521083506.356422-1-a.shimko.dev@gmail.com>
+        Thu, 21 May 2026 07:39:20 -0700 (PDT)
+Date: Thu, 21 May 2026 10:39:18 -0400
+From: "Gabriel L. Somlo" <gsomlo@gmail.com>
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Karol Gugala <kgugala@antmicro.com>,
+	Mateusz Holenko <mholenko@antmicro.com>,
+	Joel Stanley <joel@jms.id.au>,
+	Maciej Dudek <mdudek@internships.antmicro.com>,
+	Paul Mackerras <paulus@ozlabs.org>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
+	Longbin Li <looong.bin@gmail.com>
+Subject: Re: [PATCH v5 0/2] mmc: litex_mmc: Set mandatory idle clocks before
+ CMD0
+Message-ID: <ag8ZFgw3bEOJmO2c@errol.ini.cmu.edu>
+References: <20260521072122.1601215-1-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260521072122.1601215-1-inochiama@gmail.com>
+X-Clacks-Overhead: GNU Terry Pratchett
 
-Replace common pattern of dev_err() + return with dev_err_probe() in
-probe functions and their callees. This macro provides standardized
-error message format with symbolic error names and adds deferred probe
-debugging information.
+On Thu, May 21, 2026 at 03:21:19PM +0800, Inochi Amaoto wrote:
+> The litex_mmc driver assumes the card is already probed in the BIOS
+> and skip the phy initialization. This will cause the command fail
+> like the following when the old card is unplugged and then insert
+> a new card:
+> 
+> [   62.923593] litex-mmc f0004000.mmc: Command (cmd 8) error, status -110
+> [   62.949717] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   62.976606] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   63.002516] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> [   63.028442] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+> 
+> Firstly, fix the clock divider calculation so we can get the right
+> clock frequency, then add required clock settings and initialization
+> for the CMD 0, so it can probe the new card.
+> 
+> Test Results:
+> Rocket:
+> # dmesg | grep mmc
+> [    0.109176] litex-mmc 12003000.mmc: LiteX MMC controller initialized.
+> [    0.256926] mmc0: new SDHC card at address aaaa
+> [    0.257058] mmcblk0: mmc0:aaaa WC32G 29.7 GiB
+> 
+> Note: it seems like the rocket give a wrong DMA result when the target
+> address is in main memory.
+> See issue: https://github.com/enjoy-digital/litex/issues/2464
+> 
+> VexiiRiscv:
+> # dmesg | grep mmc
+> [    2.368365] litex-mmc f0004000.mmc: LiteX MMC controller initialized.
+> [    2.576993] mmc0: new SDHC card at address aaaa
+> [    2.588966] mmcblk0: mmc0:aaaa WC32G 29.7 GiB
+> [    2.620197]  mmcblk0: p1
 
-The conversion makes the code more compact and ensures consistent error
-logging across all initialization paths.
+For the whole series:
 
-Signed-off-by: Artem Shimko <a.shimko.dev@gmail.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 30 +++++++++++------------------
- 1 file changed, 11 insertions(+), 19 deletions(-)
+Reviewed-by: Gabriel Somlo <gsomlo@gmail.com>
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 925fff1c0f3a..b16027f5dd8c 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -917,11 +917,9 @@ static int dwcmshc_rk35xx_init(struct device *dev, struct sdhci_host *host,
- 		return -ENOMEM;
+Thanks,
+--Gabriel
  
- 	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
--	if (IS_ERR(priv->reset)) {
--		err = PTR_ERR(priv->reset);
--		dev_err(mmc_dev(host->mmc), "failed to get reset control %d\n", err);
--		return err;
--	}
-+	if (IS_ERR(priv->reset))
-+		return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->reset),
-+				     "failed to get reset control\n");
- 
- 	err = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
- 					    ARRAY_SIZE(clk_ids), clk_ids);
-@@ -1781,10 +1779,8 @@ static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcm
- 	dwc_priv->priv = priv;
- 
- 	ret = sdhci_eic7700_reset_init(dev, dwc_priv->priv);
--	if (ret) {
--		dev_err(dev, "failed to reset\n");
--		return ret;
--	}
-+	if (ret)
-+		return dev_err_probe(dev, ret, "failed to reset\n");
- 
- 	ret = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
- 					    ARRAY_SIZE(clk_ids), clk_ids);
-@@ -1792,16 +1788,14 @@ static int eic7700_init(struct device *dev, struct sdhci_host *host, struct dwcm
- 		return ret;
- 
- 	ret = of_parse_phandle_with_fixed_args(dev->of_node, "eswin,hsp-sp-csr", 2, 0, &args);
--	if (ret) {
--		dev_err(dev, "Fail to parse 'eswin,hsp-sp-csr' phandle (%d)\n", ret);
--		return ret;
--	}
-+	if (ret)
-+		return dev_err_probe(dev, ret, "Fail to parse 'eswin,hsp-sp-csr' phandle\n");
- 
- 	hsp_regmap = syscon_node_to_regmap(args.np);
- 	if (IS_ERR(hsp_regmap)) {
--		dev_err(dev, "Failed to get regmap for 'eswin,hsp-sp-csr'\n");
- 		of_node_put(args.np);
--		return PTR_ERR(hsp_regmap);
-+		return dev_err_probe(dev, PTR_ERR(hsp_regmap),
-+				     "Failed to get regmap for 'eswin,hsp-sp-csr'\n");
- 	}
- 	hsp_int_status = args.args[0];
- 	hsp_pwr_ctrl = args.args[1];
-@@ -2408,10 +2402,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 	u32 extra, caps;
- 
- 	pltfm_data = device_get_match_data(&pdev->dev);
--	if (!pltfm_data) {
--		dev_err(&pdev->dev, "Error: No device match data found\n");
--		return -ENODEV;
--	}
-+	if (!pltfm_data)
-+		return dev_err_probe(&pdev->dev, -ENODEV, "No device match data found\n");
- 
- 	host = sdhci_pltfm_init(pdev, &pltfm_data->pdata,
- 				sizeof(struct dwcmshc_priv));
--- 
-2.43.0
-
+> Changed from v4:
+> - https://lore.kernel.org/linux-mmc/20260517015323.264179-1-inochiama@gmail.com/
+> 1. Add a new patch for fixing clock divider calculation
+> 2. Move everything in the set_ios() callback.
+> 
+> Changed from v3:
+> - https://lore.kernel.org/linux-mmc/20260426112016.1370929-1-inochiama@gmail.com/
+> 1. Remove patch 1: mmc: litex_mmc: Move litex_mmc_setclk() to bottom for reuse
+> 2. Use set_ios() callback to apply the clock change.
+> 
+> Changed from v2:
+> - https://lore.kernel.org/linux-mmc/20260424013615.470325-1-inochiama@gmail.com/
+> 1. Remove the added function forward reference and add a new patch
+>    for moving litex_mmc_setclk() function
+> 
+> Change from v1:
+> - https://lore.kernel.org/linux-mmc/20260421025052.755471-1-inochiama@gmail.com/
+> 1. use fsleep to replace udelay
+> 
+> Inochi Amaoto (2):
+>   mmc: litex_mmc: Use DIV_ROUND_UP for more accurate clock calculation
+>   mmc: litex_mmc: Set mandatory idle clocks before CMD0
+> 
+>  drivers/mmc/host/litex_mmc.c | 20 +++++++++++++++++---
+>  1 file changed, 17 insertions(+), 3 deletions(-)
+> 
+> --
+> 2.54.0
+> 
