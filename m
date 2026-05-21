@@ -1,82 +1,73 @@
-Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
+Received: from mail-lj1-f177.google.com (mail-lj1-f177.google.com [209.85.208.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAB7239A7F9
-	for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 07:22:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51D7335B63D
+	for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 08:35:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779348130; cv=none; b=Ou254M3l83FJWDQUW0Vqb4w/FIjprmRUSgc5Ds3cMEWli6Dub9sfvyumJE+8G7tzTgz2mUdwKdcyjsscyCCiW6a9cviJx8OkM5767BUe990p/g05r39/QvBtgpbqfKY/LS3vlE+cw+IFKw6pE5pt5vJg+MJ9vCWsajbc9P405zs=
+	t=1779352519; cv=none; b=a0nJ2+/+fOX19g4qRddkAxzQxx9B0xN7wcmsvMTi3SRXUdGB3TlRUkhkY1QVEa80QbF/i2aPKX531h8GuVMQGLtBisJCCdQ/JGHnz1sx56r1cRFI/A5S86YCgJRdl1J9+6Dcy2m37IWgnx6IjYWPoZLxhbp6lk13q6PSBCrpNXc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779348130; c=relaxed/simple;
-	bh=Mw2AGjPcnmuHHZCQ0a+KC554jOJiVIjRahnR6xrADfU=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ihtAN7qcvF6panXSlDuVmRXMzyGcXoQOsJBgp6FTUNAsqCf+LW7wYr6ZJeAg3hcM1FEULmFW1xF4Ynw2zsiZLt+QY2gbt2pSfuWetbGTZu2dOt+DGoC6WIH/CNtTCHVLw5g3f7FnrYImBoFOiV9pXkWp4HPUYZGlQKpwR3VuBPk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EmK5ZyfN; arc=none smtp.client-ip=209.85.214.180
+	s=arc-20240116; t=1779352519; c=relaxed/simple;
+	bh=BjAGtuiyERsrnnd01vErI9QCyrDyM45is9k/KqcT+us=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mcptoy+JZQBtA88J5HmgurK/w/mXWG1gnduLIka/C2SIXSRbZHtyRcC0YdHS/BdVuK/ndP30x+gnQhy+vAiT0UGXvdiQnXamoHYk3UgABXFcg/LfO16JYSXKYBuHeFsbqr2IPVbzQ2uKEc+5wA7YQ8BmrcHmaBkbaFrYwW7qYOE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=tLilA6sb; arc=none smtp.client-ip=209.85.208.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EmK5ZyfN"
-Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-2bc85eda6b6so28072465ad.1
-        for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 00:22:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tLilA6sb"
+Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-38e97e73234so52316671fa.1
+        for <linux-mmc@vger.kernel.org>; Thu, 21 May 2026 01:35:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1779348128; x=1779952928; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=iTYqbJYJ9tS837Ijwhb4D+xEtAeHHmkjjGBTYP1lfQc=;
-        b=EmK5ZyfNLnIGKeUeIZt2awabvzjF/bHHXaKH0f2T1cDOpruOuTRQ/aghW1y7mUbYn1
-         8bIQc8fU1HvvpXvE8nVs5TmVxkULRY3pej/bt1DqYlku8rwdvVOWyXAi2u0EP+eUV6T6
-         vIHWa1jQeVc9vYyIKFCt1Kpspn1drRZiJ4cK62DauW2sqjQCXNmoXJ8cKNTAwj4Kb7II
-         VfZdGUm7tJcYVOY7xa/BFXlwJhpp7I+XVXyDpNa+9Xi8ehR8rzyEdmKeqofrMSauxJJ4
-         C1LMeBWNMH0M8L1RDkawLAPPb5/p9snGAwPDR4/7jv7aX/+umpAVkj+iBTbpzej8T2qZ
-         N22Q==
+        d=gmail.com; s=20251104; t=1779352513; x=1779957313; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=M7zbCi9B1UroqVUd5aRR3oeDcUX6g7L2mRwm0vu4oxA=;
+        b=tLilA6sbzKapvjVH3NsCPk5QGlzqfhDWrpqVq1zP26ceBzhZL5sFpRguxgHABetfuo
+         3wgo72wkXns0+BkNtRO697fUkbmGgldMbL+D9CRQVGTr1hfOdk29JXX7jQqNM04882YO
+         3wSOTkotnYPf7vvMxp7u93+iGpWvNeg3mdodVo9ZiGsrw+lm/WFbpUzZ6aHnFOdH7oh+
+         9sqZTASEtmDf6XYM5fmVLDzczz0SpFwJe+ufREBXi23r1RxJYtS7KGXFaCqQtFcPlC++
+         p6xTUN11uEpQQ+CmK3iWqUGDswpwu14tP3AGwNk0e4C6J8Anv/b2OtIygm8M+E0wK1Z2
+         MDvA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779348128; x=1779952928;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=iTYqbJYJ9tS837Ijwhb4D+xEtAeHHmkjjGBTYP1lfQc=;
-        b=rPVGtXz4iElDWZXVlcGpSEgMZMV+fCy1RdugnVFWSQm4G+vbCer5ipcjcFUKVirkQK
-         9xTNMkuOx9n2kddKAgRpiyK/2yjeHtI9UjxxmhJkzbYG9MBj8r+W2sAGkKTVKoNfgX1C
-         YhJGg/J/5jG7KEnEJR4GMY5cZxTIJuennDU4nDMWt5Qd1BeMSeMnYC2RgsIeITKFL6Ux
-         G32+oGiswOtBZ2mSemIBkmgiAYBu6GqIhs9g9/gbtjo2zwG/brPgu68AKyCpapMf2xDa
-         +VnnDEzx61HX6qUHTNhvKE1W2NswarW5NA1fz/gouF337G0tXEJiS5nNJEGt+dxHieOL
-         klhg==
-X-Forwarded-Encrypted: i=1; AFNElJ8QnY8MN8yDs2TdSpDgORLFyoLdPin/aNEURkaW5xUaXwI0nMTA35hefhYEnf+ffmC+M10liaq0ytI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyHOFoO5ozdML3d2nLV7rhRmDGfLz2z5v6RStE2KlUYgCiLGiqh
-	0vp+3hhODuSQ0jpixxB2rx98TT7O3N5DMT5qCVKMwBE/JvxWyOgFWgil1Y/LmWpJ
-X-Gm-Gg: Acq92OGU35zKxB1MiPP0lhIUh1wnAlw+kfCXERRDv/PvhMqe/3dUcDwX4Qu7fuFA9SY
-	jUCNPBAwswHlPhLftngt+cKqBQbekwrJEpsIHOT8Qc6WNB/DPJexho7gNs2HutTO3jmbvhRUgGo
-	rDaelIZLHhvKVxsBf6Gl0LIVNMnbJR1IuZjRwmSILFWJ9dKR+fHX4RfJlXMUEU3Wn+GHN2+yj9G
-	697deYSDB24errMDz8+geRqrlsjAxJo86WKh2NrEP9LYc5Pf1ev8T6gVRd+ADI8t2bXw8R/g4Vt
-	YCCHYXMGeKze4i4JsAIYu7QqQe7OS4PFw7nvo4s/dnexM/iG816yRU2VoivencWT3pORBkm212o
-	ejQBsq9UVZJy6qLsXPxhYiC3Eg8cSrof8eBD/wa+Vh0oHLA/IqcUk0Bvu+cHcQemSpz6GghaTiI
-	2m7SiYzbB3Z2e26XBZgDw2+i+a1paQeUW3Ew==
-X-Received: by 2002:a17:903:1ad0:b0:2b2:ebed:7afc with SMTP id d9443c01a7336-2bea335a682mr16852035ad.27.1779348128077;
-        Thu, 21 May 2026 00:22:08 -0700 (PDT)
-Received: from localhost ([2001:19f0:8001:1b2d:5400:5ff:fefa:a95d])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2bea98eca87sm584735ad.54.2026.05.21.00.22.07
+        d=1e100.net; s=20251104; t=1779352513; x=1779957313;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=M7zbCi9B1UroqVUd5aRR3oeDcUX6g7L2mRwm0vu4oxA=;
+        b=gZvwoXy4y2iIAnB0a3TqiwXbPgHiH7uTr0iFoQzRM15cGc6JMXFnXdiuTytXX85CTQ
+         AKvEOZet9cPG+QybFh4xjCx70zCOYAxP7EJK6o+DeSeJg56H+XvcCuDWnjgfLr1CVeUG
+         dsP7+Kb52yTr+Xo4KljcOJFc8fdW71EYLSUrlsCIkojYXIoMw1zGawISh/4APUDqRbxH
+         m70Eh/w0p70Jf6tvmUVCEKo2B/HvQTMdil8IpNYZzRSkR87tlFhv1oagZz207R/Xl9Kj
+         Xpq5I3TFhlb1RDC20W4jhpgowaUi20an8VHQOPTKDOJW9SXpVBgZty7rlUk2tLLOWZSh
+         kqqA==
+X-Forwarded-Encrypted: i=1; AFNElJ9bNeZW3JD/p2sn/MVOOE8L/bHiQdD+btFHYIwYOCliQ9l4nGzA/fOelnGKBpjBjIp72OcmRhvL1Pk=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzs4nkrUA44HE2H7bjrUQ2VuQ8ezDh8yMX2+0y1tnXHQwBp58lt
+	btv5kiDCvF4DGloSKYEYthojIH/bhGqR8P+9j188T4q0EAq1IFG2ATijELmFjg==
+X-Gm-Gg: Acq92OFARbh+2+Ove6IyJKzBFac3hk22Qcs1Mlyp+sDBuT8E/qlaK1NxkUa+wPmZTc8
+	rlSpO9nUpJdVTRyOCNmzVgRb1LYKFPKmfDgVkD9BsyuNNwWU2C/yAFjksgqfbGgc9KRu8TIz7ek
+	2VzC36ktoIO4U1aJsVvGba13+XJ+YutuTaOqV7nCVKpH7j5hpD8zXpOwz5vJ8GfdRuYhGN1A8HD
+	EKq7BuJT072RLl69ZmwYVsKrZ1dJyPt43chuL3SmfPWloJi7XRmfh5O0DJc+pf3R/FijXMmzdXO
+	BJIKlnoRywu38Yg5CGLN36FZnyieXohGQK+S8xBTFvNixxJ0Mj1frH+FAv+SgH1gfK3jf4/waDL
+	TAJRPONu6jLgfPiCF35imDiGYMvek2B2QbeSW1vKvYLXJjH4OA+PsfkMhnFAsu+NPPzIEkwILDj
+	idU49oI7Nwc6KmsUTM1z80sfTt3Dv2HAIjPhbf8A++A/SwUH0XYzU=
+X-Received: by 2002:a05:651c:222b:b0:394:2b4:ca36 with SMTP id 38308e7fff4ca-395ca5ee616mr7578951fa.30.1779352513202;
+        Thu, 21 May 2026 01:35:13 -0700 (PDT)
+Received: from NB-6746.corp.yadro.com ([91.132.132.206])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-395d0b68afcsm917611fa.32.2026.05.21.01.35.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 May 2026 00:22:07 -0700 (PDT)
-From: Inochi Amaoto <inochiama@gmail.com>
-To: Ulf Hansson <ulfh@kernel.org>,
-	Karol Gugala <kgugala@antmicro.com>,
-	Mateusz Holenko <mholenko@antmicro.com>,
-	Gabriel Somlo <gsomlo@gmail.com>,
-	Joel Stanley <joel@jms.id.au>,
-	Maciej Dudek <mdudek@internships.antmicro.com>,
-	Paul Mackerras <paulus@ozlabs.org>
-Cc: Inochi Amaoto <inochiama@gmail.com>,
+        Thu, 21 May 2026 01:35:12 -0700 (PDT)
+From: Artem Shimko <a.shimko.dev@gmail.com>
+To: andriy.shevchenko@intel.com,
+	adrian.hunter@intel.com,
+	ulfh@kernel.org,
+	p.zabel@pengutronix.de
+Cc: Artem Shimko <a.shimko.dev@gmail.com>,
 	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Yixun Lan <dlan@gentoo.org>,
-	Longbin Li <looong.bin@gmail.com>
-Subject: [PATCH v5 2/2] mmc: litex_mmc: Set mandatory idle clocks before CMD0
-Date: Thu, 21 May 2026 15:21:21 +0800
-Message-ID: <20260521072122.1601215-3-inochiama@gmail.com>
-X-Mailer: git-send-email 2.54.0
-In-Reply-To: <20260521072122.1601215-1-inochiama@gmail.com>
-References: <20260521072122.1601215-1-inochiama@gmail.com>
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 0/3] mmc: sdhci-of-dwcmshc: minor cleanups
+Date: Thu, 21 May 2026 11:35:01 +0300
+Message-ID: <20260521083506.356422-1-a.shimko.dev@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -85,58 +76,41 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The litex_mmc driver assumes the card is already probed in the BIOS
-and skip the phy initialization. This will cause the command fail
-like the following when the old card is unplugged and then insert
-a new card:
+Hi,
 
-[   62.923593] litex-mmc f0004000.mmc: Command (cmd 8) error, status -110
-[   62.949717] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-[   62.976606] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-[   63.002516] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
-[   63.028442] litex-mmc f0004000.mmc: Command (cmd 55) error, status -110
+This series introduces three non-functional cleanups for the Synopsys
+DWC MSHC driver.
 
-Add required clock settings and initialization for the CMD 0, so it can
-probe the new card.
+Patch 1 replaces udelay and usleep_range with fsleep,
+following the kernel documentation recommendation for delays in
+non-atomic contexts.
 
-Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
-Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
----
- drivers/mmc/host/litex_mmc.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+Patch 2 removes redundant IS_ERR() checks for bus_clk in suspend/resume
+paths where the called functions already have internal protection.
 
-diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
-index 52571bb17c61..3655542ca998 100644
---- a/drivers/mmc/host/litex_mmc.c
-+++ b/drivers/mmc/host/litex_mmc.c
-@@ -69,6 +69,9 @@
- #define SD_SLEEP_US       5
- #define SD_TIMEOUT_US 20000
- 
-+#define SD_INIT_DELAY_US  1000
-+#define SD_INIT_CLK_HZ    400000
-+
- #define SDIRQ_CARD_DETECT    1
- #define SDIRQ_SD_TO_MEM_DONE 2
- #define SDIRQ_MEM_TO_SD_DONE 4
-@@ -449,6 +452,17 @@ static void litex_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct litex_mmc_host *host = mmc_priv(mmc);
- 
-+	/*
-+	 * The SD specification requires at least 74 idle clocks before CMD0.
-+	 * These dummy cycles is generated by writing LITEX_PHY_INITIALIZE.
-+	 */
-+	if (ios->chip_select == MMC_CS_HIGH) {
-+		litex_mmc_setclk(host, SD_INIT_CLK_HZ);
-+		litex_write8(host->sdphy + LITEX_PHY_INITIALIZE, 1);
-+		fsleep(SD_INIT_DELAY_US);
-+		return;
-+	}
-+
- 	/*
- 	 * NOTE: Ignore any ios->bus_width updates; they occur right after
- 	 * the mmc core sends its own acmd6 bus-width change notification,
+Patch 3 converts error handling in probe paths to use dev_err_probe()
+macro for more compact code and better deferred probe debugging.
+--
+Best regards,
+Artem
+
+ChangeLog:
+  v1: 
+    * https://lore.kernel.org/all/20260518110034.142587-1-a.shimko.dev@gmail.com/T/#t
+  v2:
+    * Remove redundant "Error:" prefix from dev_err_probe() message
+    * Put dev_err_probe() call on a single line
+    * Replace usleep_range() with fsleep(midpoint) as primary change
+    * Reword commit message to clarify the purpose
+
+Artem Shimko (3):
+  mmc: sdhci-of-dwcmshc: improve delay and sleep handling with fsleep()
+  mmc: sdhci-of-dwcmshc: remove redundant IS_ERR() check
+  mmc: sdhci-of-dwcmshc: use dev_err_probe() to simplify error paths
+
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 50 ++++++++++++-----------------
+ 1 file changed, 20 insertions(+), 30 deletions(-)
+
 -- 
-2.54.0
+2.43.0
 
