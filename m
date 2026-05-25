@@ -1,207 +1,118 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mail-m32124.qiye.163.com (mail-m32124.qiye.163.com [220.197.32.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C612F33DEF7
-	for <linux-mmc@vger.kernel.org>; Sun, 24 May 2026 19:26:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 814EA125AA;
+	Mon, 25 May 2026 01:49:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1779650792; cv=none; b=R+OCYUTm2Sfn3EaYO9fkz9UsLa0VWPKkSzj5RE4vMa/iQdJ5EO0y6KoZKBfOu0o8TXS3Dq8qVqefVQSxKOo5ipgpIkRqRgOfPm8d8rCTSdFUNSLRKq7RoXg38KTQYzySfAbR5RYnve4RGkwUY+WluqaWCtKSoh3kr4Az1O4RC6c=
+	t=1779673796; cv=none; b=USSuzp9vuhYBddHxkvmu4+MIOlNC+C1hixH3kHOnx6A0qW9eLP/ZyYQN0iFXtADwFghxckbxjoaPwtO95TV98d/uCTaH/isjRmvxYNNKpJDy3kth4mnbPMsTP7b8t85iUQgJyquGUjHLN7YBnJQXd9nmDST23Of8/FA9y7Ku3bg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1779650792; c=relaxed/simple;
-	bh=xx/OKQkndZ0HVXGIbB1dzJVX/RWFuCljMR+ppwrasBY=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=PDDK5+sm5URVCoY6kq2mr2DHLJ9Dtp2NqDiYeU7Qt9Lhc1MuGqC8fJZRX90iaOrVmOCXPesAOIicDNvgoPa+pSPGg89CyAZCchAOOUveCQMPfGMXYn/9UQxMuGIZ3AlUiscUeavK0vRMv3Q/vjT8XpVYcgvYl6xHnXBO5kRqTw0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=bGdKW9Sb; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=Puijgxui; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1779673796; c=relaxed/simple;
+	bh=AROHQ9otRzJxsT4N3jTTBbwPHMEc9Bj7pUXaLI+pUCI=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=mEm8m0hi1INKnpchuW9gl/5uukqI2IConXsHlNApui7DPSRcP/ch/G1JSR2e0iW4zBe5S12ODgCPxuMU2eUVJQrgOPazYpnf5/w3shj/9T2DBSeRowTHIDbwUTSBmr5tgz1+UuSuGuQ9bYz9PpXpDhAi8sydv/eg/co59TDRGyU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=jj268jkF; arc=none smtp.client-ip=220.197.32.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="bGdKW9Sb";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="Puijgxui"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64O4fiQG3976722
-	for <linux-mmc@vger.kernel.org>; Sun, 24 May 2026 19:26:30 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	gDV1nPpX3nIdzbxc9n1Wsm9dVpymUyRjJcXvIcY9kbg=; b=bGdKW9SbVOFFo7Jd
-	wExZbmC8HnAzH/bYeFHp/25k0XOUuX9jqwV1EBCmHs6U7/z8NSBXlOPR8hHSYaUM
-	wSMX30zBdPFxCc96zqnm5Cso0EnCNXrse78jOgxNarxJEQuVwBF3x6/epwQnX98h
-	j6rtaA1GZDpNp22l+6Pcavaid3cPfC66YXezOHqRTBxdYWdxOLx6Lz5FnbtFiKqf
-	BeCxGLB6m1RlZP5FHNVK29m52n0dO30I7SSSW7eRqzcYc0saEGwdv0wZXN9yor1P
-	LM6n+ifRB1Eq8jEebJWufHQH6bcaJ1YMy8Uf7L7kre09iapT53FTiObOeLmvtagf
-	tDYnzQ==
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4eb3jguybk-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Sun, 24 May 2026 19:26:29 +0000 (GMT)
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2bd6aeb3637so216636765ad.2
-        for <linux-mmc@vger.kernel.org>; Sun, 24 May 2026 12:26:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1779650789; x=1780255589; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=gDV1nPpX3nIdzbxc9n1Wsm9dVpymUyRjJcXvIcY9kbg=;
-        b=PuijgxuixL8qHgXwT+jn/cIFNLlTJx9KBjnMR46lIqXc2ThnCovZbdQO4vqUAlZv5Q
-         TcqjQSqqMV6C/Q5RGktr/cu/ecJoUi+7hr/ikWh/mqKve7pi5AkJvzYHtiHg5p2Q6x8A
-         YYi61eCLSbOcz/nToJTpvG0Bc6oqHwiDbqaTSd3UGEqDg+ecWSGztn7yHLUQbHydiWcS
-         ehh4km2EOHOKbiad9kYQUCsq2D3OL3q6D8ln4gfLkku+WlTT+KPK/hanRrhyP+MmgsYz
-         3QcHaPgSZnA1TbB6QIhvkxkn8y5H/1WI5PDKFbEm201hrVgI2h3BsneO4fQhBgpCrcHP
-         iEOg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1779650789; x=1780255589;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=gDV1nPpX3nIdzbxc9n1Wsm9dVpymUyRjJcXvIcY9kbg=;
-        b=n376iTMUl8ji2tuvj7IkQrjfDfXLfor9QJ4FpjYoS8kB+c8eWgRTcqUsIU3rmV/7UY
-         eI5q01qNLuDbWrybV2NeftTtFMDNaymY7a65eJjLxBqsHgq6bfdYs/ifCrvBlPot6NRk
-         fvyCBxdv7LNIF+CaHtt7BcYuX4hhaLgbad/tIlJ73Q4FYoGBjuOo59jMRucoW+ExJAM+
-         TL1r2WqU0CFAnkr6B59E7kEzr7olX7HQMrcFrKJyXm9XNb7MD1ANkNyeSDF7rHXLWobA
-         4vCS7OUeOAhMA8Xn95N3u6EfNH7/pPi6fwEOTwCT2oIqi8ThLYA95Se8gco0nMxPzULf
-         wDZQ==
-X-Forwarded-Encrypted: i=1; AFNElJ8CFOq+PVUcYxA0uYfPFGHNZSy8nmG3RF1a2vh6wBes/ia2QgxnXb3w4jtNIYiUoMTn5kKtziNVF+Q=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzE7Dw1wJiNxxnyRAiKZRLa7NTP27I+RO5f4vemEWwsaexEOowh
-	4dI7ujs7sy7Gj/RCFLRKjQpHdIIpW/lWZqkAF5E5EhRhAzm9OJrW9Mhn+qu+XXjxAH7VACskrme
-	0q+BaxbEPVRmb75T92Dw7S3k4TALuLHcW6MBfOd3P7AA6CDsiIi7Ig9+xyveITOQ=
-X-Gm-Gg: Acq92OFBLakl9DuQTTs8aHuA4NaDP1xe2Xk3vze2YYR9grsjT+Lvp6I+aVjWrAmV2EZ
-	O8w3mKsl6UgjcXh+EqvFeQ0cfXwJ9U/2xbJ6EwE5P81Eq+aiAlRTCSj6bt/3yw1fnERFptgfiCC
-	+ks5aVB+Z4PN+43OlhFmoxqr/oaLZdmwhK9lH5/NeeBKYLnWmvgRQoikuQBpSc3a8wOjMAI/WhH
-	ZIiGQMOhpY2ExvExkpak0IugTA3qcD874klPkzmCk62DtGe5EV0+X5NDYQFfaQ2jcFwb38L8uUa
-	r0GrCtqLAHgPYjFbBR7KGFAO+Ba+At3uk3e6ejd5lxH3ge2WU9bgRhHazKawtiVlsUNfrfPHdlx
-	ZIPGQmSZLzxpppgnm9qCJYVTNwzRU5FwnhtsOoDq922FZ74rli0gGMM/1CB4=
-X-Received: by 2002:a17:902:ebd2:b0:2bc:b141:8551 with SMTP id d9443c01a7336-2beb06f81f3mr131886815ad.19.1779650788843;
-        Sun, 24 May 2026 12:26:28 -0700 (PDT)
-X-Received: by 2002:a17:902:ebd2:b0:2bc:b141:8551 with SMTP id d9443c01a7336-2beb06f81f3mr131886575ad.19.1779650788351;
-        Sun, 24 May 2026 12:26:28 -0700 (PDT)
-Received: from hu-arakshit-hyd.qualcomm.com ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2beb56ce2cdsm75329945ad.29.2026.05.24.12.26.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 24 May 2026 12:26:27 -0700 (PDT)
-From: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-Date: Mon, 25 May 2026 00:55:52 +0530
-Subject: [PATCH v9 5/5] arm64: dts: qcom: monaco: Add OPP-table for ICE UFS
- and ICE eMMC nodes
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="jj268jkF"
+Received: from [172.16.12.48] (unknown [61.154.14.86])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 3fa1a865a;
+	Mon, 25 May 2026 09:44:32 +0800 (GMT+08:00)
+Message-ID: <41863f57-3911-48b7-8a6b-11f877b982a8@rock-chips.com>
+Date: Mon, 25 May 2026 09:44:31 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260525-enable-ice-clock-scaling-v9-5-c84613e9ce47@oss.qualcomm.com>
-References: <20260525-enable-ice-clock-scaling-v9-0-c84613e9ce47@oss.qualcomm.com>
-In-Reply-To: <20260525-enable-ice-clock-scaling-v9-0-c84613e9ce47@oss.qualcomm.com>
-To: Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
-        Harshal Dev <harshal.dev@oss.qualcomm.com>,
-        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
-Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org,
-        Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-X-Mailer: b4 0.14.2
-X-Proofpoint-GUID: 0akQJoiQwmrzFnZdQyqFEUcCW1IiJzU6
-X-Proofpoint-ORIG-GUID: 0akQJoiQwmrzFnZdQyqFEUcCW1IiJzU6
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTI0MDE5NCBTYWx0ZWRfXzAXFqsRpVsgF
- fEnRIqozrjU/lNY27i9/3YXrHs/lj81dDTPp7bLgybCwDlZd9cytbpksybgW6im8eEpu67sdcSl
- 435PdiAbS6KglPMi7K9sM3sN0lur8jrxCQK35k3CqLJqMNjdjC+of8DGTOvwAjNvtOzYINFaNPH
- 7foPNpNc75McncxsUZNOEytkqyKpwFJc4upv7iWyVfz85HMg7fazKbtFDU1+PQnjiapK/+Rwq7G
- YKDWvi/ZgvZaHeudWmNg+l1DAv9vufuJD69VYJeH6SVWRoq0SrB/yWjW2i64IuFqZBANzlDZHED
- GzxnCl7dxG1pmh9s7pM/K3FEcpJ6zMaE2NcJ5zHy/+d+4JJnGSfHYgHhM6l1MpHC6891G+Ju9/L
- jxTWUKgRitdsMdM48kN489G3nE9s7UJws5oGCbB4Sj2/H0ACwESfcuU6a8PhmHv4iZBgOkj+IwC
- zT+wdWrf9yxM5csTMeA==
-X-Authority-Analysis: v=2.4 cv=Do9mPm/+ c=1 sm=1 tr=0 ts=6a1350e5 cx=c_pps
- a=cmESyDAEBpBGqyK7t0alAg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=IkcTkHD0fZMA:10 a=NGcC8JguVDcA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=ZpdpYltYx_vBUK5n70dp:22
- a=EUspDBNiAAAA:8 a=IFdraIdqUsMg42QbtkkA:9 a=QEXdDO2ut3YA:10
- a=1OuFwYUASf3TG4hYMiVC:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.51,FMLib:17.12.100.49
- definitions=2026-05-24_06,2026-05-18_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 impostorscore=0 suspectscore=0 malwarescore=0 adultscore=0
- clxscore=1015 priorityscore=1501 phishscore=0 lowpriorityscore=0 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2605130000 definitions=main-2605240194
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org,
+ linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: Add missing private data for very
+ old controllers
+To: Heiko Stuebner <heiko@sntech.de>, ulfh@kernel.org, jh80.chung@samsung.com
+References: <20260522184307.2979579-1-heiko@sntech.de>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20260522184307.2979579-1-heiko@sntech.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9e5cce1cb309cckunm290c57cce95c2
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlCTkweVkNMGR1DQk5JGUxDHVYVFA
+	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSU
+	9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=jj268jkFHMoTIsiOtgqq9u0y0urwFy4t48maGZDE2qh2OqIXJryXcryFPY9s1GioHPCBPkOFsug9lJNJv+Ta9AfaHnrIRjsALv9lwnxqtq0Vr1z0vixqhMogPEYCW6JKwD6uLmtGilMlK0jmhMM+KcP/+bs4/hOCKTkEBLP7OWo=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=w7sucLlFPpFoBQBCSVha1cyDgINh3mIbBw2+BnctLfQ=;
+	h=date:mime-version:subject:message-id:from;
 
-Qualcomm Inline Crypto Engine (ICE) platform driver now, supports
-an optional OPP-table.
+在 2026/05/23 星期六 2:43, Heiko Stuebner 写道:
+> The really old controllers (rk2928, rk3066, rk3188) do not support UHS
+> speeds at all, and thus never handled phase data.
+> 
+> For that reason it never had a parse_dt callback and no driver private
+> data at all.
+> 
+> Commit ff6f0286c896 ("mmc: dw_mmc-rockchip: Add memory clock auto-gating
+> support") makes the private data sort of mandatory, because the init
+> function checks whether phases are configured internally or through the
+> clock controller.
+> 
+> This results in the old SoCs then experiencing NULL-pointer dereferences
+> when they try to access that private-data struct.
+> 
+> While we could have if (priv) conditionals in all places, it's way less
+> cluttery to just give the old types their private-data struct.
 
-Add OPP-table for ICE UFS and ICE eMMC device nodes for Monaco
-platform.
+Thanks for fixing this.
 
-Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
----
- arch/arm64/boot/dts/qcom/monaco.dtsi | 37 ++++++++++++++++++++++++++++++++++++
- 1 file changed, 37 insertions(+)
+Acked-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-diff --git a/arch/arm64/boot/dts/qcom/monaco.dtsi b/arch/arm64/boot/dts/qcom/monaco.dtsi
-index 805feb481943e0684162048b5e665b056588095f..89586a6fda70dde16007fb9d3d6a1fc4459c58ed 100644
---- a/arch/arm64/boot/dts/qcom/monaco.dtsi
-+++ b/arch/arm64/boot/dts/qcom/monaco.dtsi
-@@ -2742,6 +2742,27 @@ ice: crypto@1d88000 {
- 			clock-names = "core",
- 				      "iface";
- 			power-domains = <&gcc GCC_UFS_PHY_GDSC>;
-+
-+			operating-points-v2 = <&ice_opp_table>;
-+
-+			ice_opp_table: opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-75000000 {
-+					opp-hz = /bits/ 64 <75000000>;
-+					required-opps = <&rpmhpd_opp_svs_l1>;
-+				};
-+
-+				opp-201600000 {
-+					opp-hz = /bits/ 64 <201600000>;
-+					required-opps = <&rpmhpd_opp_svs_l1>;
-+				};
-+
-+				opp-403200000 {
-+					opp-hz = /bits/ 64 <403200000>;
-+					required-opps = <&rpmhpd_opp_nom>;
-+				};
-+			};
- 		};
- 
- 		crypto: crypto@1dfa000 {
-@@ -4878,6 +4899,22 @@ sdhc_ice: crypto@87c8000 {
- 			clock-names = "core",
- 				      "iface";
- 			power-domains = <&rpmhpd RPMHPD_CX>;
-+
-+			operating-points-v2 = <&ice_mmc_opp_table>;
-+
-+			ice_mmc_opp_table: opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-150000000 {
-+					opp-hz = /bits/ 64 <150000000>;
-+					required-opps = <&rpmhpd_opp_svs_l1>;
-+				};
-+
-+				opp-300000000 {
-+					opp-hz = /bits/ 64 <300000000>;
-+					required-opps = <&rpmhpd_opp_nom>;
-+				};
-+			};
- 		};
- 
- 		usb_1_hsphy: phy@8904000 {
-
--- 
-2.34.1
+> 
+> Fixes: ff6f0286c896 ("mmc: dw_mmc-rockchip: Add memory clock auto-gating support")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+> ---
+>   drivers/mmc/host/dw_mmc-rockchip.c | 17 +++++++++++++++++
+>   1 file changed, 17 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index c6eece4ec3fd..75c82ff20f17 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -441,6 +441,22 @@ static int dw_mci_common_parse_dt(struct dw_mci *host)
+>   	return 0;
+>   }
+>   
+> +static int dw_mci_rk2928_parse_dt(struct dw_mci *host)
+> +{
+> +	struct dw_mci_rockchip_priv_data *priv;
+> +	int err;
+> +
+> +	err = dw_mci_common_parse_dt(host);
+> +	if (err)
+> +		return err;
+> +
+> +	priv = host->priv;
+> +
+> +	priv->internal_phase = false;
+> +
+> +	return 0;
+> +}
+> +
+>   static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+>   {
+>   	struct dw_mci_rockchip_priv_data *priv;
+> @@ -514,6 +530,7 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+>   
+>   static const struct dw_mci_drv_data rk2928_drv_data = {
+>   	.init			= dw_mci_rockchip_init,
+> +	.parse_dt		= dw_mci_rk2928_parse_dt,
+>   };
+>   
+>   static const struct dw_mci_drv_data rk3288_drv_data = {
 
