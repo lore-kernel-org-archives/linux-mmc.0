@@ -1,39 +1,64 @@
-Received: from out-188.mta1.migadu.com (out-188.mta1.migadu.com [95.215.58.188])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5EE83546EC
-	for <linux-mmc@vger.kernel.org>; Fri, 29 May 2026 01:18:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.188
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB56E348C4B;
+	Fri, 29 May 2026 08:11:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780017498; cv=none; b=eg/nCZpLHrxDSkn1oS4/6GYOHyMswZbyKtnJnJwGYokgn4FXpDyMJDp1JmO1gTisUOqhiM0Jr3/LcE6CFEFaAHf90/YzysXcs2ffzwMKxIKBIQmokyuSYw0BEZKYLZRyRtmy/xd/dH2U4lXeD9KOpspurm4Jj55/FkzZX/JpoVc=
+	t=1780042275; cv=none; b=nLvpposdrZgCo9VyuD14MHGu9pRO6vihKDCxqnNgnIaIzL/Oz+rXr8GlCErHZOlcAUtv31Oq0d6p2YngzMSbnEss8VVgtWqg5/iDerithk6m7+SWVPWidE43+p12QlU9biPtRUEwf2PmSk/2qCTw2a/rYTpKBx155RD2F6mOVN8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780017498; c=relaxed/simple;
-	bh=630VxHoH+4a7eqI2+l9hMiLkD7npVli2NlDMtiLkB3o=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=C1kvezpsDqohweapLoRp8rif3F+2eOZzTEQ3+eoVYdyWpPH3pJiLa/MipV7gzpLIaDpWuHNlsp8/mpPXExX7eN35maAW76eqTyqe36GC7a75vxmN6KJ6vrkTbd1NWN5pJ+SSDZLWqBauRdRKFCEs7r9o+qwxPl5SGwRkYEd+Z9c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=sZQO6E8X; arc=none smtp.client-ip=95.215.58.188
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+	s=arc-20240116; t=1780042275; c=relaxed/simple;
+	bh=flJfWzYRJhycIiawzUDf+c0ZT4a985J416Q4MS82tUE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Ew5R7njHkcYo9V0uWt37Cr4cNCFCPHBD9de/nvJvg2mwEa9tg8dZLwnzEf1lauimQsk+JetoecLdCrSEeGJlvm1mm8kZ6baaOG6HB4jZI4x75VolqrYM6Am9CluSo5tYery3HAK1KN0H50cGbWA30MaZ++RxgjPbg4PvGiHZH2s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=UOF6g0Hi; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="sZQO6E8X"
-X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
-	t=1780017484;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=2fK5M76Z/nKa9g5TeFjZ7TzLjI6fUv57cnktOljPR14=;
-	b=sZQO6E8XByReJg4jiTdoYlNTWirLclR7nviQ2QrvoP7o/BRtpi0eeWDoArFlaNb53uinj1
-	FXJ1sizzLjqzYuCGtO2c0BrKPGSLii8sOw4E6YKKbt2+ilU7YO1IAcL/2ait/S71ehqkMa
-	mvIUa1LukaHzZp3t55DGqgDy5KPe5RY=
-From: Shawn Lin <shawn.lin@linux.dev>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2] mmc: dw_mmc: Add desc_num field for clarity
-Date: Fri, 29 May 2026 09:17:39 +0800
-Message-ID: <20260529011739.4381-1-shawn.lin@linux.dev>
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="UOF6g0Hi"
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 64T0AE1P1495941;
+	Fri, 29 May 2026 08:11:11 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=h2rMRRlMfCpBVaLywiZddCmfbOWqCZ7zwEM
+	nr+jIjZ0=; b=UOF6g0Hiih+Z0dpGYWc3RhhnZA2ysWEK1p59p7QD3XkLYwbBKdn
+	ybfNZJ28F38ugrhg5RuPGwxcpHNEJQXcQca7y6yxp7w/ZIJbvFoklk4bd0FZs8gj
+	tqY/j+qsIK48FKlaRTffot/b30sT1WFag2ySCJssGtzkXFUv1/0SSu8HiM7F/Jp5
+	yUvRvHMcEp1wMtcMX7x1zfz/eUNFc+boKD9UivFxP3RqP93GzPri/RhzE+if48vS
+	Oax3uhctXXoQ+8hqz1Ivqn0EUCDK+/x7w3U71WmFvQAPNq5hqX2A+odWJQsMXEyB
+	pJVjOgr3PWplp+CuL0ldJWp1/bVzsNVWf1g==
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ef0159k3r-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 29 May 2026 08:11:11 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (8.18.1.7/8.18.1.7) with ESMTP id 64T8B7hn002159;
+	Fri, 29 May 2026 08:11:07 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 4eb5akbqaf-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 29 May 2026 08:11:07 +0000 (GMT)
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.18.1.12/8.18.1.12) with ESMTP id 64T8B7o6002154;
+	Fri, 29 May 2026 08:11:07 GMT
+Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-rampraka-hyd.qualcomm.com [10.147.247.88])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 64T8B6GC002153
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 29 May 2026 08:11:07 +0000 (GMT)
+Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2305851)
+	id C0139628; Fri, 29 May 2026 13:41:05 +0530 (+0530)
+From: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, konrad.dybcio@oss.qualcomm.com,
+        abhinaba.rakshit@oss.qualcomm.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, pradeep.pragallapati@oss.qualcomm.com,
+        manivannan.sadhasivam@oss.qualcomm.com,
+        Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+Subject: [PATCH v1 0/1] mmc: sdhci-msm: Set ice clk rate
+Date: Fri, 29 May 2026 13:40:44 +0530
+Message-Id: <20260529081045.2877910-1-ram.gupta@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -41,109 +66,50 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Migadu-Flow: FLOW_OUT
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-ORIG-GUID: WnwPYjdvCYGeqCsd_4SqWROmJoi6ofH8
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNTI5MDA3OCBTYWx0ZWRfX7912kufS9iTB
+ xkq6K0bW7/18jB28Y/04Koqv6s55LdWxAp40eihYfM3jDRQ5bysuzXSO1pUB948vHCMyM8Y2V7v
+ z2dAtqHmChpxQFI8XJXwCT1XfxBwNsRNAZ4Tb9CNhZoCJvLLkraOzfnXW3g+qUoVOTmuylsYwGg
+ nyk220YgBHJ5jjV9Z/SbhQ+/NtBt4Ay9BNuFL8yl1JnC6fXXvl5B7oV/OAeEL4Uhwe96Z/xDTnH
+ nyt5ZS1+Ju4UYnXrIP/Y459gv1ENzKsAD1wartYrOVwMB6JNl9mJI7ItijFLtFOVYHidtJQyJqo
+ OE7kyyLTqpXRXrev5QTs4pHI3yIZHcUixkG64O8O5uLkEdayCH+/e4g6tgs5mq/fC3EyuoxuOOf
+ N1ASSfy0m8qCkDnq7jkuas9mG2l7DYaUSPRqaI23vsTmqwLBshaxj535Ea8weFS8fAjimtlVSys
+ +wU13LcSWAHyiSi1AyA==
+X-Authority-Analysis: v=2.4 cv=DIG/JSNb c=1 sm=1 tr=0 ts=6a194a1f cx=c_pps
+ a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
+ a=NGcC8JguVDcA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=YMgV9FUhrdKAYTUUvYB2:22 a=VwQbUJbxAAAA:8 a=EUspDBNiAAAA:8
+ a=J77kmSgnQlSNxOV-0D8A:9
+X-Proofpoint-GUID: WnwPYjdvCYGeqCsd_4SqWROmJoi6ofH8
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
+ definitions=2026-05-29_02,2026-05-28_03,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 phishscore=0 lowpriorityscore=0 bulkscore=0 priorityscore=1501
+ spamscore=0 impostorscore=0 adultscore=0 clxscore=1011 malwarescore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2605210000 definitions=main-2605290078
 
-From: Shawn Lin <shawn.lin@rock-chips.com>
+Add support to configure the ICE clock to the maximum supported frequency
+to address the review comments from the below ICE upsteaming discussion:
+https://lore.kernel.org/all/7a0db353-02f7-4188-b2d7-9098548f1920@oss.qualcomm.com/
 
-The ring_size field in struct dw_mci is misleadingly named.
-Despite its name, it does not represent the size of the descriptor
-ring buffer in bytes, but rather the number of descriptors allocated
-within the fixed-size ring buffer.
+And also to address performance degradation of ~50%-70%.
+https://lore.kernel.org/all/aTpbZHRUj6QF3KSE@hu-arakshit-hyd.qualcomm.com/
 
-The actual ring buffer size is fixed at PAGE_SIZE (or DESC_RING_BUF_SZ,
-which equals PAGE_SIZE). Within this buffer, we allocate either
-struct idmac_desc or struct idmac_desc_64addr descriptors, and
-ring_size stores the count of these descriptors.
+Below is the link for the ICE upstreaming where ice clock is being
+configured to max frequency:
+https://lore.kernel.org/all/20251121-enable-ufs-ice-clock-scaling-v2-3-66cb72998041@oss.qualcomm.com/
 
-This naming has caused confusion, as it's also used to set
-mmc->max_segs (the maximum number of scatter-gather segments),
-which logically corresponds to the number of descriptors, not a
-size in bytes.
 
-No functional change is introduced by this naming-only patch.
+Ram Prakash Gupta (1):
+  mmc: sdhci-msm: Set ice clk rate
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+ drivers/mmc/host/sdhci-msm.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-Changes v2:
-- remove ring_size
-
- drivers/mmc/host/dw_mmc.c | 16 ++++++++--------
- drivers/mmc/host/dw_mmc.h |  4 ++--
- 2 files changed, 10 insertions(+), 10 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 3b4157f34d11..d734d010444d 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -490,12 +490,12 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 
- 	if (host->dma_64bit_address == 1) {
- 		struct idmac_desc_64addr *p;
--		/* Number of descriptors in the ring buffer */
--		host->ring_size =
-+
-+		host->desc_num =
- 			DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
- 
- 		/* Forward link the descriptor list */
--		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
-+		for (i = 0, p = host->sg_cpu; i < host->desc_num - 1;
- 								i++, p++) {
- 			p->des6 = (host->sg_dma +
- 					(sizeof(struct idmac_desc_64addr) *
-@@ -518,13 +518,13 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 
- 	} else {
- 		struct idmac_desc *p;
--		/* Number of descriptors in the ring buffer */
--		host->ring_size =
-+
-+		host->desc_num =
- 			DESC_RING_BUF_SZ / sizeof(struct idmac_desc);
- 
- 		/* Forward link the descriptor list */
- 		for (i = 0, p = host->sg_cpu;
--		     i < host->ring_size - 1;
-+		     i < host->desc_num - 1;
- 		     i++, p++) {
- 			p->des3 = cpu_to_le32(host->sg_dma +
- 					(sizeof(struct idmac_desc) * (i + 1)));
-@@ -2857,10 +2857,10 @@ static int dw_mci_init_host(struct dw_mci *host)
- 
- 	/* Useful defaults if platform data is unset. */
- 	if (host->use_dma == TRANS_MODE_IDMAC) {
--		mmc->max_segs = host->ring_size;
-+		mmc->max_segs = host->desc_num;
- 		mmc->max_blk_size = 65535;
- 		mmc->max_seg_size = 0x1000;
--		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
-+		mmc->max_req_size = mmc->max_seg_size * host->desc_num;
- 		mmc->max_blk_count = mmc->max_req_size / 512;
- 	} else if (host->use_dma == TRANS_MODE_EDMAC) {
- 		mmc->max_segs = 64;
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 2ce8585e2c1e..9ffcd3946cff 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -79,7 +79,7 @@ struct dw_mci_dma_slave {
-  * @dma_ops: Pointer to DMA callbacks.
-  * @cmd_status: Snapshot of SR taken upon completion of the current
-  *	command. Only valid when EVENT_CMD_COMPLETE is pending.
-- * @ring_size: Buffer size for idma descriptors.
-+ * @desc_num: Number of idmac descriptors available.
-  * @dms: structure of slave-dma private data.
-  * @phy_regs: physical address of controller's register map
-  * @data_status: Snapshot of SR taken upon completion of the current
-@@ -186,7 +186,7 @@ struct dw_mci {
- 	void			*sg_cpu;
- 	const struct dw_mci_dma_ops	*dma_ops;
- 	/* For idmac */
--	unsigned int		ring_size;
-+	unsigned short		desc_num;
- 
- 	/* For edmac */
- 	struct dw_mci_dma_slave *dms;
 -- 
-2.25.1
+2.34.1
 
