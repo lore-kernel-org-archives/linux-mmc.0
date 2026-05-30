@@ -1,41 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D4E5381B01;
-	Sat, 30 May 2026 09:19:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 154683955D3;
+	Sat, 30 May 2026 11:46:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780132793; cv=none; b=uYBrtMJ7CAZ0e4bBhjAY6Cap01QGpEwn17kOZEfY42iRS2w1EI4J9/1jjCb4uBnGNXQfnizXv+D/ZYh9uqRlGrwcIWbvltU4Pi9EPB3Yjw9Z5ZsNk5rdlnYLmsaBg3h5gKhaTU2VR57D1OQt4Beo/6ETI6MUIUQMYnqp3L6C70s=
+	t=1780141602; cv=none; b=nQR4puWPSeE3hQXmgYiXB7QbsG937N1z27MzMdcaRtD1gnnf4YEaVfP76YfHI1I//eRXl7AvtcX2YKx71KJ84oiF2ZI9KibVyzdhj9N5Xikm02N+xFCnUOjWKOaW1ZjzJpfgwm+blcS4u9ZankObmua3S3OqjeadvLB5eURlKoY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780132793; c=relaxed/simple;
-	bh=LSgZxKJCwYcrNJBxIvgfD2PKLJy/abW+DMcjYMcA+Z0=;
+	s=arc-20240116; t=1780141602; c=relaxed/simple;
+	bh=wHsOlKX63fgfP92ymKm5m+IAIs4eZcPGWPqvtwWUA14=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Jh9frLxvSVtG9XtTU6ybbHMZdOyVrCDbENXDR869kq9zMTRVMfXBi/zbQh5e+FlGvJcl/kNCV08NrWbTn9ftGzNzgwcd+DfiD/R6RhLq7ZdqENmUtTFMo3TXlUu7YWLH2acBswmuVhfL/qFFaUu0EB/REho4r6wW5ZUmnOGQpZY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P5BWGGyx; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=lU566kstJRK0WD7KEj4FUNJc/4n22M5MNlfMGbkTxLGyhqJ6OU0SUJU8E0Yxca0u9RWJPhn9mpQL7MG4eO8wd2e5oFh++lUpuMtndFkt9sDXCro5dex9QLi+oIulbKjwIBHwzVp49UDTqfpm6xHehXdUXwyS+lwzx+veYfMr7zw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UVc9T7+I; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P5BWGGyx"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B76701F00898;
-	Sat, 30 May 2026 09:19:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UVc9T7+I"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 21F2E1F00893;
+	Sat, 30 May 2026 11:46:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1780132792;
-	bh=LSgZxKJCwYcrNJBxIvgfD2PKLJy/abW+DMcjYMcA+Z0=;
+	s=k20260515; t=1780141600;
+	bh=4w+pGBw8aB7TTsd8Ahao0ApeXWwKjsPmyYUKP/TztV0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=P5BWGGyxBf1LxydwUUou67cEm72xD6zbqiE72wQHLbsoqBhbRBmi2Y/YA2nKv+Di2
-	 DBJilYSQqjZkujmSpqLgYJ0Ja5bxAdk79f8r5kU3Sa/3buAKKPQl/gnA2WRqpWccU7
-	 RNC6gBjtOV0gmzUaVGSWs8uXEosOOjOVuvRvFaL8+fWOqQpSD5m5NuBfQ05Sxinc2A
-	 M4lM6baiBumInh3PnPPQW3a0oO+sokxMVuCEnLrYGWDa68atDJbdqSBJXL7A/QmyYx
-	 X1ebspGj6UdkfMVXpK9QHEoZ38LRMmX/uLRcQAtkCzL6wXfo0stWNa5ocsLQmjx3Hv
-	 Kmd6TxegBeE9A==
-Date: Sat, 30 May 2026 11:19:50 +0200
+	b=UVc9T7+I4XrfBA3fB5JQ4uNDa4CqnLFuUeUUZWCIYqZk7LCh1dSf8HrKmiVSn9ALC
+	 ExkJXGTCjpjYeZ02T63fDjcMYUlFoPMMcs/PXQxSb75JYQujmyNfANXjaE8HlSxoi1
+	 W0T1tpwxzFQ99mSKX9GHHCR6xpIiehhF6cQyCBx1FqkatObrXMMiYHetziXubeMBmU
+	 6M057OmAq8cFp5fNruIGVFGIIT6ePOt2JXNbHXZKMkWESYGuKicprRHSgprc06wfX8
+	 Yh0lVOCga6lM6VOLNrNFPnAaZzTHv7fistBMyIX1vksHikbioVbG4EaLlkicZuzh+R
+	 BcdndSAvTphyA==
+Date: Sat, 30 May 2026 13:46:38 +0200
 From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Manish Baing <manishbaing2789@gmail.com>
+To: Manivannan Sadhasivam <manivannan.sadhasivam@oss.qualcomm.com>
 Cc: ulfh@kernel.org, robh@kernel.org, krzk+dt@kernel.org, 
-	conor+dt@kernel.org, kblaiech@nvidia.com, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] dt-bindings: mmc: mellanox,bluefield-dw-mshc: Convert
- DT schema
-Message-ID: <20260530-crystal-asparagus-saluki-8dcdd5@quoll>
-References: <20260524111528.107251-1-manishbaing2789@gmail.com>
+	conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org, 
+	linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
+Subject: Re: [PATCH] dt-bindings: mmc: sdhci-msm: Rename the binding to
+ include 'qcom' prefix
+Message-ID: <20260530-prudent-whimsical-bull-7ef4ff@quoll>
+References: <20260528135342.11678-1-manivannan.sadhasivam@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -44,17 +45,46 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260524111528.107251-1-manishbaing2789@gmail.com>
+In-Reply-To: <20260528135342.11678-1-manivannan.sadhasivam@oss.qualcomm.com>
 
-On Sun, May 24, 2026 at 11:15:28AM +0000, Manish Baing wrote:
-> Convert the Mellanox BlueField SoC extensions for the Synopsys
-> Designware Mobile Storage Host Controller from text format
-> to YAML schema.
+On Thu, May 28, 2026 at 03:53:42PM +0200, Manivannan Sadhasivam wrote:
+> This is the only Qcom binding that doesn't have 'qcom' prefix in the
 
-There is no YAML schema. It's second such I see today... from where
-do the people take it?
+One of few. Definitely not the only one:
 
-Same comments as for all your other patches.
+dp-controller.yaml
+dpu-common.yaml
+dsi-controller-main.yaml
+gmu.yaml
+gpu.yaml
+hdmi.yaml
+mdp4.yaml
+mdss-common.yaml
+ipq806x-dwmac.txta
+
+Plus there are such like leds-qcom-... which also do not match pattern
+in MAINTAINERS file.
+
+> bindings name. This doesn't match with the regex in MAINTAINERS file and
+> the 'get_maintainer.pl' script fails to list the 'linux-arm-msm' list:
+> 
+> Ulf Hansson <ulfh@kernel.org> (maintainer:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...)
+> Rob Herring <robh@kernel.org> (maintainer:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+> Krzysztof Kozlowski <krzk+dt@kernel.org> (maintainer:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+> Conor Dooley <conor+dt@kernel.org> (maintainer:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+> Bjorn Andersson <andersson@kernel.org> (in file)
+> Konrad Dybcio <konradybcio@kernel.org> (in file)
+> linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...)
+> devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+> linux-kernel@vger.kernel.org (open list)
+> 
+> Hence, rename the binding to include 'qcom' prefix so that the regex
+> matches correctly.
+> 
+> Reported-by: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
+> Closes: https://lore.kernel.org/all/20260526151003.p4kn2vek3hpv4gzv@hu-mojha-hyd.qualcomm.com
+
+Suggested-by, please. No bug here.
 
 Best regards,
 Krzysztof
