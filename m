@@ -1,63 +1,61 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48E2833F8B7
-	for <linux-mmc@vger.kernel.org>; Sat, 30 May 2026 16:08:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B558B324B33
+	for <linux-mmc@vger.kernel.org>; Sat, 30 May 2026 16:10:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780157325; cv=none; b=NOO9OaTqfDUsDVz79OCIjiwf3G4s0P1SytDwnWhi/OHi7rYIQ++Tpi/TOgPS2g/CNIgtIqymIZ0BJKuVn/abQDl2pvZPtjtydd/gLsOcpczOUvO6iZp1bNYgSAsp4hgBcNkJ+dO9GiQF/5zeaF/JPuKm2xBZzxv9lnWLrIzOAxY=
+	t=1780157405; cv=none; b=fWKO6ibZQLRpJo3h34brDUhLOaTj1PZrLtKfnE1zPPK6RViTJGl+CVMz6nEz3jE4Q7J/GnJ3H40bn0bg40VCzAV166/nv1AQ2x5Vds6TVHQX8ePwD2D74LgG0yWxIXs5DgHhSMViU/0A3KWW82cIFYkNfwuqdx4dKlx+D82FJLo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780157325; c=relaxed/simple;
-	bh=BhBy+S0HeAqMqVD0vfTgVyzMzn6TzF9an+zKeggyjho=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=NvYqkfgpr9cQM3/VJPXGyGQtNbweUgxoeUHmDxGyxsjkxDgwnCQp5DShe+9t+3bR2FF8aSvyBMV/8Ug8Zn0Tz3ZtobeX93UG1SHUOw5CoAgW7zg7DOwXC65FsT3p6blWX7o7uVxSAbkZG/f/pL/8D+hkpCclFIN3NzTFARsO/ps=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=M0tVdjdD; arc=none smtp.client-ip=209.85.128.53
+	s=arc-20240116; t=1780157405; c=relaxed/simple;
+	bh=zZOIvZOqT0aSTh6LveaAM9sD3r2T64N7TAlxwYpsk90=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=DWv50zp5jjc0hloeWMnRDMsRSMhTrrdt3Ja/bOmHdRzAcgD4PhqUrusSazTl5j04rP7Afws5R0ED8c1vgJTH4/8MuBVvQyNmd0fmPePtpollUqJsWByb17MMTXh9RGAR4oKzm3/Kidqyjw2Jfev4PgfTNjbmmiKD1OJzqZgatfk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LIR8x+aR; arc=none smtp.client-ip=209.85.221.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M0tVdjdD"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-4903997fcb5so90598315e9.2
-        for <linux-mmc@vger.kernel.org>; Sat, 30 May 2026 09:08:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LIR8x+aR"
+Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-45ef372c58aso874099f8f.0
+        for <linux-mmc@vger.kernel.org>; Sat, 30 May 2026 09:10:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780157320; x=1780762120; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=EPP3Gc7DbsXSkC2W1JsK595/iLwnbQR3mPGG4AseLmY=;
-        b=M0tVdjdD0SgY3nodBIAp6NbzPbyDUF8nSXqpOsHV0JfOoMSyhey4r0XkQfBhEWVq4L
-         hJwZ7LNP2EWudyRx4uz9y3ba9udM5fNJ7IC79vgKbms5ynqqwirG+Rpn3C4ZcRxN8bz+
-         xU7rErewuM2lykH/MiWyFF+Exa+cZtVuPtVRNB44Q9K88oG3fn4uzVrpOrUC1aJJVEDU
-         VXRjZ19+23+QLqDPo6cI9dfgYvf60O5LR/8IoE71CtO0OAB2nbcrwoSxTMdtJjmCAOoD
-         bJCyPsY+rccSAOLi+9s441FCz0k+koGhQ/LQlF5PtlY1k7sw0w834MGX/5aguIysu5T9
-         e/PQ==
+        d=gmail.com; s=20251104; t=1780157402; x=1780762202; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=4N2ujUewBRl9mQ2XiZRwnXIT+vIqH9drHk1fYIYyxf8=;
+        b=LIR8x+aRNrYxTQPOzFQCT+YcuuZFbL1FyH1QK5fBARgakoxvOCbB6zCLO942d9wbm9
+         1xBB16WKinuVmQS+oaARo7TqZQxFDW5V7MuSZ+t/3LG5ji71LEfcA1aLxkHL5BhUhT+T
+         bg42alCC6PZcaLSCwsgdh2YcDBsBP5HNxrqOh+2+99OgoJZRoa2R4bYCF1CCus1Xrzu6
+         2MmVfkMQs6J7YDuf7F2ITHhDEE4vVOK6acUxgkhqP30T23H+7zJJzV/G3ScEPHjAgbme
+         8NuVIsk6R/bP8FcUSNZvoHaAwRW/lPAGpt7/QCV2WxG3CKyy7BZ/KzM19B7e8NbwZptu
+         dbCw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780157320; x=1780762120;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=EPP3Gc7DbsXSkC2W1JsK595/iLwnbQR3mPGG4AseLmY=;
-        b=XDC3IRHUBS8ZCPOmZ0/roGqhT2J9FJ5wTViNy22iZKLLrBKt2BQOcY3iuHJaivoBiN
-         FOmdEF0W09Q9ON05VSaQ08Yf4fwmYbDmthLbQEpnk4BQTLB0kCFKEM/Cy49CL16Y4wOz
-         7PVsM8mIncc75jcidWyVslbVSDiRbf7K1Cu3r1Vvp6o5RVAD37Im/tAJbJLiJttXoBKB
-         8V/Jkx3gmWVImZgNJqbq05MRkf+niEYT7BWAnQIhVeBbp+wmpSf4UM5VC/DofkcEiBFQ
-         CuSO1eTcaNWiqWliXMf2MUpiw1P6TMv9pjE5B4op2duSa2nSOCIvOyvjdKiH7iFmLFoo
-         DJhw==
-X-Forwarded-Encrypted: i=1; AFNElJ+y+MCb16J7i7/6Wo+j0tD903OzepVrDxvOjFmKbMfCf7PA4SeVzdkPud9GQzmK7RCZf9W+eB4cgGo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzIl5XvgAtfOxBW7mbLZ8zRE/n8dX4eQOQyDf6rSLLzHWz5ZvN9
-	F5RuLe68hTcbaz0NAzonPCLfgICHgQQGInZytc8ltq0fVly7jOPi10Sd
-X-Gm-Gg: Acq92OFdqDOeyNYMMHuCHfDv/6CKCDPmscqv08OwrzRvtiVMvqcGIPI+pDCXMYLb86L
-	VgSa/dt87o9O2p/+RBtc5jfgyhGBRZDDYQB1qX4OrY9aWYyTVgvyutpEd9OEmw1dmJB2uof8mEv
-	ypRxNDn0923jbgdP9wSZ0u6qVl5tRNRe6268VQXNDKMIqzCpw745kUUFs9TJJFFQMuLcItRFljb
-	wDmM0k1/+PvB94Wohr8wt0H/DlA9uMZEENIQaZePfiA6X56hi9dAOZUKvKzjcnhkHqptTCNMVqi
-	oXWuX6BdnGUbZu06sRn9Vvpwnq4Nrr1M6E74XkYGj7LM7rKmpRxkPCPfMCROg5eRA7kWGxZXYXB
-	8FDA2SXQ2wM26UntIOTLyvMStFv9bFmncRYPjhMDwEx87uAg5HCsuUYn3jxlVipuPZ7iQkx94TX
-	ZmFrz1ZHn66hJh6LMiBwIdZt0IWSYB8iX+KHdNLHLj24wNPhznOKNARclVQU4=
-X-Received: by 2002:a05:600c:1989:b0:490:5655:8d3f with SMTP id 5b1f17b1804b1-490a297d462mr81500585e9.28.1780157319627;
-        Sat, 30 May 2026 09:08:39 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1780157402; x=1780762202;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4N2ujUewBRl9mQ2XiZRwnXIT+vIqH9drHk1fYIYyxf8=;
+        b=Iig/xCBOijXjj3+/UuMzfvPPLdJ7+uloKt0ZexwsYGT8uVOih7GQ48Yq5tcCvjM1LG
+         1Ub1/YClQ7DZXwLZ2XH5uws+wRUTJztlDDokHLzRKD2MN74lNz+dYVWOyWqI2tJmnDW1
+         ZL2WdUCPDAopvunJghHNoEzLIPPbVIRnOQo9AceE8KQ7ZOEUrx3GNmNQbONHCWTY5J8A
+         cgNF2Rry3IymFz0Kx3Ki4UBAOl3JwWBy05Xjqp1AxVeGiFfjW75hvQrr6GJZmSTHpFJ9
+         OCfoM9xQQiApZDKghzDW76x4o4d/3NkdBf/GCU9KbnDdF+Dd1XZtUuts4Cq03R0DZEcX
+         y34g==
+X-Forwarded-Encrypted: i=1; AFNElJ/+BmdI1xlpy+/+e0IHp7bi6Qhx9CMXBLYgSNOiVzGOTaPl/VjNMStKQ0fO7XpClR/t963Rm2sPwHQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwieHNDuKorGGINVk9IwHucgR+VWg0kraD4aDBIyVo/FFyCOcJA
+	MZZtWtsvN9eEq6U0Gj0kybegWLRDI2rMarW/llJI+8fdqfdbz0R/qokQ
+X-Gm-Gg: Acq92OFpT5gqWFPZRsfoSrOJIbajcy3f68U1liyugwWqVk4q4EQZtt9RoU70Mn3/B7A
+	o591F8yY7Otj02I+seQ/Pnm3CkCLq9j1kkUn58fbbOzK1nCR+prrxokgkE589nmloceYyTVzdde
+	TVUGZm9KZMpPz+TF/c75l34WosvZARHMWL5DlpaXPN0Lg8S+NKK5ndXcyjw1DFHD2GszWhC5g9e
+	VqrQFSHMkxwaVPn12VPaAqogs/aRyx4wfPsRVEHCzgrjDTLL/wchFANKYEcRGIPm7gHxHX3rNax
+	IaMfRBGzpjlEZd/+JdO9t6wjsSu7J/+hZD/CJstWXjuwR8iuJFJHv9ehZheUkPMnSVd+JUUT4Sp
+	uXNLsEMfUk6DXUntkiDTkBEGhjequBcslufz+OBcbTIJubYjAXrrxgVWuGvjU3SamnJS6FF60bG
+	0HnMD8mJ0G9ey778EIQNIzL3DMKomsue2UKGJ+UJw250WmOnVtG1Ne2FgtOqs=
+X-Received: by 2002:a05:600c:348f:b0:48f:e230:c3fb with SMTP id 5b1f17b1804b1-490a2988e6dmr78684635e9.33.1780157402141;
+        Sat, 30 May 2026 09:10:02 -0700 (PDT)
 Received: from localhost.localdomain ([2a00:23c4:a700:7301:5db6:a512:6ab4:aa07])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-45ef35874b7sm12170799f8f.35.2026.05.30.09.08.39
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4909cab7b00sm124757685e9.14.2026.05.30.09.10.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 30 May 2026 09:08:39 -0700 (PDT)
+        Sat, 30 May 2026 09:10:01 -0700 (PDT)
 From: Biju <biju.das.au@gmail.com>
 X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
@@ -69,12 +67,10 @@ Cc: Biju Das <biju.das.jz@bp.renesas.com>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
 	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH 12/17] mmc: renesas_sdhi: Save and restore IOVS across suspend/resume
-Date: Sat, 30 May 2026 17:08:06 +0100
-Message-ID: <20260530160823.130907-13-biju.das.jz@bp.renesas.com>
+Subject: [PATCH 14/17] mmc: renesas_sdhi: Add HS400 enhanced strobe support for RZ/G3L
+Date: Sat, 30 May 2026 17:09:41 +0100
+Message-ID: <20260530160958.130977-1-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260530160823.130907-1-biju.das.jz@bp.renesas.com>
-References: <20260530160823.130907-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -85,57 +81,141 @@ Content-Transfer-Encoding: 8bit
 
 From: Biju Das <biju.das.jz@bp.renesas.com>
 
-The SD_STATUS register, specifically the IOVS (I/O Voltage Switch) bit, is
-not automatically restored after a suspend/resume cycle, causing the
-regulator to report an incorrect voltage on resume.
-
-Fix this by caching the CTL_SD_STATUS register value in the renesas_sdhi
-private struct at suspend time and writing it back during resume. The
-save/restore is only performed when a regulator device (rdev) is present,
-as the IOVS bit is only relevant in that context.
+Add an hs400_es bitfield to renesas_sdhi_hw_info and implement
+renesas_sdhi_hs400_enhanced_strobe(), registered as
+host->ops.hs400_enhanced_strobe for all SCC-capable controllers.
 
 Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 ---
- drivers/mmc/host/renesas_sdhi.h      | 1 +
- drivers/mmc/host/renesas_sdhi_core.c | 6 ++++++
- 2 files changed, 7 insertions(+)
+ drivers/mmc/host/renesas_sdhi.h               |  1 +
+ drivers/mmc/host/renesas_sdhi_core.c          | 53 ++++++++++++++++---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  1 +
+ 3 files changed, 49 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index 6c024e7f69e1..10f634349da9 100644
+index 92b66116f044..1a837d0c9479 100644
 --- a/drivers/mmc/host/renesas_sdhi.h
 +++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -117,6 +117,7 @@ struct renesas_sdhi {
- 	struct regulator_dev *rdev;
- 
- 	unsigned int divider;
-+	u32 cache_sd_status;
+@@ -48,6 +48,7 @@ struct renesas_sdhi_hw_info {
+ 	unsigned tuning_delay:1;	/* Has tuning delay */
+ 	unsigned internal_divider:1;	/* Has internal divider */
+ 	unsigned scc_hs400_mode2:1;	/* Has scc hs400 mode2 */
++	unsigned hs400_es:1;		/* Has hs400 enhanced strobe */
  };
  
- #define host_to_priv(host) \
+ struct renesas_sdhi_of_data_with_info {
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index ee1b1f70c9e3..974acdf110d3 100644
+index 282107d06114..2a70a2e64b9c 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -1379,6 +1379,9 @@ int renesas_sdhi_suspend(struct device *dev)
- 	};
- 	int ret;
+@@ -274,7 +274,7 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
+ #define SH_MOBILE_SDHI_SCC_SMPCMP       0x00C
+ #define SH_MOBILE_SDHI_SCC_TMPPORT2	0x00E /* G3L: SDm_SCC_HS400MODE1 */
+ #define RZG3L_SDHI_SCC_HWADJ2		0x010
+-#define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014
++#define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014 /* G3L: SDm_SCC_HWADJ3 */
+ #define SH_MOBILE_SDHI_SCC_TMPPORT4	0x016 /* R-Car */
+ #define SH_MOBILE_SDHI_SCC_TMPPORT5	0x018 /* R-Car */
+ #define SH_MOBILE_SDHI_SCC_TMPPORT6	0x01A /* R-Car */
+@@ -298,8 +298,9 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
+ #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_REQUP	BIT(24)
+ #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_ERR	(BIT(8) | BIT(24))
  
-+	if (priv->rdev)
-+		priv->cache_sd_status = sd_ctrl_read32(host, CTL_SD_STATUS);
-+
- 	ret = pm_runtime_force_suspend(dev);
- 	if (ret)
- 		return ret;
-@@ -1410,6 +1413,9 @@ int renesas_sdhi_resume(struct device *dev)
- 	if (ret)
- 		reset_control_bulk_assert(ARRAY_SIZE(resets), resets);
+-#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL	BIT(4)
+-#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN	BIT(31)
++#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL		BIT(4)
++#define SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE	BIT(30)
++#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN		BIT(31)
  
-+	if (priv->rdev)
-+		sd_ctrl_write32(host, CTL_SD_STATUS, priv->cache_sd_status);
+ /* Definitions for values the SH_MOBILE_SDHI_SCC_TMPPORT4 register */
+ #define SH_MOBILE_SDHI_SCC_TMPPORT4_DLL_ACC_START	BIT(0)
+@@ -574,6 +575,8 @@ static void renesas_sdhi_adjust_hs400_mode_disable(struct tmio_mmc_host *host)
+ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
+ 					  struct renesas_sdhi *priv)
+ {
++	unsigned long val;
 +
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+ 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+ 
+@@ -583,10 +586,12 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
+ 
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DT2FF, priv->scc_tappos);
+ 
++	val = ~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN | SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL);
++	if (priv->info->hs400_es)
++		val &= ~SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
++
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2,
+-		       ~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
+-			 SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
+-			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
++		       val & sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
+ 
+ 	if (priv->info->scc_hs400_mode2)
+ 		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2, 0x0);
+@@ -783,6 +788,41 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
  	return ret;
  }
- EXPORT_SYMBOL_GPL(renesas_sdhi_resume);
+ 
++static void renesas_sdhi_hs400_enhanced_strobe(struct mmc_host *mmc,
++					       struct mmc_ios *ios)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct renesas_sdhi *priv = host_to_priv(host);
++	u32 val = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2);
++
++	if (!priv->info->hs400_es)
++		return;
++
++	if (ios->enhanced_strobe) {
++		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL,
++			       ~SH_MOBILE_SDHI_SCC_CKSEL_DTSEL &
++			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL));
++
++		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
++			       ~SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN &
++			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL));
++
++		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT3, BIT(8) | BIT(9));
++		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ2, 0xFF);
++		sd_ctrl_write16(host, CTL_SDIF_MODE, SDIF_MODE_HS400 |
++				sd_ctrl_read16(host, CTL_SDIF_MODE));
++		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2,
++			       RZG3L_SDHI_SCC_HS400MODE2_HS400EN2);
++
++		val |= SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
++		       SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
++	} else {
++		val &= ~SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
++	}
++
++	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, val);
++}
++
+ static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_4tap)
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
+@@ -1333,6 +1373,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 		host->ops.prepare_hs400_tuning = renesas_sdhi_prepare_hs400_tuning;
+ 		host->ops.hs400_downgrade = renesas_sdhi_disable_scc;
+ 		host->ops.hs400_complete = renesas_sdhi_hs400_complete;
++		host->ops.hs400_enhanced_strobe = renesas_sdhi_hs400_enhanced_strobe;
+ 	}
+ 
+ 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 83d348fb5eeb..a021ebb46070 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -277,6 +277,7 @@ static const struct renesas_sdhi_hw_info sdhi_hw_info_rzg3l = {
+ 	.tuning_delay = 1,
+ 	.internal_divider = 1,
+ 	.scc_hs400_mode2 = 1,
++	.hs400_es = 1,
+ };
+ 
+ static const struct renesas_sdhi_of_data_with_quirks of_r8a7795_compatible = {
 -- 
 2.43.0
 
