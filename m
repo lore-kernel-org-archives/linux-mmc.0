@@ -1,74 +1,93 @@
-Received: from mail.auroraos.dev (unknown [95.181.193.9])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail03.siengine.com (mail03.siengine.com [43.240.192.165])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27C0838AC93
-	for <linux-mmc@vger.kernel.org>; Mon,  1 Jun 2026 14:58:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.181.193.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AA3B39B970;
+	Tue,  2 Jun 2026 06:00:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=43.240.192.165
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780325892; cv=none; b=enP/DjhIe4X2IMRv/UhexqPX+/YWduYxH/5Evh29A2pVUUuIxBfI3rQkShQTxLU2LIa4yCIqZ4QUUHoK/XUDUj5W/K6WwT8o84MHJATi6ogYrcsy/rx97zbVd+FcEyzHf3N2uePCmuR/P74C6/yw8M0wSrIJ4itQbC1SlH0o8Fo=
+	t=1780380009; cv=none; b=l5u0n4wwmZFbK2cl1acTztXKFDGgbZFcUH8RHATTa6c0WBkGLIeU+pm0hJqVEudO61GaSNKF45s/zKrxjED663Kq6gh+bjImDhLOYK44LXb7oMEPRWt7LUpEx+h8P9qQ1CKiRHkjfLvEIdH19X4LEtkYrbLj/y0u0/L7QRljOfE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780325892; c=relaxed/simple;
-	bh=+WYOVwm4/5cc/WGBR9IqdjIaR3XwTSLBss7bWN5fs2M=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=X4r2BCtJCuEMhd1cVu1e+yIFh1JF45R0nHj1SLoGbWoyO/EIWnP1K2iUkE5Q5sZr62TBV8Ct5NrPQdEuzfACkCrLIdr5N0Hxmm5jxqfWC6vIHaSKSouFoC56dhupsnMFQMvNH9TUWYmG0aLd8OgHXZt3SFn/wVw+pseOnGe/voM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=auroraos.dev; spf=pass smtp.mailfrom=auroraos.dev; arc=none smtp.client-ip=95.181.193.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=auroraos.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=auroraos.dev
-Received: from [192.168.2.104] (91.78.2.227) by exch16.corp.auroraos.dev
- (10.189.209.38) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1847.3; Mon, 1 Jun 2026
- 17:58:06 +0300
-Message-ID: <4eabfc20-0bdb-47c7-ae56-e6eb3e06b8b7@auroraos.dev>
-Date: Mon, 1 Jun 2026 17:58:05 +0300
+	s=arc-20240116; t=1780380009; c=relaxed/simple;
+	bh=l5cgRYe2X9duXmHiqIS2NyYbNwskPPDWjLu1rjZXpcg=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=cbD/CBgkQvUuE1P5DS5JPfphHu65zJvUuCye9F3cWeJ9DSBoOztpl1P93+2meRe9SIUv9Sgk1gEkhWtas+Ru4a9R1sD8KqrIelIC2uP0+1OiNqP8tczQLG4sws7dxt/0f5aGehjelU+wVuGGt/viG30DtX/n8mQZmeX3O7lc9C8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=siengine.com; spf=pass smtp.mailfrom=siengine.com; arc=none smtp.client-ip=43.240.192.165
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=siengine.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=siengine.com
+Received: from mail03.siengine.com (localhost [127.0.0.2] (may be forged))
+	by mail03.siengine.com with ESMTP id 6525xhvl077570;
+	Tue, 2 Jun 2026 13:59:43 +0800 (+08)
+	(envelope-from lucas.liu@siengine.com)
+Received: from dsgsiengine01.siengine.com ([10.8.1.61])
+	by mail03.siengine.com with ESMTPS id 6525xFFp077464
+	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NO);
+	Tue, 2 Jun 2026 13:59:15 +0800 (+08)
+	(envelope-from lucas.liu@siengine.com)
+Received: from SEEXMB05-2019.siengine.com (SEEXMB05-2019.siengine.com [10.8.1.153])
+	by dsgsiengine01.siengine.com (SkyGuard) with ESMTPS id 4gV0X501fMz2SsXR;
+	Tue,  2 Jun 2026 13:59:17 +0800 (CST)
+Received: from SEEXMB03-2019.siengine.com (10.8.1.33) by
+ SEEXMB05-2019.siengine.com (10.8.1.153) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.2.2562.37; Tue, 2 Jun 2026 13:59:15 +0800
+Received: from localhost (10.12.6.21) by SEEXMB03-2019.siengine.com
+ (10.8.1.33) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA) id 15.2.2562.37 via Frontend
+ Transport; Tue, 2 Jun 2026 13:59:15 +0800
+From: "baozhu.liu" <lucas.liu@siengine.com>
+To: <ulfh@kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        "baozhu.liu"
+	<lucas.liu@siengine.com>
+Subject: [PATCH] mmc: Update the value of ios.drv_type at the location where fixed_drv_type is used
+Date: Tue, 2 Jun 2026 14:10:01 +0800
+Message-ID: <20260602061001.63579-1-lucas.liu@siengine.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: check bus clock enable result
- in the probe() method
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
-	<linux-mmc@vger.kernel.org>
-CC: Jisheng Zhang <jszhang@kernel.org>
-References: <dd3aa530-d06f-4733-ba5a-ccc95d8fa91a@auroraos.dev>
- <ed075232-69a9-4f93-95d9-0e2a815a041b@intel.com>
-Content-Language: en-US
-From: Sergey Shtylyov <s.shtylyov@auroraos.dev>
-In-Reply-To: <ed075232-69a9-4f93-95d9-0e2a815a041b@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: exch16.corp.auroraos.dev (10.189.209.38) To
- exch16.corp.auroraos.dev (10.189.209.38)
+Content-Type: text/plain
+X-DKIM-Results: [10.8.1.61]; dkim=none;
+X-DNSRBL: 
+X-SPAM-SOURCE-CHECK: pass
+X-MAIL:mail03.siengine.com 6525xhvl077570
 
-On 6/1/26 5:55 PM, Adrian Hunter wrote:
-[...]
->> In the driver's probe() method, clk_disable_unprepare() for the bus clock
->> is called on the error path even if the prior clk_prepare_enable() call has
->> failed (and the same thing happens in the remove() method as well) -- that
->> would cause the prepare/enable counter imbalance.  Also, the same problem
->> can happen in the driver's suspend() method; note that the resume() method
->> does check the clk_prepare_enable()'s result -- let's be consistent and do
->> that in probe() method as well.  BTW, I don't know for sure what does the
->> bus clock control -- if it affects the register accesses, the driver will
->> likely cause (e.g. on ARM) a kernel oops if it fails to prepare/enable the
->> bus clock in the probe() method...
->>
->> Found by Linux Verification Center (linuxtesting.org) with the Svace static
->> analysis tool.
->>
->> Fixes: e438cf49b305 ("mmc: sdhci-of-dwcmshc: add SDHCI OF Synopsys DWC MSHC driver")
->> Fixes: bccce2ec7790 ("mmc: sdhci-of-dwcmshc: add suspend/resume support")
->> Signed-off-by: Sergey Shtylyov <s.shtylyov@auroraos.dev>
-> 
-> Try to remember to add tags from previous submissions, like:
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Modify the value of "fixed-emmc-driver-type" in the device tree,
+but when checking "cat /sys/kernel/debug/mmc/ios",
+it is found that the driver type has not changed.
+So, update the value of ios.drv_type at the location
+where fixed_drv_type is used.
 
-   Oops, I was going to but finally forgot... Sorry about that!
+Signed-off-by: baozhu.liu <lucas.liu@siengine.com>
+---
+ drivers/mmc/core/mmc.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-[...]
-
-MBR, Sergey
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 05444ecf3909..773d496b856a 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1361,14 +1361,15 @@ static void mmc_select_driver_type(struct mmc_card *card)
+ 	card_drv_type = card->ext_csd.raw_driver_strength |
+ 			mmc_driver_type_mask(0);
+ 
+-	if (fixed_drv_type >= 0)
++	if (fixed_drv_type >= 0) {
+ 		drive_strength = card_drv_type & mmc_driver_type_mask(fixed_drv_type)
+ 				 ? fixed_drv_type : 0;
+-	else
++		card->host->ios.drv_type = drive_strength;
++	} else {
+ 		drive_strength = mmc_select_drive_strength(card,
+ 							   card->ext_csd.hs200_max_dtr,
+ 							   card_drv_type, &drv_type);
+-
++	}
+ 	card->drive_strength = drive_strength;
+ 
+ 	if (fixed_drv_type >= 0 && drive_strength)
+-- 
+2.34.1
 
