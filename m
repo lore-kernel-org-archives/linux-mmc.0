@@ -1,228 +1,210 @@
-Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11010016.outbound.protection.outlook.com [52.101.228.16])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A3B63FE663
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Jun 2026 06:57:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780469876; cv=none; b=LMoW2iEr5/p/j93bB3mVwp1PJH7lGuK6UaK7Imt7JYUlhHtm6e+nKJiPVX6Ch28dkyql4kwBzItxiJOSJ/Nj0XMDSAtuGtUhn1oFi39lnjR1vZ5e3bvoQFpgeQCCl74cBI75k4nu/Y9BGPaGvvdOlXNMDXSRb2abLyMQMNEMqEs=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780469876; c=relaxed/simple;
-	bh=6qJpZhXyYCBf57vMMkgWvPXgE1xKgVP7wRIY8jD34Nk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=mpeO2KMfSNZIuh6oymYNjLLLopFN1xVZVeNCtaXvL1IVccCfx2R9JQqPbjs1yNB1z7qwfrid+dixpifLTbLTMuJh8FHIDyqNfWRiyqwH/d5+hYwHbIBZZrcjiuc/SUSbhpTKEHFPa5UgdjKidgMm1Tj2Ya3cwNJWpWy9IDpqzGg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JqmY/N3K; arc=none smtp.client-ip=209.85.221.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B486939A809;
+	Wed,  3 Jun 2026 07:00:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.16
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1780470030; cv=fail; b=KUnpvLk49H9q03cQH/Tgcd4siYaL7ZaoIjR09+jfruQMZ6WdQIedRTLodGzPF3BKksNBVm+J+MazE1EmsEoFG+r537n4qoXDezj1QZCdZFfYKnuf/DhoKG2daow1taIu4N12kznH6agEIUr5ZWEFsyRziqZPAaEckpzjN1ESCvw=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1780470030; c=relaxed/simple;
+	bh=K2b33TFMYP/mGQaBoJ/2twkoVauU6XmQezDClIXL+2g=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=XeV+XoCA6gim9ZGfcDo3XHn+ReAxPJSljeFQ7Dxe4CmFovrrBG31DTC+wvArWhOLpPVyovVGvoEOC4LBheTHpFgLPuIldPOGJHzMHX8xcZi5An5dVEyelTwsSprZlA1ZWeAsQDjuB7zmUUQRIjldYNCqZ8fKKd74f+4ElhAMLbc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=DLP2LTlj; arc=fail smtp.client-ip=52.101.228.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JqmY/N3K"
-Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-45eee266c6cso4628637f8f.1
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jun 2026 23:57:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780469869; x=1781074669; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WeWYYBg948WaEc/rhznTVtqdM3wH6i2nY9UUNG9eJ2w=;
-        b=JqmY/N3KQXI4IP7XO0LiGqfEzOUl4Q7i09f/gduT36Xsxd+dxqxcGfmiPtkmFfB7Yh
-         RJejeBBfWgICUhaOf45QtI4iw3A/qerbBT007IwUb8yNMdhW+ZxjgLKzwCm0ZhFjU4G9
-         9gD+8LJZWl4Cs8Yibp+zM6oJ7+iyBZqPXkOefUSRsnNEy9VS23DsQtund5/mGnNlNkDB
-         Qhvp961hBIG1zcoMGRTZXb5Tva223xc/wZ8dWXACdz+DtddfpmSK2vc9h0ixev0zOW9B
-         17Oqt4TuFILrAMVHctIu/clSgOnoG9WhMEwB5HUxX9dF09nf+lwdnHlM29ItDr1w9Mbz
-         iK7w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780469869; x=1781074669;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=WeWYYBg948WaEc/rhznTVtqdM3wH6i2nY9UUNG9eJ2w=;
-        b=bzw9RkGQ9PEFdDOWmpWgKEp8ZB+QojNB4+TfWJJt7WRDmgnlG6bFuMOfCdZQksQXot
-         k/6xg/sx/ZXF0B8uQUmEhurlfPRZdC41n72gMj7VeDqtr9AXt4/viR91bVp+CBstgo2D
-         lGeEd+GIHmk41KVusDWuZwfL1j6lvhxWeDspKVPGLo4g+a3tRJCSviqywoVsV9oXFgsZ
-         zh2JtuJTUX+E1BZP06hL5EhtN2XfPkToVkOcCVjswcTiz24Ubb20GnjM2kfsR4qh0t+Z
-         +38YLyf0NKLAD7R5UqaDWRLxSLCdD8WLRzvEmeEPgJ+0J3UE2o/BQslrVOzXcXf6g7ID
-         8g5w==
-X-Forwarded-Encrypted: i=1; AFNElJ8YFC8vcW8G/8iPldr/k+dzCGDZ4+It+BPDmdKBsmX492J3jqWaaeAFQPj8eX/3qKMVjfEuTGGGA04=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzzg+7VwvAhgB+ThtcDsx/8c99/tCSObYrg/jnyVg5KoQe7+9t8
-	mTgyzfq7rJ2qId5Xsm7DOVqmlF7kxi/5vaaNO0r02+OFz1J/5Eixdb7Q
-X-Gm-Gg: Acq92OHcJaRQrOC5G4N3XLejjkTSp6PL81gq2mC6YPuVkP4VTw8SxbVAWDft0ZM+dnQ
-	kt16uZNpygmsL0lgtvcWx8ZbllMLNffKBEFEGAp6cNP+UiR2/8sT7Oe6ho8LHZkgb2aOvMuGm7U
-	t1xBWiVVK7hNp4J/8gaC8jKVELwC4DMGbXWpsFnLHSqa1DVqtvC1z4ua7KkS3YkexJo8HF36nh7
-	uk/m44yPjKdgH7l3YkP/5axPOEAcPt+KbdmJzMZTpuyOmjntmAwQ62BaP7cceBAS9FNK5neNtid
-	tATQRVfsb8ef6N2fr7A5X7Og2aHmVYLqEgwcPmywuAi4Lt1I1cRYj+kPpczeYheXpB8XCnsZ5/2
-	LeT9OpeXK9zT9xTeiAv5JPsKvncqpVtALGDD8YLXqO/c7VBoxSIklCVk93deQHQgV0ordxpXyIa
-	yZzGsCE4v4xumVChLCM66qUdlpxaBCsJxFYMcvazEuqEafGDDqQkKwUakvYUemmDyfrGDftQ==
-X-Received: by 2002:a05:600c:4712:b0:490:ab8b:1bb3 with SMTP id 5b1f17b1804b1-490b5ec4258mr30130165e9.18.1780469869397;
-        Tue, 02 Jun 2026 23:57:49 -0700 (PDT)
-Received: from localhost.localdomain ([2a00:23c4:a700:7301:179c:89ab:19f6:9ba4])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-490b79d90bdsm9001855e9.0.2026.06.02.23.57.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Jun 2026 23:57:49 -0700 (PDT)
-From: Biju <biju.das.au@gmail.com>
-X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Ulf Hansson <ulfh@kernel.org>
-Cc: Biju Das <biju.das.jz@bp.renesas.com>,
-	linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH v17 14/17] mmc: renesas_sdhi: Add HS400 enhanced strobe support for RZ/G3L
-Date: Wed,  3 Jun 2026 07:57:14 +0100
-Message-ID: <20260603065731.93243-15-biju.das.jz@bp.renesas.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
+	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="DLP2LTlj"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=BQ1KajVozkY2QqdQmfpNld9C/DXKIGdgRnNbbNGl3CzxDNW7KfhpzYdMDUgld9DITtPy3wlCux83U/vJp+q73dKlbl3iziG54FQ8yGcjmjXKYkEzFCgcvZkezblDaGlLxubqb08hKso0Cpr2bleuk4t2vwINgWvAn4j4jzzPeOYgkTNJdezWm2sHBG11qOkZH3p54okUaW0yXsJ5PvuGA+VELg27iWq+cbzFGkPh2aUXw3+O4ROgyWvzS/sLBvVsqI/kHVdv++DoBMkhjV3+zLDZYIRtRhIqsmKf0b18b7bpdCX/PPywUIjbejBD++Zsf/7InQLysi3Ta2L7165lFQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=DiIxKhKrGdKIkro4B5UKPgxa2hFzFr/eewdMG3IWG2Y=;
+ b=HHeGT//Oa3lOyTQFldQB6beleAQHNVgSU2qThifsirdZOhiL/TAYTuhxlVJGFqxh3qBUIdQz39J2pu56jpN6RVbrv1T1YoFhnQE1bEzoaKYXs7KIDp774gF4ky/jx8iIjl4psn0v3a27YDVAe6Pju8todmkIfHRZ8d9xniPmDadBQWDYuAVegcI3z87cC34ka4SRW+7GvuUSEg++3NrigTwG+AfWxsw9VByJfHJ04yD/QpN3wU44IvqjkJVGW0d4ne9YPzg0RmAz7LTsp6nyOkF1VnQWRw5uT6sqNBluSelFXq8VsFisVwVLh25Sxl3ZGuqliaeu0o6DxpMzQ1HHgA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=DiIxKhKrGdKIkro4B5UKPgxa2hFzFr/eewdMG3IWG2Y=;
+ b=DLP2LTljYCMQy3fTd/6HR7dmISBQ/BXMV5jshGqD+KETY25qpBuhGudLOnx5Nl1oP04XkGOrxzyzkyEdTf64mFPuNyHLUWIgS8ZrHO5mXYR0+YafvByp4Ap4YziVDRxtbPM23Ic/X1la5bKUVYw1UoD2soi6CQ2RBo2+Ftl4qxg=
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
+ by TYVPR01MB10700.jpnprd01.prod.outlook.com (2603:1096:400:2ad::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.71.17; Wed, 3 Jun 2026
+ 07:00:17 +0000
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0092.006; Wed, 3 Jun 2026
+ 07:00:17 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: biju.das.au <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>, Rob
+ Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor
+ Dooley <conor+dt@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>,
+	Philipp Zabel <p.zabel@pengutronix.de>, magnus.damm <magnus.damm@gmail.com>
+CC: wsa+renesas <wsa+renesas@sang-engineering.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>, biju.das.au
+	<biju.das.au@gmail.com>
+Subject: RE: [PATCH v17 00/17] Add Renesas RZ/G3L SD/eMMC support
+Thread-Topic: [PATCH v17 00/17] Add Renesas RZ/G3L SD/eMMC support
+Thread-Index: AQHc8yZFMuP1bVIRGUixq2TgdBuPhLYsZmtg
+Date: Wed, 3 Jun 2026 07:00:16 +0000
+Message-ID:
+ <TY3PR01MB11346485C16AFB6299B1711FD86132@TY3PR01MB11346.jpnprd01.prod.outlook.com>
 References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|TYVPR01MB10700:EE_
+x-ms-office365-filtering-correlation-id: b36f8cdb-c7ea-46de-330e-08dec13dc489
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|366016|7416014|376014|18002099003|22082099003|11063799006|56012099006|38070700021;
+x-microsoft-antispam-message-info:
+ GVJqJyBQjkRrkcnYHhHL3ffXz/4NWyiancB4lC+GfRyEv9wCgGKyxHJFz5oESQl0L3nNrxjvao/tIjQ85w6HVZyA9aElhML+fuSv3xLvs9IR52zPU+2y0++VTsCtLBp5dWiwpt0FT0dn4yfgeY2ibmQ2FHQufqeyDrN/n8UcLNGwrNaGxrIECMIJBANm2u5bI8abok+YPpxdvHrrDOM/6OiENOhOXuOFvL1oq13ZYRRFJXwKD6imGAPsJF9keSS9OfRwxa27evhDWu19hlr2Ol1oNPoky4Nch/azaBsG7dGBoMsIyEATt2bd6lxU2iTXQZcNJuh0XlJCqL1ba/oJRLpZ5xbs6Ipcpxt9OaZmNpDSV/kh8YTKh80sY0yG+9kf2zzW0dQz2SEarp6hlxbuZHKDeagZFaVMFuJs/yWLF63dUJkyf+uIKXKKliUCGVlkmj4I5PLcIH9WAZioW4Iqsc9J4YLWJy21xKoVmWbB2mWpxnxooE8c/yQ31U7sguzqKlTKp+C4jepv6ojquNHi7A4cnEe+Flth1a5xaHHnJvlxfeliY/t7HrE7tMRYem35Y4QigDZSfupOja3NurPyeMWjFf2miHNMFT9cTGAnS/61A4N9LrxFaebe74KaiOc9yHpLaroWQ8faNGTs7rNLzfK0HOnc/gk7m72UUMnzqo+rFzS0QXvG9d2wxI/WLXuI9CWLx/mHANHc2Rm7/vAETVr/GRBk7FpPyp5pok8um2iNWGFQLGNUNoo3zD/IG9Cj
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(7416014)(376014)(18002099003)(22082099003)(11063799006)(56012099006)(38070700021);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?tKfdwOVIidh0Alxq+yugujhFtRuHnAJfhtvgSJOETP4WWgmuK18JVIjch8Jf?=
+ =?us-ascii?Q?3505sId9keyR+5FK4c3xiKSLzLM7Rand8AZRFgl6aj0L0yrIu9pZHOfSG10K?=
+ =?us-ascii?Q?VcGFdavfOmr1loi+lpnmqgbmreqJP053kwCXmzO+pGRc8NP+QujpUiC/baXp?=
+ =?us-ascii?Q?Yd2W0+nSuX19Pv9iC+heGOuq2kB0NjAX8bHv1NvaccAhWcQjxp466kJCN/my?=
+ =?us-ascii?Q?q5aYBmyMKSqE7sLYeulB02516Hs9SprtjLZNqthUqIxHMbljuyqRJTYcQb7B?=
+ =?us-ascii?Q?Sf52RtWvR1/D0uVZOJvPBmT0oKeY4bOylXljDx3s5hud6uRrWXW4TypOpI3q?=
+ =?us-ascii?Q?DmYZDBX4eedS/hYtq3oMdLSA+LfMPy6P+QnF0cWWa64+Hlp7MVdvyXMeA8Qf?=
+ =?us-ascii?Q?g0fiwJxoJgGPS8LTFlnQAY0dZjyGfYnTdBC69KUj9poSlngCGQRxfrUp6MIr?=
+ =?us-ascii?Q?Izu0q7sUQMTRCXYvpTloNhsZOw+mGjOhC5hkpzJgaecd5UbtMkyAZukuWgtA?=
+ =?us-ascii?Q?BdYnaee/x4cQFIv36LwlE/2ig9w4Cw3WG9C6s5vdUpgVMX7KaIdmuO42u440?=
+ =?us-ascii?Q?mk4R0YTQm5RCTzThDiB5cM94jUY9psfl7gSrKk6uZLjUKAdBG42p5yf2rXWO?=
+ =?us-ascii?Q?BE9oLxHepAFULd0Vw9+AM9mqISf1QaKp3vslh6jpVKd7XVKEFXEAv/e1f6hT?=
+ =?us-ascii?Q?3DGp8v5BxGivejsqV5wOLsNKKTpoJ5VDfcPU74r5k1HW7cfSesas01vjk09a?=
+ =?us-ascii?Q?bLZs3EyhcdLJDw0nkaj/XAWW7UHzf1yge18rM+UXL2Nhdp18KmkIS/8u6JP6?=
+ =?us-ascii?Q?CWZUHWg1Ys7OJE4WKdPI20tiz9w2XGoXGMyp4wj7SGb1jmufllw080Dly/T/?=
+ =?us-ascii?Q?56r56TtKMc3RRm6I36kJHJS/hEnDvYpiP1sEzvO9ApObdNJV+f/AmoMO19hy?=
+ =?us-ascii?Q?5pz5uAw/mNBayOOE0UAi6BReXJ2OIv+5O99LGMN1ce/TFoJqTU1Tcf/eJlws?=
+ =?us-ascii?Q?h1LHlyffMh+2utmaTxj/qylFaW/t2C+tDELP4P+FA2sHc2cAUgVYXqNaGs9k?=
+ =?us-ascii?Q?K5h02WjxoLeGGBCA0/Ue3ZRe/MCFvoMIhMjk9dKZ+rviltGxIyQRjcOtSwgi?=
+ =?us-ascii?Q?MNFcbf7Av8VoGG1H3UfRmccDM72M2lXwa7U9IEz25oQQ+x/4P29XJQ7hBWOT?=
+ =?us-ascii?Q?XSHfkQ0qgupIomN2VBirqiU+uQwZSCLoso/dO2mDoCHspbIwCrC8LGK79fpo?=
+ =?us-ascii?Q?fqyyfOhnJAeoBuhwYbqcwNuTV2uvdf9UnQsMWSiChUnFwCSBKN3GAq1naR3x?=
+ =?us-ascii?Q?m0Vh0Zms+tAQAqvpgVjJ0h+/beLukUvCUOSqXfL2Aqp9rMT5X0YL2JU9qMde?=
+ =?us-ascii?Q?A/hd01ZBY+tPcWZe1zpFLrSTcTOJJR7oJBlzs0xj9eWTiaabWwsFAWZuTTT7?=
+ =?us-ascii?Q?mmgEsZbmZXbpeUFwGK/GXJSns0gCLpNfuiTs3v94023O66Ee14rI9p5rJVl9?=
+ =?us-ascii?Q?SPiblHyTKJD5sNfmg5jwMBfEguxSfZmyVo+sKwwLD1p2rkygCAOne5AHwG59?=
+ =?us-ascii?Q?etJzKIMfVG6TQnkVrnGy1m4JWj2QjCZqZj52F4SMmrCbnScCZzeQQ2bjuVm7?=
+ =?us-ascii?Q?ziw9KmLNmql1mdGlReR1S2oQYZA+w2jQukYb28FW/mMcJMeNP+bdHHZkktS5?=
+ =?us-ascii?Q?oNf1ibja2Z5bOxdB6+45Z/UJWPE77004pCblzLrpe/hb6oBJRlHMe2q2PHvZ?=
+ =?us-ascii?Q?LP/eYVyhbw=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b36f8cdb-c7ea-46de-330e-08dec13dc489
+X-MS-Exchange-CrossTenant-originalarrivaltime: 03 Jun 2026 07:00:16.6904
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: heey/y1ha56ZBEGrswOYiiqtFh/UMLAxlYWa5flyCdknJ/SK5Le/pi+iCWMoapGZafZAD8Pk9tZ7BJ07+B1uS10h5POxsdY2rNxcaXuCJ/E=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYVPR01MB10700
 
-From: Biju Das <biju.das.jz@bp.renesas.com>
+Hi all,
 
-Add an hs400_es bitfield to renesas_sdhi_hw_info and implement
-renesas_sdhi_hs400_enhanced_strobe(), registered as
-host->ops.hs400_enhanced_strobe for all SCC-capable controllers.
+Please ignore this series as by mistake instead of patch series 2
+I mentioned it as Patch series 17.
 
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
----
-v1->v2:
- * No change.
----
- drivers/mmc/host/renesas_sdhi.h               |  1 +
- drivers/mmc/host/renesas_sdhi_core.c          | 53 ++++++++++++++++---
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  1 +
- 3 files changed, 49 insertions(+), 6 deletions(-)
+I will fix the issue soon.
 
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index 92b66116f044..1a837d0c9479 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -48,6 +48,7 @@ struct renesas_sdhi_hw_info {
- 	unsigned tuning_delay:1;	/* Has tuning delay */
- 	unsigned internal_divider:1;	/* Has internal divider */
- 	unsigned scc_hs400_mode2:1;	/* Has scc hs400 mode2 */
-+	unsigned hs400_es:1;		/* Has hs400 enhanced strobe */
- };
- 
- struct renesas_sdhi_of_data_with_info {
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 282107d06114..2a70a2e64b9c 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -274,7 +274,7 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
- #define SH_MOBILE_SDHI_SCC_SMPCMP       0x00C
- #define SH_MOBILE_SDHI_SCC_TMPPORT2	0x00E /* G3L: SDm_SCC_HS400MODE1 */
- #define RZG3L_SDHI_SCC_HWADJ2		0x010
--#define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014
-+#define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014 /* G3L: SDm_SCC_HWADJ3 */
- #define SH_MOBILE_SDHI_SCC_TMPPORT4	0x016 /* R-Car */
- #define SH_MOBILE_SDHI_SCC_TMPPORT5	0x018 /* R-Car */
- #define SH_MOBILE_SDHI_SCC_TMPPORT6	0x01A /* R-Car */
-@@ -298,8 +298,9 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
- #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_REQUP	BIT(24)
- #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_ERR	(BIT(8) | BIT(24))
- 
--#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL	BIT(4)
--#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN	BIT(31)
-+#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL		BIT(4)
-+#define SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE	BIT(30)
-+#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN		BIT(31)
- 
- /* Definitions for values the SH_MOBILE_SDHI_SCC_TMPPORT4 register */
- #define SH_MOBILE_SDHI_SCC_TMPPORT4_DLL_ACC_START	BIT(0)
-@@ -574,6 +575,8 @@ static void renesas_sdhi_adjust_hs400_mode_disable(struct tmio_mmc_host *host)
- static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
- 					  struct renesas_sdhi *priv)
- {
-+	unsigned long val;
-+
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
- 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
- 
-@@ -583,10 +586,12 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
- 
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DT2FF, priv->scc_tappos);
- 
-+	val = ~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN | SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL);
-+	if (priv->info->hs400_es)
-+		val &= ~SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
-+
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2,
--		       ~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
--			 SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
--			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
-+		       val & sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
- 
- 	if (priv->info->scc_hs400_mode2)
- 		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2, 0x0);
-@@ -783,6 +788,41 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	return ret;
- }
- 
-+static void renesas_sdhi_hs400_enhanced_strobe(struct mmc_host *mmc,
-+					       struct mmc_ios *ios)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+	u32 val = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2);
-+
-+	if (!priv->info->hs400_es)
-+		return;
-+
-+	if (ios->enhanced_strobe) {
-+		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL,
-+			       ~SH_MOBILE_SDHI_SCC_CKSEL_DTSEL &
-+			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL));
-+
-+		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
-+			       ~SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN &
-+			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL));
-+
-+		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT3, BIT(8) | BIT(9));
-+		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ2, 0xFF);
-+		sd_ctrl_write16(host, CTL_SDIF_MODE, SDIF_MODE_HS400 |
-+				sd_ctrl_read16(host, CTL_SDIF_MODE));
-+		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2,
-+			       RZG3L_SDHI_SCC_HS400MODE2_HS400EN2);
-+
-+		val |= SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
-+		       SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
-+	} else {
-+		val &= ~SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
-+	}
-+
-+	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, val);
-+}
-+
- static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_4tap)
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
-@@ -1333,6 +1373,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		host->ops.prepare_hs400_tuning = renesas_sdhi_prepare_hs400_tuning;
- 		host->ops.hs400_downgrade = renesas_sdhi_disable_scc;
- 		host->ops.hs400_complete = renesas_sdhi_hs400_complete;
-+		host->ops.hs400_enhanced_strobe = renesas_sdhi_hs400_enhanced_strobe;
- 	}
- 
- 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 83d348fb5eeb..a021ebb46070 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -277,6 +277,7 @@ static const struct renesas_sdhi_hw_info sdhi_hw_info_rzg3l = {
- 	.tuning_delay = 1,
- 	.internal_divider = 1,
- 	.scc_hs400_mode2 = 1,
-+	.hs400_es = 1,
- };
- 
- static const struct renesas_sdhi_of_data_with_quirks of_r8a7795_compatible = {
--- 
-2.43.0
+Sorry for the inconvenience.
+
+Cheers,
+Biju
+
+> -----Original Message-----
+> From: Biju <biju.das.au@gmail.com>
+> Sent: 03 June 2026 07:57
+> Subject: [PATCH v17 00/17] Add Renesas RZ/G3L SD/eMMC support
+>=20
+> From: Biju Das <biju.das.jz@bp.renesas.com>
+>=20
+> RZ/G3L SoC has:
+>=20
+> Channel 0 supports SD and eMMC (including HS400/HS400ES).
+> Channel 1 supports SD and eMMC (except for HS400).
+> Channel 2 supports SD.
+>=20
+> The SoC supports a maximum frequency of 150 MHz. The SD0 interface does n=
+ot support IOVS and PWEN in
+> the SDHI register (no internal regulator), unlike SD1 and SD2. It has an =
+internal divider for all
+> modes except HS400.
+> It also has a 2048-bit divider compared to 512 on others. Moreover RZ/G3L=
+ supports HS400 enhanced
+> strobe mode.
+>=20
+> v1->v2:
+>  * Collected tag for binding patch.
+>  * Resending the series as there is an issue with patch threading from
+>    patch #14.
+>=20
+> Biju Das (17):
+>   dt-bindings: mmc: renesas,sdhi: Document RZ/G3L (r9a08g046) SoC
+>   clk: renesas: r9a08g046: Add clock and reset entries for SDHI
+>   pinctrl: renesas: rzg2l: Add SD channel POC support for RZ/G3L
+>   mmc: renesas_sdhi: Fix whitespace alignment in struct
+>     renesas_sdhi_of_data
+>   mmc: renesas_sdhi_internal_dmac: Fix whitespace alignment in struct
+>     initializer
+>   mmc: renesas_sdhi: Introduce renesas_sdhi_hw_info to abstract clock
+>     mask
+>   mmc: renesas_sdhi: Add max_divider to renesas_sdhi_hw_info
+>   mmc: renesas_sdhi: Add tuning_delay hw_info flag
+>   mmc: renesas_sdhi: Add internal_divider hw_info flag for clk rate
+>     adjustment
+>   mmc: renesas_sdhi: Add optional axis/axim reset controls
+>   mmc: renesas_sdhi: Add RZ/G3L SDHI support
+>   mmc: renesas_sdhi: Save and restore IOVS across suspend/resume
+>   mmc: renesas_sdhi: Add RZ/G3L HS400 support
+>   mmc: renesas_sdhi: Add HS400 enhanced strobe support for RZ/G3L
+>   arm64: dts: renesas: r9a08g046: Add SDHI nodes for RZ/G3L SoC and
+>     SDHI1 pincontrol on SMARC EVK
+>   arm64: dts: renesas: rzg3l-smarc-som: Enable SD/eMMC on SDHI0
+>   arm64: dts: renesas: rzg3l-smarc-som: Enable SDHI2
+>=20
+>  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 101 ++++++--
+>  arch/arm64/boot/dts/renesas/r9a08g046.dtsi    |  73 +++++-
+>  .../boot/dts/renesas/r9a08g046l48-smarc.dts   |  89 +++++++
+>  .../boot/dts/renesas/rzg3l-smarc-som.dtsi     | 199 +++++++++++++++
+>  drivers/clk/renesas/r9a08g046-cpg.c           |  92 +++++++
+>  drivers/mmc/host/renesas_sdhi.h               |  25 +-
+>  drivers/mmc/host/renesas_sdhi_core.c          | 226 +++++++++++++-----
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  71 +++++-
+>  drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  67 ++++--
+>  drivers/pinctrl/renesas/pinctrl-rzg2l.c       |  74 ++++--
+>  10 files changed, 889 insertions(+), 128 deletions(-)
+>=20
+> --
+> 2.43.0
 
