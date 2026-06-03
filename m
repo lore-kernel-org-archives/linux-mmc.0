@@ -1,99 +1,93 @@
-Received: from mail-vk1-f179.google.com (mail-vk1-f179.google.com [209.85.221.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 893CA3F9260
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Jun 2026 07:13:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5C4739A4CE
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Jun 2026 07:19:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780470838; cv=none; b=KWC32+7wGPJ64kY6ma5gJLBorEt5aV9WcyNZYhqyaRITTITrmGYlL7lb/egWFRg2GBMrniiuj/tX0UqaIyCWhD1wIJIdoVcp/sC2yJjZ9w6C45AHPQe/tZQdsTAP36p1YM7iE9BsC9AwQ3NzLtxQm1O0JO6SFmG2l00tf1hitSA=
+	t=1780471170; cv=none; b=BlG6McWzEGtOHnY02U+DXVmzMVdGHWi9hF3WfXYELzuQThwxTPpFK8stmNwW4pviHFig7QdwmF1lfKxKrNXwmTqp5FSW2/PMcidjNI/Qj+oZzmK4i517lsGhDudU/9nAJS9IqENrVQI2YL1kbERZELb2NTjFhgh5Vw71xt7jeGc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780470838; c=relaxed/simple;
-	bh=PCWXLFfrvNilpK8ZEoTfdntslW6sKXMO4gpjttz/CDc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=TEKM3WcAHbR1WR7caGmCSHhhaVpI4e6mwRhE7xDYwvFRFVq3/ThxlBfFnBvf0fDiaY10FgKgzh1UOoad3qJbcvhLmCVfzZASxUkSDpvlEhHMy5GGhgO4tVLHQX4XF6VijU+8kMrtoHtlv+SR4XdiHndfuBY87fKNtB3lDrIxYpc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-vk1-f179.google.com with SMTP id 71dfb90a1353d-59eb501bcf0so1287586e0c.0
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jun 2026 00:13:56 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780470835; x=1781075635;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=eVTm+HVXfWH2P4Im0jsyjBGPpAwX0VIXYMfcrROvkZ4=;
-        b=GTyt60mNjVtbMXGrzgZPMJqEKZKuHZ8XgOGYSe+kn/NERu2YlMl3367JrWY6zI1mGz
-         D5R8wkTEeaAJOm/XC/Rk8EjxxoHbO7V89us5r4EPxuqSXdgLmq53DAPYtOkRaRuYXpBO
-         wNQTt8a8WgXdO1Dz5LUab5qMUvqceUidoIOG2TtFPoTVILY+E/sPcnyphHOQpslkirtQ
-         EPpwXU/ncPoXlek2h736zMUgxvTdfr3cxd8rfwmmmKx058V8SHWGrRnWrNlZMTi8+0E2
-         JDPoO6Go9RI1hM2x6tMlRliia7CATCuRVtc9Yqg+bFXNRf8VQWWCwf0X+CWti1zyuy5P
-         e+zg==
-X-Forwarded-Encrypted: i=1; AFNElJ8xqxyJeqiKO14vBH5BJJVKwiMd1XezeqV46rx8RPTAfUyz455CmAGlYVZ6AXSmIF7XSS2ktuDXLD4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YysBlUZBHLyk8wl4iJyqQCpa4gzFvT0OgYGaa1HQNTJWftwZZkY
-	ZQQ+obmeom+jFlhxNUiAA1WJviuhZpjLrndlbkKxtuwZghJcjP+KT6+3rkpVh/YEOdc=
-X-Gm-Gg: Acq92OH7R7lG+pQxwBUVDG2iEiMNa3VGSB+ZhLdlKbXB47Rn0qGxNljIyxqegcvGEEF
-	euxiCVeR3YBuqKRI79pFoH9Pthf1zLqW2vWp8ofjWZxLEQFxGuvUJNsx77+kErjCxJ6/7bafpOC
-	WvnXlG1Rr7vXB5GcdLeiAF3AfXvCQRkJHHarCbl3J5JxLFrVt86DFCah8i3Io6tTt+tmTzxH7Hz
-	35bkbyrX1o6ZYnz2X0FLU2HnlbcB2A8EnKs9312u4FCfR8kZrJ9jw6vgPO0EMK6a94y4TBPaLR9
-	jnVjONjynYBr6mAwlcOjGEFxyTuzQTr1LuZkZW3eEnwl21IaDTCubydlV1IyXEHEjTdeNQA10pQ
-	/egv1+2MO901d29oggWT9ESMUaAK1CEOVXbNbcGZebgI2bTd4FHWM/ERjZEWjieQXQaJjyfWjaG
-	B3sIIBoBVa46DAitAp+5AsE6catt+s/aC5PZ0n22hy/sptzejn/4iulYn1Ko2JPXkktZrfyp0=
-X-Received: by 2002:a05:6122:d84:b0:56e:f071:d4ef with SMTP id 71dfb90a1353d-5a6e62bf36emr1029416e0c.8.1780470835496;
-        Wed, 03 Jun 2026 00:13:55 -0700 (PDT)
-Received: from mail-ua1-f54.google.com (mail-ua1-f54.google.com. [209.85.222.54])
-        by smtp.gmail.com with ESMTPSA id 71dfb90a1353d-5a6dcc34253sm1597535e0c.14.2026.06.03.00.13.54
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 03 Jun 2026 00:13:55 -0700 (PDT)
-Received: by mail-ua1-f54.google.com with SMTP id a1e0cc1a2514c-961556c15ceso4441957241.3
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Jun 2026 00:13:54 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AFNElJ+HjJ8QgnJqLbo36odiZSyhzvlvocR1yYD/v2tql+cT/Sp7rAqCwnyFJSqzrB8Ntzeb7c4oYdyZL10=@vger.kernel.org
-X-Received: by 2002:a67:e701:0:b0:635:1bc8:3568 with SMTP id
- ada2fe7eead31-6ec460bdfd7mr693156137.23.1780470834442; Wed, 03 Jun 2026
- 00:13:54 -0700 (PDT)
+	s=arc-20240116; t=1780471170; c=relaxed/simple;
+	bh=isQWyrVE+AEdcnOVp2BzHrZyGYpDqrdcau8Wk5dWc3U=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=oqwxgfPwswub5jMujEsu49vzaPMq/WZKcVeG6QWi74mKsvoeyBfypq5JAv0jhpYJWP+BzK4Iskncf0rgkMGAQlP2A+jrZBzu9EZI6woPp8EC5IU0oSodOl8KIkyd1hGOQZAHfvPST2LsqjQutPsFrYDO7Iv+x4UMZBmtBH/SRo8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=D8+tQfNv; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="D8+tQfNv"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=isQW
+	yrVE+AEdcnOVp2BzHrZyGYpDqrdcau8Wk5dWc3U=; b=D8+tQfNviaIlP8oA5l4c
+	COhQq+GSJTh0YqO+zVgiEav5w3rU/aypfE12u5i6awlrNItZaK0jRbzzPuEFepr4
+	BfiujfgAn/pHca2hRULimJrI91dvwXlS8mF8H2p6Too77heEWLjjj+qREIyjqh6a
+	KnovaW70iqWZHgf3hsdjAbnda/XVd42JlydJfGfxWe25U/ZhET/WkM5eq1R9kLDl
+	yz1tIGzVUkZZFbZNiEvX8bibv0ArqMZAiEUrYk06LmHEQ1JdtMHD6ui2PoWr8QaE
+	QuD7u2YpuWIT1mM999vkmj+ZjHsw4ozdtw/4XaMiyzzhSLbrGA4v+R5aLtu4DqZt
+	Iw==
+Received: (qmail 3173096 invoked from network); 3 Jun 2026 09:19:23 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Jun 2026 09:19:23 +0200
+X-UD-Smtp-Session: l3s3148p1@6iQ9P1RT8pAujnsK
+Date: Wed, 3 Jun 2026 09:19:23 +0200
+From: wsa+renesas <wsa+renesas@sang-engineering.com>
+To: Biju Das <biju.das.jz@bp.renesas.com>
+Cc: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	"magnus.damm" <magnus.damm@gmail.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH v17 00/17] Add Renesas RZ/G3L SD/eMMC support
+Message-ID: <ah_Ve65DvPhlTZ7a@ninjato>
+References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
+ <TY3PR01MB11346485C16AFB6299B1711FD86132@TY3PR01MB11346.jpnprd01.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com> <TY3PR01MB11346485C16AFB6299B1711FD86132@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="E+zmNv8waiDrnk90"
+Content-Disposition: inline
 In-Reply-To: <TY3PR01MB11346485C16AFB6299B1711FD86132@TY3PR01MB11346.jpnprd01.prod.outlook.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Wed, 3 Jun 2026 09:13:42 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdVFScg51Uj2_C9YmwAOfG1+pmGiHgEr1=s0UD=OwPb-uQ@mail.gmail.com>
-X-Gm-Features: AVHnY4KTaTymKCx0LSLs6RhnIwDGw4kaIZ2uRjB878pxxG4jPILkeBa1s_xqOpY
-Message-ID: <CAMuHMdVFScg51Uj2_C9YmwAOfG1+pmGiHgEr1=s0UD=OwPb-uQ@mail.gmail.com>
-Subject: Re: [PATCH v17 00/17] Add Renesas RZ/G3L SD/eMMC support
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, Philipp Zabel <p.zabel@pengutronix.de>, 
-	"magnus.damm" <magnus.damm@gmail.com>, "wsa+renesas" <wsa+renesas@sang-engineering.com>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
-	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, 
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, 
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
 
-Hi Biju,
 
-On Wed, 3 Jun 2026 at 09:00, Biju Das <biju.das.jz@bp.renesas.com> wrote:
-> Please ignore this series as by mistake instead of patch series 2
-> I mentioned it as Patch series 17.
->
+--E+zmNv8waiDrnk90
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+
 > I will fix the issue soon.
 
-How? I am afraid the next revision must be v18, not to confuse b4?
+No need to resend from my POV.
 
-Gr{oetje,eeting}s,
 
-                        Geert
+--E+zmNv8waiDrnk90
+Content-Type: application/pgp-signature; name="signature.asc"
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+-----BEGIN PGP SIGNATURE-----
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmof1XcACgkQFA3kzBSg
+KbagyQ//YbOXNDZ8LY7TvmANTK1JEeI8QQ20H9VxQQ1tEBdsu9UKi6Ejc2lUDge2
+GTMxvGyjVJkFhpEkwfOrswLpaaAsQKH3peuQcDMeocXy/W7Q97xWinAfOnZwa7EW
++TPLPOc/3fmkQa2a+00j2yoRJ6awF8Ek60g9bAVbp4nUQ/A5iCAPWfabUrcXdI5w
+o0nEx4t5wOdX86brXnW2B/wAXw8ul8bXeTc1O0wbD9wUbbpoQtZawIG0g02SKgro
+b+porJrZQtFGdGtllUJhH0bvD2b4NHFq926jPVNP+v1JELgG1/H2QvJLMdnGMJis
+Kkh8bXh14QERURdW7JleZnErxAi+4X5s2PX3cZ6nr+nAq3IoeHMdyc9tJ85kKNus
+wnzBlWTvcbEPiA8iLr1bBXJ8j3DKJxIye/gYPDXbNki5ee0D8KxFjZdl3UtAfsWX
+ilK4pr/1UaLm/nml3eEGipGUejh9OVHDEi2g8rXs116zU6z6KkMmaInaNDBTyFZa
+N0TpRmducyocbUiAqi3O9FqPBv29/2YNrjDmnSnYo/IQDiwYQBiCy9CFV4o1EoAl
+5AJd2Qd0kF1QCFH46CQLPs9t1T6lCvcprhFQi/wRPvwr6rXlNWNustP3yIYZk8ah
+gz3XquRg/k03ZUIKMbEOVr3EOe9iOcj4xQ8wJILJazqHtGL5OEk=
+=5yEy
+-----END PGP SIGNATURE-----
+
+--E+zmNv8waiDrnk90--
