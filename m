@@ -1,63 +1,63 @@
-Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43ED23F9F5D
-	for <linux-mmc@vger.kernel.org>; Wed,  3 Jun 2026 06:57:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C61CD3FC5A1
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Jun 2026 06:57:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780469866; cv=none; b=Bv13/XUiPNQMC+TUIpy2DrhgVSFhwL/bGv/bdK9gDMeCoo27nPUDh9g55sNSKgIBm5nMOKtBE2e8a411oW7aQ6VC2b+92fsUe9ysT9awEpTKNPqq3jyXTpYPpbYHOIIUdxftqNA8st8leNH6g+uZFur5CRsCIXLpsLlWcN+5YsY=
+	t=1780469868; cv=none; b=b8MsSYh/wBT2Edk4SpeY0BQTqG1zBfoqFvoRxdO4Rtd2lSAH6od+KO0dAZDrLN4btBxD0cke/oFpWdeilYBPRhY2XY0EkpmxvR4WTmuxzpuuwGJ2HDXmsE0EXn/OIGHkcG25zrqIICKs1yUYcJE63OCiaV9Kk6eUlT38fBEFVSE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780469866; c=relaxed/simple;
-	bh=C+h0Tj+r5ZWZxe+aF5lrXQrv+HoX58xjGfKt5zIrl6o=;
+	s=arc-20240116; t=1780469868; c=relaxed/simple;
+	bh=0xf+hP5rWVHXOKLQ6AuUcMvnJdEpIeucNgsnnDWzESc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=lgNeL1pieWASxgkbD1KCcdXeHzUeM68nvkYrYe/Ke9DsFdV8Dn15Y8zOzRP598tlv86YfyLIU5bsueW50WxfIiSl+7SSsZddq0DwZRZUlhfFtRUT9hM8mNDJCtU3+RQ1zNsFdaiAdVwFwSPuPYlLFpFaGjpwOjvlK9n0uuCCscE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=oU4XkSKL; arc=none smtp.client-ip=209.85.128.44
+	 MIME-Version; b=VH6Jcfcu11K6RebdiqypPjNtCYPiX9fslm9LmuthQ6U38iAzwUE90Pm+dyjpc9DC1zRpGNwVcNYJTmTEWuiah62LN62aGe1PjbIqBgyQ9sx4PLTqbZlcnPjaU+mX8cr9B4yyzajqja4afSt8tv3wt0pfxvT7Stsd2YOUbEruTFQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aNFp4Gqs; arc=none smtp.client-ip=209.85.128.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oU4XkSKL"
-Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-490ac10e337so17328515e9.3
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Jun 2026 23:57:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aNFp4Gqs"
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-490b3e03939so2578055e9.1
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Jun 2026 23:57:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780469862; x=1781074662; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1780469863; x=1781074663; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=JzLfIvOTnyp3/lkEWcs7a45/5McjEOZmlv1uoXxXmBU=;
-        b=oU4XkSKLO028nvqHI4YinIIH0aHY8cI8xzziCo4BTUX4letIS4qBr/Nu85sXqg6eaQ
-         ku6mv1UzKo9StYariYtQ7VlTs8ABzAFu588lvY4IzUVKG3Zgq5EN/9EGbniITO3T0hnn
-         Hl3d0r27WkcdEsJkRUAOr7G6vrZrej2KhjHAIHfbPLx1ZvhTtbkU/HPODeHx1en3pu3e
-         ggjNF99bdbHJ1+/iL/PGnx1DWi7dE6fATVWUQzuYi2jZp4uhYx47ZvgLmybp0UrkUvnk
-         LvfY6fufgGGj7Tr6+uPF+kbfxgiYxUl9FjPlwTXV3yqkRSwIwU54mCeqvAXD30OmDD0+
-         7rYw==
+        bh=HwqViYMj+duoG+HGmmKtoADFYA5MQk3J3/I4ySPOkzY=;
+        b=aNFp4GqsnSGTkDO1c+xra1FqvIQkLJGYPz60TD9pebQFRr3KzGR3j+QoWJ5UKoiSkH
+         gOMlvEdG91mImeBFPszRZ1SKkX8CS1tjiGT1BCDVs2uJytNKxqQBHu8HG9tkgWjxsOLx
+         /4+YMe3H79OedA6Q2s4Ynzv1PsVE0+8zvmZYSEHy6P/mct4qVq49EXuDFu/xNHPo09YI
+         oAJ6RMfGkgv06OwqeZjDaZWXf0KvgtJB5CbyOY56PZbRGJRdfxaKwSQhO0S/DuoYPOpK
+         i8Iv5qRzzWEpm2YwxIb3Ap9iMn80T7LE8Y7qL3+qOFrJLCS8SLJY+K6gelN23+ZofP+7
+         Qiew==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780469862; x=1781074662;
+        d=1e100.net; s=20251104; t=1780469863; x=1781074663;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=JzLfIvOTnyp3/lkEWcs7a45/5McjEOZmlv1uoXxXmBU=;
-        b=Q2/lrUwDsth/wcgw2n+ZYDRYskRx5y+R50MWhuQho4Nhc9VjcQPpgNSU/prVCQeDpQ
-         +6d6nr7vTf/bbCyXf16k6Q/4Te9dLP6o7G+comp0hxohvn9dKRtfiKKe70neBzmHrewO
-         sZq+LjVud1mSuUYRxz4PhyouRXfLRIRQNZdHEjkUgrgndE9Ipd6IJaIoRRUqLAkOy5R3
-         oztxlxopYrUiuMC4nnCQzlYAeiX5PzVJH/xRgxn1NKYS3ddJjFn6Naq6KZStuw0ilgQZ
-         DxyAqVjkS9UYg24SPOhgGXuNQtTEgplCs2wsLeKZXyE1fCf1TEoXeSwLgjPT1ZIjpDeD
-         8Dzw==
-X-Forwarded-Encrypted: i=1; AFNElJ/SFszmJVZhYTW04QVewWTpM3iz2aaMZ8FWcOrOUeYp/JXESARZHDIXYICcnTSig4eu+EbnEJoMRxY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz99QDWK0baps9JvSnfYXZolsldqTN3DeWbaxpBQh7ZUK9Q8Q/x
-	L+sBz0TZ2XNHFQm7TdUYvk/GWktM1Qouj/MYS9Cbeok2c/O8hMMN0hcM
-X-Gm-Gg: Acq92OHTChWMlLnVny4lW11aBRc62b3lFPuKB/JXFgWX/hmxAhAYTFBBEsxVLJR2Ms0
-	is9l+jHcDWQvBvtBxTVo5cO26ceOK1qPflkuXtd8c33kJleU4lF3H2HQcTw4ZqoiTJsvwgyUFDy
-	DteReKTJS7uaLRgv+2YscIr6z2ZVsSMxyLoakXoSO+AZ46xR+vWzlF0F79FHaDQhU6ABre/bmLt
-	1WC0dPWePzEtRr0CtE++Z23gZtcS8ZFbl6OxJL5oaKRiNfmsoIWNvm8uyzCYc7e8c/x8o9AP7I4
-	4NMil0YiLvSfR9jCz3jH6E470HAl6Q5hXd7nMuwTbh+KohTyyrXpSMDxS/HbV2h76DxbXb1SY6a
-	EFYEVLGRpVBCJH0WNji24QM2YMqjSvUW828pnAzTomO8mVRn7sF3IgmbpGuTzp5nO0c9EglyRCp
-	IQqZHFp2YdHpwvRD8N3ySbEPVylDgu2Lsakt9hzHwZZp6B+DbpGPybTdwQmII=
-X-Received: by 2002:a05:600c:4fcc:b0:490:59cc:999f with SMTP id 5b1f17b1804b1-490b5ea1016mr33443905e9.4.1780469861369;
-        Tue, 02 Jun 2026 23:57:41 -0700 (PDT)
+        bh=HwqViYMj+duoG+HGmmKtoADFYA5MQk3J3/I4ySPOkzY=;
+        b=GzAWBoXrlgVCzLiehsWjuBm7bCmkdw73MrJ3LX6UPputEzODmsLDQaiJH3wOVbeqtE
+         hM9x28ES1dBeJYFX+fj8c7l2kzf/2INrEiRP0ovNPGcyRXDlmcWmooVvAial+yz6TMl3
+         zP0cNkskYLVl0mF6gAP9iTkmCJbO0BrCYk5f8WdIwnEyYwnlvWakDqt5eWVMjI6Scorb
+         EdlllORvcHkDSHFju6Z8oPHMod0WgSvOho/ykReKa9XtLIjZTwIGLW22NlMrQsSYYu8A
+         fhvnAfDdU0yKeulndeB/lEvtCyUrbNetiI3MAfpYmGP04SSwQC4dBso/hT/WJ/MmAJK8
+         IMDA==
+X-Forwarded-Encrypted: i=1; AFNElJ8stHEr1xETw0iDHVgfU7HT9LeYVXQ7FvpfkK858IDWaUMpJD9W9ZE7zFMDa8464j5b19sDuySWAjc=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy9g4pEHI/NM93yxkQKIWc39HJIS6yLjSzpsX+bORGHk2sIg+RV
+	ZvX+tyPJM1VVBClinqOmDHYLaxBrqpzsccVzU6cRC+HI6729xbCHgiEK
+X-Gm-Gg: Acq92OHer4s7LJ4Ke18uLUV6Hay3UCqAmfCpIiUytDwa5pV6mamjDPOzHI1nAlbBgBk
+	JuAZXfy7owzaUMAWpDmGKzA5BsBfXxSasaEjZohIfKh1LhBOPCNvUvhFuVqyBHJ8edbeD+saoO3
+	m+LUCQvMjkMT5ZMKwfhFmmSO7mfbmuWHLYB0YyGxklQsbOaRHBN3pJbUh+grbeWioffs22itfd4
+	KseRNncmymtyo4CpF8xsxhdtTFtPQSCrf4k9n6aOGLRqu9QiLB/MC7Z2Iz7tOU0o/qtC38byvfg
+	fWMHsqlmvpHUvoX60TXWm9bQl376Y8Kw31YV2MMuOwlyyKVvKvrMOZqvMVggH2EKRPtZcotZfrG
+	qeG80tZ0yPdDm+rs0NvOlhvBsCth1UVpceJLyQnqiGr20NJtOl+r8JhYND/aCWPP/OwYCFM2yTA
+	lXHVmZe55ARigamxN7k2Ydx9Wo/0PR8TCMkVjFiCdy5rkR8fB0YDv7ZJF9ZP8=
+X-Received: by 2002:a05:600c:3586:b0:490:b080:4835 with SMTP id 5b1f17b1804b1-490b5ed385fmr26303835e9.0.1780469863125;
+        Tue, 02 Jun 2026 23:57:43 -0700 (PDT)
 Received: from localhost.localdomain ([2a00:23c4:a700:7301:179c:89ab:19f6:9ba4])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-490b79d90bdsm9001855e9.0.2026.06.02.23.57.40
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-490b79d90bdsm9001855e9.0.2026.06.02.23.57.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Jun 2026 23:57:41 -0700 (PDT)
+        Tue, 02 Jun 2026 23:57:42 -0700 (PDT)
 From: Biju <biju.das.au@gmail.com>
 X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
@@ -69,9 +69,9 @@ Cc: Biju Das <biju.das.jz@bp.renesas.com>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
 	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH v17 05/17] mmc: renesas_sdhi_internal_dmac: Fix whitespace alignment in struct initializer
-Date: Wed,  3 Jun 2026 07:57:05 +0100
-Message-ID: <20260603065731.93243-6-biju.das.jz@bp.renesas.com>
+Subject: [PATCH v17 07/17] mmc: renesas_sdhi: Add max_divider to renesas_sdhi_hw_info
+Date: Wed,  3 Jun 2026 07:57:07 +0100
+Message-ID: <20260603065731.93243-8-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
 References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
@@ -85,33 +85,86 @@ Content-Transfer-Encoding: 8bit
 
 From: Biju Das <biju.das.jz@bp.renesas.com>
 
-Remove extra tabs used to align .of_data and .quirks fields in the
-of_rza2_compatible struct initializer, replacing them with single space,
-consistent with kernel coding style.
+The RZ/G3L SoC has a maximum divider value of 2048 compared to 512 on the
+rest of the SoCs.
+
+Add a max_divider field to renesas_sdhi_hw_info and replace the hardcoded
+value in renesas_sdhi_clk_enable() and renesas_sdhi_set_clock() with
+max_divider.
+
+All existing users are assigned max_divider = 512 via sdhi_hw_info_generic
+in both the internal and sys DMAC paths, preserving current behaviour.
+No functional change.
 
 Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 ---
 v1->v2:
- * No change.
+ * No change
 ---
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/renesas_sdhi.h               | 1 +
+ drivers/mmc/host/renesas_sdhi_core.c          | 4 ++--
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 +
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 1 +
+ 4 files changed, 5 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index a7fc525b7218..a42934e6d49d 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -43,6 +43,7 @@ struct renesas_sdhi_of_data {
+ 
+ struct renesas_sdhi_hw_info {
+ 	u64 clk_mask;
++	unsigned int max_divider;
+ };
+ 
+ struct renesas_sdhi_of_data_with_info {
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 2ff40950f209..16ed6fd8470d 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -117,7 +117,7 @@ static int renesas_sdhi_clk_enable(struct tmio_mmc_host *host)
+ 	 * Minimum frequency is the minimum input clock frequency
+ 	 * divided by our maximum divider.
+ 	 */
+-	mmc->f_min = max(clk_round_rate(priv->clk, 1) / 512, 1L);
++	mmc->f_min = max(clk_round_rate(priv->clk, 1) / priv->info->max_divider, 1L);
+ 
+ 	/* enable 16bit data access on SDBUF as default */
+ 	renesas_sdhi_sdbuf_width(host, 16);
+@@ -206,7 +206,7 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
+ 	}
+ 
+ 	host->mmc->actual_clock = renesas_sdhi_clk_update(host, new_clock);
+-	clock = host->mmc->actual_clock / 512;
++	clock = host->mmc->actual_clock / priv->info->max_divider;
+ 
+ 	/*
+ 	 * Add a margin of 1/1024 rate higher to the clock rate in order
 diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 024edc4e5fe6..08cf1604ef1d 100644
+index 512ed70b3779..84b1b38ca465 100644
 --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
 +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -272,8 +272,8 @@ static const struct renesas_sdhi_of_data_with_quirks of_rcar_gen3_nohs400_compat
+@@ -234,6 +234,7 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
+ 
+ static const struct renesas_sdhi_hw_info sdhi_hw_info_generic = {
+ 	.clk_mask = 0x80000080,
++	.max_divider = 512,
  };
  
- static const struct renesas_sdhi_of_data_with_quirks of_rza2_compatible = {
--	.of_data	= &of_data_rza2,
--	.quirks		= &sdhi_quirks_fixed_addr,
-+	.of_data = &of_data_rza2,
-+	.quirks = &sdhi_quirks_fixed_addr,
+ static const struct renesas_sdhi_of_data_with_quirks of_r8a7795_compatible = {
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 1291970c2810..9d34551c6836 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -75,6 +75,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
+ 
+ static const struct renesas_sdhi_hw_info sdhi_hw_info_generic = {
+ 	.clk_mask = 0x80000080,
++	.max_divider = 512,
  };
  
- static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
+ static const struct renesas_sdhi_of_data_with_info of_default_cfg_info = {
 -- 
 2.43.0
 
