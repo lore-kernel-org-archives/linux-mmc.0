@@ -1,258 +1,168 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 841BD3F2106
-	for <linux-mmc@vger.kernel.org>; Fri,  5 Jun 2026 10:06:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 670563F4839;
+	Fri,  5 Jun 2026 13:10:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780653985; cv=none; b=CbVIPNyHOJAvPWscVwwM5PJL1rHLpRPA72ZhJipikzZyQW5bXNiGtKUSXRJoUbR4ZPmYXUlKv6/qCJr5lx3Zi9kjuCzOPzUy3fJagPLscMYZ+OmeoobrVGUWHU7uRqpgFxtkf+NRY9yXQk8iLVjb4pbMBeW2mFNRNM+sVgLdTC8=
+	t=1780665051; cv=none; b=n+FrOp2dVYEBLSpm9GbnlK9ofg6rBdFT+UQOQPsxzntm3EXoGkyYxdLLjuT9g48KEbK0Flaa/aacaLTvVOj2rsc2Jxao53epoAWTxLeePoXjQTpX2EnsEtftUr/29CEtSnXCPKbDmTv82Hsvno0LutsofGhdz/J6UXVlDsh5has=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780653985; c=relaxed/simple;
-	bh=x6Mx/EW/MnayQyGmBtoLxhCwOIWl2EnFGvzou5bIL3k=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:Cc:References:
-	 In-Reply-To:Content-Type; b=Y1ElERbJJcCiWSB4nsftIiYXJSXfIJuCjVi0EB2rJCB4VGw66AagEV+sQU9cQQcIrTOklN+JYcmm/Cqmlxj8loC5lQ54e6bePFDa+7rijfbgNuYtEKnvx2Q51+Xy4xThfsOA5IuvditiiEzktpajg1oSHpVKr0vtpbLB6HR57jI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=b5JWmOkp; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=dO7L8OYw; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1780665051; c=relaxed/simple;
+	bh=+8VoWYOVVk4Ax/GXwqQQ/cI8xY5XtFijHh8x+1AF/S0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OsY1b7KSOKnY5ecWCP98lvEKxSrMCdLqgH99uZOetB0CfhtMg6pbmdI3lR5ve0Uu95bnxWY5VoOYWg3efCQKlqk2AVXXxmtIIwbRG4RJQlIhrp4hoqG8I6w5TSI4x34nIBE7vc9iPNxHBpeMKBcmGOisoVuRpKfrossKxhcXd3w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dL+VTKb/; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="b5JWmOkp";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="dO7L8OYw"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6555qGn32428353
-	for <linux-mmc@vger.kernel.org>; Fri, 5 Jun 2026 10:06:24 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	Cm8WyObyqkNfRyMO7iz7bczR6KF/VFOYPmwAPfJalxw=; b=b5JWmOkp14IgWlcY
-	HpfJ5cagbB0aPkpIrZJAMwxWbvT+yVC3pT1GB2h+A84TH/Id7e3t1NxtdDYlYUOV
-	O7AL71vmtWheMVr7pOySNtYrcbTlRxKZApl6KevjsEofUxYfzhHApdPBxx9jROam
-	9DXKkmQvdFENxdmvZcgw96aP7S1BQDEeKFd60L+ij8AyFVGXQT5OHJdLUlxgKiai
-	HyGQZcOm7ELnaBjpP/KkxjTXcWPoOu2hg4llRZN2ToUQRUX8ikfcGDT5lC7jZPwK
-	V+g0MEaonk9eya+jAswFI+izXoMuCCJvE9Kr1K/0IQgwLXwOGwXLfec15WbOMY/A
-	aa8hsA==
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com [209.85.214.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ekrphh06c-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2026 10:06:23 +0000 (GMT)
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2c0b35fa876so20429735ad.1
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Jun 2026 03:06:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1780653983; x=1781258783; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:from:subject:user-agent:mime-version:date:message-id:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=Cm8WyObyqkNfRyMO7iz7bczR6KF/VFOYPmwAPfJalxw=;
-        b=dO7L8OYw0TIDOlkSO0CCQq05Q88NVHkHxEjIBzZtHsIDfo9qnd7cGrA1lmVNU2vABy
-         QwWTBHylq3ZWLNRU74pJSAMVMZ+mmYmaoGc4eNFxr7C9hicT/hkgBSRc37R0H5z9RiWz
-         c5nNUuALJJ1UU/IF1D1A8Vn6YMjvHNkiJZOD63L9DAGqXLWKVL2c7oPW83kOezpKZB60
-         +m8mJfhS6OyV2KwoaWdq4yrYImYb7M75apC3uMRrr3eOSrgX311T+DovFRlxMjwzLEiG
-         3GyEJzyGW+zDlVuRuaMpohn75vKOSJFVpMpvN6lC+WH2tTctZaVbxG0Cx1+TBUKJi3++
-         rEYw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780653983; x=1781258783;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:from:subject:user-agent:mime-version:date:message-id:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Cm8WyObyqkNfRyMO7iz7bczR6KF/VFOYPmwAPfJalxw=;
-        b=PZalqbTuCTCKHcfcotGhkrvA2FyM4yB+OJG2XPgWwUp+o7VPAj97eFz1T94x41NmxX
-         Z2X/URsNUR2Pvmo+AXOVt2zu+P0PI3LXNNe8/coesmTyWX4NA9W2h2hS45DakZwER0QG
-         yDpAaZeMnpNXKjbPDolGqHI6hT6L3/iz4mlzaRuStOfCqJdDEfLPiA72k5S7Z9j3Z8EH
-         brdGx+PIURGMTmkFHpDKPb1o1Bo6pjNei910PWmkTu1AxK1eg7Smp9CyQZD5AQwOcGW5
-         Y/wn7hv10nNE2FQcRDgUsou6WUYVk6Toi9KMBPIlLutiitiyewK6+qH18jRFHsh3S1b8
-         ASxA==
-X-Gm-Message-State: AOJu0YxxIor6a475BPpUxcc4ducek73FoMXDiqxrmfrq8HIsRia/wtt8
-	Ko8o9dEBt9NrsssY5GrlFtjpp88tZB6CT4TizFDKnpl6pIXDVqKoaBL96SRfAKSVXiJ09BrAFJO
-	F7EUKAtvp3YPoUdGBRR5csOod9u65Km780Y3iRLQy9gdgb9OqPmKBvPHWdaIxJw==
-X-Gm-Gg: Acq92OGnQbZPtyIGvKm1K2I9uRkWRXVSKHb4cxwY/UXaMh1gqDhrZbWV2SWnfRXAs+j
-	VUq4Lzt8wBmEjxHlpTwgJ7JJ10+J9K3VNvF6xRiip2fcma8j3aqwsafVRUlguAVh9sP47sGSo3n
-	G8EycK1MVE/VEt4EW2tlpO/jhyAIgSE34mZmcq7Jyu2J7oggHS8aNKNjFAv/Q/RSXMCZ7ywq6FI
-	PCK+uUDoDoEBjBr8j5hnuhqzPqXABnmFPduFnC7so3lb2WE7ykx20aRbcKc7ZSpciVn0xO1SJpL
-	gekqJz1hKD8qAkhUAR5Np3EkHDTmDvca1hbU0dL9AttQosFF+PrRNicG6ZZpUcfr5oezyztUy71
-	6gpf+G1eP0nrzU5r/3fqy95Od+TFu7PoLwC9IpdDXHPvOBbTyBhuUjsbu
-X-Received: by 2002:a17:902:e790:b0:2bd:d7c5:9272 with SMTP id d9443c01a7336-2c1e78dfad0mr30498905ad.6.1780653982974;
-        Fri, 05 Jun 2026 03:06:22 -0700 (PDT)
-X-Received: by 2002:a17:902:e790:b0:2bd:d7c5:9272 with SMTP id d9443c01a7336-2c1e78dfad0mr30498265ad.6.1780653982379;
-        Fri, 05 Jun 2026 03:06:22 -0700 (PDT)
-Received: from [10.217.216.18] ([202.46.22.19])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2c16629d042sm89757565ad.60.2026.06.05.03.06.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 05 Jun 2026 03:06:21 -0700 (PDT)
-Message-ID: <aa80d41d-43a9-423d-960b-c7a7125c5014@oss.qualcomm.com>
-Date: Fri, 5 Jun 2026 15:36:17 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dL+VTKb/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC91D1F00893;
+	Fri,  5 Jun 2026 13:10:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1780665049;
+	bh=E5fv+gocFRzI67nbJoG36UWHjesSesONvIbk0lbKuI4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=dL+VTKb/q6KMKBkT8DQbb/Vh+hOxFlgICPpaHxLLv4bxVrb4py4J8Us71/NoW7yo6
+	 1HKqbdSW/anzDhuJN7psq3OMhYuI2TxUeUqNQWmdO2uuU+L8j72GsUFF7rSYqYnSU2
+	 5K5qZLql0IhXMX+VYj970UmkV7HRnLUTCuOMwJ9pZt/DJETfczd61UHd3bqu0GXovB
+	 7UYNQyN67wPUrNm2SJtOUMNR7QxfN7blJ0I/33ib1MzQhQjbfT6oXfGiHRxL2qjlk1
+	 mt7Xx7ThfAVPHhIkwGDR2JfrcHyCxQmohbtRoAE/rI61uOYgDTGw77p80k7l1202x0
+	 3F0G+kLn1JcuA==
+Received: from johan by xi.lan with local (Exim 4.99.3)
+	(envelope-from <johan@kernel.org>)
+	id 1wVUJz-00000000EJf-2iOb;
+	Fri, 05 Jun 2026 15:10:47 +0200
+Date: Fri, 5 Jun 2026 15:10:47 +0200
+From: Johan Hovold <johan@kernel.org>
+To: Guangshuo Li <lgs201920130244@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Thomas Gleixner <tglx@kernel.org>,
+	Ingo Molnar <mingo@kernel.org>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Yang Yingliang <yangyingliang@huawei.com>,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: vub300: fix use-after-free on probe failure
+Message-ID: <aiLK12tgrzvqCMp_@hovoldconsulting.com>
+References: <20260604094801.1418367-1-lgs201920130244@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-msm: Set ice clk rate
-From: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, konrad.dybcio@oss.qualcomm.com,
-        abhinaba.rakshit@oss.qualcomm.com
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, pradeep.pragallapati@oss.qualcomm.com,
-        manivannan.sadhasivam@oss.qualcomm.com
-References: <20260529081045.2877910-1-ram.gupta@oss.qualcomm.com>
- <20260529081045.2877910-2-ram.gupta@oss.qualcomm.com>
- <18af0dcb-8cf1-4565-a90d-58bf1e66811f@intel.com>
- <a03e129c-6719-4cae-bffd-563bf1dfc335@oss.qualcomm.com>
- <650d6ae8-36c9-44ba-a065-a1ceebee48b2@intel.com>
- <1487d620-eb28-4a66-a611-0c6dfdf1e538@oss.qualcomm.com>
-Content-Language: en-US
-In-Reply-To: <1487d620-eb28-4a66-a611-0c6dfdf1e538@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-ORIG-GUID: E1EorhDWEsgCLKMcHgOUMNsGRoQSTfrr
-X-Proofpoint-GUID: E1EorhDWEsgCLKMcHgOUMNsGRoQSTfrr
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjA1MDA5OCBTYWx0ZWRfXzKGi7lXy1QSM
- NB9MPZgknSllXFcboyoa6xUV0j9DQyN/u5Wqd+7oxL2NYzw3iqSM8zm+5xUa3lniKO9xmUmNace
- P1QNh7hX2RTX9zMNDpKlpusGUTxaPlNT0pDhHbWXEndBdp7YvDRlsYmo9ZNRvWOVEqkBSXS+s5U
- 59lmUMV9WXaqLDloKERtfqDIE/yD8fUcdsT9CfHIDR1Z7t1DBznSE3KihI9ZOufZBgLcKGzsiVE
- VAYn1iwZYMIhXU1vWI/422qnyqb2BQTEt4IyH+kmD/B0xLT5ys+yuBV1HwjoGPy+u017cn46nqR
- mT5Fhu+7VANKHgRhVgNkz6CytH5kgEUBaXVvK3IoYsuUGLFZ1Qokua68BZF+jmN92sGtSixWmBh
- pc6i/6C49Ls7lRZwUBelt3wjySzxoabN3XsAH3akNGZ2Aadb1Kc3Yy45WLcnw/juo/dgUKrHD8T
- tDgr0lI78ezYOK4Jfpw==
-X-Authority-Analysis: v=2.4 cv=T9a8ifKQ c=1 sm=1 tr=0 ts=6a229f9f cx=c_pps
- a=IZJwPbhc+fLeJZngyXXI0A==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
- a=IkcTkHD0fZMA:10 a=FelO9ux0wxsA:10 a=s4-Qcg_JpJYA:10
- a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=yOCtJkima9RkubShWh1s:22
- a=VwQbUJbxAAAA:8 a=KKAkSRfTAAAA:8 a=EUspDBNiAAAA:8 a=eytIU0s1LhRWHgRMX8MA:9
- a=QEXdDO2ut3YA:10 a=uG9DUKGECoFWVXl0Dc02:22 a=cvBusfyB2V15izCimMoJ:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-06-05_01,2026-05-28_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 suspectscore=0 clxscore=1015 bulkscore=0 adultscore=0
- priorityscore=1501 phishscore=0 spamscore=0 lowpriorityscore=0
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2605210000
- definitions=main-2606050098
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260604094801.1418367-1-lgs201920130244@gmail.com>
 
+On Thu, Jun 04, 2026 at 05:48:01PM +0800, Guangshuo Li wrote:
+> The vub300 driver lifetime-manages its controller state using
+> vub300->kref, with vub300_delete() freeing the mmc host when the last
+> reference is dropped. The probe error path after the inactivity timer has
+> been armed still bypasses that lifetime rule, however, and falls through
+> to mmc_free_host() directly if mmc_add_host() fails.
+> 
+> The race window is between arming the inactivity timer and reaching the
+> probe error unwind after mmc_add_host() fails:
+> 
+>         probe thread                     timer/workqueue
+>         ------------                     ---------------
+>         kref_init(&vub300->kref)         ref = 1
+>         kref_get(&vub300->kref)          ref = 2, timer ref
+>         add_timer(inactivity_timer)
+>         |
+>         |   race window
+>         |<---------------------------------------------------->
+>         |
+>         mmc_add_host(mmc)
+>                                          inactivity timer fires
+>                                          vub300_queue_dead_work()
+>                                            kref_get()          ref = 3
+>                                            queue_work(deadwork)
+>         mmc_add_host() fails
+>         timer_delete_sync()
+>         mmc_free_host(mmc)
+>           frees vub300
+>                                          deadwork runs
+>                                            use-after-free
+> 
+> timer_delete_sync() only waits for the timer callback itself. It does
+> not flush deadwork that the callback may already have queued. As a
+> result, queued deadwork can still hold a kref while the probe error path
+> directly frees the backing mmc host, including the vub300 storage.
 
+You should mention that the inactivity timeout is one second, so not
+only would mmc_add_host() need to fail, it would also need to take more
+than a second to do so, so this is unlikely to ever be an issue in
+practice.
 
-On 6/4/2026 5:45 PM, Ram Prakash Gupta wrote:
-> 
-> 
-> On 6/3/2026 1:18 PM, Adrian Hunter wrote:
->> On 03/06/2026 10:03, Ram Prakash Gupta wrote:
->>>
->>>
->>> On 6/1/2026 1:00 PM, Adrian Hunter wrote:
->>>> On 29/05/2026 11:10, Ram Prakash Gupta wrote:
->>>>> Set ice clk rate from sdhci msm platform driver, needed for
->>>>> target which are having legacy ice support, and need sdhci msm
->>>>> platform driver to set rate.
->>>>
->>>> Please expand upon what "legacy" means here?
->>>>
->>>
->>> for devices where ice node is not created as separate device node those
->>> are referred here as legacy, separate device node for ice starts with
->>> below change: https://lore.kernel.org/all/20230407105029.2274111-1-abel.vesa@linaro.org/
->>>
->>> also I will update legacy that ice nodes which are created withing mmc dt
->>> node, so that ambiguity about legacy is clear.
->>>
->>>> For CQ case, qcom_ice_create() prefers "ice_core_clk" before
->>>> "ice".  How does that relate to this?  Please clarify that in the
->>>> commit message also.
->>>>
->>>
->>> "ice" is the naming convention used for emmc ice core clk in dt and
->>> "ice_core_clk" is the naming convention for ufs ice core clk. In the
->>> function you referred, since ice driver is common for both storage media,
->>> it tries to parse both the clock.
->>>
->>> Here we are handling "ice" as this is needed for emmc only. I will add
->>> the same in commit message.
->>>
->>>>>
->>>>> Signed-off-by: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
->>>>> ---
->>>>>  drivers/mmc/host/sdhci-msm.c | 12 ++++++++++++
->>>>>  1 file changed, 12 insertions(+)
->>>>>
->>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>>>> index b4131b12df56..c6a073718aa4 100644
->>>>> --- a/drivers/mmc/host/sdhci-msm.c
->>>>> +++ b/drivers/mmc/host/sdhci-msm.c
->>>>> @@ -286,6 +286,7 @@ struct sdhci_msm_host {
->>>>>  	/* core, iface, cal and sleep clocks */
->>>>>  	struct clk_bulk_data bulk_clks[4];
->>>>>  #ifdef CONFIG_MMC_CRYPTO
->>>>> +	struct clk *ice_clk;	/* ICE clock */
->>>>
->>>> Why keep ice_clk?
->>>>
->>>
->>> here we need this ice_clk because rate set is required only when ice clk
->>> is added with emmc node in dt, and in case we try to use the clk entry of
->>> qcom_ice structure it will set the rate for new ice node as well which is
->>> separate.
->>>
->>> but also we can avoid this, since this one time operation, and we can reuse
->>> local variable clk inside sdhci_msm_probe, so it wont be needed. I will remove
->>> this in next patchset.
->>>
->>>>>  	struct qcom_ice *ice;
->>>>>  #endif
->>>>>  	unsigned long clk_rate;
->>>>> @@ -2708,6 +2709,17 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>>>>  			return ret;
->>>>>  	}
->>>>>  
->>>>> +#ifdef CONFIG_MMC_CRYPTO
->>>>> +	/* Setup ICE clock */
->>>>> +	msm_host->ice_clk = devm_clk_get(&pdev->dev, "ice");
->>>>> +	if (!IS_ERR(msm_host->ice_clk)) {
->>>>
->>>> Does not attempt to deal with -EPROBE_DEFER, although bus_clk above
->>>> doesn't either.
->>>>
->>>
->>> here need is just to set the rate, rest of the enablement part would be 
->>> taken care in ice driver, hence we can avoid this handling here.
->>
->> If devm_clk_get() returns -EPROBE_DEFER, then the rate will not be set,
->> so you are relying on devm_clk_get() never to return -EPROBE_DEFER.
->>
-> 
-> here -EPROBE_DEFER can be returned when clk driver is not ready, in that
-> case other clks, core & iface, would also fail to get enabled and then driver
-> would run into issues.
-> 
-> In case we get -EPROBE_DEFER for "ice" clk only then as you said rate
-> will not be set for ice clk to max but warning log regarding ice clk
-> rate not being set would be printed, and the ice clock would be set to
-> 19.2MHz and in my opinion its not fatal.
->
+We should this fix it of course.
 
-my bad here, we wont get the print, I will add else case for log.
-
-> so -EPROBE_DEFER handling seems overkill here for ice clk.
+> Fix this by making the post-timer probe error path obey the kref lifetime
+> rules. After deleting the inactivity timer, drop both the timer reference
+> and the initial probe reference, and return without falling through to
+> err_free_host. If deadwork was queued, its reference keeps the object
+> alive until the work item drops it; otherwise the final kref_put() runs
+> vub300_delete() and releases the mmc host and USB resources.
 > 
->>>
->>>>> +		/* Vote for max. clk rate for max. performance */
->>>>> +		ret = clk_set_rate(msm_host->ice_clk, INT_MAX);
->>>>> +		if (ret)
->>>>> +			dev_err(&pdev->dev, "ice clk set rate failed (%d)\n", ret);
->>>>> +	}
->>>>> +#endif
->>>>
->>>> Could put this in a helper+stub function in the "Inline Crypto Engine
->>>> (ICE) support" section, to save having #ifdef CONFIG_MMC_CRYPTO here
->>>>
->>>
->>> sure, will take care of this in next patchset.
->>>
->>>>> +
->>>>>  	/* Setup main peripheral bus clock */
->>>>>  	clk = devm_clk_get(&pdev->dev, "iface");
->>>>>  	if (IS_ERR(clk)) {
->>>>
->>>
->>
+> Fixes: 0613ad2401f8 ("mmc: vub300: fix return value check of mmc_add_host()")
+> Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
+> ---
+> v2:
+>   - Rebase on current mainline.
+>   - Correct the Fixes tag.
+>   - Add blank lines around the early return.
+>   - Reword the code comment.
 > 
+>  drivers/mmc/host/vub300.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> index 6c3cb2f1c9d3..1b46bb87f39a 100644
+> --- a/drivers/mmc/host/vub300.c
+> +++ b/drivers/mmc/host/vub300.c
+> @@ -2342,6 +2342,16 @@ static int vub300_probe(struct usb_interface *interface,
+>  
+>  err_delete_timer:
+>  	timer_delete_sync(&vub300->inactivity_timer);
+> +	/*
+> +	 * vub300 may have async references via queued deadwork. Drop the
+> +	 * timer and initial references and let the last kref put release the
+> +	 * host through the proper destructor.
+> +	 */
+> +	kref_put(&vub300->kref, vub300_delete);	/* timer's kref */
+> +	kref_put(&vub300->kref, vub300_delete);	/* init's kref */
 
+This driver is a bit of a mess (and is IMO a candidate for removal
+unless someone steps up and rewrites it), but shouldn't you use the same
+mechanism which is used on disconnect here?
+
+That is, to clear vub300->interface so that both the timer callback and
+queued deadwork returns early and drops their references? Otherwise,
+nothing prevents the timer from being rearmed after you drop the final
+reference here, leading to another use-after-free.
+
+So something like:
+
+@@ -2336,12 +2336,16 @@ static int vub300_probe(struct usb_interface *interface,
+                         interface_to_InterfaceNumber(interface));
+        retval = mmc_add_host(mmc);
+        if (retval)
+-               goto err_delete_timer;
++               goto err_stop_io;
+ 
+        return 0;
+ 
+-err_delete_timer:
+-       timer_delete_sync(&vub300->inactivity_timer);
++err_stop_io:
++       vub300->interface = NULL;
++       kref_put(&vub300->kref, vub300_delete);
++
++       return retval;
++
+ err_free_host:
+        mmc_free_host(mmc);
+        /*
+
+USB drivers must not do any further I/O after disconnect returns so not waiting
+for any scheduled timers and work to complete is a bug in itself which should
+also be fixed though.
+
+Johan
