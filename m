@@ -1,168 +1,182 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 670563F4839;
-	Fri,  5 Jun 2026 13:10:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1CC61E1E04
+	for <linux-mmc@vger.kernel.org>; Mon,  8 Jun 2026 04:16:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780665051; cv=none; b=n+FrOp2dVYEBLSpm9GbnlK9ofg6rBdFT+UQOQPsxzntm3EXoGkyYxdLLjuT9g48KEbK0Flaa/aacaLTvVOj2rsc2Jxao53epoAWTxLeePoXjQTpX2EnsEtftUr/29CEtSnXCPKbDmTv82Hsvno0LutsofGhdz/J6UXVlDsh5has=
+	t=1780892219; cv=none; b=ccMH9jtFYa+FiixwGomdyqlndHVN6lGT0ACUWDVqUgBFckyNaoSMKmpEH4vZC7/a+IRy6lxFEhdJzQiuqoMxqqbwWfX7jCrYy10nBHCsSPCDQ121cCVD27l2UOAiOQHQvPJtGQFnsRusFPSl/JPuhKiLP58luzc2ydLlIN4rsHM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780665051; c=relaxed/simple;
-	bh=+8VoWYOVVk4Ax/GXwqQQ/cI8xY5XtFijHh8x+1AF/S0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OsY1b7KSOKnY5ecWCP98lvEKxSrMCdLqgH99uZOetB0CfhtMg6pbmdI3lR5ve0Uu95bnxWY5VoOYWg3efCQKlqk2AVXXxmtIIwbRG4RJQlIhrp4hoqG8I6w5TSI4x34nIBE7vc9iPNxHBpeMKBcmGOisoVuRpKfrossKxhcXd3w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dL+VTKb/; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1780892219; c=relaxed/simple;
+	bh=Q0O53Qi5yC/SbXyECjjdsrVdZPX/nW7yZV+7MOQfU74=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Yl3ZwjswHc7ijJ4dm51ykQuZhpCI4AVh65aYETb8g4Kd/nIJ8XccWvXEgq+C+kU12IUw52wnZeXOZPSGHARBI7msvfMzSaClujMamtmjFM9yYlNieCCJF2wpQPxOKxjInXRjtU+0yD4mKh194q36+5U2Nnjx8TKTUSU0pH077EY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=oT7LhDb/; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=JtwXsVoY; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dL+VTKb/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC91D1F00893;
-	Fri,  5 Jun 2026 13:10:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1780665049;
-	bh=E5fv+gocFRzI67nbJoG36UWHjesSesONvIbk0lbKuI4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=dL+VTKb/q6KMKBkT8DQbb/Vh+hOxFlgICPpaHxLLv4bxVrb4py4J8Us71/NoW7yo6
-	 1HKqbdSW/anzDhuJN7psq3OMhYuI2TxUeUqNQWmdO2uuU+L8j72GsUFF7rSYqYnSU2
-	 5K5qZLql0IhXMX+VYj970UmkV7HRnLUTCuOMwJ9pZt/DJETfczd61UHd3bqu0GXovB
-	 7UYNQyN67wPUrNm2SJtOUMNR7QxfN7blJ0I/33ib1MzQhQjbfT6oXfGiHRxL2qjlk1
-	 mt7Xx7ThfAVPHhIkwGDR2JfrcHyCxQmohbtRoAE/rI61uOYgDTGw77p80k7l1202x0
-	 3F0G+kLn1JcuA==
-Received: from johan by xi.lan with local (Exim 4.99.3)
-	(envelope-from <johan@kernel.org>)
-	id 1wVUJz-00000000EJf-2iOb;
-	Fri, 05 Jun 2026 15:10:47 +0200
-Date: Fri, 5 Jun 2026 15:10:47 +0200
-From: Johan Hovold <johan@kernel.org>
-To: Guangshuo Li <lgs201920130244@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Thomas Gleixner <tglx@kernel.org>,
-	Ingo Molnar <mingo@kernel.org>,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Yang Yingliang <yangyingliang@huawei.com>,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: vub300: fix use-after-free on probe failure
-Message-ID: <aiLK12tgrzvqCMp_@hovoldconsulting.com>
-References: <20260604094801.1418367-1-lgs201920130244@gmail.com>
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="oT7LhDb/";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="JtwXsVoY"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6580GCZl2005712
+	for <linux-mmc@vger.kernel.org>; Mon, 8 Jun 2026 04:16:57 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=AAqES12gs3yn2XZq7PRpgLohj1tMPki/ZHQ
+	t7fhpYl8=; b=oT7LhDb/CrJk7iaop/ZeIu6BX5nuseInQFQN8dR3eeEaoFl8KXK
+	iPGOrs1sqO2ktvUyQ0uQSfQrKmYJb2fsvNopKDB6AR2qUqvFbLxXMIpkZS86AAju
+	tm3+O2H4VfweD3+nzOUIimNIEom/gJrDc7vf0HzWmVv/cO2akEJ9/qWAOoLa6Z6J
+	XtNS6Eej6VMX8amLscUKFanpQo2SKxwwGwtiO9C8uFcygtHF2/HWY2QkLjFlosmc
+	iS9GsJh6VyqWPPHP6bCSF4P2D90qJpmbhU8z89oVALUB3ZR27AY4PRbmions+3z2
+	NyKh87rEitXfLZJ+edbYyjfXo5WPFZnwNAw==
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com [209.85.214.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4emb4w5u0p-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2026 04:16:57 +0000 (GMT)
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2bf30576aa3so26691795ad.3
+        for <linux-mmc@vger.kernel.org>; Sun, 07 Jun 2026 21:16:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1780892217; x=1781497017; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=AAqES12gs3yn2XZq7PRpgLohj1tMPki/ZHQt7fhpYl8=;
+        b=JtwXsVoY9FHoiJnFgILaLaZZXxd7T02TMb8aJcBWEWD6vMDHGuaJ0a/ej+hYciD9xt
+         pZ20fF8X8sqTx2K/Y9ZyR5TwUtT8pr0ZiKA8415gNKeY27tWPGMbsg4dewoM3EvZVX1E
+         v+d70gdQ+MwjwNZE6WQHjf2u5OdP3LwOjk1FaaPlGpqXG5uyd+FljbkXf71JNEYJbzkG
+         hwmjmkCYzc81dK2WRZz2nexjsjULRPCoA0K30tLc69RDhtO6oYieJ4fn/3u7SD86HoXr
+         6UmNnHIOIJ2Wfyh+sKzQjY3+3t1HVkkHb/DniBl0T7MB3Lx6fCNXWjLLpC4tPkNSKBIJ
+         IobQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780892217; x=1781497017;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=AAqES12gs3yn2XZq7PRpgLohj1tMPki/ZHQt7fhpYl8=;
+        b=WdobzSVx/xz7snkE1YiiCIGdcuQIXDL91k1Vp6RoqxnMPXwtwFF8ZOK4dh8iP2f2Xn
+         L6LG0CL85TtXNyTKD2vESx0uhPoGt3UjXDHsrlMgC80QFO4izbZuYQaLoIGGTPxQFTtO
+         t41xyDmRzGUhbDjfpCtZ0L++WqDlJJClxKJK8x0GE9W1tcpI7yPUyrgH7zJ3XsJ0qiog
+         v9uitipg2FbHlUK3ddZ4aicomjFd7bvQawifjFO0PPQpm5VHHC/DNZrGiEisW/TdEV7J
+         iSQCSFTmXonlXuT635HTCfuRxayjn1+VFjS9k6rPrDqgPizwfaJPI3sWjRc8d02z3Rez
+         yimQ==
+X-Gm-Message-State: AOJu0Yxcx7ut5IwPJ2lb8d1DQdZOaB8dMWMY1FekKJq9lIJjMITbqocC
+	QNtoOcE4UjvMPd+xrZERGb2Z/1j3vNGM3A+lhBm941tfzMi7TtVeiCb1jQTicGVsaxjL7FUHMNG
+	wv5eJPz0ixnRyuyS9gzKoRBVfpp42VeQZZVPxvGwg9CbI7dxzvpixcxSL0yw5vuQ=
+X-Gm-Gg: Acq92OF6DSsHQm9lONldHkq/84gcQQLBKc0aQ2Ium/UFon8rrwkz5F52+5obOM9J5KU
+	l1idDIhwFuMYK74J5KM7Rz1PTfbupuKAkHd9FyPFf8c64lblTSquH8Pom27QP67ck4aZC0/D6IR
+	VglBiw6WxrVAzwC9seQhUX8cG+Bkm+C+qTWK4J5XNz3Fg/B2/139rwtjxINfkRDbpxvy+KvA6pt
+	svyPRLWsRSG3aVJ1uFq9ufbtJiBaNxvrHc2oeUmsHWVoxd1j7mnGvV+Psq2TXKHHU5Ydpp+4DPC
+	72nGwO8ndijDq4lTaImfq384+R89esrEq9S+Yh1X4GYbqGgCz1ZwIA8mfrGeEyjZP533wlY5/Zf
+	ibszivGjFpJecXehzvX4LYiJN4dm4kRYREoA9fZJJMJxnP75BqSfTfjSGM2UzPqg=
+X-Received: by 2002:a17:903:2290:b0:2be:3434:4e28 with SMTP id d9443c01a7336-2c1e8220d05mr153941145ad.19.1780892216609;
+        Sun, 07 Jun 2026 21:16:56 -0700 (PDT)
+X-Received: by 2002:a17:903:2290:b0:2be:3434:4e28 with SMTP id d9443c01a7336-2c1e8220d05mr153940695ad.19.1780892216073;
+        Sun, 07 Jun 2026 21:16:56 -0700 (PDT)
+Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2c16649fcdfsm209392525ad.78.2026.06.07.21.16.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 07 Jun 2026 21:16:55 -0700 (PDT)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+        conor+dt@kernel.org, andersson@kernel.org, konradybcio@kernel.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, neeraj.soni@oss.qualcomm.com
+Subject: [PATCH v7 0/3] Enable Inline crypto engine for kodiak and monaco
+Date: Mon,  8 Jun 2026 09:46:47 +0530
+Message-Id: <20260608041650.541502-1-neeraj.soni@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260604094801.1418367-1-lgs201920130244@gmail.com>
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: FNFTA10J0qrpMGXrLZKa3TNO0JWdbUmL
+X-Proofpoint-GUID: FNFTA10J0qrpMGXrLZKa3TNO0JWdbUmL
+X-Authority-Analysis: v=2.4 cv=YIWvDxGx c=1 sm=1 tr=0 ts=6a264239 cx=c_pps
+ a=cmESyDAEBpBGqyK7t0alAg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=FelO9ux0wxsA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=u7WPNUs3qKkmUXheDGA7:22 a=3WHJM1ZQz_JShphwDgj5:22 a=VwQbUJbxAAAA:8
+ a=EUspDBNiAAAA:8 a=AioB4BDzo5DgHM1MsdcA:9 a=1OuFwYUASf3TG4hYMiVC:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjA4MDAzNCBTYWx0ZWRfX3rwnE7rxlcJE
+ +U1EqyF/CtXIPQrA5zDgsIcanN2zaI8u7CgpmZF1WNK2AMX/LH1KJ1hwvvAHCx4L9+HJk4lVe+C
+ 1ZH0gXFnLntHuz+HnkzHI0xhfeRXsiS4B55wEuBUgp/7tFUgkDewt/kKLkoouB4DzcOCtQAbC1W
+ 0FE3XIc/hXfADgwegjFPnqUslCraSEuUm2XoRMAxzsm2xRfgZdFiQDWHVM8XSTN+kJaL3zAfO/P
+ lvRpe9u5LXw2FoicZkX2Pd12KIGoiNvi+ccBe4Pbs3APoRnFA461ium7WR9e1nrLyyoV22uXmul
+ KREDcty1GM/2opevrARukLeeeAQ6x7gkylh+anoLl6a9XTxcqF7BzCxCyfs9BDKlaQljaSfKeOw
+ kqDSjRWaW5v+QSCbg6UFS//9Qpc3X/lALLnwbteT9lQSz2mihkZ6df9rIkC458t5v34gp1reyRD
+ 3h0C9EO0eAApTgq6AzA==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
+ definitions=2026-06-08_01,2026-06-05_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 malwarescore=0 lowpriorityscore=0 adultscore=0 impostorscore=0
+ spamscore=0 phishscore=0 clxscore=1015 priorityscore=1501 bulkscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2605210000 definitions=main-2606080034
 
-On Thu, Jun 04, 2026 at 05:48:01PM +0800, Guangshuo Li wrote:
-> The vub300 driver lifetime-manages its controller state using
-> vub300->kref, with vub300_delete() freeing the mmc host when the last
-> reference is dropped. The probe error path after the inactivity timer has
-> been armed still bypasses that lifetime rule, however, and falls through
-> to mmc_free_host() directly if mmc_add_host() fails.
-> 
-> The race window is between arming the inactivity timer and reaching the
-> probe error unwind after mmc_add_host() fails:
-> 
->         probe thread                     timer/workqueue
->         ------------                     ---------------
->         kref_init(&vub300->kref)         ref = 1
->         kref_get(&vub300->kref)          ref = 2, timer ref
->         add_timer(inactivity_timer)
->         |
->         |   race window
->         |<---------------------------------------------------->
->         |
->         mmc_add_host(mmc)
->                                          inactivity timer fires
->                                          vub300_queue_dead_work()
->                                            kref_get()          ref = 3
->                                            queue_work(deadwork)
->         mmc_add_host() fails
->         timer_delete_sync()
->         mmc_free_host(mmc)
->           frees vub300
->                                          deadwork runs
->                                            use-after-free
-> 
-> timer_delete_sync() only waits for the timer callback itself. It does
-> not flush deadwork that the callback may already have queued. As a
-> result, queued deadwork can still hold a kref while the probe error path
-> directly frees the backing mmc host, including the vub300 storage.
+Document Inline Crypto Engine (ICE) handle for SDHC and add its device-tree
+node to enable it for kodiak and monaco.
 
-You should mention that the inactivity timeout is one second, so not
-only would mmc_add_host() need to fail, it would also need to take more
-than a second to do so, so this is unlikely to ever be an issue in
-practice.
+How this patch was tested:
+- export ARCH=arm64
+- export CROSS_COMPILE=aarch64-linux-gnu-
+- make menuconfig
+- make defconifg
+- make DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/sdhci-msm.yaml dt_binding_check
+- make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CHECK_DTBS=y dtbs
 
-We should this fix it of course.
+---
+Changes in v7:
+- Rebased on latest linux-next (sdhci-msm.yaml renamed to qcom,sdhci-msm.yaml).
+- Added links for previous versions.
+- Link to v6: https://lore.kernel.org/all/20260310113557.348502-1-neeraj.soni@oss.qualcomm.com/
 
-> Fix this by making the post-timer probe error path obey the kref lifetime
-> rules. After deleting the inactivity timer, drop both the timer reference
-> and the initial probe reference, and return without falling through to
-> err_free_host. If deadwork was queued, its reference keeps the object
-> alive until the work item drops it; otherwise the final kref_put() runs
-> vub300_delete() and releases the mmc host and USB resources.
-> 
-> Fixes: 0613ad2401f8 ("mmc: vub300: fix return value check of mmc_add_host()")
-> Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
-> ---
-> v2:
->   - Rebase on current mainline.
->   - Correct the Fixes tag.
->   - Add blank lines around the early return.
->   - Reword the code comment.
-> 
->  drivers/mmc/host/vub300.c | 10 ++++++++++
->  1 file changed, 10 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index 6c3cb2f1c9d3..1b46bb87f39a 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2342,6 +2342,16 @@ static int vub300_probe(struct usb_interface *interface,
->  
->  err_delete_timer:
->  	timer_delete_sync(&vub300->inactivity_timer);
-> +	/*
-> +	 * vub300 may have async references via queued deadwork. Drop the
-> +	 * timer and initial references and let the last kref put release the
-> +	 * host through the proper destructor.
-> +	 */
-> +	kref_put(&vub300->kref, vub300_delete);	/* timer's kref */
-> +	kref_put(&vub300->kref, vub300_delete);	/* init's kref */
+Changes in v6:
+- Wrapped commit message for patch (1/3) as per Linux coding guidelines.
+- Signed off the patch (3/3).
+- Link to v5: https://lore.kernel.org/all/20260306093332.4193993-1-neeraj.soni@oss.qualcomm.com/
 
-This driver is a bit of a mess (and is IMO a candidate for removal
-unless someone steps up and rewrites it), but shouldn't you use the same
-mechanism which is used on disconnect here?
+Changes in v5:
+- Updated the constraint for SDHCI 'v4' vs rest to reflect the 'qcom,ice'
+  constraint.
+- Link to v4: https://lore.kernel.org/all/20260217052526.2335759-1-neeraj.soni@oss.qualcomm.com/
 
-That is, to clear vub300->interface so that both the timer callback and
-queued deadwork returns early and drops their references? Otherwise,
-nothing prevents the timer from being rearmed after you drop the final
-reference here, leading to another use-after-free.
+Changes in v4:
+- Added a new patch (3/3) for device tree changes for Monaco SoC.
+- Updated commit subject of cover letter to reflect "monaco".
+- Removed the text description of constraints from "description:" for "qcom,ice" and
+  wrapped the code.
+- Corrected the schema code to reflect the constraint of "qcom,ice" usage properly.
+- Link to v3: https://lore.kernel.org/all/20260206112053.3287756-1-neeraj.soni@oss.qualcomm.com/
 
-So something like:
+Changes in v3:
+- Described the purpose for phandle in "description:" for "qcom,ice".
+- Re-added the "if: required:" description for "qcom,ice" with proper
+  encoding.
+- Corrected the uppercase for base address and reg address space for ICE DT node.
+- Link to v2: https://lore.kernel.org/all/20260114094848.3790487-1-neeraj.soni@oss.qualcomm.com/
 
-@@ -2336,12 +2336,16 @@ static int vub300_probe(struct usb_interface *interface,
-                         interface_to_InterfaceNumber(interface));
-        retval = mmc_add_host(mmc);
-        if (retval)
--               goto err_delete_timer;
-+               goto err_stop_io;
- 
-        return 0;
- 
--err_delete_timer:
--       timer_delete_sync(&vub300->inactivity_timer);
-+err_stop_io:
-+       vub300->interface = NULL;
-+       kref_put(&vub300->kref, vub300_delete);
-+
-+       return retval;
-+
- err_free_host:
-        mmc_free_host(mmc);
-        /*
+Changes in v2:
+- Removed the "if: required:" description for "qcom,ice" dt-binding
+  as the ICE node is optional.
+- Corrected the ICE dt node entry according to the dt-binding description.
+- Added test details.
+- Link to v1: https://lore.kernel.org/all/20251124111914.3187803-1-neeraj.soni@oss.qualcomm.com/
 
-USB drivers must not do any further I/O after disconnect returns so not waiting
-for any scheduled timers and work to complete is a bug in itself which should
-also be fixed though.
+Changes in v1:
+- Updated the dt-binding for ICE node.
+- Added the dt node for ICE for kodiak.
 
-Johan
+Neeraj Soni (3):
+  dt-bindings: mmc: sdhci-msm: Add ICE phandle
+  arm64: dts: qcom: kodiak: enable the inline crypto engine for SDHC
+  arm64: dts: qcom: monaco: enable the inline crypto engine for SDHC
+
+ .../bindings/mmc/qcom,sdhci-msm.yaml          | 95 +++++++++++++------
+ arch/arm64/boot/dts/qcom/kodiak.dtsi          |  9 ++
+ arch/arm64/boot/dts/qcom/monaco.dtsi          |  9 ++
+ 3 files changed, 85 insertions(+), 28 deletions(-)
+
+--
+2.34.1
+
