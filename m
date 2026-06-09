@@ -1,203 +1,209 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dy1-f193.google.com (mail-dy1-f193.google.com [74.125.82.193])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A48B039D6FD;
-	Mon,  8 Jun 2026 21:58:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780955932; cv=fail; b=IaB5rfZ3qJFZHs6LBuQLWEuB0CWayP6Ax14hQpkOYLNQbavgolCYzG/XFIDVbwCDT1amxEn0dnLf2tXVdTiC01LUDQW9FdTQtNN9PrmVQEiQUc1aaYjh0cc1bKQ0Ggo9CKQKteidgC6XKJYSxpYVLYuknu6qfwVSKczdZwB/dtU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780955932; c=relaxed/simple;
-	bh=oziLaIL87HuvCdHO2KiikcabIpvd1jMhu3pdikJxWBs=;
-	h=To:Cc:Subject:From:In-Reply-To:Message-ID:References:Date:
-	 Content-Type:MIME-Version; b=tjt/I/PMVPJ/iq5kBNLXM/DHL4bUCrpXKxwAHzq75QkYaXlu18QCPj9SC4lOstneXDMJ8zuc3UCx+v4RdVLuEQydY5vI5+m56Q/n4yUrsQu7Fm18B2P/ln+JjrXgETJvWFgDRFBCggAuieDOkgjfwXlEC8zWduX6mk2+9XEFPjA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=F0SvB8Hu; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=rEd4Rb7i; arc=fail smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76A042F6596
+	for <linux-mmc@vger.kernel.org>; Tue,  9 Jun 2026 02:55:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.193
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1780973710; cv=none; b=JBNA1bqTV8b6UCXbeQqozkrMwhxEBtgCACxTfUAx6toSG86gpWfVJedSaSZ+UlxSBC6BSqsySDDN2iUBtdgzQXXjsgNv+nWoMvZ+dtDv6gqrnLrilNbwlJsnmhEFXUOHZlRJhvQZEiyjd3ct+Od8kSJ8Qfz5tW1M6tAqXsgf/Bg=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1780973710; c=relaxed/simple;
+	bh=uuY1jgwN8xznTomCCr0j0w/za4xP4VVWYhZTGynA3As=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=UizafE2/oGcmR6IXrp+RL/UVgWuFoFIrZr7vWVrF2E6JeselyQc6jxx2t324Lk3/M937tSrVgZtzW8vEj+7J2cbnf70hn/4jPRXb3v82PpbDCVJb7/aOSDbBATrn0sON7Sdwi9NGXuU7RGO7Y2GMn5X5cW2eo/9P9ypjbiFG18Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TLE8dJD+; arc=none smtp.client-ip=74.125.82.193
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="F0SvB8Hu";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="rEd4Rb7i"
-Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 658HSfq81690708;
-	Mon, 8 Jun 2026 21:58:46 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=corp-2025-04-25; bh=ddUYuhTULPgsM6+ffX
-	VATsY0vN/yZqrygzKB8PY438w=; b=F0SvB8Hu9fCt4Rsmn9dEEFzAUoBfTxYDGB
-	1n/0vnoy+Wot+J1Uc2EKQt9YWX1HB1EmZWCRozGlwmGjbUlO/d0w2ar9C0GV0/da
-	BNva63aSQa1xjKrxsbr4Mt0xVsZmCz0Gk5F91aLUBeZlUfULjZEHsAz1ErWe40yb
-	314TzO6rqs8ZBZSS1Buofg681JVXKGF7E3bdIWfuepxjS+AmemM7iDS2AWuPvfOy
-	Qpe/zeO6hsfky3lFT0YUE1PhJlXmLpx2f+2R8w4taaSNDsFH9qh22I+ZmsfhcT5K
-	rz9xCvqHSp2B1Uf/0J4+paqRJmo4zVT4wQry6V9U+oE+4AMo92iQ==
-Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4emab4kbnc-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 08 Jun 2026 21:58:46 +0000 (GMT)
-Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.7/8.18.1.7) with ESMTP id 658Lw8Nr009745;
-	Mon, 8 Jun 2026 21:58:45 GMT
-Received: from sj2pr03cu001.outbound.protection.outlook.com (mail-westusazon11012063.outbound.protection.outlook.com [52.101.43.63])
-	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 4ema0eau4a-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 08 Jun 2026 21:58:45 +0000 (GMT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=laS+dqM8uOwOlAjE45bPVJSGsbF/oLBDE6NjMIny/hGU430Kca+2Q5sd1kx7M2fz01uLpc4WTFZwOW+2yiIuXJ4kj+IwMtobDRlWad3gH+X0CN+enXL0rCVp13H5VHeQEdQo0DgnQL75TWY5ldBD9Y3F9cU8wZjRdz+C7sMfFMUxU5ztP3iYV6/M386/C/+CrdmOttuFc6ir6XXpnJpAi7tGgI/PbJNjh+HdowHPU9rQc+s6hX0STPqABwQB68B1Z/2FojVvt/sQrSIH5xm8ODDhKkTQwSsnLf2Fx7/hr/eOQoM5Z3IuLvpUN3RPxx3QUX5cRU9aQt3otkK/o00bRQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ddUYuhTULPgsM6+ffXVATsY0vN/yZqrygzKB8PY438w=;
- b=S9AyN1s7SI8CmCr9yfWe9eYKb54AYYtu4VBqceetfdNz+1u/7JB4FwJtZmuGunjk1rto5Iddut0Ag3A2KOFuXkfiS6JM3/mQy2H8GZyLT4rs60Ee34UlZXmg/YvPLSlY7NTI45+Y2gAP5nutibs6Clh6ifA2o/vuDxxWpfjfoIA2jSj+xFnAI9OP3VY7OpEZSr3+LZE2PC0UAYmtJqz7+XiCTIWnzM8Qs+X4rVc151884Bj1Y6hz3IdSc8eEN+vd3qpZqEabc1MeFC1qykpMhhaFpTGo3RM9UNya/p5EP+rcBjYqlVldygij1Qz/Kr8ZN6NYumk5oYsYEB7IuoLq0A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TLE8dJD+"
+Received: by mail-dy1-f193.google.com with SMTP id 5a478bee46e88-30759632453so7265278eec.1
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2026 19:55:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ddUYuhTULPgsM6+ffXVATsY0vN/yZqrygzKB8PY438w=;
- b=rEd4Rb7iD0UvL10JbLwfQP91XPNgzP2ejhiqUUxVPhVO/90z0jYA4p9TsIveXEjdeQ8P/D1QGm5TUtCjSH/ldN9dj67Akmusd+nYcHF6UPGIkP82zcVKAZm4Eu6GiqRcHvR10cSTCsMUb//6/XyxVgGybv/s8zTKsz23GondSjw=
-Received: from CH0PR10MB5338.namprd10.prod.outlook.com (2603:10b6:610:cb::8)
- by BN0PR10MB4998.namprd10.prod.outlook.com (2603:10b6:408:120::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.92.12; Mon, 8 Jun 2026
- 21:57:37 +0000
-Received: from CH0PR10MB5338.namprd10.prod.outlook.com
- ([fe80::e525:dd71:b002:6ad5]) by CH0PR10MB5338.namprd10.prod.outlook.com
- ([fe80::e525:dd71:b002:6ad5%6]) with mapi id 15.21.0092.011; Mon, 8 Jun 2026
- 21:57:37 +0000
-To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio
- <konradybcio@kernel.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        "Martin
- K. Petersen" <martin.petersen@oracle.com>,
-        Adrian Hunter
- <adrian.hunter@intel.com>,
-        Ulf Hansson <ulfh@kernel.org>, Rob Herring
- <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor
- Dooley <conor+dt@kernel.org>,
-        Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
-        Harshal Dev <harshal.dev@oss.qualcomm.com>,
-        Kuldeep Singh
- <kuldeep.singh@oss.qualcomm.com>,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org
-Subject: Re: [PATCH v11 2/6] ufs: host: Add ICE clock scaling during UFS
- clock changes
-From: "Martin K. Petersen" <martin.petersen@oracle.com>
-In-Reply-To: <20260609-enable-ice-clock-scaling-v11-2-1cebc8b3275b@oss.qualcomm.com>
-	(Abhinaba Rakshit's message of "Tue, 09 Jun 2026 03:17:24 +0530")
-Organization: Oracle
-Message-ID: <yq1ecig3dc1.fsf@ca-mkp.ca.oracle.com>
-References: <20260609-enable-ice-clock-scaling-v11-0-1cebc8b3275b@oss.qualcomm.com>
-	<20260609-enable-ice-clock-scaling-v11-2-1cebc8b3275b@oss.qualcomm.com>
-Date: Mon, 08 Jun 2026 17:57:35 -0400
-Content-Type: text/plain
-X-ClientProxiedBy: YT4PR01CA0315.CANPRD01.PROD.OUTLOOK.COM
- (2603:10b6:b01:10a::28) To CH0PR10MB5338.namprd10.prod.outlook.com
- (2603:10b6:610:cb::8)
+        d=gmail.com; s=20251104; t=1780973707; x=1781578507; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=pJI9CahXJjJULtLK0KUB7o46AGmYjVAvw4WBv+i+U6E=;
+        b=TLE8dJD+tqFpGYG6rbLYlL2ufeWrVB4XbjptbBxSHaCWTAvz77Wvig0+dzA4PkHum1
+         5cdnrLsgr5D915iltoX6H7I+ttCdv/ocWp8WJwoGLxnlPqLNXhducNYn0aNiyLzcgIOd
+         1vicq9dr57XIZZpcB4oyceWQTGPeK6inVjelzld6wj7+UoBr8yhZCoFXL1w8U/cwcAF4
+         UwkByIi2gfYH6eaH2H4pHA9LfI4DmRELkJs1boqbpgn0CiOmzrD/lQ6cJNQCRez3lo5U
+         h0zy6VhmcnGljKP7JpBpfjvoh+ANGI6jm69WsTzTsaW9QZfvWsNMlylcKMxZ9R0Pmu6a
+         UQxA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1780973707; x=1781578507;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pJI9CahXJjJULtLK0KUB7o46AGmYjVAvw4WBv+i+U6E=;
+        b=oMfSin3G/XTN7dntLbk1u8BNN2sPdhT9Ja6I5PWSMaTQSIr0jZtzNwcaZAkYw+fh4A
+         DMREv9xy5r52oTVwy99R7TXFD+sjl0YoJ+c9UOAWbpeC/1bUXHiOPGZI2o8wRwhnUTaC
+         gJp8XS6pXNaUbokX16Hz4ppcH81UyaUcqp1cq4DQh4Y7H9+k0tHinNhLzW4lgElJQ0AV
+         oFqq3pEctI8bA/t/zRn/D+k/0uFCscYrUD2sFNUfvq3X9WIsCNdijNYBwmBP3azd2fqw
+         BdpHxx/6N08fh/dT68uYHbHnMaTyJUfc8OfdtAGtbHPN4SIAEQUbAugK7alE7kI6Rgig
+         xwtw==
+X-Forwarded-Encrypted: i=1; AFNElJ8OpsB3NLk8r7R3HON0XwcNQmwHxYDi/PbdS3QeuZHlJCaHedHgffCscNMYgXBHvlYLsA7M7uaDRLE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwNeiRfMtVR5PjmpUzgXau9eIqXtl/jvJ5rIDOL9R9Xy9aB8I2g
+	ciFhJsSZsK20Z5ambA3zXRnA4OsAP0iyHxZ5GOfe64NOqzg2B5I9+eab
+X-Gm-Gg: Acq92OGREHJwCMghW1+shWbhOE+udpyj0/0PCZ2Wol242S7kOvBxllWzhppxnZ7MBYS
+	sbctxc6FuY//mD8Qr/B6S/wxZRfnqwpt7WPa84S053LKu9gPy0n+LiCzUKHk5od9KXaPwGW5o+b
+	wV6dGRqg4oOP2nch5iNHvnuTAa6HR8yj2EkNDd1vn8p90GFl/ayi2E9IDPQR8v2hHvyqqm6EDt1
+	XlVtVsk6bELKYZ6uBXpBShClsIGepdthwreWun6Bwi0lj6cfUUb2yfkwqaZhoxJ4huF4NcJDCe6
+	fX/nImTDVjqLaotR/yaJNoKPVeAjilq/+tELQsrWe6rgyaf594IB5OGS7fd2da31puGlUgw7hWh
+	1cNP5ggWpLzd9nu7Xxxro47YkwSwPWbhhmD8vvPdzSzhKpNkVrj3bjXmUEo7xUWgsqTEpD99M86
+	EsEbqlEfsJT6VgmjUW5JjZBJ7ko0/4FC0plkOEzsFJDgF9aJ3rbrufhQXil8TnJjE3LQhRnF+q1
+	DVqMxrbeXmlxAIcMibkQDYInY4hWQdyucUfiqB7JPCN5HTQbUxt5hg6sgee0OqgNXpsx9VmuRZ8
+	ug3XtpQ+3hYPbf/zPnJII/I4V/MX
+X-Received: by 2002:a05:693c:2c01:b0:304:705f:e4e8 with SMTP id 5a478bee46e88-3077b33835bmr11052916eec.32.1780973707366;
+        Mon, 08 Jun 2026 19:55:07 -0700 (PDT)
+Received: from ethan-latitude5420.. (host-127-24.cafrjco.fresno.ca.us.clients.pavlovmedia.net. [68.180.127.24])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3074df191d0sm28554855eec.21.2026.06.08.19.55.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 08 Jun 2026 19:55:07 -0700 (PDT)
+From: Ethan Nelson-Moore <enelsonmoore@gmail.com>
+To: linux-arm-kernel@lists.infradead.org,
+	linux-mmc@vger.kernel.org
+Cc: Ethan Nelson-Moore <enelsonmoore@gmail.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
+	Rakuram Eswaran <rakuram.e96@gmail.com>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Khalid Aziz <khalid@kernel.org>
+Subject: [PATCH] ARM: PXA: remove remnants of PXA93x support
+Date: Mon,  8 Jun 2026 19:54:51 -0700
+Message-ID: <20260609025458.13744-1-enelsonmoore@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CH0PR10MB5338:EE_|BN0PR10MB4998:EE_
-X-MS-Office365-Filtering-Correlation-Id: 0cef7bb1-a2ac-4e70-a04c-08dec5a8f3cd
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|7416014|376014|4143699003|56012099006|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info:
-	d6gyvCCummXEzBFoQeruL1Mmlhbsoy5wvvIUXgLQNle/FWrlGBUeSMLgN0mW1fWkRCFWbBLiUipMRD1CvagnYjl4kwcHPqmYF+1An18tKF6JC6JUxpT+NVUvwmc+zAjEl6M4Rsiwq3P2s9VlXWGjKGtS11AK3q2fAzkFz0NlWXuXD4PgOvF9RPIqvQBYkv9z1cflfpFNrtdnUwNoDXInUVICsIeKBb3ZGMuIKrsOg0q/1u9KC0WRucBVEM3H6SS3w6l5PHFBfN4Dcm30J25bC/RZy3Y8XkxTLF0rhaEY5TpHkMbFr5PvDrZY1ErHBqTAZ0stef+CO5tzDbjR1DG2rlIxi6bCA+pe4yDVIcnAHThUqabEGE9mHyz3lW/u3yxcbjrlQfHDg4vBg7PjjyH2pl6TS+ibba/9XOMXG6V9CdSuRNh4j8k2aa2sQMfy6LiGEIbkND4+pDE34UaTM4emHVt4U67LvCHTgsiJ9vVTLjamESS1iRuaLFXSh/Z5qNNin1dKZZcb9/gqlGXWRJH/92NWr5FEAfHsdAr03Rl71BNkUUSOkSLLNgqSj6Sn7wRTeqonSxgaoc/pLZVYgbz0Cz0yzPXeWHeQYNDDpC8qOeDZ8lE0idcsFrqJ/pHju5g419fjjKPxZARgYdZ5Ul+M3T9DIc1aKoMB+tHgF5OqiPIugn46YBhotey9AWFtlL8M
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH0PR10MB5338.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(7416014)(376014)(4143699003)(56012099006)(22082099003)(18002099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?kSQw89MMItwFOeBxGPCcaUIy2I1+uttuxKewc9eDY2na7S0AGoinNEcaTuSB?=
- =?us-ascii?Q?8UHa/qUzSwYITXjLb9a49TVs5qITPyzWj5+SozkQNnh+sa+KIBIjCyjgsAhK?=
- =?us-ascii?Q?bKbiP9Lc3T5RWEl1YjwwgLQFQW7ToUbEa85nJfrBDrXhuzbJAPiHmabN6nSg?=
- =?us-ascii?Q?JBlK3Kjf2BR+BkDE4JCq2XB9YMmfY0aXk6BB7xDfEFQRRAHD98PZDM8lmRIp?=
- =?us-ascii?Q?oPMMDjmtf1rAieNGzJTK1f0o/NDIvhgvUm7oiyameShTPGTALl1t3tQGwfp5?=
- =?us-ascii?Q?+K32k64HQKKpjqNoaBrulA4Dq7XSvDdnpmqegCzhMY7y9fE0dCjJplaSBQ04?=
- =?us-ascii?Q?7yvAYoYnGFd2XWvxSYIT9yiyUlU2omKT92ConTGYy93u64VriN6m1ATpQFxd?=
- =?us-ascii?Q?6fvVmgZOYg1gLLrqU/hYBCtTlUlj2jqMhc2ajG2CtDlXEoRwc0/Sn/QTPV3Q?=
- =?us-ascii?Q?pXWrLAXlJh+KA+NYIeETOeCTe2B22PSS+05qa3KIW2Voh2H1pNN5vlTITeWI?=
- =?us-ascii?Q?Y7At8KDkuYNiumXTts4YW2VhVQ6hqtM3EYWqnLWP9VfnFAqEgOeM4n5eiebr?=
- =?us-ascii?Q?SP0bj0Xq+UOHPGX8JtUb1KxqiBARC788so3RR/5ZKRelQHql6b3NwMzN2z0W?=
- =?us-ascii?Q?BsimbxXwFe+AJuwdCvK5hybtdz8DzWgjwR+w1PbsVEvMPByd7GQXm+CBh9Md?=
- =?us-ascii?Q?dqqjCxGbQYEt+tu3I2LoJn+ENdAcmeSKYcCgjDzNkJVpL8pEQ+CDybJMzLtd?=
- =?us-ascii?Q?6tmxOBhlYw22F/1b0+Vb3Nyv2FMynjg5kfQDN9fe0joqjVtp11MGvtOh4jJH?=
- =?us-ascii?Q?I9p1BMAv2Zat0NwbBT7GMyTNkR5HezTOjJbCGtefw5u1Cyh0GY97D7t0DxSa?=
- =?us-ascii?Q?D/3TslZVn7XcJhHhfubJynGVfVPy9JFEZIno2Q4rAUG0XmMUSbD14ODfAPzN?=
- =?us-ascii?Q?Ph4H++ISjh32ZGTDmktSux7m5KOYwZLmrRig1x3mfYn8bbew/Vz83Y9KGxqu?=
- =?us-ascii?Q?YUFp73RhduZyXjVux68x5kkGnbGJaiPH/FdnG0uVSaaulOB++QuCPnV6RBen?=
- =?us-ascii?Q?LKEX251YWAkMaOEiQJMN8lyipwA2VoyKn8XHMb4OlxG6srZB3oPlcI59YjdN?=
- =?us-ascii?Q?ttFbbAxgyiRVWKXy988dEtq69NsfnxGBRC2Y60nOsLuHi2g+n8bodZGYuCBb?=
- =?us-ascii?Q?jPoe6kMvdKKxq3Ga0o+gNDf3JqXJXAksXTRX9T9uxXo2aYoS0PV6Gwrh/6Fg?=
- =?us-ascii?Q?/7yuaJh7cCefR8VxdZ/FdAF2qKk//i2BDby6RwmwqczoEb91TuWqWWyF5Bye?=
- =?us-ascii?Q?QzW/fEeVBN1ics+4ymK3ULyz86dIaMtmJAcaq/GebmVG/qcR2khD89r8l5Bf?=
- =?us-ascii?Q?Axy++7VWmAKJANX/JQNceS8xQV3qfmoOf1nX4X+36Y0rpIggGzL1PlwqElut?=
- =?us-ascii?Q?0kRdSNLGVafDx2ubTOD/1bot0lN1SA2Z3fFszhH9lkRaB2gO2JVSLhwzsdLj?=
- =?us-ascii?Q?awe5c0ABmqG4TKwDioQPOOha1F/g1z89Qxrl+0By3ecUNvAp3d8c9rFky1VX?=
- =?us-ascii?Q?GuDWYvUy0k1lOy79hGfqI6PjtpMXO965XW6cvIO+Q2OH327s0YwA8lkFEOhD?=
- =?us-ascii?Q?i/10bR/xi69a2rxuEzqMo8Wl4uSllmXchcpD9yUVPboarS59ZMKYjQK1rrpb?=
- =?us-ascii?Q?gr6Sqjmfg//hhKUuaGgVUsuOo8MXjzJ/QSzdaAlc3dErXjSB7OpxRTf5S7ms?=
- =?us-ascii?Q?Qk7bOejLtsA5DI0mlAAiTI6GrDzfYZk=3D?=
-X-Exchange-RoutingPolicyChecked:
-	HVERBU8y7KR9tHWl+vrkXL8BQmCu4LcuOp/u1Tu/7+lQ7B+masJ2QdD1iSVxfU5twppMc8i6PyOOu4KZFYXv9yBcOuj1haRBJjeTMiO43HqMa42zmDaRbZ0bIvNaMVP4VVHIH98DPTZJcEy0f+0Xe6MP9q80G+JXlYrE7dII+zyMom71iF6dk8Yp/eyS5FJLpVPC9X1pwpN+bG49LkxLry7CTnVKe5kVGQyXnO2ewpHl3enHuVW8hPpd79Lv6FG5/1MS8lSrNabI4Q7lBEac5naiSjgsqU7Skmo71xgqm2R/ZdZkPzD3V2Lwx+fbRHLx/6WgjhhBZq3uepdEKt6LfQ==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	zi3B4uq6Ubs1/Otyh9K8p/QYzki/krjxY86/2d35ur9C+aEZkclpSGG1fpUUMNX2Bi4naG1VV6ucAQYk+e1rwWE5MdNlR1n5PEQ0EpWQDbfzMwgbzmPspKgFahrraDpHsPmtCyokmX7E2Af1zr7MIJLc+/3duG447ocKR5tXWCJMobrkfBpyvSPlSGbn56aHzGqFpXsdgv5qQgzo9jS/KfW4WxDaF6muAVc1bWkGMLhYKZuu4T06RvzsruigEvpHharXNChJiD3FnwOsrCprUMPHaR6Ahh+qHbQvK6OIVKaIhDuT0D8mP21phrGvH4KrUYjvbjMkWA7wzVW4dzt/j7P4/7mVq56WyUp2dGzA8AqI/jiyUZhOMT/GicrxTyButGsLZS78wyrkb/5vZeBYiBU7RGp8MUsnMrKmPp7s63W4QAwL014Fc11oliUEbwNgGgdZVJX60qnNhjEaj+ODLKWEE+E7RZdRj69OLLGKuxFPS+rq0z+8Ol2KZim65poU5tjoruIMSULheu4UjABYVDRQpdQJgY6HDbFDGonZB8h6Hh1D1eyTQjz2Ymvn6+gbDLwSNZydtaovflc8A+8EWzMRpbN6PoCIWjCH1lPPymw=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0cef7bb1-a2ac-4e70-a04c-08dec5a8f3cd
-X-MS-Exchange-CrossTenant-AuthSource: CH0PR10MB5338.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Jun 2026 21:57:36.9779
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Y7jGbfAJi6Ks0fuONDkDCwMXUfqKgAVF2S+mPRFmlpoQN+YJLSLMCeJeVnE+7ClNc0V1p4eQHBQyNHQ59diawr77ZmYJ32dRNfTrmOxDbv8=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN0PR10MB4998
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-06-08_05,2026-06-05_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0
- spamscore=0 malwarescore=0 bulkscore=0 mlxlogscore=999 suspectscore=0
- mlxscore=0 lowpriorityscore=0 phishscore=0 classifier=spam adjust=0
- reason=mlx scancount=1 engine=8.19.0-2605130000 definitions=main-2606080201
-X-Authority-Analysis: v=2.4 cv=cL/QdFeN c=1 sm=1 tr=0 ts=6a273b16 cx=c_pps
- a=OOZaFjgC48PWsiFpTAqLcw==:117 a=OOZaFjgC48PWsiFpTAqLcw==:17
- a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
- a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=FelO9ux0wxsA:10
- a=GoEa3M9JfhUA:10 a=VkNPw1HP01LnGYTKEx00:22 a=jiCTI4zE5U7BLdzWsZGv:22
- a=o5oIOnhZENCTenyL_yNV:22 a=yPCof4ZbAAAA:8 a=xy4oZan2cbFDXSxVChgA:9
-X-Proofpoint-GUID: pAIc_KyfAKjFExiQ1pFnJoUed3JzTk0q
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjA4MDIwMCBTYWx0ZWRfX6Qkd0eHDYY+J
- o28YJ9t6s2DFQt/nYCEo0jVG9hCAP62Mzt32e37RraAKdP9TvzUdIfWcqcijM4YeBQSYF3KJuvT
- QfQmq5HYiQxva2+zFPxLGJ2D+bmyjASIXlRhRxlcNJA/SHGzyPDDR8oUHkw1lnUxIbVqic5Cilp
- 2jL+Po7XtirDT575cgFq/dJGk9sha2kgHe/AClkgNarHX8GEgMI/URBiONVjZtRg6Sv/Y6qrXg0
- wcUTk2APXcDA8XEXrXUs/dhJZ2/3oOLZTXQDdO1VEpdQfjD1k8yKtTFSGTDROHfJobTmfn1ACrM
- KIaF3NdENK1kIIgx4tgMwSublNAtDbPWKBTUUYBndC2r9H4ly3RNvxLvL8JxtRUoYWhayLO+SIF
- NFiFYwsocsm1BuUgDBs+0MCp5UVIxtB5ffpZRoE498AwE5iCgiAJsmA3B3RtGyQqUntLbGrlwLV
- D3mCTreVJe5IYKQryJQ==
-X-Proofpoint-ORIG-GUID: pAIc_KyfAKjFExiQ1pFnJoUed3JzTk0q
+Content-Transfer-Encoding: 8bit
 
+Support for PXA93x chips was removed in commit d711b8a2987a ("ARM: pxa:
+remove pxa93x support"), but some code to handle them remains. Remove
+it.
 
-Abhinaba,
+Discovered while searching for CONFIG_* symbols referenced in code but
+not defined in any Kconfig file.
 
-> Implement ICE (Inline Crypto Engine) clock scaling in sync with
-> UFS controller clock scaling. This ensures that the ICE operates at
-> an appropriate frequency when the UFS clocks are scaled up or down,
-> improving performance and maintaining stability for crypto operations.
+Signed-off-by: Ethan Nelson-Moore <enelsonmoore@gmail.com>
+---
+ drivers/mmc/host/pxamci.c   |  3 +-
+ include/linux/soc/pxa/cpu.h | 56 -------------------------------------
+ 2 files changed, 1 insertion(+), 58 deletions(-)
 
-Acked-by: Martin K. Petersen <martin.petersen@oracle.com>
-
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index b5ea058ed467..f8427f071c00 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -43,8 +43,7 @@
+ #define NR_SG	1
+ #define CLKRT_OFF	(~0)
+ 
+-#define mmc_has_26MHz()		(cpu_is_pxa300() || cpu_is_pxa310() \
+-				|| cpu_is_pxa935())
++#define mmc_has_26MHz()		(cpu_is_pxa300() || cpu_is_pxa310())
+ 
+ struct pxamci_host {
+ 	struct mmc_host		*mmc;
+diff --git a/include/linux/soc/pxa/cpu.h b/include/linux/soc/pxa/cpu.h
+index 5782450ee45c..38bacdae684f 100644
+--- a/include/linux/soc/pxa/cpu.h
++++ b/include/linux/soc/pxa/cpu.h
+@@ -46,14 +46,6 @@
+  *  PXA31x	A2	0x69056892	0x2E649013
+  *  PXA32x	B1	0x69056825	0x5E642013
+  *  PXA32x	B2	0x69056826	0x6E642013
+- *
+- *  PXA930	B0	0x69056835	0x5E643013
+- *  PXA930	B1	0x69056837	0x7E643013
+- *  PXA930	B2	0x69056838	0x8E643013
+- *
+- *  PXA935	A0	0x56056931	0x1E653013
+- *  PXA935	B0	0x56056936	0x6E653013
+- *  PXA935	B1	0x56056938	0x8E653013
+  */
+ #ifdef CONFIG_PXA25x
+ #define __cpu_is_pxa210(id)				\
+@@ -126,26 +118,6 @@
+ #define __cpu_is_pxa320(id)	(0)
+ #endif
+ 
+-#ifdef CONFIG_CPU_PXA930
+-#define __cpu_is_pxa930(id)				\
+-	({						\
+-		unsigned int _id = (id) >> 4 & 0xfff;	\
+-		_id == 0x683;				\
+-	 })
+-#else
+-#define __cpu_is_pxa930(id)	(0)
+-#endif
+-
+-#ifdef CONFIG_CPU_PXA935
+-#define __cpu_is_pxa935(id)				\
+-	({						\
+-		unsigned int _id = (id) >> 4 & 0xfff;	\
+-		_id == 0x693;				\
+-	 })
+-#else
+-#define __cpu_is_pxa935(id)	(0)
+-#endif
+-
+ #define cpu_is_pxa210()					\
+ 	({						\
+ 		__cpu_is_pxa210(read_cpuid_id());	\
+@@ -186,18 +158,6 @@
+ 		__cpu_is_pxa320(read_cpuid_id());	\
+ 	 })
+ 
+-#define cpu_is_pxa930()					\
+-	({						\
+-		__cpu_is_pxa930(read_cpuid_id());	\
+-	 })
+-
+-#define cpu_is_pxa935()					\
+-	({						\
+-		__cpu_is_pxa935(read_cpuid_id());	\
+-	 })
+-
+-
+-
+ /*
+  * CPUID Core Generation Bit
+  * <= 0x2 for pxa21x/pxa25x/pxa26x/pxa27x
+@@ -218,22 +178,11 @@
+ 		__cpu_is_pxa300(id)			\
+ 			|| __cpu_is_pxa310(id)		\
+ 			|| __cpu_is_pxa320(id)		\
+-			|| __cpu_is_pxa93x(id);		\
+ 	 })
+ #else
+ #define __cpu_is_pxa3xx(id)	(0)
+ #endif
+ 
+-#if defined(CONFIG_CPU_PXA930) || defined(CONFIG_CPU_PXA935)
+-#define __cpu_is_pxa93x(id)				\
+-	({						\
+-		__cpu_is_pxa930(id)			\
+-			|| __cpu_is_pxa935(id);		\
+-	 })
+-#else
+-#define __cpu_is_pxa93x(id)	(0)
+-#endif
+-
+ #define cpu_is_pxa2xx()					\
+ 	({						\
+ 		__cpu_is_pxa2xx(read_cpuid_id());	\
+@@ -244,9 +193,4 @@
+ 		__cpu_is_pxa3xx(read_cpuid_id());	\
+ 	 })
+ 
+-#define cpu_is_pxa93x()					\
+-	({						\
+-		__cpu_is_pxa93x(read_cpuid_id());	\
+-	 })
+-
+ #endif
 -- 
-Martin K. Petersen
+2.43.0
+
