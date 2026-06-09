@@ -1,216 +1,389 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from DUZPR83CU001.outbound.protection.outlook.com (mail-northeuropeazon11012042.outbound.protection.outlook.com [52.101.66.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 404C83FFF92;
-	Tue,  9 Jun 2026 14:31:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781015499; cv=none; b=I9hEv0nWte/CMICxUo2KuqKFUQGzFiZxC8NhZ462d9thibPwiVmZ0MKhWrxZ6p3WCm7IOOJzzC3d4G6ZchOoyDrpDIoz7xeChIG6GTyuiSD6FTMZGrB4MTMj8sWdkV4MZHbcbZEWxtyrB1acikfJzhljDuI9Y3AVdObUIVA1iuw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781015499; c=relaxed/simple;
-	bh=Pw9+4Mrp9WsQ7Y6Tm5fYDG9zf9NzBasMKVvWut0G1s4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=k7Ay2MM9QDSW9mtzddooywHsxwB+B9MmX0BP35Up0K9sHmeEXvV/fc1u1Fmqb9SUEYsw1YSGf0jtKoNLwaK4p0ObCnKJuTEMENSXK3PBMYgK07vK7vbAleT7gyFQcWqwThLQpdoZRwcsi+3aFZpbNb68vkORlkXfF08wKBsF/ic=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hbLl1CPO; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A6242D060B;
+	Tue,  9 Jun 2026 15:26:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.66.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1781018786; cv=fail; b=mGJeriAIBRQO8eJgMWYbiaQ2KYSwGeNTYt35lIl8eZDySUZGwiTBF9nlApYcF9jh1q17DuhAwFNvOAPZ86tNj5v80NAyzE5XPN0KjDtRANh1aT78FtyNAXU+3go7TDZEaRlauHg9x0O2ri/sruiX1cu4ayvqMzWZgcBfKdJybQg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1781018786; c=relaxed/simple;
+	bh=S2EPicOSkIRjXCy0jEHq2RAVLKT6QifsdBpTlI24UQY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=XBeZm6qtvj5t8dVXbZPtO5HNhbcfz0kfF9ELdTPjYJlY5iPsV/RUyTM7hw+L2YATLqlG580CQYbuJuXzs8Z7+3o5bKjx+39YcqKqO09Sp5VRSKMimf3oXf+5peTgYFXA7900uwD4X2mxGyMZ+9fxZZLhlstmrACrXojPpd0Fz3A=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=B/wnVtjq; arc=fail smtp.client-ip=52.101.66.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hbLl1CPO"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3B2601F0089B;
-	Tue,  9 Jun 2026 14:31:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781015497;
-	bh=wnHCt9onRqoY+cbLWgHyZIs8YweKMqJpPWB0NBmJh2E=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To;
-	b=hbLl1CPOPdBa9wwSIomEqpEB19Sog2GlcWZzvi+192TOFGd0tHaqnXzjO+ttFDkBS
-	 qh+Q846IKjyEOyPDlo7AXxgSfRr5icx44xSRVQP7idXOk99r3eLnqU9bvVlGDiWp00
-	 /0fIEkM3abVn/YnOuToHmxTRG6DfTH5Lhzqkhw9EU8jsltzWfMiGaR0PogWTxQabwJ
-	 DbL+jxATM1WTbDBOyEKFFcUHwtNNDQpPsK7HGx41pXyVsTfzyR1JG+GnmXINndd3mY
-	 RUTPXeg7chvWQZN5Fzpa/QwzmKLbY8m90ELYKTX4vZTBj2etG/4Xj+Ic+B9MtrbGDB
-	 H56uWIZ+5hvmA==
-Message-ID: <490153c1-b6e4-4933-99e6-0f0ee96bb500@kernel.org>
-Date: Wed, 10 Jun 2026 00:31:33 +1000
+	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="B/wnVtjq"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=XSd/DfcTshDS3KUYn/wl/yso2pbH8xf3/wKf1Mmx5EkdhTX0IpABR7y+sp5dwULZUasilo/ZYE67e3hwJFyTDK09SNrrxKIHgq5SKhc481/nDyACB32Q2w+qyRc1V8ApTN0zXxAWRWRQu/rLY+ZIQ+WzRha8EizCeMK5xyQOH4rZ76cZwbhllsibH1ATNC58XSI7kAviBJy2ZwfgMqyVLjgIrrmQysEW7en/r65Tn9+bGYd3Aj1oN4jTql/Kp83xi0XILXLXGKoYdq0Vwc3h7Kcom+dDm4GtoOWo8bzOwocr8ZAMm3rmWDLv34lQ6WTb4Nh+uKvidfYNjqqZCldXrA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=GjdIrXBF8zvOts5cbhC9XD6ToHdg+8F9jFq6HE+dMVI=;
+ b=KL+h6KOBv2CtXeow0XXDenB/dq2tY1Q2m3QDwsouH8ZF75O6ooRPZ4FQum7odLfr6EcfEOFpddPPcaKP32FRPxDMuwU/URom5OGucdXlfPWJGfuPxPZD1B1iH8i6Z1U+IUnZUQRKHrgH41zMDPOCiqGpO7fTPqEYlSsHXxZXFbb+eWfACauASvo6mssJERTqjU8KoxHE7+mqteYajbEULLhywY+7oNqgqfLfkdqov2yqcpkb2g/PqbqIj2S8J6Pd5KbyvK9kF1RkJ4tR19OChsYKyPs9LRy7bp46/r+trhu+Ytauh0Pgk47nczj9lLjaOyRVNNTkcy0CYWwQrWCTow==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector1-NXP1-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=GjdIrXBF8zvOts5cbhC9XD6ToHdg+8F9jFq6HE+dMVI=;
+ b=B/wnVtjqY5XU1+n6Wzd/8daTpAXhfLL92qeDyYDUyjZjQ8hfiC0kGrzKqh/Z5ZjTS7Lz+giqaulslgT6ZW+rjfF5nS0Z8bxflntjz3pWc1Shl1RQ3ThBnngqTYUB20j348a4rv9IkAsqsItzItiFFVD7JYjGAVILMJNH5uNNomdLN1ePcQiGaEuN4ai9850p3n/Wkv2KGhFDmRK6dSTz08u887ZSybyvBgyIcvlN1EDz0X6DuR9kpjkKORvEA0uLpuIHMluMPottzctbBy0BIHnVI/twXTTHOCdoklUcJUvvv5WXXA5lbd6m8y0/Of+Hro5SPjz9k5EjAZhuwo2n2A==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from GV2PR04MB11799.eurprd04.prod.outlook.com (2603:10a6:150:2cf::9)
+ by AM9PR04MB8129.eurprd04.prod.outlook.com (2603:10a6:20b:3ea::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.92.14; Tue, 9 Jun 2026
+ 15:26:19 +0000
+Received: from GV2PR04MB11799.eurprd04.prod.outlook.com
+ ([fe80::2146:83a2:5329:b7c]) by GV2PR04MB11799.eurprd04.prod.outlook.com
+ ([fe80::2146:83a2:5329:b7c%6]) with mapi id 15.21.0092.011; Tue, 9 Jun 2026
+ 15:26:18 +0000
+Date: Tue, 9 Jun 2026 10:26:07 -0500
+From: Frank Li <Frank.li@oss.nxp.com>
+To: Greg Ungerer <gerg@linux-m68k.org>
+Cc: linux-m68k@lists.linux-m68k.org, linux-kernel@vger.kernel.org,
+	arnd@kernel.org, wei.fang@nxp.com, frank.li@nxp.com,
+	shenwei.wang@nxp.com, imx@lists.linux.dev, netdev@vger.kernel.org,
+	nico@fluxnic.net, adureghello@baylibre.com, ulfh@kernel.org,
+	linux-mmc@vger.kernel.org, linux-can@vger.kernel.org,
+	linux-spi@vger.kernel.org, olteanv@gmail.com,
+	Marc Kleine-Budde <mkl@pengutronix.de>
+Subject: Re: [PATCHv2 4/4] m68k: coldfire: fix non-standard readX()/writeX()
+ functions
+Message-ID: <aigwj8tXnEKjWkgU@SMW015318>
+References: <20260609142139.1563360-1-gerg@linux-m68k.org>
+ <20260609142139.1563360-6-gerg@linux-m68k.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260609142139.1563360-6-gerg@linux-m68k.org>
+X-ClientProxiedBy: PH0PR07CA0093.namprd07.prod.outlook.com
+ (2603:10b6:510:4::8) To GV2PR04MB11799.eurprd04.prod.outlook.com
+ (2603:10a6:150:2cf::9)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC 3/4] mmc: sdhci-esdhc-mcf: do not use readl()/writel() on
- ColdFire
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-m68k@lists.linux-m68k.org, linux-kernel@vger.kernel.org,
- arnd@kernel.org, Greg Ungerer <gerg@linux-m68k.org>,
- adureghello@baylibre.com, linux-mmc@vger.kernel.org
-References: <20260506142644.3234270-2-gerg@kernel.org>
- <20260506142644.3234270-6-gerg@kernel.org>
- <CAPDyKFpZ3h7Kx845K+f1EZs2ijgjBmKsLOX8GCuP=C5WV-d8KQ@mail.gmail.com>
-Content-Language: en-US
-From: Greg Ungerer <gerg@kernel.org>
-In-Reply-To: <CAPDyKFpZ3h7Kx845K+f1EZs2ijgjBmKsLOX8GCuP=C5WV-d8KQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: GV2PR04MB11799:EE_|AM9PR04MB8129:EE_
+X-MS-Office365-Filtering-Correlation-Id: 81b657bf-c6d0-4c4c-ae3a-08dec63b73a9
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|19092799006|366016|7416014|376014|1800799024|6133799003|56012099006|4143699003|11063799006|18002099003|22082099003;
+X-Microsoft-Antispam-Message-Info:
+	yPKoYWtQ4ycKbRTkCwd/SFz7LwjynupC7+cn0nBo41HXTGiGk1/Vk8zvDUd6c4GSuT1jvrlexyuDtrtsNR/bcvIB//iNXE8LZMFqtj0IcR73RuAkgQyRivF723XwapVskCCWmV3cayGrC8Vl/I6JiQqAZCI1493oLZ9PWanllP58s68n9ylEtbuJxMfWTtp1p22qYU0oK4ajeNIqdU2hOxdKjRSC2kV41DgtzahSdXQKEpPoWuyUhFnu1klGqNZi6iLY28cDTwvcMf/0OdIh2j1TNdzrAUS2uOKfILuEmKilSdJuqzDkbMoC+DY/T1nrjQu7nAYr4DUlokZycfRoGILzvNQFcA8iYe2BvCGbJ14mpGlGPmxjIRfSk3Wcu/w5fDsbmsMfEBGYvVBDJqCGbFAVGIsmz0mUPpm3rZCcznRfxX17gxcnZg5zR/+2uGoQKWXosWEMJ8vgsnY2C2MEzUhdkcV9FCcnAFXPDict/1pIIB/2qTbD7jbm+CR/8byHfOqo75SJYB5R8ZW9mSQ1V3KwFnsRZc548IxbFBL4PdGqDQchhZNN2ufu149ehPOmBClx6536TcI2xrV9bzB3Qs5l0I3oLRTeA34wh9yiynglm1Ep1pAbGMiQL8uxHzJIlvdN5jf8wGYllWHznoXe0F6qOHe4KgCmPnij0vDg3AV0KgDNYcZ4IbY7Y/ksOIuZ
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB11799.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(19092799006)(366016)(7416014)(376014)(1800799024)(6133799003)(56012099006)(4143699003)(11063799006)(18002099003)(22082099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?oZ0OvQnFpzFu1oPXNUJ14NXCqYOsvgtBZeQ6hdpwFcf2hTdjKU8w+nWSzKyN?=
+ =?us-ascii?Q?SSO5xKIpv4AAgSYpmVzL1vCW+AxwHQ0hahuh5JSLZyFB8iM+aek4AJfXLdIL?=
+ =?us-ascii?Q?QjzQ3eUeUl8VWvgfsQp9aDeh0jIT04ggPVEBV5bccBQtBpU7/lu4GJ82WpMX?=
+ =?us-ascii?Q?nqDvPyriX+O4PwKKxMGLeajhOo/fX46Cv7UulAdvrmIz+YkkEb8N4Hce/a76?=
+ =?us-ascii?Q?pnrqgMHxwnJQvnJ1EW+q/UNn+w684kt2rfC7lkn7JrvizW7PwrMgNZoY7IIr?=
+ =?us-ascii?Q?N7WOcAZOeHdKUlkpKfBJ7rWNkyOzmxB6WpVR5P7fZmioeUahizTQMdvDKGqN?=
+ =?us-ascii?Q?OPNJyJkhY1q3mKQY9ldhitvX3XpC+DwU1bVn0hN+/CIM+mbi7wU5qe4mJFRv?=
+ =?us-ascii?Q?1rGqQJxOkowX5M7SPzIygtNwAkVHNsdGa2slB1A3YFP8aEwRnt5MRVRzHgz4?=
+ =?us-ascii?Q?Vo6dOw6v3UYcFvTE8q8hpzW0HWq+g6tmLFwk8sI2FSsNlRKTav/ppJEumGtO?=
+ =?us-ascii?Q?HeXOQ6R1H5kxNqdn0loSXq6RZnGMkF4zBzDS1unGBTvCVsJHGyFI3+ggsOBg?=
+ =?us-ascii?Q?f7BqUCVIrH3bii+TYWLI8wVkYbOxaipk9cHcVUwW0UOFl58mPXqz+U0pKigP?=
+ =?us-ascii?Q?nMP4Y0oCg8bsypsFHb9AklRkCzgZcZOk2OkGunkipjx5pj03XXg40OfnYD43?=
+ =?us-ascii?Q?sReVhnGzWWbcdgFDlXeXtqCQTMxFoNZdKBZCI+F/zHCFWRM6ZAmNDN/IP1Ia?=
+ =?us-ascii?Q?APRq9HxZVtoA9TvopXdAh21CwXZrBERZHyxKPv6KSkdCCopeNeqHZHBfSmB5?=
+ =?us-ascii?Q?25xsfxiiKMH3rSHrx0DlWKwBi6W9S0ia3DlQ0OPQLQ0Ihihb1qbM/rE4Y34K?=
+ =?us-ascii?Q?ew1fLV2SW0/5KYIaCBDDw6UkjO8m4hJmzs4zik2SobLwdl5KfT83BFxGgWgw?=
+ =?us-ascii?Q?NerpsJgz7nSNx0x8doPbi2CBRhPRUwsPpOv4TrIdMTQgl6qG0ai4ILAPVtma?=
+ =?us-ascii?Q?Z7PjVhRAe3aHIJQeNR3WBYtOuYihAQvgGA83LnyGFxbZLljeDExt5Gdg0GLY?=
+ =?us-ascii?Q?VuhSVY2s4VRP0wBZx4UmLrj+/tP1FPMWNl0N+J0U2Br6GdJmujTynaSin0Re?=
+ =?us-ascii?Q?r1B2SU42GpuBTd4vhlZwv2eHUw8oAo2OUye0P161p2kuVXHNpOzkUZhlvJFJ?=
+ =?us-ascii?Q?jal59Zq05bCdBdl01KKXj51AoBMWdRNiL0oCTVqtBVWVMuBPB6qK9ovK3C5g?=
+ =?us-ascii?Q?oTmZpVqUPDsnyrzR/kjS8dNOkuPQkXsHbozIIfH9m1jTWzn1GsJI2GbDl8uo?=
+ =?us-ascii?Q?3YN26rF9GHY1Y1qOA43kSNFXudNIIxj9/hi4b8QWbmtaYcZyLGUFlewCX476?=
+ =?us-ascii?Q?s7evX9UGD6Vk8dQhCKKzxJLO/3bdQlt9UJKudj+BVdYUc2UO+UW3+gncxfks?=
+ =?us-ascii?Q?nTBRDd4B3fbjvHdStcNAUZXufVWGsMpUcc97ezfqvEXcEnN8nzaCl+5GjiOe?=
+ =?us-ascii?Q?Dmznedds6SIucilaSpDabv0Ryg5dSYx78RwdTHuAZt5Mz5Ho0t9F+u+A0n5n?=
+ =?us-ascii?Q?aAKERTVj0WBHjbf+tu+X7fumEQQwFWWBkSqEaBj4PUbl1UFm/+RQRvIOqnmB?=
+ =?us-ascii?Q?fgIuzFku/Yl+YXGqi1zYDVVhwJFCKz26EjURWX1YJghuwn4AA9/AKn3V2XeT?=
+ =?us-ascii?Q?D7GfSbXpTWvi6sJaK7BXQnHkfIqxTyyDV34Q33A0/+bA91ACbZYt2GJo3ULs?=
+ =?us-ascii?Q?7k2wmqtFHMR2+hRnOkxdLG9oU89XpG1XgudYbWgVbtpnY/vbwwMM?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 81b657bf-c6d0-4c4c-ae3a-08dec63b73a9
+X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB11799.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Jun 2026 15:26:18.4581
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: +ZaQL8w3tw9XvCYpzDO/SPoavJ4qY2vd+OYDj8ZNgNYRAfUD9nbP+6wktfcQ2Y9hHgOv9LnOnNSSgMDmIFF25o0ZqyNcGGj2juZo8YlYvK3StRcrd4x0yDdWzn6AeOjM
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM9PR04MB8129
+
+On Wed, Jun 10, 2026 at 12:13:01AM +1000, Greg Ungerer wrote:
+>
+> Remove the local ColdFire definitions of readb()/readw()/readl() and
+> writeb()/writew()/writel() and use the asm-generic versions of them.
+>
+> The implementation of the readX()/writeX() family of IO access functions
+> is non-standard on ColdFire platforms. They either return big-endian (that
+> is native endian) data, or on platforms with PCI bus support check the
+> supplied address and return either big or little endian data based on that
+> check. This is non-standard, they are expected to always return
+> little-endian byte ordered data. Unfortunately this behavior also means
+> that ioreadX()/iowroteX() and their big-endian counter parts
+> ioreadXbe()/iowriteXbe() are currently broken because they are implemented
+> using the readX()/writeX() functions.
+>
+> The change to use the asm-generic versions of readX()/writeX() itself is
+> quite strait forward, just remove the ColdFire local versions of them.  But
+
+typo  strait?
+
+> this of course has implications for any remaining drivers that use any of
+> these IO access functions. A number of drivers can be independently fixed,
+> before this final fix to readX()/writeX() for ColdFire. A small number of
+> drivers cannot easily be independently fixed and remain in a working
+> state. Those drivers are fixed here as well:
+>
+> drivers/dma/mcf-edma-main.c
+>   Supports big-endian access by setting the big-endian flag of
+>   the drivers struct fsl_edma_engine. But locally should be using
+>   ioread32be() and iowrite32be() instead of ioread32() and iowrite32().
+>
+> drivers/net/can/flexcan/flexcan-core.c
+>   Setting the driver quirks flag for big-endian access will force
+>   driver to use correct access functions.
+>
+> drivers/spi/spi-fsl-dspi.c
+>   Setting the regmap format_endian flags to use native endian will
+>   force driver to use appropriate big or little endian access on
+>   whatever platform it is built for.
+>
+> These drivers have only been compile tested.
+>
+> Acked-by: Marc Kleine-Budde <mkl@pengutronix.de> # for drivers/net/can/flexcan
+> Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
+> ---
+
+Looks goods, but no hardware to test it.
+
+Reviewed-by: Frank Li <Frank.Li@nxp.com>
 
 
-On 12/5/26 01:11, Ulf Hansson wrote:
-> On Wed, 6 May 2026 at 16:34, Greg Ungerer <gerg@kernel.org> wrote:
->>
->> From: Greg Ungerer <gerg@linux-m68k.org>
->>
->> The implementation of the readX() and writeX() family of IO access
->> functions is non-standard on ColdFire platforms. They check the supplied
->> IO address and will return either big or little endian results based on
->> that check. This is non-standard, they are expected to always return
->> little-endian byte ordered data. Unfortunately this behavior also means
->> that ioreadX()/iowroteX() and their big-endian counter parts
->> ioreadXbe()/iowriteXbe() are wrong. This is now in the process of being
->> cleaned up and fixed.
->>
->> Change the use of the readX() and writeX() access functions in this driver
->> to use the recently defined specific ColdFire internal SoC hardware IO
->> access functions mcf_read8()/mcf_read16()/mcf_read32() and
->> mcf_write8()/mcf_write16()/mcf_write32().
->>
->> There is no functional change to the driver. Though it does have the
->> effect of making the IO access slightly more efficient, since there is
->> no longer a need to do the address check at every register access.
->>
->> Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
->> ---
->>   drivers/mmc/host/sdhci-esdhc-mcf.c | 24 ++++++++++++------------
->>   1 file changed, 12 insertions(+), 12 deletions(-)
->>
->> Note that the patches to introduce mcf_readX() and mcf_writeX functions
->> are not in mainline yet. They are currently in the m68knommu git tree
->> for-next branch, and so should also be in linux-next.
-> 
-> Okay, so please resubmit the $subject patch when the mcf_readX|writeX
-> functions are available in a v7.x-rc so I can pick it up.
-> 
-> Another option is if someone can host an immutable branch for me to
-> pull in the changes for mcf_readX|writeX.
-
-Those changes are now on an immutable branch at:
-
-git://git.kernel.org/pub/scm/linux/kernel/git/gerg/m68knommu.git
-cf-internal-io branch
-
-I will follow up after 7.2-rc1 is out with this patch set as well.
-
-Regards
-Greg
-
-
-
-     
-
-> Kind regards
-> Uffe
-> 
->>
->> diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
->> index 375fce5639d7..6853521e8b2c 100644
->> --- a/drivers/mmc/host/sdhci-esdhc-mcf.c
->> +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
->> @@ -55,7 +55,7 @@ static inline void esdhc_clrset_be(struct sdhci_host *host,
->>          if (reg == SDHCI_HOST_CONTROL)
->>                  val |= ESDHC_PROCTL_D3CD;
->>
->> -       writel((readl(base) & ~mask) | val, base);
->> +       mcf_write32((mcf_read32(base) & ~mask) | val, base);
->>   }
->>
->>   /*
->> @@ -71,7 +71,7 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
->>          if (reg == SDHCI_HOST_CONTROL) {
->>                  u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
->>                  u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
->> -               u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
->> +               u8 tmp = mcf_read8(host->ioaddr + SDHCI_HOST_CONTROL + 1);
->>
->>                  tmp &= ~0x03;
->>                  tmp |= dma_bits;
->> @@ -82,12 +82,12 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
->>                   */
->>                  host_ctrl |= val;
->>                  host_ctrl |= (dma_bits << 8);
->> -               writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
->> +               mcf_write32(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
->>
->>                  return;
->>          }
->>
->> -       writel((readl(base) & mask) | (val << shift), base);
->> +       mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
->>   }
->>
->>   static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
->> @@ -110,24 +110,24 @@ static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
->>                   * As for the fsl driver,
->>                   * we have to set the mode in a single write here.
->>                   */
->> -               writel(val << 16 | mcf_data->aside,
->> +               mcf_write32(val << 16 | mcf_data->aside,
->>                         host->ioaddr + SDHCI_TRANSFER_MODE);
->>                  return;
->>          }
->>
->> -       writel((readl(base) & mask) | (val << shift), base);
->> +       mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
->>   }
->>
->>   static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
->>   {
->> -       writel(val, host->ioaddr + reg);
->> +       mcf_write32(val, host->ioaddr + reg);
->>   }
->>
->>   static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
->>   {
->>          if (reg == SDHCI_HOST_CONTROL) {
->>                  u8 __iomem *base = host->ioaddr + (reg & ~3);
->> -               u16 val = readw(base + 2);
->> +               u16 val = mcf_read16(base + 2);
->>                  u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
->>                  u8 host_ctrl = val & 0xff;
->>
->> @@ -137,7 +137,7 @@ static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
->>                  return host_ctrl;
->>          }
->>
->> -       return readb(host->ioaddr + (reg ^ 0x3));
->> +       return mcf_read8(host->ioaddr + (reg ^ 0x3));
->>   }
->>
->>   static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
->> @@ -149,14 +149,14 @@ static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
->>          if (reg == SDHCI_HOST_VERSION)
->>                  reg -= 2;
->>
->> -       return readw(host->ioaddr + (reg ^ 0x2));
->> +       return mcf_read16(host->ioaddr + (reg ^ 0x2));
->>   }
->>
->>   static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
->>   {
->>          u32 val;
->>
->> -       val = readl(host->ioaddr + reg);
->> +       val = mcf_read32(host->ioaddr + reg);
->>
->>          /*
->>           * RM (25.3.9) sd pin clock must never exceed 25Mhz.
->> @@ -245,7 +245,7 @@ static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
->>           * fvco = fsys * outdvi1 + 1
->>           * fshdc = fvco / outdiv3 + 1
->>           */
->> -       temp = readl(pll_dr);
->> +       temp = mcf_read32(pll_dr);
->>          fsys = pltfm_host->clock;
->>          fvco = fsys * ((temp & 0x1f) + 1);
->>          fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);
->> --
->> 2.54.0
->>
->>
-> 
-
+> v2: changed from RFC to PATCH
+>     use separate regmap config for mcf5441x (spi-fsl-dspi.c)
+>     reorder quirks for mcf5441x (flexcan-core.c)
+>
+>  arch/m68k/include/asm/io_no.h          | 68 +++-----------------------
+>  drivers/dma/mcf-edma-main.c            | 14 +++---
+>  drivers/net/can/flexcan/flexcan-core.c |  1 +
+>  drivers/spi/spi-fsl-dspi.c             | 14 +++++-
+>  4 files changed, 27 insertions(+), 70 deletions(-)
+>
+> diff --git a/arch/m68k/include/asm/io_no.h b/arch/m68k/include/asm/io_no.h
+> index 4f0f34b06e37..2f12f4ed0da5 100644
+> --- a/arch/m68k/include/asm/io_no.h
+> +++ b/arch/m68k/include/asm/io_no.h
+> @@ -3,15 +3,10 @@
+>  #define _M68KNOMMU_IO_H
+>
+>  /*
+> - * Convert a physical memory address into a IO memory address.
+> - * For us this is trivially a type cast.
+> - */
+> -#define iomem(a)       ((void __iomem *) (a))
+> -
+> -/*
+> - * The non-MMU m68k and ColdFire IO and memory mapped hardware access
+> - * functions have always worked in CPU native endian. We need to define
+> - * that behavior here first before we include asm-generic/io.h.
+> + * Historically the raw native endian IO access macros for non-MMU m68k and
+> + * ColdFire have accepted any integral value as the address argument.
+> + * The asm-generic versions of these expect "void __iomem *" for the address,
+> + * so define local permissive versions here.
+>   */
+>  #define __raw_readb(addr) \
+>      ({ u8 __v = (*(__force volatile u8 *) (addr)); __v; })
+> @@ -45,66 +40,15 @@
+>   * applies just the same of there is no MMU but something like a PCI bus
+>   * is present.
+>   */
+> -static int __cf_internalio(unsigned long addr)
+> +static inline int __cf_internalio(unsigned long addr)
+>  {
+>         return (addr >= IOMEMBASE) && (addr <= IOMEMBASE + IOMEMSIZE - 1);
+>  }
+>
+> -static int cf_internalio(const volatile void __iomem *addr)
+> +static inline int cf_internalio(const volatile void __iomem *addr)
+>  {
+>         return __cf_internalio((unsigned long) addr);
+>  }
+> -
+> -/*
+> - * We need to treat built-in peripherals and bus based address ranges
+> - * differently. Local built-in peripherals (and the ColdFire SoC parts
+> - * have quite a lot of them) are always native endian - which is big
+> - * endian on m68k/ColdFire. Bus based address ranges, like the PCI bus,
+> - * are accessed little endian - so we need to byte swap those.
+> - */
+> -#define readw readw
+> -static inline u16 readw(const volatile void __iomem *addr)
+> -{
+> -       if (cf_internalio(addr))
+> -               return __raw_readw(addr);
+> -       return swab16(__raw_readw(addr));
+> -}
+> -
+> -#define readl readl
+> -static inline u32 readl(const volatile void __iomem *addr)
+> -{
+> -       if (cf_internalio(addr))
+> -               return __raw_readl(addr);
+> -       return swab32(__raw_readl(addr));
+> -}
+> -
+> -#define writew writew
+> -static inline void writew(u16 value, volatile void __iomem *addr)
+> -{
+> -       if (cf_internalio(addr))
+> -               __raw_writew(value, addr);
+> -       else
+> -               __raw_writew(swab16(value), addr);
+> -}
+> -
+> -#define writel writel
+> -static inline void writel(u32 value, volatile void __iomem *addr)
+> -{
+> -       if (cf_internalio(addr))
+> -               __raw_writel(value, addr);
+> -       else
+> -               __raw_writel(swab32(value), addr);
+> -}
+> -
+> -#else
+> -
+> -#define readb __raw_readb
+> -#define readw __raw_readw
+> -#define readl __raw_readl
+> -#define writeb __raw_writeb
+> -#define writew __raw_writew
+> -#define writel __raw_writel
+> -
+>  #endif /* IOMEMBASE */
+>
+>  #if defined(CONFIG_COLDFIRE)
+> diff --git a/drivers/dma/mcf-edma-main.c b/drivers/dma/mcf-edma-main.c
+> index 9e1c6400c77b..4ed0ce644e37 100644
+> --- a/drivers/dma/mcf-edma-main.c
+> +++ b/drivers/dma/mcf-edma-main.c
+> @@ -21,9 +21,9 @@ static irqreturn_t mcf_edma_tx_handler(int irq, void *dev_id)
+>         unsigned int ch;
+>         u64 intmap;
+>
+> -       intmap = ioread32(regs->inth);
+> +       intmap = ioread32be(regs->inth);
+>         intmap <<= 32;
+> -       intmap |= ioread32(regs->intl);
+> +       intmap |= ioread32be(regs->intl);
+>         if (!intmap)
+>                 return IRQ_NONE;
+>
+> @@ -43,7 +43,7 @@ static irqreturn_t mcf_edma_err_handler(int irq, void *dev_id)
+>         struct edma_regs *regs = &mcf_edma->regs;
+>         unsigned int err, ch;
+>
+> -       err = ioread32(regs->errl);
+> +       err = ioread32be(regs->errl);
+>         if (!err)
+>                 return IRQ_NONE;
+>
+> @@ -55,7 +55,7 @@ static irqreturn_t mcf_edma_err_handler(int irq, void *dev_id)
+>                 }
+>         }
+>
+> -       err = ioread32(regs->errh);
+> +       err = ioread32be(regs->errh);
+>         if (!err)
+>                 return IRQ_NONE;
+>
+> @@ -203,8 +203,8 @@ static int mcf_edma_probe(struct platform_device *pdev)
+>                 edma_write_tcdreg(mcf_chan, cpu_to_le32(0), csr);
+>         }
+>
+> -       iowrite32(~0, regs->inth);
+> -       iowrite32(~0, regs->intl);
+> +       iowrite32be(~0, regs->inth);
+> +       iowrite32be(~0, regs->intl);
+>
+>         ret = mcf_edma->drvdata->setup_irq(pdev, mcf_edma);
+>         if (ret)
+> @@ -248,7 +248,7 @@ static int mcf_edma_probe(struct platform_device *pdev)
+>         }
+>
+>         /* Enable round robin arbitration */
+> -       iowrite32(EDMA_CR_ERGA | EDMA_CR_ERCA, regs->cr);
+> +       iowrite32be(EDMA_CR_ERGA | EDMA_CR_ERCA, regs->cr);
+>
+>         return 0;
+>  }
+> diff --git a/drivers/net/can/flexcan/flexcan-core.c b/drivers/net/can/flexcan/flexcan-core.c
+> index f5d22c61503f..f0571b97817b 100644
+> --- a/drivers/net/can/flexcan/flexcan-core.c
+> +++ b/drivers/net/can/flexcan/flexcan-core.c
+> @@ -295,6 +295,7 @@ static_assert(sizeof(struct flexcan_regs) ==  0x4 * 18 + 0xfb8);
+>
+>  static const struct flexcan_devtype_data fsl_mcf5441x_devtype_data = {
+>         .quirks = FLEXCAN_QUIRK_BROKEN_PERR_STATE |
+> +               FLEXCAN_QUIRK_DEFAULT_BIG_ENDIAN |
+>                 FLEXCAN_QUIRK_NR_IRQ_3 | FLEXCAN_QUIRK_NR_MB_16 |
+>                 FLEXCAN_QUIRK_SUPPORT_RX_MAILBOX |
+>                 FLEXCAN_QUIRK_SUPPORT_RX_FIFO,
+> diff --git a/drivers/spi/spi-fsl-dspi.c b/drivers/spi/spi-fsl-dspi.c
+> index 9f2a7b8163b1..abd3b20c2f17 100644
+> --- a/drivers/spi/spi-fsl-dspi.c
+> +++ b/drivers/spi/spi-fsl-dspi.c
+> @@ -192,6 +192,7 @@ enum {
+>         DSPI_XSPI_REGMAP,
+>         S32G_DSPI_XSPI_REGMAP,
+>         DSPI_PUSHR,
+> +       MCF5441X_DSPI_REGMAP,
+>  };
+>
+>  static const struct regmap_config dspi_regmap_config[] = {
+> @@ -238,6 +239,17 @@ static const struct regmap_config dspi_regmap_config[] = {
+>                 .reg_stride     = 2,
+>                 .max_register   = 0x2,
+>         },
+> +       [MCF5441X_DSPI_REGMAP] = {
+> +               .reg_bits       = 32,
+> +               .val_bits       = 32,
+> +               .reg_stride     = 4,
+> +               .max_register   = SPI_RXFR3,
+> +               .volatile_table = &dspi_volatile_table,
+> +               .rd_table       = &dspi_access_table,
+> +               .wr_table       = &dspi_access_table,
+> +               .reg_format_endian = REGMAP_ENDIAN_BIG,
+> +               .val_format_endian = REGMAP_ENDIAN_BIG,
+> +       },
+>  };
+>
+>  static const struct fsl_dspi_devtype_data devtype_data[] = {
+> @@ -303,7 +315,7 @@ static const struct fsl_dspi_devtype_data devtype_data[] = {
+>                 .trans_mode             = DSPI_DMA_MODE,
+>                 .max_clock_factor       = 8,
+>                 .fifo_size              = 16,
+> -               .regmap                 = &dspi_regmap_config[DSPI_REGMAP],
+> +               .regmap                 = &dspi_regmap_config[MCF5441X_DSPI_REGMAP],
+>         },
+>         [S32G] = {
+>                 .trans_mode       = DSPI_XSPI_MODE,
+> --
+> 2.54.0
+>
+>
