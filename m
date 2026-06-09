@@ -1,76 +1,93 @@
-Received: from mail-dy1-f193.google.com (mail-dy1-f193.google.com [74.125.82.193])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76A042F6596
-	for <linux-mmc@vger.kernel.org>; Tue,  9 Jun 2026 02:55:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.193
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 200273DEAD1
+	for <linux-mmc@vger.kernel.org>; Tue,  9 Jun 2026 07:35:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1780973710; cv=none; b=JBNA1bqTV8b6UCXbeQqozkrMwhxEBtgCACxTfUAx6toSG86gpWfVJedSaSZ+UlxSBC6BSqsySDDN2iUBtdgzQXXjsgNv+nWoMvZ+dtDv6gqrnLrilNbwlJsnmhEFXUOHZlRJhvQZEiyjd3ct+Od8kSJ8Qfz5tW1M6tAqXsgf/Bg=
+	t=1780990522; cv=none; b=WxU6ywBlkGMd4wqn8moqzLGDHq4e4IwxZ3Ma4fWcAYzYcQdHVcUpYS9oQFGD5ABSkT1QyVrLp27cH954bZTYgcvF82koAV6QRWSRDw2MJU6L5fQDV29WZRian3Up3ZVbSgmAs4OCO9J6k1UIHEudyZYJvI9Gu+p5JNH9rQrudSc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1780973710; c=relaxed/simple;
-	bh=uuY1jgwN8xznTomCCr0j0w/za4xP4VVWYhZTGynA3As=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=UizafE2/oGcmR6IXrp+RL/UVgWuFoFIrZr7vWVrF2E6JeselyQc6jxx2t324Lk3/M937tSrVgZtzW8vEj+7J2cbnf70hn/4jPRXb3v82PpbDCVJb7/aOSDbBATrn0sON7Sdwi9NGXuU7RGO7Y2GMn5X5cW2eo/9P9ypjbiFG18Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TLE8dJD+; arc=none smtp.client-ip=74.125.82.193
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1780990522; c=relaxed/simple;
+	bh=3yDThcOnbF2KCDvNFLK8o0ylkBvCKCemb57a0haJedI=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=OtGWLvg5sIfUik1RDPy8vQLWxqzPX9c4i5pEdnloz7OUCNSP/+IzCb9Yunb0sR5TMjpazHDUBMtk7wMV5GPeXcPKYJ+T7pmSTv0tOykvznTC7wGuArlhPe4O3GBJbn9ds9h41dIk90CVKiwyHxUMA9W6N5QdBDzQXADSiVJH8ns=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=LcEIewhb; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=adObyBkA; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TLE8dJD+"
-Received: by mail-dy1-f193.google.com with SMTP id 5a478bee46e88-30759632453so7265278eec.1
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jun 2026 19:55:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="LcEIewhb";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="adObyBkA"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6596GB0n1736459
+	for <linux-mmc@vger.kernel.org>; Tue, 9 Jun 2026 07:35:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=WLiPN4GyiZlceYQ34rrw22J23P5MVS/Mlwv
+	ELKMSq8k=; b=LcEIewhbNiT2QQNjFWsDvZbkGkp5Q/pVbpZyBIjiRJOt2KuqfSN
+	p0h2lkg4M0MsTd/AOy3MC0tGxUSsZ0P0nFTEB2eGeU8Ki+MxJoaZQKz8BPyvuc7Q
+	XjEzmBTElNgY2iUlYJUpt2CiJ54c6e8Nvous/R7terrIP/ldsSBNk/jrKfQ9S7nB
+	Rq+IvfGrmYE/WN79sSRk3PlhOaMoLQ3eZZNOixVVeAJTC2JKdMsrkRALoiv6E4Ub
+	fi/L1xtrqvX7SJPnhRRwRg5BB2ZQgX4CZWCTpv6s6X6WdGhgMAjjIYVlqBY5mwDh
+	viwPvx+cyMen6dnqpjFr92NJLaLmU7h83tA==
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com [209.85.214.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4epdds8aqc-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Tue, 09 Jun 2026 07:35:20 +0000 (GMT)
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2c0b35fa876so64718125ad.1
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Jun 2026 00:35:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1780973707; x=1781578507; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1780990519; x=1781595319; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=pJI9CahXJjJULtLK0KUB7o46AGmYjVAvw4WBv+i+U6E=;
-        b=TLE8dJD+tqFpGYG6rbLYlL2ufeWrVB4XbjptbBxSHaCWTAvz77Wvig0+dzA4PkHum1
-         5cdnrLsgr5D915iltoX6H7I+ttCdv/ocWp8WJwoGLxnlPqLNXhducNYn0aNiyLzcgIOd
-         1vicq9dr57XIZZpcB4oyceWQTGPeK6inVjelzld6wj7+UoBr8yhZCoFXL1w8U/cwcAF4
-         UwkByIi2gfYH6eaH2H4pHA9LfI4DmRELkJs1boqbpgn0CiOmzrD/lQ6cJNQCRez3lo5U
-         h0zy6VhmcnGljKP7JpBpfjvoh+ANGI6jm69WsTzTsaW9QZfvWsNMlylcKMxZ9R0Pmu6a
-         UQxA==
+        bh=WLiPN4GyiZlceYQ34rrw22J23P5MVS/MlwvELKMSq8k=;
+        b=adObyBkAxjG54fVB1xpxpJ9/B2LuSzJQKD/1LWyrRQvP+VRqQN1Im/yItZ7Q1j5oQF
+         EHseJQJxP9IVw+t+a+zYPB0VYGrzdMAtfCVKUgWcAJZpMLgEcl5JB+1nv9bCdEHWz1pR
+         6SCMFjKv2x8SvG66oM+HIVTmgv74Nq6SfKSUCAvU1zaK8cujcZAHILQQePbExTIJv53m
+         Y+VoFyS3MPCgjn13KHE/anVlE53rI17fe0suDtd3fhWh2uoP/i/4c0AX/qKfUEMae5O+
+         pO2L1xkG9I1L90AolDDH8L/2lUfhEdqT2Y6NMDff7aimz2J+91ADljwHE7s/nU9/tRbw
+         Paaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1780973707; x=1781578507;
+        d=1e100.net; s=20251104; t=1780990519; x=1781595319;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=pJI9CahXJjJULtLK0KUB7o46AGmYjVAvw4WBv+i+U6E=;
-        b=oMfSin3G/XTN7dntLbk1u8BNN2sPdhT9Ja6I5PWSMaTQSIr0jZtzNwcaZAkYw+fh4A
-         DMREv9xy5r52oTVwy99R7TXFD+sjl0YoJ+c9UOAWbpeC/1bUXHiOPGZI2o8wRwhnUTaC
-         gJp8XS6pXNaUbokX16Hz4ppcH81UyaUcqp1cq4DQh4Y7H9+k0tHinNhLzW4lgElJQ0AV
-         oFqq3pEctI8bA/t/zRn/D+k/0uFCscYrUD2sFNUfvq3X9WIsCNdijNYBwmBP3azd2fqw
-         BdpHxx/6N08fh/dT68uYHbHnMaTyJUfc8OfdtAGtbHPN4SIAEQUbAugK7alE7kI6Rgig
-         xwtw==
-X-Forwarded-Encrypted: i=1; AFNElJ8OpsB3NLk8r7R3HON0XwcNQmwHxYDi/PbdS3QeuZHlJCaHedHgffCscNMYgXBHvlYLsA7M7uaDRLE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwNeiRfMtVR5PjmpUzgXau9eIqXtl/jvJ5rIDOL9R9Xy9aB8I2g
-	ciFhJsSZsK20Z5ambA3zXRnA4OsAP0iyHxZ5GOfe64NOqzg2B5I9+eab
-X-Gm-Gg: Acq92OGREHJwCMghW1+shWbhOE+udpyj0/0PCZ2Wol242S7kOvBxllWzhppxnZ7MBYS
-	sbctxc6FuY//mD8Qr/B6S/wxZRfnqwpt7WPa84S053LKu9gPy0n+LiCzUKHk5od9KXaPwGW5o+b
-	wV6dGRqg4oOP2nch5iNHvnuTAa6HR8yj2EkNDd1vn8p90GFl/ayi2E9IDPQR8v2hHvyqqm6EDt1
-	XlVtVsk6bELKYZ6uBXpBShClsIGepdthwreWun6Bwi0lj6cfUUb2yfkwqaZhoxJ4huF4NcJDCe6
-	fX/nImTDVjqLaotR/yaJNoKPVeAjilq/+tELQsrWe6rgyaf594IB5OGS7fd2da31puGlUgw7hWh
-	1cNP5ggWpLzd9nu7Xxxro47YkwSwPWbhhmD8vvPdzSzhKpNkVrj3bjXmUEo7xUWgsqTEpD99M86
-	EsEbqlEfsJT6VgmjUW5JjZBJ7ko0/4FC0plkOEzsFJDgF9aJ3rbrufhQXil8TnJjE3LQhRnF+q1
-	DVqMxrbeXmlxAIcMibkQDYInY4hWQdyucUfiqB7JPCN5HTQbUxt5hg6sgee0OqgNXpsx9VmuRZ8
-	ug3XtpQ+3hYPbf/zPnJII/I4V/MX
-X-Received: by 2002:a05:693c:2c01:b0:304:705f:e4e8 with SMTP id 5a478bee46e88-3077b33835bmr11052916eec.32.1780973707366;
-        Mon, 08 Jun 2026 19:55:07 -0700 (PDT)
-Received: from ethan-latitude5420.. (host-127-24.cafrjco.fresno.ca.us.clients.pavlovmedia.net. [68.180.127.24])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3074df191d0sm28554855eec.21.2026.06.08.19.55.06
+        bh=WLiPN4GyiZlceYQ34rrw22J23P5MVS/MlwvELKMSq8k=;
+        b=ooCxbMOXhq/gPguclAt/Z67sBP/U9//6gGjI02AEkMzps8jvKN5xiZE0lm1ZR1yynx
+         Tb0b2yhus88anaWdEkh2iM5Q1xe1KuCvu8L2dSZxz4gzsNtqc3X6Yen1uH4+3dRbPxeo
+         DvLNja49IISd0S5C6/TbJhnB6XAZbz8JLeEbLjwxauDLhrzDgrf5BGOuI/PQkOSZP5fs
+         uoIxVpW2W/+Yf2W4/MFrEJsmyhutv+z9FC/BMq3btxwmHzQiRalfoT1um52ZX5F3uqGH
+         ojHn5BFsW8alKY8FEMiPM2G7Ebk5bebC/EZihFIgDGusrje79hEPmK9NH79X3JCAADtg
+         +5uw==
+X-Forwarded-Encrypted: i=1; AFNElJ9SBGZT8dJ5kZOdQLUwA1h8lAZH92R91AGAo64KkJ1DRUCuqqvVLHmxE1wiBxb/teSnPWZWQamtdXI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyHEvzsaRBbFxGf8SNoBH/Iei/mL6tLCKURM7GIsDJsjU02m46A
+	9cRIGEfdYZYN4Yutd1gCdNJdpfJqP7DNNflthGxeB3Z6bj1XeUOMWrEhwTgV51P1DpAGYWh9bGX
+	ukPwGF/OxCpMIBe6Pk+XzwL2UflU48xm70v7luNVSFKc/dkF9dJ+RGJ+qnCXViMw=
+X-Gm-Gg: Acq92OExt05xDuM8t0N7wDgMomrOIsplTmpsq2pdICWJ5IsO60S2jaRRAAAwdavq+0D
+	lP++1/vECrffKpw6U4ds3H4H4uyfMCQXBehTrvVgvnvn1NgAIwe88vB6NYcnPuiPI5GHB0RVxGj
+	E8EBjT/FHLg6aE7eeJBP2XFCCUV7/Y8GocBShtRi1eWhxiufs/Mn/N4yr1N8eAln7RiIfvgCquK
+	gcyldW67AI3Ll53r8v0d25blAGP6f44LLJsmB2E7C9s2wypZVKcW9290YtMc0RJppEbkoBvw8Ti
+	lpYeAylYcRag9I32H7qVWP9HrHGJXDbdbTTB1mAh6Jmddrx2GpLYnuzzD3iWIEU0TJ4hrAchXmv
+	N15zEE+aXHX4i+CEthYz7mM0hHuQiiqygw+0oJmy/9ZUagCCTQcZb73f8YO0=
+X-Received: by 2002:a17:902:ecca:b0:2bf:26d:3f42 with SMTP id d9443c01a7336-2c1e7e61c68mr242236105ad.18.1780990519031;
+        Tue, 09 Jun 2026 00:35:19 -0700 (PDT)
+X-Received: by 2002:a17:902:ecca:b0:2bf:26d:3f42 with SMTP id d9443c01a7336-2c1e7e61c68mr242235535ad.18.1780990518553;
+        Tue, 09 Jun 2026 00:35:18 -0700 (PDT)
+Received: from hu-mchunara-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2c164f875casm205521505ad.22.2026.06.09.00.35.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 08 Jun 2026 19:55:07 -0700 (PDT)
-From: Ethan Nelson-Moore <enelsonmoore@gmail.com>
-To: linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org
-Cc: Ethan Nelson-Moore <enelsonmoore@gmail.com>,
-	Ulf Hansson <ulfh@kernel.org>,
-	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
-	Rakuram Eswaran <rakuram.e96@gmail.com>,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Khalid Aziz <khalid@kernel.org>
-Subject: [PATCH] ARM: PXA: remove remnants of PXA93x support
-Date: Mon,  8 Jun 2026 19:54:51 -0700
-Message-ID: <20260609025458.13744-1-enelsonmoore@gmail.com>
-X-Mailer: git-send-email 2.43.0
+        Tue, 09 Jun 2026 00:35:18 -0700 (PDT)
+From: monish.chunara@oss.qualcomm.com
+X-Google-Original-From: mchunara@oss.qualcomm.com
+To: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org,
+        krzk+dt@kernel.org, conor+dt@kernel.org
+Cc: linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org, nitin.rawat@oss.qualcomm.com,
+        pradeep.pragallapati@oss.qualcomm.com, komal.bajaj@oss.qualcomm.com,
+        monish.chunara@oss.qualcomm.com, jsodhapa@qti.qualcomm.com
+Subject: [PATCH] arm64: dts: qcom: talos-evk: fix sdhc_2 vqmmc-supply for UHS-I mode
+Date: Tue,  9 Jun 2026 13:05:09 +0530
+Message-Id: <20260609073509.2453273-1-mchunara@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -78,132 +95,75 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: zOOpHWvTlGUYHTI-k_mABgIV1DeiniUP
+X-Authority-Analysis: v=2.4 cv=EI42FVZC c=1 sm=1 tr=0 ts=6a27c238 cx=c_pps
+ a=MTSHoo12Qbhz2p7MsH1ifg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=FelO9ux0wxsA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=u7WPNUs3qKkmUXheDGA7:22 a=yx91gb_oNiZeI1HMLzn7:22 a=EUspDBNiAAAA:8
+ a=5JD22pyS9HkwBMopzcwA:9 a=GvdueXVYPmCkWapjIL-Q:22
+X-Proofpoint-GUID: zOOpHWvTlGUYHTI-k_mABgIV1DeiniUP
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjA5MDA3MCBTYWx0ZWRfX27NN7qQpNh0i
+ w+I7o+bWLIGzvaQ6e5ii/8cNucItJ39ngHKVP7UHl0+wapNFfe4HPMd8eu4byIDyMnLnoSM4YfE
+ NkHybQkVDD+7l1TDbLnAqEchAMbOoSNIHgH2G8nLAShqNlSaU6K6ChZwyQOl5ZbzbnpJsaTCR7t
+ JnqhtQWRFYZKqp1xJeB/ASsUVXsYDrR3QDiqeRNCyoE22JPnBzzFEouKDubznm+KWK9f+eA+Qws
+ i5DnnbDUY5qliApU8Miw9n1BL7GuO51/1l2O/va7MCVxjW6X6Zfou6vujCVr7Pfr0JXuNygdz/9
+ 4HEFfNp2URa492eTN/OH4VVXnW/wMY62hO9ySsbReuC+/JrcxCWl+OgbdtTiK7+jg+u8FA4jXF2
+ NTN0dXyIqWap3mpfKL9lAC2SqVIt4z2/5iI46DhiBymEMzOMUnmBXiFJgJ15a4V+17g6GkhDR/z
+ BLjzK2zdAF1wvg1yNFA==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
+ definitions=2026-06-09_01,2026-06-09_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 spamscore=0 adultscore=0 bulkscore=0 phishscore=0
+ suspectscore=0 malwarescore=0 priorityscore=1501 clxscore=1015
+ lowpriorityscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2605210000
+ definitions=main-2606090070
 
-Support for PXA93x chips was removed in commit d711b8a2987a ("ARM: pxa:
-remove pxa93x support"), but some code to handle them remains. Remove
-it.
+From: Monish Chunara <monish.chunara@oss.qualcomm.com>
 
-Discovered while searching for CONFIG_* symbols referenced in code but
-not defined in any Kconfig file.
+SD card is detected as SDHS instead of UHS-I because sdhc_2 was
+configured with vreg_s4a as vqmmc-supply, which cannot switch
+between 1.8V and 3.3V.
 
-Signed-off-by: Ethan Nelson-Moore <enelsonmoore@gmail.com>
+Switch vqmmc-supply to vreg_l2a and update its voltage range to
+1800000-2960000 uV to enable proper UHS-I signaling.
+
+Signed-off-by: Jaypal Sodhaparmar <jsodhapa@qti.qualcomm.com>
+Signed-off-by: Monish Chunara <monish.chunara@oss.qualcomm.com>
 ---
- drivers/mmc/host/pxamci.c   |  3 +-
- include/linux/soc/pxa/cpu.h | 56 -------------------------------------
- 2 files changed, 1 insertion(+), 58 deletions(-)
+ arch/arm64/boot/dts/qcom/talos-evk-som.dtsi | 4 ++--
+ arch/arm64/boot/dts/qcom/talos-evk.dts      | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index b5ea058ed467..f8427f071c00 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -43,8 +43,7 @@
- #define NR_SG	1
- #define CLKRT_OFF	(~0)
+diff --git a/arch/arm64/boot/dts/qcom/talos-evk-som.dtsi b/arch/arm64/boot/dts/qcom/talos-evk-som.dtsi
+index 294354c034c3..f70823b31391 100644
+--- a/arch/arm64/boot/dts/qcom/talos-evk-som.dtsi
++++ b/arch/arm64/boot/dts/qcom/talos-evk-som.dtsi
+@@ -195,8 +195,8 @@ vreg_l1a: ldo1 {
  
--#define mmc_has_26MHz()		(cpu_is_pxa300() || cpu_is_pxa310() \
--				|| cpu_is_pxa935())
-+#define mmc_has_26MHz()		(cpu_is_pxa300() || cpu_is_pxa310())
+ 		vreg_l2a: ldo2 {
+ 			regulator-name = "vreg_l2a";
+-			regulator-min-microvolt = <1650000>;
+-			regulator-max-microvolt = <3100000>;
++			regulator-min-microvolt = <1800000>;
++			regulator-max-microvolt = <2960000>;
+ 			regulator-initial-mode = <RPMH_REGULATOR_MODE_LPM>;
+ 			regulator-allow-set-load;
+ 			regulator-allowed-modes = <RPMH_REGULATOR_MODE_LPM
+diff --git a/arch/arm64/boot/dts/qcom/talos-evk.dts b/arch/arm64/boot/dts/qcom/talos-evk.dts
+index b7f514fbc7b2..9ed48765ae6e 100644
+--- a/arch/arm64/boot/dts/qcom/talos-evk.dts
++++ b/arch/arm64/boot/dts/qcom/talos-evk.dts
+@@ -189,7 +189,7 @@ &sdhc_2 {
+ 	cd-gpios = <&tlmm 99 GPIO_ACTIVE_LOW>;
  
- struct pxamci_host {
- 	struct mmc_host		*mmc;
-diff --git a/include/linux/soc/pxa/cpu.h b/include/linux/soc/pxa/cpu.h
-index 5782450ee45c..38bacdae684f 100644
---- a/include/linux/soc/pxa/cpu.h
-+++ b/include/linux/soc/pxa/cpu.h
-@@ -46,14 +46,6 @@
-  *  PXA31x	A2	0x69056892	0x2E649013
-  *  PXA32x	B1	0x69056825	0x5E642013
-  *  PXA32x	B2	0x69056826	0x6E642013
-- *
-- *  PXA930	B0	0x69056835	0x5E643013
-- *  PXA930	B1	0x69056837	0x7E643013
-- *  PXA930	B2	0x69056838	0x8E643013
-- *
-- *  PXA935	A0	0x56056931	0x1E653013
-- *  PXA935	B0	0x56056936	0x6E653013
-- *  PXA935	B1	0x56056938	0x8E653013
-  */
- #ifdef CONFIG_PXA25x
- #define __cpu_is_pxa210(id)				\
-@@ -126,26 +118,6 @@
- #define __cpu_is_pxa320(id)	(0)
- #endif
+ 	vmmc-supply = <&vreg_l10a>;
+-	vqmmc-supply = <&vreg_s4a>;
++	vqmmc-supply = <&vreg_l2a>;
  
--#ifdef CONFIG_CPU_PXA930
--#define __cpu_is_pxa930(id)				\
--	({						\
--		unsigned int _id = (id) >> 4 & 0xfff;	\
--		_id == 0x683;				\
--	 })
--#else
--#define __cpu_is_pxa930(id)	(0)
--#endif
--
--#ifdef CONFIG_CPU_PXA935
--#define __cpu_is_pxa935(id)				\
--	({						\
--		unsigned int _id = (id) >> 4 & 0xfff;	\
--		_id == 0x693;				\
--	 })
--#else
--#define __cpu_is_pxa935(id)	(0)
--#endif
--
- #define cpu_is_pxa210()					\
- 	({						\
- 		__cpu_is_pxa210(read_cpuid_id());	\
-@@ -186,18 +158,6 @@
- 		__cpu_is_pxa320(read_cpuid_id());	\
- 	 })
- 
--#define cpu_is_pxa930()					\
--	({						\
--		__cpu_is_pxa930(read_cpuid_id());	\
--	 })
--
--#define cpu_is_pxa935()					\
--	({						\
--		__cpu_is_pxa935(read_cpuid_id());	\
--	 })
--
--
--
- /*
-  * CPUID Core Generation Bit
-  * <= 0x2 for pxa21x/pxa25x/pxa26x/pxa27x
-@@ -218,22 +178,11 @@
- 		__cpu_is_pxa300(id)			\
- 			|| __cpu_is_pxa310(id)		\
- 			|| __cpu_is_pxa320(id)		\
--			|| __cpu_is_pxa93x(id);		\
- 	 })
- #else
- #define __cpu_is_pxa3xx(id)	(0)
- #endif
- 
--#if defined(CONFIG_CPU_PXA930) || defined(CONFIG_CPU_PXA935)
--#define __cpu_is_pxa93x(id)				\
--	({						\
--		__cpu_is_pxa930(id)			\
--			|| __cpu_is_pxa935(id);		\
--	 })
--#else
--#define __cpu_is_pxa93x(id)	(0)
--#endif
--
- #define cpu_is_pxa2xx()					\
- 	({						\
- 		__cpu_is_pxa2xx(read_cpuid_id());	\
-@@ -244,9 +193,4 @@
- 		__cpu_is_pxa3xx(read_cpuid_id());	\
- 	 })
- 
--#define cpu_is_pxa93x()					\
--	({						\
--		__cpu_is_pxa93x(read_cpuid_id());	\
--	 })
--
- #endif
+ 	status = "okay";
+ };
 -- 
-2.43.0
+2.34.1
 
