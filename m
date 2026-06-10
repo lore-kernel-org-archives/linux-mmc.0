@@ -1,44 +1,45 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from vps0.lunn.ch (vps0.lunn.ch [156.67.10.101])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95E1538E8D5;
-	Wed, 10 Jun 2026 07:57:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BEA3430676E;
+	Wed, 10 Jun 2026 08:05:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=156.67.10.101
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781078230; cv=none; b=N0EHTdRx88ktl2bLUEHQP8Xh6Wxh698R6RnTlQbbNcrkQ0osDI4D0IHD2QPXCgp7bEkAvWDEnvGtmSEcIKForUi/hMuWilSnqLpQUC+h5B+6sxZZQE3g4yLFZMRGbnI2llG045JB8u95U6eq1vU2JTG5dFLiLXGt4v2CouJQMFE=
+	t=1781078736; cv=none; b=GvQO6VVTsge6T4AvqvzGx/MAH2w5e+CJmzTG8YvifSPN0VvGmu6wTqreVezHsdzpCUA8jtCx79Jhy+pdxVYxv/k9vBo4xkZyRg9Lf/E20DZulOrh8j9Z0bHZjeCfwwT4iNneYQgKvkXClgu850DE0cDB5mkQUTMyhtJuB3GzJkY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781078230; c=relaxed/simple;
-	bh=7XaHBnf7Alj4M/i4GuM/skfdr2Kj4vkJ2wB974S52AQ=;
+	s=arc-20240116; t=1781078736; c=relaxed/simple;
+	bh=Bku6vmbnfsIPF3upfNi33A0lpAy6UNfcQHI8Xaj7jk8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HaklbIzDKFOKSO414RWvWg+SHBL7gqw7zDuJgyaT5DFJ5YcooxMiBXZPKSK7IHDuLPEikfY2skjGcjZWCXjRBpg+lG4xHbkGXJsPbl4aoOD3tMjDHNt+0X7oxj322a3XGTQSsw64vOyRebgkew5WA0/jer2KcBItGr+ZMx1MBuQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=X+ETSH4K; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=cGXazB/ZmJHdl5moDoxSYi2yGQSicZfT4rFwIEu4eqxqJyb31Yswt37wHQ7WT6ynDSeihufiF6rETYjkAm+t4Mqzu2z3Ptla/Xsm52naLo8E8LrhDCWBMiW6r8c6aA1ZiQ/ane4uim2EudcUTY5VBn8haStT04eKn2V30CYZ80E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lunn.ch; spf=pass smtp.mailfrom=lunn.ch; dkim=pass (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b=AVc9mwDe; arc=none smtp.client-ip=156.67.10.101
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=lunn.ch
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lunn.ch
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="X+ETSH4K"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2662D1F00893;
-	Wed, 10 Jun 2026 07:57:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781078229;
-	bh=0GUjnWsLZjYOu/RMSVn+JZ9RMSDzRp+3XSMCNRi65Sk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=X+ETSH4K1MIpKJHhg0fQqMn3cRB/lFRkfGzDMOzM7mSeWW+VfFgkylcl+NtwEtz2k
-	 O61yHxwKw3zCyKV9xS7L34ixjERjQsUhax9LTWLZRu+fOGV4Ww1JFRuDNKRrrtOJe5
-	 aP+NrsBZhKjeMOc7pPKy4l1yrP0MlpI2W7WWO7uK3kIvq4OeThKrN8LNKjm+Hli9JR
-	 uyM8xZcpgJhspSAQXcOPQujpg/bsdrxZtVB2Lbkd15r4J82kw+Q2NhGLX+INz4XjEH
-	 M49eOlkW/KYwDzlZCuxx3jGJKL+JmylskanIJg8652kSteTLrTNk+yrCBAFD1iUZ8C
-	 wc1eHVW5mbk5w==
-Received: from johan by xi.lan with local (Exim 4.99.3)
-	(envelope-from <johan@kernel.org>)
-	id 1wXDoA-000000017Mt-3s6l;
-	Wed, 10 Jun 2026 09:57:06 +0200
-Date: Wed, 10 Jun 2026 09:57:06 +0200
-From: Johan Hovold <johan@kernel.org>
-To: Guangshuo Li <lgs201920130244@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Huacai Chen <chenhuacai@kernel.org>,
-	Binbin Zhou <zhoubinbin@loongson.cn>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3] mmc: vub300: fix use-after-free on probe failure
-Message-ID: <aikY0nFweVi4fn6v@hovoldconsulting.com>
-References: <20260610034904.1596521-1-lgs201920130244@gmail.com>
+	dkim=pass (1024-bit key) header.d=lunn.ch header.i=@lunn.ch header.b="AVc9mwDe"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
+	s=20171124; h=In-Reply-To:Content-Disposition:Content-Type:MIME-Version:
+	References:Message-ID:Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:
+	Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:
+	Content-ID:Content-Description:Content-Disposition:In-Reply-To:References;
+	bh=SUBiUHt/0iiIKa8WSEzuAV3b4OE0sNSco6iZTF/7BsU=; b=AVc9mwDezYfcqmBMiqIwUCYUoM
+	Q7WdYxiJugJww1//sevc6nVN3YNGEIb1ab91J5FltT9bMo6KZKb9chMrSpLN+21EaPtwzcdK5FJhH
+	+TdA+GLaIdZE928yP4zk/+QF20dc/7uoTpRzXl9spIgb/+zWebK53U5SHIK6LIvjui2E=;
+Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
+	(envelope-from <andrew@lunn.ch>)
+	id 1wXDwI-006wZA-Ak; Wed, 10 Jun 2026 10:05:30 +0200
+Date: Wed, 10 Jun 2026 10:05:30 +0200
+From: Andrew Lunn <andrew@lunn.ch>
+To: Greg Ungerer <gerg@linux-m68k.org>
+Cc: linux-m68k@lists.linux-m68k.org, linux-kernel@vger.kernel.org,
+	arnd@kernel.org, wei.fang@nxp.com, frank.li@nxp.com,
+	shenwei.wang@nxp.com, imx@lists.linux.dev, netdev@vger.kernel.org,
+	nico@fluxnic.net, adureghello@baylibre.com, ulfh@kernel.org,
+	linux-mmc@vger.kernel.org, linux-can@vger.kernel.org,
+	linux-spi@vger.kernel.org, olteanv@gmail.com
+Subject: Re: [PATCHv2 1/4] net: fec: do not use readl()/writel() for ColdFire
+Message-ID: <caa2a34c-5a73-4075-9f7f-77b30673a4e2@lunn.ch>
+References: <20260609142139.1563360-1-gerg@linux-m68k.org>
+ <20260609142139.1563360-3-gerg@linux-m68k.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,78 +48,38 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260610034904.1596521-1-lgs201920130244@gmail.com>
+In-Reply-To: <20260609142139.1563360-3-gerg@linux-m68k.org>
 
-On Wed, Jun 10, 2026 at 11:49:03AM +0800, Guangshuo Li wrote:
-> The vub300 driver lifetime-manages its controller state using
-> vub300->kref, with vub300_delete() freeing the mmc host when the last
-> reference is dropped. The probe error path after the inactivity timer has
-> been armed still bypasses that lifetime rule, however, and falls through
-> to mmc_free_host() directly if mmc_add_host() fails.
+On Wed, Jun 10, 2026 at 12:12:58AM +1000, Greg Ungerer wrote:
+> Modify the FEC driver to not directly use readl() and writel() to access
+> hardware registers but instead local fec_readl() and fec_writel() methods.
+> This allows for different architecture users of this driver to have
+> different underlying access functions - to support both little and big
+> endian hardware.
 > 
-> The race window is between arming the inactivity timer and reaching the
-> probe error unwind after mmc_add_host() fails:
+> The FEC hardware block in ColdFire SoC parts is accessed big-endian.
+> The usual kernel readl()/writel() IO memory access methods are defined to
+> access little endian data. Change access for ColdFire to use __raw_readl()
+> and __raw_writel() access methods - which do not modify or swap bytes
+> on access.
 > 
->         probe thread                     timer/workqueue
->         ------------                     ---------------
->         kref_init(&vub300->kref)         ref = 1
->         kref_get(&vub300->kref)          ref = 2, timer ref
->         add_timer(inactivity_timer)      fires after one second
->         |
->         |   race window
->         |<---------------------------------------------------->
->         |
->         mmc_add_host(mmc)
->                                          inactivity timer fires
->                                          vub300_queue_dead_work()
->                                            kref_get()          ref = 3
->                                            queue_work(deadwork)
->         mmc_add_host() fails
->         timer_delete_sync()
->         mmc_free_host(mmc)
->           frees vub300
->                                          deadwork runs
->                                            use-after-free
+> The FEC driver works today because the m68k architecture io.h has a
+> kludge in the definitions of the readl() and writel() functions for
+> ColdFire that allow big-endian access if the address of the register to
+> access is within the SoC's internal peripheral registers. This is being
+> fixed in the near future to define readl() and writel() correctly - with
+> no byte swapping. Thus the motivation for this fix here.
 > 
-> The inactivity timeout is one second, so this would require
-> mmc_add_host() to both fail and take more than one second to do so. This
-> is unlikely to happen in practice, but the error path is still wrong.
+> __raw_readl()/__raw_writel() access methods are used instead of the more
+> commonly used ioread32be()/iowrite32be() here because those are broken too,
+> because of the current readl()/writel() kludge. They are implemented in
+> asm-generic/io.h in terms of readl()/writel().
 > 
-> timer_delete_sync() only waits for the timer callback itself. It does
-> not flush deadwork that the callback may already have queued. As a
-> result, queued deadwork can still hold a kref while the probe error path
-> directly frees the backing mmc host, including the vub300 storage.
+> Note that even when readl() and writel() are fixed on ColdFire they will
+> not be the right thing to use within the FEC driver on ColdFire hardware.
 > 
-> Fix this by using the same lifetime mechanism as disconnect. Clear
-> vub300->interface so that the timer callback and any queued deadwork
-> return early and drop their references, then drop the initial probe
-> reference and return without falling through to err_free_host.
-> 
-> Fixes: 8f4d20a71022 ("mmc: vub300: fix use-after-free on disconnect")
+> Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
 
-You are using the wrong Fixes tag here again. This should be
+Reviewed-by: Andrew Lunn <andrew@lunn.ch>
 
-Fixes: 0613ad2401f8 ("mmc: vub300: fix return value check of mmc_add_host()")
-
-unless you consider this bug to have been there since the driver was
-added.
-
-> Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
-> ---
-> v3:
->   - Use the disconnect-style teardown by clearing vub300->interface.
->   - Drop only the initial probe reference and let timer/deadwork drop their
->     own references.
->   - Mention the one-second inactivity timeout in the commit message.
-> 
-> v2:
->   - Rebase on current mainline.
->   - Correct the Fixes tag.
->   - Add blank lines around the early return.
->   - Reword the code comment.
-
-This looks good to me now otherwise, so with the above fixed:
-
-Reviewed-by: Johan Hovold <johan@kernel.org>
-
-Johan
+    Andrew
