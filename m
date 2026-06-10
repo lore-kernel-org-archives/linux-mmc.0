@@ -1,107 +1,124 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 774A329BDBF;
-	Wed, 10 Jun 2026 07:16:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95E1538E8D5;
+	Wed, 10 Jun 2026 07:57:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781075794; cv=none; b=Z5uR95V4zeM7uxKifoeHL2ZwxcyLAbGnq5JW4mmZfVgGoNUVJog6elSxZdhjxI5rnaIhPRut5QgIzTuuOCYVKPdKTQH6y9uglasWAeAnSYiLuTD7NxF2DehxCzs7EMNJBl0phJmODMGIPm+X7d/SCczfvmKS8HCRHnZX/jMuzo8=
+	t=1781078230; cv=none; b=N0EHTdRx88ktl2bLUEHQP8Xh6Wxh698R6RnTlQbbNcrkQ0osDI4D0IHD2QPXCgp7bEkAvWDEnvGtmSEcIKForUi/hMuWilSnqLpQUC+h5B+6sxZZQE3g4yLFZMRGbnI2llG045JB8u95U6eq1vU2JTG5dFLiLXGt4v2CouJQMFE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781075794; c=relaxed/simple;
-	bh=IKSvTWxUBmjeVnmCYv6+YZYdwIrH5X0fWcQqB93TaLY=;
+	s=arc-20240116; t=1781078230; c=relaxed/simple;
+	bh=7XaHBnf7Alj4M/i4GuM/skfdr2Kj4vkJ2wB974S52AQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=l74r0pDxocGYUH4yEG0+qFsHemgDu/qje9L5oVc6rWCVO6gu2KocX+YpENy62wXA3B0iFTRG3y4chl5IiGFgVVTIQUnVeDcPCTRcHzWz+hhIRI3Wm8sc3c3pMNvgGt0ZR3LkYPaeS6uQzlwBpgJi8jecVwg5rtAsHZ+ZMGx5mvg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kEh5J4MY; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=HaklbIzDKFOKSO414RWvWg+SHBL7gqw7zDuJgyaT5DFJ5YcooxMiBXZPKSK7IHDuLPEikfY2skjGcjZWCXjRBpg+lG4xHbkGXJsPbl4aoOD3tMjDHNt+0X7oxj322a3XGTQSsw64vOyRebgkew5WA0/jer2KcBItGr+ZMx1MBuQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=X+ETSH4K; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kEh5J4MY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1E4511F00893;
-	Wed, 10 Jun 2026 07:16:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="X+ETSH4K"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2662D1F00893;
+	Wed, 10 Jun 2026 07:57:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781075793;
-	bh=f3pyLsJp/Pig7PJGNaXCWFzykMjoyznELiFBpvDKD50=;
+	s=k20260515; t=1781078229;
+	bh=0GUjnWsLZjYOu/RMSVn+JZ9RMSDzRp+3XSMCNRi65Sk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=kEh5J4MYt6AOcTW92yTfwHs7vsfXTGiCqD9ezn/PNbI3JWrXg4/8tr03WT6qdTNpS
-	 PAtYXXZDgPka9aZwUbI+DBa6wtCiTAIsQGRmXXaBPgcpzA28huYukZQXWGyz0yvVIW
-	 MJU9oHaPP9viU8aSsW6rlLH6xGNGZACpXj7MiV0FtCcymsGKjvyVqZD18HVrh5Eb9c
-	 H0by8hO8bDMIkvcQuscIdnJgzExUBtpjrNV0ge9SvQmhZMxLrkH1RoKe2C0aYinjXB
-	 BQpQmxWyxvNkGUNbqj0qSQ3R2MiTBOBLx5T2FPGE5kaSM8Ii3Iz+GHR5Vp3Kh5qxah
-	 rslGwKgr5JbDw==
-Date: Wed, 10 Jun 2026 09:16:29 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Jens Axboe <axboe@kernel.dk>, Johannes Berg <johannes@sipsolutions.net>, 
-	Jeff Johnson <jjohnson@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>, 
-	Marcel Holtmann <marcel@holtmann.org>, Luiz Augusto von Dentz <luiz.dentz@gmail.com>, 
-	Balakrishna Godavarthi <quic_bgodavar@quicinc.com>, Rocky Liao <quic_rjliao@quicinc.com>, 
-	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Simon Horman <horms@kernel.org>, 
-	Srinivas Kandagatla <srini@kernel.org>, Andrew Lunn <andrew@lunn.ch>, 
-	Heiner Kallweit <hkallweit1@gmail.com>, Russell King <linux@armlinux.org.uk>, 
-	Saravana Kannan <saravanak@kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-block@vger.kernel.org, 
-	linux-wireless@vger.kernel.org, ath10k@lists.infradead.org, linux-bluetooth@vger.kernel.org, 
-	netdev@vger.kernel.org, daniel@makrotopia.org, 
-	Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-Subject: Re: [PATCH v4 2/8] dt-bindings: net: wireless: qcom,ath10k: Document
- NVMEM cells
-Message-ID: <20260610-funny-paper-warthog-25fa0a@quoll>
-References: <20260609-block-as-nvmem-v4-0-45712e6b22c6@oss.qualcomm.com>
- <20260609-block-as-nvmem-v4-2-45712e6b22c6@oss.qualcomm.com>
+	b=X+ETSH4K1MIpKJHhg0fQqMn3cRB/lFRkfGzDMOzM7mSeWW+VfFgkylcl+NtwEtz2k
+	 O61yHxwKw3zCyKV9xS7L34ixjERjQsUhax9LTWLZRu+fOGV4Ww1JFRuDNKRrrtOJe5
+	 aP+NrsBZhKjeMOc7pPKy4l1yrP0MlpI2W7WWO7uK3kIvq4OeThKrN8LNKjm+Hli9JR
+	 uyM8xZcpgJhspSAQXcOPQujpg/bsdrxZtVB2Lbkd15r4J82kw+Q2NhGLX+INz4XjEH
+	 M49eOlkW/KYwDzlZCuxx3jGJKL+JmylskanIJg8652kSteTLrTNk+yrCBAFD1iUZ8C
+	 wc1eHVW5mbk5w==
+Received: from johan by xi.lan with local (Exim 4.99.3)
+	(envelope-from <johan@kernel.org>)
+	id 1wXDoA-000000017Mt-3s6l;
+	Wed, 10 Jun 2026 09:57:06 +0200
+Date: Wed, 10 Jun 2026 09:57:06 +0200
+From: Johan Hovold <johan@kernel.org>
+To: Guangshuo Li <lgs201920130244@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Huacai Chen <chenhuacai@kernel.org>,
+	Binbin Zhou <zhoubinbin@loongson.cn>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3] mmc: vub300: fix use-after-free on probe failure
+Message-ID: <aikY0nFweVi4fn6v@hovoldconsulting.com>
+References: <20260610034904.1596521-1-lgs201920130244@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260609-block-as-nvmem-v4-2-45712e6b22c6@oss.qualcomm.com>
+In-Reply-To: <20260610034904.1596521-1-lgs201920130244@gmail.com>
 
-On Tue, Jun 09, 2026 at 09:52:27AM +0200, Loic Poulain wrote:
-> Document the NVMEM cells supported by the ath10k driver, the
-> mac-address, pre-calibration data, and calibration data.
+On Wed, Jun 10, 2026 at 11:49:03AM +0800, Guangshuo Li wrote:
+> The vub300 driver lifetime-manages its controller state using
+> vub300->kref, with vub300_delete() freeing the mmc host when the last
+> reference is dropped. The probe error path after the inactivity timer has
+> been armed still bypasses that lifetime rule, however, and falls through
+> to mmc_free_host() directly if mmc_add_host() fails.
 > 
-> Reviewed-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
+> The race window is between arming the inactivity timer and reaching the
+> probe error unwind after mmc_add_host() fails:
+> 
+>         probe thread                     timer/workqueue
+>         ------------                     ---------------
+>         kref_init(&vub300->kref)         ref = 1
+>         kref_get(&vub300->kref)          ref = 2, timer ref
+>         add_timer(inactivity_timer)      fires after one second
+>         |
+>         |   race window
+>         |<---------------------------------------------------->
+>         |
+>         mmc_add_host(mmc)
+>                                          inactivity timer fires
+>                                          vub300_queue_dead_work()
+>                                            kref_get()          ref = 3
+>                                            queue_work(deadwork)
+>         mmc_add_host() fails
+>         timer_delete_sync()
+>         mmc_free_host(mmc)
+>           frees vub300
+>                                          deadwork runs
+>                                            use-after-free
+> 
+> The inactivity timeout is one second, so this would require
+> mmc_add_host() to both fail and take more than one second to do so. This
+> is unlikely to happen in practice, but the error path is still wrong.
+> 
+> timer_delete_sync() only waits for the timer callback itself. It does
+> not flush deadwork that the callback may already have queued. As a
+> result, queued deadwork can still hold a kref while the probe error path
+> directly frees the backing mmc host, including the vub300 storage.
+> 
+> Fix this by using the same lifetime mechanism as disconnect. Clear
+> vub300->interface so that the timer callback and any queued deadwork
+> return early and drop their references, then drop the initial probe
+> reference and return without falling through to err_free_host.
+> 
+> Fixes: 8f4d20a71022 ("mmc: vub300: fix use-after-free on disconnect")
+
+You are using the wrong Fixes tag here again. This should be
+
+Fixes: 0613ad2401f8 ("mmc: vub300: fix return value check of mmc_add_host()")
+
+unless you consider this bug to have been there since the driver was
+added.
+
+> Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
 > ---
->  .../devicetree/bindings/net/wireless/qcom,ath10k.yaml    | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
+> v3:
+>   - Use the disconnect-style teardown by clearing vub300->interface.
+>   - Drop only the initial probe reference and let timer/deadwork drop their
+>     own references.
+>   - Mention the one-second inactivity timeout in the commit message.
 > 
-> diff --git a/Documentation/devicetree/bindings/net/wireless/qcom,ath10k.yaml b/Documentation/devicetree/bindings/net/wireless/qcom,ath10k.yaml
-> index c21d66c7cd558ab792524be9afec8b79272d1c87..7391df5e7071e626af4c64b9919d48c41ac09f1e 100644
-> --- a/Documentation/devicetree/bindings/net/wireless/qcom,ath10k.yaml
-> +++ b/Documentation/devicetree/bindings/net/wireless/qcom,ath10k.yaml
-> @@ -92,6 +92,22 @@ properties:
->  
->    ieee80211-freq-limit: true
->  
-> +  nvmem-cells:
-> +    minItems: 1
-> +    maxItems: 3
-> +    description: |
+> v2:
+>   - Rebase on current mainline.
+>   - Correct the Fixes tag.
+>   - Add blank lines around the early return.
+>   - Reword the code comment.
 
-If there is going to be resend:
-Do not need '|' unless you need to preserve formatting.
+This looks good to me now otherwise, so with the above fixed:
 
-> +      References to nvmem cells for MAC address and/or calibration data.
-> +      Supported cell names are mac-address, calibration, and pre-calibration.
-> +
-> +  nvmem-cell-names:
-> +    minItems: 1
-> +    maxItems: 3
-> +    items:
-> +      enum:
-> +        - mac-address
-> +        - calibration
-> +        - pre-calibration
+Reviewed-by: Johan Hovold <johan@kernel.org>
 
-This means you expect random order with variable number of items. Is
-that intentional? If yes, please provide short explanation in the commit
-msg.
-
-Best regards,
-Krzysztof
-
+Johan
