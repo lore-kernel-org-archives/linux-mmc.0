@@ -1,254 +1,172 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2056D372B5E;
-	Wed, 10 Jun 2026 10:40:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB570416D1D
+	for <linux-mmc@vger.kernel.org>; Wed, 10 Jun 2026 14:56:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781088035; cv=none; b=ZRl+EXwgx6kWzePNg/jFXZuVMowyeHvtjnA1MYv5o2hemOcPE/PoGSVJwHEcm+IcQVAv0dEUUUejGjqm1vF11hCkXSVFpOQnWwEFrZY+egcRrBqLyU2PsbdEmBhSh+6RDBNRkNabhNcCDkBKUmIyo0zmORoOt8BM6poidbo9bYo=
+	t=1781103402; cv=none; b=c+Xx8hkZhkHEfxIy605tq7bci7YApT5xBTKTDys5ieCkXkXVXj4p0uupmAC57AxYxtbKPupxIbt5Di7AoBefqhiEMxqhZtL4lgeuHSr6ByWdDtZOd93vyXYCWUhbaj1oOj3lg/dRRTWLNgmLYejHd2U++gLUTNVNfpGJJHdJVFo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781088035; c=relaxed/simple;
-	bh=Q+ghOmwb6ca6yzsNslfSKHa+AkbW/ej9Rfb3xdIxs34=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ht2xS6yYBx6TcdvTB1OE35k9yKcyLb2k1dFVY9MXG55eUnwaHgw3PJbXtC9OihM+XM8eBjo4ugppRDdRctbdSsbVdqeHLKNdK9HQ9ILkRBnsmt3BxOS957HjCCBcdtKyRWOJU6yNl+vOG5IasVnEwXo6rz41GOhOiEBMqDklqk4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l48MXXUe; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1781103402; c=relaxed/simple;
+	bh=qJiyqTiUqE2JsEygmzanUv913s8+5r0Gvkz8I4ZNj4s=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Z6CTQKy4vZ4PFJRAj8nIdFjEE61L0nWbyEqibCZDNCQCtgWxJv78w5zWSVpZd8ILZ8Km3GJkVFi8fvV5J+1kO0XkppckY1Ht1ySsvLEL3eEggbMOXOADyWNO178QhASsQan4bVkixsCbL6JOeaw80QMQNJvJICsK7i7tuWWluvM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=o+LyffbB; arc=none smtp.client-ip=209.85.210.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l48MXXUe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 18B821F00893;
-	Wed, 10 Jun 2026 10:40:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781088033;
-	bh=y3zogafe8Nfrcsf+kJY2CSo0RioNu8OlWnXsDWbzwH8=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=l48MXXUe0y24pBLizMG9gqp66VI1e/D2JJv5j/aIRzXyludmgTo87u324IoAENt6q
-	 Gfvw07hIK7TV8Apt9wCMJsvUMxZEFeD+WZh2C830e4uxEmX41LNL/GDyJ+TCbExwwe
-	 FIxkN74Z6mJxMnVOPg6+Hdg6NyYua9PD5kVDrZU1rUPsCjtAtTJH7c/QrRDC9Gdveb
-	 woUCW5EVKYd6GQxZfz6WdXd87ngblNcXF8V6PAro/fBwWxmcfnFrocnKeQMvIHIWVK
-	 A5WTUmwi2LF/6Xy54jJZbJFDvZGx8PloA3L77zrqePoM2aVHoS9Ttq43YGOWesFuVU
-	 mmFN0yFX1AQIQ==
-Date: Wed, 10 Jun 2026 12:40:23 +0200
-From: Manivannan Sadhasivam <mani@kernel.org>
-To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>, 
-	Konrad Dybcio <konradybcio@kernel.org>, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Neeraj Soni <neeraj.soni@oss.qualcomm.com>, Harshal Dev <harshal.dev@oss.qualcomm.com>, 
-	Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>, linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Subject: Re: [PATCH v11 1/6] soc: qcom: ice: Add OPP-based clock scaling
- support for ICE
-Message-ID: <mcqrm4pwziflqomw22gepqusc7jdlb2foslcfvtjufuyyoslb7@37olf54qxtfv>
-References: <20260609-enable-ice-clock-scaling-v11-0-1cebc8b3275b@oss.qualcomm.com>
- <20260609-enable-ice-clock-scaling-v11-1-1cebc8b3275b@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="o+LyffbB"
+Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-842848fd613so5769123b3a.3
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Jun 2026 07:56:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1781103400; x=1781708200; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=je4HaFTs8UVFY8caIrZkNXgrHjfsHHR5Ao8SCT4Iyeo=;
+        b=o+LyffbB2j/wf7t4Z0zG7QE16eJ5Q1BV/oP4MN+JG3C7NqsK3qGQ7KXlqSGQ0P0FPD
+         l8QnVmL3xcyfd/aP9L6dJ7AfO2Etm3fxUoaTOOHOaKjoMhkio/yB5rlpfF+oJjkJbPKf
+         FqKBNgL+EpCssqBuDs78/x7uJOW2eMh4G6o4IGBbz/oPCugfseUYcqF6FlxadjvvUQkU
+         NCVhaEM3ZcIBRywDM1HNNOSC847UH73yI65tvfByVrkg3Zpm7DrghGhxiY1TbfqPSJs/
+         /R6S3ZjkKuhMW2t1J/rEWEuqQto8raL5FyGqkLrfTXRIxrI2pv9bLc4RyA+vG6VUWoW8
+         lt6Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1781103400; x=1781708200;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=je4HaFTs8UVFY8caIrZkNXgrHjfsHHR5Ao8SCT4Iyeo=;
+        b=QbZ5Lwu2WaYS3PyDBKw1lCAjs0eh5/hfpomMlpwNy5YT4uV/8ZlHGGVC4/4qs6gfrp
+         jiMZAN7V4FEykFjTDHAwGquyA2xZ1qsum6AW2UE173bu0+hvBohhWVfZUaMZutg3Fh+R
+         y9NYTIbJXF/9FB4kYheJY86cCU1b/bNtGf4BjAiOZTfanU1+PsSZIKwEjsj2CSX5GTIs
+         Zjzr/pqpOkSuV0t1AGnVAmf8QN/qHMLwdMOkjOzc1a0e/Cdxje9b7QMEF4USiFHWSmDk
+         3wsjfWPmhSCxqhVTbUkbnWrHu5LYUkIttz+3+XyF+xrVo/wAPBCREi7ZAl58vSQbLR6o
+         GP0A==
+X-Forwarded-Encrypted: i=1; AFNElJ/triHgEFMPKwv7drtBsA3AS/SyXX3ZLbQPW0KaVs3j++las7jv5bEoWbmmUhQ/X2sxl+rDXHNISxo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzIjbAK6UBDKDaUSl1ZKYuCNsFW9ccnLE4VXZxE40LzU28Df+jm
+	TmME1vzUcDVq5RS7Ol67S0bhS6Zs9ZvXPVMYeG6YkjAqSeQIMUBfHaob
+X-Gm-Gg: Acq92OFi2WjLWIv4TJHtLiSnktKPTYQDzZ+0/udUFMyst9ZLxQ4tAoCZCckhZ/rZKto
+	Mz/uEWuR04ATIzFTitgBKcw72sXVBCO2fqTovMakhivYOJf6Tbp1h+jOJPMV1j6X+IXMSDmo+lS
+	xGk05Szby6c2hapgH2h3znRgTJ6NulcAJsSr37Or+iy5AKZjm1JQSt2ZfMFE90ynTTtSQz2OPHa
+	5B2SRrtfuE5f15TX1MtVhPFZEtstwJV3lD9SuP1HJPsVh3ggU2ylf7a9OjsRyM0+16OaH1VEYeM
+	9tbBEuNhRWpbxnnw8lAn0fvLqb7drKsQB+yA5B9fUrAAGLUSURNLjoqNbSTGwSlm2SFJ6MVveCz
+	4mwGsan4V5AUvhFnCSN4Yzzqg5LRjna8dWmx/8rC7asjRyVvqLTSx+eLxrJ7hlU/Odiru5Cw4FC
+	oVXOOUmv3g2VUhtfhbIeNHVWc=
+X-Received: by 2002:a05:6a00:1815:b0:842:2cda:7a9c with SMTP id d2e1a72fcca58-8430a70be0cmr9405477b3a.29.1781103400129;
+        Wed, 10 Jun 2026 07:56:40 -0700 (PDT)
+Received: from lgs.. ([118.193.39.24])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-84282880050sm24488651b3a.29.2026.06.10.07.56.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 10 Jun 2026 07:56:39 -0700 (PDT)
+From: Guangshuo Li <lgs201920130244@gmail.com>
+To: Ulf Hansson <ulfh@kernel.org>,
+	Johan Hovold <johan@kernel.org>,
+	Guangshuo Li <lgs201920130244@gmail.com>,
+	Huacai Chen <chenhuacai@kernel.org>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v4] mmc: vub300: fix use-after-free on probe failure
+Date: Wed, 10 Jun 2026 22:56:30 +0800
+Message-ID: <20260610145630.1788731-1-lgs201920130244@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260609-enable-ice-clock-scaling-v11-1-1cebc8b3275b@oss.qualcomm.com>
 
-On Tue, Jun 09, 2026 at 03:17:23AM +0530, Abhinaba Rakshit wrote:
-> Register optional operation-points-v2 table for ICE device
-> during device probe. Attach the OPP-table with only the ICE
-> core clock. Since, dtbinding is on a transition phase to include
-> iface clock and clock-names, attaching the opp-table to core clock
-> remains optional such that it does not cause probe failures.
-> 
-> Introduce clock scaling API qcom_ice_scale_clk which scale ICE
-> core clock based on the target frequency provided and if a valid
-> OPP-table is registered. Use round_ceil passed to decide on the
-> rounding of the clock freq against OPP-table. Clock scaling is
-> disabled when a valid OPP-table is not registered.
-> 
-> This ensures when an ICE-device specific OPP table is available,
-> use the PM OPP framework to manage frequency scaling and maintain
-> proper power-domain constraints.
-> 
-> Also, ensure to drop the votes in suspend to prevent power/thermal
-> retention. Subsequently restore the frequency in resume from
-> core_clk_freq which stores the last ICE core clock operating frequency.
-> 
-> Reviewed-by: Harshal Dev <harshal.dev@oss.qualcomm.com>
-> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-> ---
->  drivers/soc/qcom/ice.c | 93 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  include/soc/qcom/ice.h |  2 ++
->  2 files changed, 95 insertions(+)
-> 
-> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
-> index 5f20108aa03ebe9a47a10fba9afde420add0f34a..519d08c4727a6cb2dc5991216a2c042ed6218857 100644
-> --- a/drivers/soc/qcom/ice.c
-> +++ b/drivers/soc/qcom/ice.c
-> @@ -17,6 +17,7 @@
->  #include <linux/of_platform.h>
->  #include <linux/platform_device.h>
->  #include <linux/xarray.h>
-> +#include <linux/pm_opp.h>
->  
->  #include <linux/firmware/qcom/qcom_scm.h>
->  
-> @@ -113,6 +114,8 @@ struct qcom_ice {
->  	bool use_hwkm;
->  	bool hwkm_init_complete;
->  	u8 hwkm_version;
-> +	unsigned long core_clk_freq;
-> +	bool has_opp;
->  };
->  
->  static DEFINE_XARRAY(ice_handles);
-> @@ -315,6 +318,10 @@ int qcom_ice_resume(struct qcom_ice *ice)
->  	struct device *dev = ice->dev;
->  	int err;
->  
-> +	/* Restore the ICE core clk freq */
+The vub300 driver lifetime-manages its controller state using
+vub300->kref, with vub300_delete() freeing the mmc host when the last
+reference is dropped. The probe error path after the inactivity timer has
+been armed still bypasses that lifetime rule, however, and falls through
+to mmc_free_host() directly if mmc_add_host() fails.
 
-Redundant comment.
+The race window is between arming the inactivity timer and reaching the
+probe error unwind after mmc_add_host() fails:
 
-> +	if (ice->has_opp && ice->core_clk_freq)
+        probe thread                     timer/workqueue
+        ------------                     ---------------
+        kref_init(&vub300->kref)         ref = 1
+        kref_get(&vub300->kref)          ref = 2, timer ref
+        add_timer(inactivity_timer)      fires after one second
+        |
+        |   race window
+        |<---------------------------------------------------->
+        |
+        mmc_add_host(mmc)
+                                         inactivity timer fires
+                                         vub300_queue_dead_work()
+                                           kref_get()          ref = 3
+                                           queue_work(deadwork)
+        mmc_add_host() fails
+        timer_delete_sync()
+        mmc_free_host(mmc)
+          frees vub300
+                                         deadwork runs
+                                           use-after-free
 
-Can core clk be 0 if OPP is used?
+The inactivity timeout is one second, so this would require
+mmc_add_host() to both fail and take more than one second to do so. This
+is unlikely to happen in practice, but the error path is still wrong.
 
-> +		dev_pm_opp_set_rate(ice->dev, ice->core_clk_freq);
-> +
->  	err = clk_prepare_enable(ice->core_clk);
->  	if (err) {
->  		dev_err(dev, "Failed to enable core clock: %d\n", err);
-> @@ -335,6 +342,11 @@ int qcom_ice_suspend(struct qcom_ice *ice)
->  {
->  	clk_disable_unprepare(ice->iface_clk);
->  	clk_disable_unprepare(ice->core_clk);
-> +
-> +	/* Drop the clock votes while suspend */
+timer_delete_sync() only waits for the timer callback itself. It does
+not flush deadwork that the callback may already have queued. As a
+result, queued deadwork can still hold a kref while the probe error path
+directly frees the backing mmc host, including the vub300 storage.
 
-Redundant comment.
+Fix this by using the same lifetime mechanism as disconnect. Clear
+vub300->interface so that the timer callback and any queued deadwork
+return early and drop their references, then drop the initial probe
+reference and return without falling through to err_free_host.
 
-> +	if (ice->has_opp)
-> +		dev_pm_opp_set_rate(ice->dev, 0);
-> +
->  	ice->hwkm_init_complete = false;
->  
->  	return 0;
-> @@ -560,6 +572,51 @@ int qcom_ice_import_key(struct qcom_ice *ice,
->  }
->  EXPORT_SYMBOL_GPL(qcom_ice_import_key);
->  
-> +/**
-> + * qcom_ice_scale_clk() - Scale ICE clock for DVFS-aware operations
-> + * @ice: ICE driver data
-> + * @target_freq: requested frequency in Hz
-> + * @round_ceil: when true, selects nearest freq >= @target_freq;
-> + *              otherwise, selects nearest freq <= @target_freq
-> + *
-> + * Selects an OPP frequency based on @target_freq and the rounding direction
-> + * specified by @round_ceil, then programs it using dev_pm_opp_set_rate(),
-> + * including any voltage or power-domain transitions handled by the OPP
-> + * framework. Updates ice->core_clk_freq on success.
-> + *
-> + * Return: 0 on success; -EOPNOTSUPP if no OPP table; or error from
+Fixes: 8f4d20a71022 ("mmc: vub300: fix use-after-free on disconnect")
+Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
+---
+v4:
+  - Fix the Fixes tag to point to the commit which added the
+    mmc_add_host() failure unwind.
+  - Add Johan's Reviewed-by tag.
 
-s/error/errno
+v3:
+  - Use the disconnect-style teardown by clearing vub300->interface.
+  - Drop only the initial probe reference and let timer/deadwork drop their
+    own references.
+  - Mention the one-second inactivity timeout in the commit message.
 
-> + *         dev_pm_opp_set_rate()/OPP lookup.
-> + */
-> +int qcom_ice_scale_clk(struct qcom_ice *ice, unsigned long target_freq,
-> +		       bool round_ceil)
-> +{
-> +	unsigned long ice_freq = target_freq;
-> +	struct dev_pm_opp *opp;
-> +	int ret;
-> +
-> +	if (!ice->has_opp)
-> +		return -EOPNOTSUPP;
-> +
-> +	if (round_ceil)
-> +		opp = dev_pm_opp_find_freq_ceil(ice->dev, &ice_freq);
-> +	else
-> +		opp = dev_pm_opp_find_freq_floor(ice->dev, &ice_freq);
-> +
-> +	if (IS_ERR(opp))
-> +		return PTR_ERR(opp);
-> +	dev_pm_opp_put(opp);
-> +
-> +	ret = dev_pm_opp_set_rate(ice->dev, ice_freq);
-> +	if (ret) {
-> +		dev_err(ice->dev, "Unable to scale ICE clock rate\n");
-> +		return ret;
-> +	}
-> +	ice->core_clk_freq = ice_freq;
-> +
-> +	return ret;
+v2:
+  - Rebase on current mainline.
+  - Correct the Fixes tag.
+  - Add blank lines around the early return.
+  - Reword the code comment.
 
-return 0;
+ drivers/mmc/host/vub300.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-> +}
-> +EXPORT_SYMBOL_GPL(qcom_ice_scale_clk);
-> +
->  static struct qcom_ice *qcom_ice_create(struct device *dev,
->  					void __iomem *base)
->  {
-> @@ -738,6 +795,7 @@ static int qcom_ice_probe(struct platform_device *pdev)
->  	unsigned long phandle = pdev->dev.of_node->phandle;
->  	struct qcom_ice *engine;
->  	void __iomem *base;
-> +	int err;
->  
->  	guard(mutex)(&ice_mutex);
->  
-> @@ -756,6 +814,41 @@ static int qcom_ice_probe(struct platform_device *pdev)
->  		return PTR_ERR(engine);
->  	}
->  
-> +	err = devm_pm_opp_set_clkname(&pdev->dev, "core");
-> +	if (err && err != -ENOENT) {
-> +		dev_err(&pdev->dev, "Unable to set core clkname to OPP-table\n");
-> +		/* Store the error pointer for devm_of_qcom_ice_get() */
-> +		xa_store(&ice_handles, phandle, ERR_PTR(err), GFP_KERNEL);
-> +		return err;
-> +	}
-> +
-> +	/* OPP table is optional */
-> +	err = devm_pm_opp_of_add_table(&pdev->dev);
-> +	if (err && err != -ENODEV) {
-> +		dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
-> +		/* Store the error pointer for devm_of_qcom_ice_get() */
-> +		xa_store(&ice_handles, phandle, ERR_PTR(err), GFP_KERNEL);
-> +		return err;
-> +	}
-> +
-> +	/*
-> +	 * The OPP table is optional. devm_pm_opp_of_add_table() returns
-> +	 * -ENODEV when no OPP table is present in DT, which is not treated
-> +	 * as an error. Therefore, track successful OPP registration only
-> +	 * when err is not -ENODEV.
-> +	 */
-> +	if (err == -ENODEV)
-> +		dev_info(&pdev->dev, "ICE OPP table is not registered, please update your DT\n");
-
-dev_dbg() please. No need to spam old DTs.
-
-> +	else
-> +		engine->has_opp = true;
-> +
-> +	/*
-> +	 * Store the core clock rate for suspend resume cycles,
-> +	 * against OPP aware DVFS operations. core_clk_freq will
-> +	 * have a valid value only for non-legacy bindings.
-
-use full 80 column width for comments.
-
-> +	 */
-> +	engine->core_clk_freq = clk_get_rate(engine->core_clk);
-
-Why can't you conditionally cache the freq by moving it to the above else
-condition?
-
-- Mani
-
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index 6c3cb2f1c9d3..c1c21e95f5bf 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -2336,12 +2336,16 @@ static int vub300_probe(struct usb_interface *interface,
+ 			 interface_to_InterfaceNumber(interface));
+ 	retval = mmc_add_host(mmc);
+ 	if (retval)
+-		goto err_delete_timer;
++		goto err_stop_io;
+ 
+ 	return 0;
+ 
+-err_delete_timer:
+-	timer_delete_sync(&vub300->inactivity_timer);
++err_stop_io:
++	vub300->interface = NULL;
++	kref_put(&vub300->kref, vub300_delete);
++
++	return retval;
++
+ err_free_host:
+ 	mmc_free_host(mmc);
+ 	/*
 -- 
-மணிவண்ணன் சதாசிவம்
+2.43.0
+
