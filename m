@@ -1,257 +1,306 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11011021.outbound.protection.outlook.com [52.101.125.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5724933AD8C
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 10:07:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6434E3BB107;
+	Fri, 12 Jun 2026 12:47:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.21
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781258880; cv=pass; b=M72DzE8r51unEXMMz0tYvG5wCF/ZRovVjMcQyhrXMsz5b+0QQoVOlkOm29D4JCgxddxg5FDVuT1uriS9LNRAy+ryOe5+y4QWIR5K04MjKgPyMR80J1WTQJzb8/ibTeBP2gJeLCNe2d5K/69MbdBF22Dx29RHuLGquTMnBBBcozU=
+	t=1781268460; cv=fail; b=glrV7pZnSSEAXk3aeXe+QUKpfW6lXiGKUq+/vu7sIidbQIr2z+Drpy6pF15cYzL+//JLVUCL/2p7Iqu/YwvDlf2DdZtWxDJ+Tos3nncoy21eiicAuDMoQvlbkvbjGPR1EwEu6zkDsm33BCrNP0yGy0LDlKc/c5JjzhS/1NCoAn0=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781258880; c=relaxed/simple;
-	bh=cHw3EhfIxeFggCpzm6CPqEcKG4hAZv5HGwcoAKqnwaw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UtfNAGOeoIbenBNLeTneOIRgqglMYZNDhVS+rQrnKerTberhikWXfcyRy4iBqYBrgQAwJHYsxbMmax0ATMyGF5bDR/gTkNgV3h5aWNlL49u2VdLajhgiZpoJReKY61H6b1+8T1eTbPjuslK3ft3j0MRJJMuDl9zguF1Bpbb4+7s=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=IgFMujEY; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=kXPhUdcO; arc=pass smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1781268460; c=relaxed/simple;
+	bh=j6mqP4bOVff6fipKxXToQ/mO1POr6UURErPl8e8G0lM=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=XCGGLHl/BsLIoXnrKEZgR5C6wmKehNyAgV4VtHEt1q8BZODeuhsutR5v5jBwWcaADJ1b8zAqB/LOEhDrl9IFxFBDsplpq2sIfhKMkvBEWMSouaDgx/RiHXP6xnTzeE2akkDOtUgF4IXqc9RsPsfhQq3uLIeHZubrQ7dceD1bwB4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=Znqxg/LG; arc=fail smtp.client-ip=52.101.125.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="IgFMujEY";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="kXPhUdcO"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65C39Uwr2496522
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 10:07:58 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	oInph8sZQ8Ma5X0t6VxxpBWehRn7abdgTsEpHVxvEAw=; b=IgFMujEYL7nMZWpd
-	KLt4YyRgH50+k1NpU1LggBs55SiDEHrC2/PN+/ZHCO7nPlyoEzT+W2Q6BK8LBbmR
-	yCFP6p6SX0zKBq5OLLfmZp1tpnnRXVuRO1slxq2z4FMsarT+TYAMGo2sUFtuDXpA
-	drZVZb4R+8gJtgY6prfUwMyHi47ZNvlK15W3OkA7E9sECp+s0r8FBguCM6giwm7b
-	cc3j4TnyGUf3YiDyV6hYMrMW5MolB0YP+vKbEQ05H/yq7f3IzUnkHzadp4N788ug
-	Z32fgVOfw+kG9QHI1EZIkUCeJWo5e77pNo7NA0LP7ntclwZLFH32bN4HLE8YiNn+
-	b5HnOg==
-Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com [209.85.222.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4er0x7k29r-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 10:07:58 +0000 (GMT)
-Received: by mail-qk1-f197.google.com with SMTP id af79cd13be357-915ba226a9bso204932985a.2
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 03:07:58 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1781258878; cv=none;
-        d=google.com; s=arc-20240605;
-        b=P+XxSFtReQwZ91R2SbpZPlio3MuAeJrWgroe6ilkrhrpFHQZgOpCO5lK4xriVdP0Ma
-         sVjOoUWlqrZMRnd6lo7t6jBqsJ+NgUinZSScK7yWMMoB6tv3lyVmw4BY9fyNxg/5hNTF
-         NI14/EU1u+jsB0zYhuEQfXh57JWum+ZlwAIpUFd0PpwIsc4jIDJWVN/JencSnb1I552l
-         XlS1RqQ9L1TewvdRcpa1HKFN1jwDhjFxuTgmiUFp69BANEVeHYsWmGPALtn/oKBIHrIz
-         dj9B/p0idCly2qsjj1UgmhlYiYd8eU7V28z49/VTFTAQ+mO5KIZU/Ve/cXoPn68lJ4qJ
-         wdLw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=oInph8sZQ8Ma5X0t6VxxpBWehRn7abdgTsEpHVxvEAw=;
-        fh=oGw3NPMnzOQ9irnw05aHP9q6sDhHd82yLT1lUJb8yps=;
-        b=FG9C4bhmG5oTV/9EPhPr0F5MGYYHBbUJZN4gz3bLlbcSCOh6vjgqxPqsq5hoidAbvm
-         h/9n6RfPFugd/3hey9vOnlTMNqe33nC7vA4r+kQGPA0krVBsUskiE3KjYF0ZWYa72FWg
-         Q2NQR2lny4/l/p7Oe2F86q4b5btcNLrkJP2/0G2MdSgeftcf+J15JVH+wy6njCrknDgr
-         xfHq9Nhbpy5L4lHLS61zh0gkQ2h7kanmrjBZOEmSIVs+Csd+NT07u9CrT/Czl10ifWZ9
-         B4lbZHOOafDPa/4F8AtxnaVmL943NWOLidCp/CsJchGYmQsPSYB9O1NvouV6C/da6HWx
-         5l4w==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1781258878; x=1781863678; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=oInph8sZQ8Ma5X0t6VxxpBWehRn7abdgTsEpHVxvEAw=;
-        b=kXPhUdcOBWDxWimhjIEAjo5Bb8Aa9SN2R6BHuC85I3hPCVc6WvtZptKsdNNUt0OoO/
-         W1G9XG/Jpx84DaMvtqjvEE4Os5OUgsJh2cttpAxJrfCynPyO3Y9aez43Npbq+W13ra7p
-         Bn62/llF4+aq/RIUXFY9vfSdry5oBwId/8X5tbqZS+vm3XQIWDi+SC7VmBV1EOLV1CAW
-         BnwJM995wKDPUzZ3Etf6zKynUD4+kOzzkoHBgIya3Zmcr9pcHZ23ubXisexJPaVbiJ3L
-         Z0b+C0Vg4WtRR+hPYSWhb/2606UTq4se0TvW6dsodQ6LtpxSAgScRTJ+0vRrmBSePe5V
-         KKHQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781258878; x=1781863678;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=oInph8sZQ8Ma5X0t6VxxpBWehRn7abdgTsEpHVxvEAw=;
-        b=Es6FdPBg8hmEZAeo0EntRjNN1z0Lu8M/JEGca1hyOJZW1Cu9nU3YKM3pZgtOPbAxp0
-         VCSDwkGMOR37p1HtgZYheJrfEjEjjr9URW26OGuRLuhuelILCXlIAd2t67x87gS4195Q
-         R3+M+CRKLClSqYTP/XBBTNSmcMSfk7117ajfoLFVPBPszGCK/zeTsXXOYuqR3qooPExX
-         BGWj4d41/KcAj4kkEJzsMUAYRC96BUv0JNqIEadUg0DEFVi/PQAkbfg5visZ1YeWlcwJ
-         pxZriRm54uFlQsl4ffzEUDu8UwAoEtB8wPvurMyQ75jUi7U7QAxOG3yE+VCcgXy7rmgP
-         85Hw==
-X-Forwarded-Encrypted: i=1; AFNElJ/Qelj6Yu+1WnbPbn8RXMbv/8lqx8hfBcK9rZPIdCqZfbWUrCLzZWm9lJpNyIO/lGbgcKZYdRr8vZY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YylUqMqxQWeg83wX0lE2ebhEkCjLz7s+PrMuJJRu7+EYpPn872A
-	RDx2S7iN4WnoHDO/JGKbatWUK3t4pfegsHH0XbeTU7hf2FhcAwiuI0tbJLiPGzkrrUINCH0X+MD
-	IVeIhQZX70ae1eLHJ+VB4N/1WlKIWRKmVmdwMk262Txetsv11PCC1dftG3N2KOjEyxf8sZVhCm9
-	cFbQMVAvNgizWw1z766KDJxa1wS0p0M+Vw2WQBEUjDxPkMlw==
-X-Gm-Gg: Acq92OHWsmb2CtdRkK8vZoFZNWFuE70AFWCUcD5pADOLT2HKZhtXrYToNInbO2FEsEX
-	cle1tJ9tOK5NPPFTvvlhZcE3GEVsWuiE+oaqUpHqDCsVzY4+vbmX1eyjqgEkPjSMNgeecbpxwW2
-	mcLN1TshkrXYjkh3oJtW5RJnMUqEl5Sb5TZsOs5tthsjtAui8O75SvGeNzjl/JWjfg2WS7w1R1T
-	xGFpEHOU2UxNQtLBOdEcoqz7gdD7jdvZKyad9PQaa0L+OgJdkNX+46g6F0B5HACwcrINiL68FMT
-	KNQgYuOkotDGyI+I8daJ
-X-Received: by 2002:a05:620a:2714:b0:915:abc4:b56f with SMTP id af79cd13be357-9161bf76166mr272189785a.50.1781258877613;
-        Fri, 12 Jun 2026 03:07:57 -0700 (PDT)
-X-Received: by 2002:a05:620a:2948:b0:915:bac0:fc2d with SMTP id
- af79cd13be357-9161bc13cc7mr245131985a.7.1781258430139; Fri, 12 Jun 2026
- 03:00:30 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="Znqxg/LG"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=YrdtWzqxYzND4tOEe1F3WzMFTETFzDjrpPLmo0OzWThtAGVCQOnPH/epdCZoYcjTi888chRnKtlHywEyBsVxPIRftUrxl/UKgbYHvapzgYNqsFdw3LTq+rsPt3iEV6Xz6mxzPlXRhK4StNxaSnL1220AhDHmoEx8xG5WsqWAj1GQ3FU2LKi5DzHSPMIoV2zZE75mE2Rdorhe1kmBtAvIRujcjhrWac2Y7SpDpujZrSVJ/1MHA2SkbcIl+nmQ2CKqV2wPoK9eVHQLbPeyzcEdV2q4anpK6pvuWn7NpTWCGmljzbGjonytQz6iRb8X26kistIjz/ffPmQfXY6pNMUORw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=5GjpxHEDsLybNkS/fDpF1Vj5/IjolkKPDfL8QHwuMTo=;
+ b=G2xIXwoUIt3yYbsTriQgMvdesA1dJZlaENdSPkCtIHfVXVHRF7v3QoG5znB2ZMNfqTW0hTqu2KGzGn8ZYgPQJfJfgHTGhvqz/DoZr78j4d6WFNt9BLdj7YuM/lrUf5oZN/i/j5g22AcW1KoZgCgZR4mVRLV6Wbf+P860cV2r97eXjKxBmoonHn6d7MfEyG1aUoYcWFqM/CPWWXEpOyUtJbXK7xyjB6JIziDVMYFVavDGl+fAJUPw6K5j6Y8SQ8aEzGe9YJN/U++OkS4W+bcHmvnAM3LoKxu+38WxAqf4TH2mpeTIuv8hQ60wOhRzvMQe3V/aNl1sUhnc1fnh1l6akQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=5GjpxHEDsLybNkS/fDpF1Vj5/IjolkKPDfL8QHwuMTo=;
+ b=Znqxg/LGmZjkh9w9JHStTwWj4Ey/oq/Ce7451afHV9/Tw6yT8vkxUHl02lC/B6PJRogTVTRphQkQystWqGVGF+OuRZiSy40ntRNUIcmcHmRU/PoXdfpuxWu1SRxL9uQ7uhiMaxAq1qiq0R/DM9hTNwc3Wj6LajWmXY+FfonRwdU=
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
+ by TY4PR01MB14466.jpnprd01.prod.outlook.com (2603:1096:405:23a::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.113.13; Fri, 12 Jun
+ 2026 12:47:35 +0000
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0113.014; Fri, 12 Jun 2026
+ 12:47:35 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: biju.das.au <biju.das.au@gmail.com>, wsa+renesas
+	<wsa+renesas@sang-engineering.com>, Ulf Hansson <ulfh@kernel.org>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Geert
+ Uytterhoeven <geert+renesas@glider.be>, Prabhakar Mahadev Lad
+	<prabhakar.mahadev-lad.rj@bp.renesas.com>, biju.das.au
+	<biju.das.au@gmail.com>
+Subject: RE: [PATCH v17 14/17] mmc: renesas_sdhi: Add HS400 enhanced strobe
+ support for RZ/G3L
+Thread-Topic: [PATCH v17 14/17] mmc: renesas_sdhi: Add HS400 enhanced strobe
+ support for RZ/G3L
+Thread-Index: AQHc8yZOYuRsglwqCEiaUHVpImBWcLY67KNA
+Date: Fri, 12 Jun 2026 12:47:35 +0000
+Message-ID:
+ <TY3PR01MB11346C9166A00D8C7CF037A4C86182@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
+ <20260603065731.93243-15-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20260603065731.93243-15-biju.das.jz@bp.renesas.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|TY4PR01MB14466:EE_
+x-ms-office365-filtering-correlation-id: 4ad6771d-abf5-45e3-6008-08dec880c6fc
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|366016|376014|23010399003|1800799024|4143699003|5023799004|11063799006|6133799003|56012099006|18002099003|22082099003|38070700021;
+x-microsoft-antispam-message-info:
+ esPbI7Jeoi8gSKGAZRZuJHhJz1INFvC9J8sdzpj8N2v1PJt98Em88Die0QIIGy0hCMbXELZNmCFw5BszTDApcCkWO6lRpYQZ3wOGb6w1d2l7ZKRBLISjb7Br9p+8yFsblbqmIUuu/7PHxAWk97zcdDXAOOQqaQ60aVE2M6IdKx1KLQxl8sf+ArVZy4pMWjmGnB5Jxr4rmyBWk31dGSWfa7y0T4IViJ66f8HhMnp5L3gSjqCOccsoT/Ig9ZEkehzaFcXgYY4xpNzUB99PrnufmZx4SvqwVXRhuVIRQtdEHUXob3kHYnE4PPExc30h9JfUvaEtA1fha24gnvgQH3Fb7uOv+DU4wQxs0OghZpvseyjrxp542rqUuC6p9PcDvaD6uxtGCpuwTJqsHYARgxCe2s8abXlTgCoSfUL5ET6b1YFyYhS2M3/RljPbEJaqOr3NRZprfMxhVkgKQjRc7KqV07u/hAsX8lwrUHyXrApz/yhm+O2xHdJLlla5dpAxSM3XmYhR3vVUAGFgjey6xh8dkQMy1dSn3DF5x5jSkEo1Wju7uRpG/lQEntlJ5W2aLGCz4P4MuTN3mADpowB2qjARGT6PoWYzMG4db4kZu9lI+PZubKv5ZshNm+V+ijOXGcJ+dDxxSg38k94WecCSWNuYDldFG3dIL+yWr4ORAOhQIAFlGPHmiH2ck36g569XmIkzZMTVJ/TsT0RtO4Z+FhgWg8bGl6FnZHRokS4s7cE8kD7lNV3Hcd4GHSFhsJhWwRYL
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(23010399003)(1800799024)(4143699003)(5023799004)(11063799006)(6133799003)(56012099006)(18002099003)(22082099003)(38070700021);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?c53jN3MkezKiZ59lwc99wT3P0T0wwYmuXDdOmuXITJF4SAgDbFUd+X0cGmEw?=
+ =?us-ascii?Q?tU3Kv9euX+n3yLsj/65Tq9qK8qv9V9Autiu/VlS6lekvnldvmOByJ7nWoVlm?=
+ =?us-ascii?Q?Oj4qKUas02QhvM0fd7B2lW7vpzpPCtmBkd+LvIZOerTz3dvqkSMl6+zDhBsQ?=
+ =?us-ascii?Q?cwwb6RWOjEFNH485k6yq3aeyoWgku8NLDunifDZeEoQ5mDad+XyXxQEVlOVp?=
+ =?us-ascii?Q?ePnCu+ruRajDuP/sQoA9pCX0mjti/k9Jy5OrIbHX+KdaRf3tilDNNjNt42hg?=
+ =?us-ascii?Q?pNjEdOFQ18kBw9hbyJ2DsV/cmnV7d5H3WBHmHIT6+RF989undCx62y6F6A2Z?=
+ =?us-ascii?Q?lMgnQfQDOxrh7EQiU/56PpatRQXNrPv+ivz+/7OM5JZUBwXcsXN/ImHS8tIN?=
+ =?us-ascii?Q?s8rmRJV6BdLBk6S7Qu511OtiL5JnWfq3dctWHqKNhW9IXqP8sbyM8qrBEkOK?=
+ =?us-ascii?Q?SVIdn+gEgK4hMuZlGHHgTkWzy0vyGjZP+/Jz8PefQfN6ArvUtHVmL6oTV+VO?=
+ =?us-ascii?Q?iBXAa2U/+PdEOFP4y2TLHIxI0Fvb5S2GI0LtnSo8ELEp2B1Grg57TlqIq3P3?=
+ =?us-ascii?Q?OmXfGh3AAVMEMmeIxtyaIKfhw/RNq/1YXYzGIQfy7qBhjJ53u+skutukTZZ/?=
+ =?us-ascii?Q?6xsuLyFFl5xt/eCKsrzsLoJK6RznPzQDtF15k4mpInWqMCkxAb9PW0YpAgQg?=
+ =?us-ascii?Q?psYq1JY7utmsRpMIPfp/ndK3+XH9Ba1iKoqXF6dGek6VrN9uCcQaOvLhVHT6?=
+ =?us-ascii?Q?KPMCDOVOQdXZGX2g2uFFscl5p2nR3k+KfiaOStFVrBIQodRe3BNAyFGbMGvQ?=
+ =?us-ascii?Q?jSNr3lWtNFYdcSJ/jPnXnCvhZSM51qM8VkTYWgBiE/YN3rggN5yFaju3bdLY?=
+ =?us-ascii?Q?zk5yufrfmbksuyG7MnoAY7MxHfpZ59m5UIkibHLtcoxqYCljC9p3lmzBavhp?=
+ =?us-ascii?Q?2TGGDVanvJx8nrTGo0HFzal6X5ZfqIgShEZCYCUoo7LCj37mNkVkUh5jBNz0?=
+ =?us-ascii?Q?rbk9CWPXoVg6V6u4tacxoQRXF9tnQng38jnqt+ysbmxfvg3Mo6dCFfQWC+eM?=
+ =?us-ascii?Q?GUre/AD4SzWKS1QUSvrQ8DpjnLlyr4N+Hnf0zMZUaGhqeY0o6C2aJV9U74ZM?=
+ =?us-ascii?Q?0swstzw+lMjyWS2V3GHS/JY74+IHFN7KudVK8GSg0STdzcVR7KHgDi2bT2gt?=
+ =?us-ascii?Q?p3J2Dz997H71lWoymKfPDh9Q1d9xJxOLpcL14686m4vKXyXRiJv2GhZ6upWj?=
+ =?us-ascii?Q?k8ODfP6XMB9Ca5Nx5XrDuY1K5Ne7vSP8MhVIfU/Ca0pRPhRsHm5oXZ4axggB?=
+ =?us-ascii?Q?FtlE4jGRwpVeRhvK0hwIlOSc8O5A9+HYv2ImqBPAvL7vUyPZE7kDBLid/qTx?=
+ =?us-ascii?Q?B8VX1oC/PrFETYshd3vWYH9meft1r3YdWECWOUiignT+bCWGDWIMLMMlApG/?=
+ =?us-ascii?Q?maccdVnvBxCC7s+OZowQUIrnvoWf6hXie5X0TbGYuGJHJnH0s+fvzmcw/ygJ?=
+ =?us-ascii?Q?AwYQX1Gd+IRI2gWEx9r+mLnRHjyYtBRdrlINJ8v4Sd56pXpcQwAlYfQLqDrg?=
+ =?us-ascii?Q?wIbQZuDPEZrbknt2FAFfMoIX9yzcNJn9Cv1qLCgpoJ3+TUzKjly1CSp+rkB/?=
+ =?us-ascii?Q?vbP2JKgxeWUB2DzARdaHazOB6SwJCxgjDCPnGwQmoPKidH+T4TkZeOve2nrg?=
+ =?us-ascii?Q?x4pJsGudIvgIRHZ1IyT75RaTBQYuo+UX87dQmGjMmH7Tvszo1kIsBDjKUoSW?=
+ =?us-ascii?Q?4TEqeyz3lQ=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260609-block-as-nvmem-v4-0-45712e6b22c6@oss.qualcomm.com>
- <20260609-block-as-nvmem-v4-6-45712e6b22c6@oss.qualcomm.com> <sy2ofvdbcxspxtmfdavjvdz7oes5ieuep4znf4ayknmuwhrlgk@7lp3bkegaeif>
-In-Reply-To: <sy2ofvdbcxspxtmfdavjvdz7oes5ieuep4znf4ayknmuwhrlgk@7lp3bkegaeif>
-From: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Date: Fri, 12 Jun 2026 12:00:19 +0200
-X-Gm-Features: AVVi8CcCaLmOad_JBtnFjekoAUWHpnzgbbLT7l_V3SVx5j2zNp67A6Sx6we9iz0
-Message-ID: <CAFEp6-3Z92KNVv6hbG_zrzan4+cP-TCkoc693orKwvQyvP_YHA@mail.gmail.com>
-Subject: Re: [PATCH v4 6/8] Bluetooth: hci_sync: Add NVMEM-backed BD address retrieval
-To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>, Jens Axboe <axboe@kernel.dk>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jeff Johnson <jjohnson@kernel.org>,
-        Bartosz Golaszewski <brgl@kernel.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
-        Rocky Liao <quic_rjliao@quicinc.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>, Simon Horman <horms@kernel.org>,
-        Srinivas Kandagatla <srini@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Saravana Kannan <saravanak@kernel.org>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
-        linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org,
-        daniel@makrotopia.org,
-        Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: wLHp1K7WoXyF-ZRzJckkIA1jA1PJxc1B
-X-Authority-Analysis: v=2.4 cv=c4abhx9l c=1 sm=1 tr=0 ts=6a2bda7e cx=c_pps
- a=50t2pK5VMbmlHzFWWp8p/g==:117 a=IkcTkHD0fZMA:10 a=FelO9ux0wxsA:10
- a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yOCtJkima9RkubShWh1s:22 a=EUspDBNiAAAA:8 a=dtGr58D_ptlPQ1E9saEA:9
- a=QEXdDO2ut3YA:10 a=IoWCM6iH3mJn3m4BftBB:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjEyMDA5MSBTYWx0ZWRfX3EGA8YPvbiVc
- iad9GjMXdVkgwJt0r3NRXJQ1+QckUvl2t3BbE12HikZ0SxXi96O6ENNDS0udRIt5YPIOPhBC+Ok
- B+rbFFMhvkOgRcSQwfKLV3iaE3F72pDV9ABX5sOFr9GOaRVOCF3jpFfIvntyE76iweezRbikySr
- 2to5IuXPNW/R7Cdh+yF2h0SHnpGhpVvdJLlAIBu1ZuNhKXgdW7pX/jvn4/AKc4S9OveM8JFaXoN
- CMPRrotrmi3izPoAmfuQh33Zq9yKTwEUuAkQoeQpsItkZ68FR1kWc0FzRS0GtHrmpGIDsn+hStC
- vPYsjdOj9M3uKaFVrssp2kCj4AiU0fkLdT/DJLnUoe6xMd6p/Oyl/K5pKg3YbrXwr/5WKZiVpnx
- P15blYbgjoht6RdvBNlZQE+P1XmHCc2YnEeKUYg3xgpEagmYSQQgnFzCuaChjnCPtiBXBxtYmfS
- ofmPMPO+QoNKUKsoEHw==
-X-Proofpoint-ORIG-GUID: wLHp1K7WoXyF-ZRzJckkIA1jA1PJxc1B
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNjEyMDA5MSBTYWx0ZWRfX4+vmIuF51TSM
- Iw2MFuGzDZovRGFq0A9I/0h1dXFUpjwwlUS/sK6FyTPg9DpyVM97516bYgk3OvPXOm43U3i/BhI
- oCY61E6oV8gyIzXkxR8QGgNoYVV/1g0=
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-06-12_01,2026-06-11_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 adultscore=0 clxscore=1015 phishscore=0 priorityscore=1501
- malwarescore=0 bulkscore=0 suspectscore=0 impostorscore=0 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606040000 definitions=main-2606120091
-
-On Fri, Jun 12, 2026 at 11:11=E2=80=AFAM Dmitry Baryshkov
-<dmitry.baryshkov@oss.qualcomm.com> wrote:
->
-> On Tue, Jun 09, 2026 at 09:52:31AM +0200, Loic Poulain wrote:
-> > Some devices store the Bluetooth BD address in non-volatile
-> > memory, which can be accessed through the NVMEM framework.
-> > Similar to Ethernet or WiFi MAC addresses, add support for
-> > reading the BD address from a 'local-bd-address' NVMEM cell.
-> >
-> > As with the device-tree provided BD address, add a quirk to
-> > indicate whether a device or platform should attempt to read
-> > the address from NVMEM when no valid in-chip address is present.
-> > Also add a quirk to indicate if the address is stored in
-> > big-endian byte order.
-> >
-> > Reviewed-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-> > Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
-> > ---
-> >  include/net/bluetooth/hci.h | 18 ++++++++++++++++++
-> >  net/bluetooth/hci_sync.c    | 39 +++++++++++++++++++++++++++++++++++++=
-+-
-> >  2 files changed, 56 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
-> > index 572b1c620c5d653a1fe10b26c1b0ba33e8f4968f..7686466d1109253b0d75ede=
-b5f6a99fb98ce4cc6 100644
-> > --- a/include/net/bluetooth/hci.h
-> > +++ b/include/net/bluetooth/hci.h
-> > @@ -164,6 +164,24 @@ enum {
-> >        */
-> >       HCI_QUIRK_BDADDR_PROPERTY_BROKEN,
-> >
-> > +     /* When this quirk is set, the public Bluetooth address
-> > +      * initially reported by HCI Read BD Address command
-> > +      * is considered invalid. The public BD Address can be
-> > +      * retrieved via a 'local-bd-address' NVMEM cell.
->
-> Why do we need a quirk here? Can't we always assume that if there is an
-> NVMEM cell, it contains a correct address, even if HCI command returned
-> a seemingly-sensible one?
-
-The pattern follows HCI_QUIRK_USE_BDADDR_PROPERTY, the quirk indicates
-that the address returned by the HCI Read BD Address command is
-invalid and should be overridden using a fwnode property. Without this
-quirk, even a valid fwnode-provided address is ignored. So here this
-is primarily done to align with that established behavior, although
-whether that design choice is ideal is a good question.
-
-This also raises the question of why an explicit HCI_QUIRK_USE_* flag
-is required to allow reading from NVMEM when the controller-provided
-address is known to be invalid, rather than attempting to use any
-available backend (fwnode-prop or NVMEM). but this remains
-consistent with the behavior established by the fwnode-based quirk.
-
-So, I think these aspects could be revisited in a Bluetooth follow-up
-series if there is interest in reworking the overall addr fallback
-design.
-
-Regards,
-Loic
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4ad6771d-abf5-45e3-6008-08dec880c6fc
+X-MS-Exchange-CrossTenant-originalarrivaltime: 12 Jun 2026 12:47:35.2583
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 8g5oJD+Io/oU4nsxxNrKD8cPHQ8VzuCxVHAV8mWK3ETonmCHyenALcFMWSoPqjeMtLLl9EgY09NQX3S2QQziogw5TiroRicB0dbQg5aVYlY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY4PR01MB14466
 
 
 
->
-> > +      *
-> > +      * This quirk can be set before hci_register_dev is called or
-> > +      * during the hdev->setup vendor callback.
-> > +      */
-> > +     HCI_QUIRK_USE_BDADDR_NVMEM,
-> > +
-> > +     /* When this quirk is set, the Bluetooth Device Address provided =
-by
-> > +      * the 'local-bd-address' NVMEM is stored in big-endian order.
-> > +      *
-> > +      * This quirk can be set before hci_register_dev is called or
-> > +      * during the hdev->setup vendor callback.
-> > +      */
-> > +     HCI_QUIRK_BDADDR_NVMEM_BE,
->
-> Also, is this necessary? Are the devices which store the address in the
-> wrong format in the NVMEM?
->
-> > +
-> >       /* When this quirk is set, the duplicate filtering during
-> >        * scanning is based on Bluetooth devices addresses. To allow
-> >        * RSSI based updates, restart scanning if needed.
->
+> -----Original Message-----
+> From: Biju <biju.das.au@gmail.com>
+> Sent: 03 June 2026 07:57
+> Subject: [PATCH v17 14/17] mmc: renesas_sdhi: Add HS400 enhanced strobe s=
+upport for RZ/G3L
+>=20
+> From: Biju Das <biju.das.jz@bp.renesas.com>
+>=20
+> Add an hs400_es bitfield to renesas_sdhi_hw_info and implement renesas_sd=
+hi_hs400_enhanced_strobe(),
+> registered as
+> host->ops.hs400_enhanced_strobe for all SCC-capable controllers.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> ---
+> v1->v2:
+>  * No change.
+> ---
+>  drivers/mmc/host/renesas_sdhi.h               |  1 +
+>  drivers/mmc/host/renesas_sdhi_core.c          | 53 ++++++++++++++++---
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  1 +
+>  3 files changed, 49 insertions(+), 6 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_s=
+dhi.h index
+> 92b66116f044..1a837d0c9479 100644
+> --- a/drivers/mmc/host/renesas_sdhi.h
+> +++ b/drivers/mmc/host/renesas_sdhi.h
+> @@ -48,6 +48,7 @@ struct renesas_sdhi_hw_info {
+>  	unsigned tuning_delay:1;	/* Has tuning delay */
+>  	unsigned internal_divider:1;	/* Has internal divider */
+>  	unsigned scc_hs400_mode2:1;	/* Has scc hs400 mode2 */
+> +	unsigned hs400_es:1;		/* Has hs400 enhanced strobe */
+>  };
+>=20
+>  struct renesas_sdhi_of_data_with_info { diff --git a/drivers/mmc/host/re=
+nesas_sdhi_core.c
+> b/drivers/mmc/host/renesas_sdhi_core.c
+> index 282107d06114..2a70a2e64b9c 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -274,7 +274,7 @@ static int renesas_sdhi_card_busy(struct mmc_host *mm=
+c)
+>  #define SH_MOBILE_SDHI_SCC_SMPCMP       0x00C
+>  #define SH_MOBILE_SDHI_SCC_TMPPORT2	0x00E /* G3L: SDm_SCC_HS400MODE1 */
+>  #define RZG3L_SDHI_SCC_HWADJ2		0x010
+> -#define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014
+> +#define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014 /* G3L: SDm_SCC_HWADJ3 */
+>  #define SH_MOBILE_SDHI_SCC_TMPPORT4	0x016 /* R-Car */
+>  #define SH_MOBILE_SDHI_SCC_TMPPORT5	0x018 /* R-Car */
+>  #define SH_MOBILE_SDHI_SCC_TMPPORT6	0x01A /* R-Car */
+> @@ -298,8 +298,9 @@ static int renesas_sdhi_card_busy(struct mmc_host *mm=
+c)
+>  #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_REQUP	BIT(24)
+>  #define SH_MOBILE_SDHI_SCC_SMPCMP_CMD_ERR	(BIT(8) | BIT(24))
+>=20
+> -#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL	BIT(4)
+> -#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN	BIT(31)
+> +#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL		BIT(4)
+> +#define SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE	BIT(30)
+> +#define SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN		BIT(31)
+>=20
+>  /* Definitions for values the SH_MOBILE_SDHI_SCC_TMPPORT4 register */
+>  #define SH_MOBILE_SDHI_SCC_TMPPORT4_DLL_ACC_START	BIT(0)
+> @@ -574,6 +575,8 @@ static void renesas_sdhi_adjust_hs400_mode_disable(st=
+ruct tmio_mmc_host *host)
+> static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
+>  					  struct renesas_sdhi *priv)
+>  {
+> +	unsigned long val;
+> +
+>  	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+>  			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+>=20
+> @@ -583,10 +586,12 @@ static void renesas_sdhi_reset_hs400_mode(struct tm=
+io_mmc_host *host,
+>=20
+>  	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DT2FF, priv->scc_tappos);
+>=20
+> +	val =3D ~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN | SH_MOBILE_SDHI_SCC_TMPP=
+ORT2_HS400OSEL);
+
+SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL- This bit not available in G3L, so ne=
+ed a fix.
+
+Cheers,
+Biju
+
+
+> +	if (priv->info->hs400_es)
+> +		val &=3D ~SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
+> +
+>  	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2,
+> -		       ~(SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
+> -			 SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
+> -			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
+> +		       val & sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
+>=20
+>  	if (priv->info->scc_hs400_mode2)
+>  		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2, 0x0); @@ -783,6 =
++788,41 @@ static
+> int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	return ret;
+>  }
+>=20
+> +static void renesas_sdhi_hs400_enhanced_strobe(struct mmc_host *mmc,
+> +					       struct mmc_ios *ios)
+> +{
+> +	struct tmio_mmc_host *host =3D mmc_priv(mmc);
+> +	struct renesas_sdhi *priv =3D host_to_priv(host);
+> +	u32 val =3D sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2);
+> +
+> +	if (!priv->info->hs400_es)
+> +		return;
+> +
+> +	if (ios->enhanced_strobe) {
+> +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL,
+> +			       ~SH_MOBILE_SDHI_SCC_CKSEL_DTSEL &
+> +			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_CKSEL));
+> +
+> +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
+> +			       ~SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN &
+> +			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL));
+> +
+> +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT3, BIT(8) | BIT(9=
+));
+> +		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ2, 0xFF);
+> +		sd_ctrl_write16(host, CTL_SDIF_MODE, SDIF_MODE_HS400 |
+> +				sd_ctrl_read16(host, CTL_SDIF_MODE));
+> +		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HS400MODE2,
+> +			       RZG3L_SDHI_SCC_HS400MODE2_HS400EN2);
+> +
+> +		val |=3D SH_MOBILE_SDHI_SCC_TMPPORT2_HS400EN |
+> +		       SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
+> +	} else {
+> +		val &=3D ~SH_MOBILE_SDHI_SCC_HS400MODE1_ENHANCED_STROBE;
+> +	}
+> +
+> +	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, val); }
+> +
+>  static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, b=
+ool use_4tap)  {
+>  	struct renesas_sdhi *priv =3D host_to_priv(host); @@ -1333,6 +1373,7 @@=
+ int
+> renesas_sdhi_probe(struct platform_device *pdev,
+>  		host->ops.prepare_hs400_tuning =3D renesas_sdhi_prepare_hs400_tuning;
+>  		host->ops.hs400_downgrade =3D renesas_sdhi_disable_scc;
+>  		host->ops.hs400_complete =3D renesas_sdhi_hs400_complete;
+> +		host->ops.hs400_enhanced_strobe =3D renesas_sdhi_hs400_enhanced_strobe=
+;
+>  	}
+>=20
+>  	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_=
+all); diff --git
+> a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesa=
+s_sdhi_internal_dmac.c
+> index 83d348fb5eeb..a021ebb46070 100644
+> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> @@ -277,6 +277,7 @@ static const struct renesas_sdhi_hw_info sdhi_hw_info=
+_rzg3l =3D {
+>  	.tuning_delay =3D 1,
+>  	.internal_divider =3D 1,
+>  	.scc_hs400_mode2 =3D 1,
+> +	.hs400_es =3D 1,
+>  };
+>=20
+>  static const struct renesas_sdhi_of_data_with_quirks of_r8a7795_compatib=
+le =3D {
 > --
-> With best wishes
-> Dmitry
+> 2.43.0
+
