@@ -1,87 +1,86 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 528793EEAEA
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 13:21:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAB123F410B
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 13:21:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781270465; cv=none; b=Tn6Mv9olb5VDgCvwFzpHrPGI6tiTNhsavNKVDPYxQQH3i5TF6j5Y5ETS6qbOwXaVghd0/EHqTqFj3VSuWie9zIMj57t5OYpjaNi62/82XGkBi0LWdYdNZItU2TJFb3srTSbsLZU5Es/Qg41WXTTYnSSZtwIHr1ToB0q2mYTkYY0=
+	t=1781270469; cv=none; b=UQ0UlPqdSCFD+Wu5t8IRCoy5znEdU9mOazaDmpjBF+hZlrF3lu9xAH+yxpI8NWbLTwe+8FWqdW28jIti7pRm623vR4oTMtDp1rTm4N19DYuAUTL/rNOgTJJxd+JCvV0iobj0WHhkqCkry7tme3aaRaqvYEL+ZaBLsqi1vPMEkp0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781270465; c=relaxed/simple;
-	bh=ND8QCWihnx/5SzmAjMX21FeKkkTEai7fgVEY9yu2Gdc=;
+	s=arc-20240116; t=1781270469; c=relaxed/simple;
+	bh=X0Ai0achBf+ZwxyXQCLBkT4mksbIzc1fznSydl00GqA=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=XkFr8+Wp4x67F/UalYoKnwLoI8rDxSA7HH1pG7M6ThtJVEGJKpV7h/nALWQqEtkZpUl0gjBrZTmX9X9cS6utEYmt9jF5BzcfPj0knafqWf08NJuBT+mk1nhuV/cwnXpcmOZnHdrsgBS0jbc1u0S4/yqUpY5bWF3m0Ta1+GvRTPY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Ih25a15f; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=D+y7On5S; arc=none smtp.client-ip=205.220.168.131
+	 In-Reply-To:To:Cc; b=Qi9D/Q5IQ0MnRGjpkIh9Z8RlDfGuJebWvQNJAuvfvH7gF6uMmlXQ5i44qxHnZ/jy71QkwbcSAro5/8R+HkXCKCwjmESCArAUJ76GAqdxmvdhd5SBNQ3bRbQG70nkrynfD95jGIZShpYfR2u9UEstSmTWthZMkNKEMYyCTHFUCTc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ewQgfnCL; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=P9Xl72Qz; arc=none smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Ih25a15f";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="D+y7On5S"
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65CCj4xd3733320
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 13:21:02 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ewQgfnCL";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="P9Xl72Qz"
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65CCijCd3747567
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 13:21:07 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	leied0AaOznatkz/yNwlsN4mHUViLaKycB742NpUAE8=; b=Ih25a15f7iXbpzty
-	m5yjqdwpdGC0IJlGeKlWrAQFy2yLuxPcCWLUN8imPBgtPjAN2FeWU+7FvlYmF7Aw
-	WDhZ/Fh5xxkRuZ2G47GesuXjMjrqPzEO5eLNJlUJ+6d4EQRonYXjTUutDr23Ilkx
-	knHZSte48LpRQMBNP8oukwa0eyryq3WWcYPVFsJwTXnnLFOljrMZ/kLSuSDH7Jfy
-	Ap3/z4CFWrtBu6m+1szEDiF81RrHgu8D+65N+qeR9NQ3LtBmF0876KMYSU9+7elW
-	ET9ZNqVwygbI9ivhL5dBV63/0R2CpY6zAWMJcecJ2+Mjwd3wLtxpZN6ZoqtoT+/C
-	BpPZ9g==
-Received: from mail-ua1-f72.google.com (mail-ua1-f72.google.com [209.85.222.72])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4er2r72xh9-1
+	/uyx06x8K5ep74cMiQuw/AWSjV6qe5TglOy6xBBnhww=; b=ewQgfnCLI68ej6Qo
+	9OvW3Hi1cjrVzZolpkfEcfXgnbQl6gVVUQe/0Yp0LuwgvD0Qsc5IdUDcrmpsOF7V
+	Z/vHzjH/RTaUpBynaPr3gFnmOdDpnUNPNDzQPhYR+o99ADjRTwBodu9jeRTtmWvz
+	te2fZaZFzkN4i1pVF6a9pk9+tSgxqW+YMd+WkNoL7CrS0KCHdRVFHbfvKF7kvEZi
+	wgOgDbXctH61qgfVv8uE9WrR9AZtA6dq0Dc9JuSq3QgoIBeREWczdf+29NpOtvH/
+	dZPxZfyuZezJJmJ7EZ7SwhXPEK3ThzjcIIOlzKvyJhxy9QkoLOOJ1VYlLWUX/Yrz
+	NCLHdQ==
+Received: from mail-ot1-f71.google.com (mail-ot1-f71.google.com [209.85.210.71])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4er76ehy7h-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 13:21:02 +0000 (GMT)
-Received: by mail-ua1-f72.google.com with SMTP id a1e0cc1a2514c-963da2c73fdso171704241.3
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 06:21:02 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 13:21:06 +0000 (GMT)
+Received: by mail-ot1-f71.google.com with SMTP id 46e09a7af769-7e71e43e89bso1334254a34.3
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Jun 2026 06:21:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1781270461; x=1781875261; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1781270466; x=1781875266; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=leied0AaOznatkz/yNwlsN4mHUViLaKycB742NpUAE8=;
-        b=D+y7On5S4Nd3LyiHl3/maoqli1GLJc9ThwAccgTjV/KmliIy3NLBAmI053ixl7qKH/
-         2nGKAz1+r48Ry5zKlf/jrqpIo70G8IqvapLgzjM+m38BzVV50QDjAdtX9Shv25AbWfrg
-         LerPPdQk88gCezMxOgAk4ULfEh4OLVZzDZE0isjnAmZXQSW9EqKbaMOBN0O+HMY532Gj
-         WYLpo3XisfkThqqj55k17mc7q+yqPQWLhwLoWT+FrwplbTn83Vsf21RE5DVEZk5xMch6
-         aXLBFVeCRY63wosn2GZ1Ex3mIk+EXTihRgS/TU7VO5l76EKdz0kQU1E2E4SeqYrzrdmz
-         5QnQ==
+        bh=/uyx06x8K5ep74cMiQuw/AWSjV6qe5TglOy6xBBnhww=;
+        b=P9Xl72QzhYLQXH/GBjYt6pTxXaZxUAwgL5u7OR3qDUVugoEEJtZftcymlbbYBGp/cE
+         po5pwnoP9UU3t/Pq2SD679RUS5fifmLbihW06h7c72WZF1vKC04YXaQzNuB0oQkb1ReP
+         y/AE8ZKaEYUx7Ns/ZAg67tHRAsP1BpN8c148s1F4iQC4rlNInUuYRQfjTSezvaKy2UqC
+         k3j/kgDoAgcxhKLAJ4XVdlO51caiRh/AfVz4+P3PGenuM0/3Iv9+BTRB23XIq9X0m9TN
+         vj3U1Y5//t8nGLTuTTx2yeQLLX3HOwteqBpKqkJOKFPOvlUoWZEPQb14J46uXbnZM8AE
+         Thhw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781270461; x=1781875261;
+        d=1e100.net; s=20251104; t=1781270466; x=1781875266;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=leied0AaOznatkz/yNwlsN4mHUViLaKycB742NpUAE8=;
-        b=K2xGuvhtmQrhAc50QXPj8pU7KVdtvVuC1jxQ6o/oKY2ASPO74mbsmPhiLQWb1nqkxG
-         a7GUx+qAlz88076U7dWzWlxrwKIAKmmpHQW0bTk6Ck8fHoEFSMxwC+ScSW0WysU88fD1
-         RA0l6LswMUmtuMTInk97JJ205aJIoZALL3iS2h6koEw8ALePn3pZL7+yN37DbSHI8/Q9
-         xCmkJlHUyAkiiZjmDnAryUtMIMIqnnvJn6PTwAHPhHi3KGsQc8XUOMdAahcEb3LhliUp
-         GRQhNJSmzV3VjDwRH2NWsoJ8kXe8rkyaNhiJTLwDIIislmaoaxXW2pt6gUdjtZGtmHVx
-         t/DQ==
-X-Gm-Message-State: AOJu0Yzn1T+B/tRhOLLz9pudGz5d4a94ivm0+P9du89q3t6yIsCvEO7m
-	JuoPt0rOsVE77cWHlagtwQvgP+rLCU2VkpBR6S9HSP0PrQPg0uU2ATE97KrnRLg8nVCAbjS4rf5
-	Iu02+AX3wnjzCJQOZFwVfqXx6Hiho5j2HvZeE7jsnYWxdxH65LjZAvj1QKbBK4eI=
-X-Gm-Gg: Acq92OF3sYcx49FkUxRbJfu3uGNIdN0xnI+C/2+sC5UikFHLjwKlfWYFa1xcaF8rcpZ
-	btvmPtsyY8UQqvsPncEAN0LI7AAbJWVZHzeR1zWKsTMUJDK5p8hkPqYoDVs53Zwa4jiO4jOgY17
-	PW/uYe/OgBF7sS+DEBnYixk378D//oKyEnHj2prz+ss8BnX1eKzmcY66pQm8AO4qxYpLwLm5INA
-	YQqVfQzmOmLHu67WIFeFEv1FdkhM+TsjxgT4jXQY6KIPp5VBg7DxEo2+aKkDAf61AzJRJK6iXGe
-	h1pqZ9YtJ4IHqqpUpuYIPd/cr0ywLfsG0ydxFDjBDejrtmfma4OUjZKZi0MqKfo84+24ZAOYIwz
-	AiwuRWc3IxZTKV3J0hxHUfuKK2lHOoYfRFEniZod1ULeysVDgQrrKgt5GX2tbIJCZL0fpbMtlqk
-	ysTRnczGdYgd9tgjCEu6B84ZKACTWp+sxoHy8jDUzVSTB5w6XVX3lNCIAa6upI7VopUGJdLq1b
-X-Received: by 2002:a05:6102:2b89:b0:611:61d3:819c with SMTP id ada2fe7eead31-71e88b2a46bmr1202690137.10.1781270461465;
-        Fri, 12 Jun 2026 06:21:01 -0700 (PDT)
-X-Received: by 2002:a05:6102:2b89:b0:611:61d3:819c with SMTP id ada2fe7eead31-71e88b2a46bmr1202596137.10.1781270460929;
-        Fri, 12 Jun 2026 06:21:00 -0700 (PDT)
+        bh=/uyx06x8K5ep74cMiQuw/AWSjV6qe5TglOy6xBBnhww=;
+        b=c/aH8HpzxfO+pFoaLESOz1awemb4raQedqpPXd2pWC5cqc3AbjMAs8U+ZdbYxHsYjj
+         PMZuibYcgFe7yvafconCsjxs/9ERzoBlZppdGWo71kTJANV9c5qWBVQtprBVhDLM6M6R
+         07g2JIHNDmqQSxo3CBKYNoFk/++umHLB7HRbA9xDaoE8LJUJEAN+3qAGldnImEtZsWFF
+         ZaTKHHVz6ZzVq+9/B9RTX1WbWlDVsD3bh2svrGp01sGAYcBvDAixHkVVBdudjSCe5wSi
+         rr5qDV+dI6xVX2Yxu8uIolxT1Aw3wRQVmB1ojy7U31PRCFJSHAcrwNzKbfgP4EtNBajj
+         8XIw==
+X-Gm-Message-State: AOJu0Yydwaz5aZiROCkJ769ujPmD+/THQ280ax8tlTzR+XESoToyLfXe
+	ljxGV7SeHjDpsfKa5nWk/cOGSAPTZ9SvbzinRt9ztCgEDaO1RSUVDkzgHmt2Ks5hWKpozIvG/pz
+	ZHDuoSsLEh8XNr5/sbt18SvgokAJhrEY4CLn1TixYuR7HMe/AB8DzzckzT/xHcFk=
+X-Gm-Gg: Acq92OHw0IWJt3pNicwivlVFVmqAQ+j4LojyIfuxPsupZxd7ITHorFO+fN9tn/h58rI
+	94D3GCaceeUbu287TWobJ2XeR1iJ34YFSRvbmdUaWUa/MUUvYGmyWl4j6lgHMv2m5ear9tvHrBQ
+	KVZQ4GVBLzCibN3hO0oNzAOOSib+2+reu3CIolVEwtpqwx41E7i41TWJkKoXFDSF+uDFx6hnfMu
+	iVFdgpDDD9EGeRbqL28We28/7tuiYjrtV5WcroeYKaf39jk9VGSiKGXN2CucWt+wau/PVjzqUYl
+	9cGN3m5d3HW0uLlsCu98y3OvuOhrYOou5tztfYlBHTwuW7s3M7U5UUA8aoZWWrCl9BrQur2f9rj
+	XVyUQK+PW/eZ6dy/Z3XuOoYy5b+exjxCPHKoTyI+ERa6t5Jl1HFEmCv3SyjIyXkooaOEst0S1CI
+	9Jm9l6Jt0qgfHLQtown0wggc032evCnH3MxAtTkug8qaAWY0JomVx4HUr5o8ZM46njoR286slr
+X-Received: by 2002:a05:6820:6ac5:b0:69b:196a:de67 with SMTP id 006d021491bc7-69edc38e930mr1694337eaf.0.1781270466088;
+        Fri, 12 Jun 2026 06:21:06 -0700 (PDT)
+X-Received: by 2002:a05:6820:6ac5:b0:69b:196a:de67 with SMTP id 006d021491bc7-69edc38e930mr1694292eaf.0.1781270465641;
+        Fri, 12 Jun 2026 06:21:05 -0700 (PDT)
 Received: from QCOM-eG0v1AUPpu.na.qualcomm.com ([2a01:e0a:830:450:3510:32cf:db6:13c6])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bfe6f9c46f0sm59986866b.1.2026.06.12.06.20.58
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-bfe6f9c46f0sm59986866b.1.2026.06.12.06.21.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Jun 2026 06:21:00 -0700 (PDT)
+        Fri, 12 Jun 2026 06:21:02 -0700 (PDT)
 From: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Date: Fri, 12 Jun 2026 15:20:53 +0200
-Subject: [PATCH v5 1/9] block: partitions: of: Skip child nodes without reg
- property
+Date: Fri, 12 Jun 2026 15:20:54 +0200
+Subject: [PATCH v5 2/9] dt-bindings: mmc: Document support for nvmem-layout
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -90,7 +89,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260612-block-as-nvmem-v5-1-95e0b30fff90@oss.qualcomm.com>
+Message-Id: <20260612-block-as-nvmem-v5-2-95e0b30fff90@oss.qualcomm.com>
 References: <20260612-block-as-nvmem-v5-0-95e0b30fff90@oss.qualcomm.com>
 In-Reply-To: <20260612-block-as-nvmem-v5-0-95e0b30fff90@oss.qualcomm.com>
 To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
@@ -117,99 +116,98 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-block@vger.kernel.org, linux-wireless@vger.kernel.org,
         ath10k@lists.infradead.org, linux-bluetooth@vger.kernel.org,
         netdev@vger.kernel.org, daniel@makrotopia.org,
-        Loic Poulain <loic.poulain@oss.qualcomm.com>
+        Loic Poulain <loic.poulain@oss.qualcomm.com>,
+        Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
 X-Mailer: b4 0.14.2
-X-Proofpoint-ORIG-GUID: sS4L1mn52e8xF1R_B_Vzyexo1Xn9FUJF
-X-Authority-Analysis: v=2.4 cv=RJGD2Yi+ c=1 sm=1 tr=0 ts=6a2c07be cx=c_pps
- a=ULNsgckmlI/WJG3HAyAuOQ==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
+X-Authority-Analysis: v=2.4 cv=O94Jeh9W c=1 sm=1 tr=0 ts=6a2c07c2 cx=c_pps
+ a=OI0sxtj7PyCX9F1bxD/puw==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
  a=FelO9ux0wxsA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=u7WPNUs3qKkmUXheDGA7:22 a=DJpcGTmdVt4CTyJn9g5Z:22 a=EUspDBNiAAAA:8
- a=e4y8cmn4OwqddjlM7QMA:9 a=QEXdDO2ut3YA:10 a=1WsBpfsz9X-RYQiigVTh:22
-X-Proofpoint-GUID: sS4L1mn52e8xF1R_B_Vzyexo1Xn9FUJF
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjEyMDEyMiBTYWx0ZWRfX9nzDRX5lVg88
- 8zi0F5R+hjS4OLsSfJWrC9ClJh2+x9ClMuaxxn3HbI9Hm5RaK6p5zrDuqt+uB82N3s/fU39DDGQ
- Fh35Ez+z35cFFXr6Hssy0wnvbSHIQy8hwQGoz5QI+wACecUDIb6Nf0HWmFIed1TV4FpuKP3YuW8
- 2U5nSVSFqLnnlxytwiy6FuFy05AOHI/iOLjcJ2BNcazc/+SYl8LHb3dyQNf8CqWDj7ZkszMO54a
- /30r/r3ZyFeuQ0bgpwc5lhJpdohsv8bZrlpwEG7mbIqBn+xLx5SsWbsY2BfZsxRuim8YGtH4xkh
- whHrfLiPOJg3E+cmMX+SEMTev4KjG/rA6T/Pn9JWTdTZxfGxe/rR3RBIyyc9fyh2VhJ9ZTqh5NW
- 2VqlHK6ExFp98MgE4Mu/fzvBD0odubHAzOb4U05FIi4SbJM4LYy7vDtpRYYjVDoGH5EqyypbpPM
- STQhQA0+GfBxNc2Eerg==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNjEyMDEyMiBTYWx0ZWRfX/XWfV5gZyMFU
- n0mAxVXIP1wZJXqL1uuZDocWxee2OnEBqACi3iKPvBM7UwAjM1JgTtnaOQGeje7CVviu22VjDZw
- W37HonWAUQyg4+d2xEqyG7PkecxC2To=
+ a=u7WPNUs3qKkmUXheDGA7:22 a=gowsoOTTUOVcmtlkKump:22 a=VwQbUJbxAAAA:8
+ a=EUspDBNiAAAA:8 a=9i5gzfhGLSn5NVSMExYA:9 a=QEXdDO2ut3YA:10
+ a=Z1Yy7GAxqfX1iEi80vsk:22
+X-Proofpoint-ORIG-GUID: v6qRT4PZsncK9HiUboiEJ2Dm9NeEj5oh
+X-Proofpoint-GUID: v6qRT4PZsncK9HiUboiEJ2Dm9NeEj5oh
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjEyMDEyMiBTYWx0ZWRfX+GzLlhXP81Zh
+ QfIid3OwpwxX7K26kOgBBQtQ+oqWkB9AZmCQe2+y5AuN7p01YJB1887j9mrURa9PcVRvshN6R9v
+ 6NJWwZAtTAWPbuZ2VOD3oV8ylKusIfEAuNeEQfvGncqvGcH76sH4aod9B4+Ic6nNyIBMUcOkeFl
+ RxMsVCNXAkmL4LHKRCbJyUpY4dD2u1ArdgwLu32HepUPmuQ3Kw3jIV9gFV5KKuFgO8w9L/Z/6Nu
+ pjryB9zLl1afb6sASsYnQdKh69qJ3i2+msbvrUt9FZPnU9Dl93VFh4zmswqCiN9mnJOPKxGuniE
+ FlvKaF1Ct+o8SitrA3IKzIe6f/4iAMjfTce3sASK3O5YBSNpmhNs6LX6tv8VpKZHdDiIw9oeG17
+ LXAD5ZmyuNaljgSudeekNSz2fK4TZjgGbW/3qh6FvLxec4IaTbSTFAcvoi0tZxm77f5bkg7eDld
+ JLMWNiekAKt2cx2ztWQ==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNjEyMDEyMiBTYWx0ZWRfX5xiBT0td288b
+ Wm1kHGgnPymZy23zvUBJV8GHijGQivMDQNljKBgwKaNHcPFK8xrCwHqsByyXKWQ+a/MvUXQaTi3
+ YlidRYyxcF86O6twsF1mXEis00PGioM=
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
  definitions=2026-06-12_01,2026-06-12_03,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 phishscore=0 spamscore=0 adultscore=0 lowpriorityscore=0
- malwarescore=0 priorityscore=1501 impostorscore=0 bulkscore=0 clxscore=1015
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606040000 definitions=main-2606120122
+ malwarescore=0 spamscore=0 clxscore=1015 bulkscore=0 adultscore=0
+ impostorscore=0 lowpriorityscore=0 phishscore=0 suspectscore=0
+ priorityscore=1501 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606040000
+ definitions=main-2606120122
 
-Child nodes of a fixed-partitions node are not necessarily partition
-entries, for example an nvmem-layout node has no reg property. The
-current code passes a NULL reg pointer and uninitialized len to the
-length check, which can result in a kernel panic or silent failure to
-register any partitions.
+Add support for an nvmem-layout subnode under an eMMC hardware
+partition. This allows the partition to be exposed as an NVMEM
+provider and its internal layout to be described. For example,
+an eMMC boot partition can be used to store device-specific
+information such as a WiFi MAC address.
 
-Fix validate_of_partition() to return a skip indicator when no reg
-property is present. Guard add_of_partition() with a reg property
-check for the same reason.
-
+Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+Reviewed-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
 Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
 ---
- block/partitions/of.c | 20 +++++++++++++-------
- 1 file changed, 13 insertions(+), 7 deletions(-)
+ .../devicetree/bindings/mmc/mmc-card.yaml          | 29 ++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
 
-diff --git a/block/partitions/of.c b/block/partitions/of.c
-index c22b6066109819c71568f73e8db8833d196b1cf6..534e02a9d85f62611d880af9b302d9fd49aa4d46 100644
---- a/block/partitions/of.c
-+++ b/block/partitions/of.c
-@@ -15,6 +15,10 @@ static int validate_of_partition(struct device_node *np, int slot)
- 	int a_cells = of_n_addr_cells(np);
- 	int s_cells = of_n_size_cells(np);
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+index a61d6c96df759102f9c1fbfd548b026a77921cae..ca907ad73095925b234b119948f94ae81e698c86 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+@@ -40,6 +40,9 @@ patternProperties:
+         contains:
+           const: fixed-partitions
  
-+	/* Skip nodes without a reg property (e.g. nvmem-layout) */
-+	if (!reg)
-+		return 1;
++      nvmem-layout:
++        $ref: /schemas/nvmem/layouts/nvmem-layout.yaml
 +
- 	/* Make sure reg len match the expected addr and size cells */
- 	if (len / sizeof(*reg) != a_cells + s_cells)
- 		return -EINVAL;
-@@ -80,14 +84,15 @@ int of_partition(struct parsed_partitions *state)
- 	slot = 1;
- 	/* Validate parition offset and size */
- 	for_each_child_of_node(partitions_np, np) {
--		if (validate_of_partition(np, slot)) {
-+		int err = validate_of_partition(np, slot);
+ required:
+   - compatible
+   - reg
+@@ -86,6 +89,32 @@ examples:
+                     read-only;
+                 };
+             };
 +
-+		if (err < 0) {
- 			of_node_put(np);
- 			of_node_put(partitions_np);
--
- 			return -1;
- 		}
--
--		slot++;
-+		if (!err)
-+			slot++;
- 	}
++            partitions-boot2 {
++                compatible = "fixed-partitions";
++
++                #address-cells = <1>;
++                #size-cells = <1>;
++
++                nvmem-layout {
++                    compatible = "fixed-layout";
++
++                    #address-cells = <1>;
++                    #size-cells = <1>;
++
++                    mac-addr@4400 {
++                        compatible = "mac-base";
++                        reg = <0x4400 0x6>;
++                        #nvmem-cell-cells = <1>;
++                    };
++
++                    bd-addr@5400 {
++                        compatible = "mac-base";
++                        reg = <0x5400 0x6>;
++                        #nvmem-cell-cells = <1>;
++                    };
++                };
++            };
+         };
+     };
  
- 	slot = 1;
-@@ -97,9 +102,10 @@ int of_partition(struct parsed_partitions *state)
- 			break;
- 		}
- 
--		add_of_partition(state, slot, np);
--
--		slot++;
-+		if (of_property_present(np, "reg")) {
-+			add_of_partition(state, slot, np);
-+			slot++;
-+		}
- 	}
- 
- 	seq_buf_puts(&state->pp_buf, "\n");
 
 -- 
 2.34.1
