@@ -1,66 +1,85 @@
-Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28A2D374739
-	for <linux-mmc@vger.kernel.org>; Sat, 13 Jun 2026 07:09:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 561583A254D
+	for <linux-mmc@vger.kernel.org>; Sat, 13 Jun 2026 09:22:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781334577; cv=none; b=IoqSSwRiTaFmOCZzI0x0xFDSfYlQVnlhXPeTk7MM6I1+W9qlCFBUAF2X3losQr2mJ05aaqkZNXv/3NB03WG6GaDAVJ1dfjTvD4YBdnK2s+LkeJqohHOP4aNf+xqyfraZui1CiC41QOiAKmaKphLY77Wt5MoF6YOw3mJZnKdglLM=
+	t=1781342555; cv=none; b=qUeLQBvNK+3nn1cnBCzxuq5MTD71MrFly+GVI87bOSePzCd5HelkWbkJxlJ/PfPP5RBgX4E7sZ43ZkJpy41BReXaNEL5IixrLv337h1jP3HELQ33OEe5Zf+MKlbuwAtcmsehphmuz2cD45dDdneoyPnqe3YpFB2jm5i5ShTv0hA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781334577; c=relaxed/simple;
-	bh=0VWkmQdyK+ohkbIi8obIRcQ1CwP55X4i56+QKTQOCq0=;
+	s=arc-20240116; t=1781342555; c=relaxed/simple;
+	bh=helDrwuxiWtrf/iPIy4Y9R/hkLMVrwdS0rRl6C7Dn4Y=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kXgHf9zKwwNV/1RI8GSzADlnpJZ8jvhvTbW9qPCRkLmZsnOlC8bK7UW63D3YYjuaMGgVf43POiG019oZo8GaYjvMPLDacRsvXMDwPe6Bm9md7verZ4/bPkv+jriU4djHIuzuD3l0m1zkSWzv40PkeSkseNbxNVB//xWS0NadhkI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=klzilNZk; arc=none smtp.client-ip=209.85.216.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 In-Reply-To:Content-Type; b=N6DES1QSFtSEwCK9prv6wpnJ0JHGsa2LTlo1n8e9+CbQ+xwnN+PGhWM3Jqh46cnXAjssXOcpp5GJpWwBYR9bjZ83/qFFI6udj4dAsfJSVdTXTmSyqzWvc5o6y3wliGHzqcYfDwzZr4MES8PAb/rH7Ytgx1CKnHp3Y5VggKxYpXM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZUdzcura; dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b=n7ACzOLv; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="klzilNZk"
-Received: by mail-pj1-f42.google.com with SMTP id 98e67ed59e1d1-36bd175fdbaso1098259a91.0
-        for <linux-mmc@vger.kernel.org>; Sat, 13 Jun 2026 00:09:33 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZUdzcura";
+	dkim=pass (2048-bit key) header.d=redhat.com header.i=@redhat.com header.b="n7ACzOLv"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1781342553;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=dkSlrlMGjyQ/p88XPP6jRxfxndrJ9//6XRAvhwfy0VE=;
+	b=ZUdzcuraVxN0tR4QJtHjX3fl/wRfhoqGYfDmhNfhjFRx2gXExTPMNgBprtslbgAJzh+/c4
+	TOLfjmt5WBXgzFcjW54M/l23ro2DGJ5ZFlDZPKdKCesMClOCg3vFJSX+E/6jpnKEAF5gA/
+	/VXzmmq3ib9yNhFnjChapll3X2dr9xQ=
+Received: from mail-qk1-f197.google.com (mail-qk1-f197.google.com
+ [209.85.222.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-679-xVLaIxgUNYKUJQUeA9tBXQ-1; Sat, 13 Jun 2026 05:22:30 -0400
+X-MC-Unique: xVLaIxgUNYKUJQUeA9tBXQ-1
+X-Mimecast-MFC-AGG-ID: xVLaIxgUNYKUJQUeA9tBXQ_1781342550
+Received: by mail-qk1-f197.google.com with SMTP id af79cd13be357-9157f453a27so262523685a.1
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Jun 2026 02:22:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1781334573; x=1781939373; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
+        d=redhat.com; s=google; t=1781342549; x=1781947349; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:content-language:from
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=yqSQR9XwXClJ1dx3NWVea2VA61Fsyqn6eOD6/POM3iY=;
-        b=klzilNZkRCFWkPmqVz30PTaZLtUjaXlaKNrdEiGPEJDTgfEbROSudIX4Kn9mQyNlxG
-         cRCtM5LeBxYiMj6pqVx+BOxu1KFeE7a8XTimtfut+VxJ+zV8TnF5eVG8frMohJjQ3X+z
-         jNT5fVgAoW4d7Fw2kPQWRXd9XiQyikQcHRqtVCAwZV9QztPrqwmR202D9lYwb9b9iFFe
-         SE+2+hGI+ce/043Sgyy9K6Ffly2RkDUuBP8/B2Kl5eqqTleQTe2tB3VKL6gmmdkVjqtU
-         BJL9C1gU43ePZ4ytcD+aDl68rqC3oWRFt5aEpUbMBmzu7+zvcEpJmtOq1PhN1YUUlXO8
-         hXFQ==
+        bh=dkSlrlMGjyQ/p88XPP6jRxfxndrJ9//6XRAvhwfy0VE=;
+        b=n7ACzOLv+WOrWvtffgBSHFCd1sqwAVcuLe0N4EwnK1hGqBRwEJdin2TthCBO/6a8mw
+         Ht1esjvYudGXsl57gJWIQ8Hee9yAgEPB4Ij3+0wMZSrabFC3cWTlsDbmnlIipEnFXF9G
+         FykR9mRnpzk2VNZf/fpDibTE10PTSfeF4A1DDIfeNJQZWpH5k/6sgq/XgkLVHJNOFOEv
+         7ZLrzbYESpAmIEa+SkDTnPRpMLa41XZjPOyrpPNYEnO/HLnhNtjF0vzk9qvkUF/NSzZD
+         ozyJz90OYTYAwjbO9dvhDpfJ/cuMy7EEEdTxY/cYMC9y2aOmf+tNYmjr2HI0ys22ctnP
+         06CA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1781334573; x=1781939373;
-        h=content-transfer-encoding:in-reply-to:from:content-language
+        d=1e100.net; s=20251104; t=1781342549; x=1781947349;
+        h=content-transfer-encoding:in-reply-to:content-language:from
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=yqSQR9XwXClJ1dx3NWVea2VA61Fsyqn6eOD6/POM3iY=;
-        b=U4kn1+xwdXQ2iX3PCqmWqyII2guR8M+Qj6dFANevNWhHj73ayJ9FkXC2sPKpnIHgg8
-         V5nlBWqlv3obO895HLmu1dV//KO/KvpoGx2Vgh5Q+fFP1D3RTQbJRa76vobg8TgtmHHI
-         8V3s2CZtRrmkVRe8VkK9sOHEysDf309KpjegJnpVo0bEdIG5URlv0UNY4beW/hgNzt8p
-         ZZEsP+l8FPO11xMIu7JjY16KAWqF0BQqWAinaG0VQM3KdrtbNqSDHwAWbjmBm8ojLGyZ
-         12fAXHYW5kwjsEOOqa7Sz4gqfEjP3UoucU8xOAB91t62CxXP3VaVEebmuYPR4gQZnAVX
-         vb5Q==
-X-Forwarded-Encrypted: i=1; AFNElJ99GenA0ERw2t5wlKQNOFo7Qm3IWrQtdFJ4BvT1VsVNsnLIxd6voOkJgCv2r4A7J3RzCFPsf6hMvN4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzFDbs1JVenqFExEZUEJzAkOwEa4l1sq/+9Tg/9CJDiQgkYYaIn
-	wFnbmhwfYuszFgw2ndfVCqolEg05qYvLy8Y/t4V+SnlH+WT4JGOuX9Ea
-X-Gm-Gg: Acq92OHlo7iI7qwkavw3uE9VCZud8TwZ3bKVDL1gH7pXJvRHfxK1O0QKP1xn9HHhKNc
-	AjVfIB/D5hvf/p7xalg0TjpBY1K9U365yOS+XetLsZ5R/XUERXrJjf2pp9z0vnvExWkKDMFskia
-	vpt8d4S+O5VHnwQl6wpNC4Yodr5mXI7FZG4+7Z2Nyc0tgtaWmVnkH83sVAGD8TkAQR9sitBZy8R
-	LP0qKsGeEfOmOjtWTuQGgh4enDJGVcyy7RXNfvJaIGgy8fYPsEE1bTpwteIrrNGpHe/3QPTFUnK
-	16YZKBpjKP6l8VBTIusuWLk02j5PFol6wfFhWkyKhQp5TRCx+LbAl5QTmzBxgbJmEoYhH2oqWWo
-	l9cOWhglvNCw0OzfoO3EfrwehOrHhLwcGdrqS0t1vi2j7GK6cdhaCf6O0CVVcUrpNfU3rmmKPdT
-	UN1O+yvfmfMlmFu5eW8im1KjHOhtR9c+rEl0S8gG0SY6a7
-X-Received: by 2002:a17:90b:2d4b:b0:368:ed26:15b2 with SMTP id 98e67ed59e1d1-37c2bc65207mr2649723a91.8.1781334573307;
-        Sat, 13 Jun 2026 00:09:33 -0700 (PDT)
-Received: from [192.168.0.8] ([49.207.61.84])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-37a1f363409sm4369435a91.8.2026.06.13.00.09.29
+        bh=dkSlrlMGjyQ/p88XPP6jRxfxndrJ9//6XRAvhwfy0VE=;
+        b=fZ+IyAt3pZgzzLRDVjDCC0I3d4nhnYrLyJzfZaq65SR4EfVfR+GpQ/acN35SdHyGDV
+         s2n0cLD+vnq3Kih8QnQNDvUveOwBWA7UoTZrc4zWUQSy1cbO6RUSq+GGD00yK0vjIVBH
+         j8omM6+8ARMtkUZzBxevHUXXTjwcHKnrzygIYcsWErnge2MI+OSoDtMDG7kMeqmafRKt
+         drpU+FjFx24yQsp2ekOQeahturTztT7RVDSQAFcQUGKN64VoghjofZcmyJBmt/pnZ2/x
+         zqzp3KaFAOsvA1mw0HmcRv+ILFcFXaRYno4X9P7yMhLnyLyHtmFqEc2L5rpGyAm3fUWK
+         pWgQ==
+X-Forwarded-Encrypted: i=1; AFNElJ/N1kCDIX/92ncUiBcKeXbDKYwqgLqG31G0TMsfMDFlM++FQ7gnL9Hxqs2qLFKq83OvtXI/w9g8t4U=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxdlib3ZVMyepVRlJta0ai8f2xYfhbx7GRHuzCJMvTp9/9Hf3q5
+	HcyblK0ePNrjAAtDHJKONizfluvJW1ZUD07q+Bbuda1nkwgCuQNw/NxZsPkRcwhMdN5IcRaBc8G
+	FGf4HLC8O/bK9rGXfX2c81pnVIeAHwd+WJB4Nji89B1S444rK3epFC5DMn8ykbg==
+X-Gm-Gg: Acq92OFeMb6xbM6qLzgt7z4jvfZPGbfP9OF22mcGeE0s2DBjYxxuUBbkd6QC4vddOix
+	uHWCalCLijG6reFdILXGyrZ9TfKzuXjfFnPC0Jvk/Z+w7000VX73YC4hNgtOw6LNyKjYMGomDHC
+	tUUv4suAXIKwGXYACYj08/oi3nRSxZbNfhU4Pzmim/bXDJQKh0qtUXIZTKwkTW5gKh8m15uhwYg
+	Ps474j5Ivga1eMmCTYUvOufzgYt64b8fQJN6bg7vz9kC8QTi3wC5GiRa6iMAW4tsZlwatFUKIz7
+	Umpth6YALOaLNV8yx4126S82iI982prER61LLu4z8bi+RF+eX+VSb1mRGTAs+3bu0fIJLtXBW8j
+	dz9Q3pIlG5S3rEPK6hArnlaSIcmvICsTT9qcPxDuKGVf+VTChobwHv3s=
+X-Received: by 2002:a05:620a:4708:b0:915:cf88:1e41 with SMTP id af79cd13be357-9161bf6c4bfmr926952885a.45.1781342549618;
+        Sat, 13 Jun 2026 02:22:29 -0700 (PDT)
+X-Received: by 2002:a05:620a:4708:b0:915:cf88:1e41 with SMTP id af79cd13be357-9161bf6c4bfmr926950585a.45.1781342549179;
+        Sat, 13 Jun 2026 02:22:29 -0700 (PDT)
+Received: from [192.168.88.32] ([150.228.25.72])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-91619f3c324sm454992285a.21.2026.06.13.02.22.26
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 13 Jun 2026 00:09:32 -0700 (PDT)
-Message-ID: <f3e1ecce-9917-456d-b02e-a75827d9c867@gmail.com>
-Date: Sat, 13 Jun 2026 12:39:27 +0530
+        Sat, 13 Jun 2026 02:22:28 -0700 (PDT)
+Message-ID: <fe40891c-3fd1-417c-835e-6f1046db7844@redhat.com>
+Date: Sat, 13 Jun 2026 11:22:24 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,89 +87,60 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 0/2] dt-bindings: mmc: st,sdhci: convert
- STMicroelectronics SDHCI-ST MMC/SD Controller controller binding to YAML
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Peter Griffin <peter.griffin@linaro.org>,
- Patrice Chotard <patrice.chotard@foss.st.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org
-References: <20260508-st-mmc-v3-0-81c329ed28e8@gmail.com>
- <CAPx+jO9woUB9VGUx+ebWD9oOhqCwzXL9=41MEesnWS15Nyr66g@mail.gmail.com>
+Subject: Re: [PATCHv2 0/4] m68k: coldfire: fix non-standard readX()/writeX()
+ functions
+To: Greg Ungerer <gerg@linux-m68k.org>, linux-m68k@lists.linux-m68k.org
+Cc: linux-kernel@vger.kernel.org, arnd@kernel.org, wei.fang@nxp.com,
+ frank.li@nxp.com, shenwei.wang@nxp.com, imx@lists.linux.dev,
+ netdev@vger.kernel.org, nico@fluxnic.net, adureghello@baylibre.com,
+ ulfh@kernel.org, linux-mmc@vger.kernel.org, linux-can@vger.kernel.org,
+ linux-spi@vger.kernel.org, olteanv@gmail.com
+References: <20260609142139.1563360-1-gerg@linux-m68k.org>
+From: Paolo Abeni <pabeni@redhat.com>
 Content-Language: en-US
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-In-Reply-To: <CAPx+jO9woUB9VGUx+ebWD9oOhqCwzXL9=41MEesnWS15Nyr66g@mail.gmail.com>
+In-Reply-To: <20260609142139.1563360-1-gerg@linux-m68k.org>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 
-
-
-On 29-05-2026 17:40, Ulf Hansson wrote:
-> On Fri, May 8, 2026 at 7:23 PM Charan Pedumuru
-> <charan.pedumuru@gmail.com> wrote:
->>
->> This patch series converts the legacy text-based Device Tree binding for
->> STMicroelectronics SDHCI-ST MMC/SD controller to DT schema (YAML) format.
->>
->> Note:
->> The patch "dt-bindings: mmc: st,sdhci: convert to DT schema"
->> depends on the patch "arm: dts: st: align node patterns with established
->> convention". If the DT schema patch is applied before the DTS
->> cleanup patch, `dtbs_check` will fail due to the presence of the removed
->> properties in the existing DTS.
->>
->> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+On 6/9/26 4:12 PM, Greg Ungerer wrote:
+> This odd collection of patches is aimed at fixing the non-standard ColdFire
+> set of readX()/writeX() IO access functions. Instead switching to using the
+> asm-generic definitions in include/asm-generic/io.h. The difficulty comes
+> in trying not to break any drivers with this change.
 > 
-> The series looks good to me, but awaiting and ack from some of the dt
-> maintainers before applying.
-
-Yeah, but until now they is no response from anyone.
-
+> The implementation of the readX()/writeX() family of IO access functions
+> is non-standard on ColdFire platforms. They either return big-endian (that
+> is native endian) data, or on platforms with PCI bus support check the
+> supplied address and return either big or little endian data based on that
+> check. This is non-standard, they are expected to always return
+> little-endian byte ordered data. Unfortunately this behavior also means
+> that ioreadX()/iowroteX() and their big-endian counter parts
+> ioreadXbe()/iowriteXbe() are currently broken because they are implemented
+> using the readX()/writeX() functions.
 > 
-> As the change in patch2 for arch/arm/boot/dts/st/stih407-family.dtsi
-> doesn't seem to cause any conflict from soc maintainer trees point of
-> view, I can pick this up too when applying.
-
-Sure.
-
+> Patches 1, 2 and 3 in this series are specific driver changes that can be
+> made independently of the final ColdFire readX()/writeX() change.
 > 
-> Kind regards
-> Uffe
+> Patch 4 is the actual switch to ColdFire building using asm-generic
+> readX()/writeX(), but also contains three driver fixes that are not easily
+> handled independently.
 > 
+> Note that I don't have access to all supported hardware needed to fully
+> test all these changes. I have tested what I have, a bunch of the standard
+> Freescale ColdFire eval boards, and inspected generated code for differences.
 > 
->> ---
->> Changes in v3:
->> - st,sdhci: Edit description of reg property. Modify reg-names. Add
->>   "minItems" for clocks and clock-names properties.
->> - Modify the commit message to match with the updated changes.
->> - Link to v2: https://patch.msgid.link/20260503-st-mmc-v2-0-11ae3216d2ce@gmail.com
->>
->> Changes in v2:
->> - Fix node name in DTS for the MMC to match with the estableshed convention.
->> - st,sdhci: drop unnecessary properties, modify "reg", "reg-names" and
->>   "clock-names" properties, include an allOf with $ref to mmc-controller.
->> - Link to v1: https://patch.msgid.link/20260409-st-mmc-v1-1-4c54321c3535@gmail.com
->>
->> ---
->> Charan Pedumuru (2):
->>       arm: dts: st: align node patterns with established convention
->>       dt-bindings: mmc: st,sdhci: convert to DT schema
->>
->>  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 110 ---------------------
->>  .../devicetree/bindings/mmc/st,sdhci.yaml          |  91 +++++++++++++++++
->>  arch/arm/boot/dts/st/stih407-family.dtsi           |   4 +-
->>  3 files changed, 93 insertions(+), 112 deletions(-)
->> ---
->> base-commit: cf2cd8efd046c561191b8541d32a8bfe845bf06b
->> change-id: 20260327-st-mmc-c906ad95ff83
->>
->> Best regards,
->> --
->> Charan Pedumuru <charan.pedumuru@gmail.com>
+> Note also that patch 3 relies on changes that are currently only in
+> linux-next, and are scheduled to hit mainline during the next v7.2
+> merge window. Those changes are also available in an immutable git tree
+> at git://git.kernel.org/pub/scm/linux/kernel/git/gerg/m68knommu.git
+> cf-internal-io branch.
 
--- 
-Best Regards,
-Charan.
+I understand that with this series you are targeting the m68K tree, am I
+correct?
+
+A possibly better option would be, after that the pre-req patches land
+into Linus's tree, to share an immutable branch for this series, so that
+both m68k and net-next could pull it.
+
+/P
 
