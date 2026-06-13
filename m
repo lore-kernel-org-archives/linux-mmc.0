@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0465713AF2;
-	Sat, 13 Jun 2026 19:03:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 971A513AF2;
+	Sat, 13 Jun 2026 19:04:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781377434; cv=none; b=DYC975puuqh2+oJRtCVO6phscVmHNr56n9au4wS5SgtvTfkChw7/mIuI1FjgohArg1m3/DL0IOqFAZSfwPhdOPGqI4QFX3Lh5rLHXnNzJJCt2h/mR/45vSmo6reVASkUIk71iP3P0BlBxE+Lz1dgsjAZIDEjyrYjzCKH4tjozfk=
+	t=1781377455; cv=none; b=BL7OVB2Gdj8Ku37yv381Tr93e7aAzoU6IOLEKvpxtAGjnqaUx95sItkUjXwbp9+W5bAuvWNMX/cskvu+p4/yvqXlqSXAyKLpk/kzHffU8G5Hfz4dId4b4djeFVhV9KqwVhgQDcwk0zO+Ew2CvavBGbBz6sb3LEaQ4e0fibgIoB0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781377434; c=relaxed/simple;
-	bh=4+KDWfUUNzEeT3YxUZvuJFDwUHb/vCxBUo61VrHGPaA=;
+	s=arc-20240116; t=1781377455; c=relaxed/simple;
+	bh=GxhgfyOu885X2gC+lUCV9hDEVj8rgN5PSlWy6TidNqs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=E2kgzDW4U+1VMMFtFlNbY3FzxiyGsB57mUGACWcG3Te9MpqPJAv48TPYkM9/6c/twIhPSsfid+dCoJ18yjkyuB8N9cDgzvqCi5msPcTi8HHhm55IoJhSQxBKSrgxnX/7fpif7KPDS/icQbgbOfkJifBJsd7OFKojQBu5Jhr0h5E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JZyPaiTw; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=XAowYdwI7CQLAfmv5umKMlCnhNIC1Vf0bCPvOr/K1Mc3oUTkyBreJDPhsn8vglIL7xZ3PIrCc5kgbNMm13sIzbD9QltENReEAzOoKxtisKeUt9Pk0RwoGWkLvJlbZFJKfiEsF46JCGmZVMaFtVK6eL9oQq4cHJVV17VcmGgm68Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Y9nNUecs; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JZyPaiTw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 072D01F000E9;
-	Sat, 13 Jun 2026 19:03:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y9nNUecs"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8607B1F000E9;
+	Sat, 13 Jun 2026 19:04:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1781377433;
-	bh=kNQdqW86qxYa8djwovcvqEdfyYcjTVULQCM3tAzMfOA=;
+	s=k20260515; t=1781377454;
+	bh=Giq5qPPsLXMfxm/YhnvybTapzE95kM59A2+7c6V2t60=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=JZyPaiTwQEHgFYv9+ptz7FrUfwLZJQCtnmPXoENoJz+BEEG9IgpmWZJlC19D3pv0v
-	 KCXEkY3O6ggSYdMmHOmig9FVqFwIM5Nwc4L3mqTlWcfufd8Mj8vBU+KsyA1JCeTV2B
-	 DHPD4UiExZzcLOuNo3pzTs39AW+cWaNBb6jYn1DzO0JyEUhmVlILqmgxqkixmxLTrc
-	 Gro2XMc3RSJxo0+thwl0IKGjulPPnzCPrwtvnPTpT/wsRfsJBM395uGp5pQQj4SqiH
-	 Q7DVQtExb1DKJEc6l6ya3P4+guOrNgxuK1gBOV0/qItpovtwX9WQojPuPFSg2U2nfT
-	 huGdtoUHGyEWA==
-Date: Sat, 13 Jun 2026 21:03:50 +0200
+	b=Y9nNUecsDFh+QQwnTiEXgtsMvlFPhobCTokdVoKUs6tzZW/vYFgPQDnD3/qZOeoss
+	 sp4OaEsZhj8Tu/todRXEuBdxPUwwliLoVWOJEFDZIushrmQPLN6cAWMrT+5r68WS4r
+	 vXWHDThPrPIBbP5tndSG6GYBbm4aRIK2nnMPcSV83kyx0QzGBFR/miA95T48DEdOaZ
+	 m3oy7CVGi1Lrnz24k2/sSuEP4ioamphINRlZYM1HKZetpvVw/eD4yUwJ0yOEqQMTuC
+	 YqIhdWI81KHtztQrSNJm8RLUAztKjBn0zOPPxGv4amA6DoJe2lgH4oHxiPDt82g62u
+	 NpwLdeft68TkQ==
+Date: Sat, 13 Jun 2026 21:04:11 +0200
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: Enzo Adriano <enzo.adriano.code@gmail.com>
 Cc: Rob Herring <robh@kernel.org>, 
@@ -35,10 +35,10 @@ Cc: Rob Herring <robh@kernel.org>,
 	Samuel Holland <samuel@sholland.org>, Maxime Ripard <mripard@kernel.org>, 
 	Ulf Hansson <ulfh@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
 	linux-sunxi@lists.linux.dev, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 2/4] dt-bindings: mmc: add Allwinner A733 compatible
-Message-ID: <20260613-dexterous-admirable-ostrich-8cc679@quoll>
+Subject: Re: [PATCH 1/4] dt-bindings: arm: sunxi: add Radxa Cubie A7S
+Message-ID: <20260613-voracious-lemon-frog-bb2edd@quoll>
 References: <20260613-a733-dts-v1-public-ready-v1-0-7787c94681db@gmail.com>
- <20260613-a733-dts-v1-public-ready-v1-2-7787c94681db@gmail.com>
+ <20260613-a733-dts-v1-public-ready-v1-1-7787c94681db@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,36 +47,18 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20260613-a733-dts-v1-public-ready-v1-2-7787c94681db@gmail.com>
+In-Reply-To: <20260613-a733-dts-v1-public-ready-v1-1-7787c94681db@gmail.com>
 
-On Sat, Jun 13, 2026 at 05:42:14AM -0400, Enzo Adriano wrote:
-> Document the A733 MMC controller compatible with the existing D1-style
-> fallback.
+On Sat, Jun 13, 2026 at 05:42:13AM -0400, Enzo Adriano wrote:
+> Document the Radxa Cubie A7S board compatible for the Allwinner A733 SoC.
 > 
 > Signed-off-by: Enzo Adriano <enzo.adriano.code@gmail.com>
 > ---
->  Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> index 9f3b1edacaa0..9e9590521210 100644
-> --- a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> @@ -58,6 +58,9 @@ properties:
->        - items:
->            - const: allwinner,sun55i-a523-mmc
->            - const: allwinner,sun20i-d1-mmc
-> +      - items:
-> +          - const: allwinner,sun60i-a733-mmc
+>  Documentation/devicetree/bindings/arm/sunxi.yaml | 5 +++++
+>  1 file changed, 5 insertions(+)
 
-So that's enum with previous entry... What's with Allwinner patches
-recently that they do not use that syntax?
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 
-items:
- - enum:
-   - ...
- - const:
-
- Best regards,
- Krzysztof
+Best regards,
+Krzysztof
 
