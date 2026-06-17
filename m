@@ -1,101 +1,171 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+Received: from mail-m49197.qiye.163.com (mail-m49197.qiye.163.com [45.254.49.197])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3132217F27
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Jun 2026 14:19:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8087448AE28;
+	Wed, 17 Jun 2026 15:28:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.197
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781705949; cv=none; b=hkFHdYbRxUrtFz5/u0Tsxv7eoDBIbXNCaK3iEuuof+CedAtmDeHY0EnLFT/v690vSjrkwF0RMyzsMVd7LzQyUMgqcmtg7kRqoaK2QMFbISzgJHnmMiy+553hy+NeDlmMMFB3X7OuaBG3RUBamycjSM7z7Se4n5z+Nf0nUjdVQGA=
+	t=1781710130; cv=none; b=r8QKZQ+0/32XSflyTt2hTFttGGwXi0VMpaOwGKHXbfydQcYih9lOtVA9BFCA+yOIZmNSfrD9yH3vZaUHdqQa62o4Gr6B/l7k9C3SVfHHcquMc0AmB461xPdGLFKdBxrUBsfk/Gqo6lAYX74IeYsDBUcrJj91YWZTCoi7OzkyEvA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781705949; c=relaxed/simple;
-	bh=JCD8cvv8rlUBHXPK9uD5sq5eLv/nvfOPoDDvsUVKle0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jx/S2zjiqGVx8CghEOF7Bfe2Jl7/jLDQniObPGB5LkiYtuuspzF6rHO5im1ZyDMCjzTwICehCXH3DacTga0AY4Asu/OOFJIClnK5hvQCRUQRybOVTPyBEABgfpby2vafixkihugkzidK0aJ/fZnHF+Pnx3xILx0lhymBZXgqXYs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=alDJPvvU; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1781710130; c=relaxed/simple;
+	bh=V8wvjVu0OPYzDI6Bh14Bz+Sa6Ci/1Zmany8gLvzkqGw=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Tw6tx30eaHlPWA4dOAZ8Gc1U7zHEX3Jj4NDA6UHeArk2saewR9NyrD1Zy2F5O2CxgGueDfGZTBFwCeF/1xF8NQ/FRuPDjhKF+iaIqCOpfURwlXfYPUjfWSt0FsHqVUSeU8XqHiSJycnbSLIRpLldV61aqi4waOIHBGfXm2zb904=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=seu.edu.cn; spf=pass smtp.mailfrom=seu.edu.cn; dkim=pass (1024-bit key) header.d=seu.edu.cn header.i=@seu.edu.cn header.b=cH00U2Mn; arc=none smtp.client-ip=45.254.49.197
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=seu.edu.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=seu.edu.cn
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="alDJPvvU"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=900S
-	KMhfjAoJ0k5ypr/nO0lm8fvJ0WQU4Q8AFwgz2FQ=; b=alDJPvvU8hC/7oiKyGei
-	v+YhbMJly6NruUddCTyvb6Hk/jvhQPgu4pzuSqFi4YZUXnsFO2D9Ss6Wmw6SHgVc
-	5XaJktkjoFD6hIIAW/7pc1XvFnvZO/9SiC4yVlXHgknXJ+cdqLPx/s2zVOjrtoyj
-	B/1xCnf8xrCERwpkQDkVppNWZA3E3z+6zFSR9N5lENbnyDKWnsn1BHVW2qfO1Euy
-	3L00ObKu5An5w7hcnaf6iuNJd7FQ4ME+NYzGlxyXOuddzVoo7cOkZj70HMVKEsqw
-	T0pRnpxyssxmV42Ss+Tm9rxt0HLhosVs48uDz6hcnYj1ICHMpYf3cogUuS81EMOW
-	EQ==
-Received: (qmail 198739 invoked from network); 17 Jun 2026 16:19:02 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 17 Jun 2026 16:19:02 +0200
-X-UD-Smtp-Session: l3s3148p1@aG/DvXNUrWBtKXEK
-Date: Wed, 17 Jun 2026 16:19:01 +0200
-From: wsa+renesas <wsa+renesas@sang-engineering.com>
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: "biju.das.au" <biju.das.au@gmail.com>, Ulf Hansson <ulfh@kernel.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v17 08/17] mmc: renesas_sdhi: Add tuning_delay hw_info
- flag
-Message-ID: <ajKs1aZiFwHkOBGt@shikoro>
-References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
- <20260603065731.93243-9-biju.das.jz@bp.renesas.com>
- <ajKVxixgTHaavVfi@shikoro>
- <TY3PR01MB1134670687D54134ED8479CBC86E42@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+	dkim=pass (1024-bit key) header.d=seu.edu.cn header.i=@seu.edu.cn header.b="cH00U2Mn"
+Received: from PC-202605011814.localdomain (unknown [222.191.246.242])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 42c703e96;
+	Wed, 17 Jun 2026 23:23:28 +0800 (GMT+08:00)
+From: Runyu Xiao <runyu.xiao@seu.edu.cn>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tony Olech <tony.olech@elandigitalsystems.com>,
+	Chris Ball <cjb@laptop.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	jianhao.xu@seu.edu.cn,
+	runyu.xiao@seu.edu.cn,
+	stable@vger.kernel.org
+Subject: [PATCH] mmc: vub300: defer reset until cmd_mutex is unlocked
+Date: Wed, 17 Jun 2026 23:23:19 +0800
+Message-Id: <20260617152319.957866-1-runyu.xiao@seu.edu.cn>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="56iKqqiBSDpEqFLZ"
-Content-Disposition: inline
-In-Reply-To: <TY3PR01MB1134670687D54134ED8479CBC86E42@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9ed62e214f03a1kunm222d957772c36
+X-HM-MType: 10
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVlDGk9PVk9OTBlIHx9DS0weQ1YeHw
+	5VEwETFhoSFyQUDg9ZV1kYEgtZQVlJSUlVSkJKVUlPTVVJT0lZV1kWGg8SFR0UWUFZT0tIVUpLSE
+	pPSExVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=cH00U2Mnc0DuQ4U4Sj1/OlcYm1vT9j+5GUtWLVYVW93SWTnQoCl4j/VIkJupYYiyZaM0GquJYVzYtIPriqpw8RP6323F2xTpQ36SRzWhlxGXmadxuHAPAGy26Z1qiZDfCOdcaLRBxAFJoEDg+0GLRf2VzuveKzUZilxaeDW9i0Q=; s=default; c=relaxed/relaxed; d=seu.edu.cn; v=1;
+	bh=1YgrcLHM640hkK4bIkBzBou0RBgMdqEUSX0MpgCbLUg=;
+	h=date:mime-version:subject:message-id:from;
 
+vub300_cmndwork_thread() holds cmd_mutex while it sends a command and
+waits for the command response.  If the response wait times out,
+__vub300_command_response() kills the command URBs and then synchronously
+resets the USB device through usb_reset_device().
 
---56iKqqiBSDpEqFLZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+That reset path re-enters the driver through vub300_pre_reset(), which
+also takes cmd_mutex.  The worker therefore tries to acquire the same
+mutex recursively while it is still holding it from the command path.
 
+This issue was found by our static analysis tool and then manually
+reviewed against the current tree.
 
-> > > +	if (host->mmc->ios.signal_voltage =3D=3D MMC_SIGNAL_VOLTAGE_330)
-> > > +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x0);
-> > > +	else
-> > > +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x1); }
-> >=20
-> > Isn't it enough to move this upwards? I don't see anything requiring th=
-is function to be so late. Am I
-> > overlooking something?
->=20
-> OK, you mean this function along with SH_MOBILE_SDHI_SCC_* macro upwards?
+The grounded PoC kept the real worker and timeout/reset carrier:
 
-Ah, the SH_MOBILE_SDHI_SCC_* macros were the things that I missed. It is
-okay as-is then.
+  vub300_cmndwork_thread()
+  __vub300_command_response()
+  usb_lock_device_for_reset()
+  usb_reset_device()
+  vub300_pre_reset()
 
+Lockdep reported the same-task recursive acquisition on cmd_mutex:
 
---56iKqqiBSDpEqFLZ
-Content-Type: application/pgp-signature; name="signature.asc"
+  WARNING: possible recursive locking detected
+  ... (&test_vub300.cmd_mutex) ... at: usb_reset_device... [vuln_msv]
+  ... (&test_vub300.cmd_mutex) ... at: vub300_cmndwork_thread+0x12/0x20 [vuln_msv]
+  Workqueue: vub300_cmd_wq vub300_cmndwork_thread [vuln_msv]
+  *** DEADLOCK ***
 
------BEGIN PGP SIGNATURE-----
+Return a flag from __vub300_command_response() when the timeout path needs
+a device reset, then perform the reset after vub300_cmndwork_thread() has
+cleared the in-flight command state and dropped cmd_mutex.  The reset is
+still attempted before mmc_request_done(), preserving the existing request
+completion ordering while avoiding the recursive lock.
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmoyrNAACgkQFA3kzBSg
-KbbFBQ//Z4YbxlxhSc5Hg9+34I01TCUEVRJcobPhGG9TdglpkkCxCtOIhtNymsk3
-BCVKQ8CHTaILRdazgFLLi3d/PLHEKPZtlRrh+cLiCpeEe290zWlgFedTOn8CRehE
-z9sseGvwSPLDS+rc8lKzvF2US1dtxDAGPONmbfy//9+72ghy2P7ZfeneflUPWpa/
-9ev+Nsuy6KM8kE8bOE3wTQPpEbTz0JRNH8QBKOkfKe/wfmo6tRZGThO/3/cbqwFg
-0pKEhI+9QPfzFgWJ1C+HW1E/hQDzqeQFh5E2XcQ7J/liQqnUdIJKOKvuaT5b2ppB
-lnTrer309CS00sayNYDREHizmA+zFyMUwWDmPjcY5VjdpTnYAO2+nx+ONpZmz2Cw
-z1FrL45AD1kVjqiO8iSv+r8EbRYT/yhXQePNJF3pETf9JlmMrvHQoqMsurJCuWzy
-ockW0tVbUhvfzv6DjbjA612AxmAnsZguS0NgqQxyMruZRQ1qV7F89rjYmZcG7xuC
-KMezIwjUTW5EQAPVn8eku1A6nB1u6CThjdqtaIEL7RX+Wf3OubtkcjIP7znZP+Yv
-kJDRyGOSKsjQMUwh9A57rZqh4ETAyCbiAmUJH2J2hmo05ih1Xabb//7iBcsaB84Z
-DcGKYwSE+I5k2oVOuOuT5Mt/PlfmDTghsSRmMpE6NPXr6RJRGX0=
-=5avp
------END PGP SIGNATURE-----
+Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
+Cc: stable@vger.kernel.org
+Signed-off-by: Runyu Xiao <runyu.xiao@seu.edu.cn>
+---
+ drivers/mmc/host/vub300.c | 26 +++++++++++++++++---------
+ 1 file changed, 17 insertions(+), 9 deletions(-)
 
---56iKqqiBSDpEqFLZ--
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index ff49d0770506..1c335e070741 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -1583,7 +1583,7 @@ static int __command_write_data(struct vub300_mmc_host *vub300,
+ 	return linear_length;
+ }
+ 
+-static void __vub300_command_response(struct vub300_mmc_host *vub300,
++static bool __vub300_command_response(struct vub300_mmc_host *vub300,
+ 				      struct mmc_command *cmd,
+ 				      struct mmc_data *data, int data_length)
+ {
+@@ -1595,17 +1595,11 @@ static void __vub300_command_response(struct vub300_mmc_host *vub300,
+ 					    msecs_to_jiffies(msec_timeout));
+ 	if (respretval == 0) { /* TIMED OUT */
+ 		/* we don't know which of "out" and "res" if any failed */
+-		int result;
+ 		vub300->usb_timed_out = 1;
+ 		usb_kill_urb(vub300->command_out_urb);
+ 		usb_kill_urb(vub300->command_res_urb);
+ 		cmd->error = -ETIMEDOUT;
+-		result = usb_lock_device_for_reset(vub300->udev,
+-						   vub300->interface);
+-		if (result == 0) {
+-			result = usb_reset_device(vub300->udev);
+-			usb_unlock_device(vub300->udev);
+-		}
++		return true;
+ 	} else if (respretval < 0) {
+ 		/* we don't know which of "out" and "res" if any failed */
+ 		usb_kill_urb(vub300->command_out_urb);
+@@ -1701,6 +1695,8 @@ static void __vub300_command_response(struct vub300_mmc_host *vub300,
+ 	} else {
+ 		cmd->error = -EINVAL;
+ 	}
++
++	return false;
+ }
+ 
+ static void construct_request_response(struct vub300_mmc_host *vub300,
+@@ -1746,6 +1742,7 @@ static void vub300_cmndwork_thread(struct work_struct *work)
+ 		struct mmc_request *req = vub300->req;
+ 		struct mmc_command *cmd = vub300->cmd;
+ 		struct mmc_data *data = vub300->data;
++		bool reset_device;
+ 		int data_length;
+ 		mutex_lock(&vub300->cmd_mutex);
+ 		init_completion(&vub300->command_complete);
+@@ -1768,7 +1765,8 @@ static void vub300_cmndwork_thread(struct work_struct *work)
+ 			data_length = __command_read_data(vub300, cmd, data);
+ 		else
+ 			data_length = __command_write_data(vub300, cmd, data);
+-		__vub300_command_response(vub300, cmd, data, data_length);
++		reset_device = __vub300_command_response(vub300, cmd,
++							 data, data_length);
+ 		vub300->req = NULL;
+ 		vub300->cmd = NULL;
+ 		vub300->data = NULL;
+@@ -1776,6 +1774,16 @@ static void vub300_cmndwork_thread(struct work_struct *work)
+ 			if (cmd->error == -ENOMEDIUM)
+ 				check_vub300_port_status(vub300);
+ 			mutex_unlock(&vub300->cmd_mutex);
++			if (reset_device) {
++				int result;
++
++				result = usb_lock_device_for_reset(vub300->udev,
++								   vub300->interface);
++				if (result == 0) {
++					result = usb_reset_device(vub300->udev);
++					usb_unlock_device(vub300->udev);
++				}
++			}
+ 			mmc_request_done(vub300->mmc, req);
+ 			kref_put(&vub300->kref, vub300_delete);
+ 			return;
+-- 
+2.34.1
+
