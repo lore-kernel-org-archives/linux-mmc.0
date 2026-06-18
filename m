@@ -1,113 +1,247 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11010037.outbound.protection.outlook.com [52.101.228.37])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75F27388866;
-	Thu, 18 Jun 2026 10:53:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.177.32
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781780027; cv=none; b=M82L3g1FiCCovt3iidBQyncCZ/n/8FFek3iqHcXk+PEVQN7vaiNDRqIw7BEWAcre1RZxutxIfH718zdSIyXIMvA47g02hIyIyZJyx/HYCszgnoF97YId8qhlALDqe93UvPCY5NlS5ZmOpiECq3VDybWNFJZbvPy+rH/KdAKldvg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781780027; c=relaxed/simple;
-	bh=JJyNFVNj3A4vFc2n0hqjbDVp1xlI8/bFORGobDvSHyU=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=kjBJpMYe61pqedETKS1KxIcXqks84C6kKHcfYvinfSQdAQD3JsLawM6oI8Ii83i7LUdFmmMSYvAQdvS220QtV5zLaTgs+7KpnmojJ6+1r/9/nphkttPW5LeJ2EBYs7rbh3k66CyubNx4Y+N1df8IBwn0EsCI6LAr0S6sXR8cVsI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=XKqEiq2s; arc=none smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16F702C236B;
+	Thu, 18 Jun 2026 12:04:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.37
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1781784293; cv=fail; b=SK2kNm5TQBJyamO8pjsZxDx364b+iDKMvilsaQauTuww/iKGJmJb+3cJPiGlrq0zNBS0eJ2Zol570nkhcDzDDzo8ihyEcCnrXM2mWXKGCJjxfmKTAzO0bwn71pJucvxrJ19qNO+O2ENjXuDdfagZ3Amc7JZAI/NoO0ZLCODshGw=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1781784293; c=relaxed/simple;
+	bh=P1qoN96L0c7AZdDLfjOWgDp3diLiehO5QNOioro/PtA=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=SxHTToSMkgn9d029W170ATQQFKwod+5R058+fofyWX+NrKz070qqghp0neFu5UduiWOcKWQ2rNK1vikCo4JDgzNwp0CCxAzw3cIyEN/9Tgj8YWrnZvDkSwBFiuyVeER9OxtTyCkROdB/yQrHi7dmEiKeKb3W6n7AMedgYWfVmSs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=qLGEcTgP; arc=fail smtp.client-ip=52.101.228.37
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="XKqEiq2s"
-Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65I5dVAv2396252;
-	Thu, 18 Jun 2026 10:53:42 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=corp-2025-04-25; bh=ch3U8Il20UNELvEAFr3wRz7Wl8Wqy
-	+5Sq9RvZuvkq24=; b=XKqEiq2snekCPfsqvXMf9B9HZyE/xxd87inZ5/5UX2/Dc
-	XJKfigqH9B8uN916TU0U8WkWjOHroVx4N2QHVOyb4RboD9URFvoW9d/lyMsmEAl+
-	nUc3mCTv5eXKpfos40D1e1uxw7AgwoNnM6JowfsAnvef4VjTUVkYm+dpGsVH8Eer
-	bKNqRatPKNVvzYs+jQacSxKEK8QBjCsnXGCN8mxwwqj3AQhe59fE6YLyFVU4vRis
-	a1uHL6KKGtzq4S9EKRoxW+YMH7oI5/FRBN1XkatuPFPF1RQkg3qL3mmakzxB5amx
-	57g8ABr+lgdYHJFW9hmimTCmhvX2nafoOGQkLG1Kg==
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4euefy2awj-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 18 Jun 2026 10:53:42 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.7/8.18.1.7) with ESMTP id 65IAra9w031645;
-	Thu, 18 Jun 2026 10:53:42 GMT
-Received: from brm-x62-22.us.oracle.com (brm-x62-22.us.oracle.com [10.80.150.48])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTP id 4ev14u0utd-1;
-	Thu, 18 Jun 2026 10:53:39 +0000 (GMT)
-From: Satyansh Shukla <satyansh.shukla@oracle.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: dwcmshc_bf3_hw_reset: Log eMMC reset calls
-Date: Thu, 18 Jun 2026 04:53:19 -0600
-Message-Id: <20260618105319.217717-1-satyansh.shukla@oracle.com>
-X-Mailer: git-send-email 2.31.1
+	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="qLGEcTgP"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=wXZpxDNbBhhQR++pT7yaw7J9iqjD+83MLf3zCp1PJ6Kg7f+3Llb1JMkXVTDssAX/4SV5ai/PPw2pd4/SujeA3UdXoi4/jbXm6JTUkR56F8Xkn0aNtl0yOd7KnODPfWXR3eIr7eXKmGcQgyXUZD3GHgzgeEIyoDOJt783ZG4yVWUSJUEG8L0VkiEQolmZAElqPdGY1W3i1b6HM52V9fLDVhx/yfh15j/tfMVv9r5Q4SBfQUZJTku1cHUK+Kt2sAGFMRtO7Q2kxuh/p5Yr8xOM6mgqTnX65M6uZs5H54QSRspeOA1RdlqE/J1yUr9drmQ9pY5UAgPuCQtS9oVXjw3Ycg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=uOLetwxHExF87FtIUFrKxC+EBvmdJjFszP8w+jjf6QM=;
+ b=qIopxjCwiVVmlkgJ3DHO/QuLVfGZLGhgMI9xBVbkpPi1YTmN/tPuxzHtOh4Hct1og2cwDUwZ0RuZ5qzYrPwX4sNGSxFVVoq+gvQl4/cdFGpoMKK6X2BbIQhleOEPviH5yZnCfYgWkAozt5goLF8M/loYWsnpg4GUqLiJzHHsSZCtlxCtmoZn6+QhKtB0C6VypptqawCphCkmLy1e3wHOwjG/3FYYtIvVFoTOuGRIBYEX787l1lu4ghAAeO/uQkzbDnkdcr/C5ytB8h5uO1dtJXXVPqI8p4l6PCRFxuNIZvlQtCGzG3qAmTtS1FCMPELlYcBqoTkD9BnpF6Qc5f0rqQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=uOLetwxHExF87FtIUFrKxC+EBvmdJjFszP8w+jjf6QM=;
+ b=qLGEcTgPd4z8jl9VHfHUCoXINMYrBrIG7eM3L/m/ZyHN63XJ3htnVdPHi2DHlmWtDenxPu4hYR151uD1awIXqk912OZUpVvtVtB0cMWnqQLKHdxbRCMm7NtfOsGvdZ522ZssH10IamI6bzWcTDfLnXfRhEmkQ6mGPrtjD6icICM=
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
+ by OS3PR01MB6564.jpnprd01.prod.outlook.com (2603:1096:604:10a::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.139.13; Thu, 18 Jun
+ 2026 12:04:49 +0000
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0139.011; Thu, 18 Jun 2026
+ 12:04:42 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: wsa+renesas <wsa+renesas@sang-engineering.com>, biju.das.au
+	<biju.das.au@gmail.com>
+CC: Ulf Hansson <ulfh@kernel.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
+	<linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: RE: [PATCH v17 06/17] mmc: renesas_sdhi: Introduce
+ renesas_sdhi_hw_info to abstract clock mask
+Thread-Topic: [PATCH v17 06/17] mmc: renesas_sdhi: Introduce
+ renesas_sdhi_hw_info to abstract clock mask
+Thread-Index: AQHc8yZLw+3qaj4210WwTP4P6hczb7ZCxVkAgAAJQjA=
+Date: Thu, 18 Jun 2026 12:04:42 +0000
+Message-ID:
+ <TY3PR01MB113467337ECB82BCD7E812DD286E32@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
+ <20260603065731.93243-7-biju.das.jz@bp.renesas.com>
+ <ajKUpOHCaufy42NH@shikoro>
+In-Reply-To: <ajKUpOHCaufy42NH@shikoro>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OS3PR01MB6564:EE_
+x-ms-office365-filtering-correlation-id: c40a99ab-dae9-4e1e-eb88-08decd31c811
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|366016|376014|1800799024|23010399003|38070700021|22082099003|18002099003|11063799006|3023799007|4143699003|56012099006;
+x-microsoft-antispam-message-info:
+ WE/ZTkOdEmTNGzTmeaLqzsD2Mh8QL+T0AV73q5JngTYc7PHneDVe8W4lXkUzLaZistF45ZOr+O+Vvrcp6IaXAG2hrav6dW6pMhI9d2idnhgEIutrI4pkiRjM+SMdhaMWHyOCRibZ/J7AirTScoIp3tzyS0rNclFlxXQQwPtews6FpYWbLgFv6IHJ6hZyANUjTOphWJbf8Gx9d8vhEn/zITb+oAHxkUkP4SDLQNvl8uZVRV33pHUSYzWa4wpqvxKrqEnH3uHW6UxxTndQjFkt6iWWw9rO+kTZNsDeD6HVfSraJDjD0OZx8YKqhixB1bPXAvoKH7tshXOhdTALs/ytD4/7tuglcUiBA/6D4xwQgjcbbp1DcMMThZRAqe6LOm/wKpTbypA8pa5Ke/n8u7zS75zxlht5UEx9fiPf08p3r9m+7B37j4DutqjMKBl6Z9fEjDDCMWf4yHOcNH29pkATsqmx5Q0TsD21aQ/Be9J6Vp0yczWVezlvJpFPNRaji41mYwpS0F9iK95dz7IsbM2pmL0QjzyCjb6jGUfQYUUxN4VlCIsc/PS2twe3M1zkQi3M2w1/DVxjm/FImAA47PklrznlJLiPDMD5lN1XYUCpR3m2yLsA0OcPiG94SiOTa/1Pmch4nShJKQVkgSXpxtPCBbRXuJtHg6g4DrxmZPA0R6KSpJR3UUPP74W4gwsEBYZLYd+I9zXlxSgZJ4XeQzHCqp6Pp5l6RslqyC3Fsc253iYD4l2LTtfXZbcpHX5h7xDF
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(23010399003)(38070700021)(22082099003)(18002099003)(11063799006)(3023799007)(4143699003)(56012099006);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?56qb/1M5yfPu04qkWPMsiPQYaZWzLUaxuNOgXi7J/6nO/YFI8RTXYG9XfUcJ?=
+ =?us-ascii?Q?BctGeb2ClWO8k65xmdRdNyMGzUHEmoyd8Gf6ZapQT40bGcWrrZ8ISvF80Kv6?=
+ =?us-ascii?Q?WyCCP7bqauDc+9oQjEga/iJjc+WWx7dfvo62apDpaba4oFYngHvQrLERJdWp?=
+ =?us-ascii?Q?FmdapK+b8UFesChMjjiQp3PkPwPtuLup0Od55raMvsPKyrBUIH0X9mSSGcfk?=
+ =?us-ascii?Q?cfivAaN0rJh0MKU80PhCMA5dVKnEBWYv4D1GvPX/A5NyHUuyvc7JJj6OGVM9?=
+ =?us-ascii?Q?Bcabf8aEw6n688x6tjlL23YH8dV7YNQm83l6A38NTOlKEAIQLa88m4FL7wiv?=
+ =?us-ascii?Q?7bA3v+BCHjDsoI8OP0ddzSPZ1OmOWEXlTqL/yTLs6EDqA6LjDAvtJIHzg3ti?=
+ =?us-ascii?Q?FdayMyfHbVBwJPxR58FxCzDuZUb6utPugcicQG3wayQxetXfhUEhNQ3PGjkZ?=
+ =?us-ascii?Q?tbk1lu45jrlnmHdxfirJSfCOdZ9tC3RKriXECOXsJNsYdcNfSvnhqQbpY8kS?=
+ =?us-ascii?Q?slS2CBOs8y9IAOhRuAoIoxI9qavcf8wGrju7XP5EUrgfjf7boVBgnPZlcZD2?=
+ =?us-ascii?Q?qVqplNHt01ICkue9eb0QsmgX/M4Vh1zmD7EludDtz7P2Dwvs1Ost0QJwb1g2?=
+ =?us-ascii?Q?FwsHcnjV54nUHOQp4iZM3hMMA4cbEC0zw+o/2NgCkWoEgXANrWwnZl906QD7?=
+ =?us-ascii?Q?FOcKQmBjkpT1zU72We9Es/0nUm6/FPJNanfHsnSAsVpqXLn577/uzV7r03ci?=
+ =?us-ascii?Q?fZNwObaFx4bJl8TG1ZPmXWKdcBhewaV3SgHE5iFYOJRGDJM1i0gVB/F4OPyO?=
+ =?us-ascii?Q?3zn01SmCFX9E3XI6LuztNgl/e7lgR6okao/Xm6eYW8y5MGp0Ap5ix2de1o9s?=
+ =?us-ascii?Q?6y96Dwu3vjM5zYOOQRspXCAd87+E0hj2GXoLrrxIpGIwlWol7FSS6gg+GFp2?=
+ =?us-ascii?Q?cJIUjGHoyAH1GeYFFp8SFSD3YVhxnv395raQA3VcJgF6tSQLTQJMBdOUFNK7?=
+ =?us-ascii?Q?kginuaAxFtHdtyRtRr/yBoq+jSar0MNbWTCyNi+jMzBvzP0zTYs0QrwzzaZD?=
+ =?us-ascii?Q?ascoHgnXtVD+iO6BtiweqPPLFj1gApnOao4BSKQ12JDsLB2r1wNXuTvrh8uo?=
+ =?us-ascii?Q?uhXkAeE7zeAD7qBmR4prhGthxOwkxNRYwqF4uCBhOr1pWzoKovpIpHGycqMM?=
+ =?us-ascii?Q?WmLEo+KhZzlBpEaI/ijFI3CnI1fMOXigtdOPTPYjqS1HyYMjMhc4aCkrnR1D?=
+ =?us-ascii?Q?1bwY9lxVMOt34Z3MicTQtPgY7u2up//G72LdfIMIhXVwCbuzyXZ/zM6TkwuI?=
+ =?us-ascii?Q?9j3eGViciDx8Q5ud9UPLVZWIaBUlabq4ZiVd+X6muUVvxCcabcrdc711vsbA?=
+ =?us-ascii?Q?d9sgAtAgtnC/5X5vRVwVziOP8z5G7zhFU3cnVXFnb5lBbTnX+ZuQG5K2NQ6b?=
+ =?us-ascii?Q?6dIffuzIt/0UH8JLX3np2jit4Ml+Vzt5NowY/Em84Qxat6958cmFdoc0WZWS?=
+ =?us-ascii?Q?uuNDJ+t93Ej+39czoGGL+a9Pc4AQq+2fecSAnsYql81/bJurcBLSTFUMLgLK?=
+ =?us-ascii?Q?Co/3FMJSoSyC7rrtUPT1PkEYqGZM5caNTXFAAKivXsRlUYH23urla0A3meSd?=
+ =?us-ascii?Q?7ycrK02S3y40pF79bbXh2sEhuEYBTv0S37Ml27vLQABEkFImWjNYuBhQox2y?=
+ =?us-ascii?Q?gOo3pZkx4IVSUGwBntY1NS7ZxfvMKgvrPQDMmTo92dgc/eRWdfNLOgFFYxzO?=
+ =?us-ascii?Q?Rg1RB/KLuw=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
- definitions=2026-06-18_01,2026-06-17_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999
- adultscore=0 suspectscore=0 mlxscore=0 bulkscore=0 spamscore=0
- lowpriorityscore=0 phishscore=0 malwarescore=0 classifier=spam adjust=0
- reason=mlx scancount=1 engine=8.19.0-2606160000 definitions=main-2606180101
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjE4MDEwMSBTYWx0ZWRfXyb1xbjCyoBsM
- xs5jWFNSM2JucvznF3hsl5xMjKjoEAN4eRD7rVa0kUJU4WnyZyKJzoEpA4FjZXLp9mivv2nGmH2
- 8R4gpfLxP13Y0RD0xjrG7DUT/iLeoRFgIbxTcsRqI+ayyTub6+d77M+B44ygqQxVKQOF+66fLSR
- a/FTBN/X+5k3TQomHAd3zw0pOoUZfgGMYvu4DOyKauDbeSUGvEfIwQBbTC4NBXbVunYJQV6sUyn
- zwBdXUMQkeNEvWG+Ugy+XXh3XKiNGmycVOm/jMoDzKXbHlzryka9MZG8rGgOHJqBwfwTRCMfw5E
- XuqEi9zuq/ExhgfBlzhAPlKqjLmdQ3BWUGjmJu5xavKZev3hpvKR3zFtCza5mD16vCADlDNVo07
- a68iIlg+CB+4tSxrbt9KzhUyenogVDajLSYpofdpdEhmkupCzBvhgyX8SVqLJiJAD7jLgFShdZF
- 8v2BddH7z7UbIi8+V34c9o010tQD9qX+NZXb1i0M=
-X-Authority-Analysis: v=2.4 cv=Xt7K/1F9 c=1 sm=1 tr=0 ts=6a33ce36 b=1 cx=c_pps
- a=qoll8+KPOyaMroiJ2sR5sw==:117 a=qoll8+KPOyaMroiJ2sR5sw==:17
- a=FelO9ux0wxsA:10 a=VkNPw1HP01LnGYTKEx00:22 a=jiCTI4zE5U7BLdzWsZGv:22
- a=3I1J8UUJPc9JN9BFgKH3:22 a=yPCof4ZbAAAA:8 a=srqlFv8YiyK0XlN9uJMA:9
- a=5yU3S35YU4bGjq-dph-N:22 a=Bho9c0fBagfJEIQBS7DQ:22 cc=ntf awl=host:12313
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNjE4MDEwMSBTYWx0ZWRfX/jeHQAcb/+JE
- V/58G7V3yGeA5zTaImRrpfjkpFDM4tJeBuVu3LZpcQAYpx8GAtJXtHKABkBdiPdZPd6Tf3sTo9s
- mEXKK+lheJoiwY0WzkbPCKuignM+BdrAinxtBj3dzptt5Vnadtok
-X-Proofpoint-GUID: P6CeYajIhSYljUvoBGwgaMM6cYPkFQI-
-X-Proofpoint-ORIG-GUID: P6CeYajIhSYljUvoBGwgaMM6cYPkFQI-
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: c40a99ab-dae9-4e1e-eb88-08decd31c811
+X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Jun 2026 12:04:42.6307
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: clE6MjD4iYbjo4IyRj9mgjcFAuiD7kQI2dAAtwvLzfwxVUZ0QGYGXcTYgUaW/YRr3WFGApGqzIi6iGv/f4S6GKlaN8kBJxnPUVonqXeWre4=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3PR01MB6564
 
-Log when the BlueField-3 eMMC hardware reset path is invoked and
-whether the RST_N SMC call succeeds.
+Hi Wolfram,
 
-This makes it easier to diagnose cases where the controller recovery path
-depends on issuing an eMMC reset, and helps confirm that the reset sequence
-was attempted on affected systems.
+Thanks for the feedback.
 
-Signed-off-by: Satyansh Shukla <satyansh.shukla@oracle.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 3 +++
- 1 file changed, 3 insertions(+)
+> -----Original Message-----
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Sent: 17 June 2026 13:36
+> Subject: Re: [PATCH v17 06/17] mmc: renesas_sdhi: Introduce renesas_sdhi_=
+hw_info to abstract clock mask
+>=20
+> On Wed, Jun 03, 2026 at 07:57:06AM +0100, Biju wrote:
+> > From: Biju Das <biju.das.jz@bp.renesas.com>
+> >
+> > The RZ/G3L SoC has 11 divider bits and requires a different clock mask
+> > in renesas_sdhi_set_clock().
+> >
+> > Add a new renesas_sdhi_hw_info struct to hold hardware-specific
+> > parameters, starting with clk_mask. This replaces the hardcoded
+> > constant in renesas_sdhi_set_clock() with a value sourced from the
+> > per-device hw_info, and widens the clk variable from u32 to u64
+> > accordingly, as clk_mask for RZ/G3L exceeds 32 bits.
+> >
+> > Wire hw_info through renesas_sdhi_of_data_with_quirks (internalDMAC
+> > path) and a new renesas_sdhi_of_data_with_info wrapper (sysDMAC path),
+> > and plumb it into renesas_sdhi_probe() so it is stored in the
+> > per-instance renesas_sdhi struct.
+> >
+> > All existing users are assigned sdhi_hw_info_generic, preserving
+> > current behaviour. No functional change.
+> >
+> > Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> > ---
+> > v1->v2:
+> >  * No change.
+> > ---
+> >  drivers/mmc/host/renesas_sdhi.h               | 12 ++++
+> >  drivers/mmc/host/renesas_sdhi_core.c          |  7 +-
+> >  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 16 ++++-
+> >  drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 66 ++++++++++++++-----
+> >  4 files changed, 81 insertions(+), 20 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/renesas_sdhi.h
+> > b/drivers/mmc/host/renesas_sdhi.h index 09bf9b24a8c3..a7fc525b7218
+> > 100644
+> > --- a/drivers/mmc/host/renesas_sdhi.h
+> > +++ b/drivers/mmc/host/renesas_sdhi.h
+> > @@ -41,6 +41,15 @@ struct renesas_sdhi_of_data {
+> >
+> >  #define SDHI_CALIB_TABLE_MAX 32
+> >
+> > +struct renesas_sdhi_hw_info {
+> > +	u64 clk_mask;
+> > +};
+> > +
+> > +struct renesas_sdhi_of_data_with_info {
+> > +	const struct renesas_sdhi_of_data *of_data;
+> > +	const struct renesas_sdhi_hw_info *info; };
+>=20
+> ? Why don't you put it in renesas_sdhi_of_data and tmio_mmc_data instead?
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index b9ecd91f44ad..8acd4652a12b 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -2019,10 +2019,13 @@ static void dwcmshc_bf3_hw_reset(struct sdhci_host *host)
- {
- 	struct arm_smccc_res res = { 0 };
- 
-+	pr_info("%s: resetting...\n", __func__);
- 	arm_smccc_smc(BLUEFIELD_SMC_SET_EMMC_RST_N, 0, 0, 0, 0, 0, 0, 0, &res);
- 
- 	if (res.a0)
- 		pr_err("%s: RST_N failed.\n", mmc_hostname(host->mmc));
-+	else
-+		pr_info("%s: RST_N succeeded.\n", mmc_hostname(host->mmc));
- }
- 
- static const struct sdhci_ops sdhci_dwcmshc_bf3_ops = {
--- 
-2.31.1
+Ok, I have prototyped with renesas_sdhi_of_data and tmio_mmc_data as per yo=
+ur=20
+suggestion
+
+The below variables[1] added to struct tmio_mmc_data and
+the feature flags[2]. Please let me know is it ok or not?
+
+[1]
+	u64				clk_mask;
+	unsigned int 		max_divider;
+	u32				osel_tmpout;
+
+[2]
+ /* Some controllers have tuning delay */
+#define TMIO_MMC_TUNING_DELAY		BIT(13)
+
+/* Some controllers have internal divider */
+#define TMIO_MMC_INTERNAL_DIVIDER	BIT(14)
+
+/* Some controllers have hw adjustment delay */
+#define TMIO_MMC_HWADJ2			BIT(15)
+
+/* Some controllers have HS400mode2  */
+#define TMIO_MMC_HS400MODE2		BIT(16)
+
+/* Some controllers have HS400ES  */
+#define TMIO_MMC_HS400ES		BIT(17)
+
+>=20
+> You wouldn't even need to put the default value in all other of_data by
+> using:
+>=20
+> In the 'if (of_data)' block of probe():
+>=20
+> 	mmc_data->clk_mask =3D of_data->clk_mask
+>=20
+> and outside of this block:
+>=20
+> 	if (!mmc_data->clk_mask) mmc_data->clk_mask =3D <default>;
+>=20
+> or something similar.
+
+OK.
+
+>=20
+> The main thing is that we don't need a hw_info struct IMO. It should be a=
+lready all there...
+>=20
+> Same for everything which gets added later to hw_info.
+
+Agreed, it now works without hw_info struct.
+
+Cheers,
+Biju
 
