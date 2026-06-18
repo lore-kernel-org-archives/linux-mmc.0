@@ -1,247 +1,180 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11010037.outbound.protection.outlook.com [52.101.228.37])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16F702C236B;
-	Thu, 18 Jun 2026 12:04:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.37
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1781784293; cv=fail; b=SK2kNm5TQBJyamO8pjsZxDx364b+iDKMvilsaQauTuww/iKGJmJb+3cJPiGlrq0zNBS0eJ2Zol570nkhcDzDDzo8ihyEcCnrXM2mWXKGCJjxfmKTAzO0bwn71pJucvxrJ19qNO+O2ENjXuDdfagZ3Amc7JZAI/NoO0ZLCODshGw=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1781784293; c=relaxed/simple;
-	bh=P1qoN96L0c7AZdDLfjOWgDp3diLiehO5QNOioro/PtA=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=SxHTToSMkgn9d029W170ATQQFKwod+5R058+fofyWX+NrKz070qqghp0neFu5UduiWOcKWQ2rNK1vikCo4JDgzNwp0CCxAzw3cIyEN/9Tgj8YWrnZvDkSwBFiuyVeER9OxtTyCkROdB/yQrHi7dmEiKeKb3W6n7AMedgYWfVmSs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=qLGEcTgP; arc=fail smtp.client-ip=52.101.228.37
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA97C3F5BD4
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Jun 2026 12:59:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1781787549; cv=none; b=GCltLspLyn6Jo73wGJvxWapSuT08cnyaD/gNsgBuZbiTqp2uVKpzrTIdwZouAnTwqMRRbhnBLHvOTGrfWk9DSJ1cp/jY77sfgWrM5ad3jkncfnox32QD3NGG+m9afVxZ4LA61LqLwupbUVELjy8ijeDctnt8HWswfbpKjbKWJL0=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1781787549; c=relaxed/simple;
+	bh=PNtWWUZnOoeuRuQvHHH8ESeBdiXIxik44bljZe73FdQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=sp9Sd2XxNtx1zSZ485nAtKnoj/5DTTvHHbFeqNo6cLRrGPSEt2NaQHikBAyg78lwhQEU5DzOe4YSz5BcrKRL+P9ResAUh9ObxqATzJ3qUipoAxvBO8269LSPeZ3kPpJcpOuOu8ty3E8Yaa1L0ST1k1lhdJcug9vPznNuYFtvRwg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=opW2ZeLZ; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=jAOaLxhf; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="qLGEcTgP"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=wXZpxDNbBhhQR++pT7yaw7J9iqjD+83MLf3zCp1PJ6Kg7f+3Llb1JMkXVTDssAX/4SV5ai/PPw2pd4/SujeA3UdXoi4/jbXm6JTUkR56F8Xkn0aNtl0yOd7KnODPfWXR3eIr7eXKmGcQgyXUZD3GHgzgeEIyoDOJt783ZG4yVWUSJUEG8L0VkiEQolmZAElqPdGY1W3i1b6HM52V9fLDVhx/yfh15j/tfMVv9r5Q4SBfQUZJTku1cHUK+Kt2sAGFMRtO7Q2kxuh/p5Yr8xOM6mgqTnX65M6uZs5H54QSRspeOA1RdlqE/J1yUr9drmQ9pY5UAgPuCQtS9oVXjw3Ycg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=uOLetwxHExF87FtIUFrKxC+EBvmdJjFszP8w+jjf6QM=;
- b=qIopxjCwiVVmlkgJ3DHO/QuLVfGZLGhgMI9xBVbkpPi1YTmN/tPuxzHtOh4Hct1og2cwDUwZ0RuZ5qzYrPwX4sNGSxFVVoq+gvQl4/cdFGpoMKK6X2BbIQhleOEPviH5yZnCfYgWkAozt5goLF8M/loYWsnpg4GUqLiJzHHsSZCtlxCtmoZn6+QhKtB0C6VypptqawCphCkmLy1e3wHOwjG/3FYYtIvVFoTOuGRIBYEX787l1lu4ghAAeO/uQkzbDnkdcr/C5ytB8h5uO1dtJXXVPqI8p4l6PCRFxuNIZvlQtCGzG3qAmTtS1FCMPELlYcBqoTkD9BnpF6Qc5f0rqQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=uOLetwxHExF87FtIUFrKxC+EBvmdJjFszP8w+jjf6QM=;
- b=qLGEcTgPd4z8jl9VHfHUCoXINMYrBrIG7eM3L/m/ZyHN63XJ3htnVdPHi2DHlmWtDenxPu4hYR151uD1awIXqk912OZUpVvtVtB0cMWnqQLKHdxbRCMm7NtfOsGvdZ522ZssH10IamI6bzWcTDfLnXfRhEmkQ6mGPrtjD6icICM=
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
- by OS3PR01MB6564.jpnprd01.prod.outlook.com (2603:1096:604:10a::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.139.13; Thu, 18 Jun
- 2026 12:04:49 +0000
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0139.011; Thu, 18 Jun 2026
- 12:04:42 +0000
-From: Biju Das <biju.das.jz@bp.renesas.com>
-To: wsa+renesas <wsa+renesas@sang-engineering.com>, biju.das.au
-	<biju.das.au@gmail.com>
-CC: Ulf Hansson <ulfh@kernel.org>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
-	<linux-renesas-soc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: RE: [PATCH v17 06/17] mmc: renesas_sdhi: Introduce
- renesas_sdhi_hw_info to abstract clock mask
-Thread-Topic: [PATCH v17 06/17] mmc: renesas_sdhi: Introduce
- renesas_sdhi_hw_info to abstract clock mask
-Thread-Index: AQHc8yZLw+3qaj4210WwTP4P6hczb7ZCxVkAgAAJQjA=
-Date: Thu, 18 Jun 2026 12:04:42 +0000
-Message-ID:
- <TY3PR01MB113467337ECB82BCD7E812DD286E32@TY3PR01MB11346.jpnprd01.prod.outlook.com>
-References: <20260603065731.93243-1-biju.das.jz@bp.renesas.com>
- <20260603065731.93243-7-biju.das.jz@bp.renesas.com>
- <ajKUpOHCaufy42NH@shikoro>
-In-Reply-To: <ajKUpOHCaufy42NH@shikoro>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OS3PR01MB6564:EE_
-x-ms-office365-filtering-correlation-id: c40a99ab-dae9-4e1e-eb88-08decd31c811
-x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|366016|376014|1800799024|23010399003|38070700021|22082099003|18002099003|11063799006|3023799007|4143699003|56012099006;
-x-microsoft-antispam-message-info:
- WE/ZTkOdEmTNGzTmeaLqzsD2Mh8QL+T0AV73q5JngTYc7PHneDVe8W4lXkUzLaZistF45ZOr+O+Vvrcp6IaXAG2hrav6dW6pMhI9d2idnhgEIutrI4pkiRjM+SMdhaMWHyOCRibZ/J7AirTScoIp3tzyS0rNclFlxXQQwPtews6FpYWbLgFv6IHJ6hZyANUjTOphWJbf8Gx9d8vhEn/zITb+oAHxkUkP4SDLQNvl8uZVRV33pHUSYzWa4wpqvxKrqEnH3uHW6UxxTndQjFkt6iWWw9rO+kTZNsDeD6HVfSraJDjD0OZx8YKqhixB1bPXAvoKH7tshXOhdTALs/ytD4/7tuglcUiBA/6D4xwQgjcbbp1DcMMThZRAqe6LOm/wKpTbypA8pa5Ke/n8u7zS75zxlht5UEx9fiPf08p3r9m+7B37j4DutqjMKBl6Z9fEjDDCMWf4yHOcNH29pkATsqmx5Q0TsD21aQ/Be9J6Vp0yczWVezlvJpFPNRaji41mYwpS0F9iK95dz7IsbM2pmL0QjzyCjb6jGUfQYUUxN4VlCIsc/PS2twe3M1zkQi3M2w1/DVxjm/FImAA47PklrznlJLiPDMD5lN1XYUCpR3m2yLsA0OcPiG94SiOTa/1Pmch4nShJKQVkgSXpxtPCBbRXuJtHg6g4DrxmZPA0R6KSpJR3UUPP74W4gwsEBYZLYd+I9zXlxSgZJ4XeQzHCqp6Pp5l6RslqyC3Fsc253iYD4l2LTtfXZbcpHX5h7xDF
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(23010399003)(38070700021)(22082099003)(18002099003)(11063799006)(3023799007)(4143699003)(56012099006);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?56qb/1M5yfPu04qkWPMsiPQYaZWzLUaxuNOgXi7J/6nO/YFI8RTXYG9XfUcJ?=
- =?us-ascii?Q?BctGeb2ClWO8k65xmdRdNyMGzUHEmoyd8Gf6ZapQT40bGcWrrZ8ISvF80Kv6?=
- =?us-ascii?Q?WyCCP7bqauDc+9oQjEga/iJjc+WWx7dfvo62apDpaba4oFYngHvQrLERJdWp?=
- =?us-ascii?Q?FmdapK+b8UFesChMjjiQp3PkPwPtuLup0Od55raMvsPKyrBUIH0X9mSSGcfk?=
- =?us-ascii?Q?cfivAaN0rJh0MKU80PhCMA5dVKnEBWYv4D1GvPX/A5NyHUuyvc7JJj6OGVM9?=
- =?us-ascii?Q?Bcabf8aEw6n688x6tjlL23YH8dV7YNQm83l6A38NTOlKEAIQLa88m4FL7wiv?=
- =?us-ascii?Q?7bA3v+BCHjDsoI8OP0ddzSPZ1OmOWEXlTqL/yTLs6EDqA6LjDAvtJIHzg3ti?=
- =?us-ascii?Q?FdayMyfHbVBwJPxR58FxCzDuZUb6utPugcicQG3wayQxetXfhUEhNQ3PGjkZ?=
- =?us-ascii?Q?tbk1lu45jrlnmHdxfirJSfCOdZ9tC3RKriXECOXsJNsYdcNfSvnhqQbpY8kS?=
- =?us-ascii?Q?slS2CBOs8y9IAOhRuAoIoxI9qavcf8wGrju7XP5EUrgfjf7boVBgnPZlcZD2?=
- =?us-ascii?Q?qVqplNHt01ICkue9eb0QsmgX/M4Vh1zmD7EludDtz7P2Dwvs1Ost0QJwb1g2?=
- =?us-ascii?Q?FwsHcnjV54nUHOQp4iZM3hMMA4cbEC0zw+o/2NgCkWoEgXANrWwnZl906QD7?=
- =?us-ascii?Q?FOcKQmBjkpT1zU72We9Es/0nUm6/FPJNanfHsnSAsVpqXLn577/uzV7r03ci?=
- =?us-ascii?Q?fZNwObaFx4bJl8TG1ZPmXWKdcBhewaV3SgHE5iFYOJRGDJM1i0gVB/F4OPyO?=
- =?us-ascii?Q?3zn01SmCFX9E3XI6LuztNgl/e7lgR6okao/Xm6eYW8y5MGp0Ap5ix2de1o9s?=
- =?us-ascii?Q?6y96Dwu3vjM5zYOOQRspXCAd87+E0hj2GXoLrrxIpGIwlWol7FSS6gg+GFp2?=
- =?us-ascii?Q?cJIUjGHoyAH1GeYFFp8SFSD3YVhxnv395raQA3VcJgF6tSQLTQJMBdOUFNK7?=
- =?us-ascii?Q?kginuaAxFtHdtyRtRr/yBoq+jSar0MNbWTCyNi+jMzBvzP0zTYs0QrwzzaZD?=
- =?us-ascii?Q?ascoHgnXtVD+iO6BtiweqPPLFj1gApnOao4BSKQ12JDsLB2r1wNXuTvrh8uo?=
- =?us-ascii?Q?uhXkAeE7zeAD7qBmR4prhGthxOwkxNRYwqF4uCBhOr1pWzoKovpIpHGycqMM?=
- =?us-ascii?Q?WmLEo+KhZzlBpEaI/ijFI3CnI1fMOXigtdOPTPYjqS1HyYMjMhc4aCkrnR1D?=
- =?us-ascii?Q?1bwY9lxVMOt34Z3MicTQtPgY7u2up//G72LdfIMIhXVwCbuzyXZ/zM6TkwuI?=
- =?us-ascii?Q?9j3eGViciDx8Q5ud9UPLVZWIaBUlabq4ZiVd+X6muUVvxCcabcrdc711vsbA?=
- =?us-ascii?Q?d9sgAtAgtnC/5X5vRVwVziOP8z5G7zhFU3cnVXFnb5lBbTnX+ZuQG5K2NQ6b?=
- =?us-ascii?Q?6dIffuzIt/0UH8JLX3np2jit4Ml+Vzt5NowY/Em84Qxat6958cmFdoc0WZWS?=
- =?us-ascii?Q?uuNDJ+t93Ej+39czoGGL+a9Pc4AQq+2fecSAnsYql81/bJurcBLSTFUMLgLK?=
- =?us-ascii?Q?Co/3FMJSoSyC7rrtUPT1PkEYqGZM5caNTXFAAKivXsRlUYH23urla0A3meSd?=
- =?us-ascii?Q?7ycrK02S3y40pF79bbXh2sEhuEYBTv0S37Ml27vLQABEkFImWjNYuBhQox2y?=
- =?us-ascii?Q?gOo3pZkx4IVSUGwBntY1NS7ZxfvMKgvrPQDMmTo92dgc/eRWdfNLOgFFYxzO?=
- =?us-ascii?Q?Rg1RB/KLuw=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="opW2ZeLZ";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="jAOaLxhf"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65ICttb51599999
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Jun 2026 12:59:06 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	PMYW4I9dC9wuzE1yOpLwjXPmFQ01enmrDtWrZvFEzpU=; b=opW2ZeLZpjprwV8g
+	8F6I8NDeMHvWwODi4f5Rwck5vmlqhPcEzKgamVFo0mmVZHdREVUd+jSf+ii2L+il
+	64zFJOOGpKEtnyGCadV3m1HFZjHzUd4R84lkPtdGyO2pZVhEaCtie9lcF4FRx5a8
+	+AzP2KNPIm1ATPoOz7LGHV7Fx13m35Fa7rfL+vzhmovAkg0hjBXEX+NcjinmmPLT
+	J/+l7pjwHpuAuAyavW5MfNArfBHGXUjRNLPQHgo0eb9uC6ACT/laUbmWe7QzB/TW
+	ghXtj3zHKsdmN7J/X3ZX3003CJhU0fVc66iLgg1Wzw8F1RTX7dy7ccFzl9Gr2NS9
+	8FspRA==
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com [209.85.222.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ev1wc36kh-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Thu, 18 Jun 2026 12:59:06 +0000 (GMT)
+Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-915737aaf0bso17718385a.3
+        for <linux-mmc@vger.kernel.org>; Thu, 18 Jun 2026 05:59:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1781787546; x=1782392346; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=PMYW4I9dC9wuzE1yOpLwjXPmFQ01enmrDtWrZvFEzpU=;
+        b=jAOaLxhf5xHaILHMYrndKw3LDZcmjDTc/yiz8Gyc/wm+Wdeq5votWFaP0CFPgBxXSE
+         rIh2AceTzI3w/14NVQ420FNaQjqqsEGZClyWmCw3ThrZY5FGIp4HVKEACYBpwguMf7FT
+         TBvt4IiZOoIqlEbUGr894AQaxWvHy6iWyLVg6czWB1MZjq55NWRtnbTZXlX0Ay8ivVBi
+         DOuhlJm4ftGVNdHCfNPtPHnAmFP8UC51Mf7eOcsIzbsa7x3VR0lQlFxmUP3/RppLu4Zw
+         mCHl3DTnM4tGQpE4qhejWe8kSFkhV6UMF206/kA/M6d9hSQpOuaVNh7M24zc+S5k3WcE
+         HwtQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1781787546; x=1782392346;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PMYW4I9dC9wuzE1yOpLwjXPmFQ01enmrDtWrZvFEzpU=;
+        b=szUJyfNyBilpJVUUcdkXfR7xMqiDtEIazmSVTKe90GQrzWQuSCubwKPCaidm422S4W
+         M8Rwg2/Axb9JgvfKopO8uzpkPGQdYxsVOBjNpOyzV+7P3gdveKCNwlVj2bg3hBDuAscQ
+         TjXtU3h14aX6dj5tBtfAc5AhXptYxJZPiJTQC1MbR0p379VWq69apsghWoJqIluSae3s
+         AScgoO/9f+Nc9PG0cEIUp+8ttzoJThdIwurURMS5re6dyvM9KiUMZqu70L/+vm1EZKiv
+         vMDA6chRleeWUBz14z+2T73pf9S/0CzxmBCEkAEYsDl736tw0W4GzVj91z3uh/vTWBSl
+         5yTw==
+X-Forwarded-Encrypted: i=1; AFNElJ98ASsB0o59ml7qDcl/g350u+tMzvi3fivzfLnyB6DJ3DwQbDpe5yj5VK/10sEO/k3YigkMkQ6kAKQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy3aNyp6+4gFYHtPRB4aCS2pEEeu5doMfavzlKXOpwtI9qkKmFj
+	Ui7IgTtNwuhGJlIRbvZ5a/avh5j5oEVwc6a2Uo619oicU/F4wtWs9GtL0/eZDEtLFOfQeZgnhxH
+	ZsvnhUAkB01oBndjf2HQW+IYRJXF1K0Shykw5+1mUg61E1Hbzj06rng+ULyJYSn4=
+X-Gm-Gg: AfdE7clxuL6Kx0QNGFG4LnNsJzyMoi5GWFSCwGrMyIKKouqZtlRLRVvmiMgFWv9FLkl
+	QtSMsdiW44m+5ICNUBpTQ2SqzCwr0dotpxRBCN+y0P33gL2gyqOUUc+6ujw/9/ZYwacQ5WoQ2mm
+	1KY+HmDEcC18Aoc7zCjicOlHXOc7oG+zDLuV/NhKlPVo+lDXEtjytssEdb6ttzhOB0IS3WqyWl2
+	QSHYDgxQkQNJluAK95znYVVd0lI/SPl4fl55H3gh+/3I7tWOStzV2eP9EuPE/XN/vDYFu/dj7J4
+	+J+GfLrPLb1BW3RrC53ywJNznTYFeUC4HfHTHLjvM2v4Ry7HoG49cYcY4+HrWigWojvRgKsnUSF
+	bOvDNXWVgTILOvOgqNIHxNR4LOQor0LAn+Cg=
+X-Received: by 2002:a05:620a:d8b:b0:90f:7ce2:3019 with SMTP id af79cd13be357-91dbd008667mr777219385a.7.1781787546055;
+        Thu, 18 Jun 2026 05:59:06 -0700 (PDT)
+X-Received: by 2002:a05:620a:d8b:b0:90f:7ce2:3019 with SMTP id af79cd13be357-91dbd008667mr777214485a.7.1781787545637;
+        Thu, 18 Jun 2026 05:59:05 -0700 (PDT)
+Received: from [192.168.120.170] ([178.235.128.140])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c01d667f63asm676768266b.19.2026.06.18.05.59.02
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 18 Jun 2026 05:59:04 -0700 (PDT)
+Message-ID: <06999033-1c2f-4203-bdcc-d8e94ed281b7@oss.qualcomm.com>
+Date: Thu, 18 Jun 2026 14:59:02 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c40a99ab-dae9-4e1e-eb88-08decd31c811
-X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Jun 2026 12:04:42.6307
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: clE6MjD4iYbjo4IyRj9mgjcFAuiD7kQI2dAAtwvLzfwxVUZ0QGYGXcTYgUaW/YRr3WFGApGqzIi6iGv/f4S6GKlaN8kBJxnPUVonqXeWre4=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3PR01MB6564
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v11 3/6] mmc: sdhci-msm: Set ICE clk to TURBO at sdhci ICE
+ init
+To: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
+        Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
+        Harshal Dev <harshal.dev@oss.qualcomm.com>,
+        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
+Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org
+References: <20260609-enable-ice-clock-scaling-v11-0-1cebc8b3275b@oss.qualcomm.com>
+ <20260609-enable-ice-clock-scaling-v11-3-1cebc8b3275b@oss.qualcomm.com>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <20260609-enable-ice-clock-scaling-v11-3-1cebc8b3275b@oss.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Authority-Analysis: v=2.4 cv=TMt1jVla c=1 sm=1 tr=0 ts=6a33eb9a cx=c_pps
+ a=qKBjSQ1v91RyAK45QCPf5w==:117 a=PRfkaYvzSr8QmIIGAkY2Sg==:17
+ a=IkcTkHD0fZMA:10 a=FelO9ux0wxsA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=yx91gb_oNiZeI1HMLzn7:22
+ a=EUspDBNiAAAA:8 a=QyXUC8HyAAAA:8 a=kiQjUq8FSzjVjtPiR3oA:9 a=QEXdDO2ut3YA:10
+ a=NFOGd7dJGGMPyQGDc5-O:22
+X-Proofpoint-GUID: SVucHDN_tqOFmw68_gbnPOchiBK7Eb0I
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNjE4MDEyMSBTYWx0ZWRfX4yIaneBswCpq
+ jEaNN41I+Fk4avDj8FQeL+bu9nk2xBogi/+i1AztT/9rUoS3eQNOPgG88B84FvpInPu46g2BVOm
+ isIjEJvsZotXKOvKKv/yTtDnYL5n8fg=
+X-Proofpoint-ORIG-GUID: SVucHDN_tqOFmw68_gbnPOchiBK7Eb0I
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjE4MDEyMSBTYWx0ZWRfXyzhaXGJO6BRY
+ UXzCbNhlYoqxIpPZUDwB+4XTVsZ4zNXLGGmrXTHmNC1OIXk+5N5tGCyHSXA5vptAaDHrM2n6g2j
+ n5CsGa2sFfsc+8EiZgLjMnip/6X1fDD0XKJZp6KwMonvrDMeV2/5VWKHu2LqqE67CemexFdCW5i
+ RYt4S2X9h7obE6P+gE5IIwhRvQnN5+aOZy0AlBOJHiNH5njvivMedMMSiQlvsT20RMQicg8R6Ty
+ nt5/ML3cTXq2EFqFXHtinOXzBbd2Qerke+Tbkaala/Npiv09B4skVWDcOIbGZcVzxbo1aZj6riM
+ /h1utm2/ywvTC+tuSEtx3Ndqy+bVzhEVaikXQl3q5JUeHskywi+dcdnN7V0zhmKdRjgwTaQctYO
+ XZAfV+8hDu8ADoiS1IQP9fwvLpfMttUPZYGLtzSTHu7jR03fDeN3pNLZuH8HCb1cNXT8SvTkJe6
+ xtFf2gRVj1qVrK79+qg==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
+ definitions=2026-06-18_01,2026-06-18_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 bulkscore=0 adultscore=0 impostorscore=0 priorityscore=1501
+ suspectscore=0 lowpriorityscore=0 spamscore=0 clxscore=1015 malwarescore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2606180121
 
-Hi Wolfram,
+On 6/8/26 11:47 PM, Abhinaba Rakshit wrote:
+> MMC controller lacks a clock scaling mechanism, unlike the UFS
+> controller. By default, the MMC controller is set to TURBO mode
+> during probe, but the ICE clock remains at XO frequency,
+> leading to read/write performance degradation on eMMC.
+> 
+> To address this, set the ICE clock to TURBO during sdhci_msm_ice_init
+> to align it with the controller clock. This ensures consistent
+> performance and avoids mismatches between the controller
+> and ICE clock frequencies.
+> 
+> For platforms where ICE is represented as a separate device,
+> use the OPP framework to vote for TURBO mode, maintaining
+> proper voltage and power domain constraints.
+> 
+> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 24 ++++++++++++++++++++++++
+>  1 file changed, 24 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 0882ce74e0c9bdddd98341a67b97bcef74078e0c..b655bcb5b90c0677bbe3dc6140de488038fe5ee8 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1901,6 +1901,8 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>  #ifdef CONFIG_MMC_CRYPTO
+>  
+>  static const struct blk_crypto_ll_ops sdhci_msm_crypto_ops; /* forward decl */
+> +static int sdhci_msm_ice_scale_clk(struct sdhci_msm_host *msm_host, unsigned long target_freq,
+> +				   bool round_ceil); /* forward decl */
 
-Thanks for the feedback.
+Can the definition simply be moved upwards?
 
-> -----Original Message-----
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Sent: 17 June 2026 13:36
-> Subject: Re: [PATCH v17 06/17] mmc: renesas_sdhi: Introduce renesas_sdhi_=
-hw_info to abstract clock mask
->=20
-> On Wed, Jun 03, 2026 at 07:57:06AM +0100, Biju wrote:
-> > From: Biju Das <biju.das.jz@bp.renesas.com>
-> >
-> > The RZ/G3L SoC has 11 divider bits and requires a different clock mask
-> > in renesas_sdhi_set_clock().
-> >
-> > Add a new renesas_sdhi_hw_info struct to hold hardware-specific
-> > parameters, starting with clk_mask. This replaces the hardcoded
-> > constant in renesas_sdhi_set_clock() with a value sourced from the
-> > per-device hw_info, and widens the clk variable from u32 to u64
-> > accordingly, as clk_mask for RZ/G3L exceeds 32 bits.
-> >
-> > Wire hw_info through renesas_sdhi_of_data_with_quirks (internalDMAC
-> > path) and a new renesas_sdhi_of_data_with_info wrapper (sysDMAC path),
-> > and plumb it into renesas_sdhi_probe() so it is stored in the
-> > per-instance renesas_sdhi struct.
-> >
-> > All existing users are assigned sdhi_hw_info_generic, preserving
-> > current behaviour. No functional change.
-> >
-> > Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-> > ---
-> > v1->v2:
-> >  * No change.
-> > ---
-> >  drivers/mmc/host/renesas_sdhi.h               | 12 ++++
-> >  drivers/mmc/host/renesas_sdhi_core.c          |  7 +-
-> >  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 16 ++++-
-> >  drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 66 ++++++++++++++-----
-> >  4 files changed, 81 insertions(+), 20 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/renesas_sdhi.h
-> > b/drivers/mmc/host/renesas_sdhi.h index 09bf9b24a8c3..a7fc525b7218
-> > 100644
-> > --- a/drivers/mmc/host/renesas_sdhi.h
-> > +++ b/drivers/mmc/host/renesas_sdhi.h
-> > @@ -41,6 +41,15 @@ struct renesas_sdhi_of_data {
-> >
-> >  #define SDHI_CALIB_TABLE_MAX 32
-> >
-> > +struct renesas_sdhi_hw_info {
-> > +	u64 clk_mask;
-> > +};
-> > +
-> > +struct renesas_sdhi_of_data_with_info {
-> > +	const struct renesas_sdhi_of_data *of_data;
-> > +	const struct renesas_sdhi_hw_info *info; };
->=20
-> ? Why don't you put it in renesas_sdhi_of_data and tmio_mmc_data instead?
-
-Ok, I have prototyped with renesas_sdhi_of_data and tmio_mmc_data as per yo=
-ur=20
-suggestion
-
-The below variables[1] added to struct tmio_mmc_data and
-the feature flags[2]. Please let me know is it ok or not?
-
-[1]
-	u64				clk_mask;
-	unsigned int 		max_divider;
-	u32				osel_tmpout;
-
-[2]
- /* Some controllers have tuning delay */
-#define TMIO_MMC_TUNING_DELAY		BIT(13)
-
-/* Some controllers have internal divider */
-#define TMIO_MMC_INTERNAL_DIVIDER	BIT(14)
-
-/* Some controllers have hw adjustment delay */
-#define TMIO_MMC_HWADJ2			BIT(15)
-
-/* Some controllers have HS400mode2  */
-#define TMIO_MMC_HS400MODE2		BIT(16)
-
-/* Some controllers have HS400ES  */
-#define TMIO_MMC_HS400ES		BIT(17)
-
->=20
-> You wouldn't even need to put the default value in all other of_data by
-> using:
->=20
-> In the 'if (of_data)' block of probe():
->=20
-> 	mmc_data->clk_mask =3D of_data->clk_mask
->=20
-> and outside of this block:
->=20
-> 	if (!mmc_data->clk_mask) mmc_data->clk_mask =3D <default>;
->=20
-> or something similar.
-
-OK.
-
->=20
-> The main thing is that we don't need a hw_info struct IMO. It should be a=
-lready all there...
->=20
-> Same for everything which gets added later to hw_info.
-
-Agreed, it now works without hw_info struct.
-
-Cheers,
-Biju
-
+Konrad
