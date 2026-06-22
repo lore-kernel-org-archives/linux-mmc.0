@@ -1,48 +1,82 @@
-Received: from imap5.colo.codethink.co.uk (imap5.colo.codethink.co.uk [78.40.148.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5490430DECE;
-	Mon, 22 Jun 2026 14:50:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=78.40.148.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1646D3CAA52
+	for <linux-mmc@vger.kernel.org>; Mon, 22 Jun 2026 15:56:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782139848; cv=none; b=HHntBOBiH93qkQR78uAjU+g5geiiuKjHuwwbC9BeoOgRj/mbG90i6+e0QJj5sK4IwFxm+mvdJJZjDy2iu45h5lIYpqXkqyEsPUAoaUa+WCid7pBmDh3/KsceX7i0oHuF+h6YsAzLROrQNbNUgi77OQymjAg2fxh3A1Y6aG+fj74=
+	t=1782143778; cv=none; b=tTuKZveoUV/90mPyDWn9SGjWaO6lZGgmXCWbXgWjw42RxUSUTA8CnzpMEpUKaSDtCEQ5M6KPq+rsZsYyPbCcksq8K3xc6SNfj8HgqDhybNYcd7J39Yj8beaycvPvF1ITUZoYiJATZcL/mkrn/dzvS4LO7rzmmgzFfeJzgwiFYq8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782139848; c=relaxed/simple;
-	bh=jLCZ5Q+WG37d2UWGkKNwwz178UNYpoMejkpuFDcwwwA=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=g7/rcKOFPhNXPF5Mh2X+MKeoC9oCCBpniXY8CvdRLqHUoPEM5sxClOtdQ8tTDeXmccwLSE+8bMYP8SMhmo1iwYl6tmQoPv9U9kDa1gRA4fyjz99XfjD49jWDpBvx85+M8URdWKkkQVWde1SCe7yNZXBoTuiE5e6kl86/QjmtIvM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.com; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=Z3xBT+sL; arc=none smtp.client-ip=78.40.148.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.com
+	s=arc-20240116; t=1782143778; c=relaxed/simple;
+	bh=sP3DTqWhImdGCeIzHLq89T2njIMNXSi4QCKR90SAFW8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=VhrTbBFOSd2Zcono8V5SJRUilhuwJF2rqIHugk9K48Ms5cqCRVV3JqDYuOu2GiR8sK7r/wvnF/jgvB80wQu3Bg4Enw4Gjm/PAAtuE3jl60JFm/f5fLq8MkiedM1DoX04aHfh1huw2nQPbg+DsnPhPrMV4uJyCu7axmm8zvFY0bc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=P+pVebQH; arc=none smtp.client-ip=209.85.128.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="Z3xBT+sL"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=codethink.co.uk; s=imap5-20230908; h=Sender:Content-Transfer-Encoding:
-	MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:In-Reply-To:
-	References; bh=7XuZyTV4r/3MI+BiVjkB7uEgYkvRfLQ7qW0kEe12To4=; b=Z3xBT+sLxCysc5
-	jYuEmQHkD7lyFDqlw2X/A5TFRFevJNQbrR/VmylZ8VIgHBxjCEVIA6izjuzzpUekT6QZ0YJjcPE5l
-	J/24ch0Jdp7rXJ22frUPk4m3uJNQo3wftuogsofii5Uesg7siX4YFYmsgjHNg+twGPsRCCx2PaHmT
-	dzfS8eINj93gsf3Pmymwu7xbyJJIIq6SiWVikjNmNDoA/aVysV9U3LJoMHGEJ24pMuvD4x/OWtr46
-	YJrrk55j8RiLwtZIwBNpgbLDlG4JAzFQyDniyBEl6I+Nu/wu8sQCBaRUfHwS/yhThTkYC8MDZKKli
-	PP5RSlfXLxbQh7/KHLUg==;
-Received: from [167.98.27.226] (helo=rainbowdash)
-	by imap5.colo.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
-	id 1wbfyw-005E4w-3Q; Mon, 22 Jun 2026 15:50:38 +0100
-Received: from ben by rainbowdash with local (Exim 4.99.4)
-	(envelope-from <ben@rainbowdash>)
-	id 1wbfyv-000000029UU-3Ke2;
-	Mon, 22 Jun 2026 15:50:37 +0100
-From: Ben Dooks <ben.dooks@codethink.co.uk>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Asutosh Das <quic_asutoshd@quicinc.com>,
-	Ritesh Harjani <ritesh.list@gmail.com>,
-	Ulf Hansson <ulfh@kernel.org>,
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="P+pVebQH"
+Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4923fb1f095so33920745e9.1
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Jun 2026 08:56:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1782143775; x=1782748575; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=cK1dU3jvwLWVY/k3Aa4QkwFEo+fnh0XN5XALhyjrfS4=;
+        b=P+pVebQHtSH3OcO+M9c9ctohSipa1dWcpbP4iy/mh/TxhMLqUM1AEc8EvVTiBt1Yag
+         PDwQInUUtwICf1StG2cTSjgsjx6rhx4R96Z7rXLaC/uH4ytCZjSmFp4jTKY1ixyRIUOA
+         7ztOt5ItBN/H4jBJMEocfQcg//lbM5mNwxj/owUZnkpsHqWw1akzj36N00t10wOfQK4b
+         CN2oyuB4Bn4A6UmaYfR9jI3O0NciGD0nDTd4lggqeh4s9QP8zir0iW+5jXlKawud4e8c
+         wFRs4+WJG3x83mhIrEdBurCS0T++aO7Jvk06W7N4Kbp1VqghOt0iG4Iu+sdlLE3hl6sQ
+         mX7A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1782143775; x=1782748575;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cK1dU3jvwLWVY/k3Aa4QkwFEo+fnh0XN5XALhyjrfS4=;
+        b=c7XJCBcGppxsrzgKkQBufWY+2deobanUdX+n5bel+cP7aMQCXajaITj431vJZE5Y2J
+         qDTqHdFx9uHXXYgObj598W3dl1t6jinN3IA8RHBRpobOoa/P8SG1ypC9P39/NwK2cgNU
+         3sFzzNvIrAvKHHdwOw9LOrGeTNbq6yeoJtnDwwZv97gIk7d+4U4AIq9JqZvc9VS+NxyU
+         Uq7xaycxE8lKU1iQQavE2n5BvRA8oqqBWrSSeIw6i4TsdabLiMLM3X1DoWqPWI/iCew1
+         PM9Inq5mT++mP2c5bpRaVXr0fIa9eyNvmgXRxrgdzVOYgDHOsSfXpFToINJGiccqEZpJ
+         uyZw==
+X-Forwarded-Encrypted: i=1; AFNElJ+DVjvehfnX/6jf+/i1fkDenkmwciAJK3Lo033xuuwXFPpTSZug/c+cy7Z4UEL42ZsJJahqaaZ4i+A=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwIQJCD7sJj+VyZ2MpXRHjR+LpNdBpn7ziQV7mlncdKta1/7kZ8
+	T5iLqFes6IJDGUPw64x1bHHdB+Tl2fYSmu+PATFQEZZSqnSIMyjbVFUn
+X-Gm-Gg: AfdE7cknSQrvL7FoKcU9uv07yf2BvdcwwmEUSC26rel4guY/V7DD3huOOADDATpSAyU
+	OBC93maa4q3XS2Ojms26hou0oEfrVvp/ijUPRX2YVSpqZJfYHIyWIn2WZfqqvOu6b5/6vvnsVN1
+	hsUOrjtpy8Eh/SoneKZVNggqXvCtYsK2p14kwLx0V8bodrxtBb0PMr3lQPkFVd4QM6cuxpifJ9I
+	rYJml5Ai36ciB6cHIGOgNpGmbQfSHFJkfOzvutmvpZYoxRTbvPx2t81sRLD7x2IpxAkxtL/pmFw
+	cB/KriDZmJHfEFNk9jbsv8hR8O3U0cUqH0CzmDtPf/XQPk4BF2K8TRcAYlOARb1XqcF8JNssyOg
+	rX5e11oUKXNCDjUSwAwf1CByGPGmH5vPt8iK38IZrRT26VZqDUeRSx8CJXcGsVJvh2StMsIWZqJ
+	7hdLE5FQa66AyQGkj4UVlglQ6xIPK6hM4ppy3JTA==
+X-Received: by 2002:a05:600c:3f12:b0:490:d32b:39d6 with SMTP id 5b1f17b1804b1-4924257194emr149666245e9.19.1782143775174;
+        Mon, 22 Jun 2026 08:56:15 -0700 (PDT)
+Received: from localhost.localdomain ([2a00:23c4:a702:d301:fdf9:c68d:5fce:b1ef])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4923ff8a9e3sm331778025e9.14.2026.06.22.08.56.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 22 Jun 2026 08:56:14 -0700 (PDT)
+From: Biju <biju.das.au@gmail.com>
+X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
+To: Ulf Hansson <ulfh@kernel.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	Magnus Damm <magnus.damm@gmail.com>
+Cc: Biju Das <biju.das.jz@bp.renesas.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH] mmc: cqhci: fix to missed endian conversions
-Date: Mon, 22 Jun 2026 15:50:36 +0100
-Message-Id: <20260622145036.513129-1-ben.dooks@codethink.co.uk>
-X-Mailer: git-send-email 2.37.2.352.g3c44437643
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Biju Das <biju.das.au@gmail.com>
+Subject: [PATCH v18 00/12] Add Renesas RZ/G3L SD/eMMC support
+Date: Mon, 22 Jun 2026 16:55:51 +0100
+Message-ID: <20260622155610.184271-1-biju.das.jz@bp.renesas.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,62 +84,61 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Sender: srv_ts003@codethink.com
 
-Fix two places where the wrong type or conversion of little-endian
-types to fix the following sparse warnings:
+From: Biju Das <biju.das.jz@bp.renesas.com>
 
-drivers/mmc/host/cqhci-core.c:487:15: warning: incorrect type in assignment (different base types)
-drivers/mmc/host/cqhci-core.c:487:15:    expected restricted __le32 [usertype]
-drivers/mmc/host/cqhci-core.c:487:15:    got int
-drivers/mmc/host/cqhci-core.c:566:19: warning: incorrect type in assignment (different base types)
-drivers/mmc/host/cqhci-core.c:566:19:    expected unsigned long long [usertype] *task_desc
-drivers/mmc/host/cqhci-core.c:566:19:    got restricted __le64 [usertype] *
+RZ/G3L SoC has:
 
-Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
----
- drivers/mmc/host/cqhci-core.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+Channel 0 supports SD and eMMC (including HS400/HS400ES).
+Channel 1 supports SD and eMMC (except for HS400).
+Channel 2 supports SD.
 
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index 178277d90c31..00614b500b2b 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -484,11 +484,11 @@ void cqhci_set_tran_desc(u8 *desc, dma_addr_t addr, int len, bool end,
- {
- 	__le32 *attr = (__le32 __force *)desc;
- 
--	*attr = (CQHCI_VALID(1) |
--		 CQHCI_END(end ? 1 : 0) |
--		 CQHCI_INT(0) |
--		 CQHCI_ACT(0x4) |
--		 CQHCI_DAT_LENGTH(len));
-+	*attr = cpu_to_le32((CQHCI_VALID(1) |
-+			     CQHCI_END(end ? 1 : 0) |
-+			     CQHCI_INT(0) |
-+			     CQHCI_ACT(0x4) |
-+			     CQHCI_DAT_LENGTH(len)));
- 
- 	if (dma64) {
- 		__le64 *dataddr = (__le64 __force *)(desc + 4);
-@@ -542,7 +542,7 @@ static int cqhci_prep_tran_desc(struct mmc_request *mrq,
- static void cqhci_prep_dcmd_desc(struct mmc_host *mmc,
- 				   struct mmc_request *mrq)
- {
--	u64 *task_desc = NULL;
-+	__le64 *task_desc = NULL;
- 	u64 data = 0;
- 	u8 resp_type;
- 	u8 *desc;
-@@ -574,7 +574,7 @@ static void cqhci_prep_dcmd_desc(struct mmc_host *mmc,
- 		 CQHCI_CMD_TIMING(timing) | CQHCI_RESP_TYPE(resp_type));
- 	if (cq_host->ops->update_dcmd_desc)
- 		cq_host->ops->update_dcmd_desc(mmc, mrq, &data);
--	*task_desc |= data;
-+	*task_desc |= cpu_to_le64(data);
- 	desc = (u8 *)task_desc;
- 	pr_debug("%s: cqhci: dcmd: cmd: %d timing: %d resp: %d\n",
- 		 mmc_hostname(mmc), mrq->cmd->opcode, timing, resp_type);
+The SoC supports a maximum frequency of 150 MHz. The SD0 interface does
+not support IOVS and PWEN in the SDHI register (no internal regulator),
+unlike SD1 and SD2. It has an internal divider for all modes except HS400.
+It also has a 2048-bit divider compared to 512 on others. Moreover
+RZ/G3L supports HS400 enhanced strobe mode.
+
+v17->v18:
+ * Collected tag
+ * Merged patch #4 and #5 and updated commit description
+ * Annotated the empty sentinel entries in the OF match tables with a
+   "Sentinel." comment for clarity.
+ * Retained the tag as it is a trivial cleanup.
+ * New patches drop struct renesas_sdhi_hw_info, instead using
+   renesas_sdhi_of_data and tmio_mmc_data.
+ * Dropped clk, pinctrl, SoC, and board dtsi from this patch series;
+   will send later.
+v1->v17:
+ * Collected tag for binding patch.
+ * Resending the series as there is an issue with patch threading from
+   patch #14.
+
+Biju Das (12):
+  dt-bindings: mmc: renesas,sdhi: Document RZ/G3L (r9a08g046) SoC
+  mmc: renesas_sdhi: Fix whitespace alignment in struct
+    renesas_sdhi_of_data
+  mmc: renesas_sdhi: Add clk_mask field to support SoC-specific clock
+    divider widths
+  mmc: renesas_sdhi: Add max_divider field to support SoC-specific clock
+    divider ranges
+  mmc: renesas_sdhi: Add tuning delay support for RZ/G2L
+  mmc: renesas_sdhi: Add TMIO_MMC_INTERNAL_DIVIDER flag
+  mmc: renesas_sdhi: Add optional axis/axim reset controls
+  mmc: renesas_sdhi: Add RZ/G3L SDHI support
+  mmc: renesas_sdhi: Save and restore IOVS across suspend/resume
+  mmc: renesas_sdhi: Make HS400 OSEL bit configurable per SoC
+  mmc: renesas_sdhi: Add RZ/G3L HS400 support
+  mmc: renesas_sdhi: Add HS400 enhanced strobe support for RZ/G3L
+
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml | 101 ++++++--
+ drivers/mmc/host/renesas_sdhi.h               |  12 +-
+ drivers/mmc/host/renesas_sdhi_core.c          | 239 ++++++++++++++----
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  73 +++++-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  12 +-
+ include/linux/platform_data/tmio.h            |  18 ++
+ 6 files changed, 370 insertions(+), 85 deletions(-)
+
 -- 
-2.37.2.352.g3c44437643
+2.43.0
 
