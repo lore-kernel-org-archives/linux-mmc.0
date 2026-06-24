@@ -1,78 +1,68 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+Received: from mail-ed1-f53.google.com (mail-ed1-f53.google.com [209.85.208.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3FFF30ACEE
-	for <linux-mmc@vger.kernel.org>; Wed, 24 Jun 2026 16:31:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C5661AAE17
+	for <linux-mmc@vger.kernel.org>; Wed, 24 Jun 2026 18:48:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782318693; cv=none; b=Kx+xJ5OULhEgPujbiWu6kCnYG4Q5eSVHwk8csD1NjFT5hPbRx5X+2ukQWU/rjEoJaMvLsv8Ouabc7EpHwPat/qpVnH8eKbemULVqGuutEFz5DgCV8SpNT6zRzuWaB1phgtGa+p6P3ehchY8wl2tjegL5LQvJwlqYjWmuhEWW/hE=
+	t=1782326919; cv=none; b=LjVw3QFZJcn7R7X5apr7rXjdbNRjgSEXcnZIrWtv28djX4AeBjbjFKQVK6gfn1ejkOKssRh1WWbY20YOpSJFqXEmQSSI/No7Ul6iN2b/fH3lhCYcwhQkcdo/WVmhirhsS5q+jKIXelvE8RfbqjkG7rNFLt0Sq/roaTBJ69dfnjs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782318693; c=relaxed/simple;
-	bh=NGaOrLTsFDY23HN6mLsw7AAbdGveOKYGWEzmFMEvhZI=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=W7sj+hH/bUpzlni8l8njcAaoQk3odaJansrlwPb251TZPUA930GXBj1vpG7zxrKg8rZQNpn57tsecTC98Tet0ijx8hZoyp8hNsFN2YUgnVPX1DT8PuAtBFTePrp32+iBAqqajZm1mh/grcqCloOrlMfKDQQl76C9p6drR7vYSUU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gVY/EPk3; arc=none smtp.client-ip=209.85.128.43
+	s=arc-20240116; t=1782326919; c=relaxed/simple;
+	bh=VCKIrR5+1ZHGvP3luUDEL+idgQ4cf/Inp5snSTF8ZiQ=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=uR/sxxED6eb4ck++F+ua6cGW0EUHQ90npicPZJp4UsntG/HW9OJwaAELHgrZ1vNlYolv8G4OZt6JES5zD7+qaPaxdWpuDOA+73KRkxUrsY86HEBH2a18lRvf+Zyo6MUaqo3hf14Oc5NRyHVIR9jD6wG6kvYR5PGjYqPpfDlpofY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nhFU9hkM; arc=none smtp.client-ip=209.85.208.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gVY/EPk3"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4924593f45dso14306795e9.1
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Jun 2026 09:31:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nhFU9hkM"
+Received: by mail-ed1-f53.google.com with SMTP id 4fb4d7f45d1cf-697b8540279so2342488a12.0
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Jun 2026 11:48:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1782318689; x=1782923489; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1782326917; x=1782931717; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=1CfY+fA8aRPdoLbeY5/hh263ftDsGPqED+585kkEVz4=;
-        b=gVY/EPk3V5yDkVgeDPBfpGS5dLVm2NSSQliEi5m8YKcKQfnDi5FFdxBYweJBLHACiR
-         yTR1b41jyghhr97nF0W2tZAkNDjHLTPODgNma/FwqPqv4JKX/RKCwbNUPnSixVuOtk4M
-         iX+iQPY7QliuUY/KuFv9AhY1bgRExcl/qUwpkGYgPyzcRdGIpROiGvzluE3vEhpz+KSB
-         0Tt47aQ8RLaHx0fyJKm8QdqrGKxrho3CHvBvWMWzmq9IzMBbMJ94A8YdPSLWBDYxKL1a
-         ycyRbmbs2S2xwAhUYbEZAelAhmUHQTBt79dgjtAcU8nxYwues8YwVOv51+CQmV3VzeFU
-         /J/A==
+         :from:sender:from:to:cc:subject:date:message-id:reply-to;
+        bh=xHHH8EY9OjAGpwdn1L/zV/NIcstDSDoYk+ngRQnWH3c=;
+        b=nhFU9hkMIi5mWAQdT43XJxR96NvjncKzm0bBHxkVPNTwK+DaLj6/SkLTM3CKT1W4bQ
+         yInoQtMLluibQ0fnKqLjnjm5ydAdrdYHwqlAx6LIJ1dtEpg9EuqccQiZayBl4k/zszrC
+         izKvLaQPVVryD3t0Fh1trkzFJ5ekbwcVQESdOL7uVWLO5vUaiFGXc9aAzH3yziaYFXHs
+         n8c7c5Sv5MXBky9IEl9rC5fnAFS7Xu6WVv8oGA+1w8SM5z7612iYOgVyQzW5cTvnVaJU
+         rY8dqp6mRmRnk35jS+8JqP9MvhmGNUEIrKJCjKN0Z9+IZrClZ3epgPe5RJ0XIk2rUGo3
+         eWVQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782318689; x=1782923489;
+        d=1e100.net; s=20251104; t=1782326917; x=1782931717;
         h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=1CfY+fA8aRPdoLbeY5/hh263ftDsGPqED+585kkEVz4=;
-        b=U597IAsd63YqBGcVH11cszz7LW6Fbbja64YcOZSdQPf9MVrh4rR0MnxNIX8GpE1P+U
-         3B+GVMJlj4r4vJVU0pRQkiSYn22p4oRJZK3iWLfjafn/9131OVC1QwcRyXTPzvTV+izT
-         w2E9ZiHLRYf7Jir3iL/EEMSEpq0cSZ+SrD0I/G0hzsZMRl1QOtBH7d0IeOQFNwU+vvCt
-         1HvDtPa1lVsY47XktZG95nrlRtjE4l/6ILu9ra4lWPo8hLwnjC8NXk/zqg9emeuBo84m
-         m3zH+Vl/RcLRxbJKiTtYKstIyCuh9Z5l53Qv87kVLBaLQh6vNMYF7+Fl2K8QgC0V0Hnx
-         zrXA==
-X-Forwarded-Encrypted: i=1; AFNElJ8mAHw9mrXUoSlZmzPfIeDBLNzghzheLEj8TcheL5R5+VrdD1QgOwx79VPHOgQoR0AH5UbgeCV81KQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywvp2OMTuHYdW1JWoWOG6EZ4xSHATR+TpLmNpOsooIaOhh6pwWc
-	kmI6uXtjn2U9OKidF6CpVQIkFR86dKmdl+0yKzXcgwmNdLEzx5hXlsdP
-X-Gm-Gg: AfdE7ckCwNUY7YSdGlrsZXXqMceSWgDYtu+KtMezcSYZlLC+rtCjp9elxnhajnzp9ta
-	UOF6OQB0By8Tc+MzZPyINchQisCMbZMd0VBldqA26M0UTvKv6moa7GnwfQDgJcclFfTtEMBZg0c
-	sCPPftnsZycJld6LQxeMquDN8jHclk9gDc8MI5k6kLzeQVI92NCV1YLsYDCgO9lo/y11Ig4Q1HL
-	WFnLj7GrVIHtaagkFM5Ggr4U55jYNJ5WwwaXi/KBrzoxwCdwKobUjUOROIdXp83XmdltKmyZ7/M
-	E2Rk57XHp32Q7YCLQg+6EeH/DDEWS12YoLN8LT61D78pIO4QdyvDFGsUGam+U7Y3eHACrqPqe5I
-	MsmgDWDqQOthOh39MhDQoCoc2aW3zGjExFVB2eB4P1jl6nCFvTvSdpTLwPQvrAgt3IfK5oV2xSU
-	8R3GNRA38Rg1Sq2XGBMRMUHRylFy8cRD62YARjbSeOFEoZOPqNiZzccw==
-X-Received: by 2002:a05:600c:4f56:b0:490:d354:bcf4 with SMTP id 5b1f17b1804b1-49260875aa9mr58753125e9.27.1782318688828;
-        Wed, 24 Jun 2026 09:31:28 -0700 (PDT)
-Received: from localhost.localdomain ([82.77.79.113])
-        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-4926401a21asm3739235e9.1.2026.06.24.09.31.27
+         :from:sender:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=xHHH8EY9OjAGpwdn1L/zV/NIcstDSDoYk+ngRQnWH3c=;
+        b=Ajh3bEeWR0v8HKv22ZGN2EdCKNNZ+ZYRz7hWCMtszrDWNcuzjuLke1gSRBso5ytdTP
+         TzHAZm50WugxxlezGj08WzAhJBA79xcwpNZx/gVzEAxtNgLzpamu+uHErn31yHzPR4XM
+         vLzfDlhWW7TEcmI/UxTqlPKoYMP+E00b7fZUUEqB+uG/sErlTlHWSJ3sHnh9h3Rl7MYK
+         vQs27yWku9nM3WNIjfoKcHol8GUot/CxehBqI5zDLG/vra2NNNMTz9FJ+D9t2fl2t46D
+         5gJUdbGcnY1H+EyWqBYYsetg7EJ6TX0U0YVwBrnr4C8/ZUhTWqsttuV6AEbeSQzq1Jkg
+         lt5w==
+X-Gm-Message-State: AOJu0YyxH0FSwFANZi7ZTGTrv7fdx2a9PaJokovML1H0DGZuTvxG7C2v
+	fvpqTdAIlLN+LAhbH76Cx8CH1PjV4+48DSDF3WkGFlCQTRzjVypqIixfZiii+Q==
+X-Gm-Gg: AfdE7cnqqhgCRt66rVvOCzhoIGRybiyfGV+FO5Z54mVv6cWTP8SE0ay0w0HpQfrZ76O
+	8Oc4NsnFkoUhwyF5YurvSNkgoYPt5kE/IsnJXiAhi5cg1e/2iWkfsn+sWb2NoHQN0i/JBKa0goJ
+	4J6xsQayZfvAR67Or1pHU6hcDF1X1lcAAFD3ZzrrpsyFh5G6gy7yHUWlKwl/BVm9IBWmAq5VPWO
+	1Hi7GmIxYPBfB4U61RzFb+8pzq1lXe/UgRPuomNnkkkPywD0jY9n5LctTV4qy2LuHlchFfD9AJB
+	DaDoEk1F9TfiG+JzTYC9eyFNRgDa92yGsz69FGcgIV++IfO0G6VXrQaAoXywrQDwdnm6MoKISdp
+	Y85hUOY0l6zb/gSeehdapNpW2JlbHRTGtD55YNsdUpvFsuhY8aA7LWNZ2Pj9qVeE8s9xAc1OIqF
+	owZhQZkb98gKyM5i8lwwLJcOSECzo=
+X-Received: by 2002:a05:6402:34c9:b0:697:f70f:8238 with SMTP id 4fb4d7f45d1cf-697f70f88a1mr2287769a12.4.1782326916771;
+        Wed, 24 Jun 2026 11:48:36 -0700 (PDT)
+Received: from torstein-laptop ([2a01:799:3a1:9700:91be:16ef:9f06:8b10])
+        by smtp.googlemail.com with ESMTPSA id 4fb4d7f45d1cf-697f3ac4774sm1659189a12.3.2026.06.24.11.48.33
+        for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Jun 2026 09:31:28 -0700 (PDT)
-From: Eduard Bostina <egbostina@gmail.com>
-To: daniel.baluta@nxp.com,
-	simona.toaca@nxp.com,
-	goledhruva@gmail.com,
-	m-chawdhry@ti.com,
-	egbostina@gmail.com,
-	Ulf Hansson <ulfh@kernel.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2] dt-bindings: mmc: Convert TI OMAP2420 MMC to DT schema
-Date: Wed, 24 Jun 2026 16:31:11 +0000
-Message-ID: <20260624163112.535237-1-egbostina@gmail.com>
-X-Mailer: git-send-email 2.43.0
+        Wed, 24 Jun 2026 11:48:35 -0700 (PDT)
+Sender: Torstein Eide <torsteine@gmail.com>
+From: Torstein Eide <torsteine+linux@gmail.com>
+To: linux-mmc@vger.kernel.org
+Subject: [PATCH v4 0/3] mmc-utils: improve lsmmc usability
+Date: Wed, 24 Jun 2026 20:48:21 +0200
+Message-ID: <20260624184824.2215718-1-torsteine+linux@gmail.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -81,122 +71,44 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Convert the Texas Instruments MMC host controller bindings
-to DT schema.
+This series improves lsmmc in three areas: external manufacturer ID files
+and accepting /dev and /sys/block paths for register reads, an mmc list
+command, and bash completion for mmc-utils.
 
-Note that the OMAP2420 driver will not work with OMAP2430 or later omaps.
-Please see the OMAP HSMMC driver for current OMAPs.
+Changes since v3 (review by Avri Altman):
+- Patch 1 didn't compile on its own: the mmc list implementation
+  (find_block_devname, print_list_entry, do_list, month_name) had
+  accidentally been committed in this patch instead of the "Add mmc
+  list command" patch. Moved all of it out, and squashed in the
+  former patch 2 ("Accept /dev and /sys/block paths for register
+  reads") since the two don't have independent value split apart from
+  the list command.
+- Patch 2 (Add mmc list command): now contains the full mmc list
+  implementation that previously leaked into patch 1.
+- Patch 3 (Add bash completion): subcommand completion is now driven
+  by parsing 'mmc help' output instead of maintaining a parallel
+  hardcoded verb list, so it stays in sync as commands are added or
+  removed.
 
-Signed-off-by: Eduard Bostina <egbostina@gmail.com>
----
-Changes in v2:
-  - Changed ti,hwmods type reference from string-array to string
-  - Updated ti,hwmods regex pattern to "^msdi([1-9]|[1-9][0-9]+)$"
----
- .../bindings/mmc/ti,omap2420-mmc.yaml         | 60 +++++++++++++++++++
- .../devicetree/bindings/mmc/ti-omap.txt       | 26 --------
- 2 files changed, 60 insertions(+), 26 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml
- delete mode 100644 Documentation/devicetree/bindings/mmc/ti-omap.txt
+Torstein Eide (3):
+  mmc-utils: lsmmc: Use external .ids files and accept /dev, /sys/block
+    paths
+  mmc-utils: lsmmc: Add mmc list command
+  mmc-utils: Add bash completion
 
-diff --git a/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml b/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml
-new file mode 100644
-index 000000000000..794d5ec0b58e
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml
-@@ -0,0 +1,60 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/ti,omap2420-mmc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Texas Instruments MMC host controller for OMAP1 and 2420
-+
-+maintainers:
-+  - Eduard Bostina <egbostina@gmail.com>
-+
-+description: |
-+  The MMC Host Controller on TI OMAP1 and 2420 family provides
-+  an interface for MMC, SD, and SDIO types of memory cards.
-+
-+allOf:
-+  - $ref: /schemas/mmc/mmc-controller.yaml#
-+
-+properties:
-+  compatible:
-+    const: ti,omap2420-mmc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  ti,hwmods:
-+    description: |
-+      Name of the hwmod associated to the MMC controller. Must be
-+      "msdi<n>" where n is the controller instance starting from 1.
-+    $ref: /schemas/types.yaml#/definitions/string
-+    pattern: "^msdi([1-9]|[1-9][0-9]+)$"
-+
-+  dmas:
-+    maxItems: 2
-+
-+  dma-names:
-+    items:
-+      - const: tx
-+      - const: rx
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    mmc@4809c000 {
-+        compatible = "ti,omap2420-mmc";
-+        ti,hwmods = "msdi1";
-+        reg = <0x4809c000 0x80>;
-+        interrupts = <83>;
-+        dmas = <&sdma 61 &sdma 62>;
-+        dma-names = "tx", "rx";
-+    };
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap.txt b/Documentation/devicetree/bindings/mmc/ti-omap.txt
-deleted file mode 100644
-index 02fd31cf361d..000000000000
---- a/Documentation/devicetree/bindings/mmc/ti-omap.txt
-+++ /dev/null
-@@ -1,26 +0,0 @@
--* TI MMC host controller for OMAP1 and 2420
--
--The MMC Host Controller on TI OMAP1 and 2420 family provides
--an interface for MMC, SD, and SDIO types of memory cards.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the omap mmc driver.
--
--Note that this driver will not work with omap2430 or later omaps,
--please see the omap hsmmc driver for the current omaps.
--
--Required properties:
--- compatible: Must be "ti,omap2420-mmc", for OMAP2420 controllers
--- ti,hwmods: For 2420, must be "msdi<n>", where n is controller
--  instance starting 1
--
--Examples:
--
--	msdi1: mmc@4809c000 {
--		compatible = "ti,omap2420-mmc";
--		ti,hwmods = "msdi1";
--		reg = <0x4809c000 0x80>;
--		interrupts = <83>;
--		dmas = <&sdma 61 &sdma 62>;
--		dma-names = "tx", "rx";
--	};
+ Makefile           |  11 +-
+ completion/mmc     |  52 ++++
+ docs/HOWTO.rst     |  77 +++++-
+ lsmmc.c            | 621 ++++++++++++++++++++++++++-------------------
+ mmc.c              |   6 +-
+ mmc_cmds.h         |   1 +
+ multimediacard.ids |  16 ++
+ sdcard.ids         |  23 ++
+ 8 files changed, 533 insertions(+), 274 deletions(-)
+ create mode 100644 completion/mmc
+ create mode 100644 multimediacard.ids
+ create mode 100644 sdcard.ids
+
 -- 
-2.43.0
+2.53.0
 
