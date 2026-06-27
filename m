@@ -1,60 +1,60 @@
-Received: from CH1PR05CU001.outbound.protection.outlook.com (mail-northcentralusazon11010011.outbound.protection.outlook.com [52.101.193.11])
+Received: from CO1PR03CU002.outbound.protection.outlook.com (mail-westus2azon11010060.outbound.protection.outlook.com [52.101.46.60])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 960B134B669;
-	Sat, 27 Jun 2026 20:15:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.193.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7819344DB5;
+	Sat, 27 Jun 2026 20:15:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.46.60
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782591339; cv=fail; b=PC7tPoYycvlkdGEk8kbm0m3uNFnu8R3ApOz0G2fiRBzDkXogietx1Ec8Eg/8xzyAvbtqOSjWcPXX2l8Q5sW4yGeDGtk/LE1ELOLk4RoJ5sou3hUoz4Mri1Mbw7fs1nVR1pKt+CBZG8MnKME8cUlcMWTnwL+KcrBesCDUyUbzzEA=
+	t=1782591341; cv=fail; b=k+njonLZx3jX87JFSMfg8liG/Ix9q4PrdfAWSaSzfIlddI1qvqWUW5aHGi5wlD1jPz7x06G36818zDsUALfPP+29wALbW3/TefNpv5AYEU+yaTznXlkP7DmTl+ZdbAayusn71whFTwhpV1h6HM7n6ZEgLWpw/uIbwXyKBqFRCbw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782591339; c=relaxed/simple;
-	bh=wwCiSOssnYBYE39BSZ3yGelq1L88D3upkfLIlfEBACI=;
+	s=arc-20240116; t=1782591341; c=relaxed/simple;
+	bh=ZPdJwBZrqZVTgJ38ZUvJyNbfR+8rBfY8uSNo3htyExg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=TZRTtu3xypDreL7dCI2AVVtS68miBOXddQoVYUVenX3t1oJAlxHmYb/j59/4kWv/+X78u2YI6FkzlulbEkAwtP6T5dGbr89IOi1ve7MJEfFuvjuK6fUeWe3LYsuNSYOCoHgdzqS3YlJaDVJIcJOOtVTjdYEwJzlHQpF1QjHXEj4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=AL7ZPSxw; arc=fail smtp.client-ip=52.101.193.11
+	 Content-Type:MIME-Version; b=m8dfD4L9nj+fzmbq5z0XfWNQ6HMobZxztJ/AcTmHYkxGR3a3YsEnZfkCGG0CTZqdlhCMxWW/F8IzM08yRNRKwmYdiXZkZ90OTfivhAT1aox/DQeRZy97/A28QY0oQrhxF8KtAwvAeA2M8aJiwVTPbPyXnS/yHFu4JZIRy1dBHvk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=aj15rRfh; arc=fail smtp.client-ip=52.101.46.60
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="AL7ZPSxw"
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="aj15rRfh"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=WAvamovAhfHQ8NLKL1ZLnAqwnYd6UY+um08qt1uSSXirPZymrBca9fM3KC6ox4xeM7yU6BXkp7hjfB2ssmzexF5jac9PuREoO0t2B+Y2er75l672xO3WgHWBIuQOywE0CL3zaTv/b3P1V+OZ2aCZTCrGorag3PYWtPavV5ZgmFdqsjshPeV2X3ANbq7BChPi4Brz2NKuuM+VH94QR08xuAUFpMFectaVVDoL+DgBkpQihgPqkZM24NkV1f0CHkcA/ONVHlW6tRsefLuEe7M9ZnXz6UzTnAh485LbLoHCb99ljr/inDqJ+gAZYpSTBFN20pejZB08hmM5iI/UAmSr4w==
+ b=ms09roeHquKmkNnr5VBnqHvLOvuFpxw8z5r0kfW3mhA4cNX7eNNyZGcdYFKNaMiFwA+7EFFSo5P+jlYozSrq8Y7fhsR5ywlbcwm+vkHaUT7JSzw4SrqmBwbc3GOesbvXKKCxTyD7RBBrqH1hyXIUtpOMo0FKar4ENmZ2C2RXnd51QwSVzOFuhelmQfIp+gnl1O8GtnqUWuld5uz2kU/8f8/mY+xax19Bu3VOxJOwIkbjjvaL3AWo/zJW9phwjG9Ev1LNg6yYOhyGOMP9W9uo8Ko5Cjz85zSph7hNHqFTNYaASIcO6C0/HZNU0/jedonhlN5b6gWF8+DKQhIpTfTwpw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=kzMimHeCY7ygGOMTdlbPTz/s7j1m4kPoXRs43ZxatxI=;
- b=m41F+SoYz6lo6alq71omvr8TzekpudgTcwpa8+lnBhmfzpwi3swXPPoAGMzPSyFIOCvZ3VOopTTx+sGmD4MNN8aq49zMYnOfnx5sBzo5SElwFoSwaqDM1xfIjR28VzZhMenDzXpRNaZIRTq2NOP2xGXd9KNf2wdCTYwKN51mtiZbURrLJSWHda1Ud+R5AgrM6u4YlUXCF3LbYgzrWsvro3ZZkKicQAyT+xRLi+J3QLebyLTCumHLdOu9z5FFrxQVG3ZQQ/DeSun9S/NhHJ09A35VUb8CbV8xr09PibbgshlnnfjVjlDqjYNjvj2zpQ9mr+hVtPhHxoGe0Vh0vWj9Bw==
+ bh=g81YHeLBmEpV+cEfGHlXRuI9Ub2PaJf69Y3WFDz/P+I=;
+ b=W/gRUwhV0WAvTGbywfW8yPnPWoKpHxqnRxLmgUt/G909B8fj0H9hB39x979DlYhukukuirVHbXlNk04JhEBdO5pSX9pnqDsJ9DLXcxxuLWSP91QOTwVPmcfemVW9GSr1+ZPfTnGLRRxB4NLVfdbp/P8iLYYQaKqJnPIfO/+cGyVGIG+D4KfHhzrOSI9NqTW7X7n02Lapz7eRS0tMI4Bi8vAaCgeYPPHmuAZdte26aFvdYtPLpsw9SXs2XV7Aq8FoSJwPrg978sXI3A8tGZ8h8Vi9enMmed6p5akf9KvvZAcOweVkn82CZnaMElfY+aGjZQ3XeJ+FJ+s2OIhb2O6log==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=kzMimHeCY7ygGOMTdlbPTz/s7j1m4kPoXRs43ZxatxI=;
- b=AL7ZPSxwScIa+iLTYW1ck7bLQlSduwb3pZo4rZscdYwvMz2T1OCPVsTQsTMBglFJUBy2CBAlGuqHf0CbOkE13Pkz3wV9lnuuEwBOBb4XWiB+xoV08Z4pxDB/mZxsBsE2Hen88k841CiCcsdjLsVhrXBtwQQ13ZQeqOOsO2jHlldQdyePDjeGc0Gm4hBLwwAsDsVCg0ztdGC2LkoQTnypilLBZg+HL1mL/gDweSREYxUw3aZ56Wvs6nBQ6sZJMeFf4LAejABJMJ0gDXnhsJBONpz9EMiXXjZe1oClXkXU5tJUC72C6LXl3aUF2uCpAbQvutAkQaeENrVuBSZK6VVbFQ==
+ bh=g81YHeLBmEpV+cEfGHlXRuI9Ub2PaJf69Y3WFDz/P+I=;
+ b=aj15rRfhOdPxxxdXSHN/peD1ZpZg6wITcaxbc3xwgr0JQfOTIpej2rgjGFr+Jv91ROqfaRC8X4I7Bs5d3PX1FCDp1iBef/nAqB/cfG4fxcSSjtv/fl1BsbRRcQQkzEFCGRbsK06UDucl2E42zHfODbvi3OU/dDoQ9wzfSTkV/lJlDlC6x363oyGGwW/GP2ExuUQgiWvOtswV+dgBcJmesGUebRYo27dB6xzmgKQjwNlPBMRrAod2l5beq6Gn32oVCXxLHLUt09ExSvcdvVj3/7uMkH2REqkur/DcZ+g5w/qa9c7ZnZk/mi4AgXLQOmTlU5JeLh68FduBwbk8weOyPw==
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
  by SJ0PR03MB5837.namprd03.prod.outlook.com (2603:10b6:a03:2df::24) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.159.18; Sat, 27 Jun
- 2026 20:15:31 +0000
+ 2026 20:15:32 +0000
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0159.018; Sat, 27 Jun 2026
- 20:15:31 +0000
+ 20:15:32 +0000
 From: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org,
 	Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
+	Dinh Nguyen <dinguyen@kernel.org>,
 	Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Dinh Nguyen <dinguyen@kernel.org>,
 	devicetree@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 4/9] dt-bindings: arm: intel: add Agilex5 SOCDK eMMC board variant
-Date: Sat, 27 Jun 2026 13:14:49 -0700
-Message-ID: <20260627201457.12318-5-tanmay.kathpalia@altera.com>
+Subject: [PATCH v2 5/9] arm64: dts: agilex5: add SOCDK eMMC daughter board support
+Date: Sat, 27 Jun 2026 13:14:50 -0700
+Message-ID: <20260627201457.12318-6-tanmay.kathpalia@altera.com>
 X-Mailer: git-send-email 2.43.7
 In-Reply-To: <20260627201457.12318-1-tanmay.kathpalia@altera.com>
 References: <20260627201457.12318-1-tanmay.kathpalia@altera.com>
@@ -71,80 +71,213 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|SJ0PR03MB5837:EE_
-X-MS-Office365-Filtering-Correlation-Id: ccca700b-65ff-4e07-ceb2-08ded488d63e
+X-MS-Office365-Filtering-Correlation-Id: 88656b1c-d6bd-4c59-94de-08ded488d6f8
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
 	BCL:0;ARA:13230040|366016|376014|1800799024|23010399003|56012099006|11063799006|18002099003|22082099003|55112099003;
 X-Microsoft-Antispam-Message-Info:
-	oUWiekPyoml4uI/q648+xsPow2frOynBn0XZm268BbiQEWjmAg9IFdF/0cNvlpTPqMP4XhSCKGiAC93e28oAIhJcwxOsmJqjHOPPMTB/NkAkn2PW30SvbrgY89l2KJNOZ97vBZeSO39TKZNaKvGaaUnxbgFRXDjIjQpQ5ePGYDSrJTSMh+hYfdCHKG7n9TFme45AQ7w4b2o8qVonvlKMgYjfIwWxlan08AuB/I2wgmGMigRPVbsHXqi7iAPUFvLJ+Bu9IEEcs79kjBgfGWY6f9XzyQoZXhZ2RYxl6hOHNKKx/CKcj/pdfYwl5dVwmdcIvMxiL1BJHD8wfTQ2HRaBfkUXCGgZ9kvI84Ue09WO4FSpK5KC3qUMECYCp5Jfz0mm18y0zJI8bmrbPYtV9RLs4Pv0PJLBz/ZbS3WOFw2hxfzheDFup5xjeIXPlsiFo00g5g8V42GJK/SoQbrQOUqfjgImYIQ/C3hocdl/pQQYU+vlMeGkesLWuhvQIs7qxzklDAgaBJ2RAAUbqyML+/5xAwspVhaN4hzKcu1kNjw7x9hjWiCljH5fe7KBQpD1xnD8k4WkLfX7cxFFF5ATNAvH+uVSL296kkn7Lb5IcpRNXVfgt4WrykmI/LjgZImHIMePesT7u/T8SOGLH+2va2cRqEbxtNXvhBq68c7EPKVRc8c=
+	zvFacgzORoIf6IQqSflZlq9p0gU+dDJedik1eM2NXilN0/dZn1PK659RwT0jzMMCYaRJajNJwoDSIK0MbLmiAz0lp4527/7kWBrKv1Vm4WImGmOR3SaDDnnitiuassjeezXK6mGeAqIjcsqXcAMAbWE942uS3RuK5ThSBWgxQN5ouTD5tlUPlaMRduCwyQBw5yCfvzeRIAs4PEApeuFDbKyjLYs9RrKmBNwIu39L4EvwTC2eDCxF2urqjmh2g70I1VQzhls6B/yVtYvC56KqP2q1WRc8rMwFB7XKo0c4Wqt80qJNhtZ+ZI8FEpUV7dPmOPX4qYBNr8DPLPg+9rDbGAoQkoPJG3yjxBb2g/XgJFb4w7c/vaexJc5Lz+mn58UTGMBkxA0po8tdp94Pck/mdF4NyN9BFpiybv/pw32n4pLAzCEaU3o5cqOC/DO+e2vgh8VnvAJ78ZdCQ9ukABQj+FkzMedmVKt3S+tV2kKakdPvrzHBN6GM6Q9Uuuh9PrhVATyCCGC8Qwp7xo9cB5qEwptFEnKN7jZEjAmhbHYpaUgxX3oobXeIpub080blOWwms3uXGDGCNeMjyp4mTb7XZOPkRwzwJDDEUsHXMQF8F0X6Acnt3RvfKzb/k24WV4xjDs6vtcxRep9mECevygzKwQ==
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(23010399003)(56012099006)(11063799006)(18002099003)(22082099003)(55112099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?AN0PIlB90/8PKAgkwzDpn0PuIBOu86SjydYXQLU2RPZHu7YLGd0zi5JeuNtS?=
- =?us-ascii?Q?lycH0IJDvhSR8WJJ+N4CrlNYkpffwomdyvqaeDnaSjRocfkqwMDPgaNDpa8g?=
- =?us-ascii?Q?9Ti/7lyooWfBMwRXh0tsLbv45Rm670W5qOGL0kgcth7ek22VLrDYrLdQxRxS?=
- =?us-ascii?Q?c+jTNPFAX5fNqXKmglFucj+uLZzAMoaBM+VXuwTPRNcNm/mCzoBq9pzxISBT?=
- =?us-ascii?Q?f+6C2GjaCNjFddIwRyc+WUXcuRO6WHFA3CBbObU+2C9d/XSBG3/Vvo3uJ4Zu?=
- =?us-ascii?Q?FFlSg4qu0LRLb3iEEtMcZ/QKXfkl6Sa3OdLYNnewn/f5MoCqmWmKDkM95kXr?=
- =?us-ascii?Q?FBv+jv4q8Ho/1TTe1d730yFyRNl/KSrRHJcIM6tWEIDvSm+z8sAWAQYt7MFO?=
- =?us-ascii?Q?5ZR6i7jblIEJakZ9d/Ir6kCjFTYUmBiDqEwiwnGxmFiPWlCGS5Wfv7bXHG+k?=
- =?us-ascii?Q?dWXCHE2eR329v99W0HFv9H1/lPpDIIEUTi/avWF/UQOQAfYEqk1F64vwuw1l?=
- =?us-ascii?Q?m9Z52jOZdlJ3JBDeM/avaa7CwHGIiefhQz4CEmgZEeSNG/+giIh74/XGukF9?=
- =?us-ascii?Q?ZLJTztaQ9kx14V4P3LLTgvp08BpKJfsMBX5yT55+OFVwJ7g7Kgx/ScF5jMQj?=
- =?us-ascii?Q?woXfMLPZrdI4sb/n4YgTbjoia3GSotE+juG9eWZGtREX2TgYQakJXcgfx1o3?=
- =?us-ascii?Q?JZBpa4EHG1+g7+iCgfPmeqK5L3MPCPgf0MlMqxAzpvQ2tRW0jfN9yTeRkayT?=
- =?us-ascii?Q?MArEGVgFq2vKiYNOS+Tjh6Nxx1jQShms52fBC5NZf71AOAvL0C70T5zC26pc?=
- =?us-ascii?Q?yHhZPUiLDCza2Sf92DtwrD1xgp5cvJ30Mmpw8qlt/7+qtaOy7XRXT+1mUrdf?=
- =?us-ascii?Q?Zh/Bv2ypHnoNRxprdPemVAZE4BA360YeQ8DeyPoIKAPJ0d6PeEfs2rXESno/?=
- =?us-ascii?Q?4rab0y3jm1i7CxduewBP7ZJXZNowIY1z7P0eOsojdWf+dCyROl5n1AXd/iKG?=
- =?us-ascii?Q?UDyWLHeFaHds3BZ82XZ1RXVhRArL6b15KtaXHRrrwUtvIHu74lFyaC0A+kSc?=
- =?us-ascii?Q?KKYUZA3E7iTYE3T41rFD9B/nL/ByGw4csl0S3dlcjCGdxyuT/Tjxq2tHImsx?=
- =?us-ascii?Q?mU50f0TfDdi5zRL3dRkGyGHwTxV1MsV9DfMH6lefvMYVkBmlYRp7czD1vRwv?=
- =?us-ascii?Q?fcWvXpQ7N0lyBjkOPrN1TTXbH8vrdqHAjX90pmcM/Rlx46HrGnhJ0Wv24bZH?=
- =?us-ascii?Q?CVUavJWmbuUWuR8hkX7nAXp4VpXBZn4ZPaBtzIVrdkwX2q/VCoE+RbXwx27s?=
- =?us-ascii?Q?9XYbDoAMn26953ddI8KuPZghcLRj/Xq08mHP1MIDwKRyxFotYkFrHUFW14pE?=
- =?us-ascii?Q?/S5P6bm+degesTyLzhLC4RTQWPYaMySbtgxBL9a41fRPLHpfJ+yi78i7S6l6?=
- =?us-ascii?Q?/gMPyTuraQQDYnYvNWA/f1D2cDlWnx5RV9I55YiHBeNGU5N2PKlFNiQpve1x?=
- =?us-ascii?Q?7622XYNBRWXN+vlUQ5XNcE6WPzrVgpzvliDphSg22f0XpK6EVb1xJ90V+8uT?=
- =?us-ascii?Q?EAgIfnlqsZ8j/QKjKB+U14THeFRzSP82xGdbDKJ5dnaDQcB/DURoAnVsNXDl?=
- =?us-ascii?Q?DyXIuul8QEanOTFZeYAjxTSspKc1NnHYj1pgddNGB9HfIbsUUc7vAewL1DLp?=
- =?us-ascii?Q?mjnZF7Bs5mOL+QYmKJPqkEykocGCCNtNQxD0uCYUG7o2So9VkU2nOgbmuHQG?=
- =?us-ascii?Q?LtDnTdFatFYXoKdP2Hrr8Q68lWuu4xA=3D?=
+	=?us-ascii?Q?9k6vEtOYgie95yag4giw4Fy1IOgemWCBuDRPH9jYK+5YIeS7IzcuOT5oj8nA?=
+ =?us-ascii?Q?9CiyUzw+GTebTlid3oN4tNC0z6/C49EN/yH997wq9OoEYZoEPp774npQ0uX0?=
+ =?us-ascii?Q?ZXpez8L3c+wABK3JpYusIGdg6OPU27Nd00RmnXnpLto117AdPjS8xN7MPdhH?=
+ =?us-ascii?Q?8TndjRG5xJ3Csv0MctdBgAZsOKCc8hHC1ZOlwTSJGBd48IIeZnvCmGm30+LS?=
+ =?us-ascii?Q?hBiNhtHnfIvncwGXQ0HySoTkxUYCU2cbE2KM2kAVAzF6wMBXX8vYQLfJFjbI?=
+ =?us-ascii?Q?nelceDflrDhUq+nyc1yhui7JZxlysmnYVV+nSpyfps01mJpvia8Qx+KWMQlP?=
+ =?us-ascii?Q?RlMePZqft7/J0BVKlJcTjDTbP6wbCS7YT20ghkc2QKIFxwFWL30y47YF9BV4?=
+ =?us-ascii?Q?ZcybHVOLgGu1ymOEABjAoaaDj7MfWo12zoEMoDqX4c+RYFYGehNiTl1c/Xyk?=
+ =?us-ascii?Q?DTZ5IFMcbJsFaHu17oxhPwv3vpELjaEI/Jrv0f+iZJIVXx1BKljOLrJIpfRt?=
+ =?us-ascii?Q?i/JIOP69Nw0xIA5m7729R8oY+BS9gXxJ8ZBv+934Kvc8eI+9CJ44mcDYpF4N?=
+ =?us-ascii?Q?LWORFSE/Slziq6B5mH8X3zKTOATZgCy+63utvyXp+BGuSt1ukJAXfkW8SuIR?=
+ =?us-ascii?Q?Vr8zw0AyhA+CDBTyZ+hHhyPeXkAbqJUKIvzIwCMgE739s1yltr/0TjypLfNQ?=
+ =?us-ascii?Q?1G93CzFTh7Q4uLGAGgD34YRxHIqvXZkKgEGVxVN6cNVrZyVyWlakQTbdhxwx?=
+ =?us-ascii?Q?mnVHmUsU9ayfnZcExx/pL98O2mubqXKJmQwElUXGTuW4DEOaR4rxGOp9uSKd?=
+ =?us-ascii?Q?RXAmXswZxuWYSAco73LuNVAO1sqaB2b06ftMxmdyTUzNJgM98t88mUhypH0d?=
+ =?us-ascii?Q?5g+KkZuzrHZVmpRVy+3v/BGxEA2MAExFy/ihLn22GQ3/Ii8S1vMHS8hhbhnB?=
+ =?us-ascii?Q?WhEYE1APzkhSkHsMkG6kV/KwzXQkZDfNhzgrywu022n44aScB0RcUjyh6sN1?=
+ =?us-ascii?Q?GGQ9HS6bfYRyy+rf5lBgWReKMLaU5r2Oae80GQdVurSkTrIPpyHSPCLw4Jwx?=
+ =?us-ascii?Q?OUNdEOFqTdKyWGA/poxFkVfxS9zUiASetT+7BU8fLhsrDEtE+R467BUt/sFl?=
+ =?us-ascii?Q?HuG/zN//qXt75yy0syBSs/LiBvhjOaTdr7mPqY5gsoFyHYsK8ud/c5LRI2tj?=
+ =?us-ascii?Q?wlKRviq8UNiWI13WVLAAb0I5SsNtYmDXufzXaDDEYFyZFGaPsBiGUgYjk2x6?=
+ =?us-ascii?Q?42Yh1nOLj3m6QNyg+WovHigZs2XqjkfBfWvPNoc0AowyGpsMHo2WfStf0+z1?=
+ =?us-ascii?Q?cuQ1mvGSzrl0aPLlzww/AnCSSFEnyDDsyhraCMlP+ytO/Wr65UsGEB5FAD1Q?=
+ =?us-ascii?Q?izAOUcaQyCShegUNoXczhBDYW0OckbwMaeiEXljay91yrvAHGgkjLAkA1CM8?=
+ =?us-ascii?Q?dMZoxLnj/iNo4lHNR6gpAr54T8ZcD9LHSgGjJ+R9ZRD6IvSk/hHiimrmgIo2?=
+ =?us-ascii?Q?SrGUHvumhUM0ZeQeoskGx98WZFiRx5R1PPZQ5EzRKr7L2I0K1H52ymhgxnU6?=
+ =?us-ascii?Q?OTvE31YUKdqiT6GeDvZzA21M3suhNVSSqG/RVmSxM0jlGM6f5eNl2jsIgrfj?=
+ =?us-ascii?Q?/26m9+kqdCWCvLLEyEBAn+1GGvl6EAEJQYYpMTEH9VwfFt0REIATM4Wct+1j?=
+ =?us-ascii?Q?mEjJjEuDW8ccv4IBkR0r2pTOguslNgdV03PTakJ30ceZS5RUFDEBcJqjUR+Y?=
+ =?us-ascii?Q?srb8DKgpM6ZgzQ/0WLTl10dfZ26Wtog=3D?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ccca700b-65ff-4e07-ceb2-08ded488d63e
+X-MS-Exchange-CrossTenant-Network-Message-Id: 88656b1c-d6bd-4c59-94de-08ded488d6f8
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jun 2026 20:15:31.0021
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jun 2026 20:15:32.2026
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: +QtCX3VI44jMmnGRVrYiJpM4izUJQBkAnVmODdae90q1XpqWDnEOCGd+mro5CZhVWTPPqCKcNhiLX05jT6spWGuouUQ/ToJxrb3hVOKe3qg=
+X-MS-Exchange-CrossTenant-UserPrincipalName: Vaggwe+Ki2B1FNBjxXWgNdxW2QcaiVxo3A2rEhic0MwmVQU6W/pxKfj1b5aDHweS1em6Km9evOZ4qcJqDY4aqOqi+wAM38hYBcvJNBS6hyE=
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR03MB5837
 
-Add "intel,socfpga-agilex5-socdk-emmc" compatible string for the
-Agilex5 SOCDK board variant configured with eMMC storage.
+Add socfpga_agilex5_socdk_emmc.dts for the Agilex5 SoCDK eMMC daughter
+board variant. Define board-specific regulators at the DTS root: a
+fixed 3.3V supply for card power and a fixed 1.8V supply for eMMC I/O
+voltage.
+
+Enable the shared SD/eMMC controller for eMMC-only operation with an
+8-bit bus, HS200 and HS400 modes at 1.8V signaling, and a 200 MHz
+maximum clock frequency.
 
 Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 ---
- Documentation/devicetree/bindings/arm/altera.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm64/boot/dts/intel/Makefile            |   1 +
+ .../dts/intel/socfpga_agilex5_socdk_emmc.dts  | 120 ++++++++++++++++++
+ 2 files changed, 121 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts
 
-diff --git a/Documentation/devicetree/bindings/arm/altera.yaml b/Documentation/devicetree/bindings/arm/altera.yaml
-index 206686f3eebc..f5efcbc381b8 100644
---- a/Documentation/devicetree/bindings/arm/altera.yaml
-+++ b/Documentation/devicetree/bindings/arm/altera.yaml
-@@ -113,6 +113,7 @@ properties:
-               - intel,socfpga-agilex5-socdk-013b
-               - intel,socfpga-agilex5-socdk-modular
-               - intel,socfpga-agilex5-socdk-nand
-+              - intel,socfpga-agilex5-socdk-emmc
-           - const: intel,socfpga-agilex5
- 
-       - description: SoCFPGA VT
+diff --git a/arch/arm64/boot/dts/intel/Makefile b/arch/arm64/boot/dts/intel/Makefile
+index 33fcc55d0cb9..5bbbcfda1f48 100644
+--- a/arch/arm64/boot/dts/intel/Makefile
++++ b/arch/arm64/boot/dts/intel/Makefile
+@@ -8,5 +8,6 @@ dtb-$(CONFIG_ARCH_INTEL_SOCFPGA) += socfpga_agilex_n6000.dtb \
+ 				socfpga_agilex5_socdk_013b.dtb \
+ 				socfpga_agilex5_socdk_modular.dtb \
+ 				socfpga_agilex5_socdk_nand.dtb \
++				socfpga_agilex5_socdk_emmc.dtb \
+ 				socfpga_n5x_socdk.dtb
+ dtb-$(CONFIG_ARCH_KEEMBAY) += keembay-evm.dtb
+diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts
+new file mode 100644
+index 000000000000..455808db32bb
+--- /dev/null
++++ b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts
+@@ -0,0 +1,120 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Copyright (C) 2026, Altera Corporation
++ */
++#include "socfpga_agilex5.dtsi"
++
++/ {
++	model = "SoCFPGA Agilex5 SoCDK eMMC daughter board";
++	compatible = "intel,socfpga-agilex5-socdk-emmc", "intel,socfpga-agilex5";
++
++	aliases {
++		serial0 = &uart0;
++		ethernet0 = &gmac0;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		led-0 {
++			label = "hps_led0";
++			gpios = <&porta 6 GPIO_ACTIVE_HIGH>;
++		};
++
++		led-1 {
++			label = "hps_led1";
++			gpios = <&porta 7 GPIO_ACTIVE_HIGH>;
++		};
++	};
++
++	memory@80000000 {
++		device_type = "memory";
++		/* We expect the bootloader to fill in the reg */
++		reg = <0x0 0x80000000 0x0 0x0>;
++	};
++
++	vmmc_reg: regulator-fixed-3p3v {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc-emmc";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++	};
++
++	vqmmc_io_reg: regulator-fixed-1p8v {
++		compatible = "regulator-fixed";
++		regulator-name = "vqmmc-io";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++	};
++};
++
++&gmac0 {
++	status = "okay";
++	phy-mode = "rgmii-id";
++	phy-handle = <&emac0_phy0>;
++	max-frame-size = <9000>;
++
++	mdio0 {
++		#address-cells = <1>;
++		#size-cells = <0>;
++		compatible = "snps,dwmac-mdio";
++
++		emac0_phy0: ethernet-phy@0 {
++			reg = <0>;
++		};
++	};
++};
++
++&gpio0 {
++	status = "okay";
++};
++
++&gpio1 {
++	status = "okay";
++};
++
++&i2c0 {
++	status = "okay";
++};
++
++&i3c0 {
++	status = "okay";
++};
++
++&i3c1 {
++	status = "okay";
++};
++
++&emmc {
++	status = "okay";
++
++	no-sd;
++	no-sdio;
++	disable-wp;
++	non-removable;
++	cap-mmc-highspeed;
++	mmc-hs200-1_8v;
++	mmc-hs400-1_8v;
++	bus-width = <8>;
++	vmmc-supply = <&vmmc_reg>;
++	vqmmc-supply = <&vqmmc_io_reg>;
++	max-frequency = <200000000>;
++};
++
++&osc1 {
++	clock-frequency = <25000000>;
++};
++
++&uart0 {
++	status = "okay";
++};
++
++&watchdog0 {
++	status = "okay";
++};
 -- 
 2.43.7
 
