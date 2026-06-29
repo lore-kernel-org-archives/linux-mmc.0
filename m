@@ -1,142 +1,142 @@
-Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com [209.85.208.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from flow-b5-smtp.messagingengine.com (flow-b5-smtp.messagingengine.com [202.12.124.140])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 908993E0C53
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 15:35:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0659E43C05C;
+	Mon, 29 Jun 2026 15:45:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.140
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782747313; cv=none; b=TYt4HsOrGoN2l7db+Eg52iZ3BGNHErB1VTeMQQVjgNW+qKZbKUR1DBSuu0LHsHw4MUmVFjDgoe3jcjD3UQNpYTFRagCFCvxa2o4bduUH/h/gCa9WU8IkjnDVBMpOSkA1pDvC4w7BE2f0/QoF/WfFrVVRcVVR3H/Jh7FEPSpSIYk=
+	t=1782747936; cv=none; b=rQoiH5eZkzWysZgIckctYyK2hU3kqFdzOekA3Tt8PZF8JoMxgHKHOhBaFZr6OnzcvG7NXaNLff2q9Y66dsfSQylqxsAfv3psuQmW58L/nwDdLXRx3u/TR1GcvPjZQPINt/dBvVSGIliysg5eZ+NI+GpN+nF/3xdcYgX4QAaUHYU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782747313; c=relaxed/simple;
-	bh=BODU8nH72xA0ScZ+HzwpHMr8UOUoOL0Z1xiarATGzqY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=sL8ds+N5rPkdJv3BR+2nBl0X2eQ2c14HAokLnGwH5B8hqHInGKKY63fvqDPILMI3qKzEyYG7x8sZj84BGDh9PDk7vwux/TODxd0YeE6cr94gWfhYAZt62Mh2yyyWnmDd9MY/0uBFBHa8EyJCai3bDijaSSEOgaXym6uhwpc0uxU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.208.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-69857dc1d5eso2737830a12.3
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 08:35:11 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782747310; x=1783352110;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3PSkrSvBcOj2Vfr1tOG9HdESUGrp+uU5X3MHl1xNqsM=;
-        b=kS15qOpBx96H9q6fg25p+IiF6vZvcYzGO8VsCLljGGOBN1jX/U6w0GOJtRmEceWuBz
-         64HjRv0Fs6TBOjTExo3HzDt3VpviVNuNpB5EZfqGKF7QE8qTELebDe/abVxXDLYNEeyV
-         DAi0Kxe0U5Z3qfFXvJQItuMvaylZfiKDmfeFMwk3RDZpH1kJhDVI87ngFsarnNpoQ0XK
-         W0FvHebIWvGzb8Bm0OnHxfGXzzaea3I0oIiVqtIjZTbasNoK8EAhRDUKr8me0c58NXJu
-         NqmSuhyLTf9r66+Xei0fH1Ec7DS6Gi8kGxKvRTD1BP+NTXLZz0zglXOw6BP9teC6zG6J
-         Ug+g==
-X-Forwarded-Encrypted: i=1; AHgh+RrFxM+T4j100IKbs431lwC9SiS44teleq5kXU1i3lO5gAvTdPvYat9v62jVyyIwv8hZzP+9YXsFFHg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxxbEmmJS036urCQPAyouRBlLjlzmjLWRYP2qs9oMd2Vs6gf0D4
-	1BLZnd7p9NUDqv6EltE/e8x0ZEgvwA8zQpSWt5lpIcWPtXR9tOSw7FK+sUrJxx0lWKI=
-X-Gm-Gg: AfdE7ckz8bs+isRpjijf2GVCVdRNj370xyB7d+rs/76VnvA4P2HdyDThbB2Tc+pjNWf
-	GZy+9LNFzuHkx5x87+stTZzl03vVkg1pSAIvTonUPGtLqWXgCbuJsLj3/zL3bgeKLj5lSh3EoFd
-	GvP0Y184NAT2hGMG4dGt8wNyuRjxbF5uycOf2SYyfnX5HMjh5+BxtGHfsxzlo5zx8wAGuOeQAmd
-	rM5LxBkw7cTb1xK2ABvO8i8pPqsXuMoEfLVWjUKzW680tyKRSsu9H2p9R1U+uhy6BcFhC7oMYQN
-	KOP6T2AgzaRwVk0y+MNzcmfbBkL3ITHk99Anbe4HCp8e4yI/u3p/X1l7Xx6DZRCUpNHTvj85R8h
-	+27US/UfbGIfEOyeZG27YAPYGk8XJyHdaOApktcC6nJzPxVQfUOvjTMgJEOxA/BBQbi1qbu8uUe
-	qDxx8cIxLdoKYVxleRDKs7xT+kQzo3N0xFXqeOyFsIEq8PoN6dlb+IOAv3s3G9
-X-Received: by 2002:a17:906:730b:b0:c12:80f6:7fac with SMTP id a640c23a62f3a-c1280f69990mr64102966b.36.1782747309796;
-        Mon, 29 Jun 2026 08:35:09 -0700 (PDT)
-Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com. [209.85.221.49])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c1276093d8fsm111701266b.13.2026.06.29.08.35.09
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 29 Jun 2026 08:35:09 -0700 (PDT)
-Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-4624a44e152so3181810f8f.2
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 08:35:09 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AFNElJ8BCtLE1VqClmgjxLde/cVVyOJosyuqRKocHPZsCshR64wGaF0M1CH2c2dkObpbTHksCxfm6olbtjg=@vger.kernel.org
-X-Received: by 2002:a17:907:3c8b:b0:c12:f84:85d4 with SMTP id
- a640c23a62f3a-c120f8487bamr796791266b.24.1782746977928; Mon, 29 Jun 2026
- 08:29:37 -0700 (PDT)
+	s=arc-20240116; t=1782747936; c=relaxed/simple;
+	bh=rjFM2D6jrN878gEPa2yebQ2V6lQ4Ly5z/86sDfy9Ef4=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=igqU4KZYGRzC+JPX1EZnz5H3JgfIDGRtyP5vRY5klE5P+k5LblIx/+KB8bDGTyl35qjn9D6bh2NQnO6zSfY7fZ+KKmUxJB4k5hQZjFfx2GFuERn3T8Ma2MZ0M7SXQvue7HJhUWrnTOnuc///Yto63dz3aSU7jf7/13NDsY9nM34=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=NE6t34RD; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=BvW9GpEf; arc=none smtp.client-ip=202.12.124.140
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="NE6t34RD";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="BvW9GpEf"
+Received: from phl-compute-04.internal (phl-compute-04.internal [10.202.2.44])
+	by mailflow.stl.internal (Postfix) with ESMTP id B7CF01300119;
+	Mon, 29 Jun 2026 11:45:33 -0400 (EDT)
+Received: from phl-imap-05 ([10.202.2.95])
+  by phl-compute-04.internal (MEProxy); Mon, 29 Jun 2026 11:45:34 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm1; t=1782747933;
+	 x=1782755133; bh=JSWP+oCjDefLm/g9PuV1GqUkziDul2e9yv/ysVQsJLY=; b=
+	NE6t34RDiIItJnjdvpPNLzERZEmy1Uokb4joPY1CUGLVDWSQy6O7lM7YR/JH2Vzz
+	EKjSBDHgy12XKPTe4T6/vFGszy9/X5bhW/dAEDGMtAFHdRGEckNuxhc9bX3PR0VE
+	bfW0MW2BR1AKR58Jk7h1JxjrIx1Kz7REAVnwk0oAlfoj8/mj7rRNlBSR0zA4hhnh
+	nrZ5Ql6KmC6VRVCiJ20YjlxB5Hon27fcsCOduVLOhAndchegK3YeVpKE9Pp1EySs
+	+Hgew3gjNwCsL97JbgGzSZGffJk0l4s3icmD0kqHlku9NQytJJHrK5zKTtqTrlSN
+	nN0K/5MSbp6GsS3AP9v5Xw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1782747933; x=
+	1782755133; bh=JSWP+oCjDefLm/g9PuV1GqUkziDul2e9yv/ysVQsJLY=; b=B
+	vW9GpEfQf5KLp9NtJM6GkHv3I5ZqIvw4Ca2lMiHX8SKqsoxlmypG2EMXAsormSFb
+	oqLT0a0Bl9FJyA6vd4v32gwdXkqPQVCs0Q1Y9jXp5dOSVQI2tfbQcx1ULcycd2no
+	cz4W31l3TBY05Bi2KSWoBV2ZPe6YbfMg4EFP7hw/vkSYA/ePVKRQACV+DCkNrleC
+	7d2U6h7NAcmkprtPUjO4A9XW6JXNK6W9RSqJU2/A289YIaXuaBCd1hJaZ6vsHuTg
+	GNxjVNjZ5DH/aXylHFIrfAuE5N81jk6hj/53mTDmJA3sJAwIS6GzLql0EapV+l/2
+	td6qNY5irlX8jNYf/UttQ==
+X-ME-Sender: <xms:HJNCaoMrkvvQS7N_eQkd2-7GzY3rf6oAfFR9scbcsRER6z01sw7mzQ>
+    <xme:HJNCapwMpwLVp89QaYKeW8Gu_iFO6mtIcDakQdQ1IcDR2awHglttG5XYgUbY-f2KY
+    MUHVhVlQ81X_KxAdYNn48ZwudPAYseWVvBXQ00pUVx7Z5102rCPfbsZ>
+X-ME-Proxy-Cause: dmFkZTGfEuV5uhz9iLc4/VqJewkOwZztE2Q/W2L8MWGpthXJSG6cnqB0ybUTZO/gmTStFr
+    IiMG3oMMwTOd1GN29iTAZh8ELqDq/pvNTu31HqcDhNTnRV5w+qN8TY5zQgqjhrWyTFnLFv
+    a5lC1bd0Nsy33atl2U9pCG8DwHiBT9SAvLqnCXSLgY6ykY2nreWYk0o6gpE7z+zCzbU5QI
+    CLqmPEwYE4mll5+cmq6mEdAN12TaRxj619rRYC2M3spZPblqPgudPkyzWrdvTZpBYK3w/u
+    jqv7Hdzc+TtswHLZ1V6GZ+c/1ZffJJfwsB5JIPB30uvkpQkKQBrSQtzi9AGb8HNFEb2kgE
+    qKkXl9pCm/0B95O8InFrTkKN0fJJdpnCSraeOZvlbYvDYSuDEOsOuD28QLxuf4mNOnHYEc
+    4em35Aufoj/L6MFtoXv8X9guYW3iZk9yMbK8VidKBOe9HIlA6Vy69oYVLWvoeIP/sRtUxM
+    xWA7NaPmd/Kd9MV/ItckFUA5jQ19oB0lqDlABCPUJva5FAJO0rNnJiVDlHuYcKo1028G2L
+    QCmWZB57sVtG9lZURwNtcccEDwqWzXsVO1FCuadUaHZRSO4zh0UrefsDvNNDkSsAklUL8C
+    nDBMgI4yo+tcTzxNjLzthPlRQuu7ftRHxOLDna+Fu5ygZv/F2jkt5rcMUitw
+X-ME-Proxy: <xmx:HJNCaiVR99ITZUIeVHLQIjkAl3W5L7-NY_eXPpexE2ezyiuvPV7Wig>
+    <xmx:HJNCaqDcmel0SZvoqXYoLZayz9Q48weXPGpjP4Y1EEA9-teXfq9kNA>
+    <xmx:HJNCalHWKybZhCSB_h9ep1tLEkKEMci7ODZ3AjJ9oK0yH0tMhtYVDw>
+    <xmx:HJNCamc1hcyXGhjSob0H8QG7OUqPoVNgYLrZzyvRI9sJF6RPK2srWA>
+    <xmx:HZNCahf_1C-xXUG9BEQMuJSIEx8k4QdhQtNpq8TMrV7EM8NaHbepNMFj>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id BA658182007A; Mon, 29 Jun 2026 11:45:32 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-ThreadId: A045QOfflcQ7
+Date: Mon, 29 Jun 2026 17:45:12 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "Andy Shevchenko" <andriy.shevchenko@intel.com>,
+ "Arnd Bergmann" <arnd@kernel.org>
+Cc: "Linus Walleij" <linusw@kernel.org>,
+ "Bartosz Golaszewski" <brgl@kernel.org>,
+ "Marcel Holtmann" <marcel@holtmann.org>,
+ "MyungJoo Ham" <myungjoo.ham@samsung.com>,
+ "Chanwoo Choi" <cw00.choi@samsung.com>,
+ "Geert Uytterhoeven" <geert+renesas@glider.be>,
+ "Andy Shevchenko" <andy@kernel.org>,
+ "Dmitry Torokhov" <dmitry.torokhov@gmail.com>,
+ "Ulf Hansson" <ulfh@kernel.org>, linux-bluetooth@vger.kernel.org,
+ linux-kernel@vger.kernel.org,
+ "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+ dri-devel@lists.freedesktop.org, linux-i2c@vger.kernel.org,
+ linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ linux-arm-kernel@lists.infradead.org, linux-pm@vger.kernel.org,
+ linux-usb@vger.kernel.org
+Message-Id: <34d4eddf-bfe5-4103-b2c6-143c63ea37f9@app.fastmail.com>
+In-Reply-To: <akKN59lv55CXS3HU@ashevche-desk.local>
 References: <20260629135917.1308621-1-arnd@kernel.org>
-In-Reply-To: <20260629135917.1308621-1-arnd@kernel.org>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Mon, 29 Jun 2026 17:29:24 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXhsM4JzArRuB=A46N-Ogbn2Fans+PVJVA-hEytFq=DeQ@mail.gmail.com>
-X-Gm-Features: AVVi8CfSSg4DcoB7CGCYddSfqoWpUaOwYUjpkorP-3LR7U8E7vJ9ucbePhiZLD8
-Message-ID: <CAMuHMdXhsM4JzArRuB=A46N-Ogbn2Fans+PVJVA-hEytFq=DeQ@mail.gmail.com>
+ <akKN59lv55CXS3HU@ashevche-desk.local>
 Subject: Re: [PATCH] [RFC] gpiolib: introduce gpio_name() helper
-To: Arnd Bergmann <arnd@kernel.org>
-Cc: Linus Walleij <linusw@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Marcel Holtmann <marcel@holtmann.org>, MyungJoo Ham <myungjoo.ham@samsung.com>, 
-	Chanwoo Choi <cw00.choi@samsung.com>, Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Andy Shevchenko <andy@kernel.org>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, 
-	Ulf Hansson <ulfh@kernel.org>, linux-bluetooth@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	dri-devel@lists.freedesktop.org, linux-i2c@vger.kernel.org, 
-	linux-iio@vger.kernel.org, linux-input@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-pm@vger.kernel.org, linux-usb@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Hi Arnd,
-
-On Mon, 29 Jun 2026 at 15:59, Arnd Bergmann <arnd@kernel.org> wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
+On Mon, Jun 29, 2026, at 17:23, Andy Shevchenko wrote:
+> On Mon, Jun 29, 2026 at 03:56:29PM +0200, Arnd Bergmann wrote:
+>> +const char *gpiod_name(const struct gpio_desc *desc)
+>> +{
+>> +	return desc ? desc->name : "(no gpio)";
 >
-> Most remaining users of desc_to_gpio() only call it for printing debug
-> information.
+> Can we get into here with wrong (error pointer descriptor)? Shouldn't you call
+> one of validate_desc() / VALIDATE_DESC()?
+
+Since all the callers previously call desc_to_gpio and that does
+not even check desc at all, it would be a preexisting bug if
+any caller passed an error pointer.
+
+I added the NULL pointer check since many callers had that
+part originally, like
+
+      tsdata->wake_gpio ? desc_to_gpio(tsdata->wake_gpio) : -1,
+
+> Also not sure if "(no gpio)" is a good choice. "not requested"? "not provided"?
+
+Any of those seem fine to me, not sure.
+
+>> +static inline const char *gpiod_name(const struct gpio_desc *desc)
+>> +{
+>> +	WARN_ON(desc);
+>> +	return "(no gpio)";
 >
-> Replace this with a new gpiod_name() helper that returns the
-> gpio_desc->name string after checking the gpio_desc pointer.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Hmm... This will be a second copy with a slight potential of going apart from
+> the other case. Perhaps a #define? (Yes, yes, I understand that there are pros
+> and cons, in particular readability with define is questionable.)
 
-Thanks for your patch!
+I was mostly trying to optimize for consistency with the other
+stub functions here. Since it should not actually be used at all
+without gpiolib, returning NULL or an empty string here would
+also work.
 
-> Not sure if this the way we want to take this, or if the gpio name is
-> an appropriate replacement in debug printk.
->
-> Since most of the callers of desc_to_gpio() and gpio_to_desc() are
-> otherwise in drivers that already depend on CONFIG_GPIOLIB_LEGACY and
-> include linux/gpio/legacy.h, only a handful of instances remain that
-> are otherwise in files that otherwise only use the descriptor interfaces:
-
-> --- a/drivers/gpio/gpio-aggregator.c
-> +++ b/drivers/gpio/gpio-aggregator.c
-> @@ -758,8 +758,8 @@ int gpiochip_fwd_desc_add(struct gpiochip_fwd *fwd, struct gpio_desc *desc,
->
->         fwd->descs[offset] = desc;
->
-> -       dev_dbg(chip->parent, "%u => gpio %d irq %d\n", offset,
-> -               desc_to_gpio(desc), gpiod_to_irq(desc));
-> +       dev_dbg(chip->parent, "%u => gpio %s irq %d\n", offset,
-> +               gpiod_name(desc), gpiod_to_irq(desc));
->
->         return 0;
->  }
-
-Before, this printed:
-
-    gpio-aggregator gpio-aggregator.1: 0 => gpio 589 irq 188
-    gpio-aggregator gpio-aggregator.1: 1 => gpio 590 irq 189
-
-After, this prints:
-
-    gpio-aggregator gpio-aggregator.1: 0 => gpio (null) irq 188
-    gpio-aggregator gpio-aggregator.1: 1 => gpio (null) irq 189
-
-Same results for instantiation using sysfs or configfs[1], although
-the latter does have optional support for specifying the name.
-
-[1] Documentation/admin-guide/gpio/gpio-aggregator.rst
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+     Arnd
