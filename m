@@ -1,154 +1,144 @@
-Received: from flow-b5-smtp.messagingengine.com (flow-b5-smtp.messagingengine.com [202.12.124.140])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-dl1-f54.google.com (mail-dl1-f54.google.com [74.125.82.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B67A8427A1F;
-	Mon, 29 Jun 2026 15:48:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.140
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF1863E450D
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 16:26:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.82.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782748113; cv=none; b=QbUnRpW7CqSKG3RoXq6tgnW654tatDjtWxE0i3ipvPfcf3OAWU7VfQkfaHD+9cAoYtZRGFTSBRYkpW1v023lg9bvKEGf96GkBPXISitRJlFsbicb4SHBs9KJgIeDsjQp6NoTALkn6WlAw4KH7z8c52hdalrW0RlxTFBC6qLKVOs=
+	t=1782750410; cv=none; b=oAMoxott/cLPSZnb658IIsQa+h5MDiu9C++1qIZcGNRxLWwerVWIJTy0Kbp+UiD2tAF19Z9req3yQDQKX0j4ywMqL7n4i/iw2iX8OW2FvPRYMngE6GpZsSX6kxq9UPG5EU0PAdVda1+mqGufDez9YXI3VXrqg6mseRg1etveKck=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782748113; c=relaxed/simple;
-	bh=1McCVs2snxu+gNjJm1D421N5eVerVO5vK6JHvxW/TfQ=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=JkXKFk2KDlXlJXEHiJi7KHZnlLSmfiBNTVT4NuzOCwqFNoPrK2cHdXG1yL3YPokO+hwyOgbfsWKZuq+Qn9iX/kTHEZ0PXILsVfk1BV4Qwbo4GqGOfMyC2pyLqp+C5B1rYUd3kSe9hofSJ6tegmtqmUBkIPSeU+bHnf8DKOq3Bpk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=otExSv6C; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=ZP+OSo5y; arc=none smtp.client-ip=202.12.124.140
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	s=arc-20240116; t=1782750410; c=relaxed/simple;
+	bh=TwOw7s9yQz7T3DWMV1OdmenyC/HWg7DBnb7vblAMzE0=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=FZxeB8IQpI1/zTspDCicY4+cIFVHtGWTRDQ790hG3NGfIXkXZSOAS40K3+Rm/iSH/l/XSZi/z9SDE1YdgHOzpvLK6xsLsOj+vNQ3zWgsevuA9fh+Igu357XtMD+j0rKAzJhRvCa654lEy8RZfVKdttOYpCEnE6U4pYnfyi/B5PQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FkEFDIR5; arc=none smtp.client-ip=74.125.82.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="otExSv6C";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="ZP+OSo5y"
-Received: from phl-compute-04.internal (phl-compute-04.internal [10.202.2.44])
-	by mailflow.stl.internal (Postfix) with ESMTP id 7F8A013001E3;
-	Mon, 29 Jun 2026 11:48:31 -0400 (EDT)
-Received: from phl-imap-05 ([10.202.2.95])
-  by phl-compute-04.internal (MEProxy); Mon, 29 Jun 2026 11:48:32 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1782748111;
-	 x=1782755311; bh=OQSYL+rcbbMvXGkfQit/IeSyVBDzp7a1uiLZytls49o=; b=
-	otExSv6CCfwgU+53OmRzfq2B2DYzwG97/7OG2yFVL9SLp2zuXWfhdL/w+7nIA4id
-	pS7hJpE+p/zM36qUEbCM1LqXAUyUGB34hT8s1CLctdvUhUl0w1ZhqpR2HIS3PV7o
-	bsnIFZBboF30NjRkOQ9UT+Q8NXhm9E13I7offTJ2aRcuG8r2Lm82KoHQohaMMwV5
-	1pog70vnywIoIEN8MJJPZBLCU4XXKtem9FHI/gOfgvqsBOGTC7GkxZFe5P2Lw2ga
-	yjsSm7K9GLJMBOqJ4k1/I3YVG3A8X1aWU9NyZdVYzw3BMgCE/ro9EeoLtAyGzeFK
-	Pl4J0bO7j6edaTVNsgNFEA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1782748111; x=
-	1782755311; bh=OQSYL+rcbbMvXGkfQit/IeSyVBDzp7a1uiLZytls49o=; b=Z
-	P+OSo5yef9/cf64i9oZY96JMQWrkgDB3///chYutdOeJnhuCLMIQBthaTPJcoReA
-	A42wB43XIfLOAHZlUSZRrEWmaIkkJVPyR9ZrNj0Zg79fjHX5GNwFKh44vBnstNjs
-	+gKwPg044HSnH3p4e5kEU8/gJdXnd5J9rcJgbSl1CjuvG8G/lzCfuRrzQSuK0yFG
-	nAQ3o6X2C2t4pALrCSMONEpg+Bh0sXEMP7jMgbrh5fxsQE9kGxPzz2YGv3rx56Gv
-	vpRCb8LQ5USUCARnUKXaPOljl/bpYRFLx50FMB3vSHHH4V2/reUKPVgJULvxVire
-	Mkj0fQjdTFT7fm+9wEFeQ==
-X-ME-Sender: <xms:z5NCakeBygjeAHHHThz3dUsTnvB6AK_UVMjKz-WZKZVRr2lluk78FQ>
-    <xme:z5NCahCpYUk2lb8a1RbHVmyXeGBSy5l5DdSrmUr_uS7YYPkiTX-Ewa_wUd6Pe47oi
-    fqqLUBT-9g8HmIrQlngZpk17TUMnckWDzEtut6NIZEoxunmVuyUuWA>
-X-ME-Proxy-Cause: dmFkZTGx/zQGI8s/7q5psZd2hog4QvvLF8VyS3SEh6yndDN0NLF+SUROST5TuJaRfbYzsR
-    kRNLz+nZnLIWxTAnVDEiVI3LWMoT76m1NPebPhT28iJCWPXc0GO7oFLEPDfrdg9tfzroWb
-    HnrfV5e1jPmjz36LnDV+54JGw32aQMY40K1t7WiGcRFvXEmQH6xS4redW3l3jMN7eHVHXH
-    OMUBqc4hdT1AWM82wO5kRpwsYMYMv8K7MRSSgj1UrGhr0ZavzP88ve8YyHNE7ly6hSja/5
-    QiP/FqZsNFQZ34zbxnGfKyKytbn/wMNNFVGFjw0DXOPPa8n6XjB/fzcu7YZiP8PrvEJSOd
-    l8wa/9o9YFghE4nmtzEFNP5GHS4DgMKC4w2rG1ksKG4K1tNod94D3VEihl/RxyL9ohAzRZ
-    DV3gAxtenHg9Z5cQJzoBipUKZ9pqhmJudtox/jlSGg2Nc/v34rLMtOwqFKQfA1uoQshteX
-    Fj+AMNKhMnJ4QbvjVI2RQG1hwfF0E+t7vkI/rh/pkR03lll3huezz0P+7sfFgS0BBFEc4I
-    tgwdiyeO6AWLRMbzNKqGc2BGlgFQrUK3BgCvUK9m1iH9OEbmB8sUgFESS3o9AeJDZgiza+
-    QtMgrmbDhds3U+BZzmooK8ccK4+ZTU4CwBh9Kr050guMXdKmxiwbffVRqy2w
-X-ME-Proxy: <xmx:z5NCaqnslMw1U4x946I_QUjw_ET8HBcAAsdnOpVQMvFlVCBGjb5OEQ>
-    <xmx:z5NCatSrHaFps5ZyxX5SqaW3oWWvqcDK6TzS14FaET5Pf4npQ179sg>
-    <xmx:z5NCanXHY9GeHNVa3tjFzINJQ_mrCW-T7sCwo55oVGN2tZsh_Krxbw>
-    <xmx:z5NCars5LXs8k9icxryzzfrpvBcoTsGtWAAjyBjSc4vWQn2-iQYc8Q>
-    <xmx:z5NCarutsUgfjq0e6Ud1ZnN0qPM1Eju682i8umHuTCrQdRzm5WnqOIk6>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 215901820082; Mon, 29 Jun 2026 11:48:31 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FkEFDIR5"
+Received: by mail-dl1-f54.google.com with SMTP id a92af1059eb24-13986d61b4fso4899058c88.0
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 09:26:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1782750407; x=1783355207; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=eA3yl5qbMrv9Pl7Gju28idPgTrKUB+D3bsjesOdUayo=;
+        b=FkEFDIR5uVQuW+7X+DeDo3Ws++NTvbkiojuFkhfrKlfo0XnNOfo252lsHPiGKWLTm6
+         ysUqagDR0fAlxnoE6lXBu3a6rb1v/u39Qy8P6gOp+PlHRJxluBhyFrePhBxnWX82qpZ9
+         q4J65YKk+Rv1KDftzBOwLJZJohyDeg5tlnfaR5y04WOyEsw1mDC7zdUeNYkNisA1bVbn
+         MSLedeKLaHS16/WMvRWQmEzKT65xn+jys4wD3/OCMDLXhsY6pzc//gCldRvMMKSY9oq1
+         +1VmWgKRmv859UQYS8r6YREjS5NBoVRdkTmVV+tCWgp1EN+TFN8goqxPxZZO2XfUD/SY
+         dH0g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1782750407; x=1783355207;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=eA3yl5qbMrv9Pl7Gju28idPgTrKUB+D3bsjesOdUayo=;
+        b=NVgdVMkNsc8wBjDmiRc3NyCluB+b3W+HS/zeQUKB+qtylCxq0hGanFHi3AdrJCUan/
+         7q2m6DBplppYM5mMDe3rqRYFXqlJkcAwv99IAG8KVB259XqEeOYsjdMrqTo192WmC0z2
+         p8SQCtRv2NGGCsXJRIr5nhH0RBV9128zBLJ3eFmGe70NIQ2eOMbysJOr+JHrWEI3gZ0e
+         Nn1VmI4dIEV9dxO5yh+1VEBcAgOvvWTyEm08Aqi8ZkinRIEqWEvSRhYiNclVkjQ4HqAg
+         /imN1DMxN2rZK5L0JpGD1pq/0442L0FeFwsVvFu4RK/nH4LNN2lMSzINqSmBCqx1n36+
+         VNpA==
+X-Gm-Message-State: AOJu0YywIRJL8nGlCwlX0vlxt5teUfbom5Zr644Cp/ErAMRb3tb4raxm
+	Nuv/Z54WGvH3P/KAlt/47TzZ981nw9LjraV7QftOj7NXfXnmXolZznN3MXqWJA==
+X-Gm-Gg: AfdE7ckTVB1lLEgcZisbzEtFv7CtiuRcQEwKL90NfjTmYtBsXOLSI6SCr4BJs7DIbka
+	CtUxZeIs058dUZkvk+Z4iFkL47hoHJvuKOYrC8VARMnr++hBi/o0c3mus8jDPwDl1jqmiqpCtaH
+	CODbg9k90eSP6LEduv3AEdQVff7essLf/RVlWB1+fh2qrkui9kBESQCp3wXSwH3FXgvoEaO42nf
+	tvexIGbZWznMsKXnx/KZkepKRMjsET3Jgh0shQt7D03/RZdg/fyZ2vqkboTpSF2fg5YY/OGbpvl
+	DFYcVKI8CJynFJtri2L+4opfMFim4oxihQTMfNBGJYfdOeeIkoOXlXKTgfNUwBpJixDPMqFgPXD
+	sYI7MGShul0A1ufmXK0nJhTakqCQo42iKGWldFebdJ2EsvLU1WErdAH95N38s0F0QHfZzE4ljPo
+	ZYG7wqMBfOqKUmgj9MPfHpEuJXSZfRLd7jwBU=
+X-Received: by 2002:a05:7022:3d10:b0:13a:21:e78a with SMTP id a92af1059eb24-13b2a16109bmr81343c88.16.1782750406983;
+        Mon, 29 Jun 2026 09:26:46 -0700 (PDT)
+Received: from Black-Pearl.localdomain ([49.207.62.174])
+        by smtp.googlemail.com with ESMTPSA id a92af1059eb24-139d912197bsm80851896c88.15.2026.06.29.09.26.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 29 Jun 2026 09:26:46 -0700 (PDT)
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+Subject: [PATCH v5 0/2] dt-bindings: mmc: st,sdhci: convert
+ STMicroelectronics SDHCI-ST MMC/SD Controller controller binding to YAML
+Date: Mon, 29 Jun 2026 16:26:38 +0000
+Message-Id: <20260629-st-mmc-v5-0-3cf0e639bff8@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: A045QOfflcQ7
-Date: Mon, 29 Jun 2026 17:48:04 +0200
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "Geert Uytterhoeven" <geert@linux-m68k.org>,
- "Arnd Bergmann" <arnd@kernel.org>
-Cc: "Linus Walleij" <linusw@kernel.org>,
- "Bartosz Golaszewski" <brgl@kernel.org>,
- "Marcel Holtmann" <marcel@holtmann.org>,
- "MyungJoo Ham" <myungjoo.ham@samsung.com>,
- "Chanwoo Choi" <cw00.choi@samsung.com>,
- "Geert Uytterhoeven" <geert+renesas@glider.be>,
- "Andy Shevchenko" <andy@kernel.org>,
- "Dmitry Torokhov" <dmitry.torokhov@gmail.com>,
- "Ulf Hansson" <ulfh@kernel.org>, linux-bluetooth@vger.kernel.org,
- linux-kernel@vger.kernel.org,
- "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
- dri-devel@lists.freedesktop.org, linux-i2c@vger.kernel.org,
- linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- linux-arm-kernel@lists.infradead.org, linux-pm@vger.kernel.org,
- linux-usb@vger.kernel.org
-Message-Id: <ff4d7043-1929-4fa1-ba5e-f28403ad6fcc@app.fastmail.com>
-In-Reply-To: 
- <CAMuHMdXhsM4JzArRuB=A46N-Ogbn2Fans+PVJVA-hEytFq=DeQ@mail.gmail.com>
-References: <20260629135917.1308621-1-arnd@kernel.org>
- <CAMuHMdXhsM4JzArRuB=A46N-Ogbn2Fans+PVJVA-hEytFq=DeQ@mail.gmail.com>
-Subject: Re: [PATCH] [RFC] gpiolib: introduce gpio_name() helper
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAL6cQmoC/13NQQrCMBCF4atI1kYyM0lMXXkPcVGnUw1YK40UR
+ Xp304pWXL6Q75+nStJFSWqzeKpO+phie8nDLReKT+XlKDpWeSs06A3hWqebbhrWXBhfVoWr60A
+ qf752Usf7FNrt8z7FdGu7x9TtYXx9J6wpPokeNGjLzhICkyO3PTZlPK+4bdSY6HFmztCXoTYao
+ JTMfIUs/4x+WfgyyizkQ1hIhUHCP7Mz8zBfs5kdiCk4D2sG/8uGYXgBRfkHR0EBAAA=
+X-Change-ID: 20260327-st-mmc-c906ad95ff83
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, 
+ Peter Griffin <peter.griffin@linaro.org>, 
+ Patrice Chotard <patrice.chotard@foss.st.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ Charan Pedumuru <charan.pedumuru@gmail.com>
+X-Mailer: b4 0.15.2
 
-On Mon, Jun 29, 2026, at 17:29, Geert Uytterhoeven wrote:
-> On Mon, 29 Jun 2026 at 15:59, Arnd Bergmann <arnd@kernel.org> wrote:
->> From: Arnd Bergmann <arnd@arndb.de>
->>
->> Most remaining users of desc_to_gpio() only call it for printing debug
->> information.
->>
->> Replace this with a new gpiod_name() helper that returns the
->> gpio_desc->name string after checking the gpio_desc pointer.
->>
->> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
->
-> Thanks for your patch!
+This patch series converts the legacy text-based Device Tree binding for
+STMicroelectronics SDHCI-ST MMC/SD controller to DT schema (YAML) format.
 
-Thanks for testing!
+Note:
+The patch "dt-bindings: mmc: st,sdhci: convert to DT schema"
+depends on the patch "arm: dts: st: align node patterns with established
+convention". If the DT schema patch is applied before the DTS
+cleanup patch, `dtbs_check` will fail due to the presence of the removed
+properties in the existing DTS.
 
->> --- a/drivers/gpio/gpio-aggregator.c
->> +++ b/drivers/gpio/gpio-aggregator.c
->> @@ -758,8 +758,8 @@ int gpiochip_fwd_desc_add(struct gpiochip_fwd *fwd, struct gpio_desc *desc,
->>
->>         fwd->descs[offset] = desc;
->>
->> -       dev_dbg(chip->parent, "%u => gpio %d irq %d\n", offset,
->> -               desc_to_gpio(desc), gpiod_to_irq(desc));
->> +       dev_dbg(chip->parent, "%u => gpio %s irq %d\n", offset,
->> +               gpiod_name(desc), gpiod_to_irq(desc));
->>
->>         return 0;
->>  }
->
-> Before, this printed:
->
->     gpio-aggregator gpio-aggregator.1: 0 => gpio 589 irq 188
->     gpio-aggregator gpio-aggregator.1: 1 => gpio 590 irq 189
->
-> After, this prints:
->
->     gpio-aggregator gpio-aggregator.1: 0 => gpio (null) irq 188
->     gpio-aggregator gpio-aggregator.1: 1 => gpio (null) irq 189
->
-> Same results for instantiation using sysfs or configfs[1], although
-> the latter does have optional support for specifying the name.
+Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+---
+Changes in v5:
+- Rename the sdhci@9060000 and sdhci@9080000 device tree nodes to mmc@9060000
+  and mmc@9080000, respectively.
+- Introduce the max-frequency property and add conditional logic to include
+  reg-names when the reg property contains two entries.
+- Modify the commit message to explain the changes done for both YAML and DTS files.
+- Link to v4: https://patch.msgid.link/20260613-st-mmc-v4-0-b3c385617c16@gmail.com
 
-I wonder how many of the other instances have the same problem
-then. Would it be appropriate for gpiochip_fwd_desc_add() to set
-a name itself to address this one?
+Changes in v4:
+- st,sdhci: Add minItems: 1 to clock-names and reg-names to allow single-entry
+  configurations, fixing dtbs_check failures on nodes that omit the
+  optional 'icn' clock or 'top-mmc-delay' register region.
+- st,sdhci: Modify the commit message to explain the changes.
+- Link to v3: https://patch.msgid.link/20260508-st-mmc-v3-0-81c329ed28e8@gmail.com
 
-       Arnd
+Changes in v3:
+- st,sdhci: Edit description of reg property. Modify reg-names. Add
+  "minItems" for clocks and clock-names properties.
+- Modify the commit message to match with the updated changes.
+- Link to v2: https://patch.msgid.link/20260503-st-mmc-v2-0-11ae3216d2ce@gmail.com
+
+Changes in v2:
+- Fix node name in DTS for the MMC to match with the estableshed convention.
+- st,sdhci: drop unnecessary properties, modify "reg", "reg-names" and
+  "clock-names" properties, include an allOf with $ref to mmc-controller.
+- Link to v1: https://patch.msgid.link/20260409-st-mmc-v1-1-4c54321c3535@gmail.com
+
+---
+Charan Pedumuru (2):
+      arm: dts: st: align MMC node names with established convention
+      dt-bindings: mmc: st,sdhci: Convert to DT schema
+
+ Documentation/devicetree/bindings/mmc/sdhci-st.txt | 110 ---------------------
+ .../devicetree/bindings/mmc/st,sdhci.yaml          | 105 ++++++++++++++++++++
+ arch/arm/boot/dts/st/stih407-family.dtsi           |   4 +-
+ arch/arm/boot/dts/st/stih410-b2260.dts             |   4 +-
+ arch/arm/boot/dts/st/stih418-b2199.dts             |   4 +-
+ arch/arm/boot/dts/st/stih418.dtsi                  |   2 +-
+ 6 files changed, 112 insertions(+), 117 deletions(-)
+---
+base-commit: cf2cd8efd046c561191b8541d32a8bfe845bf06b
+change-id: 20260327-st-mmc-c906ad95ff83
+
+Best regards,
+--  
+Charan Pedumuru <charan.pedumuru@gmail.com>
+
