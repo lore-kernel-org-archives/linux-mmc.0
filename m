@@ -1,86 +1,87 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35610357A3E
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 07:36:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 133AE348C52
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 07:36:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782718580; cv=none; b=nONrzMufF6IIs9nrVXsix6XVKO2HfKpR9PYlAIxtAfOupYzyOM08rjGi1N4l8zVNeunGGOwSEigwyrCN3MtcUPfJEjL7VedfwoH5BiXgs59Ub2SD0iyUnHZ8C1NlCr4XG1YClH0Ns3A+1FhZcEDPQx2VvMsrUJOjzL0+/Q3JvPE=
+	t=1782718584; cv=none; b=AFm2jFm8wmT7sZ4qmT/SvbbsWEeNHON53WvnPvyC4K4/QFOR+WqaPz4ijT+sTKcdvqtAKjvKs8cNV0QMUKpo4wPV4bPqwgr/czdtgODgpNOZ2d5L70oPL9jm5/Cp76TZlIxiAZI7ykO21mVo4BZqm5rI+eu2gjbOvfPlnCC8R8g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782718580; c=relaxed/simple;
-	bh=UG9Kp7jY662Of04sDVmPvTQnEYnBxLOiWQ1vf2oQK7U=;
+	s=arc-20240116; t=1782718584; c=relaxed/simple;
+	bh=T3CEPNSb8/M/dIWXVKivM2Blp2huvn6qcxNDVkeD2e0=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=YZ2ZTs67pyieuU7E43tPTOTLo50mM7mk87oOsOVnjbSVe5w1dnF3VHASDJYGKnz7OKopafD+RmybXnH+9IkENzWB1bD3fdCo88bknKiGy+isYVShgw9Xhrh7iLbY+yurUByddz/MEM1i0AJs5LuaaQeWDTNdIpElfIQ7hMf4xII=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=hqjETeMv; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=RgQnFyt3; arc=none smtp.client-ip=205.220.180.131
+	 In-Reply-To:To:Cc; b=TLxf6qLzmcmSqwtOuHQxXh+ArO0Rl16E86FL9wNIHe9nLX8aaXjfFGJBtAd1Ir7IaCuaLfa/lPUqsoy9K/yMYpomFgQoTYV48epxvry2kwcrbip8p/aaK1wQSTpTaQSDiJJyvaK/gDGxp7Fo0FfyRJ6J4tfHl8EGmxnLertlfbE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=K7FDqHdA; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=e0fayKy2; arc=none smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="hqjETeMv";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="RgQnFyt3"
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="K7FDqHdA";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="e0fayKy2"
 Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65T6rqpH2125781
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 07:36:12 GMT
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 65T6reoN2125093
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 07:36:16 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	badozWK0W2Cr2Afkm10JULzGCoMptdbDOA7a+6f5rF0=; b=hqjETeMvFYVWdf8t
-	FMhcAOlDxiA/vAvsKjSHGm02gm9MOHdrzSJawyAtAoJGh8Xz1C4hC1rjHlGZjLcb
-	Fq0kmq0Zzt2V91LF2EDwbuWR5F0n7/m7cvlwbKI8BqIyw0ZJxGr6DHEjo+nM8EwP
-	ErROz0K/zWKIDGNeg657fCKrN0HnDEkn5TKzRnPfI0XnQDDXFJ4F+0dwope/sxbO
-	OZ0+XBznxX639+E/+urI90lVjh6VuKU0TBehSIu7vcE9mT4okwfLti5xWQZAYsY8
-	WzX9MTGf//TGhnAMN8pguPVd4YS94v2B1iNhFtZcmPk0bHaOdfnYuW8NTSrI52c6
-	MTKkfg==
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f27335b36-1
+	0C+QKuMIW0soZc99z5bsH2GplHTlcg46DYutDjU8hP0=; b=K7FDqHdAOWM8RANw
+	w8d0LOSvmepGPmsZw+w3gasQ6nXzv5a//W5IBXSwlx4WvMaiMApjNc2RY7TRAUhj
+	mlFO7wNokVZT4BJMXyYOshr4u3PENaioqgVN1jiz7I60M1ktjevoYwIhLu/Qs28E
+	kdUy1mRwg9E+pLOJXMlZvhDs+PKuZfLVJ5ZBxdHdzd55epgicIny5X2s4Cx4H5B2
+	+WYTl95fOXRjPh37WcskqxyHIdR8bSz66gBVlVle78hhxP8KQLVXKjFHI00EEzqe
+	oiLlM82kqcPsxlYnwUa0evExK3oMzOV+lASxpYQX2OQVVpSojr22RMDuDW/1UP2o
+	NnOG0g==
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com [209.85.216.72])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f27335b3k-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 07:36:11 +0000 (GMT)
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-36d97955899so2000119a91.0
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 00:36:11 -0700 (PDT)
+	for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 07:36:16 +0000 (GMT)
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-37d4eede8ccso1779289a91.0
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Jun 2026 00:36:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1782718571; x=1783323371; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1782718576; x=1783323376; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=badozWK0W2Cr2Afkm10JULzGCoMptdbDOA7a+6f5rF0=;
-        b=RgQnFyt3flSYfsWtTfXGT67cXACtfrHDVTcl+Q8YmpDIe9X+sy0YsELXL3bDOaxmeN
-         HEy/OhukSeL7cTZih2Rh8KOCU/lfiwcxSpIFF6B4mGu+TBy8QqNCS15sY1D7cYITLkrN
-         NSJK9IIr2CC4+6jdkpoo3+p0hqwVDa4+Zl3aJzMl5knMCGWXRtA0dDDn2swTYt6cCdCV
-         9m5O/0DCF+as2Cy29wT4Ao89F8gZzAiPRf4sFzSXQTYmnwVI0tPlFOnZGifaIt4aLPZJ
-         onqfxn1l5gyxpMSO4FXZv7/V8V491mvxHLeJx+cbJmdduDDKQPLoAUN3jt2Ike4kiU03
-         1T3g==
+        bh=0C+QKuMIW0soZc99z5bsH2GplHTlcg46DYutDjU8hP0=;
+        b=e0fayKy2iBd+oqR/GJq06YzWSed8wiVrKnVIyKOfC8qeyGMzon/wHP15dRoepD05hT
+         xf1PSKDNKzqol6hLww5N3Mn4dAncbu6fxrQj0Bia+mxHh257ySCtEcXoJd7bZ8o1OBUd
+         ZnA44RWMMkc8F6UYqxf7pnoCC+J7NLz0mprF3TtGDEgxvb+4KTvJ+dw9GI/8MfsSD/0J
+         zm49X9y5zGFcfEUzP2sJoVA9ExCyXmnk/469UBtDSBaROK3frQH65KQwDcvDAMUSUf5f
+         fIAMnmYhKfpqb25G4giLh6kPlIYXT+V7U/FLCwVRke5duXO+xsz/M8xVv9qXMd2KSFph
+         /J4Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1782718571; x=1783323371;
+        d=1e100.net; s=20251104; t=1782718576; x=1783323376;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-gg:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=badozWK0W2Cr2Afkm10JULzGCoMptdbDOA7a+6f5rF0=;
-        b=gSAW9mayZBAHJL9R4M+z5kaJdmDCJAp8QOpAgvJ1gRBQZ9ffu8PJU7FZkcpHYmz5rJ
-         +SQFE7c60f+spfYFkLzjtn7kPwahaiskr9rLGLoEzvl0F5f/JMZu+awX2Aji2HdS4pBi
-         pu/53qS18ubpbmH4BxZ5rqBIs77WUwLZ+hWEQ1e/EGxUmDE+vFk1+SU160ADc/I5aWFj
-         1IRUKfnm2WSuj57ehaybaMehNWt92LV50qeG+4QgudrCH8FHETCRnY+W2QlaLod+0bE1
-         8mghqB6IF6tgKJut9Js0FJOjYfGczlvKgig1Ril4OE5mKm1kg49lv1r01v88K24sr+mO
-         7yPg==
-X-Forwarded-Encrypted: i=1; AHgh+RqqrVDme6/CxkLRoaDVjN2UCd/J782c/l6LAtH7PIK5vuGacMrI5UIkvvggXyZTj+p9gXLGu7dUrOI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyjof/hVP0lg1SDGDG/fJuZ1AO1VSWp+fVL8RYXs2Pn1pDoRXgn
-	xgghvsRNZ5f3oxJKBqcYiSqDcky7lBuBYnxRwE2i5ITuphajCF+aeuGEYy9H78TRBBFqkpX7Ay4
-	yvgWH6UWSB9Jfe+yquqd+OWIhdjzBpGbtNbSYrba77YxZkBGT64UJzZ+xZwjradY=
-X-Gm-Gg: AfdE7ckNzJ5REEA4T9ASwuhS1AHo5INkWix6Q8ml+XIG4lR1RgWJQrmrk/qgq8me3Pu
-	tvLfgFi3Uiu/0Xsnzko5Oxsqj5c4YScq08NU+GaXwjN3tcZ2x21Dhxd7VkM4q2jKg3eGyN7CyXh
-	4YyuZy5GzNY/T5nmMVyRxHl2TEgc3Q3JldxvruaLJbiEnM3kFupxfyzdZLQ0ZbLbq3CyWGiUZeA
-	t9pviPe1gM6XhxZoo1poYUbBLtphtowJdKeOxM4cjE2X1YPKp1iSaynnf7FSDDTNtwYgynU53of
-	cnSPZUhE20iSfBR4KtyCBZ+dJUjqINDGC+68x9CxCeQj+RCOXd03UHlkfGI3qsELpn7Y7IutNzv
-	GAiM6t8WxH3lwd8Iya7wx4ClDyYgZS1ZChi/yPFCMbCFk
-X-Received: by 2002:a17:90b:17d1:b0:37f:133a:3e07 with SMTP id 98e67ed59e1d1-37f7a52c17dmr7650808a91.2.1782718570912;
-        Mon, 29 Jun 2026 00:36:10 -0700 (PDT)
-X-Received: by 2002:a17:90b:17d1:b0:37f:133a:3e07 with SMTP id 98e67ed59e1d1-37f7a52c17dmr7650789a91.2.1782718570446;
-        Mon, 29 Jun 2026 00:36:10 -0700 (PDT)
+        bh=0C+QKuMIW0soZc99z5bsH2GplHTlcg46DYutDjU8hP0=;
+        b=rI9gxCuHV5t3NcLqaM5uhiE+bV0xIHY6TPmVPBNQRvfA1QC3fJGvZtivkuttbKG6gT
+         8fqyEoidNXpTYI+RS5JBoLlqpYetOCTGBq9y6zAXxkqmKG9kIoq6tLa8+41IJk0SH65e
+         M/C56OyKmU7t2OjUJ5NnpVJXfDD5c0N4RjX72bXTu0ozyhkpu5BO2b3I8SrgfloBA1nI
+         MiZDOSDiWZ5szHfU7d5ccwwAfXCIuuq0jnbwio2q8jHY2MOsSznYcUCsW2WruiOxWAlo
+         aD2eLhKulgFPBuxXl6k1YvusaRu4mNKmI7QKe9uCsB/8eT/SJ7Iyi1n752ik4yLYm4W0
+         d3aw==
+X-Forwarded-Encrypted: i=1; AHgh+Ro5JMGU2ONU2FS8NgxklAN9IhimXtzXj25wx1iJ2E+ZcKDXXNEqWME87ijPkByWSJ6RYr4CQpgaiTM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwLOZiP4v0XcbKdT9ijADunULGSmYR8d8qnhfkiUAMiItDzY2sP
+	dfSlhkQuyYslRzzbjqPFWJ2GueAJLjT30h5MnRSjnnm80qhQPSuxj2NSiXHl0jkEHdSd/twMV71
+	fUypJLmVvgZdndO9Vxn31gu/JMjmJv7EgH5zbEjcH77i8+mjRhvbP9M8QEtLDw5A=
+X-Gm-Gg: AfdE7ckPHGwm811FDjVJXP5VlneLkCGpsH8cJzxmQpnyoLkWX6GJ29Vyg/CmmJA1p24
+	aEp+g4eh2bwmZhpbqVPUWq4MGYWhWb28lpIf9g+GNezC+uf3TddBRqbBGYk7PFHOiWYXh0aUdxk
+	tLpquy7PRtcvuK+zn6Sqcn8FNJuxMtU7i4scLIXDZFDkrU17Hk66T0yLU3eKMGAR18ojDsI7PB5
+	teuXdvRm5wAyKn7zVOnTuGwtYP980bIonw/CKlFCUJYYwTF5I7eBjeUw5Lwbpmj5fnFvh22mLX7
+	t1bPRpuxZ9sMJzutUiB4xFkw+I6d0mKwAOWQ2pAfuJS4iKGhgYpTLaH4lYMevjWrf/8pfc0d/rY
+	K/EBedJAfiT/B3KS1G42yAqVUHBFwI5jf9G1rmiqqsXQQ
+X-Received: by 2002:a17:90b:4fc1:b0:37f:d9dc:557 with SMTP id 98e67ed59e1d1-37fd9dc06ffmr5040238a91.16.1782718575572;
+        Mon, 29 Jun 2026 00:36:15 -0700 (PDT)
+X-Received: by 2002:a17:90b:4fc1:b0:37f:d9dc:557 with SMTP id 98e67ed59e1d1-37fd9dc06ffmr5040220a91.16.1782718574982;
+        Mon, 29 Jun 2026 00:36:14 -0700 (PDT)
 Received: from hu-kuldsing-hyd.qualcomm.com ([202.46.23.25])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-37fa9629f8fsm4537979a91.8.2026.06.29.00.36.05
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-37fa9629f8fsm4537979a91.8.2026.06.29.00.36.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Jun 2026 00:36:09 -0700 (PDT)
+        Mon, 29 Jun 2026 00:36:14 -0700 (PDT)
 From: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
-Date: Mon, 29 Jun 2026 13:05:31 +0530
-Subject: [PATCH v8 1/3] dt-bindings: mmc: sdhci-msm: add ICE phandle
+Date: Mon, 29 Jun 2026 13:05:32 +0530
+Subject: [PATCH v8 2/3] arm64: dts: qcom: kodiak: enable inline crypto
+ engine for SDHC
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -89,7 +90,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260629-ice_emmc_support-v8-1-1a26e1717b85@oss.qualcomm.com>
+Message-Id: <20260629-ice_emmc_support-v8-2-1a26e1717b85@oss.qualcomm.com>
 References: <20260629-ice_emmc_support-v8-0-1a26e1717b85@oss.qualcomm.com>
 In-Reply-To: <20260629-ice_emmc_support-v8-0-1a26e1717b85@oss.qualcomm.com>
 To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
@@ -101,30 +102,27 @@ To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
 Cc: linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
-        Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
-        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>,
-        Abel Vesa <abelvesa@kernel.org>
+        Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
 X-Mailer: b4 0.15.2
-X-Authority-Analysis: v=2.4 cv=F+FnsKhN c=1 sm=1 tr=0 ts=6a42206b cx=c_pps
- a=UNFcQwm+pnOIJct1K4W+Mw==:117 a=ZePRamnt/+rB5gQjfz0u9A==:17
+X-Authority-Analysis: v=2.4 cv=F+FnsKhN c=1 sm=1 tr=0 ts=6a422070 cx=c_pps
+ a=RP+M6JBNLl+fLTcSJhASfg==:117 a=ZePRamnt/+rB5gQjfz0u9A==:17
  a=IkcTkHD0fZMA:10 a=FelO9ux0wxsA:10 a=s4-Qcg_JpJYA:10
  a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=gowsoOTTUOVcmtlkKump:22
- a=EUspDBNiAAAA:8 a=KKAkSRfTAAAA:8 a=Hwb5qPKBi1csoFV4ZQQA:9 a=QEXdDO2ut3YA:10
- a=uKXjsCUrEbL0IQVhDsJ9:22 a=cvBusfyB2V15izCimMoJ:22
-X-Proofpoint-GUID: lCcvR9Owyv4qqJ1KZVT7wsJjWDNaSx-s
-X-Proofpoint-ORIG-GUID: lCcvR9Owyv4qqJ1KZVT7wsJjWDNaSx-s
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjI5MDA2MSBTYWx0ZWRfX7STry0FtTH8Y
- V9Ku/vtxeJ+yuIf2KWzWQoOMq/nPK5C38p2wuqAIDFtqY55ZzEM1wUk/6R0/rdxT1Hw4s8DGxTd
- n0TppZanwJjLpM+f8wCoXr0m5hjelNqePvSkY5DYCWqukyzk1shGjEoNaoXBkQ3NSO9Q0yih7Xg
- dtfULOEHQnUXewEscMCIHSJJGPvZoJvJP61JCUuAcyYwST10CU+qhsdmHK2+0Q02J2lLEwM0IpI
- VwuipfKFJNBt9Otubv0F08/RlaIjXT1WiN5ENmwJ+ZNtd1V9HuD8aOm+Lo1Jq1JDCeRLoMqK+kn
- xJDC2o9iXzQC6LnBqMn5S2J6Lainn8N1zhMDzPsr56tmGM6f8IZQwzV3CZY+y93ayjlngE3ufse
- q7qpGCn1Lo5v3JNQfWpGQDCXR6Jjxm9pv3SrkNUeoshKdkkdG1DvFAzAlyDENb+FTmxrLaphbU2
- ugLxmxVfDdgXOIUDkLg==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNjI5MDA2MSBTYWx0ZWRfX0NFVXaEGD1Fr
- 8aDRsOFPB6VltKGyNTQbcvX9NSibxMFRIUhQ5ywwgW4ro/LiNlbwPtTATtmVtGfQ3jHIQdDgtdf
- asjEr1O9qxV1PtWJ+wgKfv/ynIHtK1w=
+ a=EUspDBNiAAAA:8 a=uKQuvSuCY7vHg_iPvDkA:9 a=QEXdDO2ut3YA:10
+ a=iS9zxrgQBfv6-_F4QbHw:22
+X-Proofpoint-GUID: 3l1Ax6gUIG2p3qTqRURgfiMDVukC1kCz
+X-Proofpoint-ORIG-GUID: 3l1Ax6gUIG2p3qTqRURgfiMDVukC1kCz
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNjI5MDA2MSBTYWx0ZWRfX5Ti1EQ2aD0ji
+ IJv2ptvpe79QHtK++zE0jLUQmr5Co29IeqnU/O64yrVqCmCRWMOOwFSl2hbx+0o/gkddXD1tv0U
+ vYDCwmfjeD8GnOWUWZI7J7TvA5OQsdaqxZgrpty/bYNu8SP77Fi8VIUFM0RLr9Z/6+ZaCOKo9OF
+ xmeOzJJN5KGJj7SBRF0h67mireEr/lAY+E5AzS6boSxKduz81APqryTisdGF7tf+wejXNmDCozZ
+ GhZf8q5ZPeUGSjCrHOzgXWNKLM4uUZ4yFj+wVrX3nMEBfh/0CmDaldscaPXUmsEsbSJ1vuJ5wkb
+ 9y+k5xfhM6nolK2uQ/IW2stE6Vy+Yd7Hye+EGM5aqQpX/wUnlci1hMTplforbbM0o2lCzxo+RUh
+ Fsso0uGCTsbmKShsx3xG7E5MfSYNVN6UalqZ+I+QFp2s7sA2QPXBrZ2fRakswF5u7Bv8WX5b/tK
+ 74qpxZkuHyKj0k+9onQ==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNjI5MDA2MSBTYWx0ZWRfX/t6GqyfDNnTZ
+ 7HwdY3lj3OnLbR+lnOYrTzNSnkroPBO2ubz/DgAj0MrhSXS9SprJR4pLoeNfY4tVyO2ujUHv6JH
+ A55UkPSznpYpwREHdhthc4f34yQMJ1I=
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
  definitions=2026-06-29_02,2026-06-26_01,2025-10-01_01
@@ -136,139 +134,173 @@ X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
 
 From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
 
-On newer Qualcomm SoCs (starting with sc7280/kodiak), ICE is modelled
-as a dedicated DT node. Add the optional qcom,ice phandle to reference
-that node from the SDHCI controller.
+Add the dedicated ICE node for kodiak and reference it from the SDHC
+controller via qcom,ice.
 
-When qcom,ice is present, disallow an embedded ICE register region in
-the SDHCI node to avoid double modelling. Older SoCs without qcom,ice
-remain valid.
+Keep the ICE node disabled by default in kodiak.dtsi and enable it in
+board DTS files where the corresponding SDHC node is enabled.
 
-Co-developed-by: Abel Vesa <abel.vesa@linaro.org>
-Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-Co-developed-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-Signed-off-by: Abhinaba Rakshit <abhinaba.rakshit@oss.qualcomm.com>
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Co-developed-by: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
 Signed-off-by: Kuldeep Singh <kuldeep.singh@oss.qualcomm.com>
 ---
- .../devicetree/bindings/mmc/qcom,sdhci-msm.yaml    | 95 +++++++++++++++-------
- 1 file changed, 67 insertions(+), 28 deletions(-)
+ arch/arm64/boot/dts/qcom/kodiak.dtsi                       | 14 ++++++++++++++
+ arch/arm64/boot/dts/qcom/qcm6490-idp.dts                   |  4 ++++
+ arch/arm64/boot/dts/qcom/qcs6490-radxa-dragon-q6a.dts      |  4 ++++
+ arch/arm64/boot/dts/qcom/sc7280-herobrine-crd.dts          |  4 ++++
+ arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker.dtsi      |  4 ++++
+ arch/arm64/boot/dts/qcom/sc7280-herobrine-herobrine-r1.dts |  4 ++++
+ arch/arm64/boot/dts/qcom/sc7280-herobrine-villager.dtsi    |  4 ++++
+ arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie.dtsi      |  4 ++++
+ arch/arm64/boot/dts/qcom/sc7280-idp.dtsi                   |  4 ++++
+ 9 files changed, 46 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-index bd558a11b792..b3fcc1673c10 100644
---- a/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-@@ -145,6 +145,11 @@ properties:
-     $ref: /schemas/types.yaml#/definitions/uint32
-     description: platform specific settings for DLL_CONFIG reg.
+diff --git a/arch/arm64/boot/dts/qcom/kodiak.dtsi b/arch/arm64/boot/dts/qcom/kodiak.dtsi
+index fa540d8c2615..633ebfd86352 100644
+--- a/arch/arm64/boot/dts/qcom/kodiak.dtsi
++++ b/arch/arm64/boot/dts/qcom/kodiak.dtsi
+@@ -1050,6 +1050,8 @@ sdhc_1: mmc@7c4000 {
+ 			qcom,dll-config = <0x0007642c>;
+ 			qcom,ddr-config = <0x80040868>;
  
-+  qcom,ice:
-+    $ref: /schemas/types.yaml#/definitions/phandle
-+    description:
-+      phandle to the Inline Crypto Engine (ICE) hardware block for this controller.
++			qcom,ice = <&sdhc_ice>;
 +
-   iommus:
-     minItems: 1
-     maxItems: 8
-@@ -198,35 +203,69 @@ allOf:
-             enum:
-               - qcom,sdhci-msm-v4
-     then:
--      properties:
--        reg:
--          minItems: 2
--          items:
--            - description: Host controller register map
--            - description: SD Core register map
--            - description: CQE register map
--            - description: Inline Crypto Engine register map
--        reg-names:
--          minItems: 2
--          items:
--            - const: hc
--            - const: core
--            - const: cqhci
--            - const: ice
-+      if:
-+        required:
-+          - qcom,ice
-+      then:
-+        properties:
-+          reg:
-+            minItems: 2
-+            items:
-+              - description: Host controller register map
-+              - description: SD Core register map
-+              - description: CQE register map
-+          reg-names:
-+            minItems: 2
-+            items:
-+              - const: hc
-+              - const: core
-+              - const: cqhci
-+      else:
-+        properties:
-+          reg:
-+            minItems: 2
-+            items:
-+              - description: Host controller register map
-+              - description: SD Core register map
-+              - description: CQE register map
-+              - description: Inline Crypto Engine register map
-+          reg-names:
-+            minItems: 2
-+            items:
-+              - const: hc
-+              - const: core
-+              - const: cqhci
-+              - const: ice
-     else:
--      properties:
--        reg:
--          minItems: 1
--          items:
--            - description: Host controller register map
--            - description: CQE register map
--            - description: Inline Crypto Engine register map
--        reg-names:
--          minItems: 1
--          items:
--            - const: hc
--            - const: cqhci
--            - const: ice
-+      if:
-+        required:
-+          - qcom,ice
-+      then:
-+        properties:
-+          reg:
-+            minItems: 1
-+            items:
-+              - description: Host controller register map
-+              - description: CQE register map
-+          reg-names:
-+            minItems: 1
-+            items:
-+              - const: hc
-+              - const: cqhci
-+      else:
-+        properties:
-+          reg:
-+            minItems: 1
-+            items:
-+              - description: Host controller register map
-+              - description: CQE register map
-+              - description: Inline Crypto Engine register map
-+          reg-names:
-+            minItems: 1
-+            items:
-+              - const: hc
-+              - const: cqhci
-+              - const: ice
+ 			mmc-ddr-1_8v;
+ 			mmc-hs200-1_8v;
+ 			mmc-hs400-1_8v;
+@@ -1076,6 +1078,18 @@ opp-384000000 {
+ 			};
+ 		};
  
- unevaluatedProperties: false
++		sdhc_ice: crypto@7c8000 {
++			compatible = "qcom,sc7280-inline-crypto-engine",
++				     "qcom,inline-crypto-engine";
++			reg = <0x0 0x007c8000 0x0 0x18000>;
++			clocks = <&gcc GCC_SDCC1_ICE_CORE_CLK>,
++				 <&gcc GCC_SDCC1_AHB_CLK>;
++			clock-names = "core",
++				      "iface";
++			power-domains = <&rpmhpd SC7280_CX>;
++			status = "disabled";
++		};
++
+ 		gpi_dma0: dma-controller@900000 {
+ 			#dma-cells = <3>;
+ 			compatible = "qcom,sc7280-gpi-dma", "qcom,sm6350-gpi-dma";
+diff --git a/arch/arm64/boot/dts/qcom/qcm6490-idp.dts b/arch/arm64/boot/dts/qcom/qcm6490-idp.dts
+index bdc02260f902..1af10068edf5 100644
+--- a/arch/arm64/boot/dts/qcom/qcm6490-idp.dts
++++ b/arch/arm64/boot/dts/qcom/qcm6490-idp.dts
+@@ -1158,3 +1158,7 @@ &lpass_audiocc {
+ 	compatible = "qcom,qcm6490-lpassaudiocc";
+ 	/delete-property/ power-domains;
+ };
++
++&sdhc_ice {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/qcom/qcs6490-radxa-dragon-q6a.dts b/arch/arm64/boot/dts/qcom/qcs6490-radxa-dragon-q6a.dts
+index bb5a42b038f1..ef126e29f09d 100644
+--- a/arch/arm64/boot/dts/qcom/qcs6490-radxa-dragon-q6a.dts
++++ b/arch/arm64/boot/dts/qcom/qcs6490-radxa-dragon-q6a.dts
+@@ -1093,3 +1093,7 @@ &sdc2_data {
+ 	bias-pull-up;
+ 	drive-strength = <10>;
+ };
++
++&sdhc_ice {
++	status = "okay";
++};
+diff --git a/arch/arm64/boot/dts/qcom/sc7280-herobrine-crd.dts b/arch/arm64/boot/dts/qcom/sc7280-herobrine-crd.dts
+index df39a64da923..5b10ce277fcf 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280-herobrine-crd.dts
++++ b/arch/arm64/boot/dts/qcom/sc7280-herobrine-crd.dts
+@@ -136,6 +136,10 @@ &sdhc_2 {
+ 	status = "okay";
+ };
  
++&sdhc_ice {
++	status = "okay";
++};
++
+ /* PINCTRL - ADDITIONS TO NODES IN PARENT DEVICE TREE FILES */
+ 
+ /*
+diff --git a/arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker.dtsi b/arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker.dtsi
+index 0add7a2a099c..1bb0e4b8caac 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7280-herobrine-evoker.dtsi
+@@ -98,6 +98,10 @@ &sdhc_1 {
+ 	status = "okay";
+ };
+ 
++&sdhc_ice {
++	status = "okay";
++};
++
+ /* PINCTRL - ADDITIONS TO NODES IN PARENT DEVICE TREE FILES */
+ 
+ &ts_rst_conn {
+diff --git a/arch/arm64/boot/dts/qcom/sc7280-herobrine-herobrine-r1.dts b/arch/arm64/boot/dts/qcom/sc7280-herobrine-herobrine-r1.dts
+index b04888a98203..78e0309b699c 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280-herobrine-herobrine-r1.dts
++++ b/arch/arm64/boot/dts/qcom/sc7280-herobrine-herobrine-r1.dts
+@@ -126,6 +126,10 @@ &sdhc_2 {
+ 	status = "okay";
+ };
+ 
++&sdhc_ice {
++	status = "okay";
++};
++
+ /* PINCTRL - ADDITIONS TO NODES IN PARENT DEVICE TREE FILES */
+ 
+ /*
+diff --git a/arch/arm64/boot/dts/qcom/sc7280-herobrine-villager.dtsi b/arch/arm64/boot/dts/qcom/sc7280-herobrine-villager.dtsi
+index 38c8a3679fcb..ff26dee6b804 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280-herobrine-villager.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7280-herobrine-villager.dtsi
+@@ -88,6 +88,10 @@ &sdhc_1 {
+ 	status = "okay";
+ };
+ 
++&sdhc_ice {
++	status = "okay";
++};
++
+ /* PINCTRL - ADDITIONS TO NODES IN PARENT DEVICE TREE FILES */
+ 
+ &ts_rst_conn {
+diff --git a/arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie.dtsi b/arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie.dtsi
+index a4fde22e3355..ecf518f2267c 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7280-herobrine-zombie.dtsi
+@@ -74,6 +74,10 @@ &sdhc_1 {
+ 	status = "okay";
+ };
+ 
++&sdhc_ice {
++	status = "okay";
++};
++
+ /* PINCTRL - ADDITIONS TO NODES IN PARENT DEVICE TREE FILES */
+ 
+ &ts_rst_conn {
+diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dtsi b/arch/arm64/boot/dts/qcom/sc7280-idp.dtsi
+index 8cac4ce9c851..dfefcad57f7a 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280-idp.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dtsi
+@@ -744,6 +744,10 @@ &sdc2_data {
+ 	drive-strength = <10>;
+ };
+ 
++&sdhc_ice {
++	status = "okay";
++};
++
+ &tlmm {
+ 	amp_en: amp-en-state {
+ 		pins = "gpio63";
 
 -- 
 2.34.1
