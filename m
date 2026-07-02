@@ -1,66 +1,66 @@
-Received: from BL0PR03CU003.outbound.protection.outlook.com (mail-eastusazon11012002.outbound.protection.outlook.com [52.101.53.2])
+Received: from PH0PR06CU001.outbound.protection.outlook.com (mail-westus3azon11011019.outbound.protection.outlook.com [40.107.208.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3587A2DC79F;
-	Thu,  2 Jul 2026 08:58:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.53.2
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8776B3C553A;
+	Thu,  2 Jul 2026 09:01:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.208.19
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1782982710; cv=fail; b=AJrVoL5O+xAB+xTOlQrf7fN2sqG+xQZEBjM39MyIgIcX2tab0sD04n/+kfskDCe+gUkcS/RQJJMjSqI3xcD2d73POpopS8a0fxjvNAHeXSOCR/cHkME0avTDd4jpgzvX2NWSqASTZBF6jf4BCygZfiqVd5k0OIQL2NBLH0DZ7MI=
+	t=1782982918; cv=fail; b=XyAhAqkyI5/I0X085UiSRActdu/5yCq3Sk2x5jU4mx8CiDaTM7SQdABv0lnHUkMKj+8qieP1Q6AkoL+XRZ34OKsbdNqIceMTr3LTAIrMkM2CGaY2s+GPTADCFFvPduVvxfuSnTLkprBELMHgKoL4INVyBudZq7/hgdAW4II4Azk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1782982710; c=relaxed/simple;
-	bh=kIbx0Ga1Fy3REHmsMMqQ7VMgZ0W/cexK94vr0hrwmaU=;
+	s=arc-20240116; t=1782982918; c=relaxed/simple;
+	bh=Ve91TDkcw99b8sY8I5OHTNgIxVEOS0viFt64hBw9K2M=;
 	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=dJppMExFwbZNAujzm1ZdPssrpJ/Oj1fiPceKzXI4q8JwnozE72pOzUET9yNUcCUAGooogzpZgH/58HlG/Nn//j5tawy0II1zKzXvASepyiRZvqu4Q+suKk9FNsgygIGP57hUkVNFR7nDwFkhNzVbixKy4r7Z5Sq9XEW6qrWmub8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=FdibQQlx; arc=fail smtp.client-ip=52.101.53.2
+	 Content-Type:MIME-Version; b=ueUMkx2Lk6vVxcULeJCX2D5SrwH1oEFgWOqP7nhFY46AC3DR1Ud9shzDNjrZAhmQNZqXH7hNFiF1FQEsUyUR0Ot2em9dICH9i/TgSBU8EoCPgMFRUzuc8JS70LZt/nnAY0ocVBbM0d/epsd4TRF3MUuwkUfxT3WDLYuCh9dvLYI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=YjxRnEF/; arc=fail smtp.client-ip=40.107.208.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="FdibQQlx"
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="YjxRnEF/"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=vaXUS94ibkLIJpHpqVZ66oDw1DV/W8toWnDlw5uVk0HYbt/UrDi34zLKSphVcq0SA3Jo2b5zruYB3ePHy6P4PHnYUlkvY3GchlnuTAZI8FX1yEg1dU5G6WsUoOLciAdFUlz7Adw45YOXs//NM4H+iOYpUyv1CVsSCuKrnPyBI98GkqV+Y6+wA2Gk0e5nJKju+KWqpwTp8Ve6ZdbkIu5RYXeRKqVAlA2AQcs1eHkLAeyguitUhvcr7lSU+Yst7mF8j0Qevl0ec+1rLejeR4ZZ5smrubrrPhF/vwN7XAKupQmTbyQ+2KwAmLNE3QYeX7cR/mqht5A8JzOqaUBAcDk66g==
+ b=HbZ1iWkW9d1fKqHJJhoikoOeBJ+yQ3Gbdoe8TM876riu6XM30RBJbhJCfdO7TGgUbzslJ+xON9pH4HSZty0mjiqudwi5FpbWiM/EevRgit7cFFjlziqqR3vj5KACEAFiDjRnc4ir+lFy4uG34cO5uD6O0dIqtfB4YxE9hJbi2p/yR3wgqrvgnprj/lzHd+qayjGotWNYkXnKMks8vH24NLRDwW1lsnxleR8gdI53cYxddgTFQrxB6q/WUtNf3uIF7MBKNA5al3TRFCkokYB5BwfgvtiewtxCZDf18WpZ7c6+RfOaTwVXFbBXsYzGNVQCNt6L37uor0k4jv4w+bp+KA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=QyMAxJvHc6B9t3Y2OVGaJTzCJJBjg2LZRjsBIyEI5+E=;
- b=hWAXDL8RxRsHlJngP4J9rSasWemoNR9pVoMu+g7UsEwJM1v/xTEk4UkjJZDBkQJmegh0mxevN8nIYvovLyh2JtDb2GpTuVnPWPrSM4xLvUjgNet35W6uOy2AdyOMvJQqMvB4sY4q1ZaJbqYp+Zbibbru6TJajoKyjsQ6dx+PKfZENBCqgk7GTP8TykjivhaP+l8VVnuy7fjWU3/NxkR47J366tnuBMQMIDa+x1WauYYt5jYzD8m1vrGKLMYR3UgIQF5ksWTLGeiyoSBU89RF5WRxFmFKVnMMPxu/3xtnh2v1beBj8uFWLKRPbLSuQVktmlL3n2zASy5siZA2iDdHlg==
+ bh=RAxX866RjjgBy535U7fJoDE7Xy9RM0RScEzeozAtMb8=;
+ b=m3dQ5PhRIYLRjZqeH6uhKR36ieaEBs/Qkfh+Yo1p+74iVVlInCK62Y+F7QnlEqbHGIPN9kc2hM6M83rP3Xz1/BSGlLQZlTUXQWO0iMxS21qzA+dlIllFrEBRiCDCjUfGFCcrhgs7pTcleEzxsm5C9CeTtNMQy6wuYoWdfFZ10whcyrB6tYLDvgvvdYCjraBd/qFvU0VP78bh9mSaTpkWLZxrl/0VFGF8J3b+juNTd0WparleD0GAFdIF6Gz+4bPU6tw4YJvdNRfLLUug8QjeD+Tu2vM42rH/eCw5wbyoh8mDhlGYe9MdIqqbmSdOVnYl3F6meJO6OGk4e9pfGtLoag==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=QyMAxJvHc6B9t3Y2OVGaJTzCJJBjg2LZRjsBIyEI5+E=;
- b=FdibQQlxJ5sWndDvluNhwFFyv49+UzjbUjQfijAH8/39lHKIsmilH13d4nbqhAI1zi0giOFlwGs2sCGrHjVGJ2gkZr+Z5dda+scDuxwsn8VvByXAhWbMtaAugHFe7VKD7pNSCUiNJVnENwHZZyojGWFYbYP5stQN7+LQIjGtM7gSZ9OkhrilQ/x0Ni4qLrtd53Ucywox/D9v9Z9X54dT83CY48vWvKhmQCwa4D9IfqvscqHMiZ7j04QO9BYsBUQE3WmizFtK6HctiOzXgtUfNn6hXxpdL74TO+SnVxQvtoQtvt8sIoCf7G0Dw/4D63f0UbTNaAK9h6KptabVtTFPWw==
+ bh=RAxX866RjjgBy535U7fJoDE7Xy9RM0RScEzeozAtMb8=;
+ b=YjxRnEF/tFzz2M4ByjYWoK7AE5TV2vpjk7KzYE4JW4pkcCpWK6tdEBgT6vXF2PJEGsLmDIHpt0DE2OLvVgYZVkxOm1BCIS/i/iudUt7X87ecAcawB+GPBA84X206ImhP7t1rm7JjI2BFaNIcs9yORuVfQJhhyxH/Qv1Lck4FETQqGdKfiQmIA89Xr47CnAhIkgkuTKbTtfbU7D7Z1e2WqUUaHx07/3IAgLXOmOMKXvcpt4m8wOfqzI8rQhUfFIf/tS2GU21hmPPTuWiOP0O/Sq2lUh2JpFO+Qpf+xhglNq2wzoRnRoIwd1CsE0EyQt3IC7rMCKl2KzmrsvK5EV800Q==
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
- by MW4PR03MB6921.namprd03.prod.outlook.com (2603:10b6:303:1b8::22) with
+ by MW4PR03MB6489.namprd03.prod.outlook.com (2603:10b6:303:120::6) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.10; Thu, 2 Jul
- 2026 08:58:19 +0000
+ 2026 09:01:52 +0000
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0181.009; Thu, 2 Jul 2026
- 08:58:19 +0000
-Message-ID: <6b7251f7-8231-44a6-a4bc-34e61f0e4669@altera.com>
-Date: Thu, 2 Jul 2026 14:28:09 +0530
+ 09:01:51 +0000
+Message-ID: <be1238e0-4bf3-4416-b2ca-cae4532b82e3@altera.com>
+Date: Thu, 2 Jul 2026 14:31:42 +0530
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/9] dt-bindings: mmc: cdns,sdhci: add SD6HC support
- and PHY properties
+Subject: Re: [PATCH v2 3/9] arm64: dts: agilex5: add Cadence SD6HC controller
+ and SOCDK enablement
 To: Krzysztof Kozlowski <krzk@kernel.org>
 Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
- Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+ Dinh Nguyen <dinguyen@kernel.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+ <conor+dt@kernel.org>, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org
 References: <20260627201457.12318-1-tanmay.kathpalia@altera.com>
- <20260627201457.12318-3-tanmay.kathpalia@altera.com>
- <20260629-elegant-furry-fossa-1fd2ae@quoll>
+ <20260627201457.12318-4-tanmay.kathpalia@altera.com>
+ <20260629-tireless-hippo-of-innovation-eb5e27@quoll>
 Content-Language: en-US
 From: "Kathpalia, Tanmay" <tanmay.kathpalia@altera.com>
-In-Reply-To: <20260629-elegant-furry-fossa-1fd2ae@quoll>
+In-Reply-To: <20260629-tireless-hippo-of-innovation-eb5e27@quoll>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 X-ClientProxiedBy: MA5PR01CA0148.INDPRD01.PROD.OUTLOOK.COM
  (2603:1096:a01:1b9::13) To DM4PR03MB6208.namprd03.prod.outlook.com
  (2603:10b6:5:39c::19)
@@ -71,252 +71,166 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|MW4PR03MB6921:EE_
-X-MS-Office365-Filtering-Correlation-Id: b8c999aa-9a3f-4318-e181-08ded8180f7b
+X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|MW4PR03MB6489:EE_
+X-MS-Office365-Filtering-Correlation-Id: 609e7878-078f-4e5b-95c2-08ded8188e43
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|7416014|376014|23010399003|1800799024|3023799007|4143699003|18002099003|56012099006|11063799006|22082099003|55112099003;
+	BCL:0;ARA:13230040|366016|1800799024|23010399003|376014|4143699003|11063799006|56012099006|18002099003|22082099003|55112099003;
 X-Microsoft-Antispam-Message-Info:
-	eN3yof7QZBkvbclQb7qoVJejm2fmvgZ9ID3bSwKT/ggDC3y42CuSVm7eAl8tdMt5KuvdNahJGzJbIcl/RW/96OqVexdp5miOJoijKD8qSGf25H9R0mVnQclVpfiYJZ8KRwViLn/iU/IQ89CaUB9IyhaQG5OAEon/qJuaW9OfG0AXGuHgx0Ss2ZuSwV19ESJSvIbiPzAeEFLFDkse/PknKqzoH1CsoF3pGwPqRA+BJ8tCObyJmpzzH3jKtmH2lK6RtNZYm65htSKRfFJo21WMNEDaYS+clFeF4hksLh5Df96uJKqbfnpvlj1UB2tmzBdsUasioTDMKqVjISp48NcNaqlGjg968W+LPwmtnp1R47Sgg/ujBaCSp+IWUb7LQO2rH9F6dc5Z5HaqL4f7Rfyc2IKjq6alBOoGLsaZSV/modWlaVM9o8NyaAlRnJlBOf+M+5LggSuL6WTOmAeu9oPoxfsCO7DyV956HUPweqCY4BZ2Vghp9QaxhS00mWWJ+uBGk5Rqz43Mo1Frf5rqpWxR/GWd27MXoRAoTmL5mbUO9VThf5j4Qs1AWrHEKwynV0qQZmd/DQ+7oQtKlrML7Am6ocF/vNvd+KriJ+ehPNhNiaccAJaWrhGV8LoiODcdc7O2
+	gR8DTwRuom5UAfrvFyGJ3DXtQjux9s67mkhDIe2DDCBy1+k+2Ek86N7oKjR4SK6XVMfmZNlR4+qVJHElASR8hSV6EXLJUcsgQkASuDxnKpIY1lQqIsCs81DW8G4C/j1H7ohoAOgdFAttjWyteacDtCBpJwRevETdEAqORwWoZ6KmzkF058KZoiFSahUU25xDJZrQ9+Zht8g0JwDDhLFTm7y1uUf4of9cjJjjVp8gN4SuFtqUJaOHxD5OC7v3qd3cjFVVXbNa8vktHW/+N6Gsqm0WdMXfwAUso8zVNXBIOB72IZ971jmWpIbxevZfyPqO90XDeXKVC9u8aws9oCzFQbUJsMIr2MziosJe/umBwXucP6UnsczyYDVs0l/rXgyPRRbrGG7Sr8+la3QZatkcWOMofp1uLmCJ6fxg7RJc1AbGAk+7p3XOrMzYKdOsCBG8xW+rVnOafarU2pNFAoOz/lc33VfixPPfDVOCXe9KnT+oDWC10MsI2n1J/+OT/ufePwMYGWj+278wngwOQegLgJBuPwbxyXmWpeB67UvQMupLtk5WJycwzzlM+G54sDzKLfyBAcVb7h/OkFV2c/EMEu0+4oCffxlAzjyh62nFmhQIFl3JZWM/474LFy+0HNPHfCnK3ihaiz3TRI6yMf9Jn6kwTWq6qHibkBXkU4M8qpA=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(7416014)(376014)(23010399003)(1800799024)(3023799007)(4143699003)(18002099003)(56012099006)(11063799006)(22082099003)(55112099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(376014)(4143699003)(11063799006)(56012099006)(18002099003)(22082099003)(55112099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?Yk9OT3N3VlFYdXpTYWZCZ1BKWnlxV2Z4MWxFL295Q2RnTmpkNFZCbzZxQVRw?=
- =?utf-8?B?blVkTWdhVllsWG45Y3h1ZmVFNXk1RWc0TTJsN2lpK0NBTXFTSkRacHBSZlp1?=
- =?utf-8?B?Rkp0RW85Y1hobCs3N1k2TWsyWittZUtxSzZpYWE3bGpWRHUxU3Zzd0x0K2JG?=
- =?utf-8?B?Q0xwZjZPTk9aaExSbERBVEtMZFpyKzZPazRJZXV3a2VabTNsNTJIL1FvcnIy?=
- =?utf-8?B?NHFLY2Rmck5sK2owUVhxMW5Zc0daVTI3ejRKR0QrcTl3ZEk5NTg0WmJFWGxu?=
- =?utf-8?B?T05xRHpPNmx0WE5FSXhkdjJSODlSdCtaSEJrcDZoVWVXZVNEZ0UwcHY0RU9n?=
- =?utf-8?B?TDZYNEV1dWtCU1FIaFVYYytBMkowekZOeTRHS3BTOGRkSzVQZzNLQWJYazcw?=
- =?utf-8?B?NVowcWdDekExSGZabXJWbXV2MmRpNnFSKzBNS2x0akY3WVEvdTlyS3VKdWNF?=
- =?utf-8?B?NCsweHg2ZGMyazBGZkZIU0YrNVYwdyt6MHJSakU3ZHdKSGJuTDFscGFsWGNY?=
- =?utf-8?B?WUxGVFNxNDVkQ0dHVFFsemFhY0tmTTNDSWJNRGpwWE5xbEZWeURWYWQyZjI0?=
- =?utf-8?B?K0p3NVNrSzlJT3dHdUtXZkl2aEoyQ2ZjaUhGd0N1UGsvS094cjlGMm9hZ0tE?=
- =?utf-8?B?dUlGRk9TTEJVVjZVNmFHOHpCK3dKUTNuSFdiemsrRUoyeTQ1bFZqa2FZK3dF?=
- =?utf-8?B?c0VmVjhsWFo1RDk4UEdBRzZleEllNEtVMnhkZ3M5a0oyQ0RWUXFaNDYrcEpC?=
- =?utf-8?B?MmxsSHVPbEhRQnYwajhxTEp5anpROUMybDNvdXU3a0NIWURtV0hqSEY5Mkhp?=
- =?utf-8?B?QjV6RWNCbmlhMkxpdHZndzRLM0kzWGpxK2VYZGZ2OXYwLzc2dUpyOWdicWhv?=
- =?utf-8?B?UFZtMXRQTWlNRWR3bnN4eDVVL3p4VTV0eHk4SFA1a0ZYYnhrN1RXamRCejQy?=
- =?utf-8?B?VzdyOFQwT0plR1E5akt2Y0tJcEV3bVNXRFA4RFJlK3NKbkgrUGJOVkFkYUMy?=
- =?utf-8?B?dXoxRkF2NlBNa3NpQ0tEcmc0RGRMTXlVVUhKbFBjMGtPY3JDdHNNRzVtTFJr?=
- =?utf-8?B?OW9YWEYyMXk4SE9TTXFVcjhrQVQ0VXRFcXd4QThER3BMbkNiV3dmY1ZyV3Jy?=
- =?utf-8?B?M1lJbUdmMHlwTFZvQjMzM1BpaDdXYTVkWndYWmVXSDJwdEdHM0t3dlAyOWhT?=
- =?utf-8?B?WERUT28vdEd6eFhHOGRiYlMzRFJiT1VUamE1ZlRNcWtaR3FGN1RUdkZYR05Z?=
- =?utf-8?B?Q2kydkI1eDQzeXhWS3FUTmVvcG9PYStubWxJMzlqWVFPQXNia3ZtejJ4T0cy?=
- =?utf-8?B?ZDV2Z1hxb3BsdlRwdXlmNWFjeURYWTVaWTJNWlMyb05ldnc3OXdFendOTG1z?=
- =?utf-8?B?c3VJZFlaOHBJYjcvZ1dkOUQ4WmtzTGd5MFpJT2RMcy9ORFJBT3RYOW1vVWxG?=
- =?utf-8?B?blhrMWF5akgra1FqQ2tzU0tId3hGdEdsWDlCOVVTL2ZLenFXa3VuaVRuUGRa?=
- =?utf-8?B?cGpkeHBwOU1jcHB5Ukg2WGVJc1ZQMVFTN2U4L1hyS0hUSXJoZXZyNVNXVmY0?=
- =?utf-8?B?cWpTRWUxRmZXekpNdk5kZXI2cVovSmIxRG95NE93Uy9PdVJ5bHFzYXJ6NXhS?=
- =?utf-8?B?a01TNkVIdnR0cHc0azNBT2JDWGFzSnhxMnU1UkIzemZ2cnl3UUVGWC9vVlZN?=
- =?utf-8?B?TktQOFBSWkhZRnJDZGdnSE5KWHdKOFpsRmRhbHliak04WG1TWjArM3pDcktZ?=
- =?utf-8?B?RjFhdHJGOGdwbWp4YjBYcWtGekRvS0xqSTFlQ2JoK2VtaUNwT1RydStEQ1dR?=
- =?utf-8?B?d2xPRW4yM0xtdVNLWW05S1ZEOW5nMFgwQzhxbERvK3BaZlhmT056Rys5NjN5?=
- =?utf-8?B?TWIrTU1zTlA3c0dNWlVNS0pPOUtkbjBYOGZBNkdLczRUb3FiVE9OSit4VUM3?=
- =?utf-8?B?NXFvbzRIdC8yL2FCZzFUYXpmdFZwbU9Oc3VUbDBTT1JCckxOM0VzOWNwOVRw?=
- =?utf-8?B?RFRxVjF4RG1XQ2pSVStvT1VVaVlZclprTmJlS1FpeEJ1U1dmUEV1dWVJL0NP?=
- =?utf-8?B?aTgxeS9obU9hM0psREtwd0hEaml5K0QrQ3FuNW8xZldHeU5POEZ2aGtiRjNF?=
- =?utf-8?B?YzdKMEhTQ0d0OFhQa0dGeFVhc1dKbkI5eXVmbXZ1TTJDS2duZVJWdjVEbXkx?=
- =?utf-8?B?NWhvQkE0RmlLVnE1M3d0cjY3cXJ1UWphNnYwOXVzYzVNZ3E2YSt2a2NuY1RQ?=
- =?utf-8?B?VFJIb3pGa25TVTJWZjRqU1A4K2dBWGl2a2R6K3llSWZMUVp3bnc1THJwbVoz?=
- =?utf-8?B?WTEyVi93QkdkZTlpL3dSL3Btc253SWw5MVBKQjhuOG5wdlo0ZCtxMUYyUzBo?=
- =?utf-8?Q?c0U5wbi+TYPWeHBk=3D?=
+	=?utf-8?B?TWczUTB1UEd1QThJK1d4SWpnMWxUSzNRVDdnZG12TnpXRlBmNUk2ZUFLR0ox?=
+ =?utf-8?B?aFh6UHl2Z0xkaVFVeTc4Z05oUnNYL1lyNWFhalBvZjBONVZoZ1NBbElYZDM5?=
+ =?utf-8?B?WXRCdW9QOXZ5SVRWRFhYQ3BkN3NXdkd4SUZyVHdpSXdjNGtIQWtpYWRpRHoz?=
+ =?utf-8?B?VVdSRFFQbWxNYmN4WVltTWVkZnBSdGJJaDVmaXM1T3F2T1hLZ25HbktmM21a?=
+ =?utf-8?B?M2NYUjlPWUphNWdUSmRpa1JZbzg3KzU5cGkrUWlYV1FRNFl0SXFLaGlZZXpE?=
+ =?utf-8?B?VWI4NWpHOUxjNVltdmxvcVJxWEN6QlJnVnJIVnBIb2pkVzQvK1l4V2NMRTlP?=
+ =?utf-8?B?ckJ3RjQ2QkhHRlY1UzRDQndCdjlJZmMzUWV2aFlUdHhQU01FeU00dks2SEMw?=
+ =?utf-8?B?Y1BzWVhxZFltRnZ6SVRkNlhyb1JTQVUxS0VCWVZBS2FYTzFpY3FFeWRyTHhh?=
+ =?utf-8?B?WkxGMDVZcUFtREpCWTdhcm41clBzUHJwVkdwUmFaWlkvb1J2U3FzQ2FObHFj?=
+ =?utf-8?B?MzIxbGF0WHFyUDRkaXVVdit0K2krUXdRWW1FZ2FQRi9EZUhhWWg4dTBUZkFC?=
+ =?utf-8?B?SlVCN1JGZVNxNVZQd2Fkc3hOWTU1c2p5Y0c4K2hSVWRjcHBKZiszb2lrY29K?=
+ =?utf-8?B?ZUkxT3JmdXN5YUFZRUIzejRKL2lRQTRUcExzejl5OXpMMnZ3SS9PenVneUFl?=
+ =?utf-8?B?dUNrcENua1RQNzhhOHExRFVpdndDVisrQjE0ZlBVbGlaQzZWbndTM1E5RnY0?=
+ =?utf-8?B?VTNxWitpSXdlWk8rZmJuNTl6WHdzY3N3LzBYcStVcGkzT1NBdWxHQWlFMHhj?=
+ =?utf-8?B?NXJaT3ZjN3FSL05MR0ZGVm02ZDlwWnFQUDJSMngvK2hDeG02TTI3Z2cvc3dP?=
+ =?utf-8?B?WW00b1VFUlNaME5Vbk4zbys4endJc2FzZjVaWldPcFZ5aTY3WitEaU1LMDVG?=
+ =?utf-8?B?OHlFWnpsT2hYekZUWGFzYmNYZ2tzUUgxbDFDbnhsd0tlNTRGeFZJVWtoZXdr?=
+ =?utf-8?B?c0ZmSmhvaVZjZjJhbWJTdVZDTFJFaXhiNTlHVWxpTHhDK2RqS2NVZC9RMG4w?=
+ =?utf-8?B?UGRBMmRpbU1aQW9qL3NMMzU4ZmxvbHo5c24xMUExTWZGQ0lQZk8ybmszZ2cw?=
+ =?utf-8?B?Y3ZPQ0h1ajVYam5nMG51NG1XMDdZUXlBcHJmdVZYK09vUmpUTWhKK3M5NzNJ?=
+ =?utf-8?B?bTB6YjlidkgvNXMrOEc3bllmaWdsaXVTU2pjMjErNEF0ZEVZNU84R1hyUFpF?=
+ =?utf-8?B?YWppOGU2MUJ2T2lOdWZFTUlMU3Q4MzRYbFJsSW5jenREYTBzQ0ZzbTR3bU9O?=
+ =?utf-8?B?SUVPTWtYTGlRazUyeWk2T2hpTzNKV3B1RlY0UFk3YjF3NWlDcC93Z3A4Ukxz?=
+ =?utf-8?B?ZTFzY3NLYVZWSi9PdmhseXZydnlYSUs2QWpLdDdBajZIUEhxeUdpTVNhNmI1?=
+ =?utf-8?B?ak9vK04zZitpWktsT0JVZ0s3UHBsKzNEODRkNUg0WktmejdMV0dEV3JDM1Jt?=
+ =?utf-8?B?N1I2Q3JuWktka2FxVUkzNmdsZ2NybVg0MTBieFpQY2hJWm9zL2F4K3kxdVhj?=
+ =?utf-8?B?VXZpRE5sb0h3ZWtnSTQ2b3Z4WENodDc2aVh6U0JTTU5vcDhOazNKSm43T0tL?=
+ =?utf-8?B?eENNVkxCMCtBa3NsOEV5cTcxdTZIOGpSekFHWE1PSWNqaFZCS1FKSCtwbjJL?=
+ =?utf-8?B?QjZYVWZieG5LUWxwT0gzT3NIcVk1QWxkakVzRTBVTXFKUUwxNUpmcVpCNEJG?=
+ =?utf-8?B?MWQ0OVVsZEVMQkcvSU00N0p6ZUErVGdMRDB6U29CWnBEN3UrbWZpUUF5OFV6?=
+ =?utf-8?B?NnFUY05qOHRnb05Na2dPVlRVZGtJbWdoekpLQU9vVXB5dXJXYStwVmZOVXRJ?=
+ =?utf-8?B?QXpQL1dmKzVydDJJOEdVbnNmUGJYUnM3cjU4ZHhoWnJxSzdSYXhUdkg2cWFX?=
+ =?utf-8?B?c04xUHlyWHlTMEY0VUZWaDNjZUxUNkRtZjh1bUJhbmFIU0FBeHNxOXhLVzN6?=
+ =?utf-8?B?bUp1U3g4aFBIbmdoY1ZETWUxTHdXWVVWVGtVbWpMd25mRXJVUEh3cXpEbllC?=
+ =?utf-8?B?VHdKSXJoMkgyMVF3aHFjMTFCVHAyM3hVVk4rcnpLVjNYVjBsUm1Zb2FsanhR?=
+ =?utf-8?B?M3JEMjc5S2hyMmhtRDE5MWN4TllGRGkzTGJnMUN4MVpXTFJISUVCWXBid0ZI?=
+ =?utf-8?B?UkIzUHpLRFBNNytHZW5DTzNDVFpKajlHaUl0NlVYaGt6ZlUyY0E4L01HdTlW?=
+ =?utf-8?B?emx3d3dET2JUeVdNRWsyS1JWR2I3aEVXU0ZPQjZHdW9TTWFlcElmcWxBQkh4?=
+ =?utf-8?B?cjQ3UXZjeEEreUhDZlVUMy8vR0p2ZTBJNnFKOFhwMkNPNUd5T1EzSjlXT3Vj?=
+ =?utf-8?Q?09t3m4YyK+kZbNRo=3D?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b8c999aa-9a3f-4318-e181-08ded8180f7b
+X-MS-Exchange-CrossTenant-Network-Message-Id: 609e7878-078f-4e5b-95c2-08ded8188e43
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Jul 2026 08:58:19.6828
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Jul 2026 09:01:51.5780
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: ywbz6908Kzo0P06YMhsPZ3i7gJlg0f0aLbmVe4gnquIVloV+fHNQaDwn7qchGHmnLS0QZRTujp9ZWBJMnyZOkY44CfOjKp4UeYPGZlyzn3s=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW4PR03MB6921
+X-MS-Exchange-CrossTenant-UserPrincipalName: oUgHRgVVfItlsQj6CjkKRyvhD2fNulot4CjldyWhXJhrnL/NFcZFvYCthUkUiZhcmSDf9imkrlUqaH1X5ZLxFpkNJOjxoZXR+cQDmD1Mp3w=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW4PR03MB6489
 
-Hi Krzysztof,
+Hi Krzysztof,
 
 Thanks for the review.
 
-On 6/29/2026 12:34 PM, Krzysztof Kozlowski wrote:
-> On Sat, Jun 27, 2026 at 01:14:47PM -0700, Tanmay Kathpalia wrote:
->> Extend the Cadence SDHCI binding to support the sixth-generation SD6HC
->> controller. Add the cdns,sd6hc compatible string with two named clocks
->> (ciu and biu) and three SD6HC-specific PHY timing properties for iocell
->> input/output delay and delay element size.
+On 6/29/2026 12:36 PM, Krzysztof Kozlowski wrote:
+> On Sat, Jun 27, 2026 at 01:14:48PM -0700, Tanmay Kathpalia wrote:
+>> Add the Cadence SD6HC controller node to the Agilex5 SoC DTSI as a
+>> shared SD/eMMC node, disabled by default. The controller integrates
+>> with the system SMMU for IOMMU support and uses SDMCLK as the primary
+>> clock source for PHY timing.
 >>
->> Add the altr,agilex5-sd6hc compatible string with three named reset
->> lines from the Altera HPS Reset Manager. Introduce per-variant
->> constraints so SD6HC and SD4HC each enforce their own clock, reset, and
->> PHY property requirements independently.
-> You just repeated the diff. Instead describe the hardware.
-
-Ack, I'll update the commit message to describe the SD6HC hardware
-instead of summarizing the changes.
->
+>> On the SOCDK board, add a fixed 3.3V regulator for card power and a
+>> GPIO-controlled regulator for I/O voltage switching between 1.8V and
+>> 3.3V. Enable the controller for SD-only operation in 4-bit bus width
+>> with high-speed and SDR104 UHS-I modes at 200 MHz.
+>>
 >> Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 >> ---
->>   .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 122 ++++++++++++++++--
->>   1 file changed, 111 insertions(+), 11 deletions(-)
+>>   .../arm64/boot/dts/intel/socfpga_agilex5.dtsi | 25 +++++++++++++++
+>>   .../boot/dts/intel/socfpga_agilex5_socdk.dts  | 31 +++++++++++++++++++
+>>   2 files changed, 56 insertions(+)
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->> index 6c7317d13aa6..edd96e1d2bdc 100644
->> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->> @@ -4,21 +4,29 @@
->>   $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
->>   $schema: http://devicetree.org/meta-schemas/core.yaml#
+>> diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+>> index 02e62d954e94..f552aa0c1faa 100644
+>> --- a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+>> +++ b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
+>> @@ -300,6 +300,31 @@ portb: gpio-controller@0 {
+>>   			};
+>>   		};
 >>   
->> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
->> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC and SD6HC)
->>   
->>   maintainers:
->>     - Masahiro Yamada <yamada.masahiro@socionext.com>
->> +  - Tanmay Kathpalia <tanmay.kathpalia@altera.com>
->>   
->>   properties:
->>     compatible:
->> -    items:
->> -      - enum:
->> -          - amd,pensando-elba-sd4hc
->> -          - microchip,mpfs-sd4hc
->> -          - microchip,pic64gx-sd4hc
->> -          - mobileye,eyeq-sd4hc
->> -          - socionext,uniphier-sd4hc
->> -      - const: cdns,sd4hc
->> +    oneOf:
->> +      - description: Cadence SD4HC controller
-> Drop description, you repeat the fallback compatible, so this is obvious.
+>> +		/*
+>> +		 * Shared SD/eMMC controller node. On the SOCDK OOBE daughter-card
+>> +		 * this is used for SD card operation; on the SOCDK eMMC daughter-card
+>> +		 * it is configured for eMMC.
+>> +		 */
+>> +		emmc: mmc@10808000 {
+>> +			#address-cells = <1>;
+>> +			#size-cells = <0>;
+> Please follow DTS coding style for new code.
 
-I'll remove the redundant descriptions.
->
->> +        items:
->> +          - enum:
->> +              - amd,pensando-elba-sd4hc
->> +              - microchip,mpfs-sd4hc
->> +              - microchip,pic64gx-sd4hc
->> +              - mobileye,eyeq-sd4hc
->> +              - socionext,uniphier-sd4hc
->> +          - const: cdns,sd4hc
->> +      - description: Cadence SD6HC controller
-> Same here
-
-Ack.
+Ack, I'll update the DTS formatting to follow the coding style in v3.
 
 >
->> +        items:
->> +          - enum:
->> +              - altr,agilex5-sd6hc
->> +          - const: cdns,sd6hc
->>   
->>     reg:
->>       minItems: 1
->> @@ -28,10 +36,12 @@ properties:
->>       maxItems: 1
->>   
->>     clocks:
->> -    maxItems: 1
->> +    minItems: 1
->> +    maxItems: 2
->>   
->>     resets:
->> -    maxItems: 1
->> +    minItems: 1
->> +    maxItems: 3
->>   
->>     # PHY DLL input delays:
->>     # They are used to delay the data valid window, and align the window to
->> @@ -115,6 +125,25 @@ properties:
->>       minimum: 0
->>       maximum: 0x7f
->>   
->> +  # SD6HC PHY timing properties:
->> +  cdns,iocell-input-delay:
-> Use standard unit suffixes from dtschema. I am pretty sure we have
-> picoseconds.
-
-I'll rename these properties to use the standard dtschema unit
-suffixes.
-
->
->> +    description: Input delay across IO cells in picoseconds
->> +    $ref: /schemas/types.yaml#/definitions/uint32
->> +    minimum: 0
->> +    maximum: 20000   # 20 ns
+>> +			compatible = "altr,agilex5-sd6hc", "cdns,sd6hc";
+>> +			reg = <0x10808000 0x1000>;
+>> +			interrupts = <GIC_SPI 96 IRQ_TYPE_LEVEL_HIGH>;
+>> +			resets = <&rst SDMMC_RESET>, <&rst COMBOPHY_RESET>, <&rst SDMMC_OCP_RESET>;
+>> +			reset-names = "sdhc-reset", "combophy", "sdmmc-ocp";
+>> +			/*
+>> +			 * "ciu" (SDMCLK) is listed first so it is selected as the
+>> +			 * primary clock by the SDHCI platform layer; the SD6HC PHY
+>> +			 * timing calculations are derived from this clock rate.
+>> +			 */
+>> +			clocks = <&clkmgr AGILEX5_SDMCLK>, <&clkmgr AGILEX5_L4_MP_CLK>;
+>> +			clock-names = "ciu", "biu";
+>> +			iommus = <&smmu 5>;
+>> +			dma-coherent;
+>> +			status = "disabled";
+>> +		};
 >> +
->> +  cdns,iocell-output-delay:
->> +    description: Output delay across IO cells in picoseconds
->> +    $ref: /schemas/types.yaml#/definitions/uint32
->> +    minimum: 0
->> +    maximum: 20000   # 20 ns
+>>   		nand: nand-controller@10b80000 {
+>>   			compatible = "cdns,hp-nfc";
+>>   			reg = <0x10b80000 0x10000>,
+>> diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
+>> index 262bb3e8e5c7..c56f46721bb0 100644
+>> --- a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
+>> +++ b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
+>> @@ -34,6 +34,24 @@ memory@80000000 {
+>>   		/* We expect the bootloader to fill in the reg */
+>>   		reg = <0x0 0x80000000 0x0 0x0>;
+>>   	};
 >> +
->> +  cdns,delay-element:
->> +    description: Delay element size in picoseconds
-> None of these are deducible from the compatible? IOW, they differ in
-> each board with the same SoC?
-
-These values are board/platform dependent and are provided by
-the platform integration rather than being fixed by the controller
-compatible.
-
->
->> +    $ref: /schemas/types.yaml#/definitions/uint32
->> +    minimum: 1
->> +    maximum: 1000    # 1 ns
+>> +	vmmc_reg: regulator-fixed-3p3v {
+>> +		compatible = "regulator-fixed";
+>> +		regulator-name = "vcc-sd";
+>> +		regulator-min-microvolt = <3300000>;
+>> +		regulator-max-microvolt = <3300000>;
+>> +		regulator-always-on;
+>> +	};
 >> +
->>   required:
->>     - compatible
->>     - reg
->> @@ -139,6 +168,77 @@ allOf:
->>           reg:
->>             maxItems: 1
->>   
->> +  - if:
->> +      properties:
->> +        compatible:
->> +          contains:
->> +            const: cdns,sd6hc
->> +    then:
->> +      description: SD6HC variant - use IO-cell and delay element properties
->> +      properties:
->> +        clocks:
->> +          minItems: 2
->> +          maxItems: 2
->> +        clock-names:
->> +          items:
->> +            - const: ciu
->> +            - const: biu
-> There is no property like clock-names. Look at the schema/binding.
+>> +	vqmmc_io_reg: regulator-1p8v {
+>> +		compatible = "regulator-gpio";
+>> +		regulator-name = "vqmmc-io";
+>> +		regulator-min-microvolt = <1800000>;
+>> +		regulator-max-microvolt = <3300000>;
+>> +		states =	<1800000 0x1>,
+> There is only one space after '='.
 
-Ack, I'll fix this.
+I'll fix the formatting in v3.
 
 >
->> +        dma-coherent: true
->> +        iommus:
->> +          maxItems: 1a
-> Do not define properties in conditional block, but top level.
-
-I'll move them to the top level as suggested.
-
->
->> +        cdns,phy-input-delay-sd-highspeed: false
->> +        cdns,phy-input-delay-legacy: false
->> +        cdns,phy-input-delay-sd-uhs-sdr12: false
->> +        cdns,phy-input-delay-sd-uhs-sdr25: false
->> +        cdns,phy-input-delay-sd-uhs-sdr50: false
->> +        cdns,phy-input-delay-sd-uhs-ddr50: false
->> +        cdns,phy-input-delay-mmc-highspeed: false
->> +        cdns,phy-input-delay-mmc-ddr: false
->> +        cdns,phy-dll-delay-sdclk: false
->> +        cdns,phy-dll-delay-sdclk-hsmmc: false
->> +        cdns,phy-dll-delay-strobe: false
->> +      required:
->> +        - clock-names
-> All this clearly suggests you should have own binding file.
-
-Agreed. I'll split the SD6HC support into a separate binding
-file and address the above comments in v3.
-
+>> +				<3300000 0x0>;
+>> +		gpios = <&portb 3 GPIO_ACTIVE_HIGH>;
+>> +	};
+>>   };
+> Best regards,
+> Krzysztof
 >
