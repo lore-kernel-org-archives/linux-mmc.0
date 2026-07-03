@@ -1,117 +1,104 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DD942DCBFA;
-	Fri,  3 Jul 2026 15:55:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35C33305E10;
+	Fri,  3 Jul 2026 16:29:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.12
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783094124; cv=fail; b=STHdxr16DHgC82f6q1LK8fWmeUBYsMjd9Qv1OshgL+Pngxe3JajQVnIr5joxwEhq3DicHdDC3MhRcp9PYpm97g1Ob1xLfNrc5I3blxpB6tPFgzDgmG1v1nE3cLVQKnAj0ZQ7JiqSKBu4QVn+PG/bMLGbMoH87ok2aZJsZ2uUEIU=
+	t=1783096157; cv=fail; b=PM5fQAdGcPypJf7kcB4JnnV1B9xDVpweVYQpIFq9hFA+bk838mgwfDcmaBp/QI5HFgq9VWXN6mp76QCC1RkWXM+Vj/QMHO5uhZPIjIMs9qg5XwMeajpFniNsH3uBrZuh/x05OpMspsNKxmrZZPqsphJxtevE1jPCBP/0kv24KxY=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783094124; c=relaxed/simple;
-	bh=cq1Ia3qvLUfw4q5EMv6IoenPZeED0efv9NXSJ21ATOU=;
-	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=ADwEbzUtShgZnuOWUQNcluuvf01FtWBnYbj1l+V/ENxaUTOUYtKnW5NTtBp6GQTVCCNNwKrHWRThjcRaXQ9Dr/7oj5bkNeoITPs/ukuMcm7jKfDc3NTynaZV+v/L7QoxRPMp1hFwhDV01icwkedK/AARb5ftLUP8hSW8HXO5J9Q=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=g8oMYNUZ; arc=fail smtp.client-ip=198.175.65.10
+	s=arc-20240116; t=1783096157; c=relaxed/simple;
+	bh=JgBRcUIvXEp9SCOM+NH9vr1ODUwImIhZ6NYlpoOuD+Q=;
+	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=k/FjzJr65tVyCDXBSnMN9ILYT5UgIGLTuMIqbC/PgMS9LShZXH+0//Cux92ZduzPuLhCdxYAJtpAXcpYOFgv2HEmT9gctCbkdm2Csls0aEcWeElw0qWQoqc3lMVRr7Qx5wPQBiYo0wRqV4Cir2i8P3mJY+9ZhCjTUXmDi/pMrXI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=B87NpZju; arc=fail smtp.client-ip=192.198.163.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="g8oMYNUZ"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="B87NpZju"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1783094118; x=1814630118;
-  h=message-id:date:subject:to:references:from:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=cq1Ia3qvLUfw4q5EMv6IoenPZeED0efv9NXSJ21ATOU=;
-  b=g8oMYNUZlNMVGK1htVGOHret0yVRitqiq8US/l4+a1urqWiFQ99wItgp
-   wwNWMRzsUEMGgZ6Cf+iNzlx7rPH0MKaV2iQqaNHNzYESjCIa9Mv4V3Y/6
-   ml1MvuG3LcraLJRE/niob8V7wtZVKH1Os/79MOE27365mR0ApWRfSVeRa
-   GwnYvwLDag+kJ21ajza6ayE+QJWiQEZeE1fSrgmtyPrKnH3RrcWLKPtnm
-   5GMCcI+68dyhgE4ENCzh/+iquK0JfGIi3D7wYHcPrgrbPg0B/eCGg165Z
-   5joiVRhJJLb6aXb4ovqrk4jTcO3W7xzoxDsZZZlu4OjPPLdJ3l+K/uSWe
-   g==;
-X-CSE-ConnectionGUID: JPvJ4D6AQsGwu1Z+fo6knA==
-X-CSE-MsgGUID: ZPBMb9j6RwSgr2i1a0oxTA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11836"; a="101268076"
+  t=1783096153; x=1814632153;
+  h=message-id:date:subject:to:cc:references:from:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=JgBRcUIvXEp9SCOM+NH9vr1ODUwImIhZ6NYlpoOuD+Q=;
+  b=B87NpZju8D7xR84NTgHtfe8/QkVSDtxZrS27EORqaN+uUcYBAhmtwYaz
+   srK4Csgq4oM/bdnvlMF3Oq1A15iAShEJnEBYyL/i6+UBNXe3IGRTGA2rA
+   X9Bhl/aILPZN8fU/yjsDaCO+RFSUbyo252iy0B9+9po9bkmn2RSGulR/V
+   NfD5td9Rw2HsndKt05WX/L7WE4ulJ+UzBrCVW7Gyj9LPNgqj4r23SnTXe
+   3aq9DyTsjM02j6e5sNbPcLshYYxmd6UrpVn0eeJo4ig6uqSJg10xnWU4X
+   x4LLWB4rYW+kZTRMjadBCn7da05A3Te9fYp4Ueh2ek4pdGZdtNkKhmpAp
+   A==;
+X-CSE-ConnectionGUID: 90+8nhelQ2GhHJx6F60/zw==
+X-CSE-MsgGUID: DT39epoHT8CnBmre4lsY3g==
+X-IronPort-AV: E=McAfee;i="6800,10657,11836"; a="87676623"
 X-IronPort-AV: E=Sophos;i="6.25,145,1779174000"; 
-   d="scan'208";a="101268076"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 08:55:15 -0700
-X-CSE-ConnectionGUID: oLdu9fgCSuiMMnx55b6/og==
-X-CSE-MsgGUID: J19XKXXLShuzLXT3hrug2w==
+   d="scan'208";a="87676623"
+Received: from fmviesa007.fm.intel.com ([10.60.135.147])
+  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 09:29:12 -0700
+X-CSE-ConnectionGUID: LaeIAGF9TT+/B5RTMIkVBA==
+X-CSE-MsgGUID: bGXdeRidRuumMz8jYO0hXg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.25,145,1779174000"; 
-   d="scan'208";a="277469485"
-Received: from fmsmsx902.amr.corp.intel.com ([10.18.126.91])
-  by fmviesa001.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 08:55:14 -0700
-Received: from FMSMSX903.amr.corp.intel.com (10.18.126.92) by
- fmsmsx902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
+   d="scan'208";a="249793963"
+Received: from fmsmsx901.amr.corp.intel.com ([10.18.126.90])
+  by fmviesa007.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 09:29:12 -0700
+Received: from FMSMSX901.amr.corp.intel.com (10.18.126.90) by
+ fmsmsx901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Fri, 3 Jul 2026 08:55:14 -0700
+ 15.2.2562.43; Fri, 3 Jul 2026 09:29:11 -0700
 Received: from fmsedg901.ED.cps.intel.com (10.1.192.143) by
- FMSMSX903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
+ FMSMSX901.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43 via Frontend Transport; Fri, 3 Jul 2026 08:55:14 -0700
-Received: from BYAPR05CU005.outbound.protection.outlook.com (52.101.85.14) by
+ 15.2.2562.43 via Frontend Transport; Fri, 3 Jul 2026 09:29:11 -0700
+Received: from PH8PR06CU001.outbound.protection.outlook.com (40.107.209.44) by
  edgegateway.intel.com (192.55.55.81) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Fri, 3 Jul 2026 08:55:14 -0700
+ 15.2.2562.43; Fri, 3 Jul 2026 09:29:11 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=uBc8sJCnML5IDmpY1FhfxSPFexWzwNDaTeb56G+5GKSnpPEeEWCpUkvoyIvdYogq9+vbLLoYQgPIO1gDUZqN2w9R0wBjxSNAXmcdq32zm3AnvKBuz/YHTSLFEQ2OcHx+Nv/3NwO7iIm/xjW94zlNCBs+ajgyn4KqyQbpUPVVj4kPZ+GVyKipEOIU3jq5QiyivKo1919dWko1Ld3wuHNNPd10B+CFNnbfl0cmKmVW5cGA+wD4RqukXYlsszwyrjB11+eXm6MQIbyBVXa/uENGTLNJoqX3U6iTtq6BGQSONtncbHmnZJK2HgQfOmNNW5useH+I5+q7ZPwLhGBAzCbE+Q==
+ b=VziYPHBvmEZYGd58sCGvfIEDI5S5gmUkhyhNB5+cz7W8cSyUQOQcORKUXPlAh4lLEJdIqt/ySzu8JVfwMDUOnDT0mzOLutseUHDY5N5z26JsobWvsoYEUCqr2m4cifFtCAi5sGTCIYNKt1+hHAXaR+6rXGxDFjIExHuwE/pj2RCnLPTFS1ESUNoUIeN8+hv+DwLL5a3ZmcfE0xA3xv4MLZfRxP3I0leBfBuVm+l0JZ0hfuJI7UbIHfy9ehWbaD3YIe+3ZYmX/vBXrf3uj/42Ky/tIuL8ADjlkNpd84byApdAjWmGQrt/Oey36mve892M9vJDlnCGnRwVk+sqMSv5Vw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=dLnC1fvqtYHhE4OJmX4zSZE49yWBpb7jamm1qhs+wLw=;
- b=KuEoF8iIayzYVEjdbwywx8QWQTTQpY6tijVD8Swx/X4cuqny2uX6MGVFx7db8pg8M5s1fDYGMz5aKNq8o+oS2spIOMZq0BZ3gnj0DV0Eiv5FpcylTci0qzS0ApW9opnRGgnmqyK7ltUrdRVzo24kFlpVYtWLL1LEW9ssGEjgyZ5zuPabqO88zB9lwYSA/nLDvndkPJ4F0MpZurKCPfllVdMytO/lEKsBmw5ucemlk0HbN8YeIExHdB1Nnd4VlXjPR166pKV8R/oAWXaaP7hIMy5PnaAqkvNKV5dN0WrWwqphBpdvOqL1eIFKecUbquFuNRSyF8YMtaVnoZVj/Z5/Qg==
+ bh=FlVszaH/niY13fCpSxfKWyq9m3akMg1mKwMOsY5VtKA=;
+ b=O9URFjmk8w0wpMuOdc1G1TP53r61hx0pi/3lEcwQdU73MrXMu3mFyJKKw9fM+QhSBz2O/AB7skB+Aj4MqnwPjRV+GaB4gEdUHDb14DqWfGQjfosSukly06UT3yr+NmwS5n2XmpHGSzdGaQACCZqLb+HOQuqxYQkP83KKMG4p9fgomC7ZBPb3bCvbBacUzLYfRtTdZhdPzq5nT0Hnx0GVRyCB6ywGqadX5w9hfRcfb2APh1ApUL+3a6+5vgDXe8ez/QFGcgHeWlC7lRF4JAogG9AzjVBWTslJCkrFuX5nVmk6e//5pcb5zjvQh4Dal9vekD73zzJ3ZODvy+2b4dTzuQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by PH8PR11MB6681.namprd11.prod.outlook.com (2603:10b6:510:1c4::6) with
+ by SA1PR11MB6821.namprd11.prod.outlook.com (2603:10b6:806:29d::5) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.9; Fri, 3 Jul 2026
- 15:55:10 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.10; Fri, 3 Jul
+ 2026 16:29:09 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.21.0181.010; Fri, 3 Jul 2026
- 15:55:09 +0000
-Message-ID: <06f3ba88-f7d3-426d-8c95-612140fdfd52@intel.com>
-Date: Fri, 3 Jul 2026 18:55:02 +0300
+ 16:29:09 +0000
+Message-ID: <e7523ca5-427f-486d-89fb-d97c199709f3@intel.com>
+Date: Fri, 3 Jul 2026 19:29:01 +0300
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: cqhci: Remove unused intmask parameter from
- cqhci_irq()
-To: Chanwoo Lee <cw9316.lee@samsung.com>, Asutosh Das
-	<quic_asutoshd@quicinc.com>, Ritesh Harjani <ritesh.list@gmail.com>, "Ulf
- Hansson" <ulfh@kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>,
-	Matthias Brugger <matthias.bgg@gmail.com>, AngeloGioacchino Del Regno
-	<angelogioacchino.delregno@collabora.com>, Kamal Dasu
-	<kamal.dasu@broadcom.com>, Al Cooper <alcooperx@gmail.com>, "Broadcom
- internal kernel review list" <bcm-kernel-feedback-list@broadcom.com>, Florian
- Fainelli <florian.fainelli@broadcom.com>, Haibo Chen <haibo.chen@nxp.com>,
-	Frank Li <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>,
-	"Pengutronix Kernel Team" <kernel@pengutronix.de>, Fabio Estevam
-	<festevam@gmail.com>, "Michal Simek" <michal.simek@amd.com>, Thierry Reding
-	<thierry.reding@kernel.org>, Jonathan Hunter <jonathanh@nvidia.com>, "open
- list:EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER"
-	<linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>,
-	"moderated list:ARM/Mediatek SoC support"
-	<linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC
- support" <linux-mediatek@lists.infradead.org>, "open list:ARM/QUALCOMM
- MAILING LIST" <linux-arm-msm@vger.kernel.org>, "open list:TEGRA ARCHITECTURE
- SUPPORT" <linux-tegra@vger.kernel.org>
-References: <CGME20260624021955epcas1p2ba2fa4eb8bd0aafaf7b46bde2cf524be@epcas1p2.samsung.com>
- <20260624021912.632627-1-cw9316.lee@samsung.com>
+Subject: Re: [PATCHv2 3/4] mmc: sdhci-esdhc-mcf: do not use readl()/writel()
+ on ColdFire
+To: Greg Ungerer <gerg@linux-m68k.org>, <linux-m68k@lists.linux-m68k.org>
+CC: <linux-kernel@vger.kernel.org>, <arnd@kernel.org>, <wei.fang@nxp.com>,
+	<frank.li@nxp.com>, <shenwei.wang@nxp.com>, <imx@lists.linux.dev>,
+	<netdev@vger.kernel.org>, <nico@fluxnic.net>, <adureghello@baylibre.com>,
+	<ulfh@kernel.org>, <linux-mmc@vger.kernel.org>, <linux-can@vger.kernel.org>,
+	<linux-spi@vger.kernel.org>, <olteanv@gmail.com>
+References: <20260609142139.1563360-1-gerg@linux-m68k.org>
+ <20260609142139.1563360-5-gerg@linux-m68k.org>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <20260624021912.632627-1-cw9316.lee@samsung.com>
+In-Reply-To: <20260609142139.1563360-5-gerg@linux-m68k.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DU2P250CA0007.EURP250.PROD.OUTLOOK.COM
- (2603:10a6:10:231::12) To IA1PR11MB7198.namprd11.prod.outlook.com
+X-ClientProxiedBy: DUZPR01CA0241.eurprd01.prod.exchangelabs.com
+ (2603:10a6:10:4b5::24) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -120,248 +107,197 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|PH8PR11MB6681:EE_
-X-MS-Office365-Filtering-Correlation-Id: bc67c492-b91c-4b6f-fdab-08ded91b75c7
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SA1PR11MB6821:EE_
+X-MS-Office365-Filtering-Correlation-Id: 114684c2-0597-438d-3f4d-08ded9203514
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|7416014|366016|23010399003|1800799024|4143699003|11063799006|56012099006|921020|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info: e1+PL2i5Jctr83ODWUfxrlLhq7OVnktl0fhBrP/ZxY+7qY0GHO7ZbhUsjcw1jQkNSfeMvNU1la5Ti3T3cK07jRru5O2s3z6beO7rwO9azif1TsiqDXKoeQS/heh2H2bAWcyAzJSxpr4o5jmP9zHfKDJoOEPDA1wGCx6wr4WGgKtbMm93y5fhobzdPzmqQ8me2Rl9I8v4aSqiQxBAUVzDr7NY++z8WzAt8drcsIwMnX1AJDYQhrX9UxJGZK2URUF3jeDb9dcgtTKeImDre4GWP3eb7j/vZoSqMtVISN95iMjMVapGFmiKeiWKRTdf2AgHxtS98gq0PfEKY9CrPf/+kCxmwaG1GwQqzbp3aeRNye70a/yVqd70IofZO5s+CNkt4DYSmmTH/b/niyQLXy7fe2rmin5AA42lDdh9YM9eGC+lM4VUGY37RL1yQQ4t6WxOdMNujhqEEz80fJQUhRaNubftpPCo7W2f9eUvoWeO3xU367dC4kJVM9DfcdN2w22fk91QHpSdU+rkyyAGugWx9kZe7jbv9LqaP/xcq8LHs35gFjf48byx2DazDxuKUd90rTvxv81PG0zJkgD+ovjAXU74df/HMr6a0KkkFP7OSfyhrYXzyAF+ejIAkINDYzIWxPalN4h65ZUktPoKK6ShsxVb3RP/jpRXDgBx5oU0RVT3dk14+858e6262x5WwaheGeUI3ZIdQ+dCG6K8jZUeeg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(366016)(23010399003)(1800799024)(4143699003)(11063799006)(56012099006)(921020)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|23010399003|376014|7416014|56012099006|11063799006|4143699003|6133799003|22082099003|18002099003|18092099006;
+X-Microsoft-Antispam-Message-Info: svnFszEye4s4NmjTYz1A6kaXyyxlL6VMv6aEcKzOp/ozLc5D+sjKfc5wbb0e1XVSCt9z8sVzt0xtcEAJJoMHYyxe6dcHEWh6Ck+6cSLMbCSwHiRrhktDpvXlG+AtV4TlPqQ05QHnj1PZDnt4FODK116dAcvCIsiq3kr3qa9sW+AB9s8JiexRLQ50rjqhHoMz27hgFTqJ4usI1kinwiN1oqSgC5cOWubNlON8Vu1QFp13Ib1yl+ENJYWtb6UEZ1r/4KXACxEWrHi5Qu/CU+y5/R80tC6zPfd0l34dTZcR/HcZW7MaOYkxYRZJ4j77W4Gml7EfYIBju7jOYb8I5bjsrsp4OdSed1VNVpopemRLZR+VoX4cLZdcdQv8ZU28PxozAn01Iu1DPaEDsW6hvUYTu5e/i+/GC3vuKGVCmeUfR+qTKR+zGy1YqHPla9nPzU0yMuDlMIxKLdLRLIVqNVX/P5zib1+W56hgRqSTIt7FRZ5a5gdVH2YVubvsOWfRK+APWsMovYt5oohkVZTwsy7qxY0ctWBVoFSikNIlMwsU2H1F4l8qW7AF+n8XSzzrlUbHfbVpoCNNg5Vw+X5nsikygXZro1ekfuBiG0ZB1y+B2lNb82vr6fvJ9CY9De47N7agyKeueKuR5fMwkLNlJsR91IUmPM44mtVdJoThbEFsdqM=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(376014)(7416014)(56012099006)(11063799006)(4143699003)(6133799003)(22082099003)(18002099003)(18092099006);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?K1dNOFdZSGt2cWRTcno2M0VjdFN2OXp5ZWpER0VEM01vTW5teXpsYXV3R0Mr?=
- =?utf-8?B?OER4SHJYeG9Jc3dxZEgrMXhNTjVNM3ZsaUpZaWp1L1AvSjBrUzRDYTlpbXZu?=
- =?utf-8?B?dUNWMC9ZREk3QmJ3czFHUzdEVDEyUldDclZKODUwcG1UMzhNcEpQa1Azc2dM?=
- =?utf-8?B?SUZNRGt3RHhDbk13Vk5BdnM3c0tpWEUxekV2QU9OdUcrbGFIQnVPZkhaS000?=
- =?utf-8?B?Tnkvd2xPYXNwZW0xbGhCYkxHOHFKNE9hL0JUTkYwclBQRWg4cWFobkZ5OXlT?=
- =?utf-8?B?ZGdib1RZS29KZ3NITzdKQnhuRHhBOWJZVzRqWGpkdmU4VWRSRmhOVEZPeUhl?=
- =?utf-8?B?Qjc5bVpUMk1jTUhZNmdkR3ppTVZsZ0hsb3FXc004WmQvZ3dqbksxUmNSQi9u?=
- =?utf-8?B?bUxyajloOE1nUmN4eUZjS3JrNEZTUzJQMHZYWFMyT1lmSHIyNEFDWnhYdXdX?=
- =?utf-8?B?Z2tqSUpDOGYwcDFScUZJSjNrUldTYktUR3hFdEdaeGFlT3BwYm5lL2FXZWZh?=
- =?utf-8?B?Mmd5aG5oV3pWMHM0dFV6d3pZajZiZzhNVEZjcFp4c0xKUUVkRkxaRWIxNnAr?=
- =?utf-8?B?UlE5dUVDc0VCSWFxVXMvYWY2czFlY2VZdTdWM1RpVHJqdC9sSSsvOFJ1UjYr?=
- =?utf-8?B?bmp0NVJ6NTFaSXVjQ09rN3JOU1MxMC9VYUs4bWNSY05oMUtUaHlhT2M0ZEIy?=
- =?utf-8?B?UHo5WXNlZCtxdWV4UmJPRi9KdXVVOXBSNVlKenhmczY0RkozSTFSVElSNWZ2?=
- =?utf-8?B?UW52UHhOSWRhS2Q4L21XYnMzZVZldlZOa0RpNnNDYm5wTXdHOGd5VDFSN1Fj?=
- =?utf-8?B?M0N2V2VtTkhiZE0wRDliZzRNdTBlSGlxdVNnandFd3B1OVFicGdZak5NSk95?=
- =?utf-8?B?UmVib1VWa1R0cit5ZG5QZ0dtRGMrUC9RNFFhckhNaUNxWEJJWm0vOVhQb3JX?=
- =?utf-8?B?NDIzQnI1R0RZR2VTUEI5dFd1RTNjcjlaNGR0ZmVqSGZVWjZIL1Vva3RONG91?=
- =?utf-8?B?ZDI2Y213SytsbkdhZGpzeTQ1NG1hWkFHVmczMHd5dEordkoyZWFsVC9JSWFw?=
- =?utf-8?B?d2FFbmlacU4zaCtXRWZsRWJJMHNJVDF6OGtXNkpZMllXWE1GeCtZY2RJYm43?=
- =?utf-8?B?TFl5ZFhmdzhJcmlpcjEyQXhQbSs3Wkg4bStoRzhQc1FOTUxqTHBJbVFQZHRq?=
- =?utf-8?B?bHNwbkpKOXYwbFBseXh1V2k2OEYwQ3Q1UkNnRHZUTzZyRWluUGZtOUhPaTI5?=
- =?utf-8?B?S3J5OVk0aEpxSzZwMzJ0Qm1yVmw5Zk00eXozS29NNExkUGhWWlVVU2N2RXU0?=
- =?utf-8?B?K05oblYxSjZIK2lBaTR2dE9mK3YyUUlEZk9VYjBHN09paDZIOWJkd0pPb3pF?=
- =?utf-8?B?NWI3M0FMUzlHbjZBOHFQRXFFazRCUFFqQ1kxbEhMSWtjNkxaV3Y5cXNLK2lP?=
- =?utf-8?B?SEtiQUNSWWt1elFiQU5nM1d3VWdhZWZXRnZjcTdtcUpKRUF0UDlkbTAySTZw?=
- =?utf-8?B?T1ZJNW9TMlFlMlI3bkFhM3VGWnVMOXh5Ti81Y0x0MlFmaklwbmRIZUwyOVFa?=
- =?utf-8?B?Z2hlRkU5Nm9yazRvWmUraVBwM2hEMUt3Vzg5S3htejJCb1pYRi84V203V28z?=
- =?utf-8?B?THFtdmRhY3EzbWdhRkp2SEZWOFdSQW9JR2FBQVNSeXU3TkhwRHMvTFIzM2VP?=
- =?utf-8?B?OXRGa2dIRTJ6WE1jQisvZjFwQ0s3OWhvZ1VSM2tmTHFrVXpnOHR6Vkx4SVpD?=
- =?utf-8?B?aVJBSVF1dzJpTkx4VkdOZlNGTDBXTFU0ZTBUWmcveUhVMHR5SjN5WGFkeDVO?=
- =?utf-8?B?RUNUdlNYenNEQ0pjZzIxWVRjK0x0NEN0TTZPQ3VZcUErK2NaTW5kbXM4VkpC?=
- =?utf-8?B?N212UENpaDZsNVJMSnFDZXNFeXhDQnNuWjcvMXBmQkxNb0FobE5BeWhMem85?=
- =?utf-8?B?UUFoMHRyTEVUeXAzK1RBRjJ0aHBNVFZ1eUZnME51T016WVhraVFxMjgrYzV5?=
- =?utf-8?B?djdSNlVYNXdUMjdjQ1Y2cWR1QUhtK0FlalExOXJYY2VXMnpFNDY2QVNKVjFG?=
- =?utf-8?B?ajVSSDlLbFg4N0VxMU91NkJ3aWtyL3lIS3lpMmNuakgwYk14TkhvTUlEU3N0?=
- =?utf-8?B?Y0dOVFFqaVhweWlQU0EyYUdVM1RYQnVSUEIwK3dEUHc0c1QvVTkyVHJJb1Fr?=
- =?utf-8?B?alVrWkNwaTArcmdoUzhXOGk5RkhMU2pKNGh3U1BEazlZZlNrTUZwUlZNMmE5?=
- =?utf-8?B?YWowa2h0UlNJM2FBbC95d3grUEZmb0Y4Z2RaZ0g1R1FLV3VWL3owQTBmSlV3?=
- =?utf-8?B?WVhNZkdMcUZHVnNZYlgwL0xjUkhSOHhKLzdmV2pTYlg4MzFocnlPaFRxMWNX?=
- =?utf-8?Q?z9sYXangddC7gYlk=3D?=
-X-Exchange-RoutingPolicyChecked: p2NJIiNu2PI6pHVUeIdvoL1wyD2jjMU/HczxvLzEo6CFFfS03Xxjf44wXt5NlbApP+6hDmIjfiGJuGKdRATqQ8APTxde5ThjsrPRZEjPehLMuvsrGcqbOg1robj28Mi1iE+hmHgrh79lT49gLipkRSsWEqKGfvH8ldH7WAEtAZQynLNtAT0VCsUpTQpgkyhLUzxl1VXkZGyiEpp0yxll+M0IKNkzl1jWz344BTfJLw6++A5t17YIN7mVqBeCNKu9qFQCi0T181QVUqUvSNhRi8/nlZNVxH1mOL9Zq/YAfzTJ2pqF5M4zEF3gpHwfCl2Tx9Qw3v3iv2zCQ3K8FtdyXw==
-X-MS-Exchange-CrossTenant-Network-Message-Id: bc67c492-b91c-4b6f-fdab-08ded91b75c7
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?SmZFNHVpQWVnL3h0Q2FGRis4QkdwVnpMOEEwa2NYQnBRWE5raWN1Yk9JdWNR?=
+ =?utf-8?B?Z29nU1ByZlZ1WUtzbWh4V1FiU091NmdnRnROL1JLMDdReWtYb3I1b3hzZFZk?=
+ =?utf-8?B?WEFkV0NjYkFHaWRWOVZ0c3hJeFlZNmx0Z1JPR2taQXB4Qkc1WFZBWThDV0RP?=
+ =?utf-8?B?VmtJWmlnVkovb1pvMUtGT1h3RC9BZXZXejZYM0NTSmJiVmRwbzF3OEM3bXov?=
+ =?utf-8?B?eHFxZmRzT2hESHhkd0dpSnJEQnppLzRtdFM2dGNISE9jMlBSNCtObHBvRm1S?=
+ =?utf-8?B?TVF5ZytUaWs0dGRhbEh1c2RoOTdpblFEb2h0VzdYZmJGZkRyL21GZXRRUzRa?=
+ =?utf-8?B?K0l5ZHdRV3NFY2tzdVl1OWNoUEZPMU5WOFhVY1NOL29NWmdSbjJOSHdpQ0ZR?=
+ =?utf-8?B?NkNyQ21DOVE0enRtOXNrNEx0Q1MrRzJVRC9WSlVyY25KVXQvZXp1REM2N1dK?=
+ =?utf-8?B?RXR0ek1GWnl2YytSRlJBUTFoU1JmR3hPb0RsTlRlWlRsQ3RQMTAyZVdCNDh5?=
+ =?utf-8?B?UWtPbXF2M2pmeUhKNnVsUDZRR0MwMGY1VENUTnpLUWRSQWZ2ekg1THRSUURl?=
+ =?utf-8?B?RTI0OGNqNk5UempJOFNZamNCd2FieGNVWkt6THREc201ai9UdCtHdHd6ajdy?=
+ =?utf-8?B?SnZ1OUN1QWJWSUhwRlpUMWo3RlBYbkdOQmwwRmtpOGp1TktmeXhVRGRuNEZi?=
+ =?utf-8?B?UXRoc1pSRFlibGZoUXgzR3NrMm5xdzRaUU5tOE5QUVV4MkFEME5QSHpMOWQr?=
+ =?utf-8?B?aThJOHV4UTcvUG5JT25pVy9Eam1aczJqNHhJSGk2L1dHNXVWRGhLZUpydWU4?=
+ =?utf-8?B?TXBZSGd4L3l4ZW1GaitNejNBa1Q1Z2tWTTB0aTdCbEtkZHUyRkczbDZXYzhq?=
+ =?utf-8?B?RVZkT1lNSERYWTlsOWY4dFhJbi9ocjROaFB2bURScDFoUm5XanVQSFkyaDZp?=
+ =?utf-8?B?RXljZHRWUVF2eGhBN1hheGp0ak4wWFZYSnFJcUp0NUZqT1QxTTJSZHkrR3Qz?=
+ =?utf-8?B?bC8rMnMyV0d6VmJjeFIwNGw3Z3o0WnU2TTA2ZGtpV243K2Y1MTg1U1VJUk94?=
+ =?utf-8?B?bHBvME9GRjFqK0NUVXJoZ3dzdG1USkhmU0VVY3JTZUJHQXpHb1VTMGZRSUwr?=
+ =?utf-8?B?cXhIeUQrZUpBTE1YMEtDVkdoc2p4M201OUh3bG5MSHFlaGEwQUFXUE52eDJs?=
+ =?utf-8?B?dDVCZzY3Qy9BdGtZLzAvMDdYMjViMys4ejRkekNkWVZuS1ZBT0RkWFBVVENj?=
+ =?utf-8?B?cCtwRlY5M3ByY2tEK2hRN0w4V1VMZmRzWE9zeVZPZytoNXhrcEZhK2J4QlNM?=
+ =?utf-8?B?NHZmRzRKS1h5dUR5blhjQmZmelpuTEoyNmhMclVIWWwrcGZZRUhKVFNrY0Mz?=
+ =?utf-8?B?dkx5ZXR3RWlKVzd6QmpQUHFROUFwTjBCb1A3V1l5N0tFdC9EZDhoNkN2YUJa?=
+ =?utf-8?B?VXVrc0RtU09LZ2N1T1VHSFkzeG11SlVuazlyU1k0V0lhQXdhSEduSUQ0eGY0?=
+ =?utf-8?B?U0NITlJFVnBxMXdOc1RhL0J5cy80UnQrelIvZ3N1VjVHN0t3alJTZW10djFa?=
+ =?utf-8?B?TGk1YlFkaG40eDdubEFjWGVLeENSNjRQR2JlTDNvc1hDckc2VGZ0cmp5blVO?=
+ =?utf-8?B?T0FHMG45VG5yVGZmTFJXTFJSdHFiWVpkb2J1QVJrcVNWWjNHN0NGQzJRYlE4?=
+ =?utf-8?B?NURYSmJvd01TQ042TTJyaStoMnZqR0kvTFkvSTRwQUpEVHBBdis3N2k2YlQ0?=
+ =?utf-8?B?ODl5TGZVYlRzZUt3cS85Slh0U05jeDNzV29yRzlPcmtMZU9kUlEzaGp5b0Fz?=
+ =?utf-8?B?NkdJd0ZJaWo3Y09CSHJvR25MOTl1N2VJdVNUazYxS3dsTUU1eFUzczF5WU94?=
+ =?utf-8?B?TjJxanVuekpwNTVMOVdzZDluMUc2Y012QUI0RC96dDFMMHNFRE93UzMvS0dH?=
+ =?utf-8?B?T3NDSlNvL2hhbm5xZmZkVnFHZUVwSlEyYjc0Sk82aEZoVzZmZmMwQVRzaFZm?=
+ =?utf-8?B?RFc0dEZyZzVxcnVmNjhuWnBZa0dLMnBBaGsxcHY1ZG5BR05JTFVacW43L2VT?=
+ =?utf-8?B?bVRQOHRJZFovL1BacVFUallKTE5RbS90UDBodjBIUWl5QjlodHFFb2R6ZGd1?=
+ =?utf-8?B?azM1WjJ2cnhOQjAvY09EaWpwRUlqVU1YYVF1amxYdkZBR0NoTHp1M0dJeUpq?=
+ =?utf-8?B?TFdjMi9SUHlSeFo4cjdXcEZVM3kyc1BHWDROV2FwajZvTVlFaVdRYko0ZzAx?=
+ =?utf-8?B?d3o0RWpEWUp1aU9pQnUxVGRQNkRRNi9NbERtcWFpaXkveXlISjhNbzN3K2xG?=
+ =?utf-8?B?UStLWkV2N3NTSXh1NzFDQWkwd2IxVC9CNHNWc002TENRUm9mQkxTT2htWkZm?=
+ =?utf-8?Q?3ETN/pVUTMpgljFk=3D?=
+X-Exchange-RoutingPolicyChecked: nBrq96n/oQdKJtjoqkKP6IFgKdTI1dEPP/aNflwNDSLUeaO1rvXYmJcJHRVmG4XNS8nnS7PETbFOt+a+fC8SCKcSVYqQ1t007yH29A0F83HUArU/1QBVyFoLJmxnVfvxpBj/IZScaJ69xB65mpPBWLqLOWQf7P0B6KKPlQe4lnDjHm/v6FFa5Y9V2xbGo99+5WFwUulwVOhHG8vqFIh+GfRI5CNpcd2JXZHiTOjsfWQdACh+r9pAK/MoHTmgh0DhKylb+8za7y1MQc714ruPo3trusjvJL8zO40qd2bXAh4F54Xhav5PQa1XZNtVR/pms5b9WnvMNf3jLw0zG0h2wg==
+X-MS-Exchange-CrossTenant-Network-Message-Id: 114684c2-0597-438d-3f4d-08ded9203514
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Jul 2026 15:55:09.8719
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Jul 2026 16:29:08.8972
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 9awrwnDcrx4203xZWzpIsmE5Bh+GpeYGplyaPa6lWtDCzNkrbHFMQPLnqogbqKVYmiB+rEErgyZ5tr8nj+jRkg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH8PR11MB6681
+X-MS-Exchange-CrossTenant-UserPrincipalName: mg9N0W/+dwQYRescr68D9T+FY3RerffQO01DI8Zip1pg1HXkMmGMNh0pEgyA6GSAP8jU4X2AUPHjx8NqxWRCVQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR11MB6821
 X-OriginatorOrg: intel.com
 
-On 24/06/2026 05:19, Chanwoo Lee wrote:
-> The intmask parameter of cqhci_irq() is never used within the function
-> body. The function reads the CQHCI interrupt status directly via
-> cqhci_readl() and processes interrupts independently of the SDHCI
-> intmask value passed by callers.
+On 09/06/2026 17:13, Greg Ungerer wrote:
+> The implementation of the readX() and writeX() family of IO access
+> functions is non-standard on ColdFire platforms. They check the supplied
+> IO address and will return either big or little endian results based on
+> that check. This is non-standard, they are expected to always return
+> little-endian byte ordered data. Unfortunately this behavior also means
+> that ioreadX()/iowroteX() and their big-endian counter parts
+> ioreadXbe()/iowriteXbe() are wrong. This is now in the process of being
+> cleaned up and fixed.
 > 
-> Signed-off-by: Chanwoo Lee <cw9316.lee@samsung.com>
+> Change the use of the readX() and writeX() access functions in this driver
+> to use the recently defined specific ColdFire internal SoC hardware IO
+> access functions mcf_read8()/mcf_read16()/mcf_read32() and
+> mcf_write8()/mcf_write16()/mcf_write32().
+> 
+> There is no functional change to the driver. Though it does have the
+> effect of making the IO access slightly more efficient, since there is
+> no longer a need to do the address check at every register access.
+> 
+> Acked-by: Angelo Dureghello <adureghello@baylibre.com>
+> Tested-by: Angelo Dureghello <adureghello@baylibre.com>
+> Signed-off-by: Greg Ungerer <gerg@linux-m68k.org>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/cqhci-core.c       | 3 +--
->  drivers/mmc/host/cqhci.h            | 3 +--
->  drivers/mmc/host/mtk-sd.c           | 2 +-
->  drivers/mmc/host/sdhci-brcmstb.c    | 2 +-
->  drivers/mmc/host/sdhci-esdhc-imx.c  | 2 +-
->  drivers/mmc/host/sdhci-msm.c        | 2 +-
->  drivers/mmc/host/sdhci-of-arasan.c  | 2 +-
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 2 +-
->  drivers/mmc/host/sdhci-pci-core.c   | 2 +-
->  drivers/mmc/host/sdhci-pci-gli.c    | 2 +-
->  drivers/mmc/host/sdhci-tegra.c      | 2 +-
->  drivers/mmc/host/sdhci_am654.c      | 2 +-
->  12 files changed, 12 insertions(+), 14 deletions(-)
+> v2: moved from RFC to PATCH
 > 
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index 178277d90c31..98ceb0b9a6d1 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -819,8 +819,7 @@ static void cqhci_finish_mrq(struct mmc_host *mmc, unsigned int tag)
->  	mmc_cqe_request_done(mmc, mrq);
+>  drivers/mmc/host/sdhci-esdhc-mcf.c | 24 ++++++++++++------------
+>  1 file changed, 12 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
+> index 375fce5639d7..6853521e8b2c 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-mcf.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
+> @@ -55,7 +55,7 @@ static inline void esdhc_clrset_be(struct sdhci_host *host,
+>  	if (reg == SDHCI_HOST_CONTROL)
+>  		val |= ESDHC_PROCTL_D3CD;
+>  
+> -	writel((readl(base) & ~mask) | val, base);
+> +	mcf_write32((mcf_read32(base) & ~mask) | val, base);
 >  }
 >  
-> -irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
-> -		      int data_error)
-> +irqreturn_t cqhci_irq(struct mmc_host *mmc, int cmd_error, int data_error)
->  {
->  	u32 status;
->  	unsigned long tag = 0, comp_status;
-> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-> index 3668856531c1..8fbbc48c3f85 100644
-> --- a/drivers/mmc/host/cqhci.h
-> +++ b/drivers/mmc/host/cqhci.h
-> @@ -315,8 +315,7 @@ static inline u32 cqhci_readl(struct cqhci_host *host, int reg)
+>  /*
+> @@ -71,7 +71,7 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
+>  	if (reg == SDHCI_HOST_CONTROL) {
+>  		u32 host_ctrl = ESDHC_DEFAULT_HOST_CONTROL;
+>  		u8 dma_bits = (val & SDHCI_CTRL_DMA_MASK) >> 3;
+> -		u8 tmp = readb(host->ioaddr + SDHCI_HOST_CONTROL + 1);
+> +		u8 tmp = mcf_read8(host->ioaddr + SDHCI_HOST_CONTROL + 1);
 >  
->  struct platform_device;
+>  		tmp &= ~0x03;
+>  		tmp |= dma_bits;
+> @@ -82,12 +82,12 @@ static void esdhc_mcf_writeb_be(struct sdhci_host *host, u8 val, int reg)
+>  		 */
+>  		host_ctrl |= val;
+>  		host_ctrl |= (dma_bits << 8);
+> -		writel(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+> +		mcf_write32(host_ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
 >  
-> -irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
-> -		      int data_error);
-> +irqreturn_t cqhci_irq(struct mmc_host *mmc, int cmd_error, int data_error);
->  int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc, bool dma64);
->  struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev);
->  int cqhci_deactivate(struct mmc_host *mmc);
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index b2680cc054bd..01ea3adbdf3b 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1805,7 +1805,7 @@ static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
->  			cmd_err, dat_err, intsts);
+>  		return;
 >  	}
 >  
-> -	return cqhci_irq(mmc, 0, cmd_err, dat_err);
-> +	return cqhci_irq(mmc, cmd_err, dat_err);
+> -	writel((readl(base) & mask) | (val << shift), base);
+> +	mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
 >  }
 >  
->  static irqreturn_t msdc_irq(int irq, void *dev_id)
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index 57e45951644e..1de2f05fd958 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -430,7 +430,7 @@ static u32 sdhci_brcmstb_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
+>  static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
+> @@ -110,24 +110,24 @@ static void esdhc_mcf_writew_be(struct sdhci_host *host, u16 val, int reg)
+>  		 * As for the fsl driver,
+>  		 * we have to set the mode in a single write here.
+>  		 */
+> -		writel(val << 16 | mcf_data->aside,
+> +		mcf_write32(val << 16 | mcf_data->aside,
+>  		       host->ioaddr + SDHCI_TRANSFER_MODE);
+>  		return;
+>  	}
 >  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
->  
->  	return 0;
->  }
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 18ecddd6df6f..d0fa83f67a80 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1503,7 +1503,7 @@ static u32 esdhc_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
->  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
->  
->  	return 0;
->  }
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 0882ce74e0c9..ceed47ccfda8 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2165,7 +2165,7 @@ static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
->  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
->  	return 0;
+> -	writel((readl(base) & mask) | (val << shift), base);
+> +	mcf_write32((mcf_read32(base) & mask) | (val << shift), base);
 >  }
 >  
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 785d3acb18c5..4ca73e7d799e 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -555,7 +555,7 @@ static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
->  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
->  
->  	return 0;
+>  static void esdhc_mcf_writel_be(struct sdhci_host *host, u32 val, int reg)
+>  {
+> -	writel(val, host->ioaddr + reg);
+> +	mcf_write32(val, host->ioaddr + reg);
 >  }
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index eef53455b8ee..4c5fa6a6931d 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -624,7 +624,7 @@ static u32 dwcmshc_cqe_irq_handler(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
 >  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
+>  {
+>  	if (reg == SDHCI_HOST_CONTROL) {
+>  		u8 __iomem *base = host->ioaddr + (reg & ~3);
+> -		u16 val = readw(base + 2);
+> +		u16 val = mcf_read16(base + 2);
+>  		u8 dma_bits = (val >> 5) & SDHCI_CTRL_DMA_MASK;
+>  		u8 host_ctrl = val & 0xff;
 >  
->  	return 0;
+> @@ -137,7 +137,7 @@ static u8 esdhc_mcf_readb_be(struct sdhci_host *host, int reg)
+>  		return host_ctrl;
+>  	}
+>  
+> -	return readb(host->ioaddr + (reg ^ 0x3));
+> +	return mcf_read8(host->ioaddr + (reg ^ 0x3));
 >  }
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index c347fac24515..b121d896a804 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -215,7 +215,7 @@ static u32 sdhci_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
 >  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
+> @@ -149,14 +149,14 @@ static u16 esdhc_mcf_readw_be(struct sdhci_host *host, int reg)
+>  	if (reg == SDHCI_HOST_VERSION)
+>  		reg -= 2;
 >  
->  	return 0;
+> -	return readw(host->ioaddr + (reg ^ 0x2));
+> +	return mcf_read16(host->ioaddr + (reg ^ 0x2));
 >  }
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index 6e4084407662..b55618566d65 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -1760,7 +1760,7 @@ static u32 sdhci_gl9763e_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
 >  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  static u32 esdhc_mcf_readl_be(struct sdhci_host *host, int reg)
+>  {
+>  	u32 val;
 >  
->  	return 0;
->  }
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 820ce4dae58b..221e48b59f48 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1280,7 +1280,7 @@ static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
+> -	val = readl(host->ioaddr + reg);
+> +	val = mcf_read32(host->ioaddr + reg);
 >  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
->  
->  	return 0;
->  }
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index d235b0aecfdb..2a27db2f558b 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -462,7 +462,7 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
->  		return intmask;
->  
-> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
-> +	cqhci_irq(host->mmc, cmd_error, data_error);
->  
->  	return 0;
->  }
+>  	/*
+>  	 * RM (25.3.9) sd pin clock must never exceed 25Mhz.
+> @@ -245,7 +245,7 @@ static void esdhc_mcf_pltfm_set_clock(struct sdhci_host *host,
+>  	 * fvco = fsys * outdvi1 + 1
+>  	 * fshdc = fvco / outdiv3 + 1
+>  	 */
+> -	temp = readl(pll_dr);
+> +	temp = mcf_read32(pll_dr);
+>  	fsys = pltfm_host->clock;
+>  	fvco = fsys * ((temp & 0x1f) + 1);
+>  	fesdhc = fvco / (((temp >> 10) & 0x1f) + 1);
 
