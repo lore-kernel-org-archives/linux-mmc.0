@@ -1,100 +1,117 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 987B33D524C;
-	Fri,  3 Jul 2026 15:41:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9DD942DCBFA;
+	Fri,  3 Jul 2026 15:55:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.10
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783093314; cv=fail; b=mdIHh8NWwdOeI8pxOWZ0PS0WSnrHvLbolSnxRO3zDqHbhzu9CBWGzSSYhsYhx7uFXSjralGhNFOgwdu3AzSk4aNZqPBIBll2p6kea8Y2GhMg32UO7Lqg+DKi2ZhC5hv5zoCT9AGKEzlj8pCnNaivWeOkp57se/0ttEncs/EDN6M=
+	t=1783094124; cv=fail; b=STHdxr16DHgC82f6q1LK8fWmeUBYsMjd9Qv1OshgL+Pngxe3JajQVnIr5joxwEhq3DicHdDC3MhRcp9PYpm97g1Ob1xLfNrc5I3blxpB6tPFgzDgmG1v1nE3cLVQKnAj0ZQ7JiqSKBu4QVn+PG/bMLGbMoH87ok2aZJsZ2uUEIU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783093314; c=relaxed/simple;
-	bh=dhbbqlV6/eXFBplhvhdqn5DPJ0SId51PJUi1zxKoDsI=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=flN7o3r4BUoOPcJheboYIiYUPdn1RQ4SAR6gUYXnthpvoNLFXucCvqpfEb9WhwIwpAgwZzNi6EujESztkcKLZ896UAU2fRTqz/OR2I0dVGQIkH8+GwsZGz+n+WtnhGVTZ1ZZ4d6c7rhp9y99NzO6kkYIg+spvUJGEt0PYt/U1Qw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=PAEhokTL; arc=fail smtp.client-ip=198.175.65.14
+	s=arc-20240116; t=1783094124; c=relaxed/simple;
+	bh=cq1Ia3qvLUfw4q5EMv6IoenPZeED0efv9NXSJ21ATOU=;
+	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=ADwEbzUtShgZnuOWUQNcluuvf01FtWBnYbj1l+V/ENxaUTOUYtKnW5NTtBp6GQTVCCNNwKrHWRThjcRaXQ9Dr/7oj5bkNeoITPs/ukuMcm7jKfDc3NTynaZV+v/L7QoxRPMp1hFwhDV01icwkedK/AARb5ftLUP8hSW8HXO5J9Q=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=g8oMYNUZ; arc=fail smtp.client-ip=198.175.65.10
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="PAEhokTL"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="g8oMYNUZ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1783093313; x=1814629313;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=dhbbqlV6/eXFBplhvhdqn5DPJ0SId51PJUi1zxKoDsI=;
-  b=PAEhokTLUCy+K1LT2ROG409mg6Wc4CE4mmpqV4MF/QV+oUE2PNTTz2u6
-   Rzv5MWs+zWqHtKTQ0z/s4jDhsnQAqDis3NiU7SwXHmtzstOjYdOB7WtvX
-   PtpuGHhxU1j7tsxlExjgYdov0seMQrnfyofT3j5QwEPFL+Xa1KRwBiWZr
-   dcZ1SM3luVjWdZDBki9lBpJSL28mNy+JkzFXet1gWEaQIQir9kRnozYwN
-   hOAz83ijMGTPiqzkEPOL0XfmUYvpdVm2bbnT4ZbzaHIAfWCHGNh7Jf768
-   JyLnJxOFf1T3ys8ogLDbNb/o+L00mrC6FIszuH1hU/dfhWRFJOkVWV8PV
-   w==;
-X-CSE-ConnectionGUID: o7hCDp63TLuDAsq6spcKag==
-X-CSE-MsgGUID: /B8TetY0RpSrxkstN+JwAQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11836"; a="87760192"
+  t=1783094118; x=1814630118;
+  h=message-id:date:subject:to:references:from:in-reply-to:
+   content-transfer-encoding:mime-version;
+  bh=cq1Ia3qvLUfw4q5EMv6IoenPZeED0efv9NXSJ21ATOU=;
+  b=g8oMYNUZlNMVGK1htVGOHret0yVRitqiq8US/l4+a1urqWiFQ99wItgp
+   wwNWMRzsUEMGgZ6Cf+iNzlx7rPH0MKaV2iQqaNHNzYESjCIa9Mv4V3Y/6
+   ml1MvuG3LcraLJRE/niob8V7wtZVKH1Os/79MOE27365mR0ApWRfSVeRa
+   GwnYvwLDag+kJ21ajza6ayE+QJWiQEZeE1fSrgmtyPrKnH3RrcWLKPtnm
+   5GMCcI+68dyhgE4ENCzh/+iquK0JfGIi3D7wYHcPrgrbPg0B/eCGg165Z
+   5joiVRhJJLb6aXb4ovqrk4jTcO3W7xzoxDsZZZlu4OjPPLdJ3l+K/uSWe
+   g==;
+X-CSE-ConnectionGUID: JPvJ4D6AQsGwu1Z+fo6knA==
+X-CSE-MsgGUID: ZPBMb9j6RwSgr2i1a0oxTA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11836"; a="101268076"
 X-IronPort-AV: E=Sophos;i="6.25,145,1779174000"; 
-   d="scan'208";a="87760192"
-Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 08:41:52 -0700
-X-CSE-ConnectionGUID: DELGNgR8SpiySDJDh8y/lQ==
-X-CSE-MsgGUID: qnHh8CZjQf2l9Ze590k/DQ==
+   d="scan'208";a="101268076"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 08:55:15 -0700
+X-CSE-ConnectionGUID: oLdu9fgCSuiMMnx55b6/og==
+X-CSE-MsgGUID: J19XKXXLShuzLXT3hrug2w==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.25,145,1779174000"; 
-   d="scan'208";a="252672641"
-Received: from orsmsx901.amr.corp.intel.com ([10.22.229.23])
-  by orviesa008.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 08:41:52 -0700
-Received: from ORSMSX901.amr.corp.intel.com (10.22.229.23) by
- ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+   d="scan'208";a="277469485"
+Received: from fmsmsx902.amr.corp.intel.com ([10.18.126.91])
+  by fmviesa001.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jul 2026 08:55:14 -0700
+Received: from FMSMSX903.amr.corp.intel.com (10.18.126.92) by
+ fmsmsx902.amr.corp.intel.com (10.18.126.91) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Fri, 3 Jul 2026 08:41:51 -0700
-Received: from ORSEDG902.ED.cps.intel.com (10.7.248.12) by
- ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+ 15.2.2562.43; Fri, 3 Jul 2026 08:55:14 -0700
+Received: from fmsedg901.ED.cps.intel.com (10.1.192.143) by
+ FMSMSX903.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43 via Frontend Transport; Fri, 3 Jul 2026 08:41:51 -0700
-Received: from BL2PR02CU003.outbound.protection.outlook.com (52.101.52.63) by
- edgegateway.intel.com (134.134.137.112) with Microsoft SMTP Server
+ 15.2.2562.43 via Frontend Transport; Fri, 3 Jul 2026 08:55:14 -0700
+Received: from BYAPR05CU005.outbound.protection.outlook.com (52.101.85.14) by
+ edgegateway.intel.com (192.55.55.81) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Fri, 3 Jul 2026 08:41:50 -0700
+ 15.2.2562.43; Fri, 3 Jul 2026 08:55:14 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=FXSb6E6wd7BKnBFYgee7rVGih83fe1GYC+JsenvMB9HA2rUpw+69OJnzHyZfG354NLQMd8sF0tHEfl4skCEknEimYaanKlgIK6Alb9B+NMLruj87CsangEL+LLYVekr1Ph6eHYGP2F4DRwxj+2gZnI7+RiZktFkW1sDxPx0gwb+fPIcoAHTzYdER8tshtOfkvWNYf2PwqUgb4KSEKg1e+Y/9ELDeL9cITdLYfBo2/x94uGRo9pZu4exrPjZVYon1ZWqepf3yuTskKR8ESDojC8d0G4bUQZIJFQ6UkSB8K5Jqoyq8uQo0c4B9koHyzOAb498xigd7ZXNcBq0j/hWnmw==
+ b=uBc8sJCnML5IDmpY1FhfxSPFexWzwNDaTeb56G+5GKSnpPEeEWCpUkvoyIvdYogq9+vbLLoYQgPIO1gDUZqN2w9R0wBjxSNAXmcdq32zm3AnvKBuz/YHTSLFEQ2OcHx+Nv/3NwO7iIm/xjW94zlNCBs+ajgyn4KqyQbpUPVVj4kPZ+GVyKipEOIU3jq5QiyivKo1919dWko1Ld3wuHNNPd10B+CFNnbfl0cmKmVW5cGA+wD4RqukXYlsszwyrjB11+eXm6MQIbyBVXa/uENGTLNJoqX3U6iTtq6BGQSONtncbHmnZJK2HgQfOmNNW5useH+I5+q7ZPwLhGBAzCbE+Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=otRoM0mH8AXloz+x4Jx/IzkOt1n3ZhQfJrbRVxVxToU=;
- b=hYOrzYbYbFFklU6p7Slw+LjBexy+o3tiSzD/oz7foUe6pmYjiGyppUWtkG8A/qq0QdzW0LpweDVRBaMLf3107A1iD4WOM/PcE4NRJmLakH3hCIZm9+bbHXacfKz0/qb1KrFRuxHoHNRBX0oVreNBtJiSV/Y/n203fl5gCz5X67EQ6yzBX2ofFMCm64U5psq1X4ksgU/vtnyXVjZWs/sjvkmQ7hVPZv2GP7aJlWAjSR459exMCv5/qoR93TBzu11pCtme9NYqHVXC1QODL2CR0Hk25siYZIrEAM+bvi5xvumg7RJJqUjEdRr58UEnD4Cr+dVpQRi1OMdNn3fjn/xWhQ==
+ bh=dLnC1fvqtYHhE4OJmX4zSZE49yWBpb7jamm1qhs+wLw=;
+ b=KuEoF8iIayzYVEjdbwywx8QWQTTQpY6tijVD8Swx/X4cuqny2uX6MGVFx7db8pg8M5s1fDYGMz5aKNq8o+oS2spIOMZq0BZ3gnj0DV0Eiv5FpcylTci0qzS0ApW9opnRGgnmqyK7ltUrdRVzo24kFlpVYtWLL1LEW9ssGEjgyZ5zuPabqO88zB9lwYSA/nLDvndkPJ4F0MpZurKCPfllVdMytO/lEKsBmw5ucemlk0HbN8YeIExHdB1Nnd4VlXjPR166pKV8R/oAWXaaP7hIMy5PnaAqkvNKV5dN0WrWwqphBpdvOqL1eIFKecUbquFuNRSyF8YMtaVnoZVj/Z5/Qg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by MN2PR11MB4663.namprd11.prod.outlook.com (2603:10b6:208:26f::14) with
+ by PH8PR11MB6681.namprd11.prod.outlook.com (2603:10b6:510:1c4::6) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.11; Fri, 3 Jul
- 2026 15:41:48 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.9; Fri, 3 Jul 2026
+ 15:55:10 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.21.0181.010; Fri, 3 Jul 2026
- 15:41:48 +0000
-Message-ID: <87ef634f-de1e-4a79-a9fd-977d62d85ead@intel.com>
-Date: Fri, 3 Jul 2026 18:41:43 +0300
+ 15:55:09 +0000
+Message-ID: <06f3ba88-f7d3-426d-8c95-612140fdfd52@intel.com>
+Date: Fri, 3 Jul 2026 18:55:02 +0300
 User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH] mmc: cqhci: keep CQE enabled if halt times out
-To: Pengpeng Hou <pengpeng@iscas.ac.cn>, Asutosh Das
+Subject: Re: [PATCH] mmc: cqhci: Remove unused intmask parameter from
+ cqhci_irq()
+To: Chanwoo Lee <cw9316.lee@samsung.com>, Asutosh Das
 	<quic_asutoshd@quicinc.com>, Ritesh Harjani <ritesh.list@gmail.com>, "Ulf
- Hansson" <ulfh@kernel.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-References: <20260623140401.80963-1-pengpeng@iscas.ac.cn>
+ Hansson" <ulfh@kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>,
+	Matthias Brugger <matthias.bgg@gmail.com>, AngeloGioacchino Del Regno
+	<angelogioacchino.delregno@collabora.com>, Kamal Dasu
+	<kamal.dasu@broadcom.com>, Al Cooper <alcooperx@gmail.com>, "Broadcom
+ internal kernel review list" <bcm-kernel-feedback-list@broadcom.com>, Florian
+ Fainelli <florian.fainelli@broadcom.com>, Haibo Chen <haibo.chen@nxp.com>,
+	Frank Li <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>,
+	"Pengutronix Kernel Team" <kernel@pengutronix.de>, Fabio Estevam
+	<festevam@gmail.com>, "Michal Simek" <michal.simek@amd.com>, Thierry Reding
+	<thierry.reding@kernel.org>, Jonathan Hunter <jonathanh@nvidia.com>, "open
+ list:EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER"
+	<linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>,
+	"moderated list:ARM/Mediatek SoC support"
+	<linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC
+ support" <linux-mediatek@lists.infradead.org>, "open list:ARM/QUALCOMM
+ MAILING LIST" <linux-arm-msm@vger.kernel.org>, "open list:TEGRA ARCHITECTURE
+ SUPPORT" <linux-tegra@vger.kernel.org>
+References: <CGME20260624021955epcas1p2ba2fa4eb8bd0aafaf7b46bde2cf524be@epcas1p2.samsung.com>
+ <20260624021912.632627-1-cw9316.lee@samsung.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <20260623140401.80963-1-pengpeng@iscas.ac.cn>
+In-Reply-To: <20260624021912.632627-1-cw9316.lee@samsung.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DUZPR01CA0338.eurprd01.prod.exchangelabs.com
- (2603:10a6:10:4b8::8) To IA1PR11MB7198.namprd11.prod.outlook.com
+X-ClientProxiedBy: DU2P250CA0007.EURP250.PROD.OUTLOOK.COM
+ (2603:10a6:10:231::12) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -103,144 +120,248 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|MN2PR11MB4663:EE_
-X-MS-Office365-Filtering-Correlation-Id: 58fcb59e-f8e7-434e-b0fb-08ded91997db
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|PH8PR11MB6681:EE_
+X-MS-Office365-Filtering-Correlation-Id: bc67c492-b91c-4b6f-fdab-08ded91b75c7
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014|23010399003|56012099006|11063799006|6133799003|22082099003|18002099003;
-X-Microsoft-Antispam-Message-Info: j9hqatuOgDgwm6+URHLVcKmMb8brR4lNBHRADI3Kl16Es+CqnCtqe0MZDQQJKt2FMETcILqU/TI+SGnRLLgeLtwXneqLejErzETAaohoA1yYlrVhi42+cGzXRyuYzdjLX+H0P5OPbjIt8XMwfw2SsnoY52865wq8PNlZrQvJYSu48X5RIO0aD6X9Qu5oAkXH5oIfvxtf220bMi924qvyd37mi171sYyeG42UHrnpFz5jlTsGe3x52FSydyQh56LRtaUYxGQ+QPpMfJtyIZIGr4MkRM9f+5BZz4kVPvCCkBLWEo8rVm2mQJyMPAaEe1niZYJr+MtfONNeEC+FHtTrXWHqJ/I0XBn9DwHxwqwOcb7P0f1qXhvESjgaorCo71RbNGecYK1JredxLegAIWBOtkn0aT0B78D32w+TDDpk7Y7RdJH2bo6ew+iXEiJrWgAh5FcdH1uGcbsOUFz2wIALFxLjQR3zhcEWnJRXE8kaXMwmG7U251CzwjVDxsDZtd44KY2/zyhYqhccUkYP/h2Fd4ejOidX6nWXiQl/HvsXl8tX88oa5dIAJpOIHLayaxFJs5ws+NGuvxaFDSx29h8MFa8VIULOYV72KODv5B1iZIvSKqUzRV8IflnEOP8aeb/aNco/2oeDuXRLwqfxeKkwUqLck04N/SymuEFgHp2CVVk=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(23010399003)(56012099006)(11063799006)(6133799003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|7416014|366016|23010399003|1800799024|4143699003|11063799006|56012099006|921020|22082099003|18002099003;
+X-Microsoft-Antispam-Message-Info: e1+PL2i5Jctr83ODWUfxrlLhq7OVnktl0fhBrP/ZxY+7qY0GHO7ZbhUsjcw1jQkNSfeMvNU1la5Ti3T3cK07jRru5O2s3z6beO7rwO9azif1TsiqDXKoeQS/heh2H2bAWcyAzJSxpr4o5jmP9zHfKDJoOEPDA1wGCx6wr4WGgKtbMm93y5fhobzdPzmqQ8me2Rl9I8v4aSqiQxBAUVzDr7NY++z8WzAt8drcsIwMnX1AJDYQhrX9UxJGZK2URUF3jeDb9dcgtTKeImDre4GWP3eb7j/vZoSqMtVISN95iMjMVapGFmiKeiWKRTdf2AgHxtS98gq0PfEKY9CrPf/+kCxmwaG1GwQqzbp3aeRNye70a/yVqd70IofZO5s+CNkt4DYSmmTH/b/niyQLXy7fe2rmin5AA42lDdh9YM9eGC+lM4VUGY37RL1yQQ4t6WxOdMNujhqEEz80fJQUhRaNubftpPCo7W2f9eUvoWeO3xU367dC4kJVM9DfcdN2w22fk91QHpSdU+rkyyAGugWx9kZe7jbv9LqaP/xcq8LHs35gFjf48byx2DazDxuKUd90rTvxv81PG0zJkgD+ovjAXU74df/HMr6a0KkkFP7OSfyhrYXzyAF+ejIAkINDYzIWxPalN4h65ZUktPoKK6ShsxVb3RP/jpRXDgBx5oU0RVT3dk14+858e6262x5WwaheGeUI3ZIdQ+dCG6K8jZUeeg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(366016)(23010399003)(1800799024)(4143699003)(11063799006)(56012099006)(921020)(22082099003)(18002099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?UDVvTEh5cmNwR0hoeCtUeE9YYUc3V2w1Uzc2dW16Mk1iaTJpSFc1aS9RNGNO?=
- =?utf-8?B?OXlzcDFUMmRlaG1tSW5TMjFlRmw3eEQ0bzZ4Mjg0Q0dxMGc0VzRGelNRc0pF?=
- =?utf-8?B?VlZQY3E3Y3h1Z2RQT25GUW9abDFEekJvWm5VNzlWbzNldER0ZGo0blJkTDBr?=
- =?utf-8?B?VHFob1hETU16d3NXMEJmL0FsYmI3VCtTcllsallxczJXZHhXZjNtK0UraVg1?=
- =?utf-8?B?VysyZGlKWUlIYXBKcGxZdk15ZlpoWVhGSXpDNjlvNnpSN3d1ZzdVc0hxeVZ5?=
- =?utf-8?B?b0JWRVMyclFGUUxaTFcyTVk1dFd6L2dlYkpkdzNNblJCVjAyK2lqaEd5R0Ry?=
- =?utf-8?B?SzVySmh3NmpjbkhuaE42TDNDUUxvelg5QlZ1c1NyTDB0TXlMc3plNzU3eE82?=
- =?utf-8?B?WWh6L3Q1NmxtdThycXFMQ05RMXJIaUtHMnZQZThDYWdPaWhLUzEvdlB2eW81?=
- =?utf-8?B?ZUZMODVFQkFBbWg0ZkpWU09wQ3ozZ0tzcU9LazdSZnBPbEh5MTdUR2F0T2JQ?=
- =?utf-8?B?d1JsTHB2aWJ0ei90endXdWZJQ3dWclVCZGJJK1QzQVBCcm9qektwNUhlenkr?=
- =?utf-8?B?Nkk3MWVtK2l6OHJEbkVwWUlWSkQxS0ZwanRPZG5Zc1N4QlBCSmppRzRUV0hu?=
- =?utf-8?B?ZEI2UWRGRG9SQS9UZzE2QWJKMnpXVTVNQlR3NVRFRzJCM1Q1Rk1ud1hCL3Bw?=
- =?utf-8?B?ZGlXa3ZhejR5MHFmSENIbDNjU2tRN3Y3U3REb2dZamlOdk01ZmFEcnRWWEZw?=
- =?utf-8?B?cFRpNTFTbDVwa1JQUkVDaTBva01oVHJXTG9xZFVUT1VqNGMrR2tRVXVmL2N1?=
- =?utf-8?B?eExCTXlIQ0htMlJNNWRNeWR4WmpNUGNCWXFJd2FLYnhRS204Q3dHaXRWREw3?=
- =?utf-8?B?cmN2OXF4enFqVTBFcE11dEpZelVsRENkL0xCaXJ4cXpaRnJEeHB5bHJsVXJB?=
- =?utf-8?B?MHhxeDVIWUluWW5NeE1weUdUTVVwUWhSZkVXZzY0bmJmSW94NUpmdDV2WXhF?=
- =?utf-8?B?VFRkbG9UTGJyTHJOVktnUkdMTnpKKzBVMWUxc0dxR04vUmk3Z0lrQzJPZ2pE?=
- =?utf-8?B?dlV1aFRuNHlkVmJPaFROVEJkdkozWFNwVXIrbEN0OGxoT2FwV21XWWVvbmpq?=
- =?utf-8?B?aitLNFZObnVib0NOaVdJMXdjbEQydDYvNlAxS2ZlV0w1YTFVQ1NkdDRhYnR6?=
- =?utf-8?B?bXE3OXIwc1FFb2x1R2N4NEJHWFpBeVBBZFhIZTdlRzlFS1lNN0pXdTkxd2c5?=
- =?utf-8?B?L3ZHdHBvT3l1azd1bVJWMVI5ZGxMdTl4WXdLR29CcmxTc0JkRjJFRzk0RVND?=
- =?utf-8?B?cFltSWFtU2J1TExHZlh4dElPMVloSTUrN0RRSFgrOGpPZTNLRFFyNi9GbHd3?=
- =?utf-8?B?Wk4zLzZGdVdMeml3REhCLytLTzM1TlkyK0xvSVFOMUdNcjFEOEJCbHZoTXJQ?=
- =?utf-8?B?eFU5Vlc5R1BzbTFYcU5VdHdtZjhtR2l4M0twN1JoNkg2NlhXOHJIdGxoOUxW?=
- =?utf-8?B?eHZsL1Q3RWdzNnU1dlVydERwc0pDY0ttNjhzbHE0bmhkWGRwbjhnS2gzV1FJ?=
- =?utf-8?B?b1dQTlBYT2djN0pjZHFCK1NoK0JrUUdOdjhycC9ZSjBrejRqbzlhcjhWRGxl?=
- =?utf-8?B?S2FaNW42VjhIUUo0NEZLdzZiQUJoQXdlaDN2eHMrNjJ0YXJXK2hQVTVNV0NK?=
- =?utf-8?B?OUZZQS9ab0FhMmdrZXNxVXN6WnRqdG04c1FiWmx0QTdFNDJ5dVltRWppem1u?=
- =?utf-8?B?b3NGOTAyTWtKM0hIUnYwaEtDeERxRDhWWVdSWGd2UWsrbnQ3SVNneWJHNGV5?=
- =?utf-8?B?dnBrMTFWRjFJUWpmNVB3N21VejJqcFpxZTgvZytYZ1dKaVVnMXY1ZGhTRVIz?=
- =?utf-8?B?VFdueFBUS3hFQzlQMktuMFJxR1VCbE1RQno4RVdSaGI1ZlJ1Zm9UN3h4YnRT?=
- =?utf-8?B?M2ZGWXdEWjFmbFRnUnllQWtvMmw0L1phSHVwSlFJNXJmZmtEU2d0dWhrUXMr?=
- =?utf-8?B?YXZIei9pOWJHM3ZkazJMN25pWVZlakVZd29MenVFMm9zU2dFK0tyQXR5Qjhx?=
- =?utf-8?B?TC9PcEhDM1BiSDhzYnNYVUFxUU83US9Dd1lRUnRka2tWNTBUTjdTUDdPSXJF?=
- =?utf-8?B?NVdRR1duT0d4WWZZNkpmNER1WThaSC9PN0diL2VrcEFwZkQxa3MzUldNVE5W?=
- =?utf-8?B?Ni9UUUZxZW5XYUkvZ09zZ0FYYVp0VmdQRGNNTE9BeVJOSVZTdzRqam9iSWtQ?=
- =?utf-8?B?S1RiSWNPYkM4MU5PaHg3K3EyWGNBeXBkTEtmaHdZSFZLQ3hmK1NRUmxjakpD?=
- =?utf-8?B?dFVMZGFqYnc5M0ZZRFF3Vy9NSDRYbUJjM2J6eER1alg1THAydmdOTjRTalJ2?=
- =?utf-8?Q?tsDIPtCWrIdNJVc8=3D?=
-X-Exchange-RoutingPolicyChecked: mI+SCu1dZhpPXkvsffYbDQmcVL+YQCEznNkUP09PvDQz3NbrGLidzocMiOZGio+g+U+OlsZC8fC1TLKB51SjN0FFyKTnp3uCbXQcSXa4UyKRjHLWbMeov1sb6qWUm8KdSrJ/TfxuIMDEx4Te6iRKT0ZDV5OO6SWbT+b3kRYtX78H7iHoAKJLeN+qw9aMHN+L99BmrN6ux7aV5uiV/aW6BoZ7p5M8gTdOMYLjDMT0aV0WY5tklnwrE9QdFlXudJ9e9UeZmHsQ9cppJrHaQd3fKaMfV7qSyy2+Y4G/QNEo31s9Lir7MeLSKAEiqg0JrTPZebXvwpCQHslku6EtOwRS4g==
-X-MS-Exchange-CrossTenant-Network-Message-Id: 58fcb59e-f8e7-434e-b0fb-08ded91997db
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?K1dNOFdZSGt2cWRTcno2M0VjdFN2OXp5ZWpER0VEM01vTW5teXpsYXV3R0Mr?=
+ =?utf-8?B?OER4SHJYeG9Jc3dxZEgrMXhNTjVNM3ZsaUpZaWp1L1AvSjBrUzRDYTlpbXZu?=
+ =?utf-8?B?dUNWMC9ZREk3QmJ3czFHUzdEVDEyUldDclZKODUwcG1UMzhNcEpQa1Azc2dM?=
+ =?utf-8?B?SUZNRGt3RHhDbk13Vk5BdnM3c0tpWEUxekV2QU9OdUcrbGFIQnVPZkhaS000?=
+ =?utf-8?B?Tnkvd2xPYXNwZW0xbGhCYkxHOHFKNE9hL0JUTkYwclBQRWg4cWFobkZ5OXlT?=
+ =?utf-8?B?ZGdib1RZS29KZ3NITzdKQnhuRHhBOWJZVzRqWGpkdmU4VWRSRmhOVEZPeUhl?=
+ =?utf-8?B?Qjc5bVpUMk1jTUhZNmdkR3ppTVZsZ0hsb3FXc004WmQvZ3dqbksxUmNSQi9u?=
+ =?utf-8?B?bUxyajloOE1nUmN4eUZjS3JrNEZTUzJQMHZYWFMyT1lmSHIyNEFDWnhYdXdX?=
+ =?utf-8?B?Z2tqSUpDOGYwcDFScUZJSjNrUldTYktUR3hFdEdaeGFlT3BwYm5lL2FXZWZh?=
+ =?utf-8?B?Mmd5aG5oV3pWMHM0dFV6d3pZajZiZzhNVEZjcFp4c0xKUUVkRkxaRWIxNnAr?=
+ =?utf-8?B?UlE5dUVDc0VCSWFxVXMvYWY2czFlY2VZdTdWM1RpVHJqdC9sSSsvOFJ1UjYr?=
+ =?utf-8?B?bmp0NVJ6NTFaSXVjQ09rN3JOU1MxMC9VYUs4bWNSY05oMUtUaHlhT2M0ZEIy?=
+ =?utf-8?B?UHo5WXNlZCtxdWV4UmJPRi9KdXVVOXBSNVlKenhmczY0RkozSTFSVElSNWZ2?=
+ =?utf-8?B?UW52UHhOSWRhS2Q4L21XYnMzZVZldlZOa0RpNnNDYm5wTXdHOGd5VDFSN1Fj?=
+ =?utf-8?B?M0N2V2VtTkhiZE0wRDliZzRNdTBlSGlxdVNnandFd3B1OVFicGdZak5NSk95?=
+ =?utf-8?B?UmVib1VWa1R0cit5ZG5QZ0dtRGMrUC9RNFFhckhNaUNxWEJJWm0vOVhQb3JX?=
+ =?utf-8?B?NDIzQnI1R0RZR2VTUEI5dFd1RTNjcjlaNGR0ZmVqSGZVWjZIL1Vva3RONG91?=
+ =?utf-8?B?ZDI2Y213SytsbkdhZGpzeTQ1NG1hWkFHVmczMHd5dEordkoyZWFsVC9JSWFw?=
+ =?utf-8?B?d2FFbmlacU4zaCtXRWZsRWJJMHNJVDF6OGtXNkpZMllXWE1GeCtZY2RJYm43?=
+ =?utf-8?B?TFl5ZFhmdzhJcmlpcjEyQXhQbSs3Wkg4bStoRzhQc1FOTUxqTHBJbVFQZHRq?=
+ =?utf-8?B?bHNwbkpKOXYwbFBseXh1V2k2OEYwQ3Q1UkNnRHZUTzZyRWluUGZtOUhPaTI5?=
+ =?utf-8?B?S3J5OVk0aEpxSzZwMzJ0Qm1yVmw5Zk00eXozS29NNExkUGhWWlVVU2N2RXU0?=
+ =?utf-8?B?K05oblYxSjZIK2lBaTR2dE9mK3YyUUlEZk9VYjBHN09paDZIOWJkd0pPb3pF?=
+ =?utf-8?B?NWI3M0FMUzlHbjZBOHFQRXFFazRCUFFqQ1kxbEhMSWtjNkxaV3Y5cXNLK2lP?=
+ =?utf-8?B?SEtiQUNSWWt1elFiQU5nM1d3VWdhZWZXRnZjcTdtcUpKRUF0UDlkbTAySTZw?=
+ =?utf-8?B?T1ZJNW9TMlFlMlI3bkFhM3VGWnVMOXh5Ti81Y0x0MlFmaklwbmRIZUwyOVFa?=
+ =?utf-8?B?Z2hlRkU5Nm9yazRvWmUraVBwM2hEMUt3Vzg5S3htejJCb1pYRi84V203V28z?=
+ =?utf-8?B?THFtdmRhY3EzbWdhRkp2SEZWOFdSQW9JR2FBQVNSeXU3TkhwRHMvTFIzM2VP?=
+ =?utf-8?B?OXRGa2dIRTJ6WE1jQisvZjFwQ0s3OWhvZ1VSM2tmTHFrVXpnOHR6Vkx4SVpD?=
+ =?utf-8?B?aVJBSVF1dzJpTkx4VkdOZlNGTDBXTFU0ZTBUWmcveUhVMHR5SjN5WGFkeDVO?=
+ =?utf-8?B?RUNUdlNYenNEQ0pjZzIxWVRjK0x0NEN0TTZPQ3VZcUErK2NaTW5kbXM4VkpC?=
+ =?utf-8?B?N212UENpaDZsNVJMSnFDZXNFeXhDQnNuWjcvMXBmQkxNb0FobE5BeWhMem85?=
+ =?utf-8?B?UUFoMHRyTEVUeXAzK1RBRjJ0aHBNVFZ1eUZnME51T016WVhraVFxMjgrYzV5?=
+ =?utf-8?B?djdSNlVYNXdUMjdjQ1Y2cWR1QUhtK0FlalExOXJYY2VXMnpFNDY2QVNKVjFG?=
+ =?utf-8?B?ajVSSDlLbFg4N0VxMU91NkJ3aWtyL3lIS3lpMmNuakgwYk14TkhvTUlEU3N0?=
+ =?utf-8?B?Y0dOVFFqaVhweWlQU0EyYUdVM1RYQnVSUEIwK3dEUHc0c1QvVTkyVHJJb1Fr?=
+ =?utf-8?B?alVrWkNwaTArcmdoUzhXOGk5RkhMU2pKNGh3U1BEazlZZlNrTUZwUlZNMmE5?=
+ =?utf-8?B?YWowa2h0UlNJM2FBbC95d3grUEZmb0Y4Z2RaZ0g1R1FLV3VWL3owQTBmSlV3?=
+ =?utf-8?B?WVhNZkdMcUZHVnNZYlgwL0xjUkhSOHhKLzdmV2pTYlg4MzFocnlPaFRxMWNX?=
+ =?utf-8?Q?z9sYXangddC7gYlk=3D?=
+X-Exchange-RoutingPolicyChecked: p2NJIiNu2PI6pHVUeIdvoL1wyD2jjMU/HczxvLzEo6CFFfS03Xxjf44wXt5NlbApP+6hDmIjfiGJuGKdRATqQ8APTxde5ThjsrPRZEjPehLMuvsrGcqbOg1robj28Mi1iE+hmHgrh79lT49gLipkRSsWEqKGfvH8ldH7WAEtAZQynLNtAT0VCsUpTQpgkyhLUzxl1VXkZGyiEpp0yxll+M0IKNkzl1jWz344BTfJLw6++A5t17YIN7mVqBeCNKu9qFQCi0T181QVUqUvSNhRi8/nlZNVxH1mOL9Zq/YAfzTJ2pqF5M4zEF3gpHwfCl2Tx9Qw3v3iv2zCQ3K8FtdyXw==
+X-MS-Exchange-CrossTenant-Network-Message-Id: bc67c492-b91c-4b6f-fdab-08ded91b75c7
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Jul 2026 15:41:48.0537
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Jul 2026 15:55:09.8719
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: ehYLIsiN7+vyePIwnkCTGpeGVbx5cpZU2yf0M2A9lC69CHxszjaOSFx1hMhi1NwQUPAetzbU2qH9o70DvSOPPg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR11MB4663
+X-MS-Exchange-CrossTenant-UserPrincipalName: 9awrwnDcrx4203xZWzpIsmE5Bh+GpeYGplyaPa6lWtDCzNkrbHFMQPLnqogbqKVYmiB+rEErgyZ5tr8nj+jRkg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH8PR11MB6681
 X-OriginatorOrg: intel.com
 
-On 23/06/2026 17:04, Pengpeng Hou wrote:
-> cqhci_off() asks the controller to halt before post_disable(), clearing
-> mmc->cqe_on and freeing CQE resources. If the halt wait times out, the
-> function still continues through that success path even though the
-> hardware may still be using the command queue.
-
-CQHCI should be idle when cqhci_off() is used, so it should halt
-immediately.  If not, it is a hardware error, but carrying on is
-a reasonable option because I/O errors will trigger recovery
-later.
-
+On 24/06/2026 05:19, Chanwoo Lee wrote:
+> The intmask parameter of cqhci_irq() is never used within the function
+> body. The function reads the CQHCI interrupt status directly via
+> cqhci_readl() and processes interrupts independently of the SDHCI
+> intmask value passed by callers.
 > 
-> Make cqhci_off() report whether the halt completed and leave the CQE
-> state/resources intact when the controller remains stuck on. This keeps
-> the existing host-specific ->disable() ordering and is intended as an
-> RFC patch because the cqe_disable callback itself has no error return.
+> Signed-off-by: Chanwoo Lee <cw9316.lee@samsung.com>
 
-Is there a real problem that you are trying to fix?
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> 
-> Signed-off-by: Pengpeng Hou <pengpeng@iscas.ac.cn>
 > ---
->  drivers/mmc/host/cqhci-core.c | 17 +++++++++++------
->  1 file changed, 11 insertions(+), 6 deletions(-)
+>  drivers/mmc/host/cqhci-core.c       | 3 +--
+>  drivers/mmc/host/cqhci.h            | 3 +--
+>  drivers/mmc/host/mtk-sd.c           | 2 +-
+>  drivers/mmc/host/sdhci-brcmstb.c    | 2 +-
+>  drivers/mmc/host/sdhci-esdhc-imx.c  | 2 +-
+>  drivers/mmc/host/sdhci-msm.c        | 2 +-
+>  drivers/mmc/host/sdhci-of-arasan.c  | 2 +-
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 2 +-
+>  drivers/mmc/host/sdhci-pci-core.c   | 2 +-
+>  drivers/mmc/host/sdhci-pci-gli.c    | 2 +-
+>  drivers/mmc/host/sdhci-tegra.c      | 2 +-
+>  drivers/mmc/host/sdhci_am654.c      | 2 +-
+>  12 files changed, 12 insertions(+), 14 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index 178277d90..84846207c 100644
+> index 178277d90c31..98ceb0b9a6d1 100644
 > --- a/drivers/mmc/host/cqhci-core.c
 > +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -372,14 +372,14 @@ static u32 cqhci_read_ctl(struct cqhci_host *cq_host)
->  	return cqhci_readl(cq_host, CQHCI_CTL);
+> @@ -819,8 +819,7 @@ static void cqhci_finish_mrq(struct mmc_host *mmc, unsigned int tag)
+>  	mmc_cqe_request_done(mmc, mrq);
 >  }
 >  
-> -static void cqhci_off(struct mmc_host *mmc)
-> +static bool cqhci_off(struct mmc_host *mmc)
+> -irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
+> -		      int data_error)
+> +irqreturn_t cqhci_irq(struct mmc_host *mmc, int cmd_error, int data_error)
 >  {
->  	struct cqhci_host *cq_host = mmc->cqe_private;
->  	u32 reg;
->  	int err;
+>  	u32 status;
+>  	unsigned long tag = 0, comp_status;
+> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+> index 3668856531c1..8fbbc48c3f85 100644
+> --- a/drivers/mmc/host/cqhci.h
+> +++ b/drivers/mmc/host/cqhci.h
+> @@ -315,8 +315,7 @@ static inline u32 cqhci_readl(struct cqhci_host *host, int reg)
 >  
->  	if (!cq_host->enabled || !mmc->cqe_on || cq_host->recovery_halt)
-> -		return;
-> +		return true;
+>  struct platform_device;
 >  
->  	if (cq_host->ops->disable)
->  		cq_host->ops->disable(mmc, false);
-> @@ -388,15 +388,19 @@ static void cqhci_off(struct mmc_host *mmc)
+> -irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
+> -		      int data_error);
+> +irqreturn_t cqhci_irq(struct mmc_host *mmc, int cmd_error, int data_error);
+>  int cqhci_init(struct cqhci_host *cq_host, struct mmc_host *mmc, bool dma64);
+>  struct cqhci_host *cqhci_pltfm_init(struct platform_device *pdev);
+>  int cqhci_deactivate(struct mmc_host *mmc);
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index b2680cc054bd..01ea3adbdf3b 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1805,7 +1805,7 @@ static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
+>  			cmd_err, dat_err, intsts);
+>  	}
 >  
->  	err = readx_poll_timeout(cqhci_read_ctl, cq_host, reg,
->  				 reg & CQHCI_HALT, 0, CQHCI_OFF_TIMEOUT);
-> -	if (err < 0)
-> +	if (err < 0) {
->  		pr_err("%s: cqhci: CQE stuck on\n", mmc_hostname(mmc));
-> -	else
-> -		pr_debug("%s: cqhci: CQE off\n", mmc_hostname(mmc));
-> +		return false;
-> +	}
-> +
-> +	pr_debug("%s: cqhci: CQE off\n", mmc_hostname(mmc));
->  
->  	if (cq_host->ops->post_disable)
->  		cq_host->ops->post_disable(mmc);
->  
->  	mmc->cqe_on = false;
-> +
-> +	return true;
+> -	return cqhci_irq(mmc, 0, cmd_err, dat_err);
+> +	return cqhci_irq(mmc, cmd_err, dat_err);
 >  }
 >  
->  static void cqhci_disable(struct mmc_host *mmc)
-> @@ -406,7 +410,8 @@ static void cqhci_disable(struct mmc_host *mmc)
->  	if (!cq_host->enabled)
->  		return;
+>  static irqreturn_t msdc_irq(int irq, void *dev_id)
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+> index 57e45951644e..1de2f05fd958 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -430,7 +430,7 @@ static u32 sdhci_brcmstb_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
 >  
-> -	cqhci_off(mmc);
-> +	if (!cqhci_off(mmc))
-> +		return;
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
 >  
->  	__cqhci_disable(cq_host);
+>  	return 0;
+>  }
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 18ecddd6df6f..d0fa83f67a80 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1503,7 +1503,7 @@ static u32 esdhc_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
 >  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  
+>  	return 0;
+>  }
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 0882ce74e0c9..ceed47ccfda8 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2165,7 +2165,7 @@ static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
+>  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  	return 0;
+>  }
+>  
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 785d3acb18c5..4ca73e7d799e 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -555,7 +555,7 @@ static u32 sdhci_arasan_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
+>  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  
+>  	return 0;
+>  }
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index eef53455b8ee..4c5fa6a6931d 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -624,7 +624,7 @@ static u32 dwcmshc_cqe_irq_handler(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
+>  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  
+>  	return 0;
+>  }
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index c347fac24515..b121d896a804 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -215,7 +215,7 @@ static u32 sdhci_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
+>  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  
+>  	return 0;
+>  }
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index 6e4084407662..b55618566d65 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -1760,7 +1760,7 @@ static u32 sdhci_gl9763e_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
+>  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  
+>  	return 0;
+>  }
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 820ce4dae58b..221e48b59f48 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -1280,7 +1280,7 @@ static u32 sdhci_tegra_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
+>  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  
+>  	return 0;
+>  }
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index d235b0aecfdb..2a27db2f558b 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -462,7 +462,7 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	if (!sdhci_cqe_irq(host, intmask, &cmd_error, &data_error))
+>  		return intmask;
+>  
+> -	cqhci_irq(host->mmc, intmask, cmd_error, data_error);
+> +	cqhci_irq(host->mmc, cmd_error, data_error);
+>  
+>  	return 0;
+>  }
 
