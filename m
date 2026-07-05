@@ -1,103 +1,103 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.20])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 502E8368968;
-	Sun,  5 Jul 2026 08:15:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A9403603D8;
+	Sun,  5 Jul 2026 08:30:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.8
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783239310; cv=fail; b=IFzKVLslaxKYdGMnDvxNvdSR/EupFFYz8dNVFrqqow+W14al9q6B5fqgpG88YwqOYqIVM7/iWilbU5TFHNYrON9dF1+og6qmc86USJYKAFXxMoz/OJNS4Q1qvy6LjRqInMU+x0UtXKH6vZ9plDZ2KpKNVi+oHrJ2H9QMXIX7nBw=
+	t=1783240222; cv=fail; b=GbaoIvRoPL64pPR/ckzOyJvqrFg9lC6KMlCaSB64tnBcYfemF5X5fG2e4HIkGg3IcABsAItAssvfK0+O+BwCnH81fe5IpBHUYOGfDqGY5ROpY37skkA5nu/7l5isOl5C1LYooUrZ362qoOdx/sa35XVlI8iBUwVwFpy8c8U0Hrw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783239310; c=relaxed/simple;
-	bh=fcNFUdmyEtIcGLEHGiPRvR3YBfAR982jBLrLieosZjQ=;
+	s=arc-20240116; t=1783240222; c=relaxed/simple;
+	bh=ZiM76GGbm3Qv/OIFQPJ7s535VGpMHDuRNF+v1uhPzjk=;
 	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=bD2YK/6FbhI9UOUmC4tyoJh2SksgfISPDf9XizYOTHDLPVYeNRtYWvW5ZchoK3KD48W8bmd6RrBq41fdAZ8X+c4HC7EkNLiyrGurztS4HrqOn3AUJvuHx8KHo/8IUJqwy37Q3lEpsTOnERPRdySz1GWBBOY0IusgOd00JAkOIYM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=DDokHzxT; arc=fail smtp.client-ip=198.175.65.20
+	 Content-Type:MIME-Version; b=qxNleRT4YGrDMV4PWAz44bUC+wyW6/Z/7ELu3UZ5az94F/wKhhjulz5H+73T1wrYYiUdVTOObNgVUzrC49e0gNv/yLx8PWaqIizBtqwexdSzD9TQ5DE9RFQQgvPrzTdzsJvFQMF9UI3kwb3YHRieY4RhBRkbbTq8w2j94dp6FD8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=YklZWOLE; arc=fail smtp.client-ip=192.198.163.8
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="DDokHzxT"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="YklZWOLE"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1783239307; x=1814775307;
+  t=1783240220; x=1814776220;
   h=message-id:date:subject:to:cc:references:from:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=fcNFUdmyEtIcGLEHGiPRvR3YBfAR982jBLrLieosZjQ=;
-  b=DDokHzxTTZRixp60n334DSUqHyfQAp0aeEE3A+yLd4tAzlJ8yaLZnwAP
-   f0PO7FLyVJ+cKBIhgahC/55pY3BX7R4FOtkAKgc8wRhAhzAI2HJgFqIkg
-   faGQB3NAMJDLD5i/JElgE9nsu1KmEp6z8R96hwC/v2NtJWT7E3y66f6L0
-   hPw3nk8XVQS2coX1m9Qpzo16QsXETq684RMSuiZIrnOheOnJNl/MQf3I9
-   E5iiimUY7SmBR0pQWgh/Sa6ZCe5KdhQFnioQwJQIDk2BaxWWA0yzBeJyE
-   sC+iNzs9bXBp/qDXkKjy3K0IZs15kCg9BAv8fqmysNDyuUIlgZs+ej2iF
-   A==;
-X-CSE-ConnectionGUID: UaVa/M1CRgaabgsrpSxyeQ==
-X-CSE-MsgGUID: nJfNnBlqQh6A6ApmEt1Gdg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11837"; a="83679001"
+  bh=ZiM76GGbm3Qv/OIFQPJ7s535VGpMHDuRNF+v1uhPzjk=;
+  b=YklZWOLEH3zfKgN4uIvvto4n4FQXOemEYds2R5bMaGVvqH853QHSlZx1
+   epF4ezP2a1ykNp4Hfq83hUNLKpj7xRxrLgYD86BmCbPNkcmXtzRUkGrn4
+   fV+UyZhISoZVJd+s2Cy7xacgbfuNR1qjnSPZAGNGvAIR3Z+TXMvhWpuGQ
+   uO4K2/OympbwBcGv05iRc//Bchf0K4V7ute8xbhyEaH5CZeA2saf8vi9h
+   nDfvKvRFUiV2sIBNh89o9JsiAfn5XVxspYhtalvAKdImZ2M04XSGTKz/i
+   NSsbwRGVQ7ydFSLSzukQgBYxkCEhmw+hNV5403ocJnPC2n+OI+pszSktz
+   w==;
+X-CSE-ConnectionGUID: 09YsFzw7S2eiU4VTWc5faw==
+X-CSE-MsgGUID: 9oGuMIehQpy0z4C6Q5d/4A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11837"; a="101449418"
 X-IronPort-AV: E=Sophos;i="6.25,149,1779174000"; 
-   d="scan'208";a="83679001"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa112.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jul 2026 01:15:07 -0700
-X-CSE-ConnectionGUID: mpVwxc1qSSamNm9EggZ/sQ==
-X-CSE-MsgGUID: QyXLyU0+QtuyNzKgnQI9AQ==
+   d="scan'208";a="101449418"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jul 2026 01:30:19 -0700
+X-CSE-ConnectionGUID: BvkcY58NR++v8vDdNSCTLw==
+X-CSE-MsgGUID: 6bLAsCBJQdigkvIphIK78Q==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.25,149,1779174000"; 
-   d="scan'208";a="257772725"
-Received: from orsmsx902.amr.corp.intel.com ([10.22.229.24])
-  by orviesa005.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jul 2026 01:15:06 -0700
-Received: from ORSMSX901.amr.corp.intel.com (10.22.229.23) by
- ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Sun, 5 Jul 2026 01:15:06 -0700
-Received: from ORSEDG902.ED.cps.intel.com (10.7.248.12) by
+   d="scan'208";a="283528939"
+Received: from orsmsx901.amr.corp.intel.com ([10.22.229.23])
+  by orviesa002.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jul 2026 01:30:20 -0700
+Received: from ORSMSX902.amr.corp.intel.com (10.22.229.24) by
  ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43 via Frontend Transport; Sun, 5 Jul 2026 01:15:06 -0700
-Received: from SJ2PR03CU001.outbound.protection.outlook.com (52.101.43.68) by
- edgegateway.intel.com (134.134.137.112) with Microsoft SMTP Server
+ 15.2.2562.43; Sun, 5 Jul 2026 01:30:19 -0700
+Received: from ORSEDG901.ED.cps.intel.com (10.7.248.11) by
+ ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Sun, 5 Jul 2026 01:15:05 -0700
+ 15.2.2562.43 via Frontend Transport; Sun, 5 Jul 2026 01:30:19 -0700
+Received: from SN4PR2101CU001.outbound.protection.outlook.com (40.93.195.68)
+ by edgegateway.intel.com (134.134.137.111) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.43; Sun, 5 Jul 2026 01:30:18 -0700
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=crhRqWx6ei5mTlHG20ZJT3mOPKCNg+rufoZ2P8jTRgXHHzJuCs4t6AsFbLtLSr9J886MXPcGuYz2Q5BZ85mUhD39u3ZQzqt3IcgVcF/GYMv++oouaTBqP58dxSUguCQJRgGuPlarstzxmJeoOUP0do8qypbb2hVPJTCFbE1XX2P2YEBxMai4QldhnIw9tjB2AokNEe/5V/rQG5SP5DeGXp8e7hKuZjsMpkOfQWUhxTgLfG6aamaIVIArWJbzjgb9MbnA75HaKZu+JqR0RIaFwqHROgz8Gtn31kOeVDqmgUPb2Xqt6K3F+woQin7pv1aSeRMBSV4rLNA5PTHmhm/5dA==
+ b=KRgpndHLS7sQ9tMAMK+4Q1ecBxVXN3hNa2LSc/4Q9wewGMPUXeFrIPK8Og+n4vHtyN0HNKLfEWNReHDHuwQZPa7rptXkBzD3e81DWj0jwBkmJk3CFFdetYo3I3QZFVPRU+zbIfiixTq1hN8Esb0Sgee8BYf1sIJfq24+155CFpnWs4+SrvcSZebE6BCs22BaCRYJ5P7WXszL3wTEs6bKgVSyCwgRPBS0JiebAWZa9LAjmERlNJ77Wjm5ZxRGUvwNPpe1lFG0oWcUHYFQleXii8efNtm7BbsPKAAGE0drPDLVyMgvHOSo0SZ8+eUHGmHPkcfCWbdk+Iq2n+aVlhEckA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=qGYb6qbL2KvB+DM0CMnIhdyGiW5A2H64wnRT3icbScs=;
- b=bqUZnrZ4LUdDInuFnEdq7lI1dFn+vs1S8/RG9DhM/eYa0MHCgalMI/O4M6zJQ0ZgZ2q02plyMxDmSaroC1X7YS4NxFW7KxG+iDmA3RftPkTgSTtQz9+udYuA8g3cyqkXBo0fLlO3bz0hDHdubI8m3bqH8Pf0bVJhaw5tv4MxOCeBwPAAvlSC6uIamMN9nnH910E/VgrTnmAf9xPzig5mg0xW/9Vam4iZ2pDmnbrhEuCDOnfR7ykDKu9lQ6PdmQ4KPDWHu0lYjyxDrlCMTDOFGBEyXdOPu9OUrOTTjU+D2/HPrb4piUBOVpKYQSsHGRYivPN+zd/A86qJU4Pv9q+2IQ==
+ bh=I6gUi4iZ1n/3HPfROuEbZyCRK+CXKasnvNAgkmlL70s=;
+ b=pGc1M5N73y63YPVP46nbze1rIZ1/nrYPPAx1HbH/Gd0joOJRfGLaet4lSIrupq9NhuSDpPxTH8ingqLReuvXa3bWp+QMRelKXn5dL9Ma07d+pZ2jtasY+lSLLaCY2MxUhA6ZyoVSQBe70/oBhsC8FJLLLO35GagSSWOVDl4tzQkJ1BnCcMt5i7jZE0Gh+PsYe5kQcpNxxQRfCUVCjp4QKjtjFPvA5RarQFSdOApu7x49YBuEp6yiX4V9TLHsER3I5J+jxFc3yJIgQuOZDwlquDkV5uCfsLAMW3UXBv2psve4vU80bDX3Z+KbuQNaShKvqvg16yW8s6Kwz0pG/Uh4Mg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by IA3PR11MB9445.namprd11.prod.outlook.com (2603:10b6:208:578::18) with
+ by SN7PR11MB6602.namprd11.prod.outlook.com (2603:10b6:806:272::17) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.10; Sun, 5 Jul
- 2026 08:14:58 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.159.19; Sun, 5 Jul
+ 2026 08:30:11 +0000
 Received: from IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
  ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.21.0181.010; Sun, 5 Jul 2026
- 08:14:57 +0000
-Message-ID: <c1cfc800-f590-454d-9493-55cf6bed938f@intel.com>
-Date: Sun, 5 Jul 2026 11:14:51 +0300
+ 08:30:11 +0000
+Message-ID: <0b8c3e61-e0d8-46dd-8c91-e793310087ab@intel.com>
+Date: Sun, 5 Jul 2026 11:30:06 +0300
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 3/7] mmc: sdhci-esdhc-imx: restore pinctrl before
- restoring ios timing on resume
+Subject: Re: [PATCH v4 4/7] mmc: sdhci-esdhc-imx: disable irq during suspend
+ to fix unhandled interrupt
 To: <ziniu.wang_1@oss.nxp.com>, <ulfh@kernel.org>, <haibo.chen@nxp.com>,
 	<Frank.Li@nxp.com>
 CC: <s.hauer@pengutronix.de>, <kernel@pengutronix.de>, <festevam@gmail.com>,
 	<imx@lists.linux.dev>, <linux-mmc@vger.kernel.org>, <s32@nxp.com>,
 	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>
 References: <20260703104208.3426374-1-ziniu.wang_1@oss.nxp.com>
- <20260703104208.3426374-4-ziniu.wang_1@oss.nxp.com>
+ <20260703104208.3426374-5-ziniu.wang_1@oss.nxp.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
  6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
  4, Domiciled in Helsinki
-In-Reply-To: <20260703104208.3426374-4-ziniu.wang_1@oss.nxp.com>
+In-Reply-To: <20260703104208.3426374-5-ziniu.wang_1@oss.nxp.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DU2PR04CA0236.eurprd04.prod.outlook.com
- (2603:10a6:10:2b1::31) To IA1PR11MB7198.namprd11.prod.outlook.com
+X-ClientProxiedBy: DUZPR01CA0075.eurprd01.prod.exchangelabs.com
+ (2603:10a6:10:3c2::7) To IA1PR11MB7198.namprd11.prod.outlook.com
  (2603:10b6:208:419::15)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -106,121 +106,130 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|IA3PR11MB9445:EE_
-X-MS-Office365-Filtering-Correlation-Id: 91ee273d-3793-4db1-f1d1-08deda6d808e
+X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|SN7PR11MB6602:EE_
+X-MS-Office365-Filtering-Correlation-Id: 9876c819-37b8-472b-8640-08deda6fa0d1
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|7416014|23010399003|1800799024|376014|366016|18002099003|56012099006|4143699003|11063799006|22082099003|6133799003;
-X-Microsoft-Antispam-Message-Info: bIFDopd6t/gYWSSaeepLchGdyq+/AZ+/StiHDQn3f3OxB9rmqWX/TidJ5w+o88nuDxnFvkyDKRLHGPfakrPrbRbtBBzVlIPYwdk4LvpYGcie2YZhjkc2CdrTKdtVxlbURGEbotQoXA0XLNgozUkxYLGLuqEkAMdsmHYOUN6fIvMkBSvXpZ6dkMJM7lRd6xv5XZeCiLXyo2acY7X5oHqLnPVbTOgUR5UQb5QKZ9Ek/VgMRnTkE0XmDuN+E7+b3mYh0fE11uba1EuoFWywg2bUDB2kkUFWc637vVnfHzPHfdQalH1QF+Lss6wg91bPpCX1XeRCmibzNqpWeG7GHuMQwMbxc4ClMFG0Jxdvr6IPRLKi55Ywj5bymSRBYWVOkc8hfWmq5gN+hWwOmHJrUBzNZ0hRh2WkjFXq1m2w9q4upbG+8aHQUrkMvdgBQPGgAh/sbdOr4BUpxTdTbKMzzn6n0JJldwsnmk1jjt2vpdUiXd3JVufujtrnMmkPRTOBJZwzFgI2KTmrOf/jvzlbbvROAdG64QZVXCzDoyCyrkk23S9LjD6oCLw02XBluO6rPQQQUtllznaxitehcqtKBH3PZYMNwa/pEsfDOljmk38JVIc=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(23010399003)(1800799024)(376014)(366016)(18002099003)(56012099006)(4143699003)(11063799006)(22082099003)(6133799003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|7416014|376014|23010399003|366016|4143699003|6133799003|18002099003|56012099006|11063799006|3023799007|22082099003;
+X-Microsoft-Antispam-Message-Info: h+w2if1ZeAij+igQeZTFU3K0s+9aStj9j0wtgGbhBOTH0vQBbVOB03pDiU17AhQIrLm2ianB2xstRCi0rkcfeESyfwlztj/JiZuULi6D8zqiVtjt5/g0K8hRUw7GMqKXEsUCpeN4tD2ldZJdellfUtDUaGutILH+rBG60qyqyWYLP47DgNBgLV5I2JFz7PXI0gSbdjUerClfigsLNB68RO9+yPoUO3+R0Jtnq2NZNmQJ4LThg+Y3pQZqvhOt/qxFrkJQgukpo7Ml7iTTTM+p6pcnobvvy6xauO41tqPzmpb9/U2t0prtuvSNY6Cmr/ECseqXSWAD+0u5diVwBAdap7hw1Kxk1yMfAKvFlNHfcxqbmJlbXHyPC+vPfl34VnsSH8CbBbGrpSW5vfxI+x871FsyPTS/obtSzZQFDfWXeiEto+JDG8P+uVATa4mpeOVCJ+PMo7nsVSrosJomKKKyK+bnfzGBT2nz1AZObURw0xHsMlU3LhvWDrIuScrrcXlbD91Tqu9LX1o6LptxV3mL1Nuosvg/mI2mnxEHUub65CjSCgep+ReD4X18oEh8H2HDckSBzhdHV4Jp0c5t0eXMTWefLN5i6srXYUnXrO0BmaxSvjrZuPeFlZ710XLzrW1fFuKTDv+pUB2RDn8Gp9ca/SnyjUQo8gC2fe4YL0QwXW0=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(7416014)(376014)(23010399003)(366016)(4143699003)(6133799003)(18002099003)(56012099006)(11063799006)(3023799007)(22082099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?dVcvVVZZYlRFWVpOQmhFMGNFSWd2ZkhidWVWVmdVWXRRZkM3R0VIcnZxREY5?=
- =?utf-8?B?YTViR1FHL3E3VU5kWGF0dm5jYjBtNFFxWTkwMHd2a3BUSytKZDdzQ1VBTTNG?=
- =?utf-8?B?eFNNMitSL3IxZnB6YXIyRXYxdXZGaXVGMHlFdENYYTJtYnFLQTJ1OU1sL1NL?=
- =?utf-8?B?V2dDVDMxV2FWaTUyVTlaeU0yRlFnQ3U0UnJ4VjZIRHVCQWUzanN3T0drVk9M?=
- =?utf-8?B?czJuWG4vUmxtZk5zRi9XbHZwZkhidkhrU1VIRCttUEdycGU5SGhEMHJCaG1O?=
- =?utf-8?B?Z2xNdGZGYmE4bWJyVGdoalFQVkthZEtGRTkrWjk3a0xiV1JFME44NlpQUFh3?=
- =?utf-8?B?UkdDWVFJM1hPeXA4NUhGSmhtb2drNFZpTHFNd2xPa3pFQURFRUZGMlg2N09J?=
- =?utf-8?B?ZklBbzFQa1pwa3k4RU1icHlxQTBBMFQyS2dpZTR2TEQ3STErdmdIZjBWQis3?=
- =?utf-8?B?RENNKzhCYU1RU3hsOC96S2ovUXhteXV1Mys0YUphQ1kyN3llTTU0WkZhcytZ?=
- =?utf-8?B?ZEcvOWRjQTV5R2VIS054eG1ycmUraU1LUXNXVjB4QXdQMkcxdmU5VGRDQVl5?=
- =?utf-8?B?bFoxN3BrTWtVeXZsbnpmYTlTdnBSV3dSc25uTnI2QTBXbTc0ZlRpd1RxMzhj?=
- =?utf-8?B?ZW42MHYzZkpFRnBFN05CWUJtWUFRZzZhL1JJOHBsOGZPRVhMalBWUE15TXNE?=
- =?utf-8?B?bkRzYWZCOWtuZTBVUEZJM1FBU2I2Zkg3bDNBaTBqNXQ2Mi94TXZpbU1odlYv?=
- =?utf-8?B?ZnNRTXhDVTkybXN6akNhNzVJR3VTOCtEMGZ5dk8zRU5OTHk2SkdCcGxlQnNZ?=
- =?utf-8?B?RUdwenZGSDNFalR5Tkp3MlV3dUFwTGNUUUJoRWIvMWtnSjl3VkQ3Q0xaTzZ4?=
- =?utf-8?B?dnNrc1hQeHAyVFVHNmxiMyttNzIxcVYzV1NNekcrMXVpY1d4M3FoV01WQUJm?=
- =?utf-8?B?MUlNT2ZDcGNXdmZEMzZmczRaYitTV1UwZzRmZkI0Rmx4RU1qbTl2S1RxWVpo?=
- =?utf-8?B?d0tqblkzcm9ybGdnUnBjMWpTNy9rekN4aVoyRGRZZEYwS3hiWWErK0N5dDhE?=
- =?utf-8?B?Mm5oT2kvM2pjY3h2cVcwaVIvYzhnbmlSeXAyTjBJQ09WTlY1T0pCTm5HRUIy?=
- =?utf-8?B?Y3BRZENQSjBVbkdvN3hjRFJoQnA3VXlZRUI3czZMem5RVnpWQjEzVHZOYlpl?=
- =?utf-8?B?UHp3Wm42NFVoenpTN3RyeW1WRFcybkczRVMwc1hlMUxZaUVGcWl3dDF4dGFh?=
- =?utf-8?B?QVlZU1l5RmFLNWFJRUNROVdOU0xHT2tmdXQxbFo1TGlPazlDVU9zQlJvVjN4?=
- =?utf-8?B?Q2ROSmtaem5KN1RrWEhGMnhSSXpLS04zcElwN25makRCTXhEblkyNXFCWjlK?=
- =?utf-8?B?Q3FrR0FhaEdGeTVBUXV1cFRLdE5FV0llY3lNYkFQQ1FJR1A0Z0FBczdFOGV1?=
- =?utf-8?B?aStwWlB3bENEd1BIaG5yK2dMK0paSUF3a1NYVENHNExydzFNaTFOeUlWVUhw?=
- =?utf-8?B?ZkcvYzBPSis4c0ZYTlIrc0ttZUhtRWtlaTJxZEFsZk5iRG5pK2lKMkM5MWtP?=
- =?utf-8?B?RGFKVnlJYnd2ZmtpcjBXdkoyUGk3bjlsNkFpRlhHVmZGYjZNR2M5VHk1VlM4?=
- =?utf-8?B?QkNHTmswbXdKdWJrNWhwYXZjTFdGM2RMN3BUbHpGb01uZzFpMU11L0EydkJV?=
- =?utf-8?B?dVdqcCt0bjhnVGdXSjBSVzF4YnZrYnhkNkgyRllwai9wV2FiekxrNnlLdWpL?=
- =?utf-8?B?ZFk2M0VtcTNIRVZyaTFabGVKVS9YdVdZeXdubVkvRzhkd2hhOHN6QjJqZ1Q4?=
- =?utf-8?B?WkFMdmZoWXgzMU1POUVRT1BSOTliMTVZMm4vSmpUa3hJajRJVUpPSDhXWXk5?=
- =?utf-8?B?Q1BSeFpqK1ZaanZuU3RqQzlUY1FDTWVGZHVrcXlIeEkrbXNKV2J3cGwreCt0?=
- =?utf-8?B?ZmZJTDhOZkp6eXB4RlptVkY2Q1hSVkJqOGpieHFRVlpMRzVyRW5sUWVOdG14?=
- =?utf-8?B?NzNVYkJYYWp3QTdLTXg1aVlYS1lmNHI1bFdscjBGRmtMckJqK3puRVpzU2N0?=
- =?utf-8?B?S2NIZFBxT0FpOFNuSjl6bmFhUCsySitrZ3JldnNkTmdlOHIxZlM1anRNa1NZ?=
- =?utf-8?B?RllhUE9vZFFyZGcxakpzTkN4VFFwZkRReENUOGhNZnFjdGI0MldRVHVQLzZt?=
- =?utf-8?B?cVQ1dzMyUU1GeXVXcG1MUy9FeG1pM1htcTQwUERkN21wQy9yS2ZXRHpad0xh?=
- =?utf-8?B?OERycHFiK2RhbW5PaHo0OEtreTI2ZTUxVGgyTXJtYytNSFVKRnR5dVc1Q1hH?=
- =?utf-8?B?STlwbjlza2tseUlLcHNrYVFKaS9uK25uTERuOGY4SEdrVnNVVE9zR2pXbXh3?=
- =?utf-8?Q?aKj0NRyTLPFwpbJw=3D?=
-X-Exchange-RoutingPolicyChecked: jO/dsIC2G+06MGL6cYbImbEoy2l3OJ58iWWt9HKtJeOYvJQbWQEub0DK4Z4aHQKOpjNSioF40LPOvC3cvykZmu2XPks9dFLZhbDvRIvCRdTDHCEtC1aOyRT1gSIAh+OS6+yun+6NmkZqQfPsdvudkHXobYoofrzAFL72Ix1abS6Fe+yONemeBfOkUBXFNB3HfYuwYqZlg24cHvw8L451n5p3gSKzjlmDMLDwbkA5Q4zXv4+L//LVnY6e6jrmIpnJ+00i4wVbEG4c8nqBe4tY+WuMdMHEXSQjJjU7IrtoHI5C5MJY8PjacuSM9DErYSq6cDnQvX8VsLbcpxIHCv+e1w==
-X-MS-Exchange-CrossTenant-Network-Message-Id: 91ee273d-3793-4db1-f1d1-08deda6d808e
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?eEtJaVlCdU8rclJmWk1QUHNkRTdPNGkvY1dPZ2FhRHdVcVFDZW1NeDJ4em95?=
+ =?utf-8?B?eGFNalF0VXgzbzJLQlFSQm04MCszZDRmbGtHQ09CM28zZ0NzQXB1My80b01M?=
+ =?utf-8?B?K2VCd1d6ODlUY0FQT1YzTmVsNFY1eGthZFNUTTlrNktGRXZjRGpVYzhZdkxO?=
+ =?utf-8?B?OUxUN293d0VUTmxURnc5RlVkRVNsZ0VSQlFna0lpemIxNXdSczVjWmp1SUMz?=
+ =?utf-8?B?ZlM5RFlXUlQvb3AxaWIxMnB0MVNZK2J0UXdMYUFyOFE4MVlWZ2Fub2QyTXdH?=
+ =?utf-8?B?ZmRNWG1RSWxhZVV2WUhJbGtvcFFNQWsrZjNaSm5MYzZ4S2dQeTRITVhtV3hH?=
+ =?utf-8?B?N1JDMGtaVWtXVUpHUG5OMkdtMDQ1MFl3WWE4U0Zhc2dPVXRaWkowTVozeFkr?=
+ =?utf-8?B?TStNWHJCSTNBQ2hHeHJCWFMycDNpRFQzbG0zNHRpbTVRWmdnTFVuSzE3MUhV?=
+ =?utf-8?B?T3hieHpDcXg4dndBUC9qbjZxRVVjVS9NalFETDg3QkZDdVZoL1VNelVZRXpU?=
+ =?utf-8?B?YUtEdThEU005TkpOTzlmMDJaZEpHdWxURjFZL1E5NlJvU1ZEOW03YUhQczI3?=
+ =?utf-8?B?czVMVmVoWDV3eTVneXhJaE11cENmUVI1ZzQzMlUzSU9aSm1RbUdyTzNRY3dL?=
+ =?utf-8?B?L2g5SFUvcExUekVvUGZhRlUwb2hOSGdNZmVwQUZNSmRZOWlkYzBHVU8rK1ly?=
+ =?utf-8?B?TGczTFZtZjdra01SSU4ydzYrNHZ4OTlZTXcrSEoyTXFPOEhwYTBOWmgvdW54?=
+ =?utf-8?B?YzRqNFNMZWQ1R2Uya2trRVdSQjQ5b2ZCVFIxNU5EVTFRdTVnV0ZmdE9rY1kv?=
+ =?utf-8?B?UGRqNUpEWXdTdGt5a2lMc3hFSmNOdkRpMVJYeEl5MUtDN1dKV2JiYkRGRHdX?=
+ =?utf-8?B?MU9XdDh6c0RucFhKVFNCcEtBMjdBOURSL1ZxMEpqQ0tCUFpubWRzL3ZrWWdK?=
+ =?utf-8?B?MzAwMHRMOUliNGNZcUxSei9yUjNObWptUjhoQktBUXZYS1FWNjcvWU1tL0ND?=
+ =?utf-8?B?YlJENGNxR0NQQ29rZmt5RTFtYmFpWXA1ZTRFd24xVk1iQ05HUlllYXp4TXdT?=
+ =?utf-8?B?WkZZMEh5MVdFUStaNlpCNVVaS3NPT091K3hZRWdFM0JVbXVjY1BtZGJMdTlT?=
+ =?utf-8?B?ZmI2MDhvTExWQ1FjdkdDTlVkVEkwaDR2YUc2WnROV2lGVGlHdmNXRkJXdVVl?=
+ =?utf-8?B?THhPK2l1MVFvRG9SOStCQjcxNDkyNEFQV2h1K3ZyOXpadi91b3BJcXBaTjd1?=
+ =?utf-8?B?WC9XVHA3WlJtVXVDbXJQZFc1R0hUTm02czdoNys0VDljU3ZhRUZES1ZCajZi?=
+ =?utf-8?B?ekZMb25rdVBFWVh3aUNBS1JZM0NsdC9TM1haNGl4ZlRhanZVb0xIMFk0L082?=
+ =?utf-8?B?dmZKV2lsQy9FVzZuUjR4M1BMRXVNeWd3Z2ovQ3AzWWc1TlFpUHFtZkp5UTRR?=
+ =?utf-8?B?Nk5tWTc3bU93RzdIMDZ2UHJ0WXRENklNaW0vc0k1Mkl3NjV4UE9UT0x4QTZt?=
+ =?utf-8?B?anZJWFZHMmFkMG40TE1Bckw1Zm80T1NRNWhRaFpqcEhVTUxQNDY3TW9SanBl?=
+ =?utf-8?B?Q1FXU2x6VzNsUWw3dDJhSk9KMlVjTEFDNWZUMFZLYVlPSjE2bDV0YzBZNHYw?=
+ =?utf-8?B?UXZSdHp5dTU3by9hUkliUkswZGQxckM2c1ZSNWxMcEdTWUNQMWh2Y1hVeld1?=
+ =?utf-8?B?eS9NZy9qK0NXR1J3eGhLaVNqTUpoYzAvYWcvRGVJVkdvZjR1UExjbU9EaDFS?=
+ =?utf-8?B?Yk9yNUxuV0hvSFJjVWRDWWZybkhLTHl4MkNMSk5Lb3JTc3ZSNVEwWVNhaDBZ?=
+ =?utf-8?B?RE5UdDNmRlRRbXVBM2FBdEc4ZnJxbXZzL281VEtxeGt0dXFGQlpVeTlYWHZG?=
+ =?utf-8?B?c2J2TGFEd3VYR25pcktMN1gxVEFPOExVbVhEaHllTnQyK0tldlFXMGtuNEtJ?=
+ =?utf-8?B?a2FGc1Fkd1FNUnI0eUV1YW5GY05haldvNStwOUJocXpWN0ZYa2NaZkVkZnNU?=
+ =?utf-8?B?YXdFZkFoK3gyQU5zaFZ6ZUYzQjFON3lvRHJCanpRdjRsVExVamY2bnVYWk9q?=
+ =?utf-8?B?UjlMWnNXaHhnK1FXakN5dXZTeFRpQkNxcFUzbWRlOE5KdmFESlZ0QWlteElz?=
+ =?utf-8?B?S3llZks5MStsS1czRXJMNjMzUWFGcytQb1pqK3AvdythMm9Ham0wRlc0OC9o?=
+ =?utf-8?B?cG4vK0twdkd2cjQwaXM4WWcvSmxzNUI5SG40c2FQaVk0b3FGSkkvWWVZZFM2?=
+ =?utf-8?B?aGFpcDBiNHpXZWlMSFMvQm9HS0FiWWEydWN1djV0YmVVYVoyZWRIaUhwcGx1?=
+ =?utf-8?B?RzdHcy9XMzE2WUkvUnpNUzhLTElTUW9DYWZicUJGNGlpdmJ3TXdIUT09?=
+X-Exchange-RoutingPolicyChecked: UIIJaAcK5cuuxAS32gcIzqe+VentDDD2+Tk+aRFXQK2kW94E1AKe7svJyIsVS1+H76ySUEmfCW2PIBw5XqxNaZRXsDs8OvBVBZKi75euOFU6XpQ2IwIVOCkXcz7Auz4J2eRVbk2hEcsUeaP4E1KDB56S44Vt+Vo5FLwP5UvBOUkdhKlHZp0UPHzJTx0BrH7nKkyJgtJrZvbaP3kNtsJv/6fTn/AoMhcUyXjYKAqijuABwVvJFWgHDB+iLjsFbGmLorZyifFXxScSwYpKdNXmACs1piya4sDpfUWH/p9K/146cjkg9UDCOKnov2Rf2icFWtuYeMlF39Qf2+Te//2cNg==
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9876c819-37b8-472b-8640-08deda6fa0d1
 X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Jul 2026 08:14:57.9066
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Jul 2026 08:30:11.0384
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Gvn0z9EEcXrIw1m7TazUSK9E7CsvO+Rn+OzKGJ/WYH2/8eO9JF8J80/giVZqPeo61QaVAlfnEH/T9OLq4IpMtg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA3PR11MB9445
+X-MS-Exchange-CrossTenant-UserPrincipalName: Fn+rPn1Rc0BGlcAXhgWBpnaYxVqm265fmBaEhhX6CEceSsnrEIub3e0OCeUMle7WXXc0JcDl/GnIwvqhPcvUiw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN7PR11MB6602
 X-OriginatorOrg: intel.com
 
 On 03/07/2026 13:42, ziniu.wang_1@oss.nxp.com wrote:
 > From: Luke Wang <ziniu.wang_1@nxp.com>
 > 
-> SDIO devices such as WiFi may keep power during suspend, so the MMC
-> core skips full card re-initialization on resume and directly restores
-> the host controller's ios timing to match the card. For DDR mode,
-> pm_runtime_force_resume() sets DDR_EN before the pin configuration is
-> restored from sleep state.
+> When using WIFI out-of-band wakeup, an "irq xxx: nobody cared" warning
+> occurs. This happens because the usdhc interrupt is not disabled during
+> system suspend when device_may_wakeup() returns false.
 > 
-> This is related to the SoC IP integration: switching pinctrl setting
-> (changing alt from GPIO to USDHC) impacts the internal loopback path.
-> If pinctrl configures the pad to GPIO function, once DDR_EN is set, the
-> DLL delay will be fixed based on the GPIO function loopback path. When
-> the pinctrl is later changed to USDHC function, the internal loopback
-> path changes, making the original fixed sample point no longer suitable
-> for the current loopback path. This causes persistent read CRC errors on
-> subsequent data transfers.
+> The sequence of events leading to this issue:
+> 1. System enters suspend without disabling usdhc interrupt
+> (because device_may_wakeup() returns false for usdhc device)
+> 2. WIFI out-of-band wakeup triggers system resume via GPIO interrupt
+> 3. WIFI sends a Card interrupt before usdhc has fully resumed
+> 4. usdhc is still in runtime suspend state and cannot handle the
+> interrupt properly
+> 5. The unhandled interrupt triggers "nobody cared" warning
 > 
-> SD/eMMC running in DDR mode are unaffected as they are fully
-> re-initialized from legacy timing after resume.
-> 
-> Fix this by restoring the pinctrl state based on current timing mode
-> using esdhc_change_pinstate() before pm_runtime_force_resume(). This
-> ensures the correct pin configuration (e.g., 100/200MHz for UHS modes)
-> is applied before DDR_EN is set. Only restore for non-wakeup devices
-> since wakeup devices kept their active pin state during suspend.
+> Fix this by unconditionally disabling the usdhc interrupt during suspend
+> and re-enabling it during resume, regardless of the wakeup capability.
+> This ensures no interrupts are processed during the suspend/resume
+> transition.
 > 
 > Fixes: 676a83855614 ("mmc: host: sdhci-esdhc-imx: refactor the system PM logic")
 > Reviewed-by: Haibo Chen <haibo.chen@nxp.com>
 > Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 6 ++++++
->  1 file changed, 6 insertions(+)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++++++-----
+>  1 file changed, 6 insertions(+), 5 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 7230d70e02ae..3b1e63425a19 100644
+> index 3b1e63425a19..ade99dabdb5f 100644
 > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -2113,6 +2113,12 @@ static int sdhci_esdhc_resume(struct device *dev)
->  	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
->  	int ret;
+> @@ -2075,9 +2075,10 @@ static int sdhci_esdhc_suspend(struct device *dev)
+>  	if (mmc_card_keep_power(host->mmc) && esdhc_is_usdhc(imx_data))
+>  		sdhc_esdhc_tuning_save(host);
 >  
-> +	if (!device_may_wakeup(dev)) {
-> +		ret = esdhc_change_pinstate(host, host->timing);
-> +		if (ret)
-> +			dev_warn(dev, "Failed to restore pinctrl state\n");
+> +	/* The irqs of imx are not shared. It is safe to disable */
+> +	disable_irq(host->irq);
 
-Sashiko has a point about this dev_warn().  See its first comment in:
+Pre-existing, but IRQ stays disabled even if there is an error later on
 
-	https://sashiko.dev/#/patchset/20260703104208.3426374-1-ziniu.wang_1%40oss.nxp.com?part=3
-
-> +	}
 > +
->  	pm_runtime_force_resume(dev);
+>  	if (device_may_wakeup(dev)) {
+> -		/* The irqs of imx are not shared. It is safe to disable */
+> -		disable_irq(host->irq);
+>  		ret = sdhci_enable_irq_wakeups(host);
+>  		if (!ret)
+>  			dev_warn(dev, "Failed to enable irq wakeup\n");
+> @@ -2128,10 +2129,10 @@ static int sdhci_esdhc_resume(struct device *dev)
+>  	/* re-initialize hw state in case it's lost in low power mode */
+>  	sdhci_esdhc_imx_hwinit(host);
 >  
->  	ret = mmc_gpio_set_cd_wake(host->mmc, false);
+> -	if (host->irq_wake_enabled) {
+> +	if (host->irq_wake_enabled)
+>  		sdhci_disable_irq_wakeups(host);
+> -		enable_irq(host->irq);
+> -	}
+> +
+> +	enable_irq(host->irq);
+
+Is it OK to enable interrupts before sdhc_esdhc_tuning_restore()
+and esdhc_set_dll_override() ?
+
+>  
+>  	/*
+>  	 * restore the saved tuning delay value for the device which keep
 
