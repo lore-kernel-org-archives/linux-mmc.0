@@ -1,245 +1,212 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21EE93A9D94
-	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:46:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E0963A6B6C
+	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:46:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783352784; cv=pass; b=OfTlm1kVNrp/h3U9fh3JmkCbtuWfTtqAQwG0uLnkeiqbwBvLnEbt/AmK3lgiUGHECutlm2pTpA/Qre8pnWZyMnpSygVUq4lAQRXCiCzZ6cH8wChEosES82D3uGyVhw4EKLVaf1SYmJn/5u0dhhAizL0ZlpYXbRk3elnCzdcCeIg=
+	t=1783352788; cv=pass; b=V84EqqwE1OyjNiIboTYKmNV35OdxPH/tjqiP4OzjV6WwZLhlvcKLERFW4olX8v0B7rn+rIE1//d/T5ez0/w/EN3mFP024h9mvKy5tDYILJA+jT6t8E4oKwqUsnlHeE8bGinYk61CU6qrO65JAACxoiUWWsekyoOG2kdxtQwH/WE=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783352784; c=relaxed/simple;
-	bh=RdTxmvt6M6SbFNolujjOPkNEbDkpG02Lh7u2mtV6T0k=;
+	s=arc-20240116; t=1783352788; c=relaxed/simple;
+	bh=OT2YYPmOxBkeG7rVLnyasNud540sHV3t6NYJlF1sANQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WBsHOiqXeG51oHOSkmGTdV4oFMAB3sZJzu+X08/b//vd/rnfrbo34w9vpJsoZbcCL3SATUh3B4cUZKRpNQsLfysYoJOU+02AEvq/p4tcWMqg4nQY0UoCs435UM3sWiZo4BP9ktagKqRx/iXrz8EJ9MeCzKK2cYl74JJnU3/Tx+A=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=bSjtcDDV; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=QTy6kPEe; arc=pass smtp.client-ip=205.220.168.131
+	 To:Cc:Content-Type; b=a597Y4h7fDVgUkgny0VX2kx4bdKGdGfPM4rMluKk45BqI7WxerPTk3Nlz3YNAXxiKqKlH1hscHwnyn5vBYZqxnNx/1XYjGCkIN9GsqEvrNG15+v8+agrzoJA7kTt280pDB9F91uac3vd/RkyIaSfadiDayR0RwUIwoO3SM9rHXI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=EA+eobU8; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=M7/bmX85; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="bSjtcDDV";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="QTy6kPEe"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FF16H980532
-	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:46:22 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="EA+eobU8";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="M7/bmX85"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FFDLm762357
+	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:46:26 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	k8q/VwpMDoHXIOM80kKew7t7j7EJF5A2rIUUimBPlS4=; b=bSjtcDDVGtje1jx3
-	kI+d2m0vRxPPpVhtd4+UL3c4JWPEqKYZfQKkCs+mMhkafZ2ukodEu/rzEIUPSc1A
-	nZgoqTc7qIQNbzkMnrmEMSF+3oi20Zi5qAfy5GZAXsprLiFJtd7oQWjjFst0Bd+F
-	2bku39JGaJzm/9lzUYYE426Dobogsoa1bs2jX5S6QPrADnlkmKoGkrKUrzSFHdXv
-	7L/Zo2svGzpULFzHSt6/5ftxWyaAj0yr6V4Tfcg2Z2+wi3EwwdJjT17Qg9IeXiEn
-	d5qZ2EG6kGKo4vH2d3239OppHKJB4nUMvvIIuzDzGqcbPrxVjGwbzqs+JBNSOXIF
-	BATjRw==
-Received: from mail-ua1-f72.google.com (mail-ua1-f72.google.com [209.85.222.72])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f89kgsqye-1
+	8wdnNYYzJsTlXbIJgehVx+piQn5IlDC57IpKnYZoOkQ=; b=EA+eobU8DAVQckem
+	tsdOXvnkfKuDb/n64R/jdADpMBVR6icm18vIq/DtGl1CGXgI79kJcRls60KInFDu
+	+q5odCRb3WRIJYJc7z7BR8wlN11m2kDkqeJz36CAmdWf60jA/CahIePOLrSM5IAo
+	KGwOUW4dSD2MetEStHWlu+wQWHqN1XRWsGOtHTupltnaGg6Eq5Kyw4dwJal00U4t
+	f5GtJqd1iyP+6TAYaNJsiOy1TwCbuT1/V6dnPBKh/aAWaSekcAa0e//PiHmR49Wi
+	2EDxAecUe2jjJg6Yjy18xjYF2xvau6IserK6vU+Is59F5DqsdRj9cLWJQ23tGAbY
+	kQ7YGw==
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com [209.85.219.70])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f87rxt8pj-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:46:22 +0000 (GMT)
-Received: by mail-ua1-f72.google.com with SMTP id a1e0cc1a2514c-9693878131dso2976161241.1
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:46:22 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1783352781; cv=none;
+	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:46:26 +0000 (GMT)
+Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-8f0f45415cfso39804806d6.2
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:46:26 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1783352785; cv=none;
         d=google.com; s=arc-20260327;
-        b=hpmm8G5B0FfmMsRPk7ZA5csRa0zXgYQwfXEnL4v8Q8YgONtXeYk/eO/tKEjse+2wcQ
-         YgWJym25O97hVjbrsEQblFWdN/PlIr5eqFX7i8FI2GMRDs4qECD+jKzGOwSqY50li5ru
-         O2CJX/y2515hMVJREI/eON/D96PYZQG++sdgJmbsopTSpHeot8jhm0UKVUWu6wrLe5mG
-         5+cnNT5k3UB1yXbtpSx+1mhoMiR/ldaIWFw77bIfTPhXz2OkTSb0ne9nbOqkJdrdZleX
-         Xaoss3Ql2vOni/UAF4BMQiXKFE95coi3Z67TCrh386rLT8U0Vma6v4V+z0N2gocILnil
-         20Yg==
+        b=Bg97ZimR+MU6Rckk4ZOoVi7J3eWKP02BkYtcA6hGbBWo9iXrGeRHRBnuViHArkEa25
+         +ahs5CIVaLwPRjvnmvt9X1n/dE2jIU/iAMBKvLpyPsjqoUUekMbDVrr4NuT353Ju7bQ0
+         0YwxXJS9OviPeolppiL2pJUJ0ShTGt8yUTrVCCf1Y6T7Wghz4uXjDTGVkT53v3LuVzZp
+         lH8el6ns5NbXWI9rXmMvkoOrhBZPUxZnersvzLJdLOEOaJVTSoJbJ0hkQIIQvUmPu1u6
+         GTbRwQtefgsgart2nxCOHK79NFUhRu54aP81YNx8yiwp0r14Mo3BxxYJ5RpfRRGK5ue4
+         A2Ag==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=k8q/VwpMDoHXIOM80kKew7t7j7EJF5A2rIUUimBPlS4=;
-        fh=aajazjKg8ns9C/3sN3t3AlSotHQ/obbPbPCHh3OUdpk=;
-        b=JsxX+08xav6smiQdEje0nqur4GMMyTCqd9rDAXG9Ty2N0F0IYtZlrejUmuC81H4lfi
-         r0DrWddzf1HvSbqZpcnPzL/xaWzB14Na9dRxCwzYG6UwZU6rtL+iesrlwDJ24DpVvW4n
-         1ZZMcS+wothq1/GtcwwYGFl/ezHSekTyrmf1eDvW9S8QCidAc1889jkGdkor9kbhmpyQ
-         jyLFRaerfuZC4KJMhG12fNCiU900I9PDHFlL4jQa+l3+26ZG9Gq9qGqrtz2IWACVLWte
-         k5EpHe+5dFCdf2tqfPDTG1tu/lVSajjf9emEYBqgou9bZSIW387dIJxh0uvt7rC5lA56
-         Vsmg==;
+        bh=8wdnNYYzJsTlXbIJgehVx+piQn5IlDC57IpKnYZoOkQ=;
+        fh=HSewfOrnNGD4q06cvPqOPiRYrLOo/mZ8b9RC0bOSw8A=;
+        b=JjBr0rXMnSPQpvOB2iwP4McU1K8ypoiU8Ns4ZRbpZTXz2kfjTd6Mu4llrSHQc9253U
+         VummKZu8jeOX5fJAAr0EwRmwczr7mcAz/tcA7RO8C57gJhQEL35nS+C6Ma+kkxlWfSIa
+         zjfGijq+XXHCMt6dTzOrQVgZbsumzb3Qx85M+Osqim3Eis9es7xBMG2Dy1y/QRvLV6Tt
+         CDWv3Z02o/f2TC2nJFpxQ7izZTtIZhwnHwpkhSk9StrXCQS+FEgGLr6WUPlWN3h8nfAR
+         cLnZjTJ0X0nzUwyx/z9qvAruVaviw+0biXrV31I5Fs2hEQNytE21H95vVYoeJnmNxjRR
+         16ew==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1783352781; x=1783957581; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=k8q/VwpMDoHXIOM80kKew7t7j7EJF5A2rIUUimBPlS4=;
-        b=QTy6kPEe3MycdlGdGAd1EnUm3W9iNWf965EroSdwSUL4I+E75PRhdqF2ZkErE6yI5Q
-         KqIe0fTFdmr9zxEuTPZ0X/KMFq7EHca9exu4lONpchySSqUc8sABn54d7daDmhBuGYzv
-         EvywHSwHNXtFeVTfZelAb14ttfQ8dmZi3GLyAVrT6lD1aM/gNd3E28TQytyZQJfKfJCI
-         29LOMRoC7pgWPavQ43M+SceyC6wMEgwBWCN5PaGTsNvXEJyJVnRiLpIPtMWsT+x/lItn
-         PLpnm9nc7OTeeLHFZGlFLvh1uFTlBESoKkWRugGNGtyE9pmA2UOgIJCd91aHFN+ZBiXn
-         /4iQ==
+        d=oss.qualcomm.com; s=google; t=1783352785; x=1783957585; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=8wdnNYYzJsTlXbIJgehVx+piQn5IlDC57IpKnYZoOkQ=;
+        b=M7/bmX85gu9PLeUTtHqR+IALQEI7ul9aX6a6FrDUJcUFlvYxbZ5flhpJvLP8KVtlM3
+         9PDt6W9Btezw1QQ9TmQJ3loeboPzaN0ZnHkMbaX1b4qPbyn6LLijyMCi8efFaDrud3XB
+         KTLqND+W8VS8FUXZi2RVEWoHK5156YUXE2c1K85wb6k497bEII/SmJKH/kYg6LfXXLMR
+         vxaJvypl6VfQ97zLs30U6/MAxeVPl/uQzj0eVswaGRHQn5bFgGO1gdo7r3Jn532iPNPU
+         gHlaEHGZEMACVbbho+ykPhTRAhmtmFIIiK6VJNmQrKoR87fEsE+piMOeaWLVGLbM0koK
+         fNqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783352781; x=1783957581;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=k8q/VwpMDoHXIOM80kKew7t7j7EJF5A2rIUUimBPlS4=;
-        b=EA8n+vs+nSE2+8NJUUyGfROdplJPLmVaCMQt3o/DqqlQAjLPI8iEAs5J3vMGCER5dC
-         1McE/IFCfaRBSouHBpPKe4RF48AuOMs8fkW1oaGopSIixq69G2kv/TmwJFLg1BJ6PMTU
-         rhR9u0zABJ5ddrnG/t3wF8D4kAmq/NAWdYdpDNMdENETSDXzsO7+64MKrlU2y8JWsdAW
-         b+TjAio5QVhQH/tzzrW+RtqPooCJGA9wGbOlU3G0++2TaZ8eXgTsDssdMtyL5rIn3fcO
-         GTHLE9ttytN9Rj+Glm0qinLS2ygl5bKIFJSPTZURfKAbH5hw4hbwxrtyv1NRAlCpbMdI
-         m2bQ==
-X-Forwarded-Encrypted: i=1; AHgh+RqvFD/NcabNffKM4x0yJY50iyqVDmjJNTmxVkfs5aCEmjXhS0rpmXiXey9mZ1bnBehxmRQ5A969Rg4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywv59yK+/18IEdal5uqbHCNaRaiD/LqAVMSTNLEvKHd5ICyhO3i
-	UEbu+Hw+c6DZiMzJWNfp5Op8swOV3Gyx+mPoT+Iv9BcKYPNEOGnTTpa/Or6mZQOufx6QPzGv1u+
-	e7j9FxH4cgzHdfzTJt7J7nZCXktKKCnahT31BCtcDqmEc2kZR4l9y8ocLlTQla6+XtWhuX/Tsrk
-	CRoNwTA+KKJ71TeTOYqud+x9StI6eOSr76o5Pg4w==
-X-Gm-Gg: AfdE7cnbZYJz8APfjss4WFygkPOpOxqnxowcxqk6QOqZvsfYJcnua6kl3rwPXpmPxs3
-	puQCNTqs25jGt/R0Crudu3clacb2+BDOY38JO/etP3OHH/uYwasAgdNQWQSeO/bci29NozfUfG+
-	/0cMibKWsjH1pxNCY+7n5C4lVwxJMwQYegvG6txlBHDr3PUmi1e7rSgEKTmNTqw7G41L/C
-X-Received: by 2002:a05:6102:611b:10b0:738:f5fe:3c42 with SMTP id ada2fe7eead31-73f645849bbmr4366599137.9.1783352781405;
-        Mon, 06 Jul 2026 08:46:21 -0700 (PDT)
-X-Received: by 2002:a05:6102:611b:10b0:738:f5fe:3c42 with SMTP id
- ada2fe7eead31-73f645849bbmr4366569137.9.1783352781002; Mon, 06 Jul 2026
- 08:46:21 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1783352785; x=1783957585;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=8wdnNYYzJsTlXbIJgehVx+piQn5IlDC57IpKnYZoOkQ=;
+        b=lNz/9M4wVdI76Y1mmiP7+cb61IyFPVjDXPSmQeaCPrEu73BcuBpvYb5W3vyKsHZzQY
+         ZpmxpHwT6qwx1aR0c9jbmqsfuRHCsDs6uNn0Qoq3yWIK9tlY3IiXt35ESG2hr+JQrRk3
+         4nSmb5+Q37uELZFpdi+W/UhuxCiS7tfx5rm2Fu9ubFRYLvbOGjTRWRDyNPs6WAMCSUrF
+         +kn3IMQ5C+0x2o+8VTQa8hGHgkJITSrI1hZjYzLuAXlULgopZaBpTLkIf3H8V6nqcUAb
+         P9RRfC4utlx+1PI6D7KYQYs9OPYmCCHwFR2tAHnmEaiBegpCp4DqHJypSlL3JDodGIzO
+         5Y8g==
+X-Forwarded-Encrypted: i=1; AHgh+RoQZdGMesKRW8IjIsSgKkaXGhg9ymK8mnAWrecQyq0S4zwDwqg81JFqFBXpi0H9vmTancDAy2oo5+M=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxRTNgvtb8GI1M/0UKuoQp8Enz383/nR5WeTwjvSY4wl/hQw77z
+	YWpXa6bh9ZQX2qr04OEI8qJd2VdfI0Gx2Dbmw1XvofpuzbEm5FJ9r+G5HVBSAgcKobkn2k/SFDh
+	d+OOaN3TvezpZlgrPBoi4E2+KslIY2kj0RCryhnN6hGxZbfP+zWnABVXJWhqIJz6Dex0GWnvnBJ
+	kfbfmO28Y6/wnlJwKlRaFq/XseywhVT6DtFa+RO2wDU9pPpw==
+X-Gm-Gg: AfdE7ckLkYINyas3qhF4hwg6KwnY6zD518IXxdPL0vqzEKTNcCxCcZD+pvzOTqLmoHp
+	XXE+dxYWL2y3HS1aLYyfrbaHoA6mUKPUTJ29mnsew3a4UM7bcJJuj/GgAA1D1XsbfcHjxsuAspg
+	o3RiTOkLCc/mh1pkColao2kLc/L/f2ByhIsCTIUhWpzl56pR6SIc8PfRHmXqFK3GWn7rnJ
+X-Received: by 2002:a05:6214:2624:b0:8f2:d87e:24be with SMTP id 6a1803df08f44-8fcb480e7a6mr13017026d6.41.1783352785334;
+        Mon, 06 Jul 2026 08:46:25 -0700 (PDT)
+X-Received: by 2002:a05:6214:2624:b0:8f2:d87e:24be with SMTP id
+ 6a1803df08f44-8fcb480e7a6mr13016546d6.41.1783352784832; Mon, 06 Jul 2026
+ 08:46:24 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <dd3aa530-d06f-4733-ba5a-ccc95d8fa91a@auroraos.dev>
-In-Reply-To: <dd3aa530-d06f-4733-ba5a-ccc95d8fa91a@auroraos.dev>
+References: <CGME20260602094117epcas1p398765b6fb4a8ee28836cfde89744430f@epcas1p3.samsung.com>
+ <20260602094058.358267-1-cw9316.lee@samsung.com>
+In-Reply-To: <20260602094058.358267-1-cw9316.lee@samsung.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Mon, 6 Jul 2026 17:46:10 +0200
-X-Gm-Features: AVVi8Cdr2zL_mEapWUcrkRepE_4_rAa8rt_igjBNURaSW1_AYoKCTSW8oGWGjCI
-Message-ID: <CAPx+jO_MxS_qetj1nf_u_AGx63X+2-oZ+no_x769JgLqJirB+A@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: check bus clock enable result
- in the probe() method
-To: Sergey Shtylyov <s.shtylyov@auroraos.dev>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
-        linux-mmc@vger.kernel.org, Jisheng Zhang <jszhang@kernel.org>
+Date: Mon, 6 Jul 2026 17:46:13 +0200
+X-Gm-Features: AVVi8CctPkCZsCIm6dIVSREtzJmB2Wnp2gXAbnYqarQV4rNhOMZfeaFxnbRce-Q
+Message-ID: <CAPx+jO_O3+MLvQqNqgsbZc1A4PLy16kpPPuoFMydbU4KfT_J0A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: sd: Remove unused buffer allocation in sd_enable_cache()
+To: Chanwoo Lee <cw9316.lee@samsung.com>
+Cc: Ulf Hansson <ulfh@kernel.org>,
+        Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
+        Avri Altman <avri.altman@sandisk.com>,
+        Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Linus Walleij <linusw@kernel.org>,
+        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: t0M5iZBFK91D3ZvM-7mHTOh7xNU5XYzY
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX+WzAAf5Wu0Lq
- r2JPDeDty2LG6X7PtwyDEJ/fbn0H2PjIXTGrjTEtoR7nNfY+JyGRZRHJKK0QkF8AgDPFnZHHMGq
- 5nAwIrAmobj7PeRjrS/YEnH0sU9HxZfaEUAIQy/0tkbgB1/8lKj4PmyDPBdXEpiw4EnBZN0hctI
- tT8GJax9znR8iLnnqp6kJhxrFzH+P8F4R9VYUT9f0/cbFlQT9pNDQaAjRyFYmV2E8faRNKMBQIY
- uiNMgvBSUqZMZdKOJ4UHTElyPjZzXFn98L1Euunjfix8FHGlGzLNuJQk3dnnmce7szo68GdtSA6
- 1gYoknZZJsOyfGbSwMGWHdOltKAj2hWztE9ztlomiJNH2i29OIlCSSIXK4Q3/lflUDtihql8fOw
- fYb4fw5/YM0fP3LjH1pVasr2UntSYv8n5W1K/2YnI4XS8FNoiTLVfr4RER1RovG08+8g7p9Dr2M
- bHjxZX6EXuPtL+TdJCA==
-X-Proofpoint-ORIG-GUID: t0M5iZBFK91D3ZvM-7mHTOh7xNU5XYzY
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfXztKBaPE0ZOEy
- mWgvChe7VWjRUbBFCd2+PzGY2VOZvvgW8hzE+9GB/r1oFySDAyWM1tOroW6c8KOy79ccjV79AD1
- Y/ma4FOqzpfDEJA/4AnlawRO4INeTYA=
-X-Authority-Analysis: v=2.4 cv=c6Sbhx9l c=1 sm=1 tr=0 ts=6a4bcdce cx=c_pps
- a=ULNsgckmlI/WJG3HAyAuOQ==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+X-Proofpoint-ORIG-GUID: 4edL3KtF2BFTeCBIizzcSZQwCychnhB5
+X-Authority-Analysis: v=2.4 cv=Hv1G3UTS c=1 sm=1 tr=0 ts=6a4bcdd2 cx=c_pps
+ a=oc9J++0uMp73DTRD5QyR2A==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yOCtJkima9RkubShWh1s:22 a=HH5vDtPzAAAA:8 a=g6UdFJjC8Am4eBbHc6AA:9
- a=QEXdDO2ut3YA:10 a=1WsBpfsz9X-RYQiigVTh:22 a=QM_-zKB-Ew0MsOlNKMB5:22
+ a=DJpcGTmdVt4CTyJn9g5Z:22 a=hD80L64hAAAA:8 a=KYybo1-aWJxubhzqE4cA:9
+ a=QEXdDO2ut3YA:10 a=iYH6xdkBrDN1Jqds4HTS:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX8n9tYsiAS5Lg
+ GJRFODay/e5FTF4X4iiEZIhmM8VFJlWy1K7PEY6n7wYSzHU0Pzjd+sMtEdrZpaaIumSoyAG2uIo
+ GX6ZJk+1TY4xlJDs0mF2c31Ar8HKYGo=
+X-Proofpoint-GUID: 4edL3KtF2BFTeCBIizzcSZQwCychnhB5
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfXwTleMz2hwtI7
+ QkcE5j/9ok9JCktYTn1OMzqZo/v0ItoVtp97rH6P/lHmk4l+0EkCWhqTnDS551cb0CDsFRV25cA
+ fzAq7L2mmfGMV/9fye9L/AB2d+dhkBka2IXvYY6riV21w8Smhq7edkaO/noIWP6+EHp0lS8T7x2
+ 47Q3Bdri9vQgxnc8KTL+BX0KNDjaw9iR8Q6yaqhtc3DwWmWeAKMdrnriGyXQlnYHoX6WAmjBxq9
+ BPTdCxQTU6WXtxSTkeHhuNbYrifIOtT0syf93L7pLrDANa8tFrvmiyKxEz6rHoCmuPhrIwsXXk5
+ PrPHx76qyzEzAsRxMx/xsupYQi8jGBe3tbDoCb3f32F3eDueOT5mcULTbuPq7zRkJ69/D6nN8rL
+ RPaVbQPbbyOHA3gOABg5mxlmY7F1HPyBLLTeZNElCoBJ9rWip8QkYJY86O7Ii7l1SIDjex7a3yn
+ 5hq2Pdsz6WxjdAS6sTg==
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-07-06_02,2026-07-06_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 clxscore=1015
- adultscore=0 priorityscore=1501 lowpriorityscore=0 spamscore=0
- impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
- definitions=main-2607060160
+ impostorscore=0 suspectscore=0 malwarescore=0 adultscore=0 priorityscore=1501
+ spamscore=0 bulkscore=0 clxscore=1015 lowpriorityscore=0 phishscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607060160
 
-On Mon, Jun 1, 2026 at 4:49=E2=80=AFPM Sergey Shtylyov <s.shtylyov@auroraos=
-.dev> wrote:
+On Tue, Jun 2, 2026 at 11:41=E2=80=AFAM Chanwoo Lee <cw9316.lee@samsung.com=
+> wrote:
 >
-> In the driver's probe() method, clk_disable_unprepare() for the bus clock
-> is called on the error path even if the prior clk_prepare_enable() call h=
-as
-> failed (and the same thing happens in the remove() method as well) -- tha=
-t
-> would cause the prepare/enable counter imbalance.  Also, the same problem
-> can happen in the driver's suspend() method; note that the resume() metho=
-d
-> does check the clk_prepare_enable()'s result -- let's be consistent and d=
-o
-> that in probe() method as well.  BTW, I don't know for sure what does the
-> bus clock control -- if it affects the register accesses, the driver will
-> likely cause (e.g. on ARM) a kernel oops if it fails to prepare/enable th=
-e
-> bus clock in the probe() method...
+> sd_enable_cache() allocates a 512-byte buffer that is never used.
+> sd_write_ext_reg() allocates its own internal buffer, and no read-back
+> verification is done in this function. Remove the unnecessary allocation.
 >
-> Found by Linux Verification Center (linuxtesting.org) with the Svace stat=
-ic
-> analysis tool.
->
-> Fixes: e438cf49b305 ("mmc: sdhci-of-dwcmshc: add SDHCI OF Synopsys DWC MS=
-HC driver")
-> Fixes: bccce2ec7790 ("mmc: sdhci-of-dwcmshc: add suspend/resume support")
-> Signed-off-by: Sergey Shtylyov <s.shtylyov@auroraos.dev>
+> Fixes: 130206a615a9 ("mmc: core: Add support for cache ctrl for SD cards"=
+)
+> Signed-off-by: Chanwoo Lee <cw9316.lee@samsung.com>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
->
 > ---
-> This patch is against the fixes branch of Ulf Hansson's mmc.git repo.
+>  drivers/mmc/core/sd.c | 9 +--------
+>  1 file changed, 1 insertion(+), 8 deletions(-)
 >
-> Changes in version 3:
-> - dropped stray comma in the subject;
-> - dropped unneeded word in the description.
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 948948ca9b4a..c763efb10f64 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1379,15 +1379,10 @@ static int sd_flush_cache(struct mmc_host *host)
 >
-> Changes in version 2:
-> - mentioned the problem in the remove() method as well, somewhat rephrase=
-d
->   the patch description.
+>  static int sd_enable_cache(struct mmc_card *card)
+>  {
+> -       u8 *reg_buf;
+>         int err;
 >
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 14 +++++++++-----
->  1 file changed, 9 insertions(+), 5 deletions(-)
+>         card->ext_perf.feature_enabled &=3D ~SD_EXT_PERF_CACHE;
 >
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci=
--of-dwcmshc.c
-> index b9ecd91f44ad..29af07561a86 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -2441,13 +2441,16 @@ static int dwcmshc_probe(struct platform_device *=
-pdev)
->                         return err;
->
->                 priv->bus_clk =3D devm_clk_get(dev, "bus");
-> -               if (!IS_ERR(priv->bus_clk))
-> -                       clk_prepare_enable(priv->bus_clk);
-> +               if (!IS_ERR(priv->bus_clk)) {
-> +                       err =3D clk_prepare_enable(priv->bus_clk);
-> +                       if (err)
-> +                               goto err_clk;
-> +               }
+> -       reg_buf =3D kzalloc(512, GFP_KERNEL);
+> -       if (!reg_buf)
+> -               return -ENOMEM;
+> -
+>         /*
+>          * Set Cache Enable at bit 0 in the performance enhancement regis=
+ter at
+>          * 260 bytes offset.
+> @@ -1397,7 +1392,7 @@ static int sd_enable_cache(struct mmc_card *card)
+>         if (err) {
+>                 pr_warn("%s: error %d writing Cache Enable bit\n",
+>                         mmc_hostname(card->host), err);
+> -               goto out;
+> +               return err;
 >         }
 >
->         err =3D mmc_of_parse(host->mmc);
->         if (err)
-> -               goto err_clk;
-> +               goto err_bus_clk;
+>         err =3D mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, =
+false,
+> @@ -1405,8 +1400,6 @@ static int sd_enable_cache(struct mmc_card *card)
+>         if (!err)
+>                 card->ext_perf.feature_enabled |=3D SD_EXT_PERF_CACHE;
 >
->         sdhci_get_of_property(pdev);
->
-> @@ -2461,7 +2464,7 @@ static int dwcmshc_probe(struct platform_device *pd=
-ev)
->         if (pltfm_data->init) {
->                 err =3D pltfm_data->init(&pdev->dev, host, priv);
->                 if (err)
-> -                       goto err_clk;
-> +                       goto err_bus_clk;
->         }
->
->  #ifdef CONFIG_ACPI
-> @@ -2507,9 +2510,10 @@ static int dwcmshc_probe(struct platform_device *p=
-dev)
->  err_rpm:
->         pm_runtime_disable(dev);
->         pm_runtime_put_noidle(dev);
-> +err_bus_clk:
-> +       clk_disable_unprepare(priv->bus_clk);
->  err_clk:
->         clk_disable_unprepare(pltfm_host->clk);
-> -       clk_disable_unprepare(priv->bus_clk);
->         clk_bulk_disable_unprepare(priv->num_other_clks, priv->other_clks=
-);
+> -out:
+> -       kfree(reg_buf);
 >         return err;
 >  }
+>
 > --
-> 2.54.0
+> 2.43.0
+>
