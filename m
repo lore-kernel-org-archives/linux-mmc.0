@@ -1,138 +1,145 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03A90434E20
-	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:47:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A194D434E3E
+	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:47:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783352867; cv=pass; b=jxxjMaYUf3qIiu6Xfez6L43+h/LyWFbDiwupEkKW9RHp4ZN1tHSvvoVgxyeRQcRR8UoS0VzMZJM8bGVwJQiSSaW/HgQyiVBeFuU6AF3o+DRvNjBsVPxBgPEoSyX3dL/3tFdEYXesBdJPlkIiRPleHqwn0v15iqA1JDLtiJYUGdw=
+	t=1783352869; cv=pass; b=D+rTRecmohqAJ6qM4CA3gA4EmFUyFanwpNlDHciOLwswZQlu7J9EPsPcPIM1F3feLHBUP0x9+kPeFtMDQtU2dP5fOhswMtzF7rHgH32U9FpfDqy5R9WI3RrIjXAgBS0kAwl0CadDIUl+fzfsXfJjSKHS2sOrjONF8hwI8OtDJWc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783352867; c=relaxed/simple;
-	bh=0tiakhhRHWloBkaDPloS6cW51EYt6Ge7WA++l4ZNoq4=;
+	s=arc-20240116; t=1783352869; c=relaxed/simple;
+	bh=RKcq82o+IatSlpbgbrVf1lQcaa7ltx+vix63gvV+M4o=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=S6Zlu3Y1whUe/8ydsxtZu5VQNXWsdIg2tJTuscRGDZy4N5MbPT/WUzpfuRYPs/7oc0jpjCc3pEC1kvBn1crtERRjbERihTQM5AnhNtGxAK9I6D4B/t0O0/UqBPpLMrpUrUe7GN4K9VGMhsCJ8IkDM0zKLRWJHTeyx3Gd3V1s5F8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=fnLcbYMn; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=R9kuTc7t; arc=pass smtp.client-ip=205.220.168.131
+	 To:Cc:Content-Type; b=DUD0ASi8P2ZqZneH97vGlDebQBI23Y/yMXjFQlHlUeg/wF21hkBxDozfvMcOQ5qkYpByZgBHA3xMpBKstUXsvfh2uYfD38BcVjaQAqNAKMH77cvmheYTDQtTTxblfuAVu2sjE2LSB1G5FCJAbtASB3SmbEhwdlB26pkLZuoxN0s=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ErDesEsz; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=jw0OsGhz; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="fnLcbYMn";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="R9kuTc7t"
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ErDesEsz";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="jw0OsGhz"
 Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FF2ek980949
-	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:47:45 GMT
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FF6Ki981547
+	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:47:47 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	tj0gObdWkFCTVs4u237wDEw/Qb+xCQFXIKqWze4lcIg=; b=fnLcbYMnU36V8e0k
-	q+N47oSggJwy2YnhvCHMQZ7Ve2+2waHDgIcu+6xrOvRGqj8dbhEXcDZFWNsIy/De
-	wG+zxy2xxs4b+PHA6mq4/ng1zF1gnkXRv9jYRKLscvQl9kV/tZMTPfm0hz1QX1Vj
-	mJUE3AuVwI94RkG2WtQETRCaL4RqEu+PO2EuudeK1K6XnND6aKuMIieAlE0qgBl0
-	sd97+fH60kvyNnuD7gDpYtBfsZ4ZOr83czrJf3MUahxPBUWkbDNc8QpR8wqzGXxs
-	pFrAbFsz/DgUtTONEcvRhj3js4K3IyE3mMYIZFyfY5ec5y8Yisot/ozPSVj8NlZU
-	ZgxxIg==
-Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com [209.85.219.71])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f89kgsr7d-1
+	aB+/IM/FHaAjTb1Q4NNCYcOveXeSruZofTueHVwJOeY=; b=ErDesEszR03MGw5d
+	zYUoc7iSaLjFtyM/iUV3KX526SOPJAe7dsNLiIpfz8FF133C0yduRIQzvnDGn9oN
+	Zi8qGhzu86kMoL72R4daHYlYA6G2iZZS/MVuT2HHNJulRBfFJRXQsxK4dNeWrM8d
+	8Wo+KVKoSwEOn7YpsWFMPXfSCAMkTFv9FHSdUBSpXZUsRQCxMrL6aESWXxcvEZIV
+	Py61iOFd85zy4aDaTBCvambabJ1JbDPvF/iC2IqUV3WKccSrhrL/DiEzMKpsjNje
+	Ko6+EtEGNe0wNC+bVea59J/Tg7p39LCzrnHI/eIaLEwf+lQcpaM+bO30PPAOy29e
+	QOoSHQ==
+Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com [209.85.219.69])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f89kgsr7q-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:47:45 +0000 (GMT)
-Received: by mail-qv1-f71.google.com with SMTP id 6a1803df08f44-8eb8914e651so63242616d6.3
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:47:45 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1783352864; cv=none;
+	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:47:46 +0000 (GMT)
+Received: by mail-qv1-f69.google.com with SMTP id 6a1803df08f44-8eb8914e651so63242986d6.3
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:47:46 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1783352866; cv=none;
         d=google.com; s=arc-20260327;
-        b=YnoxrQJs0JPxbO/qiw11tIYOVtPfDUIYP1JPDXjyL45SHh5QAIfKU8rtfgVc6n0mPG
-         xV+ThW8/KVs5Pnc9l7YsokBlMjcMI+WW98PwpaCZTjvdqYXQ7i2RazkuErPvAxwDclcG
-         4iT1b27TuHWWQCuFQNNFbAHpKaU/XQwndRe+Z+zIykbzUNu52Va+QBAHh+cHtMqbwOzz
-         CKYYv0D3sFpGuviKwUajGP2JmiXfFV1op0UpMCrX5d6wsdD6pdX1UDXymYt5b9n3HUQw
-         RBcjuKjeffKFlcjd4XhtinP/yBJJJqZBWvl2hf9ZmdeJq0OFiUzyIOzkIwJvTruPKtzQ
-         zLCg==
+        b=iY3Yxb1cn3OuFgTMP4RMOYmOdRDl9pqjTiI6gm7sgrYEuL5SPGIOUEybkJXhz64kYT
+         e7Ga00yryPpOYzWlYRJleiS3zLcpFq/kD8u1ys34vU2MEeStDWEwrlWzWmPcBKSYLB7T
+         1zjC9NimPT/ZOf2B7XkacQbwQ9hm8KyfyCvYSsLmS4PErf74/CRi3uikTWy4LsQ92kCr
+         Q240G6KJGjUWS1ITlLmv01ZUzPuIerNs7siSD5dlKFfWHvWpGEJINVzmp4Xk8gfa+DbS
+         FMyhlP+g99EFpvnGpi+XMSWeOmq+pfwQ/mc0tNWzx+wF21BwGAQOGsQZObeR3WU6WbmP
+         tVWw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=tj0gObdWkFCTVs4u237wDEw/Qb+xCQFXIKqWze4lcIg=;
-        fh=gFha9ppfLGHW7Lc8L6X5HbL9BF4GoZXMgrgkW7DNvVo=;
-        b=O+ur3BYYPktdXtrhSDpl5pbZQDBq0zW1vXHKoJgW+f2GPaaOIEqZJaFn0XBZlwOlHm
-         5LblAbDPEWMOpY2VniiB4eBBYp2t4hw0MBuwcTw+BmN9Sh/XzAvk19vig0reOkuKWf4h
-         VZSpoPzIS+bqPhpW5NdXx/ZAYXK9du2CdcK8giH7R/o6b9WZ8iu9kDrJiJbOU3O80YG4
-         ixICQFbfOtZKBbak5hTjTNXDAy70+dNhF7nKpEkU9TPXgbteX7jU+5y25lGaA90afqqJ
-         UaZT5ZYYFfzcUx7sx+dwxxGuJJpQFpY2tQBE5/W4pI7hx4Ostj80gvBppZsTx48MQeU7
-         7Vkw==;
+        bh=aB+/IM/FHaAjTb1Q4NNCYcOveXeSruZofTueHVwJOeY=;
+        fh=XBaaCSd2wHg6c3SvumGJfUsoLXd/skleNfdQfUPiKdo=;
+        b=G4ksa5hj5Aj9dvIpB1ENtDTTXJeSv2MjciCDbr74BYhjehP/sCSMlB0ovUzbo7NSnH
+         d93RMBZo6k4+n1Ey52qkvI/fJjQjC/etsb4drrdMsGbF2vs1dklkl01nq5ucpo5qcNte
+         TU0lvi3hRwDzhHRTeJeFwV2I5SinHiBvU8xAOkHaBnd7f2FkSyBuQycJvkpHmxRFksDL
+         jsfk1uinc4K8z5TGVlhkL9HeYlzDh+CIgw4M5yZLJcvrds9UAsTMXhhc60sonBFH6waD
+         j1PuoJpi1Zus2Pjwp4x2NJPQyhJ+Z8p2BQEbyMydRwWjy3n0nVyqlOaQp1hKTYzFiWN4
+         TBlg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1783352864; x=1783957664; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1783352866; x=1783957666; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=tj0gObdWkFCTVs4u237wDEw/Qb+xCQFXIKqWze4lcIg=;
-        b=R9kuTc7tnrSwrSIl0bd94j5BpIrBbvJg24cocZs3ZL7WMwmBnfAQb/fw29+b4AgAS4
-         uErfL28DFG+N05GEz9Y0NGN9f0bWKafZRahJnGUbDesX6AVYde8lGW44FC8eQb7tRqTZ
-         7zk78lPQx+uOPNGw6KISTelzOi1BgoFNjfTjKKKA2n1MG/mJVGl2RdIcusL7jw+bGp4U
-         t3B5sGs4YQQp9wuMeLcFsaXS0Mo76mQQ7ZtBOgns6OArQ+krFhA0Kd6kZDP53kZqq8OU
-         avIiIqib+bQfSYZXE2amCnQ1jo/jSmmkNywdx6yv6PQsnw7ACpDDGQMaVF7xeer0UQJk
-         rTWQ==
+        bh=aB+/IM/FHaAjTb1Q4NNCYcOveXeSruZofTueHVwJOeY=;
+        b=jw0OsGhzg5FZ5gDM9B1npzKnXAjj+jW6kOKssetxqScjWmTYE/VbT59EwITKdSCm/9
+         tkho9TowzSVUdVI72poc4dlJHywRRX/5CRG61Hf1Cww/Pee6rVXS0K74v8gpPA8PvaA+
+         ytsNKpsqPCX8D7CYKg0K0Fc6riOMFfpb5pdB2s7BwJIXaOfLOkJb0gso8tk+krCdtSDp
+         1uhiDw6Zv4ZpSLBW6NexhPThqCodhyYIODvQ+ghix7YRFzg0L2sOpOOwzXrIEgz8czj1
+         N9Ucs1e41SIwFSXDx7hXNfgcfkvSySMykEOJMjA96bhdVO5Y5nerbYEXzWuGdkiNJjy3
+         AgmQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783352864; x=1783957664;
+        d=1e100.net; s=20251104; t=1783352866; x=1783957666;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=tj0gObdWkFCTVs4u237wDEw/Qb+xCQFXIKqWze4lcIg=;
-        b=jcVS4cIckzd4NjgBuoK+/c18ti4QNTqaNX2uxJzmFY2AJee5YnPGfyuEXPJyKpoQr+
-         DUswpVLXlG3/WCKLUegOjI+wLhqC15bMUrhT+RyoCm/I0rNbHbhaIB6PgRUkj83t9hVX
-         HA0jxYVVcehvCDbOgJpexsANkSaI++fUnNHtvVGoHk7YMv3Emg958VPbfFFnb3yu0Vne
-         EJviAslBgRLfEsqNngCAwXYiHsmVlyVGpoBOJ/2aSpduWkF/kNR7H6l1zNQ0dHbIOG83
-         tzeqZ1jZO+N0YKuZTqLKK+Vr5lmCuBI7ZzUIHrvvnsf+ixLiXtPbFgi1fwg2bysJf6zj
-         xriQ==
-X-Forwarded-Encrypted: i=1; AHgh+Rp09kD0/GvQ/rw3ekQaIWt3yNURZo+um0FbJCnURMXjLS3evBY31wsir3QC0qPq2floOmTKzg5Tfsw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw67KwLkrbDNrteT1qBnvU2ia1N0HJ0Olzl3kqu44j6527H6456
-	lc8TbpzUUpiF5BrE3YxCuZyf4RiLpIRRLIbYZ/Jsbl9mpyH9txN0crQUt78VBPezc27H2tsV1Uq
-	6PG3B94hvqZE0RRAJD8q8/Jr8RnRkc+DAWcaYG2nEswkIn5nHbk72+pE5BiBEMB7CnZfgdoewcE
-	mKmI15uKzGdZtLjIA/E2Xx5LlnSaivb0vV6FDqNg==
-X-Gm-Gg: AfdE7cmVm7lHaEfmTI3X1/ZB3r9eDjDf/Yb/UynLo2zxamRKC696EnXIviIITq9pvvq
-	0w6vKpw+dK3TLqA5CdJt9jQ2AT/I79ko0sD0zttHeQYgoBLRoaCjXQc8k1gMkWlN+Qo3n219zir
-	q8Tk0sqBvN1HON+mbPNyQISLGfbXDOWUWSRJWB3kRYjOXfO9d6+4hT5uBKqR+Z+ql1+PNP
-X-Received: by 2002:a05:6214:4506:b0:8ec:cdb2:5e11 with SMTP id 6a1803df08f44-8fcb1ed90b4mr14552936d6.2.1783352864273;
-        Mon, 06 Jul 2026 08:47:44 -0700 (PDT)
-X-Received: by 2002:a05:6214:4506:b0:8ec:cdb2:5e11 with SMTP id
- 6a1803df08f44-8fcb1ed90b4mr14552456d6.2.1783352863886; Mon, 06 Jul 2026
- 08:47:43 -0700 (PDT)
+        bh=aB+/IM/FHaAjTb1Q4NNCYcOveXeSruZofTueHVwJOeY=;
+        b=AQ5LIJ8b7urpWO/RZvhfUXqZiRHBoibahUzuJ9zrigO8MpJh4X+sZ9K0Y7xH/osei5
+         FAlPoYhkrlcZd9AviVkBUD8jIZJPZYbd2btENUpHi9hpfMxmRV1VNjioRz96IG7VBzsX
+         WqO5RCenoJhSK6L8fLeY/96faoyYJN6fK1UgJ1T/ncVvjjRmqpOjcLUQs3CD225rE8Pk
+         a6nR7ThalIn0mTprYsq4LqJPq/jcQdF/HryFcqRoL9oQeE1JQeN2i3/vuj1UeqbPKVfl
+         bvWF8Vm0x+8X54TTP7KhzmKYGpFqFgudMwOdsdNeyDmBCMZ5M4nK+SEBD1DrHTYAGFgf
+         70cQ==
+X-Forwarded-Encrypted: i=1; AHgh+RrRvsdSyjGpMFZh7YHMnrCGekF9K8WYeAxk3M4ctdgq0HzTANTYI6a7bt8is1Roo4Y+Zq66qU5RBS4=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz+pzHiVDQ/yXgbTALcSwCCPCf8iAdblCUoWazanIGzZFxrKD+Z
+	Ebw/KJmR6QvQ+T6faPlH/+1Z2Hcke9H/IixWZPy/WHHWy5Ui0qgwk0iB2TYtgmHPKyWCyEpDl6b
+	fDIAn/AqjYXLxFKblW1Qeo/OADF8VBVpouEcQDGFrYEAKLBeCPbiuj28COnopnn1kaBlhx0RXGw
+	KtnFcDbTNgLNQW3TQi5XfR3rCV2ojO9a4LJjbf5Q==
+X-Gm-Gg: AfdE7ckqtn+lq1BaDOBEQtHQBrG28BZAxJV+EfAfMFGv3deBhxB1HhkUv5oldeL037x
+	L5OkOWdpguAV4Hu6jg8TJKTsYjWP/qN/JQJZGj0gQ9Z1KoSZhZUTTQNaBFbbrltWAxiquR1rrFw
+	bGkihUd/amT794uHTFUnJqYytqen6ipEYVPrhosWsZBjwF6nD+KEtGWT12Hw5VtsIn1o+g
+X-Received: by 2002:a05:6214:19c9:b0:8e1:6c6e:9612 with SMTP id 6a1803df08f44-8fcb2a85d71mr13055706d6.22.1783352866095;
+        Mon, 06 Jul 2026 08:47:46 -0700 (PDT)
+X-Received: by 2002:a05:6214:19c9:b0:8e1:6c6e:9612 with SMTP id
+ 6a1803df08f44-8fcb2a85d71mr13055186d6.22.1783352865595; Mon, 06 Jul 2026
+ 08:47:45 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260704124115.2874-1-pengpeng@iscas.ac.cn>
-In-Reply-To: <20260704124115.2874-1-pengpeng@iscas.ac.cn>
+References: <20260706114218.907-1-ao.sun@transsion.com>
+In-Reply-To: <20260706114218.907-1-ao.sun@transsion.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Mon, 6 Jul 2026 17:47:31 +0200
-X-Gm-Features: AVVi8Cfc23vDy9sML05-jTCqkpjriTSh-qx-MZzbfaJJdsJ4vWmJahgYgtlUlYc
-Message-ID: <CAPx+jO8WTpHOU=1qziE8Ez9vqyRu_Hq_-yKLtNA+z=-GviXjaQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-ma35d1: add missing MODULE_DEVICE_TABLE()
-To: Pengpeng Hou <pengpeng@iscas.ac.cn>
-Cc: Jacky Huang <ychuang3@nuvoton.com>, Shan-Chun Hung <schung@nuvoton.com>,
-        Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date: Mon, 6 Jul 2026 17:47:34 +0200
+X-Gm-Features: AVVi8CeAnDa519BBIGFgvcJJMaeYsdKC8qNJU7WmqIK1pBgl7ciC_41RXpYlJpM
+Message-ID: <CAPx+jO-oC9eBuejURDanXi8nxeuUAxQcZWJeBRuaqMhoSoKAoQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: block: fix RPMB device unregister ordering
+To: Ao Sun <ao.sun@transsion.com>
+Cc: "ulfh@kernel.org" <ulfh@kernel.org>,
+        "avri.altman@sandisk.com" <avri.altman@sandisk.com>,
+        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>,
+        "beanhuo@micron.com" <beanhuo@micron.com>,
+        "jenswi@kernel.org" <jenswi@kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Hongyan Xia <hongyan.xia@transsion.com>,
+        "stable@vger.kernel.org" <stable@vger.kernel.org>,
+        Jiazi Li <jiazi.li@transsion.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-GUID: 8l85OH_MizhDi4Br1KR3AndwbjG5ILA9
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MSBTYWx0ZWRfX8fT1Z0hib2Yc
- 9y5KcRp8PC4FAinme+Lk/DsYa8ArQjSw2vCY0hOiws/oLK2rVPYrL6xj87QvoQORe3DLIQDH5Ua
- zVTbFwoVGBcAhMVo9OvgT7V6459qgWWhhTGnr4HYoDIkf5ln6rLwm+G64eIwIIdeCpxWE5ce7bp
- IAeU7zIhg4G0MxNNPGkiF5aNusJCKwY55KkkxrEJR2Imc69MmorxSYX8H0GOV4qWGUXDkl52QNG
- D1H3v5BSO3qrzpcM+if5uMDzHaktlSborKFuiBLhd4GTD3bx3PwVxMxDwNOQcByXhu9uk3vTkYK
- +74eNERlpB9Szsm2HHNvcafTJTlcy1SzZ4bHJ3vj/uVI7fFsc4IqPkyk3UXK1EHBtbBR/i3Efwm
- aD4bwb9UPLngpZuDAYcluSmMRHthGaIOntnLF5cCAc6FkmuBfdHMqFk+MN8LR2AsF8fdqjeeXq9
- LQPPy2TX1T+PgKfMKZQ==
-X-Proofpoint-ORIG-GUID: 8l85OH_MizhDi4Br1KR3AndwbjG5ILA9
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MSBTYWx0ZWRfXxmI1gvV1ej7n
- gLmssSf9B2JIXhL2IJyB6DdZGV4IJqKpBhKBjuApKwDNfb9Bt5PSoqh3pqWa22w8gQ9Jqa9hZky
- lwMR3lJSGI7eD3c3+z7c6CWgJCkUvHo=
-X-Authority-Analysis: v=2.4 cv=c6Sbhx9l c=1 sm=1 tr=0 ts=6a4bce21 cx=c_pps
- a=UgVkIMxJMSkC9lv97toC5g==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+X-Proofpoint-GUID: 2gpdslERxCv83KEjGy7ODMcM5gmvnDFm
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MSBTYWx0ZWRfXx+L8Ur/jjWuv
+ K2HwFCO/edX9O/UA4AJz0VYXbDZ5UulnulRsz91D7KZk7kHVbTaQnVWa0+51GkNv86BsdAfGoJP
+ RYKRXziE/A5HsgVTEl4DqS8rrJis7LZByDgQFUYzsADy5RgQnjF2fAvCNQJLEO+sfgrdFvMb3p9
+ lZ+ryNptpJeHj4zpkmRdUeOH3y2a/KbOIfGGVNxrUBawZ6jGMudv+a3nP9K71goOssNZnTjuYUz
+ U6YkVy3NZR8QUicd09+m3SlEGDVEcLkNDcB69w7Xe1Hedxyy5gzXoerWQcbyI2frKDlzaUBHdre
+ i0claV8cOdeTsGU7hnhiIQtRjo4MmpxGY2NigYyixXIveDFleibrsKyR/7UOcug1LEzqA5gHAMa
+ x9DyuWY0wyyx0k02+gDtE7yW4uYzD6mbhUZ6PwaftOkVQR4aNf2WJ1kQ3CjqTzJhyjuaxI55Nxt
+ yxrNUFwVqe3zg1ZjnDA==
+X-Proofpoint-ORIG-GUID: 2gpdslERxCv83KEjGy7ODMcM5gmvnDFm
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MSBTYWx0ZWRfXxDeqG3Cvs2BE
+ 9e728/7acJp9M7HcVJCNyaB2aZ0jtxdWQUSnst9TDC2PQ6FVp4TtmmCCNf4LbjyUul0tNmOFmRr
+ aXwlrRGtk4oLwPW6gn/IjATm51gpvUI=
+X-Authority-Analysis: v=2.4 cv=c6Sbhx9l c=1 sm=1 tr=0 ts=6a4bce23 cx=c_pps
+ a=wEM5vcRIz55oU/E2lInRtA==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yOCtJkima9RkubShWh1s:22 a=HOKP6D99j0CxLuPf18AA:9 a=QEXdDO2ut3YA:10
- a=1HOtulTD9v-eNWfpl4qZ:22
+ a=yOCtJkima9RkubShWh1s:22 a=3xJz9W2bAAAA:8 a=VwQbUJbxAAAA:8 a=InJrZTXqAAAA:8
+ a=znh_XOoVjrxqlL3qVLcA:9 a=QEXdDO2ut3YA:10 a=OIgjcC2v60KrkQgK7BGD:22
+ a=amiGZ1mxdzcEAW_x1qlF:22 a=WwJ7OKCui7YMbFU4sWpb:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-07-06_02,2026-07-06_02,2025-10-01_01
@@ -143,43 +150,74 @@ X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
  route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
  definitions=main-2607060161
 
-On Sat, Jul 4, 2026 at 2:41=E2=80=AFPM Pengpeng Hou <pengpeng@iscas.ac.cn> =
-wrote:
+On Mon, Jul 6, 2026 at 1:43=E2=80=AFPM Ao Sun <ao.sun@transsion.com> wrote:
 >
-> The driver has an OF match table wired to .of_match_table, but does
-> not export the table with MODULE_DEVICE_TABLE().
+> From: Ao Sun <ao.sun@transsion.com>
 >
-> Add the missing MODULE_DEVICE_TABLE(of, ...) entry so module alias
-> information is generated for OF based module autoloading.
+> Since commit 7852028a35f0 ("mmc: block: register RPMB partition with
+> the RPMB subsystem"), each mmc RPMB partition is represented by two
+> device objects:
+>  - the mmc-owned device (`rpmb->dev`, backing the legacy /dev/mmcblkXrpmb
+>    char device) and
+>  - the rpmb-core device (`rdev`, backing /dev/rpmbN).
 >
-> This is a source-level fix.  It does not claim dynamic hardware
-> reproduction; the evidence is the driver-owned match table, its use by
-> the platform driver, and the missing module alias publication.
+> The child RPMB device holds a reference to its parent, so the
+> parent's release callback cannot be invoked if the child device
+> is still registered.
 >
-> Signed-off-by: Pengpeng Hou <pengpeng@iscas.ac.cn>
+> Remove rpmb_dev_unregister() from the parent release handler and
+> unregister the child RPMB device in the remove path before tearing
+> down the parent device.
+>
+> Also delete the extra blank line between mmc_blk_remove_rpmb_part()
+> and {.
+>
+> Fixes: 7852028a35f0 ("mmc: block: register RPMB partition with the RPMB s=
+ubsystem")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Jiazi Li <jiazi.li@transsion.com>
+> Signed-off-by: Ao Sun <ao.sun@transsion.com>
+> Reviewed-by: Avri Altman <avri.altman@sandisk.com>
 
-Applied for next (by cleanup of the commit message a bit), thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-ma35d1.c | 1 +
->  1 file changed, 1 insertion(+)
+> Changes in v2:
+>   - add background describing the two RPMB device objects
+>   - add Fixes and Cc
+>   - collect Reviewed-by
+> ---
+>  drivers/mmc/core/block.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-ma35d1.c b/drivers/mmc/host/sdhci-=
-of-ma35d1.c
-> index a3b676894838..2a826de97779 100644
-> --- a/drivers/mmc/host/sdhci-of-ma35d1.c
-> +++ b/drivers/mmc/host/sdhci-of-ma35d1.c
-> @@ -290,6 +290,7 @@ static const struct of_device_id sdhci_ma35_dt_ids[] =
-=3D {
->         { .compatible =3D "nuvoton,ma35d1-sdhci" },
->         {}
->  };
-> +MODULE_DEVICE_TABLE(of, sdhci_ma35_dt_ids);
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 0274e8d07660..54a923ba4f1e 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2715,7 +2715,6 @@ static void mmc_blk_rpmb_device_release(struct devi=
+ce *dev)
+>  {
+>         struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev);
 >
->  static struct platform_driver sdhci_ma35_driver =3D {
->         .driver =3D {
+> -       rpmb_dev_unregister(rpmb->rdev);
+>         mmc_blk_put(rpmb->md);
+>         ida_free(&mmc_rpmb_ida, rpmb->id);
+>         kfree(rpmb);
+> @@ -2930,8 +2929,8 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card =
+*card,
+>  }
+>
+>  static void mmc_blk_remove_rpmb_part(struct mmc_rpmb_data *rpmb)
+> -
+>  {
+> +       rpmb_dev_unregister(rpmb->rdev);
+>         cdev_device_del(&rpmb->chrdev, &rpmb->dev);
+>         put_device(&rpmb->dev);
+>  }
+> --
+> 2.34.1
 >
