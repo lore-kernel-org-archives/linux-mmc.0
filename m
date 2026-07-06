@@ -1,137 +1,138 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B1A83E51F4
-	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:46:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE1C8423773
+	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:46:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783352811; cv=pass; b=Rkh7u/0Bon2e32QNciODTL8WLz7X+K7KN2NVBcazkRVE72HRFPELT6ag52MKJ1Y5CT9/isIXRG4FtaESapiYlPHIi3T97AU7hgALFZGQuqmlwVqXlN74dgU/gMy69UVvNwG1A6hQzuHOsa+G3a8kTk09swXK4PGCz48snUiZ2O4=
+	t=1783352817; cv=pass; b=GiERaMdkNha6X9JwgD8X/0iaCItov/r6xya5txvjLs03Quc6/iNDG2XqQfbOZX+h+kG2ccyFZYxTG65TI2qN63vL4+Dv6kzuW+wryBEdrs8K0BMm2Vg8OO7ihB3FWQQfFkszsfczSzvWmPgGjmSGT3X8K83r4vkhyryCf8+Dcjw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783352811; c=relaxed/simple;
-	bh=C8IdFc/4X3DqO7HLndy1L98z1LYEAYsYOr58QolE7+A=;
+	s=arc-20240116; t=1783352817; c=relaxed/simple;
+	bh=dGl8KNZPPq4kRdR4aVbEgxvqnLrKBoyf4a9idwrdrEw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=COgyIFM6wFTzGEPzaecAn7xl0B59w4hiuuWkD/rN76lpHdfmQdslfoaJljaTjdRL1Yg3ZVCO9BA9ovj06flGAPYQDib1NGLHw8m2z8RVOsw6hnuCU+RSUlT6GgGDVnNEEdu9fc/3hT/H01/c/5HJ55nY/f6FzQe6Zi04ibih0j4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=AUfT1Q9D; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=RNSIW9tP; arc=pass smtp.client-ip=205.220.168.131
+	 To:Cc:Content-Type; b=d8GRyoEqYTDzLrVsTHkihyiWpm+aaIbLKLyL2x5tbbQvag5Pf061ocbhGiAQbzs4Tl/Kl9HPfwIYcsWrgHXRdQGdalL3vS9yIYptL0962Gx8nP0oJQ1CLqcIbI295PDNwZI4Ned+OKBAGMkwQG6yIG9MSA44KbY8o/f5Lzo/dkU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ieZbRTp8; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=L6+9y2Id; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="AUfT1Q9D";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="RNSIW9tP"
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ieZbRTp8";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="L6+9y2Id"
 Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FF0G0825594
-	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:46:47 GMT
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FF554825893
+	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:46:52 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	1nurRSv1i/fYBqpNFPZgEICUS6n2YfHXSs/xkskZjgY=; b=AUfT1Q9D6h0FU61e
-	qApfZRcP1afGbNRZY+3nhMV1tJFfeEucg8o4NrDL/r6nV3rmIA3Sq2ZvKZmxzxBo
-	M+0FsYyzui5Oy2iZfEfUyuRluXEb7a8dZSkttbjhsmHR++n0+GbDkJUYw1blnCTy
-	CKfT1FiZqRt3UwTMxApV0+IoHrZWgL6RJxTi8lTyQe9vTV2vqPKXCF3ONWxcu5RJ
-	0H+jGwP/Gg3bWDwzC51OU2p4X9uNQNSRMcORUtqUs2THDe040J0ae50Hvd3rOnfn
-	bQfsxUaXYEbBbI9Jqj1DPCACB28qzCM7zVMagv5+GmhfrzMrDKei37N6MbEtPtVR
-	VfUidA==
-Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com [209.85.219.69])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f88t89y04-1
+	XhmejSh/mnQRXVKtujCghbVf4DcyI5tuN9Z6umvCRnw=; b=ieZbRTp8D1qoIKt1
+	QR5v52hSs89F2lW99wjywzho4cgjUl5LWgB/GmopX5n2pPRBhoIz0wCTmtHeDo4G
+	5agfDZuyyQCjLn66eMtIyE5qLLBw+wUax+hWi+rJmB227e6rz691RA1MIKh6ltrN
+	MeO1JIjskNHEf2WHT+t89xbo6Mq7K83QKfcCwObgS+x169UQVHC/A1S0TQE/Fr6r
+	ZYCVQ+MVhErOaldTKxvTwxqyqy5f68nQbBwwzY+h3f+2JzoM4jhdhUPkN8sf8tVU
+	vuUuEsAhm7OOs2mKZP0jJSN2lq36wMJiFWjd/gjAyOT8uUe5sd4fXChTZg/PX64c
+	R3BVrA==
+Received: from mail-ua1-f70.google.com (mail-ua1-f70.google.com [209.85.222.70])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f88t89y0d-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:46:47 +0000 (GMT)
-Received: by mail-qv1-f69.google.com with SMTP id 6a1803df08f44-8ee40bceb55so43565056d6.1
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:46:47 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1783352807; cv=none;
+	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:46:52 +0000 (GMT)
+Received: by mail-ua1-f70.google.com with SMTP id a1e0cc1a2514c-969330d8ba1so923113241.2
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:46:51 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1783352811; cv=none;
         d=google.com; s=arc-20260327;
-        b=JE5OewVrfuGzUc7KFOEUviVDow9/2LCXcRGLMSejieQ7ZXZhzCipasRFhvxuzNkQrP
-         H/PgS93zLPK7Ge21YdvOQXxlrB7YAiK8ADhBZzq5QSanf0GLPC3dlgt60g18bjTEnTy3
-         ucphKE24Yh+hWYiEBDke0qY49rgs5OVHgvJNA9PtuRxcR2viKVC185ZWR0jGQGgfgse3
-         P2aJXxZg0JeiYOCW+AAOhC/7lLZZa++JjLF45IetTjX5yCdEfpc6vJzrSImA9fhLweEd
-         fyT2CDrGCRDBhy1C7QxSOS4Z/ac4/AVEt+5XKE+Be0o90bQs/XuZjQg9PiYoJj20Fig4
-         ekQg==
+        b=RDmQBIoJVcQl6AjDgSEiQwthxLPd0gPQMLbpPPCFPiEYkDIubwzxzkIH/IhQVIRRTP
+         xs6VTKsP8+SMRz8Egg/UCglJe7eximMb6uDOfexszguCRvIz+I0MB3+gG/oZ7z1C8QoY
+         4WikoL6gugzxTuvDUwVKdCLvap4Il5Z/SDtScty5nq97bfdGDrUaEVBf4aGMtl4bCQDy
+         mkg744xqUq3eDWYh/+RBymiL2UcvVjeSaIwlgVRUnQKUniAOkD0I6Oo1lpWEr9Lpbrua
+         Z1DYmS3VkvwIcQU7hQx+XzcEzb7ehF7zHugHclJocI1sE+dbFuMTdd9HGLzlrFAmodD7
+         jXqQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=1nurRSv1i/fYBqpNFPZgEICUS6n2YfHXSs/xkskZjgY=;
-        fh=PhBmwWLhHOUJVQpoMw+iLnwRuzo3gOoOOz/5GndfGlA=;
-        b=aaUjZ2sUzjvVsHKVnITkg1JNPXQn9fxkEkmB+De669dwHZekar/qZbUpNXly9IOUkz
-         z/NqK1S+1QwyS937yWlvSRGWyHmzCDnGOfA4RSdDvoR2qCWAu73nYV0q0kSUrXJK6qaz
-         FBTzlNBrBlujyoBpwUi3DNYK/cbZxwhNZlPKEmm3UnM5It6/u6/iZJ1ouYX9+MaYjDdo
-         rRQ2AnpNkOyPsSaWFlRIK3RBoharXpNDQQEAU5Fbemsa4zPPQTzTVIoMSdIp1gE49SnP
-         rznj2gg0uzorTYflgsI7nbqAFH/9Rf99ydPdze3wqYB/KQ80B641CdGX3lFptk20POWj
-         ZiYQ==;
+        bh=XhmejSh/mnQRXVKtujCghbVf4DcyI5tuN9Z6umvCRnw=;
+        fh=CN1D0ZzaFVxk37yiZjxoRE5wOdecpBluF56c4mTCNN0=;
+        b=SRNvsfomsna2W18Ll+LQdR701clAp+rYKZh7PQfIxCAjrP4KtKl1jKXjeaiAIXwYtb
+         Ljm3Hx5iBBhOaoghQcVMye0j1x+53TujJV3yATrEnJsstNTJedl7/ZfL/iT2cu2XrgJs
+         nZggng7kdbztloSNbwExTJ5G8SrGEv1wx6lNhXIq+erl3mH4aPC8U9I0ZCGew5bXe3SH
+         PYywDp8QvL3OcuzYXuioa3YxsCeAIund855VsGrkKKRzQYNl2K2SX13H/g5jV/H9eDCd
+         zQilVwDzUJxxPi8di25s9FlKhvS7hr9XZ6mvSQ8s5XHlU/olAyYLCWiAD9HnddS5Tyrq
+         7G/w==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1783352807; x=1783957607; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1783352811; x=1783957611; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1nurRSv1i/fYBqpNFPZgEICUS6n2YfHXSs/xkskZjgY=;
-        b=RNSIW9tPRCJbiVam+c1jzVr6Ter4Qo+hAl13mzkEgUoqU6OeTeTXSTCWaEyIBMPpox
-         jURCdnZtDi/VZIQ3/cDbsnA1OcihygxmkK1MkLx4yNGQ2DYI3w75wvKWZvb1kXESujMD
-         zGT/+Gg2Yp52LDbGvduYVtl0lWI1dLBvY65ctAPMkp7JEPz6Bd57hoZ0xVuhb5w5iH8d
-         9ol9T/MuOg+dl/XpmR4+GJkoQK85XHlbX5jEocM5UjBLj+d5X3w+Ed6QE/Cgw99HBJlQ
-         jDsRZtyXdqVPwjb9CG/+1QilMGEOf+KlqBAlCup5oGVw237ewHFjTa3EhyV3n5zkNWrB
-         yX3A==
+        bh=XhmejSh/mnQRXVKtujCghbVf4DcyI5tuN9Z6umvCRnw=;
+        b=L6+9y2IdpF22r0dJQmNtEkCftlbZojdO6tzhzPsW0fgdseK5IPD25Qf6ukkddNwT61
+         +0UQmpUjusTQ9TrcV1s0WayluVhVYrdOVPAQBFoK/DITBLfy8yVHNO9YNLZlFIdKI2z0
+         kxpjvJoiQBKMbghNDa01jT8gw0uRmEgUTF9y8UnRC/gOTMuuRX3g9nLrFQnEtFaB4ozs
+         vawp8XewW77TQGhs68DcYeOzvEq01c1YU7VZl+hxt996XPQkVPKX1DeIQ8mzLRXjiIE2
+         LpSAlFXBwY1lRBpggva+Q45c62Vgk9qOjdHyQ/Xo0B3mWWnvbCkQHIPKL6AcmRi4KBrP
+         rB3Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783352807; x=1783957607;
+        d=1e100.net; s=20251104; t=1783352811; x=1783957611;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=1nurRSv1i/fYBqpNFPZgEICUS6n2YfHXSs/xkskZjgY=;
-        b=BNP/3+tO/aIeqHpgH+07XAngDvrJCwPZUQq22wayDJqf12zryLjLO33N8chOJq3Me9
-         wn1sTe+fMVC8pzWSrws3ZY+JePLlHYCzda/Fq2UKZlZ4YJKkZSgI3K3i5sogNgTjugeG
-         SBsli6TVK+ONZ4rKZnAr6rrtIlwgGacDcUg87l9/Z9zQhhtsu0VIueUF1z3wCvGkJPh4
-         qnud9FEwoazVzEG6cTF4S+CL2KZJi/ZZ5+hudaCsdCzFyyS7ktr19SPTJ/iUdGcjh0ay
-         yRZKK5R2yAByMKjxQ0Z8VDzrFfiUVQzam0UwQ/SgjUnMe1n/Dif0krT+Z9YFcf0vVTmN
-         N+ww==
-X-Forwarded-Encrypted: i=1; AHgh+Rq26JOz0cRz2bOm/OLayfpGxEhcej+nM6x1/IiUjjpwaWQ5yo2lTTefgEh+bOPsf7uD2pOvUXc3hlg=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw9am1rt4xzHTNZiBYC7DmXYJ3AhmDR579xeVEU2nu/cw4EAG3p
-	TKSr0yjoiWKxIrrs14YzCwcM3pPY+8R9ulsfU639CLL0K7svuTq/jebZttWWfMazJtsPo+yDq7+
-	ozu7wBGGArA7+U+FDA+9THnsZuWt7kH93fQP1r7MDVRxIzf1jypv8ZRJ5AZ86AR93gskeU5XsCk
-	OyjUTnyOMzU6DFwD9rgwXQ/EbSWG9ibaqQnOat5rkoDI10kA==
-X-Gm-Gg: AfdE7cnfCEggKpuyZUsNCcyJ7lWWfbaBD0nvGvfPS1lqBcOF0vvGOKmiVxpdx/4a0/c
-	wy0wPCEl/juSDjC7X1CaVtgean1SCoSPJPOgVPErPqCi5k5WYE4J4gRANxUSu111imjaOEZ5o7x
-	qwfOCEIrWujceGJfSH7gXPR0+A1zE8LVFo7fGoy2ikYuzhSK/5Sci2jxccMAx1mPOs6BwU
-X-Received: by 2002:ad4:5942:0:b0:8e9:f5de:d605 with SMTP id 6a1803df08f44-8fcb5ea671fmr12863286d6.50.1783352806588;
-        Mon, 06 Jul 2026 08:46:46 -0700 (PDT)
-X-Received: by 2002:ad4:5942:0:b0:8e9:f5de:d605 with SMTP id
- 6a1803df08f44-8fcb5ea671fmr12862806d6.50.1783352806018; Mon, 06 Jul 2026
- 08:46:46 -0700 (PDT)
+        bh=XhmejSh/mnQRXVKtujCghbVf4DcyI5tuN9Z6umvCRnw=;
+        b=ged1LHv34ppuKJqZNqajPurKKx6u6bEhgnzwi4Qo44PmOWqBz/QjY/kbhDs43cUNot
+         CnpxeV0CExg4rgFtvnpnTWOtayJ7cE3PddiXRb11GB6t4veS4jH6HRZt4Zwee4T/RNtx
+         mJvh+dvWdllTKT7Eiq502eIk36iNxmwwl7YEI2nVxETjR+EApe1xJ4Yy02s4NPRQfWwU
+         v8RYTPLDbMEu/1C1rnEA+DLl9gDbIkZKuvmA41Csi3SHalr/dZcBVlikojqZG2XnzpVk
+         buay9o/SntmPyocyT19l3Ctbbe97MTnk80IDFgwNR71sT/Le3Fx1YUHAsWPBxkxBMs/j
+         7EmQ==
+X-Forwarded-Encrypted: i=1; AHgh+RqRp+o+es+eFac/3wMJ2+YmnrMVGulAg5QdZMK6lV36EDSQvC3hiqYmoYW53rwqferItgEBTDgFFtc=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywc+uxRl+sUlxo/499nUlFY1/sqodoUQ/wJX71ouXxlU8CxgPdP
+	41WONYICC1FoL74lV4JTtBTuJadmxX5AksAAWlx1cyBHIGQbvntYcpJrdKJB/nXu7d1+/in+gqd
+	soRhovrS4/j1+vubL5EyP5B0N8tMI7efzy9cSbth2dzPOp5dsYEOMWAtzifm1jOw+kBRoh+j6XJ
+	ddRtkXAMeYqBmP6koYi1XA9BKk7KhJvdx5a5hK7g==
+X-Gm-Gg: AfdE7cltlpRQW9nDCNfZyCPryFDzul16PzmIFLpilGNzNU5Vucyr2ZoL/pxLnZFZbDC
+	9oc/DNuRJsKwYWDJufzUo4SR3PdjKRjyKXqt/dn0zsbQSLzGHzBZQEdvGvW4c98FIbkAtkmzugm
+	9mOITlxOjIi2rq7RNM8I1V/H6oFVT3jSbcuENas2QlA5RSFhf1Ie/1x7K3YhtwhlFIUJKi
+X-Received: by 2002:a05:6102:f85:b0:737:b586:6386 with SMTP id ada2fe7eead31-744b7da5e19mr593844137.16.1783352811015;
+        Mon, 06 Jul 2026 08:46:51 -0700 (PDT)
+X-Received: by 2002:a05:6102:f85:b0:737:b586:6386 with SMTP id
+ ada2fe7eead31-744b7da5e19mr593787137.16.1783352810522; Mon, 06 Jul 2026
+ 08:46:50 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <0a4749ab9ac7ae0db0a0e651267358e947a1826f.1781080709.git.u.kleine-koenig@baylibre.com>
-In-Reply-To: <0a4749ab9ac7ae0db0a0e651267358e947a1826f.1781080709.git.u.kleine-koenig@baylibre.com>
+References: <20260612032756.2910943-1-lgs201920130244@gmail.com>
+In-Reply-To: <20260612032756.2910943-1-lgs201920130244@gmail.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Mon, 6 Jul 2026 17:46:34 +0200
-X-Gm-Features: AVVi8Cen57KHpf9whc4sxiKoOSpN8RNbmLrU6TaiB_yAFxAAU8Wmd3OlRN1oKjA
-Message-ID: <CAPx+jO8hJ7hYExqPzR3we5mewUZipEG0mSeV9qCafw8Q0VC+_A@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: wbsd: Drop unused assignment of pnp_device_id
- driver data
-To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig_=28The_Capable_Hub=29?= <u.kleine-koenig@baylibre.com>
-Cc: Pierre Ossman <pierre@ossman.eu>, Ulf Hansson <ulfh@kernel.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Mon, 6 Jul 2026 17:46:38 +0200
+X-Gm-Features: AVVi8Cf8Vno8vJb9h-L6UK-QHt0f0kykFNXamMiaa0004XSRAPwfleBJQdHF3C0
+Message-ID: <CAPx+jO8=L-_h9FET+Zp34j9OY24cmfX8jT=PV83_z0VtWssCZQ@mail.gmail.com>
+Subject: Re: [PATCH v5] mmc: vub300: fix use-after-free on probe failure
+To: Guangshuo Li <lgs201920130244@gmail.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Johan Hovold <johan@kernel.org>,
+        Binbin Zhou <zhoubinbin@loongson.cn>,
+        Huacai Chen <chenhuacai@kernel.org>,
+        Yang Yingliang <yangyingliang@huawei.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfXwZrdIpM/nO3F
- 64RSiPZscOvFRgtZWmk8a60Q4Zj3EdRkml1cZKOj+bAFzvJVVrECXVvtkv7rb9BL5/vR8gKZFGq
- hVdhrpF/FvQL6cDVUIudMd9u2Fh7hds=
-X-Proofpoint-GUID: ns3iMWmapf5efTgi4Km8WWi44Yf6guD1
-X-Authority-Analysis: v=2.4 cv=C6zZDwP+ c=1 sm=1 tr=0 ts=6a4bcde7 cx=c_pps
- a=wEM5vcRIz55oU/E2lInRtA==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX8bVj5vnJ3e3g
+ 50i1Z23tq+Av6vYunyHoi6OeZrEnQFqFoPpLYRqoZW5iaDTjfbw4uoUvGLnq6coRbwr5rzofmJ5
+ /NsG4rtWcIledv+RcsyJg7AAVHGA15c=
+X-Proofpoint-GUID: E6K3ZFkJHa2QrTbEVXbPRx9TFUVZEy9t
+X-Authority-Analysis: v=2.4 cv=C6zZDwP+ c=1 sm=1 tr=0 ts=6a4bcdec cx=c_pps
+ a=R6oCqFB+Yf/t2GF8e0/dFg==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=YMgV9FUhrdKAYTUUvYB2:22 a=VwQbUJbxAAAA:8 a=IpJZQVW2AAAA:8
- a=uU4xFXAYia2alNEYA-EA:9 a=QEXdDO2ut3YA:10 a=OIgjcC2v60KrkQgK7BGD:22
- a=IawgGOuG5U0WyFbmm1f5:22
-X-Proofpoint-ORIG-GUID: ns3iMWmapf5efTgi4Km8WWi44Yf6guD1
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX6Bik5HN3TlX8
- rf5UZBuyAEjTjxXzu03QB8noJGr189vpYDnDwRePusyEZIrfgIk++B+kBFtYiUdxi4H6wOhirYX
- zHi4SM1MTWR2AhUTa3IFy5Pl06IN7IUlpVlGTUmnLklbfD9c5j+IWiLH32cZ9TtwMS2Sjk17jwh
- bjZ+OZ9QSvkpfP7tPWhv5U6qhbKRhckrgftYyy1JFLrceIxY/Q0n5AIKtOr8TM1o+SJZp9HsWTw
- 6yj4i2dxw4wt6tZgszG+VT5jbjcShEmgGlgZrD2eu1skDKRPPSmBUqvGEAg+oi8IU+tAHciI2rw
- JDQEGs5Yc5++QmnUZ2ssPyWnLfFIhV8+rlI/P/N80I+3wW//uGuBIiXaL67DZhnBRKPKy2vkFI9
- UC50bVKC27Ys+e9SYPcUbxRVNhUx7F7ZKwGjplbsluzMwIlrHqvz0ID4pi/6anHvao1fDENeQAo
- Gf5RqtrjLVrO724YX9w==
+ a=YMgV9FUhrdKAYTUUvYB2:22 a=pGLkceISAAAA:8 a=VwQbUJbxAAAA:8
+ a=oCbBy-jv9Fm_6z_G5D0A:9 a=QEXdDO2ut3YA:10 a=TD8TdBvy0hsOASGTdmB-:22
+X-Proofpoint-ORIG-GUID: E6K3ZFkJHa2QrTbEVXbPRx9TFUVZEy9t
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX+cuqjTyRMuT9
+ 6ISRPEJCK9SnubvfWV+MfPwk+GvMXYWEdWkMk70HTrhqFcqa9LrcLccl5U+xAUYkTjvAG/VQa5A
+ RT6yn0rHSEpy3HmPzPKJ1a8BWgPpvEcqiysyYmJEIfsVZBg+c+ns4gZIAlJSSTjN7Hic5R0oqxE
+ UllHDdYofaSarJTk7lYKkaFsRfbwyHzhNzL9agOI16pVIe24kxjgvMXIXlteRBMhvy+IRtQQW3L
+ tiahV5t94HG5NhdgFYpD+zwjKezvvREERv1KBVHfT21OV+CfmuveWIu6g6X4t764IxPYnfv03yd
+ 8B5HtxOzEF0vwmxNgyiqlEybDALKzTyFlvzkR9ilKaGPj5oXsGJPqIpl/hMvyY/OrntPprNHlZC
+ lO5jmkO0wolOxhgYCogmfaVgF/P2fsEJ8SeUgpCP+azlEvqDjM6dlfC0TBwqKruHw41W+91SrPh
+ pjHad5UGY6aLyquwLcg==
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-07-06_02,2026-07-06_02,2025-10-01_01
@@ -142,70 +143,115 @@ X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
  route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
  definitions=main-2607060160
 
-On Wed, Jun 10, 2026 at 10:41=E2=80=AFAM Uwe Kleine-K=C3=B6nig (The Capable=
- Hub)
-<u.kleine-koenig@baylibre.com> wrote:
+On Fri, Jun 12, 2026 at 5:28=E2=80=AFAM Guangshuo Li <lgs201920130244@gmail=
+.com> wrote:
 >
-> The driver explicitly sets the .driver_data member of struct
-> pnp_device_id to zero without relying on that value. Drop these unused
-> assignments.
+> The vub300 driver lifetime-manages its controller state using
+> vub300->kref, with vub300_delete() freeing the mmc host when the last
+> reference is dropped. The probe error path after the inactivity timer has
+> been armed still bypasses that lifetime rule, however, and falls through
+> to mmc_free_host() directly if mmc_add_host() fails.
 >
-> While touching this array use a named initializer for .id and simplify
-> the list terminator.
+> The race window is between arming the inactivity timer and reaching the
+> probe error unwind after mmc_add_host() fails:
 >
-> This patch doesn't modify the compiled array, only its representation in
-> source form benefits. The former was confirmed with an x86 build.
+>         probe thread                     timer/workqueue
+>         ------------                     ---------------
+>         kref_init(&vub300->kref)         ref =3D 1
+>         kref_get(&vub300->kref)          ref =3D 2, timer ref
+>         add_timer(inactivity_timer)      fires after one second
+>         |
+>         |   race window
+>         |<---------------------------------------------------->
+>         |
+>         mmc_add_host(mmc)
+>                                          inactivity timer fires
+>                                          vub300_queue_dead_work()
+>                                            kref_get()          ref =3D 3
+>                                            queue_work(deadwork)
+>         mmc_add_host() fails
+>         timer_delete_sync()
+>         mmc_free_host(mmc)
+>           frees vub300
+>                                          deadwork runs
+>                                            use-after-free
 >
-> Signed-off-by: Uwe Kleine-K=C3=B6nig (The Capable Hub) <u.kleine-koenig@b=
-aylibre.com>
+> The inactivity timeout is one second, so this would require
+> mmc_add_host() to both fail and take more than one second to do so. This
+> is unlikely to happen in practice, but the error path is still wrong.
+>
+> timer_delete_sync() only waits for the timer callback itself. It does
+> not flush deadwork that the callback may already have queued. As a
+> result, queued deadwork can still hold a kref while the probe error path
+> directly frees the backing mmc host, including the vub300 storage.
+>
+> Fix this by using the same lifetime mechanism as disconnect. Clear
+> vub300->interface so that the timer callback and any queued deadwork
+> return early and drop their references, then drop the initial probe
+> reference and return without falling through to err_free_host.
+>
+> Fixes: 0613ad2401f8 ("mmc: vub300: fix return value check of mmc_add_host=
+()")
+> Signed-off-by: Guangshuo Li <lgs201920130244@gmail.com>
+> Reviewed-by: Johan Hovold <johan@kernel.org>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> Hello,
+> v5:
+>   - Correct the Fixes tag.
+>   - Add Johan's Reviewed-by tag.
 >
-> I intend to change struct pnp_device_id and for that it's required that
-> .driver_data is not assigned using a list initializer. Instead of
-> converting it to a named initializer, drop the assignment as the value
-> is unused. So this is both a cleanup and a preparation for a later patch
-> series.
+> v4:
+>   - Fix the Fixes tag to point to the commit which added the
+>     mmc_add_host() failure unwind.
+>   - Add Johan's Reviewed-by tag.
 >
-> See
-> https://lore.kernel.org/all/cover.1779878004.git.u.kleine-koenig@baylibre=
-.com/
-> for a more verbose description on the mentioned change to struct
-> pnp_device_id (though this is about platform_device_id, but the idea
-> here is the same).
+> v3:
+>   - Use the disconnect-style teardown by clearing vub300->interface.
+>   - Drop only the initial probe reference and let timer/deadwork drop the=
+ir
+>     own references.
+>   - Mention the one-second inactivity timeout in the commit message.
 >
-> Best regards
-> Uwe
+> v2:
+>   - Rebase on current mainline.
+>   - Correct the Fixes tag.
+>   - Add blank lines around the early return.
+>   - Reword the code comment.
 >
->  drivers/mmc/host/wbsd.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/vub300.c | 10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
-> index c33a0223ce7f..51706898239e 100644
-> --- a/drivers/mmc/host/wbsd.c
-> +++ b/drivers/mmc/host/wbsd.c
-> @@ -52,9 +52,9 @@
->  #ifdef CONFIG_PNP
+> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> index 6c3cb2f1c9d3..c1c21e95f5bf 100644
+> --- a/drivers/mmc/host/vub300.c
+> +++ b/drivers/mmc/host/vub300.c
+> @@ -2336,12 +2336,16 @@ static int vub300_probe(struct usb_interface *int=
+erface,
+>                          interface_to_InterfaceNumber(interface));
+>         retval =3D mmc_add_host(mmc);
+>         if (retval)
+> -               goto err_delete_timer;
+> +               goto err_stop_io;
 >
->  static const struct pnp_device_id pnp_dev_table[] =3D {
-> -       { "WEC0517", 0 },
-> -       { "WEC0518", 0 },
-> -       { "", 0 },
-> +       { .id =3D "WEC0517" },
-> +       { .id =3D "WEC0518" },
-> +       { }
->  };
+>         return 0;
 >
->  MODULE_DEVICE_TABLE(pnp, pnp_dev_table);
->
-> base-commit: 49e02880ec0a8c378e811bc9d85da188d7c6204c
+> -err_delete_timer:
+> -       timer_delete_sync(&vub300->inactivity_timer);
+> +err_stop_io:
+> +       vub300->interface =3D NULL;
+> +       kref_put(&vub300->kref, vub300_delete);
+> +
+> +       return retval;
+> +
+>  err_free_host:
+>         mmc_free_host(mmc);
+>         /*
 > --
-> 2.47.3
+> 2.43.0
 >
