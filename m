@@ -1,294 +1,183 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F46C42EEAD
-	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:47:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B54BD41A766
+	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 15:47:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783352833; cv=pass; b=LyJZJir5rPYix7vPhoLqUrYXWDeoFlVVsNmEZPwRZNkZSg5jRZRx86CPSyo//MFbBFsmmRVsANkUNuGL/ym8y/XuMUSd3L9IDWcJ4gDp72ckk2ppPc44b5Ku6mQ7t5oW/pXE3nZEZ4Cjb1Y8VCmFUpXPREZJljYcamAQqtpvTzI=
+	t=1783352837; cv=pass; b=bSzV+lqFWNzh9MRK1bHiViIoPargIKpT0IuXu+a0Yhz7vaGx0NaW2eBNhXst35I+wiGm1t69DZzZjb1e8rzg7wjaV722h5jmSW2Cv7eiyA8V5JtJou9adTothANpwM4D8N6L9zCEPwib92lLy+HtyPfptxQDMKaZpBasFoTFJrI=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783352833; c=relaxed/simple;
-	bh=ZK3umFUl4l3m+TbCatgyuRkELcarGJ4iocTqg7dKedg=;
+	s=arc-20240116; t=1783352837; c=relaxed/simple;
+	bh=E3CBLMIg+o8aJJMHOmPeH/gbGd9GIscDdPd59gmAJGs=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=k/51BDFr4wJQU7P1q/M9o24eZ1bSRS3CUGHZ5mK8mSU8EFu1Y/sE6QA2OEN14IzKUTeXCtSR9Ug2V1LKVzPKJAQKZkqGUZh2yjIQaftJDl0r235aT0NN8IeSK/fAwXhTy/p3ImcoI8fjHAUtF284HDBctguIq8HYATw9Qf21cko=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Nct9fni5; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=Hu7J1rG/; arc=pass smtp.client-ip=205.220.180.131
+	 To:Cc:Content-Type; b=Nw/gOzWg8P2SK01cbzNEBPnYjfhl7LurN2E7mhMhCecP5QLFIJsF2dt82ao6sr6ACmF4JibllN/xV6BQm/uIZBVcKRmwJjiqLMBlnQ/Tr4lZR/CJpLDBsLA8UJVwXnWidwgyo7jSzEMTfOLHT2L04KtCfqNqkspGAhheA0boWH8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=aIBhTJd8; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=dswV7uUq; arc=pass smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Nct9fni5";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="Hu7J1rG/"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FFE6B809717
-	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:47:08 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="aIBhTJd8";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="dswV7uUq"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666FFCTB972267
+	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 15:47:13 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	9iQGNVUX0c+xixcxpD1Mh6//kGs2C0OMb65NaHkl0Oo=; b=Nct9fni5GyAQ2dbG
-	XSC72Az4Wj83teMB6OixCxRi7MKkUOqYxqG1wqBWI7RwAFLxkAWboxxrRWjzQy8t
-	niiXys+zQ3W/Uz+s+zkeWWOFQ8ILlTlRqX7wra/0PJirc+NEwoR2ARdPHNU8vZug
-	sj/cv0izVU91jYOO4awJn/LAkirikLkqB5S2lHpIy20nsB6NvGW8DB4tUWZW5q6l
-	ttnsgUe2ITEhHe274wUxsYP6iO9G5kxA/BxNWAjc3doZLys1BjTwhfBGIao7GHcf
-	uUMRJEkJW5Nsy7Cy4g7gQpiEmTa7Ov7emW0di9o+IQoqtj0v31OSyDGVMbeqDtL9
-	ax4YzA==
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f88hsa29t-1
+	BFfezvwTH/BefOLxndpn64cUB5jXMIkVjWU57dxK+Ck=; b=aIBhTJd8YzFv00VR
+	n2yX3KyHG6SXSIS4AU8tvvtN4CT3Ais1sWVae8CAeyN8sOc8+I5SZU1WCpde2VJD
+	aqOoTxWv+i9LhiusZ1Vl6sZrtqL8Fwyd3byJVdsxkgTiUX3nqjTO8oK5TZ9umIEK
+	akda1J8nW72fez3H7rN9ELvANXBUY0Rr3SZZMgz4l/EbE6B35D6ZEDWuSR+59CS4
+	Sl7PvuendH/sMlQma2zMWd2hpoFtMGCqiAH0RjpDUipZyOs5Une17sZlL8gH0Tpn
+	Ov8iOuV9dIqUgvtu/wH8iK/Vml9utnzuFHfEobN0GqW/VL3vgOT69uEHl7Prb1zm
+	CYlP1Q==
+Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com [209.85.160.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f8a3r1hsj-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:47:08 +0000 (GMT)
-Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-92158791d14so324913585a.2
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:47:08 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1783352828; cv=none;
+	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 15:47:13 +0000 (GMT)
+Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-51c083f1818so33925101cf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 08:47:13 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1783352833; cv=none;
         d=google.com; s=arc-20260327;
-        b=Hs+CIQgz0bCfv6oWD8JYephbEjk+T3PfAXsEabRC9APLzCqLpsO8eCheWg+hhCgu5a
-         mWLKyVfqJ42vZuz4gxuKIkhkUtCXAwi+910Bhz/odvDYZ9L9oYjH362Hzuyx7c9ZRF8D
-         QsIrTlLXpymfuuYsatAfDpBfg9RRa6Ogq6zr2pcDCgwcpSau35Wh5kSGwBU++Zl0HpWt
-         7ESBPRlMPNC4wehtXI4SKvfb61r6uIGd9lX2LDNH4vDtWTvkkRpp0AR+nlZv+sJXe8VE
-         gxQGV9KZ84YicqfVhuH8ggdXURfE43DYnDC0x4YhlZnDQRMfkwvA2KKY5S4ZUpmv7IMp
-         cePw==
+        b=OQJrBjMqHjBKPUVf/EHuvk20S6WORf/KJR0QQ0FAFc/Ad2Xd1kdQBxuqEq2QSz6Jvn
+         jEcTdBx+GFv+c4EDhxh72zsvGa5WyRfTdBkgEwGhdP4E6krXMsIDcfn+k1SXIUGIkm0R
+         m7NC3FARmB1I1IsA4Bvj2n+YUBNTAlH1/q2dRdsZWaAILuwVy5UGbJVQLbmV6BTBwyzX
+         jNKphCiLEjCr4UiZSSNiKNWdFnSnyycyLJAGfVmPuKO6YC6CaYkRJgiapboE+wXYpVMz
+         pL6/oVQcmhKFu2r0IcQF0VTe3g+VPAJGrPH35hI2E2jGlJm2JA7iyqKeaYj0e5qvrM4S
+         iiFw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=9iQGNVUX0c+xixcxpD1Mh6//kGs2C0OMb65NaHkl0Oo=;
-        fh=YVgER7JaMuGyQy2V6KrgMLMFE0QHZZz2p0v5n+T69k0=;
-        b=Hfx0CFLr8Rx0fCGluunNF33VBIYVdKqPYSt41wR3kWypyGXKaDWBimbdlFxT1pt6n3
-         eseRoRj7Jlb5/lK6GtPF2Mkz8QKzJ4f3M+XdEar0PWc7FFD/QeflgDjZOnRzMoeHSkpN
-         xzrDZ7lSKtZK1FL4dqS1jZ9Dc8kv0SOWGomQsN0jWiFFsFwDofbDMPMJIomUbylUfnvw
-         JFFm7gHPhPaQgc5yrq0tsYVBgDwuZDzlk4U/z2fy9yKzFAOg+lcKSHzgA1WIFR/MK9ga
-         uj7PmKEh1hpeVDrHjdcVkoQmiJ2kn6jdMHJfbJp98ujTM2SiWVR/7P044v679GeKAk3j
-         YDDA==;
+        bh=BFfezvwTH/BefOLxndpn64cUB5jXMIkVjWU57dxK+Ck=;
+        fh=3jsks+qqSsOwz6LAFkaHABmk8PevXR0hRlPUjkbAg10=;
+        b=XD/SEXGx/gIkHio9d3jIsd7ZWxAoRBH4zYJmzLdvaDT7SyU42MY8oGijQQvzds/cHZ
+         aEyFSN27WmMZkYhsYgc3AdjhHgqfwQKRe6LuaV/6OUejhjyE9MP6mbYLMtDhwUQVr1kU
+         NuYmZUYhnjeMuEq4PkOHarYberKtvpjM/HvVLd2V7bW+LuGralXMkG9DF5mVTGb1zv2U
+         LrD95ewxg8c4y0QvjmNDJ1/y2Obul2Lm9AhvObvy1hJvmOWVsk2BGs8EWpQ8ZJjxrIT2
+         OjhK/QpXAh2J0EUbzj2Mm9xL1hekSdkd9sQX8FgcNSQbt1JiqYKYrZlemhaIf+LrYewO
+         /2Zg==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1783352828; x=1783957628; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1783352833; x=1783957633; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=9iQGNVUX0c+xixcxpD1Mh6//kGs2C0OMb65NaHkl0Oo=;
-        b=Hu7J1rG/nbH3wyFSBWchs95psI6LBeRfjMnk7wYZQI60JqPXXUorm1JxrQVLisKXE1
-         Ox3xdkKjXYKwd24HH1jiFy3GTATn7+rBPyntpF7cadkJ+P41LJKN3ghMc1EVO072twTQ
-         AbQImrOdwV0JxJYusrhJf+CQLHlBanPF87cJRPjg6iO1vEDSoFdYNxj2Mu8fwMiMm6Gr
-         11lV1F+YK0WgbeIxSxyzXr6iyR6mvxpBdO3lj0AizmtSFBXH4mkOxYbUdMOtVjtsNZba
-         W27zAyaLXaEAhZO05Y/Lq5n3aY9Qd0SxoLHdBnmZhMNQLKwn0zpv/lLvtVdwPfnIiShT
-         STaQ==
+        bh=BFfezvwTH/BefOLxndpn64cUB5jXMIkVjWU57dxK+Ck=;
+        b=dswV7uUqoqKXTIjiSDQZoTcJsHJJAXjd1EL0Ne3+hdM7fJI6vExV+WcBt71dk35B6V
+         Z0RQkJZZCoJQephbMGEsqTxOUXKfV6ZkIu+e9ORtbl5gQdrlUF70RxqLbRcS546sVNlA
+         O7aB2opCQ7GQeLwldO8MPIZ2a/QwmK3AKQQAicTD2rQvN7CFL4Dc3KPZ9zqyspfHdjqe
+         IoMvDVUncV8rKunZhhb74hDJwX2Ud5WA8hXhuxcxtKmgYwcgnncfN3aLzTjjevbIH3I7
+         xhQl0QeD98bPvSAnBOtSvhGddCXEPHZb1KSCCscy/FVgO9m/BMbDf7i0j6Z5cUVz2Wjc
+         WJiA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783352828; x=1783957628;
+        d=1e100.net; s=20251104; t=1783352833; x=1783957633;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=9iQGNVUX0c+xixcxpD1Mh6//kGs2C0OMb65NaHkl0Oo=;
-        b=W9DV1Og0ge/oe7V3CCXBe7h3pB6GpAPGFvv9ixtK+3OQWbp42gPH6YXjTYjCvFBylA
-         79lbqeJS81Y0KaNErDE1CmjmSNHkoPsTgNN06z0fLa+LYZOu3qMJdS14+t8PfW9YK6ZF
-         tUunAh7g8+DEuevYk5wjddiG/L4KBf5NSPd/G1UoS4r7heuJhpKZNe3s84xOWY5FGOlz
-         X5FrSy2XgXzBFhgFt+DLzQo/PcgFLL4B1jivmI6qqq8LGkBYKr1NsFTp4sNeenXK4jmM
-         +iN6aXdAEdXpLZOGGc5qXFJTJGMvnGIJSMxsRm55cGA9HcIfVrIBFXQ9xOB38AdSgzmS
-         pLCw==
-X-Forwarded-Encrypted: i=1; AHgh+Ro4DucL6A017IrDqbF/4yrGlElptJ2vmPgmv287TWfUgZGuq3tobqPm4yb75WvlVfmDIlDrMukJhzI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzulI28KtxFGqipJEjNY2fqLOXy+BbNBBKwHSfXt+mkICuy7W21
-	Jnulyp3RDFPeVkDAnRTW1XLCNse4X9qZtFg9cBpSLSDUAZoU33Zsg4drrnXsqxrxhhHohLLgAAJ
-	acQjcHBX38NqznvAYAbYTn4FTkJJEcniK7BjNKjNFX6esIIiljQzyS05jC5n7b4+okD04y+1PPW
-	CsAuuFCMuEqx5rOMx1lbcHPCGP3a2f/LOtuN5FUg==
-X-Gm-Gg: AfdE7cnrUfjY+AR1nyUqHspVyUBVze5VOCivPZ9/Ja3kSQpPE4pokt7w3bhLHW9ofUG
-	3NH2vZhm1h0WMpxKj2PRm8+siw5PvTdmJJZmJbc8fTb6WPi2g8Ctj+lczneQKu1QTASgIJqS3Ft
-	ptY6Aku/zm7xJq/kwmWVAIww5bi/pKXf+8EGpm9N7UFv6td+EzQONH1yZlRDYKeC4+NYwa
-X-Received: by 2002:a05:620a:838a:b0:92e:72cd:325a with SMTP id af79cd13be357-92ebb534c69mr154355085a.15.1783352827632;
-        Mon, 06 Jul 2026 08:47:07 -0700 (PDT)
-X-Received: by 2002:a05:620a:838a:b0:92e:72cd:325a with SMTP id
- af79cd13be357-92ebb534c69mr154349385a.15.1783352827129; Mon, 06 Jul 2026
- 08:47:07 -0700 (PDT)
+        bh=BFfezvwTH/BefOLxndpn64cUB5jXMIkVjWU57dxK+Ck=;
+        b=TLs3g/Kqons35Hr4Zn6/19pJFjxb8DShYaxnlUlkoDRxYa4t+mpVu51qOEQB5XNvYj
+         04zRClLx+FOlfM1ZiQpRFhiMyDsujfz5+PzvZthl4gZk66mbmKr7WL4j5ScWfP9eQV32
+         7niSpi75Pa9BtFI2jx/dCg4kNfFpYphDC2e5Ye0NJ1aP0Z4dMn3K/w0sa86m2/Lp8JNS
+         aZsxNYEEI66s8UzevyqmWNX7iTpZiyWhMA8LDCBWvaMy9IsWDZa3KEG53GNSj2/v7UrX
+         aupqZ3uGTSquZuo4fHVZLoS3vjs2/Mw+JudGUaPm8aA86lZwMNj8n7O3FCwtysXHqwl7
+         CPKw==
+X-Forwarded-Encrypted: i=1; AHgh+RpZUECBrKSo5Pu29xQZTDkefOw/UVcy70z8ZjqjBF9ghJXoZNR1xxKMM+XhqwQslUCFlyqslR/xC1Y=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxIIhLHS2zZZCP8Njw8C7Oyexl1esprA4qCgMU6zY818D6xIZRj
+	Kjy1XtjDmGQtJ3TG3Mdamy6SvofSO3TwR5Xgsh5rajtHu3UpgTf9hu9t0d+k6ao1fjtY5UA5qDt
+	uEecLrGDxA3oxdHW0I7wnt348FokIwzTNcs9jSkjDirhZm+Niotk7+te3V+S8WjWNdd3J3G02qk
+	mKvVv2KYB6XYvj1I/GsJbCvq13JLnX3yEhU3vEsQ==
+X-Gm-Gg: AfdE7cl9lMDhb0s4xB7UyR/4bhvIRxRpgHnNWwvg2eVhc7Y/rmQffi58M/UwfPpXC75
+	m/zKolwvKd9ighOruBAcKSML2Xl+hBQXtJe+c/10yDYId/LG2GtPV5zdFHYDvwrDXd/u2ZU9Zjq
+	0uDRxxImZxRZbUe00L+fKPstlvV2qKKBgEYQmWg0zmQX5xP0NwOCWrHn3p6DvZeXRfb6yX
+X-Received: by 2002:ac8:5806:0:b0:517:c65c:488b with SMTP id d75a77b69052e-51c7464b724mr12951991cf.0.1783352832441;
+        Mon, 06 Jul 2026 08:47:12 -0700 (PDT)
+X-Received: by 2002:ac8:5806:0:b0:517:c65c:488b with SMTP id
+ d75a77b69052e-51c7464b724mr12951361cf.0.1783352831853; Mon, 06 Jul 2026
+ 08:47:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260617152319.957866-1-runyu.xiao@seu.edu.cn>
-In-Reply-To: <20260617152319.957866-1-runyu.xiao@seu.edu.cn>
+References: <20260618220209.211875-1-jm@ti.com>
+In-Reply-To: <20260618220209.211875-1-jm@ti.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Mon, 6 Jul 2026 17:46:55 +0200
-X-Gm-Features: AVVi8CdcWzNBLTglm0g3tUKG4yFhxoCahXMX-lM1N-hReZwTQgECqgmyYQF9Ues
-Message-ID: <CAPx+jO_ZDDvEGueT-7EMHJst7qoZPJr_Gcnx1Qn3+KGpGjd39A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: vub300: defer reset until cmd_mutex is unlocked
-To: Runyu Xiao <runyu.xiao@seu.edu.cn>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-        Tony Olech <tony.olech@elandigitalsystems.com>,
-        Chris Ball <cjb@laptop.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, jianhao.xu@seu.edu.cn,
-        stable@vger.kernel.org
+Date: Mon, 6 Jul 2026 17:47:00 +0200
+X-Gm-Features: AVVi8CfjXh0u4tF-7PxbFkuwCfomEE_3se_wwKm5CGV8cPU-GJseRbq24UkHo7Y
+Message-ID: <CAPx+jO-K8sFTfn8dRL=k6==9h+3G6aAn-fbM5OgH5kuvfNS4_Q@mail.gmail.com>
+Subject: Re: [PATCH] MAINTAINERS: Add myself to maintain TI AM654 SDHCI host drver
+To: Judith Mendez <jm@ti.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org,
+        Moteen Shah <m-shah@ti.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-ORIG-GUID: UcRf4T7FTkF1Bb5HGAIa4uDyocxtmiZ5
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX31YmeG+8RWaO
- yjuU4ASzlbuhuzgPkCyHMvvlhm5AtmWFqXZBghaZxMBAUYiIozYkqCAIjPrB8Hz/NUklvv85VdU
- bIVj1zVRrY2xX38GJPwmgq5B1VUzmNCpPnuDmTyrFhkY68DU4Dx1xdJpLTzLCSGiorKzMRngZpP
- fcFTtCwH7UuKqdiQhqlgn3gUeaztd51uQ68sP1eMv7/jznZHUbP8pHA9FZszw0KSoV7/rjDWNf9
- J/bX+EUJmkAfHBjBhjhMEflXc8JfVdS1admweMtNvArscv1lp0W6V84A8HqqVIlQ4IipTbQDfFv
- iky/OhAFfXzUeE2d1NTKllOaMzhMvMo+jU0GfevzsIzfCmknthmcSAJcLoM/tCezOlzXvZtZ3j0
- rOEhLaEclxunEYiGSTLRGvu4B5BsambCPSC7yhjVZNI+t7zUwnWDL3DvQPxBwKA02oLBxaubi7y
- H4OUDNTRfNQh2KvtReQ==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfXxw+9c3Uqyg4T
- X2pIUVMND1eASCpq9oj5rkZs3I8dT3MnJ4evXD06kg+B0iiE+JusS8Ockr+o23bsEcxnWY8GWrW
- MMglNTTs+esA+4faB1Vh9UfZpuSZ400=
-X-Authority-Analysis: v=2.4 cv=XIwAjwhE c=1 sm=1 tr=0 ts=6a4bcdfc cx=c_pps
- a=HLyN3IcIa5EE8TELMZ618Q==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX527jbpENUG9f
+ d+ShTjrPE48gpUsSGfyjcXhLBFXoCC5EP/JZDbtlMWTSp4xBFL3eCjA25VyQtsJr3i5WVGfxyRF
+ RjJOA6S//POmz3Vr4TRnVrdU4XOe50XYNuOuON2kwd9vOhAOlUPp2PwSdIVSlbv0FxZPxfRo+g5
+ lr0Abz5y1eZ3N80t5IYbw2LzP8rHGaHmotj1NjX4mhuS4cACUaFVKrlcpLS0Z3aECo1bxbnLhn+
+ cbV96rMPjLuzi/iS4eM7uqSd6w5UIoDu79nfJKO8LOBE5FFLN8TNN43k1mfGV7XguJwDWlWIcOj
+ ibfYlBBLqKl7CDcUSykfAmYwwdOoklzzOxe/utCKuHK0XtZFT8OMxGtBWumO293bitHjzw4nI0t
+ n26HgVV05GnpfE2UrwX8d2bbtXBRpW2Fji0vzPQD+7fh/0/PE5rnXRDUTR/ixsjyJBETtdUlqBT
+ VRntg2zX3LgESZCz5KQ==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDE2MCBTYWx0ZWRfX7M36f/NXOts8
+ veJzwG+t4H82Y1I6YqJPs+XdcYWfzySbMKqfR+IDpuI0dHXm0stV5h3AD3OvvYBKGUK2c7QFpLY
+ TMU8fEgnxXuKb+SnlpfdGvoYOY1CMcE=
+X-Proofpoint-GUID: IGHzVUVgVzSd-4Dg-pRDQLSUut0EKXtJ
+X-Proofpoint-ORIG-GUID: IGHzVUVgVzSd-4Dg-pRDQLSUut0EKXtJ
+X-Authority-Analysis: v=2.4 cv=OKcXGyaB c=1 sm=1 tr=0 ts=6a4bce01 cx=c_pps
+ a=WeENfcodrlLV9YRTxbY/uA==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yx91gb_oNiZeI1HMLzn7:22 a=VwQbUJbxAAAA:8 a=ubNfKOfgc0bmnuDSWJcA:9
- a=QEXdDO2ut3YA:10 a=bTQJ7kPSJx9SKPbeHEYW:22
-X-Proofpoint-GUID: UcRf4T7FTkF1Bb5HGAIa4uDyocxtmiZ5
+ a=3WHJM1ZQz_JShphwDgj5:22 a=xq3W2uTSAAAA:8 a=sozttTNsAAAA:8 a=VwQbUJbxAAAA:8
+ a=pGLkceISAAAA:8 a=VSY78tqDkl8tcLGwDFkA:9 a=QEXdDO2ut3YA:10
+ a=kacYvNCVWA4VmyqE58fU:22 a=P5L7wpMTXyg1GfFA3Gwx:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-07-06_02,2026-07-06_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 clxscore=1015 bulkscore=0 priorityscore=1501 impostorscore=0
- malwarescore=0 lowpriorityscore=0 spamscore=0 phishscore=0 suspectscore=0
+ lowpriorityscore=0 adultscore=0 malwarescore=0 clxscore=1015 suspectscore=0
+ spamscore=0 phishscore=0 priorityscore=1501 impostorscore=0 bulkscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
  reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607060160
 
-On Wed, Jun 17, 2026 at 5:23=E2=80=AFPM Runyu Xiao <runyu.xiao@seu.edu.cn> =
-wrote:
+On Fri, Jun 19, 2026 at 12:02=E2=80=AFAM Judith Mendez <jm@ti.com> wrote:
 >
-> vub300_cmndwork_thread() holds cmd_mutex while it sends a command and
-> waits for the command response.  If the response wait times out,
-> __vub300_command_response() kills the command URBs and then synchronously
-> resets the USB device through usb_reset_device().
+> Since actively working on TI AM654 SDHCI driver, adding myself
+> as a maintainer of this driver.
 >
-> That reset path re-enters the driver through vub300_pre_reset(), which
-> also takes cmd_mutex.  The worker therefore tries to acquire the same
-> mutex recursively while it is still holding it from the command path.
->
-> This issue was found by our static analysis tool and then manually
-> reviewed against the current tree.
->
-> The grounded PoC kept the real worker and timeout/reset carrier:
->
->   vub300_cmndwork_thread()
->   __vub300_command_response()
->   usb_lock_device_for_reset()
->   usb_reset_device()
->   vub300_pre_reset()
->
-> Lockdep reported the same-task recursive acquisition on cmd_mutex:
->
->   WARNING: possible recursive locking detected
->   ... (&test_vub300.cmd_mutex) ... at: usb_reset_device... [vuln_msv]
->   ... (&test_vub300.cmd_mutex) ... at: vub300_cmndwork_thread+0x12/0x20 [=
-vuln_msv]
->   Workqueue: vub300_cmd_wq vub300_cmndwork_thread [vuln_msv]
->   *** DEADLOCK ***
->
-> Return a flag from __vub300_command_response() when the timeout path need=
-s
-> a device reset, then perform the reset after vub300_cmndwork_thread() has
-> cleared the in-flight command state and dropped cmd_mutex.  The reset is
-> still attempted before mmc_request_done(), preserving the existing reques=
-t
-> completion ordering while avoiding the recursive lock.
->
-> Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Runyu Xiao <runyu.xiao@seu.edu.cn>
+> Signed-off-by: Judith Mendez <jm@ti.com>
 
-Applied for fixes, thanks!
+Applied for next and by updating to "Supported", thanks!
 
 Kind regards
 Uffe
 
 
+
 > ---
->  drivers/mmc/host/vub300.c | 26 +++++++++++++++++---------
->  1 file changed, 17 insertions(+), 9 deletions(-)
+>  MAINTAINERS | 7 +++++++
+>  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index ff49d0770506..1c335e070741 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -1583,7 +1583,7 @@ static int __command_write_data(struct vub300_mmc_h=
-ost *vub300,
->         return linear_length;
->  }
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index b2040011a3865..97b9b01275729 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -26640,6 +26640,13 @@ Q:     http://patchwork.linuxtv.org/project/linu=
+x-media/list/
+>  T:     git git://linuxtv.org/mhadli/v4l-dvb-davinci_devices.git
+>  F:     drivers/media/platform/ti/am437x/
 >
-> -static void __vub300_command_response(struct vub300_mmc_host *vub300,
-> +static bool __vub300_command_response(struct vub300_mmc_host *vub300,
->                                       struct mmc_command *cmd,
->                                       struct mmc_data *data, int data_len=
-gth)
->  {
-> @@ -1595,17 +1595,11 @@ static void __vub300_command_response(struct vub3=
-00_mmc_host *vub300,
->                                             msecs_to_jiffies(msec_timeout=
-));
->         if (respretval =3D=3D 0) { /* TIMED OUT */
->                 /* we don't know which of "out" and "res" if any failed *=
-/
-> -               int result;
->                 vub300->usb_timed_out =3D 1;
->                 usb_kill_urb(vub300->command_out_urb);
->                 usb_kill_urb(vub300->command_res_urb);
->                 cmd->error =3D -ETIMEDOUT;
-> -               result =3D usb_lock_device_for_reset(vub300->udev,
-> -                                                  vub300->interface);
-> -               if (result =3D=3D 0) {
-> -                       result =3D usb_reset_device(vub300->udev);
-> -                       usb_unlock_device(vub300->udev);
-> -               }
-> +               return true;
->         } else if (respretval < 0) {
->                 /* we don't know which of "out" and "res" if any failed *=
-/
->                 usb_kill_urb(vub300->command_out_urb);
-> @@ -1701,6 +1695,8 @@ static void __vub300_command_response(struct vub300=
-_mmc_host *vub300,
->         } else {
->                 cmd->error =3D -EINVAL;
->         }
+> +TI AM654 SDHCI DRIVER
+> +M:     Judith Mendez <jm@ti.com>
+> +L:     linux-mmc@vger.kernel.org
+> +S:     Maintained
+> +F:     Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> +F:     drivers/mmc/host/sdhci_am654.c
 > +
-> +       return false;
->  }
->
->  static void construct_request_response(struct vub300_mmc_host *vub300,
-> @@ -1746,6 +1742,7 @@ static void vub300_cmndwork_thread(struct work_stru=
-ct *work)
->                 struct mmc_request *req =3D vub300->req;
->                 struct mmc_command *cmd =3D vub300->cmd;
->                 struct mmc_data *data =3D vub300->data;
-> +               bool reset_device;
->                 int data_length;
->                 mutex_lock(&vub300->cmd_mutex);
->                 init_completion(&vub300->command_complete);
-> @@ -1768,7 +1765,8 @@ static void vub300_cmndwork_thread(struct work_stru=
-ct *work)
->                         data_length =3D __command_read_data(vub300, cmd, =
-data);
->                 else
->                         data_length =3D __command_write_data(vub300, cmd,=
- data);
-> -               __vub300_command_response(vub300, cmd, data, data_length)=
-;
-> +               reset_device =3D __vub300_command_response(vub300, cmd,
-> +                                                        data, data_lengt=
-h);
->                 vub300->req =3D NULL;
->                 vub300->cmd =3D NULL;
->                 vub300->data =3D NULL;
-> @@ -1776,6 +1774,16 @@ static void vub300_cmndwork_thread(struct work_str=
-uct *work)
->                         if (cmd->error =3D=3D -ENOMEDIUM)
->                                 check_vub300_port_status(vub300);
->                         mutex_unlock(&vub300->cmd_mutex);
-> +                       if (reset_device) {
-> +                               int result;
-> +
-> +                               result =3D usb_lock_device_for_reset(vub3=
-00->udev,
-> +                                                                  vub300=
-->interface);
-> +                               if (result =3D=3D 0) {
-> +                                       result =3D usb_reset_device(vub30=
-0->udev);
-> +                                       usb_unlock_device(vub300->udev);
-> +                               }
-> +                       }
->                         mmc_request_done(vub300->mmc, req);
->                         kref_put(&vub300->kref, vub300_delete);
->                         return;
+>  TI BANDGAP AND THERMAL DRIVER
+>  M:     Eduardo Valentin <edubezval@gmail.com>
+>  M:     Keerthy <j-keerthy@ti.com>
 > --
-> 2.34.1
+> 2.54.0
+>
