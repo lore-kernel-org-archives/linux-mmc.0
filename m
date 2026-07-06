@@ -1,245 +1,220 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F286739E180
-	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 10:30:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8905389115
+	for <linux-mmc@vger.kernel.org>; Mon,  6 Jul 2026 10:34:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783333832; cv=pass; b=E7pD54K/T87vHGfRfX9UvtsFC48zInqsq/z07o3CEPQI0LeXsFa6MgHT0r5Jhfc9pozigjIAA34ii8437Ymnzd4JAbWPq9hFNaEoFN4lFrBi88v6w1FHq9Wgo4dXCkUKUy82wjLog7S39JqtEE44Rx0XT41fxHnEtIv4MIgtHs0=
+	t=1783334056; cv=pass; b=AalJK7R9zG5S9x0Xht9vpUgOhP91DGHslIq6f/7ga0otvK1O9VXaYkf8dylPmTBl9DXsF64CJ/WodVezdSuwFX7e0Dp9wWMssG8vR0MtWHtlEyc00hmGqCDwYVs4luoQCgb0fUQSCigRdk4/ih6D/5NgAFd2zHfOrBTQFSh8pmI=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783333832; c=relaxed/simple;
-	bh=6Ayca8qLGPKxUsIFjQxpWalPBGZaUIXDglEzs9D7DBY=;
+	s=arc-20240116; t=1783334056; c=relaxed/simple;
+	bh=TR+p2pu/5lqO+xEbTIdzYZMxl4O0CKWbah5V0sWjxfs=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Z76MaM3eHZszoRaylHmA43Le8dJn9qw4rv9luAc/XrNftqHH4BHPHObbFJGXap8jk2iz7Tet0T+YscE7HnNeuFjftKSuf6OYNf5TkWAU8kix62hVXObOB1+acbQb43Za3pTSMdC1B2AfBYZvDFur8JViz7lP8G5lI2Q4WL2J+kY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=EX4qlknn; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=BpsGMuZC; arc=pass smtp.client-ip=205.220.180.131
+	 To:Cc:Content-Type; b=Q46lCf8Yc2ITfdpb03oJUX0TfX56B5JgPjDje96udmCeKDDS1F087nGb0nCf12PTLvzqKmwFx9paDr0Eg1BkX5ccSGlOTicEgQL24QaAG7oJRWo4k+uyipCHFnG+AH4bX3ii/up4sGaDXz811aPTCn2YCOuF9nFYBHlHHiNHHsg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=V9lZ4d4F; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=cM3iGq6H; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="EX4qlknn";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="BpsGMuZC"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 666940YP4151656
-	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 10:30:30 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="V9lZ4d4F";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="cM3iGq6H"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 6669GsIm159973
+	for <linux-mmc@vger.kernel.org>; Mon, 6 Jul 2026 10:34:14 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	M3UbmA7EX72PxXWjZzRHV5fuh/MSA7OywU2pO5D8f/g=; b=EX4qlknn+baYDBNq
-	mqFMYeYf0Sl3nQuUHxNsxaxCJkg5UfYzdlRYDERlLr8WBuvl/KuUx6Qf24ztD3tU
-	vHxEpXNxkeiM73z2JX4Fh9GJEQe0ZplXO7XmuVI1zbmMaQHExO96I7jK8yH+th9f
-	xq/9mG8Y7IisvKHuUuC3/Jqr7Z+Jq18eBVO7ZhkkL/Z5GeXYYAad4uRfwXivMBea
-	bdFRXFto5FIAHSgCUiKDPbt3SX/uFbRGIyV1s4u0x2N/KQ2o/+UrwkTJ1Jy7UXwt
-	lPhp+SLDROr6F10RheypMP8DNZ4SHc9woUXgvb29U7Ocug/Qlc+oTobc4Cf29Wvp
-	/aJUoA==
+	THfVk3JLzARMALsypSV1vHAeURIRyLWQ1tdXmwWL/Xc=; b=V9lZ4d4F0Bhw4koL
+	RnMhQHgR1Tt0mGHNSQN+Ct/Q8xaRj3e6D9pP2vwIEfwCVIhmZ1/jE5l7iQTSjv/j
+	muLdtH1rg8HTRw+dyCGWt2lt/IllUWCN9rhbF6cNis4dJBsj2esvZ2SPxUyeokJB
+	QUX/iXBHDvJ/B0xTPF4Bcsvnj64lhVDQvPGg0xMw8swIZao//ypHrwMIbPUL58Rc
+	TC1zJhubzRSaG3uXOAgO7QExFv7avUZkd6oSLYxkLYCjANnXa+oiN36gmU14o9vq
+	vOf4orwZE0yZQsfh9HBUFTEfY+DXyiIFFraPWmZ8zQUxe7EGfw06wgde4eBS2sNL
+	msQhtw==
 Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f88hs8m0b-1
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4f89kgr9w4-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 10:30:29 +0000 (GMT)
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-51c1eb52e1fso56924071cf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 03:30:29 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1783333829; cv=none;
+	for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 10:34:13 +0000 (GMT)
+Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-51c1d7886cdso60689591cf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jul 2026 03:34:13 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1783334053; cv=none;
         d=google.com; s=arc-20260327;
-        b=MMjqVFbkjqpkV2Au0lrJrB+IyW9wsHaK47TC2Bjom3jGko0y0y9WezTB1GQ9TKR4zU
-         HZDKbzO8QcNnbsz8+4/QoAW6rJ/PzxiS7+YkpzGsPzhgOPoARXetsUx8bPDeRg/MeT5y
-         bcFH0GrkZ5R+rW/M26i29m8w5bOL7WpF4yqydm0mwWwOLv8rKgIkeum5ckR6W4eZTLBT
-         q6P0jc/PVLOa+LEU9xS5Bec2AvCf17pr1FXokAX3JqvSaAPef9v51HLeBvM98963LdLB
-         p2cmCkyTUCWuNQZ1nNJafAMimAypSBFyGsHpchuxKqLU3JiEJW3K6W9O2poH2IUxK/ar
-         y9YA==
+        b=DPq2Zsq9raDm3yjxEbR8yfEn4gRsZ+FNeyH/1VxonK8TZd/CX6Ytk3VNQuLiLLp4lW
+         Y1tXjAfaQ4+TL/T3N4Uv8/4r3HMx2jSCu6UfhP4PJmUbZncPTVHvwQjT0EWOj4O0N+LK
+         0ggF/1jRKzYNJEfDQIzOHcj/Fr+nNTX0GpA6w4k7PgCVssA3TCKhAg5gx6KmzefstBk5
+         7CNg+/rgqRVTcufUqNnEX/FPw7pRLav3sdBq2cM6Dov6/GbeFBntASBLyOTgP9Po3s5/
+         Kg9Oxy/lpTfMZTCI4PYhNcalu8RJizYjC02TrpV/uGoE4f1LSlZ7agGdhUO4O99GpFAa
+         gP3A==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=M3UbmA7EX72PxXWjZzRHV5fuh/MSA7OywU2pO5D8f/g=;
-        fh=uMed5Hv8t6QKUwVRNJyozqmAD5nVjZeAQAjSu87QM2g=;
-        b=lRgNATm3sPRMHjW/rlZwnjERbkZc7iyiBQjPaHMvR6DzyXT43JDtUa1icb3ELBsz8P
-         njN7jrbc24axrP5nx60dBNRJrRBMI3+siaac4pFfCA4LebTrk6poC7G+Wk35U2imOKT/
-         ePwbYEPWxiJo2cWGzwi6CTsD3ExOIAAzomDHxbussDMeU3xU99lMass9qSndvbWfmxsw
-         oFqQVpYK/wpY7SvZoyBoZqDG0PVNKtDAfDCTmV93EHRzoxC6y1gCIjRkwkuiWHLKxEyy
-         sEce/gmr2cQsrzm6dJByUrCIr3v824l5+EZAcbJjBWo6o3gN2D3US9Sb3ZjB/sh4K8H3
-         U0ig==;
+        bh=THfVk3JLzARMALsypSV1vHAeURIRyLWQ1tdXmwWL/Xc=;
+        fh=MQ5MDnDIoVVdyeFNk54Zg2wwWB67WffvmeLxq/qV4SE=;
+        b=kKvlCpXqMUrhqdDtHtMUYAckcoNVy5+sSVguhHEBjJBoWuTN4KJ4mRsPw38GwZ+ozp
+         yH/YSIZ3zvrcwhnkrM62a3cw2zujo0XKE7iNVxgyXNi/50ltp7suIuvVB3uhMtdnVLTk
+         KzEGoYo7ZH56KYLHUFrMgyvid6Lg62EWjr386JQZvG9trqaP9Vp+wSyfc2VpRC0C7/S8
+         Bta8s1kwIW3gFfABVV9+VGB/Jb10d51IFzxGcqnkFeXpjWGc+HOi9IUsO+ZMuZGEc+Sl
+         wTkEqFi8ijjwkw9RfAPyrVyUMHn6AnxoUf6pos3d/riSp4HD9ckeboO4WBxkrIMpFcwy
+         Ovvw==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1783333829; x=1783938629; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1783334053; x=1783938853; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=M3UbmA7EX72PxXWjZzRHV5fuh/MSA7OywU2pO5D8f/g=;
-        b=BpsGMuZCbxUcrogq5ioEsKuaxg6hmGzUGlAtkxOYHpuAtpqx1+kWG6VGbq0RW3Hw8N
-         xL5UcwQ2swnWcRsHRjfwesVv0PKTSGVqT5+l5GIOxkQcJkIQRFm2C4v0KK7VQqYnKzwM
-         CIgPGBXX8CNzuSPIPCEfF2IylPAarcoCach1zE4lTkRUd328kdEEAwOSsXXNgY85F4PA
-         fh8AbVSknlf3Ox5ij7YQOuOEfKUCF+pGgk1IQdXd0IRrLizTv37iPfMSw2Ib8o/sTWab
-         wEBe1m4rb74/Vxgzx4NGi0/SblF2/jXohMk1ErkgujQhqW1peUhD34yRyvSE0i2epVlv
-         gv0Q==
+        bh=THfVk3JLzARMALsypSV1vHAeURIRyLWQ1tdXmwWL/Xc=;
+        b=cM3iGq6Hf7x+2X1wrSlvTPjdgVDjiBw5RyjnOSZzC7u/asP2VWQzO3Ly0Ue5tctGAU
+         YCWuD9ChrfUgNbehUD+H9fuYoRh1Ek529TTNLTGKPzR60lllPtIGHtGLydc16uGFmviP
+         Gvo76o5ls1K040euAzgn2qzyrJVrRkhGdlbb7ETy/BwbfCENoTeQpy+HBRwSYS5TESHg
+         7f6PPY18XyGbnLZtZeA5t209/MX2oUWUU1jOKjabHVWU0OHxRLaeLScp+N+NaWoQ13FP
+         BbE8kuChFpBiewoWtQ27enK+qMc+xY6eKugh++r7Y0waQW2KJUspPJ2ddT1prudhg1yx
+         Fidg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1783333829; x=1783938629;
+        d=1e100.net; s=20251104; t=1783334053; x=1783938853;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to;
-        bh=M3UbmA7EX72PxXWjZzRHV5fuh/MSA7OywU2pO5D8f/g=;
-        b=rqXzOia9D7A+ycDvcCnpPrPeOKJRMXIHlvfoH1W9IKbIK2PwcQnWbzbrSd49bk5hTa
-         0XPiiqc9ow992Kz5DxgKrQP8ibOtM3GiiPyI9N1JXNa2EjEn4LvAx0FU4NgN5roQYNiJ
-         HtlU8wQwtSMa+yuB58oPO0qYixNTwPPB39VCudxUCfcRaqRatXopSuGVuzh89ttECG7K
-         1AH1LFIoscnht+J7uDnorOMA6A4wcpK8Y61o2xKW/2rHo4x0m59Ax/PZzt3eKIlu0GNk
-         Ywjv3Lp2e5z+wTJwQcOfdu+Fno6FCimIZwWQYaviJjq0W02+GZyh0TjRQDwvKBxUFYkX
-         M/Dg==
-X-Forwarded-Encrypted: i=1; AHgh+RpHn8bYskcJODHsEQaJ6B/JSfiPhAf+HHjk8so9wn04u/5aByucK6w6Xf2Fe6s08AudR3CVqAi7ejc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxvUzTV2F8YgIsOtuRU4yHH8JS1vX6GG6019ymIKvFyel5wee0I
-	nEZeRQdi4RG5iN8av88YqJG6tYV8q2vZVzbC3DPTXhaiH9861c7vHjwQeYZCn7K+G1yK45+kSNu
-	K1I0YyT6aA+wAiB0ARtU1rzhWhABnT+cjDjRbtgJ6xBVAF2mjMDdHgubRIscW6wIjm+JCLx1O+a
-	I780DukyB4iHwwjuh/WQMWHMgNCDTX7niQi0OhEg==
-X-Gm-Gg: AfdE7cnHqFDDxJYFPSnFPP/KAWU/5thxsAuKFvGG1Gq+06TUdTqtwvBZ3exIE69ebG6
-	a0qvfS9cUuM+3mfslZAQ5IEQPyEbjQkEKXSSbq5rv1IdeVzbU3qRlmKpEHZ2ftIswrGGOypjkL4
-	PoPDgqQbFe/NL35fiP3SI6WBKcnXIEiA6y01kHmFMhWMJ1lzj+mPEZ3fAuliCx24EDXQnh
-X-Received: by 2002:ac8:5d14:0:b0:514:9ece:a15a with SMTP id d75a77b69052e-51c4c2d1bf5mr140999261cf.45.1783333829315;
-        Mon, 06 Jul 2026 03:30:29 -0700 (PDT)
-X-Received: by 2002:ac8:5d14:0:b0:514:9ece:a15a with SMTP id
- d75a77b69052e-51c4c2d1bf5mr140998741cf.45.1783333828803; Mon, 06 Jul 2026
- 03:30:28 -0700 (PDT)
+        bh=THfVk3JLzARMALsypSV1vHAeURIRyLWQ1tdXmwWL/Xc=;
+        b=mgq1xnX78+kRq7riYWgTPvzysa0Zf9Eo2Wl4oOTlajfCiAgKZm8VCRa9xvz02V+wXe
+         L1/vT8Wbh9nN9XpOEhtrmucc6QCJABss3UjgMfLsd1hyhtwVkrGZiEPvQTWoRzYphmU9
+         QrjIF2W3xTDkc6mBi4dzcLxc5O05Ni+W+DlDHB6R0/KGsGuVn2XMKelgPvQz/AmAkNAu
+         JHBn1Z3NQ6ufn9IUbrmjU2RAWPQ+XEqOS2jpVrP0YfX8JwAFz0+U801sXOztYGxbsabF
+         zKt1r2f25E3PjjH2KF5IaHm87nN3uHJw6f/rmHGp6MjPK5pMozzF1zeXvUAkCKhhl8HJ
+         qLKw==
+X-Forwarded-Encrypted: i=1; AHgh+RqvTCTiSoyDkVsj+vo8l1W/0ySMhlY5l+AYB9UWILf0MTxN5OAtRZdJkFTWQD/e5DaOVXAxu/TmiwA=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx4rWEZHUYs8Crfe483nXTiomyjIGH3mHOCH76bXKTX5wTfgDT9
+	GUj+U1SClJUmlFf41o/MR/HxcyLboa2v5ljQmLnhBZluZsr7vOwnfh4D7AT1wcG3uz32/mDCHga
+	vQ8SiFObRRjRTCv4II4pvjN1mxD7+CND/eFAsyzuXRWfwKQRr9TdKCp6PVDUw21gCcHhw/+jkcn
+	dHUHEeZNjRWLHngayAOngf6fdTebuGZpgNRdlsfw5kBxhQNw==
+X-Gm-Gg: AfdE7cnwd5VfU63uW2HnmhI09cH++oc20aa4CSbFqrvg+qVRf9XOuxgBEkLTPZuv5P4
+	b048U96822D3TpH1WzGXOpEUC6MQUhaZ3ZWt60RBuxMncyeJ8mZRGi3nfsmacL+U7jvGFxVqdD2
+	FLXo6KcQMIyf87CF8uAMj3rxRMJqjryZZzjzcoZHzcgtWPjW/3Qfn4z/6wzqXlKKk8ZBTs
+X-Received: by 2002:a05:622a:3cc:b0:51c:12bf:d4a8 with SMTP id d75a77b69052e-51c4c2d12dfmr146289461cf.41.1783334052860;
+        Mon, 06 Jul 2026 03:34:12 -0700 (PDT)
+X-Received: by 2002:a05:622a:3cc:b0:51c:12bf:d4a8 with SMTP id
+ d75a77b69052e-51c4c2d12dfmr146289161cf.41.1783334052402; Mon, 06 Jul 2026
+ 03:34:12 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1776080528.git.sean@starlabs.systems> <95a293902585bd43c6857b79bdcdb8be692ff687.1776080528.git.sean@starlabs.systems>
-In-Reply-To: <95a293902585bd43c6857b79bdcdb8be692ff687.1776080528.git.sean@starlabs.systems>
+References: <964d54a3-90ce-475e-952f-342bb383f878@gmail.com>
+ <CAPDyKFoPjwBeaQKMDf7zrW8hQDZjD89=ChJ_TPf51BG4yonz6w@mail.gmail.com> <9e52c51d-c358-47ad-a2b1-763a348f6c7d@gmail.com>
+In-Reply-To: <9e52c51d-c358-47ad-a2b1-763a348f6c7d@gmail.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Mon, 6 Jul 2026 12:30:18 +0200
-X-Gm-Features: AVVi8CdB5MkOPhKcT6X0F1vQT7djuSsQ5aVdQBtoqYS6goKo_LfVx_GqnZHDEx8
-Message-ID: <CAPx+jO8aDe2MP_2B1zu7KP6WWj0igvP9u5tpoqMLSyixEjPeBQ@mail.gmail.com>
-Subject: Re: [RFC PATCH 1/2] rtsx_usb: hold runtime PM during transfers
-To: Sean Rhodes <sean@starlabs.systems>
-Cc: linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>, Ricky Wu <ricky_wu@realtek.com>,
-        Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>,
-        linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org
+Date: Mon, 6 Jul 2026 12:33:59 +0200
+X-Gm-Features: AVVi8Cc5GbO7tz7JBffB0_5KrgZwJoZsV7bW7_W4UU-NRO5zMratZUF-NEMFR80
+Message-ID: <CAPx+jO_5gH3378yPrWPiF_sDJMxW2Eg23JEgpKRiPiXhajMaOA@mail.gmail.com>
+Subject: Re: [PATCH v2] misc: rtsx_usb: reset chip on resume to re-detect card
+ after S3
+To: Greg S <grigoryya@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, rogerable@realtek.com,
+        Ricky Wu <ricky_wu@realtek.com>, Sean Rhodes <sean@starlabs.systems>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-ORIG-GUID: JD9OmRl2xZYEDsP7zZ2xAXeFr6AsmSLR
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDEwNSBTYWx0ZWRfX10lCLMjm9T9C
- AvfUCfFMhnIBbbahDlpEZpGcUUkvB/w/16bXP5gDM7t5cHpHGJJcnjP2tA+XSw+5WgKslB2VVMO
- DhVnDuA8Pbn7yZu5liAuuVD4q8vQvauxr4mGka+NX/Le3EuA+9ol9S7woDQpljMPTjfLtfX7y2n
- C02Ww10LNdzadLicfQ5LwCkE6RSU4EEheJ5+ILUvQMoUOtxDb+xz3rlHAeEE59A4WlA5DXa60zD
- mYmhzWU7HX1/mqk1OKVRBVJ1DkzsY0Muth303m8RCjCxYOYQozIVPJSevSThsAkeC+FBFvwpY9P
- gXWDEZe1jvs3uNzlr2Yl3IURZw4A965X6cjS1fOKl7K4n/JoXB+5nEne8EfIiLlSjgFIQbaF4FN
- QJppvqLseYkC70j0tnMjGUUPv34sJ/oMLCO76059CfpF5Y0zeeNU1rlab5Y0ysf2SCPtAU8MTk8
- 0jx6I7lRbIf1Zx8tbJA==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDEwNSBTYWx0ZWRfX+cZZVjCN4aWO
- xKJ0T3LzNJdUbMY2rFK7aRMgroG45SdcdkACyzI5RQxmAiQKpjPN1hmx/RwbsvGkSq2ivXI463Q
- opGXHdoPXA1VlWeXOLT/F2eVWB/tURQ=
-X-Authority-Analysis: v=2.4 cv=XIwAjwhE c=1 sm=1 tr=0 ts=6a4b83c5 cx=c_pps
+X-Proofpoint-GUID: ptB5FVku59bz-8OANTvBomsuKa0QcUzk
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDEwNiBTYWx0ZWRfX0o/3I5ERT0E7
+ KZJPkFFg3WeWBqIf4mNpBPWckGHdopVrB+a16rlPtm0cAQfPb9KoWtDWFxbX0dr9tQ6+/hraCOh
+ nzqwBuQAI/ZL99Dw68YANRUgCM9Xrk7NRKuDYZkCclTMyUVsh9byoTn5Yvf5zzjGGUeqDhw2nDk
+ /ZohC3ESrALR9uMLCVBzZrZo6khHepqLwjZH0OzLwhabaVvJz6bz0kZxfnveIla9sDqEroMMMs5
+ JqpZ5pKQn6JA6B1cxjpdSi+gD7ievyCd3AKeJMJaucwUGhvRwF5olmqfgPJjfis+KcFLbA+Rwaw
+ RxI9aaPYeobe+bH4ArTt+ylzSCb7PYfOxtZCPW0Fg87y09kJxAEKKJFsIZug64CuHYzG3q+ZtBO
+ ESddzqIco27YInscCmIKr/3JoP2kk+o9wmjCc562Bx4HcjtXTjQ+HLXoYhIGOTOYh3xLRVb1zvn
+ O1yMyOYE83tFoYL+Wag==
+X-Proofpoint-ORIG-GUID: ptB5FVku59bz-8OANTvBomsuKa0QcUzk
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDEwNiBTYWx0ZWRfX3ku9zchQ1m9r
+ puYdIWNqbdlCLyJ2ZG8LpzNJnGcMFd4ROqJaontwMN+eoJwQ9qdTIABcjtOsHGmA8qelUX8Sdv9
+ ig1rCTR9j/YmCt7/jZzyR+Bctbyvt6I=
+X-Authority-Analysis: v=2.4 cv=c6Sbhx9l c=1 sm=1 tr=0 ts=6a4b84a5 cx=c_pps
  a=EVbN6Ke/fEF3bsl7X48z0g==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=yx91gb_oNiZeI1HMLzn7:22 a=DU1fBQQ00hOWpVFU5jsA:9 a=QEXdDO2ut3YA:10
- a=a_PwQJl-kcHnX1M80qC6:22
-X-Proofpoint-GUID: JD9OmRl2xZYEDsP7zZ2xAXeFr6AsmSLR
+ a=yOCtJkima9RkubShWh1s:22 a=pGLkceISAAAA:8 a=KKAkSRfTAAAA:8
+ a=kN_0Kk2H-iRQjDHmQMAA:9 a=QEXdDO2ut3YA:10 a=a_PwQJl-kcHnX1M80qC6:22
+ a=cvBusfyB2V15izCimMoJ:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.125,FMLib:17.12.100.49
  definitions=2026-07-06_01,2026-07-03_01,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 clxscore=1015 bulkscore=0 priorityscore=1501 impostorscore=0
- malwarescore=0 lowpriorityscore=0 spamscore=0 phishscore=0 suspectscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607060105
+ malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 clxscore=1015
+ adultscore=0 priorityscore=1501 lowpriorityscore=0 spamscore=0
+ impostorscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2607060106
 
-On Mon, Apr 13, 2026 at 1:42=E2=80=AFPM Sean Rhodes <sean@starlabs.systems>=
- wrote:
+On Thu, Apr 9, 2026 at 9:41=E2=80=AFPM Greg S <grigoryya@gmail.com> wrote:
 >
-> Hold a runtime-PM reference across bulk transfers, and mark the device
-> busy afterwards.
+> On Tue, 7 Apr 2026 at XX:XX, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>  > The patch looks reasonable to me, but perhaps we also need a fixes tag=
+?
 >
-> When runtime PM is already in progress (e.g. from rtsx_usb_suspend()),
-
-What do you mean by "runtime PM is already in progress"? Is the device
-in the process of being runtime resumed?
-
-> avoid forcing a runtime resume from within the PM path by using
-> usb_autopm_get_interface_no_resume() unless the interface is already
-> runtime-suspended.
+> Good point, thanks. Here is v2 with the Fixes tag added.
 >
-> Signed-off-by: Sean Rhodes <sean@starlabs.systems>
 > ---
->  drivers/misc/cardreader/rtsx_usb.c | 38 ++++++++++++++++++++++++------
->  1 file changed, 31 insertions(+), 7 deletions(-)
 >
-> diff --git a/drivers/misc/cardreader/rtsx_usb.c b/drivers/misc/cardreader=
-/rtsx_usb.c
-> index f65acf4d1164..c8badd0db87b 100644
-> --- a/drivers/misc/cardreader/rtsx_usb.c
-> +++ b/drivers/misc/cardreader/rtsx_usb.c
-> @@ -12,6 +12,7 @@
->  #include <linux/usb.h>
->  #include <linux/platform_device.h>
->  #include <linux/mfd/core.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/rtsx_usb.h>
+> [PATCH v2] misc: rtsx_usb: reset chip on resume to re-detect card after S=
+3
 >
->  static int polling_pipe =3D 1;
-> @@ -65,19 +66,42 @@ static int rtsx_usb_bulk_transfer_sglist(struct rtsx_=
-ucr *ucr,
->  }
+> After S3 suspend the Realtek RTS5129 USB card reader loses its internal
+> state, but rtsx_usb_resume() does not reinitialize it =E2=80=94 it only w=
+akes up
+> child devices.  As a result, the first command sent to the chip after
+> resume times out with -ETIMEDOUT and the mmc subsystem never re-detects
+> the card.  The SD card (mmcblk0) disappears and does not come back until
+> the next full reboot.
 >
->  int rtsx_usb_transfer_data(struct rtsx_ucr *ucr, unsigned int pipe,
-> -                             void *buf, unsigned int len, int num_sg,
-> -                             unsigned int *act_len, int timeout)
-> +                                     void *buf, unsigned int len, int nu=
-m_sg,
-> +                                     unsigned int *act_len, int timeout)
->  {
-> +       int ret;
-> +       struct device *dev =3D &ucr->pusb_intf->dev;
-> +
->         if (timeout < 600)
->                 timeout =3D 600;
+> rtsx_usb_reset_resume() already handles this correctly by calling
+> rtsx_usb_reset_chip() before waking children.  Apply the same logic to
+> the regular resume path.
 >
-> +       /*
-> +        * During runtime suspend/resume callbacks, avoid forcing a runti=
-me resume
-> +        * from within the PM path. The device is still active when
+> Tested on a laptop with an RTS5129 (0x0bda:0x0129) built-in card reader
+> and a 128 GB SDXC card.  Before the patch, mmcblk0 was lost after every
+> S3 cycle; after the patch, the card is reliably re-detected on resume.
+>
+> Fixes: 730876be2566 ("mfd: Add realtek USB card reader driver")
+> Signed-off-by: Greg S <grigoryya@gmail.com>
 
-Sorry, but I don't understand the above. Can you please elaborate?
-
-> +        * rtsx_usb_suspend() runs, but usb_autopm_get_interface() can bl=
-ock when
-> +        * runtime PM is already in progress.
-> +        */
-> +       if (pm_runtime_status_suspended(dev)) {
-
-This looks odd to me. Should it not be the responsibility of the
-caller to make sure the device's runtime is resumed before this
-function gets called?
-
-> +               ret =3D usb_autopm_get_interface(ucr->pusb_intf);
-> +       } else {
-> +               usb_autopm_get_interface_no_resume(ucr->pusb_intf);
-> +               ret =3D 0;
-> +       }
-> +       if (ret)
-> +               return ret;
-> +
->         if (num_sg)
-> -               return rtsx_usb_bulk_transfer_sglist(ucr, pipe,
-> -                               (struct scatterlist *)buf, num_sg, len, a=
-ct_len,
-> -                               timeout);
-> +               ret =3D rtsx_usb_bulk_transfer_sglist(ucr, pipe,
-> +                                                   (struct scatterlist *=
-)buf,
-> +                                                   num_sg, len, act_len,
-> +                                                   timeout);
->         else
-> -               return usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_le=
-n,
-> -                               timeout);
-> +               ret =3D usb_bulk_msg(ucr->pusb_dev, pipe, buf, len, act_l=
-en,
-> +                                  timeout);
-> +
-> +       usb_mark_last_busy(ucr->pusb_dev);
-> +       usb_autopm_put_interface(ucr->pusb_intf);
-> +       return ret;
->  }
->  EXPORT_SYMBOL_GPL(rtsx_usb_transfer_data);
+Please re-send this to include Greg/Arnd, who is responsible for drivers/mi=
+sc.
 
 Kind regards
 Uffe
+
+> ---
+> Changes in v2:
+>   - Added Fixes tag (Ulf Hansson)
+>
+>   drivers/misc/cardreader/rtsx_usb.c | 12 ++++++++++++
+>   1 file changed, 12 insertions(+)
+>
+>
+> diff --git a/drivers/misc/cardreader/rtsx_usb.c
+> b/drivers/misc/cardreader/rtsx_usb.c
+> index 2b3ae2914ec8..f1a3b5c7e912 100644
+> --- a/drivers/misc/cardreader/rtsx_usb.c
+> +++ b/drivers/misc/cardreader/rtsx_usb.c
+> @@ -732,6 +732,18 @@ static int rtsx_usb_resume_child(struct device
+> *dev, void *data)
+>
+>   static int rtsx_usb_resume(struct usb_interface *intf)
+>   {
+> +    struct rtsx_ucr *ucr =3D
+> +        (struct rtsx_ucr *)usb_get_intfdata(intf);
+> +
+> +    /* After S3 suspend the chip loses its internal state and needs a fu=
+ll
+> +     * reset, identical to what reset_resume already does. Without this
+> +     * the first command sent to the chip after resume times out
+> +     * (-ETIMEDOUT) and the mmc subsystem never re-detects the card
+> +     * (mmcblk0 disappears until the next reboot).
+> +     *
+> +     * Affected: at least RTS5129 on several laptop models.
+> +     */
+> +    rtsx_usb_reset_chip(ucr);
+>       device_for_each_child(&intf->dev, NULL, rtsx_usb_resume_child);
+>       return 0;
+>   }
+> --
+> 2.43.0
