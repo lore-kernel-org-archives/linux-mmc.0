@@ -1,225 +1,111 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2924A4252A6;
-	Mon,  6 Jul 2026 12:20:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D057842B73B;
+	Mon,  6 Jul 2026 12:34:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.177.32
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783340426; cv=none; b=FdAm/dt8t6D+v+hZxhPRkvqe+4T9ORp2LmGY0WydmBwI3qIPRj+pqoRfGUDjqsyv+kBiIVgu+Qoa5jokIEKKA25efD7aeyNZkyLWs7WALQ8nEjjVt9Aa4ahmRJ74RA7rA9NuZZM1MthyjI2a4KGHbm7KvnD6WuDXk7i1STXypZc=
+	t=1783341245; cv=none; b=MZCWHZbnILbyed+uRODhmZRcAfnAhQGSQhmzzdoThiVi7NGFGz6BYxlL1Z3eieROBs24o8mWwD5zJfxrhkX3GeFK2idab1jzXEPdrzZ1tisdsoifynZsoqoF3TrhnuU+i/BvGVhlN7Ew++1jz1ReRBR2k6OEDXG5aTp9p8keRjM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783340426; c=relaxed/simple;
-	bh=L9ZQiAG8v4+fZCVXxwejSDShgoX4JcG6q4TFIZYF5QM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=geTVIvzErf6LZLZ7hPIYvozd06oATCcPMT6AYQfyFQY/YsOoFlaIUg34OrTJnhfQ56tEwip66qhi4jl1vtroUNVQEwHFGGD8T/KuzQ1yWhyXhYdGCnxsfd7Lb/ROVa/UhXhweqJgChyJqqPe/RQ+zIYGhffj7rvpUNkrvrVgAV4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C6ozwaBI; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1783341245; c=relaxed/simple;
+	bh=lv4pNqlV2LLOtBngZ7+0w3lB9ZgCFolGueEZwb+eXvw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=LZTqIQQ5pifvdX3MOik7QJlLZnLexuCPDG/7n4cvSYSSKjPVxwqy65znwb0kk6kQ8Fqtzvt2LaFZNs3NeFwkKyT48Qpo3dfo/vtu7cluO1ogXIEi+iJbGl5+hmFOc2wJ74fkGX0dFEUOhyT/m7kYmkSTwH49fLESvaKDgWSB3X4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=fBIdC2gZ; arc=none smtp.client-ip=205.220.177.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C6ozwaBI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 737921F000E9;
-	Mon,  6 Jul 2026 12:20:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1783340424;
-	bh=L9ZQiAG8v4+fZCVXxwejSDShgoX4JcG6q4TFIZYF5QM=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=C6ozwaBI/97xZxlb0kmr8PA9iMolOuyBfguWvZQClRq/46Zu2S9kvWx24//aF2X8n
-	 Nh791WaveY8mVYOKz5FsgRvfOJ4+cHgj772ChzSAqbzxXjZhY3tHcT8oAk7XVXCgCU
-	 tA10Z5hXZzaIq2nwfzaQP6f13+jV4kPeGYZFn85gRWiUGIva3eVDWgfZxKyBc8kWsU
-	 vJrmdRgZTahoKLsew4hkBkgxq2U13ymmTXrWD3Q6LDiUvUjVuIxt+GXqST4N1rV9gv
-	 jb054KB6P3mLVkhZnpXBPEUtAk5IIaBJ7V/8QGukeju2b8oWQgJov/9j9LrH2BgQ4P
-	 AG/ZuXIf/CJ1g==
-Date: Mon, 6 Jul 2026 13:20:05 +0100
-From: Mark Brown <broonie@kernel.org>
-To: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Liviu Dudau <liviu.dudau@arm.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Joel Stanley <joel@jms.id.au>,
-	Andrew Jeffery <andrew@codeconstruct.com.au>,
-	Paul Cercueil <paul@crapouillou.net>,
-	Anitha Chrisanthus <anitha.chrisanthus@intel.com>,
-	Paul Kocialkowski <paulk@sys-base.io>,
-	Linus Walleij <linusw@kernel.org>, Chen-Yu Tsai <wens@kernel.org>,
-	Jernej Skrabec <jernej.skrabec@gmail.com>,
-	Samuel Holland <samuel@sholland.org>,
-	Alexey Brodkin <abrodkin@synopsys.com>,
-	Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-	Tomi Valkeinen <tomi.valkeinen@ideasonboard.com>,
-	Michal Simek <michal.simek@amd.com>,
-	Daniel Scally <dan.scally@ideasonboard.com>,
-	Jacopo Mondi <jacopo.mondi@ideasonboard.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Eddie James <eajames@linux.ibm.com>,
-	Tiffany Lin <tiffany.lin@mediatek.com>,
-	Andrew-CT Chen <andrew-ct.chen@mediatek.com>,
-	Yunfei Dong <yunfei.dong@mediatek.com>,
-	Minghsiu Tsai <minghsiu.tsai@mediatek.com>,
-	Houlong Wei <houlong.wei@mediatek.com>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Joseph Liu <kwliu@nuvoton.com>, Marvin Lin <kflin@nuvoton.com>,
-	Dmitry Osipenko <dmitry.osipenko@collabora.com>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Thierry Reding <thierry.reding@kernel.org>,
-	Jonathan Hunter <jonathanh@nvidia.com>,
-	Srinivas Kandagatla <srini@kernel.org>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Ge Gordon <gordon.ge@bst.ai>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-	Saravana Kannan <saravanak@kernel.org>,
-	Mathieu Poirier <mathieu.poirier@linaro.org>,
-	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
-	Shengjiu Wang <shengjiu.wang@gmail.com>,
-	Xiubo Li <Xiubo.Lee@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>,
-	Frank Li <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>,
-	Peter Ujfalusi <peter.ujfalusi@linux.intel.com>,
-	Bard Liao <yung-chuan.liao@linux.intel.com>,
-	Daniel Baluta <daniel.baluta@nxp.com>,
-	Orson Zhai <orsonzhai@gmail.com>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Peter Chen <peter.chen@cixtech.com>,
-	Fugang Duan <fugang.duan@cixtech.com>,
-	Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>,
-	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
-	Fabio Estevam <festevam@gmail.com>,
-	Nicolin Chen <nicoleotsuka@gmail.com>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Kai Vehmanen <kai.vehmanen@linux.intel.com>,
-	Pierre-Louis Bossart <pierre-louis.bossart@linux.dev>,
-	Vijendar Mukunda <Vijendar.Mukunda@amd.com>,
-	Chunyan Zhang <zhang.lyra@gmail.com>,
-	CIX Linux Kernel Upstream Group <cix-kernel-upstream@cixtech.com>,
-	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-	dri-devel@lists.freedesktop.org, linux-aspeed@lists.ozlabs.org,
-	linux-arm-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-	linux-sunxi@lists.linux.dev, linux-media@vger.kernel.org,
-	openbmc@lists.ozlabs.org, linux-mediatek@lists.infradead.org,
-	kernel@collabora.com, linux-tegra@vger.kernel.org,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-remoteproc@vger.kernel.org, linux-staging@lists.linux.dev,
-	linux-sound@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-	imx@lists.linux.dev, sound-open-firmware@alsa-project.org
-Subject: Re: [PATCH 31/42] ASoC: cix-ipbloq: Use
- devm_of_reserved_mem_device_init()
-Message-ID: <016b46c2-a411-47ab-8b17-e679c9ca7583@sirena.org.uk>
-Mail-Followup-To: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Liviu Dudau <liviu.dudau@arm.com>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Joel Stanley <joel@jms.id.au>,
-	Andrew Jeffery <andrew@codeconstruct.com.au>,
-	Paul Cercueil <paul@crapouillou.net>,
-	Anitha Chrisanthus <anitha.chrisanthus@intel.com>,
-	Paul Kocialkowski <paulk@sys-base.io>,
-	Linus Walleij <linusw@kernel.org>, Chen-Yu Tsai <wens@kernel.org>,
-	Jernej Skrabec <jernej.skrabec@gmail.com>,
-	Samuel Holland <samuel@sholland.org>,
-	Alexey Brodkin <abrodkin@synopsys.com>,
-	Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-	Tomi Valkeinen <tomi.valkeinen@ideasonboard.com>,
-	Michal Simek <michal.simek@amd.com>,
-	Daniel Scally <dan.scally@ideasonboard.com>,
-	Jacopo Mondi <jacopo.mondi@ideasonboard.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Eddie James <eajames@linux.ibm.com>,
-	Tiffany Lin <tiffany.lin@mediatek.com>,
-	Andrew-CT Chen <andrew-ct.chen@mediatek.com>,
-	Yunfei Dong <yunfei.dong@mediatek.com>,
-	Minghsiu Tsai <minghsiu.tsai@mediatek.com>,
-	Houlong Wei <houlong.wei@mediatek.com>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Joseph Liu <kwliu@nuvoton.com>, Marvin Lin <kflin@nuvoton.com>,
-	Dmitry Osipenko <dmitry.osipenko@collabora.com>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Thierry Reding <thierry.reding@kernel.org>,
-	Jonathan Hunter <jonathanh@nvidia.com>,
-	Srinivas Kandagatla <srini@kernel.org>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Ge Gordon <gordon.ge@bst.ai>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-	Saravana Kannan <saravanak@kernel.org>,
-	Mathieu Poirier <mathieu.poirier@linaro.org>,
-	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
-	Shengjiu Wang <shengjiu.wang@gmail.com>,
-	Xiubo Li <Xiubo.Lee@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>,
-	Frank Li <Frank.Li@nxp.com>, Sascha Hauer <s.hauer@pengutronix.de>,
-	Peter Ujfalusi <peter.ujfalusi@linux.intel.com>,
-	Bard Liao <yung-chuan.liao@linux.intel.com>,
-	Daniel Baluta <daniel.baluta@nxp.com>,
-	Orson Zhai <orsonzhai@gmail.com>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Peter Chen <peter.chen@cixtech.com>,
-	Fugang Duan <fugang.duan@cixtech.com>,
-	Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>,
-	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
-	Fabio Estevam <festevam@gmail.com>,
-	Nicolin Chen <nicoleotsuka@gmail.com>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Kai Vehmanen <kai.vehmanen@linux.intel.com>,
-	Pierre-Louis Bossart <pierre-louis.bossart@linux.dev>,
-	Vijendar Mukunda <Vijendar.Mukunda@amd.com>,
-	Chunyan Zhang <zhang.lyra@gmail.com>,
-	CIX Linux Kernel Upstream Group <cix-kernel-upstream@cixtech.com>,
-	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-	dri-devel@lists.freedesktop.org, linux-aspeed@lists.ozlabs.org,
-	linux-arm-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-	linux-sunxi@lists.linux.dev, linux-media@vger.kernel.org,
-	openbmc@lists.ozlabs.org, linux-mediatek@lists.infradead.org,
-	kernel@collabora.com, linux-tegra@vger.kernel.org,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-remoteproc@vger.kernel.org, linux-staging@lists.linux.dev,
-	linux-sound@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-	imx@lists.linux.dev, sound-open-firmware@alsa-project.org
-References: <20260703193855.110619-1-mukesh.ojha@oss.qualcomm.com>
- <20260703193855.110619-32-mukesh.ojha@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="fBIdC2gZ"
+Received: from pps.filterd (m0246630.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 665NK1G31009311;
+	Mon, 6 Jul 2026 12:33:59 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:date:from:in-reply-to:message-id
+	:mime-version:references:subject:to; s=corp-2025-04-25; bh=a5qBw
+	LJ1SiydWRWopG745VRT5VPXZJlVmFigbrSfY2s=; b=fBIdC2gZxcPeX7qxAyUTj
+	g/WtjvHK6LdS1drFPzmpvYvAnyV7+IdZqMj7dD4UT/+pivZCt1OD18bf8YBGjvFS
+	q8lKc1ifnQ4D5TGTCEk5hYu3wRrs3HbF5wOx2vz/An8KAs1cDznhFLa0G2gpch+k
+	rbWNJKoWmBtAbzDzx0NKFp9E3yuU9JD6ohIcmYNTEgcovfn0LK3gVhYfFREhlXSA
+	5k+nEla8zN1WwN13kRTaDBbyoDlPmUnj8vBlqA818Ur9B+T5Z07rQXAYcH30R/Me
+	DUt7Iu/BIdBhS5uIHqCUkH2+rZ1g2SoSjE0op7mqTXHjcduP7B+xpYF/GbGKcuhO
+	A==
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4f6rkbbmsa-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 06 Jul 2026 12:33:59 +0000 (GMT)
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.7/8.18.1.7) with ESMTP id 666CXXn6005634;
+	Mon, 6 Jul 2026 12:33:59 GMT
+Received: from brm-x62-22.us.oracle.com (brm-x62-22.us.oracle.com [10.80.150.48])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTP id 4f6rmp3244-1;
+	Mon, 06 Jul 2026 12:33:59 +0000 (GMT)
+From: Satyansh Shukla <satyansh.shukla@oracle.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: dwcmshc_bf3_hw_reset: Log eMMC reset calls
+Date: Mon,  6 Jul 2026 06:33:57 -0600
+Message-ID: <20260706123357.1512192-1-satyansh.shukla@oracle.com>
+X-Mailer: git-send-email 2.43.7
+In-Reply-To: <3425c3da-86fd-469d-a3ec-7805138d3e2e@intel.com>
+References: <3425c3da-86fd-469d-a3ec-7805138d3e2e@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="kLTrwa+nl9jSAPoJ"
-Content-Disposition: inline
-In-Reply-To: <20260703193855.110619-32-mukesh.ojha@oss.qualcomm.com>
-X-Cookie: Did I do an INCORRECT THING??
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-06_01,2026-07-06_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0
+ suspectscore=0 lowpriorityscore=0 bulkscore=0 mlxlogscore=999 spamscore=0
+ phishscore=0 mlxscore=0 adultscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.19.0-2606160000 definitions=main-2607060128
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzA2MDEyOCBTYWx0ZWRfX+meTPp/9wNil
+ 40RLBosHb0Cwh0tCHXK8nj3h7BvDDCWzP2oTgoGytKQfAYL5QRbQ93qOzAzOIYto3ZRLEI15nKj
+ tBvmcJvXlXxvaVjU8EXgvj8p7UNkcx4i+b7FqUOBWYYfCbObPig9
+X-Authority-Analysis: v=2.4 cv=QP1YgALL c=1 sm=1 tr=0 ts=6a4ba0b7 b=1 cx=c_pps
+ a=zPCbziy225d3KhSqZt3L1A==:117 a=zPCbziy225d3KhSqZt3L1A==:17
+ a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=jiCTI4zE5U7BLdzWsZGv:22
+ a=x4eqshVgHu-cdnggieHk:22 a=yPCof4ZbAAAA:8 a=n9bOmymY_TfqcxJohPcA:9
+ a=zZCYzV9kfG8A:10 a=5yU3S35YU4bGjq-dph-N:22 a=Bho9c0fBagfJEIQBS7DQ:22 cc=ntf
+ awl=host:12221
+X-Proofpoint-GUID: WJx4zN8BrkBTUj58IY5crgsgHMKkK8e2
+X-Proofpoint-ORIG-GUID: WJx4zN8BrkBTUj58IY5crgsgHMKkK8e2
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzA2MDEyOCBTYWx0ZWRfX0KdGKkYAyEde
+ pKdpy3hW6WA6gmxARAxEdJkxAVd+w5j1Uz21sFGp+t9tjL4E2+8AObNhdb6sZTLZ/hfLTV248vY
+ Ssw2Pt6y8PggZL7gyG1sblXwStDcsaWu5HLwYfPlbmskICE8RQ/NejvZjz8OOKgaSblN2RMPj+E
+ P8KOFhLQUCl5v4/pdoBQQa2vk9NK0tdECs412MNMG1PLj6Mi3mH6Lub2wUkVCQUthVC095libQK
+ E15qX77Ab1oo1wRq+d7mahOMj6KaVw2O1gUAW2kbv2QsJ/rtRhETRp09/MMALZJG8no9ni4oeWc
+ h7Bpk2CAD5QWIXQCPjC3ij3tG87hSo5+kxm6wn56lcxHmnBm9M9/XoIMpjv7LwC3rI8c5Ko+d19
+ 6iD0ztEWenJ+HFvhNuKiPWlYIbPmcQtY017/WxVcd0cVrOLycPsiwvqDxLTVGBseJqMD0Tu4XyQ
+ ZlXGWWGr3FzMuX29jm7lwyUFYtsEXngeiL9Ima2o=
 
+Log when the BlueField-3 eMMC hardware reset path is invoked.
 
---kLTrwa+nl9jSAPoJ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This makes it easier to diagnose cases where the controller recovery path
+depends on issuing an eMMC reset, and helps confirm that the reset sequence
+was attempted on affected systems.
 
-On Sat, Jul 04, 2026 at 01:08:44AM +0530, Mukesh Ojha wrote:
-> Use the devres-managed devm_of_reserved_mem_device_init() to ensure
-> the reserved memory region is released on device removal, fixing a
-> missing cleanup in the original code.
+Signed-off-by: Satyansh Shukla <satyansh.shukla@oracle.com>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Acked-by: Mark Brown <broonie@kernel.org>
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index eef53455b8ee..a01668b66e7d 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -2013,6 +2013,7 @@ static void dwcmshc_bf3_hw_reset(struct sdhci_host *host)
+ {
+ 	struct arm_smccc_res res = { 0 };
+ 
++	pr_debug("%s: resetting...\n", __func__);
+ 	arm_smccc_smc(BLUEFIELD_SMC_SET_EMMC_RST_N, 0, 0, 0, 0, 0, 0, 0, &res);
+ 
+ 	if (res.a0)
+-- 
+2.43.7
 
---kLTrwa+nl9jSAPoJ
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmpLnXUACgkQJNaLcl1U
-h9CXQAf8DO5Zk9xuOb8fTwRJIIud+GlrdJtvcprjSHWU5ymHQPkN42Prm3dW0Ut4
-OKEMbp1vbc5dzatR666ThvdBWJKtZsR+5FkQtiYSkrpbp2IZhStfEB1E1asPPN0X
-kthMlnGnLeb7Bu8qpxAn0s4xgLaycfsPXvbWJZ3xDEPrhrKWPmIv67jPR4mchEH8
-PjU+XLJw8I811PX1RbTELfbNgHWdvDFXZ6s1xPjODVw62PaGGDVBMlv5rAkEdYRg
-esYE2BAs1/qFt0OSfMgv+Sht1er7hryzp1Mnr3qgRs4uDsnEdIvyEdrWvsRnKq3Q
-TSiu7ZO3KFhVC8KoNZS7qFcHgW97rA==
-=DjQp
------END PGP SIGNATURE-----
-
---kLTrwa+nl9jSAPoJ--
