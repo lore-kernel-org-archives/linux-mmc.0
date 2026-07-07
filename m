@@ -1,347 +1,186 @@
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11010017.outbound.protection.outlook.com [52.101.229.17])
+Received: from DUZPR83CU001.outbound.protection.outlook.com (mail-northeuropeazon11012058.outbound.protection.outlook.com [52.101.66.58])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9D0E3DD873;
-	Tue,  7 Jul 2026 10:54:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 677DD3D88E8;
+	Tue,  7 Jul 2026 11:00:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.66.58
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783421646; cv=fail; b=qHVSvLTb6RNkgspq3B4HxfjhPInGIVrZ2JpcjWlGokNpqaDwi5j2f98Iv5En0vIju78N2C0+ZmFOjKOhjSEFupNg2IxTn4EyWb00DtIHgMMKCZOiYP3MMQwP4L8U6XgWyoMV8BGYGgCTueciA8xCw+FdmxTdwDV+rqQCam7yCCs=
+	t=1783422027; cv=fail; b=VFtTiNF5XYJILfANlCyUb5jg/6z+lcUHSvsDesyf9tNJo2lKABdxxhzlOE8NiCOlqSHRc8A8T7NmgOOBwSpSELPhisfYJsluAjpC8CwWGOU9Jr2g3tqJiZ6AYuDYh57RyVQuiYfk5wHcNGRuA6IOuQ20dSvmb8z59rS6l/S32jo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783421646; c=relaxed/simple;
-	bh=0N2klaBu11idCToHhOK/Hdqf2pXU6Pj3+3sR9SYQIAg=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=eHDVZnDJZpQ4OPBNNKFBGTimbVu5luKUKW8+u09I8/6e8oz/0vN6YlBvs7mrN6lYdNDougGhLDEs6IG/UcNFdtlMMoTKDGrw9mQe72ByPInCR/VNZ5OzVo82ziREsbk8tW+r9WywzefkaGyWr0r+DVJz8Nv8fkMZMFIENKg1zyA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=mb8FKeza; arc=fail smtp.client-ip=52.101.229.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
+	s=arc-20240116; t=1783422027; c=relaxed/simple;
+	bh=buhe41+nNdahoYccz3TuFPTzk/j+q2iK2WmIWPXiIsY=;
+	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=XM7OMD6f9fjEFWKB/bf9mOQyrg9MJWB1mo/uJiHwCCM4OExq5UDQbdYnhD1K5YDxy46vTFe30qdlIIzgiqloBEGxz8mqtwCZKamt3Vn8PurmlTuXkx4vtQliT9SNMQrDa+fBtKeciXgRYjjTH3I1IBiZ3WTdGDSFoidJHtg0VuA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=JU+vBLeX; arc=fail smtp.client-ip=52.101.66.58
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="mb8FKeza"
+	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="JU+vBLeX"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=VOwDp1DbMlChiKnCC6FOUBdbpusOM7fcnbq2GwakZ0SqdWQvM5PAwutokXJSSZwFA2Z9fnkHVqs0YFn2JdDNJOiGju+qRMAKad2dGW/xZ8N9NufPPgccQR9b4ObHrjZZoWdJhF94jBwKbuH/CCw8mUSjbQgI1NODp/BtZxNuJkMS0c1r7isM6f91hAKnIECuFbyFYdGBE10UHo6RjUXXjfJ4PREQAh9sVGthR1UOkf7JS3PpB4E2OCGQt0ikJaQk1Bx/X74pKQRVxF+loYes6oyL5LFQMmA8dbjQUOCPARj2fLzUjkMfgfVXQeJ277tStTKqvO+7J30PzKKxR4Rbww==
+ b=gIzXbNTXXu2Ba4FiM70zAdSiwGPt5eKCntQmV3HgqSt4cZ9mLqoR81Nm0J85whAEo6TEQsvFMf3w8A1dzf6bnuARAdQeyblfJO3Y8ZyOMPneYa/Jlut6quNSV3GtWB8MU1m6nJ97rq0Z8crEvwh/gKFerP8eCu9mV5QaoLHIt7iMmhpdQwgEqcDMUGG+XcZUZFeojVjjT0y7j4ZVwmdQHSaCWJeo0PP3qq/xDr7zjNJQgMB+h120tbyDkovJM+LGkMIUmuIVG9Tv1M4RHmH6SrlTqoOOV8S6Z0Rig3lzCc9tYn8d2hTcHeFN4e2JiDQn0y402uGtBIuHMF2B5AEU2w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=yFBCsiNhn3N/frtyomKopAKAn+fRyGvPMeKLmElGXJg=;
- b=RlbIxqBLv+93U+MksnKAN7APsGUHYmI6OxPqRNw/N1c7blCdSqHeN6b00FZCy88iccXq2QCZRFUcairxH/pWCWGZFH5CGdcqP75aerOsd0LhtUknsYluzhXLmDFNKtfIzWf/1ZYXvTOvCN+c7WEdT1Gz5fR5IVKun1UawTWqdE/3V6mJU91IrYiXFGoZaYhIgMo1XjDAKC46pDlY2X6vNmRUXCQ7Rv2A3X2lyuiT0jdp7kdMBYBYJchZQVAgMYY1W3AAlq4adgHM2Qbl6m6PZUOH5wqGsIP/zZojfC4VnxBVuYGLjeQQcWujyHMBa28EZmjpzEvlsSafuCvaB8TeHw==
+ bh=x7M4lNghRvy+TUMxRRzY+Cxfan69VqvPK0WrAwL5w+w=;
+ b=LlAtazttO2apEq8vsPr2S2Jpkc00x8PbHrtKusYETypOPJtMOKQLECIdXGFZE2fyOYlC+hRFnerbTkjU0f1Q/u4cGjoolDW00DuOOAaxO+bT0V85C8kVHFBMYsRg2a5UoY6VbWAcqOMx298y9JOcTS/pjQzvOshZil8ifTGSuTymKyilJwLEF61H71qNUeta2FUbjK9ggIubiNIM9919pZebM7QOLmy2RNjb+0HUI7LlwkZiHdHIrsnOjqtUag0qAwawtwxGGYyENSzrMyQddPDiwRw/A6oVYAJWs9XeZN7RZL/8Da+fvQLiANzNL595k31KRRmaQoGs4RMO65URFw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
- s=selector1;
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector1-NXP1-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=yFBCsiNhn3N/frtyomKopAKAn+fRyGvPMeKLmElGXJg=;
- b=mb8FKeza+b3XfbpQrVbIDeqqXimk1Tmbzyr4tw8N9F7R0DgrqcG+5XLSBiymtlGY1knr14reY0VCdBeTTDcZvw/+NPWRMzFz4nInu024wVjnw4BsSJFH6SzQ4Nk7H2RXeaSQqy+W7j05Dqp/3jg5JrcCXXTQrzO1H+mywnLTirs=
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
- by OS7PR01MB14968.jpnprd01.prod.outlook.com (2603:1096:604:397::12) with
+ bh=x7M4lNghRvy+TUMxRRzY+Cxfan69VqvPK0WrAwL5w+w=;
+ b=JU+vBLeXtUlZ3SqhMdpw6+wnx/jcawmUx4IQwJDK9akXyMOboURzOGA1RkLHCWnXihuQhWaqrkKI3WW3aFJTC2NyPExvGU8RTdKrG3tdmo/8fGe499cHHwC0TU48oABC08Qg9c4cegEGChUh69SMeEWivCnlrE4sYg5CUnqCVquknl+AMeyVsEfZIzmcdBfnAAJBTpOwqRxgdMN7ytvyTL3lCOQD9/04vRoRq4xEAcZL7rfZ8ok2xCuVlcTzev6aRyjR/BffNrQ2CCs9OiStCUiNrShwn/QZTm+Om0qExkG/PZlbypze2UaROpR/lUf7MNuxTw+NZHALeswkNZHN7A==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from DU2PR04MB9180.eurprd04.prod.outlook.com (2603:10a6:10:2f7::6)
+ by GVUPR04MB12195.eurprd04.prod.outlook.com (2603:10a6:150:33e::15) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.159.13; Tue, 7 Jul
- 2026 10:53:59 +0000
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0181.009; Tue, 7 Jul 2026
- 10:53:58 +0000
-From: Biju Das <biju.das.jz@bp.renesas.com>
-To: biju.das.au <biju.das.au@gmail.com>, wsa+renesas
-	<wsa+renesas@sang-engineering.com>, Ulf Hansson <ulfh@kernel.org>
-CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Geert
- Uytterhoeven <geert+renesas@glider.be>, Prabhakar Mahadev Lad
-	<prabhakar.mahadev-lad.rj@bp.renesas.com>, biju.das.au
-	<biju.das.au@gmail.com>
-Subject: RE: [PATCH v18 04/12] mmc: renesas_sdhi: Add max_divider field to
- support SoC-specific clock divider ranges
-Thread-Topic: [PATCH v18 04/12] mmc: renesas_sdhi: Add max_divider field to
- support SoC-specific clock divider ranges
-Thread-Index: AQHdAl+t65n/jCG400miBz4CBtOX3bZh9/tA
-Date: Tue, 7 Jul 2026 10:53:58 +0000
-Message-ID:
- <TY3PR01MB11346CFB7B99FB22483112D7786F02@TY3PR01MB11346.jpnprd01.prod.outlook.com>
-References: <20260622155610.184271-1-biju.das.jz@bp.renesas.com>
- <20260622155610.184271-5-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20260622155610.184271-5-biju.das.jz@bp.renesas.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OS7PR01MB14968:EE_
-x-ms-office365-filtering-correlation-id: 6dce7aaa-a13a-46b4-ef88-08dedc160c64
-x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|366016|23010399003|376014|4143699003|38070700021|6133799003|22082099003|18002099003|56012099006|11063799006;
-x-microsoft-antispam-message-info:
- rW2MSpmhT0aP052OzZkWGSzGrra6B8MI72oyPWE1fNoXeNsX0CvZ4uj+zs8fLRfd/rGQ4BfabSlDr6jBuxYoaH9OvpHWoNjngr5JGy91uIPfsL50xQYXZSlDu8Rj5MBYZiQd0AGb97Xf/GpkfxXeUXatnEdgji4hgBI9gFHQcM36/42dL3OFxkN4BaQvyUGVJDhQm/4mlrNFVmkTLjWND558xZvb3RSO4ID86u1OIg0SCyj4pveZe6KGwnuQ9aowUtMk/+NnXRxvk0TnKV3t5HVnxH+2FY9LEmjEl3b5clrA629UHqgUpjK7lEW92Ow6I2dJhsf7895QB+G6PVPezzXF8tMyo/sADgGnFr+oz40lXa9pRwUS6giEb16pjihE6RPDW8FQOjAZ4IKl41Ro7ST3NHHLt9gXTiNulADR4eHHirCV8NWWMnQsKijoiehieknWa1ej4yt4ChBqaOuAcG4HOHQi9yHljMbNO4eBhjhzX8Z7XmHZthBWmV5+DPiLyVsXQvJsN6De3Cr5CJ+Lv9KwvHKYs1bGv5qfFUO5+CBmrM5WfZC2sWIGTCjpiUsjQt2OG9HmKtEPcPn+r20mpgiNbyyYsMMbw2QnwybnSQdhTYRgsLh5+ac+b+Uo0PGCTJGwdJ25KIuVRM5FTWVaac7lPA14oHdfh2az+27CdiM=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(23010399003)(376014)(4143699003)(38070700021)(6133799003)(22082099003)(18002099003)(56012099006)(11063799006);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?4IUTWn34aHaPbiqneWfYNMA65O8X0im0owwKsxpGXegPD4MJgxXq+N2Wr/Fg?=
- =?us-ascii?Q?CBzkD0tSKPLBRvJLXnVN/5QtgtLLcGwIjsQudvAU/LdAeE/H5ALZpE1lbx/i?=
- =?us-ascii?Q?o2oI9Nvrj3v9H/3dmsqq1I8Sal/EA0/CsnPUNPmdlFd8f0pul32DoTm8Kn1y?=
- =?us-ascii?Q?VE1lQCac15mTd7c3EUM3KyQIMZ4oir8o7HFJj2niL7a2bouZoORbr76odk74?=
- =?us-ascii?Q?pdFnAAUJOORUVqeYDnFTmSymL7OU1RDnJAwhjURn12bEYGQ1mEyBOhwQNSPb?=
- =?us-ascii?Q?2epq5kLOTa56q6Sc4VuuIZLjr7bejnYu0EiTaLBnddU/L8UzC10YDGPpWtt6?=
- =?us-ascii?Q?3BvRSWz24haLXpMbs59g3/Rs/t60J6kktnegTJb5ZexYjuvpedendqjKn7nW?=
- =?us-ascii?Q?tBaGkTlI7Rfgl2vUn4GEABnjYTX8pwuRHl2kUbMlTQc7jQUwz+IdbMHfUX/8?=
- =?us-ascii?Q?xjQGEZKsGTwIsYPh2Ildp5cyuodiSu4lmdYZzCIKUQ2PTE+HbsYKTIpJvcwV?=
- =?us-ascii?Q?RuDjJ47cEWrXO6m1yV35QATLndG/HF3fq8OfBnridGMj+KJTMlFkEwtVY2lt?=
- =?us-ascii?Q?uQsHUebKSLobLpIJhbBD3K9yVI8ucZZ2nkdOvKKRoavhbK++/+HW2ZBw5Zx3?=
- =?us-ascii?Q?PGE85WrmcOyXPgfN9SGVwpS1MewKApgDeyXX7CGRj6cuxYVyArVEPxV+Orza?=
- =?us-ascii?Q?4y/D+BxrvgBsjWseO+n4rKv3wrtOUVd5mvfw94HDh0arsiwsVUSI77+7KLIW?=
- =?us-ascii?Q?FnjGLPKUmtpfpHRbiPEhzqfyoLRnvDfJnyKd87mG36olw7r5Ohv3QOtU29Qf?=
- =?us-ascii?Q?qYQ9tFwgkrcmLYUml1CWC2YU8c6TByOHBvRZvrM3hrBzzPaqxzkf053aU91Q?=
- =?us-ascii?Q?wuQQp8lOWCHojxt0TGBxXKuOVTnwc5l6cgI8PNSsDWYEEitKmKExmIIrgYif?=
- =?us-ascii?Q?D/9MM1WDsBGKcMavn/V6BmktgoLWKxcMjc4D0hFEURXFqOu1BWhVtJI6TxuS?=
- =?us-ascii?Q?H31IjqyV7ttuIn+2qHe0rzDzW0q+6JLtLOSkB1/UqMiMrMJP6HBXX2B+Niql?=
- =?us-ascii?Q?cT6yfOizgnGwpxiswBMiq9RU3tPY94Sdd9RTyFoonG1wLelSkFNqwkskBvBA?=
- =?us-ascii?Q?1nFn7E7BF0GUUthZ7Q5z0LTnYfCJkALAnSCIBJ2j/frqzaRK7+/1sMiO/NQQ?=
- =?us-ascii?Q?yILJwulGonDwXvPpNKT2kevbfKKgJCrqX97wt0AdArVu3ccPPwVnEyReAiZt?=
- =?us-ascii?Q?Imct/bsu3WmDm9W+pS77sPd9fosMtN60vPZ2lxMMAB/7ycbnIWRDTZSe7ddL?=
- =?us-ascii?Q?Ain1YT4x+mtfGVBl0NYSQ4C2xQOr8y2Bpw+0PTcmNpUD0Xsi0li65V8ZHP4T?=
- =?us-ascii?Q?okv4TrGU3fI+xqeZbva2txK/8Rzd7Ud1PVLaUE1gdzQX72jZMLqIi3QYAm4w?=
- =?us-ascii?Q?qWaYpJG7yGeWBnNPTKMVia802qdKvY8UN+x49pSnpGjBfetv1uwBWj1troXZ?=
- =?us-ascii?Q?LEWrwUFCCXY4cehNyEupncHWRoZVnJFwpDDeMMJmG53f0YVZGRqIDW74S39L?=
- =?us-ascii?Q?M4NjJb6c1zFGuZ4K3++fasksSONrbFSUdS1wPjshAJTEpi+aDNiRb9QDPN7A?=
- =?us-ascii?Q?wfnUYhNSBPMZ6he4ckVKE/JRO2BkaBJI487ZEHtnRVuU4LkT3tRu5Q871qQx?=
- =?us-ascii?Q?7mOzyT8SM9LIu91g0zCjyevQIPwgf4uGtHhDMkExg7wBhthB/Sb9hdHjnI2u?=
- =?us-ascii?Q?Qz5BAkxaGA=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.8; Tue, 7 Jul 2026
+ 11:00:20 +0000
+Received: from DU2PR04MB9180.eurprd04.prod.outlook.com
+ ([fe80::f94c:ce27:1558:fb05]) by DU2PR04MB9180.eurprd04.prod.outlook.com
+ ([fe80::f94c:ce27:1558:fb05%6]) with mapi id 15.21.0181.008; Tue, 7 Jul 2026
+ 11:00:20 +0000
+From: ziniu.wang_1@oss.nxp.com
+To: adrian.hunter@intel.com,
+	ulfh@kernel.org,
+	haibo.chen@nxp.com,
+	Frank.Li@nxp.com
+Cc: s.hauer@pengutronix.de,
+	kernel@pengutronix.de,
+	festevam@gmail.com,
+	imx@lists.linux.dev,
+	linux-mmc@vger.kernel.org,
+	s32@nxp.com,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v5 0/8] mmc: sdhci-esdhc-imx: fix SDIO suspend/resume issues
+Date: Tue,  7 Jul 2026 19:02:55 +0800
+Message-Id: <20260707110303.3779799-1-ziniu.wang_1@oss.nxp.com>
+X-Mailer: git-send-email 2.34.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: FR4P281CA0274.DEUP281.PROD.OUTLOOK.COM
+ (2603:10a6:d10:e6::18) To DU2PR04MB9180.eurprd04.prod.outlook.com
+ (2603:10a6:10:2f7::6)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DU2PR04MB9180:EE_|GVUPR04MB12195:EE_
+X-MS-Office365-Filtering-Correlation-Id: 2ba2dbb6-bcf5-4460-b021-08dedc16efc1
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|366016|19092799006|1800799024|23010399003|376014|3023799007|56012099006|11063799006|18002099003|6133799003;
+X-Microsoft-Antispam-Message-Info:
+	Eh4XFL1JFhFWNC4adyxgEETSaHVTCLXc54Sfl4GNngwK52lbqPBAKRU1VhkJv/isyn8SeW/N/Xe8FgPpuRNnLW6usvSugXDgByXdufCtP2AUo2kSQc/ZsJSlOWrUFsf5JzdCDZLRarOdkv6Rm6eDQkNVVKaPJkaQAksDSSqRmtMCJc4W+pO0CKXJPRYcvgFQuPA5j5c4PbWlkGLBcWAX0743s7onuzJ/wb47YAwXOOgBO04bzGw/PD7W4wVS5BUNLW9j9CcAzaqzRF0VgX0zgl5e13ZlP5GYzbAZkqFZ5il44HgZnk/GCJPQ2SXZ3RXkV4INpDSMNUNoPGyzrT+uVBG4yVPPF4kIIEq5rew2Bgc6JtBng+E07b3MqGw/HwOcsVQG+0ZVBfMYxpzF6rcpu6hpr1okya5Ap7/Hj2/M56qRuNdmiLqeg8235JdUCEx0S3YyeBE/5mC0YU+5kuxkSYrXistSxDmoXSOpFG0eP/k7l6jCKRNh+8zV82k2eDQGdgpRaZw1mKOBJWwKBEvgtlJ5rAYiiJDBdpAKQ/KAM/jgK3b0oLNvP2xv6IwAimRpjZcEI12ONZoHF1XC8ZobdQkJ3RyrZGdSDa/uiVVa1+ouNDzVOhwGeY6MHFnRFH6S7dwX8isp5CVxzVZ/7ZM26RyL456/8YzP7XrX535fYMA=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU2PR04MB9180.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(19092799006)(1800799024)(23010399003)(376014)(3023799007)(56012099006)(11063799006)(18002099003)(6133799003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?VxO+2Orajz4taYlOfmHOJIkU0jGgozwFYmMiEoW3HwlEUDokjUaghMQLkjcz?=
+ =?us-ascii?Q?/9ETvS3rxgCEMFNLc0mBp/0RhoyOXNxQmsDzY1Xont3Y97dJ5GSQwHUKrtua?=
+ =?us-ascii?Q?RtnpaxT368zURJfwBKuHZfH1FJ+mQvXSF2JfgB56M3I8U1Y1my14CKotm+ir?=
+ =?us-ascii?Q?cg429GC/adGkDXsSIx4Dvt8C7swWnfhjdBTb4z9ishfUmvqSZ0z3UwmxZkmE?=
+ =?us-ascii?Q?ypiEhOhdkRTCnWheguwqvu+0TSTSdc/j0fiVd5nt55AqhHbzgWdejpKFRZLy?=
+ =?us-ascii?Q?WzhzfYXvgsznumsPhlYJN15Xbj3TA9Z2/pdHOHKTk97sSycd7msOSo8XSLdz?=
+ =?us-ascii?Q?Zi40J6pAJQj+B0e8yHJxXFl4Q8mSLXhm8xi8AatoK2rbk+dV1rRJm/qscsLl?=
+ =?us-ascii?Q?Os2+DekGgwoMChLOcJZagJhKKMBShi2cxQ1go/lzHTacWojoCKKR+FmEf4Fc?=
+ =?us-ascii?Q?d7zmEv1MOG6CG1qvfWujBV0iZ1AfmVrAfHbmegdYVFHONuNoUZEQNN3KMC57?=
+ =?us-ascii?Q?vMpiX26ETrHeLvb66jQIADRZ0HGQfCgkVDAwTUw1NNujASnY4qJELt8bLDln?=
+ =?us-ascii?Q?h7RlLJRx+KJkKK+wWViQMjpxCBQVMBw1BnQsX6Dn8VqAdRiCBsksKAhZpuUj?=
+ =?us-ascii?Q?hiT+NBlo/dY3F5lhnILn/qezcRSfHv+gZyDXW6ajDNNl0C8mTpRe8if28wSQ?=
+ =?us-ascii?Q?0AEkkqj5Fk8DaMtnoMzT53kOOF+NrfrUm9KdNsmNTkdzrnhUSfruCZG1JSxL?=
+ =?us-ascii?Q?exaSXMHKN0VJjVuY/mKICUDfWmfDhzJ48Wui4MBRxwvk7NgvRJs43dB0EHyt?=
+ =?us-ascii?Q?XDtkJ6MJvxyRouZz/wsNUI1naK7vuhnHBqFMagUs6LSvDZBUpABtCjTyW/fU?=
+ =?us-ascii?Q?R3qoID3GFZUZT/HoFE9qfQ3LfRW3COqaiIFo53AOv2/2TST80/s1lESgsiTB?=
+ =?us-ascii?Q?HDN4H2mou6Tz1CinEcEajgiKYngjnDRX+syMazQhMgVufWP7O2Z8OtXCtn1F?=
+ =?us-ascii?Q?MkeHQqIf3ET6fkTeI7R0oUpNy+YovCyi/+tWQdy4U1NPj5YWyRbpJiTwAifZ?=
+ =?us-ascii?Q?qJOmRhWh0C+1sSYZs1841uabTYmgKzGTLIypYL78ddjdSYvvsGyhvGs5F0Sx?=
+ =?us-ascii?Q?g49cfZXgg1qdDmqMXSt8UCADoLzCknw1o9UC9yfMqIu3nf2KfF+y1e+Fielx?=
+ =?us-ascii?Q?8/tscRaCADbu6jEkQZ0u3abwOBruF5cJs51gk5FmEK2l8aDpgwZpXc16WL9Z?=
+ =?us-ascii?Q?A4PmDR0ySxLyLWM9fWY8nbsgW3grVPa8Upr2rcACQCgyZGR9RjNOdX7CyWV7?=
+ =?us-ascii?Q?zXiLxTd5b8kgxe5Z1bi9phL4lTNuYvsT3M0jluxTOg3nyyYxZMCmYqkDCtk8?=
+ =?us-ascii?Q?x5lBMlkbMJMayo/qBZQgxYkoZg8JuzZvLeAp2KLr1I8YSuc3L+deodi/YbIK?=
+ =?us-ascii?Q?O3WZlwBpHFIPMdK89a7gsdwnPc52P3pbRw8agW3JHY6zj2VvZhm7Wq1RhA5x?=
+ =?us-ascii?Q?2FnGW3upA/xiHcmQQuQe4JI/SfrzgJB/umARKU1rbfnIiSMW9lDJ2uBHJfwf?=
+ =?us-ascii?Q?ZYNqds7p1vwzSN/hCDTkGz4YZ49q8F9j+slRUgMnGgcoXCdWhPbvf3YofdwW?=
+ =?us-ascii?Q?do0VeD2q8gMDLidzCvBsFxkJLyjo8wWAw5TmQpm3IO5bUc/nYPLDarMpCqvB?=
+ =?us-ascii?Q?sjDWM0r/+ZH138m+JjAQ7vfSR/7U1iVmUzI+ZxOvemvg7cXhSoo6LbcW+PJP?=
+ =?us-ascii?Q?517D1iWnPHla5TE/2lPPgzV8yXPLVtqgkMFgM8Mk3wS0AzBx/kKF?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2ba2dbb6-bcf5-4460-b021-08dedc16efc1
+X-MS-Exchange-CrossTenant-AuthSource: DU2PR04MB9180.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6dce7aaa-a13a-46b4-ef88-08dedc160c64
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Jul 2026 10:53:58.7985
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Jul 2026 11:00:20.4033
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: lf62+YS5XquZo9NIWsbYMNVn9S/nzIqZ8hbvCEjKUr6mIGrTFP7x0eRGAaylLWKY/V5C+v5BnVvfoRNBDVdfb7X9xy9grimDz8+o/YEZtYQ=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS7PR01MB14968
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: zUBAxgcthQ2KrYU/Hx+DAkkovprGq7VXDzmLvXYye0Bef3gSh20Q28P+B4Zf+iXGYrtVYCiMZDOYrkNCZqbpJmv/CEKDD05eAkm3+gNTVGazwOgvbCpQnWzMq6M4TG62
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GVUPR04MB12195
 
-Hi Wolfram,
+From: Luke Wang <ziniu.wang_1@nxp.com>
 
-> -----Original Message-----
-> From: Biju <biju.das.au@gmail.com>
-> Sent: 22 June 2026 16:56
-> Subject: [PATCH v18 04/12] mmc: renesas_sdhi: Add max_divider field to su=
-pport SoC-specific clock divider
-> ranges
->=20
-> From: Biju Das <biju.das.jz@bp.renesas.com>
->=20
-> The RZ/G3L SoC supports a maximum clock divider beyond the existing hardc=
-oded value of 512, requiring a
-> configurable max_divider field.
-> Introduce max_divider in both renesas_sdhi_of_data and tmio_mmc_data.
->=20
-> Replace the two hardcoded 512 constants in renesas_sdhi_clk_enable() and =
-renesas_sdhi_set_clock() with
-> host->pdata->max_divider. A fallback of 512 is applied at probe time when=
- no value is provided,
-> preserving behaviour for existing platforms.
->=20
-> All existing of_data entries across both the internal and system DMAC dri=
-vers are updated to explicitly
-> set max_divider =3D 512, consistent with the approach taken for clk_mask =
-in the previous patch.
->=20
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-> ---
-> v18:
->  * New patch.
-> ---
->  drivers/mmc/host/renesas_sdhi.h               | 2 ++
->  drivers/mmc/host/renesas_sdhi_core.c          | 8 ++++++--
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 +++
->  drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 4 ++++
->  include/linux/platform_data/tmio.h            | 1 +
->  5 files changed, 16 insertions(+), 2 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_s=
-dhi.h index
-> f926a36f213c..438b2a7afe76 100644
-> --- a/drivers/mmc/host/renesas_sdhi.h
-> +++ b/drivers/mmc/host/renesas_sdhi.h
-> @@ -23,6 +23,7 @@ struct renesas_sdhi_scc {
->=20
->  #define SDHI_FLAG_NEED_CLKH_FALLBACK	BIT(0)
->  #define SDHI_CLK_MASK_DEFAULT		0x80000080
-> +#define SDHI_MAX_DIVIDER_DEFAULT	512
->=20
->  struct renesas_sdhi_of_data {
->  	unsigned long tmio_flags;
-> @@ -39,6 +40,7 @@ struct renesas_sdhi_of_data {
->  	unsigned short max_segs;
->  	unsigned long sdhi_flags;
->  	u64 clk_mask;
-> +	unsigned int max_divider;
->  };
->=20
->  #define SDHI_CALIB_TABLE_MAX 32
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/rene=
-sas_sdhi_core.c
-> index cccc8fc235d2..7e48e78cbfab 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -117,7 +117,7 @@ static int renesas_sdhi_clk_enable(struct tmio_mmc_ho=
-st *host)
->  	 * Minimum frequency is the minimum input clock frequency
->  	 * divided by our maximum divider.
->  	 */
-> -	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) / 512, 1L);
-> +	mmc->f_min =3D max(clk_round_rate(priv->clk, 1) /
-> +host->pdata->max_divider, 1L);
->=20
->  	/* enable 16bit data access on SDBUF as default */
->  	renesas_sdhi_sdbuf_width(host, 16);
-> @@ -205,7 +205,7 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_ho=
-st *host,
->  	}
->=20
->  	host->mmc->actual_clock =3D renesas_sdhi_clk_update(host, new_clock);
-> -	clock =3D host->mmc->actual_clock / 512;
-> +	clock =3D host->mmc->actual_clock / host->pdata->max_divider;
->=20
->  	/*
->  	 * Add a margin of 1/1024 rate higher to the clock rate in order @@ -11=
-37,6 +1137,7 @@ int
-> renesas_sdhi_probe(struct platform_device *pdev,
->  		mmc_data->max_blk_count =3D of_data->max_blk_count;
->  		mmc_data->max_segs =3D of_data->max_segs;
->  		mmc_data->clk_mask =3D of_data->clk_mask;
-> +		mmc_data->max_divider =3D of_data->max_divider;
->  		dma_priv->dma_buswidth =3D of_data->dma_buswidth;
->  		host->bus_shift =3D of_data->bus_shift;
->  		/* Fallback for old DTs */
-> @@ -1148,6 +1149,9 @@ int renesas_sdhi_probe(struct platform_device *pdev=
-,
->  	if (!mmc_data->clk_mask)
->  		mmc_data->clk_mask =3D SDHI_CLK_MASK_DEFAULT;
->=20
-> +	if (!mmc_data->max_divider)
-> +		mmc_data->max_divider =3D SDHI_MAX_DIVIDER_DEFAULT;
-> +
+This series fixes several suspend/resume issues in the sdhci-esdhc-imx
+driver, primarily affecting SDIO devices (e.g., WiFi).
 
-As shaskiko [1] pointed out, for non-DT platforms
+Issues fixed:
+- Tuning delay values not saved/restored for out-of-band wakeup devices
+- DLL override lost after resume for DDR modes
+- Pinctrl not restored before DDR_EN is set, causing CRC errors
+- Unhandled interrupt during resume causing "nobody cared" warning
+- Various error handling issues in suspend/resume paths
 
-+	if (mmd && !mmd->max_divider)
-+		mmd->max_divider =3D SDHI_MAX_DIVIDER_DEFAULT;
-+
+Changes since v4:
+- New patch 3: Fix esdhc_change_pinstate() to move IS_ERR checks for
+  pins_100mhz/pins_200mhz into their respective switch cases, so that
+  legacy timing modes can still reach pinctrl_select_default_state().
+  This avoids log spam on resume for devices without UHS pin states (Sashiko)
 
-Also replaced the hardcoded value 9 with a variable as ilog2(512)=3D9
+Changes since v3:
+- Patch 2: Remove unused 'boarddata' variable in esdhc_set_uhs_signaling()
+- Patch 7: Expand commit message to document intentional skip of enable_irq()
+  and sdhci_disable_irq_wakeups() on early return, and explain why the
+  PM runtime usage counter leak is acceptable (Sashiko)
 
--	for (i =3D min(9, ilog2(UINT_MAX / new_clock)); i >=3D 0; i--) {
-+	for (i =3D min(ilog2(host->pdata->max_divider), ilog2(UINT_MAX / new_cloc=
-k)); i >=3D 0; i--) {
+Changes since v2:
+- Patch 3: Updated commit message to explain the SoC IP integration
+  detail about internal loopback path change when switching pinctrl
+  from GPIO to USDHC function (per Bough Chen suggestion)
+- Patch 5 (v2): Split into three separate patches (5/6/7) so each
+  patch fixes one problem (per Frank Li suggestion)
 
-[1] https://sashiko.dev/#/patchset/20260622155610.184271-1-biju.das.jz%40bp=
-.renesas.com
+Changes since v1:
+- Added patch 5 to fix error handling issues identified during review
+- Use pm_runtime_resume_and_get() instead of pm_runtime_get_sync()
+- Make pinctrl and cd-wake failures non-fatal (dev_warn only)
+- Use esdhc_change_pinstate() instead of pinctrl_pm_select_default_state()
+  in resume to restore correct pin state based on timing mode
+- Skip pinctrl restore for wakeup devices to avoid SD bus glitch
+- Check pm_runtime_force_resume() return value in resume
 
-Cheers,
-Biju
+Luke Wang (8):
+  mmc: sdhci-esdhc-imx: remove unnecessary mmc_card_wake_sdio_irq check
+    for tuning save/restore
+  mmc: sdhci-esdhc-imx: restore DLL override for DDR modes on resume
+  mmc: sdhci-esdhc-imx: fix esdhc_change_pinstate() to allow default
+    state restore
+  mmc: sdhci-esdhc-imx: restore pinctrl before restoring ios timing on
+    resume
+  mmc: sdhci-esdhc-imx: disable irq during suspend to fix unhandled
+    interrupt
+  mmc: sdhci-esdhc-imx: use pm_runtime_resume_and_get() in suspend
+  mmc: sdhci-esdhc-imx: make non-fatal errors non-blocking in suspend
+  mmc: sdhci-esdhc-imx: fix resume error handling
 
+ drivers/mmc/host/sdhci-esdhc-imx.c | 84 ++++++++++++++++++++----------
+ 1 file changed, 57 insertions(+), 27 deletions(-)
 
->  	host->write16_hook =3D renesas_sdhi_write16_hook;
->  	host->clk_enable =3D renesas_sdhi_clk_enable;
->  	host->clk_disable =3D renesas_sdhi_clk_disable; diff --git
-> a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesa=
-s_sdhi_internal_dmac.c
-> index 2865ec30be66..c91b910488da 100644
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -103,6 +103,7 @@ static const struct renesas_sdhi_of_data of_data_rza2=
- =3D {
->  	.max_blk_count	=3D UINT_MAX / TMIO_MAX_BLK_SIZE,
->  	.max_segs	=3D 1,
->  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
-> +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
->  };
->=20
->  static const struct renesas_sdhi_of_data of_data_rcar_gen3 =3D { @@ -121=
-,6 +122,7 @@ static const struct
-> renesas_sdhi_of_data of_data_rcar_gen3 =3D {
->  	.max_segs	=3D 1,
->  	.sdhi_flags	=3D SDHI_FLAG_NEED_CLKH_FALLBACK,
->  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
-> +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
->  };
->=20
->  static const struct renesas_sdhi_of_data of_data_rcar_gen3_no_sdh_fallba=
-ck =3D { @@ -138,6 +140,7 @@
-> static const struct renesas_sdhi_of_data of_data_rcar_gen3_no_sdh_fallbac=
-k =3D {
->  	.max_blk_count	=3D UINT_MAX / TMIO_MAX_BLK_SIZE,
->  	.max_segs	=3D 1,
->  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
-> +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
->  };
->=20
->  static const u8 r8a7796_es13_calib_table[2][SDHI_CALIB_TABLE_MAX] =3D { =
-diff --git
-> a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdh=
-i_sys_dmac.c
-> index d1a4f65ddd91..d91b48dce8c9 100644
-> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> @@ -30,6 +30,7 @@
->  static const struct renesas_sdhi_of_data of_default_cfg =3D {
->  	.tmio_flags	=3D TMIO_MMC_HAS_IDLE_WAIT,
->  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
-> +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
->  };
->=20
->  static const struct renesas_sdhi_of_data of_rz_compatible =3D { @@ -39,6=
- +40,7 @@ static const struct
-> renesas_sdhi_of_data of_rz_compatible =3D {
->  	.capabilities	=3D MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
->  			  MMC_CAP_WAIT_WHILE_BUSY,
->  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
-> +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
->  };
->=20
->  static const struct renesas_sdhi_of_data of_rcar_gen1_compatible =3D { @=
-@ -47,6 +49,7 @@ static const
-> struct renesas_sdhi_of_data of_rcar_gen1_compatible =3D {
->  			  MMC_CAP_WAIT_WHILE_BUSY,
->  	.capabilities2	=3D MMC_CAP2_NO_WRITE_PROTECT,
->  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
-> +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
->  };
->=20
->  /* Definitions for sampling clocks */
-> @@ -75,6 +78,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen2_c=
-ompatible =3D {
->  	.taps_num	=3D ARRAY_SIZE(rcar_gen2_scc_taps),
->  	.max_blk_count	=3D UINT_MAX / TMIO_MAX_BLK_SIZE,
->  	.clk_mask	=3D SDHI_CLK_MASK_DEFAULT,
-> +	.max_divider	=3D SDHI_MAX_DIVIDER_DEFAULT,
->  };
->=20
->  static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] =3D { =
-diff --git
-> a/include/linux/platform_data/tmio.h b/include/linux/platform_data/tmio.h
-> index 76056d49f5e0..27ea21c00419 100644
-> --- a/include/linux/platform_data/tmio.h
-> +++ b/include/linux/platform_data/tmio.h
-> @@ -62,5 +62,6 @@ struct tmio_mmc_data {
->  	unsigned int			max_blk_count;
->  	unsigned short			max_segs;
->  	u64				clk_mask;
-> +	unsigned int			max_divider;
->  };
->  #endif
-> --
-> 2.43.0
+-- 
+2.34.1
 
