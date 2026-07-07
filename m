@@ -1,250 +1,245 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 726AC3F8886
-	for <linux-mmc@vger.kernel.org>; Tue,  7 Jul 2026 11:41:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783424506; cv=none; b=QngE0bbg5v6yen0CeOv8klqtFWzcbnO+UggX8bKObpM6oU51LXJiMoWb/AAs1vUf4P8xDLtxDLyR0Ra+v1M+GHsW//+vG3DQz95wiPtlpHtF/Awrg/9goQD2WON0V+63ovajTaXU4KyqVh1NIu/NwUqMKyb8IFsg2KuX050ThSs=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783424506; c=relaxed/simple;
-	bh=AXimq/rtIFwP4aD04kh/5vfPSxje93mi8aUhDJB2eB0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YajPo6EQk9l1m2XeWywJpIY80C83zjLmTqg7bZb7XORnu/USrLhrd2zKgH+S1kFmoufw37kOvRMg3C76MwD19yAkSfvqlOODY5SLzHbv24bazo/pmCpUO/ApqvQ9tLF1ceHeFkEskCmAEv/rnN1foYQc0MD3ch3sTQkHBT0D7i0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b=lMUFU7Co; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from TYVP286CU001.outbound.protection.outlook.com (mail-japaneastazon11011046.outbound.protection.outlook.com [52.101.125.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8E502FB969;
+	Tue,  7 Jul 2026 11:49:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.125.46
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1783424989; cv=fail; b=Wxdn0l6ho1eGRvW8tzjjoHu82sOi42XenRao1/ho3sTFa5fNWGR6anmhlEB6pABJBHBVklkVX8NLOX405K2HaRnWymgYgGQDLi41pdh3jxDbB9GfJW5/YgOQ8bx6e3Cp+t56e9/Ag4y2tsFP10iI3Ixc6h1O2oZGNqyJ2+r2FkE=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1783424989; c=relaxed/simple;
+	bh=6PK2dvga3naiAmi5VAfjnqiiHHO/KW/j119JoMGO5kc=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=arRsShiJ9DCztJy4v7FeRv8Oxu+cSlaoOQzgd5HSg05WAID3SHuJaStAM45SzUJwaDvEpvPU9fHDMipq+gwoQyNRxBcZTRr92iYsew59/Q1YgByS/TbX2CNRsYJJt4ymUooci/tRr4P1+qXjyO1R1s8oc1b9C9zcawg7sWKSjlY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=VJ3DCVBu; arc=fail smtp.client-ip=52.101.125.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=arm.com header.i=@arm.com header.b="lMUFU7Co"
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id B1FFF2680
-	for <linux-mmc@vger.kernel.org>; Tue,  7 Jul 2026 04:41:40 -0700 (PDT)
-Received: from [192.168.0.1] (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id D03313F85F
-	for <linux-mmc@vger.kernel.org>; Tue,  7 Jul 2026 04:41:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=arm.com; s=foss;
-	t=1783424505; bh=AXimq/rtIFwP4aD04kh/5vfPSxje93mi8aUhDJB2eB0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=lMUFU7Co05ys3CthwwUA8JHeXvv16FyJ5T5puGswwe2fP6jzsG745P7FQ8hTdqKuL
-	 eyau05yQfdzCWrKDG/vkebQy9Gsy2L8PAeWour1mUWdfN7avterG3CQKXJgzxHeQ18
-	 A5vUi4Mcs/j9+Zax/278FrAOryBubquT5haKRTzU=
-Date: Tue, 7 Jul 2026 12:39:54 +0100
-From: Liviu Dudau <liviu.dudau@arm.com>
-To: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
-Cc: Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-	Joel Stanley <joel@jms.id.au>,
-	Andrew Jeffery <andrew@codeconstruct.com.au>,
-	Paul Cercueil <paul@crapouillou.net>,
-	Anitha Chrisanthus <anitha.chrisanthus@intel.com>,
-	Paul Kocialkowski <paulk@sys-base.io>,
-	Linus Walleij <linusw@kernel.org>, Chen-Yu Tsai <wens@kernel.org>,
-	Jernej Skrabec <jernej.skrabec@gmail.com>,
-	Samuel Holland <samuel@sholland.org>,
-	Alexey Brodkin <abrodkin@synopsys.com>,
-	Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-	Tomi Valkeinen <tomi.valkeinen@ideasonboard.com>,
-	Michal Simek <michal.simek@amd.com>,
-	Daniel Scally <dan.scally@ideasonboard.com>,
-	Jacopo Mondi <jacopo.mondi@ideasonboard.com>,
-	Mauro Carvalho Chehab <mchehab@kernel.org>,
-	Eddie James <eajames@linux.ibm.com>,
-	Tiffany Lin <tiffany.lin@mediatek.com>,
-	Andrew-CT Chen <andrew-ct.chen@mediatek.com>,
-	Yunfei Dong <yunfei.dong@mediatek.com>,
-	Minghsiu Tsai <minghsiu.tsai@mediatek.com>,
-	Houlong Wei <houlong.wei@mediatek.com>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Joseph Liu <kwliu@nuvoton.com>, Marvin Lin <kflin@nuvoton.com>,
-	Dmitry Osipenko <dmitry.osipenko@collabora.com>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Thierry Reding <thierry.reding@kernel.org>,
-	Jonathan Hunter <jonathanh@nvidia.com>,
-	Srinivas Kandagatla <srini@kernel.org>,
-	Arnd Bergmann <arnd@arndb.de>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Ge Gordon <gordon.ge@bst.ai>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-	Saravana Kannan <saravanak@kernel.org>,
-	Mathieu Poirier <mathieu.poirier@linaro.org>,
-	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
-	Shengjiu Wang <shengjiu.wang@gmail.com>,
-	Xiubo Li <Xiubo.Lee@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>,
-	Mark Brown <broonie@kernel.org>, Frank Li <Frank.Li@nxp.com>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Peter Ujfalusi <peter.ujfalusi@linux.intel.com>,
-	Bard Liao <yung-chuan.liao@linux.intel.com>,
-	Daniel Baluta <daniel.baluta@nxp.com>,
-	Orson Zhai <orsonzhai@gmail.com>,
-	Baolin Wang <baolin.wang@linux.alibaba.com>,
-	Peter Chen <peter.chen@cixtech.com>,
-	Fugang Duan <fugang.duan@cixtech.com>,
-	Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>,
-	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
-	Fabio Estevam <festevam@gmail.com>,
-	Nicolin Chen <nicoleotsuka@gmail.com>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Kai Vehmanen <kai.vehmanen@linux.intel.com>,
-	Pierre-Louis Bossart <pierre-louis.bossart@linux.dev>,
-	Vijendar Mukunda <Vijendar.Mukunda@amd.com>,
-	Chunyan Zhang <zhang.lyra@gmail.com>,
-	CIX Linux Kernel Upstream Group <cix-kernel-upstream@cixtech.com>,
-	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-	dri-devel@lists.freedesktop.org, linux-aspeed@lists.ozlabs.org,
-	linux-arm-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-	linux-sunxi@lists.linux.dev, linux-media@vger.kernel.org,
-	openbmc@lists.ozlabs.org, linux-mediatek@lists.infradead.org,
-	kernel@collabora.com, linux-tegra@vger.kernel.org,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-remoteproc@vger.kernel.org, linux-staging@lists.linux.dev,
-	linux-sound@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-	imx@lists.linux.dev, sound-open-firmware@alsa-project.org
-Subject: Re: [PATCH 00/42] of: reserved_mem: Introduce devres helpers and
- convert drivers
-Message-ID: <akzliqtjZVwNw594@e142607>
-References: <20260703193855.110619-1-mukesh.ojha@oss.qualcomm.com>
+	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="VJ3DCVBu"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=kvbyu8rWMvreZdITEs4O/MTIQ925dYS+LySUX5F+ghxz8UbP/QWjB6mF/TPsD9yDZ00R+dB5Q6mWG/tZBUcDFZ86ZWx8x+wMC1MtU+r2xqLCl+gSUt7QLrVt0LH34ZkexbUVe5hI6xMya19i26M4YAOXD2PPv5yeG59KmGEiA3pExnjN4jgKoAXor4CfQ5LLCp5vbgJgOFvdAt+WNTDU1y3Xi5NTEut71HtSuAFbomyOoa8Wnczfeen0yS6G9B3KKrnVPLZ0wxfTmCBknVWtQHwBVfNFLvJvNv2xnXoB/iIyvcbU4H6ynji/hdIhBZTIFojSd7jsfvdHXmPl/Mbs+g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=CXvo3gr1Skp6oGjxDrvn/SjGA3BZmaMTj2F6MBHpJsg=;
+ b=xpxfEzhS8LZ/PPZrT03nQe2vmZDcU2aZK1vXgElPJ17buSljGbEjKE6adOp/7byMKt3LLwcjniz3/lDa7vZToyA5XFANtr5FzBe62lGfI1LVTdWKcTPIiqbV2Vb3ROCejCahiHlEKxv50aFy+zwhACDlrtF01CoxcO8ovckSJ5jtkmEbKqYsl0pDYKA/UbiP4xVCJztpNP+fdUp2Rybk60WtHTfxM0b1MLd89toEr5nbzTcoolQFbjI4nscchgFrtl1DHQ6/Ht/nabVXB6aIqXOBV06gADttRV2RttrN0sB5hO9ED12bP0q3gi8Dd/Q58vmoYRzmfVwbBAzOf7we0A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=CXvo3gr1Skp6oGjxDrvn/SjGA3BZmaMTj2F6MBHpJsg=;
+ b=VJ3DCVBuPklRJQFBYKEAq2LFlwkvxe7bAg4fl31wEvcC8Au6tdzHACWYXU9GAj0npNFjQwXwjYcxXZVlCALpkWm8+BJtQltoWVv03Y0LNfzNVEZ81JnOYLY5tbE/xxrCir0A48fv7PkIeFe17LXyaMzaCa0Rn63jaMKofrvLfH4=
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
+ by OS9PR01MB12372.jpnprd01.prod.outlook.com (2603:1096:604:2e6::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.181.11; Tue, 7 Jul
+ 2026 11:49:44 +0000
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::87d1:4928:d55:97de%4]) with mapi id 15.21.0181.009; Tue, 7 Jul 2026
+ 11:49:44 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: biju.das.au <biju.das.au@gmail.com>, wsa+renesas
+	<wsa+renesas@sang-engineering.com>, Ulf Hansson <ulfh@kernel.org>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Geert
+ Uytterhoeven <geert+renesas@glider.be>, Prabhakar Mahadev Lad
+	<prabhakar.mahadev-lad.rj@bp.renesas.com>, biju.das.au
+	<biju.das.au@gmail.com>
+Subject: RE: [PATCH v18 06/12] mmc: renesas_sdhi: Add
+ TMIO_MMC_INTERNAL_DIVIDER flag
+Thread-Topic: [PATCH v18 06/12] mmc: renesas_sdhi: Add
+ TMIO_MMC_INTERNAL_DIVIDER flag
+Thread-Index: AQHdAl+ukFlVjUjX+EiPQo3upCHJZbZiCCPA
+Date: Tue, 7 Jul 2026 11:49:44 +0000
+Message-ID:
+ <TY3PR01MB11346F5057FB697FA68024A8F86F02@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+References: <20260622155610.184271-1-biju.das.jz@bp.renesas.com>
+ <20260622155610.184271-7-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20260622155610.184271-7-biju.das.jz@bp.renesas.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OS9PR01MB12372:EE_
+x-ms-office365-filtering-correlation-id: 4d6e0f22-57c1-4cfd-95cf-08dedc1dd684
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|23010399003|366016|376014|38070700021|18002099003|22082099003|4143699003|11063799006|56012099006;
+x-microsoft-antispam-message-info:
+ zQB/it8Ev37C+DGZ+JhGY5oCeSVz0nQP8LcjwQkWu174glJKux1raqRsfgyATdM0UXuWUiIsN/D5h/Hlz1gtXsaLhHPS8cOtWOkNcxigQ3cyNqnFU7vqwASVwuEL7C2cqI37nWG+1YomAdib0hCHoo78JW/c79tglO2Dn0MKSmQoJ6i0SP9Mx/ssmlSUTTAPmsVEboTb9EXs8UdXUUSroKK7oY3kPzxkKtqb7cxiWt7peS/GPnzHPU0RqhqKDa3HYo3gDDepwfsHBGnqTF/O4COCoXriO85IPzxEP++vdnOjRsDHJJQhCjVjEnjAt7uKzx3QUa2cSOFKI/I83g/G3iJZi6TaP2sz9UXxEdT9V2/vED44CM9I64JQukM4qBtXNdKvaL+wkbMkHvdNbBA9egcSIvyHsuGWUtoJUtInNqZO1cwYcfBff3NOS+sY45VAGNq/68zkYjPGAQmKISGM0RmjChzMnhZ9ctRzStqcNYXi/khdlGQRHg8VmGYjCrr4g1EUQGD21mKcWGcuAH/W/l9lR/pVGLrMvr8nIAGcXz3WfNOiWqLDh04WgSRS2oJwzmnZl5CY8P4SUY1dWFlTAxGPWwXsjd7SQyov/h5/ZGFj0pcIE/ZXx0/CYNL7lJzdu0hSUgCulB864S7IWmitmIk9Wuypyp7z7CGMmq35MtE=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(23010399003)(366016)(376014)(38070700021)(18002099003)(22082099003)(4143699003)(11063799006)(56012099006);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?KNS+ppZm+WLDR5Nz3oIY9Ashi8VkeFxVRcw52zgDXIsW75wyBByITk/zdCd3?=
+ =?us-ascii?Q?ma1yWD9F755+L4Z2kwPJQW07tktJa6FHkEgSxrD72x4tXdi5XnwDmRLwgMf4?=
+ =?us-ascii?Q?J/rET9ckqc1+m92N1Z0mvB7B0/cGBAxztx/b3/LlPzPiGC0aa9ZUv3l/xdM1?=
+ =?us-ascii?Q?FJpsxEj7JNGtiKdYqE7Z5UJSsE2iMA0vZ7neaZtjUhZGa4AJCq8xbj46x0Qd?=
+ =?us-ascii?Q?mCn3sNQy/PFc9Am1ln5MfCutDYnCx5m9qvaQtX1wJYrmson9pG2BCHLdHxI6?=
+ =?us-ascii?Q?MMuxZv6lv4AzZAcnUKNZk/rQV766TfJunTvTCUVsAuJfeeHc4KMmMs+cefxY?=
+ =?us-ascii?Q?Hm/L7dQGGb2cOiPpwFdwT30imNjTKxmj8GCpH5Q0q07fuqKOt6a+h9fVFv6e?=
+ =?us-ascii?Q?Cf8s12ESqMezVHheybQLbxoVbxywIJdh8qTgMB7dGHb0BmxBoqpmdhaBiG4I?=
+ =?us-ascii?Q?YfIM2x0wwoT396Y93gD2NL7IcIMWQLJTYkFesfOI6j/Y5dVAKp5/KawvPF2d?=
+ =?us-ascii?Q?TPGL5bdWS+Hom1Spjlfe13xngaxLx6dEyLbbd4QJOd08TTcVTm3Y0NlcdOG6?=
+ =?us-ascii?Q?pOpg0m+beHtCu9GLikAqjmIuDo1MhJ9Fabmbj98W8FyBEjQ9EkmAxWKwBx21?=
+ =?us-ascii?Q?6IUKzdbA+pzgIe8Zu9Jp8AnSNSh+UQzmD/1zZmAtZjvRa7OMrRpO+570jzY3?=
+ =?us-ascii?Q?bTByvC1c6sZ3s12Bl+fCoIGqC/MhLPQSTNcHqvBLIv7qXTBnbmxL5pL/CAEH?=
+ =?us-ascii?Q?kTyZHqb9qHlXR+0n1VYtZFWegCNXnVs1PSmiHOEJtecaPjGoKheF4a6aQgAd?=
+ =?us-ascii?Q?RcZx5uKkiMwYw0TZ/ois5QGjdRCNyaGfEwpwRU94TD6V6TZKQyaP+yP6gq+M?=
+ =?us-ascii?Q?oLUw6qCm2R1o5kyvgB8ToYygIIeBBXQrBTIq1EEK145zVXN8u0IgVON5uJBs?=
+ =?us-ascii?Q?N8ybTx3wHgygcqy0jyQGhp6h1AGEnDJYTuVS+fag1/0D7PpqfPPdFvcIa+Ty?=
+ =?us-ascii?Q?ArLsSH76hhFEYx8vypps/APeJpw5p6KxK1Xg0OsajF0BpjDM5N66OXY1eZWz?=
+ =?us-ascii?Q?l9ddgNpw/DFt/gfpph0wkX0Ehvoe2UriRyaYWcdyoYSZ0v5ixI46AHqFgUtB?=
+ =?us-ascii?Q?btCnxsytvMTFXEusTUBfQzFb4TFWJnGt1cQKsNpieTL9GLhZnP8uPfbHhrUm?=
+ =?us-ascii?Q?fR3NWZE1AlOpFvXF/q95REJsKy5vf0R9eOlZIBrQjcTZcKNE3soE8ner7Oak?=
+ =?us-ascii?Q?o7ce+FgnQkcuTAZ/VDb0cLYazVyt4HxxioHEHpvoUG92315HZses0oIGrt4B?=
+ =?us-ascii?Q?CWgUqbfmdWYJ4YRbpZf5UPgmnhrecfA3u1dW2qes13iWSLTNDClDcAAex0oN?=
+ =?us-ascii?Q?dVye9vsxznhLez2nALHtCnkUkCgYWNXqNbLF0TsrLHZjxFUOql1Hwxj0RBdZ?=
+ =?us-ascii?Q?MbFziD30FKymh9G/L5rGUj5wn6LDI3vnCjpj4xuSZ/tuSrb/z9s9sfPES7ZV?=
+ =?us-ascii?Q?jbz2DXZiKuOmwRxTu4EuOz/KuYlMJ1iOYTDyEsKQkTEhspWLtfEjun2wQ4Ws?=
+ =?us-ascii?Q?67VInrT7i+H9aAAkfsvzP9bwApfhQHfUvJbUlFx/9fCaJHm9NKeRxwjKz0WI?=
+ =?us-ascii?Q?dmHmr40aLACjdcUlSiddN8ErlzR2p9Ai5RsJVr+g4fgoXMX8Sn4a145YI2La?=
+ =?us-ascii?Q?91anSQrr1cYca89JGNctrIY4Bftgb1iLRODnQ+k99kKw4ba+Tx3/xJKbdY5e?=
+ =?us-ascii?Q?mQtoLwDzlw=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20260703193855.110619-1-mukesh.ojha@oss.qualcomm.com>
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4d6e0f22-57c1-4cfd-95cf-08dedc1dd684
+X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Jul 2026 11:49:44.3921
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: NTtTmQIkAcJcVKNiuasq6jk11nWacXxp2WKfaIgXRjJPsa8rfxMJ6kv6c9VTKdi8Yn3j82e7EJIbIHckPL2NVCUvMKd7yIOE6IiX0USkmSg=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9PR01MB12372
 
-On Sat, Jul 04, 2026 at 01:08:13AM +0530, Mukesh Ojha wrote:
-> Drivers using of_reserved_mem_device_init() and its variants must
-> manually call of_reserved_mem_device_release() in their remove and
-> error-unwind paths. This is repetitive boilerplate that is easy to
-> get wrong, and several drivers have open-coded the teardown
-> inconsistently or skipped it entirely, leading to dangling reserved
-> memory references.
-> 
-> This series introduces devres-managed wrappers —
-> devm_of_reserved_mem_device_init(), devm_of_reserved_mem_device_init_by_idx(),
-> and devm_of_reserved_mem_device_init_by_name() — that tie the reserved
-> memory region lifetime to the device, releasing it automatically on
-> unbind. The remaining 40 patches convert drivers across the drm, media,
-> ASoC, remoteproc, firmware, mmc, memory and misc subsystems to use these
-> helpers, yielding a net reduction of ~90 lines of boilerplate.
-> 
-> This series depends on  https://lore.kernel.org/lkml/20260703164457.4040457-1-mukesh.ojha@oss.qualcomm.com/
-> 
-> Konrad Dybcio (1):
->   of: reserved_mem: Introduce devres-managed initialization functions
-> 
-> Mukesh Ojha (41):
->   of: reserved_mem: Add devm_of_reserved_mem_device_init_by_name()
->   firmware: qcom: scm: Use devm_of_reserved_mem_device_init()
->   remoteproc: da8xx: Use devm_of_reserved_mem_device_init()
->   remoteproc: keystone: Use devm_of_reserved_mem_device_init()
->   media: synopsys: hdmirx: Use devm_of_reserved_mem_device_init()
->   remoteproc: omap: Use devm_of_reserved_mem_device_init()
->   drm: logicvc: Use devm_of_reserved_mem_device_init()
->   drm: hdlcd: Use devm_of_reserved_mem_device_init()
->   drm: pl111: Use devm_of_reserved_mem_device_init()
->   remoteproc: mtk_scp: Use devm_of_reserved_mem_device_init()
->   media: aspeed: Use devm_of_reserved_mem_device_init()
->   media: nuvoton: npcm-video: Use devm_of_reserved_mem_device_init()
->   memory: tegra210-emc: Use devm_of_reserved_mem_device_init_by_name()
->   drm: komeda: Use devm_of_reserved_mem_device_init()
->   drm: malidp: Use devm_of_reserved_mem_device_init()
+Hi Wolfram,
 
-For the hdlcd, komeda and malidp drivers:
+> -----Original Message-----
+> From: Biju <biju.das.au@gmail.com>
+> Sent: 22 June 2026 16:56
+> Subject: [PATCH v18 06/12] mmc: renesas_sdhi: Add TMIO_MMC_INTERNAL_DIVID=
+ER flag
+>=20
+> From: Biju Das <biju.das.jz@bp.renesas.com>
+>=20
+> The RZ/G3L SoC has an internal clock divider active for all modes except =
+HS400. To compensate, the rate
+> requested from clk_set_rate() for clk relative to clkh must be doubled in=
+ those cases so that the SoC's
+> internal /2 divider brings the actual card clock back to the intended rat=
+e.
+>=20
+> Introduce a TMIO_MMC_INTERNAL_DIVIDER flag (bit 14) in tmio.h and a divid=
+er field in struct renesas_sdhi.
+> During probe, when the flag is set and the device tree does not include t=
+he mmc-hs400-1_8v property,
+> priv->divider is set to 2; otherwise it defaults to 1. The divider is
+> applied in renesas_sdhi_clk_update() when computing the rate for
+> priv->clk, replacing the previously implicit multiply-by-1.
+>=20
+> No existing platform sets TMIO_MMC_INTERNAL_DIVIDER; this patch introduce=
+s the infrastructure only, with
+> no functional change for current platforms.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> ---
+> v18:
+>  * New patch using flag.
+> ---
+>  drivers/mmc/host/renesas_sdhi.h      | 2 ++
+>  drivers/mmc/host/renesas_sdhi_core.c | 8 +++++++-
+>  include/linux/platform_data/tmio.h   | 3 +++
+>  3 files changed, 12 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_s=
+dhi.h index
+> 438b2a7afe76..6f6b41fbe91e 100644
+> --- a/drivers/mmc/host/renesas_sdhi.h
+> +++ b/drivers/mmc/host/renesas_sdhi.h
+> @@ -102,6 +102,8 @@ struct renesas_sdhi {
+>  	struct reset_control *rstc;
+>  	struct tmio_mmc_host *host;
+>  	struct regulator_dev *rdev;
+> +
+> +	unsigned int divider;
+>  };
+>=20
+>  #define host_to_priv(host) \
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/rene=
+sas_sdhi_core.c
+> index e9767aa83b00..8890859d0777 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -185,7 +185,7 @@ static unsigned int renesas_sdhi_clk_update(struct tm=
+io_mmc_host *host,
+>  	clk_set_rate(ref_clk, best_freq);
+>=20
+>  	if (priv->clkh)
+> -		clk_set_rate(priv->clk, best_freq >> clkh_shift);
+> +		clk_set_rate(priv->clk, (best_freq >> clkh_shift) * priv->divider);
 
-Reviewed-by: Liviu Dudau <liviu.dudau@arm.com>
+As sashiko pointer out [1]
 
-Best regards,
-Liviu
+priv->divider is not required, if we calculate clkh_shift for the HS400 cas=
+e(internal 1/2 Divider) and
+non-HS400 case
 
->   drm: ingenic: Use devm_of_reserved_mem_device_init()
->   drm: kmb: Use devm_of_reserved_mem_device_init()
->   drm: sun4i: Use devm_of_reserved_mem_device_init()
->   drm: xlnx: zynqmp_dpsub: Use devm_of_reserved_mem_device_init()
->   media: arm: mali-c55: Use devm_of_reserved_mem_device_init()
->   media: mediatek: vpu: Use devm_of_reserved_mem_device_init()
->   mmc: sdhci-of-bst: Use devm_of_reserved_mem_device_init_by_idx()
->   remoteproc: ti_k3: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8192: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8196: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8183: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8189: Use devm_of_reserved_mem_device_init()
->   ASoC: SOF: imx: Use devm_of_reserved_mem_device_init_by_name()
->   staging: media: cedrus: Use devm_of_reserved_mem_device_init()
->   ASoC: cix-ipbloq: Use devm_of_reserved_mem_device_init()
->   drm: aspeed: Use devm_of_reserved_mem_device_init()
->   drm: arcpgu: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8173: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8186: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8188: Use devm_of_reserved_mem_device_init()
->   ASoC: mediatek: mt8195: Use devm_of_reserved_mem_device_init()
->   ASoC: SOF: mediatek: mt8186: Use devm_of_reserved_mem_device_init()
->   ASoC: SOF: mediatek: mt8195: Use devm_of_reserved_mem_device_init()
->   misc: fastrpc: Use devm_of_reserved_mem_device_init()
->   ASoC: fsl: imx-rpmsg: Use devm_of_reserved_mem_device_init_by_idx()
->   ASoC: sprd: Use devm_of_reserved_mem_device_init()
-> 
->  drivers/firmware/qcom/qcom_scm.c              | 22 +++------
->  .../gpu/drm/arm/display/komeda/komeda_dev.c   |  4 +-
->  drivers/gpu/drm/arm/hdlcd_drv.c               |  6 +--
->  drivers/gpu/drm/arm/malidp_drv.c              |  4 +-
->  drivers/gpu/drm/aspeed/aspeed_gfx_drv.c       |  2 +-
->  drivers/gpu/drm/ingenic/ingenic-drm-drv.c     | 13 +-----
->  drivers/gpu/drm/kmb/kmb_drv.c                 | 12 +----
->  drivers/gpu/drm/logicvc/logicvc_drm.c         | 21 ++++-----
->  drivers/gpu/drm/pl111/pl111_drv.c             |  4 +-
->  drivers/gpu/drm/sun4i/sun4i_drv.c             |  4 +-
->  drivers/gpu/drm/tiny/arcpgu.c                 |  2 +-
->  drivers/gpu/drm/xlnx/zynqmp_dpsub.c           |  4 +-
->  .../platform/arm/mali-c55/mali-c55-core.c     | 12 ++---
->  drivers/media/platform/aspeed/aspeed-video.c  | 12 ++---
->  drivers/media/platform/mediatek/vpu/mtk_vpu.c |  3 +-
->  drivers/media/platform/nuvoton/npcm-video.c   |  9 +---
->  .../platform/synopsys/hdmirx/snps_hdmirx.c    | 16 +------
->  drivers/memory/tegra/tegra210-emc-core.c      | 21 ++++-----
->  drivers/misc/fastrpc.c                        |  2 +-
->  drivers/mmc/host/sdhci-of-bst.c               |  7 +--
->  drivers/of/of_reserved_mem.c                  | 41 +++++++++++++++++
->  drivers/remoteproc/da8xx_remoteproc.c         | 10 +---
->  drivers/remoteproc/keystone_remoteproc.c      | 16 +------
->  drivers/remoteproc/mtk_scp.c                  |  3 +-
->  drivers/remoteproc/omap_remoteproc.c          | 13 +-----
->  drivers/remoteproc/ti_k3_common.c             | 13 +-----
->  drivers/remoteproc/ti_k3_common.h             |  1 -
->  .../staging/media/sunxi/cedrus/cedrus_hw.c    |  6 +--
->  include/linux/of_reserved_mem.h               | 46 +++++++++++++++++++
->  sound/hda/controllers/cix-ipbloq.c            |  2 +-
->  sound/soc/fsl/imx-rpmsg.c                     |  2 +-
->  sound/soc/mediatek/mt8173/mt8173-afe-pcm.c    |  2 +-
->  sound/soc/mediatek/mt8183/mt8183-afe-pcm.c    | 13 +-----
->  sound/soc/mediatek/mt8186/mt8186-afe-pcm.c    |  2 +-
->  sound/soc/mediatek/mt8188/mt8188-afe-pcm.c    |  2 +-
->  sound/soc/mediatek/mt8189/mt8189-afe-pcm.c    | 16 +------
->  sound/soc/mediatek/mt8192/mt8192-afe-pcm.c    | 11 +----
->  sound/soc/mediatek/mt8195/mt8195-afe-pcm.c    |  2 +-
->  sound/soc/mediatek/mt8196/mt8196-afe-pcm.c    | 14 +-----
->  sound/soc/sof/imx/imx-common.c                |  9 ++--
->  sound/soc/sof/mediatek/mt8186/mt8186.c        |  2 +-
->  sound/soc/sof/mediatek/mt8195/mt8195.c        |  2 +-
->  sound/soc/sprd/sprd-pcm-dma.c                 |  3 +-
->  43 files changed, 162 insertions(+), 249 deletions(-)
-> 
-> -- 
-> 2.53.0
-> 
+[1] https://sashiko.dev/#/patchset/20260622155610.184271-1-biju.das.jz%40bp=
+.renesas.com
 
--- 
-====================
-| I would like to |
-| fix the world,  |
-| but they're not |
-| giving me the   |
- \ source code!  /
-  ---------------
-    ¯\_(ツ)_/¯
+Cheers,
+Biju
+
+>=20
+>  	return clk_get_rate(priv->clk);
+>  }
+> @@ -1231,6 +1231,12 @@ int renesas_sdhi_probe(struct platform_device *pde=
+v,
+>=20
+>  	dev_pm_domain_start(&pdev->dev);
+>=20
+> +	if ((host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER) &&
+> +	    !device_property_read_bool(dev, "mmc-hs400-1_8v"))
+> +		priv->divider =3D 2;
+> +	else
+> +		priv->divider =3D 1;
+> +
+>  	ret =3D renesas_sdhi_clk_enable(host);
+>  	if (ret)
+>  		return ret;
+> diff --git a/include/linux/platform_data/tmio.h b/include/linux/platform_=
+data/tmio.h
+> index 868a21842fa5..6c512e96e192 100644
+> --- a/include/linux/platform_data/tmio.h
+> +++ b/include/linux/platform_data/tmio.h
+> @@ -53,6 +53,9 @@
+>  /* Some controllers have tuning delay */
+>  #define TMIO_MMC_TUNING_DELAY		BIT(13)
+>=20
+> +/* Some controllers have internal divider */
+> +#define TMIO_MMC_INTERNAL_DIVIDER	BIT(14)
+> +
+>  struct tmio_mmc_data {
+>  	void				*chan_priv_tx;
+>  	void				*chan_priv_rx;
+> --
+> 2.43.0
+
