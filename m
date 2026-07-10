@@ -1,94 +1,116 @@
-Received: from imap4.hz.codethink.co.uk (imap4.hz.codethink.co.uk [188.40.203.114])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3AA5443800A;
-	Fri, 10 Jul 2026 16:13:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=188.40.203.114
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1DED03749E5
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Jul 2026 17:46:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783700000; cv=none; b=rxoigQlsHTaW7zhIF2W51jxXShsqlB7igMChiV6561X2EcpbYygTPjT382fNdU3W7I0ioNnn3PDE+p0F9tWwvLBADx4cQWAo9BlyUR8TwjfbH0SaaiixeEPXLBYYmT/pWvAoco8FTAhWlIA1yt3I2sunmxJRAonw1p+OmDaNKRo=
+	t=1783705564; cv=none; b=kE/64jzoL+7QPE3VaRRGwwbaZ4vdDHmI7NJ1S5p8R1w9DPH639TEM+OKPvupnnHiThLKOfKJEclhKQRZROatmNehty3IEMUIas2BSsO5mfmmouubrOcZ2isWTCJRhtzV8jJ4GZVJ278noXQM+182tdcCDSVvLmyZbFhGl97wTII=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1783700000; c=relaxed/simple;
-	bh=ucXI49U/Plmb003QvLQRcChStFws7HwkeKF49Jut3V0=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=pjwEaqRIBn8xFqym9XsbEKTuWu0Ef27dOa0LeuUvog0lmkvNhgCTKn3U4TpIL/MHWw6REctXdowMvJdgF6pmIeoCUR/GoZPMlEzNr5zF0UsEwKQphMQvwoCLR8av+rNLm1txSoBxP+699TBIfd5UGML6MaiBrhUHldYjtM15rMM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.com; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=UgosjGaB; arc=none smtp.client-ip=188.40.203.114
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.com
+	s=arc-20240116; t=1783705564; c=relaxed/simple;
+	bh=KvBYP+wl2IjCxMaSVmX25pjv+NEzDq5zeL7bHnenBoI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=s6Dp2HqYqevUDqA/Is5a2scx/iB0Q9oWTjKzBc08YwJI4VKtiNvN6oAaZbvWz3SqWgiRiDhwJxkshfCdByrTcsxZlynQgU7sYqUrzbRk9u5+7HhPSL0YvXiComRo5HsLnbhn4e1WkpB9OiFyTKC5L3gEoTbLuNiYptTBwedfdHk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Kj7a6Pu5; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="UgosjGaB"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=codethink.co.uk; s=imap4-20230908; h=Sender:Content-Transfer-Encoding:
-	MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:In-Reply-To:
-	References; bh=TC/UGrgWHjBp92DAPM0VNybod7BKYXnvEVYlfeyMgow=; b=UgosjGaBl/3qtH
-	WAzu98Z21TGx4fta0hDZQBpkz0o6GgH/SP1xT4kcI8zdvaZkiXl2kXznsLgyYZTgAjlpgjSBk/XNZ
-	PqakMUowakRcpg8rZRzb0EUr3+VnNFdRHfx0uYEPmVE27BOn86bFxNH+IsHPor0z4o6mNfro5P55p
-	CMM0lCtHuku10IOJ+YU77Za/hyLrXr8ykwbggxwmzknk5jxhbiG0kEON2Jcmj0CM9DrKumBBhU8+E
-	T7FkQjrq/+oJBiLD+BczJy8YCSKCo1JE/A4jtd1f+NKkqwBaBlqOzlyv8+qL89/S/qrFZsQ1WbzX8
-	Ny0+9GJo+UsXt1zI/R3w==;
-Received: from [167.98.27.226] (helo=rainbowdash)
-	by imap4.hz.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
-	id 1wiDqV-0036mO-8Y; Fri, 10 Jul 2026 17:12:59 +0100
-Received: from ben by rainbowdash with local (Exim 4.99.4)
-	(envelope-from <ben@rainbowdash>)
-	id 1wiDqU-00000002OHv-3WTm;
-	Fri, 10 Jul 2026 17:12:58 +0100
-From: Ben Dooks <ben.dooks@codethink.co.uk>
-To: Jaehoon Chung <jh80.chung@samsung.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
-	Ulf Hansson <ulfh@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH v2] mmc: dw_mmc: move declaration of dw_mci_pmops
-Date: Fri, 10 Jul 2026 17:12:54 +0100
-Message-Id: <20260710161254.569883-1-ben.dooks@codethink.co.uk>
-X-Mailer: git-send-email 2.37.2.352.g3c44437643
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Kj7a6Pu5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 565501F00ACF
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Jul 2026 17:46:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1783705562;
+	bh=KvBYP+wl2IjCxMaSVmX25pjv+NEzDq5zeL7bHnenBoI=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc;
+	b=Kj7a6Pu5eehgdCmmTI+vwhf9nbZJIqM/gmnHg3wk7GzSc/sIfh4SLBJdGeaTBEiDv
+	 b8rDzUGmQ/ofpb+jeVOCzO/AAJvsUlpTJmujo/sCcFYlSo5w1qI5V62txkfh20z4kl
+	 8oUrAnr7A+VpIdb3rMwkdCVuO7ctSV2dTRn501mKvbH8XS7Ebz3yLokZ6BfsTxc9Bm
+	 bPq4gjzedbjsGFpMYyyq3+099H0QssWs4bvFBBUd2pgnTSl5SQ1f1xtuAKGKw076b6
+	 m1YLoNVUzOAFOWsUsdRS6GJyVcxI8PKE6nSaCG5S2VX3Fwb/kc2mr1aHX9vD75TnB0
+	 Uq2zAgam/8dZQ==
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5b00ca000ceso1274203e87.0
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Jul 2026 10:46:02 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AHgh+Rp2aBORf28ZbyGmmy6OOxScjhTLK/ChJR5L/oXel7gpVmXl4HGQbCnJeBDi0seMKNmLmY69LXVgzhw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzfvBSm1aM6oTCXnMEjGuSOu74DyQhmVa5Us9Qy+f+EZs9Gufwb
+	6JqqF47NYBXvLCIRfbGJjs0Ghhxa3cq+IPc0ZvVl8GsLrADbwV8TofLndjrWi5kywG1pITOFIRt
+	RLKdDCNp5lddku4yzRGji3cTBm4SpuXQ=
+X-Received: by 2002:a05:6512:688f:10b0:5b0:12d6:4c05 with SMTP id
+ 2adb3069b0e04-5b02369c6e8mr17375e87.36.1783705559836; Fri, 10 Jul 2026
+ 10:45:59 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Sender: srv_ts003@codethink.com
+References: <20260703193855.110619-1-mukesh.ojha@oss.qualcomm.com> <20260703193855.110619-11-mukesh.ojha@oss.qualcomm.com>
+In-Reply-To: <20260703193855.110619-11-mukesh.ojha@oss.qualcomm.com>
+From: Linus Walleij <linusw@kernel.org>
+Date: Fri, 10 Jul 2026 19:45:47 +0200
+X-Gmail-Original-Message-ID: <CAD++jLnUf6j8jPJogpuo4w55EHqgt7LChOQX5JY5h4n2VOf5nQ@mail.gmail.com>
+X-Gm-Features: AUfX_mz2mAY-nRqzEwN08-F9a7Mq7XiQwd_nI9Ppbf1sw-soYPlPLluIapY3fR0
+Message-ID: <CAD++jLnUf6j8jPJogpuo4w55EHqgt7LChOQX5JY5h4n2VOf5nQ@mail.gmail.com>
+Subject: Re: [PATCH 10/42] drm: pl111: Use devm_of_reserved_mem_device_init()
+To: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
+Cc: Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Liviu Dudau <liviu.dudau@arm.com>, Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+	Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
+	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, Joel Stanley <joel@jms.id.au>, 
+	Andrew Jeffery <andrew@codeconstruct.com.au>, Paul Cercueil <paul@crapouillou.net>, 
+	Anitha Chrisanthus <anitha.chrisanthus@intel.com>, Paul Kocialkowski <paulk@sys-base.io>, 
+	Chen-Yu Tsai <wens@kernel.org>, Jernej Skrabec <jernej.skrabec@gmail.com>, 
+	Samuel Holland <samuel@sholland.org>, Alexey Brodkin <abrodkin@synopsys.com>, 
+	Laurent Pinchart <laurent.pinchart@ideasonboard.com>, 
+	Tomi Valkeinen <tomi.valkeinen@ideasonboard.com>, Michal Simek <michal.simek@amd.com>, 
+	Daniel Scally <dan.scally@ideasonboard.com>, Jacopo Mondi <jacopo.mondi@ideasonboard.com>, 
+	Mauro Carvalho Chehab <mchehab@kernel.org>, Eddie James <eajames@linux.ibm.com>, 
+	Tiffany Lin <tiffany.lin@mediatek.com>, Andrew-CT Chen <andrew-ct.chen@mediatek.com>, 
+	Yunfei Dong <yunfei.dong@mediatek.com>, Minghsiu Tsai <minghsiu.tsai@mediatek.com>, 
+	Houlong Wei <houlong.wei@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, Joseph Liu <kwliu@nuvoton.com>, 
+	Marvin Lin <kflin@nuvoton.com>, Dmitry Osipenko <dmitry.osipenko@collabora.com>, 
+	Krzysztof Kozlowski <krzk@kernel.org>, Thierry Reding <thierry.reding@kernel.org>, 
+	Jonathan Hunter <jonathanh@nvidia.com>, Srinivas Kandagatla <srini@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ge Gordon <gordon.ge@bst.ai>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Saravana Kannan <saravanak@kernel.org>, Mathieu Poirier <mathieu.poirier@linaro.org>, 
+	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, Shengjiu Wang <shengjiu.wang@gmail.com>, 
+	Xiubo Li <Xiubo.Lee@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, 
+	Mark Brown <broonie@kernel.org>, Frank Li <Frank.Li@nxp.com>, 
+	Sascha Hauer <s.hauer@pengutronix.de>, Peter Ujfalusi <peter.ujfalusi@linux.intel.com>, 
+	Bard Liao <yung-chuan.liao@linux.intel.com>, Daniel Baluta <daniel.baluta@nxp.com>, 
+	Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linux.alibaba.com>, 
+	Peter Chen <peter.chen@cixtech.com>, Fugang Duan <fugang.duan@cixtech.com>, 
+	Ekansh Gupta <ekansh.gupta@oss.qualcomm.com>, 
+	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>, Fabio Estevam <festevam@gmail.com>, 
+	Nicolin Chen <nicoleotsuka@gmail.com>, Pengutronix Kernel Team <kernel@pengutronix.de>, 
+	Kai Vehmanen <kai.vehmanen@linux.intel.com>, 
+	Pierre-Louis Bossart <pierre-louis.bossart@linux.dev>, 
+	Vijendar Mukunda <Vijendar.Mukunda@amd.com>, Chunyan Zhang <zhang.lyra@gmail.com>, 
+	CIX Linux Kernel Upstream Group <cix-kernel-upstream@cixtech.com>, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, 
+	linux-aspeed@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org, 
+	linux-mips@vger.kernel.org, linux-sunxi@lists.linux.dev, 
+	linux-media@vger.kernel.org, openbmc@lists.ozlabs.org, 
+	linux-mediatek@lists.infradead.org, kernel@collabora.com, 
+	linux-tegra@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-remoteproc@vger.kernel.org, 
+	linux-staging@lists.linux.dev, linux-sound@vger.kernel.org, 
+	linuxppc-dev@lists.ozlabs.org, imx@lists.linux.dev, 
+	sound-open-firmware@alsa-project.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-The dw_mci_pmops is exported out of dw_mmc.c so move the declaration of
-ton dw_mmc.h from dw_mmc-pltfm.h to fix the following sparse warning:
+On Fri, Jul 3, 2026 at 9:43=E2=80=AFPM Mukesh Ojha <mukesh.ojha@oss.qualcom=
+m.com> wrote:
 
-drivers/mmc/host/dw_mmc.c:3512:25: warning: symbol 'dw_mci_pmops' was not declared. Should it be static?
+> Switch to devm_of_reserved_mem_device_init() so the reserved memory
+> region is released automatically on probe failure or device removal.
+> Remove the explicit of_reserved_mem_device_release() calls in the
+> dev_put error path and pl111_amba_remove().
+>
+> Signed-off-by: Mukesh Ojha <mukesh.ojha@oss.qualcomm.com>
 
-Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
----
-v2:
-  - changed to moving the definition and re-worded commit
----
- drivers/mmc/host/dw_mmc-pltfm.h | 1 -
- drivers/mmc/host/dw_mmc.h       | 2 ++
- 2 files changed, 2 insertions(+), 1 deletion(-)
+Looks good to me:
+Reviewed-by: Linus Walleij <linusw@kernel.org>
 
-diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-pltfm.h
-index ef1b05d484c3..f3193662abf1 100644
---- a/drivers/mmc/host/dw_mmc-pltfm.h
-+++ b/drivers/mmc/host/dw_mmc-pltfm.h
-@@ -11,6 +11,5 @@
- extern int dw_mci_pltfm_register(struct platform_device *pdev,
- 				const struct dw_mci_drv_data *drv_data);
- extern void dw_mci_pltfm_remove(struct platform_device *pdev);
--extern const struct dev_pm_ops dw_mci_pmops;
- 
- #endif /* _DW_MMC_PLTFM_H_ */
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 9ffcd3946cff..38610c89d54a 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -19,6 +19,8 @@
- #include <linux/interrupt.h>
- #include <linux/workqueue.h>
- 
-+extern const struct dev_pm_ops dw_mci_pmops;
-+
- enum dw_mci_state {
- 	STATE_IDLE = 0,
- 	STATE_SENDING_CMD,
--- 
-2.37.2.352.g3c44437643
-
+Yours,
+Linus Walleij
