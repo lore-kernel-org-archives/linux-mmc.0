@@ -1,83 +1,77 @@
-Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F00334CFA1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0737A345CC0
 	for <linux-mmc@vger.kernel.org>; Mon, 13 Jul 2026 17:52:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.53
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1783965127; cv=none; b=AzAS8lnO3T3LHehGcqBov/MpeZ7Mh6eH4k+5SJixUtxojuSB+TEGQbXWp0rqJmQjY6OYgkgJ9B29BqPr7ICt89e9UZ7pMc3s+HyfI1SniAvfZMEqIFW76VsN9ueINUFbuiJxMVEFBpJ2Fh+9MPz+sobMoEMaglUa9FpUVC0l63I=
+	t=1783965127; cv=none; b=qGZhZTMMyv8v4nQlynNXAqqZC/D82Y+xs9EQK+sWBiZ+foPTT0NMsoW/NIfesqM8KhqIQP/+FPfaYgqNKUNdNhmOkHSoJWYyhrNL8GEXvtfckrCbYUKp+rGvH6xdCijwvFCFtCiWe33MfLhZDy5bmBUKkpxpAKsXzT6Bdk171iM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1783965127; c=relaxed/simple;
-	bh=JAiqAxkcwnnqDSaNuZpYNFoN5e4I5rBW7k+/R1zI/wU=;
+	bh=/FGwBoak+K1dZ3DgCaKeto6pzKCz+zzDgtJUpzrYq3I=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=NgoGnhLWkEtObdb2GS3BjtKmpkS3K8M3P6r83D+4W3wtieTkil6hcZQfUdFupWLzsFXemVrReDGEYGQ3VKv5LC7um5e7+Z6Xa9NG8hAiJo2rldjhvGWgmS7xvoL3Y0EPaUJIV9BVqkhMfQwlzzxiVgivj1kiUHm1nnuG8OXYrcA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RhZso2GH; arc=none smtp.client-ip=209.85.221.53
+	 MIME-Version; b=qCMEI4J0GkRuRK8Syc5EdZ5KLnCVrFyk2XIWMeKgXA/pqTEM6VCIHS8ziZqUUDfHXK413A2v63cxf1MDuENuBJ/IIE56kGV2Yl8QjldFpYWCj2v2WnGI/WzgF8IthgnRFDPoFkbpsh8EKtxe3WJLEEXiKGL8WKrKQUiVK/DbLH0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fKHSLgPF; arc=none smtp.client-ip=209.85.221.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RhZso2GH"
-Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-47d6c634f45so1830655f8f.3
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fKHSLgPF"
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-4720d22c94aso93868f8f.1
         for <linux-mmc@vger.kernel.org>; Mon, 13 Jul 2026 10:52:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20251104; t=1783965124; x=1784569924; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=6XgOLzsrb24W2iBPumJJf1NiQ0JSKLBfdmOgsqRSs9Q=;
-        b=RhZso2GHYAPDR/Q+xb33d3g5y8PA6X8iH5CoDlVHjya6INtaytMZnuB5Ma5DJqNaoa
-         RiVnznZo3t8uSB8bZBBV0fgiZJ/7iHmML0R6mpYjCkcsNOhg58FjCxcrRnlwKa1SM7zs
-         yxtdNRf0cUxj6ufWfxpJJD/Kj3NrZfdcHTHctg/7z07mBraBkNx1SRs5haIhILDvfRGf
-         d8XFyNz1vE+P0HdVez+aauMPh0dk1coS8LfPnxDuVwBZyr2f40GHesAy+leGOEKBLYli
-         JFrBNvo3MPMtgmnhEVvUvWXUSqAmB5/epJ2sKptgwQYpX4OV75VvoGrC5ZNGWknjvZXJ
-         CaMA==
+        bh=iyfVj+1fDts4apxcCqosk3edydtohs7g/ZwBDxQKGmY=;
+        b=fKHSLgPF+C4FAkP7zFEJNT4LfRo/pSZE5V0RsdpEFUNl8oVF6FVs//SrTweBAn4CvW
+         ltbotEN6JO3gFSmuL9eKmfjDs5aNLsnKH+m418GpJqVB4l7mEseSdnd8BT0S9vJC1RCG
+         aZZWDqkBo06nkVrPsZ4qTJNWWhI4512KFjGxGaJZ4uoW+5OTF6dUzOPUzOAjpC7/K1xm
+         dSy4dhhjvOVnd2ErwJGGOhB+atHES5WkICkLv9ighOskAujutbaK9l57vbs0kvDqaSFl
+         jYBPtOM9koPnYRbZXH/SYWR/eYxW5WDqfVk80+3KTqf9TW0aY86wK7xNNpVMGbJF12Ta
+         5WQQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20251104; t=1783965124; x=1784569924;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=6XgOLzsrb24W2iBPumJJf1NiQ0JSKLBfdmOgsqRSs9Q=;
-        b=PKSbxkIEcGNmrJ2RWsH+98bzhFk5OoaPUmxp08LZdbc+kJ6oZnjc54ZZGanQBG9D27
-         ylk483TDD216tWztIqCd1V8DEbrlKqbjeTR4K4Nrz2BlfYS0CW6TkqWBGdEXips8sLr2
-         WA3olI2oh+LXFgXTa+JOmighSmbgtWFBLBcCXXYVoFWqoZInCSoO7IYSQ8ZDay+9Dpr1
-         7hqVsQV3QaBxwiwSIvO/7aVkHAM2uKRbYx5xeBJ1r78WZJOyLpdQzNRHjw55fpX3drYX
-         u77YkSkKyEVyDPP17V92aooZyfKv4y+4H/f2BvfBUkq3igaICyobWmUKX2nOzt6OJbc1
-         JGSw==
-X-Forwarded-Encrypted: i=1; AHgh+RqwyRYc7SQ0W3vVK5hlSJodm1jJ/Wy1H/SDg8a0/D4nIXCgT7Eb1AaFkfhkd5bmg7Na7/VH1FjPmBo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzINLW8PSJp8yZZo6fC4TAQBt65wR2ehSwHmypQz02JPjL/wnjp
-	42aSanB8eCBdND7JFAg/01HV46BFZgf5LAICow/XAMFW61Q0NXk3ZlJl
-X-Gm-Gg: AfdE7clg4fpUgTq8LAec6G0wAB/bK2UEj8zeYRSrO4Hu2q8Qrfs7UBFhtzlb27RhFzD
-	QWBLDenn5iXo8J9cS76ez42dbpG60Dk1HIYWIbSyKAn2hcS3hPniaF22YqZQMVZHejQaShB+tNA
-	JjK9+j/YHQ1bSgbnp5FKsAOrzxPWl9ag2eeVMk87RrPWIT2AJ9dS7xnG7SrbeNF185C/7Vu3HN4
-	WuQHyvk6WAjO/gvgLPpyG6Dr+8V56C0mLBe1hO/vCGXcmQQi8pFGoh6GVYkgIK14Tonb6ccuyTe
-	0mGhCOGJqiotg2Rjo5R3CVD+UejBK6XkmIjpo5jHFLMJLcPCEffZ11qMTwmPsJTIFc6WNJWBNuI
-	L1plX9AosWd+kyzn1AHnLN4LK5jfB1Xt/OXDYBxeU17pAEPSBi3JGjz58DULPIrsaf2/PugBWpc
-	8W6EqyAfxTYCnnus5jYDhpyRZIqQxf7EO+iwlFbQ==
-X-Received: by 2002:a5d:5f83:0:b0:475:cb71:a344 with SMTP id ffacd0b85a97d-47f2dcc63aamr10574540f8f.37.1783965123536;
-        Mon, 13 Jul 2026 10:52:03 -0700 (PDT)
+        bh=iyfVj+1fDts4apxcCqosk3edydtohs7g/ZwBDxQKGmY=;
+        b=cCtO2jaHXHnJ0kMLKA74LSzD9f87mg0Ly76cp1winIBpedoPSSlwHre5r5It0rg5ZW
+         ghAfRo7BOPdR0xb18pXdSFPfS7gm0vsLPKRFF0nGO267jSUZydcKRCQiItcoOsHA/7D/
+         X5+95yw9OzL9MSgnpAq9IG9L8uT6W99x+5sOEddUlVtzsqn1NosUYViLay2T8cGazqya
+         8IiTwdATyeMgGQdqqi5dYp6vQRtKmCXTDZHm/Gk1sDKowYu+BEOFoTYDTKjBbydj11g1
+         yvjgAErRZQHpZKNAaJ4uFzzhZPO29ybSl5rBxaN0xBz4gONrZjDvVsUs5mINOgECfRBR
+         sL5g==
+X-Forwarded-Encrypted: i=1; AHgh+RqkpXSR/5G0djnTbTFASNKPS/c4vHdqFUg2b1Va3T+7hQT9OtodmCOOmzqVTbqHJ3D/xBdSdj/86T8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzCBjvHft09CW9CtDuaQ3ByySD5FVLUvR4RrF/eTtEl/WnkMjlg
+	hVskRW2hmkLgx5e65C+vRFqXYB6CIk/vBccYeAXj9IUR/3jKa7jMfmwo
+X-Gm-Gg: AfdE7cmZLICyuzpp8HKcnqUhTfUZgQZ7QVrcp2/3Inv4wDAojrAz79QZSB+nLCVWiIt
+	O4MnMb7qfqHgOemkSJJnJ/JSn7k6HPP1LYn83OkRo6O9en6Zbd9b1HFswyjZYj2I5Fvw0DZ4Eu/
+	3cNXZvq3F/4QGRhcfWAh/eyUgw5NGlB6B4umB7PyFOAcomNfHaKXyo8f/MYD20+6THrl3BpdqCw
+	Q1mep7sZnOup5jvUpVgYdre2yUZSEWrLJAwfnCICruZr3/ThKlILukMoRq4/TNCopXMTwQczAzv
+	ReDzMzxlmigBBvK54NSxXC4nX4cRAxjuNdKrOf9XYwfEMi5yOtvMKr/BajD6njlLRdprEg36W/e
+	14Flo7L0gu6TbF7EH23BiEtis3AAto4yAgXUbN2wH5ZissUAwIBfLkK58OvqAFYQOvAPUeNRfQy
+	PajHyFQDUPU3zWlElH1pbxm+NIr13JzEGHXlu5dg==
+X-Received: by 2002:a05:6000:1a88:b0:47e:81aa:def0 with SMTP id ffacd0b85a97d-47f2dd215c1mr11680288f8f.61.1783965124369;
+        Mon, 13 Jul 2026 10:52:04 -0700 (PDT)
 Received: from localhost.localdomain ([2a00:23c4:a702:d301:c899:4fec:2bdb:b719])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47f464d6fa7sm1011037f8f.37.2026.07.13.10.52.02
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47f464d6fa7sm1011037f8f.37.2026.07.13.10.52.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jul 2026 10:52:03 -0700 (PDT)
+        Mon, 13 Jul 2026 10:52:04 -0700 (PDT)
 From: Biju <biju.das.au@gmail.com>
 X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
-To: Ulf Hansson <ulfh@kernel.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulfh@kernel.org>
 Cc: Biju Das <biju.das.jz@bp.renesas.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
 	linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>,
-	Conor Dooley <conor.dooley@microchip.com>
-Subject: [PATCH v20 01/12] dt-bindings: mmc: renesas,sdhi: Document RZ/G3L (r9a08g046) SoC
-Date: Mon, 13 Jul 2026 18:51:42 +0100
-Message-ID: <20260713175159.138334-2-biju.das.jz@bp.renesas.com>
+	Biju Das <biju.das.au@gmail.com>
+Subject: [PATCH v20 02/12] mmc: renesas_sdhi: Clean up whitespace and add OF table sentinels
+Date: Mon, 13 Jul 2026 18:51:43 +0100
+Message-ID: <20260713175159.138334-3-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20260713175159.138334-1-biju.das.jz@bp.renesas.com>
 References: <20260713175159.138334-1-biju.das.jz@bp.renesas.com>
@@ -91,213 +85,95 @@ Content-Transfer-Encoding: 8bit
 
 From: Biju Das <biju.das.jz@bp.renesas.com>
 
-Document the RZ/G3L (r9a08g046) SDHI controller. The RZ/G3L SDHI
-controller is similar to RZ/G2L but has five clocks (core, clkh,
-cd, aclkm, aclks) and three resets (rst, axim, axis), so update the
-clocks/clock-names maximum to 5 and resets/reset-names maximum to 3.
-It has an internal divider for all modes except HS400, and a 2048-bit
-divider compared to 512 on others.
+Clean up coding style inconsistencies across the Renesas SDHI host driver
+files. Remove redundant internal spacing in the struct definitions and
+static initializers to enforce a single space separator or uniform tabs,
+aligning the code with standard kernel formatting guidelines.
 
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
+While at it, add a "Sentinel." comment block to the empty terminating
+entries of the Open Firmware (OF) device matching tables to improve
+code readability and explicitly mark the table boundaries.
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 ---
 v19->v20:
  * No change.
 v18->v19:
- * Updated commit description
- * Updated clock and reset description with AXI master and AXI slave
- * Added else condition for reset and reset-names.
- * Renamed aclk->aclkm and reordered the axi clocks similar to resets.
- * Retained the tag as the changes are trivial.
+ * Updated commit description.
 v17->v18:
- * No change.
+ * Merged patch#4 and #5
+ * Updated commit description
+ * Annotate the empty sentinel entries in the OF match tables with a
+   "Sentinel." comment for clarity.
+ * Retained the tag as it is trivial cleanups.
 v1->v17:
- * Collected tag.
+ * No change.
 ---
- .../devicetree/bindings/mmc/renesas,sdhi.yaml | 108 +++++++++++++-----
- 1 file changed, 81 insertions(+), 27 deletions(-)
+ drivers/mmc/host/renesas_sdhi.h               | 2 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 6 +++---
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 4 ++--
+ 3 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 4d66966ce290..6d229a41a4b5 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -18,6 +18,7 @@ properties:
-           - renesas,sdhi-r7s9210 # SH-Mobile AG5
-           - renesas,sdhi-r8a73a4 # R-Mobile APE6
-           - renesas,sdhi-r8a7740 # R-Mobile A1
-+          - renesas,sdhi-r9a08g046 # RZ/G3L
-           - renesas,sdhi-r9a09g057 # RZ/V2H(P)
-           - renesas,sdhi-sh73a0  # R-Mobile APE6
-       - items:
-@@ -86,11 +87,11 @@ properties:
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index afc36a407c2c..09bf9b24a8c3 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -25,7 +25,7 @@ struct renesas_sdhi_scc {
  
-   clocks:
-     minItems: 1
--    maxItems: 4
-+    maxItems: 5
+ struct renesas_sdhi_of_data {
+ 	unsigned long tmio_flags;
+-	u32	      tmio_ocr_mask;
++	u32 tmio_ocr_mask;
+ 	unsigned long capabilities;
+ 	unsigned long capabilities2;
+ 	enum dma_slave_buswidth dma_buswidth;
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 0c3967f758c2..b3f4a5f8dec0 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -271,8 +271,8 @@ static const struct renesas_sdhi_of_data_with_quirks of_rcar_gen3_nohs400_compat
+ };
  
-   clock-names:
-     minItems: 1
--    maxItems: 4
-+    maxItems: 5
+ static const struct renesas_sdhi_of_data_with_quirks of_rza2_compatible = {
+-	.of_data	= &of_data_rza2,
+-	.quirks		= &sdhi_quirks_fixed_addr,
++	.of_data = &of_data_rza2,
++	.quirks = &sdhi_quirks_fixed_addr,
+ };
  
-   dmas:
-     minItems: 4
-@@ -116,7 +117,12 @@ properties:
-     maxItems: 1
+ static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
+@@ -293,7 +293,7 @@ static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
+ 	{ .compatible = "renesas,rzg2l-sdhi", .data = &of_rzg2l_compatible, },
+ 	{ .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
+ 	{ .compatible = "renesas,rcar-gen4-sdhi", .data = &of_rcar_gen3_compatible, },
+-	{},
++	{ /* Sentinel. */ }
+ };
+ MODULE_DEVICE_TABLE(of, renesas_sdhi_internal_dmac_of_match);
  
-   resets:
--    maxItems: 1
-+    minItems: 1
-+    maxItems: 3
-+
-+  reset-names:
-+    minItems: 1
-+    maxItems: 3
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index 426308b73b49..7ae488e5c1e0 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -27,7 +27,7 @@
+ #define TMIO_MMC_MIN_DMA_LEN 8
  
-   pinctrl-0:
-     minItems: 1
-@@ -155,60 +161,106 @@ allOf:
-         properties:
-           compatible:
-             contains:
--              enum:
--                - renesas,sdhi-r9a09g057
--                - renesas,rzg2l-sdhi
-+              const: renesas,sdhi-r9a08g046
-       then:
-         properties:
-           clocks:
-             items:
-               - description: IMCLK, SDHI channel main clock1.
-               - description: CLK_HS, SDHI channel High speed clock which operates
--                             4 times that of SDHI channel main clock1.
-+                             2 times that of SDHI channel main clock1.
-               - description: IMCLK2, SDHI channel main clock2. When this clock is
-                              turned off, external SD card detection cannot be
-                              detected.
--              - description: ACLK, SDHI channel bus clock.
-+              - description: IACLKM, SDHI channel AXI master bus clock.
-+              - description: IACLKS, SDHI channel AXI slave bus clock.
-           clock-names:
-             items:
-               - const: core
-               - const: clkh
-               - const: cd
--              - const: aclk
-+              - const: aclkm
-+              - const: aclks
-+          resets:
-+            items:
-+              - description: rst, Core reset.
-+              - description: axim, SDHI channel AXI master bus reset.
-+              - description: axis, SDHI channel AXI slave bus reset.
-+          reset-names:
-+            items:
-+              - const: rst
-+              - const: axim
-+              - const: axis
-         required:
-           - clock-names
-           - resets
-+          - reset-names
-       else:
-+        properties:
-+          resets:
-+            maxItems: 1
-+          reset-names:
-+            maxItems: 1
-         if:
-           properties:
-             compatible:
-               contains:
-                 enum:
--                  - renesas,rcar-gen2-sdhi
--                  - renesas,rcar-gen3-sdhi
--                  - renesas,rcar-gen4-sdhi
-+                  - renesas,sdhi-r9a09g057
-+                  - renesas,rzg2l-sdhi
-         then:
-           properties:
-             clocks:
--              minItems: 1
--              maxItems: 3
--            clock-names:
--              minItems: 1
--              uniqueItems: true
-               items:
--                - const: core
--                - enum: [ clkh, cd ]
--                - const: cd
--        else:
--          properties:
--            clocks:
--              minItems: 1
--              maxItems: 2
-+                - description: IMCLK, SDHI channel main clock1.
-+                - description: CLK_HS, SDHI channel High speed clock which operates
-+                               4 times that of SDHI channel main clock1.
-+                - description: IMCLK2, SDHI channel main clock2. When this clock is
-+                               turned off, external SD card detection cannot be
-+                               detected.
-+                - description: ACLK, SDHI channel bus clock.
-             clock-names:
--              minItems: 1
-               items:
-                 - const: core
-+                - const: clkh
-                 - const: cd
-+                - const: aclk
-+            resets:
-+              maxItems: 1
-+          required:
-+            - clock-names
-+            - resets
-+        else:
-+          if:
-+            properties:
-+              compatible:
-+                contains:
-+                  enum:
-+                    - renesas,rcar-gen2-sdhi
-+                    - renesas,rcar-gen3-sdhi
-+                    - renesas,rcar-gen4-sdhi
-+          then:
-+            properties:
-+              clocks:
-+                minItems: 1
-+                maxItems: 3
-+              clock-names:
-+                minItems: 1
-+                uniqueItems: true
-+                items:
-+                  - const: core
-+                  - enum: [ clkh, cd ]
-+                  - const: cd
-+          else:
-+            properties:
-+              clocks:
-+                minItems: 1
-+                maxItems: 2
-+              clock-names:
-+                minItems: 1
-+                items:
-+                  - const: core
-+                  - const: cd
+ static const struct renesas_sdhi_of_data of_default_cfg = {
+-	.tmio_flags = TMIO_MMC_HAS_IDLE_WAIT,
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
+ };
  
-   - if:
-       properties:
-@@ -247,7 +299,9 @@ allOf:
-       properties:
-         compatible:
-           contains:
--            const: renesas,sdhi-r9a09g057
-+            enum:
-+              - renesas,sdhi-r9a08g046
-+              - renesas,sdhi-r9a09g057
-     then:
-       properties:
-         vqmmc-regulator:
+ static const struct renesas_sdhi_of_data of_rz_compatible = {
+@@ -89,7 +89,7 @@ static const struct of_device_id renesas_sdhi_sys_dmac_of_match[] = {
+ 	{ .compatible = "renesas,rcar-gen1-sdhi", .data = &of_rcar_gen1_compatible, },
+ 	{ .compatible = "renesas,rcar-gen2-sdhi", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-shmobile" },
+-	{},
++	{ /* Sentinel. */ }
+ };
+ MODULE_DEVICE_TABLE(of, renesas_sdhi_sys_dmac_of_match);
+ 
 -- 
 2.43.0
 
