@@ -1,103 +1,84 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 881CF3F1ABB;
-	Tue, 14 Jul 2026 07:51:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5CB52EEE89
+	for <linux-mmc@vger.kernel.org>; Tue, 14 Jul 2026 08:45:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784015518; cv=fail; b=eicQ7g9tXGhLRBOT8hypre8is19jvsXxg10hm+QmAISKw0Eg5ex1sSIr3E1BhnXuDQfhqFDTvMvzN83NTf7wswj6RpxWgNrWchzafobWykFNNiDT/I9PEf2MSCv/dSVKUjcmHD9r2XJGSXs+SHptQYffi09CdZ+uX1+GGRBMQYs=
+	t=1784018732; cv=fail; b=MEWQ9d3YSEGHJYxrcPtwCIdPoJzS9yqFWUrbz/NFQaddPpKUwmBh3jLN1720IBnskYhSb4ydzxxSSX9aiNDIpTlAtAqHLnxWWyNTysLFuukBKvJ0vm8SLJY12veiWvRumNQu5HtoUHQeEpzHMJhCLfia45DpwCdazgzwp+AlGAk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784015518; c=relaxed/simple;
-	bh=HQxSHmKOHVoAGe7uHcDZ29n9Fp8OBo6+QHrfYLS1bwM=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=JcmtrZ3WAGJLdZyoMevwOX9ohHCQM51/djhiD3j5hk+8nEN5tTfP4JXpYquqQXAcv3kQPYgmpyNeE0pRd6akpR96f+13eCrIbdBK6PrPLYvJw/xLiIy/GqcdG2e2gjwAbCtC/itd+bLOhhaMcijvnHdzJD84evABNv4ibYg4hg8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=TUloaPQX; arc=fail smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1784018732; c=relaxed/simple;
+	bh=+/+yen9NVu1Cx26vwNR5Sp42ON01Q3Uv0POaKmLuo44=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=SkmMPtHgDZIwIuQE4NkEkGk951DxlhIR51TrTVCYaZEeuVDSNrwmhmVLQmvGwMwlqf6lo1iHbiq7Kbn1R3hGQ3nsRcOe15bPf7iIbVz5ZIaYoeAhIURLPU/I2WjaF8NIRrYHaG1qC0xg5MvXIKgDyvXXXKy1MHMUq60/4LMEe7g=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=pvXrB9ZM; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=gzzOnxRu; arc=fail smtp.client-ip=205.220.165.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="TUloaPQX"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1784015516; x=1815551516;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=HQxSHmKOHVoAGe7uHcDZ29n9Fp8OBo6+QHrfYLS1bwM=;
-  b=TUloaPQXWvM5OEjj9cSBYaPG+7HkizD5bPivmzPcdvp+/HKVCb/sPE29
-   pIu8JIr2DDqCZHrpcRAuij2SRv8WounhoEOgTlu1xiz8wSJUp+fX2Jk+p
-   O9jwpqcdWRiJlXopNXx6YrR3YYEmzdlDTnV4Aue3e8oLftHvqKix+M84p
-   KuomaDsMsVgf+362KBdXxa4vkqkRDRreyqdN3RFA+xhFlTQ8fe39DBwa/
-   STQUbspsP546+ZETaLtE1c5G+6XzRXAkHE55YUD/hXskJEdeRvnFY5thY
-   BSVLJiFxjojx0zuaqCXtND2PRpBYMPFMDMNNKlm9q3627z67tOVXKtpXS
-   w==;
-X-CSE-ConnectionGUID: Ti4LUuHeQlSs7NHUyUw1Fg==
-X-CSE-MsgGUID: 36UwPr6ZS1KAgKZBZ2ClJw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11846"; a="72155599"
-X-IronPort-AV: E=Sophos;i="6.25,163,1779174000"; 
-   d="scan'208";a="72155599"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2026 00:51:54 -0700
-X-CSE-ConnectionGUID: P6DbmK8mQIu6YxG1d5MEWA==
-X-CSE-MsgGUID: CO3HNxncSf+u8/cP6Du72g==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.25,163,1779174000"; 
-   d="scan'208";a="256432737"
-Received: from orsmsx903.amr.corp.intel.com ([10.22.229.25])
-  by orviesa009.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2026 00:51:54 -0700
-Received: from ORSMSX902.amr.corp.intel.com (10.22.229.24) by
- ORSMSX903.amr.corp.intel.com (10.22.229.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Tue, 14 Jul 2026 00:51:53 -0700
-Received: from ORSEDG902.ED.cps.intel.com (10.7.248.12) by
- ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43 via Frontend Transport; Tue, 14 Jul 2026 00:51:53 -0700
-Received: from PH8PR06CU001.outbound.protection.outlook.com (40.107.209.69) by
- edgegateway.intel.com (134.134.137.112) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.43; Tue, 14 Jul 2026 00:51:53 -0700
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="pvXrB9ZM";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="gzzOnxRu"
+Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66DLFGA11377394;
+	Tue, 14 Jul 2026 08:45:11 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=corp-2025-04-25; bh=TCPakeBng7AvE4gI
+	Pj6rY2lBpfXfXCVFJOmd1ZqMJyw=; b=pvXrB9ZMc2rG0nWsYksC1e5gwfXkBNrd
+	drL2AAUdJWAkwl8twrI3RJJ20eV6tUYeiDd7OOynlpnCLkSa9NuSTYlYoQC1eUDS
+	K0Q+kCuF6eQeb9cy5xrRl7nymK/rWPXGJYx0Rf9Hnqqf1a/hPNgC2jfoV4spncCL
+	tR+WB7Wx/AWoqjiBzmVlVhiE/S/F0U4yIIhFk24aaYZgn9ILtcLk1wRRj61IpWyF
+	hgBTfMxLutCFrgY/EkQg0KUmY5cYX9VwnUHoFtXFA4gyAXuyk/Vk3uKJqt1RFaP+
+	vGcjzb1NYhs43d8N/hFDatLvZjpO0YeRrih06ftkSRP44b7NR/yBvw==
+Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.appoci.oracle.com [138.1.37.129])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 4fbed2br91-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 14 Jul 2026 08:45:11 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.7/8.18.1.7) with ESMTP id 66E8h9XI006499;
+	Tue, 14 Jul 2026 08:45:10 GMT
+Received: from sa9pr02cu001.outbound.protection.outlook.com (mail-southcentralusazon11013043.outbound.protection.outlook.com [40.93.196.43])
+	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 4fbc9depa8-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 14 Jul 2026 08:45:10 +0000 (GMT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=A6D2AYzrBYsY2alwGvOMCRjN4izX45RVVDeRDLge4PFEj3HXKDMCli/qXecbXfFbVigBY+RdPxWrxve5hhD6buiyCCYEoBPdhVZ8RWDHNChkzIlJVSzLJPFMxDS04NfOqOpjhuNKrS1Xrs4fT7OOpBpvjzicRYNb9mThfWAmQxPczMWoTWvA8rIi+2yd6/VIwHOM6qc8eH7TGObrwW68TSgqt+q4SJVKjU7QbkaUJLN5l2TD63lat+8BMCP4b4nfTFZycn2iUcnDygIjlmDgFQPlkINlZm0kaxc8ts7eZsYGnQTyfmx9BoTOkATCNJsT7FvCvPrsdLVKjrU0JYYRvQ==
+ b=pMeqBLEUSTYzXhxHAE8kwLxTCajgN0AN3bewFxWpfOmAownW7IVFreLyfs+N6JlXRCq1yCqApMFus/kphoQRCXm6eYSLUJuploqO1C8Oq/9s4m7ifHIWcf0w6u1zc7kmIwhjK28fNZxvxSojXsHuIky3hC66AH3MRFB66w6jV3C5JTyzMMF7e/XpfKKdMsDCv/NHEvRXlJUlRN1mpLFaQMmabhwZWh/ZU4Recpu+d2NPUhDjLf0HUAgcoCN6N1PCTpVCzWwWH5o+o5cKWR9Nt60c6s5eLxaQhM+Uq1ra12IbySki7YVuWwSefmuw+oiCfBI0qjLTATvs2Kj/5McUmw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ol6P4ncjkkvSfbGsjuu6c0EyidPL6nXwTeLsmKOlGTI=;
- b=tmaXWkVDRiaXTuK62PTZ5s9axoRJ7Ed6+duR158djylWztiyDDJNXedzIaImickpK1AqCk3ZqvKAiudpuDHnfJoeqyfEBOVz/oqCwfEGDo4Z+9XaGmvYElKXcJqpGaQBQCpvlrVnfWRJpmBKB41pL8XzIGAO4xsw9Qxw8XBg6ebzzNg/uw6h0cMd+ufOFQmHxKiiQWarJb7lAk8tc7TJdgq+7XEZaMbOQ+F3vkl1xWzKeI//0kJhbaBUHWcPcqOvcBxSgy8Nxh9suovkAXeKkQL4CR5t1onCREtjF3GlhrPLtqmBqxyWBkQ/il3M0S5BNWTsrwqSKBwcwF6xoRdDKw==
+ bh=TCPakeBng7AvE4gIPj6rY2lBpfXfXCVFJOmd1ZqMJyw=;
+ b=erD64VVl4DcUxUbpLsuuM9byQCYpbhlcAqo3csec6K9E+q9mv58OF9FU/dObR7tlFyltqEv7W83uK8kuh1+zBsm9bQLA3d6K78eD/zdWz3iU+m423uRI4VZyr6Few7r6IU8JIYDWgOZ/SLzZwnPsLi/uYkz0HpWBZ4Ea8qjybeLx3NLb65o2rD68r/Zn60TEkHp0J+hmI1nN5xe1lKqA6AYowdMralIkSWBge9IlsqBx3+nQZz2Hcch5CMOeuoyTD9H6FX4v42V6ULGt41tp27l6f9JlAUcWxrg3EXuHUQ+dAkx4YLWioHCAcTo/yTFZGo2QMrmUzrZ08Yea9IeCMw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com (2603:10b6:208:419::15)
- by CO1PR11MB5171.namprd11.prod.outlook.com (2603:10b6:303:94::15) with
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=TCPakeBng7AvE4gIPj6rY2lBpfXfXCVFJOmd1ZqMJyw=;
+ b=gzzOnxRuDMmVYcYNmDsTdN4bZVWTuwskjEF4pkHsW2pDA7/1cA0MyiCIgXFnmFuCceKL2eteLnQRejM+lmIMumjoXOeRM9T8EcaYNjWu0ldkON/kLT8oX67VPhSl4uifY36RbnH4QT9mblIHbu2zAH+/LHJk2dIIuwYmGJ8x/Hs=
+Received: from DM4PR10MB6229.namprd10.prod.outlook.com (2603:10b6:8:8c::12) by
+ SA1PR10MB997557.namprd10.prod.outlook.com (2603:10b6:806:4b1::11) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.223.9; Tue, 14 Jul
- 2026 07:51:50 +0000
-Received: from IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456]) by IA1PR11MB7198.namprd11.prod.outlook.com
- ([fe80::2c4e:e92a:4fa:a456%3]) with mapi id 15.21.0181.019; Tue, 14 Jul 2026
- 07:51:50 +0000
-Message-ID: <74c00cf4-f4d3-434e-981b-0de47ba2ba2f@intel.com>
-Date: Tue, 14 Jul 2026 10:51:44 +0300
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 0/8] mmc: sdhci-esdhc-imx: fix SDIO suspend/resume
- issues
-To: <ziniu.wang_1@oss.nxp.com>, <ulfh@kernel.org>, <haibo.chen@nxp.com>,
-	<Frank.Li@nxp.com>
-CC: <s.hauer@pengutronix.de>, <kernel@pengutronix.de>, <festevam@gmail.com>,
-	<imx@lists.linux.dev>, <linux-mmc@vger.kernel.org>, <s32@nxp.com>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>
-References: <20260713043904.4144172-1-ziniu.wang_1@oss.nxp.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: c/o Alberga Business Park,
- 6 krs, Bertel Jungin Aukio 5, 02600 Espoo, Business Identity Code: 0357606 -
- 4, Domiciled in Helsinki
-In-Reply-To: <20260713043904.4144172-1-ziniu.wang_1@oss.nxp.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: DU7PR01CA0003.eurprd01.prod.exchangelabs.com
- (2603:10a6:10:50f::17) To IA1PR11MB7198.namprd11.prod.outlook.com
- (2603:10b6:208:419::15)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.202.18; Tue, 14 Jul
+ 2026 08:45:08 +0000
+Received: from DM4PR10MB6229.namprd10.prod.outlook.com
+ ([fe80::867:63e7:13fa:fa7d]) by DM4PR10MB6229.namprd10.prod.outlook.com
+ ([fe80::867:63e7:13fa:fa7d%6]) with mapi id 15.21.0202.018; Tue, 14 Jul 2026
+ 08:45:07 +0000
+From: John Garry <john.g.garry@oracle.com>
+To: ulfh@kernel.org, florian.fainelli@broadcom.com, rjui@broadcom.com,
+        sbranden@broadcom.com
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
+        hch@lst.de, robin.murphy@arm.com, martin.petersen@oracle.com,
+        linux-rpi-kernel@lists.infradead.org,
+        John Garry <john.g.garry@oracle.com>
+Subject: [PATCH v2] mmc: bcm2835: DMA mapping improvements
+Date: Tue, 14 Jul 2026 08:44:56 +0000
+Message-ID: <20260714084456.3356354-1-john.g.garry@oracle.com>
+X-Mailer: git-send-email 2.43.7
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: PH7PR17CA0034.namprd17.prod.outlook.com
+ (2603:10b6:510:323::12) To DM4PR10MB6229.namprd10.prod.outlook.com
+ (2603:10b6:8:8c::12)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -105,138 +86,221 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR11MB7198:EE_|CO1PR11MB5171:EE_
-X-MS-Office365-Filtering-Correlation-Id: 3c098541-8572-430d-5c7f-08dee17cc320
+X-MS-TrafficTypeDiagnostic: DM4PR10MB6229:EE_|SA1PR10MB997557:EE_
+X-MS-Office365-Filtering-Correlation-Id: a63211de-e307-442f-534c-08dee18434ac
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|23010399003|1800799024|376014|7416014|18002099003|22082099003|11063799006|56012099006|3023799007|6133799003;
-X-Microsoft-Antispam-Message-Info: pXDT4uIsQHx2qkUltxhvewq0j7rJ/WcQWWd39sjM9kQLJ2sRoQl4ED0TvxpDWRzkuVLygCYUPp0hKgxAmdOep8NriBIjEybv0EO+fNLhxsTbvz6ey/vVUBnjHhgRDBfxp/9ol6MmpXfqn0Cp5WQyn4Kqzrst8cHcNfnjcjUUtXX1UsSlsaMpdfGPFJ02thLGUKFOTC1zKxzFtsA5k66tJScc6eTZKqpPcloTODH1A2bW8FzfYTU1PuG2vTV4LADT5HPjIoIawHragiVuioKhZiMlR4xDOxZmViBy8Khpd3vvFrN+vq8Tkeu1B0k2Tn2U7HKj/wwTOfPPNURAqkJB2bG9nazBKKIzPDrxh57pOaBFw755AZW5FBufH0m3ibREbiODGuJom5HdtDfJw2YPCyXTCVsmeUZC++dEDNGtTuWpHVGx7BF+sD5IfLeAgBhJ8Vep92XjlVxxkGV9z6b7ZweVGpt0EoWk52kods54rpeRAwxrI8tIfj1xM0Ve+yPLzb7socOzdHDGcI0eGN5vbPn8ydC3QbksMES7K/vq9rg4puNdZ3Yw1Kd874BIFiwGuruuwsndyKfwDn53yIzvBCmLqZX+pXkkekZkaWWHOg02h67nKs8zgloBhTtoKgYsaT057e1ahs8VBWY0XKE2omvjRNHYUMYtjr+07Wo5W4g=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:IA1PR11MB7198.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(23010399003)(1800799024)(376014)(7416014)(18002099003)(22082099003)(11063799006)(56012099006)(3023799007)(6133799003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|23010399003|376014|366016|1800799024|6133799003|56012099006|18002099003;
+X-Microsoft-Antispam-Message-Info:
+	UuGUGgYlYwudEM9Zopc/wo917OnASLIcoW6bF841jsCarjlPDHbgzUSowne5jYTIrWoY5s55usV4BPyCp7DNrBwUUNep30DdLUCQozr5PR55jO29f/Ao4wPDTTSc3vhZs8WbO89lmQxH5ID7clJ9FoB6TM9Z0VXVzc8pihHbrcMcGnbHjydCFTFmnGXGv9c1d9Gi3OEX66AKY9zNPiuz2rpxwvr1YklSrQmAVG87y7vUqBoe1vC8gNTiu2Y0FKZ03IM7PLQlQZ0bYdsY1T9ralBMh8gG9KQ7sSJuaaARGTNlsxqZ/AjmR08BGSvGpDYWRINvAAoKEHeVE84N4MM0ey+kDngLEOEogKSEntoJupO3+VbEH0l+pVqavozdkHGvK4LEXpcZw16h1T9Gu8qAHFatr+C38KmT+zJRUmYMAlmLCwL9tp7mnsc+4ehI1VsNp8XMT2eyTfEIaUpduldxaTEUTeiVmWdC3QKwUGnOLTGMcjAQEhAy25aGJOwcCW/qbTBdmwnqOh1bp43v1nH/4zCowlEDoPEVgzo8uy8myM5RX/+rbaAT6y98SzzyPVooyVPJkl6Cu2JeNNdJ/GQx8d1uXsf/spK1a7iX/YdgwYNY1WvhfmrOeOVYEBItBOdgxGwX+txLyzN2P7uX7fPJmFeQy1o+JPf2EMz9jJWS24M=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR10MB6229.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(376014)(366016)(1800799024)(6133799003)(56012099006)(18002099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?dDBIeXRHSHZKak5Od1BvVGdwWWZoVm41eHFxMFBXUGoydWE2SkdSVi82bzgx?=
- =?utf-8?B?aUk4Qmh5RXpvQWQzeGsyL0crSnRXdnMweU1keUUxdGVOQkZOS1Q4bXo3K2pS?=
- =?utf-8?B?dktjLzZSRlNYQURjTHpYWWY2OXlnUFhRK3JTRWhCS2IzcmsvZmxXR1pieUdw?=
- =?utf-8?B?eEdqaWJQd1R1Yk1leWVPbnY0eXhhVFVJVFpqUTRVNXNQYnQzSE0vT1p0RnFs?=
- =?utf-8?B?TzlZOHV0a24zZHFPMGZ6eVJRUCsvWDJmTGxtendkUFJkbng1cFpSUDB4Y3cz?=
- =?utf-8?B?NzNPY1VlQlIyT2U5MytsbldBSVk3YlI2MmRDVnBmaXlTZDdiRXhBcFVnRjNP?=
- =?utf-8?B?Y3VVUXB0VDlSRVZSQW0yRi9BNUxTM0E0V1lKcytBRmtBUjIwejFJWTg0aHVK?=
- =?utf-8?B?RXMzc21Rb2lJcm9lRitabDREb3dackxQYmxXUkU5cEdBdW55SmFxSVY1bzVq?=
- =?utf-8?B?ZlRkVW9lZURuQkJVSE15MERFelZEbGVoRitZd0hOTWl4WUx4Q0F3QlJkL3E0?=
- =?utf-8?B?UGZxWE5rWlgxcjM4VFVLakFyUjJvVVhsaEZXQ3hseFVXWjFVVEJEWFZ3K1ZB?=
- =?utf-8?B?NXlRTGk3Wk9PeGdKQm91UWU4TDRwOEUyQ3BvWm44RSs2a2krSXN0cy9JWndo?=
- =?utf-8?B?ZWkySE9MYXVBNkZET2Y3cXBjNi9iREREYWtKWXdYbW9MdlJFS0crelZOYjZv?=
- =?utf-8?B?aTBWTDg5UVRNdE5CNGtTTlNwdU81dWdadFVrU0ZpbVllUU96cmV0QUdOVFpI?=
- =?utf-8?B?elI2U3RnRlBwTDJWSFV3WjFpUXpiYkFBWjZvRVdMQ2RFRnNkS1BkTUhHOHM5?=
- =?utf-8?B?U3g1TVYyK3A5NDR1VVRTT2kyaVVTS2lnOGc1L096Y0pmeGV0d1JyMEtERnlW?=
- =?utf-8?B?Skl5VkRtVzlGVjFOK2p0Rnh0RFRYNGIxdHB1RlREN0lITk1BZHJ3SjUySXYy?=
- =?utf-8?B?ZGhNVTdwL1pjblJ0NVhaUTZ0ancyeXB2T3o5Vkl1ZEhZS0tRN1hXanpZcWZ5?=
- =?utf-8?B?OVhFdnJ3V1JqQnQrNFprNUtRRGRMV1pqS2xKSkJRSVlUeHRXNVhuMmF0UlV4?=
- =?utf-8?B?Z3MrazdJY0tCL3Zpejg2cUlncXQ5eTZoU2xZczJ4WVNGaHBzYW5la2FqcEZ3?=
- =?utf-8?B?cU52ZndYbmtSNWhubEtuUXRvM1lZSFpPZnQ5Yy9HMTJscjZZOGxoZkxiYjMx?=
- =?utf-8?B?MGFqb0JyNHlSRUlwSzE3d01GNE93NVg5cFVBUEpHRnNwOEw1Y3Rsbzd0ekVZ?=
- =?utf-8?B?Ti96MzErTk8xWDArdkk1dEV1Rzl3SysrQStLZElpUGROM1MyM0JkVHIrYmZH?=
- =?utf-8?B?MDdnejNLVFFPSnVEVGNVUUQyMzdMZCtWcjdiK1dCSEJjTmlhYm0xQklaZU1m?=
- =?utf-8?B?VmgranVyK0orWnlFRW9aU2k1cXhoOXk4dGF1SWt2RzBkRWFlR3ZUamQ1NkVw?=
- =?utf-8?B?ZjdabHpQTUI1MnZ2K3NnREIwTWNaZ3lQZmFZcmR1Z0R0NS80THI2Y1pGTUw5?=
- =?utf-8?B?UGgrNDNXdUhmWXZzdllFeGs4OUZ4YlpEdjdkSkJqSXJaM2prazJnWlREaHVa?=
- =?utf-8?B?cW8rbkdnell5djl2Z3g0cW1Hb3J5NU5VcWJFNGc4NmdBVDV2Y1MzZE1VQ1dn?=
- =?utf-8?B?YkRZYmJ2NlZQT3dlTlhJaTRXVFpOZUE0eFlQdUE5KzV5NTVQVUlwcGRON0pq?=
- =?utf-8?B?dGMwQzZYM25HL0J5am1XaWhLN2VnK1lZMDRWMVdhTW05RDJMejJYNkhJalZt?=
- =?utf-8?B?cmUxcGxqYlQxNHdZZWJEUjdRRG9lNFE3QUJkdk1QZWtlcDFFb3NMYjM4THpq?=
- =?utf-8?B?TUFBS1kyNVZJemJiZ2JPSktkRm1FWS9EdUtaUG9hUFBvWFhXSExxK0lVWHJJ?=
- =?utf-8?B?bGN2Z1B1dnBXaGowUFhQU0lSUkRyRHBvSDAzRU96cUVyb3IwSXZTZTkxdHV5?=
- =?utf-8?B?d1ZiL2IwazF0ME9QUnRZV1Q0WlBQdi9NTzNzb2FOa1V3Z0tBUHQ4cGsyWXZD?=
- =?utf-8?B?VHg4MjNUKzhKaUMwV3ZMVjFBOUJ5K3R2dHdDM0NmZkNVTkFhdDg1bnZTL05G?=
- =?utf-8?B?bk5NckRjUGJUSDg3N2VlVHpPbDNTMW5RWURnOExhN0xnRVRoVENaam40YmhI?=
- =?utf-8?B?ZEZJWFVrL0JVR1E0clkrYktNK3dCWDRkVkNuWHBhY2c0eGQrSVNmR00xQWFj?=
- =?utf-8?B?c2V3V1ovUUJFYnNEZnZneTNJeWd1azJCZHdZNmU1aFUzckozVWU4QmdwUlhC?=
- =?utf-8?B?NERBdnhjclR4dGV4bHBBNHZ2VmZxdlRkcnFUbzJLMDZKZld5R1Y3WFJFL0My?=
- =?utf-8?B?NGwxcnBiZHhvVjlHZEFMcHlQU1pLeXNaNUxjSjhWNmo5bUJabHJCNGRZZlBP?=
- =?utf-8?Q?uQhooPmn6GsF0sUw=3D?=
-X-Exchange-RoutingPolicyChecked: oXr8VZ+QYzEz69aS2FHKEteWeilo3Okh4jJPo0QiSD4EzixNUPJwBB58HDLHAUueNTAnuzbdXJenxYAKja8FvjFLCb0zleaQifEAOd02v895H7qgTihSxWe/+nSwynJthz/Ml9j5jnciAjE8V/zxvM78CLg+tf3oJXzp/dlaMzNIiI2oFVD6YxhgXJAdXrniUYniZeBZz6RKTQDjxDI/3EFMtbEiUExQW8pXsRCU82lCGvaJIygrbeKnf7vYBCJbedSXl2NldiR4f2T+MwJ5tNUfcNu+Suij6ahFQ+6Xc0zcDxnbY9bRFXLuqXuDkEt5tsjnPu4Yfw+K5tETn6VYxg==
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3c098541-8572-430d-5c7f-08dee17cc320
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR11MB7198.namprd11.prod.outlook.com
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?H5RGDb8zEVULQgns67JoYvJjgZ/h9z9lpMxgtNc4PKp3knDq/4frG+Kz3bPt?=
+ =?us-ascii?Q?GirKyDg9Zik0KAoX7U+sYVqvXV4ssh2jHZXmil5uAX1tkKEWknWVSf6L718+?=
+ =?us-ascii?Q?sXTMakbYEtDDtJwyw+aZH8D9LSyv/o14OWsaI9lydHSHUzn3DS6HmQ2umvo8?=
+ =?us-ascii?Q?ykzQo5LIigNBRhgC/UYOJsjYX3aWzQkXZVXhtEAJb4uMpCLgu9vTa11lNVGY?=
+ =?us-ascii?Q?a5/9cF41kYUOeAEi7IlkoXk2M9elbRYevTuEEkCGV4J6dkol1So/MgaQ5Fpg?=
+ =?us-ascii?Q?/uR3ML9sthn81aUvsmtbQr63lEvDLoInIvBs3SB4vgLjKjBxPPPJx4NT4/sS?=
+ =?us-ascii?Q?L6P+0KiGLx4080uD0fNa/xEreFJbzMrjn9GhyBdOU+4riaIk7A0DXEg92kdl?=
+ =?us-ascii?Q?8tNA1q94YvAQ+4HmoU3TN7gq2RdvUAKLjXizwyDqzPTCBT3sKIVXY+XN8J8f?=
+ =?us-ascii?Q?SfUYFM5Pr84MpaZf1umLqbyovQHXfJxjkYRG6FegJk/EnIHD5WZYhAJ1ga9o?=
+ =?us-ascii?Q?TFP1gM/7bxyZr6PYFPI9AvK5syeWWjTBEG86jCb4gy8aM5tHrvbeYpoRQwTl?=
+ =?us-ascii?Q?5IDU4waZ516dZHzgQhDGbri+lkiYiCRtd30yZv1s4/5OY6u90j5QbuoZ3Aod?=
+ =?us-ascii?Q?SoI0ZVXnIFgXNQIvqk/jbElNXzWEzyRpKQRErht6sPymKMJDecwmMq9V34rm?=
+ =?us-ascii?Q?HiOnELwxe9m8kVRM9ItV7pj5jkKZ0LxX8LMmiHUrXHhy1xCI0XldSZJxbBUn?=
+ =?us-ascii?Q?ZM4wG3Sq6R9j0APXJkmrHymJ59/8nszKHr7oWx5z40o/e+UNUEmN60FV1vb3?=
+ =?us-ascii?Q?DOxSsXXkfVzDmLBiIYzJqgsaDSLgA6KPXJDQnEcdmxoMQN5am6hy2oeHahnt?=
+ =?us-ascii?Q?iSWyRcfYy3KXrMnqDjD4xAW0fI6ghkMW9yLO9YgLnSsPOxpOMHZpxmSM8LtH?=
+ =?us-ascii?Q?RIz7CTM0ITUhbmaFtkh7vX3xUFj+Y9i9bgGBQ/kZAvx+KQiyimQQhyELWQR2?=
+ =?us-ascii?Q?oMdcas6zW/0AJod/XjyNOWMbhejzVNeDXetdv4Wz/ag+QEDDLuYMuc+3WcNW?=
+ =?us-ascii?Q?eh7vjCaDnkIIMEif9JqyOuM815xnQc9+Q/SgW62MCLT8sknc0zFLI6u2Wc6b?=
+ =?us-ascii?Q?VaM4iSlp3k6x1h2+7/lPPDdVeI8hkA5btaKrgJoaS/ZpDgSfpimlAvjHhwTg?=
+ =?us-ascii?Q?styBKmFpTRWyYCZE/1g4ILi1foBJWPGG+otSglmw49qaVTp2egaK9JBc7rDs?=
+ =?us-ascii?Q?pf/4DrJik1rdY59ODtYSZLcpq2n2tIRFhhUxkfrCDC0r2oCr/2OWWOqCG9dJ?=
+ =?us-ascii?Q?y6XgVQ2QHJN80W0vo9MrDFSCIxwaxQ9CI+cGqa2txN8kK/RhU6ovumraVOon?=
+ =?us-ascii?Q?PtFwLrGRdhm4lA97gthMHEFgSWkYxRQw8HArGvd/qzKZSNztvyBshw1sW3rO?=
+ =?us-ascii?Q?ncHzLMDMFF7GBy3ySk4MKebPfl0XOmdeBO8OzY1v4t/hR87KsNkvb/oqNPHT?=
+ =?us-ascii?Q?U+GMMmFHZKU+xHixZsEA2XkrUsDz2ht7O4SiFgr4VV924L2HnZUI2YVbEL6Q?=
+ =?us-ascii?Q?q5fpgfMWkgxtyLF9zc0Zsp2iZ5lIWdB+LhxmBQTembLM0s7pq+fl/mle+QGD?=
+ =?us-ascii?Q?k13bBPpKajaxkYeWB5jqcKUJgI+cEw/MqaYeF+aflEsGSyH3trImSKo+wE1p?=
+ =?us-ascii?Q?51s9lkTZUi5VHPzh+lrhIG60ozan1hyhdXavUKM3Xz2ZGiAshMXDVbG+AB70?=
+ =?us-ascii?Q?KL5mfCv+lA=3D=3D?=
+X-Exchange-RoutingPolicyChecked:
+	P5F/3oLnthDok9xoJwrG0fLnnC8eYhFkfygSaDvtoaM+k5THRkc9cUpp+1NqDU5TX3RuYP06ce736vq9HPmUTLTvRfevHlC6HEtoLQfVr5Brn0HX0V7LhfHYymGBb/HR4rJM86/rJVVlW/cTSkupBX4+v59sjT9WgwQTPSqgU/qTVzXMLoYKMOBTALsaUYQMd/Xba4fZEt33YMUJOILBY6Qgf6mNPZgtfY/sL/ZujyjyO9hitjhjd3LAJ0yQwt/XC5bQJ0MeU7UXKfgtuSSXb6AMFUlqEmmC2gArEX/8u5v3IEW6SOf9usRMY7Z5dchhHHdIBbKoYyjuB+9AdirBdQ==
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	o2wMFuhyvrFTmnc3fnlKULECAr+3RcQwGDoIIo+5dDw2VxNz8lPsYh5mq48Be5Pnz8su2WYcBi/j/q0+u9DRukdx+Q1PCaJXsW5LGkG8mzzwYungfUWB/AVdZFjdTsIx8H2CR0kpsPaBe5P9umeu5w8ab0ojK7WE3ADFQXDkteXQ5nRwQXGbAOgkH6y5IP0+N5j4rNHhML+2v/q1MONqk2qBzFk6GEIynGI9C8TJLE7j05iUBHVKE3ON+4dNmF5hUB7+CwirhXteT/CqZtYN34CVcExsDp+Mdtrp0FUjz4CWU5oXNx5mNBpkdLRsNzwSPp4xL0MsohnobKaD2WhRtLb8d1M4+XFhIDfEi/UrEJ4ZFSuQRa9JazvS2fy2lJiEBgQMxQ3Tx0aab7SUhIE5NjGDxyLK1PQn9jaiwNEi4+HuuTgXEZ55IMdGh2W9inpPwjD7vOTFvsCG+4/HNaA+Zczj7Wshj36Wv2KPDtThqtnR/gAmJsVsbMboLFh127/R7lkNumTRDlFEeouyT/JJl/J0DQseX5oI2XK9GpB3lfb5OSt4PIzddscpJKIwJcwXZ8MwOng36Fy0DS0+4vvD6IwoQHjTLscVM09vFoKVpa8=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: a63211de-e307-442f-534c-08dee18434ac
+X-MS-Exchange-CrossTenant-AuthSource: DM4PR10MB6229.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Jul 2026 07:51:50.1568
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Jul 2026 08:45:07.0589
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: X1G+i25Cn4YnnEqosSCSczXx1a2ktI444i7L1aYHdUXUAjilJXnjjGwcSEq8ssmKOfYbikL/6U2XbT17SGEW8g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO1PR11MB5171
-X-OriginatorOrg: intel.com
+X-MS-Exchange-CrossTenant-UserPrincipalName: WrEKX3zeewo9ylklF9M+A8yBw7RoVyQ9jl5+VAIGa/hVhDEExoOK3MQR1K0LZMrV88Z+FMXQkjfLZORYozQ+9A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR10MB997557
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-14_02,2026-07-10_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0
+ suspectscore=0 phishscore=0 lowpriorityscore=0 mlxlogscore=999 bulkscore=0
+ spamscore=0 malwarescore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.19.0-2606160000 definitions=main-2607140091
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzE0MDA5MSBTYWx0ZWRfX/aHmKFZ0QN6j
+ eB6v4lk1hLa5uyZJbtudrHrOITT7Eu3vtM1ALb6psCH3eHnOWwO4a3nMuz1vuKnRvkgPVIceTnd
+ /YWU4Iken0mWSHupTxsfUwYVntqPDJId5S4XMpIPOJ4n6uHolDoRi8T1sObygQhWh2RNwo2xFNK
+ l+HuVNwtgAZLEfJJodbVTuthpsOEcjyB5Eq91xY0+I4HKkSquobJwRg4GJ28ZhYYUXvD+L/98zx
+ 085QIdzI1VWitJK6U8vhAN8f5v6M7PqCVXEAYbq/HH1SctIxaYyXCcp5jQitiZBMiemO0rb5hKx
+ 2LVnCcSaf+P6KU0CeQeVFktDSdSUYoyAebl6J2HxJmAFnSxahQj6Tn70T53W8j9Fm7uruqW1cWm
+ lB36DlWPM/pMrDJs+Uo2T1ZM8CTxPqTguipgWKPjkrc5OSFfDox2Eq6UDxnmeSwvwx7X9cln/Jo
+ d/R0eexUOGOZWLUQqnw==
+X-Authority-Analysis: v=2.4 cv=GcknWwXL c=1 sm=1 tr=0 ts=6a55f717 b=1 cx=c_pps
+ a=WeWmnZmh0fydH62SvGsd2A==:117 a=WeWmnZmh0fydH62SvGsd2A==:17
+ a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=RAioF0-LDSMA:10
+ a=GoEa3M9JfhUA:10 a=VkNPw1HP01LnGYTKEx00:22 a=jiCTI4zE5U7BLdzWsZGv:22
+ a=7Gl3-_t3PgB9XO-mQDs3:22 a=VwQbUJbxAAAA:8 a=yPCof4ZbAAAA:8
+ a=CTe3vKi2XHbYApGxVx8A:9 a=WmVTiCyuxqgg3mnwYu6p:22
+X-Proofpoint-GUID: ieTXXpYhW1X4NpP7h0cczkRs7FLMgXds
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzE0MDA5MSBTYWx0ZWRfXyolCzrrqB96a
+ B5LoMBe9LKHHaed47+WmfPZwRfiFYDb9P7R9QbNM15o6iJmnp7UEN/DZ3fQM+9fTNHfDLQcuYsh
+ J5dCEQHaxYHqEtO3eCT8mj1x9JHVg7kWeB6VOU2Q98Ag23lGygdu
+X-Proofpoint-ORIG-GUID: ieTXXpYhW1X4NpP7h0cczkRs7FLMgXds
 
-On 13/07/2026 07:38, ziniu.wang_1@oss.nxp.com wrote:
-> From: Luke Wang <ziniu.wang_1@nxp.com>
-> 
-> This series fixes several suspend/resume issues in the sdhci-esdhc-imx
-> driver, primarily affecting SDIO devices (e.g., WiFi).
-> 
-> Issues fixed:
-> - Tuning delay values not saved/restored for out-of-band wakeup devices
-> - DLL override lost after resume for DDR modes
-> - Pinctrl not restored before DDR_EN is set, causing CRC errors
-> - Unhandled interrupt during resume causing "nobody cared" warning
-> - Various error handling issues in suspend/resume paths
-> 
-> All patches now carry a Fixes tag pointing at v6.16. Patches 2-8 fix
-> regressions introduced by commit 676a83855614 ("mmc: host:
-> sdhci-esdhc-imx: refactor the system PM logic") in v6.16; patch 1 fixes
-> commit c63d25cdc59a ("mmc: sdhci-esdhc-imx: Save tuning value when card
-> stays powered in suspend"), also in v6.16.
-> 
-> Changes since v5:
-> - Added Fixes tags to all remaining patches (patch 3, 6, 7, 8) so the
->   whole series is properly tagged for stable, as requested by Ulf.
->   No functional changes.
-> 
-> Changes since v4:
-> - New patch 3: Fix esdhc_change_pinstate() to move IS_ERR checks for
->   pins_100mhz/pins_200mhz into their respective switch cases, so that
->   legacy timing modes can still reach pinctrl_select_default_state().
->   This avoids log spam on resume for devices without UHS pin states (Sashiko)
-> 
-> Changes since v3:
-> - Patch 2: Remove unused 'boarddata' variable in esdhc_set_uhs_signaling()
-> - Patch 7: Expand commit message to document intentional skip of enable_irq()
->   and sdhci_disable_irq_wakeups() on early return, and explain why the
->   PM runtime usage counter leak is acceptable (Sashiko)
-> 
-> Changes since v2:
-> - Patch 3: Updated commit message to explain the SoC IP integration
->   detail about internal loopback path change when switching pinctrl
->   from GPIO to USDHC function (per Bough Chen suggestion)
-> - Patch 5 (v2): Split into three separate patches (5/6/7) so each
->   patch fixes one problem (per Frank Li suggestion)
-> 
-> Changes since v1:
-> - Added patch 5 to fix error handling issues identified during review
-> - Use pm_runtime_resume_and_get() instead of pm_runtime_get_sync()
-> - Make pinctrl and cd-wake failures non-fatal (dev_warn only)
-> - Use esdhc_change_pinstate() instead of pinctrl_pm_select_default_state()
->   in resume to restore correct pin state based on timing mode
-> - Skip pinctrl restore for wakeup devices to avoid SD bus glitch
-> - Check pm_runtime_force_resume() return value in resume
-> 
-> Luke Wang (8):
->   mmc: sdhci-esdhc-imx: remove unnecessary mmc_card_wake_sdio_irq check
->     for tuning save/restore
->   mmc: sdhci-esdhc-imx: restore DLL override for DDR modes on resume
->   mmc: sdhci-esdhc-imx: fix esdhc_change_pinstate() to allow default
->     state restore
->   mmc: sdhci-esdhc-imx: restore pinctrl before restoring ios timing on
->     resume
->   mmc: sdhci-esdhc-imx: disable irq during suspend to fix unhandled
->     interrupt
->   mmc: sdhci-esdhc-imx: use pm_runtime_resume_and_get() in suspend
->   mmc: sdhci-esdhc-imx: make non-fatal errors non-blocking in suspend
->   mmc: sdhci-esdhc-imx: fix resume error handling
-> 
->  drivers/mmc/host/sdhci-esdhc-imx.c | 84 ++++++++++++++++++++----------
->  1 file changed, 56 insertions(+), 28 deletions(-)
-> 
+As pointed out by sashiko bot in [0], recent proposed changes to
+dma_max_mapping_size() may affect the driver.
 
-Already acked patches 1 and 2, but now for all the rest:
+While the issue reported may be a false positive, Robin pointed out some
+other DMA-related issues in the driver which are addressed here:
+- the DMA max mapping size is irrelevant for the programmed IO mode of
+  operation
+- we should not call dma_max_mapping_size() on the MMC host platform
+  device, but rather the DMA engine device
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+In addition, it's better to use the device returned from
+dmaengine_get_dma_device() for dma_umap_sg() and dma_unmap_sg(), and not
+reference the DMA channel device directly.
+
+[0] https://lore.kernel.org/linux-scsi/d82926fe-4557-401d-ae58-4302fef5657c@oracle.com/#t
+
+Signed-off-by: John Garry <john.g.garry@oracle.com>
+---
+Compile tested only, so HW testing also would be preferred - this HW
+seems to be on rpi1 (which I don't have access to).
+
+Differences to v1:
+- fix logic in bcm2835_add_host() (Robin)
+- stop unnecessarily NULLifying dma_dev
+- use dma_dev pointer in bcm2835_dma_complete_work() -> dma_unmap_sg()
+
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index ee63835b3ca0a..c949a3eaae794 100644
+--- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -188,7 +188,7 @@ struct bcm2835_host {
+ 	u32			drain_words;
+ 	struct page		*drain_page;
+ 	u32			drain_offset;
+-	bool			use_dma;
++	struct device		*dma_dev;
+ };
+ 
+ static void bcm2835_dumpcmd(struct bcm2835_host *host, struct mmc_command *cmd,
+@@ -494,8 +494,7 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
+ 				     &host->dma_cfg_rx :
+ 				     &host->dma_cfg_tx);
+ 
+-	sg_len = dma_map_sg(dma_chan->device->dev, data->sg, data->sg_len,
+-			    dir_data);
++	sg_len = dma_map_sg(host->dma_dev, data->sg, data->sg_len, dir_data);
+ 	if (!sg_len)
+ 		return;
+ 
+@@ -503,8 +502,7 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
+ 				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+ 
+ 	if (!desc) {
+-		dma_unmap_sg(dma_chan->device->dev, data->sg, data->sg_len,
+-			     dir_data);
++		dma_unmap_sg(host->dma_dev, data->sg, data->sg_len, dir_data);
+ 		return;
+ 	}
+ 
+@@ -1057,7 +1055,7 @@ static void bcm2835_dma_complete_work(struct work_struct *work)
+ 	data = host->data;
+ 
+ 	if (host->dma_chan) {
+-		dma_unmap_sg(host->dma_chan->device->dev,
++		dma_unmap_sg(host->dma_dev,
+ 			     data->sg, data->sg_len,
+ 			     host->dma_dir);
+ 
+@@ -1201,7 +1199,7 @@ static void bcm2835_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		return;
+ 	}
+ 
+-	if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
++	if (host->dma_dev && mrq->data && (mrq->data->blocks > PIO_THRESHOLD))
+ 		bcm2835_prepare_dma(host, mrq->data);
+ 
+ 	host->use_sbc = !!mrq->sbc && host->mrq->data &&
+@@ -1281,10 +1279,7 @@ static int bcm2835_add_host(struct bcm2835_host *host)
+ 
+ 	if (!host->dma_chan_rxtx) {
+ 		dev_warn(dev, "unable to initialise DMA channel. Falling back to PIO\n");
+-		host->use_dma = false;
+ 	} else {
+-		host->use_dma = true;
+-
+ 		host->dma_cfg_tx.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+ 		host->dma_cfg_tx.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+ 		host->dma_cfg_tx.direction = DMA_MEM_TO_DEV;
+@@ -1297,15 +1292,21 @@ static int bcm2835_add_host(struct bcm2835_host *host)
+ 		host->dma_cfg_rx.src_addr = host->phys_addr + SDDATA;
+ 		host->dma_cfg_rx.dst_addr = 0;
+ 
+-		if (dmaengine_slave_config(host->dma_chan_rxtx,
+-					   &host->dma_cfg_tx) != 0 ||
+-		    dmaengine_slave_config(host->dma_chan_rxtx,
+-					   &host->dma_cfg_rx) != 0)
+-			host->use_dma = false;
++		if (!dmaengine_slave_config(host->dma_chan_rxtx,
++					   &host->dma_cfg_tx) &&
++		    !dmaengine_slave_config(host->dma_chan_rxtx,
++					   &host->dma_cfg_rx)) {
++			host->dma_dev =
++				dmaengine_get_dma_device(host->dma_chan_rxtx);
++		}
+ 	}
+ 
+ 	mmc->max_segs = 128;
+-	mmc->max_req_size = min_t(size_t, 524288, dma_max_mapping_size(dev));
++	mmc->max_req_size = 524288;
++	if (host->dma_dev) {
++		mmc->max_req_size = min_t(size_t, mmc->max_req_size,
++				dma_max_mapping_size(host->dma_dev));
++	}
+ 	mmc->max_seg_size = mmc->max_req_size;
+ 	mmc->max_blk_size = 1024;
+ 	mmc->max_blk_count =  65535;
+@@ -1336,10 +1337,10 @@ static int bcm2835_add_host(struct bcm2835_host *host)
+ 	}
+ 
+ 	pio_limit_string[0] = '\0';
+-	if (host->use_dma && (PIO_THRESHOLD > 0))
++	if (host->dma_dev && (PIO_THRESHOLD > 0))
+ 		sprintf(pio_limit_string, " (>%d)", PIO_THRESHOLD);
+ 	dev_info(dev, "loaded - DMA %s%s\n",
+-		 host->use_dma ? "enabled" : "disabled", pio_limit_string);
++		 host->dma_dev ? "enabled" : "disabled", pio_limit_string);
+ 
+ 	return 0;
+ }
+-- 
+2.43.7
 
