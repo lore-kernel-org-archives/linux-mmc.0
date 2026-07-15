@@ -1,109 +1,96 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mail-m49223.qiye.163.com (mail-m49223.qiye.163.com [45.254.49.223])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E0563FB055;
-	Tue, 14 Jul 2026 21:58:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F84F3A7F64;
+	Wed, 15 Jul 2026 02:32:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.49.223
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784066329; cv=none; b=ZE1XBnWtgsgH7odbE3QVTmMFHdIuBQwh3MENIDUaRMYLl3Ent9Hsm2D5O/49FL9+YnwrD4/e5B3sI6L44R8tXcKVF0c7df6sLbW+ChzD9M8qrpH/T4dTYlAIluWxhYEmGnL4EUlZrWzg5S4H77Dd1s/T8+V8Ynh1kIR+NiSualI=
+	t=1784082751; cv=none; b=ZuJpwuBoVsoDOO+Ma03uP8cL1pVAMVQSvXiiKkdwA8+6eR/HYU0R68lg7C4O4LKzLQBqodWOWNF6vY0Wc6lAm1oLeWFYFujXPPVySxVMECR25RvcLZjgnLbF0smm4YNTrJIUYwfAi6yZ0wnjOKRpTAdJDK18pe8S4pEpVeheFe8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784066329; c=relaxed/simple;
-	bh=ouy4npV4LYbEkQl2h2wNkvuTixT3WVi6+ilKYKx4Dbc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ilLJoLjir4570P/TbRRBNWm99vUBDd8ugAUfdyRVyOFX7+/yLB3ToUZ0s8Mk6q5GCd6IcgYb/PxXEq9F5G6kIAIOyHFcPwOP/aNNrz44NDZclTyNaz6PcDxuzM01yJBGIVhxW69cwsaQ/xEvs1beVV5Nqo1fVs5wThcsOBf4OLk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Dt4jxkA4; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1784082751; c=relaxed/simple;
+	bh=FlJmCWM6Xdt8uKWJ3UiLjhgLO474hgPIYzwgQWU04vg=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=EM9PJ2kr9xVj8Ags9zuSwo+tNN4WRiSyZo92QphPLPP3XDNnOQuty47Ay7qvrmwfAUot+GKO8hQkjPolCCzuMQsnaNCVbcob9QjMEnXfuytZxXQSvBTHBwxJeOY+Eybn2XWZcsVCyOHNJFgvdxaVcj04Wae2llGxrnPHzFcBhrU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=N7wrJUvl; arc=none smtp.client-ip=45.254.49.223
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Dt4jxkA4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8307E1F000E9;
-	Tue, 14 Jul 2026 21:58:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1784066327;
-	bh=jIilpnqGzj8khC1MQLy4UAKt3Fn3dMi3MkFbuxyLZ9w=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=Dt4jxkA4TwqZ1+6gdpqQXr0td3yEo2ANQRTYH4pFYL/oWQgZtzgthWkPKSwydZG14
-	 hu360Yk5Z3QM4gFEYxmrmJh2wbsiWQb8kcUPaO/RUPNv6ljfTE+TNgVy2gLCOUWWBk
-	 +0eWrDG+UJT3sGaUT+YJw6/sYBEC0D/8Z0InhL8k7LDIQ/w041PIu/5S6b8SK+wbg0
-	 cNlK0N79w9kBiOwmOy+HCaYGi3/C7pIcu+bbYn7hGw2IATAAoM2XHwrbnRwMfaBw92
-	 YkrAl4N5tIKo2dj04VmE/gGR/BsaiG7JIr6iUd9PFDZpw0jKi6kzGFE1ngSzI/TqdP
-	 ReYiWXDcJVTig==
-Date: Tue, 14 Jul 2026 16:58:46 -0500
-From: Rob Herring <robh@kernel.org>
-To: Komal Bajaj <komal.bajaj@oss.qualcomm.com>,
-	Bjorn Andersson <andersson@kernel.org>
-Cc: Konrad Dybcio <konradybcio@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Wesley Cheng <quic_wcheng@quicinc.com>,
-	Ulf Hansson <ulfh@kernel.org>, linux-arm-msm@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-phy@lists.infradead.org, linux-mmc@vger.kernel.org,
-	monish.chunara@oss.qualcomm.com,
-	Imran Shaik <imran.shaik@oss.qualcomm.com>,
-	Monish Chunara <quic_mchunara@quicinc.com>,
-	Rakesh Kota <rakesh.kota@oss.qualcomm.com>,
-	Raviteja Laggyshetty <raviteja.laggyshetty@oss.qualcomm.com>,
-	Sneh Mankad <sneh.mankad@oss.qualcomm.com>,
-	Vishnu Santhosh <vishnu.santhosh@oss.qualcomm.com>,
-	Xueyao An <xueyao.an@oss.qualcomm.com>,
-	Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Subject: Re: [PATCH v7 2/5] arm64: dts: qcom: Introduce Shikra SoC base dtsi
-Message-ID: <20260714215846.GA2932445-robh@kernel.org>
-References: <20260708-shikra-dt-v7-0-977b65a300c1@oss.qualcomm.com>
- <20260708-shikra-dt-v7-2-977b65a300c1@oss.qualcomm.com>
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="N7wrJUvl"
+Received: from [172.16.12.48] (unknown [61.154.14.86])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 46357c29a;
+	Wed, 15 Jul 2026 10:16:54 +0800 (GMT+08:00)
+Message-ID: <29b8489c-3a0b-4e9d-a6f6-0400e7d00103@rock-chips.com>
+Date: Wed, 15 Jul 2026 10:16:53 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260708-shikra-dt-v7-2-977b65a300c1@oss.qualcomm.com>
+User-Agent: Mozilla Thunderbird
+Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>,
+ linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: dw_mmc: move declaration of dw_mci_pmops
+To: Ben Dooks <ben.dooks@codethink.co.uk>, Ulf Hansson <ulfh@kernel.org>
+References: <20260710161254.569883-1-ben.dooks@codethink.co.uk>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20260710161254.569883-1-ben.dooks@codethink.co.uk>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Tid: 0a9f639011d903a4kunm7bd851d34a493
+X-HM-MType: 1
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWRgWCB1ZQUpXWS1ZQUlXWQ8JGhUIEh9ZQVkZTh8aVkhCS0weTEhJTEkfTVYVFA
+	kWGhdVEwETFhoSFyQUDg9ZV1kYEgtZQVlNSlVKTk9VSk9VQ01ZV1kWGg8SFR0UWUFZT0tIVUpLSU
+	9PT0hVSktLVUpCS0tZBg++
+DKIM-Signature: a=rsa-sha256;
+	b=N7wrJUvlP6W6pqGD4E2gPebo3ahqyrWuYxwjQ9m9Ie5nLMKSO/P2UlalhP8dPjUOAOpqL9RzTHt3RasPg+FX6m4kiIH8IekYRzQphIXX4aPIlNZu8t4PMj+bZvBDMtRnYjQ7p/7CsLWRYY9BWzRiqb4MiRBvlkESl7NuYhvM7GU=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=NoVM5r8D/RSA21CSNws4J4aK0M4c+MRH26JgYcSIpJk=;
+	h=date:mime-version:subject:message-id:from;
 
-On Wed, Jul 08, 2026 at 05:47:31PM +0530, Komal Bajaj wrote:
-> Add initial device tree support for the Qualcomm Shikra SoC,
-> an IoT-focused platform built around a heterogeneous CPU cluster
-> (Cortex-A55 + Cortex-A78C) with RPM-based power and clock management.
+在 2026/07/11 星期六 0:12, Ben Dooks 写道:
+> The dw_mci_pmops is exported out of dw_mmc.c so move the declaration of
+> ton dw_mmc.h from dw_mmc-pltfm.h to fix the following sparse warning:
 > 
-> Enable support for the following peripherals:
->   - CPU nodes
->   - Global Clock Controller (GCC)
->   - RPM-based clock controller (RPMCC) and power domains (RPMPD)
->   - Interrupt controller
->   - Top Level Mode Multiplexer (TLMM)
->   - Debug UART
->   - eMMC host controller
->   - System timer and watchdog
+> drivers/mmc/host/dw_mmc.c:3512:25: warning: symbol 'dw_mci_pmops' was not declared. Should it be static?
 > 
-> Co-developed-by: Imran Shaik <imran.shaik@oss.qualcomm.com>
-> Signed-off-by: Imran Shaik <imran.shaik@oss.qualcomm.com>
-> Co-developed-by: Monish Chunara <quic_mchunara@quicinc.com>
-> Signed-off-by: Monish Chunara <quic_mchunara@quicinc.com>
-> Co-developed-by: Rakesh Kota <rakesh.kota@oss.qualcomm.com>
-> Signed-off-by: Rakesh Kota <rakesh.kota@oss.qualcomm.com>
-> Co-developed-by: Raviteja Laggyshetty <raviteja.laggyshetty@oss.qualcomm.com>
-> Signed-off-by: Raviteja Laggyshetty <raviteja.laggyshetty@oss.qualcomm.com>
-> Co-developed-by: Sneh Mankad <sneh.mankad@oss.qualcomm.com>
-> Signed-off-by: Sneh Mankad <sneh.mankad@oss.qualcomm.com>
-> Co-developed-by: Vishnu Santhosh <vishnu.santhosh@oss.qualcomm.com>
-> Signed-off-by: Vishnu Santhosh <vishnu.santhosh@oss.qualcomm.com>
-> Co-developed-by: Xueyao An <xueyao.an@oss.qualcomm.com>
-> Signed-off-by: Xueyao An <xueyao.an@oss.qualcomm.com>
-> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-> Signed-off-by: Komal Bajaj <komal.bajaj@oss.qualcomm.com>
 
-So none of these people nor the maintainers managed to run dtbs_check on 
-this?
+Sorry for late response, this looks good to me,
 
-All of these show up as undocumented in linux-next now:
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-     'qcom,scm-shikra', 'qcom,scm'
-     'qcom,shikra-imem', 'mmio-sram'
-     'qcom,shikra-tcsr', 'syscon'
 
-Please fix or drop this series.
+> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+> ---
+> v2:
+>    - changed to moving the definition and re-worded commit
+> ---
+>   drivers/mmc/host/dw_mmc-pltfm.h | 1 -
+>   drivers/mmc/host/dw_mmc.h       | 2 ++
+>   2 files changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-pltfm.h
+> index ef1b05d484c3..f3193662abf1 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.h
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.h
+> @@ -11,6 +11,5 @@
+>   extern int dw_mci_pltfm_register(struct platform_device *pdev,
+>   				const struct dw_mci_drv_data *drv_data);
+>   extern void dw_mci_pltfm_remove(struct platform_device *pdev);
+> -extern const struct dev_pm_ops dw_mci_pmops;
+>   
+>   #endif /* _DW_MMC_PLTFM_H_ */
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 9ffcd3946cff..38610c89d54a 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -19,6 +19,8 @@
+>   #include <linux/interrupt.h>
+>   #include <linux/workqueue.h>
+>   
+> +extern const struct dev_pm_ops dw_mci_pmops;
+> +
+>   enum dw_mci_state {
+>   	STATE_IDLE = 0,
+>   	STATE_SENDING_CMD,
 
-I'm tired of chasing down new QCom DT warnings.
-
-Rob
