@@ -1,309 +1,248 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A64243D522C
-	for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 13:19:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FB6F41E6D4
+	for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 13:37:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784207960; cv=pass; b=oxPCk2e/kd855/U/+FA3SThwMPTuLieMNMrkCkPvgEGcLIByR797IDi32ylcl+QDME9EbEmA9tOpvVrLQnE0a9XTszuCkIqJtc3EE7qFMKYidq3cbp1j9JFINHFLggwrMdoaTW4AO1QvyaYXK69IB8KacHOMXe4dCtEeSe9K0G4=
+	t=1784209059; cv=pass; b=rgVY9VhJ28kobAE59bsfO4bR/b2zkVrieSTlvV42hX4grjW5bUh+BmCMqNUuRX6ZIfJcErulWEcom5sa6E4XvXG0HD2Oo9FcpXngLrBfLdraOZG5C2140Gn/+aUkYpFyIZ/nvl7Q2taIM84ENZ6broE169Iryx/eu4yY2+y3JKc=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784207960; c=relaxed/simple;
-	bh=4AmOO+7rlx+hHuvnOSyX2KGjLFRqTfMfxKZd2BRafhs=;
+	s=arc-20240116; t=1784209059; c=relaxed/simple;
+	bh=1aXnFY53krYuOZuQpV2j2RhkeAvxCo1KAwi0UjQa3G8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=aY9dvYUX3cpSE5zrOu5vjqoSqEgw8ChgTNGg7aHKVDNMB9clGScezwDdaHdo1AdM1HPS7LZb1KJyOfg6xtyTRxS4JjrX8kODiKdA4dhzo0I1uG4ProbOzLs15g/AfeGcrc4LkDmCxiXzQ3VTEh+wM6ITCfLXeKTEMZ4CbhsoT6I=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=gRkSNtrY; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=K/VBiLED; arc=pass smtp.client-ip=205.220.180.131
+	 To:Cc:Content-Type; b=Tpkpw1Zr6B2FLCU+CQpz55rRiZKOVZ0QD5qm9C2vr+cJBaA4w3UaEjOdfqEDWdtcQGqb8M67INlceK6ABUkzaxPA61GC+/HB3OnIpHSB02Ud49VOxLFn1YOyk6NcPH6JHQ2wpxQO2RdBAmjwKP/1ZXGmPe14cqL5iu06QlcJqq0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=koBtFBM+; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=BOqklBCy; arc=pass smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="gRkSNtrY";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="K/VBiLED"
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66GCl4Sv2882352
-	for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 13:19:17 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="koBtFBM+";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="BOqklBCy"
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66GDJnWK2837994
+	for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 13:37:37 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	e2r0ZQVrpmQYd+PGofyii1I1ut1cDt900FipSd0NNhc=; b=gRkSNtrYgbJj7xOg
-	6KMzKkxYpg5IVHCbemqnFtev5KWrMf28ahCCDAAAqn1WA/YCVOnZw7ib1Oym/Uea
-	trHysU8l2XKMLICINuKgrS+cRbxdOIYat+8KnXOixOOqjlh2EGQgELVDDMdFcCH0
-	dlGU9XhRVeMzwt9RV2+r0GmFCgFYHIvX619Fgj3jK7syUmECimicoGIAFWTSBTNf
-	SOHK39winweClUt39l2X+CAIejEOa6LSenzXLkQZxChRUKka9V+qrWC+ohcsQRQ/
-	T7ttWy6e/aQUMLj6H2u22llktOa0YxuztIsVqyhAJ057ns2bhGFxw/19ynZjxnTe
-	tyZPIQ==
-Received: from mail-qv1-f71.google.com (mail-qv1-f71.google.com [209.85.219.71])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4feym18431-1
+	X7wiIfj5l8bSUfyQ2Jq7YXo0v5uKuE1RL41eHyKAd4Y=; b=koBtFBM+1qmC14tw
+	RzE0fIEWxqBlfrZmmXzos5RSoSBfxEXFDu8S+SI+370w6MxHy5uhEeKOzBoQxryq
+	gmcXaSTPW8h4k3LNfY1BDTVnseL92z7YcD6Mp3B6ebRbY96bDBZDrXHVZKqadwwM
+	6x/r/dXYNy6I+py8B37LcOLwZLgbtyT8mgJupAnGzRG6/nT7d0kX1qhkFdJ5eEk/
+	Rt8Im2df7hlxAzdqxNjEvWfhyhZkVKbdU3ZrwF8Cs9UV6fwzCVpa54aLTIACV7Az
+	HjYt0V6NDCIAXeMSVVxtBp5zZsIOpQF3fDvTwzh8fMKVQCWByyb6F3OP3gLQyEOc
+	vrjHZw==
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com [209.85.222.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4feefqm4dy-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 13:19:17 +0000 (GMT)
-Received: by mail-qv1-f71.google.com with SMTP id 6a1803df08f44-8fc92c5373bso109192206d6.1
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 06:19:17 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1784207957; cv=none;
+	for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 13:37:37 +0000 (GMT)
+Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-92ec3146553so1346370685a.1
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Jul 2026 06:37:37 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784209056; cv=none;
         d=google.com; s=arc-20260327;
-        b=ppxW+Fme3alYYlj+ZKRS2Vbp6/r0FOJN7Zqc3MlaKV9LS3C2tx6WjJWE1QCdtP5qJR
-         YrqYt/YmntpN2U87uN9ckx8CDUG/8CG4G/k+rzOPyxon5+4UEze/b/OrUovjUMq0IyfX
-         s0UVrJHjdEiqCQZJ1KYnqzwnxM+pfLLemgbXmLegTz1m1oa+3waYMFna8KoAsgn045gS
-         EAUgPjq9okKoYVv4Q+7lnq0EzcYR8aRlm2l7EAuQhEjY9Gw8o6y/lDdgMJ9Yqq5Bfk9j
-         Kvh7c77VzkQhX/41FYmSMWjCF16JSQYuy/AToo9Q4HRXwIcTpAi9V8f8c/OyXjFsKAAO
-         Rv/A==
+        b=EL52BDSzzk5CkzS/5Ua7oddXpEOQpDT1RsVzzEJjBhWmC2p/HLlFtxuLqZPZIFGGcK
+         pGAlNixXPJn2hfh8YfsELWlatjo55lZqnqgddc7tAs6ZUitPU5avJp2saNwGsiLaiF1V
+         MHlvSN+FJaJhL3BreS1/x+l4DN1UCLWoAyJKkd3boL289gFF4VD7ddb6hPJlXj+gcgS7
+         h23btzYETtA8vvGj+0Y4iAulPveSJeGoba1ZhuAhkjuYcok7fBcc9TFWu1Sl0T1TnR0X
+         DLeSF6y0E0ytcMt65KNn1nujSLsbmEh+dUQJSOrlEjn+2px8ZXPY+UcCjMgUxyAWJSq5
+         hxLQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=e2r0ZQVrpmQYd+PGofyii1I1ut1cDt900FipSd0NNhc=;
-        fh=71Lpt6IbkzTCECKidLtab7rHQsONqjhn16Dm55GjPj8=;
-        b=XyGsYhd28jfzYDpC4U/ZQKAjyDmOE69XNlz7nxEd8Z4t1Jz3HYOvbajWM51U7xcfp+
-         CmSMMCL/lnYfELdrbE6MQ+3c0K02OOz1UksVMcMBQH2r6En3vAHz2lvJnJjWc5V9LJLC
-         dbOsEgMK5s4ylwPUo7o/gMPThCdWGr+0XBJeKGlAY2wQdxIkzSRrDij2mIelWMIurgyF
-         O6Skq+zoKM/YC7ZxxJa43YqVXcF7h8Dy9dAZ57tkak67qDJEf4UR+5sjs4N2ZKelTAdq
-         zMDXBdnKuduJ7/2klASyHpUwpFmIkoDX32ZvbIUjFHPkmn0NThuSqDCLTGo/3JQt1j8+
-         BWtQ==;
+        bh=X7wiIfj5l8bSUfyQ2Jq7YXo0v5uKuE1RL41eHyKAd4Y=;
+        fh=7QriWlS4U0icu6m/72NGA22bMQRTV0KmoTSy8AjNEBw=;
+        b=rMK+wuuo6KJqnFYpgiK0l7sL9QRYqscFd+HR6k4ivtMGTymKiQiivMFWLPWgvhOQj/
+         Wu5+MJhqQFiYP/UVwtQeEA0rXUxQGkSMT2cCkCAWqNRpYo/7XEhJe4l3ACWVlKZ3BVN9
+         v/gISD9POqemSGR3JskRfAJgP68f2Flx1E1O+hJlxvw+bepJb1YdqW/qQiCvxQzE49QP
+         mZjCJSUzGt4/W1nnD6IIURXFideuDZGtzRsC2uRR9oESqw/odzp03rjrYFEioioUAtlS
+         GfNTJfh+PLZwZoZ1/tz/V/aI5YVWTuAuCFVHPNeUTJmUofpYKloIaZkSlPhoKFWy5Z7U
+         9bug==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1784207957; x=1784812757; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1784209056; x=1784813856; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=e2r0ZQVrpmQYd+PGofyii1I1ut1cDt900FipSd0NNhc=;
-        b=K/VBiLEDZsuFngiBfgO+2uQxkQgbc5UHItpzrEb+hx/y61vnunY5sKCTmv+ZPrxKOt
-         GWADqWa6Iw4vLIA/Lcf5iicNMzHx0psYPlZF6g1t/Q4Jw/RRbRXtKrZ1llknjmSuh7Tp
-         iTNJmTE2vj4SQCcvcjk22R0I8eRGDtGidcmTsctB1HcQe0WuDQjBMD009XoZh0v3ikqZ
-         cBh/aYPpigjTbf4YtfZWBGlBZvMbqg2KslsnmOQh1lDBk6YNnv5nszmiz5g+mpWebX6G
-         A0pDi12XkxsMXJrLP2O0RM9l4rlSlZiauZFJ2x43esZLBRijtUAb4vrVkMGS5KG2pFr5
-         dc+g==
+        bh=X7wiIfj5l8bSUfyQ2Jq7YXo0v5uKuE1RL41eHyKAd4Y=;
+        b=BOqklBCyotuyFPc2yE+ZJSoE95q1kkRzY7/iTValDJw076wHbe7PnNZGu8KrfTdWhV
+         WvPHI8RGIsWCjyuU0EyqWXKp544iNwPlJC4oAJmYbgGiKL7CJv5yyu0fbtIosFf/bROh
+         Oet+6b+ktVQKUPMxNBbAAUDCt5LWM+MDOc/U3lMYdXkXwoqWrhcd3SWDGW/HTmBuliw/
+         SaKUIyycPKLC5TE2zz1Qh01LrHq1MDkObinAf0noYpdF/XxR5GoOp/+nSaNEPXJxPc/k
+         pI5RARRMk1VfEEDYCxE73RgVBdx42CeQRXS/DF5OI93pQk6zF9pLgYdZqsmKUy4o5ZR1
+         h5IA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784207957; x=1784812757;
+        d=1e100.net; s=20251104; t=1784209056; x=1784813856;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=e2r0ZQVrpmQYd+PGofyii1I1ut1cDt900FipSd0NNhc=;
-        b=A/WKMa+Op1K9NOStaPkP6nf1BGofDDnvavHJfRFjonha50G+HzbVVQ4raR5GaSZIGK
-         O6gqgTJbsvoTt++hzUZIqNnTtaNSglxzv9Fw6eKo/T4vALEY5ySHVs3FdoxRryc+3Hhv
-         YNdFkDK/OpSHwHiELQAA8BFzrr0vtf0XmdMfA+CajMhmZkeYidhXLc7fHRAFKtTJdBmD
-         TvAaSW21v8Kw2E8zTeSEUppo3VvkVq55fcf8m9Y/LSbGhY2M09KehCrwp7eYhh+QGUGU
-         wd+5ErRrQy387YROPQ9bWt76NecmmBY662zc8WWImO7evGgEfncRpomepHwVIQeeEUvB
-         940Q==
-X-Forwarded-Encrypted: i=1; AHgh+RpGsczwp3C7XgksTD4p1fyxiYF/mQ0rkm5KUP+mFA5U1HieleWeibo4ydbgV30ZRwWrc00GvI2q6UY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx9ISi8BJdZq7lPvCS3oA6F67AetimZokwLPoXKmDB8wsrAyof7
-	jtcp4ozsNufFdlcWXlZ4AQ5epB4RMXc9gEdjSzKyZxDvH0/gulEaAyK8E6no5CM1w0plN+T1zDf
-	vNLfZYG8Ks7ocrmgMFO1ezkim8h0hkHkcIo3lRqVPmOPUWYZAQBWvByzy0MV1tnXjEKLN8W+aTb
-	4x7+wZ806NWnwum4KBD29S1edXaIu+anKV6sLQVA==
-X-Gm-Gg: AfdE7cnQ3LnrO0ZpI/iVF/h/ROiqsJNAVnnoIyF64X/0uGzZwhZXaORAXsHB2KC2OrG
-	G3IZ1nbSQuzz2Pkc8qG6VBmE3HvBMxrR86Fypvb7belt1aNC09NqGGN/yjhxvrHl6dtBhZWdShV
-	YVCk8x6mKPmLw5CwhE4Jbi9d91gp21WdvdxgjHUdVCH3QuDQR5kCOjMgpIoQ==
-X-Received: by 2002:a05:6214:428c:b0:8db:5f:c588 with SMTP id 6a1803df08f44-90758cc04efmr95850046d6.3.1784207956687;
-        Thu, 16 Jul 2026 06:19:16 -0700 (PDT)
-X-Received: by 2002:a05:6214:428c:b0:8db:5f:c588 with SMTP id
- 6a1803df08f44-90758cc04efmr95849526d6.3.1784207956218; Thu, 16 Jul 2026
- 06:19:16 -0700 (PDT)
+        bh=X7wiIfj5l8bSUfyQ2Jq7YXo0v5uKuE1RL41eHyKAd4Y=;
+        b=BZsHC5KQt7yhVotorNeTDEX7oPW5Qb/lVdOHrjr20a80rRrEIijujFvjA09FttIdev
+         axHHCWPfvo63Cu07aVL8aBDkbHj3DQumL56LdC3QriUQROfY06MmCpvaQM6p877JTq45
+         dAHPHUitHOZAX/DGxNXNMXf21Bdum3lgva8z7skkf3t/plfGI6h5pSkRp/3dfNedzvL7
+         wCzlBTu5K/bzUPDOegxenGhhNtkChKWacxCvZqhSR3zbXBY9+cD7XoigAltrzQGIdp/h
+         GeAfV4P80oYCnGGng6jD/3ExuORVADU+oiR1MR0hLdNQfatT0T0WbgjrFLMdV8KfPVgf
+         zMcQ==
+X-Forwarded-Encrypted: i=1; AHgh+RrCwy67RIqUZxvLjyVWewu5Iph0YwqqsITp7kAjIFcgTwlyF1RyMunt6Xm+sOWwcjHbPlKFxKQ9VMY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwSDvtqLbXPtFHF4lmaUCAKkbM9+cFzj5r/qaZcjMz1LiwnX44P
+	Evatyzpe9FiGtuy5ZAwqwfLUcP2u6V4woKE6TexTfA+2WQ5V+JlVkeh35X6hXSESQ41SmhsDPos
+	RHEjfmW4B6MJ9Koe/659oqKVmBa3LBsZhtb1BDXMYXyrWtEWwsrMdewIs9iAS2tYFI3lfl0slEs
+	1dFCR5zRmP4M6JqGwOICRwVQy6kPY16GPZId9tKw==
+X-Gm-Gg: AfdE7cmU3BhACcOmPbkNEETtbe2Rnh5Xn1+OrA4ne9/DQZxW9tXWKpAlIa8X3t/2LDu
+	zRfu4X1kTpwmCanDjFWIhjJvZ45hofV4gHbokKMNY2Yzj1mJDti87TxQH1sbYWk6rPEMCNnL7SS
+	0DWxa7vg/s3+4dSaJA7JpvSpAQP+wgs97l8kolC80VJfcRrJ5tyAJIx0lMoFSGmu0rIS7PBtIuV
+	GxqLUI3nMtdb1We4eb06lcjPqwV/TQJ+PZgmRhhJZZXtvBeRhuQSNujPCQdKLw3vgnIu5l0zR7m
+X-Received: by 2002:a05:620a:2a09:b0:915:94f7:55df with SMTP id af79cd13be357-930961ec42dmr789767785a.20.1784209056491;
+        Thu, 16 Jul 2026 06:37:36 -0700 (PDT)
+X-Received: by 2002:a05:620a:2a09:b0:915:94f7:55df with SMTP id
+ af79cd13be357-930961ec42dmr789765185a.20.1784209056076; Thu, 16 Jul 2026
+ 06:37:36 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260714084456.3356354-1-john.g.garry@oracle.com>
-In-Reply-To: <20260714084456.3356354-1-john.g.garry@oracle.com>
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Thu, 16 Jul 2026 15:19:05 +0200
-X-Gm-Features: AUfX_mzPdrJGCsG9s-kQ1f-ok162sDoteL7q9rt9naKA1QCMqVu7Bn80L-NJHAo
-Message-ID: <CAPx+jO8ZeheZrOk536XbNVnbLu9ue8kZ8KEDMvnioBsQX2D1Sw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: bcm2835: DMA mapping improvements
-To: John Garry <john.g.garry@oracle.com>
-Cc: ulfh@kernel.org, florian.fainelli@broadcom.com, rjui@broadcom.com,
-        sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com,
-        linux-mmc@vger.kernel.org, hch@lst.de, robin.murphy@arm.com,
-        martin.petersen@oracle.com, linux-rpi-kernel@lists.infradead.org
+References: <20260703-block-as-nvmem-v8-0-98ae32bfc49a@oss.qualcomm.com>
+ <20260703-block-as-nvmem-v8-1-98ae32bfc49a@oss.qualcomm.com> <CAPx+jO_6KcZyp=4HuJqnYY40VKt1ee+si0BEpxUE+1pkMFtvCA@mail.gmail.com>
+In-Reply-To: <CAPx+jO_6KcZyp=4HuJqnYY40VKt1ee+si0BEpxUE+1pkMFtvCA@mail.gmail.com>
+From: Loic Poulain <loic.poulain@oss.qualcomm.com>
+Date: Thu, 16 Jul 2026 15:37:24 +0200
+X-Gm-Features: AUfX_mzUGsJpNZbOCbBzK6qgEgvOrmyZdlmDjPAHBJOztrU8oh-UhYCbNKmWFvI
+Message-ID: <CAFEp6-1CXaOHFnbSZ=ijwSi-nBnZXv1v+DhjT5P3GQoB+zB1Rw@mail.gmail.com>
+Subject: Re: [PATCH v8 1/9] dt-bindings: mmc: Document fixed-layout NVMEM
+ provider support
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Authority-Analysis: v=2.4 cv=KPRqylFo c=1 sm=1 tr=0 ts=6a58da55 cx=c_pps
- a=UgVkIMxJMSkC9lv97toC5g==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+X-Authority-Analysis: v=2.4 cv=APNfGQ4N c=1 sm=1 tr=0 ts=6a58dea1 cx=c_pps
+ a=qKBjSQ1v91RyAK45QCPf5w==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=3WHJM1ZQz_JShphwDgj5:22 a=VwQbUJbxAAAA:8 a=yPCof4ZbAAAA:8
- a=AAfwrZ--nDAgvqgJmSgA:9 a=QEXdDO2ut3YA:10 a=1HOtulTD9v-eNWfpl4qZ:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzE2MDEzNiBTYWx0ZWRfXxyf3d3KzJeLR
- 6u3IClw9q3PB3xcmG3Pu83QRgNMsYEFgZGffuw35qbWeGhF6BavAG2fQNKAn6QNv1ZiD+X1UeGM
- pVzq+WrwHjSjNrWpvL4i6vze6rprlGN7D5nJJgrmy/Lz3yETuxctqgeqHQ+rn+jyJhUfMsrtTzd
- UwhZ5Uu9rr3kShgzJBlIbREM/hP8A5HjQJSkLtRSMYrdVsQRqaDFfTT4TltaRCcixwZb5fAORxK
- Xlj3pU5PnBz0PDpKrTFPs3uaZdliXwaPwF3IbsdrERB2HAnN5GW4KApVeV704kSAvUjduXgV9rI
- hCkPG6XmUGGBOtF5qxdmf0BIRYb5wGueYiKQxZj+zxt7T5GgkymNvpbjZ6ZWeQMjMpTBAOXbrvh
- tlcLhU0SRyQo1zc3P05+VsqGogYuVhFrIpzV/uCN5nECOJ/s3mJXyODpXHgH6fTOhRblVTWjXJV
- Ub0Y9TMQyLqU0kvA8/g==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzE2MDEzNiBTYWx0ZWRfXyVepZGK/KqYs
- K8za+fXtDGzWWdWAFhUku/wcDm+FXW0qbWkpr6ITzfCepmnOAiKv4+YQW5Au2NRNnOmirrj6kGZ
- 6iDvRYHJ+I5CNwIs3Otclwjbfn2r2W4=
-X-Proofpoint-GUID: bXZ5_M2_hXoG6cPRB6QsFsWD_iioN8wp
-X-Proofpoint-ORIG-GUID: bXZ5_M2_hXoG6cPRB6QsFsWD_iioN8wp
+ a=rJkE3RaqiGZ5pbrm-msn:22 a=VwQbUJbxAAAA:8 a=pGLkceISAAAA:8 a=EUspDBNiAAAA:8
+ a=qKCy34jk-mlrzchimWYA:9 a=QEXdDO2ut3YA:10 a=NFOGd7dJGGMPyQGDc5-O:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzE2MDEzOSBTYWx0ZWRfXzsgziLto6POR
+ abJqyPKTepx92G/K04wQgXTq1DT+D+SCN0mtKZwRKdIHvQPf+7y7XCkzw458xbksH1blb8m8yps
+ CPWjJae3UUafNqQB5bq3l6srR7j/1lI=
+X-Proofpoint-ORIG-GUID: EMRy1qhZ7UnYROZEe_TOUWH_6R3GGdVa
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzE2MDEzOSBTYWx0ZWRfXwb8UmHqbHcg6
+ FxnDbYUxoIgTITpc2Frpz1WmZbBK6nR8c2UDVDUyw/h8ILK4Ts3UBPw1oisiUjwPaecUSyuqGLR
+ SNnF/abDJcrNkNH6NNbojKvMV9P3UU+DFX4zEmKU5ylCBViJzN9O6QaTpHfJLJVhx1m8nKwkzjt
+ gH8IfMD4GlTsKvPTirm5n9NrIqhG3ZuBWDQeWvShJU7nDkj5lfRdlVcczSa5i/Aj201ydMPOHdA
+ 921SpHvBY12z/gYnW0ODeD7RnzpVjGnbZVUjc85J7WrCvNODmofo6b7ujiMTe9gS5tQUibxQaRR
+ 15sC4AXr2BspKrBusHA60qMJeZ2Lcffd04yQMGLfLp4Lca3mb6jfeolvqmCQ9ptyeW8oB1qPLi2
+ QErT5OKK5/3oqSOB9KRjOfOAyyXOYBmYO8JeaksrcmQUX9emXSUu/iZK3hUZRb/PMFCc2Aik65x
+ RRatVEI37V015uHs3Kw==
+X-Proofpoint-GUID: EMRy1qhZ7UnYROZEe_TOUWH_6R3GGdVa
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-07-16_04,2026-07-15_02,2025-10-01_01
+ definitions=2026-07-16_05,2026-07-15_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- priorityscore=1501 lowpriorityscore=0 adultscore=0 impostorscore=0
- clxscore=1015 malwarescore=0 bulkscore=0 spamscore=0 phishscore=0
- suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
- definitions=main-2607160136
+ suspectscore=0 phishscore=0 adultscore=0 lowpriorityscore=0 impostorscore=0
+ malwarescore=0 bulkscore=0 spamscore=0 clxscore=1015 priorityscore=1501
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607160139
 
-On Tue, Jul 14, 2026 at 10:45=E2=80=AFAM John Garry <john.g.garry@oracle.co=
-m> wrote:
->
-> As pointed out by sashiko bot in [0], recent proposed changes to
-> dma_max_mapping_size() may affect the driver.
->
-> While the issue reported may be a false positive, Robin pointed out some
-> other DMA-related issues in the driver which are addressed here:
-> - the DMA max mapping size is irrelevant for the programmed IO mode of
->   operation
-> - we should not call dma_max_mapping_size() on the MMC host platform
->   device, but rather the DMA engine device
->
-> In addition, it's better to use the device returned from
-> dmaengine_get_dma_device() for dma_umap_sg() and dma_unmap_sg(), and not
-> reference the DMA channel device directly.
->
-> [0] https://lore.kernel.org/linux-scsi/d82926fe-4557-401d-ae58-4302fef565=
-7c@oracle.com/#t
->
-> Signed-off-by: John Garry <john.g.garry@oracle.com>
+Hi Ulf,
 
-Applied for next, thanks!
+On Thu, Jul 16, 2026 at 3:16=E2=80=AFPM Ulf Hansson
+<ulf.hansson@oss.qualcomm.com> wrote:
+>
+> - trimmed the cc-list
+>
+> On Fri, Jul 3, 2026 at 3:45=E2=80=AFPM Loic Poulain
+> <loic.poulain@oss.qualcomm.com> wrote:
+> >
+> > Allow an eMMC hardware partition node to describe an NVMEM layout so th=
+e
+> > partition can be exposed as an NVMEM provider. This lets a partition
+> > (e.g. an eMMC boot partition) store device-specific information such as=
+ a
+> > WiFi MAC address or a Bluetooth BD address and reference it through NVM=
+EM
+> > cells.
+> >
+> > Accept "fixed-layout" as the partition node compatible, in addition to
+> > "fixed-partitions", so the layout can be described directly on the
+> > partition node.
+> >
+> > Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
+>
+> I think it would be nice to have some version history here as well,
+> for next time. I noticed that v6 was reviewed and ready to go, but
+> then something changed in v7 as those tags were dropped.
 
-Kind regards
-Uffe
+Indeed, the changes in v7 significantly reworked the DTS and binding
+structure, so I did not carry over the tags.
 
-> ---
-> Compile tested only, so HW testing also would be preferred - this HW
-> seems to be on rpi1 (which I don't have access to).
+This was called out in the cover letter:
+Rework bindings/DTS so that the eMMC boot partition can be expressed
+as an nvmem fixed-layout rather than as a child of fixed-partitions.
+
+This change was made following the discussion with Rob:
+https://lore.kernel.org/all/CAFEp6-20FXTOKQ6EPuR8OUDkqE4JXcUbXaFy7kRFt4fzsz=
+PQCA@mail.gmail.com/
+
+That said, I'll make sure to include the version-to-version context
+directly in the commit message and/or when such changes occur.
+
+Regards,
+Loic
+
+
+
 >
-> Differences to v1:
-> - fix logic in bcm2835_add_host() (Robin)
-> - stop unnecessarily NULLifying dma_dev
-> - use dma_dev pointer in bcm2835_dma_complete_work() -> dma_unmap_sg()
->
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index ee63835b3ca0a..c949a3eaae794 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -188,7 +188,7 @@ struct bcm2835_host {
->         u32                     drain_words;
->         struct page             *drain_page;
->         u32                     drain_offset;
-> -       bool                    use_dma;
-> +       struct device           *dma_dev;
->  };
->
->  static void bcm2835_dumpcmd(struct bcm2835_host *host, struct mmc_comman=
-d *cmd,
-> @@ -494,8 +494,7 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, s=
-truct mmc_data *data)
->                                      &host->dma_cfg_rx :
->                                      &host->dma_cfg_tx);
->
-> -       sg_len =3D dma_map_sg(dma_chan->device->dev, data->sg, data->sg_l=
-en,
-> -                           dir_data);
-> +       sg_len =3D dma_map_sg(host->dma_dev, data->sg, data->sg_len, dir_=
-data);
->         if (!sg_len)
->                 return;
->
-> @@ -503,8 +502,7 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, s=
-truct mmc_data *data)
->                                        DMA_PREP_INTERRUPT | DMA_CTRL_ACK)=
-;
->
->         if (!desc) {
-> -               dma_unmap_sg(dma_chan->device->dev, data->sg, data->sg_le=
-n,
-> -                            dir_data);
-> +               dma_unmap_sg(host->dma_dev, data->sg, data->sg_len, dir_d=
-ata);
->                 return;
->         }
->
-> @@ -1057,7 +1055,7 @@ static void bcm2835_dma_complete_work(struct work_s=
-truct *work)
->         data =3D host->data;
->
->         if (host->dma_chan) {
-> -               dma_unmap_sg(host->dma_chan->device->dev,
-> +               dma_unmap_sg(host->dma_dev,
->                              data->sg, data->sg_len,
->                              host->dma_dir);
->
-> @@ -1201,7 +1199,7 @@ static void bcm2835_request(struct mmc_host *mmc, s=
-truct mmc_request *mrq)
->                 return;
->         }
->
-> -       if (host->use_dma && mrq->data && (mrq->data->blocks > PIO_THRESH=
-OLD))
-> +       if (host->dma_dev && mrq->data && (mrq->data->blocks > PIO_THRESH=
-OLD))
->                 bcm2835_prepare_dma(host, mrq->data);
->
->         host->use_sbc =3D !!mrq->sbc && host->mrq->data &&
-> @@ -1281,10 +1279,7 @@ static int bcm2835_add_host(struct bcm2835_host *h=
-ost)
->
->         if (!host->dma_chan_rxtx) {
->                 dev_warn(dev, "unable to initialise DMA channel. Falling =
-back to PIO\n");
-> -               host->use_dma =3D false;
->         } else {
-> -               host->use_dma =3D true;
-> -
->                 host->dma_cfg_tx.src_addr_width =3D DMA_SLAVE_BUSWIDTH_4_=
-BYTES;
->                 host->dma_cfg_tx.dst_addr_width =3D DMA_SLAVE_BUSWIDTH_4_=
-BYTES;
->                 host->dma_cfg_tx.direction =3D DMA_MEM_TO_DEV;
-> @@ -1297,15 +1292,21 @@ static int bcm2835_add_host(struct bcm2835_host *=
-host)
->                 host->dma_cfg_rx.src_addr =3D host->phys_addr + SDDATA;
->                 host->dma_cfg_rx.dst_addr =3D 0;
->
-> -               if (dmaengine_slave_config(host->dma_chan_rxtx,
-> -                                          &host->dma_cfg_tx) !=3D 0 ||
-> -                   dmaengine_slave_config(host->dma_chan_rxtx,
-> -                                          &host->dma_cfg_rx) !=3D 0)
-> -                       host->use_dma =3D false;
-> +               if (!dmaengine_slave_config(host->dma_chan_rxtx,
-> +                                          &host->dma_cfg_tx) &&
-> +                   !dmaengine_slave_config(host->dma_chan_rxtx,
-> +                                          &host->dma_cfg_rx)) {
-> +                       host->dma_dev =3D
-> +                               dmaengine_get_dma_device(host->dma_chan_r=
-xtx);
-> +               }
->         }
->
->         mmc->max_segs =3D 128;
-> -       mmc->max_req_size =3D min_t(size_t, 524288, dma_max_mapping_size(=
-dev));
-> +       mmc->max_req_size =3D 524288;
-> +       if (host->dma_dev) {
-> +               mmc->max_req_size =3D min_t(size_t, mmc->max_req_size,
-> +                               dma_max_mapping_size(host->dma_dev));
-> +       }
->         mmc->max_seg_size =3D mmc->max_req_size;
->         mmc->max_blk_size =3D 1024;
->         mmc->max_blk_count =3D  65535;
-> @@ -1336,10 +1337,10 @@ static int bcm2835_add_host(struct bcm2835_host *=
-host)
->         }
->
->         pio_limit_string[0] =3D '\0';
-> -       if (host->use_dma && (PIO_THRESHOLD > 0))
-> +       if (host->dma_dev && (PIO_THRESHOLD > 0))
->                 sprintf(pio_limit_string, " (>%d)", PIO_THRESHOLD);
->         dev_info(dev, "loaded - DMA %s%s\n",
-> -                host->use_dma ? "enabled" : "disabled", pio_limit_string=
-);
-> +                host->dma_dev ? "enabled" : "disabled", pio_limit_string=
-);
->
->         return 0;
->  }
-> --
-> 2.43.7
->
+> > ---
+> >  .../devicetree/bindings/mmc/mmc-card.yaml          | 23 ++++++++++++++=
++++++++-
+> >  1 file changed, 22 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Docu=
+mentation/devicetree/bindings/mmc/mmc-card.yaml
+> > index a61d6c96df759102f9c1fbfd548b026a77921cae..0422894508478c8d0ca6829=
+2b58a5fdbee218358 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+> > @@ -38,7 +38,9 @@ patternProperties:
+> >      properties:
+> >        compatible:
+> >          contains:
+> > -          const: fixed-partitions
+> > +          enum:
+> > +            - fixed-partitions
+> > +            - fixed-layout
+> >
+> >  required:
+> >    - compatible
+> > @@ -86,6 +88,25 @@ examples:
+> >                      read-only;
+> >                  };
+> >              };
+> > +
+> > +            partitions-boot2 {
+> > +                compatible =3D "fixed-layout";
+> > +
+> > +                #address-cells =3D <1>;
+> > +                #size-cells =3D <1>;
+> > +
+> > +                mac-addr@4400 {
+> > +                    compatible =3D "mac-base";
+> > +                    reg =3D <0x4400 0x6>;
+> > +                    #nvmem-cell-cells =3D <1>;
+> > +                };
+> > +
+> > +                bd-addr@5400 {
+> > +                    compatible =3D "mac-base";
+> > +                    reg =3D <0x5400 0x6>;
+> > +                    #nvmem-cell-cells =3D <1>;
+> > +                };
+> > +            };
+> >          };
+> >      };
+> >
+> >
+> > --
+> > 2.34.1
+> >
