@@ -1,309 +1,203 @@
-Received: from TYPPR03CU001.outbound.protection.outlook.com (mail-japaneastazon11012025.outbound.protection.outlook.com [52.101.126.25])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A52413BE627;
-	Fri, 17 Jul 2026 10:17:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.126.25
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F01B39B960
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Jul 2026 10:21:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784283456; cv=fail; b=p/Y19NRIGMLlTj4hCRfq5LwMSA2z61JKhiVGj0MKVO4tPDc/UWnauy7vmcYSNTZX40ca5pwSfMX1Rl3apr4iaZh4aFsDJz5eTx9sZMFuT4LMaP4I3MdjeNttKycdFPVeUz+UNu4XYsj3hp2STFSIbFBoIWJBMIblxUwl+N0Xkgc=
+	t=1784283707; cv=pass; b=Pl/PV5xxAKoE7FjozrRL+WtCkPVnCBfz+oISVrS2xNJKf/I8jh1ArMOKmTFxAsBHwjwUHy352YzSPCZCYc5GK02Zvu0q2tbPGATovJoNrrPGSYIxEdtyXDtGArO+jATylSld6kADCjqH68cjy0uQI8wWhdQd+PKL6t8wnsfC1Bw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784283456; c=relaxed/simple;
-	bh=J3NFrYDKgFSBpjMeAq7a+gArADW7jP8JsDGz7QtGB0k=;
-	h=From:To:Subject:Date:Message-Id:Content-Type:MIME-Version; b=MM2pJWjM3LU5ZnMA27XQ9pV/NbzI6FBXx6EqYQqTBpARsRy4VfPfnm6LiXwk8MCqN84XWsEKjT5TcwTpYMcUNnKhwnO4yRw2fJe1rWYrGqMKUeQZuzDaL6l73n5HIiBuFVu9I6lSYu6F4petlF7NoWLBCc9W39Q4FyLMWEIJ/Ls=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com; spf=pass smtp.mailfrom=vivo.com; dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b=G9VS29Hk; arc=fail smtp.client-ip=52.101.126.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vivo.com
+	s=arc-20240116; t=1784283707; c=relaxed/simple;
+	bh=/G4+gIUlSW9w20eY18zrYk65ITLGo9r3/SZkfk+RMdk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=b+Lb42FpXfVD0WYHutvH4q8RvWJNPUp9jhqEuLQhFPKXHIrSTfpL5Re8bNGCZ7X/yr93EmAcsDvVo+rleXmE/WFXjMvzTopb5NR40xPOWubqUf7zS18H9l/oVNOrqOySUpOxFdQ3gDEnZv0sEPunAGoFTA/5YmoJGHDS4PSO3SA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=cBNifLEv; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=ayuTtwXP; arc=pass smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b="G9VS29Hk"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=c1OR1Ztd+r+GzXaXdOtCkMgul6zjSX9GgjIWtjaZ944MMXO9+TgevaSurUNu7T3oHL9bVvkIr/FkLLmcteBZtXjNiDHFhoT6VDX1fN39Lv7ah9JvxjMt3CVO9W3LILQH8lp4tONlRyW8lHiiDbhdghRBRocmjEX34w/Erex6JfrurLodW1wlS9rjz0qbAjrvJ/L379u7A0VNVEPxFHsxV5r/hd21h5EpaW/yNi6x3EzRQLiQz9MxfT8fKuuhO25jwZXaZhS/ue8IE9G85wy1sgCd6FWHXPzoOghniDqA02lXM4ZymWSw7D/mZZbk6Q/GTXX3c0ZEZ/OdM7zEG97+wg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=QlCXnuVJLtgpwozbDJuuBWH1wFu7oE+TtVH9lNTRAv4=;
- b=fD5IoZXtFiNdDKJTkMvnCVdJoKwh852GNe4OE/jqVfUQYd6Ro/BHG5ir+vO1FivsfeO4A080osqORXbJBO09K7Tc/DEzwjk21hyyQ+8QLf8y4sUbemBnxzraa5nyd4meV6NePZdAC7P5CYNdCaT+qpMtJ0CguaZ3ltqjeIOgKA9Vby5V+JTWa6JXadZwXdjb6qSttiul9Ycs7KLYT31QJgSlkUWWbB6tbZGKsXNa1+qUEeYuhPfme3boyEbxr1IYi0GgquPx/rBv/6doG4WF7MHI0IEi0oFesyAtYesKwi4m3N6JA4yST1w5fAcn10pU4eOcC5Zuh8/0fliVXr3bZQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
- dkim=pass header.d=vivo.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=QlCXnuVJLtgpwozbDJuuBWH1wFu7oE+TtVH9lNTRAv4=;
- b=G9VS29Hkx8WVCXj8JIfNddhvVKc4DywXPVf9PjxPlx7T0Y0iLTRT5Ewr2EeF7Kw7mtdhKbJia+IOJqSSCRELC2keCwoaFKAqPRSAQz27Als3SzmcEtLrHFGj2HnYQ2DYaHfhCU5a7AJsFRehpTHi0h8CUaGKC8T2GW24/5BPD84e0PUOqeUNtKiKIwixfZ+LukCsmJG3XkIcn4cJhzXcoLIWtaCNoAogaSZ/oua5kSoO+XCFMalhIwr/xtvv2xekg10fcwPf7vfp42H177miz9R0bh1eWfXTs/ENiHvSurazu2GUbVwCLV5fU9P1w9tbXmvpTLk9rjwCUuileOevcw==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=vivo.com;
-Received: from SEZPR06MB5832.apcprd06.prod.outlook.com (2603:1096:101:c8::12)
- by SEYPR06MB5940.apcprd06.prod.outlook.com (2603:1096:101:d2::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.223.12; Fri, 17 Jul
- 2026 10:17:26 +0000
-Received: from SEZPR06MB5832.apcprd06.prod.outlook.com
- ([fe80::f98:5e32:4ccb:d07b]) by SEZPR06MB5832.apcprd06.prod.outlook.com
- ([fe80::f98:5e32:4ccb:d07b%6]) with mapi id 15.21.0223.011; Fri, 17 Jul 2026
- 10:17:25 +0000
-From: Pan Chuang <panchuang@vivo.com>
-To: Ulf Hansson <ulfh@kernel.org>,
-	Robert Richter <rric@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Jerome Brunet <jbrunet@baylibre.com>,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-	Nicolas Pitre <nico@fluxnic.net>,
-	=?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
-	Manivannan Sadhasivam <mani@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Jisheng Zhang <jszhang@kernel.org>,
-	Pan Chuang <panchuang@vivo.com>,
-	Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
-	Linus Walleij <linusw@kernel.org>,
-	Thomas Fourier <fourier.thomas@gmail.com>,
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
-	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig=20=28The=20Capable=20Hub=29?= <u.kleine-koenig@baylibre.com>,
-	Danilo Krummrich <dakr@kernel.org>,
-	Takashi Sakamoto <o-takashi@sakamocchi.jp>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
-	linux-kernel@vger.kernel.org (open list),
-	linux-arm-kernel@lists.infradead.org (moderated list:ARM/Amlogic Meson SoC support),
-	linux-amlogic@lists.infradead.org (open list:ARM/Amlogic Meson SoC support),
-	linux-omap@vger.kernel.org (open list:OMAP HS MMC SUPPORT),
-	linux-actions@lists.infradead.org (moderated list:ARM/ACTIONS SEMI ARCHITECTURE),
-	linux-arm-msm@vger.kernel.org (open list:ARM/QUALCOMM MAILING LIST)
-Subject: [PATCH] mmc: host: Remove redundant dev_err()/dev_err_probe()
-Date: Fri, 17 Jul 2026 18:14:49 +0800
-Message-Id: <20260717101508.635969-1-panchuang@vivo.com>
-X-Mailer: git-send-email 2.34.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: TY4P286CA0109.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:405:380::15) To SEZPR06MB5832.apcprd06.prod.outlook.com
- (2603:1096:101:c8::12)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="cBNifLEv";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="ayuTtwXP"
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66H6cRWJ794339
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Jul 2026 10:21:41 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	dNQ3xUEu7rEeKDGZoZN4sDPkrMPXqT5TEYjiXqzqNpQ=; b=cBNifLEvBF3dlMDu
+	q0RtTkWQW8q/RumeZGb1An4tC1S6kUiqpRwvBJBtoXJs7riIhYJY61Cb/oMK87Oq
+	F5+/6CHrkLi//+Apm/3yywZQyFrLmWXCTlAKUtJ6Idm9ALdj3VZNV2Rk3PYeLKxY
+	OuOsc+mb6SCrtgt6TodcTK5NJ6wDcP3l1CLCp1+yWOzT50HHTTMiE6LCltGFSpj6
+	gJZPzgbLp9SZwmRZVUiQrQXoFD8vIKj+WVINfuRRv4q8anXGChdaQn/BXIZ3Skzl
+	qS+SpQsv60MnV6UJkoFiJQ8wog5VCADNVV/uVEHk+R3FFpSmAwDgyT+VQWvYCMOh
+	kjeFTg==
+Received: from mail-yw1-f199.google.com (mail-yw1-f199.google.com [209.85.128.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ff3u8k8w0-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 17 Jul 2026 10:21:41 +0000 (GMT)
+Received: by mail-yw1-f199.google.com with SMTP id 00721157ae682-81e68281f2eso121548077b3.1
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Jul 2026 03:21:41 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1784283700; cv=none;
+        d=google.com; s=arc-20260327;
+        b=pzXQc+OEDSLh+t74yW9e8LtJwXUqwKlsCxZN4Vpnya2oZV2gqeq7BJCEZjVg10LL5B
+         zLZkPsxQks+XWQVg74jluQP30lXXXpgtX/QvCWuqDHP2kvcWLqJzqLRZ4NlUshcOq3DG
+         3n6NnxqzWyi19e3X0pxhpv+pxqYOfgd2CNHmTN1vWJeNfuM8UYNCmSOT/tzr60lTiWMl
+         VseLieOY0KHJuVVsvUNHTwJE1xpOiyaLaCqaUmyG0KPT1p7RLNygv11090pxDPuyahYj
+         BvZibJsNBXLaV46YJXzADOlhUoGFFZPEAs8T/uZAFdUGrWE6yMRPDNUJa3BvWzm5A2AJ
+         kqEQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=dNQ3xUEu7rEeKDGZoZN4sDPkrMPXqT5TEYjiXqzqNpQ=;
+        fh=FORjSvzxUwx03P9a44OTGNGDVWD4Vhe8p2WLpS3Gvuc=;
+        b=m6xIIxgFjoSFmdcxJ3+Ziqz6bLrvRlwIcFRcnw0iISL3T8mzf+A59rrT+yv5Zvzv/0
+         8grXuzv82qm6OuiTbeuz8PYbvGg4JtrWhg/+n7NcpJgHDOJr5cYA97UyAenlEQPiHx9i
+         3ugbmub1ffG4FrXdJstumsxPZ1EjNAoN0wMk6lTF9up+qZPCxXLgydc6gvywSU3OAG5E
+         H7z/ikL32jMxqHMWdahOSSF80xDwZWDZcZmUntZXVqj78S86dlcGtwuBNRmika02Ogy7
+         qqEQaMJjnUkMZuNHSnjWpY2dz6nwKxFNY+kJ3mBfjaat/oZmsST69+GAPHzMOvEU2BhL
+         yoEw==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1784283700; x=1784888500; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=dNQ3xUEu7rEeKDGZoZN4sDPkrMPXqT5TEYjiXqzqNpQ=;
+        b=ayuTtwXPhVP+1I8SfKWP5CIBHd7kJl8cntV+xLgBxuGimOyfn+swUULWUiRqONEXFr
+         WMcekKtLtajoVsfiiQUJlDSRHW0IzYoCXVzGK4G/DWihTic4D/5k1q6M75VREo8NwSIh
+         CeUReBW/XjupqFdlCL/8Ql0C894Skumn+RdR/44wzqqpmxwFQqurdpD40AXX1jQa0Rtz
+         aDSG8SliEbb7wPyLE/S3KHNLIaVxvp/O7F5QS/US5WhgBqm1bYmf9BNiRSy7IDwOvi5J
+         vQpAkSd4lz1EyLCaKnA1JYErnhHEII9ld8Dmol5sLZbmX2q5IMqk9UfxZ3B3Q+Ic9hC5
+         bLbw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784283700; x=1784888500;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=dNQ3xUEu7rEeKDGZoZN4sDPkrMPXqT5TEYjiXqzqNpQ=;
+        b=gWZqHktti4Gaf4ihc3NHkFQAxZ9YXkVYlhuH6qF4VQ14Rz2iJ46IruDu/OqSwC9DdS
+         1QtVaY5mOwrKhJ51W8/4zfK/+rfuEPmPPH6+uEQliGsaX5syl5Li98x3MxSUGEAcRnfA
+         t2GpLVL4mlHhOg4WndBuOQ7VxLw7882wzi7/MQewpS0CLflp6z0iapsOccT7s0AnhyQm
+         GW0qYl7+xYU2uJR10Qr2ba6KGX0thfQ8qtllwLeQo1FIVz58ZDHA7znhYeq1S8RDmg4G
+         qEc2IsvpKdlIhNIgokaOj0TzOzTfHy35mIbZ7IFuQN0m0308Pc3Em+Sl33Rs4+O0Eu1i
+         w9yQ==
+X-Forwarded-Encrypted: i=1; AHgh+RpD7SWYQMpDBkj0tpzpQARdQIAqFldVVtR9nUoGHRa/1jMvImM7Ivb64zP7BeOlUhR86e+nFnFgfoE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxSJ0BLu2uvGHezNuap54rK4q9XaG8GsPsEBgRkbXOVW3g464O2
+	S3KvKJojO/hXc+1h64neTzgtmLE1mLO7/b7z44ISWQY3GQfBUieWU1qhiq0jTYk1sHB2pIe8+Z0
+	W5idmdIKxmK5K9hWvUd1OpspGj0tGoDEHPpPpxqeaYVOgjq4MpT7bPXBxDN6d0LjizzeVrq/a0s
+	T1lAYRUey42ecJycGiSe4XwpHieCGoSFLBop3XzQ==
+X-Gm-Gg: AfdE7cnG4AVOKAEAGtzHckGplXCgrI7XeSm6AiLHi3PzrCj8L3uxf2649HKtSgnaLCZ
+	fz8ETPYFt5sthPEFQEivMrpA4vIH7XvtY8BB1buFvNiAksVIboXeR7aVQUdxctE/xQudt0LCpjQ
+	e+19QWwtucBUnSHdVzMGr0C5t+92PBD67FYxHPuWPoRSBWVmu14BSA1Q6vPw==
+X-Received: by 2002:a05:690c:eca:b0:80b:968:29ff with SMTP id 00721157ae682-81ef283962fmr4760877b3.53.1784283700290;
+        Fri, 17 Jul 2026 03:21:40 -0700 (PDT)
+X-Received: by 2002:a05:690c:eca:b0:80b:968:29ff with SMTP id
+ 00721157ae682-81ef283962fmr4760837b3.53.1784283699924; Fri, 17 Jul 2026
+ 03:21:39 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SEZPR06MB5832:EE_|SEYPR06MB5940:EE_
-X-MS-Office365-Filtering-Correlation-Id: 92fbbbec-fb2d-4b95-87fb-08dee3ec991b
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|52116014|7416014|23010399003|366016|1800799024|6133799003|18002099003|56012099006|11063799006|10067099003|921020|38350700014;
-X-Microsoft-Antispam-Message-Info:
-	xoNfW4hMvV1k/cnKs8eFDPwk4rBYb2OHFuwrYiPny+OFrP+L8bydW+PWco84Uk7d55uq4foUPGxGKJoamdYtR6hBHd7JVP+OiGQaedTcfBl7JNsSyvRWwAQ2gyugJDqpwm+2ptvUrQGAKVAOKd3b/Z8bYy5WH9EymQmKUQcdy7ChAeDK+7TqrSe8Qkxqy6zLaEDo5Tw9ikP6NGNRflROOFI+G2hLXY0mXqV0ob/pxwPvInXSrz/NFAvm2F307/1+zgEC25Wmi9b3fDFkl3R8G8cmrGJ0sQsTWGSBlo4A1l0cA1oy2GPMpLsi792SgL+vnjWsmYcnbjEUvgzowHag3kUfoUnx43001zAvCUG2nYJ8v98DBaPjGgnMQVRaL1Q7vxNhg6URJcU4XMaFgTFPn9+Z0vRzliPXZv/Siyun2YJQDfmdeP6uIlCtL2iuwxmoSbzLCX0lg4pXavHp2cMdppnF0xP83t2qKdGr+kt5yHnp43OwMdNBW45qHJ/rSvrxzvMb5lb2H6acNyLcm9iniITizEs7EkIrhyUK0jEwVqHVZfzP6QWbseyp+VyGpZ6iuCth8mAv8F9aBAGE3m7QBxtzF6HLGXF/fOsRbstaL0SM1a5733HjjpBTz/6s+KN1dh0Z7pqNDL35FyDBjsSSXKomJb/Ww/N1F6L/Ewv3gMAMYRwlkCvQcwCLskgXC1ThAXkvy5HJ7v55pczQpwYsL0VtWGDaFPikkvjTEPMmjVYViECWR7GV2NKSOzm/Uogh
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SEZPR06MB5832.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(52116014)(7416014)(23010399003)(366016)(1800799024)(6133799003)(18002099003)(56012099006)(11063799006)(10067099003)(921020)(38350700014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?cUveRhYOqkorN/3wiWFS+AT037dH2uQ4yMZ2dA4o15rhjHRL/bP1i/UKkwpw?=
- =?us-ascii?Q?OkXrrvypoTHom2tK99heDKSQD0hSDtottfmvtMNlKEtPkVfEngvA1pvDiBJO?=
- =?us-ascii?Q?jhwkktMmYfCoAeCubyJw41TXkiKiTrfipUrJyGhe5z+NJjH5T7s2R0ckkZP3?=
- =?us-ascii?Q?OVFQAlEF3jVrMKvCM2nzl3LJLYnfert/kbDQhjNtA1WW/TARFmQtzt1eoGjm?=
- =?us-ascii?Q?P6zxqQ2ka2BOfLnLwuSNXAhRux74CvlBCUspL074FFct3oVmZSf/mrUjmQVg?=
- =?us-ascii?Q?CHI01RqdYAYuiKh0zppD2zTI9ELiz5sq7f7V765nvP0Vd/N7NNr5QWE+yD5v?=
- =?us-ascii?Q?uQx9QnVBeMowiZRXjbwekqQD4tSRxxrmU51Uwe1CJKszaSTq8WKTQJFkGmOJ?=
- =?us-ascii?Q?VJ8a/5Hjd8lg0XLccz5b9GWpxu7KT+eNQEL3hiMmV7heaa1qXhU/pTMCsr5j?=
- =?us-ascii?Q?3qwUfpAju/RxKXt3KOFuvJww5OS8Ns5Erb/OnesEaHIS6FrVuv/Z2P+qrsmX?=
- =?us-ascii?Q?pqFnEQSQd3tlAoaY+3wrkvhzVDmxFBPEjfYAi7MjTyLuk4FB9URV9LmG2/NG?=
- =?us-ascii?Q?k6dnDimyjPSbjgzirrg5EHRF878JSLjI7/iN4KA6ksAGWz5SMfmlLRxCzzFb?=
- =?us-ascii?Q?v1GtqKL02cB7qSm6TT1nEEzLUYZwF3NMv6EDxGWyiLMa3J3VipsiwzSvniSa?=
- =?us-ascii?Q?DXyVllfma7Jiwt7LcyMlZN3hq6EUj7fnFWg0Mi/lFTkwuCqc0ufzCavKhovz?=
- =?us-ascii?Q?QiumUBD50MQjZqnEXIQ/jsJomNcmLfB6/jJsVgWcd2JmQN2JYrZlG2xMT/zW?=
- =?us-ascii?Q?WiGMqXn6dCKSIkCEC8Xc6TRdqiZIkdi1zaN0bR+/t8K0muNrQEHeWbRqwzlL?=
- =?us-ascii?Q?4FJRHIeGF1KCu4SZuwahf4ghyDhDMcqni4WUKSY5IVnNh7t+d6ApbAncrO+K?=
- =?us-ascii?Q?KGzxjhAjMnzTRcOOUh4ONe3CNK35w8ozymXRFKGiJ4ZWPoy6AQ1oW368wMZL?=
- =?us-ascii?Q?qBZb5JTH2PW/Ku4n0Yg5rkVUW+skHOWSYK/K+5oxUcfW8DdZnSDaBV1wLw3+?=
- =?us-ascii?Q?zSo3FUSN61XHT/+aLMMLvIDq6Bbrq/P4emhFSLPqYRBUb/9ATGPtdhsCjsDT?=
- =?us-ascii?Q?Y3JZ/1ITRd9lQyQKzff2abmiGu+naOoJfxx7hB5htzaMfbgkblGo6MhIRtsM?=
- =?us-ascii?Q?Tn9c84wSnnaw7+p8AXSxgnz54RQz0vMOTrAapRTZ/BhHaesbrJfdSW4mDn4/?=
- =?us-ascii?Q?sk8amB8gfYuMhgQEMw+2fuaeQbr2QMuThfPr8hWcoGzG5IBM22yslZ5YJNo9?=
- =?us-ascii?Q?SDQLdTgwV1vA0ciyEtL92iWmHGf4GIkWqKjRyBF5dI2hlqtdLhzDJ4V58HC7?=
- =?us-ascii?Q?Mz3KkMbTEUl+7dvdGmzJOpmF+3TLdNtVXIZK7swA7nTtwzFUdjZlytebdiwG?=
- =?us-ascii?Q?5vEe3dK/Cvc9GsRbVwLssAIBGn8VqZEXTRBnFYDD3q7S1Ct2g6b/9Vk2szmy?=
- =?us-ascii?Q?5MzA/6k4CF4Mm2wbKf0gfTy/z4SU264G+Q/rnia+EGTeasULe+2plTJfEdyi?=
- =?us-ascii?Q?yM2Tvmq4vHEkSi7vABp3HiSb52xBf39GT5INxXnmbQyPN/mTPIqxf4T2poSH?=
- =?us-ascii?Q?CJcQWOngT3dF38otWH6/DKDND6aj3ay75nnCW/ygMrw49+PyTlRmQtPD5fnM?=
- =?us-ascii?Q?zvjcsfRQHEdOkMTXPs4gFoM8WZetMwGsYpJZPoz8r2pkK7Q1UWiTdMVJVEGJ?=
- =?us-ascii?Q?0tFVhpUu8Q=3D=3D?=
-X-OriginatorOrg: vivo.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 92fbbbec-fb2d-4b95-87fb-08dee3ec991b
-X-MS-Exchange-CrossTenant-AuthSource: SEZPR06MB5832.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Jul 2026 10:17:25.5382
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: om+aYqPkmGZYnKXFzzGgfEpBERCrsOzazsdeVPSGKTOcXVZqPkGtzl7fOS12JyrSxC8yg59CaF+dCkui/sm4yQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SEYPR06MB5940
+References: <20260716232641.2659710-1-jm@ti.com> <20260716232641.2659710-2-jm@ti.com>
+In-Reply-To: <20260716232641.2659710-2-jm@ti.com>
+From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Date: Fri, 17 Jul 2026 12:21:27 +0200
+X-Gm-Features: AUfX_mzSz06nBydsnL59jdtc7LlWaatmuH2qAmiMtcQw1WWvAMpZ2E_IF3c5_YY
+Message-ID: <CAPx+jO-a3+mv2msL+12Ag-xs33es2+Wxbr_uKRMY3rbN7eL-cw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: Add post-power-off-delay-ms property
+To: Judith Mendez <jm@ti.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Proofpoint-GUID: B50F0bLIiEFkE1olZSI1q16l_BdpJ6sD
+X-Proofpoint-ORIG-GUID: B50F0bLIiEFkE1olZSI1q16l_BdpJ6sD
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzE3MDEwMyBTYWx0ZWRfX1xhLbqvzUZAE
+ U8DM2OlRshwAPUDsVgVzRoQNRbsgoox5ODPU2vLNUTWHN4hZS8QmXTyfObvomPbPtl2VB4Dj3Ye
+ ZJAiSn3du1n1Q5NRHWkCWrNpa5Wbtno=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzE3MDEwMyBTYWx0ZWRfXzET1YhsIJPxX
+ 6W4cBUwGL7Xpq/S1ACBvfv19gslDxisaPB3TXmoPlBfU6cn4AkyYnXQ9AiOO43JO4ATnp9JEMEN
+ OUz7BHkMGC4KFwtjOIlWY0kkjJdJ/OcWPZ5bOGcS+kaR4oueyISAnkXH9ShYMhTmF2l/YSJXViF
+ Hz9LBNOJNuKkCdUyGfVvplnk1O8nY/MldmOzIYkv+S0kslvkSl4+m8Tg/O7kGRXbVIMc601Kty1
+ VhgrJYonRbZLLcmhtPFAI2FxXtH+sjIkxDdKCwTS8fGzS1GnWu8kdMWaG9Qi7GDLcaUocz6Sw8U
+ aKsk3YS/aXXLiDYeKGoV7739Bx3/E+84hRz+tEbpkQx2Mv2NKQZZnj3LaET603vMAx7zVlNgVFy
+ Gp/I3QfFKZZ3iHVz3fXSa7Nbf/PpO3qOsubD7TCu+gOskJsp+Ys9/tAbMoSyUOmnj4Yddf1WWoY
+ IOr1i5VzETHF+hDA9uA==
+X-Authority-Analysis: v=2.4 cv=TL11jVla c=1 sm=1 tr=0 ts=6a5a0235 cx=c_pps
+ a=72HoHk1woDtn7btP4rdmlg==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+ a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=YMgV9FUhrdKAYTUUvYB2:22 a=sozttTNsAAAA:8 a=dMylU1riQLpZtJOQe0IA:9
+ a=QEXdDO2ut3YA:10 a=kA6IBgd4cpdPkAWqgNAz:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-17_02,2026-07-15_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 priorityscore=1501 clxscore=1015 lowpriorityscore=0
+ spamscore=0 bulkscore=0 malwarescore=0 suspectscore=0 adultscore=0
+ phishscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2607170103
 
-Since commit 55b48e23f5c4 ("genirq/devres: Add error handling in
-devm_request_*_irq()"), devm_request_irq() and devm_request_threaded_irq()
-automatically log detailed error messages on failure. Remove the
-now-redundant driver-specific dev_err() and dev_err_probe() calls.
+On Fri, Jul 17, 2026 at 1:26=E2=80=AFAM Judith Mendez <jm@ti.com> wrote:
+>
+> Add post-power-off-delay-ms property to MMC controller common.
+>
+> This property shall be used to specify delay if needed after
+> deasserting power during MMC power cycles.
 
-Signed-off-by: Pan Chuang <panchuang@vivo.com>
----
- drivers/mmc/host/alcor.c         |  3 +--
- drivers/mmc/host/cavium-octeon.c | 10 ++--------
- drivers/mmc/host/meson-mx-sdio.c |  5 +----
- drivers/mmc/host/mvsdio.c        |  4 +---
- drivers/mmc/host/omap_hsmmc.c    |  4 +---
- drivers/mmc/host/owl-mmc.c       |  5 +----
- drivers/mmc/host/sdhci-msm.c     |  4 +---
- drivers/mmc/host/sh_mmcif.c      |  8 ++------
- 8 files changed, 10 insertions(+), 33 deletions(-)
+Please clarify with some additional information from the cover-letter,
+like "specify custom delays after MMC power off to work around
+hardware issues such as slow RC circuites on MMC VDD rails."
 
-diff --git a/drivers/mmc/host/alcor.c b/drivers/mmc/host/alcor.c
-index 721db54739c1..45528909a758 100644
---- a/drivers/mmc/host/alcor.c
-+++ b/drivers/mmc/host/alcor.c
-@@ -1103,8 +1103,7 @@ static int alcor_pci_sdmmc_drv_probe(struct platform_device *pdev)
- 			alcor_irq, alcor_irq_thread, IRQF_SHARED,
- 			DRV_NAME_ALCOR_PCI_SDMMC, host);
- 	if (ret)
--		return dev_err_probe(&pdev->dev, ret,
--				     "Failed to get irq for data line\n");
-+		return ret;
- 
- 	mutex_init(&host->cmd_mutex);
- 	INIT_DELAYED_WORK(&host->timeout_work, alcor_timeout_timer);
-diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-octeon.c
-index 8a0daddd9200..1bfc1a4f9fe9 100644
---- a/drivers/mmc/host/cavium-octeon.c
-+++ b/drivers/mmc/host/cavium-octeon.c
-@@ -240,21 +240,15 @@ static int octeon_mmc_probe(struct platform_device *pdev)
- 			ret = devm_request_irq(&pdev->dev, mmc_irq[i],
- 					       cvm_mmc_interrupt,
- 					       0, cvm_mmc_irq_names[i], host);
--			if (ret < 0) {
--				dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
--					mmc_irq[i]);
-+			if (ret < 0)
- 				return ret;
--			}
- 		}
- 	} else {
- 		ret = devm_request_irq(&pdev->dev, mmc_irq[0],
- 				       cvm_mmc_interrupt, 0, KBUILD_MODNAME,
- 				       host);
--		if (ret < 0) {
--			dev_err(&pdev->dev, "Error: devm_request_irq %d\n",
--				mmc_irq[0]);
-+		if (ret < 0)
- 			return ret;
--		}
- 	}
- 
- 	host->global_pwr_gpiod = devm_gpiod_get_optional(&pdev->dev,
-diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
-index 5921e2cb2180..bef5e843f449 100644
---- a/drivers/mmc/host/meson-mx-sdio.c
-+++ b/drivers/mmc/host/meson-mx-sdio.c
-@@ -683,11 +683,8 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
- 					meson_mx_mmc_irq,
- 					meson_mx_mmc_irq_thread, IRQF_ONESHOT,
- 					NULL, host);
--	if (ret) {
--		dev_err_probe(host->controller_dev, ret,
--			      "Failed to request IRQ\n");
-+	if (ret)
- 		goto error_unregister_slot_pdev;
--	}
- 
- 	core_clk = devm_clk_get_enabled(host->controller_dev, "core");
- 	if (IS_ERR(core_clk)) {
-diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-index 79df2fa89a3f..cf705b265e21 100644
---- a/drivers/mmc/host/mvsdio.c
-+++ b/drivers/mmc/host/mvsdio.c
-@@ -764,10 +764,8 @@ static int mvsd_probe(struct platform_device *pdev)
- 	mvsd_power_down(host);
- 
- 	ret = devm_request_irq(&pdev->dev, irq, mvsd_irq, 0, DRIVER_NAME, host);
--	if (ret) {
--		dev_err(&pdev->dev, "cannot assign irq %d\n", irq);
-+	if (ret)
- 		goto out;
--	}
- 
- 	timer_setup(&host->timer, mvsd_timeout_timer, 0);
- 	platform_set_drvdata(pdev, mmc);
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 58c881f2725b..63a9fb970975 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1915,10 +1915,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	/* Request IRQ for MMC operations */
- 	ret = devm_request_irq(&pdev->dev, host->irq, omap_hsmmc_irq, 0,
- 			mmc_hostname(mmc), host);
--	if (ret) {
--		dev_err(mmc_dev(host->mmc), "Unable to grab HSMMC IRQ\n");
-+	if (ret)
- 		goto err_irq;
--	}
- 
- 	ret = omap_hsmmc_reg_get(host);
- 	if (ret)
-diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
-index 349082d76a99..d5b8a110267b 100644
---- a/drivers/mmc/host/owl-mmc.c
-+++ b/drivers/mmc/host/owl-mmc.c
-@@ -635,11 +635,8 @@ static int owl_mmc_probe(struct platform_device *pdev)
- 
- 	ret = devm_request_irq(&pdev->dev, owl_host->irq, owl_irq_handler,
- 			       0, dev_name(&pdev->dev), owl_host);
--	if (ret) {
--		dev_err(&pdev->dev, "Failed to request irq %d\n",
--			owl_host->irq);
-+	if (ret)
- 		goto err_release_channel;
--	}
- 
- 	ret = mmc_add_host(mmc);
- 	if (ret) {
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index ceed47ccfda8..4aff965f0e2e 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2864,10 +2864,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
- 					sdhci_msm_pwr_irq, IRQF_ONESHOT,
- 					dev_name(&pdev->dev), host);
--	if (ret) {
--		dev_err(&pdev->dev, "Request IRQ failed (%d)\n", ret);
-+	if (ret)
- 		goto clk_disable;
--	}
- 
- 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
- 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index 9831956de1c8..7706d01b149e 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -1505,18 +1505,14 @@ static int sh_mmcif_probe(struct platform_device *pdev)
- 	name = irq[1] < 0 ? dev_name(dev) : "sh_mmc:error";
- 	ret = devm_request_threaded_irq(dev, irq[0], sh_mmcif_intr,
- 					sh_mmcif_irqt, 0, name, host);
--	if (ret) {
--		dev_err(dev, "request_irq error (%s)\n", name);
-+	if (ret)
- 		goto err_clk;
--	}
- 	if (irq[1] >= 0) {
- 		ret = devm_request_threaded_irq(dev, irq[1],
- 						sh_mmcif_intr, sh_mmcif_irqt,
- 						0, "sh_mmc:int", host);
--		if (ret) {
--			dev_err(dev, "request_irq error (sh_mmc:int)\n");
-+		if (ret)
- 			goto err_clk;
--		}
- 	}
- 
- 	mutex_init(&host->thread_lock);
--- 
-2.34.1
+>
+> Signed-off-by: Judith Mendez <jm@ti.com>
+> ---
+>  .../devicetree/bindings/mmc/mmc-controller-common.yaml    | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.=
+yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+> index 3d7195e9461c3..3ff68d32a308f 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+> @@ -275,6 +275,14 @@ properties:
+>        not available.
+>      default: 10
+>
+> +  post-power-off-delay-ms:
 
+For mmc-pwrseq-simple we already have "power-off-delay-us", perhaps
+better to re-use that name instead.
+
+> +    description:
+> +      The presence of this property indicates that the card requires a
+> +      delay (in milliseconds) after power off before the next power on.
+
+Again, maybe something to indicate this is specific like "specify
+custom delays after MMC power off to work around
+hardware issues such as slow RC circuites on MMC VDD rails."
+
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    minimum: 0
+> +    maximum: 10000
+
+Are the above limits needed at all?
+
+I suggest we add a "default: 1", as that would correspond to the
+hardcoded value that the mmc core currently uses for this delay.
+
+> +
+>    supports-cqe:
+>      $ref: /schemas/types.yaml#/definitions/flag
+>      description:
+> --
+> 2.54.0
+>
+
+Kind regards
+Uffe
