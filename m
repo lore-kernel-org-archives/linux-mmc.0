@@ -1,116 +1,113 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mout-p-103.mailbox.org (mout-p-103.mailbox.org [80.241.56.161])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E60FD41166D;
-	Mon, 20 Jul 2026 21:56:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E51D138D014;
+	Mon, 20 Jul 2026 22:46:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.161
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784584615; cv=none; b=os+e0Aw8PY5Z2BUgXBZu6YS9eTdZdlKUIFnnLQ4NH9YPCmB6jYcq5leEilZMqyMp7acg5WE1uc0zz1zYLFgeHFCqk4ipE06uHE8uVJp+Ur1G+w5IpAcfFuIR2x54SxZqYjEUyXiL4SpYlILEYjQMjQktNH/nBGDWRmdhEiVxb1I=
+	t=1784587619; cv=none; b=hzrH52hORFsQt/DrN2IkUy6J1woLoBqiu6GDVrDwBBzTicn5PBqina8T7YGbDumhxm823n7J4kT9wmx/DlnnOKy6wCN5R1qRbfqS42x+2YyHSl2VSNwTH1bKLvLhU5LHXbueEN2wQDgnhhaq80Ox7Vd09volLmnJU6AlaGW6P38=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784584615; c=relaxed/simple;
-	bh=rFHtA+OQX00vdgu1FIH3BJ5MiynZaunIggegQByo+Jk=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=IqS7Y/ijg2g0IxYbcfZeNNjKbba3G0k9VhUQp9TYYwEskv0E1bET8Eb+zaKYsK6cVjme/Rm2Nv6wE/DymLMLrmctxcEUsEjgnwLpLvyoN9Z8PLIUaLy3ElO2Zr+yV+XW9MMSqK+5OoSIUw4YFJOUEq1fwUqM7Pb4lQzVTLnPXzA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=mJUMAFGj; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+	s=arc-20240116; t=1784587619; c=relaxed/simple;
+	bh=G28jyeTFq6CtIFaSECPw6bRj9dZ5++FHmZLh1y+5jRQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Z6Nr6UVebPE98PniMqKMro6MmjJE2tMv/Af+SAhCOthPFj4kacyLHSkFw+gCcEJjWsLH0mAUTOr3PU6//48eZ0txWPnk6gCWKoVJjGCPPbQTY1gnJUF3PcVssYyTyfy0OeDmg7MrREsjcnQIU6Sv7H5Psa1plfq7TAXs76JP13M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mailbox.org; spf=pass smtp.mailfrom=mailbox.org; dkim=pass (2048-bit key) header.d=mailbox.org header.i=@mailbox.org header.b=Ij/94th7; arc=none smtp.client-ip=80.241.56.161
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=mailbox.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mailbox.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="mJUMAFGj"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66KJU0HE3368819;
-	Mon, 20 Jul 2026 21:56:51 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=qcppdkim1; bh=eirM1jKmLbzUAYJH/SPS2pcWi+7XOaJzK6y
-	CZnFBkRQ=; b=mJUMAFGjheMRPlHDbjhdl0XvvmeuMTmrTaC/6pC+9Mw+AwhfpcG
-	YV4jjLvwYNw5NYqLmuVxbVgKzhMkaKYixF7PU9BJPnfkNmGWz3gF4fKwn2nQ49Fq
-	VIHtFYPW53v6xjBdzjUnVxdO4sm1dW2XX1TTi0HsXdIXa7MSMMcWZZ8y6NfYfmYv
-	sMqlFfMEEnO6OrfoOLaDAPmU1sOXScbw4ocDjpQ3wPL2ss/wiurNJQNrbdUDtQsc
-	fuhs+bpSeWdIW9pPzFf4jcmAfPbav8YVo6zjHx1pAIvDfIBN/Akl2XZX4pl+7dXG
-	ceJ688GO4D1KBOK2/1cZhafoM7ySMgXQH4w==
-Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fhgs036n6-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 20 Jul 2026 21:56:51 +0000 (GMT)
-Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (8.18.1.7/8.18.1.7) with ESMTP id 66KLumPT021949;
-	Mon, 20 Jul 2026 21:56:48 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 4fgj53k9nr-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 20 Jul 2026 21:56:48 +0000 (GMT)
-Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.18.1.12/8.18.1.12) with ESMTP id 66KLumJa021944;
-	Mon, 20 Jul 2026 21:56:48 GMT
-Received: from hu-devc-hyd-u22-c.qualcomm.com ([10.213.101.157])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 66KLum5i021943
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 20 Jul 2026 21:56:48 +0000 (GMT)
-Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2342877)
-	id 68B21644; Tue, 21 Jul 2026 03:26:47 +0530 (+0530)
-From: Nitin Rawat <nitin.rawat@oss.qualcomm.com>
-To: krzk+dt@kernel.org, robh@kernel.org, ulfh@kernel.org, conor+dt@kernel.org,
-        andersson@kernel.org
-Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Nitin Rawat <nitin.rawat@oss.qualcomm.com>
-Subject: [PATCH V1] dt-bindings: mmc: sdhci-msm: Document the Maili compatible
-Date: Tue, 21 Jul 2026 03:26:45 +0530
-Message-Id: <20260720215645.1464901-1-nitin.rawat@oss.qualcomm.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=mailbox.org header.i=@mailbox.org header.b="Ij/94th7"
+Received: from smtp202.mailbox.org (smtp202.mailbox.org [10.196.197.202])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature RSA-PSS (4096 bits) server-digest SHA512)
+	(No client certificate requested)
+	by mout-p-103.mailbox.org (Postfix) with ESMTPS id 4h3wcW55sszKn65;
+	Tue, 21 Jul 2026 00:46:51 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailbox.org; s=mail20150812;
+	t=1784587611;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=eo+9+4t/XF8wxVM2KHRZKUCNyv2OchmaEckT5QN/S/I=;
+	b=Ij/94th7YYbgHBRyVHOahYsl8rkSBNtGUZwdiCvBSAC1Q8j1Z7JESgPz44piNJrAmlOP0k
+	1uiC4uBmBbK+g5wTmdczuO5T/y8tho/+4Wd53XqBH6rCK9bXzQhCaOFYhEkXhAKR7C+0um
+	WUB2T+xyXtR3djxwMo70wDFbgQKdIJwJzKNBEv7x1pTd78NtWEapTtCw4VgzqDULShcg+z
+	Wm8Y2olnj/fLTbARpbolvxoMlppymj1b/J5BNEvlc+/Mi6gI0Q6pSKJw5WpK8RU0BycR2n
+	o7cd0VZcczumDE7JwVWkhIs4zQleQTiKrEZ40YwdHwUp7M6yAN0LOzl9JNXj8w==
+Message-ID: <d1ae2d8c-43af-4a59-ad8e-fe5ab1f0a2d2@mailbox.org>
+Date: Tue, 21 Jul 2026 00:46:49 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzIwMDIzNyBTYWx0ZWRfX6deLzWirMWI0
- As3mRPE58jEcnXsr5T0KSlhKtxVgPQr/NXb3GHkHernfcJJLJVfWs3xNPgPq3tD1Aktzm/q0TzX
- uy44ccp8ja4Ub2TqThmD0Abo5qmJ+z0=
-X-Proofpoint-ORIG-GUID: -gGwUT45iVQivOwVLLs5p6kTXO5dk96J
-X-Authority-Analysis: v=2.4 cv=DMS/JSNb c=1 sm=1 tr=0 ts=6a5e99a3 cx=c_pps
- a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
- a=RAioF0-LDSMA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=_K5XuSEh1TEqbUxoQ0s3:22 a=EUspDBNiAAAA:8 a=KwdnOhj-2HFfZa4zV1EA:9
-X-Proofpoint-GUID: -gGwUT45iVQivOwVLLs5p6kTXO5dk96J
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzIwMDIzNyBTYWx0ZWRfX8VA8u7j1vHe+
- 5dK8M8oykN8zEaOuVZ6YHRxYOu0rUazZL2NgU3SrZH1386VyteT0DpehJ5hHpgE8XQYmlqL1N3W
- R1ttUj0eGJwo9afYsVnCvQznNOS0F6eWPBdgsFf2oCCApn0wIIAUOmXOYQ32pm8Cdm+CMYrBXGw
- FwHVi5Xr9XZs1zOY6qQscUagciJfLMMv4aWl8bVALrsIrAlluRqNlI8yUX8OniULNPVzNOI32rI
- QcyPi8x7cRZzNSBWoPnx8I9A37lzeZNDn57vvCVmfio1obLxlawEoyBPqPuXZdJ9JfT2bCnssdF
- HvU1RKh6/5zY0KmH/dDZU3NuhB5WNffYXo2LXJNTALiVyAtRrzXwNuXCgWXXPb6++hZVM0c7cyK
- pu3Ll8mwjKH1g5+Q6QM/fW2BK0aCNcbkhidPMzLv56VbXUrIMoHwbox8ASNNuziiPXrs+6SVv3d
- 812JZouj2YNwyXBVqvg==
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-07-20_05,2026-07-20_03,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- suspectscore=0 impostorscore=0 priorityscore=1501 spamscore=0 bulkscore=0
- lowpriorityscore=0 clxscore=1011 phishscore=0 malwarescore=0 adultscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607200237
+Subject: Re: [PATCH do not merge 0/4] wifi: mwifiex: add iw61x support
+To: Sascha Hauer <s.hauer@pengutronix.de>,
+ Brian Norris <briannorris@chromium.org>,
+ Francesco Dolcini <francesco@dolcini.it>,
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org
+References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+Content-Language: en-US
+From: Marek Vasut <marek.vasut@mailbox.org>
+In-Reply-To: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-MBO-RS-META: jtkc5g1yefost6y1o99j5kbqexk3ogz6
+X-MBO-RS-ID: 9b924e6a7eed59363d5
 
-Document the compatible for SDHCI on Qualcomm Maili SoC.
+Hello Sascha,
 
-Signed-off-by: Nitin Rawat <nitin.rawat@oss.qualcomm.com>
----
- Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml | 1 +
- 1 file changed, 1 insertion(+)
+On 3/26/25 1:18 PM, Sascha Hauer wrote:
+> This series adds iw61x support to the mwifiex driver. It works for me,
+> but is not yet ready to be merged. Some people showed interest in it, so
+> I am sending it here.
+> 
+> All testing and review feedback appreciated.
+> 
+> During startup I get these messages:
+> 
+> [   12.078010] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
+> [   12.078018] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
+> [   12.078024] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x23e
+> [   12.078029] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x25c
+> 
+> Not sure what these are about, I can't see these handled in the
+> downstream mwifiex driver as well. Could also be there is some parsing
+> error. Nevertheless the driver seems to work.
+> 
+> The series applies to v6.14, but should apply to my mwifiex cleanup
+> series as well.
 
-diff --git a/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-index bd558a11b792..8dfcd1351551 100644
---- a/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/qcom,sdhci-msm.yaml
-@@ -47,6 +47,7 @@ properties:
-               - qcom,ipq9574-sdhci
-               - qcom,ipq9650-sdhci
-               - qcom,kaanapali-sdhci
-+              - qcom,maili-sdhci
-               - qcom,milos-sdhci
-               - qcom,qcm2290-sdhci
-               - qcom,qcs404-sdhci
---
-2.34.1
+I was able to test these patches with IW610G based muRata 2LL SDIO 
+device. I used firmware from [1] and I had to add SDIO ID for that 
+IW610G device (trivial patch is below). Besides that, I am adding my:
 
+Tested-by: Marek Vasut <marek.vasut@mailbox.org> # muRata 2LL
+
+Do you plan to finish upstreaming these patches ?
+
+"
+diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c 
+b/drivers/net/wireless/marvell/mwifiex/sdio.c
+index 84e3946cc4e4e..54fc82a6e3458 100644
+--- a/drivers/net/wireless/marvell/mwifiex/sdio.c
++++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
+@@ -1049,6 +1049,8 @@ static const struct sdio_device_id mwifiex_ids[] = {
+                 .driver_data = (unsigned long)&mwifiex_sdio_sd8987},
+         {SDIO_DEVICE(SDIO_VENDOR_ID_MARVELL, 
+SDIO_DEVICE_ID_MARVELL_8997_WLAN),
+                 .driver_data = (unsigned long)&mwifiex_sdio_sd8997},
++       {SDIO_DEVICE(SDIO_VENDOR_ID_NXP, 0x0215),
++               .driver_data = (unsigned long)&mwifiex_sdio_iw612},
+         {SDIO_DEVICE(SDIO_VENDOR_ID_NXP, SDIO_DEVICE_ID_NXP_IW612_WLAN),
+                 .driver_data = (unsigned long)&mwifiex_sdio_iw612},
+         {},
+"
+
+[1] 
+https://github.com/nxp-imx/imx-firmware/tree/lf-6.18.20_2.0.0/FwImage_IW610_SD
+
+Thank you for your help !
