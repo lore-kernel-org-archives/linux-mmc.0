@@ -1,298 +1,213 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E89257262B;
-	Wed, 22 Jul 2026 10:46:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D571E3469F6;
+	Wed, 22 Jul 2026 13:56:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784717195; cv=none; b=VSd8lIP+3igsNyegmbb93Aye7iRoyAJnficw3y4SyKd7bvskBU2SLpCIAdA7czVL+F0PLfRG8mroH7b8nIrKBge04CYUcQtG+bRXFl6Aw8r56pgzE5i2UvNjB0HFAnIu2xET+xYJLBYZvBHc1qU9HTqdtPk/21Qzts6TGjqEs8k=
+	t=1784728612; cv=none; b=j/3vEprRxbVNYzUIIqolfJFBChg70BEpmBN3ygdi8+CIza5wuCA6OmSZT5yWzT4wTEh79aY2h4gCChdqVJDdAFz6qau6nlr3n27GKPZ+L6qatfbDD+mA2hln1oMrRDaW2wHCiZwheukF1l38OQ9xcjcoAxGifmBL5UsPxlghLsg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784717195; c=relaxed/simple;
-	bh=ACrGGXdQ+YY/PhHFxMny9a5wdzTXm54gQB09cH65GyA=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=YgsjZM18r1n+je98NxDpI6pB+jtevxnmlja/4I1XFm21KUpIa5TAaJMe8d8PZvG3Eu07Sg4iH8i53dkRx2iZCBIQL5MwZJhNmjC1RF9dsvS5G6EKRu/FFqk/wqt5aNM8R56IZFN3cIjBJKFOEWt4u7fIARwzZBqNuovaR7NrfIo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p/xk1MDW; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1784728612; c=relaxed/simple;
+	bh=c/7N6KbADqM0WgN320UPrjz3skJFAld4wBD9sgg7JaM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=T4/9XIcshb0aaEQRxo4QESppA1zVEiJuKz7Z9fi0c3CDZMQdpedEv8SDNvSrPk/cCkvG5sPSLYPcWP449zjMCvZosPk+bPDTMvjNZGsKnrJfvGSMuA50lE1IYpJAVOxjCbwYEZ89dVNLEunQo6bUXPyQVcpHOHHmesd28WEuRic=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aM4rVYxw; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p/xk1MDW"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id A8AD9C2BCFF;
-	Wed, 22 Jul 2026 10:46:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1784717194;
-	bh=ACrGGXdQ+YY/PhHFxMny9a5wdzTXm54gQB09cH65GyA=;
-	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=p/xk1MDWWxUJDOJqntaM3GQcZoyREPBzXYKcAzCEI5kjhm6MrRVLMUIKIF1XzeilR
-	 tIDRNOgqDtow2jouscHLD8RO/MIRAr+QSu6umhGUaIPcAou1c4xbrfN4oO09/ro71t
-	 sSbS3RJGY2Z05W4GDUVdnfR2GAneSIRmREnFL19EbTBp5vzVA0Jugqt/IXPy4q8kxP
-	 4KJVAOK2PUJDbXt8hdLqu7f1ZipAr+Gr5nvRpA8J7eOWReRMoHnWRcPi3MNQN9SmHI
-	 oHnTWfKdeaERIxSmd2IaIvtZfXWw9vjonRAmkLAZ9nT7NMVxaLXs1C+f0ebp9sY9HL
-	 7jKuSZm7cHGTg==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 948CDC44532;
-	Wed, 22 Jul 2026 10:46:34 +0000 (UTC)
-From: Rohan Joshi via B4 Relay <devnull+rohan1sj.cadence.com@kernel.org>
-Date: Wed, 22 Jul 2026 16:18:38 +0530
-Subject: [PATCH v3 2/2] mmc: sdhci-cadence: add CQE support
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aM4rVYxw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 742BE1F000E9;
+	Wed, 22 Jul 2026 13:56:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784728610;
+	bh=sehDTWB0q5frYBeNUuht2aeeZDtQWH6OWbqVSpxsbs4=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To;
+	b=aM4rVYxwFhpdESVNtNEH0TL19rF/Ph+vLZLrEzmEh+nq2M52/uJlNSVyTwUkWbLA3
+	 WbLKcWcQeIRu0SXOKP45pQQS+cNUS6JE3tHPuQyumc/K7ZkaOmbEGASa+je8cmfWvE
+	 V934w3dNxldNFSAMHNutcTpLW3sxy9cU6+hGFrGRzPqth4bBfuB0iM1H6OBaCt21LG
+	 3Oz/E18Hr2KL+/IiFKrR+PPm+Tsp/YjK+A/HWTmyRBWhiNPeqd7T/gzUAkdAw5ylth
+	 DDE54SjkJCghE5f5Kh/I2wyc9ntGzbL592c83Umm4pjriXC+sVXrWVx/HYnIsL9NDk
+	 wD+xJd5JJs1Hw==
+Message-ID: <3d954cdd-6dde-4be6-84c9-2f2f7d008f5b@kernel.org>
+Date: Wed, 22 Jul 2026 14:56:41 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260722-cdns_sdhci_cqe-support-v3-2-4412856a4488@cadence.com>
-References: <20260722-cdns_sdhci_cqe-support-v3-0-4412856a4488@cadence.com>
-In-Reply-To: <20260722-cdns_sdhci_cqe-support-v3-0-4412856a4488@cadence.com>
-To: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, 
- Masahiro Yamada <yamada.masahiro@socionext.com>, 
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, mparab@cadence.com, pawell@cadence.com, 
- sjakhade@cadence.com, mpillai@cadence.com, rohan1sj@cadence.com, 
- razb@mobileye.com
-X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1784717318; l=6985;
- i=rohan1sj@cadence.com; s=20260406; h=from:subject:message-id;
- bh=TIvygmbfzIhclAgw5h0kIZYKRTzFSS/RgesIZ50ewws=;
- b=Hbrc57Oqvqq2J69S2feO/h2isGE5iRwNWgqwn4QLaDOQsRmu3wmyKMkjEHQYaIMsgjkSMCWrS
- I0Isuj3K5pUCswTZMhbelchfKXF9VqMCZr8bD6dFWScpwWX3W5tQl9U
-X-Developer-Key: i=rohan1sj@cadence.com; a=ed25519;
- pk=YuwylizMVlVj8I4+VPMZ6xrFR2wyqJAWZyj90OVZgD0=
-X-Endpoint-Received: by B4 Relay for rohan1sj@cadence.com/20260406 with
- auth_id=723
-X-Original-From: Rohan Joshi <rohan1sj@cadence.com>
-Reply-To: rohan1sj@cadence.com
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v8 0/9] Support for block device NVMEM providers
+To: Loic Poulain <loic.poulain@oss.qualcomm.com>,
+ Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>, Jens Axboe <axboe@kernel.dk>,
+ Johannes Berg <johannes@sipsolutions.net>, Jeff Johnson
+ <jjohnson@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>,
+ Marcel Holtmann <marcel@holtmann.org>,
+ Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+ Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
+ Rocky Liao <quic_rjliao@quicinc.com>, "David S. Miller"
+ <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>,
+ Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+ Simon Horman <horms@kernel.org>, Srinivas Kandagatla <srini@kernel.org>,
+ Andrew Lunn <andrew@lunn.ch>, Heiner Kallweit <hkallweit1@gmail.com>,
+ Russell King <linux@armlinux.org.uk>, Saravana Kannan
+ <saravanak@kernel.org>, Christian Marangi <ansuelsmth@gmail.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ linux-block@vger.kernel.org, linux-wireless@vger.kernel.org,
+ ath10k@lists.infradead.org, linux-bluetooth@vger.kernel.org,
+ netdev@vger.kernel.org, daniel@makrotopia.org,
+ Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>,
+ Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
+ Piotr Kwapulinski <piotr.kwapulinski@intel.com>,
+ Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+References: <20260703-block-as-nvmem-v8-0-98ae32bfc49a@oss.qualcomm.com>
+Content-Language: en-US
+From: Srinivas Kandagatla <srini@kernel.org>
+In-Reply-To: <20260703-block-as-nvmem-v8-0-98ae32bfc49a@oss.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-From: Rohan Joshi <rohan1sj@cadence.com>
 
-Cadence host controller has optional CQE (Command Queue Engine).
-The presence of CQE is determined by an additional host capability
-register. The same information is used to identify and support all
-platforms that contain Command Queue Engine
 
-Signed-off-by: Rohan Joshi <rohan1sj@cadence.com>
----
- drivers/mmc/host/Kconfig         |   1 +
- drivers/mmc/host/sdhci-cadence.c | 124 +++++++++++++++++++++++++++++++++++++--
- 2 files changed, 121 insertions(+), 4 deletions(-)
+On 7/3/26 2:45 PM, Loic Poulain wrote:
+> On embedded devices, it is common for factory provisioning to store
+> device-specific information, such as Ethernet or WiFi MAC addresses,
+> in a dedicated area of an eMMC partition. This avoids the need for
+> and additional EEPROM/OTP and leverages the persistence of eMMC.
+> 
+> One example is the Arduino UNO-Q, where the WiFi MAC address and the
+> Bluetooth Device address are stored in the eMMC Boot1 partition.
+> 
+> Until now, accessing this information required a custom bootloader
+> to read the data and inject it into the Device Tree before handing
+> control over to the kernel. This approach is fragile and leads to
+> device-specific workarounds.
+> 
+> Rather than adding a new NVMEM provider specifically to the eMMC
+> subsystem, the new support operates at the block layer, allowing any
+> block device to behave like other non-volatile memories such as EEPROM
+> or OTP.
+> 
+> This series builds on earlier work by Daniel Golle that enables block
+> devices to act as NVMEM providers:
+> https://lore.kernel.org/all/6061aa4201030b9bb2f8d03ef32a564fdb786ed1.1709667858.git.daniel@makrotopia.org/
+> 
+> It also introduces an NVMEM layout description for the Arduino UNO-Q,
+> allowing device-specific data stored in the eMMC Boot1 partition to
+> be accessed in a standard way.
+> 
+> WiFi and Ethernet already support retrieving MAC addresses from NVMEM.
+> Bluetooth requires similar support, which is also addressed.
+> 
+> Note that this is currently limited to MMC-backed block devices, as
+> only the MMC core associates a firmware node with the block device
+> (add_disk_fwnode). This can be easily extended in the future to
+> support additional block drivers.
+> 
+> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 4f060d3e5636..2cc8133e8ef3 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -293,6 +293,7 @@ config MMC_SDHCI_CADENCE
- 	depends on MMC_SDHCI_PLTFM
- 	depends on OF
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select MMC_CQHCI
- 	help
- 	  This selects the Cadence SD/SDIO/eMMC driver.
- 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 435603c8c00b..f1ae7743ef5f 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -15,6 +15,8 @@
- #include <linux/reset.h>
- 
- #include "sdhci-pltfm.h"
-+#include "sdhci-cqhci.h"
-+#include "cqhci.h"
- 
- /* HRS - Host Register Set (specific to Cadence) */
- #define SDHCI_CDNS_HRS04		0x10		/* PHY access port */
-@@ -36,6 +38,10 @@
- #define   SDHCI_CDNS_HRS06_MODE_MMC_HS400	0x5
- #define   SDHCI_CDNS_HRS06_MODE_MMC_HS400ES	0x6
- 
-+/* Host capabilities not covered by the standard capability registers (SRS16-SRS18) */
-+#define SDHCI_CDNS_HRS30		0x78	/* Host capabilities */
-+#define SDHCI_CDNS_HRS30_CQE_SUPPORTED	BIT(0)
-+
- /* Read block gap */
- #define SDHCI_CDNS_HRS37		0x94	/* interface mode select */
- #define   SDHCI_CDNS_HRS37_MODE_DS		0x0
-@@ -88,6 +94,7 @@ struct sdhci_cdns_priv {
- 	void __iomem *ctl_addr;	/* write control */
- 	spinlock_t wrlock;	/* write lock */
- 	bool enhanced_strobe;
-+	bool cqe_support;	/* Command Queuing Engine support */
- 	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
- 	struct reset_control *rst_hw;
- 	unsigned int nr_phy_params;
-@@ -385,6 +392,68 @@ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
- 		sdhci_set_uhs_signaling(host, timing);
- }
- 
-+static u32 sdhci_cdns_cqhci_irq(struct sdhci_host *host, u32 intmask)
-+{
-+	int cmd_err = 0;
-+	int data_err = 0;
-+
-+	/* return original intmask to be handled by other handlers if it's not a CQE interrupt */
-+	if (!sdhci_cqe_irq(host, intmask, &cmd_err, &data_err))
-+		return intmask;
-+
-+	cqhci_irq(host->mmc, intmask, cmd_err, data_err);
-+
-+	return 0;
-+}
-+
-+static const struct cqhci_host_ops sdhci_cdns_cqhci_ops = {
-+	.enable		= sdhci_cqe_enable,
-+	.disable	= sdhci_cqe_disable,
-+};
-+
-+static int sdhci_cdns_cqe_add_host(struct sdhci_host *host, struct platform_device *pdev)
-+{
-+	struct cqhci_host *cq_host;
-+	bool dma64;
-+	int ret;
-+
-+	ret = sdhci_setup_host(host);
-+	if (ret)
-+		return ret;
-+
-+	cq_host = cqhci_pltfm_init(pdev);
-+	if (IS_ERR(cq_host)) {
-+		ret = PTR_ERR(cq_host);
-+		dev_err_probe(&pdev->dev, ret, "cqhci platform init failed\n");
-+		goto cleanup;
-+	}
-+
-+	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
-+	if (dma64)
-+		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
-+
-+	cq_host->ops = &sdhci_cdns_cqhci_ops;
-+
-+	host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
-+
-+	ret = cqhci_init(cq_host, host->mmc, dma64);
-+	if (ret) {
-+		dev_err_probe(&pdev->dev, ret, "cqhci init failed\n");
-+		goto cleanup;
-+	}
-+
-+	/* add host to MMC subsystem */
-+	ret = __sdhci_add_host(host);
-+	if (ret)
-+		goto cleanup;
-+
-+	return 0;
-+
-+cleanup:
-+	sdhci_cleanup_host(host);
-+	return ret;
-+}
-+
- /* Elba control register bits [6:3] are byte-lane enables */
- #define ELBA_BYTE_ENABLE_MASK(x)	((x) << 3)
- 
-@@ -445,8 +514,9 @@ static const struct sdhci_ops sdhci_elba_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--	.reset = sdhci_reset,
-+	.reset = sdhci_and_cqhci_reset,
- 	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
-+	.irq = sdhci_cdns_cqhci_irq,
- };
- 
- static int elba_drv_init(struct platform_device *pdev)
-@@ -474,9 +544,10 @@ static const struct sdhci_ops sdhci_cdns_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--	.reset = sdhci_reset,
-+	.reset = sdhci_and_cqhci_reset,
- 	.platform_execute_tuning = sdhci_cdns_execute_tuning,
- 	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
-+	.irq = sdhci_cdns_cqhci_irq,
- };
- 
- static const struct sdhci_cdns_drv_data sdhci_cdns_uniphier_drv_data = {
-@@ -553,6 +624,8 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	int ret;
- 	struct device *dev = &pdev->dev;
- 	static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
-+	bool cqe_enabled;
-+	u32 host_caps;
- 
- 	clk = devm_clk_get_enabled(dev, NULL);
- 	if (IS_ERR(clk))
-@@ -608,7 +681,43 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
- 	}
- 
--	return sdhci_add_host(host);
-+	host_caps = readl(priv->hrs_addr + SDHCI_CDNS_HRS30);
-+
-+	/*
-+	 * CQE is enabled only when both conditions are met:
-+	 *   1. Hardware reports CQE support via HRS30[0].
-+	 *   2. DT provides a named "cqhci" register space.
-+	 */
-+	cqe_enabled = (host_caps & SDHCI_CDNS_HRS30_CQE_SUPPORTED) &&
-+		      !!platform_get_resource_byname(pdev, IORESOURCE_MEM, "cqhci");
-+
-+	if ((host_caps & SDHCI_CDNS_HRS30_CQE_SUPPORTED) && !cqe_enabled)
-+		dev_dbg(dev, "CQE supported by hardware but no 'cqhci' register space in DT, disabling\n");
-+
-+	if (cqe_enabled) {
-+		priv->cqe_support = true;
-+		ret = sdhci_cdns_cqe_add_host(host, pdev);
-+	} else {
-+		ret = sdhci_add_host(host);
-+	}
-+
-+	return ret;
-+}
-+
-+static int sdhci_cdns_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	if (priv->cqe_support) {
-+		ret = cqhci_suspend(host->mmc);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	return sdhci_pltfm_suspend(dev);
- }
- 
- static int sdhci_cdns_resume(struct device *dev)
-@@ -630,6 +739,13 @@ static int sdhci_cdns_resume(struct device *dev)
- 	if (ret)
- 		goto disable_clk;
- 
-+	/* Resume CQE if enabled */
-+	if (priv->cqe_support) {
-+		ret = cqhci_resume(host->mmc);
-+		if (ret)
-+			goto disable_clk;
-+	}
-+
- 	return 0;
- 
- disable_clk:
-@@ -638,7 +754,7 @@ static int sdhci_cdns_resume(struct device *dev)
- 	return ret;
- }
- 
--static DEFINE_SIMPLE_DEV_PM_OPS(sdhci_cdns_pm_ops, sdhci_pltfm_suspend, sdhci_cdns_resume);
-+static DEFINE_SIMPLE_DEV_PM_OPS(sdhci_cdns_pm_ops, sdhci_cdns_suspend, sdhci_cdns_resume);
- 
- static const struct of_device_id sdhci_cdns_match[] = {
- 	{
+What is the merge strategy here, Am happy to take it via nvmem tree if
+all the non nvmem patches are acked or reviewed-by.
 
--- 
-2.43.0
-
+--srini
+> ---
+> Changes in v8:
+> - block: Fix bdev->bd_nvmem on registering failure (sashiko)
+> - net: of_net: of_get_nvmem_eui48() now also rejects all-ones cells (sashiko)
+> - Bluetooth: mgmt: account for HCI_QUIRK_USE_BDADDR_NVMEM in
+>   is_configured() and get_missing_options() (sashiko)
+> - Reword blk-nvmem KCONFIG help text to satisfy checkpatch
+> - Link to v7: https://lore.kernel.org/r/20260701-block-as-nvmem-v7-0-3fe8205ef0a8@oss.qualcomm.com
+> 
+> Changes in v7:
+> - Rework bindings/dts so that the eMMC boot partition can be a nvmem fixed-layout
+>   and not a child of fixed-partition. (Rob)
+> - Add Support for fixed-layout as the nvmem device node itself
+> - Remove "block: partitions: of: Skip child nodes without reg property"
+>   This is no more required in this series and will be submitted separately (Rob)
+> - Add missing linux/cleanup.h and linux/device.h includes (Bartosz)
+> - simplify nvmem_register() error path using dev_err_probe() (Bartosz)
+> - nvmem_device forward declaration to blk_types.h (Bartosz)
+> - Add hci_dev_get_bd_addr_from_nvmem() kernel-doc for return value (Piotr)
+> - Link to v6: https://lore.kernel.org/r/20260629-block-as-nvmem-v6-0-f02513dcd46d@oss.qualcomm.com
+> 
+> Changes in v6:
+> - blk_nvmem_add() returns int, error properly propagated (Bartosz)
+> - Redundant if (bdev->bd_nvmem) guard removed in blk_nvmem_del() (Bartosz)
+> - Size guard changed from UINT_MAX → INT_MAX to avoid signed overflow in config.size (sashiko)
+> - BLK_OPEN_RESTRICT_WRITES removed from blk_nvmem_reg_read() (sashiko)
+> - Link to v5: https://lore.kernel.org/r/20260612-block-as-nvmem-v5-0-95e0b30fff90@oss.qualcomm.com
+> 
+> Changes in v5:
+> - Fixed ath10k binding issue + extended commit message (Krzysztof)
+> - Moved blk-nvmem handling to block core instead of a class_interface
+>   This allows correct/robust integration with block device life cycle (Bartosz).
+> - block: partitions: of: Skip child nodes without reg property (sashiko)
+> - Link to v4: https://lore.kernel.org/r/20260609-block-as-nvmem-v4-0-45712e6b22c6@oss.qualcomm.com
+> 
+> Changes in v4:
+> - Fix squash issue (dts commit incorrectly squashed) (Konrad)
+> - Use devres for nvmem resources (Bartosz)
+> - use __free() destructor helper when possible (Bartosz)
+> - Fix value return checking for bdev_file_open_by_dev
+> - Link to v3: https://lore.kernel.org/r/20260608-block-as-nvmem-v3-0-82681f50aa35@oss.qualcomm.com
+> 
+> Changes in v3:
+> - Fixed missing 'fixed-partitions' compatible in partition (Rob)
+> - Fixed clashing nvmem cells, document calibration along mac (Sashiko)
+> - Remove workaround to handle dangling nvmem references after
+>   unregistering, this is a generic nvmem framework issue handled
+>   in Bartosz's series:
+>    https://lore.kernel.org/all/20260429-nvmem-unbind-v3-0-2a694f95395b@oss.qualcomm.com/
+> - Validate mac (is_valid_ether_addr) before copying to output buffer
+> - Link to v2: https://lore.kernel.org/r/20260507-block-as-nvmem-v2-0-bf17edd5134e@oss.qualcomm.com
+> 
+> Changes in v2:
+> - Fix example nvmem-layout cells to use compatible = "mac-base"
+> - Squash WiFi MAC and Bluetooth BD address consumer patches into the nvmem layout patch
+> - Fix possible use-after-free in blk-nvmem: bnv (nvmem priv) linked to nvmem lifetime
+> - Simplify nvmem-cell-names from items: - const: to plain const:
+> - Factor out common NVMEM EUI-48 retrieval logic
+> - Reorder changes
+> - Link to v1: https://lore.kernel.org/r/20260428-block-as-nvmem-v1-0-6ad23e75190a@oss.qualcomm.com
+> 
+> ---
+> Daniel Golle (1):
+>       block: implement NVMEM provider
+> 
+> Loic Poulain (8):
+>       dt-bindings: mmc: Document fixed-layout NVMEM provider support
+>       dt-bindings: net: wireless: qcom,ath10k: Document NVMEM cells
+>       dt-bindings: bluetooth: qcom: Add NVMEM BD address cell
+>       nvmem: layouts: Support fixed-layout as the nvmem device node itself
+>       net: of_net: Add of_get_nvmem_eui48() helper for EUI-48 lookup
+>       Bluetooth: hci_sync: Add NVMEM-backed BD address retrieval
+>       Bluetooth: qca: Set NVMEM BD address quirks when address is invalid
+>       arm64: dts: qcom: arduino-imola: Describe NVMEM layout for WiFi/BT addresses
+> 
+>  .../devicetree/bindings/mmc/mmc-card.yaml          |  23 ++++-
+>  .../net/bluetooth/qcom,bluetooth-common.yaml       |   9 ++
+>  .../bindings/net/wireless/qcom,ath10k.yaml         |  16 +++
+>  arch/arm64/boot/dts/qcom/qrb2210-arduino-imola.dts |  32 ++++++
+>  block/Kconfig                                      |  11 +++
+>  block/Makefile                                     |   1 +
+>  block/blk-nvmem.c                                  | 110 +++++++++++++++++++++
+>  block/blk.h                                        |   8 ++
+>  block/genhd.c                                      |   4 +
+>  drivers/bluetooth/btqca.c                          |   5 +-
+>  drivers/nvmem/layouts.c                            |  13 ++-
+>  include/linux/blk_types.h                          |   4 +
+>  include/linux/of_net.h                             |   7 ++
+>  include/net/bluetooth/hci.h                        |  18 ++++
+>  net/bluetooth/hci_sync.c                           |  41 +++++++-
+>  net/bluetooth/mgmt.c                               |   6 +-
+>  net/core/of_net.c                                  |  52 +++++++---
+>  17 files changed, 342 insertions(+), 18 deletions(-)
+> ---
+> base-commit: dffcfe75c722be66aa2669fb335528edb0590671
+> change-id: 20260428-block-as-nvmem-4b308e8bda9a
+> 
+> Best regards,
 
