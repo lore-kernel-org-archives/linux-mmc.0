@@ -1,328 +1,395 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+Received: from mail-pl1-f225.google.com (mail-pl1-f225.google.com [209.85.214.225])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 390424570DE
-	for <linux-mmc@vger.kernel.org>; Thu, 23 Jul 2026 15:10:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A69EC47FAF5
+	for <linux-mmc@vger.kernel.org>; Thu, 23 Jul 2026 18:54:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.225
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784819458; cv=none; b=Kcxb/ioh3BoqCtwcD1CbkK5yZHIqTj7V5YJGsh1T03vdim1kPgZ1h9hjIjWNGu1PhDdzphi2XHaflV++jcoBeqkEoM015LK0YsAVgjE+2ZDn0/kUi4VUnTj6yzSbZrXEnvKtCWYVxVICJ5j8jNMDcwYxwZXbduog+IxPc5XbW78=
+	t=1784832848; cv=none; b=CsrCsPou0wopKtYqL8VO5x7Rs5d4kdRjExKdM90gFRP07KdPGZdS5dx+2ZplXN70HOSZesOpT9hTBaPCBsjZ08XtSoOeFA4terrUrpzB6n0DBdtLIB6fYJYs+rn7gM36pQl9stE47ErDUhMR4+W+JP6ELAwiz7StIBZdvRH11GI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784819458; c=relaxed/simple;
-	bh=WboOCyDCF7AbvxHTCR948lEfX3IziVYEAqZ+3x0HLQA=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=BXt/Az+rNTQC9YFcAiifKaIxcb31wFTsaBo5KpQiECW+QMGIOJlzdPf5/+pCQu8ozhiVL0LqYFCDarmyx0i5KRa/bmzv2MS19NWki/OGoQLmh46luDDhncuzI07uvyea/UE22KkM5zvEdl3ecJqzPg63s+OeB48xPlGyx0JbMYo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KwnuPjRe; arc=none smtp.client-ip=209.85.221.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1784832848; c=relaxed/simple;
+	bh=Mh76uWHKRaT99pK3PCcZ99DH8Fu6tjzC5sm+aEbxV/0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=BxACckk0VdARcEf2R0LKpCI8XEHDw/nol8a3kfIF7vV3aZUcg5ETBiEqKSOGx40ecC8ByIhlBsszsr6vO4ImMoq2GwT+8t1DRcUWwD2Qafo0/cB1nZ3tTdX//4PpC3gUaGLkbtc54Injlu+i2H9LlCIfWQ/QSQR2KozZT8cXTKU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=bBChfUH6; arc=none smtp.client-ip=209.85.214.225
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KwnuPjRe"
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-47f365afc5aso490983f8f.0
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jul 2026 08:10:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1784819435; x=1785424235; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:date:subject:cc:to:from:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=+gLTGrjF5l+5jbKrLDleaB4qZYjxxCzgzovbSkilTIE=;
-        b=KwnuPjRe2IM9r9HgTLQbMIjlSC7BaI57dFUen7ksj8cumnIQMLac4Gr/VAB5nEYlun
-         6fdL71AWsE2OE1bfIJv7qrOUerfhzVoQQ2SXEWHrdzIljwJ0KlVOBl2mVuqfb0IaUzkv
-         Hm7Gncc60DbdTuJJvATzGvy7o90TUQHXR2lE4gNTr9erT3yFPvzQkRUozQ2kmJTeO1jm
-         v55heOM6EpWk+JnTPOW0IEOK1RanqJjpdLT0cTJk7FJJtc/6nFuqTUrbQXX8ptPRsRlA
-         f7q81cYkM5oINkImviQGH03hZ5AoI28+eXadgEmMmLzNvLiPekbGLI09PiR1+bKSXMoW
-         GZkg==
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="bBChfUH6"
+Received: by mail-pl1-f225.google.com with SMTP id d9443c01a7336-2cab973140bso14100255ad.3
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jul 2026 11:54:03 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1784819435; x=1785424235;
-        h=content-transfer-encoding:content-type:mime-version:references
-         :in-reply-to:message-id:date:subject:cc:to:from:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+        d=1e100.net; s=20251104; t=1784832840; x=1785437640;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:dkim-signature:x-gm-gg:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=tmLxgOQW9msoK155Q92RR4TtAdTnf39BWo6VtiWQcmE=;
+        b=MYt/VNPhTL423bEX2ZDMql1JBesW6PUFL+MZClSfaBEvBPSbrOZQteMb4dcY597XKS
+         TZs0QD6ODO1drT9pl8/r7y/9YB+BlTkJ0kJZBDctBfFFDnQewJlj7egi7UHjK2y0JRLt
+         OYEg28vxaJmcoyY/RBhELIPpigDpUgzxJJmRrN5Rc6J727WxCIWDGnp7qnNZoY23e+Pj
+         GMgw7dyqzwSsQqPChj+5LMRHcXMGQ5qkJbynfxqWDP6xF3M6+5P8p6v7hbGh8ap5dnfh
+         7befinn+YNzpAGS00EtH6KNGb7G+fAyZpxn6ifW2gVyXD5rxgU6dygQmEiw8bf3TQakl
+         z8Ew==
+X-Forwarded-Encrypted: i=1; AHgh+Rqfyupj5XucqYRJ5A/APbayKRTo22danp2etozxdv+iKPJbXlCbgza3oxhxotRjmoY/ejuTK6alSDI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzyrN0BDdPq3oL3t3vmLYPYzhBprCtz/U7dPSE4QzUWA0eEgYhq
+	Gdp+Xp21gmr1R9VYvidXJ86fKf2LrwifWWzVKtA559hWIh/cFfoubkaIObVvkhj+HncQ51wm6sc
+	DnRlGvmEdiJ4lbp/d2KnWaMMaZOeVOTzBzLYbeJTMgKbcpVXxmHe9O8Mg3MW+h8yW8k3kqH9uZT
+	RXzblNAM7hDITXya2eXjs/C02y75fQdKfPaKvy06uF7ZIehAA+4RKYNmHBoSEvHnZ63JWMpQKZ4
+	xddRIQ1icB8
+X-Gm-Gg: AR+sD12Mk9gRpFCMhAalDxGs0PrxwXFUdxH2Aob5eI4NWVVbBx9ZH2ZiiX4s/IAtsyU
+	78XZOmbConSdektQuai3CBZ7xpRZpQypfWh1NVrdwwHOAY+/UFTHF+fVJaYcb5VZ6bnnvAzM5bW
+	0ABVtEKrebRzTC3z26AXDAsr2aFoL8XC46cNv5hHbYhuAKW9O7GxDtlZB2OrH4jnLGrFaWFZMHi
+	y6DwSscEYxt+P9vIxcI06jXSocPPQgsUvS6K1jShM87tkObtI8tSSThy+vJkH4EvD0tVPiVpuFm
+	MoMMMMIQO7JF7DL4oO4Y4BHIdWUN6q4Bt4BBJ4xGz20nObsNcH1X0glPUd3tFDpXDo7SfkJ6rWL
+	D0/sXqCk+iVm83EC1n7LGKEZU18FAsbeue3BuIAT4Sdav8XRS5g2U8IYm9B3k5tiNA8hdRKU3At
+	6A5RBaia4ijbYEeekMdSNmagejMn27Sw8B
+X-Received: by 2002:a17:902:f544:b0:2cc:7c36:2c23 with SMTP id d9443c01a7336-2cfa6f8eee1mr48673655ad.43.1784832840298;
+        Thu, 23 Jul 2026 11:54:00 -0700 (PDT)
+Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-23.dlp.protect.broadcom.com. [144.49.247.23])
+        by smtp-relay.gmail.com with ESMTPS id d9443c01a7336-2cf8f312f6csm5960385ad.48.2026.07.23.11.53.59
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 23 Jul 2026 11:54:00 -0700 (PDT)
+X-Relaying-Domain: broadcom.com
+X-CFilter-Loop: Reflected
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-38e63de75aaso1424358a91.3
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jul 2026 11:53:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1784832838; x=1785437638; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:from:in-reply-to
+         :references:mime-version:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=+gLTGrjF5l+5jbKrLDleaB4qZYjxxCzgzovbSkilTIE=;
-        b=iJglCRbBla4Uyhtg0Y4oRjIr+Re+C5VzWQL0qrqQ+JMefyG4ayBh7eAr61E80YjAF6
-         T4hsQ5hk9G6F1b7nLsdZDRElUYqQW+6gbjtd/OBKb6lvFbZYVJLgC/8I0OpUzuoLBYBM
-         U5K8Td9yOuVs17Z8wiqDJ3ZgFV7MpOhuzTmxyUrKW31uPrVHk6B1F1ltV5dQRQ/ou4RE
-         ZWRZ201PHMpFeBjqsSm89xX1E7n0P85WCY+L1KkA+zpzSQJv74VDMnc4nK+e2XCqxTEl
-         9mTqCMYKfQ9grSVNeU8V9HX3MjrMm2K4XYTpsKixaGHok8e+eZw9NOtMoFUzDiRnFurj
-         7S1g==
-X-Forwarded-Encrypted: i=1; AHgh+RrR3iiq/DKzzBQmkkNZiVjCK42Be7IgE/tTxQkYUqRF+plBATf+t0eMGWzJvdhAYwK2OF6Ltu7YORE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YymaHqfN2YfFcG27hdelKe1K5vO++XRk6LdhNNlhmzOQHVbk7aV
-	mCkE6eb30PMBqGCFXQhBgO3YViaSOj1DcQqVS6di+GgeCWV9B09m1Idd
-X-Gm-Gg: AR+sD11asPfnn24fXlwlbmb5QXxS+cwTpY3amN9iFdVdqytXM5aH2M+fmrykIfD0z8v
-	b/yTx50O1dXybiYrwvFzm6aKTdZgeTuGix6qU4PVwHZvTt6L3p3xkUcgwgmYARkTe9Q0Ug91mdD
-	c2Zs1UCMWmDknWkZb6EuXdpRbUowokuov8sADbzTM/r+Qjyp8qrzKLzukcc4efqSrCGYdCbOKCO
-	8hbWwgqfCS5L5LwU/GsLRtDRfHF+B+mNXjKr2xqpnpEoWCOrn4tGOLiIbkYGkj9cTHOsmqCmH1R
-	c9CxieWAhHDNtVFHNHxkMVveQKNXA2i9tvT1l6Qm4GME/578rBSnK6WFnsf5Och+1vuySdidxjD
-	DKRgOol49ddrtCqCeu/BLTwrHqfgFJyVaGqQ6tMWfIxx54w0UR+mQQ21kqzC0bsbRvhQAVTdarU
-	eAXsSJRcAoe0Ug6ncffcLL0xYEVgY2bV5+b0ifzA==
-X-Received: by 2002:a05:6000:18a2:b0:475:f0c2:5afe with SMTP id ffacd0b85a97d-47f8dca4f76mr4335892f8f.52.1784819435021;
-        Thu, 23 Jul 2026 08:10:35 -0700 (PDT)
-Received: from localhost.localdomain ([2a00:23c4:a702:d301:f073:32ed:a057:cd3d])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-47f85bb81dcsm15886823f8f.12.2026.07.23.08.10.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Jul 2026 08:10:34 -0700 (PDT)
-From: Biju <biju.das.au@gmail.com>
-X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Ulf Hansson <ulfh@kernel.org>
-Cc: Biju Das <biju.das.jz@bp.renesas.com>,
-	linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH v22 09/13] mmc: renesas_sdhi: Add RZ/G3L SDHI support
-Date: Thu, 23 Jul 2026 16:10:13 +0100
-Message-ID: <20260723151024.318918-10-biju.das.jz@bp.renesas.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260723151024.318918-1-biju.das.jz@bp.renesas.com>
-References: <20260723151024.318918-1-biju.das.jz@bp.renesas.com>
+        bh=tmLxgOQW9msoK155Q92RR4TtAdTnf39BWo6VtiWQcmE=;
+        b=bBChfUH6p+CueivXJaCmSTPMhi/wrSmj547ToTmzeCZM9p6j/s7lrCzGgazmo8ds9t
+         bbU4JP1Ewt4LhxxTU1PV6sWna16BuzqyYbxRAU2m5sFid+8VL7An1IefjXgY4P8cOpQV
+         DLVpSGsFWFW4UnirqmLaPycexZB4P10iLJ3Ho=
+X-Forwarded-Encrypted: i=1; AHgh+RoITbVZVI5t8677G8d+VY4x8kzWinWmiGXM6GUxp09cve8MFmIVG3SLbvUeWOEjOsguVPgvvwqmy2A=@vger.kernel.org
+X-Received: by 2002:a17:90b:1b07:b0:38e:4b60:e01 with SMTP id 98e67ed59e1d1-38ec6429847mr4086132a91.12.1784832838278;
+        Thu, 23 Jul 2026 11:53:58 -0700 (PDT)
+X-Received: by 2002:a17:90b:1b07:b0:38e:4b60:e01 with SMTP id
+ 98e67ed59e1d1-38ec6429847mr4086112a91.12.1784832837779; Thu, 23 Jul 2026
+ 11:53:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20260722211417.3702709-1-kamal.dasu@broadcom.com>
+ <20260722211417.3702709-2-kamal.dasu@broadcom.com> <20260723-venerable-infallible-oriole-434b75@quoll>
+In-Reply-To: <20260723-venerable-infallible-oriole-434b75@quoll>
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+Date: Thu, 23 Jul 2026 14:53:20 -0400
+X-Gm-Features: AUfX_mxp3MbXhsuXZkwkR_YeR5hlo0zFxX3WR9zpys3NZWSXcgnR-VOmZkh8Yp0
+Message-ID: <CAKekbevxiN=8q60sHkRLKzEwc75PYHO7nJtMEahLF+u39g-FBw@mail.gmail.com>
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: Document no-mmc-poweroff-suspend property
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Ulf Hansson <ulfh@kernel.org>, Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Wolfram Sang <wsa+renesas@sang-engineering.com>, Oleksij Rempel <o.rempel@pengutronix.de>, 
+	Avri Altman <avri.altman@sandisk.com>, Pedro Demarchi Gomes <pedrodemargomes@gmail.com>, 
+	Erick Shepherd <erick.shepherd@ni.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+	boundary="00000000000056f14c06574bc780"
 
-From: Biju Das <biju.das.jz@bp.renesas.com>
+--00000000000056f14c06574bc780
+Content-Type: multipart/alternative; boundary="00000000000047ac6d06574bc76d"
 
-RZ/G3L (r9a08g046) has an SDHI controller that differs from existing
-platforms in clock divider width, a second HW adjustment register,
-and an extra tuning register.
+--00000000000047ac6d06574bc76d
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Add TMIO_MMC_HWADJ to mark controllers with a second HWADJ2 register
-(offset 0x010), programmed by renesas_sdhi_set_hw_adjustment_delay()
-alongside TMPPORT2 (0x3FFF at 3.3V, 0xFF at 1.8V). Clear the new
-HWADJ4 register (0x022) at tuning start when TMIO_MMC_INTERNAL_DIVIDER
-is set.
+On Thu, Jul 23, 2026 at 3:51=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.or=
+g> wrote:
 
-Update renesas_sdhi_set_clock() to write the clock control register
-with a 32-bit access when max_divider isn't the default, moving bits
-[9:8] of the clock value into bits [17:16] of the register — needed
-to drive RZ/G3L's wider 11-bit divider field via the max_divider/
-clk_div_mask support added earlier in this series.
+> On Wed, Jul 22, 2026 at 05:14:16PM -0400, Kamal Dasu wrote:
+> > On some platforms, firmware accesses the (e)MMC card directly during
+> > system resume from Suspend-to-DRAM, before the kernel's own resume
+> > path has run, in order to load boot code using hard wired logic that
+> > is not field updatable. This requires the card to remain powered
+> > and responsive throughout suspend: it cannot be put to sleep, sent a
+> > power-off notification, or have its supply removed.
+> >
+> > Add a no-mmc-poweroff-suspend flag property so affected boards can
+> > tell the mmc core to keep the card powered across suspend instead of
+> > sleeping or powering it off.
+> >
+> > Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+> > ---
+> > Changes in v3:
+> >   - Renamed from no-mmc-sleep; dropped S_A_TIMEOUT framing per Ulf.
+> >
+> > Changes in v2:
+> >   - New patch, replacing v1's card-level quirk, per Ulf.
+> >
+> >  .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++++++++
+> >  1 file changed, 10 insertions(+)
+> >
+> > diff --git
+> a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+> b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+> > index 3d7195e9461c..5f7b3f8ef1dd 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+> > @@ -232,6 +232,16 @@ properties:
+> >      description:
+> >        All eMMC HS400 modes are not supported.
+> >
+> > +  no-mmc-poweroff-suspend:
+> > +    $ref: /schemas/types.yaml#/definitions/flag
+> > +    description:
+> > +      On this platform, firmware accesses the attached (e)MMC card
+> > +      directly during system resume, before the kernel's own resume
+> > +      path runs. The card must therefore stay powered throughout
+> > +      suspend, and the controller must not send it a sleep or
+> > +      power-off notification. The kernel re-initializes the card
+> > +      after resume, since firmware may have already reset it.
+>
+> Isn't this exactly the same as keep-power-in-suspend?
+>
+>
+Not quite, though I see why it reads that way from the description
+alone.
 
-Add SDHI_VER_RZ_G3L_SDMMC (0xce10) and handle it in
-renesas_sdhi_sdbuf_width(). Add of_data_rzg3l with RZ/G3L's wider
-clk_mask, an 11-bit max_divider of 2048, a dedicated tap table, and
-the relevant flags including TMIO_MMC_INTERNAL_DIVIDER and
-TMIO_MMC_HWADJ. Wire it up via of_rzg3l_compatible (fixed_addr_mode
-quirk) and register the "renesas,sdhi-r9a08g046" compatible string.
+keep-power-in-suspend only takes effect through host->pm_flags, which
+gets set at runtime via sdio_set_host_pm_flags() -- an SDIO function
+driver opts in from its own suspend() callback, per suspend cycle.
+The consuming logic lives entirely in mmc_sdio_suspend()/
+mmc_sdio_resume() (drivers/mmc/core/sdio.c); pm_flags is never read
+in mmc.c, which is what this series touches.
 
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
----
-v21->v22:
- * Updated commit description.
- * Added `clock &= ~GENMASK(9, 8)` to clear the divider mask bits in
-   the register value.
-v20->v21:
- * Added clk_div_mask to RZ/G3L of_data.
- * Restored actual_clk calculation in renesas_sdhi_set_clock().
-v19->v20:
- * Added bitfield.h header file.
- * Reworked on renesas_sdhi_set_clock() to handle the 11-bit divider
-   case and the 32-bit register write.
-v18->v19:
- * Update commit description.
- * Updated handling for clk divider.
- * Renamed TMIO_MMC_HWADJ2->TMIO_MMC_HWADJ to make it generic for
-   hardware tuning delays
- * Dropped duplicate SH_MOBILE_SDHI_SCC_TMPPORT2 macro
-v18:
- * New patch.
----
- drivers/mmc/host/renesas_sdhi_core.c          | 31 +++++++++++++--
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 38 +++++++++++++++++++
- include/linux/platform_data/tmio.h            |  3 ++
- 3 files changed, 68 insertions(+), 4 deletions(-)
+no-mmc-poweroff-suspend differs in two ways:
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 6d8f32e2fc38..be7720305d32 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -18,6 +18,7 @@
-  *
-  */
- 
-+#include <linux/bitfield.h>
- #include <linux/clk.h>
- #include <linux/delay.h>
- #include <linux/iopoll.h>
-@@ -59,6 +60,7 @@
- #define SDHI_VER_GEN2_SDR104	0xcb0d
- #define SDHI_VER_GEN3_SD	0xcc10
- #define SDHI_VER_GEN3_SDMMC	0xcd10
-+#define SDHI_VER_RZ_G3L_SDMMC	0xce10
- 
- #define SDHI_GEN3_MMC0_ADDR	0xee140000
- 
-@@ -79,6 +81,7 @@ static void renesas_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
- 		break;
- 	case SDHI_VER_GEN3_SD:
- 	case SDHI_VER_GEN3_SDMMC:
-+	case SDHI_VER_RZ_G3L_SDMMC:
- 		if (width == 64)
- 			val = HOST_MODE_GEN3_64BIT;
- 		else if (width == 32)
-@@ -253,7 +256,17 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
- 	if (clock != CLK_CTL_DIV_MASK)
- 		host->mmc->actual_clock /= (1 << (ffs(clock) + 1));
- 
--	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clock);
-+	if (host->pdata->max_divider != SDHI_MAX_DIVIDER_DEFAULT) {
-+		u64 tmp;
-+
-+		tmp = FIELD_GET(GENMASK(9, 8), clk);
-+		clock |= FIELD_PREP(GENMASK(17, 16), tmp);
-+		clock &= ~GENMASK(9, 8);
-+		sd_ctrl_write32(host, CTL_SD_CARD_CLK_CTL, clock);
-+	} else {
-+		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clock);
-+	}
-+
- 	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
- 		usleep_range(10000, 11000);
- 
-@@ -289,12 +302,14 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
- #define SH_MOBILE_SDHI_SCC_RVSCNTL	0x008
- #define SH_MOBILE_SDHI_SCC_RVSREQ	0x00A
- #define SH_MOBILE_SDHI_SCC_SMPCMP       0x00C
--#define SH_MOBILE_SDHI_SCC_TMPPORT2	0x00E
-+#define SH_MOBILE_SDHI_SCC_TMPPORT2	0x00E /* G3L: SDm_SCC_HS400MODE1 */
-+#define RZG3L_SDHI_SCC_HWADJ2		0x010
- #define SH_MOBILE_SDHI_SCC_TMPPORT3	0x014
- #define SH_MOBILE_SDHI_SCC_TMPPORT4	0x016
- #define SH_MOBILE_SDHI_SCC_TMPPORT5	0x018
- #define SH_MOBILE_SDHI_SCC_TMPPORT6	0x01A
- #define SH_MOBILE_SDHI_SCC_TMPPORT7	0x01C
-+#define RZG3L_SDHI_SCC_HWADJ4		0x022
- 
- #define SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN		BIT(0)
- #define SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT	16
-@@ -344,14 +359,20 @@ static inline void sd_scc_write32(struct tmio_mmc_host *host,
- static void renesas_sdhi_set_hw_adjustment_delay(struct tmio_mmc_host *host)
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
-+	bool hwadj2 = host->pdata->flags & TMIO_MMC_HWADJ;
- 
- 	if (!(host->pdata->flags & TMIO_MMC_TUNING_DELAY))
- 		return;
- 
--	if (host->mmc->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-+	if (host->mmc->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
- 		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x0);
--	else
-+		if (hwadj2)
-+			sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ2, 0x3FFF);
-+	} else {
- 		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x1);
-+		if (hwadj2)
-+			sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ2, 0xFF);
-+	}
- }
- 
- static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
-@@ -418,6 +439,8 @@ static unsigned int renesas_sdhi_init_tuning(struct tmio_mmc_host *host)
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DT2FF, priv->scc_tappos);
- 
- 	renesas_sdhi_set_hw_adjustment_delay(host);
-+	if (host->pdata->flags & TMIO_MMC_HWADJ)
-+		sd_scc_write32(host, priv, RZG3L_SDHI_SCC_HWADJ4, 0x0);
- 
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
- 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 1799c6106102..893d9395e9d6 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -88,6 +88,13 @@ static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
- 	},
- };
- 
-+static struct renesas_sdhi_scc rzg3l_scc_taps[] = {
-+	{
-+		.clk_rate = 0,
-+		.tap = 0x00000300,
-+	},
-+};
-+
- static const struct renesas_sdhi_of_data of_data_rza2 = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
- 			  TMIO_MMC_HAVE_CBSY,
-@@ -165,6 +172,27 @@ static const struct renesas_sdhi_of_data of_data_rz_g2l = {
- 	.clk_div_mask	= GENMASK(7, 0),
- };
- 
-+static const struct renesas_sdhi_of_data of_data_rzg3l = {
-+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
-+			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
-+			  TMIO_MMC_64BIT_DATA_PORT | TMIO_MMC_TUNING_DELAY |
-+			  TMIO_MMC_INTERNAL_DIVIDER | TMIO_MMC_HWADJ,
-+	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-+			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
-+	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
-+	.bus_shift	= 2,
-+	.scc_offset	= 0x1000,
-+	.taps		= rzg3l_scc_taps,
-+	.taps_num	= ARRAY_SIZE(rzg3l_scc_taps),
-+	/* DMAC can handle 32bit blk count but only 1 segment */
-+	.max_blk_count	= UINT_MAX / TMIO_MAX_BLK_SIZE,
-+	.max_segs	= 1,
-+	.sdhi_flags	= SDHI_FLAG_NEED_CLKH_FALLBACK,
-+	.clk_mask	= 0x200000200,
-+	.max_divider	= 2048,
-+	.clk_div_mask	= GENMASK(9, 0),
-+};
-+
- static const u8 r8a7796_es13_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
- 	{ 3,  3,  3,  3,  3,  3,  3,  4,  4,  5,  6,  7,  8,  9, 10, 15,
- 	 16, 16, 16, 16, 16, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24, 25 },
-@@ -245,6 +273,10 @@ static const struct renesas_sdhi_quirks sdhi_quirks_rzg2l = {
- 	.hs400_disabled = true,
- };
- 
-+static const struct renesas_sdhi_quirks sdhi_quirks_rzg3l = {
-+	.fixed_addr_mode = true,
-+};
-+
- /*
-  * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
-  * So, we want to treat them equally and only have a match for ES1.2 to enforce
-@@ -304,6 +336,11 @@ static const struct renesas_sdhi_of_data_with_quirks of_rza2_compatible = {
- 	.quirks = &sdhi_quirks_fixed_addr,
- };
- 
-+static const struct renesas_sdhi_of_data_with_quirks of_rzg3l_compatible = {
-+	.of_data = &of_data_rzg3l,
-+	.quirks = &sdhi_quirks_rzg3l,
-+};
-+
- static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-r7s9210", .data = &of_rza2_compatible, },
- 	{ .compatible = "renesas,sdhi-mmc-r8a77470", .data = &of_rcar_gen3_compatible, },
-@@ -317,6 +354,7 @@ static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-r8a77990", .data = &of_r8a77990_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a77995", .data = &of_rcar_gen3_nohs400_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a779md", .data = &of_rcar_gen3_nohs400_compatible, },
-+	{ .compatible = "renesas,sdhi-r9a08g046", .data = &of_rzg3l_compatible, },
- 	{ .compatible = "renesas,sdhi-r9a09g011", .data = &of_rzg2l_compatible, },
- 	{ .compatible = "renesas,sdhi-r9a09g057", .data = &of_rzg2l_compatible, },
- 	{ .compatible = "renesas,rzg2l-sdhi", .data = &of_rzg2l_compatible, },
-diff --git a/include/linux/platform_data/tmio.h b/include/linux/platform_data/tmio.h
-index 09b3411a59c9..99b05c8c840a 100644
---- a/include/linux/platform_data/tmio.h
-+++ b/include/linux/platform_data/tmio.h
-@@ -56,6 +56,9 @@
- /* Some controllers have internal divider */
- #define TMIO_MMC_INTERNAL_DIVIDER	BIT(14)
- 
-+/* Some controllers have hw adjustment delay */
-+#define TMIO_MMC_HWADJ			BIT(15)
-+
- struct tmio_mmc_data {
- 	void				*chan_priv_tx;
- 	void				*chan_priv_rx;
--- 
-2.43.0
+  - It's a fixed platform characteristic, not a per-driver runtime
+    request. There's no SDIO-style function driver to call an opt-in
+    API from for a plain (e)MMC storage card -- the requirement here
+    (firmware always touches the card at resume, on this board) is
+    always true, not something decided per suspend cycle.
+  - The resume-side behavior differs. keep-power-in-suspend without a
+    wake IRQ does nothing at resume: it assumes the card's state
+    survived untouched. This flag needs the opposite -- keep power,
+    but still fully re-initialize the card via mmc_init_card(), since
+    firmware may have reconfigured it while the kernel was suspended.
 
+Given those differences I went with a host capability following the
+existing no-sdio/no-sd/no-mmc/no-mmc-hs400 pattern in mmc_of_parse()
+rather than extending pm_flags/keep-power-in-suspend, but happy to
+hear if you see a cleaner way to fold this in.
+
+Kamal
+
+
+>
+> Best regards,
+> Krzysztof
+>
+>
+
+--00000000000047ac6d06574bc76d
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><div dir=3D"ltr"><br></div><br><div class=3D"gmail_quote g=
+mail_quote_container"><div dir=3D"ltr" class=3D"gmail_attr">On Thu, Jul 23,=
+ 2026 at 3:51=E2=80=AFAM Krzysztof Kozlowski &lt;<a href=3D"mailto:krzk@ker=
+nel.org">krzk@kernel.org</a>&gt; wrote:<br></div><blockquote class=3D"gmail=
+_quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204=
+,204);padding-left:1ex">On Wed, Jul 22, 2026 at 05:14:16PM -0400, Kamal Das=
+u wrote:<br>
+&gt; On some platforms, firmware accesses the (e)MMC card directly during<b=
+r>
+&gt; system resume from Suspend-to-DRAM, before the kernel&#39;s own resume=
+<br>
+&gt; path has run, in order to load boot code using hard wired logic that<b=
+r>
+&gt; is not field updatable. This requires the card to remain powered<br>
+&gt; and responsive throughout suspend: it cannot be put to sleep, sent a<b=
+r>
+&gt; power-off notification, or have its supply removed.<br>
+&gt; <br>
+&gt; Add a no-mmc-poweroff-suspend flag property so affected boards can<br>
+&gt; tell the mmc core to keep the card powered across suspend instead of<b=
+r>
+&gt; sleeping or powering it off.<br>
+&gt; <br>
+&gt; Signed-off-by: Kamal Dasu &lt;<a href=3D"mailto:kamal.dasu@broadcom.co=
+m" target=3D"_blank">kamal.dasu@broadcom.com</a>&gt;<br>
+&gt; ---<br>
+&gt; Changes in v3:<br>
+&gt;=C2=A0 =C2=A0- Renamed from no-mmc-sleep; dropped S_A_TIMEOUT framing p=
+er Ulf.<br>
+&gt; <br>
+&gt; Changes in v2:<br>
+&gt;=C2=A0 =C2=A0- New patch, replacing v1&#39;s card-level quirk, per Ulf.=
+<br>
+&gt; <br>
+&gt;=C2=A0 .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++=
+++++++<br>
+&gt;=C2=A0 1 file changed, 10 insertions(+)<br>
+&gt; <br>
+&gt; diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-comm=
+on.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml<=
+br>
+&gt; index 3d7195e9461c..5f7b3f8ef1dd 100644<br>
+&gt; --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml=
+<br>
+&gt; +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml=
+<br>
+&gt; @@ -232,6 +232,16 @@ properties:<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 description:<br>
+&gt;=C2=A0 =C2=A0 =C2=A0 =C2=A0 All eMMC HS400 modes are not supported.<br>
+&gt;=C2=A0 <br>
+&gt; +=C2=A0 no-mmc-poweroff-suspend:<br>
+&gt; +=C2=A0 =C2=A0 $ref: /schemas/types.yaml#/definitions/flag<br>
+&gt; +=C2=A0 =C2=A0 description:<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 On this platform, firmware accesses the attached=
+ (e)MMC card<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 directly during system resume, before the kernel=
+&#39;s own resume<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 path runs. The card must therefore stay powered =
+throughout<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 suspend, and the controller must not send it a s=
+leep or<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 power-off notification. The kernel re-initialize=
+s the card<br>
+&gt; +=C2=A0 =C2=A0 =C2=A0 after resume, since firmware may have already re=
+set it.<br>
+<br>
+Isn&#39;t this exactly the same as keep-power-in-suspend?<br>
+<br></blockquote><br>Not quite, though I see why it reads that way from the=
+ description<br>alone.<br><br>keep-power-in-suspend only takes effect throu=
+gh host-&gt;pm_flags, which<br>gets set at runtime via sdio_set_host_pm_fla=
+gs() -- an SDIO function<br>driver opts in from its own suspend() callback,=
+ per suspend cycle.<br>The consuming logic lives entirely in mmc_sdio_suspe=
+nd()/<br>mmc_sdio_resume() (drivers/mmc/core/sdio.c); pm_flags is never rea=
+d<br>in mmc.c, which is what this series touches.<br><br>no-mmc-poweroff-su=
+spend differs in two ways:<br><br>=C2=A0 - It&#39;s a fixed platform charac=
+teristic, not a per-driver runtime<br>=C2=A0 =C2=A0 request. There&#39;s no=
+ SDIO-style function driver to call an opt-in<br>=C2=A0 =C2=A0 API from for=
+ a plain (e)MMC storage card -- the requirement here<br>=C2=A0 =C2=A0 (firm=
+ware always touches the card at resume, on this board) is<br>=C2=A0 =C2=A0 =
+always true, not something decided per suspend cycle.<br>=C2=A0 - The resum=
+e-side behavior differs. keep-power-in-suspend without a<br>=C2=A0 =C2=A0 w=
+ake IRQ does nothing at resume: it assumes the card&#39;s state<br>=C2=A0 =
+=C2=A0 survived untouched. This flag needs the opposite -- keep power,<br>=
+=C2=A0 =C2=A0 but still fully re-initialize the card via mmc_init_card(), s=
+ince<br>=C2=A0 =C2=A0 firmware may have reconfigured it while the kernel wa=
+s suspended.<br><br>Given those differences I went with a host capability f=
+ollowing the<br>existing no-sdio/no-sd/no-mmc/no-mmc-hs400 pattern in mmc_o=
+f_parse()<br>rather than extending pm_flags/keep-power-in-suspend, but happ=
+y to<br>hear if you see a cleaner way to fold this in.<br><br>Kamal<br><br>=
+=C2=A0<blockquote class=3D"gmail_quote" style=3D"margin:0px 0px 0px 0.8ex;b=
+order-left:1px solid rgb(204,204,204);padding-left:1ex">
+Best regards,<br>
+Krzysztof<br>
+<br>
+</blockquote></div></div>
+
+--00000000000047ac6d06574bc76d--
+
+--00000000000056f14c06574bc780
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
+
+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
+H0K0rs+X8O45xZIUJlxzf5UZex3BLi1f/H+08rSQULWEtO/ECwkFod2DIzSX7fZdz5RQ1PpziEOp
+goo/JZPYIeCmgt3rIyvMuupj8Ymb0J/velhpXfQuYUM52viw2nmqVcxCwBqyM3Iq7eI4xtEOFRmR
+wxSizd3MSQMf6GCHA4/B/6ttnxhGAr3utaOU+x/RnzG0gPLTW1XRAQ0+GVc/tGFdI864OG1cyrRl
+GvBnHJQSAFOIKwYrUk2oFpgMbafQ6osCAwEAAaOCAdswggHXMA4GA1UdDwEB/wQEAwIFoDAMBgNV
+HRMBAf8EAjAAMIGTBggrBgEFBQcBAQSBhjCBgzBGBggrBgEFBQcwAoY6aHR0cDovL3NlY3VyZS5n
+bG9iYWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyNnNtaW1lY2EyMDIzLmNydDA5BggrBgEFBQcwAYYt
+aHR0cDovL29jc3AuZ2xvYmFsc2lnbi5jb20vZ3NnY2NyNnNtaW1lY2EyMDIzMGUGA1UdIAReMFww
+CQYHZ4EMAQUDAzALBgkrBgEEAaAyASgwQgYKKwYBBAGgMgoDAjA0MDIGCCsGAQUFBwIBFiZodHRw
+czovL3d3dy5nbG9iYWxzaWduLmNvbS9yZXBvc2l0b3J5LzBBBgNVHR8EOjA4MDagNKAyhjBodHRw
+Oi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjZzbWltZWNhMjAyMy5jcmwwIgYDVR0RBBswGYEX
+a2FtYWwuZGFzdUBicm9hZGNvbS5jb20wEwYDVR0lBAwwCgYIKwYBBQUHAwQwHwYDVR0jBBgwFoAU
+ACk2nlx6ug+vLVAt26AjhRiwoJIwHQYDVR0OBBYEFOV9h+N/T9ZsJ40qRxh7NYYD+N6MMA0GCSqG
+SIb3DQEBCwUAA4ICAQAKtKh30wv1/30230mCimgUjMWQE/LImRmyfDgrp2IhBVS6mDun+wH8thEB
+WhBHQMz3gsGixU4ZBJG72eWi39IzQ7CGnisJwA0+hsGaGg03AVtFtqo1rXYRZ81MEDOb6BPYLigJ
+RsHbNmrUGR+LsGeUwOWUeRXqBrYaYFrkgHKvVK1NEewv+vUY08n4tsezO3jq0HKhVDY46bMbf8vL
+oQqqhtcQvu2+5FK2jpUayeubpzPwobjEG61RIhBvM0KivY4CB2s9A7qgjL1XBycAybIvG03BbFoT
+t282FqXwk9JU6YihLlt+hpzO9UF7E8GZYlQlVIZOLOvytqilhua+2h77Yy8Jz/FJyIXKuaLPtvb2
+SC2shL7jF28kQbP3QUKwAig+cxwbpngnUkd9D9cXSHVq9PPwYm0A4eAO0YQ/80Uq20+gXF++g0sy
+NKrrV3i0T1dbCd86miGDKvarGzjh7pdsdwNY15liGP6Orib1tnWkJcbtP1rJty4r/mbbxcK8ILO4
+IvTGFG6BfjJ+La0aRt69i1fQmjUWHLwzkLNpw9cJH8/MONZcEJeDkq9WELSyy29bagStk5KHu7NO
+TH65sZg+i/4qmj3DEeEGTr/Shzp4YWSNn4W7NEelr0VgDlwa7xqlwZjXxG4MIJqy0SsQlAwEXtqd
+nH2FpJfzgAetkuyU6DGCAlcwggJTAgEBMGIwUjELMAkGA1UEBhMCQkUxGTAXBgNVBAoTEEdsb2Jh
+bFNpZ24gbnYtc2ExKDAmBgNVBAMTH0dsb2JhbFNpZ24gR0NDIFI2IFNNSU1FIENBIDIwMjMCDEca
+ZUGCu6d0oT1M+zANBglghkgBZQMEAgEFAKCBxzAvBgkqhkiG9w0BCQQxIgQgSQeBk6NELo/mdWND
+hbhCrWv8rkPxB7wN66pOMunUY6IwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0B
+CQUxDxcNMjYwNzIzMTg1MzU4WjBcBgkqhkiG9w0BCQ8xTzBNMAsGCWCGSAFlAwQBKjALBglghkgB
+ZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMAsGCSqGSIb3DQEBBzALBglghkgBZQMEAgEw
+DQYJKoZIhvcNAQEBBQAEggEAUfW8HEwQrjGeLEyOhRyHZJ4dt282qEXK91NxU1buZ78ttWyUmBLG
+6ghWoIxpbpdFofbAcb2PDXEoBOmdhSwVPubIeW01UjJCkD4ZInfkHyzUuApl2t5pr8RG975dpY63
+NxME6UebDx4mYuBcFaz6v0iBd0qOT6FqhtTnKyJ7i9S01FaXwS9zxjxxHFy7eJ+o539obRhBr3U8
+HNNFEPTR7pPtj2A+RCXfQpX023sitdQUgIzdOtf0c5o6UMCdJuoaGWH+oSUYsJ/PChl1SHPBtgq1
+BSpMhKUHy4rEyzQFxA+jrpWtrUXrVOS0qmAXVVT6xV7nBaNOZez7EI2HYpceWQ==
+--00000000000056f14c06574bc780--
