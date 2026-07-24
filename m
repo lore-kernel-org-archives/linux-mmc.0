@@ -1,68 +1,70 @@
-Received: from mx.et1.uk (mx.et1.uk [116.203.106.43])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE26E43C7A5
-	for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2026 16:23:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.106.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10148345CD0;
+	Fri, 24 Jul 2026 16:51:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784910195; cv=none; b=csSW85CRVDYjEInz8UcataTO4cvQTz1E1IZNuxCxu4TD8uW8p5DphJL6sRrMOiuIL6q1TCciWWQc8wgBEA0mP+05AKor+iLjemUUTzENQk0eFyPOJYOyy+dmOnqxbLYwRBgPxa9CE8GurASBkc+Zw3mZZtX6PC84cJiUY458SAs=
+	t=1784911909; cv=none; b=VCJ0Mp1+U6im8/yveMUD3UVcNLCqnvEPF+75xrzg8M4QnUgASHxesbY79oKjUoYVDEKjxykkcaOLlGnUNy0DDkKJ4KSu30wpIdfcq3blJAs5PFeit8fY4y+8drazsFlibIJv/Aye66SzLWWu+BeUZyM6fgflgAp+1h/6zQp8erk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784910195; c=relaxed/simple;
-	bh=hzVBusIg2mV4cIa8oAUVjvBBJTeh+BN7RYfmA5M3Utw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=QttcAGXZmkLBciJdeGJwRSjt0a7TpxjLmIn3sZ1QQfyLDHlD3k//D7opAvPaiJtFOs6phJhMPYe3T04TTKvLWlGKx5r1LPa0b6RDTPoqrTITju0BRlKZ0yb6g5jQbQ2WuR/2QZmGcumfTGwh3NWzeDXf1cB/pawO4xzWovfDHaQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=et1.uk; spf=pass smtp.mailfrom=et1.uk; dkim=pass (2048-bit key) header.d=et1.uk header.i=@et1.uk header.b=bF3/+XXs; arc=none smtp.client-ip=116.203.106.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=et1.uk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=et1.uk
+	s=arc-20240116; t=1784911909; c=relaxed/simple;
+	bh=mXfpubb33GTwUghEKTjtBFpq4NY7lJrUvfAh/upGi5k=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=WBXTsDCpWkwwFRhC5U86D02LhjZ3sau0wro+0sieGivsbnlRbodEMwN0aJw7WYgQ1wKm/Evo9L9osQsXhgwt+pLdo3OiEds+dpfBywqGf3OQgaqJR75nthfk9LlHnrTRS0+sFdzHUB7yzYGZ4jTFjyTOyU/X2dv6ZYFGoFnA2hg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dUEPPyQn; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=et1.uk header.i=@et1.uk header.b="bF3/+XXs"
-Message-ID: <44dba018-151a-4e9c-9f92-0d0cdce0b61e@et1.uk>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=et1.uk; s=mail;
-	t=1784910186;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DJsSj5K/tET91en1mgAeiHVmJ1YJxqjYsqI+yZqqXX8=;
-	b=bF3/+XXsbuY4RbYfI5eNFK+JH6j37psfpZCTlzDtYWVW6YNRSCODca3HiT5RfhdcYXAFXF
-	TEEK/Jb3mOFI3fVgMTRRphn0KpWrDWJCwT0y2gRW4tO+voEVC2hLlqDFGBM2F1GbJvoSxl
-	E++lvr7AeK7j1u8pR6We3GokBYu61hlhV+vzGzzKnft97H2LXjYIHZz8jfnX+RK8I3uFRE
-	hpotguLE2Jr3kDNoqafSvUUUlsDmDySStQmWOtBFXmARr0AHJEdZIpT6SprZ09HK5yJufn
-	SeaADekvrYaeVs7DTwKGy8npP7tGrsDNM9AdvR8gYIrhssPGJ/7SHzw/170PqQ==
-Date: Fri, 24 Jul 2026 17:23:04 +0100
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dUEPPyQn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99BDF1F000E9;
+	Fri, 24 Jul 2026 16:51:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1784911907;
+	bh=mXfpubb33GTwUghEKTjtBFpq4NY7lJrUvfAh/upGi5k=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=dUEPPyQnm1tr0N7Zq8cR2tcoNKtM4mvx2/iJ9d5n6QJvP6wsLTJ9AOBZeNvuaTt8B
+	 TdCcEJZwI73NlixfGonlPevhWiCvhDDVOThyd1Zu6fXQxPx8EDHUjkkC568QmdOb5N
+	 SsN4C5Ny2Td3MmzkAu0J876L9KQZwIi1GGMZJ+RipBfJA/xONT7ROuA4CX5Ldil99R
+	 iVNtFTJ8ps+MyxsCQhfhkRN8QLgqXxhcuQBxBgJmojaluuvtF1vPFAaXxv3E21Moo2
+	 j1mCtqJSo5XhS2e4Kty2JLF0m7i9kCPYEUsjUTp8OGC4/xI1oHyyz2ZEP3/7OO4S9h
+	 CTnw3Zw0bP9Fg==
+Date: Fri, 24 Jul 2026 17:51:43 +0100
+From: Conor Dooley <conor@kernel.org>
+To: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
+Cc: linux-mmc@vger.kernel.org, ulfh@kernel.org, adrian.hunter@intel.com,
+	krzk+dt@kernel.org, robh@kernel.org, conor+dt@kernel.org,
+	dinguyen@kernel.org, p.zabel@pengutronix.de,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 3/8] dt-bindings: arm: altera: add Agilex5 SOCDK eMMC
+ board variant
+Message-ID: <20260724-calamity-basin-fe1c00457fe0@spud>
+References: <20260724145009.7456-1-tanmay.kathpalia@altera.com>
+ <20260724145009.7456-3-tanmay.kathpalia@altera.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Subject: Re: PROBLEM: mmc clock reduction error on NanoPi-R5S (rk3568)
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
- Ulf Hansson <ulfh@kernel.org>
-References: <43e06f45-7617-4a6c-9b4f-f952e8700456@et1.uk>
- <b01a6658-e575-42e6-9520-e8bb55d0329e@rock-chips.com>
-Content-Language: en-US
-From: Peter Taylor <me@et1.uk>
-In-Reply-To: <b01a6658-e575-42e6-9520-e8bb55d0329e@rock-chips.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="vl6kr/NIStq6hugj"
+Content-Disposition: inline
+In-Reply-To: <20260724145009.7456-3-tanmay.kathpalia@altera.com>
 
-Hi
+--vl6kr/NIStq6hugj
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-On 22/07/2026 03:54, Shawn Lin wrote:
- > May I ask which dts file you're using now?
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
+pw-bot: not-applicable
 
-I was using the u-boot 2026.07 release
+--vl6kr/NIStq6hugj
+Content-Type: application/pgp-signature; name=signature.asc
 
-On 22/07/2026 03:54, Shawn Lin wrote:
- > The RK3566/RK3568 SoCs only claim to support HS200.
+-----BEGIN PGP SIGNATURE-----
 
-This was really helpful, as there are some custom u-boot overrides 
-adding HS400
-items for the board in its device tree.
+iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCamOYHwAKCRB4tDGHoIJi
+0qoFAP9wPxQldDL5x2Nv86dBXolcAaBmad3MpCbn4BYSEynrqwEAkNxbFsa10ZGV
++UPKUv1p/kJDs8YNJxj9KYMeCRtWlwo=
+=lD/X
+-----END PGP SIGNATURE-----
 
-Removing these fixes the issue. I will be sending a patch upstream to u-boot
-shortly
-
-Peter
+--vl6kr/NIStq6hugj--
