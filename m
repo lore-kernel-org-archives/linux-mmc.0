@@ -1,169 +1,260 @@
-Received: from CH5PR02CU005.outbound.protection.outlook.com (mail-northcentralusazon11012059.outbound.protection.outlook.com [40.107.200.59])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08A3D3B83EF;
-	Fri, 24 Jul 2026 07:57:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.200.59
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784879855; cv=fail; b=Y1qgqCD3C4rwqORGX85etvnfpzA5kY9+8yrjYG7ttFPInOtL3+MoYPigDbIs0sVeVxA3A9+yUQAKC8g2jAiz2DURZvQsK0S/tY1/T+b+4KHGWDA1CV5UfJxE704Iz9w/8TxOY21qwY8yV9AVfGSbt9gSimc7TfEuDJxz4xffLtE=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784879855; c=relaxed/simple;
-	bh=5icMnBorhcIomdf+6iRhElGpCUlw95w6H20U8expRGc=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Gvzhh7b2zV62skfuVsuQFzkn3PVZFIyczjWiui7o9NWJO/wk4t82FqpZTFIHhoDBZD3a+vrfOoHM4Pq1MXoQs76BfvrubjZP6l0a/LW635TuLNkryXgN1styyEGYzzNggYEmgl4jXQTxRgF2CiyA3JSqEZNw+011RNMAXWFJaKs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=iXT53/g2; arc=fail smtp.client-ip=40.107.200.59
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35D853E5585
+	for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2026 08:59:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784883575; cv=none; b=gs2pNbyw4sctifGnqQuAPpRi4ehhsw9SfiaLQAqwWN4L8OlLa3MJ8AYqfmUIPpfLurVA928BzqX3yYYC8LTxsbu5skRgOJK+bHZfY0QAOSVavuuefwnWG5Mo+07ST5yb/ANM2yJ9R73+XRAtDdaCEQG55QmmOUJrbUYs4bJxTFQ=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784883575; c=relaxed/simple;
+	bh=Hr21Ef44C0/l40hmrk4Hk5UG55mypQWcs3OpQwMQF48=;
+	h=From:Subject:To:Cc:References:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=LFEYnLc8XwKCUz7N6NqkyL/uUs9SQxfUagVjRwghdJ5rKsKQ/zWRyaaQkc/8ridGTSx2qya0KLAMECgIPYI3Sr6kwGT8e85GTGi/31RhoQ0uLsMQ6dqRGm0lRTkklS2yztKu7E4StxaSSSYhG4l8BanbTBAm7CUs6uq3xXGhFQk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=FWBta0Du; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=d53tylHq; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="iXT53/g2"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=emm+ba5/fZLc36InqlOdAcVHmKsjY7OF6E0sYiJxEswzIOK7jKrEEiw3D43GUbo3ul6a7N9qXvxCeTTGubiK3+wS0ZlxKvX5UqjuJNcfUvfnTrk4QOARpbS/EPQ9hEh88MLYYXAl5TquJd74nuzzY+S+UzrKVNbx6FKnNtQSCmAmN913FyLn6a7B6jP5yUrAAU2CFa2a34E4lRSBSvtW8Rb5WkFd9meINxVXaDbSIbYl40rEdvYnxmmcSKzHTvLVEd5IVnZu/65cWnTyBq5rfeSYGWvZCgguPZ5gFWrD+R295WX+5Uca+eqQrkXdsYaWAtoNRQ1VtdB907PaL+kYAA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=fyHjD7O7uRWzu/eGysHxszGrhk0pu0lHgRTb/Gr9bkE=;
- b=ne2srUzjXdotJ4BSgCg6IJlmjJ0ujAPMF8bZ59dxG9PhkQ2gdzuboIYGK5mnkjOvsdnkr2L5gZxCzfbeT1NSux4Tg65NRNUxbw5NTLOsXNPz36k+DZ95pWlPm+LgLB1KpQRkbP1Nhi+D9bgi8tTl8+870E82jW3emk9Z2B4QIOmqmmc3vF4cGwqCpG6uhuqjG6VLBJa1z2Nd0bMitaQRy4rCiQnX+zHVwO1L1RvevApp2eVpAs7rlZVI7w7RKXX9a8OdYcbprZZ7sNdYxV7/USzEYK/a68H+rO3cKb/Dr4TIqJw/wrjqWZne46eKG21hcEXYI2k6XUK83ToWQJdNIQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 216.228.118.233) smtp.rcpttodomain=kernel.org smtp.mailfrom=nvidia.com;
- dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
- dkim=none (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=fyHjD7O7uRWzu/eGysHxszGrhk0pu0lHgRTb/Gr9bkE=;
- b=iXT53/g2PgGIgFJpoTRXbNMPxU+9ka367UoZXwOeS3xcB3tIs2D11Z54ziFSMlMy8TaslKLuipMDo3HcKsBwgcg1Ad7NM34E9rfhQTIVin4j8E/l0bnYTl6Ni9NofsI5fZrdHlIlhrhti46WSU5n7L/YqU1YCTHDSriTZZr/baYKp6iK/7948lOi06vYyJEsJrSLM5aYalz8TujYoclP9XhFEX2vkC5u9S7HLtqEDeVHyypo5yWFZJo9PEtb7Jh7gbexTWMGZckYA06Ush33VR54vZAzrvw5zNq25t4hfGmbp0MmvxeFTijBKS9YGzWmxK9vUZdAAC28Fb3mKEyzsA==
-Received: from BN9PR03CA0733.namprd03.prod.outlook.com (2603:10b6:408:110::18)
- by CY8PR12MB8215.namprd12.prod.outlook.com (2603:10b6:930:77::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.245.11; Fri, 24 Jul
- 2026 07:57:26 +0000
-Received: from BN1PEPF00004688.namprd05.prod.outlook.com
- (2603:10b6:408:110:cafe::90) by BN9PR03CA0733.outlook.office365.com
- (2603:10b6:408:110::18) with Microsoft SMTP Server (version=TLS1_3,
- cipher=TLS_AES_256_GCM_SHA384) id 15.21.245.11 via Frontend Transport; Fri,
- 24 Jul 2026 07:57:26 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.118.233)
- smtp.mailfrom=nvidia.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=nvidia.com;
-Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
- 216.228.118.233 as permitted sender) receiver=protection.outlook.com;
- client-ip=216.228.118.233; helo=mail.nvidia.com; pr=C
-Received: from mail.nvidia.com (216.228.118.233) by
- BN1PEPF00004688.mail.protection.outlook.com (10.167.243.133) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.21.270.5 via Frontend Transport; Fri, 24 Jul 2026 07:57:25 +0000
-Received: from drhqmail203.nvidia.com (10.126.190.182) by mail.nvidia.com
- (10.127.129.6) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Fri, 24 Jul
- 2026 00:57:16 -0700
-Received: from drhqmail203.nvidia.com (10.126.190.182) by
- drhqmail203.nvidia.com (10.126.190.182) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.2562.20; Fri, 24 Jul 2026 00:57:16 -0700
-Received: from build-pshete-bionic-20260122.nvidia.com (10.127.8.11) by
- mail.nvidia.com (10.126.190.182) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
- Transport; Fri, 24 Jul 2026 00:57:15 -0700
-From: Prathamesh Shete <pshete@nvidia.com>
-To: <ulfh@kernel.org>, <adrian.hunter@intel.com>, <thierry.reding@kernel.org>,
-	<jonathanh@nvidia.com>, <robh@kernel.org>, <krzk+dt@kernel.org>,
-	<conor+dt@kernel.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<pshete@nvidia.com>
-Subject: [PATCH 5/5] arm64: tegra: Add Tegra264 SDMMC1 device tree node
-Date: Fri, 24 Jul 2026 07:56:59 +0000
-Message-ID: <20260724075700.714261-6-pshete@nvidia.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20260724075700.714261-1-pshete@nvidia.com>
-References: <20260724075700.714261-1-pshete@nvidia.com>
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="FWBta0Du";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="d53tylHq"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66O4lLOA2276409
+	for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2026 08:59:33 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	SyOBQsoBBSbgjvpJBtVfWA1ADD8DzVhTrrX4jNO1Klw=; b=FWBta0Du1TQITriF
+	OQi0m9KBPmKgQ0PDkUsFJC9+v0Hm4LOm2hNsEHUBIdW4XEFugNjuoA7RZ5JCbjRz
+	zsAdd5lsgtTTQoRrZFovAlBLGiTJg6cbbPUVv8ZBvMeVzQmsQy2cmMUMQKhk+ypR
+	dBEzSj6xbcqAj4OoMVC0wb09PmLLTq6LhTJc2yEKCWo9h6GBGtOlKZP+yDMUfL4X
+	xVmLNinuM2Bu61YG/aTHsyzaZPBjuSWlcqVJKsTOsKdoCqdABhpylWOSUYHywgU5
+	NAl3sQoBjS3vnkmZue9r84AHAyAi4cpVX3KvvR1S6ls2DLJ5cUPYmpPYkR/KcbQ6
+	wmmI6A==
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com [209.85.215.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fkqa0axyb-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2026 08:59:33 +0000 (GMT)
+Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-cb5bdd8450dso145275a12.0
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jul 2026 01:59:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1784883572; x=1785488372; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-language:content-type:in-reply-to
+         :mime-version:user-agent:date:message-id:references:cc:to:subject
+         :from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=SyOBQsoBBSbgjvpJBtVfWA1ADD8DzVhTrrX4jNO1Klw=;
+        b=d53tylHqYjSJ7GAOaFSoKJzhvTOEarl6YhpMqQUJ4jNeP9EV1elhufSMVovaY6pXQF
+         fFClB0P5C+sTkabY5GmVbP2PXUeVAHnZufkQJBNXRFCrcbrSMVLhnpP8TxIjGaRbdbJv
+         ISVAm7qF/uzYId9IQnlcxc69LW1fFZyTx1rJd1MHAGMlI4jrXuVawgWYnriwY4HHuQtv
+         TiJIlK/H5ppLjgji+XQaGyjfbmnbiwXIMyKYnHEeyL3YZS07Sq2DqLKfOBD0kRuFWtIZ
+         jvKg6FnoKgjQdT763WRsE02H7DqD2iMdEeI3+NVPqEQq3FEMldg4nM8dSH8XSRkLJHKU
+         C8lw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1784883572; x=1785488372;
+        h=content-transfer-encoding:content-language:content-type:in-reply-to
+         :mime-version:user-agent:date:message-id:references:cc:to:subject
+         :from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=SyOBQsoBBSbgjvpJBtVfWA1ADD8DzVhTrrX4jNO1Klw=;
+        b=RQhPg71B45jvEqk/J+//lN1fPL1nao9hVYRufhbKJvdnfDwIWg4aZIB7Ozok4BL+kG
+         s7DCPR+oe0sFudaxnmzQI1nMM+wgzPZuvqIlG73d/mxbXJS3+Zxsg4hn6uBNcqNJj2dY
+         GPrzr8DtJKWVzf2DKqNZgfGfHP9ykNe2VLbl+GMSjoT0jk/RP3ZpZc3+WIS490LDq7rX
+         ATba+5HcerDR5CHU3pulXJjBHBBmSK+ZPdhc3zbriLdA75IRbbyh1NRgIxIOJxjGFjKJ
+         zqedxj4VGiDI/krQ3ApFmpF6OL8KTu6DxFZjrd6eDKHimTFap69iP6rooGnNpmKPfje1
+         gulw==
+X-Forwarded-Encrypted: i=1; AHgh+RobmOIJt0+iVjCIf34ytq/JQb4F4odubauZjhv5oMZ/AqMsV3PHl9mOgdVmA1QunjraQfFCAIDHGKc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxQgT0Fs5LJ/0MnnwyLW/SXxUECiPcQBmQ9F4p15Xcd2gDNPaku
+	A74jfZCF5JZ/grrKWVrAFTavVkvWsjzZ0Okyl1Fbo2t7o6SQxskcN75PB+Hkgb4qTsNkPH25HRz
+	qIpWBxH7J8HqRx5/D/ysc+waJ5Xf7DunEKogd8HLqbnHkpMd6w+0+fQ/3s7pBco4=
+X-Gm-Gg: AR+sD12tO8RFi5H5PY9UgiwGVDD6Ef7azHUa78k0msIcj95cSf+qpnO+vXZBaCqOCJr
+	a33u23uwwuvRrOUaUX7pYbl3RlcVCzpZcuT+0qWBsku8iOXoMLFMsgYfFfiwj2vMREKvdrmGU23
+	oqtY1YBVjRL5c44zJnEZNLtO1Sl5Zm/A5qmYm7tFzrxqZRAVQCq3nh1y2tg3jheRgA0K86bnTqR
+	tCY/8DxKdfe2rZ/AGLurQoGRi/zkolxdnlQaszdLuozmBPJzbpyE3PoNpX+UHoroIiyP3l8Kt1T
+	N/t0iVR4hNfvGpfJ/fdTd2sfokLxldnBPg+8Uc5+H6N8FPceX7JcD2WojbtOlaHvjWcIvtNsiTR
+	mbiWFU7sG4V6ssM84hqrRVQlhV1E=
+X-Received: by 2002:a05:6a20:c79a:b0:3bf:a698:ce4d with SMTP id adf61e73a8af0-3c44b244083mr7319276637.54.1784883572471;
+        Fri, 24 Jul 2026 01:59:32 -0700 (PDT)
+X-Received: by 2002:a05:6a20:c79a:b0:3bf:a698:ce4d with SMTP id adf61e73a8af0-3c44b244083mr7319243637.54.1784883571908;
+        Fri, 24 Jul 2026 01:59:31 -0700 (PDT)
+Received: from [10.218.4.105] ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-cbb8f0eb2edsm4048097a12.9.2026.07.24.01.59.27
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 24 Jul 2026 01:59:31 -0700 (PDT)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Subject: Re: [PATCH v4] mmc: Avoid reprogram all keys to Inline Crypto Engine
+ for MMC runtime suspend resume
+To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Eric Biggers <ebiggers@kernel.org>,
+        adrian.hunter@intel.com, quic_dmukhopa@quicinc.com,
+        quic_rampraka@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
+        quic_gaurkash@quicinc.com, quic_sartgarg@quicinc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org
+References: <20260116121004.1829223-1-neeraj.soni@oss.qualcomm.com>
+ <CAPDyKFrOHqStZbsye9Quk71UGkzUxOkwG9yAGYFVvt+=nMJSyw@mail.gmail.com>
+ <20260122011417.GB946159@google.com>
+ <CAPDyKFoPVeu3xe7ZAxBTNFfHmf=f7OZ3iUG=pRG8mD=UOGNVPA@mail.gmail.com>
+ <3e04735c-ce0c-b2b6-508d-57ec363b8894@oss.qualcomm.com>
+ <625d16ec-052b-dfb2-61f4-bf0404297f28@oss.qualcomm.com>
+ <CAPx+jO8rUwYV6q1-RrA4aZ9XnomSf82fgf8Jh2fUC0fE03RFPw@mail.gmail.com>
+Message-ID: <4fe3977f-74a6-e74e-b217-2b07e4ad1151@oss.qualcomm.com>
+Date: Fri, 24 Jul 2026 14:29:25 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-NV-OnPremToCloud: ExternallySecured
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BN1PEPF00004688:EE_|CY8PR12MB8215:EE_
-X-MS-Office365-Filtering-Correlation-Id: 80c391ef-ae8c-4fad-7add-08dee95933a1
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|82310400026|1800799024|36860700016|7416014|376014|23010399003|11063799006|56012099006|10067099003|18002099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	P4+orbPZdC8lLrR4ZD2KbroLGR2dzq4/kgS0jIFfUO7kp9J6twKk1u7Oi7LQrZpCD5j/fNsmz8ABpCZ7A2bNr3i8FbWSRBa0NTua9wcIIhmCUlKC4Uu7P0hJelXUelq3JknaZBBRsuM5QkvOnIE8YBR187nV5xUgnTBsVK+be41TovldrC9nBRR4rYX7VRKe85eKFemGygHCp3gsoFiwMyfON9tgMyCQ6G9sHcH998v+esXZpDd9pb1SJs2C+WpAH2uMZTwbwnjWSv0y2t64Uy0v5HP28B6yxDF1wcnVzCDgq0jsQd1b4zKFKcgeAUnfL5khoOclMVAbYonUgqRuxePYE7r4m3DZOuqLavrZGdY+gHcUtuNREeeVeKrlMTRUkPKYyLMQF910Bg/GqJzX7JCneabXsaMS4KzXLAui73htG07vgrgUhxCYcb22abwnvMe9bMQFkLhgHgmUNdkPPaOggN9rremN4Q26oy6nZTQCTghblXln1kdGWeFTyXIkCmGozcFRslwoebrscdIcSjbUVSB7JQ4NVn/JwI79GAjlitM+e5e0TWAaattHXFCs6FfQ6p/qvsYx6x4I+Oambq0YLu8fSHFv4NnSp3gWTVb6CZGYij4ntpnImNi9BPb8y6B3Y2EejtxjcK+VKKbEVMNM52wic0iZ/xvafBv229hr3XeGUmEJV//L0ucUQkSpN6XZxDAIkgtehBtD9dhZcg==
-X-Forefront-Antispam-Report:
-	CIP:216.228.118.233;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc7edge2.nvidia.com;CAT:NONE;SFS:(13230040)(82310400026)(1800799024)(36860700016)(7416014)(376014)(23010399003)(11063799006)(56012099006)(10067099003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	GhTkoquBIFHtx+TDIZFJLJT8sNhxhfNVjReyu02qv66N9RroR3FbDVcdLl7WDs/RvBc3dnAQ/PMPmCIwTiRJq5BZGmi+s4Fk1vuI7dVcQ20K2yUwHpikto7oMGP7l/QYDuRU6YzACnajys6fUMu8MnCzA5/ezMTTT7qiku1fNPQi96BsojT/ALvBVhTxvvgDL0WpW1DsiUHSUVM4fIoMDcwJG8/CR/G32fKzLNHBtVLASdZ4RlIw6qxbmeouFDF0y5Vq1M9ti1QaYCIJ2Ovt0HJuWmW0jtDCb66Co4ZYAhTbUZJB06a6SkDuwKU0JFQDmK4+7Jefm+G7eqAFz+kUi37epsXTdy/V28CaOOL2WOp1pR9Q5yefjQwqDe0V2SFYNhBfzwZjFHMeBlLFHLAQYT/FOFfpebrATjrFGajCdvk4/1O7Jjsxl0ycmLsk34eT
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Jul 2026 07:57:25.8883
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 80c391ef-ae8c-4fad-7add-08dee95933a1
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.118.233];Helo=[mail.nvidia.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	BN1PEPF00004688.namprd05.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY8PR12MB8215
+In-Reply-To: <CAPx+jO8rUwYV6q1-RrA4aZ9XnomSf82fgf8Jh2fUC0fE03RFPw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: HIXjglvQuhMLJcrAZcgudGZ-S4Zuzwpg
+X-Proofpoint-GUID: HIXjglvQuhMLJcrAZcgudGZ-S4Zuzwpg
+X-Authority-Analysis: v=2.4 cv=e/k2j6p/ c=1 sm=1 tr=0 ts=6a632975 cx=c_pps
+ a=oF/VQ+ItUULfLr/lQ2/icg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=Um2Pa8k9VHT-vaBCBUpS:22
+ a=VwQbUJbxAAAA:8 a=EUspDBNiAAAA:8 a=Y-QaNR4vB-fFdNo4IRoA:9 a=3ZKOabzyN94A:10
+ a=QEXdDO2ut3YA:10 a=3WC7DwWrALyhR5TkjVHa:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzI0MDA4MSBTYWx0ZWRfX1JIFufL05VGy
+ 3HLK+5tJ9Bz+VV6cOo8uTzdUgQxdc+7P7yE0/P7uF7sZhFvxZfSIZIO958J+qvrdl/D11uikYY1
+ 4LdlFX5KSN5AvpZW666T6KGGMu35iPX7REBdfzy5O523r9lD4tBiV/EqtNRz68PZD4TVXrOUWf6
+ iul9oYm3iVHPoM390ALgbYpjUJArDQC9VhJTWS3mMvKuI/0UtKMO/YVNBbEQIeG5xixJbnVJ+lo
+ ThBdLu5SNVsXXNzXXcq6jEExIWJzVPgusXWcuGJ1plS40e3bDI03S43xnDvt1DxpBybXWK1+Wfp
+ wO1g1t69txlznzQf6lfEdg9cy83mRWt8hkibOyPMBAVzYRNbqfRa2xDlKFd2awqXoq3kP9zXFp5
+ DDA8QsHUQ5/tyJvv85x06kobFfZjK2BjEo6OKAgVaKafHVQZWEw8yqKx/FkIZYM8xuSMy+CH9JL
+ GXAEsJSf9/KWtGfXdTA==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzI0MDA4MSBTYWx0ZWRfX6FoCJGTWBb0e
+ NhyC4UkIIl9f2HDaUmWKKp3U4T1S2UmB2oZ07yCf1DgV9Fs+sAQpTFUekNDIyxI8OmbzTNoTcHi
+ 91PK77fSnKa98sjRgagHJlX9sjyZ45Y=
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-24_01,2026-07-22_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 priorityscore=1501 lowpriorityscore=0 impostorscore=0
+ malwarescore=0 clxscore=1015 spamscore=0 phishscore=0 bulkscore=0
+ adultscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2607240081
 
-Add device tree node for the Tegra264 SDMMC1 instance.
 
-Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
----
- arch/arm64/boot/dts/nvidia/tegra264.dtsi | 34 ++++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/nvidia/tegra264.dtsi b/arch/arm64/boot/dts/nvidia/tegra264.dtsi
-index 2d2cb1a3d95c..f1eafb6a3970 100644
---- a/arch/arm64/boot/dts/nvidia/tegra264.dtsi
-+++ b/arch/arm64/boot/dts/nvidia/tegra264.dtsi
-@@ -3631,6 +3631,40 @@
- 			status = "disabled";
- 		};
+On 7/6/2026 6:30 PM, Ulf Hansson wrote:
+> On Wed, May 20, 2026 at 12:50 PM Neeraj Soni
+> <neeraj.soni@oss.qualcomm.com> wrote:
+>>
+>> Hello Ulf,
+>>
+>> Can you please help to clarify? If there is no more modifications expected
+>> then wanted to understand when this patch can be picked for mmc-next.
+> 
+> Apologize for the delay. See more comments below.
+> 
+>>
+>> Regards
+>> Neeraj
+>>
+>> On 5/14/2026 11:26 AM, Neeraj Soni wrote:
+>>>
+>>>
+>>> On 1/22/2026 3:44 PM, Ulf Hansson wrote:
+>>>> On Thu, 22 Jan 2026 at 02:14, Eric Biggers <ebiggers@kernel.org> wrote:
+>>>>>
+>>>>> On Wed, Jan 21, 2026 at 03:12:43PM +0100, Ulf Hansson wrote:
+>>>>>>> diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
+>>>>>>> index fec4fbf16a5b..a5a90bfc634e 100644
+>>>>>>> --- a/drivers/mmc/core/crypto.c
+>>>>>>> +++ b/drivers/mmc/core/crypto.c
+>>>>>>> @@ -15,7 +15,7 @@
+>>>>>>>  void mmc_crypto_set_initial_state(struct mmc_host *host)
+>>>>>>>  {
+>>>>>>>         /* Reset might clear all keys, so reprogram all the keys. */
+>>>>>>> -       if (host->caps2 & MMC_CAP2_CRYPTO)
+>>>>>>> +       if ((host->caps2 & MMC_CAP2_CRYPTO) && !(host->caps2 & MMC_CAP2_CRYPTO_NO_REPROG))
+>>>>>>>                 blk_crypto_reprogram_all_keys(&host->crypto_profile);
+>>>>>>
+>>>>>> As far as I understand, calling blk_crypto_reprogram_all_keys() would
+>>>>>> only be needed for those mmc hosts that lose their corresponding ICE
+>>>>>> context during runtime+system suspend, reset and possibly during
+>>>>>> ->probe().
+>>>>>>
+>>>>>> In other words, calling mmc_crypto_set_initial_state() from
+>>>>>> mmc_set_initial_state() looks like it's a mistake, as it has really
+>>>>>> nothing to do with the card's initialization, unless I have understood
+>>>>>> this wrong!?
+>>>>>>
+>>>>>> That said, I would rather make the mtk-sd and sdhci-msm drivers to
+>>>>>> handle this themselves, by explicitly calling
+>>>>>> blk_crypto_reprogram_all_keys() when needed - and drop
+>>>>>> mmc_crypto_set_initial_state() altogether.
+>>>>>>
+>>>>>> For the sdhci-msm case, it seems like the only case we need to care
+>>>>>> about is for the reset.
+>>>>>>
+>>>>>> For mtk-sd I don't know what is needed, but possibly Eric can help out here?
+>>>>>
+>>>>> The comment for mmc_set_initial_state() says "Set initial state after a
+>>>>> power cycle or a hw_reset."  I relied on that when I added the call to
+>>>>> mmc_crypto_set_initial_state() back in 2020.  In the following thread it
+>>>>> was also discussed that the code was intended to reprogram the keys on
+>>>>> reset, not runtime suspend as that shouldn't be needed:
+>>>>> https://lore.kernel.org/linux-mmc/X7gQ9Y44iIgkiM64@sol.localdomain/T/#u
+>>>>
+>>>> The comment in the mmc_set_initial_state() is referring to the card
+>>>> and not the host controller. There have been some similar
+>>>> misunderstandings in the past for other functions in the core, sorry.
+>>>>
+>>>> In any case, I have been trying to understand where the ICE context
+>>>> really belongs and recently Neeraj answered that question [1].
+>>>>
+>>>>>
+>>>>> If that is not what it actually does, it probably would be appropriate
+>>>>> to replace it with something else.
+>>>>
+>>>> I agree, the comment(s) could deserve some clarifications.
+>>>
+>>> Hello Ulf. Do you expect modifications in the comment for mmc_set_initial_state()?
+>>> I am sorry i did not follow up and assumed that no more changes are expected in
+>>> the patch but i stil see it is not yet reviewed or approved.
+> 
+> There are a couple of things needed to get this merged.
+> 
+> 1) Please split up the patch into two pieces. Let the core change be a
+> separate patch preceding the change to sdhci-msm.
+
+Ack.
+>
+> 2) Clarify in the commit messages that the register context for the
+> crypto profile belongs to the sdhci/cqhci host and not the mmc card,
+> hence re-programming should be managed by the host driver itself.
+> Typically that should be done from the driver's runtime suspend/resume
+> callbacks, even if that isn't needed for sdhci-msm, it seems.
+> 
+Ack. Yes this is not needed for sdhci-msm.
+
+> 3) To avoid breaking the support for mediatek drivers, I agree that
+> adding MMC_CAP2_CRYPTO_NO_REPROG as proposed, makes sense as an
+> intermediate step. We can look into the mtk-sd driver later on and
+> clean things up properly.
+>
+Okay.
  
-+		mmc@c570000 {
-+			compatible = "nvidia,tegra264-sdhci", "nvidia,tegra194-sdhci";
-+			reg = <0x00 0x0c570000 0x0 0x10000>;
-+			interrupts = <GIC_SPI 162 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&bpmp TEGRA264_CLK_SDMMC1>,
-+				 <&bpmp TEGRA264_CLK_SDMMC_LEGACY_TM>;
-+			clock-names = "sdhci", "tmclk";
-+			assigned-clocks = <&bpmp TEGRA264_CLK_SDMMC1>,
-+					  <&bpmp TEGRA264_CLK_PLLC4_MUXED>;
-+			assigned-clock-parents = <&bpmp TEGRA264_CLK_PLLC4_MUXED>,
-+						 <&bpmp TEGRA264_CLK_PLLC4_OUT0>;
-+			resets = <&bpmp TEGRA264_RESET_SDMMC1>;
-+			reset-names = "sdhci";
-+			interconnects = <&mc TEGRA264_MEMORY_CLIENT_SDMMC0R &emc>,
-+					<&mc TEGRA264_MEMORY_CLIENT_SDMMC0W &emc>;
-+			interconnect-names = "dma-mem", "write";
-+			iommus = <&smmu2 TEGRA264_SID_SDMMC0>;
-+			nvidia,pad-autocal-pull-up-offset-3v3-timeout = <0x07>;
-+			nvidia,pad-autocal-pull-down-offset-3v3-timeout = <0x07>;
-+			nvidia,pad-autocal-pull-up-offset-1v8-timeout = <0x06>;
-+			nvidia,pad-autocal-pull-down-offset-1v8-timeout = <0x07>;
-+			nvidia,pad-autocal-pull-up-offset-sdr104 = <0x00>;
-+			nvidia,pad-autocal-pull-down-offset-sdr104 = <0x00>;
-+			nvidia,default-tap = <0x6>;
-+			nvidia,default-trim = <0x0>;
-+			sd-uhs-sdr12;
-+			sd-uhs-sdr25;
-+			sd-uhs-sdr50;
-+			sd-uhs-sdr104;
-+			mmc-hs200-1_8v;
-+			dma-coherent;
-+			status = "disabled";
-+		};
-+
- 		i2c0: i2c@c630000 {
- 			compatible = "nvidia,tegra264-i2c";
- 			reg = <0x00 0x0c630000 0x0 0x10000>;
--- 
-2.17.1
-
+> 4) The call to blk_crypto_reprogram_all_keys() that's added to
+> sdhci_msm_gcc_reset(), gets called once during ->probe(), is that
+> sufficient then? In any I would prefer that we don't use "#ifdef
+> CONFIG_MMC_CRYPTO" more than needed in the code, so  please, either
+> add a new function within the existing section along with a stub
+> function or - if it works, call blk_crypto_reprogram_all_keys() from
+> sdhci_msm_ice_init() directly instead.
+>
+Ack. Yes the intention is to re-program the keys only if the host undergoes
+hardware reset. I will post v5 with the clean up you suggested.
+ 
+> Kind regards
+> Uffe
+> 
+Regards,
+Neeraj
