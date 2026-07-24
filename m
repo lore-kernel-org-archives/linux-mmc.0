@@ -1,120 +1,131 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from SJ2PR03CU001.outbound.protection.outlook.com (mail-westusazon11012011.outbound.protection.outlook.com [52.101.43.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A87E3264C2;
-	Fri, 24 Jul 2026 04:57:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1784869083; cv=none; b=rIUgdE4hctFmKeANe6LF+sQ7mfiqD4vYKNEyTrO8iUX6NW5s2l+N8Sjq2YK3sobyG6FB5buuYFSFcPCkN+UFjiOA7gUeR5JBnSASPmtTLTtHYBfw9L5/vMvstkarKpqewjVB0GUXf+Y5qfy87PYocKJlBk//4jAUBUvmfz6kFBw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1784869083; c=relaxed/simple;
-	bh=muNGbVSE63ZwLx6JTwUqy7Oq+2WVsxviAG63JXRC72A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=T7JZDOMZCMUn/07GDAp4Gf+rx8XYrFq+zZXLXu+eG7PjACNkI6luzqeA4pmTjmZnILpG+AXXBt2W4H3WeOZoumrANhhbF9yF01LEZdw5V6qwQFF/EtMqokhpQYbvx+KuFpci6bUpXRto2GRm/uP0xHDRsT5k4g25g2th590ndqI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=dCJEMHRn; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC733314B63;
+	Fri, 24 Jul 2026 07:57:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.43.11
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1784879840; cv=fail; b=jgZ3ql+FeTDGYmEZSLSTE1VXuqFXeeDbe5vkQyzjqH7ZZuaBtbPokFIisZ2vk7hu0aGduQNvjWkfQhnCgdQfT8YCPXLWY7O6SX4mFzXqQapU9nIdhX+AFNzBAMopmYE/iDStOKPhuRdZ9+MbXAUiM1GS+vA47yOle9J0wlY6+Ew=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1784879840; c=relaxed/simple;
+	bh=pAlWe3KPZRgpXN4mVmCDbr55EhOPzXVSf5FQyuY+UUc=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=neSj85J2GtCH3S5oRhsW/fOeF3KSD12wovbBBsUg3EI8ieu1R8ojKco82Y0qlvocxqyNNE6mIobSBNGCjvl6Q49cRzPGhFpR7XCaXX51KyDcNCqG7XqB5TcxX3DFOtTdWLbvxekmKXy655VAzPBKy6ZuzmreYg7lEbUeYIrnDOc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=bL2XPxHk; arc=fail smtp.client-ip=52.101.43.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="dCJEMHRn"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=0pO6hUB0iIxD4TyXUYlqc7LrnsyhEtYUcjdZrQrosCo=; b=dCJEMHRn3xYqVAfuYYkzbIPIp3
-	Inq2NxvS38Srj9Jj4S6ZY+acCFPe1cObOEJRiTmc+Ezv/JVCiqJtb50wgxpJaBky5Nu/S0t47ipvB
-	GO715i4MWZCMen5TGlZJM+oZYzf5tt+pLPElmDgc+RediL8nEVrUwocrewR2SlAwypnL/5SzFO3c7
-	hbasNQagNIq0oEqoKbmWsN8LzbUg4tQAcYUct//pUr5JQCGXI0GhKjzCVct4bqY6ZFn/o2fpDIOyn
-	WM1czYp32/cejCQe5997e7Om4NX3n1Iz1mj01qp/3S6PZafVrfY6vZWI0M0Di/xGIL4vifq4/n0q2
-	RPRVg4gQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.99.1 #2 (Red Hat Linux))
-	id 1wn7yp-0000000FTwy-42lv;
-	Fri, 24 Jul 2026 04:57:51 +0000
-Date: Thu, 23 Jul 2026 21:57:51 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Jens Axboe <axboe@kernel.dk>,
-	Johannes Berg <johannes@sipsolutions.net>,
-	Jeff Johnson <jjohnson@kernel.org>,
-	Bartosz Golaszewski <brgl@kernel.org>,
-	Marcel Holtmann <marcel@holtmann.org>,
-	Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-	Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
-	Rocky Liao <quic_rjliao@quicinc.com>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Simon Horman <horms@kernel.org>,
-	Srinivas Kandagatla <srini@kernel.org>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	Russell King <linux@armlinux.org.uk>,
-	Saravana Kannan <saravanak@kernel.org>,
-	Christian Marangi <ansuelsmth@gmail.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, linux-block@vger.kernel.org,
-	linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
-	linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org,
-	daniel@makrotopia.org,
-	Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
-Subject: Re: [PATCH v8 5/9] block: implement NVMEM provider
-Message-ID: <amLwz6WuHYUwKKJo@infradead.org>
-References: <20260703-block-as-nvmem-v8-0-98ae32bfc49a@oss.qualcomm.com>
- <20260703-block-as-nvmem-v8-5-98ae32bfc49a@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="bL2XPxHk"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=g1Icfy0pzTdHZHbcjpUDDIyW8jkxwBHxWj+BmJOb5zjWBTS5zpL1z3AAGSUR9P6XqKdwjO4dkPPUVlo77k5hSZWsg9afoVyUuJ3Eb5MrQ1gqgFYwLqVgtk8eof1q9I03G1gC1l1B5dMOqdHjKtXty60lKtQZp+5mKceFM+h0WTiuGYqpOXolOe05SN52NjylLfez+UPicXCgpE0QFv3dD0SlFdwbrogogup7MEubOJvPn3F0gwJ+VdfQVz7lf5lUhipTeofivImf1bCHWCg2A0jx68fQ8Wd9sFH8ywU1YrA2voD0zMozKDZJb7DFlk8+giLg9wXYNBMkAz76U1uigw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=XlmSp26XuO+O/esKi7J7WvDscLL7eDOFAvQOz9pTnXM=;
+ b=fx+e7DNIip5wcBxBU9TSTEHhHruflBU654i44eQ+Q/dinWaHmVgej7bxyZZtauQHb++Hghg/BrnwYebve9xL7r7LWk31L2WdlykZVJbxJk4nuhj/SQ7sQK5hYOKjEg1RqAHy/rwfDNL/2lve6a7XARTeJMZtqvjElFAhc75ydSARtOwZeszogfLGkb/RJq+6qYQ8hL3nFefmwKmm9A6OITDxuRpbVC/rbDK+TP9JbRGGILJWT3aiPpOrMCUOQqh5lyyEbGehA3Zj/vgq7XPArXY+HbWN98Wi50U3ESBU/qZ17PnJrjsjtHgsXSfIoAnzvLt4gqsqhiTSAT5Xk7xRbw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.118.233) smtp.rcpttodomain=kernel.org smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=XlmSp26XuO+O/esKi7J7WvDscLL7eDOFAvQOz9pTnXM=;
+ b=bL2XPxHkl8hx92BgLS/poi39AfgoEpvdlRbOCcZNoc5MdW3eg9O2T18HfVziDLz3tbOpebDzV3Iw3TG0tMLc2/hSI2xEan1ihNOmD9bDGhGMANMX/J4LZ1FFUoqcwEbeUZq93ya3mpPmGhjV+GMGNphCqm1B9dqxdW8qJ67cD7uQfwRMZNRL8z7uZuXtmlXBKod0m9MIBC+SVOWp5KKBWYbOj0R0IRkPd12ID1SGDZiMIaMkY2d5H0cYTrDzIvc3AOWMZj5sFhHYBae1q2jnIkybWZlZdCpnVhWJUPcQ7jSDcvAcelq1ObIHd6lteVPSy7K2Z94RSz5O9aAnyeueNg==
+Received: from BN9PR03CA0754.namprd03.prod.outlook.com (2603:10b6:408:13a::9)
+ by DS0PR12MB7827.namprd12.prod.outlook.com (2603:10b6:8:146::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.245.12; Fri, 24 Jul
+ 2026 07:57:12 +0000
+Received: from BN1PEPF0000468B.namprd05.prod.outlook.com
+ (2603:10b6:408:13a:cafe::19) by BN9PR03CA0754.outlook.office365.com
+ (2603:10b6:408:13a::9) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.245.11 via Frontend Transport; Fri,
+ 24 Jul 2026 07:57:12 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.118.233)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.118.233 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.118.233; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.118.233) by
+ BN1PEPF0000468B.mail.protection.outlook.com (10.167.243.136) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.21.270.5 via Frontend Transport; Fri, 24 Jul 2026 07:57:12 +0000
+Received: from drhqmail203.nvidia.com (10.126.190.182) by mail.nvidia.com
+ (10.127.129.6) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20; Fri, 24 Jul
+ 2026 00:57:05 -0700
+Received: from drhqmail203.nvidia.com (10.126.190.182) by
+ drhqmail203.nvidia.com (10.126.190.182) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.2562.20; Fri, 24 Jul 2026 00:57:04 -0700
+Received: from build-pshete-bionic-20260122.nvidia.com (10.127.8.11) by
+ mail.nvidia.com (10.126.190.182) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.20 via Frontend
+ Transport; Fri, 24 Jul 2026 00:57:04 -0700
+From: Prathamesh Shete <pshete@nvidia.com>
+To: <ulfh@kernel.org>, <adrian.hunter@intel.com>, <thierry.reding@kernel.org>,
+	<jonathanh@nvidia.com>, <robh@kernel.org>, <krzk+dt@kernel.org>,
+	<conor+dt@kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+	<pshete@nvidia.com>
+Subject: [PATCH 0/5] mmc: tegra: Add Tegra238 and Tegra264 SDHCI support
+Date: Fri, 24 Jul 2026 07:56:54 +0000
+Message-ID: <20260724075700.714261-1-pshete@nvidia.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260703-block-as-nvmem-v8-5-98ae32bfc49a@oss.qualcomm.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain
+X-NV-OnPremToCloud: ExternallySecured
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN1PEPF0000468B:EE_|DS0PR12MB7827:EE_
+X-MS-Office365-Filtering-Correlation-Id: f174891d-dc1e-44e0-30ae-08dee9592b92
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|82310400026|1800799024|23010399003|36860700016|7416014|376014|56012099006|11063799006|10067099003|18002099003;
+X-Microsoft-Antispam-Message-Info:
+	McHhDWRKUh1J7P83Ql25ZxUaqSS2eGvMFfCoV5ixyT2WSCGEJ5325ghWyPagGhiHGb0PdxIUSw251mQl8RJPWsaQhYGVIrVZhE7vr5R0aYMJmhCSfvdQMLmMGRv1ytH7J9+m/TPw87oxOkkCFQvKIkDiuFQPmf2FptX4TgQP7tUAPKH1vga8Ag9cymQkqUgcWB091/FttuFskF6pB8oVUQv4P5V6D94OFNKf9Jl7h8/dxgqzQq1jDolPEz+oS3+CrKozwSOerOoxUoCUNZY/DlTG1hmPhOGAXaz5+T7iNwiJtcra//NsJe3dsQwEnM5vSqFxP7ZFgw5CgLqv4qRBEBBcLtAoEs2qJnYzf41zNnYmi4ajp2ZUySASyEuOuWhQr/JLOVnfpJePpGNiX+tS+RUfovZlw+4/DCzBlT4rccnBOnbfuX0O5CQJDq6j5WGrBFzPTbYCxzwKSO9rZswt5voER2L/fr7v6CS4swp1tSneirFX+1Rn0lBDsXb4Iu5Sq5nGMarfeKMfHeyDSLeSL1sSikxpadghkmoehEIPo6As4bVvqbrrgpNRvHAo29rrVRNt6KP8qcYZJqVGSAPGpPxNYUCAM9TbV+BfqPTXoDg0cdB5QhXw7vi0KvXnStCfYaciDUsX5KUPXWZdAm8fNnVcUDFZ8WhHP7RnzZbqvTvCMygJJToWbWTWJA0YmJ4ogDmWRs3ZQhOKLyxfToKDag==
+X-Forefront-Antispam-Report:
+	CIP:216.228.118.233;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc7edge2.nvidia.com;CAT:NONE;SFS:(13230040)(82310400026)(1800799024)(23010399003)(36860700016)(7416014)(376014)(56012099006)(11063799006)(10067099003)(18002099003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	lD086/Ez4O7juAEXf2AJ7myOoZIACL7IOjibgvOJsCBBMazwDpo0DvvWPTggP4HQmx80pNtN5jsUEoARdYUyj9WjHmRBOPql3XpvL0J7Xp448kafH/HlHEXQ9A6JMTKdNFU9EDa+T8WZC5GESwIFq+ftw4xjwEp1Y8MYWfTwgpRs8wX5Pf1oMNIUoJRbmRliuhakryTkTR1+frn6q9EwCE8XWxnUhGRQZNFtSxOV9fHZ7qn1xCXnoBEk5Pk0dABBNQav/wbujtrER80lCBXJv8+syVXFLhjrjJK2/nONKqnFiQlmJX+6pc/kHIJdQpI1S1NLGo3vvUGnp5CsQdQ51HYQe2ldnyaMEM9LrVVjyyL7GQHvSEczNuDaUqHWZMQKfeo/7JQNC/CRjzwekKDRR7vB6Uj2y+fi2eBGEhTh9EthTLMqZdSusRl3E783I4uh
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Jul 2026 07:57:12.3673
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: f174891d-dc1e-44e0-30ae-08dee9592b92
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.118.233];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	BN1PEPF0000468B.namprd05.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR12MB7827
 
-On Fri, Jul 03, 2026 at 03:45:18PM +0200, Loic Poulain wrote:
-> +	  Allow block devices (or partitions) to act as NVMEM providers,
+Add SDHCI support for the Tegra238 and Tegra264 SoCs.
 
-Based on the code below I don't think you actually support partitions.
+The series documents the compatible strings and adds the corresponding
+SoC data. It also adds the Tegra264 SDMMC1 device tree node.
 
-> +static int blk_nvmem_reg_read(void *priv, unsigned int from, void *val, size_t bytes)
+Prathamesh Shete (5):
+  dt-bindings: mmc: tegra: Document Tegra238 SDHCI
+  mmc: sdhci-tegra: Add Tegra238 SoC data
+  dt-bindings: mmc: tegra: Document Tegra264 SDHCI
+  mmc: sdhci-tegra: Add Tegra264 SoC data
+  arm64: tegra: Add Tegra264 SDMMC1 device tree node
 
-Overly long line.
+ .../bindings/mmc/nvidia,tegra20-sdhci.yaml    |  6 ++++
+ arch/arm64/boot/dts/nvidia/tegra264.dtsi      | 34 +++++++++++++++++++
+ drivers/mmc/host/sdhci-tegra.c                | 30 ++++++++++++++++
+ 3 files changed, 70 insertions(+)
 
-> +{
-> +	dev_t devt = (dev_t)(uintptr_t)priv;
-> +	size_t bytes_left = bytes;
-> +	loff_t pos = from;
-> +	int ret = 0;
-> +
-> +	struct file *bdev_file __free(fput) =
-> +		bdev_file_open_by_dev(devt, BLK_OPEN_READ, NULL, NULL);
+-- 
+2.17.1
 
-Please try to avoid all that magic autfree stuff that makes the code
-impossible to read about.
-
-> +	if (IS_ERR(bdev_file))
-> +		return PTR_ERR(bdev_file);
-> +
-> +	while (bytes_left) {
-
-.. and just use __kernel_read instead of badly reimplementing it.
-
-> +	config.name = dev_name(dev);
-> +	config.owner = THIS_MODULE;
-> +	config.priv = (void *)(uintptr_t)dev->devt;
-
-Why is this storing the dev_t and not the block device itself?
-
-> +
-> +		blk_nvmem_add(disk->part0);
-
-Hmm, and you're always doing it for the whole device.  So the intefaces
-really should be based on a gendisk, not a block_device.
-
-Also once you register the whole devices as nvmem provider, we really
-should keep it from being used a block device, shouldn't we?
