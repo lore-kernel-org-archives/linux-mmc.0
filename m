@@ -1,69 +1,70 @@
-Received: from mail-pl1-f173.google.com (mail-pl1-f173.google.com [209.85.214.173])
+Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 396A42882DE
-	for <linux-mmc@vger.kernel.org>; Sat, 25 Jul 2026 18:51:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BD8E377AA3
+	for <linux-mmc@vger.kernel.org>; Sun, 26 Jul 2026 21:57:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785005504; cv=none; b=SEl0NQpPyD/CwpbIwY6sEbsIXMSS0LLrm3i7WKEMXI8pf4cBnSf40C2OPXcrU84CNYWjvGBxRy6mQux7Q/CNzc1daVWoJX8r6f7ZGJ6qVHMs05pLqVXxbkAC0KRJFtHCpearlD4wlWW261ymFnzUSXVzsc4edFuLz+0iDVmwq6M=
+	t=1785103066; cv=none; b=SnfJY6ZWvBqCNRvGCOWH6xd9i2A06U5YQutoQN/o4Rh+umc7CPpMaP7bkInLuQWZyXbDFcT+LOfIeZf9mBlcNoExI3iI1cuvOrEuMpwpyQl9m7ibolQFj7FGmkXijxYVu8BOtg9oFs8VUf/6Pv3pPfFA5tnpAgMEo3Vxsw8KI7M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785005504; c=relaxed/simple;
-	bh=zXmjRYsNskrjIXx7qyH5rsMW2os+RcAo3nnc7FL477c=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=UYBYv04dvIYanbpqWm2tzJgqM0Sr5jj0ge6Rg08lyPTNjZoeiLyEo+5dxc5NoICnC0TrsZTjTNl/PuuMaIf/s54iljvmmeVxEDw35dS8cvy2G/x1ShzvS+204RNsXAYmgsM04YO1v0fYp5H46MgSgIEBIUR+rCvxVlR4eLue67c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mxcaFRsV; arc=none smtp.client-ip=209.85.214.173
+	s=arc-20240116; t=1785103066; c=relaxed/simple;
+	bh=ISbei8wuwbwd+qsDwqxaJvR+/sHMQY8pYWaHZpMoAdE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=P/WmL0sM/ezcO/tUzv3ugHRCz6g+SC4HIpVfCEVb0+mqVsRusjvBRkQfcpwMEY1zg1qZiT5+ZkAMEa1GkYsE1xdPurIA7Op0O6JZENNHVieE+3disyXWKRVXvEHEIiCScMgyoIIgcZ3AitN36R83a5R22ElE8qsAVbPqs8C21xY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GmQQTK04; arc=none smtp.client-ip=209.85.216.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mxcaFRsV"
-Received: by mail-pl1-f173.google.com with SMTP id d9443c01a7336-2cedda2ce6fso12664655ad.1
-        for <linux-mmc@vger.kernel.org>; Sat, 25 Jul 2026 11:51:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GmQQTK04"
+Received: by mail-pj1-f42.google.com with SMTP id 98e67ed59e1d1-38e08baf860so2099019a91.2
+        for <linux-mmc@vger.kernel.org>; Sun, 26 Jul 2026 14:57:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1785005502; x=1785610302; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1785103065; x=1785707865; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=3n25c2qu5nQId8pRmFQPbeaPos2SANAOL544ubHzaWs=;
-        b=mxcaFRsVQ/4lnm76eCTbNIZQ3F2K2EvNXLAjSH2gjLPulQPOiz963bl+0tBRgz0bXG
-         t3o2/sZC/xrCzYJz58MNWZlaEJqswjyNu3X6mVGqaFVTGhLcOJMdJIqndf/WXeL2qiat
-         KWDx/+ws2iuUt8354q29JycaYV4/g+MeQs46jv9EYXEuiUwd94hCN3RbhGP2TtFVGG/0
-         sXUYWYeCMrFTlRGDu3LsIaTggonHArADSCxJAuzDWJRmGWQl4gxmWppVQ/RP+kh37+05
-         RHWz2EN1QxBPfI2FK6PaojahDSNSiGk7/1Ze1v5eyg4XhsnR+D+SBmtS3KvprGaxizU0
-         9D8w==
+        bh=tqWCtESQQ2bWbP4HQOrXWNhHPb+LXu076IiCVmal7Vw=;
+        b=GmQQTK04Im+bO4fjyi2mpEi32fSnN7aTF9fyGlfYp9K3mqemtaeK+jMuWVI3OXUkUD
+         ISEBDGxuHg4gcDDwgqULTKRCx53M2MTxuXh9QDImQdWwodgGbcT65GUpQyNtcqg/ycx/
+         hUE4J3+g5jz0eHsw8D7eaGHDcTf8VQMbghOEKGdsTgN2TDAR3uDeY0R9J3rwPBAOfr/c
+         xjk6kWFJUj14OCfknthbH9G0I/MwLZZRugboadUdtlaBTz8aJcN2WK9fMlTEKoDDTrBc
+         Hj0yjWzZsPUuQbWuvYaPi5kp/iDVNCmFh15YwYD6kWNtWMMHIuYwa8oIMTK/DsP4aQ42
+         3hTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785005502; x=1785610302;
+        d=1e100.net; s=20251104; t=1785103065; x=1785707865;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=3n25c2qu5nQId8pRmFQPbeaPos2SANAOL544ubHzaWs=;
-        b=mYku4+EtGPyH7KiRdLm2n6Ierk5mO0yhmVtuDzXbCl7RP5Bb9/Q5u99lTxPWWAz2DT
-         EFwvhRZYR9ruh5DWauod8wJAaEqrjSH0SN36UOkAyO/IIPqRK9XJ3z/2Bi16TdBsxS/X
-         Fh0/MMzyS+XKEPS+u/Q+CWRrPGBkyKRf78x35kZHnj8lyDIdz+SCwxaCMqTZRP4RE8qe
-         oYyAr9yHdzNr7PWTWXTD9pxIoruYpAaTOMkFsr2hbBbEGsruOfxirxaeOg9pDk8IM0LC
-         1y9SPicJ3W7GGcpslt3F+7Nep+b0XHIQcpKv/M6jG0ExraNQK7pmuL0JnrBAum/QdH8x
-         5L+Q==
-X-Gm-Message-State: AOJu0YxKQLQvoBS6UbbwKRw0hXgs33O6edWRWT/qRpmHRhF3hYGTwCRK
-	ZkdIgsXDIH7nYL0/c4tGZrgaomX6nFqRemsGxJimdr43T6Nc6wGGBTh7
-X-Gm-Gg: AR+sD12+CP0kNCzLvucH8uDtygPo9pOXVhszwMn3uf0RuaSbVyyTOQVutGoUkUplOVP
-	1msfnKhub5W96ZKPoEhKR7Zxc4A0lbcNEY8ESjDftinpMtkJVqFHJWZSZbNYKS2UtAHyUnzeWU+
-	+1NRcuTJywFMZWkolI8v/MePHRqyy/etTVOYIYQcQUYnDs01om/LLCsqehhY2LG7p4baH6VIRLA
-	csAVPUp00b3ZBJT3XgXLDckhhMsiBdCDb9b9JfqpyGijrdJFv1nleXscfQL8Ws3damqLMCAaVhk
-	4AtSEaOYXapxt8ig6Q6kJINcF44YLJdhFlz71Cr0ff+1LYuvrMF3k9WOBRKNwX5a/imbsOL9t1+
-	9WQ18EodMVx88Wq18ZrgJSR4o1Yb3+bPOlpIw7QEGtcWKaguv25Q1EgL2z8UPTHHb0rnPZbDGv4
-	5U/K569Ki501N5a1ocdg==
-X-Received: by 2002:a17:903:37ce:b0:2ca:1bd2:d57b with SMTP id d9443c01a7336-2cfde55acfemr25735425ad.0.1785005502403;
-        Sat, 25 Jul 2026 11:51:42 -0700 (PDT)
-Received: from Strong10mede.domain.name ([122.161.51.82])
-        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-314bc549cacsm13281089eec.16.2026.07.25.11.51.40
+        bh=tqWCtESQQ2bWbP4HQOrXWNhHPb+LXu076IiCVmal7Vw=;
+        b=NtxyZyCQSt3YIjKk8RJ3G+cUetYUlpzeiWX6g/bsTFp7MANSt0hSQg31MHeU0U/vq3
+         db50g5P/0CHAzJDEwBQc+drTIxoafKnju3dMsyt5c7QtlGb/AvZPmJ9S+j8u6SXCpWY+
+         0k9I8xH4MIz9k1xQuYdi/DahxfqraE6Hyhc23p1iSvfLxcYhumlRVYrAEyDWPkEOcgRI
+         M70KrTwoVYIjLD8l1npd5AHXPKcEiPpaHkGZinTIQl8DGUU231qk42leNzj2pn9xqu/w
+         U0552L3ekeRAqn216rLvfPm1l3eLX4Je3wjl1eM89CqZqsyuv002xBy4i78l7dmJEj4G
+         TBZA==
+X-Gm-Message-State: AOJu0YwUHKlDQF/HhIeF5G6BmMq3ioS1RfuaOBg8+SNtRziIkE1eRZR2
+	ThKfwRkJ750BbgFD9Y+8M+lozeHfem3BnGtrTn8u1MKs8+bhXZr9eTYJnqxHRg==
+X-Gm-Gg: AR+sD10tDjOiRN1roX+TFx0Cf42+iF83IgLCFuA35yQuehikJQqfOVUVQNWxrtRPcti
+	BVqzhxk/E2YwO0Ie8WUAPgazaIEjEAgI0wCKWmSQB9unrkmu5nlFQu/YfdWeNimFGAH8cY5hxP8
+	Koy3aQDffTltb9JQbKnSqOIxWG7wM1btQNFP7OzJeeWKZqS23hgibfnSVzIr+NJzJc1kiEsdGAT
+	6KNXWbtHo2ajTu93sDfH8UXjMcoNFGBufXBZx5VAuhbxVFrUVlqvJFhxQcfwFitgivuvei3Mu4d
+	OCC7H6vtuxLN1JATbHSRLpW5OFFlJKb4eWzV8oWq3oTgpPGXe/BFqLPXf92eubH8C+WMfZ5T41P
+	2sVtBloqDGOc5jrb2/QieANObFEAlcsDIhmioZonizxC2kJBXRxDOmQQ0oSYeVaAm3BXYt4oxio
+	X9i6mEM2PzB2AXiIKyHVg8PlghPyc813y71mSFQHB8LTRInHOO65dqmE/NvkhFvSEXaXRFcOT00
+	WIgDO6h7fW/6RmuJkNvdhInVmRSZq/iwQ3vXTesUtnC1l9+qPVk4QM=
+X-Received: by 2002:a17:90b:53ce:b0:38d:a150:ee04 with SMTP id 98e67ed59e1d1-38f2965eb5emr5493758a91.30.1785103064721;
+        Sun, 26 Jul 2026 14:57:44 -0700 (PDT)
+Received: from ryzen.lan ([2601:644:8000:7a86::e35])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-38f2913c891sm2022788a91.0.2026.07.26.14.57.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 25 Jul 2026 11:51:42 -0700 (PDT)
-From: Mayur Kumar <kmayur809@gmail.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Mayur Kumar <kmayur809@gmail.com>
-Subject: [PATCH] mmc: core: add MMC_QUIRK_BROKEN_WRITE_ZEROES for ESMT eMMC
-Date: Sun, 26 Jul 2026 00:21:29 +0530
-Message-Id: <20260725185129.43397-1-kmayur809@gmail.com>
-X-Mailer: git-send-email 2.34.1
+        Sun, 26 Jul 2026 14:57:42 -0700 (PDT)
+From: Rosen Penev <rosenp@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulfh@kernel.org>,
+	linux-omap@vger.kernel.org (open list:OMAP HS MMC SUPPORT),
+	linux-kernel@vger.kernel.org (open list)
+Subject: [PATCH] mmc: omap_hsmmc: use platform_get_irq_optional for wake IRQ
+Date: Sun, 26 Jul 2026 14:57:40 -0700
+Message-ID: <20260726215740.34574-1-rosenp@gmail.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -72,77 +73,63 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-ESMT eMMC (SM0000) supports normal TRIM discard, but fails when TRIM
-is used to offload WRITE_ZEROES operations.
+Replace irq_of_parse_and_map() with platform_get_irq_optional() to
+get the wake IRQ. This is a more portable approach that works with
+both DT and non-DT platforms, and follows the modern platform API
+conventions for optional IRQ resources.
 
-Add a new card quirk, MMC_QUIRK_BROKEN_WRITE_ZEROES, to prevent setting
-max_write_zeroes_sectors during queue setup when this quirk is present.
-Apply this fixup to ESMT eMMC devices (CID_MANFID_ESM_MMC 0xEC,
-CID 'SM0000').
+The wake IRQ is now fetched earlier in the probe function alongside
+the main IRQ, and the -EPROBE_DEFER case is handled properly before
+the deferred probe can be triggered.
 
-Signed-off-by: Mayur Kumar <kmayur809@gmail.com>
+Signed-off-by: Rosen Penev <rosenp@gmail.com>
 ---
- drivers/mmc/core/card.h   | 1 +
- drivers/mmc/core/queue.c  | 3 ++-
- drivers/mmc/core/quirks.h | 6 ++++++
- include/linux/mmc/card.h  | 1 +
- 4 files changed, 10 insertions(+), 1 deletion(-)
+ drivers/mmc/host/omap_hsmmc.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index a7c364d0030..144a8f5e7d2 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -94,6 +94,7 @@ struct mmc_fixup {
- #define CID_MANFID_KINGSTON     0x70
- #define CID_MANFID_HYNIX	0x90
- #define CID_MANFID_KINGSTON_SD	0x9F
-+#define CID_MANFID_ESMT_MMC	0xEC
- #define CID_MANFID_NUMONYX	0xFE
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 58c881f2725b..4b5589157c59 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1764,7 +1764,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	struct mmc_host *mmc;
+ 	struct omap_hsmmc_host *host = NULL;
+ 	struct resource *res;
+-	int ret, irq;
++	int ret, irq, wake_irq;
+ 	const struct of_device_id *match;
+ 	const struct omap_mmc_of_data *data;
+ 	void __iomem *base;
+@@ -1792,6 +1792,11 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	if (irq < 0)
+ 		return irq;
  
- #define END_FIXUP { NULL }
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 5d187e063da..3ee640056a5 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -191,7 +191,8 @@ static void mmc_queue_setup_discard(struct mmc_card *card,
- 			lim->max_secure_erase_sectors = max_discard;
- 	}
- 
--	if (mmc_card_can_trim(card) && card->erased_byte == 0)
-+	if (mmc_card_can_trim(card) && card->erased_byte == 0 &&
-+	    !(card->quirks & MMC_QUIRK_BROKEN_WRITE_ZEROS))
- 		lim->max_write_zeroes_sectors = max_discard;
- 
- 	/* granularity must not be greater than max. discard */
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index ae3ece89d0a..91758fd7fc2 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -91,6 +91,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
- 	MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_BLK_NO_CMD23),
- 
-+	/* SM0000 supports normal TRIM discard but fails when TRIM is
-+	 * used to offload WRITE_ZEROES, so we disable it.
-+	 */
-+	MMC_FIXUP("SM0000", CID_MANFID_ESMT_MMC, 0x0100, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_WRITE_ZEROES),
++	wake_irq = platform_get_irq_optional(pdev, 1);
++	if (wake_irq == -EPROBE_DEFER)
++		return wake_irq;
++	wake_irq = max(wake_irq, 0);
 +
- 	/*
- 	 * Some SD cards lockup while using CMD23 multiblock transfers.
- 	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 9dc4750296a..938a4296b55 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -331,6 +331,7 @@ struct mmc_card {
- #define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */
- #define MMC_QUIRK_BROKEN_MDT    (1<<19) /* Wrong manufacturing year */
- #define MMC_QUIRK_FIXED_SECURE_ERASE_TRIM_TIME	(1<<20) /* Secure erase/trim time is fixed regardless of size */
-+#define MMC_QUIRK_BROKEN_WRITE_ZEROES	(1<<21)	/* Broken write zeroes via trim */
+ 	base = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
+ 	if (IS_ERR(base))
+ 		return PTR_ERR(base);
+@@ -1811,6 +1816,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->use_dma	= 1;
+ 	host->dma_ch	= -1;
+ 	host->irq	= irq;
++	host->wake_irq	= wake_irq;
+ 	host->mapbase	= res->start + pdata->reg_offset;
+ 	host->base	= base + pdata->reg_offset;
+ 	host->power_mode = MMC_POWER_OFF;
+@@ -1820,9 +1826,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
  
- 	bool			written_flag;	/* Indicates eMMC has been written since power on */
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 	platform_set_drvdata(pdev, host);
+ 
+-	if (pdev->dev.of_node)
+-		host->wake_irq = irq_of_parse_and_map(pdev->dev.of_node, 1);
+-
+ 	mmc->ops	= &omap_hsmmc_ops;
+ 
+ 	mmc->f_min = OMAP_MMC_MIN_CLOCK;
 -- 
-2.34.1
+2.55.0
 
