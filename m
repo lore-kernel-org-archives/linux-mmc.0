@@ -1,236 +1,368 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCA99390987
-	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 16:19:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA4463612EC
+	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 16:25:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.180.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785169187; cv=pass; b=Q2YlsJQZGHJNsEkk1Ux1B2Z9tV0vXB7YYVWdKQpo6rLQJzP+pjvvuLo9qUnub6wcsqc3PS7knD+mVeelubTkAma0ea7GGPrTlQcf9jz9xktMcJYsx9FKDh4RcQixM1v4VyvdwkwsR/CJedrjGhGFoL6a2KKIW5D0Kv/k0cckuc4=
+	t=1785169516; cv=pass; b=sNdI0e4vABCKod4T/OEttd2hJbPhZZu9HBwgsXJW5uT/+vJZPC6EvAdlqN9mW+1dswZl63Y4mVBUawFsP6l6uH3f6zplkoDGpgg/P0WQkTxkEl97QxsLLzGj8DWFUsNL6xFpRHaxJA/buMi8NhsY3FwCMHj+1Nx+oyBf2DEtCG4=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785169187; c=relaxed/simple;
-	bh=CYRMDuw+y2WIfUGRNRhwiz0KxMh/mfpfl53lxeGUyRk=;
+	s=arc-20240116; t=1785169516; c=relaxed/simple;
+	bh=4uzvo+bFYxakkdeclpr3u49Wg5tNvIr0lCX6tf7orSo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Tskrps85LycXHJ7OSCcoPkCMD3itoESmIGu/JVdsKh7mv6YW/iIOt97lMpkWbn8MgpPE8urBzLHx++kzYDaM6J+7WQC1ZdmkZ6Sic5wnW1UwQktv/SegKSdA+4gHObCg7yyxyFz5WSKfP1j/s6g+pxlG7vDXtjbNNuvMf+M53M8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=bKUWalET; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=EClHNRQV; arc=pass smtp.client-ip=205.220.168.131
+	 To:Cc:Content-Type; b=taxhLv9PkI4QdbSIGbwKhJbX9DS0iSvINGkEaYxfsIzpvsuAyfQIWgdNJ9E0i90EN2K8qNEAIhu7GOrAGovUbqObQ2Yu38bXzK4/tIFPpnYR0JNUh+7RlIAIu6PBJumxvgfn1sqTpP2VxZc1Rz+DBdsDYf0id3n0ZakUafrmnWc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=dA3/8qQb; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=XxOMt0NE; arc=pass smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="bKUWalET";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="EClHNRQV"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66RDlYpL855731
-	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 16:19:45 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="dA3/8qQb";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="XxOMt0NE"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66RDlsUW3787481
+	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 16:25:12 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	/nM+18oFo9xMbcyJq32Ax87Z5+meKINEq5a5KB92jkQ=; b=bKUWalETk2k6Vl+v
-	FoBQ2UByKitupRIEGj7W695W69amLTYYj9srBA6/zhFstKzU6WEeItEoCcmO/tam
-	jT3mLsyv2Qir7e8l9PfSoOOeHTPRH6vWioEkebExO62WO48TC5bGrfV4LkqTIj5j
-	5T6ywoXIY6kfg29Fj5J7hcTz5hzHVx7g7G4/XPXga8mrogTUZm2t6vsH0Jc/IEok
-	ARTtFRj6+aLTPGCKZ4vO0IxMt0TuhRl087oJHxONuglFb1OYaQm2q6I7rXSSjoXb
-	G6Bbt603J6Th01hMLI14eFmYoXy8jxDPKYiihU0srMPNzaAtSjuc0/RlkBs/aC6N
-	S+SLkA==
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com [209.85.219.72])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fny9wk10f-1
+	8UmwPFdZqcBS6XeoAjDE7OzL4Jwi9egEhXg4C5h1XHw=; b=dA3/8qQbFZLPYKV4
+	upzFD2CZL4QFwUTRDk5NnQdoSIXJ0GRZNNwBZXfu+SV6AhH4jQlDU6LDAzopRZXg
+	lWSCNGpe2bjfcddxCHD5ktK+UA8KEy1B140DRTj0ousdcYSnhnAN0JjwtQ/kPo9L
+	CLr0xZ8+3vKM6/5athIjm96UQ7rye7M0EqxkiXhQqayAidtElubN7SatsMklwlRK
+	oZl4n5O1dVr5z0ZnbyLx+LJLOZ40MuCibFiGzAQTY2hGtZnN2Y/KMa4aYqto8Yxr
+	G2SilhxAOf/Y8Ijh2ggksqgz977uHruA6lQkLAhRQg8oEhIIRFk5Gb2b9uNsFbn4
+	XffEGQ==
+Received: from mail-qk1-f200.google.com (mail-qk1-f200.google.com [209.85.222.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fp3v2hxgq-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 16:19:44 +0000 (GMT)
-Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-8ef18406878so38279916d6.2
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 09:19:44 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1785169184; cv=none;
+	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 16:25:12 +0000 (GMT)
+Received: by mail-qk1-f200.google.com with SMTP id af79cd13be357-92ef31cd429so294633585a.3
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 09:25:12 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1785169512; cv=none;
         d=google.com; s=arc-20260327;
-        b=eDlFgH7Pf97W2dxNprWh7WlCY25aZPry9kDAphXujXhUWvsGI73jd3OZVjv9L9ZxUm
-         dkJL4jetticFgVIcVeok11fE5BnhgUZ/yKW+hhBidMMYe8DYZRB7NtdjEo5pYjm5YuCn
-         zfiA0zsRcFuhRaQ3Mrz8PwoOSVCEvMcY3ua5QMgwD09+hBMqCm0g9xS3izUl2Y3NsWDs
-         IDYwDoTvhBbWzbTwsAX0Gdi2nBf9JFX/aA3W0RZsqcZVOgE4GclIic/q9cW+zmkV3EwB
-         xG5uAAL/lBbU8L5yDDmhZZ70ap4Yy+bGkuEzrX0ENSkASuJWQGvvOwvKzPj3LMHdRqIl
-         tlnw==
+        b=k13/y00YwPYADKS13ZsnJqD2tNWPMFglbfXsbipp0ncoPQV1Idwbgu9O7BR2jUA1Ey
+         lWA+23eBHQaTkGZL+nMeS+eovImaZS58hHXe6TKBvbNu+cgGg94beublSkBgMboJt2px
+         7NRxnEAmtakA05SuRsLJ49+Hz2wc0yHMxojLFXNYoC4mOpAOf2I+8BeH4yDvIgwZAhRe
+         NUWziAQlWAU33nvjVMqxYONSpRZNO5SbP/ePtYWxFCmk4QatwfMPs1doO5nBL0btYRBy
+         ZPOdhcryrjKKyqmUr4r2CyXyBDUa/VJNNq1DvvYCvG6f0SK1dHLHfMSVtLLKDvYhkN5Q
+         Qh8g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=/nM+18oFo9xMbcyJq32Ax87Z5+meKINEq5a5KB92jkQ=;
-        fh=QJxveW3wX7KpBiYhloUX+ZrpOJ2mTiXBHfEPytFsIp4=;
-        b=NhVOcCBifiCFT+Xg6WNLxRAKBMHGJad5lxszArw5gR71lM2dbA8Shksi2o4Z7RkCvB
-         d7AMqyYiJTos9WE/XSrxZdFHFCOkY6hP37arbcgiU/nCoQ8XrwmgCxNlN+oM6aRkyWR+
-         U1/x7/U9tipxvSkPENpxWWuUeUsFD0t+cdYUzXlgiRgJqMUWfqjUu0JAgdTDclaAsJFP
-         bMvNkfiqOBdvYXA7EK4M+DiyvawBDKN8h/eWVhPRHoiGx/z2Y0G3fUIaWOs3hObk+HEV
-         ScASURjE7Ge4Hcjap5A4XCJrRs0QfH97b4pYhPu36AkqA1keucT00Y+MJDqWZFr/RfEg
-         Pabg==;
+        bh=8UmwPFdZqcBS6XeoAjDE7OzL4Jwi9egEhXg4C5h1XHw=;
+        fh=EB6ULqvQ6kOewyVZt/2Adt/j6dWlLBbjhVsfFnlNJ4M=;
+        b=P5mKMvSNZ1Ulh8kJUz56MYGwqNWqFuBRQcVztliMXrGGcM7UeGSOFPi0m2mzYQmxcn
+         HuXWUlPUo4VoMiAQfWKAUHUsVsffhmimFkKTVFIGuMi/EIzn99TWnxwNKmKYwDClo4zn
+         5l1+HnnUb17qTjZJOkXfb+N7CFHLJJyokx7sazlgFxFiwRQ+SL/10P19CJBPcts3xzTV
+         Mf4ajs7FKP+Y781u4cYu8f7slITTrZ6+SmvZgYKob3/diPNQhlT9Nzcj1tLABN6JE49R
+         SKjF+IHlHUkPOFZju61hnV04NQryax9prOuia7nZXwb1UU+CBYnC7qpDZR3MkwTVnNW2
+         +Kig==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1785169184; x=1785773984; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1785169512; x=1785774312; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=/nM+18oFo9xMbcyJq32Ax87Z5+meKINEq5a5KB92jkQ=;
-        b=EClHNRQVUuViFZI7tvkymKL4XWPBghyolt+qYyV9ANx05GroqZ4BPjX7QAlERgtgq5
-         FqJW8wvUA7VrlfY0WEzomMhNTegtWLUjiMkzvpbwOXeMcLEts0ENwa0fbSJ3hBP3ax9g
-         JZJFjAtrmv80Wdqow0r36WHBGJJE4rQeQ7PMZ+CnCU7i2WlsdQEu3y7sYqTW/PGCyhJe
-         YKS2wSlUoTVar80MdvUKx4v2EleMU3lzrZh43PfwyXSIMmr2GFJF3bRRUWkaVjVDPvBO
-         k5TrIyIp/X6FM0lNjYruA+bdPSDJrLeFQMggVI5NZUmKEPDL69t/+BrrLe1FgKvCbq7J
-         ySyA==
+        bh=8UmwPFdZqcBS6XeoAjDE7OzL4Jwi9egEhXg4C5h1XHw=;
+        b=XxOMt0NELMTlK8Wzac0IRu0mwrAF72RrMWs0G28g9anReSAfBMDdOUgkClBI8xDqct
+         SfvRyr5bRgfYpImEuvX7QAwciRhovWWLJuLsp7hlebdtRb+pHG4A7sXAck5M3FZZ/Aag
+         DSSYpiGOAVh9CDs7LICQEXjHKMQLoHNdw/OlyqpvLmJT99gR2KEOICDVPDTEgIJfnDCT
+         QroeQebgZCUS6Q9S0G8y9CWHth73JwuXCY+y1g2to+AXPbqHq4pTBMC3WBj3HqvJilOL
+         8CDHseAepcD+lNJhHBeyMJkfLB/aChghaEZ3QDoB8QjEy25N0/D5XeVd7FBtUvgRJtsu
+         A5Pw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785169184; x=1785773984;
+        d=1e100.net; s=20251104; t=1785169512; x=1785774312;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=/nM+18oFo9xMbcyJq32Ax87Z5+meKINEq5a5KB92jkQ=;
-        b=IzhulW02fKjMaBDAtvWbztRuFNfpGYLJaSmgEjz0fSLe7SfpI6zOPKIRHkwUm1v0zg
-         oX2BUGp+97rv8L39rL5ZEZKqudItQmfSkfQGUrYtw268oRXYA7hCqOe8MWTqOE8GCDYh
-         hnTSkFCI15GjFUxRprtlYurrmbObUunbIuunLqWGXcZMJiQmNLzO7WVFgbKvnPx0nBLX
-         bUN1cHNLWwNSt9wAVox826FX0rq2Vi94vbyYvShhS3gGKzjI39JgFz8BTEZphyMNYefI
-         AeECloQB820Qv0DxEt5JL3BiW9vpnGbiBp9d4YDRcnH/K7EiIGNIlA8SgEnULrN2yGm/
-         IJeA==
-X-Forwarded-Encrypted: i=1; AHgh+Rpk1VdWps+r3w8qf1eK+Kd6AkOh7HvRsuVPbyLhybZlmEmeiKTzaEv5lhaWUfCiEMezMGADF///2Lo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzLHTVPzLp3SF25fPXr0h4JQTqjRR4tKOesAWxl4AmCHSlmN9Az
-	nqJ/g5NjCuIwDLP0bLNzCkhfj2PXIMe0mSdwXsA951EZyGcKFMNzzFvYfmFkvNhhzNGNHA01D9z
-	oALABiWWAzs9umYrbBXFvuPPN+br6PzPESkiFbEh8KUk5ImYI2AazoV7zBKvQ+YpAm0oXrcQj5o
-	6zoRKqQPt44vsqtmHve+e5xeT1uiEB8CvAb8nfXQ==
-X-Gm-Gg: AR+sD11r2ie2/xcW41e7A+lAmDX17asP0vlYLv79Fns1qBavA4XMYHZ8p8QmR/WCIDt
-	oSj5rZRAtlvEXHC6r9m96LMZvJ5iSlGHvvikKF/gYKwxD3A2LlZccJbgBGtu+dWWAmSk2KQdWm1
-	GWu+uG+MI+cbLH4qcPVAegCZiomxQVRhJ711uJX00GknitnZZGeXUAlKfSSw==
-X-Received: by 2002:a05:6214:540d:b0:8ef:cfa:2a36 with SMTP id 6a1803df08f44-90812699963mr2458666d6.9.1785169183678;
-        Mon, 27 Jul 2026 09:19:43 -0700 (PDT)
-X-Received: by 2002:a05:6214:540d:b0:8ef:cfa:2a36 with SMTP id
- 6a1803df08f44-90812699963mr2458216d6.9.1785169183123; Mon, 27 Jul 2026
- 09:19:43 -0700 (PDT)
+        bh=8UmwPFdZqcBS6XeoAjDE7OzL4Jwi9egEhXg4C5h1XHw=;
+        b=KBL57oX2q6IPFWTRD9P1ANiTxKarX9rF1jHdR5q+ZhR9l8U6I6GIm5uZzAIqY+hrnI
+         lN3g9xIM2Y+oF+Nr+M/4OQokOdKH5LH5NLrM9BrjikofjFr/NVidJl3gbHXX3RoGh+oQ
+         gGbtWXzosTHItDpPhpqWwg5Iq/tIFSc2D9qHgm/lkjc7Sf9dZSrN+O2fDQ04C6HvSeO0
+         SeL+21sRMbpALQxRdD4LmZWfZnWrsmVljKHD3MbZplcK/Bw481lef/nha6F2fihRmfgH
+         Pr5+9qFfTEM1VQmWMa97NHrcEtjmu6VNiBdnboIlkdgpTwOfXG4633apOMx0NCR5BO90
+         fYTQ==
+X-Forwarded-Encrypted: i=1; AHgh+Rot3xI9ASKg3dMBV5dMUQN34o5aOVWUq2R4Ovz5XdojxS31FDDf65MYZNpAD68kfnfh+jJKoGfppSM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxbMg7x+cE91g8UwvYDPF0/svYmM2Y4XHHoyH4m+R4I6SyqDjkz
+	NVGSAezm560gPfJonP+lqxe4ram1EZzG5nF9y6Y/GiSQeqC+Sze6XAbpVsGWNisJ2XiWfTwIyLq
+	NDyynTJlO4S/MGP1pZaq9Jqby0x+fFg76+MqLPwwaMNj7CMU/xdkG3QkshOIsLfaSUuc6NqbI7y
+	alCecs0pHF22dVZc5m1oBfAeAMT+JSR5HYyKs/XQ==
+X-Gm-Gg: AR+sD10up46VZZYL2GPBUOkS3VMUDY1LyWTL39UeznvS+CsetU/X3QZhiVhqsIicwfL
+	whlXuiQEYq1s3lsCtcFelfHJnI0fwfMmxvUndpPPUCc0Lmhs7BCLjXyWvXFcpYvnTYFAxAmMg4g
+	Ol6i62Jbnr6+IWZNyDzUcJPKvmR3Sfr/EBnHlTu+jk9U2flfH6SCC+rse8uA==
+X-Received: by 2002:a05:620a:630f:10b0:92e:70e9:6865 with SMTP id af79cd13be357-932df6f5721mr719208885a.59.1785169511739;
+        Mon, 27 Jul 2026 09:25:11 -0700 (PDT)
+X-Received: by 2002:a05:620a:630f:10b0:92e:70e9:6865 with SMTP id
+ af79cd13be357-932df6f5721mr719204585a.59.1785169511268; Mon, 27 Jul 2026
+ 09:25:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260725185129.43397-1-kmayur809@gmail.com>
-In-Reply-To: <20260725185129.43397-1-kmayur809@gmail.com>
+References: <20260717101508.635969-1-panchuang@vivo.com>
+In-Reply-To: <20260717101508.635969-1-panchuang@vivo.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Mon, 27 Jul 2026 18:19:32 +0200
-X-Gm-Features: AUfX_mwPlQrgFMQyjAZ5yXIWnjedtehlosD29SiCPKHDV_rQ9JCUMMSr7b3a9-0
-Message-ID: <CAPx+jO9rFKorZ9DYQ7uNjRJK9r1+Kx6Qxza7GQChAWtzZeK63w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: add MMC_QUIRK_BROKEN_WRITE_ZEROES for ESMT eMMC
-To: Mayur Kumar <kmayur809@gmail.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date: Mon, 27 Jul 2026 18:25:00 +0200
+X-Gm-Features: AUfX_mypfPWM-amzHbSs1D-8MroCYJxvNGLX8PscRYAazVsoNMy_QxZjvylnM7A
+Message-ID: <CAPx+jO_fcijCoA0UEPS359EZKgzEtjP3EYKt48r7ryOz6RT12A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: Remove redundant dev_err()/dev_err_probe()
+To: Pan Chuang <panchuang@vivo.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Robert Richter <rric@kernel.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Nicolas Pitre <nico@fluxnic.net>,
+        =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>,
+        Linus Walleij <linusw@kernel.org>,
+        Thomas Fourier <fourier.thomas@gmail.com>,
+        Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig_=28The_Capable_Hub=29?= <u.kleine-koenig@baylibre.com>,
+        Danilo Krummrich <dakr@kernel.org>,
+        Takashi Sakamoto <o-takashi@sakamocchi.jp>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        "moderated list:ARM/Amlogic Meson SoC support" <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Amlogic Meson SoC support" <linux-amlogic@lists.infradead.org>,
+        "open list:OMAP HS MMC SUPPORT" <linux-omap@vger.kernel.org>,
+        "moderated list:ARM/ACTIONS SEMI ARCHITECTURE" <linux-actions@lists.infradead.org>,
+        "open list:ARM/QUALCOMM MAILING LIST" <linux-arm-msm@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzI3MDE1MSBTYWx0ZWRfX3WoMOIX5Q/80
- TbnnqQaax5etIqV0tL1Cn2p6Q7uCqRfI55+RUoV29hhpOFD53bXmts7s8Jm5WPl3+AunuhUAGdI
- OzMctky4Iiugue+4lJ3/gVD33Bt6HNk9qYG8iCL5tZSSV8o4yye14sTzQGm5iaMWBTSP2ctrjBN
- j03vfFpbjEz5qUMm7pcPRSA2Tm15ucHv0AoLf43rYm3ukLqpsCZY1Yd0XrzTwdNYiHQ/1l2fu2F
- +phDJ5Wp4ij2hhHDzij5GmjgYVlv+5sC0NpLtkzcBW5Qy0m0sz3+7C6lWpfcZPQSzUdqWjki/lY
- uNr3iBuBOaQS3US+/gZWHe6dAtVFSHJXU9UuR3KOTS3qAbqwRmn2OGlnzm0HEGlm40YU9Lj5q7e
- qLs7mmY8hjGDv3LNibJTszF+Xt+LVu72tGXPrxEXM9NNjem5fZs3Bnm0orWD0hKPd00gD6l/SzQ
- iYZqIiQ2M3Z1tSyOmPA==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzI3MDE1MSBTYWx0ZWRfXxOJJfzvboiDI
- zi3ZMitW7IVFsBCyCIoUlemHee32YFdSHv2qNavV6HXrlBMv98Rh5ko3W+7apfV7y25R0GWd7Ky
- il8WZ6BGsRRJ+rIKdRA+6JrDPOs+GpE=
-X-Proofpoint-ORIG-GUID: 1Y7ZcEMxkSp4-WlhpQ5Jr1yF2bQGFoRJ
-X-Authority-Analysis: v=2.4 cv=E4b9Y6dl c=1 sm=1 tr=0 ts=6a678520 cx=c_pps
- a=7E5Bxpl4vBhpaufnMqZlrw==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzI3MDE1MiBTYWx0ZWRfX0clgrVJFFCaK
+ HGcmwK4YxxCaz8PLG1k25L3v2h3KXhJocHIA7KTnLbkZUiOngugAwXTQmOFEP0cr3KUV2FKMBAk
+ jPIOwWuX036k9D4lkuXUOxMNR/e+TDE=
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzI3MDE1MiBTYWx0ZWRfXxIVP8Q+N3eXh
+ f/QEnIPA+KkHmO5y8onkXqQUI94YzA8h5K+7//R0PmRKoqqrlF77ybpdeETb1sqJOzUT8/5ZDOw
+ vnc01T5mEHLkM5f/5ckGNRtRJVkvf4Sh2N+zqMkhAJUBFvobwMoJf4GgYTai7H/YcLpMJJGaOVh
+ 0yKse1h5Kd/qhwmarJnNs5Uyb9TGs1snke1OcToHbaO712sZT01QWTU+KxioUkimpcb6v5Qm6dC
+ AoEL2rhOkH3AGy0YrCSRA6S+n7gN30d8xLvZ6YSmRODlXJX9hLkT70bcxg/3NY7icemA3DRpvjo
+ NeLp0b4cBWHqYkg0ynlS1vLjNdVUKPkVXiN8v8ns/6oHOGxtoZPaQJp6OGeP6EJ8kBhqaH5WLE/
+ 42XhTr06ZKXKrnrc2VkcXj6g9vS+PNBv++a/4ySQlKkUu6NGYbgW71ghn6FYq094SXrJWyZzSGR
+ FqoTKIWrb/s/Q3cYDSw==
+X-Proofpoint-GUID: 0MW6i4vkqRFsGIRz_ljDur7QDhUN7A4a
+X-Authority-Analysis: v=2.4 cv=KJ9qylFo c=1 sm=1 tr=0 ts=6a678668 cx=c_pps
+ a=hnmNkyzTK/kJ09Xio7VxxA==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=eoimf2acIAo5FJnRuUoq:22 a=pGLkceISAAAA:8 a=ArojrkID1Xi9Fne5oiQA:9
- a=QEXdDO2ut3YA:10 a=pJ04lnu7RYOZP9TFuWaZ:22
-X-Proofpoint-GUID: 1Y7ZcEMxkSp4-WlhpQ5Jr1yF2bQGFoRJ
+ a=yx91gb_oNiZeI1HMLzn7:22 a=1WtWmnkvAAAA:8 a=TYD399XWoFAa3X5oXMIA:9
+ a=QEXdDO2ut3YA:10 a=PEH46H7Ffwr30OY-TuGO:22
+X-Proofpoint-ORIG-GUID: 0MW6i4vkqRFsGIRz_ljDur7QDhUN7A4a
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-07-27_04,2026-07-24_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 clxscore=1015 priorityscore=1501 impostorscore=0 bulkscore=0
- lowpriorityscore=0 adultscore=0 suspectscore=0 malwarescore=0 phishscore=0
+ spamscore=0 impostorscore=0 malwarescore=0 clxscore=1015 lowpriorityscore=0
+ phishscore=0 priorityscore=1501 suspectscore=0 bulkscore=0 adultscore=0
  classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607270151
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607270152
 
-On Sat, Jul 25, 2026 at 8:51=E2=80=AFPM Mayur Kumar <kmayur809@gmail.com> w=
-rote:
+On Fri, Jul 17, 2026 at 12:17=E2=80=AFPM Pan Chuang <panchuang@vivo.com> wr=
+ote:
 >
-> ESMT eMMC (SM0000) supports normal TRIM discard, but fails when TRIM
-> is used to offload WRITE_ZEROES operations.
+> Since commit 55b48e23f5c4 ("genirq/devres: Add error handling in
+> devm_request_*_irq()"), devm_request_irq() and devm_request_threaded_irq(=
+)
+> automatically log detailed error messages on failure. Remove the
+> now-redundant driver-specific dev_err() and dev_err_probe() calls.
+>
+> Signed-off-by: Pan Chuang <panchuang@vivo.com>
 
-Out of curiosity, how does it fail?
-
->
-> Add a new card quirk, MMC_QUIRK_BROKEN_WRITE_ZEROES, to prevent setting
-> max_write_zeroes_sectors during queue setup when this quirk is present.
-> Apply this fixup to ESMT eMMC devices (CID_MANFID_ESM_MMC 0xEC,
-> CID 'SM0000').
->
-> Signed-off-by: Mayur Kumar <kmayur809@gmail.com>
-> ---
->  drivers/mmc/core/card.h   | 1 +
->  drivers/mmc/core/queue.c  | 3 ++-
->  drivers/mmc/core/quirks.h | 6 ++++++
->  include/linux/mmc/card.h  | 1 +
->  4 files changed, 10 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index a7c364d0030..144a8f5e7d2 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -94,6 +94,7 @@ struct mmc_fixup {
->  #define CID_MANFID_KINGSTON     0x70
->  #define CID_MANFID_HYNIX       0x90
->  #define CID_MANFID_KINGSTON_SD 0x9F
-> +#define CID_MANFID_ESMT_MMC    0xEC
->  #define CID_MANFID_NUMONYX     0xFE
->
->  #define END_FIXUP { NULL }
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 5d187e063da..3ee640056a5 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -191,7 +191,8 @@ static void mmc_queue_setup_discard(struct mmc_card *=
-card,
->                         lim->max_secure_erase_sectors =3D max_discard;
->         }
->
-> -       if (mmc_card_can_trim(card) && card->erased_byte =3D=3D 0)
-> +       if (mmc_card_can_trim(card) && card->erased_byte =3D=3D 0 &&
-> +           !(card->quirks & MMC_QUIRK_BROKEN_WRITE_ZEROS))
-
-Please add a helper in card.h, similar to the others "mmc_card_broken_*".
-
->                 lim->max_write_zeroes_sectors =3D max_discard;
->
->         /* granularity must not be greater than max. discard */
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index ae3ece89d0a..91758fd7fc2 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -91,6 +91,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_f=
-ixups[] =3D {
->         MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_=
-mmc,
->                   MMC_QUIRK_BLK_NO_CMD23),
->
-> +       /* SM0000 supports normal TRIM discard but fails when TRIM is
-> +        * used to offload WRITE_ZEROES, so we disable it.
-> +        */
-> +       MMC_FIXUP("SM0000", CID_MANFID_ESMT_MMC, 0x0100, add_quirk_mmc,
-> +                 MMC_QUIRK_BROKEN_WRITE_ZEROES),
-> +
->         /*
->          * Some SD cards lockup while using CMD23 multiblock transfers.
->          */
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 9dc4750296a..938a4296b55 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -331,6 +331,7 @@ struct mmc_card {
->  #define MMC_QUIRK_NO_UHS_DDR50_TUNING  (1<<18) /* Disable DDR50 tuning *=
-/
->  #define MMC_QUIRK_BROKEN_MDT    (1<<19) /* Wrong manufacturing year */
->  #define MMC_QUIRK_FIXED_SECURE_ERASE_TRIM_TIME (1<<20) /* Secure erase/t=
-rim time is fixed regardless of size */
-> +#define MMC_QUIRK_BROKEN_WRITE_ZEROES  (1<<21) /* Broken write zeroes vi=
-a trim */
->
->         bool                    written_flag;   /* Indicates eMMC has bee=
-n written since power on */
->         bool                    reenable_cmdq;  /* Re-enable Command Queu=
-e */
-> --
-> 2.34.1
->
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/alcor.c         |  3 +--
+>  drivers/mmc/host/cavium-octeon.c | 10 ++--------
+>  drivers/mmc/host/meson-mx-sdio.c |  5 +----
+>  drivers/mmc/host/mvsdio.c        |  4 +---
+>  drivers/mmc/host/omap_hsmmc.c    |  4 +---
+>  drivers/mmc/host/owl-mmc.c       |  5 +----
+>  drivers/mmc/host/sdhci-msm.c     |  4 +---
+>  drivers/mmc/host/sh_mmcif.c      |  8 ++------
+>  8 files changed, 10 insertions(+), 33 deletions(-)
+>
+> diff --git a/drivers/mmc/host/alcor.c b/drivers/mmc/host/alcor.c
+> index 721db54739c1..45528909a758 100644
+> --- a/drivers/mmc/host/alcor.c
+> +++ b/drivers/mmc/host/alcor.c
+> @@ -1103,8 +1103,7 @@ static int alcor_pci_sdmmc_drv_probe(struct platfor=
+m_device *pdev)
+>                         alcor_irq, alcor_irq_thread, IRQF_SHARED,
+>                         DRV_NAME_ALCOR_PCI_SDMMC, host);
+>         if (ret)
+> -               return dev_err_probe(&pdev->dev, ret,
+> -                                    "Failed to get irq for data line\n")=
+;
+> +               return ret;
+>
+>         mutex_init(&host->cmd_mutex);
+>         INIT_DELAYED_WORK(&host->timeout_work, alcor_timeout_timer);
+> diff --git a/drivers/mmc/host/cavium-octeon.c b/drivers/mmc/host/cavium-o=
+cteon.c
+> index 8a0daddd9200..1bfc1a4f9fe9 100644
+> --- a/drivers/mmc/host/cavium-octeon.c
+> +++ b/drivers/mmc/host/cavium-octeon.c
+> @@ -240,21 +240,15 @@ static int octeon_mmc_probe(struct platform_device =
+*pdev)
+>                         ret =3D devm_request_irq(&pdev->dev, mmc_irq[i],
+>                                                cvm_mmc_interrupt,
+>                                                0, cvm_mmc_irq_names[i], h=
+ost);
+> -                       if (ret < 0) {
+> -                               dev_err(&pdev->dev, "Error: devm_request_=
+irq %d\n",
+> -                                       mmc_irq[i]);
+> +                       if (ret < 0)
+>                                 return ret;
+> -                       }
+>                 }
+>         } else {
+>                 ret =3D devm_request_irq(&pdev->dev, mmc_irq[0],
+>                                        cvm_mmc_interrupt, 0, KBUILD_MODNA=
+ME,
+>                                        host);
+> -               if (ret < 0) {
+> -                       dev_err(&pdev->dev, "Error: devm_request_irq %d\n=
+",
+> -                               mmc_irq[0]);
+> +               if (ret < 0)
+>                         return ret;
+> -               }
+>         }
+>
+>         host->global_pwr_gpiod =3D devm_gpiod_get_optional(&pdev->dev,
+> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx=
+-sdio.c
+> index 5921e2cb2180..bef5e843f449 100644
+> --- a/drivers/mmc/host/meson-mx-sdio.c
+> +++ b/drivers/mmc/host/meson-mx-sdio.c
+> @@ -683,11 +683,8 @@ static int meson_mx_mmc_probe(struct platform_device=
+ *pdev)
+>                                         meson_mx_mmc_irq,
+>                                         meson_mx_mmc_irq_thread, IRQF_ONE=
+SHOT,
+>                                         NULL, host);
+> -       if (ret) {
+> -               dev_err_probe(host->controller_dev, ret,
+> -                             "Failed to request IRQ\n");
+> +       if (ret)
+>                 goto error_unregister_slot_pdev;
+> -       }
+>
+>         core_clk =3D devm_clk_get_enabled(host->controller_dev, "core");
+>         if (IS_ERR(core_clk)) {
+> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+> index 79df2fa89a3f..cf705b265e21 100644
+> --- a/drivers/mmc/host/mvsdio.c
+> +++ b/drivers/mmc/host/mvsdio.c
+> @@ -764,10 +764,8 @@ static int mvsd_probe(struct platform_device *pdev)
+>         mvsd_power_down(host);
+>
+>         ret =3D devm_request_irq(&pdev->dev, irq, mvsd_irq, 0, DRIVER_NAM=
+E, host);
+> -       if (ret) {
+> -               dev_err(&pdev->dev, "cannot assign irq %d\n", irq);
+> +       if (ret)
+>                 goto out;
+> -       }
+>
+>         timer_setup(&host->timer, mvsd_timeout_timer, 0);
+>         platform_set_drvdata(pdev, mmc);
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.=
+c
+> index 58c881f2725b..63a9fb970975 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1915,10 +1915,8 @@ static int omap_hsmmc_probe(struct platform_device=
+ *pdev)
+>         /* Request IRQ for MMC operations */
+>         ret =3D devm_request_irq(&pdev->dev, host->irq, omap_hsmmc_irq, 0=
+,
+>                         mmc_hostname(mmc), host);
+> -       if (ret) {
+> -               dev_err(mmc_dev(host->mmc), "Unable to grab HSMMC IRQ\n")=
+;
+> +       if (ret)
+>                 goto err_irq;
+> -       }
+>
+>         ret =3D omap_hsmmc_reg_get(host);
+>         if (ret)
+> diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+> index 349082d76a99..d5b8a110267b 100644
+> --- a/drivers/mmc/host/owl-mmc.c
+> +++ b/drivers/mmc/host/owl-mmc.c
+> @@ -635,11 +635,8 @@ static int owl_mmc_probe(struct platform_device *pde=
+v)
+>
+>         ret =3D devm_request_irq(&pdev->dev, owl_host->irq, owl_irq_handl=
+er,
+>                                0, dev_name(&pdev->dev), owl_host);
+> -       if (ret) {
+> -               dev_err(&pdev->dev, "Failed to request irq %d\n",
+> -                       owl_host->irq);
+> +       if (ret)
+>                 goto err_release_channel;
+> -       }
+>
+>         ret =3D mmc_add_host(mmc);
+>         if (ret) {
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index ceed47ccfda8..4aff965f0e2e 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2864,10 +2864,8 @@ static int sdhci_msm_probe(struct platform_device =
+*pdev)
+>         ret =3D devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, =
+NULL,
+>                                         sdhci_msm_pwr_irq, IRQF_ONESHOT,
+>                                         dev_name(&pdev->dev), host);
+> -       if (ret) {
+> -               dev_err(&pdev->dev, "Request IRQ failed (%d)\n", ret);
+> +       if (ret)
+>                 goto clk_disable;
+> -       }
+>
+>         msm_host->mmc->caps |=3D MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_R=
+SP_BUSY;
+>
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 9831956de1c8..7706d01b149e 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1505,18 +1505,14 @@ static int sh_mmcif_probe(struct platform_device =
+*pdev)
+>         name =3D irq[1] < 0 ? dev_name(dev) : "sh_mmc:error";
+>         ret =3D devm_request_threaded_irq(dev, irq[0], sh_mmcif_intr,
+>                                         sh_mmcif_irqt, 0, name, host);
+> -       if (ret) {
+> -               dev_err(dev, "request_irq error (%s)\n", name);
+> +       if (ret)
+>                 goto err_clk;
+> -       }
+>         if (irq[1] >=3D 0) {
+>                 ret =3D devm_request_threaded_irq(dev, irq[1],
+>                                                 sh_mmcif_intr, sh_mmcif_i=
+rqt,
+>                                                 0, "sh_mmc:int", host);
+> -               if (ret) {
+> -                       dev_err(dev, "request_irq error (sh_mmc:int)\n");
+> +               if (ret)
+>                         goto err_clk;
+> -               }
+>         }
+>
+>         mutex_init(&host->thread_lock);
+> --
+> 2.34.1
+>
