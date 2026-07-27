@@ -1,177 +1,232 @@
-Received: from AM0PR02CU008.outbound.protection.outlook.com (mail-westeuropeazon11013065.outbound.protection.outlook.com [52.101.72.65])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8F9F388386;
-	Mon, 27 Jul 2026 14:52:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.72.65
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DE41346FA4
+	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 15:17:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785163962; cv=fail; b=JcJqvkg8MOsamT3k517RixSq9BbThgWSIkgTOWMDeP8QjC577n6jecaDBoBpPQKHjFhkZVy6zII8n2JQsfUaCDNhAEbnPu9hmUXiXv7SYaTnDsTh877q7BUdIrDbpf2+zz8YFc2qtTpe0TvjEsgnHyfzu+xXNUmGGRfzvK2rL18=
+	t=1785165422; cv=pass; b=eRq+6FqeoicoJOA6mTm8f6I4AUlIJ4E68otHRYYbg916qqsDwdYEzoCCY51AhJfx+jiXodgD4GeXB+dwJGgD+rPlRScw1rHDpUCxMgTL4hQGe4+azb3Bm5ypb76gDUlzujyX3BJWqDqWiigMuaz6taDutI0U7V+Df+yWCQP9f7E=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785163962; c=relaxed/simple;
-	bh=q22gAeeJnZdbu7YRJl/nOcRmab9PkyCsQ0yTzC78Ueg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=HDREDZWfgvIKgywIDvy8M4ZokeyUR/QiLvYP7XS2dkvGvwM2P1G6aZ3Nco0ntWyc019EyY/Jyunyi2WPJIQtVuu4pGsS++etjgS36elMQIlS0qfxMF1xEnxCNAMbaF1Cx4qYzXmCIuhLfaNHGl2GJqWiFRCXKLb08caytrW3tC8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=JFy/1xzt; arc=fail smtp.client-ip=52.101.72.65
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
+	s=arc-20240116; t=1785165422; c=relaxed/simple;
+	bh=upcAxlK/pJxiGNOpFfkmTSfZpXzLTLC4M8zkiBNmxDU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=hHkrFG+3osvQm5EdOucMknr8DMx0SrCJqPcSWZMNGwnq4tb047Ng9DvDOYHkec8St37SkB8icZYJn1k6G1QQ0aRqPTOrYV9J34MwEx8ktkicBxZcMpjqOV9R5L3PdXaYAq4fAjfrW4XyAN9VNp/R64VR84VckCLEVT+SxKEQmuI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=NmgdLGJ9; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=LpX9QJVl; arc=pass smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="JFy/1xzt"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Ns7RRXlzBm0wmY47/8wpW8lf85uhv37UJ2UjotEHN8CFbV4BhuvLzkDTS9Be/Q/Kg7cTSJVG3Q1gLgut836RCFCAif8F6LoZl7MpNH/KoG98h92UubchoVCCY+vVdXpR+vtbqi7KUmi2mVzZ1+gwgSpdiLk6x0yEIiL0FizhRFRgMDzrCbZ4zUKXybueRRKrSyJIyIfcq/pT/VLrLZ+EMNTz0hpzSafj7Zo7F00VmCFNf+X1q2paTCFz1NMaL/rdW3ldHF2vT4Tio/cbNmRt1t9wUvFlK5FG7Lzwct4L61mSBe3/Pq30MLcTxOBxhHrHQr5YK0yooz5CNtVH72LLTA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=NJ3vz77x+c0Ii+mJwUAKUzfACqek2mJMgxi5AJRQVC0=;
- b=nA+d1QtPrqovtHbpo/4fqdjfiTiqSY7NA2LuFkZy+bV1nXMvsJ0SZi7zeASua4ou42OEE+hc/2Kv346Sa/wnGp1MVKTVnwF8M2CnV+RYUujnYViQKp+OZHgzSrI3K59M690s6piW3zgYFcbYijfpQVcuXqldIdMJ2gH+UlPDMu4p7IVt9J+gt8Q3fnSgxYR8iFEOTqnTmodtCxbyfyESLGCbi610IqqqeoafphJMl4cGs8B8Lxwhy/hLapw9wRRY6hTwnq9Dv5NNVkX1tKvcyxehG6diJjP6AAb2TjEc2Pi065VHqwU0N98sm0eFAShfzIaak8he11Iv4UmVQcWGEQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
- dkim=pass header.d=oss.nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
- s=selector1-NXP1-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=NJ3vz77x+c0Ii+mJwUAKUzfACqek2mJMgxi5AJRQVC0=;
- b=JFy/1xztNfqZQVZLx1vRzAnTfUYoG1gb9aUoRG9+TAXjrYidWbj4gZ0qkeAx0e4STE9oR1jjMqa4lD5bZRe91GfbwDStKBlCr3KvS5asVoXgX27l7j1NGcaCUXKnq5wLhAad95pRhxvgyft3QhGLJbfRzuKWX6dX/U4S0uMcJjAahh2n+w2fb5vvwTqn+YzQUx6nBROy2Lzgtc1xuuKMSvlDvdC5MEN18M9+8tz9+2Dzq563X3Gk99+tNy4LIQNgyPTRvcIhFb7Fv0mzeowHtgycCwn529Maok08VglGlnWer5ewDsjVilZ/UOzbN6wGr6bzP84j94flK0L50Km/6A==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=oss.nxp.com;
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com (2603:10a6:150:2cf::9)
- by AS4PR04MB9265.eurprd04.prod.outlook.com (2603:10a6:20b:4e0::8) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.245.13; Mon, 27 Jul
- 2026 14:52:36 +0000
-Received: from GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c]) by GV2PR04MB11799.eurprd04.prod.outlook.com
- ([fe80::2146:83a2:5329:b7c%6]) with mapi id 15.21.0245.012; Mon, 27 Jul 2026
- 14:52:36 +0000
-Date: Mon, 27 Jul 2026 09:52:28 -0500
-From: Frank Li <Frank.li@oss.nxp.com>
-To: haibo.chen@oss.nxp.com
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
-	Yinbo Zhu <yinbo.zhu@nxp.com>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, imx@lists.linux.dev,
-	Haibo Chen <haibo.chen@nxp.com>
-Subject: Re: [PATCH] mmc: sdhci: make tuning_err a signed int
-Message-ID: <amdwrKu5KP82r-Yf@SMW015318>
-References: <20260727-sdhci-fix-v1-1-1a655a5d895d@nxp.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260727-sdhci-fix-v1-1-1a655a5d895d@nxp.com>
-X-ClientProxiedBy: PH3PEPF000040A1.namprd05.prod.outlook.com
- (2603:10b6:518:1::52) To GV2PR04MB11799.eurprd04.prod.outlook.com
- (2603:10a6:150:2cf::9)
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="NmgdLGJ9";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="LpX9QJVl"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66RDlfWU033188
+	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 15:17:00 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	TsB+fBvryEs98glnklrZSnP8jIeujXx+Rk85PKBUBk8=; b=NmgdLGJ9KzuC+ka6
+	HPlQzhUJ8doQmfSL4SgBBlkJBMNzucRQyPUocC0K4uufu2yaEP/ZmbWnuL+qbZzU
+	Tv+KQE0oKCCURQHJKmGjK0WhkBMZ2GgyE8415jQAAKLiN2BeGothQP1U4M7+Jafu
+	MBRQ0SbxxXFjC7BYwWQirbquq2TA9HA+DIYmIzKpsDmxwD+E7Ww4scMMd4LlzshC
+	e9jKiFwIwKNEMcAaHtQh2rF0uIWdcVT8Mgh4ZIktbVngPIce8EA3htVKPx+M5Ma4
+	cCYpRRRehTOEJMb1l6ZDK9p2X0vr3Z0kij7ZUbX38hBGlxtzt8FX7mDBC36i08+a
+	Tg5cWg==
+Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com [209.85.219.72])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fp4c61gf3-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 15:16:59 +0000 (GMT)
+Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-8f08560ea44so39141526d6.1
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jul 2026 08:16:59 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1785165418; cv=none;
+        d=google.com; s=arc-20260327;
+        b=ZbMUtFgb8sQqWLaLcsR1R6+mrWtZaeVMleVX9Fv9Szwkuw9wZZsSeZopVKvwkej3Iw
+         9NTQ0GBtzjGiaynbDAM2gScvYvpvEl58uLQ0NGZRgY+gQ8oBYGF18d1YhTJMCjAPgqoQ
+         guzO7+T5GcZ5H6uHge000BZgguMMN+J9+M1958IY6FdpPAx8UYcETlJp4gENvWN8ABvE
+         MOPYwU1BjPTHnkl/SPLaf2BblZaTv/AcbwflGp7u3uwhbqORcpj+vXwuOEi+puumPvQU
+         1VW626v/WqzgR8Lru/iWV7Nxi4PnaC/xLAVaEpEx9GIWN8tA2PrOkqwhLIdX7AuqnBbK
+         tizA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:dkim-signature;
+        bh=TsB+fBvryEs98glnklrZSnP8jIeujXx+Rk85PKBUBk8=;
+        fh=hxf+F5dd/+X78hwcYi10X/6rIoqRLxIn0k9/Aj26z4A=;
+        b=YjP8IyqTujoiNTc+JP+QwFUAhbtaqonPh21Oxo6uTlj/az3JNsr6mgXefddAPhqIc3
+         k5jiFu7AeU/DRd8ohIJXx6F/V9IzDoDldJapWeQHXogXU9dKcn2Q5fEpur9KY4hufaFl
+         sfSczpodKxw5LDvgo3T3q+9QCe5SySNB5br9T+m+snsd1wgdMDPGugPi/e9B/zFb68oR
+         4RLRV+hvovqCTBYpmIpsHUDkOshwRN1jGdyesCYgyq29d12rJV6IOh/SPapvSGH39mJY
+         3KsUtn10elwm0QAdE04917WS6tEsdoojZq/LXHcxB3+icViM8EzO9//HckgT+GoV8iuR
+         9G4A==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1785165418; x=1785770218; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
+         :date:message-id:reply-to:content-type;
+        bh=TsB+fBvryEs98glnklrZSnP8jIeujXx+Rk85PKBUBk8=;
+        b=LpX9QJVl7RisoCVOgWXSyDg/UhfyYZ2HZ5CrdOY+TvWAtywlkqL4J7JJNdjRgT5KHt
+         YvmfaHzGpD6+x6mGN+OL1vD9W1uiXq4bcfzlfR31/Sp5dWNLCQTne+YeDG7+mJ2pQIyM
+         3bwwud4kntiPjjQJDPBPlWD9H3PF8Fl7ZlaXxo01guvL6gOmVoNnkyYXJ9SPZZ+hXbRu
+         vGwjlvxHSjxjN/AW0i8Sy3AT1bevQ+husHzcbRaJQMI/AXmrrWqaliLAAQZQuLKYDx60
+         1Slc/9ZzvhxW3FW+3nTBdpxiCuPB1IiWBaEOlsD6UlppfgiTuhKISvyb3K0D+0pYtQ9l
+         3TCw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785165418; x=1785770218;
+        h=content-transfer-encoding:content-type:cc:to:subject:message-id
+         :date:from:in-reply-to:references:mime-version:x-gm-gg
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=TsB+fBvryEs98glnklrZSnP8jIeujXx+Rk85PKBUBk8=;
+        b=iaEpf7au1bLWaxDZ+mjDaF97sxUFbfAb0yoB3V7mo/gkVygeUQyieD4vn56W0+YUGt
+         iF4lcasZHjtJunlLlc1ngMgufKR2nKjRazfBsSVw9ibLNEp3MSUeEf8V4nHYlXrR991Z
+         lqKJX5VYkCTK9c0ZQ7YoZ9j56S0GKO4hJYoRHHzRMmM4CwF2FoF0V0vmpaCnhp2pvEzq
+         tAymT9AgL2GU+LJdlyPlUpEQpQFEayuQVd3XddXmv5/CsF9uUUHYcXqJesy7pxHS76R2
+         tblO6y+u4hJ5Ghp/fglNwqmVYqPLKNTGXMMNQp2pucbFSyQAbVfClWzOcMNYUNraKqo9
+         npsw==
+X-Forwarded-Encrypted: i=1; AHgh+RqdO6+zOzcmJbaVoGuunBVSp91+g46BWE+neNgjjWeN99d/V0dTmJFPiAF4EYN20B6zfdaGvfhVJg0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw0JeEbCuoGF6M65YoTIO3iBQ6vnt2Q62poLZ/vYzTH3nVxxWZp
+	Z9SH6gKRb9XUUl3CkdfzXupyWxa/CxCVUfShoDJWzW79A7qn81ir/CoMHmBtMgyp6i0daLw8CUz
+	K+UZM9lcEBrBpXcqmvrijtJXw14oM+rUeJkTEo3eT2og3d/HkwWGLz05njFT1yDurArv9nvtwj+
+	4EchQm+lXtfZnAN4DcwA9NhvqZTRn2uX4wAyo1sw==
+X-Gm-Gg: AR+sD124Cvoi3xCX9LMZcqLtopceyJmQhQFgz/yZLKJYWoWpA+cJyvahtqrKXAkF1lA
+	sjlVSdjiG4aaAalrJ/XPJ3496k4MXCblmp8uhuM/jDvR0RcgfUvSLVPSedBbGUk9d5s37hJ3d4a
+	cfERLB6ELK86nw2IGsbMedZlOLc/Rmd3vlIEybkArfCQZ73+3l7U5YXwir/w==
+X-Received: by 2002:a05:620a:4101:b0:932:e030:dd26 with SMTP id af79cd13be357-932e030dd67mr898068085a.8.1785165418441;
+        Mon, 27 Jul 2026 08:16:58 -0700 (PDT)
+X-Received: by 2002:a05:620a:4101:b0:932:e030:dd26 with SMTP id
+ af79cd13be357-932e030dd67mr898064285a.8.1785165417981; Mon, 27 Jul 2026
+ 08:16:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: GV2PR04MB11799:EE_|AS4PR04MB9265:EE_
-X-MS-Office365-Filtering-Correlation-Id: d8b48a89-73fd-4db8-c7b0-08deebeeb284
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|19092799006|366016|1800799024|23010399003|11063799006|56012099006|10067099003|6133799003|22082099003|18002099003|17002099007;
-X-Microsoft-Antispam-Message-Info:
-	ij93v/EsXg72OZS4EofGkfu0SK8fTdfad9QAE6a+SPVXceHr7esdFunHI8XfPperqzcd0keRsTziwb+iIshXmK3mpZ2ShkLaGmply6hH2g2+4ozp/H0H7cwXnWgAYt09Ba5Qd0utyj0c1NBSfELD+HYu8QSBBRpXRgbAjySncr72XrkX1yMtEluTZazxzeqxKdWXWupHVFhAixQMjprL0b9PjXuC8TsNFvyZnkSDo6TLmzZWl8x0tE66xgv/gE7/kbAJMqKBXzJ3CP2KzmvJ+n4ygcyo700o+CTC9RCZeYABTHwFDqVnyzHbfTMFLwJv4D6VV/Cg1bRJoKL62V+M3wPiKWBVUARUAbgus6RA1rxYLnCxgO1w5TsBD5mjY/zD5gB3SF5rXEeglgObOjISQ14scpCIzXU0Yn0J6fWysiKFjsWl09YdVeYy7NicwJgteGkKtZ6vgIxAEVQsrtMGRzDsZxWbj1SoKXMIEqNVYZzy9DeCEWT9u7944mn9njfc56bOlBM1e5d4rxYrI98l5zql81T8LGGrI3mvNrduCs350Tfqc75wps6RDVGX5TU3wY8XQY/8ZFa9QNQB1IiXWj+gfmVvjxMFHaOLMqr9mRc2y0CXwvBE83jMBYZzrmv7mrWmi5DJS64E2Coy0FzDug==
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:GV2PR04MB11799.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(19092799006)(366016)(1800799024)(23010399003)(11063799006)(56012099006)(10067099003)(6133799003)(22082099003)(18002099003)(17002099007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?KdFauJJjkbF7vI3EQAILLPVDqr6DU9iWJzKgqZHs7cT7AeWVr9efe2br06O3?=
- =?us-ascii?Q?BLXBuWXL4EgOQensMRy44kZzWlIDngv7Bs9ZTnrRLnwt987wBkdiN9jkACL6?=
- =?us-ascii?Q?v/gasjfuc7Hd5nvYRVByw24G0aNHLbxVdh9mOUDnq8hW7JGuTZAMt2PKYmwA?=
- =?us-ascii?Q?FeiSK2x+7otBvFMd1w7p6mf+VoJvvlRZB7dlcm4/LFK1PemdJ5tBTtsrfYU+?=
- =?us-ascii?Q?EszslSX5cETeK3FL15gQaDmcDkoX37nEPXBVDBvTRx2H4QOiQsj110mUelZr?=
- =?us-ascii?Q?4mSfPAgzVYuNxVy3fL1KhB1FjrgsL63NCrNDTyYDlr97Bdx0BtdFGv2vr/NA?=
- =?us-ascii?Q?x7HRqLe058gqnIAFtO0ILNiwAP21VCfROxo8EgrBNEFGEgf5blUGI+GiOG6w?=
- =?us-ascii?Q?BCqX4bj0S8hK75ULHX7lmkemitUBXCyzgb9ibbrr8ehI5wiO8PzhgkMmQD7E?=
- =?us-ascii?Q?OVypp2qYinobj1gNxGTzkH7sIjh32AoUGWRmwLjMwIZFIjg/T+qPpmNNqC2g?=
- =?us-ascii?Q?hHQjPeewRMzkiXT9IZcUSzokkDyVlLiNbonckYNiJC+S7PrC6WAjsBwHdiOb?=
- =?us-ascii?Q?5vgy2rPg5wc/8H5CtIav1ussWfmFYz0fXfks6hP8nhuQ79T5iBdohKNqGjK3?=
- =?us-ascii?Q?SZiXNzyggdYoa4SjHmEYQUTHb573V22bzcvJ/f7qIOl6ieyw5wOhePP0/erN?=
- =?us-ascii?Q?/ZvYLWJ8QskNMEaGS6E10fQzbciOveDukIaXul1G3guFi9wihmN0HDYBJ1B0?=
- =?us-ascii?Q?Okk5y5Lp1DDQcFlkNotwC2XbPUy0B57xr6ZR+aI/W0fXHdeQdq9ZUQP4G8W9?=
- =?us-ascii?Q?BsWi3JUsl5UNHOeXOpJeE0B+5QTHw7IO9yNvYov0OK+Pjq9ZBWaxUgozRpmI?=
- =?us-ascii?Q?H7YVd9iRqg/ZeD8oI0lJPHt4AFDOhf3IwROGvpRcwcK0T44VfLwunafNvj4G?=
- =?us-ascii?Q?xeJviwb0Rk1NSxMb9UejljvvhZ1V+RYr2Kr7MbkVL75VxcQ8J1nyCeO/LG7s?=
- =?us-ascii?Q?e/MzByuYeHhdU+c/9ukOYCxmq5h1kTB6TKBLsHGToxvJd8mGoYT6+R0miXok?=
- =?us-ascii?Q?ViNsVWbwBDZtJieNBPSNSSfQaHBXkG8ziDqSteHrQbuk38XwicQfx9/GpH8N?=
- =?us-ascii?Q?xsMDWsIMGzPgK+phsZ/YRxIPdl7NWSwCjRd71tK2zepHYJIZQJTwSctX8JMV?=
- =?us-ascii?Q?LNad54r/zPmSijpUG7U++ChorkCVOGqvsdqM8wE5GzKEzFWHyLrEE8RWNSMH?=
- =?us-ascii?Q?b5TjJZxv0rd0L6M5tdiAbIKF+eISIDd7WvVGOtdmNJYYRmM5O2MtXrLXfHkO?=
- =?us-ascii?Q?wdrpoCzE1XvhVYX4uSiJat69zYBkk+FP0EBGjzLZMYBjisIwXCkvBIuvKp22?=
- =?us-ascii?Q?iDEZnRhoHmOkqWuLu5ZcMjZwsasm/2spWruANsCH5xo1s8GRmeW66ZdUEr1y?=
- =?us-ascii?Q?ULlKoMQ3It+HnjLEPzByEZ9z2t2tD/x1LSKY9hBnzEVAB5jnMo4y3tX2hDYD?=
- =?us-ascii?Q?9G4pG82FUGRdxD/L0oofZe5e8trU7PxBYv1d9Bzqg1g81J7+YMDkR3UWDeUW?=
- =?us-ascii?Q?ds6h858UMQ4LiOl6r951+xCb+qdCgqSdDD8X4gFW5CzX1X+iru/KOzHeOtXp?=
- =?us-ascii?Q?Zh64bMHRTT4iTmLRfLNqxCUVwnFJaR0OI8vBTkZ+BVRWCp30JtpRaimuoz30?=
- =?us-ascii?Q?sGf/XXPIRpXxqJrioXV07KHQycR2OTqkiUsK1S1FlyQjsdVNBvPlD5GiwPm1?=
- =?us-ascii?Q?70H49o2Y7OkWmf0GLcJthfK8X1jSETjAfVC4g6hYm0JKDKj6V+f4?=
-X-OriginatorOrg: oss.nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: d8b48a89-73fd-4db8-c7b0-08deebeeb284
-X-MS-Exchange-CrossTenant-AuthSource: GV2PR04MB11799.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jul 2026 14:52:36.5745
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: E+a8wfLQYLTpT0dNJ687jaRjRaCsIkSGd1w48YUVcuf/I9m5lzEhe9aRk5fJnVFkKCcZvdyliNgcMnXeOgjbI0J/h/DMvBih802lBgQwyt8qZ7ThEHUZls/08twcXp5A
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS4PR04MB9265
+References: <20260722205701.372789-1-jm@ti.com> <20260722205701.372789-4-jm@ti.com>
+In-Reply-To: <20260722205701.372789-4-jm@ti.com>
+From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
+Date: Mon, 27 Jul 2026 17:16:46 +0200
+X-Gm-Features: AUfX_mzbZaUBnQEX06GqMrpHJi7Vn1gpbWl7sEjT3spkw5OUl0dS0c-9S2d03G0
+Message-ID: <CAPx+jO9w0utg5BhsKnUSgdCWeM1prOqoV0gCrTpaeuaWZouXoA@mail.gmail.com>
+Subject: Re: [PATCH v2 3/3] mmc: core: Add power-off-delay-us support
+To: Judith Mendez <jm@ti.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Authority-Analysis: v=2.4 cv=eYQNubEH c=1 sm=1 tr=0 ts=6a67766b cx=c_pps
+ a=7E5Bxpl4vBhpaufnMqZlrw==:117 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
+ a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
+ a=Um2Pa8k9VHT-vaBCBUpS:22 a=sozttTNsAAAA:8 a=4A_6DvDk7c3mpj7IUuEA:9
+ a=QEXdDO2ut3YA:10 a=pJ04lnu7RYOZP9TFuWaZ:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzI3MDE0NCBTYWx0ZWRfX99olWeR7xtck
+ tPF03cuKAJyC7hY3Ic62zgM9/kySZBpuy2srSTnjwaU4rjXUeL7L0Esu+Z/acA58H5cYPrzvgCW
+ TiJAyb4DFmj/rYQYquykcEwMXHCoLko=
+X-Proofpoint-ORIG-GUID: zx3NWQbUsRpsts-LGeLWaprPGSvDwwEw
+X-Proofpoint-GUID: zx3NWQbUsRpsts-LGeLWaprPGSvDwwEw
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzI3MDE0NCBTYWx0ZWRfX1vS07SoSvb3k
+ 8oGJ8kTprsLPYSLGYP0jWwZD56+KVrMblhU5c1b5vx7o4DaOxe525voPag18gf75uqS1G/kj1EM
+ 42IeHyr4avYcYtkKDKowwVC6jwkqrnEbUfd9aIpo+J6mnZe2b/hkuX9XKDQ/yD/QGMFsrwZN3z2
+ ZN1fculQj2z4i4p/Xmb/zCwp/crDuojWr4ofmkO5knybMeOtneXzoIO5MbLpNE5cbYG7w8DPsW5
+ tCuhRZnOF12JpL7D78pJQUi9FC4M2EB3fshZPNZlKfMoBGISG+JP9ggmsoSwLV4xTcyQEY3Wikx
+ uZNC9Kco5DHF5SjaES0M3Jel22+rAdewvNFbNrARwpdwfceKO0aKEIVL908Bm7Ib4ZwIGCT8BTR
+ nn3VOe8H2iCBRUFgeR719Ydd8tWgEzFWCRBraHvCjJM4wca2HwwSxR46CTZPK/o2Xi6MCdzCJnB
+ h5lwlwN4Zm5hbTL+Y4A==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-27_04,2026-07-24_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ phishscore=0 suspectscore=0 spamscore=0 adultscore=0 priorityscore=1501
+ lowpriorityscore=0 bulkscore=0 impostorscore=0 malwarescore=0 clxscore=1015
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607270144
 
-On Mon, Jul 27, 2026 at 06:38:49PM +0800, haibo.chen@oss.nxp.com wrote:
-> From: Haibo Chen <haibo.chen@nxp.com>
+On Wed, Jul 22, 2026 at 10:57=E2=80=AFPM Judith Mendez <jm@ti.com> wrote:
 >
-> Coverity report INTEGER_OVERFLOW for host->tuning_err.
-> The tuning_err field in struct sdhci_host is used to store an error
-> code for re-tuning, but it was declared as unsigned int. Several call
-> sites store negative error codes into it and later compare against
-> negative values:
+> Add support for power-off-delay-us which shall be used to specify
+> value of delay after deasserting power during MMC power cycles.
+> Default for delay is 1000us but custom delay can be passed in to work
+> around hardware issues such as slow RC discharge on MMC VDD rails.
 >
->   - sdhci.c, sdhci-of-dwcmshc.c and sdhci-pci-gli.c assign it the
->     return value of __sdhci_execute_tuning()/__sdhci_execute_tuning_9750(),
->     both of which return a signed int (possibly a negative errno);
->   - sdhci-of-esdhc.c assigns host->tuning_err = -EAGAIN and later does
->     "ret = host->tuning_err; if (ret == -EAGAIN ...)";
->   - sdhci-of-dwcmshc.c prints it with the %d (signed) conversion.
->
-> Storing a negative errno in an unsigned int and reading it back as a
-> signed int only happens to work because of two's-complement, same-width
-> integer conversions. It is misleading and triggers sign-conversion
-> warnings. All users treat the value either as a signed error code or as
-> a boolean (zero / non-zero), so changing the type to a signed int is
-> safe and makes the intent explicit.
->
-> Fixes: 7d8bb1f46e13 ("mmc: sdhci: add tuning error codes")
-> Assisted-by: Cline:claude-sonnet [read_file, search_files, git]
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Signed-off-by: Judith Mendez <jm@ti.com>
 > ---
-
-Reviewed-by: Frank Li <Frank.Li@nxp.com>
-
->  drivers/mmc/host/sdhci.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index b6a571d866fa53ce2aad0105cea2909abe6bce01..f0fd81409a86c6fd9120e69766fa2407c14e9048 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -659,7 +659,7 @@ struct sdhci_host {
->
->  	unsigned int		tuning_count;	/* Timer count for re-tuning */
->  	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
-> -	unsigned int		tuning_err;	/* Error code for re-tuning */
-> +	int			tuning_err;	/* Error code for re-tuning */
->  #define SDHCI_TUNING_MODE_1	0
->  #define SDHCI_TUNING_MODE_2	1
->  #define SDHCI_TUNING_MODE_3	2
->
+> Changes since v1:
+> - Move delay to mmc_power_off
+> - Fix dt checks and remove print
+> - Move from mmc_host struct to mmc_ios struct
+> - Rename post-power-off-delay-ms to power_off_delay_us
 > ---
-> base-commit: c5e32e86ca02b003f86e095d379b38148999293d
-> change-id: 20260727-sdhci-fix-13481630ae02
+>  drivers/mmc/core/core.c  | 2 +-
+>  drivers/mmc/core/host.c  | 8 ++++++++
+>  include/linux/mmc/host.h | 1 +
+>  3 files changed, 10 insertions(+), 1 deletion(-)
 >
-> Best regards,
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 29e80e5f928e9..9472041fe1c20 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1388,7 +1388,7 @@ void mmc_power_off(struct mmc_host *host)
+>          * XO-1.5, require a short delay after poweroff before the card
+>          * can be successfully turned on again.
+>          */
+> -       mmc_delay(1);
+> +       mmc_delay_us(host->ios.power_off_delay_us);
+>  }
+>
+>  void mmc_power_cycle(struct mmc_host *host, u32 ocr)
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index b7ce3137d4529..fac50a2860211 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -421,6 +421,13 @@ int mmc_of_parse(struct mmc_host *host)
+>         device_property_read_u32(dev, "post-power-on-delay-ms",
+>                                  &host->ios.power_delay_ms);
+>
+> +       device_property_read_u32(dev, "power-off-delay-us",
+> +                                &host->ios.power_off_delay_us);
+> +       if (host->ios.power_off_delay_us < 1)
+> +               host->ios.power_off_delay_us =3D 1000;
+
+If power-off-delay-us is specified and the value >=3D 0, I think we can
+respect it as is.
+
+This means we need to treat "0" a bit special and bail out in mmc_delay_us(=
+).
+
+> +       if (host->ios.power_off_delay_us > 10000000)
+> +               host->ios.power_off_delay_us =3D 10000000;
+> +
+>         return mmc_pwrseq_alloc(host);
+>  }
+>
+> @@ -574,6 +581,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct dev=
+ice *dev)
+>
+>         host->fixed_drv_type =3D -EINVAL;
+>         host->ios.power_delay_ms =3D 10;
+> +       host->ios.power_off_delay_us =3D 1000;
+>         host->ios.power_mode =3D MMC_POWER_UNDEFINED;
+>
+>         return host;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index ba84f02c2a101..714417466707c 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -23,6 +23,7 @@ struct mmc_ios {
+>         unsigned int    clock;                  /* clock rate */
+>         unsigned short  vdd;
+>         unsigned int    power_delay_ms;         /* waiting for stable pow=
+er */
+> +       unsigned int    power_off_delay_us;     /* waiting for power disc=
+harge */
+>
+>  /* vdd stores the bit number of the selected voltage range from below. *=
+/
+>
 > --
-> Haibo Chen <haibo.chen@nxp.com>
+> 2.54.0
 >
->
+
+Kind regards
+Uffe
