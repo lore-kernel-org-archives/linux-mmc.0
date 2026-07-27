@@ -1,123 +1,190 @@
-Received: from mx1.white.stw.pengutronix.de (mx1.white.stw.pengutronix.de [185.203.200.13])
+Received: from AS8PR04CU009.outbound.protection.outlook.com (mail-westeuropeazon11011066.outbound.protection.outlook.com [52.101.70.66])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 330E13C09F4;
-	Mon, 27 Jul 2026 07:19:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.200.13
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785136788; cv=none; b=X9Dt5VCrBqV90PRKPVMxdcsZq9+NxV3UjFY7uVcPTYJUX2EKCGVlYsa6Au4DrozBbTtySDkV9UqeUL0/egAZutLBxe/zBGDJB1XU2Z3L2Myaml6pCQcXuv2o18mdAuFoX/0sNXtS8k+T/WMnRRWVUVcUUKeGgAuWxt4yzpDkezY=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785136788; c=relaxed/simple;
-	bh=2jYssiDmKJebD0apzeuRPI6i36t6AiL/lJfzDfdsX8A=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=GQF2zc+uORc85NgkDMgrJpI7XfU6Odqhwqxo51sdNmO+BGd6TVVDdhGjP8dOuD5miGSW4P8rMMNXoNEq9IPvmo92ubi+jOBIurDzJIWfQEk1Y/pPVq2G8QztdsE+8gjsO3OhtGO9cIpaltTk6BHx/MPrV5YbIcrp8K+lNan0Pdo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.200.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de (drehscheibe.grey.stw.pengutronix.de [IPv6:2a0a:edc0:0:c01:1d::a2])
-	(Authenticated sender: relay-from-drehscheibe.grey.stw.pengutronix.de)
-	by mx1.white.stw.pengutronix.de (Postfix) with ESMTPSA id E61E0202054;
-	Mon, 27 Jul 2026 09:19:42 +0200 (CEST)
-Received: from lupine.office.stw.pengutronix.de ([2a0a:edc0:0:900:1d::4e] helo=lupine)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.96)
-	(envelope-from <p.zabel@pengutronix.de>)
-	id 1woFck-001VGv-2h;
-	Mon, 27 Jul 2026 09:19:42 +0200
-Received: from pza by lupine with local (Exim 4.98.2)
-	(envelope-from <p.zabel@pengutronix.de>)
-	id 1woFck-000000006TH-3EDo;
-	Mon, 27 Jul 2026 09:19:42 +0200
-Message-ID: <ff8b32095ad014ae1dff98443d3ac72aa4f274bc.camel@pengutronix.de>
-Subject: Re: [PATCH v3 8/8] mmc: sdhci-cadence: add Altera Agilex5 SD6HC
- support
-From: Philipp Zabel <p.zabel@pengutronix.de>
-To: Tanmay Kathpalia <tanmay.kathpalia@altera.com>, linux-mmc@vger.kernel.org
-Cc: ulfh@kernel.org, adrian.hunter@intel.com, krzk+dt@kernel.org,
- robh@kernel.org, 	conor+dt@kernel.org, dinguyen@kernel.org,
- devicetree@vger.kernel.org, 	linux-kernel@vger.kernel.org
-Date: Mon, 27 Jul 2026 09:19:42 +0200
-In-Reply-To: <20260724145009.7456-8-tanmay.kathpalia@altera.com>
-References: <20260724145009.7456-1-tanmay.kathpalia@altera.com>
-	 <20260724145009.7456-8-tanmay.kathpalia@altera.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.56.2-0+deb13u1 
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B9013FBB4E;
+	Mon, 27 Jul 2026 10:35:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.70.66
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1785148525; cv=fail; b=PJCJG+wYzRbiq7qigIxUuMt/3n4WGAm3G2+BYxzV+STuYfHu8yGV9bnauJ9ONkXPbFrrbG730OECsbpNqdFw6QPph/IajHs13jzmv8Np8mYBEKjMv1k0ouUElAixzJOi5Jf8HR9N1xLZ9N8xHO/W5tRAoIegj4f9ZkqxZlynFik=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1785148525; c=relaxed/simple;
+	bh=kQkPCn4YVBNY6lpRhfYYaIMsmc2GGyU0Xd9iv1gBDys=;
+	h=From:Date:Subject:Content-Type:Message-Id:To:Cc:MIME-Version; b=sCQRdu79WGVRIUbH8Lf2KjGgoRrUzIhMO871GWXv0JxDsKprVe+Oi6GgufkamEUFN60lWJ2Pm+iXBu4l0J0ob472PKQ1FvK2cxie3jMTdfmro9+UmEttVIsa532QFHHtYN35eJfTK13aac1/XZ18nrslcFt6Q7WR4Ltz5vZ3hBc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=QXcyGsi+; arc=fail smtp.client-ip=52.101.70.66
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="QXcyGsi+"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=L8BvLcnlCuEZcLU2P+vkhF5yzTV6RnZwnKeiTiP83U0vG4lYr19myEududyZQ+Rt3xCrdmb1Dkun//mNfcF1oZiS853Ko/Khk36sH+gPWZXOWd39agGNusezGWmzaduUr1FOhtnjZF3IPC13y9KXJXMFo6xOTOAxBC/YKRRxWDCvzK+FKZYQcOpv8GvFcONEdd4wzmH0IQ6ceFsSInAwuWXLKwsZBJV3pHwgXZKeIktCeakXx3so2y261yGfu9JLBr2O/NmwM6Gnq2wECEltgqCDdeltoyaH9A4EZo6csctIq803bXz77S3W9taw0At5pePeOaOaZt9FDo6nQnO1zA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=AT4roHj7IA5uDxmp02CU5wdG/Zf4bXvc0f6nY0Nyuk8=;
+ b=OhxxiL6mtoQToDOQqE8GFaDkcuEp/LpiK7cJU4ZxT+CRilpBDFBCBN3/nbu5f+tMDzQoK/6DW710STaDOFaM8xNtFun9Mlpy504pPuDcX3bqug2f+a40f70crc0VJjG3PU1PrWj0qQ6DKVN8FnIYB36/6AEq3PRM5YpwN1ZgDA0TPj8TOHDF12UzybgsD8DhJxP4DnkpYXx5iSIWbjSwk7ZoCM8mYzbWVKBwkMDvKGmGfTIoV1Fx8gy41cHKuWi2CI27SZWR7dMVJLG8rwxjNfPQBKv88L56JEClmwD1kWD4pBs03zZs9GRn1O/KzFvT2n2u38J6HK3WbQwLeDU87Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector1-NXP1-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=AT4roHj7IA5uDxmp02CU5wdG/Zf4bXvc0f6nY0Nyuk8=;
+ b=QXcyGsi+U/PiporXKSW60y18STRch3ii5WP2xz00+Wb4XG1OzT0YW8peuo2T4b6LJP0RuCxvnaLlfQEzD7txnnWGOHGs+DlFvnQgYK1F/XITEOdzWiP03ZU5VNMWuO+rrPFY3qMw0g1N5WCM5swTrBOZ9yjy/Ez7QMTtBE5t0Y6CbWptVJ0zq07R4Au3yt9Um2qnvPQ6xiHfe+I0OJHSGnUMlU5qKqNEHIt+CCjkGS1WPTOJJbY+fYirHDmk9FBmU98XFj4RavShKIzYbS11LC3uamfDZyXL4IuaPeJI8Nm3nv7/+DblDqkUftMxeTTiKy3IxDk5f4+JgXlT3P4OOQ==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from PA6PR04MB11909.eurprd04.prod.outlook.com
+ (2603:10a6:102:51c::22) by DB9PR04MB11558.eurprd04.prod.outlook.com
+ (2603:10a6:10:60c::21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.245.13; Mon, 27 Jul
+ 2026 10:35:17 +0000
+Received: from PA6PR04MB11909.eurprd04.prod.outlook.com
+ ([fe80::a4b:fa4e:7fe7:e6a2]) by PA6PR04MB11909.eurprd04.prod.outlook.com
+ ([fe80::a4b:fa4e:7fe7:e6a2%5]) with mapi id 15.21.0245.012; Mon, 27 Jul 2026
+ 10:35:17 +0000
+From: haibo.chen@oss.nxp.com
+Date: Mon, 27 Jul 2026 18:38:49 +0800
+Subject: [PATCH] mmc: sdhci: make tuning_err a signed int
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260727-sdhci-fix-v1-1-1a655a5d895d@nxp.com>
+X-B4-Tracking: v=1; b=H4sIADk1Z2oC/x2MQQqAIBAAvyJ7TtA1NPpKdBDdci8WChGIf086z
+ jBMg0qFqcIqGhR6uPKVB+hJQEg+nyQ5DgZUaJVDJ2tMgeXBr9RmXrQ1ypNCGP1daOj/te29f1L
+ FxzRbAAAA
+X-Change-ID: 20260727-sdhci-fix-13481630ae02
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>, 
+ Yinbo Zhu <yinbo.zhu@nxp.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ imx@lists.linux.dev, Haibo Chen <haibo.chen@nxp.com>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1785148738; l=2120;
+ i=haibo.chen@nxp.com; s=20250421; h=from:subject:message-id;
+ bh=hhkbayyhcraYQCXPFr8OOkllGyKwuOqCjtsgsqOEi8E=;
+ b=UlNV04Rf8e30Ns0uUEPAA/tFEUJZZAyartEz+mqDk27iSB6WfPjON6os+rhgdovaQXvWwCCTh
+ n/MT7Z0RaReCwj2iwCTrH5SRaTmS9VWe6kon8DO6opu56NhK5VM5rXH
+X-Developer-Key: i=haibo.chen@nxp.com; a=ed25519;
+ pk=HR9LLTuVOg3BUNeAf4/FNOIkMaZvuwVJdNrGpvKDKaI=
+X-ClientProxiedBy: MA5PR01CA0149.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:a01:1b9::14) To PA6PR04MB11909.eurprd04.prod.outlook.com
+ (2603:10a6:102:51c::22)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PA6PR04MB11909:EE_|DB9PR04MB11558:EE_
+X-MS-Office365-Filtering-Correlation-Id: e46426e7-4f3c-4720-a73b-08deebcabfc1
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|376014|23010399003|19092799006|366016|56012099006|11063799006|10067099003|6133799003|18002099003|17002099007;
+X-Microsoft-Antispam-Message-Info:
+	+gaNnr8WYY9948lzHHiqRQ23lzznS6lbEzSzucUIu7QJ+ktj1tvegWIA3ZFJMYozQl0YtDKu7IzyZ/rLpOSdJoJJXRkcaiPW4cHSM08cymkh2izXY7dzp663/CP1k+HDSLxpYcXfijd9jalocy8QGdWkefM9Tv05V6iFAGCAfijqU8Ij59hs2mV+S2BZMNyNiCLDxSVt7hdXATfOO6RpHEkPzH/pBaLiVUtG82LBmMQQt2RT9sFhzcTahct54XAEXwNEugj1BprJDSZO2N7za+F8nKb5ZWyzhYTSyEklFYwfR0/gItyybE4/3pz4DxOKxHcXW42xR2HesRQlCSSrn4AgJVguqmIP4pNvVgmUv+zpvR5W43yjEGLb+KczPmHRPpw6HJvTRiP4fyazhh+UTpC4b5pi2X+Pnaz5nmUUlLuxUrhOF8a8/G/dNdzbMG2OgOAOeYoLxv0/gjJyicJT86Oap0vNchWbcVZtqKUN2vh5ggpaYyBJgcESMQcbBSZ1GJKl67n94S2dqx+43O6rUt+GpK7lyMBoeCtV8qYs6LsqdRtuv/KEE/yuwH3Wwjz0RTlVJxilterDVOw/TIxkcy55uVTLOzzPK4SfrweRMMpLbYYzCdHdsKHXgurC1SHm7s5Fhr1Z840tHlbZZO1Umg==
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PA6PR04MB11909.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(23010399003)(19092799006)(366016)(56012099006)(11063799006)(10067099003)(6133799003)(18002099003)(17002099007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?NUp2NzI5SUVubmUrQ2UrY2lIeDljelVKNlFzRVV1YnlYcEt6aVFRS3Zuc09C?=
+ =?utf-8?B?MzVScjVSZ3BpQ2J1NENEOXJOZ2F0RGN1bytJa0JZQnNFYmZMY29FNGlFVkpE?=
+ =?utf-8?B?ekNSYmR2Ukc5ODFEVFpNS2xOMHJ0c2NxYXc1UG1HeUN1R2ZudHQ3Z2N1L2hO?=
+ =?utf-8?B?VlU4YWl0VXJjN0ZMZjJ1eGVlR0ZQQlJvM2E3TUJtR3VmeTB4Ky9yWkthdUdx?=
+ =?utf-8?B?WjJGT1JESUsxOUFSL0lWUWpleVZPaHRPY0FCWEdCS2JvQmdsbzkrQWZUSWpw?=
+ =?utf-8?B?YWhYN3N5dnlaZUpKaGpOYmZObFJpTDQybTJBN3NyUW1NWnRqYVNLMHVXdmJy?=
+ =?utf-8?B?VnUzV3U0d2NCMHE1d08xbVRmbHNMVHMvTkFvR0lDSjBSMm5xWmRGN3c3OTMw?=
+ =?utf-8?B?T2srQWtlNElvV2FiVHBzcVdodThvZW5ERTMrS3lPeVU5elQ5eHphdVBwQWdE?=
+ =?utf-8?B?VjVmSm1uMHBwckhLQU53QWI4WGZVbGFGZi9vTUttYUY4ODV1R2ppUGpRazJY?=
+ =?utf-8?B?MEIvT2ZGVG01RFVCY2xmNG9qV3NuRGgvenNiUUh4UmpkYnJiUHFqSWtwaFJT?=
+ =?utf-8?B?bXcyK0Z3TWRyOThzc3ZCNFdkOE4vRFZOdytrZEU3eUNPR3pWWnVvdVB6THFo?=
+ =?utf-8?B?ZjNad0lZMzhicVNKOGx4bkJ1ZWNIelpSZWxZRUZoZDRiRnluaUxTdmEwektq?=
+ =?utf-8?B?YSt4VjduOEdwbjVmenNtUlFVSVErTmtXZHozdGdpdlFTQ2h1aEJoMGxsSU1K?=
+ =?utf-8?B?UmFjOHViUmN0a3ZHNXExWjNzaDVoSnNkWUNUTjIyYjlZUWhNaW9JV2Q3SkZm?=
+ =?utf-8?B?Zk5BbUpZRVBpN3FmZ1VvNy9EQ2dUZit3ZVJBT1o2R1RvWXp6QkNveWZ5djZJ?=
+ =?utf-8?B?VERaUUpXVkcwK3JqMXZpREJsM1BFYjRwTGFpaVRUNm44b2VheHMwaXQxb2tS?=
+ =?utf-8?B?TXJacDlzWHlPTVNNRCtmaGpudFVlUFlMMGwwcEk2bWN5dGcxUE8yN2EyNkZK?=
+ =?utf-8?B?NFJzckxUM2tRcHg2bTY2KytQRWZTWVhqdS83amVZK0ptYytPMjgrZndDbFRO?=
+ =?utf-8?B?emxtYmZFK0JMeC9UNTgyTHJ4Yng0S29paUljUzFwQThjc2liSmduZUt3SXB2?=
+ =?utf-8?B?S3dCd0ZqU2JsdGJyWlR3YjRlaXB1NnRsaXNzTlBZb0E1SUhTdEppUm5KL1Ru?=
+ =?utf-8?B?R2N2U2syemxDdG5aTVNzT3lkekpmR0ZSTU53UDd3YW53cVZLSVFPdVI2N2xU?=
+ =?utf-8?B?Q21icVMrNjBMY25kSldrR1J4eENvMVAxalptNXhjU3oveEdTR1dRek1mdnA2?=
+ =?utf-8?B?U1JrVlhTWkl6N2lmTm1RL0VNS3ZzN0M0YTg2bWQ3TDBxNHN0bzlhKzdyRHRE?=
+ =?utf-8?B?bXhKRTA4a1IzVUxBSndIaWVoUjVDZ2Z3N1BZdDhMQWNDS3ZHYW1Gci9sMnpC?=
+ =?utf-8?B?RXZjRHptRURCbUYzdStKV3RaK0p5VXhVVGRNS2tNN3Vsa2JTcDhNanR2bGdL?=
+ =?utf-8?B?ZC9rVmtranFlK1hPSDl5OGgxK3gyY1B4QjlZMUNjcEJKcmZHeStPaXZoYzYv?=
+ =?utf-8?B?SXcxeUJwb2lOK2xCYXFLVis0d0pvQTRiRGRJbVAvVm9MRCsrL1BlVUpBY0VY?=
+ =?utf-8?B?MG1jT3ZOOFNTMEZhSVpzYUwxeG9aYkU3S0FkZWIxWDh3dGQzbUY4ZHlvUHdZ?=
+ =?utf-8?B?VVNxVk9CcE1CMVUzdVhiUUd1cVpkQW5PS0F1UlpRYytLdVN0TFUwdS9HdjNs?=
+ =?utf-8?B?VDZIUFdjczFOQzNiZDdTN3o4TjlJVTZtVjMvQWZQRExHdTVqZjM4clozOXA2?=
+ =?utf-8?B?VE5qQmR5Wm5XeWphK1hFQnRzNi80d05kbHlmMTZuSVV5aHAzazBaTDhOUDlQ?=
+ =?utf-8?B?VlpkOTBMSGFMNzFRbDRCSytldzBvZk1OSlBJNk9LVkxLU1VpT1hMSnlnMktN?=
+ =?utf-8?B?LzFWbzZPSkxINVBjNmNwcEoxekQ5UjVIbVY3YmxMQW0rTC80Tk1ZazNpMUdy?=
+ =?utf-8?B?eGR1cytOVzVMVEJDZ0lIZlBzTXZBTjE3TXlKdkQwNXExR1JwSlFWZk9pL1hk?=
+ =?utf-8?B?SDdBakJnRmgvR08zT1I0bC9kZVhndlo5YitreWIwRXRTUHJwQkx2SUxWVXJl?=
+ =?utf-8?B?QW1NVVU3aThMYTNHc1hsQTBFUTBjekEvWTVDMmNMeXU3VGJuQ1J5YzIxUWVs?=
+ =?utf-8?B?YUpBSDJaZG12VGpTalNqTS9lYzd1Q3AxallYamZXMGhVOWpMcCtYR0hFSkQ5?=
+ =?utf-8?B?a2w0cnBzcTN6TW03aFlsd08ySmRYMW9RQVgxNkJxa3REbHJxcHJYUERlcWZW?=
+ =?utf-8?B?MFF3U0FpUEpFU0kxYUE1Z1dUYnFLdUVXTmdIU1oycFpqM3YxK2FoZUJvbVR2?=
+ =?utf-8?Q?kn1TsQ7os8LIYxW43iwuw84jcH3wB3/uBbg7A?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: e46426e7-4f3c-4720-a73b-08deebcabfc1
+X-MS-Exchange-CrossTenant-AuthSource: PA6PR04MB11909.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jul 2026 10:35:16.9199
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 6X3PfrqMC8t46yiPUeg4Pmp7HbgxDNf2KDqLtKh3M3FkRxB5i7AVQs8yqOLsiTjXQlWmoYL3PXDIvr0BI4qMZdXP0C087EnbQTun6KfMohzgZGFVMSdDE1QC/UXwAUkF
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB9PR04MB11558
 
-On Fr, 2026-07-24 at 07:50 -0700, Tanmay Kathpalia wrote:
-> The Altera Agilex5 SoC integrates a Cadence SD6HC controller that needs
-> platform-specific configuration to operate correctly.
->=20
-> The SoC requires three named resets: "sdhc-reset", "combophy", and
-> "sdmmc-ocp". All three are exclusive and must be asserted together before
-> being released, so the SDHCI, SoftPHY, and OCP/AXI clock domains cross th=
-e
-> reset boundary simultaneously. SoftPHY is shared with NAND at the SoC
-> level, but only one of SDMMC or NAND is enabled on a given board.
->=20
-> The IOMMU maps DMA addresses within a 40-bit physical address space, so
-> the DMA mask is capped at 40 bits to prevent allocation beyond the
-> controller's reach.
->=20
-> The silicon requires the MULTIBLOCK_READ_ACMD12, CAP_CLOCK_BASE_BROKEN,
-> PRESET_VALUE_BROKEN, and ACMD23_BROKEN quirks. Since
-> CAP_CLOCK_BASE_BROKEN prevents reading the base clock from the
-> capabilities register, the maximum clock is supplied from the platform
-> clock instead.
->=20
-> Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
-> ---
->  drivers/mmc/host/sdhci-cadence-core.c | 113 ++++++++++++++++++++++++++
->  1 file changed, 113 insertions(+)
->=20
-> diff --git a/drivers/mmc/host/sdhci-cadence-core.c b/drivers/mmc/host/sdh=
-ci-cadence-core.c
-> index 18846acc0b11..24130655a385 100644
-> --- a/drivers/mmc/host/sdhci-cadence-core.c
-> +++ b/drivers/mmc/host/sdhci-cadence-core.c
-[...]
-> @@ -462,6 +481,72 @@ static int elba_drv_init(struct platform_device *pde=
-v)
->  	return 0;
->  }
-> =20
-> +static int sdhci_cdns6_agilex5_init(struct platform_device *pdev)
-> +{
-> +	struct device *dev =3D &pdev->dev;
-> +	struct reset_control *rst_sdhc;
-> +	struct reset_control *rst_combophy;
-> +	struct reset_control *rst_ocp;
-> +	int ret;
-> +
-> +	/*
-> +	 * Assert SDHCI, SoftPHY (combophy), and SDMMC OCP/AXI resets together
-> +	 * so their active periods overlap before all domains are released.
-> +	 * SoftPHY is shared with NAND, but only one of SDMMC
-> +	 * or NAND is enabled on a given board.
-> +	 */
-> +	rst_sdhc =3D devm_reset_control_get_exclusive(dev, "sdhc-reset");
-> +	if (IS_ERR(rst_sdhc))
-> +		return dev_err_probe(dev, PTR_ERR(rst_sdhc), "failed to get sdhc-reset=
-\n");
-> +
-> +	rst_combophy =3D devm_reset_control_get_exclusive(dev, "combophy");
-> +	if (IS_ERR(rst_combophy))
-> +		return dev_err_probe(dev, PTR_ERR(rst_combophy), "failed to get combop=
-hy reset\n");
-> +
-> +	rst_ocp =3D devm_reset_control_get_exclusive(dev, "sdmmc-ocp");
-> +	if (IS_ERR(rst_ocp))
-> +		return dev_err_probe(dev, PTR_ERR(rst_ocp), "failed to get sdmmc-ocp r=
-eset\n");
+From: Haibo Chen <haibo.chen@nxp.com>
 
-This looks like it could be simplified with
-devm_reset_control_bulk_get_exclusive().
+Coverity report INTEGER_OVERFLOW for host->tuning_err.
+The tuning_err field in struct sdhci_host is used to store an error
+code for re-tuning, but it was declared as unsigned int. Several call
+sites store negative error codes into it and later compare against
+negative values:
 
-regards
-Philipp
+  - sdhci.c, sdhci-of-dwcmshc.c and sdhci-pci-gli.c assign it the
+    return value of __sdhci_execute_tuning()/__sdhci_execute_tuning_9750(),
+    both of which return a signed int (possibly a negative errno);
+  - sdhci-of-esdhc.c assigns host->tuning_err = -EAGAIN and later does
+    "ret = host->tuning_err; if (ret == -EAGAIN ...)";
+  - sdhci-of-dwcmshc.c prints it with the %d (signed) conversion.
+
+Storing a negative errno in an unsigned int and reading it back as a
+signed int only happens to work because of two's-complement, same-width
+integer conversions. It is misleading and triggers sign-conversion
+warnings. All users treat the value either as a signed error code or as
+a boolean (zero / non-zero), so changing the type to a signed int is
+safe and makes the intent explicit.
+
+Fixes: 7d8bb1f46e13 ("mmc: sdhci: add tuning error codes")
+Assisted-by: Cline:claude-sonnet [read_file, search_files, git]
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+---
+ drivers/mmc/host/sdhci.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index b6a571d866fa53ce2aad0105cea2909abe6bce01..f0fd81409a86c6fd9120e69766fa2407c14e9048 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -659,7 +659,7 @@ struct sdhci_host {
+ 
+ 	unsigned int		tuning_count;	/* Timer count for re-tuning */
+ 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+-	unsigned int		tuning_err;	/* Error code for re-tuning */
++	int			tuning_err;	/* Error code for re-tuning */
+ #define SDHCI_TUNING_MODE_1	0
+ #define SDHCI_TUNING_MODE_2	1
+ #define SDHCI_TUNING_MODE_3	2
+
+---
+base-commit: c5e32e86ca02b003f86e095d379b38148999293d
+change-id: 20260727-sdhci-fix-13481630ae02
+
+Best regards,
+-- 
+Haibo Chen <haibo.chen@nxp.com>
+
