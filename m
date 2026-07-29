@@ -1,190 +1,316 @@
-Received: from mx0a-0002e601.pphosted.com (mx0a-0002e601.pphosted.com [148.163.150.75])
+Received: from mx0a-0014ca01.pphosted.com (mx0a-0014ca01.pphosted.com [208.84.65.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33E35471D14;
-	Tue, 28 Jul 2026 22:28:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=148.163.150.75
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56301331202;
+	Wed, 29 Jul 2026 05:11:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=208.84.65.235
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785277732; cv=fail; b=S//0evakG3YH3+4khUacbvLS/B1hAKjLQzPx+QEq86D8yegoqu2QfDB8uW/PZ6uxrwdtbDMBK43+sfEAyQEaP9s1F5r30Qve+g1P+8Tlr6sWYKitjg4VSxK8U7rPya2nrvnmWhc7OW/L0Y7r/AKpD0Yoi2iRHeaSqKctfQxH/tQ=
+	t=1785301899; cv=fail; b=Ga2WCd1jckwXLXJcDCaGLr7Wtrg3P9qcLAuGosnkWq5vAWv+2gQKhJ45CWVC7B5EhWte500J9VijizURM/RwgNHe3TjrIWqQ9BxGnLbInIpdD6A/5h/svD0O9j0JjdXBDubyQ/dP9x1rQCwUpeAr1oEk0Gmi0PEP/mma208eW8w=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785277732; c=relaxed/simple;
-	bh=aIGJ/1KUgidZFPeVNMcmU+fWiys8q2JQRRGp41V5uvM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=jDd3kBUE7BYLhFvOt7cDbPvKfmVZx6ZvkYMRW+TCU+zwA4aCyNN+ny7es+1GIOTEdYDmVJgaOpTbqP3rh3EoVy56jae8TFmwCvfdffur7MBJ+CZY5x3s9CkYB1a+AxYfreSc9mneFCY9rPwJdGm1iFQuV6x0yWIwtqGnSN5Mp10=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (2048-bit key) header.d=ti.com header.i=@ti.com header.b=X5q51W2H; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=aAZfq086; arc=fail smtp.client-ip=148.163.150.75
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1785301899; c=relaxed/simple;
+	bh=SPxt+4aa23mJ4VWoHU9Xuh/h3Ch5QCtXSe66mM4Bf+Q=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=INqPLU9Ld9rtyeRj1sjxlibhPAmAJGi+fcHmqd6f2wFWmd3q6JnWybCqRwGv8aFBiADDFGidnEizzdma5ETRx0gD2VqxKWjI4IMqU0g+wJtk2Iehi2Ge3jQ/sVbWTzt/Wkin7FpkvmTMFf7BEbdNL1BBvxdlFGnGqAfPA1qlgJk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cadence.com; spf=pass smtp.mailfrom=cadence.com; dkim=pass (2048-bit key) header.d=cadence.com header.i=@cadence.com header.b=lV4YXcqW; dkim=fail (0-bit key) header.d=cadence.com header.i=@cadence.com header.b=OovyGen5 reason="key not found in DNS"; arc=fail smtp.client-ip=208.84.65.235
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cadence.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cadence.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ti.com header.i=@ti.com header.b="X5q51W2H";
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="aAZfq086"
-Received: from pps.filterd (m0380145.ppops.net [127.0.0.1])
-	by m0380145.ppops.net (8.18.1.11/8.18.1.11) with ESMTP id 66SL5KHG620519;
-	Tue, 28 Jul 2026 17:28:46 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	proofpoint-05-2026; bh=szuyTgQu+3mPkGdecSrLOJPRvBdgunmGhEOFHec2C
-	BQ=; b=X5q51W2HvP0YhBO/HLUdpx/kAJcZf8G0l40EfVQhDLtYe5gm7tWC0Jg2A
-	ECBgYuJSQCSJ8S8B2Svhc5+UI+IArBBOgyx1pBuTXXKrcA7beLd58x5UsttzHJjD
-	SZsr2PtrSFiY1aiyJaU6eHeoTslphBAeRxkYg4f0pq2NRyAsAlXDMAr+33p2l6OL
-	EBL4FZmxzZw4/hEXsPve82pVbd9NLAPTwxTE+q3h4SsyDajktLZgMqTZcWnaw3dc
-	FG3+jnacjNRP9ibhTRP65/HNUp2jmjoOrpeWY/2S97J+k7YVAc5bPA0N6B04P9qj
-	dLDI7qAPyQORpXT7EMw58OiDErioA==
-Received: from sn4pr0501cu005.outbound.protection.outlook.com (mail-southcentralusazon11011046.outbound.protection.outlook.com [40.93.194.46])
-	by m0380145.ppops.net (PPS) with ESMTPS id 4fpufxv43d-1
+	dkim=pass (2048-bit key) header.d=cadence.com header.i=@cadence.com header.b="lV4YXcqW";
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=cadence.com header.i=@cadence.com header.b="OovyGen5"
+Received: from pps.filterd (m0042385.ppops.net [127.0.0.1])
+	by mx0a-0014ca01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66T4afEC324651;
+	Tue, 28 Jul 2026 22:05:47 -0700
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cadence.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=proofpoint;
+	 bh=79ALOO33l8lOkTAF8bSY/tSRHWXhIrEGE6azQ99JAMA=; b=lV4YXcqWWSMG
+	MMYuksO1hVDkvmkjMJ9R9bLBrQz6p3xV85K+NS/e6OzitlZf2x9yLpenf52Nb16X
+	X1S7z6UGefbC6HsO3LrsFhMVduWqLIoqKTQXlW2fLAAMPmUoKnDAYfsdcsYuJ7Lh
+	6cUpCw+j1Si5UipCt0lLJUGzVs86fU0TBE5gUQWF2oRHafwfj2r4THJ67v1tkoc+
+	A3DvTpH0q0uP2j0lAAlq17P2raZVSXg/9FZ9FFMVCfVevTq5pdUtG692wwR3eeEU
+	m/s54V8cynAcxHa2CZ6HiYcViiMldXmodqNAYjWi8U/CoG1HzbeokQwdUeOnsTWn
+	0CW9cF+org==
+Received: from bl2pr02cu003.outbound.protection.outlook.com (mail-eastusazon11011053.outbound.protection.outlook.com [52.101.52.53])
+	by mx0a-0014ca01.pphosted.com (PPS) with ESMTPS id 4fpewdag15-1
 	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=NOT);
-	Tue, 28 Jul 2026 17:28:46 -0500 (CDT)
+	Tue, 28 Jul 2026 22:05:47 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=swp2cPDVlzkLbV8tcQNaYKzWA2XLpeFu9qZbAfdoLdaiGNil3Z9qYP8bQ8Acr4WVXnB5HyIx6+66wwjytmKdlSqzN7AklEclJwCsKnES0tIwtlktuBcD7SkkaQ29VRTOiKbhgthnmh3T9i4WXGUt3G5WpuV34aK78k9T1azemW1LQE1D/5lLciZXp3cjagNnCHAutSleltPmELdreAdLaO7Ov0knCKImWZwwJFP7NUO+kkEv5rZyb6sM8/RJ41KnSXoAI/+a7w5HAFZhmUgHC0LdFKfJi9hZt1lvQQwbwKEFh+oupCZQVdpwAhCnccSaUjeLBg02QnCo7XalRL/38A==
+ b=E+mMgo0Dd173OxeFtTP1/a6n1bViXpZ91EpZgQLCG91Bu0/kjEApi990nfXzQHLVOcn4nd51Btl+HwbChD+2UBmWsIU1nH8MbtVv4pDlZ/t4207VysoAGC6mhySh7s5DxmdmkflRhHZ2YI35k1x8fCnQubwUl6njk1Ho15ucmsUCUbDdBgzQmffwdHbiCyMDCos/ufEcVQEc3IjP25RPnTBxPEdPhA3/haCaGvHXWDAlPdF7ZJHeE9jHttxuD0CyuwH5gUJISw1/4BsuB+9ebgq1mM85Sm3YjMlIjF239WWiudh21V3lIslnHHBoRYmPav3fdz50N/agYi1yqWUFUw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=szuyTgQu+3mPkGdecSrLOJPRvBdgunmGhEOFHec2CBQ=;
- b=W4M/0JJiT5ajwH0mBWWR6VIKIs2s2AqF4MS3hOwRCdfdnBXi+ixHQxVDY7GRnANI50ay9VOfMcfCuPxQc/gtsfa4pBrOqY7lB0RQftwGNPooKpYv8zLinQWhm7LNULsEWVViXfUQlaY/83Oj9D5wGtL0oKb5CwACfrdYw5Yu8ozM/VtKLAN59CuPoWsQgYNmpRW+EogCrnwqijJG6u430XVk2iT/+U7DS/FFy+okkcNOuf90qmvcMx9chl4fdbGms9aON0etJ477zV3rjW/uYC42j1TB9boErM2uklH+ZBks3qlOs/iL0EIyvF7u451dGT4jVaMUQUMpj6Sv527yLQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 198.47.23.194) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=ti.com;
- dmarc=pass (p=quarantine sp=none pct=100) action=none header.from=ti.com;
- dkim=none (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com; s=selector1;
+ bh=79ALOO33l8lOkTAF8bSY/tSRHWXhIrEGE6azQ99JAMA=;
+ b=lmBfT/FCEV8JmelQwmI+xarfMhwlZd1vufeYZGsMt27r5xbtLEUm+XEc14AGuisYVaMc1lxpAMTzH4M6EVG/auYh06L2FGLsudbZs1aBO9RKK6kczi6S2ysdOKvWEkPQ0dRdqdENXCNVTQOKrapBCYtMeYL3htSZt36qCt8nmq25oOLNCy/XWYLGNczUFLhFBiyBozZdHGnpWjFKZta7dU5ZcSbIrqnPvFJuwVe6FCqsBOtwiteOr4v7LGiARsgoHD50TbjF/jKp3hyILklxPKvQw53eNrfxYqwhgocYG6CuuXN8CLdFOuz43tsLno8KmivG0IDqWcZ0acEJ/HP55A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=cadence.com; dmarc=pass action=none header.from=cadence.com;
+ dkim=pass header.d=cadence.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cadence.com;
+ s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=szuyTgQu+3mPkGdecSrLOJPRvBdgunmGhEOFHec2CBQ=;
- b=aAZfq086JkMEmJKrEDyZl47ryF1QUwf9NpX6UddjCSOw9sO5x6DV9pgbiLCkE0XwFD7jcb5j2HpVg9uHexgiPVd7sfPg+sFDBnIbJYlPJXwxdg87hrIiT/8XFnGrkd38S2rjwSw5XSKWBNPMaU+zU3CMRHyZNkduh8I1qokJVNU=
-Received: from MN0PR04CA0009.namprd04.prod.outlook.com (2603:10b6:208:52d::30)
- by PH3PPF262994532.namprd10.prod.outlook.com (2603:10b6:518:1::78f) with
+ bh=79ALOO33l8lOkTAF8bSY/tSRHWXhIrEGE6azQ99JAMA=;
+ b=OovyGen5my8E0F3lg/9h10Bk5BbrlfrnARBxzTyQjYRXGjWD2V1hj1JJpQPzAKeEjw0bFgJ2WY7+DWAkdI2SRZorZf8FxHq4o3xchEgB4lGjU41M0da88aHBYZgZi3Dr2Tpr1OSajqbWTPCrM5Ixi9cCDH6zP16qVWy9wPt3V33+UGqSm4dFJwSSXwVgYVOs6zwM5ogAxFcluW9y/TKsPz9S/LgIaRwqxyG2J+N5+cipjtBPFRT+NuVfYRdrhGOuR2Vy72XueRvYuuR3v8uJTpJ/340I0X5ygmmn8ImsHwGOk65pLTaZEHanEp9oqEB/Xud8h7Gu7FQFP2hWb04fUw==
+Received: from CH3PR07MB10625.namprd07.prod.outlook.com (2603:10b6:610:21a::6)
+ by BY1PR07MB10652.namprd07.prod.outlook.com (2603:10b6:a03:5c1::5) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.270.12; Tue, 28 Jul
- 2026 22:28:42 +0000
-Received: from BL6PEPF00022572.namprd02.prod.outlook.com
- (2603:10b6:208:52d:cafe::74) by MN0PR04CA0009.outlook.office365.com
- (2603:10b6:208:52d::30) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.245.13 via Frontend
- Transport; Tue, 28 Jul 2026 22:28:42 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 198.47.23.194)
- smtp.mailfrom=ti.com; dkim=none (message not signed) header.d=none;dmarc=pass
- action=none header.from=ti.com;
-Received-SPF: Pass (protection.outlook.com: domain of ti.com designates
- 198.47.23.194 as permitted sender) receiver=protection.outlook.com;
- client-ip=198.47.23.194; helo=lewvzet200.ext.ti.com; pr=C
-Received: from lewvzet200.ext.ti.com (198.47.23.194) by
- BL6PEPF00022572.mail.protection.outlook.com (10.167.249.40) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.21.270.5 via Frontend Transport; Tue, 28 Jul 2026 22:28:42 +0000
-Received: from DLEE213.ent.ti.com (157.170.170.116) by lewvzet200.ext.ti.com
- (10.4.14.103) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.37; Tue, 28 Jul
- 2026 17:28:41 -0500
-Received: from DLEE204.ent.ti.com (157.170.170.84) by DLEE213.ent.ti.com
- (157.170.170.116) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.37; Tue, 28 Jul
- 2026 17:28:41 -0500
-Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DLEE204.ent.ti.com
- (157.170.170.84) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.2562.37 via Frontend
- Transport; Tue, 28 Jul 2026 17:28:41 -0500
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 66SMSex43575728;
-	Tue, 28 Jul 2026 17:28:41 -0500
-Message-ID: <6bceddfa-fa5a-4967-a2ca-737db64e741a@ti.com>
-Date: Tue, 28 Jul 2026 17:28:40 -0500
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.270.12; Wed, 29 Jul
+ 2026 05:05:43 +0000
+Received: from CH3PR07MB10625.namprd07.prod.outlook.com
+ ([fe80::8704:27e3:9e5:e5a0]) by CH3PR07MB10625.namprd07.prod.outlook.com
+ ([fe80::8704:27e3:9e5:e5a0%6]) with mapi id 15.21.0270.009; Wed, 29 Jul 2026
+ 05:05:43 +0000
+From: Rohan Santosh Joshi <rohan1sj@cadence.com>
+To: Conor Dooley <conor@kernel.org>
+CC: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof
+ Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Masahiro
+ Yamada <yamada.masahiro@socionext.com>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org"
+	<devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>,
+        Milind Parab <mparab@cadence.com>,
+        Pawel
+ Laszczak <pawell@cadence.com>,
+        Swapnil Kashinath Jakhade
+	<sjakhade@cadence.com>,
+        Manikandan Karunakaran Pillai <mpillai@cadence.com>,
+        "razb@mobileye.com" <razb@mobileye.com>
+Subject: RE: [PATCH v3 1/2] dt-bindings: mmc: cdns,sdhci: Add CQE support
+Thread-Topic: [PATCH v3 1/2] dt-bindings: mmc: cdns,sdhci: Add CQE support
+Thread-Index: AQHdGcdf1urGZZY2iUagUGPYAgn807Z5vSIAgAo0nyA=
+Date: Wed, 29 Jul 2026 05:05:43 +0000
+Message-ID:
+ <CH3PR07MB106257D01FBAA8310F90C02C58CCA2@CH3PR07MB10625.namprd07.prod.outlook.com>
+References: <20260722-cdns_sdhci_cqe-support-v3-0-4412856a4488@cadence.com>
+ <20260722-cdns_sdhci_cqe-support-v3-1-4412856a4488@cadence.com>
+ <20260722-nursing-shrine-9e9196d96f14@spud>
+In-Reply-To: <20260722-nursing-shrine-9e9196d96f14@spud>
+Accept-Language: en-IN, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: CH3PR07MB10625:EE_|BY1PR07MB10652:EE_
+x-ms-office365-filtering-correlation-id: 6fc72aa8-e6cf-4d1e-3626-08deed2f0afb
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|7416014|376014|23010399003|366016|1800799024|38070700021|6133799003|56012099006|11063799006|4143699003|10067099003|22082099003|18002099003;
+x-microsoft-antispam-message-info:
+ Tb9W4UhsWg5ZFN6WypMAEgXK30ppsqPzhDnj9yOdBX7ZQFSk9sLVnfzQDPECdYUQEIojIrblxJY+sdTZd0KsFTRj+S/tbl6FYPnBp4dIz6ZIvYuixTKncfric75HGbFzDxEoOMo53WyIuMIMDUkJwCweuDPojiRBwkoGi15Leb4+jRzscmEG9+46SmvorcvvJ+ePR5Gxq2ZU4KIdKY+o8e7aNEXbt1B2+/YMYUZT5R8Uld3KmXNXCbdkST5fxO0ZrHsVzF8K3+TSLn1jrvkXYhR9aqxsaxUzY1ZU6y93gxN46XUDrrueIubYIo1i7oYACIyi55mXXR+MMJRt5OwHmJCTQNSb0RAsxSHJVcVfgVv2CUIjqc6AVZ2q+QI1qZFtNcm9aJIn4cwO/ROCx2ddNZ0FAM/WEa15iMj/nUtFBCMsyqbmuRKfWLIPUcf2yXgmpG0dq/FwE48X8HP6lsvBzTHmywG+Vxgs+rnNX5Gl6vOiShSi9WnGZuvXCYcEVsoBn+vj7Gb/JiZ9n+HGZDQZQBlUlB7Bs019+vO+ZBo5FkkF1X1Ar/4kFIcedA24iVu6y3NCVrYq+Ssf7P3SZ1HJJSNro9kyki5RsJJOL/c+MC3r2saVyn73ysZc6iaD8pHwzCoVE/aQ8VOjiSlRzvv3vExLbBwTIk3WlG8zikrZbfNmUyWxyPIFzXKTq9gDP1sCreDiQQ7Fqvmd2Ks+//opDGf+3KP4AphgYog/Fo97+WM=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH3PR07MB10625.namprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(23010399003)(366016)(1800799024)(38070700021)(6133799003)(56012099006)(11063799006)(4143699003)(10067099003)(22082099003)(18002099003);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?Q9yY/Qs5HeS9yD4xdKRvGuIPucV1q1LXtyckVwDQbokm82sMV3tvtttcY6nt?=
+ =?us-ascii?Q?tkLvhe2047/gOMMB+RDpRkNngVtOvLHX2g/QRh7ySQCuFExm9VlpbAMlguqR?=
+ =?us-ascii?Q?ucwe+WpfCpIWkxRzlaYsaudT8d5c7yzmXcXIIvkwDuXRa79+QW376UG5xkNP?=
+ =?us-ascii?Q?5EZsfbqzXJfR0PGmVfeBJSpFNRuigJwSS4JGLS87aAxPCx5PCoMqbN1fJvmL?=
+ =?us-ascii?Q?4pGIJ673juTsYNSPGyhLViuAFB4oVqf6Z71tQxsdoXFI08Oz+yKoWekm4b2U?=
+ =?us-ascii?Q?ylqy8XiYVnxdYTadI5dLWo6CiSCZkcwJysw51ljCdTAbqatx4TrmDY0Nvddp?=
+ =?us-ascii?Q?a47A258XtaydO5tufDp6ErebTOF/kjmC/qhmh58rwyMBfZGSEez0pWiGHXgC?=
+ =?us-ascii?Q?VjQDQMYz3V8T9jZ8u84Is7wCIT6oJiWre/ebzAXgY8NwesGz6nVgatIJW4Nc?=
+ =?us-ascii?Q?grbqcRy7Uy7YJUSmkleprhZ/xoRqwwZs+NMfZb0ujNHRk0jaoriYvm+Rwsc4?=
+ =?us-ascii?Q?lNKUK8p3npzejqPnUyPjbU+YPp+1P2KncSVbO8jbpQVngqFnJTSAT3Ffn0UP?=
+ =?us-ascii?Q?Bt43U1roaBej81t9dxH+VbMDc0SSMzWZQF3lroDh+qCNRvDu8N/bKM7V52GQ?=
+ =?us-ascii?Q?29IWJFdMdVOF2dQxd7Ed0QKs/JhD21foxMe30JXO7Uy3ZRzdNnAv+oK2xhSm?=
+ =?us-ascii?Q?jryW29zhOzyvs8bkURmJ1342jkAHiOHBR5H+pXe7gtO03wbsRwtdPg+W1Zfo?=
+ =?us-ascii?Q?TjS0UmASt66PINEOq8bnZecbUFIQZTQSUZlxlTQYnZ8BR/4sR4tC6UlWVkXI?=
+ =?us-ascii?Q?Le9xiARPze1vogXSp3wT7qvJEMTqR6eVipKoP+5EhIu9R0fB1Q6xgDkDWdbk?=
+ =?us-ascii?Q?WCbaptHkHzR2OeTyt8eJkIP4yIaF1kwm4zSTnSU+5FzIzYRBgrkg1x5PufNy?=
+ =?us-ascii?Q?yMo6ni7LtWv3xPt+pnOb+bFUi+3/beiLBR8+5QIWYv13Wb/a4eAmu3VryCy7?=
+ =?us-ascii?Q?d1mvutN5nu3S+jqPMzD4avxhq919xSCvKsOn6WeAPovnnhIxA/8h/g1DRVos?=
+ =?us-ascii?Q?BDbQisY4qjJKCNNtxfv0HyP7Kjccb5Lf4JELSJvgfxk7480KkypIHgIWIuC7?=
+ =?us-ascii?Q?zlj3L3ie7x6BZHg+a/IZluHZoCczzLs9K98VzvubwBo+9ohYZwSqpGwjDRct?=
+ =?us-ascii?Q?oagMbX0g6GggNw/Fhd97w8NIEWnAkL3tKuaKVCroaK7nSQhhKtEr/DSdn+Xu?=
+ =?us-ascii?Q?9S681qE2RN1AQPgALMR5aii9oNqY6tP4HLzIMXorvu2iJE9SGjqIiBhNMLnH?=
+ =?us-ascii?Q?KJ3VMM+t8rVY8Et9H6Fvv4mjebm1cMAwi5wA+G05Bik7LGAmOETPwbabTccc?=
+ =?us-ascii?Q?SjPTo3orDJODbiG8kaVRy+B4iHsZ+CQ/2CFVUhZeiFChjVfiH+aN+vhneNWc?=
+ =?us-ascii?Q?UwXQC7QhlyyuvntTR1bVkuKfQNcDF/WOBI6dHY+3ceSVzkq2o2ZwS3EQi9lr?=
+ =?us-ascii?Q?k+Ff+kWpwG1tSMkXu9Nz0j7Mvx0ROGWhbH6I2U2OGPt8ObMgzgeyj7FlBMyR?=
+ =?us-ascii?Q?d0jX5dF+SGsqyJ4O5gOpWU6NutzigqP70FVQfqq74oY3XwfbTDWMkig3e/Zh?=
+ =?us-ascii?Q?SKtAxpJxo/9DVvW7yN+FWW7mztmzfui2QlglVQPUb5bhucaFmilrJUpAJwfR?=
+ =?us-ascii?Q?9h1TwON23LU0LkOyewzTAjaEgw9K11zVeVUp5R1qsd1CQrf1h6h8DFVdbR2x?=
+ =?us-ascii?Q?yoZuQ9DRwg=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/3] mmc: core: Add mmc_delay_us() for microsecond
- precision delays
-To: Sebastian Reichel <sebastian.reichel@collabora.com>
-CC: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
-        "Krzysztof
- Kozlowski" <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-References: <20260722205701.372789-1-jm@ti.com>
- <20260722205701.372789-3-jm@ti.com> <amPkAhf_LiXGjzC3@venus>
-Content-Language: en-US
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <amPkAhf_LiXGjzC3@venus>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BL6PEPF00022572:EE_|PH3PPF262994532:EE_
-X-MS-Office365-Filtering-Correlation-Id: a3e33973-3761-489e-ece0-08deecf79448
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|36860700016|23010399003|82310400026|1800799024|56012099006|4143699003|10067099003|18002099003|22082099003;
-X-Microsoft-Antispam-Message-Info:
-	JsB9fSeI1wQ6C/7U4pYuaRpzsmt5D8T41iVDR8qL9KBAMP+ly8ppmQvJ46o6biFj6QGUYdg+DSCX25peCpnYBXOtCOV8LsBCppdZAQ/jQnG64oR1YSXXgkpouZTzlJKCBWjTL0mKBgonXiCODCCNRv1EkPp7+snVNXbTQ8dyhWQW2ar9GbI/hbG9zBUzGhcDgnp+lSTMyJxhHkWfAi1DDZ3XWdNdhSTiexAfMAuLgTHHJK6os0fvqI1gJu2fgoMXOfx8CPl+oyRwvn72ClJzKgYKniNTzSjt4bVJszAwVbtR/sGjkB+5sXCm3NQv9KDF4072GyMRX0HeiGGpGpje4DAaPZRu36qyfyb20oqb8HtTCoqwbMKBXkr5UVjMMkkK/MvThnJE5ZHVvg77r2kwY30WBNP4sghP0sytFxxZ4LWAui/X9quFkLGORY4WmfgPBCaNwnmTtMXIEHU2w8mXj/aV17EFLOZQNo7HICuMMpkBCv+ptO4cj30XJ8r2Q5SzDTS1/TEqsAFdp+PxE8pACZW3an56ymC+KDes18TsWH+5LZ6uxa+rgAprs8c8TULkloX4zss8oE1bmV5Ly3uPK7NpL3IeCM+OLOCfY2ZxzWU6H5TQURKVjwA94TMhcZYrfBAyGHCzPjFevZKAybkheSEi9TP68dMofz5XN/Tp5KyA2HJSbq8zLKvcKARJR2egJJPZNjUANjIC2XTZXO442Q==
-X-Forefront-Antispam-Report:
-	CIP:198.47.23.194;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:lewvzet200.ext.ti.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(376014)(36860700016)(23010399003)(82310400026)(1800799024)(56012099006)(4143699003)(10067099003)(18002099003)(22082099003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	5ZUzRPSzMU+FkJmuZGtxuBpmY6x9gJW1/h2Hs+87jr1tXC+SVj5ATSoLBll2OXESlnrM5B7HAyVC7XEXIbjGM4fi5nuBnZL1mXN+ONSllMnENQDiTgVP/3WFSLJXETDKgcnchQy+5GCGf9z14nbPxztvpIdiokdbgvA+GbsnXgXWVSY6rtCrCmE/pqkgXWce/ZuBpVRPD8KPYPkQeiPf2brqEI8FBGjkiiZVOP+W2c226WHW9AvrBz8mwY3y5KCzX3m6icTdEPJOsQ7B6smnl3MEUzZ+65lmk6mVRVkvwSI4uJYtpJbWC/juHDocJzngbzLtCyFplFvUBO1KwigNd7oDQdHjVfDRHLQJpj6FQ7rbLpS3DOt4+kOfdyNnAvgjEJ2ErG6HQhEUwHOXlLgCuOsopkY2vg1ChPt+ZiauP3O/ojluK8YCTnuM/CaHAV4e
 X-Exchange-RoutingPolicyChecked:
-	VmeYNCgZDtpjfHjMe/i/8NTTlzThA5AguvXTdG6iYaBOfQ57SsmE48EE8YKb1kViRDhAJ6JCfF2HSHAv+A0UHi5crcUiwnh5RMseBT7bGwTs8cQTXUnhcDBhvczigIaqHsO7fww9DPx2ExAiTEnA3+/bSnIilXjWw+7pWn2NeUj+CZM5dB9h0NlGOT1VJT78UgQs+Us+d31PchtZhYsf1dbeOOJyi1MNNVc8COvCg05XtIFTcL8IyctgYjeboeypV8vFaOXv8TwCuwnGHsrG62KbcA6Stq7i8LPBSGMS9T6KmlQlmZykjAbPR4Q6Q53b2d5uVb8C/qZM1YhWG7GJcA==
-X-OriginatorOrg: ti.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Jul 2026 22:28:42.0881
+	k0uXNo5xTCQz6+rVsYQ/JYGl5ZI7c1Tnvp1x+dHzfTZ1uhaBSSw089DDvK6xF6Cj9UuDzTRDI+y9/GkUFAFtgi2nOFCS1DVcu0st7BuGyk/m47ZIaoQWXbt9g7jij+t4u690yAQEM9OIhWHjNFIN4xgYkjBBCja/IDbpKQp4zOqcvODT1Srdakwo8IEEpIUUql0nIC9p+PD9S/Un90LYYvBxz+RWoJMJEykDV6OjCm6WjmVDpxdSCgHC6PV8H3FkXA/mtlguBjuhMplGPy4LRI/dRlQM/A0gbu6XNHPph1ZUNWE0YJqWej41nD98qy1EUZr/NSy1Am9oZLFb14cGYA==
+X-OriginatorOrg: cadence.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: CH3PR07MB10625.namprd07.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6fc72aa8-e6cf-4d1e-3626-08deed2f0afb
+X-MS-Exchange-CrossTenant-originalarrivaltime: 29 Jul 2026 05:05:43.6535
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: a3e33973-3761-489e-ece0-08deecf79448
-X-MS-Exchange-CrossTenant-Id: e5b49634-450b-4709-8abb-1e2b19b982b7
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=e5b49634-450b-4709-8abb-1e2b19b982b7;Ip=[198.47.23.194];Helo=[lewvzet200.ext.ti.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	BL6PEPF00022572.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH3PPF262994532
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzI4MDE5MSBTYWx0ZWRfX7c8PPCrDll0k
- UuywJfeVFNripKVGKRBdhtqMBCA/A6WQMN2n+lHHgpxFY/js2cEpEBJFbFI5T8AqjaZfFX8CiZY
- 8XaScbhbT/zkH5IGQ+Ri85VEhp+81kqLqZ7nMwWp8iJ5mtBaRChTnaaqTQzEwycWbfp2TrVYQBc
- EmM3soDPuENBsvmeF/AMQ68Nvuh58bRmkDIDvZN57H3QFJXvH44oOD1WZyHiefXF9Tfpb4nKKBS
- ENfGewQMatGQdCiVVQuaNLSP3+Z5d8a3v+VI3aGj73N8ggktQctQljMne8CWuHd2VKtP1ISGyEm
- zmEsYJFYRipPoxg0O/lWRFVkrThxeOFM5lDlTrVQU87Rb+7OuSgypUSLaPi49UzOhILQXBAYMx9
- 3r7kADzqgDtPoJEdrGROWlDyHc9utE3mIf+qE4ib7ZSUyVf7HUKGS/rQOZgo6npcdnk/b8r/3aQ
- yAAAPSpj1CK/ZSCMp9Q==
-X-Proofpoint-Spam-Info: AW1haW4tMjYwNzI4MDE5MSBTYWx0ZWRfX1lxmpgm+yAo5
- 43/i+43rLrMw57WKTLiIed9oy/B8fsNxsVNbj/jNvgIkr8utdjOZifthDKpYRHmGkARCSdFlgZV
- PE0KNi5mXu2moYeyRPJumlvXMXa0iOU=
-X-Authority-Analysis: v=2.4 cv=a70AM0SF c=1 sm=1 tr=0 ts=6a692d1e cx=c_pps
- a=kRgXGWC4h8N5Zk8PQP6WEw==:117 a=WotqVVQAdb04rnGuttW3Kw==:17
- a=6eWqkTHjU83fiwn7nKZWdM+Sl24=:19 a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10
- a=s63m1ICgrNkA:10 a=V5UXEbMT0ywA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=Z8NIEmU8O1QQgoT56wFK:22 a=gO1vWkAQAl3rybz1DQOp:22 a=sozttTNsAAAA:8
- a=FOlfubG17nqmgHlx8pQA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-ORIG-GUID: u9ledypYMolDY963gtGNwtcWT8hbmK6_
-X-Proofpoint-GUID: u9ledypYMolDY963gtGNwtcWT8hbmK6_
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: d36035c5-6ce6-4662-a3dc-e762e61ae4c9
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: uXu/ynZa9LOkXO5ZD5t4nA2ZEGHzmq5VBKRd1gdNQtzlIvt6u45972M+kGdZ+053szTOrU4p97cqcEYirgAH++tTjzoPEdcrEJDua+d+5V8=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY1PR07MB10652
+X-Proofpoint-GUID: eEq0jqNWG8tY6ka3reC91WMllHVFVtMM
+X-Proofpoint-ORIG-GUID: eEq0jqNWG8tY6ka3reC91WMllHVFVtMM
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzI5MDAzOCBTYWx0ZWRfX6UUbhmPsKNVo
+ EAAT4yYVTpLIQIRON+lG2OVQkEwoVfV4QqzaAami7razB67GP2xT1HeehmxqjRq4ReGY2SM7aJH
+ s2fag59TjTK+DE+BjSYgE82MS3zs9/3Hov/M7zQxtSznh8vkmnmMRgY6d4hLvpOGZg0pl3zor4d
+ /huk2nBT7Qp8y2XD45lUHydO7XIIFNmiZtP4bO5DrIHJ91WilQx2sD2oxcsA6vuVV+DFejoYyDq
+ MbwqkRJ4V6TV2KMqjmiXwuH6SuXnU6GOxDgdHJo+bwLdDaJTcPxiDO986KeJ/toTjWK9sNP63n6
+ DoDOQHSDHyT0O2c6Jk7e9TMFbGgU3oAU8GBWdgn7bXZ7jz52/4bcSPlHRgk99B60ZiaKamhuEUo
+ +NcukC2PDxnaXOv4moLtN9+pp83GDB0HeES0kON/cgBah/wNaXuU97Cuu2zpbgWQBl67eT4MP56
+ ntSyhT5W7Xj6rGoJGEw==
+X-Authority-Analysis: v=2.4 cv=avOCzyZV c=1 sm=1 tr=0 ts=6a698a2b cx=c_pps
+ a=H9d2Io+6O/etw3jU54J+0Q==:117 a=z/mQ4Ysz8XfWz/Q5cLBRGdckG28=:19
+ a=lCpzRmAYbLLaTzLvsPZ7Mbvzbb8=:19 a=xqWC_Br6kY4A:10 a=kj9zAlcOel0A:10
+ a=RAioF0-LDSMA:10 a=Zpq2whiEiuAA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=W8fx6O4W8wtO2w6lYej3:22 a=jPItpJ3sizTKmla2ehJN:22 a=VwQbUJbxAAAA:8
+ a=Br2UW1UjAAAA:8 a=c-n4J4-pAAAA:8 a=QyXUC8HyAAAA:8 a=JvO64EORAAAA:8
+ a=qgyFSXN0kY_tQLgaTNQA:9 a=CjuIK1q_8ugA:10 a=WmXOPjafLNExVIMTj843:22
+ a=Qz6KxWHdQ2_aS5WpiCfK:22
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzI5MDAzOCBTYWx0ZWRfXwZWOGc9T/p9j
+ XQbWo/D7iGkGyBJuAsXxkK3ib3aaVdx1vokdnSsdH0lkm9pAmPRvQmivbOdvfyRjEuV8bf5EjLI
+ mFAYCEc6ELAbwPEuj1PbS4VvlO5vqYvk//3523S+eEm3ANhSgvE/
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-07-28_06,2026-07-28_02,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1011 impostorscore=0 adultscore=0 bulkscore=0 phishscore=0
- priorityscore=1501 lowpriorityscore=0 malwarescore=0 spamscore=0
- suspectscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ definitions=2026-07-29_02,2026-07-28_02,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_check_notspam policy=outbound_check
+ score=0 adultscore=0 priorityscore=1501 malwarescore=0 lowpriorityscore=0
+ phishscore=0 spamscore=0 suspectscore=0 bulkscore=0 impostorscore=0
+ clxscore=1011 classifier=typeunknown authscore=0 authtc= authcc=
  route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
- definitions=main-2607280191
+ definitions=main-2607290038
 
-Hi Sebastian,
+Hi Conor,
 
-On 7/24/26 5:17 PM, Sebastian Reichel wrote:
-> Hi,
-> 
-> On Wed, Jul 22, 2026 at 03:57:00PM -0500, Judith Mendez wrote:
->> Add mmc_delay_us() to support microsecond-granularity delays needed
->> in MMC framework. It uses 25% margin consistent with  mmc_delay() for
->> timing flexibility.
->>
->> Signed-off-by: Judith Mendez <jm@ti.com>
->> ---
->> Changes since v1:
->> - add patch 2/3
->> ---
-> 
-> Looks like you should just use fsleep() from <linux/delay.h>.
-> 
+Currently, there is no public domain information that confirms if the elba =
+supports CQE.
 
-Actually yes it is, thanks!
+In the last (v2) patch series, Krzysztof mentioned about why the Pensando E=
+lba is NOT being modified/considered for the CQE.
+The current implementation marks CQE as optional space and the related driv=
+er can take the CQE or non-CQE path depending on whether the DT defines it.
+Please refer to the cover letter for additional details on this.
 
-~ judith
+Given the above information, can you please confirm if the next patch shoul=
+d modify the elba or restrict the new reg entries to device compatibles?=20
+
+Best Regards,
+Rohan=20
+
+-----Original Message-----
+From: Conor Dooley <conor@kernel.org>=20
+Sent: Wednesday, July 22, 2026 10:07 PM
+To: Rohan Santosh Joshi <rohan1sj@cadence.com>
+Cc: Ulf Hansson <ulfh@kernel.org>; Rob Herring <robh@kernel.org>; Krzysztof=
+ Kozlowski <krzk+dt@kernel.org>; Conor Dooley <conor+dt@kernel.org>; Masahi=
+ro Yamada <yamada.masahiro@socionext.com>; Adrian Hunter <adrian.hunter@int=
+el.com>; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-kerne=
+l@vger.kernel.org; Milind Parab <mparab@cadence.com>; Pawel Laszczak <pawel=
+l@cadence.com>; Swapnil Kashinath Jakhade <sjakhade@cadence.com>; Manikanda=
+n Karunakaran Pillai <mpillai@cadence.com>; razb@mobileye.com
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: cdns,sdhci: Add CQE support
+
+EXTERNAL MAIL
+
+
+On Wed, Jul 22, 2026 at 04:18:37PM +0530, Rohan Joshi via B4 Relay wrote:
+> From: Rohan Joshi <rohan1sj@cadence.com>
+>=20
+> Cadence host controller can optionally support CQE.
+> Add optional CQE register space to cdns sdhci bindings.
+>=20
+> Signed-off-by: Rohan Joshi <rohan1sj@cadence.com>
+> ---
+>  .../devicetree/bindings/mmc/cdns,sdhci.yaml        | 28 ++++++++++++++++=
++++---
+>  1 file changed, 25 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Docu=
+mentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> index 6c7317d13aa6..10bc9ac2073a 100644
+> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> @@ -22,7 +22,14 @@ properties:
+> =20
+>    reg:
+>      minItems: 1
+> -    maxItems: 2
+> +    maxItems: 3
+> +
+> +  reg-names:
+> +    minItems: 1
+> +    items:
+> +      - const: hc
+> +      - enum: [bctl, cqhci]
+> +      - const: cqhci
+> =20
+>    interrupts:
+>      maxItems: 1
+> @@ -131,13 +138,27 @@ allOf:
+>      then:
+>        properties:
+>          reg:
+> +          minItems: 2
+>            items:
+>              - description: Host controller registers
+>              - description: Elba byte-lane enable register for writes
+> +            - description: CQE (Command Queuing Engine) registers (optio=
+nal)
+
+I see no explanation in your commit message for why the elba is being
+modified.
+
+This new reg entry should be restricted to only the device-specific
+compatibles that actually support it.
+
+pw-bot: changes-requested
+
+Thanks,
+Conor.
+
+> +        reg-names:
+> +          minItems: 2
+> +          items:
+> +            - const: hc
+> +            - const: bctl
+> +            - const: cqhci
+>      else:
+>        properties:
+>          reg:
+> -          maxItems: 1
+> +          items:
+> +            - description: Host Controller registers
+> +            - description: CQE (Command Queuing Engine) registers (optio=
+nal)
+> +        reg-names:
+> +          items:
+> +            - const: hc
+> +            - const: cqhci
+> =20
+>  unevaluatedProperties: false
+> =20
+> @@ -145,7 +166,8 @@ examples:
+>    - |
+>      emmc: mmc@5a000000 {
+>          compatible =3D "socionext,uniphier-sd4hc", "cdns,sd4hc";
+> -        reg =3D <0x5a000000 0x400>;
+> +        reg =3D <0x5a000000 0x400>, <0x5a000400 0x060>;
+> +        reg-names =3D "hc", "cqhci";
+>          interrupts =3D <0 78 4>;
+>          clocks =3D <&clk 4>;
+>          bus-width =3D <8>;
+>=20
+> --=20
+> 2.43.0
+>=20
+>=20
