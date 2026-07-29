@@ -1,129 +1,225 @@
-Received: from smtpout-02.galae.net (smtpout-02.galae.net [185.246.84.56])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4E15479871;
-	Wed, 29 Jul 2026 12:28:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.246.84.56
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A36FE37C934;
+	Wed, 29 Jul 2026 17:32:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785328107; cv=none; b=RhURAA+VIjUZtIjcPSWOLGRdVBU0KLGQU3xstSGVDOmgQ2yfbGJ/VU17/XMQx94glaoT6BsFu+9uOUWy0M1hEDTFv+hjMmBePFBicRHzKoTP/IP+qogP35dgWP5I4fRutLJSQ6joAu5F1q6U3nY3ioiR9RkAmoSd2o3i4Ud79/4=
+	t=1785346355; cv=none; b=gOPqEOfrar2VHQ7ANoxaSQpSnUhbNmZVUNlqSIui0QEudM6OIuLiDrOa24q/lWMsmYG1HDRJvfOLbfFRLMXGVjWgCRW7M0mNoGx+zOMufaZXvbxhpcaMgxNcM9jh99GtGq3bdUvwT0fZfKIIT3RP/v4dj2BzU4TakA7T78qHsRA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785328107; c=relaxed/simple;
-	bh=oRrUTYWgMVtYtvO+yjVrNdlmthvRQeQ9FVYDf8+4kJA=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Q2O0t6bmP0G1lfe7Wyx33qwFgb2fnvJf8h2ds3jz1Q0oofOzypxJulxn2PSF7PanjU09dDENVihg7Pn+7H2qFQiYHCs/isq5/oFb95TGGeMprVTIJ4+lNIbzkE/XvGnzvkgO/oNfQq6eczB4bKffWSRg1yJY5kWvsmHoPMLxyjs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=lhzGuDQ8; arc=none smtp.client-ip=185.246.84.56
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+	s=arc-20240116; t=1785346355; c=relaxed/simple;
+	bh=dWpwaixtjSkDkpqhYJ3TVYwhTM5mPzHzRheqXs6aWCY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=u/IeuaZ669Wa/d7RPkTP3DDQfBeg6RgQ7/7q02tOFnjwfgkIXQ54RgsXq0Sl5wGxAL/SuHUtmsv57Y/ANWxakscunEYeffJ2XDyuXBkCSpL8uEsW62+kENUv2VoN5bXNA8TsXb1ZbiyhnBjZgsjTzcUPZVB7l71TZtr/b9NHKhY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DVaWEpg1; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="lhzGuDQ8"
-Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-02.galae.net (Postfix) with ESMTPS id 754B21A1304;
-	Wed, 29 Jul 2026 12:28:13 +0000 (UTC)
-Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id 4A6EC6039A;
-	Wed, 29 Jul 2026 12:28:13 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id BF41711C14DCE;
-	Wed, 29 Jul 2026 14:28:10 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1785328092; h=from:subject:date:message-id:to:cc:mime-version:content-type:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=62401MNJZd+NmwPO/Zom0O45zUQA8pu5GRnhVjurZNY=;
-	b=lhzGuDQ8XOwq2z0owD5QZ53Wkcv+/B7Pc94F+tfdSZq677xcZ+CndNeIGYDJCvz4ubtcHf
-	GxvR3AYcay/FozXA7tQ/snLTXsuOPln360Mp7l80tf9Nq14RLICgDCi+qAO5rOcgoyAfDn
-	OX4pg2PN8/swPJX5MazSrguRgRFzf2Io78zlSNt5eekW0HO9nm2C7pSwsyfzL6FAtMs8Az
-	e2fJrqDovncn/zJteFhwzef54U307jtc8+HPZKvngCP3bu+eoQybT+fw44lMpUlHf5li+R
-	Wbag7s/su2Y5qXhwLL9Uw+C6XnFeByjEp2Fv0WizpbMyecdhwvkDwJP2WqUEYw==
-From: "Diogo Ivo (Schneider Electric)" <diogo.ivo@bootlin.com>
-Date: Wed, 29 Jul 2026 14:25:44 +0200
-Subject: [PATCH 3/3] mmc: sdhci_am654: Fallback to DT-provided itap delay
- on DDR50 tuning failure
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DVaWEpg1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F27721F000E9;
+	Wed, 29 Jul 2026 17:32:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1785346351;
+	bh=ZBy5MVeU7TQua/dAX5cOUPmb+YsKmk/igucJkOOmXxE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=DVaWEpg1Hi+BYx06d+Vz1H02BrNUj79KxOnSFnUzesMFZX46gMjDAZiPXpwz7UUNZ
+	 iZwczgK++b5cK6/VQaT79PW5TuzQRBUOEXEhFGuv2HzoNeRiUalWL9OAvKffCPuHtE
+	 XyS5ThpyhGEy619UVvLesA1pnyIR5AAikNc1ij8p6iUH8+xVxBCsdv8QrVsqo9NyLJ
+	 /C2T297fjrLh/hpbJyagSPkq4lGi2OLHEthw5K9ixuDPZ8aXG5CbD8GAkiMsLr3WSL
+	 xbtXih+1d84dTXryi43BkwkhOvV250yj5ZL5ZGf4DjdqA6qjvYx6+ujkJhkA14dCcD
+	 r5mD0tEdCVBQw==
+Date: Wed, 29 Jul 2026 18:32:26 +0100
+From: Conor Dooley <conor@kernel.org>
+To: Rohan Santosh Joshi <rohan1sj@cadence.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Masahiro Yamada <yamada.masahiro@socionext.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	Milind Parab <mparab@cadence.com>,
+	Pawel Laszczak <pawell@cadence.com>,
+	Swapnil Kashinath Jakhade <sjakhade@cadence.com>,
+	Manikandan Karunakaran Pillai <mpillai@cadence.com>,
+	"razb@mobileye.com" <razb@mobileye.com>,
+	Brad Larson <blarson@amd.com>
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: cdns,sdhci: Add CQE support
+Message-ID: <20260729-empower-cheddar-abdd64961c6b@spud>
+References: <20260722-cdns_sdhci_cqe-support-v3-0-4412856a4488@cadence.com>
+ <20260722-cdns_sdhci_cqe-support-v3-1-4412856a4488@cadence.com>
+ <20260722-nursing-shrine-9e9196d96f14@spud>
+ <CH3PR07MB106257D01FBAA8310F90C02C58CCA2@CH3PR07MB10625.namprd07.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20260729-am654-sdhci-v1-3-7568108e4b9a@bootlin.com>
-References: <20260729-am654-sdhci-v1-0-7568108e4b9a@bootlin.com>
-In-Reply-To: <20260729-am654-sdhci-v1-0-7568108e4b9a@bootlin.com>
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>, 
- Faiz Abbas <faiz_abbas@ti.com>, Judith Mendez <jm@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Thomas Petazzoni <thomas.petazzoni@bootlin.com>, 
- Pascal EBERHARD <pascal.eberhard@se.com>, 
- Miquel Raynal <miquel.raynal@bootlin.com>, 
- "Diogo Ivo (Schneider Electric)" <diogo.ivo@bootlin.com>, 
- stable@vger.kernel.org
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1890; i=diogo.ivo@bootlin.com;
- h=from:subject:message-id; bh=oRrUTYWgMVtYtvO+yjVrNdlmthvRQeQ9FVYDf8+4kJA=;
- b=owEBbQKS/ZANAwAKAQa+fFtWXslFAcsmYgBqafHPYfhalSO375YP6WpjElK/d1l+8DRDP+EaB
- T8SKB1YeReJAjMEAAEKAB0WIQTma35o1i1081e8B2UGvnxbVl7JRQUCamnxzwAKCRAGvnxbVl7J
- Rer3D/9x479kR3xhmBc1TdtzLVowHEdBrwyjMtU2pgWQKzSCUCx/Yurlv/q8sLGkUteN15p+93Z
- 5JcQBdfK+Up8q1KqOarSJv6rBPcRtQsaTjVF+9R3P2lFZKk7s2c4HCydhfIR7Xl9dJbvorPt2Fp
- Z9geeHg1eWsQRnZoHIV93UyoQZ6SD+7hgReQ713+BMzzMRVk9kw9VRmj+Duh4BEGQRqHNZPygSm
- o+qeHuxNXEkhtPvJqmJa9v62MBKZkJsjqnQ1x94CV0vsovfe4VjZ6oOblG9RcyDiyYHhQU5Ws6e
- cYXBvfqNzgE/+xB7lvX5l9nWOZklr/tnoITQrp0crozO84uC2dNxX54xeX3iSMKMzmfvvKmfE06
- rONBjmd0hcp+FiYPzzqeyJQBjFep0NrYlzmpq3TkGMlA2b93M77jgPie5tnDkdnivMMJyM/XXx1
- BwwKaRZx+cxIUc+BwNruCoMgVs9aPy8N8Za6tA17zduKi9ewTbHwgwoschbRCfI0qfdpKrjU9IG
- 6z9pqq6gHmwzlQupu5STN2EwoZGfnh/lKqOLFe8bGsoFkjoCvQQb+acHNz3AMiOxWbobfB8Tjvt
- aRjqSfPH/nMe3Abz+FuYk5BOZ9oeoQ3rZS9eDLHTnX4M0Y+VkxJe49TPgYV1CJW4fBItOYzb3za
- kEOkRcZye5hqrwQ==
-X-Developer-Key: i=diogo.ivo@bootlin.com; a=openpgp;
- fpr=E66B7E68D62D74F357BC076506BE7C5B565EC945
-X-Last-TLS-Session-Version: TLSv1.3
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="ggQjqE9E7xunXzdV"
+Content-Disposition: inline
+In-Reply-To: <CH3PR07MB106257D01FBAA8310F90C02C58CCA2@CH3PR07MB10625.namprd07.prod.outlook.com>
 
-DDR50 mode is not required to support the tuning command CMD19, meaning
-that calibration may fail on cards that do not implement it, in which
-case a known-good itap delay value should be programmed into the host
-controller.
+--ggQjqE9E7xunXzdV
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Do this by reading the (already defined) itap delay DT property for DDR50
-and, if tuning fails for this mode, fall back to the DT-provided itap delay
-value.
+On Wed, Jul 29, 2026 at 05:05:43AM +0000, Rohan Santosh Joshi wrote:
+> Hi Conor,
+>=20
+> Currently, there is no public domain information that confirms if the elb=
+a supports CQE.
 
-Fixes: 901d16e46296 ("mmc: sdhci_am654: Add retry tuning")
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Diogo Ivo (Schneider Electric) <diogo.ivo@bootlin.com>
----
- drivers/mmc/host/sdhci_am654.c | 14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+Well then modifying it to add CQE is wrong.
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 806544db0128..a7c64c5ac636 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -126,7 +126,7 @@ static const struct timing_data td[] = {
- 				   NULL,
- 				   MMC_CAP_UHS_SDR104},
- 	[MMC_TIMING_UHS_DDR50]	= {"ti,otap-del-sel-ddr50",
--				   NULL,
-+				   "ti,itap-del-sel-ddr50",
- 				   MMC_CAP_UHS_DDR50},
- 	[MMC_TIMING_MMC_DDR52]	= {"ti,otap-del-sel-ddr52",
- 				   "ti,itap-del-sel-ddr52",
-@@ -580,9 +580,15 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
- 	} while (++sdhci_am654->tuning_loop < RETRY_TUNING_MAX);
- 
- 	if (itapdly < 0) {
--		dev_err(dev, "Failed to find itapdly, fail tuning\n");
--		/* Explicitly clear ITAPDLY */
--		sdhci_am654_write_itapdly(sdhci_am654, 0, 0);
-+		if (timing == MMC_TIMING_UHS_DDR50) {
-+			sdhci_am654_write_itapdly(sdhci_am654,
-+						  sdhci_am654->itap_del_sel[timing],
-+						  sdhci_am654->itap_del_ena[timing]);
-+		} else {
-+			dev_err(dev, "Failed to find itapdly, fail tuning\n");
-+			/* Explicitly clear ITAPDLY */
-+			sdhci_am654_write_itapdly(sdhci_am654, 0, 0);
-+		}
- 		return -1;
- 	}
- 
+> In the last (v2) patch series, Krzysztof mentioned about why the Pensando=
+ Elba is NOT being modified/considered for the CQE.
 
--- 
-2.55.0
+Right, and he's coming at this from the same perspective as me.
+We both want to know why you're making (or not making) the changes that
+you are to the binding. You didn't explain in v2 why the elba didn't
+need the change and now in v3 you haven't actually explained that it
+does.
 
+> The current implementation marks CQE as optional space and the related dr=
+iver can take the CQE or non-CQE path depending on whether the DT defines i=
+t.
+> Please refer to the cover letter for additional details on this.
+>=20
+> Given the above information, can you please confirm if the next patch sho=
+uld modify the elba or restrict the new reg entries to device compatibles?=
+=20
+
+You need to figure that out, perhaps by CCing the person responsible for
+the addition and maintainance of the platform?
+
+Additionally, please fix your quoting.
+
+Thanks,
+Conor.
+
+>=20
+> Best Regards,
+> Rohan=20
+>=20
+> -----Original Message-----
+> From: Conor Dooley <conor@kernel.org>=20
+> Sent: Wednesday, July 22, 2026 10:07 PM
+> To: Rohan Santosh Joshi <rohan1sj@cadence.com>
+> Cc: Ulf Hansson <ulfh@kernel.org>; Rob Herring <robh@kernel.org>; Krzyszt=
+of Kozlowski <krzk+dt@kernel.org>; Conor Dooley <conor+dt@kernel.org>; Masa=
+hiro Yamada <yamada.masahiro@socionext.com>; Adrian Hunter <adrian.hunter@i=
+ntel.com>; linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-ker=
+nel@vger.kernel.org; Milind Parab <mparab@cadence.com>; Pawel Laszczak <paw=
+ell@cadence.com>; Swapnil Kashinath Jakhade <sjakhade@cadence.com>; Manikan=
+dan Karunakaran Pillai <mpillai@cadence.com>; razb@mobileye.com
+> Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: cdns,sdhci: Add CQE support
+>=20
+> EXTERNAL MAIL
+>=20
+>=20
+> On Wed, Jul 22, 2026 at 04:18:37PM +0530, Rohan Joshi via B4 Relay wrote:
+> > From: Rohan Joshi <rohan1sj@cadence.com>
+> >=20
+> > Cadence host controller can optionally support CQE.
+> > Add optional CQE register space to cdns sdhci bindings.
+> >=20
+> > Signed-off-by: Rohan Joshi <rohan1sj@cadence.com>
+> > ---
+> >  .../devicetree/bindings/mmc/cdns,sdhci.yaml        | 28 ++++++++++++++=
++++++---
+> >  1 file changed, 25 insertions(+), 3 deletions(-)
+> >=20
+> > diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Do=
+cumentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> > index 6c7317d13aa6..10bc9ac2073a 100644
+> > --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> > @@ -22,7 +22,14 @@ properties:
+> > =20
+> >    reg:
+> >      minItems: 1
+> > -    maxItems: 2
+> > +    maxItems: 3
+> > +
+> > +  reg-names:
+> > +    minItems: 1
+> > +    items:
+> > +      - const: hc
+> > +      - enum: [bctl, cqhci]
+> > +      - const: cqhci
+> > =20
+> >    interrupts:
+> >      maxItems: 1
+> > @@ -131,13 +138,27 @@ allOf:
+> >      then:
+> >        properties:
+> >          reg:
+> > +          minItems: 2
+> >            items:
+> >              - description: Host controller registers
+> >              - description: Elba byte-lane enable register for writes
+> > +            - description: CQE (Command Queuing Engine) registers (opt=
+ional)
+>=20
+> I see no explanation in your commit message for why the elba is being
+> modified.
+>=20
+> This new reg entry should be restricted to only the device-specific
+> compatibles that actually support it.
+>=20
+> pw-bot: changes-requested
+>=20
+> Thanks,
+> Conor.
+>=20
+> > +        reg-names:
+> > +          minItems: 2
+> > +          items:
+> > +            - const: hc
+> > +            - const: bctl
+> > +            - const: cqhci
+> >      else:
+> >        properties:
+> >          reg:
+> > -          maxItems: 1
+> > +          items:
+> > +            - description: Host Controller registers
+> > +            - description: CQE (Command Queuing Engine) registers (opt=
+ional)
+> > +        reg-names:
+> > +          items:
+> > +            - const: hc
+> > +            - const: cqhci
+> > =20
+> >  unevaluatedProperties: false
+> > =20
+> > @@ -145,7 +166,8 @@ examples:
+> >    - |
+> >      emmc: mmc@5a000000 {
+> >          compatible =3D "socionext,uniphier-sd4hc", "cdns,sd4hc";
+> > -        reg =3D <0x5a000000 0x400>;
+> > +        reg =3D <0x5a000000 0x400>, <0x5a000400 0x060>;
+> > +        reg-names =3D "hc", "cqhci";
+> >          interrupts =3D <0 78 4>;
+> >          clocks =3D <&clk 4>;
+> >          bus-width =3D <8>;
+> >=20
+> > --=20
+> > 2.43.0
+> >=20
+> >=20
+
+--ggQjqE9E7xunXzdV
+Content-Type: application/pgp-signature; name=signature.asc
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYKAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCamo5KgAKCRB4tDGHoIJi
+0mB+AP9UbEV8Aes+YoGfo3dWw8dRNX6E8w9ofgcKtojSzFB0hgD+Jl3mPtbDm8Pd
+R9djyoTluoQWaUxmZksOEGEQQZ3N0AM=
+=try9
+-----END PGP SIGNATURE-----
+
+--ggQjqE9E7xunXzdV--
