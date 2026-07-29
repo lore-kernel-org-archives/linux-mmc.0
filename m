@@ -1,73 +1,127 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from smtpout-03.galae.net (smtpout-03.galae.net [185.246.85.4])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8F21436BF0;
-	Wed, 29 Jul 2026 08:38:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1889648034B;
+	Wed, 29 Jul 2026 12:28:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.246.85.4
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785314323; cv=none; b=pG5saPqtNc4NbNZ5CTApH4png9hQeQ6LL4nS5F51r955LrvKBIWTBEXCRTGRmHs786FiFSo19xWz2wn08LgIa5yjCjTXvVHaTjxxX2XuQA0K4ejLszSaZbEzoD9qKv4/mMCxJ8/xefIKh9cTnFWGU07S0SCpzTlDze2lmSJS8wg=
+	t=1785328103; cv=none; b=kvva22M01ySIpzRtxo2U1AY1h338kXVxjLScBMnrdvmW3wnn9Hfb7+uYpTqS/juw5+KjXgTN/1UgOIBAQ1yKN8lSQVRrtZJGZtCuVzY1dXA+Bp3ZlGGNsbZ4SMFuu+MbL6c8JbdL4Y6umWj65Dcg7Y4aKvBFFLJblCJxUdVQ2Wg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785314323; c=relaxed/simple;
-	bh=xxR3BBZQfI3GHNVL8T56Uv5XXQP3o79tuI08L7ai5yE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=i5nAeDVBSzcIGcvzCkT2n1kf68ve2loMlVfmB8H3oeN2z6RYUJV981nSYIGwq7wgBBIMk9uyW0fmR99+49o/Csp+gD0dG4mye3cTLDo2m/+2bI0PAdBpZJckVEp3f+KhD4xBAV/W4O8Tf2GYpe1ELwzXN+3lxJWTx0mYF+VV/Gc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YfGoUPSw; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785328103; c=relaxed/simple;
+	bh=OaQECTvq8DlTEMy7Li4rKqrFc0cNFuieTzFENUed5L0=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=CZeFXZySOKaN95ZLI7bnxWbIqdUbA69cVDdnjuh7VLWwn43L1xzCdsNdJWYtlScUAVXhorWzVVWQag8hbQpeddWlTsfS2Qbhlm+8Mov0tjV3gIQANIMU+t5tHJ8kk/uFAjhZMd5XZZLFlDcY/6tnxr0Fn+C64N5hSSeCFmZGKjQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=wG4JY0gi; arc=none smtp.client-ip=185.246.85.4
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YfGoUPSw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C747C1F00A3A;
-	Wed, 29 Jul 2026 08:38:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785314322;
-	bh=k2NCALBJJAy6tR2mhsLx6zg/zUETsbxYPP2QMRDNySg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=YfGoUPSwnE6nfF78gylxXw8MgMZuc465SE+uyVFPDgwCZ9taYEAVDAufYjggZ71TW
-	 4vFeEKmHyVyTl9iTrKkPSalfQzcW3+MBDH3w7cFwfHjcLZNBla8/Jr0LiguiLXjHLz
-	 5bbuvWK/BXFjF+dGK6ZhNrXwjBMF2G+MFHWuVI5Ga2vOVyayidPSIDNAeWLqBPcNLp
-	 ZkJzuCw/V0deCtWBOc/Du/duVHnmSQwgSVlVExdDC29Ky70Fhql1drdNHMMtYzE7Ca
-	 k5ry1SwYkau9z/rGpLhklsj+/u86XTb0kO/OPI1AR1oqV+rU41P7LVzksAuOSgYXcI
-	 MAAl53KRVf9CQ==
-Date: Wed, 29 Jul 2026 10:38:38 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Kamal Dasu <kamal.dasu@broadcom.com>
-Cc: Ulf Hansson <ulfh@kernel.org>, 
-	Florian Fainelli <florian.fainelli@broadcom.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Oleksij Rempel <o.rempel@pengutronix.de>, Avri Altman <avri.altman@sandisk.com>, 
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>, Erick Shepherd <erick.shepherd@ni.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: Extend keep-power-in-suspend
- beyond SDIO
-Message-ID: <20260729-huge-mink-of-climate-b6e7de@quoll>
-References: <20260728190314.2325906-1-kamal.dasu@broadcom.com>
- <20260728190314.2325906-2-kamal.dasu@broadcom.com>
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="wG4JY0gi"
+Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
+	by smtpout-03.galae.net (Postfix) with ESMTPS id A41054E40FDB;
+	Wed, 29 Jul 2026 12:28:11 +0000 (UTC)
+Received: from mail.galae.net (mail.galae.net [212.83.136.155])
+	by smtpout-01.galae.net (Postfix) with ESMTPS id 796506039A;
+	Wed, 29 Jul 2026 12:28:11 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 51C6411C14DBC;
+	Wed, 29 Jul 2026 14:28:09 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
+	t=1785328090; h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	 content-transfer-encoding:in-reply-to:references;
+	bh=ly0Na/ui4PywvObFlStWP4jBCuUGyGQnyCh8Cv9fak0=;
+	b=wG4JY0giOkyFHGo3Z2UYZ17RfOk6KQIdPUXLvsuuoXsZs9M6ghO1/EEC2wKdc9Z5RysmnJ
+	wHavKdGF1JXVr5q4Hs092wWJL/V+jc3jVKZAeYKkxai/nAID6ncueYtikk6R01tF9BdiMs
+	Rcx4B92UmtE0psvT9fQYemx2yGJ7X+Zkb+Y+UH3UgqMBDv/8gj65YPv6vCDePT/yx4Yliv
+	oN9uo9HRZhRzd6FvKZB9c2D7ehpKManUWVDHWY80dt7/sG/euQFqxsTb4W/sw5A4k6tOlN
+	YSOJfmLHDeh3gp7XcrgjN3yqsNqo08DNT1XzNnnTKfX+cMZLJaixeR8/KM4kRg==
+From: "Diogo Ivo (Schneider Electric)" <diogo.ivo@bootlin.com>
+Date: Wed, 29 Jul 2026 14:25:43 +0200
+Subject: [PATCH 2/3] mmc: sdhci_am654: Clear ITAPDLY on tuning failure
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20260728190314.2325906-2-kamal.dasu@broadcom.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20260729-am654-sdhci-v1-2-7568108e4b9a@bootlin.com>
+References: <20260729-am654-sdhci-v1-0-7568108e4b9a@bootlin.com>
+In-Reply-To: <20260729-am654-sdhci-v1-0-7568108e4b9a@bootlin.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>, 
+ Faiz Abbas <faiz_abbas@ti.com>, Judith Mendez <jm@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Thomas Petazzoni <thomas.petazzoni@bootlin.com>, 
+ Pascal EBERHARD <pascal.eberhard@se.com>, 
+ Miquel Raynal <miquel.raynal@bootlin.com>, 
+ "Diogo Ivo (Schneider Electric)" <diogo.ivo@bootlin.com>, 
+ stable@vger.kernel.org
+X-Mailer: b4 0.15.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1899; i=diogo.ivo@bootlin.com;
+ h=from:subject:message-id; bh=OaQECTvq8DlTEMy7Li4rKqrFc0cNFuieTzFENUed5L0=;
+ b=owEBbQKS/ZANAwAKAQa+fFtWXslFAcsmYgBqafHP8ZXrfyE2Vd+HyEWgAQUXRX+w6LF3TbSQC
+ pVXFt6Z8cSJAjMEAAEKAB0WIQTma35o1i1081e8B2UGvnxbVl7JRQUCamnxzwAKCRAGvnxbVl7J
+ RcdyD/0dASDaJZZSh7icCbAWDLNMgQus9/aPqxKksW4hYcXxM+CL9PUOGFPG+aVcaJHY/uWecA6
+ JhGUNf04KtvPKuCM2DDA08HIW1h17QTJFQKoxT7prJsLt8b/pFWGyL1TTd8g1vTNO4PndOihTY0
+ ZtfGpIbZKynI3J5xXioW07RjHTM4r/tER/gk/2NsPbpsMCFGVGYQulENYBVcl0y+v6Q+/Msoitk
+ td5ohbf/QY71B0hoqxOmPgWXPwFrYz1lQevvSBhJsip/9jRvrUN9Kj5VcEpFOranF+T5eDZ0XTS
+ km139v4KBAX+Kcv2M4GhmtcCXKWp3z/x1WCnfdi7HzjhN7VE5E/Vz3aWYePyU0tngTFm1vCA5t/
+ DSembX8AHlAxzjSEBdKLvuQH8CRMt0+FwUHrA8qvT0JCYHaLe/EjESC9Oli9yX/+SORHVxAWhCZ
+ 2pBQdQ5TeR85yg3ntBaeawvj8teL852K2OjL14cI+i1LrtqHo9YM+06Klg/Bo+UI6lZR6gsyM1Z
+ vkRYjk3NGB6jBhGP8iMMEt4eIZWc0mfUiaLJ6wrvcDr/7MlPTXYg4ODschFwxCL+F5N2Ten0kIs
+ MTRT6DBYc/w21sDrApLFnrNQhFuh3k0QUJLDxFexEiKrvxrum/d9XNpw7t3Wt+ysyMxSJm06JlB
+ +KtDv3iTTencpiw==
+X-Developer-Key: i=diogo.ivo@bootlin.com; a=openpgp;
+ fpr=E66B7E68D62D74F357BC076506BE7C5B565EC945
+X-Last-TLS-Session-Version: TLSv1.3
 
-On Tue, Jul 28, 2026 at 03:03:13PM -0400, Kamal Dasu wrote:
-> keep-power-in-suspend already documents exactly the requirement
-> needed on (e)MMC platforms where firmware accesses the card directly
-> during resume. Rather than add a separate property describing the
-> same contract, drop its "SDIO only" restriction and document the
-> (e)MMC use case alongside the existing SDIO one.
-> 
-> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
-> ---
-> Changes in v4:
->   - Dropped no-mmc-poweroff-suspend entirely and extended
->     keep-power-in-suspend instead, per Krzysztof: the two properties
->     described the same "don't power off across suspend/resume"
->     contract.
+When tuning fails, stale ITAPDLY values can persist and interfere with
+subsequent I/O accesses, for example in DDR50 mode in cards with no tuning
+support. Move the ITAPDLY enable setting out of the tuning loop to after
+successful tuning, and explicitly clear ITAPDLY (delay and enable) when
+tuning fails so that we are sure only working values are actually left in
+hardware.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Fixes: 901d16e46296 ("mmc: sdhci_am654: Add retry tuning")
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Diogo Ivo (Schneider Electric) <diogo.ivo@bootlin.com>
+---
+ drivers/mmc/host/sdhci_am654.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index f76aab7e3a16..806544db0128 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -537,11 +537,8 @@ static int sdhci_am654_do_tuning(struct sdhci_host *host,
+ 
+ 	memset(fail_window, 0, sizeof(fail_window));
+ 
+-	/* Enable ITAPDLY */
+-	sdhci_am654->itap_del_ena[timing] = 0x1;
+-
+ 	for (itap = 0; itap < ITAPDLY_LENGTH; itap++) {
+-		sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
++		sdhci_am654_write_itapdly(sdhci_am654, itap, 0x1);
+ 
+ 		curr_pass = !mmc_send_tuning(host->mmc, opcode, NULL);
+ 
+@@ -584,10 +581,15 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+ 
+ 	if (itapdly < 0) {
+ 		dev_err(dev, "Failed to find itapdly, fail tuning\n");
++		/* Explicitly clear ITAPDLY */
++		sdhci_am654_write_itapdly(sdhci_am654, 0, 0);
+ 		return -1;
+ 	}
+ 
+ 	dev_dbg(dev, "Passed tuning, final itapdly=%d\n", itapdly);
++
++	/* Enable ITAPDLY */
++	sdhci_am654->itap_del_ena[timing] = 0x1;
+ 	sdhci_am654_write_itapdly(sdhci_am654, itapdly, sdhci_am654->itap_del_ena[timing]);
+ 	/* Save ITAPDLY */
+ 	sdhci_am654->itap_del_sel[timing] = itapdly;
+
+-- 
+2.55.0
 
