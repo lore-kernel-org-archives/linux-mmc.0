@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A717D35C6B1;
-	Thu, 30 Jul 2026 19:12:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E9CD46984A;
+	Thu, 30 Jul 2026 19:20:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785438748; cv=none; b=fG8CkOIZ/bWhch2xwPgIMjNc4LF/gBqu1oPggd4zrHv2IOBIayJg37JX4uGzRtl/JfjFLATMUG3kURQ/rQNys7C1t71RkazprsRuC0pK/nvegHMckP65fhUpox9CW/fCN9r5vq6sSnJA2e3j/HOMf8+lGur7LUNhcuMXqxFqOG8=
+	t=1785439220; cv=none; b=sBZNroY4wIceH+SfvrLuDACgjpeWrvAvcEidp1l/bsyIH8r5nrZtjj7iCXmSwsKhwuoTcYKsfLTw7aaU/wPOectQwh8aT4//070Y67APPT7n/QliEPH+idNN1jt9HTvfYZWhVy+RNKRb1YIdnQPC9aUEegNLbgmmSgFnqLh/duk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785438748; c=relaxed/simple;
-	bh=PPrTWkytK5iH58wqoe1Gs+vr4s8nFdo6g8ux6wtdNFo=;
+	s=arc-20240116; t=1785439220; c=relaxed/simple;
+	bh=nnQUjNO4MsukXzb1epLIp9lkKegltnzVf8MMKlRJ7Es=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hygMgBnxKzNX5bZDJirXTZrzRdyJ9awe+ovcigCrIWqpaztcMt+bSlufO12sc0jEph66xY+0YKmyda4Yg5xKAbvOD7+xJmelkRcFmSWm4G16lGQyUUHp8ghvEU5C+Of+1OfjEcUVvov+z5106gj4jUHJYmxbWsoixLEyIFQio9A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RAo7Z3eE; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=eLLEkAVDf93Xd4V0paEBaN8+SeFmF1v4s0zmfCVoHobjK0rMJTVXE9IWgfLQjeYDo4ssGJlLe6rWHTblhTBrKajIkGrT30A0wAmRN2wPxQcyuAD6HJpkcb24TNuflhKgTYov6cijz35hVJXO6QjvWg2GCxZu7QeLtrAEExdvEv8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aHI/oWNH; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RAo7Z3eE"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1D2041F000E9;
-	Thu, 30 Jul 2026 19:12:26 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aHI/oWNH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF8331F000E9;
+	Thu, 30 Jul 2026 19:20:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785438746;
-	bh=ttozWw676yvL/fA7vpvA+Q/hEfMpSEDSW7KUbOiVrz0=;
+	s=k20260515; t=1785439219;
+	bh=9MPmBguCgRKWpaMThY+gSwrAPGCo4Mvj2d1HIenjEBY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=RAo7Z3eE709nSaZx6Y/De/p8znXHgAiRlSIx0axFAbZXC5td0b+EwbuajYS15XY+P
-	 +N9w0pw9+bVYzidXuLM3l1fQiEfFbZ5aJuIkTOgtu/j/S637yrddCr00qaBNt6mVKo
-	 Kfn7FBAYhIyi68zm7ub0x5iSqKzisdurhj9S1INF4YdKjJ7SGkvuHNkaJXkA7nkVGl
-	 5RUY2cKi/mX0ANEWCz2jQnPunsB4ciO6BUUdei6wcsPKwln5YdTit5+1LXTT5X8n2K
-	 mLvQAiTvFTITFbHXhH0k7+oPYy2OtSJ9PSU+Wq7UQq8rsO/TOtP6RWwNhIdL5Nh0R/
-	 5rqNG5SbFH+0A==
-Date: Thu, 30 Jul 2026 12:10:30 -0700
+	b=aHI/oWNHIxD5z3kVxl6VF8HWEYnKBT1OXV+ysmZg/cO9fbNFyCtc8RK9luDNJGfbb
+	 ohD8LkGEXqNByFO53W3j2cN66fVW9LIFPpev8Y23hIc6s1dn2iHwkOUeQXp+y/tmhj
+	 mruibq0e9BEm45RoEVqn101UKfJPmJGsa0p9OZNgyGDvgMpEQs47fu1PZsLjNTa1tx
+	 Jas98iMIhXPIBi21YQAFaW/xMttvmcGQuClCBgo4clb3sZW23d2ssML7hEoZvRa7tg
+	 MVgSWgN7MlqtxoShYWBae3GqpWxWWfor1ypor8d38PiBH4OJxMUCle6pn/NSe4WCbF
+	 9A/wMBs3Ddc+A==
+Date: Thu, 30 Jul 2026 12:18:23 -0700
 From: Eric Biggers <ebiggers@kernel.org>
 To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
 Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com,
@@ -36,11 +36,11 @@ Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com,
 	quic_sartgarg@quicinc.com, ram.gupta@oss.qualcomm.com,
 	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH v5 4/4] mmc: mtk-sd: Protect crypto capability with
- crypto config
-Message-ID: <20260730191030.GC3139@sol>
+Subject: Re: [PATCH v5 2/4] mmc: sdhci-msm: Reprogram crypto keys during host
+ hardware initialization
+Message-ID: <20260730191823.GD3139@sol>
 References: <20260730140822.1976635-1-neeraj.soni@oss.qualcomm.com>
- <20260730140822.1976635-5-neeraj.soni@oss.qualcomm.com>
+ <20260730140822.1976635-3-neeraj.soni@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,41 +49,48 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20260730140822.1976635-5-neeraj.soni@oss.qualcomm.com>
+In-Reply-To: <20260730140822.1976635-3-neeraj.soni@oss.qualcomm.com>
 
-On Thu, Jul 30, 2026 at 07:38:22PM +0530, Neeraj Soni wrote:
-> Host crypto capability can not be used if CONFIG_MMC_CRYPTO=n.
-> So set MMC_CAP2_CRYPTO in mmc->caps2 only if CONFIG_MMC_CRYPTO=y.
+On Thu, Jul 30, 2026 at 07:38:20PM +0530, Neeraj Soni wrote:
+> Host looses the Inline Crypto Engine (ICE) keys during hardware reset.
+> Re-program the keys while intializing ICE to ensure that ICE is available
+> in the same state as before the hardware reset.
 > 
+> Also set MMC_CAP2_CRYPTO_NO_REPROG to indicate that re-program of ICE keys
+> is not needed during MMC runtime suspend/resume.
+> 
+> Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+> Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
 > Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
 > ---
->  drivers/mmc/host/mtk-sd.c | 4 ++++
->  1 file changed, 4 insertions(+)
+>  drivers/mmc/host/sdhci-msm.c | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 01ea3adbdf3b..c415ed97e3c2 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -3031,7 +3031,11 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  		if (IS_ERR(host->crypto_clk))
->  			return PTR_ERR(host->crypto_clk);
->  		else if (host->crypto_clk)
-> +#ifdef CONFIG_MMC_CRYPTO
->  			mmc->caps2 |= MMC_CAP2_CRYPTO;
-> +#else
-> +			dev_dbg(host->dev, "Enable necessary crypto config\n");
-> +#endif
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4aff965f0e2e..7d71dc6f388d 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1958,7 +1958,10 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>  				cap.sdus_mask * 512;
+>  	}
+>  
+> +	blk_crypto_reprogram_all_keys(&mmc->crypto_profile);
+> +
 
-host->dev is still NULL at this point.  So if the log message were to be
-actually reached it would show '(NULL device *)'.
+This still does nothing.  The crypto profile was just initialized, so no
+keyslots are in-use and blk_crypto_reprogram_all_keys() does nothing.
 
-But the message doesn't seem very useful anyway, especially when it's
-logged only at debug level.  So maybe just drop it.
+>  	mmc->caps2 |= MMC_CAP2_CRYPTO;
+> +	mmc->caps2 |= MMC_CAP2_CRYPTO_NO_REPROG;
 
-Is there a reason to even enable the crypto clock when CONFIG_MMC_CRYPTO
-is disabled?  If no, then the 'if' condition above could just be changed
-to:
-
-    if (IS_ENABLED(CONFIG_MMC_CRYPTO) && !(mmc->caps2 & MMC_CAP2_NO_MMC)) {
+This seems to be the actual point of the patch, so let's simplify it to
+just this.  However, this is also broken because this is ordered before
+patch 3 that introduces the actually functional key reprogramming.
+Please drop the no-op call to blk_crypto_reprogram_all_keys(), then
+merge patches 2 and 3 into a single one.
 
 - Eric
