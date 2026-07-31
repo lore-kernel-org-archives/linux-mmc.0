@@ -1,58 +1,58 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A9843DB32A
-	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 08:39:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCB123D75CF
+	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 08:40:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785487163; cv=none; b=j6AFSYKFwO0VWsK6cXRaC+jgSbrFIHEGCQDAr3gPoa31l6p5DQ92pkbaIdNvTPB4uMHtj7qa2SssYS6DatHjXheI2YHWlOGQWcXrh3aRBX19feextvoDkjVXLhkxChwoE6CwKxfcehk8BRb1dII9pL87M/qiSQ9lvXFHvnj8wwI=
+	t=1785487253; cv=none; b=PFO8XZs1e8ag2LO4UM/k6MdOoW8jbCAurOy1DS4ZmKLFXKHoHZ0DYcxSxhSYv5WEWKteak2hcVuzHW5HHPML3K4KLCXlTvJOK6qB+S9+dB2BKfSPdoJUj/g7iSUKjqjfsMEQq5QbWdJxsNfd9v4qep+DrqHdJe1GWVsW9szJVJU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785487163; c=relaxed/simple;
-	bh=9twirzm5nktw8mCQZKCsisWF22u3KfRsBskDwndW4Kk=;
+	s=arc-20240116; t=1785487253; c=relaxed/simple;
+	bh=xQJfCIYx7YtBoHGSdPxLID9UpP7U21GdSDr2MFYu7TQ=;
 	h=From:In-Reply-To:MIME-Version:References:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Nweak+nxBq7AMOG9WooGl8VKgccXsrzzJDliNreHNAoEbvyT2Zc4ybAUQmB/cdnaCyfmB+Lm3E3Ym7l1ByNc3trV23NJQiMgk4PuymWCmRwXctxCelF5wk+dTVHukfja2kWJglFxPi2hro1NzXCr0PHbLm9CvFf2GrWqYOWDXKI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LZWL8ED4; arc=none smtp.client-ip=100.103.45.18
+	 To:Cc:Content-Type; b=rmyvTRA4M3R8NVwGVx/mzuCeyXHfhNUdc+VMvfUpONx/77ovcAdaS/AoeL2CXu4xvwJojX+ksUIyvIajIHaOXsOvKPY6ratPPj3+G3SFwXF10msEljl3k8e3F7qorKoBQ3JStIa8kc9qq2brxCRqDvca7RviDlMYjnWekSHSsZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aU7b6+lG; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LZWL8ED4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F15C51F00ADE
-	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 08:39:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aU7b6+lG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C90E1F0155B
+	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 08:40:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785487162;
-	bh=9twirzm5nktw8mCQZKCsisWF22u3KfRsBskDwndW4Kk=;
+	s=k20260515; t=1785487251;
+	bh=xQJfCIYx7YtBoHGSdPxLID9UpP7U21GdSDr2MFYu7TQ=;
 	h=From:In-Reply-To:References:Date:Subject:To:Cc;
-	b=LZWL8ED4/GLHz40ICKDSglo8zKrRJbgy0c4yptTrK9MYgO0oE9fP2ICqkx4SLZ7mW
-	 PypWqDT+mPJAtEu6lKE+1BgacksVsqZfl62WhLsdlHzDlaFuzUkb1PwsNUtWgWoMw1
-	 YJMezDlF85xTKaD9qTyXa+0lAS+uvucwLJ16a9he7h/vsUVgZlw1AqXgGtfR5VVY1Z
-	 uFexvjCVnGfrs5Hl0S/75iqKcV7FaHBypzQcQ+MSZCp1nY/5SsTJpAfEfSbTEaAL6j
-	 GnUdknqAihCvA0ycmc+AXkOCuz+ctZ3Xgj6QWhQjrjpHDCp/av4+c4yQGoAXK1t12d
-	 eShTbdGyUaTSA==
-Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-39c95395230so6647901fa.2
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 01:39:21 -0700 (PDT)
-X-Gm-Message-State: AOJu0YwuhUkCkZGlmAqF2SCXOp0EK6pVb6ve4IwmZl8lNDEk7Yom9dRg
-	GYIq477p56k6BK+r1CR5kCy31jLmZUaSaYYQB448vbyHSqw4tl4NMYG8Z/i+fk9RKGjqiRmAgAc
-	DRBN2GdCE9Rdg6tUeCzyx6Ey31c1xmdPkbKAijOXR3Q==
-X-Received: by 2002:a2e:a806:0:b0:39a:fec6:efd0 with SMTP id
- 38308e7fff4ca-39f7e3b70e1mr2581091fa.23.1785487160524; Fri, 31 Jul 2026
- 01:39:20 -0700 (PDT)
+	b=aU7b6+lGFkvei3Qenni7Ts3ynzCIDnFCIEEq2DDi9fPD5q7FO86BbwGtuzu3sk+eI
+	 fcApUNn7PlABHixqudHKWCU9e05d+voFJKxFZwMuU/KGnXQtQJMiQHkMZyGekWf6qB
+	 6OJOEoLCTxZRR4lWfM+kAw4WmC50cAEGH0XlcIIxr0m9nSodeIjaHh8UbvsQ2w89t4
+	 gvkurEsAFZuvDllBjDhfmkuH7ibapIBD8I9+h7cBLjxtrrIiVCIwYrVk6KLrqDDEQO
+	 2rryHmYhquV5/ydU4cOEjxQz57WxQFYFkfbZhIp9tZRf2JxqSvEesNE7HW+RvuzNwx
+	 3xzWVqM/YBguA==
+Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-39c95395230so6660221fa.2
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 01:40:51 -0700 (PDT)
+X-Gm-Message-State: AOJu0Yz+azmr4wEFlH78Yir5fd/ymLXzbomkY4k4hax9hxiVGoEQJF/L
+	6JmudBHUA/uqIEX8qC98+5ngYn7IRNUGYLXFkeZ5Kn5ZaYMQTTsx10UxsWxaTwt7HTb6LJuUrN+
+	kPQ9DCVSPH+x7w/2f8JFflwo0Gu7leWoHBBbOsIBjFQ==
+X-Received: by 2002:a05:651c:a20d:20b0:39c:650c:454e with SMTP id
+ 38308e7fff4ca-39f7e352fbcmr1943041fa.13.1785487250229; Fri, 31 Jul 2026
+ 01:40:50 -0700 (PDT)
 Received: from 969154062570 named unknown by gmailapi.google.com with
- HTTPREST; Fri, 31 Jul 2026 01:39:17 -0700
+ HTTPREST; Fri, 31 Jul 2026 01:40:48 -0700
 Received: from 969154062570 named unknown by gmailapi.google.com with
- HTTPREST; Fri, 31 Jul 2026 01:39:17 -0700
+ HTTPREST; Fri, 31 Jul 2026 01:40:48 -0700
 From: Bartosz Golaszewski <brgl@kernel.org>
-In-Reply-To: <20260730-block-as-nvmem-v9-1-f72935817dbf@oss.qualcomm.com>
+In-Reply-To: <20260730-block-as-nvmem-v9-5-f72935817dbf@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260730-block-as-nvmem-v9-0-f72935817dbf@oss.qualcomm.com> <20260730-block-as-nvmem-v9-1-f72935817dbf@oss.qualcomm.com>
-Date: Fri, 31 Jul 2026 01:39:17 -0700
-X-Gmail-Original-Message-ID: <CAMRc=MdRd-FgAa+NMf-GZLi05G8PrGjD9LB2h7dQ=9iXiLh9sw@mail.gmail.com>
-X-Gm-Features: AUfX_myHE9QF2TZrMuCq1Fl8GoUB-sokgcKRRxyeNwASqhiRSWL8Z59R0TWE-vo
-Message-ID: <CAMRc=MdRd-FgAa+NMf-GZLi05G8PrGjD9LB2h7dQ=9iXiLh9sw@mail.gmail.com>
-Subject: Re: [PATCH v9 01/10] dt-bindings: mmc: Document fixed-layout NVMEM
- provider support
+References: <20260730-block-as-nvmem-v9-0-f72935817dbf@oss.qualcomm.com> <20260730-block-as-nvmem-v9-5-f72935817dbf@oss.qualcomm.com>
+Date: Fri, 31 Jul 2026 01:40:48 -0700
+X-Gmail-Original-Message-ID: <CAMRc=MdXFDFw_oHSGk5=RgLJAfTixuUNYTY62Dpcdb4nqcg7ig@mail.gmail.com>
+X-Gm-Features: AUfX_my0BSuN_dmw9PAQ3RKVVzPb03vWf8SlnwYWcd8wsPsuOu4arihpRTxh5pc
+Message-ID: <CAMRc=MdXFDFw_oHSGk5=RgLJAfTixuUNYTY62Dpcdb4nqcg7ig@mail.gmail.com>
+Subject: Re: [PATCH v9 05/10] block: partitions: of: Attach partition fwnode
+ to the block device
 To: Loic Poulain <loic.poulain@oss.qualcomm.com>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
@@ -72,20 +72,26 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
 	Saravana Kannan <saravanak@kernel.org>, Christian Marangi <ansuelsmth@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 30 Jul 2026 18:00:31 +0200, Loic Poulain
+On Thu, 30 Jul 2026 18:00:35 +0200, Loic Poulain
 <loic.poulain@oss.qualcomm.com> said:
-> Allow an eMMC hardware partition node to describe an NVMEM layout so the
-> partition can be exposed as an NVMEM provider. This lets a partition
-> (e.g. an eMMC boot partition) store device-specific information such as a
-> WiFi MAC address or a Bluetooth BD address and reference it through NVMEM
-> cells.
+> The OF partition parser reads offset, size and label from each
+> "fixed-partitions" child node but does not associate that node with the
+> resulting partition block device. As a result a partition has no
+> of_node, unlike the whole-disk device which gets its firmware node via
+> add_disk_fwnode().
 >
-> Accept "fixed-layout" as the partition node compatible, in addition to
-> "fixed-partitions", so the layout can be described directly on the
-> partition node.
+> Carry the partition's device tree node through the parser and attach it
+> to the partition's block device with device_set_node(), mirroring the
+> whole-disk case. This lets consumers describe per-partition properties
+> in the device tree (for example an NVMEM layout on a partition node) and
+> look them up through the partition device.
 >
-> Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+> No functional change for existing users, partitions without a matching
+> device tree node simply get a NULL fwnode.
+>
 > Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
 > ---
+
+Makes sense.
 
 Reviewed-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
