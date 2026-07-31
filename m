@@ -1,97 +1,195 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCB123D75CF
-	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 08:40:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03B823D25CC
+	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 09:53:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785487253; cv=none; b=PFO8XZs1e8ag2LO4UM/k6MdOoW8jbCAurOy1DS4ZmKLFXKHoHZ0DYcxSxhSYv5WEWKteak2hcVuzHW5HHPML3K4KLCXlTvJOK6qB+S9+dB2BKfSPdoJUj/g7iSUKjqjfsMEQq5QbWdJxsNfd9v4qep+DrqHdJe1GWVsW9szJVJU=
+	t=1785491603; cv=none; b=C0Bg3jNLMwOpxKO68zGpRxkWEPpCvd700jrPz2NeS2S1hASqbjobMzJThw6tnGSsRHpSf4GECT2zZEPqTQ5jbAHQH2HOz+2tfElG2xWq+iDq8xjUsyXJ1F8/aiyFEFZJRCbg4qLyZvRHoHTxjqjKpYu9OfmHRHiawLt3SPoTCSM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785487253; c=relaxed/simple;
-	bh=xQJfCIYx7YtBoHGSdPxLID9UpP7U21GdSDr2MFYu7TQ=;
-	h=From:In-Reply-To:MIME-Version:References:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=rmyvTRA4M3R8NVwGVx/mzuCeyXHfhNUdc+VMvfUpONx/77ovcAdaS/AoeL2CXu4xvwJojX+ksUIyvIajIHaOXsOvKPY6ratPPj3+G3SFwXF10msEljl3k8e3F7qorKoBQ3JStIa8kc9qq2brxCRqDvca7RviDlMYjnWekSHSsZY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aU7b6+lG; arc=none smtp.client-ip=100.103.45.18
+	s=arc-20240116; t=1785491603; c=relaxed/simple;
+	bh=H1LZa/KrxatxurmpF0jmErkpLMHZVVy5f1CpaCtqq/E=;
+	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=aFGX2HfQNzWIHvygsG1G88j4M9haFkh14u05ID2lpXmcAsZRfQ7cStEvAwUhFZIwxFvSqbYLvdsR3faEAGYheWhmWe0R3UPIkQjNj96BBa9BaWzGMz3CdKEg4sKYuIRseCFXzo2dd6P2os0YGp0Sg5EUh32IfUyFChgLAM/Ys34=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=FuWxOq+v; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=Yy/6bYYe; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aU7b6+lG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C90E1F0155B
-	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 08:40:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785487251;
-	bh=xQJfCIYx7YtBoHGSdPxLID9UpP7U21GdSDr2MFYu7TQ=;
-	h=From:In-Reply-To:References:Date:Subject:To:Cc;
-	b=aU7b6+lGFkvei3Qenni7Ts3ynzCIDnFCIEEq2DDi9fPD5q7FO86BbwGtuzu3sk+eI
-	 fcApUNn7PlABHixqudHKWCU9e05d+voFJKxFZwMuU/KGnXQtQJMiQHkMZyGekWf6qB
-	 6OJOEoLCTxZRR4lWfM+kAw4WmC50cAEGH0XlcIIxr0m9nSodeIjaHh8UbvsQ2w89t4
-	 gvkurEsAFZuvDllBjDhfmkuH7ibapIBD8I9+h7cBLjxtrrIiVCIwYrVk6KLrqDDEQO
-	 2rryHmYhquV5/ydU4cOEjxQz57WxQFYFkfbZhIp9tZRf2JxqSvEesNE7HW+RvuzNwx
-	 3xzWVqM/YBguA==
-Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-39c95395230so6660221fa.2
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 01:40:51 -0700 (PDT)
-X-Gm-Message-State: AOJu0Yz+azmr4wEFlH78Yir5fd/ymLXzbomkY4k4hax9hxiVGoEQJF/L
-	6JmudBHUA/uqIEX8qC98+5ngYn7IRNUGYLXFkeZ5Kn5ZaYMQTTsx10UxsWxaTwt7HTb6LJuUrN+
-	kPQ9DCVSPH+x7w/2f8JFflwo0Gu7leWoHBBbOsIBjFQ==
-X-Received: by 2002:a05:651c:a20d:20b0:39c:650c:454e with SMTP id
- 38308e7fff4ca-39f7e352fbcmr1943041fa.13.1785487250229; Fri, 31 Jul 2026
- 01:40:50 -0700 (PDT)
-Received: from 969154062570 named unknown by gmailapi.google.com with
- HTTPREST; Fri, 31 Jul 2026 01:40:48 -0700
-Received: from 969154062570 named unknown by gmailapi.google.com with
- HTTPREST; Fri, 31 Jul 2026 01:40:48 -0700
-From: Bartosz Golaszewski <brgl@kernel.org>
-In-Reply-To: <20260730-block-as-nvmem-v9-5-f72935817dbf@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="FuWxOq+v";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="Yy/6bYYe"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 66V9jFJB3832258
+	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 09:53:08 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	HvZg9BaI71518j+dVN+0raZ5nJoSq6JKDTdb3ojUPXs=; b=FuWxOq+vNWU4cliy
+	CS+GJZbQ4iGyaIFUYSTpu/ZBuHhBHJXSjWcMo+h596X8DMeMwnkNCLkkzbMkUznO
+	qIIi7sCEhQs4xI1X5rOzzi9ixUNOB6c9ZgGjX74tHBgtpv3SId8aCzgb1X34aQ50
+	7Tby/eKIZCwic1g90XT6SWp8p5oUaSE7qLYDRAprYPYSF3A28/le/Xw5NLxYDXvt
+	lHpbleu36gb2hujIJC8o6tOC4kmmWjuEDcdTx/1KDgD9W+qf2HiKrz6+RlEizqiN
+	RmkZwIj5yosqtaCNQi14i3Z6kXQuaglGvNMtjHTLHQrQ1MM/IjwCfolCGBcmFIdK
+	ytl2kQ==
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com [209.85.215.200])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4frsbm810x-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 09:53:08 +0000 (GMT)
+Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-cb6cf425e86so958535a12.1
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Jul 2026 02:53:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1785491588; x=1786096388; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-language:content-type:in-reply-to
+         :mime-version:user-agent:date:message-id:from:references:cc:to
+         :subject:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=HvZg9BaI71518j+dVN+0raZ5nJoSq6JKDTdb3ojUPXs=;
+        b=Yy/6bYYeUg6o2w1sntgJBGgvgjI1b6Qzj5GPrEbB57MWoClhdeGeflJR6NWZZXIxzu
+         rbMYvdUNhXOjy99INl9CqWx+fwx3Nj7LOWJaRETq921hSxy/YemxiF0HL+vlvF4P86sB
+         rlPh4QuVn8X+7eLqpFbWflGHlX00wZGrohPVjH7bQ+tZtcTEZDdjMCCX8UcgwUYHshUj
+         jkC760oDjTwMIamBzAtB8Nyni7kkisPIajlM6iQGOm3HGBjja+6ZQjNi6jlap8d+9abv
+         CaHSioekF2L9P2QAQ7QbVWdYPO774HF46ScOk8TUUqPagnrkmnVrtjrHpgkj/Uypswr4
+         Y9Xw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785491588; x=1786096388;
+        h=content-transfer-encoding:content-language:content-type:in-reply-to
+         :mime-version:user-agent:date:message-id:from:references:cc:to
+         :subject:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=HvZg9BaI71518j+dVN+0raZ5nJoSq6JKDTdb3ojUPXs=;
+        b=IULT++2F47izlhFjoQHODXhy0vlHn79/aU1TzGFhPNlJwil+xJY7D79FiAq4wzTEJW
+         osfs8LxG5EyPqIL4k2OFwqKCyX2ii695hkUKhi+blFNH0nBDxocHlu0Kdh7NtrIO0m3M
+         sLt7TXLOmnDHCRBmM4MD218VFixnZAyIXaMcOUZAoG7+lNZHInZG9tsAtxgDYuZcPFJJ
+         HbxJeFy+B1+Rv+E0/d7dTLTsAWeXUAFtcIlZc80LkZEUWsX+0n6oDE4cAeCPxtL/2/gq
+         hXojU51D8NA10IgRJs/ZXkG69apuXz8vPpmkT+zZR8pU8L11wWiEPClVeEY7+kFarH0V
+         nnbw==
+X-Forwarded-Encrypted: i=1; AHgh+RrvDUaL9Djno+SAM20c3FZa2p46Jc1l1zK2Ux7E/LoxUVx4BdLmKW8PxX5XCcrhLeH3PalyUjmHtyM=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz5pGCAZJvd1hWQUcjVOYReWZkaRchV9m4V9jo5lTe/TlEFa/8F
+	nxPm7wWadwjQXqNOJtHJh7iaFtlWWMJYg1gFh6P0tDfWk0Q6ZpLVMaTmsZ64Qm0bFBZpb5KS+rR
+	9IFtvwXSuye+R7OCH5u44GJCO5MQHI368/nmbiTnckGAmh43ubqcLBaXPugrFKPQ=
+X-Gm-Gg: AR+sD106DQCoisUZwEdwSzThQ2nEugOs7dfgzfEYQ/HkyQC77F11cRA6gkhU6+jNTo4
+	0lYvfO+Nflo9WyiqtLWhq0elLRUPNaLHE70T3tIEnMOMO1v0kddkjN8CoFSnDyL5Ka+soyrqghg
+	T5UgZ0yWT2IysTL01RMjJLpQTSzhojrSLn0HqhkzZRF8VUzviFRJsUpROsmCO3Ciw1n/xl123Hm
+	3X8BtnqQMGe/RQub3pwhT3kmH1Mvaj6IEMZZmLd3xoStzFyxiB/SzsXHTa/amWqwsw+v7wBfLIx
+	/XngC0DWj8+cienWGE1bg31G9fcKRhLV23c2PnoDjSBQjsN8hGWWLp36zJTAx6gVsChUTvxM8hz
+	AYhVHthH7kUQaCnxzMsZTP1xEUUw=
+X-Received: by 2002:a05:6a20:a109:b0:3bf:7c02:c46f with SMTP id adf61e73a8af0-3c91b09040emr1228385637.14.1785491587816;
+        Fri, 31 Jul 2026 02:53:07 -0700 (PDT)
+X-Received: by 2002:a05:6a20:a109:b0:3bf:7c02:c46f with SMTP id adf61e73a8af0-3c91b09040emr1228369637.14.1785491587419;
+        Fri, 31 Jul 2026 02:53:07 -0700 (PDT)
+Received: from [10.218.4.105] ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-13fab14475asm1615245c88.5.2026.07.31.02.53.01
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 31 Jul 2026 02:53:06 -0700 (PDT)
+Subject: Re: [PATCH v5 3/4] mmc: sdhci-msm: Use pm ops instead of macro to
+ restore crypto keys
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, quic_dmukhopa@quicinc.com,
+        quic_rampraka@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
+        quic_gaurkash@quicinc.com, quic_sartgarg@quicinc.com,
+        ram.gupta@oss.qualcomm.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+References: <20260730140822.1976635-1-neeraj.soni@oss.qualcomm.com>
+ <20260730140822.1976635-4-neeraj.soni@oss.qualcomm.com>
+ <20260730192336.GE3139@sol>
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Message-ID: <a18f5699-0337-a4b8-369f-138c140fcaf7@oss.qualcomm.com>
+Date: Fri, 31 Jul 2026 15:23:00 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260730-block-as-nvmem-v9-0-f72935817dbf@oss.qualcomm.com> <20260730-block-as-nvmem-v9-5-f72935817dbf@oss.qualcomm.com>
-Date: Fri, 31 Jul 2026 01:40:48 -0700
-X-Gmail-Original-Message-ID: <CAMRc=MdXFDFw_oHSGk5=RgLJAfTixuUNYTY62Dpcdb4nqcg7ig@mail.gmail.com>
-X-Gm-Features: AUfX_my0BSuN_dmw9PAQ3RKVVzPb03vWf8SlnwYWcd8wsPsuOu4arihpRTxh5pc
-Message-ID: <CAMRc=MdXFDFw_oHSGk5=RgLJAfTixuUNYTY62Dpcdb4nqcg7ig@mail.gmail.com>
-Subject: Re: [PATCH v9 05/10] block: partitions: of: Attach partition fwnode
- to the block device
-To: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
-	linux-block@vger.kernel.org, linux-wireless@vger.kernel.org, 
-	ath10k@lists.infradead.org, linux-bluetooth@vger.kernel.org, 
-	netdev@vger.kernel.org, daniel@makrotopia.org, Ulf Hansson <ulfh@kernel.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Jens Axboe <axboe@kernel.dk>, Johannes Berg <johannes@sipsolutions.net>, 
-	Jeff Johnson <jjohnson@kernel.org>, Bartosz Golaszewski <brgl@kernel.org>, 
-	Marcel Holtmann <marcel@holtmann.org>, Luiz Augusto von Dentz <luiz.dentz@gmail.com>, 
-	Balakrishna Godavarthi <quic_bgodavar@quicinc.com>, Rocky Liao <quic_rjliao@quicinc.com>, 
-	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Simon Horman <horms@kernel.org>, 
-	Srinivas Kandagatla <srini@kernel.org>, Andrew Lunn <andrew@lunn.ch>, 
-	Heiner Kallweit <hkallweit1@gmail.com>, Russell King <linux@armlinux.org.uk>, 
-	Saravana Kannan <saravanak@kernel.org>, Christian Marangi <ansuelsmth@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20260730192336.GE3139@sol>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
+X-Authority-Analysis: v=2.4 cv=IKEyzAvG c=1 sm=1 tr=0 ts=6a6c7084 cx=c_pps
+ a=oF/VQ+ItUULfLr/lQ2/icg==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=IkcTkHD0fZMA:10 a=RAioF0-LDSMA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=yOCtJkima9RkubShWh1s:22
+ a=VwQbUJbxAAAA:8 a=EUspDBNiAAAA:8 a=HjoYPmhRGCijR8R-PCoA:9 a=QEXdDO2ut3YA:10
+ a=3WC7DwWrALyhR5TkjVHa:22
+X-Proofpoint-ORIG-GUID: 5ZjiFXf3NdZ4kgvINOdCpTXoVjEA8MoM
+X-Proofpoint-Spam-Info: AW1haW4tMjYwNzMxMDA3MyBTYWx0ZWRfXyNvB89ay7kdi
+ 7s/g4o0ETwdVmywMKDlmdBglypt8MXlwQl+UBwXR6uYO9w8nzCGupRD3t6crPCcr54DzLVi+KVQ
+ SJ5xvHMpU8ridJdN6I3RGQB0LLtpx8E=
+X-Proofpoint-GUID: 5ZjiFXf3NdZ4kgvINOdCpTXoVjEA8MoM
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwNzMxMDA3MyBTYWx0ZWRfXwzhnGeixTYl9
+ fHYvl2b95nnVSm65W47owxPrfv34noVk4omD75pSBsW3dpRDKMEvmtP2arWVRqmlBz6IAfq7KsA
+ cEU3q83TT8WY+Y8zCslZYIHQNCjBiqwTqhCfCA9UXwpYzYecQxmm3nR4lz4PsS1GR5sBmIWq0rv
+ bQUI79DsbM/tNC2KylQry290r94Awg3LVJipsDc04EvjPnmE8XGJZnT6CiqPWyPhaQuT79Lm704
+ +Mx6cLpb3MyIUhsnmuuRy9YexW/rBJOVyvBSzIP+BJR9E22LyRBmpF0qjJjyHDj0dL9SsLhE5Vg
+ rrLUy8RlGzflQ5HaDFemglMvrhJzXepc1LxoT3MFxuDJOta1D8aas6vtNb/hq5KsCYBcacWmy7+
+ /UHOzIy469ZKrFHf1LXnWLj2wdm7sHtuKnI3IS1HwT6vDJl77g6zO3Fg1pFwRjOJscR2OKAUI+P
+ W8vMBf6HVx3e7l6zyOg==
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1143,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-07-31_03,2026-07-30_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 phishscore=0 adultscore=0 lowpriorityscore=0 bulkscore=0
+ malwarescore=0 priorityscore=1501 suspectscore=0 clxscore=1015 spamscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2607310073
 
-On Thu, 30 Jul 2026 18:00:35 +0200, Loic Poulain
-<loic.poulain@oss.qualcomm.com> said:
-> The OF partition parser reads offset, size and label from each
-> "fixed-partitions" child node but does not associate that node with the
-> resulting partition block device. As a result a partition has no
-> of_node, unlike the whole-disk device which gets its firmware node via
-> add_disk_fwnode().
->
-> Carry the partition's device tree node through the parser and attach it
-> to the partition's block device with device_set_node(), mirroring the
-> whole-disk case. This lets consumers describe per-partition properties
-> in the device tree (for example an NVMEM layout on a partition node) and
-> look them up through the partition device.
->
-> No functional change for existing users, partitions without a matching
-> device tree node simply get a NULL fwnode.
->
-> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
-> ---
 
-Makes sense.
 
-Reviewed-by: Bartosz Golaszewski <bartosz.golaszewski@oss.qualcomm.com>
+On 7/31/2026 12:53 AM, Eric Biggers wrote:
+> On Thu, Jul 30, 2026 at 07:38:21PM +0530, Neeraj Soni wrote:
+>> From: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+>>
+>> Inline Crypto Engine (ICE) keys are lost after hibernation entry and this
+>> needs to be restored when hibernation exits. ICE keys are re-programmed
+>> during sdhci_msm_ice_init() but it may not cover cases where the
+>> hibernation image is already restored.
+>>
+>> Unwrap the pm ops and use directly in driver to add the call to restore
+>> Inline Crypto Engine (ICE) keys. This ensures that ICE is brought into
+>> same state as before hibernation.
+>>
+>> Signed-off-by: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+>> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+>> ---
+>>  drivers/mmc/host/sdhci-msm.c | 19 ++++++++++++++++++-
+>>  1 file changed, 18 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 7d71dc6f388d..a4998e74a2bd 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -2986,9 +2986,26 @@ static int sdhci_msm_runtime_resume(struct device *dev)
+>>  	return ret;
+>>  }
+>>  
+>> +static int sdhci_msm_restore(struct device *dev)
+>> +{
+>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>> +
+>> +#ifdef CONFIG_MMC_CRYPTO
+>> +	if (host->mmc->caps2 & MMC_CAP2_CRYPTO)
+>> +		blk_crypto_reprogram_all_keys(&host->mmc->crypto_profile);
+>> +#endif
+>> +
+>> +	return pm_runtime_force_resume(dev);
+>> +}
+> 
+> Is it correct to access the ICE registers before
+> pm_runtime_force_resume() has run?  Aren't clocks and power still off?
+>
+Ack. Will fix it in v6.
+ 
+> Also, prefer IS_ENABLED() to '#ifdef'.  However, this suggests to me
+> that we actually should just keep MMC_CAP2_CRYPTO defined to 0 when
+> !IS_ENABLED(CONFIG_MMC_CRYPTO), as that solves this naturally without
+> any need for #ifdef or IS_ENABLED().
+>
+Ack. I will revert the change made around MMC_CAP2_CRYPTO here:
+https://lore.kernel.org/linux-mmc/20260116121004.1829223-1-neeraj.soni@oss.qualcomm.com/.
+and clean this as well in v6.
+ 
+> - Eric
+> 
+Regards
+Neeraj
