@@ -1,160 +1,215 @@
-Received: from smtpout-03.galae.net (smtpout-03.galae.net [185.246.85.4])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35D1F420E71;
-	Mon,  3 Aug 2026 13:48:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.246.85.4
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E290352C4F
+	for <linux-mmc@vger.kernel.org>; Mon,  3 Aug 2026 14:00:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785764925; cv=none; b=IBg3iRtfcBMSNBbbxQcevhdUZm6H64awEa4v5+nxRwWWq4RuBAvnpOo7ECWPlcFwMGSeQ+JQmei9YQT5T/Y2bKDxv4ErFAY+j1qceoqs+HgPsGxbENAzvENDyKP8szg2464mny8z3vYwDBYWg8cAuNysMru5zWqqHCiTqWa47Gs=
+	t=1785765629; cv=none; b=N0AujomMIAhsCIwJmMUQrBE1mVr76TuozwqYzf6mb4+GZQLF2abp8kLSEnzy4KoI+oqoZhoSr/4M+s/S+M1qQH8ouB0fUtyD5/IQJ3tK+IIJdUfxczh9Ht8LaOQWb6y5wjo2UdB1z9q30jcp0+RzgLVzYlnAxNpva3bNwkahjA0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785764925; c=relaxed/simple;
-	bh=lT+JEV0aFEKxlgkKQDL+bPnIS/8E0YX9GtsEONosqbE=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Wed0/3rDNEXkuu8Y/8un3FKduG070NblJM69EK2hc3LUL3TfHpm6RnHVckPC7xtQPLEe2L6PeCFuyqZsbMj4Oc/Il6eBIWhHGTV8jRBjJ3N9u2frroxkom/hUpF5mVlzy2dHCfOuIYWIGHhxCdc/4gLMRaHontVhcdNqoL0Ng/I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=u87MwDiA; arc=none smtp.client-ip=185.246.85.4
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+	s=arc-20240116; t=1785765629; c=relaxed/simple;
+	bh=RjeFzdCXL+NHFyMq3/xT9cd8LkEcbtMX18oNa+YN0BI=;
+	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=FbjvHU4ri8PKo7L9AwOhSFMTGI9stQXdQJRxyLpiGjX4CCnOfgcaIF+LD09vPX4KM83Zb8BSCaxSQNEmkIvqKwOHZWOSUM8Ju+hGhktelrJ16fNDgSsvNpzXEOndrJxf/VggAVrb0FO6Lv8G46p0LABAyojepgfptbNNmNhVMks=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=nr7i0/Gd; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=jqM1/Rkg; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="u87MwDiA"
-Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
-	by smtpout-03.galae.net (Postfix) with ESMTPS id AC74D4E410C0;
-	Mon,  3 Aug 2026 13:48:36 +0000 (UTC)
-Received: from mail.galae.net (mail.galae.net [212.83.136.155])
-	by smtpout-01.galae.net (Postfix) with ESMTPS id 7A6336029B;
-	Mon,  3 Aug 2026 13:48:36 +0000 (UTC)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 881E711C30CE9;
-	Mon,  3 Aug 2026 15:48:34 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
-	t=1785764915; h=from:subject:date:message-id:to:cc:mime-version:content-type:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=/I3qV8RwQ6dz6kYeEH/ASz1b7/s47uUjXDhMGIZri18=;
-	b=u87MwDiAu2esZx4A5OE0VkYuOMhP7oFrsMDlMavWx4WHHytAhEWgWCL/7RizoVhWqCp3tt
-	7mxg0SEbs6JiLpczqFY0rVZTOCwTqX3fJi7aftwaXo968LA5JSXEerY6Ty9MR0XXd/Vpvk
-	BdEfYCBtc/LfqXS6NkjZrJ+kXHX6Yns5n3ZrvFfAVIPRkJJC9YsSGg+KqHUC0MBnd/2Lg7
-	5ZxBtWetDHo6oLYsTtmfEpIgGv2c1ljcJ7+av/ajXSQDJQC/lEjOUdtaY2vBOm78RQ8cIO
-	zAWzM0HkPTzSbjUO2knBjugzJCgMG7lDnkCGzr8Z+JJ7ODUJp9q3SmXCXCemjA==
-From: "Diogo Ivo (Schneider Electric)" <diogo.ivo@bootlin.com>
-Date: Mon, 03 Aug 2026 15:47:34 +0200
-Subject: [PATCH v2 4/4] mmc: sdhci_am654: Fallback to DT-provided itap
- delay on DDR50 tuning failure
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="nr7i0/Gd";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="jqM1/Rkg"
+Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 673DRou8739536
+	for <linux-mmc@vger.kernel.org>; Mon, 3 Aug 2026 14:00:27 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	vKfDnl36SXijj5vK7jAVVLNegdlF1dNn5bPXXAHyHOI=; b=nr7i0/GdV00Fgv2s
+	Lp7UPsWwvMlcl2PbGW/rEJf6/yPPdBaB+ABwH/ID6bPVjh945vRDcNjC67MGNv+U
+	B3jgX/60smLpjl5myqKYEnRuee1salsn2bxzkp0Y0EP/1Fv/XrEJMrL/7d/adKhm
+	iux0ELYKYfYp4F4kKTtqvThBzmXt8vc1Gykj3lrhDUuZ8a60Ccs6VkgPLz2uimQw
+	QLHc4wqrbOryBjgEvaZByZHZMp4qYMOhGkrx8LiDf5prEgWer/esrxi/ST6JQ6CD
+	Af9Ownj/skwR4FP/RNwtUCd6W8G5rQAsXTHJRouXJXSPD6NIoIO7ROprc/EUIiUB
+	YNTO0A==
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com [209.85.215.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4ftnvnhu5y-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 03 Aug 2026 14:00:27 +0000 (GMT)
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-c85798977dcso5759485a12.0
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Aug 2026 07:00:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1785765626; x=1786370426; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-language:content-type:in-reply-to
+         :mime-version:user-agent:date:message-id:from:references:cc:to
+         :subject:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=vKfDnl36SXijj5vK7jAVVLNegdlF1dNn5bPXXAHyHOI=;
+        b=jqM1/RkgA8787Sk8VGltgIy86ZwYI4GnvbPp9/xAP+AzqDlzm37Pvga+7X2Qsh3Ckf
+         NvSYKQQci0YcTrsL30q+BsACUgKo/3+VuXhiPd0DeEtxM/0TX4TD0hgsqqpkPjSEin2Z
+         v3CTHbFz4e8lf9fnQyibwHdaqVFsnX8kPvCRSZW9BFEhSXfHBjZE9Sc9UgrxQS8h/Lix
+         WvoOd0BEbmXcAIko2AnefsIZqSogO5XjXblGxewtrMZC2Y+gGeaF7rqKSHSTlvTJ7FJk
+         /efS/paHE54dzjD3SbId/KGRVu8Rn07A/mf4iqaS3GAS6aF49HSGfTrLEBrr1F5Qz+0x
+         Eqhg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785765626; x=1786370426;
+        h=content-transfer-encoding:content-language:content-type:in-reply-to
+         :mime-version:user-agent:date:message-id:from:references:cc:to
+         :subject:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=vKfDnl36SXijj5vK7jAVVLNegdlF1dNn5bPXXAHyHOI=;
+        b=sCFFlnOWM5dEuZLZG+d59FFZSCvT9j/uKcihoyfSGNDwnw4W9HliqU5tD2GLalpiWK
+         maREOWe6hT23d1AKyD2jde0F3cVNC7QtS8Mf6LhlqGM8gUJbxxp5fyLH4zE/Qr6+oykO
+         Sq5IIMDHdcxkm8HtjfyOe2c6hHCnykyGzwU81X444P2JaBbz/Se0PBsQpdsGtfKVIK5X
+         Nq+Y9RJApHH/adlYz4tJWxDXQP6kU5Sg21Ec4VNcxq8QwPSKoUZk1LkJlurO6F3H0tik
+         Gy8zPhBmcU0IJs5Ujoog2MlEVXaDQYfiLhCYGXH+5FluGmspNRRqEBoBEH5aD/uwDHXY
+         l1UA==
+X-Forwarded-Encrypted: i=1; AHgh+Rpfbm2hHtzg7Sm62AX/BFfxbkJYPgDOQyHTpsIxvF4oX5OPJ/aOqz5ZP54MFaeb75WS3bxVrSMZwn8=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyt9Y14ZjgaTPTYpktosvlXgHhl0MK1nQsqJ73T9srBBjyCr6kO
+	OJoM2kVevSG2ODegsm+vVN05+CQjGD30oIVTex4orQdCef/ouSDpXv6igdxpLjkHQAEYIsOiCYy
+	61s8jHd7Q6XorCFKZpy4xpZ631YqIbjFqqiOmFJgoDlDtrskE0U2J6O2n+fbT7KI=
+X-Gm-Gg: AR+sD126Apb9NM+pkplAJtqkUhyVWwJiOnWa97HLy89skPm3s9gOIV3nY6S7rgCrw1q
+	aArn+/l8N09aZCLzlMIjxq8eqKQ7E7FjApZW1S8FQFrLlMTWqPOVEEQ7M3XQrZmp0jQNS0qDDHv
+	s58rud4tGjMNMnKih/P2fAcxd11WreDivTQXkkEevIty5kU34a/uazV748MF7RMRdojgYdZtrhN
+	zabET+Z+JpWa/PoKEg3oJ8rR8REOsn9wHeaLkGoCV0stcargiYLq9mXpWas8qL8WQPM3OFB6jWk
+	JEwsRl8E4iO0VyciSns1MQMP8UxeRrTnxxGTu0z7yxnoDPPtETrbJ2f+GZZ7LwQM9ppZmQsHm5V
+	P5CC4p/yjYQRUrPiaP/QGMFT836SaqA==
+X-Received: by 2002:a05:6a21:4683:b0:3c3:b57b:6455 with SMTP id adf61e73a8af0-3c92a846c3dmr11146519637.49.1785765624303;
+        Mon, 03 Aug 2026 07:00:24 -0700 (PDT)
+X-Received: by 2002:a05:6a21:4683:b0:3c3:b57b:6455 with SMTP id adf61e73a8af0-3c92a846c3dmr11146165637.49.1785765621378;
+        Mon, 03 Aug 2026 07:00:21 -0700 (PDT)
+Received: from [192.168.29.77] ([49.43.218.234])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-3153e18e107sm43434358eec.27.2026.08.03.07.00.15
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 03 Aug 2026 07:00:20 -0700 (PDT)
+Subject: Re: [PATCH v5 2/4] mmc: sdhci-msm: Reprogram crypto keys during host
+ hardware initialization
+To: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, quic_dmukhopa@quicinc.com,
+        quic_rampraka@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
+        quic_gaurkash@quicinc.com, quic_sartgarg@quicinc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org
+References: <20260730140822.1976635-1-neeraj.soni@oss.qualcomm.com>
+ <20260730140822.1976635-3-neeraj.soni@oss.qualcomm.com>
+ <20260730191823.GD3139@sol>
+ <6c795412-ab63-22f9-0b64-8bc746fc2773@oss.qualcomm.com>
+ <20260731061246.GB57540@sol>
+ <5af5ea26-9cf6-4cce-8cdf-7b5acb773608@oss.qualcomm.com>
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+Message-ID: <4ca7b3c5-7efc-bf60-4f24-caefd96c391c@oss.qualcomm.com>
+Date: Mon, 3 Aug 2026 19:30:13 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+In-Reply-To: <5af5ea26-9cf6-4cce-8cdf-7b5acb773608@oss.qualcomm.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-Message-Id: <20260803-am654-sdhci-v2-4-a5ee5be86133@bootlin.com>
-References: <20260803-am654-sdhci-v2-0-a5ee5be86133@bootlin.com>
-In-Reply-To: <20260803-am654-sdhci-v2-0-a5ee5be86133@bootlin.com>
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>, 
- Faiz Abbas <faiz_abbas@ti.com>, Judith Mendez <jm@ti.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Pascal EBERHARD <pascal.eberhard@se.com>, 
- Thomas Petazzoni <thomas.petazzoni@bootlin.com>, 
- Miquel Raynal <miquel.raynal@bootlin.com>, 
- "Diogo Ivo (Schneider Electric)" <diogo.ivo@bootlin.com>, 
- stable@vger.kernel.org
-X-Mailer: b4 0.15.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2965; i=diogo.ivo@bootlin.com;
- h=from:subject:message-id; bh=lT+JEV0aFEKxlgkKQDL+bPnIS/8E0YX9GtsEONosqbE=;
- b=owEBbQKS/ZANAwAKAQa+fFtWXslFAcsmYgBqcJwrjEEtYYtxm8RYVAFN64Io/5dCXwPevUzQ3
- qnQJ/FmplyJAjMEAAEKAB0WIQTma35o1i1081e8B2UGvnxbVl7JRQUCanCcKwAKCRAGvnxbVl7J
- RWHzD/4jgRqpP6bdFGHzVxGun+a+5hLMIEtP9Exoq5oCt2rnJjuDKEynT1IgtzpejT01TijSMoN
- xrzyXUxZhOL+RiIth4j4+Zzg1z9JY2KuYrSCFGLfZGLkWWM2fkX6krcOKNNnUyHZyZpU0P7/mRY
- hgvi+QcIE415/7+1r+hGWAdeeXimnPmXXURfVMneDJw4FZevjqSP5A8froqFCXRQ78PM67TvTkn
- d6jUCitF3arduHzvfBzlz35H3HXa6pdo8TgnXGEfD9SA33FGo8KpblZXVI80p8oyBtqyK83wpsK
- wfWABpyk+jBi+ykJ5c5+RX48OKm8vox8bfz6Ma4bAVXm/zC1v+ptI9Vn8V+KI6yqk6WyrwCDsmD
- fbVQzoRGUCpEtbRa4yo9pIVCGTL3IVYekcAPX5BI6ATUX6cUIykTUysA286PH3nm7G5+3gAaEXN
- 0MgeQK0yvnbGgfIIPiX3Js4gHfc1kcN3S7BaNvqu6W9Zjs7x5/LjvJ6jCzpy9nTzAQ8M9UhmSqA
- 7U09OqpDjfc95cFaTURSk2SlxCr08CpuoxiZjgT5p/jreDlawbnEMYHaetrvd8vkA5xN0KhfeX6
- /EY1KVXSvI8N2ebHUL5wJxdVaC8CyS3f3H0loTXqh/OKmCC8TS7hd09kPgbBnLFvPUn1GsvBaHL
- Z922Ngc1fNXYsjQ==
-X-Developer-Key: i=diogo.ivo@bootlin.com; a=openpgp;
- fpr=E66B7E68D62D74F357BC076506BE7C5B565EC945
-X-Last-TLS-Session-Version: TLSv1.3
+X-Authority-Analysis: v=2.4 cv=aoaCzyZV c=1 sm=1 tr=0 ts=6a709efb cx=c_pps
+ a=Qgeoaf8Lrialg5Z894R3/Q==:117 a=9qtqvq33Fd9BUailxVlm8w==:17
+ a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=ZpdpYltYx_vBUK5n70dp:22
+ a=VwQbUJbxAAAA:8 a=LDBv8-xUAAAA:8 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
+ a=kJZwEO8prvA8Bnpbhs4A:9 a=QEXdDO2ut3YA:10 a=x9snwWr2DeNwDh03kgHS:22
+ a=DZeXCJrVpAJBw65Qk4Ds:22 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-GUID: EzoFNpcDyKW8xKW_JanAHm8XUUxDh0TD
+X-Proofpoint-ORIG-GUID: EzoFNpcDyKW8xKW_JanAHm8XUUxDh0TD
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODAzMDEyNSBTYWx0ZWRfX/kBFa5llRY0a
+ Q8Ek9k+4/ELS+NJBMtshkVDsT1Y//422ASCILWVFeZwUHPexDGb1uHaEsdjQHFScjCrqc2GrI3f
+ /+x7BpKlI7pXS4fPaRxqr/oYGgzMLDBtP30ANJX4v0aj6P7WU75qqq8iROR6lCRHeoLq8MbCMHO
+ Dbx96EYQPTb3XWA7EtEfzPWks88lXJJvZWMQAUae32UGSVffI7brWPM9whU6fXgydzeEXo9aL20
+ fHYZkseUhJya477Wdz6swlGFmbLxE2CYdtn89VUipZEJYXD2Q17lSwG5qHflMPM0r1H5mMfF9rV
+ 7/+vG3fZIwoAoNvQcGGLtUstQlUQTyMBaYFMz/kFhJpggqtHN7Z0KtcYgkWKjH7USlsDVep23JR
+ ajIS87LY3gqlC5nKKbahQIgJ8rxwSdiN+ZM2ipCSG/Ciq+7VBMYguRrBeJKnj7CVGn5fcNehjGI
+ 3YXNT4ABRDHF9NQi1AA==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODAzMDEyNSBTYWx0ZWRfX+8NWAF2U50EF
+ DSeqOLXzjfK0MH4kn0kBUsevtgesXXRiZYNuB8E7bvRP/3Mn3HI0WqVnFbQi+Cz43KJKWGth5BT
+ v7158658BiSQjlVgBIb9usA5su2wswE=
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-08-03_03,2026-08-03_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ clxscore=1015 bulkscore=0 suspectscore=0 priorityscore=1501 adultscore=0
+ spamscore=0 lowpriorityscore=0 malwarescore=0 phishscore=0 impostorscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608030125
 
-DDR50 mode is not required to support the tuning command CMD19, meaning
-that calibration may fail on cards that do not implement it, in which
-case a known-good itap delay value should be programmed into the host
-controller.
 
-Do this by reading the (already defined) itap delay DT property for DDR50
-and, if tuning fails for this mode, fall back to the DT-provided itap delay
-value. If the DT does not provide a value for DDR50 fallback then this
-simply disables using itapdly.
 
-Fixes: 901d16e46296 ("mmc: sdhci_am654: Add retry tuning")
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Diogo Ivo (Schneider Electric) <diogo.ivo@bootlin.com>
----
-Changes in v2:
- - As suggested by Sashiko save values read from DT for DDR50 in separate
-   variables in order to keep them across multiple tuning cycles without
-   overwriting them.
----
- drivers/mmc/host/sdhci_am654.c | 25 ++++++++++++++++++++-----
- 1 file changed, 20 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 8ce10422bba0..27ef79420eba 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -126,7 +126,7 @@ static const struct timing_data td[] = {
- 				   NULL,
- 				   MMC_CAP_UHS_SDR104},
- 	[MMC_TIMING_UHS_DDR50]	= {"ti,otap-del-sel-ddr50",
--				   NULL,
-+				   "ti,itap-del-sel-ddr50",
- 				   MMC_CAP_UHS_DDR50},
- 	[MMC_TIMING_MMC_DDR52]	= {"ti,otap-del-sel-ddr52",
- 				   "ti,itap-del-sel-ddr52",
-@@ -144,6 +144,8 @@ struct sdhci_am654_data {
- 	u32 otap_del_sel[ARRAY_SIZE(td)];
- 	u32 itap_del_sel[ARRAY_SIZE(td)];
- 	u32 itap_del_ena[ARRAY_SIZE(td)];
-+	u32 itap_del_sel_dt_ddr50;
-+	u32 itap_del_ena_dt_ddr50;
- 	int clkbuf_sel;
- 	int trm_icp;
- 	int drv_strength;
-@@ -579,10 +581,18 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
- 	} while (++tuning_loop < RETRY_TUNING_MAX);
+On 7/31/2026 6:14 PM, Ram Prakash Gupta wrote:
+> 
+> 
+> On 7/31/2026 11:42 AM, Eric Biggers wrote:
+>> On Fri, Jul 31, 2026 at 11:37:44AM +0530, Neeraj Soni wrote:
+>>>
+>>>
+>>> On 7/31/2026 12:48 AM, Eric Biggers wrote:
+>>>> On Thu, Jul 30, 2026 at 07:38:20PM +0530, Neeraj Soni wrote:
+>>>>> Host looses the Inline Crypto Engine (ICE) keys during hardware reset.
+>>>>> Re-program the keys while intializing ICE to ensure that ICE is available
+>>>>> in the same state as before the hardware reset.
+>>>>>
+>>>>> Also set MMC_CAP2_CRYPTO_NO_REPROG to indicate that re-program of ICE keys
+>>>>> is not needed during MMC runtime suspend/resume.
+>>>>>
+>>>>> Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+>>>>> Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+>>>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+>>>>> Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>>>> Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
+>>>>> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+>>>>> ---
+>>>>>  drivers/mmc/host/sdhci-msm.c | 3 +++
+>>>>>  1 file changed, 3 insertions(+)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>>>> index 4aff965f0e2e..7d71dc6f388d 100644
+>>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>>> @@ -1958,7 +1958,10 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>>>>>  				cap.sdus_mask * 512;
+>>>>>  	}
+>>>>>  
+>>>>> +	blk_crypto_reprogram_all_keys(&mmc->crypto_profile);
+>>>>> +
+>>>>
+>>>> This still does nothing.  The crypto profile was just initialized, so no
+>>>> keyslots are in-use and blk_crypto_reprogram_all_keys() does nothing.
+>>>>
+>>> This is needed to address those scenarios where device is running in a
+>>> stable state and only the host hardware goes for a reset, for example,
+>>> to recover from an error state or stall.
+>>
+>> Nope.  Please check the actual code.  This is called only at driver
+>> probe time.  Again, the crypto profile was just initialized, and no
+>> keyslots are in-use.  It is a no-op.  Maybe you intended it to do
+>> something else, but that is not what it actually does.
+>>
+>> - Eric
+> 
+> Hi Neeraj,
+> 
+> earlier change for blk_crypto_reprogram_all_keys() in sdhci_msm_gcc_reset() was required
+> when .hw_reset from sdhci_ops was overwritten with sdhi_msm_gcc_reset internally for robust
+> error recovery but this changed after https://lore.kernel.org/all/20220408080045.6497-4-wsa+renesas@sang-engineering.com/
+> 
+> we plan to rework recovery soon and we will take care of key reprogramming as part of that.
+> For time being you can drop this, as Eric pointed out, this is redundant.
+>
+Ack. Will fix this in v6.
  
- 	if (itapdly < 0) {
--		dev_err(dev, "Failed to find itapdly, fail tuning\n");
--		sdhci_am654_write_itapdly(sdhci_am654, 0, 0);
--		sdhci_am654->itap_del_ena[timing] = 0;
--		sdhci_am654->itap_del_sel[timing] = 0;
-+		if (timing == MMC_TIMING_UHS_DDR50) {
-+			sdhci_am654->itap_del_sel[timing] = sdhci_am654->itap_del_sel_dt_ddr50;
-+			sdhci_am654->itap_del_ena[timing] = sdhci_am654->itap_del_ena_dt_ddr50;
-+		} else {
-+			dev_err(dev, "Failed to find itapdly, fail tuning\n");
-+			sdhci_am654->itap_del_ena[timing] = 0;
-+			sdhci_am654->itap_del_sel[timing] = 0;
-+		}
-+
-+		sdhci_am654_write_itapdly(sdhci_am654,
-+					  sdhci_am654->itap_del_sel[timing],
-+					  sdhci_am654->itap_del_ena[timing]);
- 		return -1;
- 	}
+> Thanks,
+> Ram
+>
+Regards
+Neeraj
  
-@@ -758,6 +768,11 @@ static int sdhci_am654_get_otap_delay(struct sdhci_host *host,
- 		}
- 	}
- 
-+	sdhci_am654->itap_del_sel_dt_ddr50 =
-+		sdhci_am654->itap_del_sel[MMC_TIMING_UHS_DDR50];
-+	sdhci_am654->itap_del_ena_dt_ddr50 =
-+		sdhci_am654->itap_del_ena[MMC_TIMING_UHS_DDR50];
-+
- 	return 0;
- }
- 
-
--- 
-2.55.0
-
+> 
+> 
+> 
