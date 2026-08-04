@@ -1,103 +1,151 @@
-Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 1955431AABF;
-	Tue,  4 Aug 2026 06:12:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
+Received: from smtpout-02.galae.net (smtpout-02.galae.net [185.246.84.56])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13FD7367F2F;
+	Tue,  4 Aug 2026 08:45:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.246.84.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785823936; cv=none; b=j1HOCoN4BAfpMmWZnq/8gPX9AkjfNLpDU1MZeMw6hSEdXflC//kmQNFvLUZduSZaZrBfuXAlY/22+P3xdmRZ2db9/VV4dO3grLOcBfXz+bqwriIInEUm+I7fXdMqb68LP+FCqV3tFSLiJ42H3AjGCJOShwy7q5u25kRmfi6MT4M=
+	t=1785833156; cv=none; b=Q4oIZh8XnW67vWU/JQA1IsN4k6zsF3kRiER2fvTS2fFdiXrmw7xvvMCkTM5ktyMbYZQRf7G0hVZSWvcLNeKomx0jE8nu5fmDxdC+KvRAmaefY53T9D4T0l8O5/5TzJpB1ILQhQA7gnOS3TZyJejUbdjLE3Foe4lw+l2onvYZUy4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785823936; c=relaxed/simple;
-	bh=QZ7HU7TVrJI/Ym28cZCoeeJ5FDQt6B/2QCuH1EV1tYk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jXZ/fh0Ge1h72ujQJDbGDcfDfUlgENxhU8pucglK6p0nOMaxf2qmernvwaBmauIDo3RygrQZBNSiQQBga/Wsu+xqucdVo6DMbbhUZSDk/afyjznwXLcButKO6ycojiv8gfD5m/14HKjL5AN9RARPgLwEskhs51nsfRZjFSt5uOI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
-Received: from loongson.cn (unknown [223.64.68.205])
-	by gateway (Coremail) with SMTP id _____8BxXZu6gnFqQy4KAA--.10106S3;
-	Tue, 04 Aug 2026 14:12:10 +0800 (CST)
-Received: from kernelserver (unknown [223.64.68.205])
-	by front1 (Coremail) with SMTP id qMiowJDxPcW5gnFqnxAjAA--.57941S2;
-	Tue, 04 Aug 2026 14:12:09 +0800 (CST)
-From: Binbin Zhou <zhoubinbin@loongson.cn>
-To: Binbin Zhou <zhoubb.aaron@gmail.com>,
-	Huacai Chen <chenhuacai@loongson.cn>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Huacai Chen <chenhuacai@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	stable@vger.kernel.org
-Subject: [PATCH] mmc: loongson2: Fix sg iteration in data reorder functions
-Date: Tue,  4 Aug 2026 14:12:00 +0800
-Message-ID: <20260804061200.3897779-1-zhoubinbin@loongson.cn>
-X-Mailer: git-send-email 2.52.0
+	s=arc-20240116; t=1785833156; c=relaxed/simple;
+	bh=S//OlL8n6dGgAq9CSHuh2ghfxRpqCbbXnwB/NP+WXjw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=VJOAJ7iAuYl/oDlJB6wOGFJwr14feBhWBCm9aTPknDQf/tNsBVYRc06F2j3MGUv/ACszyUr9NhfW3dGN/7PBSy9UFjRZO+kEt1DAJY8/zjbiFu3GO5FIm/i4ZUzRI+HKpaLuEiJdW044ym287EW3OvZ3AaMS23H3CMwNLedk7uE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=kygwDI5Y; arc=none smtp.client-ip=185.246.84.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="kygwDI5Y"
+Received: from smtpout-01.galae.net (smtpout-01.galae.net [212.83.139.233])
+	by smtpout-02.galae.net (Postfix) with ESMTPS id 6873F1A13F6;
+	Tue,  4 Aug 2026 08:45:50 +0000 (UTC)
+Received: from mail.galae.net (mail.galae.net [212.83.136.155])
+	by smtpout-01.galae.net (Postfix) with ESMTPS id 336F66029E;
+	Tue,  4 Aug 2026 08:45:50 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 6267611C32665;
+	Tue,  4 Aug 2026 10:45:42 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=dkim;
+	t=1785833145; h=from:subject:date:message-id:to:cc:mime-version:content-type:
+	 content-transfer-encoding:content-language:in-reply-to:references;
+	bh=2IrhJb1f1JY7GIAXVHYDGZwNXTKJIHbIo7dg8wZa84U=;
+	b=kygwDI5YHL0kPko+oQd5TbgvAZn80Uz7lUDETgYniRDJbFRWJtnlQPSZK0ChzpMUeNFFl9
+	7KO6GJfTrin4r1ETW+cCvea8fsVmtySjZMy7SlpwoINutNm4WXgGNL6p9MLmBg2K0Rza3U
+	s5SoyEWBYML9Uxpdhugf3t5ZOUQgyov2Hns/7I8yEZXU4MLaLcajaPW0jQyXrZ0K0JwrJX
+	KjDG4lki8XaPjA9JqjqXgLnbmULTeYI1i/WPtgC0WUKf4ARXqHUkfndVLETaIr4TDUk+xW
+	1WGORaUmEGxCkkdaa3PdB0FZKzFz/jsPHdkWV8/MLY/NFJX0y+RMtju6UT36Lw==
+Message-ID: <6fc6216a-5e57-4df5-9033-d3573409ed78@bootlin.com>
+Date: Tue, 4 Aug 2026 10:45:42 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowJDxPcW5gnFqnxAjAA--.57941S2
-X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/1tbiAQEJCGpxaFEBDwAAst
-X-Coremail-Antispam: 1Uk129KBj93XoW7ZrykuF47Cw1xJF48Kw4kuFX_yoW8Cry5pa
-	4fAw1a9F4UtF4Yvr98X3y7ury5ua4aga42gF4DGwn5uFWkXr1Uur1UK3WFqF129FWYkFyI
-	qr4qgrZxW3Z5GFcCm3ZEXasCq-sJn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7KY7ZEXa
-	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUUk0b4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r106r15M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
-	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Jr0_Gr1l84ACjcxK6I8E87Iv67AKxVWxJVW8Jr1l84ACjcxK6I8E87Iv6xkF7I0E14v2
-	6r4j6r4UJwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYIkI8VC2zVCFFI0UMc
-	02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAF
-	wI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JMxAIw28IcxkI7V
-	AKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCj
-	r7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUAVWUtwCIc40Y0x0EwIxGrwCI42IY6x
-	IIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVWUJVW8JwCI42IY6xAI
-	w20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z280aVCY1x
-	0267AKxVWUJVW8JbIYCTnIWIevJa73UjIFyTuYvjxU25EfUUUUU
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 4/4] mmc: sdhci_am654: Fallback to DT-provided itap
+ delay on DDR50 tuning failure
+To: "Mendez, Judith" <jm@ti.com>, Adrian Hunter <adrian.hunter@intel.com>,
+ Ulf Hansson <ulfh@kernel.org>, Faiz Abbas <faiz_abbas@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ Pascal EBERHARD <pascal.eberhard@se.com>,
+ Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
+ Miquel Raynal <miquel.raynal@bootlin.com>, stable@vger.kernel.org
+References: <20260803-am654-sdhci-v2-0-a5ee5be86133@bootlin.com>
+ <20260803-am654-sdhci-v2-4-a5ee5be86133@bootlin.com>
+ <4721675e-e3ae-4e81-89db-eb0f7f419d1e@ti.com>
+Content-Language: en-US
+From: Diogo Ivo <diogo.ivo@bootlin.com>
+In-Reply-To: <4721675e-e3ae-4e81-89db-eb0f7f419d1e@ti.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Last-TLS-Session-Version: TLSv1.3
 
-In ls2k0500_mmc_reorder_cmd_data() and ls2k2000_mmc_reorder_cmd_data(),
-the for_each_sg() macro already iterates over the scatterlist entries,
-with 'sg' pointing to the current entry. However, the code incorrectly
-uses '&sg[i]' and 'sg_dma_len(&sg[i])' inside the loop, which treats
-'sg' as an array base and indexes it again, leading to access of
-wrong sg entries (or out-of-bounds if the list is not an array).
+Hi Judith,
 
-Cc: stable@vger.kernel.org
-Fixes: d0f8e961deae ("mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver")
-Fixes: 2115772014bd ("mmc: loongson2: Add Loongson-2K SD/SDIO controller driver")
-Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
----
- drivers/mmc/host/loongson2-mmc.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Thanks for the review!
 
-diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
-index f553e92fd9e5..118eccbaf8cd 100644
---- a/drivers/mmc/host/loongson2-mmc.c
-+++ b/drivers/mmc/host/loongson2-mmc.c
-@@ -641,8 +641,8 @@ static void ls2k0500_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
- 		return;
- 
- 	for_each_sg(cmd->data->sg, sg, cmd->data->sg_len, i) {
--		data = sg_virt(&sg[i]);
--		for (j = 0; j < (sg_dma_len(&sg[i]) / 4); j++)
-+		data = sg_virt(sg);
-+		for (j = 0; j < (sg_dma_len(sg) / 4); j++)
- 			if (cmd->opcode == SD_SWITCH)
- 				data[j] = bitrev8x4(data[j]);
- 			else
-@@ -758,8 +758,8 @@ static void ls2k2000_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
- 		return;
- 
- 	for_each_sg(cmd->data->sg, sg, cmd->data->sg_len, i) {
--		data = sg_virt(&sg[i]);
--		for (j = 0; j < (sg_dma_len(&sg[i]) / 4); j++)
-+		data = sg_virt(sg);
-+		for (j = 0; j < (sg_dma_len(sg) / 4); j++)
- 			data[j] = bitrev8x4(data[j]);
- 	}
- }
+On 8/3/26 9:59 PM, Mendez, Judith wrote:
+> Hi Diogo,
+> 
+> Thanks for your patch, couple of doubts below.
+> 
+> On 8/3/2026 8:47 AM, Diogo Ivo (Schneider Electric) wrote:
+>> DDR50 mode is not required to support the tuning command CMD19, meaning
+>> that calibration may fail on cards that do not implement it, in which
+>> case a known-good itap delay value should be programmed into the host
+>> controller.
+>>
+>> Do this by reading the (already defined) itap delay DT property for DDR50
+>> and, if tuning fails for this mode, fall back to the DT-provided itap 
+>> delay
+>> value. If the DT does not provide a value for DDR50 fallback then this
+>> simply disables using itapdly.
+>>
+>> Fixes: 901d16e46296 ("mmc: sdhci_am654: Add retry tuning")
+> 
+> Should this commit be the one to blame or should it be the commit that
+> introduces DDR50 support?
 
-base-commit: e27c946b589c53520409a0956b33d52ef7a0898f
--- 
-2.52.0
+I'm not sure I follow you here, as I wasn't able to pinpoint a commit
+that specifically introduced support for DDR50. Could you please clarify?
 
+Taking a look at the git log of the driver I see a0a62497f6aa, where
+reading itapdly from DT was added but without reading the DDR50 value
+and 13ebeae68ac9, the commit where tuning was originally added, but the
+"responsibility" seems split between the two.
+
+>> Cc: <stable@vger.kernel.org>
+>> Signed-off-by: Diogo Ivo (Schneider Electric) <diogo.ivo@bootlin.com>
+>> ---
+>> Changes in v2:
+>>   - As suggested by Sashiko save values read from DT for DDR50 in 
+>> separate
+>>     variables in order to keep them across multiple tuning cycles without
+>>     overwriting them.
+>> ---
+>>   drivers/mmc/host/sdhci_am654.c | 25 ++++++++++++++++++++-----
+>>   1 file changed, 20 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/ 
+>> sdhci_am654.c
+>> index 8ce10422bba0..27ef79420eba 100644
+>> --- a/drivers/mmc/host/sdhci_am654.c
+>> +++ b/drivers/mmc/host/sdhci_am654.c
+>> @@ -126,7 +126,7 @@ static const struct timing_data td[] = {
+>>                      NULL,
+>>                      MMC_CAP_UHS_SDR104},
+>>       [MMC_TIMING_UHS_DDR50]    = {"ti,otap-del-sel-ddr50",
+>> -                   NULL,
+>> +                   "ti,itap-del-sel-ddr50",
+>>                      MMC_CAP_UHS_DDR50},
+>>       [MMC_TIMING_MMC_DDR52]    = {"ti,otap-del-sel-ddr52",
+>>                      "ti,itap-del-sel-ddr52",
+>> @@ -144,6 +144,8 @@ struct sdhci_am654_data {
+>>       u32 otap_del_sel[ARRAY_SIZE(td)];
+>>       u32 itap_del_sel[ARRAY_SIZE(td)];
+>>       u32 itap_del_ena[ARRAY_SIZE(td)];
+>> +    u32 itap_del_sel_dt_ddr50;
+>> +    u32 itap_del_ena_dt_ddr50;
+>>       int clkbuf_sel;
+>>       int trm_icp;
+>>       int drv_strength;
+>> @@ -579,10 +581,18 @@ static int 
+>> sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>>       } while (++tuning_loop < RETRY_TUNING_MAX);
+>>       if (itapdly < 0) {
+>> -        dev_err(dev, "Failed to find itapdly, fail tuning\n");
+>> -        sdhci_am654_write_itapdly(sdhci_am654, 0, 0);
+>> -        sdhci_am654->itap_del_ena[timing] = 0;
+>> -        sdhci_am654->itap_del_sel[timing] = 0;
+>> +        if (timing == MMC_TIMING_UHS_DDR50) {
+> 
+> Should dev_dbg be added here to let the user know that tuning failed but
+> DT defaults were set?
+
+That sounds useful, I'll add a print here.
+
+> ~ Judith
+> 
+
+Best regards,
+Diogo
