@@ -1,47 +1,78 @@
-Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06A38344DBD;
-	Tue,  4 Aug 2026 01:40:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2F323FADF6
+	for <linux-mmc@vger.kernel.org>; Tue,  4 Aug 2026 02:25:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785807626; cv=none; b=ZoHgQGOW4/G0ryrKXvN9K6Tt6fMHZM0fKWr9VTK75oj59WUdN/55AehkDKwZGFSE90UI33ilrVvQfJGFzDGxG6EhSVaoybD/zcZbrIxkN4PNxu+FZIxmnemfB2OrU42T+PKzj4DT0/ZHYsF7IQH4Y0z/S/kvr0LHaKLZ/Z/XDEU=
+	t=1785810316; cv=none; b=uiLSnK8vj24Z6oYyUcvZZlT00/YVnClQC7Ly0hmqFTwNLni4h8/+Toq/qtVKkwJQzaq5MgUEdWYMMPIss+tZwyOD1cz9uhfQz3IEgyZZALuTfWBx62Y/MoTPY3V2GnOzl6SErdkd8IdnQjCCd+GPwk+MFJDFyOaH6webHC6VgWQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785807626; c=relaxed/simple;
-	bh=86YNWpTr5H2BVX5nBmndArnt6BVDTCQ48ruQpGq9GbA=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=J15JLu2DBR5klqXHJ3Jt7dE23vz7snoddufYA6po7eGcJcgkHN2inwoDdZ7Pp93YwT7EKQZWok2A6SlhoN4nYeWo/tTPNt4Iv0GaOoN+v5ikF3/s9paV6DLhmWyI/wFrPK29n4udlyI+IWGmmU6kmSJzRQVagDzp5mNBY5mtm8I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
-X-UUID: 739b580c8fa511f1aa26b74ffac11d73-20260804
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.3.12,REQID:da68e7c7-64e4-420f-b145-637a34dede29,IP:0,U
-	RL:0,TC:0,Content:0,EDM:25,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
-	:release,TS:25
-X-CID-META: VersionHash:e7bac3a,CLOUDID:8d14d71818f1a3ad32b09e14a023bca4,BulkI
-	D:nil,BulkQuantity:0,Recheck:0,SF:102|850|865|898,TC:nil,Content:0|15|50,E
-	DM:5,IP:nil,URL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:
-	0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 2,SSN|SDN
-X-CID-BAS: 2,SSN|SDN,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
-X-UUID: 739b580c8fa511f1aa26b74ffac11d73-20260804
-X-User: xiaopei01@kylinos.cn
-Received: from localhost.localdomain [(10.44.16.150)] by mailgw.kylinos.cn
-	(envelope-from <xiaopei01@kylinos.cn>)
-	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
-	with ESMTP id 1555632735; Tue, 04 Aug 2026 09:40:19 +0800
-From: Pei Xiao <xiaopei01@kylinos.cn>
-To: ulfh@kernel.org,
+	s=arc-20240116; t=1785810316; c=relaxed/simple;
+	bh=0ajQB+hPab2vIWSNK6YjKmU3k2ZE+ruh1odyGqqOzg8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fUnO8pKcYsSOzzkIwCFhdvR02pGepG72yq1XHUslfw0MB4ocElHxJhLF3cSorPX3rBoaEyQWwdsEvzrFLsKqZKkNcrgWyJLDCBEuo7fcg25drVPPyVC9LFUz18faflVkCoHRrCBYEd55qlm/MLVH/Dfm9bMmUxqPWj/dkPpGMzU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OVV4PXhL; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OVV4PXhL"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2d02b4c3601so44917565ad.3
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Aug 2026 19:25:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1785810310; x=1786415110; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=1OaiGLLoxTsUad13rL5qrpAU9a1lh1UZkttvZnhnlXg=;
+        b=OVV4PXhLzZLP8OQoWeJOJafRZj1Q1/uqjr+H4cemRtroqQK1zzAhvSPJEgaMAm/Hn5
+         e9pJzZdVt9YDYQojIAtzvRwQEotV0xX2lPqOFdknjKuJHsYgOL+Qtpo3tlSx2i2MGqTM
+         hzqp/H8Qaw7iPkEnL9+3OdU5CwOstGRRcE+HAESnBFoJOzH5yArhIFA6XkAnoQSAVu94
+         Mgv3sWDXCCVoXSoS935qKLyiCdINFAev03baH6hPwdPoMj0n9UmtCoCLfLalyqgJORkD
+         WBpNFsXwS+xhupjFnO1GU826p2lWhZn+bUskAm3vzyAry3zcE6qupz0+07iAqmNdKLX6
+         D3mA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1785810310; x=1786415110;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=1OaiGLLoxTsUad13rL5qrpAU9a1lh1UZkttvZnhnlXg=;
+        b=ilkReZf02wabHIkuX35/0doHXyM9E6lq+jHOZrPOx9/42bICyrbItD2wY5ldCcMkcu
+         XyZ1ak8KAgZh4l12Kk+qgJrZYbWf3nezXIPr73iLHcoL2DgIMz6h2hos2rqyYayLRRBB
+         4XMyNnAk5rDiNmohpqtIfcIl58A55eJKfQ6NDRj0i4NX8LEtYx3/nLMjUm2pbQTU7l3Y
+         6HCJmDmrbhw6gnofdMCJexXAh1dqgf9/tBAORBq17eULcE+/TsTAV9rzW5582Lv5DBcu
+         8vs9O2y8cfLi2UnTuzh7pnZYhChzlLX7EAJR++V7+oGWNzgPV+tsSdt4FAEtnBOBm+26
+         Ndyg==
+X-Forwarded-Encrypted: i=1; AHgh+RpZY8GKi0ulSSvngaJnGM7hCQczLpVpnVdaZz/2Q0u/8/1nCiLjKkZshbDbc5yaRJ0oX3J94LbhBxQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxyWMjK2BJZBpzZYcpDt3Fj45nOS+QqsbRXqsqzL+XFxnA9snES
+	0CIjRgl3Lf9ZApuXTbmtsrC7bASWErcigU25Iha8LuVcnXTQiqoWY727
+X-Gm-Gg: AR+sD13pzDsp2SyXR9YiStzR3x0IH5SItEqrFsVSI1qpl8PBXgHGS4Q/pN1+sWpfFOB
+	1BXv9WO8BxMLUBGTtWcnX3M2yWO/g6zsCutllMWo6wB7i2AOLzdp+p9LeXvEZ6jtBvA1azreiKr
+	g+5S6boxmZgdQMmDjwwABXL8u1iksqLfBnT8FUz43LGZsmEjUteRs0stHZgUX6En6ls2bkY9Vq2
+	RszCC9b6GX0VsUTVWl20lKYamwlRhr7twD1AvBMEFrR2Qxx5y32LuGWxdvYlQ2fjV4gYso961c1
+	tfOkiE3vIZLM/jwSr0m7YE07BpuWgUo4J991FMLkcfrSzJ8IzxYwrbM5dLZGZgHoydwh9pPfViM
+	c2Xmj3FUoXUnsnDb7QOQAYFjCUEFDPL1zWr/lM6r1By3kKjlW+lPEglUgpZ6BCYuf6Drpb2Huco
+	C8WnM3q73dRdaBsLBq4xYn/FLmAeFMecDsPkeLlJiGW+CBUg3aJTFlaN4RBthKrcUiXXHQvmpe
+X-Received: by 2002:a17:902:ea05:b0:2c9:d55d:2d3 with SMTP id d9443c01a7336-2d052244e67mr121387165ad.15.1785810309827;
+        Mon, 03 Aug 2026 19:25:09 -0700 (PDT)
+Received: from osman.mioffice.cn ([43.224.245.178])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2d04b1216bdsm45230825ad.69.2026.08.03.19.25.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 03 Aug 2026 19:25:08 -0700 (PDT)
+From: Zhan Xusheng <zhanxusheng1024@gmail.com>
+X-Google-Original-From: Zhan Xusheng <zhanxusheng@xiaomi.com>
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: Jisheng Zhang <jszhang@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Sekhar Nori <nsekhar@ti.com>,
+	Ravikumar Kattekola <rk@ti.com>,
+	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
 	linux-mmc@vger.kernel.org,
+	linux-omap@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	ulf.hansson@linaro.org
-Cc: Pei Xiao <xiaopei01@kylinos.cn>
-Subject: [PATCH] mmc: via-sdmmc: Fix use-after-free in via_sd_remove due to race condition
-Date: Tue,  4 Aug 2026 09:40:15 +0800
-Message-Id: <94dac731cadea4732725a83bbbe1d8fe47636694.1785807411.git.xiaopei01@kylinos.cn>
-X-Mailer: git-send-email 2.25.1
+	Zhan Xusheng <zhanxusheng@xiaomi.com>,
+	stable@vger.kernel.org
+Subject: [PATCH] mmc: omap_hsmmc: fix busy_timeout overflow in ns conversion on 32-bit
+Date: Tue,  4 Aug 2026 10:25:00 +0800
+Message-ID: <20260804022500.3768116-1-zhanxusheng@xiaomi.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,55 +81,45 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-In via_init_mmc_host, &sdhost->carddet_work is bound with
-via_sdc_card_detect, and via_sdc_isr can schedule this work on
-system_wq when it handles a card insertion/removal interrupt.
+omap_hsmmc_prepare_data() converts the command busy timeout to nanoseconds
+with:
 
-If we remove the device, via_sd_remove makes cleanup and the memory
-allocated for sdhost with devm_mmc_alloc_host() is released after the
-remove callback returns, while the work mentioned above may still be
-pending or running. The sequence of operations that may lead to a UAF
-bug is as follows:
+	timeout = req->cmd->busy_timeout * NSEC_PER_MSEC;
 
-CPU0                                      CPU1
+busy_timeout is an unsigned int (milliseconds) and timeout is a u64, but
+NSEC_PER_MSEC is 1000000L.  On 32-bit builds the multiplication is
+performed in 32-bit arithmetic and wraps for busy_timeout values above
+~4294 ms, before the result is assigned to the u64.
 
-                                          | via_sdc_isr
-                                          | schedule_work(&sdhost->carddet_work)
-via_sd_remove                             |
-mmc_remove_host(sdhost->mmc)              |
-free_irq(pcidev->irq, sdhost)             |
-timer_delete_sync(&sdhost->timer)         |
-cancel_work_sync(&sdhost->finish_bh_work) |
-                                          | via_sdc_card_detect
-                                          | // use sdhost
-// devm resources released after          |
-// remove returns, sdhost is freed        |
-                                          | // use sdhost (use-after-free)
+The driver does not set mmc->max_busy_timeout, so the core does not cap the
+busy timeout, and commands such as erase or SANITIZE (MMC_SANITIZE_TIMEOUT_MS
+is 240000 ms) can pass a busy_timeout far larger than 4294 ms.  The wrapped,
+much smaller ns value is then programmed via set_data_timeout(), so the data
+timeout is set too short and the operation can time out prematurely.
 
-Fix it by canceling the work after the IRQ handler that can schedule
-it has been stopped, and before proceeding with the remaining cleanup
-in via_sd_remove.
+Cast busy_timeout to u64 before the multiplication so the conversion is done
+in 64-bit arithmetic.
 
-Fixes: f0bf7f61b840 ("mmc: Add new via-sdmmc host controller driver")
-Assisted-by: Codex:deepseek-v4-flash
-Signed-off-by: Pei Xiao <xiaopei01@kylinos.cn>
+Fixes: 8cc9a3e73de1 ("mmc: host: omap_hsmmc: use generic_cmd6_time to program timeout value for CMD6")
+Cc: stable@vger.kernel.org
+Signed-off-by: Zhan Xusheng <zhanxusheng@xiaomi.com>
 ---
- drivers/mmc/host/via-sdmmc.c | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/omap_hsmmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index 8c049f8355cd..be90fc767c74 100644
---- a/drivers/mmc/host/via-sdmmc.c
-+++ b/drivers/mmc/host/via-sdmmc.c
-@@ -1199,6 +1199,8 @@ static void via_sd_remove(struct pci_dev *pcidev)
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 58c881f2725b..3356ac5a1fa0 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1357,7 +1357,7 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host *host, struct mmc_request *req)
+ 	if (req->data == NULL) {
+ 		OMAP_HSMMC_WRITE(host->base, BLK, 0);
+ 		if (req->cmd->flags & MMC_RSP_BUSY) {
+-			timeout = req->cmd->busy_timeout * NSEC_PER_MSEC;
++			timeout = (u64)req->cmd->busy_timeout * NSEC_PER_MSEC;
  
- 	free_irq(pcidev->irq, sdhost);
- 
-+	cancel_work_sync(&sdhost->carddet_work);
-+
- 	timer_delete_sync(&sdhost->timer);
- 
- 	cancel_work_sync(&sdhost->finish_bh_work);
+ 			/*
+ 			 * Set an arbitrary 100ms data timeout for commands with
 -- 
-2.25.1
+2.43.0
 
