@@ -1,132 +1,104 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6571630AAD8;
-	Mon,  3 Aug 2026 20:18:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06A38344DBD;
+	Tue,  4 Aug 2026 01:40:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785788292; cv=none; b=MjQCfYh9igaDTfjUzXsMjNA2JiyQU/xnYx89nYaJ1W95NG1Kk7YB4q3Uw/bmMIP3uSKRT687QOkbIgzGAOUnLsmwCkoqnPHojTexYILlsUjSl+5bOuPK4BtsUQO3z/yHkQOvxlj7cgdf+B+HyNV/SyI39poDUNz7iK4NMc9Ywd0=
+	t=1785807626; cv=none; b=ZoHgQGOW4/G0ryrKXvN9K6Tt6fMHZM0fKWr9VTK75oj59WUdN/55AehkDKwZGFSE90UI33ilrVvQfJGFzDGxG6EhSVaoybD/zcZbrIxkN4PNxu+FZIxmnemfB2OrU42T+PKzj4DT0/ZHYsF7IQH4Y0z/S/kvr0LHaKLZ/Z/XDEU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785788292; c=relaxed/simple;
-	bh=BXEduQogSxY0YRCOpPsMnNU5CIoRhv1e1OuF8pP1WUo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gVr2LbcT0YlUB7sHFwoRYZ9AYqkORaf/uQReQ/EsRAd+RlY1GGT73bYy757ccWeZ2ACt+e+lehCUqkUKS0U/kC/KSdgtEO2Zc3vM/6EIghSfAECRXQNZtXlqer7zW+h2zpARU3sqJ/LDzJpDuTPHYzJk1XxFum5t8ehcbUuIET8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lW71eh8I; arc=none smtp.client-ip=100.103.45.18
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lW71eh8I"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 75FFC1F000E9;
-	Mon,  3 Aug 2026 20:18:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1785788291;
-	bh=/XQHauEhFbAY1xUTUPdKDwoJjw2c56eGJ0uD7YlH1ks=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=lW71eh8IoNexrF6yQLqmZSd0oje+kHUJx1Z7loK7tA3lCAkQ2zwvfNZFQNRfPOcnj
-	 DJ3fBP8e0awRngXbBPoKOasBJgTWrvh1pXNMEYEAkmz4cQcNrgCcT+NTnCt/Op9l67
-	 J8WExLoerPLG9mL/K8GTJSEkCAUJOKq9MIrwTyue1qLWHBHFEWJ/eKGScWUaycmY+M
-	 sTZbHtRSymbc2R3fBCUE5yeM7Ccd6Swto65S2K8ZndqQ+Kwp3KKZcKSQ1af3zUkhab
-	 X0//ANC7oy23ZmojRpW/cslHGJ0TaaXtB3OldBNq9RuvAMOhObPLlbSw0qI+emAGUT
-	 ZuHwbkTa52PaA==
-Date: Mon, 3 Aug 2026 13:18:03 -0700
-From: Eric Biggers <ebiggers@kernel.org>
-To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com,
-	quic_dmukhopa@quicinc.com, quic_rampraka@quicinc.com,
-	quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
-	quic_bhaskarv@quicinc.com, quic_gaurkash@quicinc.com,
-	quic_sartgarg@quicinc.com, ram.gupta@oss.qualcomm.com,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH v6 2/2] mmc: sdhci-msm: Use pm ops instead of macro to
- restore crypto keys
-Message-ID: <20260803201803.GB63318@quark>
-References: <20260803163123.1802005-1-neeraj.soni@oss.qualcomm.com>
- <20260803163123.1802005-3-neeraj.soni@oss.qualcomm.com>
+	s=arc-20240116; t=1785807626; c=relaxed/simple;
+	bh=86YNWpTr5H2BVX5nBmndArnt6BVDTCQ48ruQpGq9GbA=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=J15JLu2DBR5klqXHJ3Jt7dE23vz7snoddufYA6po7eGcJcgkHN2inwoDdZ7Pp93YwT7EKQZWok2A6SlhoN4nYeWo/tTPNt4Iv0GaOoN+v5ikF3/s9paV6DLhmWyI/wFrPK29n4udlyI+IWGmmU6kmSJzRQVagDzp5mNBY5mtm8I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: 739b580c8fa511f1aa26b74ffac11d73-20260804
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.12,REQID:da68e7c7-64e4-420f-b145-637a34dede29,IP:0,U
+	RL:0,TC:0,Content:0,EDM:25,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+	:release,TS:25
+X-CID-META: VersionHash:e7bac3a,CLOUDID:8d14d71818f1a3ad32b09e14a023bca4,BulkI
+	D:nil,BulkQuantity:0,Recheck:0,SF:102|850|865|898,TC:nil,Content:0|15|50,E
+	DM:5,IP:nil,URL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:
+	0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: 739b580c8fa511f1aa26b74ffac11d73-20260804
+X-User: xiaopei01@kylinos.cn
+Received: from localhost.localdomain [(10.44.16.150)] by mailgw.kylinos.cn
+	(envelope-from <xiaopei01@kylinos.cn>)
+	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
+	with ESMTP id 1555632735; Tue, 04 Aug 2026 09:40:19 +0800
+From: Pei Xiao <xiaopei01@kylinos.cn>
+To: ulfh@kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	ulf.hansson@linaro.org
+Cc: Pei Xiao <xiaopei01@kylinos.cn>
+Subject: [PATCH] mmc: via-sdmmc: Fix use-after-free in via_sd_remove due to race condition
+Date: Tue,  4 Aug 2026 09:40:15 +0800
+Message-Id: <94dac731cadea4732725a83bbbe1d8fe47636694.1785807411.git.xiaopei01@kylinos.cn>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20260803163123.1802005-3-neeraj.soni@oss.qualcomm.com>
+Content-Transfer-Encoding: 8bit
 
-On Mon, Aug 03, 2026 at 10:01:23PM +0530, Neeraj Soni wrote:
-> From: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
-> 
-> Inline Crypto Engine (ICE) keys are lost after hibernation entry and this
-> needs to be restored when hibernation exits. ICE keys are re-programmed
-> during sdhci_msm_ice_init() but it may not cover cases where the
-> hibernation image is already restored.
-> 
-> Unwrap the pm ops and use directly in driver to add the call to restore
-> Inline Crypto Engine (ICE) keys. This ensures that ICE is brought into
-> same state as before hibernation.
-> 
-> Also set MMC_CAP2_CRYPTO_NO_REPROG to indicate that re-programming of ICE
-> keys is not needed during MMC runtime suspend/resume.
-> 
-> Signed-off-by: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
-> Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
-> Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
-> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 23 ++++++++++++++++++++++-
->  1 file changed, 22 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 4aff965f0e2e..f64788a70309 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1959,6 +1959,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
->  	}
->  
->  	mmc->caps2 |= MMC_CAP2_CRYPTO;
-> +	mmc->caps2 |= MMC_CAP2_CRYPTO_NO_REPROG;
->  	return 0;
->  }
->  
-> @@ -2983,9 +2984,29 @@ static int sdhci_msm_runtime_resume(struct device *dev)
->  	return ret;
->  }
->  
-> +static int sdhci_msm_restore(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	int ret;
-> +
-> +	ret = pm_runtime_force_resume(dev);
-> +	if (ret)
-> +		return ret;
-> +
-> +	if (host->mmc->caps2 & MMC_CAP2_CRYPTO)
-> +		blk_crypto_reprogram_all_keys(&host->mmc->crypto_profile);
-> +
-> +	return ret;
-> +}
+In via_init_mmc_host, &sdhost->carddet_work is bound with
+via_sdc_card_detect, and via_sdc_isr can schedule this work on
+system_wq when it handles a card insertion/removal interrupt.
 
-Sorry, it looks like this actually does need an #ifdef because the
-crypto_profile field is conditional.  It doesn't need to be a new #ifdef
-though, as you could add a function sdhci_msm_ice_restore() within the
-existing CONFIG_MMC_CRYPTO section of this file (along with a no-op stub
-in the !CONFIG_MMC_CRYPTO section), then call it from here.  Similar to
-how the existing sdhci_msm_ice_resume() works, for example.
+If we remove the device, via_sd_remove makes cleanup and the memory
+allocated for sdhost with devm_mmc_alloc_host() is released after the
+remove callback returns, while the work mentioned above may still be
+pending or running. The sequence of operations that may lead to a UAF
+bug is as follows:
 
->  static const struct dev_pm_ops sdhci_msm_pm_ops = {
-> -	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
->  	RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume, NULL)
-> +	.suspend	= pm_runtime_force_suspend,
-> +	.resume		= pm_runtime_force_resume,
-> +	.freeze		= pm_runtime_force_suspend,
-> +	.restore	= sdhci_msm_restore,
-> +	.thaw		= pm_runtime_force_resume,
-> +	.poweroff	= pm_runtime_force_suspend,
+CPU0                                      CPU1
 
-Should these use pm_sleep_ptr() to allow dead code elimination when
-!CONFIG_PM_SLEEP?
+                                          | via_sdc_isr
+                                          | schedule_work(&sdhost->carddet_work)
+via_sd_remove                             |
+mmc_remove_host(sdhost->mmc)              |
+free_irq(pcidev->irq, sdhost)             |
+timer_delete_sync(&sdhost->timer)         |
+cancel_work_sync(&sdhost->finish_bh_work) |
+                                          | via_sdc_card_detect
+                                          | // use sdhost
+// devm resources released after          |
+// remove returns, sdhost is freed        |
+                                          | // use sdhost (use-after-free)
 
-- Eric
+Fix it by canceling the work after the IRQ handler that can schedule
+it has been stopped, and before proceeding with the remaining cleanup
+in via_sd_remove.
+
+Fixes: f0bf7f61b840 ("mmc: Add new via-sdmmc host controller driver")
+Assisted-by: Codex:deepseek-v4-flash
+Signed-off-by: Pei Xiao <xiaopei01@kylinos.cn>
+---
+ drivers/mmc/host/via-sdmmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+index 8c049f8355cd..be90fc767c74 100644
+--- a/drivers/mmc/host/via-sdmmc.c
++++ b/drivers/mmc/host/via-sdmmc.c
+@@ -1199,6 +1199,8 @@ static void via_sd_remove(struct pci_dev *pcidev)
+ 
+ 	free_irq(pcidev->irq, sdhost);
+ 
++	cancel_work_sync(&sdhost->carddet_work);
++
+ 	timer_delete_sync(&sdhost->timer);
+ 
+ 	cancel_work_sync(&sdhost->finish_bh_work);
+-- 
+2.25.1
+
