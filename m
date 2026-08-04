@@ -1,78 +1,34 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2F323FADF6
-	for <linux-mmc@vger.kernel.org>; Tue,  4 Aug 2026 02:25:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 1955431AABF;
+	Tue,  4 Aug 2026 06:12:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785810316; cv=none; b=uiLSnK8vj24Z6oYyUcvZZlT00/YVnClQC7Ly0hmqFTwNLni4h8/+Toq/qtVKkwJQzaq5MgUEdWYMMPIss+tZwyOD1cz9uhfQz3IEgyZZALuTfWBx62Y/MoTPY3V2GnOzl6SErdkd8IdnQjCCd+GPwk+MFJDFyOaH6webHC6VgWQ=
+	t=1785823936; cv=none; b=j1HOCoN4BAfpMmWZnq/8gPX9AkjfNLpDU1MZeMw6hSEdXflC//kmQNFvLUZduSZaZrBfuXAlY/22+P3xdmRZ2db9/VV4dO3grLOcBfXz+bqwriIInEUm+I7fXdMqb68LP+FCqV3tFSLiJ42H3AjGCJOShwy7q5u25kRmfi6MT4M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785810316; c=relaxed/simple;
-	bh=0ajQB+hPab2vIWSNK6YjKmU3k2ZE+ruh1odyGqqOzg8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fUnO8pKcYsSOzzkIwCFhdvR02pGepG72yq1XHUslfw0MB4ocElHxJhLF3cSorPX3rBoaEyQWwdsEvzrFLsKqZKkNcrgWyJLDCBEuo7fcg25drVPPyVC9LFUz18faflVkCoHRrCBYEd55qlm/MLVH/Dfm9bMmUxqPWj/dkPpGMzU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OVV4PXhL; arc=none smtp.client-ip=209.85.214.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OVV4PXhL"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2d02b4c3601so44917565ad.3
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Aug 2026 19:25:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1785810310; x=1786415110; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=1OaiGLLoxTsUad13rL5qrpAU9a1lh1UZkttvZnhnlXg=;
-        b=OVV4PXhLzZLP8OQoWeJOJafRZj1Q1/uqjr+H4cemRtroqQK1zzAhvSPJEgaMAm/Hn5
-         e9pJzZdVt9YDYQojIAtzvRwQEotV0xX2lPqOFdknjKuJHsYgOL+Qtpo3tlSx2i2MGqTM
-         hzqp/H8Qaw7iPkEnL9+3OdU5CwOstGRRcE+HAESnBFoJOzH5yArhIFA6XkAnoQSAVu94
-         Mgv3sWDXCCVoXSoS935qKLyiCdINFAev03baH6hPwdPoMj0n9UmtCoCLfLalyqgJORkD
-         WBpNFsXwS+xhupjFnO1GU826p2lWhZn+bUskAm3vzyAry3zcE6qupz0+07iAqmNdKLX6
-         D3mA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785810310; x=1786415110;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=1OaiGLLoxTsUad13rL5qrpAU9a1lh1UZkttvZnhnlXg=;
-        b=ilkReZf02wabHIkuX35/0doHXyM9E6lq+jHOZrPOx9/42bICyrbItD2wY5ldCcMkcu
-         XyZ1ak8KAgZh4l12Kk+qgJrZYbWf3nezXIPr73iLHcoL2DgIMz6h2hos2rqyYayLRRBB
-         4XMyNnAk5rDiNmohpqtIfcIl58A55eJKfQ6NDRj0i4NX8LEtYx3/nLMjUm2pbQTU7l3Y
-         6HCJmDmrbhw6gnofdMCJexXAh1dqgf9/tBAORBq17eULcE+/TsTAV9rzW5582Lv5DBcu
-         8vs9O2y8cfLi2UnTuzh7pnZYhChzlLX7EAJR++V7+oGWNzgPV+tsSdt4FAEtnBOBm+26
-         Ndyg==
-X-Forwarded-Encrypted: i=1; AHgh+RpZY8GKi0ulSSvngaJnGM7hCQczLpVpnVdaZz/2Q0u/8/1nCiLjKkZshbDbc5yaRJ0oX3J94LbhBxQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxyWMjK2BJZBpzZYcpDt3Fj45nOS+QqsbRXqsqzL+XFxnA9snES
-	0CIjRgl3Lf9ZApuXTbmtsrC7bASWErcigU25Iha8LuVcnXTQiqoWY727
-X-Gm-Gg: AR+sD13pzDsp2SyXR9YiStzR3x0IH5SItEqrFsVSI1qpl8PBXgHGS4Q/pN1+sWpfFOB
-	1BXv9WO8BxMLUBGTtWcnX3M2yWO/g6zsCutllMWo6wB7i2AOLzdp+p9LeXvEZ6jtBvA1azreiKr
-	g+5S6boxmZgdQMmDjwwABXL8u1iksqLfBnT8FUz43LGZsmEjUteRs0stHZgUX6En6ls2bkY9Vq2
-	RszCC9b6GX0VsUTVWl20lKYamwlRhr7twD1AvBMEFrR2Qxx5y32LuGWxdvYlQ2fjV4gYso961c1
-	tfOkiE3vIZLM/jwSr0m7YE07BpuWgUo4J991FMLkcfrSzJ8IzxYwrbM5dLZGZgHoydwh9pPfViM
-	c2Xmj3FUoXUnsnDb7QOQAYFjCUEFDPL1zWr/lM6r1By3kKjlW+lPEglUgpZ6BCYuf6Drpb2Huco
-	C8WnM3q73dRdaBsLBq4xYn/FLmAeFMecDsPkeLlJiGW+CBUg3aJTFlaN4RBthKrcUiXXHQvmpe
-X-Received: by 2002:a17:902:ea05:b0:2c9:d55d:2d3 with SMTP id d9443c01a7336-2d052244e67mr121387165ad.15.1785810309827;
-        Mon, 03 Aug 2026 19:25:09 -0700 (PDT)
-Received: from osman.mioffice.cn ([43.224.245.178])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2d04b1216bdsm45230825ad.69.2026.08.03.19.25.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 03 Aug 2026 19:25:08 -0700 (PDT)
-From: Zhan Xusheng <zhanxusheng1024@gmail.com>
-X-Google-Original-From: Zhan Xusheng <zhanxusheng@xiaomi.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Jisheng Zhang <jszhang@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Sekhar Nori <nsekhar@ti.com>,
-	Ravikumar Kattekola <rk@ti.com>,
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
+	s=arc-20240116; t=1785823936; c=relaxed/simple;
+	bh=QZ7HU7TVrJI/Ym28cZCoeeJ5FDQt6B/2QCuH1EV1tYk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jXZ/fh0Ge1h72ujQJDbGDcfDfUlgENxhU8pucglK6p0nOMaxf2qmernvwaBmauIDo3RygrQZBNSiQQBga/Wsu+xqucdVo6DMbbhUZSDk/afyjznwXLcButKO6ycojiv8gfD5m/14HKjL5AN9RARPgLwEskhs51nsfRZjFSt5uOI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
+Received: from loongson.cn (unknown [223.64.68.205])
+	by gateway (Coremail) with SMTP id _____8BxXZu6gnFqQy4KAA--.10106S3;
+	Tue, 04 Aug 2026 14:12:10 +0800 (CST)
+Received: from kernelserver (unknown [223.64.68.205])
+	by front1 (Coremail) with SMTP id qMiowJDxPcW5gnFqnxAjAA--.57941S2;
+	Tue, 04 Aug 2026 14:12:09 +0800 (CST)
+From: Binbin Zhou <zhoubinbin@loongson.cn>
+To: Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
-	linux-omap@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Zhan Xusheng <zhanxusheng@xiaomi.com>,
+	Binbin Zhou <zhoubinbin@loongson.cn>,
 	stable@vger.kernel.org
-Subject: [PATCH] mmc: omap_hsmmc: fix busy_timeout overflow in ns conversion on 32-bit
-Date: Tue,  4 Aug 2026 10:25:00 +0800
-Message-ID: <20260804022500.3768116-1-zhanxusheng@xiaomi.com>
-X-Mailer: git-send-email 2.43.0
+Subject: [PATCH] mmc: loongson2: Fix sg iteration in data reorder functions
+Date: Tue,  4 Aug 2026 14:12:00 +0800
+Message-ID: <20260804061200.3897779-1-zhoubinbin@loongson.cn>
+X-Mailer: git-send-email 2.52.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -80,46 +36,68 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:qMiowJDxPcW5gnFqnxAjAA--.57941S2
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/1tbiAQEJCGpxaFEBDwAAst
+X-Coremail-Antispam: 1Uk129KBj93XoW7ZrykuF47Cw1xJF48Kw4kuFX_yoW8Cry5pa
+	4fAw1a9F4UtF4Yvr98X3y7ury5ua4aga42gF4DGwn5uFWkXr1Uur1UK3WFqF129FWYkFyI
+	qr4qgrZxW3Z5GFcCm3ZEXasCq-sJn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUUk0b4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r106r15M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Jr0_JF4l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Jr0_Gr1l84ACjcxK6I8E87Iv67AKxVWxJVW8Jr1l84ACjcxK6I8E87Iv6xkF7I0E14v2
+	6r4j6r4UJwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYIkI8VC2zVCFFI0UMc
+	02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAF
+	wI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JMxAIw28IcxkI7V
+	AKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCj
+	r7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUAVWUtwCIc40Y0x0EwIxGrwCI42IY6x
+	IIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVWUJVW8JwCI42IY6xAI
+	w20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z280aVCY1x
+	0267AKxVWUJVW8JbIYCTnIWIevJa73UjIFyTuYvjxU25EfUUUUU
 
-omap_hsmmc_prepare_data() converts the command busy timeout to nanoseconds
-with:
+In ls2k0500_mmc_reorder_cmd_data() and ls2k2000_mmc_reorder_cmd_data(),
+the for_each_sg() macro already iterates over the scatterlist entries,
+with 'sg' pointing to the current entry. However, the code incorrectly
+uses '&sg[i]' and 'sg_dma_len(&sg[i])' inside the loop, which treats
+'sg' as an array base and indexes it again, leading to access of
+wrong sg entries (or out-of-bounds if the list is not an array).
 
-	timeout = req->cmd->busy_timeout * NSEC_PER_MSEC;
-
-busy_timeout is an unsigned int (milliseconds) and timeout is a u64, but
-NSEC_PER_MSEC is 1000000L.  On 32-bit builds the multiplication is
-performed in 32-bit arithmetic and wraps for busy_timeout values above
-~4294 ms, before the result is assigned to the u64.
-
-The driver does not set mmc->max_busy_timeout, so the core does not cap the
-busy timeout, and commands such as erase or SANITIZE (MMC_SANITIZE_TIMEOUT_MS
-is 240000 ms) can pass a busy_timeout far larger than 4294 ms.  The wrapped,
-much smaller ns value is then programmed via set_data_timeout(), so the data
-timeout is set too short and the operation can time out prematurely.
-
-Cast busy_timeout to u64 before the multiplication so the conversion is done
-in 64-bit arithmetic.
-
-Fixes: 8cc9a3e73de1 ("mmc: host: omap_hsmmc: use generic_cmd6_time to program timeout value for CMD6")
 Cc: stable@vger.kernel.org
-Signed-off-by: Zhan Xusheng <zhanxusheng@xiaomi.com>
+Fixes: d0f8e961deae ("mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver")
+Fixes: 2115772014bd ("mmc: loongson2: Add Loongson-2K SD/SDIO controller driver")
+Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/omap_hsmmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/loongson2-mmc.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 58c881f2725b..3356ac5a1fa0 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1357,7 +1357,7 @@ omap_hsmmc_prepare_data(struct omap_hsmmc_host *host, struct mmc_request *req)
- 	if (req->data == NULL) {
- 		OMAP_HSMMC_WRITE(host->base, BLK, 0);
- 		if (req->cmd->flags & MMC_RSP_BUSY) {
--			timeout = req->cmd->busy_timeout * NSEC_PER_MSEC;
-+			timeout = (u64)req->cmd->busy_timeout * NSEC_PER_MSEC;
+diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
+index f553e92fd9e5..118eccbaf8cd 100644
+--- a/drivers/mmc/host/loongson2-mmc.c
++++ b/drivers/mmc/host/loongson2-mmc.c
+@@ -641,8 +641,8 @@ static void ls2k0500_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
+ 		return;
  
- 			/*
- 			 * Set an arbitrary 100ms data timeout for commands with
+ 	for_each_sg(cmd->data->sg, sg, cmd->data->sg_len, i) {
+-		data = sg_virt(&sg[i]);
+-		for (j = 0; j < (sg_dma_len(&sg[i]) / 4); j++)
++		data = sg_virt(sg);
++		for (j = 0; j < (sg_dma_len(sg) / 4); j++)
+ 			if (cmd->opcode == SD_SWITCH)
+ 				data[j] = bitrev8x4(data[j]);
+ 			else
+@@ -758,8 +758,8 @@ static void ls2k2000_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
+ 		return;
+ 
+ 	for_each_sg(cmd->data->sg, sg, cmd->data->sg_len, i) {
+-		data = sg_virt(&sg[i]);
+-		for (j = 0; j < (sg_dma_len(&sg[i]) / 4); j++)
++		data = sg_virt(sg);
++		for (j = 0; j < (sg_dma_len(sg) / 4); j++)
+ 			data[j] = bitrev8x4(data[j]);
+ 	}
+ }
+
+base-commit: e27c946b589c53520409a0956b33d52ef7a0898f
 -- 
-2.43.0
+2.52.0
 
