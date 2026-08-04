@@ -1,213 +1,241 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 405ED43B483
-	for <linux-mmc@vger.kernel.org>; Tue,  4 Aug 2026 13:43:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A49D4657FB
+	for <linux-mmc@vger.kernel.org>; Tue,  4 Aug 2026 13:43:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=205.220.168.131
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1785850990; cv=pass; b=h6v/2hjB5hP8gd47gGdMzPMad8uoALFYOGnHWzp86SZAKYxk7f85gRKjpcE2w77aUDEdiR3PuUk5DcpN/8tiM7rmFxLNhpx+4QEZ3DxOTdsrWbtgFtYAy+QEuhqOGtYDT9glXbhetPzzAmLvwJ9LNb9S+kA/pWIIUJlg/DtEbAo=
+	t=1785850994; cv=pass; b=aDyZu8Lh9JYOatsgAiw/TBYkpRgfZRWy8CSTj1v21J+lFpML3hIEZcjk7xWdjyuLrl+RfhWNg3mUti/QXDbNHRTK0E5n3njRN6bhsuHN9ocw98IQlbnulFjd45gAwOOqfpI8eUlZ5cYh9A1nKAqobtnKcUC1bM1TroD//ppeTWU=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1785850990; c=relaxed/simple;
-	bh=vWrRgLg0J40/F7IFgvutSnpLvx8wmx6h7DOuDiZqAzI=;
+	s=arc-20240116; t=1785850994; c=relaxed/simple;
+	bh=Av355PoOiQqfN+lI28kxuagN2wHx9snA+0ylF3eg6GI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VuQblLwSabZvNYxn2kXHGTLXKz/z0TrG4s7xbXKoWy8jXiTq5xsrIbL1sxaoTkzqkNSj/SFcKPu5VBOeh7Dj7R5zK+h6LR3pGUoaLK9slcQKGLO7hJDAg1LVT6avk1cobNBu1gTnzEHsZ67LPIgsKkhrXknIwZPgzVEiEMzAUts=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Zxcghe62; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=kkRxQgtu; arc=pass smtp.client-ip=205.220.168.131
+	 To:Cc:Content-Type; b=XE+goeRcToxaAhZqn6prTa0EUdo4l5ERROuOJmh8Sp5ah7FbRUYRjPk2/2SCP2b1OlXuJ5+l9gc0lVTLhgOfhW01McmbsxEPENkN9MG9hUrGAt/miN8x4iyeXBglpfmsxhjRPRy6sAxI63tBwSTrezmemBW/DktNKnWsO0FTvcI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=gWSqX4An; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=MZQslKWR; arc=pass smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Zxcghe62";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="kkRxQgtu"
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 674CWwWZ3211639
-	for <linux-mmc@vger.kernel.org>; Tue, 4 Aug 2026 13:43:08 GMT
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="gWSqX4An";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="MZQslKWR"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 674CXO6D185698
+	for <linux-mmc@vger.kernel.org>; Tue, 4 Aug 2026 13:43:11 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	JFV09JBf8TVgMgmB8u/59KCRJjmSsbdJUhQVWVSH6NI=; b=Zxcghe62akMqHxQX
-	TcX9gyT4igpxPkdeCzWD6PCdSLX8b/M98LVaHTJ0v/U8WRnvlMPJHRpKazk5OKUz
-	YtcQJ/QU90EJ9NQdxZ8F94Lwfvv/+Wkxzi3k+/fbpkvn2W5TRPMym2G+u6rQwL2d
-	iSuyzR/h4RvBLPh5nW6XyPyK1vNiLNhEGQoaSsrSUnql8mQGvU0kK7aA2HQHbk1W
-	5IYMECDQrQTTytnYNvxGH2HQWBpWbQ8NYbCz8daWePsPI1tDfDp1/G+JIeWLpJvE
-	g+05ZcxX6zokFBLu6iWGdsLResGJhL3Bcv2cIv1uBGCwrqCiIp+D+ykosKqky8h6
-	NdBt/Q==
-Received: from mail-qv1-f72.google.com (mail-qv1-f72.google.com [209.85.219.72])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fud23h2nx-1
+	QWQr/x5bEL6Unr8s/2mTIOitfI4p3mr1jrf6Pl+pGJk=; b=gWSqX4AnlEtpxj6Q
+	Kolx19zNihtI79jb/u5x93/3RIRF/ynzmhH52E2pAWDlIG40klO9F3WYrDnNecrA
+	Mvfb6nxJuTNXh4JIR0ajkI+lba7CtsfsM09qOuD/mdptyX0Fkf+w5a8+m+IWObVr
+	aoTJeUXIt42+xRXjKmsCzTEjliHe6lqAV/6HQxo0H/0HTZTXYesd8+gx2QHlfItC
+	Uew28HCg6lftgQb+cr7Mj5MnfKzClGCf0NxQGhPFOyFFZNWAElTdp0VHyA92Nsf9
+	Dys7phUWfnLavtU7rZNonD8m8pk88xbX8sSZjkD/5YryOFt+sg1FIwW31MLvK0VZ
+	D6JX7g==
+Received: from mail-qv1-f70.google.com (mail-qv1-f70.google.com [209.85.219.70])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fu1p4usgj-1
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 04 Aug 2026 13:43:08 +0000 (GMT)
-Received: by mail-qv1-f72.google.com with SMTP id 6a1803df08f44-8f0ed4fe79aso100150316d6.0
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Aug 2026 06:43:08 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1785850987; cv=none;
+	for <linux-mmc@vger.kernel.org>; Tue, 04 Aug 2026 13:43:11 +0000 (GMT)
+Received: by mail-qv1-f70.google.com with SMTP id 6a1803df08f44-8ec3314f65fso45653696d6.3
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Aug 2026 06:43:11 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1785850991; cv=none;
         d=google.com; s=arc-20260327;
-        b=oUjkVJbXK6g/UM5O5DhG7GnTpIPpn+NiJax/YOKqICzbyk4Wf/9xyMa4Id0Pk6Ef+J
-         jpvGiKohe0qnj4+IrldHpvo4GHD9J8Ax5fP7kCx4/v7zY4N/U44S8IyngiB47Wq3NWej
-         wMiZ0AimNSwPMpLPM3+DTYdJDqB+dALYkFnBYETDAlIaTXJTbTkSkwFHa6GOjzsK0j6m
-         ohsxPtgnDz9/4N24P4CRVkUpEtYvB3ZJVlWUxoflZPI9+s8pu1Ilb6PKLytBzpPesiDC
-         l4r3mfxhrI/nMpEKPnJnu6I00lXv6ZB2YE659iUcv3Lofhly2KWInh7O0sRwZ246k61S
-         EclA==
+        b=QZhiYGWnGi5sBIwWO3Zqvhq3Wmjwgp2CYrtyhj8ieiLsNHh/g2a44jf/kTLaSjFEjT
+         il78rkbIngQwduShfsNdZiWx3Gnju2ZSKmVLsOBIHWQAV17GjwAPaTNagZoYOS48B+wc
+         h7/HVUfRA7FdWY7Rh88MPSqjU6X0gEp6Pq7Sp3hUYXmQ48i8BMq869FpFheZwH6NrOpT
+         P+druhmEQuypWPZ8lHG1X5jT24jzkJrMBD+KZ/UeVe7DPzi/MjTwguCFywVNZ14hFyOG
+         GiBCrj2KZewTebzKHjwhUBKFz8I5KUk9ScpeAkTI9YW+VMwfugE3rSuFtzaDnB48/pOr
+         NiTQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:dkim-signature;
-        bh=JFV09JBf8TVgMgmB8u/59KCRJjmSsbdJUhQVWVSH6NI=;
-        fh=FF8jEcgxFOcm2gG2JRY9I24Yj6oCkLNFfZpIgG48I7w=;
-        b=fcAgCVz2ZQgC91tiLouGGrb9T5Gs86Mjd7qn9WSJbBXTL/cwSY40CiNpqCuIWUVHnu
-         Wrsi8Clq7eKk70wvms+GmbeAGfI7L75oR3YhpE0cFY3I9BEtiSHZPWhEm4S/GEqZSPH+
-         lUBBA9XGLiBjAd6qTrClyB/+pwkYBefdXe7FEgl+Hf0GHDjiJ0kYmvNMHcA9OB6vfbVx
-         1Yyy76tgHecJiWJ2KMOU7B6mbPfoYsMQDq2e/XNPHqwnwq/Djr0B4mDCmlbKUuDh/8La
-         MSwAGC1InzRpkjwCG+lR1chj8D4y6L/6KzNcKv5UnvQn07tskUtAFeS8eRx/BCouYTxq
-         h15g==;
+        bh=QWQr/x5bEL6Unr8s/2mTIOitfI4p3mr1jrf6Pl+pGJk=;
+        fh=5ODzBM4MknTaZABd0NwzWhTTrI7u8yGdAxWiupqbU2Y=;
+        b=i8+7zxIEpj1jCGqTItRK2Qq4T35+fFzv3kMTC6xZ1mRDBFSdO3x2PwPw/0Eegodzvm
+         Y9uy0GerENpVncO/xUpAmBg5l+TqMmNz/yamGxuWz1b8y0L0mLdPIiR1KutnkTFHLzeR
+         pX/TSVIZiMlXW+03MUyZ9uOkg3Uer7mF9lM9CCGiGyMIZATL5twfeo42K16MCYdS0gMQ
+         PaXutobJO6eLlUMwMMI0SsjiBIwRdSgcL4axECd2rRhemlHZqe3O67LtgTboXcPn8aHr
+         I7hxAiRY7uEX148D6N2tvgEoWEGz6H4XpeBL1+dzsgml8UWcPVURVeKUR8YnLRhf1Xex
+         K3qA==;
         darn=vger.kernel.org
 ARC-Authentication-Results: i=1; mx.google.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1785850987; x=1786455787; darn=vger.kernel.org;
+        d=oss.qualcomm.com; s=google; t=1785850991; x=1786455791; darn=vger.kernel.org;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:from:to:cc:subject
          :date:message-id:reply-to:content-type;
-        bh=JFV09JBf8TVgMgmB8u/59KCRJjmSsbdJUhQVWVSH6NI=;
-        b=kkRxQgtuXQH1+oYaGOcLFA/SttB1O72Equ+QuLK1hhPmbR/1beLb/NqW7sc7Jzf79d
-         HUtopDUeQwCOhrWeCPw4mG3FoDMSv0sOPh3OI3xDwWwvB1EaUA3pLa+J7k0moVaSUbWZ
-         8DgBoaFrUIx1XBPsazrdQFHMnXrJfS3XTqkL6L2pHDWa85etZolx6vHczt0fLhDRePaZ
-         DszI7bSnOxVveacsJQGt1I/viMiNuSWiWqO2Mr4Iv/EnLLyPp6RntslSXjgU9iPWCbi3
-         ItMYgB/Gc7enOk29VtjBvDYd2UJkDXC8jUQvUpuOCdejvBSuBsBpP9ytHERGzYiqctPb
-         QiJg==
+        bh=QWQr/x5bEL6Unr8s/2mTIOitfI4p3mr1jrf6Pl+pGJk=;
+        b=MZQslKWRcv5ULJPy3/9e0Lr8QrlZmnZ/9XLbE5GYSOpr9wLEcalSBa5ZNL4BIhEefb
+         gWKkEnCAMLbRmGlXOpWJMsMNL7jRTkfgr5nThaNruYZMrlDJMpQNM83N2booE4iAe1kN
+         MkJclyw6s6J5dLh5T52wa5pfRw/I2pyULfgYuaUJRsd8mVBZ96PD+UET11TaevicIFQO
+         /Dk7CiIUDFgM5yCdnH0g4H7rW8oUbX0f87LE7rSngW83OuFgXnncn3Alfpdte25tCJey
+         1SWe2f2SDYL1xy4JBe2zvFqgW+vcZgbwsXF9A4/payzciquWTs+KfNdc4msTGe2mKVoY
+         DkMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1785850987; x=1786455787;
+        d=1e100.net; s=20251104; t=1785850991; x=1786455791;
         h=content-transfer-encoding:content-type:cc:to:subject:message-id
          :date:from:in-reply-to:references:mime-version:x-gm-gg
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=JFV09JBf8TVgMgmB8u/59KCRJjmSsbdJUhQVWVSH6NI=;
-        b=jYg2Wu4PMh+OKADRnHuIFvFVzMZ1+S9bl467MA8xnWtC0vQYqxmYH9eEHcl8I1SY+T
-         BMr9/rdxhjLlvX9FmzXI4y74nBvUw3v/y3z3teuWVg3f8+avrkuOS9G5oxzXrwfjw+vi
-         /2QNSCLFelBZq9qO8C+5oGTqTxKSy/OurC+O1T/W/AKOkEAxPZQkKZHuQ9aF8VGWB1FQ
-         BAHUSi+GVCc+hYHzxJIw6ha7e4Cw5Oob3vJBAgUohdPX7nSmOiK5Nlxu7JAWMh90VqZ4
-         242U/J1dWdUi6kugIBRSKNGCWjUkTJ3inlzuTGl0TjLqS+2xW7oFe1psJiKK9NE1FqJ5
-         FqWA==
-X-Forwarded-Encrypted: i=1; AHgh+RqzfwBb1NCvL//4kTZhyg85PlP6zPZCQqSQ+YoUPf4xy4pGLlg2a9AKher666Zn+4JhtDu1RBNjQGk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzK/3Na170VlY+PKD5XPRl4lDdisALCopLF1clXWXlqtHv8yr6I
-	/ADzejverYJ+glLa4I1ma0D3M0QpJu/rX6ftROCsIplouPjxDJ2y119MgfEAIxB/q5ho8pfpl9L
-	fRHFf6S4yXbQkWSBr3EoviSPrkgthuLbmiY4g86JHagEP7Zm4vY9HOP3s6zs333AQJeG8KgrpzS
-	YGSpXDQ/Ly72WYoJ7YnjImzoZssEKLPXBmhbYXDEPLFE5vKw==
-X-Gm-Gg: AR+sD10cR+HFHU3/iLJTlyOFVkq8j1IivOAP6+7BxJN4gpEJiO56HjRfCAq9S9NVy6o
-	xO50gEjdjexQMQT73bHQgfati1EvS6ySmDKXaepde9oD4a1onqrUJiCUOWT0bG6C7G6xNjcLqr5
-	Fqf15fZ3HvBYCgesLvHG6Rk7JSCt5us8mv7U4Qw67EJ7iCxgJUiqBNnU69mg==
-X-Received: by 2002:a05:6214:2123:b0:8ee:fd0c:5d96 with SMTP id 6a1803df08f44-9084954cfb5mr292319606d6.7.1785850986014;
-        Tue, 04 Aug 2026 06:43:06 -0700 (PDT)
-X-Received: by 2002:a05:6214:2123:b0:8ee:fd0c:5d96 with SMTP id
- 6a1803df08f44-9084954cfb5mr292318986d6.7.1785850985502; Tue, 04 Aug 2026
- 06:43:05 -0700 (PDT)
+        bh=QWQr/x5bEL6Unr8s/2mTIOitfI4p3mr1jrf6Pl+pGJk=;
+        b=fJKhAhkl+IeLeH2987DpRLl0PXJpOnKLHUSfv/u/O32N8WCrUVtsVf1J6vMv35xkiE
+         ZxUp82qysFWjx5f3aqAk27YFNFgXL3vesutdThBH8+NIIGwcrT7mZlL1yQ0J6vukIJn1
+         VzkNOCAmV7oKC/5wR+/YJWqbHf5QonxgbE3eEirADd7CojPCXbsFIxXxjtEj8fz6avw4
+         eIbsH1eUczt0Ty62k3hzGzUOL0ZLxWWPV0VbVpkQPXkvUJr1Pl7yzOEObOj3OYuDcvCx
+         DfxApYu+ZYvv3qoiMC318QLMyUi+bPiR/ZP8jhRpWiGRYXG309FAQc3OV2Q/9oHow6II
+         yKhw==
+X-Forwarded-Encrypted: i=1; AHgh+RoxsJ95Vo+FOuP9PoBKZ3Jz3MtN3TJKedKTRpuLdKZ9gEVrNsWG+VHX8a4rJPqI+9g4fYQLoxYa+PQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyh6sHRaMXxewB0b01aQjNXva6uOpT9BxXpmYcDkETTJnGirh/v
+	49+OgZRgdM5byhgsjBawuKoMLZc6dXcAdDtqf5ywKw1gDGMtdNOK3oGQ0J2gOEzGBxgMGIqcs2Q
+	7qXuI0VxCSyX1zBNJmhNEQ7BYBotb1b39NJwhxR9HAZrUyVfNwbrko4eVOUMaG2bvNRwDKGCr9Y
+	cfRMwJVA8CzvEzwG4gskjy3FV94dAYxslB11melA==
+X-Gm-Gg: AR+sD138yjjfF9ZrQB7Nq3AyHUwfNoFL4cAHs5MhkNH5kkzHZkOstgzk10ZwAvuPj6X
+	JzFLBAFU9jUcvz1VJiXf+P7fuL5Apm0/TKz3if/qe1wUFxtwrLmDLS73HjbZeIu8vmitgt8A3L7
+	MG4yZKk234I/uipnQuWKM1tNavTmg7H5j7euileJ3n2mgWdo09yw4M3hgkog==
+X-Received: by 2002:a05:6214:20e5:b0:8f3:ba0f:e7b9 with SMTP id 6a1803df08f44-90849603117mr235603566d6.18.1785850990591;
+        Tue, 04 Aug 2026 06:43:10 -0700 (PDT)
+X-Received: by 2002:a05:6214:20e5:b0:8f3:ba0f:e7b9 with SMTP id
+ 6a1803df08f44-90849603117mr235602546d6.18.1785850990119; Tue, 04 Aug 2026
+ 06:43:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260727140322.41306-1-mhun512@gmail.com>
-In-Reply-To: <20260727140322.41306-1-mhun512@gmail.com>
+References: <20260730-block-as-nvmem-v9-0-f72935817dbf@oss.qualcomm.com> <20260730-block-as-nvmem-v9-1-f72935817dbf@oss.qualcomm.com>
+In-Reply-To: <20260730-block-as-nvmem-v9-1-f72935817dbf@oss.qualcomm.com>
 From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Date: Tue, 4 Aug 2026 15:42:53 +0200
-X-Gm-Features: AUfX_my7B5k2X---RdqnxtTsY7r9fbypq1sJhWZOEiJTCkULuzpV4YOD1Ks3_qU
-Message-ID: <CAPx+jO-uVPs0xXvX=qie_pP8+L6yaWSD+w=1Jh8tCEXNYmxugA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: unmap the bounce buffer before device release
-To: Myeonghun Pak <mhun512@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulfh@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ijae Kim <ae878000@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Date: Tue, 4 Aug 2026 15:42:57 +0200
+X-Gm-Features: AUfX_mzk0wJt2Gak_njsh0rcAEI1svN-3axItB8B6ASWCCxtH7hxRBo8wnhVM-8
+Message-ID: <CAPx+jO8rMUaw7MAYpfp4cLASZ75mfFD4n3NOi2wdHNVvnb4rbw@mail.gmail.com>
+Subject: Re: [PATCH v9 01/10] dt-bindings: mmc: Document fixed-layout NVMEM
+ provider support
+To: Loic Poulain <loic.poulain@oss.qualcomm.com>
+Cc: Ulf Hansson <ulfh@kernel.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>, Jens Axboe <axboe@kernel.dk>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Jeff Johnson <jjohnson@kernel.org>,
+        Bartosz Golaszewski <brgl@kernel.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
+        Rocky Liao <quic_rjliao@quicinc.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>, Simon Horman <horms@kernel.org>,
+        Srinivas Kandagatla <srini@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Saravana Kannan <saravanak@kernel.org>,
+        Christian Marangi <ansuelsmth@gmail.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
+        linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org,
+        daniel@makrotopia.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-ORIG-GUID: _dcMZXjwjGvDaJy_quNZIGxHsRFkv1ys
-X-Proofpoint-Spam-Info: AW1haW4tMjYwODA0MDExMCBTYWx0ZWRfX4boeZ7JcIlAR
- bUp4eT2fErQtYgmoQacbPBHzX8veCa+idmHvCEzIPLFDcFhjaRJPoIuFEplFa28LKe3sI+7tv/H
- 62UFB9MZk+ZgDjh8i8LjG/5Vzul7rxk=
-X-Authority-Analysis: v=2.4 cv=XIkAjwhE c=1 sm=1 tr=0 ts=6a71ec6c cx=c_pps
- a=7E5Bxpl4vBhpaufnMqZlrw==:117 a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10
+X-Authority-Analysis: v=2.4 cv=auOCzyZV c=1 sm=1 tr=0 ts=6a71ec6f cx=c_pps
+ a=oc9J++0uMp73DTRD5QyR2A==:117 a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10
  a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22
- a=DJpcGTmdVt4CTyJn9g5Z:22 a=pGLkceISAAAA:8 a=VwQbUJbxAAAA:8
- a=9OAQqQgZgWU5tXGBbwcA:9 a=QEXdDO2ut3YA:10 a=pJ04lnu7RYOZP9TFuWaZ:22
-X-Proofpoint-GUID: _dcMZXjwjGvDaJy_quNZIGxHsRFkv1ys
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODA0MDExMCBTYWx0ZWRfX5mrNNUGCy1zY
- OeitG9sjOrNZawDm95mA6ZxlUkygGTfgjctUCScX0/08Y9h4TkJx7ILE2n25v8Cdf5pk+ttdYs0
- 9/mCiv+jlYrJDHe4VFNsBGM4wJzXj43Z2iNBrdJlxV3GCVs4XLA4KKbhW8tcauZPO7TlaHQ9XlU
- USddM0vtVs9Wer8zWP1IW1WCIBURawVtdld4dZ9uSEHsKTTQph+JdJRRUh7rxbsOZcJZd18dqXf
- yXtAMyevGHS7YdfLknCHYFFRGhhJTC/pUMoibCHbfcJYBlRzbNdzINIYG0/U6zFogTasSCUvgLZ
- VwVLmc+9ap/k5Svc8L9fdBVQV8LryWwBpC90Ya8xL3Kjcw5NBAMRbVsN5LeaHN7OsE7vTMLcwWY
- O2AS+5//0esLdjjf4DHJY2R/TK9nNv9GJTgGQ7D44ssonuHSFVGN6WxYVMoLuPxtRLgQoirJvXO
- wP3QrzJCvBV0YRVZmpQ==
+ a=Um2Pa8k9VHT-vaBCBUpS:22 a=EUspDBNiAAAA:8 a=VwQbUJbxAAAA:8
+ a=F73tXhIjRpzWiH7OJSEA:9 a=QEXdDO2ut3YA:10 a=iYH6xdkBrDN1Jqds4HTS:22
+X-Proofpoint-ORIG-GUID: 46BQB2ssc-qy5VxZV3La-OVZFsbHC-Nn
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODA0MDExMCBTYWx0ZWRfX3L1/OGcoWMJA
+ YJYnWh9N0xPqr4C4YZRGddcu4fiAgO3uazo+T0Oc1mzP3UT/17JUIDKeAJSZQ5nsPU7V4JWfJKd
+ kmiu53MtsF1lXhok4L8/dQProN+sQK8=
+X-Proofpoint-GUID: 46BQB2ssc-qy5VxZV3La-OVZFsbHC-Nn
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODA0MDExMCBTYWx0ZWRfX3kCDj5o+SS3k
+ 585WqeJbM9AV/AhaTVAMrY6sfAzm1u18IvMghQdMM6UPmiukbg68O+iaO4vTwTZFxct3MlBoK/I
+ Dt91WsA6TtFEWg/0pExh/g+bPkgeXru4MLJVMRq9NNa99fDP1q6eTwSslW4jY4mYDjMY8TmxBoF
+ Ls5J6w4yLmsqgveQwusI49eEABpMcw6kNCYVDOYPVXaoZM+QJsGt71KAUj141JJWg6clcw/tlxg
+ R8/WmeIiQDBcylEYFLJZId5yntQ8hFBNwDy78zDyMIFIjTQBeklnVn30QSFQXvbM9wxL6ocWu6b
+ PYDPkXEle9ldt21xa2w7VOyoH/haQ1BqDndUqf2GKSdYInquJpgDcLzvGWkO8HeKe3Gonig5xjR
+ wr68Wvd6CMvx+702MABIR1hy4xNVyYJ3bfdH2dweNyfLTL8EZIIJABQfBsGtqyCi9F7GXM39rFf
+ VsAe3gcyFJJkbE97Eqg==
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
  definitions=2026-08-04_03,2026-08-03_02,2025-10-01_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- clxscore=1015 suspectscore=0 lowpriorityscore=0 phishscore=0
- priorityscore=1501 malwarescore=0 adultscore=0 impostorscore=0 bulkscore=0
- spamscore=0 classifier=typeunknown authscore=0 authtc= authcc= route=outbound
- adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
- definitions=main-2608040110
+ priorityscore=1501 spamscore=0 bulkscore=0 suspectscore=0 malwarescore=0
+ lowpriorityscore=0 clxscore=1015 phishscore=0 adultscore=0 impostorscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608040110
 
-On Mon, Jul 27, 2026 at 4:11=E2=80=AFPM Myeonghun Pak <mhun512@gmail.com> w=
-rote:
+On Thu, Jul 30, 2026 at 6:00=E2=80=AFPM Loic Poulain
+<loic.poulain@oss.qualcomm.com> wrote:
 >
-> sdhci_allocate_bounce_buffer() allocates its buffer with devm_kmalloc()
-> but maps it with dma_map_single(). The buffer is therefore released by
-> devres without the streaming DMA mapping being unmapped.
+> Allow an eMMC hardware partition node to describe an NVMEM layout so the
+> partition can be exposed as an NVMEM provider. This lets a partition
+> (e.g. an eMMC boot partition) store device-specific information such as a
+> WiFi MAC address or a Bluetooth BD address and reference it through NVMEM
+> cells.
 >
-> Register a managed action after dma_map_single() succeeds so the mapping
-> is removed before devres releases the buffer. The action is registered
-> only for buffers allocated and mapped by the SDHCI core, leaving buffers
-> provided by host drivers under their existing ownership.
+> Accept "fixed-layout" as the partition node compatible, in addition to
+> "fixed-partitions", so the layout can be described directly on the
+> partition node.
 >
-> Fixes: bd9b902798ab ("mmc: sdhci: Implement an SDHCI-specific bounce buff=
-er")
-> Cc: stable@vger.kernel.org
-> Co-developed-by: Ijae Kim <ae878000@gmail.com>
-> Signed-off-by: Ijae Kim <ae878000@gmail.com>
-> Signed-off-by: Myeonghun Pak <mhun512@gmail.com>
+> Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
 
-Applied for fixes, thanks!
+I don't think there is any reason to push this any further, the
+updated mmc binding is ready to go. So, applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
+>  .../devicetree/bindings/mmc/mmc-card.yaml          | 23 ++++++++++++++++=
++++++-
+>  1 file changed, 22 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index e3bf901b10aa..efb4c7742fe2 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -4187,6 +4187,14 @@ void __sdhci_read_caps(struct sdhci_host *host, co=
-nst u16 *ver,
->  }
->  EXPORT_SYMBOL_GPL(__sdhci_read_caps);
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Docume=
+ntation/devicetree/bindings/mmc/mmc-card.yaml
+> index a61d6c96df759102f9c1fbfd548b026a77921cae..0422894508478c8d0ca68292b=
+58a5fdbee218358 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+> @@ -38,7 +38,9 @@ patternProperties:
+>      properties:
+>        compatible:
+>          contains:
+> -          const: fixed-partitions
+> +          enum:
+> +            - fixed-partitions
+> +            - fixed-layout
 >
-> +static void sdhci_unmap_bounce_buffer(void *data)
-> +{
-> +       struct sdhci_host *host =3D data;
+>  required:
+>    - compatible
+> @@ -86,6 +88,25 @@ examples:
+>                      read-only;
+>                  };
+>              };
 > +
-> +       dma_unmap_single(mmc_dev(host->mmc), host->bounce_addr,
-> +                        host->bounce_buffer_size, DMA_BIDIRECTIONAL);
-> +}
+> +            partitions-boot2 {
+> +                compatible =3D "fixed-layout";
 > +
->  static void sdhci_allocate_bounce_buffer(struct sdhci_host *host)
->  {
->         struct mmc_host *mmc =3D host->mmc;
-> @@ -4247,6 +4255,14 @@ static void sdhci_allocate_bounce_buffer(struct sd=
-hci_host *host)
->         }
+> +                #address-cells =3D <1>;
+> +                #size-cells =3D <1>;
+> +
+> +                mac-addr@4400 {
+> +                    compatible =3D "mac-base";
+> +                    reg =3D <0x4400 0x6>;
+> +                    #nvmem-cell-cells =3D <1>;
+> +                };
+> +
+> +                bd-addr@5400 {
+> +                    compatible =3D "mac-base";
+> +                    reg =3D <0x5400 0x6>;
+> +                    #nvmem-cell-cells =3D <1>;
+> +                };
+> +            };
+>          };
+>      };
 >
->         host->bounce_buffer_size =3D bounce_size;
-> +       ret =3D devm_add_action_or_reset(mmc_dev(mmc),
-> +                                      sdhci_unmap_bounce_buffer, host);
-> +       if (ret) {
-> +               devm_kfree(mmc_dev(mmc), host->bounce_buffer);
-> +               host->bounce_buffer =3D NULL;
-> +               host->bounce_buffer_size =3D 0;
-> +               return;
-> +       }
 >
->  out:
->         /* Lie about this since we're bouncing */
 > --
-> 2.47.1
+> 2.34.1
 >
