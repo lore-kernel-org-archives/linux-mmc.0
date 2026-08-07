@@ -1,379 +1,137 @@
-Received: from mail-yw1-f227.google.com (mail-yw1-f227.google.com [209.85.128.227])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 725B44052BA
-	for <linux-mmc@vger.kernel.org>; Fri,  7 Aug 2026 20:01:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.227
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6449E37F300;
+	Fri,  7 Aug 2026 21:48:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786132912; cv=none; b=aJrliq/hZmLydQ1fC/n7ViFKPqZZYgYiEDi3oJlETlRwlnZSaKBOVpBd9g9OGO8G9hF7EsBJcf6qo92GsoFxgNqiNdL/Our30J18Zt/TFj/Jbvkcvts72BTpHBrHhbmJ5NscTQwXfWlQ7q1/KrB64+RvI6gD9hHrlc+AO4BmPXo=
+	t=1786139323; cv=none; b=HrDBmRcgiIR3zCw+nAiWPK1J8P1T5fOh8Ge8gwDRUJZkvmUwXBmUcnJY5PEhwNIAbBkmM/b2ObieaIrSBqS2lLolvh0E+gpk3WawfADUAfvT4xnshIW71WwSPOOZZcodEzITf2Fm7v4af0mbO6FcD+nEuljiNE2uYg880//BcQI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786132912; c=relaxed/simple;
-	bh=Q9BLlmOTz2usbyq8ka3liaH9eyUOVuZYmb+fmUCD8Os=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=QrctaEYS3i0YplmyjL6gNEJJmoSw5y1/nIZadjZS9Mgd1zvUrPrFSuD3wYn7OfvJalaHIS6IqycDEpjuUqoYqqES1HrR5Fim8XO2oQI6Vo7zXFGNfz21Wk/Yr4ZFRq7J3IzQwlvxjIRd1ofm3tn3GI4aYVvWwjggOjVCZTYZ3ls=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=dXKSagOB; arc=none smtp.client-ip=209.85.128.227
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	s=arc-20240116; t=1786139323; c=relaxed/simple;
+	bh=mTXaWMUkp0dBHLyGD71UGs8JJqt+8LEcZCpN5x1Yz7k=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=R+sP16Oh5nz5Z1FE13vuluFQNrxUBgPlb6JNI7U+uEzTvad3zf0c3PNLQMz4ohGKZoVAljlh9PyN5LGU8mhcjPAu+RFS6fS0Z0xy0GZ0nt3buoz69W4R2ZUnaC61ntTeGFsUDt19kB+oxxlCY4M9bZpjTYBg527UoRlQ2PE3u1M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=P2jaq7rs; arc=none smtp.client-ip=192.198.163.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="dXKSagOB"
-Received: by mail-yw1-f227.google.com with SMTP id 00721157ae682-821106b5b64so48559377b3.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 13:01:46 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786132905; x=1786737705;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:dkim-signature:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=TGz4vR3Ngz/jd/dVhW6F3Rli+5agAyjyjU7MO0KJQBU=;
-        b=KLRxKXVNx+e1xlbHxcvP7WWW76i5CRzzAzRRSZbqJMzfxvXYRpyMvq+KuuWN4Nwda6
-         sDaQAkgb/vyrJG9UFWmnSiEEMBhgKN3onV8aTcePjBKqvP8vFSWHqXKaOwc85b3+3aGF
-         SRIkP4uywsDVrQg6OHPD1j5LbzNSFyl5ZhUgoh2Rem1UtEiqo6KX508nJ3xit3ho/F6C
-         LiXq4l9ofy6DcvFrXguVVE08scJAmoZ7JTHaf0KddllNpm0oU/6O+J8+tVOrYZJRx2fB
-         j4k48avD0tmxFQbdoULpJm0Ic5ScSSAQT15EeFJnsYO4CgVz2PZXdS3CnzvWIW0nkoyp
-         hmjg==
-X-Forwarded-Encrypted: i=1; AHgh+Rosj+WhwkuBiq4xtpNvOuJ90wuZ8NNeW7HpVZlVbtwjw83GvEl5wpWiqzCiGodX06BlQOZe4pkgOQw=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyfmWD8ipowWTIhQ5ZeKQuq3jfLaZAGE4AJ4d6dIFrMphkfCyPD
-	dG3MjWXiMIi8K4LQnN5T1zXm5E15BFMv+fpjiZ1y5cxR3lsSazyjWV5WouCPINmzho52aJEVL1r
-	vEMLl09UElWLBLLb5qFclY5j1XXQoX9U01zCZ2QX9thJ1F5eC5yetV2eyLaCWCtTNSK8NZcDvc+
-	/8s6B20HQTVm/PpIW/OdurcV84cD3eCupkWHKUiOwAyG4+AjECDpodzyHRmSJRT895oG3rMHHro
-	RG8HKU2kLj9
-X-Gm-Gg: AR+sD10ihJS2MEVst0oA9Szw7aA3PgJmHDKeNESN1LTl6vIW+qyDk+R2oMixFBDQRrQ
-	3pYyh7FFJXlQpDWzR+ipZOO99W6ccACqmn1L1NfYZYD96ZfjQpn/g/syIb7gU2t0J8i5RAyqWkk
-	RhJ4qWlya1Q/KUPA09aIy/geGEar67bI9ALioaQ6McWlhZ5JEbpA/ioagGI0qot2T5aRALbbS9S
-	gr/rG9VwPBxIE2Aywi5hwEZ0HE/fp1FDSAx5zyVyGTY19sCPFV7+xSzu6Gj26epLqWaE/3pyvyz
-	92oRmbpGkW72Pqh1z8l3AKRVAdQ5INgHxp0eBY3HSqB6WbZl4cR2o2jKrTFrwJ/k635FpqVTq/F
-	zSq3RZTxPZUuj/hkf09vlLd0bxoYnXoevAsOpH55KRfkehivaI98S9hCRskLLLrBxsnRFM5FYKv
-	I2r7n+qGl2fNB/mHiZFHTZbDc5M0eqpQ==
-X-Received: by 2002:a05:690c:e205:10b0:81e:f308:cfa3 with SMTP id 00721157ae682-825ef601655mr6661387b3.14.1786132904903;
-        Fri, 07 Aug 2026 13:01:44 -0700 (PDT)
-Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-0.dlp.protect.broadcom.com. [144.49.247.0])
-        by smtp-relay.gmail.com with ESMTPS id 00721157ae682-823f6cfd2easm1326217b3.18.2026.08.07.13.01.44
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 07 Aug 2026 13:01:44 -0700 (PDT)
-X-Relaying-Domain: broadcom.com
-X-CFilter-Loop: Reflected
-Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-92e82060977so233341385a.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 13:01:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1786132904; x=1786737704; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=TGz4vR3Ngz/jd/dVhW6F3Rli+5agAyjyjU7MO0KJQBU=;
-        b=dXKSagOBq11xcAuGq4ueg0VOh7HSVpVNLREy3YD+5ZP/aK7NU5juWrUvZ/b/JDrGTo
-         wTohI/PL6Qup3egn9qZfB6Vvrwx6B1rtljLCZaXqp7Ha/BYaZ1o8jxFVPLrSuMn6aJft
-         D07Hn8whNm9rdYEBlrA2VFR+piKrZXloh+Dh0=
-X-Forwarded-Encrypted: i=1; AHgh+Rr2dfKda/0fHOn7df5ZiOKUW4+ABAkCVPzqoavQPfaE7iwCYmag1E3jB7bY1H9nLIOXRlR/mUiFVek=@vger.kernel.org
-X-Received: by 2002:a05:620a:2304:20b0:934:ac0a:8bb1 with SMTP id af79cd13be357-9367b5e6d5emr117685385a.8.1786132903621;
-        Fri, 07 Aug 2026 13:01:43 -0700 (PDT)
-X-Received: by 2002:a05:620a:2304:20b0:934:ac0a:8bb1 with SMTP id af79cd13be357-9367b5e6d5emr117672985a.8.1786132902883;
-        Fri, 07 Aug 2026 13:01:42 -0700 (PDT)
-Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-9366dc51b43sm225839185a.0.2026.08.07.13.01.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Aug 2026 13:01:42 -0700 (PDT)
-From: Kamal Dasu <kamal.dasu@broadcom.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Kamal Dasu <kamal.dasu@broadcom.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Oleksij Rempel <o.rempel@pengutronix.de>,
-	Avri Altman <avri.altman@sandisk.com>,
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
-	Erick Shepherd <erick.shepherd@ni.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v8 3/3] mmc: core: Honor keep-power-in-suspend and reset-card-at-resume for (e)MMC
-Date: Fri,  7 Aug 2026 16:01:21 -0400
-Message-Id: <20260807200121.2590202-4-kamal.dasu@broadcom.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260807200121.2590202-1-kamal.dasu@broadcom.com>
-References: <20260807200121.2590202-1-kamal.dasu@broadcom.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="P2jaq7rs"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1786139321; x=1817675321;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=mTXaWMUkp0dBHLyGD71UGs8JJqt+8LEcZCpN5x1Yz7k=;
+  b=P2jaq7rsAK34qQM8eH/1f25SEgd/urv7zeEapJXsZ45mXsUgcXUgBO+f
+   ekyYnqA/xlCYhsVcMVxjrJRYqRBeWH1z/VPowFcw7tiSTlaUTeOPpQNL/
+   EQNNs0RM9WUPoWuKmX69TYLvxf9iGM0KnYW3jGR8JUN/aC1TAzgQsU3v8
+   JIeej0zitoHsPd/SAuKpJ51vT7PFYpE4LcZPqIboeuNu4gfWeCG5jEwiV
+   RIHiDRwS8sU+YW3m+t9WsY0+4vBqdBDL+JmPbz7/ykxtBQOFm3PXcWFUe
+   k2QwDa2VHviULF/1a7cg9RsHPQE/JMrWm56SnxwxIzLHFgPYUGdWPDpdn
+   w==;
+X-CSE-ConnectionGUID: s7M07yaFR2yMy8FYnD8xYQ==
+X-CSE-MsgGUID: yNYvkwmmSnqnr/tbiAXUWA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11868"; a="85728898"
+X-IronPort-AV: E=Sophos;i="6.25,210,1779174000"; 
+   d="scan'208";a="85728898"
+Received: from orviesa010.jf.intel.com ([10.64.159.150])
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Aug 2026 14:48:41 -0700
+X-CSE-ConnectionGUID: 3tkWBxqFQzSlgE6g20gERw==
+X-CSE-MsgGUID: H2rvAy3kQGySe8n5fS96Zg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.25,210,1779174000"; 
+   d="scan'208";a="261212881"
+Received: from lkp-server01.sh.intel.com (HELO 6eda058d650d) ([10.239.97.150])
+  by orviesa010.jf.intel.com with ESMTP; 07 Aug 2026 14:48:37 -0700
+Received: from kbuild by 6eda058d650d with local (Exim 4.98.2)
+	(envelope-from <lkp@intel.com>)
+	id 1wsSQb-00000000JKf-11qQ;
+	Fri, 07 Aug 2026 21:48:33 +0000
+Date: Sat, 8 Aug 2026 05:47:55 +0800
+From: kernel test robot <lkp@intel.com>
+To: Mayur Kumar <kmayur809@gmail.com>, Ulf Hansson <ulfh@kernel.org>
+Cc: oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, Mayur Kumar <kmayur809@gmail.com>
+Subject: Re: [PATCH] mmc: core: add MMC_QUIRK_BROKEN_WRITE_ZEROES for ESMT
+ eMMC
+Message-ID: <202608080412.ueBVGtOw-lkp@intel.com>
+References: <20260725185129.43397-1-kmayur809@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260725185129.43397-1-kmayur809@gmail.com>
 
-On some platforms, firmware accesses the (e)MMC card directly during
-resume from Suspend-to-DRAM, before the kernel's own resume path has
-run, in order to load boot code. This requires the card to remain
-powered and responsive throughout suspend: putting it to sleep,
-sending it a power-off notification, or removing its supply is not
-safe, since firmware needs to talk to a live card. Since the card is
-never power-cycled, nothing else resets it back to a known state
-before the kernel reuses it after resume.
+Hi Mayur,
 
-keep-power-in-suspend / MMC_PM_KEEP_POWER already exist for the first
-part, but are only consumed in the SDIO suspend/resume path
-(mmc_sdio_suspend()/mmc_sdio_resume()), gated on a per-function
-runtime request via sdio_set_host_pm_flags(). (e)MMC has no
-equivalent function-driver layer to make that request, and the
-requirement here is a fixed platform characteristic rather than a
-per-cycle one, so _mmc_suspend() checks host->pm_caps directly
-instead of pm_flags.
+kernel test robot noticed the following build errors:
 
-reset-card-at-resume covers the second part: when set, _mmc_resume()
-resets the host to its initial bus state the same way _mmc_hw_reset()
-does for a non-power-cycle reset, before mmc_power_up() and
-mmc_init_card() re-identify the card.
+[auto build test ERROR on linus/master]
+[also build test ERROR on v7.2-rc6 next-20260807]
+[cannot apply to ulf-hansson-mmc-mirror/next]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-_mmc_suspend()'s fast path requires both MMC_PM_KEEP_POWER and
-MMC_CAP2_RESET_AT_RESUME to be set. Keeping the card powered without
-also resetting it at resume is not safe for this driver: skipping
-mmc_power_off() leaves power_mode at MMC_POWER_ON, so mmc_power_up()
-no-ops in _mmc_resume(), and without an explicit reset first,
-mmc_init_card() runs against whatever bus speed/width was active
-before suspend instead of the initial state it expects. Conversely,
-_mmc_resume()'s reset checks pm_flags rather than the
-MMC_CAP2_RESET_AT_RESUME capability directly, since pm_flags is only
-set when the fast path actually ran -- the only time power_mode is
-guaranteed to still be MMC_POWER_ON, and so the only time resetting
-the bus before mmc_power_up() is both necessary and safe. Without
-that check, MMC_CAP2_RESET_AT_RESUME set on its own would drive the
-clock and bus lines while the card's supply is still off following a
-normal mmc_power_off().
+url:    https://github.com/intel-lab-lkp/linux/commits/Mayur-Kumar/mmc-core-add-MMC_QUIRK_BROKEN_WRITE_ZEROES-for-ESMT-eMMC/20260807-212705
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20260725185129.43397-1-kmayur809%40gmail.com
+patch subject: [PATCH] mmc: core: add MMC_QUIRK_BROKEN_WRITE_ZEROES for ESMT eMMC
+config: alpha-allmodconfig (https://download.01.org/0day-ci/archive/20260808/202608080412.ueBVGtOw-lkp@intel.com/config)
+compiler: alpha-linux-gcc (GCC) 16.1.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20260808/202608080412.ueBVGtOw-lkp@intel.com/reproduce)
 
-The fast path also leaves the card marked suspended without powering
-it off, so _mmc_suspend()'s pre-existing early exit for an
-already-suspended card can no longer assume there is nothing left to
-do: a shutdown, unbind or undervoltage event can still arrive before
-the card's next real access lazily triggers _mmc_resume() via runtime
-PM, and those events need the normal power-off sequence regardless.
-Reselect the card and continue into that sequence in that case,
-instead of returning early and silently skipping mmc_poweroff_notify()
-and mmc_power_off().
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202608080412.ueBVGtOw-lkp@intel.com/
 
-host->pm_flags is set alongside marking the card suspended, and
-cleared in _mmc_resume(), so host controller resume handlers can tell
-power was preserved if they need to.
+All errors (new ones prefixed by >>):
 
-Reported-by: Florian Fainelli <florian.fainelli@broadcom.com>
-Closes: https://lore.kernel.org/r/20260413180551.3683969-1-florian.fainelli@broadcom.com/
-Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
----
-Changes in v8:
-  - Sashiko's AI review of v7 found a High severity issue: the
-    keep-power fast path marks the card suspended without powering
-    it off, but the pre-existing early exit at the top of
-    _mmc_suspend() (for an already-suspended card) doesn't know that
-    -- it just returns immediately regardless of pm_type. Since the
-    system-resume path only re-enables runtime PM rather than calling
-    _mmc_resume() directly (that happens lazily, via runtime PM, on
-    the card's next real access), a shutdown, unbind or undervoltage
-    event landing before that next access would hit the early exit
-    and silently skip mmc_poweroff_notify()/mmc_power_off() entirely.
-    Fixed by reselecting the card and continuing into the normal
-    power-off sequence whenever the card is suspended via our fast
-    path but pm_type isn't a plain suspend, instead of a bare early
-    exit. Calling _mmc_resume() itself from here isn't an option, since
-    _mmc_suspend() already holds the host claim.
+   drivers/mmc/core/queue.c: In function 'mmc_queue_setup_discard':
+>> drivers/mmc/core/queue.c:195:30: error: 'MMC_QUIRK_BROKEN_WRITE_ZEROS' undeclared (first use in this function); did you mean 'MMC_QUIRK_BROKEN_WRITE_ZEROES'?
+     195 |             !(card->quirks & MMC_QUIRK_BROKEN_WRITE_ZEROS))
+         |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         |                              MMC_QUIRK_BROKEN_WRITE_ZEROES
+   drivers/mmc/core/queue.c:195:30: note: each undeclared identifier is reported only once for each function it appears in
 
-Changes in v7:
-  - Sashiko's AI review of v6 found two real, complementary bugs in
-    treating MMC_PM_KEEP_POWER and MMC_CAP2_RESET_AT_RESUME as fully
-    independent in this driver:
-      * keep-power-in-suspend without reset-card-at-resume: confirmed
-        on hardware to hang -- _mmc_resume()'s mmc_power_up() no-ops
-        since power_mode never left MMC_POWER_ON, so mmc_init_card()
-        runs at the pre-suspend bus speed and CMD1 times out.
-      * reset-card-at-resume without keep-power-in-suspend: the reset
-        block ran mmc_set_clock()/mmc_set_initial_state() ahead of
-        mmc_power_up(), while power_mode was still MMC_POWER_OFF from
-        a normal suspend-time mmc_power_off() -- driving the clock
-        and bus lines before the card's supply is enabled.
-    Fixed by requiring both capabilities together for the suspend
-    fast path, and checking pm_flags (not the raw capability) for the
-    resume-side reset, so it only ever runs when power was actually
-    kept this cycle. Verified on hardware: the keep-power-in-suspend-
-    without-reset-card-at-resume case now correctly falls through to
-    a normal power-off/power-on cycle instead of hanging, and the
-    paired-capability case is unaffected (still hardware-verified,
-    now with an extra confirmation run after this fix).
 
-Changes in v6:
-  - Reworked around Ulf's two-property split: dropped the
-    unconditional mmc_set_clock()/mmc_set_initial_state() reset from
-    the suspend-side fast path, and instead perform it in
-    _mmc_resume(), gated on the new MMC_CAP2_RESET_AT_RESUME (from
-    reset-card-at-resume), matching the property's name and
-    description ("before the card can be used, it must be reset").
-  - No longer touches MMC_CAP2_NO_POWEROFF_SUSPEND/no-mmc-poweroff-
-    suspend at all -- that capability and property are gone, per the
-    v4 rework; this patch only adds MMC_CAP2_RESET_AT_RESUME.
+vim +195 drivers/mmc/core/queue.c
 
-Changes in v5:
-  - Only set host->pm_flags |= MMC_PM_KEEP_POWER after
-    mmc_deselect_cards() succeeds, instead of unconditionally before
-    it. Otherwise, if the deselect fails, the card is never marked
-    suspended, _mmc_resume() takes its early exit, and the flag never
-    gets cleared -- leaking it for the rest of uptime.
+   176	
+   177	static void mmc_queue_setup_discard(struct mmc_card *card,
+   178			struct queue_limits *lim)
+   179	{
+   180		unsigned max_discard;
+   181	
+   182		max_discard = mmc_calc_max_discard(card);
+   183		if (!max_discard)
+   184			return;
+   185	
+   186		lim->max_hw_discard_sectors = max_discard;
+   187		if (mmc_card_can_secure_erase_trim(card)) {
+   188			if (mmc_card_fixed_secure_erase_trim_time(card))
+   189				lim->max_secure_erase_sectors = UINT_MAX >> card->erase_shift;
+   190			else
+   191				lim->max_secure_erase_sectors = max_discard;
+   192		}
+   193	
+   194		if (mmc_card_can_trim(card) && card->erased_byte == 0 &&
+ > 195		    !(card->quirks & MMC_QUIRK_BROKEN_WRITE_ZEROS))
+   196			lim->max_write_zeroes_sectors = max_discard;
+   197	
+   198		/* granularity must not be greater than max. discard */
+   199		if (card->pref_erase > max_discard)
+   200			lim->discard_granularity = SECTOR_SIZE;
+   201		else
+   202			lim->discard_granularity = card->pref_erase << 9;
+   203	}
+   204	
 
-Changes in v4:
-  - Gated the fast path on pm_type == MMC_POWEROFF_SUSPEND; it was
-    previously unconditional, so it wrongly skipped the required
-    power-off/notify handling during shutdown, unbind and
-    undervoltage as well.
-  - Set/clear host->pm_flags |= MMC_PM_KEEP_POWER around the suspend/
-    resume, mirroring the SDIO convention, so host controller resume
-    handlers can tell power was preserved and perform a soft resume
-    sequence instead of assuming power was lost.
-  - Dropped MMC_CAP2_NO_POWEROFF_SUSPEND and the no-mmc-poweroff-
-    suspend DT property entirely. Reuse keep-power-in-suspend /
-    MMC_PM_KEEP_POWER instead, per Krzysztof's point that the new
-    property described the same contract as the existing one.
-    _mmc_suspend() now checks host->pm_caps directly rather than
-    pm_flags, since (e)MMC has no per-function driver to make the
-    dynamic sdio_set_host_pm_flags()-style request SDIO uses.
-
-Changes in v3:
-  - Reworked _mmc_suspend() to skip poweroff-notify/sleep/power-off
-    entirely, not just SLEEP, per Ulf.
-  - Renamed to MMC_CAP2_NO_POWEROFF_SUSPEND/no-mmc-poweroff-suspend.
-
-Changes in v2:
-  - Replaced the card-level MMC_QUIRK_BROKEN_SLEEP quirk with a host
-    capability, per Ulf.
-  - Added Reported-by/Closes crediting Florian.
-
- drivers/mmc/core/host.c  |  2 ++
- drivers/mmc/core/mmc.c   | 71 ++++++++++++++++++++++++++++++++++++++++++++++--
- include/linux/mmc/host.h |  1 +
- 3 files changed, 72 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index b7ce3137d452..1622f7846441 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -400,6 +400,8 @@ int mmc_of_parse(struct mmc_host *host)
- 	if (device_property_read_bool(dev, "no-mmc-hs400"))
- 		host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
- 				 MMC_CAP2_HS400_ES);
-+	if (device_property_read_bool(dev, "reset-card-at-resume"))
-+		host->caps2 |= MMC_CAP2_RESET_AT_RESUME;
- 
- 	/* Must be after "non-removable" check */
- 	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 05444ecf3909..a081907bbcf5 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -2144,8 +2144,28 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- 
- 	mmc_claim_host(host);
- 
--	if (mmc_card_suspended(host->card))
--		goto out;
-+	if (mmc_card_suspended(host->card)) {
-+		/*
-+		 * Nothing to do for a redundant suspend call. Otherwise, the
-+		 * card can only still be marked suspended here because the
-+		 * keep-power fast path below left it powered and merely
-+		 * deselected -- reselect it and continue into the normal
-+		 * power-off sequence below, since shutdown, unbind and
-+		 * undervoltage need mmc_power_off() regardless of how the
-+		 * card got here.
-+		 */
-+		if (pm_type == MMC_POWEROFF_SUSPEND ||
-+		    !(host->pm_flags & MMC_PM_KEEP_POWER))
-+			goto out;
-+
-+		if (!mmc_host_is_spi(host)) {
-+			err = mmc_select_card(host->card);
-+			if (err)
-+				goto out;
-+		}
-+		mmc_card_clr_suspended(host->card);
-+		host->pm_flags &= ~MMC_PM_KEEP_POWER;
-+	}
- 
- 	/*
- 	 * For the undervoltage case, we care more about device integrity.
-@@ -2157,6 +2177,33 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- 			goto out;
- 	}
- 
-+	/*
-+	 * Keep the card powered across an actual suspend; shutdown, unbind
-+	 * and undervoltage still need the normal power-off path below,
-+	 * since they aren't guaranteed a subsequent _mmc_resume().
-+	 *
-+	 * Check pm_caps, not pm_flags: unlike SDIO, (e)MMC has no
-+	 * per-function driver to request this via
-+	 * sdio_set_host_pm_flags(), so it's a fixed platform trait here.
-+	 *
-+	 * Require MMC_CAP2_RESET_AT_RESUME too: without it, _mmc_resume()
-+	 * has no way to bring the host back to a state mmc_init_card() can
-+	 * use, since mmc_power_up() no-ops when power_mode is already
-+	 * MMC_POWER_ON. Keeping power without also resetting at resume is
-+	 * not a safe combination for this driver.
-+	 */
-+	if (pm_type == MMC_POWEROFF_SUSPEND &&
-+	    (host->pm_caps & MMC_PM_KEEP_POWER) &&
-+	    (host->caps2 & MMC_CAP2_RESET_AT_RESUME)) {
-+		if (!mmc_host_is_spi(host))
-+			err = mmc_deselect_cards(host);
-+		if (!err) {
-+			host->pm_flags |= MMC_PM_KEEP_POWER;
-+			mmc_card_set_suspended(host->card);
-+		}
-+		goto out;
-+	}
-+
- 	if (mmc_card_can_poweroff_notify(host->card) &&
- 	    mmc_host_can_poweroff_notify(host, pm_type))
- 		err = mmc_poweroff_notify(host->card, notify_type);
-@@ -2217,9 +2264,29 @@ static int _mmc_resume(struct mmc_host *host)
- 	if (!mmc_card_suspended(host->card))
- 		goto out;
- 
-+	/*
-+	 * Firmware or other hardware may have accessed the card while it
-+	 * stayed powered through suspend, leaving it in a state the kernel
-+	 * can no longer assume it knows. Reset the host to its initial bus
-+	 * state like _mmc_hw_reset() does for a non-power-cycle reset,
-+	 * before mmc_init_card() re-identifies the card.
-+	 *
-+	 * Check pm_flags, not the MMC_CAP2_RESET_AT_RESUME capability
-+	 * directly: pm_flags only ends up set here when _mmc_suspend()
-+	 * actually took the keep-power fast path this cycle, which is the
-+	 * only time power_mode is guaranteed to still be MMC_POWER_ON (and
-+	 * so the only time this reset is both necessary and safe to do
-+	 * before mmc_power_up() touches the bus).
-+	 */
-+	if (host->pm_flags & MMC_PM_KEEP_POWER) {
-+		mmc_set_clock(host, host->f_init);
-+		mmc_set_initial_state(host);
-+	}
-+
- 	mmc_power_up(host, host->card->ocr);
- 	err = mmc_init_card(host, host->card->ocr, host->card);
- 	mmc_card_clr_suspended(host->card);
-+	host->pm_flags &= ~MMC_PM_KEEP_POWER;
- 
- out:
- 	mmc_release_host(host);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ba84f02c2a10..14a407a9f9b7 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -463,6 +463,7 @@ struct mmc_host {
- #define MMC_CAP2_CRYPTO		0
- #endif
- #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
-+#define MMC_CAP2_RESET_AT_RESUME (1 << 29)	/* Card must be reset before use at resume */
- 
- 	bool			uhs2_sd_tran;	/* UHS-II flag for SD_TRAN state */
- 	bool			uhs2_app_cmd;	/* UHS-II flag for APP command */
--- 
-2.34.1
-
+--
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
