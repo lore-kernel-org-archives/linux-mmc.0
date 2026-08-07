@@ -1,159 +1,93 @@
-Received: from mail-qk1-f172.google.com (mail-qk1-f172.google.com [209.85.222.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C1EC472F9A
-	for <linux-mmc@vger.kernel.org>; Fri,  7 Aug 2026 13:28:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5EE02C21F1;
+	Fri,  7 Aug 2026 13:56:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786109307; cv=none; b=QKEt3tM1iOLnnERrgMrvD+/FIhWXpvUtM4TLzqIHas1j91RntAs1+4/L+QvP3Qr1tyI3jgvVzhnA180qpzdgkvgJfrUApIUUGo/33w+Iq+Ll8Kxn4YSVmAX/1fd2FVVaXObiKUEr3aC2VJe+11lA+zJ+CFQnGhuX+xZbJHpBS5I=
+	t=1786111011; cv=none; b=ryMTb6zDZuhfa9aofWKhnGrOipLk5twLmUdB2IJFD322fpzC5IsOHpkaaEcqszK32ShK6yKj6fqf8xyWs69VE1kPR4VOUbRF+SLZAAtwnG9HMUQwnJwNi1IDNYg9HMd+O3D6tmMPKxk6XN5hH4ae4+LR/zWtq+m3ZphzbJe4qvc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786109307; c=relaxed/simple;
-	bh=iGEucwuv0cDETFySrvCtSDoMSdRLS4yfZWG/9BrZsOg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Dw9VacQwuu+3qyHuh9PiTSnbHtcj55zUTbMBwPyGMYBWxdqMpu0KOyV3sHBFbvEhZA3dPDM0qvRwucLCQBgm64M/lTWnz4e+X/NcjNRfIO4lRtTwkbtbrdBEaTdNNd5DuK3VCVUoVy84svVBbUezFwz+gUDkilKjHI/f8P4x7bk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-qk1-f172.google.com with SMTP id af79cd13be357-92e99ef0902so185827085a.2
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 06:28:22 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786109301; x=1786714101;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=ihkRYHxMD45hBtXtL0ryyoy4S8BR0bYvAoTcaodyV1g=;
-        b=TSxMBJwUNUxdQFi8OVeq7o6nz7wrGPzfiWiDuDRm2Ub8AoaFYTfCSfnVGmqb77RxAH
-         KrRUkXd88MgDm7WkRQJhX2MkfCoIzz4uKo20n4x/g5MUGXbH/yRZro+PDXAnCoPU5x5r
-         ZwHa42KWgtHYB+5tbXc1RK+4TKlEik1j96LGQReoYKrjv6OWmKyDY3rVy/NWmP2ujJ4A
-         vKe4PVfzk8gqKgGCqtFS9++MjyRgsLRhqX102vu4qAwVTdGNgMi8ZdK0j63e37/ve5Nj
-         YYN+lkDjLRuQtQzXBXqk3Amb+7RqRSNkCzxq7JQa+PvyaTmB6+i4FTgdyy2GBkd/Y76/
-         E/4Q==
-X-Forwarded-Encrypted: i=1; AHgh+RrpATqIhX5XfUC1nXv/9cDNRrjIrrrJaN39pa4G7W0/SjI/OLxyC4sfJPNsigM6fLAX6EJ16q7mg/0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxQL4OLcHpfeI0rtgtdm74GBfPnS0YccZRNC/5UbPYWXpiHap+4
-	ZmXmBoQXZvMg3D+9UQrDH036SJ4j8bDH5tC4gqUHni2N2s3ryywtO21rW2bymrmP
-X-Gm-Gg: AR+sD11NNxG7TiT6GAwct+85snjWikGyWEX0UR6U9RYP+R6buHyfQuaiDfpLH6HHfOa
-	LUMPUm2jmtnWNKzCh87xl9uhO0ieuuv1RrXii13FirCIaWdH6mVOPDRxqxOSCmvlq82XN5r2k8l
-	m1ZzcE11vdrCtuggkPw5k1PhAaCHIHwqKcx9ZRZAb9GOOaiRKfIDeqTAnUCsjHneQSrrYiUCMdV
-	iEHEkjQMN+24+srSZYDYGRm+GOb5oBHFsvjRBirS34JZXKmdNpWrkzJFFS3h9unlWoC1AtunDYx
-	WaZY5SGIdgzkEuw+JJsXa5Fd7Dx28EzxSJtQ+kbOWH6weURgBTkNC8Wz46/KtPMa6F+N+SMU2ZA
-	og/tV/qyVo3ILVe5Mo88fRQHSCBA7xp7bMluLJQTpkTbVCgjHOs29fqHVc62/UO16FADvjaZIPj
-	po37YCoLVphyIioi8dG+rwRHdgoNrQa5N/UVwamYmXq4embjU70Ml1TwYRjtFzpHKJtulSrSC65
-	9czugVlJfIPvPKEPUH/Az+aJg==
-X-Received: by 2002:a05:620a:628d:b0:92b:9df9:faf6 with SMTP id af79cd13be357-9364914e653mr2586861685a.37.1786109301040;
-        Fri, 07 Aug 2026 06:28:21 -0700 (PDT)
-Received: from mail-ua1-f46.google.com (mail-ua1-f46.google.com. [209.85.222.46])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-9366e290054sm148241985a.40.2026.08.07.06.28.20
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Aug 2026 06:28:20 -0700 (PDT)
-Received: by mail-ua1-f46.google.com with SMTP id a1e0cc1a2514c-9773c6ea885so959222241.3
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 06:28:20 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AHgh+RoxBtFiYf9WWckQAwXdPtlwP8xBTHyIekqgM7njCw6qB8SKvtsMEnrrWJZn8jW2D1FTYFBs4iNZEtY=@vger.kernel.org
-X-Received: by 2002:a05:6102:4bc2:b0:738:84c:6b3 with SMTP id
- ada2fe7eead31-760e6ed510fmr5729903137.3.1786109299935; Fri, 07 Aug 2026
- 06:28:19 -0700 (PDT)
+	s=arc-20240116; t=1786111011; c=relaxed/simple;
+	bh=Q8124jl1mOacnezf+Ks9x7d0mYgCrxXRfVy4mLrv8gI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OVsI/u5TjBJgNY9bcPyx0hC9LFW+jLjJzEFoEU+/nMI3vClnrAUyFo/cYLUWP2VcIyS+4eSqpxRBRWDbbBVX2khfBCXX+JdmeQer/yWx9hJhcsP/jtSm9SehCoCu8+/HhwkUA25EMJYhlSQvqeoj4k5HiC4cviVAnlgDiMlScBY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AENq5IgV; arc=none smtp.client-ip=100.103.45.18
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AENq5IgV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0E72A1F00A3A;
+	Fri,  7 Aug 2026 13:56:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
+	s=k20260515; t=1786110999;
+	bh=DxgY0bb4BOQCmncK6Z/sKqPNiJtjxxMvm+CmP1Xszak=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=AENq5IgVL8UdEra4AKauo4MZgTGd+xLA4oOKq2C7RhSXLEGRXEflKyktodLBqCY4g
+	 by8mpX/XyB4R1/EcmbRjWFIpohrY/c7KW72/HRiOXkwj7eAexB+/oCnJHJgbkQIJS+
+	 m3xYM+hfPmNnXGpMBwl00eAzq/bIq+dQjCticiLhgGiFWGlSUMyubmK+4LQItP/EC+
+	 ZTSrlJYGF+N+OJARsEc0WDEKKTMg6ThT8itjaqBp1IzlAZJTBSrKAuUKT9/VAxBsBm
+	 tSYs3jJye1Ai0RbZK+NfogxiJqkHsNYwCDZsTFnQVFxAidaCKSUsH1Co9zuagWFa/G
+	 MVrt2Sm/CBBCw==
+Date: Fri, 7 Aug 2026 08:56:38 -0500
+From: Rob Herring <robh@kernel.org>
+To: Kamal Dasu <kamal.dasu@broadcom.com>
+Cc: Ulf Hansson <ulfh@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Oleksij Rempel <o.rempel@pengutronix.de>,
+	Avri Altman <avri.altman@sandisk.com>,
+	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
+	Erick Shepherd <erick.shepherd@ni.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
+Subject: Re: [PATCH v7 2/3] dt-bindings: mmc: Add reset-card-at-resume
+ property
+Message-ID: <20260807135638.GA67309-robh@kernel.org>
+References: <y>
+ <20260805222500.2567801-1-kamal.dasu@broadcom.com>
+ <20260805222500.2567801-3-kamal.dasu@broadcom.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260730113200.36456-1-biju.das.jz@bp.renesas.com> <20260730113200.36456-11-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20260730113200.36456-11-biju.das.jz@bp.renesas.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Fri, 7 Aug 2026 15:28:08 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdVd-PQBPvoof650UjXfSZqg2kGN=9kOnVUDgZvnGUOLcQ@mail.gmail.com>
-X-Gm-Features: AUfX_mzIOXg0IiwN3D9gDKa8uwjJk9QQ4Yu2cWICJeqOqyAGpD8yG0bvdP7SOQ0
-Message-ID: <CAMuHMdVd-PQBPvoof650UjXfSZqg2kGN=9kOnVUDgZvnGUOLcQ@mail.gmail.com>
-Subject: Re: [PATCH v23 10/14] mmc: renesas_sdhi: Add RZ/G3L SDHI support
-To: Biju <biju.das.au@gmail.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulfh@kernel.org>, 
-	Biju Das <biju.das.jz@bp.renesas.com>, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20260805222500.2567801-3-kamal.dasu@broadcom.com>
 
-Hi Biju,
-
-On Thu, 30 Jul 2026 at 13:32, Biju <biju.das.au@gmail.com> wrote:
-> From: Biju Das <biju.das.jz@bp.renesas.com>
->
-> RZ/G3L (r9a08g046) has an SDHI controller that differs from existing
-> platforms in clock divider width, a second HW adjustment register,
-> and an extra tuning register.
->
-> Add TMIO_MMC_HWADJ to mark controllers with a second HWADJ2 register
-> (offset 0x010), programmed by renesas_sdhi_set_hw_adjustment_delay()
-> alongside TMPPORT2 (0x3FFF at 3.3V, 0xFF at 1.8V). Clear the new
-> HWADJ4 register (0x022) at tuning start when TMIO_MMC_INTERNAL_DIVIDER
-> is set.
->
-> Update renesas_sdhi_set_clock() to write the clock control register
-> with a 32-bit access when max_divider isn't the default, moving bits
-> [9:8] of the clock value into bits [17:16] of the register =E2=80=94 need=
-ed
-> to drive RZ/G3L's wider 11-bit divider field via the max_divider/
-> clk_div_mask support added earlier in this series.
->
-> Add SDHI_VER_RZ_G3L_SDMMC (0xce10) and handle it in
-> renesas_sdhi_sdbuf_width(). Add of_data_rzg3l with RZ/G3L's wider
-> clk_mask, an 11-bit max_divider of 2048, a dedicated tap table, and
-> the relevant flags including TMIO_MMC_INTERNAL_DIVIDER and
-> TMIO_MMC_HWADJ. Wire it up via of_rzg3l_compatible (fixed_addr_mode
-> quirk) and register the "renesas,sdhi-r9a08g046" compatible string.
->
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+On Wed, Aug 05, 2026 at 06:24:59PM -0400, Kamal Dasu wrote:
+> On some platforms, firmware or other hardware accesses the card
+> during suspend/resume, before the kernel's own resume path has run,
+> leaving the card in a state the kernel can no longer assume it knows.
+> Add a flag property so such boards can tell the mmc core the card
+> needs to be reset before it can be used again.
+> 
+> This is expected to be paired with keep-power-in-suspend on boards
+> whose firmware needs the card to stay powered and live throughout
+> suspend: since the card is never power-cycled, nothing else would
+> force it back to a known state on resume.
+> 
+> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@oss.qualcomm.com>
 > ---
-> v22->v23:
->  * Updated tmio_mmc_reset() to handle 32 bit divider register in RZ/G3L.
-> v21->v22:
->  * Updated commit description.
->  * Added `clock &=3D ~GENMASK(9, 8)` to clear the divider mask bits in
->    the register value.
+> Changes in v7:
+>   - Added Krzysztof's Reviewed-by.
+>   - No other change here; patch 3/3 now requires this property
+>     alongside keep-power-in-suspend for (e)MMC rather than treating
+>     them as fully independent in the driver -- see that patch's
+>     changelog.
+> 
+> Changes in v6:
+>   - New patch, per Ulf's suggestion: rather than fold "needs a reset
+>     at resume" into keep-power-in-suspend's own meaning, describe it
+>     as its own independent property, so the two can be combined only
+>     where actually needed (brcmstb sets both; SDIO's existing
+>     keep-power-in-suspend users are unaffected and set neither this
+>     nor a reset).
+> 
+>  Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml | 7 +++++++
+>  1 file changed, 7 insertions(+)
 
-Thanks for the update!
-
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-
-> @@ -253,7 +256,17 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_h=
-ost *host,
->         if (clock !=3D CLK_CTL_DIV_MASK)
->                 host->mmc->actual_clock /=3D (1 << (ffs(clock) + 1));
->
-> -       sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clock);
-> +       if (host->pdata->max_divider !=3D SDHI_MAX_DIVIDER_DEFAULT) {
-> +               u64 tmp;
-> +
-> +               tmp =3D FIELD_GET(GENMASK(9, 8), clk);
-> +               clock |=3D FIELD_PREP(GENMASK(17, 16), tmp);
-> +               clock &=3D ~GENMASK(9, 8);
-
-Add #defines for the magic bits?
-We already have CLK_CTL_SCLKEN for BIT(8).
-
-> +               sd_ctrl_write32(host, CTL_SD_CARD_CLK_CTL, clock);
-> +       } else {
-> +               sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clock);
-> +       }
-> +
->         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2))
->                 usleep_range(10000, 11000);
->
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
-
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+sashiko issue needs to be addressed
