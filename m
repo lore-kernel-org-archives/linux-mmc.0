@@ -1,75 +1,75 @@
-Received: from mail-vk1-f181.google.com (mail-vk1-f181.google.com [209.85.221.181])
+Received: from mail-ua1-f43.google.com (mail-ua1-f43.google.com [209.85.222.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECDB547F76A
-	for <linux-mmc@vger.kernel.org>; Fri,  7 Aug 2026 13:16:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 912F942FCB4
+	for <linux-mmc@vger.kernel.org>; Fri,  7 Aug 2026 13:25:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786108612; cv=none; b=tIMOABEfKfa7XgqT34YdblrZ8dlfalZwwdWnsjw7zkmlWIv88++sr8kXiZ9ZuBJnB11WHiA8NvuAg2NZOAnHlLYjnyUvZyLfAtJ6QHDqgPY8iTVQMl7vusR56VnYy2421TScF/U6Ucug0ZBF2cgP8+FxHC27sxnahhL2cyv5HoI=
+	t=1786109125; cv=none; b=TrPkfpIJFVvRtn0QLw+T9UvBi3DilK7wijWYB/8oyXdN4P/LycFr9FmBXdewDBfQyRukAHItq+j7bC8/lh9dlS6tTFVNFBjR7giGn8sIy7NYalJ7tYrv0WUxqBuULbuYKV3iT4eZigW+Ew7ooj89/RNqH/i3qlgRlWWj4NZ95As=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786108612; c=relaxed/simple;
-	bh=kCe7+ovW97xnpwebauqhnPTjDQ/9rPidEkTfLc/PfTU=;
+	s=arc-20240116; t=1786109125; c=relaxed/simple;
+	bh=a19jPmi+GzVCvFFZOgNfOCBH89do39+pNlklgVN8luE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Z97FoMPyabfwoJZCaakp2Tu3Ar7SQR/PKYDBvUHXx/AcuCR3J9wP58CRq2PQzwZ/GK98zAjttI14WEOmGEUTeffIWlu2CWCn9uSfwaQs03U8NyvIoSZ9UbZC32iWiRqoSs7Ia4YPC/m8vh6ldqmXj3M8ZzvJr0E7fILvwGVBpTY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.221.181
+	 To:Cc:Content-Type; b=TtWETPN3ZsOk/FoCuu8K6xinFVByWeRnCe/BKnVcuwu1jhbXZohTwdBztTuF3VErQ1RVdJa1IxGQOLYrwj5MKUFtpEBdhiJ+956mhZS8K5y7D9BFk+mIMJQEEDTjLkUgI0bsxaH9pWcE2oiVWt1y75NMgQnFlMjI9a1EM9C/rAU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-vk1-f181.google.com with SMTP id 71dfb90a1353d-5bf95ade656so1159133e0c.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 06:16:45 -0700 (PDT)
+Received: by mail-ua1-f43.google.com with SMTP id a1e0cc1a2514c-9696319e14dso1282370241.3
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 06:25:22 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786108603; x=1786713403;
+        d=1e100.net; s=20251104; t=1786109120; x=1786713920;
         h=content-type:cc:to:subject:message-id:date:from:in-reply-to
          :references:mime-version:x-gm-gg:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to:content-type;
-        bh=CNCX7FMkI+eIPoPw4/O/hZx4FHa2CnaRhnoCRy0wWYI=;
-        b=a5pRB30ddNcFlAdle7gnbhODPqgelAODfHFexx6t3mE4fhZiilmZ3PtQDV8sGJOv+3
-         3Di4WWnQ5uJHmMxb1AFsH1wd0WebmE3GF5WWJNgy2HD/yFK72cvjq0XkfgsiG2uduk1V
-         YWF6vnWD9pjuMAt5g9YtwFTw8m3zG8qs3tc72hKNfcgq74NizS27O44IiTPLqCiwo+Uk
-         y8MIO+0xvHoEz352A5gFujyJFssxpdGhUv331fFSaVEueK4kGxj9S+L7spUgiL8Chlx4
-         9Od2MowugisDCJyYZbmb8W6GrpZ4/Ejy1aCS0WgPVwfIYC/8oLPajzzkcRp/tu2mXZiy
-         wJrw==
-X-Forwarded-Encrypted: i=1; AHgh+RrZsLDn7LcYphZ7GSyK54HuLrxx7EgzkftXQhgld+ciDavKvqv+HNMlG95zJE7GclZ/9rvawUE2s4E=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxyYEjxaNT5UqXP8/q37AbWBXfEItk2S/q53DdubXDNBQR2euNb
-	KDvSkkOiY79QFYDlWSwAK4Ec0G0eA3o63hey62PR009yTZUnpEEyCDe9BdAzKRb3
-X-Gm-Gg: AR+sD11Np1XqfGVkkUqjemPzQoaGVywe20yt3UjThTs9ZapSg5XGzTdZ5IS0ioAMGOt
-	GLvKwQjBf3/EeBfKWpndukaMFsTWB4InrRZFAVCI+XGXY+zublbqFeTXro8aRiZnRU4Ven4olcC
-	eeEqSPX9BstHspZuzEEa/wZnOBQJtI4dJfKmeUGfPnaceIdflFqodjdMMVCt2BMBQQCyA5CeD6n
-	ENwlH2gNtMpriV/DC4VHIOMtocpFVrQXJc8GE9x/OnNdr0p6EteIJMqIflF0i9xz4XdjfrGwr5a
-	os3SeekorrkPGiSBqsESMDddeDVs9WKGh/j11ebdAlwwCMKEzugWdWwUJw630aWnAOSdsg6FstZ
-	8P19p0DaU8+BWGTBYQdYoPaz9zY/mcT3IEeKs24bWZy7f/kn94Lm/goMgcWj/W7ljcpdyQJsyBW
-	Tv4ZMhYpMGfE0FFNmsm3Mn79DGSc99pU/yi4Mg++8g8FplRMEhaDJxqYYvSzKe8ynWoH6YXCdxa
-	7ZjmpJpB6zAv0ZB7klK+qTacNjU/g==
-X-Received: by 2002:a05:6122:d89:b0:5bd:cb34:1b70 with SMTP id 71dfb90a1353d-5c4092da336mr389808e0c.1.1786108602600;
-        Fri, 07 Aug 2026 06:16:42 -0700 (PDT)
-Received: from mail-vk1-f175.google.com (mail-vk1-f175.google.com. [209.85.221.175])
-        by smtp.gmail.com with ESMTPSA id a1e0cc1a2514c-979f2e53b38sm433738241.3.2026.08.07.06.16.40
+        bh=s+oxSUT87w6ZNNbKpTMGnmQcsBsam/5hlyl/VeXKudE=;
+        b=tGZrzhgJtj52Foq/Ww5pzq3qxWWz7H5X9pqY3oXDmT4gJ9X6DJZhwJ0crzbIB7oEu5
+         Mom/eAhWz7daqeERZkQORM4BKP+xW1X6y6fWZgRreUVz0YFenEWL5Y+wk4NWvTXjoXk4
+         A7Uy9BMPrgWZm09ZXRUDSxeFEAdlV8AU11L05xjn4o4KyrKzFOxRCsTRV0saZ4Ge/nmI
+         urThWtUnbS+KCoFX8YZHy86erGgHDRe60NR8UzKwRStoWmHvqeaM8x8AWhtK3fdzY9V5
+         iiv4dK/SWE8xgp2GpH+kyZ4RPBjuA7XmzQOJ/KDwYAA2Ve1+9ctxezMbUz6XA36/69CU
+         33RQ==
+X-Forwarded-Encrypted: i=1; AHgh+RrU8K/3yeQAffrKPv+HPQPR3jJatUoWBmK5Gn5xyFdTfaasTBfF9oXn9n0r/9BFz0wK/QN0UOksdxc=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy1YK3EoYeU+HQIG/tfpKOwNLay6FYaQhv90hvNLqFWZxFKZb2L
+	NrCPp3MlRRMdNpwHCGYZ5W2PSMAuYdilF8omhBPMCHivsNs3/zELB3Gf+L4bfq9D
+X-Gm-Gg: AR+sD12OBQtpvR3z1Zp4y+MmcqD/38ipn1LoMbIJLGypgnBCXrfA1mYbyHtdxEWHc3S
+	xOeTH5gTyWdY84yd8hFTd3WL/8Zla36rwEUTB56A0Xf1Qga/a2TEAw+Xyg1AhJP8JTNG5gCllOm
+	JmKWbzdfzTtfOzvzvbZys4f8IG0UCwy63GHueQ5kqH5taUv13Ge1qL6aRV+FXuVQUkdYqw3PMPE
+	yjg5m70+6n7KYDnDGon8gXMAnqpx5azzY0Vu+c7HCdh9nIZs509iEEYJSOC4q8pUjQ6aeSibMwl
+	WsIEdQ9wsvLNj9EHP6eAhhFxfitwX4kLp+ROvqVbL28zrhNL38AA4KIF5r571+8LBj43PZf8qZn
+	8gNW1vUPUsahsX0UZWAnfEHUNInm5kjfa9tQ6vD3W5b58wCeo5aUBuSDHheVyhe7tVPVF3E8PWs
+	sFwk8wEX5VYAtJEN0t1xUgfjoBjoBwFm1RN4GdWEad6rSRokZFG6XkzwUHdIOL+tQnoqltOLoVl
+	fyI5TRaphtsMvbLBwu1wM0pPw==
+X-Received: by 2002:a05:6102:5691:b0:738:bce9:6afc with SMTP id ada2fe7eead31-760e3194f65mr5789064137.0.1786109120439;
+        Fri, 07 Aug 2026 06:25:20 -0700 (PDT)
+Received: from mail-ua1-f50.google.com (mail-ua1-f50.google.com. [209.85.222.50])
+        by smtp.gmail.com with ESMTPSA id ada2fe7eead31-764013f0724sm792599137.10.2026.08.07.06.25.17
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Aug 2026 06:16:40 -0700 (PDT)
-Received: by mail-vk1-f175.google.com with SMTP id 71dfb90a1353d-5bfaf91daa2so801193e0c.0
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 06:16:40 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AHgh+RrzZBrV2uQouUfTvQAQ2SdNfNxp0QORn9fy03nwn4arnuBYmgMxIPA9X5Sn6JhD90jOvp2zENxqQcg=@vger.kernel.org
-X-Received: by 2002:a05:6122:d89:b0:5bd:cb34:1b70 with SMTP id
- 71dfb90a1353d-5c4092da336mr389660e0c.1.1786108600257; Fri, 07 Aug 2026
- 06:16:40 -0700 (PDT)
+        Fri, 07 Aug 2026 06:25:18 -0700 (PDT)
+Received: by mail-ua1-f50.google.com with SMTP id a1e0cc1a2514c-9690c99c917so1186706241.2
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Aug 2026 06:25:17 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AHgh+Rorhwf6XBxIGgYK5UJyTW6XVbYg8Nx5jRCSKpuneUbiOGbdbMv08Yu1qg6Ui0V8sQIrF6ULyqGdMl0=@vger.kernel.org
+X-Received: by 2002:a05:6102:4bc6:b0:740:2664:801b with SMTP id
+ ada2fe7eead31-760e851e3e5mr5577733137.11.1786109117333; Fri, 07 Aug 2026
+ 06:25:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20260730113200.36456-1-biju.das.jz@bp.renesas.com> <20260730113200.36456-6-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20260730113200.36456-6-biju.das.jz@bp.renesas.com>
+References: <20260730113200.36456-1-biju.das.jz@bp.renesas.com> <20260730113200.36456-14-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20260730113200.36456-14-biju.das.jz@bp.renesas.com>
 From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Fri, 7 Aug 2026 15:16:28 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXAFX1bji7Q+OAmDRYmQ8Gezxhf2RsrBOV34AXLOBgLPw@mail.gmail.com>
-X-Gm-Features: AUfX_my9Sfq3h2qGUbcX_HTTH1M-D8wf0nhKfba41o9CddFp_OLJvLenzCoUQpM
-Message-ID: <CAMuHMdXAFX1bji7Q+OAmDRYmQ8Gezxhf2RsrBOV34AXLOBgLPw@mail.gmail.com>
-Subject: Re: [PATCH v23 05/14] mmc: renesas_sdhi: Make clock divider mask configurable
+Date: Fri, 7 Aug 2026 15:25:06 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdUkagUkD=HhfstYyazZdv25F6ab-ZM7k9T0=EQtfindvA@mail.gmail.com>
+X-Gm-Features: AUfX_mzQPeCDyQ1wyaJV5V4Fa3iFtKPteQt78XLxVMU8eg754UK0SgY97Mc3Jfs
+Message-ID: <CAMuHMdUkagUkD=HhfstYyazZdv25F6ab-ZM7k9T0=EQtfindvA@mail.gmail.com>
+Subject: Re: [PATCH v23 13/14] mmc: renesas_sdhi: Add RZ/G3L HS400 support
 To: Biju <biju.das.au@gmail.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulfh@kernel.org>, 
-	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, 
+	Biju Das <biju.das.jz@bp.renesas.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 
@@ -78,72 +78,80 @@ Hi Biju,
 On Thu, 30 Jul 2026 at 13:32, Biju <biju.das.au@gmail.com> wrote:
 > From: Biju Das <biju.das.jz@bp.renesas.com>
 >
-> Add a clk_div_mask field to renesas_sdhi_of_data and tmio_mmc_data
-> so each SoC can specify its own divider mask instead of the
-> hardcoded CLK_CTL_DIV_MASK used in renesas_sdhi_set_clock().
+> Add HS400 support for the RZ/G3L SoC.
 >
-> Default to GENMASK(7, 0) at probe time when unset, and populate all
-> existing internal/sys DMAC of_data tables with this value to keep
-> current SoCs unaffected. This lets RZ/G3L, which has a wider
-> divider field, reuse the same clock-setting code.
+> RZ/G3L needs a second HS400 enable register, SDm_SCC_HS400MODE2
+> (offset 0x020), alongside the existing TMPPORT2 path. Add a
+> TMIO_MMC_HS400MODE2 flag (bit 16) for controllers that need it.
+>
+> renesas_sdhi_hs400_complete() now also sets HS400EN2 in HS400MODE2
+> when the flag is set, and renesas_sdhi_reset_hs400_mode() clears it
+> on exit. Add renesas_sdhi_set_tmpport() to mask off only the lower
+> 16 bits (TMPOUT) of TMPPORT2 when writing it, preserving the upper
+> bits on controllers with HS400MODE2, instead of the previous
+> unconditional zero write.
+>
+> RZ/G3L HS400 supports only one divider value, so
+> renesas_sdhi_set_clock() now forces the clock value to 0 before
+> masking when HS400MODE2 is set and the internal divider isn't
+> currently enabled, rejecting any other divider. This also completes
+> renesas_sdhi_is_internal_divider_enabled() from earlier in the
+> series, which now additionally checks that the current timing mode
+> is not MMC_TIMING_MMC_HS400 before reporting the internal divider as
+> enabled.
+>
+> Enable TMIO_MMC_HS400MODE2 in of_data_rzg3l to complete RZ/G3L HS400
+> support.
 >
 > Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 > ---
->  * Assigned of_data->clk_div_mask in renesas_sdhi_probe().
+> v22->v23:
+>  * No change.
 > v21->v22:
->  * Updated commit description.
->  * Added clk_div_mask to of_default_cfg and of_rcar_gen2_compatible.
+>  * Updated commit description
+>  * Added a renesas_sdhi_set_tmpport() helper to set delay values.
+>  * Added a check in renesas_sdhi_is_internal_divider_enabled() to
+>    return disabled status when in HS400 mode.
 
 Thanks for the update!
 
-> --- a/drivers/mmc/host/renesas_sdhi.h
-> +++ b/drivers/mmc/host/renesas_sdhi.h
-> @@ -41,6 +41,7 @@ struct renesas_sdhi_of_data {
->         unsigned long sdhi_flags;
->         u64 clk_mask;
->         int max_divider;
-> +       u16 clk_div_mask;
->  };
->
->  #define SDHI_CALIB_TABLE_MAX 32
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index d893a263e770..5dcbb431e1e1 100644
 > --- a/drivers/mmc/host/renesas_sdhi_core.c
 > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -224,7 +224,7 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
->                         clk &= ~0xff;
->         }
->
-> -       clock = clk & CLK_CTL_DIV_MASK;
-> +       clock = clk & host->pdata->clk_div_mask;
->         if (clock != CLK_CTL_DIV_MASK)
 
-This strikes me as a bit odd; should CLK_CTL_DIV_MASK be changed to
-host->pdata->clk_div_mask in the check, too?
-
->                 host->mmc->actual_clock /= (1 << (ffs(clock) + 1));
+> @@ -355,6 +366,22 @@ static inline void sd_scc_write32(struct tmio_mmc_host *host,
+>         writel(val, priv->scc_ctl + (addr << host->bus_shift));
+>  }
 >
-> @@ -1138,6 +1138,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->                 mmc_data->max_segs = of_data->max_segs;
->                 mmc_data->clk_mask = of_data->clk_mask;
->                 mmc_data->max_divider = of_data->max_divider;
-> +               mmc_data->clk_div_mask = of_data->clk_div_mask;
->                 dma_priv->dma_buswidth = of_data->dma_buswidth;
->                 host->bus_shift = of_data->bus_shift;
->                 /* Fallback for old DTs */
-> @@ -1186,6 +1187,9 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->         if (!mmc_data->max_divider)
->                 mmc_data->max_divider = SDHI_MAX_DIVIDER_DEFAULT;
->
-> +       if (!mmc_data->clk_div_mask)
-> +               mmc_data->clk_div_mask = GENMASK(7, 0);
+> +static void renesas_sdhi_set_tmpport(struct tmio_mmc_host *host, u32 tmpport)
+> +{
+> +       struct renesas_sdhi *priv = host_to_priv(host);
+> +       u32 val;
 
-CLK_CTL_DIV_MASK, perhaps?
+u32 val = tmpport;
 
 > +
->         dma_priv->filter = shdma_chan_filter;
->         dma_priv->enable = renesas_sdhi_enable_dma;
->
+> +       if (host->pdata->flags & TMIO_MMC_HS400MODE2) {
+> +               val = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2);
+> +               val &= ~GENMASK(15, 0); /* TMPOUT MASK */
+
+Add a #define for this magic value?
+
+val |= sd_scc_read32(...) & ...;
+
+> +               val |= tmpport;
+> +       } else {
+> +               val = tmpport;
+> +       }
+
+And then you can drop these...
+
+> +
+> +       sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, val);
+> +}
+> +
+>  static void renesas_sdhi_set_hw_adjustment_delay(struct tmio_mmc_host *host)
+>  {
+>         struct renesas_sdhi *priv = host_to_priv(host);
 
 Gr{oetje,eeting}s,
 
