@@ -1,139 +1,87 @@
-Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from vinatta.cz (vinatta.cz [37.205.8.231])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 367E45695;
-	Mon, 10 Aug 2026 01:00:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78483277CAD;
+	Mon, 10 Aug 2026 05:38:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786323658; cv=none; b=d17oNz8HlNMmJIjQ54ZUsVoJCpXkpEyCARkqeu8OU9W9Zx1RGlmen5UlPn2p0nMqcUfp+d2N9RhmD7QGRvz690yMOla0QVODZ46L9QOzKulm0ivW/pOJkjuO9Z6thteTFwWn2e5sDxklsID9ZaEKGBgISFQxNeAvUp+bqmZaNPM=
+	t=1786340317; cv=none; b=nl/e/0VAwSGPlJOGimRZH3ZA6KOtwtenko1ih04xfiPfJr/1WW+KxiQyWkP3Arvk20IFfy1ZcdP9wYgrkFPmJQV9elGFfs/nqiskq2gerZy6mQt3lJnXx4IY57fCleKME0KXmIa+nlFg9IMroQGY1NWxKVXhdqjG/FsKKWjcZAY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786323658; c=relaxed/simple;
-	bh=DgW71cJmCV5xFGLedMaWYcCmsfNj81ysm0gAjiqEH0k=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=utVdQFekt1HCsn2A/JgLqeHWPQEBz7SG/ZyYLGo7NHKsfXf+3dw9S5JV55P1HkGIov4/pMFw3zxvbzq/AQVD8DohUXJDLmkG/NISA+Q67snpFBCtKcXh0qCQv5f2ipju0xHPfdtXSYNMY8sS9pnzizuqeMw7Lt6CdXnZI12mC6E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
-X-UUID: ea58cce4945611f1aa26b74ffac11d73-20260810
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.3.12,REQID:f71462ab-abc3-4110-b015-ca616d577845,IP:0,U
-	RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
-	release,TS:0
-X-CID-META: VersionHash:e7bac3a,CLOUDID:6fd1508fc49c735f6f7edf5eb54f382b,BulkI
-	D:nil,BulkQuantity:0,Recheck:0,SF:80|81|82|83|102|865|898,TC:nil,Content:0
-	|15|52,EDM:-3,IP:nil,URL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,O
-	SI:0,OSA:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 2,SSN|SDN
-X-CID-BAS: 2,SSN|SDN,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
-X-UUID: ea58cce4945611f1aa26b74ffac11d73-20260810
-X-User: xiaopei01@kylinos.cn
-Received: from [10.42.12.251] [(10.44.16.150)] by mailgw.kylinos.cn
-	(envelope-from <xiaopei01@kylinos.cn>)
-	(Generic MTA with TLSv1.3 TLS_AES_128_GCM_SHA256 128/128)
-	with ESMTP id 944241646; Mon, 10 Aug 2026 09:00:44 +0800
-Message-ID: <14a274fe-b414-4360-bc88-757a04a020e5@kylinos.cn>
-Date: Mon, 10 Aug 2026 09:00:41 +0800
+	s=arc-20240116; t=1786340317; c=relaxed/simple;
+	bh=rdgatJqXq09iZfF8MwWC7oqz/aY6pcVLm3L68LKTsVg=;
+	h=Mime-Version:Content-Type:Date:Message-Id:To:From:Cc:Subject:
+	 References:In-Reply-To; b=JoxB2a0jm2ITwXeFGUgkvKyb/YD5N++vfrX/89XdxlwiDfyCc+aOA1EOFnWmKcSBnB9nd5LRDsyDQFmyQq50SQPU4wy8c73tyrCJr2Wq0jpVcbdXYsBW1sYNgP8LoxZkLJUMvqWJRUV58IZ2YAmPjwDckBa2ylNgoaNET+5fj8o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=vinatta.cz; dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b=oGxaFSkb; arc=none smtp.client-ip=37.205.8.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=matfyz.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vinatta.cz
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=vinatta.cz header.i=@vinatta.cz header.b="oGxaFSkb"
+DKIM-Signature: a=rsa-sha256; bh=rdgatJqXq09iZfF8MwWC7oqz/aY6pcVLm3L68LKTsVg=;
+ c=relaxed/relaxed; d=vinatta.cz;
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
+ i=@vinatta.cz; s=default; t=1786339366; v=1; x=1786771366;
+ b=oGxaFSkb04TgaZtwxVkxckf1o7rYI9s9/g6I7Of/SalSoGIexeWIuZlUoEHf73s0Nz8+hSCO
+ 2mOt9PDjshw9LrKOukPYyHWII+Uck9dHlxrom4H64jN1o5BFdzzPoa9+IFdmpBoKBQDBVl16dQs
+ hC35Gafs18KqAAzWU46laRUuSsP4DfzpJLci/N+VWs3zQRlDEPttvBsDAEekZmzC1nzttaILjwY
+ yZau2lTDM6Ymsd74zl4KX0Y06mN6FNZrSkv1WFxAl0CftJlHdo4eL5z7SAml85Z/PAHHrPlxTBn
+ GrKqIEVA05Te3hkgHF92CN9f233BrkQuCP+yRINYgmKHA==
+Received: by vinatta.cz (envelope-sender <karel@vinatta.cz>) with ESMTPS id
+ 15759296; Mon, 10 Aug 2026 07:22:46 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: atmel-mci: Fix use-after-free in atmci_remove due to
- race condition
-To: Aubin Constans <aubin.constans@microchip.com>, ulfh@kernel.org,
- nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com,
- claudiu.beznea@tuxon.dev, linux-mmc@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <4389d5deff90b2b860bd07f17668270fda36bd26.1785750407.git.xiaopei01@kylinos.cn>
- <e4960897-fe77-41c2-95c6-56038b7c9ba2@microchip.com>
-From: Pei Xiao <xiaopei01@kylinos.cn>
-In-Reply-To: <e4960897-fe77-41c2-95c6-56038b7c9ba2@microchip.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Date: Mon, 10 Aug 2026 07:22:34 +0200
+Message-Id: <DKL0GAHVZF2H.1PCBLWAT453SS@matfyz.cz>
+To: "Johannes Berg" <johannes@sipsolutions.net>
+From: "Karel Balej" <balejk@matfyz.cz>
+Cc: "Brian Norris" <briannorris@chromium.org>, "Francesco Dolcini"
+ <francesco@dolcini.it>, "Rob Herring" <robh@kernel.org>, "Krzysztof
+ Kozlowski" <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>,
+ =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>, "Andrew Lunn"
+ <andrew@lunn.ch>, "Gregory Clement" <gregory.clement@bootlin.com>,
+ "Sebastian Hesselbarth" <sebastian.hesselbarth@gmail.com>, "Ulf Hansson"
+ <ulf.hansson@linaro.org>, "Frank Li" <Frank.Li@nxp.com>,
+ <linux-wireless@vger.kernel.org>, <devicetree@vger.kernel.org>,
+ <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+ <linux-mmc@vger.kernel.org>, <~postmarketos/upstreaming@lists.sr.ht>,
+ <phone-devel@vger.kernel.org>, "Jeff Chen" <jeff.chen_1@nxp.com>, "Peng
+ Fan" <peng.fan@nxp.com>, <david@ixit.cz>
+Subject: Re: [DONOTAPPLY RFC PATCH v2 0/4] WiFi support for
+ samsung,coreprimevelte
+References: <20251026182602.26464-1-balejk@matfyz.cz>
+ <DEJL1ATTQMVE.120JV9YW59I27@matfyz.cz>
+ <aSnWYS2g5slVFaSk@gaggiata.pivistrello.it>
+ <DI5L100Q1RKO.1A68EJIPWYSRC@matfyz.cz>
+ <DIKSVZCAQES1.35I4QY11LBVNV@matfyz.cz>
+In-Reply-To: <DIKSVZCAQES1.35I4QY11LBVNV@matfyz.cz>
 
+Johannes,
 
+Karel Balej, 2026-05-17T10:14:58+02:00:
+> Karel Balej, 2026-04-29T12:55:23+02:00:
+>> what are the options here now? Would it be possible to make an
+>> exception and accept the patches without the firmware being in
+>> linux-firmware? This is an old device with no mainstream audience so I
+>> expect everyone who will want to use it will be able to supply the
+>> firmware themselves and it would be great to not have to keep the
+>> patches in a fork, especially when trying to build on top of them
+>> further (such as to fix the driver-firmware incompatibilities discussed
+>> in one of the patches of this series).
+>
+> would you please let us know whether there is any chance an exception
+> could be made for this chip regarding the firmware or whether there is
+> any other way to upstream the support?
 
-在 2026/8/8 01:23, Aubin Constans 写道:
-> On 03/08/2026 11:48, Pei Xiao wrote:
-> 
->> In atmci_probe, &host->bh_work is bound with atmci_work_func, and>
-> atmci_interrupt, atmci_timeout_timer and atmci_dma_complete can all
->> queue this work on system_bh_wq.
->>
->> If we remove the module, atmci_remove makes cleanup and the memory
->> allocated for host with devm_kzalloc() is released after the remove
->> callback returns, while the work mentioned above may still be pending
->> or running. The sequence of operations that may lead to a UAF bug is
->> as follows:
-> 
-> Thank you for having spotted the issue, and sent this fix.
->  >
->> CPU0                                      CPU1
->>
->>                                            | atmci_interrupt
->>                                            | queue_work(system_bh_wq,
->>                                            |            &host->bh_work)
->> atmci_remove                              |
->> atmci_cleanup_slot(...)                   |
->> atmci_writel(host, ATMCI_IDR, ~0UL)       |
->> timer_delete_sync(&host->timer)           |
->> dma_release_channel(host->dma.chan)       |
->> free_irq(platform_get_irq(pdev, 0), host) |
->>                                            | atmci_work_func
->>                                            | // use host
->> // devm resources released after          |
->> // remove returns, host is freed          |
->>                                            | // use host (use-after-free)
->>
->> Fix it by canceling the work after all the sources that can schedule
->> it (IRQ handler, timeout timer and DMA completion callback) have been
->> stopped, and before proceeding with the remaining cleanup in
->> atmci_remove.
-> 
-> For completeness, PDC completion could be added to the above list of
-> sources,
-> even though it is a subroutine of the IRQ handler.
-Yes.I used an IRQ handler instead here.
-> PDC and DMA are exclusive.
+I still haven't heard from you, could you please have a look and let us
+know if there is any way forward?
 
-> 
-> Mentioning on which board or MPU the patch was tested would also be a
-> welcome
-> addition.
-Sorry, I don't have hardware testing here; I found this issue through
-static analysis.
+The support for the chip has been out of tree for over two and a half
+years now.
 
-Thanks!
-Pei.
-> 
->>
->> Fixes: 7d2be0749a59 ("atmel-mci: Driver for Atmel on-chip MMC
->> controllers")
->> Assisted-by: Codex:deepseek-v4-flash
->> Signed-off-by: Pei Xiao <xiaopei01@kylinos.cn>
->> ---
->>   drivers/mmc/host/atmel-mci.c | 2 ++
->>   1 file changed, 2 insertions(+)
->>
->> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
->> index 3b4928f5b9b2..8f4df250a77a 100644
->> --- a/drivers/mmc/host/atmel-mci.c
->> +++ b/drivers/mmc/host/atmel-mci.c
->> @@ -2610,6 +2610,8 @@ static void atmci_remove(struct platform_device
->> *pdev)
->>
->>          free_irq(platform_get_irq(pdev, 0), host);
->>
->> +       cancel_work_sync(&host->bh_work);
->> +
->>          clk_disable_unprepare(host->mck);
->>
->>          pm_runtime_disable(dev);
->> -- 
->> 2.25.1
->>
-
+Thank you,
+Karel
