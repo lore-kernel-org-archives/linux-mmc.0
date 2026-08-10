@@ -1,304 +1,235 @@
-Received: from esa.hc6817-7.iphmx.com (esa.hc6817-7.iphmx.com [216.71.154.88])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 336692C08D0
-	for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 06:24:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.88
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786343045; cv=fail; b=V/8pYBgWCJNnqG4L1y0pVJl3njqqyh0CCXCoZyNeQSqR+yg3OCs1pRaEJ3EPUzXqgW2xyilRw/q8tPpPHWK79odzo49rzR3tvYcUP1vWR6fuvfcGHfZpce7MWwU4YhyDQaOC4m0t/u4evnu0MRCizL8LfYaSCtn/FaytJAfW9eM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786343045; c=relaxed/simple;
-	bh=Rh1DopA1X03MQzlDB7NGAEwbf2bpHEpKIYSaASZBTI8=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=HBijyI+3kgzf/mS/sR+zTBkYlzfNYnj6Tln9bTcNVr7tgsLaugmqsLnbUO3UXnuZ9gLR/oYsuztP6PD5M13EU2YBUIxy2XtiH3KyJ+UFOE+OSRel7AoShQwQEk0EqGkoj/go5/RSF7qhPkp4Ur9hU6aWMuCBToAJ0kTxRWPXMXs=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=BTWWLWzX; arc=fail smtp.client-ip=216.71.154.88
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4221348C7D
+	for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 08:03:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786349025; cv=none; b=G4KnaRYmlEYEI7V8IigJyt8zI989r+6n5IIXfXjlGNW165oaMMQmOEq5CxeAIZhesIIKFUgzlTXJsf4EapcVvzBQM6d6Q9afaEM9MBIVKG8yMYME2IVpHYck/X0n2Q3DF8BymbKK5Mzjwjq4FReRCiQfvHTDHIOinxJyl44+NTw=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786349025; c=relaxed/simple;
+	bh=foWs9e24w9qPUIsKEA7/suDgVJil5cRHU69ADdNXgR4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=dEDoETVg0v9IcBYVg4y3Xz44glTLLkAXeckRhI9GXNjNEytGwrQ0iWrToLFozpQ2JhvcNgTxiY/zyo8xakEhkw0QL1y3PcE4wQvcMZcTjuld+bqoMq5pjhnD49BsCXe2Kj5Df7ovd84ZVbJSCRSSvv2ZfSgeGoWeMzFzhvly6wQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=gdTnpVyV; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=IEYjOHLP; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="BTWWLWzX"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkimnew.sandisk.com; t=1786343044; x=1817879044;
-  h=from:to:subject:date:message-id:references:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=Rh1DopA1X03MQzlDB7NGAEwbf2bpHEpKIYSaASZBTI8=;
-  b=BTWWLWzXIcUlXPWnaizDAStCYE/FGIWfIFiHnndD+H9jMjq9t2vq0gAH
-   CAFBsQoYQ3iAwTkNZkvRtTlydw86W7czfAzlmZ7FtB+lLhxBn9qz0wfu0
-   g8M1XnCzhY7vaXG35J6FIsoBipsNBr3wp7oHOpuLO2cqsUtDbxnaXySXq
-   kQZx3eP3BodWIm4k2h6N8Jf21eH39YqFJ0DXfTCMUV9480ktcN7Eh2o2Z
-   OHx6ejZWTSAtIuwDlbZakT9nq2pKAwaFPEmzCKO50+tyLfZ9+0hvfL42n
-   dOA4RiW8h0A6jdGsiO0EE5yjgwzqEXNsXzA8rtTv6qgrMbfGEWkhnOn7Y
-   g==;
-X-CSE-ConnectionGUID: iymo6CafQ+u35l0+Xs0L1Q==
-X-CSE-MsgGUID: ewX6ImdiTpKjEv+/3vzG1A==
-X-IronPort-RemoteIP: 52.101.52.113
-X-IronPort-MID: 28069246
-X-IronPort-Reputation: None
-X-IronPort-Listener: OutgoingMail
-X-IronPort-SenderGroup: RELAY_O365
-X-IronPort-MailFlowPolicy: $RELAYED
-Received: from mail-eastusazon11021113.outbound.protection.outlook.com (HELO BL2PR02CU003.outbound.protection.outlook.com) ([52.101.52.113])
-  by ob1.hc6817-7.iphmx.com with ESMTP; 09 Aug 2026 23:22:55 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=qUZbF/9UFTxywbSJ95tKLM+7d9eE9V2Hu+QQp08w8iohFfd6hmXK6Kut6TrFQMeZwXZCWYknTQk1b3YyuDsVbN1X6dnRekCl2avhgpQ7r284mAyTUjRw8jpz8K6ZsbVnzShzlAUViwU7y+/GA+neZNxuAL+vshnllMOsNfqR74ts4cjzG+WPwY0P8M429J4be19LOxtkNXUskrF4W3A3hit3wu97VM/AzifHQXvhmY+0ZWFdBAYzEMb/p47WpwCXSwqQ8m1TWdvhnZ8+qvoGaGX2qrLpyF7olYdRO4FiPXSr+6p8NizcUw8Xukun70PAfQBkRW76No3VVDYsA5ojzA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=5ZiVxgaKWGfa3X1DLfrN883YzAGWj2iVkwZnkIRwpPA=;
- b=aCS9qbdh0NIZcnmuYaZyjKMoc3FpYLsLcDx1B6SFTRchwSTvCnqZDn9mzYBfHY3gxLU6HTCIZZ3DtCuTJDcuMvQ6hFRDG1+DtjsyqTW4I93/Qrw5o+ZQOeqDn3ZCDLBq+4AAIgLGSIHUjZIo1HHOHA+Tu5OQcR5TXLtTffc/uYXp0krnoGNlyrQ4zJGskasbAizHrDfyybDCLt7P2/FeSOhkGhZUpmR5fS2tAy0Sm7qP4sIbSmNkCxC8H7UV95+8RcTwStPt0GpbDtInxMY1ifEzkSEPzG3LowsxPcK/2wMm4GroWueXkjUN2Tu3SQVuZLuRV4uX4dju3HiEGZhH8g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sandisk.com; dmarc=pass action=none header.from=sandisk.com;
- dkim=pass header.d=sandisk.com; arc=none
-Received: from DS1PR16MB6753.namprd16.prod.outlook.com (2603:10b6:8:1ec::5) by
- IA3PR16MB6727.namprd16.prod.outlook.com (2603:10b6:208:51f::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.292.25; Mon, 10 Aug
- 2026 06:22:52 +0000
-Received: from DS1PR16MB6753.namprd16.prod.outlook.com
- ([fe80::72d7:97b5:4539:a90]) by DS1PR16MB6753.namprd16.prod.outlook.com
- ([fe80::72d7:97b5:4539:a90%6]) with mapi id 15.21.0292.024; Mon, 10 Aug 2026
- 06:22:51 +0000
-From: Avri Altman <Avri.Altman@sandisk.com>
-To: Torstein Eide <torsteine+linux@gmail.com>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH] mmc-utils: Add bash completion
-Thread-Topic: [PATCH] mmc-utils: Add bash completion
-Thread-Index: AQHdJ9Yrk9Y+yu/KI0GvbV/N7rVqqLaWz94Q
-Date: Mon, 10 Aug 2026 06:22:51 +0000
-Message-ID:
- <DS1PR16MB675305B57F157ACDBCBB5D7CE5DE2@DS1PR16MB6753.namprd16.prod.outlook.com>
-References: <20260809080714.67754-1-torsteine+linux@gmail.com>
-In-Reply-To: <20260809080714.67754-1-torsteine+linux@gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=sandisk.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DS1PR16MB6753:EE_|IA3PR16MB6727:EE_
-x-ms-office365-filtering-correlation-id: 1cf65604-9abe-49a0-b5e7-08def6a7ce96
-x-ms-exchange-atpmessageproperties: SA
-sndkipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|23010399003|366016|1800799024|376014|11063799006|56012099006|10067099003|3023799007|38070700021|55112099003|22082099003|18002099003;
-x-microsoft-antispam-message-info:
- QPsg1IQurNGNqx/YMvtnGMWGqI8ITI0LHkaO0YS156dSHgLoL6AKQZakd2MJczoQ2eoVXH3Y+ncF/CxiIKKxcDVnvxuuOuHdckmzaZ5D8AeYmO9N55syl5rqf2+BQ8qnf6c8stnjtHeDwCm7Tmig8POwXxmDJNN5kzMB2hCRftH4B+lqiz15lJu8yLODzqjDFTp4UoXyq12IhlC1AX51rnUV5JsDn5qPUuyvP86oYQq68LPmxRD9Ajc5aQqrVI/QTVp4Shg+xJ3Ihdf2TLNXB38Ovq0Bwg0nzX6GWuNEr57VISGqyu/HQdQ2de6Cv6j6E2u7ZGC9tH2cJL0mp5XizMVmykPcdVLqgvX+ubuQmJyxfcfPxe/ZtSe/XicHu9oOViQxCC/XgwOBdBY1q0kIC+zxHZjzNcsHni8C7bP2BbqZXYAfmJoe5JxD6pxKyjsqutSsWBqO7KMqv2MfMR1d2dbrvZD2p/aQ1yrme2fQdVZDKsAEQ0vnymSw2x6nITDkLeHw4qe47Omqkt1SX/CxOjBSLuHLAtf1dL0mIYwWAAHvQ7rPfVd/+1pmIUscEpWX+n6L+YIbOJuztGhh4aZsWhRbE9pEqxVtzf6BuxgpNujGXGhkx9Nr3B6gYIaFI5B6KodpuBXICVD6c2QD3eNEI/IKuH8nwh+8PTBhKp4axP861KNO6M+12elxbCw3eQcBtdFDILvGPtb81BJttDSNwQgCCYkKTMKe3yH43bXCDd4=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DS1PR16MB6753.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(23010399003)(366016)(1800799024)(376014)(11063799006)(56012099006)(10067099003)(3023799007)(38070700021)(55112099003)(22082099003)(18002099003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?qdfQZ8DxEK8r0nPszDwaFo7Yp/AtLYAHMwhZdC1h5FK9LgJmpz5JyE8X66er?=
- =?us-ascii?Q?dIF3Cv5Equ7EJxQxJSbF3MMmxDDngpEUQiVUHJmS66UcT+gUKcJGXm71p/XG?=
- =?us-ascii?Q?NaBKvFz3EETS6LmWXx//Nmt+7hwLqOaRmybypiGRr+zbo5tNLKi8gE8kNdfW?=
- =?us-ascii?Q?ikaEFBsz0jW8Sf4SOOaXdUf2rpYpcMngfWAMaXswjaO2F5t7Xj9Zder5PkWQ?=
- =?us-ascii?Q?W/kCW2E+a+SpHYmuIKiKxpeqfN7235eIOZe8X9bzp2LMX9RAVtSeu93Iaujo?=
- =?us-ascii?Q?10JN9gq4xv7KO9eF1q5ac6EbrMoGlmaXDVsMFlmnAFouMCyVvYnQavF+9gto?=
- =?us-ascii?Q?ALOT0iKBt2nZ6P6Gje/saUshVRALrJgazjnfaT3AiOFO/Iaed56ClAYrOp43?=
- =?us-ascii?Q?ffaJjDuEt+ktEy26aWrrlb3H8YMQ9gcnElfaP6pIlIzj6vDI750W9J16ZDBc?=
- =?us-ascii?Q?SSID21BBO8p0gvztKRiw6Mvh6IbQCNKCUv+hOGVCOHWkOYh7ekQtOLLLCRzc?=
- =?us-ascii?Q?V3+HlTI7eGUnWETYm71u5mX5bgL0TqUQkrcKjh4jx8F7cr6SjL6Kkn2boJHo?=
- =?us-ascii?Q?sjqe7BxgdVWM6l10X6S9xErV60GTFcrY+mgt8ZRxSJaxzCWWM8r4joIwsKI0?=
- =?us-ascii?Q?wkMN7EdCS9OKVU/hxPuQ9ZJa+IHdUlLaaSUNDykGN89B8Gq2++wpYD1HprnZ?=
- =?us-ascii?Q?NbfTPF20hsXIq21+g2OVe7p1tRlOKoNsYI4rWtzDU6P0CVDTg9dEoMAXKeJa?=
- =?us-ascii?Q?9u2UYhBDzuzXjln/s2Bp1MI6Q1+Rp+jT6inrMyUwkq7TkWHXk43oLGclCl/Y?=
- =?us-ascii?Q?MW9uPgb2kb2pC3Y+Vohfg1cE6Hm65uxNyrjUdCMo8fO1u6EUdAQ38SBEmLRD?=
- =?us-ascii?Q?3ijF0uuXIJdrw+Ul9d96wXfnTJEA87QlZpLiLbjQSDgr9MIqc7c0yIu/Kgcc?=
- =?us-ascii?Q?J0qXnFAT2BJ26ly7brPL2njiNX9bCP+p2a76uIyXxT20PK38fqQb0BbJ8f/+?=
- =?us-ascii?Q?nihdY0QB0VCXdI4J2FoeY95x9jczTeNFWMm4CDwyTn5mcXS9d1Z/zS16P/qd?=
- =?us-ascii?Q?rqviHt5K6Djz01rwqdIS34y6/zcS7uKu2zfpXCjxO7nJSEqx2FcArxXlmKGF?=
- =?us-ascii?Q?z/FL3B+LGMA+bHL77ECSHjxiE0zRNeJ8MXQb5okCl+kdTzJ6xbyJLVOqXdAI?=
- =?us-ascii?Q?fzs2J25brBKWEHDPv3VJUCVpG+6ie59pMCaW2MHn3kRvUy9/jFCg8HDdqOHq?=
- =?us-ascii?Q?iZEzbrZVH/hQl8ei5ibejRGAeAwhWWzXpPTn8vFdzjGvyxpzwmIDkVYyIhxK?=
- =?us-ascii?Q?x6INYqZiD0cgS2gwxACkPnM4syAikPdP6vxKP4e5VrWnmZ/r3mljN73diIUd?=
- =?us-ascii?Q?vBDveARrzRUIeq17pEjYste4wYMxOuU/cWlpjCCv4wStNdznTn5M+MrkBkD4?=
- =?us-ascii?Q?f9x2MxYC3z7sakWUQ55bxJubySEHndNwHaSvmIoYPwjMz1qHFnhBkA75ZegD?=
- =?us-ascii?Q?cvkFPZ5tL4FY2WlEAMAa0KQHcx0ePz/jZ/kz8S3LCQKEP3m/Sz8RCBqYhv/3?=
- =?us-ascii?Q?XR/7pMmS6Nxe/FPDgF6rh/QKglqXbGxFl21YqjAKs815Us1SZN+eYPWThWeW?=
- =?us-ascii?Q?LZLmCauKAof1kvTVn1sArvTA6KIj3wjZ9bhncJjrnOvGc64Z9Nk4pUlPUYhZ?=
- =?us-ascii?Q?Hvs60McTrU/jDfl3oSJNPNsdkDpJQqIGuxYF3bb34cVu+weoMZKQ4scFoKJR?=
- =?us-ascii?Q?x5dGGHMBig=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="gdTnpVyV";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="IEYjOHLP"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67A5pWnr1240653
+	for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 08:03:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	JxKtSuEy3P4FHpzR9BO4tWVvzdjxxUd1uxUCq5FcQ4Q=; b=gdTnpVyV1nzijyYt
+	CZqYZ3Ul4Fc2P1pm/QB4FlX/pxzxNSKwIuWKzp3S+WvUShL9DhYIRnwtQjNt8XrC
+	kUy4sLeNk/dGiZyPBjFLvSgRqiXjfINqpzNC9v7CBUWiXWOER5uJsgsiWirbwcbt
+	XMon4SpKAmT0q1+Wi9zmsnGiMi1PfCOSmAcgSNbGYmsXaqqQfkZ53eec6s/aup/V
+	qZUbZqPUsCu/Auj6nr3LQ//ZjMPrTk4nI8nI+lMDD4pMxVFdmN3MiNFPiojYEEMu
+	AQ503uAreeK+P6AsAWbjp6x60hfnGD0UV5sQ42j5lcftsTp/n5VnZU2oreABEtSW
+	+mEQeg==
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com [209.85.216.71])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4fy8v3rcqw-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 08:03:43 +0000 (GMT)
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-38ecc48b3c2so2855277a91.1
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 01:03:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1786349020; x=1786953820; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=JxKtSuEy3P4FHpzR9BO4tWVvzdjxxUd1uxUCq5FcQ4Q=;
+        b=IEYjOHLP7uq+h3agamktqQe08eHVDA8MyBUs31adICL81kzEOb70TeVOVYjHkSlu6p
+         Juhcw43gziN6Avfofc3Va7SOh9G3uDLssb4mmHxD3iFRiv8lfJnpQxwEEKgv9XOUulmv
+         wDH90EukSE6HdhQ+NaX+aJcK/92YNiYewOh52r9oPEYmXWuclth2Git14pY3RJrKv9qJ
+         mxhfYrOfSfrfmLKJV6TqOBUiPKydqElVPWt7GP+32/pcs7rXVbKHCVw30umb2jxN6jvY
+         i6eyqQXdU4K6rpkEvaHwVpmihayb7LK8IsfxMoTCek8kd3Od9w6VAZ3VSNouZ70sJrsn
+         Kpiw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786349020; x=1786953820;
+        h=content-transfer-encoding:content-type:in-reply-to:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=JxKtSuEy3P4FHpzR9BO4tWVvzdjxxUd1uxUCq5FcQ4Q=;
+        b=AeIQrbSG0IWsQFqvPYgEvRmE7bHi5a6tMJl+JEZsHg9EkZBBbUfPM0rLb7Kv13bclX
+         qtft53UcEHWLnTrFwTqpIX3nsF8b/S0wH4Geqbg02Znu745SMxszgmKHOH5MvZ7AOq5C
+         ZZPZ52GH3qvsW/HvJly2Nwi+F/factBOdlRZ+k2+rrHTykEIxRcfEaQ0cOh35q7YGZKU
+         NdVoKt5GcVFXOpIpFfO5UPTf535iugSCVyAfMXD95331X3jHI2V77EzzZbj47PD1g6aY
+         UeRLNsrLqL0Bok5Mns7tBX+aKw3NClfYRUVPn84yCXc2yBD07U9xlgL1JDyFGeHWIRlr
+         Izow==
+X-Forwarded-Encrypted: i=1; AHgh+RqzOmvCmtIQiQv36AsoEKNx0asvay5Suroyamu8Lh7aEF9t1B4hga/z3h6in+CZkS5VW2fI3R94/+k=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwZJ2aDFo0w1e1Y8BGpXNhnvIf9NM645O7ywShqbVZd9/ScFAcT
+	xAesf7BKg7kn+QYlRkXZw/Vr0/cjXbWqOEe7tNfkPF9bMu49SpHdQnuRrLy1b5CqTexH4l3pBA9
+	CHofI/iXpeyUbwJR8W6FB8c/d9AvfEZPg8n9xIEa/4pB7jW5SEmIKBy2DJQChiw==
+X-Gm-Gg: AR+sD102Lzzvz8tdXJrAyxAiXsAhBnvuCpRk+1Bv9LLm/xzG9kXYTqbF4T17a4e+DDI
+	0StawB/2hEb7muoJauMb4GhVpkVzFQfm8CeZFOFjjJuVslcCyTZX2y/UrPz/YVoNQh0Ttc2xSv7
+	8XYsbZUsSj8Q1qD+rtTu8YPuKT7jmUh4yH1xpdg6lZrG2ioymqGP6VlhKmALQwS07I4idHuQXjM
+	bEfeAtl9GXCWXvzi2q9qF8mWTjzT+4IEcFELQ4AU7/tPVJxBZSGPFMCOKE7CEQg00p8tkvW9BxT
+	MgYrRHd8TXHns1Y1DD+04fE9obPkucvPgFgwxyH7w3K4FDICmO/FrmqGsrFLFPyuliwpBGHni1C
+	5blukwfxfCVquK68AznXR6aYl5w==
+X-Received: by 2002:a17:90b:4f81:b0:38c:e9e9:e7ce with SMTP id 98e67ed59e1d1-392822bf6abmr15056743a91.3.1786349020381;
+        Mon, 10 Aug 2026 01:03:40 -0700 (PDT)
+X-Received: by 2002:a17:90b:4f81:b0:38c:e9e9:e7ce with SMTP id 98e67ed59e1d1-392822bf6abmr15056694a91.3.1786349019895;
+        Mon, 10 Aug 2026 01:03:39 -0700 (PDT)
+Received: from [192.168.0.102] ([49.204.22.130])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3925fc6c13asm11501889a91.2.2026.08.10.01.03.34
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 10 Aug 2026 01:03:39 -0700 (PDT)
+Message-ID: <c0716e8e-728a-4364-98b3-a122a5475bc3@oss.qualcomm.com>
+Date: Mon, 10 Aug 2026 13:33:32 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Exchange-RoutingPolicyChecked:
-	jHOSiYaEy83xvsmJkAtDeox6+0A8maCx5ApwCERfO8oHw3tSIjcqv2xeOF+ee5tGM8BsI570BnKMOOQa48mSgx/HEEFw55QErw546D+RTGWF0ExAo/cvJsRrpKk66Qex/slgFoZIM7VCXNumMV1VJOOHYAXNtdpA7cqBkFO6j0whA6tDoKydKWG1dl36e31f6UWlQLraw0oRUccz9M4+dc1+QKTh8f1JLV257AmW/e9TXd2X0p01+N/CLCetajs+tYRHGc9kzZ41rr3TF5kDUhzgAcJal78ETFOQga83tyi1QL6mVrbAnXWnoLb46fJ4eRAMElAXPg12PkFruDUqgw==
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	S/21dgV/APofudH040wUGovLN9hH6IrXioU/OM5EM7sJQG9XjpcUxVIHAE3Y5p9UtHgDEQ1015FeQyFxdkrzSo+D8WmWM88NhXJ+tyJ3zcaB5AI56fRcyh/ylwJ0GjWedPGengt6DVP7JNpq0mOkW1d/2s4l3ru/3ujAF0/LYV80EF/7KTX/hYZHX+255kbRkABu9KrCp0SzK3FADr3JPsDKinmoVGjuCx5UGqQ0KCUEmwLUgFiiWRsZGVWvuWyUK7tj2strsx0Unmx39uUbL5xZKPe8T9SRZX2bj0BPU/FepS4pMvicEGG495GRuWPL+WUdX85dGUUfoSGOWDwXPTlu94bbHxyTjHwrrQdc92DM10uF54Kng4D6Pl1eKU37JLH3k0Nzkh1bzq/I8cBbmEx8z4VL5cWdFROd5dE+17ybaIYr9Nr/zzT+Flpnm4So51XDzGsbSkmdGxB9ahQd4QA53WzR7nWHGSsROu4Q4RRsl2/yVYyWdaj2s4DOz6Y/GvDrC1iMW9i1yM2PELDiBuoO+s4AHD8nL6QS3/rz+8oQmaLhMyJNkLKZvtW+Q/Spkdloh4oRHEs1t9virBYo5JTu1fdJdUz4EQIG9IMrpy8TrrBvqV3XhHdWQ3nNYw7qPnIywdb96NoBoy57WTY5Fg==
-X-OriginatorOrg: sandisk.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DS1PR16MB6753.namprd16.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1cf65604-9abe-49a0-b5e7-08def6a7ce96
-X-MS-Exchange-CrossTenant-originalarrivaltime: 10 Aug 2026 06:22:51.8704
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 7ffe0ff2-35d0-407e-a107-79fc32e84ec4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: d7TjguHH7lYo63y9LQWlsRfRWrRUwsYqRw0vd++9Hz55C1JLHiHrgp1/Pn+6GOlLaFubo2/btEh7TI2tp/WoLA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA3PR16MB6727
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v6 2/2] mmc: sdhci-msm: Use pm ops instead of macro to
+ restore crypto keys
+To: Neeraj Soni <neeraj.soni@oss.qualcomm.com>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, quic_dmukhopa@quicinc.com,
+        quic_rampraka@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
+        quic_gaurkash@quicinc.com, quic_sartgarg@quicinc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org
+References: <20260803163123.1802005-1-neeraj.soni@oss.qualcomm.com>
+ <20260803163123.1802005-3-neeraj.soni@oss.qualcomm.com>
+ <20260803201803.GB63318@quark>
+ <abe31a1b-e34c-d5b6-4bc4-3733acc56e98@oss.qualcomm.com>
+Content-Language: en-US
+From: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+In-Reply-To: <abe31a1b-e34c-d5b6-4bc4-3733acc56e98@oss.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-ORIG-GUID: 9X0CoIAhfCJHAndPQ6PkdV5Kf_mZ-1rz
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODEwMDA2OCBTYWx0ZWRfXz2RzE9GoCLM4
+ VqwwGQbjoUHz3EvIj0i9tEyX1xZ8Nj+TGgobBF12UQdJ1CfBsMq5wDOB5L0rADPsGYn510aBPqR
+ HNmjWA0rTrbzR+Ikm2/GxoKx9nowFgKhirfT9sIpQG6zeC7j/xbGNeTkMARlSoXSM95lYrr+20o
+ qC2sjxueA9biFVJUlQ8CAV5J4rGCyBdd/FJPBGACyr4msJrWIX1wyi0Y7t8Q9KAf5cv1QoWQsZ3
+ UJ5Vf8L/RRAHbVOyEltoIgmdWUCYLNIXCTAC9YMs2ypm79QP4BdZwPsIeWa/WE2dyKgE05gJFZH
+ aTM3HlLOnMq8pYEDco4fiiTXZ61JwTa2xnFG2iDJb5rwy42X16R2ACYR2SzTe0SnSYKmyImFR2x
+ EEusL8eDPGaaN85a18dNPGWuh6ypc4+doxGUluDenJVCIWb+cNTTNB2XPCAelRk8hnZK1EGRw8e
+ rSOs4s+ZKL24oHqSfWQ==
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODEwMDA2OCBTYWx0ZWRfX/aykjIUHREZt
+ 6E1QAgaIpkURUQF6sOB6sH6kHA5KD9vgK3FWEmkLH2wn5eznvbo6KVMj424mxOuKnK5BkxKUwSn
+ fqzwKCDx2DaLwhA8oqwAgEDAzXinUfo=
+X-Proofpoint-GUID: 9X0CoIAhfCJHAndPQ6PkdV5Kf_mZ-1rz
+X-Authority-Analysis: v=2.4 cv=c+mbhx9l c=1 sm=1 tr=0 ts=6a7985df cx=c_pps
+ a=UNFcQwm+pnOIJct1K4W+Mw==:117 a=wB/OwOWguG3OqMiIzyR4iQ==:17
+ a=IkcTkHD0fZMA:10 a=Sv0fKeRqtYgA:10 a=s4-Qcg_JpJYA:10
+ a=VkNPw1HP01LnGYTKEx00:22 a=u7WPNUs3qKkmUXheDGA7:22 a=Um2Pa8k9VHT-vaBCBUpS:22
+ a=EUspDBNiAAAA:8 a=COk6AnOGAAAA:8 a=RJ2Gkk4ao1b7OKlePUwA:9 a=QEXdDO2ut3YA:10
+ a=uKXjsCUrEbL0IQVhDsJ9:22 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-08-10_01,2026-08-07_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 priorityscore=1501 malwarescore=0 bulkscore=0 adultscore=0
+ impostorscore=0 lowpriorityscore=0 phishscore=0 clxscore=1011 suspectscore=0
+ classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
+ reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608100068
 
-> Add a bash completion script in completion/mmc that completes
-> subcommands and /dev/mmcblkN device paths for all mmc commands.
->=20
-> Subcommand completion is driven by parsing 'mmc help' output rather than
-> maintaining a parallel hardcoded verb list, so it stays in sync as comman=
-ds are
-> added or removed.
->=20
-> The completion directory is named 'completion/' rather than 'bash-
-> completion/' so shell-specific scripts for other shells (zsh, fish, etc.)=
- can be
-> placed alongside it without renaming.
->=20
-> Add bashcompletiondir variable to the Makefile (defaulting to the standar=
-d
-> /usr/share/bash-completion/completions) and install the script as part of
-> 'make install'. The install path can be overridden at build time with mak=
-e
-> bashcompletiondir=3D<path>.
->=20
-> Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
-> ---
->  Makefile       |  5 ++++-
->  completion/mmc | 53
-> ++++++++++++++++++++++++++++++++++++++++++++++++++
->  docs/HOWTO.rst |  6 ++++++
->  3 files changed, 63 insertions(+), 1 deletion(-)  create mode 100644
-> completion/mmc
->=20
-> diff --git a/Makefile b/Makefile
-> index bf8c006..607d372 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -7,6 +7,8 @@ AM_CFLAGS =3D -D_FILE_OFFSET_BITS=3D64 -
-> D_FORTIFY_SOURCE=3D2 \
->             -DSD_IDS_PATH=3D\"$(idsdir)/sdcard.ids\" \
->             -DMMC_IDS_PATH=3D\"$(idsdir)/multimediacard.ids\"
-I guess you are assuming here that the lsmmc series is applied first - whic=
-h is fine IMHO.
 
->  CFLAGS ?=3D -g -O2
-> +idsdir =3D /usr/share/misc
-Ditto.
-'?=3D' is perfectly fine.  I would just leave it
 
-> +bashcompletiondir =3D /usr/share/bash-completion/completions
-better '?=3D' Here also
+On 8/7/2026 7:49 PM, Neeraj Soni wrote:
+> 
+> 
+> On 8/4/2026 1:48 AM, Eric Biggers wrote:
+>> On Mon, Aug 03, 2026 at 10:01:23PM +0530, Neeraj Soni wrote:
+>>> From: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+>>>
+>>> Inline Crypto Engine (ICE) keys are lost after hibernation entry and this
+>>> needs to be restored when hibernation exits. ICE keys are re-programmed
+>>> during sdhci_msm_ice_init() but it may not cover cases where the
+>>> hibernation image is already restored.
+>>>
+>>> Unwrap the pm ops and use directly in driver to add the call to restore
+>>> Inline Crypto Engine (ICE) keys. This ensures that ICE is brought into
+>>> same state as before hibernation.
+>>>
+>>> Also set MMC_CAP2_CRYPTO_NO_REPROG to indicate that re-programming of ICE
+>>> keys is not needed during MMC runtime suspend/resume.
+>>>
+>>> Signed-off-by: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+>>> Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+>>> Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+>>> Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>> Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
+>>> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-msm.c | 23 ++++++++++++++++++++++-
+>>>  1 file changed, 22 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>> index 4aff965f0e2e..f64788a70309 100644
+>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>> @@ -1959,6 +1959,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+>>>  	}
+>>>  
+>>>  	mmc->caps2 |= MMC_CAP2_CRYPTO;
+>>> +	mmc->caps2 |= MMC_CAP2_CRYPTO_NO_REPROG;
+>>>  	return 0;
+>>>  }
+>>>  
+>>> @@ -2983,9 +2984,29 @@ static int sdhci_msm_runtime_resume(struct device *dev)
+>>>  	return ret;
+>>>  }
+>>>  
+>>> +static int sdhci_msm_restore(struct device *dev)
+>>> +{
+>>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>>> +	int ret;
+>>> +
+>>> +	ret = pm_runtime_force_resume(dev);
+>>> +	if (ret)
+>>> +		return ret;
+>>> +
+>>> +	if (host->mmc->caps2 & MMC_CAP2_CRYPTO)
+>>> +		blk_crypto_reprogram_all_keys(&host->mmc->crypto_profile);
+>>> +
+>>> +	return ret;
+>>> +}
+>>
+>> Sorry, it looks like this actually does need an #ifdef because the
+>> crypto_profile field is conditional.  It doesn't need to be a new #ifdef
+>> though, as you could add a function sdhci_msm_ice_restore() within the
+>> existing CONFIG_MMC_CRYPTO section of this file (along with a no-op stub
+>> in the !CONFIG_MMC_CRYPTO section), then call it from here.  Similar to
+>> how the existing sdhci_msm_ice_resume() works, for example.
+>>
+> But MMC_CPA2_CRYPTO=0 if !CONFIG_MMC_CRYPTO so crypto_profile field is
+> not accessed if !CONFIG_MMC_CRYPTO. Does it need encapsulation?
+>  
+>>>  static const struct dev_pm_ops sdhci_msm_pm_ops = {
+>>> -	SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend, pm_runtime_force_resume)
+>>>  	RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume, NULL)
+>>> +	.suspend	= pm_runtime_force_suspend,
+>>> +	.resume		= pm_runtime_force_resume,
+>>> +	.freeze		= pm_runtime_force_suspend,
+>>> +	.restore	= sdhci_msm_restore,
+>>> +	.thaw		= pm_runtime_force_resume,
+>>> +	.poweroff	= pm_runtime_force_suspend,
+>>
+>> Should these use pm_sleep_ptr() to allow dead code elimination when
+>> !CONFIG_PM_SLEEP?
+>>
+> Ram can you please check this. Looks valid to me. 
+>  
+>> - Eric
 
->  objects =3D \
->         mmc.o \
->         mmc_cmds.o \
-> @@ -23,7 +25,6 @@ override CFLAGS :=3D $(CHECKFLAGS) $(AM_CFLAGS)
-> $(CFLAGS)  INSTALL =3D install  prefix ?=3D /usr/local  bindir =3D $(pref=
-ix)/bin -idsdir
-> ?=3D /usr/share/misc  LIBS=3D  RESTORE_LIBS=3D  mandir =3D /usr/share/man=
- @@ -
-> 63,6 +64,8 @@ install: $(progs)
->         $(INSTALL) -m755 -d $(DESTDIR)$(idsdir)
->         $(INSTALL) -m 644 sdcard.ids $(DESTDIR)$(idsdir)
->         $(INSTALL) -m 644 multimediacard.ids $(DESTDIR)$(idsdir)
-> +       $(INSTALL) -m755 -d $(DESTDIR)$(bashcompletiondir)
-> +       $(INSTALL) -m 644 completion/mmc
-> + $(DESTDIR)$(bashcompletiondir)/mmc
->=20
->  -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
->=20
-> diff --git a/completion/mmc b/completion/mmc new file mode 100644 index
-> 0000000..0a93bb1
-> --- /dev/null
-> +++ b/completion/mmc
-> @@ -0,0 +1,53 @@
-> +_mmc_complete() {
-> +       local cur prev words cword
-> +       _init_completion || return
-> +
-> +       local devices
-> +       devices=3D$(compgen -G "/dev/mmcblk*" 2>/dev/null | grep -E
-> + '^/dev/mmcblk[0-9]+$')
-I think you are excluding rpmb nodes such as /dev/mmcblk0rpmb.
+Agree with this, we will update this in next patchset using pm_sleep_ptr().
 
-Thanks,
-Avri
-> +
-> +       local mmcbin
-> +       mmcbin=3D$(type -P "${words[0]}") || return
-> +
-> +       # "mmc help" prints one "Usage for command\t<verb words...> <args=
-...>"
-> +       # line per command. Argument placeholders always start with '<', =
-so
-> +       # stripping from the first '<' onward leaves just the verb words.
-> +       local verbs
-> +       verbs=3D$("$mmcbin" help 2>/dev/null | sed -n 's/^Usage for
-> command[[:space:]]*//p' | sed 's/<.*//')
-> +       [[ -z $verbs ]] && return
-> +
-> +       local -a typed=3D("${words[@]:1:cword-1}")
-> +       local -A next_words=3D()
-> +       local have_leaf=3D
-> +
-> +       local line i match
-> +       while IFS=3D read -r line; do
-> +               [[ -z $line ]] && continue
-> +               local -a w
-> +               read -ra w <<<"$line"
-> +               [[ ${#w[@]} -lt ${#typed[@]} ]] && continue
-> +
-> +               match=3D1
-> +               for ((i =3D 0; i < ${#typed[@]}; i++)); do
-> +                       if [[ ${w[i]} !=3D "${typed[i]}" ]]; then
-> +                               match=3D0
-> +                               break
-> +                       fi
-> +               done
-> +               [[ $match -eq 0 ]] && continue
-> +
-> +               if [[ ${#w[@]} -gt ${#typed[@]} ]]; then
-> +                       next_words[${w[${#typed[@]}]}]=3D1
-> +               else
-> +                       have_leaf=3D1
-> +               fi
-> +       done <<<"$verbs"
-> +
-> +       if [[ ${#next_words[@]} -gt 0 ]]; then
-> +               COMPREPLY=3D($(compgen -W "${!next_words[*]}" -- "$cur"))
-> +       elif [[ -n $have_leaf ]]; then
-> +               COMPREPLY=3D($(compgen -W "$devices" -- "$cur"))
-> +       fi
-> +}
-> +
-> +complete -F _mmc_complete mmc
-> +complete -F _mmc_complete ./mmc
-> diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst index 0b486e4..3aba86f
-> 100644
-> --- a/docs/HOWTO.rst
-> +++ b/docs/HOWTO.rst
-> @@ -2,6 +2,12 @@
->=20
->  Running mmc-utils
->  -----------------
-> +**Bash completion**
-> +    Source ``completion/mmc`` to enable tab-completion for all subcomman=
-ds
-> and
-> +    device paths. When installed via ``make install``, the file is place=
-d in
-> +    ``$(bashcompletiondir)`` (default: ``/usr/share/bash-
-> completion/completions/mmc``)
-> +    and loaded automatically by bash-completion.
-> +
->  **Name**
->      mmc - a tool for configuring MMC storage devices
->  **Synopsis**
-> --
-> 2.53.0
->=20
+>>
+> Regards
+> Neeraj
 
