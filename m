@@ -1,75 +1,70 @@
-Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
+Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC8ED3F4854
-	for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 15:35:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6EED30E0E5
+	for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 15:37:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786376105; cv=none; b=YCoXywNlKU9Z10O+jfnUqGak2xszXs0qRZ75Z12zaDmcJB7bLskVew7XKx06F5zec1uJthbpTCrhPnJVAZVwRktDwfIsWnuYUBQK+OBvaFKm4umUYWm19wxiTwF5gdmTlgwOai5jBoRUE+QXwoD6gNcW0ROe+/4L45KB5dRUaq0=
+	t=1786376279; cv=none; b=GD6pDKpUI5Pgh3XSVuMmgX4QdylDKCaXfDbwOjRMJIt6JyPJfIyC6os+46AYb+x+zZoTpBfaBFWPfjZ3Ysid2aBMeFQmSO/YXcKCeYLWPgng7zawfmH6dHx+UljPIfcXX5nu6ZzH21MBDDFKiN4g4qQqbzNJbw8j7Z71RlbFC+M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786376105; c=relaxed/simple;
-	bh=9bJhAfrtK+sHPFSlq0mcc39XHvzpEMeakDKzzGHvo4w=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=PRvyeMwOhkIBwrtS6Xo4jx+Wj60cKyCgf65qn3J5bjsQgaZvOVLnDgTnrTa2EEA1/ok0nfFxgh7sl3teDlKSJlkid+vqGMrjIo17PRyU4XsmJd3TgTa1Kz3oU+UPTrXE9nY7Fc+9bkUDe0+SOuJKkelPUN8WCOYH3ScZ/rsbBVM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=k96dha46; arc=none smtp.client-ip=209.85.218.53
+	s=arc-20240116; t=1786376279; c=relaxed/simple;
+	bh=x8DmvlcgOwwiiOGjzQiTCDtbFefAvKFgFH76DKsbwnw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=frwax1mMv74RlHSQQIBnW6BeRCFqTkkbph9ypWR6UgowZ6OsFFOK6KT3BFWsihgaglo76Iry9Y9qyIzvq1HGYmRwOm83RyMfqWLx8AA9gSlgKF0FHwhWtWjsp39iG2K8VxeetMs/evel9lxuDRsFvdrhf7FpJmW5bAzMtV0uJDs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JXXJf6Lu; arc=none smtp.client-ip=209.85.208.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="k96dha46"
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-c15c42a45adso3518466b.0
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 08:35:03 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JXXJf6Lu"
+Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-6a0de062db5so3037019a12.1
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Aug 2026 08:37:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786376102; x=1786980902; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:sender:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=+T22MwXVZJj9hBpf4/s/rxRNKSyma2dim4SOgt58Akk=;
-        b=k96dha46931FrBqgSq6lgmxPm+ujg7/VunRKDCarV5mTECgSSNOPRthtTChXztBC+J
-         KxHpS3RggxCjSY02cGv3OLdudFL3wfEPe9eQKN5hn6dNXIkun9yzz7P+3z/NqQVw+KYo
-         WL5Gc8obCEqOx5pHFM2sLQs6H9AqqZXt8lsTcDyFRxPteis8bIT8GpHhqsGbpWpZoPWo
-         WtEiQ2BYV4wR3LJ61QR2WVv15s1XwkhZjDK5f4lxLEBzfvwkJ3exXHqxjuneIKItmcqh
-         OEZvr7s/2xB8EEKhac9RcZxDbUykXT3N6dX3kk9LZlAUJzsR2jCGj9kdg20BNisWRN1o
-         IbRA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786376102; x=1786980902;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:sender:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+        d=gmail.com; s=20251104; t=1786376275; x=1786981075; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:sender:from:to:cc:subject:date:message-id:reply-to
          :content-type;
-        bh=+T22MwXVZJj9hBpf4/s/rxRNKSyma2dim4SOgt58Akk=;
-        b=GGrXVNMb071N/q3E/wf4u3yAzR1OmrC9K2lL71P+NVsjLcZjzLrQ824akkB8SGnEKm
-         nhG106HSHiqeJxD/m1DBwCSKNEC+etERIVI/nSVwCXkzl3DcYgD/u5hV5HZ62FJEeoY3
-         mv2wx+UeA6KiiAzZlyloTk2VqdQjiVv5YWrtshF0io6633GilUx4ES48C2bpEAeyBo26
-         ZmczLvzEHbVsRlpPhOV1OST7sFapvaSsZLjcyzX0gNrZT+jHGwMLjOHiKNH3aGVRe2DV
-         u8IIXfuhl9sRk6JGNtpxjtAuxe0h/6YiFUzH8/yHxe15g7lj0FCBXgS+GIFmQLNKaj/S
-         kFiw==
-X-Gm-Message-State: AOJu0YwJltUj559Xth8CJnuqmcxlgkj3VVV+xs1sIdTB9aE0DnvC79Vn
-	g/iObwE7W8mgF/HPJx3HlOc+AkwlljRjn34kDxvgCMtHsgulSHJTcW+vaLSpI2oH
-X-Gm-Gg: AR+sD133hNhEOpNzhu/s/1zvh9SET4RIVPt/9c9cb6Q44HzPC/XwLErBq2sjGwRouWL
-	KjGMcShD88fYjPSF/IGArfVPA8SCvETN25K7Q55tJtmBgxsKZ07EEpUQ7BOLE/6PPX1wPQQ0w2k
-	gy//4xYhnd/SQxHS4njQ/GwIHDphIJIzTR1vFjXpsaDHQ5uGL6eEjhAWC8xkfXqF/KFzKYD2pDQ
-	+3IaLEbP/iWob+4Zf5HncIqDML97+uA4JBbUdfLCt0FitMY3OLdMxO904uCbv61gHNhUeSkpzyJ
-	v4oVdB0s3X4JzpxqAINxNq+Zj/8yJ+bb9D66QHQzGlw07mBlyKeNjRuj+avyiZz7sRJPr+74jfB
-	Ljk3gcPJz+kSuv//N9CzLBYVGcXKgKfSGqEIFzw6aBvxmhGy4oyvSpHHTxx71piwGG+Jc2gfjHT
-	pqKDmDK9665RVsceVVion99tgnZuuOgp6xZzL7+GyvkS6xtQNjKO+UAX5AS/F16NAXSyzLJGiSc
-	vvmFlQXOicX
-X-Received: by 2002:a17:907:b04c:20b0:c20:96cd:cd9e with SMTP id a640c23a62f3a-c2096cdd54emr101795566b.15.1786376101777;
-        Mon, 10 Aug 2026 08:35:01 -0700 (PDT)
+        bh=pP7WjT0exd0B+vIGyPL1D5mikb8cn57i/gwpKQgd/bk=;
+        b=JXXJf6LucIwS+ODhLvn2wTFOVbi9nxwlg7PiDhSppWqMcaVbs1pJdyo0wNJp8qDEHs
+         JYOr+E0Bsifgo3wELCM55amNb/y0Uw6QLuX5he6FVofSt7InjESWLjVqA7hB1XSvg5NE
+         vvWgXjTJCw16565crC7Qa/lqsuBqa6ezcp31bLgQAhK5xiYh19zvWfTwy/iR3993n+pp
+         7/a4FsdtD29ss7/y5iNp/IxGdax8Imn75325Xpm2BRj7hWvi0XKLSeDJAPe2Ktj9Czc9
+         ChEUh4ViARdi/+HEZ+fFt+E3Z4jeZvhTzKLU9ZoENdbLaYTZEwALFyqPpTCDqA4cV/T0
+         ogSg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786376275; x=1786981075;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:sender:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=pP7WjT0exd0B+vIGyPL1D5mikb8cn57i/gwpKQgd/bk=;
+        b=DimUeeaeTr0aXUWLq74CYZ0IHVw7t9ZSMif5iEUTtghBICo+VhpRFpI000gG9n0JNF
+         uao1En7jKARiuh19PdmszF5aGHASYAAutwWzpP2mmzop7h02TGGshO919JXvOvJ+PMla
+         cbm4jnghChaJStzDGyhNK+Fu5SHE3ecaeZJQW3GftvG5G3NorHbyQdp6AnepDkorHNXv
+         9uqJWpOYlpPAa0HDnaOKbdJszNg4+TCrF/cp10rPFr8pBf1uRdDrvuWdYav4HbwSUOBP
+         wGpx4lL4uA7c/VAZF+Ydcmy2DdUR13ix+S1HEyR8WcW9cRhh5Mqj8xHHjGNNdjjhOHRw
+         jyqw==
+X-Gm-Message-State: AOJu0YxRfjjXa5kz+uQekPXq2jiLCGNZ748PpMHrb6gKsbdrGF+rntzE
+	fztYFuIZ/Dq0V+t8drmm8uRPT+ORrv3rj4+Iq+RjxpzUlSO0obtELIRx5velgdOD
+X-Gm-Gg: AR+sD13xgGAQbU+yPkbC+nI3hyBlOEeIe5a2jh9IGeQP4ugFFys24DwoP43CvzI+nnW
+	0gI11ElZkXHnzHdfqyMBNO4h2CRXeKPnzg0e+ts31/k4Pgc8sZtdvGh2LbiHgfJ1uQL5e9APQpY
+	E49XYSUmK9dNm9cZBN+cxqmO/MWmmkZjV9rcSw2rJ/q8QnuaViRLYUGHmbgQBDJDWWu1x+xOJ/i
+	+bqoQU4De2N//ZEngBo99Gg2LifRjLISNBNfrc1TCqF49wWMM487d2BDClM7RkVoQzamc13dkVF
+	cz3Atf8vs9G3FhSYBHWJB24R9Oxpn+kK2j83NbJ287Vzof1QimprwVJWVK4QAv4sAo+gQqj8xdC
+	4wfGDvhqVlXRXcVtieoqqtLRb7mSqpnjTfNcQg6N8dvU0CqlNgtv04mBGtCQiqeSCSRzZPhCyEG
+	t71ifZ7gpoDnnl10d8yQwWLjHyofplVoquwHlhHO3fqKAf0JSYsilo7lSIWksvA/p1m3lYWlQr7
+	jb/h1O0/9BV1o8yf8FNZ8Y=
+X-Received: by 2002:a17:907:3c88:b0:c1c:5ec9:1954 with SMTP id a640c23a62f3a-c207ed873d1mr1171313166b.32.1786376275270;
+        Mon, 10 Aug 2026 08:37:55 -0700 (PDT)
 Received: from torstein-laptop.internal ([2a01:799:3a1:9700:9fe:dfd2:946e:90f])
-        by smtp.googlemail.com with ESMTPSA id a640c23a62f3a-c2080cc3bdfsm393966466b.48.2026.08.10.08.35.00
+        by smtp.googlemail.com with ESMTPSA id a640c23a62f3a-c2080ab2e41sm411057366b.26.2026.08.10.08.37.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Aug 2026 08:35:01 -0700 (PDT)
+        Mon, 10 Aug 2026 08:37:54 -0700 (PDT)
 Sender: Torstein Eide <torsteine@gmail.com>
 From: Torstein Eide <torsteine+linux@gmail.com>
 To: linux-mmc@vger.kernel.org
-Cc: Torstein Eide <torsteine+linux@gmail.com>,
-	Avri Altman <avri.altman@sandisk.com>
-Subject: [PATCH v6 3/3] mmc-utils: lsmmc: Add mmc list command
-Date: Mon, 10 Aug 2026 17:34:42 +0200
-Message-ID: <20260810153442.132286-4-torsteine+linux@gmail.com>
+Cc: Torstein Eide <torsteine+linux@gmail.com>
+Subject: [PATCH v2] mmc-utils: Add bash completion
+Date: Mon, 10 Aug 2026 17:37:34 +0200
+Message-ID: <20260810153734.139186-1-torsteine+linux@gmail.com>
 X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260810153442.132286-1-torsteine+linux@gmail.com>
-References: <20260810153442.132286-1-torsteine+linux@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -78,236 +73,133 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add a 'mmc list' command that scans /sys/bus/mmc/devices/, resolves
-each card's sysfs path, and prints a one-line summary per device.
+Add a bash completion script in completion/mmc that completes subcommands
+and /dev/mmcblkN device paths for all mmc commands.
 
-find_block_devname() maps a sysfs device path back to its mmcblkN
-name by scanning /sys/class/block/mmcblkN/device symlinks.
+Subcommand completion is driven by parsing 'mmc help' output rather than
+maintaining a parallel hardcoded verb list, so it stays in sync as
+commands are added or removed.
 
-print_list_entry() parses the CID register and formats a fixed-width
-table row with device name, /dev path, bus type, manufacturer, product,
-revision, serial number, and manufacturing date.
+The completion directory is named 'completion/' rather than
+'bash-completion/' so shell-specific scripts for other shells (zsh,
+fish, etc.) can be placed alongside it without renaming.
 
-The header is printed once before the first result. Devices without a
-readable cid file are skipped silently via access() so unrelated sysfs
-entries do not produce spurious error messages.
+Add bashcompletiondir variable to the Makefile (defaulting to the
+standard /usr/share/bash-completion/completions) and install the
+script as part of 'make install'. The install path can be overridden
+at build time with make bashcompletiondir=<path>.
 
 Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
-Reviewed-by: Avri Altman <avri.altman@sandisk.com>
 ---
- docs/HOWTO.rst |  12 +++++
- lsmmc.c        | 133 +++++++++++++++++++++++++++++++++++++++++++++++++
- mmc.c          |   6 ++-
- mmc_cmds.h     |   1 +
- 4 files changed, 151 insertions(+), 1 deletion(-)
+Changes since v1:
+- Makefile: use 'bashcompletiondir ?=' instead of '='.
+- completion/mmc: match rpmb, bootN, and partition device nodes in
+  addition to the base mmcblkN device.
 
+ Makefile       |  3 +++
+ completion/mmc | 54 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ docs/HOWTO.rst |  6 ++++++
+ 3 files changed, 63 insertions(+)
+ create mode 100644 completion/mmc
+
+diff --git a/Makefile b/Makefile
+index bf8c006..6eb584b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -7,6 +7,7 @@ AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2 \
+ 	    -DSD_IDS_PATH=\"$(idsdir)/sdcard.ids\" \
+ 	    -DMMC_IDS_PATH=\"$(idsdir)/multimediacard.ids\"
+ CFLAGS ?= -g -O2
++bashcompletiondir ?= /usr/share/bash-completion/completions
+ objects = \
+ 	mmc.o \
+ 	mmc_cmds.o \
+@@ -63,6 +64,8 @@ install: $(progs)
+ 	$(INSTALL) -m755 -d $(DESTDIR)$(idsdir)
+ 	$(INSTALL) -m 644 sdcard.ids $(DESTDIR)$(idsdir)
+ 	$(INSTALL) -m 644 multimediacard.ids $(DESTDIR)$(idsdir)
++	$(INSTALL) -m755 -d $(DESTDIR)$(bashcompletiondir)
++	$(INSTALL) -m 644 completion/mmc $(DESTDIR)$(bashcompletiondir)/mmc
+ 
+ -include $(foreach obj,$(objects), $(dir $(obj))/.$(notdir $(obj)).d)
+ 
+diff --git a/completion/mmc b/completion/mmc
+new file mode 100644
+index 0000000..1ac053b
+--- /dev/null
++++ b/completion/mmc
+@@ -0,0 +1,54 @@
++_mmc_complete() {
++	local cur prev words cword
++	_init_completion || return
++
++	local devices
++	# Include rpmb, bootN, and partition nodes alongside the base device.
++	devices=$(compgen -G "/dev/mmcblk*" 2>/dev/null | grep -E '^/dev/mmcblk[0-9]+(rpmb|boot[0-9]+|p[0-9]+)?$')
++
++	local mmcbin
++	mmcbin=$(type -P "${words[0]}") || return
++
++	# "mmc help" prints one "Usage for command\t<verb words...> <args...>"
++	# line per command. Argument placeholders always start with '<', so
++	# stripping from the first '<' onward leaves just the verb words.
++	local verbs
++	verbs=$("$mmcbin" help 2>/dev/null | sed -n 's/^Usage for command[[:space:]]*//p' | sed 's/<.*//')
++	[[ -z $verbs ]] && return
++
++	local -a typed=("${words[@]:1:cword-1}")
++	local -A next_words=()
++	local have_leaf=
++
++	local line i match
++	while IFS= read -r line; do
++		[[ -z $line ]] && continue
++		local -a w
++		read -ra w <<<"$line"
++		[[ ${#w[@]} -lt ${#typed[@]} ]] && continue
++
++		match=1
++		for ((i = 0; i < ${#typed[@]}; i++)); do
++			if [[ ${w[i]} != "${typed[i]}" ]]; then
++				match=0
++				break
++			fi
++		done
++		[[ $match -eq 0 ]] && continue
++
++		if [[ ${#w[@]} -gt ${#typed[@]} ]]; then
++			next_words[${w[${#typed[@]}]}]=1
++		else
++			have_leaf=1
++		fi
++	done <<<"$verbs"
++
++	if [[ ${#next_words[@]} -gt 0 ]]; then
++		COMPREPLY=($(compgen -W "${!next_words[*]}" -- "$cur"))
++	elif [[ -n $have_leaf ]]; then
++		COMPREPLY=($(compgen -W "$devices" -- "$cur"))
++	fi
++}
++
++complete -F _mmc_complete mmc
++complete -F _mmc_complete ./mmc
 diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
-index 3739a0a..0b486e4 100644
+index 0b486e4..3aba86f 100644
 --- a/docs/HOWTO.rst
 +++ b/docs/HOWTO.rst
-@@ -90,6 +90,18 @@ Running mmc-utils
-             sysfs: /sys/devices/platform/fe320000.mmc/mmc_host/mmc1/mmc1:aaaa
-             SCR Register: 0235800000000000
+@@ -2,6 +2,12 @@
  
-+    ``list``
-+        List all MMC/SD devices present on the system. Output is a table with
-+        columns: DEVICE (sysfs name), DEV (/dev path), TYPE (MMC or SD),
-+        MANUFACTURER, PRODUCT, REV, SERIAL, and DATE.
+ Running mmc-utils
+ -----------------
++**Bash completion**
++    Source ``completion/mmc`` to enable tab-completion for all subcommands and
++    device paths. When installed via ``make install``, the file is placed in
++    ``$(bashcompletiondir)`` (default: ``/usr/share/bash-completion/completions/mmc``)
++    and loaded automatically by bash-completion.
 +
-+        Example::
-+
-+            $ mmc list
-+            DEVICE          DEV            TYPE  MANUFACTURER         PRODUCT    REV   SERIAL      DATE
-+            mmc0:0001       /dev/mmcblk0   MMC   Samsung              MAG4FA     1.0   0x1a2b3c4d  2021-jan
-+            mmc1:aaaa       /dev/mmcblk1   SD    SanDisk              SP32G      8.0   0x5e6f7a8b  2020-mar
-+
-     ``ffu <image name> <device> [chunk-bytes]``
-       Default mode.  Run Field Firmware Update with `<image name>` on `<device>`. `[chunk-bytes]` is optional and defaults to its max - 512k. Should be in decimal bytes and sector aligned.
- 
-diff --git a/lsmmc.c b/lsmmc.c
-index 3139a7d..4167095 100644
---- a/lsmmc.c
-+++ b/lsmmc.c
-@@ -229,6 +229,38 @@ fallback:
- 	return strdup(name);
- }
- 
-+static char *find_block_devname(const char *sysfs_devpath)
-+{
-+	DIR *d;
-+	struct dirent *ent;
-+
-+	d = opendir("/sys/class/block");
-+	if (!d)
-+		return NULL;
-+
-+	while ((ent = readdir(d)) != NULL) {
-+		char linkpath[PATH_MAX];
-+		char resolved[PATH_MAX];
-+
-+		if (strncmp(ent->d_name, "mmcblk", 6) != 0)
-+			continue;
-+		if (strchr(ent->d_name + 6, 'p'))
-+			continue;
-+
-+		snprintf(linkpath, sizeof(linkpath),
-+			 "/sys/class/block/%s/device", ent->d_name);
-+		if (realpath(linkpath, resolved) == NULL)
-+			continue;
-+		if (strcmp(resolved, sysfs_devpath) == 0) {
-+			closedir(d);
-+			return strdup(ent->d_name);
-+		}
-+	}
-+
-+	closedir(d);
-+	return NULL;
-+}
-+
- /* MMC/SD file parsing functions */
- static char *read_file_at(const char *dir, const char *name)
- {
-@@ -2290,6 +2322,107 @@ static int do_read_reg(int argc, char **argv, enum REG_TYPE reg)
- 	return ret;
- }
- 
-+static void print_list_entry(struct config *cfg, const char *devname,
-+			     const char *blkdev, char *cid)
-+{
-+	char *mfr;
-+	char devnode[32];
-+
-+	snprintf(devnode, sizeof(devnode), "/dev/%s", blkdev ? blkdev : "?");
-+
-+	if (cfg->bus == SD) {
-+		struct sd_cid c;
-+
-+		parse_sd_cid(cid, &c);
-+		mfr = get_manufacturer(cfg, c.mid);
-+		printf("%-14s %-14s SD   %-20s %-10s %u.%u  0x%08x  %u-%s\n",
-+		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
-+		       c.prv_major, c.prv_minor, c.psn, sd_cid_year(&c),
-+		       month_name(c.mdt_month));
-+	} else {
-+		struct mmc_cid c;
-+
-+		parse_mmc_cid(cid, &c);
-+		mfr = get_manufacturer(cfg, c.mid);
-+		printf("%-14s %-14s MMC  %-20s %-10s %u.%u  0x%08x  %u-%s\n",
-+		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
-+		       c.prv_major, c.prv_minor, c.psn,
-+		       mmc_cid_year(&c, cfg->ext_csd_rev),
-+		       month_name(c.mdt_month));
-+	}
-+
-+	free(mfr);
-+}
-+
-+int do_list(int nargs, char **argv)
-+{
-+	const char *bus_path = "/sys/bus/mmc/devices";
-+	DIR *d;
-+	struct dirent *ent;
-+	bool header_printed = false;
-+
-+	d = opendir(bus_path);
-+	if (!d) {
-+		fprintf(stderr, "Cannot open %s\n", bus_path);
-+		return -1;
-+	}
-+
-+	struct config cfg = {};
-+
-+	/* Probe ids files so any warning appears before table output */
-+	cfg.bus = SD;
-+	free(get_manufacturer(&cfg, ~0u));
-+	cfg.bus = MMC;
-+	free(get_manufacturer(&cfg, ~0u));
-+
-+	while ((ent = readdir(d)) != NULL) {
-+		char devpath[PATH_MAX];
-+		char resolved[PATH_MAX];
-+		char *type, *cid, *blkdev;
-+
-+		if (!strchr(ent->d_name, ':'))
-+			continue;
-+
-+		snprintf(devpath, sizeof(devpath), "%s/%s", bus_path, ent->d_name);
-+		if (realpath(devpath, resolved) == NULL)
-+			continue;
-+
-+		type = read_file_at(resolved, "type");
-+		if (!type)
-+			continue;
-+
-+		if (strcmp(type, "MMC") != 0 && strcmp(type, "SD") != 0) {
-+			free(type);
-+			continue;
-+		}
-+
-+		cid = read_file_at(resolved, "cid");
-+		if (!cid) {
-+			free(type);
-+			continue;
-+		}
-+
-+		blkdev = find_block_devname(resolved);
-+		cfg.bus = strcmp(type, "MMC") ? SD : MMC;
-+
-+		if (!header_printed) {
-+			printf("%-14s %-14s %-5s%-20s %-10s %-5s %-12s %s\n",
-+			       "DEVICE", "DEV", "TYPE", "MANUFACTURER", "PRODUCT",
-+			       "REV", "SERIAL", "DATE");
-+			header_printed = true;
-+		}
-+
-+		print_list_entry(&cfg, ent->d_name, blkdev, cid);
-+
-+		free(blkdev);
-+		free(cid);
-+		free(type);
-+	}
-+
-+	closedir(d);
-+	return 0;
-+}
-+
- int do_read_csd(int argc, char **argv)
- {
- 	return do_read_reg(argc, argv, CSD);
-diff --git a/mmc.c b/mmc.c
-index fce7eef..b0f1f9b 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -306,6 +306,11 @@ static struct Command commands[] = {
- 	  "3. Only up to 512K bytes of boot data will be transferred.\n"
- 	  "4. The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.\n",
- 	},
-+	{ do_list, 0,
-+	  "list", "\n"
-+		"List all MMC/SD devices with their /dev path and CID info.",
-+	  NULL
-+	},
- 	{ NULL, 0, NULL, NULL }
- };
- 
-@@ -590,4 +595,3 @@ int main(int ac, char **av )
- 
- 	exit(func(nargs, args));
- }
--
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 9d5f944..033cc09 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -62,6 +62,7 @@ int do_opt_ffu4(int nargs, char **argv);
- int do_read_scr(int argc, char **argv);
- int do_read_cid(int argc, char **argv);
- int do_read_csd(int argc, char **argv);
-+int do_list(int nargs, char **argv);
- int do_erase(int nargs, char **argv);
- int do_general_cmd_read(int nargs, char **argv);
- int do_softreset(int nargs, char **argv);
+ **Name**
+     mmc - a tool for configuring MMC storage devices
+ **Synopsis**
 -- 
 2.53.0
 
