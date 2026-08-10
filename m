@@ -1,311 +1,139 @@
-Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80DE03A5449
-	for <linux-mmc@vger.kernel.org>; Sun,  9 Aug 2026 08:22:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 367E45695;
+	Mon, 10 Aug 2026 01:00:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786263733; cv=none; b=ooiKk59vZ8wUDu7H4RWH3lr8PbRoR4OAGTZhuxP/DbjTuJuyBNDc7ipzdgDqAENfW6msuj6VYRlUZIxCAC6oYpymtS7ONNEfVASQ/7Pkf6vggFg4QxHMemrA6cEdSkAdCoj0B1Cs65IBhn1NsaCNNyHwBdGbAXtE/A2wGdZE88g=
+	t=1786323658; cv=none; b=d17oNz8HlNMmJIjQ54ZUsVoJCpXkpEyCARkqeu8OU9W9Zx1RGlmen5UlPn2p0nMqcUfp+d2N9RhmD7QGRvz690yMOla0QVODZ46L9QOzKulm0ivW/pOJkjuO9Z6thteTFwWn2e5sDxklsID9ZaEKGBgISFQxNeAvUp+bqmZaNPM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786263733; c=relaxed/simple;
-	bh=xVmxegc19Q7wISwVJg6iGWZLBsNNIumIjTFcUH9zhms=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=eg2VMDIlsjywkwzWqq8Vzci65vZNsx3D88Y0kYEEvnBO7zumxShxSm0Z2FtqLiEiDrDklG8Ppm6QTFvPRd3GCF5oPHiPfojJIYA1wqFV5dFgd9aJh0bhcfTBC39fvBkjyk72Td/GWFPdMPY8IOG08bXykoZG6CuZq/4H3mO6XYQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Q/PkDQqS; arc=none smtp.client-ip=209.85.208.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q/PkDQqS"
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-6983d3dae7aso5152520a12.0
-        for <linux-mmc@vger.kernel.org>; Sun, 09 Aug 2026 01:22:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786263730; x=1786868530; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:sender:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=mcQdpyc3MAFTbiE9wJi3m4YyI9ejFUcgU+1L6iCeMx4=;
-        b=Q/PkDQqS/qhKCmmMoeIztXBTQOyIMDR5LA7LoE1wzjLtouhQjistgFrSWBjpLTjWEs
-         a27kRlNo55affg5/7BT4Nra/ju8ulzpqNHj4Pru/bK3VrcCNKM0xshxPurFpcVh8cYTW
-         1Km7nqDj2qkgtnm9xtuAGSi9EEyfX3pIutiR/b7CNCg/R4akDuhRDyBEDt52zMv5vNUQ
-         wzzNDTb3YjVPx6qfuP6vtvFe/XPqCj3Sx6fZArN3YMtwFc1zZjZjR3iIK+QLR8sI0eAf
-         wjGw9XsrGP4EB3VmaK9D3l6raP45EFDuODzU6f5K+DGGV13P3EIiJwtUJ/oJn7E70Ofn
-         I/Jw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786263730; x=1786868530;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:sender:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=mcQdpyc3MAFTbiE9wJi3m4YyI9ejFUcgU+1L6iCeMx4=;
-        b=AxSpeFYMq15OO7jdOtER59VU0GAI48RwBwzq3saDBbJhAhpcCKibHs5Smm9UygHiAl
-         Nr5fLOaCH/EqtwLKcsMamJ0jl7B9t9chhGbWB93C0QLwqWow1yP3BAGpybP9h8H5ZpeP
-         SCWJg3WLO+UAqh7wT4hc6IsCSb8UNqs2WY3OHflga9U22OzrML1nSaaRs8lVzR8JgXzA
-         Ei6WTlI2k//LHLkqZt/JT2zBvctoz6sgsI8VwrwZxmZfkEs2AeYAnLHnEGSMcL+iw47b
-         VnKiN64sovTfA2xGQPgiEGKQEKe+Q6b9+vRwzeSL13NLINXyU9m3/q1Ch4ee4zAJQlrQ
-         97uA==
-X-Gm-Message-State: AOJu0Yx+eTz7fIl2LoTlA4pSIgeKUu+5V0lWs/o9WyDdSgPx/RbilY6C
-	cFB0jwHWOKgDxImmOramr71Q7bGugufi6kVLUPiMnvOH5BY/n2CdwIR+WKmPcg==
-X-Gm-Gg: AR+sD13Lb7xq4lSty8TP0/tEc0uHH5IQumggHNvZTgaBoassQJGWJmxig2yqNMBhks5
-	JAUKsEkk/ebCDk1dnt+5zVHp/W+sNUhEZlz4TPKvMlsZ0X9EXJMAMIwS9+QjorLm3VxNU2UAKff
-	TleKspRP3mEQEU6Ja3StzEV2yInObJT+XN4JMGtBFycepVCwUR9wx4KoXYLRALno4t3cUmgx1Dj
-	GsSXboabF3jIHvnTXVfmL3oSVzvrgQ07tsg74kkxUatM7foqNxzpFn1wXCXWaW0YEqzhJIUCyWY
-	QPsUJcpnz7goRBU7CO6pKUUWJWdEd4RFcmmoI857VlzqRtaCjvHJsRml3PsZMF50bKCnlw4NJ4q
-	jDqG4qsqs7Zl5rDeCmuCWeliLucJ477YGrKqqgVON/i60TXNhQsP5RBjmTL9GMzQk+RuTSLn30g
-	HppFNh/T8cF5tD/B02iS+jzSker33L84gbiQkTwffp10/vLym03v1ZVbZmosb07EpMP+ncqor+f
-	FVPC9rWXHFmFQ==
-X-Received: by 2002:a17:907:3f07:b0:c1c:4c72:e6df with SMTP id a640c23a62f3a-c208c6574d0mr495763266b.0.1786263729381;
-        Sun, 09 Aug 2026 01:22:09 -0700 (PDT)
-Received: from torstein-laptop.internal ([2a01:799:3a1:9700:1e75:8b0f:2e1:e0bd])
-        by smtp.googlemail.com with ESMTPSA id a640c23a62f3a-c2080cc3b88sm226094066b.51.2026.08.09.01.22.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2026 01:22:08 -0700 (PDT)
-Sender: Torstein Eide <torsteine@gmail.com>
-From: Torstein Eide <torsteine+linux@gmail.com>
-To: linux-mmc@vger.kernel.org
-Cc: Torstein Eide <torsteine+linux@gmail.com>
-Subject: [PATCH v5 3/3] mmc-utils: lsmmc: Add mmc list command
-Date: Sun,  9 Aug 2026 10:21:53 +0200
-Message-ID: <20260809082153.104311-4-torsteine+linux@gmail.com>
-X-Mailer: git-send-email 2.53.0
-In-Reply-To: <20260809082153.104311-1-torsteine+linux@gmail.com>
-References: <20260809082153.104311-1-torsteine+linux@gmail.com>
+	s=arc-20240116; t=1786323658; c=relaxed/simple;
+	bh=DgW71cJmCV5xFGLedMaWYcCmsfNj81ysm0gAjiqEH0k=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=utVdQFekt1HCsn2A/JgLqeHWPQEBz7SG/ZyYLGo7NHKsfXf+3dw9S5JV55P1HkGIov4/pMFw3zxvbzq/AQVD8DohUXJDLmkG/NISA+Q67snpFBCtKcXh0qCQv5f2ipju0xHPfdtXSYNMY8sS9pnzizuqeMw7Lt6CdXnZI12mC6E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
+X-UUID: ea58cce4945611f1aa26b74ffac11d73-20260810
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.3.12,REQID:f71462ab-abc3-4110-b015-ca616d577845,IP:0,U
+	RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+	release,TS:0
+X-CID-META: VersionHash:e7bac3a,CLOUDID:6fd1508fc49c735f6f7edf5eb54f382b,BulkI
+	D:nil,BulkQuantity:0,Recheck:0,SF:80|81|82|83|102|865|898,TC:nil,Content:0
+	|15|52,EDM:-3,IP:nil,URL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,O
+	SI:0,OSA:0,AV:0,LES:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 2,SSN|SDN
+X-CID-BAS: 2,SSN|SDN,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
+X-UUID: ea58cce4945611f1aa26b74ffac11d73-20260810
+X-User: xiaopei01@kylinos.cn
+Received: from [10.42.12.251] [(10.44.16.150)] by mailgw.kylinos.cn
+	(envelope-from <xiaopei01@kylinos.cn>)
+	(Generic MTA with TLSv1.3 TLS_AES_128_GCM_SHA256 128/128)
+	with ESMTP id 944241646; Mon, 10 Aug 2026 09:00:44 +0800
+Message-ID: <14a274fe-b414-4360-bc88-757a04a020e5@kylinos.cn>
+Date: Mon, 10 Aug 2026 09:00:41 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: atmel-mci: Fix use-after-free in atmci_remove due to
+ race condition
+To: Aubin Constans <aubin.constans@microchip.com>, ulfh@kernel.org,
+ nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com,
+ claudiu.beznea@tuxon.dev, linux-mmc@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <4389d5deff90b2b860bd07f17668270fda36bd26.1785750407.git.xiaopei01@kylinos.cn>
+ <e4960897-fe77-41c2-95c6-56038b7c9ba2@microchip.com>
+From: Pei Xiao <xiaopei01@kylinos.cn>
+In-Reply-To: <e4960897-fe77-41c2-95c6-56038b7c9ba2@microchip.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Add a 'mmc list' command that scans /sys/bus/mmc/devices/, resolves
-each card's sysfs path, and prints a one-line summary per device.
 
-find_block_devname() maps a sysfs device path back to its mmcblkN
-name by scanning /sys/class/block/mmcblkN/device symlinks.
 
-print_list_entry() parses the CID register and formats a fixed-width
-table row with device name, /dev path, bus type, manufacturer, product,
-revision, serial number, and manufacturing date.
+在 2026/8/8 01:23, Aubin Constans 写道:
+> On 03/08/2026 11:48, Pei Xiao wrote:
+> 
+>> In atmci_probe, &host->bh_work is bound with atmci_work_func, and>
+> atmci_interrupt, atmci_timeout_timer and atmci_dma_complete can all
+>> queue this work on system_bh_wq.
+>>
+>> If we remove the module, atmci_remove makes cleanup and the memory
+>> allocated for host with devm_kzalloc() is released after the remove
+>> callback returns, while the work mentioned above may still be pending
+>> or running. The sequence of operations that may lead to a UAF bug is
+>> as follows:
+> 
+> Thank you for having spotted the issue, and sent this fix.
+>  >
+>> CPU0                                      CPU1
+>>
+>>                                            | atmci_interrupt
+>>                                            | queue_work(system_bh_wq,
+>>                                            |            &host->bh_work)
+>> atmci_remove                              |
+>> atmci_cleanup_slot(...)                   |
+>> atmci_writel(host, ATMCI_IDR, ~0UL)       |
+>> timer_delete_sync(&host->timer)           |
+>> dma_release_channel(host->dma.chan)       |
+>> free_irq(platform_get_irq(pdev, 0), host) |
+>>                                            | atmci_work_func
+>>                                            | // use host
+>> // devm resources released after          |
+>> // remove returns, host is freed          |
+>>                                            | // use host (use-after-free)
+>>
+>> Fix it by canceling the work after all the sources that can schedule
+>> it (IRQ handler, timeout timer and DMA completion callback) have been
+>> stopped, and before proceeding with the remaining cleanup in
+>> atmci_remove.
+> 
+> For completeness, PDC completion could be added to the above list of
+> sources,
+> even though it is a subroutine of the IRQ handler.
+Yes.I used an IRQ handler instead here.
+> PDC and DMA are exclusive.
 
-The header is printed once before the first result. Devices without a
-readable cid file are skipped silently via access() so unrelated sysfs
-entries do not produce spurious error messages.
+> 
+> Mentioning on which board or MPU the patch was tested would also be a
+> welcome
+> addition.
+Sorry, I don't have hardware testing here; I found this issue through
+static analysis.
 
-Signed-off-by: Torstein Eide <torsteine+linux@gmail.com>
----
- docs/HOWTO.rst |  12 +++++
- lsmmc.c        | 133 +++++++++++++++++++++++++++++++++++++++++++++++++
- mmc.c          |   6 ++-
- mmc_cmds.h     |   1 +
- 4 files changed, 151 insertions(+), 1 deletion(-)
-
-diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
-index 3739a0a..0b486e4 100644
---- a/docs/HOWTO.rst
-+++ b/docs/HOWTO.rst
-@@ -90,6 +90,18 @@ Running mmc-utils
-             sysfs: /sys/devices/platform/fe320000.mmc/mmc_host/mmc1/mmc1:aaaa
-             SCR Register: 0235800000000000
- 
-+    ``list``
-+        List all MMC/SD devices present on the system. Output is a table with
-+        columns: DEVICE (sysfs name), DEV (/dev path), TYPE (MMC or SD),
-+        MANUFACTURER, PRODUCT, REV, SERIAL, and DATE.
-+
-+        Example::
-+
-+            $ mmc list
-+            DEVICE          DEV            TYPE  MANUFACTURER         PRODUCT    REV   SERIAL      DATE
-+            mmc0:0001       /dev/mmcblk0   MMC   Samsung              MAG4FA     1.0   0x1a2b3c4d  2021-jan
-+            mmc1:aaaa       /dev/mmcblk1   SD    SanDisk              SP32G      8.0   0x5e6f7a8b  2020-mar
-+
-     ``ffu <image name> <device> [chunk-bytes]``
-       Default mode.  Run Field Firmware Update with `<image name>` on `<device>`. `[chunk-bytes]` is optional and defaults to its max - 512k. Should be in decimal bytes and sector aligned.
- 
-diff --git a/lsmmc.c b/lsmmc.c
-index 3139a7d..4167095 100644
---- a/lsmmc.c
-+++ b/lsmmc.c
-@@ -229,6 +229,38 @@ fallback:
- 	return strdup(name);
- }
- 
-+static char *find_block_devname(const char *sysfs_devpath)
-+{
-+	DIR *d;
-+	struct dirent *ent;
-+
-+	d = opendir("/sys/class/block");
-+	if (!d)
-+		return NULL;
-+
-+	while ((ent = readdir(d)) != NULL) {
-+		char linkpath[PATH_MAX];
-+		char resolved[PATH_MAX];
-+
-+		if (strncmp(ent->d_name, "mmcblk", 6) != 0)
-+			continue;
-+		if (strchr(ent->d_name + 6, 'p'))
-+			continue;
-+
-+		snprintf(linkpath, sizeof(linkpath),
-+			 "/sys/class/block/%s/device", ent->d_name);
-+		if (realpath(linkpath, resolved) == NULL)
-+			continue;
-+		if (strcmp(resolved, sysfs_devpath) == 0) {
-+			closedir(d);
-+			return strdup(ent->d_name);
-+		}
-+	}
-+
-+	closedir(d);
-+	return NULL;
-+}
-+
- /* MMC/SD file parsing functions */
- static char *read_file_at(const char *dir, const char *name)
- {
-@@ -2290,6 +2322,107 @@ static int do_read_reg(int argc, char **argv, enum REG_TYPE reg)
- 	return ret;
- }
- 
-+static void print_list_entry(struct config *cfg, const char *devname,
-+			     const char *blkdev, char *cid)
-+{
-+	char *mfr;
-+	char devnode[32];
-+
-+	snprintf(devnode, sizeof(devnode), "/dev/%s", blkdev ? blkdev : "?");
-+
-+	if (cfg->bus == SD) {
-+		struct sd_cid c;
-+
-+		parse_sd_cid(cid, &c);
-+		mfr = get_manufacturer(cfg, c.mid);
-+		printf("%-14s %-14s SD   %-20s %-10s %u.%u  0x%08x  %u-%s\n",
-+		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
-+		       c.prv_major, c.prv_minor, c.psn, sd_cid_year(&c),
-+		       month_name(c.mdt_month));
-+	} else {
-+		struct mmc_cid c;
-+
-+		parse_mmc_cid(cid, &c);
-+		mfr = get_manufacturer(cfg, c.mid);
-+		printf("%-14s %-14s MMC  %-20s %-10s %u.%u  0x%08x  %u-%s\n",
-+		       devname, devnode, mfr ? mfr : "Unlisted", c.pnm,
-+		       c.prv_major, c.prv_minor, c.psn,
-+		       mmc_cid_year(&c, cfg->ext_csd_rev),
-+		       month_name(c.mdt_month));
-+	}
-+
-+	free(mfr);
-+}
-+
-+int do_list(int nargs, char **argv)
-+{
-+	const char *bus_path = "/sys/bus/mmc/devices";
-+	DIR *d;
-+	struct dirent *ent;
-+	bool header_printed = false;
-+
-+	d = opendir(bus_path);
-+	if (!d) {
-+		fprintf(stderr, "Cannot open %s\n", bus_path);
-+		return -1;
-+	}
-+
-+	struct config cfg = {};
-+
-+	/* Probe ids files so any warning appears before table output */
-+	cfg.bus = SD;
-+	free(get_manufacturer(&cfg, ~0u));
-+	cfg.bus = MMC;
-+	free(get_manufacturer(&cfg, ~0u));
-+
-+	while ((ent = readdir(d)) != NULL) {
-+		char devpath[PATH_MAX];
-+		char resolved[PATH_MAX];
-+		char *type, *cid, *blkdev;
-+
-+		if (!strchr(ent->d_name, ':'))
-+			continue;
-+
-+		snprintf(devpath, sizeof(devpath), "%s/%s", bus_path, ent->d_name);
-+		if (realpath(devpath, resolved) == NULL)
-+			continue;
-+
-+		type = read_file_at(resolved, "type");
-+		if (!type)
-+			continue;
-+
-+		if (strcmp(type, "MMC") != 0 && strcmp(type, "SD") != 0) {
-+			free(type);
-+			continue;
-+		}
-+
-+		cid = read_file_at(resolved, "cid");
-+		if (!cid) {
-+			free(type);
-+			continue;
-+		}
-+
-+		blkdev = find_block_devname(resolved);
-+		cfg.bus = strcmp(type, "MMC") ? SD : MMC;
-+
-+		if (!header_printed) {
-+			printf("%-14s %-14s %-5s%-20s %-10s %-5s %-12s %s\n",
-+			       "DEVICE", "DEV", "TYPE", "MANUFACTURER", "PRODUCT",
-+			       "REV", "SERIAL", "DATE");
-+			header_printed = true;
-+		}
-+
-+		print_list_entry(&cfg, ent->d_name, blkdev, cid);
-+
-+		free(blkdev);
-+		free(cid);
-+		free(type);
-+	}
-+
-+	closedir(d);
-+	return 0;
-+}
-+
- int do_read_csd(int argc, char **argv)
- {
- 	return do_read_reg(argc, argv, CSD);
-diff --git a/mmc.c b/mmc.c
-index fce7eef..b0f1f9b 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -306,6 +306,11 @@ static struct Command commands[] = {
- 	  "3. Only up to 512K bytes of boot data will be transferred.\n"
- 	  "4. The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.\n",
- 	},
-+	{ do_list, 0,
-+	  "list", "\n"
-+		"List all MMC/SD devices with their /dev path and CID info.",
-+	  NULL
-+	},
- 	{ NULL, 0, NULL, NULL }
- };
- 
-@@ -590,4 +595,3 @@ int main(int ac, char **av )
- 
- 	exit(func(nargs, args));
- }
--
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 9d5f944..033cc09 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -62,6 +62,7 @@ int do_opt_ffu4(int nargs, char **argv);
- int do_read_scr(int argc, char **argv);
- int do_read_cid(int argc, char **argv);
- int do_read_csd(int argc, char **argv);
-+int do_list(int nargs, char **argv);
- int do_erase(int nargs, char **argv);
- int do_general_cmd_read(int nargs, char **argv);
- int do_softreset(int nargs, char **argv);
--- 
-2.53.0
+Thanks!
+Pei.
+> 
+>>
+>> Fixes: 7d2be0749a59 ("atmel-mci: Driver for Atmel on-chip MMC
+>> controllers")
+>> Assisted-by: Codex:deepseek-v4-flash
+>> Signed-off-by: Pei Xiao <xiaopei01@kylinos.cn>
+>> ---
+>>   drivers/mmc/host/atmel-mci.c | 2 ++
+>>   1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+>> index 3b4928f5b9b2..8f4df250a77a 100644
+>> --- a/drivers/mmc/host/atmel-mci.c
+>> +++ b/drivers/mmc/host/atmel-mci.c
+>> @@ -2610,6 +2610,8 @@ static void atmci_remove(struct platform_device
+>> *pdev)
+>>
+>>          free_irq(platform_get_irq(pdev, 0), host);
+>>
+>> +       cancel_work_sync(&host->bh_work);
+>> +
+>>          clk_disable_unprepare(host->mck);
+>>
+>>          pm_runtime_disable(dev);
+>> -- 
+>> 2.25.1
+>>
 
