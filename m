@@ -1,442 +1,310 @@
-Received: from mail-pj1-f100.google.com (mail-pj1-f100.google.com [209.85.216.100])
+Received: from mail-vk1-f228.google.com (mail-vk1-f228.google.com [209.85.221.228])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49C823BBFA9
-	for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2026 16:38:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.100
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D19E233952
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2026 16:47:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.228
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786466308; cv=none; b=mZmpKPPT6++SvErWGAQQ5hK9YalpxwKrTEd9zty7uFIZk40bODcwtlHmSEsknElAJEox8LXstMqDX7T2TWDPNjjVRQwhGHRSiEnN7E5MQgNjhJtO+YTrM4GB7darr8mSe2UoYlVAajFWt9pZLGtM+NNsR7sutWTiMGQ3quVanDE=
+	t=1786466842; cv=none; b=Y6OnK5bk9IeShcBaZxEZ8UlVMFMikL3/Gnc4+lbB/SV/0DuwnJ1EXFyy3fkqO5YHRDylxdcWgzH0xOG8iTA9ZcDQua56kMcEuMgsekHlEqMpxqZFiVpoNo4NpMtt73G96HkFzMRfyVDOBWQPTsIS20BhyQcgIHOShphOBRIdpx0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786466308; c=relaxed/simple;
-	bh=qDIPVpVxEpcy+zvTLK84r8RGodocHdhfgyJCOWwDWL4=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=SL6cq88EbrTwIrcRs3XhN28lvt81gP3GmZ54jyFGO3qWyYrgCOGK40cmjhl0/6TiPsTugMXoZmzGNZ2R24V+ntdJPkXTwdByyQ3TZ7hLjGP3X6GHFtXiccD36D9mkZKK90G1uU4Pm2MymFV+7tuj/IEoADdCTr27Zxwe3dLUngI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=EagPx92G; arc=none smtp.client-ip=209.85.216.100
+	s=arc-20240116; t=1786466842; c=relaxed/simple;
+	bh=XeM5byNfDLFL9tAqAidxi3XPnNmpaOXG/kBp3I75TDQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Nyr4xZdOGg7WhI5f/eKwS6BeN/t+NO6yY+s/mheCYgN9t57hYJUiUkxh8bGgs9VnMxatcUq6lFHV9DlK62kGDUgA/V9pXuNSpNoHMnxqmEnBGraBPY1VQUEZNHQWa2TOyet2Glhi46uuRaFm/hD8UyyWv1stg3E4lKFg1yImK0A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=E0Dz5Avd; arc=none smtp.client-ip=209.85.221.228
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="EagPx92G"
-Received: by mail-pj1-f100.google.com with SMTP id 98e67ed59e1d1-38dfe910e9dso81101a91.3
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2026 09:38:23 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="E0Dz5Avd"
+Received: by mail-vk1-f228.google.com with SMTP id 71dfb90a1353d-5c2c0e261aeso892408e0c.0
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2026 09:47:19 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786466303; x=1787071103;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:dkim-signature:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=K2PGjge9uHRNeS69RnlDH3bcMcQ9lvmh6M0bI5U6ZnQ=;
-        b=KlXucIfMzyEVWHRnuOn0YuHdq0UcIEMVObqMNzb8Mi+pt4860neVW2tEj4LJeF53j2
-         5DECX2+T/rU5n5IMjXVNQpKnhLCHKc2Mvy7lPfNIlWOUe1TBg1lrnSQnYFbpaLT5ui3K
-         4ceyebpaWm7NB1K58wZGkSEOGTuzqc2YX2b8aWjWn77pvlWf8Smy9LmlOffdI6NXw+ZH
-         xUCPg8AfOaRcdgfp8ksFNh3BhYTRMvuJvLfeHCHInmOBHfC2qlBZC/lEMd6puZBkJhlj
-         fkuNWgqQcjvylz6VuMg5PBFBMYpm/kf3+IN3xo20BhUJ/9rrdNPxkF98N+2mwxCa9ffl
-         QbOw==
-X-Forwarded-Encrypted: i=1; AHgh+RpbPTtXb+GdwF9zWxCo5k7u65C7E/BLsimNTSD6Fy0yYS2xHeGQeUSzD0sMfGSS2mzTsJYC9tHilj0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzEtZ9WlVWlRuxUaNE7GG2kVE8EXHe7+NE7F0opSIak/acobDJh
-	UBMZ35xT4ol107Ymz7DmkNQg8nnYjtTRiQqeCQAgTvRdMstR92PVTfHWkexX+bE/LLQxk1NroHv
-	4oBXOUznxAHE0HtwDApgXoMJdSxsDKEowtN612DfXnAhAaWhF++pcBIleY4fvT2/gLbz5abSJrL
-	Odor+fvFyurXXv70XEeJnLhO4ANREpKueE9GMzAvwnzCs+w3O5gkSBVEHoDWnazVTjpCAGTgmtU
-	sqizCHq6CwD
-X-Gm-Gg: AR+sD12xyvt2wl67Rvo+pZGyHBHCqVo3jFyGMxWMC5aYlKzIYUBOWe16BmOL5bgLMas
-	LPXhkVeu67yUm6ZZqeH5RvwKsvRRB5SIRVc5GIvYe1Ws4wOhDyhAD3pY9LWeXWkcNc/sD3QZJe5
-	UO50kGkpXfRmZOg5dqJyeI2aN3fKo4PT/GKQ6FDWxu2FdrEy3r543y7U6i+/ioVffrHmxR8H759
-	PEaRfSOABVAcig1yYl3nwh2RK4opyoZRDxlvw46RU7TZVSbenyuexLohES0V/gHjRbj2XW/zpkf
-	qXshpPxiBVQ/RtNtoAr5s9QvpNQ6iaIbcJe1YPLvxQ0JLpa2NJPiOsXvlFSbm8Cwph4rvpjekeh
-	mP9Bimtx1KO7CmBT+jSWBiSB23fCFJDFcFnsNwx2mE5Ju83Tiqxldatvb6fOg/4uZ4luwslFuRo
-	MpCWMJ/QvyUjWnzVFecL17zr93oT09WZNI
-X-Received: by 2002:a17:90b:2d43:b0:392:c80b:8ef7 with SMTP id 98e67ed59e1d1-392f484a476mr1247539a91.18.1786466302672;
-        Tue, 11 Aug 2026 09:38:22 -0700 (PDT)
+        d=1e100.net; s=20251104; t=1786466838; x=1787071638;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:dkim-signature:x-gm-gg:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to:content-type;
+        bh=5hVUqKAq7+CGR3gV29vn5IOnGPr6UMObs1caCTW5v8Q=;
+        b=jtjeIp4gfmKq3o8NmN8hjaOimYxnofK8LM9ZjDQHQpQIzu3RbcoN+H4pD8kJHG1QHR
+         t3h6qAl05LndOdmelKjo2XtQZTDsG+szBzSlYHrf72kSIef5YCKhxu1969Cd3F2NN9x+
+         9zI/7gfnBvKZo8epE8JCtAoVkfcWS0maB2WXtScztN9np4gApPrYnVUECglAEHZM5jCb
+         HMbSkrwQckLTSLupQWw6qb7pZv0kODXEQh+cMXtIZ2q6bC+/qGlxhMTAcfQyv0mqIXaj
+         lwdKWFh2BbFkDCf9a8lapZGJ4Oc0P1JU0O1guBdI4+YGowORmskIO/9RBeZjHOBV1kwF
+         onlA==
+X-Forwarded-Encrypted: i=1; AHgh+RqBdXs2qG69VxLqw36ARrQFsPO99zwwLLdXsHqTKySMbzksCJscY/HxduqV93nRj5+23Mq8dSH24x8=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw+8/AXaUXAHC6uC/TAb7uVPKoPjHy2Qvz2iCvmaYqs+8ImIaKd
+	/DgHUg3ewtrKZYtlY1k2EUBAMW+aXLfES/IcPo6DEl8tNe/ApgU9jX8VZWJVc+X82/gX2qDlr0d
+	QX+UMpmwXyYAkOc1+7a5F0ydlqXS+bhCI6wW950T5cmfb54xryk7xFBycXIQaBv6jPIavFBTKxz
+	igOoS6M8Kr5rs2SZs/XEwH5LCaZp++BCxdtKfFeg5nW4/O4MT0EdkG5tvs1sOxOZzpQb0Qt79BZ
+	Fh7eNX5wQ1CAUdhzzY7
+X-Gm-Gg: AR+sD105W5sPOHb/gDeFfsfDS6bC5UM64LlJMOYyQsZEXM0e3ffsAjrxCXj/mol52lW
+	8RIRypDKppgeGZAkXV7S1AiZ/kUH35JbK8NuU4pHzx0EUx8etd06cjTfpzzXn1QLObwgwisISKb
+	PUUzlmpicedl977wH3YpI74dOykSh+tcYv5fjJCsnj+beVQoHuElArVsXG/qGkBnZN8b0sxIfXF
+	pdRzh3MXMwGvIzYRwzWkmTqjzSTG0eXOZLBG/N4D00ZP0T+SwB/xugyRcBzXvdqQB9wY46Zd+l2
+	/U4QreMcSJxpAG+ZvX6GMtVVQNUNbHYFydDXYzynqdbc4vkbHx5H5Zb0TPCXuXtrTwpAA60hNry
+	Yt9vvjTuQEycq+FlJOSWjwCFJIInewu9LAsZqQBHsr41IINveeGv0LMR8G/BX3uzNfm4Wag5Src
+	m8kIxMJnY1sgGvWOZGFy9403lReoZIpv6pmIp3i5wv
+X-Received: by 2002:a05:6122:4591:b0:5bf:b879:15c0 with SMTP id 71dfb90a1353d-5c45039b18emr498866e0c.5.1786466837902;
+        Tue, 11 Aug 2026 09:47:17 -0700 (PDT)
 Received: from smtp-us-east1-p01-i01-si01.dlp.protect.broadcom.com (address-144-49-247-20.dlp.protect.broadcom.com. [144.49.247.20])
-        by smtp-relay.gmail.com with ESMTPS id 98e67ed59e1d1-392f9514bc0sm28870a91.13.2026.08.11.09.38.22
+        by smtp-relay.gmail.com with ESMTPS id 71dfb90a1353d-5c45b3d9972sm58111e0c.2.2026.08.11.09.47.17
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 11 Aug 2026 09:38:22 -0700 (PDT)
+        Tue, 11 Aug 2026 09:47:17 -0700 (PDT)
 X-Relaying-Domain: broadcom.com
 X-CFilter-Loop: Reflected
-Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-51a8b0a08d2so1180291cf.0
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2026 09:38:21 -0700 (PDT)
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-c85798977dcso4869354a12.0
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Aug 2026 09:47:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1786466301; x=1787071101; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=K2PGjge9uHRNeS69RnlDH3bcMcQ9lvmh6M0bI5U6ZnQ=;
-        b=EagPx92GGJzuWnX5xycj2/LovP6jWbre2OeO1Wh5OdjrPwutBU5uxs0KO+KkVqFFbq
-         tKl0MAvl6HQgRB9BGPaRD/9PSG9GnQBFVR+NHYZdIvml1/zMgCU4ObxkjZ7/MLaFxIAk
-         VuK4+1xC/3Z+/X9aktvFvCTbAdu1xvlWKv/Xs=
-X-Forwarded-Encrypted: i=1; AHgh+RrvmHsyA5qQIYRYIskEauPJXdMVxh4QQz3NyC1mjn8KaLEOaX2Izl6jWAyDnmaVfNcpx0LxbDxCpYo=@vger.kernel.org
-X-Received: by 2002:ac8:5d13:0:b0:52d:28f8:578c with SMTP id d75a77b69052e-52d60232d28mr14082231cf.31.1786466300775;
-        Tue, 11 Aug 2026 09:38:20 -0700 (PDT)
-X-Received: by 2002:ac8:5d13:0:b0:52d:28f8:578c with SMTP id d75a77b69052e-52d60232d28mr14081381cf.31.1786466300075;
-        Tue, 11 Aug 2026 09:38:20 -0700 (PDT)
-Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-52d57c3c09bsm14427981cf.25.2026.08.11.09.38.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Aug 2026 09:38:19 -0700 (PDT)
-From: Kamal Dasu <kamal.dasu@broadcom.com>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Kamal Dasu <kamal.dasu@broadcom.com>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Oleksij Rempel <o.rempel@pengutronix.de>,
-	Avri Altman <avri.altman@sandisk.com>,
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
-	Erick Shepherd <erick.shepherd@ni.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v9 3/3] mmc: core: Honor keep-power-in-suspend and reset-card-at-resume for (e)MMC
-Date: Tue, 11 Aug 2026 12:38:10 -0400
-Message-Id: <20260811163810.1599747-4-kamal.dasu@broadcom.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20260811163810.1599747-1-kamal.dasu@broadcom.com>
-References: <20260811163810.1599747-1-kamal.dasu@broadcom.com>
+        d=broadcom.com; s=google; t=1786466837; x=1787071637; darn=vger.kernel.org;
+        h=content-transfer-encoding:content-type:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=5hVUqKAq7+CGR3gV29vn5IOnGPr6UMObs1caCTW5v8Q=;
+        b=E0Dz5AvdZu3svnmUAmHJ3BC6ZdKw1ny2alwkMhUT05//xI2LyrqS2cOZi3uApYDD3u
+         a6AN9ag93Kk+Gi/0o6+0oIgKxbjufi6+YCUDU4HWxfA4PDcao3AAVSVzeKxbCTqZqupH
+         RpCUDtkYz6hPoXC4I+/x3A2fyfexjskWtIwGE=
+X-Forwarded-Encrypted: i=1; AHgh+RqrWOCKVIamA6NIsjPS4KZn+DLuTNWfyH2y/Z7HDWEFOW18wlbqZPM9LSI6mZjcXZqHjMhClJrffwI=@vger.kernel.org
+X-Received: by 2002:a05:6a20:2d13:b0:3c4:1916:9d46 with SMTP id adf61e73a8af0-3cc2bac42a9mr6230597637.27.1786466836465;
+        Tue, 11 Aug 2026 09:47:16 -0700 (PDT)
+X-Received: by 2002:a05:6a20:2d13:b0:3c4:1916:9d46 with SMTP id adf61e73a8af0-3cc2bac42a9mr6230508637.27.1786466835825;
+        Tue, 11 Aug 2026 09:47:15 -0700 (PDT)
+Received: from [10.67.48.245] ([192.19.223.252])
+        by smtp.gmail.com with ESMTPSA id 5a478bee46e88-31cf6d7a366sm1085740eec.27.2026.08.11.09.47.13
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 11 Aug 2026 09:47:15 -0700 (PDT)
+Message-ID: <b6cdd25a-af18-40f4-8fc1-fac2e1d0ef41@broadcom.com>
+Date: Tue, 11 Aug 2026 09:47:13 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 0/4] mmc: Add pstore backend for crash dump storage on
+ eMMC
+To: Kamal Dasu <kamal.dasu@broadcom.com>, Ulf Hansson <ulfh@kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Kees Cook <kees@kernel.org>,
+ Tony Luck <tony.luck@intel.com>, "Guilherme G . Piccoli"
+ <gpiccoli@igalia.com>, Arend van Spriel <arend.vanspriel@broadcom.com>,
+ William Zhang <william.zhang@broadcom.com>,
+ bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20260422205053.3392395-1-kamal.dasu@broadcom.com>
+ <CAKekbesT-CazRUv-LMU92h8pPP06PdrP8PQSTQZkeJs8vUePXw@mail.gmail.com>
+ <CAKekbes22Es97vR39y==Ds-VszAOo0ypwYhVT2ODbSpkb=cZfA@mail.gmail.com>
+Content-Language: en-US, fr-FR
+From: Florian Fainelli <florian.fainelli@broadcom.com>
+Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
+ xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
+ M0Txqn1tOWoIc4QUl6Ggqf5KP6FoRkCrgMMTnUAINsINYXK+3OLe7HjP10h2jDRX4Ajs4Ghs
+ JrZOBru6rH0YrgAhr6O5gG7NE1jhly+EsOa2MpwOiXO4DE/YKZGuVe6Bh87WqmILs9KvnNrQ
+ PcycQnYKTVpqE95d4M824M5cuRB6D1GrYovCsjA9uxo22kPdOoQRAu5gBBn3AdtALFyQj9DQ
+ KQuc39/i/Kt6XLZ/RsBc6qLs+p+JnEuPJngTSfWvzGjpx0nkwCMi4yBb+xk7Hki4kEslABEB
+ AAHNMEZsb3JpYW4gRmFpbmVsbGkgPGZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tPsLB
+ IQQQAQgAywUCZWl41AUJI+Jo+hcKAAG/SMv+fS3xUQWa0NryPuoRGjsA3SAUAAAAAAAWAAFr
+ ZXktdXNhZ2UtbWFza0BwZ3AuY29tjDAUgAAAAAAgAAdwcmVmZXJyZWQtZW1haWwtZW5jb2Rp
+ bmdAcGdwLmNvbXBncG1pbWUICwkIBwMCAQoFF4AAAAAZGGxkYXA6Ly9rZXlzLmJyb2FkY29t
+ Lm5ldAUbAwAAAAMWAgEFHgEAAAAEFQgJChYhBNXZKpfnkVze1+R8aIExtcQpvGagAAoJEIEx
+ tcQpvGagWPEH/2l0DNr9QkTwJUxOoP9wgHfmVhqc0ZlDsBFv91I3BbhGKI5UATbipKNqG13Z
+ TsBrJHcrnCqnTRS+8n9/myOF0ng2A4YT0EJnayzHugXm+hrkO5O9UEPJ8a+0553VqyoFhHqA
+ zjxj8fUu1px5cbb4R9G4UAySqyeLLeqnYLCKb4+GklGSBGsLMYvLmIDNYlkhMdnnzsSUAS61
+ WJYW6jjnzMwuKJ0ZHv7xZvSHyhIsFRiYiEs44kiYjbUUMcXor/uLEuTIazGrE3MahuGdjpT2
+ IOjoMiTsbMc0yfhHp6G/2E769oDXMVxCCbMVpA+LUtVIQEA+8Zr6mX0Yk4nDS7OiBlvOwE0E
+ U8AbwQEIAKxr71oqe+0+MYCc7WafWEcpQHFUwvYLcdBoOnmJPxDwDRpvU5LhqSPvk/yJdh9k
+ 4xUDQu3rm1qIW2I9Puk5n/Jz/lZsqGw8T13DKyu8eMcvaA/irm9lX9El27DPHy/0qsxmxVmU
+ pu9y9S+BmaMb2CM9IuyxMWEl9ruWFS2jAWh/R8CrdnL6+zLk60R7XGzmSJqF09vYNlJ6Bdbs
+ MWDXkYWWP5Ub1ZJGNJQ4qT7g8IN0qXxzLQsmz6tbgLMEHYBGx80bBF8AkdThd6SLhreCN7Uh
+ IR/5NXGqotAZao2xlDpJLuOMQtoH9WVNuuxQQZHVd8if+yp6yRJ5DAmIUt5CCPcAEQEAAcLB
+ gQQYAQIBKwUCU8AbwgUbDAAAAMBdIAQZAQgABgUCU8AbwQAKCRCTYAaomC8PVQ0VCACWk3n+
+ obFABEp5Rg6Qvspi9kWXcwCcfZV41OIYWhXMoc57ssjCand5noZi8bKg0bxw4qsg+9cNgZ3P
+ N/DFWcNKcAT3Z2/4fTnJqdJS//YcEhlr8uGs+ZWFcqAPbteFCM4dGDRruo69IrHfyyQGx16s
+ CcFlrN8vD066RKevFepb/ml7eYEdN5SRALyEdQMKeCSf3mectdoECEqdF/MWpfWIYQ1hEfdm
+ C2Kztm+h3Nkt9ZQLqc3wsPJZmbD9T0c9Rphfypgw/SfTf2/CHoYVkKqwUIzI59itl5Lze+R5
+ wDByhWHx2Ud2R7SudmT9XK1e0x7W7a5z11Q6vrzuED5nQvkhAAoJEIExtcQpvGagugcIAJd5
+ EYe6KM6Y6RvI6TvHp+QgbU5dxvjqSiSvam0Ms3QrLidCtantcGT2Wz/2PlbZqkoJxMQc40rb
+ fXa4xQSvJYj0GWpadrDJUvUu3LEsunDCxdWrmbmwGRKqZraV2oG7YEddmDqOe0Xm/NxeSobc
+ MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
+ 7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
+ 95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
+In-Reply-To: <CAKekbes22Es97vR39y==Ds-VszAOo0ypwYhVT2ODbSpkb=cZfA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 X-DetectorID-Processed: b00c1d49-9d2e-4205-b15f-d015386d3d5e
 
-On some platforms, firmware accesses the (e)MMC card directly during
-resume from Suspend-to-DRAM, before the kernel's own resume path has
-run, in order to load boot code. This requires the card to remain
-powered and responsive throughout suspend: putting it to sleep,
-sending it a power-off notification, or removing its supply is not
-safe, since firmware needs to talk to a live card. Since the card is
-never power-cycled, nothing else resets it back to a known state
-before the kernel reuses it after resume.
+Hi Ulf,
 
-keep-power-in-suspend / MMC_PM_KEEP_POWER already exist for the first
-part, but are only consumed in the SDIO suspend/resume path
-(mmc_sdio_suspend()/mmc_sdio_resume()), gated on a per-function
-runtime request via sdio_set_host_pm_flags(). (e)MMC has no
-equivalent function-driver layer to make that request, and the
-requirement here is a fixed platform characteristic rather than a
-per-cycle one, so _mmc_suspend() checks host->pm_caps directly
-instead of pm_flags.
+On 6/10/26 10:01, Kamal Dasu wrote:
+> 
+> 
+> On Wed, Jun 10, 2026 at 12:53 PM Kamal Dasu <kamal.dasu@broadcom.com 
+> <mailto:kamal.dasu@broadcom.com>> wrote:
+> 
+> 
+> 
+>     On Wed, Apr 22, 2026 at 4:51 PM Kamal Dasu <kamal.dasu@broadcom.com
+>     <mailto:kamal.dasu@broadcom.com>> wrote:
+> 
+>         This series adds mmcpstore, a pstore backend driver that enables
+>         persistent storage of kernel crash logs on eMMC devices. When the
+>         kernel panics, pstore captures the kmsg dump and writes it directly
+>         to a dedicated MMC partition using polled I/O with interrupts
+>         disabled.
+> 
+>         Changes since v4 (addresses Ulf Hansson's feedback on the v4 panic
+>         host path, linux-mmc):
+>         - mmc_panic_claim_host(): log claimed, runtime suspend, and
+>            ongoing_mrq before claim; always call panic_prepare() when
+>            implemented so the host can drain or gracefully terminate
+>            in-flight requests, then force-claim. Vendor controllers may
+>            supply their own panic_prepare for platform-specific cases (1/4).
+>         - SDHCI: reference panic_prepare implementation; longer drain/reset
+>            timeouts; document panic helper return values in kernel-doc
+>         (2/4).
+>         - mmcpstore: single prepare/claim path; panic_complete() after
+>            panic_poll_completion() on panic writes (4/4).
+> 
+>         Changes since v3:
+>         - Fixed kernel-doc warnings reported by kernel test robot:
+>            - Added missing @param descriptions for sdhci_panic_prepare(),
+>              sdhci_panic_poll_completion(), sdhci_panic_complete() (patch 2)
+>            - Added missing @sect_offset param doc for
+>              mmcpstore_do_request_internal() (patch 4)
+>            - Fixed kernel-doc function name mismatch: mmcpstore_read() ->
+>              mmcpstore_read_zone() (patch 4)
+>            - Added missing @disk param doc for mmcpstore_card_add()
+>         (patch 4)
+>         - Removed unused 'offset_bytes' variable in
+>            mmcpstore_register_for_card() (patch 4)
+> 
+>         Changes since v2 (RFC):
+>         - Rebased onto v7.0-rc — no longer reverts any existing MMC core
+>            or SDHCI changes (v1/v2 accidentally reverted recent upstream
+>            commits due to being based on an older tree)
+>         - Removed all erase/bitmap tracking logic — MMC/eMMC is managed
+>            flash and does not need erase-before-write; the pstore_zone
+>            framework handles zone management internally
+>         - Uses standard MMC core request path (mmc_start_request) instead
+>            of hand-building mmc_request structs; panic-context I/O is
+>            handled through proper mmc_host_ops callbacks rather than ad-hoc
+>            code in the driver
+>         - Added panic-context ops to mmc_host_ops and sdhci_ops for clean
+>            separation of panic and normal I/O paths
+>         - Fixed deadlocks caused by spinlock contention during panic
+>            (lockless mmc_panic_claim_host using WRITE_ONCE)
+>         - Fixed data corruption in pstore recovery (zlib_inflate failures)
+>            by letting the normal sdhci_request() path run instead of a
+>            custom panic request handler
+>         - Added PM suspend/resume support with eMMC re-initialization
+>         - Supports module loading or builtin loading of the driver
+>         - Added MAINTAINERS entry
+>         - Split into 4-patch series for reviewability
+> 
+>         The series is structured as follows:
+> 
+>         Patch 1 adds panic-context operations to struct mmc_host_ops and a
+>         lockless mmc_panic_claim_host() for use during kernel panic when
+>         other CPUs are stopped and may hold locks. Host drivers may replace
+>         panic_prepare with vendor-specific code where needed.
+> 
+>         Patch 2 implements the SDHCI reference panic_prepare (graceful
+>         termination of in-flight work, then polled completion paths); other
+>         MMC host drivers use the same mmc_host_ops hooks with their own
+>         panic_prepare where the hardware differs.
+> 
+>         Patch 3 adds mmc_blk_get_card_by_name() helper to look up an
+>         mmc_card from a block device name, used by the mmcpstore module
+>         path for card discovery.
+> 
+>         Patch 4 adds the mmcpstore driver itself, which registers with the
+>         pstore_blk framework and handles panic writes, PM suspend/resume,
+>         and dual-path registration (direct probe hook for builtin,
+>         mmc_blk_get_card_by_name() for module). Also adds probe/remove
+>         hooks in block.c and declarations in block.h for the builtin path.
+> 
+>         Tested on Broadcom STB platforms (ARM64) with SDHCI controllers,
+>         verified panic dump recovery across multiple panic/reboot cycles
+>         with kmsg, pmsg, and console pstore; also tested with concurrent
+>         I/O stress before panic.
+> 
+>         Previous submissions and related work:
+>            RFC v1: https://lore.kernel.org/linux-
+>         mmc/20221216212738.7928-1-kdasu.kdev@gmail.com/ <https://
+>         lore.kernel.org/linux-mmc/20221216212738.7928-1-
+>         kdasu.kdev@gmail.com/>
+>            RFC v2: https://lore.kernel.org/linux-
+>         mmc/20221222185948.12717-1-kdasu.kdev@gmail.com/ <https://
+>         lore.kernel.org/linux-mmc/20221222185948.12717-1-
+>         kdasu.kdev@gmail.com/>
+>            v3: https://lore.kernel.org/linux-
+>         mmc/20260319185705.1516950-1-kamal.dasu@broadcom.com/ <https://
+>         lore.kernel.org/linux-mmc/20260319185705.1516950-1-
+>         kamal.dasu@broadcom.com/>
+>            v4: linux-mmc (same thread as v3; superseded by this v5)
+>            Marvell MMC pstore attempt (2020):
+>         https://lore.kernel.org/linux-mmc/20201207115753.21728-1-
+>         bbudiredla@marvell.com/ <https://lore.kernel.org/linux-
+>         mmc/20201207115753.21728-1-bbudiredla@marvell.com/>
+>            pstore/blk documentation:
+>         https://www.kernel.org/doc/html/latest/admin-guide/pstore-
+>         blk.html <https://www.kernel.org/doc/html/latest/admin-guide/
+>         pstore-blk.html>
+> 
+>         Kamal Dasu (4):
+>            mmc: core: Add panic-context host operations for pstore backends
+>            mmc: sdhci: Implement panic-context write support
+>            mmc: block: Add helper to look up mmc_card by device name
+>            mmc: core: Add MMC pstore backend driver
+> 
+>           MAINTAINERS                  |    6 +
+>           drivers/mmc/core/Kconfig     |   12 +
+>           drivers/mmc/core/Makefile    |    1 +
+>           drivers/mmc/core/block.c     |   56 ++
+>           drivers/mmc/core/block.h     |   18 +
+>           drivers/mmc/core/core.c      |   54 ++
+>           drivers/mmc/core/mmcpstore.c | 1511 ++++++++++++++++++++++++++
+>         ++++++++
+>           drivers/mmc/host/sdhci.c     |  173 +++-
+>           drivers/mmc/host/sdhci.h     |    6 +
+>           include/linux/mmc/host.h     |   12 +
+>           10 files changed, 1845 insertions(+), 4 deletions(-)
+>           create mode 100644 drivers/mmc/core/mmcpstore.c
+> 
+>         -- 
+>         2.34.1
+> 
+> 
+> 
+> 
+> Ulf,
+> 
+> I'm resending a gentle reminder regarding the v5 patch series for mmcpstore.
+> 
+> This version addresses your previous feedback on the v4 panic host path 
+> and includes several key stability improvements:
+> 
+> - Implements a lockless mmc_panic_claim_host using WRITE_ONCE to avoid 
+> deadlocks during panic.
+> - Adds panic_prepare to the host ops to ensure in-flight requests are 
+> drained and runtime PM states are handled before panic writes.
+> - Uses standard MMC core request paths with polling-based completion for 
+> robust I/O during a crash.
+> - Includes full PM suspend/resume support with eMMC re-initialization.
+> 
+> The series has been tested thoroughly on Broadcom STB platforms (ARM64), 
+> verifying reliable recovery of kmsg, pmsg, and console logs across 
+> multiple panic cycles.
+> 
+> Please let me know if you need any further information or if there are 
+> additional changes required for acceptance.
 
-reset-card-at-resume covers the second part: when set, _mmc_resume()
-resets the host to its initial bus state the same way _mmc_hw_reset()
-does for a non-power-cycle reset, before mmc_power_up() and
-mmc_init_card() re-identify the card.
+Is there anything we could do here to move this forward? We have large 
+number of devices in the field that make use of that feature and we 
+would really like for this to be included upstream and usable by others 
+as well.
 
-_mmc_suspend()'s fast path requires both MMC_PM_KEEP_POWER and
-MMC_CAP2_RESET_AT_RESUME to be set. Keeping the card powered without
-also resetting it at resume is not safe for this driver: skipping
-mmc_power_off() leaves power_mode at MMC_POWER_ON, so mmc_power_up()
-no-ops in _mmc_resume(), and without an explicit reset first,
-mmc_init_card() runs against whatever bus speed/width was active
-before suspend instead of the initial state it expects. Conversely,
-_mmc_resume()'s reset checks pm_flags rather than the
-MMC_CAP2_RESET_AT_RESUME capability directly, since pm_flags is only
-set when the fast path actually ran -- the only time power_mode is
-guaranteed to still be MMC_POWER_ON, and so the only time resetting
-the bus before mmc_power_up() is both necessary and safe. Without
-that check, MMC_CAP2_RESET_AT_RESUME set on its own would drive the
-clock and bus lines while the card's supply is still off following a
-normal mmc_power_off().
-
-The fast path also leaves the card marked suspended without powering
-it off, so _mmc_suspend()'s pre-existing early exit for an
-already-suspended card can no longer assume there is nothing left to
-do: a shutdown, unbind or undervoltage event can still arrive before
-the card's next real access lazily triggers _mmc_resume() via runtime
-PM, and those events need the normal power-off sequence regardless.
-Reselect the card and continue into that sequence in that case,
-instead of returning early and silently skipping mmc_poweroff_notify()
-and mmc_power_off(). Reset the host to its initial bus state first,
-the same way _mmc_resume() does, since firmware may have left the
-card in a state that doesn't decode reliably at whatever clock/timing
-was negotiated before suspend -- otherwise mmc_select_card() itself
-can fail and abort into that same early exit, before ever reaching
-the sequence it was supposed to fall through to. If mmc_select_card()
-still fails after that reset -- the card may genuinely be gone -- fall
-through to mmc_power_off() directly rather than aborting again:
-unlike the other steps here, powering off doesn't need a responsive
-card, and shutdown/undervoltage need the supply actually removed
-regardless.
-
-host->pm_flags is set alongside marking the card suspended, and
-cleared in _mmc_resume(), so host controller resume handlers can tell
-power was preserved if they need to.
-
-Reported-by: Florian Fainelli <florian.fainelli@broadcom.com>
-Closes: https://lore.kernel.org/r/20260413180551.3683969-1-florian.fainelli@broadcom.com/
-Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
----
-Changes in v9:
-  - Sashiko's AI review found two more High severity issues in the
-    same shutdown/undervoltage fallback added in v8:
-      * Calling mmc_select_card() straight after finding the card
-        still marked suspended assumed the card would respond to
-        CMD7 as-is, but that's exactly the assumption
-        reset-card-at-resume exists to distrust -- firmware may have
-        left the card unable to decode commands at whatever
-        clock/timing was negotiated before suspend. A CMD7 timeout
-        there hit "goto out" and skipped the power-off sequence
-        entirely, the same failure mode this fallback was added to
-        close in v8. Fixed by resetting the host to its initial bus
-        state before mmc_select_card(), the same way _mmc_resume()
-        already does before touching the card.
-      * Even with that reset, mmc_select_card() can still legitimately
-        fail (card genuinely gone). The code still unconditionally
-        "goto out" in that case, skipping mmc_power_off() entirely --
-        but mmc_power_off() is host/regulator-side only and doesn't
-        need a responsive card, so there's no reason a select failure
-        should leave the supply on indefinitely for a shutdown or
-        undervoltage event, or leave pm_flags/suspended state stuck
-        retrying the same failing select on every later call. Fixed
-        by falling through to mmc_power_off() directly on select
-        failure instead of aborting.
-  - Patches 1/3 and 2/3 are unchanged from v8.
-
-Changes in v8:
-  - Sashiko's AI review of v7 found a High severity issue: the
-    keep-power fast path marks the card suspended without powering
-    it off, but the pre-existing early exit at the top of
-    _mmc_suspend() (for an already-suspended card) doesn't know that
-    -- it just returns immediately regardless of pm_type. Since the
-    system-resume path only re-enables runtime PM rather than calling
-    _mmc_resume() directly (that happens lazily, via runtime PM, on
-    the card's next real access), a shutdown, unbind or undervoltage
-    event landing before that next access would hit the early exit
-    and silently skip mmc_poweroff_notify()/mmc_power_off() entirely.
-    Fixed by reselecting the card and continuing into the normal
-    power-off sequence whenever the card is suspended via our fast
-    path but pm_type isn't a plain suspend, instead of a bare early
-    exit. Calling _mmc_resume() itself from here isn't an option, since
-    _mmc_suspend() already holds the host claim.
-
-Changes in v7:
-  - Sashiko's AI review of v6 found two real, complementary bugs in
-    treating MMC_PM_KEEP_POWER and MMC_CAP2_RESET_AT_RESUME as fully
-    independent in this driver:
-      * keep-power-in-suspend without reset-card-at-resume: confirmed
-        on hardware to hang -- _mmc_resume()'s mmc_power_up() no-ops
-        since power_mode never left MMC_POWER_ON, so mmc_init_card()
-        runs at the pre-suspend bus speed and CMD1 times out.
-      * reset-card-at-resume without keep-power-in-suspend: the reset
-        block ran mmc_set_clock()/mmc_set_initial_state() ahead of
-        mmc_power_up(), while power_mode was still MMC_POWER_OFF from
-        a normal suspend-time mmc_power_off() -- driving the clock
-        and bus lines before the card's supply is enabled.
-    Fixed by requiring both capabilities together for the suspend
-    fast path, and checking pm_flags (not the raw capability) for the
-    resume-side reset, so it only ever runs when power was actually
-    kept this cycle. Verified on hardware: the keep-power-in-suspend-
-    without-reset-card-at-resume case now correctly falls through to
-    a normal power-off/power-on cycle instead of hanging, and the
-    paired-capability case is unaffected (still hardware-verified,
-    now with an extra confirmation run after this fix).
-
-Changes in v6:
-  - Reworked around Ulf's two-property split: dropped the
-    unconditional mmc_set_clock()/mmc_set_initial_state() reset from
-    the suspend-side fast path, and instead perform it in
-    _mmc_resume(), gated on the new MMC_CAP2_RESET_AT_RESUME (from
-    reset-card-at-resume), matching the property's name and
-    description ("before the card can be used, it must be reset").
-  - No longer touches MMC_CAP2_NO_POWEROFF_SUSPEND/no-mmc-poweroff-
-    suspend at all -- that capability and property are gone, per the
-    v4 rework; this patch only adds MMC_CAP2_RESET_AT_RESUME.
-
-Changes in v5:
-  - Only set host->pm_flags |= MMC_PM_KEEP_POWER after
-    mmc_deselect_cards() succeeds, instead of unconditionally before
-    it. Otherwise, if the deselect fails, the card is never marked
-    suspended, _mmc_resume() takes its early exit, and the flag never
-    gets cleared -- leaking it for the rest of uptime.
-
-Changes in v4:
-  - Gated the fast path on pm_type == MMC_POWEROFF_SUSPEND; it was
-    previously unconditional, so it wrongly skipped the required
-    power-off/notify handling during shutdown, unbind and
-    undervoltage as well.
-  - Set/clear host->pm_flags |= MMC_PM_KEEP_POWER around the suspend/
-    resume, mirroring the SDIO convention, so host controller resume
-    handlers can tell power was preserved and perform a soft resume
-    sequence instead of assuming power was lost.
-  - Dropped MMC_CAP2_NO_POWEROFF_SUSPEND and the no-mmc-poweroff-
-    suspend DT property entirely. Reuse keep-power-in-suspend /
-    MMC_PM_KEEP_POWER instead, per Krzysztof's point that the new
-    property described the same contract as the existing one.
-    _mmc_suspend() now checks host->pm_caps directly rather than
-    pm_flags, since (e)MMC has no per-function driver to make the
-    dynamic sdio_set_host_pm_flags()-style request SDIO uses.
-
-Changes in v3:
-  - Reworked _mmc_suspend() to skip poweroff-notify/sleep/power-off
-    entirely, not just SLEEP, per Ulf.
-  - Renamed to MMC_CAP2_NO_POWEROFF_SUSPEND/no-mmc-poweroff-suspend.
-
-Changes in v2:
-  - Replaced the card-level MMC_QUIRK_BROKEN_SLEEP quirk with a host
-    capability, per Ulf.
-  - Added Reported-by/Closes crediting Florian.
-
- drivers/mmc/core/host.c  |  2 +
- drivers/mmc/core/mmc.c   | 98 +++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/host.h |  1 +
- 3 files changed, 99 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index b7ce3137d452..1622f7846441 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -400,6 +400,8 @@ int mmc_of_parse(struct mmc_host *host)
- 	if (device_property_read_bool(dev, "no-mmc-hs400"))
- 		host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
- 				 MMC_CAP2_HS400_ES);
-+	if (device_property_read_bool(dev, "reset-card-at-resume"))
-+		host->caps2 |= MMC_CAP2_RESET_AT_RESUME;
- 
- 	/* Must be after "non-removable" check */
- 	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 05444ecf3909..3a0855a4ca44 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -2144,8 +2144,55 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- 
- 	mmc_claim_host(host);
- 
--	if (mmc_card_suspended(host->card))
--		goto out;
-+	if (mmc_card_suspended(host->card)) {
-+		/*
-+		 * Nothing to do for a redundant suspend call. Otherwise, the
-+		 * card can only still be marked suspended here because the
-+		 * keep-power fast path below left it powered and merely
-+		 * deselected -- reselect it and continue into the normal
-+		 * power-off sequence below, since shutdown, unbind and
-+		 * undervoltage need mmc_power_off() regardless of how the
-+		 * card got here.
-+		 */
-+		if (pm_type == MMC_POWEROFF_SUSPEND ||
-+		    !(host->pm_flags & MMC_PM_KEEP_POWER))
-+			goto out;
-+
-+		/*
-+		 * Firmware may have accessed the card while it stayed
-+		 * powered through suspend, leaving it in a state the kernel
-+		 * can no longer assume it knows. Reset the host to its
-+		 * initial bus state first, same as _mmc_resume() does before
-+		 * touching the card, so mmc_select_card() below is talking
-+		 * at a clock/timing every card is guaranteed to decode
-+		 * rather than whatever mode was negotiated before suspend.
-+		 */
-+		mmc_set_clock(host, host->f_init);
-+		mmc_set_initial_state(host);
-+
-+		if (!mmc_host_is_spi(host))
-+			err = mmc_select_card(host->card);
-+
-+		if (err) {
-+			/*
-+			 * The card still isn't responding even after the
-+			 * reset above -- it may genuinely be gone. Nothing
-+			 * else below needs a responsive card except
-+			 * mmc_power_off() itself, which is host/regulator
-+			 * side only, so cut power directly instead of
-+			 * leaving the card's supply on indefinitely (and
-+			 * pm_flags/suspended state stuck retrying this same
-+			 * failing select on every later call).
-+			 */
-+			mmc_power_off(host);
-+			host->pm_flags &= ~MMC_PM_KEEP_POWER;
-+			mmc_card_set_suspended(host->card);
-+			goto out;
-+		}
-+
-+		mmc_card_clr_suspended(host->card);
-+		host->pm_flags &= ~MMC_PM_KEEP_POWER;
-+	}
- 
- 	/*
- 	 * For the undervoltage case, we care more about device integrity.
-@@ -2157,6 +2204,33 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- 			goto out;
- 	}
- 
-+	/*
-+	 * Keep the card powered across an actual suspend; shutdown, unbind
-+	 * and undervoltage still need the normal power-off path below,
-+	 * since they aren't guaranteed a subsequent _mmc_resume().
-+	 *
-+	 * Check pm_caps, not pm_flags: unlike SDIO, (e)MMC has no
-+	 * per-function driver to request this via
-+	 * sdio_set_host_pm_flags(), so it's a fixed platform trait here.
-+	 *
-+	 * Require MMC_CAP2_RESET_AT_RESUME too: without it, _mmc_resume()
-+	 * has no way to bring the host back to a state mmc_init_card() can
-+	 * use, since mmc_power_up() no-ops when power_mode is already
-+	 * MMC_POWER_ON. Keeping power without also resetting at resume is
-+	 * not a safe combination for this driver.
-+	 */
-+	if (pm_type == MMC_POWEROFF_SUSPEND &&
-+	    (host->pm_caps & MMC_PM_KEEP_POWER) &&
-+	    (host->caps2 & MMC_CAP2_RESET_AT_RESUME)) {
-+		if (!mmc_host_is_spi(host))
-+			err = mmc_deselect_cards(host);
-+		if (!err) {
-+			host->pm_flags |= MMC_PM_KEEP_POWER;
-+			mmc_card_set_suspended(host->card);
-+		}
-+		goto out;
-+	}
-+
- 	if (mmc_card_can_poweroff_notify(host->card) &&
- 	    mmc_host_can_poweroff_notify(host, pm_type))
- 		err = mmc_poweroff_notify(host->card, notify_type);
-@@ -2217,9 +2291,29 @@ static int _mmc_resume(struct mmc_host *host)
- 	if (!mmc_card_suspended(host->card))
- 		goto out;
- 
-+	/*
-+	 * Firmware or other hardware may have accessed the card while it
-+	 * stayed powered through suspend, leaving it in a state the kernel
-+	 * can no longer assume it knows. Reset the host to its initial bus
-+	 * state like _mmc_hw_reset() does for a non-power-cycle reset,
-+	 * before mmc_init_card() re-identifies the card.
-+	 *
-+	 * Check pm_flags, not the MMC_CAP2_RESET_AT_RESUME capability
-+	 * directly: pm_flags only ends up set here when _mmc_suspend()
-+	 * actually took the keep-power fast path this cycle, which is the
-+	 * only time power_mode is guaranteed to still be MMC_POWER_ON (and
-+	 * so the only time this reset is both necessary and safe to do
-+	 * before mmc_power_up() touches the bus).
-+	 */
-+	if (host->pm_flags & MMC_PM_KEEP_POWER) {
-+		mmc_set_clock(host, host->f_init);
-+		mmc_set_initial_state(host);
-+	}
-+
- 	mmc_power_up(host, host->card->ocr);
- 	err = mmc_init_card(host, host->card->ocr, host->card);
- 	mmc_card_clr_suspended(host->card);
-+	host->pm_flags &= ~MMC_PM_KEEP_POWER;
- 
- out:
- 	mmc_release_host(host);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ba84f02c2a10..14a407a9f9b7 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -463,6 +463,7 @@ struct mmc_host {
- #define MMC_CAP2_CRYPTO		0
- #endif
- #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
-+#define MMC_CAP2_RESET_AT_RESUME (1 << 29)	/* Card must be reset before use at resume */
- 
- 	bool			uhs2_sd_tran;	/* UHS-II flag for SD_TRAN state */
- 	bool			uhs2_app_cmd;	/* UHS-II flag for APP command */
+Thanks!
 -- 
-2.34.1
-
+Florian
