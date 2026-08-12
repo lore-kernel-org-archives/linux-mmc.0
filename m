@@ -1,122 +1,149 @@
-Received: from mail-pj1-f49.google.com (mail-pj1-f49.google.com [209.85.216.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from ixit.cz (ixit.cz [84.42.129.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D24B3437478
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2026 11:21:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CA25435504;
+	Wed, 12 Aug 2026 11:40:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=84.42.129.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786533665; cv=none; b=V/E4ZMxQQFzNwHoBlT6RBojm52GIf5Dg+UEVHyV1eU7nYnv1Jgd7tTHEEOifwhSh9RXoSVbQawXRt4z8+RttSJ13IwZHu3xvMUK6Tc31XH/yvAYBbcdWjnZwibihOgUCLJd7Ke2ns2o1LoOjcW7hAuRzZC5iagh7sXrdTMhTqP8=
+	t=1786534828; cv=none; b=MYR0K2oDmXvpEz/hj+VYkImZvEe56JDzIf9v8HfP9pHnV0fg8+s1yOjPKfY/z2ToXQrfkeyChDAx/qy8D+lA5sTsAsOgOdYQuaohBTgHN3BCOAr5QK4oNmriWsR/62EI5OPL1sFAzYbxZaACNDu9euNE+hoW7C2C/ZXKe7Tgxdc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786533665; c=relaxed/simple;
-	bh=AQEbC5gXjnq96gD4UbxnJsrrXRSK8uBtmRVGLbSyuhI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ujXtWgWTT/JKn5dXDx6GU+eJDUk9NQ04/0MX4sVpS1ffvCJw+pHLA85XK6YXusoUzRwXygtWLo/EwNa18TR9xBrFFmvUJ0tnV/JZw6VDceiZ3Sh2WuSMDfs3W1nXNIn9SCCY8bwJIWX9yYJEIsSYYLWhor/mpoOKDDAlfOYqGkQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lILSSDuv; arc=none smtp.client-ip=209.85.216.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1786534828; c=relaxed/simple;
+	bh=4h/0oLp2h7IE8pA6uZy4AQLNovG4Wqu1oVEvekedYSA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DMtnPU65fDILrYTo06tAmD6FYYIn1zJsAuJnegXnWuziHVXUQid6568tUFVNXgYy95C9ba9qWj4DkiDh5w4Wk33jomaRjzVkLi+qPcPeyTIu1LhxIZAldGbwT9uJ4Yx15P8QrJRiJ3XepybbmGbdWH4i6WvoFrW3a+cArlYqY08=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ixit.cz; spf=pass smtp.mailfrom=ixit.cz; dkim=pass (1024-bit key) header.d=ixit.cz header.i=@ixit.cz header.b=GB7ysRj8; arc=none smtp.client-ip=84.42.129.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ixit.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ixit.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lILSSDuv"
-Received: by mail-pj1-f49.google.com with SMTP id 98e67ed59e1d1-381b831d535so1409086a91.0
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2026 04:21:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786533663; x=1787138463; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=doym3QyHT8bL7rPyfRL2QEekEkOSH3JrEcV5LcFpHT4=;
-        b=lILSSDuvd2PlLtSY2uzE95zBDvcg7bHZUUirPl3InUMuTh2qaUI/6tE4xa3QMTEM3x
-         jSyMm55r0wUSVbMWwZ9oCu00JELdehFLAhwGdOPEkeaMKECLGsZfVmgbQDk7Ty/swtvK
-         F1LYbqYHJpfu4A99pxObUQ7lT0sEJoa1beWeykipkHk5pK6TXYx95u+2V+nd2cimONV/
-         qaQXWn0vDvUxhc7ZLPZGSGQIxkudK7BuM+Q6e/f34dx4LZLySSoWhXGF/42rVyXUgkHo
-         dUp11x0cgCp5OILA/wFYkHTw5KZypIaytF/ncOvE00WcydcDBw/gZ3moCpopjKGk/b9u
-         6GvA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786533663; x=1787138463;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=doym3QyHT8bL7rPyfRL2QEekEkOSH3JrEcV5LcFpHT4=;
-        b=cvUalGr97R5ab6Z0kLSFtEaWUGPBQ7nlsTths3UHC3Vth7OqZZPr1P0pxHxCidbS3O
-         uhYDEgOXkAW2bYXQDde+gw8CE5WzORiKnXZpjFYoEyIu7l6F9R9bpAkMSgkUraq2XGxs
-         Xp8kEjIjGfjF0AQGdW+CvjIzF62YLGu0ED3lTpdQMmoWstjhSnbbcgo7gJbAQ9+YRiSI
-         ho3QeI5QkM4RBBZDNqx6bqB5rx91kAGsuzZQ9l81MzQmVDX/Kjl7pMUS2zmFG+fZ41HN
-         XxCfDmcbg4i1hCFMG6sXBw5CKDZAssolT56yKovGyPGGWuvOuMIqC4WMa1k6oVGbYlHX
-         KDmg==
-X-Forwarded-Encrypted: i=1; AHgh+Ro7lzW62Wgq5wTv3jMgkGpK01HZeCujm9M4p1qEspeXhBXLXCviJhQxHeN/riYCRkqxgjZfZTG6aAc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwZBYUWvqOrLpnpzwqi39/2aEYQRtjXgtczUwvglqvQidbbs4Sp
-	bsaF46Mq/z4B02cpsPRnXX8bLcHfGl8sgAZI4A0i0KQUpAy7lR4fWYKo
-X-Gm-Gg: AR+sD13Zj0KcJ2e9WS0yZJp7WiJmbp2LWt/3IM6tNelfAJyLXDgapeZNHf3IKhxxqgG
-	2nQl6PH+YaGPdbTJmwhVBuaL19xsJlBLg5RO5eO1Vv6hMJdaWbzFTbdpJNhUjkmmS2n67tz7aNN
-	FilQC1pFbQ/Rt3IjzOkkUUBmt503GAuGcssp/wRS9L4cY+CU/S5QEC0D5G2rYxB0fTxqdfxAn28
-	DcCDOupi0ZS7GPBxvJrSSHy+UsZbvpacMgGa4nc7SzKFTfsafwxzhTTHKGcEuxMLKci6m25cZuj
-	m9CAvhpWj1Tfyv66WRyDXCD/LWLqIzLrHC4tyQaELgm74Yz+1OYjtQS71E4quqzOuPo7RnSkn7o
-	3znGzv7zyIJ4C2ptcRkmMEsBQf6fyd1Lj+Tw5nhu8ZKHac9xK19ZeCfHQGZ4chGoNXe/FdKidui
-	m33RZ1smcddsiN3HScIQ6eSmyHiPxIR19mAHjUJ2SA47ab2aUyqhWVY+jvBIrsvmu1IQJrZYYrn
-	spKBtjzEbwfA53GAdCjnNC2Gk7he4SDl/953JH6wGTWY0wkmrrByct0PL3qe1CzFIpwBdeI41FZ
-	2AjdpjZTgQ==
-X-Received: by 2002:a17:90b:3807:b0:38d:f096:a1dc with SMTP id 98e67ed59e1d1-393013e58ecmr4752057a91.11.1786533662842;
-        Wed, 12 Aug 2026 04:21:02 -0700 (PDT)
-Received: from phuc-desktop.. ([183.91.15.56])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-392f935f5ecsm3193765a91.5.2026.08.12.04.20.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Aug 2026 04:21:02 -0700 (PDT)
-From: phucduc.bui@gmail.com
-To: Ulf Hansson <ulfh@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Jerome Brunet <jbrunet@baylibre.com>,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-	Jisheng Zhang <jszhang@kernel.org>,
-	Stepan Ionichev <sozdayvek@gmail.com>,
-	Colin Ian King <colin.i.king@gmail.com>,
-	Pedro Demarchi Gomes <pedrodemargomes@gmail.com>,
-	Osama Abdelkader <osama.abdelkader@gmail.com>,
-	linux-mmc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-amlogic@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org,
-	bui duc phuc <phucduc.bui@gmail.com>
-Subject: [PATCH 3/3] mmc: davinci: Handle optional IRQ return value correctly
-Date: Wed, 12 Aug 2026 18:20:23 +0700
-Message-ID: <20260812112023.42254-4-phucduc.bui@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20260812112023.42254-1-phucduc.bui@gmail.com>
-References: <20260812112023.42254-1-phucduc.bui@gmail.com>
+	dkim=pass (1024-bit key) header.d=ixit.cz header.i=@ixit.cz header.b="GB7ysRj8"
+Received: from [172.16.124.192] (ip-78-44-13-22.bb.vodafone.cz [78.44.13.22])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange x25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by ixit.cz (Postfix) with ESMTPSA id B6B8F53401E6;
+	Wed, 12 Aug 2026 13:40:23 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ixit.cz; s=dkim;
+	t=1786534824;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=KArXhTGikECnnXJBaKJQL5HiSiaclLz+gY4N4WdWjRA=;
+	b=GB7ysRj8pn9j8ajPfl9zs1ENqu8qTVII284Qf4FOevTFQfE6k//3GPYoLp5AlMyfiII8KF
+	bmiL05O4Yw4ptY+RPGmR1DHhpv3qai5XeDSN/rTPsAXphZx0FOsSqW7It7FR4+276wuubB
+	XtmhSyiGNND8ETSKmaPTKjjifL1M/ik=
+Message-ID: <cce3fe36-322e-49ed-8928-3aef813faad7@ixit.cz>
+Date: Wed, 12 Aug 2026 13:40:23 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 00/33] Add support for Qualcomm Snapdragon SM7150 SoC and
+ Google Pixel 4a
+To: Jens Reidel <adrian@mainlining.org>, Danila Tikhonov
+ <danila@jiaxyga.com>, Miro Mraz <mraz.miro@seznam.cz>
+Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ linux-watchdog@vger.kernel.org, linux-usb@vger.kernel.org,
+ linux-phy@lists.infradead.org, linux-mmc@vger.kernel.org,
+ netdev@vger.kernel.org, linux-scsi@vger.kernel.org,
+ dmaengine@vger.kernel.org, linux-crypto@vger.kernel.org,
+ linux-i2c@vger.kernel.org, linux-clk@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+ linux-remoteproc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+ neil.armstrong@linaro.org, linux-hardening@vger.kernel.org,
+ linux@mainlining.org, Connor Mitchell <c.dog29@hotmail.com>
+References: <20250422-sm7150-upstream-v1-0-bf9a9081631d@jiaxyga.com>
+ <2ca2b774-fd7f-4612-b38d-f60e32ff6f9a@mainlining.org>
+ <283096ad-ae1b-42b8-8312-b192f735fc80@linaro.org>
+Content-Language: en-US
+From: David Heidelberg <david@ixit.cz>
+Autocrypt: addr=david@ixit.cz; keydata=
+ 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
+In-Reply-To: <283096ad-ae1b-42b8-8312-b192f735fc80@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-From: bui duc phuc <phucduc.bui@gmail.com>
 
-host->sdio_irq is assigned from platform_get_irq_optional(), which
-returns a positive IRQ number on success or a negative error code on
-failure. Therefore, 0 is not a possible return value from this API.
 
-Check for a positive IRQ number before requesting the SDIO IRQ instead
-of treating zero as a valid IRQ.
+On 23/04/2025 09:26, Neil Armstrong wrote:
+> Hi,
+> 
+> On 23/04/2025 00:07, Jens Reidel wrote:
+>> Hi everyone,
+>>
+>> apologies for the mess this created. Danila's mail provider ratelimited him 
+>> halfway through sending the series and the attempt to re-try sending the 
+>> second half an hour later ended up with a new message ID (I think due to not 
+>> using --in-reply-to).
+>> He asked me to let you know that this will be resolved later and the whole 
+>> series will be re-sent once the problems are resolved.
+> 
+> The b4 web submission is a great alternative when the mail provider is rate 
+> limited:
+> https://b4.docs.kernel.org/en/latest/contributor/send.html#web-endpoint
+> 
 
-Signed-off-by: bui duc phuc <phucduc.bui@gmail.com>
----
- drivers/mmc/host/davinci_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I see people interested in moving Pixel 4a forward, but it seems this was never 
+upstreamed? I looked at sm7150 repository [1] where I see FROMLIST, but these 
+patches never arrived to the list and this series is from 2025.
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 4765d2dee599..dddd152d2ec4 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -1303,7 +1303,7 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto mmc_add_host_fail;
- 
--	if (host->sdio_irq >= 0) {
-+	if (host->sdio_irq > 0) {
- 		ret = devm_request_irq(&pdev->dev, host->sdio_irq,
- 				       mmc_davinci_sdio_irq, 0,
- 				       mmc_hostname(mmc), host);
--- 
-2.43.0
+Should we expect v2 (re)based on recent tree?
 
+Thanks
+David
+
+[1] 
+https://github.com/sm7150-mainline/linux/commit/7ea41523c678e94a7c048936052b5b1b1b109cdd
+
+> Neil
+> 
+>>
+>> Best regards,
+>> Jens
+> 
+> 
