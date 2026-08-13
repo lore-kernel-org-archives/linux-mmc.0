@@ -1,63 +1,65 @@
-Received: from mail-pj1-f45.google.com (mail-pj1-f45.google.com [209.85.216.45])
+Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D0763F6C22
-	for <linux-mmc@vger.kernel.org>; Thu, 13 Aug 2026 05:34:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 592273F58C9
+	for <linux-mmc@vger.kernel.org>; Thu, 13 Aug 2026 05:34:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786599266; cv=none; b=SH3PjBD29jKAzJww0XEQei/zzE9SREvaDdKqyDZPkbR815L9JuHtTQzMxTn+Zi/e3oN5aJQ5y9fOTFLwtKnxMo3/Pc1mx/IiE7y8mOQ3yWE4bjk9TzcMlOfSMPWeagOq/VNlhrsM6PPs91MhWCgEs0Sd3/MzZVbUwazVtNo2h1M=
+	t=1786599269; cv=none; b=lvey3nxyQvsnZ78pdISmBchT+1l6/1x3jb4ErHljHaNPOOwZf1Im98yF/I5BVl9EZOB2ELDP0ZjH+lQF5qHH80uoiy8/xwvuXs/cy8VlwGFTmd2fIpmBko/u3N3xXsugyEnYG8hB3ucekarYw6W0pJyy8MgPOgNJS81zluqPlRE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786599266; c=relaxed/simple;
-	bh=ikPR/Ibwd8ndAW6bzvAvqytJfjTbiBz9OeekzVrRU+U=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=o7hbMpc3TU8FZBjEjVXiEHwWhdHV92q39sNh3ETOV/Vjcg5h5/ADvOBYxgDP3EDgLGh8gZIlHzUbGP9ChvGql/EiWvyeUUhPSuLzDLMvIjRbz+CAZhCqOqtVJUVNGzPy4Mh1xFkV/WWU9HUwDmTmYnCIOP/ZM7pucn10LR01PJE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jmvEz2Qd; arc=none smtp.client-ip=209.85.216.45
+	s=arc-20240116; t=1786599269; c=relaxed/simple;
+	bh=Mhj3jWYbiVdYMnI3fvWRvTxrfRl3RdIu2H/JxIENP4k=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=rn2kn0NEqyZbuTyM+9MOwplOshXpNVpTIswX5qXQ+okKU6eQKQheiH16HEArb9s6MJjGMNp3HZ3Hq/8O8d2ynFP5amv9TBDC0A0H8R9unZgUMpaIkoBuqjwk/igjxTiVMFOS5kVdRYcsCWgvtd1Pcr2sAuyyZM3kvniFrvhv86c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BUPuLKOD; arc=none smtp.client-ip=209.85.216.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jmvEz2Qd"
-Received: by mail-pj1-f45.google.com with SMTP id 98e67ed59e1d1-38e041ea211so2060865a91.0
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2026 22:34:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BUPuLKOD"
+Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-38fdeaed181so2414000a91.1
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Aug 2026 22:34:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786599261; x=1787204061; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=lh941E03WqQoOdzW0XPuu5W0k5Y6sQxubyIZa23gmJo=;
-        b=jmvEz2QdhYDPkqiWWOm0Jh/1BIVzWvUtNISDFEmsW6imp88DPPIQqZFqC8+O9vpLXW
-         qa3HKLzGAI8MWPJDuM6YykzkXafva3qA6JWQlX3evlZnIh+wDnIpS1CPlVd9w+s5G6aK
-         sdqpBxR+s4WMs8TJP5GaYSScTURaMgsTb3yMOMVJRwjEziKnpS36l7Qrx/gmO+UF7Guo
-         jDLJRsALWpIHvYc85aEViToljAdiA7eDgk2l3OZzl6EnuaXfQMYBS47SAdxbHkrv2ro7
-         1OUQ22I1twZ0mAlt8EqNoVhCwEFqdyeFYPVhSwVb1RLksu7Tfq3rx1HVtCcgbOo2P8Xg
-         7LpA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786599261; x=1787204061;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20251104; t=1786599265; x=1787204065; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=lh941E03WqQoOdzW0XPuu5W0k5Y6sQxubyIZa23gmJo=;
-        b=Nu42UO4zLwiKvYrd+VndBHz5A3zTuzuc3n+KmOrriHqD51FLjA2VOl+VvZ0aig3Hww
-         wBKjQrx6RyneyD03wwMtWbePuXzO+V2JjVek4Yq0cn0rEILh7W/GNMGMdFUiGqzj3xn4
-         xkBghq9muqr3/lZYp15pu4DZL6a8iDhuhpbULQ1KfCOI9qskDoAq0NguWQx3cvFEpGBQ
-         3cynTLb+kbjX1XjKVWm/UcU2C6uGy5rkHUnkrknTfUrDFckBzTI6bD6sXG2siqKxvBOK
-         JAwQ+WT38SKETbpESP59yITztLX97lId9dcPUZFnn1iaQc1EbA2MvNIfX2fkq3UhzOb1
-         jtBw==
-X-Forwarded-Encrypted: i=1; AHgh+RoinimUJYHZJLGgT0Xz4UGGmB70zO7RlhzDi3mX0njKlNR6nbeg0AkPIsVyNKzBQcP14p/PuSXrdF8=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy3x/SDxSrcD4wPpEA22JqtjYXQ9T8iukK6vJY1KeUiSUcO/Ph5
-	SHlMpynxRJXFzcXN8h7WZJR2Q6YBeOkFUDd/7vM+IZu0E6vry0kVQcUm
-X-Gm-Gg: AR+sD11j8pBsNb01P/hzULZbXX84MNPMN9qut1+LbUG25jw8sBDOiEoz73ygkWzclM+
-	f1F85W6bDap1I1J67y6+XituHJMDngIiw6rt+iJelgeI5et0IuaOn8FXoAVobFWE4LQt7V9QFQy
-	IA8Fy4n9t5enlXFjeUiHTF7SzHvOv0oTVO9lqZrlcyUV3qFf1rtFXPGTTq7R5PyO9uYG217x4Mb
-	z/5Fb6AVa93ciqSXE1YLvbwYOERNLG3HAghHE3UQdxdIGaCkAih/LnKqZcHrGY7KWNYIc9HzWXs
-	mNv3zoHejjY6952BYrjp6iX2Xr8LXL+r9HtMe3PrEfXgQiouNjdEGMkTpZymhgTvlnc2ySsy2gv
-	aBM6SP6u78/v4EYXvZ9+Cv/RSaXJRq/uRSmWrcNCZ17kZG5V6sU2nGgoz7M/IIPVIRiTedDAUy2
-	fpZCaifSllSCnE3vLqIVSHzlyu1JX38znfyyshQFbPSNQzigf9ieC0XpRFmPOwI8ofGvBC8vwE2
-	QRUyRKROgz9pkvxL0Q4TzSY8CbekBIJA5/YKeqLDRUXWEksjZ1WHF4ifvJvkFz7bgNTykg6D0uw
-	QVU9cr68fYgEiz4=
-X-Received: by 2002:a17:90a:d647:b0:36d:9e0b:3801 with SMTP id 98e67ed59e1d1-3931e04a995mr4154302a91.8.1786599260750;
-        Wed, 12 Aug 2026 22:34:20 -0700 (PDT)
+        bh=Sg48OebW8O5DYM3I5rKP0/NygxmXw5dDjKnd0RIjz50=;
+        b=BUPuLKODAaPmgjLsr7zfA8+I8jTgKDiqW9sS+gl1leplmc6MFmiIg2lew2BBTKRmOC
+         iaUOtRNyrJaHfUL2oiVdJ5oSngJT5HYaS+Ey2jPvzWozH3415Ui6ViGhevEzlV3hnLY6
+         SVoeyya3HXarsFJJjo1bMr/8iYSyg2t7AacAn+EmZkv+3HDRoAMX5hbzSmigC1vCR4Dx
+         xyVpr2VmYHhKy+RCLbmsAgFre5c4rKgA+VaoCFLRkjPbotggvKoSxRlEXQv37jLzve9u
+         8giV6Zi/fuUVfgOAlSuEqPANMH/K9WfhM+l8c9uhcZ4ksJwBiZ8h2NEmRVeaAe3vb3V+
+         1nYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786599265; x=1787204065;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=Sg48OebW8O5DYM3I5rKP0/NygxmXw5dDjKnd0RIjz50=;
+        b=OWUAtPMJovqAjueyTaUz19pL52zv65HvHHO1qNm1SVIH3KKjn1Fa8zWPeW69DCx+md
+         syERPwcYPLtdR04ObePytW8s+c1ohE4tMGUgB//h8bKCiytZGMPnYmT2+lr/GGaDErSO
+         16gPktoCrRAnzeUSKMhUgaWIgmocUYYOgziApsC3+OsSjl+ifTUsVsbEtsxrUflexACo
+         egsnCqCP4Xeq5hNNAR+lesum8BOl262o2Qpz5inA9hihGuR6DDAFKqXWdRni3TNpUAkh
+         UqLbvEm0Qe/bVhovxlQBHrbyXTUHMMlLCiumy7StBH78wuxirAkbC+ElDV/Bl4jZvKWj
+         UWfg==
+X-Forwarded-Encrypted: i=1; AHgh+Rp6FN9TcdywOxHJ9Dj5jvwSZTKW+qe8CmQB+XDA0e8af0Q7Uy/EtoQUQw7XAORLChcUHFdCh1EjU4I=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzlP0fb9zoQSf1PlHwjfHr6bdsUtvfMJl343WlSsAmS4ug9lGM4
+	tcYsC70Q7CNnqZVZmDXIF3ss+J50VVCvP/eOVGwroOmA3exKrqPMkZ90
+X-Gm-Gg: AR+sD10sVgsbl9KSTwsLft3odSWEIuhYIqoJZvrvo/ZUOO1Fbe6qEa/Th0TlEfA9XNT
+	eSqp4ip3N8Z/pIvWTOVMgN6WJ58FiIx+orthHdacwoxb8TzMoIFUrKtGFtK4SEFlylnWevV7I17
+	r1yg7Q5ueiJ3UjWT2UMF5mfqAvIws793somFWRtdlLZSB2NUNsex9SuxbJxFSsl7pT+Z4N1RokC
+	q/ptx95FdfrReEC7+AQOs9T1XmLSdxVtTU41eORHBFZ9S1LEHm18Ifs5Xfe+uIkvpFN1OHvkoc4
+	CCeiU+sdYbLo2vyRNEHPxqkcUOzAO167mP7znKiNXnEIq8qcZWZPj2bgC8ekU6vMn+J3oihUr4U
+	XuwTM5zNDRiKhzB0MKhjbM7bsLL9lTxF5a1q0Uv6p2P96EHLfBxQ+Avm9zVyhr8G3IFtFfHPH3T
+	ZuYP4Z01VVUoTBUIuGa3UNoIo+TS5k3IlgNOlqLwjJdpJiKNQbLSTEPF2cjeh7AAovTm6GXCG62
+	aD7GDKT4r9Y1TcEld1ww8Hk860tIVwCTFQ2918U30qqKh5I+hAfNTzkeLEhTBFIe1gNpC9pxDnF
+	Be5Gmhkgmw==
+X-Received: by 2002:a17:90a:d40b:b0:393:19a3:4f1 with SMTP id 98e67ed59e1d1-3931e058763mr3777372a91.6.1786599264874;
+        Wed, 12 Aug 2026 22:34:24 -0700 (PDT)
 Received: from phuc-desktop.. ([183.91.15.56])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3931d872ec5sm594734a91.0.2026.08.12.22.34.17
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-3931d872ec5sm594734a91.0.2026.08.12.22.34.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Aug 2026 22:34:20 -0700 (PDT)
+        Wed, 12 Aug 2026 22:34:24 -0700 (PDT)
 From: phucduc.bui@gmail.com
 To: Ulf Hansson <ulfh@kernel.org>,
 	Neil Armstrong <neil.armstrong@linaro.org>,
@@ -74,10 +76,12 @@ To: Ulf Hansson <ulfh@kernel.org>,
 	linux-amlogic@lists.infradead.org
 Cc: linux-kernel@vger.kernel.org,
 	bui duc phuc <phucduc.bui@gmail.com>
-Subject: [PATCH v2 0/3] mmc: Handle errors from optional IRQ lookup
-Date: Thu, 13 Aug 2026 12:34:01 +0700
-Message-ID: <20260813053404.21553-1-phucduc.bui@gmail.com>
+Subject: [PATCH v2 1/3] mmc: meson-gx: Handle errors from optional IRQ lookup
+Date: Thu, 13 Aug 2026 12:34:02 +0700
+Message-ID: <20260813053404.21553-2-phucduc.bui@gmail.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20260813053404.21553-1-phucduc.bui@gmail.com>
+References: <20260813053404.21553-1-phucduc.bui@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -88,32 +92,54 @@ Content-Transfer-Encoding: 8bit
 
 From: bui duc phuc <phucduc.bui@gmail.com>
 
-Hi all,
+platform_get_irq_optional() returns a positive IRQ number on success or
+a negative error code on failure. For an optional IRQ, -ENXIO indicates
+that no optional IRQ is available. Other errors, such as -EPROBE_DEFER
+and -EINVAL, should be propagated so that the caller can handle them
+appropriately.
 
-This series improves error handling for optional IRQ lookups in several
-MMC drivers.
+However, the driver currently stores the return value directly in
+cd_irq and continues probing.
 
-I noticed that mmc: litex_mmc handles the return value from
-platform_get_irq_optional() correctly, distinguishing the case where an
-optional IRQ is not available from other errors. This series follows the
-same approach in the affected drivers.
+Propagate negative errors other than -ENXIO, and only assign the IRQ to
+cd_irq when a valid IRQ number is returned.
+
+Signed-off-by: bui duc phuc <phucduc.bui@gmail.com>
+---
 
 Changes in v2:
- - Use parse_fail for proper cleanup on IRQ lookup errors.
  - Initialize cd_irq to -ENXIO.
 
-Best regards,
-Phuc
-
-bui duc phuc (3):
-  mmc: meson-gx: Handle errors from optional IRQ lookup
-  mmc: davinci: Handle errors from optional IRQ lookup
-  mmc: davinci: Handle optional IRQ return value correctly
-
- drivers/mmc/host/davinci_mmc.c  | 6 +++++-
  drivers/mmc/host/meson-gx-mmc.c | 9 +++++++--
- 2 files changed, 12 insertions(+), 3 deletions(-)
+ 1 file changed, 7 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 694bb443d5f3..d2903e3dfd6f 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1141,7 +1141,8 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	struct meson_host *host;
+ 	struct mmc_host *mmc;
+ 	struct clk *core_clk;
+-	int cd_irq, ret;
++	int cd_irq = -ENXIO;
++	int ret;
+ 
+ 	mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(struct meson_host));
+ 	if (!mmc)
+@@ -1185,7 +1186,11 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	if (host->irq < 0)
+ 		return host->irq;
+ 
+-	cd_irq = platform_get_irq_optional(pdev, 1);
++	ret = platform_get_irq_optional(pdev, 1);
++	if (ret < 0 && ret != -ENXIO)
++		return ret;
++	if (ret > 0)
++		cd_irq = ret;
+ 	mmc_gpio_set_cd_irq(mmc, cd_irq);
+ 
+ 	host->pinctrl = devm_pinctrl_get(&pdev->dev);
 -- 
 2.43.0
 
