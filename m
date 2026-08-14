@@ -1,172 +1,575 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ot1-f79.google.com (mail-ot1-f79.google.com [209.85.210.79])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5128C3C1D4B
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2026 14:20:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDAC9480320
+	for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2026 15:11:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.79
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786717235; cv=none; b=NVQAMpjgvl4FySy77MaB+YJVLorJnTlXzr+NLGOBAtnFINQsLuhS3ewZf7JSU1lQcEZbkNV80poST+thctNpHmqkOnAK926moIvqacH9RhnNBQA6mx1yLUBegGUYkjANQi4NwcehROt7u5K3V1tIVBQe+aZjvpSpJYQZAHVaiOI=
+	t=1786720293; cv=none; b=CvgZv7WmE2jB3yGk7xUiZ/ILsp5D8ydl1v861QutNR8hHyX9eqo2XgiNsF2FfVt4XEpoQomlluxSfH0mm824tlyr6wXZqQdNaSFVyqLM2UK0ucj0vH+tp2wD+wRyO/y0eodo401riwsasRcmdfbJSpXACVQSPuZywvFCKVaOZJM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786717235; c=relaxed/simple;
-	bh=6ubUtij028ciG8eA7qshIWoVkphMvLMblsfQMYOq0/s=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FboRDHk4brH+gr4+JDTNJNqxmRkMt7/Pt/cvx/XSxaUCmbKEO+SYSnf1nHWUYXEZa28QD3lwYY/p+3PbUvH2n4Cidv8TLAL5T1UBufHq0UsDFq1+4qbSooOUHWneNT4dI2mpGRD7aFuYNJxbGnXlA6/5zlZmSwu84ojri5e2p/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=b3ko83Gw; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=gOwsESDv; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="b3ko83Gw";
-	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="gOwsESDv"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67EDxVJN1565052
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2026 14:20:16 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=qcppdkim1; bh=ZaYJyS88v1km9or5Aj9dFFZrwn/PVURb594
-	fNdViUeE=; b=b3ko83GwTlqZcl70JWJGtbTOQfZ7pFVDNwVHaDcX41GkhIFRS34
-	JMBQI5242AUT6nIZQlN+ZZ8fBHvayHgmTINTh1SyyEdMi2FSeyyW8Cua6CZJRXm1
-	PIVzd+LM6x1SSXrTmhYSj4/VFD/hRL0qK7m5JuGeXTca5Wa2DM/xtAMmU56qmjZu
-	4IiBXkOjskGQuz28QRaE1opqnSjEs/6Q2N6ogOwiSfPTAdev7xFwHkdbATORA1Pf
-	aF1EOPX3wpTlL3kRxNdjMIY7wmyplBJhiRY1kURu+UmxpuNKBngNS6o8ostxQOYU
-	CYWeKLNjbjLgmkp2FSaCk+X0bqsfypUebMA==
-Received: from mail-qt1-f200.google.com (mail-qt1-f200.google.com [209.85.160.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4g1j2f4jqh-1
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2026 14:20:15 +0000 (GMT)
-Received: by mail-qt1-f200.google.com with SMTP id d75a77b69052e-5174a23afcbso16412641cf.3
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2026 07:20:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=oss.qualcomm.com; s=google; t=1786717215; x=1787322015; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=ZaYJyS88v1km9or5Aj9dFFZrwn/PVURb594fNdViUeE=;
-        b=gOwsESDvLDLp0BVz8pd7/cm1/2UQ8lXLEptch+fzYVVZ8oXS3KRudFlQGfvNVhC77n
-         KA/YD1908lP5IiTB6UgCTVwzyImSEzzYpEfJhDVPbwSvUM5FuI4Ar9A7PE0u78eKFEwv
-         /OivCzkSe1SAyCPFhe5C98OhlY0yD1Zw8H3d8X+KW4c2kCNNW0NmjtXIdqbzeKYD00tk
-         fxdzyVEKVNZeAqeL5o0a2V7JJxUJUwHPS4esxxLDYzIUYkWjBoZyETp0AlMO9YomV6uY
-         ZTznhtUqPTYgUplfUOgiA04zNuJbv26UUpCFB0uhPgoLBhzTUVha2v13yh+03ZNtgthW
-         30kQ==
+	s=arc-20240116; t=1786720293; c=relaxed/simple;
+	bh=/ZrmtC2pVKkk+Fgrao8x+BBCzcnQ5vlH+XOL5czNtDc=;
+	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=HtHcNJD87xBVY3W6j6SiMxgXPbqldj+oN6qhd8rCLIXmktWKnpqToKcQmfUM4a05XIvQRYuteUoFTSUzO9s0ChXYOraLbCqQalVSotacHlY6jwLMus1D7GRjvbdAoMM18R1JCl1PqMU2pPnPQtQDoxnRQhhUB1cSyQOniLepehU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=209.85.210.79
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-ot1-f79.google.com with SMTP id 46e09a7af769-7eb89852728so800870a34.3
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2026 08:11:29 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786717215; x=1787322015;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=ZaYJyS88v1km9or5Aj9dFFZrwn/PVURb594fNdViUeE=;
-        b=LxLwTYobpL9Mjpb7Va9zmOni1csPV8uWk5OZKd85dj9xCFb9Bp0/mN7qZEnVMcNgT+
-         PrAPROTh4ODOGN/Uu6CH8aaRQ8q9At66huKI6NYBQPUBNu4seY+GeK4NnFl7SjdsKVMa
-         MF3psKe6XSRUYESQTxjNBJK+nH6r32E8oLHAwFVSKYDlKtTmAiA7ktGOf/vIUHASuAcj
-         plI4WAZYuIkcvJYbBtXMRuY5pnMiKd67zddUpZyU6oBeaJIpZNJ4pHa1o784VqwEOMoR
-         0XePl2NX0QzMcCE643VkbrOQltamZ7oepUovOSGkQUXqt0YwDo8t3kDs1Gx4/lMClg4/
-         4E1g==
-X-Forwarded-Encrypted: i=1; AHgh+RrkTaCzKcHXgmjBnArGd/hNWRGlioYqiDaVi8eSKY7FZK1uKug98Gnlc+fGEZxXw7rYYzQhFC4A0uo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwntBhu5iHjEEcBbXNckuIvHeDMCi7Kv6PDv1QLB9BRZrzWmQje
-	dn+VPgN4ImoAAn1M56foJdWctMm2htf3tHI73ZwztoBqHphDrq68VPIIhxGRxbWMrqyMWDmN5SC
-	ccMR5LcbEaojLsBB45oWChDQYdgh8kQ7C7pH1MVDbK5D4CJSg8vq7qm96amykIuo=
-X-Gm-Gg: AR+sD137lrNxP8iVbyF7oUlH/n73j3ZFy6yacyX2K1aan9J8SAlG6MNSTBXXUUYnp9z
-	mZMXWaS26URS7AzRbLM6P+EzAjDcdxhHyIO4CdOYmVnNij2WCf3vBdrp3jTydVrhFa5gEFO0oTa
-	94wrMiRnMvBXt3TZrp8Rj9lzVLHERasmScKoRkRheaqc6iVaLajCpUpgOPO6o2abSn2Nwfc9kyS
-	mbJlGCRv9+tpDy6y2L01WCOosDECE8Q6plSkVxQE8+LCqQiCeMSicbGE5nHncyItTpwxAILJyav
-	EsupMEP7lX1EkObZoMNYWFucH3kWKm86VVrPmBS7nCiP8HDcaSizpPJeGYocZxEjit2KyBM9RNH
-	CAvofHSyDHjGg5HzqvLu3lOAyFlXuYHkL/yYPovV7Ss/QB4gaJw89tEeNkQ==
-X-Received: by 2002:ac8:7d50:0:b0:52d:7bd0:d12b with SMTP id d75a77b69052e-52d854faa39mr58882431cf.43.1786717214466;
-        Fri, 14 Aug 2026 07:20:14 -0700 (PDT)
-X-Received: by 2002:ac8:7d50:0:b0:52d:7bd0:d12b with SMTP id d75a77b69052e-52d854faa39mr58881581cf.43.1786717213930;
-        Fri, 14 Aug 2026 07:20:13 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-c212378da3esm108536866b.37.2026.08.14.07.20.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Aug 2026 07:20:12 -0700 (PDT)
-From: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-To: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Subject: [GIT PULL] MMC fixes for v7.2-rc8
-Date: Fri, 14 Aug 2026 16:20:10 +0200
-Message-ID: <20260814142010.127902-1-ulf.hansson@oss.qualcomm.com>
-X-Mailer: git-send-email 2.43.0
+        d=1e100.net; s=20251104; t=1786720289; x=1787325089;
+        h=content-type:to:from:subject:message-id:date:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ckS03SzjPkKNDuc+6LezxBOebF0DwUwc/THgl/tiQUA=;
+        b=FVWWRzTuC2dJr4hAwF0AanZl8qz3hT/BnkswVPuZwDOM8p6RuoNk37KOWwN+UWYICM
+         ATiK8Ye0FfJnuRkNVGXmixVbDyi4yMZBOAcGzSy9uouUJR9FFS9VUlhK4v/CZaSqMtDs
+         nezM+N3+uV5KAS6nZmFq4cU6qAic97vfyVoLVMqnGJGANJdC5xPv+2A4F4NSmdFv8pOF
+         cAqAycA+6UJFHbWiq0QuuTAKMVHezjV26Kb459RxPl3LFb8sOaRTGZy8c6dA6Qp5ll9a
+         v8A2dJlCtntDroYrMkSabKMdXT7wpLmuswSgDcdvJE2IwoNAaMyvuYDSJS3o+wjjs4vG
+         VgyA==
+X-Forwarded-Encrypted: i=1; AHgh+RqkORYh69yPlQjdtikpc/wyD/nkMWoTchuFNnFVa/bUGrizSTz9zwOVkGeBr+Ojb8OvNFFrWzqJZlQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwJnDlWGWSkiiENui76BErmNwCqjXyL8k7Tb+ttMuupvO8dCNbx
+	bh0Cjwynf2HosCeQ6nEIEPu8lUnAUbmlxalyYG/aobxg34En2ocsahxBwljDun2AaOqXZiX6qfU
+	n+/dcTWGpOXxAt4/nl6dHjWXcWj53cUzqnSPWfJ7fgQbFS5uoUI78EWebXts=
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Authority-Analysis: v=2.4 cv=FeMHAp+6 c=1 sm=1 tr=0 ts=6a7f241f cx=c_pps
- a=JbAStetqSzwMeJznSMzCyw==:117 a=h7aNHqOhPKB91FvYUefsSA==:17
- a=Sv0fKeRqtYgA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
- a=u7WPNUs3qKkmUXheDGA7:22 a=_K5XuSEh1TEqbUxoQ0s3:22 a=VwQbUJbxAAAA:8
- a=PXh4eQp6rZknt7XP5e4A:9 a=uxP6HrT_eTzRwkO_Te1X:22
-X-Proofpoint-GUID: 1No_ejoWuBsA4IE4P40uSwQEOb7uS3GQ
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODE0MDEwOSBTYWx0ZWRfX3BKMpTOMNovX
- rnR8IhUN1oy8aw1yHUAcnmgGnV9GZ8EgNKqu8xeaJjGSjIqJw95DvFJ5vqr8d/pBmY2Fi6roGv5
- QAp1xyHvvaREOB+A08JCEjEHEdC7+umAJLTSTX9v1SoX4c9USLPje0/+f9Uh5UenlPfZwNZSygs
- NCAO9AqunGtxNzSkRvNASp7WbHUgkH15JCt2PAsOOtnz4YGqnUqumycOREmmWR4nHmP9OX1iNPM
- Miy9egPbHc1TOWJw/tZDZnXfNgWWT8vV3bX2vGyGvBjwvbIaT2IqAyHRYaQ8xPAvkYQ0Utewmh/
- 42ZWlBFQ+/MjKPUX5ib31Qdk/sM4bPfCRPL0MnJJdFlGajojk1JJeF8ngFb1/i/7gq+tz4ye6t0
- Eob4WGuNlxLThiUg9wZ/usbzfrP9O+yT89DjWRDl8kEhziZrqaArSUb8Yl5HcIN/QQZCMBPiyAa
- /23M1FV+N9v/p5284Zg==
-X-Proofpoint-ORIG-GUID: 1No_ejoWuBsA4IE4P40uSwQEOb7uS3GQ
-X-Proofpoint-Spam-Info: AW1haW4tMjYwODE0MDEwOSBTYWx0ZWRfXyftp+4vAUlmu
- yCDUOaA8/tjf1iFK0USKZXnovkPDg6B/+SXOuxap6SA5Vy3l4zm0MHlqVOW1ktRuBIbZsAk0GI/
- +KAMmI6pFspNxFOf8pI2xog+LqPEOD4=
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
- definitions=2026-08-14_05,2026-08-12_01,2025-10-01_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 malwarescore=0 lowpriorityscore=0 adultscore=0 impostorscore=0
- suspectscore=0 clxscore=1015 priorityscore=1501 bulkscore=0 spamscore=0
- classifier=typeunknown authscore=0 authtc= authcc= route=outbound adjust=0
- reason=mlx scancount=1 engine=8.22.0-2606150000 definitions=main-2608140109
+X-Received: by 2002:a05:6820:201b:b0:6b0:589e:42f4 with SMTP id
+ 006d021491bc7-6b0d6245e3bmr5390234eaf.20.1786720288815; Fri, 14 Aug 2026
+ 08:11:28 -0700 (PDT)
+Date: Fri, 14 Aug 2026 08:11:28 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6a7f3020.5ca1970b.32aa76.0004.GAE@google.com>
+Subject: [syzbot] [mmc?] WARNING: suspicious RCU usage in cancel_delayed_work_sync
+From: syzbot <syzbot+9c1988bc953fca2086a3@syzkaller.appspotmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-usb@vger.kernel.org, syzkaller-bugs@googlegroups.com, 
+	ulf.hansson@linaro.org, ulfh@kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Linus,
+Hello,
 
-Here's a pull-request with a couple of MMC fixes intended for v7.2-rc8.
-Details about the highlights are as usual found in the signed tag.
+syzbot found the following issue on:
 
-Please pull this in!
+HEAD commit:    05abeffcc27e Merge tag 'usb-serial-7.3-rc1' of ssh://gitol..
+git tree:       https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/usb.git usb-testing
+console output: https://syzkaller.appspot.com/x/log.txt?x=172cfac6580000
+kernel config:  https://syzkaller.appspot.com/x/.config?x=8bdeea7ee6735f91
+dashboard link: https://syzkaller.appspot.com/bug?extid=9c1988bc953fca2086a3
+compiler:       gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44
 
-Kind regards
-Ulf Hansson
+Unfortunately, I don't have any reproducer for this issue yet.
+
+Downloadable assets:
+disk image: https://storage.googleapis.com/syzbot-assets/f63099341558/disk-05abeffc.raw.xz
+vmlinux: https://storage.googleapis.com/syzbot-assets/2f8181068028/vmlinux-05abeffc.xz
+kernel image: https://storage.googleapis.com/syzbot-assets/7d35739c76eb/bzImage-05abeffc.xz
+
+IMPORTANT: if you fix the issue, please add the following tag to the commit:
+Reported-by: syzbot+9c1988bc953fca2086a3@syzkaller.appspotmail.com
+
+=============================
+WARNING: suspicious RCU usage
+syzkaller #0 Not tainted
+-----------------------------
+kernel/sched/core.c:9159 Illegal context switch in RCU-sched read-side critical section!
+
+other info that might help us debug this:
 
 
-The following changes since commit e27c946b589c53520409a0956b33d52ef7a0898f:
+rcu_scheduler_active = 2, debug_locks = 1
+9 locks held by syz-executor/2973:
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: dup_mm kernel/fork.c:1542 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_mm kernel/fork.c:1595 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_process+0x498b/0x7dd0 kernel/fork.c:2289
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: mmap_write_lock_killable include/linux/mmap_lock.h:554 [inline]
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: dup_mmap+0x11f/0x1f60 mm/mmap.c:1739
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: mmap_write_lock_nested include/linux/mmap_lock.h:544 [inline]
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: dup_mmap+0x1ba/0x1f60 mm/mmap.c:1746
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: spin_lock include/linux/spinlock.h:342 [inline]
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: pte_offset_map_lock+0x10f/0x320 mm/pgtable-generic.c:404
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pte_range mm/memory.c:1272 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pmd_range mm/memory.c:1408 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pud_range mm/memory.c:1445 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_p4d_range mm/memory.c:1469 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_page_range+0xcc2/0x56a0 mm/memory.c:1555
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_read_lock_sched include/linux/rcupdate.h:938 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: pfn_valid+0xbc/0x4a0 include/linux/mmzone.h:2270
+ #8: ffffc90000007ca0 ((&vub300->inactivity_timer)){+.-.}-{0:0}, at: call_timer_fn+0x11f/0x610 kernel/time/timer.c:1745
 
-  mmc: sdhci-esdhc-imx: fix resume error handling (2026-07-15 11:00:02 +0200)
+stack backtrace:
+CPU: 0 UID: 0 PID: 2973 Comm: syz-executor Not tainted syzkaller #0 PREEMPT(lazy) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
+Call Trace:
+ <IRQ>
+ __dump_stack lib/dump_stack.c:94 [inline]
+ dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
+ lockdep_rcu_suspicious.cold+0x4f/0xb1 kernel/locking/lockdep.c:6876
+ __might_resched+0x2e0/0x330 kernel/sched/core.c:9159
+ __cancel_work_sync kernel/workqueue.c:4487 [inline]
+ cancel_delayed_work_sync+0xb8/0xf0 kernel/workqueue.c:4568
+ mmc_free_host+0x19/0x30 drivers/mmc/core/host.c:700
+ vub300_delete drivers/mmc/host/vub300.c:379 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ vub300_inactivity_timer_expired drivers/mmc/host/vub300.c:747 [inline]
+ vub300_inactivity_timer_expired+0x42f/0x550 drivers/mmc/host/vub300.c:742
+ call_timer_fn+0x19a/0x610 kernel/time/timer.c:1748
+ expire_timers kernel/time/timer.c:1799 [inline]
+ __run_timers+0x757/0xb00 kernel/time/timer.c:2374
+ __run_timer_base kernel/time/timer.c:2386 [inline]
+ __run_timer_base kernel/time/timer.c:2378 [inline]
+ run_timer_base+0x114/0x190 kernel/time/timer.c:2395
+ run_timer_softirq+0x1a/0x50 kernel/time/timer.c:2405
+ handle_softirqs+0x1dd/0x990 kernel/softirq.c:622
+ __do_softirq kernel/softirq.c:656 [inline]
+ invoke_softirq kernel/softirq.c:496 [inline]
+ __irq_exit_rcu+0x160/0x210 kernel/softirq.c:735
+ irq_exit_rcu+0x9/0x30 kernel/softirq.c:752
+ instr_sysvec_apic_timer_interrupt arch/x86/kernel/apic/apic.c:1062 [inline]
+ sysvec_apic_timer_interrupt+0x8f/0xb0 arch/x86/kernel/apic/apic.c:1062
+ </IRQ>
+ <TASK>
+ asm_sysvec_apic_timer_interrupt+0x1a/0x20 arch/x86/include/asm/idtentry.h:674
+RIP: 0010:check_preemption_disabled+0x26/0xe0 lib/smp_processor_id.c:54
+Code: 90 90 90 90 41 54 55 53 48 83 ec 08 65 8b 1d 65 1f 82 05 65 f7 05 56 1f 82 05 ff ff ff 7f 74 0f 48 83 c4 08 89 d8 5b 5d 41 5c <c3> cc cc cc cc 9c 58 f6 c4 02 74 ea 65 4c 8b 25 1e 1f 82 05 48 89
+RSP: 0018:ffffc90001457430 EFLAGS: 00000286
+RAX: 0000000000000000 RBX: 0000000000125cae RCX: ffffffff82216929
+RDX: ffff8881236b0000 RSI: ffffffff87b15680 RDI: ffffffff87b156c0
+RBP: ffff88823ff5d480 R08: 0000000000000005 R09: 0000000000000000
+R10: 0000000000000001 R11: 0000000000000000 R12: 0000000000000001
+R13: ffff88823ff5e000 R14: dffffc0000000000 R15: 0000000000000000
+ rcu_is_watching_curr_cpu include/linux/context_tracking.h:128 [inline]
+ rcu_is_watching+0x12/0xc0 kernel/rcu/tree.c:752
+ rcu_read_lock_sched include/linux/rcupdate.h:939 [inline]
+ pfn_valid+0x2d0/0x4a0 include/linux/mmzone.h:2270
+ page_table_check_set+0x25/0x580 mm/page_table_check.c:105
+ __page_table_check_ptes_set+0x217/0x270 mm/page_table_check.c:223
+ page_table_check_ptes_set include/linux/page_table_check.h:83 [inline]
+ set_ptes include/linux/pgtable.h:447 [inline]
+ __copy_present_ptes mm/memory.c:1118 [inline]
+ copy_present_ptes mm/memory.c:1197 [inline]
+ copy_pte_range mm/memory.c:1320 [inline]
+ copy_pmd_range mm/memory.c:1408 [inline]
+ copy_pud_range mm/memory.c:1445 [inline]
+ copy_p4d_range mm/memory.c:1469 [inline]
+ copy_page_range+0x1c87/0x56a0 mm/memory.c:1555
+ dup_mmap+0xcd8/0x1f60 mm/mmap.c:1840
+ dup_mm kernel/fork.c:1543 [inline]
+ copy_mm kernel/fork.c:1595 [inline]
+ copy_process+0x4996/0x7dd0 kernel/fork.c:2289
+ kernel_clone+0x176/0x9d0 kernel/fork.c:2748
+ __do_sys_clone+0xd9/0x120 kernel/fork.c:2889
+ do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+ do_syscall_64+0x10b/0x7f0 arch/x86/entry/syscall_64.c:94
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+RIP: 0033:0x7f2fd1056b52
+Code: 89 e7 e8 71 8b f7 ff 45 31 c0 31 d2 31 f6 64 48 8b 04 25 10 00 00 00 bf 11 00 20 01 4c 8d 90 d0 02 00 00 b8 38 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 66 89 c5 85 c0 75 3b 64 48 8b 04 25 10 00 00
+RSP: 002b:00007ffc26622180 EFLAGS: 00000246 ORIG_RAX: 0000000000000038
+RAX: ffffffffffffffda RBX: 00007ffc26622180 RCX: 00007f2fd1056b52
+RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000001200011
+RBP: 00007ffc2662230c R08: 0000000000000000 R09: 0000000000000001
+R10: 000055558a3997d0 R11: 0000000000000246 R12: 0000000000000000
+R13: 00000000000927c0 R14: 000000000001c243 R15: 00007ffc26622360
+ </TASK>
+BUG: sleeping function called from invalid context at kernel/workqueue.c:4487
+in_atomic(): 1, irqs_disabled(): 0, non_block: 0, pid: 2973, name: syz-executor
+preempt_count: 104, expected: 0
+RCU nest depth: 2, expected: 0
+9 locks held by syz-executor/2973:
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: dup_mm kernel/fork.c:1542 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_mm kernel/fork.c:1595 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_process+0x498b/0x7dd0 kernel/fork.c:2289
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: mmap_write_lock_killable include/linux/mmap_lock.h:554 [inline]
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: dup_mmap+0x11f/0x1f60 mm/mmap.c:1739
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: mmap_write_lock_nested include/linux/mmap_lock.h:544 [inline]
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: dup_mmap+0x1ba/0x1f60 mm/mmap.c:1746
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: spin_lock include/linux/spinlock.h:342 [inline]
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: pte_offset_map_lock+0x10f/0x320 mm/pgtable-generic.c:404
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pte_range mm/memory.c:1272 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pmd_range mm/memory.c:1408 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pud_range mm/memory.c:1445 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_p4d_range mm/memory.c:1469 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_page_range+0xcc2/0x56a0 mm/memory.c:1555
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_read_lock_sched include/linux/rcupdate.h:938 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: pfn_valid+0xbc/0x4a0 include/linux/mmzone.h:2270
+ #8: ffffc90000007ca0 ((&vub300->inactivity_timer)){+.-.}-{0:0}, at: call_timer_fn+0x11f/0x610 kernel/time/timer.c:1745
+Preemption disabled at:
+[<0000000000000000>] 0x0
+CPU: 0 UID: 0 PID: 2973 Comm: syz-executor Not tainted syzkaller #0 PREEMPT(lazy) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
+Call Trace:
+ <IRQ>
+ __dump_stack lib/dump_stack.c:94 [inline]
+ dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
+ __might_resched.cold+0x1ec/0x232 kernel/sched/core.c:9197
+ __cancel_work_sync kernel/workqueue.c:4487 [inline]
+ cancel_delayed_work_sync+0xb8/0xf0 kernel/workqueue.c:4568
+ mmc_free_host+0x19/0x30 drivers/mmc/core/host.c:700
+ vub300_delete drivers/mmc/host/vub300.c:379 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ vub300_inactivity_timer_expired drivers/mmc/host/vub300.c:747 [inline]
+ vub300_inactivity_timer_expired+0x42f/0x550 drivers/mmc/host/vub300.c:742
+ call_timer_fn+0x19a/0x610 kernel/time/timer.c:1748
+ expire_timers kernel/time/timer.c:1799 [inline]
+ __run_timers+0x757/0xb00 kernel/time/timer.c:2374
+ __run_timer_base kernel/time/timer.c:2386 [inline]
+ __run_timer_base kernel/time/timer.c:2378 [inline]
+ run_timer_base+0x114/0x190 kernel/time/timer.c:2395
+ run_timer_softirq+0x1a/0x50 kernel/time/timer.c:2405
+ handle_softirqs+0x1dd/0x990 kernel/softirq.c:622
+ __do_softirq kernel/softirq.c:656 [inline]
+ invoke_softirq kernel/softirq.c:496 [inline]
+ __irq_exit_rcu+0x160/0x210 kernel/softirq.c:735
+ irq_exit_rcu+0x9/0x30 kernel/softirq.c:752
+ instr_sysvec_apic_timer_interrupt arch/x86/kernel/apic/apic.c:1062 [inline]
+ sysvec_apic_timer_interrupt+0x8f/0xb0 arch/x86/kernel/apic/apic.c:1062
+ </IRQ>
+ <TASK>
+ asm_sysvec_apic_timer_interrupt+0x1a/0x20 arch/x86/include/asm/idtentry.h:674
+RIP: 0010:check_preemption_disabled+0x26/0xe0 lib/smp_processor_id.c:54
+Code: 90 90 90 90 41 54 55 53 48 83 ec 08 65 8b 1d 65 1f 82 05 65 f7 05 56 1f 82 05 ff ff ff 7f 74 0f 48 83 c4 08 89 d8 5b 5d 41 5c <c3> cc cc cc cc 9c 58 f6 c4 02 74 ea 65 4c 8b 25 1e 1f 82 05 48 89
+RSP: 0018:ffffc90001457430 EFLAGS: 00000286
+RAX: 0000000000000000 RBX: 0000000000125cae RCX: ffffffff82216929
+RDX: ffff8881236b0000 RSI: ffffffff87b15680 RDI: ffffffff87b156c0
+RBP: ffff88823ff5d480 R08: 0000000000000005 R09: 0000000000000000
+R10: 0000000000000001 R11: 0000000000000000 R12: 0000000000000001
+R13: ffff88823ff5e000 R14: dffffc0000000000 R15: 0000000000000000
+ rcu_is_watching_curr_cpu include/linux/context_tracking.h:128 [inline]
+ rcu_is_watching+0x12/0xc0 kernel/rcu/tree.c:752
+ rcu_read_lock_sched include/linux/rcupdate.h:939 [inline]
+ pfn_valid+0x2d0/0x4a0 include/linux/mmzone.h:2270
+ page_table_check_set+0x25/0x580 mm/page_table_check.c:105
+ __page_table_check_ptes_set+0x217/0x270 mm/page_table_check.c:223
+ page_table_check_ptes_set include/linux/page_table_check.h:83 [inline]
+ set_ptes include/linux/pgtable.h:447 [inline]
+ __copy_present_ptes mm/memory.c:1118 [inline]
+ copy_present_ptes mm/memory.c:1197 [inline]
+ copy_pte_range mm/memory.c:1320 [inline]
+ copy_pmd_range mm/memory.c:1408 [inline]
+ copy_pud_range mm/memory.c:1445 [inline]
+ copy_p4d_range mm/memory.c:1469 [inline]
+ copy_page_range+0x1c87/0x56a0 mm/memory.c:1555
+ dup_mmap+0xcd8/0x1f60 mm/mmap.c:1840
+ dup_mm kernel/fork.c:1543 [inline]
+ copy_mm kernel/fork.c:1595 [inline]
+ copy_process+0x4996/0x7dd0 kernel/fork.c:2289
+ kernel_clone+0x176/0x9d0 kernel/fork.c:2748
+ __do_sys_clone+0xd9/0x120 kernel/fork.c:2889
+ do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+ do_syscall_64+0x10b/0x7f0 arch/x86/entry/syscall_64.c:94
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+RIP: 0033:0x7f2fd1056b52
+Code: 89 e7 e8 71 8b f7 ff 45 31 c0 31 d2 31 f6 64 48 8b 04 25 10 00 00 00 bf 11 00 20 01 4c 8d 90 d0 02 00 00 b8 38 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 66 89 c5 85 c0 75 3b 64 48 8b 04 25 10 00 00
+RSP: 002b:00007ffc26622180 EFLAGS: 00000246 ORIG_RAX: 0000000000000038
+RAX: ffffffffffffffda RBX: 00007ffc26622180 RCX: 00007f2fd1056b52
+RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000001200011
+RBP: 00007ffc2662230c R08: 0000000000000000 R09: 0000000000000001
+R10: 000055558a3997d0 R11: 0000000000000246 R12: 0000000000000000
+R13: 00000000000927c0 R14: 000000000001c243 R15: 00007ffc26622360
+ </TASK>
 
-are available in the Git repository at:
+=============================
+WARNING: suspicious RCU usage
+syzkaller #0 Tainted: G        W          
+-----------------------------
+kernel/rcu/srcutree.c:1483 Illegal synchronize_srcu() in same-type SRCU (or in RCU) read-side critical section!
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v7.2-rc2-2
+other info that might help us debug this:
 
-for you to fetch changes up to 00179ed9fbe07799676e2cb63c4e7f0e7cd80a5c:
 
-  mmc: loongson2: Fix sg iteration in data reorder functions (2026-08-04 15:39:11 +0200)
+rcu_scheduler_active = 2, debug_locks = 1
+9 locks held by syz-executor/2973:
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: dup_mm kernel/fork.c:1542 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_mm kernel/fork.c:1595 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_process+0x498b/0x7dd0 kernel/fork.c:2289
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: mmap_write_lock_killable include/linux/mmap_lock.h:554 [inline]
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: dup_mmap+0x11f/0x1f60 mm/mmap.c:1739
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: mmap_write_lock_nested include/linux/mmap_lock.h:544 [inline]
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: dup_mmap+0x1ba/0x1f60 mm/mmap.c:1746
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: spin_lock include/linux/spinlock.h:342 [inline]
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: pte_offset_map_lock+0x10f/0x320 mm/pgtable-generic.c:404
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pte_range mm/memory.c:1272 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pmd_range mm/memory.c:1408 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pud_range mm/memory.c:1445 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_p4d_range mm/memory.c:1469 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_page_range+0xcc2/0x56a0 mm/memory.c:1555
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_read_lock_sched include/linux/rcupdate.h:938 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: pfn_valid+0xbc/0x4a0 include/linux/mmzone.h:2270
+ #8: ffffc90000007ca0 ((&vub300->inactivity_timer)){+.-.}-{0:0}, at: call_timer_fn+0x11f/0x610 kernel/time/timer.c:1745
 
-----------------------------------------------------------------
-MMC host:
- - atmel-mci: Fix use-after-free in atmci_remove due to race condition
- - loongson2: Fix sg iteration in data reorder functions
- - omap_hsmmc: Fix busy_timeout overflow in ns conversion on 32-bit
- - sdhci: Make tuning_err a signed int
- - sdhci: Unmap the bounce buffer before device release
+stack backtrace:
+CPU: 0 UID: 0 PID: 2973 Comm: syz-executor Tainted: G        W           syzkaller #0 PREEMPT(lazy) 
+Tainted: [W]=WARN
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
+Call Trace:
+ <IRQ>
+ __dump_stack lib/dump_stack.c:94 [inline]
+ dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
+ lockdep_rcu_suspicious.cold+0x4f/0xb1 kernel/locking/lockdep.c:6876
+ __synchronize_srcu+0x29d/0x300 kernel/rcu/srcutree.c:1483
+ wakeup_source_remove drivers/base/power/wakeup.c:201 [inline]
+ wakeup_source_unregister.part.0+0x12c/0x540 drivers/base/power/wakeup.c:237
+ wakeup_source_unregister+0x1f/0x30 drivers/base/power/wakeup.c:236
+ mmc_host_classdev_release+0x42/0x120 drivers/mmc/core/host.c:69
+ device_release+0xd2/0x270 drivers/base/core.c:2636
+ kobject_cleanup lib/kobject.c:689 [inline]
+ kobject_release lib/kobject.c:720 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ kobject_put+0x1f7/0x640 lib/kobject.c:737
+ put_device+0x1f/0x30 drivers/base/core.c:3880
+ vub300_delete drivers/mmc/host/vub300.c:379 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ vub300_inactivity_timer_expired drivers/mmc/host/vub300.c:747 [inline]
+ vub300_inactivity_timer_expired+0x42f/0x550 drivers/mmc/host/vub300.c:742
+ call_timer_fn+0x19a/0x610 kernel/time/timer.c:1748
+ expire_timers kernel/time/timer.c:1799 [inline]
+ __run_timers+0x757/0xb00 kernel/time/timer.c:2374
+ __run_timer_base kernel/time/timer.c:2386 [inline]
+ __run_timer_base kernel/time/timer.c:2378 [inline]
+ run_timer_base+0x114/0x190 kernel/time/timer.c:2395
+ run_timer_softirq+0x1a/0x50 kernel/time/timer.c:2405
+ handle_softirqs+0x1dd/0x990 kernel/softirq.c:622
+ __do_softirq kernel/softirq.c:656 [inline]
+ invoke_softirq kernel/softirq.c:496 [inline]
+ __irq_exit_rcu+0x160/0x210 kernel/softirq.c:735
+ irq_exit_rcu+0x9/0x30 kernel/softirq.c:752
+ instr_sysvec_apic_timer_interrupt arch/x86/kernel/apic/apic.c:1062 [inline]
+ sysvec_apic_timer_interrupt+0x8f/0xb0 arch/x86/kernel/apic/apic.c:1062
+ </IRQ>
+ <TASK>
+ asm_sysvec_apic_timer_interrupt+0x1a/0x20 arch/x86/include/asm/idtentry.h:674
+RIP: 0010:check_preemption_disabled+0x26/0xe0 lib/smp_processor_id.c:54
+Code: 90 90 90 90 41 54 55 53 48 83 ec 08 65 8b 1d 65 1f 82 05 65 f7 05 56 1f 82 05 ff ff ff 7f 74 0f 48 83 c4 08 89 d8 5b 5d 41 5c <c3> cc cc cc cc 9c 58 f6 c4 02 74 ea 65 4c 8b 25 1e 1f 82 05 48 89
+RSP: 0018:ffffc90001457430 EFLAGS: 00000286
+RAX: 0000000000000000 RBX: 0000000000125cae RCX: ffffffff82216929
+RDX: ffff8881236b0000 RSI: ffffffff87b15680 RDI: ffffffff87b156c0
+RBP: ffff88823ff5d480 R08: 0000000000000005 R09: 0000000000000000
+R10: 0000000000000001 R11: 0000000000000000 R12: 0000000000000001
+R13: ffff88823ff5e000 R14: dffffc0000000000 R15: 0000000000000000
+ rcu_is_watching_curr_cpu include/linux/context_tracking.h:128 [inline]
+ rcu_is_watching+0x12/0xc0 kernel/rcu/tree.c:752
+ rcu_read_lock_sched include/linux/rcupdate.h:939 [inline]
+ pfn_valid+0x2d0/0x4a0 include/linux/mmzone.h:2270
+ page_table_check_set+0x25/0x580 mm/page_table_check.c:105
+ __page_table_check_ptes_set+0x217/0x270 mm/page_table_check.c:223
+ page_table_check_ptes_set include/linux/page_table_check.h:83 [inline]
+ set_ptes include/linux/pgtable.h:447 [inline]
+ __copy_present_ptes mm/memory.c:1118 [inline]
+ copy_present_ptes mm/memory.c:1197 [inline]
+ copy_pte_range mm/memory.c:1320 [inline]
+ copy_pmd_range mm/memory.c:1408 [inline]
+ copy_pud_range mm/memory.c:1445 [inline]
+ copy_p4d_range mm/memory.c:1469 [inline]
+ copy_page_range+0x1c87/0x56a0 mm/memory.c:1555
+ dup_mmap+0xcd8/0x1f60 mm/mmap.c:1840
+ dup_mm kernel/fork.c:1543 [inline]
+ copy_mm kernel/fork.c:1595 [inline]
+ copy_process+0x4996/0x7dd0 kernel/fork.c:2289
+ kernel_clone+0x176/0x9d0 kernel/fork.c:2748
+ __do_sys_clone+0xd9/0x120 kernel/fork.c:2889
+ do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+ do_syscall_64+0x10b/0x7f0 arch/x86/entry/syscall_64.c:94
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+RIP: 0033:0x7f2fd1056b52
+Code: 89 e7 e8 71 8b f7 ff 45 31 c0 31 d2 31 f6 64 48 8b 04 25 10 00 00 00 bf 11 00 20 01 4c 8d 90 d0 02 00 00 b8 38 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 66 89 c5 85 c0 75 3b 64 48 8b 04 25 10 00 00
+RSP: 002b:00007ffc26622180 EFLAGS: 00000246 ORIG_RAX: 0000000000000038
+RAX: ffffffffffffffda RBX: 00007ffc26622180 RCX: 00007f2fd1056b52
+RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000001200011
+RBP: 00007ffc2662230c R08: 0000000000000000 R09: 0000000000000001
+R10: 000055558a3997d0 R11: 0000000000000246 R12: 0000000000000000
+R13: 00000000000927c0 R14: 000000000001c243 R15: 00007ffc26622360
+ </TASK>
+BUG: sleeping function called from invalid context at kernel/rcu/srcutree.c:1491
+in_atomic(): 1, irqs_disabled(): 0, non_block: 0, pid: 2973, name: syz-executor
+preempt_count: 104, expected: 0
+RCU nest depth: 2, expected: 0
+9 locks held by syz-executor/2973:
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: dup_mm kernel/fork.c:1542 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_mm kernel/fork.c:1595 [inline]
+ #0: ffffffff89823d10 (dup_mmap_sem){.+.+}-{0:0}, at: copy_process+0x498b/0x7dd0 kernel/fork.c:2289
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: mmap_write_lock_killable include/linux/mmap_lock.h:554 [inline]
+ #1: ffff888123fdceb8 (&mm->mmap_lock){++++}-{4:4}, at: dup_mmap+0x11f/0x1f60 mm/mmap.c:1739
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: mmap_write_lock_nested include/linux/mmap_lock.h:544 [inline]
+ #2: ffff888118e9e7b8 (&mm->mmap_lock/1){+.+.}-{4:4}, at: dup_mmap+0x1ba/0x1f60 mm/mmap.c:1746
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #3: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: spin_lock include/linux/spinlock.h:342 [inline]
+ #4: ffff88810cf5e8b8 (ptlock_ptr(ptdesc)#2){+.+.}-{3:3}, at: pte_offset_map_lock+0x10f/0x320 mm/pgtable-generic.c:404
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: rcu_read_lock include/linux/rcupdate.h:840 [inline]
+ #5: ffffffff896e2bc0 (rcu_read_lock){....}-{1:3}, at: __pte_offset_map+0x2f/0x300 mm/pgtable-generic.c:290
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pte_range mm/memory.c:1272 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pmd_range mm/memory.c:1408 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_pud_range mm/memory.c:1445 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_p4d_range mm/memory.c:1469 [inline]
+ #6: ffff888123d09f18 (ptlock_ptr(ptdesc)#2/1){+.+.}-{3:3}, at: copy_page_range+0xcc2/0x56a0 mm/memory.c:1555
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_lock_acquire include/linux/rcupdate.h:300 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: rcu_read_lock_sched include/linux/rcupdate.h:938 [inline]
+ #7: ffffffff896e2b00 (rcu_read_lock_sched){....}-{1:2}, at: pfn_valid+0xbc/0x4a0 include/linux/mmzone.h:2270
+ #8: ffffc90000007ca0 ((&vub300->inactivity_timer)){+.-.}-{0:0}, at: call_timer_fn+0x11f/0x610 kernel/time/timer.c:1745
+Preemption disabled at:
+[<0000000000000000>] 0x0
+CPU: 0 UID: 0 PID: 2973 Comm: syz-executor Tainted: G        W           syzkaller #0 PREEMPT(lazy) 
+Tainted: [W]=WARN
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/24/2026
+Call Trace:
+ <IRQ>
+ __dump_stack lib/dump_stack.c:94 [inline]
+ dump_stack_lvl+0x100/0x190 lib/dump_stack.c:120
+ __might_resched.cold+0x1ec/0x232 kernel/sched/core.c:9197
+ __synchronize_srcu+0x13c/0x300 kernel/rcu/srcutree.c:1491
+ wakeup_source_remove drivers/base/power/wakeup.c:201 [inline]
+ wakeup_source_unregister.part.0+0x12c/0x540 drivers/base/power/wakeup.c:237
+ wakeup_source_unregister+0x1f/0x30 drivers/base/power/wakeup.c:236
+ mmc_host_classdev_release+0x42/0x120 drivers/mmc/core/host.c:69
+ device_release+0xd2/0x270 drivers/base/core.c:2636
+ kobject_cleanup lib/kobject.c:689 [inline]
+ kobject_release lib/kobject.c:720 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ kobject_put+0x1f7/0x640 lib/kobject.c:737
+ put_device+0x1f/0x30 drivers/base/core.c:3880
+ vub300_delete drivers/mmc/host/vub300.c:379 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ vub300_inactivity_timer_expired drivers/mmc/host/vub300.c:747 [inline]
+ vub300_inactivity_timer_expired+0x42f/0x550 drivers/mmc/host/vub300.c:742
+ call_timer_fn+0x19a/0x610 kernel/time/timer.c:1748
+ expire_timers kernel/time/timer.c:1799 [inline]
+ __run_timers+0x757/0xb00 kernel/time/timer.c:2374
+ __run_timer_base kernel/time/timer.c:2386 [inline]
+ __run_timer_base kernel/time/timer.c:2378 [inline]
+ run_timer_base+0x114/0x190 kernel/time/timer.c:2395
+ run_timer_softirq+0x1a/0x50 kernel/time/timer.c:2405
+ handle_softirqs+0x1dd/0x990 kernel/softirq.c:622
+ __do_softirq kernel/softirq.c:656 [inline]
+ invoke_softirq kernel/softirq.c:496 [inline]
+ __irq_exit_rcu+0x160/0x210 kernel/softirq.c:735
+ irq_exit_rcu+0x9/0x30 kernel/softirq.c:752
+ instr_sysvec_apic_timer_interrupt arch/x86/kernel/apic/apic.c:1062 [inline]
+ sysvec_apic_timer_interrupt+0x8f/0xb0 arch/x86/kernel/apic/apic.c:1062
+ </IRQ>
+ <TASK>
+ asm_sysvec_apic_timer_interrupt+0x1a/0x20 arch/x86/include/asm/idtentry.h:674
+RIP: 0010:check_preemption_disabled+0x26/0xe0 lib/smp_processor_id.c:54
+Code: 90 90 90 90 41 54 55 53 48 83 ec 08 65 8b 1d 65 1f 82 05 65 f7 05 56 1f 82 05 ff ff ff 7f 74 0f 48 83 c4 08 89 d8 5b 5d 41 5c <c3> cc cc cc cc 9c 58 f6 c4 02 74 ea 65 4c 8b 25 1e 1f 82 05 48 89
+RSP: 0018:ffffc90001457430 EFLAGS: 00000286
+RAX: 0000000000000000 RBX: 0000000000125cae RCX: ffffffff82216929
+RDX: ffff8881236b0000 RSI: ffffffff87b15680 RDI: ffffffff87b156c0
+RBP: ffff88823ff5d480 R08: 0000000000000005 R09: 0000000000000000
+R10: 0000000000000001 R11: 0000000000000000 R12: 0000000000000001
+R13: ffff88823ff5e000 R14: dffffc0000000000 R15: 0000000000000000
+ rcu_is_watching_curr_cpu include/linux/context_tracking.h:128 [inline]
+ rcu_is_watching+0x12/0xc0 kernel/rcu/tree.c:752
+ rcu_read_lock_sched include/linux/rcupdate.h:939 [inline]
+ pfn_valid+0x2d0/0x4a0 include/linux/mmzone.h:2270
+ page_table_check_set+0x25/0x580 mm/page_table_check.c:105
+ __page_table_check_ptes_set+0x217/0x270 mm/page_table_check.c:223
+ page_table_check_ptes_set include/linux/page_table_check.h:83 [inline]
+ set_ptes include/linux/pgtable.h:447 [inline]
+ __copy_present_ptes mm/memory.c:1118 [inline]
+ copy_present_ptes mm/memory.c:1197 [inline]
+ copy_pte_range mm/memory.c:1320 [inline]
+ copy_pmd_range mm/memory.c:1408 [inline]
+ copy_pud_range mm/memory.c:1445 [inline]
+ copy_p4d_range mm/memory.c:1469 [inline]
+ copy_page_range+0x1c87/0x56a0 mm/memory.c:1555
+ dup_mmap+0xcd8/0x1f60 mm/mmap.c:1840
+ dup_mm kernel/fork.c:1543 [inline]
+ copy_mm kernel/fork.c:1595 [inline]
+ copy_process+0x4996/0x7dd0 kernel/fork.c:2289
+ kernel_clone+0x176/0x9d0 kernel/fork.c:2748
+ __do_sys_clone+0xd9/0x120 kernel/fork.c:2889
+ do_syscall_x64 arch/x86/entry/syscall_64.c:63 [inline]
+ do_syscall_64+0x10b/0x7f0 arch/x86/entry/syscall_64.c:94
+ entry_SYSCALL_64_after_hwframe+0x77/0x7f
+RIP: 0033:0x7f2fd1056b52
+Code: 89 e7 e8 71 8b f7 ff 45 31 c0 31 d2 31 f6 64 48 8b 04 25 10 00 00 00 bf 11 00 20 01 4c 8d 90 d0 02 00 00 b8 38 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 66 89 c5 85 c0 75 3b 64 48 8b 04 25 10 00 00
+RSP: 002b:00007ffc26622180 EFLAGS: 00000246 ORIG_RAX: 0000000000000038
+RAX: ffffffffffffffda RBX: 00007ffc26622180 RCX: 00007f2fd1056b52
+RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000001200011
+RBP: 00007ffc2662230c R08: 0000000000000000 R09: 0000000000000001
+R10: 000055558a3997d0 R11: 0000000000000246 R12: 0000000000000000
+R13: 00000000000927c0 R14: 000000000001c243 R15: 00007ffc26622360
+ </TASK>
+ODEBUG: object ffffc90000007a70 is NOT on stack ffffc90001450000, but annotated.
 
-----------------------------------------------------------------
-Binbin Zhou (1):
-      mmc: loongson2: Fix sg iteration in data reorder functions
+======================================================
+----------------
+Code disassembly (best guess):
+   0:	90                   	nop
+   1:	90                   	nop
+   2:	90                   	nop
+   3:	90                   	nop
+   4:	41 54                	push   %r12
+   6:	55                   	push   %rbp
+   7:	53                   	push   %rbx
+   8:	48 83 ec 08          	sub    $0x8,%rsp
+   c:	65 8b 1d 65 1f 82 05 	mov    %gs:0x5821f65(%rip),%ebx        # 0x5821f78
+  13:	65 f7 05 56 1f 82 05 	testl  $0x7fffffff,%gs:0x5821f56(%rip)        # 0x5821f74
+  1a:	ff ff ff 7f
+  1e:	74 0f                	je     0x2f
+  20:	48 83 c4 08          	add    $0x8,%rsp
+  24:	89 d8                	mov    %ebx,%eax
+  26:	5b                   	pop    %rbx
+  27:	5d                   	pop    %rbp
+  28:	41 5c                	pop    %r12
+* 2a:	c3                   	ret <-- trapping instruction
+  2b:	cc                   	int3
+  2c:	cc                   	int3
+  2d:	cc                   	int3
+  2e:	cc                   	int3
+  2f:	9c                   	pushf
+  30:	58                   	pop    %rax
+  31:	f6 c4 02             	test   $0x2,%ah
+  34:	74 ea                	je     0x20
+  36:	65 4c 8b 25 1e 1f 82 	mov    %gs:0x5821f1e(%rip),%r12        # 0x5821f5c
+  3d:	05
+  3e:	48                   	rex.W
+  3f:	89                   	.byte 0x89
 
-Haibo Chen (1):
-      mmc: sdhci: make tuning_err a signed int
 
-Myeonghun Pak (1):
-      mmc: sdhci: unmap the bounce buffer before device release
+---
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
 
-Pei Xiao (1):
-      mmc: atmel-mci: Fix use-after-free in atmci_remove due to race condition
+syzbot will keep track of this issue. See:
+https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
 
-Zhan Xusheng (1):
-      mmc: omap_hsmmc: fix busy_timeout overflow in ns conversion on 32-bit
+If the report is already addressed, let syzbot know by replying with:
+#syz fix: exact-commit-title
 
- drivers/mmc/host/atmel-mci.c     |  2 ++
- drivers/mmc/host/loongson2-mmc.c |  8 ++++----
- drivers/mmc/host/omap_hsmmc.c    |  2 +-
- drivers/mmc/host/sdhci.c         | 16 ++++++++++++++++
- drivers/mmc/host/sdhci.h         |  2 +-
- 5 files changed, 24 insertions(+), 6 deletions(-)
+If you want to overwrite report's subsystems, reply with:
+#syz set subsystems: new-subsystem
+(See the list of subsystem names on the web dashboard)
+
+If the report is a duplicate of another one, reply with:
+#syz dup: exact-subject-of-another-report
+
+If you want to undo deduplication, reply with:
+#syz undup
