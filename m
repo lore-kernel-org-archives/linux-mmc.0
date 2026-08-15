@@ -1,137 +1,176 @@
-Received: from mail-qk2-f7.google.com (mail-qk2-f7.google.com [74.125.230.199])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailout3.hostsharing.net (mailout3.hostsharing.net [144.76.133.104])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 298CB26159E
-	for <linux-mmc@vger.kernel.org>; Sat, 15 Aug 2026 03:14:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=74.125.230.199
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786763645; cv=pass; b=ZmfwygsOw0Jb0d9j7bc4u+noVHcw291mCJGe4hnuZdmOw+op1itJb/SAnhH9HD2rjv30JP69DjOuX+3Qu4jsXE9VtwRxOnCBMxg9iGibSkNQgoa4XLx9INL/3JKhHVJJS+D+jULn7hgP3V5myrFBiLW9LhKKua1sZ9bLXV1OoVk=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786763645; c=relaxed/simple;
-	bh=iSfM/5zR3FO1hxc641lTfSTUQipWVINU8smV1++P6Uc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=dto7EBUJckbFWPvT0Fn2Lw7qdJyXdkS+//AY5oqfgFm/UUNlY4t7aS5CMK0CzhnJBAnaxXk8Nm15WOecYalrMK7VXW+YmwVf9txTwOiqhtElSY7epz2IEi9fvj7+O93rAx3SETLW4HyPJ3Fpy5XmMhWdugjZ7e/T4bTJGRFiJAc=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=X7kk774K; arc=pass smtp.client-ip=74.125.230.199
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X7kk774K"
-Received: by mail-qk2-f7.google.com with SMTP id af79cd13be357-936b6f4b44dso41159385a.1
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Aug 2026 20:14:04 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; t=1786763643; cv=none;
-        d=google.com; s=arc-20260327;
-        b=FDn8A2fSMlRrEvU5TRVPKnlwlBm3DS0zycxcHo81Ifr2jX4Di7XyRgdP21dkPt5w85
-         2R2CD64fJjGh94e80gLsARc5V1SY4p4RNb7HwKUqmU/UXwBng5OUu/EjqZHxZoGMCgaq
-         uGCF/DPNa+89Wn8hbLOEi5aw59s1LlbXDWULuudRA3XxFXeTpMI9dNzH3ME2HjDOFMTo
-         7vr7K26okw2OmGq+TBA6mvSeaQk8ONjLN9PVJOA41pup/rE1uFqYlXGfNTa9+REOPycZ
-         QCmHCXaPlbIWfSJucDTgTMCDOW/9VYxhnCMDAUb4wbkG46zJ9p6BacNUQ3WFiwK2gRMB
-         je4A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:dkim-signature;
-        bh=N1niuDJcwGLVmXZCzrR8HgoUrAWQplWf6u5KB9p/0LI=;
-        fh=4L0ps9OejE00C8Mbh4EiH7W7F2dJ+yivQ+FAcrn3fkY=;
-        b=lUBVb1R59HDIZR0UAAmoGWjzXE4xSsYhkEmatKlpcxP5aZrZuU5GUu20JQ/e7scJ72
-         QgGjhfW4FhUXVDiRXTYRdmTIbe33sY42CgqW/SE12sGmZgLrjvdJ36BAChKNBuVplEXe
-         p2pzozJEoat9oaGamrxcNLm1RZgxiud3jIrtTlSCKHr8pQcKMOwMufmjjbDBSVJzTSlq
-         6bqO7zHo8mHDxq03gwhO3dFVWI1NxBKo3eCue5MDSS3U2bi9391jfFeQIndBDAbNSHPo
-         QFcUu6PttyiU12mdMllXbboQs4SzaTg7uX+ek8ER7NlvnvywyXnWfg2I30pPuXXV+FNA
-         D5Lw==;
-        darn=vger.kernel.org
-ARC-Authentication-Results: i=1; mx.google.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1786763643; x=1787368443; darn=vger.kernel.org;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:from:to:cc:subject
-         :date:message-id:reply-to:content-type;
-        bh=N1niuDJcwGLVmXZCzrR8HgoUrAWQplWf6u5KB9p/0LI=;
-        b=X7kk774KgXkc62bmcMautk8W+SXbPk80iSM2/u/cde+78u52CqQ67lgvM0gQcDq0UF
-         ReETU1Ii1Zid7B72sdeGyjC1zjVA5Ros7TLzAH4zhGFYKP/hOCbMF9bkHStifWhxJrW6
-         KTvIP3h9/1pw9RgfbfpeWHTINi91NqpBYgTlhQ8j9xTt4sGvoiTBhzpDhSq349gJ/RVZ
-         jJTltFavtxMjpHVvzm4FLbvu/rvbJ6IU2VKlXltebe5g/xgRpMDf5zpkAhCBbap52jma
-         IOp++2oR5GtI3F5NsYGJEkW8iD29JGrEANOhmrUq33a04miAJOev9tYWxNVCRV7rq6eU
-         ZHOQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1786763643; x=1787368443;
-        h=content-transfer-encoding:content-type:cc:to:subject:message-id
-         :date:from:in-reply-to:references:mime-version:x-gm-gg
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=N1niuDJcwGLVmXZCzrR8HgoUrAWQplWf6u5KB9p/0LI=;
-        b=YwtZ8BCxSOrnnd1Dy2quRUgEIiV6yhhHA4q3bYjJ1KsVZ62SvwmD9tJPPgT7NOM2Cj
-         FokU/MqyYJ9jNxbmjjusX2eVgFB4+AgYJwszb93YN4PidRg/xw5OectWO3vYutOHjjNE
-         xPSDDlj6L5CCKASZCTkZphLTRSXqMmZUFPyEpg0gfgdvMJvIMXcfrlv5TCh2ugM6a4to
-         28ai42fV4eyw/Y4lxgNkaG303pvk1c45tPbFjSSGzMBwxVRjFSB2qQcMEzh5Sa0y/hso
-         vlFh0EIxCf5C10ujRNI1Wx8OHIriVi353hPstk9RHgHSpI0sJqrqUX+4sNntjsnzzXTt
-         Gk3w==
-X-Gm-Message-State: AOJu0YxinmBtVn1QUJ+ZQye/hDJWxrkgCz3n04mIyblcgsBX/v7a+luT
-	acQ0Qrpf1watzxgLxZXLyEADGFRYyOWO7z/hQVwVasAGM5s3Lm2Iz3YFzx7Bq6zPg5FFx3fjs6c
-	YiHNCAZKPoTZH6WWP4nv/ZD2HaGXnbRRa4PNZ
-X-Gm-Gg: AR+sD10f2hfxqQDOOLDDfs1zjLKCecZozGOpjISady6gd32XSq6y4Y7gy0fqpzj5hdp
-	J/OQcXVM+aPD/FE3kf6wOUQAk6V6d143dq+XvZtnwGSP49ECr6uAwakLKPuMEZt5D9d0rsDA0BZ
-	Atu+881DwaO3HihrWyq+wtOBan5wlkMmiXDV6YSLp6tovAilMXilt6an7C3Rq5wdNhxIxPR4w11
-	RyaH+UFS+09m6who4h5Yn5aXlhgNDNv/Adsg0ZHxs4vr4bYkM4s/kovyWhCPY8aJYfQUcum4jQq
-	2WQiOAimyYGyR+BypguOF8HvRLbgWHTI768wMmEAcM4lwgONfdmXIeKbW0OPlzsClaYJSllZUA5
-	lncjFDjzJdtvEDDa9pprYO7D7hDL5bBkiYI7g1C8il0V3cZTT9p5RnxCkzWiar0HB5j2KEh8IXw
-	==
-X-Received: by 2002:a05:6214:27ea:b0:908:25a2:6bbf with SMTP id
- 6a1803df08f44-90a91dc8d86mr104476016d6.30.1786763642968; Fri, 14 Aug 2026
- 20:14:02 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9576E31327D
+	for <linux-mmc@vger.kernel.org>; Sat, 15 Aug 2026 08:10:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=144.76.133.104
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1786781430; cv=none; b=h8f559v+1i4WrZUsv7HUASmkw6EXMcezo9fLhZZb7bjQdTF/b4NjYPGdfui1sf7JkiP65wWyAJAHAOnEwpHqlc/8fghEeM8rk2ZDYF1S4LQE1fry/zlkVgCUWysoFYX6TAMa50VCBTgmjghXTOpWlzXvagXOgpW+dSrkkpShglE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1786781430; c=relaxed/simple;
+	bh=66oio1iBquwMzpKVN5vCKfaA1boxE8tRsNBeCsYxuJE=;
+	h=Message-Id:From:Date:Subject:To:Cc; b=HBGMCWzv8DSVqU9DcHi5H++gnzui3+maxziwESWUoyv//UAC8u7qNAEgNs/KSfLOG0S9yzhoY0qNWYY3OP54650NWRqte8FAZruGmujIroSRYGeAnGHKB3d0meGZQJms7mVqQelIavabDHuuCWkPH9lOVQJwO6wMnB6VEj8yKjY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de; spf=pass smtp.mailfrom=wunner.de; arc=none smtp.client-ip=144.76.133.104
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wunner.de
+Received: from h08.hostsharing.net (h08.hostsharing.net [IPv6:2a01:37:1000::53df:5f1c:0])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange x25519 server-signature ECDSA (secp384r1) server-digest SHA384
+	 client-signature ECDSA (secp384r1) client-digest SHA384)
+	(Client CN "*.hostsharing.net", Issuer "GlobalSign GCC R6 AlphaSSL CA 2025" (verified OK))
+	by mailout3.hostsharing.net (Postfix) with ESMTPS id 8845EC3B;
+	Sat, 15 Aug 2026 10:10:26 +0200 (CEST)
+Received: by h08.hostsharing.net (Postfix, from userid 100393)
+	id 540936198889; Sat, 15 Aug 2026 10:10:26 +0200 (CEST)
+Message-Id: <f20e08ef831f0bad278adcec44046742b54ab648.1786781008.git.lukas@wunner.de>
+From: Lukas Wunner <lukas@wunner.de>
+Date: Sat, 15 Aug 2026 10:10:29 +0200
+Subject: [PATCH] mmc: rtsx_pci: Cope with hot-removal of MMC host
+To: Ulf Hansson <ulfh@kernel.org>, Ricky Wu <ricky_wu@realtek.com>
+Cc: "Derek J. Clark" <derekjohn.clark@gmail.com>, Matthew Schwartz <matthew.schwartz@linux.dev>, "Pierre-Loup A. Griffais" <pgriffais@valvesoftware.com>, linux-mmc@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Keith Busch <kbusch@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-References: <20260806115112.45821-1-ulf.hansson@oss.qualcomm.com>
-In-Reply-To: <20260806115112.45821-1-ulf.hansson@oss.qualcomm.com>
-From: Ethan Nelson-Moore <enelsonmoore@gmail.com>
-Date: Fri, 14 Aug 2026 20:13:51 -0700
-X-Gm-Features: AcwNN1Wqt6uiM684YoSQBluLfBebn8_UF46faNXL9yaidrUvjAI7TAJyQLtqwFI
-Message-ID: <CADkSEUiBRBb-UGKraUkiXaMbSe6Ng0YbqY-FjXnjPoXsf5=r5Q@mail.gmail.com>
-Subject: Re: [PATCH] ARM: PXA: Fix build error for PXA93x
-To: Ulf Hansson <ulf.hansson@oss.qualcomm.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulfh@kernel.org>, 
-	linux-kernel@vger.kernel.org, kernel test robot <lkp@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, Aug 6, 2026 at 4:51=E2=80=AFAM Ulf Hansson <ulf.hansson@oss.qualcom=
-m.com> wrote:
->
-> From: Ulf Hansson <ulfh@kernel.org>
->
-> Add a missing semicolon to fix the build error for PXA93x.
->
-> Reported-by: kernel test robot <lkp@intel.com>
-> Closes: https://lore.kernel.org/oe-kbuild-all/202607301822.cl0lEkQt-lkp@i=
-ntel.com/
-> Fixes: ab9c44bbf6d7 ("ARM: PXA: remove remnants of PXA93x support")
-> Cc: Ethan Nelson-Moore <enelsonmoore@gmail.com>
-> Signed-off-by: Ulf Hansson <ulfh@kernel.org>
-> ---
->  include/linux/soc/pxa/cpu.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/include/linux/soc/pxa/cpu.h b/include/linux/soc/pxa/cpu.h
-> index 38bacdae684f..c5b275a80854 100644
-> --- a/include/linux/soc/pxa/cpu.h
-> +++ b/include/linux/soc/pxa/cpu.h
-> @@ -177,7 +177,7 @@
->         ({                                              \
->                 __cpu_is_pxa300(id)                     \
->                         || __cpu_is_pxa310(id)          \
-> -                       || __cpu_is_pxa320(id)          \
-> +                       || __cpu_is_pxa320(id);         \
->          })
->  #else
->  #define __cpu_is_pxa3xx(id)    (0)
-> --
-> 2.43.0
->
+Derek reports a lockup on hot-removal of a PCI-attached Realtek RTS525A
+MMC host if a card is inserted.  He has root-caused it to the block
+layer being unaware of the hot-removal and waiting indefinitely in
+sync_filesystem().
 
-Hi, Ulf,
+For comparison, the NVMe subsystem copes with hot-removal by setting the
+controller state to NVME_CTRL_DEAD in nvme_remove(), which in turn leads
+to blk_mark_disk_dead() being called from nvme_mark_namespaces_dead().
+That avoids the indefinite wait in sync_filesystem().
 
-That's embarrassing. Thanks for catching it.
+Adopt this approach:  Detect hot-removal in rtsx_pci_sdmmc_drv_remove()
+and invoke a new mmc_host_set_removed() helper which in turn invokes
+mmc_card_set_removed().  Before flushing outstanding requests to the
+card in mmc_blk_remove_req(), check for its removal and call
+blk_mark_disk_dead().
 
-Ethan
+Note that mmc_card_set_removed() cannot be called from the MMC host
+driver because it is private to the MMC core, hence the indirection
+through the newly introduced mmc_host_set_removed() helper.
+
+Other removable MMC hosts, in particular if attached via PCI or USB,
+may need to be amended with a similar check for hot-removal.  The
+present commit seeks to get that process going.
+
+Reported-by: Derek J. Clark <derekjohn.clark@gmail.com>
+Tested-by: Derek J. Clark <derekjohn.clark@gmail.com>
+Closes: https://lore.kernel.org/r/20260806214808.1202819-1-derekjohn.clark@gmail.com/
+Link: https://github.com/ValveSoftware/SteamOS/issues/2473
+Signed-off-by: Lukas Wunner <lukas@wunner.de>
+Cc: Matthew Schwartz <matthew.schwartz@linux.dev>
+---
+ drivers/mmc/core/block.c          | 11 +++++++----
+ drivers/mmc/core/host.c           | 15 +++++++++++++++
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  3 +++
+ include/linux/mmc/host.h          |  1 +
+ 4 files changed, 26 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 0274e8d..1a82233 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2978,8 +2978,11 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ 	return 0;
+ }
+ 
+-static void mmc_blk_remove_req(struct mmc_blk_data *md)
++static void mmc_blk_remove_req(struct mmc_card *card, struct mmc_blk_data *md)
+ {
++	if (mmc_card_removed(card))
++		blk_mark_disk_dead(md->disk);
++
+ 	/*
+ 	 * Flush remaining requests and free queues. It is freeing the queue
+ 	 * that stops new requests from being accepted.
+@@ -3006,7 +3009,7 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
+ 	list_for_each_safe(pos, q, &md->part) {
+ 		part_md = list_entry(pos, struct mmc_blk_data, part);
+ 		list_del(pos);
+-		mmc_blk_remove_req(part_md);
++		mmc_blk_remove_req(card, part_md);
+ 	}
+ }
+ 
+@@ -3252,7 +3255,7 @@ static int mmc_blk_probe(struct mmc_card *card)
+ 
+ out:
+ 	mmc_blk_remove_parts(card, md);
+-	mmc_blk_remove_req(md);
++	mmc_blk_remove_req(card, md);
+ out_free:
+ 	destroy_workqueue(card->complete_wq);
+ 	return ret;
+@@ -3273,7 +3276,7 @@ static void mmc_blk_remove(struct mmc_card *card)
+ 	if (!mmc_card_sd_combo(card))
+ 		pm_runtime_disable(&card->dev);
+ 	pm_runtime_put_noidle(&card->dev);
+-	mmc_blk_remove_req(md);
++	mmc_blk_remove_req(card, md);
+ 	destroy_workqueue(card->complete_wq);
+ }
+ 
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index b7ce313..2625d91 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -22,6 +22,7 @@
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/slot-gpio.h>
+ 
++#include "card.h"
+ #include "core.h"
+ #include "crypto.h"
+ #include "host.h"
+@@ -703,3 +704,17 @@ void mmc_free_host(struct mmc_host *host)
+ }
+ 
+ EXPORT_SYMBOL(mmc_free_host);
++
++/**
++ *	mmc_host_set_removed - declare host removed
++ *	@host: mmc host
++ *
++ *	Declare the host (and any inserted card) removed and inaccessible.
++ */
++void mmc_host_set_removed(struct mmc_host *host)
++{
++	if (host->card)
++		mmc_card_set_removed(host->card);
++}
++
++EXPORT_SYMBOL(mmc_host_set_removed);
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 8dfbc62..3f97659f 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1511,6 +1511,9 @@ static void rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+ 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
+ 	mmc = host->mmc;
+ 
++	if (pci_dev_is_disconnected(pcr->pci))
++		mmc_host_set_removed(mmc);
++
+ 	cancel_work_sync(&host->work);
+ 
+ 	mutex_lock(&host->host_mutex);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index ba84f02..a240306 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -588,6 +588,7 @@ struct mmc_host {
+ int mmc_add_host(struct mmc_host *);
+ void mmc_remove_host(struct mmc_host *);
+ void mmc_free_host(struct mmc_host *);
++void mmc_host_set_removed(struct mmc_host *host);
+ void mmc_of_parse_clk_phase(struct device *dev,
+ 			    struct mmc_clk_phase_map *map);
+ int mmc_of_parse(struct mmc_host *host);
+-- 
+2.53.0
+
