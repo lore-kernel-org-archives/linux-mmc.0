@@ -1,176 +1,118 @@
-Received: from mailout3.hostsharing.net (mailout3.hostsharing.net [144.76.133.104])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9576E31327D
-	for <linux-mmc@vger.kernel.org>; Sat, 15 Aug 2026 08:10:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=144.76.133.104
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37BDB24BBEE
+	for <linux-mmc@vger.kernel.org>; Sun, 16 Aug 2026 15:39:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1786781430; cv=none; b=h8f559v+1i4WrZUsv7HUASmkw6EXMcezo9fLhZZb7bjQdTF/b4NjYPGdfui1sf7JkiP65wWyAJAHAOnEwpHqlc/8fghEeM8rk2ZDYF1S4LQE1fry/zlkVgCUWysoFYX6TAMa50VCBTgmjghXTOpWlzXvagXOgpW+dSrkkpShglE=
+	t=1786894763; cv=none; b=EhlYtU7vAWq3r5Jw5Mgk+LjWudytQQZK24ufBN1QZjgF0X5FWzwcf5jg0pNmDH/onX2zwIQagXUWiWcclP7OXFzy40SPMGTGeinCWy2gsPPeUM4M++yX4a6pryDssvmajKF68oDVScqdODb0elckSjDDN4d21z6dllP2TgKZ8CA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1786781430; c=relaxed/simple;
-	bh=66oio1iBquwMzpKVN5vCKfaA1boxE8tRsNBeCsYxuJE=;
-	h=Message-Id:From:Date:Subject:To:Cc; b=HBGMCWzv8DSVqU9DcHi5H++gnzui3+maxziwESWUoyv//UAC8u7qNAEgNs/KSfLOG0S9yzhoY0qNWYY3OP54650NWRqte8FAZruGmujIroSRYGeAnGHKB3d0meGZQJms7mVqQelIavabDHuuCWkPH9lOVQJwO6wMnB6VEj8yKjY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de; spf=pass smtp.mailfrom=wunner.de; arc=none smtp.client-ip=144.76.133.104
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=wunner.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wunner.de
-Received: from h08.hostsharing.net (h08.hostsharing.net [IPv6:2a01:37:1000::53df:5f1c:0])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange x25519 server-signature ECDSA (secp384r1) server-digest SHA384
-	 client-signature ECDSA (secp384r1) client-digest SHA384)
-	(Client CN "*.hostsharing.net", Issuer "GlobalSign GCC R6 AlphaSSL CA 2025" (verified OK))
-	by mailout3.hostsharing.net (Postfix) with ESMTPS id 8845EC3B;
-	Sat, 15 Aug 2026 10:10:26 +0200 (CEST)
-Received: by h08.hostsharing.net (Postfix, from userid 100393)
-	id 540936198889; Sat, 15 Aug 2026 10:10:26 +0200 (CEST)
-Message-Id: <f20e08ef831f0bad278adcec44046742b54ab648.1786781008.git.lukas@wunner.de>
-From: Lukas Wunner <lukas@wunner.de>
-Date: Sat, 15 Aug 2026 10:10:29 +0200
-Subject: [PATCH] mmc: rtsx_pci: Cope with hot-removal of MMC host
-To: Ulf Hansson <ulfh@kernel.org>, Ricky Wu <ricky_wu@realtek.com>
-Cc: "Derek J. Clark" <derekjohn.clark@gmail.com>, Matthew Schwartz <matthew.schwartz@linux.dev>, "Pierre-Loup A. Griffais" <pgriffais@valvesoftware.com>, linux-mmc@vger.kernel.org, Christoph Hellwig <hch@lst.de>, Keith Busch <kbusch@kernel.org>
+	s=arc-20240116; t=1786894763; c=relaxed/simple;
+	bh=zPX8KBkMZJrT+ze6Vk4oOsowxMMXWy+Jz5rlbiUqD6s=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=rzfSIgtS6DPBwXdkPdZiCUFXqLPwRseW+ihyV24xUl+g3X3q3M3XWgKwRVbQgUKeukgeADOHqGwbtHN5DN5Rlf0M7sRjtbmtl1biFrWL/BOOfBeIG0OeoVi+DC1RQeBwKWYR0z6Fm9W96At47wXu4t0UzjjrdOv5S4AVvZPVQIk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CRYIKvPA; arc=none smtp.client-ip=209.85.221.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CRYIKvPA"
+Received: by mail-wr1-f46.google.com with SMTP id ffacd0b85a97d-47f96c5b722so1614536f8f.0
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Aug 2026 08:39:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1786894757; x=1787499557; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=n+AD3yvYtELlzfMYB79Dik4mUEZ2MSC2FzjAo/30HpA=;
+        b=CRYIKvPAxhR+4ZpXRB4jrnPB/OQ1Nijvm3/OYOynfQk3Y3+bD/PYRqjM5rfXSaj2QN
+         5/SNbK42HmfiVqEf8xI3ZhjR8rEtk4hh0pkZ9pd/9Y4cosXDGM41cxJHxkLRHz1xI+iD
+         fj7Z2UEJlGNZZo4+BQUMuOAyjR1W8UJ1bK7Eita+x1d/RTU9DFkB0nEl58bZb5GKA048
+         F+2RzouwM4F0nUH+o+OePVOmR2zbwi3c7dIZ02Bhe3PI1TmtqxzSFtirJJzfKdnib1/z
+         CIRW9TBlF9rcOvzUBrHSB1dlXAd1tdZuHfTYBFu5VOXii5xFMpdOyZblAimHFnraAdeu
+         Hq8Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1786894757; x=1787499557;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=n+AD3yvYtELlzfMYB79Dik4mUEZ2MSC2FzjAo/30HpA=;
+        b=h3pJxaHZuGxcjziey3ZzvWRkhNYoyeJ3QGAsBBMUz7oYuk3LKeP3p3G9J6AihiW4tI
+         CLW3ouWkpaouOvVf2tq0DoSoiaeV6iKQU5CTE3iC9NgxcJ9Gtr6DyLrtfLm7U6j9+Qmx
+         6DgdfGUC5bX989Ok3+8GqniE2o3kalggjT5SVYb4jKaIXakEiJPQt4BxiplmvPBNdFAA
+         aT1SJCNwJSyOqXpi0m5EL01fRzrJ6wssj/6Ee3kKBkYKHgciCuj+wJDmCsUdWg3cToiY
+         Ou1wIQRckbdpiUbIGL+lf4YLY8xvHGs6pd/If5j9sh+ZEcziz4R7cTcVdf7TZLXOyY/P
+         Xg2g==
+X-Gm-Message-State: AOJu0YwowMdXZgqxUATC1brZsBOnQWjrJf0X2uEi6rGDaKlm/yG6VSeh
+	IyRKFekE7Ex/bXgIFqm61WK3sBipcxirPT4kSIAHxc0cDp3nHyoR0gW7DHHxGBE=
+X-Gm-Gg: AR+sD13wcKOvNdZ2ImFd1hWjEK9CBCNPtlNFPej0FvrAOx+UDC49ZW2i7kiJM3c/Wl9
+	JRs9ijWoMMrknwcrhiYqU0ryNdsGoaIGEeBqH0PSVHkx94ddGxr74a99wlgKrhjreiEiYUl6nM9
+	61lSgxvq1ROB1/IWwYAg1cZbnR27AnxihKZFdj9GbNJGTtqrpA0P15RG0B15qXZ/qT+PwVGhI+4
+	68UNB4z8N9fpErzIRc8MVWe9G+rd0S/gikcLVlJ1XjzYM9Zr5zHEWh4Ai5wpdqQ2bRulMyZTncS
+	gKwaDzrlOFlv8nAayxi9ciWWIklmpakyBA1L/py24jE+4fOBJ8FCgouMdRCIpzfKIKhT53PCrDp
+	7QJ6RNBDZ8xeiLbKo+6rMzNs0a7SQCJ9DHX0Ikp8jGa5RcO88RwT5LF8TazZS/NHKKfDY5vEJ/2
+	9eS47n8RVCKvICU1Se1C7H3ebOU1kN3ducuCCsD6IhaHeG6b1/RbmN8d3tsuRUJS99Wo4iF7tZL
+	5lWJw1FjAYRxweGS63UipNkhKgqnV2+dgkHu8qCP0/n6GMh75QJOAktio2QOQ1o3PIbrNlynkmD
+	KiwTybt1QIwieks=
+X-Received: by 2002:a05:600c:37cd:b0:499:8596:3ba9 with SMTP id 5b1f17b1804b1-499879c279cmr331256545e9.18.1786894757402;
+        Sun, 16 Aug 2026 08:39:17 -0700 (PDT)
+Received: from archtop.localdomain (92-242-249-15.broadband.mtnet.hr. [92.242.249.15])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4999610ddaesm75681475e9.7.2026.08.16.08.39.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 16 Aug 2026 08:39:17 -0700 (PDT)
+From: Jakov Novak <jakovnovak30@gmail.com>
+To: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-kernel-mentees@lists.linux.dev,
+	Ulf Hansson <ulfh@kernel.org>
+Cc: Johan Hovold <johan@kernel.org>,
+	Guangshuo Li <lgs201920130244@gmail.com>,
+	Runyu Xiao <runyu.xiao@seu.edu.cn>,
+	Shuah Khan <skhan@linuxfoundation.org>,
+	Jakov Novak <jakovnovak30@gmail.com>,
+	syzbot+1ee4f3b9228e35f14677@syzkaller.appspotmail.com
+Subject: [PATCH] mmc: vub300: fix sleeping function call from invalid context in vub300_inactivity_timer_expired
+Date: Sun, 16 Aug 2026 17:38:09 +0200
+Message-ID: <20260816153809.7067-1-jakovnovak30@gmail.com>
+X-Mailer: git-send-email 2.55.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-Derek reports a lockup on hot-removal of a PCI-attached Realtek RTS525A
-MMC host if a card is inserted.  He has root-caused it to the block
-layer being unaware of the hot-removal and waiting indefinitely in
-sync_filesystem().
+ Currently, the function vub300_inactivity_timer_expired, which gets
+ called in a softirq context, calls a sleeping function in the following
+ call chain:
 
-For comparison, the NVMe subsystem copes with hot-removal by setting the
-controller state to NVME_CTRL_DEAD in nvme_remove(), which in turn leads
-to blk_mark_disk_dead() being called from nvme_mark_namespaces_dead().
-That avoids the indefinite wait in sync_filesystem().
+ vub300_inactivity_timer_expired -> kref_put -> vub300_delete ->
+ mmc_free_host -> cancel_delayed_work_sync -> __cancel_work_sync ->
+ might_sleep -> BUG
 
-Adopt this approach:  Detect hot-removal in rtsx_pci_sdmmc_drv_remove()
-and invoke a new mmc_host_set_removed() helper which in turn invokes
-mmc_card_set_removed().  Before flushing outstanding requests to the
-card in mmc_blk_remove_req(), check for its removal and call
-blk_mark_disk_dead().
+ Fix this by replacing kref_put(&vub300->kref, vub300_delete) with
+ vub300_queue_dead_work(vub300), which does the same thing, but in a
+ workqueue context.
 
-Note that mmc_card_set_removed() cannot be called from the MMC host
-driver because it is private to the MMC core, hence the indirection
-through the newly introduced mmc_host_set_removed() helper.
-
-Other removable MMC hosts, in particular if attached via PCI or USB,
-may need to be amended with a similar check for hot-removal.  The
-present commit seeks to get that process going.
-
-Reported-by: Derek J. Clark <derekjohn.clark@gmail.com>
-Tested-by: Derek J. Clark <derekjohn.clark@gmail.com>
-Closes: https://lore.kernel.org/r/20260806214808.1202819-1-derekjohn.clark@gmail.com/
-Link: https://github.com/ValveSoftware/SteamOS/issues/2473
-Signed-off-by: Lukas Wunner <lukas@wunner.de>
-Cc: Matthew Schwartz <matthew.schwartz@linux.dev>
+Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
+Reported-and-tested-by: syzbot+1ee4f3b9228e35f14677@syzkaller.appspotmail.com
+Closes: https://syzkaller.appspot.com/bug?extid=1ee4f3b9228e35f14677
+Signed-off-by: Jakov Novak <jakovnovak30@gmail.com>
 ---
- drivers/mmc/core/block.c          | 11 +++++++----
- drivers/mmc/core/host.c           | 15 +++++++++++++++
- drivers/mmc/host/rtsx_pci_sdmmc.c |  3 +++
- include/linux/mmc/host.h          |  1 +
- 4 files changed, 26 insertions(+), 4 deletions(-)
+ drivers/mmc/host/vub300.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 0274e8d..1a82233 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2978,8 +2978,11 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
- 	return 0;
- }
- 
--static void mmc_blk_remove_req(struct mmc_blk_data *md)
-+static void mmc_blk_remove_req(struct mmc_card *card, struct mmc_blk_data *md)
- {
-+	if (mmc_card_removed(card))
-+		blk_mark_disk_dead(md->disk);
-+
- 	/*
- 	 * Flush remaining requests and free queues. It is freeing the queue
- 	 * that stops new requests from being accepted.
-@@ -3006,7 +3009,7 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
- 	list_for_each_safe(pos, q, &md->part) {
- 		part_md = list_entry(pos, struct mmc_blk_data, part);
- 		list_del(pos);
--		mmc_blk_remove_req(part_md);
-+		mmc_blk_remove_req(card, part_md);
- 	}
- }
- 
-@@ -3252,7 +3255,7 @@ static int mmc_blk_probe(struct mmc_card *card)
- 
- out:
- 	mmc_blk_remove_parts(card, md);
--	mmc_blk_remove_req(md);
-+	mmc_blk_remove_req(card, md);
- out_free:
- 	destroy_workqueue(card->complete_wq);
- 	return ret;
-@@ -3273,7 +3276,7 @@ static void mmc_blk_remove(struct mmc_card *card)
- 	if (!mmc_card_sd_combo(card))
- 		pm_runtime_disable(&card->dev);
- 	pm_runtime_put_noidle(&card->dev);
--	mmc_blk_remove_req(md);
-+	mmc_blk_remove_req(card, md);
- 	destroy_workqueue(card->complete_wq);
- }
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index b7ce313..2625d91 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -22,6 +22,7 @@
- #include <linux/mmc/card.h>
- #include <linux/mmc/slot-gpio.h>
- 
-+#include "card.h"
- #include "core.h"
- #include "crypto.h"
- #include "host.h"
-@@ -703,3 +704,17 @@ void mmc_free_host(struct mmc_host *host)
- }
- 
- EXPORT_SYMBOL(mmc_free_host);
-+
-+/**
-+ *	mmc_host_set_removed - declare host removed
-+ *	@host: mmc host
-+ *
-+ *	Declare the host (and any inserted card) removed and inaccessible.
-+ */
-+void mmc_host_set_removed(struct mmc_host *host)
-+{
-+	if (host->card)
-+		mmc_card_set_removed(host->card);
-+}
-+
-+EXPORT_SYMBOL(mmc_host_set_removed);
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 8dfbc62..3f97659f 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1511,6 +1511,9 @@ static void rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
- 	pcr->slots[RTSX_SD_CARD].card_event = NULL;
- 	mmc = host->mmc;
- 
-+	if (pci_dev_is_disconnected(pcr->pci))
-+		mmc_host_set_removed(mmc);
-+
- 	cancel_work_sync(&host->work);
- 
- 	mutex_lock(&host->host_mutex);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ba84f02..a240306 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -588,6 +588,7 @@ struct mmc_host {
- int mmc_add_host(struct mmc_host *);
- void mmc_remove_host(struct mmc_host *);
- void mmc_free_host(struct mmc_host *);
-+void mmc_host_set_removed(struct mmc_host *host);
- void mmc_of_parse_clk_phase(struct device *dev,
- 			    struct mmc_clk_phase_map *map);
- int mmc_of_parse(struct mmc_host *host);
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index 2dae474dcd06..df0096bc53db 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -744,7 +744,7 @@ static void vub300_inactivity_timer_expired(struct timer_list *t)
+ 	struct vub300_mmc_host *vub300 = timer_container_of(vub300, t,
+ 							    inactivity_timer);
+ 	if (!vub300->interface) {
+-		kref_put(&vub300->kref, vub300_delete);
++		vub300_queue_dead_work(vub300);
+ 	} else if (vub300->cmd) {
+ 		mod_timer(&vub300->inactivity_timer, jiffies + HZ);
+ 	} else {
 -- 
-2.53.0
+2.55.0
 
