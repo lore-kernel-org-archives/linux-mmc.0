@@ -1,145 +1,109 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-alma10-1.taild15c8.ts.net [100.103.45.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D3883AA1B2;
-	Tue, 18 Aug 2026 15:52:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 605943A5436;
+	Tue, 18 Aug 2026 17:12:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=100.103.45.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787068378; cv=none; b=Ey0VjxB+1BdbuAiaymhCbE0at8CfjyQM7zM3XhLz4zkJC4PtIh1ZUBG0ZW1cphONX5wcZpg3OkWN5tHktuKlvVFOJX62t6Ozv2kczKbh4oP5Jvtaz3ij8csjGIUTLTEM615x2xo6TNqpTluKQP8WOcUYHkYdSP874mPdfz+8yEY=
+	t=1787073151; cv=none; b=X/f+p2UGjaK/TbsYliUYkOpPDlWQvY+j9DoMK9Rt04RQYFJMZENFflZHBvmnGLAhOfePkfPls1wEwAF5Jx2lCJrX+X/g683LLmtrL9/JI4lIf6SUfH7rppm6J4SUWsQVQFUIzNo3An7I3l6H9G62qP/OkApbFIrlEWqKIMLJ1TE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787068378; c=relaxed/simple;
-	bh=am7ybGL9Q8oSMs4hacQktmAWvyUXUl+luPF1azoUW6E=;
+	s=arc-20240116; t=1787073151; c=relaxed/simple;
+	bh=km+06z1zZjsvET193diCdp1XZYNW91zhvBs+rcinbOs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iv3IytoaqGle5n1KeL8n3ZmMg3x6m5l9r4vFUT1GLsoILZC0SkMIQ9dlL5L22tJAfRcHFhTHQEoQZWJEBfKGzc/3hDQkAWg9SyuwYy4Yp1bPPRLquTkUDcoqEWWoMSI3VOLnLTIKZNLJcqlsWLaWLAtytTZzutrPEkJ8qQRXG9E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jifPou5a; arc=none smtp.client-ip=100.103.45.18
+	 Content-Type:Content-Disposition:In-Reply-To; b=lfCe8q2hsYvj7V8ISg4FSSj8m0GnlXEBX7nfHlEb1u4ktk+cq6Ij+JBRsfgDiMTEDETSglGodmyma03CBU5zvaC3VfiCYtmUvB4IZjtiEqruHSmoplKmuYK1IcFYfOoi3SNr2TlMhYZRt/qHrECPDdNEKfiMnSim0enTqYD5moY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=csgiEA5v; arc=none smtp.client-ip=100.103.45.18
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jifPou5a"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E347C1F00A3A;
-	Tue, 18 Aug 2026 15:52:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="csgiEA5v"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C6E31F000E9;
+	Tue, 18 Aug 2026 17:12:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kernel.org;
-	s=k20260515; t=1787068376;
-	bh=/np37PKAyOIhfidNFuVWtwBk/OqeOF98enEzZHm8JxM=;
+	s=k20260515; t=1787073150;
+	bh=EXKaeMDyyG/3gBUL3UZXwLwdxbFaiuHU+n74julUvzY=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To;
-	b=jifPou5aokYHS88kaWIzuzheElhyiCJ8ZVv4x84tAOoMGGeH2r88FXhMLAAYpe6xk
-	 6YlecvQXcpLmHIfr3AyCFCfdOKYz3bhBM3H9UPpKS/WeclWWC8U5ltuWetFWz1Qu0T
-	 OAUH4xVkKy/7wjy8DOHnhcCJLjMUkOyj/HS+43m2mxpgaVfr5iD8itGeKyDscSf861
-	 LZ9SMgaFt9ZLrlQTSMfPlVQKlXMo8j/u9Hlt6jUKCbuD2jmgemTZLkmKcaMqgiaG3a
-	 3NzVJBxgOadGQZsDhLRHMLC28GpK1LfrSwMtmD9DfWIv2+fKCWc67i0W1rTWrPO/Br
-	 7EyFhxyxi0ZcQ==
-Received: from johan by xi.lan with local (Exim 4.99.4)
-	(envelope-from <johan@kernel.org>)
-	id 1wwM7S-00000000v7D-3TLZ;
-	Tue, 18 Aug 2026 17:52:54 +0200
-Date: Tue, 18 Aug 2026 17:52:54 +0200
-From: Johan Hovold <johan@kernel.org>
-To: =?utf-8?B?w5ZtZXI=?= Mete Kaya <omermetekaya0@gmail.com>
-Cc: linux-mmc@vger.kernel.org, ulfh@kernel.org, cjb@laptop.org,
-	tony.olech@elandigitalsystems.com, linux-kernel@vger.kernel.org,
-	syzbot+0e06aa1bdc6495bac24b@syzkaller.appspotmail.com
-Subject: Re: [PATCH v2] mmc: vub300: fix sleeping function called from
- invalid context
-Message-ID: <aoR_1vXMIqIdBDaI@hovoldconsulting.com>
-References: <aoLDMrhGPGOjNVpb@hovoldconsulting.com>
- <20260818143658.61667-1-omermetekaya0@gmail.com>
- <aoR1e68--w71XihE@hovoldconsulting.com>
+	b=csgiEA5vB0v0U8I95W4nxOSeWR6T9rEZ5p3S3kNm6tDswwmkDzKejewdZzYi5n+Di
+	 Q4k4wb+QofhyDz1WFkrBJfXeEsjK/bNl3Xc3Srb/uBtyeks5NMpsI2sUonRyoGiYs/
+	 m9MZ3qx4iV1b92U4KIPbbPM14NcOfq6nehavrGFhwezpMtteHqB612yzzD1xNZ2sjp
+	 zTHviQ764LGwzP+dcTXYyV1rvmVsCtnwl2ATqJfwM62UO2zrPuHG+ROcN9CDdTfXfI
+	 uPv68bNz/yZSqhIjSA/r1/y91Q1MjdlZnE7dFGV9/gM6ODlqtR/jjoSmHcfCjQ+sO9
+	 /JF4uOF/7iWzw==
+Date: Tue, 18 Aug 2026 10:12:27 -0700
+From: Eric Biggers <ebiggers@kernel.org>
+To: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+Cc: Neeraj Soni <neeraj.soni@oss.qualcomm.com>, ulf.hansson@linaro.org,
+	adrian.hunter@intel.com, quic_dmukhopa@quicinc.com,
+	quic_rampraka@quicinc.com, quic_nitirawa@quicinc.com,
+	quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
+	quic_gaurkash@quicinc.com, quic_sartgarg@quicinc.com,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH v7 2/2] mmc: sdhci-msm: Use pm ops instead of macro to
+ restore crypto keys
+Message-ID: <20260818171227.GA2249@quark>
+References: <20260811151759.1258525-1-neeraj.soni@oss.qualcomm.com>
+ <20260811151759.1258525-3-neeraj.soni@oss.qualcomm.com>
+ <20260811190851.GC2895176@google.com>
+ <877c20e3-625c-4ba8-beed-305393b18cfe@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <aoR1e68--w71XihE@hovoldconsulting.com>
+In-Reply-To: <877c20e3-625c-4ba8-beed-305393b18cfe@oss.qualcomm.com>
 
-On Tue, Aug 18, 2026 at 05:08:43PM +0200, Johan Hovold wrote:
-> On Tue, Aug 18, 2026 at 05:36:56PM +0300, Ömer Mete Kaya wrote:
-> > syzbot reports:
-> > 
-> >   BUG: sleeping function called from invalid context at kernel/workqueue.c:4487
-> >   in_atomic(): 1, irqs_disabled(): 0, non_block: 0, pid: 0, name: swapper/1
-> >   ...
-> >    <IRQ>
-> >    __might_resched
-> >    __cancel_work_sync
-> >    mmc_free_host+0x19/0x30 [drivers/mmc/core/host.c:700]
-> >    call_timer_fn+0x192/0x5e0 [kernel/time/timer.c:1748]
-> >    run_timer_softirq
-> >    ...
-> > 
-> > vub300_inactivity_timer_expired() runs in softirq (timer) context.
-> > When the USB interface had already gone away (->interface == NULL,
-> > cleared by vub300_disconnect() or the probe() error path), the timer
-> > handler dropped the object's last kref via
-> > kref_put(&vub300->kref, vub300_delete). If that was the last
-> > reference, vub300_delete() ran from softirq context and called
-> > mmc_free_host(), which calls cancel_delayed_work_sync() - a sleeping
-> > function, illegal from softirq/timer context.
-> > 
-> > Root cause: inactivity_timer is armed in probe() and continuously
-> > re-armed via mod_timer(), but - unlike sg_transfer_timer, which is
-> > explicitly deleted after each use - it is never stopped when the
-> > device is torn down, so it can still fire after ->interface has
-> > been cleared.
-> > 
-> > Fix this by decoupling inactivity_timer from the object's kref
-> > entirely: drop the kref_get() taken on its behalf in probe(); make
-> > vub300_inactivity_timer_expired() a no-op when ->interface is NULL
-> > instead of dropping a reference; and in both vub300_disconnect() and
-> > the probe() err_stop_io path, call
-> > timer_delete_sync(&vub300->inactivity_timer) right after clearing
-> > ->interface and before the final kref_put(). Since ->interface is
-> > already NULL at that point, any concurrently running timer instance
-> > takes the no-op branch, so timer_delete_sync() is guaranteed to
-> > return with the timer stopped for good - removing any race with the
-> > final kref_put()/vub300_delete()/mmc_free_host(). Before this
-> > patch, a successful probe() left two references on the kref (one
-> > from kref_init(), one from the timer's kref_get()); after it, only
-> > the initial kref_init() reference remains, matching the single
-> > kref_put() in vub300_disconnect() and err_stop_io.
-> > 
-> > While auditing the driver for the same class of bug, also switch
-> > sg_transfer_timer's two timer_delete() call sites (in
-> > __command_read_data() and __command_write_data()) to
-> > timer_delete_sync(), since usb_sg_wait() returning does not
-> > guarantee a concurrently running vub300_sg_timed_out() has finished.
-> > __command_write_data() additionally only deleted the timer on the
-> > success path, leaking an armed timer on the cmd->error path; the
-> > (now synchronous) delete is moved before that check so it always
-> > runs.
-> > 
-> > Reported-by: syzbot+0e06aa1bdc6495bac24b@syzkaller.appspotmail.com
-> > Closes: https://syzkaller.appspot.com/bug?extid=0e06aa1bdc6495bac24b
-> > Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
+On Tue, Aug 18, 2026 at 01:00:21PM +0530, Ram Prakash Gupta wrote:
 > 
-> This is not the commit that introduced the issue. See my reply to [2].
 > 
-> > Assisted-by: Claude:claude-sonnet-4-6
-> > Signed-off-by: Ömer Mete Kaya <omermetekaya0@gmail.com>
-> > ---
-> > v2: I used an LLM to help structure and polish the English commit
-> > message. I did not know
-> > this required an Assisted-by tag until Johan pointed it out - added
-> > now.
+> On 8/12/2026 12:38 AM, Eric Biggers wrote:
+> > On Tue, Aug 11, 2026 at 08:47:59PM +0530, Neeraj Soni wrote:
+> >> From: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+> >>
+> >> Inline Crypto Engine (ICE) keys are lost after hibernation entry and this
+> >> needs to be restored when hibernation exits. ICE keys are re-programmed
+> >> during sdhci_msm_ice_init() but it may not cover cases where the
+> >> hibernation image is already restored.
+> >>
+> >> Unwrap the pm ops and use directly in driver to add the call to restore
+> >> Inline Crypto Engine (ICE) keys. This ensures that ICE is brought into
+> >> same state as before hibernation.
+> >>
+> >> Also set MMC_CAP2_CRYPTO_NO_REPROG to indicate that re-programming of ICE
+> >> keys is not needed during MMC runtime suspend/resume.
+> >>
+> >> Signed-off-by: Ram Prakash Gupta <ram.gupta@oss.qualcomm.com>
+> >> Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+> >> Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> >> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> >> Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> >> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> >> Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
+> >> Signed-off-by: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+> >> ---
+> >>  drivers/mmc/host/sdhci-msm.c | 32 +++++++++++++++++++++++++++++++-
+> >>  1 file changed, 31 insertions(+), 1 deletion(-)
+> > 
+> > So with this patch, resume from hibernation will be the *only* time that
+> > ICE keys are reprogrammed.  Are you absolutely sure that is enough on
+> > every SoC this driver supports?  What about resume from suspend-to-RAM?
+> > CQE error recovery?  What if the hibernation image fails to be created?
+> > 
+> > - Eric
 > 
-> So you didn't use an LLM to write the proposed fix itself? The commit
-> message and comments in the code makes it look that way.
+> Hi Eric,
 > 
-> Also note that the syzbot LLM created a similar fix the day before you
-> posted yours:
+> There are two scenarios where key would be required to reprogram, first is when
+> rail powering the ICE goes off or SDCC does BCR reset.
 > 
->   [1] https://lore.kernel.org/all/49982079-95f4-4e8c-bbbc-bcb127e2f378@mail.kernel.org/	
+> now during suspend-to-RAM, rail powering the ice wont go off, so key would not
+> be required to reprogram. During CQE recovery, key would be only lost when BCR
+> reset is performed but that is not happening right now, to be taken up once its
+> fixed as part of recovery flow. And in case hibernation image fails to create
+> then device boots from normal flow where there is no need to reprogram the keys.
+> 
 
-Sorry, that was supposed to say:
+Okay this patch should be okay then.  Seems that the commit message
+needs some work though to properly explain this.
 
-   [1] https://lore.kernel.org/all/397da4bd-97e2-4367-b3f4-d69e0f58dd91@mail.kernel.org/
-
-Apparently the bot produced two different fixes for the same issue...
-
-> and there are at least two further proposals:
-> 
->   [2] https://lore.kernel.org/all/20260816153809.7067-1-jakovnovak30@gmail.com/
->   [3] https://lore.kernel.org/all/20260818064800.3886851-1-tao1.yu@intel.com/
-
-Johan
+- Eric
