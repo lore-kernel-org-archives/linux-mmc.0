@@ -1,63 +1,64 @@
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5872C481FDD
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Aug 2026 17:17:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AD1248423D
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Aug 2026 17:17:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787246231; cv=none; b=JE0NkjsFLndSkOY35Z+G5aA6aOWzMAXW/bnjJcH9Q5ArvWExB7RmVGC7qrR36/Gabj+9LJFX+TwUe+go3ndsC8tPSyISuvK+lO4wI3G/IVZ5bgYp4MqiS12Ozsm5oQkdpWQ4bBkXw58hBRu8S0XDZ51HTkzcvt8q02ncorH3L4w=
+	t=1787246233; cv=none; b=jyg6MXSIIyfWldwhBSmvsVL7WlkX5QB24BhvB3NqyEH8OWLLCEQCAgjNE/MQGeilbfb8WbFfy4h7bBpJO/ZyyqoupxPPMY02jS3GVAaB7btPnKU5Lel7FrTdZ3gHqCzhT5ZM3J6bt/Lds5bqwyI1ruWAE9cuduXfrALY6YABIuM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787246231; c=relaxed/simple;
-	bh=bLrtTJTAuBtltqT4KT6hk3htf9Q9jGCVfNrCvvTJ3aM=;
+	s=arc-20240116; t=1787246233; c=relaxed/simple;
+	bh=uvEVZrsTmsZfHrJ6REwxpuKWQsGP/OMPoPdCJOMN3uw=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=AAuegSU/dK2HSbsVSwxQkPlqzS7wNJOckx94w5EGNWSk91yOUiN6n4aRieRCVrDGNzj5geV4HP5lU+fnhp0EMlgVQwko+p4bSyeFYbjd96rRajwiGcD28OeVY+QNUrT0KRDclWTfmUn4yj8mWagoPzxy7doP0r0ZWwPQliSwJ14=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=iCqL+Kel; arc=none smtp.client-ip=209.85.128.47
+	 MIME-Version; b=FmDiotwnXxYj2pkWaBd2uVkyoS1HfuqdxeTzm9v5hQ6907ggFdsa6lz1R7SvFWIMd5ajY+nHU63ZLXad/eOYrFl0TszqqyaVbmxsB4SpMdgu82pME170uUexL3cSPkfpFkvJQAZjiBOkRKxRx0iISG7/SeQcFVJMDQwNmo/D/jw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ln8Jq261; arc=none smtp.client-ip=209.85.128.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iCqL+Kel"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4954df200ddso648245e9.0
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Aug 2026 10:17:08 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ln8Jq261"
+Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-49978908b35so630325e9.0
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Aug 2026 10:17:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20251104; t=1787246226; x=1787851026; darn=vger.kernel.org;
+        d=gmail.com; s=20251104; t=1787246227; x=1787851027; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to:content-type;
-        bh=Uw7ZIY4K40hB6INAbjLrOXE3eSBXoJzhfQ1DFzL+dVo=;
-        b=iCqL+KelarYgLIDP8t8GFmXHD6a2OOCi9FMNGImaBQRWvw4zZeZUBDZsd9VCtmj2Ke
-         6ypqQwZGjr5RjySvp0LJXz4ayquXsRlyDcC0L3PQ+Ahf1ifnjkyfSNvLrprDB/k188JM
-         yinpVPvzeRLGo9cXh8/ur7f6YH+95bNU6o71mv4pqxaDf9pTHLSp0XrdBfIKg7lJlEYR
-         Lqw5uMLwg7kbQAKkpBFZiRImzDIsRFzTqP3vy+z95UTkhQO+xwnu6pp9nBpvlacWLhUN
-         lDj9ebpkZNYwBu5VJkM4MNKrfmjSQwANalv8Q7HVpkimYgCkgba3MpiWEwxxKX4Xxj3+
-         juKg==
+        bh=ZruPNUmecmT47tLASIyFaVykHI9/Lk+W+uqbdFD73Vo=;
+        b=ln8Jq261fZGFwZJI0I9q4b/zC0bVXBwC+gY2dUmVR3dIzNXvCYGWisdA4jvhqL3Zk6
+         DKyEsvRMRHXKvvm13o4pK1uGVdEftkTEQjA6WzVq+7jPTixWyiYExf57FXJCnW1zgm0g
+         bnnVsk81+qY3YLiPEkovisn0mPnqHOxnuFE2HT6lsUGnZXAVFNeMXROlB5mA2YQRifxg
+         UeGPu4br62RG2HNdOTb3Vwcg9+tondSDN/2U5D7ENvhNiGC7vUmqBo/nS7zW1JaKdAJa
+         aHSJf2ZzoMYN0KRo5Cb2P1veQf13+QhjzSAXyjfzL3Y9AM8OEPGun8kSqkx+OKGE5Q4V
+         4CVA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787246226; x=1787851026;
+        d=1e100.net; s=20251104; t=1787246227; x=1787851027;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-gg:x-gm-message-state:from
          :to:cc:subject:date:message-id:reply-to:content-type;
-        bh=Uw7ZIY4K40hB6INAbjLrOXE3eSBXoJzhfQ1DFzL+dVo=;
-        b=CAsmNMA+TNdnjWZEV+pWWPLGBDwGnAe4ueB1k/OoNqbDzbNARYd7quk7HmKQlh1KRa
-         fUK1jeFi7ApAJvTKZAv4UjVBSNZblR8Zef+wSddy3vwuW+lKpOp9Z6s9gb38+2F1NO9x
-         gXv+2/G5fK+szUg7s+2BItBKxZegdf+GVyyfygmWQB0lKCELbXYYRjuYLWbwRoknRPMY
-         9yLul8fcOxQUdBG6QxvudAoxRgtPxoXPdoAuWK7e/v2t44Xwv/g2Dg/jYXNU32xCIOFI
-         Hn1e2alkBpibx1mKE7etPsQ4Wxfxw2gAWy4VQuZGbg4NHFuHyABSK/D0PYr0cSiS6mC+
-         tTrA==
-X-Forwarded-Encrypted: i=1; AHgh+RryDSWl9btLFLWReFYUJ+qjzcZBKhWUQjw2Tt54FlcjcRJl8TFsd3L9BB610/8YfHWZTGuPTdA6aYE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzJKpXXPfh2WERfubGTfhe3iy96eMfUQNa0GycqeCMEii0o/TOs
-	Xtn3Pwgq/I2xjYTR2RYjCty3QW0H7pF+dYBBQ5zFXOvibngAFxpsdFlnm+d6tg==
-X-Gm-Gg: AR+sD131BZC4mv48A/NAjJjvwwLy+F8aNgAiaoVOIERie0JITgNgXoipPBqWjMiITKO
-	ETk522FfOJ4WSLeD8tVlhBAgHqKo1r6kIHVs7TOeLnXXF1BpLc6LzO+ipaed5D1NojWBpC6qo8p
-	UtszZPUFJcgOqQcpiFYTt+7862xMyU5TDxGiso4TPdBPxuIMdO8+dSkyDXBrd6Meo/aw3m+01WS
-	2kPzKQ0J5IyuwDXcCXe/wIQH//wDchhJor6SM0rk9OBq9uRktbcL7xrQ9WijryivLBt9IDcLi1L
-	xqiZWtXWYr7j5uYryjTej7zFyBGxSzE4/mNYxWnW1MmNzi55TN4oIDslFHX6YzkKPQnfJY7y+qi
-	v1j2JUpq5UUehusEtOOAWauJbqhHg4IBi81kYe+KvVMIqfZ6Smb3tg7FovzNlXG45mHb/pJ0hd3
-	L8PXAhitwhylU+fq61gafVb1hnJZVIUj1vZg21PMcCsUitO+zImIVvxcPAniMp9yQOSzol
-X-Received: by 2002:a05:600c:1548:b0:493:aa0a:45ad with SMTP id 5b1f17b1804b1-499b828db5bmr10433165e9.2.1787246226358;
-        Thu, 20 Aug 2026 10:17:06 -0700 (PDT)
+        bh=ZruPNUmecmT47tLASIyFaVykHI9/Lk+W+uqbdFD73Vo=;
+        b=mMVpx1/R3JVKL77czkY2/Fht6aDjsHmLoBroOz6vQbSzDLY632HfF4ukxItfDPbK2n
+         g0yrYjVb638jwfuWngttAX80fzvulfmJJBMzUqgnfMJda7FqJzvQO11+Mz1WvtAh2+mt
+         uDSXnOaBVs13galRvKGN3KR3j8xWr7gJ4TBWNljqB5UvDWD+icZajf6AuY76pGgIcloE
+         HzReFkG2Ns5b2HCYDR+58hUbzlEHNjujByfcxreFD12MsZ9zOiTXWw69ugn5IdCa8sXi
+         tySyIUtMQqGnMdrptTx9hz8IrYPm5ElLDZWPzmnpWp8wrhaPuAXAlc8ihkDyiol8HPzo
+         IkXQ==
+X-Forwarded-Encrypted: i=1; AHgh+Rq148vvWia2DimTRHR3B4AYA3S+lllXi3F/GbIKRHEXPdKODDuIHfwrGNdrSqirz0peqYBku3a6d94=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyJfAmSpo+r/TFDuT/IAvwTQyXD1QkIpfWbFoh253REWDnqlZp1
+	cEJBFSjIumA7EtE7ey6fR1vYwpNJV9LeGco6bMCUkYtMbh7ObycjBaG2
+X-Gm-Gg: AR+sD13jBSEpbC44HGDa/ZV14EuBSC0v59sJj0/C46f7GVYkBmcEE3liOhBczWgC0Zj
+	u1LdQKfpfAPFR6eKA4uLBPbPbv5jCox9ujEOCrq6EUZ+uELWIv4xdCzoHuBQ6xx6VY3vBm+9Iyh
+	SduFeoNv5/hb6UjGoGpRwidUXcEPHncEtg+SjDP6P6eCoUzavFDwF6QqtUyeS9fCdIWW4KfX5ej
+	UnTDpiurWy2sxyh9tqZox7Ggh0+bRnN4+pPNJ7i0RW5EyfCjIwTAA//6n5BvZL+pvAKnAGnWVy9
+	LPr1nVbffo4AvqxU38VR/9Ea9E2ZsFndWc0C0NFb1WLyf5jLhNUrWCJMvpupHelimdBeeBuLHOh
+	IRW32jK8fVqGRQPAs2HeAqFKaTdO69UFzmNFJsAud/rrL5v7rsev8Mnb/amkpWxpvgeFlTuZJZz
+	RhJ+BFBwXTpa7D36LlVs3sR0jrV//zBbO0wUJPmxJ9+FldDr4Pe9sX2gNCLD0q3ukvohKG7Yg0X
+	w==
+X-Received: by 2002:a05:600c:3b08:b0:499:b402:6c0 with SMTP id 5b1f17b1804b1-499b830d671mr5964415e9.3.1787246227251;
+        Thu, 20 Aug 2026 10:17:07 -0700 (PDT)
 Received: from biju.lan ([2a00:23c4:a702:d301:eda0:8ef1:e1ab:c2b1])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-499aa0fd728sm219313495e9.3.2026.08.20.10.17.05
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-499aa0fd728sm219313495e9.3.2026.08.20.10.17.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Aug 2026 10:17:05 -0700 (PDT)
+        Thu, 20 Aug 2026 10:17:06 -0700 (PDT)
 From: Biju <biju.das.au@gmail.com>
 X-Google-Original-From: Biju <biju.das.jz@bp.renesas.com>
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
@@ -69,9 +70,9 @@ Cc: Biju Das <biju.das.jz@bp.renesas.com>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
 	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH v24 07/15] mmc: renesas_sdhi: Add tuning delay support for RZ/G2L
-Date: Thu, 20 Aug 2026 18:16:37 +0100
-Message-ID: <20260820171657.62815-8-biju.das.jz@bp.renesas.com>
+Subject: [PATCH v24 08/15] mmc: renesas_sdhi: Add TMIO_MMC_INTERNAL_DIVIDER flag
+Date: Thu, 20 Aug 2026 18:16:38 +0100
+Message-ID: <20260820171657.62815-9-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
 References: <20260820171657.62815-1-biju.das.jz@bp.renesas.com>
@@ -85,214 +86,114 @@ Content-Transfer-Encoding: 8bit
 
 From: Biju Das <biju.das.jz@bp.renesas.com>
 
-RZ/G2L and later SoCs need a hardware adjustment delay written to
-SCC_TMPPORT2 on signal-voltage switch during tuning: 0x1 for 1.8V,
-0x0 for 3.3V.
+RZ/G3L has a fixed internal /2 clock divider active in all bus
+timing modes except HS400, where the divider is bypassed. Add a
+TMIO_MMC_INTERNAL_DIVIDER flag to mark controllers with this
+divider.
 
-Add a TMIO_MMC_TUNING_DELAY flag and
-renesas_sdhi_set_hw_adjustment_delay(), called from
-renesas_sdhi_start_signal_voltage_switch() after the regulator is
-set, and reset SCC_TMPPORT2 to 0 at the start of
-renesas_sdhi_execute_tuning() when the flag is set and tap_num == 8.
+Add renesas_sdhi_clk_get_rate() to fold the /2 division into the
+reported clock rate when the flag is set, and use it in
+renesas_sdhi_clk_update() in place of clk_get_rate(). HS400 is not
+yet supported in software for this SoC. Adjust clkh_shift for the
+internal divider case.
 
-Add a dedicated of_data_rz_g2l descriptor with this flag and switch
-of_rzg2l_compatible to use it instead of the generic R-Car Gen3
-descriptor.
+No existing platform sets this flag, so this is infrastructure only,
+with no functional change for current SoCs.
 
 Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 ---
 v23->v24:
- * Replaced GENMASK(7, 0) with CLK_CTL_DIV_MASK.
-v22->v23:
  * No change.
+v22->v23:
+ * Updated commit description.
 v21->v22:
  * Updated commit description.
- * Added a renesas_sdhi_set_hw_adjustment_delay() call to
-   renesas_sdhi_init_tuning().
+ * Added renesas_sdhi_is_internal_divider_enabled() and
+   renesas_sdhi_clk_get_rate() to simplify the clock rate logic.
 v20->v21:
- * Added clk_div_mask to RZ/G2L of_data.
+ * No change.
 v19->v20:
  * No change.
 v18->v19:
- * No change.
+ * Updated commit description.
+ * Dropped divider variable from struct renesas_sdhi.
+ * Updated renesas_sdhi_clk_update() to return rate for HS400mode
+   and nonHS400mode(uses 1/2 internal divider).
 v18:
- * New patch.
+ * New patch using flag.
 ---
- drivers/mmc/host/renesas_sdhi_core.c          | 88 ++++++++++++-------
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 22 ++++-
- include/linux/platform_data/tmio.h            |  3 +
- 3 files changed, 78 insertions(+), 35 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 31 +++++++++++++++++++++++++---
+ include/linux/platform_data/tmio.h   |  3 +++
+ 2 files changed, 31 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index e11d357225a1..ff428b6187bb 100644
+index ff428b6187bb..b5f2ff68db75 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -256,40 +256,6 @@ static int renesas_sdhi_card_busy(struct mmc_host *mmc)
- 		 TMIO_STAT_DAT0);
+@@ -125,6 +125,27 @@ static int renesas_sdhi_clk_enable(struct tmio_mmc_host *host)
+ 	return 0;
  }
  
--static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
--						    struct mmc_ios *ios)
--{
--	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct renesas_sdhi *priv = host_to_priv(host);
--	struct pinctrl_state *pin_state;
--	int ret;
--
--	switch (ios->signal_voltage) {
--	case MMC_SIGNAL_VOLTAGE_330:
--		pin_state = priv->pins_default;
--		break;
--	case MMC_SIGNAL_VOLTAGE_180:
--		pin_state = priv->pins_uhs;
--		break;
--	default:
--		return -EINVAL;
--	}
--
--	/*
--	 * If anything is missing, assume signal voltage is fixed at
--	 * 3.3V and succeed/fail accordingly.
--	 */
--	if (IS_ERR(priv->pinctrl) || IS_ERR(pin_state))
--		return ios->signal_voltage ==
--			MMC_SIGNAL_VOLTAGE_330 ? 0 : -EINVAL;
--
--	ret = mmc_regulator_set_vqmmc(host->mmc, ios);
--	if (ret < 0)
--		return ret;
--
--	return pinctrl_select_state(priv->pinctrl, pin_state);
--}
--
- /* SCC registers */
- #define SH_MOBILE_SDHI_SCC_DTCNTL	0x000
- #define SH_MOBILE_SDHI_SCC_TAPSET	0x002
-@@ -350,6 +316,55 @@ static inline void sd_scc_write32(struct tmio_mmc_host *host,
- 	writel(val, priv->scc_ctl + (addr << host->bus_shift));
- }
- 
-+static void renesas_sdhi_set_hw_adjustment_delay(struct tmio_mmc_host *host)
++static bool renesas_sdhi_is_internal_divider_enabled(struct tmio_mmc_host *host)
 +{
-+	struct renesas_sdhi *priv = host_to_priv(host);
++	bool enable = false;
 +
-+	if (!(host->pdata->flags & TMIO_MMC_TUNING_DELAY))
-+		return;
++	if (host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER)
++		enable = true;
 +
-+	if (host->mmc->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-+		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x0);
-+	else
-+		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0x1);
++	return enable;
 +}
 +
-+static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
-+						    struct mmc_ios *ios)
++static unsigned int renesas_sdhi_clk_get_rate(struct tmio_mmc_host *host,
++					      struct clk *clk)
 +{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+	struct pinctrl_state *pin_state;
-+	int ret;
++	unsigned int freq = clk_get_rate(clk);
 +
-+	switch (ios->signal_voltage) {
-+	case MMC_SIGNAL_VOLTAGE_330:
-+		pin_state = priv->pins_default;
-+		break;
-+	case MMC_SIGNAL_VOLTAGE_180:
-+		pin_state = priv->pins_uhs;
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
++	if (renesas_sdhi_is_internal_divider_enabled(host))
++		freq /= 2;
 +
-+	/*
-+	 * If anything is missing, assume signal voltage is fixed at
-+	 * 3.3V and succeed/fail accordingly.
-+	 */
-+	if (IS_ERR(priv->pinctrl) || IS_ERR(pin_state))
-+		return ios->signal_voltage ==
-+			MMC_SIGNAL_VOLTAGE_330 ? 0 : -EINVAL;
-+
-+	ret = mmc_regulator_set_vqmmc(host->mmc, ios);
-+	if (ret < 0)
-+		return ret;
-+
-+	renesas_sdhi_set_hw_adjustment_delay(host);
-+
-+	return pinctrl_select_state(priv->pinctrl, pin_state);
++	return freq;
 +}
 +
- static unsigned int renesas_sdhi_init_tuning(struct tmio_mmc_host *host)
+ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 					    unsigned int wanted_clock)
  {
- 	struct renesas_sdhi *priv;
-@@ -377,6 +392,8 @@ static unsigned int renesas_sdhi_init_tuning(struct tmio_mmc_host *host)
+@@ -141,7 +162,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 	 * clock during tuning, so we don't change the external clock setup.
+ 	 */
+ 	if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2) || mmc_doing_tune(host->mmc))
+-		return clk_get_rate(priv->clk);
++		return renesas_sdhi_clk_get_rate(host, priv->clk);
  
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DT2FF, priv->scc_tappos);
+ 	if (priv->clkh) {
+ 		/* HS400 with 4TAP needs different clock settings */
+@@ -184,10 +205,14 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
  
-+	renesas_sdhi_set_hw_adjustment_delay(host);
+ 	clk_set_rate(ref_clk, best_freq);
+ 
+-	if (priv->clkh)
++	if (priv->clkh) {
++		if (host->pdata->flags & TMIO_MMC_INTERNAL_DIVIDER)
++			clkh_shift = 1;
 +
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
- 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+ 		clk_set_rate(priv->clk, best_freq >> clkh_shift);
++	}
  
-@@ -709,6 +726,9 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (!priv->tap_num)
- 		return 0; /* Tuning is not supported */
+-	return clk_get_rate(priv->clk);
++	return renesas_sdhi_clk_get_rate(host, priv->clk);
+ }
  
-+	if ((host->pdata->flags & TMIO_MMC_TUNING_DELAY) && priv->tap_num == 8)
-+		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2, 0);
-+
- 	if (priv->tap_num * 2 >= sizeof(priv->taps) * BITS_PER_BYTE) {
- 		dev_err(&host->pdev->dev,
- 			"Too many taps, please update 'taps' in tmio_mmc_host!\n");
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index b2622ea9ce20..f2c14ec680a8 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -145,6 +145,26 @@ static const struct renesas_sdhi_of_data of_data_rcar_gen3_no_sdh_fallback = {
- 	.clk_div_mask	= CLK_CTL_DIV_MASK,
- };
- 
-+static const struct renesas_sdhi_of_data of_data_rz_g2l = {
-+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
-+			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
-+			  TMIO_MMC_64BIT_DATA_PORT | TMIO_MMC_TUNING_DELAY,
-+	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-+			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
-+	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
-+	.bus_shift	= 2,
-+	.scc_offset	= 0x1000,
-+	.taps		= rcar_gen3_scc_taps,
-+	.taps_num	= ARRAY_SIZE(rcar_gen3_scc_taps),
-+	/* DMAC can handle 32bit blk count but only 1 segment */
-+	.max_blk_count	= UINT_MAX / TMIO_MAX_BLK_SIZE,
-+	.max_segs	= 1,
-+	.sdhi_flags	= SDHI_FLAG_NEED_CLKH_FALLBACK,
-+	.clk_mask	= SDHI_CLK_MASK_DEFAULT,
-+	.max_divider	= SDHI_MAX_DIVIDER_DEFAULT,
-+	.clk_div_mask	= CLK_CTL_DIV_MASK,
-+};
-+
- static const u8 r8a7796_es13_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
- 	{ 3,  3,  3,  3,  3,  3,  3,  4,  4,  5,  6,  7,  8,  9, 10, 15,
- 	 16, 16, 16, 16, 16, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24, 25 },
-@@ -266,7 +286,7 @@ static const struct renesas_sdhi_of_data_with_quirks of_r8a77990_compatible = {
- };
- 
- static const struct renesas_sdhi_of_data_with_quirks of_rzg2l_compatible = {
--	.of_data = &of_data_rcar_gen3,
-+	.of_data = &of_data_rz_g2l,
- 	.quirks = &sdhi_quirks_rzg2l,
- };
- 
+ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
 diff --git a/include/linux/platform_data/tmio.h b/include/linux/platform_data/tmio.h
-index e4232934c7fe..abf4134a8bd8 100644
+index abf4134a8bd8..8d435f7690a5 100644
 --- a/include/linux/platform_data/tmio.h
 +++ b/include/linux/platform_data/tmio.h
-@@ -50,6 +50,9 @@
- /* Some controllers have a 64-bit wide data port register */
- #define TMIO_MMC_64BIT_DATA_PORT	BIT(12)
+@@ -53,6 +53,9 @@
+ /* Some controllers have tuning delay */
+ #define TMIO_MMC_TUNING_DELAY		BIT(13)
  
-+/* Some controllers have tuning delay */
-+#define TMIO_MMC_TUNING_DELAY		BIT(13)
++/* Some controllers have internal divider */
++#define TMIO_MMC_INTERNAL_DIVIDER	BIT(14)
 +
  struct tmio_mmc_data {
  	void				*chan_priv_tx;
