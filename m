@@ -1,47 +1,47 @@
-Received: from SN4PR0501CU005.outbound.protection.outlook.com (mail-southcentralusazon11011041.outbound.protection.outlook.com [40.93.194.41])
+Received: from SJ2PR03CU001.outbound.protection.outlook.com (mail-westusazon11012049.outbound.protection.outlook.com [52.101.43.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C362138F230;
-	Thu, 20 Aug 2026 18:57:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.194.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BB4339184C;
+	Thu, 20 Aug 2026 18:57:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.43.49
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787252266; cv=fail; b=mV0LaK6cg5VL0GOHBt/rfqlEIfjDFGqoR30vmc9oTArOTLa3AOFA+8tHlAxfgE7hnJrZE6DRbWN/Xua714ttoIZJvucIFSfv3PuVxuT1FTZClSduNUWpU0+JPYif1er2P3CGm57rxTl9fi5TA9AH2BEw5BVJ69wuX9K+r+PvxqA=
+	t=1787252271; cv=fail; b=ZvQTylYbhZdRLeGYW2kC7ySsJOOp1ojP1wlHoowcfHN6g3CfDC6kxAapujc/Cvyg/nwUXdnadsLY5CzdbKVkJZivaxHOb4i22rckhnYVjCBLYho8UyBFc+vCeF2hBoCBiDZnKbuGJMSS2P4G2Ya1riH+ZdvkrM4VIrncu99Tp2E=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787252266; c=relaxed/simple;
-	bh=rA1Rcfrt544covNMpl1oWIGjKDxpF9hgQK35DGfTSUw=;
+	s=arc-20240116; t=1787252271; c=relaxed/simple;
+	bh=WczcylBLqQu5lmjS+gZkofPspz3tzFt5QxTbeKFM2Pk=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=KGrqDn0o3lQCiujGVjI3/CGBbjLk59w72I9/yMwAisP+fLwLDO5/yibDU2nSGwwxkmzwozYWHM7pvb3Gh7uRYyfVCGGDqmrD5SMOEnicxoz2ZvxiVn5q75JsJSqADocWXCfTPiyltvPoZ8FbR/ihqTng2Y2TrQBoKvluzDvXDc4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=ksuW8Qoz; arc=fail smtp.client-ip=40.93.194.41
+	 Content-Type:MIME-Version; b=toVBCFN1voIYEqIoMY1kSrztO9J68u1ZbRTcU3M51n+ANspp7TH8wwCMR1Oflt+a2Rp2YUNwB/H14wBtxRzTg94ATkx4K8kWZK1roALyGKxZYmBjcy2dfujakb8dTkbL6V53vwXfElKFJzKL8Dn0/9e8tYKtGxI8Fm2tTmlLtoM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=Y7mHQ80N; arc=fail smtp.client-ip=52.101.43.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="ksuW8Qoz"
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="Y7mHQ80N"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=K1H1cL/cI1qPyMi10+UpeCyrMpyUDxiyAdRtQUikCvuNVZs6HdqgohLJg5vbisQGMgiQjAkOvCkcYXc/aqZf4Y82+3rsXfrl7CqsYJMjfHynlakbyqzrlPSi3HA9xkpjPXFd09fE340tncqgRQNV10I/H6lxkLg3l0YlXsbKtKBQCIo143c5hzgsr+pvd1uhpezEl2/JrYeLwgEk8jRvtvTBPfm9zJ+R3ShXD7NssD4x7DFPA98dcCNt8Qa+o0r9rTp+biMB85OmvR78JTh2VrENGaEFg/DrsbTog+tZcuSNQQXrUqUFVo4pxPF5Esju3aiE+bowvkRigR4NtIwtig==
+ b=UMUB+X2EX9uisG7OYGXwEuDckAPR1DSXnSpDfYT1SRx2q3aKDS5Z0RxddhJncs6BZPCAjbJFN0CYZSae68QzMA36VN0L5ZkTAcLiIUjEFPtgJMET5xZMvpyL0JK4jloHUmC6ZzIkDfNdkE8U9bGS95f0fcSYy4CYF1Tl3fE8xzQ16ZITfcXtiw6mvfyde6/Vlu8TDvboVNO51NKDQC67TWisnHjAf5W9/tfXwAm7/EaQaq9k92RWtlzfLKuwapjVFZWnE1U9jqZuQf+5AcMB3cJKdxsviuDTivENdZFYT0JveVF5F/jo02jbae+IhYvyUHuzXaF109qWzTFKIU5nRw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=5v8+neQRBC5Yc/c1X6jFKpLDmFyxuh+2yw1dNUwk/jc=;
- b=lfyR7BxppIP070fY67awaUO7gRMllooyZGsYtIiDRm2na3spDHuRo1ImFWD31xYiJ7VAHLARhklFiFhqi3h3N4zAdOMjPHc2t5kNY2/MRFFBMDbmUKgPPw2dec7Oi7/pcafwiG5CAzilySElA8l4vDaZFtN6q1fUbp0UbRpidaSazQYtoqJtm1H+MAHX3Sc5Cz7HATwr4hHSwxUbueLP0BdopECi1cZRYtupIZo57odEChJgTAHb/SN9ebDW8UUmhuk7IXXlDccfe1+kt150yEa95nouQG4seMagIsRQPSuekNvug8dbRsOgQiMRqb7Sjyk3hOv5XIIyd77vmhIC+g==
+ bh=h6UZTonAKOknQboePts5Go6bifpHd7XMpHd0Nj2KV14=;
+ b=RtQPAJjr5QuVFJOhIHrlXYnf6dNISZSELAPD69a8ntAbo7ybCk5rUXXvdS5+8GznDApc3UMBhFEtt60OZHfA6YT8Ha5Iv2DAQgt58kN53bCcHUXLvxdccBlPxGyE1grCGzw0ACEVzawbVTBknYX8Y4gUbql15Lp6trrmgZ1ebXFXiPHFwf/HlSrain92Cl4JSVGa3ovWnDDpTbt6yWrtThD2eVbyLoN2niV5gELUEU5OEBhoeqAtjIGtwHos3IBktd1UxlHA4JMsVDpYphzsOupuyKEnO24vIN2MV9pXcw4bxvFUkdWJzkTxdcaU7C2q89rgDY1nkj9A7BWbZbdS3w==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=5v8+neQRBC5Yc/c1X6jFKpLDmFyxuh+2yw1dNUwk/jc=;
- b=ksuW8QoznwEMrwl/9VTa+pmTDgwx1Vx96rz6hIAtnlP5XDbFahCsEDrSes73HfIBVOu7577zHq2biR/7vr7gLJn7K1bHJ8ruc5AJyqkqgnVOgqEfhXF0N6xp4M/+Yef7LGjE+aWGfKUdgbFWY3dd5Fr9GDFXAmIZ55Di207s34sxf5jRgtJHvn3GzKyNXXqIUy2rpf+A64mcn2sRaKaNyhsIqUjjW1OwQsSOVCmUc/6Q1/Kr4QuyNfzzX0iv4FXRjkMLBJdyr/KoD+88I0TnVsOBaDpJMqOQA8mQ0LKon32kcG2C2d5cNE2+Qf3MdX1zTl6Ba5qTwl6a3iI8Als1Iw==
+ bh=h6UZTonAKOknQboePts5Go6bifpHd7XMpHd0Nj2KV14=;
+ b=Y7mHQ80NFyUqimZPC63q39Mn3/Ug68TPZ0P+1g0HqNWG7vlM/m33My5AXU+8zY/3z1iHg/RYu1tyhRHyxG6MzdVwRpxoyAJE/Y9TZEzAshDqwC9YUWkUigCTBgIOjs+XKRL1lIeT3Lm9mB3l/I6Fxh4nmNv6pDUZLe8Y7oRc9AzGfanr7W70BdLj2mEx9m3vA00yr0BhkRy+qZ05fxEEMoDb3MwMzC7j7bXMDy7+2HemOtHuuyBHIMMB35ZQi8GlKQKLMUm12nDjdmL9MheFim9F9/6CTc6+ep9emcCogeJi7hkPynMPTVaTAEv6+NnOGuN+2N3avoO2rYrZ5GfbGQ==
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
- by CH3PR03MB7364.namprd03.prod.outlook.com (2603:10b6:610:1a8::10) with
+ by BLAPR03MB5636.namprd03.prod.outlook.com (2603:10b6:208:297::15) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.339.8; Thu, 20 Aug
- 2026 18:57:36 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.339.10; Thu, 20 Aug
+ 2026 18:57:39 +0000
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0339.008; Thu, 20 Aug 2026
- 18:57:36 +0000
+ 18:57:39 +0000
 From: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 To: linux-mmc@vger.kernel.org
 Cc: ulfh@kernel.org,
@@ -54,9 +54,9 @@ Cc: ulfh@kernel.org,
 	devicetree@vger.kernel.org,
 	Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v5 2/8] arm64: dts: agilex5: add SD/eMMC host controller
-Date: Thu, 20 Aug 2026 11:57:08 -0700
-Message-Id: <20260820185721.22823-3-tanmay.kathpalia@altera.com>
+Subject: [PATCH v5 4/8] arm64: dts: agilex5: add SOCDK eMMC daughter board
+Date: Thu, 20 Aug 2026 11:57:10 -0700
+Message-Id: <20260820185721.22823-5-tanmay.kathpalia@altera.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20260820185721.22823-1-tanmay.kathpalia@altera.com>
 References: <20260820185721.22823-1-tanmay.kathpalia@altera.com>
@@ -72,140 +72,142 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|CH3PR03MB7364:EE_
-X-MS-Office365-Filtering-Correlation-Id: b7b4e33e-91f6-42a4-2ea9-08defeece67a
+X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|BLAPR03MB5636:EE_
+X-MS-Office365-Filtering-Correlation-Id: c7a16492-67e2-4ec6-9132-08defeece80a
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|7416014|376014|23010399003|1800799024|366016|56012099006|10067099003|11063799006|18002099003|22082099003|55112099003;
+	BCL:0;ARA:13230040|7416014|376014|366016|1800799024|23010399003|10067099003|11063799006|56012099006|18002099003|22082099003|55112099003;
 X-Microsoft-Antispam-Message-Info:
-	oF9Y16a5GQrBdDG9I6xRF+sFxsKPR0Jzg+kYTP16fHlKdzTIL6G6XJjWRYLZnu0Um+wjYQihVr/sGyfwptYatu0dhHXVKkPGZrmm1Oqfp2Agujx1gb94Qj+Qk3TqA41ftXT9JcLRAI1l/YrBmCmL208AP/fIPRQFs6KmtP/Bg34x7L0qBykzUxqL6iaNaSDIrjZRgpgcq+T2j69KcSkm4WVklnGO2CgLU56MwMOSOW7QGXq/7j/bZXQSUcb5lAZE8AvQBVa3c1cDFzWy08s06b8D+sF0pI9XHwu6p+tK8UK9QFFhwKonZ7jNlrJSRYce9OhmwjtobTrKeAN2MJWt/I62QnvI/qmNf2OUmH83u7tqJXOkJ2fg72jiGWINyORP6XkuajvYdRwACe8baRe6E7AvcMErBslQbVHJlqUy0yGp972hXVzdxlPb8w5HXZ5dcZVpZ0+kp3kBpChFSinuEdzzMqe8BWEUg1U3wIld7HjfSQ8AjUFLF5y3pV2JUqyTuR8uLH8n+iyFx1uHqZg3u6PzJz/Sg9C3l2SZytnIPVOmhJPMPw3kxktQCsXeljPz66iIR2W+ZoCjfzqvpEeZEZST6p7sutNCoWjsWOlheDTnjPH3QlkOuQ46v+knpJYLgavdb3Umm//sTbxYub+9uUdBpdtk6ouxwEErTv17fRM=
+	oIt+BsWdTLnnE1i1+eyrrP9kx2xndDs25t5XDtef++Co6wuodv2q0VpLPqyyWy3vuOPy2D3dlGJHLDmyog4PXw6U3SgKrgoKn6538Ulu2E9iQHdQw3ua1vb7Cqnnt/BpL+5topZl2cJh+5IVLnibfClhBing35BfAEsUlLhqwCJ4NnnpkrTjFwxvepwvr0u+1SjLmVOnNl+4umyihbw8pRGhkbwv2EIz3oaCUQXOPrxDVnsvdZv6SE1jsrhuBY57Vcj+BqDBAfN6UOEpMcd+0teFTjB4IdMDQSVw1qkFKVAjk+e/g7XZxRGkF81PZJkygfd424BBbIPqATbwMiJPGXXInQmaVW6ZcEfI0Q7nVvJnrt4Bn1lC+voP0P8d3WZngzmWU6CdMHFDjnvCw9p9bpt9kdmnCWSpF89F34smb/+q5MxScMLk6hphOr+z/icrGHBr46xb3BCHanpbCBSPxzDri2AqrvMI1YSwMCllDZn7SqmukEE4xN0WCayVJd9W5Qr48KZ0ffy9siTFzGt8/XDRcRPkgqtgBQhYBDqpbtrJYYXQr8lUALCyG31VrgDIYI/ahNteIIwYIivtSEAcsM2LRwTBh5prDXKL6wLebhKjY+mk/XyqZ4P8gcWojQQdnG5P//q5VtlQQ3FDVA2iVWPN7cYpx5+qToIbPd+wW+o=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(23010399003)(1800799024)(366016)(56012099006)(10067099003)(11063799006)(18002099003)(22082099003)(55112099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(366016)(1800799024)(23010399003)(10067099003)(11063799006)(56012099006)(18002099003)(22082099003)(55112099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?DTVAox/WnfqKU8MgrRhjGLWzdQVGKZmQUkTyhWtjLgVc7My7RGp3J1pXWfcI?=
- =?us-ascii?Q?mqt0W5Yx7T4OON7eLKGgzb0B+vFg9r0Bk0WLXXKckexbJfGeMNbvJYEOUtCo?=
- =?us-ascii?Q?UrtE91PeySjnmWcv0o/ECU1YR98lV0IfyYtOuVVQ+kOy2vw4sTVUjyJw/RnU?=
- =?us-ascii?Q?a3tahx6Zfv/p6IH1FM85BfJ5KYYTrooQQGLcXWIWrW0UMNxy5J9ygrH9XODh?=
- =?us-ascii?Q?7KXywmGBw5diXdQY3noovWsOy5pHN0WIWgfC+L9QfA+JBWwQ99f6YDjG8rMS?=
- =?us-ascii?Q?fUQjjJ7YOWijWoa5VQqIWGKroVfqNcz3NNLISomfv0DJQxMgAfDgPxgtjYPC?=
- =?us-ascii?Q?18uLD3YC0t3eOD9krIe8TgUkpISYBQ7diDoeuQqhzmEKzzNHUuidflAUPp0A?=
- =?us-ascii?Q?RlpvLndCXLvyfPUWxmYtyPANvf9tVjzWhVjWvqiukxUpkXAukX6RSI2sLAl9?=
- =?us-ascii?Q?aZ8Q43Z4KVuWvkAwf6lgvfhl0J9+yVlamJvv+t7O5Bw7fG/WaQlCFoNbA5bo?=
- =?us-ascii?Q?TuKfhCl2AKac9JrWkxqCJbZD9021/dvNYC/bCFc9jY6zdi9UjmB7IYfYWrGH?=
- =?us-ascii?Q?TcRpYoctwTmaP40sAWXXDO+QP/swmZBXchTG9wIk8UGLNC/7DWbJPdMk9o6B?=
- =?us-ascii?Q?ZqSxpUgU0wVxpbbvbSf+kmZNkvbnCnRKBU5X6YEp+8TV7fdblSulZ1Mj8EA+?=
- =?us-ascii?Q?0jvJ5p6B5lGzSkPbFz0ZrWc70cRGb0HOLBvXpHHHrD4cUx4QFY85NwNHRBBg?=
- =?us-ascii?Q?hldyaYTxLwk93MMhoYC39qJudtnmeA/Ufo/DDo6P8NhTjFBzcDFt6GGmXuwe?=
- =?us-ascii?Q?Kz8YmGUaQCACZmLGIQFJjQHKqQu3TaOSybdn+OSz0NrkBg1VrGMMBGxpNsLW?=
- =?us-ascii?Q?tmVfIFlEjks8ltzrIWlmErqwTGTRv6kq7JvdXv0szuhC92GDYx/r7yanw9+E?=
- =?us-ascii?Q?ftOpJlDgvkwkD4lUeug3bWwj2dkKVmTf7a2G5q9daPQHwbeOBdRo5xd63/UM?=
- =?us-ascii?Q?252Bbtq3nWYLAKTPzztAAT6u9h3PKiqyAyJ6rBS5f/poDY8oaSkQ0276o6aQ?=
- =?us-ascii?Q?gzcPj6XDokdtNNgUUsYxvb9JpWutQ80Qnvfe5PFm0uE5lrWmaAr2MOsoCar5?=
- =?us-ascii?Q?9leCAWk9Oi4X6AhR+S3o3BzGFm+c8+Jn2zbzKB9bWUqXESCIrlDvSLXcxyN7?=
- =?us-ascii?Q?ZLJ/wDtwUq9wt9QNnuVwEHRTMOowxR7EdcLkLqUNBu+ItGNoR/IJDTIIROs0?=
- =?us-ascii?Q?HkC0s7HKt3z3gBWLCRPTjXTNgWcwU06NXjkDOkFyaglG0AT+22bL/zR0HRbX?=
- =?us-ascii?Q?mxbj7mJpvm5TtSB87VyezIq61Sflsd7xyYjp/cklLyGGs0AZTuKO6OV3+VC4?=
- =?us-ascii?Q?Kb+xJJgyYEd3VJ++dGjiPmjncbUrby9+hMmqYvo1Xi/9BEJxD0vpqlqlCFcs?=
- =?us-ascii?Q?s6dWPSo1z0JNfRpCm7sqrUFoqMo2th2TSzh5AA5B6Slyv9JLt1G6cIaNdkOs?=
- =?us-ascii?Q?4XoIxyJHUSzwF2MRKqz6p5rhgFQgNRmxmvehcVhqqHhWPhQSW6jBmNjgzH8Z?=
- =?us-ascii?Q?vlFE0ogC0EXsKbX+hC4Xm22ZiqRLVNK2AWHa9UUkh1dKuDBFyknCFnrKUOSB?=
- =?us-ascii?Q?mf8I6cXF09LFcoYl0Ahzcz5IUdih1qvVKzpUPR/eQS4eT14J4CQLyH7pHa9a?=
- =?us-ascii?Q?d+P5cw2ZwVUytAwtvRqYy1AtpdxztNXePX+EQeN0XESqpRNdC36/oGgKXtZ+?=
- =?us-ascii?Q?B7Jj5plz26snLDtIS4I3uTrdPoF4sJI=3D?=
+	=?us-ascii?Q?XnF+YXqWTxJjeg9WgED82+7tKaYNG2N0Iv9xo3/Xa37hY6H6aHg4FvaVQ824?=
+ =?us-ascii?Q?g62tzr+EYVoH9TkRDFfJep4cw1iHyg0XUq9uKhynrL6uPKZCW2u8e4oYUzz2?=
+ =?us-ascii?Q?x3HHKzcNIkP24M0tBGkq3hT+OouE1CI+0npm3Sr5/vyJQlQ0e3YwMwQ/E+LE?=
+ =?us-ascii?Q?v8PEBeCfNbhGu6LWo0A9+0mBVuy1YtETadGjprIv5rhqZ7ZKvrONQcJmENR2?=
+ =?us-ascii?Q?EK5gnFivLmh/L487jpnqJGkivAErA/HKU/Wn5ddzSN1jfMrr9oj52UOwizri?=
+ =?us-ascii?Q?th4XnVXi1QIbNwel4o9zva6xS/ktQqivoFlTVhulQyuB/Mvz4DPvMC+iOXak?=
+ =?us-ascii?Q?AiTpLMHMFNWSvZHwaqzn9a3sgLg0HQG5HVxj1uktfKV1ghdd+6xEb5oSQHko?=
+ =?us-ascii?Q?ZNRKalGlgdzZCgHc+Z2hYgmUb32Iaslvh45MnegeE0ZPRI7tHXCZmfqoM+yt?=
+ =?us-ascii?Q?5BogZmB41xL0CN+WBdVS4sIeE+qMAqWvrIX71eCSTuai0GiuY3X7BnY6S7JC?=
+ =?us-ascii?Q?u47lX2hbcgJyOmp1Src41BFUzaKpTJrlWJOzQUh0xwOlcPa0ShKRrxzo8Y/H?=
+ =?us-ascii?Q?gVv7wrp26s8iXXSWl8wC/oNwSa/Tk91qzY3Yk3s0yHsVk+b1At386d+yK1KB?=
+ =?us-ascii?Q?6Jd7DBzhsR9TjJIj9PbYLxITn9XsOSCGBm8HqzF0Eu9P/0NJ7LAauTeuNPMR?=
+ =?us-ascii?Q?Pk7Lio2waKYp5FCCrTbdspaoZyyoKMPkzz+jFhZ62Ly8UI/i/JnUw91GLZvz?=
+ =?us-ascii?Q?FYl3TTvZJfS6KbG4mb9Kgyvd4tTZeWVCupo9QOxnk1k8TjYCiwub+NV3zVMv?=
+ =?us-ascii?Q?Tl/WX7RgBwpwFO+mhJs+KAzFL/0GdWNxD/C/Y4Cydf/VZTbAQabIfkWkjPys?=
+ =?us-ascii?Q?UJQuYkcxVqZF5kRtXwMAl0my2zXBAZMedktNMcD0He7ka6AwGqiG5NAgsp1/?=
+ =?us-ascii?Q?4EoHg5p8tgN6sYaIvXSocI9to7k4YMHcvo2oq18F2mOpEJ8dmYZPqcVWhxuc?=
+ =?us-ascii?Q?129XQ2McW/yaVxkFGXdfDxVm5an9AUyir/QJNrt6Ew56j7+WyQhLUwBv7DRG?=
+ =?us-ascii?Q?POHIqlHk2w/q1VyquQC7ron7R1TwZdvxgXi6uxf5/9IqjVPGxjaPLAwDiA1z?=
+ =?us-ascii?Q?A2Z4epSRWB8sT+7YHb5BDAjgvEoBJm9E/DJAdtKcuUkrggBvGe5OdI2Z5fgM?=
+ =?us-ascii?Q?az8PPJNhBw5vYXisIuiwXpee+sbklsJAXNk/jp4V7HUFKRr2pySYDI9ddItM?=
+ =?us-ascii?Q?lJwaA5AlRYsfxthcKcV2Y9Tc7c7p9WoS6ZYcAFRF17vkXttyVXl/MdXWZkVa?=
+ =?us-ascii?Q?hbdaeItWhK5SzRIXkD1OXxwRs/FsjSBTUEoIQDx9+U3Ii0hHJ80ijC7DPo4S?=
+ =?us-ascii?Q?a6+GfXHxTpQZRkbsN7i2dYAe1+Q49jGxD1TmLvhP4i93muUwDUs8zgLNKCWH?=
+ =?us-ascii?Q?raMLaNdXlPmrjsvccVhXzgMNE84uIpe5JsGouc+TBGBh1Eu3wbvx8/JDiHHy?=
+ =?us-ascii?Q?aQV1dtZcDGdDt7FuyMR1TyDHQr7CJ31zyxY7qi8WjzXLWdnMy95kqFfo8bJV?=
+ =?us-ascii?Q?jsYakUbeMK0vcBcwlH/8pOPak3vOf5dGhEyxoOS8XEKxQ39CXEqPWUA4dEHZ?=
+ =?us-ascii?Q?v22/heANr4EyJpGIiBCSr4PgU8VNGaO2ZPEQkXBjbTbtFD9ZtyB/EcJgREKA?=
+ =?us-ascii?Q?REFWADHz//pKeM16XtQHkiGrk14lopq9QmYA8bep45KYht9YjgBWIsWmmcfU?=
+ =?us-ascii?Q?W+PkSF8PotB4G8mFalcqQMrBj8tg5wI=3D?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b7b4e33e-91f6-42a4-2ea9-08defeece67a
+X-MS-Exchange-CrossTenant-Network-Message-Id: c7a16492-67e2-4ec6-9132-08defeece80a
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Aug 2026 18:57:36.6555
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Aug 2026 18:57:39.3843
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: CZn3MP26OxArrtPdzE+AdKty0TIsJQ7OE550eU10sf1G4igz9GcmVKTEjE0wQmMUxPHzgIRCetqKbKxgPMOjmuWecWzaetJTpPRp5egTmlE=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR03MB7364
+X-MS-Exchange-CrossTenant-UserPrincipalName: bJnOhee4iG01rpcgp3kJ3k7PS1KwhsYPq6hFlNTfsuyviSl18aGEHN4COd2RDVrL/YLrhRMZGF7tLVn0Prcy9DRaMYBxKQWU9b7l69c/k+s=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BLAPR03MB5636
 
-The Agilex5 HPS includes a Cadence SD6HC that drives either an SD card
-or eMMC, depending on the SOCDK daughter card. It uses separate SDMCLK
-(CIU) and L4_MP (BIU) clocks, and has three resets for the host
-controller, Combo PHY, and SDMMC OCP bridge.
-
-On the SOCDK OOBE card the slot is SD-only: fixed 3.3 V card supply and
-a GPIO-selected 3.3 V / 1.8 V I/O supply for UHS-I signalling up to
-SDR104.
+The Agilex5 SoCDK eMMC daughter card wires the shared HPS SD6HC to an
+8-bit onboard eMMC with fixed 3.3 V VCC and 1.8 V I/O, supporting HS200
+and HS400. The board also brings up GMAC0, I2C, I3C, LEDs, and the UART.
 
 Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 ---
-Depends on commit ab45ecfab540 ("dt-bindings: reset: altr: add
-COMBOPHY_RESET for Agilex5"), which is already in mainline via the
-reset tree. It is not yet in mmc/next; apply or merge that commit when
-building/testing this patch on top of mmc/next.
-
 Depends on commit 10cf797f3f8a ("arm64: dts: socfpga: agilex5: Enable
 the SMMU"), which is already in the SoC DT tree. It is not yet in
 mmc/next; apply or merge that commit when building/testing this patch
 on top of mmc/next, otherwise the SMMU remains disabled.
 
- .../arm64/boot/dts/intel/socfpga_agilex5.dtsi | 25 ++++++++++++++
- .../boot/dts/intel/socfpga_agilex5_socdk.dts  | 34 ++++++++++++++++++-
- 2 files changed, 58 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/intel/Makefile            |   1 +
+ .../dts/intel/socfpga_agilex5_socdk_emmc.dts  | 123 ++++++++++++++++++
+ 2 files changed, 124 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts
 
-diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
-index b06c6d5d60ee..5ccbd7bf2034 100644
---- a/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
-+++ b/arch/arm64/boot/dts/intel/socfpga_agilex5.dtsi
-@@ -300,6 +300,31 @@ portb: gpio-controller@0 {
- 			};
- 		};
- 
-+		/*
-+		 * Shared SD/eMMC controller node. On the SOCDK OOBE daughter-card
-+		 * this is used for SD card operation; on the SOCDK eMMC daughter-card
-+		 * it is configured for eMMC.
-+		 */
-+		emmc: mmc@10808000 {
-+			compatible = "altr,agilex5-sd6hc", "cdns,sd6hc";
-+			reg = <0x10808000 0x1000>;
-+			/*
-+			 * "ciu" (SDMCLK) is listed first so it is selected as the
-+			 * primary clock by the SDHCI platform layer; the SD6HC PHY
-+			 * timing calculations are derived from this clock rate.
-+			 */
-+			clocks = <&clkmgr AGILEX5_SDMCLK>, <&clkmgr AGILEX5_L4_MP_CLK>;
-+			clock-names = "ciu", "biu";
-+			dma-coherent;
-+			interrupts = <GIC_SPI 96 IRQ_TYPE_LEVEL_HIGH>;
-+			iommus = <&smmu 5>;
-+			resets = <&rst SDMMC_RESET>, <&rst COMBOPHY_RESET>,
-+				 <&rst SDMMC_OCP_RESET>;
-+			reset-names = "sdhc-reset", "combophy", "sdmmc-ocp";
+diff --git a/arch/arm64/boot/dts/intel/Makefile b/arch/arm64/boot/dts/intel/Makefile
+index 088a03b89c99..add2b91f5972 100644
+--- a/arch/arm64/boot/dts/intel/Makefile
++++ b/arch/arm64/boot/dts/intel/Makefile
+@@ -6,6 +6,7 @@ dtb-$(CONFIG_ARCH_INTEL_SOCFPGA) += socfpga_agilex_n6000.dtb \
+ 				socfpga_agilex3_socdk.dtb \
+ 				socfpga_agilex5_socdk.dtb \
+ 				socfpga_agilex5_socdk_013b.dtb \
++				socfpga_agilex5_socdk_emmc.dtb \
+ 				socfpga_agilex5_socdk_modular.dtb \
+ 				socfpga_agilex5_socdk_nand.dtb \
+ 				socfpga_agilex7m_socdk.dtb \
+diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts
+new file mode 100644
+index 000000000000..af9cf11ca0f2
+--- /dev/null
++++ b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk_emmc.dts
+@@ -0,0 +1,123 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Copyright (C) 2026, Altera Corporation
++ */
++#include "socfpga_agilex5.dtsi"
 +
-+			status = "disabled";
++/ {
++	model = "SoCFPGA Agilex5 SoCDK eMMC daughter board";
++	compatible = "intel,socfpga-agilex5-socdk-emmc", "intel,socfpga-agilex5";
++
++	aliases {
++		ethernet0 = &gmac0;
++		i3c0 = &i3c0;
++		i3c1 = &i3c1;
++		serial0 = &uart0;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		led-0 {
++			label = "hps_led0";
++			gpios = <&porta 6 GPIO_ACTIVE_HIGH>;
 +		};
 +
- 		nand: nand-controller@10b80000 {
- 			compatible = "cdns,hp-nfc";
- 			reg = <0x10b80000 0x10000>,
-diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
-index 57d3c5807c65..93222b199038 100644
---- a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
-+++ b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
-@@ -36,9 +36,37 @@ memory@80000000 {
- 		/* We expect the bootloader to fill in the reg */
- 		reg = <0x0 0x80000000 0x0 0x0>;
- 	};
++		led-1 {
++			label = "hps_led1";
++			gpios = <&porta 7 GPIO_ACTIVE_HIGH>;
++		};
++	};
 +
-+	vqmmc_io_reg: regulator-1p8v {
-+		compatible = "regulator-gpio";
-+		gpios = <&portb 3 GPIO_ACTIVE_HIGH>;
-+		gpios-states = <0>;
-+		regulator-max-microvolt = <3300000>;
++	memory@80000000 {
++		device_type = "memory";
++		/* Expect the bootloader to fill in the reg */
++		reg = <0x0 0x80000000 0x0 0x0>;
++	};
++
++	vqmmc_io_reg: regulator-fixed-1p8v {
++		compatible = "regulator-fixed";
++		regulator-always-on;
++		regulator-max-microvolt = <1800000>;
 +		regulator-min-microvolt = <1800000>;
 +		regulator-name = "vqmmc-io";
-+		states = <1800000 0x1>,
-+			 <3300000 0x0>;
 +	};
 +
 +	vmmc_reg: regulator-fixed-3p3v {
@@ -213,35 +215,75 @@ index 57d3c5807c65..93222b199038 100644
 +		regulator-always-on;
 +		regulator-max-microvolt = <3300000>;
 +		regulator-min-microvolt = <3300000>;
-+		regulator-name = "vcc-sd";
++		regulator-name = "vcc-emmc";
 +	};
- };
- 
--&gpio0 {
++};
++
 +&emmc {
-+	bus-width = <4>;
-+	cap-sd-highspeed;
++	bus-width = <8>;
++	cap-mmc-highspeed;
 +	disable-wp;
 +	max-frequency = <200000000>;
-+	no-mmc;
-+	sd-uhs-sdr104;
++	mmc-hs200-1_8v;
++	mmc-hs400-1_8v;
++	no-sd;
++	no-sdio;
++	non-removable;
 +	vmmc-supply = <&vmmc_reg>;
 +	vqmmc-supply = <&vqmmc_io_reg>;
 +
- 	status = "okay";
- };
- 
-@@ -59,6 +87,10 @@ emac2_phy0: ethernet-phy@0 {
- 	};
- };
- 
++	status = "okay";
++};
++
++&gmac0 {
++	max-frame-size = <9000>;
++	phy-handle = <&emac0_phy0>;
++	phy-mode = "rgmii"; /* TX/RX clock delays provided by Agilex5 I/O hardware */
++
++	status = "okay";
++
++	mdio0 {
++		compatible = "snps,dwmac-mdio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		emac0_phy0: ethernet-phy@0 {
++			reg = <0>;
++		};
++	};
++};
++
 +&gpio0 {
 +	status = "okay";
 +};
 +
- &gpio1 {
- 	status = "okay";
- };
++&gpio1 {
++	status = "okay";
++};
++
++&i2c0 {
++	status = "okay";
++};
++
++&i3c0 {
++	status = "okay";
++};
++
++&i3c1 {
++	status = "okay";
++};
++
++&osc1 {
++	clock-frequency = <25000000>;
++};
++
++&uart0 {
++	status = "okay";
++};
++
++&watchdog0 {
++	status = "okay";
++};
 -- 
 2.43.7
 
