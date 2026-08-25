@@ -1,168 +1,165 @@
-Received: from mail-oi2-f11.google.com (mail-oi2-f11.google.com [74.125.231.203])
+Received: from mail-pg1-f177.google.com (mail-pg1-f177.google.com [209.85.215.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C399530B53F
-	for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2026 01:37:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.231.203
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE1863E3167
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2026 08:28:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787621867; cv=none; b=UI1fJBek4XJvFjEwzXdj+InKV8YR9BYGih+VpI+5C+AlBju8iNz48G0v7h0+Wl8jHjtqanqHx0IQbnktHzXRRp1mjSi4f/4zFxlTzh37ZqJK+PDm69falCAFCTvhH3FMUNYw+TF0H/s0Q5YwcCU31+3iPmPeUNSvx/FTAZQppoA=
+	t=1787646539; cv=none; b=tVHdLvgkRwB7BIHyZ9e1Vnzc8u2mrTmqPUMwbVyQf3lknkUOmaw5OrdpIoWW9Ox6OmK2ls0nBqv7dTdCEeh1lfU+T6uIuUd97rgUTvkt6OSmtJkE6WKt+fvmGC/+nimchQ0qNivnm3hI3FysgRcbCCfAKDdhBR3QkILAW2l4q0o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787621867; c=relaxed/simple;
-	bh=9Dw5zUP4FEQbfZad9C6UYP7+xUYXOAdRDpnna5GLKac=;
-	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=rh98UnLpd56/my/lNdGmRfjyobHSMT0F4erUUuq8xF6ukF7vHQBQdh1mAKcjS+twKMZbeiE9E97C/C7B3tMpZSJ86UQfTOVkcaTSh4RFvBmBo4XR5FF53OZsqe/Go7tkO6ieCO3hLUmK2B+LITrMEFYmK4T9QEqhFtNJjMotm+A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=74.125.231.203
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
-Received: by mail-oi2-f11.google.com with SMTP id 5614622812f47-4af7193adb7so1370847b6e.0
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Aug 2026 18:37:45 -0700 (PDT)
+	s=arc-20240116; t=1787646539; c=relaxed/simple;
+	bh=D1UCAtU9SxqGtG7q6DYSm91qmaVsbEgtt8rPORR9a+A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pWNBBXDySsCIFgr5vuhLlu0o2HzlI3ntZlaTc3QSmU92Tqii5DrYZVszaT24LP81aDs6vBsy+F52m/R5DIpIieNZTlLO9ClLxbt0GcxlGYbEwdhfERkR3Cghgj/71u/yInvX86hSnnDgcNbPcvywWFQthT+Bw+3Ir3c9FOl96F8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fcEPt0CD; arc=none smtp.client-ip=209.85.215.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fcEPt0CD"
+Received: by mail-pg1-f177.google.com with SMTP id 41be03b00d2f7-ca88130e09aso2716337a12.3
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2026 01:28:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20251104; t=1787646537; x=1788251337; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=auUE+jAHKPa+cSMKOTTSmj2ehc05SvpVRDH7zDwZHsU=;
+        b=fcEPt0CDRWDhvcZJxb3I5keLGlVo7r87Jp2ovMSheAAYRLEf5FyIEt6qfGd6E8CITB
+         swJquWo7aXB+tnf8eaVaUc/iYT0mxpwBY0HQUIsZLc144oMvFPzKodKG7rDWeoyRqKOE
+         jT96QT15Dz2AmhVY/a5DMdKJ1W2cG/K4z8fAIFfl741NfB4GNEgr60YfBPtCtmdChVh0
+         ayt0gE4LrbxbARGRJn42tusR9KnD4GEnvLChH66s3R17npuxRL9hQknNACX2CTkPyjLW
+         SEf6hzsBpLJhb8+aVDswA4h8HQtdVMLaZgVADgRN+6pmRmwDFamg3sYoG5xcsdWU/p4f
+         cvIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787621864; x=1788226664;
-        h=content-type:to:from:subject:message-id:date:mime-version
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
-         :content-type;
-        bh=ycCjzGwowX5X5Ud8FvH0v8aZ95u8DKe9u08t1TKKXbk=;
-        b=Fm9g8+00BZG3f18l5FbXz9T8g5vlAXU8JXkgo3jGAEBPoUkbJxPLRwoTwmUq72NKix
-         7g0x0HSH3fNwhKKhQnmkNNg5Jybsz6ruougz5w9lKiEgbRlJAs91C5JaeV5u7PLSVjNW
-         pyoyRrf8AzoDgkBg3Lf1KTL4CtwcQyJth8fGJTAyHOR1FRR9coXNpIqi/BU/Fx4LITPk
-         bgnsvwzKggPmrqKwhT0ggVOu7qpw4jgSyIz1QZVXLD9JUycOHZn+Fb9OwAKiAdFGWWiU
-         2WCYB1TNU0S7QF4KvDf8qdJIHo2kVXuGF51YMzVMrvz1SAIpBToiB5+fsr7T1yovYDFs
-         VAFA==
-X-Forwarded-Encrypted: i=1; AHgh+RrrI92/lnyosrNQ7h3A1E2ipcaxXGiD7XOkBe/9/3Jn4OsSyhh2l+5xlvn0q+9HhudSPdJFDu3HUB0=@vger.kernel.org
-X-Gm-Message-State: AFuF++mvicQ7LuxXve89PXJbNhaVKvsMEb/sPBVWJIvLu1HRRa0u+A1n
-	nzRtZ4HB9WN4gh6I/bPWkrb8DMvLHMWNN8zfVzpYG4xyX3DWhhygmTnlu07L3ipiSBIP/Dp7HJY
-	D8efvZku2wYq3N2/M3FPA/RxHn4fsp8/IRDO2cDM0n05fobUon3NO7uaisek=
+        d=1e100.net; s=20251104; t=1787646537; x=1788251337;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=auUE+jAHKPa+cSMKOTTSmj2ehc05SvpVRDH7zDwZHsU=;
+        b=T8w3W9fc1gAE3lOU/D1feG/4bTZh3kxbPYNlIhYQv1uVgedOEQa1gPiJmIDTvfJw3p
+         lSR1lv/nNhFrOpNZcsVLWQ9tCxEd7f1YGo0AvGiRGUwsfnyF81dXRReHumTxSFagdP+Z
+         vTmc3FDXQlVx0kJxjL8nguQYVGxg+553lEj3r53aNV7vxy17Qwz2ODq5r77c2QXwHa3r
+         65Dlt7qQx5wdbWfoXh0TZoNrCedtKoTOleGpEj8D4nvBq9Mj76zzuB7ymT+zlPtRnVr1
+         H+KRZjzQMQDYg/w+Cz4BeO3g2pCKsEFyLwn7V8XB6KheUotWwMQ9EbUhUJ0Kbt9S0J/o
+         eFRQ==
+X-Forwarded-Encrypted: i=1; AHgh+RrJj6Jm4mtZ1HEQbIsAYKqpYW0c0+pga1+xOIhiZiW3jh53jtHHmnhWhTBr7Yk3Nj/4edBeZAAZZ48=@vger.kernel.org
+X-Gm-Message-State: AFuF++lidzZgTJc5bV3vPhp63x3fzdrj4DPV8SWR6xFbxUA0ha0PhyYd
+	Yx50Ov5ZtQb/WxFJrZ/k7SqR65CESaLB0NwkhKjBjxLwFe3bLLX0Jj4=
+X-Gm-Gg: AR+sD134AQ9U6BCCq2I/oSN+DOgQ+y6ZreqjVBvDW60RWXV5EQzW4/2iOIQhBDO0lDT
+	B7b2OXpebGqnsEMRdIUHZv2QZJhP2LJem2k/alMR3cemkpbqX1Mdp00867jgnIDK/jhfbTCmFTD
+	vkkTTuSLMO+lOSBusrZvp9tyKmFnK+ChZU1K+SnyuZhyQDUTIojTFsNzAgeBX3u1nHKw3mR0h2e
+	VPBcYsttb+h3iNA9FOdZp5oFQ9EHbXkEoyV5IC7hIx/afx6AR+zdXWM550+Vgrqmk/h2UMTLTVZ
+	IqR2Ct2LI+HiWVUZwyykCvnqvi4Afbqv37pKDtDqWwIr0CHPinHbERHMnD8n6I4664m6Drx/eYU
+	HUS+oGCZUEUYSst9dAoGbCI/0vEWpo45Nrdrkr0dEa8k3mC708Yf9Fy4lgqyZqlBC+0nPf6BYIN
+	BiKWr9BqQIklQPVoSl41Vu08+7r8Z8kfGTIdFEaTR3wx7OxT9mvTnHV0z6dq+SyKM0rC4+HH/Q7
+	A==
+X-Received: by 2002:a17:90b:53d0:b0:38e:bbf1:de3f with SMTP id 98e67ed59e1d1-395c359a74bmr59130797a91.12.1787646536867;
+        Tue, 25 Aug 2026 01:28:56 -0700 (PDT)
+Received: from DL2XHKPB4.dl.net ([103.63.104.162])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-39645b3a49bsm2946379a91.6.2026.08.25.01.28.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Aug 2026 01:28:56 -0700 (PDT)
+From: Triet Hoang <triet.hoang.dev@gmail.com>
+To: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Alex Dubov <oakad@yahoo.com>,
+	Ulf Hansson <ulfh@kernel.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Triet Hoang <triet.hoang.dev@gmail.com>
+Subject: [PATCH] memstick: Convert to DEFINE_SIMPLE_DEV_PM_OPS()
+Date: Tue, 25 Aug 2026 15:27:17 +0700
+Message-ID: <20260825082718.244949-1-triet.hoang.dev@gmail.com>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Received: by 2002:a05:6808:2293:b0:4b2:98a3:a567 with SMTP id
- 5614622812f47-4b2ef1bea44mr31947539b6e.4.1787621864696; Mon, 24 Aug 2026
- 18:37:44 -0700 (PDT)
-Date: Mon, 24 Aug 2026 18:37:44 -0700
-X-Google-Appengine-App-Id: s~syzkaller
-X-Google-Appengine-App-Id-Alias: syzkaller
-Message-ID: <6a8cf1e8.dbb3a75c.7844.001a.GAE@google.com>
-Subject: [syzbot] [kernel?] WARNING: ODEBUG bug in vub300_disconnect
-From: syzbot <syzbot+f4a0159ce6802a0a4774@syzkaller.appspotmail.com>
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	syzkaller-bugs@googlegroups.com, ulfh@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-Hello,
+Convert the deprecated SIMPLE_DEV_PM_OPS to DEFINE_SIMPLE_DEV_PM_OPS
+and pm_sleep_ptr().
 
-syzbot found the following issue on:
+This lets us drop the __maybe_unused annotations from the suspend
+and resume callbacks, also reduces kernel size in case CONFIG_PM
+or CONFIG_PM_SLEEP is disabled.
 
-HEAD commit:    0a0d1d55dad5 Merge tag 'scftorture.2026.08.18a' of git://g..
-git tree:       upstream
-console output: https://syzkaller.appspot.com/x/log.txt?x=126be415580000
-kernel config:  https://syzkaller.appspot.com/x/.config?x=335632b21d0ce540
-dashboard link: https://syzkaller.appspot.com/bug?extid=f4a0159ce6802a0a4774
-compiler:       Debian clang version 22.1.8 (++20260613092233+e80beda6e255-1~exp1~20260613092250.77), Debian LLD 22.1.8
-
-Unfortunately, I don't have any reproducer for this issue yet.
-
-Downloadable assets:
-disk image: https://storage.googleapis.com/syzbot-assets/b00b3ccadcaf/disk-0a0d1d55.raw.xz
-vmlinux: https://storage.googleapis.com/syzbot-assets/0e672b557a64/vmlinux-0a0d1d55.xz
-kernel image: https://storage.googleapis.com/syzbot-assets/b5c1ac823fac/bzImage-0a0d1d55.xz
-
-IMPORTANT: if you fix the issue, please add the following tag to the commit:
-Reported-by: syzbot+f4a0159ce6802a0a4774@syzkaller.appspotmail.com
-
-------------[ cut here ]------------
-ODEBUG: free active (active state 0) object: ffff888077279270 object type: timer_list hint: vub300_inactivity_timer_expired+0x0/0x3f0 include/linux/refcount.h:-1
-WARNING: lib/debugobjects.c:632 at debug_print_object+0xec/0x230 lib/debugobjects.c:629, CPU#0: kworker/0:1/10
-Modules linked in:
-CPU: 0 UID: 0 PID: 10 Comm: kworker/0:1 Not tainted syzkaller #0 PREEMPT(full) 
-Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/16/2026
-Workqueue: usb_hub_wq hub_event
-RIP: 0010:debug_print_object+0x18a/0x230 lib/debugobjects.c:629
-Code: f8 48 c1 e8 03 80 3c 18 00 74 08 4c 89 ff e8 5d 6f 4f fd 4d 8b 0f 4c 89 ef 48 8b 74 24 08 48 89 ea 44 89 e1 4d 89 f0 ff 34 24 <67> 48 0f b9 3a 48 83 c4 08 ff 05 53 75 92 0b 48 83 c4 10 5b 41 5c
-RSP: 0018:ffffc900000f7218 EFLAGS: 00010246
-RAX: 1ffffffff181ede4 RBX: dffffc0000000000 RCX: 0000000000000000
-RDX: ffffffff8c6d6340 RSI: ffffffff8c6d5dc0 RDI: ffffffff9084da30
-RBP: ffffffff8c6d6340 R08: ffff888077279270 R09: ffffffff8c0f8280
-R10: dffffc0000000000 R11: ffffffff81b32b80 R12: 0000000000000000
-R13: ffffffff9084da30 R14: ffff888077279270 R15: ffffffff8c0f6f20
-FS:  0000000000000000(0000) GS:ffff888124cf3000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 00007f5b6cbceff8 CR3: 000000000eb46000 CR4: 0000000000350ef0
-Call Trace:
- <TASK>
- __debug_check_no_obj_freed lib/debugobjects.c:1171 [inline]
- debug_check_no_obj_freed+0x2e3/0x450 lib/debugobjects.c:1201
- slab_free_hook mm/slub.c:2609 [inline]
- slab_free mm/slub.c:6372 [inline]
- kfree+0x13e/0x640 mm/slub.c:6687
- device_release+0xc4/0x1f0 drivers/base/core.c:-1
- kobject_cleanup lib/kobject.c:689 [inline]
- kobject_release lib/kobject.c:720 [inline]
- kref_put include/linux/kref.h:65 [inline]
- kobject_put+0x222/0x550 lib/kobject.c:737
- vub300_delete drivers/mmc/host/vub300.c:379 [inline]
- kref_put include/linux/kref.h:65 [inline]
- vub300_disconnect+0x280/0x2f0 drivers/mmc/host/vub300.c:2388
- usb_unbind_interface+0x295/0x9f0 drivers/usb/core/driver.c:458
- device_remove drivers/base/dd.c:618 [inline]
- __device_release_driver drivers/base/dd.c:1349 [inline]
- device_release_driver_internal+0x4f5/0x880 drivers/base/dd.c:1372
- bus_remove_device+0x444/0x560 drivers/base/bus.c:664
- device_del+0x524/0x8f0 drivers/base/core.c:3965
- usb_disable_device+0x3d4/0x8d0 drivers/usb/core/message.c:1478
- usb_disconnect+0x346/0x9a0 drivers/usb/core/hub.c:2345
- hub_port_connect drivers/usb/core/hub.c:5415 [inline]
- hub_port_connect_change drivers/usb/core/hub.c:5715 [inline]
- port_event drivers/usb/core/hub.c:5879 [inline]
- hub_event+0x1bbb/0x4d30 drivers/usb/core/hub.c:5961
- process_one_work kernel/workqueue.c:3387 [inline]
- process_scheduled_works+0xc3d/0x1630 kernel/workqueue.c:3470
- worker_thread+0xa47/0xfb0 kernel/workqueue.c:3551
- kthread+0x38b/0x480 kernel/kthread.c:436
- ret_from_fork+0x514/0xb70 arch/x86/kernel/process.c:158
- ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
- </TASK>
-----------------
-Code disassembly (best guess):
-   0:	f8                   	clc
-   1:	48 c1 e8 03          	shr    $0x3,%rax
-   5:	80 3c 18 00          	cmpb   $0x0,(%rax,%rbx,1)
-   9:	74 08                	je     0x13
-   b:	4c 89 ff             	mov    %r15,%rdi
-   e:	e8 5d 6f 4f fd       	call   0xfd4f6f70
-  13:	4d 8b 0f             	mov    (%r15),%r9
-  16:	4c 89 ef             	mov    %r13,%rdi
-  19:	48 8b 74 24 08       	mov    0x8(%rsp),%rsi
-  1e:	48 89 ea             	mov    %rbp,%rdx
-  21:	44 89 e1             	mov    %r12d,%ecx
-  24:	4d 89 f0             	mov    %r14,%r8
-  27:	ff 34 24             	push   (%rsp)
-* 2a:	67 48 0f b9 3a       	ud1    (%edx),%rdi <-- trapping instruction
-  2f:	48 83 c4 08          	add    $0x8,%rsp
-  33:	ff 05 53 75 92 0b    	incl   0xb927553(%rip)        # 0xb92758c
-  39:	48 83 c4 10          	add    $0x10,%rsp
-  3d:	5b                   	pop    %rbx
-  3e:	41 5c                	pop    %r12
-
-
+Signed-off-by: Triet Hoang <triet.hoang.dev@gmail.com>
 ---
-This report is generated by a bot. It may contain errors.
-See https://goo.gl/tpsmEJ for more information about syzbot.
-syzbot engineers can be reached at syzkaller@googlegroups.com.
+ drivers/memstick/host/jmb38x_ms.c | 8 ++++----
+ drivers/memstick/host/r592.c      | 6 ++----
+ 2 files changed, 6 insertions(+), 8 deletions(-)
 
-syzbot will keep track of this issue. See:
-https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
+diff --git a/drivers/memstick/host/jmb38x_ms.c b/drivers/memstick/host/jmb38x_ms.c
+index d93ba5e8662c..2f5f0e0677f5 100644
+--- a/drivers/memstick/host/jmb38x_ms.c
++++ b/drivers/memstick/host/jmb38x_ms.c
+@@ -792,7 +792,7 @@ static int jmb38x_ms_pmos(struct pci_dev *pdev, int flag)
+         return 0;
+ }
+ 
+-static int __maybe_unused jmb38x_ms_suspend(struct device *dev)
++static int jmb38x_ms_suspend(struct device *dev)
+ {
+ 	struct jmb38x_ms *jm = dev_get_drvdata(dev);
+ 
+@@ -809,7 +809,7 @@ static int __maybe_unused jmb38x_ms_suspend(struct device *dev)
+ 	return 0;
+ }
+ 
+-static int __maybe_unused jmb38x_ms_resume(struct device *dev)
++static int jmb38x_ms_resume(struct device *dev)
+ {
+ 	struct jmb38x_ms *jm = dev_get_drvdata(dev);
+ 	int rc;
+@@ -1011,14 +1011,14 @@ static struct pci_device_id jmb38x_ms_id_tbl [] = {
+ 	{ }
+ };
+ 
+-static SIMPLE_DEV_PM_OPS(jmb38x_ms_pm_ops, jmb38x_ms_suspend, jmb38x_ms_resume);
++static DEFINE_SIMPLE_DEV_PM_OPS(jmb38x_ms_pm_ops, jmb38x_ms_suspend, jmb38x_ms_resume);
+ 
+ static struct pci_driver jmb38x_ms_driver = {
+ 	.name = DRIVER_NAME,
+ 	.id_table = jmb38x_ms_id_tbl,
+ 	.probe = jmb38x_ms_probe,
+ 	.remove = jmb38x_ms_remove,
+-	.driver.pm = &jmb38x_ms_pm_ops,
++	.driver.pm = pm_sleep_ptr(&jmb38x_ms_pm_ops),
+ };
+ 
+ module_pci_driver(jmb38x_ms_driver);
+diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
+index 605b2265536f..ba7d63eb5b31 100644
+--- a/drivers/memstick/host/r592.c
++++ b/drivers/memstick/host/r592.c
+@@ -847,7 +847,6 @@ static void r592_remove(struct pci_dev *pdev)
+ 	memstick_free_host(dev->host);
+ }
+ 
+-#ifdef CONFIG_PM_SLEEP
+ static int r592_suspend(struct device *core_dev)
+ {
+ 	struct r592_device *dev = dev_get_drvdata(core_dev);
+@@ -868,9 +867,8 @@ static int r592_resume(struct device *core_dev)
+ 	r592_update_card_detect(dev);
+ 	return 0;
+ }
+-#endif
+ 
+-static SIMPLE_DEV_PM_OPS(r592_pm_ops, r592_suspend, r592_resume);
++static DEFINE_SIMPLE_DEV_PM_OPS(r592_pm_ops, r592_suspend, r592_resume);
+ 
+ MODULE_DEVICE_TABLE(pci, r592_pci_id_tbl);
+ 
+@@ -879,7 +877,7 @@ static struct pci_driver r592_pci_driver = {
+ 	.id_table	= r592_pci_id_tbl,
+ 	.probe		= r592_probe,
+ 	.remove		= r592_remove,
+-	.driver.pm	= &r592_pm_ops,
++	.driver.pm	= pm_sleep_ptr(&r592_pm_ops),
+ };
+ 
+ module_pci_driver(r592_pci_driver);
+-- 
+2.53.0
 
-If the report is already addressed, let syzbot know by replying with:
-#syz fix: exact-commit-title
-
-If you want to overwrite report's subsystems, reply with:
-#syz set subsystems: new-subsystem
-(See the list of subsystem names on the web dashboard)
-
-If the report is a duplicate of another one, reply with:
-#syz dup: exact-subject-of-another-report
-
-If you want to undo deduplication, reply with:
-#syz undup
