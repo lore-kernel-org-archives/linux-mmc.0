@@ -1,112 +1,168 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+Received: from mail-oi2-f11.google.com (mail-oi2-f11.google.com [74.125.231.203])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59DF217A586
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Aug 2026 20:39:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C399530B53F
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Aug 2026 01:37:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.125.231.203
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787603975; cv=none; b=okbkKeSVCK42pTuW6VK+CmXYz29j3QicUFW5akSZ3Wg3awRxlYpg+Filk3MrbvQkGRuDIdt9z7VGky26/4sztc3NtVbLzbdBDs9JE6QxMqGatOMwBOMIzq/QPk2ZgvSpj43+OcGpZ/5igFNVG1SPZJRjLUDXvF8hFvcMieJP9pQ=
+	t=1787621867; cv=none; b=UI1fJBek4XJvFjEwzXdj+InKV8YR9BYGih+VpI+5C+AlBju8iNz48G0v7h0+Wl8jHjtqanqHx0IQbnktHzXRRp1mjSi4f/4zFxlTzh37ZqJK+PDm69falCAFCTvhH3FMUNYw+TF0H/s0Q5YwcCU31+3iPmPeUNSvx/FTAZQppoA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787603975; c=relaxed/simple;
-	bh=2cHyoTVL38zNjoAWUYdF0/iIR9zdRPhNwSF9aqQM8UQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YXCKZXb2aB+AvKCKXKzi/XkZOnyI0FNlI4ZFazmQVc7rRN5OnefrDW1lxbzrslKEevzgpwqHlRQ06VRkQll++5Fs0UbFUNLEMumkfbEFeCcoSnvN40jIJPfHwxQxYlh5xtNyP8XVxBjOBets0XTkKfMagf7LEytGHurB6iqVolk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems; spf=pass smtp.mailfrom=starlabs.systems; dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b=gs/Jgp6P; arc=none smtp.client-ip=209.85.128.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=starlabs.systems
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=starlabs.systems
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=starlabs-systems.20251104.gappssmtp.com header.i=@starlabs-systems.20251104.gappssmtp.com header.b="gs/Jgp6P"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-4954dff6536so28743285e9.0
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Aug 2026 13:39:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=starlabs-systems.20251104.gappssmtp.com; s=20251104; t=1787603971; x=1788208771; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
-        bh=eftbG+RbbUU0Nqfoz3kLIkQNJ4noM/Iq8sqwWhnuWt8=;
-        b=gs/Jgp6PhOg39zVqOgk5Ph1dtVHN1ngpMVHy/O4Z4kjKjTKqgU0A+0hxvFDDE5VqYB
-         WzPYNeXPjnmRTrwkntFfYqP4LL7/NOoxh/p/X6n+N2pqC8+Jl3jsdIWSqg4GelGot/S4
-         Z+pwE7It6wRwj2GrHSS+q2+cVVzyqXwGEeAt52ya+8XDn1okkYycg7//fR4hKhlmuVrd
-         SZNF2WWlp9Aye3l0aH2mOqWWtsAeLa3epV4V/6628frZqgxXKAxPkl3iJW71Alp5cMB3
-         4UVIJds+eBraEUqcDvLdceldQct1Ph4oae6wIrEwPGeu4M/TbLc3yfEvmBKm1tlXGRqJ
-         EhPw==
+	s=arc-20240116; t=1787621867; c=relaxed/simple;
+	bh=9Dw5zUP4FEQbfZad9C6UYP7+xUYXOAdRDpnna5GLKac=;
+	h=MIME-Version:Date:Message-ID:Subject:From:To:Content-Type; b=rh98UnLpd56/my/lNdGmRfjyobHSMT0F4erUUuq8xF6ukF7vHQBQdh1mAKcjS+twKMZbeiE9E97C/C7B3tMpZSJ86UQfTOVkcaTSh4RFvBmBo4XR5FF53OZsqe/Go7tkO6ieCO3hLUmK2B+LITrMEFYmK4T9QEqhFtNJjMotm+A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com; arc=none smtp.client-ip=74.125.231.203
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=syzkaller.appspotmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=M3KW2WVRGUFZ5GODRSRYTGD7.apphosting.bounces.google.com
+Received: by mail-oi2-f11.google.com with SMTP id 5614622812f47-4af7193adb7so1370847b6e.0
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Aug 2026 18:37:45 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20251104; t=1787603971; x=1788208771;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to:content-type;
-        bh=eftbG+RbbUU0Nqfoz3kLIkQNJ4noM/Iq8sqwWhnuWt8=;
-        b=kOvnJrH06ouO7j2idCrZIiAp+79tNOJJnM293TSk9Pd7rY0aJeP2IenJm9J3a4TDOm
-         k7jOPlK4DTWGKFGABt/qTNlxCNp3yVKok1Ar5RckqN2wyxKOhIYXWSURHkxcLFVqY2LG
-         o7tRG0LgL4IXHHhe0NRyVwJuaH1i9JQJaURVgd/5ut5m6Wx//HKIMVyWZ84oaW+MfVkh
-         sZiqsVS4rg7zugz4MRpNtNNVTwa8Nsz9jltjRrO0XCaJ1+N2c/zQ6eP5/zYbXaOkm6zl
-         bUjlOg+z3dfqSaEiXHhHgTQ1RSLNuGXmEKk0qvueT2Jv5sabuOCEmi9eGWJGvt79tKam
-         3zJQ==
-X-Forwarded-Encrypted: i=1; AHgh+Ro461p3igq2RTIZhsLUkL8qeXgXGHc6tVokPKmDoixjxoEU/inPOW6AgDrJsxd0vQdYHdUKevVs0Rg=@vger.kernel.org
-X-Gm-Message-State: AFuF++kGqkAVGIYPnOXtPhGUkqMTNRTWBhtdVcRojN6J6BU+8KGbLbbd
-	OJXDd360Xe2OlaajqqK7GIqbkPsIBh6eEcLu0i/OsKJTA3BUKgrF9Qw97hAV4+WluQ==
-X-Gm-Gg: AR+sD13P19iTWsUri50OGOXBc6vmmCdKZecYADOABRl4j/tymA5/cfNl+radfeJWocN
-	dfQKC/Nrc3bbVzFMlW8lvxTUY0YTRASqu132VLt7lG3v0nc3qkyGTpchtfXBVKC/xc16O+eFGp8
-	Sb1ZNRRfpbyjvUb8GvmC4vKexcTiQDvxclw2KHWkJmYDk5n4iEaqlmIfWU4lo/eTHuHlmnv9Q+p
-	aIg8zht3aoKKUIvdhN51/Oem8BrU2kM7ROMhrCwCUGU5vnnJE4NK4e8QaTrBTqirIx7rQgiXc+u
-	KOg/pmaVxRTws5Ct2cBa6PJM/UwbeaCVDuGhc0K1RfNO1NdjfGreCEWVmd/uSJ4Jss5NV++jgh3
-	4IOBHfHndaFlEXujLkZPp+ftxwYs5UniGo4lV2YZGPHTj8a8gfSay8QCFI8c6DKdQmwmRdie9te
-	RJ+ohEyc2vJ7i7+oMLTCxh1G4mPXURBpuBP5JIYcM8uNg9h/AXMh1PYVJP5Q6qk+5FS/d3wJCWV
-	sPfSnvNPG3tDw==
-X-Received: by 2002:a05:600c:8506:b0:499:48bb:417e with SMTP id 5b1f17b1804b1-499d64f9113mr23805205e9.2.1787603971244;
-        Mon, 24 Aug 2026 13:39:31 -0700 (PDT)
-Received: from horizon ([217.155.46.38])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-499d5d64ffdsm5914435e9.2.2026.08.24.13.39.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Aug 2026 13:39:30 -0700 (PDT)
-From: Sean Rhodes <sean@starlabs.systems>
-To: Ulf Hansson <ulfh@kernel.org>
-Cc: Sean Rhodes <sean@starlabs.systems>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: rtsx_usb_sdmmc: start card power-up at 3.3V
-Date: Mon, 24 Aug 2026 21:39:29 +0100
-Message-ID: <50fc5e8a29e3a5e9a64c64c5f775d758dce39b71.1787603965.git.sean@starlabs.systems>
-X-Mailer: git-send-email 2.53.0
+        d=1e100.net; s=20251104; t=1787621864; x=1788226664;
+        h=content-type:to:from:subject:message-id:date:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to
+         :content-type;
+        bh=ycCjzGwowX5X5Ud8FvH0v8aZ95u8DKe9u08t1TKKXbk=;
+        b=Fm9g8+00BZG3f18l5FbXz9T8g5vlAXU8JXkgo3jGAEBPoUkbJxPLRwoTwmUq72NKix
+         7g0x0HSH3fNwhKKhQnmkNNg5Jybsz6ruougz5w9lKiEgbRlJAs91C5JaeV5u7PLSVjNW
+         pyoyRrf8AzoDgkBg3Lf1KTL4CtwcQyJth8fGJTAyHOR1FRR9coXNpIqi/BU/Fx4LITPk
+         bgnsvwzKggPmrqKwhT0ggVOu7qpw4jgSyIz1QZVXLD9JUycOHZn+Fb9OwAKiAdFGWWiU
+         2WCYB1TNU0S7QF4KvDf8qdJIHo2kVXuGF51YMzVMrvz1SAIpBToiB5+fsr7T1yovYDFs
+         VAFA==
+X-Forwarded-Encrypted: i=1; AHgh+RrrI92/lnyosrNQ7h3A1E2ipcaxXGiD7XOkBe/9/3Jn4OsSyhh2l+5xlvn0q+9HhudSPdJFDu3HUB0=@vger.kernel.org
+X-Gm-Message-State: AFuF++mvicQ7LuxXve89PXJbNhaVKvsMEb/sPBVWJIvLu1HRRa0u+A1n
+	nzRtZ4HB9WN4gh6I/bPWkrb8DMvLHMWNN8zfVzpYG4xyX3DWhhygmTnlu07L3ipiSBIP/Dp7HJY
+	D8efvZku2wYq3N2/M3FPA/RxHn4fsp8/IRDO2cDM0n05fobUon3NO7uaisek=
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-Received: by 2002:a05:6808:2293:b0:4b2:98a3:a567 with SMTP id
+ 5614622812f47-4b2ef1bea44mr31947539b6e.4.1787621864696; Mon, 24 Aug 2026
+ 18:37:44 -0700 (PDT)
+Date: Mon, 24 Aug 2026 18:37:44 -0700
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <6a8cf1e8.dbb3a75c.7844.001a.GAE@google.com>
+Subject: [syzbot] [kernel?] WARNING: ODEBUG bug in vub300_disconnect
+From: syzbot <syzbot+f4a0159ce6802a0a4774@syzkaller.appspotmail.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	syzkaller-bugs@googlegroups.com, ulfh@kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-A UHS session can leave the SD pads and SD18 regulator configured for
-1.8V. The power-off path disables card power and suspends the regulator,
-but does not restore their voltage selection.
+Hello,
 
-On the next power-up, this stale state remains until after the MMC core
-requests its initial signal voltage. Restore the SD pads and SD18 regulator
-to 3.3V before enabling card power, as the old rts5139 driver did.
+syzbot found the following issue on:
 
-Tested: StarLite ADL with an RTS5129 tray reader; repeated 1.8V UHS
-        sessions, power cycles, and tray removal/reinsertion.
-Tested: StarFighter MTL with an RTS5129 trayless reader; repeated 1.8V
-        UHS sessions, power cycles, and card removal/reinsertion.
-Tested: Both systems re-enumerated the card after every cycle.
+HEAD commit:    0a0d1d55dad5 Merge tag 'scftorture.2026.08.18a' of git://g..
+git tree:       upstream
+console output: https://syzkaller.appspot.com/x/log.txt?x=126be415580000
+kernel config:  https://syzkaller.appspot.com/x/.config?x=335632b21d0ce540
+dashboard link: https://syzkaller.appspot.com/bug?extid=f4a0159ce6802a0a4774
+compiler:       Debian clang version 22.1.8 (++20260613092233+e80beda6e255-1~exp1~20260613092250.77), Debian LLD 22.1.8
 
-Signed-off-by: Sean Rhodes <sean@starlabs.systems>
+Unfortunately, I don't have any reproducer for this issue yet.
+
+Downloadable assets:
+disk image: https://storage.googleapis.com/syzbot-assets/b00b3ccadcaf/disk-0a0d1d55.raw.xz
+vmlinux: https://storage.googleapis.com/syzbot-assets/0e672b557a64/vmlinux-0a0d1d55.xz
+kernel image: https://storage.googleapis.com/syzbot-assets/b5c1ac823fac/bzImage-0a0d1d55.xz
+
+IMPORTANT: if you fix the issue, please add the following tag to the commit:
+Reported-by: syzbot+f4a0159ce6802a0a4774@syzkaller.appspotmail.com
+
+------------[ cut here ]------------
+ODEBUG: free active (active state 0) object: ffff888077279270 object type: timer_list hint: vub300_inactivity_timer_expired+0x0/0x3f0 include/linux/refcount.h:-1
+WARNING: lib/debugobjects.c:632 at debug_print_object+0xec/0x230 lib/debugobjects.c:629, CPU#0: kworker/0:1/10
+Modules linked in:
+CPU: 0 UID: 0 PID: 10 Comm: kworker/0:1 Not tainted syzkaller #0 PREEMPT(full) 
+Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 07/16/2026
+Workqueue: usb_hub_wq hub_event
+RIP: 0010:debug_print_object+0x18a/0x230 lib/debugobjects.c:629
+Code: f8 48 c1 e8 03 80 3c 18 00 74 08 4c 89 ff e8 5d 6f 4f fd 4d 8b 0f 4c 89 ef 48 8b 74 24 08 48 89 ea 44 89 e1 4d 89 f0 ff 34 24 <67> 48 0f b9 3a 48 83 c4 08 ff 05 53 75 92 0b 48 83 c4 10 5b 41 5c
+RSP: 0018:ffffc900000f7218 EFLAGS: 00010246
+RAX: 1ffffffff181ede4 RBX: dffffc0000000000 RCX: 0000000000000000
+RDX: ffffffff8c6d6340 RSI: ffffffff8c6d5dc0 RDI: ffffffff9084da30
+RBP: ffffffff8c6d6340 R08: ffff888077279270 R09: ffffffff8c0f8280
+R10: dffffc0000000000 R11: ffffffff81b32b80 R12: 0000000000000000
+R13: ffffffff9084da30 R14: ffff888077279270 R15: ffffffff8c0f6f20
+FS:  0000000000000000(0000) GS:ffff888124cf3000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00007f5b6cbceff8 CR3: 000000000eb46000 CR4: 0000000000350ef0
+Call Trace:
+ <TASK>
+ __debug_check_no_obj_freed lib/debugobjects.c:1171 [inline]
+ debug_check_no_obj_freed+0x2e3/0x450 lib/debugobjects.c:1201
+ slab_free_hook mm/slub.c:2609 [inline]
+ slab_free mm/slub.c:6372 [inline]
+ kfree+0x13e/0x640 mm/slub.c:6687
+ device_release+0xc4/0x1f0 drivers/base/core.c:-1
+ kobject_cleanup lib/kobject.c:689 [inline]
+ kobject_release lib/kobject.c:720 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ kobject_put+0x222/0x550 lib/kobject.c:737
+ vub300_delete drivers/mmc/host/vub300.c:379 [inline]
+ kref_put include/linux/kref.h:65 [inline]
+ vub300_disconnect+0x280/0x2f0 drivers/mmc/host/vub300.c:2388
+ usb_unbind_interface+0x295/0x9f0 drivers/usb/core/driver.c:458
+ device_remove drivers/base/dd.c:618 [inline]
+ __device_release_driver drivers/base/dd.c:1349 [inline]
+ device_release_driver_internal+0x4f5/0x880 drivers/base/dd.c:1372
+ bus_remove_device+0x444/0x560 drivers/base/bus.c:664
+ device_del+0x524/0x8f0 drivers/base/core.c:3965
+ usb_disable_device+0x3d4/0x8d0 drivers/usb/core/message.c:1478
+ usb_disconnect+0x346/0x9a0 drivers/usb/core/hub.c:2345
+ hub_port_connect drivers/usb/core/hub.c:5415 [inline]
+ hub_port_connect_change drivers/usb/core/hub.c:5715 [inline]
+ port_event drivers/usb/core/hub.c:5879 [inline]
+ hub_event+0x1bbb/0x4d30 drivers/usb/core/hub.c:5961
+ process_one_work kernel/workqueue.c:3387 [inline]
+ process_scheduled_works+0xc3d/0x1630 kernel/workqueue.c:3470
+ worker_thread+0xa47/0xfb0 kernel/workqueue.c:3551
+ kthread+0x38b/0x480 kernel/kthread.c:436
+ ret_from_fork+0x514/0xb70 arch/x86/kernel/process.c:158
+ ret_from_fork_asm+0x1a/0x30 arch/x86/entry/entry_64.S:245
+ </TASK>
+----------------
+Code disassembly (best guess):
+   0:	f8                   	clc
+   1:	48 c1 e8 03          	shr    $0x3,%rax
+   5:	80 3c 18 00          	cmpb   $0x0,(%rax,%rbx,1)
+   9:	74 08                	je     0x13
+   b:	4c 89 ff             	mov    %r15,%rdi
+   e:	e8 5d 6f 4f fd       	call   0xfd4f6f70
+  13:	4d 8b 0f             	mov    (%r15),%r9
+  16:	4c 89 ef             	mov    %r13,%rdi
+  19:	48 8b 74 24 08       	mov    0x8(%rsp),%rsi
+  1e:	48 89 ea             	mov    %rbp,%rdx
+  21:	44 89 e1             	mov    %r12d,%ecx
+  24:	4d 89 f0             	mov    %r14,%r8
+  27:	ff 34 24             	push   (%rsp)
+* 2a:	67 48 0f b9 3a       	ud1    (%edx),%rdi <-- trapping instruction
+  2f:	48 83 c4 08          	add    $0x8,%rsp
+  33:	ff 05 53 75 92 0b    	incl   0xb927553(%rip)        # 0xb92758c
+  39:	48 83 c4 10          	add    $0x10,%rsp
+  3d:	5b                   	pop    %rbx
+  3e:	41 5c                	pop    %r12
+
+
 ---
- drivers/mmc/host/rtsx_usb_sdmmc.c | 5 +++++
- 1 file changed, 5 insertions(+)
+This report is generated by a bot. It may contain errors.
+See https://goo.gl/tpsmEJ for more information about syzbot.
+syzbot engineers can be reached at syzkaller@googlegroups.com.
 
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index bf37fab233cf..d9b33aa79165 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -980,6 +980,11 @@ static int sd_power_on(struct rtsx_usb_sdmmc *host)
- 	}
- 	dev_dbg(sdmmc_dev(host), "%s\n", __func__);
- 	rtsx_usb_init_cmd(ucr);
-+	/* Start SD init at 3.3V, like the old rts5139 driver. */
-+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, SD_PAD_CTL,
-+			 SD_IO_USING_1V8, SD_IO_USING_3V3);
-+	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, LDO_POWER_CFG,
-+			 TUNE_SD18_MASK, TUNE_SD18_3V3);
- 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SEL);
- 	rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SHARE_MODE,
- 			CARD_SHARE_MASK, CARD_SHARE_SD);
+syzbot will keep track of this issue. See:
+https://goo.gl/tpsmEJ#status for how to communicate with syzbot.
+
+If the report is already addressed, let syzbot know by replying with:
+#syz fix: exact-commit-title
+
+If you want to overwrite report's subsystems, reply with:
+#syz set subsystems: new-subsystem
+(See the list of subsystem names on the web dashboard)
+
+If the report is a duplicate of another one, reply with:
+#syz dup: exact-subject-of-another-report
+
+If you want to undo deduplication, reply with:
+#syz undup
