@@ -1,52 +1,92 @@
-Received: from mailgw.kylinos.cn (mailgw.kylinos.cn [124.126.103.232])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 003E63B6C15;
-	Wed, 26 Aug 2026 08:37:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=124.126.103.232
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 34DC73BD649
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Aug 2026 09:52:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787733453; cv=none; b=AOvrzu/HQEHa566DB8aX4ikqlTIE/vzouDrYgW0R9fji4cAILew8Vws4WD92X+E/12OsAixVHtaswbkDR9JlCLZTwhqzLxF4ZIejZGqPZb6xwTIk0du2/TnKEm6AzKQgPUUbr/dZo3VVI5HqlVaLgL39NI7FHCzqG/wMY8/nPws=
+	t=1787737948; cv=none; b=PwBCvbcjmW8NbJMlJ1vKgjREDaejD7YR4eQv8Y/D81z6lgCsvzD3fBWU0bvinwDZSgV2h0pSDTUUewk/Z9kLCw2GXQ358av5MnQjQmjI7nO8o9OfvcIe4DonWAH9IqaN8V8pSr+y23cYykl3E1lWMjmEamWmnW4U83LpLZHKoOc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787733453; c=relaxed/simple;
-	bh=/nJ+6muvPjw51iymCr3S4mmwHKOg1vP9q5wNnUEFStE=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Mf+VelpsG7HnpQ7+3GeVLcEXvraqNlHfSCnSyhfB1EUSqgvmPDDnMK4Rv8kJFvsOiY7LHooju+ub0ccz5lyuGarsDGRQfnrYs2D+tBeZoKy9beb8o8mBeR8T9SgBEUpAr2xEI1m/W66/4WudMyuOftDTuN4gyiL9hKC6+7fbMn8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn; spf=pass smtp.mailfrom=kylinos.cn; arc=none smtp.client-ip=124.126.103.232
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kylinos.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kylinos.cn
-X-UUID: 5b4cb9eaa12911f19a56ed5b684f684d-20260826
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.3.19,REQID:3271276e-ecaf-42b4-9819-320377205142,IP:0,U
-	RL:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
-	N:release,TS:-25
-X-CID-META: VersionHash:7db8b62,CLOUDID:6c3636afc8496d9cf70cbed7c874e8f3,BulkI
-	D:nil,BulkQuantity:0,SF:102|850|865|898,TC:nil,Content:0|15|50,EDM:-3,IP:n
-	il,URL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LE
-	S:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 2,SSN|SDN
-X-CID-BAS: 2,SSN|SDN,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-CID-RHF: D41D8CD98F00B204E9800998ECF8427E
-X-UUID: 5b4cb9eaa12911f19a56ed5b684f684d-20260826
-X-User: yanglinlin@kylinos.cn
-Received: from localhost.localdomain [(10.44.16.150)] by mailgw.kylinos.cn
-	(envelope-from <yanglinlin@kylinos.cn>)
-	(Generic MTA with TLSv1.3 TLS_AES_256_GCM_SHA384 256/256)
-	with ESMTP id 1157170727; Wed, 26 Aug 2026 16:37:22 +0800
-From: Linlin Yang <yanglinlin@kylinos.cn>
-To: linux-kernel@vger.kernel.org
-Cc: amd-gfx@lists.freedesktop.org,
-	dri-devel@lists.freedesktop.org,
-	linux-hwmon@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	netdev@vger.kernel.org,
-	linux-scsi@vger.kernel.org,
-	linux-spi@vger.kernel.org,
-	linux-fbdev@vger.kernel.org,
-	Linlin Yang <yanglinlin@kylinos.cn>
-Subject: [PATCH] treewide: fix spelling of "overridden"
-Date: Wed, 26 Aug 2026 16:37:15 +0800
-Message-Id: <20260826083715.625136-1-yanglinlin@kylinos.cn>
-X-Mailer: git-send-email 2.25.1
+	s=arc-20240116; t=1787737948; c=relaxed/simple;
+	bh=/QBOoKexHSv+6S9TnRfL7zK1e/8WkGNWuw8pdpfWHCE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=pRkegxMrWEjCg2OUU87z/ciLdSsSqRm7g1h+BnqUQJmux2FiE1z5KaLSv/FD+7bWBaYIGuQWZ2AbQQUsiMKPjXk/jrey936EBI5zxq2MHJXNwXh2rdbDImk+dTuAC7gJgTsUIFnZQdTf7StrSue3Dfff8nFXLbyUSL+CLtEfpYQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=TVxU6Us7; dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b=IUOCBC06; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="TVxU6Us7";
+	dkim=pass (2048-bit key) header.d=oss.qualcomm.com header.i=@oss.qualcomm.com header.b="IUOCBC06"
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 67Q9CfVV500922
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Aug 2026 09:52:26 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=QQ/waY63tEphnRBtMLXJZh4HjD9raH3agUr
+	MAEQION4=; b=TVxU6Us7NvoHcLct0Ciacik6N5LFLfI8mJ3jjIw8k4U1i8VXP/H
+	WIx/ki8rCneyfQHeKd7A+8U6ubsN6QkAGS1x+fetBs/6fJ6pUhX4VflnXsrttwRE
+	vZw8YLRijkS43XJPOa3hIS/xyh2q9nY1rcVJ/g6U4W6rqlBSmYKOYrs8IZJuaA0T
+	lE040M+KviPAy1tC+TyRZYzvNocHF/gJcmKWP19ZH6ZFt71bKTkPUCrL0gHSabrQ
+	lN+JYVcdEhsbkVE/59XMsqZJprUStEATVh/byhaiwZkGRwd10xc0Onz/GVzG1gCx
+	zURkzgOu5Yw9xrWfyrhGvFKW5ynwEknx/sA==
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com [209.85.216.69])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4g9g4mu2eu-1
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Aug 2026 09:52:25 +0000 (GMT)
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-381250979d5so1185396a91.0
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Aug 2026 02:52:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=oss.qualcomm.com; s=google; t=1787737945; x=1788342745; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to:content-type;
+        bh=QQ/waY63tEphnRBtMLXJZh4HjD9raH3agUrMAEQION4=;
+        b=IUOCBC06OimnCHY+bb0dWH1uAhfqlGxCposbqI7wl4yJa+VKV5Nehji5Q0XhowpKRa
+         ozBwQZNkZNVHK2d1zmyZsi/xV1jfki9D8HFWdhxRY9TdSGEC4nk3OXBIK+0ngFdk1GX5
+         IAp1Ryab/ftZjykvCIvyqZjH4bBddWQaTc4XSHGEuJXb6qyPluhsJA+slbPAvT8kdX5b
+         oQn9SkfY9PvQ52DLMMgTE+TuvE+tQfmWMyuhHVlF4qquHTGGvYmY2Re5aMGghR5775qX
+         Hvz8j9K+obtP/OGtfIu1UrTDnRN/0O4rtKid3QKKW8Xe02S84DqWbzamqX67Wr1ojgL4
+         EikA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787737945; x=1788342745;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-gg:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to:content-type;
+        bh=QQ/waY63tEphnRBtMLXJZh4HjD9raH3agUrMAEQION4=;
+        b=PD3IAIKYyEgBWo69k2qoU6+Xfqcj8Wqn2wIZG/V5miZl4m/IItOSn69De/HNdhiPgH
+         Q4kN1PzDywQBxm3odUXXGD8IxXBNQYkEQ2f0ROQ0GXKXzePAl9BoFyjkiGFOlwtAM2gy
+         rM0YrWbSjkkpRcHVuVgEzv0BUtXYn1NSmaZtukoFxLi9ELug+87bWd9I6WEsQKSRsg2+
+         tDMJOCIjnXmSVHmkGWnDrHwyHygO7xsatFappvrgSSXAQkW5N4VLPIX04icotGS7wZGx
+         Ww6amPmViQ7PqnOGViWKW+aDnvh6+og8GLiotveimTHuYj02AZ0Bn2eauhwvc94Ut7yS
+         pnXg==
+X-Forwarded-Encrypted: i=1; AHgh+RrA1eoG9gAUjDAhkXwbItgnV12WyXg5dCgOtG+v9Gs1k4dp61Hb4flEyLE8fyE5U+GRVWeynDGgt7w=@vger.kernel.org
+X-Gm-Message-State: AFuF++lweKj3jKXsdo3A50Wlc6Z7PbvqeVndqR0aVX+n1eQPKJ7te2ZB
+	XJHQbYvol4aBuEMPP9mfEns1QyL0WeAfY7HaBFze00cciceJFayn85KMO3I6/OY1rfQPuj8JClu
+	zRg6IUJBEvCarqDrGIi4pXMhzSKP48L3aDjgjwbBgRrTZwNGvU6wbBWvODDqpi18=
+X-Gm-Gg: AR+sD10lN0KbBOsbKqaeq2Wm2wQujSf0kZil2shfW6bKRqdcZ+22dd0SQkNUy/18hNs
+	kE3qbO2auc2tkXqXWvPVUEzkABCGOvztD86YOJoO+/2i77JyfH9qGrIcD5tMdbt8HEjndiosAyM
+	Vh4NdElMCmSFqWj5IYC6OF0Vw7lD8xcgU3zk5buUPUBHUIg+XrnINXesVFck1nVjl77cgTok748
+	QjW7DNwsJG+joQNT/GTXaQ9U4oNM/Scs3y8w6wdY7Z32Pytp6FhILLi3PUiuiGRkjQleLT5tOL3
+	J3wRLcySBOt9h6v5aesR24TNHfGh6o7TrebCVfKl8DapvD5jU79ccAVCU7siP2mvF/lSfdWPJga
+	LWtZx4rM6J4hk3287+dlH/445nege1GQ=
+X-Received: by 2002:a17:90a:d2c6:b0:38e:5c6:4db9 with SMTP id 98e67ed59e1d1-3966d3dafb9mr12538722a91.11.1787737945071;
+        Wed, 26 Aug 2026 02:52:25 -0700 (PDT)
+X-Received: by 2002:a17:90a:d2c6:b0:38e:5c6:4db9 with SMTP id 98e67ed59e1d1-3966d3dafb9mr12538627a91.11.1787737944494;
+        Wed, 26 Aug 2026 02:52:24 -0700 (PDT)
+Received: from hu-neersoni-hyd.qualcomm.com ([202.46.22.19])
+        by smtp.gmail.com with ESMTPSA id a92af1059eb24-141a8eefd98sm12587158c88.3.2026.08.26.02.52.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 26 Aug 2026 02:52:23 -0700 (PDT)
+From: Neeraj Soni <neeraj.soni@oss.qualcomm.com>
+To: ebiggers@kernel.org, ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: quic_dmukhopa@quicinc.com, quic_rampraka@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+        quic_bhaskarv@quicinc.com, quic_gaurkash@quicinc.com,
+        quic_sartgarg@quicinc.com, ram.gupta@oss.qualcomm.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, neeraj.soni@oss.qualcomm.com
+Subject: [PATCH v8 0/2] mmc: Avoid reprogram all keys to Inline Crypto Engine for MMC runtime suspend resume
+Date: Wed, 26 Aug 2026 15:22:15 +0530
+Message-Id: <20260826095217.2885229-1-neeraj.soni@oss.qualcomm.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -54,250 +94,88 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Proofpoint-Spam-Info: AW1haW4tMjYwODI2MDA4MSBTYWx0ZWRfX3AT++gVhnE1N
+ pJCGQJpD1NnuimfMrK+sVskAiEnM5pwXQUHdwfGS3ImuDkDoU5qM3fHQfHXh/iQ/aUfDBQqliqk
+ hVSnTBmqlKoQJjOSgCTYbsthoYFb9RI=
+X-Proofpoint-ORIG-GUID: U2AJkpA8WwoUt5e_hv10DpEebudn3cun
+X-Authority-Analysis: v=2.4 cv=eYgNubEH c=1 sm=1 tr=0 ts=6a8eb75a cx=c_pps
+ a=vVfyC5vLCtgYJKYeQD43oA==:117 a=fChuTYTh2wq5r3m49p7fHw==:17
+ a=Sv0fKeRqtYgA:10 a=s4-Qcg_JpJYA:10 a=VkNPw1HP01LnGYTKEx00:22
+ a=u7WPNUs3qKkmUXheDGA7:22 a=gowsoOTTUOVcmtlkKump:22 a=VwQbUJbxAAAA:8
+ a=EUspDBNiAAAA:8 a=pGLkceISAAAA:8 a=1XWaLZrsAAAA:8 a=bHz8KAZ3X1NNnLgrXMwA:9
+ a=rl5im9kqc5Lf4LNbBjHf:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwODI2MDA4MSBTYWx0ZWRfX52bz6sIWCs0R
+ 3BcUfjwsIH+DfgfjRUTgDmZheAwcNsDE8oViljMkWv0PbXiPGaoCKXsBbfM4paXn+UN5x4G1KNj
+ ZkVIti0nM3wPor/1ChDTNVOSsbzFyXC+Pdlez2nIAN59m7o7Xg6aqf2hbKvM1cBQh61GZ7EUlLq
+ 8Wb7TykogY8SF6OgqGOoTO65dEQzuY+O78duiqAwlplqBd63iIz+TMh84y32goKWP+DcsvGycQE
+ kmR+/KH6RLkBQqehnenX6uOHOqdUAQBBhJ82c/+J+aN3YysaAL5gIkBNvK7L7mYM7EHDl2EVp6g
+ MNzH032Ori5CW5w8GvxJOFMUbpCoEkgku08ejM0on0EkAkXgWHLauNoV2WGPVnnvLro6YZN2uV6
+ 1+T0bkPXjPb1f34KKvQ403gEiC2sDH2cU6GsAarexEcQm9sHIQ54jPa2waPtBuK5jbsmlLKOGmO
+ H4SeC5o0aXV+V3MqWLQ==
+X-Proofpoint-GUID: U2AJkpA8WwoUt5e_hv10DpEebudn3cun
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-08-26_02,2026-08-26_01,2025-10-01_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ malwarescore=0 priorityscore=1501 impostorscore=0 suspectscore=0
+ clxscore=1015 lowpriorityscore=0 bulkscore=0 phishscore=0 spamscore=0
+ adultscore=0 classifier=typeunknown authscore=0 authtc= authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.22.0-2606150000
+ definitions=main-2608260081
 
-Fix misspelling of "overridden" (missing a 'd') in comments across
-multiple drivers.  The correct spelling "overridden" is already used
-292 times in the same drivers/ directory.
+Crypto reprogram all keys is called for each MMC runtime suspend/resume in
+current upstream design. If this is implemented as a non-interruptible
+call to TEE for security, the cpu core is blocked for execution while this
+call executes although the crypto engine already has the keys.
+For example, glitches in audio/video streaming applications have been
+observed due to this.
 
-All occurrences are in comments only, no functional change.
+Fix this by allowing host driver to control when to re-program the
+crypto keys.
 
-Signed-off-by: Linlin Yang <yanglinlin@kylinos.cn>
 ---
- .../gpu/drm/amd/display/dc/dml/dcn30/display_mode_vba_30.c    | 2 +-
- .../gpu/drm/amd/display/dc/dml/dcn31/display_mode_vba_31.c    | 2 +-
- .../amd/display/dc/link/protocols/link_edp_panel_control.c    | 4 ++--
- drivers/gpu/drm/amd/display/dmub/src/dmub_srv.c               | 2 +-
- drivers/gpu/drm/msm/registers/gen_header.py                   | 2 +-
- drivers/gpu/drm/nouveau/nouveau_bios.c                        | 2 +-
- drivers/hwmon/abituguru.c                                     | 2 +-
- drivers/mmc/core/block.c                                      | 2 +-
- drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c              | 2 +-
- drivers/net/ethernet/chelsio/cxgb4vf/sge.c                    | 2 +-
- drivers/net/ethernet/freescale/fman/fman_memac.c              | 2 +-
- drivers/net/ethernet/sfc/mcdi_pcol.h                          | 2 +-
- drivers/scsi/aic7xxx/aic79xx_osm.c                            | 2 +-
- drivers/scsi/sym53c8xx_2/sym53c8xx.h                          | 2 +-
- drivers/spi/spi-omap2-mcspi.c                                 | 2 +-
- drivers/video/fbdev/tridentfb.c                               | 2 +-
- 16 files changed, 17 insertions(+), 17 deletions(-)
+Changes in v8:
+- Update the commit message for [PATCH 2/2] to clarify the expected key
+reprogramming behavior following hibernation image creation failures,
+suspend-to-RAM transitions and CQE recovery events.
 
-diff --git a/drivers/gpu/drm/amd/display/dc/dml/dcn30/display_mode_vba_30.c b/drivers/gpu/drm/amd/display/dc/dml/dcn30/display_mode_vba_30.c
-index 33b5136f7ce3..75bdad22bf69 100644
---- a/drivers/gpu/drm/amd/display/dc/dml/dcn30/display_mode_vba_30.c
-+++ b/drivers/gpu/drm/amd/display/dc/dml/dcn30/display_mode_vba_30.c
-@@ -1805,7 +1805,7 @@ static void DISPCLKDPPCLKDCFCLKDeepSleepPrefetchParametersWatermarksAndPerforman
- 	v->DISPCLKWithRamping = 0;
- 	v->DISPCLKWithoutRamping = 0;
- 	v->GlobalDPPCLK = 0.0;
--	/* DAL custom code: need to update ReturnBW in case min dcfclk is overriden */
-+	/* DAL custom code: need to update ReturnBW in case min dcfclk is overridden */
- 	v->IdealSDPPortBandwidthPerState[v->VoltageLevel][v->maxMpcComb] = dml_min3(
- 			v->ReturnBusWidth * v->DCFCLK,
- 			v->DRAMSpeedPerState[v->VoltageLevel] * v->NumberOfChannels * v->DRAMChannelWidth,
-diff --git a/drivers/gpu/drm/amd/display/dc/dml/dcn31/display_mode_vba_31.c b/drivers/gpu/drm/amd/display/dc/dml/dcn31/display_mode_vba_31.c
-index 8064c4b3fd25..3f62ea493787 100644
---- a/drivers/gpu/drm/amd/display/dc/dml/dcn31/display_mode_vba_31.c
-+++ b/drivers/gpu/drm/amd/display/dc/dml/dcn31/display_mode_vba_31.c
-@@ -2045,7 +2045,7 @@ static void DISPCLKDPPCLKDCFCLKDeepSleepPrefetchParametersWatermarksAndPerforman
- 	v->DISPCLKWithRamping = 0;
- 	v->DISPCLKWithoutRamping = 0;
- 	v->GlobalDPPCLK = 0.0;
--	/* DAL custom code: need to update ReturnBW in case min dcfclk is overriden */
-+	/* DAL custom code: need to update ReturnBW in case min dcfclk is overridden */
- 	{
- 	double IdealFabricAndSDPPortBandwidthPerState = dml_min(
- 			v->ReturnBusWidth * v->DCFCLKState[v->VoltageLevel][v->maxMpcComb],
-diff --git a/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c b/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c
-index 16951a9550f2..d3fe6e024891 100644
---- a/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c
-+++ b/drivers/gpu/drm/amd/display/dc/link/protocols/link_edp_panel_control.c
-@@ -108,7 +108,7 @@ enum dp_panel_mode dp_get_panel_mode(struct dc_link *link)
- 			/* alternate scrambler reset is required for Travis
- 			 * for the case when external chip does not
- 			 * provide sink device id, alternate scrambler
--			 * scheme will  be overriden later by querying
-+			 * scheme will  be overridden later by querying
- 			 * Encoder features
- 			 */
- 			if (strncmp(
-@@ -124,7 +124,7 @@ enum dp_panel_mode dp_get_panel_mode(struct dc_link *link)
- 			/* alternate scrambler reset is required for NUTMEG
- 			 * for the case when external chip does not provide
- 			 * sink device id, alternate scrambler scheme will
--			 * be overriden later by querying Encoder feature
-+			 * be overridden later by querying Encoder feature
- 			 */
- 			if (strncmp(link->dpcd_caps.branch_dev_name,
- 				DP_VGA_LVDS_CONVERTER_ID_3,
-diff --git a/drivers/gpu/drm/amd/display/dmub/src/dmub_srv.c b/drivers/gpu/drm/amd/display/dmub/src/dmub_srv.c
-index 204375f1eff8..587d26c742cd 100644
---- a/drivers/gpu/drm/amd/display/dmub/src/dmub_srv.c
-+++ b/drivers/gpu/drm/amd/display/dmub/src/dmub_srv.c
-@@ -584,7 +584,7 @@ static bool dmub_srv_hw_setup(struct dmub_srv *dmub, enum dmub_asic asic)
- 		return false;
- 	}
- 
--	/* set default inbox type if not overriden */
-+	/* set default inbox type if not overridden */
- 	if (dmub->inbox_type == DMUB_CMD_INTERFACE_DEFAULT) {
- 		if (default_inbox_type != DMUB_CMD_INTERFACE_DEFAULT) {
- 			/* use default inbox type as specified by DCN rev */
-diff --git a/drivers/gpu/drm/msm/registers/gen_header.py b/drivers/gpu/drm/msm/registers/gen_header.py
-index d3b56a9d84fb..d6bfb7b7d7b3 100644
---- a/drivers/gpu/drm/msm/registers/gen_header.py
-+++ b/drivers/gpu/drm/msm/registers/gen_header.py
-@@ -576,7 +576,7 @@ class Parser(object):
-             raise self.error(e)
- 
-     def parse_varset(self, attrs):
--        # Inherit the varset from the enclosing domain if not overriden:
-+        # Inherit the varset from the enclosing domain if not overridden:
-         varset = self.current_varset
-         if "varset" in attrs:
-             varset = self.enums[attrs["varset"]]
-diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
-index 38032bb95826..10cd606d01b9 100644
---- a/drivers/gpu/drm/nouveau/nouveau_bios.c
-+++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -323,7 +323,7 @@ get_fp_strap(struct drm_device *dev, struct nvbios *bios)
- 	/*
- 	 * The fp strap is normally dictated by the "User Strap" in
- 	 * PEXTDEV_BOOT_0[20:16], but on BMP cards when bit 2 of the
--	 * Internal_Flags struct at 0x48 is set, the user strap gets overriden
-+	 * Internal_Flags struct at 0x48 is set, the user strap gets overridden
- 	 * by the PCI subsystem ID during POST, but not before the previous user
- 	 * strap has been committed to CR58 for CR57=0xf on head A, which may be
- 	 * read and used instead
-diff --git a/drivers/hwmon/abituguru.c b/drivers/hwmon/abituguru.c
-index ba8c68ae4595..5accd463599c 100644
---- a/drivers/hwmon/abituguru.c
-+++ b/drivers/hwmon/abituguru.c
-@@ -475,7 +475,7 @@ abituguru_detect_bank1_sensor_type(struct abituguru_data *data,
- 	u8 val, test_flag, buf[3];
- 	int i, ret = -ENODEV; /* error is the most common used retval :| */
- 
--	/* If overriden by the user return the user selected type */
-+	/* If overridden by the user return the user selected type */
- 	if (bank1_types[sensor_addr] >= ABIT_UGURU_IN_SENSOR &&
- 			bank1_types[sensor_addr] <= ABIT_UGURU_NC) {
- 		ABIT_UGURU_DEBUG(2, "assuming sensor type %d for bank1 sensor "
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index e760d13ee325..a02bb2fee874 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -86,7 +86,7 @@ MODULE_ALIAS("mmc:block");
- static DEFINE_MUTEX(block_mutex);
- 
- /*
-- * The defaults come from config options but can be overriden by module
-+ * The defaults come from config options but can be overridden by module
-  * or bootarg options.
-  */
- static int perdev_minors = CONFIG_MMC_BLOCK_MINORS;
-diff --git a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c
-index ea310057fe3a..bc36d7578ce2 100644
---- a/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c
-+++ b/drivers/net/ethernet/broadcom/bnx2x/bnx2x_link.c
-@@ -3743,7 +3743,7 @@ static void bnx2x_warpcore_enable_AN_KR(struct bnx2x_phy *phy,
- 		{MDIO_WC_DEVAD, MDIO_WC_REG_CL72_USERB0_CL72_TX_FIR_TAP, 0},
- 	};
- 	DP(NETIF_MSG_LINK, "Enable Auto Negotiation for KR\n");
--	/* Set to default registers that may be overriden by 10G force */
-+	/* Set to default registers that may be overridden by 10G force */
- 	for (i = 0; i < ARRAY_SIZE(reg_set); i++)
- 		bnx2x_cl45_write(bp, phy, reg_set[i].devad, reg_set[i].reg,
- 				 reg_set[i].val);
-diff --git a/drivers/net/ethernet/chelsio/cxgb4vf/sge.c b/drivers/net/ethernet/chelsio/cxgb4vf/sge.c
-index 31fab2415743..b4374ca1d653 100644
---- a/drivers/net/ethernet/chelsio/cxgb4vf/sge.c
-+++ b/drivers/net/ethernet/chelsio/cxgb4vf/sge.c
-@@ -2194,7 +2194,7 @@ static void __iomem *bar2_address(struct adapter *adapter,
-  *	@rspq: pointer to the new rxq's Response Queue to be filled in
-  *	@iqasynch: if 0, a normal rspq; if 1, an asynchronous event queue
-  *	@dev: the network device associated with the new rspq
-- *	@intr_dest: MSI-X vector index (overriden in MSI mode)
-+ *	@intr_dest: MSI-X vector index (overridden in MSI mode)
-  *	@fl: pointer to the new rxq's Free List to be filled in
-  *	@hnd: the interrupt handler to invoke for the rspq
-  */
-diff --git a/drivers/net/ethernet/freescale/fman/fman_memac.c b/drivers/net/ethernet/freescale/fman/fman_memac.c
-index e2d8c58deef0..c1d588337751 100644
---- a/drivers/net/ethernet/freescale/fman/fman_memac.c
-+++ b/drivers/net/ethernet/freescale/fman/fman_memac.c
-@@ -1311,7 +1311,7 @@ int memac_initialization(struct mac_device *mac_dev,
- 
- 	/* Most boards should use MLO_AN_INBAND, but existing boards don't have
- 	 * a managed property. Default to MLO_AN_INBAND rather than MLO_AN_PHY.
--	 * Phylink will allow this to be overriden by a fixed link. We need to
-+	 * Phylink will allow this to be overridden by a fixed link. We need to
- 	 * be careful and not enable this if we are using MII or RGMII, since
- 	 * those configurations modes don't use in-band autonegotiation.
- 	 */
-diff --git a/drivers/net/ethernet/sfc/mcdi_pcol.h b/drivers/net/ethernet/sfc/mcdi_pcol.h
-index b9866e389e6d..9adfa058512f 100644
---- a/drivers/net/ethernet/sfc/mcdi_pcol.h
-+++ b/drivers/net/ethernet/sfc/mcdi_pcol.h
-@@ -13547,7 +13547,7 @@
-  * an ancestor of the current user (see MC_CMD_SET_VI_USER). Note that LL
-  * queues require this to be called after allocation but before initialisation
-  * of the queue. TLP options of a queue are fixed after queue is initialised,
-- * with the values set to current global value or they can be overriden using
-+ * with the values set to current global value or they can be overridden using
-  * this command. At LL queue allocation, all overrides are cleared.
-  */
- #define MC_CMD_SET_VI_TLP_PROCESSING 0xb1
-diff --git a/drivers/scsi/aic7xxx/aic79xx_osm.c b/drivers/scsi/aic7xxx/aic79xx_osm.c
-index feb1707feb7e..c9470f80626b 100644
---- a/drivers/scsi/aic7xxx/aic79xx_osm.c
-+++ b/drivers/scsi/aic7xxx/aic79xx_osm.c
-@@ -173,7 +173,7 @@ static adapter_tag_info_t aic79xx_tag_info[] =
- 
- /*
-  * The I/O cell on the chip is very configurable in respect to its analog
-- * characteristics.  Set the defaults here; they can be overriden with
-+ * characteristics.  Set the defaults here; they can be overridden with
-  * the proper insmod parameters.
-  */
- struct ahd_linux_iocell_opts
-diff --git a/drivers/scsi/sym53c8xx_2/sym53c8xx.h b/drivers/scsi/sym53c8xx_2/sym53c8xx.h
-index 11f5dc29aa59..8790f1315f75 100644
---- a/drivers/scsi/sym53c8xx_2/sym53c8xx.h
-+++ b/drivers/scsi/sym53c8xx_2/sym53c8xx.h
-@@ -128,7 +128,7 @@ struct sym_driver_setup {
- /*
-  *  Initial setup.
-  *
-- *  Can be overriden at startup by a command line.
-+ *  Can be overridden at startup by a command line.
-  */
- #define SYM_LINUX_DRIVER_SETUP	{				\
- 	.max_tag	= CONFIG_SCSI_SYM53C8XX_DEFAULT_TAGS,	\
-diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
-index a3355147f5de..90f3990e0060 100644
---- a/drivers/spi/spi-omap2-mcspi.c
-+++ b/drivers/spi/spi-omap2-mcspi.c
-@@ -1244,7 +1244,7 @@ static int omap2_mcspi_transfer_one(struct spi_controller *ctlr,
- 		omap2_mcspi_set_fifo(spi, t, 0);
- 
- out:
--	/* Restore defaults if they were overriden */
-+	/* Restore defaults if they were overridden */
- 	if (par_override) {
- 		par_override = 0;
- 		status = omap2_mcspi_setup_transfer(spi, NULL);
-diff --git a/drivers/video/fbdev/tridentfb.c b/drivers/video/fbdev/tridentfb.c
-index 9f055ba776c8..6501f6e2615a 100644
---- a/drivers/video/fbdev/tridentfb.c
-+++ b/drivers/video/fbdev/tridentfb.c
-@@ -58,7 +58,7 @@ static struct fb_fix_screeninfo tridentfb_fix = {
- 	.accel = FB_ACCEL_NONE,
- };
- 
--/* defaults which are normally overriden by user values */
-+/* defaults which are normally overridden by user values */
- 
- /* video mode */
- static char *mode_option;
--- 
-2.25.1
+Changes in v7:
+- Register pm ops using pm_sleep_ptr() to allow dead code elimination when
+!CONFIG_PM_SLEEP.
+- Added sdhci_msm_ice_restore() to restore crypto keys.
+
+Changes in v6:
+- Dropped the change, introduced in [PATCH v4] https://lore.kernel.org/linux-mmc/20260116121004.1829223-1-neeraj.soni@oss.qualcomm.com/,
+which removed encapsulation of MMC_CAP2_CRYPTO with CONFIG_MMC_CRYPTO.
+- Dropped the change to re-program crypto keys in sdhci_msm_ice_init().
+- Merged [PATCH v5 2/4] https://lore.kernel.org/linux-mmc/20260730140822.1976635-3-neeraj.soni@oss.qualcomm.com/
+and [PATCH v5 3/4] https://lore.kernel.org/linux-mmc/20260730140822.1976635-4-neeraj.soni@oss.qualcomm.com/
+into [PATCH v6 2/2].
+- Dropped the [PATCH v5 4/4] https://lore.kernel.org/linux-mmc/20260730140822.1976635-5-neeraj.soni@oss.qualcomm.com/.
+- Link to v5 https://lore.kernel.org/linux-mmc/20260730140822.1976635-1-neeraj.soni@oss.qualcomm.com/.
+
+Changes in v5:
+- Split the v4 patch https://lore.kernel.org/linux-mmc/20260529092612.1749752-1-neeraj.soni@oss.qualcomm.com/
+as suggested here https://lore.kernel.org/all/CAPx+jO8rUwYV6q1-RrA4aZ9XnomSf82fgf8Jh2fUC0fE03RFPw@mail.gmail.com/
+into 2 logical patches [PATCH v5 1/4] and [PATCH v5 2/4].
+- Introduced [PATCH v5 3/4] to specifically restore crypto keys during
+hibernation exit.
+- Introduced [PATCH v5 4/4] to fix crypto capability usage in mtk-sd as
+suggested here https://lore.kernel.org/all/20260723230104.GA662946@google.com/.
+- Dropped "Acked-by:" tag from v4 due to the split and introduction of
+new changes.
+
+Neeraj Soni (1):
+  mmc: Allow host driver to control the re-programming of crypto keys
+
+Ram Prakash Gupta (1):
+  mmc: sdhci-msm: Use pm ops instead of macro to restore crypto keys
+
+ drivers/mmc/core/crypto.c    |  2 +-
+ drivers/mmc/host/sdhci-msm.c | 32 +++++++++++++++++++++++++++++++-
+ include/linux/mmc/host.h     |  1 +
+ 3 files changed, 33 insertions(+), 2 deletions(-)
+
+--
+2.34.1
 
