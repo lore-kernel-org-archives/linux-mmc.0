@@ -1,88 +1,124 @@
-Received: from cstnet.cn (smtp81.cstnet.cn [159.226.251.81])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B2D03A838A;
-	Fri, 28 Aug 2026 03:44:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.81
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1787888689; cv=none; b=Px87sAlE50rIMyMD+c6Kfjj9djZyxuo+V7SmnW47sA2dd08x90gcwo3l+avjFulW9xDi+tkiO2cBGAeeCXTYDgOiws9I7t4bUxKiw2J0KQrPL6l23IGXeTHC6+I8A3oUiqqtRYanloXnEYGEOW3SsiQtiWFo76sl/PRaYMp/x4A=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1787888689; c=relaxed/simple;
-	bh=Ll5/+6PMcj1HWlCXwLxWXiDksPF+IwYuNg0HMK1kf7o=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PWfrL+W5G9zF0bnD9jbsUs1bVOi86vQi0pI3iX/k1ia9e+OZMkq8vGn9XbWhzc5CD9FYNEUWjWNVXjdAb8ZRcPzY/BnXdNbZsyDH9qRkmEJpe9e5eK+6XIla4tna9AdrFXUWevltbXoTg6NoFN2EeSBXF0kbkMcWsAe6ftqtOgM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
-Received: from DESKTOP-L0HPE2S.localdomain (unknown [36.110.52.2])
-	by APP-03 (Coremail) with SMTP id rQCowABHUD4qBJFqiW1wBg--.8165S2;
-	Fri, 28 Aug 2026 11:44:42 +0800 (CST)
-From: Haotian Zhang <vulab@iscas.ac.cn>
-To: maximlevitsky@gmail.com,
-	oakad@yahoo.com,
-	ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Haotian Zhang <vulab@iscas.ac.cn>
-Subject: [PATCH] memstick: ms_block: Fix memcmp() size in msb_resume card validation
-Date: Fri, 28 Aug 2026 11:44:13 +0800
-Message-ID: <20260828034413.26115-1-vulab@iscas.ac.cn>
-X-Mailer: git-send-email 2.43.0
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2D2835A397
+	for <linux-mmc@vger.kernel.org>; Fri, 28 Aug 2026 05:40:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=209.85.214.169
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1787895612; cv=pass; b=RUKuuqu0VWBfXW1uIXOKU0S3n22/BtXAmcSizaSWiRq8d6ZQ8NVZz2dlMas/SRdLi/kEODvibbmX4tRj7oEQg/vwT4M+7i1F2D0Gnp0qNJpoy3nJI0HTZePBTigxbgRswNe1TSWx24wOBje+i1wR9RVOA1GwhhLGjKyuiG8j+mM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1787895612; c=relaxed/simple;
+	bh=DmJHBRIgTIHnDaysgbMYNL5Sxs3/1dzntpjOgveg750=;
+	h=From:MIME-Version:Date:Message-ID:Subject:To:Cc:Content-Type; b=eogu3vf3Y8CtfycXXmqwYfWQZ+vqECJ4IMSAxQ18Ltd+WltX62i8MmCoDSqcSgN+VVqDIbNHA/EyIfVjfatJORl2T+egVPpKvXPetm4fW0GnSZN9vcDtDdZjVlGOtTPLiPnypYcOOaVh3B0LGiIAPHVK+BCGOaGSkfs/yfNEBag=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=berkeley.edu; spf=pass smtp.mailfrom=berkeley.edu; dkim=pass (2048-bit key) header.d=berkeley.edu header.i=@berkeley.edu header.b=ZJTEItq1; arc=pass smtp.client-ip=209.85.214.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=berkeley.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=berkeley.edu
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=berkeley.edu header.i=@berkeley.edu header.b="ZJTEItq1"
+Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-2d71e253c90so5975595ad.0
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Aug 2026 22:40:11 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1787895611; cv=none;
+        d=google.com; s=arc-20260327;
+        b=GPeP0sqWwZgN+MQ/bm2UDIEGQkEpWPCTDESciKLGiEjsdm2S+BWFuWJQQ44HzwYnB/
+         4jkRZrOtdzQsSNeVOHb/DW1Apf3D0L2uzJR0b23x2ZRRfFxS5ovQjooGgK1PTh1tkurJ
+         y0fK3o4rdgYs/fDcbFuccr7sflo4CcMB79t0i3aKbFb0FCzejkJ+D7cczoQXlSFSXEop
+         l+GfRUJ8t7xhTfYKCNsyy4aWssnFGUqCC1w2xxK0wkeqjeb3nbfWWuX8QAr3YNCWavlM
+         XFyaaHuLV878JQrLAhNqfppe7MCfrS+STIL/SKcbpDd+JojeboU3yskU5F2DFwz5+A01
+         HQ/g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327;
+        h=cc:to:subject:message-id:date:mime-version:from:dkim-signature;
+        bh=kX4001c5uQsdS+9FkPB6xzWvEC3+tpgtec4pqMg2mvw=;
+        fh=Af8qhlVDc9PubbY04VGkLTWLesJNgMy0mBlXb/M1kP0=;
+        b=SXmhMP05Qkf1+tc2eIfFRP3o8vCxNdC7+sOeM9Y6YhyvN1QcTtxfI1ExnsT6uMERJr
+         zXHM749K2JBGDR2SlXVS3il9ydmFi5EtKLbykR4Me+G8RqspPV7Vd8CWIQcEg2E7pEIu
+         Z4JUT7KvSgIVfAs8ntt0fm7yaf9pSjF1kIbnB/9/0z3QTyo2Ejh5gp/PwL+JE5uGN9VN
+         eVye47oVZ0Q3ZdJUCO/LaQBHTwHRvOcf0qm6zEneF9rDsxDw7XxXc9gBARXVTEu/T0yK
+         fvAjoSG1spPs5LOvErsYp1m3pPmX7iMAhfkZw7NwIRDwOHdwbFMTu+Rj1Rz/Z3nli1Zc
+         wTsA==;
+        darn=vger.kernel.org
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=berkeley.edu; s=google; t=1787895611; x=1788500411; darn=vger.kernel.org;
+        h=content-type:cc:to:subject:message-id:date:mime-version:from:from
+         :to:cc:subject:date:message-id:reply-to:content-type;
+        bh=kX4001c5uQsdS+9FkPB6xzWvEC3+tpgtec4pqMg2mvw=;
+        b=ZJTEItq12xoOGAI1HFkhBLwY6OBKDzGBC/syyqVOHwSVSJEaCD/Eon+hhcTYeavnVR
+         GATeFvxGMvthZA3Wc5/afyNKunazLGfrqC3ccBjw2egTSJPyWwHMizd88O9sNT9jOR6N
+         dHejy9F3nTzZfBHyjfI36FY8oLcXKHO82X7Sioln1TZKo0/vE3lnzUxXL4lLgK15O+V8
+         hX9U0kN6UIah4RDbAREZFJjLnVIb37ORALFMRQSBP1Uih7Vy1zOSX+zPZ6VIzjqe06ba
+         VGQbyZ6/zCzpuje/Q4fvslGSxleSkj1N1bEEk3MD5o7gwUMyQ+4anhbGfpgNfmcvLaGR
+         UXdA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20251104; t=1787895611; x=1788500411;
+        h=content-type:cc:to:subject:message-id:date:mime-version:from
+         :x-gm-gg:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to:content-type;
+        bh=kX4001c5uQsdS+9FkPB6xzWvEC3+tpgtec4pqMg2mvw=;
+        b=RYg0KaEyFqOF5hHyxz0RKqsviz71M1J1DAp2+XkOGFDW0bP+V337Q3qp4YV0DMn//5
+         S5naqUL9bz59dWu4Fqgt2nL+r1Q8jsz8pCzd+I3A8bLWem0BSX7IJz68O/5FqiFpe0Ff
+         aNGy7JKYD88Gq2hchMsdMm+xQKMh7t+8Su2Ie5LPCCKwntipr8GXtIdnXtYzw/r5QuUL
+         5KaNCthWjAJKttU8DLdjuZ0j04c8lBH+DGnRst/Po/+8uP9E0Fs977FWb4lu4O+94htP
+         d261wMGMmtducOpoqTXLaZWu8LeyLTCZqOQujsu6pmb93voBahRMwmJOzxT9MoyMdZFi
+         RXlA==
+X-Forwarded-Encrypted: i=1; AHgh+RpzwYe7qRJGg/ZAHzZNTRNpdaiDs/AG1EXuOArr4liXB8yAQ+a49LsiMzc0eieVDUC+Las9rgxzujc=@vger.kernel.org
+X-Gm-Message-State: AFuF++khUyS1ev1qp+cfiXBL0DjGaLcoLDMKzXOodrfTEKE/l5yHLTiT
+	sx/A2wGPxL4dCk9Gxe79wfBtqPhE4T9M1EAu2WvxvjgYeEnW1pF5SPGS4xzuqBrvnLXgeuP4Q7X
+	pecjQMJ1cSYuU8jVwp4EVSeHQTkeSqLwJPYvuRoJIECOy9wu1ZXfV4Q==
+X-Gm-Gg: AR+sD135+FsaXGOTZvQy+cEWRLeXR3qDeuhvcMyDq7yAvCI+IE2Cqz7LRcOHaVrFIQq
+	0iLlDUE6Es3uoUowk7MnTYuxjiX6QiB/BWm3gHlwVixotSb1w/t2ICUYHfwiozOsyFLo9xETpkx
+	Udpj05Uye5h69eJab+3LtCqkghXXeZUMveruSYShA+Swcm157VAPB5y7Rx1slpT8SB+yFstmhoK
+	kIQqsRdeHInmAtHjuTK9ilpuGIuVlQ40GHu7+J1ofCPDG21CQIsrT0d3tfCvhSRHAfuBWqw0tqu
+	uwnnkNScVhJAjEHSg66l8xX8Id3+SSs8KdpJ2ZPzpbCHE9rYakIeTJckWLy+L1G242oYVyRCmpu
+	dGnRS/+Yc8QCKyHzkd/eWIc6IY42yGL0o
+X-Received: by 2002:a17:903:1ad0:b0:2d6:f9e2:af7f with SMTP id
+ d9443c01a7336-2d74dca2148mr90214615ad.1.1787895610029; Thu, 27 Aug 2026
+ 22:40:10 -0700 (PDT)
+Received: from 474444807712 named unknown by gmailapi.google.com with
+ HTTPREST; Thu, 27 Aug 2026 22:40:09 -0700
+Received: from 474444807712 named unknown by gmailapi.google.com with
+ HTTPREST; Thu, 27 Aug 2026 22:40:09 -0700
+From: Farhad Alemi <farhad.alemi@berkeley.edu>
+X-Mailer: git-send-email 2.53.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:rQCowABHUD4qBJFqiW1wBg--.8165S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7Cryktr17Kw4kGw15AFy3CFg_yoW8Gr1DpF
-	srJFyUGws5Wa4jvFn7Z3Z5XFZxuay8GFW5KrZ8K3srZwsFyF13CFWktas8Jr4qvFZ7Jrnr
-	Zr13KryjkF48X3JanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUkK14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-	1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
-	6F4UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AKxVWxJr
-	0_GcWle2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
-	2Ix0cI8IcVAFwI0_Jrv_JF1lYx0Ex4A2jsIE14v26F4j6r4UJwAm72CE4IkC6x0Yz7v_Jr
-	0_Gr1lF7xvr2IYc2Ij64vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7MxkF7I0En4kS14v2
-	6r126r1DMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrV
-	AFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUAVWUtwCI
-	c40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267
-	AKxVWUJVW8JwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_
-	Gr1lIxAIcVC2z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7VUbdWrJ
-	UUUUU==
-X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiBwQNA2qQunj4+wAAs2
+Date: Thu, 27 Aug 2026 22:40:09 -0700
+X-Gm-Features: AcwNN1V1xXokhQQ7CNk4vlQXfjGfvMBUshkzw2uzUqY1xboKWA3St6UdW4awAgc
+Message-ID: <CA+0ovCiuSWBLetbWVJThDc+LzRU=xp+FmZeGddF3vOd_0UevzQ@mail.gmail.com>
+Subject: [BUG] ushc_request -- URB submitted while already active: WARN in usb_submit_urb
+To: Ulf Hansson <ulfh@kernel.org>
+Cc: falemi@asu.edu, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-In msb_resume(), the LBA-to-PBA table comparison passes
-the entry count msb->logical_block_count directly to memcmp().
-Since msb->lba_to_pba_table is an array of u16, only half
-of the table is compared, so a replaced or changed card whose
-mapping differs only in the latter entries can be wrongly
-treated as the same card, keeping stale cache/FTL state.
+Hello,
 
-Change the memcmp() size argument to msb->logical_block_count *
-sizeof(*msb->lba_to_pba_table) so that the full table
-is compared.
+As part of the kernel research at ASU's SEFCOM
+lab, we hit the crash below. Crash reports can be found here:
 
-Fixes: 0ab30494bc4f ("memstick: add support for legacy memorysticks")
-Signed-off-by: Haotian Zhang <vulab@iscas.ac.cn>
----
- drivers/memstick/core/ms_block.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+  https://github.com/farhad-alemi/public_bug_reports/tree/main/160-mmc-ushc-urb-submitted-while-active/
 
-diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-index 1af157ce0a63..589ee2eb1a60 100644
---- a/drivers/memstick/core/ms_block.c
-+++ b/drivers/memstick/core/ms_block.c
-@@ -2246,7 +2246,7 @@ static int msb_resume(struct memstick_dev *card)
- 
- 	if (msb->logical_block_count != new_msb->logical_block_count ||
- 		memcmp(msb->lba_to_pba_table, new_msb->lba_to_pba_table,
--						msb->logical_block_count))
-+			msb->logical_block_count * sizeof(*msb->lba_to_pba_table)))
- 		goto out;
- 
- 	if (msb->block_count != new_msb->block_count ||
--- 
-2.43.0
+  WARNING: drivers/usb/core/urb.c:379 at usb_submit_urb+0x7b/0x18c0,
+CPU#1: kworker/1:2/992
+  Workqueue: events_freezable mmc_rescan
+  RIP: 0010:usb_submit_urb+0x7e/0x18c0
+  Call Trace:
+   usb_submit_urb+0x7e/0x18c0
+   ushc_request+0x3ce/0x8f0
+   mmc_start_request+0x202/0x2d0
+   mmc_wait_for_req+0xd9/0x240
+   mmc_wait_for_cmd+0x183/0x2a0
+   sdio_reset+0x1fa/0x3a0
+   mmc_rescan+0x6d3/0x1020
+   process_scheduled_works+0xc99/0x1900
+   worker_thread+0xa53/0xfc0
+   kthread+0x38b/0x480
+  Kernel panic - not syncing: kernel: panic_on_warn set ...
 
+Our reproducer.c is available upon request.
+
+Happy to test a patch if that would help.
+
+Regards,
