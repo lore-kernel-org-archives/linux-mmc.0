@@ -1,47 +1,47 @@
 Received: from SN4PR2101CU001.outbound.protection.outlook.com (mail-southcentralusazon11012020.outbound.protection.outlook.com [40.93.195.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4F75412C17;
-	Sat, 29 Aug 2026 18:43:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFE6C415B68;
+	Sat, 29 Aug 2026 18:43:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.195.20
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788029001; cv=fail; b=etsE1byg0opx1aBEOGr4efCIbt8VVcbS45eLwBQPmiF+bmx5Cx1EEWg4IblUR92WyHI00TxTkEzuThFWKRduzx+MTgms2ZjRMTaQIF0lpToVNlT8qGckXYgDWvHwfXKro6eBAMSRkoiYazXToDpckg6PGJ3hRXNGpiSJkphxQ6c=
+	t=1788029003; cv=fail; b=E86yrCDi+T/VRTjieWxtb8SnHKfdwSInGhjViaTmnKKps7sYcinwS0tzGr18YFRFsa/kRwT04xHKcAQqSFRCtBA7BgFwm6JogpUsk2Vvc61xJGHo4j35pGseHjTRAKBfRZKMecHVEhooWURe8TWIELTOsjCxW3fmvjDf79TAMC4=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1788029001; c=relaxed/simple;
-	bh=JlfpqPUU+GzssH1r7oCUMPtS5nR7MadffoSoOkF5lb4=;
+	s=arc-20240116; t=1788029003; c=relaxed/simple;
+	bh=VC1OCAaMCPpOP6NYYYGAQbjDyBqeXUE36QVDmm2QhWQ=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=A+J1dpJ2iXgzlZu+1/Zlc7YA+i2ZS+/U66ivYEGMAeH3ejtCfVAho52bY2EjH1esklOtl+wDytI/r5E1jJsNhovbl9IL9hhL/HFJ4mo9c+n7UBm5F7FkduHy5dZWbL5DUM6EafIbvHZ9T9MQdNOvtl+HPODigmVwVUr+BctfBYk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=HOxJ3qnz; arc=fail smtp.client-ip=40.93.195.20
+	 Content-Type:MIME-Version; b=tWYyMOe1GW7ABEZDWl/AqG5iP0oobRWkpDICz2Cv6iGyCzym6q68Ke/3dE+RN9ClSHiTHo/LHVEUmtb2N/mT3EHvMHA+MxliRiV9CnxMEUVWLor9hw1n60RCmDlG/G5V+4ox+PiupdaeU0XHhfBAhJvzYiss9IsGSEXBj/8kSE0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=ewoGHmZP; arc=fail smtp.client-ip=40.93.195.20
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="HOxJ3qnz"
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="ewoGHmZP"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=smRMSZo5JLxrEnCxd7Ny0kX2eJMqshrLlJ9Yib0sVBlsa17NccoxjncD7H9cz1gv4HXqB0mL5YiQYVKCxcR2F8P7UWclS87BROS66KCMOm6xQnDFvS/TMOePrM3c3vgJkZH4H1m8w2VJxOz4Z1Fwv3Mir+kr+x4urGAlPDyW+XXOUZoEB6xr2+oosSNuE64iBVFoNuB7GTAUi59KK0GgxPV41APHsrIIraFOuqCwPXT+0/CR7MLJjQNRHFKvqfSAxc4EcU03VOAQvpKzMOaHSh8gQY2lA4uLWokjUg3OyR390Sn/g3ac/whqCDDpVOu/T0hIS4sF4Jjw4bfrSq2xUg==
+ b=iw7W9cljoMUWaqaj7og8Mz7n14rCVThJ0krC79SFoWhaJCUaERFDWFtRIwIgU9ERe7lbAI5YKXpThwYlIDrQOMWPKfSIXnw86En16R7VwS8j2a29D1MFBRcNYB0IpOxbLV8mU90FTT+WnO46X0k8YKk8X98gy92ZCYnEtxmXhCzt6QeZTfpmoLJKPfQvvZroQPxb61VECGetm9l0FLeA/rFsI3GcPes/A9YhhONtxWIy30Z8z0wlvoHJe/MKwfPpGeHOf+Ly9l9vmUmREM4yXX82KnEleoTzbvU4o5jvZ7SG++4c7s7KP+h4upZ0udy8rSdv7a5QXuogWxpfRMzS7g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=HFM55r99TAaOMZWL2YMQZO55XP4I9u2oovB8jwSPAHw=;
- b=HsNRYw6IrJqd+DlfMEF7SNbmPGriptQ5Pj2qpdpuytjYNLZK1OZp+7zF7ZOEocb0Mzj9Fs/iibFKDZJaKBLYjJwrwX/TZk+LgzYIg32XLVi2sM/m+IQhnSYCiqUjuR7nBUuCdJQNRU2Qw0XWmiybqGfJctknJ/6QRsLe3MspnZQ7IkP9lzcKuXjNDNrAoWUHqBlemb2EjfiBtC+Z+4J5dK3emmEYsjAjABrlJkIFIQGYnTrdsleVB9a4paQvsxhwzIARxjG0DdGFy8RPeOEv2y7mR2idsLD5KqMLO2D8wjVFTmro5yZqsfz/ScymrG7BHf0+itx8p7rl01MLrsIN1A==
+ bh=+zEJxAM6uwNGRpZay4T84eHX703h2821KvekUVlx3IU=;
+ b=qqERm6l9TG8bkqmh8mkGTRG70hwWq+xbCbxHyXxQkzPE0bc3akspfvYOGie7ZsejdQ8pZFtkSpT8QkksrJ0jocIQLLchW17i/uEjvhMeEs5ut8UBRxfb5zkoZNtjMbh9A6DkYinrtNXcqgeLmm8k/R2xUA6Jb68/n/Md0+hVQyHZ3oDFL12cLv/SXgV/qHQetfOJrnQi7dUFKN3E1h6MIQ/vGrdc4JJs6ogrtX86fDqGFJ11TK0tsb+WxXmEHXks0tbXDlFHyjczyna8EHFzdSzqeaK+qY9qA7+2OpyWjmlOKwR7ROm5x44SFyQHSRbmAMvTMa6GDxZAOQM7WUn1NQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=HFM55r99TAaOMZWL2YMQZO55XP4I9u2oovB8jwSPAHw=;
- b=HOxJ3qnzpP2p4S+AXbi1HPJthO9u9anl0eaIqRDtVhMW7+K3romQ0iNAPmF9N3/xHj7/04S5XA+r888RQf8fq0PgkwWp6o8I3oVZOrZkg8aOcUOEFCyqgRuuDReTTkH8mOiY0Vwxbi0R62jG6NjYAPtj3bzQ6aTQlhsBNFaYqr+EY7tXhehR+zXrYmuVzJl/FFs66os0PBGYhFaEYBZzJ6p3pdF9KI7yjAtejizo9ySD7ECHOREbXaHbGdCIU5CYGVsdnEP1UO9ivBGTXuzlOMXg0tGG/Xuc1Rs9bF7Zpiri6sleqtLjoaVwd6nYmbW7eeUd5gqP9WmWFiyUOz5lqg==
+ bh=+zEJxAM6uwNGRpZay4T84eHX703h2821KvekUVlx3IU=;
+ b=ewoGHmZPho2rWMi24rSCb2n1r+Mkk7xZzAHNXwX6Hov6bQ0EXrY+0we2Eau0Mh9otFkX+hcVxebWCzLaScMqjk/Ljp81M+aWZNK7en1JCAAtXqK+zZjlZvkDpghuFijdfXMmT3vh7CteB8ANMRAgVU7dkWPgHYeW8144r9uHp3MWlBj2fYVcF51kSEUNsnrNk4pOEaU9LyvQHgY7X8hV2a77GEAkcFajje75paPskcAxOWUmqPhgKiIv2IzjROdbweb9pM/Htb0q12+jeJ4Wqwm6m1mYgZOQAkum1rbqTRjEIwZ6VTq26mwvNUSmHUvhb7UFC85OkXhdrXpJSPlNfg==
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
  by MN2PR03MB4926.namprd03.prod.outlook.com (2603:10b6:208:1b1::8) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.12; Sat, 29 Aug
- 2026 18:43:06 +0000
+ 2026 18:43:09 +0000
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0360.008; Sat, 29 Aug 2026
- 18:43:06 +0000
+ 18:43:09 +0000
 From: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 To: linux-mmc@vger.kernel.org
 Cc: ulfh@kernel.org,
@@ -54,9 +54,9 @@ Cc: ulfh@kernel.org,
 	devicetree@vger.kernel.org,
 	Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v6 6/8] mmc: sdhci-cadence: refactor driver structure for V6 controller support
-Date: Sat, 29 Aug 2026 11:42:48 -0700
-Message-Id: <20260829184252.27644-7-tanmay.kathpalia@altera.com>
+Subject: [PATCH v6 8/8] mmc: sdhci-cadence: add Altera Agilex5 SD6HC support
+Date: Sat, 29 Aug 2026 11:42:50 -0700
+Message-Id: <20260829184252.27644-9-tanmay.kathpalia@altera.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20260829184252.27644-1-tanmay.kathpalia@altera.com>
 References: <20260829184252.27644-1-tanmay.kathpalia@altera.com>
@@ -73,209 +73,227 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|MN2PR03MB4926:EE_
-X-MS-Office365-Filtering-Correlation-Id: 6acba564-2770-4065-ad69-08df05fd5da2
+X-MS-Office365-Filtering-Correlation-Id: f6ca41fe-ed26-41ed-770b-08df05fd5f67
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
 	BCL:0;ARA:13230040|366016|1800799024|23010399003|7416014|376014|10067099003|6133799003|11063799006|56012099006|22082099003|18002099003|55112099003;
 X-Microsoft-Antispam-Message-Info:
-	nBdB0XbMCoI1lslGMuzI5PdOvWHo9VHhV7RShZB5wvPX6lA1xr2Wr+91yi4C7tOqVetWdu4TIF6Q0kun7CIWzU85TElmFqwRNJCHRjILKJYRJpVwxr3HaPrv6GPlEQftB1pTc7csvedO3met2+ASx4RKCuFg6z1bgDktyebIXJb5rGlrhay9CGFL83a7iXYxd/MckuHD2CAK/JbD92jGuco/fq4lJA3RpfeWklOvGaSMIdMJFWrbINf1MS1sRbOMJYdUh+BSzMdcVrxJDmKif1ZmCkIo1AOpQXd+4iBe+d1xrqXpXKdf4KP0yri/T0POXAawxE0TYw1nOSoZBXnTiupvMdSnQenQcO02Hwosy0Uj0yT6YFqj13xOtv3G4YjVbDHyZJD84bw4tk/e6rAwqUDjvjIg4V5wItzspYsEVq+4Ssw975ORNDoMkKWMDcGRIQK3RsTNzhkoZkv7lkXKixaO5rAEGVgZgLBXfdXtaMV4gR6gehNjTHYz9pTVvA6nR4Z66YcngsUFCj5yIMsue+TsY0Abso28i6s8Ia5yvSYHQdpEcswoC5F5HV+qXPG+NNwb0oGTOuyX8iPu73hogeIF+QdwERS8wAtOGdTgjlc+wHOXn6nef3LxhQ5F9wG8Or+9QDeY5JBjfUKsvS+cptg2kF7b8VbFaQbyq0cWrkA=
+	KK1FivprMw3+aG1dF9jnOLIWyBHPhRMrVTpf9WKc2lAxntdOzmiW+JVYM6KKz+YzagYnzzwUg4ub9/GvH4/VFZi4AFtoDaWrgRn67IC4MccITZcbPa1bGghwiBZgV3RIAnTrEg6uVg8lrn8C5dx1jytB77w1WAEN1gGZ2s2wqpz1hVw1fOVMfT1QTuA8UH9/v6+qs4dj076iay6Ue80GskxdsX0PElR5jugqVegIH9l6S6qC8A0fdWSHP7c199XJRYnYt9HG1AZmbH5e9oPWQYjeBRSvWRyYn8S1VOHESm+xn6MliZjWgrxb0vfYkg3Ym1GRZsiIG531ZTFw3UAlwwwY4mupKFE8cXMvKbMbskInYgZ3KYZ432ilwNW6ksld55vEgDUzbb9xX/U7JQLKgKe2n6ccrVKozMCNv2H/99cab/VuDB8j2Yo6QGczX1YbLa9/yzl642uju/6hO+7Kt8VBPzo4or5TetdTrvtV0+PtIe8aMgUTrB6SB7jwoF7VWFBgydTSAaHlb3QvUbsQagF+DrFy/1v1u4z9s/qLhHSjvyutlBl2InSL9571CVvtofmNp0f1JqghJJSp/wfMIPr3I/aKgCRhvXpGUHB/t+iQhzMbA/hfr1iA0YFSNzaQk7IgYLp/mjKZmjq1q/i+cZ63qqqfGHzNCslnads4o7Q=
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(7416014)(376014)(10067099003)(6133799003)(11063799006)(56012099006)(22082099003)(18002099003)(55112099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?ZEwZ6ifh8KeSqJWXj0hr4AE3RkXTyu14iWreErcdJgRYBuQt88UqG20nP6sT?=
- =?us-ascii?Q?bjrcJNAAFwrVXk8fi94eWih0tLfMfXpkQ7Mx4euutFDWVP7WLhfBisrmpxoJ?=
- =?us-ascii?Q?sa9ODIDEkfCQdwG7QSycoIV4rye1vBBOEAT+RCRCUMaJq2wmbuF6LUsi/VFg?=
- =?us-ascii?Q?ZRipTvIuD9UmBEzB53E/1p4/b88aSWU9WsoVavIefHh5kypCrX7JgWFgzMak?=
- =?us-ascii?Q?LN1AYidB/y1e+IORiETIm6ISOJwN4bTOskoWvkmNKlUajlH+wpGObP0GSa12?=
- =?us-ascii?Q?lJ/lrbkuZ2Cn4oJe+TR8MjOKiISgtaBNfEDetzUS+o9ysF/mD4nrYNqRVtFu?=
- =?us-ascii?Q?GYNbYIbNVjlApM1A1dWTaPdlXgnzpt9SWp9vIiMRqMGdknhB2Hx3mw5oCTlQ?=
- =?us-ascii?Q?0s+HTrxSbSFRvpvJ1h/80YIM970CwRN10977Td+I/PFuWn7ivQzPPQe2ZSLk?=
- =?us-ascii?Q?cU3qwAvAc4hDx3A2FVqzNdJ0v0f87V7uFWU+/tleFZTAak9ao3KplMIHSyV1?=
- =?us-ascii?Q?6+qQRZ8KwWOpDEyoEmkPWIjBfjpwqxf/2pubKzYf9MVd6X6sW/nG5L0nd6H7?=
- =?us-ascii?Q?VooFQQzq04XXsruPg9vfSvhalwSgPegubHUsgqOkesSmpJhplOUoqOo9ZfZ5?=
- =?us-ascii?Q?M98ixRV8r2Q3da24fneneqUXRUx6k7OiFikWom1/MLYADhyqYSgRgBSVIoe4?=
- =?us-ascii?Q?jrDA4fwawp03kIpqM/u/QNLoM6lmH4FdLPF0PBDTOWOvL7BOo5lV/rUk+RFg?=
- =?us-ascii?Q?owZ0a4lG1QidTI/ub0qiFA4qJ7dhTqJBBWqraVAeUrqGI8E2A6jHmL1OvLdZ?=
- =?us-ascii?Q?cJziXCv4IsiSXTUH8KbvI05tLGgtr2Twh+LPbsO3eMTBY5tgzlTSfaxTJs9V?=
- =?us-ascii?Q?zqUmGIjWWa3lTI8oZ4TmccUihJscg3cvA4zaO/H+UdVXiYk7XEUwOW0ufSMV?=
- =?us-ascii?Q?gVnL5szCUJ6FDJx8TEQwxjDS8IK/k4x9n57SLyQBFe17RAlkp5Es61lfg3Tt?=
- =?us-ascii?Q?FX7WumaXJD3gXlhsh4psWi5tRuVYhQmj21d5xXURLKv3ssvPLy03D58aCz9J?=
- =?us-ascii?Q?PdUPIz0KpojX59Nohbmrlq5xPZN5jNcMWQjkJ8Svna4AlNiG68cbpWpTbjsh?=
- =?us-ascii?Q?1Ai4/uv2IfcouXmS7KVFUp8kC3WhXpet3q9UcwQT+egfcOLBbh7vBKCDKN6W?=
- =?us-ascii?Q?C2RZ/lKws4wemFKhskcsuSsqhUXM6xzEpK8bfpfEpeUGc6OqpvuQ4GMalVuq?=
- =?us-ascii?Q?AR/bPSNyDjHYqQV8ruZg4aQIzvnk0yZFWeTuLRHkG/Oj4EDeRAM0yF1PCowh?=
- =?us-ascii?Q?pNj/fZaWXZO+eG8xrJP5y3BfkaohEsJx/CBVRP76p+lmWsOcC6yH/6SVc27S?=
- =?us-ascii?Q?BsyLi+zd+1aiEmBQbRMpHcaxL4hJer6qjlAr87r7P6+TSEfTR34srVJZ69j3?=
- =?us-ascii?Q?qxXisIvYmY+2Lt80fIGJ/QrcE6WPmLvdp2h+XQV9tMdynULEgLmNKH/MZhzQ?=
- =?us-ascii?Q?T+ivLbYbirhAV8pU10WHYEvhm4eRucLC/lGRrHrMYvUe6X2P1nUrmGYw/xWe?=
- =?us-ascii?Q?d8io00VvIdG7h5t0VmeV76wERJNyRlpj+DPTy67weFAjmpG327D2bxmXYq/b?=
- =?us-ascii?Q?5jZvnDqf3uNkrxwcXWljxvK01rRO0HM+SHdJNxnQM3dcV4KPPdx8jPD/8dmm?=
- =?us-ascii?Q?BVqGwPhev8udPL6aCvuOiuviUYr9fo0I71XZJSK7Cvr6Xv4fxwiy7FqA/22t?=
- =?us-ascii?Q?eNfGWgmqMk1u964e6wTXTrg3TmGQry8=3D?=
+	=?us-ascii?Q?fE2WG8HTViokCfDbfdQU8r2Kfi9tNGKZVPqCyqZZDzapbLX4AYg/XZtOTSxd?=
+ =?us-ascii?Q?cFD2vpM37XI7dpomwM92CmH5I/+Xh01avfOAEtw5h1QdYsOaPsOcAd/HVJnK?=
+ =?us-ascii?Q?D2gj1V886/irf1x0t08bHKHUraUjWDn1knPNM84jbQOHiYLCa/u5vLfiqjWw?=
+ =?us-ascii?Q?wdoAzx1VK177skeE0dvW3k/WE+zN7ymEtG4GgbwnDVcy7Ri1/HCIPixvdUs6?=
+ =?us-ascii?Q?tgt4TPCa+cahCyULu/z2YEHsNbQKkCVg28xuYtxQGOpVZpgZkrRWiTM+jt5S?=
+ =?us-ascii?Q?UR+taFMXgi15WLF6Ud2gDHiSWEVdWRZlLhd8LwL5BrwN5QfLyBzaF547WmR4?=
+ =?us-ascii?Q?XeVpr6+W6bkGokDcGQFpYW7cO+O8At3YKEvlv3ktve2Ji5duPPD3yoVORUX6?=
+ =?us-ascii?Q?UmMXPyJjbeWFYJzWwAkq5FWX/zehhD8jt25TJMfvLOgDuxw63Ziv4tqU29HJ?=
+ =?us-ascii?Q?WtfNnseEVhGr0Idw2wIemIENmkUQ6UN9HXQ08LcA2YR2Y9wfOyHVUsZ14NH2?=
+ =?us-ascii?Q?AdQj0giRwlv7oap8hLBMY5FlWdSJz3nzdtOR8E3OUn03Bw8LymTi2ecYncrK?=
+ =?us-ascii?Q?SIaINUjMsWQL5Ix1DJm0NRoE6GiNzQodFoIDqdnZqynZ7+JYGpECfvA/Jfk4?=
+ =?us-ascii?Q?Qkx4M0KimGG5mWo3j7JF5YehfcH3yrz01g8uf8fokhu/UNE2Oo8vFwj5T9NP?=
+ =?us-ascii?Q?MAVlB3qslL6LWmnaeprSZlX/STb8pk/QegC3qDZ/EOpDdsQySlGXfK8rst4/?=
+ =?us-ascii?Q?B1x07Qi3KNWgjv6wdwHcO6xLoFuK3fLNytaW+c9PhuiK5bMM5zjQ4SNsslPO?=
+ =?us-ascii?Q?2WQpTofOHJM+wjj3Yigf7JBXP3018FUeAjkBPC0Lefg0gnfrZWdcF1HnC2TS?=
+ =?us-ascii?Q?IolQDo2qbtFd1Y1wXddzX/rhxdM0ISXLeOEqa9GUBVReDxttB17sQIcs/Ffe?=
+ =?us-ascii?Q?j3OopKUHQeW9iDNS7npyDM+JqWgdyIH+/0pioFcvvC/+LQFmit4Tmi2Un0XY?=
+ =?us-ascii?Q?ixvrDLM0dVxIh/VaMm1corBh1xNt3NR1NTbZecefTeAwdO95PKjaaebaL5zv?=
+ =?us-ascii?Q?8PBmDBz1vwirQs/NZQD2Ndhx7Po1RJNepcFiY05jmRW8wM3+EYx5BEFVUIHH?=
+ =?us-ascii?Q?IUWCVNgltBBDgQlXpDrK8N3doy+TS3sfiWGO808dkD6svc0EPu8S4PYnPD0P?=
+ =?us-ascii?Q?z7O/4yMu4sujXcZ6Iq6G+SEfpQpFmNyipcrnML6ffKvIHgqcATVwk41hrEJk?=
+ =?us-ascii?Q?lr+RRLHv4H4c1aE3kKyRsyYFNWucR7/aL+gzeQf5BTTC1TfH8l0b8wbAKrkW?=
+ =?us-ascii?Q?2fFI4EcJoqof4MqTflRvne7WhFS8SK2U0Xaf4UCb7OR13jRQSBSF+oSWo/RI?=
+ =?us-ascii?Q?zb2AQUydFWOxau+eXOT4Dnb6e0Z4n+ogiYRj3zAaV0AXLvFOVLcR3qGb4gfN?=
+ =?us-ascii?Q?40l8eEJCuwOHrXeDSSNb1eyH1diUAatAi9r0nXINxhVUaM6uYm+VU9RURTAM?=
+ =?us-ascii?Q?cYI/0+zwvDZSoZBXu+x3WRc3TFCUtQNZuY0B5WEpRdn3+/k3+Z5OEoMI3a1s?=
+ =?us-ascii?Q?8ePknPyLgFhKBq7Bu9M8h9MEZ+edOqtMOPRpfWrxdK7+5KbjvPYnj+d4NPXE?=
+ =?us-ascii?Q?INvyUPs/B2aRUDQKiuEw0QzNd1rEEISfQPe613ZUGIJBqGIoueTAMGqRONeN?=
+ =?us-ascii?Q?d6VsE32ParSN2TrmzoVwk81Qv7+k2ivGbIe9Ni/IuMzf3TJxyw1epr9wsppX?=
+ =?us-ascii?Q?8XoB0PaSEVv1NR4MWXlHWcNoE80ZuCY=3D?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6acba564-2770-4065-ad69-08df05fd5da2
+X-MS-Exchange-CrossTenant-Network-Message-Id: f6ca41fe-ed26-41ed-770b-08df05fd5f67
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Aug 2026 18:43:06.6346
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Aug 2026 18:43:09.6119
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: nr5ep8n3ALul1HJ1x/zXLDFK5x0ZWNuDsDezWx5PwEMI/i9ebgxMBAKgjVI3lSa8TuBDC7QUG9ykv/LOH4gIp/SEDZmJIte4GSvEvkcKEW0=
+X-MS-Exchange-CrossTenant-UserPrincipalName: hKoA5ahPKKU7LhnppBo6mSZGFujzhUMMotAaJW+B/6rZz0XQ5HAQZAQzA61nKQN6GanwKEUdS89mIqqC+F4NmE8yueOk3JY9LYNVe+BrbCs=
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR03MB4926
 
-Refactor the sdhci-cadence driver in preparation for adding SD6HC (V6
-controller) support. Separate PHY parameter handling into a dedicated
-sdhci_cdns4_phy structure and move PHY initialization logic into a
-dedicated sdhci_cdns4_phy_probe() function. This allows different
-controller versions to manage their PHY configurations independently
-while keeping shared logic in the main driver.
+The Altera Agilex5 SoC integrates a Cadence SD6HC controller that needs
+platform-specific configuration to operate correctly.
 
-Each compatible entry now carries its own driver data, so drop the
-silent fallback to sdhci_cdns4_drv_data and return an error if platform
-data is missing.
+The SoC requires three named resets: "sdhc-reset", "combophy", and
+"sdmmc-ocp". All three are exclusive and must be asserted together before
+being released, so the SDHCI, SoftPHY, and OCP/AXI clock domains cross the
+reset boundary simultaneously. SoftPHY is shared with NAND at the SoC
+level, but only one of SDMMC or NAND is enabled on a given board.
+
+The IOMMU maps DMA addresses within a 40-bit physical address space, so
+the DMA mask is capped at 40 bits to prevent allocation beyond the
+controller's reach.
+
+The silicon requires the MULTIBLOCK_READ_ACMD12, CAP_CLOCK_BASE_BROKEN,
+PRESET_VALUE_BROKEN, and ACMD23_BROKEN quirks. Since
+CAP_CLOCK_BASE_BROKEN prevents reading the base clock from the
+capabilities register, the maximum clock is supplied from the platform
+clock instead.
 
 Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-cadence.c | 54 ++++++++++++++++++++++----------
- 1 file changed, 37 insertions(+), 17 deletions(-)
+ drivers/mmc/host/sdhci-cadence-core.c | 89 +++++++++++++++++++++++++++
+ 1 file changed, 89 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 8a6ef6d9d1dd..1fb23051a047 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -83,6 +83,11 @@ struct sdhci_cdns4_phy_param {
- 	u8 data;
+diff --git a/drivers/mmc/host/sdhci-cadence-core.c b/drivers/mmc/host/sdhci-cadence-core.c
+index 18a5329f27db..2f4dfdc04ae7 100644
+--- a/drivers/mmc/host/sdhci-cadence-core.c
++++ b/drivers/mmc/host/sdhci-cadence-core.c
+@@ -7,6 +7,7 @@
+ 
+ #include <linux/bitfield.h>
+ #include <linux/bits.h>
++#include <linux/dma-mapping.h>
+ #include <linux/iopoll.h>
+ #include <linux/module.h>
+ #include <linux/mmc/host.h>
+@@ -90,6 +91,7 @@ struct sdhci_cdns4_phy_cfg {
+ struct sdhci_cdns_drv_data {
+ 	int (*init)(struct platform_device *pdev);
+ 	const struct sdhci_pltfm_data pltfm_data;
++	u64 dma_mask;
  };
  
-+struct sdhci_cdns4_phy {
-+	unsigned int nr_phy_params;
-+	struct sdhci_cdns4_phy_param phy_params[];
-+};
-+
- struct sdhci_cdns_priv {
- 	void __iomem *hrs_addr;
- 	void __iomem *ctl_addr;	/* write control */
-@@ -90,8 +95,7 @@ struct sdhci_cdns_priv {
- 	bool enhanced_strobe;
- 	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
- 	struct reset_control *rst_hw;
--	unsigned int nr_phy_params;
--	struct sdhci_cdns4_phy_param phy_params[];
-+	struct sdhci_cdns4_phy *phy;
- };
- 
- struct sdhci_cdns4_phy_cfg {
-@@ -167,9 +171,9 @@ static unsigned int sdhci_cdns4_phy_param_count(struct device_node *np)
- 	return count;
+ static const struct sdhci_cdns4_phy_cfg sdhci_cdns4_phy_cfgs[] = {
+@@ -196,6 +198,23 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
+ 	return host->max_clk;
  }
  
--static void sdhci_cdns4_phy_param_parse(struct device_node *np, struct sdhci_cdns_priv *priv)
-+static void sdhci_cdns4_phy_param_parse(struct device_node *np, struct sdhci_cdns4_phy *phy)
- {
--	struct sdhci_cdns4_phy_param *p = priv->phy_params;
-+	struct sdhci_cdns4_phy_param *p = phy->phy_params;
- 	u32 val;
- 	int ret, i;
- 
-@@ -186,11 +190,12 @@ static void sdhci_cdns4_phy_param_parse(struct device_node *np, struct sdhci_cdn
- 
- static int sdhci_cdns4_phy_init(struct sdhci_cdns_priv *priv)
- {
-+	struct sdhci_cdns4_phy *phy = priv->phy;
- 	int ret, i;
- 
--	for (i = 0; i < priv->nr_phy_params; i++) {
--		ret = sdhci_cdns4_write_phy_reg(priv, priv->phy_params[i].addr,
--						priv->phy_params[i].data);
-+	for (i = 0; i < phy->nr_phy_params; i++) {
-+		ret = sdhci_cdns4_write_phy_reg(priv, phy->phy_params[i].addr,
-+						phy->phy_params[i].data);
- 		if (ret)
- 			return ret;
- 	}
-@@ -539,6 +544,24 @@ static void sdhci_cdns_mmc_hw_reset(struct mmc_host *mmc)
- 	usleep_range(300, 1000);
- }
- 
-+static int sdhci_cdns4_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *priv)
++static int sdhci_cdns_set_dma_mask(struct sdhci_host *host)
 +{
-+	struct device *dev = &pdev->dev;
-+	struct sdhci_cdns4_phy *phy;
-+	unsigned int nr_phy_params;
++	const struct sdhci_cdns_drv_data *data;
++	struct device *dev = mmc_dev(host->mmc);
++	int ret;
 +
-+	nr_phy_params = sdhci_cdns4_phy_param_count(dev->of_node);
-+	phy = devm_kzalloc(dev, struct_size(phy, phy_params, nr_phy_params), GFP_KERNEL);
-+	if (!phy)
-+		return -ENOMEM;
++	data = of_device_get_match_data(dev);
++	if (!data || !data->dma_mask)
++		return 0;
 +
-+	phy->nr_phy_params = nr_phy_params;
-+	sdhci_cdns4_phy_param_parse(dev->of_node, phy);
-+	priv->phy = phy;
++	ret = dma_set_mask_and_coherent(dev, data->dma_mask);
++	if (ret)
++		return dev_err_probe(dev, ret, "failed to set DMA mask\n");
 +
-+	return sdhci_cdns4_phy_init(priv);
++	return 0;
 +}
 +
- static int sdhci_cdns_probe(struct platform_device *pdev)
+ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
  {
- 	struct sdhci_host *host;
-@@ -546,7 +569,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_cdns_priv *priv;
- 	struct clk *clk;
--	unsigned int nr_phy_params;
- 	int ret;
- 	struct device *dev = &pdev->dev;
- 	static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
-@@ -557,11 +579,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	u32 tmp;
+@@ -462,6 +481,48 @@ static int elba_drv_init(struct platform_device *pdev)
+ 	return 0;
+ }
  
- 	data = of_device_get_match_data(dev);
- 	if (!data)
--		data = &sdhci_cdns4_drv_data;
-+		return dev_err_probe(dev, -EINVAL, "missing platform driver data\n");
- 
--	nr_phy_params = sdhci_cdns4_phy_param_count(dev->of_node);
--	host = sdhci_pltfm_init(pdev, &data->pltfm_data,
--				struct_size(priv, phy_params, nr_phy_params));
-+	host = sdhci_pltfm_init(pdev, &data->pltfm_data, sizeof(*priv));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
-@@ -569,7 +589,6 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	pltfm_host->clk = clk;
- 
- 	priv = sdhci_pltfm_priv(pltfm_host);
--	priv->nr_phy_params = nr_phy_params;
- 	priv->hrs_addr = host->ioaddr;
- 	priv->enhanced_strobe = false;
- 	priv->priv_writel = cdns_writel;
-@@ -590,9 +609,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (ret)
- 		return ret;
- 
--	sdhci_cdns4_phy_param_parse(dev->of_node, priv);
--
--	ret = sdhci_cdns4_phy_init(priv);
-+	ret = sdhci_cdns4_phy_probe(pdev, priv);
- 	if (ret)
- 		return ret;
- 
-@@ -650,7 +667,10 @@ static const struct of_device_id sdhci_cdns_match[] = {
- 		.compatible = "mobileye,eyeq-sd4hc",
- 		.data = &sdhci_eyeq_drv_data,
- 	},
--	{ .compatible = "cdns,sd4hc" },
-+	{
-+		.compatible = "cdns,sd4hc",
-+		.data = &sdhci_cdns4_drv_data,
-+	},
- 	{ /* sentinel */ }
++static const struct reset_control_bulk_data sdhci_cdns6_agilex5_reset_ids[] = {
++	{ .id = "sdhc-reset" },
++	{ .id = "combophy" },
++	{ .id = "sdmmc-ocp" },
++};
++
++static int sdhci_cdns6_agilex5_init(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	struct reset_control_bulk_data *resets;
++	int ret;
++
++	resets = devm_kmemdup(dev, sdhci_cdns6_agilex5_reset_ids,
++			      sizeof(sdhci_cdns6_agilex5_reset_ids), GFP_KERNEL);
++	if (!resets)
++		return -ENOMEM;
++
++	/*
++	 * Assert SDHCI, SoftPHY (combophy), and SDMMC OCP/AXI resets together
++	 * so their active periods overlap before all domains are released.
++	 * SoftPHY is shared with NAND, but only one of SDMMC
++	 * or NAND is enabled on a given board.
++	 */
++	ret = devm_reset_control_bulk_get_exclusive(dev, ARRAY_SIZE(sdhci_cdns6_agilex5_reset_ids),
++						    resets);
++	if (ret)
++		return dev_err_probe(dev, ret, "failed to get resets\n");
++
++	ret = reset_control_bulk_assert(ARRAY_SIZE(sdhci_cdns6_agilex5_reset_ids), resets);
++	if (ret)
++		return dev_err_probe(dev, ret, "failed to assert resets\n");
++
++	/* Hold resets asserted long enough for all clock domains to capture. */
++	usleep_range(10, 20);
++
++	ret = reset_control_bulk_deassert(ARRAY_SIZE(sdhci_cdns6_agilex5_reset_ids), resets);
++	if (ret)
++		return dev_err_probe(dev, ret, "failed to deassert resets\n");
++
++	return 0;
++}
++
+ static const struct sdhci_ops sdhci_cdns4_ops = {
+ 	.set_clock = sdhci_set_clock,
+ 	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
+@@ -481,6 +542,18 @@ static const struct sdhci_ops sdhci_cdns6_ops = {
+ 	.hw_reset = sdhci_cdns6_hw_reset,
  };
- MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
+ 
++static const struct sdhci_ops sdhci_cdns6_agilex5_ops = {
++	.set_clock = sdhci_cdns6_set_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.platform_execute_tuning = sdhci_cdns_execute_tuning,
++	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
++	.hw_reset = sdhci_cdns6_hw_reset,
++	.set_dma_mask = sdhci_cdns_set_dma_mask,
++};
++
+ static const struct sdhci_cdns_drv_data sdhci_cdns_uniphier_drv_data = {
+ 	.pltfm_data = {
+ 		.ops = &sdhci_cdns4_ops,
+@@ -508,6 +581,18 @@ static const struct sdhci_cdns_drv_data sdhci_cdns4_drv_data = {
+ 	},
+ };
+ 
++static const struct sdhci_cdns_drv_data sdhci_cdns6_agilex5_drv_data = {
++	.init = sdhci_cdns6_agilex5_init,
++	.pltfm_data = {
++		.ops = &sdhci_cdns6_agilex5_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++			  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++			   SDHCI_QUIRK2_ACMD23_BROKEN,
++	},
++	.dma_mask = DMA_BIT_MASK(40),
++};
++
+ static const struct sdhci_cdns_drv_data sdhci_cdns6_drv_data = {
+ 	.pltfm_data = {
+ 		.ops = &sdhci_cdns6_ops,
+@@ -713,6 +798,10 @@ static const struct of_device_id sdhci_cdns_match[] = {
+ 		.compatible = "cdns,sd4hc",
+ 		.data = &sdhci_cdns4_drv_data,
+ 	},
++	{
++		.compatible = "altr,agilex5-sd6hc",
++		.data = &sdhci_cdns6_agilex5_drv_data,
++	},
+ 	{
+ 		.compatible = "cdns,sd6hc",
+ 		.data = &sdhci_cdns6_drv_data,
 -- 
 2.43.7
 
