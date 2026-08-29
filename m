@@ -1,47 +1,47 @@
-Received: from SN4PR2101CU001.outbound.protection.outlook.com (mail-southcentralusazon11012020.outbound.protection.outlook.com [40.93.195.20])
+Received: from CH5PR02CU005.outbound.protection.outlook.com (mail-northcentralusazon11012022.outbound.protection.outlook.com [40.107.200.22])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFE6C415B68;
-	Sat, 29 Aug 2026 18:43:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.93.195.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B1D7417BC3;
+	Sat, 29 Aug 2026 18:43:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.200.22
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1788029003; cv=fail; b=E86yrCDi+T/VRTjieWxtb8SnHKfdwSInGhjViaTmnKKps7sYcinwS0tzGr18YFRFsa/kRwT04xHKcAQqSFRCtBA7BgFwm6JogpUsk2Vvc61xJGHo4j35pGseHjTRAKBfRZKMecHVEhooWURe8TWIELTOsjCxW3fmvjDf79TAMC4=
+	t=1788029003; cv=fail; b=dGTNOEnGFSYHFfRVATV23u4Dt1JiLkQAH/+QPPF9yKEin0tLtHRn6vFt/EmjLryQqWzyQyWxf9cU+zIsVqxOkC5pUqtqhc+zVK1uSgGtf3AxjTOqoUG2NWG8/rv3u+3TDvxU8GGqxoiPjl2pCaMa6K9PlpOnSDPzBUWgShxXYOo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1788029003; c=relaxed/simple;
-	bh=VC1OCAaMCPpOP6NYYYGAQbjDyBqeXUE36QVDmm2QhWQ=;
+	bh=e0v4qspL+Prao4+FSgxQwzQBzOJOFUT3Me0gUpHpwXs=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=tWYyMOe1GW7ABEZDWl/AqG5iP0oobRWkpDICz2Cv6iGyCzym6q68Ke/3dE+RN9ClSHiTHo/LHVEUmtb2N/mT3EHvMHA+MxliRiV9CnxMEUVWLor9hw1n60RCmDlG/G5V+4ox+PiupdaeU0XHhfBAhJvzYiss9IsGSEXBj/8kSE0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=ewoGHmZP; arc=fail smtp.client-ip=40.93.195.20
+	 Content-Type:MIME-Version; b=Y3EpC0sDyTX+j9pDBqREWv2ZFjq9reDHPnMe5DecEtdKfD1FlEEBuI08QfA3+OD66JPQ78UUtF/7FH3OkDXfiLL3ry4FACOM/O9lSLMWvn5U97POeUSTUPuukmZzdvApBGrN5YSrb5juPsUZnJHC9n8AXaqd2eYFI/Mk2FadCHM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com; spf=pass smtp.mailfrom=altera.com; dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b=Vc4W5LDa; arc=fail smtp.client-ip=40.107.200.22
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=altera.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=altera.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="ewoGHmZP"
+	dkim=pass (2048-bit key) header.d=altera.com header.i=@altera.com header.b="Vc4W5LDa"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=iw7W9cljoMUWaqaj7og8Mz7n14rCVThJ0krC79SFoWhaJCUaERFDWFtRIwIgU9ERe7lbAI5YKXpThwYlIDrQOMWPKfSIXnw86En16R7VwS8j2a29D1MFBRcNYB0IpOxbLV8mU90FTT+WnO46X0k8YKk8X98gy92ZCYnEtxmXhCzt6QeZTfpmoLJKPfQvvZroQPxb61VECGetm9l0FLeA/rFsI3GcPes/A9YhhONtxWIy30Z8z0wlvoHJe/MKwfPpGeHOf+Ly9l9vmUmREM4yXX82KnEleoTzbvU4o5jvZ7SG++4c7s7KP+h4upZ0udy8rSdv7a5QXuogWxpfRMzS7g==
+ b=NlZK8vIsz7ex1fqxBqCcKAeRpqeu+rH3vBDfUSxWgkFHQqgndH30COkRnMCL9SttONSwV1I+yZIEqgIaewdi27UGM3pH+XP2ib5l/IIxwjyzAWBV2SD3btSdiHz+5Yy3/knvucGdwJSkCQu1ObLdqONn75VIwOXiN0UfXLYH/VGLO5PENytsZ15IQDEHnYRzQRH7HcnG5RZHsOZzwNMglb6xjpxiBnsUyOwq19IAnhvfpWm7wHxkrvNXeQIUSq33efn1qVrs92Iqn3hwRb0Nbl3Fu+f0EF/CLSoLPH4uRHqd1ffF9esoAuogs2SCgnBC7cwD+Qg+tRKfky5RFnKMig==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+zEJxAM6uwNGRpZay4T84eHX703h2821KvekUVlx3IU=;
- b=qqERm6l9TG8bkqmh8mkGTRG70hwWq+xbCbxHyXxQkzPE0bc3akspfvYOGie7ZsejdQ8pZFtkSpT8QkksrJ0jocIQLLchW17i/uEjvhMeEs5ut8UBRxfb5zkoZNtjMbh9A6DkYinrtNXcqgeLmm8k/R2xUA6Jb68/n/Md0+hVQyHZ3oDFL12cLv/SXgV/qHQetfOJrnQi7dUFKN3E1h6MIQ/vGrdc4JJs6ogrtX86fDqGFJ11TK0tsb+WxXmEHXks0tbXDlFHyjczyna8EHFzdSzqeaK+qY9qA7+2OpyWjmlOKwR7ROm5x44SFyQHSRbmAMvTMa6GDxZAOQM7WUn1NQ==
+ bh=n16IItfH5Rdl0C769t3IOWUGtpTyXUXYMUOUcfyYWvQ=;
+ b=Y4VCOYBG8Bfx4qFIQzDzBcaRp/55ur2woMb9VMY1a6kgSYMaqViQQE09UPXidL2fVzpOYmQifl8BJWLgYl7EjTL0i31adSKZ1vhQxmEb9jgyEocy52IHeCinrY3LvBJlf0uz3gwLIZHvJ2VDnSl8OFXte6MGPfjSfH0VbC7mqODWZd86dnzsh11/IiVLVviihJZryRIQMaj/XRdOzGSEjAHU3MJNZ5HGzENlcTI4b8PH4D+B0IdE8QEC/2Aod0RljdSwm8e4WORunjBGXawR9/NzfoX8xBGzigyIsmaUlhTDOYycBNZpasdeJ1kS5O/4Swd+cE2hlI3gYSh95oWUTw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=altera.com; dmarc=pass action=none header.from=altera.com;
  dkim=pass header.d=altera.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=altera.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+zEJxAM6uwNGRpZay4T84eHX703h2821KvekUVlx3IU=;
- b=ewoGHmZPho2rWMi24rSCb2n1r+Mkk7xZzAHNXwX6Hov6bQ0EXrY+0we2Eau0Mh9otFkX+hcVxebWCzLaScMqjk/Ljp81M+aWZNK7en1JCAAtXqK+zZjlZvkDpghuFijdfXMmT3vh7CteB8ANMRAgVU7dkWPgHYeW8144r9uHp3MWlBj2fYVcF51kSEUNsnrNk4pOEaU9LyvQHgY7X8hV2a77GEAkcFajje75paPskcAxOWUmqPhgKiIv2IzjROdbweb9pM/Htb0q12+jeJ4Wqwm6m1mYgZOQAkum1rbqTRjEIwZ6VTq26mwvNUSmHUvhb7UFC85OkXhdrXpJSPlNfg==
+ bh=n16IItfH5Rdl0C769t3IOWUGtpTyXUXYMUOUcfyYWvQ=;
+ b=Vc4W5LDa65GtN4751zjEKyyCyGwEtW3h/fNXD2uF+b6hMVd4GlDKa8301y54YfHwjwBVHvAalrn6MUao1lVhoedVA1c0o/inFHGaj+lW5z6nFx+fXqZf67jZwgCgO+jECRJjKdCkfu7/GmkvbqT5a+6r4d8TwH2zXOWlVlue8Awq5cqpr1Pl/EqVtaQozU8H6dUPxvQWzcBYrehXZ9l8to+rYyzpsLhrmHrLtzm+f4SpG20gX2rhp++khPqjlpktHTksR4I8caVD1YOlyyKjRHTh7aaYGPnJ8Z+FoD6MhZXcp7N52+uMBQqSwZhosQMGM9r25dEPLFumIRJGlBNqfA==
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=altera.com;
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com (2603:10b6:5:39c::19)
  by MN2PR03MB4926.namprd03.prod.outlook.com (2603:10b6:208:1b1::8) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.360.12; Sat, 29 Aug
- 2026 18:43:09 +0000
+ 2026 18:43:08 +0000
 Received: from DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04]) by DM4PR03MB6208.namprd03.prod.outlook.com
  ([fe80::2216:93ef:67b:9e04%3]) with mapi id 15.21.0360.008; Sat, 29 Aug 2026
- 18:43:09 +0000
+ 18:43:08 +0000
 From: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 To: linux-mmc@vger.kernel.org
 Cc: ulfh@kernel.org,
@@ -54,9 +54,9 @@ Cc: ulfh@kernel.org,
 	devicetree@vger.kernel.org,
 	Tanmay Kathpalia <tanmay.kathpalia@altera.com>,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v6 8/8] mmc: sdhci-cadence: add Altera Agilex5 SD6HC support
-Date: Sat, 29 Aug 2026 11:42:50 -0700
-Message-Id: <20260829184252.27644-9-tanmay.kathpalia@altera.com>
+Subject: [PATCH v6 7/8] mmc: sdhci-cadence: add Cadence SD6HC support
+Date: Sat, 29 Aug 2026 11:42:49 -0700
+Message-Id: <20260829184252.27644-8-tanmay.kathpalia@altera.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20260829184252.27644-1-tanmay.kathpalia@altera.com>
 References: <20260829184252.27644-1-tanmay.kathpalia@altera.com>
@@ -73,227 +73,1489 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: DM4PR03MB6208:EE_|MN2PR03MB4926:EE_
-X-MS-Office365-Filtering-Correlation-Id: f6ca41fe-ed26-41ed-770b-08df05fd5f67
+X-MS-Office365-Filtering-Correlation-Id: dc2ef8f9-6926-42bb-3e8a-08df05fd5ec3
 X-MS-Exchange-AtpMessageProperties: SA
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|366016|1800799024|23010399003|7416014|376014|10067099003|6133799003|11063799006|56012099006|22082099003|18002099003|55112099003;
+	BCL:0;ARA:13230040|366016|1800799024|23010399003|7416014|376014|10067099003|3023799007|6133799003|11063799006|56012099006|22082099003|18002099003|55112099003;
 X-Microsoft-Antispam-Message-Info:
-	KK1FivprMw3+aG1dF9jnOLIWyBHPhRMrVTpf9WKc2lAxntdOzmiW+JVYM6KKz+YzagYnzzwUg4ub9/GvH4/VFZi4AFtoDaWrgRn67IC4MccITZcbPa1bGghwiBZgV3RIAnTrEg6uVg8lrn8C5dx1jytB77w1WAEN1gGZ2s2wqpz1hVw1fOVMfT1QTuA8UH9/v6+qs4dj076iay6Ue80GskxdsX0PElR5jugqVegIH9l6S6qC8A0fdWSHP7c199XJRYnYt9HG1AZmbH5e9oPWQYjeBRSvWRyYn8S1VOHESm+xn6MliZjWgrxb0vfYkg3Ym1GRZsiIG531ZTFw3UAlwwwY4mupKFE8cXMvKbMbskInYgZ3KYZ432ilwNW6ksld55vEgDUzbb9xX/U7JQLKgKe2n6ccrVKozMCNv2H/99cab/VuDB8j2Yo6QGczX1YbLa9/yzl642uju/6hO+7Kt8VBPzo4or5TetdTrvtV0+PtIe8aMgUTrB6SB7jwoF7VWFBgydTSAaHlb3QvUbsQagF+DrFy/1v1u4z9s/qLhHSjvyutlBl2InSL9571CVvtofmNp0f1JqghJJSp/wfMIPr3I/aKgCRhvXpGUHB/t+iQhzMbA/hfr1iA0YFSNzaQk7IgYLp/mjKZmjq1q/i+cZ63qqqfGHzNCslnads4o7Q=
+	Ok9oEcxvoYnTzopasQBVcnewQGTnn7ppOsA5eDVpxIzqxIEZiTNEZ27a7kO90siMZxaViNN2eKgSk5BAPlwzNBr9rXa/Tsz+ZvypJ/eSrt+fEGpYGe3/qsAuIaNPqZy0iVY4QlGrnnZg7pCIXUev4PLfEFJmG10NpbBc7F1SVV2dKh2i289wiqidlW/nQRBS2VL91g8EgOMkHzrtP1Z09avbmVQ3K5wBblx8H1v5MqD4Jz96Vm4YB/4t5DkxFztek/sisizeTBbBNBstoG32uF6QpUy5mTFjgXWMfXNU9v49miKBXTtNI7ZQMQjq9pg35KYT8csz8Ce4Ept0Tka5WfKNDMcYLLAZkSns9+FeAC0txJgJrZ8ABaY7enco9L+17R5ajMMVtXeRsuysB8DgAa7p1Yl8cakdoxuTavUalcLceYBmXx/sbb7dWiRb/C8CU1wYe5xk/qyQRzDpieoJH9zWkcx5J9upUK4i6WtegXHVFrFaWoSWaAzSznyQVJPb25WLwS2CV58BF9+lTwVe+h8QR5q8CnRvzVsvJBd5yb/FwjhrVgdsFTCI3kEKFm8lIvO1uGYpIwrzn94cAs3YcneP50QjwKesXPXAvdutW3FyLfi8kyRldpVyqbbKcfd1TxotJJvITFAhm0lxgkYhCsi08puoDYEp+vlNb7L7eCc=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(7416014)(376014)(10067099003)(6133799003)(11063799006)(56012099006)(22082099003)(18002099003)(55112099003);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR03MB6208.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(23010399003)(7416014)(376014)(10067099003)(3023799007)(6133799003)(11063799006)(56012099006)(22082099003)(18002099003)(55112099003);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?fE2WG8HTViokCfDbfdQU8r2Kfi9tNGKZVPqCyqZZDzapbLX4AYg/XZtOTSxd?=
- =?us-ascii?Q?cFD2vpM37XI7dpomwM92CmH5I/+Xh01avfOAEtw5h1QdYsOaPsOcAd/HVJnK?=
- =?us-ascii?Q?D2gj1V886/irf1x0t08bHKHUraUjWDn1knPNM84jbQOHiYLCa/u5vLfiqjWw?=
- =?us-ascii?Q?wdoAzx1VK177skeE0dvW3k/WE+zN7ymEtG4GgbwnDVcy7Ri1/HCIPixvdUs6?=
- =?us-ascii?Q?tgt4TPCa+cahCyULu/z2YEHsNbQKkCVg28xuYtxQGOpVZpgZkrRWiTM+jt5S?=
- =?us-ascii?Q?UR+taFMXgi15WLF6Ud2gDHiSWEVdWRZlLhd8LwL5BrwN5QfLyBzaF547WmR4?=
- =?us-ascii?Q?XeVpr6+W6bkGokDcGQFpYW7cO+O8At3YKEvlv3ktve2Ji5duPPD3yoVORUX6?=
- =?us-ascii?Q?UmMXPyJjbeWFYJzWwAkq5FWX/zehhD8jt25TJMfvLOgDuxw63Ziv4tqU29HJ?=
- =?us-ascii?Q?WtfNnseEVhGr0Idw2wIemIENmkUQ6UN9HXQ08LcA2YR2Y9wfOyHVUsZ14NH2?=
- =?us-ascii?Q?AdQj0giRwlv7oap8hLBMY5FlWdSJz3nzdtOR8E3OUn03Bw8LymTi2ecYncrK?=
- =?us-ascii?Q?SIaINUjMsWQL5Ix1DJm0NRoE6GiNzQodFoIDqdnZqynZ7+JYGpECfvA/Jfk4?=
- =?us-ascii?Q?Qkx4M0KimGG5mWo3j7JF5YehfcH3yrz01g8uf8fokhu/UNE2Oo8vFwj5T9NP?=
- =?us-ascii?Q?MAVlB3qslL6LWmnaeprSZlX/STb8pk/QegC3qDZ/EOpDdsQySlGXfK8rst4/?=
- =?us-ascii?Q?B1x07Qi3KNWgjv6wdwHcO6xLoFuK3fLNytaW+c9PhuiK5bMM5zjQ4SNsslPO?=
- =?us-ascii?Q?2WQpTofOHJM+wjj3Yigf7JBXP3018FUeAjkBPC0Lefg0gnfrZWdcF1HnC2TS?=
- =?us-ascii?Q?IolQDo2qbtFd1Y1wXddzX/rhxdM0ISXLeOEqa9GUBVReDxttB17sQIcs/Ffe?=
- =?us-ascii?Q?j3OopKUHQeW9iDNS7npyDM+JqWgdyIH+/0pioFcvvC/+LQFmit4Tmi2Un0XY?=
- =?us-ascii?Q?ixvrDLM0dVxIh/VaMm1corBh1xNt3NR1NTbZecefTeAwdO95PKjaaebaL5zv?=
- =?us-ascii?Q?8PBmDBz1vwirQs/NZQD2Ndhx7Po1RJNepcFiY05jmRW8wM3+EYx5BEFVUIHH?=
- =?us-ascii?Q?IUWCVNgltBBDgQlXpDrK8N3doy+TS3sfiWGO808dkD6svc0EPu8S4PYnPD0P?=
- =?us-ascii?Q?z7O/4yMu4sujXcZ6Iq6G+SEfpQpFmNyipcrnML6ffKvIHgqcATVwk41hrEJk?=
- =?us-ascii?Q?lr+RRLHv4H4c1aE3kKyRsyYFNWucR7/aL+gzeQf5BTTC1TfH8l0b8wbAKrkW?=
- =?us-ascii?Q?2fFI4EcJoqof4MqTflRvne7WhFS8SK2U0Xaf4UCb7OR13jRQSBSF+oSWo/RI?=
- =?us-ascii?Q?zb2AQUydFWOxau+eXOT4Dnb6e0Z4n+ogiYRj3zAaV0AXLvFOVLcR3qGb4gfN?=
- =?us-ascii?Q?40l8eEJCuwOHrXeDSSNb1eyH1diUAatAi9r0nXINxhVUaM6uYm+VU9RURTAM?=
- =?us-ascii?Q?cYI/0+zwvDZSoZBXu+x3WRc3TFCUtQNZuY0B5WEpRdn3+/k3+Z5OEoMI3a1s?=
- =?us-ascii?Q?8ePknPyLgFhKBq7Bu9M8h9MEZ+edOqtMOPRpfWrxdK7+5KbjvPYnj+d4NPXE?=
- =?us-ascii?Q?INvyUPs/B2aRUDQKiuEw0QzNd1rEEISfQPe613ZUGIJBqGIoueTAMGqRONeN?=
- =?us-ascii?Q?d6VsE32ParSN2TrmzoVwk81Qv7+k2ivGbIe9Ni/IuMzf3TJxyw1epr9wsppX?=
- =?us-ascii?Q?8XoB0PaSEVv1NR4MWXlHWcNoE80ZuCY=3D?=
+	=?us-ascii?Q?tKZAQE2QTuoY4ybWHFsoMMJLSWV3kXRDxvM+6U3XAT6yRMJca8o42fDfV3AB?=
+ =?us-ascii?Q?x34qEDDRz0Mb/iTzzZRCMLUfD8DaS5d3OFU2QpKW1e/y42vVUADAENc328Xl?=
+ =?us-ascii?Q?9eTX9+2K8PwawQvYJTImLE2n4hru7eeeBHWwbIgjHfCIXq4nJSkW5wKSX9C1?=
+ =?us-ascii?Q?omZe65E6byHJwXBx9AsGyk5lHy463LvZlyH00Pg9K2+CDsR30sX0Tu/xgXRi?=
+ =?us-ascii?Q?NwEN4SxXZmnlRtOT3LkqpUcVh0/rUOP65CqEzhyNwIzdTqnWWhfp/+19Cr5l?=
+ =?us-ascii?Q?IHFNS9ARMUMPy7HF1LfSUB+gLtopXhxamQxsYmmU+sKOI9F0z3WqmhbPgUL3?=
+ =?us-ascii?Q?fJYbsq5Lf+4QUo55UOclapuWbEHZhCgH05ADh7jMToedKQMXL0oTl8UlzVUJ?=
+ =?us-ascii?Q?uI/03L75CWBJjrnYjOcdCQ7iiDNBYdaPfBPam70riM22pvwZrM/B89dH1GPi?=
+ =?us-ascii?Q?cRZPRUumJ9Saon4cKRDbyvBp73oS2ThD4BrrmLMKR4kWWuiT+S+1mivut9E9?=
+ =?us-ascii?Q?eiU7RQNRODCrdqW+9Ly9fit1EaWfX74/zxoMExR7zlfjjnST3g5Ng0L/B8wF?=
+ =?us-ascii?Q?7+HUB4lQ9QYZDnflTKHPMAH1mWDkXYZPyombLhZvfD9PQlFhVKX/7WNHd/b+?=
+ =?us-ascii?Q?q0/KZpU0G7DfE8BQSAbMwMHilKWLRRAhB5iBbURRqb+26IieE7unGN5G06K7?=
+ =?us-ascii?Q?Pz41N7uiWvbi70S5iEnKkKwqYGLhL84AKjQEKF9Pcv4eTOP5gnHi1/Z17nJe?=
+ =?us-ascii?Q?HlYaHXsmdicBOqI4NtrEQK8d58OWEdhE4ZV96hgyPJRw5oqGDZxaHJyEdDTv?=
+ =?us-ascii?Q?Njudjnblo0cbz/wYTvxtOAlg+GlKxjb961Y2fk0cZFrtzBVRJdVFHg31mvp+?=
+ =?us-ascii?Q?8kw0zBZ9Jp3M5P05VstKdqyEOXafc02RivHzFGiFwLcH15xQR7wVGNYJeeTd?=
+ =?us-ascii?Q?+RywO5L0roab83UAChvL9SACSbo8wEDfYtXSollrh8bx0qMjtT63skfxGmiA?=
+ =?us-ascii?Q?Yo6IwxuitKLo9GQ/pW54kzJn9kpAcAxScfvjlLNWwcqLQ0S4nkFrUcfvuUgJ?=
+ =?us-ascii?Q?RN5sNToREKLwXpEV0G4cnfFh3cn060afkA/+Ln7NX36rubobH6p52ZyPMe++?=
+ =?us-ascii?Q?45WC5FMfCVRyzVaqugGrjXoJ6t+MqzZSCI5rPsvlgfVoca9FhXwRqII+Xhgl?=
+ =?us-ascii?Q?C+EbzwVYP5PtanhMTBjtn+OtVNltcccqtyjHvmOiML1WJtQzk7QM2RLYllWj?=
+ =?us-ascii?Q?BwlQFHgnXoke5lS86JnBTdrJgxvJD0eo8xheW4i/c54wiCNiQNUghMqTTLgr?=
+ =?us-ascii?Q?UPZJTJaOp3hY2TuiKHD3otZuwDpdfBmQAw5fMYstsqF34SYE1tcXbM6SuqJj?=
+ =?us-ascii?Q?L7zas0u0v2J/eKcK+J3YQrJ7ruGgkIIaKGAt8t5kraePeppmHbpuNCl2h57/?=
+ =?us-ascii?Q?g+OnM2pcwDPrJgpvDvP2Qq0fXNV7+InvAFhHjHuRunZNCOYJyfByKLQLnSyS?=
+ =?us-ascii?Q?N6Pf3WTy3nQZ13hfUZ3eN2gISJUQ0w8cOgCzZjjDZXNSItZhZVUAXGJHTDS4?=
+ =?us-ascii?Q?maV6M6f5OqB8GNSw7HDUiBocXGgR+Fw9Nj0cyNkINGTJAIFyQb1gdIn8U3fX?=
+ =?us-ascii?Q?Sjj0Nsw05swmWQCYJOvsCWHmMFtMuG43/AYjufEU3AWi5LNWSQO2y8WLoB+7?=
+ =?us-ascii?Q?uts0MRSPihy5IeIr6W78Yp03MnD/Oad/PIjJNacZNn3YqylDMC1FP+Oeiwmy?=
+ =?us-ascii?Q?v0DdlK023rEaRaX/3v/devXeSDDo6m8=3D?=
 X-OriginatorOrg: altera.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f6ca41fe-ed26-41ed-770b-08df05fd5f67
+X-MS-Exchange-CrossTenant-Network-Message-Id: dc2ef8f9-6926-42bb-3e8a-08df05fd5ec3
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR03MB6208.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Aug 2026 18:43:09.6119
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Aug 2026 18:43:08.5719
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: fbd72e03-d4a5-4110-adce-614d51f2077a
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: hKoA5ahPKKU7LhnppBo6mSZGFujzhUMMotAaJW+B/6rZz0XQ5HAQZAQzA61nKQN6GanwKEUdS89mIqqC+F4NmE8yueOk3JY9LYNVe+BrbCs=
+X-MS-Exchange-CrossTenant-UserPrincipalName: puqp7z6cAlr+7+QdkMH+4WdKPURrXcSGZ8AD2aT3VgxyYtMslacjeOCRJ+fwKb9p8kVGr6Xd1mL2mhpYPw58txFvjHvonFgdaTlS1dTm1LU=
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR03MB4926
 
-The Altera Agilex5 SoC integrates a Cadence SD6HC controller that needs
-platform-specific configuration to operate correctly.
+The Cadence SD6HC is a sixth-generation SD/SDIO/eMMC host controller
+with an integrated combo-PHY. PHY timing depends on the active speed
+mode, the SD clock period, and board-level IO-cell and DLL delay-
+element characteristics.
 
-The SoC requires three named resets: "sdhc-reset", "combophy", and
-"sdmmc-ocp". All three are exclusive and must be asserted together before
-being released, so the SDHCI, SoftPHY, and OCP/AXI clock domains cross the
-reset boundary simultaneously. SoftPHY is shared with NAND at the SoC
-level, but only one of SDMMC or NAND is enabled on a given board.
+SD6HC provides separate card-interface (CIU) and bus-interface (BIU)
+clocks, and asserts eMMC hardware reset through an internal controller
+register rather than an external RST_n line. The "cdns,sd6hc" compatible
+string identifies this IP in device tree.
 
-The IOMMU maps DMA addresses within a 40-bit physical address space, so
-the DMA mask is capped at 40 bits to prevent allocation beyond the
-controller's reach.
-
-The silicon requires the MULTIBLOCK_READ_ACMD12, CAP_CLOCK_BASE_BROKEN,
-PRESET_VALUE_BROKEN, and ACMD23_BROKEN quirks. Since
-CAP_CLOCK_BASE_BROKEN prevents reading the base clock from the
-capabilities register, the maximum clock is supplied from the platform
-clock instead.
+Split the existing driver into sdhci-cadence-core.c and
+sdhci-cadence-phy-v6.c, and add sdhci-cadence.h for shared private
+state.
 
 Signed-off-by: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-cadence-core.c | 89 +++++++++++++++++++++++++++
- 1 file changed, 89 insertions(+)
+ MAINTAINERS                                   |   7 +
+ drivers/mmc/host/Makefile                     |   1 +
+ .../{sdhci-cadence.c => sdhci-cadence-core.c} | 126 ++-
+ drivers/mmc/host/sdhci-cadence-phy-v6.c       | 975 ++++++++++++++++++
+ drivers/mmc/host/sdhci-cadence.h              | 118 +++
+ 5 files changed, 1187 insertions(+), 40 deletions(-)
+ rename drivers/mmc/host/{sdhci-cadence.c => sdhci-cadence-core.c} (85%)
+ create mode 100644 drivers/mmc/host/sdhci-cadence-phy-v6.c
+ create mode 100644 drivers/mmc/host/sdhci-cadence.h
 
-diff --git a/drivers/mmc/host/sdhci-cadence-core.c b/drivers/mmc/host/sdhci-cadence-core.c
-index 18a5329f27db..2f4dfdc04ae7 100644
---- a/drivers/mmc/host/sdhci-cadence-core.c
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 6a0996faa091..58267c681780 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -24407,6 +24407,13 @@ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/sdhci-brcmstb*
+ 
++SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) CADENCE DRIVER
++M:	Tanmay Kathpalia <tanmay.kathpalia@altera.com>
++L:	linux-mmc@vger.kernel.org
++S:	Supported
++F:	Documentation/devicetree/bindings/mmc/cdns,sd6hc.yaml
++F:	drivers/mmc/host/sdhci-cadence*
++
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
+ M:	Adrian Hunter <adrian.hunter@intel.com>
+ L:	linux-mmc@vger.kernel.org
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index ee412e6b84d6..799ce7ad43d5 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -80,6 +80,7 @@ obj-$(CONFIG_MMC_REALTEK_USB)	+= rtsx_usb_sdmmc.o
+ 
+ obj-$(CONFIG_MMC_SDHCI_PLTFM)		+= sdhci-pltfm.o
+ obj-$(CONFIG_MMC_SDHCI_CADENCE)		+= sdhci-cadence.o
++sdhci-cadence-y				+= sdhci-cadence-core.o sdhci-cadence-phy-v6.o
+ obj-$(CONFIG_MMC_SDHCI_ESDHC_MCF)       += sdhci-esdhc-mcf.o
+ obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)	+= sdhci-esdhc-imx.o
+ obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence-core.c
+similarity index 85%
+rename from drivers/mmc/host/sdhci-cadence.c
+rename to drivers/mmc/host/sdhci-cadence-core.c
+index 1fb23051a047..18a5329f27db 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
 +++ b/drivers/mmc/host/sdhci-cadence-core.c
-@@ -7,6 +7,7 @@
+@@ -2,6 +2,7 @@
+ /*
+  * Copyright (C) 2016 Socionext Inc.
+  *   Author: Masahiro Yamada <yamada.masahiro@socionext.com>
++ * Copyright (C) 2026 Altera Corporation
+  */
  
  #include <linux/bitfield.h>
- #include <linux/bits.h>
-+#include <linux/dma-mapping.h>
- #include <linux/iopoll.h>
- #include <linux/module.h>
- #include <linux/mmc/host.h>
-@@ -90,6 +91,7 @@ struct sdhci_cdns4_phy_cfg {
- struct sdhci_cdns_drv_data {
- 	int (*init)(struct platform_device *pdev);
- 	const struct sdhci_pltfm_data pltfm_data;
-+	u64 dma_mask;
+@@ -14,10 +15,10 @@
+ #include <linux/platform_device.h>
+ #include <linux/reset.h>
+ 
+-#include "sdhci-pltfm.h"
++#include "sdhci-cadence.h"
+ 
+ /* HRS - Host Register Set (specific to Cadence) */
+-#define SDHCI_CDNS_HRS04		0x10		/* PHY access port */
++/* HRS04 (PHY access) bitfields (SD4HC) */
+ #define   SDHCI_CDNS_HRS04_ACK			BIT(26)
+ #define   SDHCI_CDNS_HRS04_RD			BIT(25)
+ #define   SDHCI_CDNS_HRS04_WR			BIT(24)
+@@ -71,13 +72,6 @@
+ #define SDHCI_CDNS_PHY_DLY_HSMMC	0x0c
+ #define SDHCI_CDNS_PHY_DLY_STROBE	0x0d
+ 
+-/*
+- * The tuned val register is 6 bit-wide, but not the whole of the range is
+- * available.  The range 0-42 seems to be available (then 43 wraps around to 0)
+- * but I am not quite sure if it is official.  Use only 0 to 39 for safety.
+- */
+-#define SDHCI_CDNS_MAX_TUNING_LOOP	40
+-
+ struct sdhci_cdns4_phy_param {
+ 	u8 addr;
+ 	u8 data;
+@@ -88,16 +82,6 @@ struct sdhci_cdns4_phy {
+ 	struct sdhci_cdns4_phy_param phy_params[];
  };
  
- static const struct sdhci_cdns4_phy_cfg sdhci_cdns4_phy_cfgs[] = {
-@@ -196,6 +198,23 @@ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
- 	return host->max_clk;
- }
- 
-+static int sdhci_cdns_set_dma_mask(struct sdhci_host *host)
-+{
-+	const struct sdhci_cdns_drv_data *data;
-+	struct device *dev = mmc_dev(host->mmc);
-+	int ret;
-+
-+	data = of_device_get_match_data(dev);
-+	if (!data || !data->dma_mask)
-+		return 0;
-+
-+	ret = dma_set_mask_and_coherent(dev, data->dma_mask);
-+	if (ret)
-+		return dev_err_probe(dev, ret, "failed to set DMA mask\n");
-+
-+	return 0;
-+}
-+
- static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
- {
- 	u32 tmp;
-@@ -462,6 +481,48 @@ static int elba_drv_init(struct platform_device *pdev)
+-struct sdhci_cdns_priv {
+-	void __iomem *hrs_addr;
+-	void __iomem *ctl_addr;	/* write control */
+-	spinlock_t wrlock;	/* write lock */
+-	bool enhanced_strobe;
+-	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
+-	struct reset_control *rst_hw;
+-	struct sdhci_cdns4_phy *phy;
+-};
+-
+ struct sdhci_cdns4_phy_cfg {
+ 	const char *property;
+ 	u8 addr;
+@@ -203,13 +187,6 @@ static int sdhci_cdns4_phy_init(struct sdhci_cdns_priv *priv)
  	return 0;
  }
  
-+static const struct reset_control_bulk_data sdhci_cdns6_agilex5_reset_ids[] = {
-+	{ .id = "sdhc-reset" },
-+	{ .id = "combophy" },
-+	{ .id = "sdmmc-ocp" },
-+};
+-static void *sdhci_cdns_priv(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-
+-	return sdhci_pltfm_priv(pltfm_host);
+-}
+-
+ static unsigned int sdhci_cdns_get_timeout_clock(struct sdhci_host *host)
+ {
+ 	/*
+@@ -245,6 +222,9 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	u32 tmp;
+ 	int i, ret;
+ 
++	if (host->version >= SDHCI_SPEC_420)
++		return sdhci_cdns6_set_tune_val(host, val);
 +
-+static int sdhci_cdns6_agilex5_init(struct platform_device *pdev)
-+{
-+	struct device *dev = &pdev->dev;
-+	struct reset_control_bulk_data *resets;
-+	int ret;
+ 	if (WARN_ON(!FIELD_FIT(SDHCI_CDNS_HRS06_TUNE, val)))
+ 		return -EINVAL;
+ 
+@@ -325,8 +305,10 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 	 * The delay is set by probe, based on the DT properties.
+ 	 */
+ 	if (host->timing != MMC_TIMING_MMC_HS200 &&
+-	    host->timing != MMC_TIMING_UHS_SDR104)
++	    host->timing != MMC_TIMING_UHS_SDR104) {
++		dev_dbg(mmc_dev(host->mmc), "Tuning skipped (timing: %d)\n", host->timing);
+ 		return 0;
++	}
+ 
+ 	for (i = 0; i < SDHCI_CDNS_MAX_TUNING_LOOP; i++) {
+ 		if (sdhci_cdns_set_tune_val(host, i) ||
+@@ -350,6 +332,10 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
+ 	if (ret)
+ 		return ret;
+ 
++	/* Block gap tuning is only required for SD4HC, not for SD6HC */
++	if (host->version >= SDHCI_SPEC_420)
++		return 0;
 +
-+	resets = devm_kmemdup(dev, sdhci_cdns6_agilex5_reset_ids,
-+			      sizeof(sdhci_cdns6_agilex5_reset_ids), GFP_KERNEL);
-+	if (!resets)
-+		return -ENOMEM;
+ 	return sdhci_cdns_tune_blkgap(host->mmc);
+ }
+ 
+@@ -385,6 +371,10 @@ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+ 	/* For SD, fall back to the default handler */
+ 	if (mode == SDHCI_CDNS_HRS06_MODE_SD)
+ 		sdhci_set_uhs_signaling(host, timing);
 +
-+	/*
-+	 * Assert SDHCI, SoftPHY (combophy), and SDMMC OCP/AXI resets together
-+	 * so their active periods overlap before all domains are released.
-+	 * SoftPHY is shared with NAND, but only one of SDMMC
-+	 * or NAND is enabled on a given board.
-+	 */
-+	ret = devm_reset_control_bulk_get_exclusive(dev, ARRAY_SIZE(sdhci_cdns6_agilex5_reset_ids),
-+						    resets);
-+	if (ret)
-+		return dev_err_probe(dev, ret, "failed to get resets\n");
-+
-+	ret = reset_control_bulk_assert(ARRAY_SIZE(sdhci_cdns6_agilex5_reset_ids), resets);
-+	if (ret)
-+		return dev_err_probe(dev, ret, "failed to assert resets\n");
-+
-+	/* Hold resets asserted long enough for all clock domains to capture. */
-+	usleep_range(10, 20);
-+
-+	ret = reset_control_bulk_deassert(ARRAY_SIZE(sdhci_cdns6_agilex5_reset_ids), resets);
-+	if (ret)
-+		return dev_err_probe(dev, ret, "failed to deassert resets\n");
-+
-+	return 0;
-+}
-+
- static const struct sdhci_ops sdhci_cdns4_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
-@@ -481,6 +542,18 @@ static const struct sdhci_ops sdhci_cdns6_ops = {
- 	.hw_reset = sdhci_cdns6_hw_reset,
++	/* For host controller V6, set SDHCI and PHY registers for UHS signaling */
++	if (host->version >= SDHCI_SPEC_420)
++		sdhci_cdns6_set_uhs_signaling(host, timing);
+ }
+ 
+ /* Elba control register bits [6:3] are byte-lane enables */
+@@ -481,6 +471,16 @@ static const struct sdhci_ops sdhci_cdns4_ops = {
+ 	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
  };
  
-+static const struct sdhci_ops sdhci_cdns6_agilex5_ops = {
++static const struct sdhci_ops sdhci_cdns6_ops = {
 +	.set_clock = sdhci_cdns6_set_clock,
-+	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
 +	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
 +	.set_bus_width = sdhci_set_bus_width,
 +	.reset = sdhci_reset,
 +	.platform_execute_tuning = sdhci_cdns_execute_tuning,
 +	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
 +	.hw_reset = sdhci_cdns6_hw_reset,
-+	.set_dma_mask = sdhci_cdns_set_dma_mask,
 +};
 +
  static const struct sdhci_cdns_drv_data sdhci_cdns_uniphier_drv_data = {
  	.pltfm_data = {
  		.ops = &sdhci_cdns4_ops,
-@@ -508,6 +581,18 @@ static const struct sdhci_cdns_drv_data sdhci_cdns4_drv_data = {
+@@ -508,6 +508,12 @@ static const struct sdhci_cdns_drv_data sdhci_cdns4_drv_data = {
  	},
  };
  
-+static const struct sdhci_cdns_drv_data sdhci_cdns6_agilex5_drv_data = {
-+	.init = sdhci_cdns6_agilex5_init,
++static const struct sdhci_cdns_drv_data sdhci_cdns6_drv_data = {
 +	.pltfm_data = {
-+		.ops = &sdhci_cdns6_agilex5_ops,
-+		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+			  SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
-+		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+			   SDHCI_QUIRK2_ACMD23_BROKEN,
++		.ops = &sdhci_cdns6_ops,
 +	},
-+	.dma_mask = DMA_BIT_MASK(40),
 +};
 +
- static const struct sdhci_cdns_drv_data sdhci_cdns6_drv_data = {
- 	.pltfm_data = {
- 		.ops = &sdhci_cdns6_ops,
-@@ -713,6 +798,10 @@ static const struct of_device_id sdhci_cdns_match[] = {
+ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 					     struct mmc_ios *ios)
+ {
+@@ -526,6 +532,14 @@ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 	if (mode == SDHCI_CDNS_HRS06_MODE_MMC_HS400ES && !ios->enhanced_strobe)
+ 		sdhci_cdns_set_emmc_mode(priv,
+ 					 SDHCI_CDNS_HRS06_MODE_MMC_HS400);
++
++	/*
++	 * Reprogram the SD6HC PHY for the current timing. Enhanced strobe
++	 * affects PHY delays, and this callback may run with either HS400
++	 * (enabling/disabling ES) or Legacy (initial bus state).
++	 */
++	if (host->version >= SDHCI_SPEC_420)
++		sdhci_cdns6_set_uhs_signaling(host, ios->timing);
+ }
+ 
+ static void sdhci_cdns_mmc_hw_reset(struct mmc_host *mmc)
+@@ -569,6 +583,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_cdns_priv *priv;
+ 	struct clk *clk;
++	struct clk *biu_clk;
+ 	int ret;
+ 	struct device *dev = &pdev->dev;
+ 	static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
+@@ -577,6 +592,13 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	if (IS_ERR(clk))
+ 		return PTR_ERR(clk);
+ 
++	/* SD6HC requires a second clock, "biu", for the bus interface unit. */
++	if (of_device_is_compatible(dev->of_node, "cdns,sd6hc")) {
++		biu_clk = devm_clk_get_enabled(dev, "biu");
++		if (IS_ERR(biu_clk))
++			return dev_err_probe(dev, PTR_ERR(biu_clk), "failed to enable biu clock\n");
++	}
++
+ 	data = of_device_get_match_data(dev);
+ 	if (!data)
+ 		return dev_err_probe(dev, -EINVAL, "missing platform driver data\n");
+@@ -601,30 +623,46 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 			return ret;
+ 	}
+ 	sdhci_enable_v4_mode(host);
+-	__sdhci_read_caps(host, &version, NULL, NULL);
+-
+ 	sdhci_get_of_property(pdev);
+ 
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = sdhci_cdns4_phy_probe(pdev, priv);
+-	if (ret)
+-		return ret;
++	/*
++	 * For SD4HC, read capabilities with fixed version override and set up
++	 * the optional eMMC card RST_n reset control.
++	 * For SD6HC, sdhci_add_host() will automatically read capabilities
++	 * and version from the host controller registers.
++	 */
++	if (of_device_is_compatible(dev->of_node, "cdns,sd4hc")) {
++		__sdhci_read_caps(host, &version, NULL, NULL);
++		ret = sdhci_cdns4_phy_probe(pdev, priv);
++		if (ret)
++			return ret;
+ 
+-	if (host->mmc->caps & MMC_CAP_HW_RESET) {
+-		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, NULL);
+-		if (IS_ERR(priv->rst_hw))
+-			return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
+-					    "reset controller error\n");
+-		if (priv->rst_hw)
+-			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
++		if (host->mmc->caps & MMC_CAP_HW_RESET) {
++			priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, NULL);
++			if (IS_ERR(priv->rst_hw))
++				return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
++						    "reset controller error\n");
++			if (priv->rst_hw)
++				host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
++		}
++	} else {
++		ret = sdhci_cdns6_phy_probe(pdev, priv);
++		if (ret)
++			return ret;
+ 	}
+ 
+ 	return sdhci_add_host(host);
+ }
+ 
++/*
++ * Only the CIU clock is gated on suspend. The SD6HC "biu" clock is not
++ * toggled here as it may be a shared bus clock; a dedicated biu clock
++ * would need explicit PM gating added here.
++ */
+ static int sdhci_cdns_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+@@ -636,7 +674,11 @@ static int sdhci_cdns_resume(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = sdhci_cdns4_phy_init(priv);
++	if (host->version >= SDHCI_SPEC_420)
++		ret = sdhci_cdns6_phy_init(priv);
++	else
++		ret = sdhci_cdns4_phy_init(priv);
++
+ 	if (ret)
+ 		goto disable_clk;
+ 
+@@ -671,6 +713,10 @@ static const struct of_device_id sdhci_cdns_match[] = {
  		.compatible = "cdns,sd4hc",
  		.data = &sdhci_cdns4_drv_data,
  	},
 +	{
-+		.compatible = "altr,agilex5-sd6hc",
-+		.data = &sdhci_cdns6_agilex5_drv_data,
++		.compatible = "cdns,sd6hc",
++		.data = &sdhci_cdns6_drv_data,
 +	},
- 	{
- 		.compatible = "cdns,sd6hc",
- 		.data = &sdhci_cdns6_drv_data,
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
+diff --git a/drivers/mmc/host/sdhci-cadence-phy-v6.c b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+new file mode 100644
+index 000000000000..22d56bb46d75
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-cadence-phy-v6.c
+@@ -0,0 +1,975 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * PHY and host controller support for Cadence SD6HC SDHCI
++ *
++ * This file provides support for Cadence's sixth-generation SDHCI controller (SD6HC).
++ * Implements PHY initialization, DLL management, per-speed-mode timing calculations,
++ * and host controller register programming for the SD6HC integrated combo-PHY.
++ *
++ * Copyright (C) 2026 Altera Corporation
++ *   Author: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
++ */
++
++#include <linux/bitfield.h>
++#include <linux/bits.h>
++#include <linux/iopoll.h>
++#include <linux/of.h>
++
++#include "sdhci-cadence.h"
++
++/* IO Delay Information */
++#define SDHCI_CDNS_HRS07		0x1c
++#define   SDHCI_CDNS_HRS07_RW_COMPENSATE	GENMASK(20, 16)
++#define   SDHCI_CDNS_HRS07_IDELAY_VAL		GENMASK(4, 0)
++
++/* PHY Control and Status */
++#define SDHCI_CDNS_HRS09		0x24
++#define   SDHCI_CDNS_HRS09_RDDATA_EN		BIT(16)
++#define   SDHCI_CDNS_HRS09_RDCMD_EN		BIT(15)
++#define   SDHCI_CDNS_HRS09_EXTENDED_WR_MODE	BIT(3)
++#define   SDHCI_CDNS_HRS09_EXTENDED_RD_MODE	BIT(2)
++#define   SDHCI_CDNS_HRS09_PHY_INIT_COMPLETE	BIT(1)
++#define   SDHCI_CDNS_HRS09_PHY_SW_RESET		BIT(0)
++
++/* SDCLK start point adjustment */
++#define SDHCI_CDNS_HRS10		0x28
++#define   SDHCI_CDNS_HRS10_HCSDCLKADJ		GENMASK(19, 16)
++
++/* eMMC Control */
++#define SDHCI_CDNS_HRS11		0x2c
++#define   SDHCI_CDNS_HRS11_EMMC_RST		BIT(0) /* eMMC reset */
++
++/* CMD/DAT output delay */
++#define SDHCI_CDNS_HRS16		0x40
++#define   SDHCI_CDNS_HRS16_WRDATA1_SDCLK_DLY	GENMASK(31, 28)
++#define   SDHCI_CDNS_HRS16_WRDATA0_SDCLK_DLY	GENMASK(27, 24)
++#define   SDHCI_CDNS_HRS16_WRCMD1_SDCLK_DLY	GENMASK(23, 20)
++#define   SDHCI_CDNS_HRS16_WRCMD0_SDCLK_DLY	GENMASK(19, 16)
++#define   SDHCI_CDNS_HRS16_WRDATA1_DLY		GENMASK(15, 12)
++#define   SDHCI_CDNS_HRS16_WRDATA0_DLY		GENMASK(11, 8)
++#define   SDHCI_CDNS_HRS16_WRCMD1_DLY		GENMASK(7, 4)
++#define   SDHCI_CDNS_HRS16_WRCMD0_DLY		GENMASK(3, 0)
++
++/* PHY Special Function Registers */
++/* DQ timing */
++#define SDHCI_CDNS6_PHY_DQ_TIMING_REG			0x2000
++#define   SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_ALWAYS_ON		BIT(31)
++#define   SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_END			GENMASK(29, 27)
++#define   SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_START		GENMASK(26, 24)
++#define   SDHCI_CDNS6_PHY_DQ_TIMING_DATA_SELECT_OE_END		GENMASK(2, 0)
++
++/* DQS timing */
++#define SDHCI_CDNS6_PHY_DQS_TIMING_REG			0x2004
++#define   SDHCI_CDNS6_PHY_DQS_TIMING_USE_EXT_LPBK_DQS		BIT(22)
++#define   SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS		BIT(21)
++#define   SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS		BIT(20)
++#define   SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD		BIT(19)
++
++/* Gate and loopback control */
++#define SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_REG		0x2008
++#define   SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_SYNC_METHOD		BIT(31)
++#define   SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_RD_DEL_SEL		GENMASK(24, 19)
++#define   SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_UNDERRUN_SUPPRESS	BIT(18)
++#define   SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_GATE_CFG_ALWAYS_ON	BIT(6)
++
++/* Master DLL logic */
++#define SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_REG		0x200c
++#define   SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_BYPASS_MODE		BIT(23)
++#define   SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_PHASE_DETECT_SEL	GENMASK(22, 20)
++#define   SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_DLL_LOCK_NUM		GENMASK(18, 16)
++#define   SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_DLL_START_POINT	GENMASK(7, 0)
++
++/* Slave DLL logic */
++#define SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_REG		0x2010
++#define   SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_CMD_DELAY	GENMASK(31, 24)
++#define   SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_CLK_WRDQS_DELAY	GENMASK(23, 16)
++#define   SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_CLK_WR_DELAY		GENMASK(15, 8)
++#define   SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY		GENMASK(7, 0)
++
++/* Global control settings */
++#define SDHCI_CDNS6_PHY_CTRL_REG			0x2080
++#define   SDHCI_CDNS6_PHY_CTRL_PHONY_DQS_TIMING			GENMASK(9, 4)
++
++/* Default PHY settings */
++#define SDHCI_CDNS6_PHY_DEFAULT_IOCELL_DELAY		2500
++#define SDHCI_CDNS6_PHY_DEFAULT_DELAY_ELEMENT		24
++#define SDHCI_CDNS6_PHY_DEFAULT_RD_DEL_SEL		52
++#define SDHCI_CDNS6_PHY_DEFAULT_DLL_START		4
++#define SDHCI_CDNS6_PHY_DEFAULT_PHASE_DETECT_SEL	2
++#define SDHCI_CDNS6_PHY_DEFAULT_DLL_LOCK_NUM		0
++#define SDHCI_CDNS6_PHY_DEFAULT_DATA_SELECT_OE_END	1
++
++/* Scale tuning tap (0..39) to 8-bit PHY DLL delay field (0..255) */
++#define SDHCI_CDNS6_PHY_DLL_FIELD_SIZE		256
++
++struct sdhci_cdns6_phy {
++	/*
++	 * Mode-specific timing constraints (in picoseconds)
++	 * These define valid output windows per SD/eMMC spec
++	 */
++	u32 t_cmd_output_min;
++	u32 t_cmd_output_max;
++	u32 t_dat_output_min;
++	u32 t_dat_output_max;
++
++	/*
++	 * PHY delay configuration (in picoseconds)
++	 * Derived from clock period and board-level IO cell delays
++	 */
++	u32 phy_sdclk_delay;
++	u32 phy_cmd_o_delay;
++	u32 phy_dat_o_delay;
++	u32 iocell_input_delay;
++	u32 iocell_output_delay;
++	/* Configured delay element (ps); preserved across clock changes */
++	u32 delay_element_org;
++	/* Active delay element (ps); doubled when one SDMCLK requires > 256 steps */
++	u32 delay_element;
++
++	/* PHY_DLL_SLAVE_CTRL register fields */
++	u8 cp_read_dqs_cmd_delay;	/* bits [31:24] */
++	u8 cp_clk_wrdqs_delay;		/* bits [23:16] */
++	u8 cp_clk_wr_delay;		/* bits [15:8] */
++	u8 cp_read_dqs_delay;		/* bits [7:0] */
++
++	/* PHY_DLL_MASTER_CTRL register fields */
++	bool cp_dll_bypass_mode;	/* bit [23] */
++
++	/* PHY_DQ_TIMING register fields */
++	u8 cp_io_mask_end;		/* bits [29:27] */
++	u8 cp_io_mask_start;		/* bits [26:24] */
++
++	/* PHY_DQS_TIMING register fields */
++	bool cp_use_phony_dqs;		/* bit [20] */
++	bool cp_use_phony_dqs_cmd;	/* bit [19] */
++
++	/* HRS07 register - IO delay Information */
++	u8 sdhc_rw_compensate;		/* bits [20:16] */
++	u8 sdhc_idelay_val;		/* bits [4:0] */
++
++	/* HRS09 register - PHY control and Status */
++	bool sdhc_extended_wr_mode;	/* bit [3] */
++	bool sdhc_extended_rd_mode;	/* bit [2] */
++
++	/* HRS10 register - SDCLK start point adjustment */
++	u8 sdhc_hcsdclkadj;		/* bits [19:16] */
++
++	/* HRS16 register fields - CMD/DAT output delay control */
++	u8 sdhc_wrdata1_sdclk_dly;	/* bits [31:28] */
++	u8 sdhc_wrdata0_sdclk_dly;	/* bits [27:24] */
++	u8 sdhc_wrcmd1_sdclk_dly;	/* bits [23:20] */
++	u8 sdhc_wrcmd0_sdclk_dly;	/* bits [19:16] */
++	u8 sdhc_wrdata1_dly;		/* bits [15:12] */
++	u8 sdhc_wrdata0_dly;		/* bits [11:8] */
++	u8 sdhc_wrcmd1_dly;		/* bits [7:4] */
++	u8 sdhc_wrcmd0_dly;		/* bits [3:0] */
++
++	/* DLL calculation intermediate values, used during PHY timing calculations */
++	u32 t_sdmclk_calc;	/* DLL-quantized SDMCLK period */
++	u32 dll_max_value;	/* DLL delay field ceiling */
++
++	/* Tuning value for HS200/HS400 modes */
++	u8 hs200_tune_val;
++
++	/* Clock periods (in picoseconds) */
++	u32 t_sdmclk;		/* Master clock period */
++	u32 t_sdclk;		/* SD card clock period */
++
++	/* Current operating state */
++	bool strobe_cmd;	/* Enhanced strobe for CMD line */
++	unsigned int mode;	/* Current MMC_TIMING_* mode */
++};
++
++/**
++ * init_ds() - Initialize PHY timing for Default Speed mode (25 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_ds(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 5000;
++	phy->t_cmd_output_max = t_sdclk - 5000;
++	phy->t_dat_output_min = 5000;
++	phy->t_dat_output_max = t_sdclk - 5000;
++}
++
++/**
++ * init_hs() - Initialize PHY timing for High Speed mode (50 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_hs(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 2000;
++	phy->t_cmd_output_max = t_sdclk - 6000;
++	phy->t_dat_output_min = 2000;
++	phy->t_dat_output_max = t_sdclk - 6000;
++}
++
++/**
++ * init_uhs_sdr12() - Initialize PHY timing for UHS SDR12 mode (25 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_uhs_sdr12(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 800;
++	phy->t_cmd_output_max = t_sdclk - 3000;
++	phy->t_dat_output_min = 800;
++	phy->t_dat_output_max = t_sdclk - 3000;
++}
++
++/**
++ * init_uhs_sdr25() - Initialize PHY timing for UHS SDR25 mode (50 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_uhs_sdr25(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 800;
++	phy->t_cmd_output_max = t_sdclk - 3000;
++	phy->t_dat_output_min = 800;
++	phy->t_dat_output_max = t_sdclk - 3000;
++}
++
++/**
++ * init_uhs_sdr50() - Initialize PHY timing for UHS SDR50 mode (100 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_uhs_sdr50(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 800;
++	phy->t_cmd_output_max = t_sdclk - 3000;
++	phy->t_dat_output_min = 800;
++	phy->t_dat_output_max = t_sdclk - 3000;
++}
++
++/**
++ * init_uhs_sdr104() - Initialize PHY timing for UHS SDR104 mode (200 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_uhs_sdr104(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 800;
++	phy->t_cmd_output_max = t_sdclk - 1400;
++	phy->t_dat_output_min = 800;
++	phy->t_dat_output_max = t_sdclk - 1400;
++}
++
++/**
++ * init_uhs_ddr50() - Initialize PHY timing for UHS DDR50 mode (50 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_uhs_ddr50(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 800;
++	phy->t_cmd_output_max = t_sdclk - 3000;
++	phy->t_dat_output_min = 800;
++	phy->t_dat_output_max = t_sdclk - 3000;
++}
++
++/**
++ * init_emmc_sdr() - Initialize PHY timing for eMMC legacy/SDR mode.
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_emmc_sdr(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 3000;
++	phy->t_cmd_output_max = t_sdclk - 3000;
++	phy->t_dat_output_min = 3000;
++	phy->t_dat_output_max = t_sdclk - 3000;
++}
++
++/**
++ * init_emmc_ddr() - Initialize PHY timing for eMMC DDR52 mode.
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_emmc_ddr(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 3000;
++	phy->t_cmd_output_max = t_sdclk - 3000;
++	phy->t_dat_output_min = 2500;
++	phy->t_dat_output_max = t_sdclk - 2500;
++}
++
++/**
++ * init_emmc_hs200() - Initialize PHY timing for eMMC HS200 mode (200 MHz).
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_emmc_hs200(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 800;
++	phy->t_cmd_output_max = t_sdclk - 1400;
++	phy->t_dat_output_min = 800;
++	phy->t_dat_output_max = t_sdclk - 1400;
++}
++
++/**
++ * init_emmc_hs400() - Initialize PHY timing for eMMC HS400/HS400ES mode.
++ * @phy: Pointer to SD6HC PHY state.
++ * @t_sdclk: SD clock period in picoseconds.
++ */
++static void init_emmc_hs400(struct sdhci_cdns6_phy *phy, u32 t_sdclk)
++{
++	phy->t_cmd_output_min = 800;
++	phy->t_cmd_output_max = t_sdclk - 1400;
++	phy->t_dat_output_min = 400;
++	phy->t_dat_output_max = t_sdclk - 400;
++}
++
++/*
++ * init_timings - PHY timing initializers indexed by MMC_TIMING_* value.
++ *
++ * Each entry corresponds to a MMC_TIMING_* constant and sets the appropriate cmd/dat
++ * output timing windows in the PHY state struct.
++ */
++static void (* const init_timings[])(struct sdhci_cdns6_phy *, u32) = {
++	[MMC_TIMING_LEGACY]     = init_ds,
++	[MMC_TIMING_MMC_HS]     = init_emmc_sdr,
++	[MMC_TIMING_SD_HS]      = init_hs,
++	[MMC_TIMING_UHS_SDR12]  = init_uhs_sdr12,
++	[MMC_TIMING_UHS_SDR25]  = init_uhs_sdr25,
++	[MMC_TIMING_UHS_SDR50]  = init_uhs_sdr50,
++	[MMC_TIMING_UHS_SDR104] = init_uhs_sdr104,
++	[MMC_TIMING_UHS_DDR50]  = init_uhs_ddr50,
++	[MMC_TIMING_MMC_DDR52]  = init_emmc_ddr,
++	[MMC_TIMING_MMC_HS200]  = init_emmc_hs200,
++	[MMC_TIMING_MMC_HS400]  = init_emmc_hs400,
++};
++
++static unsigned int sdhci_cdns6_read_phy_reg(struct sdhci_cdns_priv *priv, const u32 address)
++{
++	writel(address, priv->hrs_addr + SDHCI_CDNS_HRS04);
++	return readl(priv->hrs_addr + SDHCI_CDNS_HRS05);
++}
++
++static void sdhci_cdns6_write_phy_reg(struct sdhci_cdns_priv *priv, const u32 address,
++				      const u32 value)
++{
++	writel(address, priv->hrs_addr + SDHCI_CDNS_HRS04);
++	writel(value, priv->hrs_addr + SDHCI_CDNS_HRS05);
++}
++
++static int sdhci_cdns6_phy_lock_dll(struct sdhci_cdns6_phy *phy)
++{
++	u32 delay_element = phy->delay_element_org;
++	u32 delay_elements_in_sdmclk;
++
++	delay_elements_in_sdmclk = DIV_ROUND_UP(phy->t_sdmclk, delay_element);
++	if (delay_elements_in_sdmclk > 256) {
++		delay_element *= 2;
++		delay_elements_in_sdmclk = DIV_ROUND_UP(phy->t_sdmclk, delay_element);
++
++		if (delay_elements_in_sdmclk > 256)
++			return -EINVAL;
++
++		phy->dll_max_value = 127;
++	} else {
++		phy->dll_max_value = 255;
++	}
++
++	phy->t_sdmclk_calc = delay_element * delay_elements_in_sdmclk;
++	phy->delay_element = delay_element;
++	phy->cp_dll_bypass_mode = false;
++
++	return 0;
++}
++
++static void sdhci_cdns6_phy_dll_bypass(struct sdhci_cdns6_phy *phy)
++{
++	phy->dll_max_value = 255;
++	phy->cp_dll_bypass_mode = true;
++}
++
++static void sdhci_cdns6_phy_configure_dll(struct sdhci_cdns6_phy *phy)
++{
++	if (!phy->sdhc_extended_wr_mode) {
++		if (sdhci_cdns6_phy_lock_dll(phy) == 0)
++			return;
++	}
++	sdhci_cdns6_phy_dll_bypass(phy);
++}
++
++static void sdhci_cdns6_phy_calc_out(struct sdhci_cdns6_phy *phy, bool cmd_not_dat)
++{
++	u32 wr0_dly = 0, wr1_dly = 0, output_min, output_max, phy_o_delay,
++	    clk_wr_delay = 0, wr0_sdclk_dly = 0, wr1_sdclk_dly = 0;
++	bool ddr = (phy->mode == MMC_TIMING_UHS_DDR50) || (phy->mode == MMC_TIMING_MMC_DDR52) ||
++		   (phy->mode == MMC_TIMING_MMC_HS400);
++	bool data_ddr = ddr && !cmd_not_dat;
++	int t;
++
++	if (cmd_not_dat) {
++		output_min = phy->t_cmd_output_min;
++		output_max = phy->t_cmd_output_max;
++		phy_o_delay = phy->phy_cmd_o_delay;
++	} else {
++		output_min = phy->t_dat_output_min;
++		output_max = phy->t_dat_output_max;
++		phy_o_delay = phy->phy_dat_o_delay;
++	}
++
++	if (data_ddr) {
++		wr0_sdclk_dly = 1;
++		wr1_sdclk_dly = 1;
++	}
++
++	t = phy_o_delay - phy->phy_sdclk_delay - output_min;
++	if (t < 0 && phy->sdhc_extended_wr_mode) {
++		u32 n_half_cycle = DIV_ROUND_UP(-t * 2, phy->t_sdmclk);
++
++		wr0_dly = (n_half_cycle + 1) / 2;
++		if (data_ddr)
++			wr1_dly = (n_half_cycle + 1) / 2;
++		else
++			wr1_dly = (n_half_cycle + 1) % 2 + wr0_dly - 1;
++	}
++
++	if (!phy->sdhc_extended_wr_mode) {
++		u32 out_hold, out_setup, out_hold_margin;
++		u32 n;
++
++		if (!data_ddr)
++			wr0_dly = 1;
++
++		out_setup = output_max;
++		out_hold = output_min;
++		out_hold_margin = DIV_ROUND_UP(out_setup - out_hold, 4);
++		out_hold += out_hold_margin;
++
++		if (!phy->cp_dll_bypass_mode)
++			n = DIV_ROUND_UP(256 * out_hold, phy->t_sdmclk_calc);
++		else
++			n = DIV_ROUND_UP(out_hold, phy->delay_element) - 1;
++
++		if (n <= phy->dll_max_value)
++			clk_wr_delay = n;
++		else
++			clk_wr_delay = 255;
++	} else {
++		/* sdhc_extended_wr_mode set => PHY IO cell work in SDR mode */
++		clk_wr_delay = 0;
++	}
++
++	if (cmd_not_dat) {
++		phy->sdhc_wrcmd0_dly = wr0_dly;
++		phy->sdhc_wrcmd1_dly = wr1_dly;
++		phy->cp_clk_wrdqs_delay = clk_wr_delay;
++		phy->sdhc_wrcmd0_sdclk_dly = wr0_sdclk_dly;
++		phy->sdhc_wrcmd1_sdclk_dly = wr1_sdclk_dly;
++	} else {
++		phy->sdhc_wrdata0_dly = wr0_dly;
++		phy->sdhc_wrdata1_dly = wr1_dly;
++		phy->cp_clk_wr_delay = clk_wr_delay;
++		phy->sdhc_wrdata0_sdclk_dly = wr0_sdclk_dly;
++		phy->sdhc_wrdata1_sdclk_dly = wr1_sdclk_dly;
++	}
++}
++
++static void sdhci_cdns6_phy_calc_cmd_out(struct sdhci_cdns6_phy *phy)
++{
++	sdhci_cdns6_phy_calc_out(phy, true);
++}
++
++static void sdhci_cdns6_phy_calc_cmd_in(struct sdhci_cdns6_phy *phy)
++{
++	phy->cp_io_mask_end = ((phy->iocell_output_delay + phy->iocell_input_delay) * 2) /
++				phy->t_sdmclk;
++
++	/* cp_io_mask_end is a 3-bit field, clamp to max value of 7 */
++	phy->cp_io_mask_end = min_t(u8, phy->cp_io_mask_end, 7);
++
++	if (phy->strobe_cmd && phy->cp_io_mask_end > 0)
++		phy->cp_io_mask_end--;
++
++	if (phy->strobe_cmd) {
++		phy->cp_use_phony_dqs_cmd = false;
++		phy->cp_read_dqs_cmd_delay = 64;
++	} else {
++		phy->cp_use_phony_dqs_cmd = true;
++		phy->cp_read_dqs_cmd_delay = 0;
++	}
++
++	if ((phy->mode == MMC_TIMING_MMC_HS400 && !phy->strobe_cmd) ||
++	    phy->mode == MMC_TIMING_MMC_HS200)
++		phy->cp_read_dqs_cmd_delay = phy->hs200_tune_val;
++}
++
++static void sdhci_cdns6_phy_calc_dat_in(struct sdhci_cdns6_phy *phy)
++{
++	u32 hcsdclkadj = 0;
++	bool strobe_dat = (phy->mode == MMC_TIMING_MMC_HS400);
++
++	if (strobe_dat) {
++		phy->cp_use_phony_dqs = false;
++		phy->cp_read_dqs_delay = 64;
++	} else {
++		phy->cp_use_phony_dqs = true;
++		phy->cp_read_dqs_delay = 0;
++	}
++
++	if (phy->mode == MMC_TIMING_MMC_HS200)
++		phy->cp_read_dqs_delay = phy->hs200_tune_val;
++
++	if (strobe_dat) {
++		/* dqs loopback input via IO cell */
++		hcsdclkadj += phy->iocell_input_delay;
++		/* dfi_dqs_in: mem_dqs -> clean_dqs_mod; delay of hic_dll_dqs_nand2 */
++		hcsdclkadj += phy->delay_element / 2;
++		/* delay line */
++		hcsdclkadj += phy->t_sdclk / 2;
++		/* PHY FIFO write pointer */
++		hcsdclkadj += phy->t_sdclk / 2 + phy->delay_element;
++		/* 1st synchronizer */
++		hcsdclkadj += DIV_ROUND_UP(hcsdclkadj, phy->t_sdmclk) * phy->t_sdmclk - hcsdclkadj;
++		/*
++		 * 2nd synchronizer + PHY FIFO read pointer + PHY rddata
++		 * + PHY rddata registered, + FIFO 1st ciu_en
++		 */
++		hcsdclkadj += 5 * phy->t_sdmclk;
++		/* FIFO 2nd ciu_en */
++		hcsdclkadj += phy->t_sdclk;
++		hcsdclkadj /= phy->t_sdclk;
++	} else {
++		u32 n;
++
++		/* rebar PHY delay */
++		hcsdclkadj += 2 * phy->t_sdmclk;
++		/* rebar output via IO cell */
++		hcsdclkadj += phy->iocell_output_delay;
++		/* dqs loopback input via IO cell */
++		hcsdclkadj += phy->iocell_input_delay;
++		/* dfi_dqs_in: mem_dqs -> clean_dqs_mod delay of hic_dll_dqs_nand2 */
++		hcsdclkadj += phy->delay_element / 2;
++		/* dll: one delay element between SIGI_0 and SIGO_0 */
++		hcsdclkadj += phy->delay_element;
++		/* dfi_dqs_in: mem_dqs_delayed -> clk_dqs delay of hic_dll_dqs_nand2 */
++		hcsdclkadj += phy->delay_element / 2;
++		/* deskew DLL: clk_dqs -> clk_dqN: one delay element */
++		hcsdclkadj += phy->delay_element;
++
++		if (phy->t_sdclk == phy->t_sdmclk)
++			n = (hcsdclkadj - 2 * phy->t_sdmclk) / phy->t_sdclk;
++		else
++			n = hcsdclkadj / phy->t_sdclk;
++
++		/* phase shift within one t_sdclk clock cycle caused by rebar - lbk dqs delay */
++		hcsdclkadj = hcsdclkadj % phy->t_sdclk;
++		/* PHY FIFO write pointer */
++		hcsdclkadj += phy->t_sdclk / 2;
++		/* 1st synchronizer */
++		hcsdclkadj += DIV_ROUND_UP(hcsdclkadj, phy->t_sdmclk) * phy->t_sdmclk - hcsdclkadj;
++		/*
++		 * 2nd synchronizer + PHY FIFO read pointer + PHY rddata + PHY rddata registered
++		 */
++		hcsdclkadj += 4 * phy->t_sdmclk;
++
++		if ((phy->t_sdclk / phy->t_sdmclk) > 1) {
++			u32 tmp1, tmp2;
++
++			tmp1 = hcsdclkadj;
++			tmp2 = (hcsdclkadj / phy->t_sdclk) * phy->t_sdclk + phy->t_sdclk -
++				phy->t_sdmclk;
++			if (tmp1 == tmp2)
++				tmp2 += phy->t_sdclk;
++
++			/* FIFO aligns to clock cycle before ciu_en */
++			hcsdclkadj += tmp2 - tmp1;
++		}
++
++		/* FIFO 1st ciu_en */
++		hcsdclkadj += phy->t_sdmclk;
++		/* FIFO 2nd ciu_en */
++		hcsdclkadj += phy->t_sdclk;
++		hcsdclkadj /= phy->t_sdclk;
++		hcsdclkadj += n;
++
++		if ((phy->t_sdclk / phy->t_sdmclk) >= 2) {
++			if (phy->mode == MMC_TIMING_UHS_DDR50 || phy->mode == MMC_TIMING_MMC_DDR52)
++				hcsdclkadj -= 2;
++			else
++				hcsdclkadj -= 1;
++		} else if ((phy->t_sdclk / phy->t_sdmclk) == 1) {
++			hcsdclkadj += 2;
++		}
++
++		if (phy->mode == MMC_TIMING_UHS_SDR104 || phy->mode == MMC_TIMING_MMC_HS200)
++			hcsdclkadj -= 1;
++	}
++
++	/* hcsdclkadj is a 4-bit field, clamp to max value of 15 */
++	if (hcsdclkadj > 15)
++		hcsdclkadj = 15;
++
++	phy->sdhc_hcsdclkadj = hcsdclkadj;
++}
++
++static void sdhci_cdns6_phy_calc_dat_out(struct sdhci_cdns6_phy *phy)
++{
++	sdhci_cdns6_phy_calc_out(phy, false);
++}
++
++static void sdhci_cdns6_phy_calc_io(struct sdhci_cdns6_phy *phy)
++{
++	u32 rw_compensate;
++
++	rw_compensate = ((phy->iocell_input_delay + phy->iocell_output_delay) / phy->t_sdmclk) +
++			  phy->sdhc_wrdata0_dly + 5 + 3;
++
++	phy->sdhc_idelay_val = (2 * phy->iocell_input_delay) / phy->t_sdmclk;
++
++	phy->cp_io_mask_start = 0;
++	if (phy->t_sdclk == phy->t_sdmclk && rw_compensate > 10)
++		phy->cp_io_mask_start = 2 * (rw_compensate - 10);
++
++	if (phy->mode == MMC_TIMING_UHS_SDR104)
++		phy->cp_io_mask_start++;
++
++	if (phy->t_sdclk == phy->t_sdmclk && phy->mode == MMC_TIMING_UHS_SDR50)
++		phy->cp_io_mask_start++;
++
++	/* cp_io_mask_start is a 3-bit field, clamp to max value of 7 */
++	phy->cp_io_mask_start = min_t(u8, phy->cp_io_mask_start, 7);
++
++	phy->sdhc_rw_compensate = rw_compensate;
++}
++
++static void sdhci_cdns6_phy_calc_settings(struct sdhci_cdns6_phy *phy)
++{
++	sdhci_cdns6_phy_calc_cmd_out(phy);
++	sdhci_cdns6_phy_calc_cmd_in(phy);
++	sdhci_cdns6_phy_calc_dat_out(phy);
++	sdhci_cdns6_phy_calc_dat_in(phy);
++	sdhci_cdns6_phy_calc_io(phy);
++}
++
++static int sdhci_cdns6_dll_reset(struct sdhci_cdns_priv *priv, bool reset)
++{
++	u32 reg;
++	int ret = 0;
++
++	reg = readl(priv->hrs_addr + SDHCI_CDNS_HRS09);
++	if (reset)
++		reg &= ~SDHCI_CDNS_HRS09_PHY_SW_RESET;
++	else
++		reg |= SDHCI_CDNS_HRS09_PHY_SW_RESET;
++
++	writel(reg, priv->hrs_addr + SDHCI_CDNS_HRS09);
++
++	/* After releasing PHY from reset, wait until PHY_INIT_COMPLETE is set within 3000us */
++	if (!reset) {
++		ret = readl_poll_timeout(priv->hrs_addr + SDHCI_CDNS_HRS09, reg, (reg &
++					 SDHCI_CDNS_HRS09_PHY_INIT_COMPLETE), 0, 3000);
++	}
++
++	return ret;
++}
++
++int sdhci_cdns6_phy_init(struct sdhci_cdns_priv *priv)
++{
++	struct sdhci_cdns6_phy *phy = priv->phy;
++	u32 reg;
++	int ret;
++
++	sdhci_cdns6_dll_reset(priv, true);
++
++	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG);
++	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS;
++	reg &= ~SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD;
++	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_EXT_LPBK_DQS;
++	reg |= SDHCI_CDNS6_PHY_DQS_TIMING_USE_LPBK_DQS;
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS, phy->cp_use_phony_dqs);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQS_TIMING_USE_PHONY_DQS_CMD, phy->cp_use_phony_dqs_cmd);
++	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DQS_TIMING_REG, reg);
++
++	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_REG);
++	reg &= ~SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_RD_DEL_SEL;
++	reg |= SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_UNDERRUN_SUPPRESS;
++	reg |= SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_GATE_CFG_ALWAYS_ON;
++	reg |= SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_SYNC_METHOD;
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_RD_DEL_SEL,
++			  SDHCI_CDNS6_PHY_DEFAULT_RD_DEL_SEL);
++	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_GATE_LPBK_CTRL_REG, reg);
++
++	reg = FIELD_PREP(SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_BYPASS_MODE, phy->cp_dll_bypass_mode);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_PHASE_DETECT_SEL,
++			  SDHCI_CDNS6_PHY_DEFAULT_PHASE_DETECT_SEL);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_DLL_LOCK_NUM,
++			  SDHCI_CDNS6_PHY_DEFAULT_DLL_LOCK_NUM);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_DLL_START_POINT,
++			  SDHCI_CDNS6_PHY_DEFAULT_DLL_START);
++	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DLL_MASTER_CTRL_REG, reg);
++
++	reg = FIELD_PREP(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_CMD_DELAY,
++			 phy->cp_read_dqs_cmd_delay);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_CLK_WRDQS_DELAY, phy->cp_clk_wrdqs_delay);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_CLK_WR_DELAY, phy->cp_clk_wr_delay);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY, phy->cp_read_dqs_delay);
++	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_REG, reg);
++
++	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_CTRL_REG);
++	reg &= ~SDHCI_CDNS6_PHY_CTRL_PHONY_DQS_TIMING;
++	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_CTRL_REG, reg);
++
++	/*
++	 * Ensure all preceding PHY register writes complete and reach the controller before
++	 * releasing the PHY from reset. Without this, SDR104 has been observed to fail
++	 * intermittently on some boards.
++	 */
++	wmb();
++
++	ret = sdhci_cdns6_dll_reset(priv, false);
++	if (ret)
++		return ret;
++
++	reg = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_DQ_TIMING_REG);
++	reg &= ~SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_ALWAYS_ON;
++	reg &= ~SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_END;
++	reg &= ~SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_START;
++	reg &= ~SDHCI_CDNS6_PHY_DQ_TIMING_DATA_SELECT_OE_END;
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_END, phy->cp_io_mask_end);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQ_TIMING_IO_MASK_START, phy->cp_io_mask_start);
++	reg |= FIELD_PREP(SDHCI_CDNS6_PHY_DQ_TIMING_DATA_SELECT_OE_END,
++			  SDHCI_CDNS6_PHY_DEFAULT_DATA_SELECT_OE_END);
++	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DQ_TIMING_REG, reg);
++
++	/* Ensure DQ timing programming is visible before HRS09 follow-up writes */
++	wmb();
++
++	reg = readl(priv->hrs_addr + SDHCI_CDNS_HRS09);
++	if (phy->sdhc_extended_wr_mode)
++		reg |= SDHCI_CDNS_HRS09_EXTENDED_WR_MODE;
++	else
++		reg &= ~SDHCI_CDNS_HRS09_EXTENDED_WR_MODE;
++
++	if (phy->sdhc_extended_rd_mode)
++		reg |= SDHCI_CDNS_HRS09_EXTENDED_RD_MODE;
++	else
++		reg &= ~SDHCI_CDNS_HRS09_EXTENDED_RD_MODE;
++
++	reg |= SDHCI_CDNS_HRS09_RDDATA_EN;
++	reg |= SDHCI_CDNS_HRS09_RDCMD_EN;
++	writel(reg, priv->hrs_addr + SDHCI_CDNS_HRS09);
++
++	reg = FIELD_PREP(SDHCI_CDNS_HRS10_HCSDCLKADJ, phy->sdhc_hcsdclkadj);
++	writel(reg, priv->hrs_addr + SDHCI_CDNS_HRS10);
++
++	reg = FIELD_PREP(SDHCI_CDNS_HRS16_WRDATA1_SDCLK_DLY, phy->sdhc_wrdata1_sdclk_dly);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS16_WRDATA0_SDCLK_DLY, phy->sdhc_wrdata0_sdclk_dly);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS16_WRCMD1_SDCLK_DLY, phy->sdhc_wrcmd1_sdclk_dly);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS16_WRCMD0_SDCLK_DLY, phy->sdhc_wrcmd0_sdclk_dly);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS16_WRDATA1_DLY, phy->sdhc_wrdata1_dly);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS16_WRDATA0_DLY, phy->sdhc_wrdata0_dly);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS16_WRCMD1_DLY, phy->sdhc_wrcmd1_dly);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS16_WRCMD0_DLY, phy->sdhc_wrcmd0_dly);
++	writel(reg, priv->hrs_addr + SDHCI_CDNS_HRS16);
++
++	reg = FIELD_PREP(SDHCI_CDNS_HRS07_RW_COMPENSATE, phy->sdhc_rw_compensate);
++	reg |= FIELD_PREP(SDHCI_CDNS_HRS07_IDELAY_VAL, phy->sdhc_idelay_val);
++	writel(reg, priv->hrs_addr + SDHCI_CDNS_HRS07);
++
++	/* Allow 5 to 5.5 ms for clock and PHY signals to stabilize after configuration */
++	usleep_range(5000, 5500);
++
++	return 0;
++}
++
++int sdhci_cdns6_set_tune_val(struct sdhci_host *host, unsigned int val)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	struct sdhci_cdns6_phy *phy = priv->phy;
++	u32 tmp, tuneval;
++	int ret;
++
++	/*
++	 * Scale tuning tap (val in [0, SDHCI_CDNS_MAX_TUNING_LOOP-1]) to the
++	 * 8-bit PHY DLL slave delay field [0, 255]. With MAX_TUNING_LOOP=40
++	 * and FIELD_SIZE=256, the result fits in 8 bits.
++	 */
++	tuneval = (val * SDHCI_CDNS6_PHY_DLL_FIELD_SIZE) / SDHCI_CDNS_MAX_TUNING_LOOP;
++
++	phy->hs200_tune_val = tuneval;
++	phy->cp_read_dqs_cmd_delay = tuneval;
++	phy->cp_read_dqs_delay = tuneval;
++
++	tmp = sdhci_cdns6_read_phy_reg(priv, SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_REG);
++	tmp &= ~(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_CMD_DELAY |
++		 SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY);
++	tmp |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_CMD_DELAY, tuneval);
++	tmp |= FIELD_PREP(SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_READ_DQS_DELAY, tuneval);
++
++	sdhci_cdns6_dll_reset(priv, true);
++	sdhci_cdns6_write_phy_reg(priv, SDHCI_CDNS6_PHY_DLL_SLAVE_CTRL_REG, tmp);
++
++	ret = sdhci_cdns6_dll_reset(priv, false);
++	if (ret)
++		dev_warn(mmc_dev(host->mmc), "%s: DLL reset release failed: %d\n", __func__, ret);
++
++	return ret;
++}
++
++static int sdhci_cdns6_phy_update_timings(struct sdhci_host *host)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	struct sdhci_cdns6_phy *phy = priv->phy;
++	u32 t_sdmclk = phy->t_sdmclk;
++
++	/* Validate mode is within supported range */
++	if (phy->mode >= ARRAY_SIZE(init_timings))
++		return -EINVAL;
++
++	/* initialize input */
++	init_timings[phy->mode](phy, phy->t_sdclk);
++
++	phy->strobe_cmd = false;
++
++	if (priv->enhanced_strobe)
++		phy->strobe_cmd = true;
++
++	phy->phy_sdclk_delay = 2 * t_sdmclk;
++
++	/*
++	 * CMD and DAT output delays are currently identical, but kept separate to allow
++	 * independent tuning for specific modes (e.g., HS400) or board-specific optimizations
++	 * in the future.
++	 */
++	phy->phy_cmd_o_delay = 2 * t_sdmclk + t_sdmclk / 2;
++	phy->phy_dat_o_delay = 2 * t_sdmclk + t_sdmclk / 2;
++
++	if (phy->t_sdclk == phy->t_sdmclk) {
++		phy->sdhc_extended_wr_mode = false;
++		phy->sdhc_extended_rd_mode = false;
++	} else {
++		phy->sdhc_extended_wr_mode = true;
++		phy->sdhc_extended_rd_mode = true;
++	}
++
++	sdhci_cdns6_phy_configure_dll(phy);
++	sdhci_cdns6_phy_calc_settings(phy);
++
++	return 0;
++}
++
++int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *priv)
++{
++	struct device *dev = &pdev->dev;
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_cdns6_phy *phy;
++	unsigned long val;
++	int ret;
++
++	phy = devm_kzalloc(dev, sizeof(*phy), GFP_KERNEL);
++	if (!phy)
++		return -ENOMEM;
++
++	val = clk_get_rate(pltfm_host->clk);
++	if (!val)
++		return dev_err_probe(dev, -EINVAL, "failed to get controller clock rate\n");
++
++	phy->t_sdmclk = DIV_ROUND_DOWN_ULL(1000000000000ULL, val);
++
++	/*
++	 * Optional board-level PHY timing properties. When omitted, use the
++	 * Cadence-recommended defaults (2500 ps IO-cell delays, 24 ps DLL
++	 * delay element) that are valid for typical SoC packaging.
++	 */
++	ret = of_property_read_u32(dev->of_node, "cdns,iocell-input-delay-ps",
++				   &phy->iocell_input_delay);
++	if (ret)
++		phy->iocell_input_delay = SDHCI_CDNS6_PHY_DEFAULT_IOCELL_DELAY;
++
++	ret = of_property_read_u32(dev->of_node, "cdns,iocell-output-delay-ps",
++				   &phy->iocell_output_delay);
++	if (ret)
++		phy->iocell_output_delay = SDHCI_CDNS6_PHY_DEFAULT_IOCELL_DELAY;
++
++	ret = of_property_read_u32(dev->of_node, "cdns,delay-element-ps", &phy->delay_element);
++	if (ret) {
++		phy->delay_element = SDHCI_CDNS6_PHY_DEFAULT_DELAY_ELEMENT;
++	} else if (!phy->delay_element) {
++		dev_warn(dev, "cdns,delay-element-ps is 0, using default %u\n",
++			 SDHCI_CDNS6_PHY_DEFAULT_DELAY_ELEMENT);
++		phy->delay_element = SDHCI_CDNS6_PHY_DEFAULT_DELAY_ELEMENT;
++	}
++
++	phy->delay_element_org = phy->delay_element;
++
++	priv->phy = phy;
++
++	return 0;
++}
++
++static void sdhci_cdns6_phy_reconfigure(struct sdhci_host *host, unsigned int timing)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	struct sdhci_cdns6_phy *phy = priv->phy;
++	unsigned int rate = host->mmc->actual_clock ?: host->mmc->ios.clock;
++	u32 t_sdclk;
++	int ret;
++
++	if (!rate)
++		return;
++
++	t_sdclk = DIV_ROUND_DOWN_ULL(1000000000000ULL, rate);
++	if (phy->mode == timing && phy->t_sdclk == t_sdclk &&
++	    phy->strobe_cmd == priv->enhanced_strobe)
++		return;
++
++	phy->t_sdclk = t_sdclk;
++	phy->mode = timing;
++
++	ret = sdhci_cdns6_phy_update_timings(host);
++	if (ret) {
++		phy->t_sdclk = 0;
++		dev_warn(mmc_dev(host->mmc), "%s: update timings failed: %d\n", __func__, ret);
++		return;
++	}
++
++	ret = sdhci_cdns6_phy_init(priv);
++	if (ret) {
++		phy->t_sdclk = 0;
++		dev_warn(mmc_dev(host->mmc), "%s: phy init failed: %d\n", __func__, ret);
++	}
++}
++
++void sdhci_cdns6_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	struct sdhci_cdns6_phy *phy = priv->phy;
++
++	sdhci_set_clock(host, clock);
++
++	if (!clock) {
++		/* Force PHY reprogramming on the next non-zero clock. */
++		phy->t_sdclk = 0;
++		return;
++	}
++
++	sdhci_cdns6_phy_reconfigure(host, host->mmc->ios.timing);
++}
++
++void sdhci_cdns6_set_uhs_signaling(struct sdhci_host *host, unsigned int timing)
++{
++	sdhci_cdns6_phy_reconfigure(host, timing);
++}
++
++void sdhci_cdns6_hw_reset(struct sdhci_host *host)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	void __iomem *reg;
++
++	reg = priv->hrs_addr + SDHCI_CDNS_HRS11;
++	writel(SDHCI_CDNS_HRS11_EMMC_RST, reg);
++	/* eMMC HW reset assertion: spec requires >= 1us, give margin */
++	usleep_range(10, 20);
++	writel(0, reg);
++	/* For eMMC, minimum is 200us but give it 300us for good measure */
++	usleep_range(300, 1000);
++}
+diff --git a/drivers/mmc/host/sdhci-cadence.h b/drivers/mmc/host/sdhci-cadence.h
+new file mode 100644
+index 000000000000..2ac11befb53b
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-cadence.h
+@@ -0,0 +1,118 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later */
++/*
++ * Copyright (C) 2026 Altera Corporation
++ *   Author: Tanmay Kathpalia <tanmay.kathpalia@altera.com>
++ *
++ * Cadence SD/SDIO/eMMC Host Controller driver - common header
++ * Shared definitions and structures for the Cadence SDHCI driver.
++ * Contains private data and declarations for SD6HC-specific functions
++ * called by the main driver in sdhci-cadence-core.c.
++ */
++
++#ifndef _MMC_HOST_SDHCI_CADENCE_H
++#define _MMC_HOST_SDHCI_CADENCE_H
++
++#include <linux/compiler.h>
++#include <linux/spinlock.h>
++#include <linux/types.h>
++
++#include "sdhci-pltfm.h"
++
++struct reset_control;
++
++/* HRS - Host Register Set (specific to Cadence) */
++#define SDHCI_CDNS_HRS04		0x10		/* PHY access: address port */
++#define SDHCI_CDNS_HRS05		0x14		/* PHY access: data port */
++
++/*
++ * The tuned val register is 6 bit-wide, but not the whole of the range is
++ * available.  The range 0-42 seems to be available (then 43 wraps around to 0)
++ * but I am not quite sure if it is official.  Use only 0 to 39 for safety.
++ */
++#define SDHCI_CDNS_MAX_TUNING_LOOP	40
++
++/**
++ * struct sdhci_cdns_priv - Cadence SDHCI private controller data
++ * @hrs_addr: Base address of Cadence Host Register Set (HRS) registers.
++ * @ctl_addr: Base address for write control registers.
++ *            Used only for "amd,pensando-elba-sd4hc" compatible controllers to enable
++ *            byte-lane writes.
++ * @wrlock: Spinlock for protecting register writes (Elba only).
++ * @enhanced_strobe: Flag indicating if Enhanced Strobe (HS400ES) is enabled.
++ * @priv_writel: Optional SoC-specific write function for register access.
++ *               Used for Elba to ensure correct byte-lane enable.
++ * @rst_hw: Hardware reset control for the eMMC card RST_n pin (SD4HC only).
++ * @phy: Opaque pointer to variant-specific PHY data.
++ *       For SD4HC: points to struct sdhci_cdns4_phy.
++ *       For SD6HC: points to struct sdhci_cdns6_phy.
++ */
++struct sdhci_cdns_priv {
++	void __iomem *hrs_addr;
++	void __iomem *ctl_addr;	/* write control */
++	spinlock_t wrlock;	/* write lock */
++	bool enhanced_strobe;
++	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
++	struct reset_control *rst_hw;
++	void *phy;
++};
++
++/**
++ * sdhci_cdns_priv - Helper to retrieve Cadence private data from sdhci_host
++ * @host: Pointer to struct sdhci_host.
++ *
++ * Return: Pointer to struct sdhci_cdns_priv.
++ */
++static inline void *sdhci_cdns_priv(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++
++	return sdhci_pltfm_priv(pltfm_host);
++}
++
++/**
++ * sdhci_cdns6_set_clock - Set SDCLK and reprogram SD6HC PHY timings.
++ * @host: Pointer to struct sdhci_host.
++ * @clock: Requested clock frequency in Hz (0 to disable).
++ */
++void sdhci_cdns6_set_clock(struct sdhci_host *host, unsigned int clock);
++
++/**
++ * sdhci_cdns6_set_uhs_signaling - Program PHY registers for a specific timing mode.
++ * @host: Pointer to struct sdhci_host.
++ * @timing: MMC timing mode (MMC_TIMING_*).
++ */
++void sdhci_cdns6_set_uhs_signaling(struct sdhci_host *host, unsigned int timing);
++
++/**
++ * sdhci_cdns6_set_tune_val - Set the PHY tuning value.
++ * @host: Pointer to struct sdhci_host.
++ * @val: Tuning value to program.
++ *
++ * Return: 0 on success, -ETIMEDOUT if DLL reset release times out.
++ */
++int sdhci_cdns6_set_tune_val(struct sdhci_host *host, unsigned int val);
++
++/**
++ * sdhci_cdns6_phy_probe - Probe and initialize Cadence SD6HC PHY parameters
++ * @pdev: Platform device pointer
++ * @priv: Pointer to Cadence private data structure
++ *
++ * Return: 0 on success or a negative error code.
++ */
++int sdhci_cdns6_phy_probe(struct platform_device *pdev, struct sdhci_cdns_priv *priv);
++
++/**
++ * sdhci_cdns6_hw_reset - Perform hardware reset of the Cadence SDHCI controller.
++ * @host: Pointer to struct sdhci_host.
++ */
++void sdhci_cdns6_hw_reset(struct sdhci_host *host);
++
++/**
++ * sdhci_cdns6_phy_init - Initialize the SD6HC PHY with current settings.
++ * @priv: Pointer to Cadence private data structure.
++ *
++ * Return: 0 on success, -ETIMEDOUT if PHY initialization times out.
++ */
++int sdhci_cdns6_phy_init(struct sdhci_cdns_priv *priv);
++
++#endif /* _MMC_HOST_SDHCI_CADENCE_H */
 -- 
 2.43.7
 
